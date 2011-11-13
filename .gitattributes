@@ -1,0 +1,11 @@
+*.sh            eol=lf
+*.ac            eol=lf
+*.am            eol=lf
+*.sln           eol=crlf
+*.vcproj        eol=crlf
+*.vcxproj*      eol=crlf
+*.rc            eol=crlf
+*.sh            export-ignore
+.gitattributes  export-ignore
+.gitignore      export-ignore
+*.creole        export-ignore
