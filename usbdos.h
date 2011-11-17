@@ -18,17 +18,10 @@
 
 #pragma once
 
-#if !defined(bool)
-#define bool BOOL
-#endif
-#if !defined(true)
-#define true TRUE
-#endif
-#if !defined(false)
-#define false FALSE
-#endif
+#define USBDOS_DEBUG
 
 #define APP_VERSION                 "USBDOS v0.1.0.1"
+#define IGNORE_RETVAL(expr)         do { (void)(expr); } while(0)
 
 #define safe_free(p) do {free((void*)p); p = NULL;} while(0)
 #define safe_min(a, b) min((size_t)(a), (size_t)(b))
@@ -44,3 +37,16 @@
 #define safe_sprintf _snprintf
 #define safe_strlen(str) ((((char*)str)==NULL)?0:strlen(str))
 #define safe_strdup _strdup
+
+#if defined(_MSC_VER)
+#define safe_vsnprintf(buf, size, format, arg) _vsnprintf_s(buf, size, _TRUNCATE, format, arg)
+#else
+#define safe_vsnprintf vsnprintf
+#endif
+
+typedef struct _SCSI_PASS_THROUGH_WITH_BUFFERS {
+	SCSI_PASS_THROUGH Spt;
+	ULONG             Filler;
+	UCHAR             SenseBuf[32];
+	UCHAR             DataBuf[512];
+} SCSI_PASS_THROUGH_WITH_BUFFERS, *PSCSI_PASS_THROUGH_WITH_BUFFERS;
