@@ -1,6 +1,9 @@
 /*
  * USBDOS: USB DOS bootable stick creation utility
  * Copyright (c) 2011 Pete Batard <pete@akeo.ie>
+ * 
+ * Device enumeration based in part on TestUSBDriveEject.cpp by ahmd:
+ * http://www.codeguru.com/forum/showpost.php?p=1951973&postcount=7
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,6 +26,7 @@
 #include <string.h>
 #include <commctrl.h>
 #include <setupapi.h>
+// TODO: MinGW32 requires <ddk/ntddscsi.h>
 #include <ntddscsi.h>
 
 #include "msapi_utf8.h"
@@ -96,7 +100,7 @@ static char err_string[256];
  */
 char GetDriveInfo(DWORD num, char** label)
 {
-	BOOL r, ret = FALSE;
+	BOOL r;
 	DWORD size;
 	HANDLE hDrive;
 	STORAGE_DEVICE_NUMBER sdn = {0};
@@ -158,10 +162,15 @@ static BOOL GetUSBDevices(void)
 	SP_DEVICE_INTERFACE_DATA devint_data;
 	PSP_DEVICE_INTERFACE_DETAIL_DATA_A devint_detail_data;
 	STORAGE_DEVICE_NUMBER storage_device;
+	STORAGE_PROPERTY_QUERY storage_query;
+	STORAGE_DESCRIPTOR_HEADER storage_descriptor_header;
+	PSTORAGE_DEVICE_DESCRIPTOR storage_descriptor;
+	BYTE geometry[128];
+	LONGLONG disk_size;
 	DWORD size, i, j, datatype;
 	HANDLE hDrive;
 	char drive_letter;
-	char *label, entry[MAX_PATH], buffer[MAX_PATH];
+	char *label, entry[MAX_PATH], buffer[MAX_PATH], *tmp;
 
 	IGNORE_RETVAL(ComboBox_ResetContent(hDeviceList));
 
@@ -191,8 +200,14 @@ static BOOL GetUSBDevices(void)
 		uprintf("found drive '%s'\n", buffer);
 
 		devint_data.cbSize = sizeof(devint_data);
+		hDrive = INVALID_HANDLE_VALUE;
 		devint_detail_data = NULL;
-		for (j=0;;j++) {
+		storage_descriptor = NULL;
+		for (j=0; ;j++) {
+			safe_closehandle(hDrive);
+			safe_free(devint_detail_data);
+			safe_free(storage_descriptor);
+
 			if (!SetupDiEnumDeviceInterfaces(dev_info, &dev_info_data, &GUID_DEVINTERFACE_DISK, j, &devint_data)) {
 				if(GetLastError() != ERROR_NO_MORE_ITEMS) {
 					uprintf("SetupDiEnumDeviceInterfaces failed: %s\n", WindowsErrorString(0));
@@ -223,21 +238,56 @@ static BOOL GetUSBDevices(void)
 				uprintf("could not open '%s': %s\n", devint_detail_data->DevicePath, WindowsErrorString(0)); 
 				continue;
 			}
-			safe_free(devint_detail_data);
 
 			memset(&storage_device, 0, sizeof(storage_device));
 			r = DeviceIoControl(hDrive, IOCTL_STORAGE_GET_DEVICE_NUMBER, 
 						NULL, 0, &storage_device, sizeof(storage_device), &size, NULL );
 			if (!r || size <= 0) {
 				uprintf("IOCTL_STORAGE_GET_DEVICE_NUMBER failed: %s\n", WindowsErrorString(0));
-				CloseHandle(hDrive);
 				continue;
 			}
-			CloseHandle(hDrive);
+
+			storage_query.PropertyId =  StorageDeviceProperty;
+			storage_query.QueryType = PropertyStandardQuery;
+			r = DeviceIoControl(hDrive, IOCTL_STORAGE_QUERY_PROPERTY, 
+						&storage_query, sizeof(storage_query),
+						&storage_descriptor_header, sizeof(storage_descriptor_header),
+						&size, NULL );
+			if (!r || size <= 0) {
+				uprintf("IOCTL_STORAGE_QUERY_PROPERTY->STORAGE_DEVICE_DESCRIPTOR (dummy) failed: %s\n", WindowsErrorString(0));
+				continue;
+			}
+			storage_descriptor = (PSTORAGE_DEVICE_DESCRIPTOR)calloc(1, storage_descriptor_header.Size);
+			if (storage_descriptor == NULL) {
+				uprintf("unable to allocate memory for STORAGE_DEVICE_DESCRIPTOR\n");
+				continue;
+			}
+			r = DeviceIoControl(hDrive, IOCTL_STORAGE_QUERY_PROPERTY, 
+						&storage_query, sizeof(storage_query),
+						storage_descriptor, storage_descriptor_header.Size,
+						&size, NULL );
+			if (!r || size <= 0) {
+				uprintf("IOCTL_STORAGE_QUERY_PROPERTY->STORAGE_DEVICE_DESCRIPTOR (actual) failed: %s\n", WindowsErrorString(0));
+				continue;
+			}
+			tmp = (char*)storage_descriptor;
+			uprintf("%s:%s:%s:%s\n", storage_descriptor->VendorIdOffset?&tmp[storage_descriptor->VendorIdOffset]:"",
+				storage_descriptor->ProductIdOffset?&tmp[storage_descriptor->ProductIdOffset]:"",
+				storage_descriptor->ProductRevisionOffset?&tmp[storage_descriptor->ProductRevisionOffset]:"",
+				storage_descriptor->SerialNumberOffset?&tmp[storage_descriptor->SerialNumberOffset]:"");
+
+			r = DeviceIoControl(hDrive, IOCTL_DISK_GET_DRIVE_GEOMETRY_EX, 
+						NULL, 0, geometry, sizeof(geometry),
+						&size, NULL );
+			if (!r || size <= 0) {
+				uprintf("IOCTL_DISK_GET_DRIVE_GEOMETRY_EX failed: %s\n", WindowsErrorString(0));
+				continue;
+			}
+			disk_size = ((PDISK_GEOMETRY_EX)geometry)->DiskSize.QuadPart / 1024 / 1024;
 
 			drive_letter = GetDriveInfo(storage_device.DeviceNumber, &label);
 			if (drive_letter) {
-				safe_sprintf(entry, sizeof(entry), "%s (%c:)\n", label, drive_letter);
+				safe_sprintf(entry, sizeof(entry), "%s (%I64i MB) (%c:)\n", label, disk_size, drive_letter);
 				IGNORE_RETVAL(ComboBox_AddStringU(hDeviceList, entry));
 			}
 		}
@@ -246,10 +296,12 @@ static BOOL GetUSBDevices(void)
 	return TRUE;
 }
 
+// TODO: the device is currently in use by another application (find application a la TGit installer?)
+
 /*
 * Main dialog callback
 */
-static INT_PTR CALLBACK main_callback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	switch (message) {
 
@@ -347,7 +399,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
 
 	// Create the main Window
-	if ( (hDlg = CreateDialogA(hInstance, MAKEINTRESOURCEA(IDD_DIALOG), NULL, main_callback)) == NULL ) {
+	if ( (hDlg = CreateDialogA(hInstance, MAKEINTRESOURCEA(IDD_DIALOG), NULL, MainCallback)) == NULL ) {
 		MessageBoxA(NULL, "Could not create Window", "DialogBox failure", MB_ICONSTOP);
 		goto out;
 	}
