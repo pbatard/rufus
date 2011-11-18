@@ -22,6 +22,9 @@
 
 #define APP_VERSION                 "USBDOS v0.1.0.1"
 #define IGNORE_RETVAL(expr)         do { (void)(expr); } while(0)
+#ifndef ARRAYSIZE
+#define ARRAYSIZE(A)                (sizeof(A)/sizeof((A)[0]))
+#endif
 
 #define safe_free(p) do {free((void*)p); p = NULL;} while(0)
 #define safe_closehandle(h) do {if (h != INVALID_HANDLE_VALUE) {CloseHandle(h); h = INVALID_HANDLE_VALUE;}} while(0)

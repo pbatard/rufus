@@ -28,6 +28,10 @@
 #include <setupapi.h>
 // TODO: MinGW32 requires <ddk/ntddscsi.h>
 #include <ntddscsi.h>
+// http://doc.sch130.nsc.ru/www.sysinternals.com/ntw2k/source/fmifs.shtml
+// http://svn.reactos.org/svn/reactos/trunk/reactos/include/reactos/libs/fmifs/
+//#include <fmifs.h>
+// http://git.kernel.org/?p=fs/ext2/e2fsprogs.git;a=blob;f=misc/badblocks.c
 
 #include "msapi_utf8.h"
 #include "resource.h"
@@ -37,7 +41,7 @@
  * Globals
  */
 static HINSTANCE main_instance;
-static HWND hDeviceList;
+static HWND hDeviceList, hCapacity;
 
 #ifdef USBDOS_DEBUG
 static void _uprintf(const char *format, ...)
@@ -96,59 +100,136 @@ static char err_string[256];
 }
 
 /*
- * Returns the drive letter (0 if error) and fills the drive label
+ * Opens a drive return both the handle and the drive letter
  */
-char GetDriveInfo(DWORD num, char** label)
+static BOOL GetDriveHandle(DWORD num, HANDLE* hDrive, char* DriveLetter)
 {
 	BOOL r;
 	DWORD size;
-	HANDLE hDrive;
 	STORAGE_DEVICE_NUMBER sdn = {0};
-	static char volume_label[MAX_PATH];
-	static char drives[26*2];
+	static char drives[26*4];	/* "D:\", "E:\", etc. */
 	char *drive = drives;
 	char drive_name[] = "\\\\.\\#:";
-
-	*label = "NO_LABEL";
 
 	size = GetLogicalDriveStringsA(sizeof(drives), drives);
 	if (size == 0) {
 		uprintf("GetLogicalDriveStrings failed: %s\n", WindowsErrorString(0));
-		return 0;
+		return FALSE;
 	}
 	if (size > sizeof(drives)) {
 		uprintf("GetLogicalDriveStrings: buffer too small (required %d vs %d)\n", size, sizeof(drives));
 		return FALSE;
 	}
 
+	*hDrive = INVALID_HANDLE_VALUE;
 	for ( ;*drive; drive += safe_strlen(drive)+1) {
 		if (*drive < 'C') {
 			continue;
 		}
 		safe_sprintf(drive_name, sizeof(drive_name), "\\\\.\\%c:", drive[0]);
-		hDrive = CreateFileA(drive_name, GENERIC_READ, FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, 0);
+		*hDrive = CreateFileA(drive_name, GENERIC_READ, FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, 0);
 		if (hDrive == INVALID_HANDLE_VALUE) {
 			uprintf("Could not open drive %c: %s\n", WindowsErrorString(0));
 			continue;
 		}
 	
-		r = DeviceIoControl(hDrive, IOCTL_STORAGE_GET_DEVICE_NUMBER, NULL,
+		r = DeviceIoControl(*hDrive, IOCTL_STORAGE_GET_DEVICE_NUMBER, NULL,
 			0, &sdn, sizeof(sdn), &size, NULL);
 		if ((!r) || (size <= 0)) {
-			uprintf("IOCTL_STORAGE_GET_DEVICE_NUMBER failed: %s\n", WindowsErrorString(0));
-			CloseHandle(hDrive);
-			return 0;
+			uprintf("IOCTL_STORAGE_GET_DEVICE_NUMBER 1 failed: %s\n", WindowsErrorString(0));
+			safe_closehandle(*hDrive);
+			break;
 		}
 		if (sdn.DeviceNumber == num)
 			break;
-		CloseHandle(hDrive);
 	}
 
-	if (*drive && GetVolumeInformationA(drive, volume_label, sizeof(volume_label), NULL, NULL, NULL, NULL, 0)) {
-		*label = volume_label;
+	if (DriveLetter != NULL) {
+		*DriveLetter = *drive;
 	}
 
-	return *drive;
+	return (*hDrive != INVALID_HANDLE_VALUE);
+}
+
+/*
+ * Returns the drive letter and volume label
+ */
+static BOOL GetDriveLabel(DWORD num, char* letter, char** label)
+{
+	HANDLE hDrive;
+	char DrivePath[] = "#:\\";
+	char volume_label[MAX_PATH];
+
+	*label = "NO_LABEL";
+
+	if (!GetDriveHandle(num, &hDrive, DrivePath))
+		return FALSE;
+	safe_closehandle(hDrive);
+
+	if (!GetVolumeInformationA(DrivePath, volume_label, sizeof(volume_label), NULL, NULL, NULL, NULL, 0)) {
+		uprintf("GetVolumeInformation failed: %s\n", WindowsErrorString(0));
+		return FALSE;
+	}
+	*label = volume_label;
+	*letter = DrivePath[0];
+
+	return TRUE;
+}
+
+/*
+ * Returns the drive letter and volume label
+ */
+static BOOL GetDriveInfo(DWORD num, LONGLONG* DriveSize)
+{
+	BOOL r;
+	HANDLE hDrive;
+	DWORD size;
+	BYTE geometry[128];
+
+	*DriveSize = 0;
+
+	if (!GetDriveHandle(num, &hDrive, NULL))
+		return FALSE;
+
+	r = DeviceIoControl(hDrive, IOCTL_DISK_GET_DRIVE_GEOMETRY_EX, 
+			NULL, 0, geometry, sizeof(geometry), &size, NULL );
+	if (!r || size <= 0) {
+		uprintf("IOCTL_DISK_GET_DRIVE_GEOMETRY_EX failed: %s\n", WindowsErrorString(0));
+		safe_closehandle(hDrive);
+		return FALSE;
+	}
+	*DriveSize = ((PDISK_GEOMETRY_EX)geometry)->DiskSize.QuadPart;
+
+	safe_closehandle(hDrive);
+
+	return TRUE;
+}
+
+static BOOL PopulateProperties(int index)
+{
+	double HumanReadableSize;
+	LONGLONG DiskSize;
+	DWORD DeviceNumber;
+	char capacity[64];
+	char* suffix[] = { "KB", "MB", "GB", "TB", "PB"};
+	int i;
+
+	DeviceNumber = (DWORD)ComboBox_GetItemData(hDeviceList, index);
+	if (!GetDriveInfo(DeviceNumber, &DiskSize))
+		return FALSE;
+
+	HumanReadableSize = (double)DiskSize;
+	for (i=0; i<ARRAYSIZE(suffix); i++) {
+		HumanReadableSize /= 1024.0;
+		if (HumanReadableSize < 512.0) {
+			safe_sprintf(capacity, sizeof(capacity), "%0.2f %s", HumanReadableSize, suffix[i]);
+			break;
+		}
+	}
+	IGNORE_RETVAL(ComboBox_ResetContent(hCapacity));
+	IGNORE_RETVAL(ComboBox_AddStringU(hCapacity, capacity));
+	IGNORE_RETVAL(ComboBox_SetCurSel(hCapacity, 0));
+	return TRUE;
 }
 
 /*
@@ -161,9 +242,7 @@ static BOOL GetUSBDevices(void)
 	SP_DEVINFO_DATA dev_info_data;
 	SP_DEVICE_INTERFACE_DATA devint_data;
 	PSP_DEVICE_INTERFACE_DETAIL_DATA_A devint_detail_data;
-	STORAGE_DEVICE_NUMBER storage_device;
-	BYTE geometry[128];
-	LONGLONG disk_size;
+	STORAGE_DEVICE_NUMBER device_number;
 	DWORD size, i, j, datatype;
 	HANDLE hDrive;
 	char drive_letter;
@@ -234,31 +313,22 @@ static BOOL GetUSBDevices(void)
 				continue;
 			}
 
-			memset(&storage_device, 0, sizeof(storage_device));
+			memset(&device_number, 0, sizeof(device_number));
 			r = DeviceIoControl(hDrive, IOCTL_STORAGE_GET_DEVICE_NUMBER, 
-						NULL, 0, &storage_device, sizeof(storage_device), &size, NULL );
+						NULL, 0, &device_number, sizeof(device_number), &size, NULL );
 			if (!r || size <= 0) {
-				uprintf("IOCTL_STORAGE_GET_DEVICE_NUMBER failed: %s\n", WindowsErrorString(0));
+				uprintf("IOCTL_STORAGE_GET_DEVICE_NUMBER 2 failed: %s\n", WindowsErrorString(0));
 				continue;
 			}
 
-			r = DeviceIoControl(hDrive, IOCTL_DISK_GET_DRIVE_GEOMETRY_EX, 
-						NULL, 0, geometry, sizeof(geometry),
-						&size, NULL );
-			if (!r || size <= 0) {
-				uprintf("IOCTL_DISK_GET_DRIVE_GEOMETRY_EX failed: %s\n", WindowsErrorString(0));
-				continue;
-			}
-			disk_size = ((PDISK_GEOMETRY_EX)geometry)->DiskSize.QuadPart / 1024 / 1024;
-
-			drive_letter = GetDriveInfo(storage_device.DeviceNumber, &label);
-			if (drive_letter) {
-				safe_sprintf(entry, sizeof(entry), "%s (%I64i MB) (%c:)\n", label, disk_size, drive_letter);
-				IGNORE_RETVAL(ComboBox_AddStringU(hDeviceList, entry));
+			if (GetDriveLabel(device_number.DeviceNumber, &drive_letter, &label)) {
+				safe_sprintf(entry, sizeof(entry), "%s (%c:)\n", label, drive_letter);
+				IGNORE_RETVAL(ComboBox_SetItemData(hDeviceList, ComboBox_AddStringU(hDeviceList, entry), device_number.DeviceNumber));
 			}
 		}
 	}
 	IGNORE_RETVAL(ComboBox_SetCurSel(hDeviceList, 0));
+	PopulateProperties(0);
 	return TRUE;
 }
 
@@ -277,6 +347,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 
 	case WM_INITDIALOG:
 		hDeviceList = GetDlgItem(hDlg, IDC_DEVICE);
+		hCapacity = GetDlgItem(hDlg, IDC_CAPACITY);
 		GetUSBDevices();
 		return (INT_PTR)TRUE;
 
