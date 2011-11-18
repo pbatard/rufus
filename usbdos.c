@@ -162,15 +162,12 @@ static BOOL GetUSBDevices(void)
 	SP_DEVICE_INTERFACE_DATA devint_data;
 	PSP_DEVICE_INTERFACE_DETAIL_DATA_A devint_detail_data;
 	STORAGE_DEVICE_NUMBER storage_device;
-	STORAGE_PROPERTY_QUERY storage_query;
-	STORAGE_DESCRIPTOR_HEADER storage_descriptor_header;
-	PSTORAGE_DEVICE_DESCRIPTOR storage_descriptor;
 	BYTE geometry[128];
 	LONGLONG disk_size;
 	DWORD size, i, j, datatype;
 	HANDLE hDrive;
 	char drive_letter;
-	char *label, entry[MAX_PATH], buffer[MAX_PATH], *tmp;
+	char *label, entry[MAX_PATH], buffer[MAX_PATH];
 
 	IGNORE_RETVAL(ComboBox_ResetContent(hDeviceList));
 
@@ -202,11 +199,9 @@ static BOOL GetUSBDevices(void)
 		devint_data.cbSize = sizeof(devint_data);
 		hDrive = INVALID_HANDLE_VALUE;
 		devint_detail_data = NULL;
-		storage_descriptor = NULL;
 		for (j=0; ;j++) {
 			safe_closehandle(hDrive);
 			safe_free(devint_detail_data);
-			safe_free(storage_descriptor);
 
 			if (!SetupDiEnumDeviceInterfaces(dev_info, &dev_info_data, &GUID_DEVINTERFACE_DISK, j, &devint_data)) {
 				if(GetLastError() != ERROR_NO_MORE_ITEMS) {
@@ -246,35 +241,6 @@ static BOOL GetUSBDevices(void)
 				uprintf("IOCTL_STORAGE_GET_DEVICE_NUMBER failed: %s\n", WindowsErrorString(0));
 				continue;
 			}
-
-			storage_query.PropertyId =  StorageDeviceProperty;
-			storage_query.QueryType = PropertyStandardQuery;
-			r = DeviceIoControl(hDrive, IOCTL_STORAGE_QUERY_PROPERTY, 
-						&storage_query, sizeof(storage_query),
-						&storage_descriptor_header, sizeof(storage_descriptor_header),
-						&size, NULL );
-			if (!r || size <= 0) {
-				uprintf("IOCTL_STORAGE_QUERY_PROPERTY->STORAGE_DEVICE_DESCRIPTOR (dummy) failed: %s\n", WindowsErrorString(0));
-				continue;
-			}
-			storage_descriptor = (PSTORAGE_DEVICE_DESCRIPTOR)calloc(1, storage_descriptor_header.Size);
-			if (storage_descriptor == NULL) {
-				uprintf("unable to allocate memory for STORAGE_DEVICE_DESCRIPTOR\n");
-				continue;
-			}
-			r = DeviceIoControl(hDrive, IOCTL_STORAGE_QUERY_PROPERTY, 
-						&storage_query, sizeof(storage_query),
-						storage_descriptor, storage_descriptor_header.Size,
-						&size, NULL );
-			if (!r || size <= 0) {
-				uprintf("IOCTL_STORAGE_QUERY_PROPERTY->STORAGE_DEVICE_DESCRIPTOR (actual) failed: %s\n", WindowsErrorString(0));
-				continue;
-			}
-			tmp = (char*)storage_descriptor;
-			uprintf("%s:%s:%s:%s\n", storage_descriptor->VendorIdOffset?&tmp[storage_descriptor->VendorIdOffset]:"",
-				storage_descriptor->ProductIdOffset?&tmp[storage_descriptor->ProductIdOffset]:"",
-				storage_descriptor->ProductRevisionOffset?&tmp[storage_descriptor->ProductRevisionOffset]:"",
-				storage_descriptor->SerialNumberOffset?&tmp[storage_descriptor->SerialNumberOffset]:"");
 
 			r = DeviceIoControl(hDrive, IOCTL_DISK_GET_DRIVE_GEOMETRY_EX, 
 						NULL, 0, geometry, sizeof(geometry),
