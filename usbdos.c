@@ -40,8 +40,8 @@
 /*
  * Globals
  */
-static HINSTANCE main_instance;
-static HWND hDeviceList, hCapacity;
+static HINSTANCE hMainInstance;
+static HWND hDialog, hDeviceList, hCapacity;
 
 #ifdef USBDOS_DEBUG
 static void _uprintf(const char *format, ...)
@@ -214,6 +214,11 @@ static BOOL PopulateProperties(int index)
 	char* suffix[] = { "KB", "MB", "GB", "TB", "PB"};
 	int i;
 
+	IGNORE_RETVAL(ComboBox_ResetContent(hCapacity));
+	if (index < 0) {
+		return TRUE;
+	}
+
 	DeviceNumber = (DWORD)ComboBox_GetItemData(hDeviceList, index);
 	if (!GetDriveInfo(DeviceNumber, &DiskSize))
 		return FALSE;
@@ -226,7 +231,6 @@ static BOOL PopulateProperties(int index)
 			break;
 		}
 	}
-	IGNORE_RETVAL(ComboBox_ResetContent(hCapacity));
 	IGNORE_RETVAL(ComboBox_AddStringU(hCapacity, capacity));
 	IGNORE_RETVAL(ComboBox_SetCurSel(hCapacity, 0));
 	return TRUE;
@@ -328,7 +332,8 @@ static BOOL GetUSBDevices(void)
 		}
 	}
 	IGNORE_RETVAL(ComboBox_SetCurSel(hDeviceList, 0));
-	PopulateProperties(0);
+	PostMessage(hDialog, WM_COMMAND, (CBN_SELCHANGE<<16) | IDC_DEVICE, 0);
+
 	return TRUE;
 }
 
@@ -346,6 +351,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		return (INT_PTR)TRUE;
 
 	case WM_INITDIALOG:
+		hDialog = hDlg;
 		hDeviceList = GetDlgItem(hDlg, IDC_DEVICE);
 		hCapacity = GetDlgItem(hDlg, IDC_CAPACITY);
 		GetUSBDevices();
@@ -353,6 +359,13 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 
 	case WM_COMMAND:
 		switch(LOWORD(wParam)) {
+		case IDC_DEVICE:		// dropdown: device description
+			switch (HIWORD(wParam)) {
+			case CBN_SELCHANGE:
+				PopulateProperties(ComboBox_GetCurSel(hDeviceList));
+				break;
+			}
+		break;
 		case IDC_CLOSE:
 			PostQuitMessage(0);
 			break;
@@ -430,7 +443,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	}
 
 	// Save instance of the application for further reference
-	main_instance = hInstance;
+	hMainInstance = hInstance;
 
 	// Initialize COM for folder selection
 	CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
