@@ -44,7 +44,7 @@
  * Globals
  */
 static HINSTANCE hMainInstance;
-static HWND hDialog, hDeviceList, hCapacity;
+static HWND hDialog, hDeviceList, hCapacity, hFileSystem;
 
 #ifdef USBDOS_DEBUG
 static void _uprintf(const char *format, ...)
@@ -161,7 +161,7 @@ static BOOL GetDriveLabel(DWORD num, char* letter, char** label)
 {
 	HANDLE hDrive;
 	char DrivePath[] = "#:\\";
-	char volume_label[MAX_PATH];
+	char volume_label[MAX_PATH+1];
 
 	*label = "NO_LABEL";
 
@@ -170,7 +170,7 @@ static BOOL GetDriveLabel(DWORD num, char* letter, char** label)
 	safe_closehandle(hDrive);
 
 	if (!GetVolumeInformationA(DrivePath, volume_label, sizeof(volume_label), NULL, NULL, NULL, NULL, 0)) {
-		uprintf("GetVolumeInformation failed: %s\n", WindowsErrorString(0));
+		uprintf("GetVolumeInformation (Label) failed: %s\n", WindowsErrorString(0));
 		return FALSE;
 	}
 	*label = volume_label;
@@ -182,16 +182,17 @@ static BOOL GetDriveLabel(DWORD num, char* letter, char** label)
 /*
  * Returns the drive letter and volume label
  */
-static BOOL GetDriveInfo(DWORD num, LONGLONG* DriveSize)
+static BOOL GetDriveInfo(DWORD num, LONGLONG* DriveSize, char* FSType, DWORD FSTypeSize)
 {
 	BOOL r;
 	HANDLE hDrive;
 	DWORD size;
 	BYTE geometry[128];
+	char DrivePath[] = "#:\\";
 
 	*DriveSize = 0;
 
-	if (!GetDriveHandle(num, &hDrive, NULL))
+	if (!GetDriveHandle(num, &hDrive, DrivePath))
 		return FALSE;
 
 	r = DeviceIoControl(hDrive, IOCTL_DISK_GET_DRIVE_GEOMETRY_EX, 
@@ -205,6 +206,11 @@ static BOOL GetDriveInfo(DWORD num, LONGLONG* DriveSize)
 
 	safe_closehandle(hDrive);
 
+	if (!GetVolumeInformationA(DrivePath, NULL, 0, NULL, NULL, NULL, FSType, FSTypeSize)) {
+		uprintf("GetVolumeInformation (Properties) failed: %s\n", WindowsErrorString(0));
+		return FALSE;
+	}
+
 	return TRUE;
 }
 
@@ -213,17 +219,18 @@ static BOOL PopulateProperties(int index)
 	double HumanReadableSize;
 	LONGLONG DiskSize;
 	DWORD DeviceNumber;
-	char capacity[64];
+	char capacity[64], FSType[32];
 	char* suffix[] = { "KB", "MB", "GB", "TB", "PB"};
 	int i;
 
 	IGNORE_RETVAL(ComboBox_ResetContent(hCapacity));
+	IGNORE_RETVAL(ComboBox_ResetContent(hFileSystem));
 	if (index < 0) {
 		return TRUE;
 	}
 
 	DeviceNumber = (DWORD)ComboBox_GetItemData(hDeviceList, index);
-	if (!GetDriveInfo(DeviceNumber, &DiskSize))
+	if (!GetDriveInfo(DeviceNumber, &DiskSize, FSType, sizeof(FSType)))
 		return FALSE;
 
 	HumanReadableSize = (double)DiskSize;
@@ -236,6 +243,8 @@ static BOOL PopulateProperties(int index)
 	}
 	IGNORE_RETVAL(ComboBox_AddStringU(hCapacity, capacity));
 	IGNORE_RETVAL(ComboBox_SetCurSel(hCapacity, 0));
+	IGNORE_RETVAL(ComboBox_AddStringU(hFileSystem, FSType));
+	IGNORE_RETVAL(ComboBox_SetCurSel(hFileSystem, 0));
 	return TRUE;
 }
 
@@ -357,6 +366,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		hDialog = hDlg;
 		hDeviceList = GetDlgItem(hDlg, IDC_DEVICE);
 		hCapacity = GetDlgItem(hDlg, IDC_CAPACITY);
+		hFileSystem = GetDlgItem(hDlg, IDC_FILESYSTEM);
 		GetUSBDevices();
 		return (INT_PTR)TRUE;
 
