@@ -26,19 +26,19 @@ LANGUAGE LANG_ENGLISH, SUBLANG_NEUTRAL
 
 IDD_DIALOG DIALOGEX 12, 12, 221, 260
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "USBDOS"
+CAPTION "Rufus"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     PUSHBUTTON      "Close",IDC_CLOSE,119,230,50,14
     PUSHBUTTON      "Start",IDC_START,53,230,50,14
     COMBOBOX        IDC_DEVICE,16,20,190,30,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Device",IDC_STATIC,18,8,22,8
-    COMBOBOX        IDC_FILESYSTEM,16,81,190,30,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "File System",IDC_STATIC,18,69,51,10
+    LTEXT           "Device",IDC_STATIC,17,8,22,8
+    COMBOBOX        IDC_FILESYSTEM,16,80,190,30,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "File System",IDC_STATIC,17,68,51,10
     COMBOBOX        IDC_CAPACITY,16,49,190,30,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Capacity",IDC_STATIC,18,37,29,8
-    COMBOBOX        IDC_ALLOCSIZE,16,112,190,30,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Allocation unit size",IDC_STATIC,18,100,105,10
+    LTEXT           "Capacity",IDC_STATIC,17,37,29,8
+    COMBOBOX        IDC_ALLOCSIZE,16,111,190,30,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Allocation unit size",IDC_STATIC,17,99,105,10
 END
 
 
@@ -106,13 +106,13 @@ BEGIN
         BLOCK "000904b0"
         BEGIN
             VALUE "CompanyName", "akeo.ie"
-            VALUE "FileDescription", "UsbDos"
+            VALUE "FileDescription", "Rufus"
             VALUE "FileVersion", "1.0.0.1"
-            VALUE "InternalName", "UsbDos"
-            VALUE "LegalCopyright", "© 2010-2011 Pete Batard (GPL v3)"
+            VALUE "InternalName", "Rufus"
+            VALUE "LegalCopyright", "© 2011 Pete Batard (GPL v3)"
             VALUE "LegalTrademarks", "http://www.gnu.org/copyleft/gpl.html"
-            VALUE "OriginalFilename", "usbdos.exe"
-            VALUE "ProductName", "UsbDos"
+            VALUE "OriginalFilename", "rufus.exe"
+            VALUE "ProductName", "Rufus"
             VALUE "ProductVersion", "1.0.0.1"
         END
     END
@@ -130,7 +130,7 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDI_ICON                ICON                    "usbdos.ico"
+IDI_ICON                ICON                    "rufus.ico"
 #endif    // English resources
 /////////////////////////////////////////////////////////////////////////////
 

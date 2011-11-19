@@ -1,5 +1,5 @@
 /*
- * USBDOS: USB DOS bootable stick creation utility
+ * Rufus: The Reliable USB Formatting Utility
  * Copyright (c) 2011 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,9 +18,9 @@
 
 #pragma once
 
-#define USBDOS_DEBUG
+#define RUFUS_DEBUG
 
-#define APP_VERSION                 "USBDOS v0.1.0.1"
+#define APP_VERSION                 "Rufus v0.1.0.1"
 #define IGNORE_RETVAL(expr)         do { (void)(expr); } while(0)
 #ifndef ARRAYSIZE
 #define ARRAYSIZE(A)                (sizeof(A)/sizeof((A)[0]))

@@ -15,15 +15,12 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\usbdos.c">
+    <ClCompile Include="..\rufus.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\usbdos.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\usbdos_license.h">
+    <ClInclude Include="..\rufus.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\resource.h">
@@ -34,7 +31,7 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\usbdos.ico">
+    <None Include="..\rufus.ico">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>
@@ -44,7 +41,7 @@
     </Manifest>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="..\usbdos.rc">
+    <ResourceCompile Include="..\rufus.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
   </ItemGroup>

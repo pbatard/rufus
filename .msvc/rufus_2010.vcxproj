@@ -19,9 +19,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectName>usbdos</ProjectName>
+    <ProjectName>rufus</ProjectName>
     <ProjectGuid>{731858A7-0303-4988-877B-9C0DD6471864}</ProjectGuid>
-    <RootNamespace>usbdos</RootNamespace>
+    <RootNamespace>rufus</RootNamespace>
     <Keyword>Win32Proj</Keyword>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -139,22 +139,21 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\usbdos.c" />
+    <ClCompile Include="..\rufus.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\msapi_utf8.h" />
-    <ClInclude Include="..\usbdos_license.h" />
-    <ClInclude Include="..\usbdos.h" />
+    <ClInclude Include="..\rufus.h" />
     <ClInclude Include="..\resource.h" />
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="..\common_controls_and_elevation.manifest" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\usbdos.ico" />
+    <None Include="..\rufus.ico" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="..\usbdos.rc" />
+    <ResourceCompile Include="..\rufus.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

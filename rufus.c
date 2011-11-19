@@ -1,5 +1,5 @@
 /*
- * USBDOS: USB DOS bootable stick creation utility
+ * Rufus: The Reliable USB Formatting Utility
  * Copyright (c) 2011 Pete Batard <pete@akeo.ie>
  * 
  * Device enumeration based in part on TestUSBDriveEject.cpp by ahmd:
@@ -38,7 +38,7 @@
 
 #include "msapi_utf8.h"
 #include "resource.h"
-#include "usbdos.h"
+#include "rufus.h"
 
 /*
  * Globals
@@ -46,7 +46,7 @@
 static HINSTANCE hMainInstance;
 static HWND hDialog, hDeviceList, hCapacity, hFileSystem;
 
-#ifdef USBDOS_DEBUG
+#ifdef RUFUS_DEBUG
 static void _uprintf(const char *format, ...)
 {
 	char buf[4096], *p = buf;
@@ -443,13 +443,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	HWND hDlg = NULL;
 	MSG msg;
 
-	uprintf("*** USBDOS INIT ***\n");
+	uprintf("*** RUFUS INIT ***\n");
 
 	// Prevent 2 applications from running at the same time
-	mutex = CreateMutexA(NULL, TRUE, "Global/USBDOS");
+	mutex = CreateMutexA(NULL, TRUE, "Global/RUFUS");
 	if ((mutex == NULL) || (GetLastError() == ERROR_ALREADY_EXISTS))
 	{
-		MessageBoxA(NULL, "Another USBDOS application is running.\n"
+		MessageBoxA(NULL, "Another Rufus application is running.\n"
 			"Please close the first application before running another one.",
 			"Other instance detected", MB_ICONSTOP);
 		return 0;
@@ -478,7 +478,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 out:
 	CloseHandle(mutex);
-	uprintf("*** USBDOS EXIT ***\n");
+	uprintf("*** RUFUS EXIT ***\n");
 
 	return 0;
 }
