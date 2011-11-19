@@ -33,6 +33,9 @@
 //#include <fmifs.h>
 // http://git.kernel.org/?p=fs/ext2/e2fsprogs.git;a=blob;f=misc/badblocks.c
 
+// TODO: publicize the link and license for USB icon:
+// http://www.softicons.com/free-icons/computer-icons/icons-unleashed-vol-1-by-pc-unleashed/usb-icon
+
 #include "msapi_utf8.h"
 #include "resource.h"
 #include "usbdos.h"
@@ -136,7 +139,7 @@ static BOOL GetDriveHandle(DWORD num, HANDLE* hDrive, char* DriveLetter)
 		r = DeviceIoControl(*hDrive, IOCTL_STORAGE_GET_DEVICE_NUMBER, NULL,
 			0, &sdn, sizeof(sdn), &size, NULL);
 		if ((!r) || (size <= 0)) {
-			uprintf("IOCTL_STORAGE_GET_DEVICE_NUMBER 1 failed: %s\n", WindowsErrorString(0));
+			uprintf("IOCTL_STORAGE_GET_DEVICE_NUMBER failed: %s\n", WindowsErrorString(0));
 			safe_closehandle(*hDrive);
 			break;
 		}
