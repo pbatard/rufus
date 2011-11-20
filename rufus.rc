@@ -68,6 +68,11 @@ END
 3 TEXTINCLUDE 
 BEGIN
     "\r\n"
+    "// Must reference a manifest for visual styles and elevation\r\n"
+    "// Oh, and it must happen at the end, or MinGW will ignore it!\r\n"
+    "#if defined(__GNUC__)\r\n"
+    "CREATEPROCESS_MANIFEST_RESOURCE_ID RT_MANIFEST ""common_controls_and_elevation.manifest""\r\n"
+    "#endif\r\n"
     "\0"
 END
 
@@ -148,6 +153,11 @@ IDI_ICON                ICON                    "rufus.ico"
 // Generated from the TEXTINCLUDE 3 resource.
 //
 
+// Must reference a manifest for visual styles and elevation
+// Oh, and it must happen at the end, or MinGW will ignore it!
+#if defined(__GNUC__)
+CREATEPROCESS_MANIFEST_RESOURCE_ID RT_MANIFEST "common_controls_and_elevation.manifest"
+#endif
 
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED

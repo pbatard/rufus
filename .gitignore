@@ -24,7 +24,6 @@
 .libs
 Debug
 INSTALL
-Makefile
 Makefile.in
 Release
 aclocal.m4

@@ -189,6 +189,7 @@ static BOOL GetDriveInfo(DWORD num, LONGLONG* DriveSize, char* FSType, DWORD FST
 	HANDLE hDrive;
 	DWORD size;
 	BYTE geometry[128];
+	void* disk_geometry = (void*)geometry;
 	char DrivePath[] = "#:\\";
 
 	*DriveSize = 0;
@@ -203,7 +204,7 @@ static BOOL GetDriveInfo(DWORD num, LONGLONG* DriveSize, char* FSType, DWORD FST
 		safe_closehandle(hDrive);
 		return FALSE;
 	}
-	*DriveSize = ((PDISK_GEOMETRY_EX)geometry)->DiskSize.QuadPart;
+	*DriveSize = ((PDISK_GEOMETRY_EX)(disk_geometry))->DiskSize.QuadPart;
 
 	safe_closehandle(hDrive);
 
@@ -400,7 +401,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 /*
  * Center a dialog with regards to the main application Window or the desktop
  */
-void CenterDialog(HWND hDialog)
+void CenterDialog(HWND hDlg)
 {
 	POINT Point;
 	HWND hParent;
@@ -410,10 +411,10 @@ void CenterDialog(HWND hDialog)
 	int nHeight;
 
 	// Get the size of the dialog box.
-	GetWindowRect(hDialog, &DialogRect);
+	GetWindowRect(hDlg, &DialogRect);
 
 	// Get the parent
-	hParent = GetParent(hDialog);
+	hParent = GetParent(hDlg);
 	if (hParent == NULL) {
 		hParent = GetDesktopWindow();
 	}
@@ -433,7 +434,7 @@ void CenterDialog(HWND hDialog)
 	Point.y -= nHeight / 2 + 35;
 
 	// Move the window.
-	MoveWindow(hDialog, Point.x, Point.y, nWidth, nHeight, FALSE);
+	MoveWindow(hDlg, Point.x, Point.y, nWidth, nHeight, FALSE);
 }
 
 /*
