@@ -3,7 +3,7 @@ TARGETNAME=rufus
 CC     = gcc
 RC     = windres
 STRIP  = strip
-CFLAGS = -std=gnu99 -Wall -Wundef -Wunused -Wstrict-prototypes -Werror-implicit-function-declaration -Wno-pointer-sign -Wshadow -O2 -Wl,--subsystem,windows
+CFLAGS = -std=gnu99 -Wall -Wundef -Wunused -Wstrict-prototypes -Werror-implicit-function-declaration -Wno-pointer-sign -Wshadow -O2 -Wl,--subsystem,windows -DWINVER=0x501 -D_WIN32_IE=0x501
 LIBS   = -lsetupapi -lole32
 
 .PHONY: all clean

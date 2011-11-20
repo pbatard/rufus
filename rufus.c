@@ -24,11 +24,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 #include <commctrl.h>
 #include <setupapi.h>
 #include <winioctl.h>
-// TODO: MinGW32 requires <ddk/ntddscsi.h>
-#include <ntddscsi.h>
+
 // http://doc.sch130.nsc.ru/www.sysinternals.com/ntw2k/source/fmifs.shtml
 // http://svn.reactos.org/svn/reactos/trunk/reactos/include/reactos/libs/fmifs/
 //#include <fmifs.h>
@@ -110,7 +110,7 @@ static BOOL GetDriveHandle(DWORD num, HANDLE* hDrive, char* DriveLetter)
 {
 	BOOL r;
 	DWORD size;
-	STORAGE_DEVICE_NUMBER sdn = {0};
+	STORAGE_DEVICE_NUMBER_REDEF device_number = {0};
 	static char drives[26*4];	/* "D:\", "E:\", etc. */
 	char *drive = drives;
 	char drive_name[] = "\\\\.\\#:";
@@ -138,13 +138,13 @@ static BOOL GetDriveHandle(DWORD num, HANDLE* hDrive, char* DriveLetter)
 		}
 	
 		r = DeviceIoControl(*hDrive, IOCTL_STORAGE_GET_DEVICE_NUMBER, NULL,
-			0, &sdn, sizeof(sdn), &size, NULL);
+			0, &device_number, sizeof(device_number), &size, NULL);
 		if ((!r) || (size <= 0)) {
 			uprintf("IOCTL_STORAGE_GET_DEVICE_NUMBER failed: %s\n", WindowsErrorString(0));
 			safe_closehandle(*hDrive);
 			break;
 		}
-		if (sdn.DeviceNumber == num)
+		if (device_number.DeviceNumber == num)
 			break;
 	}
 
@@ -260,7 +260,7 @@ static BOOL GetUSBDevices(void)
 	SP_DEVINFO_DATA dev_info_data;
 	SP_DEVICE_INTERFACE_DATA devint_data;
 	PSP_DEVICE_INTERFACE_DETAIL_DATA_A devint_detail_data;
-	STORAGE_DEVICE_NUMBER device_number;
+	STORAGE_DEVICE_NUMBER_REDEF device_number;
 	DWORD size, i, j, datatype;
 	HANDLE hDrive;
 	char drive_letter;
