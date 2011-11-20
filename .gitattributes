@@ -1,7 +1,7 @@
 *.sh            eol=lf
 *.ac            eol=lf
 *.am            eol=lf
-GNUmakefile     eol=lf
+Makefile        eol=lf
 *.sln           eol=crlf
 *.vcproj        eol=crlf
 *.vcxproj*      eol=crlf
