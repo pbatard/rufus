@@ -26,6 +26,7 @@
 #include <string.h>
 #include <commctrl.h>
 #include <setupapi.h>
+#include <winioctl.h>
 // TODO: MinGW32 requires <ddk/ntddscsi.h>
 #include <ntddscsi.h>
 // http://doc.sch130.nsc.ru/www.sysinternals.com/ntw2k/source/fmifs.shtml
@@ -263,6 +264,7 @@ static BOOL GetUSBDevices(void)
 	HANDLE hDrive;
 	char drive_letter;
 	char *label, entry[MAX_PATH], buffer[MAX_PATH];
+	const char* usbstor_name = "USBSTOR";
 
 	IGNORE_RETVAL(ComboBox_ResetContent(hDeviceList));
 
@@ -281,7 +283,7 @@ static BOOL GetUSBDevices(void)
 			continue;
 		}
 
-		if (safe_strcmp(buffer, "USBSTOR") != 0)
+		if (safe_strcmp(buffer, usbstor_name) != 0)
 			continue;
 		memset(buffer, 0, sizeof(buffer));
 		if (!SetupDiGetDeviceRegistryPropertyA(dev_info, &dev_info_data, SPDRP_FRIENDLYNAME,

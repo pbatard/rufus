@@ -41,5 +41,4 @@ install-sh
 libtool
 ltmain.sh
 missing
-sources
 stamp-h1
