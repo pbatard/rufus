@@ -31,7 +31,9 @@ echo Build failed
 goto done
 
 :usage
-echo wdk_build must be run in a Windows Driver Kit build environment
+echo This command must be run in a Windows Driver Kit build environment.
+echo See: http://msdn.microsoft.com/en-us/windows/hardware/gg487463
+echo:
 pause
 
 :done
