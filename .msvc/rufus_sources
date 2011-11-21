@@ -15,10 +15,14 @@ C_DEFINES = $(C_DEFINES) /DDDKBUILD /DISOLATION_AWARE_ENABLED
 TARGETLIBS=$(SDK_LIB_PATH)\kernel32.lib \
            $(SDK_LIB_PATH)\user32.lib \
            $(SDK_LIB_PATH)\setupapi.lib \
-           $(SDK_LIB_PATH)\ole32.lib
+           $(SDK_LIB_PATH)\ole32.lib \
+           $(SDK_LIB_PATH)\version.lib \
+           $(SDK_LIB_PATH)\uuid.lib \
+           $(SDK_LIB_PATH)\shell32.lib
 
 # http://jpassing.com/2008/02/01/how-to-use-manifests-with-buildexe/
 SXS_APPLICATION_MANIFEST=common_controls_and_elevation.manifest
 
 SOURCES=rufus.c \
+        stdlg.c \
         rufus.rc

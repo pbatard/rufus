@@ -18,15 +18,18 @@
     <ClCompile Include="..\rufus.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\stdlg.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\rufus.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\resource.h">
+    <ClInclude Include="..\msapi_utf8.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\msapi_utf8.h">
+    <ClInclude Include="..\license.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

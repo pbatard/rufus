@@ -1,5 +1,5 @@
 /*
- * Rufus: The Reliable USB Formatting Utility
+ * Rufus: The Resourceful USB Formatting Utility
  * Copyright (c) 2011 Pete Batard <pete@akeo.ie>
  * 
  * Device enumeration based in part on TestUSBDriveEject.cpp by ahmd:
@@ -34,21 +34,30 @@
 //#include <fmifs.h>
 // http://git.kernel.org/?p=fs/ext2/e2fsprogs.git;a=blob;f=misc/badblocks.c
 
-// TODO: publicize the link and license for USB icon:
-// http://www.softicons.com/free-icons/computer-icons/icons-unleashed-vol-1-by-pc-unleashed/usb-icon
-
 #include "msapi_utf8.h"
 #include "resource.h"
 #include "rufus.h"
 
+#if !defined(GUID_DEVINTERFACE_DISK)
+const GUID GUID_DEVINTERFACE_DISK = { 0x53f56307L, 0xb6bf, 0x11d0, {0x94, 0xf2, 0x00, 0xa0, 0xc9, 0x1e, 0xfb, 0x8b} };
+#endif
+
+extern char *WindowsErrorString(void);
+
 /*
  * Globals
  */
-static HINSTANCE hMainInstance;
-static HWND hDialog, hDeviceList, hCapacity, hFileSystem;
+HINSTANCE hMainInstance;
+HWND hMainDialog;
+char szFolderPath[MAX_PATH];
+HWND hStatus;
+float fScale = 1.0f;
+
+static HWND hDeviceList, hCapacity, hFileSystem;
+
 
 #ifdef RUFUS_DEBUG
-static void _uprintf(const char *format, ...)
+void _uprintf(const char *format, ...)
 {
 	char buf[4096], *p = buf;
 	va_list args;
@@ -69,42 +78,95 @@ static void _uprintf(const char *format, ...)
 
 	OutputDebugStringA(buf);
 }
-#define uprintf(...) _uprintf(__VA_ARGS__)
-#else
-#define uprintf(...)
 #endif
 
+
 /*
- * Converts a windows error to human readable string
- * uses retval as errorcode, or, if 0, use GetLastError()
+ * Convert a partition type to its human readable form
+ * http://www.win.tue.nl/~aeb/partitions/partition_types-1.html
  */
-static char *WindowsErrorString(DWORD retval)
+static const char* GetPartitionType(BYTE Type)
 {
-static char err_string[256];
-
-	DWORD size;
-	DWORD error_code, format_error;
-
-	error_code = retval?retval:GetLastError();
-
-	safe_sprintf(err_string, sizeof(err_string), "[%d] ", error_code);
-
-	size = FormatMessageU(FORMAT_MESSAGE_FROM_SYSTEM, NULL, error_code,
-		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), &err_string[strlen(err_string)],
-		sizeof(err_string)-(DWORD)strlen(err_string), NULL);
-	if (size == 0) {
-		format_error = GetLastError();
-		if (format_error)
-			safe_sprintf(err_string, sizeof(err_string),
-				"Windows error code %u (FormatMessage error code %u)", error_code, format_error);
-		else
-			safe_sprintf(err_string, sizeof(err_string), "Unknown error code %u", error_code);
+	switch(Type) {
+	case 0x00: 
+		return "Unused";
+	case 0x01:
+		return "DOS FAT12";
+	case 0x02:
+		return "Logical Disk Manager";
+	case 0x04:
+		return "DOS 3.0+ FAT16";
+	case 0x05:
+		return "Extended Partition";
+	case 0x06:
+		return "DOS 3.31+ FAT16 (Huge)";
+	case 0x07:
+		return "NTFS";
+	case 0x0b:
+		return "Win95 FAT32";
+	case 0x0c:
+		return "Win95 FAT32 (LBA)";
+	case 0x0e:
+		return "Win95 FAT16 (LBA)";
+	case 0x0f:
+		return "Win95 Extended (LBA)";
+	case 0x11:
+		return "Hidden DOS FAT12";
+	case 0x12:
+		return "Diagnostics Partition";
+	case 0x14:
+		return "Hidden DOS 3.0+ FAT16";
+	case 0x16:
+		return "Hidden DOS 3.31+ FAT16 (Huge)";
+	case 0x17:
+		return "Hidden NTFS";
+	case 0x1b:
+		return "Hidden Win95 FAT32";
+	case 0x1c:
+		return "Hidden Win95 FAT32 (LBA)";
+	case 0x1e:
+		return "Hidden Win95 FAT16 (LBA)";
+	case 0x1f:
+		return "Hidden Win95 Extended (LBA)";
+	case 0x27:
+		return "Windows Recovery";
+	case 0x42:
+		return "Windows 2000 Dynamic Extended";
+	case 0x63:
+		return "Unix System V";
+	case 0x82:
+		return "Linux Swap";
+	case 0x83:
+		return "Linux";
+	case 0x85:
+		return "Linux Extended";
+	case 0x8e:
+		return "Linux LVM";
+	case 0x9f:
+	case 0xa6:
+	case 0xa9:
+		return "BSD";
+	case 0xa8:
+	case 0xaf:
+		return "OS-X";
+	case 0xab:
+		return "OS-X (Boot)";
+	case 0xeb:
+		return "BeOS";
+	case 0xfa:
+		return "Bochs";
+	case 0xfb:
+	case 0xfc:
+		return "VMWare";
+	case 0xfd:
+		return "Linux RAID";
+	default:
+		return "Unknown";
 	}
-	return err_string;
 }
 
 /*
- * Opens a drive return both the handle and the drive letter
+ * Open a drive - return both the handle and the drive letter
  */
 static BOOL GetDriveHandle(DWORD num, HANDLE* hDrive, char* DriveLetter)
 {
@@ -117,7 +179,7 @@ static BOOL GetDriveHandle(DWORD num, HANDLE* hDrive, char* DriveLetter)
 
 	size = GetLogicalDriveStringsA(sizeof(drives), drives);
 	if (size == 0) {
-		uprintf("GetLogicalDriveStrings failed: %s\n", WindowsErrorString(0));
+		uprintf("GetLogicalDriveStrings failed: %s\n", WindowsErrorString());
 		return FALSE;
 	}
 	if (size > sizeof(drives)) {
@@ -133,14 +195,14 @@ static BOOL GetDriveHandle(DWORD num, HANDLE* hDrive, char* DriveLetter)
 		safe_sprintf(drive_name, sizeof(drive_name), "\\\\.\\%c:", drive[0]);
 		*hDrive = CreateFileA(drive_name, GENERIC_READ, FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, 0);
 		if (hDrive == INVALID_HANDLE_VALUE) {
-			uprintf("Could not open drive %c: %s\n", WindowsErrorString(0));
+			uprintf("Could not open drive %c: %s\n", WindowsErrorString());
 			continue;
 		}
 	
 		r = DeviceIoControl(*hDrive, IOCTL_STORAGE_GET_DEVICE_NUMBER, NULL,
 			0, &device_number, sizeof(device_number), &size, NULL);
 		if ((!r) || (size <= 0)) {
-			uprintf("IOCTL_STORAGE_GET_DEVICE_NUMBER failed: %s\n", WindowsErrorString(0));
+			uprintf("IOCTL_STORAGE_GET_DEVICE_NUMBER (GetDriveHandle) failed: %s\n", WindowsErrorString());
 			safe_closehandle(*hDrive);
 			break;
 		}
@@ -156,7 +218,7 @@ static BOOL GetDriveHandle(DWORD num, HANDLE* hDrive, char* DriveLetter)
 }
 
 /*
- * Returns the drive letter and volume label
+ * Return the drive letter and volume label
  */
 static BOOL GetDriveLabel(DWORD num, char* letter, char** label)
 {
@@ -169,28 +231,32 @@ static BOOL GetDriveLabel(DWORD num, char* letter, char** label)
 	if (!GetDriveHandle(num, &hDrive, DrivePath))
 		return FALSE;
 	safe_closehandle(hDrive);
-
-	if (!GetVolumeInformationA(DrivePath, volume_label, sizeof(volume_label), NULL, NULL, NULL, NULL, 0)) {
-		uprintf("GetVolumeInformation (Label) failed: %s\n", WindowsErrorString(0));
-		return FALSE;
-	}
-	*label = volume_label;
 	*letter = DrivePath[0];
+
+	if (GetVolumeInformationA(DrivePath, volume_label, sizeof(volume_label), NULL, NULL, NULL, NULL, 0)) {
+		*label = volume_label;
+	} else {
+		uprintf("GetVolumeInformation (Label) failed: %s\n", WindowsErrorString());
+	}
 
 	return TRUE;
 }
 
 /*
- * Returns the drive letter and volume label
+ * Returns the drive properties (size, FS)
  */
 static BOOL GetDriveInfo(DWORD num, LONGLONG* DriveSize, char* FSType, DWORD FSTypeSize)
 {
 	BOOL r;
 	HANDLE hDrive;
 	DWORD size;
-	BYTE geometry[128];
+	BYTE geometry[128], layout[1024];
 	void* disk_geometry = (void*)geometry;
+	void* drive_layout = (void*)layout;
+	PDISK_GEOMETRY_EX DiskGeometry = (PDISK_GEOMETRY_EX)disk_geometry;
+	PDRIVE_LAYOUT_INFORMATION_EX DriveLayout = (PDRIVE_LAYOUT_INFORMATION_EX)drive_layout;
 	char DrivePath[] = "#:\\";
+	DWORD i, nb_partitions = 0;
 
 	*DriveSize = 0;
 
@@ -200,22 +266,54 @@ static BOOL GetDriveInfo(DWORD num, LONGLONG* DriveSize, char* FSType, DWORD FST
 	r = DeviceIoControl(hDrive, IOCTL_DISK_GET_DRIVE_GEOMETRY_EX, 
 			NULL, 0, geometry, sizeof(geometry), &size, NULL );
 	if (!r || size <= 0) {
-		uprintf("IOCTL_DISK_GET_DRIVE_GEOMETRY_EX failed: %s\n", WindowsErrorString(0));
+		uprintf("IOCTL_DISK_GET_DRIVE_GEOMETRY_EX failed: %s\n", WindowsErrorString());
 		safe_closehandle(hDrive);
 		return FALSE;
 	}
-	*DriveSize = ((PDISK_GEOMETRY_EX)(disk_geometry))->DiskSize.QuadPart;
+	*DriveSize = DiskGeometry->DiskSize.QuadPart;
+
+	r = DeviceIoControl(hDrive, IOCTL_DISK_GET_DRIVE_LAYOUT_EX, 
+			NULL, 0, layout, sizeof(layout), &size, NULL );
+	if (!r || size <= 0) {
+		uprintf("IOCTL_DISK_GET_DRIVE_LAYOUT_EX failed: %s\n", WindowsErrorString());
+	} else {
+		switch (DriveLayout->PartitionStyle) {
+		case PARTITION_STYLE_MBR:
+			for (i=0; i<DriveLayout->PartitionCount; i++) {
+				if (DriveLayout->PartitionEntry[i].Mbr.PartitionType != PARTITION_ENTRY_UNUSED) {
+					uprintf("Partition #%d:\n", ++nb_partitions);
+					uprintf("  Type: %s (0x%02X)\n  Boot: %s\n  Recognized: %s\n  Hidden Sectors: %d\n",
+						GetPartitionType(DriveLayout->PartitionEntry[i].Mbr.PartitionType),
+						DriveLayout->PartitionEntry[i].Mbr.PartitionType,
+						DriveLayout->PartitionEntry[i].Mbr.BootIndicator?"Yes":"No",
+						DriveLayout->PartitionEntry[i].Mbr.RecognizedPartition?"Yes":"No",
+						DriveLayout->PartitionEntry[i].Mbr.HiddenSectors);
+				}
+			}
+			uprintf("Partition type: MBR, NB Partitions: %d\n", nb_partitions);
+			break;
+		case PARTITION_STYLE_GPT:
+			uprintf("Partition type: GPT, NB Partitions: %d\n", DriveLayout->PartitionCount);
+			break;
+		default:
+			uprintf("Partition type: RAW\n");
+			break;
+		}
+	}
 
 	safe_closehandle(hDrive);
 
 	if (!GetVolumeInformationA(DrivePath, NULL, 0, NULL, NULL, NULL, FSType, FSTypeSize)) {
-		uprintf("GetVolumeInformation (Properties) failed: %s\n", WindowsErrorString(0));
-		return FALSE;
+		safe_sprintf(FSType, FSTypeSize, "Non Windows (Please Select)");
+		uprintf("GetVolumeInformation (Properties) failed: %s\n", WindowsErrorString());
 	}
 
 	return TRUE;
 }
 
+/*
+ * Populate the UI properties
+ */
 static BOOL PopulateProperties(int index)
 {
 	double HumanReadableSize;
@@ -251,7 +349,7 @@ static BOOL PopulateProperties(int index)
 }
 
 /*
- * Refreshes the list of USB devices
+ * Refresh the list of USB devices
  */
 static BOOL GetUSBDevices(void)
 {
@@ -271,7 +369,7 @@ static BOOL GetUSBDevices(void)
 
 	dev_info = SetupDiGetClassDevsA(&GUID_DEVINTERFACE_DISK, NULL, NULL, DIGCF_PRESENT|DIGCF_DEVICEINTERFACE);
 	if (dev_info == INVALID_HANDLE_VALUE) {
-		uprintf("SetupDiGetClassDevs (Interface) failed: %d\n", WindowsErrorString(0));
+		uprintf("SetupDiGetClassDevs (Interface) failed: %d\n", WindowsErrorString());
 		return FALSE;
 	}
 
@@ -280,7 +378,7 @@ static BOOL GetUSBDevices(void)
 		memset(buffer, 0, sizeof(buffer));
 		if (!SetupDiGetDeviceRegistryPropertyA(dev_info, &dev_info_data, SPDRP_ENUMERATOR_NAME,
 				&datatype, (LPBYTE)buffer, sizeof(buffer), &size)) {
-			uprintf("SetupDiGetDeviceRegistryProperty (Enumerator Name) failed: %d\n", WindowsErrorString(0));
+			uprintf("SetupDiGetDeviceRegistryProperty (Enumerator Name) failed: %d\n", WindowsErrorString());
 			continue;
 		}
 
@@ -289,7 +387,7 @@ static BOOL GetUSBDevices(void)
 		memset(buffer, 0, sizeof(buffer));
 		if (!SetupDiGetDeviceRegistryPropertyA(dev_info, &dev_info_data, SPDRP_FRIENDLYNAME,
 				&datatype, (LPBYTE)buffer, sizeof(buffer), &size)) {
-			uprintf("SetupDiGetDeviceRegistryProperty (Friendly Name) failed: %d\n", WindowsErrorString(0));
+			uprintf("SetupDiGetDeviceRegistryProperty (Friendly Name) failed: %d\n", WindowsErrorString());
 			continue;
 		}
 		uprintf("found drive '%s'\n", buffer);
@@ -303,7 +401,7 @@ static BOOL GetUSBDevices(void)
 
 			if (!SetupDiEnumDeviceInterfaces(dev_info, &dev_info_data, &GUID_DEVINTERFACE_DISK, j, &devint_data)) {
 				if(GetLastError() != ERROR_NO_MORE_ITEMS) {
-					uprintf("SetupDiEnumDeviceInterfaces failed: %s\n", WindowsErrorString(0));
+					uprintf("SetupDiEnumDeviceInterfaces failed: %s\n", WindowsErrorString());
 				}
 				break;
 			}
@@ -317,18 +415,18 @@ static BOOL GetUSBDevices(void)
 					}
 					devint_detail_data->cbSize = sizeof(SP_DEVICE_INTERFACE_DETAIL_DATA_A);
 				} else {
-					uprintf("SetupDiGetDeviceInterfaceDetail (dummy) failed: %s\n", WindowsErrorString(0));
+					uprintf("SetupDiGetDeviceInterfaceDetail (dummy) failed: %s\n", WindowsErrorString());
 					continue;
 				}
 			}
 			if(!SetupDiGetDeviceInterfaceDetailA(dev_info, &devint_data, devint_detail_data, size, &size, NULL)) {
-				uprintf("SetupDiGetDeviceInterfaceDetail (actual) failed: %s\n", WindowsErrorString(0));
+				uprintf("SetupDiGetDeviceInterfaceDetail (actual) failed: %s\n", WindowsErrorString());
 				continue;
 			}
 
 			hDrive = CreateFileA(devint_detail_data->DevicePath, GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
 			if(hDrive == INVALID_HANDLE_VALUE) {
-				uprintf("could not open '%s': %s\n", devint_detail_data->DevicePath, WindowsErrorString(0)); 
+				uprintf("could not open '%s': %s\n", devint_detail_data->DevicePath, WindowsErrorString()); 
 				continue;
 			}
 
@@ -336,7 +434,7 @@ static BOOL GetUSBDevices(void)
 			r = DeviceIoControl(hDrive, IOCTL_STORAGE_GET_DEVICE_NUMBER, 
 						NULL, 0, &device_number, sizeof(device_number), &size, NULL );
 			if (!r || size <= 0) {
-				uprintf("IOCTL_STORAGE_GET_DEVICE_NUMBER 2 failed: %s\n", WindowsErrorString(0));
+				uprintf("IOCTL_STORAGE_GET_DEVICE_NUMBER (GetUSBDevices) failed: %s\n", WindowsErrorString());
 				continue;
 			}
 
@@ -347,7 +445,7 @@ static BOOL GetUSBDevices(void)
 		}
 	}
 	IGNORE_RETVAL(ComboBox_SetCurSel(hDeviceList, 0));
-	PostMessage(hDialog, WM_COMMAND, (CBN_SELCHANGE<<16) | IDC_DEVICE, 0);
+	PostMessage(hMainDialog, WM_COMMAND, (CBN_SELCHANGE<<16) | IDC_DEVICE, 0);
 
 	return TRUE;
 }
@@ -355,10 +453,13 @@ static BOOL GetUSBDevices(void)
 // TODO: the device is currently in use by another application (find application a la TGit installer?)
 
 /*
-* Main dialog callback
-*/
+ * Main dialog callback
+ */
 static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
+	HDC hDC;
+	DRAWITEMSTRUCT* pDI;
+
 	switch (message) {
 
 	case WM_DEVICECHANGE:
@@ -366,15 +467,39 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		return (INT_PTR)TRUE;
 
 	case WM_INITDIALOG:
-		hDialog = hDlg;
+		hMainDialog = hDlg;
 		hDeviceList = GetDlgItem(hDlg, IDC_DEVICE);
 		hCapacity = GetDlgItem(hDlg, IDC_CAPACITY);
 		hFileSystem = GetDlgItem(hDlg, IDC_FILESYSTEM);
+		// High DPI scaling
+		hDC = GetDC(hDlg);
+		fScale = GetDeviceCaps(hDC, LOGPIXELSX) / 96.0f;
+		ReleaseDC(hDlg, hDC);
+		// Create the status line
+		CreateStatusBar();
+		// Display the version in the right area of the status bar
+		SendMessageA(GetDlgItem(hDlg, IDC_STATUS), SB_SETTEXTA, SBT_OWNERDRAW | 1, (LPARAM)APP_VERSION);
 		GetUSBDevices();
 		return (INT_PTR)TRUE;
 
+	// Change the colour of the version text in the status bar
+	case WM_DRAWITEM:
+		if (wParam == IDC_STATUS) {
+			pDI = (DRAWITEMSTRUCT*)lParam;
+			SetBkMode(pDI->hDC, TRANSPARENT);
+			SetTextColor(pDI->hDC, GetSysColor(COLOR_3DSHADOW));
+			pDI->rcItem.top += (int)(2.0f * fScale);
+			pDI->rcItem.left += (int)(4.0f * fScale);
+			DrawTextExA(pDI->hDC, APP_VERSION, -1, &pDI->rcItem, DT_LEFT, NULL);
+			return (INT_PTR)TRUE;
+		}
+		break;
+
 	case WM_COMMAND:
 		switch(LOWORD(wParam)) {
+		case IDC_ABOUT:
+			CreateAboutBox();
+			break;
 		case IDC_DEVICE:		// dropdown: device description
 			switch (HIWORD(wParam)) {
 			case CBN_SELCHANGE:
@@ -398,44 +523,6 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	return (INT_PTR)FALSE;
 }
 
-/*
- * Center a dialog with regards to the main application Window or the desktop
- */
-void CenterDialog(HWND hDlg)
-{
-	POINT Point;
-	HWND hParent;
-	RECT DialogRect;
-	RECT ParentRect;
-	int nWidth;
-	int nHeight;
-
-	// Get the size of the dialog box.
-	GetWindowRect(hDlg, &DialogRect);
-
-	// Get the parent
-	hParent = GetParent(hDlg);
-	if (hParent == NULL) {
-		hParent = GetDesktopWindow();
-	}
-	GetClientRect(hParent, &ParentRect);
-
-	// Calculate the height and width of the current dialog
-	nWidth = DialogRect.right - DialogRect.left;
-	nHeight = DialogRect.bottom - DialogRect.top;
-
-	// Find the center point and convert to screen coordinates.
-	Point.x = (ParentRect.right - ParentRect.left) / 2;
-	Point.y = (ParentRect.bottom - ParentRect.top) / 2;
-	ClientToScreen(hParent, &Point);
-
-	// Calculate the new x, y starting point.
-	Point.x -= nWidth / 2;
-	Point.y -= nHeight / 2 + 35;
-
-	// Move the window.
-	MoveWindow(hDlg, Point.x, Point.y, nWidth, nHeight, FALSE);
-}
 
 /*
  * Application Entrypoint

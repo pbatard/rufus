@@ -140,11 +140,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\rufus.c" />
+    <ClCompile Include="..\stdlg.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\msapi_utf8.h" />
     <ClInclude Include="..\rufus.h" />
-    <ClInclude Include="..\resource.h" />
+    <ClInclude Include="..\license.h" />
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="..\common_controls_and_elevation.manifest" />

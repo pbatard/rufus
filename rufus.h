@@ -1,5 +1,5 @@
 /*
- * Rufus: The Reliable USB Formatting Utility
+ * Rufus: The Resourceful USB Formatting Utility
  * Copyright (c) 2011 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -20,7 +20,12 @@
 
 #define RUFUS_DEBUG
 
-#define APP_VERSION                 "Rufus v0.1.0.1"
+#define APP_VERSION                 "Rufus v1.0.0.1"
+#define MAX_TOOLTIPS                16
+#define WHITE                       RGB(255,255,255)
+#define SEPARATOR_GREY              RGB(223,223,223)
+#define RUFUS_URL                   "https://github.com/pbatard/rufus/wiki/Rufus"
+#define BUG_URL                     "https://github.com/pbatard/rufus/issues"
 #define IGNORE_RETVAL(expr)         do { (void)(expr); } while(0)
 #ifndef ARRAYSIZE
 #define ARRAYSIZE(A)                (sizeof(A)/sizeof((A)[0]))
@@ -41,16 +46,41 @@
 #define safe_sprintf _snprintf
 #define safe_strlen(str) ((((char*)str)==NULL)?0:strlen(str))
 #define safe_strdup _strdup
-
 #if defined(_MSC_VER)
 #define safe_vsnprintf(buf, size, format, arg) _vsnprintf_s(buf, size, _TRUNCATE, format, arg)
 #else
 #define safe_vsnprintf vsnprintf
 #endif
 
-#if !defined(GUID_DEVINTERFACE_DISK)
-const GUID GUID_DEVINTERFACE_DISK = { 0x53f56307L, 0xb6bf, 0x11d0, {0x94, 0xf2, 0x00, 0xa0, 0xc9, 0x1e, 0xfb, 0x8b} };
+/*
+ * Globals
+ */
+extern HINSTANCE hMainInstance;
+extern HWND hMainDialog;
+extern HWND hStatus;
+extern float fScale;
+extern char szFolderPath[MAX_PATH];
+
+/*
+ * Shared prototypes
+ */
+extern void CenterDialog(HWND hDlg);
+extern void CreateStatusBar(void);
+extern INT_PTR CreateAboutBox(void);
+
+#ifdef RUFUS_DEBUG
+extern void _uprintf(const char *format, ...);
+#define uprintf(...) _uprintf(__VA_ARGS__)
+#else
+#define uprintf(...)
 #endif
+
+/* Custom notifications */
+enum MessageType {
+	MSG_INFO,
+	MSG_WARNING,
+	MSG_ERROR
+};
 
 typedef struct {
 	DWORD DeviceType;
