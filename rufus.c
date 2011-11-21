@@ -57,7 +57,7 @@ char szFolderPath[MAX_PATH];
 HWND hStatus;
 float fScale = 1.0f;
 
-static HWND hDeviceList, hCapacity, hFileSystem;
+static HWND hDeviceList, hCapacity, hFileSystem, hDeviceToolTip = NULL;
 static StrArray DriveID;
 
 #ifdef RUFUS_DEBUG
@@ -509,6 +509,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		case IDCANCEL:
 			PostQuitMessage(0);
 			StrArrayDestroy(&DriveID);
+			DestroyAllTooltips();
 			EndDialog(hDlg, 0);
 			break;
 		case IDC_ABOUT:
@@ -520,7 +521,9 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				nDeviceIndex = ComboBox_GetCurSel(hDeviceList);
 				if (nDeviceIndex != CB_ERR) {
 					PopulateProperties(ComboBox_GetCurSel(hDeviceList));
-					SetDlgItemTextU(hMainDialog, IDC_STATUS, DriveID.Table[nDeviceIndex]);
+					// Display a tooltip with the OS reported description
+					DestroyTooltip(hDeviceToolTip);
+					hDeviceToolTip = CreateTooltip(hDeviceList, DriveID.Table[nDeviceIndex], -1);
 				}
 				break;
 			}

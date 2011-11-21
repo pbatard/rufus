@@ -68,6 +68,9 @@ extern char *WindowsErrorString(void);
 extern void CenterDialog(HWND hDlg);
 extern void CreateStatusBar(void);
 extern INT_PTR CreateAboutBox(void);
+extern HWND CreateTooltip(HWND hControl, char* message, int duration);
+extern void DestroyTooltip(HWND hWnd);
+extern void DestroyAllTooltips(void);
 
 /* Basic String Array */
 typedef struct {

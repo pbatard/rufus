@@ -634,7 +634,8 @@ HWND CreateTooltip(HWND hControl, char* message, int duration)
 		if (ttlist[i].hTip == NULL) break;
 	}
 	if (i == MAX_TOOLTIPS) {
-		return (HWND)NULL; // No more space
+		uprintf("Maximum number of tooltips reached\n");
+		return (HWND)NULL;
 	}
 
 	// Create the tooltip window
