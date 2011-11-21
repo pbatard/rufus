@@ -64,9 +64,22 @@ extern char szFolderPath[MAX_PATH];
 /*
  * Shared prototypes
  */
+extern char *WindowsErrorString(void);
 extern void CenterDialog(HWND hDlg);
 extern void CreateStatusBar(void);
 extern INT_PTR CreateAboutBox(void);
+
+/* Basic String Array */
+typedef struct {
+	char** Table;
+	size_t Size;
+	size_t Index;
+	size_t Max;
+} StrArray;
+extern void StrArrayCreate(StrArray* arr, size_t initial_size);
+extern void StrArrayAdd(StrArray* arr, const char* str);
+extern void StrArrayClear(StrArray* arr);
+extern void StrArrayDestroy(StrArray* arr);
 
 #ifdef RUFUS_DEBUG
 extern void _uprintf(const char *format, ...);

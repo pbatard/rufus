@@ -19,6 +19,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/* Memory leaks detection - define _CRTDBG_MAP_ALLOC as preprocessor macro */
+#ifdef _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
+#endif
+
 #include <windows.h>
 #include <windowsx.h>
 #include <stdlib.h>
@@ -42,8 +48,6 @@
 const GUID GUID_DEVINTERFACE_DISK = { 0x53f56307L, 0xb6bf, 0x11d0, {0x94, 0xf2, 0x00, 0xa0, 0xc9, 0x1e, 0xfb, 0x8b} };
 #endif
 
-extern char *WindowsErrorString(void);
-
 /*
  * Globals
  */
@@ -54,7 +58,7 @@ HWND hStatus;
 float fScale = 1.0f;
 
 static HWND hDeviceList, hCapacity, hFileSystem;
-
+static StrArray DriveID;
 
 #ifdef RUFUS_DEBUG
 void _uprintf(const char *format, ...)
@@ -366,6 +370,7 @@ static BOOL GetUSBDevices(void)
 	const char* usbstor_name = "USBSTOR";
 
 	IGNORE_RETVAL(ComboBox_ResetContent(hDeviceList));
+	StrArrayClear(&DriveID);
 
 	dev_info = SetupDiGetClassDevsA(&GUID_DEVINTERFACE_DISK, NULL, NULL, DIGCF_PRESENT|DIGCF_DEVICEINTERFACE);
 	if (dev_info == INVALID_HANDLE_VALUE) {
@@ -391,6 +396,7 @@ static BOOL GetUSBDevices(void)
 			continue;
 		}
 		uprintf("found drive '%s'\n", buffer);
+		StrArrayAdd(&DriveID, buffer);
 
 		devint_data.cbSize = sizeof(devint_data);
 		hDrive = INVALID_HANDLE_VALUE;
@@ -459,6 +465,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 {
 	HDC hDC;
 	DRAWITEMSTRUCT* pDI;
+	int nDeviceIndex;
 
 	switch (message) {
 
@@ -479,6 +486,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		CreateStatusBar();
 		// Display the version in the right area of the status bar
 		SendMessageA(GetDlgItem(hDlg, IDC_STATUS), SB_SETTEXTA, SBT_OWNERDRAW | 1, (LPARAM)APP_VERSION);
+		StrArrayCreate(&DriveID, 16);
 		GetUSBDevices();
 		return (INT_PTR)TRUE;
 
@@ -497,19 +505,26 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 
 	case WM_COMMAND:
 		switch(LOWORD(wParam)) {
+		case IDOK:			// close application
+		case IDCANCEL:
+			PostQuitMessage(0);
+			StrArrayDestroy(&DriveID);
+			EndDialog(hDlg, 0);
+			break;
 		case IDC_ABOUT:
 			CreateAboutBox();
 			break;
 		case IDC_DEVICE:		// dropdown: device description
 			switch (HIWORD(wParam)) {
 			case CBN_SELCHANGE:
-				PopulateProperties(ComboBox_GetCurSel(hDeviceList));
+				nDeviceIndex = ComboBox_GetCurSel(hDeviceList);
+				if (nDeviceIndex != CB_ERR) {
+					PopulateProperties(ComboBox_GetCurSel(hDeviceList));
+					SetDlgItemTextU(hMainDialog, IDC_STATUS, DriveID.Table[nDeviceIndex]);
+				}
 				break;
 			}
 		break;
-		case IDC_CLOSE:
-			PostQuitMessage(0);
-			break;
 		default:
 			return (INT_PTR)FALSE;
 		}
@@ -569,6 +584,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 out:
 	CloseHandle(mutex);
 	uprintf("*** RUFUS EXIT ***\n");
+
+#ifdef _CRTDBG_MAP_ALLOC
+	_CrtDumpMemoryLeaks();
+#endif
 
 	return 0;
 }

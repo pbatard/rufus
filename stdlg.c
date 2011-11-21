@@ -19,6 +19,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/* Memory leaks detection - define _CRTDBG_MAP_ALLOC as preprocessor macro */
+#ifdef _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
+#endif
+
 #include <windows.h>
 #include <windowsx.h>
 #include <stdlib.h>
@@ -125,6 +131,54 @@ void DetectWindowsVersion(void)
 			nWindowsVersion = WINDOWS_8;
 		}
 	}
+}
+
+
+/*
+ * String array manipulation
+ */
+void StrArrayCreate(StrArray* arr, size_t initial_size)
+{
+	if (arr == NULL) return;
+	arr->Max = initial_size; arr->Index = 0;
+	arr->Table = (char**)calloc(arr->Max, sizeof(char*));
+	if (arr->Table == NULL)
+		uprintf("Could not allocate string array\n");
+}
+
+void StrArrayAdd(StrArray* arr, const char* str)
+{
+	if ((arr == NULL) || (arr->Table == NULL))
+		return;
+	if (arr->Index == arr->Max) {
+		arr->Max *= 2;
+		arr->Table = (char**)realloc(arr->Table, arr->Max*sizeof(char*));
+		if (arr->Table == NULL) {
+			uprintf("Could not reallocate string array\n");
+			return;
+		}
+	}
+	arr->Table[arr->Index] = safe_strdup(str);
+	if (arr->Table[arr->Index++] == NULL) {
+		uprintf("Could not store string in array\n");
+	}
+}
+
+void StrArrayClear(StrArray* arr)
+{
+	size_t i;
+	if ((arr == NULL) || (arr->Table == NULL))
+		return;
+	for (i=0; i<arr->Index; i++) {
+		safe_free(arr->Table[i]);
+	}
+	arr->Index = 0;
+}
+
+void StrArrayDestroy(StrArray* arr)
+{
+	StrArrayClear(arr);
+	safe_free(arr->Table);
 }
 
 /*
