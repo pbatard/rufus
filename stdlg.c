@@ -549,7 +549,6 @@ INT_PTR CALLBACK NotificationCallback(HWND hDlg, UINT message, WPARAM wParam, LP
 		switch (LOWORD(wParam)) {
 		case IDOK:
 		case IDCANCEL:
-		case IDC_NOTIFICATION_CLOSE:
 			EndDialog(hDlg, LOWORD(wParam));
 			return (INT_PTR)TRUE;
 		}

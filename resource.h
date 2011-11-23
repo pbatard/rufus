@@ -23,8 +23,7 @@
 #define IDC_ABOUT_BUG_URL               1033
 #define IDC_NOTIFICATION_ICON           1040
 #define IDC_NOTIFICATION_TEXT           1041
-#define IDC_NOTIFICATION_CLOSE          1042
-#define IDC_NOTIFICATION_LINE           1043
+#define IDC_NOTIFICATION_LINE           1042
 #define IDC_LICENSE_TEXT                1050
 
 // Next default values for new objects

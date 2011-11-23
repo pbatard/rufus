@@ -73,6 +73,7 @@ extern INT_PTR CreateAboutBox(void);
 extern HWND CreateTooltip(HWND hControl, char* message, int duration);
 extern void DestroyTooltip(HWND hWnd);
 extern void DestroyAllTooltips(void);
+extern void Notification(int type, char* text, char* title);
 
 /* Basic String Array */
 typedef struct {
