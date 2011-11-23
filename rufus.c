@@ -283,7 +283,7 @@ static BOOL GetDriveLabel(DWORD num, char* letter, char** label)
 	safe_closehandle(hDrive);
 	*letter = DrivePath[0];
 
-	if (GetVolumeInformationA(DrivePath, volume_label, sizeof(volume_label), NULL, NULL, NULL, NULL, 0)) {
+	if (GetVolumeInformationA(DrivePath, volume_label, sizeof(volume_label), NULL, NULL, NULL, NULL, 0) && *volume_label) {
 		*label = volume_label;
 	}
 
