@@ -40,6 +40,9 @@
 //#include <fmifs.h>
 // http://git.kernel.org/?p=fs/ext2/e2fsprogs.git;a=blob;f=misc/badblocks.c
 
+// http://ms-sys.sourceforge.net/
+// http://thestarman.pcministry.com/asm/mbr/MSWIN41.htm
+
 #include "msapi_utf8.h"
 #include "resource.h"
 #include "rufus.h"
@@ -84,6 +87,26 @@ void _uprintf(const char *format, ...)
 }
 #endif
 
+
+void StatusPrintf(const char *format, ...)
+{
+	char buf[256], *p = buf;
+	va_list args;
+	int n;
+
+	va_start(args, format);
+	n = safe_vsnprintf(p, sizeof(buf)-1, format, args); // room for NUL
+	va_end(args);
+
+	p += (n < 0)?sizeof(buf)-1:n;
+
+	while((p>buf) && (isspace(p[-1])))
+		*--p = '\0';
+
+	*p   = '\0';
+
+	SetDlgItemTextU(hMainDialog, IDC_STATUS, buf);
+}
 
 /*
  * Convert a partition type to its human readable form
@@ -170,16 +193,28 @@ static const char* GetPartitionType(BYTE Type)
 }
 
 /*
- * Open a drive - return both the handle and the drive letter
+ * Open a drive - return a drive HANDLE and the drive letter
+ * This call is quite risky (left unchecked, inadvertently passing 0 as index would
+ * return a handle to C:, which we might then proceed to unknowingly repartition!),
+ * so we apply the following mitigation factors:
+ * - Valid indexes must belong to a specific range [DRIVE_INDEX_MIN; DRIVE_INDEX_MAX]
+ * - When opening for write access, we lock the volume. If that fails, which would
+ *   typically be the case on C:\ or any other drive in use, we fail the call
+ * - We report the full path of any drive that was successfully opened for write acces
  */
-static BOOL GetDriveHandle(DWORD num, HANDLE* hDrive, char* DriveLetter)
+static BOOL GetDriveHandle(DWORD DriveIndex, HANDLE* hDrive, char* DriveLetter, BOOL bWriteAccess)
 {
 	BOOL r;
 	DWORD size;
 	STORAGE_DEVICE_NUMBER_REDEF device_number = {0};
-	static char drives[26*4];	/* "D:\", "E:\", etc. */
+	char drives[26*4];	/* "D:\", "E:\", etc. */
 	char *drive = drives;
 	char drive_name[] = "\\\\.\\#:";
+
+	if ((DriveIndex < DRIVE_INDEX_MIN) || (DriveIndex > DRIVE_INDEX_MAX)) {
+		uprintf("WARNING: Bad index value. Please check your code!\n");
+	}
+	DriveIndex -= DRIVE_INDEX_MIN;
 
 	size = GetLogicalDriveStringsA(sizeof(drives), drives);
 	if (size == 0) {
@@ -197,12 +232,13 @@ static BOOL GetDriveHandle(DWORD num, HANDLE* hDrive, char* DriveLetter)
 			continue;
 		}
 		safe_sprintf(drive_name, sizeof(drive_name), "\\\\.\\%c:", drive[0]);
-		*hDrive = CreateFileA(drive_name, GENERIC_READ, FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, 0);
+		*hDrive = CreateFileA(drive_name, GENERIC_READ|(bWriteAccess?GENERIC_WRITE:0),
+			FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, 0);
 		if (hDrive == INVALID_HANDLE_VALUE) {
-			uprintf("Could not open drive %c: %s\n", WindowsErrorString());
+			uprintf("Could not open drive %c: %s\n", drive[0], WindowsErrorString());
 			continue;
 		}
-	
+
 		r = DeviceIoControl(*hDrive, IOCTL_STORAGE_GET_DEVICE_NUMBER, NULL,
 			0, &device_number, sizeof(device_number), &size, NULL);
 		if ((!r) || (size <= 0)) {
@@ -210,12 +246,22 @@ static BOOL GetDriveHandle(DWORD num, HANDLE* hDrive, char* DriveLetter)
 			safe_closehandle(*hDrive);
 			break;
 		}
-		if (device_number.DeviceNumber == num)
+		if (device_number.DeviceNumber == DriveIndex) {
+			if (bWriteAccess) {
+				if (!DeviceIoControl(*hDrive, FSCTL_LOCK_VOLUME, NULL, 0, NULL, 0, &size, NULL)) {
+					uprintf("Could not get exclusive access to %s: %s\n", drive_name, WindowsErrorString());
+					safe_closehandle(*hDrive);
+					return FALSE;
+				}
+				uprintf("Warning: Opening %s drive for write access\n", drive_name);
+			}
 			break;
+		}
+		safe_closehandle(*hDrive);
 	}
 
 	if (DriveLetter != NULL) {
-		*DriveLetter = *drive;
+		*DriveLetter = *drive?*drive:' ';	// TODO: handle NUL char upstream
 	}
 
 	return (*hDrive != INVALID_HANDLE_VALUE);
@@ -232,15 +278,13 @@ static BOOL GetDriveLabel(DWORD num, char* letter, char** label)
 
 	*label = "NO_LABEL";
 
-	if (!GetDriveHandle(num, &hDrive, DrivePath))
+	if (!GetDriveHandle(num, &hDrive, DrivePath, FALSE))
 		return FALSE;
 	safe_closehandle(hDrive);
 	*letter = DrivePath[0];
 
 	if (GetVolumeInformationA(DrivePath, volume_label, sizeof(volume_label), NULL, NULL, NULL, NULL, 0)) {
 		*label = volume_label;
-	} else {
-		uprintf("GetVolumeInformation (Label) failed: %s\n", WindowsErrorString());
 	}
 
 	return TRUE;
@@ -264,7 +308,7 @@ static BOOL GetDriveInfo(DWORD num, LONGLONG* DriveSize, char* FSType, DWORD FST
 
 	*DriveSize = 0;
 
-	if (!GetDriveHandle(num, &hDrive, DrivePath))
+	if (!GetDriveHandle(num, &hDrive, DrivePath, FALSE))
 		return FALSE;
 
 	r = DeviceIoControl(hDrive, IOCTL_DISK_GET_DRIVE_GEOMETRY_EX, 
@@ -275,6 +319,9 @@ static BOOL GetDriveInfo(DWORD num, LONGLONG* DriveSize, char* FSType, DWORD FST
 		return FALSE;
 	}
 	*DriveSize = DiskGeometry->DiskSize.QuadPart;
+	uprintf("Cylinders: %lld, TracksPerCylinder: %d, SectorsPerTrack: %d, BytesPerSector: %d\n",
+		DiskGeometry->Geometry.Cylinders, DiskGeometry->Geometry.TracksPerCylinder,
+		DiskGeometry->Geometry.SectorsPerTrack, DiskGeometry->Geometry.BytesPerSector);
 
 	r = DeviceIoControl(hDrive, IOCTL_DISK_GET_DRIVE_LAYOUT_EX, 
 			NULL, 0, layout, sizeof(layout), &size, NULL );
@@ -309,7 +356,7 @@ static BOOL GetDriveInfo(DWORD num, LONGLONG* DriveSize, char* FSType, DWORD FST
 
 	if (!GetVolumeInformationA(DrivePath, NULL, 0, NULL, NULL, NULL, FSType, FSTypeSize)) {
 		safe_sprintf(FSType, FSTypeSize, "Non Windows (Please Select)");
-		uprintf("GetVolumeInformation (Properties) failed: %s\n", WindowsErrorString());
+//		uprintf("GetVolumeInformation (Properties) failed: %s\n", WindowsErrorString());
 	}
 
 	return TRUE;
@@ -350,6 +397,109 @@ static BOOL PopulateProperties(int index)
 	IGNORE_RETVAL(ComboBox_AddStringU(hFileSystem, FSType));
 	IGNORE_RETVAL(ComboBox_SetCurSel(hFileSystem, 0));
 	return TRUE;
+}
+
+BOOL WriteSectors(HANDLE hDrive, size_t SectorSize, size_t StartSector, size_t nSectors, void* Buf, size_t BufSize)
+{
+	LARGE_INTEGER ptr;
+	DWORD Size;
+
+	if (SectorSize * nSectors > BufSize) {
+		uprintf("WriteSectors: Buffer is too small\n");
+		return FALSE;
+	}
+
+	ptr.QuadPart = StartSector*SectorSize;
+	if (!SetFilePointerEx(hDrive, ptr, NULL, FILE_BEGIN)) {
+		uprintf("WriteSectors: Could not access sector %lld - %s\n", StartSector, WindowsErrorString());
+		return FALSE;
+	}
+
+	if ((!WriteFile(hDrive, Buf, BufSize, &Size, NULL)) || (Size != BufSize)) {
+		uprintf("WriteSectors: Write error - %s\n", WindowsErrorString());
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
+BOOL ReadSectors(HANDLE hDrive, size_t SectorSize, size_t StartSector, size_t nSectors, void* Buf, size_t BufSize)
+{
+	LARGE_INTEGER ptr;
+	DWORD size;
+
+	if (SectorSize * nSectors > BufSize) {
+		uprintf("ReadSectors: Buffer is too small\n");
+		return FALSE;
+	}
+
+	ptr.QuadPart = StartSector*SectorSize;
+	if (!SetFilePointerEx(hDrive, ptr, NULL, FILE_BEGIN)) {
+		uprintf("ReadSectors: Could not access sector %lld - %s\n", StartSector, WindowsErrorString());
+		return FALSE;
+	}
+
+	if ((!ReadFile(hDrive, Buf, BufSize, &size, NULL)) || (size != BufSize)) {
+		uprintf("ReadSectors: Write error - %s\n", WindowsErrorString());
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
+/*
+ * Create a partition table
+ */
+BOOL CreatePartition(HANDLE hDrive)
+{
+	BYTE layout[sizeof(DRIVE_LAYOUT_INFORMATION_EX) + 3*sizeof(PARTITION_INFORMATION_EX)] = {0};
+	PDRIVE_LAYOUT_INFORMATION_EX DriveLayoutEx = (PDRIVE_LAYOUT_INFORMATION_EX)layout;
+	BOOL r;
+	DWORD size;
+	int nbHidden = 63;
+
+	DriveLayoutEx->PartitionStyle = PARTITION_STYLE_MBR;
+	DriveLayoutEx->PartitionCount = 4;	// Must be multiple of 4 for MBR
+	DriveLayoutEx->Mbr.Signature = GetTickCount();
+	DriveLayoutEx->PartitionEntry[0].PartitionStyle = PARTITION_STYLE_MBR;
+	DriveLayoutEx->PartitionEntry[0].StartingOffset.QuadPart = nbHidden*512;	// TODO
+	DriveLayoutEx->PartitionEntry[0].PartitionLength.QuadPart = 63*2*512;		// TODO
+	DriveLayoutEx->PartitionEntry[0].PartitionNumber = 1;
+	DriveLayoutEx->PartitionEntry[0].RewritePartition = TRUE;
+	DriveLayoutEx->PartitionEntry[0].Mbr.PartitionType = 0x83;					// TODO
+	DriveLayoutEx->PartitionEntry[0].Mbr.HiddenSectors = nbHidden;				// TODO
+
+	// For the remaining partitions, PartitionType has already been zeroed (= set to unused)
+	DriveLayoutEx->PartitionEntry[1].PartitionStyle = PARTITION_STYLE_MBR;
+	DriveLayoutEx->PartitionEntry[2].PartitionStyle = PARTITION_STYLE_MBR;
+	DriveLayoutEx->PartitionEntry[3].PartitionStyle = PARTITION_STYLE_MBR;
+
+	r = DeviceIoControl(hDrive, IOCTL_DISK_SET_DRIVE_LAYOUT_EX, 
+			layout, sizeof(layout), NULL, 0, &size, NULL );
+	if (!r) {
+		uprintf("IOCTL_DISK_SET_DRIVE_LAYOUT_EX failed: %s\n", WindowsErrorString());
+		safe_closehandle(hDrive);
+		return FALSE;
+	}
+	StatusPrintf("Successfully Created Partition");
+
+	return TRUE;
+}
+
+BOOL FormatDrive(DWORD num)
+{
+	HANDLE hDrive;
+	BOOL r;
+
+	if (!GetDriveHandle(num, &hDrive, NULL, TRUE)) {
+		// TODO: report an error for exclusive access
+		return FALSE;
+	}
+
+	r = CreatePartition(hDrive);
+
+	CloseHandle(hDrive);
+	return r;
 }
 
 /*
@@ -395,7 +545,7 @@ static BOOL GetUSBDevices(void)
 			uprintf("SetupDiGetDeviceRegistryProperty (Friendly Name) failed: %d\n", WindowsErrorString());
 			continue;
 		}
-		uprintf("found drive '%s'\n", buffer);
+		uprintf("Found drive '%s'\n", buffer);
 		StrArrayAdd(&DriveID, buffer);
 
 		devint_data.cbSize = sizeof(devint_data);
@@ -444,9 +594,10 @@ static BOOL GetUSBDevices(void)
 				continue;
 			}
 
-			if (GetDriveLabel(device_number.DeviceNumber, &drive_letter, &label)) {
+			if (GetDriveLabel(device_number.DeviceNumber + DRIVE_INDEX_MIN, &drive_letter, &label)) {
 				safe_sprintf(entry, sizeof(entry), "%s (%c:)\n", label, drive_letter);
-				IGNORE_RETVAL(ComboBox_SetItemData(hDeviceList, ComboBox_AddStringU(hDeviceList, entry), device_number.DeviceNumber));
+				IGNORE_RETVAL(ComboBox_SetItemData(hDeviceList, ComboBox_AddStringU(hDeviceList, entry),
+					device_number.DeviceNumber + DRIVE_INDEX_MIN));
 			}
 		}
 	}
@@ -455,8 +606,6 @@ static BOOL GetUSBDevices(void)
 
 	return TRUE;
 }
-
-// TODO: the device is currently in use by another application (find application a la TGit installer?)
 
 /*
  * Main dialog callback
@@ -526,6 +675,12 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 					hDeviceToolTip = CreateTooltip(hDeviceList, DriveID.Table[nDeviceIndex], -1);
 				}
 				break;
+			}
+		break;
+		case IDC_START:
+			nDeviceIndex = ComboBox_GetCurSel(hDeviceList);
+			if (nDeviceIndex != CB_ERR) {
+				FormatDrive(ComboBox_GetItemData(hDeviceList, nDeviceIndex));
 			}
 		break;
 		default:

@@ -21,6 +21,8 @@
 #define RUFUS_DEBUG
 
 #define APP_VERSION                 "Rufus v1.0.0.1"
+#define DRIVE_INDEX_MIN             0x80
+#define DRIVE_INDEX_MAX             0xC0
 #define MAX_TOOLTIPS                16
 #define WHITE                       RGB(255,255,255)
 #define SEPARATOR_GREY              RGB(223,223,223)
@@ -103,26 +105,3 @@ typedef struct {
 	ULONG DeviceNumber;
 	ULONG PartitionNumber;
 } STORAGE_DEVICE_NUMBER_REDEF;
-
-typedef struct _SCSI_PASS_THROUGH {
-	USHORT Length;
-	UCHAR ScsiStatus;
-	UCHAR PathId;
-	UCHAR TargetId;
-	UCHAR Lun;
-	UCHAR CdbLength;
-	UCHAR SenseInfoLength;
-	UCHAR DataIn;
-	ULONG DataTransferLength;
-	ULONG TimeOutValue;
-	ULONG_PTR DataBufferOffset;
-	ULONG SenseInfoOffset;
-	UCHAR Cdb[16];
-} SCSI_PASS_THROUGH,*PSCSI_PASS_THROUGH;
-
-typedef struct _SCSI_PASS_THROUGH_WITH_BUFFERS {
-	SCSI_PASS_THROUGH Spt;
-	ULONG             Filler;
-	UCHAR             SenseBuf[32];
-	UCHAR             DataBuf[512];
-} SCSI_PASS_THROUGH_WITH_BUFFERS, *PSCSI_PASS_THROUGH_WITH_BUFFERS;
