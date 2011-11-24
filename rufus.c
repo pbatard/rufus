@@ -450,7 +450,7 @@ BOOL WriteSectors(HANDLE hDrive, size_t SectorSize, size_t StartSector, size_t n
 		return FALSE;
 	}
 
-	if ((!WriteFile(hDrive, Buf, BufSize, &Size, NULL)) || (Size != BufSize)) {
+	if ((!WriteFile(hDrive, Buf, (DWORD)BufSize, &Size, NULL)) || (Size != BufSize)) {
 		uprintf("WriteSectors: Write error - %s\n", WindowsErrorString());
 		return FALSE;
 	}
@@ -474,7 +474,7 @@ BOOL ReadSectors(HANDLE hDrive, size_t SectorSize, size_t StartSector, size_t nS
 		return FALSE;
 	}
 
-	if ((!ReadFile(hDrive, Buf, BufSize, &size, NULL)) || (size != BufSize)) {
+	if ((!ReadFile(hDrive, Buf, (DWORD)BufSize, &size, NULL)) || (size != BufSize)) {
 		uprintf("ReadSectors: Write error - %s\n", WindowsErrorString());
 		return FALSE;
 	}
@@ -725,7 +725,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				safe_sprintf(str, sizeof(str), "WARNING: ALL DATA ON DEVICE %s\r\nWILL BE ERASED!\r\n"
 					"Do you want to continue with this operation?", tmp);
 				if (MessageBoxA(hMainDialog, str, "Rufus", MB_OKCANCEL|MB_ICONWARNING) == IDOK) {
-					FormatDrive(ComboBox_GetItemData(hDeviceList, nDeviceIndex));
+					FormatDrive((DWORD)ComboBox_GetItemData(hDeviceList, nDeviceIndex));
 				}
 			}
 		break;
