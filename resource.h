@@ -13,18 +13,22 @@
 #define IDC_CLOSE                       1004
 #define IDC_CAPACITY                    1005
 #define IDC_ALLOCSIZE                   1006
-#define IDC_ABOUT_ICON                  1007
-#define IDC_RUFUS_BOLD                  1008
 #define IDC_STATUS                      1009
 #define IDC_ABOUT                       1010
+#define IDC_LABEL                       1011
+#define IDC_QUICKFORMAT                 1012
+#define IDC_DOSSTARTUP                  1013
+#define IDC_PROGRESS                    1014
 #define IDC_ABOUT_LICENSE               1030
-#define IDC_ABOUT_COPYRIGHTS            1031
-#define IDC_ABOUT_RUFUS_URL             1032
-#define IDC_ABOUT_BUG_URL               1033
+#define IDC_ABOUT_ICON                  1031
+#define IDC_RUFUS_BOLD                  1032
+#define IDC_ABOUT_COPYRIGHTS            1033
+#define IDC_ABOUT_RUFUS_URL             1034
+#define IDC_ABOUT_BUG_URL               1035
+#define IDC_LICENSE_TEXT                1036
 #define IDC_NOTIFICATION_ICON           1040
 #define IDC_NOTIFICATION_TEXT           1041
 #define IDC_NOTIFICATION_LINE           1042
-#define IDC_LICENSE_TEXT                1050
 
 // Next default values for new objects
 // 
@@ -33,7 +37,7 @@
 #define _APS_NO_MFC                     1
 #define _APS_NEXT_RESOURCE_VALUE        106
 #define _APS_NEXT_COMMAND_VALUE         40001
-#define _APS_NEXT_CONTROL_VALUE         1051
+#define _APS_NEXT_CONTROL_VALUE         1043
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

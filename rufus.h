@@ -21,8 +21,10 @@
 #define RUFUS_DEBUG
 
 #define APP_VERSION                 "Rufus v1.0.0.1"
+#define STR_NO_LABEL                "NO_LABEL"
 #define DRIVE_INDEX_MIN             0x80
 #define DRIVE_INDEX_MAX             0xC0
+#define MAX_DRIVES                  16
 #define MAX_TOOLTIPS                16
 #define WHITE                       RGB(255,255,255)
 #define SEPARATOR_GREY              RGB(223,223,223)

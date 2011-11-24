@@ -31,6 +31,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
+#include <math.h>
 #include <commctrl.h>
 #include <setupapi.h>
 #include <winioctl.h>
@@ -60,8 +61,19 @@ char szFolderPath[MAX_PATH];
 HWND hStatus;
 float fScale = 1.0f;
 
-static HWND hDeviceList, hCapacity, hFileSystem, hDeviceToolTip = NULL;
-static StrArray DriveID;
+BOOL bBootable;
+BOOL bQuickFormat;
+
+struct {
+	DWORD DeviceNumber;
+	LONGLONG DiskSize;
+	LONGLONG PartitionSize;
+	DWORD FirstSector;
+	char FSType[32];
+} SelectedDrive;
+
+static HWND hDeviceList, hCapacity, hFileSystem, hLabel, hDeviceToolTip = NULL;
+static StrArray DriveID, DriveLabel;
 
 #ifdef RUFUS_DEBUG
 void _uprintf(const char *format, ...)
@@ -270,15 +282,15 @@ static BOOL GetDriveHandle(DWORD DriveIndex, HANDLE* hDrive, char* DriveLetter, 
 /*
  * Return the drive letter and volume label
  */
-static BOOL GetDriveLabel(DWORD num, char* letter, char** label)
+static BOOL GetDriveLabel(DWORD DriveIndex, char* letter, char** label)
 {
 	HANDLE hDrive;
 	char DrivePath[] = "#:\\";
-	char volume_label[MAX_PATH+1];
+	static char volume_label[MAX_PATH+1];
 
-	*label = "NO_LABEL";
+	*label = STR_NO_LABEL;
 
-	if (!GetDriveHandle(num, &hDrive, DrivePath, FALSE))
+	if (!GetDriveHandle(DriveIndex, &hDrive, DrivePath, FALSE))
 		return FALSE;
 	safe_closehandle(hDrive);
 	*letter = DrivePath[0];
@@ -291,9 +303,9 @@ static BOOL GetDriveLabel(DWORD num, char* letter, char** label)
 }
 
 /*
- * Returns the drive properties (size, FS)
+ * Fill the drive properties (size, FS, etc)
  */
-static BOOL GetDriveInfo(DWORD num, LONGLONG* DriveSize, char* FSType, DWORD FSTypeSize)
+static BOOL GetDriveInfo(void)
 {
 	BOOL r;
 	HANDLE hDrive;
@@ -306,9 +318,9 @@ static BOOL GetDriveInfo(DWORD num, LONGLONG* DriveSize, char* FSType, DWORD FST
 	char DrivePath[] = "#:\\";
 	DWORD i, nb_partitions = 0;
 
-	*DriveSize = 0;
+	SelectedDrive.DiskSize = 0;
 
-	if (!GetDriveHandle(num, &hDrive, DrivePath, FALSE))
+	if (!GetDriveHandle(SelectedDrive.DeviceNumber, &hDrive, DrivePath, FALSE))
 		return FALSE;
 
 	r = DeviceIoControl(hDrive, IOCTL_DISK_GET_DRIVE_GEOMETRY_EX, 
@@ -318,7 +330,7 @@ static BOOL GetDriveInfo(DWORD num, LONGLONG* DriveSize, char* FSType, DWORD FST
 		safe_closehandle(hDrive);
 		return FALSE;
 	}
-	*DriveSize = DiskGeometry->DiskSize.QuadPart;
+	SelectedDrive.DiskSize = DiskGeometry->DiskSize.QuadPart;
 	uprintf("Cylinders: %lld, TracksPerCylinder: %d, SectorsPerTrack: %d, BytesPerSector: %d\n",
 		DiskGeometry->Geometry.Cylinders, DiskGeometry->Geometry.TracksPerCylinder,
 		DiskGeometry->Geometry.SectorsPerTrack, DiskGeometry->Geometry.BytesPerSector);
@@ -354,9 +366,9 @@ static BOOL GetDriveInfo(DWORD num, LONGLONG* DriveSize, char* FSType, DWORD FST
 
 	safe_closehandle(hDrive);
 
-	if (!GetVolumeInformationA(DrivePath, NULL, 0, NULL, NULL, NULL, FSType, FSTypeSize)) {
-		safe_sprintf(FSType, FSTypeSize, "Non Windows (Please Select)");
-//		uprintf("GetVolumeInformation (Properties) failed: %s\n", WindowsErrorString());
+	if (!GetVolumeInformationA(DrivePath, NULL, 0, NULL, NULL, NULL,
+		SelectedDrive.FSType, sizeof(SelectedDrive.FSType))) {
+		safe_sprintf(SelectedDrive.FSType, sizeof(SelectedDrive.FSType), "Non Windows (Please Select)");
 	}
 
 	return TRUE;
@@ -365,26 +377,30 @@ static BOOL GetDriveInfo(DWORD num, LONGLONG* DriveSize, char* FSType, DWORD FST
 /*
  * Populate the UI properties
  */
-static BOOL PopulateProperties(int index)
+static BOOL PopulateProperties(int ComboIndex)
 {
 	double HumanReadableSize;
-	LONGLONG DiskSize;
-	DWORD DeviceNumber;
-	char capacity[64], FSType[32];
-	char* suffix[] = { "KB", "MB", "GB", "TB", "PB"};
+	char capacity[64];
+	char *suffix[] = { "KB", "MB", "GB", "TB", "PB"};
+	char proposed_label[16], no_label[] = STR_NO_LABEL;
 	int i;
 
 	IGNORE_RETVAL(ComboBox_ResetContent(hCapacity));
 	IGNORE_RETVAL(ComboBox_ResetContent(hFileSystem));
-	if (index < 0) {
+	SetWindowTextA(hLabel, "");
+	DestroyTooltip(hDeviceToolTip);
+	hDeviceToolTip = NULL;
+	memset(&SelectedDrive, 0, sizeof(SelectedDrive));
+
+	if (ComboIndex < 0) {
 		return TRUE;
 	}
 
-	DeviceNumber = (DWORD)ComboBox_GetItemData(hDeviceList, index);
-	if (!GetDriveInfo(DeviceNumber, &DiskSize, FSType, sizeof(FSType)))
+	SelectedDrive.DeviceNumber = (DWORD)ComboBox_GetItemData(hDeviceList, ComboIndex);
+	if (!GetDriveInfo())
 		return FALSE;
 
-	HumanReadableSize = (double)DiskSize;
+	HumanReadableSize = (double)SelectedDrive.DiskSize;
 	for (i=0; i<ARRAYSIZE(suffix); i++) {
 		HumanReadableSize /= 1024.0;
 		if (HumanReadableSize < 512.0) {
@@ -394,8 +410,19 @@ static BOOL PopulateProperties(int index)
 	}
 	IGNORE_RETVAL(ComboBox_AddStringU(hCapacity, capacity));
 	IGNORE_RETVAL(ComboBox_SetCurSel(hCapacity, 0));
-	IGNORE_RETVAL(ComboBox_AddStringU(hFileSystem, FSType));
+	IGNORE_RETVAL(ComboBox_AddStringU(hFileSystem, SelectedDrive.FSType));
 	IGNORE_RETVAL(ComboBox_SetCurSel(hFileSystem, 0));
+	hDeviceToolTip = CreateTooltip(hDeviceList, DriveID.Table[ComboIndex], -1);
+	// If no existing label is available, propose one according to the size (eg: "256MB", "8GB")
+	if (safe_strcmp(no_label, DriveLabel.Table[ComboIndex]) == 0) {
+		if (fabs(floor(HumanReadableSize + 0.5) - HumanReadableSize) < 0.15) {
+			safe_sprintf(proposed_label, sizeof(proposed_label), "%0.0f%s", floor(HumanReadableSize + 0.5), suffix[i]);
+			SetWindowTextA(hLabel, proposed_label);
+		}
+	} else {
+		SetWindowTextA(hLabel, DriveLabel.Table[ComboIndex]);
+	}
+
 	return TRUE;
 }
 
@@ -521,6 +548,7 @@ static BOOL GetUSBDevices(void)
 
 	IGNORE_RETVAL(ComboBox_ResetContent(hDeviceList));
 	StrArrayClear(&DriveID);
+	StrArrayClear(&DriveLabel);
 
 	dev_info = SetupDiGetClassDevsA(&GUID_DEVINTERFACE_DISK, NULL, NULL, DIGCF_PRESENT|DIGCF_DEVICEINTERFACE);
 	if (dev_info == INVALID_HANDLE_VALUE) {
@@ -546,7 +574,6 @@ static BOOL GetUSBDevices(void)
 			continue;
 		}
 		uprintf("Found drive '%s'\n", buffer);
-		StrArrayAdd(&DriveID, buffer);
 
 		devint_data.cbSize = sizeof(devint_data);
 		hDrive = INVALID_HANDLE_VALUE;
@@ -595,9 +622,15 @@ static BOOL GetUSBDevices(void)
 			}
 
 			if (GetDriveLabel(device_number.DeviceNumber + DRIVE_INDEX_MIN, &drive_letter, &label)) {
-				safe_sprintf(entry, sizeof(entry), "%s (%c:)\n", label, drive_letter);
+				// Must ensure that the combo box is UNSORTED for indexes to be the same
+				StrArrayAdd(&DriveID, buffer);
+				StrArrayAdd(&DriveLabel, label);
+				safe_sprintf(entry, sizeof(entry), "%s (%c:)", label, drive_letter);
 				IGNORE_RETVAL(ComboBox_SetItemData(hDeviceList, ComboBox_AddStringU(hDeviceList, entry),
 					device_number.DeviceNumber + DRIVE_INDEX_MIN));
+				safe_closehandle(hDrive);
+				safe_free(devint_detail_data);
+				break;
 			}
 		}
 	}
@@ -615,6 +648,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	HDC hDC;
 	DRAWITEMSTRUCT* pDI;
 	int nDeviceIndex;
+	char str[MAX_PATH], tmp[128];
 
 	switch (message) {
 
@@ -627,6 +661,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		hDeviceList = GetDlgItem(hDlg, IDC_DEVICE);
 		hCapacity = GetDlgItem(hDlg, IDC_CAPACITY);
 		hFileSystem = GetDlgItem(hDlg, IDC_FILESYSTEM);
+		hLabel = GetDlgItem(hDlg, IDC_LABEL);
 		// High DPI scaling
 		hDC = GetDC(hDlg);
 		fScale = GetDeviceCaps(hDC, LOGPIXELSX) / 96.0f;
@@ -635,7 +670,8 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		CreateStatusBar();
 		// Display the version in the right area of the status bar
 		SendMessageA(GetDlgItem(hDlg, IDC_STATUS), SB_SETTEXTA, SBT_OWNERDRAW | 1, (LPARAM)APP_VERSION);
-		StrArrayCreate(&DriveID, 16);
+		StrArrayCreate(&DriveID, MAX_DRIVES);
+		StrArrayCreate(&DriveLabel, MAX_DRIVES);
 		GetUSBDevices();
 		return (INT_PTR)TRUE;
 
@@ -658,29 +694,31 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		case IDCANCEL:
 			PostQuitMessage(0);
 			StrArrayDestroy(&DriveID);
+			StrArrayDestroy(&DriveLabel);
 			DestroyAllTooltips();
 			EndDialog(hDlg, 0);
 			break;
 		case IDC_ABOUT:
 			CreateAboutBox();
 			break;
-		case IDC_DEVICE:		// dropdown: device description
+		case IDC_DEVICE:
 			switch (HIWORD(wParam)) {
 			case CBN_SELCHANGE:
-				nDeviceIndex = ComboBox_GetCurSel(hDeviceList);
-				if (nDeviceIndex != CB_ERR) {
-					PopulateProperties(ComboBox_GetCurSel(hDeviceList));
-					// Display a tooltip with the OS reported description
-					DestroyTooltip(hDeviceToolTip);
-					hDeviceToolTip = CreateTooltip(hDeviceList, DriveID.Table[nDeviceIndex], -1);
-				}
+				StatusPrintf("%d device%s found.", ComboBox_GetCount(hDeviceList),
+					(ComboBox_GetCount(hDeviceList)!=1)?"s":"");
+				PopulateProperties(ComboBox_GetCurSel(hDeviceList));
 				break;
 			}
 		break;
 		case IDC_START:
 			nDeviceIndex = ComboBox_GetCurSel(hDeviceList);
 			if (nDeviceIndex != CB_ERR) {
-				FormatDrive(ComboBox_GetItemData(hDeviceList, nDeviceIndex));
+				GetWindowTextA(hDeviceList, tmp, sizeof(tmp));
+				safe_sprintf(str, sizeof(str), "WARNING: ALL DATA ON DEVICE %s\r\nWILL BE ERASED!\r\n"
+					"Do you want to continue with this operation?", tmp);
+				if (MessageBoxA(hMainDialog, str, "Rufus", MB_OKCANCEL|MB_ICONWARNING) == IDOK) {
+					FormatDrive(ComboBox_GetItemData(hDeviceList, nDeviceIndex));
+				}
 			}
 		break;
 		default:
