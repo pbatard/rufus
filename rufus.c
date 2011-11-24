@@ -503,11 +503,8 @@ BOOL CreatePartition(HANDLE hDrive)
 	DriveLayoutEx->PartitionEntry[0].RewritePartition = TRUE;
 	DriveLayoutEx->PartitionEntry[0].Mbr.PartitionType = 0x83;					// TODO
 	DriveLayoutEx->PartitionEntry[0].Mbr.HiddenSectors = nbHidden;				// TODO
-
-	// For the remaining partitions, PartitionType has already been zeroed (= set to unused)
-	DriveLayoutEx->PartitionEntry[1].PartitionStyle = PARTITION_STYLE_MBR;
-	DriveLayoutEx->PartitionEntry[2].PartitionStyle = PARTITION_STYLE_MBR;
-	DriveLayoutEx->PartitionEntry[3].PartitionStyle = PARTITION_STYLE_MBR;
+	// For the remaining partitions, PartitionStyle & PartitionType have already
+	// been zeroed => set to MBR/unused
 
 	r = DeviceIoControl(hDrive, IOCTL_DISK_SET_DRIVE_LAYOUT_EX, 
 			layout, sizeof(layout), NULL, 0, &size, NULL );
