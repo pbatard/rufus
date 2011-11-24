@@ -619,7 +619,7 @@ INT_PTR CALLBACK TooltipCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM 
  * duration sets the duration in ms. Use -1 for default
  * message is an UTF-8 string
  */
-HWND CreateTooltip(HWND hControl, char* message, int duration)
+HWND CreateTooltip(HWND hControl, const char* message, int duration)
 {
 	TOOLINFOW toolInfo = {0};
 	int i;

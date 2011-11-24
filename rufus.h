@@ -27,6 +27,7 @@
 #define MAX_DRIVES                  16
 #define MAX_TOOLTIPS                16
 #define PROPOSEDLABEL_TOLERANCE     0.10
+#define FS_DEFAULT                  FS_FAT32
 #define WHITE                       RGB(255,255,255)
 #define SEPARATOR_GREY              RGB(223,223,223)
 #define RUFUS_URL                   "https://github.com/pbatard/rufus/wiki/Rufus"
@@ -73,7 +74,7 @@ extern char *WindowsErrorString(void);
 extern void CenterDialog(HWND hDlg);
 extern void CreateStatusBar(void);
 extern INT_PTR CreateAboutBox(void);
-extern HWND CreateTooltip(HWND hControl, char* message, int duration);
+extern HWND CreateTooltip(HWND hControl, const char* message, int duration);
 extern void DestroyTooltip(HWND hWnd);
 extern void DestroyAllTooltips(void);
 extern void Notification(int type, char* text, char* title);
@@ -102,6 +103,14 @@ enum MessageType {
 	MSG_INFO,
 	MSG_WARNING,
 	MSG_ERROR
+};
+
+/* File system indexes in our FS combobox */
+enum FSType {
+	FS_FAT16 = 0,
+	FS_FAT32,
+	FS_NTFS,
+	FS_MAX
 };
 
 typedef struct {

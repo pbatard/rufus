@@ -72,7 +72,8 @@ struct {
 	char FSType[32];
 } SelectedDrive;
 
-static HWND hDeviceList, hCapacity, hFileSystem, hLabel, hDeviceToolTip = NULL;
+static HWND hDeviceList, hCapacity, hFileSystem, hLabel;
+static HWND hDeviceTooltip = NULL, hFSTooltip = NULL;
 static StrArray DriveID, DriveLabel;
 
 #ifdef RUFUS_DEBUG
@@ -315,7 +316,7 @@ static BOOL GetDriveInfo(void)
 	void* drive_layout = (void*)layout;
 	PDISK_GEOMETRY_EX DiskGeometry = (PDISK_GEOMETRY_EX)disk_geometry;
 	PDRIVE_LAYOUT_INFORMATION_EX DriveLayout = (PDRIVE_LAYOUT_INFORMATION_EX)drive_layout;
-	char DrivePath[] = "#:\\";
+	char DrivePath[] = "#:\\", tmp[128];
 	DWORD i, nb_partitions = 0;
 
 	SelectedDrive.DiskSize = 0;
@@ -340,11 +341,19 @@ static BOOL GetDriveInfo(void)
 	if (!r || size <= 0) {
 		uprintf("IOCTL_DISK_GET_DRIVE_LAYOUT_EX failed: %s\n", WindowsErrorString());
 	} else {
+		DestroyTooltip(hFSTooltip);
+		hFSTooltip = NULL;
 		switch (DriveLayout->PartitionStyle) {
 		case PARTITION_STYLE_MBR:
 			for (i=0; i<DriveLayout->PartitionCount; i++) {
 				if (DriveLayout->PartitionEntry[i].Mbr.PartitionType != PARTITION_ENTRY_UNUSED) {
 					uprintf("Partition #%d:\n", ++nb_partitions);
+					if (hFSTooltip == NULL) {
+						safe_sprintf(tmp, sizeof(tmp), "Existing file system: %s (0x%02X)",
+							GetPartitionType(DriveLayout->PartitionEntry[i].Mbr.PartitionType),
+							DriveLayout->PartitionEntry[i].Mbr.PartitionType);
+						hFSTooltip = CreateTooltip(hFileSystem, tmp, -1);
+					}
 					uprintf("  Type: %s (0x%02X)\n  Boot: %s\n  Recognized: %s\n  Hidden Sectors: %d\n",
 						GetPartitionType(DriveLayout->PartitionEntry[i].Mbr.PartitionType),
 						DriveLayout->PartitionEntry[i].Mbr.PartitionType,
@@ -366,9 +375,18 @@ static BOOL GetDriveInfo(void)
 
 	safe_closehandle(hDrive);
 
-	if (!GetVolumeInformationA(DrivePath, NULL, 0, NULL, NULL, NULL,
+	IGNORE_RETVAL(ComboBox_SetCurSel(hFileSystem, FS_DEFAULT));
+	if (GetVolumeInformationA(DrivePath, NULL, 0, NULL, NULL, NULL,
 		SelectedDrive.FSType, sizeof(SelectedDrive.FSType))) {
-		safe_sprintf(SelectedDrive.FSType, sizeof(SelectedDrive.FSType), "Non Windows (Please Select)");
+		// re-select existing FS if it's one we know
+		for (i=0; i<FS_MAX; i++) {
+			tmp[0] = 0;
+			IGNORE_RETVAL(ComboBox_GetLBTextU(hFileSystem, i, tmp));
+			if (safe_strcmp(SelectedDrive.FSType, tmp) == 0) {
+				IGNORE_RETVAL(ComboBox_SetCurSel(hFileSystem, i));
+				break;
+			}
+		}
 	}
 
 	return TRUE;
@@ -388,13 +406,18 @@ static BOOL PopulateProperties(int ComboIndex)
 	IGNORE_RETVAL(ComboBox_ResetContent(hCapacity));
 	IGNORE_RETVAL(ComboBox_ResetContent(hFileSystem));
 	SetWindowTextA(hLabel, "");
-	DestroyTooltip(hDeviceToolTip);
-	hDeviceToolTip = NULL;
+	DestroyTooltip(hDeviceTooltip);
+	hDeviceTooltip = NULL;
 	memset(&SelectedDrive, 0, sizeof(SelectedDrive));
 
 	if (ComboIndex < 0) {
 		return TRUE;
 	}
+
+	// Populate the FileSystem values
+	IGNORE_RETVAL(ComboBox_AddStringU(hFileSystem, "FAT"));
+	IGNORE_RETVAL(ComboBox_AddStringU(hFileSystem, "FAT32"));
+	IGNORE_RETVAL(ComboBox_AddStringU(hFileSystem, "NTFS"));
 
 	SelectedDrive.DeviceNumber = (DWORD)ComboBox_GetItemData(hDeviceList, ComboIndex);
 	if (!GetDriveInfo())
@@ -410,9 +433,7 @@ static BOOL PopulateProperties(int ComboIndex)
 	}
 	IGNORE_RETVAL(ComboBox_AddStringU(hCapacity, capacity));
 	IGNORE_RETVAL(ComboBox_SetCurSel(hCapacity, 0));
-	IGNORE_RETVAL(ComboBox_AddStringU(hFileSystem, SelectedDrive.FSType));
-	IGNORE_RETVAL(ComboBox_SetCurSel(hFileSystem, 0));
-	hDeviceToolTip = CreateTooltip(hDeviceList, DriveID.Table[ComboIndex], -1);
+	hDeviceTooltip = CreateTooltip(hDeviceList, DriveID.Table[ComboIndex], -1);
 
 	// If no existing label is available, propose one according to the size (eg: "256MB", "8GB")
 	if (safe_strcmp(no_label, DriveLabel.Table[ComboIndex]) == 0) {
