@@ -26,6 +26,7 @@
 #define DRIVE_INDEX_MAX             0xC0
 #define MAX_DRIVES                  16
 #define MAX_TOOLTIPS                16
+#define PROPOSEDLABEL_TOLERANCE     0.10
 #define WHITE                       RGB(255,255,255)
 #define SEPARATOR_GREY              RGB(223,223,223)
 #define RUFUS_URL                   "https://github.com/pbatard/rufus/wiki/Rufus"

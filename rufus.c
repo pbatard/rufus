@@ -205,7 +205,7 @@ static const char* GetPartitionType(BYTE Type)
 }
 
 /*
- * Open a drive - return a drive HANDLE and the drive letter
+ * Open a drive with optional write access - return a drive HANDLE and the drive letter
  * This call is quite risky (left unchecked, inadvertently passing 0 as index would
  * return a handle to C:, which we might then proceed to unknowingly repartition!),
  * so we apply the following mitigation factors:
@@ -413,12 +413,20 @@ static BOOL PopulateProperties(int ComboIndex)
 	IGNORE_RETVAL(ComboBox_AddStringU(hFileSystem, SelectedDrive.FSType));
 	IGNORE_RETVAL(ComboBox_SetCurSel(hFileSystem, 0));
 	hDeviceToolTip = CreateTooltip(hDeviceList, DriveID.Table[ComboIndex], -1);
+
 	// If no existing label is available, propose one according to the size (eg: "256MB", "8GB")
 	if (safe_strcmp(no_label, DriveLabel.Table[ComboIndex]) == 0) {
-		if (fabs(floor(HumanReadableSize + 0.5) - HumanReadableSize) < 0.15) {
-			safe_sprintf(proposed_label, sizeof(proposed_label), "%0.0f%s", floor(HumanReadableSize + 0.5), suffix[i]);
-			SetWindowTextA(hLabel, proposed_label);
+		if (HumanReadableSize < 1.0) {
+			HumanReadableSize *= 1024.0;
+			i--;
 		}
+		// If we're beneath the tolerance, round proposed label to an integer, if not, show one decimal point
+		if (fabs(HumanReadableSize / ceil(HumanReadableSize) - 1.0) < PROPOSEDLABEL_TOLERANCE) {
+			safe_sprintf(proposed_label, sizeof(proposed_label), "%0.0f%s", ceil(HumanReadableSize), suffix[i]);
+		} else {
+			safe_sprintf(proposed_label, sizeof(proposed_label), "%0.1f%s", HumanReadableSize, suffix[i]);
+		}
+		SetWindowTextA(hLabel, proposed_label);
 	} else {
 		SetWindowTextA(hLabel, DriveLabel.Table[ComboIndex]);
 	}
