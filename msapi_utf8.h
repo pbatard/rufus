@@ -44,7 +44,7 @@ extern "C" {
 
 #define sfree(p) do {if (p != NULL) {free((void*)(p)); p = NULL;}} while(0)
 #define wconvert(p)     wchar_t* w ## p = utf8_to_wchar(p)
-#define walloc(p, size) wchar_t* w ## p = calloc(size, sizeof(wchar_t))
+#define walloc(p, size) wchar_t* w ## p = (wchar_t*)calloc(size, sizeof(wchar_t))
 #define wfree(p) sfree(w ## p)
 
 /*
@@ -241,6 +241,26 @@ static __inline BOOL SetDlgItemTextU(HWND hDlg, int nIDDlgItem, const char* lpSt
 	wfree(lpString);
 	SetLastError(err);
 	return ret;
+}
+
+static __inline int ComboBox_GetLBTextU(HWND hCtrl, int index, char* lpString)
+{
+	int size;
+	DWORD err = ERROR_INVALID_DATA;
+	wchar_t* wlpString;
+	if (lpString == NULL)
+		return CB_ERR;
+	size = (int)SendMessageW(hCtrl, CB_GETLBTEXTLEN, (WPARAM)index, (LPARAM)0);
+	if (size < 0)
+		return size;
+	wlpString = (wchar_t*)calloc(size, sizeof(wchar_t));
+	size = (int)SendMessageW(hCtrl, CB_GETLBTEXT, (WPARAM)index, (LPARAM)wlpString);
+	err = GetLastError();
+	if (size > 0)
+		wchar_to_utf8_no_alloc(wlpString, lpString, size+1);
+	wfree(lpString);
+	SetLastError(err);
+	return size;
 }
 
 static __inline HANDLE CreateFileU(const char* lpFileName, DWORD dwDesiredAccess, DWORD dwShareMode,
