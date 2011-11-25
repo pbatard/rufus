@@ -26,6 +26,10 @@ const char* additional_copyrights =
 "http://pcunleashed.com\r\n"
 "Freeware\r\n"
 "\r\n"
+"FS Type description from by GNU fdisk:\r\n"
+"http://www.gnu.org/software/fdisk\r\n"
+"GNU General Public License (GPL) v3 or later\r\n"
+"\r\n"
 "About and License dialogs inspired by WinSCP\r\n"
 "Copyright (c) 2000-2011 Martin Prikryl\r\n"
 "GNU General Public License (GPL) v3 or later";

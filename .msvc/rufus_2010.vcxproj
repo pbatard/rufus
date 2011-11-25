@@ -150,6 +150,7 @@
     <ClInclude Include="..\msapi_utf8.h" />
     <ClInclude Include="..\rufus.h" />
     <ClInclude Include="..\license.h" />
+    <ClInclude Include="..\sys_types.h" />
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="..\common_controls_and_elevation.manifest" />

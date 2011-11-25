@@ -47,6 +47,7 @@
 #include "msapi_utf8.h"
 #include "resource.h"
 #include "rufus.h"
+#include "sys_types.h"
 
 #if !defined(GUID_DEVINTERFACE_DISK)
 const GUID GUID_DEVINTERFACE_DISK = { 0x53f56307L, 0xb6bf, 0x11d0, {0x94, 0xf2, 0x00, 0xa0, 0xc9, 0x1e, 0xfb, 0x8b} };
@@ -123,87 +124,17 @@ void StatusPrintf(const char *format, ...)
 }
 
 /*
- * Convert a partition type to its human readable form
- * http://www.win.tue.nl/~aeb/partitions/partition_types-1.html
+ * Convert a partition type to its human readable form using
+ * (slightly modified) entries from GNU fdisk
  */
 static const char* GetPartitionType(BYTE Type)
 {
-	switch(Type) {
-	case 0x00: 
-		return "Unused";
-	case 0x01:
-		return "DOS FAT12";
-	case 0x02:
-		return "Logical Disk Manager";
-	case 0x04:
-		return "DOS 3.0+ FAT16";
-	case 0x05:
-		return "Extended Partition";
-	case 0x06:
-		return "DOS 3.31+ FAT16 (Huge)";
-	case 0x07:
-		return "NTFS";
-	case 0x0b:
-		return "Win95 FAT32";
-	case 0x0c:
-		return "Win95 FAT32 (LBA)";
-	case 0x0e:
-		return "Win95 FAT16 (LBA)";
-	case 0x0f:
-		return "Win95 Extended (LBA)";
-	case 0x11:
-		return "Hidden DOS FAT12";
-	case 0x12:
-		return "Diagnostics Partition";
-	case 0x14:
-		return "Hidden DOS 3.0+ FAT16";
-	case 0x16:
-		return "Hidden DOS 3.31+ FAT16 (Huge)";
-	case 0x17:
-		return "Hidden NTFS";
-	case 0x1b:
-		return "Hidden Win95 FAT32";
-	case 0x1c:
-		return "Hidden Win95 FAT32 (LBA)";
-	case 0x1e:
-		return "Hidden Win95 FAT16 (LBA)";
-	case 0x1f:
-		return "Hidden Win95 Extended (LBA)";
-	case 0x27:
-		return "Windows Recovery";
-	case 0x42:
-		return "Windows 2000 Dynamic Extended";
-	case 0x63:
-		return "Unix System V";
-	case 0x82:
-		return "Linux Swap";
-	case 0x83:
-		return "Linux";
-	case 0x85:
-		return "Linux Extended";
-	case 0x8e:
-		return "Linux LVM";
-	case 0x9f:
-	case 0xa6:
-	case 0xa9:
-		return "BSD";
-	case 0xa8:
-	case 0xaf:
-		return "OS-X";
-	case 0xab:
-		return "OS-X (Boot)";
-	case 0xeb:
-		return "BeOS";
-	case 0xfa:
-		return "Bochs";
-	case 0xfb:
-	case 0xfc:
-		return "VMWare";
-	case 0xfd:
-		return "Linux RAID";
-	default:
-		return "Unknown";
+	int i;
+	for (i=0; i<ARRAYSIZE(msdos_systypes); i++) {
+		if (msdos_systypes[i].type == Type)
+			return msdos_systypes[i].name;
 	}
+	return "Unknown";
 }
 
 /*
@@ -351,7 +282,7 @@ static BOOL GetDriveInfo(void)
 				if (DriveLayout->PartitionEntry[i].Mbr.PartitionType != PARTITION_ENTRY_UNUSED) {
 					uprintf("Partition #%d:\n", ++nb_partitions);
 					if (hFSTooltip == NULL) {
-						safe_sprintf(tmp, sizeof(tmp), "Existing file system: %s (0x%02X)",
+						safe_sprintf(tmp, sizeof(tmp), "Current file system: %s (0x%02X)",
 							GetPartitionType(DriveLayout->PartitionEntry[i].Mbr.PartitionType),
 							DriveLayout->PartitionEntry[i].Mbr.PartitionType);
 						hFSTooltip = CreateTooltip(hFileSystem, tmp, -1);
@@ -413,7 +344,9 @@ static BOOL PopulateProperties(int ComboIndex)
 	IGNORE_RETVAL(ComboBox_ResetContent(hFileSystem));
 	SetWindowTextA(hLabel, "");
 	DestroyTooltip(hDeviceTooltip);
+	DestroyTooltip(hFSTooltip);
 	hDeviceTooltip = NULL;
+	hFSTooltip = NULL;
 	memset(&SelectedDrive, 0, sizeof(SelectedDrive));
 
 	if (ComboIndex < 0) {

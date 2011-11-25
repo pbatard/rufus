@@ -32,6 +32,9 @@
     <ClInclude Include="..\license.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\sys_types.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\rufus.ico">
