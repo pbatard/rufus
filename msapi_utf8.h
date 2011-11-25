@@ -253,7 +253,7 @@ static __inline int ComboBox_GetLBTextU(HWND hCtrl, int index, char* lpString)
 	size = (int)SendMessageW(hCtrl, CB_GETLBTEXTLEN, (WPARAM)index, (LPARAM)0);
 	if (size < 0)
 		return size;
-	wlpString = (wchar_t*)calloc(size, sizeof(wchar_t));
+	wlpString = (wchar_t*)calloc(size+1, sizeof(wchar_t));
 	size = (int)SendMessageW(hCtrl, CB_GETLBTEXT, (WPARAM)index, (LPARAM)wlpString);
 	err = GetLastError();
 	if (size > 0)
