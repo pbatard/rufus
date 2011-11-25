@@ -68,8 +68,9 @@ struct {
 	DWORD DeviceNumber;
 	LONGLONG DiskSize;
 	LONGLONG PartitionSize;
+	DISK_GEOMETRY Geometry;
 	DWORD FirstSector;
-	char FSType[32];
+	enum _FSType FSType;
 } SelectedDrive;
 
 static HWND hDeviceList, hCapacity, hFileSystem, hLabel;
@@ -316,7 +317,7 @@ static BOOL GetDriveInfo(void)
 	void* drive_layout = (void*)layout;
 	PDISK_GEOMETRY_EX DiskGeometry = (PDISK_GEOMETRY_EX)disk_geometry;
 	PDRIVE_LAYOUT_INFORMATION_EX DriveLayout = (PDRIVE_LAYOUT_INFORMATION_EX)drive_layout;
-	char DrivePath[] = "#:\\", tmp[128];
+	char DrivePath[] = "#:\\", tmp[128], fs_type[32];
 	DWORD i, nb_partitions = 0;
 
 	SelectedDrive.DiskSize = 0;
@@ -332,6 +333,7 @@ static BOOL GetDriveInfo(void)
 		return FALSE;
 	}
 	SelectedDrive.DiskSize = DiskGeometry->DiskSize.QuadPart;
+	memcpy(&SelectedDrive.Geometry, &DiskGeometry->Geometry, sizeof(DISK_GEOMETRY));
 	uprintf("Cylinders: %lld, TracksPerCylinder: %d, SectorsPerTrack: %d, BytesPerSector: %d\n",
 		DiskGeometry->Geometry.Cylinders, DiskGeometry->Geometry.TracksPerCylinder,
 		DiskGeometry->Geometry.SectorsPerTrack, DiskGeometry->Geometry.BytesPerSector);
@@ -375,19 +377,23 @@ static BOOL GetDriveInfo(void)
 
 	safe_closehandle(hDrive);
 
-	IGNORE_RETVAL(ComboBox_SetCurSel(hFileSystem, FS_DEFAULT));
+	SelectedDrive.FSType = FS_DEFAULT;
+
 	if (GetVolumeInformationA(DrivePath, NULL, 0, NULL, NULL, NULL,
-		SelectedDrive.FSType, sizeof(SelectedDrive.FSType))) {
+		fs_type, sizeof(fs_type))) {
 		// re-select existing FS if it's one we know
-		for (i=0; i<FS_MAX; i++) {
+		for (SelectedDrive.FSType=FS_FAT16; SelectedDrive.FSType<FS_MAX; SelectedDrive.FSType++) {
 			tmp[0] = 0;
-			IGNORE_RETVAL(ComboBox_GetLBTextU(hFileSystem, i, tmp));
-			if (safe_strcmp(SelectedDrive.FSType, tmp) == 0) {
-				IGNORE_RETVAL(ComboBox_SetCurSel(hFileSystem, i));
+			IGNORE_RETVAL(ComboBox_GetLBTextU(hFileSystem, SelectedDrive.FSType, tmp));
+			if (safe_strcmp(fs_type, tmp) == 0) {
+				IGNORE_RETVAL(ComboBox_SetCurSel(hFileSystem, SelectedDrive.FSType));
 				break;
 			}
 		}
+		if (SelectedDrive.FSType == FS_MAX)
+			SelectedDrive.FSType = FS_DEFAULT;
 	}
+	IGNORE_RETVAL(ComboBox_SetCurSel(hFileSystem, SelectedDrive.FSType));
 
 	return TRUE;
 }
@@ -512,18 +518,29 @@ BOOL CreatePartition(HANDLE hDrive)
 	PDRIVE_LAYOUT_INFORMATION_EX DriveLayoutEx = (PDRIVE_LAYOUT_INFORMATION_EX)layout;
 	BOOL r;
 	DWORD size;
-	int nbHidden = 63;
 
 	DriveLayoutEx->PartitionStyle = PARTITION_STYLE_MBR;
 	DriveLayoutEx->PartitionCount = 4;	// Must be multiple of 4 for MBR
 	DriveLayoutEx->Mbr.Signature = GetTickCount();
 	DriveLayoutEx->PartitionEntry[0].PartitionStyle = PARTITION_STYLE_MBR;
-	DriveLayoutEx->PartitionEntry[0].StartingOffset.QuadPart = nbHidden*512;	// TODO
-	DriveLayoutEx->PartitionEntry[0].PartitionLength.QuadPart = 63*2*512;		// TODO
+	DriveLayoutEx->PartitionEntry[0].StartingOffset.QuadPart = 
+		SelectedDrive.Geometry.BytesPerSector * SelectedDrive.Geometry.SectorsPerTrack;
+	DriveLayoutEx->PartitionEntry[0].PartitionLength.QuadPart = SelectedDrive.DiskSize -
+		DriveLayoutEx->PartitionEntry[0].StartingOffset.QuadPart;
 	DriveLayoutEx->PartitionEntry[0].PartitionNumber = 1;
 	DriveLayoutEx->PartitionEntry[0].RewritePartition = TRUE;
-	DriveLayoutEx->PartitionEntry[0].Mbr.PartitionType = 0x83;					// TODO
-	DriveLayoutEx->PartitionEntry[0].Mbr.HiddenSectors = nbHidden;				// TODO
+	DriveLayoutEx->PartitionEntry[0].Mbr.HiddenSectors = SelectedDrive.Geometry.SectorsPerTrack;
+	switch (ComboBox_GetCurSel(hFileSystem)) {
+	case FS_FAT16:
+		DriveLayoutEx->PartitionEntry[0].Mbr.PartitionType = 0x0e;
+		break;
+	case FS_NTFS:
+		DriveLayoutEx->PartitionEntry[0].Mbr.PartitionType = 0x07;
+		break;
+	default:
+		DriveLayoutEx->PartitionEntry[0].Mbr.PartitionType = 0x0c;
+		break;
+	}
 	// For the remaining partitions, PartitionStyle & PartitionType have already
 	// been zeroed => set to MBR/unused
 

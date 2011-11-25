@@ -106,7 +106,7 @@ enum MessageType {
 };
 
 /* File system indexes in our FS combobox */
-enum FSType {
+enum _FSType {
 	FS_FAT16 = 0,
 	FS_FAT32,
 	FS_NTFS,
