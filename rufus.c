@@ -578,8 +578,8 @@ BOOL Format(char DriveLetter)
 
 	// TODO: properly set MediaType
 	FormatErr = 0;
-	GetWindowText(hFileSystem, wFSType, ARRAYSIZE(wFSType));
-	GetWindowText(hLabel, wLabel, ARRAYSIZE(wLabel));
+	GetWindowTextW(hFileSystem, wFSType, ARRAYSIZE(wFSType));
+	GetWindowTextW(hLabel, wLabel, ARRAYSIZE(wLabel));
 	pfFormatEx(wDriveRoot, RemovableMedia, wFSType, wLabel,
 		(IsDlgButtonChecked(hMainDialog, IDC_QUICKFORMAT) == BST_CHECKED),
 		4096, FormatExCallback);
