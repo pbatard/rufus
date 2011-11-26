@@ -35,12 +35,9 @@
 #include <commctrl.h>
 #include <setupapi.h>
 #include <winioctl.h>
+#include <dbt.h>
 
-// http://doc.sch130.nsc.ru/www.sysinternals.com/ntw2k/source/fmifs.shtml
-// http://svn.reactos.org/svn/reactos/trunk/reactos/include/reactos/libs/fmifs/
-//#include <fmifs.h>
 // http://git.kernel.org/?p=fs/ext2/e2fsprogs.git;a=blob;f=misc/badblocks.c
-
 // http://ms-sys.sourceforge.net/
 // http://thestarman.pcministry.com/asm/mbr/MSWIN41.htm
 
@@ -77,6 +74,7 @@ struct {
 static HWND hDeviceList, hCapacity, hFileSystem, hLabel;
 static HWND hDeviceTooltip = NULL, hFSTooltip = NULL;
 static StrArray DriveID, DriveLabel;
+static DWORD FormatErr;
 
 #ifdef RUFUS_DEBUG
 void _uprintf(const char *format, ...)
@@ -282,12 +280,12 @@ static BOOL GetDriveInfo(void)
 				if (DriveLayout->PartitionEntry[i].Mbr.PartitionType != PARTITION_ENTRY_UNUSED) {
 					uprintf("Partition #%d:\n", ++nb_partitions);
 					if (hFSTooltip == NULL) {
-						safe_sprintf(tmp, sizeof(tmp), "Current file system: %s (0x%02X)",
+						safe_sprintf(tmp, sizeof(tmp), "Current file system: %s (0x%02x)",
 							GetPartitionType(DriveLayout->PartitionEntry[i].Mbr.PartitionType),
 							DriveLayout->PartitionEntry[i].Mbr.PartitionType);
 						hFSTooltip = CreateTooltip(hFileSystem, tmp, -1);
 					}
-					uprintf("  Type: %s (0x%02X)\n  Boot: %s\n  Recognized: %s\n  Hidden Sectors: %d\n",
+					uprintf("  Type: %s (0x%02x)\n  Boot: %s\n  Recognized: %s\n  Hidden Sectors: %d\n",
 						GetPartitionType(DriveLayout->PartitionEntry[i].Mbr.PartitionType),
 						DriveLayout->PartitionEntry[i].Mbr.PartitionType,
 						DriveLayout->PartitionEntry[i].Mbr.BootIndicator?"Yes":"No",
@@ -452,6 +450,7 @@ BOOL CreatePartition(HANDLE hDrive)
 	BOOL r;
 	DWORD size;
 
+	StatusPrintf("Partitioning...");
 	DriveLayoutEx->PartitionStyle = PARTITION_STYLE_MBR;
 	DriveLayoutEx->PartitionCount = 4;	// Must be multiple of 4 for MBR
 	DriveLayoutEx->Mbr.Signature = GetTickCount();
@@ -484,15 +483,126 @@ BOOL CreatePartition(HANDLE hDrive)
 		safe_closehandle(hDrive);
 		return FALSE;
 	}
-	StatusPrintf("Successfully Created Partition");
 
 	return TRUE;
 }
 
+/*
+ * FormatEx callback. Return FALSE to halt operations
+ */
+BOOLEAN __stdcall FormatExCallback(FILE_SYSTEM_CALLBACK_COMMAND Command, DWORD Action, PVOID Data)
+{
+	DWORD* percent;
+	int task_number = 0;
+
+	switch(Command) {
+	case FCC_PROGRESS:
+		percent = (DWORD*)Data;
+//		PostMessage(hMainDialog, UM_FORMAT_PROGRESS, (WPARAM)*percent, (LPARAM)0);
+		uprintf("%d percent completed.\n", *percent);
+		break;
+	case FCC_STRUCTURE_PROGRESS:	// No progress on quick format
+		uprintf("format task %d/n completed.\n", ++task_number);
+		break;
+	case FCC_DONE:
+		if(*(BOOLEAN*)Data == FALSE) {
+			uprintf("Error while formatting.\n");
+			if (FormatErr == 0)
+				FormatErr = FCC_DONE;
+		}
+		break;
+	case FCC_INCOMPATIBLE_FILE_SYSTEM:
+		uprintf("Incompatible File System\n");
+		FormatErr = Command;
+		break;
+	case FCC_ACCESS_DENIED:
+		uprintf("Access denied\n");
+		FormatErr = Command;
+		break;
+	case FCC_MEDIA_WRITE_PROTECTED:
+		uprintf("Media is write protected\n");
+		FormatErr = Command;
+		break;
+	case FCC_VOLUME_IN_USE:
+		uprintf("Volume is in use\n");
+		FormatErr = Command;
+		break;
+	case FCC_CANT_QUICK_FORMAT:
+		uprintf("Cannot quick format this volume\n");
+		FormatErr = Command;
+		break;
+	case FCC_BAD_LABEL:
+		uprintf("Bad label\n");
+		break;
+	case FCC_OUTPUT:
+		uprintf("%s\n", ((PTEXTOUTPUT)Data)->Output);
+		break;
+	case FCC_CLUSTER_SIZE_TOO_SMALL:
+		uprintf("Allocation unit size is too small\n");
+		FormatErr = Command;
+		break;
+	case FCC_CLUSTER_SIZE_TOO_BIG:
+		uprintf("Allocation unit size is too big\n");
+		FormatErr = Command;
+		break;
+	case FCC_VOLUME_TOO_SMALL:
+		uprintf("Volume is too small\n");
+		FormatErr = Command;
+		break;
+	case FCC_VOLUME_TOO_BIG:
+		uprintf("Volume is too big\n");
+		FormatErr = Command;
+		break;
+	case FCC_NO_MEDIA_IN_DRIVE:
+		uprintf("No media\n");
+		FormatErr = Command;
+		break;
+	default:
+		uprintf("FormatExCallback: received unhandled command %X\n", Command);
+		break;
+	}
+	return (FormatErr == 0);
+}
+
+BOOL Format(char DriveLetter)
+{
+	BOOL r = FALSE;
+	PF_DECL(FormatEx);
+	WCHAR wDriveRoot[] = L"?:\\";
+	WCHAR wFSType[32];
+	WCHAR wLabel[128];
+
+	wDriveRoot[0] = (WCHAR)DriveLetter;
+	StatusPrintf("Formatting...");
+	PF_INIT_OR_OUT(FormatEx, fmifs);
+
+	// TODO: properly set MediaType
+	FormatErr = 0;
+	GetWindowText(hFileSystem, wFSType, ARRAYSIZE(wFSType));
+	GetWindowText(hLabel, wLabel, ARRAYSIZE(wLabel));
+	pfFormatEx(wDriveRoot, RemovableMedia, wFSType, wLabel,
+		(IsDlgButtonChecked(hMainDialog, IDC_QUICKFORMAT) == BST_CHECKED),
+		4096, FormatExCallback);
+	if (FormatErr == 0) {
+		uprintf("Format completed.\n");
+		StatusPrintf("Done.");
+		r = TRUE;
+	} else {
+		uprintf("Format error: %X\n", FormatErr);
+		StatusPrintf("FAILED.");
+	}
+
+out:
+	return r;
+}
+
+// TODO: create a thread for this
 BOOL FormatDrive(DWORD num)
 {
 	HANDLE hDrive;
-	BOOL r;
+	BOOL r = FALSE;
+	char drive_letter;
+	int i;
 
 	if (!GetDriveHandle(num, &hDrive, NULL, TRUE)) {
 		// TODO: report an error for exclusive access
@@ -500,8 +610,24 @@ BOOL FormatDrive(DWORD num)
 	}
 
 	r = CreatePartition(hDrive);
+	safe_closehandle(hDrive);
+	if (!r) return FALSE;
 
-	CloseHandle(hDrive);
+	// Make sure we can reopen the drive before trying to format it
+	for (i=0; i<10; i++) {
+		Sleep(500);
+		if (GetDriveHandle(num, &hDrive, &drive_letter, FALSE)) {
+			break;
+		}
+	}
+	if (i >= 10) {
+		uprintf("Unable to reopen drive after partitioning\n");
+		return FALSE;
+	}
+	safe_closehandle(hDrive);
+
+	r = Format(drive_letter);
+
 	return r;
 }
 
@@ -629,8 +755,12 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	switch (message) {
 
 	case WM_DEVICECHANGE:
-		GetUSBDevices();
-		return (INT_PTR)TRUE;
+		// TODO: also prevent detect during format
+		if ((wParam == DBT_DEVICEARRIVAL) || (wParam == DBT_DEVICEREMOVECOMPLETE)) {
+			GetUSBDevices();
+			return (INT_PTR)TRUE;
+		}
+		break;
 
 	case WM_INITDIALOG:
 		hMainDialog = hDlg;
@@ -646,8 +776,11 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		CreateStatusBar();
 		// Display the version in the right area of the status bar
 		SendMessageA(GetDlgItem(hDlg, IDC_STATUS), SB_SETTEXTA, SBT_OWNERDRAW | 1, (LPARAM)APP_VERSION);
+		// Create the string array
 		StrArrayCreate(&DriveID, MAX_DRIVES);
 		StrArrayCreate(&DriveLabel, MAX_DRIVES);
+		// Set the quick format checkbox
+		CheckDlgButton(hDlg, IDC_QUICKFORMAT, BST_CHECKED);
 		GetUSBDevices();
 		return (INT_PTR)TRUE;
 
@@ -705,6 +838,10 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	case WM_CLOSE:
 		PostQuitMessage(0);
 		break;
+
+	case UM_FORMAT_PROGRESS:
+		uprintf("Got UM_FORMAT_PROGRESS with percent %d\n", (DWORD)wParam);
+		return (INT_PTR)TRUE;
 
 	}
 	return (INT_PTR)FALSE;

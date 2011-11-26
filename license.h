@@ -30,6 +30,11 @@ const char* additional_copyrights =
 "http://www.gnu.org/software/fdisk\r\n"
 "GNU General Public License (GPL) v3 or later\r\n"
 "\r\n"
+"fmifs.dll usage based on Formatx by Mark Russinovich:\r\n"
+"http://doc.sch130.nsc.ru/www.sysinternals.com/ntw2k/source/fmifs.shtml\r\n"
+"http://svn.reactos.org/svn/reactos/trunk/reactos/include/reactos/libs/fmifs\r\n"
+"Public Domain\r\n"
+"\r\n"
 "About and License dialogs inspired by WinSCP\r\n"
 "Copyright (c) 2000-2011 Martin Prikryl\r\n"
 "GNU General Public License (GPL) v3 or later";
