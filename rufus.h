@@ -37,6 +37,7 @@
 #ifndef ARRAYSIZE
 #define ARRAYSIZE(A)                (sizeof(A)/sizeof((A)[0]))
 #endif
+#define IsChecked(CheckBox_ID)      (IsDlgButtonChecked(hMainDialog, CheckBox_ID) == BST_CHECKED)
 
 #define safe_free(p) do {free((void*)p); p = NULL;} while(0)
 #define safe_closehandle(h) do {if (h != INVALID_HANDLE_VALUE) {CloseHandle(h); h = INVALID_HANDLE_VALUE;}} while(0)
@@ -79,6 +80,7 @@ extern HWND CreateTooltip(HWND hControl, const char* message, int duration);
 extern void DestroyTooltip(HWND hWnd);
 extern void DestroyAllTooltips(void);
 extern void Notification(int type, char* text, char* title);
+extern BOOL ExtractMSDOS(const char* path);
 
 /* Basic String Array */
 typedef struct {

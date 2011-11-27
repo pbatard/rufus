@@ -35,11 +35,13 @@
 #include <commctrl.h>
 #include <setupapi.h>
 #include <winioctl.h>
+#include <process.h>
 #include <dbt.h>
 
 // http://git.kernel.org/?p=fs/ext2/e2fsprogs.git;a=blob;f=misc/badblocks.c
 // http://ms-sys.sourceforge.net/
 // http://thestarman.pcministry.com/asm/mbr/MSWIN41.htm
+// http://www.c-jump.com/CIS24/Slides/FAT/lecture.html#F01_0130_sector_assignments
 
 #include "msapi_utf8.h"
 #include "resource.h"
@@ -48,6 +50,14 @@
 
 #if !defined(GUID_DEVINTERFACE_DISK)
 const GUID GUID_DEVINTERFACE_DISK = { 0x53f56307L, 0xb6bf, 0x11d0, {0x94, 0xf2, 0x00, 0xa0, 0xc9, 0x1e, 0xfb, 0x8b} };
+#endif
+
+// For MinGW
+#ifndef PBS_MARQUEE
+#define PBS_MARQUEE 0x08
+#endif
+#ifndef PBM_SETMARQUEE
+#define PBM_SETMARQUEE (WM_USER+10)
 #endif
 
 /*
@@ -171,6 +181,9 @@ static BOOL GetDriveHandle(DWORD DriveIndex, HANDLE* hDrive, char* DriveLetter, 
 
 	*hDrive = INVALID_HANDLE_VALUE;
 	for ( ;*drive; drive += safe_strlen(drive)+1) {
+		if (!isalpha(*drive))
+			continue;
+		*drive = (char)toupper((int)*drive);
 		if (*drive < 'C') {
 			continue;
 		}
@@ -498,7 +511,7 @@ BOOLEAN __stdcall FormatExCallback(FILE_SYSTEM_CALLBACK_COMMAND Command, DWORD A
 	switch(Command) {
 	case FCC_PROGRESS:
 		percent = (DWORD*)Data;
-//		PostMessage(hMainDialog, UM_FORMAT_PROGRESS, (WPARAM)*percent, (LPARAM)0);
+		PostMessage(hMainDialog, UM_FORMAT_PROGRESS, (WPARAM)*percent, (LPARAM)0);
 		uprintf("%d percent completed.\n", *percent);
 		break;
 	case FCC_STRUCTURE_PROGRESS:	// No progress on quick format
@@ -564,7 +577,10 @@ BOOLEAN __stdcall FormatExCallback(FILE_SYSTEM_CALLBACK_COMMAND Command, DWORD A
 	return (FormatErr == 0);
 }
 
-BOOL Format(char DriveLetter)
+/*
+ * Call on fmifs.dll's FormatEx() to format the drive
+ */
+BOOL FormatDrive(char DriveLetter)
 {
 	BOOL r = FALSE;
 	PF_DECL(FormatEx);
@@ -580,15 +596,15 @@ BOOL Format(char DriveLetter)
 	FormatErr = 0;
 	GetWindowTextW(hFileSystem, wFSType, ARRAYSIZE(wFSType));
 	GetWindowTextW(hLabel, wLabel, ARRAYSIZE(wLabel));
+	// TODO set sector size
 	pfFormatEx(wDriveRoot, RemovableMedia, wFSType, wLabel,
-		(IsDlgButtonChecked(hMainDialog, IDC_QUICKFORMAT) == BST_CHECKED),
-		4096, FormatExCallback);
+		IsChecked(IDC_QUICKFORMAT), 4096, FormatExCallback);
 	if (FormatErr == 0) {
 		uprintf("Format completed.\n");
 		StatusPrintf("Done.");
 		r = TRUE;
 	} else {
-		uprintf("Format error: %X\n", FormatErr);
+		uprintf("Format error: 0x%02x\n", FormatErr);
 		StatusPrintf("FAILED.");
 	}
 
@@ -596,39 +612,55 @@ out:
 	return r;
 }
 
-// TODO: create a thread for this
-BOOL FormatDrive(DWORD num)
+/*
+ * Create a separate thread for the formatting operation
+ */
+void __cdecl FormatThread(void* param)
 {
+	DWORD num = (DWORD)(uintptr_t)param;
 	HANDLE hDrive;
-	BOOL r = FALSE;
-	char drive_letter;
+	BOOL r;
+	char drive_name[] = "?:";
 	int i;
 
 	if (!GetDriveHandle(num, &hDrive, NULL, TRUE)) {
-		// TODO: report an error for exclusive access
-		return FALSE;
+		// TODO: use FormatErr to report an error
+		goto out;
 	}
 
 	r = CreatePartition(hDrive);
 	safe_closehandle(hDrive);
-	if (!r) return FALSE;
+	if (!r) {
+		// TODO: use FormatErr to report an error
+		goto out;
+	}
 
 	// Make sure we can reopen the drive before trying to format it
 	for (i=0; i<10; i++) {
 		Sleep(500);
-		if (GetDriveHandle(num, &hDrive, &drive_letter, FALSE)) {
+		if (GetDriveHandle(num, &hDrive, drive_name, FALSE)) {
 			break;
 		}
 	}
 	if (i >= 10) {
-		uprintf("Unable to reopen drive after partitioning\n");
-		return FALSE;
+		uprintf("Unable to reopen drive post partitioning\n");
+		// TODO: use FormatErr to report an error
+		goto out;
 	}
 	safe_closehandle(hDrive);
 
-	r = Format(drive_letter);
+	if (!FormatDrive(drive_name[0])) {
+		goto out;
+	}
 
-	return r;
+	if (IsChecked(IDC_DOSSTARTUP)) {
+		// TODO: check return value & set bootblock
+		ExtractMSDOS(drive_name);
+	}
+
+out:
+	PostMessage(hMainDialog, UM_FORMAT_COMPLETED, 0, 0);
+	_endthread();
 }
 
 /*
@@ -750,7 +782,11 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	HDC hDC;
 	DRAWITEMSTRUCT* pDI;
 	int nDeviceIndex;
+	DWORD DeviceNum;
 	char str[MAX_PATH], tmp[128];
+	static uintptr_t format_thid = -1L;
+	static HWND hProgress;
+	static LONG ProgressStyle = 0;
 
 	switch (message) {
 
@@ -768,6 +804,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		hCapacity = GetDlgItem(hDlg, IDC_CAPACITY);
 		hFileSystem = GetDlgItem(hDlg, IDC_FILESYSTEM);
 		hLabel = GetDlgItem(hDlg, IDC_LABEL);
+		hProgress = GetDlgItem(hDlg, IDC_PROGRESS);
 		// High DPI scaling
 		hDC = GetDC(hDlg);
 		fScale = GetDeviceCaps(hDC, LOGPIXELSX) / 96.0f;
@@ -776,6 +813,8 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		CreateStatusBar();
 		// Display the version in the right area of the status bar
 		SendMessageA(GetDlgItem(hDlg, IDC_STATUS), SB_SETTEXTA, SBT_OWNERDRAW | 1, (LPARAM)APP_VERSION);
+		// We'll switch the progressbar to marquee and back => keep a copy of current style
+		ProgressStyle = GetWindowLong(hProgress, GWL_STYLE);
 		// Create the string array
 		StrArrayCreate(&DriveID, MAX_DRIVES);
 		StrArrayCreate(&DriveLabel, MAX_DRIVES);
@@ -818,18 +857,32 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				PopulateProperties(ComboBox_GetCurSel(hDeviceList));
 				break;
 			}
-		break;
+			break;
 		case IDC_START:
+			// TODO: disable all controls and replace Close with Cancel
+			if (format_thid != -1L) {
+				return (INT_PTR)TRUE;
+			}
 			nDeviceIndex = ComboBox_GetCurSel(hDeviceList);
 			if (nDeviceIndex != CB_ERR) {
 				GetWindowTextA(hDeviceList, tmp, sizeof(tmp));
 				safe_sprintf(str, sizeof(str), "WARNING: ALL DATA ON DEVICE %s\r\nWILL BE ERASED!\r\n"
 					"Do you want to continue with this operation?", tmp);
 				if (MessageBoxA(hMainDialog, str, "Rufus", MB_OKCANCEL|MB_ICONWARNING) == IDOK) {
-					FormatDrive((DWORD)ComboBox_GetItemData(hDeviceList, nDeviceIndex));
+					// Handle marquee progress bar on quickformat
+					SetWindowLongPtr(hProgress, GWL_STYLE, ProgressStyle | (IsChecked(IDC_QUICKFORMAT)?PBS_MARQUEE:0));
+					if (IsChecked(IDC_QUICKFORMAT)) {
+						SendMessage(hProgress, PBM_SETMARQUEE, TRUE, 0);
+					}
+					DeviceNum =  (DWORD)ComboBox_GetItemData(hDeviceList, nDeviceIndex);
+					format_thid = _beginthread(FormatThread, 0, (void*)(uintptr_t)DeviceNum);
+					if (format_thid == -1L) {
+						// TODO: handle error
+						uprintf("Unable to start formatting thread");
+					}
 				}
 			}
-		break;
+			break;
 		default:
 			return (INT_PTR)FALSE;
 		}
@@ -840,13 +893,23 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		break;
 
 	case UM_FORMAT_PROGRESS:
-		uprintf("Got UM_FORMAT_PROGRESS with percent %d\n", (DWORD)wParam);
+		SendMessage(hProgress, PBM_SETPOS, wParam, lParam);
 		return (INT_PTR)TRUE;
 
+	case UM_FORMAT_COMPLETED:
+		format_thid = -1L;
+		if (IsChecked(IDC_QUICKFORMAT))
+			SendMessage(hProgress, PBM_SETMARQUEE, FALSE, 0);
+		SetWindowLongPtr(hProgress, GWL_STYLE, ProgressStyle);
+		// This is the only way to achieve instantenous progress transition
+		SendMessage(hProgress, PBM_SETRANGE, 0, 101<<16);
+		SendMessage(hProgress, PBM_SETPOS, 101, 0);
+		SendMessage(hProgress, PBM_SETRANGE, 0, 100<<16);
+		SendMessage(hProgress, PBM_SETPOS, 100, 0);
+		return (INT_PTR)TRUE;
 	}
 	return (INT_PTR)FALSE;
 }
-
 
 /*
  * Application Entrypoint

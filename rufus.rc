@@ -49,7 +49,7 @@ BEGIN
     CONTROL         "&Quick Format",IDC_QUICKFORMAT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,21,162,58,10
     CONTROL         "Create an &MS-DOS startup disk",IDC_DOSSTARTUP,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,21,174,115,10
     LTEXT           "New volume &label",IDC_STATIC,17,122,105,10
-    CONTROL         "",IDC_PROGRESS,"msctls_progress32",WS_BORDER,15,198,189,9
+    CONTROL         "",IDC_PROGRESS,"msctls_progress32",PBS_SMOOTH | WS_BORDER,15,198,189,9
 END
 
 IDD_ABOUTBOX DIALOGEX 0, 0, 287, 195
