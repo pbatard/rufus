@@ -21,6 +21,9 @@
     <ClCompile Include="..\stdlg.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\msdos.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\rufus.h">
@@ -33,6 +36,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\sys_types.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\msdos.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

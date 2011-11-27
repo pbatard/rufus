@@ -25,4 +25,5 @@ SXS_APPLICATION_MANIFEST=common_controls_and_elevation.manifest
 
 SOURCES=rufus.c \
         stdlg.c \
+        msdos.c \
         rufus.rc

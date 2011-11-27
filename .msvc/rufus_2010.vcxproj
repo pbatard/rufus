@@ -143,11 +143,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\msdos.c" />
     <ClCompile Include="..\rufus.c" />
     <ClCompile Include="..\stdlg.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\msapi_utf8.h" />
+    <ClInclude Include="..\msdos.h" />
     <ClInclude Include="..\rufus.h" />
     <ClInclude Include="..\license.h" />
     <ClInclude Include="..\sys_types.h" />
