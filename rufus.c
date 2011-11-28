@@ -405,7 +405,7 @@ static BOOL PopulateProperties(int ComboIndex)
 	return TRUE;
 }
 
-BOOL WriteSectors(HANDLE hDrive, size_t SectorSize, size_t StartSector, size_t nSectors, void* Buf, size_t BufSize)
+static BOOL WriteSectors(HANDLE hDrive, size_t SectorSize, size_t StartSector, size_t nSectors, void* Buf, size_t BufSize)
 {
 	LARGE_INTEGER ptr;
 	DWORD Size;
@@ -429,7 +429,7 @@ BOOL WriteSectors(HANDLE hDrive, size_t SectorSize, size_t StartSector, size_t n
 	return TRUE;
 }
 
-BOOL ReadSectors(HANDLE hDrive, size_t SectorSize, size_t StartSector, size_t nSectors, void* Buf, size_t BufSize)
+static BOOL ReadSectors(HANDLE hDrive, size_t SectorSize, size_t StartSector, size_t nSectors, void* Buf, size_t BufSize)
 {
 	LARGE_INTEGER ptr;
 	DWORD size;
@@ -456,7 +456,7 @@ BOOL ReadSectors(HANDLE hDrive, size_t SectorSize, size_t StartSector, size_t nS
 /*
  * Create a partition table
  */
-BOOL CreatePartition(HANDLE hDrive)
+static BOOL CreatePartition(HANDLE hDrive)
 {
 	BYTE layout[sizeof(DRIVE_LAYOUT_INFORMATION_EX) + 3*sizeof(PARTITION_INFORMATION_EX)] = {0};
 	PDRIVE_LAYOUT_INFORMATION_EX DriveLayoutEx = (PDRIVE_LAYOUT_INFORMATION_EX)layout;
@@ -503,10 +503,12 @@ BOOL CreatePartition(HANDLE hDrive)
 /*
  * FormatEx callback. Return FALSE to halt operations
  */
-BOOLEAN __stdcall FormatExCallback(FILE_SYSTEM_CALLBACK_COMMAND Command, DWORD Action, PVOID Data)
+static BOOLEAN __stdcall FormatExCallback(FILE_SYSTEM_CALLBACK_COMMAND Command, DWORD Action, PVOID Data)
 {
 	DWORD* percent;
 	int task_number = 0;
+
+	if (FormatErr != 0) return FALSE;
 
 	switch(Command) {
 	case FCC_PROGRESS:
@@ -520,8 +522,7 @@ BOOLEAN __stdcall FormatExCallback(FILE_SYSTEM_CALLBACK_COMMAND Command, DWORD A
 	case FCC_DONE:
 		if(*(BOOLEAN*)Data == FALSE) {
 			uprintf("Error while formatting.\n");
-			if (FormatErr == 0)
-				FormatErr = FCC_DONE;
+			FormatErr = FCC_DONE;
 		}
 		break;
 	case FCC_INCOMPATIBLE_FILE_SYSTEM:
@@ -580,7 +581,7 @@ BOOLEAN __stdcall FormatExCallback(FILE_SYSTEM_CALLBACK_COMMAND Command, DWORD A
 /*
  * Call on fmifs.dll's FormatEx() to format the drive
  */
-BOOL FormatDrive(char DriveLetter)
+static BOOL FormatDrive(char DriveLetter)
 {
 	BOOL r = FALSE;
 	PF_DECL(FormatEx);
@@ -601,11 +602,9 @@ BOOL FormatDrive(char DriveLetter)
 		IsChecked(IDC_QUICKFORMAT), 4096, FormatExCallback);
 	if (FormatErr == 0) {
 		uprintf("Format completed.\n");
-		StatusPrintf("Done.");
 		r = TRUE;
 	} else {
 		uprintf("Format error: 0x%02x\n", FormatErr);
-		StatusPrintf("FAILED.");
 	}
 
 out:
@@ -615,7 +614,7 @@ out:
 /*
  * Create a separate thread for the formatting operation
  */
-void __cdecl FormatThread(void* param)
+static void __cdecl FormatThread(void* param)
 {
 	DWORD num = (DWORD)(uintptr_t)param;
 	HANDLE hDrive;
@@ -774,6 +773,21 @@ static BOOL GetUSBDevices(void)
 	return TRUE;
 }
 
+/* Toggle controls according to operation */
+static void EnableControls(BOOL bEnable)
+{
+	EnableWindow(GetDlgItem(hMainDialog, IDC_DEVICE), bEnable);
+	EnableWindow(GetDlgItem(hMainDialog, IDC_CAPACITY), bEnable);
+	EnableWindow(GetDlgItem(hMainDialog, IDC_FILESYSTEM), bEnable);
+	EnableWindow(GetDlgItem(hMainDialog, IDC_ALLOCSIZE), bEnable);
+	EnableWindow(GetDlgItem(hMainDialog, IDC_LABEL), bEnable);
+	EnableWindow(GetDlgItem(hMainDialog, IDC_QUICKFORMAT), bEnable);
+	EnableWindow(GetDlgItem(hMainDialog, IDC_DOSSTARTUP), bEnable);
+	EnableWindow(GetDlgItem(hMainDialog, IDC_ABOUT), bEnable);
+	EnableWindow(GetDlgItem(hMainDialog, IDC_START), bEnable);
+	SetDlgItemTextA(hMainDialog, IDCANCEL, bEnable?"Close":"Cancel");
+}
+
 /*
  * Main dialog callback
  */
@@ -791,8 +805,8 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	switch (message) {
 
 	case WM_DEVICECHANGE:
-		// TODO: also prevent detect during format
-		if ((wParam == DBT_DEVICEARRIVAL) || (wParam == DBT_DEVICEREMOVECOMPLETE)) {
+		if ( (format_thid == -1L) &&
+			 ((wParam == DBT_DEVICEARRIVAL) || (wParam == DBT_DEVICEREMOVECOMPLETE)) ) {
 			GetUSBDevices();
 			return (INT_PTR)TRUE;
 		}
@@ -840,6 +854,19 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		switch(LOWORD(wParam)) {
 		case IDOK:			// close application
 		case IDCANCEL:
+			if (format_thid != -1L) {
+				// TODO: destroy MessageBox if operation completed while waiting
+				if (MessageBoxA(hMainDialog, "Cancelling may leave the device in an UNUSABLE state.\r\n"
+					"If you are sure you want to cancel, click YES. Otherwise, click NO.",
+					"Do you want to cancel?", MB_YESNO|MB_ICONWARNING) == IDYES) {
+					// Operation may have completed
+					if (format_thid != -1L) {
+						FormatErr = -1;
+						StatusPrintf("Cancelling - please wait...");
+					}
+				}
+				return (INT_PTR)TRUE;
+			}
 			PostQuitMessage(0);
 			StrArrayDestroy(&DriveID);
 			StrArrayDestroy(&DriveLabel);
@@ -866,9 +893,11 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			nDeviceIndex = ComboBox_GetCurSel(hDeviceList);
 			if (nDeviceIndex != CB_ERR) {
 				GetWindowTextA(hDeviceList, tmp, sizeof(tmp));
-				safe_sprintf(str, sizeof(str), "WARNING: ALL DATA ON DEVICE %s\r\nWILL BE ERASED!\r\n"
-					"Do you want to continue with this operation?", tmp);
+				safe_sprintf(str, sizeof(str), "WARNING: ALL DATA ON DEVICE %s\r\nWILL BE DESTROYED.\r\n"
+					"To continue with this operation, click OK. To quit click CANCEL.", tmp);
 				if (MessageBoxA(hMainDialog, str, "Rufus", MB_OKCANCEL|MB_ICONWARNING) == IDOK) {
+					// Disable all controls except cancel
+					EnableControls(FALSE);
 					// Handle marquee progress bar on quickformat
 					SetWindowLongPtr(hProgress, GWL_STYLE, ProgressStyle | (IsChecked(IDC_QUICKFORMAT)?PBS_MARQUEE:0));
 					if (IsChecked(IDC_QUICKFORMAT)) {
@@ -889,6 +918,9 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		return (INT_PTR)TRUE;
 
 	case WM_CLOSE:
+		if (format_thid != -1L) {
+			return (INT_PTR)TRUE;
+		}
 		PostQuitMessage(0);
 		break;
 
@@ -898,14 +930,18 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 
 	case UM_FORMAT_COMPLETED:
 		format_thid = -1L;
-		if (IsChecked(IDC_QUICKFORMAT))
+		if (IsChecked(IDC_QUICKFORMAT)) {
 			SendMessage(hProgress, PBM_SETMARQUEE, FALSE, 0);
-		SetWindowLongPtr(hProgress, GWL_STYLE, ProgressStyle);
-		// This is the only way to achieve instantenous progress transition
-		SendMessage(hProgress, PBM_SETRANGE, 0, 101<<16);
-		SendMessage(hProgress, PBM_SETPOS, 101, 0);
-		SendMessage(hProgress, PBM_SETRANGE, 0, 100<<16);
-		SendMessage(hProgress, PBM_SETPOS, 100, 0);
+			SetWindowLongPtr(hProgress, GWL_STYLE, ProgressStyle);
+			// This is the only way to achieve instantenous progress transition
+			SendMessage(hProgress, PBM_SETRANGE, 0, 101<<16);
+			SendMessage(hProgress, PBM_SETPOS, 101, 0);
+			SendMessage(hProgress, PBM_SETRANGE, 0, 100<<16);
+		}
+		SendMessage(hProgress, PBM_SETPOS, FormatErr?0:100, 0);
+		// TODO: report cancelled status
+		StatusPrintf(FormatErr?"FAILED":"DONE");
+		EnableControls(TRUE);
 		return (INT_PTR)TRUE;
 	}
 	return (INT_PTR)FALSE;
