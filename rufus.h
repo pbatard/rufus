@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <winioctl.h>	// for MEDIA_TYPE
+#include <winioctl.h>				// for MEDIA_TYPE
 
 #pragma once
 
@@ -23,6 +23,7 @@
 
 #define APP_VERSION                 "Rufus v1.0.0.1"
 #define STR_NO_LABEL                "NO_LABEL"
+#define RUFUS_CANCELBOX_TITLE       "Rufus - Cancellation"
 #define DRIVE_INDEX_MIN             0x80
 #define DRIVE_INDEX_MAX             0xC0
 #define MAX_DRIVES                  16
@@ -213,3 +214,11 @@ typedef BOOLEAN (WINAPI* EnableVolumeCompression_t)(
 	WCHAR*          DriveRoot,
 	ULONG           CompressionFlags	// FILE_SYSTEM_PROP_FLAG
 );
+
+/* Custom application errors */
+#define FAC(f)                         (f<<16)
+#define ERROR_INCOMPATIBLE_FS          (APPLICATION_ERROR_MASK|0x1201)
+#define ERROR_CANT_QUICK_FORMAT        (APPLICATION_ERROR_MASK|0x1202)
+#define ERROR_INVALID_CLUSTER_SIZE     (APPLICATION_ERROR_MASK|0x1203)
+#define ERROR_INVALID_VOLUME_SIZE      (APPLICATION_ERROR_MASK|0x1204)
+#define ERROR_CANT_START_THREAD        (APPLICATION_ERROR_MASK|0x1205)

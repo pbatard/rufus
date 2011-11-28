@@ -84,7 +84,7 @@ struct {
 static HWND hDeviceList, hCapacity, hFileSystem, hLabel;
 static HWND hDeviceTooltip = NULL, hFSTooltip = NULL;
 static StrArray DriveID, DriveLabel;
-static DWORD FormatErr;
+static DWORD FormatStatus;
 
 #ifdef RUFUS_DEBUG
 void _uprintf(const char *format, ...)
@@ -209,7 +209,7 @@ static BOOL GetDriveHandle(DWORD DriveIndex, HANDLE* hDrive, char* DriveLetter, 
 					safe_closehandle(*hDrive);
 					return FALSE;
 				}
-				uprintf("Warning: Opening %s drive for write access\n", drive_name);
+				uprintf("Caution: Opened %s drive for write access\n", drive_name);
 			}
 			break;
 		}
@@ -217,7 +217,7 @@ static BOOL GetDriveHandle(DWORD DriveIndex, HANDLE* hDrive, char* DriveLetter, 
 	}
 
 	if (DriveLetter != NULL) {
-		*DriveLetter = *drive?*drive:' ';	// TODO: handle NUL char upstream
+		*DriveLetter = *drive?*drive:' ';
 	}
 
 	return (*hDrive != INVALID_HANDLE_VALUE);
@@ -293,6 +293,7 @@ static BOOL GetDriveInfo(void)
 				if (DriveLayout->PartitionEntry[i].Mbr.PartitionType != PARTITION_ENTRY_UNUSED) {
 					uprintf("Partition #%d:\n", ++nb_partitions);
 					if (hFSTooltip == NULL) {
+						// TODO: provide all partitions FS on tooltip, not just the one
 						safe_sprintf(tmp, sizeof(tmp), "Current file system: %s (0x%02x)",
 							GetPartitionType(DriveLayout->PartitionEntry[i].Mbr.PartitionType),
 							DriveLayout->PartitionEntry[i].Mbr.PartitionType);
@@ -508,7 +509,8 @@ static BOOLEAN __stdcall FormatExCallback(FILE_SYSTEM_CALLBACK_COMMAND Command, 
 	DWORD* percent;
 	int task_number = 0;
 
-	if (FormatErr != 0) return FALSE;
+	if (IS_ERROR(FormatStatus))
+		return FALSE;
 
 	switch(Command) {
 	case FCC_PROGRESS:
@@ -517,65 +519,60 @@ static BOOLEAN __stdcall FormatExCallback(FILE_SYSTEM_CALLBACK_COMMAND Command, 
 		uprintf("%d percent completed.\n", *percent);
 		break;
 	case FCC_STRUCTURE_PROGRESS:	// No progress on quick format
-		uprintf("format task %d/n completed.\n", ++task_number);
+		uprintf("Format task %d/? completed.\n", ++task_number);
 		break;
 	case FCC_DONE:
 		if(*(BOOLEAN*)Data == FALSE) {
 			uprintf("Error while formatting.\n");
-			FormatErr = FCC_DONE;
+			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_GEN_FAILURE;
 		}
 		break;
 	case FCC_INCOMPATIBLE_FILE_SYSTEM:
 		uprintf("Incompatible File System\n");
-		FormatErr = Command;
+		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_INCOMPATIBLE_FS;
 		break;
 	case FCC_ACCESS_DENIED:
 		uprintf("Access denied\n");
-		FormatErr = Command;
+		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_ACCESS_DENIED;
 		break;
 	case FCC_MEDIA_WRITE_PROTECTED:
 		uprintf("Media is write protected\n");
-		FormatErr = Command;
+		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_WRITE_PROTECT;
 		break;
 	case FCC_VOLUME_IN_USE:
 		uprintf("Volume is in use\n");
-		FormatErr = Command;
+		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_DEVICE_IN_USE;
 		break;
 	case FCC_CANT_QUICK_FORMAT:
 		uprintf("Cannot quick format this volume\n");
-		FormatErr = Command;
+		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANT_QUICK_FORMAT;
 		break;
 	case FCC_BAD_LABEL:
 		uprintf("Bad label\n");
+		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_INVALID_LABEL;
 		break;
 	case FCC_OUTPUT:
 		uprintf("%s\n", ((PTEXTOUTPUT)Data)->Output);
 		break;
-	case FCC_CLUSTER_SIZE_TOO_SMALL:
-		uprintf("Allocation unit size is too small\n");
-		FormatErr = Command;
-		break;
 	case FCC_CLUSTER_SIZE_TOO_BIG:
-		uprintf("Allocation unit size is too big\n");
-		FormatErr = Command;
-		break;
-	case FCC_VOLUME_TOO_SMALL:
-		uprintf("Volume is too small\n");
-		FormatErr = Command;
+	case FCC_CLUSTER_SIZE_TOO_SMALL:
+		uprintf("Allocation unit size is too %s\n", FCC_CLUSTER_SIZE_TOO_BIG?"big":"small");
+		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_INVALID_CLUSTER_SIZE;
 		break;
 	case FCC_VOLUME_TOO_BIG:
-		uprintf("Volume is too big\n");
-		FormatErr = Command;
-		break;
+	case FCC_VOLUME_TOO_SMALL:
+		uprintf("Volume is too %s\n", FCC_VOLUME_TOO_BIG?"big":"small");
+		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_INVALID_VOLUME_SIZE;
 	case FCC_NO_MEDIA_IN_DRIVE:
-		uprintf("No media\n");
-		FormatErr = Command;
+		uprintf("No media in drive\n");
+		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_NO_MEDIA_IN_DRIVE;
 		break;
 	default:
 		uprintf("FormatExCallback: received unhandled command %X\n", Command);
+		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_NOT_SUPPORTED;
 		break;
 	}
-	return (FormatErr == 0);
+	return (!IS_ERROR(FormatStatus));
 }
 
 /*
@@ -594,17 +591,14 @@ static BOOL FormatDrive(char DriveLetter)
 	PF_INIT_OR_OUT(FormatEx, fmifs);
 
 	// TODO: properly set MediaType
-	FormatErr = 0;
 	GetWindowTextW(hFileSystem, wFSType, ARRAYSIZE(wFSType));
 	GetWindowTextW(hLabel, wLabel, ARRAYSIZE(wLabel));
 	// TODO set sector size
 	pfFormatEx(wDriveRoot, RemovableMedia, wFSType, wLabel,
 		IsChecked(IDC_QUICKFORMAT), 4096, FormatExCallback);
-	if (FormatErr == 0) {
+	if (!IS_ERROR(FormatStatus)) {
 		uprintf("Format completed.\n");
 		r = TRUE;
-	} else {
-		uprintf("Format error: 0x%02x\n", FormatErr);
 	}
 
 out:
@@ -623,14 +617,14 @@ static void __cdecl FormatThread(void* param)
 	int i;
 
 	if (!GetDriveHandle(num, &hDrive, NULL, TRUE)) {
-		// TODO: use FormatErr to report an error
+		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_OPEN_FAILED;
 		goto out;
 	}
 
 	r = CreatePartition(hDrive);
 	safe_closehandle(hDrive);
 	if (!r) {
-		// TODO: use FormatErr to report an error
+		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_PARTITION_FAILURE;
 		goto out;
 	}
 
@@ -643,12 +637,14 @@ static void __cdecl FormatThread(void* param)
 	}
 	if (i >= 10) {
 		uprintf("Unable to reopen drive post partitioning\n");
-		// TODO: use FormatErr to report an error
+		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_OPEN_FAILED;
 		goto out;
 	}
 	safe_closehandle(hDrive);
 
 	if (!FormatDrive(drive_name[0])) {
+		// Error will be set by FormatDrive() in FormatStatus
+		uprintf("Format error: 0x%08X\n", FormatStatus);
 		goto out;
 	}
 
@@ -855,13 +851,12 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		case IDOK:			// close application
 		case IDCANCEL:
 			if (format_thid != -1L) {
-				// TODO: destroy MessageBox if operation completed while waiting
 				if (MessageBoxA(hMainDialog, "Cancelling may leave the device in an UNUSABLE state.\r\n"
 					"If you are sure you want to cancel, click YES. Otherwise, click NO.",
-					"Do you want to cancel?", MB_YESNO|MB_ICONWARNING) == IDYES) {
-					// Operation may have completed
+					RUFUS_CANCELBOX_TITLE, MB_YESNO|MB_ICONWARNING) == IDYES) {
+					// Operation may have completed in the meantime
 					if (format_thid != -1L) {
-						FormatErr = -1;
+						FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANCELLED;
 						StatusPrintf("Cancelling - please wait...");
 					}
 				}
@@ -886,7 +881,6 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			}
 			break;
 		case IDC_START:
-			// TODO: disable all controls and replace Close with Cancel
 			if (format_thid != -1L) {
 				return (INT_PTR)TRUE;
 			}
@@ -904,10 +898,12 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 						SendMessage(hProgress, PBM_SETMARQUEE, TRUE, 0);
 					}
 					DeviceNum =  (DWORD)ComboBox_GetItemData(hDeviceList, nDeviceIndex);
+					FormatStatus = 0;
 					format_thid = _beginthread(FormatThread, 0, (void*)(uintptr_t)DeviceNum);
 					if (format_thid == -1L) {
-						// TODO: handle error
 						uprintf("Unable to start formatting thread");
+						FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANT_START_THREAD;
+						PostMessage(hMainDialog, UM_FORMAT_COMPLETED, 0, 0);
 					}
 				}
 			}
@@ -930,6 +926,8 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 
 	case UM_FORMAT_COMPLETED:
 		format_thid = -1L;
+		// Close the cancel MessageBox if active
+		SendMessage(FindWindowA(MAKEINTRESOURCEA(32770), RUFUS_CANCELBOX_TITLE), WM_COMMAND, IDNO, 0);
 		if (IsChecked(IDC_QUICKFORMAT)) {
 			SendMessage(hProgress, PBM_SETMARQUEE, FALSE, 0);
 			SetWindowLongPtr(hProgress, GWL_STYLE, ProgressStyle);
@@ -938,9 +936,9 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			SendMessage(hProgress, PBM_SETPOS, 101, 0);
 			SendMessage(hProgress, PBM_SETRANGE, 0, 100<<16);
 		}
-		SendMessage(hProgress, PBM_SETPOS, FormatErr?0:100, 0);
-		// TODO: report cancelled status
-		StatusPrintf(FormatErr?"FAILED":"DONE");
+		SendMessage(hProgress, PBM_SETPOS, FormatStatus?0:100, 0);
+		StatusPrintf(!IS_ERROR(FormatStatus)?"DONE":
+			((SCODE_CODE(FormatStatus)==ERROR_CANCELLED)?"Cancelled":"FAILED"));
 		EnableControls(TRUE);
 		return (INT_PTR)TRUE;
 	}
