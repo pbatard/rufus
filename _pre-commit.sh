@@ -47,6 +47,8 @@ git add ./rufus.h
 #sed -f cmd.sed _bm.sh > _bm.sh~
 #mv _bm.sh~ _bm.sh
 
+rm cmd.sed
+
 # TODO?: use the following in post-commit to setup a tag every 10 commits
 #if [ "${TAGVER:${#TAGVER}-1:1}" == '0' ]; then
 #	echo "  commit #${TAGVER:${#TAGVER}-1:1}";
