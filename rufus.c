@@ -81,7 +81,7 @@ struct {
 	enum _FSType FSType;
 } SelectedDrive;
 
-static HWND hDeviceList, hCapacity, hFileSystem, hLabel;
+static HWND hDeviceList, hCapacity, hFileSystem, hClusterSize, hLabel;
 static HWND hDeviceTooltip = NULL, hFSTooltip = NULL;
 static StrArray DriveID, DriveLabel;
 static DWORD FormatStatus;
@@ -246,6 +246,34 @@ static BOOL GetDriveLabel(DWORD DriveIndex, char* letter, char** label)
 	return TRUE;
 }
 
+static void SetClusterSizes(enum _FSType FSType)
+{
+	IGNORE_RETVAL(ComboBox_ResetContent(hClusterSize));
+	// Don't ask me - just following the MS standard here
+	IGNORE_RETVAL(ComboBox_SetItemData(hClusterSize, ComboBox_AddStringU(hClusterSize, "Default allocation size"), 0x8000));
+	// TODO set value above according to FS selected and default cluster sizes from
+	// http://support.microsoft.com/kb/140365
+	IGNORE_RETVAL(ComboBox_SetItemData(hClusterSize, ComboBox_AddStringU(hClusterSize, "512 bytes"), 0x200));
+	IGNORE_RETVAL(ComboBox_SetItemData(hClusterSize, ComboBox_AddStringU(hClusterSize, "1024 bytes"), 0x400));
+	IGNORE_RETVAL(ComboBox_SetItemData(hClusterSize, ComboBox_AddStringU(hClusterSize, "2048 bytes"), 0x800));
+	IGNORE_RETVAL(ComboBox_SetItemData(hClusterSize, ComboBox_AddStringU(hClusterSize, "4096 bytes"), 0x1000));
+	IGNORE_RETVAL(ComboBox_SetItemData(hClusterSize, ComboBox_AddStringU(hClusterSize, "8192 bytes"), 0x2000));
+	IGNORE_RETVAL(ComboBox_SetItemData(hClusterSize, ComboBox_AddStringU(hClusterSize, "16 kilobytes"), 0x4000));
+	IGNORE_RETVAL(ComboBox_SetItemData(hClusterSize, ComboBox_AddStringU(hClusterSize, "32 kilobytes"), 0x8000));
+	IGNORE_RETVAL(ComboBox_SetItemData(hClusterSize, ComboBox_AddStringU(hClusterSize, "64 kilobytes"), 0x10000));
+	IGNORE_RETVAL(ComboBox_SetItemData(hClusterSize, ComboBox_AddStringU(hClusterSize, "128 kilobytes"), 0x20000));
+	IGNORE_RETVAL(ComboBox_SetItemData(hClusterSize, ComboBox_AddStringU(hClusterSize, "256 kilobytes"), 0x40000));
+	IGNORE_RETVAL(ComboBox_SetItemData(hClusterSize, ComboBox_AddStringU(hClusterSize, "512 kilobytes"), 0x80000));
+	IGNORE_RETVAL(ComboBox_SetItemData(hClusterSize, ComboBox_AddStringU(hClusterSize, "1024 kilobytes"), 0x100000));
+	IGNORE_RETVAL(ComboBox_SetItemData(hClusterSize, ComboBox_AddStringU(hClusterSize, "2048 kilobytes"), 0x200000));
+	IGNORE_RETVAL(ComboBox_SetItemData(hClusterSize, ComboBox_AddStringU(hClusterSize, "4096 kilobytes"), 0x400000));
+	IGNORE_RETVAL(ComboBox_SetItemData(hClusterSize, ComboBox_AddStringU(hClusterSize, "8192 kilobytes"), 0x800000));
+	IGNORE_RETVAL(ComboBox_SetItemData(hClusterSize, ComboBox_AddStringU(hClusterSize, "16 megabytes"), 0x1000000));
+	IGNORE_RETVAL(ComboBox_SetItemData(hClusterSize, ComboBox_AddStringU(hClusterSize, "32 megabytes"), 0x2000000));
+	// TODO set value according to disk props
+	IGNORE_RETVAL(ComboBox_SetCurSel(hClusterSize, 0));
+}
+
 /*
  * Fill the drive properties (size, FS, etc)
  */
@@ -337,6 +365,7 @@ static BOOL GetDriveInfo(void)
 			SelectedDrive.FSType = FS_DEFAULT;
 	}
 	IGNORE_RETVAL(ComboBox_SetCurSel(hFileSystem, SelectedDrive.FSType));
+	SetClusterSizes(SelectedDrive.FSType);
 
 	return TRUE;
 }
@@ -354,6 +383,7 @@ static BOOL PopulateProperties(int ComboIndex)
 
 	IGNORE_RETVAL(ComboBox_ResetContent(hCapacity));
 	IGNORE_RETVAL(ComboBox_ResetContent(hFileSystem));
+	IGNORE_RETVAL(ComboBox_ResetContent(hClusterSize));
 	SetWindowTextA(hLabel, "");
 	DestroyTooltip(hDeviceTooltip);
 	DestroyTooltip(hFSTooltip);
@@ -556,7 +586,7 @@ static BOOLEAN __stdcall FormatExCallback(FILE_SYSTEM_CALLBACK_COMMAND Command, 
 		break;
 	case FCC_CLUSTER_SIZE_TOO_BIG:
 	case FCC_CLUSTER_SIZE_TOO_SMALL:
-		uprintf("Allocation unit size is too %s\n", FCC_CLUSTER_SIZE_TOO_BIG?"big":"small");
+		uprintf("Unsupported cluster size\n");
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_INVALID_CLUSTER_SIZE;
 		break;
 	case FCC_VOLUME_TOO_BIG:
@@ -593,9 +623,9 @@ static BOOL FormatDrive(char DriveLetter)
 	// TODO: properly set MediaType
 	GetWindowTextW(hFileSystem, wFSType, ARRAYSIZE(wFSType));
 	GetWindowTextW(hLabel, wLabel, ARRAYSIZE(wLabel));
-	// TODO set sector size
+	uprintf("Using cluster size: %d bytes\n", ComboBox_GetItemData(hClusterSize, ComboBox_GetCurSel(hClusterSize)));
 	pfFormatEx(wDriveRoot, RemovableMedia, wFSType, wLabel,
-		IsChecked(IDC_QUICKFORMAT), 4096, FormatExCallback);
+		IsChecked(IDC_QUICKFORMAT), ComboBox_GetItemData(hClusterSize, ComboBox_GetCurSel(hClusterSize)), FormatExCallback);
 	if (!IS_ERROR(FormatStatus)) {
 		uprintf("Format completed.\n");
 		r = TRUE;
@@ -813,6 +843,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		hDeviceList = GetDlgItem(hDlg, IDC_DEVICE);
 		hCapacity = GetDlgItem(hDlg, IDC_CAPACITY);
 		hFileSystem = GetDlgItem(hDlg, IDC_FILESYSTEM);
+		hClusterSize = GetDlgItem(hDlg, IDC_CLUSTERSIZE);
 		hLabel = GetDlgItem(hDlg, IDC_LABEL);
 		hProgress = GetDlgItem(hDlg, IDC_PROGRESS);
 		// High DPI scaling

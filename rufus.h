@@ -21,7 +21,7 @@
 
 #define RUFUS_DEBUG
 
-#define APP_VERSION                 "Rufus v1.0.0.41"
+#define APP_VERSION                 "Rufus v1.0.0.42"
 #define STR_NO_LABEL                "NO_LABEL"
 #define RUFUS_CANCELBOX_TITLE       "Rufus - Cancellation"
 #define DRIVE_INDEX_MIN             0x80

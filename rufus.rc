@@ -41,7 +41,7 @@ BEGIN
     LTEXT           "&File system",IDC_STATIC,17,65,51,10
     COMBOBOX        IDC_CAPACITY,16,47,190,30,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
     LTEXT           "Ca&pacity",IDC_STATIC,17,36,29,8
-    COMBOBOX        IDC_ALLOCSIZE,16,105,190,30,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_CLUSTERSIZE,16,105,190,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     LTEXT           "&Allocation unit size",IDC_STATIC,17,94,105,10
     PUSHBUTTON      "About...",IDC_ABOUT,16,224,50,14
     GROUPBOX        "Format Options",IDC_STATIC,15,150,189,40
@@ -63,7 +63,7 @@ BEGIN
     DEFPUSHBUTTON   "OK",IDOK,231,175,50,14,WS_GROUP
     CONTROL         "<a href=""https://github.com/pbatard/rufus/wiki/Rufus"">https://github.com/pbatard/rufus</a>",IDC_ABOUT_RUFUS_URL,
                     "SysLink",WS_TABSTOP,46,47,114,9
-    LTEXT           "Version 1.0.0 (Build 41)",IDC_STATIC,46,19,78,8
+    LTEXT           "Version 1.0.0 (Build 42)",IDC_STATIC,46,19,78,8
     PUSHBUTTON      "License...",IDC_ABOUT_LICENSE,46,175,50,14,WS_GROUP
     EDITTEXT        IDC_ABOUT_COPYRIGHTS,46,107,235,63,ES_MULTILINE | ES_READONLY | WS_VSCROLL
     LTEXT           "Report bugs or request enhancements at:",IDC_STATIC,46,66,187,8
@@ -162,8 +162,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,0,0,41
- PRODUCTVERSION 1,0,0,41
+ FILEVERSION 1,0,0,42
+ PRODUCTVERSION 1,0,0,42
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -180,13 +180,13 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "akeo.ie"
             VALUE "FileDescription", "Rufus"
-            VALUE "FileVersion", "1.0.0.41"
+            VALUE "FileVersion", "1.0.0.42"
             VALUE "InternalName", "Rufus"
             VALUE "LegalCopyright", "© 2011 Pete Batard (GPL v3)"
             VALUE "LegalTrademarks", "http://www.gnu.org/copyleft/gpl.html"
             VALUE "OriginalFilename", "rufus.exe"
             VALUE "ProductName", "Rufus"
-            VALUE "ProductVersion", "1.0.0.41"
+            VALUE "ProductVersion", "1.0.0.42"
         END
     END
     BLOCK "VarFileInfo"

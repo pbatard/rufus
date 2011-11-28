@@ -11,7 +11,7 @@
 #define IDC_FILESYSTEM                  1002
 #define IDC_START                       1003
 #define IDC_CAPACITY                    1004
-#define IDC_ALLOCSIZE                   1005
+#define IDC_CLUSTERSIZE                 1005
 #define IDC_STATUS                      1006
 #define IDC_ABOUT                       1007
 #define IDC_LABEL                       1008
