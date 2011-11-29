@@ -15,13 +15,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include <Windows.h>
 #include <winioctl.h>				// for MEDIA_TYPE
 
 #pragma once
 
 #define RUFUS_DEBUG
 
-#define APP_VERSION                 "Rufus v1.0.0.43"
+#define APP_VERSION                 "Rufus v1.0.0.44"
 #define STR_NO_LABEL                "NO_LABEL"
 #define RUFUS_CANCELBOX_TITLE       "Rufus - Cancellation"
 #define DRIVE_INDEX_MIN             0x80
@@ -52,6 +53,7 @@
 #define safe_stricmp(str1, str2) _stricmp(((str1==NULL)?"<NULL>":str1), ((str2==NULL)?"<NULL>":str2))
 #define safe_strncmp(str1, str2, count) strncmp(((str1==NULL)?"<NULL>":str1), ((str2==NULL)?"<NULL>":str2), count)
 #define safe_closehandle(h) do {if (h != INVALID_HANDLE_VALUE) {CloseHandle(h); h = INVALID_HANDLE_VALUE;}} while(0)
+#define safe_unlockclose(h) do {if (h != INVALID_HANDLE_VALUE) {UnlockDrive(h); CloseHandle(h); h = INVALID_HANDLE_VALUE;}} while(0)
 #define safe_sprintf _snprintf
 #define safe_strlen(str) ((((char*)str)==NULL)?0:strlen(str))
 #define safe_strdup _strdup
@@ -193,7 +195,7 @@ typedef BOOLEAN (__stdcall *FILE_SYSTEM_CALLBACK)(
 	PVOID                        Data
 );
 
-/* Parameter naming aligned to
+/* Parameter names aligned to
    http://msdn.microsoft.com/en-us/library/windows/desktop/aa819439.aspx */
 typedef VOID (WINAPI *FormatEx_t)(
 	WCHAR*               DriveRoot,
