@@ -954,6 +954,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	int nDeviceIndex;
 	DWORD DeviceNum;
 	char str[MAX_PATH], tmp[128];
+	static char app_version[32];
 	static uintptr_t format_thid = -1L;
 	static HWND hProgress;
 	static LONG ProgressStyle = 0;
@@ -983,7 +984,8 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		// Create the status line
 		CreateStatusBar();
 		// Display the version in the right area of the status bar
-		SendMessageA(GetDlgItem(hDlg, IDC_STATUS), SB_SETTEXTA, SBT_OWNERDRAW | 1, (LPARAM)APP_VERSION);
+		LoadStringA(hMainInstance, IDS_VERSION, app_version, sizeof(app_version));
+		SendMessageA(GetDlgItem(hDlg, IDC_STATUS), SB_SETTEXTA, SBT_OWNERDRAW | 1, (LPARAM)app_version);
 		// We'll switch the progressbar to marquee and back => keep a copy of current style
 		ProgressStyle = GetWindowLong(hProgress, GWL_STYLE);
 		// Create the string array
@@ -1002,7 +1004,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			SetTextColor(pDI->hDC, GetSysColor(COLOR_3DSHADOW));
 			pDI->rcItem.top += (int)(2.0f * fScale);
 			pDI->rcItem.left += (int)(4.0f * fScale);
-			DrawTextExA(pDI->hDC, APP_VERSION, -1, &pDI->rcItem, DT_LEFT, NULL);
+			DrawTextExA(pDI->hDC, app_version, -1, &pDI->rcItem, DT_LEFT, NULL);
 			return (INT_PTR)TRUE;
 		}
 		break;

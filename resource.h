@@ -7,6 +7,7 @@
 #define IDD_ABOUTBOX                    103
 #define IDD_NOTIFICATION                104
 #define IDD_LICENSE                     105
+#define IDS_VERSION                     106
 #define IDC_DEVICE                      1001
 #define IDC_FILESYSTEM                  1002
 #define IDC_START                       1003
@@ -34,7 +35,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NO_MFC                     1
-#define _APS_NEXT_RESOURCE_VALUE        106
+#define _APS_NEXT_RESOURCE_VALUE        107
 #define _APS_NEXT_COMMAND_VALUE         40001
 #define _APS_NEXT_CONTROL_VALUE         1043
 #define _APS_NEXT_SYMED_VALUE           101

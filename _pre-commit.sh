@@ -39,14 +39,10 @@ mv cmd.sed~ cmd.sed
 # Run sed to update the nano version
 # NB: we need to run git add else the modified files may be ignored
 sed -f cmd.sed ./rufus.rc > ./rufus.rc~
-# MinGW's sed has the bad habit of eating CRLFs
+# MinGW's sed has the bad habit of eating CRLFs - make sure we keep 'em
 sed 's/$/\r/' ./rufus.rc~ > ./rufus.rc
 rm ./rufus.rc~
 git add ./rufus.rc
-sed -f cmd.sed ./rufus.h > ./rufus.h~
-sed 's/$/\r/' ./rufus.h~ > ./rufus.h
-rm ./rufus.h~
-git add ./rufus.h
 #sed -f cmd.sed _bm.sh > _bm.sh~
 #mv _bm.sh~ _bm.sh
 
