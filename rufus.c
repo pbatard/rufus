@@ -37,6 +37,7 @@
 #include <winioctl.h>
 #include <process.h>
 #include <dbt.h>
+#include <io.h>
 
 // http://git.kernel.org/?p=fs/ext2/e2fsprogs.git;a=blob;f=misc/badblocks.c
 // http://ms-sys.sourceforge.net/
@@ -47,6 +48,9 @@
 #include "resource.h"
 #include "rufus.h"
 #include "sys_types.h"
+#include "br.h"
+#include "fat32.h"
+#include "file.h"
 
 #if !defined(GUID_DEVINTERFACE_DISK)
 const GUID GUID_DEVINTERFACE_DISK = { 0x53f56307L, 0xb6bf, 0x11d0, {0x94, 0xf2, 0x00, 0xa0, 0xc9, 0x1e, 0xfb, 0x8b} };
@@ -110,8 +114,38 @@ void _uprintf(const char *format, ...)
 }
 #endif
 
+void DumpBufferHex(unsigned char *buffer, size_t size)
+{
+	size_t i, j, k, pos;
+	char line[80] = "";
 
-void StatusPrintf(const char *format, ...)
+	for (i=0, pos=0; i<size; i+=16) {
+		uprintf("%s\n", line);
+		line[0] = 0;
+		sprintf(&line[strlen(line)], "  %08x  ", i);
+		for(j=0,k=0; k<16; j++,k++) {
+			if (i+j < size) {
+				sprintf(&line[strlen(line)], "%02x", buffer[i+j]);
+			} else {
+				sprintf(&line[strlen(line)], "  ");
+			}
+			sprintf(&line[strlen(line)], " ");
+		}
+		sprintf(&line[strlen(line)], " ");
+		for(j=0,k=0; k<16; j++,k++) {
+			if (i+j < size) {
+				if ((buffer[i+j] < 32) || (buffer[i+j] > 126)) {
+					sprintf(&line[strlen(line)], ".");
+				} else {
+					sprintf(&line[strlen(line)], "%c", buffer[i+j]);
+				}
+			}
+		}
+	}
+	uprintf("%s\n", line);
+}
+
+void PrintStatus(const char *format, ...)
 {
 	char buf[256], *p = buf;
 	va_list args;
@@ -146,81 +180,104 @@ static const char* GetPartitionType(BYTE Type)
 }
 
 /*
- * Open a drive with optional write access - return a drive HANDLE and the drive letter
+ * Open a drive with optional write access - returns a drive HANDLE and the drive letter
+ * or INVALID_HANDLE_VALUE (/!\ which is != NULL /!\) on failure
  * This call is quite risky (left unchecked, inadvertently passing 0 as index would
  * return a handle to C:, which we might then proceed to unknowingly repartition!),
  * so we apply the following mitigation factors:
  * - Valid indexes must belong to a specific range [DRIVE_INDEX_MIN; DRIVE_INDEX_MAX]
  * - When opening for write access, we lock the volume. If that fails, which would
- *   typically be the case on C:\ or any other drive in use, we fail the call
+ *   typically be the case on C:\ or any other drive in use, we report failure
  * - We report the full path of any drive that was successfully opened for write acces
  */
-static BOOL GetDriveHandle(DWORD DriveIndex, HANDLE* hDrive, char* DriveLetter, BOOL bWriteAccess)
+static HANDLE GetDriveHandle(DWORD DriveIndex, char* DriveLetter, BOOL bWriteAccess, BOOL bLockDrive)
 {
 	BOOL r;
 	DWORD size;
+	HANDLE hDrive = INVALID_HANDLE_VALUE;
 	STORAGE_DEVICE_NUMBER_REDEF device_number = {0};
 	char drives[26*4];	/* "D:\", "E:\", etc. */
 	char *drive = drives;
-	char drive_name[] = "\\\\.\\#:";
+	char logical_drive[] = "\\\\.\\#:";
+	char physical_drive[24];
 
 	if ((DriveIndex < DRIVE_INDEX_MIN) || (DriveIndex > DRIVE_INDEX_MAX)) {
-		uprintf("WARNING: Bad index value. Please check your code!\n");
+		uprintf("WARNING: Bad index value. Please check the code!\n");
 	}
 	DriveIndex -= DRIVE_INDEX_MIN;
 
-	size = GetLogicalDriveStringsA(sizeof(drives), drives);
-	if (size == 0) {
-		uprintf("GetLogicalDriveStrings failed: %s\n", WindowsErrorString());
-		return FALSE;
-	}
-	if (size > sizeof(drives)) {
-		uprintf("GetLogicalDriveStrings: buffer too small (required %d vs %d)\n", size, sizeof(drives));
-		return FALSE;
-	}
-
-	*hDrive = INVALID_HANDLE_VALUE;
-	for ( ;*drive; drive += safe_strlen(drive)+1) {
-		if (!isalpha(*drive))
-			continue;
-		*drive = (char)toupper((int)*drive);
-		if (*drive < 'C') {
-			continue;
-		}
-		safe_sprintf(drive_name, sizeof(drive_name), "\\\\.\\%c:", drive[0]);
-		*hDrive = CreateFileA(drive_name, GENERIC_READ|(bWriteAccess?GENERIC_WRITE:0),
+	// If no drive letter is requested, open a phyical drive
+	if (DriveLetter == NULL) {
+		safe_sprintf(physical_drive, sizeof(physical_drive), "\\\\.\\PHYSICALDRIVE%d", DriveIndex);
+		hDrive = CreateFileA(physical_drive, GENERIC_READ|(bWriteAccess?GENERIC_WRITE:0),
 			FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, 0);
 		if (hDrive == INVALID_HANDLE_VALUE) {
-			uprintf("Could not open drive %c: %s\n", drive[0], WindowsErrorString());
-			continue;
+			uprintf("Could not open drive %s: %s\n", physical_drive, WindowsErrorString());
+			goto out;
+		}
+		if (bWriteAccess) {
+			uprintf("Caution: Opened %s drive for write access\n", physical_drive);
+		}
+	} else {
+		*DriveLetter = ' ';
+		size = GetLogicalDriveStringsA(sizeof(drives), drives);
+		if (size == 0) {
+			uprintf("GetLogicalDriveStrings failed: %s\n", WindowsErrorString());
+			goto out;
+		}
+		if (size > sizeof(drives)) {
+			uprintf("GetLogicalDriveStrings: buffer too small (required %d vs %d)\n", size, sizeof(drives));
+			goto out;
 		}
 
-		r = DeviceIoControl(*hDrive, IOCTL_STORAGE_GET_DEVICE_NUMBER, NULL,
-			0, &device_number, sizeof(device_number), &size, NULL);
-		if ((!r) || (size <= 0)) {
-			uprintf("IOCTL_STORAGE_GET_DEVICE_NUMBER (GetDriveHandle) failed: %s\n", WindowsErrorString());
-			safe_closehandle(*hDrive);
-			break;
-		}
-		if (device_number.DeviceNumber == DriveIndex) {
-			if (bWriteAccess) {
-				if (!DeviceIoControl(*hDrive, FSCTL_LOCK_VOLUME, NULL, 0, NULL, 0, &size, NULL)) {
-					uprintf("Could not get exclusive access to %s: %s\n", drive_name, WindowsErrorString());
-					safe_closehandle(*hDrive);
-					return FALSE;
-				}
-				uprintf("Caution: Opened %s drive for write access\n", drive_name);
+		hDrive = INVALID_HANDLE_VALUE;
+		for ( ;*drive; drive += safe_strlen(drive)+1) {
+			if (!isalpha(*drive))
+				continue;
+			*drive = (char)toupper((int)*drive);
+			if (*drive < 'C') {
+				continue;
 			}
-			break;
-		}
-		safe_closehandle(*hDrive);
-	}
+			safe_sprintf(logical_drive, sizeof(logical_drive), "\\\\.\\%c:", drive[0]);
+			hDrive = CreateFileA(logical_drive, GENERIC_READ|(bWriteAccess?GENERIC_WRITE:0),
+				FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, 0);
+			if (hDrive == INVALID_HANDLE_VALUE) {
+				uprintf("Warning: could not open drive %c: %s\n", drive[0], WindowsErrorString());
+				continue;
+			}
 
-	if (DriveLetter != NULL) {
+			r = DeviceIoControl(hDrive, IOCTL_STORAGE_GET_DEVICE_NUMBER, NULL,
+				0, &device_number, sizeof(device_number), &size, NULL);
+			if ((!r) || (size <= 0)) {
+				uprintf("IOCTL_STORAGE_GET_DEVICE_NUMBER failed for device %s: %s\n", logical_drive, WindowsErrorString());
+			} else if (device_number.DeviceNumber == DriveIndex) {
+				break;
+			}
+			safe_closehandle(hDrive);
+		}
+		if (hDrive == INVALID_HANDLE_VALUE) {
+			goto out;
+		}
+		if (bWriteAccess) {
+			uprintf("Caution: Opened %s drive for write access\n", logical_drive);
+		}
 		*DriveLetter = *drive?*drive:' ';
 	}
 
-	return (*hDrive != INVALID_HANDLE_VALUE);
+	if ((bLockDrive) && (!DeviceIoControl(hDrive, FSCTL_LOCK_VOLUME, NULL, 0, NULL, 0, &size, NULL))) {
+		uprintf("Could not get exclusive access to %s: %s\n", logical_drive, WindowsErrorString());
+		safe_closehandle(hDrive);
+		goto out;
+	}
+
+out:
+	return hDrive;
+}
+
+static __inline BOOL UnlockDrive(HANDLE hDrive)
+{
+	DWORD size;
+	return DeviceIoControl(hDrive, FSCTL_UNLOCK_VOLUME, NULL, 0, NULL, 0, &size, NULL);
 }
 
 /*
@@ -234,7 +291,8 @@ static BOOL GetDriveLabel(DWORD DriveIndex, char* letter, char** label)
 
 	*label = STR_NO_LABEL;
 
-	if (!GetDriveHandle(DriveIndex, &hDrive, DrivePath, FALSE))
+	hDrive = GetDriveHandle(DriveIndex, DrivePath, FALSE, FALSE);
+	if (hDrive == INVALID_HANDLE_VALUE)
 		return FALSE;
 	safe_closehandle(hDrive);
 	*letter = DrivePath[0];
@@ -250,7 +308,7 @@ static void SetClusterSizes(enum _FSType FSType)
 {
 	IGNORE_RETVAL(ComboBox_ResetContent(hClusterSize));
 	// Don't ask me - just following the MS standard here
-	IGNORE_RETVAL(ComboBox_SetItemData(hClusterSize, ComboBox_AddStringU(hClusterSize, "Default allocation size"), 0x8000));
+	IGNORE_RETVAL(ComboBox_SetItemData(hClusterSize, ComboBox_AddStringU(hClusterSize, "Default allocation size"), 0x1000));
 	// TODO set value above according to FS selected and default cluster sizes from
 	// http://support.microsoft.com/kb/140365
 	IGNORE_RETVAL(ComboBox_SetItemData(hClusterSize, ComboBox_AddStringU(hClusterSize, "512 bytes"), 0x200));
@@ -292,7 +350,8 @@ static BOOL GetDriveInfo(void)
 
 	SelectedDrive.DiskSize = 0;
 
-	if (!GetDriveHandle(SelectedDrive.DeviceNumber, &hDrive, DrivePath, FALSE))
+	hDrive = GetDriveHandle(SelectedDrive.DeviceNumber, DrivePath, FALSE, FALSE);
+	if (hDrive == INVALID_HANDLE_VALUE)
 		return FALSE;
 
 	r = DeviceIoControl(hDrive, IOCTL_DISK_GET_DRIVE_GEOMETRY_EX, 
@@ -436,54 +495,6 @@ static BOOL PopulateProperties(int ComboIndex)
 	return TRUE;
 }
 
-static BOOL WriteSectors(HANDLE hDrive, size_t SectorSize, size_t StartSector, size_t nSectors, void* Buf, size_t BufSize)
-{
-	LARGE_INTEGER ptr;
-	DWORD Size;
-
-	if (SectorSize * nSectors > BufSize) {
-		uprintf("WriteSectors: Buffer is too small\n");
-		return FALSE;
-	}
-
-	ptr.QuadPart = StartSector*SectorSize;
-	if (!SetFilePointerEx(hDrive, ptr, NULL, FILE_BEGIN)) {
-		uprintf("WriteSectors: Could not access sector %lld - %s\n", StartSector, WindowsErrorString());
-		return FALSE;
-	}
-
-	if ((!WriteFile(hDrive, Buf, (DWORD)BufSize, &Size, NULL)) || (Size != BufSize)) {
-		uprintf("WriteSectors: Write error - %s\n", WindowsErrorString());
-		return FALSE;
-	}
-
-	return TRUE;
-}
-
-static BOOL ReadSectors(HANDLE hDrive, size_t SectorSize, size_t StartSector, size_t nSectors, void* Buf, size_t BufSize)
-{
-	LARGE_INTEGER ptr;
-	DWORD size;
-
-	if (SectorSize * nSectors > BufSize) {
-		uprintf("ReadSectors: Buffer is too small\n");
-		return FALSE;
-	}
-
-	ptr.QuadPart = StartSector*SectorSize;
-	if (!SetFilePointerEx(hDrive, ptr, NULL, FILE_BEGIN)) {
-		uprintf("ReadSectors: Could not access sector %lld - %s\n", StartSector, WindowsErrorString());
-		return FALSE;
-	}
-
-	if ((!ReadFile(hDrive, Buf, (DWORD)BufSize, &size, NULL)) || (size != BufSize)) {
-		uprintf("ReadSectors: Write error - %s\n", WindowsErrorString());
-		return FALSE;
-	}
-
-	return TRUE;
-}
-
 /*
  * Create a partition table
  */
@@ -494,7 +505,7 @@ static BOOL CreatePartition(HANDLE hDrive)
 	BOOL r;
 	DWORD size;
 
-	StatusPrintf("Partitioning...");
+	PrintStatus("Partitioning...");
 	DriveLayoutEx->PartitionStyle = PARTITION_STYLE_MBR;
 	DriveLayoutEx->PartitionCount = 4;	// Must be multiple of 4 for MBR
 	DriveLayoutEx->Mbr.Signature = GetTickCount();
@@ -508,13 +519,13 @@ static BOOL CreatePartition(HANDLE hDrive)
 	DriveLayoutEx->PartitionEntry[0].Mbr.HiddenSectors = SelectedDrive.Geometry.SectorsPerTrack;
 	switch (ComboBox_GetCurSel(hFileSystem)) {
 	case FS_FAT16:
-		DriveLayoutEx->PartitionEntry[0].Mbr.PartitionType = 0x0e;
+		DriveLayoutEx->PartitionEntry[0].Mbr.PartitionType = 0x0e;	// FAT16 LBA
 		break;
 	case FS_NTFS:
-		DriveLayoutEx->PartitionEntry[0].Mbr.PartitionType = 0x07;
+		DriveLayoutEx->PartitionEntry[0].Mbr.PartitionType = 0x07;	// NTFS
 		break;
 	default:
-		DriveLayoutEx->PartitionEntry[0].Mbr.PartitionType = 0x0c;
+		DriveLayoutEx->PartitionEntry[0].Mbr.PartitionType = 0x0c;	// FAT32 LBA
 		break;
 	}
 	// For the remaining partitions, PartitionStyle & PartitionType have already
@@ -617,7 +628,7 @@ static BOOL FormatDrive(char DriveLetter)
 	WCHAR wLabel[128];
 
 	wDriveRoot[0] = (WCHAR)DriveLetter;
-	StatusPrintf("Formatting...");
+	PrintStatus("Formatting...");
 	PF_INIT_OR_OUT(FormatEx, fmifs);
 
 	// TODO: properly set MediaType
@@ -636,41 +647,125 @@ out:
 }
 
 /*
- * Create a separate thread for the formatting operation
+ * Process the MBR
+ */
+static BOOL ProcessMBR(HANDLE hPhysicalDrive)
+{
+	BOOL r = FALSE;
+	HANDLE hDrive = hPhysicalDrive;
+	FILE fake_fd;
+	unsigned char* buf;
+	size_t SecSize = SelectedDrive.Geometry.BytesPerSector;
+	size_t nSecs = 0x200/min(0x200, SelectedDrive.Geometry.BytesPerSector);
+
+	if (SecSize * nSecs != 0x200) {
+		uprintf("Seriously? A drive where sector size is not a power of 2?!?\n");
+		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_NOT_SUPPORTED;
+		goto out;
+	}
+
+	PrintStatus("Processing MBR...\n");
+
+	fake_fd._ptr = (char*)hPhysicalDrive;
+	fake_fd._bufsiz = SelectedDrive.Geometry.BytesPerSector;
+	uprintf("I'm %sa boot record\n", is_br(&fake_fd)?"":"NOT ");
+
+	// FormatEx rewrites the MBR and removes the LBA attribute of FAT16
+	// and FAT32 partitions - we need to correct this in the MBR
+	// TODO: something else for bootable GPT
+	buf = (unsigned char*)malloc(SecSize * nSecs);
+	if (buf == NULL) {
+		uprintf("Could not allocate memory for MBR");
+		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_NOT_ENOUGH_MEMORY;
+		goto out;
+	}
+
+	if (!read_sectors(hDrive, SelectedDrive.Geometry.BytesPerSector, 0, nSecs, buf, SecSize)) {
+		uprintf("Could not read MBR\n");
+		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_READ_FAULT;
+		goto out;
+	}
+	DumpBufferHex(buf, 0x200);
+	switch (ComboBox_GetCurSel(hFileSystem)) {
+	// TODO: check for 0x06 & 0x0b?
+	case FS_FAT16:
+		buf[0x1c2] = 0x0e;
+		break;
+	case FS_FAT32:
+		buf[0x1c2] = 0x0c;
+		break;
+	}
+
+	if (!write_sectors(hDrive, SelectedDrive.Geometry.BytesPerSector, 0, nSecs, buf, SecSize)) {
+		uprintf("Could not write MBR\n");
+		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_WRITE_FAULT;
+		goto out;
+	}
+
+	r = TRUE;
+
+out:
+	safe_free(buf);
+	return r;
+}
+
+/* http://msdn.microsoft.com/en-us/library/windows/desktop/aa364562%28v=vs.85%29.aspx
+   Dismounting a volume is useful when a volume needs to disappear for a while. For
+   example, an application that changes a volume file system from the FAT file system
+   to the NTFS file system might use the following procedure.
+
+   To change a volume file system
+
+    Open a volume.
+    Lock the volume.
+    Format the volume.
+    Dismount the volume.
+    Unlock the volume.
+    Close the volume handle.
+
+   A dismounting operation removes the volume from the FAT file system awareness.
+   When the operating system mounts the volume, it appears as an NTFS file system volume.
+*/
+
+/*
+ * Standalone thread for the formatting operation
  */
 static void __cdecl FormatThread(void* param)
 {
 	DWORD num = (DWORD)(uintptr_t)param;
-	HANDLE hDrive;
-	BOOL r;
+	HANDLE hPhysicalDrive = INVALID_HANDLE_VALUE;
+	HANDLE hLogicalVolume = INVALID_HANDLE_VALUE;
 	char drive_name[] = "?:";
 	int i;
+//	DWORD size;
 
-	if (!GetDriveHandle(num, &hDrive, NULL, TRUE)) {
+	hPhysicalDrive = GetDriveHandle(num, NULL, TRUE, TRUE);
+	if (hPhysicalDrive == INVALID_HANDLE_VALUE) {
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_OPEN_FAILED;
 		goto out;
 	}
+	// At this stage with have both a handle and a lock to the physical drive
 
-	r = CreatePartition(hDrive);
-	safe_closehandle(hDrive);
-	if (!r) {
+	if (!CreatePartition(hPhysicalDrive)) {
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_PARTITION_FAILURE;
 		goto out;
 	}
 
-	// Make sure we can reopen the drive before trying to format it
+	// Make sure we can access the volume again before trying to format it
 	for (i=0; i<10; i++) {
 		Sleep(500);
-		if (GetDriveHandle(num, &hDrive, drive_name, FALSE)) {
+		hLogicalVolume = GetDriveHandle(num, drive_name, FALSE, TRUE);
+		if (hLogicalVolume != INVALID_HANDLE_VALUE) {
 			break;
 		}
 	}
 	if (i >= 10) {
-		uprintf("Unable to reopen drive post partitioning\n");
+		uprintf("Could not access volume after partitioning\n");
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_OPEN_FAILED;
 		goto out;
 	}
-	safe_closehandle(hDrive);
+	// Handle needs to be closed for FormatEx to be happy - we keep a lock though
+	safe_closehandle(hLogicalVolume);
 
 	if (!FormatDrive(drive_name[0])) {
 		// Error will be set by FormatDrive() in FormatStatus
@@ -678,12 +773,47 @@ static void __cdecl FormatThread(void* param)
 		goto out;
 	}
 
+	// TODO: Enable compression on NTFS
+	// TODO: disable indexing on NTFS
+
+	// Ideally we would lock, FSCTL_DISMOUNT_VOLUME, unlock and close our volume
+	// handle, but some explorer versions have problems with volumes disappear
+// #define VOL_DISMOUNT
+#ifdef VOL_DISMOUNT
+	// Dismount the volume
+	hLogicalVolume = GetDriveHandle(num, drive_name, FALSE, TRUE);
+	if (hLogicalVolume == INVALID_HANDLE_VALUE) {
+		uprintf("Could not open the volume for dismount\n");
+		goto out;
+	}
+
+	if (!DeviceIoControl(hLogicalVolume, FSCTL_DISMOUNT_VOLUME, NULL, 0, NULL, 0, &size, NULL)) {
+		uprintf("Could not dismount volume\n");
+		goto out;
+	}
+#endif
+	if (!ProcessMBR(hPhysicalDrive)) {
+		goto out;
+	}
+
+#ifdef VOL_DISMOUNT
+	safe_unlockclose(hLogicalVolume);
+//	Sleep(10000);
+	hLogicalVolume = GetDriveHandle(num, drive_name, FALSE, FALSE);
+	if (hLogicalVolume == INVALID_HANDLE_VALUE) {
+		uprintf("Could not re-mount volume\n");
+		goto out;
+	}
+#endif
+
 	if (IsChecked(IDC_DOSSTARTUP)) {
 		// TODO: check return value & set bootblock
 		ExtractMSDOS(drive_name);
 	}
 
 out:
+	safe_unlockclose(hLogicalVolume);
+	safe_unlockclose(hPhysicalDrive);
 	PostMessage(hMainDialog, UM_FORMAT_COMPLETED, 0, 0);
 	_endthread();
 }
@@ -794,7 +924,7 @@ static BOOL GetUSBDevices(void)
 		}
 	}
 	IGNORE_RETVAL(ComboBox_SetCurSel(hDeviceList, 0));
-	PostMessage(hMainDialog, WM_COMMAND, (CBN_SELCHANGE<<16) | IDC_DEVICE, 0);
+	SendMessage(hMainDialog, WM_COMMAND, (CBN_SELCHANGE<<16) | IDC_DEVICE, 0);
 
 	return TRUE;
 }
@@ -805,7 +935,7 @@ static void EnableControls(BOOL bEnable)
 	EnableWindow(GetDlgItem(hMainDialog, IDC_DEVICE), bEnable);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_CAPACITY), bEnable);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_FILESYSTEM), bEnable);
-	EnableWindow(GetDlgItem(hMainDialog, IDC_ALLOCSIZE), bEnable);
+	EnableWindow(GetDlgItem(hMainDialog, IDC_CLUSTERSIZE), bEnable);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_LABEL), bEnable);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_QUICKFORMAT), bEnable);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_DOSSTARTUP), bEnable);
@@ -888,7 +1018,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 					// Operation may have completed in the meantime
 					if (format_thid != -1L) {
 						FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANCELLED;
-						StatusPrintf("Cancelling - please wait...");
+						PrintStatus("Cancelling - please wait...");
 					}
 				}
 				return (INT_PTR)TRUE;
@@ -905,7 +1035,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		case IDC_DEVICE:
 			switch (HIWORD(wParam)) {
 			case CBN_SELCHANGE:
-				StatusPrintf("%d device%s found.", ComboBox_GetCount(hDeviceList),
+				PrintStatus("%d device%s found.", ComboBox_GetCount(hDeviceList),
 					(ComboBox_GetCount(hDeviceList)!=1)?"s":"");
 				PopulateProperties(ComboBox_GetCurSel(hDeviceList));
 				break;
@@ -968,9 +1098,10 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			SendMessage(hProgress, PBM_SETRANGE, 0, 100<<16);
 		}
 		SendMessage(hProgress, PBM_SETPOS, FormatStatus?0:100, 0);
-		StatusPrintf(!IS_ERROR(FormatStatus)?"DONE":
-			((SCODE_CODE(FormatStatus)==ERROR_CANCELLED)?"Cancelled":"FAILED"));
 		EnableControls(TRUE);
+		GetUSBDevices();
+		PrintStatus(!IS_ERROR(FormatStatus)?"DONE":
+			((SCODE_CODE(FormatStatus)==ERROR_CANCELLED)?"Cancelled":"FAILED"));
 		return (INT_PTR)TRUE;
 	}
 	return (INT_PTR)FALSE;
