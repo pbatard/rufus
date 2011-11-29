@@ -116,13 +116,13 @@ void _uprintf(const char *format, ...)
 
 void DumpBufferHex(unsigned char *buffer, size_t size)
 {
-	size_t i, j, k, pos;
+	size_t i, j, k;
 	char line[80] = "";
 
-	for (i=0, pos=0; i<size; i+=16) {
+	for (i=0; i<size; i+=16) {
 		uprintf("%s\n", line);
 		line[0] = 0;
-		sprintf(&line[strlen(line)], "  %08x  ", i);
+		sprintf(&line[strlen(line)], "  %08x  ", (unsigned int)i);
 		for(j=0,k=0; k<16; j++,k++) {
 			if (i+j < size) {
 				sprintf(&line[strlen(line)], "%02x", buffer[i+j]);
@@ -590,7 +590,7 @@ static BOOLEAN __stdcall FormatExCallback(FILE_SYSTEM_CALLBACK_COMMAND Command, 
 		break;
 	case FCC_BAD_LABEL:
 		uprintf("Bad label\n");
-		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_INVALID_LABEL;
+		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_LABEL_TOO_LONG;
 		break;
 	case FCC_OUTPUT:
 		uprintf("%s\n", ((PTEXTOUTPUT)Data)->Output);
@@ -654,7 +654,7 @@ static BOOL ProcessMBR(HANDLE hPhysicalDrive)
 	BOOL r = FALSE;
 	HANDLE hDrive = hPhysicalDrive;
 	FILE fake_fd;
-	unsigned char* buf;
+	unsigned char* buf = NULL;
 	size_t SecSize = SelectedDrive.Geometry.BytesPerSector;
 	size_t nSecs = 0x200/min(0x200, SelectedDrive.Geometry.BytesPerSector);
 
