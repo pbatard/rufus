@@ -9,7 +9,7 @@ MSC_WARNING_LEVEL=/W3
 
 USE_MSVCRT=1
 
-INCLUDES=$(DDK_INC_PATH)
+INCLUDES=$(DDK_INC_PATH);.\inc
 C_DEFINES = $(C_DEFINES) /DDDKBUILD /DISOLATION_AWARE_ENABLED
 
 TARGETLIBS=$(SDK_LIB_PATH)\kernel32.lib \
@@ -26,4 +26,9 @@ SXS_APPLICATION_MANIFEST=common_controls_and_elevation.manifest
 SOURCES=rufus.c \
         stdlg.c \
         msdos.c \
+        file.c  \
+        br.c    \
+        fat12.c \
+        fat16.c \
+        fat32.c \
         rufus.rc
