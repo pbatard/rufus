@@ -20,7 +20,6 @@
 
 #include "file.h"
 #include "fat16.h"
-#include "fat16fd.h"
 
 int is_fat_16_fs(FILE *fp)
 {

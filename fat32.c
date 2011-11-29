@@ -20,8 +20,6 @@
 
 #include "file.h"
 #include "fat32.h"
-#include "fat32fd.h"
-#include "fat32nt.h"
 
 int is_fat_32_fs(FILE *fp)
 {

@@ -49,6 +49,7 @@
 #include "rufus.h"
 #include "sys_types.h"
 #include "br.h"
+#include "fat16.h"
 #include "fat32.h"
 #include "file.h"
 
@@ -646,14 +647,63 @@ out:
 	return r;
 }
 
+static BOOL AnalyzeMBR(HANDLE hPhysicalDrive)
+{
+	FILE fake_fd;
+
+	fake_fd._ptr = (char*)hPhysicalDrive;
+	fake_fd._bufsiz = SelectedDrive.Geometry.BytesPerSector;
+
+	// TODO: Apply this detection before partitioning
+	// TODO: since we detect all these, might as well give some MBR choice to the user?
+	if (is_br(&fake_fd)) {
+		uprintf("Drive has an x86 boot sector\n");
+	} else{
+		uprintf("Drive is missing an x86 boot sector!\n");
+		return FALSE;
+	}
+	// TODO: Add/Eliminate FAT12?
+	if (is_fat_16_br(&fake_fd) || is_fat_32_br(&fake_fd)) {
+		if (entire_fat_16_br_matches(&fake_fd)) {
+			uprintf("Exact FAT16 DOS boot record match\n");
+		} else if (entire_fat_16_fd_br_matches(&fake_fd)) {
+			uprintf("Exact FAT16 FreeDOS boot record match\n");
+		} else if (entire_fat_32_br_matches(&fake_fd)) {
+			uprintf("Exact FAT32 DOS boot record match\n");
+		} else if (entire_fat_32_nt_br_matches(&fake_fd)) {
+			uprintf("Exact FAT32 NT boot record match\n");
+		} else if (entire_fat_32_fd_br_matches(&fake_fd)) {
+			uprintf("Exactly FAT32 FreeDOS boot record match\n");
+		} else {
+			uprintf("Unknown FAT16 or FAT32 boot record\n");
+		}
+	} else if (is_dos_mbr(&fake_fd)) {
+		uprintf("Microsoft DOS/NT/95A master boot record match\n");
+	} else if (is_dos_f2_mbr(&fake_fd)) {
+		uprintf("Microsoft DOS/NT/95A master boot record with the undocumented\n");
+		uprintf("F2 instruction match\n");
+	} else if (is_95b_mbr(&fake_fd)) {
+		uprintf("Microsoft 95B/98/98SE/ME master boot record match\n");
+	} else if (is_2000_mbr(&fake_fd)) {
+		uprintf("Microsoft 2000/XP/2003 master boot record match\n");
+	} else if (is_vista_mbr(&fake_fd)) {
+		uprintf("Microsoft Vista master boot record match\n");
+	} else if (is_win7_mbr(&fake_fd)) {
+		uprintf("Microsoft 7 master boot record match\n");
+	} else if (is_zero_mbr(&fake_fd)) {
+		uprintf("Zeroed non-bootable master boot record match\n");
+	} else {
+		uprintf("Unknown boot record\n");
+	}
+	return TRUE;
+}
+
 /*
  * Process the MBR
  */
 static BOOL ProcessMBR(HANDLE hPhysicalDrive)
 {
 	BOOL r = FALSE;
-	HANDLE hDrive = hPhysicalDrive;
-	FILE fake_fd;
 	unsigned char* buf = NULL;
 	size_t SecSize = SelectedDrive.Geometry.BytesPerSector;
 	size_t nSecs = 0x200/min(0x200, SelectedDrive.Geometry.BytesPerSector);
@@ -665,10 +715,7 @@ static BOOL ProcessMBR(HANDLE hPhysicalDrive)
 	}
 
 	PrintStatus("Processing MBR...\n");
-
-	fake_fd._ptr = (char*)hPhysicalDrive;
-	fake_fd._bufsiz = SelectedDrive.Geometry.BytesPerSector;
-	uprintf("I'm %sa boot record\n", is_br(&fake_fd)?"":"NOT ");
+	if (!AnalyzeMBR(hPhysicalDrive)) return FALSE;
 
 	// FormatEx rewrites the MBR and removes the LBA attribute of FAT16
 	// and FAT32 partitions - we need to correct this in the MBR
@@ -680,7 +727,7 @@ static BOOL ProcessMBR(HANDLE hPhysicalDrive)
 		goto out;
 	}
 
-	if (!read_sectors(hDrive, SelectedDrive.Geometry.BytesPerSector, 0, nSecs, buf, SecSize)) {
+	if (!read_sectors(hPhysicalDrive, SelectedDrive.Geometry.BytesPerSector, 0, nSecs, buf, SecSize)) {
 		uprintf("Could not read MBR\n");
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_READ_FAULT;
 		goto out;
@@ -696,7 +743,7 @@ static BOOL ProcessMBR(HANDLE hPhysicalDrive)
 		break;
 	}
 
-	if (!write_sectors(hDrive, SelectedDrive.Geometry.BytesPerSector, 0, nSecs, buf, SecSize)) {
+	if (!write_sectors(hPhysicalDrive, SelectedDrive.Geometry.BytesPerSector, 0, nSecs, buf, SecSize)) {
 		uprintf("Could not write MBR\n");
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_WRITE_FAULT;
 		goto out;

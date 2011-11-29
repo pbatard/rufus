@@ -173,10 +173,7 @@
     <ClInclude Include="..\inc\br_fat32_0x52.h" />
     <ClInclude Include="..\inc\fat12.h" />
     <ClInclude Include="..\inc\fat16.h" />
-    <ClInclude Include="..\inc\fat16fd.h" />
     <ClInclude Include="..\inc\fat32.h" />
-    <ClInclude Include="..\inc\fat32fd.h" />
-    <ClInclude Include="..\inc\fat32nt.h" />
     <ClInclude Include="..\inc\file.h" />
     <ClInclude Include="..\inc\label_11_char.h" />
     <ClInclude Include="..\inc\mbr_2000.h" />

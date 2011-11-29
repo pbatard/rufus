@@ -1,6 +1,6 @@
 /******************************************************************
     Copyright (C) 2009  Henrik Carlqvist
-    Modified for Windows/Rufus (C) 2011  Pete Batard
+    Modified for Rufus/Windows (C) 2011  Pete Batard
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -106,38 +106,37 @@ int contains_data(FILE *fp, unsigned long ulPosition,
    if(memcmp(pData, &aucBuf[ulPosition - ulStartSector*ulSectorSize], uiLen))
       return 0;
    return 1;
-
-/*
-   // ONLY WORKS IN SECTORS!!!
-   ptr.QuadPart = ulPosition;
-   uprintf("HANDLE = %p\n", (HANDLE)fp);
-   if (!SetFilePointerEx((HANDLE)fp, ptr, NULL, FILE_BEGIN))
-   {
-      uprintf("Could not access byte %d - %s\n", ulPosition, WindowsErrorString());
-      return 0;
-   }
-   uprintf("SEEK to %d OK\n", WindowsErrorString());
-
-   uiLen = 512;
-   if ((!ReadFile((HANDLE)fp, aucBuf, (DWORD)uiLen, &size, NULL)) || (size != (DWORD)uiLen)) {
-      uprintf("Read error (size = %d vs %d) - %s\n", size, (DWORD)uiLen, WindowsErrorString());
-      return 0;
-   }
-
-   uiLen = 2;
-   uprintf("aucBuf[0] = %02X, aucBuf[1] = %02X\n", aucBuf[0], aucBuf[1]);
-   if(memcmp(pData, aucBuf, uiLen))
-      return 0;
-   return 1;
-*/
 } /* contains_data */
 
+/* May read/write the same sector many times, but compatible with existing ms-sys */
 int write_data(FILE *fp, unsigned long ulPosition,
                const void *pData, unsigned int uiLen)
 {
-   if(fseek(fp, ulPosition, SEEK_SET))
+   unsigned char aucBuf[MAX_DATA_LEN];
+   HANDLE hDrive = (HANDLE)fp->_ptr;
+   unsigned long ulSectorSize = (unsigned long)fp->_bufsiz;
+   unsigned long ulStartSector, ulEndSector, ulNumSectors;
+
+   ulStartSector = ulPosition/ulSectorSize;
+   ulEndSector   = (ulPosition+uiLen+ulSectorSize-1)/ulSectorSize;
+   ulNumSectors  = ulEndSector - ulStartSector;
+
+   if((ulNumSectors*ulSectorSize) > MAX_DATA_LEN)
+   {
+      uprintf("Please increase MAX_DATA_LEN in file.h\n");
       return 0;
-   if(!fwrite(pData, uiLen, 1, fp))
+   }
+
+   /* Data to write may not be aligned on a sector boundary => read into a sector buffer first */
+   if(!read_sectors(hDrive, ulSectorSize, ulStartSector,
+                     ulNumSectors, aucBuf, sizeof(aucBuf)))
+      return 0;
+
+   if(!memcpy(&aucBuf[ulPosition - ulStartSector*ulSectorSize], pData, uiLen))
+      return 0;
+
+   if(!write_sectors(hDrive, ulSectorSize, ulStartSector,
+                     ulNumSectors, aucBuf, sizeof(aucBuf)))
       return 0;
    return 1;
 } /* write_data */

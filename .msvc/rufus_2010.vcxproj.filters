@@ -110,16 +110,7 @@
     <ClInclude Include="..\inc\fat16.h">
       <Filter>Header Files\inc</Filter>
     </ClInclude>
-    <ClInclude Include="..\inc\fat16fd.h">
-      <Filter>Header Files\inc</Filter>
-    </ClInclude>
     <ClInclude Include="..\inc\fat32.h">
-      <Filter>Header Files\inc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\inc\fat32fd.h">
-      <Filter>Header Files\inc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\inc\fat32nt.h">
       <Filter>Header Files\inc</Filter>
     </ClInclude>
     <ClInclude Include="..\inc\file.h">
