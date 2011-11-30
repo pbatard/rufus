@@ -9,5 +9,6 @@
 
 type -P git &>/dev/null || { echo "git command not found. Aborting." >&2; exit 1; }
 
-TAGVER=`cat .tag`
+TAGVER=`cat ./.tag`
 git tag "#$TAGVER"
+rm ./.tag

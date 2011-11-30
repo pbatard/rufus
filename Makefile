@@ -1,23 +1,46 @@
-TARGETNAME=rufus
+#
+# This file is part of the Rufus project.
+#
+# Copyright (c) 2011 Pete Batard <pbatard@akeo.ie>
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License as
+# published by the Free Software Foundation, either version 3 of
+# the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, see <http://www.gnu.org/licenses/>.
+#
 
-CC     = gcc
-RC     = windres
-STRIP  = strip
-CFLAGS = -std=gnu99 -Wall -Wundef -Wunused -Wstrict-prototypes -Werror-implicit-function-declaration -Wno-pointer-sign -Wshadow -O2 -Wl,--subsystem,windows -DWINVER=0x501 -D_WIN32_IE=0x501
-LIBS   = -lsetupapi -lole32 -lgdi32
+OBJECTS   = fat12.o fat16.o fat32.o br.o file.o msdos.o stdlg.o rufus.o  
+TARGET    = rufus
 
-RUFUS_SRC = rufus.c stdlg.c msdos.c file.c br.c fat12.c fat16.c fat32.c
+CC        = gcc
+RC        = windres
+STRIP     = strip
+CFLAGS    = -DWINVER=0x501 -D_WIN32_IE=0x501 -I./inc -std=gnu99 -Wall -Wundef -Wunused -Wstrict-prototypes -Werror-implicit-function-declaration -Wno-pointer-sign -Wshadow
+LDFLAGS   = -O2 -Wall -Wl,--subsystem,windows
+LIBS      = -lsetupapi -lole32 -lgdi32
 
-.PHONY: all clean
+.PHONY: all clean 
 
-all: $(TARGETNAME)
+all: $(TARGET)
 
-$(TARGETNAME): $(RUFUS_SRC) $(TARGETNAME)_rc.o
+$(TARGET): $(OBJECTS) $(TARGET)_rc.o
 	@echo "[CCLD]  $@"
-	@$(CC) -I./inc -o $@ $(CFLAGS) $^ $(TARGETNAME)_rc.o $(LIBS)
-	@$(STRIP) $(TARGETNAME).exe
+	@$(CC) $(LDFLAGS) -o $@ $(OBJECTS) $(TARGET)_rc.o $(LIBS)
+	@$(STRIP) $(TARGET).exe
 
-$(TARGETNAME)_rc.o: $(TARGETNAME).rc
+%.o: %.c
+	@echo "[CC]    $@"
+	@$(CC) -c -o $*.o $(CFLAGS) $<
+
+%_rc.o: %.rc
 	@echo "[RC]    $@"
 	@$(RC) -i $< -o $@
 
