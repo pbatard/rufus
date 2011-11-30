@@ -18,9 +18,11 @@ TAGVER=`echo $VER`
 # of a .amend file in the current directory will do
 if [ -f ./.amend ]; then
 	TAGVER=`expr $TAGVER - 1`
+	git tag -d "#$TAGVER"
 	rm ./.amend;
 fi
 echo "setting nano to $TAGVER"
+echo $TAGVER > .tag
 
 cat > cmd.sed <<\_EOF
 s/^[ \t]*FILEVERSION[ \t]*\(.*\),\(.*\),\(.*\),.*/ FILEVERSION \1,\2,\3,@@TAGVER@@/
@@ -47,8 +49,3 @@ git add ./rufus.rc
 #mv _bm.sh~ _bm.sh
 
 rm cmd.sed
-
-# TODO?: use the following in post-commit to setup a tag every 10 commits
-#if [ "${TAGVER:${#TAGVER}-1:1}" == '0' ]; then
-#	echo "  commit #${TAGVER:${#TAGVER}-1:1}";
-#fi
