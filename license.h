@@ -26,7 +26,7 @@ const char* additional_copyrights =
 "http://pcunleashed.com\r\n"
 "Freeware\r\n"
 "\r\n"
-"Boot record handling by ms-sys by Henrik Carlqvist:\r\n"
+"Boot record handling from ms-sys by Henrik Carlqvist:\r\n"
 "http://ms-sys.sourceforge.net\r\n"
 "GNU General Public License (GPL) v2 or later\r\n"
 "\r\n"

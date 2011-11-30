@@ -706,13 +706,8 @@ static BOOL ProcessMBR(HANDLE hPhysicalDrive)
 	BOOL r = FALSE;
 	unsigned char* buf = NULL;
 	size_t SecSize = SelectedDrive.Geometry.BytesPerSector;
-	size_t nSecs = 0x200/min(0x200, SelectedDrive.Geometry.BytesPerSector);
-
-	if (SecSize * nSecs != 0x200) {
-		uprintf("Seriously? A drive where sector size is not a power of 2?!?\n");
-		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_NOT_SUPPORTED;
-		goto out;
-	}
+	size_t nSecs = (0x200 + SecSize -1) / SecSize;
+	FILE fake_fd;
 
 	PrintStatus("Processing MBR...\n");
 	if (!AnalyzeMBR(hPhysicalDrive)) return FALSE;
@@ -732,7 +727,7 @@ static BOOL ProcessMBR(HANDLE hPhysicalDrive)
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_READ_FAULT;
 		goto out;
 	}
-	DumpBufferHex(buf, 0x200);
+//	DumpBufferHex(buf, 0x200);
 	switch (ComboBox_GetCurSel(hFileSystem)) {
 	// TODO: check for 0x06 & 0x0b?
 	case FS_FAT16:
@@ -742,14 +737,62 @@ static BOOL ProcessMBR(HANDLE hPhysicalDrive)
 		buf[0x1c2] = 0x0c;
 		break;
 	}
+	if (IsChecked(IDC_DOSSTARTUP)) {
+		buf[0x1be] = 0x80;		// Set first partition bootable
+	}
 
-	if (!write_sectors(hPhysicalDrive, SelectedDrive.Geometry.BytesPerSector, 0, nSecs, buf, SecSize)) {
+	if (!write_sectors(hPhysicalDrive, SelectedDrive.Geometry.BytesPerSector, 0, nSecs, buf, SecSize*nSecs)) {
 		uprintf("Could not write MBR\n");
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_WRITE_FAULT;
 		goto out;
 	}
 
-	r = TRUE;
+	fake_fd._ptr = (char*)hPhysicalDrive;
+	fake_fd._bufsiz = SelectedDrive.Geometry.BytesPerSector;
+	r = write_95b_mbr(&fake_fd);
+
+	if (!read_sectors(hPhysicalDrive, SelectedDrive.Geometry.BytesPerSector, 0, nSecs, buf, SecSize)) {
+		uprintf("Could not re-read MBR\n");
+		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_READ_FAULT;
+		goto out;
+	}
+	DumpBufferHex(buf, 0x200);
+
+out:
+	safe_free(buf);
+	return r;
+}
+
+static BOOL ProcessFS_BR(HANDLE hLogicalVolume)
+{
+	BOOL r = FALSE;
+	unsigned char* buf = NULL;
+	FILE fake_fd;
+	size_t SecSize = SelectedDrive.Geometry.BytesPerSector;
+	size_t nSecs = (0x400 + SecSize -1) / SecSize;
+
+	fake_fd._ptr = (char*)hLogicalVolume;
+	fake_fd._bufsiz = SelectedDrive.Geometry.BytesPerSector;
+	write_fat_32_br(&fake_fd, 0);
+
+	PrintStatus("Processing FS BR...\n");
+	// FormatEx rewrites the MBR and removes the LBA attribute of FAT16
+	// and FAT32 partitions - we need to correct this in the MBR
+	// TODO: something else for bootable GPT
+	buf = (unsigned char*)malloc(SecSize * nSecs);
+	if (buf == NULL) {
+		uprintf("Could not allocate memory for FS BR");
+		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_NOT_ENOUGH_MEMORY;
+		goto out;
+	}
+
+	if (!read_sectors(hLogicalVolume, SelectedDrive.Geometry.BytesPerSector, 0, nSecs, buf, SecSize*nSecs)) {
+		uprintf("Could not read FS BR\n");
+		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_READ_FAULT;
+		goto out;
+	}
+	uprintf("FS_BR:\n");
+	DumpBufferHex(buf, 0x400);
 
 out:
 	safe_free(buf);
@@ -854,8 +897,20 @@ static void __cdecl FormatThread(void* param)
 #endif
 
 	if (IsChecked(IDC_DOSSTARTUP)) {
+		hLogicalVolume = GetDriveHandle(num, drive_name, TRUE, FALSE);
+		if (hLogicalVolume == INVALID_HANDLE_VALUE) {
+			uprintf("Could not re-mount volume\n");
+			goto out;
+		}
+		ProcessFS_BR(hLogicalVolume);
 		// TODO: check return value & set bootblock
 		ExtractMSDOS(drive_name);
+		// TODO:
+		// http://www.multiboot.ru/msdos8.htm & http://en.wikipedia.org/wiki/Windows_Me#Real_mode_DOS
+		// COMMAND.COM and IO.SYS from diskcopy.dll are from the WinME crippled version of DOS
+		// that removed real mode DOS => they must be patched:
+		// IO.SYS            000003AA          75 -> EB
+		// COMMAND.COM       00006510          75 -> EB
 	}
 
 out:
