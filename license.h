@@ -18,10 +18,6 @@
  */
 
 const char* additional_copyrights =
-"Device enumeration based on TestUSBDriveEject.cpp by ahmd:\r\n"
-"http://www.codeguru.com/forum/showthread.php?p=1951973\r\n"
-"Assumed Public Domain\r\n"
-"\r\n"
 "Icon by PC Unleashed:\r\n"
 "http://pcunleashed.com\r\n"
 "Freeware\r\n"
@@ -30,18 +26,29 @@ const char* additional_copyrights =
 "http://ms-sys.sourceforge.net\r\n"
 "GNU General Public License (GPL) v2 or later\r\n"
 "\r\n"
-"FS Type description from by GNU fdisk:\r\n"
-"http://www.gnu.org/software/fdisk\r\n"
-"GNU General Public License (GPL) v3 or later\r\n"
-"\r\n"
 "fmifs.dll usage based on Formatx by Mark Russinovich:\r\n"
 "http://doc.sch130.nsc.ru/www.sysinternals.com/ntw2k/source/fmifs.shtml\r\n"
 "http://svn.reactos.org/svn/reactos/trunk/reactos/include/reactos/libs/fmifs\r\n"
 "Public Domain\r\n"
 "\r\n"
+"Device enumeration based on TestUSBDriveEject.cpp by ahmd:\r\n"
+"http://www.codeguru.com/forum/showthread.php?p=1951973\r\n"
+"Public Domain\r\n"
+"\r\n"
+"Some FAT and time-conversion handling by ReactOS:\r\n"
+"http://svn.reactos.org/svn/reactos/trunk/reactos\r\n"
+"GNU General Public License (GPL) v3 compatible\r\n"
+"\r\n"
+"FS Type description from by GNU fdisk:\r\n"
+"http://www.gnu.org/software/fdisk\r\n"
+"GNU General Public License (GPL) v3 or later\r\n"
+"\r\n"
 "About and License dialogs inspired by WinSCP\r\n"
 "Copyright (c) 2000-2011 Martin Prikryl\r\n"
-"GNU General Public License (GPL) v3 or later";
+"GNU General Public License (GPL) v3 or later\r\n"
+"\r\n"
+"\r\n"
+"All other references are to be found in the source.\r\n";
 
 const char* gplv3 =
 "                    GNU GENERAL PUBLIC LICENSE\r\n"

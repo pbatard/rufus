@@ -637,7 +637,8 @@ static BOOL FormatDrive(char DriveLetter)
 	GetWindowTextW(hLabel, wLabel, ARRAYSIZE(wLabel));
 	uprintf("Using cluster size: %d bytes\n", ComboBox_GetItemData(hClusterSize, ComboBox_GetCurSel(hClusterSize)));
 	pfFormatEx(wDriveRoot, RemovableMedia, wFSType, wLabel,
-		IsChecked(IDC_QUICKFORMAT), ComboBox_GetItemData(hClusterSize, ComboBox_GetCurSel(hClusterSize)), FormatExCallback);
+		IsChecked(IDC_QUICKFORMAT), (ULONG)ComboBox_GetItemData(hClusterSize, ComboBox_GetCurSel(hClusterSize)),
+		FormatExCallback);
 	if (!IS_ERROR(FormatStatus)) {
 		uprintf("Format completed.\n");
 		r = TRUE;
@@ -709,7 +710,6 @@ static BOOL ProcessMBR(HANDLE hPhysicalDrive)
 	size_t nSecs = (0x200 + SecSize -1) / SecSize;
 	FILE fake_fd;
 
-	PrintStatus("Processing MBR...\n");
 	if (!AnalyzeMBR(hPhysicalDrive)) return FALSE;
 
 	// FormatEx rewrites the MBR and removes the LBA attribute of FAT16
@@ -775,7 +775,6 @@ static BOOL ProcessFS_BR(HANDLE hLogicalVolume)
 	fake_fd._bufsiz = SelectedDrive.Geometry.BytesPerSector;
 	write_fat_32_br(&fake_fd, 0);
 
-	PrintStatus("Processing FS BR...\n");
 	// FormatEx rewrites the MBR and removes the LBA attribute of FAT16
 	// and FAT32 partitions - we need to correct this in the MBR
 	// TODO: something else for bootable GPT
@@ -864,7 +863,8 @@ static void __cdecl FormatThread(void* param)
 	}
 
 	// TODO: Enable compression on NTFS
-	// TODO: disable indexing on NTFS
+	// TODO: optionally disable indexing on NTFS
+	// TODO: use progress bar during MBR/FSBR/MSDOS copy
 
 	// Ideally we would lock, FSCTL_DISMOUNT_VOLUME, unlock and close our volume
 	// handle, but some explorer versions have problems with volumes disappear
@@ -882,7 +882,9 @@ static void __cdecl FormatThread(void* param)
 		goto out;
 	}
 #endif
+	PrintStatus("Writing master boot record...\n");
 	if (!ProcessMBR(hPhysicalDrive)) {
+		// Errorcode has already been set
 		goto out;
 	}
 
@@ -900,17 +902,19 @@ static void __cdecl FormatThread(void* param)
 		hLogicalVolume = GetDriveHandle(num, drive_name, TRUE, FALSE);
 		if (hLogicalVolume == INVALID_HANDLE_VALUE) {
 			uprintf("Could not re-mount volume\n");
+			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_OPEN_FAILED;
 			goto out;
 		}
-		ProcessFS_BR(hLogicalVolume);
-		// TODO: check return value & set bootblock
-		ExtractMSDOS(drive_name);
-		// TODO:
-		// http://www.multiboot.ru/msdos8.htm & http://en.wikipedia.org/wiki/Windows_Me#Real_mode_DOS
-		// COMMAND.COM and IO.SYS from diskcopy.dll are from the WinME crippled version of DOS
-		// that removed real mode DOS => they must be patched:
-		// IO.SYS            000003AA          75 -> EB
-		// COMMAND.COM       00006510          75 -> EB
+		PrintStatus("Writing filesystem boot record...\n");
+		if (!ProcessFS_BR(hLogicalVolume)) {
+			// Errorcode has already been set
+			goto out;
+		}
+		PrintStatus("Copying MS-DOS files...\n");
+		if (!ExtractMSDOS(drive_name)) {
+			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANNOT_COPY;
+			goto out;
+		}
 	}
 
 out:
@@ -1204,6 +1208,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		SendMessage(hProgress, PBM_SETPOS, FormatStatus?0:100, 0);
 		EnableControls(TRUE);
 		GetUSBDevices();
+		// TODO: process and report error code to user
 		PrintStatus(!IS_ERROR(FormatStatus)?"DONE":
 			((SCODE_CODE(FormatStatus)==ERROR_CANCELLED)?"Cancelled":"FAILED"));
 		return (INT_PTR)TRUE;
