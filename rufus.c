@@ -353,7 +353,7 @@ static BOOL PopulateProperties(int ComboIndex)
 {
 	double HumanReadableSize;
 	char capacity[64];
-	char *suffix[] = { "KB", "MB", "GB", "TB", "PB"};
+	static char *suffix[] = { "KB", "MB", "GB", "TB", "PB"};
 	char proposed_label[16], no_label[] = STR_NO_LABEL;
 	int i;
 

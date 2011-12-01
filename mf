@@ -1,4 +1,4 @@
-#
+# Rufus STANDALONE Makefile - invoke with "make -f mf"
 # This file is part of the Rufus project.
 #
 # Copyright (c) 2011 Pete Batard <pbatard@akeo.ie>
