@@ -17,7 +17,7 @@
 # along with this program; if not, see <http://www.gnu.org/licenses/>.
 #
 
-OBJECTS   = fat12.o fat16.o fat32.o br.o file.o msdos.o stdio.o stdlg.o rufus.o  
+OBJECTS   = fat12.o fat16.o fat32.o br.o file.o msdos.o format.o stdio.o stdlg.o rufus.o  
 TARGET    = rufus
 
 CC        = gcc

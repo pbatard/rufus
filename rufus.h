@@ -15,8 +15,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <Windows.h>
-#include <winioctl.h>				// for MEDIA_TYPE
+#include <windows.h>
+#include <winioctl.h>				// for DISK_GEOMETRY
 
 #pragma once
 
@@ -62,42 +62,6 @@
 #define safe_vsnprintf vsnprintf
 #endif
 
-/*
- * Globals
- */
-extern HINSTANCE hMainInstance;
-extern HWND hMainDialog;
-extern HWND hStatus;
-extern float fScale;
-extern char szFolderPath[MAX_PATH];
-
-/*
- * Shared prototypes
- */
-extern char *WindowsErrorString(void);
-extern void DumpBufferHex(void *buf, size_t size);
-extern void PrintStatus(const char *format, ...);
-extern void CenterDialog(HWND hDlg);
-extern void CreateStatusBar(void);
-extern INT_PTR CreateAboutBox(void);
-extern HWND CreateTooltip(HWND hControl, const char* message, int duration);
-extern void DestroyTooltip(HWND hWnd);
-extern void DestroyAllTooltips(void);
-extern void Notification(int type, char* text, char* title);
-extern BOOL ExtractMSDOS(const char* path);
-
-/* Basic String Array */
-typedef struct {
-	char** Table;
-	size_t Size;
-	size_t Index;
-	size_t Max;
-} StrArray;
-extern void StrArrayCreate(StrArray* arr, size_t initial_size);
-extern void StrArrayAdd(StrArray* arr, const char* str);
-extern void StrArrayClear(StrArray* arr);
-extern void StrArrayDestroy(StrArray* arr);
-
 #ifdef RUFUS_DEBUG
 extern void _uprintf(const char *format, ...);
 #define uprintf(...) _uprintf(__VA_ARGS__)
@@ -131,95 +95,73 @@ enum {
 	FS_MAX
 };
 
+/* Current drive info */
+typedef struct {
+	DWORD DeviceNumber;
+	LONGLONG DiskSize;
+	DISK_GEOMETRY Geometry;
+	DWORD FirstSector;
+	int FSType;
+	struct {
+		ULONG Allowed;
+		ULONG Default;
+	} ClusterSize[FS_MAX];
+} RUFUS_DRIVE_INFO;
+
+/*
+ * Globals
+ */
+extern HINSTANCE hMainInstance;
+extern HWND hMainDialog, hStatus, hDeviceList, hCapacity;
+extern HWND hFileSystem, hClusterSize, hLabel; 
+extern float fScale;
+extern char szFolderPath[MAX_PATH];
+extern DWORD FormatStatus;
+extern RUFUS_DRIVE_INFO SelectedDrive;
+
+/*
+ * Shared prototypes
+ */
+extern char *WindowsErrorString(void);
+extern void DumpBufferHex(void *buf, size_t size);
+extern void PrintStatus(const char *format, ...);
+extern void CenterDialog(HWND hDlg);
+extern void CreateStatusBar(void);
+extern INT_PTR CreateAboutBox(void);
+extern HWND CreateTooltip(HWND hControl, const char* message, int duration);
+extern void DestroyTooltip(HWND hWnd);
+extern void DestroyAllTooltips(void);
+extern void Notification(int type, char* text, char* title);
+extern BOOL ExtractMSDOS(const char* path);
+extern void __cdecl FormatThread(void* param);
+extern BOOL CreatePartition(HANDLE hDrive);
+extern HANDLE GetDriveHandle(DWORD DriveIndex, char* DriveLetter, BOOL bWriteAccess, BOOL bLockDrive);
+
+__inline static BOOL UnlockDrive(HANDLE hDrive)
+{
+	DWORD size;
+	return DeviceIoControl(hDrive, FSCTL_UNLOCK_VOLUME, NULL, 0, NULL, 0, &size, NULL);
+}
+
+/* Basic String Array */
+typedef struct {
+	char** Table;
+	size_t Size;
+	size_t Index;
+	size_t Max;
+} StrArray;
+extern void StrArrayCreate(StrArray* arr, size_t initial_size);
+extern void StrArrayAdd(StrArray* arr, const char* str);
+extern void StrArrayClear(StrArray* arr);
+extern void StrArrayDestroy(StrArray* arr);
+
+/* We need a redef of this MS structure */
 typedef struct {
 	DWORD DeviceType;
 	ULONG DeviceNumber;
 	ULONG PartitionNumber;
 } STORAGE_DEVICE_NUMBER_REDEF;
 
-/*
- * typedefs for the function prototypes. Use the something like:
- *   PF_DECL(FormatEx);
- * which translates to:
- *   FormatEx_t pfFormatEx = NULL;
- * in your code, to declare the entrypoint and then use:
- *   PF_INIT(FormatEx, fmifs);
- * which translates to:
- *   pfFormatEx = (FormatEx_t) GetProcAddress(GetDLLHandle("fmifs"), "FormatEx");
- * to make it accessible.
- */
-static __inline HMODULE GetDLLHandle(char* szDLLName)
-{
-	HMODULE h = NULL;
-	if ((h = GetModuleHandleA(szDLLName)) == NULL)
-		h = LoadLibraryA(szDLLName);
-	return h;
-}
-#define PF_DECL(proc) proc##_t pf##proc = NULL
-#define PF_INIT(proc, dllname) pf##proc = (proc##_t) GetProcAddress(GetDLLHandle(#dllname), #proc)
-#define PF_INIT_OR_OUT(proc, dllname) \
-	PF_INIT(proc, dllname); if (pf##proc == NULL) { \
-	uprintf("unable to access %s DLL: %s", #dllname, \
-	WindowsErrorString()); goto out; }
-
-/* Callback command types (some errorcode were filled from HPUSBFW V2.2.3 and their
-   designation from msdn.microsoft.com/en-us/library/windows/desktop/aa819439.aspx */
-typedef enum {
-	FCC_PROGRESS,
-	FCC_DONE_WITH_STRUCTURE,
-	FCC_UNKNOWN2,
-	FCC_INCOMPATIBLE_FILE_SYSTEM,
-	FCC_UNKNOWN4,
-	FCC_UNKNOWN5,
-	FCC_ACCESS_DENIED,
-	FCC_MEDIA_WRITE_PROTECTED,
-	FCC_VOLUME_IN_USE,
-	FCC_CANT_QUICK_FORMAT,
-	FCC_UNKNOWNA,
-	FCC_DONE,
-	FCC_BAD_LABEL,
-	FCC_UNKNOWND,
-	FCC_OUTPUT,
-	FCC_STRUCTURE_PROGRESS,
-	FCC_CLUSTER_SIZE_TOO_SMALL,
-	FCC_CLUSTER_SIZE_TOO_BIG,
-	FCC_VOLUME_TOO_SMALL,
-	FCC_VOLUME_TOO_BIG,
-	FCC_NO_MEDIA_IN_DRIVE,
-} FILE_SYSTEM_CALLBACK_COMMAND;
-
-typedef struct {
-	DWORD Lines;
-	CHAR* Output;
-} TEXTOUTPUT, *PTEXTOUTPUT;
-
-typedef BOOLEAN (__stdcall *FILE_SYSTEM_CALLBACK)(
-	FILE_SYSTEM_CALLBACK_COMMAND Command,
-	ULONG                        Action,
-	PVOID                        pData
-);
-
-/* Parameter names aligned to
-   http://msdn.microsoft.com/en-us/library/windows/desktop/aa819439.aspx */
-typedef VOID (WINAPI *FormatEx_t)(
-	WCHAR*               DriveRoot,
-	MEDIA_TYPE           MediaType,		// See WinIoCtl.h
-	WCHAR*               FileSystemTypeName,
-	WCHAR*               Label,
-	BOOL                 QuickFormat,
-	ULONG                DesiredUnitAllocationSize,
-	FILE_SYSTEM_CALLBACK Callback
-);
-
-/* http://msdn.microsoft.com/en-us/library/windows/desktop/aa383357.aspx */
-typedef enum  {
-	FPF_COMPRESSED   = 0x01 
-} FILE_SYSTEM_PROP_FLAG;
-
-typedef BOOLEAN (WINAPI* EnableVolumeCompression_t)(
-	WCHAR*          DriveRoot,
-	ULONG           CompressionFlags	// FILE_SYSTEM_PROP_FLAG
-);
 
 /* Custom application errors */
 #define FAC(f)                         (f<<16)

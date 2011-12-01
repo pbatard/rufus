@@ -151,12 +151,14 @@
     <ClCompile Include="..\fat16.c" />
     <ClCompile Include="..\fat32.c" />
     <ClCompile Include="..\file.c" />
+    <ClCompile Include="..\format.c" />
     <ClCompile Include="..\msdos.c" />
     <ClCompile Include="..\rufus.c" />
     <ClCompile Include="..\stdio.c" />
     <ClCompile Include="..\stdlg.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\format.h" />
     <ClInclude Include="..\inc\br.h" />
     <ClInclude Include="..\inc\br_fat12_0x0.h" />
     <ClInclude Include="..\inc\br_fat12_0x3e.h" />

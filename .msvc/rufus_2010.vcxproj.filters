@@ -45,6 +45,9 @@
     <ClCompile Include="..\stdio.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\format.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\rufus.h">
@@ -145,6 +148,9 @@
     </ClInclude>
     <ClInclude Include="..\inc\mbr_zero.h">
       <Filter>Header Files\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\format.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

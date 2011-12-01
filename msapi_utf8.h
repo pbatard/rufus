@@ -25,6 +25,8 @@
 #include <shellapi.h>
 #include <setupapi.h>
 
+#pragma once
+
 #ifdef __cplusplus
 extern "C" {
 #endif
