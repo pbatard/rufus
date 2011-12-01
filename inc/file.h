@@ -6,13 +6,13 @@
 
 /* Checks if a file contains a data pattern of length uiLen at position
    ulPositoin. The file pointer will change when calling this function! */
-int contains_data(FILE *fp, unsigned long ulPosition,
-                  const void *pData, unsigned int uiLen);
+int contains_data(FILE *fp, size_t ulPosition,
+                  const void *pData, size_t uiLen);
 
 /* Writes a data pattern of length uiLen at position ulPositoin.
    The file pointer will change when calling this function! */
-int write_data(FILE *fp, unsigned long ulPosition,
-               const void *pData, unsigned int uiLen);
+int write_data(FILE *fp, size_t ulPosition,
+               const void *pData, size_t uiLen);
 
 /* Checks if a file contains a data pattern of length uiLen at position
    ulPositoin. The file pointer will change when calling this function! */

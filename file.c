@@ -27,7 +27,7 @@ int write_sectors(HANDLE hDrive, size_t SectorSize,
                   const void *pBuf, size_t BufSize)
 {
    LARGE_INTEGER ptr;
-   DWORD dwSize;
+   DWORD Size;
 
    if(SectorSize * nSectors > BufSize)
    {
@@ -42,7 +42,7 @@ int write_sectors(HANDLE hDrive, size_t SectorSize,
       return 0;
    }
 
-   if((!WriteFile(hDrive, pBuf, (DWORD)BufSize, &dwSize, NULL)) || (dwSize != BufSize))
+   if((!WriteFile(hDrive, pBuf, (DWORD)BufSize, &Size, NULL)) || (Size != BufSize))
    {
       uprintf("write_sectors: Write error - %s\n", WindowsErrorString());
       return 0;
@@ -56,7 +56,7 @@ int read_sectors(HANDLE hDrive, size_t SectorSize,
                  void *pBuf, size_t BufSize)
 {
    LARGE_INTEGER ptr;
-   DWORD dwSize;
+   DWORD Size;
 
    if(SectorSize * nSectors > BufSize)
    {
@@ -71,7 +71,7 @@ int read_sectors(HANDLE hDrive, size_t SectorSize,
       return 0;
    }
 
-   if((!ReadFile(hDrive, pBuf, (DWORD)BufSize, &dwSize, NULL)) || (dwSize != BufSize))
+   if((!ReadFile(hDrive, pBuf, (DWORD)BufSize, &Size, NULL)) || (Size != BufSize))
    {
       uprintf("read_sectors: Read error - %s\n", WindowsErrorString());
       return 0;
@@ -81,62 +81,62 @@ int read_sectors(HANDLE hDrive, size_t SectorSize,
 }
 
 /* Use a bastardized fp that contains a Windows handle and the sector size */
-int contains_data(FILE *fp, unsigned long ulPosition,
-                  const void *pData, unsigned int uiLen)
+int contains_data(FILE *fp, size_t Position,
+                  const void *pData, size_t Len)
 {
    unsigned char aucBuf[MAX_DATA_LEN];
    HANDLE hDrive = (HANDLE)fp->_ptr;
-   unsigned long ulSectorSize = (unsigned long)fp->_bufsiz;
-   unsigned long ulStartSector, ulEndSector, ulNumSectors;
+   size_t SectorSize = (size_t)fp->_bufsiz;
+   size_t StartSector, EndSector, NumSectors;
 
-   ulStartSector = ulPosition/ulSectorSize;
-   ulEndSector   = (ulPosition+uiLen+ulSectorSize-1)/ulSectorSize;
-   ulNumSectors  = ulEndSector - ulStartSector;
+   StartSector = Position/SectorSize;
+   EndSector   = (Position+Len+SectorSize-1)/SectorSize;
+   NumSectors  = EndSector - StartSector;
 
-   if((ulNumSectors*ulSectorSize) > MAX_DATA_LEN)
+   if((NumSectors*SectorSize) > MAX_DATA_LEN)
    {
       uprintf("Please increase MAX_DATA_LEN in file.h\n");
       return 0;
    }
 
-   if(!read_sectors(hDrive, ulSectorSize, ulStartSector,
-                     ulNumSectors, aucBuf, sizeof(aucBuf)))
+   if(!read_sectors(hDrive, SectorSize, StartSector,
+                     NumSectors, aucBuf, sizeof(aucBuf)))
       return 0;
 
-   if(memcmp(pData, &aucBuf[ulPosition - ulStartSector*ulSectorSize], uiLen))
+   if(memcmp(pData, &aucBuf[Position - StartSector*SectorSize], Len))
       return 0;
    return 1;
 } /* contains_data */
 
 /* May read/write the same sector many times, but compatible with existing ms-sys */
-int write_data(FILE *fp, unsigned long ulPosition,
-               const void *pData, unsigned int uiLen)
+int write_data(FILE *fp, size_t Position,
+               const void *pData, size_t Len)
 {
    unsigned char aucBuf[MAX_DATA_LEN];
    HANDLE hDrive = (HANDLE)fp->_ptr;
-   unsigned long ulSectorSize = (unsigned long)fp->_bufsiz;
-   unsigned long ulStartSector, ulEndSector, ulNumSectors;
+   size_t SectorSize = (size_t)fp->_bufsiz;
+   size_t StartSector, EndSector, NumSectors;
 
-   ulStartSector = ulPosition/ulSectorSize;
-   ulEndSector   = (ulPosition+uiLen+ulSectorSize-1)/ulSectorSize;
-   ulNumSectors  = ulEndSector - ulStartSector;
+   StartSector = Position/SectorSize;
+   EndSector   = (Position+Len+SectorSize-1)/SectorSize;
+   NumSectors  = EndSector - StartSector;
 
-   if((ulNumSectors*ulSectorSize) > MAX_DATA_LEN)
+   if((NumSectors*SectorSize) > MAX_DATA_LEN)
    {
       uprintf("Please increase MAX_DATA_LEN in file.h\n");
       return 0;
    }
 
    /* Data to write may not be aligned on a sector boundary => read into a sector buffer first */
-   if(!read_sectors(hDrive, ulSectorSize, ulStartSector,
-                     ulNumSectors, aucBuf, sizeof(aucBuf)))
+   if(!read_sectors(hDrive, SectorSize, StartSector,
+                     NumSectors, aucBuf, sizeof(aucBuf)))
       return 0;
 
-   if(!memcpy(&aucBuf[ulPosition - ulStartSector*ulSectorSize], pData, uiLen))
+   if(!memcpy(&aucBuf[Position - StartSector*SectorSize], pData, Len))
       return 0;
 
-   if(!write_sectors(hDrive, ulSectorSize, ulStartSector,
-                     ulNumSectors, aucBuf, sizeof(aucBuf)))
+   if(!write_sectors(hDrive, SectorSize, StartSector,
+                     NumSectors, aucBuf, sizeof(aucBuf)))
       return 0;
    return 1;
 } /* write_data */
