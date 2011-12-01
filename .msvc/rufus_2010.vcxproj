@@ -147,6 +147,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\br.c" />
+    <ClCompile Include="..\drive.c" />
     <ClCompile Include="..\fat12.c" />
     <ClCompile Include="..\fat16.c" />
     <ClCompile Include="..\fat32.c" />

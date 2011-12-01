@@ -28,6 +28,7 @@ SOURCES=rufus.c  \
         stdio.c  \
         stdlg.c  \
         msdos.c  \
+        drive.c  \
         file.c   \
         br.c     \
         fat12.c  \

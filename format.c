@@ -27,7 +27,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <process.h>
-// #include <ctype.h>
+#include <stddef.h>
 
 #include "msapi_utf8.h"
 #include "rufus.h"
@@ -37,6 +37,11 @@
 #include "fat32.h"
 #include "file.h"
 #include "format.h"
+
+/*
+ * Globals
+ */
+DWORD FormatStatus;
 
 /*
  * FormatEx callback. Return FALSE to halt operations

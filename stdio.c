@@ -31,6 +31,11 @@
 #include "rufus.h"
 #include "resource.h"
 
+/*
+ * Globals
+ */
+HWND hStatus;
+
 #ifdef RUFUS_DEBUG
 void _uprintf(const char *format, ...)
 {

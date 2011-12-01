@@ -30,7 +30,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <ctype.h>
 #include <math.h>
 #include <commctrl.h>
 #include <setupapi.h>
@@ -71,14 +70,9 @@ static const char* ClusterSizeLabel[] = { "512 bytes", "1024 bytes","2048 bytes"
 HINSTANCE hMainInstance;
 HWND hMainDialog;
 char szFolderPath[MAX_PATH];
-HWND hStatus;
 float fScale = 1.0f;
 int default_fs;
 ULONG default_clutersize;
-RUFUS_DRIVE_INFO SelectedDrive;
-BOOL bBootable;
-BOOL bQuickFormat;
-DWORD FormatStatus;
 HWND hDeviceList, hCapacity, hFileSystem, hClusterSize, hLabel;
 static HWND hDeviceTooltip = NULL, hFSTooltip = NULL;
 
@@ -98,124 +92,6 @@ static const char* GetPartitionType(BYTE Type)
 	return "Unknown";
 }
 
-/*
- * Open a drive with optional write access - returns a drive HANDLE and the drive letter
- * or INVALID_HANDLE_VALUE (/!\ which is DIFFERENT from NULL /!\) on failure
- * This call is quite risky (left unchecked, inadvertently passing 0 as index would
- * return a handle to C:, which we might then proceed to unknowingly repartition!),
- * so we apply the following mitigation factors:
- * - Valid indexes must belong to a specific range [DRIVE_INDEX_MIN; DRIVE_INDEX_MAX]
- * - When opening for write access, we lock the volume. If that fails, which would
- *   typically be the case on C:\ or any other drive in use, we report failure
- * - We report the full path of any drive that was successfully opened for write acces
- */
-HANDLE GetDriveHandle(DWORD DriveIndex, char* DriveLetter, BOOL bWriteAccess, BOOL bLockDrive)
-{
-	BOOL r;
-	DWORD size;
-	HANDLE hDrive = INVALID_HANDLE_VALUE;
-	STORAGE_DEVICE_NUMBER_REDEF device_number = {0};
-	char drives[26*4];	/* "D:\", "E:\", etc. */
-	char *drive = drives;
-	char logical_drive[] = "\\\\.\\#:";
-	char physical_drive[24];
-
-	if ((DriveIndex < DRIVE_INDEX_MIN) || (DriveIndex > DRIVE_INDEX_MAX)) {
-		uprintf("WARNING: Bad index value. Please check the code!\n");
-	}
-	DriveIndex -= DRIVE_INDEX_MIN;
-
-	// If no drive letter is requested, open a phyical drive
-	if (DriveLetter == NULL) {
-		safe_sprintf(physical_drive, sizeof(physical_drive), "\\\\.\\PHYSICALDRIVE%d", DriveIndex);
-		hDrive = CreateFileA(physical_drive, GENERIC_READ|(bWriteAccess?GENERIC_WRITE:0),
-			FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, 0);
-		if (hDrive == INVALID_HANDLE_VALUE) {
-			uprintf("Could not open drive %s: %s\n", physical_drive, WindowsErrorString());
-			goto out;
-		}
-		if (bWriteAccess) {
-			uprintf("Caution: Opened %s drive for write access\n", physical_drive);
-		}
-	} else {
-		*DriveLetter = ' ';
-		size = GetLogicalDriveStringsA(sizeof(drives), drives);
-		if (size == 0) {
-			uprintf("GetLogicalDriveStrings failed: %s\n", WindowsErrorString());
-			goto out;
-		}
-		if (size > sizeof(drives)) {
-			uprintf("GetLogicalDriveStrings: buffer too small (required %d vs %d)\n", size, sizeof(drives));
-			goto out;
-		}
-
-		hDrive = INVALID_HANDLE_VALUE;
-		for ( ;*drive; drive += safe_strlen(drive)+1) {
-			if (!isalpha(*drive))
-				continue;
-			*drive = (char)toupper((int)*drive);
-			if (*drive < 'C') {
-				continue;
-			}
-			safe_sprintf(logical_drive, sizeof(logical_drive), "\\\\.\\%c:", drive[0]);
-			hDrive = CreateFileA(logical_drive, GENERIC_READ|(bWriteAccess?GENERIC_WRITE:0),
-				FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, 0);
-			if (hDrive == INVALID_HANDLE_VALUE) {
-				uprintf("Warning: could not open drive %c: %s\n", drive[0], WindowsErrorString());
-				continue;
-			}
-
-			r = DeviceIoControl(hDrive, IOCTL_STORAGE_GET_DEVICE_NUMBER, NULL,
-				0, &device_number, sizeof(device_number), &size, NULL);
-			if ((!r) || (size <= 0)) {
-				uprintf("IOCTL_STORAGE_GET_DEVICE_NUMBER failed for device %s: %s\n", logical_drive, WindowsErrorString());
-			} else if (device_number.DeviceNumber == DriveIndex) {
-				break;
-			}
-			safe_closehandle(hDrive);
-		}
-		if (hDrive == INVALID_HANDLE_VALUE) {
-			goto out;
-		}
-		if (bWriteAccess) {
-			uprintf("Caution: Opened %s drive for write access\n", logical_drive);
-		}
-		*DriveLetter = *drive?*drive:' ';
-	}
-
-	if ((bLockDrive) && (!DeviceIoControl(hDrive, FSCTL_LOCK_VOLUME, NULL, 0, NULL, 0, &size, NULL))) {
-		uprintf("Could not get exclusive access to %s: %s\n", logical_drive, WindowsErrorString());
-		safe_closehandle(hDrive);
-		goto out;
-	}
-
-out:
-	return hDrive;
-}
-
-/*
- * Return the drive letter and volume label
- */
-static BOOL GetDriveLabel(DWORD DriveIndex, char* letter, char** label)
-{
-	HANDLE hDrive;
-	char DrivePath[] = "#:\\";
-	static char volume_label[MAX_PATH+1];
-
-	*label = STR_NO_LABEL;
-
-	hDrive = GetDriveHandle(DriveIndex, DrivePath, FALSE, FALSE);
-	if (hDrive == INVALID_HANDLE_VALUE)
-		return FALSE;
-	safe_closehandle(hDrive);
-	*letter = DrivePath[0];
-
-	if (GetVolumeInformationA(DrivePath, volume_label, sizeof(volume_label), NULL, NULL, NULL, NULL, 0) && *volume_label) {
-		*label = volume_label;
-	}
-
-	return TRUE;
-}
 
 #define KB          1024LL
 #define MB       1048576LL
@@ -316,6 +192,9 @@ out:
 #undef GB
 #undef TB
 
+/*
+ * Populate the Allocation unit size field
+ */
 static BOOL SetClusterSizes(int FSType)
 {
 	char szDefault[64];
@@ -689,7 +568,9 @@ static BOOL GetUSBDevices(void)
 	return TRUE;
 }
 
-/* Toggle controls according to operation */
+/* 
+ * Toggle controls according to operation
+ */
 static void EnableControls(BOOL bEnable)
 {
 	EnableWindow(GetDlgItem(hMainDialog, IDC_DEVICE), bEnable);
