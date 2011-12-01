@@ -57,10 +57,11 @@
 const GUID GUID_DEVINTERFACE_DISK = { 0x53f56307L, 0xb6bf, 0x11d0, {0x94, 0xf2, 0x00, 0xa0, 0xc9, 0x1e, 0xfb, 0x8b} };
 #endif
 
+const char* FileSystemLabel[FS_MAX] = { "FAT", "FAT32", "NTFS", "exFAT" };
 // Don't ask me - just following the MS standard here
-const char* ClusterSizeLabel[] = {"512 bytes", "1024 bytes","2048 bytes","4096 bytes","8192 bytes",
+const char* ClusterSizeLabel[] = { "512 bytes", "1024 bytes","2048 bytes","4096 bytes","8192 bytes",
 	"16 kilobytes", "32 kilobytes", "64 kilobytes", "128 kilobytes", "256 kilobytes", "512 kilobytes",
-	"1024 kilobytes","2048 kilobytes","4096 kilobytes","8192 kilobytes","16 megabytes","32 megabytes"};
+	"1024 kilobytes","2048 kilobytes","4096 kilobytes","8192 kilobytes","16 megabytes","32 megabytes" };
 
 // For MinGW
 #ifndef PBS_MARQUEE
@@ -78,6 +79,8 @@ HWND hMainDialog;
 char szFolderPath[MAX_PATH];
 HWND hStatus;
 float fScale = 1.0f;
+int default_fs;
+ULONG default_clutersize;
 
 BOOL bBootable;
 BOOL bQuickFormat;
@@ -87,7 +90,7 @@ struct {
 	LONGLONG DiskSize;
 	DISK_GEOMETRY Geometry;
 	DWORD FirstSector;
-	enum _FSType FSType;
+	int FSType;
 	struct {
 		ULONG Allowed;
 		ULONG Default;
@@ -123,13 +126,15 @@ void _uprintf(const char *format, ...)
 }
 #endif
 
-void DumpBufferHex(unsigned char *buffer, size_t size)
+void DumpBufferHex(void *buf, size_t size)
 {
+	unsigned char* buffer = (unsigned char*)buf;
 	size_t i, j, k;
 	char line[80] = "";
 
 	for (i=0; i<size; i+=16) {
-		uprintf("%s\n", line);
+		if (i!=0)
+			uprintf("%s\n", line);
 		line[0] = 0;
 		sprintf(&line[strlen(line)], "  %08x  ", (unsigned int)i);
 		for(j=0,k=0; k<16; j++,k++) {
@@ -319,16 +324,23 @@ static BOOL GetDriveLabel(DWORD DriveIndex, char* letter, char** label)
 #define GB    1073741824LL
 #define TB 1099511627776LL
 
-// Set cluster size values according to http://support.microsoft.com/kb/140365
+/* 
+ * Set cluster size values according to http://support.microsoft.com/kb/140365
+ * this call will return FALSE if we can't find a supportable FS for the drive
+ */
 static BOOL DefineClusterSizes(void)
 {
 	LONGLONG i;
-//	int j;
+	int fs;
+	BOOL r = FALSE;
+	char tmp[64] = "";
+
+	default_fs = FS_UNKNOWN;
 	memset(&SelectedDrive.ClusterSize, 0, sizeof(SelectedDrive.ClusterSize));
 	if (SelectedDrive.DiskSize < 8*MB) {
 		// TODO: muck with FAT12 and Small FAT16 like Microsoft does
 		uprintf("This application does not support volumes smaller than 8 MB yet\n");
-		return FALSE;
+		goto out;
 	}
 
 	// FAT 16
@@ -385,25 +397,40 @@ static BOOL DefineClusterSizes(void)
 			SelectedDrive.ClusterSize[FS_EXFAT].Default = 28*1024;
 	}
 
-//	for (j=0; j<FS_MAX; j++) {
-//		uprintf("SelectedDrive.ClusterSize[%d].Allowed = %08X\n", j, SelectedDrive.ClusterSize[j].Allowed);
-//		uprintf("SelectedDrive.ClusterSize[%d].Default = %08X\n", j, SelectedDrive.ClusterSize[j].Default);
-//	}
+out:
+	// Only add the filesystems we can service
+	for (fs=0; fs<FS_MAX; fs++) {
+		if (SelectedDrive.ClusterSize[fs].Allowed != 0) {
+			safe_sprintf(tmp, sizeof(tmp), FileSystemLabel[fs]);
+			if (default_fs == FS_UNKNOWN) {
+				safe_strcat(tmp, sizeof(tmp), " (Default)");
+				default_fs = fs;
+			}
+			IGNORE_RETVAL(ComboBox_SetItemData(hFileSystem, 
+				ComboBox_AddStringU(hFileSystem, tmp), fs));
+			r = TRUE;
+		}
+	}
 
-	return TRUE;
+	return r;
 }
 #undef KB
 #undef MB
 #undef GB
 #undef TB
 
-static BOOL SetClusterSizes(enum _FSType FSType)
+static BOOL SetClusterSizes(int FSType)
 {
 	char szDefault[64];
 	int i;
 	ULONG j;
 
 	IGNORE_RETVAL(ComboBox_ResetContent(hClusterSize));
+
+	if ((FSType < 0) || (FSType >= FS_MAX)) {
+		uprintf("Invalid FS value passed to SetClusterSizes\n");
+		return FALSE;
+	}
 
 	if ( (SelectedDrive.ClusterSize[FSType].Allowed == 0)
 	  || (SelectedDrive.ClusterSize[FSType].Default == 0) ) {
@@ -503,27 +530,44 @@ static BOOL GetDriveInfo(void)
 
 	safe_closehandle(hDrive);
 
-	SelectedDrive.FSType = FS_DEFAULT;
+	if (!DefineClusterSizes()) {
+		uprintf("no file system is selectable for this drive\n");
+		return FALSE;
+	}
 
+	// re-select existing FS if it's one we know
 	if (GetVolumeInformationA(DrivePath, NULL, 0, NULL, NULL, NULL,
 		fs_type, sizeof(fs_type))) {
-		// re-select existing FS if it's one we know
-		for (SelectedDrive.FSType=FS_FAT16; SelectedDrive.FSType<FS_MAX; SelectedDrive.FSType++) {
-			tmp[0] = 0;
-			IGNORE_RETVAL(ComboBox_GetLBTextU(hFileSystem, SelectedDrive.FSType, tmp));
-			if (safe_strcmp(fs_type, tmp) == 0) {
-				IGNORE_RETVAL(ComboBox_SetCurSel(hFileSystem, SelectedDrive.FSType));
+		for (SelectedDrive.FSType=FS_MAX-1; SelectedDrive.FSType>=0; SelectedDrive.FSType--) {
+			if (safe_strcmp(fs_type, FileSystemLabel[SelectedDrive.FSType]) == 0) {
 				break;
 			}
 		}
-		if (SelectedDrive.FSType == FS_MAX)
-			SelectedDrive.FSType = FS_DEFAULT;
+	} else {
+		SelectedDrive.FSType = FS_UNKNOWN;
 	}
-	IGNORE_RETVAL(ComboBox_SetCurSel(hFileSystem, SelectedDrive.FSType));
-	DefineClusterSizes();
-	SetClusterSizes(SelectedDrive.FSType);
 
-	return TRUE;
+	for (i=0; i<ComboBox_GetCount(hFileSystem); i++) {
+		if (ComboBox_GetItemData(hFileSystem, i) == SelectedDrive.FSType) {
+			IGNORE_RETVAL(ComboBox_SetCurSel(hFileSystem, i));
+			break;
+		}
+	}
+
+	if (i == ComboBox_GetCount(hFileSystem)) {
+		// failed to reselect => pick default
+		for (i=0; i<ComboBox_GetCount(hFileSystem); i++) {
+			if (ComboBox_GetItemData(hFileSystem, i) == default_fs) {
+				IGNORE_RETVAL(ComboBox_SetCurSel(hFileSystem, i));
+				break;
+			}
+		}
+	}
+
+	// At least one filesystem is go => enable formatting
+	EnableWindow(GetDlgItem(hMainDialog, IDC_START), TRUE);
+
+	return SetClusterSizes((int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem)));
 }
 
 /*
@@ -540,6 +584,7 @@ static BOOL PopulateProperties(int ComboIndex)
 	IGNORE_RETVAL(ComboBox_ResetContent(hCapacity));
 	IGNORE_RETVAL(ComboBox_ResetContent(hFileSystem));
 	IGNORE_RETVAL(ComboBox_ResetContent(hClusterSize));
+	EnableWindow(GetDlgItem(hMainDialog, IDC_START), FALSE);
 	SetWindowTextA(hLabel, "");
 	DestroyTooltip(hDeviceTooltip);
 	DestroyTooltip(hFSTooltip);
@@ -550,12 +595,6 @@ static BOOL PopulateProperties(int ComboIndex)
 	if (ComboIndex < 0) {
 		return TRUE;
 	}
-
-	// Populate the FileSystem values
-	IGNORE_RETVAL(ComboBox_AddStringU(hFileSystem, "FAT"));
-	IGNORE_RETVAL(ComboBox_AddStringU(hFileSystem, "FAT32"));
-	IGNORE_RETVAL(ComboBox_AddStringU(hFileSystem, "NTFS"));
-	IGNORE_RETVAL(ComboBox_AddStringU(hFileSystem, "exFAT"));
 
 	SelectedDrive.DeviceNumber = (DWORD)ComboBox_GetItemData(hDeviceList, ComboIndex);
 	if (!GetDriveInfo())
@@ -645,7 +684,7 @@ static BOOL CreatePartition(HANDLE hDrive)
 /*
  * FormatEx callback. Return FALSE to halt operations
  */
-static BOOLEAN __stdcall FormatExCallback(FILE_SYSTEM_CALLBACK_COMMAND Command, DWORD Action, PVOID Data)
+static BOOLEAN __stdcall FormatExCallback(FILE_SYSTEM_CALLBACK_COMMAND Command, DWORD Action, PVOID pData)
 {
 	DWORD* percent;
 	int task_number = 0;
@@ -655,7 +694,7 @@ static BOOLEAN __stdcall FormatExCallback(FILE_SYSTEM_CALLBACK_COMMAND Command, 
 
 	switch(Command) {
 	case FCC_PROGRESS:
-		percent = (DWORD*)Data;
+		percent = (DWORD*)pData;
 		PostMessage(hMainDialog, UM_FORMAT_PROGRESS, (WPARAM)*percent, (LPARAM)0);
 		uprintf("%d percent completed.\n", *percent);
 		break;
@@ -663,10 +702,16 @@ static BOOLEAN __stdcall FormatExCallback(FILE_SYSTEM_CALLBACK_COMMAND Command, 
 		uprintf("Format task %d/? completed.\n", ++task_number);
 		break;
 	case FCC_DONE:
-		if(*(BOOLEAN*)Data == FALSE) {
+		if(*(BOOLEAN*)pData == FALSE) {
 			uprintf("Error while formatting.\n");
 			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_GEN_FAILURE;
 		}
+		break;
+	case FCC_DONE_WITH_STRUCTURE:	// We get this message when formatting Small FAT16
+		// pData Seems to be a struct with at least one (32 BIT!!!) string pointer to the size in MB
+		uprintf("Done with that sort of things: Action=%d pData=%0p\n", Action, pData);
+		DumpBufferHex(pData, 8);
+		uprintf("Volume size: %s MB\n", (char*)(LONG_PTR)(*(ULONG32*)pData));
 		break;
 	case FCC_INCOMPATIBLE_FILE_SYSTEM:
 		uprintf("Incompatible File System\n");
@@ -693,7 +738,7 @@ static BOOLEAN __stdcall FormatExCallback(FILE_SYSTEM_CALLBACK_COMMAND Command, 
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_LABEL_TOO_LONG;
 		break;
 	case FCC_OUTPUT:
-		uprintf("%s\n", ((PTEXTOUTPUT)Data)->Output);
+		uprintf("%s\n", ((PTEXTOUTPUT)pData)->Output);
 		break;
 	case FCC_CLUSTER_SIZE_TOO_BIG:
 	case FCC_CLUSTER_SIZE_TOO_SMALL:
@@ -726,6 +771,7 @@ static BOOL FormatDrive(char DriveLetter)
 	WCHAR wDriveRoot[] = L"?:\\";
 	WCHAR wFSType[32];
 	WCHAR wLabel[128];
+	size_t i;
 
 	wDriveRoot[0] = (WCHAR)DriveLetter;
 	PrintStatus("Formatting...");
@@ -733,6 +779,14 @@ static BOOL FormatDrive(char DriveLetter)
 
 	// TODO: properly set MediaType
 	GetWindowTextW(hFileSystem, wFSType, ARRAYSIZE(wFSType));
+	// We may have a " (Default)" trail
+	for (i=0; i<wcslen(wFSType); i++) {
+		if (wFSType[i] == ' ') {
+			uprintf("removed %d\n", i);
+			wFSType[i] = 0;
+			break;
+		}
+	}
 	GetWindowTextW(hLabel, wLabel, ARRAYSIZE(wLabel));
 	uprintf("Using cluster size: %d bytes\n", ComboBox_GetItemData(hClusterSize, ComboBox_GetCurSel(hClusterSize)));
 	pfFormatEx(wDriveRoot, RemovableMedia, wFSType, wLabel,
@@ -1251,7 +1305,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		case IDC_FILESYSTEM:
 			switch (HIWORD(wParam)) {
 			case CBN_SELCHANGE:
-				SetClusterSizes((enum _FSType)ComboBox_GetCurSel(hFileSystem));
+				SetClusterSizes((int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem)));
 				break;
 			}
 			break;

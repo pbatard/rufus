@@ -119,7 +119,9 @@ enum MessageType {
 /* File system indexes in our FS combobox */
 // TODO: FormatEx should support "NTFS", "FAT", "FAT32", "UDF", and "EXFAT" as per
 // http://msdn.microsoft.com/en-us/library/windows/desktop/aa819439.aspx
-enum _FSType {
+
+enum {
+	FS_UNKNOWN = -1,
 	FS_FAT16 = 0,
 	FS_FAT32,
 	FS_NTFS,
@@ -192,7 +194,7 @@ typedef struct {
 typedef BOOLEAN (__stdcall *FILE_SYSTEM_CALLBACK)(
 	FILE_SYSTEM_CALLBACK_COMMAND Command,
 	ULONG                        Action,
-	PVOID                        Data
+	PVOID                        pData
 );
 
 /* Parameter names aligned to
