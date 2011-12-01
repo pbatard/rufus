@@ -123,6 +123,7 @@ enum _FSType {
 	FS_FAT16 = 0,
 	FS_FAT32,
 	FS_NTFS,
+	FS_EXFAT,
 	FS_MAX
 };
 

@@ -57,6 +57,11 @@
 const GUID GUID_DEVINTERFACE_DISK = { 0x53f56307L, 0xb6bf, 0x11d0, {0x94, 0xf2, 0x00, 0xa0, 0xc9, 0x1e, 0xfb, 0x8b} };
 #endif
 
+// Don't ask me - just following the MS standard here
+const char* ClusterSizeLabel[] = {"512 bytes", "1024 bytes","2048 bytes","4096 bytes","8192 bytes",
+	"16 kilobytes", "32 kilobytes", "64 kilobytes", "128 kilobytes", "256 kilobytes", "512 kilobytes",
+	"1024 kilobytes","2048 kilobytes","4096 kilobytes","8192 kilobytes","16 megabytes","32 megabytes"};
+
 // For MinGW
 #ifndef PBS_MARQUEE
 #define PBS_MARQUEE 0x08
@@ -80,10 +85,13 @@ BOOL bQuickFormat;
 struct {
 	DWORD DeviceNumber;
 	LONGLONG DiskSize;
-	LONGLONG PartitionSize;
 	DISK_GEOMETRY Geometry;
 	DWORD FirstSector;
 	enum _FSType FSType;
+	struct {
+		ULONG Allowed;
+		ULONG Default;
+	} ClusterSize[FS_MAX];
 } SelectedDrive;
 
 static HWND hDeviceList, hCapacity, hFileSystem, hClusterSize, hLabel;
@@ -305,32 +313,119 @@ static BOOL GetDriveLabel(DWORD DriveIndex, char* letter, char** label)
 	return TRUE;
 }
 
-static void SetClusterSizes(enum _FSType FSType)
+
+#define KB          1024LL
+#define MB       1048576LL
+#define GB    1073741824LL
+#define TB 1099511627776LL
+
+// Set cluster size values according to http://support.microsoft.com/kb/140365
+static BOOL DefineClusterSizes(void)
 {
+	LONGLONG i;
+//	int j;
+	memset(&SelectedDrive.ClusterSize, 0, sizeof(SelectedDrive.ClusterSize));
+	if (SelectedDrive.DiskSize < 8*MB) {
+		// TODO: muck with FAT12 and Small FAT16 like Microsoft does
+		uprintf("This application does not support volumes smaller than 8 MB yet\n");
+		return FALSE;
+	}
+
+	// FAT 16
+	if (SelectedDrive.DiskSize < 4*GB) {
+		// TODO: Refine the following according to size
+		SelectedDrive.ClusterSize[FS_FAT16].Allowed = 0x0001FE00;
+		for (i=32; i<=4096; i<<=1) {			// 8 MB -> 4 GB
+			if (SelectedDrive.DiskSize < i*MB) {
+				SelectedDrive.ClusterSize[FS_FAT16].Default = 16*(ULONG)i;
+				break;
+			}
+		}
+	}
+
+	// FAT 32
+	if (SelectedDrive.DiskSize < 256*MB) {
+		// TODO: Refine the following according to size
+		SelectedDrive.ClusterSize[FS_FAT32].Allowed = 0x0001FE00;
+		for (i=64; i<=256; i<<=1) {				// 8 MB -> 256 MB
+			if (SelectedDrive.DiskSize < i*MB) {
+				SelectedDrive.ClusterSize[FS_FAT32].Default = 8*(ULONG)i;
+				break;
+			}
+		}
+	} else if (SelectedDrive.DiskSize < 32*GB) {
+		SelectedDrive.ClusterSize[FS_FAT32].Allowed = 0x0001FE00;
+		for (i=8; i<=32; i<<=1) {				// 256 MB -> 32 GB
+			if (SelectedDrive.DiskSize < i*GB) {
+				SelectedDrive.ClusterSize[FS_FAT32].Default = ((ULONG)i/2)*1024;
+				break;
+			}
+		}
+	}
+
+	// NTFS
+	if (SelectedDrive.DiskSize < 256*TB) {
+		SelectedDrive.ClusterSize[FS_NTFS].Allowed = 0x0001FE00;
+		for (i=16; i<=256; i<<=1) {				// 7 MB -> 256 TB
+			if (SelectedDrive.DiskSize < i*TB) {
+				SelectedDrive.ClusterSize[FS_NTFS].Default = ((ULONG)i/4)*1024;
+				break;
+			}
+		}
+	}
+
+	// exFAT
+	if (SelectedDrive.DiskSize < 256*TB) {
+		SelectedDrive.ClusterSize[FS_EXFAT].Allowed = 0x03FFFE00;
+		if (SelectedDrive.DiskSize < 256*MB)	// < 256 MB
+			SelectedDrive.ClusterSize[FS_EXFAT].Default = 4*1024;
+		else if (SelectedDrive.DiskSize < 32*GB)	// < 32 GB
+			SelectedDrive.ClusterSize[FS_EXFAT].Default = 32*1024;
+		else
+			SelectedDrive.ClusterSize[FS_EXFAT].Default = 28*1024;
+	}
+
+//	for (j=0; j<FS_MAX; j++) {
+//		uprintf("SelectedDrive.ClusterSize[%d].Allowed = %08X\n", j, SelectedDrive.ClusterSize[j].Allowed);
+//		uprintf("SelectedDrive.ClusterSize[%d].Default = %08X\n", j, SelectedDrive.ClusterSize[j].Default);
+//	}
+
+	return TRUE;
+}
+#undef KB
+#undef MB
+#undef GB
+#undef TB
+
+static BOOL SetClusterSizes(enum _FSType FSType)
+{
+	char szDefault[64];
+	int i;
+	ULONG j;
+
 	IGNORE_RETVAL(ComboBox_ResetContent(hClusterSize));
-	// Don't ask me - just following the MS standard here
-	IGNORE_RETVAL(ComboBox_SetItemData(hClusterSize, ComboBox_AddStringU(hClusterSize, "Default allocation size"), 0x1000));
-	// TODO set value above according to FS selected and default cluster sizes from
-	// http://support.microsoft.com/kb/140365
-	IGNORE_RETVAL(ComboBox_SetItemData(hClusterSize, ComboBox_AddStringU(hClusterSize, "512 bytes"), 0x200));
-	IGNORE_RETVAL(ComboBox_SetItemData(hClusterSize, ComboBox_AddStringU(hClusterSize, "1024 bytes"), 0x400));
-	IGNORE_RETVAL(ComboBox_SetItemData(hClusterSize, ComboBox_AddStringU(hClusterSize, "2048 bytes"), 0x800));
-	IGNORE_RETVAL(ComboBox_SetItemData(hClusterSize, ComboBox_AddStringU(hClusterSize, "4096 bytes"), 0x1000));
-	IGNORE_RETVAL(ComboBox_SetItemData(hClusterSize, ComboBox_AddStringU(hClusterSize, "8192 bytes"), 0x2000));
-	IGNORE_RETVAL(ComboBox_SetItemData(hClusterSize, ComboBox_AddStringU(hClusterSize, "16 kilobytes"), 0x4000));
-	IGNORE_RETVAL(ComboBox_SetItemData(hClusterSize, ComboBox_AddStringU(hClusterSize, "32 kilobytes"), 0x8000));
-	IGNORE_RETVAL(ComboBox_SetItemData(hClusterSize, ComboBox_AddStringU(hClusterSize, "64 kilobytes"), 0x10000));
-	IGNORE_RETVAL(ComboBox_SetItemData(hClusterSize, ComboBox_AddStringU(hClusterSize, "128 kilobytes"), 0x20000));
-	IGNORE_RETVAL(ComboBox_SetItemData(hClusterSize, ComboBox_AddStringU(hClusterSize, "256 kilobytes"), 0x40000));
-	IGNORE_RETVAL(ComboBox_SetItemData(hClusterSize, ComboBox_AddStringU(hClusterSize, "512 kilobytes"), 0x80000));
-	IGNORE_RETVAL(ComboBox_SetItemData(hClusterSize, ComboBox_AddStringU(hClusterSize, "1024 kilobytes"), 0x100000));
-	IGNORE_RETVAL(ComboBox_SetItemData(hClusterSize, ComboBox_AddStringU(hClusterSize, "2048 kilobytes"), 0x200000));
-	IGNORE_RETVAL(ComboBox_SetItemData(hClusterSize, ComboBox_AddStringU(hClusterSize, "4096 kilobytes"), 0x400000));
-	IGNORE_RETVAL(ComboBox_SetItemData(hClusterSize, ComboBox_AddStringU(hClusterSize, "8192 kilobytes"), 0x800000));
-	IGNORE_RETVAL(ComboBox_SetItemData(hClusterSize, ComboBox_AddStringU(hClusterSize, "16 megabytes"), 0x1000000));
-	IGNORE_RETVAL(ComboBox_SetItemData(hClusterSize, ComboBox_AddStringU(hClusterSize, "32 megabytes"), 0x2000000));
-	// TODO set value according to disk props
+
+	if ( (SelectedDrive.ClusterSize[FSType].Allowed == 0)
+	  || (SelectedDrive.ClusterSize[FSType].Default == 0) ) {
+		uprintf("The drive is incompatible with FS type #%d\n", FSType);
+		return FALSE;
+	}
+
+	// Yes, I know there exist more efficient ways...
+	for(i=0,j=SelectedDrive.ClusterSize[FSType].Default>>10;j;i++,j>>=1);
+	safe_sprintf(szDefault, sizeof(szDefault), "Default allocation size (%s)", ClusterSizeLabel[i]);
+
+	IGNORE_RETVAL(ComboBox_SetItemData(hClusterSize, ComboBox_AddStringU(hClusterSize, szDefault),
+		SelectedDrive.ClusterSize[FSType].Default));
+
+	for(i=0,j=0x200;j<0x10000000;i++,j<<=1) {
+		if (j & SelectedDrive.ClusterSize[FSType].Allowed) {
+			IGNORE_RETVAL(ComboBox_SetItemData(hClusterSize, ComboBox_AddStringU(hClusterSize, ClusterSizeLabel[i]), j));
+		}
+	}
+
 	IGNORE_RETVAL(ComboBox_SetCurSel(hClusterSize, 0));
+	return TRUE;
 }
 
 /*
@@ -425,6 +520,7 @@ static BOOL GetDriveInfo(void)
 			SelectedDrive.FSType = FS_DEFAULT;
 	}
 	IGNORE_RETVAL(ComboBox_SetCurSel(hFileSystem, SelectedDrive.FSType));
+	DefineClusterSizes();
 	SetClusterSizes(SelectedDrive.FSType);
 
 	return TRUE;
@@ -459,6 +555,7 @@ static BOOL PopulateProperties(int ComboIndex)
 	IGNORE_RETVAL(ComboBox_AddStringU(hFileSystem, "FAT"));
 	IGNORE_RETVAL(ComboBox_AddStringU(hFileSystem, "FAT32"));
 	IGNORE_RETVAL(ComboBox_AddStringU(hFileSystem, "NTFS"));
+	IGNORE_RETVAL(ComboBox_AddStringU(hFileSystem, "exFAT"));
 
 	SelectedDrive.DeviceNumber = (DWORD)ComboBox_GetItemData(hDeviceList, ComboIndex);
 	if (!GetDriveInfo())
@@ -523,6 +620,8 @@ static BOOL CreatePartition(HANDLE hDrive)
 		DriveLayoutEx->PartitionEntry[0].Mbr.PartitionType = 0x0e;	// FAT16 LBA
 		break;
 	case FS_NTFS:
+	case FS_EXFAT:
+		// TODO: but how do we set this thing up afterwards?
 		DriveLayoutEx->PartitionEntry[0].Mbr.PartitionType = 0x07;	// NTFS
 		break;
 	default:
@@ -1146,6 +1245,13 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				PrintStatus("%d device%s found.", ComboBox_GetCount(hDeviceList),
 					(ComboBox_GetCount(hDeviceList)!=1)?"s":"");
 				PopulateProperties(ComboBox_GetCurSel(hDeviceList));
+				break;
+			}
+			break;
+		case IDC_FILESYSTEM:
+			switch (HIWORD(wParam)) {
+			case CBN_SELCHANGE:
+				SetClusterSizes((enum _FSType)ComboBox_GetCurSel(hFileSystem));
 				break;
 			}
 			break;
