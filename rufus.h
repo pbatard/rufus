@@ -75,6 +75,8 @@ extern char szFolderPath[MAX_PATH];
  * Shared prototypes
  */
 extern char *WindowsErrorString(void);
+extern void DumpBufferHex(void *buf, size_t size);
+extern void PrintStatus(const char *format, ...);
 extern void CenterDialog(HWND hDlg);
 extern void CreateStatusBar(void);
 extern INT_PTR CreateAboutBox(void);

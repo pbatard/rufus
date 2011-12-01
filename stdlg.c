@@ -76,35 +76,6 @@ static WNDPROC pOrgBrowseWndproc;
 HFONT hBoldFont = NULL;
 
 /*
- * Convert a windows error to human readable string
- * uses retval as errorcode, or, if 0, use GetLastError()
- */
-char *WindowsErrorString(void)
-{
-static char err_string[256];
-
-	DWORD size;
-	DWORD error_code, format_error;
-
-	error_code = GetLastError();
-
-	safe_sprintf(err_string, sizeof(err_string), "[%d] ", error_code);
-
-	size = FormatMessageU(FORMAT_MESSAGE_FROM_SYSTEM, NULL, error_code,
-		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), &err_string[strlen(err_string)],
-		sizeof(err_string)-(DWORD)strlen(err_string), NULL);
-	if (size == 0) {
-		format_error = GetLastError();
-		if (format_error)
-			safe_sprintf(err_string, sizeof(err_string),
-				"Windows error code %u (FormatMessage error code %u)", error_code, format_error);
-		else
-			safe_sprintf(err_string, sizeof(err_string), "Unknown error code %u", error_code);
-	}
-	return err_string;
-}
-
-/*
  * Detect Windows version
  */
 void DetectWindowsVersion(void)

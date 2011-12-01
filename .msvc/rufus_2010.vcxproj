@@ -153,6 +153,7 @@
     <ClCompile Include="..\file.c" />
     <ClCompile Include="..\msdos.c" />
     <ClCompile Include="..\rufus.c" />
+    <ClCompile Include="..\stdio.c" />
     <ClCompile Include="..\stdlg.c" />
   </ItemGroup>
   <ItemGroup>

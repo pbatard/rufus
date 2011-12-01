@@ -42,6 +42,9 @@
     <ClCompile Include="..\fat12.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\stdio.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\rufus.h">

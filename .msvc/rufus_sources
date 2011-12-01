@@ -24,6 +24,7 @@ TARGETLIBS=$(SDK_LIB_PATH)\kernel32.lib \
 SXS_APPLICATION_MANIFEST=common_controls_and_elevation.manifest
 
 SOURCES=rufus.c \
+        stdio.c \
         stdlg.c \
         msdos.c \
         file.c  \
