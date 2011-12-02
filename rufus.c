@@ -2,9 +2,6 @@
  * Rufus: The Resourceful USB Formatting Utility
  * Copyright (c) 2011 Pete Batard <pete@akeo.ie>
  * 
- * Device enumeration based in part on TestUSBDriveEject.cpp by ahmd:
- * http://www.codeguru.com/forum/showpost.php?p=1951973&postcount=7
- *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -36,33 +33,21 @@
 #include <winioctl.h>
 #include <process.h>
 #include <dbt.h>
-#include <io.h>
 
 // http://git.kernel.org/?p=fs/ext2/e2fsprogs.git;a=blob;f=misc/badblocks.c
 // http://thestarman.pcministry.com/asm/mbr/MSWIN41.htm
+// http://sourceforge.net/projects/grub4dos/ (bootable NTFS?)
 
 #include "msapi_utf8.h"
 #include "resource.h"
 #include "rufus.h"
 #include "sys_types.h"
 
-#if !defined(GUID_DEVINTERFACE_DISK)
-const GUID GUID_DEVINTERFACE_DISK = { 0x53f56307L, 0xb6bf, 0x11d0, {0x94, 0xf2, 0x00, 0xa0, 0xc9, 0x1e, 0xfb, 0x8b} };
-#endif
-
 static const char* FileSystemLabel[FS_MAX] = { "FAT", "FAT32", "NTFS", "exFAT" };
 // Don't ask me - just following the MS standard here
 static const char* ClusterSizeLabel[] = { "512 bytes", "1024 bytes","2048 bytes","4096 bytes","8192 bytes",
 	"16 kilobytes", "32 kilobytes", "64 kilobytes", "128 kilobytes", "256 kilobytes", "512 kilobytes",
 	"1024 kilobytes","2048 kilobytes","4096 kilobytes","8192 kilobytes","16 megabytes","32 megabytes" };
-
-// For MinGW
-#ifndef PBS_MARQUEE
-#define PBS_MARQUEE 0x08
-#endif
-#ifndef PBM_SETMARQUEE
-#define PBM_SETMARQUEE (WM_USER+10)
-#endif
 
 /*
  * Globals
@@ -72,10 +57,9 @@ HWND hMainDialog;
 char szFolderPath[MAX_PATH];
 float fScale = 1.0f;
 int default_fs;
-ULONG default_clutersize;
 HWND hDeviceList, hCapacity, hFileSystem, hClusterSize, hLabel;
-static HWND hDeviceTooltip = NULL, hFSTooltip = NULL;
 
+static HWND hDeviceTooltip = NULL, hFSTooltip = NULL;
 static StrArray DriveID, DriveLabel;
 
 /*
@@ -473,12 +457,14 @@ static BOOL GetUSBDevices(void)
 	char drive_letter;
 	char *label, entry[MAX_PATH], buffer[MAX_PATH];
 	const char* usbstor_name = "USBSTOR";
+	GUID _GUID_DEVINTERFACE_DISK =			// only known to some...
+		{ 0x53f56307L, 0xb6bf, 0x11d0, {0x94, 0xf2, 0x00, 0xa0, 0xc9, 0x1e, 0xfb, 0x8b} };
 
 	IGNORE_RETVAL(ComboBox_ResetContent(hDeviceList));
 	StrArrayClear(&DriveID);
 	StrArrayClear(&DriveLabel);
 
-	dev_info = SetupDiGetClassDevsA(&GUID_DEVINTERFACE_DISK, NULL, NULL, DIGCF_PRESENT|DIGCF_DEVICEINTERFACE);
+	dev_info = SetupDiGetClassDevsA(&_GUID_DEVINTERFACE_DISK, NULL, NULL, DIGCF_PRESENT|DIGCF_DEVICEINTERFACE);
 	if (dev_info == INVALID_HANDLE_VALUE) {
 		uprintf("SetupDiGetClassDevs (Interface) failed: %d\n", WindowsErrorString());
 		return FALSE;
@@ -510,7 +496,7 @@ static BOOL GetUSBDevices(void)
 			safe_closehandle(hDrive);
 			safe_free(devint_detail_data);
 
-			if (!SetupDiEnumDeviceInterfaces(dev_info, &dev_info_data, &GUID_DEVINTERFACE_DISK, j, &devint_data)) {
+			if (!SetupDiEnumDeviceInterfaces(dev_info, &dev_info_data, &_GUID_DEVINTERFACE_DISK, j, &devint_data)) {
 				if(GetLastError() != ERROR_NO_MORE_ITEMS) {
 					uprintf("SetupDiEnumDeviceInterfaces failed: %s\n", WindowsErrorString());
 				}
@@ -573,13 +559,20 @@ static BOOL GetUSBDevices(void)
  */
 static void EnableControls(BOOL bEnable)
 {
+	int fs;
+
 	EnableWindow(GetDlgItem(hMainDialog, IDC_DEVICE), bEnable);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_CAPACITY), bEnable);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_FILESYSTEM), bEnable);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_CLUSTERSIZE), bEnable);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_LABEL), bEnable);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_QUICKFORMAT), bEnable);
-	EnableWindow(GetDlgItem(hMainDialog, IDC_DOSSTARTUP), bEnable);
+	if (bEnable) {
+		fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
+		EnableWindow(GetDlgItem(hMainDialog, IDC_DOS), (fs == FS_FAT16) || (fs == FS_FAT32));
+	} else {
+		EnableWindow(GetDlgItem(hMainDialog, IDC_DOS), FALSE);
+	}
 	EnableWindow(GetDlgItem(hMainDialog, IDC_ABOUT), bEnable);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_START), bEnable);
 	SetDlgItemTextA(hMainDialog, IDCANCEL, bEnable?"Close":"Cancel");
@@ -588,17 +581,24 @@ static void EnableControls(BOOL bEnable)
 /*
  * Main dialog callback
  */
+#ifndef PBS_MARQUEE				// Some versions of MinGW don't know these
+#define PBS_MARQUEE 0x08
+#endif
+#ifndef PBM_SETMARQUEE
+#define PBM_SETMARQUEE (WM_USER+10)
+#endif
 static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	HDC hDC;
 	DRAWITEMSTRUCT* pDI;
-	int nDeviceIndex;
+	int nDeviceIndex, fs;
 	DWORD DeviceNum;
 	char str[MAX_PATH], tmp[128];
 	static char app_version[32];
 	static uintptr_t format_thid = -1L;
-	static HWND hProgress;
+	static HWND hProgress, hDOS;
 	static LONG ProgressStyle = 0;
+	static UINT uDOSChecked = BST_CHECKED;
 
 	switch (message) {
 
@@ -618,6 +618,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		hClusterSize = GetDlgItem(hDlg, IDC_CLUSTERSIZE);
 		hLabel = GetDlgItem(hDlg, IDC_LABEL);
 		hProgress = GetDlgItem(hDlg, IDC_PROGRESS);
+		hDOS = GetDlgItem(hDlg, IDC_DOS);
 		// High DPI scaling
 		hDC = GetDC(hDlg);
 		fScale = GetDeviceCaps(hDC, LOGPIXELSX) / 96.0f;
@@ -632,8 +633,9 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		// Create the string array
 		StrArrayCreate(&DriveID, MAX_DRIVES);
 		StrArrayCreate(&DriveLabel, MAX_DRIVES);
-		// Set the quick format checkbox
+		// Set the quick format & create DOS disk checkboxes
 		CheckDlgButton(hDlg, IDC_QUICKFORMAT, BST_CHECKED);
+		CheckDlgButton(hDlg, IDC_DOS, BST_CHECKED);
 		GetUSBDevices();
 		return (INT_PTR)TRUE;
 
@@ -687,7 +689,21 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		case IDC_FILESYSTEM:
 			switch (HIWORD(wParam)) {
 			case CBN_SELCHANGE:
-				SetClusterSizes((int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem)));
+				fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
+				SetClusterSizes(fs);
+				// Disable/Restore the DOS checkbox according to FS
+				if ((fs == FS_FAT16) || (fs == FS_FAT32)) {
+					if (!IsWindowEnabled(hDOS)) {
+						EnableWindow(hDOS, TRUE);
+						CheckDlgButton(hDlg, IDC_DOS, uDOSChecked);
+					}
+				} else {
+					if (IsWindowEnabled(hDOS)) {
+						uDOSChecked = IsDlgButtonChecked(hMainDialog, IDC_DOS);
+						CheckDlgButton(hDlg, IDC_DOS, BST_UNCHECKED);
+						EnableWindow(hDOS, FALSE);
+					}
+				}
 				break;
 			}
 			break;
