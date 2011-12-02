@@ -170,7 +170,6 @@ static BOOL AnalyzeMBR(HANDLE hPhysicalDrive)
 	fake_fd._bufsiz = SelectedDrive.Geometry.BytesPerSector;
 
 	// TODO: Apply this detection before partitioning
-	// TODO: since we detect all these, might as well give some MBR choice to the user?
 	if (is_br(&fake_fd)) {
 		uprintf("Drive has an x86 boot sector\n");
 	} else{
@@ -352,6 +351,7 @@ void __cdecl FormatThread(void* param)
 	// TODO: Enable compression on NTFS
 	// TODO: optionally disable indexing on NTFS
 	// TODO: use progress bar during MBR/FSBR/MSDOS copy
+	// TODO: unlock/remount trick to make the volume reappear
 
 	PrintStatus("Writing master boot record...\n");
 	if (!WriteMBR(hPhysicalDrive)) {
