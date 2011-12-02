@@ -144,7 +144,6 @@ static BOOL FormatDrive(char DriveLetter)
 	// We may have a " (Default)" trail
 	for (i=0; i<wcslen(wFSType); i++) {
 		if (wFSType[i] == ' ') {
-			uprintf("removed %d\n", i);
 			wFSType[i] = 0;
 			break;
 		}
@@ -215,9 +214,9 @@ static BOOL AnalyzeMBR(HANDLE hPhysicalDrive)
 }
 
 /*
- * Process the MBR
+ * Process the Master Boot Record
  */
-static BOOL ProcessMBR(HANDLE hPhysicalDrive)
+static BOOL WriteMBR(HANDLE hPhysicalDrive)
 {
 	BOOL r = FALSE;
 	unsigned char* buf = NULL;
@@ -242,17 +241,26 @@ static BOOL ProcessMBR(HANDLE hPhysicalDrive)
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_READ_FAULT;
 		goto out;
 	}
-//	DumpBufferHex(buf, 0x200);
-	switch (ComboBox_GetCurSel(hFileSystem)) {
-	// TODO: check for 0x06 & 0x0b?
+
+	switch (ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem))) {
 	case FS_FAT16:
+		if (buf[0x1c2] == 0x0e) {
+			uprintf("Partition is already FAT16 LBA...\n");
+		} else if ((buf[0x1c2] != 0x04) && (buf[0x1c2] != 0x06)) {
+			uprintf("Warning: converting a non FAT16 partition to FAT16 LBA: FS type=0x%02x\n", buf[0x1c2]);
+		}
 		buf[0x1c2] = 0x0e;
 		break;
 	case FS_FAT32:
+		if (buf[0x1c2] == 0x0c) {
+			uprintf("Partition is already FAT32 LBA...\n");
+		} else if (buf[0x1c2] != 0x0b) {
+			uprintf("Warning: converting a non FAT32 partition to FAT32 LBA: FS type=0x%02x\n", buf[0x1c2]);
+		}
 		buf[0x1c2] = 0x0c;
 		break;
 	}
-	if (IsChecked(IDC_DOSSTARTUP)) {
+	if (IsChecked(IDC_DOS)) {
 		buf[0x1be] = 0x80;		// Set first partition bootable
 	}
 
@@ -266,70 +274,35 @@ static BOOL ProcessMBR(HANDLE hPhysicalDrive)
 	fake_fd._bufsiz = SelectedDrive.Geometry.BytesPerSector;
 	r = write_95b_mbr(&fake_fd);
 
-	if (!read_sectors(hPhysicalDrive, SelectedDrive.Geometry.BytesPerSector, 0, nSecs, buf, SecSize)) {
-		uprintf("Could not re-read MBR\n");
-		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_READ_FAULT;
-		goto out;
-	}
-	DumpBufferHex(buf, 0x200);
-
 out:
 	safe_free(buf);
 	return r;
 }
 
-static BOOL ProcessFS_BR(HANDLE hLogicalVolume)
+/*
+ * Process the Partition Boot Record
+ */
+static BOOL WritePBR(HANDLE hLogicalVolume)
 {
-	BOOL r = FALSE;
-	unsigned char* buf = NULL;
 	FILE fake_fd;
-	size_t SecSize = SelectedDrive.Geometry.BytesPerSector;
-	size_t nSecs = (0x400 + SecSize -1) / SecSize;
 
 	fake_fd._ptr = (char*)hLogicalVolume;
 	fake_fd._bufsiz = SelectedDrive.Geometry.BytesPerSector;
-	write_fat_32_br(&fake_fd, 0);
 
-	// FormatEx rewrites the MBR and removes the LBA attribute of FAT16
-	// and FAT32 partitions - we need to correct this in the MBR
-	// TODO: something else for bootable GPT
-	buf = (unsigned char*)malloc(SecSize * nSecs);
-	if (buf == NULL) {
-		uprintf("Could not allocate memory for FS BR");
-		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_NOT_ENOUGH_MEMORY;
-		goto out;
+	switch (ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem))) {
+	case FS_FAT16:
+		if (write_fat_16_br(&fake_fd, 0))
+			return TRUE;
+	case FS_FAT32:
+		if (write_fat_32_br(&fake_fd, 0))
+			return TRUE;
+	default:
+		uprintf("unsupported FS for FS BR processing\n");
+		break;
 	}
-
-	if (!read_sectors(hLogicalVolume, SelectedDrive.Geometry.BytesPerSector, 0, nSecs, buf, SecSize*nSecs)) {
-		uprintf("Could not read FS BR\n");
-		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_READ_FAULT;
-		goto out;
-	}
-	uprintf("FS_BR:\n");
-	DumpBufferHex(buf, 0x400);
-
-out:
-	safe_free(buf);
-	return r;
+	FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_WRITE_FAULT;
+	return FALSE;
 }
-
-/* http://msdn.microsoft.com/en-us/library/windows/desktop/aa364562%28v=vs.85%29.aspx
-   Dismounting a volume is useful when a volume needs to disappear for a while. For
-   example, an application that changes a volume file system from the FAT file system
-   to the NTFS file system might use the following procedure.
-
-   To change a volume file system
-
-    Open a volume.
-    Lock the volume.
-    Format the volume.
-    Dismount the volume.
-    Unlock the volume.
-    Close the volume handle.
-
-   A dismounting operation removes the volume from the FAT file system awareness.
-   When the operating system mounts the volume, it appears as an NTFS file system volume.
-*/
 
 /*
  * Standalone thread for the formatting operation
@@ -341,7 +314,6 @@ void __cdecl FormatThread(void* param)
 	HANDLE hLogicalVolume = INVALID_HANDLE_VALUE;
 	char drive_name[] = "?:";
 	int i;
-//	DWORD size;
 
 	hPhysicalDrive = GetDriveHandle(num, NULL, TRUE, TRUE);
 	if (hPhysicalDrive == INVALID_HANDLE_VALUE) {
@@ -358,7 +330,7 @@ void __cdecl FormatThread(void* param)
 	// Make sure we can access the volume again before trying to format it
 	for (i=0; i<10; i++) {
 		Sleep(500);
-		hLogicalVolume = GetDriveHandle(num, drive_name, FALSE, TRUE);
+		hLogicalVolume = GetDriveHandle(num, drive_name, FALSE, FALSE);
 		if (hLogicalVolume != INVALID_HANDLE_VALUE) {
 			break;
 		}
@@ -381,50 +353,27 @@ void __cdecl FormatThread(void* param)
 	// TODO: optionally disable indexing on NTFS
 	// TODO: use progress bar during MBR/FSBR/MSDOS copy
 
-	// Ideally we would lock, FSCTL_DISMOUNT_VOLUME, unlock and close our volume
-	// handle, but some explorer versions have problems with volumes disappear
-// #define VOL_DISMOUNT
-#ifdef VOL_DISMOUNT
-	// Dismount the volume
-	hLogicalVolume = GetDriveHandle(num, drive_name, FALSE, TRUE);
-	if (hLogicalVolume == INVALID_HANDLE_VALUE) {
-		uprintf("Could not open the volume for dismount\n");
-		goto out;
-	}
-
-	if (!DeviceIoControl(hLogicalVolume, FSCTL_DISMOUNT_VOLUME, NULL, 0, NULL, 0, &size, NULL)) {
-		uprintf("Could not dismount volume\n");
-		goto out;
-	}
-#endif
 	PrintStatus("Writing master boot record...\n");
-	if (!ProcessMBR(hPhysicalDrive)) {
+	if (!WriteMBR(hPhysicalDrive)) {
 		// Errorcode has already been set
 		goto out;
 	}
 
-#ifdef VOL_DISMOUNT
-	safe_unlockclose(hLogicalVolume);
-//	Sleep(10000);
-	hLogicalVolume = GetDriveHandle(num, drive_name, FALSE, FALSE);
-	if (hLogicalVolume == INVALID_HANDLE_VALUE) {
-		uprintf("Could not re-mount volume\n");
-		goto out;
-	}
-#endif
-
-	if (IsChecked(IDC_DOSSTARTUP)) {
-		hLogicalVolume = GetDriveHandle(num, drive_name, TRUE, FALSE);
+	if (IsChecked(IDC_DOS)) {
+		// We must have a lock to modify the FS boot record...
+		hLogicalVolume = GetDriveHandle(num, drive_name, TRUE, TRUE);
 		if (hLogicalVolume == INVALID_HANDLE_VALUE) {
-			uprintf("Could not re-mount volume\n");
+			uprintf("Could not re-mount volume for partition boot record access\n");
 			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_OPEN_FAILED;
 			goto out;
 		}
-		PrintStatus("Writing filesystem boot record...\n");
-		if (!ProcessFS_BR(hLogicalVolume)) {
+		PrintStatus("Writing partition boot record...\n");
+		if (!WritePBR(hLogicalVolume)) {
 			// Errorcode has already been set
 			goto out;
 		}
+		// ... and we must have relinquished that lock to write the MS-DOS files 
+		safe_unlockclose(hLogicalVolume);
 		PrintStatus("Copying MS-DOS files...\n");
 		if (!ExtractMSDOS(drive_name)) {
 			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANNOT_COPY;

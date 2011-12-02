@@ -47,7 +47,7 @@ BEGIN
     GROUPBOX        "Format Options",IDC_STATIC,15,150,189,40
     EDITTEXT        IDC_LABEL,15,132,190,13,ES_AUTOHSCROLL
     CONTROL         "&Quick Format",IDC_QUICKFORMAT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,21,162,58,10
-    CONTROL         "Create an &MS-DOS startup disk",IDC_DOSSTARTUP,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,21,174,115,10
+    CONTROL         "Create an &MS-DOS startup disk",IDC_DOS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,21,174,115,10
     LTEXT           "New volume &label",IDC_STATIC,17,122,105,10
     CONTROL         "",IDC_PROGRESS,"msctls_progress32",PBS_SMOOTH | WS_BORDER,15,198,189,9
 END
@@ -63,7 +63,7 @@ BEGIN
     DEFPUSHBUTTON   "OK",IDOK,231,175,50,14,WS_GROUP
     CONTROL         "<a href=""https://github.com/pbatard/rufus/wiki/Rufus"">https://github.com/pbatard/rufus</a>",IDC_ABOUT_RUFUS_URL,
                     "SysLink",WS_TABSTOP,46,47,114,9
-    LTEXT           "Version 1.0.0 (Build 60)",IDC_STATIC,46,19,78,8
+    LTEXT           "Version 1.0.0 (Build 61)",IDC_STATIC,46,19,78,8
     PUSHBUTTON      "License...",IDC_ABOUT_LICENSE,46,175,50,14,WS_GROUP
     EDITTEXT        IDC_ABOUT_COPYRIGHTS,46,107,235,63,ES_MULTILINE | ES_READONLY | WS_VSCROLL
     LTEXT           "Report bugs or request enhancements at:",IDC_STATIC,46,66,187,8
@@ -162,8 +162,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,0,0,60
- PRODUCTVERSION 1,0,0,60
+ FILEVERSION 1,0,0,61
+ PRODUCTVERSION 1,0,0,61
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -180,13 +180,13 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "akeo.ie"
             VALUE "FileDescription", "Rufus"
-            VALUE "FileVersion", "1.0.0.60"
+            VALUE "FileVersion", "1.0.0.61"
             VALUE "InternalName", "Rufus"
             VALUE "LegalCopyright", "© 2011 Pete Batard (GPL v3)"
             VALUE "LegalTrademarks", "http://www.gnu.org/copyleft/gpl.html"
             VALUE "OriginalFilename", "rufus.exe"
             VALUE "ProductName", "Rufus"
-            VALUE "ProductVersion", "1.0.0.60"
+            VALUE "ProductVersion", "1.0.0.61"
         END
     END
     BLOCK "VarFileInfo"
@@ -212,7 +212,7 @@ IDI_ICON                ICON                    "rufus.ico"
 
 STRINGTABLE
 BEGIN
-    IDS_VERSION             "Rufus v1.0.0.60"
+    IDS_VERSION             "Rufus v1.0.0.61"
 END
 
 #endif    // English resources
