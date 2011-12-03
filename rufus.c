@@ -590,6 +590,7 @@ static void EnableControls(BOOL bEnable)
 static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	HDC hDC;
+	HICON hSmallIcon, hBigIcon;
 	DRAWITEMSTRUCT* pDI;
 	int nDeviceIndex, fs;
 	DWORD DeviceNum;
@@ -623,6 +624,11 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		hDC = GetDC(hDlg);
 		fScale = GetDeviceCaps(hDC, LOGPIXELSX) / 96.0f;
 		ReleaseDC(hDlg, hDC);
+		// Create the title bar icon
+		hSmallIcon = (HICON)LoadImage(hMainInstance, MAKEINTRESOURCE(IDI_ICON), IMAGE_ICON, 16, 16, 0);
+		SendMessage (hDlg, WM_SETICON, ICON_SMALL, (LPARAM)hSmallIcon);
+		hBigIcon = (HICON)LoadImage(hMainInstance, MAKEINTRESOURCE(IDI_ICON), IMAGE_ICON, 32, 32, 0);
+		SendMessage (hDlg, WM_SETICON, ICON_BIG, (LPARAM)hBigIcon);
 		// Create the status line
 		CreateStatusBar();
 		// Display the version in the right area of the status bar
