@@ -591,11 +591,9 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 {
 	HDC hDC;
 	HICON hSmallIcon, hBigIcon;
-	DRAWITEMSTRUCT* pDI;
 	int nDeviceIndex, fs;
 	DWORD DeviceNum;
 	char str[MAX_PATH], tmp[128];
-	static char app_version[32];
 	static uintptr_t format_thid = -1L;
 	static HWND hProgress, hDOS;
 	static LONG ProgressStyle = 0;
@@ -630,10 +628,8 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		hBigIcon = (HICON)LoadImage(hMainInstance, MAKEINTRESOURCE(IDI_ICON), IMAGE_ICON, 32, 32, 0);
 		SendMessage (hDlg, WM_SETICON, ICON_BIG, (LPARAM)hBigIcon);
 		// Create the status line
-		CreateStatusBar();
-		// Display the version in the right area of the status bar
-		LoadStringA(hMainInstance, IDS_VERSION, app_version, sizeof(app_version));
-		SendMessageA(GetDlgItem(hDlg, IDC_STATUS), SB_SETTEXTA, SBT_OWNERDRAW | 1, (LPARAM)app_version);
+		hStatus = CreateWindowEx(0, STATUSCLASSNAME, NULL, WS_CHILD | WS_VISIBLE,
+			0, 0, 0, 0, hMainDialog, (HMENU)IDC_STATUS,  hMainInstance, NULL);
 		// We'll switch the progressbar to marquee and back => keep a copy of current style
 		ProgressStyle = GetWindowLong(hProgress, GWL_STYLE);
 		// Create the string array
@@ -644,19 +640,6 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		CheckDlgButton(hDlg, IDC_DOS, BST_CHECKED);
 		GetUSBDevices();
 		return (INT_PTR)TRUE;
-
-	// Change the colour of the version text in the status bar
-	case WM_DRAWITEM:
-		if (wParam == IDC_STATUS) {
-			pDI = (DRAWITEMSTRUCT*)lParam;
-			SetBkMode(pDI->hDC, TRANSPARENT);
-			SetTextColor(pDI->hDC, GetSysColor(COLOR_3DSHADOW));
-			pDI->rcItem.top += (int)(2.0f * fScale);
-			pDI->rcItem.left += (int)(4.0f * fScale);
-			DrawTextExA(pDI->hDC, app_version, -1, &pDI->rcItem, DT_LEFT, NULL);
-			return (INT_PTR)TRUE;
-		}
-		break;
 
 	case WM_COMMAND:
 		switch(LOWORD(wParam)) {

@@ -339,25 +339,6 @@ void CreateBoldFont(HDC dc) {
 }
 
 /*
- * Create the application status bar
- */
-void CreateStatusBar(void)
-{
-	RECT rect;
-	int edge[2];
-
-	// Create the status bar.
-	hStatus = CreateWindowEx(0, STATUSCLASSNAME, NULL, WS_CHILD | WS_VISIBLE,
-		0, 0, 0, 0, hMainDialog, (HMENU)IDC_STATUS,  hMainInstance, NULL);
-
-	// Create 2 status areas
-	GetClientRect(hMainDialog, &rect);
-	edge[0] = rect.right - (int)(100.0f*fScale);
-	edge[1] = rect.right;
-	SendMessage(hStatus, SB_SETPARTS, (WPARAM) 2, (LPARAM)&edge);
-}
-
-/*
  * Center a dialog with regards to the main application Window or the desktop
  */
 void CenterDialog(HWND hDlg)
