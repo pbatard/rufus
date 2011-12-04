@@ -29,8 +29,7 @@ s/^[ \t]*FILEVERSION[ \t]*\(.*\),\(.*\),\(.*\),.*/ FILEVERSION \1,\2,\3,@@TAGVER
 s/^[ \t]*PRODUCTVERSION[ \t]*\(.*\),\(.*\),\(.*\),.*/ PRODUCTVERSION \1,\2,\3,@@TAGVER@@/
 s/^\([ \t]*\)VALUE[ \t]*"FileVersion",[ \t]*"\(.*\)\..*"/\1VALUE "FileVersion", "\2.@@TAGVER@@"/
 s/^\([ \t]*\)VALUE[ \t]*"ProductVersion",[ \t]*"\(.*\)\..*"/\1VALUE "ProductVersion", "\2.@@TAGVER@@"/
-s/^\(.*\)ufus v\(.*\)\.\(.*\)"\(.*\)/\1ufus v\2.@@TAGVER@@"\4/
-s/^zadig_version=\(.*\)\..*/rufus_version=\1.@@TAGVER@@/
+s/^\(.*\)"Rufus v\(.*\)\.\(.*\)"\(.*\)/\1"Rufus v\2.@@TAGVER@@"\4/
 s/^\(.*\)"Version \(.*\) (Build \(.*\))"\(.*\)/\1"Version \2 (Build @@TAGVER@@)"\4/
 _EOF
 
