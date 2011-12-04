@@ -97,7 +97,7 @@ void DumpBufferHex(void *buf, size_t size)
  * Convert a windows error to human readable string
  * uses retval as errorcode, or, if 0, use GetLastError()
  */
-char *WindowsErrorString(void)
+const char *WindowsErrorString(void)
 {
 static char err_string[256];
 
@@ -106,18 +106,18 @@ static char err_string[256];
 
 	error_code = GetLastError();
 
-	safe_sprintf(err_string, sizeof(err_string), "[%d] ", error_code);
+	safe_sprintf(err_string, sizeof(err_string), "[0x%08X] ", error_code);
 
 	size = FormatMessageU(FORMAT_MESSAGE_FROM_SYSTEM, NULL, error_code,
 		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), &err_string[strlen(err_string)],
 		sizeof(err_string)-(DWORD)strlen(err_string), NULL);
 	if (size == 0) {
 		format_error = GetLastError();
-		if (format_error)
+		if ((format_error) && (format_error != 0x13D))		// 0x13D, decode error, is returned for unknown codes
 			safe_sprintf(err_string, sizeof(err_string),
-				"Windows error code %u (FormatMessage error code %u)", error_code, format_error);
+				"Windows error code 0x%08X (FormatMessage error code 0x%08X)", error_code, format_error);
 		else
-			safe_sprintf(err_string, sizeof(err_string), "Unknown error code %u", error_code);
+			safe_sprintf(err_string, sizeof(err_string), "Unknown error 0x%08X", error_code);
 	}
 	return err_string;
 }
@@ -140,4 +140,61 @@ void PrintStatus(const char *format, ...)
 	*p   = '\0';
 
 	SetDlgItemTextU(hMainDialog, IDC_STATUS, buf);
+}
+
+const char* StrError(DWORD error_code)
+{
+	if ( (!IS_ERROR(error_code)) || (SCODE_CODE(error_code) == ERROR_SUCCESS)) {
+		return "Success";
+	}
+	if (SCODE_FACILITY(error_code) != FACILITY_STORAGE) {
+		uprintf("StrError: non storage - %08X (%X)\n", error_code, SCODE_FACILITY(error_code));
+		SetLastError(error_code);
+		return WindowsErrorString();
+	}
+	switch (SCODE_CODE(error_code)) {
+	case ERROR_GEN_FAILURE:
+		return "Undetermined error while formatting";
+	case ERROR_INCOMPATIBLE_FS:
+		return "Cannot use the selected file system for this media";
+	case ERROR_ACCESS_DENIED:
+		return "Access to the media is denied";
+	case ERROR_WRITE_PROTECT:
+		return "Media is write protected";
+	case ERROR_DEVICE_IN_USE:
+		return "The device is in use by another process\n"
+			"Please close any other process that may be accessing the device";
+	case ERROR_CANT_QUICK_FORMAT:
+		return "Quick format is not available for this device";
+	case ERROR_LABEL_TOO_LONG:
+		return "The volume label is invalid";
+	case ERROR_INVALID_CLUSTER_SIZE:
+		return "The selected allocation unit size is not valid for this device";
+	case ERROR_INVALID_VOLUME_SIZE:
+		return "The volume size is invalid";
+	case ERROR_NO_MEDIA_IN_DRIVE:
+		return "Please insert a media in drive";
+	case ERROR_NOT_SUPPORTED:
+		return "An unsupported command was received";
+	case ERROR_NOT_ENOUGH_MEMORY:
+		return "Memory allocation error";
+	case ERROR_READ_FAULT:
+		return "Read error";
+	case ERROR_WRITE_FAULT:
+		return "Write error";
+	case ERROR_OPEN_FAILED:
+		return "Could not open media";
+	case ERROR_PARTITION_FAILURE:
+		return "Error while partitioning drive";
+	case ERROR_CANNOT_COPY:
+		return "Could not copy MS-DOS files";
+	case ERROR_CANCELLED:
+		return "Cancelled by user";
+	case ERROR_CANT_START_THREAD:
+		return "Unable to create formatting thread";
+	default:
+		uprintf("StrError: hit default - %08X\n", error_code);
+		SetLastError(error_code);
+		return WindowsErrorString();
+	}
 }

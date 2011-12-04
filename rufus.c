@@ -718,7 +718,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 					format_thid = _beginthread(FormatThread, 0, (void*)(uintptr_t)DeviceNum);
 					if (format_thid == -1L) {
 						uprintf("Unable to start formatting thread");
-						FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANT_START_THREAD;
+						FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_START_THREAD);
 						PostMessage(hMainDialog, UM_FORMAT_COMPLETED, 0, 0);
 					}
 				}
@@ -755,9 +755,15 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		SendMessage(hProgress, PBM_SETPOS, FormatStatus?0:100, 0);
 		EnableControls(TRUE);
 		GetUSBDevices();
-		// TODO: process and report error code to user
-		PrintStatus(!IS_ERROR(FormatStatus)?"DONE":
-			((SCODE_CODE(FormatStatus)==ERROR_CANCELLED)?"Cancelled":"FAILED"));
+		if (!IS_ERROR(FormatStatus)) {
+			PrintStatus("DONE");
+		} else if (SCODE_CODE(FormatStatus) == ERROR_CANCELLED) {
+			PrintStatus("Cancelled");
+			Notification(MSG_INFO, "Cancelled", "Operation cancelled by the user.");
+		} else {
+			PrintStatus("FAILED");
+			Notification(MSG_ERROR, "Error", "Error: %s", StrError(FormatStatus));
+		}
 		return (INT_PTR)TRUE;
 	}
 	return (INT_PTR)FALSE;

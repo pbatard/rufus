@@ -122,16 +122,17 @@ extern RUFUS_DRIVE_INFO SelectedDrive;
 /*
  * Shared prototypes
  */
-extern char *WindowsErrorString(void);
+extern const char *WindowsErrorString(void);
 extern void DumpBufferHex(void *buf, size_t size);
 extern void PrintStatus(const char *format, ...);
+extern const char* StrError(DWORD error_code);
 extern void CenterDialog(HWND hDlg);
 extern void CreateStatusBar(void);
 extern INT_PTR CreateAboutBox(void);
 extern HWND CreateTooltip(HWND hControl, const char* message, int duration);
 extern void DestroyTooltip(HWND hWnd);
 extern void DestroyAllTooltips(void);
-extern void Notification(int type, char* text, char* title);
+extern BOOL Notification(int type, char* title, char* format, ...);
 extern BOOL ExtractMSDOS(const char* path);
 extern void __cdecl FormatThread(void* param);
 extern BOOL CreatePartition(HANDLE hDrive);
@@ -176,8 +177,9 @@ typedef struct {
 
 /* Custom application errors */
 #define FAC(f)                         (f<<16)
-#define ERROR_INCOMPATIBLE_FS          (APPLICATION_ERROR_MASK|0x1201)
-#define ERROR_CANT_QUICK_FORMAT        (APPLICATION_ERROR_MASK|0x1202)
-#define ERROR_INVALID_CLUSTER_SIZE     (APPLICATION_ERROR_MASK|0x1203)
-#define ERROR_INVALID_VOLUME_SIZE      (APPLICATION_ERROR_MASK|0x1204)
-#define ERROR_CANT_START_THREAD        (APPLICATION_ERROR_MASK|0x1205)
+#define APPERR(err)                    (APPLICATION_ERROR_MASK|err)
+#define ERROR_INCOMPATIBLE_FS          0x1201
+#define ERROR_CANT_QUICK_FORMAT        0x1202
+#define ERROR_INVALID_CLUSTER_SIZE     0x1203
+#define ERROR_INVALID_VOLUME_SIZE      0x1204
+#define ERROR_CANT_START_THREAD        0x1205

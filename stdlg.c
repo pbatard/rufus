@@ -512,10 +512,17 @@ INT_PTR CALLBACK NotificationCallback(HWND hDlg, UINT message, WPARAM wParam, LP
 /*
  * Display a custom notification
  */
-void Notification(int type, char* text, char* title)
+BOOL Notification(int type, char* title, char* format, ...)
 {
-	szMessageText = text;
+	va_list args;
+	szMessageText = (char*)malloc(MAX_PATH);
+	if (szMessageText == NULL) return FALSE;
 	szMessageTitle = title;
+	va_start(args, format);
+	safe_vsnprintf(szMessageText, MAX_PATH-1, format, args);
+	va_end(args);
+	szMessageText[MAX_PATH-1] = 0;
+
 	switch(type) {
 	case MSG_WARNING:
 		hMessageIcon = LoadIcon(NULL, IDI_WARNING);
@@ -529,7 +536,8 @@ void Notification(int type, char* text, char* title)
 		break;
 	}
 	DialogBox(hMainInstance, MAKEINTRESOURCE(IDD_NOTIFICATION), hMainDialog, NotificationCallback);
-	szMessageText = NULL;
+	safe_free(szMessageText);
+	return TRUE;
 }
 
 struct {
