@@ -139,7 +139,6 @@ static BOOL FormatDrive(char DriveLetter)
 	PrintStatus("Formatting...");
 	PF_INIT_OR_OUT(FormatEx, fmifs);
 
-	// TODO: properly set MediaType
 	GetWindowTextW(hFileSystem, wFSType, ARRAYSIZE(wFSType));
 	// We may have a " (Default)" trail
 	for (i=0; i<wcslen(wFSType); i++) {
@@ -150,7 +149,7 @@ static BOOL FormatDrive(char DriveLetter)
 	}
 	GetWindowTextW(hLabel, wLabel, ARRAYSIZE(wLabel));
 	uprintf("Using cluster size: %d bytes\n", ComboBox_GetItemData(hClusterSize, ComboBox_GetCurSel(hClusterSize)));
-	pfFormatEx(wDriveRoot, RemovableMedia, wFSType, wLabel,
+	pfFormatEx(wDriveRoot, SelectedDrive.Geometry.MediaType, wFSType, wLabel,
 		IsChecked(IDC_QUICKFORMAT), (ULONG)ComboBox_GetItemData(hClusterSize, ComboBox_GetCurSel(hClusterSize)),
 		FormatExCallback);
 	if (!IS_ERROR(FormatStatus)) {

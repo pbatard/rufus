@@ -181,8 +181,8 @@ out:
  */
 static BOOL SetClusterSizes(int FSType)
 {
-	char szDefault[64];
-	int i;
+	char szClustSize[64];
+	int i, default_index = 0;
 	ULONG j;
 
 	IGNORE_RETVAL(ComboBox_ResetContent(hClusterSize));
@@ -198,20 +198,18 @@ static BOOL SetClusterSizes(int FSType)
 		return FALSE;
 	}
 
-	// Yes, I know there exist more efficient ways...
-	for(i=0,j=SelectedDrive.ClusterSize[FSType].Default>>10;j;i++,j>>=1);
-	safe_sprintf(szDefault, sizeof(szDefault), "Default allocation size (%s)", ClusterSizeLabel[i]);
-
-	IGNORE_RETVAL(ComboBox_SetItemData(hClusterSize, ComboBox_AddStringU(hClusterSize, szDefault),
-		SelectedDrive.ClusterSize[FSType].Default));
-
 	for(i=0,j=0x200;j<0x10000000;i++,j<<=1) {
 		if (j & SelectedDrive.ClusterSize[FSType].Allowed) {
-			IGNORE_RETVAL(ComboBox_SetItemData(hClusterSize, ComboBox_AddStringU(hClusterSize, ClusterSizeLabel[i]), j));
+			safe_sprintf(szClustSize, sizeof(szClustSize), "%s", ClusterSizeLabel[i]);
+			if (j == SelectedDrive.ClusterSize[FSType].Default) {
+				safe_strcat(szClustSize, sizeof(szClustSize), " (Default)");
+				default_index = i;
+			}
+			IGNORE_RETVAL(ComboBox_SetItemData(hClusterSize, ComboBox_AddStringU(hClusterSize, szClustSize), j));
 		}
 	}
 
-	IGNORE_RETVAL(ComboBox_SetCurSel(hClusterSize, 0));
+	IGNORE_RETVAL(ComboBox_SetCurSel(hClusterSize, default_index));
 	return TRUE;
 }
 
