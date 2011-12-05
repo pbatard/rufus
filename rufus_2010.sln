@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rufus", ".msvc\rufus_2010.vcxproj", "{731858A7-0303-4988-877B-9C0DD6471864}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rufus", "src\.msvc\rufus_2010.vcxproj", "{731858A7-0303-4988-877B-9C0DD6471864}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
