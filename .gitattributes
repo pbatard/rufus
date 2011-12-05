@@ -1,7 +1,9 @@
 *.sh            eol=lf
 *.ac            eol=lf
 *.am            eol=lf
-Makefile        eol=lf
+*.in            eol=lf
+mkf             eol=lf
+configure       eol=lf
 *.sln           eol=crlf
 *.vcproj        eol=crlf
 *.vcxproj*      eol=crlf
@@ -10,3 +12,4 @@ Makefile        eol=lf
 .gitattributes  export-ignore
 .gitignore      export-ignore
 *.creole        export-ignore
+

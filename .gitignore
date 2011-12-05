@@ -7,7 +7,6 @@
 *.lib
 *.lo
 *.log
-*.m4
 *.mac
 *.ncb
 *.o
@@ -22,11 +21,8 @@
 *.user
 .deps
 .libs
-Debug
-INSTALL
-Makefile.in
-Release
-aclocal.m4
+x86_32
+x86_64
 autom4te.cache
 compile
 config.guess
@@ -34,10 +30,5 @@ config.h
 config.log
 config.status
 config.sub
-configure
 depcomp
-install-sh
-libtool
-ltmain.sh
-missing
 stamp-h1
