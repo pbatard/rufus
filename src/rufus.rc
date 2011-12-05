@@ -1,0 +1,226 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include <windows.h>
+#ifndef IDC_STATIC
+#define IDC_STATIC -1
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+LANGUAGE LANG_ENGLISH, SUBLANG_NEUTRAL
+#pragma code_page(1252)
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_DIALOG DIALOGEX 12, 12, 206, 263
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_APPWINDOW
+CAPTION "Rufus v1.0.1.71"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "Start",IDC_START,94,223,50,14
+    PUSHBUTTON      "Close",IDCANCEL,148,223,50,14
+    COMBOBOX        IDC_DEVICE,8,17,190,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    CONTROL         "&Device",IDC_STATIC,"Static",SS_LEFTNOWORDWRAP | WS_GROUP,9,6,22,8
+    COMBOBOX        IDC_FILESYSTEM,8,75,190,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "&File system",IDC_STATIC,9,64,51,10
+    COMBOBOX        IDC_CAPACITY,8,46,190,30,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Ca&pacity",IDC_STATIC,9,35,29,8
+    COMBOBOX        IDC_CLUSTERSIZE,8,104,190,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "&Allocation unit size",IDC_STATIC,9,93,105,10
+    PUSHBUTTON      "About...",IDC_ABOUT,8,223,50,14
+    GROUPBOX        "Format Options",IDC_STATIC,7,149,189,40
+    EDITTEXT        IDC_LABEL,7,131,190,13,ES_AUTOHSCROLL
+    CONTROL         "&Quick Format",IDC_QUICKFORMAT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,161,58,10
+    CONTROL         "Create an &MS-DOS startup disk",IDC_DOS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,173,115,10
+    LTEXT           "New volume &label",IDC_STATIC,9,121,105,10
+    CONTROL         "",IDC_PROGRESS,"msctls_progress32",PBS_SMOOTH | WS_BORDER,7,197,189,9
+END
+
+IDD_ABOUTBOX DIALOGEX 0, 0, 287, 195
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "About Rufus"
+FONT 8, "Microsoft Sans Serif", 400, 0, 0x0
+BEGIN
+    ICON            IDI_ICON,IDC_ABOUT_ICON,11,8,20,20
+    LTEXT           "Rufus - The Resourceful USB Formatting Utility *BETA*",IDC_RUFUS_BOLD,46,8,240,10,SS_NOPREFIX | SS_NOTIFY
+    LTEXT           "Copyright (c) 2011 Pete Batard",IDC_STATIC,46,36,139,8
+    DEFPUSHBUTTON   "OK",IDOK,231,175,50,14,WS_GROUP
+    CONTROL         "<a href=""https://github.com/pbatard/rufus/wiki/Rufus"">https://github.com/pbatard/rufus</a>",IDC_ABOUT_RUFUS_URL,
+                    "SysLink",WS_TABSTOP,46,47,114,9
+    LTEXT           "Version 1.0.1 (Build 71)",IDC_STATIC,46,19,78,8
+    PUSHBUTTON      "License...",IDC_ABOUT_LICENSE,46,175,50,14,WS_GROUP
+    EDITTEXT        IDC_ABOUT_COPYRIGHTS,46,107,235,63,ES_MULTILINE | ES_READONLY | WS_VSCROLL
+    LTEXT           "Report bugs or request enhancements at:",IDC_STATIC,46,66,187,8
+    LTEXT           "Portions copyright:",IDC_STATIC,46,95,59,8
+    CONTROL         "<a>https://github.com/pbatard/rufus/issues</a>",IDC_ABOUT_BUG_URL,
+                    "SysLink",WS_TABSTOP,46,76,203,14
+END
+
+IDD_NOTIFICATION DIALOGEX 0, 0, 263, 63
+STYLE DS_SETFONT | DS_FIXEDSYS | DS_NOFAILCREATE | DS_CENTER | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_THICKFRAME
+CAPTION "Rufus"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    LTEXT           "",IDC_NOTIFICATION_LINE,0,0,263,39
+    CONTROL         "",IDC_STATIC,"Static",SS_WHITERECT,0,0,263,38
+    ICON            32516,IDC_NOTIFICATION_ICON,6,6,20,20
+    LTEXT           "",IDC_NOTIFICATION_TEXT,35,10,219,20
+    DEFPUSHBUTTON   "Close",IDCANCEL,211,44,50,14
+END
+
+IDD_LICENSE DIALOGEX 0, 0, 335, 205
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Rufus License"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "Close",IDOK,278,187,50,14
+    EDITTEXT        IDC_LICENSE_TEXT,7,7,321,176,ES_MULTILINE | ES_READONLY | WS_VSCROLL
+END
+
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include <windows.h>\r\n"
+    "#ifndef IDC_STATIC\r\n"
+    "#define IDC_STATIC -1\r\n"
+    "#endif\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\n"
+    "// Must reference a manifest for visual styles and elevation\r\n"
+    "// Oh, and it must happen at the end, or MinGW will ignore it!\r\n"
+    "#if defined(__GNUC__)\r\n"
+    "CREATEPROCESS_MANIFEST_RESOURCE_ID RT_MANIFEST ""common_controls_and_elevation.manifest""\r\n"
+    "#endif\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO
+BEGIN
+    IDD_DIALOG, DIALOG
+    BEGIN
+        BOTTOMMARGIN, 249
+    END
+
+    IDD_ABOUTBOX, DIALOG
+    BEGIN
+    END
+
+    IDD_NOTIFICATION, DIALOG
+    BEGIN
+    END
+
+    IDD_LICENSE, DIALOG
+    BEGIN
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,1,71
+ PRODUCTVERSION 1,0,1,71
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x40004L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "000904b0"
+        BEGIN
+            VALUE "CompanyName", "akeo.ie"
+            VALUE "FileDescription", "Rufus"
+            VALUE "FileVersion", "1.0.1.71"
+            VALUE "InternalName", "Rufus"
+            VALUE "LegalCopyright", "© 2011 Pete Batard (GPL v3)"
+            VALUE "LegalTrademarks", "http://www.gnu.org/copyleft/gpl.html"
+            VALUE "OriginalFilename", "rufus.exe"
+            VALUE "ProductName", "Rufus"
+            VALUE "ProductVersion", "1.0.1.71"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x9, 1200
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDI_ICON                ICON                    "rufus.ico"
+#endif    // English resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+// Must reference a manifest for visual styles and elevation
+// Oh, and it must happen at the end, or MinGW will ignore it!
+#if defined(__GNUC__)
+CREATEPROCESS_MANIFEST_RESOURCE_ID RT_MANIFEST "common_controls_and_elevation.manifest"
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+
