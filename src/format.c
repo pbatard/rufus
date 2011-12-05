@@ -1,5 +1,5 @@
 /*
- * Rufus: The Resourceful USB Formatting Utility
+ * Rufus: The Reliable USB Formatting Utility
  * Formatting function calls
  * Copyright (c) 2011 Pete Batard <pete@akeo.ie>
  *

@@ -1,5 +1,5 @@
 /*
- * Rufus: The Resourceful USB Formatting Utility
+ * Rufus: The Reliable USB Formatting Utility
  * Licensing Data
  * Copyright (c) 20111 Pete Batard <pete@akeo.ie>
  *
