@@ -10,11 +10,13 @@ m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])],
 
 AC_PREREQ([2.50])
 AC_PROG_CC
-AC_PROG_LIBTOOL
-LT_LANG([Windows Resource])
+AC_PATH_PROG(RM, rm, rm)
+AC_CHECK_TOOL(STRIP, strip, strip)
+AC_CHECK_TOOL(WINDRES, windres, windres)
 AC_C_INLINE
 AM_PROG_CC_C_O
 AC_DEFINE([_GNU_SOURCE], [], [Use GNU extensions])
+AC_CANONICAL_HOST
 
 AC_MSG_CHECKING([development environment])
 case $host in
@@ -27,7 +29,7 @@ case $host in
 esac
 
 AM_CFLAGS="${AM_CFLAGS} -DWINVER=0x501 -D_WIN32_IE=0x501"
-AM_LDFLAGS="${AM_LDFLAGS} -no-undefined -avoid-version"
+AM_LDFLAGS="${AM_LDFLAGS} -Wl,-no-undefined"
 
 # Debug logging
 #AC_ARG_ENABLE([log], [AS_HELP_STRING([--enable-log], [enable logging (default y)])],
@@ -60,8 +62,6 @@ AM_CFLAGS="$AM_CFLAGS -std=gnu99 -Wall -Wundef -Wunused -Wstrict-prototypes -Wer
 AC_SUBST([VISIBILITY_CFLAGS])
 AC_SUBST([AM_CFLAGS])
 AC_SUBST([AM_LDFLAGS])
-AC_SUBST([LIBCONFIG_CFLAGS])
-AC_SUBST([LIBCONFIG_LIBADD])
 
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT

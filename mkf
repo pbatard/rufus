@@ -34,7 +34,6 @@ all: $(TARGET)
 $(TARGET): $(OBJECTS) $(TARGET)_rc.o
 	@echo "[CCLD]  $@"
 	@$(CC) $(LDFLAGS) -o $@ $(OBJECTS) $(TARGET)_rc.o $(LIBS)
-	@$(STRIP) $(TARGET).exe
 
 %.o: %.c
 	@echo "[CC]    $@"
@@ -46,3 +45,9 @@ $(TARGET): $(OBJECTS) $(TARGET)_rc.o
 
 clean:
 	rm -f *.exe *.o
+
+# This step produces the UPX compressed and signed release that is made available for public download
+release: $(TARGET)
+	@$(STRIP) $(TARGET).exe
+	@upx $(TARGET).exe
+	@cmd.exe /k _sign.bat rufus.exe
