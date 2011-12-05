@@ -39,7 +39,7 @@ _EOF
 # First run sed to substitute our variable in the sed command file
 sed -e "s/@@MAJOR@@/$MAJOR/g" -e "s/@@MINOR@@/$MINOR/g" -e "s/@@MICRO@@/$MICRO/g" cmd.sed > cmd.sed~
 mv cmd.sed~ cmd.sed
-sed -f cmd.sed ./rufus.rc > ./rufus.rc~
-sed 's/$/\r/' ./rufus.rc~ > ./rufus.rc
-rm ./rufus.rc~
+sed -f cmd.sed src/rufus.rc > src/rufus.rc~
+sed 's/$/\r/' src/rufus.rc~ > src/rufus.rc
+rm src/rufus.rc~
 rm cmd.sed

@@ -15,6 +15,8 @@
 
 @SET_MAKE@
 
+#INCLUDES = -I$(top_srcdir)
+
 VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@
 pkgincludedir = $(includedir)/@PACKAGE@
@@ -162,14 +164,12 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-INCLUDES = -I$(top_srcdir)
 pkg_v_rc = $(pkg_v_rc_$(V))
 pkg_v_rc_ = $(pkg_v_rc_$(AM_DEFAULT_VERBOSITY))
 pkg_v_rc_0 = @echo "  RC     $@";
 rufus_SOURCES = fat12.c fat16.c fat32.c br.c file.c drive.c msdos.c format.c stdio.c stdlg.c rufus.c
 rufus_CFLAGS = -I./inc $(ARCH_CFLAGS) $(AM_CFLAGS)
-# static ensures that the exe can be shared as a standalone, and still allow driver installation
-rufus_LDFLAGS = $(AM_LDFLAGS) -mwindows -static
+rufus_LDFLAGS = $(AM_LDFLAGS) -mwindows
 rufus_LDADD = rufus_rc.o -lsetupapi -lole32 -lgdi32
 all: all-am
 
@@ -476,14 +476,8 @@ uninstall-am:
 	ps ps-am tags uninstall uninstall-am
 
 
-rufus_rc.o: rufus.rc
+%_rc.o: %.rc
 	$(pkg_v_rc)$(WINDRES) -i $< -o $@
-
-# This step produces the UPX compressed and signed release that is made available for public download
-release: rufus.exe
-	@$(STRIP) rufus.exe
-	@upx rufus.exe
-	@cmd.exe /k _sign.bat rufus.exe
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

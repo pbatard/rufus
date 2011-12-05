@@ -1,6 +1,6 @@
 AC_INIT([rufus], [1.0.1], [https://github.com/pbatard/rufus/issues], [rufus], [https://github.com/pbatard/rufus])
 AM_INIT_AUTOMAKE([-Wno-portability foreign no-dist no-dependencies])
-AC_CONFIG_SRCDIR([rufus.c])
+AC_CONFIG_SRCDIR([src/rufus.c])
 AC_CONFIG_MACRO_DIR([m4])
 # Enable silent build rules by default (Automake v1.11 or later).
 # Disable by either passing --disable-silent-rules to configure or passing V=1 to make
@@ -67,4 +67,5 @@ AC_SUBST([AM_CFLAGS])
 AC_SUBST([AM_LDFLAGS])
 
 AC_CONFIG_FILES([Makefile])
+AC_CONFIG_FILES([src/Makefile])
 AC_OUTPUT

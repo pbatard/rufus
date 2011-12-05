@@ -564,7 +564,7 @@ PACKAGE_STRING='rufus 1.0.1'
 PACKAGE_BUGREPORT='https://github.com/pbatard/rufus/issues'
 PACKAGE_URL='https://github.com/pbatard/rufus'
 
-ac_unique_file="rufus.c"
+ac_unique_file="src/rufus.c"
 ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
@@ -3416,6 +3416,8 @@ AM_CFLAGS="$AM_CFLAGS -std=gnu99 -Wshadow -Wall -Wundef -Wunused -Wstrict-protot
 
 ac_config_files="$ac_config_files Makefile"
 
+ac_config_files="$ac_config_files src/Makefile"
+
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
 # tests run on this system so they can be shared between configure
@@ -4146,6 +4148,7 @@ for ac_config_target in $ac_config_targets
 do
   case $ac_config_target in
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
+    "src/Makefile") CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;
 
   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5 ;;
   esac
