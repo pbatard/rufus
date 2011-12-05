@@ -169,7 +169,7 @@ const char* StrError(DWORD error_code)
 	case ERROR_LABEL_TOO_LONG:
 		return "The volume label is invalid";
 	case ERROR_INVALID_CLUSTER_SIZE:
-		return "The selected allocation unit size is not valid for this device";
+		return "The selected cluster size is not valid for this device";
 	case ERROR_INVALID_VOLUME_SIZE:
 		return "The volume size is invalid";
 	case ERROR_NO_MEDIA_IN_DRIVE:
