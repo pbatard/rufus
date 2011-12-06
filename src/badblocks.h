@@ -24,42 +24,40 @@
 #define __u32  UINT32
 #endif
 typedef UINT32 blk_t;
-typedef struct ext2_struct_u32_list *ext2_badblocks_list;
-typedef struct ext2_struct_u32_iterate *ext2_badblocks_iterate;
-typedef struct ext2_struct_u32_list *ext2_u32_list;
-typedef struct ext2_struct_u32_iterate *ext2_u32_iterate;
-typedef long   errcode_t;
+typedef DWORD  errcode_t;
 
-#define EXT2_ET_NO_MEMORY                        (2133571398L)
-#define EXT2_ET_MAGIC_BADBLOCKS_LIST             (2133571330L)
-#define EXT2_ET_MAGIC_BADBLOCKS_ITERATE          (2133571331L)
+typedef struct ext2_struct_u32_list         *ext2_badblocks_list;
+typedef struct ext2_struct_u32_iterate      *ext2_badblocks_iterate;
+typedef struct ext2_struct_u32_list         *ext2_u32_list;
+typedef struct ext2_struct_u32_iterate      *ext2_u32_iterate;
+
+#define EXT2_ET_NO_MEMORY                   (ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_NOT_ENOUGH_MEMORY)
+#define EXT2_ET_MAGIC_BADBLOCKS_LIST        (ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_OBJECT_IN_LIST)
+#define EXT2_ET_MAGIC_BADBLOCKS_ITERATE     (ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_INVALID_BLOCK)
+
 
 #define EXT2_CHECK_MAGIC(struct, code) \
-	  if ((struct)->magic != (code)) return (code)
+	if ((struct)->magic != (code)) return (code)
+#define EXT2_BAD_BLOCKS_THRESHOLD           32
+#define EXT2_BLOCKS_AT_ONCE                 64
+#define EXT2_SYS_PAGE_SIZE                  4096
+
+enum test_type {
+	BADBLOCKS_RO,		/* Read-only */
+	BADBLOCKS_RW,		/* DESTRUCTIVE read-write */
+	BADBLOCKS_ND		/* non-destructive read-write */
+};
+enum error_types { READ_ERROR, WRITE_ERROR, CORRUPTION_ERROR };
 
 /*
- * Badblocks list
+ * Badblocks report
  */
-struct ext2_struct_u32_list {
-	int	magic;
-	int	num;
-	int	size;
-	__u32	*list;
-	int	badblocks_flags;
-};
-
-struct ext2_struct_u32_iterate {
-	int			magic;
-	ext2_u32_list		bb;
-	int			ptr;
-};
-
-/* Test type */
-enum {
-	BADBLOCKS_RO,	/* Read-only */
-	BADBLOCKS_RW,	/* *DESTRUCTIVE* read-write */
-	BADBLOCKS_ND	/* non-destructive read-write */
-};
+typedef struct {
+	blk_t bb_count;
+	blk_t num_read_errors;
+	blk_t num_write_errors;
+	blk_t num_corruption_errors;
+} badblocks_report;
 
 /*
  * Shared prototypes

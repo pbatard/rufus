@@ -47,6 +47,24 @@
 /*
  *From e2fsprogs/lib/ext2fs/badblocks.c
  */
+
+/*
+ * Badblocks list
+ */
+struct ext2_struct_u32_list {
+	int   magic;
+	int   num;
+	int   size;
+	__u32 *list;
+	int   badblocks_flags;
+};
+
+struct ext2_struct_u32_iterate {
+	int           magic;
+	ext2_u32_list bb;
+	int           ptr;
+};
+
 static errcode_t make_u32_list(int size, int num, __u32 *list, ext2_u32_list *ret)
 {
 	ext2_u32_list	bb;
@@ -254,36 +272,27 @@ static void ext2fs_badblocks_list_iterate_end(ext2_badblocks_iterate iter)
 /*
  * from e2fsprogs/misc/badblocks.c
  */
-static int v_flag = 2;			/* verbose */
-static int s_flag = 1;			/* show progress of test */
-static int t_flag = 0;			/* number of test patterns */
+static int v_flag = 2;					/* verbose */
+static int s_flag = 1;					/* show progress of test */
+static int t_flag = 0;					/* number of test patterns */
 static unsigned int *t_patts = NULL;	/* test patterns */
-// TODO: set this from parameter
-static unsigned int max_bb = 32;		/* Abort test if more than this number of bad blocks has been encountered */
-static unsigned int d_flag = 0;		/* delay factor between reads */
+/* Abort test if more than this number of bad blocks has been encountered */
+static unsigned int max_bb = EXT2_BAD_BLOCKS_THRESHOLD;
 static DWORD time_start;
-
-#define T_INC 32
-
-unsigned int sys_page_size = 4096;
-
 static blk_t currently_testing = 0;
 static blk_t num_blocks = 0;
 static blk_t num_read_errors = 0;
 static blk_t num_write_errors = 0;
 static blk_t num_corruption_errors = 0;
 static ext2_badblocks_list bb_list = NULL;
-static FILE *out;
 static blk_t next_bad = 0;
 static ext2_badblocks_iterate bb_iter = NULL;
 
-enum error_types { READ_ERROR, WRITE_ERROR, CORRUPTION_ERROR };
-
 static __inline void *allocate_buffer(size_t size) {
 #ifdef __MINGW32__
-	return __mingw_aligned_malloc(size, sys_page_size);
+	return __mingw_aligned_malloc(size, EXT2_SYS_PAGE_SIZE);
 #else 
-	return _aligned_malloc(size, sys_page_size);
+	return _aligned_malloc(size, EXT2_SYS_PAGE_SIZE);
 #endif
 }
 
@@ -311,7 +320,7 @@ static int bb_output (blk_t bad, enum error_types error_type)
 	error_code = ext2fs_badblocks_list_add(bb_list, bad);
 	if (error_code) {
 		uprintf("Error %d adding to in-memory bad block list", error_code);
-		exit (1);
+		return 0;
 	}
 
 	/* kludge:
@@ -403,9 +412,6 @@ static int do_read (HANDLE hDrive, unsigned char * buffer, int tryout, int block
 		    blk_t current_block)
 {
 	long got;
-//	DWORD tv1, tv2;
-#define NANOSEC (1000000000L)
-#define MILISEC (1000L)
 
 #if 0
 	printf("do_read: block %d, try %d\n", current_block, tryout);
@@ -415,54 +421,12 @@ static int do_read (HANDLE hDrive, unsigned char * buffer, int tryout, int block
 		print_status();
 
 	/* Try the read */
-//	if (d_flag)
-//		tv1 = GetTickCount();
 	got = read_sectors(hDrive, block_size, current_block, tryout, buffer);
-		// read (dev, buffer, tryout * block_size);
-//	if (d_flag)
-//		tv2 = GetTickCount();
 	if (got < 0)
 		got = 0;
 	if (got & 511)
 		uprintf("Weird value (%ld) in do_read\n", got);
 	got /= block_size;
-	if (d_flag && got == tryout) {
-// TODO: either remove or update for Windows
-#ifdef HAVE_NANOSLEEP
-		struct timespec ts;
-		ts.tv_sec = tv2.tv_sec - tv1.tv_sec;
-		ts.tv_nsec = (tv2.tv_usec - tv1.tv_usec) * MILISEC;
-		if (ts.tv_nsec < 0) {
-			ts.tv_nsec += NANOSEC;
-			ts.tv_sec -= 1;
-		}
-		/* increase/decrease the sleep time based on d_flag value */
-		ts.tv_sec = ts.tv_sec * d_flag / 100;
-		ts.tv_nsec = ts.tv_nsec * d_flag / 100;
-		if (ts.tv_nsec > NANOSEC) {
-			ts.tv_sec += ts.tv_nsec / NANOSEC;
-			ts.tv_nsec %= NANOSEC;
-		}
-		if (ts.tv_sec || ts.tv_nsec)
-			nanosleep(&ts, NULL);
-#else
-#ifdef HAVE_USLEEP
-		struct timeval tv;
-		tv.tv_sec = tv2.tv_sec - tv1.tv_sec;
-		tv.tv_usec = tv2.tv_usec - tv1.tv_usec;
-		tv.tv_sec = tv.tv_sec * d_flag / 100;
-		tv.tv_usec = tv.tv_usec * d_flag / 100;
-		if (tv.tv_usec > 1000000) {
-			tv.tv_sec += tv.tv_usec / 1000000;
-			tv.tv_usec %= 1000000;
-		}
-		if (tv.tv_sec)
-			sleep(tv.tv_sec);
-		if (tv.tv_usec)
-			usleep(tv.tv_usec);
-#endif
-#endif
-	}
 	return got;
 }
 
@@ -719,6 +683,7 @@ struct saved_blk_record {
 	int	num;
 };
 
+// TODO: this is untested!
 static unsigned int test_nd(HANDLE hDrive, blk_t last_block,
 			     int block_size, blk_t first_block,
 			     unsigned int blocks_at_once)
@@ -745,6 +710,7 @@ static unsigned int test_nd(HANDLE hDrive, blk_t last_block,
 	error_code = ext2fs_badblocks_list_iterate_begin(bb_list,&bb_iter);
 	if (error_code) {
 		uprintf("Error %d while beginning bad block list iteration", error_code);
+		// TODO
 		exit (1);
 	}
 	do {
@@ -755,6 +721,7 @@ static unsigned int test_nd(HANDLE hDrive, blk_t last_block,
 	test_record = malloc (blocks_at_once*sizeof(struct saved_blk_record));
 	if (!blkbuf || !test_record) {
 		uprintf("Error while allocating buffers");
+		// TODO
 		exit (1);
 	}
 
@@ -786,7 +753,7 @@ static unsigned int test_nd(HANDLE hDrive, blk_t last_block,
 				 block_size, test_record[i].block);
 			save_ptr += test_record[i].num * block_size;
 		}
-		fflush (out);
+		// TODO
 		exit(1);
 	}
 
@@ -963,14 +930,10 @@ static unsigned int test_nd(HANDLE hDrive, blk_t last_block,
 int BadBlocks(HANDLE hPhysicalDrive, ULONGLONG disk_size, int block_size, int test_type)
 {
 	errcode_t error_code;
-	unsigned int blocks_at_once = 64;
-	unsigned int (*test_func)(HANDLE, blk_t,
-				  int, blk_t,
-				  unsigned int);
+	unsigned int (*test_func)(HANDLE, blk_t, int, blk_t, unsigned int);
 	int num_passes = 0;
 	int passes_clean = 0;
-	int bb_count;
-	blk_t first_block = 0, last_block = (blk_t)disk_size/block_size;
+	blk_t bb_count = 0, first_block = 0, last_block = (blk_t)disk_size/block_size;
 
 	error_code = ext2fs_badblocks_list_create(&bb_list, 0);
 	if (error_code) {
@@ -991,7 +954,7 @@ int BadBlocks(HANDLE hPhysicalDrive, ULONGLONG disk_size, int block_size, int te
 	}
 	time_start = GetTickCount();
 	do {
-		bb_count = test_func(hPhysicalDrive, last_block, block_size, first_block, blocks_at_once);
+		bb_count = test_func(hPhysicalDrive, last_block, block_size, first_block, EXT2_BLOCKS_AT_ONCE);
 		if (bb_count)
 			passes_clean = 0;
 		else
