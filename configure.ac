@@ -1,4 +1,4 @@
-AC_INIT([rufus], [1.0.1], [https://github.com/pbatard/rufus/issues], [rufus], [https://github.com/pbatard/rufus])
+AC_INIT([rufus], [1.0.2], [https://github.com/pbatard/rufus/issues], [rufus], [https://github.com/pbatard/rufus])
 AM_INIT_AUTOMAKE([-Wno-portability foreign no-dist no-dependencies])
 AC_CONFIG_SRCDIR([src/rufus.c])
 AC_CONFIG_MACRO_DIR([m4])
@@ -31,7 +31,7 @@ AC_DEFINE([_GNU_SOURCE], [], [Use GNU extensions])
 #	AC_MSG_ERROR([unsupported development environment])
 #esac
 
-AM_CFLAGS="${AM_CFLAGS} -DWINVER=0x501 -D_WIN32_IE=0x501"
+AM_CFLAGS="${AM_CFLAGS} -D__MSVCRT_VERSION__=0x700 -DWINVER=0x501 -D_WIN32_IE=0x501"
 AM_LDFLAGS="${AM_LDFLAGS} -Wl,-no-undefined"
 
 # Debug logging

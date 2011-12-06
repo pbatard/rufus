@@ -37,6 +37,7 @@
 #include "fat32.h"
 #include "file.h"
 #include "format.h"
+#include "badblocks.h"
 
 /*
  * Globals
@@ -234,7 +235,7 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 		goto out;
 	}
 
-	if (!read_sectors(hPhysicalDrive, SelectedDrive.Geometry.BytesPerSector, 0, nSecs, buf, SecSize)) {
+	if (!read_sectors(hPhysicalDrive, SelectedDrive.Geometry.BytesPerSector, 0, nSecs, buf)) {
 		uprintf("Could not read MBR\n");
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_READ_FAULT;
 		goto out;
@@ -262,7 +263,7 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 		buf[0x1be] = 0x80;		// Set first partition bootable
 	}
 
-	if (!write_sectors(hPhysicalDrive, SelectedDrive.Geometry.BytesPerSector, 0, nSecs, buf, SecSize*nSecs)) {
+	if (!write_sectors(hPhysicalDrive, SecSize, 0, nSecs, buf)) {
 		uprintf("Could not write MBR\n");
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_WRITE_FAULT;
 		goto out;
@@ -318,7 +319,25 @@ void __cdecl FormatThread(void* param)
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_OPEN_FAILED;
 		goto out;
 	}
-	// At this stage with have both a handle and a lock to the physical drive
+	// At this stage with have both a handle and a lock to the physical drive...
+
+	if (IsChecked(IDC_BADBLOCKS)) {
+		// ... but we can't write sectors that are part of a volume, even if we have 
+		// access to physical, unless we have a lock (which doesn't have to be write)
+		hLogicalVolume = GetDriveHandle(num, drive_name, FALSE, TRUE);
+		if (hLogicalVolume == INVALID_HANDLE_VALUE) {
+			uprintf("Could not lock volume for badblock checks\n");
+			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_OPEN_FAILED;
+			goto out;
+		}
+
+		if (BadBlocks(hPhysicalDrive, SelectedDrive.DiskSize, SelectedDrive.Geometry.BytesPerSector)) {
+			// TODO: report block failure number, etc
+			uprintf("Bad blocks check failed.\n");
+			goto out;
+		}
+		safe_unlockclose(hLogicalVolume);
+	}
 
 	if (!CreatePartition(hPhysicalDrive)) {
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_PARTITION_FAILURE;
@@ -359,7 +378,7 @@ void __cdecl FormatThread(void* param)
 	}
 
 	if (IsChecked(IDC_DOS)) {
-		// We must have a lock to modify the FS boot record...
+		// We must have a lock to modify the volume boot record...
 		hLogicalVolume = GetDriveHandle(num, drive_name, TRUE, TRUE);
 		if (hLogicalVolume == INVALID_HANDLE_VALUE) {
 			uprintf("Could not re-mount volume for partition boot record access\n");

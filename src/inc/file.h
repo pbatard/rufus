@@ -14,14 +14,14 @@ int contains_data(FILE *fp, size_t ulPosition,
 int write_data(FILE *fp, size_t ulPosition,
                const void *pData, size_t uiLen);
 
-/* Checks if a file contains a data pattern of length uiLen at position
-   ulPositoin. The file pointer will change when calling this function! */
+/* Writes nSectors of size SectorSize starting at sector StartSector */
 int write_sectors(void *hDrive, size_t SectorSize,
                   size_t StartSector, size_t nSectors,
-                  const void *pBuf, size_t BufSize);
+                  const void *pBuf);
 
+/* Reads nSectors of size SectorSize starting at sector StartSector */
 int read_sectors(void *hDrive, size_t SectorSize,
                  size_t StartSector, size_t nSectors,
-                 void *pBuf, size_t BufSize);
+                 void *pBuf);
 
 #endif

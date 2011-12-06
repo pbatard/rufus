@@ -288,6 +288,7 @@ BOOL ExtractMSDOS(const char* path)
 {
 	char dllname[MAX_PATH] = "C:\\Windows\\System32";
 	int i, j;
+	BOOL r = TRUE;
 	HMODULE hDLL;
 	HRSRC hDiskImage;
 
@@ -321,17 +322,17 @@ BOOL ExtractMSDOS(const char* path)
 		return FALSE;
 	}
 
-	for (i=0; i<FAT_FN_DIR_ENTRY_LAST; i++) {
+	for (i=0; r && i<FAT_FN_DIR_ENTRY_LAST; i++) {
 		if (DiskImage[FAT12_ROOTDIR_OFFSET + i*FAT_BYTES_PER_DIRENT] == FAT_DIRENT_DELETED)
 			continue;
-		for (j=0; j<ARRAYSIZE(extractlist); j++) {
+		for (j=0; r && j<ARRAYSIZE(extractlist); j++) {
 			if (memcmp(extractlist[j], &DiskImage[FAT12_ROOTDIR_OFFSET + i*FAT_BYTES_PER_DIRENT], 8+3) == 0) {
-				ExtractFAT(i, path);
+				r = ExtractFAT(i, path);
 			}
 		}
 	}
 
 	FreeLibrary(hDLL);
 
-	return TRUE;
+	return r;
 }

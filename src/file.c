@@ -22,64 +22,53 @@
 #include "rufus.h"
 #include "file.h"
 
+/* Returns the number of bytes written or -1 on error */
 int write_sectors(HANDLE hDrive, size_t SectorSize,
                   size_t StartSector, size_t nSectors,
-                  const void *pBuf, size_t BufSize)
+                  const void *pBuf)
 {
    LARGE_INTEGER ptr;
-   DWORD Size;
-
-   if(SectorSize * nSectors > BufSize)
-   {
-      uprintf("write_sectors: Buffer is too small\n");
-      return 0;
-   }
+   DWORD Size = 0;
 
    ptr.QuadPart = StartSector*SectorSize;
    if(!SetFilePointerEx(hDrive, ptr, NULL, FILE_BEGIN))
    {
       uprintf("write_sectors: Could not access sector %d - %s\n", StartSector, WindowsErrorString());
-      return 0;
+      return -1;
    }
 
-   if((!WriteFile(hDrive, pBuf, (DWORD)BufSize, &Size, NULL)) || (Size != BufSize))
+   if((!WriteFile(hDrive, pBuf, (DWORD)nSectors*SectorSize, &Size, NULL)) || (Size != nSectors*SectorSize))
    {
       uprintf("write_sectors: Write error - %s\n", WindowsErrorString());
       uprintf("  StartSector:%0X, nSectors:%0X, SectorSize:%0X\n", StartSector, nSectors, SectorSize);
-      return 0;
+      return Size;
    }
 
-   return 1;
+   return Size;
 }
 
+/* Returns the number of bytes read or -1 on error */
 int read_sectors(HANDLE hDrive, size_t SectorSize,
                  size_t StartSector, size_t nSectors,
-                 void *pBuf, size_t BufSize)
+                 void *pBuf)
 {
    LARGE_INTEGER ptr;
-   DWORD Size;
-
-   if(SectorSize * nSectors > BufSize)
-   {
-      uprintf("read_sectors: Buffer is too small\n");
-      return 0;
-   }
+   DWORD Size = 0;
 
    ptr.QuadPart = StartSector*SectorSize;
    if(!SetFilePointerEx(hDrive, ptr, NULL, FILE_BEGIN))
    {
       uprintf("read_sectors: Could not access sector %d - %s\n", StartSector, WindowsErrorString());
-      return 0;
+      return -1;
    }
 
-   if((!ReadFile(hDrive, pBuf, (DWORD)BufSize, &Size, NULL)) || (Size != BufSize))
+   if((!ReadFile(hDrive, pBuf, (DWORD)nSectors*SectorSize, &Size, NULL)) || (Size != nSectors*SectorSize))
    {
       uprintf("read_sectors: Read error - %s\n", WindowsErrorString());
       uprintf("  StartSector:%0X, nSectors:%0X, SectorSize:%0X\n", StartSector, nSectors, SectorSize);
-      return 0;
    }
 
-   return 1;
+   return Size;
 }
 
 /* Use a bastardized fp that contains a Windows handle and the sector size */
@@ -101,8 +90,8 @@ int contains_data(FILE *fp, size_t Position,
       return 0;
    }
 
-   if(!read_sectors(hDrive, SectorSize, StartSector,
-                     NumSectors, aucBuf, sizeof(aucBuf)))
+   if(read_sectors(hDrive, SectorSize, StartSector,
+                     NumSectors, aucBuf) <= 0)
       return 0;
 
    if(memcmp(pData, &aucBuf[Position - StartSector*SectorSize], Len))
@@ -130,15 +119,15 @@ int write_data(FILE *fp, size_t Position,
    }
 
    /* Data to write may not be aligned on a sector boundary => read into a sector buffer first */
-   if(!read_sectors(hDrive, SectorSize, StartSector,
-                     NumSectors, aucBuf, sizeof(aucBuf)))
+   if(read_sectors(hDrive, SectorSize, StartSector,
+                     NumSectors, aucBuf) <= 0)
       return 0;
 
    if(!memcpy(&aucBuf[Position - StartSector*SectorSize], pData, Len))
       return 0;
 
-   if(!write_sectors(hDrive, SectorSize, StartSector,
-                     NumSectors, aucBuf, sizeof(aucBuf)))
+   if(write_sectors(hDrive, SectorSize, StartSector,
+                     NumSectors, aucBuf) <= 0)
       return 0;
    return 1;
 } /* write_data */

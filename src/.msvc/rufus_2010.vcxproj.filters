@@ -51,6 +51,9 @@
     <ClCompile Include="..\drive.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\badblocks.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\rufus.h">
@@ -153,6 +156,9 @@
       <Filter>Header Files\ms-sys inc</Filter>
     </ClInclude>
     <ClInclude Include="..\format.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\badblocks.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

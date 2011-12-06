@@ -48,8 +48,9 @@ PROGRAMS = $(noinst_PROGRAMS)
 am_rufus_OBJECTS = rufus-fat12.$(OBJEXT) rufus-fat16.$(OBJEXT) \
 	rufus-fat32.$(OBJEXT) rufus-br.$(OBJEXT) rufus-file.$(OBJEXT) \
 	rufus-drive.$(OBJEXT) rufus-msdos.$(OBJEXT) \
-	rufus-format.$(OBJEXT) rufus-stdio.$(OBJEXT) \
-	rufus-stdlg.$(OBJEXT) rufus-rufus.$(OBJEXT)
+	rufus-badblocks.$(OBJEXT) rufus-format.$(OBJEXT) \
+	rufus-stdio.$(OBJEXT) rufus-stdlg.$(OBJEXT) \
+	rufus-rufus.$(OBJEXT)
 rufus_OBJECTS = $(am_rufus_OBJECTS)
 rufus_DEPENDENCIES = rufus_rc.o
 rufus_LINK = $(CCLD) $(rufus_CFLAGS) $(CFLAGS) $(rufus_LDFLAGS) \
@@ -167,7 +168,7 @@ top_srcdir = @top_srcdir@
 pkg_v_rc = $(pkg_v_rc_$(V))
 pkg_v_rc_ = $(pkg_v_rc_$(AM_DEFAULT_VERBOSITY))
 pkg_v_rc_0 = @echo "  RC     $@";
-rufus_SOURCES = fat12.c fat16.c fat32.c br.c file.c drive.c msdos.c format.c stdio.c stdlg.c rufus.c
+rufus_SOURCES = fat12.c fat16.c fat32.c br.c file.c drive.c msdos.c badblocks.c format.c stdio.c stdlg.c rufus.c
 rufus_CFLAGS = -I./inc $(ARCH_CFLAGS) $(AM_CFLAGS)
 rufus_LDFLAGS = $(AM_LDFLAGS) -mwindows
 rufus_LDADD = rufus_rc.o -lsetupapi -lole32 -lgdi32
@@ -281,6 +282,14 @@ rufus-msdos.o: msdos.c
 rufus-msdos.obj: msdos.c
 	$(AM_V_CC) @AM_BACKSLASH@
 	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_CFLAGS) $(CFLAGS) -c -o rufus-msdos.obj `if test -f 'msdos.c'; then $(CYGPATH_W) 'msdos.c'; else $(CYGPATH_W) '$(srcdir)/msdos.c'; fi`
+
+rufus-badblocks.o: badblocks.c
+	$(AM_V_CC) @AM_BACKSLASH@
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_CFLAGS) $(CFLAGS) -c -o rufus-badblocks.o `test -f 'badblocks.c' || echo '$(srcdir)/'`badblocks.c
+
+rufus-badblocks.obj: badblocks.c
+	$(AM_V_CC) @AM_BACKSLASH@
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_CFLAGS) $(CFLAGS) -c -o rufus-badblocks.obj `if test -f 'badblocks.c'; then $(CYGPATH_W) 'badblocks.c'; else $(CYGPATH_W) '$(srcdir)/badblocks.c'; fi`
 
 rufus-format.o: format.c
 	$(AM_V_CC) @AM_BACKSLASH@

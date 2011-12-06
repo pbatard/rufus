@@ -34,10 +34,6 @@
 #include <process.h>
 #include <dbt.h>
 
-// http://git.kernel.org/?p=fs/ext2/e2fsprogs.git;a=blob;f=misc/badblocks.c
-// http://thestarman.pcministry.com/asm/mbr/MSWIN41.htm
-// http://sourceforge.net/projects/grub4dos/ (bootable NTFS?)
-
 #include "msapi_utf8.h"
 #include "resource.h"
 #include "rufus.h"
@@ -571,6 +567,7 @@ static void EnableControls(BOOL bEnable)
 	} else {
 		EnableWindow(GetDlgItem(hMainDialog, IDC_DOS), FALSE);
 	}
+	EnableWindow(GetDlgItem(hMainDialog, IDC_BADBLOCKS), bEnable);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_ABOUT), bEnable);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_START), bEnable);
 	SetDlgItemTextA(hMainDialog, IDCANCEL, bEnable?"Close":"Cancel");

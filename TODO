@@ -6,6 +6,7 @@ o set keyboard according to locale in DOS
 o allow selection of one of the existing compatible volume (keep existing MBR) / full repartitioning (overwrite MBR)
 o FreeDOS integration
 o Enable compression for NTFS
-o Bootable NTFS/exFAT
+o Bootable NTFS/exFAT?
+  http://sourceforge.net/projects/grub4dos/
 o GPT support?
 o disable indexing support on NTFS?

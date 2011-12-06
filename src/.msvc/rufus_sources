@@ -23,15 +23,16 @@ TARGETLIBS=$(SDK_LIB_PATH)\kernel32.lib \
 # http://jpassing.com/2008/02/01/how-to-use-manifests-with-buildexe/
 SXS_APPLICATION_MANIFEST=common_controls_and_elevation.manifest
 
-SOURCES=rufus.c  \
-        format.c \
-        stdio.c  \
-        stdlg.c  \
-        msdos.c  \
-        drive.c  \
-        file.c   \
-        br.c     \
-        fat12.c  \
-        fat16.c  \
-        fat32.c  \
+SOURCES=rufus.c     \
+        format.c    \
+        stdio.c     \
+        stdlg.c     \
+        msdos.c     \
+        badblocks.c \
+        drive.c     \
+        file.c      \
+        br.c        \
+        fat12.c     \
+        fat16.c     \
+        fat32.c     \
         rufus.rc

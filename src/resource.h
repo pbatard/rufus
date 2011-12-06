@@ -18,7 +18,8 @@
 #define IDC_LABEL                       1008
 #define IDC_QUICKFORMAT                 1009
 #define IDC_DOS                         1010
-#define IDC_PROGRESS                    1011
+#define IDC_BADBLOCKS                   1011
+#define IDC_PROGRESS                    1012
 #define IDC_ABOUT_LICENSE               1030
 #define IDC_ABOUT_ICON                  1031
 #define IDC_RUFUS_BOLD                  1032

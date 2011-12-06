@@ -146,6 +146,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\badblocks.c" />
     <ClCompile Include="..\br.c" />
     <ClCompile Include="..\drive.c" />
     <ClCompile Include="..\fat12.c" />
@@ -159,6 +160,7 @@
     <ClCompile Include="..\stdlg.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\badblocks.h" />
     <ClInclude Include="..\format.h" />
     <ClInclude Include="..\inc\br.h" />
     <ClInclude Include="..\inc\br_fat12_0x0.h" />
