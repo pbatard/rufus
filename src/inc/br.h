@@ -72,4 +72,8 @@ int write_syslinux_mbr(FILE *fp);
    FALSE */
 int write_zero_mbr(FILE *fp);
 
+/* Completely clears (zeroes) master boot record, returns TRUE on success, otherwise
+   FALSE */
+int clear_mbr(FILE *fp);
+
 #endif

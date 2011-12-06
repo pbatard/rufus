@@ -212,6 +212,16 @@ static BOOL AnalyzeMBR(HANDLE hPhysicalDrive)
 	return TRUE;
 }
 
+
+static BOOL ClearMBR(HANDLE hPhysicalDrive)
+{
+	FILE fake_fd;
+
+	fake_fd._ptr = (char*)hPhysicalDrive;
+	fake_fd._bufsiz = SelectedDrive.Geometry.BytesPerSector;
+	return clear_mbr(&fake_fd);
+}
+
 /*
  * Process the Master Boot Record
  */
@@ -335,10 +345,19 @@ void __cdecl FormatThread(void* param)
 			SelectedDrive.Geometry.BytesPerSector, BADBLOCKS_RW)) {
 			// TODO: report block failure number, etc
 			uprintf("Bad blocks check failed.\n");
+			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_BADBLOCKS);
 			goto out;
 		}
 		safe_unlockclose(hLogicalVolume);
 	}
+
+	// Especially after destructive badblocks test, you must zero the MBR completely
+	// before repartitioning. Else, all kind of bad things happen
+	if (!ClearMBR(hPhysicalDrive)) {
+		uprintf("unable to zero MBR\n");
+		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_WRITE_FAULT;
+		goto out;
+	} 
 
 	if (!CreatePartition(hPhysicalDrive)) {
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_PARTITION_FAILURE;

@@ -192,6 +192,8 @@ const char* StrError(DWORD error_code)
 		return "Cancelled by user";
 	case ERROR_CANT_START_THREAD:
 		return "Unable to create formatting thread";
+	case ERROR_BADBLOCKS:
+		return "Bad blocks detected";
 	default:
 		uprintf("StrError: hit default - %08X\n", error_code);
 		SetLastError(error_code);

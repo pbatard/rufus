@@ -183,3 +183,4 @@ typedef struct {
 #define ERROR_INVALID_CLUSTER_SIZE     0x1203
 #define ERROR_INVALID_VOLUME_SIZE      0x1204
 #define ERROR_CANT_START_THREAD        0x1205
+#define ERROR_BADBLOCKS                0x1206

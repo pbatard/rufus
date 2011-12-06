@@ -742,7 +742,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		if (IsChecked(IDC_QUICKFORMAT)) {
 			SendMessage(hProgress, PBM_SETMARQUEE, FALSE, 0);
 			SetWindowLongPtr(hProgress, GWL_STYLE, ProgressStyle);
-			// This is the only way to achieve instantenous progress transition
+			// This is the only way to achieve instantanenous progress transition
 			SendMessage(hProgress, PBM_SETRANGE, 0, 101<<16);
 			SendMessage(hProgress, PBM_SETPOS, 101, 0);
 			SendMessage(hProgress, PBM_SETRANGE, 0, 100<<16);
