@@ -703,11 +703,13 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				if (MessageBoxA(hMainDialog, str, "Rufus", MB_OKCANCEL|MB_ICONWARNING) == IDOK) {
 					// Disable all controls except cancel
 					EnableControls(FALSE);
+#if 0
 					// Handle marquee progress bar on quickformat
 					SetWindowLongPtr(hProgress, GWL_STYLE, ProgressStyle | (IsChecked(IDC_QUICKFORMAT)?PBS_MARQUEE:0));
 					if (IsChecked(IDC_QUICKFORMAT)) {
 						SendMessage(hProgress, PBM_SETMARQUEE, TRUE, 0);
 					}
+#endif
 					DeviceNum =  (DWORD)ComboBox_GetItemData(hDeviceList, nDeviceIndex);
 					FormatStatus = 0;
 					format_thid = _beginthread(FormatThread, 0, (void*)(uintptr_t)DeviceNum);
@@ -739,6 +741,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		format_thid = -1L;
 		// Close the cancel MessageBox if active
 		SendMessage(FindWindowA(MAKEINTRESOURCEA(32770), RUFUS_CANCELBOX_TITLE), WM_COMMAND, IDNO, 0);
+#if 0
 		if (IsChecked(IDC_QUICKFORMAT)) {
 			SendMessage(hProgress, PBM_SETMARQUEE, FALSE, 0);
 			SetWindowLongPtr(hProgress, GWL_STYLE, ProgressStyle);
@@ -747,6 +750,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			SendMessage(hProgress, PBM_SETPOS, 101, 0);
 			SendMessage(hProgress, PBM_SETRANGE, 0, 100<<16);
 		}
+#endif
 		SendMessage(hProgress, PBM_SETPOS, FormatStatus?0:100, 0);
 		EnableControls(TRUE);
 		GetUSBDevices();

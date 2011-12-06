@@ -31,6 +31,8 @@ AC_DEFINE([_GNU_SOURCE], [], [Use GNU extensions])
 #	AC_MSG_ERROR([unsupported development environment])
 #esac
 
+# Clang needs an explicit WIN32_WINNT defined else it produces warnings
+# in msapi_utf8.h - including winver.h only doesn't work
 AM_CFLAGS="${AM_CFLAGS} -DWINVER=0x501 -D_WIN32_WINNT=0x501 -D_WIN32_IE=0x501"
 AM_LDFLAGS="${AM_LDFLAGS} -Wl,-no-undefined"
 

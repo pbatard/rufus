@@ -272,10 +272,11 @@ static void ext2fs_badblocks_list_iterate_end(ext2_badblocks_iterate iter)
 /*
  * from e2fsprogs/misc/badblocks.c
  */
-static int v_flag = 2;					/* verbose */
+static int v_flag = 1;					/* verbose */
 static int s_flag = 1;					/* show progress of test */
 static int t_flag = 0;					/* number of test patterns */
 static unsigned int *t_patts = NULL;	/* test patterns */
+static int cancel_ops = 0;				/* abort current operation */
 /* Abort test if more than this number of bad blocks has been encountered */
 static unsigned int max_bb = EXT2_BAD_BLOCKS_THRESHOLD;
 static DWORD time_start;
@@ -354,23 +355,32 @@ static float calc_percent(unsigned long current, unsigned long total) {
 
 static void print_status(void)
 {
-	static DWORD msecs = 0;
 	DWORD time_end;
+	float percent;
 
-	// TODO: use GetTickCount64 on Vista and later
 	time_end = GetTickCount();
-	/* update status every second */
-	if (time_end - time_start >= msecs) {
-		uprintf("%6.2f%% done, %0.2f elapsed. "
-					 "(%d/%d/%d errors)",
-				   calc_percent((unsigned long) currently_testing,
-						(unsigned long) num_blocks), 
-				   (time_end - time_start)/1000.0,
-				   num_read_errors,
-				   num_write_errors,
-				   num_corruption_errors);
-		msecs += 1000;
+	percent = calc_percent((unsigned long) currently_testing,
+					(unsigned long) num_blocks);
+	uprintf("%6.2f%% done, %4.0fs elapsed. "
+					"(%d/%d/%d errors)",
+				percent, 
+				(time_end - time_start)/1000.0,
+				num_read_errors,
+				num_write_errors,
+				num_corruption_errors);
+	PostMessage(hMainDialog, UM_FORMAT_PROGRESS, (WPARAM)(DWORD)percent, (LPARAM)0);
+}
+
+static void CALLBACK alarm_intr(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
+{
+	if (!num_blocks)
+		return;
+	if (FormatStatus) {
+		uprintf("Interrupting at block %llu\n", 
+			(unsigned long long) currently_testing);
+		cancel_ops = -1;
 	}
+	print_status();
 }
 
 static void pattern_fill(unsigned char *buffer, unsigned int pattern,
@@ -413,10 +423,6 @@ static int do_read (HANDLE hDrive, unsigned char * buffer, int tryout, int block
 {
 	long got;
 
-#if 0
-	printf("do_read: block %d, try %d\n", current_block, tryout);
-#endif
-
 	if (v_flag > 1)
 		print_status();
 
@@ -439,9 +445,6 @@ static int do_write(HANDLE hDrive, unsigned char * buffer, int tryout, int block
 {
 	long got;
 
-#if 0
-	printf("do_write: block %lu, try %d\n", current_block, tryout);
-#endif
 	if (v_flag > 1)
 		print_status();
 
@@ -483,8 +486,8 @@ static unsigned int test_ro (HANDLE hDrive, blk_t last_block,
 	}
 	if (!blkbuf)
 	{
-		// TODO: err
 		uprintf("could not allocate buffers\n");
+		cancel_ops = -1;
 		return 0;
 	}
 	if (t_flag) {
@@ -505,6 +508,7 @@ static unsigned int test_ro (HANDLE hDrive, blk_t last_block,
 			if (s_flag || v_flag) {
 				uprintf("Too many bad blocks, aborting test\n");
 			}
+			cancel_ops = -1;
 			break;
 		}
 		if (next_bad) {
@@ -559,7 +563,7 @@ static unsigned int test_ro (HANDLE hDrive, blk_t last_block,
 
 static unsigned int test_rw(HANDLE hDrive, blk_t last_block, int block_size, blk_t first_block, unsigned int blocks_at_once)
 {
-	unsigned char *buffer, *read_buffer;
+	unsigned char *buffer = NULL, *read_buffer;
 	const unsigned int patterns[] = {0xaa}; // {0xaa, 0x55, 0xff, 0x00};
 	const unsigned int *pattern;
 	int i, tryout, got, nr_pattern, pat_idx;
@@ -571,6 +575,7 @@ static unsigned int test_rw(HANDLE hDrive, blk_t last_block, int block_size, blk
 
 	if (!buffer) {
 		uprintf("Error while allocating buffers");
+		cancel_ops = -1;
 		return 0;
 	}
 
@@ -583,24 +588,24 @@ static unsigned int test_rw(HANDLE hDrive, blk_t last_block, int block_size, blk
 		pattern = patterns;
 		nr_pattern = ARRAYSIZE(patterns);
 	}
-	// TODO: allow cancellation
+
 	for (pat_idx = 0; pat_idx < nr_pattern; pat_idx++) {
+		if (cancel_ops) goto out;
 		pattern_fill(buffer, pattern[pat_idx], blocks_at_once * block_size);
 		num_blocks = last_block - 1;
 		currently_testing = first_block;
-//		if (s_flag && v_flag <= 1)
-//			alarm_intr(SIGALRM);
 		if (s_flag | v_flag)
 			uprintf("Writing\n");
 		tryout = blocks_at_once;
 		while (currently_testing < last_block) {
 			if (max_bb && bb_count >= max_bb) {
 				if (s_flag || v_flag) {
-					// TODO: this abort blows
 					uprintf("Too many bad blocks, aborting test\n");
 				}
+				cancel_ops = -1;
 				break;
 			}
+			if (cancel_ops) goto out;
 			if (currently_testing + tryout > last_block)
 				tryout = last_block - currently_testing;
 			got = do_write(hDrive, buffer, tryout, block_size, currently_testing);
@@ -623,19 +628,14 @@ static unsigned int test_rw(HANDLE hDrive, blk_t last_block, int block_size, blk
 		}
 
 		num_blocks = 0;
-//		alarm (0);
-//		if (s_flag | v_flag)
-//			fputs(_(done_string), stderr);
 		if (s_flag | v_flag)
-			// TODO: status
 			uprintf("Reading and comparing\n");
 		num_blocks = last_block;
 		currently_testing = first_block;
-//		if (s_flag && v_flag <= 1)
-//			alarm_intr(SIGALRM);
 
 		tryout = blocks_at_once;
 		while (currently_testing < last_block) {
+			if (cancel_ops) goto out;
 			if (max_bb && bb_count >= max_bb) {
 				if (s_flag || v_flag) {
 					uprintf("Too many bad blocks, aborting test\n");
@@ -670,10 +670,8 @@ static unsigned int test_rw(HANDLE hDrive, blk_t last_block, int block_size, blk
 		}
 
 		num_blocks = 0;
-//		alarm (0);
-//		if (s_flag | v_flag)
-//			fputs(_(done_string), stderr);
 	}
+out:
 	free_buffer(buffer);
 	return bb_count;
 }
@@ -721,8 +719,8 @@ static unsigned int test_nd(HANDLE hDrive, blk_t last_block,
 	test_record = malloc (blocks_at_once*sizeof(struct saved_blk_record));
 	if (!blkbuf || !test_record) {
 		uprintf("Error while allocating buffers");
-		// TODO
-		exit (1);
+		cancel_ops = -1;
+		return 0;
 	}
 
 	save_base = blkbuf;
@@ -782,6 +780,7 @@ static unsigned int test_nd(HANDLE hDrive, blk_t last_block,
 				if (s_flag || v_flag) {
 					uprintf("Too many bad blocks, aborting test\n");
 				}
+				cancel_ops = -1;
 				break;
 			}
 			tryout = granularity - buf_used;
@@ -927,18 +926,20 @@ static unsigned int test_nd(HANDLE hDrive, blk_t last_block,
 	return bb_count;
 }
 
-int BadBlocks(HANDLE hPhysicalDrive, ULONGLONG disk_size, int block_size, int test_type)
+BOOL BadBlocks(HANDLE hPhysicalDrive, ULONGLONG disk_size, int block_size,
+	int test_type, badblocks_report *report)
 {
 	errcode_t error_code;
 	unsigned int (*test_func)(HANDLE, blk_t, int, blk_t, unsigned int);
-	int num_passes = 0;
-	int passes_clean = 0;
-	blk_t bb_count = 0, first_block = 0, last_block = (blk_t)disk_size/block_size;
+	blk_t first_block = 0, last_block = (blk_t)disk_size/block_size;
+
+	if (report == NULL) return FALSE;
+	report->bb_count = 0;
 
 	error_code = ext2fs_badblocks_list_create(&bb_list, 0);
 	if (error_code) {
 		uprintf("Error %d while creating in-memory bad blocks list", error_code);
-		return -1;
+		return FALSE;
 	}
 
 	switch(test_type) {
@@ -953,21 +954,20 @@ int BadBlocks(HANDLE hPhysicalDrive, ULONGLONG disk_size, int block_size, int te
 		break;
 	}
 	time_start = GetTickCount();
-	do {
-		bb_count = test_func(hPhysicalDrive, last_block, block_size, first_block, EXT2_BLOCKS_AT_ONCE);
-		if (bb_count)
-			passes_clean = 0;
-		else
-			++passes_clean;
-
-		if (v_flag)
-			uprintf("Pass completed, %u bad blocks found. (%d/%d/%d errors)\n",
-				bb_count, num_read_errors, num_write_errors, num_corruption_errors);
-
-	} while (passes_clean < num_passes);
+	cancel_ops = 0;
+	/* use a timer to update status every second */
+	SetTimer(hMainDialog, EXT2_TIMER_ID, 1000, alarm_intr);
+	report->bb_count = test_func(hPhysicalDrive, last_block, block_size, first_block, EXT2_BLOCKS_AT_ONCE);
+	KillTimer(hMainDialog, EXT2_TIMER_ID);
 	free(t_patts);
 	free(bb_list->list);
 	free(bb_list);
+	// TODO: report first problem block for each error
+	report->num_read_errors = num_read_errors;
+	report->num_write_errors = num_write_errors;
+	report->num_corruption_errors = num_corruption_errors;
 
-	return bb_count;
+	if (cancel_ops)
+		return FALSE;
+	return TRUE;
 }

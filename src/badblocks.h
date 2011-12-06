@@ -41,6 +41,7 @@ typedef struct ext2_struct_u32_iterate      *ext2_u32_iterate;
 #define EXT2_BAD_BLOCKS_THRESHOLD           32
 #define EXT2_BLOCKS_AT_ONCE                 64
 #define EXT2_SYS_PAGE_SIZE                  4096
+#define EXT2_TIMER_ID                       0x1000
 
 enum test_type {
 	BADBLOCKS_RO,		/* Read-only */
@@ -62,4 +63,5 @@ typedef struct {
 /*
  * Shared prototypes
  */
-int BadBlocks(HANDLE hPhysicalDrive, ULONGLONG disk_size, int block_size, int test_type);
+BOOL BadBlocks(HANDLE hPhysicalDrive, ULONGLONG disk_size, int block_size,
+	int test_type, badblocks_report *report);

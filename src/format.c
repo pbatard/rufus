@@ -43,6 +43,7 @@
  * Globals
  */
 DWORD FormatStatus;
+badblocks_report report;
 
 /*
  * FormatEx callback. Return FALSE to halt operations
@@ -341,14 +342,20 @@ void __cdecl FormatThread(void* param)
 			goto out;
 		}
 
-		if (BadBlocks(hPhysicalDrive, SelectedDrive.DiskSize,
-			SelectedDrive.Geometry.BytesPerSector, BADBLOCKS_RW)) {
-			// TODO: report block failure number, etc
+		if (!BadBlocks(hPhysicalDrive, SelectedDrive.DiskSize,
+			SelectedDrive.Geometry.BytesPerSector, BADBLOCKS_RW, &report)) {
 			uprintf("Bad blocks check failed.\n");
-			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_BADBLOCKS);
+			if (!FormatStatus)
+				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|
+					APPERR(ERROR_BADBLOCKS_FAILURE);
+			// TODO: should probably ClearMBR here as well
 			goto out;
 		}
+		uprintf("Check completed, %u bad blocks found. (%d/%d/%d errors)\n",
+			report.bb_count, report.num_read_errors, report.num_write_errors, report.num_corruption_errors);
 		safe_unlockclose(hLogicalVolume);
+
+		// TODO: check bb_count and ask user if they want to continue
 	}
 
 	// Especially after destructive badblocks test, you must zero the MBR completely
@@ -382,7 +389,7 @@ void __cdecl FormatThread(void* param)
 
 	if (!FormatDrive(drive_name[0])) {
 		// Error will be set by FormatDrive() in FormatStatus
-		uprintf("Format error: 0x%08X\n", FormatStatus);
+		uprintf("Format error: %s\n", StrError(FormatStatus));
 		goto out;
 	}
 
