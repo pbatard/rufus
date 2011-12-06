@@ -28,7 +28,7 @@ int write_sectors(HANDLE hDrive, size_t SectorSize,
                   const void *pBuf)
 {
    LARGE_INTEGER ptr;
-   DWORD Size = 0;
+   DWORD Size = (DWORD)(nSectors*SectorSize);
 
    ptr.QuadPart = StartSector*SectorSize;
    if(!SetFilePointerEx(hDrive, ptr, NULL, FILE_BEGIN))
@@ -37,7 +37,7 @@ int write_sectors(HANDLE hDrive, size_t SectorSize,
       return -1;
    }
 
-   if((!WriteFile(hDrive, pBuf, (DWORD)nSectors*SectorSize, &Size, NULL)) || (Size != nSectors*SectorSize))
+   if((!WriteFile(hDrive, pBuf, Size, &Size, NULL)) || (Size != nSectors*SectorSize))
    {
       uprintf("write_sectors: Write error - %s\n", WindowsErrorString());
       uprintf("  StartSector:%0X, nSectors:%0X, SectorSize:%0X\n", StartSector, nSectors, SectorSize);
@@ -53,7 +53,7 @@ int read_sectors(HANDLE hDrive, size_t SectorSize,
                  void *pBuf)
 {
    LARGE_INTEGER ptr;
-   DWORD Size = 0;
+   DWORD Size = (DWORD)(nSectors*SectorSize);
 
    ptr.QuadPart = StartSector*SectorSize;
    if(!SetFilePointerEx(hDrive, ptr, NULL, FILE_BEGIN))
@@ -62,7 +62,7 @@ int read_sectors(HANDLE hDrive, size_t SectorSize,
       return -1;
    }
 
-   if((!ReadFile(hDrive, pBuf, (DWORD)nSectors*SectorSize, &Size, NULL)) || (Size != nSectors*SectorSize))
+   if((!ReadFile(hDrive, pBuf, Size, &Size, NULL)) || (Size != nSectors*SectorSize))
    {
       uprintf("read_sectors: Read error - %s\n", WindowsErrorString());
       uprintf("  StartSector:%0X, nSectors:%0X, SectorSize:%0X\n", StartSector, nSectors, SectorSize);

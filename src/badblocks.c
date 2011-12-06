@@ -34,7 +34,6 @@
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
-//#include <intrin.h>
 #include <malloc.h>
 #include <string.h>
 #include <time.h>
@@ -46,10 +45,9 @@
 #include "file.h"
 
 /*
- *From e2fsprogs/e2fsck/badblocks.c
+ *From e2fsprogs/lib/ext2fs/badblocks.c
  */
-static errcode_t make_u32_list(int size, int num, __u32 *list,
-			       ext2_u32_list *ret)
+static errcode_t make_u32_list(int size, int num, __u32 *list, ext2_u32_list *ret)
 {
 	ext2_u32_list	bb;
 
@@ -87,13 +85,11 @@ static errcode_t ext2fs_badblocks_list_create(ext2_badblocks_list *ret, int size
 static errcode_t ext2fs_u32_list_add(ext2_u32_list bb, __u32 blk)
 {
 	int		i, j;
-	unsigned long	old_size;
 	__u32* old_bb_list = bb->list;
 
 	EXT2_CHECK_MAGIC(bb, EXT2_ET_MAGIC_BADBLOCKS_LIST);
 
 	if (bb->num >= bb->size) {
-		old_size = bb->size * sizeof(__u32);
 		bb->size += 100;
 		bb->list = realloc(bb->list, bb->size * sizeof(__u32));
 		if (bb->list == NULL) {
@@ -187,31 +183,6 @@ static int ext2fs_badblocks_list_test(ext2_badblocks_list bb, blk_t blk)
 	return ext2fs_u32_list_test((ext2_u32_list) bb, (__u32) blk);
 }
 
-/*
- * Remove a block from the badblock list
- */
-int ext2fs_u32_list_del(ext2_u32_list bb, __u32 blk)
-{
-	int	remloc, i;
-
-	if (bb->num == 0)
-		return -1;
-
-	remloc = ext2fs_u32_list_find(bb, blk);
-	if (remloc < 0)
-		return -1;
-
-	for (i = remloc ; i < bb->num-1; i++)
-		bb->list[i] = bb->list[i+1];
-	bb->num--;
-	return 0;
-}
-
-static void ext2fs_badblocks_list_del(ext2_u32_list bb, __u32 blk)
-{
-	ext2fs_u32_list_del(bb, blk);
-}
-
 static errcode_t ext2fs_u32_list_iterate_begin(ext2_u32_list bb,
 					ext2_u32_iterate *ret)
 {
@@ -280,39 +251,12 @@ static void ext2fs_badblocks_list_iterate_end(ext2_badblocks_iterate iter)
 }
 
 
-static int ext2fs_u32_list_equal(ext2_u32_list bb1, ext2_u32_list bb2)
-{
-	EXT2_CHECK_MAGIC(bb1, EXT2_ET_MAGIC_BADBLOCKS_LIST);
-	EXT2_CHECK_MAGIC(bb2, EXT2_ET_MAGIC_BADBLOCKS_LIST);
-
-	if (bb1->num != bb2->num)
-		return 0;
-
-	if (memcmp(bb1->list, bb2->list, bb1->num * sizeof(blk_t)) != 0)
-		return 0;
-	return 1;
-}
-
-static int ext2fs_badblocks_equal(ext2_badblocks_list bb1, ext2_badblocks_list bb2)
-{
-	return ext2fs_u32_list_equal((ext2_u32_list) bb1,
-				     (ext2_u32_list) bb2);
-}
-
-static int ext2fs_u32_list_count(ext2_u32_list bb)
-{
-	return bb->num;
-}
-
 /*
- * from e2fsprogs\misc\badblocks.c
+ * from e2fsprogs/misc/badblocks.c
  */
 static int v_flag = 2;			/* verbose */
-static int w_flag = 0;			/* do r/w test: 0=no, 1=yes,
-					 * 2=non-destructive */
 static int s_flag = 1;			/* show progress of test */
 static int t_flag = 0;			/* number of test patterns */
-static int t_max = 0;			/* allocated test patterns */
 static unsigned int *t_patts = NULL;	/* test patterns */
 // TODO: set this from parameter
 static unsigned int max_bb = 32;		/* Abort test if more than this number of bad blocks has been encountered */
@@ -336,13 +280,19 @@ static ext2_badblocks_iterate bb_iter = NULL;
 enum error_types { READ_ERROR, WRITE_ERROR, CORRUPTION_ERROR };
 
 static __inline void *allocate_buffer(size_t size) {
-	// TODO: requires -D__MSVCRT_VERSION__=0x700 for MinGW
-	// find out if older XP platforms might miss it
+#ifdef __MINGW32__
+	return __mingw_aligned_malloc(size, sys_page_size);
+#else 
 	return _aligned_malloc(size, sys_page_size);
+#endif
 }
 
 static __inline void free_buffer(void* p) {
+#ifdef __MINGW32__
+	__mingw_aligned_free(p);
+#else
 	_aligned_free(p);
+#endif
 }
 
 /*
@@ -351,16 +301,16 @@ static __inline void free_buffer(void* p) {
  */
 static int bb_output (blk_t bad, enum error_types error_type)
 {
-	errcode_t errcode;
+	errcode_t error_code;
 
 	if (ext2fs_badblocks_list_test(bb_list, bad))
 		return 0;
 
 	uprintf("%lu\n", (unsigned long) bad);
 
-	errcode = ext2fs_badblocks_list_add(bb_list, bad);
-	if (errcode) {
-		uprintf("Error %d adding to in-memory bad block list", errcode);
+	error_code = ext2fs_badblocks_list_add(bb_list, bad);
+	if (error_code) {
+		uprintf("Error %d adding to in-memory bad block list", error_code);
 		exit (1);
 	}
 
@@ -453,7 +403,7 @@ static int do_read (HANDLE hDrive, unsigned char * buffer, int tryout, int block
 		    blk_t current_block)
 {
 	long got;
-	DWORD tv1, tv2;
+//	DWORD tv1, tv2;
 #define NANOSEC (1000000000L)
 #define MILISEC (1000L)
 
@@ -465,12 +415,12 @@ static int do_read (HANDLE hDrive, unsigned char * buffer, int tryout, int block
 		print_status();
 
 	/* Try the read */
-	if (d_flag)
-		tv1 = GetTickCount();
+//	if (d_flag)
+//		tv1 = GetTickCount();
 	got = read_sectors(hDrive, block_size, current_block, tryout, buffer);
 		// read (dev, buffer, tryout * block_size);
-	if (d_flag)
-		tv2 = GetTickCount();
+//	if (d_flag)
+//		tv2 = GetTickCount();
 	if (got < 0)
 		got = 0;
 	if (got & 511)
@@ -549,13 +499,13 @@ static unsigned int test_ro (HANDLE hDrive, blk_t last_block,
 	int tryout;
 	int got;
 	unsigned int bb_count = 0;
-	errcode_t errcode;
+	errcode_t error_code;
 	blk_t recover_block = ~0;
 
-	errcode = ext2fs_badblocks_list_iterate_begin(bb_list,&bb_iter);
-	if (errcode) {
+	error_code = ext2fs_badblocks_list_iterate_begin(bb_list,&bb_iter);
+	if (error_code) {
 		// TODO: set FormatStatus
-		uprintf("errcode %d while beginning bad block list iteration\n", errcode);
+		uprintf("errcode %d while beginning bad block list iteration\n", error_code);
 		return 0;
 	}
 	do {
@@ -785,16 +735,16 @@ static unsigned int test_nd(HANDLE hDrive, blk_t last_block,
 	/* This is static to prevent being clobbered by the longjmp */
 	static int num_saved;
 	jmp_buf terminate_env;
-	errcode_t errcode;
+	errcode_t error_code;
 	unsigned long buf_used;
 	static unsigned int bb_count;
 	int granularity = blocks_at_once;
 	blk_t recover_block = ~0;
 
 	bb_count = 0;
-	errcode = ext2fs_badblocks_list_iterate_begin(bb_list,&bb_iter);
-	if (errcode) {
-		uprintf("Error %d while beginning bad block list iteration", errcode);
+	error_code = ext2fs_badblocks_list_iterate_begin(bb_list,&bb_iter);
+	if (error_code) {
+		uprintf("Error %d while beginning bad block list iteration", error_code);
 		exit (1);
 	}
 	do {
@@ -867,7 +817,7 @@ static unsigned int test_nd(HANDLE hDrive, blk_t last_block,
 				}
 				break;
 			}
-			got = tryout = granularity - buf_used;
+			tryout = granularity - buf_used;
 			if (next_bad) {
 				if (currently_testing == next_bad) {
 					/* fprintf (out, "%lu\n", nextbad); */
@@ -916,7 +866,6 @@ static unsigned int test_nd(HANDLE hDrive, blk_t last_block,
 			test_ptr += got * block_size;
 			currently_testing += got;
 			if (got != tryout) {
-				tryout = 1;
 				if (recover_block == ~0)
 					recover_block = currently_testing -
 						got + blocks_at_once;
@@ -1011,9 +960,9 @@ static unsigned int test_nd(HANDLE hDrive, blk_t last_block,
 	return bb_count;
 }
 
-int BadBlocks(HANDLE hPhysicalDrive, ULONGLONG disk_size, int block_size)
+int BadBlocks(HANDLE hPhysicalDrive, ULONGLONG disk_size, int block_size, int test_type)
 {
-	errcode_t errcode;
+	errcode_t error_code;
 	unsigned int blocks_at_once = 64;
 	unsigned int (*test_func)(HANDLE, blk_t,
 				  int, blk_t,
@@ -1023,13 +972,23 @@ int BadBlocks(HANDLE hPhysicalDrive, ULONGLONG disk_size, int block_size)
 	int bb_count;
 	blk_t first_block = 0, last_block = (blk_t)disk_size/block_size;
 
-	errcode = ext2fs_badblocks_list_create(&bb_list, 0);
-	if (errcode) {
-		uprintf("Error %d while creating in-memory bad blocks list", errcode);
+	error_code = ext2fs_badblocks_list_create(&bb_list, 0);
+	if (error_code) {
+		uprintf("Error %d while creating in-memory bad blocks list", error_code);
 		return -1;
 	}
 
-	test_func = test_rw;
+	switch(test_type) {
+	case BADBLOCKS_RW:
+		test_func = test_rw;
+		break;
+	case BADBLOCKS_ND:
+		test_func = test_nd;
+		break;
+	default:
+		test_func = test_ro;
+		break;
+	}
 	time_start = GetTickCount();
 	do {
 		bb_count = test_func(hPhysicalDrive, last_block, block_size, first_block, blocks_at_once);

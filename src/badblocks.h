@@ -54,7 +54,14 @@ struct ext2_struct_u32_iterate {
 	int			ptr;
 };
 
+/* Test type */
+enum {
+	BADBLOCKS_RO,	/* Read-only */
+	BADBLOCKS_RW,	/* *DESTRUCTIVE* read-write */
+	BADBLOCKS_ND	/* non-destructive read-write */
+};
+
 /*
  * Shared prototypes
  */
-BOOL BadBlocks(HANDLE hPhysicalDrive, ULONGLONG disk_size, int block_size);
+int BadBlocks(HANDLE hPhysicalDrive, ULONGLONG disk_size, int block_size, int test_type);

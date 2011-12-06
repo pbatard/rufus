@@ -331,7 +331,8 @@ void __cdecl FormatThread(void* param)
 			goto out;
 		}
 
-		if (BadBlocks(hPhysicalDrive, SelectedDrive.DiskSize, SelectedDrive.Geometry.BytesPerSector)) {
+		if (BadBlocks(hPhysicalDrive, SelectedDrive.DiskSize,
+			SelectedDrive.Geometry.BytesPerSector, BADBLOCKS_RW)) {
 			// TODO: report block failure number, etc
 			uprintf("Bad blocks check failed.\n");
 			goto out;
