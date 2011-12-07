@@ -43,12 +43,13 @@ typedef struct ext2_struct_u32_iterate      *ext2_u32_iterate;
 #define EXT2_SYS_PAGE_SIZE                  4096
 #define EXT2_TIMER_ID                       0x1000
 
-enum test_type {
+enum test_types {
 	BADBLOCKS_RO,		/* Read-only */
 	BADBLOCKS_RW,		/* DESTRUCTIVE read-write */
 	BADBLOCKS_ND		/* non-destructive read-write */
 };
 enum error_types { READ_ERROR, WRITE_ERROR, CORRUPTION_ERROR };
+enum op_type { OP_READ, OP_WRITE };
 
 /*
  * Badblocks report

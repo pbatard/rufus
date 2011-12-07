@@ -277,6 +277,8 @@ static int s_flag = 1;					/* show progress of test */
 static int t_flag = 0;					/* number of test patterns */
 static unsigned int *t_patts = NULL;	/* test patterns */
 static int cancel_ops = 0;				/* abort current operation */
+static int cur_pattern, nr_pattern;
+static int cur_op;
 /* Abort test if more than this number of bad blocks has been encountered */
 static unsigned int max_bb = EXT2_BAD_BLOCKS_THRESHOLD;
 static DWORD time_start;
@@ -361,8 +363,11 @@ static void print_status(void)
 	time_end = GetTickCount();
 	percent = calc_percent((unsigned long) currently_testing,
 					(unsigned long) num_blocks);
-	uprintf("%6.2f%% done, %4.0fs elapsed. "
+	PrintStatus("%d/%d(%c): %6.2f%% done, %.0fs elapsed. "
 					"(%d/%d/%d errors)",
+				2*cur_pattern - ((cur_op==OP_WRITE)?1:0),
+				2*nr_pattern,
+				(cur_op==OP_READ)?'R':'W',
 				percent, 
 				(time_end - time_start)/1000.0,
 				num_read_errors,
@@ -411,6 +416,7 @@ static void pattern_fill(unsigned char *buffer, unsigned int pattern,
 				i--;
 		}
 		PrintStatus("Testing with pattern 0x%02X", bpattern[i]);
+		cur_pattern++;
 	}
 }
 
@@ -564,9 +570,9 @@ static unsigned int test_ro (HANDLE hDrive, blk_t last_block,
 static unsigned int test_rw(HANDLE hDrive, blk_t last_block, int block_size, blk_t first_block, unsigned int blocks_at_once)
 {
 	unsigned char *buffer = NULL, *read_buffer;
-	const unsigned int patterns[] = {0xaa}; // {0xaa, 0x55, 0xff, 0x00};
+	const unsigned int patterns[] = {0xaa, 0x55, 0xff, 0x00};
 	const unsigned int *pattern;
-	int i, tryout, got, nr_pattern, pat_idx;
+	int i, tryout, got, pat_idx;
 	unsigned int bb_count = 0;
 	blk_t recover_block = ~0;
 
@@ -588,6 +594,7 @@ static unsigned int test_rw(HANDLE hDrive, blk_t last_block, int block_size, blk
 		pattern = patterns;
 		nr_pattern = ARRAYSIZE(patterns);
 	}
+	cur_pattern = 0;
 
 	for (pat_idx = 0; pat_idx < nr_pattern; pat_idx++) {
 		if (cancel_ops) goto out;
@@ -596,6 +603,7 @@ static unsigned int test_rw(HANDLE hDrive, blk_t last_block, int block_size, blk
 		currently_testing = first_block;
 		if (s_flag | v_flag)
 			uprintf("Writing\n");
+		cur_op = OP_WRITE;
 		tryout = blocks_at_once;
 		while (currently_testing < last_block) {
 			if (max_bb && bb_count >= max_bb) {
@@ -630,6 +638,7 @@ static unsigned int test_rw(HANDLE hDrive, blk_t last_block, int block_size, blk
 		num_blocks = 0;
 		if (s_flag | v_flag)
 			uprintf("Reading and comparing\n");
+		cur_op = OP_READ;
 		num_blocks = last_block;
 		currently_testing = first_block;
 

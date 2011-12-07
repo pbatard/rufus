@@ -29,7 +29,8 @@ s/^[ \t]*FILEVERSION[ \t]*\(.*\),\(.*\),\(.*\),.*/ FILEVERSION \1,\2,\3,@@TAGVER
 s/^[ \t]*PRODUCTVERSION[ \t]*\(.*\),\(.*\),\(.*\),.*/ PRODUCTVERSION \1,\2,\3,@@TAGVER@@/
 s/^\([ \t]*\)VALUE[ \t]*"FileVersion",[ \t]*"\(.*\)\..*"/\1VALUE "FileVersion", "\2.@@TAGVER@@"/
 s/^\([ \t]*\)VALUE[ \t]*"ProductVersion",[ \t]*"\(.*\)\..*"/\1VALUE "ProductVersion", "\2.@@TAGVER@@"/
-s/^\(.*\)"Rufus v\(.*\)\.\(.*\)"\(.*\)/\1"Rufus v\2.@@TAGVER@@"\4/
+# TODO: revert ' ' to '"' below when out of beta
+s/^\(.*\)"Rufus v\(.*\)\.\(.*\) \(.*\)/\1"Rufus v\2.@@TAGVER@@ \4/
 s/^\(.*\)"Version \(.*\) (Build \(.*\))"\(.*\)/\1"Version \2 (Build @@TAGVER@@)"\4/
 _EOF
 
@@ -44,7 +45,5 @@ sed -f cmd.sed src/rufus.rc > src/rufus.rc~
 sed 's/$/\r/' src/rufus.rc~ > src/rufus.rc
 rm src/rufus.rc~
 git add src/rufus.rc
-#sed -f cmd.sed _bm.sh > _bm.sh~
-#mv _bm.sh~ _bm.sh
 
 rm cmd.sed
