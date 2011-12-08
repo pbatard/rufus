@@ -396,7 +396,7 @@ BOOL CreatePartition(HANDLE hDrive)
 	BOOL r;
 	DWORD size;
 
-	PrintStatus("Partitioning...");
+	PrintStatus(0, "Partitioning...");
 	DriveLayoutEx->PartitionStyle = PARTITION_STYLE_MBR;
 	DriveLayoutEx->PartitionCount = 4;	// Must be multiple of 4 for MBR
 	DriveLayoutEx->Mbr.Signature = GetTickCount();
@@ -591,7 +591,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	char str[MAX_PATH], tmp[128];
 	static uintptr_t format_thid = -1L;
 	static HWND hProgress, hDOS;
-	static LONG ProgressStyle = 0;
+//	static LONG ProgressStyle = 0;
 	static UINT uDOSChecked = BST_CHECKED;
 
 	switch (message) {
@@ -626,7 +626,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		hStatus = CreateWindowEx(0, STATUSCLASSNAME, NULL, WS_CHILD | WS_VISIBLE,
 			0, 0, 0, 0, hMainDialog, (HMENU)IDC_STATUS,  hMainInstance, NULL);
 		// We'll switch the progressbar to marquee and back => keep a copy of current style
-		ProgressStyle = GetWindowLong(hProgress, GWL_STYLE);
+//		ProgressStyle = GetWindowLong(hProgress, GWL_STYLE);
 		// Create the string array
 		StrArrayCreate(&DriveID, MAX_DRIVES);
 		StrArrayCreate(&DriveLabel, MAX_DRIVES);
@@ -647,7 +647,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 					// Operation may have completed in the meantime
 					if (format_thid != -1L) {
 						FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANCELLED;
-						PrintStatus("Cancelling - please wait...");
+						PrintStatus(0, "Cancelling - please wait...");
 					}
 				}
 				return (INT_PTR)TRUE;
@@ -664,7 +664,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		case IDC_DEVICE:
 			switch (HIWORD(wParam)) {
 			case CBN_SELCHANGE:
-				PrintStatus("%d device%s found.", ComboBox_GetCount(hDeviceList),
+				PrintStatus(0, "%d device%s found.", ComboBox_GetCount(hDeviceList),
 					(ComboBox_GetCount(hDeviceList)!=1)?"s":"");
 				PopulateProperties(ComboBox_GetCurSel(hDeviceList));
 				break;
@@ -755,12 +755,12 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		EnableControls(TRUE);
 		GetUSBDevices();
 		if (!IS_ERROR(FormatStatus)) {
-			PrintStatus("DONE");
+			PrintStatus(0, "DONE");
 		} else if (SCODE_CODE(FormatStatus) == ERROR_CANCELLED) {
-			PrintStatus("Cancelled");
+			PrintStatus(0, "Cancelled");
 			Notification(MSG_INFO, "Cancelled", "Operation cancelled by the user.");
 		} else {
-			PrintStatus("FAILED");
+			PrintStatus(0, "FAILED");
 			Notification(MSG_ERROR, "Error", "Error: %s", StrError(FormatStatus));
 		}
 		return (INT_PTR)TRUE;

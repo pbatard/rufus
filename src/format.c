@@ -138,7 +138,7 @@ static BOOL FormatDrive(char DriveLetter)
 	size_t i;
 
 	wDriveRoot[0] = (WCHAR)DriveLetter;
-	PrintStatus("Formatting...");
+	PrintStatus(0, "Formatting...");
 	PF_INIT_OR_OUT(FormatEx, fmifs);
 
 	GetWindowTextW(hFileSystem, wFSType, ARRAYSIZE(wFSType));
@@ -323,6 +323,7 @@ void __cdecl FormatThread(void* param)
 	HANDLE hPhysicalDrive = INVALID_HANDLE_VALUE;
 	HANDLE hLogicalVolume = INVALID_HANDLE_VALUE;
 	char drive_name[] = "?:";
+	char bb_msg[256];
 	int i;
 
 	hPhysicalDrive = GetDriveHandle(num, NULL, TRUE, TRUE);
@@ -341,7 +342,7 @@ void __cdecl FormatThread(void* param)
 			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_OPEN_FAILED;
 			goto out;
 		}
-
+bb_retry:
 		if (!BadBlocks(hPhysicalDrive, SelectedDrive.DiskSize,
 			SelectedDrive.Geometry.BytesPerSector, BADBLOCKS_RW, &report)) {
 			uprintf("Bad blocks check failed.\n");
@@ -351,11 +352,23 @@ void __cdecl FormatThread(void* param)
 			// TODO: should probably ClearMBR here as well
 			goto out;
 		}
-		uprintf("Check completed, %u bad blocks found. (%d/%d/%d errors)\n",
-			report.bb_count, report.num_read_errors, report.num_write_errors, report.num_corruption_errors);
+		uprintf("Check completed, %u bad block%s found. (%d/%d/%d errors)\n",
+			report.bb_count, (report.bb_count==1)?"":"s",
+			report.num_read_errors, report.num_write_errors, report.num_corruption_errors);
+		safe_sprintf(bb_msg, sizeof(bb_msg), "Check completed - %u bad block%s found:\n"
+			"  %d read errors\n  %d write errors\n  %d corruption errors",
+			report.bb_count, (report.bb_count==1)?"":"s",
+			report.num_read_errors, report.num_write_errors, 
+			report.num_corruption_errors);
+		switch(MessageBoxA(hMainDialog, bb_msg, "Bad blocks check",
+			report.bb_count?(MB_ABORTRETRYIGNORE|MB_ICONWARNING):(MB_OK|MB_ICONINFORMATION))) {
+		case IDRETRY: 
+			goto bb_retry;
+		case IDABORT:
+			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANCELLED;
+			goto out;
+		}
 		safe_unlockclose(hLogicalVolume);
-
-		// TODO: check bb_count and ask user if they want to continue
 	}
 
 	// Especially after destructive badblocks test, you must zero the MBR completely
@@ -398,7 +411,7 @@ void __cdecl FormatThread(void* param)
 	// TODO: use progress bar during MBR/FSBR/MSDOS copy
 	// TODO: unlock/remount trick to make the volume reappear
 
-	PrintStatus("Writing master boot record...\n");
+	PrintStatus(0, "Writing master boot record...\n");
 	if (!WriteMBR(hPhysicalDrive)) {
 		// Errorcode has already been set
 		goto out;
@@ -412,14 +425,14 @@ void __cdecl FormatThread(void* param)
 			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_OPEN_FAILED;
 			goto out;
 		}
-		PrintStatus("Writing partition boot record...\n");
+		PrintStatus(0, "Writing partition boot record...\n");
 		if (!WritePBR(hLogicalVolume)) {
 			// Errorcode has already been set
 			goto out;
 		}
 		// ... and we must have relinquished that lock to write the MS-DOS files 
 		safe_unlockclose(hLogicalVolume);
-		PrintStatus("Copying MS-DOS files...\n");
+		PrintStatus(0, "Copying MS-DOS files...\n");
 		if (!ExtractMSDOS(drive_name)) {
 			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANNOT_COPY;
 			goto out;

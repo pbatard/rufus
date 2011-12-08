@@ -76,10 +76,16 @@ enum user_message_type {
 };
 
 /* Custom notifications */
-enum MessageType {
+enum notification_type {
 	MSG_INFO,
 	MSG_WARNING,
 	MSG_ERROR
+};
+
+/* Timers used throughout the program */
+enum timer_id {
+	PRINTSTATUS_TIMER_ID = 0x1000,
+	BADBLOCK_TIMER_ID
 };
 
 /* File system indexes in our FS combobox */
@@ -124,7 +130,7 @@ extern RUFUS_DRIVE_INFO SelectedDrive;
  */
 extern const char *WindowsErrorString(void);
 extern void DumpBufferHex(void *buf, size_t size);
-extern void PrintStatus(const char *format, ...);
+extern void PrintStatus(unsigned int duration, const char *format, ...);
 extern const char* StrError(DWORD error_code);
 extern void CenterDialog(HWND hDlg);
 extern void CreateStatusBar(void);

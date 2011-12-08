@@ -363,10 +363,10 @@ static void print_status(void)
 	time_end = GetTickCount();
 	percent = calc_percent((unsigned long) currently_testing,
 					(unsigned long) num_blocks);
-	PrintStatus("%d/%d(%c): %6.2f%% done, %.0fs elapsed. "
+	percent = (percent/2.0f) + ((cur_op==OP_READ)? 50.0f : 0.0f);
+	PrintStatus(0, "PASS %d/%d(%c): %6.2f%% done, %.0fs elapsed. "
 					"(%d/%d/%d errors)",
-				2*cur_pattern - ((cur_op==OP_WRITE)?1:0),
-				2*nr_pattern,
+				cur_pattern, nr_pattern,
 				(cur_op==OP_READ)?'R':'W',
 				percent, 
 				(time_end - time_start)/1000.0,
@@ -398,7 +398,8 @@ static void pattern_fill(unsigned char *buffer, unsigned int pattern,
 		for (ptr = buffer; ptr < buffer + n; ptr++) {
 			(*ptr) = rand() % (1 << (8 * sizeof(char)));
 		}
-		PrintStatus("Testing with random pattern: ");
+		PrintStatus(3500, "Testing with random pattern: ");
+		uprintf("Testing with random pattern: ");
 	} else {
 		bpattern[0] = 0;
 		for (i = 0; i < sizeof(bpattern); i++) {
@@ -415,7 +416,8 @@ static void pattern_fill(unsigned char *buffer, unsigned int pattern,
 			else
 				i--;
 		}
-		PrintStatus("Testing with pattern 0x%02X", bpattern[i]);
+		PrintStatus(3500, "Testing with pattern 0x%02X", bpattern[i]);
+		uprintf("Testing with pattern 0x%02X", bpattern[i]);
 		cur_pattern++;
 	}
 }
@@ -700,7 +702,7 @@ static unsigned int test_nd(HANDLE hDrive, blk_t last_block,
 	int tryout, i;
 	const unsigned int patterns[] = { ~0 };
 	const unsigned int *pattern;
-	int nr_pattern, pat_idx;
+	int pat_idx;
 	int got, used2, written;
 	blk_t save_currently_testing;
 	struct saved_blk_record *test_record;
@@ -965,13 +967,13 @@ BOOL BadBlocks(HANDLE hPhysicalDrive, ULONGLONG disk_size, int block_size,
 	time_start = GetTickCount();
 	cancel_ops = 0;
 	/* use a timer to update status every second */
-	SetTimer(hMainDialog, EXT2_TIMER_ID, 1000, alarm_intr);
+	SetTimer(hMainDialog, BADBLOCK_TIMER_ID, 1000, alarm_intr);
 	report->bb_count = test_func(hPhysicalDrive, last_block, block_size, first_block, EXT2_BLOCKS_AT_ONCE);
-	KillTimer(hMainDialog, EXT2_TIMER_ID);
+	KillTimer(hMainDialog, BADBLOCK_TIMER_ID);
 	free(t_patts);
 	free(bb_list->list);
 	free(bb_list);
-	// TODO: report first problem block for each error
+	// TODO: report first problem block for each error or create a report file
 	report->num_read_errors = num_read_errors;
 	report->num_write_errors = num_write_errors;
 	report->num_corruption_errors = num_corruption_errors;

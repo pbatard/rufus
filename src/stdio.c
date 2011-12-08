@@ -122,24 +122,46 @@ static char err_string[256];
 	return err_string;
 }
 
-void PrintStatus(const char *format, ...)
+/*
+ * Display a message on the status bar. If duration is non zero, ensures that message
+ * is displayed for at least duration ms regardless, regardless of any other incoming
+ * message
+ */
+static BOOL bStatusTimerArmed = FALSE;
+static char szStatusMessage[256] = { 0 };
+static void CALLBACK PrintStatusTimeout(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
 {
-	char buf[256], *p = buf;
+	bStatusTimerArmed = FALSE;
+	// potentially display lower priority message that was overridden
+	SetDlgItemTextU(hMainDialog, IDC_STATUS, szStatusMessage);
+	KillTimer(hMainDialog, PRINTSTATUS_TIMER_ID);
+}
+
+void PrintStatus(unsigned int duration, const char *format, ...)
+{
+	char *p = szStatusMessage;
 	va_list args;
 	int n;
 
 	va_start(args, format);
-	n = safe_vsnprintf(p, sizeof(buf)-1, format, args); // room for NUL
+	n = safe_vsnprintf(p, sizeof(szStatusMessage)-1, format, args); // room for NUL
 	va_end(args);
 
-	p += (n < 0)?sizeof(buf)-1:n;
+	p += (n < 0)?sizeof(szStatusMessage)-1:n;
 
-	while((p>buf) && (isspace(p[-1])))
+	while((p>szStatusMessage) && (isspace(p[-1])))
 		*--p = '\0';
 
 	*p   = '\0';
 
-	SetDlgItemTextU(hMainDialog, IDC_STATUS, buf);
+	if ((duration) || (!bStatusTimerArmed)) {
+		SetDlgItemTextU(hMainDialog, IDC_STATUS, szStatusMessage);
+	}
+
+	if (duration) {
+		SetTimer(hMainDialog, PRINTSTATUS_TIMER_ID, duration, PrintStatusTimeout);
+		bStatusTimerArmed = TRUE;
+	}
 }
 
 const char* StrError(DWORD error_code)

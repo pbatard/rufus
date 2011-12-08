@@ -41,7 +41,6 @@ typedef struct ext2_struct_u32_iterate      *ext2_u32_iterate;
 #define EXT2_BAD_BLOCKS_THRESHOLD           32
 #define EXT2_BLOCKS_AT_ONCE                 64
 #define EXT2_SYS_PAGE_SIZE                  4096
-#define EXT2_TIMER_ID                       0x1000
 
 enum test_types {
 	BADBLOCKS_RO,		/* Read-only */
