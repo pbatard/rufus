@@ -57,6 +57,8 @@ HWND hDeviceList, hCapacity, hFileSystem, hClusterSize, hLabel;
 
 static HWND hDeviceTooltip = NULL, hFSTooltip = NULL;
 static StrArray DriveID, DriveLabel;
+static char szTimer[10] = "00:00:00";
+static unsigned int timer;
 
 /*
  * Convert a partition type to its human readable form using
@@ -574,6 +576,17 @@ static void EnableControls(BOOL bEnable)
 }
 
 /*
+ * Timer in the right part of the status area
+ */
+static void CALLBACK ClockTimer(HWND hWnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
+{
+	timer++;
+	safe_sprintf(szTimer, sizeof(szTimer), "%02d:%02d:%02d",
+		timer/3600, (timer%3600)/60, timer%60);
+	SendMessageA(GetDlgItem(hWnd, IDC_STATUS), SB_SETTEXTA, SBT_OWNERDRAW | 1, (LPARAM)szTimer);
+}
+
+/*
  * Main dialog callback
  */
 #ifndef PBS_MARQUEE				// Some versions of MinGW don't know these
@@ -586,6 +599,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 {
 	HDC hDC;
 	HICON hSmallIcon, hBigIcon;
+	DRAWITEMSTRUCT* pDI;
 	int nDeviceIndex, fs;
 	DWORD DeviceNum;
 	char str[MAX_PATH], tmp[128];
@@ -623,8 +637,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		hBigIcon = (HICON)LoadImage(hMainInstance, MAKEINTRESOURCE(IDI_ICON), IMAGE_ICON, 32, 32, 0);
 		SendMessage (hDlg, WM_SETICON, ICON_BIG, (LPARAM)hBigIcon);
 		// Create the status line
-		hStatus = CreateWindowEx(0, STATUSCLASSNAME, NULL, WS_CHILD | WS_VISIBLE,
-			0, 0, 0, 0, hMainDialog, (HMENU)IDC_STATUS,  hMainInstance, NULL);
+		CreateStatusBar();
 		// We'll switch the progressbar to marquee and back => keep a copy of current style
 //		ProgressStyle = GetWindowLong(hProgress, GWL_STYLE);
 		// Create the string array
@@ -635,6 +648,19 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		CheckDlgButton(hDlg, IDC_DOS, BST_CHECKED);
 		GetUSBDevices();
 		return (INT_PTR)TRUE;
+
+	// Change the colour of the version text in the status bar
+	case WM_DRAWITEM:
+		if (wParam == IDC_STATUS) {
+			pDI = (DRAWITEMSTRUCT*)lParam;
+			SetBkMode(pDI->hDC, TRANSPARENT);
+			SetTextColor(pDI->hDC, GetSysColor(COLOR_3DSHADOW));
+			pDI->rcItem.top += (int)(2.0f * fScale);
+			pDI->rcItem.left += (int)(4.0f * fScale);
+			DrawTextExA(pDI->hDC, szTimer, -1, &pDI->rcItem, DT_LEFT, NULL);
+			return (INT_PTR)TRUE;
+		}
+		break;
 
 	case WM_COMMAND:
 		switch(LOWORD(wParam)) {
@@ -718,6 +744,11 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 						FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_START_THREAD);
 						PostMessage(hMainDialog, UM_FORMAT_COMPLETED, 0, 0);
 					}
+					timer = 0;
+					safe_sprintf(szTimer, sizeof(szTimer), "00:00:00");
+					SendMessageA(GetDlgItem(hMainDialog, IDC_STATUS), SB_SETTEXTA,
+						SBT_OWNERDRAW | 1, (LPARAM)szTimer);
+					SetTimer(hMainDialog, STATUSBAR_TIMER_ID, 1000, ClockTimer);
 				}
 			}
 			break;
@@ -739,6 +770,8 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 
 	case UM_FORMAT_COMPLETED:
 		format_thid = -1L;
+		// Stop the timer
+		KillTimer(hMainDialog, STATUSBAR_TIMER_ID);
 		// Close the cancel MessageBox if active
 		SendMessage(FindWindowA(MAKEINTRESOURCEA(32770), RUFUS_CANCELBOX_TITLE), WM_COMMAND, IDNO, 0);
 #if 0

@@ -38,7 +38,7 @@ typedef struct ext2_struct_u32_iterate      *ext2_u32_iterate;
 
 #define EXT2_CHECK_MAGIC(struct, code) \
 	if ((struct)->magic != (code)) return (code)
-#define EXT2_BAD_BLOCKS_THRESHOLD           32
+#define EXT2_BAD_BLOCKS_THRESHOLD           256
 #define EXT2_BLOCKS_AT_ONCE                 64
 #define EXT2_SYS_PAGE_SIZE                  4096
 

@@ -85,7 +85,8 @@ enum notification_type {
 /* Timers used throughout the program */
 enum timer_id {
 	PRINTSTATUS_TIMER_ID = 0x1000,
-	BADBLOCK_TIMER_ID
+	BADBLOCK_TIMER_ID,
+	STATUSBAR_TIMER_ID
 };
 
 /* File system indexes in our FS combobox */

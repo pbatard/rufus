@@ -281,7 +281,6 @@ static int cur_pattern, nr_pattern;
 static int cur_op;
 /* Abort test if more than this number of bad blocks has been encountered */
 static unsigned int max_bb = EXT2_BAD_BLOCKS_THRESHOLD;
-static DWORD time_start;
 static blk_t currently_testing = 0;
 static blk_t num_blocks = 0;
 static blk_t num_read_errors = 0;
@@ -357,19 +356,15 @@ static float calc_percent(unsigned long current, unsigned long total) {
 
 static void print_status(void)
 {
-	DWORD time_end;
 	float percent;
 
-	time_end = GetTickCount();
 	percent = calc_percent((unsigned long) currently_testing,
 					(unsigned long) num_blocks);
 	percent = (percent/2.0f) + ((cur_op==OP_READ)? 50.0f : 0.0f);
-	PrintStatus(0, "PASS %d/%d(%c): %6.2f%% done, %.0fs elapsed. "
-					"(%d/%d/%d errors)",
+	PrintStatus(0, "PASS %d/%d(%c): %6.2f%% done. (%d/%d/%d errors)",
 				cur_pattern, nr_pattern,
 				(cur_op==OP_READ)?'R':'W',
 				percent, 
-				(time_end - time_start)/1000.0,
 				num_read_errors,
 				num_write_errors,
 				num_corruption_errors);
@@ -964,7 +959,6 @@ BOOL BadBlocks(HANDLE hPhysicalDrive, ULONGLONG disk_size, int block_size,
 		test_func = test_ro;
 		break;
 	}
-	time_start = GetTickCount();
 	cancel_ops = 0;
 	/* use a timer to update status every second */
 	SetTimer(hMainDialog, BADBLOCK_TIMER_ID, 1000, alarm_intr);
@@ -978,7 +972,7 @@ BOOL BadBlocks(HANDLE hPhysicalDrive, ULONGLONG disk_size, int block_size,
 	report->num_write_errors = num_write_errors;
 	report->num_corruption_errors = num_corruption_errors;
 
-	if (cancel_ops)
+	if ((cancel_ops) && (!report->bb_count))
 		return FALSE;
 	return TRUE;
 }
