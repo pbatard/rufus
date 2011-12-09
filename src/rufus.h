@@ -28,6 +28,7 @@
 #define DRIVE_INDEX_MAX             0xC0
 #define MAX_DRIVES                  16
 #define MAX_TOOLTIPS                16
+#define MAX_PROGRESS                (0xFFFF-1)	// leave room for 1 more for insta-progress workaround
 #define PROPOSEDLABEL_TOLERANCE     0.10
 #define FS_DEFAULT                  FS_FAT32
 #define WHITE                       RGB(255,255,255)
@@ -71,8 +72,7 @@ extern void _uprintf(const char *format, ...);
 
 /* Custom Windows messages */
 enum user_message_type {
-	UM_FORMAT_PROGRESS = WM_APP,
-	UM_FORMAT_COMPLETED
+	UM_FORMAT_COMPLETED = WM_APP
 };
 
 /* Custom notifications */
@@ -83,10 +83,23 @@ enum notification_type {
 };
 
 /* Timers used throughout the program */
-enum timer_id {
-	PRINTSTATUS_TIMER_ID = 0x1000,
-	BADBLOCK_TIMER_ID,
-	STATUSBAR_TIMER_ID
+enum timer_type {
+	TID_MESSAGE = 0x1000,
+	TID_BADBLOCKS_UPDATE,
+	TID_APP_TIMER
+};
+
+/* Action type, for progress bar breakdown */
+enum action_type {
+	OP_BADBLOCKS,
+	OP_ZERO_MBR,
+	OP_PARTITION,
+	OP_FORMAT_LONG,
+	OP_FORMAT_QUICK,
+	OP_FORMAT_DONE,
+	OP_FIX_MBR,
+	OP_DOS,
+	OP_MAX
 };
 
 /* File system indexes in our FS combobox */
@@ -125,6 +138,7 @@ extern float fScale;
 extern char szFolderPath[MAX_PATH];
 extern DWORD FormatStatus;
 extern RUFUS_DRIVE_INFO SelectedDrive;
+extern const int nb_steps[FS_MAX];
 
 /*
  * Shared prototypes
@@ -132,6 +146,7 @@ extern RUFUS_DRIVE_INFO SelectedDrive;
 extern const char *WindowsErrorString(void);
 extern void DumpBufferHex(void *buf, size_t size);
 extern void PrintStatus(unsigned int duration, const char *format, ...);
+extern void UpdateProgress(int op, float percent);
 extern const char* StrError(DWORD error_code);
 extern void CenterDialog(HWND hDlg);
 extern void CreateStatusBar(void);

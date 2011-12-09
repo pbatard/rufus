@@ -134,7 +134,7 @@ static void CALLBACK PrintStatusTimeout(HWND hwnd, UINT uMsg, UINT_PTR idEvent, 
 	bStatusTimerArmed = FALSE;
 	// potentially display lower priority message that was overridden
 	SetDlgItemTextU(hMainDialog, IDC_STATUS, szStatusMessage);
-	KillTimer(hMainDialog, PRINTSTATUS_TIMER_ID);
+	KillTimer(hMainDialog, TID_MESSAGE);
 }
 
 void PrintStatus(unsigned int duration, const char *format, ...)
@@ -159,7 +159,7 @@ void PrintStatus(unsigned int duration, const char *format, ...)
 	}
 
 	if (duration) {
-		SetTimer(hMainDialog, PRINTSTATUS_TIMER_ID, duration, PrintStatusTimeout);
+		SetTimer(hMainDialog, TID_MESSAGE, duration, PrintStatusTimeout);
 		bStatusTimerArmed = TRUE;
 	}
 }

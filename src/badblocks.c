@@ -361,14 +361,14 @@ static void print_status(void)
 	percent = calc_percent((unsigned long) currently_testing,
 					(unsigned long) num_blocks);
 	percent = (percent/2.0f) + ((cur_op==OP_READ)? 50.0f : 0.0f);
-	PrintStatus(0, "PASS %d/%d(%c): %6.2f%% done. (%d/%d/%d errors)",
+	PrintStatus(0, "BB PASS %d/%d(%c): %0.2f%% done. (%d/%d/%d errors)",
 				cur_pattern, nr_pattern,
 				(cur_op==OP_READ)?'R':'W',
 				percent, 
 				num_read_errors,
 				num_write_errors,
 				num_corruption_errors);
-	PostMessage(hMainDialog, UM_FORMAT_PROGRESS, (WPARAM)(DWORD)percent, (LPARAM)0);
+	UpdateProgress(OP_BADBLOCKS, (((cur_pattern-1)*100.0f) + percent) / nr_pattern);
 }
 
 static void CALLBACK alarm_intr(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
@@ -567,7 +567,7 @@ static unsigned int test_ro (HANDLE hDrive, blk_t last_block,
 static unsigned int test_rw(HANDLE hDrive, blk_t last_block, int block_size, blk_t first_block, unsigned int blocks_at_once)
 {
 	unsigned char *buffer = NULL, *read_buffer;
-	const unsigned int patterns[] = {0xaa, 0x55, 0xff, 0x00};
+	const unsigned int patterns[] = EXT2_RW_PATTERNS;
 	const unsigned int *pattern;
 	int i, tryout, got, pat_idx;
 	unsigned int bb_count = 0;
@@ -766,7 +766,7 @@ static unsigned int test_nd(HANDLE hDrive, blk_t last_block,
 		nr_pattern = t_flag;
 	} else {
 		pattern = patterns;
-		nr_pattern = sizeof(patterns) / sizeof(patterns[0]);
+		nr_pattern = ARRAYSIZE(patterns);
 	}
 	for (pat_idx = 0; pat_idx < nr_pattern; pat_idx++) {
 		pattern_fill(test_base, pattern[pat_idx],
@@ -961,9 +961,9 @@ BOOL BadBlocks(HANDLE hPhysicalDrive, ULONGLONG disk_size, int block_size,
 	}
 	cancel_ops = 0;
 	/* use a timer to update status every second */
-	SetTimer(hMainDialog, BADBLOCK_TIMER_ID, 1000, alarm_intr);
+	SetTimer(hMainDialog, TID_BADBLOCKS_UPDATE, 1000, alarm_intr);
 	report->bb_count = test_func(hPhysicalDrive, last_block, block_size, first_block, EXT2_BLOCKS_AT_ONCE);
-	KillTimer(hMainDialog, BADBLOCK_TIMER_ID);
+	KillTimer(hMainDialog, TID_BADBLOCKS_UPDATE);
 	free(t_patts);
 	free(bb_list->list);
 	free(bb_list);

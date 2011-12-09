@@ -328,6 +328,7 @@ BOOL ExtractMSDOS(const char* path)
 		for (j=0; r && j<ARRAYSIZE(extractlist); j++) {
 			if (memcmp(extractlist[j], &DiskImage[FAT12_ROOTDIR_OFFSET + i*FAT_BYTES_PER_DIRENT], 8+3) == 0) {
 				r = ExtractFAT(i, path);
+				UpdateProgress(OP_DOS, -1.0f);
 			}
 		}
 	}

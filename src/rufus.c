@@ -55,10 +55,22 @@ float fScale = 1.0f;
 int default_fs;
 HWND hDeviceList, hCapacity, hFileSystem, hClusterSize, hLabel;
 
-static HWND hDeviceTooltip = NULL, hFSTooltip = NULL;
+static HWND hDeviceTooltip = NULL, hFSTooltip = NULL, hProgress = NULL;
 static StrArray DriveID, DriveLabel;
 static char szTimer[10] = "00:00:00";
 static unsigned int timer;
+
+/*
+ * The following is used to allocate slots within the progress bar
+ * 0 means unused (no operation or no progress allocated to it)
+ * +n means allocate exactly n bars (n percents of the progress bar)
+ * -n means allocate a weighted slot of n from all remaining
+ *    bars. Eg if 80 slots remain and the sum of all negative entries
+ *    is 10, -4 will allocate 4/10*80 = 32 bars (32%) for OP progress
+ */
+static int nb_slots[OP_MAX];
+static float slot_end[OP_MAX+1];	// shifted +1 so that we can substract 1 to OP indexes
+static float previous_end = 0.0f;
 
 /*
  * Convert a partition type to its human readable form using
@@ -410,7 +422,7 @@ BOOL CreatePartition(HANDLE hDrive)
 	DriveLayoutEx->PartitionEntry[0].PartitionNumber = 1;
 	DriveLayoutEx->PartitionEntry[0].RewritePartition = TRUE;
 	DriveLayoutEx->PartitionEntry[0].Mbr.HiddenSectors = SelectedDrive.Geometry.SectorsPerTrack;
-	switch (ComboBox_GetCurSel(hFileSystem)) {
+	switch (ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem))) {
 	case FS_FAT16:
 		DriveLayoutEx->PartitionEntry[0].Mbr.PartitionType = 0x0e;	// FAT16 LBA
 		break;
@@ -550,6 +562,103 @@ static BOOL GetUSBDevices(void)
 	return TRUE;
 }
 
+/*
+ * Set up progress bar real estate allocation
+ */
+static void InitProgress(void)
+{
+	int i;
+	float last_end = 0.0f, slots_discrete = 0.0f, slots_analog = 0.0f;
+
+	memset(&nb_slots, 0, sizeof(nb_slots));
+	memset(&slot_end, 0, sizeof(slot_end));
+	previous_end = 0.0f;
+
+	nb_slots[OP_ZERO_MBR] = 1;
+	if (IsChecked(IDC_BADBLOCKS)) {
+		nb_slots[OP_BADBLOCKS] = -1;
+	}
+	if (IsChecked(IDC_DOS)) {
+		// TODO: this should reflect the number of files to copy +1 for PBR writing
+		nb_slots[OP_DOS] = 3+1;
+	}
+	nb_slots[OP_PARTITION] = 1;
+	nb_slots[OP_FIX_MBR] = 1;
+	nb_slots[OP_FORMAT_QUICK] = 
+		nb_steps[ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem))];
+	nb_slots[OP_FORMAT_DONE] = 1;
+	if (!IsChecked(IDC_QUICKFORMAT)) {
+		nb_slots[OP_FORMAT_LONG] = -1;
+	}
+
+	for (i=0; i<OP_MAX; i++) {
+		if (nb_slots[i] > 0) {
+			slots_discrete += nb_slots[i]*1.0f;
+		}
+		if (nb_slots[i] < 0) {
+			slots_analog += nb_slots[i]*1.0f;
+		}
+	}
+
+	for (i=0; i<OP_MAX; i++) {
+		if (nb_slots[i] == 0) {
+			slot_end[i+1] = last_end;
+		} else if (nb_slots[i] > 0) {
+			slot_end[i+1] = last_end + (1.0f * nb_slots[i]);
+		} else if (nb_slots[i] < 0) {
+			slot_end[i+1] = last_end + (( (100.0f-slots_discrete) * nb_slots[i]) / slots_analog);
+		}
+		last_end = slot_end[i+1];
+	}
+
+	/* Is there's no analog, adjust our discrete ends to fill the whole bar */
+	if (slots_analog == 0.0f) {
+		for (i=0; i<OP_MAX; i++) {
+			slot_end[i+1] *= 100.0f / slots_discrete;
+		}
+	}
+}
+
+/*
+ * Position the progress bar within each operation range
+ */
+void UpdateProgress(int op, float percent)
+{
+	int pos;
+
+	if ((op < 0) || (op > OP_MAX)) {
+		uprintf("UpdateProgress: invalid op %d\n", op);
+		return;
+	}
+	if (percent > 100.1f) {
+		uprintf("UpdateProgress(%d): invalid percentage %0.2f\n", op, percent);
+		return;
+	}
+	if ((percent < 0.0f) && (nb_slots[op] <= 0)) {
+		uprintf("UpdateProgress(%d): error negative percentage sent for negative slot value\n", op);
+		return;
+	}
+	if (nb_slots[op] == 0)
+		return;
+	if (previous_end < slot_end[op]) {
+		previous_end = slot_end[op];
+	}
+
+	if (percent < 0.0f) {
+		// Negative means advance one slot (1.0%) - requires a positive slot allocation
+		previous_end += (slot_end[op+1] - slot_end[op]) / (1.0f * nb_slots[op]);
+		pos = (int)(previous_end / 100.0f * MAX_PROGRESS);
+	} else {
+		pos = (int)((previous_end + ((slot_end[op+1] - previous_end) * (percent / 100.0f))) / 100.0f * MAX_PROGRESS);
+	}
+	if (pos > MAX_PROGRESS) {
+		uprintf("UpdateProgress(%d): rounding error - pos %d is greater than %d\n", op, pos, MAX_PROGRESS);
+		pos = MAX_PROGRESS;
+	}
+
+	SendMessage(hProgress, PBM_SETPOS, (WPARAM)pos, 0);
+}
+
 /* 
  * Toggle controls according to operation
  */
@@ -589,12 +698,6 @@ static void CALLBACK ClockTimer(HWND hWnd, UINT uMsg, UINT_PTR idEvent, DWORD dw
 /*
  * Main dialog callback
  */
-#ifndef PBS_MARQUEE				// Some versions of MinGW don't know these
-#define PBS_MARQUEE 0x08
-#endif
-#ifndef PBM_SETMARQUEE
-#define PBM_SETMARQUEE (WM_USER+10)
-#endif
 static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	HDC hDC;
@@ -604,8 +707,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	DWORD DeviceNum;
 	char str[MAX_PATH], tmp[128];
 	static uintptr_t format_thid = -1L;
-	static HWND hProgress, hDOS;
-//	static LONG ProgressStyle = 0;
+	static HWND hDOS;
 	static UINT uDOSChecked = BST_CHECKED;
 
 	switch (message) {
@@ -638,8 +740,8 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		SendMessage (hDlg, WM_SETICON, ICON_BIG, (LPARAM)hBigIcon);
 		// Create the status line
 		CreateStatusBar();
-		// We'll switch the progressbar to marquee and back => keep a copy of current style
-//		ProgressStyle = GetWindowLong(hProgress, GWL_STYLE);
+		// Use maximum granularity for the progress bar
+		SendMessage(hProgress, PBM_SETRANGE, 0, MAX_PROGRESS<<16);
 		// Create the string array
 		StrArrayCreate(&DriveID, MAX_DRIVES);
 		StrArrayCreate(&DriveLabel, MAX_DRIVES);
@@ -729,15 +831,9 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				if (MessageBoxA(hMainDialog, str, "Rufus", MB_OKCANCEL|MB_ICONWARNING) == IDOK) {
 					// Disable all controls except cancel
 					EnableControls(FALSE);
-#if 0
-					// Handle marquee progress bar on quickformat
-					SetWindowLongPtr(hProgress, GWL_STYLE, ProgressStyle | (IsChecked(IDC_QUICKFORMAT)?PBS_MARQUEE:0));
-					if (IsChecked(IDC_QUICKFORMAT)) {
-						SendMessage(hProgress, PBM_SETMARQUEE, TRUE, 0);
-					}
-#endif
 					DeviceNum =  (DWORD)ComboBox_GetItemData(hDeviceList, nDeviceIndex);
 					FormatStatus = 0;
+					InitProgress();
 					format_thid = _beginthread(FormatThread, 0, (void*)(uintptr_t)DeviceNum);
 					if (format_thid == -1L) {
 						uprintf("Unable to start formatting thread");
@@ -748,7 +844,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 					safe_sprintf(szTimer, sizeof(szTimer), "00:00:00");
 					SendMessageA(GetDlgItem(hMainDialog, IDC_STATUS), SB_SETTEXTA,
 						SBT_OWNERDRAW | 1, (LPARAM)szTimer);
-					SetTimer(hMainDialog, STATUSBAR_TIMER_ID, 1000, ClockTimer);
+					SetTimer(hMainDialog, TID_APP_TIMER, 1000, ClockTimer);
 				}
 			}
 			break;
@@ -764,27 +860,20 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		PostQuitMessage(0);
 		break;
 
-	case UM_FORMAT_PROGRESS:
-		SendMessage(hProgress, PBM_SETPOS, wParam, lParam);
-		return (INT_PTR)TRUE;
-
 	case UM_FORMAT_COMPLETED:
 		format_thid = -1L;
 		// Stop the timer
-		KillTimer(hMainDialog, STATUSBAR_TIMER_ID);
+		KillTimer(hMainDialog, TID_APP_TIMER);
 		// Close the cancel MessageBox if active
 		SendMessage(FindWindowA(MAKEINTRESOURCEA(32770), RUFUS_CANCELBOX_TITLE), WM_COMMAND, IDNO, 0);
-#if 0
-		if (IsChecked(IDC_QUICKFORMAT)) {
-			SendMessage(hProgress, PBM_SETMARQUEE, FALSE, 0);
-			SetWindowLongPtr(hProgress, GWL_STYLE, ProgressStyle);
-			// This is the only way to achieve instantanenous progress transition
-			SendMessage(hProgress, PBM_SETRANGE, 0, 101<<16);
-			SendMessage(hProgress, PBM_SETPOS, 101, 0);
-			SendMessage(hProgress, PBM_SETRANGE, 0, 100<<16);
+		if (FormatStatus) {
+			SendMessage(hProgress, PBM_SETPOS, 0, 0);
+		} else {
+			// This is the only way to achieve instantenous progress transition
+			SendMessage(hProgress, PBM_SETRANGE, 0, (MAX_PROGRESS+1)<<16);
+			SendMessage(hProgress, PBM_SETPOS, (MAX_PROGRESS+1), 0);
+			SendMessage(hProgress, PBM_SETRANGE, 0, MAX_PROGRESS<<16);
 		}
-#endif
-		SendMessage(hProgress, PBM_SETPOS, FormatStatus?0:100, 0);
 		EnableControls(TRUE);
 		GetUSBDevices();
 		if (!IS_ERROR(FormatStatus)) {

@@ -44,6 +44,10 @@
  */
 DWORD FormatStatus;
 badblocks_report report;
+static float format_percent = 0.0f;
+static int task_number = 0;
+/* Number of steps for each FS for FCC_STRUCTURE_PROGRESS */
+const int nb_steps[FS_MAX] = { 4, 4, 11, 9 };
 
 /*
  * FormatEx callback. Return FALSE to halt operations
@@ -51,31 +55,37 @@ badblocks_report report;
 static BOOLEAN __stdcall FormatExCallback(FILE_SYSTEM_CALLBACK_COMMAND Command, DWORD Action, PVOID pData)
 {
 	DWORD* percent;
-	int task_number = 0;
-
 	if (IS_ERROR(FormatStatus))
 		return FALSE;
 
 	switch(Command) {
 	case FCC_PROGRESS:
+		// TODO: send this percentage to the status bar
 		percent = (DWORD*)pData;
-		PostMessage(hMainDialog, UM_FORMAT_PROGRESS, (WPARAM)*percent, (LPARAM)0);
 		uprintf("%d percent completed.\n", *percent);
+		format_percent = 1.0f * (*percent);
+		UpdateProgress(OP_FORMAT_LONG, format_percent);
 		break;
 	case FCC_STRUCTURE_PROGRESS:	// No progress on quick format
-		uprintf("Format task %d/? completed.\n", ++task_number);
+		uprintf("Format task %d/%d completed.\n", ++task_number,
+			nb_steps[ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem))]);
+		// TODO: figure out likely values
+		format_percent += 100.0f / (1.0f * nb_steps[ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem))]);
+		UpdateProgress(OP_FORMAT_QUICK, format_percent);
 		break;
 	case FCC_DONE:
 		if(*(BOOLEAN*)pData == FALSE) {
 			uprintf("Error while formatting.\n");
 			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_GEN_FAILURE;
 		}
+		UpdateProgress(OP_FORMAT_DONE, 100.0f);
 		break;
 	case FCC_DONE_WITH_STRUCTURE:	// We get this message when formatting Small FAT16
 		// pData Seems to be a struct with at least one (32 BIT!!!) string pointer to the size in MB
 		uprintf("Done with that sort of things: Action=%d pData=%0p\n", Action, pData);
 		DumpBufferHex(pData, 8);
 		uprintf("Volume size: %s MB\n", (char*)(LONG_PTR)(*(ULONG32*)pData));
+		UpdateProgress(OP_FORMAT_DONE, 100.0f);
 		break;
 	case FCC_INCOMPATIBLE_FILE_SYSTEM:
 		uprintf("Incompatible File System\n");
@@ -151,6 +161,8 @@ static BOOL FormatDrive(char DriveLetter)
 	}
 	GetWindowTextW(hLabel, wLabel, ARRAYSIZE(wLabel));
 	uprintf("Using cluster size: %d bytes\n", ComboBox_GetItemData(hClusterSize, ComboBox_GetCurSel(hClusterSize)));
+	format_percent = 0.0f;
+	task_number = 0;
 	pfFormatEx(wDriveRoot, SelectedDrive.Geometry.MediaType, wFSType, wLabel,
 		IsChecked(IDC_QUICKFORMAT), (ULONG)ComboBox_GetItemData(hClusterSize, ComboBox_GetCurSel(hClusterSize)),
 		FormatExCallback);
@@ -355,18 +367,20 @@ bb_retry:
 		uprintf("Check completed, %u bad block%s found. (%d/%d/%d errors)\n",
 			report.bb_count, (report.bb_count==1)?"":"s",
 			report.num_read_errors, report.num_write_errors, report.num_corruption_errors);
-		safe_sprintf(bb_msg, sizeof(bb_msg), "Check completed - %u bad block%s found:\n"
-			"  %d read errors\n  %d write errors\n  %d corruption errors",
-			report.bb_count, (report.bb_count==1)?"":"s",
-			report.num_read_errors, report.num_write_errors, 
-			report.num_corruption_errors);
-		switch(MessageBoxA(hMainDialog, bb_msg, "Bad blocks check",
-			report.bb_count?(MB_ABORTRETRYIGNORE|MB_ICONWARNING):(MB_OK|MB_ICONINFORMATION))) {
-		case IDRETRY: 
-			goto bb_retry;
-		case IDABORT:
-			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANCELLED;
-			goto out;
+		if (report.bb_count) {
+			safe_sprintf(bb_msg, sizeof(bb_msg), "Check completed - %u bad block%s found:\n"
+				"  %d read errors\n  %d write errors\n  %d corruption errors",
+				report.bb_count, (report.bb_count==1)?"":"s",
+				report.num_read_errors, report.num_write_errors, 
+				report.num_corruption_errors);
+			switch(MessageBoxA(hMainDialog, bb_msg, "Bad blocks check", 
+				MB_ABORTRETRYIGNORE|MB_ICONWARNING)) {
+			case IDRETRY: 
+				goto bb_retry;
+			case IDABORT:
+				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANCELLED;
+				goto out;
+			}
 		}
 		safe_unlockclose(hLogicalVolume);
 	}
@@ -378,11 +392,13 @@ bb_retry:
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_WRITE_FAULT;
 		goto out;
 	} 
+	UpdateProgress(OP_ZERO_MBR, -1.0f);
 
 	if (!CreatePartition(hPhysicalDrive)) {
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_PARTITION_FAILURE;
 		goto out;
 	}
+	UpdateProgress(OP_PARTITION, -1.0f);
 
 	// Make sure we can access the volume again before trying to format it
 	for (i=0; i<10; i++) {
@@ -416,6 +432,7 @@ bb_retry:
 		// Errorcode has already been set
 		goto out;
 	}
+	UpdateProgress(OP_FIX_MBR, -1.0f);
 
 	if (IsChecked(IDC_DOS)) {
 		// We must have a lock to modify the volume boot record...
@@ -432,6 +449,7 @@ bb_retry:
 		}
 		// ... and we must have relinquished that lock to write the MS-DOS files 
 		safe_unlockclose(hLogicalVolume);
+		UpdateProgress(OP_DOS, -1.0f);
 		PrintStatus(0, "Copying MS-DOS files...\n");
 		if (!ExtractMSDOS(drive_name)) {
 			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANNOT_COPY;
