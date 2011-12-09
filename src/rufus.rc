@@ -30,7 +30,7 @@ LANGUAGE LANG_ENGLISH, SUBLANG_NEUTRAL
 IDD_DIALOG DIALOGEX 12, 12, 206, 278
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_APPWINDOW
-CAPTION "Rufus v1.0.2.86 (Beta)"
+CAPTION "Rufus v1.0.2.87 (Beta)"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     DEFPUSHBUTTON   "Start",IDC_START,94,236,50,14
@@ -50,8 +50,7 @@ BEGIN
     CONTROL         "Create a &DOS bootable disk",IDC_DOS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,173,115,10
     LTEXT           "New volume &label",IDC_STATIC,9,121,105,10
     CONTROL         "",IDC_PROGRESS,"msctls_progress32",PBS_SMOOTH | WS_BORDER,7,210,189,9
-    CONTROL         "Check device for bad blocks",IDC_BADBLOCKS,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,185,171,10
+    CONTROL         "Check device for bad blocks",IDC_BADBLOCKS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,185,171,10
 END
 
 IDD_ABOUTBOX DIALOGEX 0, 0, 287, 195
@@ -63,9 +62,9 @@ BEGIN
     LTEXT           "Rufus - The Reliable USB Formatting Utility *BETA*",IDC_RUFUS_BOLD,46,8,240,10,SS_NOPREFIX | SS_NOTIFY
     LTEXT           "Copyright (c) 2011 Pete Batard",IDC_STATIC,46,36,139,8
     DEFPUSHBUTTON   "OK",IDOK,231,175,50,14,WS_GROUP
-    CONTROL         "<a href=""https://github.com/pbatard/rufus/wiki/Rufus"">https://github.com/pbatard/rufus</a>",IDC_ABOUT_RUFUS_URL,
+    CONTROL         "<a href=""http://rufus.akeo.ie"">http://rufus.akeo.ie</a>",IDC_ABOUT_RUFUS_URL,
                     "SysLink",WS_TABSTOP,46,47,114,9
-    LTEXT           "Version 1.0.2 (Build 86)",IDC_STATIC,46,19,78,8
+    LTEXT           "Version 1.0.2 (Build 87)",IDC_STATIC,46,19,78,8
     PUSHBUTTON      "License...",IDC_ABOUT_LICENSE,46,175,50,14,WS_GROUP
     EDITTEXT        IDC_ABOUT_COPYRIGHTS,46,107,235,63,ES_MULTILINE | ES_READONLY | WS_VSCROLL
     LTEXT           "Report bugs or request enhancements at:",IDC_STATIC,46,66,187,8
@@ -164,8 +163,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,0,2,86
- PRODUCTVERSION 1,0,2,86
+ FILEVERSION 1,0,2,87
+ PRODUCTVERSION 1,0,2,87
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -182,13 +181,13 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "akeo.ie"
             VALUE "FileDescription", "Rufus"
-            VALUE "FileVersion", "1.0.2.86"
+            VALUE "FileVersion", "1.0.2.87"
             VALUE "InternalName", "Rufus"
             VALUE "LegalCopyright", "© 2011 Pete Batard (GPL v3)"
             VALUE "LegalTrademarks", "http://www.gnu.org/copyleft/gpl.html"
             VALUE "OriginalFilename", "rufus.exe"
             VALUE "ProductName", "Rufus"
-            VALUE "ProductVersion", "1.0.2.86"
+            VALUE "ProductVersion", "1.0.2.87"
         END
     END
     BLOCK "VarFileInfo"

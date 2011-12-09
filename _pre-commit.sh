@@ -5,7 +5,9 @@
 # To have git run this script on commit, create a "pre-commit" text file in
 # .git/hooks/ with the following content:
 # #!/bin/sh
-# source ./_pre-commit.sh
+# if [ -x ./_pre-commit.sh ]; then
+# 	source ./_pre-commit.sh
+# fi
 
 type -P sed &>/dev/null || { echo "sed command not found. Aborting." >&2; exit 1; }
 type -P grep &>/dev/null || { echo "grep command not found. Aborting." >&2; exit 1; }

@@ -2,12 +2,14 @@
 *.ac            eol=lf
 *.am            eol=lf
 *.in            eol=lf
-mkf             eol=lf
+*.m4            eol=lf
 configure       eol=lf
+install-sh      eol=lf
 *.sln           eol=crlf
 *.vcproj        eol=crlf
 *.vcxproj*      eol=crlf
 *.rc            eol=crlf
+*.cmd           eol=crlf
 *.sh            export-ignore
 .gitattributes  export-ignore
 .gitignore      export-ignore

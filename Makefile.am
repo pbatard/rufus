@@ -6,4 +6,4 @@ release: all
 	@mv src/$(TARGET)$(EXEEXT) .
 	@$(STRIP) $(TARGET)$(EXEEXT)
 	@upx $(TARGET)$(EXEEXT)
-	@cmd.exe /k _sign.bat $(TARGET)$(EXEEXT)
+	@cmd.exe /k _sign.cmd $(TARGET)$(EXEEXT)

@@ -446,7 +446,7 @@ release: all
 	@mv src/$(TARGET)$(EXEEXT) .
 	@$(STRIP) $(TARGET)$(EXEEXT)
 	@upx $(TARGET)$(EXEEXT)
-	@cmd.exe /k _sign.bat $(TARGET)$(EXEEXT)
+	@cmd.exe /k _sign.cmd $(TARGET)$(EXEEXT)
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

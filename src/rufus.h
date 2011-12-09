@@ -33,7 +33,7 @@
 #define FS_DEFAULT                  FS_FAT32
 #define WHITE                       RGB(255,255,255)
 #define SEPARATOR_GREY              RGB(223,223,223)
-#define RUFUS_URL                   "https://github.com/pbatard/rufus/wiki/Rufus"
+#define RUFUS_URL                   "http://rufus.akeo.ie"
 #define BUG_URL                     "https://github.com/pbatard/rufus/issues"
 #define IGNORE_RETVAL(expr)         do { (void)(expr); } while(0)
 #ifndef ARRAYSIZE

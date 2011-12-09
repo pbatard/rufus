@@ -5,7 +5,9 @@
 # To have git run this script on commit, create a "post-commit" text file in
 # .git/hooks/ with the following content:
 # #!/bin/sh
-# source ./_post-commit.sh
+# if [ -x ./_post-commit.sh ]; then
+# 	source ./_post-commit.sh
+# fi
 
 type -P git &>/dev/null || { echo "git command not found. Aborting." >&2; exit 1; }
 
