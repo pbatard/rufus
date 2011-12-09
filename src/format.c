@@ -47,7 +47,8 @@ badblocks_report report;
 static float format_percent = 0.0f;
 static int task_number = 0;
 /* Number of steps for each FS for FCC_STRUCTURE_PROGRESS */
-const int nb_steps[FS_MAX] = { 4, 4, 11, 9 };
+const int nb_steps[FS_MAX] = { 5, 5, 12, 10 };
+static int fs_index = 0;
 
 /*
  * FormatEx callback. Return FALSE to halt operations
@@ -62,30 +63,30 @@ static BOOLEAN __stdcall FormatExCallback(FILE_SYSTEM_CALLBACK_COMMAND Command, 
 	case FCC_PROGRESS:
 		// TODO: send this percentage to the status bar
 		percent = (DWORD*)pData;
-		uprintf("%d percent completed.\n", *percent);
-		format_percent = 1.0f * (*percent);
-		UpdateProgress(OP_FORMAT_LONG, format_percent);
+		PrintStatus(0, "Formatting: %d%% completed.\n", *percent);
+//		uprintf("%d percent completed.\n", *percent);
+		UpdateProgress(OP_FORMAT, 1.0f * (*percent));
 		break;
 	case FCC_STRUCTURE_PROGRESS:	// No progress on quick format
-		uprintf("Format task %d/%d completed.\n", ++task_number,
-			nb_steps[ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem))]);
-		// TODO: figure out likely values
-		format_percent += 100.0f / (1.0f * nb_steps[ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem))]);
-		UpdateProgress(OP_FORMAT_QUICK, format_percent);
+		PrintStatus(0, "Creating file system: Task %d/%d completed.\n", ++task_number, nb_steps[fs_index]);
+		uprintf("Create FS: Task %d/%d completed.\n", task_number, nb_steps[fs_index]);
+		format_percent += 100.0f / (1.0f * nb_steps[fs_index]);
+		UpdateProgress(OP_CREATE_FS, format_percent);
 		break;
 	case FCC_DONE:
+		PrintStatus(0, "Creating file system: Task %d/%d completed.\n", nb_steps[fs_index], nb_steps[fs_index]);
+		uprintf("Create FS: Task %d/%d completed.\n", nb_steps[fs_index], nb_steps[fs_index]);
+		UpdateProgress(OP_CREATE_FS, 100.0f);
 		if(*(BOOLEAN*)pData == FALSE) {
 			uprintf("Error while formatting.\n");
 			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_GEN_FAILURE;
 		}
-		UpdateProgress(OP_FORMAT_DONE, 100.0f);
 		break;
 	case FCC_DONE_WITH_STRUCTURE:	// We get this message when formatting Small FAT16
 		// pData Seems to be a struct with at least one (32 BIT!!!) string pointer to the size in MB
 		uprintf("Done with that sort of things: Action=%d pData=%0p\n", Action, pData);
 		DumpBufferHex(pData, 8);
 		uprintf("Volume size: %s MB\n", (char*)(LONG_PTR)(*(ULONG32*)pData));
-		UpdateProgress(OP_FORMAT_DONE, 100.0f);
 		break;
 	case FCC_INCOMPATIBLE_FILE_SYSTEM:
 		uprintf("Incompatible File System\n");
@@ -163,6 +164,7 @@ static BOOL FormatDrive(char DriveLetter)
 	uprintf("Using cluster size: %d bytes\n", ComboBox_GetItemData(hClusterSize, ComboBox_GetCurSel(hClusterSize)));
 	format_percent = 0.0f;
 	task_number = 0;
+	fs_index = ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
 	pfFormatEx(wDriveRoot, SelectedDrive.Geometry.MediaType, wFSType, wLabel,
 		IsChecked(IDC_QUICKFORMAT), (ULONG)ComboBox_GetItemData(hClusterSize, ComboBox_GetCurSel(hClusterSize)),
 		FormatExCallback);

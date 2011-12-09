@@ -1,5 +1,4 @@
 o create a report file with failed block details when bad blocks are found
-o progress bar during quick format / partitioning / MS-DOS files copy
 o use the umount/remount trick to make the volume reappear post formatting
 o set keyboard according to locale in DOS
 o allow selection of one of the existing compatible volume (keep existing MBR) / full repartitioning (overwrite MBR)

@@ -558,7 +558,8 @@ static BOOL GetUSBDevices(void)
 	}
 	IGNORE_RETVAL(ComboBox_SetCurSel(hDeviceList, 0));
 	SendMessage(hMainDialog, WM_COMMAND, (CBN_SELCHANGE<<16) | IDC_DEVICE, 0);
-
+	SendMessage(hMainDialog, WM_COMMAND, (CBN_SELCHANGE<<16) | IDC_FILESYSTEM,
+		ComboBox_GetCurSel(hFileSystem));
 	return TRUE;
 }
 
@@ -584,11 +585,10 @@ static void InitProgress(void)
 	}
 	nb_slots[OP_PARTITION] = 1;
 	nb_slots[OP_FIX_MBR] = 1;
-	nb_slots[OP_FORMAT_QUICK] = 
+	nb_slots[OP_CREATE_FS] = 
 		nb_steps[ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem))];
-	nb_slots[OP_FORMAT_DONE] = 1;
 	if (!IsChecked(IDC_QUICKFORMAT)) {
-		nb_slots[OP_FORMAT_LONG] = -1;
+		nb_slots[OP_FORMAT] = -1;
 	}
 
 	for (i=0; i<OP_MAX; i++) {
@@ -866,14 +866,6 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		KillTimer(hMainDialog, TID_APP_TIMER);
 		// Close the cancel MessageBox if active
 		SendMessage(FindWindowA(MAKEINTRESOURCEA(32770), RUFUS_CANCELBOX_TITLE), WM_COMMAND, IDNO, 0);
-		if (FormatStatus) {
-			SendMessage(hProgress, PBM_SETPOS, 0, 0);
-		} else {
-			// This is the only way to achieve instantenous progress transition
-			SendMessage(hProgress, PBM_SETRANGE, 0, (MAX_PROGRESS+1)<<16);
-			SendMessage(hProgress, PBM_SETPOS, (MAX_PROGRESS+1), 0);
-			SendMessage(hProgress, PBM_SETRANGE, 0, MAX_PROGRESS<<16);
-		}
 		EnableControls(TRUE);
 		GetUSBDevices();
 		if (!IS_ERROR(FormatStatus)) {
@@ -884,6 +876,14 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		} else {
 			PrintStatus(0, "FAILED");
 			Notification(MSG_ERROR, "Error", "Error: %s", StrError(FormatStatus));
+		}
+		if (FormatStatus) {
+			SendMessage(hProgress, PBM_SETPOS, 0, 0);
+		} else {
+			// This is the only way to achieve instantenous progress transition
+			SendMessage(hProgress, PBM_SETRANGE, 0, (MAX_PROGRESS+1)<<16);
+			SendMessage(hProgress, PBM_SETPOS, (MAX_PROGRESS+1), 0);
+			SendMessage(hProgress, PBM_SETRANGE, 0, MAX_PROGRESS<<16);
 		}
 		return (INT_PTR)TRUE;
 	}
