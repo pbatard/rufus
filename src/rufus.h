@@ -159,6 +159,7 @@ extern void __cdecl FormatThread(void* param);
 extern BOOL CreatePartition(HANDLE hDrive);
 extern HANDLE GetDriveHandle(DWORD DriveIndex, char* DriveLetter, BOOL bWriteAccess, BOOL bLockDrive);
 extern BOOL GetDriveLabel(DWORD DriveIndex, char* letter, char** label);
+extern BOOL UnmountDrive(HANDLE hDrive);
 
 __inline static BOOL UnlockDrive(HANDLE hDrive)
 {

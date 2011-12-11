@@ -155,3 +155,14 @@ BOOL GetDriveLabel(DWORD DriveIndex, char* letter, char** label)
 
 	return TRUE;
 }
+
+BOOL UnmountDrive(HANDLE hDrive)
+{
+	DWORD size;
+
+	if (!DeviceIoControl(hDrive, FSCTL_DISMOUNT_VOLUME, NULL, 0, NULL, 0, &size, NULL)) {
+		uprintf("Could not ummount drive: %s\n", WindowsErrorString());
+		return FALSE;
+	}
+	return TRUE;
+}

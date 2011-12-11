@@ -164,7 +164,7 @@ static BOOL FormatDrive(char DriveLetter)
 	uprintf("Using cluster size: %d bytes\n", ComboBox_GetItemData(hClusterSize, ComboBox_GetCurSel(hClusterSize)));
 	format_percent = 0.0f;
 	task_number = 0;
-	fs_index = ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
+	fs_index = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
 	pfFormatEx(wDriveRoot, SelectedDrive.Geometry.MediaType, wFSType, wLabel,
 		IsChecked(IDC_QUICKFORMAT), (ULONG)ComboBox_GetItemData(hClusterSize, ComboBox_GetCurSel(hClusterSize)),
 		FormatExCallback);
@@ -338,7 +338,7 @@ void __cdecl FormatThread(void* param)
 	HANDLE hLogicalVolume = INVALID_HANDLE_VALUE;
 	char drive_name[] = "?:";
 	char bb_msg[256];
-	int i;
+	int r;
 
 	hPhysicalDrive = GetDriveHandle(num, NULL, TRUE, TRUE);
 	if (hPhysicalDrive == INVALID_HANDLE_VALUE) {
@@ -347,45 +347,49 @@ void __cdecl FormatThread(void* param)
 	}
 	// At this stage with have both a handle and a lock to the physical drive...
 
+	// ... but we can't write sectors that are part of a volume, even if we have 
+	// access to physical, unless we have a lock (which doesn't have to be write)
+	// Also, having a volume handle allows us to unmount the volume
+	hLogicalVolume = GetDriveHandle(num, drive_name, FALSE, TRUE);
+	if (hLogicalVolume == INVALID_HANDLE_VALUE) {
+		uprintf("Could not lock volume\n");
+		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_OPEN_FAILED;
+		goto out;
+	}
+	UnmountDrive(hLogicalVolume);
+
 	if (IsChecked(IDC_BADBLOCKS)) {
-		// ... but we can't write sectors that are part of a volume, even if we have 
-		// access to physical, unless we have a lock (which doesn't have to be write)
-		hLogicalVolume = GetDriveHandle(num, drive_name, FALSE, TRUE);
-		if (hLogicalVolume == INVALID_HANDLE_VALUE) {
-			uprintf("Could not lock volume for badblock checks\n");
-			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_OPEN_FAILED;
-			goto out;
-		}
-bb_retry:
-		if (!BadBlocks(hPhysicalDrive, SelectedDrive.DiskSize,
-			SelectedDrive.Geometry.BytesPerSector, BADBLOCKS_RW, &report)) {
-			uprintf("Bad blocks check failed.\n");
-			if (!FormatStatus)
-				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|
-					APPERR(ERROR_BADBLOCKS_FAILURE);
-			// TODO: should probably ClearMBR here as well
-			goto out;
-		}
-		uprintf("Check completed, %u bad block%s found. (%d/%d/%d errors)\n",
-			report.bb_count, (report.bb_count==1)?"":"s",
-			report.num_read_errors, report.num_write_errors, report.num_corruption_errors);
-		if (report.bb_count) {
-			safe_sprintf(bb_msg, sizeof(bb_msg), "Check completed - %u bad block%s found:\n"
-				"  %d read errors\n  %d write errors\n  %d corruption errors",
-				report.bb_count, (report.bb_count==1)?"":"s",
-				report.num_read_errors, report.num_write_errors, 
-				report.num_corruption_errors);
-			switch(MessageBoxA(hMainDialog, bb_msg, "Bad blocks check", 
-				MB_ABORTRETRYIGNORE|MB_ICONWARNING)) {
-			case IDRETRY: 
-				goto bb_retry;
-			case IDABORT:
-				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANCELLED;
+		do {
+			if (!BadBlocks(hPhysicalDrive, SelectedDrive.DiskSize,
+				SelectedDrive.Geometry.BytesPerSector, BADBLOCKS_RW, &report)) {
+				uprintf("Bad blocks check failed.\n");
+				if (!FormatStatus)
+					FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|
+						APPERR(ERROR_BADBLOCKS_FAILURE);
+				// TODO: should probably ClearMBR here as well
 				goto out;
 			}
+			uprintf("Check completed, %u bad block%s found. (%d/%d/%d errors)\n",
+				report.bb_count, (report.bb_count==1)?"":"s",
+				report.num_read_errors, report.num_write_errors, report.num_corruption_errors);
+			r = IDOK;
+			if (report.bb_count) {
+				safe_sprintf(bb_msg, sizeof(bb_msg), "Check completed - %u bad block%s found:\n"
+					"  %d read errors\n  %d write errors\n  %d corruption errors",
+					report.bb_count, (report.bb_count==1)?"":"s",
+					report.num_read_errors, report.num_write_errors, 
+					report.num_corruption_errors);
+				r = MessageBoxA(hMainDialog, bb_msg, "Bad blocks check", MB_ABORTRETRYIGNORE|MB_ICONWARNING);
+			}
+		} while (r == IDRETRY);
+		if (r == IDABORT) {
+			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANCELLED;
+			goto out;
 		}
-		safe_unlockclose(hLogicalVolume);
 	}
+	// Close the (unmounted) volume before formatting, but keep the lock
+	safe_closehandle(hLogicalVolume);
+	// TODO: do we have to sleep here for unmount to be effective?
 
 	// Especially after destructive badblocks test, you must zero the MBR completely
 	// before repartitioning. Else, all kind of bad things happen
@@ -402,32 +406,14 @@ bb_retry:
 	}
 	UpdateProgress(OP_PARTITION, -1.0f);
 
-	// Make sure we can access the volume again before trying to format it
-	for (i=0; i<10; i++) {
-		Sleep(500);
-		hLogicalVolume = GetDriveHandle(num, drive_name, FALSE, FALSE);
-		if (hLogicalVolume != INVALID_HANDLE_VALUE) {
-			break;
-		}
-	}
-	if (i >= 10) {
-		uprintf("Could not access volume after partitioning\n");
-		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_OPEN_FAILED;
-		goto out;
-	}
-	// Handle needs to be closed for FormatEx to be happy - we keep a lock though
-	safe_closehandle(hLogicalVolume);
+	// Add a small delay after partitioning to be safe
+	Sleep(500);
 
 	if (!FormatDrive(drive_name[0])) {
 		// Error will be set by FormatDrive() in FormatStatus
 		uprintf("Format error: %s\n", StrError(FormatStatus));
 		goto out;
 	}
-
-	// TODO: Enable compression on NTFS
-	// TODO: optionally disable indexing on NTFS
-	// TODO: use progress bar during MBR/FSBR/MSDOS copy
-	// TODO: unlock/remount trick to make the volume reappear
 
 	PrintStatus(0, "Writing master boot record...\n");
 	if (!WriteMBR(hPhysicalDrive)) {
@@ -437,8 +423,9 @@ bb_retry:
 	UpdateProgress(OP_FIX_MBR, -1.0f);
 
 	if (IsChecked(IDC_DOS)) {
-		// We must have a lock to modify the volume boot record...
-		hLogicalVolume = GetDriveHandle(num, drive_name, TRUE, TRUE);
+		// We still have a lock, which we need to modify the volume boot record 
+		// => no need to reacquire the lock...
+		hLogicalVolume = GetDriveHandle(num, drive_name, TRUE, FALSE);
 		if (hLogicalVolume == INVALID_HANDLE_VALUE) {
 			uprintf("Could not re-mount volume for partition boot record access\n");
 			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_OPEN_FAILED;
@@ -449,7 +436,7 @@ bb_retry:
 			// Errorcode has already been set
 			goto out;
 		}
-		// ... and we must have relinquished that lock to write the MS-DOS files 
+		// ...but we must have relinquished that lock to write the MS-DOS files 
 		safe_unlockclose(hLogicalVolume);
 		UpdateProgress(OP_DOS, -1.0f);
 		PrintStatus(0, "Copying MS-DOS files...\n");
