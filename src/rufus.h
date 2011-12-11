@@ -16,11 +16,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <windows.h>
-#include <winioctl.h>				// for DISK_GEOMETRY
+#include <winioctl.h>               // for DISK_GEOMETRY
 
 #pragma once
 
-#define RUFUS_DEBUG
+/* Program options */
+#define RUFUS_DEBUG                 // print debug info to Debug facility (use debugview to consult)
+#define DISABLE_AUTORUN             // disable new USB drive notification from explorer when application is running
 
 #define STR_NO_LABEL                "NO_LABEL"
 #define RUFUS_CANCELBOX_TITLE       "Rufus - Cancellation"
