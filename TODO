@@ -1,9 +1,10 @@
-o create a report file with failed block details when bad blocks are found
-o use the umount/remount trick to make the volume reappear post formatting
-o set keyboard according to locale in DOS
-o allow selection of one of the existing compatible volume (keep existing MBR) / full repartitioning (overwrite MBR)
-o FreeDOS integration
-o Enable compression for NTFS
+o Create a report file with failed block details on bad blocks
+o Integrate FreeDOS
+o Allow the provision of external DOS files
+o Set DOS keyboard according to locale
+o Allow selection of one of the existing compatible partitions (keep existing MBR) vs. full repartitioning (overwrite MBR)
 o Bootable NTFS/exFAT (http://sourceforge.net/projects/grub4dos)?
 o GPT support?
+o Enable compression for NTFS?
 o disable indexing support on NTFS?
+o FAT32 formatting for volumes > 32 GB?
