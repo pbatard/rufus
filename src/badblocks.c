@@ -274,8 +274,6 @@ static void ext2fs_badblocks_list_iterate_end(ext2_badblocks_iterate iter)
  */
 static int v_flag = 1;					/* verbose */
 static int s_flag = 1;					/* show progress of test */
-static int t_flag = 0;					/* number of test patterns */
-static unsigned int *t_patts = NULL;	/* test patterns */
 static int cancel_ops = 0;				/* abort current operation */
 static int cur_pattern, nr_pattern;
 static int cur_op;
@@ -481,26 +479,17 @@ static unsigned int test_ro (HANDLE hDrive, blk_t last_block,
 		ext2fs_badblocks_list_iterate (bb_iter, &next_bad);
 	} while (next_bad && next_bad < first_block);
 
-	if (t_flag) {
-		blkbuf = allocate_buffer((blocks_at_once + 1) * block_size);
-	} else {
-		blkbuf = allocate_buffer(blocks_at_once * block_size);
-	}
+	blkbuf = allocate_buffer(blocks_at_once * block_size);
 	if (!blkbuf)
 	{
 		uprintf("could not allocate buffers\n");
 		cancel_ops = -1;
 		return 0;
 	}
-	if (t_flag) {
-		uprintf("Checking for bad blocks in read-only mode\n");
-		pattern_fill(blkbuf + blocks_at_once * block_size,
-			     t_patts[0], block_size);
-	}
 	tryout = blocks_at_once;
 	currently_testing = first_block;
 	num_blocks = last_block - 1;
-	if (!t_flag && (s_flag || v_flag)) {
+	if (s_flag || v_flag) {
 		// Printstatus
 		uprintf("Checking for bad blocks (read-only test): \n");
 	}
@@ -526,16 +515,6 @@ static unsigned int test_ro (HANDLE hDrive, blk_t last_block,
 		if (currently_testing + tryout > last_block)
 			tryout = last_block - currently_testing;
 		got = do_read(hDrive, blkbuf, tryout, block_size, currently_testing);
-		if (t_flag) {
-			/* test the comparison between all the
-			   blocks successfully read  */
-			int i;
-			for (i = 0; i < got; ++i)
-				if (memcmp (blkbuf+i*block_size,
-					    blkbuf+blocks_at_once*block_size,
-					    block_size))
-					bb_count += bb_output(currently_testing + i, CORRUPTION_ERROR);
-		}
 		if (got == 0 && tryout == 1)
 			bb_count += bb_output(currently_testing++, READ_ERROR);
 		currently_testing += got;
@@ -566,8 +545,7 @@ static unsigned int test_ro (HANDLE hDrive, blk_t last_block,
 static unsigned int test_rw(HANDLE hDrive, blk_t last_block, int block_size, blk_t first_block, unsigned int blocks_at_once)
 {
 	unsigned char *buffer = NULL, *read_buffer;
-	const unsigned int patterns[] = EXT2_RW_PATTERNS;
-	const unsigned int *pattern;
+	const unsigned int pattern[] = EXT2_RW_PATTERNS;
 	int i, tryout, got, pat_idx;
 	unsigned int bb_count = 0;
 	blk_t recover_block = ~0;
@@ -583,16 +561,10 @@ static unsigned int test_rw(HANDLE hDrive, blk_t last_block, int block_size, blk
 
 	uprintf("Checking for bad blocks in read-write mode\n");
 	uprintf("From block %lu to %lu\n", (unsigned long) first_block, (unsigned long) last_block - 1);
-	if (t_flag) {
-		pattern = t_patts;
-		nr_pattern = t_flag;
-	} else {
-		pattern = patterns;
-		nr_pattern = ARRAYSIZE(patterns);
-	}
+	nr_pattern = ARRAYSIZE(pattern);
 	cur_pattern = 0;
 
-	for (pat_idx = 0; pat_idx < nr_pattern; pat_idx++) {
+	for (pat_idx = 0; pat_idx < ARRAYSIZE(pattern); pat_idx++) {
 		if (cancel_ops) goto out;
 		pattern_fill(buffer, pattern[pat_idx], blocks_at_once * block_size);
 		num_blocks = last_block - 1;
@@ -694,8 +666,7 @@ static unsigned int test_nd(HANDLE hDrive, blk_t last_block,
 	unsigned char *blkbuf, *save_ptr, *test_ptr, *read_ptr;
 	unsigned char *test_base, *save_base, *read_base;
 	int tryout, i;
-	const unsigned int patterns[] = { ~0 };
-	const unsigned int *pattern;
+	const unsigned int pattern[] = { ~0 };
 	int pat_idx;
 	int got, used2, written;
 	blk_t save_currently_testing;
@@ -760,17 +731,9 @@ static unsigned int test_nd(HANDLE hDrive, blk_t last_block,
 		exit(1);
 	}
 
-	if (t_flag) {
-		pattern = t_patts;
-		nr_pattern = t_flag;
-	} else {
-		pattern = patterns;
-		nr_pattern = ARRAYSIZE(patterns);
-	}
-	for (pat_idx = 0; pat_idx < nr_pattern; pat_idx++) {
-		pattern_fill(test_base, pattern[pat_idx],
-			     blocks_at_once * block_size);
-
+	nr_pattern = ARRAYSIZE(pattern);
+	for (pat_idx = 0; pat_idx < ARRAYSIZE(pattern); pat_idx++) {
+		pattern_fill(test_base, pattern[pat_idx], blocks_at_once * block_size);
 		buf_used = 0;
 		bb_count = 0;
 		save_ptr = save_base;
@@ -963,7 +926,6 @@ BOOL BadBlocks(HANDLE hPhysicalDrive, ULONGLONG disk_size, int block_size,
 	SetTimer(hMainDialog, TID_BADBLOCKS_UPDATE, 1000, alarm_intr);
 	report->bb_count = test_func(hPhysicalDrive, last_block, block_size, first_block, EXT2_BLOCKS_AT_ONCE);
 	KillTimer(hMainDialog, TID_BADBLOCKS_UPDATE);
-	free(t_patts);
 	free(bb_list->list);
 	free(bb_list);
 	// TODO: report first problem block for each error or create a report file

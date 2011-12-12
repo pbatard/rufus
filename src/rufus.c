@@ -105,75 +105,39 @@ static BOOL DefineClusterSizes(void)
 	default_fs = FS_UNKNOWN;
 	memset(&SelectedDrive.ClusterSize, 0, sizeof(SelectedDrive.ClusterSize));
 	if (SelectedDrive.DiskSize < 8*MB) {
-		// TODO: muck with FAT12 and Small FAT16 like Microsoft does to support small drives?
-		uprintf("This application does not support volumes smaller than 8 MB\n");
+		// TODO: muck with FAT12 and Small FAT16 like Microsoft does
+		uprintf("This application does not support volumes smaller than 8 MB yet\n");
 		goto out;
 	}
 
-/*
- * The following is MS's allowed cluster sizes for FAT16 and FAT32:
- *
- * FAT16
- * 31M  :  512 - 4096
- * 63M  : 1024 - 8192
- * 127M : 2048 - 16k
- * 255M : 4096 - 32k
- * 511M : 8192 - 64k
- * 1023M:  16k - 64k
- * 2047M:  32k - 64k
- * 4095M:  64k
- * 4GB+ : N/A
- *
- * FAT32
- * 31M  : N/A
- * 63M  : N/A			(NB unlike MS, we're allowing 512-512 here - UNTESTED)
- * 127M :  512 - 1024
- * 255M :  512 - 2048
- * 511M :  512 - 4096
- * 1023M:  512 - 8192
- * 2047M:  512 - 16k
- * 4095M: 1024 - 32k
- * 7GB  : 2048 - 64k
- * 15GB : 4096 - 64k
- * 31GB : 8192 - 64k
- * 32GB+: possible but N/A from Microsoft (see below)
- */
-
 	// FAT 16
 	if (SelectedDrive.DiskSize < 4*GB) {
-		SelectedDrive.ClusterSize[FS_FAT16].Allowed = 0x00001E00;
+		// TODO: Refine the following according to size
+		SelectedDrive.ClusterSize[FS_FAT16].Allowed = 0x0001FE00;
 		for (i=32; i<=4096; i<<=1) {			// 8 MB -> 4 GB
 			if (SelectedDrive.DiskSize < i*MB) {
 				SelectedDrive.ClusterSize[FS_FAT16].Default = 16*(ULONG)i;
 				break;
 			}
-			SelectedDrive.ClusterSize[FS_FAT16].Allowed <<= 1;
 		}
-		SelectedDrive.ClusterSize[FS_FAT16].Allowed &= 0x0001FE00;
 	}
 
 	// FAT 32
-	// > 32GB FAT32 is not supported by MS (and likely FormatEx) but is feasible
-	// See: http://www.ridgecrop.demon.co.uk/index.htm?fat32format.htm
-	// < 32 MB FAT32 is not allowed by FormatEx
-	if ((SelectedDrive.DiskSize >= 32*MB) && (SelectedDrive.DiskSize < 32*GB)) {
-		SelectedDrive.ClusterSize[FS_FAT32].Allowed = 0x000001F8;
-		for (i=32; i<=(32*1024); i<<=1) {			// 32 MB -> 32 GB
+	if (SelectedDrive.DiskSize < 256*MB) {
+		// TODO: Refine the following according to size
+		SelectedDrive.ClusterSize[FS_FAT32].Allowed = 0x0001FE00;
+		for (i=64; i<=256; i<<=1) {				// 8 MB -> 256 MB
 			if (SelectedDrive.DiskSize < i*MB) {
 				SelectedDrive.ClusterSize[FS_FAT32].Default = 8*(ULONG)i;
 				break;
 			}
-			SelectedDrive.ClusterSize[FS_FAT32].Allowed <<= 1;
 		}
-		SelectedDrive.ClusterSize[FS_FAT32].Allowed &= 0x0001FE00;
-
-		// Default cluster sizes in the 256MB to 32 GB range do not follow the rule above
-		if (SelectedDrive.DiskSize >= 256*MB) {
-			for (i=8; i<=32; i<<=1) {				// 256 MB -> 32 GB
-				if (SelectedDrive.DiskSize < i*GB) {
-					SelectedDrive.ClusterSize[FS_FAT32].Default = ((ULONG)i/2)*1024;
-					break;
-				}
+	} else if (SelectedDrive.DiskSize < 32*GB) {
+		SelectedDrive.ClusterSize[FS_FAT32].Allowed = 0x0001FE00;
+		for (i=8; i<=32; i<<=1) {				// 256 MB -> 32 GB
+			if (SelectedDrive.DiskSize < i*GB) {
+				SelectedDrive.ClusterSize[FS_FAT32].Default = ((ULONG)i/2)*1024;
+				break;
 			}
 		}
 	}
@@ -228,7 +192,7 @@ out:
 static BOOL SetClusterSizes(int FSType)
 {
 	char szClustSize[64];
-	int i, k, default_index = 0;
+	int i, default_index = 0;
 	ULONG j;
 
 	IGNORE_RETVAL(ComboBox_ResetContent(hClusterSize));
@@ -244,15 +208,14 @@ static BOOL SetClusterSizes(int FSType)
 		return FALSE;
 	}
 
-	for(i=0,j=0x200,k=0;j<0x10000000;i++,j<<=1) {
+	for(i=0,j=0x200;j<0x10000000;i++,j<<=1) {
 		if (j & SelectedDrive.ClusterSize[FSType].Allowed) {
 			safe_sprintf(szClustSize, sizeof(szClustSize), "%s", ClusterSizeLabel[i]);
 			if (j == SelectedDrive.ClusterSize[FSType].Default) {
 				safe_strcat(szClustSize, sizeof(szClustSize), " (Default)");
-				default_index = k;
+				default_index = i;
 			}
 			IGNORE_RETVAL(ComboBox_SetItemData(hClusterSize, ComboBox_AddStringU(hClusterSize, szClustSize), j));
-			k++;
 		}
 	}
 
@@ -700,39 +663,40 @@ void UpdateProgress(int op, float percent)
 /*
  * Set or restore a Local Group Policy DWORD key indexed by szPath/SzPolicy
  */
-#pragma push_macro("INTERFACE")
-#undef  INTERFACE
-#define INTERFACE IGroupPolicyObject
-#define REGISTRY_EXTENSION_GUID { 0x35378EAC, 0x683F, 0x11D2, {0xA8, 0x9A, 0x00, 0xC0, 0x4F, 0xBB, 0xCF, 0xA2} }
-#define GPO_OPEN_LOAD_REGISTRY  1
-#define GPO_SECTION_MACHINE     2
 typedef enum _GROUP_POLICY_OBJECT_TYPE {
-	GPOTypeLocal = 0, GPOTypeRemote, GPOTypeDS
-} GROUP_POLICY_OBJECT_TYPE, *PGROUP_POLICY_OBJECT_TYPE;
-DECLARE_INTERFACE_(IGroupPolicyObject, IUnknown) {
-	STDMETHOD(QueryInterface) (THIS_ REFIID riid, LPVOID *ppvObj) PURE;
-	STDMETHOD_(ULONG, AddRef) (THIS) PURE;
-	STDMETHOD_(ULONG, Release) (THIS) PURE;
-	STDMETHOD(New) (THIS_ LPOLESTR pszDomainName, LPOLESTR pszDisplayName, DWORD dwFlags) PURE;
-	STDMETHOD(OpenDSGPO) (THIS_ LPOLESTR pszPath, DWORD dwFlags) PURE;
-	STDMETHOD(OpenLocalMachineGPO) (THIS_ DWORD dwFlags) PURE;
-	STDMETHOD(OpenRemoteMachineGPO) (THIS_ LPOLESTR pszComputerName, DWORD dwFlags) PURE;
-	STDMETHOD(Save) (THIS_ BOOL bMachine, BOOL bAdd,GUID *pGuidExtension, GUID *pGuid) PURE;
-	STDMETHOD(Delete) (THIS) PURE;
-	STDMETHOD(GetName) (THIS_ LPOLESTR pszName, int cchMaxLength) PURE;
-	STDMETHOD(GetDisplayName) (THIS_ LPOLESTR pszName, int cchMaxLength) PURE;
-	STDMETHOD(SetDisplayName) (THIS_ LPOLESTR pszName) PURE;
-	STDMETHOD(GetPath) (THIS_ LPOLESTR pszPath, int cchMaxPath) PURE;
-	STDMETHOD(GetDSPath) (THIS_ DWORD dwSection, LPOLESTR pszPath ,int cchMaxPath) PURE;
-	STDMETHOD(GetFileSysPath) (THIS_ DWORD dwSection, LPOLESTR pszPath, int cchMaxPath) PURE;
-	STDMETHOD(GetRegistryKey) (THIS_ DWORD dwSection, HKEY *hKey) PURE;
-	STDMETHOD(GetOptions) (THIS_ DWORD *dwOptions) PURE;
-	STDMETHOD(SetOptions) (THIS_ DWORD dwOptions, DWORD dwMask) PURE;
-	STDMETHOD(GetType) (THIS_ GROUP_POLICY_OBJECT_TYPE *gpoType) PURE;
-	STDMETHOD(GetMachineName) (THIS_ LPOLESTR pszName, int cchMaxLength) PURE;
-	STDMETHOD(GetPropertySheetPages) (THIS_ HPROPSHEETPAGE **hPages, UINT *uPageCount) PURE;
-};
-typedef IGroupPolicyObject *LPGROUPPOLICYOBJECT;
+  GPOTypeLocal = 0,GPOTypeRemote,GPOTypeDS
+} GROUP_POLICY_OBJECT_TYPE,*PGROUP_POLICY_OBJECT_TYPE;
+
+#define REGISTRY_EXTENSION_GUID { 0x35378EAC,0x683F,0x11D2, {0xA8,0x9A,0x00,0xC0,0x4F,0xBB,0xCF,0xA2} }
+#define GPO_OPEN_LOAD_REGISTRY 0x00000001
+#define GPO_SECTION_MACHINE 2
+
+#undef INTERFACE
+#define INTERFACE IGroupPolicyObject
+  DECLARE_INTERFACE_(IGroupPolicyObject,IUnknown) {
+    STDMETHOD(QueryInterface) (THIS_ REFIID riid,LPVOID *ppvObj) PURE;
+    STDMETHOD_(ULONG,AddRef) (THIS) PURE;
+    STDMETHOD_(ULONG,Release) (THIS) PURE;
+    STDMETHOD(New) (THIS_ LPOLESTR pszDomainName,LPOLESTR pszDisplayName,DWORD dwFlags) PURE;
+    STDMETHOD(OpenDSGPO) (THIS_ LPOLESTR pszPath,DWORD dwFlags) PURE;
+    STDMETHOD(OpenLocalMachineGPO) (THIS_ DWORD dwFlags) PURE;
+    STDMETHOD(OpenRemoteMachineGPO) (THIS_ LPOLESTR pszComputerName,DWORD dwFlags) PURE;
+    STDMETHOD(Save) (THIS_ BOOL bMachine, BOOL bAdd,GUID *pGuidExtension,GUID *pGuid) PURE;
+    STDMETHOD(Delete) (THIS) PURE;
+    STDMETHOD(GetName) (THIS_ LPOLESTR pszName,int cchMaxLength) PURE;
+    STDMETHOD(GetDisplayName) (THIS_ LPOLESTR pszName,int cchMaxLength) PURE;
+    STDMETHOD(SetDisplayName) (THIS_ LPOLESTR pszName) PURE;
+    STDMETHOD(GetPath) (THIS_ LPOLESTR pszPath,int cchMaxPath) PURE;
+    STDMETHOD(GetDSPath) (THIS_ DWORD dwSection,LPOLESTR pszPath,int cchMaxPath) PURE;
+    STDMETHOD(GetFileSysPath) (THIS_ DWORD dwSection,LPOLESTR pszPath,int cchMaxPath) PURE;
+    STDMETHOD(GetRegistryKey) (THIS_ DWORD dwSection,HKEY *hKey) PURE;
+    STDMETHOD(GetOptions) (THIS_ DWORD *dwOptions) PURE;
+    STDMETHOD(SetOptions) (THIS_ DWORD dwOptions,DWORD dwMask) PURE;
+    STDMETHOD(GetType) (THIS_ GROUP_POLICY_OBJECT_TYPE *gpoType) PURE;
+    STDMETHOD(GetMachineName) (THIS_ LPOLESTR pszName,int cchMaxLength) PURE;
+    STDMETHOD(GetPropertySheetPages) (THIS_ HPROPSHEETPAGE **hPages,UINT *uPageCount) PURE;
+  };
+  typedef IGroupPolicyObject *LPGROUPPOLICYOBJECT;
 
 BOOL SetLGP(BOOL bRestore, const char* szPath, const char* szPolicy, DWORD dwValue)
 {
@@ -742,7 +706,7 @@ BOOL SetLGP(BOOL bRestore, const char* szPath, const char* szPolicy, DWORD dwVal
 	HRESULT hr;
 	IGroupPolicyObject* pLGPO;
 	// These statuc values are used to restore initial state
-	static BOOL existing_key = FALSE;
+	static BOOL key_was_present = FALSE;
 	static DWORD original_val;
 	HKEY path_key = NULL, policy_key = NULL;
 	// MSVC is finicky about these ones => redefine them
@@ -791,20 +755,20 @@ BOOL SetLGP(BOOL bRestore, const char* szPath, const char* szPolicy, DWORD dwVal
 		goto error;
 	}
 
-	if ((disp == REG_OPENED_EXISTING_KEY) && (!bRestore) && (!existing_key)) {
+	if ((disp == REG_OPENED_EXISTING_KEY) && (!bRestore) && (!key_was_present)) {
 		// backup existing value for restore
-		existing_key = TRUE;
+		key_was_present = TRUE;
 		regtype = REG_DWORD;
 		r = RegQueryValueExA(policy_key, szPolicy, NULL, &regtype, (LPBYTE)&original_val, &val_size);
 		if (r == ERROR_FILE_NOT_FOUND) {
 			// The Key exists but not its value, which is OK
-			existing_key = FALSE;
+			key_was_present = FALSE;
 		} else if (r != ERROR_SUCCESS) {
 			uprintf("SetLGP: Failed to read original %s policy value - error %x\n", szPolicy, r);
 		}
 	}
 
-	if ((!bRestore) || (existing_key)) {
+	if ((!bRestore) || (key_was_present)) {
 		val = (bRestore)?original_val:dwValue;
 		r = RegSetValueExA(policy_key, szPolicy, 0, REG_DWORD, (BYTE*)&val, sizeof(val));
 	} else {
@@ -822,11 +786,7 @@ BOOL SetLGP(BOOL bRestore, const char* szPath, const char* szPolicy, DWORD dwVal
 		uprintf("SetLGP: Unable to apply %s policy - error %x\n", szPolicy, hr);
 		goto error;
 	} else {
-		if ((bRestore) && (!existing_key)) {
-			uprintf("SetLGP: Successfully removed %s policy key\n", szPolicy);
-		} else {
-			uprintf("SetLGP: Successfully %s %s policy to 0x%08X\n", (bRestore)?"restored":"set", szPolicy, val);
-		}
+		uprintf("SetLGP: Successfully %s %s policy\n", (bRestore)?"restored":"disabled", szPolicy);
 	}
 
 	RegCloseKey(path_key);
@@ -839,7 +799,6 @@ error:
 	if (pLGPO != NULL) pLGPO->lpVtbl->Release(pLGPO);
 	return FALSE;
 }
-#pragma pop_macro("INTERFACE")
 
 /* 
  * Toggle controls according to operation

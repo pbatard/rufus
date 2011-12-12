@@ -61,6 +61,7 @@ static BOOLEAN __stdcall FormatExCallback(FILE_SYSTEM_CALLBACK_COMMAND Command, 
 
 	switch(Command) {
 	case FCC_PROGRESS:
+		// TODO: send this percentage to the status bar
 		percent = (DWORD*)pData;
 		PrintStatus(0, "Formatting: %d%% completed.\n", *percent);
 //		uprintf("%d percent completed.\n", *percent);
