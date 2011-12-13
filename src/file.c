@@ -71,7 +71,12 @@ int read_sectors(HANDLE hDrive, size_t SectorSize,
    return Size;
 }
 
-/* Use a bastardized fp that contains a Windows handle and the sector size */
+/*
+ * The following calls use a bastardized fp on Windows that contains:
+ * fp->_ptr: a Windows handle
+ * fp->_bufsiz: the sector size
+ * fp->_cnt: a file offset
+ */
 int contains_data(FILE *fp, size_t Position,
                   const void *pData, size_t Len)
 {
@@ -79,6 +84,7 @@ int contains_data(FILE *fp, size_t Position,
    HANDLE hDrive = (HANDLE)fp->_ptr;
    size_t SectorSize = (size_t)fp->_bufsiz;
    size_t StartSector, EndSector, NumSectors;
+   Position += (size_t)fp->_cnt;
 
    StartSector = Position/SectorSize;
    EndSector   = (Position+Len+SectorSize-1)/SectorSize;
@@ -107,6 +113,7 @@ int write_data(FILE *fp, size_t Position,
    HANDLE hDrive = (HANDLE)fp->_ptr;
    size_t SectorSize = (size_t)fp->_bufsiz;
    size_t StartSector, EndSector, NumSectors;
+   Position += (size_t)fp->_cnt;
 
    StartSector = Position/SectorSize;
    EndSector   = (Position+Len+SectorSize-1)/SectorSize;
