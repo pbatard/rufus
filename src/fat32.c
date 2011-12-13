@@ -64,12 +64,16 @@ int write_fat_32_br(FILE *fp, int bKeepLabel)
    #include "br_fat32_0x0.h"
    #include "br_fat32_0x52.h"
    #include "br_fat32_0x3f0.h"
+   const unsigned char offset_x40 = 0x80;
 
    if(bKeepLabel)
       return
 	 ( write_data(fp, 0x0, br_fat32_0x0, sizeof(br_fat32_0x0)) &&
 	   /* BIOS Parameter Block should not be overwritten */
 	   write_data(fp, 0x52, br_fat32_0x52, sizeof(br_fat32_0x52)) &&
+	   /* except offsets 0x40 & 0xC40 which may have to be corrected */
+	   write_data(fp, 0x40, &offset_x40, 1) &&
+	   write_data(fp, 0xc40, &offset_x40, 1) &&
 	   /* Cluster information is not overwritten, however, it would bo OK
 	      to write 0xff 0xff 0xff 0xff 0xff 0xff 0xff 0xff here. */
 	   write_data(fp, 0x3f0, br_fat32_0x3f0, sizeof(br_fat32_0x3f0)) );
@@ -79,6 +83,9 @@ int write_fat_32_br(FILE *fp, int bKeepLabel)
 	   /* BIOS Parameter Block should not be overwritten */
 	   write_data(fp, 0x47, label_11_char, sizeof(label_11_char)) &&
 	   write_data(fp, 0x52, br_fat32_0x52, sizeof(br_fat32_0x52)) &&
+	  /* except offsets 0x40 & 0xC40 which may have to be corrected */
+	   write_data(fp, 0x40, &offset_x40, 1) &&
+	   write_data(fp, 0xc40, &offset_x40, 1) &&
 	   /* Cluster information is not overwritten, however, it would bo OK
 	      to write 0xff 0xff 0xff 0xff 0xff 0xff 0xff 0xff here. */
 	   write_data(fp, 0x3f0, br_fat32_0x3f0, sizeof(br_fat32_0x3f0)) );

@@ -61,7 +61,6 @@ static BOOLEAN __stdcall FormatExCallback(FILE_SYSTEM_CALLBACK_COMMAND Command, 
 
 	switch(Command) {
 	case FCC_PROGRESS:
-		// TODO: send this percentage to the status bar
 		percent = (DWORD*)pData;
 		PrintStatus(0, "Formatting: %d%% completed.\n", *percent);
 //		uprintf("%d percent completed.\n", *percent);
@@ -84,9 +83,10 @@ static BOOLEAN __stdcall FormatExCallback(FILE_SYSTEM_CALLBACK_COMMAND Command, 
 		break;
 	case FCC_DONE_WITH_STRUCTURE:	// We get this message when formatting Small FAT16
 		// pData Seems to be a struct with at least one (32 BIT!!!) string pointer to the size in MB
-		uprintf("Done with that sort of things: Action=%d pData=%0p\n", Action, pData);
-		DumpBufferHex(pData, 8);
-		uprintf("Volume size: %s MB\n", (char*)(LONG_PTR)(*(ULONG32*)pData));
+		uprintf("Done with that sort of thing: Action=%d pData=%0p\n", Action, pData);
+		// /!\ THE FOLLOWING ONLY WORKS ON VISTA OR LATER - DO NOT ENABLE ON XP!
+		// DumpBufferHex(pData, 8);
+		// uprintf("Volume size: %s MB\n", (char*)(LONG_PTR)(*(ULONG32*)pData));
 		break;
 	case FCC_INCOMPATIBLE_FILE_SYSTEM:
 		uprintf("Incompatible File System\n");
@@ -318,6 +318,7 @@ static BOOL WritePBR(HANDLE hLogicalVolume)
 		if (write_fat_16_br(&fake_fd, 0))
 			return TRUE;
 	case FS_FAT32:
+		// TODO: we may have to validate the 0xc40 offset of second FS boot sector
 		if (write_fat_32_br(&fake_fd, 0))
 			return TRUE;
 	default:
