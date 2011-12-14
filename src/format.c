@@ -35,6 +35,7 @@
 #include "br.h"
 #include "fat16.h"
 #include "fat32.h"
+#include "partition_info.h"
 #include "file.h"
 #include "format.h"
 #include "badblocks.h"
@@ -325,6 +326,7 @@ static BOOL WritePBR(HANDLE hLogicalVolume)
 	fake_fd._ptr = (char*)hLogicalVolume;
 	fake_fd._bufsiz = SelectedDrive.Geometry.BytesPerSector;
 
+	// TODO: call write_partition_number_of_heads() and write_partition_start_sector_number()?
 	switch (ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem))) {
 	case FS_FAT16:
 		if (!is_fat_16_fs(&fake_fd)) {
@@ -332,7 +334,9 @@ static BOOL WritePBR(HANDLE hLogicalVolume)
 			break;
 		}
 		uprintf("Confirmed new volume has a FAT16 boot sector\n");
-		if (!write_fat_16_br(&fake_fd, 0))
+		if (!write_fat_16_br(&fake_fd, 0) ||
+			// Disk Drive ID needs to be corrected on XP
+			!write_partition_physical_disk_drive_id_fat16(&fake_fd))
 			break;
 		return TRUE;
 	case FS_FAT32:
@@ -343,7 +347,9 @@ static BOOL WritePBR(HANDLE hLogicalVolume)
 			}
 			uprintf("Confirmed new volume has a %s FAT32 boot sector\n", i?"secondary":"primary");
 			uprintf("Setting %s FAT32 boot sector for DOS boot...\n", i?"secondary":"primary");
-			if (!write_fat_32_br(&fake_fd, 0))
+			if (!write_fat_32_br(&fake_fd, 0) ||
+				// Disk Drive ID needs to be corrected on XP
+				!write_partition_physical_disk_drive_id_fat32(&fake_fd))
 				break;
 			fake_fd._cnt += 6 * (int)SelectedDrive.Geometry.BytesPerSector;
 		}

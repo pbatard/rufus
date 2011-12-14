@@ -54,6 +54,9 @@
     <ClCompile Include="..\badblocks.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\partition_info.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\rufus.h">
@@ -160,6 +163,9 @@
     </ClInclude>
     <ClInclude Include="..\badblocks.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\inc\partition_info.h">
+      <Filter>Header Files\ms-sys inc</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

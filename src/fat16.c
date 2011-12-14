@@ -58,23 +58,18 @@ int write_fat_16_br(FILE *fp, int bKeepLabel)
    #include "label_11_char.h"
    #include "br_fat16_0x0.h"
    #include "br_fat16_0x3e.h"
-   const unsigned char offset_x24 = 0x80;
 
    if(bKeepLabel)
       return
 	 ( write_data(fp, 0x0, br_fat16_0x0, sizeof(br_fat16_0x0)) &&
 	   /* BIOS Parameter Block should not be overwritten */
-	   write_data(fp, 0x3e, br_fat16_0x3e, sizeof(br_fat16_0x3e)) &&
-	   /* except offset 0x24 which may have to be corrected */
-	   write_data(fp, 0x24, &offset_x24, 1) );
+	   write_data(fp, 0x3e, br_fat16_0x3e, sizeof(br_fat16_0x3e)) );
    else
       return
 	 ( write_data(fp, 0x0, br_fat16_0x0, sizeof(br_fat16_0x0)) &&
 	   /* BIOS Parameter Block should not be overwritten */
 	   write_data(fp, 0x2b, label_11_char, sizeof(label_11_char)) &&
-	   write_data(fp, 0x3e, br_fat16_0x3e, sizeof(br_fat16_0x3e)) &&
-	   /* except offset 0x24 which may have to be corrected */
-	   write_data(fp, 0x24, &offset_x24, 1) );
+	   write_data(fp, 0x3e, br_fat16_0x3e, sizeof(br_fat16_0x3e)) );
 } /* write_fat_16_br */
 
 int entire_fat_16_fd_br_matches(FILE *fp)

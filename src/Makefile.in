@@ -46,11 +46,11 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 PROGRAMS = $(noinst_PROGRAMS)
 am_rufus_OBJECTS = rufus-fat12.$(OBJEXT) rufus-fat16.$(OBJEXT) \
-	rufus-fat32.$(OBJEXT) rufus-br.$(OBJEXT) rufus-file.$(OBJEXT) \
-	rufus-drive.$(OBJEXT) rufus-msdos.$(OBJEXT) \
-	rufus-badblocks.$(OBJEXT) rufus-format.$(OBJEXT) \
-	rufus-stdio.$(OBJEXT) rufus-stdlg.$(OBJEXT) \
-	rufus-rufus.$(OBJEXT)
+	rufus-fat32.$(OBJEXT) rufus-partition_info.$(OBJEXT) \
+	rufus-br.$(OBJEXT) rufus-file.$(OBJEXT) rufus-drive.$(OBJEXT) \
+	rufus-msdos.$(OBJEXT) rufus-badblocks.$(OBJEXT) \
+	rufus-format.$(OBJEXT) rufus-stdio.$(OBJEXT) \
+	rufus-stdlg.$(OBJEXT) rufus-rufus.$(OBJEXT)
 rufus_OBJECTS = $(am_rufus_OBJECTS)
 rufus_DEPENDENCIES = rufus_rc.o
 rufus_LINK = $(CCLD) $(rufus_CFLAGS) $(CFLAGS) $(rufus_LDFLAGS) \
@@ -168,7 +168,7 @@ top_srcdir = @top_srcdir@
 pkg_v_rc = $(pkg_v_rc_$(V))
 pkg_v_rc_ = $(pkg_v_rc_$(AM_DEFAULT_VERBOSITY))
 pkg_v_rc_0 = @echo "  RC     $@";
-rufus_SOURCES = fat12.c fat16.c fat32.c br.c file.c drive.c msdos.c badblocks.c format.c stdio.c stdlg.c rufus.c
+rufus_SOURCES = fat12.c fat16.c fat32.c partition_info.c br.c file.c drive.c msdos.c badblocks.c format.c stdio.c stdlg.c rufus.c
 rufus_CFLAGS = -I./inc $(ARCH_CFLAGS) $(AM_CFLAGS)
 rufus_LDFLAGS = $(AM_LDFLAGS) -mwindows
 rufus_LDADD = rufus_rc.o -lsetupapi -lole32 -lgdi32
@@ -250,6 +250,14 @@ rufus-fat32.o: fat32.c
 rufus-fat32.obj: fat32.c
 	$(AM_V_CC) @AM_BACKSLASH@
 	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_CFLAGS) $(CFLAGS) -c -o rufus-fat32.obj `if test -f 'fat32.c'; then $(CYGPATH_W) 'fat32.c'; else $(CYGPATH_W) '$(srcdir)/fat32.c'; fi`
+
+rufus-partition_info.o: partition_info.c
+	$(AM_V_CC) @AM_BACKSLASH@
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_CFLAGS) $(CFLAGS) -c -o rufus-partition_info.o `test -f 'partition_info.c' || echo '$(srcdir)/'`partition_info.c
+
+rufus-partition_info.obj: partition_info.c
+	$(AM_V_CC) @AM_BACKSLASH@
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_CFLAGS) $(CFLAGS) -c -o rufus-partition_info.obj `if test -f 'partition_info.c'; then $(CYGPATH_W) 'partition_info.c'; else $(CYGPATH_W) '$(srcdir)/partition_info.c'; fi`
 
 rufus-br.o: br.c
 	$(AM_V_CC) @AM_BACKSLASH@

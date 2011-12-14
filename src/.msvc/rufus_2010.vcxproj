@@ -155,6 +155,7 @@
     <ClCompile Include="..\file.c" />
     <ClCompile Include="..\format.c" />
     <ClCompile Include="..\msdos.c" />
+    <ClCompile Include="..\partition_info.c" />
     <ClCompile Include="..\rufus.c" />
     <ClCompile Include="..\stdio.c" />
     <ClCompile Include="..\stdlg.c" />
@@ -190,6 +191,7 @@
     <ClInclude Include="..\inc\mbr_vista.h" />
     <ClInclude Include="..\inc\mbr_win7.h" />
     <ClInclude Include="..\inc\mbr_zero.h" />
+    <ClInclude Include="..\inc\partition_info.h" />
     <ClInclude Include="..\msapi_utf8.h" />
     <ClInclude Include="..\msdos.h" />
     <ClInclude Include="..\rufus.h" />
