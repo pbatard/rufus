@@ -116,6 +116,12 @@ enum {
 	FS_MAX
 };
 
+enum dos_type {
+	DT_FREEDOS = 0,
+	DT_WINME,
+	DT_MAX
+};
+
 /* Current drive info */
 typedef struct {
 	DWORD DeviceNumber;
@@ -134,7 +140,7 @@ typedef struct {
  */
 extern HINSTANCE hMainInstance;
 extern HWND hMainDialog, hStatus, hDeviceList, hCapacity;
-extern HWND hFileSystem, hClusterSize, hLabel; 
+extern HWND hFileSystem, hClusterSize, hLabel, hDOSType; 
 extern float fScale;
 extern char szFolderPath[MAX_PATH];
 extern DWORD FormatStatus;
@@ -156,7 +162,7 @@ extern HWND CreateTooltip(HWND hControl, const char* message, int duration);
 extern void DestroyTooltip(HWND hWnd);
 extern void DestroyAllTooltips(void);
 extern BOOL Notification(int type, char* title, char* format, ...);
-extern BOOL ExtractMSDOS(const char* path);
+extern BOOL ExtractDOS(const char* path, int dos_type);
 extern void __cdecl FormatThread(void* param);
 extern BOOL CreatePartition(HANDLE hDrive);
 extern HANDLE GetDriveHandle(DWORD DriveIndex, char* DriveLetter, BOOL bWriteAccess, BOOL bLockDrive);

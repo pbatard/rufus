@@ -30,7 +30,7 @@ LANGUAGE LANG_ENGLISH, SUBLANG_NEUTRAL
 IDD_DIALOG DIALOGEX 12, 12, 206, 278
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_APPWINDOW
-CAPTION "Rufus v1.0.3.95"
+CAPTION "Rufus v1.0.3.96"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     DEFPUSHBUTTON   "Start",IDC_START,94,236,50,14
@@ -48,9 +48,10 @@ BEGIN
     EDITTEXT        IDC_LABEL,7,131,190,13,ES_AUTOHSCROLL
     CONTROL         "Check device for bad blocks",IDC_BADBLOCKS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,161,171,10
     CONTROL         "Quick Format",IDC_QUICKFORMAT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,173,58,10
-    CONTROL         "Create a DOS bootable disk",IDC_DOS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,185,115,10
+    CONTROL         "Create a DOS bootable disk:",IDC_DOS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,185,101,10
     LTEXT           "New volume label",IDC_STATIC,9,121,105,10
     CONTROL         "",IDC_PROGRESS,"msctls_progress32",PBS_SMOOTH | WS_BORDER,7,210,189,9
+    COMBOBOX        IDC_DOSTYPE,116,183,45,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
 END
 
 IDD_ABOUTBOX DIALOGEX 0, 0, 287, 195
@@ -64,7 +65,7 @@ BEGIN
     DEFPUSHBUTTON   "OK",IDOK,231,175,50,14,WS_GROUP
     CONTROL         "<a href=""http://rufus.akeo.ie"">http://rufus.akeo.ie</a>",IDC_ABOUT_RUFUS_URL,
                     "SysLink",WS_TABSTOP,46,47,114,9
-    LTEXT           "Version 1.0.3 (Build 95)",IDC_STATIC,46,19,78,8
+    LTEXT           "Version 1.0.3 (Build 96)",IDC_STATIC,46,19,78,8
     PUSHBUTTON      "License...",IDC_ABOUT_LICENSE,46,175,50,14,WS_GROUP
     EDITTEXT        IDC_ABOUT_COPYRIGHTS,46,107,235,63,ES_MULTILINE | ES_READONLY | WS_VSCROLL
     LTEXT           "Report bugs or request enhancements at:",IDC_STATIC,46,66,187,8
@@ -163,8 +164,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,0,3,95
- PRODUCTVERSION 1,0,3,95
+ FILEVERSION 1,0,3,96
+ PRODUCTVERSION 1,0,3,96
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -181,13 +182,13 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "akeo.ie"
             VALUE "FileDescription", "Rufus"
-            VALUE "FileVersion", "1.0.3.95"
+            VALUE "FileVersion", "1.0.3.96"
             VALUE "InternalName", "Rufus"
             VALUE "LegalCopyright", "© 2011 Pete Batard (GPL v3)"
             VALUE "LegalTrademarks", "http://www.gnu.org/copyleft/gpl.html"
             VALUE "OriginalFilename", "rufus.exe"
             VALUE "ProductName", "Rufus"
-            VALUE "ProductVersion", "1.0.3.95"
+            VALUE "ProductVersion", "1.0.3.96"
         END
     END
     BLOCK "VarFileInfo"
@@ -205,6 +206,14 @@ END
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
 IDI_ICON                ICON                    "rufus.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// RCDATA
+//
+
+IDR_FD_COMMAND_COM      RCDATA                  "../freedos/COMMAND.COM"
+IDR_FD_KERNEL_SYS       RCDATA                  "../freedos/KERNEL.SYS"
 #endif    // English resources
 /////////////////////////////////////////////////////////////////////////////
 

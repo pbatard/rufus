@@ -53,7 +53,7 @@ HWND hMainDialog;
 char szFolderPath[MAX_PATH];
 float fScale = 1.0f;
 int default_fs;
-HWND hDeviceList, hCapacity, hFileSystem, hClusterSize, hLabel;
+HWND hDeviceList, hCapacity, hFileSystem, hClusterSize, hLabel, hDOSType;
 
 static HWND hDeviceTooltip = NULL, hFSTooltip = NULL, hProgress = NULL;
 static StrArray DriveID, DriveLabel;
@@ -234,7 +234,6 @@ static BOOL SetClusterSizes(int FSType)
 	IGNORE_RETVAL(ComboBox_ResetContent(hClusterSize));
 
 	if ((FSType < 0) || (FSType >= FS_MAX)) {
-		uprintf("Invalid FS value passed to SetClusterSizes\n");
 		return FALSE;
 	}
 
@@ -846,8 +845,10 @@ static void EnableControls(BOOL bEnable)
 	if (bEnable) {
 		fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
 		EnableWindow(GetDlgItem(hMainDialog, IDC_DOS), (fs == FS_FAT16) || (fs == FS_FAT32));
+		EnableWindow(GetDlgItem(hMainDialog, IDC_DOSTYPE), (fs == FS_FAT16) || (fs == FS_FAT32));
 	} else {
 		EnableWindow(GetDlgItem(hMainDialog, IDC_DOS), FALSE);
+		EnableWindow(GetDlgItem(hMainDialog, IDC_DOSTYPE), FALSE);
 	}
 	EnableWindow(GetDlgItem(hMainDialog, IDC_BADBLOCKS), bEnable);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_ABOUT), bEnable);
@@ -900,6 +901,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		hLabel = GetDlgItem(hDlg, IDC_LABEL);
 		hProgress = GetDlgItem(hDlg, IDC_PROGRESS);
 		hDOS = GetDlgItem(hDlg, IDC_DOS);
+		hDOSType = GetDlgItem(hDlg, IDC_DOSTYPE);
 		// High DPI scaling
 		hDC = GetDC(hDlg);
 		fScale = GetDeviceCaps(hDC, LOGPIXELSX) / 96.0f;
@@ -913,6 +915,12 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		CreateStatusBar();
 		// Use maximum granularity for the progress bar
 		SendMessage(hProgress, PBM_SETRANGE, 0, MAX_PROGRESS<<16);
+		// Fill up the DOS type dropdown
+		IGNORE_RETVAL(ComboBox_AddStringU(hDOSType, "FreeDOS"));
+		IGNORE_RETVAL(ComboBox_AddStringU(hDOSType, "WinMe"));
+		// TODO: enable folder selection
+		// IGNORE_RETVAL(ComboBox_AddStringU(hDOSType, "Custom"));
+		IGNORE_RETVAL(ComboBox_SetCurSel(hDOSType, 0));
 		// Create the string array
 		StrArrayCreate(&DriveID, MAX_DRIVES);
 		StrArrayCreate(&DriveLabel, MAX_DRIVES);
@@ -978,6 +986,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				if ((fs == FS_FAT16) || (fs == FS_FAT32)) {
 					if (!IsWindowEnabled(hDOS)) {
 						EnableWindow(hDOS, TRUE);
+						EnableWindow(hDOSType, TRUE);
 						CheckDlgButton(hDlg, IDC_DOS, uDOSChecked);
 					}
 				} else {
@@ -985,6 +994,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 						uDOSChecked = IsDlgButtonChecked(hMainDialog, IDC_DOS);
 						CheckDlgButton(hDlg, IDC_DOS, BST_UNCHECKED);
 						EnableWindow(hDOS, FALSE);
+						EnableWindow(hDOSType, FALSE);
 					}
 				}
 				break;

@@ -29,6 +29,7 @@
 
 #include "rufus.h"
 #include "msdos.h"
+#include "resource.h"
 
 static BYTE* DiskImage;
 static size_t DiskImageSize;
@@ -257,7 +258,7 @@ static BOOL ExtractFAT(int entry, const char* path)
 	if ((!WriteFile(hFile, &DiskImage[filestart], (DWORD)filesize, &Size, 0)) || (filesize != Size)) {
 		uprintf("Couldn't write file '%s': %s.\n", filename, WindowsErrorString());
 		safe_closehandle(hFile);
-		return FALSE;		safe_closehandle(hFile);
+		return FALSE;
 	}
 
 	/* Restore timestamps from FAT */
@@ -284,7 +285,7 @@ static BOOL ExtractFAT(int entry, const char* path)
 
 /* Extract the MS-DOS files contained in the FAT12 1.4MB floppy
    image included as resource "BINFILE" in diskcopy.dll */
-BOOL ExtractMSDOS(const char* path)
+static BOOL ExtractMSDOS(const char* path)
 {
 	char dllname[MAX_PATH] = "C:\\Windows\\System32";
 	int i, j;
@@ -336,4 +337,75 @@ BOOL ExtractMSDOS(const char* path)
 	FreeLibrary(hDLL);
 
 	return r;
+}
+
+/* Extract the FreeDOS files embedded in the app */
+BOOL ExtractFreeDOS(const char* path)
+{
+	const char* res_name[2] = { "COMMAND.COM", "KERNEL.SYS" };
+	const int res_id[2] = { IDR_FD_COMMAND_COM, IDR_FD_KERNEL_SYS };
+	char filename[MAX_PATH];
+	HGLOBAL res_handle[2];
+	HRSRC res[2];
+	BYTE* res_data[2];
+	DWORD res_size[2], Size;
+	HANDLE hFile;
+	size_t pos;
+	int i;
+
+	if ((path == NULL) || ((safe_strlen(path) + 14) > sizeof(filename))) {
+		uprintf("invalid path supplied for FreeDOS extraction\n");
+		return FALSE;
+	}
+
+	for (i=0; i<2; i++) {
+		res[i] = FindResource(hMainInstance, MAKEINTRESOURCE(res_id[i]), RT_RCDATA);
+		if (res[i] == NULL) {
+			uprintf("Unable to locate FreeDOS resource %s: %s\n", res_name[i], WindowsErrorString());
+			return FALSE;
+		}
+		res_handle[i] = LoadResource(NULL, res[i]);
+		if (res_handle[i] == NULL) {
+			uprintf("Unable to load FreeDOS resource %s: %s\n", res_name[i], WindowsErrorString());
+			return FALSE;
+		}
+		res_data[i] = (BYTE*)LockResource(res_handle[i]);
+		res_size[i] = SizeofResource(NULL, res[i]);
+
+		strcpy(filename, path);
+		pos = strlen(path);
+		filename[pos++] = '\\';
+		filename[pos] = 0;
+		safe_strcat(filename, sizeof(filename), res_name[i]);
+
+		// TODO: set attributes
+		hFile = CreateFileA(filename, GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ|FILE_SHARE_WRITE,
+			NULL, CREATE_ALWAYS, 0, 0);
+		if (hFile == INVALID_HANDLE_VALUE) {
+			uprintf("Unable to create file '%s': %s.\n", filename, WindowsErrorString());
+			return FALSE;
+		}
+
+		if ((!WriteFile(hFile, res_data[i], res_size[i], &Size, 0)) || (res_size[i] != Size)) {
+			uprintf("Couldn't write file '%s': %s.\n", filename, WindowsErrorString());
+			safe_closehandle(hFile);
+			return FALSE;
+		}
+
+		// TODO: Restore timestamps from resource
+//		if (!SetFileTime(hFile, &ftCreationTime, &ftLastAccessTime, &ftLastWriteTime)) {
+//			uprintf("Could not set timestamps: %s\n", WindowsErrorString());
+//		}
+
+		safe_closehandle(hFile);
+		uprintf("Succesfully wrote '%s' (%d bytes)\n", filename, res_size[i]);
+	}
+	return TRUE;
+}
+
+BOOL ExtractDOS(const char* path, int dos_type)
+{
+	if (dos_type == DT_WINME)
+		return ExtractMSDOS(path);
+	return ExtractFreeDOS(path);
 }

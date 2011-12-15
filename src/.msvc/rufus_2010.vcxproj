@@ -194,6 +194,7 @@
     <ClInclude Include="..\inc\partition_info.h" />
     <ClInclude Include="..\msapi_utf8.h" />
     <ClInclude Include="..\msdos.h" />
+    <ClInclude Include="..\resource.h" />
     <ClInclude Include="..\rufus.h" />
     <ClInclude Include="..\license.h" />
     <ClInclude Include="..\sys_types.h" />
@@ -202,6 +203,8 @@
     <Manifest Include="..\common_controls_and_elevation.manifest" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\freedos\COMMAND.COM" />
+    <None Include="..\..\freedos\KERNEL.SYS" />
     <None Include="..\rufus.ico" />
   </ItemGroup>
   <ItemGroup>

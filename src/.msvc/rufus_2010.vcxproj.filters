@@ -16,6 +16,9 @@
     <Filter Include="Header Files\ms-sys inc">
       <UniqueIdentifier>{ecff9fec-41c4-4ce8-b725-27ee39754cb7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\freedos">
+      <UniqueIdentifier>{340c377e-7530-411d-a367-49825f080d85}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\rufus.c">
@@ -167,10 +170,19 @@
     <ClInclude Include="..\inc\partition_info.h">
       <Filter>Header Files\ms-sys inc</Filter>
     </ClInclude>
+    <ClInclude Include="..\resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\rufus.ico">
       <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\freedos\COMMAND.COM">
+      <Filter>Resource Files\freedos</Filter>
+    </None>
+    <None Include="..\..\freedos\KERNEL.SYS">
+      <Filter>Resource Files\freedos</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

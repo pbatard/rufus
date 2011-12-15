@@ -26,7 +26,7 @@ const char* additional_copyrights =
 "http://ms-sys.sourceforge.net\r\n"
 "GNU General Public License (GPL) v2 or later\r\n"
 "\r\n"
-"Bad blocks testing from e2fsprogs by Theodore T'so and al:\r\n"
+"Bad blocks testing from e2fsprogs by Theodore T'so et al:\r\n"
 "http://e2fsprogs.sourceforge.net\r\n"
 "GNU General Public License (GPL) v3 compatible\r\n"
 "\r\n"

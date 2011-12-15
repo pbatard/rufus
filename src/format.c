@@ -318,7 +318,7 @@ out:
 /*
  * Process the Partition Boot Record
  */
-static BOOL WritePBR(HANDLE hLogicalVolume)
+static BOOL WritePBR(HANDLE hLogicalVolume, BOOL bFreeDOS)
 {
 	int i;
 	FILE fake_fd = { 0 };
@@ -334,9 +334,11 @@ static BOOL WritePBR(HANDLE hLogicalVolume)
 			break;
 		}
 		uprintf("Confirmed new volume has a FAT16 boot sector\n");
-		if (!write_fat_16_br(&fake_fd, 0) ||
-			// Disk Drive ID needs to be corrected on XP
-			!write_partition_physical_disk_drive_id_fat16(&fake_fd))
+		if (bFreeDOS) {
+			if (!write_fat_16_fd_br(&fake_fd, 0)) break;
+		} else if (!write_fat_16_br(&fake_fd, 0)) break;
+		// Disk Drive ID needs to be corrected on XP
+		if (!write_partition_physical_disk_drive_id_fat16(&fake_fd))
 			break;
 		return TRUE;
 	case FS_FAT32:
@@ -347,9 +349,11 @@ static BOOL WritePBR(HANDLE hLogicalVolume)
 			}
 			uprintf("Confirmed new volume has a %s FAT32 boot sector\n", i?"secondary":"primary");
 			uprintf("Setting %s FAT32 boot sector for DOS boot...\n", i?"secondary":"primary");
-			if (!write_fat_32_br(&fake_fd, 0) ||
-				// Disk Drive ID needs to be corrected on XP
-				!write_partition_physical_disk_drive_id_fat32(&fake_fd))
+			if (bFreeDOS) {
+				if (!write_fat_32_fd_br(&fake_fd, 0)) break;
+			} else if (!write_fat_32_br(&fake_fd, 0)) break;
+			// Disk Drive ID needs to be corrected on XP
+			if (!write_partition_physical_disk_drive_id_fat32(&fake_fd))
 				break;
 			fake_fd._cnt += 6 * (int)SelectedDrive.Geometry.BytesPerSector;
 		}
@@ -469,15 +473,15 @@ void __cdecl FormatThread(void* param)
 			goto out;
 		}
 		PrintStatus(0, "Writing partition boot record...\n");
-		if (!WritePBR(hLogicalVolume)) {
+		if (!WritePBR(hLogicalVolume, ComboBox_GetCurSel(hDOSType) == DT_FREEDOS)) {
 			// Errorcode has already been set
 			goto out;
 		}
 		// ...but we must have relinquished that lock to write the MS-DOS files 
 		safe_unlockclose(hLogicalVolume);
 		UpdateProgress(OP_DOS, -1.0f);
-		PrintStatus(0, "Copying MS-DOS files...\n");
-		if (!ExtractMSDOS(drive_name)) {
+		PrintStatus(0, "Copying DOS files...\n");
+		if (!ExtractDOS(drive_name, ComboBox_GetCurSel(hDOSType))) {
 			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANNOT_COPY;
 			goto out;
 		}
