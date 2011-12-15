@@ -30,7 +30,7 @@ LANGUAGE LANG_ENGLISH, SUBLANG_NEUTRAL
 IDD_DIALOG DIALOGEX 12, 12, 206, 278
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_APPWINDOW
-CAPTION "Rufus v1.0.3.96"
+CAPTION "Rufus v1.0.3.97"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     DEFPUSHBUTTON   "Start",IDC_START,94,236,50,14
@@ -65,7 +65,7 @@ BEGIN
     DEFPUSHBUTTON   "OK",IDOK,231,175,50,14,WS_GROUP
     CONTROL         "<a href=""http://rufus.akeo.ie"">http://rufus.akeo.ie</a>",IDC_ABOUT_RUFUS_URL,
                     "SysLink",WS_TABSTOP,46,47,114,9
-    LTEXT           "Version 1.0.3 (Build 96)",IDC_STATIC,46,19,78,8
+    LTEXT           "Version 1.0.3 (Build 97)",IDC_STATIC,46,19,78,8
     PUSHBUTTON      "License...",IDC_ABOUT_LICENSE,46,175,50,14,WS_GROUP
     EDITTEXT        IDC_ABOUT_COPYRIGHTS,46,107,235,63,ES_MULTILINE | ES_READONLY | WS_VSCROLL
     LTEXT           "Report bugs or request enhancements at:",IDC_STATIC,46,66,187,8
@@ -119,6 +119,12 @@ END
 3 TEXTINCLUDE 
 BEGIN
     "\r\n"
+    "// Only include these in rufus_fd\r\n"
+    "#if defined(WITH_FREEDOS)\r\n"
+    "IDR_FD_COMMAND_COM      RCDATA                  ""../freedos/COMMAND.COM""\r\n"
+    "IDR_FD_KERNEL_SYS       RCDATA                  ""../freedos/KERNEL.SYS""\r\n"
+    "#endif\r\n"
+    "\r\n"
     "// Must reference a manifest for visual styles and elevation\r\n"
     "// Oh, and it must happen at the end, or MinGW will ignore it!\r\n"
     "#if defined(__GNUC__)\r\n"
@@ -164,8 +170,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,0,3,96
- PRODUCTVERSION 1,0,3,96
+ FILEVERSION 1,0,3,97
+ PRODUCTVERSION 1,0,3,97
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -182,13 +188,13 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "akeo.ie"
             VALUE "FileDescription", "Rufus"
-            VALUE "FileVersion", "1.0.3.96"
+            VALUE "FileVersion", "1.0.3.97"
             VALUE "InternalName", "Rufus"
             VALUE "LegalCopyright", "© 2011 Pete Batard (GPL v3)"
             VALUE "LegalTrademarks", "http://www.gnu.org/copyleft/gpl.html"
             VALUE "OriginalFilename", "rufus.exe"
             VALUE "ProductName", "Rufus"
-            VALUE "ProductVersion", "1.0.3.96"
+            VALUE "ProductVersion", "1.0.3.97"
         END
     END
     BLOCK "VarFileInfo"
@@ -206,14 +212,6 @@ END
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
 IDI_ICON                ICON                    "rufus.ico"
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// RCDATA
-//
-
-IDR_FD_COMMAND_COM      RCDATA                  "../freedos/COMMAND.COM"
-IDR_FD_KERNEL_SYS       RCDATA                  "../freedos/KERNEL.SYS"
 #endif    // English resources
 /////////////////////////////////////////////////////////////////////////////
 
@@ -224,6 +222,12 @@ IDR_FD_KERNEL_SYS       RCDATA                  "../freedos/KERNEL.SYS"
 //
 // Generated from the TEXTINCLUDE 3 resource.
 //
+
+// Only include these in rufus_fd
+#if defined(WITH_FREEDOS)
+IDR_FD_COMMAND_COM      RCDATA                  "../freedos/COMMAND.COM"
+IDR_FD_KERNEL_SYS       RCDATA                  "../freedos/KERNEL.SYS"
+#endif
 
 // Must reference a manifest for visual styles and elevation
 // Oh, and it must happen at the end, or MinGW will ignore it!
