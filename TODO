@@ -1,5 +1,4 @@
 o Create a report file with failed block details on bad blocks
-o Integrate FreeDOS
 o Allow the provision of external DOS files
 o Set DOS keyboard according to locale
 o Allow selection of one of the existing compatible partitions (keep existing MBR) vs. full repartitioning (overwrite MBR)

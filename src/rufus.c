@@ -54,6 +54,7 @@ char szFolderPath[MAX_PATH];
 float fScale = 1.0f;
 int default_fs;
 HWND hDeviceList, hCapacity, hFileSystem, hClusterSize, hLabel, hDOSType;
+BOOL bWithFreeDOS;
 
 static HWND hDeviceTooltip = NULL, hFSTooltip = NULL, hProgress = NULL;
 static StrArray DriveID, DriveLabel;
@@ -920,7 +921,11 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		IGNORE_RETVAL(ComboBox_AddStringU(hDOSType, "WinMe"));
 		// TODO: enable folder selection
 		// IGNORE_RETVAL(ComboBox_AddStringU(hDOSType, "Custom"));
-		IGNORE_RETVAL(ComboBox_SetCurSel(hDOSType, 0));
+		IGNORE_RETVAL(ComboBox_SetCurSel(hDOSType, bWithFreeDOS?DT_FREEDOS:DT_WINME));
+		if (bWithFreeDOS) {
+			SetDlgItemTextA(hDlg, IDC_DOS, "Create a DOS bootable disk:");
+			ShowWindow(hDOSType, SW_SHOW);
+		}
 		// Create the string array
 		StrArrayCreate(&DriveID, MAX_DRIVES);
 		StrArrayCreate(&DriveLabel, MAX_DRIVES);
@@ -1103,6 +1108,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	// 0x9e disables removable and fixed drive notifications
 	SetLGP(FALSE, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer", "NoDriveTypeAutorun", 0x9e);
 #endif
+
+	// Find out if the FreeDOS resources are embedded in the app
+	bWithFreeDOS = (FindResource(hMainInstance, MAKEINTRESOURCE(IDR_FD_COMMAND_COM), RT_RCDATA) != NULL) &&
+		(FindResource(hMainInstance, MAKEINTRESOURCE(IDR_FD_KERNEL_SYS), RT_RCDATA) != NULL);
+	uprintf("FreeDOS resources are %sembedded with this app\n", bWithFreeDOS?"":"NOT ");
 
 	// Create the main Window
 	if ( (hDlg = CreateDialogA(hInstance, MAKEINTRESOURCEA(IDD_DIALOG), NULL, MainCallback)) == NULL ) {

@@ -146,6 +146,7 @@ extern char szFolderPath[MAX_PATH];
 extern DWORD FormatStatus;
 extern RUFUS_DRIVE_INFO SelectedDrive;
 extern const int nb_steps[FS_MAX];
+extern BOOL bWithFreeDOS;
 
 /*
  * Shared prototypes

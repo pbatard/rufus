@@ -378,9 +378,8 @@ BOOL ExtractFreeDOS(const char* path)
 		filename[pos] = 0;
 		safe_strcat(filename, sizeof(filename), res_name[i]);
 
-		// TODO: set attributes
 		hFile = CreateFileA(filename, GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ|FILE_SHARE_WRITE,
-			NULL, CREATE_ALWAYS, 0, 0);
+			NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_HIDDEN|FILE_ATTRIBUTE_READONLY|FILE_ATTRIBUTE_SYSTEM, 0);
 		if (hFile == INVALID_HANDLE_VALUE) {
 			uprintf("Unable to create file '%s': %s.\n", filename, WindowsErrorString());
 			return FALSE;
@@ -392,10 +391,8 @@ BOOL ExtractFreeDOS(const char* path)
 			return FALSE;
 		}
 
-		// TODO: Restore timestamps from resource
-//		if (!SetFileTime(hFile, &ftCreationTime, &ftLastAccessTime, &ftLastWriteTime)) {
-//			uprintf("Could not set timestamps: %s\n", WindowsErrorString());
-//		}
+		// We don't restore timestamps for FreeDOS, as there's no metadata in the files,
+		// thus we would need to have a separate header with each file's timestamps
 
 		safe_closehandle(hFile);
 		uprintf("Succesfully wrote '%s' (%d bytes)\n", filename, res_size[i]);
