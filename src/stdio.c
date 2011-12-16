@@ -205,7 +205,8 @@ const char* StrError(DWORD error_code)
 	case ERROR_WRITE_FAULT:
 		return "Write error";
 	case ERROR_OPEN_FAILED:
-		return "Could not open media";
+		return "Could not open media. It may be in use by another process.\n"
+			"Please re-plug the media and try again";
 	case ERROR_PARTITION_FAILURE:
 		return "Error while partitioning drive";
 	case ERROR_CANNOT_COPY:
@@ -217,7 +218,7 @@ const char* StrError(DWORD error_code)
 	case ERROR_BADBLOCKS_FAILURE:
 		return "Bad blocks check didn't complete";
 	default:
-		uprintf("StrError: hit default - %08X\n", error_code);
+		uprintf("Unknown error: %08X\n", error_code);
 		SetLastError(error_code);
 		return WindowsErrorString();
 	}

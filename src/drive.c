@@ -122,7 +122,7 @@ HANDLE GetDriveHandle(DWORD DriveIndex, char* DriveLetter, BOOL bWriteAccess, BO
 	}
 
 	if ((bLockDrive) && (!DeviceIoControl(hDrive, FSCTL_LOCK_VOLUME, NULL, 0, NULL, 0, &size, NULL))) {
-		uprintf("Could not get exclusive access to %s: %s\n", logical_drive, WindowsErrorString());
+		uprintf("Could not get exclusive access to %s %s\n", logical_drive, WindowsErrorString());
 		safe_closehandle(hDrive);
 		goto out;
 	}

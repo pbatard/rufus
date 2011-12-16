@@ -2,7 +2,6 @@
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rufus", "src\.msvc\rufus_2010.vcxproj", "{731858A7-0303-4988-877B-9C0DD6471864}"
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rufus", "src\.msvc\rufus_fd_2010.vcxproj", "{CB1A2185-AD54-47DF-B64C-B94C444E0C1F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -20,14 +19,6 @@ Global
 		{731858A7-0303-4988-877B-9C0DD6471864}.Release|Win32.Build.0 = Release|Win32
 		{731858A7-0303-4988-877B-9C0DD6471864}.Release|x64.ActiveCfg = Release|x64
 		{731858A7-0303-4988-877B-9C0DD6471864}.Release|x64.Build.0 = Release|x64
-		{CB1A2185-AD54-47DF-B64C-B94C444E0C1F}.Debug|Win32.ActiveCfg = Debug|Win32
-		{CB1A2185-AD54-47DF-B64C-B94C444E0C1F}.Debug|Win32.Build.0 = Debug|Win32
-		{CB1A2185-AD54-47DF-B64C-B94C444E0C1F}.Debug|x64.ActiveCfg = Debug|x64
-		{CB1A2185-AD54-47DF-B64C-B94C444E0C1F}.Debug|x64.Build.0 = Debug|x64
-		{CB1A2185-AD54-47DF-B64C-B94C444E0C1F}.Release|Win32.ActiveCfg = Release|Win32
-		{CB1A2185-AD54-47DF-B64C-B94C444E0C1F}.Release|Win32.Build.0 = Release|Win32
-		{CB1A2185-AD54-47DF-B64C-B94C444E0C1F}.Release|x64.ActiveCfg = Release|x64
-		{CB1A2185-AD54-47DF-B64C-B94C444E0C1F}.Release|x64.Build.0 = Release|x64		
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -409,6 +409,7 @@ BOOL ExtractFreeDOS(const char* path)
 	if (hFile == INVALID_HANDLE_VALUE) {
 		uprintf("Unable to create 'AUTOEXEC.BAT': %s.\n", WindowsErrorString());
 	}
+	safe_closehandle(hFile);
 
 	return TRUE;
 }
