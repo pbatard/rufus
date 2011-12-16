@@ -379,7 +379,7 @@ BOOL ExtractFreeDOS(const char* path)
 		safe_strcat(filename, sizeof(filename), res_name[i]);
 
 		hFile = CreateFileA(filename, GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ|FILE_SHARE_WRITE,
-			NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_HIDDEN|FILE_ATTRIBUTE_READONLY|FILE_ATTRIBUTE_SYSTEM, 0);
+			NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_HIDDEN|FILE_ATTRIBUTE_SYSTEM, 0);
 		if (hFile == INVALID_HANDLE_VALUE) {
 			uprintf("Unable to create file '%s': %s.\n", filename, WindowsErrorString());
 			return FALSE;
@@ -397,6 +397,19 @@ BOOL ExtractFreeDOS(const char* path)
 		safe_closehandle(hFile);
 		uprintf("Succesfully wrote '%s' (%d bytes)\n", filename, res_size[i]);
 	}
+
+	// There needs to be at least an AUTOEXEC.BAT to avoid the user being prompted for date and time
+	strcpy(filename, path);
+	pos = strlen(path);
+	filename[pos++] = '\\';
+	filename[pos] = 0;
+	safe_strcat(filename, sizeof(filename), "AUTOEXEC.BAT");
+	hFile = CreateFileA(filename, GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ|FILE_SHARE_WRITE,
+		NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
+	if (hFile == INVALID_HANDLE_VALUE) {
+		uprintf("Unable to create 'AUTOEXEC.BAT': %s.\n", WindowsErrorString());
+	}
+
 	return TRUE;
 }
 
