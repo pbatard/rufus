@@ -10,3 +10,5 @@ release: all
 	@upx $(TARGET)$(EXEEXT)
 	@upx $(TARGET)_fd$(EXEEXT)
 	@cmd.exe /k _sign.cmd $(TARGET)$(EXEEXT) $(TARGET)_fd$(EXEEXT)
+	@mv $(TARGET)$(EXEEXT) $(TARGET)_v$(VERSION)$(EXEEXT)
+	@mv $(TARGET)_fd$(EXEEXT) $(TARGET)_v$(VERSION)f$(EXEEXT)

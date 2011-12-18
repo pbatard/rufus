@@ -912,6 +912,13 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		SendMessage (hDlg, WM_SETICON, ICON_SMALL, (LPARAM)hSmallIcon);
 		hBigIcon = (HICON)LoadImage(hMainInstance, MAKEINTRESOURCE(IDI_ICON), IMAGE_ICON, 32, 32, 0);
 		SendMessage (hDlg, WM_SETICON, ICON_BIG, (LPARAM)hBigIcon);
+		// Update the title if we have FreeDOS support
+		if (bWithFreeDOS) {
+			GetWindowTextA(hDlg, &tmp[15], sizeof(tmp)-15);
+			safe_sprintf(tmp, sizeof(tmp), "Rufus (with FreeDOS)");
+			tmp[20] = ' ';
+			SetWindowTextA(hDlg, tmp);
+		}
 		// Create the status line
 		CreateStatusBar();
 		// Use maximum granularity for the progress bar
