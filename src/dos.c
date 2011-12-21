@@ -1,6 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
- * MS-DOS boot file extraction, from the FAT12 floppy image in diskcopy.dll
+ * DOS boot file extraction, from the FAT12 floppy image in diskcopy.dll
+ * (MS WinME DOS) or from the embedded FreeDOS resource files
  * Copyright (c) 2011 Pete Batard <pete@akeo.ie>
  * 
  * This program is free software: you can redistribute it and/or modify
@@ -28,7 +29,7 @@
 #include <string.h>
 
 #include "rufus.h"
-#include "msdos.h"
+#include "dos.h"
 #include "resource.h"
 
 static BYTE* DiskImage;
@@ -292,9 +293,15 @@ static BOOL ExtractMSDOS(const char* path)
 	BOOL r = TRUE;
 	HMODULE hDLL;
 	HRSRC hDiskImage;
+	char locale_path[MAX_PATH];
+	char* extractlist[] = { "MSDOS   SYS", "COMMAND COM", "IO      SYS", "MODE    COM",
+		"KEYB    COM", "KEYBOARDSYS", "KEYBRD2 SYS", "KEYBRD3 SYS", "KEYBRD4 SYS",
+		"DISPLAY SYS", "EGA     CPI", "EGA2    CPI", "EGA3    CPI" };
 
-	// TODO: optionally extract some more, including "deleted" entries
-	char* extractlist[] = {"MSDOS   SYS", "COMMAND COM", "IO      SYS"};
+	// Reduce the visible mess by placing all the locale files into a subdir
+	safe_strcpy(locale_path, sizeof(locale_path), path);
+	safe_strcat(locale_path, sizeof(locale_path), "\\LOCALE");
+	CreateDirectoryA(locale_path, NULL);
 
 	GetSystemDirectoryA(dllname, sizeof(dllname));
 	safe_strcat(dllname, sizeof(dllname), "\\diskcopy.dll");
@@ -328,13 +335,15 @@ static BOOL ExtractMSDOS(const char* path)
 			continue;
 		for (j=0; r && j<ARRAYSIZE(extractlist); j++) {
 			if (memcmp(extractlist[j], &DiskImage[FAT12_ROOTDIR_OFFSET + i*FAT_BYTES_PER_DIRENT], 8+3) == 0) {
-				r = ExtractFAT(i, path);
-				UpdateProgress(OP_DOS, -1.0f);
+				r = ExtractFAT(i, (j<3)?path:locale_path);
+				if ((j == 6) || (j == 12))
+					UpdateProgress(OP_DOS, -1.0f);
 			}
 		}
 	}
 
 	FreeLibrary(hDLL);
+	SetMSDOSLocale(path);
 
 	return r;
 }
@@ -350,7 +359,6 @@ BOOL ExtractFreeDOS(const char* path)
 	BYTE* res_data[2];
 	DWORD res_size[2], Size;
 	HANDLE hFile;
-	size_t pos;
 	int i;
 
 	if ((path == NULL) || ((safe_strlen(path) + 14) > sizeof(filename))) {
@@ -373,9 +381,7 @@ BOOL ExtractFreeDOS(const char* path)
 		res_size[i] = SizeofResource(NULL, res[i]);
 
 		strcpy(filename, path);
-		pos = strlen(path);
-		filename[pos++] = '\\';
-		filename[pos] = 0;
+		safe_strcat(filename, sizeof(filename), "\\");
 		safe_strcat(filename, sizeof(filename), res_name[i]);
 
 		hFile = CreateFileA(filename, GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ|FILE_SHARE_WRITE,
@@ -400,10 +406,7 @@ BOOL ExtractFreeDOS(const char* path)
 
 	// There needs to be at least an AUTOEXEC.BAT to avoid the user being prompted for date and time
 	strcpy(filename, path);
-	pos = strlen(path);
-	filename[pos++] = '\\';
-	filename[pos] = 0;
-	safe_strcat(filename, sizeof(filename), "AUTOEXEC.BAT");
+	safe_strcat(filename, sizeof(filename), "\\AUTOEXEC.BAT");
 	hFile = CreateFileA(filename, GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ|FILE_SHARE_WRITE,
 		NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
 	if (hFile == INVALID_HANDLE_VALUE) {

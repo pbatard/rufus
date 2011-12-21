@@ -154,7 +154,7 @@
     <ClCompile Include="..\fat32.c" />
     <ClCompile Include="..\file.c" />
     <ClCompile Include="..\format.c" />
-    <ClCompile Include="..\msdos.c" />
+    <ClCompile Include="..\dos.c" />
     <ClCompile Include="..\partition_info.c" />
     <ClCompile Include="..\rufus.c" />
     <ClCompile Include="..\stdio.c" />
@@ -193,7 +193,7 @@
     <ClInclude Include="..\inc\mbr_zero.h" />
     <ClInclude Include="..\inc\partition_info.h" />
     <ClInclude Include="..\msapi_utf8.h" />
-    <ClInclude Include="..\msdos.h" />
+    <ClInclude Include="..\dos.h" />
     <ClInclude Include="..\resource.h" />
     <ClInclude Include="..\rufus.h" />
     <ClInclude Include="..\license.h" />

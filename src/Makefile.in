@@ -48,9 +48,10 @@ PROGRAMS = $(noinst_PROGRAMS)
 am_rufus_OBJECTS = rufus-fat12.$(OBJEXT) rufus-fat16.$(OBJEXT) \
 	rufus-fat32.$(OBJEXT) rufus-partition_info.$(OBJEXT) \
 	rufus-br.$(OBJEXT) rufus-file.$(OBJEXT) rufus-drive.$(OBJEXT) \
-	rufus-msdos.$(OBJEXT) rufus-badblocks.$(OBJEXT) \
-	rufus-format.$(OBJEXT) rufus-stdio.$(OBJEXT) \
-	rufus-stdlg.$(OBJEXT) rufus-rufus.$(OBJEXT)
+	rufus-dos.$(OBJEXT) rufus-dos_locale.$(OBJEXT) \
+	rufus-badblocks.$(OBJEXT) rufus-format.$(OBJEXT) \
+	rufus-stdio.$(OBJEXT) rufus-stdlg.$(OBJEXT) \
+	rufus-rufus.$(OBJEXT)
 rufus_OBJECTS = $(am_rufus_OBJECTS)
 rufus_DEPENDENCIES = rufus_rc.o
 rufus_LINK = $(CCLD) $(rufus_CFLAGS) $(CFLAGS) $(rufus_LDFLAGS) \
@@ -59,9 +60,10 @@ am_rufus_fd_OBJECTS = rufus_fd-fat12.$(OBJEXT) \
 	rufus_fd-fat16.$(OBJEXT) rufus_fd-fat32.$(OBJEXT) \
 	rufus_fd-partition_info.$(OBJEXT) rufus_fd-br.$(OBJEXT) \
 	rufus_fd-file.$(OBJEXT) rufus_fd-drive.$(OBJEXT) \
-	rufus_fd-msdos.$(OBJEXT) rufus_fd-badblocks.$(OBJEXT) \
-	rufus_fd-format.$(OBJEXT) rufus_fd-stdio.$(OBJEXT) \
-	rufus_fd-stdlg.$(OBJEXT) rufus_fd-rufus.$(OBJEXT)
+	rufus_fd-dos.$(OBJEXT) rufus_fd-dos_locale.$(OBJEXT) \
+	rufus_fd-badblocks.$(OBJEXT) rufus_fd-format.$(OBJEXT) \
+	rufus_fd-stdio.$(OBJEXT) rufus_fd-stdlg.$(OBJEXT) \
+	rufus_fd-rufus.$(OBJEXT)
 rufus_fd_OBJECTS = $(am_rufus_fd_OBJECTS)
 rufus_fd_DEPENDENCIES = rufus_fd_rc.o
 rufus_fd_LINK = $(CCLD) $(rufus_fd_CFLAGS) $(CFLAGS) \
@@ -179,12 +181,12 @@ top_srcdir = @top_srcdir@
 pkg_v_rc = $(pkg_v_rc_$(V))
 pkg_v_rc_ = $(pkg_v_rc_$(AM_DEFAULT_VERBOSITY))
 pkg_v_rc_0 = @echo "  RC     $@";
-rufus_SOURCES = fat12.c fat16.c fat32.c partition_info.c br.c file.c drive.c msdos.c badblocks.c format.c stdio.c stdlg.c rufus.c
-rufus_CFLAGS = -I./inc $(ARCH_CFLAGS) $(AM_CFLAGS)
+rufus_SOURCES = fat12.c fat16.c fat32.c partition_info.c br.c file.c drive.c dos.c dos_locale.c badblocks.c format.c stdio.c stdlg.c rufus.c
+rufus_CFLAGS = -I./inc $(AM_CFLAGS)
 rufus_LDFLAGS = $(AM_LDFLAGS) -mwindows
 rufus_LDADD = rufus_rc.o -lsetupapi -lole32 -lgdi32
-rufus_fd_SOURCES = fat12.c fat16.c fat32.c partition_info.c br.c file.c drive.c msdos.c badblocks.c format.c stdio.c stdlg.c rufus.c
-rufus_fd_CFLAGS = -I./inc $(ARCH_CFLAGS) $(AM_CFLAGS)
+rufus_fd_SOURCES = fat12.c fat16.c fat32.c partition_info.c br.c file.c drive.c dos.c dos_locale.c badblocks.c format.c stdio.c stdlg.c rufus.c
+rufus_fd_CFLAGS = -I./inc $(AM_CFLAGS)
 rufus_fd_LDFLAGS = $(AM_LDFLAGS) -mwindows
 rufus_fd_LDADD = rufus_fd_rc.o -lsetupapi -lole32 -lgdi32
 all: all-am
@@ -301,13 +303,21 @@ rufus-drive.obj: drive.c
 	$(AM_V_CC) @AM_BACKSLASH@
 	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_CFLAGS) $(CFLAGS) -c -o rufus-drive.obj `if test -f 'drive.c'; then $(CYGPATH_W) 'drive.c'; else $(CYGPATH_W) '$(srcdir)/drive.c'; fi`
 
-rufus-msdos.o: msdos.c
+rufus-dos.o: dos.c
 	$(AM_V_CC) @AM_BACKSLASH@
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_CFLAGS) $(CFLAGS) -c -o rufus-msdos.o `test -f 'msdos.c' || echo '$(srcdir)/'`msdos.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_CFLAGS) $(CFLAGS) -c -o rufus-dos.o `test -f 'dos.c' || echo '$(srcdir)/'`dos.c
 
-rufus-msdos.obj: msdos.c
+rufus-dos.obj: dos.c
 	$(AM_V_CC) @AM_BACKSLASH@
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_CFLAGS) $(CFLAGS) -c -o rufus-msdos.obj `if test -f 'msdos.c'; then $(CYGPATH_W) 'msdos.c'; else $(CYGPATH_W) '$(srcdir)/msdos.c'; fi`
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_CFLAGS) $(CFLAGS) -c -o rufus-dos.obj `if test -f 'dos.c'; then $(CYGPATH_W) 'dos.c'; else $(CYGPATH_W) '$(srcdir)/dos.c'; fi`
+
+rufus-dos_locale.o: dos_locale.c
+	$(AM_V_CC) @AM_BACKSLASH@
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_CFLAGS) $(CFLAGS) -c -o rufus-dos_locale.o `test -f 'dos_locale.c' || echo '$(srcdir)/'`dos_locale.c
+
+rufus-dos_locale.obj: dos_locale.c
+	$(AM_V_CC) @AM_BACKSLASH@
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_CFLAGS) $(CFLAGS) -c -o rufus-dos_locale.obj `if test -f 'dos_locale.c'; then $(CYGPATH_W) 'dos_locale.c'; else $(CYGPATH_W) '$(srcdir)/dos_locale.c'; fi`
 
 rufus-badblocks.o: badblocks.c
 	$(AM_V_CC) @AM_BACKSLASH@
@@ -405,13 +415,21 @@ rufus_fd-drive.obj: drive.c
 	$(AM_V_CC) @AM_BACKSLASH@
 	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_fd_CFLAGS) $(CFLAGS) -c -o rufus_fd-drive.obj `if test -f 'drive.c'; then $(CYGPATH_W) 'drive.c'; else $(CYGPATH_W) '$(srcdir)/drive.c'; fi`
 
-rufus_fd-msdos.o: msdos.c
+rufus_fd-dos.o: dos.c
 	$(AM_V_CC) @AM_BACKSLASH@
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_fd_CFLAGS) $(CFLAGS) -c -o rufus_fd-msdos.o `test -f 'msdos.c' || echo '$(srcdir)/'`msdos.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_fd_CFLAGS) $(CFLAGS) -c -o rufus_fd-dos.o `test -f 'dos.c' || echo '$(srcdir)/'`dos.c
 
-rufus_fd-msdos.obj: msdos.c
+rufus_fd-dos.obj: dos.c
 	$(AM_V_CC) @AM_BACKSLASH@
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_fd_CFLAGS) $(CFLAGS) -c -o rufus_fd-msdos.obj `if test -f 'msdos.c'; then $(CYGPATH_W) 'msdos.c'; else $(CYGPATH_W) '$(srcdir)/msdos.c'; fi`
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_fd_CFLAGS) $(CFLAGS) -c -o rufus_fd-dos.obj `if test -f 'dos.c'; then $(CYGPATH_W) 'dos.c'; else $(CYGPATH_W) '$(srcdir)/dos.c'; fi`
+
+rufus_fd-dos_locale.o: dos_locale.c
+	$(AM_V_CC) @AM_BACKSLASH@
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_fd_CFLAGS) $(CFLAGS) -c -o rufus_fd-dos_locale.o `test -f 'dos_locale.c' || echo '$(srcdir)/'`dos_locale.c
+
+rufus_fd-dos_locale.obj: dos_locale.c
+	$(AM_V_CC) @AM_BACKSLASH@
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_fd_CFLAGS) $(CFLAGS) -c -o rufus_fd-dos_locale.obj `if test -f 'dos_locale.c'; then $(CYGPATH_W) 'dos_locale.c'; else $(CYGPATH_W) '$(srcdir)/dos_locale.c'; fi`
 
 rufus_fd-badblocks.o: badblocks.c
 	$(AM_V_CC) @AM_BACKSLASH@

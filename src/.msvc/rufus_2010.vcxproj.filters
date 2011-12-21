@@ -24,7 +24,7 @@
     <ClCompile Include="..\stdlg.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\msdos.c">
+    <ClCompile Include="..\dos.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\fat32.c">
@@ -71,7 +71,7 @@
     <ClInclude Include="..\sys_types.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\msdos.h">
+    <ClInclude Include="..\dos.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\inc\br.h">

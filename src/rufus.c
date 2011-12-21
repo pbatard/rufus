@@ -618,7 +618,7 @@ static void InitProgress(void)
 		nb_slots[OP_BADBLOCKS] = -1;
 	}
 	if (IsChecked(IDC_DOS)) {
-		// TODO: this should reflect the number of files to copy +1 for PBR writing
+		// 3 slots + 1 for PBR writing
 		nb_slots[OP_DOS] = 3+1;
 	}
 	nb_slots[OP_PARTITION] = 1;
