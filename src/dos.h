@@ -137,4 +137,4 @@ typedef struct _LONG_FILE_NAME_ENTRY {
                                           FAT_DIRENT_ATTR_SYSTEM |    \
                                           FAT_DIRENT_ATTR_VOLUME_ID)
 
-extern BOOL SetMSDOSLocale(const char* path);
+extern BOOL SetDOSLocale(const char* path, BOOL bFreeDOS);

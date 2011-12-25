@@ -618,8 +618,8 @@ static void InitProgress(void)
 		nb_slots[OP_BADBLOCKS] = -1;
 	}
 	if (IsChecked(IDC_DOS)) {
-		// 3 slots + 1 for PBR writing
-		nb_slots[OP_DOS] = 3+1;
+		// 1 extra slot for PBR writing
+		nb_slots[OP_DOS] = ((ComboBox_GetCurSel(hDOSType) == DT_FREEDOS)?5:3)+1;
 	}
 	nb_slots[OP_PARTITION] = 1;
 	nb_slots[OP_FIX_MBR] = 1;

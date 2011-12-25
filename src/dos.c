@@ -174,6 +174,9 @@ static BOOL Patch_COMMAND_COM(size_t filestart, size_t filesize)
 		uprintf("  unexpected file size\n");
 		return FALSE;
 	}
+//	See #24: https://github.com/pbatard/rufus/issues/24
+//	uprintf("&DiskImage[filestart(=%x)+0x650c] = %p\n", filestart, &DiskImage[filestart+0x650c]);
+//	uprintf("&DiskImage[0] = %p\n", &DiskImage[0]);
 	if (memcmp(&DiskImage[filestart+0x650c], expected, sizeof(expected)) != 0) {
 		uprintf("  unexpected binary data\n");
 		return FALSE;
@@ -336,14 +339,14 @@ static BOOL ExtractMSDOS(const char* path)
 		for (j=0; r && j<ARRAYSIZE(extractlist); j++) {
 			if (memcmp(extractlist[j], &DiskImage[FAT12_ROOTDIR_OFFSET + i*FAT_BYTES_PER_DIRENT], 8+3) == 0) {
 				r = ExtractFAT(i, (j<3)?path:locale_path);
-				if ((j == 6) || (j == 12))
+				if ((j == 2) || (j == 7) || (j == 12))
 					UpdateProgress(OP_DOS, -1.0f);
 			}
 		}
 	}
-
 	FreeLibrary(hDLL);
-	SetMSDOSLocale(path);
+	if (r)
+		r = SetDOSLocale(path, FALSE);
 
 	return r;
 }
@@ -351,13 +354,23 @@ static BOOL ExtractMSDOS(const char* path)
 /* Extract the FreeDOS files embedded in the app */
 BOOL ExtractFreeDOS(const char* path)
 {
-	const char* res_name[2] = { "COMMAND.COM", "KERNEL.SYS" };
-	const int res_id[2] = { IDR_FD_COMMAND_COM, IDR_FD_KERNEL_SYS };
-	char filename[MAX_PATH];
-	HGLOBAL res_handle[2];
-	HRSRC res[2];
-	BYTE* res_data[2];
-	DWORD res_size[2], Size;
+	const char* res_name[] = { "COMMAND.COM", "KERNEL.SYS", "DISPLAY.EXE", "KEYB.EXE",
+		"MODE.COM", "KEYBOARD.SYS", "KEYBRD2.SYS", "KEYBRD3.SYS", "KEYBRD4.SYS", "ega.cpx",
+		"ega2.cpx", "ega3.cpx", "ega4.cpx", "ega5.cpx", "ega6.cpx",
+		"ega7.cpx", "ega8.cpx", "ega9.cpx", "ega10.cpx", "ega11.cpx",
+		"ega12.cpx", "ega13.cpx", "ega14.cpx", "ega15.cpx", "ega16.cpx",
+		"ega17.cpx", "ega18.cpx" };
+	const int res_id[ARRAYSIZE(res_name)] = { IDR_FD_COMMAND_COM, IDR_FD_KERNEL_SYS, IDR_FD_DISPLAY_EXE, IDR_FD_KEYB_EXE,
+		IDR_FD_MODE_COM, IDR_FD_KB1_SYS, IDR_FD_KB2_SYS, IDR_FD_KB3_SYS, IDR_FD_KB4_SYS, IDR_FD_EGA1_CPX,
+		IDR_FD_EGA2_CPX, IDR_FD_EGA3_CPX, IDR_FD_EGA4_CPX, IDR_FD_EGA5_CPX, IDR_FD_EGA6_CPX,
+		IDR_FD_EGA7_CPX, IDR_FD_EGA8_CPX, IDR_FD_EGA9_CPX, IDR_FD_EGA10_CPX, IDR_FD_EGA11_CPX,
+		IDR_FD_EGA12_CPX, IDR_FD_EGA13_CPX, IDR_FD_EGA14_CPX, IDR_FD_EGA15_CPX, IDR_FD_EGA16_CPX,
+		IDR_FD_EGA17_CPX, IDR_FD_EGA18_CPX };
+	char filename[MAX_PATH], locale_path[MAX_PATH];
+	HGLOBAL res_handle;
+	HRSRC res;
+	BYTE* res_data;
+	DWORD res_size, Size;
 	HANDLE hFile;
 	int i;
 
@@ -366,21 +379,26 @@ BOOL ExtractFreeDOS(const char* path)
 		return FALSE;
 	}
 
-	for (i=0; i<2; i++) {
-		res[i] = FindResource(hMainInstance, MAKEINTRESOURCE(res_id[i]), RT_RCDATA);
-		if (res[i] == NULL) {
+	// Reduce the visible mess by placing all the locale files into a subdir
+	safe_strcpy(locale_path, sizeof(locale_path), path);
+	safe_strcat(locale_path, sizeof(locale_path), "\\LOCALE");
+	CreateDirectoryA(locale_path, NULL);
+
+	for (i=0; i<ARRAYSIZE(res_name); i++) {
+		res = FindResource(hMainInstance, MAKEINTRESOURCE(res_id[i]), RT_RCDATA);
+		if (res == NULL) {
 			uprintf("Unable to locate FreeDOS resource %s: %s\n", res_name[i], WindowsErrorString());
 			return FALSE;
 		}
-		res_handle[i] = LoadResource(NULL, res[i]);
-		if (res_handle[i] == NULL) {
+		res_handle = LoadResource(NULL, res);
+		if (res_handle == NULL) {
 			uprintf("Unable to load FreeDOS resource %s: %s\n", res_name[i], WindowsErrorString());
 			return FALSE;
 		}
-		res_data[i] = (BYTE*)LockResource(res_handle[i]);
-		res_size[i] = SizeofResource(NULL, res[i]);
+		res_data = (BYTE*)LockResource(res_handle);
+		res_size = SizeofResource(NULL, res);
 
-		strcpy(filename, path);
+		strcpy(filename, (i<3)?path:locale_path);
 		safe_strcat(filename, sizeof(filename), "\\");
 		safe_strcat(filename, sizeof(filename), res_name[i]);
 
@@ -391,7 +409,7 @@ BOOL ExtractFreeDOS(const char* path)
 			return FALSE;
 		}
 
-		if ((!WriteFile(hFile, res_data[i], res_size[i], &Size, 0)) || (res_size[i] != Size)) {
+		if ((!WriteFile(hFile, res_data, res_size, &Size, 0)) || (res_size != Size)) {
 			uprintf("Couldn't write file '%s': %s.\n", filename, WindowsErrorString());
 			safe_closehandle(hFile);
 			return FALSE;
@@ -401,20 +419,13 @@ BOOL ExtractFreeDOS(const char* path)
 		// thus we would need to have a separate header with each file's timestamps
 
 		safe_closehandle(hFile);
-		uprintf("Succesfully wrote '%s' (%d bytes)\n", filename, res_size[i]);
+		uprintf("Succesfully wrote '%s' (%d bytes)\n", filename, res_size);
+
+		if ((i == 4) || (i == 10) || (i == 16) || (i == 22) || (i == ARRAYSIZE(res_name)-1))
+			UpdateProgress(OP_DOS, -1.0f);
 	}
 
-	// There needs to be at least an AUTOEXEC.BAT to avoid the user being prompted for date and time
-	strcpy(filename, path);
-	safe_strcat(filename, sizeof(filename), "\\AUTOEXEC.BAT");
-	hFile = CreateFileA(filename, GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ|FILE_SHARE_WRITE,
-		NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
-	if (hFile == INVALID_HANDLE_VALUE) {
-		uprintf("Unable to create 'AUTOEXEC.BAT': %s.\n", WindowsErrorString());
-	}
-	safe_closehandle(hFile);
-
-	return TRUE;
+	return SetDOSLocale(path, TRUE);
 }
 
 BOOL ExtractDOS(const char* path, int dos_type)

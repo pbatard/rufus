@@ -29,352 +29,949 @@
 
 #include "rufus.h"
 
-enum kb_layouts {
-	KB_US = 0, KB_GR, KB_HE, KB_FR, KB_SP, KB_IT, KB_SV, KB_NL, KB_BR, KB_NO,
-	KB_DK, KB_SU, KB_RU, KB_CZ, KB_PL, KB_HU, KB_PO, KB_TR, KB_GK, KB_BL,
-	KB_BG, KB_YU, KB_BE, KB_CF, KB_UK, KB_ET, KB_SF, KB_SG, KB_IS, KB_IME,
-	KB_RO, KB_YC, KB_LA, KB_UR, KB_SL, KB_MAX };
+/*
+ * Note: if you want a book that can be used as a keyboards and codepages bible, I
+ * would recommend the "OS/2 Warp Server for e-business - Keyboards and Codepages".
+ * See http://www.borgendale.com/keyboard.pdf
+ */
 
-static const char* dos_kb_str[KB_MAX] = {
-	"us", "gr", "he", "fr", "sp", "it", "sv", "nl", "br", "no",
-	"dk", "su", "ru", "cz", "pl", "hu", "po", "tr", "gk", "bl",
-	"bg", "yu", "be", "cf", "uk", "et", "sf", "sg", "is", "ime",
-	"ro", "yc", "la", "ur", "sl" };
-
-static const char* dos_kb_human_readable_str[KB_MAX] = {
-	"US", "German", "Hebrew", "French", "Spanish", "Italian", "Swedish", "Dutch", "Portuguese (Brazilian)", "Norwegian", "Danish",
-	"Finnish", "Russian", "Czech", "Polish", "Hungarian", "Portuguese (Portugal)", "Turkish", "Greek", "Russian (Belarus)", "Bulgarian",
-	"Serbian/Croatian/Slovenian", "French (Belgium)", "French (Canada)", "English (UK)", "Estonian", "French (Switzerland)", "German (Switzerland)",
-	"Icelandic", "CJK Input Method Editor", "Romanian", "Serbian Cyrillic", "Spanish (Latin America)", "Ukrainian", "Slovakian" };
-
-static const char* dos_kb_drv_str[] = {
-	"keyboard.sys", "keybrd2.sys", "keybrd3.sys", "keybrd4.sys" };
-
-static const char* dos_con_str[] = {
-	"ega,,1", "ega,,2", "ega,,3", "ega,,4", "ega,,h" };
-
-static const char* dos_cpi_str[] = {
-	"ega.cpi", "ega2.cpi", "ega3.cpi", "ega4.cpi", "hebega.cpi" };
-
-static const int kb_to_drv[KB_MAX] = {
-	-1, 0, 3, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 2, 1, 3, 1, 0, 1, 3, 2,
-	1, 1, 0, 1, 0, 3, 0, 0, 1, 0,
-	1, 1, 0, 2, 1 };
+/* WinME DOS keyboard 2 letter codes & supported keyboard ID(s), as retrieved
+ * from the Millenium disk image in diskcopy.dll on a Windows 7 system
+ *
+ *	KEYBOARD.SYS
+ *		GR 129*
+ *		SP 172
+ *		PO 163*
+ *		FR 120*, 189*
+ *		DK 159*
+ *		SG 000*
+ *		IT 141*, 142*
+ *		UK 166*, 168*
+ *		SF 150*
+ *		BE 120*
+ *		NL 143*
+ *		NO 155*
+ *		CF 058*
+ *		SV 153*
+ *		SU 153
+ *		LA 171*
+ *		BR 274*
+ *		PL 214*
+ *		CZ 243*
+ *		SL 245*
+ *		YU 234*
+ *		HU 208*
+ *		US/XX 103*
+ *		JP defines ID:194 but points to SP entry
+ *
+ *	KEYBRD2.SYS
+ *		GR 129*
+ *		RU 441
+ *		IT 141*, 142*
+ *		UK 166*, 168*
+ *		NO 155*
+ *		CF 058*
+ *		SV 153*
+ *		SU 153
+ *		BR 274*, 275*
+ *		BG 442*
+ *		PL 214*
+ *		CZ 243*
+ *		SL 245*
+ *		YU 234*
+ *		YC 118
+ *		HU 208*
+ *		RO 333
+ *		IS 161*
+ *		TR 179*, 440*
+ *		GK 319*
+ *		US/XX 103*
+ *
+ *	KEYBRD3.SYS
+ *		GR 129*
+ *		SP 172*
+ *		FR 189*
+ *		DK 159*
+ *		SG 000*
+ *		IT 141*
+ *		UK 166*
+ *		SF 150*
+ *		BE 120*
+ *		NL 143*
+ *		SV 153*
+ *		SU 153
+ *		PL 214*
+ *		CZ 243*
+ *		SL 245*
+ *		YU 234*
+ *		HU 208*
+ *		RU 091*, 092*, 093*, 341*
+ *		UR 094*, 095*, 096*
+ *		BL 097*, 098*, 099*
+ *		US/XX 103*
+ *		JP defines ID:194 but points to SP entry
+ *
+ *	KEYBRD4.SYS
+ *		GK 101*, 319*, 220*
+ *		PL 214*
+ *		ET 425*
+ *		HE 400*
+ *		AR 401*, 402*, 403*
+ *		US/XX 103*
+ */
 
 /*
- * These locale to keyboard conversions are lifted from Microsoft's diskcopy.dll
- * and are unmodified (apart from Simplified Chinese, that was moved to IME, and
- * Tibet, which was moved out of China)
- * If you feel they should be altered, please provide your locale ID in hex as well
- * as the DOS keyboard layout ID you would like to use
- * For the main IDs ref see http://msdn.microsoft.com/en-us/library/cc233965.aspx or
- * http://msdn.microsoft.com/en-us/goglobal/bb896001.aspx
- * Also see http://en.wikipedia.org/wiki/Keyboard_layout for keyboard layouts
+ * The following lists the keyboard code that are supported in each
+ * of the WinMe DOS KEYBOARD.SYS, KEYBRD2.SYS, ...
  */
-static unsigned int syslocale_to_kbid(WORD locale)
+static const char* ms_kb1[] = {
+	"be", "br", "cf", "cz", "dk", "fr", "gr", "hu", "it", "la",
+	"nl", "no", "pl", "po", "sf", "sg", "sl", "sp", "su", "sv",
+	"uk", "us", "yu" };
+static const char* ms_kb2[] = {
+	"bg", "br", "cf", "cz", "gk", "gr", "hu", "is", "it", "no",
+	"pl", "ro", "ru", "sl", "su", "sv", "tr", "uk", "us", "yc",
+	"yu" };
+static const char* ms_kb3[] = {
+	"be", "bl", "cz", "dk", "fr", "gr", "hu", "it", "nl", "pl",
+	"ru", "sf", "sg", "sl", "sp", "su", "sv", "uk", "ur", "us",
+	"yu" };
+static const char* ms_kb4[] = {
+	"ar", "et", "gk", "he", "pl", "us" };
+
+/*
+ * The following lists the keyboard code that are supported in each
+ * of the FreeDOS DOS KEYBOARD.SYS, KEYBRD2.SYS, ...
+ */
+static const char* fd_kb1[] = {
+	"be", "br", "cf", "co", "cz", "dk", "dv", "fr", "gr", "hu",
+	"it", "jp", "la", "lh", "nl", "no", "pl", "po", "rh", "sf",
+	"sg", "sk", "sp", "su", "sv", "uk", "us", "yu" };
+static const char* fd_kb2[] = {
+	"bg", "ce", "gk", "is", "ro", "ru", "rx", "tr", "tt", "yc" };
+static const char* fd_kb3[] = {
+	"az", "bl", "et", "fo", "hy", "il", "ka", "kk", "ky", "lt",
+	"lv", "mk", "mn", "mt", "ph", "sq", "tj", "tm", "ur", "uz",
+	"vi" };
+static const char* fd_kb4[] = {
+	"ar", "bn", "bx", "fx", "ix", "kx", "ne", "ng", "px", "sx",
+	"ux" };
+
+typedef struct {
+	const char* name;
+	size_t size;
+	const char** list;
+} kb_list;
+
+static kb_list ms_kb_list[] = {
+	{"keyboard.sys", ARRAYSIZE(ms_kb1), ms_kb1},
+	{"kbrd2.sys", ARRAYSIZE(ms_kb2), ms_kb2},
+	{"kbrd3.sys", ARRAYSIZE(ms_kb3), ms_kb3},
+	{"kbrd3.sys", ARRAYSIZE(ms_kb4), ms_kb4} };
+
+static kb_list fd_kb_list[] = {
+	{"keyboard.sys", ARRAYSIZE(fd_kb1), fd_kb1},
+	{"kbrd2.sys", ARRAYSIZE(fd_kb2), fd_kb2},
+	{"kbrd3.sys", ARRAYSIZE(fd_kb3), fd_kb3},
+	{"kbrd3.sys", ARRAYSIZE(fd_kb4), fd_kb4} };
+
+static const char* ms_get_kbdrv(const char* kb)
 {
-	int pass = 0;
-	WORD mask = 0xffff;
-
-	do {
-		switch (locale & mask) {
-		case 0x0000:	// ???
-		case 0x0001:	// ar		Arabic
-	//	case 0x0004:	// zh-Hans	Chinese (Simplified)
-	//	moved to KB_IME
-		case 0x0009:	// en		English
-		case 0x001C:	// sq		Albanian
-		case 0x001E:	// th		Thai
-		case 0x0020:	// ur		Urdu
-		case 0x0021:	// id		Indonesian
-		case 0x0026:	// lv		Latvian
-		case 0x0027:	// lt		Lithuanian
-		case 0x0029:	// fa		Persian
-		case 0x002A:	// vi		Vietnamese
-		case 0x002B:	// hy		Armenian
-		case 0x002C:	// az		Azeri
-		case 0x002F:	// mk		Macedonian
-		case 0x0036:	// af		Afrikaans
-		case 0x0037:	// ka		Georgian
-		case 0x0039:	// hi		Hindi
-		case 0x003E:	// ms		Malay
-		case 0x003F:	// kk		Kazakh
-		case 0x0041:	// sw		Kiswahili
-		case 0x0043:	// uz		Uzbek
-		case 0x0044:	// tt		Tatar
-		case 0x0045:	// bn		Bengali
-		case 0x0046:	// pa		Punjabi
-		case 0x0047:	// gu		Gujarati
-		case 0x0048:	// or		Oriya
-		case 0x0049:	// ta		Tamil
-		case 0x004A:	// te		Telugu
-		case 0x004B:	// kn		Kannada
-		case 0x004C:	// ml		Malayalam
-		case 0x004D:	// as		Assamese
-		case 0x004E:	// mr		Marathi
-		case 0x004F:	// sa		Sanskrit
-		case 0x0051:	// bo		Tibetan
-		case 0x0057:	// kok		Konkani
-		case 0x0058:	// ???
-		case 0x0059:	// ???
-		case 0x0060:	// ???
-		case 0x0061:	// ne		Nepali
-		case 0x0417:	// rm-CH	Romansh (Switzerland)
-		case 0x0428:	// tg-Cyrl-TJ	Tajik (Cyrillic, Tajikistan)
-		case 0x042E:	// hsb-DE	Upper Sorbian (Germany)
-		case 0x0430:	// st-ZA	Sutu (South Africa)
-		case 0x0431:	// ts-ZA	Tsonga (South Africa)
-		case 0x0432:	// tn-ZA	Setswana (South Africa)
-		case 0x0433:	// ven-ZA	Venda (South Africa)
-		case 0x0434:	// xh-ZA	isiXhosa (South Africa)
-		case 0x0435:	// zu-ZA	isiZulu (South Africa)
-		case 0x043A:	// mt-MT	Maltese (Malta)
-		case 0x043B:	// se-NO	Sami, Northern (Norway)
-		case 0x043D:	// ???
-		case 0x043E:	// ms-MY	Malay (Malaysia)
-		case 0x0440:	// ky-KG	Kyrgyz (Kyrgyzstan)
-		case 0x0442:	// tk-TM	Turkmen (Turkmenistan)
-		case 0x0450:	// mn-MN	Mongolian (Cyrillic, Mongolia)
-		case 0x0452:	// cy-GB	Welsh (United Kingdom)
-		case 0x0453:	// km-KH	Khmer (Cambodia)
-		case 0x0454:	// lo-LA	Lao (Laos)
-		case 0x0455:	// my-MM	Myanmar (Burmese)
-		case 0x045A:	// syr-SY	Syriac (Syria)
-		case 0x045B:	// si-LK	Sinhala (Sri Lanka)
-		case 0x045C:	// chr-US	Cherokee (United States)
-		case 0x045E:	// am-ET	Amharic (Ethiopia)
-		case 0x0462:	// fy-NL	Frisian (Netherlands)
-		case 0x0463:	// ps-AF	Pashto (Afghanistan)
-		case 0x0464:	// fil-PH	Filipino (Philippines)
-		case 0x0850:	// mn-Mong-CN	Mongolian (Traditional Mongolian, China)
-		case 0x101A:	// hr-BA	Croatian (Latin, Bosnia and Herzegovina)
-		case 0x4409:	// en-MY	English (Malaysia)
-			return KB_US;		//	English (US)
-
-		case 0x0007:	// de		German
-			return KB_GR;		//	German
-
-		case 0x000D:	// he		Hebre
-			return KB_HE;		//	Hebrew
-
-		case 0x000C:	// fr		French
-			return KB_FR;		//	French
-
-		case 0x0003:	// ca		Catalan
-		case 0x000A:	// es		Spanish
-		case 0x002D:	// eu		Basque
-		case 0x0456:	// gl-ES	Galician (Galicia)
-		case 0x0C0A:	// es-ES	Spanish (Spain)
-			return KB_SP;		//	Spanish
-
-		case 0x0010:	// it		Italian
-			return KB_IT;		//	Italian
-
-		case 0x001D:	// sv		Swedish
-			return KB_SV;		//	Swedish
-
-		case 0x0013:	// nl		Dutch
-			return KB_NL;		//	Dutch
-
-		case 0x0416:	// pt-BR	Portuguese (Brazil)
-			return KB_BR;		//	Portuguese (Brazil)
-
-		case 0x0014:	// no		Norwegian
-			return KB_NO;		//	Norwegian
-
-		case 0x0006:	// da		Danish
-		case 0x0038:	// fo		Faroese
-			return KB_DK;		//	Danish
-
-		case 0x000B:	// fi		Finnish
-			return KB_SU;		//	Finnish
-
-		case 0x0019:	// ru		Russian
-			return KB_RU;		//	Russian
-
-		case 0x0005:	// cs		Czech
-			return KB_CZ;		//	Czech
-
-		case 0x0015:	// pl		Polish
-			return KB_PL;		//	Polish
-
-		case 0x000E:	// hu		Hungarian
-			return KB_HU;		//	Hungarian
-
-		case 0x0016:	// pt		Portuguese
-			return KB_PO;		//	Portuguese (Portugal)
-
-		case 0x001F:	// tr		Turkish
-			return KB_TR;		//	Turkish
-
-		case 0x0008:	// el		Greek
-			return KB_GK;		//	Greek
-
-		case 0x0023:	// be		Belarussian
-			return KB_BL;		//	Russian (Belarus)
-
-		case 0x0002:	// bg		Bulgarian
-			return KB_BG;		//	Bulgarian
-
-		case 0x001A:	// hr		Croatian
-		case 0x0024:	// sl		Slovenian
-		case 0x081A:	// sr-Latn-SP	Serbian (Latin, Serbia)
-			return KB_YU;		//	Yugoslavian Latin
-
-		case 0x080C:	// fr-BE	French (Belgium)
-		case 0x0813:	// nl-BE	Dutch (Belgium)
-			return KB_BE;		//	French (Belgium)
-
-		case 0x0C0C:	// fr-CA	French (Canada)
-		case 0x1009:	// en-CA	English (Canada)
-			return KB_CF;		//	French (Canada)
-
-		case 0x043C:	// ga-GB	Gaelic (Scotland)
-		case 0x0809:	// en-GB	English (United Kingdom)
-		case 0x083C:	// ga-IE	Irish (Ireland)
-		case 0x1809:	// en-IE	English (Ireland)
-			return KB_UK;		//	English (UK)
-
-		case 0x0025:	// et		Estonian
-			return KB_ET;		//	Estonian
-
-		case 0x100C:	// fr-CH	French (Switzerland)
-			return KB_SF;		//	French (Switzerland)
-
-		case 0x0807:	// de-CH	German (Switzerland)
-			return KB_SG;		//	German (Switzerland)
-
-		case 0x000F:	// is		Icelandic
-			return KB_IS;		//	Icelandic
-
-		case 0x0004:	// zh-Hans	Chinese (Simplified)
-		case 0x0011:	// ja		Japanese (Generic)
-		case 0x0012:	// ko		Korean (Generic)
-			return KB_IME;		//	CJK Input Method Editor
-
-		case 0x0018:	// ro		Romanian
-			return KB_RO;		//	Romanian
-
-		case 0x0C1A:	// sr-Cyrl-SP	Serbian (Cyrillic, Serbia)
-			return KB_YC;		//	Yougoslavian Cyrillic
-
-		case 0x080A:	// es-MX	Spanish (Mexico)
-		case 0x100A:	// es-GT	Spanish (Guatemala)
-		case 0x140A:	// es-CR	Spanish (Costa Rica)
-		case 0x180A:	// es-PA	Spanish (Panama)
-		case 0x1C0A:	// es-DO	Spanish (Dominican Republic)
-		case 0x200A:	// es-VE	Spanish (Venezuela)
-		case 0x240A:	// es-CO	Spanish (Colombia)
-		case 0x280A:	// es-PE	Spanish (Peru)
-		case 0x2C0A:	// es-AR	Spanish (Argentina)
-		case 0x300A:	// es-EC	Spanish (Ecuador)
-		case 0x340A:	// es-CL	Spanish (Chile)
-		case 0x380A:	// es-UY	Spanish (Uruguay)
-		case 0x3C0A:	// es-PY	Spanish (Paraguay)
-		case 0x400A:	// es-BO	Spanish (Bolivia)
-		case 0x440A:	// es-SV	Spanish (El Salvador)
-		case 0x480A:	// es-HN	Spanish (Honduras)
-		case 0x4C0A:	// es-NI	Spanish (Nicaragua)
-		case 0x500A:	// es-PR	Spanish (Puerto Rico)
-			return KB_LA;		//	Spanish (Latin America)
-
-		case 0x0022:	// uk		Ukrainian
-			return KB_UR;		//	Ukrainian
-
-		case 0x001B:	// sk		Slovak
-			return KB_SL;		//	Slovakian
-
-		default:
-			pass++;
-			if (pass > 1) {
-				uprintf("Could not match a DOS keyboard ID for locale 0x%04X\n", locale);
-				return KB_US;
+	unsigned int i, j;
+	for (i=0; i<ARRAYSIZE(ms_kb_list); i++) {
+		for (j=0; j<ms_kb_list[i].size; j++) {
+			if (safe_strcmp(ms_kb_list[i].list[j], kb) == 0) {
+				return ms_kb_list[i].name;
 			}
-			// If we didn't get a match on first pass, mask with 0x03ff to try more generic pages
-			mask = 0x03ff;
+		}
+	}
+	return NULL;
+}
+
+static const char* fd_get_kbdrv(const char* kb)
+{
+	unsigned int i, j;
+	for (i=0; i<ARRAYSIZE(fd_kb_list); i++) {
+		for (j=0; j<fd_kb_list[i].size; j++) {
+			if (safe_strcmp(fd_kb_list[i].list[j], kb) == 0) {
+				return fd_kb_list[i].name;
+			}
+		}
+	}
+	return NULL;
+}
+
+/* 
+ * We display human readable descriptions of the locale in the menu
+ * As real estate might be limited, keep it short
+ */
+static const char* kb_hr_list[][2] = {
+	{"ar", "Arabic"},
+	{"bg", "Bulgarian"},
+	{"ch", "Chinese"},
+	{"cz", "Czech"},
+	{"dk", "Danish"},
+	{"gr", "German"},
+	{"sg", "Swiss-German"},
+	{"gk", "Greek"},
+	{"us", "US-English"},
+	{"uk", "UK-English"},
+	{"cf", "CA-French"},
+	{"dv", "US-Dvorak"},
+	{"lh", "US-Dvorak (LH)"},
+	{"rh", "US-Dvorak (RH)"},
+	{"sp", "Spanish"},
+	{"la", "Latin-American"},
+	{"su", "Finnish"},
+	{"fr", "French"},
+	{"be", "Belgian-French"},
+	{"sf", "Swiss-French"},
+	{"il", "Hebrew"},
+	{"hu", "Hungarian"},
+	{"is", "Icelandic"},
+	{"it", "Italian"},
+	{"jp", "Japanese"},
+//	{"ko", "Korean"},			// Unsupported by FreeDOS?
+	{"nl", "Dutch"},
+	{"no", "Norwegian"},
+	{"pl", "Polish"},
+	{"br", "Brazilian"},
+	{"po", "Portuguese"},
+	{"ro", "Romanian"},
+	{"ru", "Russian"},
+	{"yu", "YU-Latin"},
+	{"yc", "YU-Cyrillic"},
+	{"sl", "Slovak"},
+	{"sq", "Albanian"},
+	{"sv", "Swedish"},
+	{"tr", "Turkish"},
+	{"ur", "Ukrainian"},
+	{"bl", "Belarusian"},
+	{"et", "Estonian"},
+	{"lv", "Latvian"},
+	{"lt", "Lithuanian"},
+	{"tj", "Tajik"},
+//	{"fa", "Persian"};			// Unsupported by FreeDOS?
+	{"vi", "Vietnamese"},
+	{"hy", "Armenian"},
+	{"az", "Azeri"},
+	{"mk", "Macedonian"},
+	{"ka", "Georgian"},
+	{"fo", "Faeroese"},
+	{"mt", "Maltese"},
+	{"kk", "Kazakh"},
+	{"ky", "Kyrgyz"},
+	{"uz", "Uzbek"},
+	{"tm", "Turkmen"},
+	{"tt", "Tatar"},
+};
+
+static const char* kb_to_hr(const char* kb)
+{
+	int i;
+	for (i=0; i<ARRAYSIZE(kb_hr_list); i++) {
+		if (safe_strcmp(kb, kb_hr_list[i][0]) == 0) {
+			return kb_hr_list[i][1];
+		}
+	}
+	// Should never happen, so let's try to get some attention here
+	MessageBoxA(hMainDialog, "YO BNLA #1", "UHAHAHHA?", MB_OKCANCEL|MB_ICONWARNING);
+	return "Someone missed a keyboard!";
+}
+
+typedef struct {
+	ULONG cp;
+	const char* name;
+} cp_list;
+
+// From FreeDOS CPX pack as well as
+// http://msdn.microsoft.com/en-us/library/windows/desktop/dd317756.aspx
+static cp_list cp_hr_list[] = {
+	{ 113, "Lat-Yugoslavian"},
+	{ 437, "US-English"},
+	{ 667, "Polish"},
+	{ 668, "Polish (Alt)"},
+	{ 737, "Greek (ex-437G)"},
+	{ 770, "Baltic"},
+	{ 771, "Cyr-Russian (KBL)"},
+	{ 772, "Cyr-Russian"},
+	{ 773, "Baltic Rim (Old)"},
+	{ 774, "Lithuanian"},
+	{ 775, "Baltic Rim"},
+	{ 777, "Acc-Lithuanian (Old)"},
+	{ 778, "Acc-Lithuanian"},
+	{ 790, "Mazovian-Polish"},
+	{ 808, "Cyr-Russian (Euro)"},
+	{ 848, "Cyr-Ukrainian (Euro)"},
+	{ 849, "Cyr-Belarusian (Euro)"},
+	{ 850, "Western-European"},
+	{ 851, "Greek"},
+	{ 852, "Central-European"},
+	{ 853, "Southern-European"},
+	{ 855, "Cyr-South-Slavic"},
+	{ 856, "Hebrew II"},
+	{ 857, "Turkish"},
+	{ 858, "Western-European (Euro)"},
+	{ 859, "Western-European (Alt)"},
+	{ 860, "Portuguese"},
+	{ 861, "Icelandic"},
+	{ 862, "Hebrew"},
+	{ 863, "Canadian-French"},
+	{ 864, "Arabic"},
+	{ 865, "Nordic"},
+	{ 866, "Cyr-Russian"},
+	{ 867, "Czech Kamenicky"},
+	{ 869, "Modern Greek"},
+	{ 872, "Cyr-South-Slavic (Euro)"},
+	{ 895, "Czech Kamenicky (Alt)"},
+	{ 899, "Armenian"},
+	{ 991, "Mazovian-Polish (Zloty)"},
+	{ 1116, "Estonian"},
+	{ 1117, "Latvian"},
+	{ 1118, "Lithuanian"},
+	{ 1119, "Cyr-Russian (Alt)"},
+	{ 1125, "Cyr-Ukrainian"},
+	{ 1131, "Cyr-Belarusian"},
+	{ 3012, "Cyr-Latvian"},
+	{ 3021, "Cyr-Bulgarian"},
+	{ 3845, "Hungarian"},
+	{ 3846, "Turkish"},
+	{ 3848, "Brazilian (ABICOMP)"},
+	{ 30000, "Saami"},
+	{ 30001, "Celtic"},
+	{ 30002, "Cyr-Tajik"},
+	{ 30003, "Latin American"},
+	{ 30004, "Greenlandic"},
+	{ 30005, "Nigerian"},
+	{ 30006, "Vietnamese"},
+	{ 30007, "Latin"},
+	{ 30008, "Cyr-Ossetian"},
+	{ 30009, "Romani"},
+	{ 30010, "Cyr-Moldovan"},
+	{ 30011, "Cyr-Chechen"},
+	{ 30012, "Cyr-Siberian"},
+	{ 30013, "Cyr-Turkic"},
+	{ 30014, "Cyr-Finno-Ugric"},
+	{ 30015, "Cyr-Khanty"},
+	{ 30016, "Cyr-Mansi"},
+	{ 30017, "Cyr-Northwestern"},
+	{ 30018, "Lat-Tatar"},
+	{ 30019, "Lat-Chechen"},
+	{ 30020, "Low-Saxon and Frisian"},
+	{ 30021, "Oceanian"},
+	{ 30022, "First Nations"},
+	{ 30023, "Southern African"},
+	{ 30024, "North & East African"},
+	{ 30025, "Western African"},
+	{ 30026, "Central African"},
+	{ 30027, "Beninese"},
+	{ 30028, "Nigerian (Alt)"},
+	{ 30029, "Mexican"},
+	{ 30030, "Mexican (Alt)"},
+	{ 30031, "Northern-European"},
+	{ 30032, "Nordic"},
+	{ 30033, "Crimean-Tatar (Hryvnia)"},
+	{ 30034, "Cherokee"},
+	{ 30039, "Cyr-Ukrainian (Hryvnia)"},
+	{ 30040, "Cyr-Russian (Hryvnia)"},
+	{ 58152, "Cyr-Kazakh (Euro)"},
+	{ 58210, "Cyr-Azeri"},
+	{ 58335, "Kashubian"},
+	{ 59234, "Cyr-Tatar"},
+	{ 59829, "Georgian"},
+	{ 60258, "Lat-Azeri"},
+	{ 60853, "Georgian (Alt)"},
+	{ 62306, "Cyr-Uzbek"}
+};
+
+static const char* cp_to_hr(ULONG cp)
+{
+	int i;
+	for (i=0; i<ARRAYSIZE(cp_hr_list); i++) {
+		if (cp_hr_list[i].cp == cp) {
+			return cp_hr_list[i].name;
+		}
+	}
+	// Should never happen, so this oughta get some attention
+	MessageBoxA(hMainDialog, "YO BNLA #2", "UHAHAHHA?", MB_OKCANCEL|MB_ICONWARNING);
+	return "Someone missed a codepage!";
+}
+
+// http://blogs.msdn.com/b/michkap/archive/2004/12/05/275231.aspx
+static const char* get_kb(void)
+{
+	unsigned int kbid;
+	char kbid_str[KL_NAMELENGTH];
+	int pass;
+
+	// Count on Microsoft to add convolution to a simple operation.
+	// We use GetKeyboardLayout() because it returns an HKL, which for instance
+	// doesn't tell us if the *LAYOUT* is Dvorak or something else. For that we
+	// need an KLID which GetKeyboardLayoutNameA() does return ...but only as a
+	// string of an hex value...
+	GetKeyboardLayoutNameA(kbid_str);
+	sscanf(kbid_str, "%x", &kbid);
+	uprintf("Windows KBID 0x%08x\n", kbid);
+
+	for (pass=0; pass<3; pass++) {
+		// Some of these return values are defined in
+		// HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Keyboard Layout\DosKeybCodes
+		// Others are picked up in FreeDOS official keyboard layouts, v3.0
+		// Note: keyboard values are meant to start at 0x400. The cases below 0x400 are added
+		// to attempt to figure out a "best match" in case we couldn't find a supported keyboard
+		// by using the one most relevant to the language being spoken. Also we intentionally
+		// group keyboards that shouldn't be together
+
+		// Note: these cases are mostly organized first by (kbid & 0x3ff) and then by
+		// ascending order for same (kbid & 0x3ff)
+		switch(kbid) {
+		case 0x00000001:
+		case 0x00010401: // Arabic (102)
+		case 0x00020401: // Arabic (102) AZERTY
+			return "ar";
+		case 0x00000002:
+		case 0x00000402: // Bulgarian (Typewriter)
+		case 0x00010402: // Bulgarian (Latin)
+		case 0x00020402: // Bulgarian (Phonetic)
+		case 0x00030402: // Bulgarian
+		case 0x00040402: // Bulgarian (Phonetic Traditional)
+			return "bg";
+		case 0x00000004:
+		case 0x00000404: // Chinese (Traditional) - US Keyboard
+		case 0x00000804: // Chinese (Simplified) - US Keyboard
+		case 0x00000c04: // Chinese (Traditional, Hong Kong) - US Keyboard
+		case 0x00001004: // Chinese (Simplified, Singapore) - US Keyboard
+		case 0x00001404: // Chinese (Traditional, Macao) - US Keyboard
+			return "ch";
+		case 0x00000005:
+		case 0x00000405: // Czech
+		case 0x00010405: // Czech (QWERTY)
+		case 0x00020405: // Czech Programmers
+			return "cz";
+		case 0x00000006:
+		case 0x00000406: // Danish
+			return "dk";
+		case 0x00000007:
+		case 0x00000407: // German
+		case 0x00010407: // German (IBM)
+			return "gr";
+		case 0x00000807: // Swiss German
+			return "sg";
+		case 0x00000008:
+		case 0x00000408: // Greek
+		case 0x00010408: // Greek (220)
+		case 0x00020408: // Greek (319)
+		case 0x00030408: // Greek (220) Latin
+		case 0x00040408: // Greek (319) Latin
+		case 0x00050408: // Greek Latin
+		case 0x00060408: // Greek Polytonic
+			return "gk";
+		case 0x00000009:
+		case 0x00000409: // US
+		case 0x00020409: // United States-International
+		case 0x00050409: // US English Table for IBM Arabic 238_L
+			return "us";
+		case 0x00000809: // United Kingdom
+		case 0x00000452: // United Kingdom Extended (Welsh)
+		case 0x00001809: // Irish
+		case 0x00011809: // Gaelic
+			return "uk";
+		case 0x00000c0c: // Canadian French (Legacy)
+		case 0x00001009: // Canadian French
+		case 0x00011009: // Canadian Multilingual Standard
+			return "cf";
+		case 0x00010409: // United States-Dvorak
+			return "dv";
+		case 0x00030409: // United States-Dvorak for left hand
+			return "lh";
+		case 0x00040409: // United States-Dvorak for right hand
+			return "rh";
+		case 0x0000000a:
+		case 0x0000040a: // Spanish
+		case 0x0001040a: // Spanish Variation
+			return "sp";
+		case 0x0000080a: // Latin American
+			return "la";
+		case 0x0000000b:
+		case 0x0000040b: // Finnish
+		case 0x0001083b: // Finnish with Sami
+			return "su";
+		case 0x0000000c:
+		case 0x0000040c: // French
+		case 0x0000046e: // Luxembourgish
+			return "fr";
+		case 0x0000080c: // Belgian French
+		case 0x0001080c: // Belgian (Comma)
+			return "be";
+		case 0x0000100c: // Swiss French
+			return "sf";
+		case 0x0000000d:
+		case 0x0000040d: // Hebrew
+			return "il";
+		case 0x0000000e:
+		case 0x0000040e: // Hungarian
+		case 0x0001040e: // Hungarian 101-key
+			return "hu";
+		case 0x0000000f:
+		case 0x0000040f: // Icelandic
+			return "is";
+		case 0x00000010:
+		case 0x00000410: // Italian
+		case 0x00010410: // Italian (142)
+			return "it";
+		case 0x00000011:
+		case 0x00000411: // Japanese
+			return "jp";
+	//	case 0x00000012:
+	//	case 0x00000412: // Korean
+	//		return "ko";	// NOT IMPLEMENTED IN FREEDOS?
+		case 0x00000013:
+		case 0x00000413: // Dutch
+		case 0x00000813: // Belgian (Period)
+			return "nl";
+		case 0x00000014:
+		case 0x00000414: // Norwegian
+		case 0x0000043b: // Norwegian with Sami
+		case 0x0001043b: // Sami Extended Norway
+			return "no";
+		case 0x00000015:
+		case 0x00010415: // Polish (214)
+		case 0x00000415: // Polish (Programmers)
+			return "pl";
+		case 0x00000016:
+		case 0x00000416: // Portuguese (Brazilian ABNT)
+		case 0x00010416: // Portuguese (Brazilian ABNT2)
+			return "br";
+		case 0x00000816: // Portuguese (Portugal)
+			return "po";
+		case 0x00000018:
+		case 0x00000418: // Romanian (Legacy)
+		case 0x00010418: // Romanian (Standard)
+		case 0x00020418: // Romanian (Programmers)
+			return "ro";
+		case 0x00000019:
+		case 0x00000419: // Russian
+		case 0x00010419: // Russian (Typewriter)
+			return "ru";
+		case 0x0000001a:
+		case 0x0000041a: // Croatian
+		case 0x0000081a: // Serbian (Latin)
+		case 0x00000024:
+		case 0x00000424: // Slovenian
+			return "yu";
+		case 0x00000c1a: // Serbian (Cyrillic)
+		case 0x0000201a: // Bosnian (Cyrillic)
+			return "yc";
+		case 0x0000001b:
+		case 0x0000041b: // Slovak
+		case 0x0001041b: // Slovak (QWERTY)
+			return "sl";
+		case 0x0000001c:
+		case 0x0000041c: // Albanian
+			return "sq";
+		case 0x0000001d:
+		case 0x0000041d: // Swedish
+		case 0x0000083b: // Swedish with Sami
+			return "sv";
+		case 0x0000001f:
+		case 0x0000041f: // Turkish Q
+		case 0x0001041f: // Turkish F
+			return "tr";
+		case 0x00000022:
+		case 0x00000422: // Ukrainian
+		case 0x00020422: // Ukrainian (Enhanced)
+			return "ur";
+		case 0x00000023:
+		case 0x00000423: // Belarusian
+			return "bl";
+		case 0x00000025:
+		case 0x00000425: // Estonian
+			return "et";
+		case 0x00000026:
+		case 0x00000426: // Latvian
+		case 0x00010426: // Latvian (QWERTY)
+			return "lv";
+		case 0x00000027:
+		case 0x00000427: // Lithuanian IBM
+		case 0x00010427: // Lithuanian
+		case 0x00020427: // Lithuanian Standard
+			return "lt";
+		case 0x00000028:
+		case 0x00000428: // Tajik
+			return "tj";
+	//	case 0x00000029:
+	//	case 0x00000429: // Persian
+	//		return "fa";	// NOT IMPLEMENTED IN FREEDOS?
+		case 0x0000002a:
+		case 0x0000042a: // Vietnamese
+			return "vi";
+		case 0x0000002b:
+		case 0x0000042b: // Armenian Eastern
+		case 0x0001042b: // Armenian Western
+			return "hy";
+		case 0x0000002c:
+		case 0x0000042c: // Azeri Latin
+		case 0x0000082c: // Azeri Cyrillic
+			return "az";
+		case 0x0000002f:
+		case 0x0000042f: // Macedonian (FYROM)
+		case 0x0001042f: // Macedonian (FYROM) - Standard
+			return "mk";
+		case 0x00000037:
+		case 0x00000437: // Georgian
+		case 0x00010437: // Georgian (QWERTY)
+		case 0x00020437: // Georgian (Ergonomic)
+			return "ka";
+		case 0x00000038:
+		case 0x00000438: // Faeroese
+			return "fo";
+		case 0x0000003a:
+		case 0x0000043a: // Maltese 47-Key
+		case 0x0001043a: // Maltese 48-Key
+			return "mt";
+		case 0x0000003f:
+		case 0x0000043f: // Kazakh
+			return "kk";
+		case 0x00000040:
+		case 0x00000440: // Kyrgyz Cyrillic
+			return "ky";
+		case 0x00000043:
+		case 0x00000843: // Uzbek Crillic
+			return "uz";
+		case 0x00000042:
+		case 0x00000442: // Turkmen
+			return "tm";
+		case 0x00000044:
+		case 0x00000444: // Tatar
+			return "tt";
+
+	// Below are more Windows 7 listed keyboards that were left out
+	#if 0
+		case 0x0000041e: // Thai Kedmanee
+		case 0x0001041e: // Thai Pattachote
+		case 0x0002041e: // Thai Kedmanee (non-ShiftLock)
+		case 0x0003041e: // Thai Pattachote (non-ShiftLock)
+		case 0x00000420: // Urdu
+		case 0x0000042e: // Sorbian Standard (Legacy)
+		case 0x0001042e: // Sorbian Extended
+		case 0x0002042e: // Sorbian Standard
+		case 0x00000432: // Setswana
+		case 0x00000439: // Devanagari - INSCRIPT#
+		case 0x00010439: // Hindi Traditional
+		case 0x0002083b: // Sami Extended Finland-Sweden
+		case 0x00000445: // Bengali
+		case 0x00010445: // Bengali - INSCRIPT (Legacy)
+		case 0x00020445: // Bengali - INSCRIPT
+		case 0x00000446: // Punjabi
+		case 0x00000447: // Gujarati
+		case 0x00000448: // Oriya
+		case 0x00000449: // Tamil
+		case 0x0000044a: // Telugu
+		case 0x0000044b: // Kannada
+		case 0x0000044c: // Malayalam
+		case 0x0000044d: // Assamese - INSCRIPT
+		case 0x0000044e: // Marathi
+		case 0x00000450: // Mongolian Cyrillic
+		case 0x00000451: // Tibetan
+		case 0x00000850: // Mongolian (Mongolian Script)
+		case 0x0000085d: // Inuktitut - Latin
+		case 0x0001045d: // Inuktitut - Naqittaut
+		case 0x00000453: // Khmer
+		case 0x00000454: // Lao
+		case 0x0000045a: // Syriac
+		case 0x0001045a: // Syriac Phonetic
+		case 0x0000045b: // Sinhala
+		case 0x0001045b: // Sinhala - Wij 9
+		case 0x00000461: // Nepali
+		case 0x00000463: // Pashto (Afghanistan)
+		case 0x00000465: // Divehi Phonetic
+		case 0x00010465: // Divehi Typewriter
+		case 0x00000468: // Hausa
+		case 0x0000046a: // Yoruba
+		case 0x0000046c: // Sesotho sa Leboa
+		case 0x0000046d: // Bashkir
+		case 0x0000046f: // Greenlandic
+		case 0x00000470: // Igbo
+		case 0x00000480: // Uyghur (Legacy)
+		case 0x00010480: // Uyghur
+		case 0x00000481: // Maori
+		case 0x00000485: // Yakut
+		case 0x00000488: // Wolof
+	#endif
+		default:
+			if (pass == 0) {
+				// If we didn't get a match 1st time around, try to match
+				// the primary language of the keyboard
+				kbid = PRIMARYLANGID(kbid);
+			} else if (pass == 1) {
+				// If we still didn't get a match, use the system's primary language
+				kbid = PRIMARYLANGID(GetSystemDefaultLangID());
+				uprintf("Unable to match KBID, trying LangID 0x%04x\n", kbid);
+			}
 			break;
 		}
-	} while(1);
+	}
+	uprintf("Unable to match KBID and LangID - defaulting to US\n");
+	return "us";
 }
 
-// See http://msdn.microsoft.com/en-us/library/windows/desktop/dd317756.aspx
-static int get_egacpi_idx(void)
+/*
+ * From WinME DOS
+ *
+ *	EGA.CPI:
+ *		0x01B5	437 (United States)
+ *		0x0352	850 (Latin 1)
+ *		0x0354	852 (Latin 2)
+ *		0x035C	860 (Portuguese)
+ *		0x035F	863 (French Canadian)
+ *		0x0361	865 (Nordic)
+ *	
+ *	EGA2.CPI:
+ *		0x0352	850 (Latin 1)
+ *		0x0354	852 (Latin 2)
+ *		0x0359	857 (Turkish)
+ *		0x035D	861 (Icelandic)
+ *		0x0365	869 (Greek)
+ *		0x02E1	737 (Greek II)
+ *	
+ *	EGA3.CPI:
+ *		0x01B5	437 (United States)
+ *		0x0307	775 (Baltic)
+ *		0x0352	850 (Latin 1)
+ *		0x0354	852 (Latin 2)
+ *		0x0357	855 (Cyrillic I)
+ *		0x0362	866 (Cyrillic II)
+ */
+
+
+// Pick the EGA to use according to the DOS target codepage (see above)
+static const char* ms_get_ega(ULONG cp)
 {
-	switch(GetOEMCP()) {
-	case 708:	// Arabic (ASMO 708)
-	case 709:	// Arabic (ASMO 449+, BCON V4)
-	case 710:	// Arabic (Transparent Arabic)
-	case 860:	// Portuguese
-	case 861:	// Icelandic
-	case 863:	// French Canadian
-	case 864:	// Arabic
-	case 865:	// Nordic
-	case 874:	// Thai
-	case 932:	// Japanese
-	case 936:	// Simplified Chinese
-	case 949:	// Korean
-	case 950:	// Traditional Chinese
-	case 1258:	// Vietnamese
-		return 0;	// In the original DLL, MS returns 99 here and gets
-					// overflowed string indexes as a result - WTF?
-	case 437:	// United States
-	case 850:	// Latin 1
-	case 852:	// Latin 2
-		return 0;
-	case 737:	// The Greek Formerly Known As 437G
-	case 857:	// Turkish
-	case 869:	// Modern Greek
-		return 1;
-	case 775:	// Baltic
-	case 855:	// Cyrillic
-	case 866:	// Russian
-		return 2;
-	case 720:	// Arabic (Transparent ASMO)
-		return 3;
-	case 862:	// Hebrew
-		return 4;
+	switch(cp) {
+	case   437: // United States
+	case   850: // Latin-1 (Western European)
+	case   852: // Latin-2 (Central European)
+	case   860: // Portuguese
+	case   863: // French Canadian
+	case   865: // Nordic
+		return "ega.cpi"; 
+
+//	case   850: // Latin-1 (Western European)
+//	case   852: // Latin-2 (Central European)
+	case   857: // Turkish
+	case   861: // Icelandic
+	case   869: // Greek
+	case   737: // Greek II
+		return "ega2.cpi";
+
+//	case   437: // United States
+	case   775: // Baltic
+//	case   850: // Latin-1 (Western European)
+//	case   852: // Latin-2 (Central European)
+	case   855: // Cyrillic I
+	case   866: // Cyrillic II
+		return "ega3.cpi";
+
 	default:
-		return 0;
+		return NULL;
+	}	
+}
+
+// Pick the EGA to use according to the DOS target codepage (from CPIDOS' Codepage.txt)
+static const char* fd_get_ega(ULONG cp)
+{
+	switch(cp) {
+	case   437: // United States
+	case   850: // Latin-1 (Western European)
+	case   852: // Latin-2 (Central European)
+	case   853: // Latin-3 (Southern European)
+	case   857: // Latin-5 
+	case   858: // Latin-1 with Euro
+		return "ega.cpx"; 
+	case   775: // Latin-7 (Baltic Rim)
+	case   859: // Latin-9
+	case  1116: // Estonian
+	case  1117: // Latvian
+	case  1118: // Lithuanian
+	case  1119: // Cyrillic Russian and Lithuanian (*)
+		return "ega2.cpx";
+	case   771: // Cyrillic Russian and Lithuanian (KBL)
+	case   772: // Cyrillic Russian and Lithuanian
+	case   808: // Cyrillic Russian with Euro
+	case   855: // Cyrillic South Slavic
+	case   866: // Cyrillic Russian
+	case   872: // Cyrillic South Slavic with Euro
+		return "ega3.cpx";
+	case   848: // Cyrillic Ukrainian with Euro
+	case   849: // Cyrillic Belarusian with Euro
+	case  1125: // Cyrillic Ukrainian
+	case  1131: // Cyrillic Belarusian
+	case  3012: // Cyrillic Russian and Latvian ("RusLat")
+	case 30010: // Cyrillic Gagauz and Moldovan
+		return "ega4.cpx";
+	case   113: // Yugoslavian Latin
+	case   737: // Greek-2
+	case   851: // Greek (old codepage)
+//	case   852: // Latin-2
+//	case   858: // Multilingual Latin-1 with Euro
+	case   869: // Greek
+		return "ega5.cpx";
+	case   899: // Armenian
+	case 30008: // Cyrillic Abkhaz and Ossetian
+	case 58210: // Cyrillic Russian and Azeri
+	case 59829: // Georgian
+	case 60258: // Cyrillic Russian and Latin Azeri
+	case 60853: // Georgian with capital letters
+		return "ega6.cpx";
+	case 30011: // Cyrillic Russian Southern District
+	case 30013: // Cyrillic Volga District: // Turkic languages
+	case 30014: // Cyrillic Volga District: // Finno-ugric languages
+	case 30017: // Cyrillic Northwestern District
+	case 30018: // Cyrillic Russian and Latin Tatar
+	case 30019: // Cyrillic Russian and Latin Chechen
+		return "ega7.cpx";
+	case   770: // Baltic
+	case   773: // Latin-7 (old standard)
+	case   774: // Lithuanian
+//	case   775: // Latin-7
+	case   777: // Accented Lithuanian (old)
+	case   778: // Accented Lithuanian
+		return "ega8.cpx";
+//	case   858: // Latin-1 with Euro
+	case   860: // Portuguese
+	case   861: // Icelandic
+	case   863: // Canadian French
+	case   865: // Nordic
+	case   867: // Czech Kamenicky
+		return "ega9.cpx";
+	case   667: // Polish
+	case   668: // Polish (polish letters on cp852 codepoints)
+	case   790: // Polish Mazovia
+//	case   852: // Latin-2
+	case   991: // Polish Mazovia with Zloty sign
+	case  3845: // Hungarian
+		return "ega10.cpx";
+//	case   858: // Latin-1 with Euro
+	case 30000: // Saami
+	case 30001: // Celtic
+	case 30004: // Greenlandic
+	case 30007: // Latin
+	case 30009: // Romani
+		return "ega11.cpx";
+//	case   852: // Latin-2
+//	case   858: // Latin-1 with Euro
+	case 30003: // Latin American
+	case 30029: // Mexican
+	case 30030: // Mexican II
+	case 58335: // Kashubian
+		return "ega12";
+//	case   852: // Latin-2
+	case   895: // Czech Kamenicky
+	case 30002: // Cyrillic Tajik
+	case 58152: // Cyrillic Kazakh with Euro
+	case 59234: // Cyrillic Tatar
+	case 62306: // Cyrillic Uzbek
+		return "ega13.cpx";
+	case 30006: // Vietnamese
+	case 30012: // Cyrillic Russian Siberian and Far Eastern Districts
+	case 30015: // Cyrillic Khanty
+	case 30016: // Cyrillic Mansi
+	case 30020: // Low saxon and frisian
+	case 30021: // Oceania
+		return "ega14.cpx";
+	case 30023: // Southern Africa
+	case 30024: // Northern and Eastern Africa
+	case 30025: // Western Africa
+	case 30026: // Central Africa
+	case 30027: // Beninese
+	case 30028: // Nigerian II
+		return "ega15.cpx";
+//	case   858: // Latin-1 with Euro
+	case  3021: // Cyrillic MIK Bulgarian
+	case 30005: // Nigerian
+	case 30022: // Canadian First Nations
+	case 30031: // Latin-4 (Northern European)
+	case 30032: // Latin-6
+		return "ega16.cpx";
+	case   862: // Hebrew
+	case   864: // Arabic
+	case 30034: // Cherokee
+	case 30033: // Crimean Tatar with Hryvnia
+	case 30039: // Cyrillic Ukrainian with Hryvnia
+	case 30040: // Cyrillic Russian with Hryvnia
+		return "ega17.cpx";
+	case   856: // Hebrew II
+	case  3846: // Turkish
+	case  3848: // Brazilian ABICOMP
+		return "ega18.cpx";
+	default:
+		return NULL;
 	}
 }
 
-static BOOL is_cjkus(void)
+// Transliteration of the codepage (to add currency symbol, etc - FreeDOS only)
+static ULONG fd_upgrade_cp(ULONG cp)
 {
-	switch(GetOEMCP()) {
-	case 437:	// United States
-	case 932:	// Japanese
-	case 936:	// Simplified Chinese
-	case 949:	// Korean
-	case 950:	// Traditional Chinese
-		return TRUE;
+	switch(cp) {
+	case   850: // Latin-1 (Western European)
+		return 858; // Latin-1 with Euro
 	default:
-		return FALSE;
+		return cp;
 	}
 }
 
-BOOL SetMSDOSLocale(const char* path)
+
+// Don't bother about setting up the country or multiple codepages
+BOOL SetDOSLocale(const char* path, BOOL bFreeDOS)
 {
-	char filename[MAX_PATH];
-	int kb_id;
-	int drv_id;
-	int egacpi_id;
-	unsigned int oem_cp;
 	FILE* fd;
+	char filename[MAX_PATH];
+	ULONG cp;
+	const char *kb;
+	const char* kbdrv;
+	const char* egadrv;
 
-	// Microsoft doesn't actually set a locale if the CP is CJK or US
-	if (is_cjkus())
-		return TRUE;
-
-	kb_id = syslocale_to_kbid((WORD)(LONG_PTR)GetKeyboardLayout(0));
-	uprintf("Using DOS keyboard '%s'\n", dos_kb_str[kb_id]);
-	drv_id = kb_to_drv[kb_id];
-	if (drv_id < 0) {
-		kb_id = syslocale_to_kbid((WORD)GetSystemDefaultLangID());
+	// First handle the codepage
+	kb = get_kb();
+	// We have a keyboard ID, but that doesn't mean it's supported
+	kbdrv = bFreeDOS?fd_get_kbdrv(kb):ms_get_kbdrv(kb);
+	if (kbdrv == NULL) {
+		uprintf("Keyboard id '%s' is not supported - falling back to 'us'\n", kb);
+		kb = "us";	// TODO: smarter fallback?
+		kbdrv = bFreeDOS?fd_get_kbdrv(kb):ms_get_kbdrv(kb);	// Always succeeds
 	}
-	egacpi_id = get_egacpi_idx();
-	oem_cp = GetOEMCP();
+	uprintf("Will use DOS keyboard '%s' [%s]\n", kb, kb_to_hr(kb));
 
+	// Now get a codepage
+	cp = GetOEMCP();
+	egadrv = bFreeDOS?fd_get_ega(cp):ms_get_ega(cp);
+	if (egadrv == NULL) {
+		uprintf("Unable to find EGA for codepage %d - falling back to 437\n");
+		cp = 437;
+		egadrv =  bFreeDOS?"eag.cpx":"ega.cpi";
+	} else if (bFreeDOS) {
+		cp = fd_upgrade_cp(cp);
+	}
+	uprintf("Will use codepage %d [%s]\n", cp, cp_to_hr(cp));
+
+	if ((cp == 437) && (strcmp(kb, "us") == 0)) {
+		// Nothing much to do if US/US - just notify in autoexec.bat
+		strcpy(filename, path);
+		safe_strcat(filename, sizeof(filename), "\\AUTOEXEC.BAT");
+		fd = fopen(filename, "w+");
+		if (fd == NULL) {
+			uprintf("Unable to create 'AUTOEXEC.BAT': %s.\n", WindowsErrorString());
+			return FALSE;
+		}
+		fprintf(fd, "@echo off\n");
+		fprintf(fd, "set PATH=.;C:\\;C:\\LOCALE\n");
+		fprintf(fd, "echo Using %s keyboard with %s codepage [%d]\n", kb_to_hr("us"), cp_to_hr(437), 437);
+		fclose(fd);
+		uprintf("Succesfully wrote 'AUTOEXEC.BAT'\n");
+		return TRUE;
+	}
+
+	// CONFIG.SYS
 	strcpy(filename, path);
 	safe_strcat(filename, sizeof(filename), "\\CONFIG.SYS");
 	fd = fopen(filename, "w+");
@@ -382,17 +979,23 @@ BOOL SetMSDOSLocale(const char* path)
 		uprintf("Unable to create 'CONFIG.SYS': %s.\n", WindowsErrorString());
 		return FALSE;
 	}
-	// TODO: address cases where selection is between US and US
-	fprintf(fd, "[MENU]\n");
-	fprintf(fd, "MENUITEM NON_US, Use %s keyboard locale (default)\n", dos_kb_human_readable_str[kb_id]);
-	fprintf(fd, "MENUITEM US, Use US keyboard locale\n");
-	fprintf(fd, "MENUDEFAULT 1, 5\n");
-	fprintf(fd, "[NON_US]\n");
-	fprintf(fd, "device=C:\\locale\\display.sys con=(%s)\n", dos_con_str[egacpi_id]);
-	fprintf(fd, "[US]\n");
+	if (bFreeDOS) {
+		fprintf(fd, "MENU\nMENU   FreeDOS Language Selection Menu\n");
+		fprintf(fd, "MENU   อออออออออออออออออออออออออออออออ\nMENU\n");
+	} else {
+		fprintf(fd, "[MENU]\n");
+	}
+	fprintf(fd, "MENUDEFAULT=1,5\n");
+	// Menu item max: 70 characters
+	fprintf(fd, "%s1%c Use %s keyboard with %s codepage [%d]\n",
+		bFreeDOS?"MENU ":"MENUITEM=", bFreeDOS?')':',', kb_to_hr(kb), cp_to_hr(cp), (int)cp);
+	fprintf(fd, "%s2%c Use %s keyboard with %s codepage [%d]\n",
+		bFreeDOS?"MENU ":"MENUITEM=", bFreeDOS?')':',', kb_to_hr("us"), cp_to_hr(437), 437);
+	fprintf(fd, "%s", bFreeDOS?"MENU\n12?\n":"[1]\ndevice=C:\\locale\\display.sys con=(ega,,1)\n[2]\n");
 	fclose(fd);
 	uprintf("Succesfully wrote 'CONFIG.SYS'\n");
 
+	// AUTOEXEC.BAT
 	strcpy(filename, path);
 	safe_strcat(filename, sizeof(filename), "\\AUTOEXEC.BAT");
 	fd = fopen(filename, "w+");
@@ -402,13 +1005,14 @@ BOOL SetMSDOSLocale(const char* path)
 	}
 	fprintf(fd, "@echo off\n");
 	fprintf(fd, "set PATH=.;C:\\;C:\\LOCALE\n");
+	if (bFreeDOS)
+		fprintf(fd, "display con=(ega,,1)\n");
 	fprintf(fd, "GOTO %%CONFIG%%\n");
-	fprintf(fd, ":NON_US\n");
-	fprintf(fd, "mode con codepage prepare=((%d) \\locale\\%s) > NUL\n", oem_cp, dos_cpi_str[egacpi_id]);
-	fprintf(fd, "mode con codepage select=%d > NUL\n", oem_cp);
-	// TODO: specify /ID: for Turkish and Hebrew
-	fprintf(fd, "keyb %s,,\\locale\\%s\n", dos_kb_str[kb_id], dos_kb_drv_str[drv_id]);
-	fprintf(fd, ":US\n");
+	fprintf(fd, ":1\n");
+	fprintf(fd, "mode con codepage prepare=((%d) C:\\locale\\%s) > NUL\n", (int)cp, egadrv);
+	fprintf(fd, "mode con codepage select=%d > NUL\n", (int)cp);
+	fprintf(fd, "keyb %s,,C:\\locale\\%s\n", kb, kbdrv);
+	fprintf(fd, ":2\n");
 	fclose(fd);
 	uprintf("Succesfully wrote 'AUTOEXEC.BAT'\n");
 
