@@ -26,7 +26,7 @@ const char* additional_copyrights =
 "http://ms-sys.sourceforge.net\r\n"
 "GNU General Public License (GPL) v2 or later\r\n"
 "\r\n"
-"FreeDOS (Kernel + FreeCOM) support from the FreeDOS project:\r\n"
+"FreeDOS support from the FreeDOS project:\r\n"
 "http://www.freedos.org\r\n"
 "GNU General Public License (GPL) v2 or later, with binary redistribution allowed\r\n"
 "\r\n"
