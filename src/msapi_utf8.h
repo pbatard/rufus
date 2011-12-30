@@ -159,6 +159,20 @@ static __inline HWND CreateWindowU(char* lpClassName, char* lpWindowName,
 	return ret;
 }
 
+static __inline int MessageBoxU(HWND hWnd, LPCSTR lpText, LPCSTR lpCaption, UINT uType)
+{
+	int ret;
+	DWORD err = ERROR_INVALID_DATA;
+	wconvert(lpText);
+	wconvert(lpCaption);
+	ret = MessageBoxW(hWnd, wlpText, wlpCaption, uType);
+	err = GetLastError();
+	wfree(lpText);
+	wfree(lpCaption);
+	SetLastError(err);
+	return ret;
+}
+
 static __inline int GetWindowTextU(HWND hWnd, char* lpString, int nMaxCount)
 {
 	int ret = 0;
@@ -576,6 +590,16 @@ static __inline FILE* fopenU(const char* filename, const char* mode)
 	ret = _wfopen(wfilename, wmode);
 	wfree(filename);
 	wfree(mode);
+	return ret;
+}
+
+// returned UTF-8 string must be freed
+static __inline char* getenvU(const char* varname)
+{
+	wconvert(varname);
+	char* ret;
+	ret = wchar_to_utf8(_wgetenv(wvarname));
+	wfree(varname);
 	return ret;
 }
 

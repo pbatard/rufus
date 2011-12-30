@@ -65,4 +65,4 @@ typedef struct {
  * Shared prototypes
  */
 BOOL BadBlocks(HANDLE hPhysicalDrive, ULONGLONG disk_size, int block_size,
-	int test_type, badblocks_report *report);
+	int test_type, badblocks_report *report, FILE* fd);

@@ -43,6 +43,10 @@
 #include "rufus.h"
 #include "badblocks.h"
 #include "file.h"
+#include "msapi_utf8.h"
+
+FILE* log_fd = NULL;
+static const char* abort_msg = "Too many bad blocks, aborting test\n";
 
 /*
  *From e2fsprogs/lib/ext2fs/badblocks.c
@@ -316,6 +320,9 @@ static int bb_output (blk_t bad, enum error_types error_type)
 		return 0;
 
 	uprintf("%lu\n", (unsigned long) bad);
+	fprintf(log_fd, "Block %lu: %s error\n", (unsigned long)bad, (error_type==READ_ERROR)?"read":
+		((error_type == WRITE_ERROR)?"write":"corruption"));
+	fflush(log_fd);
 
 	error_code = ext2fs_badblocks_list_add(bb_list, bad);
 	if (error_code) {
@@ -497,7 +504,9 @@ static unsigned int test_ro (HANDLE hDrive, blk_t last_block,
 	{
 		if (max_bb && bb_count >= max_bb) {
 			if (s_flag || v_flag) {
-				uprintf("Too many bad blocks, aborting test\n");
+				uprintf(abort_msg);
+				fprintf(log_fd, abort_msg);
+				fflush(log_fd);
 			}
 			cancel_ops = -1;
 			break;
@@ -576,7 +585,9 @@ static unsigned int test_rw(HANDLE hDrive, blk_t last_block, int block_size, blk
 		while (currently_testing < last_block) {
 			if (max_bb && bb_count >= max_bb) {
 				if (s_flag || v_flag) {
-					uprintf("Too many bad blocks, aborting test\n");
+					uprintf(abort_msg);
+					fprintf(log_fd, abort_msg);
+					fflush(log_fd);
 				}
 				cancel_ops = -1;
 				break;
@@ -615,7 +626,9 @@ static unsigned int test_rw(HANDLE hDrive, blk_t last_block, int block_size, blk
 			if (cancel_ops) goto out;
 			if (max_bb && bb_count >= max_bb) {
 				if (s_flag || v_flag) {
-					uprintf("Too many bad blocks, aborting test\n");
+					uprintf(abort_msg);
+					fprintf(log_fd, abort_msg);
+					fflush(log_fd);
 				}
 				break;
 			}
@@ -746,7 +759,9 @@ static unsigned int test_nd(HANDLE hDrive, blk_t last_block,
 		while (currently_testing < last_block) {
 			if (max_bb && bb_count >= max_bb) {
 				if (s_flag || v_flag) {
-					uprintf("Too many bad blocks, aborting test\n");
+					uprintf(abort_msg);
+					fprintf(log_fd, abort_msg);
+					fflush(log_fd);
 				}
 				cancel_ops = -1;
 				break;
@@ -895,7 +910,7 @@ static unsigned int test_nd(HANDLE hDrive, blk_t last_block,
 }
 
 BOOL BadBlocks(HANDLE hPhysicalDrive, ULONGLONG disk_size, int block_size,
-	int test_type, badblocks_report *report)
+	int test_type, badblocks_report *report, FILE* fd)
 {
 	errcode_t error_code;
 	unsigned int (*test_func)(HANDLE, blk_t, int, blk_t, unsigned int);
@@ -903,6 +918,11 @@ BOOL BadBlocks(HANDLE hPhysicalDrive, ULONGLONG disk_size, int block_size,
 
 	if (report == NULL) return FALSE;
 	report->bb_count = 0;
+	if (fd != NULL) {
+		log_fd = fd;
+	} else {
+		log_fd = freopen(NULL, "w", stderr);
+	}
 
 	error_code = ext2fs_badblocks_list_create(&bb_list, 0);
 	if (error_code) {
@@ -928,7 +948,6 @@ BOOL BadBlocks(HANDLE hPhysicalDrive, ULONGLONG disk_size, int block_size,
 	KillTimer(hMainDialog, TID_BADBLOCKS_UPDATE);
 	free(bb_list->list);
 	free(bb_list);
-	// TODO: report first problem block for each error or create a report file
 	report->num_read_errors = num_read_errors;
 	report->num_write_errors = num_write_errors;
 	report->num_corruption_errors = num_corruption_errors;

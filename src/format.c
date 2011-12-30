@@ -374,8 +374,11 @@ void __cdecl FormatThread(void* param)
 	DWORD num = (DWORD)(uintptr_t)param;
 	HANDLE hPhysicalDrive = INVALID_HANDLE_VALUE;
 	HANDLE hLogicalVolume = INVALID_HANDLE_VALUE;
+	SYSTEMTIME lt;
 	char drive_name[] = "?:";
-	char bb_msg[256];
+	char bb_msg[512];
+	char logfile[MAX_PATH], *userdir;
+	FILE* log_fd;
 	int r;
 
 	hPhysicalDrive = GetDriveHandle(num, NULL, TRUE, TRUE);
@@ -401,8 +404,26 @@ void __cdecl FormatThread(void* param)
 
 	if (IsChecked(IDC_BADBLOCKS)) {
 		do {
+			// create a log file for bad blocks report. Since %USERPROFILE% may
+			// have localised characters, we use the UTF-8 API.
+			userdir = getenvU("USERPROFILE");
+			safe_strcpy(logfile, MAX_PATH, userdir);
+			safe_free(userdir);
+			GetLocalTime(&lt);
+			safe_sprintf(&logfile[strlen(logfile)], sizeof(logfile)-strlen(logfile)-1,
+				"\\rufus_%04d%02d%02d_%02d%02d%02d.log",
+				lt.wYear, lt.wMonth, lt.wDay, lt.wHour, lt.wMinute, lt.wSecond);
+			log_fd = fopenU(logfile, "w+");
+			if (log_fd == NULL) {
+				uprintf("Could not create log file for bad blocks check\n");
+			} else {
+				fprintf(log_fd, "Rufus bad blocks check started on: %04d.%02d.%02d %02d:%02d:%02d\n",
+				lt.wYear, lt.wMonth, lt.wDay, lt.wHour, lt.wMinute, lt.wSecond);
+				fflush(log_fd);
+			}
+
 			if (!BadBlocks(hPhysicalDrive, SelectedDrive.DiskSize,
-				SelectedDrive.Geometry.BytesPerSector, BADBLOCKS_RW, &report)) {
+				SelectedDrive.Geometry.BytesPerSector, BADBLOCKS_RW, &report, log_fd)) {
 				uprintf("Bad blocks check failed.\n");
 				if (!FormatStatus)
 					FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|
@@ -415,12 +436,21 @@ void __cdecl FormatThread(void* param)
 				report.num_read_errors, report.num_write_errors, report.num_corruption_errors);
 			r = IDOK;
 			if (report.bb_count) {
-				safe_sprintf(bb_msg, sizeof(bb_msg), "Check completed - %u bad block%s found:\n"
-					"  %d read errors\n  %d write errors\n  %d corruption errors",
+				safe_sprintf(bb_msg, sizeof(bb_msg), "Check completed: %u bad block%s found.\n"
+					"  %d read errors\n  %d write errors\n  %d corruption errors\n",
 					report.bb_count, (report.bb_count==1)?"":"s",
 					report.num_read_errors, report.num_write_errors, 
 					report.num_corruption_errors);
-				r = MessageBoxA(hMainDialog, bb_msg, "Bad blocks check", MB_ABORTRETRYIGNORE|MB_ICONWARNING);
+				fprintf(log_fd, "%s", bb_msg);
+				fclose(log_fd);
+				safe_sprintf(&bb_msg[strlen(bb_msg)], sizeof(bb_msg)-strlen(bb_msg)-1,
+					"\nA more detailed report can be found in:\n%s\n", logfile);
+				r = MessageBoxU(hMainDialog, bb_msg, "Bad blocks found", MB_ABORTRETRYIGNORE|MB_ICONWARNING);
+			} else {
+				// We didn't get any errors => delete the log file
+				// NB: the log doesn't get deleted on abort
+				fclose(log_fd);
+				_unlink(logfile);
 			}
 		} while (r == IDRETRY);
 		if (r == IDABORT) {
