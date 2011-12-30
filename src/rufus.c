@@ -44,6 +44,8 @@ static const char* FileSystemLabel[FS_MAX] = { "FAT", "FAT32", "NTFS", "exFAT" }
 static const char* ClusterSizeLabel[] = { "512 bytes", "1024 bytes","2048 bytes","4096 bytes","8192 bytes",
 	"16 kilobytes", "32 kilobytes", "64 kilobytes", "128 kilobytes", "256 kilobytes", "512 kilobytes",
 	"1024 kilobytes","2048 kilobytes","4096 kilobytes","8192 kilobytes","16 megabytes","32 megabytes" };
+// For LGP set/restore
+static BOOL existing_key = FALSE;
 
 /*
  * Globals
@@ -740,8 +742,7 @@ BOOL SetLGP(BOOL bRestore, const char* szPath, const char* szPolicy, DWORD dwVal
 	DWORD disp, regtype, val, val_size=sizeof(DWORD);
 	HRESULT hr;
 	IGroupPolicyObject* pLGPO;
-	// These statuc values are used to restore initial state
-	static BOOL existing_key = FALSE;
+	// Along with global 'existing_key', this static value is used to restore initial state
 	static DWORD original_val;
 	HKEY path_key = NULL, policy_key = NULL;
 	// MSVC is finicky about these ones => redefine them
@@ -1130,8 +1131,16 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	ShowWindow(hDlg, SW_SHOWNORMAL);
 	UpdateWindow(hDlg);
 
-	// Do our own event processing
+	// Do our own event processing and process "magic" commands
 	while(GetMessage(&msg, NULL, 0, 0)) {
+#ifdef DISABLE_AUTORUN
+		// Alt-D => Delete the NoDriveTypeAutorun key on exit (useful if the app crashed)
+		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'D')) {
+			PrintStatus(0, "NoDriveTypeAutorun will be deleted on exit.");
+			existing_key = FALSE;
+			continue;
+		}
+#endif
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
 	}
