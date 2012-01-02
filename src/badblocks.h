@@ -7,7 +7,7 @@
  *
  * Copyright 1995, 1996, 1997, 1998, 1999 by Theodore Ts'o
  * Copyright 1999 by David Beattie
- * Copyright 2011 by Pete Batard
+ * Copyright 2011-2012 by Pete Batard
  *
  * This file is based on the minix file system programs fsck and mkfs
  * written and copyrighted by Linus Torvalds <Linus.Torvalds@cs.helsinki.fi>

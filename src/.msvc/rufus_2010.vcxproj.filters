@@ -57,6 +57,9 @@
     <ClCompile Include="..\partition_info.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\dos_locale.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\rufus.h">

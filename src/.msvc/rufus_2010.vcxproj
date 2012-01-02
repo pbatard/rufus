@@ -148,6 +148,7 @@
   <ItemGroup>
     <ClCompile Include="..\badblocks.c" />
     <ClCompile Include="..\br.c" />
+    <ClCompile Include="..\dos_locale.c" />
     <ClCompile Include="..\drive.c" />
     <ClCompile Include="..\fat12.c" />
     <ClCompile Include="..\fat16.c" />

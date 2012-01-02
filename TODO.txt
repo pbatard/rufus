@@ -1,5 +1,0 @@
-o Create a report file with failed block details on bad blocks
-o Allow selection of one of the existing compatible partitions (keep existing MBR) vs. full repartitioning (overwrite MBR)
-o Bootable NTFS/exFAT (http://sourceforge.net/projects/grub4dos)?
-o GPT support?
-o FAT32 formatting for volumes > 32 GB?

@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Standard Dialog Routines (Browse for folder, About, etc)
- * Copyright (c) 2011 Pete Batard <pete@akeo.ie>
+ * Copyright (c) 2011-2012 Pete Batard <pete@akeo.ie>
  *
  * Based on zadig_stdlg.c, part of libwdi: http://libwdi.sf.net
  *

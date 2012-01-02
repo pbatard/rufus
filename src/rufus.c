@@ -1,6 +1,6 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
- * Copyright (c) 2011 Pete Batard <pete@akeo.ie>
+ * Copyright (c) 2011-2012 Pete Batard <pete@akeo.ie>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -739,7 +739,7 @@ typedef IGroupPolicyObject *LPGROUPPOLICYOBJECT;
 BOOL SetLGP(BOOL bRestore, const char* szPath, const char* szPolicy, DWORD dwValue)
 {
 	LONG r;
-	DWORD disp, regtype, val, val_size=sizeof(DWORD);
+	DWORD disp, regtype, val=0, val_size=sizeof(DWORD);
 	HRESULT hr;
 	IGroupPolicyObject* pLGPO;
 	// Along with global 'existing_key', this static value is used to restore initial state
@@ -812,10 +812,10 @@ BOOL SetLGP(BOOL bRestore, const char* szPath, const char* szPolicy, DWORD dwVal
 		uprintf("SetLGP: Unable to apply %s policy - error %x\n", szPolicy, hr);
 		goto error;
 	} else {
-		if ((bRestore) && (!existing_key)) {
-			uprintf("SetLGP: Successfully removed %s policy key\n", szPolicy);
-		} else {
+		if ((!bRestore) || (existing_key)) {
 			uprintf("SetLGP: Successfully %s %s policy to 0x%08X\n", (bRestore)?"restored":"set", szPolicy, val);
+		} else {
+			uprintf("SetLGP: Successfully removed %s policy key\n", szPolicy);
 		}
 	}
 
