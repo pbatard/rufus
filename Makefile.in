@@ -71,6 +71,7 @@ AMTAR = @AMTAR@
 AM_CFLAGS = @AM_CFLAGS@
 AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
 AM_LDFLAGS = @AM_LDFLAGS@
+AM_RCFLAGS = @AM_RCFLAGS@
 AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
@@ -84,6 +85,7 @@ ECHO_C = @ECHO_C@
 ECHO_N = @ECHO_N@
 ECHO_T = @ECHO_T@
 EXEEXT = @EXEEXT@
+EXESUFFIX = @EXESUFFIX@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
@@ -444,14 +446,15 @@ uninstall-am:
 # This step produces the UPX compressed and signed releases that are made available for public download
 release: all
 	@mv src/$(TARGET)$(EXEEXT) .
-	@mv src/$(TARGET)_fd$(EXEEXT) .
 	@$(STRIP) $(TARGET)$(EXEEXT)
-	@$(STRIP) $(TARGET)_fd$(EXEEXT)
 	@upx $(TARGET)$(EXEEXT)
-	@upx $(TARGET)_fd$(EXEEXT)
-	@cmd.exe /k _sign.cmd $(TARGET)$(EXEEXT) $(TARGET)_fd$(EXEEXT)
-	@mv $(TARGET)$(EXEEXT) $(TARGET)_v$(VERSION)$(EXEEXT)
-	@mv $(TARGET)_fd$(EXEEXT) $(TARGET)_v$(VERSION)f$(EXEEXT)
+	@mv $(TARGET)$(EXEEXT) $(TARGET)_v$(VERSION)$(EXESUFFIX)$(EXEEXT)
+# Don't want to enter a password twice => only sign when we have both release files
+	@if [ -f $(TARGET)_v$(VERSION)f$(EXEEXT) ]; then \
+		if [ -f $(TARGET)_v$(VERSION)$(EXEEXT) ]; then \
+			cmd.exe /k _sign.cmd $(TARGET)_v$(VERSION)$(EXEEXT) $(TARGET)_v$(VERSION)f$(EXEEXT); \
+		fi; \
+	fi
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

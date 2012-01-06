@@ -1,4 +1,4 @@
-AC_INIT([rufus], [1.0.6], [https://github.com/pbatard/rufus/issues], [rufus], [https://github.com/pbatard/rufus])
+AC_INIT([rufus], [1.0.7], [https://github.com/pbatard/rufus/issues], [rufus], [http://rufus.akeo.ie])
 AM_INIT_AUTOMAKE([-Wno-portability foreign no-dist no-dependencies])
 AC_CONFIG_SRCDIR([src/rufus.c])
 AC_CONFIG_MACRO_DIR([m4])
@@ -36,16 +36,18 @@ AC_DEFINE([_GNU_SOURCE], [], [Use GNU extensions])
 AM_CFLAGS="${AM_CFLAGS} -DWINVER=0x501 -D_WIN32_IE=0x501 -D_WIN32_WINNT=0x501"
 AM_LDFLAGS="${AM_LDFLAGS} -Wl,-no-undefined"
 
-# Debug logging
-#AC_ARG_ENABLE([log], [AS_HELP_STRING([--enable-log], [enable logging (default y)])],
-#	[log_enabled=$enableval],
-#	[log_enabled='yes'])
-#if test "x$log_enabled" != "xno"; then
-#	AC_DEFINE([RUFUS_DEBUG], [1], [Debug logging])
-#fi
+AC_ARG_WITH([freedos],
+	[AS_HELP_STRING([--with-freedos],
+		[embed FreeDOS support (default=yes)])],
+	[],
+	[with_freedos=yes])
+if test "x$with_freedos" != "xno" ; then
+	AM_RCFLAGS="-DWITH_FREEDOS"
+	EXESUFFIX="f"
+fi
 
 # Debug symbols
-AC_ARG_ENABLE(debug, AS_HELP_STRING([--enable-debug], [keep debug symbols for gdb (default y)]),
+AC_ARG_ENABLE(debug, AS_HELP_STRING([--enable-debug], [keep debug symbols for gdb (default=yes)]),
 	[debug_enabled=$enableval],
 	[debug_enabled='yes'])
 if test "x$debug_enabled" = "xyes" ; then
@@ -67,6 +69,8 @@ AM_CFLAGS="$AM_CFLAGS -std=gnu99 -Wshadow -Wall -Wundef -Wunused -Wstrict-protot
 AC_SUBST([VISIBILITY_CFLAGS])
 AC_SUBST([AM_CFLAGS])
 AC_SUBST([AM_LDFLAGS])
+AC_SUBST([AM_RCFLAGS])
+AC_SUBST([EXESUFFIX])
 
 AC_CONFIG_FILES([Makefile])
 AC_CONFIG_FILES([src/Makefile])
