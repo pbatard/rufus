@@ -980,7 +980,7 @@ BOOL SetDOSLocale(const char* path, BOOL bFreeDOS)
 		return FALSE;
 	}
 	if (bFreeDOS) {
-		fprintf(fd, "MENU\nMENU   FreeDOS Language Selection Menu\n");
+		fprintf(fd, "!MENUCOLOR=7,0\nMENU\nMENU   FreeDOS Language Selection Menu\n");
 		fprintf(fd, "MENU   อออออออออออออออออออออออออออออออ\nMENU\n");
 	} else {
 		fprintf(fd, "[MENU]\n");
