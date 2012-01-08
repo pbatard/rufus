@@ -55,7 +55,7 @@ HWND hMainDialog;
 char szFolderPath[MAX_PATH];
 float fScale = 1.0f;
 int default_fs;
-HWND hDeviceList, hCapacity, hFileSystem, hClusterSize, hLabel, hDOSType;
+HWND hDeviceList, hCapacity, hFileSystem, hClusterSize, hLabel, hDOSType, hNBPasses;
 BOOL bWithFreeDOS;
 
 static HWND hDeviceTooltip = NULL, hFSTooltip = NULL, hProgress = NULL;
@@ -904,6 +904,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		hProgress = GetDlgItem(hDlg, IDC_PROGRESS);
 		hDOS = GetDlgItem(hDlg, IDC_DOS);
 		hDOSType = GetDlgItem(hDlg, IDC_DOSTYPE);
+		hNBPasses = GetDlgItem(hDlg, IDC_NBPASSES);
 		// High DPI scaling
 		hDC = GetDC(hDlg);
 		fScale = GetDeviceCaps(hDC, LOGPIXELSX) / 96.0f;
@@ -924,11 +925,15 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		CreateStatusBar();
 		// Use maximum granularity for the progress bar
 		SendMessage(hProgress, PBM_SETRANGE, 0, MAX_PROGRESS<<16);
+		// Fill up the passes
+		IGNORE_RETVAL(ComboBox_AddStringU(hNBPasses, "1 Pass"));
+		IGNORE_RETVAL(ComboBox_AddStringU(hNBPasses, "2 Passes"));
+		IGNORE_RETVAL(ComboBox_AddStringU(hNBPasses, "3 Passes"));
+		IGNORE_RETVAL(ComboBox_AddStringU(hNBPasses, "4 Passes"));
+		IGNORE_RETVAL(ComboBox_SetCurSel(hNBPasses, 1));
 		// Fill up the DOS type dropdown
 		IGNORE_RETVAL(ComboBox_AddStringU(hDOSType, "FreeDOS"));
 		IGNORE_RETVAL(ComboBox_AddStringU(hDOSType, "WinMe"));
-		// TODO: enable folder selection
-		// IGNORE_RETVAL(ComboBox_AddStringU(hDOSType, "Custom"));
 		IGNORE_RETVAL(ComboBox_SetCurSel(hDOSType, bWithFreeDOS?DT_FREEDOS:DT_WINME));
 		if (bWithFreeDOS) {
 			SetDlgItemTextA(hDlg, IDC_DOS, "Create a DOS bootable disk:");

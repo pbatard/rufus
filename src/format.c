@@ -423,7 +423,7 @@ void __cdecl FormatThread(void* param)
 			}
 
 			if (!BadBlocks(hPhysicalDrive, SelectedDrive.DiskSize,
-				SelectedDrive.Geometry.BytesPerSector, BADBLOCKS_RW, &report, log_fd)) {
+				SelectedDrive.Geometry.BytesPerSector, ComboBox_GetCurSel(hNBPasses)+1, &report, log_fd)) {
 				uprintf("Bad blocks check failed.\n");
 				if (!FormatStatus)
 					FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|

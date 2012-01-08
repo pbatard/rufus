@@ -35,19 +35,12 @@ typedef struct ext2_struct_u32_iterate      *ext2_u32_iterate;
 #define EXT2_ET_MAGIC_BADBLOCKS_LIST        (ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_OBJECT_IN_LIST)
 #define EXT2_ET_MAGIC_BADBLOCKS_ITERATE     (ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_INVALID_BLOCK)
 
-
 #define EXT2_CHECK_MAGIC(struct, code) \
 	if ((struct)->magic != (code)) return (code)
 #define EXT2_BAD_BLOCKS_THRESHOLD           256
 #define EXT2_BLOCKS_AT_ONCE                 64
 #define EXT2_SYS_PAGE_SIZE                  4096
-#define EXT2_RW_PATTERNS                    {0xaa, 0x55}
 
-enum test_types {
-	BADBLOCKS_RO,		/* Read-only */
-	BADBLOCKS_RW,		/* DESTRUCTIVE read-write */
-	BADBLOCKS_ND		/* non-destructive read-write */
-};
 enum error_types { READ_ERROR, WRITE_ERROR, CORRUPTION_ERROR };
 enum op_type { OP_READ, OP_WRITE };
 

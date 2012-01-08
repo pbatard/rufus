@@ -140,7 +140,7 @@ typedef struct {
  */
 extern HINSTANCE hMainInstance;
 extern HWND hMainDialog, hStatus, hDeviceList, hCapacity;
-extern HWND hFileSystem, hClusterSize, hLabel, hDOSType; 
+extern HWND hFileSystem, hClusterSize, hLabel, hDOSType, hNBPasses;
 extern float fScale;
 extern char szFolderPath[MAX_PATH];
 extern DWORD FormatStatus;

@@ -47,6 +47,8 @@
 #define IDC_DOS                         1010
 #define IDC_BADBLOCKS                   1011
 #define IDC_PROGRESS                    1012
+#define IDC_DOSTYPE                     1013
+#define IDC_NBPASSES                    1014
 #define IDC_ABOUT_LICENSE               1030
 #define IDC_ABOUT_ICON                  1031
 #define IDC_RUFUS_BOLD                  1032
@@ -57,7 +59,6 @@
 #define IDC_NOTIFICATION_ICON           1040
 #define IDC_NOTIFICATION_TEXT           1041
 #define IDC_NOTIFICATION_LINE           1042
-#define IDC_DOSTYPE                     1043
 
 // Next default values for new objects
 // 
@@ -66,7 +67,7 @@
 #define _APS_NO_MFC                     1
 #define _APS_NEXT_RESOURCE_VALUE        107
 #define _APS_NEXT_COMMAND_VALUE         40001
-#define _APS_NEXT_CONTROL_VALUE         1044
+#define _APS_NEXT_CONTROL_VALUE         1043
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
