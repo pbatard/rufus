@@ -30,7 +30,7 @@ LANGUAGE LANG_ENGLISH, SUBLANG_NEUTRAL
 IDD_DIALOG DIALOGEX 12, 12, 206, 278
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_APPWINDOW
-CAPTION "Rufus v1.0.7.113"
+CAPTION "Rufus v1.0.7.114"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     DEFPUSHBUTTON   "Start",IDC_START,94,236,50,14
@@ -66,7 +66,7 @@ BEGIN
     DEFPUSHBUTTON   "OK",IDOK,231,175,50,14,WS_GROUP
     CONTROL         "<a href=""http://rufus.akeo.ie"">http://rufus.akeo.ie</a>",IDC_ABOUT_RUFUS_URL,
                     "SysLink",WS_TABSTOP,46,47,114,9
-    LTEXT           "Version 1.0.7 (Build 113)",IDC_STATIC,46,19,78,8
+    LTEXT           "Version 1.0.7 (Build 114)",IDC_STATIC,46,19,78,8
     PUSHBUTTON      "License...",IDC_ABOUT_LICENSE,46,175,50,14,WS_GROUP
     EDITTEXT        IDC_ABOUT_COPYRIGHTS,46,107,235,63,ES_MULTILINE | ES_READONLY | WS_VSCROLL
     LTEXT           "Report bugs or request enhancements at:",IDC_STATIC,46,66,187,8
@@ -122,33 +122,33 @@ BEGIN
     "\r\n"
     "// Only include these in rufus_fd\r\n"
     "#if defined(WITH_FREEDOS)\r\n"
-    "IDR_FD_COMMAND_COM      RCDATA                  ""../freedos/COMMAND.COM""\r\n"
-    "IDR_FD_KERNEL_SYS       RCDATA                  ""../freedos/KERNEL.SYS""\r\n"
-    "IDR_FD_DISPLAY_EXE      RCDATA                  ""../freedos/DISPLAY.EXE""\r\n"
-    "IDR_FD_KEYB_EXE         RCDATA                  ""../freedos/KEYB.EXE""\r\n"
-    "IDR_FD_MODE_COM         RCDATA                  ""../freedos/MODE.COM""\r\n"
-    "IDR_FD_KB1_SYS          RCDATA                  ""../freedos/KEYBOARD.SYS""\r\n"
-    "IDR_FD_KB2_SYS          RCDATA                  ""../freedos/KEYBRD2.SYS""\r\n"
-    "IDR_FD_KB3_SYS          RCDATA                  ""../freedos/KEYBRD3.SYS""\r\n"
-    "IDR_FD_KB4_SYS          RCDATA                  ""../freedos/KEYBRD4.SYS""\r\n"
-    "IDR_FD_EGA1_CPX         RCDATA                  ""../freedos/ega.cpx""\r\n"
-    "IDR_FD_EGA2_CPX         RCDATA                  ""../freedos/ega2.cpx""\r\n"
-    "IDR_FD_EGA3_CPX         RCDATA                  ""../freedos/ega3.cpx""\r\n"
-    "IDR_FD_EGA4_CPX         RCDATA                  ""../freedos/ega4.cpx""\r\n"
-    "IDR_FD_EGA5_CPX         RCDATA                  ""../freedos/ega5.cpx""\r\n"
-    "IDR_FD_EGA6_CPX         RCDATA                  ""../freedos/ega6.cpx""\r\n"
-    "IDR_FD_EGA7_CPX         RCDATA                  ""../freedos/ega7.cpx""\r\n"
-    "IDR_FD_EGA8_CPX         RCDATA                  ""../freedos/ega8.cpx""\r\n"
-    "IDR_FD_EGA9_CPX         RCDATA                  ""../freedos/ega9.cpx""\r\n"
-    "IDR_FD_EGA10_CPX        RCDATA                  ""../freedos/ega10.cpx""\r\n"
-    "IDR_FD_EGA11_CPX        RCDATA                  ""../freedos/ega11.cpx""\r\n"
-    "IDR_FD_EGA12_CPX        RCDATA                  ""../freedos/ega12.cpx""\r\n"
-    "IDR_FD_EGA13_CPX        RCDATA                  ""../freedos/ega13.cpx""\r\n"
-    "IDR_FD_EGA14_CPX        RCDATA                  ""../freedos/ega14.cpx""\r\n"
-    "IDR_FD_EGA15_CPX        RCDATA                  ""../freedos/ega15.cpx""\r\n"
-    "IDR_FD_EGA16_CPX        RCDATA                  ""../freedos/ega16.cpx""\r\n"
-    "IDR_FD_EGA17_CPX        RCDATA                  ""../freedos/ega17.cpx""\r\n"
-    "IDR_FD_EGA18_CPX        RCDATA                  ""../freedos/ega18.cpx""\r\n"
+    "IDR_FD_COMMAND_COM      RCDATA                  ""../res/freedos/COMMAND.COM""\r\n"
+    "IDR_FD_KERNEL_SYS       RCDATA                  ""../res/freedos/KERNEL.SYS""\r\n"
+    "IDR_FD_DISPLAY_EXE      RCDATA                  ""../res/freedos/DISPLAY.EXE""\r\n"
+    "IDR_FD_KEYB_EXE         RCDATA                  ""../res/freedos/KEYB.EXE""\r\n"
+    "IDR_FD_MODE_COM         RCDATA                  ""../res/freedos/MODE.COM""\r\n"
+    "IDR_FD_KB1_SYS          RCDATA                  ""../res/freedos/KEYBOARD.SYS""\r\n"
+    "IDR_FD_KB2_SYS          RCDATA                  ""../res/freedos/KEYBRD2.SYS""\r\n"
+    "IDR_FD_KB3_SYS          RCDATA                  ""../res/freedos/KEYBRD3.SYS""\r\n"
+    "IDR_FD_KB4_SYS          RCDATA                  ""../res/freedos/KEYBRD4.SYS""\r\n"
+    "IDR_FD_EGA1_CPX         RCDATA                  ""../res/freedos/ega.cpx""\r\n"
+    "IDR_FD_EGA2_CPX         RCDATA                  ""../res/freedos/ega2.cpx""\r\n"
+    "IDR_FD_EGA3_CPX         RCDATA                  ""../res/freedos/ega3.cpx""\r\n"
+    "IDR_FD_EGA4_CPX         RCDATA                  ""../res/freedos/ega4.cpx""\r\n"
+    "IDR_FD_EGA5_CPX         RCDATA                  ""../res/freedos/ega5.cpx""\r\n"
+    "IDR_FD_EGA6_CPX         RCDATA                  ""../res/freedos/ega6.cpx""\r\n"
+    "IDR_FD_EGA7_CPX         RCDATA                  ""../res/freedos/ega7.cpx""\r\n"
+    "IDR_FD_EGA8_CPX         RCDATA                  ""../res/freedos/ega8.cpx""\r\n"
+    "IDR_FD_EGA9_CPX         RCDATA                  ""../res/freedos/ega9.cpx""\r\n"
+    "IDR_FD_EGA10_CPX        RCDATA                  ""../res/freedos/ega10.cpx""\r\n"
+    "IDR_FD_EGA11_CPX        RCDATA                  ""../res/freedos/ega11.cpx""\r\n"
+    "IDR_FD_EGA12_CPX        RCDATA                  ""../res/freedos/ega12.cpx""\r\n"
+    "IDR_FD_EGA13_CPX        RCDATA                  ""../res/freedos/ega13.cpx""\r\n"
+    "IDR_FD_EGA14_CPX        RCDATA                  ""../res/freedos/ega14.cpx""\r\n"
+    "IDR_FD_EGA15_CPX        RCDATA                  ""../res/freedos/ega15.cpx""\r\n"
+    "IDR_FD_EGA16_CPX        RCDATA                  ""../res/freedos/ega16.cpx""\r\n"
+    "IDR_FD_EGA17_CPX        RCDATA                  ""../res/freedos/ega17.cpx""\r\n"
+    "IDR_FD_EGA18_CPX        RCDATA                  ""../res/freedos/ega18.cpx""\r\n"
     "#endif\r\n"
     "\r\n"
     "// Must reference a manifest for visual styles and elevation\r\n"
@@ -196,8 +196,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,0,7,113
- PRODUCTVERSION 1,0,7,113
+ FILEVERSION 1,0,7,114
+ PRODUCTVERSION 1,0,7,114
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -214,13 +214,13 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "akeo.ie"
             VALUE "FileDescription", "Rufus"
-            VALUE "FileVersion", "1.0.7.113"
+            VALUE "FileVersion", "1.0.7.114"
             VALUE "InternalName", "Rufus"
             VALUE "LegalCopyright", "© 2011 Pete Batard (GPL v3)"
             VALUE "LegalTrademarks", "http://www.gnu.org/copyleft/gpl.html"
             VALUE "OriginalFilename", "rufus.exe"
             VALUE "ProductName", "Rufus"
-            VALUE "ProductVersion", "1.0.7.113"
+            VALUE "ProductVersion", "1.0.7.114"
         END
     END
     BLOCK "VarFileInfo"
@@ -237,7 +237,7 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDI_ICON                ICON                    "rufus.ico"
+IDI_ICON                ICON                    "../res/rufus.ico"
 #endif    // English resources
 /////////////////////////////////////////////////////////////////////////////
 
@@ -251,33 +251,33 @@ IDI_ICON                ICON                    "rufus.ico"
 
 // Only include these in rufus_fd
 #if defined(WITH_FREEDOS)
-IDR_FD_COMMAND_COM      RCDATA                  "../freedos/COMMAND.COM"
-IDR_FD_KERNEL_SYS       RCDATA                  "../freedos/KERNEL.SYS"
-IDR_FD_DISPLAY_EXE      RCDATA                  "../freedos/DISPLAY.EXE"
-IDR_FD_KEYB_EXE         RCDATA                  "../freedos/KEYB.EXE"
-IDR_FD_MODE_COM         RCDATA                  "../freedos/MODE.COM"
-IDR_FD_KB1_SYS          RCDATA                  "../freedos/KEYBOARD.SYS"
-IDR_FD_KB2_SYS          RCDATA                  "../freedos/KEYBRD2.SYS"
-IDR_FD_KB3_SYS          RCDATA                  "../freedos/KEYBRD3.SYS"
-IDR_FD_KB4_SYS          RCDATA                  "../freedos/KEYBRD4.SYS"
-IDR_FD_EGA1_CPX         RCDATA                  "../freedos/ega.cpx"
-IDR_FD_EGA2_CPX         RCDATA                  "../freedos/ega2.cpx"
-IDR_FD_EGA3_CPX         RCDATA                  "../freedos/ega3.cpx"
-IDR_FD_EGA4_CPX         RCDATA                  "../freedos/ega4.cpx"
-IDR_FD_EGA5_CPX         RCDATA                  "../freedos/ega5.cpx"
-IDR_FD_EGA6_CPX         RCDATA                  "../freedos/ega6.cpx"
-IDR_FD_EGA7_CPX         RCDATA                  "../freedos/ega7.cpx"
-IDR_FD_EGA8_CPX         RCDATA                  "../freedos/ega8.cpx"
-IDR_FD_EGA9_CPX         RCDATA                  "../freedos/ega9.cpx"
-IDR_FD_EGA10_CPX        RCDATA                  "../freedos/ega10.cpx"
-IDR_FD_EGA11_CPX        RCDATA                  "../freedos/ega11.cpx"
-IDR_FD_EGA12_CPX        RCDATA                  "../freedos/ega12.cpx"
-IDR_FD_EGA13_CPX        RCDATA                  "../freedos/ega13.cpx"
-IDR_FD_EGA14_CPX        RCDATA                  "../freedos/ega14.cpx"
-IDR_FD_EGA15_CPX        RCDATA                  "../freedos/ega15.cpx"
-IDR_FD_EGA16_CPX        RCDATA                  "../freedos/ega16.cpx"
-IDR_FD_EGA17_CPX        RCDATA                  "../freedos/ega17.cpx"
-IDR_FD_EGA18_CPX        RCDATA                  "../freedos/ega18.cpx"
+IDR_FD_COMMAND_COM      RCDATA                  "../res/freedos/COMMAND.COM"
+IDR_FD_KERNEL_SYS       RCDATA                  "../res/freedos/KERNEL.SYS"
+IDR_FD_DISPLAY_EXE      RCDATA                  "../res/freedos/DISPLAY.EXE"
+IDR_FD_KEYB_EXE         RCDATA                  "../res/freedos/KEYB.EXE"
+IDR_FD_MODE_COM         RCDATA                  "../res/freedos/MODE.COM"
+IDR_FD_KB1_SYS          RCDATA                  "../res/freedos/KEYBOARD.SYS"
+IDR_FD_KB2_SYS          RCDATA                  "../res/freedos/KEYBRD2.SYS"
+IDR_FD_KB3_SYS          RCDATA                  "../res/freedos/KEYBRD3.SYS"
+IDR_FD_KB4_SYS          RCDATA                  "../res/freedos/KEYBRD4.SYS"
+IDR_FD_EGA1_CPX         RCDATA                  "../res/freedos/ega.cpx"
+IDR_FD_EGA2_CPX         RCDATA                  "../res/freedos/ega2.cpx"
+IDR_FD_EGA3_CPX         RCDATA                  "../res/freedos/ega3.cpx"
+IDR_FD_EGA4_CPX         RCDATA                  "../res/freedos/ega4.cpx"
+IDR_FD_EGA5_CPX         RCDATA                  "../res/freedos/ega5.cpx"
+IDR_FD_EGA6_CPX         RCDATA                  "../res/freedos/ega6.cpx"
+IDR_FD_EGA7_CPX         RCDATA                  "../res/freedos/ega7.cpx"
+IDR_FD_EGA8_CPX         RCDATA                  "../res/freedos/ega8.cpx"
+IDR_FD_EGA9_CPX         RCDATA                  "../res/freedos/ega9.cpx"
+IDR_FD_EGA10_CPX        RCDATA                  "../res/freedos/ega10.cpx"
+IDR_FD_EGA11_CPX        RCDATA                  "../res/freedos/ega11.cpx"
+IDR_FD_EGA12_CPX        RCDATA                  "../res/freedos/ega12.cpx"
+IDR_FD_EGA13_CPX        RCDATA                  "../res/freedos/ega13.cpx"
+IDR_FD_EGA14_CPX        RCDATA                  "../res/freedos/ega14.cpx"
+IDR_FD_EGA15_CPX        RCDATA                  "../res/freedos/ega15.cpx"
+IDR_FD_EGA16_CPX        RCDATA                  "../res/freedos/ega16.cpx"
+IDR_FD_EGA17_CPX        RCDATA                  "../res/freedos/ega17.cpx"
+IDR_FD_EGA18_CPX        RCDATA                  "../res/freedos/ega18.cpx"
 #endif
 
 // Must reference a manifest for visual styles and elevation
