@@ -1,7 +1,12 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{95A3A8A7-A1B1-4EE7-B2EF-709D21EB567F}") = "rufus", "src\.msvc\rufus_fd_2010.vcxproj", "{CB1A2185-AD54-47DF-B64C-B94C444E0C1F}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rufus_fd", "src\.msvc\rufus_fd_2010.vcxproj", "{CB1A2185-AD54-47DF-B64C-B94C444E0C1F}"
+	ProjectSection(ProjectDependencies) = postProject
+		{2B1D078D-8EB4-4398-9CA4-23457265A7F6} = {2B1D078D-8EB4-4398-9CA4-23457265A7F6}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ms-sys", "src\ms-sys\.msvc\ms-sys.vcxproj", "{2B1D078D-8EB4-4398-9CA4-23457265A7F6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -18,7 +23,15 @@ Global
 		{CB1A2185-AD54-47DF-B64C-B94C444E0C1F}.Release|Win32.ActiveCfg = Release|Win32
 		{CB1A2185-AD54-47DF-B64C-B94C444E0C1F}.Release|Win32.Build.0 = Release|Win32
 		{CB1A2185-AD54-47DF-B64C-B94C444E0C1F}.Release|x64.ActiveCfg = Release|x64
-		{CB1A2185-AD54-47DF-B64C-B94C444E0C1F}.Release|x64.Build.0 = Release|x64		
+		{CB1A2185-AD54-47DF-B64C-B94C444E0C1F}.Release|x64.Build.0 = Release|x64
+		{2B1D078D-8EB4-4398-9CA4-23457265A7F6}.Debug|Win32.ActiveCfg = Debug|Win32
+		{2B1D078D-8EB4-4398-9CA4-23457265A7F6}.Debug|Win32.Build.0 = Debug|Win32
+		{2B1D078D-8EB4-4398-9CA4-23457265A7F6}.Debug|x64.ActiveCfg = Debug|x64
+		{2B1D078D-8EB4-4398-9CA4-23457265A7F6}.Debug|x64.Build.0 = Debug|x64
+		{2B1D078D-8EB4-4398-9CA4-23457265A7F6}.Release|Win32.ActiveCfg = Release|Win32
+		{2B1D078D-8EB4-4398-9CA4-23457265A7F6}.Release|Win32.Build.0 = Release|Win32
+		{2B1D078D-8EB4-4398-9CA4-23457265A7F6}.Release|x64.ActiveCfg = Release|x64
+		{2B1D078D-8EB4-4398-9CA4-23457265A7F6}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

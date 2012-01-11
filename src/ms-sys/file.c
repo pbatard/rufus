@@ -19,7 +19,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "rufus.h"
+#include "../rufus.h"
 #include "file.h"
 
 /* Returns the number of bytes written or -1 on error */

@@ -205,32 +205,6 @@ static int ext2fs_badblocks_list_test(ext2_badblocks_list bb, blk_t blk)
 	return ext2fs_u32_list_test((ext2_u32_list) bb, (__u32) blk);
 }
 
-static errcode_t ext2fs_u32_list_iterate_begin(ext2_u32_list bb,
-					ext2_u32_iterate *ret)
-{
-	ext2_u32_iterate iter;
-
-	EXT2_CHECK_MAGIC(bb, EXT2_ET_MAGIC_BADBLOCKS_LIST);
-
-	iter = malloc(sizeof(struct ext2_struct_u32_iterate));
-	if (iter == NULL)
-		return EXT2_ET_NO_MEMORY;
-
-	iter->magic = EXT2_ET_MAGIC_BADBLOCKS_ITERATE;
-	iter->bb = bb;
-	iter->ptr = 0;
-	*ret = iter;
-	return 0;
-}
-
-static errcode_t ext2fs_badblocks_list_iterate_begin(ext2_badblocks_list bb,
-					      ext2_badblocks_iterate *ret)
-{
-	return ext2fs_u32_list_iterate_begin((ext2_u32_list) bb,
-					      (ext2_u32_iterate *) ret);
-}
-
-
 static int ext2fs_u32_list_iterate(ext2_u32_iterate iter, __u32 *blk)
 {
 	ext2_u32_list	bb;
@@ -256,22 +230,6 @@ static int ext2fs_badblocks_list_iterate(ext2_badblocks_iterate iter, blk_t *blk
 	return ext2fs_u32_list_iterate((ext2_u32_iterate) iter,
 				       (__u32 *) blk);
 }
-
-
-static void ext2fs_u32_list_iterate_end(ext2_u32_iterate iter)
-{
-	if (!iter || (iter->magic != EXT2_ET_MAGIC_BADBLOCKS_ITERATE))
-		return;
-
-	iter->bb = 0;
-	free(iter);
-}
-
-static void ext2fs_badblocks_list_iterate_end(ext2_badblocks_iterate iter)
-{
-	ext2fs_u32_list_iterate_end((ext2_u32_iterate) iter);
-}
-
 
 /*
  * from e2fsprogs/misc/badblocks.c

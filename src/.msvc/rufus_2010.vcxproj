@@ -80,7 +80,7 @@
       <PreprocessorDefinitions>_CRTDBG_MAP_ALLOC;_CRT_SECURE_NO_WARNINGS;ISOLATION_AWARE_ENABLED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
-      <AdditionalIncludeDirectories>..\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\ms-sys\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <AdditionalDependencies>setupapi.lib;comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -89,6 +89,9 @@
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <BuildLog />
@@ -96,7 +99,7 @@
       <TargetEnvironment>X64</TargetEnvironment>
     </Midl>
     <ClCompile>
-      <AdditionalIncludeDirectories>..\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\ms-sys\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_CRTDBG_MAP_ALLOC;_CRT_SECURE_NO_WARNINGS;ISOLATION_AWARE_ENABLED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
@@ -109,6 +112,9 @@
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX64</TargetMachine>
     </Link>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <BuildLog />
@@ -116,7 +122,7 @@
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;ISOLATION_AWARE_ENABLED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
-      <AdditionalIncludeDirectories>..\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\ms-sys\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <AdditionalDependencies>setupapi.lib;comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -125,6 +131,9 @@
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <BuildLog />
@@ -135,7 +144,7 @@
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;ISOLATION_AWARE_ENABLED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
-      <AdditionalIncludeDirectories>..\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\ms-sys\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <AdditionalDependencies>setupapi.lib;comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -144,19 +153,16 @@
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX64</TargetMachine>
     </Link>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\badblocks.c" />
-    <ClCompile Include="..\br.c" />
     <ClCompile Include="..\dos_locale.c" />
     <ClCompile Include="..\drive.c" />
-    <ClCompile Include="..\fat12.c" />
-    <ClCompile Include="..\fat16.c" />
-    <ClCompile Include="..\fat32.c" />
-    <ClCompile Include="..\file.c" />
     <ClCompile Include="..\format.c" />
     <ClCompile Include="..\dos.c" />
-    <ClCompile Include="..\partition_info.c" />
     <ClCompile Include="..\rufus.c" />
     <ClCompile Include="..\stdio.c" />
     <ClCompile Include="..\stdlg.c" />
@@ -164,35 +170,6 @@
   <ItemGroup>
     <ClInclude Include="..\badblocks.h" />
     <ClInclude Include="..\format.h" />
-    <ClInclude Include="..\inc\br.h" />
-    <ClInclude Include="..\inc\br_fat12_0x0.h" />
-    <ClInclude Include="..\inc\br_fat12_0x3e.h" />
-    <ClInclude Include="..\inc\br_fat16fd_0x3e.h" />
-    <ClInclude Include="..\inc\br_fat16_0x0.h" />
-    <ClInclude Include="..\inc\br_fat16_0x3e.h" />
-    <ClInclude Include="..\inc\br_fat32fd_0x3f0.h" />
-    <ClInclude Include="..\inc\br_fat32fd_0x52.h" />
-    <ClInclude Include="..\inc\br_fat32nt_0x0.h" />
-    <ClInclude Include="..\inc\br_fat32nt_0x1800.h" />
-    <ClInclude Include="..\inc\br_fat32nt_0x3f0.h" />
-    <ClInclude Include="..\inc\br_fat32nt_0x52.h" />
-    <ClInclude Include="..\inc\br_fat32_0x0.h" />
-    <ClInclude Include="..\inc\br_fat32_0x3f0.h" />
-    <ClInclude Include="..\inc\br_fat32_0x52.h" />
-    <ClInclude Include="..\inc\fat12.h" />
-    <ClInclude Include="..\inc\fat16.h" />
-    <ClInclude Include="..\inc\fat32.h" />
-    <ClInclude Include="..\inc\file.h" />
-    <ClInclude Include="..\inc\label_11_char.h" />
-    <ClInclude Include="..\inc\mbr_2000.h" />
-    <ClInclude Include="..\inc\mbr_95b.h" />
-    <ClInclude Include="..\inc\mbr_dos.h" />
-    <ClInclude Include="..\inc\mbr_dos_f2.h" />
-    <ClInclude Include="..\inc\mbr_syslinux.h" />
-    <ClInclude Include="..\inc\mbr_vista.h" />
-    <ClInclude Include="..\inc\mbr_win7.h" />
-    <ClInclude Include="..\inc\mbr_zero.h" />
-    <ClInclude Include="..\inc\partition_info.h" />
     <ClInclude Include="..\msapi_utf8.h" />
     <ClInclude Include="..\dos.h" />
     <ClInclude Include="..\resource.h" />
@@ -208,6 +185,11 @@
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\rufus.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ms-sys\.msvc\ms-sys.vcxproj">
+      <Project>{2b1d078d-8eb4-4398-9ca4-23457265a7f6}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -9,6 +9,7 @@ m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])],
 
 AC_PREREQ([2.50])
 AC_PROG_CC
+AC_PROG_RANLIB
 AC_PATH_PROG(RM, rm, rm)
 AC_CHECK_TOOL(STRIP, strip, strip)
 AC_CHECK_TOOL(WINDRES, windres, windres)
@@ -74,4 +75,5 @@ AC_SUBST([EXESUFFIX])
 
 AC_CONFIG_FILES([Makefile])
 AC_CONFIG_FILES([src/Makefile])
+AC_CONFIG_FILES([src/ms-sys/Makefile])
 AC_OUTPUT

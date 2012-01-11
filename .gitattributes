@@ -6,7 +6,6 @@
 configure       eol=lf
 install-sh      eol=lf
 *.sln           eol=crlf
-*.vcproj        eol=crlf
 *.vcxproj*      eol=crlf
 *.rc            eol=crlf
 *.cmd           eol=crlf

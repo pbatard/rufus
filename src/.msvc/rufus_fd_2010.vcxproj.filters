@@ -13,9 +13,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
     </Filter>
-    <Filter Include="Header Files\ms-sys inc">
-      <UniqueIdentifier>{ecff9fec-41c4-4ce8-b725-27ee39754cb7}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\rufus.c">
@@ -25,21 +22,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\dos.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\fat32.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\file.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\br.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\fat16.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\fat12.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\stdio.c">
@@ -52,9 +34,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\badblocks.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\partition_info.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\dos_locale.c">
@@ -77,98 +56,11 @@
     <ClInclude Include="..\dos.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\inc\br.h">
-      <Filter>Header Files\ms-sys inc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\inc\br_fat12_0x0.h">
-      <Filter>Header Files\ms-sys inc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\inc\br_fat12_0x3e.h">
-      <Filter>Header Files\ms-sys inc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\inc\br_fat16_0x0.h">
-      <Filter>Header Files\ms-sys inc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\inc\br_fat16_0x3e.h">
-      <Filter>Header Files\ms-sys inc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\inc\br_fat16fd_0x3e.h">
-      <Filter>Header Files\ms-sys inc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\inc\br_fat32_0x0.h">
-      <Filter>Header Files\ms-sys inc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\inc\br_fat32_0x3f0.h">
-      <Filter>Header Files\ms-sys inc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\inc\br_fat32_0x52.h">
-      <Filter>Header Files\ms-sys inc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\inc\br_fat32fd_0x3f0.h">
-      <Filter>Header Files\ms-sys inc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\inc\br_fat32fd_0x52.h">
-      <Filter>Header Files\ms-sys inc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\inc\br_fat32nt_0x0.h">
-      <Filter>Header Files\ms-sys inc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\inc\br_fat32nt_0x3f0.h">
-      <Filter>Header Files\ms-sys inc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\inc\br_fat32nt_0x52.h">
-      <Filter>Header Files\ms-sys inc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\inc\br_fat32nt_0x1800.h">
-      <Filter>Header Files\ms-sys inc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\inc\fat12.h">
-      <Filter>Header Files\ms-sys inc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\inc\fat16.h">
-      <Filter>Header Files\ms-sys inc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\inc\fat32.h">
-      <Filter>Header Files\ms-sys inc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\inc\file.h">
-      <Filter>Header Files\ms-sys inc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\inc\label_11_char.h">
-      <Filter>Header Files\ms-sys inc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\inc\mbr_95b.h">
-      <Filter>Header Files\ms-sys inc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\inc\mbr_2000.h">
-      <Filter>Header Files\ms-sys inc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\inc\mbr_dos.h">
-      <Filter>Header Files\ms-sys inc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\inc\mbr_dos_f2.h">
-      <Filter>Header Files\ms-sys inc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\inc\mbr_syslinux.h">
-      <Filter>Header Files\ms-sys inc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\inc\mbr_vista.h">
-      <Filter>Header Files\ms-sys inc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\inc\mbr_win7.h">
-      <Filter>Header Files\ms-sys inc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\inc\mbr_zero.h">
-      <Filter>Header Files\ms-sys inc</Filter>
-    </ClInclude>
     <ClInclude Include="..\format.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\badblocks.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\inc\partition_info.h">
-      <Filter>Header Files\ms-sys inc</Filter>
     </ClInclude>
     <ClInclude Include="..\resource.h">
       <Filter>Header Files</Filter>

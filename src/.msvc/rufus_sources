@@ -2,16 +2,14 @@ TARGETNAME=rufus
 TARGETTYPE=PROGRAM
 UMTYPE=windows
 UMENTRY=winmain
-C_DEFINES=$(C_DEFINES) /DUNICODE /D_UNICODE
+
+INCLUDES=$(DDK_INC_PATH);.\ms-sys\inc
+C_DEFINES = $(C_DEFINES) /DDDKBUILD /DUNICODE /D_UNICODE /DISOLATION_AWARE_ENABLED
 
 !IFNDEF MSC_WARNING_LEVEL
 MSC_WARNING_LEVEL=/W3
 !ENDIF
-
 USE_MSVCRT=1
-
-INCLUDES=$(DDK_INC_PATH);.\inc
-C_DEFINES = $(C_DEFINES) /DDDKBUILD /DISOLATION_AWARE_ENABLED
 
 TARGETLIBS=$(SDK_LIB_PATH)\kernel32.lib \
            $(SDK_LIB_PATH)\user32.lib \
@@ -19,10 +17,11 @@ TARGETLIBS=$(SDK_LIB_PATH)\kernel32.lib \
            $(SDK_LIB_PATH)\ole32.lib \
            $(SDK_LIB_PATH)\version.lib \
            $(SDK_LIB_PATH)\uuid.lib \
-           $(SDK_LIB_PATH)\shell32.lib
+           $(SDK_LIB_PATH)\shell32.lib \
+           .\ms-sys\ms-sys.lib
 
 # http://jpassing.com/2008/02/01/how-to-use-manifests-with-buildexe/
-SXS_APPLICATION_MANIFEST=common_controls_and_elevation.manifest
+SXS_APPLICATION_MANIFEST=..\common_controls_and_elevation.manifest
 
 SOURCES=rufus.c          \
         format.c         \
@@ -32,10 +31,4 @@ SOURCES=rufus.c          \
         dos_locale.c     \
         badblocks.c      \
         drive.c          \
-        file.c           \
-        br.c             \
-        fat12.c          \
-        fat16.c          \
-        fat32.c          \
-        partition_info.c \
         rufus.rc
