@@ -10,8 +10,12 @@ Features:
 Compilation:
   Use either Visual Studio 2010, WDK (Windows Driver Kit) or MinGW and then
   invoke the .sln, wdk_build.cmd or configure/make respectively.
-  You can get additional information about what Rufus is doing through a Windows
-  debugger such as DebugView.
+  You can change the project options (FreeDOS support, etc) by editing the top-level
+  ms-config.h (Visual Studio, WDK) or running "./configure --help" (MinGW).
+  
+Additional information:
+  Rufus provides extensive information abour what it is doing through the Windows
+  debug facility, which can be accessed with an application such as DebugView.
 
 More info:
   http://rufus.akeo.ie

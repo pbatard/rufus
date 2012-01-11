@@ -168,6 +168,7 @@
     <ClCompile Include="..\stdlg.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\ms-config.h" />
     <ClInclude Include="..\badblocks.h" />
     <ClInclude Include="..\format.h" />
     <ClInclude Include="..\msapi_utf8.h" />
@@ -181,7 +182,7 @@
     <Manifest Include="..\common_controls_and_elevation.manifest" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\rufus.ico" />
+    <None Include="..\..\res\rufus.ico" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\rufus.rc" />

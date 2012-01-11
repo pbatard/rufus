@@ -1,14 +1,6 @@
 @echo off
-::# NB: You can pass the option FD to build a version of rufus that includes FreeDOS
 
 if Test%BUILD_ALT_DIR%==Test goto usage
-
-::# process commandline parameters
-set FREEDOS=
-if "%1" == "" goto no_more_args
-::# /I for case insensitive
-if /I Test%1==TestFD set C_DEFINES="/DWITH_FREEDOS"
-:no_more_args
 
 ::# /M 2 for multiple cores
 set BUILD_CMD=build -bcwgZ -M2
