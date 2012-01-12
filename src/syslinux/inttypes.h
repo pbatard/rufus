@@ -29,8 +29,8 @@
 #define _INTTYPES_H_
 
 #include <stdint.h>
-/* SysLinux types addon */
-#include <sltypes.h>
+/* Workaround - TODO: move this include back into source */
+#include <unistd.h>
 
 #ifdef	__cplusplus
 extern	"C"	{

@@ -2,10 +2,10 @@
 #error This header should only be used with Microsoft compilers
 #endif
 
-/* The addons below are not part of inttypes but required for syslinux */
+/* Workaround unisdt.h for MS compilers */
 
-#ifndef _SLTYPES_H_
-#define _SLTYPES_H_
+#ifndef _UNISTD_H_
+#define _UNISTD_H_
 
 /* On MS environments, the inline keyword is available in C++ only */
 #ifndef inline
