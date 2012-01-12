@@ -30,6 +30,10 @@ const char* additional_copyrights =
 "http://www.freedos.org\r\n"
 "GNU General Public License (GPL) v2 or later, with binary redistribution allowed\r\n"
 "\r\n"
+"Syslinux support from Syslinux by H. Peter Anvin et al:\r\n"
+"http://www.syslinux.org\r\n"
+"GNU General Public License (GPL) v2 or later\r\n"
+"\r\n"
 "Bad blocks testing from e2fsprogs by Theodore T'so et al:\r\n"
 "http://e2fsprogs.sourceforge.net\r\n"
 "GNU General Public License (GPL) v3 compatible\r\n"
@@ -56,7 +60,7 @@ const char* additional_copyrights =
 "GNU General Public License (GPL) v3 or later\r\n"
 "\r\n"
 "\r\n"
-"All other references are to be found in the source.\r\n";
+"All other references can be found in the source.\r\n";
 
 const char* gplv3 =
 "                    GNU GENERAL PUBLIC LICENSE\r\n"

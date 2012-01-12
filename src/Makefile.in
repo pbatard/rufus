@@ -45,10 +45,12 @@ CONFIG_CLEAN_VPATH_FILES =
 PROGRAMS = $(noinst_PROGRAMS)
 am_rufus_OBJECTS = rufus-drive.$(OBJEXT) rufus-dos.$(OBJEXT) \
 	rufus-dos_locale.$(OBJEXT) rufus-badblocks.$(OBJEXT) \
-	rufus-format.$(OBJEXT) rufus-stdio.$(OBJEXT) \
-	rufus-stdlg.$(OBJEXT) rufus-rufus.$(OBJEXT)
+	rufus-syslinux.$(OBJEXT) rufus-format.$(OBJEXT) \
+	rufus-stdio.$(OBJEXT) rufus-stdlg.$(OBJEXT) \
+	rufus-rufus.$(OBJEXT)
 rufus_OBJECTS = $(am_rufus_OBJECTS)
-rufus_DEPENDENCIES = rufus_rc.o ms-sys/libmssys.a
+rufus_DEPENDENCIES = rufus_rc.o ms-sys/libmssys.a \
+	syslinux/libfat/libfat.a syslinux/libinstaller/libinstaller.a
 rufus_LINK = $(CCLD) $(rufus_CFLAGS) $(CFLAGS) $(rufus_LDFLAGS) \
 	$(LDFLAGS) -o $@
 DEFAULT_INCLUDES = -I.@am__isrc@
@@ -176,14 +178,14 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-SUBDIRS = ms-sys
+SUBDIRS = ms-sys syslinux/libfat syslinux/libinstaller
 pkg_v_rc = $(pkg_v_rc_$(V))
 pkg_v_rc_ = $(pkg_v_rc_$(AM_DEFAULT_VERBOSITY))
 pkg_v_rc_0 = @echo "  RC     $@";
-rufus_SOURCES = drive.c dos.c dos_locale.c badblocks.c format.c stdio.c stdlg.c rufus.c
-rufus_CFLAGS = -I./ms-sys/inc $(AM_CFLAGS)
+rufus_SOURCES = drive.c dos.c dos_locale.c badblocks.c syslinux.c format.c stdio.c stdlg.c rufus.c
+rufus_CFLAGS = -I./ms-sys/inc -I./syslinux/libfat -I./syslinux/libinstaller $(AM_CFLAGS)
 rufus_LDFLAGS = $(AM_LDFLAGS) -mwindows
-rufus_LDADD = rufus_rc.o ms-sys/libmssys.a -lsetupapi -lole32 -lgdi32 
+rufus_LDADD = rufus_rc.o ms-sys/libmssys.a syslinux/libfat/libfat.a syslinux/libinstaller/libinstaller.a -lsetupapi -lole32 -lgdi32 
 all: all-recursive
 
 .SUFFIXES:
@@ -270,6 +272,14 @@ rufus-badblocks.o: badblocks.c
 rufus-badblocks.obj: badblocks.c
 	$(AM_V_CC) @AM_BACKSLASH@
 	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_CFLAGS) $(CFLAGS) -c -o rufus-badblocks.obj `if test -f 'badblocks.c'; then $(CYGPATH_W) 'badblocks.c'; else $(CYGPATH_W) '$(srcdir)/badblocks.c'; fi`
+
+rufus-syslinux.o: syslinux.c
+	$(AM_V_CC) @AM_BACKSLASH@
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_CFLAGS) $(CFLAGS) -c -o rufus-syslinux.o `test -f 'syslinux.c' || echo '$(srcdir)/'`syslinux.c
+
+rufus-syslinux.obj: syslinux.c
+	$(AM_V_CC) @AM_BACKSLASH@
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_CFLAGS) $(CFLAGS) -c -o rufus-syslinux.obj `if test -f 'syslinux.c'; then $(CYGPATH_W) 'syslinux.c'; else $(CYGPATH_W) '$(srcdir)/syslinux.c'; fi`
 
 rufus-format.o: format.c
 	$(AM_V_CC) @AM_BACKSLASH@

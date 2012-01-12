@@ -1,4 +1,4 @@
-SUBDIRS = ms-sys
+SUBDIRS = ms-sys syslinux/libfat syslinux/libinstaller
 
 noinst_PROGRAMS = rufus
 
@@ -9,7 +9,7 @@ pkg_v_rc_0 = @echo "  RC     $@";
 %_rc.o: %.rc
 	$(pkg_v_rc)$(WINDRES) $(AM_RCFLAGS) -i $< -o $@
 
-rufus_SOURCES = drive.c dos.c dos_locale.c badblocks.c format.c stdio.c stdlg.c rufus.c
-rufus_CFLAGS = -I./ms-sys/inc $(AM_CFLAGS)
+rufus_SOURCES = drive.c dos.c dos_locale.c badblocks.c syslinux.c format.c stdio.c stdlg.c rufus.c
+rufus_CFLAGS = -I./ms-sys/inc -I./syslinux/libfat -I./syslinux/libinstaller $(AM_CFLAGS)
 rufus_LDFLAGS = $(AM_LDFLAGS) -mwindows
-rufus_LDADD = rufus_rc.o ms-sys/libmssys.a -lsetupapi -lole32 -lgdi32 
+rufus_LDADD = rufus_rc.o ms-sys/libmssys.a syslinux/libfat/libfat.a syslinux/libinstaller/libinstaller.a -lsetupapi -lole32 -lgdi32 

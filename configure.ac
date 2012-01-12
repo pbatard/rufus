@@ -87,4 +87,6 @@ AC_SUBST([EXESUFFIX])
 AC_CONFIG_FILES([Makefile])
 AC_CONFIG_FILES([src/Makefile])
 AC_CONFIG_FILES([src/ms-sys/Makefile])
+AC_CONFIG_FILES([src/syslinux/libfat/Makefile])
+AC_CONFIG_FILES([src/syslinux/libinstaller/Makefile])
 AC_OUTPUT

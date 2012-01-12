@@ -56,7 +56,7 @@ char szFolderPath[MAX_PATH];
 float fScale = 1.0f;
 int default_fs;
 HWND hDeviceList, hCapacity, hFileSystem, hClusterSize, hLabel, hDOSType, hNBPasses;
-BOOL bWithFreeDOS, bWithSysLinux;
+BOOL bWithFreeDOS, bWithSyslinux;
 
 static HWND hDeviceTooltip = NULL, hFSTooltip = NULL, hProgress = NULL;
 static StrArray DriveID, DriveLabel;
@@ -630,7 +630,7 @@ static void InitProgress(void)
 			nb_slots[OP_DOS] = 5+1;
 			break;
 		default:
-			nb_slots[OP_DOS] = 2+1;
+			nb_slots[OP_DOS] = 1+1;
 			break;
 		}
 	}
@@ -946,11 +946,11 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		IGNORE_RETVAL(ComboBox_SetItemData(hDOSType, ComboBox_AddStringU(hDOSType, "WinMe"), DT_WINME));
 		if (bWithFreeDOS)
 			IGNORE_RETVAL(ComboBox_SetItemData(hDOSType, ComboBox_AddStringU(hDOSType, "FreeDOS"), DT_FREEDOS));
-		if (bWithSysLinux)
-			IGNORE_RETVAL(ComboBox_SetItemData(hDOSType, ComboBox_AddStringU(hDOSType, "SysLinux"), DT_SYSLINUX));
+		if (bWithSyslinux)
+			IGNORE_RETVAL(ComboBox_SetItemData(hDOSType, ComboBox_AddStringU(hDOSType, "Syslinux"), DT_SYSLINUX));
 		IGNORE_RETVAL(ComboBox_SetCurSel(hDOSType, bWithFreeDOS?DT_FREEDOS:DT_WINME));
-		if (bWithFreeDOS || bWithSysLinux) {
-			SetDlgItemTextA(hDlg, IDC_DOS, "Create a DOS bootable disk:");
+		if (bWithFreeDOS || bWithSyslinux) {
+			SetDlgItemTextA(hDlg, IDC_DOS, "Create a bootable USB drive:");
 			ShowWindow(hDOSType, SW_SHOW);
 		}
 		// Create the string array
@@ -1140,10 +1140,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	bWithFreeDOS = (FindResource(hMainInstance, MAKEINTRESOURCE(IDR_FD_COMMAND_COM), RT_RCDATA) != NULL) &&
 		(FindResource(hMainInstance, MAKEINTRESOURCE(IDR_FD_KERNEL_SYS), RT_RCDATA) != NULL);
 	uprintf("FreeDOS resources are %sembedded with this app\n", bWithFreeDOS?"":"NOT ");
-	// Find out if the SysLinux resources are embedded in the app
-	bWithSysLinux = (FindResource(hMainInstance, MAKEINTRESOURCE(IDR_SL_LDLINUX_SYS), RT_RCDATA) != NULL) &&
+	// Find out if the Syslinux resources are embedded in the app
+	bWithSyslinux = (FindResource(hMainInstance, MAKEINTRESOURCE(IDR_SL_LDLINUX_SYS), RT_RCDATA) != NULL) &&
 		(FindResource(hMainInstance, MAKEINTRESOURCE(IDR_SL_LDLINUX_BSS), RT_RCDATA) != NULL);
-	uprintf("SysLinux resources are %sembedded with this app\n", bWithSysLinux?"":"NOT ");
+	uprintf("Syslinux resources are %sembedded with this app\n", bWithSyslinux?"":"NOT ");
 
 	// Create the main Window
 	if ( (hDlg = CreateDialogA(hInstance, MAKEINTRESOURCEA(IDD_DIALOG), NULL, MainCallback)) == NULL ) {

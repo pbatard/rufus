@@ -62,7 +62,7 @@ int libfat_readfile(intptr_t pp, void *buf, size_t secsize,
 }
 
 // TODO: set format errors
-BOOL InstallSysLinux(DWORD num, const char* drive_name)
+BOOL InstallSyslinux(DWORD num, const char* drive_name)
 {
 	HANDLE f_handle = INVALID_HANDLE_VALUE;
 	HANDLE d_handle = INVALID_HANDLE_VALUE;
@@ -76,7 +76,7 @@ BOOL InstallSysLinux(DWORD num, const char* drive_name)
 	static char ldlinux_name[] = "?:\\ldlinux.sys";
 	struct libfat_filesystem *fs;
 	libfat_sector_t s, *secp;
-	libfat_sector_t *sectors;
+	libfat_sector_t *sectors = NULL;
 	int ldlinux_sectors;
 	uint32_t ldlinux_cluster;
 	int nsectors;
@@ -140,6 +140,9 @@ BOOL InstallSysLinux(DWORD num, const char* drive_name)
 		goto out;
 	}
 
+	uprintf("Succesfully wrote 'ldlinux.sys'\n");
+	UpdateProgress(OP_DOS, -1.0f);
+
 	/* Now flush the media */
 	if (!FlushFileBuffers(f_handle)) {
 		uprintf("FlushFileBuffers failed\n");
@@ -150,7 +153,6 @@ BOOL InstallSysLinux(DWORD num, const char* drive_name)
 	d_handle = GetDriveHandle(num, (char*)drive_name, TRUE, FALSE);
 	if (d_handle == INVALID_HANDLE_VALUE) {
 		uprintf("Could open volume for syslinux operation\n");
-		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_OPEN_FAILED;
 		goto out;
 	}
 
@@ -203,9 +205,13 @@ BOOL InstallSysLinux(DWORD num, const char* drive_name)
 		goto out;
 	}
 
+	uprintf("Succesfully wrote Syslinux boot record\n");
+	UpdateProgress(OP_DOS, -1.0f);
+
 	r = TRUE;
 
 out:
+	safe_free(sectors);
 	safe_closehandle(d_handle);
 	safe_closehandle(f_handle);
 	return r;

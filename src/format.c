@@ -523,10 +523,10 @@ void __cdecl FormatThread(void* param)
 				goto out;
 			}
 			break;
-		// SysLinux requires patching of the PBR after the files have been extracted
+		// Syslinux requires patching of the PBR after the files have been extracted
 		case DT_SYSLINUX:
-			if (!InstallSysLinux(num, drive_name)) {
-				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANNOT_COPY;
+			if (!InstallSyslinux(num, drive_name)) {
+				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_INSTALL_FAILURE;
 				goto out;
 			}
 			break;

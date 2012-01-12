@@ -20,7 +20,6 @@
  * Return 0 on success, -1 on error, and set errno.
  *
  */
-#define  _GNU_SOURCE
 
 #include <stdio.h>
 #include <stdlib.h>

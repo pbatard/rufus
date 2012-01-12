@@ -5,4 +5,4 @@
 #define WITH_FREEDOS
 
 /* SysLinux support, for ISO -> bootable USB */
-//#define WITH_SYSLINUX
+#define WITH_SYSLINUX
