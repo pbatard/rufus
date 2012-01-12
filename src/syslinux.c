@@ -61,7 +61,10 @@ int libfat_readfile(intptr_t pp, void *buf, size_t secsize,
 	return (int)secsize;
 }
 
-// TODO: set format errors
+/*
+ * Extract the ldlinux.sys and ldlinux.bss from resources,
+ * then patch and install them
+ */
 BOOL InstallSyslinux(DWORD num, const char* drive_name)
 {
 	HANDLE f_handle = INVALID_HANDLE_VALUE;
@@ -186,7 +189,7 @@ BOOL InstallSyslinux(DWORD num, const char* drive_name)
 	/* Close file */
 	safe_closehandle(f_handle);
 
-	/* Make the syslinux boot sector */
+	/* Read existing FAT data into boot sector */
 	if (SetFilePointer(d_handle, 0, NULL, FILE_BEGIN) != 0 ||
 		!ReadFile(d_handle, sectbuf, SECTOR_SIZE,
 			   &bytes_read, NULL)
@@ -195,8 +198,10 @@ BOOL InstallSyslinux(DWORD num, const char* drive_name)
 		goto out;
 	}
 
+	/* Make the syslinux boot sector */
 	syslinux_make_bootsect(sectbuf);
 
+	/* Write boot sector back */
 	if (SetFilePointer(d_handle, 0, NULL, FILE_BEGIN) != 0 ||
 		!WriteFile(d_handle, sectbuf, SECTOR_SIZE,
 			   &bytes_written, NULL)

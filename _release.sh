@@ -1,6 +1,6 @@
 #!/bin/sh
 rm -f rufus*.exe
-./configure --without-freedos
+./configure --without-freedos --without-syslinux
 make clean
 make release -j2
 ./configure --with-freedos

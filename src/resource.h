@@ -37,6 +37,7 @@
 #define IDR_FD_EGA18_CPX                326
 #define IDR_SL_LDLINUX_BSS              400
 #define IDR_SL_LDLINUX_SYS              401
+#define IDR_SL_CHAIN_C32                402
 #define IDC_DEVICE                      1001
 #define IDC_FILESYSTEM                  1002
 #define IDC_START                       1003
