@@ -117,8 +117,9 @@ enum {
 };
 
 enum dos_type {
-	DT_FREEDOS = 0,
-	DT_WINME,
+	DT_WINME = 0,
+	DT_FREEDOS,
+	DT_SYSLINUX,
 	DT_MAX
 };
 
@@ -163,7 +164,8 @@ extern HWND CreateTooltip(HWND hControl, const char* message, int duration);
 extern void DestroyTooltip(HWND hWnd);
 extern void DestroyAllTooltips(void);
 extern BOOL Notification(int type, char* title, char* format, ...);
-extern BOOL ExtractDOS(const char* path, int dos_type);
+extern BOOL ExtractDOS(const char* path);
+extern BOOL InstallSysLinux(DWORD num, const char* drive_name);
 extern void __cdecl FormatThread(void* param);
 extern BOOL CreatePartition(HANDLE hDrive);
 extern HANDLE GetDriveHandle(DWORD DriveIndex, char* DriveLetter, BOOL bWriteAccess, BOOL bLockDrive);

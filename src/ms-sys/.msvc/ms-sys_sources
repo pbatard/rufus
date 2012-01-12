@@ -10,13 +10,7 @@ MSC_WARNING_LEVEL=/W3
 USE_MSVCRT=1
 
 TARGETLIBS=$(SDK_LIB_PATH)\kernel32.lib \
-           $(SDK_LIB_PATH)\user32.lib \
-           $(SDK_LIB_PATH)\setupapi.lib \
-           $(SDK_LIB_PATH)\ole32.lib \
-           $(SDK_LIB_PATH)\version.lib \
-           $(SDK_LIB_PATH)\uuid.lib \
-           $(SDK_LIB_PATH)\shell32.lib \
-           ms-sys.lib
+           $(SDK_LIB_PATH)\user32.lib
 
 SOURCES=file.c           \
         br.c             \

@@ -3,3 +3,6 @@
 
 /* Embed FreeDOS files and allow FreeDOS support */
 #define WITH_FREEDOS
+
+/* SysLinux support, for ISO -> bootable USB */
+//#define WITH_SYSLINUX

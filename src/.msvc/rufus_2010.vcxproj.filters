@@ -39,6 +39,9 @@
     <ClCompile Include="..\dos_locale.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\syslinux.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\rufus.h">

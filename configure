@@ -652,6 +652,7 @@ ac_user_opts='
 enable_option_checking
 enable_silent_rules
 with_freedos
+with_syslinux
 enable_debug
 '
       ac_precious_vars='build_alias
@@ -1286,6 +1287,7 @@ Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
   --with-freedos          embed FreeDOS support (default=yes)
+  --with-syslinux         embed SysLinux support (default=yes)
 
 Some influential environment variables:
   CC          C compiler command
@@ -3475,9 +3477,23 @@ else
 fi
 
 if test "x$with_freedos" != "xno" ; then
-	AM_RCFLAGS="-DWITH_FREEDOS"
+	AM_RCFLAGS="${AM_RCFLAGS} -DWITH_FREEDOS"
 	EXESUFFIX="f"
 fi
+
+
+# Check whether --with-syslinux was given.
+if test "${with_syslinux+set}" = set; then :
+  withval=$with_syslinux;
+else
+  with_freedos=yes
+fi
+
+if test "x$with_syslinux" != "xno" ; then
+	AM_RCFLAGS="${AM_RCFLAGS} -DWITH_SYSLINUX"
+	EXESUFFIX="f"
+fi
+
 
 # Debug symbols
 # Check whether --enable-debug was given.

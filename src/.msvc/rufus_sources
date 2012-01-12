@@ -3,7 +3,7 @@ TARGETTYPE=PROGRAM
 UMTYPE=windows
 UMENTRY=winmain
 
-INCLUDES=$(DDK_INC_PATH);.\ms-sys\inc
+INCLUDES=$(DDK_INC_PATH);.\ms-sys\inc;.\syslinux;.\syslinux\libfat;.\syslinux\libinstaller
 C_DEFINES = $(C_DEFINES) /DDDKBUILD /DUNICODE /D_UNICODE /DISOLATION_AWARE_ENABLED
 
 !IFNDEF MSC_WARNING_LEVEL
@@ -18,7 +18,9 @@ TARGETLIBS=$(SDK_LIB_PATH)\kernel32.lib \
            $(SDK_LIB_PATH)\version.lib \
            $(SDK_LIB_PATH)\uuid.lib \
            $(SDK_LIB_PATH)\shell32.lib \
-           .\ms-sys\ms-sys.lib
+           .\ms-sys\ms-sys.lib \
+           .\syslinux\libfat\libfat.lib \
+           .\syslinux\libinstaller\libinstaller.lib
 
 # http://jpassing.com/2008/02/01/how-to-use-manifests-with-buildexe/
 SXS_APPLICATION_MANIFEST=..\common_controls_and_elevation.manifest
@@ -31,4 +33,5 @@ SOURCES=rufus.c          \
         dos_locale.c     \
         badblocks.c      \
         drive.c          \
+        syslinux.c       \
         rufus.rc

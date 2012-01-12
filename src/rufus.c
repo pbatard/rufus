@@ -56,7 +56,7 @@ char szFolderPath[MAX_PATH];
 float fScale = 1.0f;
 int default_fs;
 HWND hDeviceList, hCapacity, hFileSystem, hClusterSize, hLabel, hDOSType, hNBPasses;
-BOOL bWithFreeDOS;
+BOOL bWithFreeDOS, bWithSysLinux;
 
 static HWND hDeviceTooltip = NULL, hFSTooltip = NULL, hProgress = NULL;
 static StrArray DriveID, DriveLabel;
@@ -621,7 +621,18 @@ static void InitProgress(void)
 	}
 	if (IsChecked(IDC_DOS)) {
 		// 1 extra slot for PBR writing
-		nb_slots[OP_DOS] = ((ComboBox_GetCurSel(hDOSType) == DT_FREEDOS)?5:3)+1;
+		// TODO: switch
+		switch (ComboBox_GetItemData(hDOSType, ComboBox_GetCurSel(hDOSType))) {
+		case DT_WINME:
+			nb_slots[OP_DOS] = 3+1;
+			break;
+		case DT_FREEDOS:
+			nb_slots[OP_DOS] = 5+1;
+			break;
+		default:
+			nb_slots[OP_DOS] = 2+1;
+			break;
+		}
 	}
 	nb_slots[OP_PARTITION] = 1;
 	nb_slots[OP_FIX_MBR] = 1;
@@ -932,10 +943,13 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		IGNORE_RETVAL(ComboBox_AddStringU(hNBPasses, "4 Passes"));
 		IGNORE_RETVAL(ComboBox_SetCurSel(hNBPasses, 1));
 		// Fill up the DOS type dropdown
-		IGNORE_RETVAL(ComboBox_AddStringU(hDOSType, "FreeDOS"));
-		IGNORE_RETVAL(ComboBox_AddStringU(hDOSType, "WinMe"));
+		IGNORE_RETVAL(ComboBox_SetItemData(hDOSType, ComboBox_AddStringU(hDOSType, "WinMe"), DT_WINME));
+		if (bWithFreeDOS)
+			IGNORE_RETVAL(ComboBox_SetItemData(hDOSType, ComboBox_AddStringU(hDOSType, "FreeDOS"), DT_FREEDOS));
+		if (bWithSysLinux)
+			IGNORE_RETVAL(ComboBox_SetItemData(hDOSType, ComboBox_AddStringU(hDOSType, "SysLinux"), DT_SYSLINUX));
 		IGNORE_RETVAL(ComboBox_SetCurSel(hDOSType, bWithFreeDOS?DT_FREEDOS:DT_WINME));
-		if (bWithFreeDOS) {
+		if (bWithFreeDOS || bWithSysLinux) {
 			SetDlgItemTextA(hDlg, IDC_DOS, "Create a DOS bootable disk:");
 			ShowWindow(hDOSType, SW_SHOW);
 		}
@@ -1126,6 +1140,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	bWithFreeDOS = (FindResource(hMainInstance, MAKEINTRESOURCE(IDR_FD_COMMAND_COM), RT_RCDATA) != NULL) &&
 		(FindResource(hMainInstance, MAKEINTRESOURCE(IDR_FD_KERNEL_SYS), RT_RCDATA) != NULL);
 	uprintf("FreeDOS resources are %sembedded with this app\n", bWithFreeDOS?"":"NOT ");
+	// Find out if the SysLinux resources are embedded in the app
+	bWithSysLinux = (FindResource(hMainInstance, MAKEINTRESOURCE(IDR_SL_LDLINUX_SYS), RT_RCDATA) != NULL) &&
+		(FindResource(hMainInstance, MAKEINTRESOURCE(IDR_SL_LDLINUX_BSS), RT_RCDATA) != NULL);
+	uprintf("SysLinux resources are %sembedded with this app\n", bWithSysLinux?"":"NOT ");
 
 	// Create the main Window
 	if ( (hDlg = CreateDialogA(hInstance, MAKEINTRESOURCEA(IDD_DIALOG), NULL, MainCallback)) == NULL ) {

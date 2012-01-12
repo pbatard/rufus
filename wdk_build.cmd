@@ -25,8 +25,38 @@ copy obj%BUILD_ALT_DIR%\%ARCH_DIR%\ms-sys.lib . >NUL 2>&1
 if EXIST Makefile.hide ren Makefile.hide Makefile
 if EXIST sources del sources >NUL 2>&1
 
+::# SysLinux libfat Library
+cd ..\syslinux\libfat
+if EXIST Makefile ren Makefile Makefile.hide
+
+copy .msvc\libfat_sources sources >NUL 2>&1
+
+@echo on
+%BUILD_CMD%
+@echo off
+if errorlevel 1 goto builderror
+copy obj%BUILD_ALT_DIR%\%ARCH_DIR%\libfat.lib . >NUL 2>&1
+
+if EXIST Makefile.hide ren Makefile.hide Makefile
+if EXIST sources del sources >NUL 2>&1
+
+::# SysLinux libinstaller Library
+cd ..\libinstaller
+if EXIST Makefile ren Makefile Makefile.hide
+
+copy .msvc\libinstaller_sources sources >NUL 2>&1
+
+@echo on
+%BUILD_CMD%
+@echo off
+if errorlevel 1 goto builderror
+copy obj%BUILD_ALT_DIR%\%ARCH_DIR%\libinstaller.lib . >NUL 2>&1
+
+if EXIST Makefile.hide ren Makefile.hide Makefile
+if EXIST sources del sources >NUL 2>&1
+
 ::# Rufus Application
-cd ..
+cd ..\..
 if EXIST Makefile ren Makefile Makefile.hide
 
 copy .msvc\rufus_sources sources >NUL 2>&1

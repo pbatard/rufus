@@ -105,7 +105,7 @@ typedef struct _LONG_FILE_NAME_ENTRY {
 } LONG_FILE_NAME_ENTRY, *PLONG_FILE_NAME_ENTRY;
 //  sizeof = 0x020
 
-#pragma pack()
+#pragma pack(pop)
 
 #define FAT_LFN_NAME_LENGTH \
     (RTL_FIELD_SIZE(LONG_FILE_NAME_ENTRY, NameA) \

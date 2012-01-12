@@ -43,9 +43,20 @@ AC_ARG_WITH([freedos],
 	[],
 	[with_freedos=yes])
 if test "x$with_freedos" != "xno" ; then
-	AM_RCFLAGS="-DWITH_FREEDOS"
+	AM_RCFLAGS="${AM_RCFLAGS} -DWITH_FREEDOS"
 	EXESUFFIX="f"
 fi
+
+AC_ARG_WITH([syslinux],
+	[AS_HELP_STRING([--with-syslinux],
+		[embed SysLinux support (default=yes)])],
+	[],
+	[with_freedos=yes])
+if test "x$with_syslinux" != "xno" ; then
+	AM_RCFLAGS="${AM_RCFLAGS} -DWITH_SYSLINUX"
+	EXESUFFIX="f"
+fi
+
 
 # Debug symbols
 AC_ARG_ENABLE(debug, AS_HELP_STRING([--enable-debug], [keep debug symbols for gdb (default=yes)]),

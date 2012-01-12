@@ -308,7 +308,11 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 
 	fake_fd._ptr = (char*)hPhysicalDrive;
 	fake_fd._bufsiz = SelectedDrive.Geometry.BytesPerSector;
-	r = write_95b_mbr(&fake_fd);
+	if (ComboBox_GetItemData(hDOSType, ComboBox_GetCurSel(hDOSType)) == DT_SYSLINUX) {
+		r = write_syslinux_mbr(&fake_fd);
+	} else {
+		r = write_95b_mbr(&fake_fd);
+	}
 
 out:
 	safe_free(buf);
@@ -494,26 +498,38 @@ void __cdecl FormatThread(void* param)
 	UpdateProgress(OP_FIX_MBR, -1.0f);
 
 	if (IsChecked(IDC_DOS)) {
-		// We still have a lock, which we need to modify the volume boot record 
-		// => no need to reacquire the lock...
-		hLogicalVolume = GetDriveHandle(num, drive_name, TRUE, FALSE);
-		if (hLogicalVolume == INVALID_HANDLE_VALUE) {
-			uprintf("Could not re-mount volume for partition boot record access\n");
-			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_OPEN_FAILED;
-			goto out;
-		}
-		PrintStatus(0, "Writing partition boot record...\n");
-		if (!WritePBR(hLogicalVolume, ComboBox_GetCurSel(hDOSType) == DT_FREEDOS)) {
-			// Errorcode has already been set
-			goto out;
-		}
-		// ...but we must have relinquished that lock to write the MS-DOS files 
-		safe_unlockclose(hLogicalVolume);
-		UpdateProgress(OP_DOS, -1.0f);
-		PrintStatus(0, "Copying DOS files...\n");
-		if (!ExtractDOS(drive_name, ComboBox_GetCurSel(hDOSType))) {
-			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANNOT_COPY;
-			goto out;
+		switch (ComboBox_GetItemData(hDOSType, ComboBox_GetCurSel(hDOSType))) {
+		case DT_FREEDOS:
+		case DT_WINME:
+			// We still have a lock, which we need to modify the volume boot record 
+			// => no need to reacquire the lock...
+			hLogicalVolume = GetDriveHandle(num, drive_name, TRUE, FALSE);
+			if (hLogicalVolume == INVALID_HANDLE_VALUE) {
+				uprintf("Could not re-mount volume for partition boot record access\n");
+				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_OPEN_FAILED;
+				goto out;
+			}
+			PrintStatus(0, "Writing partition boot record...\n");
+			if (!WritePBR(hLogicalVolume, ComboBox_GetItemData(hDOSType, ComboBox_GetCurSel(hDOSType)) == DT_FREEDOS)) {
+				// Errorcode has already been set
+				goto out;
+			}
+			// ...but we must have relinquished that lock to write the MS-DOS files 
+			safe_unlockclose(hLogicalVolume);
+			UpdateProgress(OP_DOS, -1.0f);
+			PrintStatus(0, "Copying DOS files...\n");
+			if (!ExtractDOS(drive_name)) {
+				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANNOT_COPY;
+				goto out;
+			}
+			break;
+		// SysLinux requires patching of the PBR after the files have been extracted
+		case DT_SYSLINUX:
+			if (!InstallSysLinux(num, drive_name)) {
+				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANNOT_COPY;
+				goto out;
+			}
+			break;
 		}
 	}
 

@@ -25,6 +25,7 @@
 #endif
 
 #include <windows.h>
+#include <windowsx.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -428,9 +429,13 @@ BOOL ExtractFreeDOS(const char* path)
 	return SetDOSLocale(path, TRUE);
 }
 
-BOOL ExtractDOS(const char* path, int dos_type)
+BOOL ExtractDOS(const char* path)
 {
-	if (dos_type == DT_WINME)
+	switch(ComboBox_GetItemData(hDOSType, ComboBox_GetCurSel(hDOSType))) {
+	case DT_WINME:
 		return ExtractMSDOS(path);
-	return ExtractFreeDOS(path);
+	case DT_FREEDOS:
+		return ExtractFreeDOS(path);
+	}
+	return FALSE;
 }
