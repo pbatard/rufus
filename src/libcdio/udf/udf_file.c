@@ -240,8 +240,8 @@ udf_read_block(const udf_dirent_t *p_udf_dirent, void * buf, size_t count)
       uint32_t i_max_blocks = CEILING(i_max_size, UDF_BLOCKSIZE);
       if ( i_max_blocks < count ) {
 	  fprintf(stderr, "Warning: read count %u is larger than %u extent size.\n",
-		  count, i_max_blocks);
-	  fprintf(stderr, "Warning: read count truncated to %u\n", count);
+		  (unsigned int)count, i_max_blocks);
+	  fprintf(stderr, "Warning: read count truncated to %u\n", (unsigned int)count);
 	  count = i_max_blocks;
       }
       ret = udf_read_sectors(p_udf, buf, i_lba, (long)count);

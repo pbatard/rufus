@@ -59,7 +59,7 @@
 /* Very disputable hack! -- good thing we use MinGW for the release */
 #define EMPTY_ARRAY_ECMA 1
 #else
-#define EMPTY_ARRAY_ECMA
+#define EMPTY_ARRAY_ECMA 0
 #endif
 
 /**

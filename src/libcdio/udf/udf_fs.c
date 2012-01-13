@@ -41,7 +41,7 @@
  */
 
 
-#ifdef HAVE_CONFIG_H
+#if defined(HAVE_CONFIG_H) && !defined(__CDIO_CONFIG_H__)
 # include "config.h"
 # define __CDIO_CONFIG_H__ 1
 #else
@@ -58,6 +58,8 @@
 #ifdef HAVE_STDLIB_H
 # include <stdlib.h>
 #endif
+
+#include <stdio.h>
 
 /* These definitions are also to make debugging easy. Note that they
    have to come *before* #include <cdio/ecma_167.h> which sets 
@@ -499,7 +501,6 @@ udf_get_root (udf_t *p_udf, bool b_any_partition, partition_num_t i_partition)
      Directory File Entry.
   */
   for (i_lba = mvds_start; i_lba < mvds_end; i_lba++) {
-    uint8_t data[UDF_BLOCKSIZE];
     
     partition_desc_t *p_partition = (partition_desc_t *) &data;
     

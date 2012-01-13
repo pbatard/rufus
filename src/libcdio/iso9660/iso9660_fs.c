@@ -780,7 +780,7 @@ _iso9660_dir_to_statbuf (iso9660_dir_t *p_iso9660_dir, bool_3way_t b_xa,
 	  calloc(1, sizeof(iso9660_stat_t)+i_rr_fname+2);
         if (!p_stat_new)
           {
-          cdio_warn("Couldn't calloc(1, %zd)", sizeof(iso9660_stat_t)+i_rr_fname+2);
+          cdio_warn("Couldn't calloc(1, %u)", (unsigned int)(sizeof(iso9660_stat_t)+i_rr_fname+2));
           return NULL;
           }
 	memcpy(p_stat_new, p_stat, stat_len);
@@ -1008,7 +1008,6 @@ _fs_stat_traverse (const CdIo_t *p_cdio, const iso9660_stat_t *_root,
   while (offset < (_root->secsize * ISO_BLOCKSIZE))
     {
       iso9660_dir_t *p_iso9660_dir = (void *) &_dirbuf[offset];
-      iso9660_stat_t *p_stat;
       int cmp;
 
       if (!iso9660_get_dir_len(p_iso9660_dir))
@@ -1026,7 +1025,6 @@ _fs_stat_traverse (const CdIo_t *p_cdio, const iso9660_stat_t *_root,
 	   && yep != p_stat->rr.b3_rock ) {
 	char *trans_fname = NULL;
 	size_t i_trans_fname=strlen(p_stat->filename);
-	int trans_len;
 	
 	if (i_trans_fname) {
 	  trans_fname = calloc(1, i_trans_fname+1);
@@ -1036,7 +1034,7 @@ _fs_stat_traverse (const CdIo_t *p_cdio, const iso9660_stat_t *_root,
 	    free(p_stat);
 	    return NULL;
 	  }
-	  trans_len = iso9660_name_translate_ext(p_stat->filename, trans_fname,
+	  iso9660_name_translate_ext(p_stat->filename, trans_fname,
 						 p_env->i_joliet_level);
 	  cmp = strcmp(splitpath[0], trans_fname);
 	  free(trans_fname);
@@ -1080,7 +1078,7 @@ _fs_iso_stat_traverse (iso9660_t *p_iso, const iso9660_stat_t *_root,
       p_stat = calloc(1, len);
       if (!p_stat)
         {
-        cdio_warn("Couldn't calloc(1, %d)", len);
+        cdio_warn("Couldn't calloc(1, %u)", (unsigned int)len);
         return NULL;
         }
       memcpy(p_stat, _root, len);
@@ -1133,8 +1131,7 @@ _fs_iso_stat_traverse (iso9660_t *p_iso, const iso9660_stat_t *_root,
 	   && yep != p_stat->rr.b3_rock ) {
 	char *trans_fname = NULL;
 	size_t i_trans_fname=strlen(p_stat->filename);
-	int trans_len;
-	
+
 	if (i_trans_fname) {
 	  trans_fname = calloc(1, i_trans_fname+1);
 	  if (!trans_fname) {
@@ -1143,7 +1140,7 @@ _fs_iso_stat_traverse (iso9660_t *p_iso, const iso9660_stat_t *_root,
 	    free(p_stat);
 	    return NULL;
 	  }
-	  trans_len = iso9660_name_translate_ext(p_stat->filename, trans_fname, 
+	  iso9660_name_translate_ext(p_stat->filename, trans_fname, 
 						 p_iso->i_joliet_level);
 	  cmp = strcmp(splitpath[0], trans_fname);
 	  free(trans_fname);
@@ -1450,7 +1447,7 @@ find_lsn_recurse (void *p_image, iso9660_readdir_t iso9660_readdir,
     {
       iso9660_stat_t *statbuf = _cdio_list_node_data (entnode);
       const char *psz_filename  = (char *) statbuf->filename;
-      const size_t len = strlen(psz_path) + strlen(psz_filename)+2;
+      size_t len = strlen(psz_path) + strlen(psz_filename)+2;
       
       if (*ppsz_full_filename != NULL) free(*ppsz_full_filename);
       *ppsz_full_filename = calloc(1, len);
@@ -1463,11 +1460,11 @@ find_lsn_recurse (void *p_image, iso9660_readdir_t iso9660_readdir,
       }
 
       if (statbuf->lsn == lsn) {
-	size_t len=sizeof(iso9660_stat_t)+strlen(statbuf->filename)+1;
+	len=sizeof(iso9660_stat_t)+strlen(statbuf->filename)+1;
 	iso9660_stat_t *ret_stat = calloc(1, len);
 	if (!ret_stat)
 	  {
-          cdio_warn("Couldn't calloc(1, %d)", len);
+          cdio_warn("Couldn't calloc(1, %u)", (unsigned int)len);
           return NULL;
 	  }
 	memcpy(ret_stat, statbuf, len);

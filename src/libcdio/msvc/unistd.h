@@ -9,11 +9,6 @@
 #ifndef _UNISTD_H_
 #define _UNISTD_H_
 
-/* On MS environments, the inline keyword is available in C++ only */
-#ifndef inline
-#define inline __inline
-#endif
-
 typedef unsigned short mode_t;
 
 /* ssize_t is also not available (copy/paste from MinGW) */

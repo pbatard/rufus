@@ -38,7 +38,7 @@
  *  http://www.boulder.nist.gov/timefreq/pubs/bulletin/leapsecond.htm
  */
 
-#ifdef HAVE_CONFIG_H
+#if defined(HAVE_CONFIG_H) && !defined(__CDIO_CONFIG_H__)
 #include "config.h"
 # define __CDIO_CONFIG_H__ 1
 #else

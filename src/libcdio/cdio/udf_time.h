@@ -70,6 +70,13 @@ extern "C" {
   time_t *udf_stamp_to_time(time_t *dest, long int *dest_usec, 
 			  const udf_timestamp_t src);
 
+#if defined(__MINGW32__) && !defined(__MINGW64__)
+struct timespec {
+  time_t  tv_sec;   /* Seconds */
+  long    tv_nsec;  /* Nanoseconds */
+};
+#endif
+
   udf_timestamp_t *udf_timespec_to_stamp(const struct timespec ts,
 					 udf_timestamp_t *dest);
 

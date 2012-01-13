@@ -25,46 +25,46 @@
 #include <sys/stat.h>
 #endif
 
-#if !S_IRUSR
-# if S_IREAD
+#ifndef S_IRUSR
+# ifdef S_IREAD
 #  define S_IRUSR S_IREAD
 # else
 #  define S_IRUSR 00400
 # endif
 #endif
 
-#if !S_IWUSR
-# if S_IWRITE
+#ifndef S_IWUSR
+# ifdef S_IWRITE
 #  define S_IWUSR S_IWRITE
 # else
 #  define S_IWUSR 00200
 # endif
 #endif
 
-#if !S_IXUSR
-# if S_IEXEC
+#ifndef S_IXUSR
+# ifdef S_IEXEC
 #  define S_IXUSR S_IEXEC
 # else
 #  define S_IXUSR 00100
 # endif
 #endif
 
-#if !S_IRGRP
+#ifndef S_IRGRP
 # define S_IRGRP (S_IRUSR >> 3)
 #endif
-#if !S_IWGRP
+#ifndef S_IWGRP
 # define S_IWGRP (S_IWUSR >> 3)
 #endif
-#if !S_IXGRP
+#ifndef S_IXGRP
 # define S_IXGRP (S_IXUSR >> 3)
 #endif
-#if !S_IROTH
+#ifndef S_IROTH
 # define S_IROTH (S_IRUSR >> 6)
 #endif
-#if !S_IWOTH
+#ifndef S_IWOTH
 # define S_IWOTH (S_IWUSR >> 6)
 #endif
-#if !S_IXOTH
+#ifndef S_IXOTH
 # define S_IXOTH (S_IXUSR >> 6)
 #endif
 

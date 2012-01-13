@@ -50,11 +50,9 @@ udf_get_posix_filemode(const udf_dirent_t *p_udf_dirent)
   mode_t mode = 0;
 
   if (udf_get_file_entry(p_udf_dirent, &udf_fe)) {
-    uint16_t i_flags;
     uint32_t i_perms;
 
     i_perms = uint32_from_le(udf_fe.permissions);
-    i_flags = uint16_from_le(udf_fe.icb_tag.flags);
 
     if (i_perms & FE_PERM_U_READ)  mode |= S_IRUSR;
     if (i_perms & FE_PERM_U_WRITE) mode |= S_IWUSR;
@@ -101,6 +99,9 @@ udf_get_posix_filemode(const udf_dirent_t *p_udf_dirent)
     };
   
 #ifdef S_ISUID
+    uint16_t i_flags;
+    i_flags = uint16_from_le(udf_fe.icb_tag.flags);
+
     if (i_flags & ICBTAG_FLAG_SETUID) mode |= S_ISUID;
     if (i_flags & ICBTAG_FLAG_SETGID) mode |= S_ISGID;
     if (i_flags & ICBTAG_FLAG_STICKY) mode |= S_ISVTX;

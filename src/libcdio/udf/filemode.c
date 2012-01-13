@@ -18,7 +18,7 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#if HAVE_CONFIG_H
+#if defined(HAVE_CONFIG_H) && !defined(__CDIO_CONFIG_H__)
 # include <config.h>
 # define __CDIO_CONFIG_H__ 1
 #else
