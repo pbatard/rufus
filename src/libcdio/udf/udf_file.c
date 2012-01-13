@@ -126,7 +126,8 @@ offset_to_lba(const udf_dirent_t *p_udf_dirent, off_t i_offset,
     {
       uint32_t icblen = 0;
       lba_t lsector;
-      int ad_offset, ad_num = 0;
+      uint32_t ad_offset;
+      int ad_num = 0;
       uint16_t addr_ilk = uint16_from_le(p_icb_tag->flags&ICBTAG_FLAG_AD_MASK);
       
       switch (addr_ilk) {
@@ -150,7 +151,7 @@ offset_to_lba(const udf_dirent_t *p_udf_dirent, off_t i_offset,
 		      + ad_offset );
 	    icblen = p_icb->len;
 	    ad_num++;
-	  } while(i_offset >= icblen);
+	  } while(i_offset >= (off_t)icblen);
 	  
 	  lsector = (i_offset / UDF_BLOCKSIZE) + p_icb->pos;
 	  
@@ -177,7 +178,7 @@ offset_to_lba(const udf_dirent_t *p_udf_dirent, off_t i_offset,
 		      + ad_offset );
 	    icblen = p_icb->len;
 	    ad_num++;
-	  } while(i_offset >= icblen);
+	  } while(i_offset >= (off_t)icblen);
 	
 	  lsector = (i_offset / UDF_BLOCKSIZE) +
 	    uint32_from_le(((udf_long_ad_t *)(p_icb))->loc.lba);
@@ -233,7 +234,7 @@ udf_read_block(const udf_dirent_t *p_udf_dirent, void * buf, size_t count)
     driver_return_code_t ret;
     uint32_t i_max_size=0;
     udf_t *p_udf = p_udf_dirent->p_udf;
-    lba_t i_lba = offset_to_lba(p_udf_dirent, p_udf->i_position, &i_lba, 
+    lba_t i_lba = offset_to_lba(p_udf_dirent, (off_t)p_udf->i_position, &i_lba, 
 				&i_max_size);
     if (i_lba != CDIO_INVALID_LBA) {
       uint32_t i_max_blocks = CEILING(i_max_size, UDF_BLOCKSIZE);
@@ -243,7 +244,7 @@ udf_read_block(const udf_dirent_t *p_udf_dirent, void * buf, size_t count)
 	  fprintf(stderr, "Warning: read count truncated to %u\n", count);
 	  count = i_max_blocks;
       }
-      ret = udf_read_sectors(p_udf, buf, i_lba, count);
+      ret = udf_read_sectors(p_udf, buf, i_lba, (long)count);
       if (DRIVER_OP_SUCCESS == ret) {
 	ssize_t i_read_len = MIN(i_max_size, count * UDF_BLOCKSIZE);
 	p_udf->i_position += i_read_len;

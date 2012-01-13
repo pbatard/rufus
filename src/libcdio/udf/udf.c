@@ -20,13 +20,10 @@
    say opensolaris. */
 #include "udf_private.h"
 #include <cdio/bytesex.h>
+#include <cdio/filemode.h>
 
 #ifdef HAVE_STRING_H
 # include <string.h>
-#endif
-
-#ifdef HAVE_SYS_STAT_H
-# include <sys/stat.h>
 #endif
 
 /** The below variables are trickery to force enum symbol values to be
@@ -62,7 +59,7 @@ udf_get_posix_filemode(const udf_dirent_t *p_udf_dirent)
     if (i_perms & FE_PERM_U_READ)  mode |= S_IRUSR;
     if (i_perms & FE_PERM_U_WRITE) mode |= S_IWUSR;
     if (i_perms & FE_PERM_U_EXEC)  mode |= S_IXUSR;
-    
+
 #ifdef S_IRGRP
     if (i_perms & FE_PERM_G_READ)  mode |= S_IRGRP;
     if (i_perms & FE_PERM_G_WRITE) mode |= S_IWGRP;
@@ -95,9 +92,11 @@ udf_get_posix_filemode(const udf_dirent_t *p_udf_dirent)
       mode |= S_IFSOCK;
       break;
 #endif
+#ifdef S_IFBLK
     case ICBTAG_FILE_TYPE_BLOCK:
       mode |= S_IFBLK;
       break;
+#endif
     default: ;
     };
   

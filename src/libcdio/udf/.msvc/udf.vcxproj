@@ -19,22 +19,22 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\filemode.c" />
+    <ClCompile Include="..\udf.c" />
+    <ClCompile Include="..\udf_file.c" />
+    <ClCompile Include="..\udf_fs.c" />
+    <ClCompile Include="..\udf_time.c" />
+  </ItemGroup>
+  <ItemGroup>
     <ClInclude Include="..\..\cdio\cdio_config.h" />
-    <ClInclude Include="..\iso9660_private.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\iso9660.c" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="..\iso9660_fs.c" />
-    <ClCompile Include="..\rock.c" />
-    <ClCompile Include="..\xa.c" />
+    <ClInclude Include="..\udf_fs.h" />
+    <ClInclude Include="..\udf_private.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{D4E80F35-2604-40AC-B436-97B052ECB572}</ProjectGuid>
+    <ProjectGuid>{0CEC40A6-A195-4BE5-A88B-0AB00EB142EC}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>iso9660</RootNamespace>
-    <ProjectName>libcdio-iso9660</ProjectName>
+    <RootNamespace>udf</RootNamespace>
+    <ProjectName>libcdio-udf</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

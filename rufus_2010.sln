@@ -12,6 +12,10 @@ Project("{11411DA5-63FE-49DC-8D5C-CA379B95FF3C}") = "syslinux-libfat", "src\sysl
 EndProject
 Project("{11411DA5-63FE-49DC-8D5C-CA379B95FF3C}") = "syslinux-libinstaller", "src\syslinux\libinstaller\.msvc\libinstaller.vcxproj", "{266502AC-CD74-4581-B707-938A7D05AD7A}"
 EndProject
+Project("{11411DA5-63FE-49DC-8D5C-CA379B95FF3C}") = "libcdio-iso9660", "src\libcdio\iso9660\.msvc\iso9660.vcxproj", "{D4E80F35-2604-40AC-B436-97B052ECB572}"
+EndProject
+Project("{11411DA5-63FE-49DC-8D5C-CA379B95FF3C}") = "libcdio-udf", "src\libcdio\udf\.msvc\udf.vcxproj", "{0CEC40A6-A195-4BE5-A88B-0AB00EB142EC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -52,6 +56,22 @@ Global
 		{266502AC-CD74-4581-B707-938A7D05AD7A}.Release|Win32.Build.0 = Release|Win32
 		{266502AC-CD74-4581-B707-938A7D05AD7A}.Release|x64.ActiveCfg = Release|x64
 		{266502AC-CD74-4581-B707-938A7D05AD7A}.Release|x64.Build.0 = Release|x64
+		{D4E80F35-2604-40AC-B436-97B052ECB572}.Debug|Win32.ActiveCfg = Debug|Win32
+		{D4E80F35-2604-40AC-B436-97B052ECB572}.Debug|Win32.Build.0 = Debug|Win32
+		{D4E80F35-2604-40AC-B436-97B052ECB572}.Debug|x64.ActiveCfg = Debug|x64
+		{D4E80F35-2604-40AC-B436-97B052ECB572}.Debug|x64.Build.0 = Debug|x64
+		{D4E80F35-2604-40AC-B436-97B052ECB572}.Release|Win32.ActiveCfg = Release|Win32
+		{D4E80F35-2604-40AC-B436-97B052ECB572}.Release|Win32.Build.0 = Release|Win32
+		{D4E80F35-2604-40AC-B436-97B052ECB572}.Release|x64.ActiveCfg = Release|x64
+		{D4E80F35-2604-40AC-B436-97B052ECB572}.Release|x64.Build.0 = Release|x64
+		{0CEC40A6-A195-4BE5-A88B-0AB00EB142EC}.Debug|Win32.ActiveCfg = Debug|Win32
+		{0CEC40A6-A195-4BE5-A88B-0AB00EB142EC}.Debug|Win32.Build.0 = Debug|Win32
+		{0CEC40A6-A195-4BE5-A88B-0AB00EB142EC}.Debug|x64.ActiveCfg = Debug|x64
+		{0CEC40A6-A195-4BE5-A88B-0AB00EB142EC}.Debug|x64.Build.0 = Debug|x64
+		{0CEC40A6-A195-4BE5-A88B-0AB00EB142EC}.Release|Win32.ActiveCfg = Release|Win32
+		{0CEC40A6-A195-4BE5-A88B-0AB00EB142EC}.Release|Win32.Build.0 = Release|Win32
+		{0CEC40A6-A195-4BE5-A88B-0AB00EB142EC}.Release|x64.ActiveCfg = Release|x64
+		{0CEC40A6-A195-4BE5-A88B-0AB00EB142EC}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

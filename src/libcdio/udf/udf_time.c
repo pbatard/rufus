@@ -41,6 +41,11 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 # define __CDIO_CONFIG_H__ 1
+#else
+#ifndef EXTERNAL_LIBCDIO_CONFIG_H
+#define EXTERNAL_LIBCDIO_CONFIG_H
+#include <cdio/cdio_config.h>
+#endif
 #endif
 
 #ifdef NEED_TIMEZONEVAR

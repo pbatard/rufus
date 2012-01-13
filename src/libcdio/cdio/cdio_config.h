@@ -7,7 +7,12 @@
 #undef CYGWIN
 
 /* what to put between the brackets for empty arrays */
-#define EMPTY_ARRAY_SIZE MAX_PATH
+#ifdef _MSC_VER
+/* Very disputable hack! -- good thing we use MinGW for the release */
+#define EMPTY_ARRAY_SIZE 256
+#else
+#define EMPTY_ARRAY_SIZE
+#endif
 
 /* Define 1 if you have BSDI-type CD-ROM support */
 #undef HAVE_BSDI_CDROM
@@ -143,7 +148,7 @@
 #undef HAVE_VSNPRINTF
 
 /* Define 1 if you have MinGW CD-ROM support */
-#define HAVE_WIN32_CDROM 1
+#undef HAVE_WIN32_CDROM
 
 /* Define as const if the declaration of iconv() needs const. */
 #undef ICONV_CONST 

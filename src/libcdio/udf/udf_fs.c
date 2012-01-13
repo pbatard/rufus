@@ -44,6 +44,11 @@
 #ifdef HAVE_CONFIG_H
 # include "config.h"
 # define __CDIO_CONFIG_H__ 1
+#else
+#ifndef EXTERNAL_LIBCDIO_CONFIG_H
+#define EXTERNAL_LIBCDIO_CONFIG_H
+#include <cdio/cdio_config.h>
+#endif
 #endif
 
 #ifdef HAVE_STRING_H
@@ -291,7 +296,7 @@ udf_new_dirent(udf_file_entry_t *p_udf_fe, udf_t *p_udf,
     calloc(1, sizeof(udf_dirent_t) + i_alloc_size);
   if (!p_udf_dirent) return NULL;
   
-  p_udf_dirent->psz_name     = strdup(psz_name);
+  p_udf_dirent->psz_name     = _strdup(psz_name);
   p_udf_dirent->b_dir        = b_dir;
   p_udf_dirent->b_parent     = b_parent;
   p_udf_dirent->p_udf        = p_udf;
@@ -314,7 +319,7 @@ udf_read_sectors (const udf_t *p_udf, void *ptr, lsn_t i_start,
 		 long int i_blocks) 
 {
   driver_return_code_t ret;
-  long int i_read;
+  ssize_t i_read;
   long int i_byte_offset;
   
   if (!p_udf) return 0;

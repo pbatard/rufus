@@ -2,6 +2,8 @@
 #error This header should only be used with Microsoft compilers
 #endif
 
+#include <windows.h>
+
 /* Workaround unisdt.h for MS compilers */
 
 #ifndef _UNISTD_H_
@@ -11,6 +13,8 @@
 #ifndef inline
 #define inline __inline
 #endif
+
+typedef unsigned short mode_t;
 
 /* ssize_t is also not available (copy/paste from MinGW) */
 #ifndef _SSIZE_T_DEFINED

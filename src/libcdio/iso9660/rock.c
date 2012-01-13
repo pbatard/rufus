@@ -18,8 +18,14 @@
 /* Rock Ridge Extensions to iso9660 */
 
 
-#ifdef HAVE_CONFIG_H
-# include "config.h"
+#if HAVE_CONFIG_H
+# include <config.h>
+# define __CDIO_CONFIG_H__ 1
+#else
+#ifndef EXTERNAL_LIBCDIO_CONFIG_H
+#define EXTERNAL_LIBCDIO_CONFIG_H
+#include <cdio/cdio_config.h>
+#endif
 #endif
 
 #ifdef HAVE_STRING_H
@@ -34,6 +40,12 @@
 # include <sys/stat.h>
 #endif
 
+#include <cdio/iso9660.h>
+#include <cdio/logging.h>
+#include <cdio/bytesex.h>
+#include <cdio/filemode.h>
+#include <malloc.h>
+
 #ifndef HAVE_S_ISLNK
 # define S_ISLNK(s) ((void)s,0)
 #endif
@@ -41,10 +53,6 @@
 # define S_ISSOCK(s) ((void)s,0)
 #endif
 
-#include <cdio/iso9660.h>
-#include <cdio/logging.h>
-#include <cdio/bytesex.h>
-#include <malloc.h>
 
 #define CDIO_MKDEV(ma,mi)	((ma)<<16 | (mi))
 
@@ -572,16 +580,16 @@ iso9660_get_rock_attr_str(posix_mode_t st_mode)
 {
   char *result = _getbuf();
 
-  if (S_ISBLK(st_mode))
-    result[ 0] = 'b';
-  else if (S_ISDIR(st_mode)) 
+  if (S_ISDIR(st_mode)) 
     result[ 0] = 'd';
+//  else if (S_ISBLK(st_mode))
+//    result[ 0] = 'b';
   else if (S_ISCHR(st_mode))
     result[ 0] = 'c';
   else if (S_ISLNK(st_mode))
     result[ 0] = 'l';
-  else if (S_ISFIFO(st_mode))
-    result[ 0] = 'p';
+//  else if (S_ISFIFO(st_mode))
+//    result[ 0] = 'p';
   else if (S_ISSOCK(st_mode)) 
     result[ 0] = 's';
   /* May eventually fill in others.. */

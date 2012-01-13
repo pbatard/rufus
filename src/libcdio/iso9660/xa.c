@@ -17,9 +17,14 @@
 */
 
 
-#ifdef HAVE_CONFIG_H
-# include "config.h"
+#if HAVE_CONFIG_H
+# include <config.h>
 # define __CDIO_CONFIG_H__ 1
+#else
+#ifndef EXTERNAL_LIBCDIO_CONFIG_H
+#define EXTERNAL_LIBCDIO_CONFIG_H
+#include <cdio/cdio_config.h>
+#endif
 #endif
 
 #ifdef HAVE_STRING_H
@@ -28,14 +33,6 @@
 
 #ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
-#endif
-
-// TODO: Why the frack can't we redef using sys/stat.h?!?
-#ifdef _MSC_VER
-#define S_IRUSR 0x0100
-#define S_IWUSR 0x0080
-#define S_IXUSR 0x0040
-#define S_IFDIR 0x4000
 #endif
 
 /*! String inside frame which identifies XA attributes.  Note should
@@ -48,6 +45,7 @@ const char ISO_XA_MARKER_STRING[] = {'C', 'D', '-', 'X', 'A', '0', '0', '1'};
 #include <cdio/iso9660.h>
 #include <cdio/util.h>
 #include <cdio/bytesex.h>
+#include <cdio/filemode.h>
 
 /* Private headers */
 #include "cdio_assert.h"

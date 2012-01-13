@@ -21,6 +21,11 @@
 #if defined(HAVE_CONFIG_H) && !defined(__CDIO_CONFIG_H__)
 # include "config.h"
 # define __CDIO_CONFIG_H__ 1
+#else
+#ifndef EXTERNAL_LIBCDIO_CONFIG_H
+#define EXTERNAL_LIBCDIO_CONFIG_H
+#include <cdio/cdio_config.h>
+#endif
 #endif
 
 #ifdef HAVE_STRING_H
@@ -585,8 +590,8 @@ iso9660_ifs_fuzzy_read_superblock (iso9660_t *p_iso,
 	
 	if (pvd) {
 	  /* Yay! Found something */
-	  p_iso->i_fuzzy_offset = (pvd - frame - 1) - 
-	    ((ISO_PVD_SECTOR-lsn)*p_iso->i_framesize) ;
+	  p_iso->i_fuzzy_offset = (int) ((pvd - frame - 1) - 
+	    ((ISO_PVD_SECTOR-lsn)*p_iso->i_framesize)) ;
 	  /* But is it *really* a PVD? */
 	  if ( iso9660_ifs_read_pvd_loglevel(p_iso, &(p_iso->pvd), 
 					     CDIO_LOG_DEBUG) ) {
@@ -711,9 +716,9 @@ iso9660_seek_read_framesize (const iso9660_t *p_iso, void *ptr,
   i_byte_offset = (start * p_iso->i_framesize) + p_iso->i_fuzzy_offset 
     + p_iso->i_datastart;
 
-  ret = cdio_stream_seek (p_iso->stream, i_byte_offset, SEEK_SET);
+  ret = (long)cdio_stream_seek (p_iso->stream, i_byte_offset, SEEK_SET);
   if (ret!=0) return 0;
-  return cdio_stream_read (p_iso->stream, ptr, i_framesize, size);
+  return (long)cdio_stream_read (p_iso->stream, ptr, i_framesize, size);
 }
 
 /*!
@@ -879,11 +884,11 @@ iso9660_dir_to_name (const iso9660_dir_t *iso9660_dir)
   /* (iso9660_dir->file_flags & ISO_DIRECTORY) */
   
   if (iso9660_dir->filename[0] == '\0')
-    return strdup(".");
+    return _strdup(".");
   else if (iso9660_dir->filename[0] == '\1')
-    return strdup("..");
+    return _strdup("..");
   else {
-    return strdup(iso9660_dir->filename);
+    return _strdup(iso9660_dir->filename);
   }
 }
 
@@ -968,7 +973,7 @@ _fs_stat_traverse (const CdIo_t *p_cdio, const iso9660_stat_t *_root,
 
   if (!splitpath[0])
     {
-      unsigned int len=sizeof(iso9660_stat_t) + strlen(_root->filename)+1;
+      size_t len=sizeof(iso9660_stat_t) + strlen(_root->filename)+1;
       p_stat = calloc(1, len);
       memcpy(p_stat, _root, len);
       p_stat->rr.psz_symlink = calloc(1, p_stat->rr.i_symlink_max);
@@ -1020,7 +1025,7 @@ _fs_stat_traverse (const CdIo_t *p_cdio, const iso9660_stat_t *_root,
       if ( 0 != cmp && 0 == p_env->i_joliet_level 
 	   && yep != p_stat->rr.b3_rock ) {
 	char *trans_fname = NULL;
-	unsigned int i_trans_fname=strlen(p_stat->filename);
+	size_t i_trans_fname=strlen(p_stat->filename);
 	int trans_len;
 	
 	if (i_trans_fname) {
@@ -1071,7 +1076,7 @@ _fs_iso_stat_traverse (iso9660_t *p_iso, const iso9660_stat_t *_root,
   if (!splitpath[0])
     {
       iso9660_stat_t *p_stat;
-      unsigned int len=sizeof(iso9660_stat_t) + strlen(_root->filename)+1;
+      size_t len=sizeof(iso9660_stat_t) + strlen(_root->filename)+1;
       p_stat = calloc(1, len);
       if (!p_stat)
         {
@@ -1127,7 +1132,7 @@ _fs_iso_stat_traverse (iso9660_t *p_iso, const iso9660_stat_t *_root,
       if ( 0 != cmp && 0 == p_iso->i_joliet_level 
 	   && yep != p_stat->rr.b3_rock ) {
 	char *trans_fname = NULL;
-	unsigned int i_trans_fname=strlen(p_stat->filename);
+	size_t i_trans_fname=strlen(p_stat->filename);
 	int trans_len;
 	
 	if (i_trans_fname) {
@@ -1445,20 +1450,20 @@ find_lsn_recurse (void *p_image, iso9660_readdir_t iso9660_readdir,
     {
       iso9660_stat_t *statbuf = _cdio_list_node_data (entnode);
       const char *psz_filename  = (char *) statbuf->filename;
-      const unsigned int len = strlen(psz_path) + strlen(psz_filename)+2;
+      const size_t len = strlen(psz_path) + strlen(psz_filename)+2;
       
       if (*ppsz_full_filename != NULL) free(*ppsz_full_filename);
       *ppsz_full_filename = calloc(1, len);
-      snprintf (*ppsz_full_filename, len, "%s%s/", psz_path, psz_filename);
+      _snprintf (*ppsz_full_filename, len, "%s%s/", psz_path, psz_filename);
 
       if (statbuf->type == _STAT_DIR
           && strcmp ((char *) statbuf->filename, ".") 
           && strcmp ((char *) statbuf->filename, "..")) {
-        _cdio_list_append (dirlist, strdup(*ppsz_full_filename));
+        _cdio_list_append (dirlist, _strdup(*ppsz_full_filename));
       }
 
       if (statbuf->lsn == lsn) {
-	unsigned int len=sizeof(iso9660_stat_t)+strlen(statbuf->filename)+1;
+	size_t len=sizeof(iso9660_stat_t)+strlen(statbuf->filename)+1;
 	iso9660_stat_t *ret_stat = calloc(1, len);
 	if (!ret_stat)
 	  {

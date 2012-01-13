@@ -44,11 +44,6 @@ extern "C" {
 #include <sys/types.h>
 #endif 
 
-#ifdef _MSC_VER
-#include <windows.h>
-typedef unsigned short mode_t;
-#endif
-
 #if defined(HAVE_STDINT_H)
 # include <stdint.h>
 #elif defined(HAVE_INTTYPES_H)
