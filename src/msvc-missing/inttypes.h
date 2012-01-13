@@ -23,14 +23,17 @@
 #error This header should only be used with Microsoft compilers
 #endif
 
+/* It's convenient to hijack this header to also define 'inline' on MS environments */
+#ifndef inline
+#define inline __inline
+#endif
+
 /* 7.8 Format conversion of integer types <inttypes.h> */
 
 #ifndef _INTTYPES_H_
 #define _INTTYPES_H_
 
 #include <stdint.h>
-/* Workaround - TODO: move this include back into source */
-#include <unistd.h>
 
 #ifdef	__cplusplus
 extern	"C"	{

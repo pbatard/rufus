@@ -16,6 +16,8 @@ Project("{11411DA5-63FE-49DC-8D5C-CA379B95FF3C}") = "libcdio-iso9660", "src\libc
 EndProject
 Project("{11411DA5-63FE-49DC-8D5C-CA379B95FF3C}") = "libcdio-udf", "src\libcdio\udf\.msvc\udf.vcxproj", "{0CEC40A6-A195-4BE5-A88B-0AB00EB142EC}"
 EndProject
+Project("{11411DA5-63FE-49DC-8D5C-CA379B95FF3C}") = "libcdio-driver", "src\libcdio\driver\.msvc\driver.vcxproj", "{FA1B1093-BA86-410A-B7A0-7A54C605F812}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -72,6 +74,14 @@ Global
 		{0CEC40A6-A195-4BE5-A88B-0AB00EB142EC}.Release|Win32.Build.0 = Release|Win32
 		{0CEC40A6-A195-4BE5-A88B-0AB00EB142EC}.Release|x64.ActiveCfg = Release|x64
 		{0CEC40A6-A195-4BE5-A88B-0AB00EB142EC}.Release|x64.Build.0 = Release|x64
+		{FA1B1093-BA86-410A-B7A0-7A54C605F812}.Debug|Win32.ActiveCfg = Debug|Win32
+		{FA1B1093-BA86-410A-B7A0-7A54C605F812}.Debug|Win32.Build.0 = Debug|Win32
+		{FA1B1093-BA86-410A-B7A0-7A54C605F812}.Debug|x64.ActiveCfg = Debug|x64
+		{FA1B1093-BA86-410A-B7A0-7A54C605F812}.Debug|x64.Build.0 = Debug|x64
+		{FA1B1093-BA86-410A-B7A0-7A54C605F812}.Release|Win32.ActiveCfg = Release|Win32
+		{FA1B1093-BA86-410A-B7A0-7A54C605F812}.Release|Win32.Build.0 = Release|Win32
+		{FA1B1093-BA86-410A-B7A0-7A54C605F812}.Release|x64.ActiveCfg = Release|x64
+		{FA1B1093-BA86-410A-B7A0-7A54C605F812}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -80,7 +80,7 @@
       <PreprocessorDefinitions>_CRTDBG_MAP_ALLOC;_CRT_SECURE_NO_WARNINGS;ISOLATION_AWARE_ENABLED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
-      <AdditionalIncludeDirectories>..\ms-sys\inc;..\syslinux;..\syslinux\libinstaller;..\syslinux\libfat;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\msvc-missing;..\ms-sys\inc;..\syslinux\libinstaller;..\syslinux\libfat;..\libcdio;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <AdditionalDependencies>setupapi.lib;comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -99,7 +99,7 @@
       <TargetEnvironment>X64</TargetEnvironment>
     </Midl>
     <ClCompile>
-      <AdditionalIncludeDirectories>..\ms-sys\inc;..\syslinux;..\syslinux\libinstaller;..\syslinux\libfat;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\msvc-missing;..\ms-sys\inc;..\syslinux\libinstaller;..\syslinux\libfat;..\libcdio;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_CRTDBG_MAP_ALLOC;_CRT_SECURE_NO_WARNINGS;ISOLATION_AWARE_ENABLED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
@@ -122,7 +122,7 @@
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;ISOLATION_AWARE_ENABLED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
-      <AdditionalIncludeDirectories>..\ms-sys\inc;..\syslinux;..\syslinux\libinstaller;..\syslinux\libfat;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\msvc-missing;..\ms-sys\inc;..\syslinux\libinstaller;..\syslinux\libfat;..\libcdio;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <AdditionalDependencies>setupapi.lib;comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -144,7 +144,7 @@
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;ISOLATION_AWARE_ENABLED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
-      <AdditionalIncludeDirectories>..\ms-sys\inc;..\syslinux;..\syslinux\libinstaller;..\syslinux\libfat;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\msvc-missing;..\ms-sys\inc;..\syslinux\libinstaller;..\syslinux\libfat;..\libcdio;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <AdditionalDependencies>setupapi.lib;comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -163,6 +163,7 @@
     <ClCompile Include="..\drive.c" />
     <ClCompile Include="..\format.c" />
     <ClCompile Include="..\dos.c" />
+    <ClCompile Include="..\iso.c" />
     <ClCompile Include="..\rufus.c" />
     <ClCompile Include="..\stdio.c" />
     <ClCompile Include="..\stdlg.c" />
@@ -189,6 +190,15 @@
     <ResourceCompile Include="..\rufus.rc" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\libcdio\driver\.msvc\driver.vcxproj">
+      <Project>{fa1b1093-ba86-410a-b7a0-7a54c605f812}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\libcdio\iso9660\.msvc\iso9660.vcxproj">
+      <Project>{d4e80f35-2604-40ac-b436-97b052ecb572}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\libcdio\udf\.msvc\udf.vcxproj">
+      <Project>{0cec40a6-a195-4be5-a88b-0ab00eb142ec}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\ms-sys\.msvc\ms-sys.vcxproj">
       <Project>{2b1d078d-8eb4-4398-9ca4-23457265a7f6}</Project>
     </ProjectReference>

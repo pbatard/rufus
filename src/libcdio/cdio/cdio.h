@@ -75,6 +75,6 @@ extern "C" {
 //#include <cdio/cdtext.h>
 
 /* Track-related functions. */
-//#include <cdio/track.h>
+#include <cdio/track.h>
 
 #endif /* __CDIO_H__ */

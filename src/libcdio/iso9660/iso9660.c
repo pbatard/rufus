@@ -80,13 +80,13 @@ timegm(struct tm *tm)
   
   tz = getenv("TZ");
   setenv("TZ", "UTC", 1);
-  tzset();
+  _tzset();
   ret = mktime(tm);
   if (tz)
     setenv("TZ", tz, 1);
   else
     unsetenv("TZ");
-  tzset();
+  _tzset();
   return ret;
 }
 #endif
@@ -1048,7 +1048,7 @@ iso9660_pathname_valid_p (const char pathname[])
   if ((p = strrchr (pathname, '/')))
     {
       bool rc;
-      char *_tmp = strdup (pathname);
+      char *_tmp = _strdup (pathname);
       
       *strrchr (_tmp, '/') = '\0';
 
@@ -1112,7 +1112,7 @@ iso9660_pathname_isofy (const char pathname[], uint16_t version)
 
   _snprintf (tmpbuf, sizeof(tmpbuf), "%s;%d", pathname, version);
 
-  return strdup (tmpbuf);
+  return _strdup (tmpbuf);
 }
 
 /*!
@@ -1123,7 +1123,7 @@ char *
 iso9660_get_application_id(iso9660_pvd_t *p_pvd)
 {
   if (NULL==p_pvd) return NULL;
-  return strdup(strip_trail(p_pvd->application_id, ISO_MAX_APPLICATION_ID));
+  return _strdup(strip_trail(p_pvd->application_id, ISO_MAX_APPLICATION_ID));
 }
 
 #ifdef FIXME
@@ -1212,7 +1212,7 @@ char *
 iso9660_get_preparer_id(const iso9660_pvd_t *pvd)
 {
   if (NULL==pvd) return NULL;
-  return strdup(strip_trail(pvd->preparer_id, ISO_MAX_PREPARER_ID));
+  return _strdup(strip_trail(pvd->preparer_id, ISO_MAX_PREPARER_ID));
 }
 
 /*!
@@ -1223,7 +1223,7 @@ char *
 iso9660_get_publisher_id(const iso9660_pvd_t *pvd)
 {
   if (NULL==pvd) return NULL;
-  return strdup(strip_trail(pvd->publisher_id, ISO_MAX_PUBLISHER_ID));
+  return _strdup(strip_trail(pvd->publisher_id, ISO_MAX_PUBLISHER_ID));
 }
 
 /*!
@@ -1234,7 +1234,7 @@ char *
 iso9660_get_system_id(const iso9660_pvd_t *pvd)
 {
   if (NULL==pvd) return NULL;
-  return strdup(strip_trail(pvd->system_id, ISO_MAX_SYSTEM_ID));
+  return _strdup(strip_trail(pvd->system_id, ISO_MAX_SYSTEM_ID));
 }
 
 /*!
@@ -1244,7 +1244,7 @@ char *
 iso9660_get_volume_id(const iso9660_pvd_t *pvd) 
 {
   if (NULL == pvd) return NULL;
-  return strdup(strip_trail(pvd->volume_id, ISO_MAX_VOLUME_ID));
+  return _strdup(strip_trail(pvd->volume_id, ISO_MAX_VOLUME_ID));
 }
 
 /*!
@@ -1255,7 +1255,7 @@ char *
 iso9660_get_volumeset_id(const iso9660_pvd_t *pvd)
 {
   if ( NULL == pvd ) return NULL;
-  return strdup(strip_trail(pvd->volume_set_id, ISO_MAX_VOLUMESET_ID));
+  return _strdup(strip_trail(pvd->volume_set_id, ISO_MAX_VOLUMESET_ID));
 }
 
 

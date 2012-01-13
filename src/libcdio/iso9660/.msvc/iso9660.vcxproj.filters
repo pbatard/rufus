@@ -14,9 +14,6 @@
     <ClInclude Include="..\iso9660_private.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\iso9660.c">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\cdio\cdio_config.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -29,6 +26,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\xa.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\iso9660.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

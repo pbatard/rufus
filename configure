@@ -3554,6 +3554,8 @@ ac_config_files="$ac_config_files src/libcdio/iso9660/Makefile"
 
 ac_config_files="$ac_config_files src/libcdio/udf/Makefile"
 
+ac_config_files="$ac_config_files src/libcdio/driver/Makefile"
+
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
 # tests run on this system so they can be shared between configure
@@ -4290,6 +4292,7 @@ do
     "src/syslinux/libinstaller/Makefile") CONFIG_FILES="$CONFIG_FILES src/syslinux/libinstaller/Makefile" ;;
     "src/libcdio/iso9660/Makefile") CONFIG_FILES="$CONFIG_FILES src/libcdio/iso9660/Makefile" ;;
     "src/libcdio/udf/Makefile") CONFIG_FILES="$CONFIG_FILES src/libcdio/udf/Makefile" ;;
+    "src/libcdio/driver/Makefile") CONFIG_FILES="$CONFIG_FILES src/libcdio/driver/Makefile" ;;
 
   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5 ;;
   esac

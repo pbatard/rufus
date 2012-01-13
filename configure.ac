@@ -91,4 +91,5 @@ AC_CONFIG_FILES([src/syslinux/libfat/Makefile])
 AC_CONFIG_FILES([src/syslinux/libinstaller/Makefile])
 AC_CONFIG_FILES([src/libcdio/iso9660/Makefile])
 AC_CONFIG_FILES([src/libcdio/udf/Makefile])
+AC_CONFIG_FILES([src/libcdio/driver/Makefile])
 AC_OUTPUT

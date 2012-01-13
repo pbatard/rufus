@@ -19,22 +19,27 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\fat.h" />
-    <ClInclude Include="..\libfat.h" />
-    <ClInclude Include="..\libfatint.h" />
-    <ClInclude Include="..\ulint.h" />
+    <ClCompile Include="..\disc.c" />
+    <ClCompile Include="..\ds.c" />
+    <ClCompile Include="..\logging.c" />
+    <ClCompile Include="..\read.c" />
+    <ClCompile Include="..\sector.c" />
+    <ClCompile Include="..\track.c" />
+    <ClCompile Include="..\util.c" />
+    <ClCompile Include="..\_cdio_stdio.c" />
+    <ClCompile Include="..\_cdio_stream.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\cache.c" />
-    <ClCompile Include="..\fatchain.c" />
-    <ClCompile Include="..\open.c" />
-    <ClCompile Include="..\searchdir.c" />
+    <ClInclude Include="..\cdio_assert.h" />
+    <ClInclude Include="..\cdio_private.h" />
+    <ClInclude Include="..\_cdio_stdio.h" />
+    <ClInclude Include="..\_cdio_stream.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{8390DCE0-859D-4F57-AD9C-AAEAC4D77EEF}</ProjectGuid>
+    <ProjectGuid>{FA1B1093-BA86-410A-B7A0-7A54C605F812}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>libfat</RootNamespace>
-    <ProjectName>syslinux-libfat</ProjectName>
+    <RootNamespace>driver</RootNamespace>
+    <ProjectName>libcdio-driver</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -97,7 +102,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_CRTDBG_MAP_ALLOC;_CRT_SECURE_NO_WARNINGS;ISOLATION_AWARE_ENABLED;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..;..\..\..\msvc-missing;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..;..\..;..\..\..\msvc-missing;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
@@ -117,7 +122,7 @@
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>_CRTDBG_MAP_ALLOC;_CRT_SECURE_NO_WARNINGS;ISOLATION_AWARE_ENABLED;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..;..\..\..\msvc-missing;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..;..\..;..\..\..\msvc-missing;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
@@ -132,7 +137,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_CRTDBG_MAP_ALLOC;_CRT_SECURE_NO_WARNINGS;ISOLATION_AWARE_ENABLED;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..;..\..\..\msvc-missing;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..;..\..;..\..\..\msvc-missing;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
@@ -152,7 +157,7 @@
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>_CRTDBG_MAP_ALLOC;_CRT_SECURE_NO_WARNINGS;ISOLATION_AWARE_ENABLED;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..;..\..\..\msvc-missing;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..;..\..;..\..\..\msvc-missing;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
