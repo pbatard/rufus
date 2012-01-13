@@ -577,7 +577,7 @@ iso9660_ifs_fuzzy_read_superblock (iso9660_t *p_iso,
 			      0 : CDIO_CD_SYNC_SIZE;
 	p_iso->i_fuzzy_offset = 0;
 	if (0 == iso9660_seek_read_framesize (p_iso, frame, lsn, 1, 
-					      p_iso->i_framesize)) {
+					      (uint16_t)p_iso->i_framesize)) {
 	  return false;
 	}
 
@@ -1448,6 +1448,7 @@ find_lsn_recurse (void *p_image, iso9660_readdir_t iso9660_readdir,
       iso9660_stat_t *statbuf = _cdio_list_node_data (entnode);
       const char *psz_filename  = (char *) statbuf->filename;
       size_t len = strlen(psz_path) + strlen(psz_filename)+2;
+      iso9660_stat_t *ret_stat;
       
       if (*ppsz_full_filename != NULL) free(*ppsz_full_filename);
       *ppsz_full_filename = calloc(1, len);
@@ -1461,7 +1462,7 @@ find_lsn_recurse (void *p_image, iso9660_readdir_t iso9660_readdir,
 
       if (statbuf->lsn == lsn) {
 	len=sizeof(iso9660_stat_t)+strlen(statbuf->filename)+1;
-	iso9660_stat_t *ret_stat = calloc(1, len);
+	ret_stat = calloc(1, len);
 	if (!ret_stat)
 	  {
           cdio_warn("Couldn't calloc(1, %u)", (unsigned int)len);

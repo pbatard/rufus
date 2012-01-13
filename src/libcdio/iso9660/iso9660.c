@@ -308,12 +308,12 @@ iso9660_set_dtime_with_timezone (const struct tm *p_tm,
 
   if (!p_tm) return;
 
-  p_idr_date->dt_year   = p_tm->tm_year;
-  p_idr_date->dt_month  = p_tm->tm_mon + 1;
-  p_idr_date->dt_day    = p_tm->tm_mday;
-  p_idr_date->dt_hour   = p_tm->tm_hour;
-  p_idr_date->dt_minute = p_tm->tm_min;
-  p_idr_date->dt_second = p_tm->tm_sec;
+  p_idr_date->dt_year   = (iso711_t)p_tm->tm_year;
+  p_idr_date->dt_month  = (iso711_t)p_tm->tm_mon + 1;
+  p_idr_date->dt_day    = (iso711_t)p_tm->tm_mday;
+  p_idr_date->dt_hour   = (iso711_t)p_tm->tm_hour;
+  p_idr_date->dt_minute = (iso711_t)p_tm->tm_min;
+  p_idr_date->dt_second = (iso711_t)p_tm->tm_sec;
 
   /* The ISO 9660 timezone is in the range -48..+52 and each unit
      represents a 15-minute interval. */
@@ -364,7 +364,7 @@ iso9660_set_ltime_with_timezone (const struct tm *p_tm,
 
   if (!p_tm) return;
 
-  snprintf(_pvd_date, 17, 
+  _snprintf(_pvd_date, 17, 
            "%4.4d%2.2d%2.2d" "%2.2d%2.2d%2.2d" "%2.2d",
            p_tm->tm_year + 1900, p_tm->tm_mon + 1, p_tm->tm_mday,
            p_tm->tm_hour, p_tm->tm_min, p_tm->tm_sec,
@@ -447,7 +447,7 @@ iso9660_name_translate_ext(const char *psz_oldname, char *psz_newname,
       break;
     
     /* Lower case, unless we have Joliet extensions.  */
-    if (!i_joliet_level && isupper(c)) c = tolower(c);
+    if (!i_joliet_level && isupper(c)) c = (unsigned char)tolower(c);
     
     /* Drop trailing '.;1' (ISO 9660:1988 7.5.1 requires period) */
     if (c == '.' && i == len - 3 
@@ -647,7 +647,7 @@ iso9660_set_pvd(void *pd,
   memcpy(&(ipd.root_directory_record), root_dir, 
          sizeof(ipd.root_directory_record));
   ipd.root_directory_filename='\0';
-  ipd.root_directory_record.length = sizeof(ipd.root_directory_record)+1;
+  ipd.root_directory_record.length = (iso711_t)(sizeof(ipd.root_directory_record)+1);
   iso9660_strncpy_pad (ipd.volume_set_id, VOLUME_SET_ID, 
                        ISO_MAX_VOLUMESET_ID, ISO9660_DCHARS);
 
@@ -760,7 +760,7 @@ iso9660_dir_add_entry_su(void *dir,
   
   memset(idr, 0, length);
 
-  idr->length = to_711(length);
+  idr->length = to_711((uint8_t)length);
   idr->extent = to_733(extent);
   idr->size = to_733(size);
   
@@ -841,7 +841,7 @@ iso9660_get_posix_filemode(const iso9660_stat_t *p_iso_dirent)
   } else 
 #endif 
   if (p_iso_dirent->b_xa) { 
-    return iso9660_get_posix_filemode_from_xa(p_iso_dirent->xa.attributes); 
+    return (mode_t)iso9660_get_posix_filemode_from_xa(p_iso_dirent->xa.attributes); 
   } 
   return mode;
 }
@@ -927,7 +927,7 @@ iso9660_pathtable_l_add_entry (void *pt,
 
   memset (ipt, 0, sizeof (iso_path_table_t) + name_len); /* paranoia */
 
-  ipt->name_len = to_711 (name_len);
+  ipt->name_len = to_711 ((uint8_t)name_len);
   ipt->extent = to_731 (extent);
   ipt->parent = to_721 (parent);
   memcpy (ipt->name, name, name_len);
@@ -944,7 +944,7 @@ iso9660_pathtable_l_add_entry (void *pt,
       cdio_assert (from_721 (ipt2->parent) <= parent);
     }
   
-  return entrynum;
+  return (uint16_t)entrynum;
 }
 
 uint16_t 
@@ -962,7 +962,7 @@ iso9660_pathtable_m_add_entry (void *pt,
 
   memset(ipt, 0, sizeof (iso_path_table_t) + name_len); /* paranoia */
 
-  ipt->name_len = to_711 (name_len);
+  ipt->name_len = to_711 ((uint8_t)name_len);
   ipt->extent = to_732 (extent);
   ipt->parent = to_722 (parent);
   memcpy (ipt->name, name, name_len);
@@ -979,7 +979,7 @@ iso9660_pathtable_m_add_entry (void *pt,
       cdio_assert (from_722 (ipt2->parent) <= parent);
     }
 
-  return entrynum;
+  return (uint16_t)entrynum;
 }
 
 /*!
@@ -1110,7 +1110,7 @@ iso9660_pathname_isofy (const char pathname[], uint16_t version)
     
   cdio_assert (strlen (pathname) < (sizeof (tmpbuf) - sizeof (";65535")));
 
-  snprintf (tmpbuf, sizeof(tmpbuf), "%s;%d", pathname, version);
+  _snprintf (tmpbuf, sizeof(tmpbuf), "%s;%d", pathname, version);
 
   return strdup (tmpbuf);
 }
