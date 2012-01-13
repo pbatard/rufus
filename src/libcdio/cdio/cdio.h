@@ -61,7 +61,6 @@ extern "C" {
 /* Drive(r)/Device-related functions. Perhaps we should break out 
    Driver from device?
 */
-// TODO: die die die
 #include <cdio/device.h>
 
 /* Disc-related functions. */
@@ -73,11 +72,9 @@ extern "C" {
 #include <cdio/read.h>
 
 /* CD-Text-related functions. */
-// TODO: die die die
-#include <cdio/cdtext.h>
+//#include <cdio/cdtext.h>
 
 /* Track-related functions. */
-// TODO: die die die
-#include <cdio/track.h>
+//#include <cdio/track.h>
 
 #endif /* __CDIO_H__ */
