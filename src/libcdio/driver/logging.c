@@ -119,6 +119,18 @@ cdio_log (cdio_log_level_t level, const char format[], ...)
   va_end (args);
 }
 
+#if defined(__GNUC__)
+void
+cdio_assert_log (const char format[], ...)
+{
+  va_list args;
+  va_start (args, format);
+  cdio_logv (CDIO_LOG_ASSERT, format, args);
+  va_end (args);
+  exit(1);
+}
+#endif
+
 #define CDIO_LOG_TEMPLATE(level, LEVEL) \
 void \
 cdio_ ## level (const char format[], ...) \
