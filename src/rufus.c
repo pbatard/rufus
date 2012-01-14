@@ -1000,6 +1000,10 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		case IDC_ABOUT:
 			CreateAboutBox();
 			break;
+		case IDC_TEST:
+			ExtractISO("D:\\fd11src.iso", NULL);
+//			ExtractISO("D:\\Incoming\\en_windows_7_ultimate_with_sp1_x64_dvd_618240.iso", NULL);
+			break;
 		case IDC_DEVICE:
 			switch (HIWORD(wParam)) {
 			case CBN_SELCHANGE:

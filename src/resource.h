@@ -52,6 +52,7 @@
 #define IDC_PROGRESS                    1012
 #define IDC_DOSTYPE                     1013
 #define IDC_NBPASSES                    1014
+#define IDC_TEST                        1015
 #define IDC_ABOUT_LICENSE               1030
 #define IDC_ABOUT_ICON                  1031
 #define IDC_RUFUS_BOLD                  1032

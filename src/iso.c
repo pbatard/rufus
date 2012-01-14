@@ -2,8 +2,8 @@
  * Rufus: The Reliable USB Formatting Utility
  * ISO file extraction
  * Copyright (c) 2011-2012 Pete Batard <pete@akeo.ie>
- * Based on libcdio's iso-read.c & iso-info.c:
- * Copyright (C) 2004, 2005, 2006, 2008 Rocky Bernstein <rocky@gnu.org>
+ * Based on libcdio's iso & udf samples:
+ * Copyright (c) 2003-2011 Rocky Bernstein <rocky@gnu.org>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,13 +19,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/* Memory leaks detection - define _CRTDBG_MAP_ALLOC as preprocessor macro */
+#ifdef _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
+#endif
+
 #include <windows.h>
 #include <stdio.h>
 #include <malloc.h>
 #include "rufus.h"
 
 #include <cdio/cdio.h>
+#include <cdio/logging.h>
 #include <cdio/iso9660.h>
+#include <cdio/udf.h>
 
 #define print_vd_info(title, fn)			\
 	if (fn(p_iso, &psz_str)) {				\
@@ -34,20 +42,98 @@
 	free(psz_str);							\
 	psz_str = NULL;
 
+/* Needed for UDF ISO access */
+CdIo_t* cdio_open (const char *psz_source, driver_id_t driver_id) {return NULL;}
+void cdio_destroy (CdIo_t *p_cdio) {}
+
+static void log_handler(cdio_log_level_t level, const char* message)
+{
+	uprintf("cdio %d message: %s\n", level, message);
+}
+
+static void print_file_info(const udf_dirent_t *p_udf_dirent, const char* psz_dirname)
+{
+	time_t mod_time = udf_get_modification_time(p_udf_dirent);
+	char psz_mode[11] = "invalid";
+	const char *psz_fname = psz_dirname?psz_dirname:udf_get_filename(p_udf_dirent);
+
+	/* Print directory attributes*/
+	uprintf("%s %4d %lu %s %s\n", udf_mode_string(udf_get_posix_filemode(p_udf_dirent), psz_mode),
+		udf_get_link_count(p_udf_dirent), (long unsigned int)udf_get_file_length(p_udf_dirent),
+		(*psz_fname?psz_fname:"/"), ctime(&mod_time));
+}
+
+static udf_dirent_t* list_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const char *psz_path)
+{
+	if (!p_udf_dirent)
+		return NULL;
+	print_file_info(p_udf_dirent, psz_path);
+	while (udf_readdir(p_udf_dirent)) {
+		if (udf_is_dir(p_udf_dirent)) {
+			udf_dirent_t *p_udf_dirent2 = udf_opendir(p_udf_dirent);
+			if (p_udf_dirent2) {
+				const char *psz_dirname = udf_get_filename(p_udf_dirent);
+				const unsigned int i_newlen=2 + safe_strlen(psz_path) + safe_strlen(psz_dirname);
+				char* psz_newpath = (char*)calloc(sizeof(char), i_newlen);
+				safe_sprintf(psz_newpath, i_newlen, "%s%s/", psz_path, psz_dirname);
+				uprintf("psz_newpath = %s\n", psz_newpath);
+				list_files(p_udf, p_udf_dirent2, psz_newpath);
+				free(psz_newpath);
+			} else {
+				uprintf("Could not open UDF directory!\n");
+			}
+		} else {
+			print_file_info(p_udf_dirent, NULL);
+		}
+	}
+	return p_udf_dirent;
+}
+
 BOOL ExtractISO(const char* src_iso, const char* dest_dir)
 {
 	BOOL r = FALSE;
-	CdioList_t *p_entlist;
-	CdioListNode_t *p_entnode;
-	iso9660_t *p_iso;
+	CdioList_t* p_entlist;
+	CdioListNode_t* p_entnode;
+	iso9660_t* p_iso = NULL;
+	udf_t* p_udf = NULL; 
+	udf_dirent_t* p_udf_root;
+//	udf_dirent_t* p_udf_file = NULL;
 	const char *psz_path="/";
 	char *psz_str = NULL;
+	char vol_id[UDF_VOLID_SIZE] = "";
+	char volset_id[UDF_VOLSET_ID_SIZE+1] = "";
 
+	cdio_log_set_handler(log_handler);
 
+	p_udf = udf_open(src_iso);
+	if (p_udf == NULL) {
+		uprintf("Unable to open UDF image '%s'.\n", src_iso);
+		goto try_iso;
+	}
+	p_udf_root = udf_get_root(p_udf, true, 0);
+	if (p_udf_root == NULL) {
+		uprintf("Couldn't locate UDF root directory\n");
+		goto out;
+	}
+	vol_id[0] = 0; volset_id[0] = 0;
+	if (udf_get_volume_id(p_udf, vol_id, sizeof(vol_id)) > 0)
+		uprintf("volume id: %s\n", vol_id);
+	if (udf_get_volume_id(p_udf, volset_id, sizeof(volset_id)) >0 ) {
+		volset_id[UDF_VOLSET_ID_SIZE]='\0';
+		uprintf("volume set id: %s\n", volset_id);
+	}
+	uprintf("partition number: %d\n", udf_get_part_number(p_udf));
+	list_files(p_udf, p_udf_root, "");
+	udf_dirent_free(p_udf_root);
+
+	r = TRUE;
+	goto out;
+
+try_iso:
 	p_iso = iso9660_open(src_iso);
 	if (p_iso == NULL) {
 		uprintf("Unable to open ISO image '%s'.\n", src_iso);
-		goto out1;
+		goto out;
 	}
 
 	/* Show basic CD info from the Primary Volume Descriptor. */
@@ -69,7 +155,9 @@ BOOL ExtractISO(const char* src_iso, const char* dest_dir)
 			uprintf("%s [LSN %6d] %8u %s%s\n", _STAT_DIR == p_statbuf->type ? "d" : "-",
 				p_statbuf->lsn, p_statbuf->size, psz_path, filename);
 		}
-		_cdio_list_free (p_entlist, true);
+		_cdio_list_free(p_entlist, true);
+	} else {
+		uprintf("Could not open ISO directory!\n");
 	}
 	r = TRUE;
 
@@ -121,8 +209,11 @@ out3:
 	fclose(outfd);
 out2:
 #endif
-	iso9660_close(p_iso);
-out1:
+out:
+	if (p_iso != NULL)
+		iso9660_close(p_iso);
+	if (p_udf != NULL)
+		udf_close(p_udf);
 
 	return r;
 }

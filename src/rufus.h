@@ -165,6 +165,7 @@ extern void DestroyTooltip(HWND hWnd);
 extern void DestroyAllTooltips(void);
 extern BOOL Notification(int type, char* title, char* format, ...);
 extern BOOL ExtractDOS(const char* path);
+extern BOOL ExtractISO(const char* src_iso, const char* dest_dir);
 extern BOOL InstallSyslinux(DWORD num, const char* drive_name);
 extern void __cdecl FormatThread(void* param);
 extern BOOL CreatePartition(HANDLE hDrive);

@@ -152,9 +152,11 @@ typedef uint8_t ubyte;
   /* should work with most EDG-frontend based compilers */
 # define PRAGMA_BEGIN_PACKED _Pragma("pack(1)")
 # define PRAGMA_END_PACKED   _Pragma("pack()")
+#elif defined(_MSC_VER)
+# define PRAGMA_BEGIN_PACKED __pragma(pack(push, 1))
+# define PRAGMA_END_PACKED __pragma(pack(pop))
 #else /* neither gcc nor _Pragma() available... */
   /* ...so let's be naive and hope the regression testsuite is run... */
-// TODO!
 # define PRAGMA_BEGIN_PACKED
 # define PRAGMA_END_PACKED
 #endif

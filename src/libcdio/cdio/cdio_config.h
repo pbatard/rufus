@@ -14,26 +14,14 @@
 #define EMPTY_ARRAY_SIZE
 #endif
 
-/* Define 1 if you have BSDI-type CD-ROM support */
-#undef HAVE_BSDI_CDROM
-
 /* Define to 1 if you have the `bzero' function. */
 #undef HAVE_BZERO
-
-/* Define this if you have libcddb installed */
-#undef HAVE_CDDB
-
-/* Define to 1 if you have the <CoreFoundation/CFBase.h> header file. */
-#undef HAVE_COREFOUNDATION_CFBASE_H
 
 /* Define if time.h defines extern long timezone and int daylight vars. */
 #undef HAVE_DAYLIGHT
 
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #undef HAVE_DLFCN_H
-
-/* Define to 1 if you have the <dvd.h> header file. */
-#undef HAVE_DVD_H
 
 /* Define to 1 if you have the <errno.h> header file. */
 #define HAVE_ERRNO_H 1
