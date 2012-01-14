@@ -28,7 +28,11 @@
 #include <windows.h>
 #include <stdio.h>
 #include <malloc.h>
+#ifndef ISO_TEST
 #include "rufus.h"
+#else
+#define uprintf(...) printf(__VA_ARGS__)
+#endif
 
 #include <cdio/cdio.h>
 #include <cdio/logging.h>
@@ -73,9 +77,9 @@ static udf_dirent_t* list_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const 
 			udf_dirent_t *p_udf_dirent2 = udf_opendir(p_udf_dirent);
 			if (p_udf_dirent2) {
 				const char *psz_dirname = udf_get_filename(p_udf_dirent);
-				const unsigned int i_newlen=2 + safe_strlen(psz_path) + safe_strlen(psz_dirname);
+				const unsigned int i_newlen=2 + strlen(psz_path) + strlen(psz_dirname);
 				char* psz_newpath = (char*)calloc(sizeof(char), i_newlen);
-				safe_sprintf(psz_newpath, i_newlen, "%s%s/", psz_path, psz_dirname);
+				_snprintf(psz_newpath, i_newlen, "%s%s/", psz_path, psz_dirname);
 				uprintf("psz_newpath = %s\n", psz_newpath);
 				list_files(p_udf, p_udf_dirent2, psz_newpath);
 				free(psz_newpath);
@@ -217,3 +221,11 @@ out:
 
 	return r;
 }
+
+#ifdef ISO_TEST
+int main(int argc, char** argv)
+{
+	ExtractISO("D:\\src\\libcdio\\test\\udf102.iso", NULL);
+	return 0;
+}
+#endif
