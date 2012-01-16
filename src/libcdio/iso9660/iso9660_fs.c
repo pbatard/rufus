@@ -1392,7 +1392,11 @@ iso9660_ifs_readdir (iso9660_t *p_iso, const char psz_path[])
       }
 
     ret = iso9660_iso_seek_read (p_iso, _dirbuf, p_stat->lsn, p_stat->secsize);
-    if (ret != ISO_BLOCKSIZE*p_stat->secsize) return NULL;
+    if (ret != ISO_BLOCKSIZE*p_stat->secsize) 
+	  {
+	    free (_dirbuf);
+	    return NULL;
+	  }
     
     while (offset < (p_stat->secsize * ISO_BLOCKSIZE))
       {
@@ -1422,6 +1426,7 @@ iso9660_ifs_readdir (iso9660_t *p_iso, const char psz_path[])
       return NULL;
     }
 
+    free(p_stat->rr.psz_symlink);
     free (p_stat);
     return retval;
   }
