@@ -62,35 +62,31 @@ static void print_file_info(const udf_dirent_t *p_udf_dirent, const char* psz_di
 	const char *psz_fname = psz_dirname?psz_dirname:udf_get_filename(p_udf_dirent);
 
 	/* Print directory attributes*/
-	uprintf("%s %4d %lu %s %s\n", udf_mode_string(udf_get_posix_filemode(p_udf_dirent), psz_mode),
+	uprintf("%s %4d %lu %s %s", udf_mode_string(udf_get_posix_filemode(p_udf_dirent), psz_mode),
 		udf_get_link_count(p_udf_dirent), (long unsigned int)udf_get_file_length(p_udf_dirent),
 		(*psz_fname?psz_fname:"/"), ctime(&mod_time));
 }
 
-static udf_dirent_t* list_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const char *psz_path)
+static void list_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const char *psz_path)
 {
 	if (!p_udf_dirent)
-		return NULL;
+		return;
 	print_file_info(p_udf_dirent, psz_path);
 	while (udf_readdir(p_udf_dirent)) {
 		if (udf_is_dir(p_udf_dirent)) {
 			udf_dirent_t *p_udf_dirent2 = udf_opendir(p_udf_dirent);
 			if (p_udf_dirent2) {
 				const char *psz_dirname = udf_get_filename(p_udf_dirent);
-				const unsigned int i_newlen=2 + strlen(psz_path) + strlen(psz_dirname);
+				const unsigned int i_newlen = 2 + strlen(psz_path) + strlen(psz_dirname);
 				char* psz_newpath = (char*)calloc(sizeof(char), i_newlen);
 				_snprintf(psz_newpath, i_newlen, "%s%s/", psz_path, psz_dirname);
-				uprintf("psz_newpath = %s\n", psz_newpath);
 				list_files(p_udf, p_udf_dirent2, psz_newpath);
 				free(psz_newpath);
-			} else {
-				uprintf("Could not open UDF directory!\n");
 			}
 		} else {
 			print_file_info(p_udf_dirent, NULL);
 		}
 	}
-	return p_udf_dirent;
 }
 
 BOOL ExtractISO(const char* src_iso, const char* dest_dir)
@@ -128,7 +124,6 @@ BOOL ExtractISO(const char* src_iso, const char* dest_dir)
 	}
 	uprintf("partition number: %d\n", udf_get_part_number(p_udf));
 	list_files(p_udf, p_udf_root, "");
-	udf_dirent_free(p_udf_root);
 
 	r = TRUE;
 	goto out;
@@ -225,7 +220,15 @@ out:
 #ifdef ISO_TEST
 int main(int argc, char** argv)
 {
-	ExtractISO("D:\\src\\libcdio\\test\\udf102.iso", NULL);
-	return 0;
+//	ExtractISO("D:\\src\\libcdio\\test\\udf102.iso", NULL);
+	ExtractISO("D:\\Incoming\\en_windows_7_ultimate_with_sp1_x64_dvd_618240.iso", NULL);
+
+	while(getchar() != 0x0a);
+
+#ifdef _CRTDBG_MAP_ALLOC
+	_CrtDumpMemoryLeaks();
+#endif
+
+	exit(0);
 }
 #endif
