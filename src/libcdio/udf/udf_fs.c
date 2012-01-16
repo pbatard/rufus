@@ -415,6 +415,7 @@ udf_open (const char *psz_path)
   return p_udf;
 
  error:
+  cdio_stdio_destroy(p_udf->stream);
   free(p_udf);
   return NULL;
 }
