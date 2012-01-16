@@ -161,7 +161,7 @@ udf_get_lba(const udf_file_entry_t *p_udf_fe,
     {
       /* The allocation descriptor field is filled with short_ad's. */
       udf_short_ad_t *p_ad = (udf_short_ad_t *) 
-	(p_udf_fe->ext_attr + p_udf_fe->i_extended_attr);
+	(p_udf_fe->ext_attr_alloc_descs + p_udf_fe->i_extended_attr);
       
       *start = uint32_from_le(p_ad->pos);
       *end = *start + 
@@ -173,7 +173,7 @@ udf_get_lba(const udf_file_entry_t *p_udf_fe,
     {
       /* The allocation descriptor field is filled with long_ad's */
       udf_long_ad_t *p_ad = (udf_long_ad_t *) 
-	(p_udf_fe->ext_attr + p_udf_fe->i_extended_attr);
+	(p_udf_fe->ext_attr_alloc_descs + p_udf_fe->i_extended_attr);
       
       *start = uint32_from_le(p_ad->loc.lba); /* ignore partition number */
       *end = *start + 
@@ -184,7 +184,7 @@ udf_get_lba(const udf_file_entry_t *p_udf_fe,
   case ICBTAG_FLAG_AD_EXTENDED:
     {
       udf_ext_ad_t *p_ad = (udf_ext_ad_t *)
-	(p_udf_fe->ext_attr + p_udf_fe->i_extended_attr);
+	(p_udf_fe->ext_attr_alloc_descs + p_udf_fe->i_extended_attr);
       
       *start = uint32_from_le(p_ad->ext_loc.lba); /* ignore partition number */
       *end = *start + 
