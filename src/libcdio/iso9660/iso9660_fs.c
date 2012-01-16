@@ -744,7 +744,7 @@ _iso9660_dir_to_statbuf (iso9660_dir_t *p_iso9660_dir, bool_3way_t b_xa,
 
   if (!dir_len) return NULL;
 
-  i_fname  = from_711(p_iso9660_dir->filename_len);
+  i_fname  = from_711(p_iso9660_dir->filename.len);
 
   /* .. string in statbuf is one longer than in p_iso9660_dir's listing '\1' */
   stat_len      = sizeof(iso9660_stat_t)+i_fname+2;
@@ -789,9 +789,9 @@ _iso9660_dir_to_statbuf (iso9660_dir_t *p_iso9660_dir, bool_3way_t b_xa,
       }
       strncpy(p_stat->filename, rr_fname, i_rr_fname+1);
     } else {
-      if ('\0' == p_iso9660_dir->filename[0] && 1 == i_fname)
+      if ('\0' == p_iso9660_dir->filename.str[1] && 1 == i_fname)
 	strncpy (p_stat->filename, ".", sizeof("."));
-      else if ('\1' == p_iso9660_dir->filename[0] && 1 == i_fname)
+      else if ('\1' == p_iso9660_dir->filename.str[1] && 1 == i_fname)
 	strncpy (p_stat->filename, "..", sizeof(".."));
 #ifdef HAVE_JOLIET
       else if (i_joliet_level) {
@@ -809,7 +809,7 @@ _iso9660_dir_to_statbuf (iso9660_dir_t *p_iso9660_dir, bool_3way_t b_xa,
       }
 #endif /*HAVE_JOLIET*/
       else {
-	strncpy (p_stat->filename, p_iso9660_dir->filename, i_fname);
+	strncpy (p_stat->filename, &p_iso9660_dir->filename.str[1], i_fname);
       }
     }
   }
@@ -883,12 +883,12 @@ iso9660_dir_to_name (const iso9660_dir_t *iso9660_dir)
 
   /* (iso9660_dir->file_flags & ISO_DIRECTORY) */
   
-  if (iso9660_dir->filename[0] == '\0')
+  if (iso9660_dir->filename.str[1] == '\0')
     return _strdup(".");
-  else if (iso9660_dir->filename[0] == '\1')
+  else if (iso9660_dir->filename.str[1] == '\1')
     return _strdup("..");
   else {
-    return _strdup(iso9660_dir->filename);
+    return _strdup(&iso9660_dir->filename.str[1]);
   }
 }
 

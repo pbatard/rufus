@@ -233,6 +233,20 @@ typedef struct iso9660_stat_s   iso9660_stat_t;
 
 #include <cdio/rock.h>
 
+/*! MSVC compilers cannot handle a zero sized array in the middle of a struct, and
+    uct iso9660_dir_s is reused in the middle of iso9660_pvd_s, so instead of having
+       iso711_t filename_len;
+       char     filename[];
+    we use the fact that iso711_t and char are the same size and use an union.
+    The only gotcha is that the actual string payload starts at 1, not 0
+*/
+union iso9660_filename_u {
+  iso711_t          len;
+  char              str[1];
+} GNUC_PACKED;
+
+typedef union iso9660_filename_u  iso9660_filename_t;
+
 /*! \brief Format of an ISO-9660 directory record 
 
  Section 9.1 of ECMA 119.
@@ -273,8 +287,7 @@ struct iso9660_dir_s {
                                           the Extent described by this
                                           Directory Record is
                                           recorded. (9.1.9) */
-  iso711_t         filename_len;      /*! number of bytes in filename field */
-  char             filename[EMPTY_ARRAY_SIZE];
+  iso9660_filename_t filename;
 } GNUC_PACKED;
 
 /*! 

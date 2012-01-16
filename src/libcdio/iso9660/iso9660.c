@@ -771,10 +771,10 @@ iso9660_dir_add_entry_su(void *dir,
 
   idr->volume_sequence_number = to_723(1);
 
-  idr->filename_len = to_711(strlen(filename) 
+  idr->filename.len = to_711(strlen(filename) 
                              ? strlen(filename) : 1); /* working hack! */
 
-  memcpy(idr->filename, filename, from_711(idr->filename_len));
+  memcpy(&idr->filename.str[1], filename, from_711(idr->filename.len));
   memcpy(&dir8[offset] + su_offset, su_data, su_size);
 }
 
