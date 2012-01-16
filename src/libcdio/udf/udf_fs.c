@@ -61,6 +61,10 @@
 
 #include <stdio.h>
 
+#ifndef min
+#define min(a,b) (((a) < (b)) ? (a) : (b))
+#endif
+
 /* These definitions are also to make debugging easy. Note that they
    have to come *before* #include <cdio/ecma_167.h> which sets 
    #defines for these.
@@ -662,14 +666,30 @@ udf_readdir(udf_dirent_t *p_udf_dirent)
 	const unsigned int i_len = p_udf_dirent->fid->i_file_id;
 	uint8_t data[UDF_BLOCKSIZE] = {0};
 	udf_file_entry_t *p_udf_fe = (udf_file_entry_t *) &data;
+	udf_Uint32_t i_alloc_descs = p_udf_dirent->fe.i_alloc_descs;
+	udf_Uint32_t i_extended_attr = p_udf_dirent->fe.i_extended_attr;
 
 	if (DRIVER_OP_SUCCESS != udf_read_sectors(p_udf, p_udf_fe, p_udf->i_part_start 
 			 + p_udf_dirent->fid->icb.loc.lba, 1))
 		return NULL;
-      
+
+/* There is a bug here, as we may use a file entry with i_alloc_descs or i_extended_attr
+   that doesn't match the one we used when allocating the structure. If they are bigger
+   memcpy will result in memory overflow and corruption. Use min() as a workaround. */
+if ((p_udf_fe->i_alloc_descs != p_udf_dirent->fe.i_alloc_descs)) {
+	cdio_error("MISMATCH! p_udf_dirent = %p: i_alloc_desc %d (new LBA) vs %d (existing)", p_udf_dirent, p_udf_fe->i_alloc_descs, p_udf_dirent->fe.i_alloc_descs);
+	i_alloc_descs = min(p_udf_fe->i_alloc_descs, p_udf_dirent->fe.i_alloc_descs);
+}
+if ((p_udf_fe->i_extended_attr != p_udf_dirent->fe.i_extended_attr)) {
+	cdio_error("MISMATCH! p_udf_dirent = %p: i_extended_attr %d (new LBA) vs %d (existing)", p_udf_dirent, p_udf_fe->i_extended_attr, p_udf_dirent->fe.i_extended_attr);
+	i_extended_attr = min(p_udf_fe->i_extended_attr, p_udf_dirent->fe.i_extended_attr);
+}
+
 	memcpy(&(p_udf_dirent->fe), p_udf_fe, 
-	       sizeof(udf_file_entry_t) + p_udf_fe->i_alloc_descs 
-	       + p_udf_fe->i_extended_attr );
+	       sizeof(udf_file_entry_t) + min(p_udf_fe->i_alloc_descs 
+	       + p_udf_fe->i_extended_attr, p_udf_dirent->fe.i_alloc_descs + p_udf_dirent->fe.i_extended_attr));
+	p_udf_dirent->fe.i_alloc_descs = i_alloc_descs;
+	p_udf_dirent->fe.i_extended_attr = i_extended_attr;
 
 	if (strlen(p_udf_dirent->psz_name) < i_len) 
 	  p_udf_dirent->psz_name = (char *)
