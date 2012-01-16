@@ -204,7 +204,7 @@ cdio_stream_seek(CdioDataSource_t* p_obj, ssize_t offset, int whence)
   Return whatever size of stream reports, I guess unit size is bytes. 
   On error return -1;
  */
-ssize_t
+int64_t
 cdio_stream_stat(CdioDataSource_t *p_obj)
 {
   if (!p_obj) return -1;

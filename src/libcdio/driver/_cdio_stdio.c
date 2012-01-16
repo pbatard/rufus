@@ -50,7 +50,7 @@ typedef struct {
   char *pathname;
   FILE *fd;
   char *fd_buf;
-  off_t st_size; /* used only for source */
+  int64_t st_size; /* used only for source */
 } _UserData;
 
 static int
@@ -125,7 +125,7 @@ _stdio_seek(void *p_user_data, long i_offset, int whence)
   return i_offset;
 }
 
-static long int
+static uint64_t
 _stdio_stat(void *p_user_data)
 {
   const _UserData *const ud = p_user_data;
@@ -192,9 +192,9 @@ cdio_stdio_new(const char pathname[])
   CdioDataSource_t *new_obj = NULL;
   cdio_stream_io_functions funcs = { NULL, NULL, NULL, NULL, NULL, NULL };
   _UserData *ud = NULL;
-  struct _stat statbuf;
+  struct _stat64 statbuf;
   
-  if (_stat (pathname, &statbuf) == -1) 
+  if (_stat64 (pathname, &statbuf) == -1) 
     {
       cdio_warn ("could not retrieve file info for `%s': %s", 
                  pathname, strerror (errno));

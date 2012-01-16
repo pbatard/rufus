@@ -38,7 +38,7 @@ extern "C" {
   typedef driver_return_code_t(*cdio_data_seek_t)(void *user_data, long offset,
                                                   int whence);
   
-  typedef long(*cdio_data_stat_t)(void *user_data);
+  typedef uint64_t(*cdio_data_stat_t)(void *user_data);
   
   typedef int(*cdio_data_close_t)(void *user_data);
   
@@ -114,7 +114,7 @@ extern "C" {
     Return whatever size of stream reports, I guess unit size is bytes. 
     On error return -1;
   */
-  ssize_t cdio_stream_stat(CdioDataSource_t *p_obj);
+  int64_t cdio_stream_stat(CdioDataSource_t *p_obj);
   
   /**
     Deallocate resources associated with p_obj. After this p_obj is unusable.
