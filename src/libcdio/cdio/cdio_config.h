@@ -3,16 +3,8 @@
 /* compiler does lsbf in struct bitfields */
 #undef BITFIELD_LSBF
 
-/* Define 1 if you are compiling using cygwin */
-#undef CYGWIN
-
 /* what to put between the brackets for empty arrays */
-#ifdef _MSC_VER
-/* Very disputable hack! -- good thing we use MinGW for the release */
-#define EMPTY_ARRAY_SIZE 256
-#else
-#define EMPTY_ARRAY_SIZE
-#endif
+#define EMPTY_ARRAY_SIZE 0
 
 /* Define to 1 if you have the `bzero' function. */
 #undef HAVE_BZERO
