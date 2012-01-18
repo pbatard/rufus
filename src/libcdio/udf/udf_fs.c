@@ -678,11 +678,11 @@ udf_readdir(udf_dirent_t *p_udf_dirent)
    that doesn't match the one we used when allocating the structure. If they are bigger
    memcpy will result in memory overflow and corruption. Use min() as a workaround. */
 if ((p_udf_fe->i_alloc_descs != p_udf_dirent->fe.i_alloc_descs)) {
-	cdio_error("MISMATCH! p_udf_dirent = %p: i_alloc_desc %d (new LBA) vs %d (existing)", p_udf_dirent, p_udf_fe->i_alloc_descs, p_udf_dirent->fe.i_alloc_descs);
+	cdio_debug("MISMATCH! p_udf_dirent = %p: i_alloc_desc %d (new LBA) vs %d (existing)", p_udf_dirent, p_udf_fe->i_alloc_descs, p_udf_dirent->fe.i_alloc_descs);
 	i_alloc_descs = min(p_udf_fe->i_alloc_descs, p_udf_dirent->fe.i_alloc_descs);
 }
 if ((p_udf_fe->i_extended_attr != p_udf_dirent->fe.i_extended_attr)) {
-	cdio_error("MISMATCH! p_udf_dirent = %p: i_extended_attr %d (new LBA) vs %d (existing)", p_udf_dirent, p_udf_fe->i_extended_attr, p_udf_dirent->fe.i_extended_attr);
+	cdio_debug("MISMATCH! p_udf_dirent = %p: i_extended_attr %d (new LBA) vs %d (existing)", p_udf_dirent, p_udf_fe->i_extended_attr, p_udf_dirent->fe.i_extended_attr);
 	i_extended_attr = min(p_udf_fe->i_extended_attr, p_udf_dirent->fe.i_extended_attr);
 }
 

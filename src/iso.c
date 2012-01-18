@@ -50,12 +50,7 @@
 CdIo_t* cdio_open (const char *psz_source, driver_id_t driver_id) {return NULL;}
 void cdio_destroy (CdIo_t *p_cdio) {}
 
-static void log_handler(cdio_log_level_t level, const char* message)
-{
-	uprintf("cdio %d message: %s\n", level, message);
-}
-
-static void print_file_info(const udf_dirent_t *p_udf_dirent, const char* psz_dirname)
+static void udf_print_file_info(const udf_dirent_t *p_udf_dirent, const char* psz_dirname)
 {
 	time_t mod_time = udf_get_modification_time(p_udf_dirent);
 	char psz_mode[11] = "invalid";
@@ -67,11 +62,11 @@ static void print_file_info(const udf_dirent_t *p_udf_dirent, const char* psz_di
 		(*psz_fname?psz_fname:"/"), ctime(&mod_time));
 }
 
-static void list_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const char *psz_path)
+static void udf_list_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const char *psz_path)
 {
 	if (!p_udf_dirent)
 		return;
-	print_file_info(p_udf_dirent, psz_path);
+	udf_print_file_info(p_udf_dirent, psz_path);
 	while (udf_readdir(p_udf_dirent)) {
 		if (udf_is_dir(p_udf_dirent)) {
 			udf_dirent_t *p_udf_dirent2 = udf_opendir(p_udf_dirent);
@@ -80,31 +75,55 @@ static void list_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const char *psz
 				const unsigned int i_newlen = 2 + strlen(psz_path) + strlen(psz_dirname);
 				char* psz_newpath = (char*)calloc(sizeof(char), i_newlen);
 				_snprintf(psz_newpath, i_newlen, "%s%s/", psz_path, psz_dirname);
-				list_files(p_udf, p_udf_dirent2, psz_newpath);
+				udf_list_files(p_udf, p_udf_dirent2, psz_newpath);
 				free(psz_newpath);
 			}
 		} else {
-			print_file_info(p_udf_dirent, NULL);
+			udf_print_file_info(p_udf_dirent, NULL);
 		}
 	}
+}
+
+static void iso_list_files(iso9660_t* p_iso, const char *psz_path)
+{
+	int i = 0;
+	char filename[4096], *p;
+	CdioListNode_t* p_entnode;
+	iso9660_stat_t *p_statbuf;
+	CdioList_t* p_entlist;
+	strncpy(filename, psz_path, 4094);
+	p = &filename[strlen(psz_path)];
+	*p++ = '/';
+	*p = 0;
+	p_entlist = iso9660_ifs_readdir(p_iso, psz_path);
+	if (!p_entlist)
+		return;
+
+	_CDIO_LIST_FOREACH (p_entnode, p_entlist) {
+		p_statbuf = (iso9660_stat_t*) _cdio_list_node_data(p_entnode);
+		if (i++ < 2)
+			continue;	// Eliminate . and .. entries
+		iso9660_name_translate(p_statbuf->filename, p);
+		uprintf("%s [LSN %6d] %8u %s\n", (p_statbuf->type == _STAT_DIR)?"d":"-",
+			p_statbuf->lsn, p_statbuf->size, filename);
+		if (p_statbuf->type == _STAT_DIR)
+			iso_list_files(p_iso, filename);
+	}
+	_cdio_list_free(p_entlist, true);
 }
 
 BOOL ExtractISO(const char* src_iso, const char* dest_dir)
 {
 	BOOL r = FALSE;
-	CdioList_t* p_entlist;
-	CdioListNode_t* p_entnode;
 	iso9660_t* p_iso = NULL;
 	udf_t* p_udf = NULL; 
 	udf_dirent_t* p_udf_root;
 //	udf_dirent_t* p_udf_file = NULL;
-	const char *psz_path="/";
 	char *psz_str = NULL;
 	char vol_id[UDF_VOLID_SIZE] = "";
 	char volset_id[UDF_VOLSET_ID_SIZE+1] = "";
 
-	cdio_log_set_handler(log_handler);
-
+	cdio_loglevel_default = CDIO_LOG_DEBUG;
 	p_udf = udf_open(src_iso);
 	if (p_udf == NULL) {
 		uprintf("Unable to open UDF image '%s'.\n", src_iso);
@@ -123,7 +142,7 @@ BOOL ExtractISO(const char* src_iso, const char* dest_dir)
 		uprintf("volume set id: %s\n", volset_id);
 	}
 	uprintf("partition number: %d\n", udf_get_part_number(p_udf));
-	list_files(p_udf, p_udf_root, "");
+	udf_list_files(p_udf, p_udf_root, "");
 
 	r = TRUE;
 	goto out;
@@ -143,21 +162,7 @@ try_iso:
 	print_vd_info("Volume     ", iso9660_ifs_get_volume_id);
 	print_vd_info("Volume Set ", iso9660_ifs_get_volumeset_id);
 
-	p_entlist = iso9660_ifs_readdir(p_iso, psz_path);
-
-	/* Iterate over the list of nodes that iso9660_ifs_readdir gives  */
-	if (p_entlist) {
-		_CDIO_LIST_FOREACH (p_entnode, p_entlist) {
-			char filename[4096];
-			iso9660_stat_t *p_statbuf = (iso9660_stat_t*) _cdio_list_node_data(p_entnode);
-			iso9660_name_translate(p_statbuf->filename, filename);
-			uprintf("%s [LSN %6d] %8u %s%s\n", _STAT_DIR == p_statbuf->type ? "d" : "-",
-				p_statbuf->lsn, p_statbuf->size, psz_path, filename);
-		}
-		_cdio_list_free(p_entlist, true);
-	} else {
-		uprintf("Could not open ISO directory!\n");
-	}
+	iso_list_files(p_iso, "");
 	r = TRUE;
 
 #if 0
@@ -220,15 +225,16 @@ out:
 #ifdef ISO_TEST
 int main(int argc, char** argv)
 {
-//	ExtractISO("D:\\src\\libcdio\\test\\udf102.iso", NULL);
-	ExtractISO("D:\\Incoming\\en_windows_7_ultimate_with_sp1_x64_dvd_618240.iso", NULL);
-
-	while(getchar() != 0x0a);
+//	ExtractISO("D:\\Incoming\\GRMSDKX_EN_DVD.iso", NULL);
+	ExtractISO("D:\\fd11src.iso", NULL);
+//	ExtractISO("D:\\Incoming\\en_windows_7_ultimate_with_sp1_x64_dvd_618240.iso", NULL);
+//	ExtractISO("D:\\Incoming\\Windows 8 Preview\\WindowsDeveloperPreview-64bit-English-Developer.iso", NULL);
 
 #ifdef _CRTDBG_MAP_ALLOC
 	_CrtDumpMemoryLeaks();
 #endif
 
+	while(getchar() != 0x0a);
 	exit(0);
 }
 #endif
