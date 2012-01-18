@@ -86,22 +86,27 @@ static void udf_list_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const char 
 
 static void iso_list_files(iso9660_t* p_iso, const char *psz_path)
 {
-	int i = 0;
 	char filename[4096], *p;
 	CdioListNode_t* p_entnode;
 	iso9660_stat_t *p_statbuf;
 	CdioList_t* p_entlist;
+
+	if ( (p_iso == NULL) || (psz_path == NULL))
+		return;
+
 	strncpy(filename, psz_path, 4094);
 	p = &filename[strlen(psz_path)];
 	*p++ = '/';
 	*p = 0;
 	p_entlist = iso9660_ifs_readdir(p_iso, psz_path);
+
 	if (!p_entlist)
 		return;
 
 	_CDIO_LIST_FOREACH (p_entnode, p_entlist) {
 		p_statbuf = (iso9660_stat_t*) _cdio_list_node_data(p_entnode);
-		if (i++ < 2)
+		if ( (strcmp(p_statbuf->filename, ".") == 0)
+		  || (strcmp(p_statbuf->filename, "..") == 0) )
 			continue;	// Eliminate . and .. entries
 		iso9660_name_translate(p_statbuf->filename, p);
 		uprintf("%s [LSN %6d] %8u %s\n", (p_statbuf->type == _STAT_DIR)?"d":"-",
@@ -227,6 +232,7 @@ int main(int argc, char** argv)
 {
 //	ExtractISO("D:\\Incoming\\GRMSDKX_EN_DVD.iso", NULL);
 	ExtractISO("D:\\fd11src.iso", NULL);
+//	ExtractISO("D:\\Incoming\\en_windows_driver_kit_3790.iso", NULL);
 //	ExtractISO("D:\\Incoming\\en_windows_7_ultimate_with_sp1_x64_dvd_618240.iso", NULL);
 //	ExtractISO("D:\\Incoming\\Windows 8 Preview\\WindowsDeveloperPreview-64bit-English-Developer.iso", NULL);
 

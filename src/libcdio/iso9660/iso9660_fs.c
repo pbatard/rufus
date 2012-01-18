@@ -987,13 +987,6 @@ _fs_stat_traverse (const CdIo_t *p_cdio, const iso9660_stat_t *_root,
 
   cdio_assert (_root->type == _STAT_DIR);
 
-  if (_root->size != ISO_BLOCKSIZE * _root->secsize)
-    {
-      cdio_warn ("bad size for ISO9660 directory (%ud) should be (%lu)!",
-		 (unsigned) _root->size, 
-		 (unsigned long int) ISO_BLOCKSIZE * _root->secsize);
-    }
-  
   _dirbuf = calloc(1, _root->secsize * ISO_BLOCKSIZE);
   if (!_dirbuf)
     {
@@ -1092,13 +1085,6 @@ _fs_iso_stat_traverse (iso9660_t *p_iso, const iso9660_stat_t *_root,
     return NULL;
 
   cdio_assert (_root->type == _STAT_DIR);
-
-  if (_root->size != ISO_BLOCKSIZE * _root->secsize)
-    {
-      cdio_warn ("bad size for ISO9660 directory (%ud) should be (%lu)!",
-		 (unsigned) _root->size, 
-		 (unsigned long int) ISO_BLOCKSIZE * _root->secsize);
-    }
   
   _dirbuf = calloc(1, _root->secsize * ISO_BLOCKSIZE);
   if (!_dirbuf)
@@ -1306,13 +1292,6 @@ iso9660_fs_readdir (CdIo_t *p_cdio, const char psz_path[], bool b_mode2)
     uint8_t *_dirbuf = NULL;
     CdioList_t *retval = _cdio_list_new ();
 
-    if (p_stat->size != ISO_BLOCKSIZE * p_stat->secsize)
-      {
-	cdio_warn ("bad size for ISO9660 directory (%ud) should be (%lu)!",
-		   (unsigned) p_stat->size, 
-		   (unsigned long int) ISO_BLOCKSIZE * p_stat->secsize);
-      }
-
     _dirbuf = calloc(1, p_stat->secsize * ISO_BLOCKSIZE);
     if (!_dirbuf)
       {
@@ -1376,13 +1355,6 @@ iso9660_ifs_readdir (iso9660_t *p_iso, const char psz_path[])
     unsigned offset = 0;
     uint8_t *_dirbuf = NULL;
     CdioList_t *retval = _cdio_list_new ();
-
-    if (p_stat->size != ISO_BLOCKSIZE * p_stat->secsize)
-      {
-	cdio_warn ("bad size for ISO9660 directory (%ud) should be (%lu)!",
-		   (unsigned int) p_stat->size, 
-		   (unsigned long int) ISO_BLOCKSIZE * p_stat->secsize);
-      }
 
     _dirbuf = calloc(1, p_stat->secsize * ISO_BLOCKSIZE);
     if (!_dirbuf)
