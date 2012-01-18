@@ -192,9 +192,9 @@ cdio_stdio_new(const char pathname[])
   CdioDataSource_t *new_obj = NULL;
   cdio_stream_io_functions funcs = { NULL, NULL, NULL, NULL, NULL, NULL };
   _UserData *ud = NULL;
-  struct _stat64 statbuf;
+  struct _stati64 statbuf;
   
-  if (_stat64 (pathname, &statbuf) == -1) 
+  if (_stati64 (pathname, &statbuf) == -1) 
     {
       cdio_warn ("could not retrieve file info for `%s': %s", 
                  pathname, strerror (errno));

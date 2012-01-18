@@ -797,7 +797,7 @@ _iso9660_dir_to_statbuf (iso9660_dir_t *p_iso9660_dir, bool_3way_t b_xa,
       else if (i_joliet_level) {
 	int i_inlen = i_fname;
 	cdio_utf8_t *p_psz_out = NULL;
-	if (cdio_charset_to_utf8(p_iso9660_dir->filename, i_inlen,
+	if (cdio_charset_to_utf8(&p_iso9660_dir->filename.str[1], i_inlen,
                              &p_psz_out, "UCS-2BE")) {
           strncpy(p_stat->filename, p_psz_out, i_fname);
           free(p_psz_out);

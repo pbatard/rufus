@@ -31,5 +31,8 @@
     <ClCompile Include="..\iso9660.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\utf8.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

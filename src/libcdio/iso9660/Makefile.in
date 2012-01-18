@@ -54,7 +54,7 @@ libiso9660_a_AR = $(AR) $(ARFLAGS)
 libiso9660_a_LIBADD =
 am_libiso9660_a_OBJECTS = libiso9660_a-iso9660.$(OBJEXT) \
 	libiso9660_a-iso9660_fs.$(OBJEXT) libiso9660_a-rock.$(OBJEXT) \
-	libiso9660_a-xa.$(OBJEXT)
+	libiso9660_a-xa.$(OBJEXT) libiso9660_a-utf8.$(OBJEXT)
 libiso9660_a_OBJECTS = $(am_libiso9660_a_OBJECTS)
 DEFAULT_INCLUDES = -I.@am__isrc@
 depcomp =
@@ -167,7 +167,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 noinst_LIBRARIES = libiso9660.a
-libiso9660_a_SOURCES = iso9660.c iso9660_fs.c rock.c xa.c
+libiso9660_a_SOURCES = iso9660.c iso9660_fs.c rock.c xa.c utf8.c
 libiso9660_a_CFLAGS = -I. -I.. -I../driver $(AM_CFLAGS)
 all: all-am
 
@@ -256,6 +256,14 @@ libiso9660_a-xa.o: xa.c
 libiso9660_a-xa.obj: xa.c
 	$(AM_V_CC) @AM_BACKSLASH@
 	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libiso9660_a_CFLAGS) $(CFLAGS) -c -o libiso9660_a-xa.obj `if test -f 'xa.c'; then $(CYGPATH_W) 'xa.c'; else $(CYGPATH_W) '$(srcdir)/xa.c'; fi`
+
+libiso9660_a-utf8.o: utf8.c
+	$(AM_V_CC) @AM_BACKSLASH@
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libiso9660_a_CFLAGS) $(CFLAGS) -c -o libiso9660_a-utf8.o `test -f 'utf8.c' || echo '$(srcdir)/'`utf8.c
+
+libiso9660_a-utf8.obj: utf8.c
+	$(AM_V_CC) @AM_BACKSLASH@
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libiso9660_a_CFLAGS) $(CFLAGS) -c -o libiso9660_a-utf8.obj `if test -f 'utf8.c'; then $(CYGPATH_W) 'utf8.c'; else $(CYGPATH_W) '$(srcdir)/utf8.c'; fi`
 
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \

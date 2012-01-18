@@ -35,7 +35,7 @@
 
 /* Define 1 if you want ISO-9660 Joliet extension support. You must have also
    libiconv installed to get Joliet extension support. */
-#undef HAVE_JOLIET
+#define HAVE_JOLIET 1
 
 /* Define to 1 if you have the `memcpy' function. */
 #define HAVE_MEMCPY 1

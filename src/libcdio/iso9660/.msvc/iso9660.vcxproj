@@ -26,6 +26,7 @@
     <ClCompile Include="..\iso9660.c" />
     <ClCompile Include="..\iso9660_fs.c" />
     <ClCompile Include="..\rock.c" />
+    <ClCompile Include="..\utf8.c" />
     <ClCompile Include="..\xa.c" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
