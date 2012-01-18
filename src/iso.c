@@ -28,6 +28,8 @@
 #include <windows.h>
 #include <stdio.h>
 #include <malloc.h>
+#include <io.h>
+#include <direct.h>
 #ifndef ISO_TEST
 #include "rufus.h"
 #else
@@ -38,6 +40,10 @@
 #include <cdio/logging.h>
 #include <cdio/iso9660.h>
 #include <cdio/udf.h>
+
+#ifndef CEILING
+#define CEILING(x, y) ((x+(y-1))/y)
+#endif
 
 #define print_vd_info(title, fn)			\
 	if (fn(p_iso, &psz_str)) {				\
@@ -84,20 +90,28 @@ static void udf_list_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const char 
 	}
 }
 
+const char* extract_dir = "D:/tmp/iso";
+
 static void iso_list_files(iso9660_t* p_iso, const char *psz_path)
 {
-	char filename[4096], *p;
+	FILE *fd;
+	char filename[4096], *p, *iso_filename;
+	unsigned char buf[ISO_BLOCKSIZE];
 	CdioListNode_t* p_entnode;
 	iso9660_stat_t *p_statbuf;
 	CdioList_t* p_entlist;
+	size_t i, i_blocks;
+	lsn_t lsn;
 
 	if ( (p_iso == NULL) || (psz_path == NULL))
 		return;
 
-	strncpy(filename, psz_path, 4094);
-	p = &filename[strlen(psz_path)];
-	*p++ = '/';
-	*p = 0;
+	// TODO: safe_###
+	strcpy(filename, extract_dir);
+	iso_filename = &filename[strlen(filename)];
+	strcat(filename, psz_path);
+	strcat(filename, "/");
+	p = &filename[strlen(filename)];
 	p_entlist = iso9660_ifs_readdir(p_iso, psz_path);
 
 	if (!p_entlist)
@@ -111,9 +125,43 @@ static void iso_list_files(iso9660_t* p_iso, const char *psz_path)
 		iso9660_name_translate(p_statbuf->filename, p);
 		uprintf("%s [LSN %6d] %8u %s\n", (p_statbuf->type == _STAT_DIR)?"d":"-",
 			p_statbuf->lsn, p_statbuf->size, filename);
-		if (p_statbuf->type == _STAT_DIR)
-			iso_list_files(p_iso, filename);
+		if (p_statbuf->type == _STAT_DIR) {
+			// TODO: Joliet and Unicode support
+			_mkdir(filename);
+			iso_list_files(p_iso, iso_filename);
+		} else {
+			fd = fopen(filename, "wb");
+			if (fd == NULL) {
+				uprintf("Unable to create file %s\n", filename);
+				goto out;
+			}
+			i_blocks = CEILING(p_statbuf->size, ISO_BLOCKSIZE);
+			for (i = 0; i < i_blocks ; i++) {
+				memset (buf, 0, ISO_BLOCKSIZE);
+				lsn = p_statbuf->lsn + i;
+				if (iso9660_iso_seek_read (p_iso, buf, lsn, 1) != ISO_BLOCKSIZE) {
+					uprintf("Error reading ISO 9660 file %s at LSN %lu\n",
+						iso_filename, (long unsigned int)lsn);
+					goto out;
+				}
+				fwrite (buf, ISO_BLOCKSIZE, 1, fd);
+				if (ferror(fd)) {
+					uprintf("Error writing file %s\n", filename);
+					goto out;
+				}
+			}
+			// TODO: this is slowing us down! Compute the size to use with fwrite instead
+			fflush(fd);
+			/* Make sure the file size has the exact same byte size. Without the
+			   truncate below, the file will a multiple of ISO_BLOCKSIZE. */
+			if (_chsize(_fileno(fd), p_statbuf->size)) {
+				uprintf("Error adjusting file size for %s\n", filename);
+				goto out;
+			}
+			fclose(fd);
+		}
 	}
+out:
 	_cdio_list_free(p_entlist, true);
 }
 
