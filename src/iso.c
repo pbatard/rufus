@@ -56,6 +56,10 @@
 CdIo_t* cdio_open (const char *psz_source, driver_id_t driver_id) {return NULL;}
 void cdio_destroy (CdIo_t *p_cdio) {}
 
+const char* extract_dir = "D:/tmp/iso";
+
+// TODO: Unicode support, timestamp preservation
+
 static void udf_print_file_info(const udf_dirent_t *p_udf_dirent, const char* psz_dirname)
 {
 	time_t mod_time = udf_get_modification_time(p_udf_dirent);
@@ -70,32 +74,87 @@ static void udf_print_file_info(const udf_dirent_t *p_udf_dirent, const char* ps
 
 static void udf_list_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const char *psz_path)
 {
-	if (!p_udf_dirent)
+	FILE *fd = NULL;
+	int len;
+	char* fullpath;
+	const char* basename;
+	udf_dirent_t *p_udf_dirent2;
+	uint64_t i, file_len, i_blocks;
+	uint8_t buf[UDF_BLOCKSIZE];
+	ssize_t i_read;
+
+	if ((p_udf_dirent == NULL) || (psz_path == NULL))
 		return;
-	udf_print_file_info(p_udf_dirent, psz_path);
+
+//	udf_print_file_info(p_udf_dirent, psz_path);
 	while (udf_readdir(p_udf_dirent)) {
+		basename = udf_get_filename(p_udf_dirent);
+		len = 3 + strlen(psz_path) + strlen(basename) + strlen(extract_dir);
+		fullpath = (char*)calloc(sizeof(char), len);
+		len = _snprintf(fullpath, len, "%s%s/%s", extract_dir, psz_path, basename);
+		if (len < 0) {
+			goto err;
+		}
+uprintf("FULLPATH: %s\n", fullpath);
 		if (udf_is_dir(p_udf_dirent)) {
-			udf_dirent_t *p_udf_dirent2 = udf_opendir(p_udf_dirent);
-			if (p_udf_dirent2) {
-				const char *psz_dirname = udf_get_filename(p_udf_dirent);
-				const unsigned int i_newlen = 2 + strlen(psz_path) + strlen(psz_dirname);
-				char* psz_newpath = (char*)calloc(sizeof(char), i_newlen);
-				_snprintf(psz_newpath, i_newlen, "%s%s/", psz_path, psz_dirname);
-				udf_list_files(p_udf, p_udf_dirent2, psz_newpath);
-				free(psz_newpath);
+			_mkdir(fullpath);
+			p_udf_dirent2 = udf_opendir(p_udf_dirent);
+			if (p_udf_dirent2 != NULL) {
+				udf_list_files(p_udf, p_udf_dirent2, &fullpath[strlen(extract_dir)]);
+			} else {
+//				printf("do we have problem?\n");
 			}
 		} else {
-			udf_print_file_info(p_udf_dirent, NULL);
-		}
-	}
-}
+			fd = fopen(fullpath, "wb");
+			if (fd == NULL) {
+				uprintf("Unable to create file %s\n", fullpath);
+				goto err;
+			}
+			file_len = udf_get_file_length(p_udf_dirent);
+//uprintf("file len = %d\n", file_len);
+			i_blocks = CEILING(file_len, UDF_BLOCKSIZE);
+//uprintf("i_blocks = %d\n", i_blocks);
+			for (i=0; i<i_blocks; i++) {
+				i_read = udf_read_block(p_udf_dirent, buf, 1);
+				if (i_read < 0) {
+					uprintf("Error reading UDF file %s at block %u\n", &fullpath[strlen(extract_dir)], i);
+					goto err;
+				}
+				fwrite(buf, i_read, 1, fd);
+				if (ferror(fd)) {
+					uprintf("Error writing file %s\n", fullpath);
+					goto err;
+				}
+			}
 
-const char* extract_dir = "D:/tmp/iso";
+			// TODO: this is slowing us down! Compute the size to use with fwrite instead
+			fflush(fd);
+			/* Make sure the file size has the exact same byte size. Without the
+			   truncate below, the file will a multiple of ISO_BLOCKSIZE. */
+			if (_chsize_s(_fileno(fd), file_len)) {
+				uprintf("Error adjusting file size for %s\n", fullpath);
+				goto err;
+			}
+			fclose(fd);
+			fd = NULL;
+//			udf_print_file_info(p_udf_dirent, NULL);
+		}
+		free(fullpath);
+	}
+	return;
+
+err:
+	if (fd != NULL)
+		fclose(fd);
+	free(fullpath);
+}
 
 static void iso_list_files(iso9660_t* p_iso, const char *psz_path)
 {
-	FILE *fd;
-	char filename[4096], *p, *iso_filename;
+	FILE *fd = NULL;
+	int len;
+	char filename[4096], *basename;
+	const char* iso_filename = &filename[strlen(extract_dir)];
 	unsigned char buf[ISO_BLOCKSIZE];
 	CdioListNode_t* p_entnode;
 	iso9660_stat_t *p_statbuf;
@@ -103,17 +162,15 @@ static void iso_list_files(iso9660_t* p_iso, const char *psz_path)
 	size_t i, i_blocks;
 	lsn_t lsn;
 
-	if ( (p_iso == NULL) || (psz_path == NULL))
+	if ((p_iso == NULL) || (psz_path == NULL))
 		return;
 
-	// TODO: safe_###
-	strcpy(filename, extract_dir);
-	iso_filename = &filename[strlen(filename)];
-	strcat(filename, psz_path);
-	strcat(filename, "/");
-	p = &filename[strlen(filename)];
-	p_entlist = iso9660_ifs_readdir(p_iso, psz_path);
+	len = _snprintf(filename, sizeof(filename), "%s%s/", extract_dir, psz_path);
+	if (len < 0)
+		return;
+	basename = &filename[len];
 
+	p_entlist = iso9660_ifs_readdir(p_iso, psz_path);
 	if (!p_entlist)
 		return;
 
@@ -122,11 +179,10 @@ static void iso_list_files(iso9660_t* p_iso, const char *psz_path)
 		if ( (strcmp(p_statbuf->filename, ".") == 0)
 		  || (strcmp(p_statbuf->filename, "..") == 0) )
 			continue;	// Eliminate . and .. entries
-		iso9660_name_translate(p_statbuf->filename, p);
+		iso9660_name_translate(p_statbuf->filename, basename);
 		uprintf("%s [LSN %6d] %8u %s\n", (p_statbuf->type == _STAT_DIR)?"d":"-",
 			p_statbuf->lsn, p_statbuf->size, filename);
 		if (p_statbuf->type == _STAT_DIR) {
-			// TODO: Joliet and Unicode support
 			_mkdir(filename);
 			iso_list_files(p_iso, iso_filename);
 		} else {
@@ -159,9 +215,12 @@ static void iso_list_files(iso9660_t* p_iso, const char *psz_path)
 				goto out;
 			}
 			fclose(fd);
+			fd = NULL;
 		}
 	}
 out:
+	if (fd != NULL)
+		fclose(fd);
 	_cdio_list_free(p_entlist, true);
 }
 
@@ -171,7 +230,6 @@ BOOL ExtractISO(const char* src_iso, const char* dest_dir)
 	iso9660_t* p_iso = NULL;
 	udf_t* p_udf = NULL; 
 	udf_dirent_t* p_udf_root;
-//	udf_dirent_t* p_udf_file = NULL;
 	char *psz_str = NULL;
 	char vol_id[UDF_VOLID_SIZE] = "";
 	char volset_id[UDF_VOLSET_ID_SIZE+1] = "";
@@ -279,9 +337,9 @@ out:
 int main(int argc, char** argv)
 {
 //	ExtractISO("D:\\Incoming\\GRMSDKX_EN_DVD.iso", NULL);
-	ExtractISO("D:\\fd11src.iso", NULL);
+//	ExtractISO("D:\\fd11src.iso", NULL);
 //	ExtractISO("D:\\Incoming\\en_windows_driver_kit_3790.iso", NULL);
-//	ExtractISO("D:\\Incoming\\en_windows_7_ultimate_with_sp1_x64_dvd_618240.iso", NULL);
+	ExtractISO("D:\\Incoming\\en_windows_7_ultimate_with_sp1_x64_dvd_618240.iso", NULL);
 //	ExtractISO("D:\\Incoming\\Windows 8 Preview\\WindowsDeveloperPreview-64bit-English-Developer.iso", NULL);
 
 #ifdef _CRTDBG_MAP_ALLOC
