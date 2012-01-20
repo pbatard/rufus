@@ -86,7 +86,6 @@ static void udf_list_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const char 
 	if ((p_udf_dirent == NULL) || (psz_path == NULL))
 		return;
 
-//	udf_print_file_info(p_udf_dirent, psz_path);
 	while (udf_readdir(p_udf_dirent)) {
 		basename = udf_get_filename(p_udf_dirent);
 		len = 3 + strlen(psz_path) + strlen(basename) + strlen(extract_dir);
@@ -101,8 +100,6 @@ uprintf("FULLPATH: %s\n", fullpath);
 			p_udf_dirent2 = udf_opendir(p_udf_dirent);
 			if (p_udf_dirent2 != NULL) {
 				udf_list_files(p_udf, p_udf_dirent2, &fullpath[strlen(extract_dir)]);
-			} else {
-//				printf("do we have problem?\n");
 			}
 		} else {
 			fd = fopen(fullpath, "wb");
@@ -111,9 +108,7 @@ uprintf("FULLPATH: %s\n", fullpath);
 				goto err;
 			}
 			file_len = udf_get_file_length(p_udf_dirent);
-//uprintf("file len = %d\n", file_len);
 			i_blocks = CEILING(file_len, UDF_BLOCKSIZE);
-//uprintf("i_blocks = %d\n", i_blocks);
 			for (i=0; i<i_blocks; i++) {
 				i_read = udf_read_block(p_udf_dirent, buf, 1);
 				if (i_read < 0) {
@@ -131,13 +126,13 @@ uprintf("FULLPATH: %s\n", fullpath);
 			fflush(fd);
 			/* Make sure the file size has the exact same byte size. Without the
 			   truncate below, the file will a multiple of ISO_BLOCKSIZE. */
+			// TODO: use _chsize_s to handle 64
 			if (_chsize_s(_fileno(fd), file_len)) {
 				uprintf("Error adjusting file size for %s\n", fullpath);
 				goto err;
 			}
 			fclose(fd);
 			fd = NULL;
-//			udf_print_file_info(p_udf_dirent, NULL);
 		}
 		free(fullpath);
 	}

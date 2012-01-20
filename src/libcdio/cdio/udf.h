@@ -51,7 +51,7 @@ typedef struct udf_dirent_s {
     
     /* This field has to come last because it is variable in length. */
     udf_file_entry_t   fe;
-} udf_dirent_t;;
+} udf_dirent_t;
 
 
 

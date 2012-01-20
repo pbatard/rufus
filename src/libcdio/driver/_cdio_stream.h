@@ -35,7 +35,7 @@ extern "C" {
   
   typedef long(*cdio_data_read_t)(void *user_data, void *buf, long count);
   
-  typedef driver_return_code_t(*cdio_data_seek_t)(void *user_data, long offset,
+  typedef off64_t(*cdio_data_seek_t)(void *user_data, off64_t offset,
                                                   int whence);
   
   typedef uint64_t(*cdio_data_stat_t)(void *user_data);
@@ -65,8 +65,8 @@ extern "C" {
      @return unpon successful completion, return value is positive, else,
      the global variable errno is set to indicate the error.
   */
-  ssize_t cdio_stream_getpos(CdioDataSource_t* p_obj, 
-                             /*out*/ ssize_t *i_offset);
+  off64_t cdio_stream_getpos(CdioDataSource_t* p_obj, 
+                             /*out*/ off64_t *i_offset);
   
   CdioDataSource_t *
   cdio_stream_new(void *user_data, const cdio_stream_io_functions *funcs);
@@ -92,7 +92,7 @@ extern "C" {
                            long nmemb);
   
   /** 
-    Like fseek(3) and in fact may be the same.
+    Like fseek64/_fseeki64 and in fact may be the same.
 
     This  function sets the file position indicator for the stream
     pointed to by stream.  The new position, measured in bytes, is obtained
@@ -107,7 +107,7 @@ extern "C" {
     DRIVER_OP_ERROR is returned and the global variable errno is set to
     indicate the error.
    */
-  ssize_t cdio_stream_seek(CdioDataSource_t *p_obj, ssize_t i_offset, 
+  off64_t cdio_stream_seek(CdioDataSource_t *p_obj, off64_t i_offset, 
                            int whence);
   
   /**

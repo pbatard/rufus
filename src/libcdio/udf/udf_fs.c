@@ -60,6 +60,8 @@
 #endif
 
 #include <stdio.h>
+#include <inttypes.h>
+#include "cdio_assert.h"
 
 #ifndef min
 #define min(a,b) (((a) < (b)) ? (a) : (b))
@@ -247,14 +249,13 @@ udf_fopen(udf_dirent_t *p_udf_root, const char *psz_name)
   if (p_udf_root) {
     char tokenline[udf_MAX_PATHLEN];
     char *psz_token;
-    
+
+    /* file position must be reset when accessing a new file */
+    p_udf_root->p_udf->i_position = 0;
+
     strncpy(tokenline, psz_name, udf_MAX_PATHLEN);
     psz_token = strtok(tokenline, udf_PATH_DELIMITERS);
     if (psz_token) {
-      /*** FIXME??? udf_dirent can be variable size due to the
-	   extended attributes and descriptors. Given that, is this
-	   correct? 
-       */
       udf_dirent_t *p_udf_dirent = 
 	udf_new_dirent(&p_udf_root->fe, p_udf_root->p_udf,
 		       p_udf_root->psz_name, p_udf_root->b_dir, 
@@ -295,11 +296,8 @@ static udf_dirent_t *
 udf_new_dirent(udf_file_entry_t *p_udf_fe, udf_t *p_udf,
 	       const char *psz_name, bool b_dir, bool b_parent) 
 {
-  const unsigned int i_alloc_size = p_udf_fe->i_alloc_descs
-    + p_udf_fe->i_extended_attr;
-  
   udf_dirent_t *p_udf_dirent = (udf_dirent_t *) 
-    calloc(1, sizeof(udf_dirent_t) + i_alloc_size);
+    calloc(1, sizeof(udf_dirent_t));
   if (!p_udf_dirent) return NULL;
   
   p_udf_dirent->psz_name     = _strdup(psz_name);
@@ -310,7 +308,7 @@ udf_new_dirent(udf_file_entry_t *p_udf_fe, udf_t *p_udf,
   p_udf_dirent->dir_left     = uint64_from_le(p_udf_fe->info_len); 
 
   memcpy(&(p_udf_dirent->fe), p_udf_fe, 
-	 sizeof(udf_file_entry_t) + i_alloc_size);
+	 sizeof(udf_file_entry_t));
   udf_get_lba( p_udf_fe, &(p_udf_dirent->i_loc), 
 	       &(p_udf_dirent->i_loc_end) );
   return p_udf_dirent;
@@ -318,7 +316,8 @@ udf_new_dirent(udf_file_entry_t *p_udf_fe, udf_t *p_udf,
 
 /*!
   Seek to a position i_start and then read i_blocks. Number of blocks read is 
-  returned. One normally expects the return to be equal to i_blocks.
+  returned. One normally expects the return to be equal to i_blocks.#
+  NB: 32 bit lsn_t and i_blocks means the UDF media should not be larger than 4TB
 */
 driver_return_code_t
 udf_read_sectors (const udf_t *p_udf, void *ptr, lsn_t i_start, 
@@ -326,10 +325,11 @@ udf_read_sectors (const udf_t *p_udf, void *ptr, lsn_t i_start,
 {
   driver_return_code_t ret;
   ssize_t i_read;
-  long int i_byte_offset;
+  off64_t i_byte_offset;
   
   if (!p_udf) return 0;
-  i_byte_offset = (i_start * UDF_BLOCKSIZE);
+  /* i_start * UDF_BLOCKSIZE is evaluated as 32 bit by default */
+  i_byte_offset = ((off64_t)i_start) * UDF_BLOCKSIZE;
 
   if (p_udf->b_stream) {
     ret = cdio_stream_seek (p_udf->stream, i_byte_offset, SEEK_SET);
@@ -354,6 +354,9 @@ udf_open (const char *psz_path)
 {
   udf_t *p_udf = (udf_t *) calloc(1, sizeof(udf_t)) ;
   uint8_t data[UDF_BLOCKSIZE];
+
+  /* Sanity check */
+  cdio_assert(sizeof(udf_file_entry_t) == UDF_BLOCKSIZE);
 
   if (!p_udf) return NULL;
 
@@ -592,19 +595,18 @@ udf_opendir(const udf_dirent_t *p_udf_dirent)
 {
   if (p_udf_dirent->b_dir && !p_udf_dirent->b_parent && p_udf_dirent->fid) {
     udf_t *p_udf = p_udf_dirent->p_udf;
-    uint8_t data[UDF_BLOCKSIZE];
-    udf_file_entry_t *p_udf_fe = (udf_file_entry_t *) &data;
+    udf_file_entry_t udf_fe;
     
     driver_return_code_t i_ret = 
-      udf_read_sectors(p_udf, p_udf_fe, p_udf->i_part_start 
+      udf_read_sectors(p_udf, &udf_fe, p_udf->i_part_start 
 		       + p_udf_dirent->fid->icb.loc.lba, 1);
 
     if (DRIVER_OP_SUCCESS == i_ret 
-	&& !udf_checktag(&p_udf_fe->tag, TAGID_FILE_ENTRY)) {
+	&& !udf_checktag(&udf_fe.tag, TAGID_FILE_ENTRY)) {
       
-      if (ICBTAG_FILE_TYPE_DIRECTORY == p_udf_fe->icb_tag.file_type) {
+      if (ICBTAG_FILE_TYPE_DIRECTORY == udf_fe.icb_tag.file_type) {
 	udf_dirent_t *p_udf_dirent_new = 
-	  udf_new_dirent(p_udf_fe, p_udf, p_udf_dirent->psz_name, true, true);
+	  udf_new_dirent(&udf_fe, p_udf, p_udf_dirent->psz_name, true, true);
 	return p_udf_dirent_new;
       }
     }
@@ -622,7 +624,10 @@ udf_readdir(udf_dirent_t *p_udf_dirent)
     return NULL;
   }
 
+  /* file position must be reset when accessing a new file */
   p_udf = p_udf_dirent->p_udf;
+  p_udf->i_position = 0;
+
   if (p_udf_dirent->fid) { 
     /* advance to next File Identifier Descriptor */
     /* FIXME: need to advance file entry (fe) as well.  */
@@ -665,32 +670,10 @@ udf_readdir(udf_dirent_t *p_udf_dirent)
 
       {
 	const unsigned int i_len = p_udf_dirent->fid->i_file_id;
-	uint8_t data[UDF_BLOCKSIZE] = {0};
-	udf_file_entry_t *p_udf_fe = (udf_file_entry_t *) &data;
-	udf_Uint32_t i_alloc_descs = p_udf_dirent->fe.i_alloc_descs;
-	udf_Uint32_t i_extended_attr = p_udf_dirent->fe.i_extended_attr;
 
-	if (DRIVER_OP_SUCCESS != udf_read_sectors(p_udf, p_udf_fe, p_udf->i_part_start 
+	if (DRIVER_OP_SUCCESS != udf_read_sectors(p_udf, &p_udf_dirent->fe, p_udf->i_part_start 
 			 + p_udf_dirent->fid->icb.loc.lba, 1))
 		return NULL;
-
-/* There is a bug here, as we may use a file entry with i_alloc_descs or i_extended_attr
-   that doesn't match the one we used when allocating the structure. If they are bigger
-   memcpy will result in memory overflow and corruption. Use min() as a workaround. */
-if ((p_udf_fe->i_alloc_descs != p_udf_dirent->fe.i_alloc_descs)) {
-	cdio_debug("MISMATCH! p_udf_dirent = %p: i_alloc_desc %d (new LBA) vs %d (existing)", p_udf_dirent, p_udf_fe->i_alloc_descs, p_udf_dirent->fe.i_alloc_descs);
-	i_alloc_descs = min(p_udf_fe->i_alloc_descs, p_udf_dirent->fe.i_alloc_descs);
-}
-if ((p_udf_fe->i_extended_attr != p_udf_dirent->fe.i_extended_attr)) {
-	cdio_debug("MISMATCH! p_udf_dirent = %p: i_extended_attr %d (new LBA) vs %d (existing)", p_udf_dirent, p_udf_fe->i_extended_attr, p_udf_dirent->fe.i_extended_attr);
-	i_extended_attr = min(p_udf_fe->i_extended_attr, p_udf_dirent->fe.i_extended_attr);
-}
-
-	memcpy(&(p_udf_dirent->fe), p_udf_fe, 
-	       sizeof(udf_file_entry_t) + min(p_udf_fe->i_alloc_descs 
-	       + p_udf_fe->i_extended_attr, p_udf_dirent->fe.i_alloc_descs + p_udf_dirent->fe.i_extended_attr));
-	p_udf_dirent->fe.i_alloc_descs = i_alloc_descs;
-	p_udf_dirent->fe.i_extended_attr = i_extended_attr;
 
 	if (strlen(p_udf_dirent->psz_name) < i_len) 
 	  p_udf_dirent->psz_name = (char *)

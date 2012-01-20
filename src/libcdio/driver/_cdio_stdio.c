@@ -98,7 +98,7 @@ _stdio_free(void *user_data)
 }
 
 /*! 
-  Like fseek(3) and in fact may be the same.
+  Like fseek64(3) and in fact may be the same.
   
   This  function sets the file position indicator for the stream
   pointed to by stream.  The new position, measured in bytes, is obtained
@@ -113,12 +113,12 @@ _stdio_free(void *user_data)
   DRIVER_OP_ERROR is returned and the global variable errno is set to
   indicate the error.
 */
-static driver_return_code_t 
-_stdio_seek(void *p_user_data, long i_offset, int whence)
+static off64_t 
+_stdio_seek(void *p_user_data, off64_t i_offset, int whence)
 {
-  _UserData *const ud = p_user_data;
+  _UserData *const ud = (_UserData*)p_user_data;
 
-  if ( (i_offset=fseek (ud->fd, i_offset, whence)) ) {
+  if ( (i_offset=_fseeki64 (ud->fd, i_offset, whence)) ) {
     cdio_error ("fseek (): %s", strerror (errno));
   }
 

@@ -49,6 +49,8 @@ udf_get_posix_filemode(const udf_dirent_t *p_udf_dirent)
   udf_file_entry_t udf_fe;
   mode_t mode = 0;
 
+  // FIXME: what's the point of the fe dupe? This is the only
+  // place that seems to use udf_get_file_entry...
   if (udf_get_file_entry(p_udf_dirent, &udf_fe)) {
     uint32_t i_perms;
 

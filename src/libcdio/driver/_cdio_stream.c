@@ -53,7 +53,7 @@ struct _CdioDataSource {
   void* user_data;
   cdio_stream_io_functions op;
   int is_open;
-  long position;
+  off64_t position;
 };
 
 void
@@ -90,8 +90,8 @@ cdio_stream_destroy(CdioDataSource_t *p_obj)
   @return unpon successful completion, return value is positive, else,
   the global variable errno is set to indicate the error.
 */
-ssize_t
-cdio_stream_getpos(CdioDataSource_t* p_obj, /*out*/ ssize_t *i_offset)
+off64_t
+cdio_stream_getpos(CdioDataSource_t* p_obj, /*out*/ off64_t *i_offset)
 {
   if (!p_obj || !p_obj->is_open) return DRIVER_OP_UNINIT;
   return *i_offset = p_obj->position;
@@ -178,8 +178,8 @@ cdio_stream_read(CdioDataSource_t* p_obj, void *ptr, long size, long nmemb)
   @return unpon successful completion, return value is positive, else,
   the global variable errno is set to indicate the error.
 */
-ssize_t
-cdio_stream_seek(CdioDataSource_t* p_obj, ssize_t offset, int whence)
+off64_t
+cdio_stream_seek(CdioDataSource_t* p_obj, off64_t offset, int whence)
 {
   if (!p_obj) return DRIVER_OP_UNINIT;
 
@@ -193,8 +193,8 @@ cdio_stream_seek(CdioDataSource_t* p_obj, ssize_t offset, int whence)
 #ifdef STREAM_DEBUG
     cdio_warn("had to reposition DataSource from %ld to %ld!", obj->position, offset);
 #endif
-    p_obj->position = (long)offset;
-    return p_obj->op.seek(p_obj->user_data, (long)offset, whence);
+    p_obj->position = (off64_t)offset;
+    return p_obj->op.seek(p_obj->user_data, offset, whence);
   }
 
   return 0;

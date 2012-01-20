@@ -35,7 +35,6 @@
 
 #define	GETICB(offset)	\
 	&p_udf_fe->ext_attr_alloc_descs[offset]
-// TODO: do we need to add p_udf_fe->i_extended_attr to offset here?
 
 const char *
 udf_get_filename(const udf_dirent_t *p_udf_dirent)
@@ -45,8 +44,7 @@ udf_get_filename(const udf_dirent_t *p_udf_dirent)
   return p_udf_dirent->psz_name;
 }
 
-/* Get UDF File Entry. However we do NOT get the variable-length extended
- attributes. */
+/* Copy an UDF File Entry into a Directory Entry structure. */
 bool
 udf_get_file_entry(const udf_dirent_t *p_udf_dirent, 
 		   /*out*/ udf_file_entry_t *p_udf_fe)
@@ -149,7 +147,7 @@ offset_to_lba(const udf_dirent_t *p_udf_dirent, off_t i_offset,
 	    }
 	    p_icb = (udf_short_ad_t *) 
 	      GETICB( uint32_from_le(p_udf_fe->i_extended_attr) 
-		      + ad_offset );
+		      + ad_offset*sizeof(udf_short_ad_t*) );
 	    icblen = p_icb->len;
 	    ad_num++;
 	  } while(i_offset >= (off_t)icblen);
@@ -176,7 +174,7 @@ offset_to_lba(const udf_dirent_t *p_udf_dirent, off_t i_offset,
 	    }
 	    p_icb = (udf_long_ad_t *) 
 	      GETICB( uint32_from_le(p_udf_fe->i_extended_attr)
-		      + ad_offset );
+		      + ad_offset*sizeof(udf_long_ad_t*) );
 	    icblen = p_icb->len;
 	    ad_num++;
 	  } while(i_offset >= (off_t)icblen);

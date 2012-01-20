@@ -59,6 +59,9 @@ extern "C" {
 #endif /* HAVE_STDINT_H */
   
 typedef uint8_t ubyte;
+#if !defined(off64_t)
+typedef int64_t off64_t;
+#endif
 
   /* default HP/UX macros are broken */
 #if defined(__hpux__)
