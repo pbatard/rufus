@@ -85,7 +85,7 @@ const char VSD_STD_ID_TEA01[] = {'T', 'E', 'A', '0', '1'};
 /*
  * The UDF specs are pretty clear on how each data structure is made
  * up, but not very clear on how they relate to each other.  Here is
- * the skinny... This demostrates a filesystem with one file in the
+ * the skinny... This demonstrates a filesystem with one file in the
  * root directory.  Subdirectories are treated just as normal files,
  * but they have File Id Descriptors of their children as their file
  * data.  As for the Anchor Volume Descriptor Pointer, it can exist in

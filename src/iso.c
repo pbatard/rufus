@@ -41,10 +41,6 @@
 #include <cdio/iso9660.h>
 #include <cdio/udf.h>
 
-#ifndef CEILING
-#define CEILING(x, y) ((x+(y-1))/y)
-#endif
-
 #define print_vd_info(title, fn)			\
 	if (fn(p_iso, &psz_str)) {				\
 		uprintf(title ": %s\n", psz_str);	\
@@ -79,9 +75,8 @@ static void udf_list_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const char 
 	char* fullpath;
 	const char* basename;
 	udf_dirent_t *p_udf_dirent2;
-	uint64_t i, file_len, i_blocks;
 	uint8_t buf[UDF_BLOCKSIZE];
-	ssize_t i_read;
+	int64_t i_read, file_len;
 
 	if ((p_udf_dirent == NULL) || (psz_path == NULL))
 		return;
@@ -108,28 +103,18 @@ uprintf("FULLPATH: %s\n", fullpath);
 				goto err;
 			}
 			file_len = udf_get_file_length(p_udf_dirent);
-			i_blocks = CEILING(file_len, UDF_BLOCKSIZE);
-			for (i=0; i<i_blocks; i++) {
+			while (file_len > 0) {
 				i_read = udf_read_block(p_udf_dirent, buf, 1);
 				if (i_read < 0) {
-					uprintf("Error reading UDF file %s at block %u\n", &fullpath[strlen(extract_dir)], i);
+					uprintf("Error reading UDF file %s\n", &fullpath[strlen(extract_dir)]);
 					goto err;
 				}
-				fwrite(buf, i_read, 1, fd);
+				fwrite(buf, (size_t)min(file_len, i_read), 1, fd);
 				if (ferror(fd)) {
 					uprintf("Error writing file %s\n", fullpath);
 					goto err;
 				}
-			}
-
-			// TODO: this is slowing us down! Compute the size to use with fwrite instead
-			fflush(fd);
-			/* Make sure the file size has the exact same byte size. Without the
-			   truncate below, the file will a multiple of ISO_BLOCKSIZE. */
-			// TODO: use _chsize_s to handle 64
-			if (_chsize_s(_fileno(fd), file_len)) {
-				uprintf("Error adjusting file size for %s\n", fullpath);
-				goto err;
+				file_len -= i_read;
 			}
 			fclose(fd);
 			fd = NULL;
@@ -154,8 +139,9 @@ static void iso_list_files(iso9660_t* p_iso, const char *psz_path)
 	CdioListNode_t* p_entnode;
 	iso9660_stat_t *p_statbuf;
 	CdioList_t* p_entlist;
-	size_t i, i_blocks;
+	size_t i;
 	lsn_t lsn;
+	int64_t file_len;
 
 	if ((p_iso == NULL) || (psz_path == NULL))
 		return;
@@ -186,8 +172,8 @@ static void iso_list_files(iso9660_t* p_iso, const char *psz_path)
 				uprintf("Unable to create file %s\n", filename);
 				goto out;
 			}
-			i_blocks = CEILING(p_statbuf->size, ISO_BLOCKSIZE);
-			for (i = 0; i < i_blocks ; i++) {
+			file_len = p_statbuf->size;
+			for (i = 0; file_len > 0 ; i++) {
 				memset (buf, 0, ISO_BLOCKSIZE);
 				lsn = p_statbuf->lsn + i;
 				if (iso9660_iso_seek_read (p_iso, buf, lsn, 1) != ISO_BLOCKSIZE) {
@@ -195,19 +181,12 @@ static void iso_list_files(iso9660_t* p_iso, const char *psz_path)
 						iso_filename, (long unsigned int)lsn);
 					goto out;
 				}
-				fwrite (buf, ISO_BLOCKSIZE, 1, fd);
+				fwrite (buf, (size_t)min(file_len, ISO_BLOCKSIZE), 1, fd);
 				if (ferror(fd)) {
 					uprintf("Error writing file %s\n", filename);
 					goto out;
 				}
-			}
-			// TODO: this is slowing us down! Compute the size to use with fwrite instead
-			fflush(fd);
-			/* Make sure the file size has the exact same byte size. Without the
-			   truncate below, the file will a multiple of ISO_BLOCKSIZE. */
-			if (_chsize(_fileno(fd), p_statbuf->size)) {
-				uprintf("Error adjusting file size for %s\n", filename);
-				goto out;
+				file_len -= ISO_BLOCKSIZE;
 			}
 			fclose(fd);
 			fd = NULL;

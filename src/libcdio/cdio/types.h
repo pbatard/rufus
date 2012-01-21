@@ -63,6 +63,10 @@ typedef uint8_t ubyte;
 typedef int64_t off64_t;
 #endif
 
+#if defined(_MSC_VER)
+#define fseeko64 _fseeki64
+#endif
+
   /* default HP/UX macros are broken */
 #if defined(__hpux__)
 # undef UINT16_C

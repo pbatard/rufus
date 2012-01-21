@@ -33,7 +33,7 @@
 struct udf_s {
   bool          b_stream;         /* Use stream pointer, else use 
 				    p_cdio.  */
-  ssize_t               i_position; /* Position in file if positive. */
+  off64_t               i_position; /* Position in file if positive. */
   CdioDataSource_t      *stream;  /* Stream pointer if stream */
   CdIo_t                *cdio;    /* Cdio pointer if read device */
   anchor_vol_desc_ptr_t anchor_vol_desc_ptr;

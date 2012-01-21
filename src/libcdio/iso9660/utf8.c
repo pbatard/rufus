@@ -274,7 +274,7 @@ bool cdio_charset_to_utf8(char *src, size_t src_len, cdio_utf8_t **dst,
 	if (src == NULL || dst == NULL || src_charset == NULL || strcmp(src_charset, "UCS-2BE") != 0)
 		return false;
 
-	if (src_len < 0) {
+	if (src_len == (size_t)-1) {
 		for (src_len = 0; ((uint16_t*)src)[src_len] !=0; src_len++);
 		src_len <<=2;
 	}

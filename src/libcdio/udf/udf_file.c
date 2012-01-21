@@ -90,6 +90,7 @@ uint64_t udf_get_file_length(const udf_dirent_t *p_udf_dirent)
   if (p_udf_dirent) {
     return uint64_from_le(p_udf_dirent->fe.info_len);
   }
+  // TODO: use INT64MAX
   return 2147483647L; /* Error. Non-error case handled above. */
 }
 
@@ -107,7 +108,7 @@ udf_is_dir(const udf_dirent_t *p_udf_dirent)
  * block.
  */
 static lba_t
-offset_to_lba(const udf_dirent_t *p_udf_dirent, off_t i_offset, 
+offset_to_lba(const udf_dirent_t *p_udf_dirent, off64_t i_offset, 
 	      /*out*/ lba_t *pi_lba, /*out*/ uint32_t *pi_max_size)
 {
   udf_t *p_udf = p_udf_dirent->p_udf;
@@ -123,8 +124,8 @@ offset_to_lba(const udf_dirent_t *p_udf_dirent, off_t i_offset,
     break;
   case ICBTAG_STRATEGY_TYPE_4:
     {
-      uint32_t icblen = 0;
-      lba_t lsector;
+      off64_t icblen = 0;
+      uint64_t lsector;
       uint32_t ad_offset;
       int ad_num = 0;
       uint16_t addr_ilk = uint16_from_le(p_icb_tag->flags&ICBTAG_FLAG_AD_MASK);
@@ -147,10 +148,10 @@ offset_to_lba(const udf_dirent_t *p_udf_dirent, off_t i_offset,
 	    }
 	    p_icb = (udf_short_ad_t *) 
 	      GETICB( uint32_from_le(p_udf_fe->i_extended_attr) 
-		      + ad_offset*sizeof(udf_short_ad_t*) );
+		      + ad_offset );
 	    icblen = p_icb->len;
 	    ad_num++;
-	  } while(i_offset >= (off_t)icblen);
+	  } while(i_offset >= icblen);
 	  
 	  lsector = (i_offset / UDF_BLOCKSIZE) + p_icb->pos;
 	  
@@ -174,7 +175,7 @@ offset_to_lba(const udf_dirent_t *p_udf_dirent, off_t i_offset,
 	    }
 	    p_icb = (udf_long_ad_t *) 
 	      GETICB( uint32_from_le(p_udf_fe->i_extended_attr)
-		      + ad_offset*sizeof(udf_long_ad_t*) );
+		      + ad_offset );
 	    icblen = p_icb->len;
 	    ad_num++;
 	  } while(i_offset >= (off_t)icblen);
@@ -201,7 +202,7 @@ offset_to_lba(const udf_dirent_t *p_udf_dirent, off_t i_offset,
 	return CDIO_INVALID_LBA;
       }
       
-      *pi_lba = lsector + p_udf->i_part_start;
+      *pi_lba = (lba_t)lsector + p_udf->i_part_start;
       return *pi_lba;
     }
   default:
@@ -233,7 +234,7 @@ udf_read_block(const udf_dirent_t *p_udf_dirent, void * buf, size_t count)
     driver_return_code_t ret;
     uint32_t i_max_size=0;
     udf_t *p_udf = p_udf_dirent->p_udf;
-    lba_t i_lba = offset_to_lba(p_udf_dirent, (off_t)p_udf->i_position, &i_lba, 
+    lba_t i_lba = offset_to_lba(p_udf_dirent, p_udf->i_position, &i_lba, 
 				&i_max_size);
     if (i_lba != CDIO_INVALID_LBA) {
       uint32_t i_max_blocks = CEILING(i_max_size, UDF_BLOCKSIZE);

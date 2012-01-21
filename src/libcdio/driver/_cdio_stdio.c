@@ -118,7 +118,7 @@ _stdio_seek(void *p_user_data, off64_t i_offset, int whence)
 {
   _UserData *const ud = (_UserData*)p_user_data;
 
-  if ( (i_offset=_fseeki64 (ud->fd, i_offset, whence)) ) {
+  if ( (i_offset=fseeko64 (ud->fd, i_offset, whence)) ) {
     cdio_error ("fseek (): %s", strerror (errno));
   }
 

@@ -14,4 +14,6 @@ TARGETLIBS=$(SDK_LIB_PATH)\kernel32.lib \
 
 SOURCES=iso9660.c    \
 	iso9660_fs.c       \
-	rock.c xa.c
+	rock.c             \
+	utf8.c             \
+	xa.c

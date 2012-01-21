@@ -37,5 +37,8 @@
     <ClInclude Include="..\..\cdio\cdio_config.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\cdio\udf.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
