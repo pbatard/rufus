@@ -97,6 +97,10 @@
 /* Define to 1 if you have the ANSI C header files. */
 #define STDC_HEADERS 1
 
+/* Number of bits in a file offset, on hosts where this is settable. */
+// TODO: should we use that for off64_t
+#define _FILE_OFFSET_BITS 64
+
 /* Define to `__inline__' or `__inline' if that's what the C compiler
    calls it, or to nothing if 'inline' is not supported under any name.  */
 #define inline  __inline
