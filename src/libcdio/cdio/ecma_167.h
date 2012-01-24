@@ -727,14 +727,14 @@ struct udf_file_entry_s
   udf_Uint64_t	  unique_ID;
   udf_Uint32_t	  i_extended_attr;
   udf_Uint32_t	  i_alloc_descs;
-//  udf_Uint8_t	  ext_attr[0];
-  /* This may look wasteful, but if we didn't do it here, an UDF block
-     would still need to be allocated for each fe before truncation.
-     This also allows updates without worrying about overflows, as the
-     specs states that a file entry cannot be larger than a block */
-  // TODO: use an union with padding to UDF_BLOCKSIZE (2048)
-  // Also, define UDF_BLOCKSIZE in this file
-  udf_Uint8_t	  ext_attr_alloc_descs[2048-176];
+/* The following union allows file entry reuse without worrying
+     about overflows, by ensuring the struct is always the
+     maximum possible size allowed by the specs: one UDF block. */
+  union {
+    udf_Uint8_t	  ext_attr[0];
+    udf_Uint8_t	  alloc_descs[0];
+    udf_Uint8_t	  pad_to_one_block[2048-176];
+  } u;
 } GNUC_PACKED;
 
 typedef struct udf_file_entry_s udf_file_entry_t;

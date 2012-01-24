@@ -71,18 +71,6 @@ const char *psz_extract_dir = "D:/tmp/iso";
 
 // TODO: Unicode support, timestamp preservation
 
-static void udf_print_file_info(const udf_dirent_t *p_udf_dirent, const char* psz_dirname)
-{
-	time_t mod_time = udf_get_modification_time(p_udf_dirent);
-	char psz_mode[11] = "invalid";
-	const char *psz_fname = psz_dirname?psz_dirname:udf_get_filename(p_udf_dirent);
-
-	/* Print directory attributes*/
-	uprintf("%s %4d %lu %s %s", udf_mode_string(udf_get_posix_filemode(p_udf_dirent), psz_mode),
-		udf_get_link_count(p_udf_dirent), (long unsigned int)udf_get_file_length(p_udf_dirent),
-		(*psz_fname?psz_fname:"/"), ctime(&mod_time));
-}
-
 static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const char *psz_path)
 {
 	FILE *fd = NULL;

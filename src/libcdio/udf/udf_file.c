@@ -34,7 +34,7 @@
 #define CEILING(x, y) ((x+(y-1))/y)
 
 #define	GETICB(offset)	\
-	&p_udf_fe->ext_attr_alloc_descs[offset]
+	&p_udf_fe->u.alloc_descs[offset]
 
 const char *
 udf_get_filename(const udf_dirent_t *p_udf_dirent)
