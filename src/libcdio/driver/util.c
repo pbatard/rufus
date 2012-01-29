@@ -17,21 +17,18 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#if defined(HAVE_CONFIG_H) && !defined(__CDIO_CONFIG_H__)
+#ifdef HAVE_CONFIG_H
 # include "config.h"
 # define __CDIO_CONFIG_H__ 1
-#else
-#ifndef EXTERNAL_LIBCDIO_CONFIG_H
-#define EXTERNAL_LIBCDIO_CONFIG_H
-#include <cdio/cdio_config.h>
-#endif
 #endif
 
 #include <ctype.h>
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
+#ifdef HAVE_STDIO_H
 #include <stdio.h>
+#endif
 
 #ifdef HAVE_STRING_H
 #include <string.h>
@@ -82,7 +79,7 @@ _cdio_strsplit(const char str[], char delim) /* fixme -- non-reentrant */
 
   cdio_assert (str != NULL);
 
-  _str = _strdup(str);
+  _str = strdup(str);
   _delim[0] = delim;
 
   cdio_assert (_str != NULL);
@@ -97,7 +94,7 @@ _cdio_strsplit(const char str[], char delim) /* fixme -- non-reentrant */
   
   n = 0;
   while((p = strtok(n ? NULL : _str, _delim)) != NULL) 
-    strv[n++] = _strdup(p);
+    strv[n++] = strdup(p);
 
   free(_str);
 
@@ -127,11 +124,11 @@ _cdio_strdup_upper (const char str[])
     {
       char *p;
 
-      p = new_str = _strdup (str);
+      p = new_str = strdup (str);
 
       while (*p)
         {
-          *p = (char)toupper (*p);
+          *p = toupper (*p);
           p++;
         }
     }

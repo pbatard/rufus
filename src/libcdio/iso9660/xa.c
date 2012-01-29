@@ -17,14 +17,9 @@
 */
 
 
-#if defined(HAVE_CONFIG_H) && !defined(__CDIO_CONFIG_H__)
-# include <config.h>
+#ifdef HAVE_CONFIG_H
+# include "config.h"
 # define __CDIO_CONFIG_H__ 1
-#else
-#ifndef EXTERNAL_LIBCDIO_CONFIG_H
-#define EXTERNAL_LIBCDIO_CONFIG_H
-#include <cdio/cdio_config.h>
-#endif
 #endif
 
 #ifdef HAVE_STRING_H
@@ -45,10 +40,10 @@ const char ISO_XA_MARKER_STRING[] = {'C', 'D', '-', 'X', 'A', '0', '0', '1'};
 #include <cdio/iso9660.h>
 #include <cdio/util.h>
 #include <cdio/bytesex.h>
-#include <cdio/filemode.h>
 
 /* Private headers */
 #include "cdio_assert.h"
+#include "filemode.h"
 
 /** The below variable is trickery to force enum symbol values to be
     recorded in debug symbol tables. It is used to allow one to refer

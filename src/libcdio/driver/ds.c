@@ -16,18 +16,17 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#if defined(HAVE_CONFIG_H) && !defined(__CDIO_CONFIG_H__)
+#ifdef HAVE_CONFIG_H
 # include "config.h"
 # define __CDIO_CONFIG_H__ 1
-#else
-#ifndef EXTERNAL_LIBCDIO_CONFIG_H
-#define EXTERNAL_LIBCDIO_CONFIG_H
-#include <cdio/cdio_config.h>
-#endif
 #endif
 
+#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
+#endif
+#ifdef HAVE_STRING_H
 #include <string.h>
+#endif
 
 #include <cdio/ds.h>
 #include <cdio/util.h>

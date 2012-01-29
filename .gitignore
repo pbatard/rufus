@@ -26,7 +26,7 @@ x86_64
 autom4te.cache
 compile
 config.guess
-config.h
+./config.h
 config.log
 config.status
 config.sub

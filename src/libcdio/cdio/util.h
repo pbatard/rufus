@@ -28,6 +28,18 @@
 #include <stdlib.h>
 #include <cdio/types.h>
 
+#if !defined CDIO_INLINE
+#if defined(__cplusplus) || defined(inline)
+#define CDIO_INLINE inline
+#elif defined(__GNUC__)
+#define CDIO_INLINE __inline__
+#elif defined(_MSC_VER)
+#define CDIO_INLINE __inline
+#else
+#define CDIO_INLINE
+#endif
+#endif /* CDIO_INLINE */
+
 #undef  MAX
 #define MAX(a, b)  (((a) > (b)) ? (a) : (b))
 
@@ -40,7 +52,7 @@
 #undef  CLAMP
 #define CLAMP(x, low, high)  (((x) > (high)) ? (high) : (((x) < (low)) ? (low) : (x)))
 
-static inline uint32_t
+static CDIO_INLINE uint32_t
 _cdio_len2blocks (uint32_t i_len, uint16_t i_blocksize)
 {
   uint32_t i_blocks;
@@ -53,13 +65,13 @@ _cdio_len2blocks (uint32_t i_len, uint16_t i_blocksize)
 }
 
 /* round up to next block boundary */
-static inline unsigned 
+static CDIO_INLINE unsigned 
 _cdio_ceil2block (unsigned offset, uint16_t i_blocksize)
 {
   return _cdio_len2blocks (offset, i_blocksize) * i_blocksize;
 }
 
-static inline unsigned int
+static CDIO_INLINE unsigned int
 _cdio_ofs_add (unsigned offset, unsigned length, uint16_t i_blocksize)
 {
   if (i_blocksize - (offset % i_blocksize) < length)
@@ -70,7 +82,7 @@ _cdio_ofs_add (unsigned offset, unsigned length, uint16_t i_blocksize)
   return offset;
 }
 
-static inline const char *
+static CDIO_INLINE const char *
 _cdio_bool_str (bool b)
 {
   return b ? "yes" : "no";

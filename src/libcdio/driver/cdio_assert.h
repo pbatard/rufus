@@ -31,14 +31,15 @@
 
 #define cdio_assert(expr) \
  { \
-   if (GNUC_UNLIKELY (!(expr))) cdio_assert_log ( \
+   if (GNUC_UNLIKELY (!(expr))) cdio_log (CDIO_LOG_ASSERT, \
      "file %s: line %d (%s): assertion failed: (%s)", \
      __FILE__, __LINE__, __PRETTY_FUNCTION__, #expr); \
  }
 
 #define cdio_assert_not_reached() \
  { \
-   cdio_assert_log ("file %s: line %d (%s): should not be reached", \
+   cdio_log (CDIO_LOG_ASSERT, \
+     "file %s: line %d (%s): should not be reached", \
      __FILE__, __LINE__, __PRETTY_FUNCTION__); \
  }
 

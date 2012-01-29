@@ -6,7 +6,7 @@
 /*
  *  THIS SOFTWARE IS NOT COPYRIGHTED
  *
- *  Modified for libusb/MSVC: Pete Batard <pbatard@gmail.com>
+ *  Modified for libusb/MSVC: Pete Batard <pete@akeo.com>
  *
  *  This source code is offered for use in the public domain. You may
  *  use, modify or distribute it freely.
@@ -21,11 +21,6 @@
 
 #ifndef _MSC_VER
 #error This header should only be used with Microsoft compilers
-#endif
-
-/* It's convenient to hijack this header to also define 'inline' on MS environments */
-#ifndef inline
-#define inline __inline
 #endif
 
 /* 7.8 Format conversion of integer types <inttypes.h> */

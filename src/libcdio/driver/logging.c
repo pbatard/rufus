@@ -16,19 +16,20 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#if defined(HAVE_CONFIG_H) && !defined(__CDIO_CONFIG_H__)
+#ifdef HAVE_CONFIG_H
 # include "config.h"
 # define __CDIO_CONFIG_H__ 1
-#else
-#ifndef EXTERNAL_LIBCDIO_CONFIG_H
-#define EXTERNAL_LIBCDIO_CONFIG_H
-#include <cdio/cdio_config.h>
-#endif
 #endif
 
+#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
+#endif
+#ifdef HAVE_STDARG_H
 #include <stdarg.h>
+#endif
+#ifdef HAVE_STDIO_H
 #include <stdio.h>
+#endif
 
 #include <cdio/logging.h>
 #include "cdio_assert.h"
@@ -103,7 +104,7 @@ cdio_logv (cdio_log_level_t level, const char format[], va_list args)
 
   in_recursion = 1;
   
-  _vsnprintf(buf, sizeof(buf)-1, format, args);
+  vsnprintf(buf, sizeof(buf)-1, format, args);
 
   _handler(level, buf);
 
@@ -118,18 +119,6 @@ cdio_log (cdio_log_level_t level, const char format[], ...)
   cdio_logv (level, format, args);
   va_end (args);
 }
-
-#if defined(__GNUC__)
-void
-cdio_assert_log (const char format[], ...)
-{
-  va_list args;
-  va_start (args, format);
-  cdio_logv (CDIO_LOG_ASSERT, format, args);
-  va_end (args);
-  exit(1);
-}
-#endif
 
 #define CDIO_LOG_TEMPLATE(level, LEVEL) \
 void \

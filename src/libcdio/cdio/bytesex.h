@@ -29,7 +29,7 @@
 #define __CDIO_BYTESEX_H__
 
 #include <cdio/types.h>
-#include <cdio/bytesex_asm.h>
+#include <cdio/bytesex_asm.h> /* also defines CDIO_INLINE */
 #include <cdio/logging.h>
 
 /** 16-bit big-endian to little-endian */
@@ -67,19 +67,19 @@
 # define UINT64_SWAP_LE_BE UINT64_SWAP_LE_BE_C
 #endif
 
-inline static 
+static CDIO_INLINE
 uint16_t uint16_swap_le_be (const uint16_t val)
 {
   return UINT16_SWAP_LE_BE (val);
 }
 
-inline static 
+static CDIO_INLINE
 uint32_t uint32_swap_le_be (const uint32_t val)
 {
   return UINT32_SWAP_LE_BE (val);
 }
 
-inline static 
+static CDIO_INLINE
 uint64_t uint64_swap_le_be (const uint64_t val)
 {
   return UINT64_SWAP_LE_BE (val);
@@ -119,10 +119,10 @@ uint64_t uint64_swap_le_be (const uint64_t val)
 
 /** converter function template */
 #define CVT_TO_FUNC(bits) \
- static inline uint ## bits ## _t \
+ static CDIO_INLINE uint ## bits ## _t \
  uint ## bits ## _to_be (uint ## bits ## _t val) \
  { return UINT ## bits ## _TO_BE (val); } \
- static inline uint ## bits ## _t \
+ static CDIO_INLINE uint ## bits ## _t \
  uint ## bits ## _to_le (uint ## bits ## _t val) \
  { return UINT ## bits ## _TO_LE (val); } \
 
@@ -163,14 +163,14 @@ CVT_TO_FUNC(64)
 #define from_722(i) uint16_from_be(i)
 
 /** Convert from uint16_t to ISO 9669 7.2.3 format */
-static inline uint32_t
+static CDIO_INLINE uint32_t
 to_723(uint16_t i)
 {
   return uint32_swap_le_be(i) | i;
 }
 
 /** Convert from ISO 9660 7.2.3 format to uint16_t */
-static inline uint16_t 
+static CDIO_INLINE uint16_t 
 from_723 (uint32_t p)
 {
   if (uint32_swap_le_be (p) != p)
@@ -192,14 +192,14 @@ from_723 (uint32_t p)
 #define from_732(i) uint32_from_be(i)
 
 /** Convert from uint16_t to ISO 9669 7.3.3 format */
-static inline uint64_t
+static CDIO_INLINE uint64_t
 to_733(uint32_t i)
 {
   return uint64_swap_le_be(i) | i;
 }
 
 /** Convert from ISO 9660 7.3.3 format to uint32_t */
-static inline uint32_t 
+static CDIO_INLINE uint32_t 
 from_733 (uint64_t p)
 {
   if (uint64_swap_le_be (p) != p)

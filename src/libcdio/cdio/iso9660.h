@@ -60,7 +60,7 @@ typedef uint64_t iso733_t; /*! See section 7.3.3 */
 typedef char     achar_t;  /*! See section 7.4.1 */
 typedef char     dchar_t;  /*! See section 7.4.1 */
 
-#ifndef  EMPTY_ARRAY_SIZE
+#ifndef EMPTY_ARRAY_SIZE
 #define EMPTY_ARRAY_SIZE 0
 #endif
 
@@ -233,20 +233,6 @@ typedef struct iso9660_stat_s   iso9660_stat_t;
 
 #include <cdio/rock.h>
 
-/*! MSVC compilers cannot handle a zero sized array in the middle of a struct, and
-    uct iso9660_dir_s is reused in the middle of iso9660_pvd_s, so instead of having
-       iso711_t filename_len;
-       char     filename[];
-    we use the fact that iso711_t and char are the same size and use an union.
-    The only gotcha is that the actual string payload starts at 1, not 0
-*/
-union iso9660_filename_u {
-  iso711_t          len;
-  char              str[1];
-} GNUC_PACKED;
-
-typedef union iso9660_filename_u  iso9660_filename_t;
-
 /*! \brief Format of an ISO-9660 directory record 
 
  Section 9.1 of ECMA 119.
@@ -287,7 +273,18 @@ struct iso9660_dir_s {
                                           the Extent described by this
                                           Directory Record is
                                           recorded. (9.1.9) */
-  iso9660_filename_t filename;
+/*! MSVC compilers cannot handle a zero sized array in the middle
+    of a struct, and iso9660_dir_s is reused within iso9660_pvd_s.
+    Therefore, instead of defining:
+       iso711_t filename_len;
+       char     filename[];
+    we leverage the fact that iso711_t and char are the same size
+    and use an union. The only gotcha is that the actual string
+    payload of filename.str[] starts at 1, not 0. */
+  union { 
+    iso711_t        len;
+    char            str[1];
+  } filename;
 } GNUC_PACKED;
 
 /*! 
@@ -989,7 +986,7 @@ uint8_t iso9660_ifs_get_joliet_level(iso9660_t *p_iso);
 
 uint8_t iso9660_get_dir_len(const iso9660_dir_t *p_idr);
 
-#ifdef FIXME
+#if FIXME
 uint8_t iso9660_get_dir_size(const iso9660_dir_t *p_idr);
 
 lsn_t iso9660_get_dir_extent(const iso9660_dir_t *p_idr);

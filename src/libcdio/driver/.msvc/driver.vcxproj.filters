@@ -38,6 +38,9 @@
     <ClCompile Include="..\track.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\utf8.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\_cdio_stdio.h">
@@ -50,6 +53,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\cdio_private.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\filemode.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

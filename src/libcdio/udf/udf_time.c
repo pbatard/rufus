@@ -38,14 +38,9 @@
  *  http://www.boulder.nist.gov/timefreq/pubs/bulletin/leapsecond.htm
  */
 
-#if defined(HAVE_CONFIG_H) && !defined(__CDIO_CONFIG_H__)
+#ifdef HAVE_CONFIG_H
 #include "config.h"
 # define __CDIO_CONFIG_H__ 1
-#else
-#ifndef EXTERNAL_LIBCDIO_CONFIG_H
-#define EXTERNAL_LIBCDIO_CONFIG_H
-#include <cdio/cdio_config.h>
-#endif
 #endif
 
 #ifdef NEED_TIMEZONEVAR
@@ -108,7 +103,7 @@ static time_t year_seconds[MAX_YEAR_SECONDS]= {
   /*2038*/ SPY(68,17,0)
 };
 
-#ifdef HAVE_TIMEZONE_VAR
+#if defined(HAVE_TIMEZONE_VAR) && !defined(__MINGW32__)
 extern long timezone;
 #endif
 

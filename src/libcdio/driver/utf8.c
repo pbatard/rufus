@@ -1,6 +1,7 @@
 /*
   Copyright (C) 2006, 2008 Burkhard Plaum <plaum@ipf.uni-stuttgart.de>
   Copyright (C) 2011 Rocky Bernstein <rocky@gnu.org>
+  Copyright (C) 2012 Pete Batard <pete@akeo.ie>
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -17,14 +18,9 @@
 */
 /* UTF-8 support */
 
-#if defined(HAVE_CONFIG_H) && !defined(__CDIO_CONFIG_H__)
-# include <config.h>
+#ifdef HAVE_CONFIG_H
 # define __CDIO_CONFIG_H__ 1
-#else
-#ifndef EXTERNAL_LIBCDIO_CONFIG_H
-#define EXTERNAL_LIBCDIO_CONFIG_H
-#include <cdio/cdio_config.h>
-#endif
+# include "config.h"
 #endif
 
 #ifdef HAVE_JOLIET
@@ -41,9 +37,13 @@
 #endif
 
 #include <cdio/utf8.h>
+#include <cdio/logging.h>
 
+#ifdef HAVE_STDIO_H
 #include <stdio.h>
+#endif
 
+// TODO: also remove the need for iconv on MinGW
 #ifdef HAVE_ICONV
 #include <iconv.h>
 struct cdio_charset_coverter_s
@@ -144,13 +144,13 @@ do_convert(iconv_t cd, char * src, int src_len,
           ret = realloc(ret, alloc_size);
           if (ret == NULL)
             {
-            fprintf(stderr, "Can't realloc(%d).\n", alloc_size);
+            cdio_warn("Can't realloc(%d).", alloc_size);
             return false;
             }
           outbuf = ret + output_pos;
           break;
         default:
-          fprintf(stderr, "Iconv failed: %s\n", strerror(errno));
+          cdio_warn("Iconv failed: %s", strerror(errno));
           if (ret != NULL)
             free(ret);
           return false;
@@ -226,7 +226,7 @@ static __inline char* wchar_to_utf8(const wchar_t* wstr)
 	int size = 0;
 	char* str = NULL;
 
-	// Find out the size we need to allocate for our converted string
+	/* Find out the size we need to allocate for our converted string */
 	size = WideCharToMultiByte(CP_UTF8, 0, wstr, -1, NULL, 0, NULL, NULL);
 	if (size <= 1)	// An empty string would be size 1
 		return NULL;
@@ -251,7 +251,7 @@ static __inline wchar_t* utf8_to_wchar(const char* str)
 	int size = 0;
 	wchar_t* wstr = NULL;
 
-	// Find out the size we need to allocate for our converted string
+	/* Find out the size we need to allocate for our converted string */
 	size = MultiByteToWideChar(CP_UTF8, 0, str, -1, NULL, 0);
 	if (size <= 1)	// An empty string would be size 1
 		return NULL;
@@ -279,8 +279,8 @@ bool cdio_charset_to_utf8(char *src, size_t src_len, cdio_utf8_t **dst,
 		src_len <<=2;
 	}
 
-	// zero lenght is a headache (LCMapString doesn't support it)
-	// => eliminate this case first
+	/* zero lenght is a headache (LCMapString doesn't support it)
+	   => eliminate this case first */
 	if (src_len == 0) {
 		*dst = (cdio_utf8_t*)malloc(1);
 		*dst[0] = 0;
@@ -288,8 +288,8 @@ bool cdio_charset_to_utf8(char *src, size_t src_len, cdio_utf8_t **dst,
 	}
 
 	le_src = (wchar_t*)malloc(src_len+2);
-	// WideCharToMultiByte only takes UCS-2LE, and we are fed UCS-2BE 
-	// => perform byte reversal
+	/* WideCharToMultiByte only takes UCS-2LE, and we are fed UCS-2BE 
+	   => perform byte reversal */
 	LCMapStringW(0, LCMAP_BYTEREV, (LPCWSTR)src, src_len, le_src, src_len);
 	*dst = wchar_to_utf8(le_src);
 	free(le_src);

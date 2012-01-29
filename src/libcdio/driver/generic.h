@@ -26,7 +26,7 @@
 #endif
 
 #include <cdio/cdio.h>
-//#include <cdio/cdtext.h>
+#include <cdio/cdtext.h>
 #include <cdio/iso9660.h>
 
 #ifdef __cplusplus
@@ -62,7 +62,7 @@ extern "C" {
     iso9660_svd_t svd;      
     CdIo_t   *cdio;         /**< a way to call general cdio routines. */
     cdtext_t *cdtext;       /**< CD-Text for disc. */
-//    track_flags_t track_flags[CDIO_CD_MAX_TRACKS+1];
+    track_flags_t track_flags[CDIO_CD_MAX_TRACKS+1];
 
     /* Memorized sense reply of the most recent SCSI command.
        Recorded by driver implementations of cdio_funcs_t.run_mmc_cmd(). 

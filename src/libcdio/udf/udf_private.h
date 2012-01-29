@@ -31,13 +31,12 @@
 /* Implementation of opaque types */
 
 struct udf_s {
-  bool          b_stream;         /* Use stream pointer, else use 
-				    p_cdio.  */
-  off64_t               i_position; /* Position in file if positive. */
-  CdioDataSource_t      *stream;  /* Stream pointer if stream */
-  CdIo_t                *cdio;    /* Cdio pointer if read device */
+  bool                  b_stream;     /* Use stream pointer, else use p_cdio */
+  off_t                 i_position;   /* Position in file if positive */
+  CdioDataSource_t      *stream;      /* Stream pointer if stream */
+  CdIo_t                *cdio;        /* Cdio pointer if read device */
   anchor_vol_desc_ptr_t anchor_vol_desc_ptr;
-  uint32_t              pvd_lba;  /* sector of Primary Volume Descriptor */
+  uint32_t              pvd_lba;      /* sector of Primary Volume Descriptor */
   partition_num_t       i_partition;  /* partition number */
   uint32_t              i_part_start; /* start of Partition Descriptor */
   uint32_t              lvd_lba;      /* sector of Logical Volume Descriptor */

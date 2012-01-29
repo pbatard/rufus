@@ -26,7 +26,9 @@
 # include <string.h>
 #endif
 
+#ifdef HAVE_STDIO_H
 #include <stdio.h>  /* Remove when adding cdio/logging.h */
+#endif
 
 /* Useful defines */
 
@@ -90,7 +92,6 @@ uint64_t udf_get_file_length(const udf_dirent_t *p_udf_dirent)
   if (p_udf_dirent) {
     return uint64_from_le(p_udf_dirent->fe.info_len);
   }
-  // TODO: use INT64MAX
   return 2147483647L; /* Error. Non-error case handled above. */
 }
 
@@ -108,7 +109,7 @@ udf_is_dir(const udf_dirent_t *p_udf_dirent)
  * block.
  */
 static lba_t
-offset_to_lba(const udf_dirent_t *p_udf_dirent, off64_t i_offset, 
+offset_to_lba(const udf_dirent_t *p_udf_dirent, off_t i_offset, 
 	      /*out*/ lba_t *pi_lba, /*out*/ uint32_t *pi_max_size)
 {
   udf_t *p_udf = p_udf_dirent->p_udf;
@@ -116,18 +117,22 @@ offset_to_lba(const udf_dirent_t *p_udf_dirent, off64_t i_offset,
     &p_udf_dirent->fe;
   const udf_icbtag_t *p_icb_tag = &p_udf_fe->icb_tag;
   const uint16_t strat_type= uint16_from_le(p_icb_tag->strat_type);
-  
+
+  if (i_offset < 0) {
+    cdio_warn("Negative offset value");
+    return CDIO_INVALID_LBA;
+  }
+
   switch (strat_type) {
   case 4096:
-    printf("Cannot deal with strategy4096 yet!\n");
+    cdio_warn("Cannot deal with strategy4096 yet!");
     return CDIO_INVALID_LBA;
     break;
   case ICBTAG_STRATEGY_TYPE_4:
     {
-      off64_t icblen = 0;
+      off_t icblen = 0;
       uint64_t lsector;
-      uint32_t ad_offset;
-      int ad_num = 0;
+      int ad_offset, ad_num = 0;
       uint16_t addr_ilk = uint16_from_le(p_icb_tag->flags&ICBTAG_FLAG_AD_MASK);
       
       switch (addr_ilk) {
@@ -143,7 +148,7 @@ offset_to_lba(const udf_dirent_t *p_udf_dirent, off64_t i_offset,
 	    i_offset -= icblen;
 	    ad_offset = sizeof(udf_short_ad_t) * ad_num;
 	    if (ad_offset > uint32_from_le(p_udf_fe->i_alloc_descs)) {
-	      printf("File offset out of bounds\n");
+	      cdio_warn("File offset out of bounds");
 	      return CDIO_INVALID_LBA;
 	    }
 	    p_icb = (udf_short_ad_t *) 
@@ -170,7 +175,7 @@ offset_to_lba(const udf_dirent_t *p_udf_dirent, off64_t i_offset,
 	    i_offset -= icblen;
 	    ad_offset = sizeof(udf_long_ad_t) * ad_num;
 	    if (ad_offset > uint32_from_le(p_udf_fe->i_alloc_descs)) {
-	      printf("File offset out of bounds\n");
+	      cdio_warn("File offset out of bounds");
 	      return CDIO_INVALID_LBA;
 	    }
 	    p_icb = (udf_long_ad_t *) 
@@ -178,7 +183,7 @@ offset_to_lba(const udf_dirent_t *p_udf_dirent, off64_t i_offset,
 		      + ad_offset );
 	    icblen = p_icb->len;
 	    ad_num++;
-	  } while(i_offset >= (off_t)icblen);
+	  } while(i_offset >= icblen);
 	
 	  lsector = (i_offset / UDF_BLOCKSIZE) +
 	    uint32_from_le(((udf_long_ad_t *)(p_icb))->loc.lba);
@@ -192,21 +197,25 @@ offset_to_lba(const udf_dirent_t *p_udf_dirent, off64_t i_offset,
 	 * allocation descriptor field of the file entry.
 	 */
 	*pi_max_size = 0;
-	printf("Don't know how to data in ICB handle yet\n");
+	cdio_warn("Don't know how to data in ICB handle yet");
 	return CDIO_INVALID_LBA;
       case ICBTAG_FLAG_AD_EXTENDED:
-	printf("Don't know how to handle extended addresses yet\n");
+	cdio_warn("Don't know how to handle extended addresses yet");
 	return CDIO_INVALID_LBA;
       default:
-	printf("Unsupported allocation descriptor %d\n", addr_ilk);
+	cdio_warn("Unsupported allocation descriptor %d", addr_ilk);
 	return CDIO_INVALID_LBA;
       }
-      
+
       *pi_lba = (lba_t)lsector + p_udf->i_part_start;
+      if (*pi_lba < 0) {
+	cdio_warn("Negative LBA value");
+	return CDIO_INVALID_LBA;
+      }
       return *pi_lba;
     }
   default:
-    printf("Unknown strategy type %d\n", strat_type);
+    cdio_warn("Unknown strategy type %d", strat_type);
     return DRIVER_OP_ERROR;
   }
 }
@@ -239,12 +248,12 @@ udf_read_block(const udf_dirent_t *p_udf_dirent, void * buf, size_t count)
     if (i_lba != CDIO_INVALID_LBA) {
       uint32_t i_max_blocks = CEILING(i_max_size, UDF_BLOCKSIZE);
       if ( i_max_blocks < count ) {
-	  fprintf(stderr, "Warning: read count %u is larger than %u extent size.\n",
+	  cdio_warn("read count %u is larger than %u extent size.",
 		  (unsigned int)count, i_max_blocks);
-	  fprintf(stderr, "Warning: read count truncated to %u\n", (unsigned int)count);
+	  cdio_warn("read count truncated to %u", (unsigned int)count);
 	  count = i_max_blocks;
       }
-      ret = udf_read_sectors(p_udf, buf, i_lba, (long)count);
+      ret = udf_read_sectors(p_udf, buf, i_lba, count);
       if (DRIVER_OP_SUCCESS == ret) {
 	ssize_t i_read_len = MIN(i_max_size, count * UDF_BLOCKSIZE);
 	p_udf->i_position += i_read_len;

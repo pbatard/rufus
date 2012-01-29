@@ -33,12 +33,12 @@ extern "C" {
   
   typedef int(*cdio_data_open_t)(void *user_data);
   
-  typedef long(*cdio_data_read_t)(void *user_data, void *buf, long count);
+  typedef ssize_t(*cdio_data_read_t)(void *user_data, void *buf, size_t count);
   
-  typedef off64_t(*cdio_data_seek_t)(void *user_data, off64_t offset,
+  typedef int(*cdio_data_seek_t)(void *user_data, off_t offset,
                                                   int whence);
   
-  typedef uint64_t(*cdio_data_stat_t)(void *user_data);
+  typedef off_t(*cdio_data_stat_t)(void *user_data);
   
   typedef int(*cdio_data_close_t)(void *user_data);
   
@@ -65,8 +65,8 @@ extern "C" {
      @return unpon successful completion, return value is positive, else,
      the global variable errno is set to indicate the error.
   */
-  off64_t cdio_stream_getpos(CdioDataSource_t* p_obj, 
-                             /*out*/ off64_t *i_offset);
+  off_t cdio_stream_getpos(CdioDataSource_t* p_obj, 
+                             /*out*/ off_t *i_offset);
   
   CdioDataSource_t *
   cdio_stream_new(void *user_data, const cdio_stream_io_functions *funcs);
@@ -88,11 +88,11 @@ extern "C" {
      We do not distinguish between end-of-file and error, and callers
      must use feof(3) and ferror(3) to determine which occurred.
   */
-  ssize_t cdio_stream_read(CdioDataSource_t* p_obj, void *ptr, long i_size, 
-                           long nmemb);
+  ssize_t cdio_stream_read(CdioDataSource_t* p_obj, void *ptr, size_t i_size, 
+                           size_t nmemb);
   
   /** 
-    Like fseek64/_fseeki64 and in fact may be the same.
+    Like fseek(3)/fseeko(3) and in fact may be the same.
 
     This  function sets the file position indicator for the stream
     pointed to by stream.  The new position, measured in bytes, is obtained
@@ -107,14 +107,14 @@ extern "C" {
     DRIVER_OP_ERROR is returned and the global variable errno is set to
     indicate the error.
    */
-  off64_t cdio_stream_seek(CdioDataSource_t *p_obj, off64_t i_offset, 
+  int cdio_stream_seek(CdioDataSource_t *p_obj, off_t i_offset, 
                            int whence);
   
   /**
     Return whatever size of stream reports, I guess unit size is bytes. 
     On error return -1;
   */
-  int64_t cdio_stream_stat(CdioDataSource_t *p_obj);
+  off_t cdio_stream_stat(CdioDataSource_t *p_obj);
   
   /**
     Deallocate resources associated with p_obj. After this p_obj is unusable.

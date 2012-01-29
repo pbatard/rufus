@@ -29,42 +29,33 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#ifndef EXTERNAL_LIBCDIO_CONFIG_H
-#define EXTERNAL_LIBCDIO_CONFIG_H
-#include <cdio/cdio_config.h>
-#endif
-
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-
-  /* provide some C99 definitions */
-
-#if defined(HAVE_SYS_TYPES_H) 
+/* If <sys/types.h> is not available on your platform please
+   contact the libcdio mailing list so that we can fix it! */
+#if !defined(ARE_THERE_STILL_ENVS_WITHOUT_SYS_TYPES) 
 #include <sys/types.h>
 #endif 
 
-#if defined(HAVE_STDINT_H)
-# include <stdint.h>
-#elif defined(HAVE_INTTYPES_H)
-# include <inttypes.h>
-#elif defined(AMIGA) || defined(__linux__)
-  typedef u_int8_t uint8_t;
-  typedef u_int16_t uint16_t;
-  typedef u_int32_t uint32_t;
-  typedef u_int64_t uint64_t;
+#if defined(AMIGA)
+typedef u_int8_t uint8_t;
+typedef u_int16_t uint16_t;
+typedef u_int32_t uint32_t;
+typedef u_int64_t uint64_t;
 #else
-  /* warning ISO/IEC 9899:1999 <stdint.h> was missing and even <inttypes.h> */
-  /* fixme */
-#endif /* HAVE_STDINT_H */
-  
-typedef uint8_t ubyte;
-#if !defined(off64_t)
-typedef int64_t off64_t;
+/* If <stdint.h> is not available on your platform please
+   contact the libcdio mailing list so that we can fix it!
+   For MSVC, you can find both a public domain stdint.h and
+   inttypes.h in the MSVC/missing directory of libcdio. */
+#include <stdint.h>
 #endif
 
+typedef uint8_t ubyte;
+
+/* MSVC does not define mode_t and ssize_t by default. The way
+   to compensate for missing UNIX types is to include a custom
+   unistd.h that defines them. Such a file is provided with
+   the libcdio source, in the MSVC/missing directory */
 #if defined(_MSC_VER)
-#define fseeko64 _fseeki64
+#include <unistd.h>
 #endif
 
   /* default HP/UX macros are broken */
@@ -113,15 +104,24 @@ typedef int64_t off64_t;
 #endif
   
 #ifndef __cplusplus
-# if defined(HAVE_STDBOOL_H)
-#  include <stdbool.h>
-# else
-   /* ISO/IEC 9899:1999 <stdbool.h> missing -- enabling workaround */
-  
-#   define false   0
-#   define true    1
-#   define bool uint8_t
-# endif /*HAVE_STDBOOL_H*/
+
+/* All the stdbool.h seem to define those */
+#ifndef __bool_true_false_are_defined
+#define __bool_true_false_are_defined 1
+
+#undef bool
+#undef true
+#undef false
+
+#ifdef _Bool
+#define bool _Bool
+#else
+#define bool int
+#endif
+#define true 1
+#define false 0
+
+#endif /* __bool_true_false_are_defined */
 #endif /*C++*/
   
   /* some GCC optimizations -- gcc 2.5+ */
@@ -155,13 +155,13 @@ typedef int64_t off64_t;
   /* for GCC we try to use GNUC_PACKED */
 # define PRAGMA_BEGIN_PACKED
 # define PRAGMA_END_PACKED
-#elif defined(HAVE_ISOC99_PRAGMA)
+#elif defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901)
   /* should work with most EDG-frontend based compilers */
 # define PRAGMA_BEGIN_PACKED _Pragma("pack(1)")
 # define PRAGMA_END_PACKED   _Pragma("pack()")
 #elif defined(_MSC_VER)
 # define PRAGMA_BEGIN_PACKED __pragma(pack(push, 1))
-# define PRAGMA_END_PACKED __pragma(pack(pop))
+# define PRAGMA_END_PACKED   __pragma(pack(pop))
 #else /* neither gcc nor _Pragma() available... */
   /* ...so let's be naive and hope the regression testsuite is run... */
 # define PRAGMA_BEGIN_PACKED

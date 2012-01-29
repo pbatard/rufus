@@ -17,14 +17,9 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#if defined(HAVE_CONFIG_H) && !defined(__CDIO_CONFIG_H__)
+#ifdef HAVE_CONFIG_H
 # include "config.h"
 # define __CDIO_CONFIG_H__ 1
-#else
-#ifndef EXTERNAL_LIBCDIO_CONFIG_H
-#define EXTERNAL_LIBCDIO_CONFIG_H
-#include <cdio/cdio_config.h>
-#endif
 #endif
 
 #include <cdio/sector.h>
@@ -33,7 +28,9 @@
 #include "cdio_assert.h"
 #include "portable.h"
 
+#ifdef HAVE_STDIO_H
 #include <stdio.h>
+#endif
 #ifdef HAVE_STRING_H
 #include <string.h>
 #endif
@@ -89,9 +86,9 @@ cdio_lsn_to_msf (lsn_t lsn, msf_t *msf)
     m = 99;
   }
   
-  msf->m = cdio_to_bcd8 ((uint8_t)m);
-  msf->s = cdio_to_bcd8 ((uint8_t)s);
-  msf->f = cdio_to_bcd8 ((uint8_t)f);
+  msf->m = cdio_to_bcd8 (m);
+  msf->s = cdio_to_bcd8 (s);
+  msf->f = cdio_to_bcd8 (f);
 }
 
 /*! 
@@ -102,7 +99,7 @@ cdio_lba_to_msf_str (lba_t lba)
 {
 
   if (CDIO_INVALID_LBA == lba) {
-    return _strdup("*INVALID");
+    return strdup("*INVALID");
   } else {
     msf_t msf;
     msf.m = msf.s = msf.f = 0;
@@ -173,7 +170,7 @@ cdio_msf_to_str (const msf_t *msf)
   char buf[16];
   
   snprintf (buf, sizeof (buf), "%2.2x:%2.2x:%2.2x", msf->m, msf->s, msf->f);
-  return _strdup (buf);
+  return strdup (buf);
 }
 
 /*!  

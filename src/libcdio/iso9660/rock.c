@@ -18,14 +18,8 @@
 /* Rock Ridge Extensions to iso9660 */
 
 
-#if defined(HAVE_CONFIG_H) && !defined(__CDIO_CONFIG_H__)
-# include <config.h>
-# define __CDIO_CONFIG_H__ 1
-#else
-#ifndef EXTERNAL_LIBCDIO_CONFIG_H
-#define EXTERNAL_LIBCDIO_CONFIG_H
-#include <cdio/cdio_config.h>
-#endif
+#ifdef HAVE_CONFIG_H
+# include "config.h"
 #endif
 
 #ifdef HAVE_STRING_H
@@ -43,16 +37,7 @@
 #include <cdio/iso9660.h>
 #include <cdio/logging.h>
 #include <cdio/bytesex.h>
-#include <cdio/filemode.h>
-#include <malloc.h>
-
-#ifndef HAVE_S_ISLNK
-# define S_ISLNK(s) ((void)s,0)
-#endif
-#ifndef HAVE_S_ISSOCK
-# define S_ISSOCK(s) ((void)s,0)
-#endif
-
+#include "filemode.h"
 
 #define CDIO_MKDEV(ma,mi)	((ma)<<16 | (mi))
 
@@ -74,7 +59,7 @@ realloc_symlink(/*in/out*/ iso9660_stat_t *p_stat, uint8_t i_grow)
     p_stat->rr.i_symlink_max = i_max;
     return (NULL != p_stat->rr.psz_symlink);
   } else {
-    int i_needed = p_stat->rr.i_symlink + i_grow ;
+    unsigned int i_needed = p_stat->rr.i_symlink + i_grow ;
     if ( i_needed <= p_stat->rr.i_symlink_max)
       return true;
     else {
@@ -116,8 +101,7 @@ realloc_symlink(/*in/out*/ iso9660_stat_t *p_stat, uint8_t i_grow)
 #define CHECK_CE				 \
   { cont_extent = from_733(*rr->u.CE.extent);	 \
     cont_offset = from_733(*rr->u.CE.offset);	 \
-    cont_size = from_733(*rr->u.CE.size);	 \
-    (void)cont_extent; (void)cont_offset, (void)cont_size; }
+    cont_size = from_733(*rr->u.CE.size); }
 
 #define SETUP_ROCK_RIDGE(DE,CHR,LEN)	      		      	\
   {								\
@@ -474,7 +458,7 @@ parse_rock_ridge_stat_internal(iso9660_dir_t *p_iso9660_dir,
       case SIG('R','E'):
 	cdio_warn("Attempt to read p_stat for relocated directory");
 	goto out;
-#ifdef FINISHED
+#if FINISHED
       case SIG('C','L'): 
 	{
 	  iso9660_stat_t * reloc;
@@ -581,16 +565,16 @@ iso9660_get_rock_attr_str(posix_mode_t st_mode)
 {
   char *result = _getbuf();
 
-  if (S_ISDIR(st_mode)) 
+  if (S_ISBLK(st_mode))
+    result[ 0] = 'b';
+  else if (S_ISDIR(st_mode)) 
     result[ 0] = 'd';
-//  else if (S_ISBLK(st_mode))
-//    result[ 0] = 'b';
   else if (S_ISCHR(st_mode))
     result[ 0] = 'c';
   else if (S_ISLNK(st_mode))
     result[ 0] = 'l';
-//  else if (S_ISFIFO(st_mode))
-//    result[ 0] = 'p';
+  else if (S_ISFIFO(st_mode))
+    result[ 0] = 'p';
   else if (S_ISSOCK(st_mode)) 
     result[ 0] = 's';
   /* May eventually fill in others.. */

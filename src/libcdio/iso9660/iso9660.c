@@ -80,13 +80,13 @@ timegm(struct tm *tm)
   
   tz = getenv("TZ");
   setenv("TZ", "UTC", 1);
-  _tzset();
+  tzset();
   ret = mktime(tm);
   if (tz)
     setenv("TZ", tz, 1);
   else
     unsetenv("TZ");
-  _tzset();
+  tzset();
   return ret;
 }
 #endif
@@ -301,23 +301,23 @@ iso9660_get_ltime (const iso9660_ltime_t *p_ldate,
 */
 void
 iso9660_set_dtime_with_timezone (const struct tm *p_tm, 
-                                 int time_zone,
+                                 int timezone,
                                  /*out*/ iso9660_dtime_t *p_idr_date)
 {
   memset (p_idr_date, 0, 7);
 
   if (!p_tm) return;
 
-  p_idr_date->dt_year   = (iso711_t)p_tm->tm_year;
-  p_idr_date->dt_month  = (iso711_t)p_tm->tm_mon + 1;
-  p_idr_date->dt_day    = (iso711_t)p_tm->tm_mday;
-  p_idr_date->dt_hour   = (iso711_t)p_tm->tm_hour;
-  p_idr_date->dt_minute = (iso711_t)p_tm->tm_min;
-  p_idr_date->dt_second = (iso711_t)p_tm->tm_sec;
+  p_idr_date->dt_year   = p_tm->tm_year;
+  p_idr_date->dt_month  = p_tm->tm_mon + 1;
+  p_idr_date->dt_day    = p_tm->tm_mday;
+  p_idr_date->dt_hour   = p_tm->tm_hour;
+  p_idr_date->dt_minute = p_tm->tm_min;
+  p_idr_date->dt_second = p_tm->tm_sec;
 
   /* The ISO 9660 timezone is in the range -48..+52 and each unit
      represents a 15-minute interval. */
-  p_idr_date->dt_gmtoff = time_zone / 15;
+  p_idr_date->dt_gmtoff = timezone / 15;
 
   if (p_idr_date->dt_gmtoff < -48 ) {
     
@@ -337,14 +337,14 @@ iso9660_set_dtime_with_timezone (const struct tm *p_tm,
 void
 iso9660_set_dtime (const struct tm *p_tm, /*out*/ iso9660_dtime_t *p_idr_date)
 {
-  int time_zone;
+  int timezone;
 #ifdef HAVE_TM_GMTOFF
   /* Convert seconds to minutes */
-  time_zone = p_tm->tm_gmtoff / 60;
+  timezone = p_tm->tm_gmtoff / 60;
 #else 
-  time_zone = (p_tm->tm_isdst > 0) ? -60 : 0;
+  timezone = (p_tm->tm_isdst > 0) ? -60 : 0;
 #endif
-  iso9660_set_dtime_with_timezone (p_tm, time_zone, p_idr_date);
+  iso9660_set_dtime_with_timezone (p_tm, timezone, p_idr_date);
 }
 
 /*!
@@ -354,7 +354,7 @@ iso9660_set_dtime (const struct tm *p_tm, /*out*/ iso9660_dtime_t *p_idr_date)
 */
 void
 iso9660_set_ltime_with_timezone (const struct tm *p_tm, 
-                                 int time_zone,
+                                 int timezone,
                                  /*out*/ iso9660_ltime_t *pvd_date)
 {
   char *_pvd_date = (char *) pvd_date; 
@@ -364,14 +364,14 @@ iso9660_set_ltime_with_timezone (const struct tm *p_tm,
 
   if (!p_tm) return;
 
-  _snprintf(_pvd_date, 17, 
+  snprintf(_pvd_date, 17, 
            "%4.4d%2.2d%2.2d" "%2.2d%2.2d%2.2d" "%2.2d",
            p_tm->tm_year + 1900, p_tm->tm_mon + 1, p_tm->tm_mday,
            p_tm->tm_hour, p_tm->tm_min, p_tm->tm_sec,
            0 /* 1/100 secs */ );
 
   /* Set time zone in 15-minute interval encoding. */
-  pvd_date->lt_gmtoff -= (time_zone / 15);
+  pvd_date->lt_gmtoff -= (timezone / 15);
   if (pvd_date->lt_gmtoff < -48 ) {
     
     cdio_warn ("Converted ISO 9660 timezone %d is less than -48. Adjusted", 
@@ -390,14 +390,14 @@ iso9660_set_ltime_with_timezone (const struct tm *p_tm,
 void
 iso9660_set_ltime (const struct tm *p_tm, /*out*/ iso9660_ltime_t *pvd_date)
 {
-  int time_zone;
+  int timezone;
 #ifdef HAVE_TM_GMTOFF
   /* Set time zone in 15-minute interval encoding. */
-  time_zone = p_tm->tm_gmtoff / 60;
+  timezone = p_tm->tm_gmtoff / 60;
 #else
-  time_zone = (p_tm->tm_isdst > 0) ? -60 : 0;
+  timezone = (p_tm->tm_isdst > 0) ? -60 : 0;
 #endif
-  iso9660_set_ltime_with_timezone (p_tm, time_zone, pvd_date);
+  iso9660_set_ltime_with_timezone (p_tm, timezone, pvd_date);
 }
 
 /*!
@@ -447,7 +447,7 @@ iso9660_name_translate_ext(const char *psz_oldname, char *psz_newname,
       break;
     
     /* Lower case, unless we have Joliet extensions.  */
-    if (!i_joliet_level && isupper(c)) c = (unsigned char)tolower(c);
+    if (!i_joliet_level && isupper(c)) c = tolower(c);
     
     /* Drop trailing '.;1' (ISO 9660:1988 7.5.1 requires period) */
     if (c == '.' && i == len - 3 
@@ -647,7 +647,7 @@ iso9660_set_pvd(void *pd,
   memcpy(&(ipd.root_directory_record), root_dir, 
          sizeof(ipd.root_directory_record));
   ipd.root_directory_filename='\0';
-  ipd.root_directory_record.length = (iso711_t)(sizeof(ipd.root_directory_record)+1);
+  ipd.root_directory_record.length = sizeof(ipd.root_directory_record)+1;
   iso9660_strncpy_pad (ipd.volume_set_id, VOLUME_SET_ID, 
                        ISO_MAX_VOLUMESET_ID, ISO9660_DCHARS);
 
@@ -760,7 +760,7 @@ iso9660_dir_add_entry_su(void *dir,
   
   memset(idr, 0, length);
 
-  idr->length = to_711((uint8_t)length);
+  idr->length = to_711(length);
   idr->extent = to_733(extent);
   idr->size = to_733(size);
   
@@ -841,7 +841,7 @@ iso9660_get_posix_filemode(const iso9660_stat_t *p_iso_dirent)
   } else 
 #endif 
   if (p_iso_dirent->b_xa) { 
-    return (mode_t)iso9660_get_posix_filemode_from_xa(p_iso_dirent->xa.attributes); 
+    return iso9660_get_posix_filemode_from_xa(p_iso_dirent->xa.attributes); 
   } 
   return mode;
 }
@@ -927,7 +927,7 @@ iso9660_pathtable_l_add_entry (void *pt,
 
   memset (ipt, 0, sizeof (iso_path_table_t) + name_len); /* paranoia */
 
-  ipt->name_len = to_711 ((uint8_t)name_len);
+  ipt->name_len = to_711 (name_len);
   ipt->extent = to_731 (extent);
   ipt->parent = to_721 (parent);
   memcpy (ipt->name, name, name_len);
@@ -944,7 +944,7 @@ iso9660_pathtable_l_add_entry (void *pt,
       cdio_assert (from_721 (ipt2->parent) <= parent);
     }
   
-  return (uint16_t)entrynum;
+  return entrynum;
 }
 
 uint16_t 
@@ -962,7 +962,7 @@ iso9660_pathtable_m_add_entry (void *pt,
 
   memset(ipt, 0, sizeof (iso_path_table_t) + name_len); /* paranoia */
 
-  ipt->name_len = to_711 ((uint8_t)name_len);
+  ipt->name_len = to_711 (name_len);
   ipt->extent = to_732 (extent);
   ipt->parent = to_722 (parent);
   memcpy (ipt->name, name, name_len);
@@ -979,7 +979,7 @@ iso9660_pathtable_m_add_entry (void *pt,
       cdio_assert (from_722 (ipt2->parent) <= parent);
     }
 
-  return (uint16_t)entrynum;
+  return entrynum;
 }
 
 /*!
@@ -1048,7 +1048,7 @@ iso9660_pathname_valid_p (const char pathname[])
   if ((p = strrchr (pathname, '/')))
     {
       bool rc;
-      char *_tmp = _strdup (pathname);
+      char *_tmp = strdup (pathname);
       
       *strrchr (_tmp, '/') = '\0';
 
@@ -1110,9 +1110,9 @@ iso9660_pathname_isofy (const char pathname[], uint16_t version)
     
   cdio_assert (strlen (pathname) < (sizeof (tmpbuf) - sizeof (";65535")));
 
-  _snprintf (tmpbuf, sizeof(tmpbuf), "%s;%d", pathname, version);
+  snprintf (tmpbuf, sizeof(tmpbuf), "%s;%d", pathname, version);
 
-  return _strdup (tmpbuf);
+  return strdup (tmpbuf);
 }
 
 /*!
@@ -1123,10 +1123,10 @@ char *
 iso9660_get_application_id(iso9660_pvd_t *p_pvd)
 {
   if (NULL==p_pvd) return NULL;
-  return _strdup(strip_trail(p_pvd->application_id, ISO_MAX_APPLICATION_ID));
+  return strdup(strip_trail(p_pvd->application_id, ISO_MAX_APPLICATION_ID));
 }
 
-#ifdef FIXME
+#if FIXME
 lsn_t
 iso9660_get_dir_extent(const iso9660_dir_t *idr) 
 {
@@ -1142,7 +1142,7 @@ iso9660_get_dir_len(const iso9660_dir_t *idr)
   return idr->length;
 }
 
-#ifdef FIXME
+#if FIXME
 uint8_t
 iso9660_get_dir_size(const iso9660_dir_t *idr) 
 {
@@ -1212,7 +1212,7 @@ char *
 iso9660_get_preparer_id(const iso9660_pvd_t *pvd)
 {
   if (NULL==pvd) return NULL;
-  return _strdup(strip_trail(pvd->preparer_id, ISO_MAX_PREPARER_ID));
+  return strdup(strip_trail(pvd->preparer_id, ISO_MAX_PREPARER_ID));
 }
 
 /*!
@@ -1223,7 +1223,7 @@ char *
 iso9660_get_publisher_id(const iso9660_pvd_t *pvd)
 {
   if (NULL==pvd) return NULL;
-  return _strdup(strip_trail(pvd->publisher_id, ISO_MAX_PUBLISHER_ID));
+  return strdup(strip_trail(pvd->publisher_id, ISO_MAX_PUBLISHER_ID));
 }
 
 /*!
@@ -1234,7 +1234,7 @@ char *
 iso9660_get_system_id(const iso9660_pvd_t *pvd)
 {
   if (NULL==pvd) return NULL;
-  return _strdup(strip_trail(pvd->system_id, ISO_MAX_SYSTEM_ID));
+  return strdup(strip_trail(pvd->system_id, ISO_MAX_SYSTEM_ID));
 }
 
 /*!
@@ -1244,7 +1244,7 @@ char *
 iso9660_get_volume_id(const iso9660_pvd_t *pvd) 
 {
   if (NULL == pvd) return NULL;
-  return _strdup(strip_trail(pvd->volume_id, ISO_MAX_VOLUME_ID));
+  return strdup(strip_trail(pvd->volume_id, ISO_MAX_VOLUME_ID));
 }
 
 /*!
@@ -1255,7 +1255,7 @@ char *
 iso9660_get_volumeset_id(const iso9660_pvd_t *pvd)
 {
   if ( NULL == pvd ) return NULL;
-  return _strdup(strip_trail(pvd->volume_set_id, ISO_MAX_VOLUMESET_ID));
+  return strdup(strip_trail(pvd->volume_set_id, ISO_MAX_VOLUMESET_ID));
 }
 
 

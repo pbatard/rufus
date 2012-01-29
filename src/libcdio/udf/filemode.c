@@ -18,18 +18,17 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#if defined(HAVE_CONFIG_H) && !defined(__CDIO_CONFIG_H__)
+#if HAVE_CONFIG_H
 # include <config.h>
 # define __CDIO_CONFIG_H__ 1
-#else
-#ifndef EXTERNAL_LIBCDIO_CONFIG_H
-#define EXTERNAL_LIBCDIO_CONFIG_H
-#include <cdio/cdio_config.h>
-#endif
 #endif
 
+#ifdef HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif 
+
 #include <cdio/udf.h>
-#include <cdio/filemode.h>
+#include "filemode.h"
 
 
 /* Set the 's' and 't' flags in file attributes string CHARS,

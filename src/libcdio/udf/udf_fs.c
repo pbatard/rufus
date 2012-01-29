@@ -41,14 +41,13 @@
  */
 
 
-#if defined(HAVE_CONFIG_H) && !defined(__CDIO_CONFIG_H__)
+#ifdef HAVE_CONFIG_H
 # include "config.h"
 # define __CDIO_CONFIG_H__ 1
-#else
-#ifndef EXTERNAL_LIBCDIO_CONFIG_H
-#define EXTERNAL_LIBCDIO_CONFIG_H
-#include <cdio/cdio_config.h>
 #endif
+
+#ifdef HAVE_STDIO_H
+#include <stdio.h>
 #endif
 
 #ifdef HAVE_STRING_H
@@ -57,14 +56,6 @@
 
 #ifdef HAVE_STDLIB_H
 # include <stdlib.h>
-#endif
-
-#include <stdio.h>
-#include <inttypes.h>
-#include "cdio_assert.h"
-
-#ifndef min
-#define min(a,b) (((a) < (b)) ? (a) : (b))
 #endif
 
 /* These definitions are also to make debugging easy. Note that they
@@ -81,11 +72,12 @@ const char VSD_STD_ID_TEA01[] = {'T', 'E', 'A', '0', '1'};
 #include <cdio/bytesex.h>
 #include "udf_private.h"
 #include "udf_fs.h"
+#include "cdio_assert.h"
 
 /*
  * The UDF specs are pretty clear on how each data structure is made
  * up, but not very clear on how they relate to each other.  Here is
- * the skinny... This demonstrates a filesystem with one file in the
+ * the skinny... This demostrates a filesystem with one file in the
  * root directory.  Subdirectories are treated just as normal files,
  * but they have File Id Descriptors of their children as their file
  * data.  As for the Anchor Volume Descriptor Pointer, it can exist in
@@ -256,6 +248,10 @@ udf_fopen(udf_dirent_t *p_udf_root, const char *psz_name)
     strncpy(tokenline, psz_name, udf_MAX_PATHLEN);
     psz_token = strtok(tokenline, udf_PATH_DELIMITERS);
     if (psz_token) {
+      /*** FIXME??? udf_dirent can be variable size due to the
+	   extended attributes and descriptors. Given that, is this
+	   correct? 
+       */
       udf_dirent_t *p_udf_dirent = 
 	udf_new_dirent(&p_udf_root->fe, p_udf_root->p_udf,
 		       p_udf_root->psz_name, p_udf_root->b_dir, 
@@ -300,7 +296,7 @@ udf_new_dirent(udf_file_entry_t *p_udf_fe, udf_t *p_udf,
     calloc(1, sizeof(udf_dirent_t));
   if (!p_udf_dirent) return NULL;
   
-  p_udf_dirent->psz_name     = _strdup(psz_name);
+  p_udf_dirent->psz_name     = strdup(psz_name);
   p_udf_dirent->b_dir        = b_dir;
   p_udf_dirent->b_parent     = b_parent;
   p_udf_dirent->p_udf        = p_udf;
@@ -316,20 +312,25 @@ udf_new_dirent(udf_file_entry_t *p_udf_fe, udf_t *p_udf,
 
 /*!
   Seek to a position i_start and then read i_blocks. Number of blocks read is 
-  returned. One normally expects the return to be equal to i_blocks.#
-  NB: 32 bit lsn_t and i_blocks means the UDF media should not be larger than 4TB
+  returned. One normally expects the return to be equal to i_blocks.
 */
 driver_return_code_t
 udf_read_sectors (const udf_t *p_udf, void *ptr, lsn_t i_start, 
-		 long int i_blocks) 
+		 long i_blocks) 
 {
   driver_return_code_t ret;
-  ssize_t i_read;
-  off64_t i_byte_offset;
+  long i_read;
+  off_t i_byte_offset;
   
   if (!p_udf) return 0;
-  /* i_start * UDF_BLOCKSIZE is evaluated as 32 bit by default */
-  i_byte_offset = ((off64_t)i_start) * UDF_BLOCKSIZE;
+  /* Without the cast, i_start * UDF_BLOCKSIZE may be evaluated as 32 bit */
+  i_byte_offset = ((off_t)i_start) * UDF_BLOCKSIZE;
+  /* Since we're using SEEK_SET, the value must be positive */
+  if (i_byte_offset < 0) {
+    if (sizeof(off_t) <= 4)	/* probably missing LFS */
+      cdio_warn("Large File Support is required to access streams of 2 GB or more");
+    return DRIVER_OP_BAD_PARAMETER;
+  }
 
   if (p_udf->b_stream) {
     ret = cdio_stream_seek (p_udf->stream, i_byte_offset, SEEK_SET);
@@ -355,10 +356,10 @@ udf_open (const char *psz_path)
   udf_t *p_udf = (udf_t *) calloc(1, sizeof(udf_t)) ;
   uint8_t data[UDF_BLOCKSIZE];
 
+  if (!p_udf) return NULL;
+
   /* Sanity check */
   cdio_assert(sizeof(udf_file_entry_t) == UDF_BLOCKSIZE);
-
-  if (!p_udf) return NULL;
 
   p_udf->cdio = cdio_open(psz_path, DRIVER_UNKNOWN);
   if (!p_udf->cdio) {
@@ -509,6 +510,7 @@ udf_get_root (udf_t *p_udf, bool b_any_partition, partition_num_t i_partition)
      Directory File Entry.
   */
   for (i_lba = mvds_start; i_lba < mvds_end; i_lba++) {
+    uint8_t data[UDF_BLOCKSIZE];
     
     partition_desc_t *p_partition = (partition_desc_t *) &data;
     
@@ -679,7 +681,7 @@ udf_readdir(udf_dirent_t *p_udf_dirent)
 	  p_udf_dirent->psz_name = (char *)
 	    realloc(p_udf_dirent->psz_name, sizeof(char)*i_len+1);
 	
-	unicode16_decode(p_udf_dirent->fid->imp_use 
+	unicode16_decode(p_udf_dirent->fid->u.imp_use 
 			 + p_udf_dirent->fid->i_imp_use, 
 			 i_len, p_udf_dirent->psz_name);
       }

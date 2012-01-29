@@ -26,16 +26,7 @@
 #ifndef __CDIO_READ_H__
 #define __CDIO_READ_H__
 
-#ifndef EXTERNAL_LIBCDIO_CONFIG_H
-#define EXTERNAL_LIBCDIO_CONFIG_H
-/* Need for HAVE_SYS_TYPES_H */
-#include <cdio/cdio_config.h>
-#endif
-
-#ifdef HAVE_SYS_TYPES_H
-/* Some systems need this for off_t and ssize. */
-#include <sys/types.h>
-#endif
+#include <cdio/types.h>
 
 #ifdef __cplusplus
 extern "C" {
