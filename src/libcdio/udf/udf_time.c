@@ -103,7 +103,7 @@ static time_t year_seconds[MAX_YEAR_SECONDS]= {
   /*2038*/ SPY(68,17,0)
 };
 
-#if defined(HAVE_TIMEZONE_VAR) && !defined(__MINGW32__)
+#if defined(HAVE_TIMEZONE_VAR) && !defined(_WIN32)
 extern long timezone;
 #endif
 

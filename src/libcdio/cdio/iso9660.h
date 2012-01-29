@@ -986,7 +986,7 @@ uint8_t iso9660_ifs_get_joliet_level(iso9660_t *p_iso);
 
 uint8_t iso9660_get_dir_len(const iso9660_dir_t *p_idr);
 
-#if FIXME
+#ifdef FIXME
 uint8_t iso9660_get_dir_size(const iso9660_dir_t *p_idr);
 
 lsn_t iso9660_get_dir_extent(const iso9660_dir_t *p_idr);

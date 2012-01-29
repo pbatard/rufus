@@ -32,6 +32,9 @@ AC_DEFINE([_GNU_SOURCE], [], [Use GNU extensions])
 #	AC_MSG_ERROR([unsupported development environment])
 #esac
 
+AC_MSG_RESULT([enabling support for large files (_FILE_OFFSET_BITS=64)])
+AM_CFLAGS="-D_FILE_OFFSET_BITS=64 -D_OFF_T_DEFINED -D_OFF_T_ -D_off_t=off64_t -Doff_t=off64_t"
+
 # Clang needs an explicit WIN32_WINNT defined else it produces warnings
 # in msapi_utf8.h - including winver.h only doesn't work
 AM_CFLAGS="${AM_CFLAGS} -DWINVER=0x501 -D_WIN32_IE=0x501 -D_WIN32_WINNT=0x501"
