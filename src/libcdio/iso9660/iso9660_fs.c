@@ -1431,8 +1431,8 @@ find_lsn_recurse (void *p_image, iso9660_readdir_t iso9660_readdir,
       }
 
       if (statbuf->lsn == lsn) {
-	len = sizeof(iso9660_stat_t)+strlen(statbuf->filename)+1;
 	iso9660_stat_t *ret_stat = calloc(1, len);
+	len = sizeof(iso9660_stat_t)+strlen(statbuf->filename)+1;
 	if (!ret_stat)
 	  {
           cdio_warn("Couldn't calloc(1, %d)", len);
