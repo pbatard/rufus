@@ -510,9 +510,9 @@ udf_get_root (udf_t *p_udf, bool b_any_partition, partition_num_t i_partition)
      Directory File Entry.
   */
   for (i_lba = mvds_start; i_lba < mvds_end; i_lba++) {
-    uint8_t data[UDF_BLOCKSIZE];
+    uint8_t data2[UDF_BLOCKSIZE];
     
-    partition_desc_t *p_partition = (partition_desc_t *) &data;
+    partition_desc_t *p_partition = (partition_desc_t *) &data2;
     
     if (DRIVER_OP_SUCCESS != udf_read_sectors (p_udf, p_partition, i_lba, 1) ) 
       return NULL;
@@ -528,7 +528,7 @@ udf_get_root (udf_t *p_udf, bool b_any_partition, partition_num_t i_partition)
       }
     } else if (!udf_checktag(&p_partition->tag, TAGID_LOGVOL)) {
       /* Get fileset descriptor */
-      logical_vol_desc_t *p_logvol = (logical_vol_desc_t *) &data;
+      logical_vol_desc_t *p_logvol = (logical_vol_desc_t *) &data2;
       bool b_valid = 
 	UDF_BLOCKSIZE == uint32_from_le(p_logvol->logical_blocksize);
       

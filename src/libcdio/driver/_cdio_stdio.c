@@ -186,11 +186,11 @@ static ssize_t
 _stdio_read(void *user_data, void *buf, size_t count)
 {
   _UserData *const ud = user_data;
-  long read;
+  long read_count;
 
-  read = fread(buf, 1, count, ud->fd);
+  read_count = fread(buf, 1, count, ud->fd);
 
-  if (read != count)
+  if (read_count != count)
     { /* fixme -- ferror/feof */
       if (feof (ud->fd))
         {
@@ -206,7 +206,7 @@ _stdio_read(void *user_data, void *buf, size_t count)
         cdio_debug ("fread (): short read and no EOF?!?");
     }
 
-  return read;
+  return read_count;
 }
 
 /*!

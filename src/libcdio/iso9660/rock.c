@@ -458,7 +458,7 @@ parse_rock_ridge_stat_internal(iso9660_dir_t *p_iso9660_dir,
       case SIG('R','E'):
 	cdio_warn("Attempt to read p_stat for relocated directory");
 	goto out;
-#if FINISHED
+#ifdef FINISHED
       case SIG('C','L'): 
 	{
 	  iso9660_stat_t * reloc;

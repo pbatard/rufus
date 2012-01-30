@@ -994,7 +994,7 @@ _fs_stat_traverse (const CdIo_t *p_cdio, const iso9660_stat_t *_root,
   while (offset < (_root->secsize * ISO_BLOCKSIZE))
     {
       iso9660_dir_t *p_iso9660_dir = (void *) &_dirbuf[offset];
-      iso9660_stat_t *p_stat;
+      iso9660_stat_t *p_iso9660_stat;
       int cmp;
 
       if (!iso9660_get_dir_len(p_iso9660_dir))
@@ -1003,25 +1003,25 @@ _fs_stat_traverse (const CdIo_t *p_cdio, const iso9660_stat_t *_root,
 	  continue;
 	}
       
-      p_stat = _iso9660_dir_to_statbuf (p_iso9660_dir, dunno, 
+      p_iso9660_stat = _iso9660_dir_to_statbuf (p_iso9660_dir, dunno, 
 					p_env->i_joliet_level);
 
-      cmp = strcmp(splitpath[0], p_stat->filename);
+      cmp = strcmp(splitpath[0], p_iso9660_stat->filename);
 
       if ( 0 != cmp && 0 == p_env->i_joliet_level 
-	   && yep != p_stat->rr.b3_rock ) {
+	   && yep != p_iso9660_stat->rr.b3_rock ) {
 	char *trans_fname = NULL;
-	unsigned int i_trans_fname=strlen(p_stat->filename);
+	unsigned int i_trans_fname=strlen(p_iso9660_stat->filename);
 	
 	if (i_trans_fname) {
 	  trans_fname = calloc(1, i_trans_fname+1);
 	  if (!trans_fname) {
 	    cdio_warn("can't allocate %lu bytes", 
-		      (long unsigned int) strlen(p_stat->filename));
-	    free(p_stat);
+		      (long unsigned int) strlen(p_iso9660_stat->filename));
+	    free(p_iso9660_stat);
 	    return NULL;
 	  }
-	  iso9660_name_translate_ext(p_stat->filename, trans_fname,
+	  iso9660_name_translate_ext(p_iso9660_stat->filename, trans_fname,
 				     p_env->i_joliet_level);
 	  cmp = strcmp(splitpath[0], trans_fname);
 	  free(trans_fname);
@@ -1030,15 +1030,15 @@ _fs_stat_traverse (const CdIo_t *p_cdio, const iso9660_stat_t *_root,
       
       if (!cmp) {
 	iso9660_stat_t *ret_stat 
-	  = _fs_stat_traverse (p_cdio, p_stat, &splitpath[1]);
-	free(p_stat->rr.psz_symlink);
-	free(p_stat);
+	  = _fs_stat_traverse (p_cdio, p_iso9660_stat, &splitpath[1]);
+	free(p_iso9660_stat->rr.psz_symlink);
+	free(p_iso9660_stat);
 	free (_dirbuf);
 	return ret_stat;
       }
 
-      free(p_stat->rr.psz_symlink);
-      free(p_stat);
+      free(p_iso9660_stat->rr.psz_symlink);
+      free(p_iso9660_stat);
 	  
       offset += iso9660_get_dir_len(p_iso9660_dir);
     }
@@ -1418,7 +1418,7 @@ find_lsn_recurse (void *p_image, iso9660_readdir_t iso9660_readdir,
     {
       iso9660_stat_t *statbuf = _cdio_list_node_data (entnode);
       const char *psz_filename  = (char *) statbuf->filename;
-      const unsigned int len = strlen(psz_path) + strlen(psz_filename)+2;
+      unsigned int len = strlen(psz_path) + strlen(psz_filename)+2;
       
       if (*ppsz_full_filename != NULL) free(*ppsz_full_filename);
       *ppsz_full_filename = calloc(1, len);
@@ -1431,7 +1431,7 @@ find_lsn_recurse (void *p_image, iso9660_readdir_t iso9660_readdir,
       }
 
       if (statbuf->lsn == lsn) {
-	unsigned int len=sizeof(iso9660_stat_t)+strlen(statbuf->filename)+1;
+	len = sizeof(iso9660_stat_t)+strlen(statbuf->filename)+1;
 	iso9660_stat_t *ret_stat = calloc(1, len);
 	if (!ret_stat)
 	  {
