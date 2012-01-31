@@ -101,7 +101,8 @@ realloc_symlink(/*in/out*/ iso9660_stat_t *p_stat, uint8_t i_grow)
 #define CHECK_CE				 \
   { cont_extent = from_733(*rr->u.CE.extent);	 \
     cont_offset = from_733(*rr->u.CE.offset);	 \
-    cont_size = from_733(*rr->u.CE.size); }
+    cont_size = from_733(*rr->u.CE.size);        \
+    (void)cont_extent; (void)cont_offset, (void)cont_size; }
 
 #define SETUP_ROCK_RIDGE(DE,CHR,LEN)	      		      	\
   {								\

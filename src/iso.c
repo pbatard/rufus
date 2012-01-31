@@ -30,26 +30,14 @@
 #include <string.h>
 #include <malloc.h>
 #include <errno.h>
+#include <direct.h>
 
 #include <cdio/cdio.h>
 #include <cdio/logging.h>
 #include <cdio/iso9660.h>
 #include <cdio/udf.h>
 
-#if defined(_WIN32)
-#include <direct.h>
-#define snprintf _snprintf
-#else
-#include <sys/stat.h>
-#include <sys/types.h>
-#define _mkdir(a) mkdir(a, S_IRWXU)
-#endif
-
-#ifndef ISO_TEST
 #include "rufus.h"
-#else
-#define uprintf printf
-#endif
 
 #ifndef MIN
 #define MIN(a,b) (((a) < (b)) ? (a) : (b))
@@ -69,7 +57,7 @@ void cdio_destroy (CdIo_t *p_cdio) {}
 
 const char *psz_extract_dir = "D:/tmp/iso";
 
-// TODO: Unicode support, timestamp preservation
+// TODO: Unicode support, progress computation, timestamp preservation
 
 static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const char *psz_path)
 {
@@ -86,13 +74,13 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 
 	while (udf_readdir(p_udf_dirent)) {
 		psz_basename = udf_get_filename(p_udf_dirent);
-		i_length = 3 + strlen(psz_path) + strlen(psz_basename) + strlen(psz_extract_dir);
+		i_length = (int)(3 + strlen(psz_path) + strlen(psz_basename) + strlen(psz_extract_dir));
 		psz_fullpath = (char*)calloc(sizeof(char), i_length);
 		if (psz_fullpath == NULL) {
 			uprintf("Error allocating file name\n");
 			goto out;
 		}
-		i_length = snprintf(psz_fullpath, i_length, "%s%s/%s", psz_extract_dir, psz_path, psz_basename);
+		i_length = _snprintf(psz_fullpath, i_length, "%s%s/%s", psz_extract_dir, psz_path, psz_basename);
 		if (i_length < 0) {
 			goto out;
 		}
@@ -156,7 +144,7 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 	if ((p_iso == NULL) || (psz_path == NULL))
 		return 1;
 
-	i_length = snprintf(psz_fullpath, sizeof(psz_fullpath), "%s%s/", psz_extract_dir, psz_path);
+	i_length = _snprintf(psz_fullpath, sizeof(psz_fullpath), "%s%s/", psz_extract_dir, psz_path);
 	if (i_length < 0)
 		return 1;
 	psz_basename = &psz_fullpath[i_length];
@@ -186,7 +174,7 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 			i_file_length = p_statbuf->size;
 			for (i = 0; i_file_length > 0; i++) {
 				memset(buf, 0, ISO_BLOCKSIZE);
-				lsn = p_statbuf->lsn + i;
+				lsn = p_statbuf->lsn + (lsn_t)i;
 				if (iso9660_iso_seek_read(p_iso, buf, lsn, 1) != ISO_BLOCKSIZE) {
 					uprintf("  Error reading ISO9660 file %s at LSN %lu\n",
 						psz_iso_name, (long unsigned int)lsn);

@@ -34,10 +34,19 @@
     <ClInclude Include="..\udf_private.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\cdio\cdio_config.h">
+    <ClInclude Include="..\..\cdio\udf.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\cdio\udf.h">
+    <ClInclude Include="..\..\config.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\driver\filemode.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cdio\bytesex.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\driver\cdio_assert.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

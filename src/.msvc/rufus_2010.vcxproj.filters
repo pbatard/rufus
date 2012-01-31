@@ -74,6 +74,18 @@
     <ClInclude Include="..\..\ms-config.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\libcdio\cdio\cdio.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libcdio\cdio\logging.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libcdio\cdio\iso9660.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libcdio\cdio\udf.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\res\rufus.ico">

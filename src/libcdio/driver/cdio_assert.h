@@ -19,7 +19,7 @@
 #ifndef __CDIO_ASSERT_H__
 #define __CDIO_ASSERT_H__
 
-#if defined(__GNUC__)
+#if defined(__GNUC__) && !defined(__MINGW32__)
 
 #if defined(HAVE_CONFIG_H) && !defined(__CDIO_CONFIG_H__)
 # include "config.h"
@@ -43,7 +43,7 @@
      __FILE__, __LINE__, __PRETTY_FUNCTION__); \
  }
 
-#else /* non GNU C */
+#else /* non GNU C or MinGW */
 
 #include <assert.h>
 

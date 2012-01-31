@@ -8,6 +8,7 @@
 /* Disable: warning C4242: conversion from 'x' to 'y', possible loss of data */
 #pragma warning(disable:4242) /* 32 bit */
 #pragma warning(disable:4244) /* 64 bit */
+#pragma warning(disable:4267) /* 64 bit */
 #endif
 
 /* what to put between the brackets for empty arrays */
