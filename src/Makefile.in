@@ -43,14 +43,16 @@ mkinstalldirs = $(install_sh) -d
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 PROGRAMS = $(noinst_PROGRAMS)
-am_rufus_OBJECTS = rufus-drive.$(OBJEXT) rufus-dos.$(OBJEXT) \
-	rufus-dos_locale.$(OBJEXT) rufus-badblocks.$(OBJEXT) \
-	rufus-syslinux.$(OBJEXT) rufus-format.$(OBJEXT) \
-	rufus-stdio.$(OBJEXT) rufus-stdlg.$(OBJEXT) \
-	rufus-rufus.$(OBJEXT)
+am_rufus_OBJECTS = rufus-drive.$(OBJEXT) rufus-iso.$(OBJEXT) \
+	rufus-dos.$(OBJEXT) rufus-dos_locale.$(OBJEXT) \
+	rufus-badblocks.$(OBJEXT) rufus-syslinux.$(OBJEXT) \
+	rufus-format.$(OBJEXT) rufus-stdio.$(OBJEXT) \
+	rufus-stdlg.$(OBJEXT) rufus-rufus.$(OBJEXT)
 rufus_OBJECTS = $(am_rufus_OBJECTS)
 rufus_DEPENDENCIES = rufus_rc.o ms-sys/libmssys.a \
-	syslinux/libfat/libfat.a syslinux/libinstaller/libinstaller.a
+	syslinux/libfat/libfat.a syslinux/libinstaller/libinstaller.a \
+	libcdio/iso9660/libiso9660.a libcdio/udf/libudf.a \
+	libcdio/driver/libdriver.a
 rufus_LINK = $(CCLD) $(rufus_CFLAGS) $(CFLAGS) $(rufus_LDFLAGS) \
 	$(LDFLAGS) -o $@
 DEFAULT_INCLUDES = -I.@am__isrc@
@@ -178,14 +180,16 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-SUBDIRS = ms-sys syslinux/libfat syslinux/libinstaller
+SUBDIRS = ms-sys syslinux/libfat syslinux/libinstaller libcdio/iso9660 libcdio/udf libcdio/driver
 pkg_v_rc = $(pkg_v_rc_$(V))
 pkg_v_rc_ = $(pkg_v_rc_$(AM_DEFAULT_VERBOSITY))
 pkg_v_rc_0 = @echo "  RC     $@";
-rufus_SOURCES = drive.c dos.c dos_locale.c badblocks.c syslinux.c format.c stdio.c stdlg.c rufus.c
-rufus_CFLAGS = -I./ms-sys/inc -I./syslinux/libfat -I./syslinux/libinstaller $(AM_CFLAGS)
+rufus_SOURCES = drive.c iso.c dos.c dos_locale.c badblocks.c syslinux.c format.c stdio.c stdlg.c rufus.c
+rufus_CFLAGS = -I./ms-sys/inc -I./syslinux/libfat -I./syslinux/libinstaller -I./libcdio $(AM_CFLAGS)
 rufus_LDFLAGS = $(AM_LDFLAGS) -mwindows
-rufus_LDADD = rufus_rc.o ms-sys/libmssys.a syslinux/libfat/libfat.a syslinux/libinstaller/libinstaller.a -lsetupapi -lole32 -lgdi32 
+rufus_LDADD = rufus_rc.o ms-sys/libmssys.a syslinux/libfat/libfat.a syslinux/libinstaller/libinstaller.a \
+	libcdio/iso9660/libiso9660.a libcdio/udf/libudf.a libcdio/driver/libdriver.a -lsetupapi -lole32 -lgdi32 
+
 all: all-recursive
 
 .SUFFIXES:
@@ -248,6 +252,14 @@ rufus-drive.o: drive.c
 rufus-drive.obj: drive.c
 	$(AM_V_CC) @AM_BACKSLASH@
 	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_CFLAGS) $(CFLAGS) -c -o rufus-drive.obj `if test -f 'drive.c'; then $(CYGPATH_W) 'drive.c'; else $(CYGPATH_W) '$(srcdir)/drive.c'; fi`
+
+rufus-iso.o: iso.c
+	$(AM_V_CC) @AM_BACKSLASH@
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_CFLAGS) $(CFLAGS) -c -o rufus-iso.o `test -f 'iso.c' || echo '$(srcdir)/'`iso.c
+
+rufus-iso.obj: iso.c
+	$(AM_V_CC) @AM_BACKSLASH@
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_CFLAGS) $(CFLAGS) -c -o rufus-iso.obj `if test -f 'iso.c'; then $(CYGPATH_W) 'iso.c'; else $(CYGPATH_W) '$(srcdir)/iso.c'; fi`
 
 rufus-dos.o: dos.c
 	$(AM_V_CC) @AM_BACKSLASH@

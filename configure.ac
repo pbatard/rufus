@@ -32,6 +32,9 @@ AC_DEFINE([_GNU_SOURCE], [], [Use GNU extensions])
 #	AC_MSG_ERROR([unsupported development environment])
 #esac
 
+AC_MSG_RESULT([enabling Large File Support (for ISO images)])
+AM_CFLAGS="-D_FILE_OFFSET_BITS=64 -D_OFF_T_DEFINED -D_OFF_T_ -D_off_t=off64_t -Doff_t=off64_t"
+
 # Clang needs an explicit WIN32_WINNT defined else it produces warnings
 # in msapi_utf8.h - including winver.h only doesn't work
 AM_CFLAGS="${AM_CFLAGS} -DWINVER=0x501 -D_WIN32_IE=0x501 -D_WIN32_WINNT=0x501"
@@ -89,4 +92,7 @@ AC_CONFIG_FILES([src/Makefile])
 AC_CONFIG_FILES([src/ms-sys/Makefile])
 AC_CONFIG_FILES([src/syslinux/libfat/Makefile])
 AC_CONFIG_FILES([src/syslinux/libinstaller/Makefile])
+AC_CONFIG_FILES([src/libcdio/iso9660/Makefile])
+AC_CONFIG_FILES([src/libcdio/udf/Makefile])
+AC_CONFIG_FILES([src/libcdio/driver/Makefile])
 AC_OUTPUT
