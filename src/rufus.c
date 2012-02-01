@@ -56,6 +56,7 @@ char szFolderPath[MAX_PATH];
 float fScale = 1.0f;
 int default_fs;
 HWND hDeviceList, hCapacity, hFileSystem, hClusterSize, hLabel, hDOSType, hNBPasses;
+HWND hISOProgressDlg = NULL, hISOProgressBar, hISOFileName;
 BOOL bWithFreeDOS, bWithSyslinux;
 
 static HWND hDeviceTooltip = NULL, hFSTooltip = NULL, hProgress = NULL;
@@ -880,6 +881,42 @@ static void CALLBACK ClockTimer(HWND hWnd, UINT uMsg, UINT_PTR idEvent, DWORD dw
 	SendMessageA(GetDlgItem(hWnd, IDC_STATUS), SB_SETTEXTA, SBT_OWNERDRAW | 1, (LPARAM)szTimer);
 }
 
+/* Callback for the modeless ISO extraction progress */
+BOOL CALLBACK ISOProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam) 
+{
+	switch (message) {
+	case WM_INITDIALOG:
+		CenterDialog(hDlg);
+		hISOProgressBar = GetDlgItem(hDlg, IDC_ISO_PROGRESS);
+		hISOFileName = GetDlgItem(hDlg, IDC_ISO_FILENAME);
+		// Use maximum granularity for the progress bar
+		SendMessage(hISOProgressBar, PBM_SETRANGE, 0, MAX_PROGRESS<<16);
+		return TRUE;
+	case UM_ISO_EXIT:
+		DestroyWindow(hDlg);
+		hISOProgressDlg = NULL;
+		return TRUE;
+	case WM_COMMAND: 
+		switch (LOWORD(wParam)) {
+		case IDC_ISO_ABORT:
+			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANCELLED;
+			PrintStatus(0, "Cancelling - please wait...");
+			return TRUE;
+		}
+	case WM_CLOSE:		// prevent closure using Alt-F4
+		return TRUE;
+	}
+	return FALSE; 
+} 
+
+// The scanning process can be blocking for message processing => use a thread
+void __cdecl ISOScanThread(void* param)
+{
+	ExtractISO(ISO_IMAGE, ISO_DEST, TRUE);
+	uprintf("Projected size: %lld\nHas 4GB: %s\n", iso_report.projected_size, iso_report.has_4GB_file?"TRUE":"FALSE");
+	_endthread();
+}
+
 /*
  * Main dialog callback
  */
@@ -1000,13 +1037,23 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		case IDC_ABOUT:
 			CreateAboutBox();
 			break;
+#ifdef RUFUS_TEST
 		case IDC_TEST:
-//			ExtractISO("D:\\Incoming\\GRMSDKX_EN_DVD.iso", NULL);
-//			ExtractISO("D:\\fd11src.iso", NULL);
-//			ExtractISO("D:\\Incoming\\en_windows_driver_kit_3790.iso", NULL);
-//			ExtractISO("D:\\Incoming\\en_windows_7_ultimate_with_sp1_x64_dvd_618240.iso", NULL);
-			ExtractISO("D:\\Incoming\\Windows 8 Preview\\WindowsDeveloperPreview-64bit-English-Developer.iso", NULL);
+			FormatStatus = 0;
+			// You'd think that Windows would let you instantiate a modeless dialog wherever
+			// but you'd be wrong. It has to be done in the main callback!
+			if (!IsWindow(hISOProgressDlg)) { 
+				hISOProgressDlg = CreateDialogA(hMainInstance, MAKEINTRESOURCEA(IDD_ISO_EXTRACT),
+					hDlg, (DLGPROC)ISOProc); 
+				// The window is not visible by default but takes focus => restore it
+				SetFocus(hDlg);
+			} 
+			if (_beginthread(ISOScanThread, 0, NULL) == -1L) {
+				uprintf("Unable to start ISO scanning thread");
+				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_START_THREAD);
+			}
 			break;
+#endif
 		case IDC_DEVICE:
 			switch (HIWORD(wParam)) {
 			case CBN_SELCHANGE:
@@ -1043,6 +1090,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			if (format_thid != -1L) {
 				return (INT_PTR)TRUE;
 			}
+			FormatStatus = 0;
 			nDeviceIndex = ComboBox_GetCurSel(hDeviceList);
 			if (nDeviceIndex != CB_ERR) {
 				GetWindowTextA(hDeviceList, tmp, sizeof(tmp));
@@ -1054,6 +1102,12 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 					DeviceNum =  (DWORD)ComboBox_GetItemData(hDeviceList, nDeviceIndex);
 					FormatStatus = 0;
 					InitProgress();
+					if (!IsWindow(hISOProgressDlg)) { 
+						hISOProgressDlg = CreateDialogA(hMainInstance, MAKEINTRESOURCEA(IDD_ISO_EXTRACT),
+							hDlg, (DLGPROC)ISOProc); 
+						// The window is not visible by default but takes focus => restore it
+						SetFocus(hDlg);
+					} 
 					format_thid = _beginthread(FormatThread, 0, (void*)(uintptr_t)DeviceNum);
 					if (format_thid == -1L) {
 						uprintf("Unable to start formatting thread");
@@ -1157,22 +1211,28 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		MessageBoxA(NULL, "Could not create Window", "DialogBox failure", MB_ICONSTOP);
 		goto out;
 	}
-	CenterDialog(hDlg);
+//	CenterDialog(hDlg);
+#ifndef RUFUS_TEST
+	ShowWindow(GetDlgItem(hDlg, IDC_TEST), SW_HIDE);
+#endif
 	ShowWindow(hDlg, SW_SHOWNORMAL);
 	UpdateWindow(hDlg);
 
 	// Do our own event processing and process "magic" commands
 	while(GetMessage(&msg, NULL, 0, 0)) {
+		// The following ensures the processing of the ISO progress window messages
+		if (!IsWindow(hISOProgressDlg) || !IsDialogMessage(hISOProgressDlg, &msg)) {
 #ifdef DISABLE_AUTORUN
-		// Alt-D => Delete the NoDriveTypeAutorun key on exit (useful if the app crashed)
-		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'D')) {
-			PrintStatus(0, "NoDriveTypeAutorun will be deleted on exit.");
-			existing_key = FALSE;
-			continue;
-		}
+			// Alt-D => Delete the NoDriveTypeAutorun key on exit (useful if the app crashed)
+			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'D')) {
+				PrintStatus(0, "NoDriveTypeAutorun will be deleted on exit.");
+				existing_key = FALSE;
+				continue;
+			}
 #endif
-		TranslateMessage(&msg);
-		DispatchMessage(&msg);
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}
 	}
 
 out:

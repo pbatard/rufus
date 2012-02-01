@@ -38,26 +38,33 @@
 #include <cdio/udf.h>
 
 #include "rufus.h"
+#include "msapi_utf8.h"
+#include "resource.h"
 
 #ifndef MIN
 #define MIN(a,b) (((a) < (b)) ? (a) : (b))
 #endif
+#ifndef PBS_MARQUEE
+#define PBS_MARQUEE 0x08
+#endif
+#ifndef PBM_SETMARQUEE
+#define PBM_SETMARQUEE (WM_USER+10)
+#endif
+// How often should we update the progress bar (in 2K blocks) as updating
+// the progress bar for every block will bring extraction to a crawl
+#define PROGRESS_UPDATE 1024
+#define FOUR_GIGABYTES 4294967296LL
 
-#define print_vd_info(title, fn)      \
-  if (fn(p_iso, &psz_str)) {          \
-    uprintf(title ": %s\n", psz_str); \
-  }                                   \
-  free(psz_str);                      \
-  psz_str = NULL;
-
-/* Needed for UDF ISO access */
-// TODO: should be able to elmininate those with an alternate approach
+// Needed for UDF ISO access
 CdIo_t* cdio_open (const char *psz_source, driver_id_t driver_id) {return NULL;}
 void cdio_destroy (CdIo_t *p_cdio) {}
 
-const char *psz_extract_dir = "D:/tmp/iso";
+RUFUS_ISO_REPORT iso_report;
+static const char *psz_extract_dir;
+static uint64_t total_blocks, nb_blocks;
+static BOOL scan_only = FALSE;
 
-// TODO: Unicode support, progress computation, timestamp preservation
+// TODO: Unicode support, timestamp & permissions preservation
 
 static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const char *psz_path)
 {
@@ -72,7 +79,8 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 	if ((p_udf_dirent == NULL) || (psz_path == NULL))
 		return 1;
 
-	while (udf_readdir(p_udf_dirent)) {
+	while ((p_udf_dirent = udf_readdir(p_udf_dirent)) != NULL) {
+		if (FormatStatus) goto out;
 		psz_basename = udf_get_filename(p_udf_dirent);
 		i_length = (int)(3 + strlen(psz_path) + strlen(psz_basename) + strlen(psz_extract_dir));
 		psz_fullpath = (char*)calloc(sizeof(char), i_length);
@@ -84,22 +92,34 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 		if (i_length < 0) {
 			goto out;
 		}
-		uprintf("Extracting: %s\n", psz_fullpath);
 		if (udf_is_dir(p_udf_dirent)) {
-			_mkdir(psz_fullpath);
+			if (!scan_only)
+				_mkdir(psz_fullpath);
 			p_udf_dirent2 = udf_opendir(p_udf_dirent);
 			if (p_udf_dirent2 != NULL) {
 				if (udf_extract_files(p_udf, p_udf_dirent2, &psz_fullpath[strlen(psz_extract_dir)]))
 					goto out;
 			}
 		} else {
+			i_file_length = udf_get_file_length(p_udf_dirent);
+			if (scan_only) {
+				if (i_file_length >= FOUR_GIGABYTES)
+					iso_report.has_4GB_file = TRUE;
+				total_blocks += i_file_length/UDF_BLOCKSIZE;
+				if ((i_file_length != 0) && (i_file_length%UDF_BLOCKSIZE == 0))
+					total_blocks++;
+				safe_free(psz_fullpath);
+				continue;
+			}
+			uprintf("Extracting: %s\n", psz_fullpath);
+			SetWindowTextU(hISOFileName, psz_fullpath);
 			fd = fopen(psz_fullpath, "wb");
 			if (fd == NULL) {
 				uprintf("  Unable to create file\n");
 				goto out;
 			}
-			i_file_length = udf_get_file_length(p_udf_dirent);
 			while (i_file_length > 0) {
+				if (FormatStatus) goto out;
 				memset(buf, 0, UDF_BLOCKSIZE);
 				i_read = udf_read_block(p_udf_dirent, buf, 1);
 				if (i_read < 0) {
@@ -112,18 +132,22 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 					goto out;
 				}
 				i_file_length -= i_read;
+				if (nb_blocks++ % PROGRESS_UPDATE == 0)
+					SendMessage(hISOProgressBar, PBM_SETPOS, (WPARAM)((MAX_PROGRESS*nb_blocks)/total_blocks), 0);
 			}
 			fclose(fd);
 			fd = NULL;
 		}
-		free(psz_fullpath);
+		safe_free(psz_fullpath);
 	}
 	return 0;
 
 out:
+	if (p_udf_dirent != NULL)
+		udf_dirent_free(p_udf_dirent);
 	if (fd != NULL)
 		fclose(fd);
-	free(psz_fullpath);
+	safe_free(psz_fullpath);
 	return 1;
 }
 
@@ -154,6 +178,7 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 		return 1;
 
 	_CDIO_LIST_FOREACH (p_entnode, p_entlist) {
+		if (FormatStatus) goto out;
 		p_statbuf = (iso9660_stat_t*) _cdio_list_node_data(p_entnode);
 		/* Eliminate . and .. entries */
 		if ( (strcmp(p_statbuf->filename, ".") == 0)
@@ -161,18 +186,28 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 			continue;
 		iso9660_name_translate(p_statbuf->filename, psz_basename);
 		if (p_statbuf->type == _STAT_DIR) {
-			_mkdir(psz_fullpath);
+			if (!scan_only)
+				_mkdir(psz_fullpath);
 			if (iso_extract_files(p_iso, psz_iso_name))
 				goto out;
 		} else {
+			i_file_length = p_statbuf->size;
+			if (scan_only) {
+				if (i_file_length >= FOUR_GIGABYTES)
+					iso_report.has_4GB_file = TRUE;
+				total_blocks += i_file_length/ISO_BLOCKSIZE;
+				if ((i_file_length != 0) && (i_file_length%ISO_BLOCKSIZE == 0))
+					total_blocks++;
+				continue;
+			}
 			uprintf("Extracting: %s\n", psz_fullpath);
 			fd = fopen(psz_fullpath, "wb");
 			if (fd == NULL) {
 				uprintf("  Unable to create file\n");
 				goto out;
 			}
-			i_file_length = p_statbuf->size;
 			for (i = 0; i_file_length > 0; i++) {
+				if (FormatStatus) goto out;
 				memset(buf, 0, ISO_BLOCKSIZE);
 				lsn = p_statbuf->lsn + (lsn_t)i;
 				if (iso9660_iso_seek_read(p_iso, buf, lsn, 1) != ISO_BLOCKSIZE) {
@@ -186,6 +221,8 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 					goto out;
 				}
 				i_file_length -= ISO_BLOCKSIZE;
+				if (nb_blocks++ % PROGRESS_UPDATE == 0)
+					SendMessage(hISOProgressBar, PBM_SETPOS, (WPARAM)((MAX_PROGRESS*nb_blocks)/total_blocks), 0);
 			}
 			fclose(fd);
 			fd = NULL;
@@ -200,17 +237,46 @@ out:
 	return r;
 }
 
-BOOL ExtractISO(const char* src_iso, const char* dest_dir)
+BOOL ExtractISO(const char* src_iso, const char* dest_dir, bool scan)
 {
 	BOOL r = FALSE;
 	iso9660_t* p_iso = NULL;
 	udf_t* p_udf = NULL; 
 	udf_dirent_t* p_udf_root;
-	char *psz_str = NULL;
-	char vol_id[UDF_VOLID_SIZE] = "";
-	char volset_id[UDF_VOLSET_ID_SIZE+1] = "";
+	LONG progress_style;
+	const char* scan_text = "Scanning ISO image...\n";
 
+	if ((src_iso == NULL) || (dest_dir == NULL))
+		return FALSE;
+
+	scan_only = scan;
 	cdio_loglevel_default = CDIO_LOG_DEBUG;
+	psz_extract_dir = dest_dir;
+	progress_style = GetWindowLong(hISOProgressBar, GWL_STYLE);
+	if (scan_only) {
+		uprintf(scan_text);
+		total_blocks = 0;
+		iso_report.projected_size = 0;
+		iso_report.has_4GB_file = FALSE;
+		// Change the Window title and static text
+		SetWindowTextU(hISOProgressDlg, scan_text);
+		SetWindowTextU(hISOFileName, scan_text);
+		// Change progress style to marquee for scanning
+		SetWindowLong(hISOProgressBar, GWL_STYLE, progress_style | PBS_MARQUEE);
+		SendMessage(hISOProgressBar, PBM_SETMARQUEE, TRUE, 0);
+	} else {
+		uprintf("Extracting files...\n");
+		if (total_blocks == 0) {
+			uprintf("Error: ISO has not been properly scanned.\n");
+			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_ISO_SCAN);
+			goto out;
+		}
+		nb_blocks = 0;
+		SetWindowLong(hISOProgressBar, GWL_STYLE, progress_style & (~PBS_MARQUEE));
+		SendMessage(hISOProgressBar, PBM_SETPOS, 0, 0);
+	}
+	ShowWindow(hISOProgressDlg, SW_SHOW);
+	UpdateWindow(hISOProgressDlg);
 
 	/* First try to open as UDF - fallback to ISO if it failed */
 	p_udf = udf_open(src_iso);
@@ -222,20 +288,7 @@ BOOL ExtractISO(const char* src_iso, const char* dest_dir)
 		uprintf("Couldn't locate UDF root directory\n");
 		goto out;
 	}
-	vol_id[0] = 0; volset_id[0] = 0;
-
-	/* Show basic UDF Volume info */
-	if (udf_get_volume_id(p_udf, vol_id, sizeof(vol_id)) > 0)
-		uprintf("Volume id: %s\n", vol_id);
-	if (udf_get_volume_id(p_udf, volset_id, sizeof(volset_id)) >0 ) {
-		volset_id[UDF_VOLSET_ID_SIZE]='\0';
-		uprintf("Volume set id: %s\n", volset_id);
-	}
-	uprintf("Partition number: %d\n", udf_get_part_number(p_udf));
-
-	/* Recursively extract files */
 	r = udf_extract_files(p_udf, p_udf_root, "");
-
 	goto out;
 
 try_iso:
@@ -244,22 +297,19 @@ try_iso:
 		uprintf("Unable to open image '%s'.\n", src_iso);
 		goto out;
 	}
-
-	/* Show basic ISO9660 info from the Primary Volume Descriptor. */
-	print_vd_info("Application", iso9660_ifs_get_application_id);
-	print_vd_info("Preparer   ", iso9660_ifs_get_preparer_id);
-	print_vd_info("Publisher  ", iso9660_ifs_get_publisher_id);
-	print_vd_info("System     ", iso9660_ifs_get_system_id);
-	print_vd_info("Volume     ", iso9660_ifs_get_volume_id);
-	print_vd_info("Volume Set ", iso9660_ifs_get_volumeset_id);
-
 	r = iso_extract_files(p_iso, "");
 
 out:
+	if (scan_only) {
+		// We use the fact that UDF_BLOCKSIZE and ISO_BLOCKSIZE are the same here
+		iso_report.projected_size = total_blocks * ISO_BLOCKSIZE;
+	}
+	SendMessage(hISOProgressDlg, UM_ISO_EXIT, 0, 0);
 	if (p_iso != NULL)
 		iso9660_close(p_iso);
 	if (p_udf != NULL)
 		udf_close(p_udf);
-
+	if ((r != 0) && (FormatStatus == 0))
+		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(scan_only?ERROR_ISO_SCAN:ERROR_ISO_EXTRACT);
 	return r;
 }

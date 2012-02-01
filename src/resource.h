@@ -7,7 +7,8 @@
 #define IDD_ABOUTBOX                    103
 #define IDD_NOTIFICATION                104
 #define IDD_LICENSE                     105
-#define IDS_VERSION                     106
+#define IDD_ISO_EXTRACT                 106
+#define IDS_VERSION                     107
 #define IDR_FD_COMMAND_COM              300
 #define IDR_FD_KERNEL_SYS               301
 #define IDR_FD_DISPLAY_EXE              302
@@ -53,6 +54,9 @@
 #define IDC_DOSTYPE                     1013
 #define IDC_NBPASSES                    1014
 #define IDC_TEST                        1015
+#define IDC_ISO_PROGRESS                1020
+#define IDC_ISO_FILENAME                1021
+#define IDC_ISO_ABORT                   1022
 #define IDC_ABOUT_LICENSE               1030
 #define IDC_ABOUT_ICON                  1031
 #define IDC_RUFUS_BOLD                  1032
@@ -69,7 +73,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NO_MFC                     1
-#define _APS_NEXT_RESOURCE_VALUE        107
+#define _APS_NEXT_RESOURCE_VALUE        108
 #define _APS_NEXT_COMMAND_VALUE         40001
 #define _APS_NEXT_CONTROL_VALUE         1043
 #define _APS_NEXT_SYMED_VALUE           101

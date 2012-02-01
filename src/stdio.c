@@ -217,6 +217,10 @@ const char* StrError(DWORD error_code)
 		return "Unable to create formatting thread";
 	case ERROR_BADBLOCKS_FAILURE:
 		return "Bad blocks check didn't complete";
+	case ERROR_ISO_SCAN:
+		return "ISO image scan failure";
+	case ERROR_ISO_EXTRACT:
+		return "ISO image scan failure";
 	default:
 		uprintf("Unknown error: %08X\n", error_code);
 		SetLastError(error_code);

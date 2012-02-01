@@ -1431,14 +1431,14 @@ find_lsn_recurse (void *p_image, iso9660_readdir_t iso9660_readdir,
       }
 
       if (statbuf->lsn == lsn) {
-	iso9660_stat_t *ret_stat = calloc(1, len);
-	len = sizeof(iso9660_stat_t)+strlen(statbuf->filename)+1;
+	const unsigned int len2 = sizeof(iso9660_stat_t)+strlen(statbuf->filename)+1;
+	iso9660_stat_t *ret_stat = calloc(1, len2);
 	if (!ret_stat)
 	  {
-          cdio_warn("Couldn't calloc(1, %d)", len);
+          cdio_warn("Couldn't calloc(1, %d)", len2);
           return NULL;
 	  }
-	memcpy(ret_stat, statbuf, len);
+	memcpy(ret_stat, statbuf, len2);
         _cdio_list_free (entlist, true);
         _cdio_list_free (dirlist, true);
         return ret_stat;

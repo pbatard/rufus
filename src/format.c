@@ -385,6 +385,11 @@ void __cdecl FormatThread(void* param)
 	FILE* log_fd;
 	int r;
 
+#ifdef RUFUS_TEST
+	ExtractISO(ISO_IMAGE, ISO_DEST, FALSE);
+	goto out;
+#endif
+
 	hPhysicalDrive = GetDriveHandle(num, NULL, TRUE, TRUE);
 	if (hPhysicalDrive == INVALID_HANDLE_VALUE) {
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_OPEN_FAILED;

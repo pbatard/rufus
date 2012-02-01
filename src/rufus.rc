@@ -31,9 +31,9 @@ LANGUAGE LANG_ENGLISH, SUBLANG_NEUTRAL
 //
 
 IDD_DIALOG DIALOGEX 12, 12, 206, 278
-STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_APPWINDOW
-CAPTION "Rufus v1.0.7.121"
+CAPTION "Rufus v1.0.7.122"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     DEFPUSHBUTTON   "Start",IDC_START,94,236,50,14
@@ -70,7 +70,7 @@ BEGIN
     DEFPUSHBUTTON   "OK",IDOK,231,175,50,14,WS_GROUP
     CONTROL         "<a href=""http://rufus.akeo.ie"">http://rufus.akeo.ie</a>",IDC_ABOUT_RUFUS_URL,
                     "SysLink",WS_TABSTOP,46,47,114,9
-    LTEXT           "Version 1.0.7 (Build 121)",IDC_STATIC,46,19,78,8
+    LTEXT           "Version 1.0.7 (Build 122)",IDC_STATIC,46,19,78,8
     PUSHBUTTON      "License...",IDC_ABOUT_LICENSE,46,175,50,14,WS_GROUP
     EDITTEXT        IDC_ABOUT_COPYRIGHTS,46,107,235,63,ES_MULTILINE | ES_READONLY | WS_VSCROLL
     LTEXT           "Report bugs or request enhancements at:",IDC_STATIC,46,66,187,8
@@ -89,6 +89,16 @@ BEGIN
     ICON            32516,IDC_NOTIFICATION_ICON,6,6,20,20
     LTEXT           "",IDC_NOTIFICATION_TEXT,35,10,219,20
     DEFPUSHBUTTON   "Close",IDCANCEL,211,44,50,14
+END
+
+IDD_ISO_EXTRACT DIALOGEX 0, 0, 262, 73
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_POPUP | WS_CAPTION
+CAPTION "Extracting Files..."
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    LTEXT           "",IDC_ISO_FILENAME,14,9,232,14
+    CONTROL         "",IDC_ISO_PROGRESS,"msctls_progress32",WS_BORDER,14,32,231,8
+    PUSHBUTTON      "Abort",IDC_ISO_ABORT,112,50,50,14
 END
 
 IDD_LICENSE DIALOGEX 0, 0, 335, 205
@@ -184,7 +194,6 @@ GUIDELINES DESIGNINFO
 BEGIN
     IDD_DIALOG, DIALOG
     BEGIN
-        BOTTOMMARGIN, 264
     END
 
     IDD_ABOUTBOX, DIALOG
@@ -192,6 +201,10 @@ BEGIN
     END
 
     IDD_NOTIFICATION, DIALOG
+    BEGIN
+    END
+
+    IDD_ISO_EXTRACT, DIALOG
     BEGIN
     END
 
@@ -208,8 +221,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,0,7,121
- PRODUCTVERSION 1,0,7,121
+ FILEVERSION 1,0,7,122
+ PRODUCTVERSION 1,0,7,122
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -226,13 +239,13 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "akeo.ie"
             VALUE "FileDescription", "Rufus"
-            VALUE "FileVersion", "1.0.7.121"
+            VALUE "FileVersion", "1.0.7.122"
             VALUE "InternalName", "Rufus"
             VALUE "LegalCopyright", "© 2011 Pete Batard (GPL v3)"
             VALUE "LegalTrademarks", "http://www.gnu.org/copyleft/gpl.html"
             VALUE "OriginalFilename", "rufus.exe"
             VALUE "ProductName", "Rufus"
-            VALUE "ProductVersion", "1.0.7.121"
+            VALUE "ProductVersion", "1.0.7.122"
         END
     END
     BLOCK "VarFileInfo"
