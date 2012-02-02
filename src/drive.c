@@ -52,6 +52,7 @@ HANDLE GetDriveHandle(DWORD DriveIndex, char* DriveLetter, BOOL bWriteAccess, BO
 	DWORD size;
 	HANDLE hDrive = INVALID_HANDLE_VALUE;
 	STORAGE_DEVICE_NUMBER_REDEF device_number = {0};
+	UINT drive_type;
 	char drives[26*4];	/* "D:\", "E:\", etc. */
 	char *drive = drives;
 	char logical_drive[] = "\\\\.\\#:";
@@ -94,6 +95,15 @@ HANDLE GetDriveHandle(DWORD DriveIndex, char* DriveLetter, BOOL bWriteAccess, BO
 			if (*drive < 'C') {
 				continue;
 			}
+
+			/* IOCTL_STORAGE_GET_DEVICE_NUMBER's STORAGE_DEVICE_NUMBER.DeviceNumber is
+			   not unique! An HDD, a DVD and probably other drives can have the same
+			   value there => Use GetDriveType() to filter out unwanted devices.
+			   See https://github.com/pbatard/rufus/issues/32 for details. */
+			drive_type = GetDriveTypeA(drive);
+			if ((drive_type != DRIVE_REMOVABLE) && (drive_type != DRIVE_FIXED))
+				continue;
+
 			safe_sprintf(logical_drive, sizeof(logical_drive), "\\\\.\\%c:", drive[0]);
 			hDrive = CreateFileA(logical_drive, GENERIC_READ|(bWriteAccess?GENERIC_WRITE:0),
 				FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, 0);
