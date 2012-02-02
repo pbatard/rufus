@@ -60,9 +60,12 @@ HWND hISOProgressDlg = NULL, hISOProgressBar, hISOFileName;
 BOOL bWithFreeDOS, bWithSyslinux;
 
 static HWND hDeviceTooltip = NULL, hFSTooltip = NULL, hProgress = NULL;
+static HWND hDOS = NULL, hSelectISO = NULL, hISOToolTip = NULL;
+static HICON hIconDisc;
 static StrArray DriveID, DriveLabel;
 static char szTimer[10] = "00:00:00";
 static unsigned int timer;
+static char* iso_path = NULL;
 
 /*
  * The following is used to allocate slots within the progress bar
@@ -912,9 +915,121 @@ BOOL CALLBACK ISOProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 // The scanning process can be blocking for message processing => use a thread
 void __cdecl ISOScanThread(void* param)
 {
-	ExtractISO(ISO_IMAGE, ISO_DEST, TRUE);
+	int i;
+//	ExtractISO(ISO_IMAGE, ISO_DEST, TRUE);
+	PrintStatus(0, "Scanning ISO image...");
+	ExtractISO(iso_path, "", TRUE);
 	uprintf("Projected size: %lld\nHas 4GB: %s\n", iso_report.projected_size, iso_report.has_4GB_file?"TRUE":"FALSE");
+	for (i=safe_strlen(iso_path); (i>=0)&&(iso_path[i] != '\\'); i--);
+	PrintStatus(0, "Using ISO: '%s'", &iso_path[i+1]);
 	_endthread();
+}
+
+// Helper function to obtain a handle to a DLL
+static __inline HMODULE GetDLLHandle(char* szDLLName)
+{
+	HMODULE h = NULL;
+	if ((h = GetModuleHandleA(szDLLName)) == NULL)
+		h = LoadLibraryA(szDLLName);
+	return h;
+}
+
+void InitDialog(HWND hDlg)
+{
+	// MinGW fails to link those
+	typedef HIMAGELIST (WINAPI *ImageList_Create_t)(
+		int cx,
+		int cy,
+		UINT flags,
+		int cInitial,
+		int cGrow
+	);
+	ImageList_Create_t pImageList_Create = NULL;
+	typedef int (WINAPI *ImageList_ReplaceIcon_t)(
+		HIMAGELIST himl,
+		int i,
+		HICON hicon
+	);
+	ImageList_ReplaceIcon_t pImageList_ReplaceIcon = NULL;
+	struct {
+		HIMAGELIST himl;
+		RECT margin;
+		UINT uAlign;
+	} bi = {0};	// BUTTON_IMAGELIST
+	HINSTANCE hDllInst;
+	HDC hDC;
+	int i16;
+	HICON hSmallIcon, hBigIcon;
+	char tmp[128];
+
+	// Quite a burden to carry around as parameters
+	hMainDialog = hDlg;
+	hDeviceList = GetDlgItem(hDlg, IDC_DEVICE);
+	hCapacity = GetDlgItem(hDlg, IDC_CAPACITY);
+	hFileSystem = GetDlgItem(hDlg, IDC_FILESYSTEM);
+	hClusterSize = GetDlgItem(hDlg, IDC_CLUSTERSIZE);
+	hLabel = GetDlgItem(hDlg, IDC_LABEL);
+	hProgress = GetDlgItem(hDlg, IDC_PROGRESS);
+	hDOS = GetDlgItem(hDlg, IDC_DOS);
+	hDOSType = GetDlgItem(hDlg, IDC_DOSTYPE);
+	hSelectISO = GetDlgItem(hDlg, IDC_SELECT_ISO);
+	hNBPasses = GetDlgItem(hDlg, IDC_NBPASSES);
+
+	// High DPI scaling
+	i16 = GetSystemMetrics(SM_CXSMICON);
+	hDC = GetDC(hDlg);
+	fScale = GetDeviceCaps(hDC, LOGPIXELSX) / 96.0f;
+	ReleaseDC(hDlg, hDC);
+
+	// Create the title bar icon
+	hSmallIcon = (HICON)LoadImage(hMainInstance, MAKEINTRESOURCE(IDI_ICON), IMAGE_ICON, 16, 16, 0);
+	SendMessage (hDlg, WM_SETICON, ICON_SMALL, (LPARAM)hSmallIcon);
+	hBigIcon = (HICON)LoadImage(hMainInstance, MAKEINTRESOURCE(IDI_ICON), IMAGE_ICON, 32, 32, 0);
+	SendMessage (hDlg, WM_SETICON, ICON_BIG, (LPARAM)hBigIcon);
+	// Update the title if we have FreeDOS support
+	if (bWithFreeDOS) {
+		GetWindowTextA(hDlg, &tmp[15], sizeof(tmp)-15);
+		safe_sprintf(tmp, sizeof(tmp), "Rufus (with FreeDOS)");
+		tmp[20] = ' ';
+		SetWindowTextA(hDlg, tmp);
+	}
+
+	// Create the status line
+	CreateStatusBar();
+	// Use maximum granularity for the progress bar
+	SendMessage(hProgress, PBM_SETRANGE, 0, MAX_PROGRESS<<16);
+	// Fill up the passes
+	IGNORE_RETVAL(ComboBox_AddStringU(hNBPasses, "1 Pass"));
+	IGNORE_RETVAL(ComboBox_AddStringU(hNBPasses, "2 Passes"));
+	IGNORE_RETVAL(ComboBox_AddStringU(hNBPasses, "3 Passes"));
+	IGNORE_RETVAL(ComboBox_AddStringU(hNBPasses, "4 Passes"));
+	IGNORE_RETVAL(ComboBox_SetCurSel(hNBPasses, 1));
+	// Fill up the DOS type dropdown
+	IGNORE_RETVAL(ComboBox_SetItemData(hDOSType, ComboBox_AddStringU(hDOSType, "MS-DOS"), DT_WINME));
+	IGNORE_RETVAL(ComboBox_SetItemData(hDOSType, ComboBox_AddStringU(hDOSType, "ISO"), DT_ISO));
+	IGNORE_RETVAL(ComboBox_SetCurSel(hDOSType, bWithFreeDOS?DT_FREEDOS:DT_WINME));
+	// Create the string array
+	StrArrayCreate(&DriveID, MAX_DRIVES);
+	StrArrayCreate(&DriveLabel, MAX_DRIVES);
+	// Set the quick format & create DOS disk checkboxes
+	CheckDlgButton(hDlg, IDC_QUICKFORMAT, BST_CHECKED);
+	CheckDlgButton(hDlg, IDC_DOS, BST_CHECKED);
+
+	// Load system icons (NB: Use the excellent http://www.nirsoft.net/utils/iconsext.html to find icon IDs)
+	hDllInst = LoadLibraryA("shell32.dll");
+	hIconDisc = (HICON)LoadImage(hDllInst, MAKEINTRESOURCE(12), IMAGE_ICON, i16, i16, LR_DEFAULTCOLOR|LR_SHARED);
+
+	// Set a disc icon on the select ISO button
+	pImageList_Create = (ImageList_Create_t) GetProcAddress(GetDLLHandle("Comctl32.dll"), "ImageList_Create");
+	pImageList_ReplaceIcon = (ImageList_ReplaceIcon_t) GetProcAddress(GetDLLHandle("Comctl32.dll"), "ImageList_ReplaceIcon");
+
+	bi.himl = pImageList_Create(i16, i16, ILC_COLOR32 | ILC_MASK, 1, 0);
+	pImageList_ReplaceIcon(bi.himl, -1, hIconDisc);
+	SetRect(&bi.margin, 0, 1, 0, 0);
+	bi.uAlign = 4;	// BUTTON_IMAGELIST_ALIGN_CENTER
+	SendMessage(GetDlgItem(hDlg, IDC_SELECT_ISO), 0x1602, 0, (LPARAM)&bi);	// BCM_SETIMAGELIST 
+
+	hISOToolTip = CreateTooltip(hSelectISO, "Click to select...", -1);
 }
 
 /*
@@ -922,14 +1037,11 @@ void __cdecl ISOScanThread(void* param)
  */
 static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	HDC hDC;
-	HICON hSmallIcon, hBigIcon;
 	DRAWITEMSTRUCT* pDI;
-	int nDeviceIndex, fs;
+	int nDeviceIndex, fs, dt;
 	DWORD DeviceNum;
 	char str[MAX_PATH], tmp[128];
 	static uintptr_t format_thid = -1L;
-	static HWND hDOS;
 	static UINT uDOSChecked = BST_CHECKED;
 
 	switch (message) {
@@ -943,59 +1055,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		break;
 
 	case WM_INITDIALOG:
-		hMainDialog = hDlg;
-		hDeviceList = GetDlgItem(hDlg, IDC_DEVICE);
-		hCapacity = GetDlgItem(hDlg, IDC_CAPACITY);
-		hFileSystem = GetDlgItem(hDlg, IDC_FILESYSTEM);
-		hClusterSize = GetDlgItem(hDlg, IDC_CLUSTERSIZE);
-		hLabel = GetDlgItem(hDlg, IDC_LABEL);
-		hProgress = GetDlgItem(hDlg, IDC_PROGRESS);
-		hDOS = GetDlgItem(hDlg, IDC_DOS);
-		hDOSType = GetDlgItem(hDlg, IDC_DOSTYPE);
-		hNBPasses = GetDlgItem(hDlg, IDC_NBPASSES);
-		// High DPI scaling
-		hDC = GetDC(hDlg);
-		fScale = GetDeviceCaps(hDC, LOGPIXELSX) / 96.0f;
-		ReleaseDC(hDlg, hDC);
-		// Create the title bar icon
-		hSmallIcon = (HICON)LoadImage(hMainInstance, MAKEINTRESOURCE(IDI_ICON), IMAGE_ICON, 16, 16, 0);
-		SendMessage (hDlg, WM_SETICON, ICON_SMALL, (LPARAM)hSmallIcon);
-		hBigIcon = (HICON)LoadImage(hMainInstance, MAKEINTRESOURCE(IDI_ICON), IMAGE_ICON, 32, 32, 0);
-		SendMessage (hDlg, WM_SETICON, ICON_BIG, (LPARAM)hBigIcon);
-		// Update the title if we have FreeDOS support
-		if (bWithFreeDOS) {
-			GetWindowTextA(hDlg, &tmp[15], sizeof(tmp)-15);
-			safe_sprintf(tmp, sizeof(tmp), "Rufus (with FreeDOS)");
-			tmp[20] = ' ';
-			SetWindowTextA(hDlg, tmp);
-		}
-		// Create the status line
-		CreateStatusBar();
-		// Use maximum granularity for the progress bar
-		SendMessage(hProgress, PBM_SETRANGE, 0, MAX_PROGRESS<<16);
-		// Fill up the passes
-		IGNORE_RETVAL(ComboBox_AddStringU(hNBPasses, "1 Pass"));
-		IGNORE_RETVAL(ComboBox_AddStringU(hNBPasses, "2 Passes"));
-		IGNORE_RETVAL(ComboBox_AddStringU(hNBPasses, "3 Passes"));
-		IGNORE_RETVAL(ComboBox_AddStringU(hNBPasses, "4 Passes"));
-		IGNORE_RETVAL(ComboBox_SetCurSel(hNBPasses, 1));
-		// Fill up the DOS type dropdown
-		IGNORE_RETVAL(ComboBox_SetItemData(hDOSType, ComboBox_AddStringU(hDOSType, "WinMe"), DT_WINME));
-		if (bWithFreeDOS)
-			IGNORE_RETVAL(ComboBox_SetItemData(hDOSType, ComboBox_AddStringU(hDOSType, "FreeDOS"), DT_FREEDOS));
-		if (bWithSyslinux)
-			IGNORE_RETVAL(ComboBox_SetItemData(hDOSType, ComboBox_AddStringU(hDOSType, "Syslinux"), DT_SYSLINUX));
-		IGNORE_RETVAL(ComboBox_SetCurSel(hDOSType, bWithFreeDOS?DT_FREEDOS:DT_WINME));
-		if (bWithFreeDOS || bWithSyslinux) {
-			SetDlgItemTextA(hDlg, IDC_DOS, "Create a bootable USB drive:");
-			ShowWindow(hDOSType, SW_SHOW);
-		}
-		// Create the string array
-		StrArrayCreate(&DriveID, MAX_DRIVES);
-		StrArrayCreate(&DriveLabel, MAX_DRIVES);
-		// Set the quick format & create DOS disk checkboxes
-		CheckDlgButton(hDlg, IDC_QUICKFORMAT, BST_CHECKED);
-		CheckDlgButton(hDlg, IDC_DOS, BST_CHECKED);
+		InitDialog(hDlg);
 		GetUSBDevices();
 		return (INT_PTR)TRUE;
 
@@ -1064,26 +1124,71 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			}
 			break;
 		case IDC_FILESYSTEM:
+			if (HIWORD(wParam) != CBN_SELCHANGE)
+				break;
+			fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
+			uprintf("fs = %d\n", fs);
+			SetClusterSizes(fs);
+			if (((fs == FS_EXFAT) || (fs <0)) && IsWindowEnabled(hDOS)) {
+				// unlikely to be supported by BIOSes => don't bother
+				IGNORE_RETVAL(ComboBox_SetCurSel(hDOSType, 0));
+				uDOSChecked = IsDlgButtonChecked(hMainDialog, IDC_DOS);
+				CheckDlgButton(hDlg, IDC_DOS, BST_UNCHECKED);
+				EnableWindow(hDOS, FALSE);
+				EnableWindow(hDOSType, FALSE);
+				ShowWindow(hSelectISO, SW_HIDE);
+				break;
+			}
+			IGNORE_RETVAL(ComboBox_ResetContent(hDOSType));
+			if ((fs == FS_FAT16) || (fs == FS_FAT32)) {
+				IGNORE_RETVAL(ComboBox_SetItemData(hDOSType, ComboBox_AddStringU(hDOSType, "MS-DOS"), DT_WINME));
+				if (bWithFreeDOS)
+					IGNORE_RETVAL(ComboBox_SetItemData(hDOSType, ComboBox_AddStringU(hDOSType, "FreeDOS"), DT_FREEDOS));
+				if (bWithSyslinux)
+					IGNORE_RETVAL(ComboBox_SetItemData(hDOSType, ComboBox_AddStringU(hDOSType, "Syslinux"), DT_SYSLINUX));
+			}
+			IGNORE_RETVAL(ComboBox_SetItemData(hDOSType, ComboBox_AddStringU(hDOSType, "ISO"), DT_ISO));
+			IGNORE_RETVAL(ComboBox_SetCurSel(hDOSType, (bWithFreeDOS && (fs != FS_NTFS))?1:0));
+			if (!IsWindowEnabled(hDOS)) {
+				EnableWindow(hDOS, TRUE);
+				EnableWindow(hDOSType, TRUE);
+				CheckDlgButton(hDlg, IDC_DOS, uDOSChecked);
+			}
+			// Fall through to enable/disable the ISO selection
+		case IDC_DOSTYPE:
 			switch (HIWORD(wParam)) {
 			case CBN_SELCHANGE:
-				fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
-				SetClusterSizes(fs);
+				dt = (int)ComboBox_GetItemData(hDOSType, ComboBox_GetCurSel(hDOSType));
 				// Disable/Restore the DOS checkbox according to FS
-				if ((fs == FS_FAT16) || (fs == FS_FAT32)) {
-					if (!IsWindowEnabled(hDOS)) {
-						EnableWindow(hDOS, TRUE);
-						EnableWindow(hDOSType, TRUE);
-						CheckDlgButton(hDlg, IDC_DOS, uDOSChecked);
-					}
+				if (dt == DT_ISO) {
+					ShowWindow(hSelectISO, SW_SHOW);
 				} else {
-					if (IsWindowEnabled(hDOS)) {
-						uDOSChecked = IsDlgButtonChecked(hMainDialog, IDC_DOS);
-						CheckDlgButton(hDlg, IDC_DOS, BST_UNCHECKED);
-						EnableWindow(hDOS, FALSE);
-						EnableWindow(hDOSType, FALSE);
-					}
+					ShowWindow(hSelectISO, SW_HIDE);
 				}
 				break;
+			}
+			break;
+		case IDC_SELECT_ISO:
+			DestroyTooltip(hISOToolTip);
+			safe_free(iso_path);
+			iso_path = FileDialog(FALSE, NULL, "*.iso", "iso", "ISO Image");
+			if (iso_path == NULL) {
+				hISOToolTip = CreateTooltip(hSelectISO, "Click to select...", -1);
+				break;
+			}
+			hISOToolTip = CreateTooltip(hSelectISO, iso_path, -1);
+			FormatStatus = 0;
+			// You'd think that Windows would let you instantiate a modeless dialog wherever
+			// but you'd be wrong. It must be done in the main callback!
+			if (!IsWindow(hISOProgressDlg)) { 
+				hISOProgressDlg = CreateDialogA(hMainInstance, MAKEINTRESOURCEA(IDD_ISO_EXTRACT),
+					hDlg, (DLGPROC)ISOProc); 
+				// The window is not visible by default but takes focus => restore it
+				SetFocus(hDlg);
+			} 
+			if (_beginthread(ISOScanThread, 0, NULL) == -1L) {
+				uprintf("Unable to start ISO scanning thread");
+				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_START_THREAD);
 			}
 			break;
 		case IDC_START:
@@ -1131,6 +1236,8 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		if (format_thid != -1L) {
 			return (INT_PTR)TRUE;
 		}
+		DestroyAllTooltips();
+		safe_free(iso_path);
 		PostQuitMessage(0);
 		break;
 

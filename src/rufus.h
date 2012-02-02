@@ -27,8 +27,8 @@
 
 /* Features not ready for prime time and that may *DESTROY* your data - USE AT YOUR OWN RISKS! */
 //#define RUFUS_TEST
-#define ISO_DEST  "D:/tmp/iso"
-#define ISO_IMAGE "D:\\Incoming\\Windows 8 Preview\\WindowsDeveloperPreview-64bit-English-Developer.iso"
+//#define ISO_DEST  "D:/tmp/iso"
+//#define ISO_IMAGE "D:\\Incoming\\Windows 8 Preview\\WindowsDeveloperPreview-64bit-English-Developer.iso"
 //#define ISO_IMAGE "D:\\fd11src.iso", "D:/tmp/iso"
 //#define ISO_IMAGE "D:\\Incoming\\GRMSDKX_EN_DVD.iso"
 //#define ISO_IMAGE "D:\\Incoming\\en_windows_driver_kit_3790.iso"
@@ -131,6 +131,7 @@ enum dos_type {
 	DT_WINME = 0,
 	DT_FREEDOS,
 	DT_SYSLINUX,
+	DT_ISO,
 	DT_MAX
 };
 
@@ -192,6 +193,7 @@ extern HANDLE GetDriveHandle(DWORD DriveIndex, char* DriveLetter, BOOL bWriteAcc
 extern BOOL GetDriveLabel(DWORD DriveIndex, char* letter, char** label);
 extern BOOL UnmountDrive(HANDLE hDrive);
 extern BOOL CreateProgress(void);
+extern char* FileDialog(BOOL save, char* path, char* filename, char* ext, char* ext_desc);
 
 __inline static BOOL UnlockDrive(HANDLE hDrive)
 {

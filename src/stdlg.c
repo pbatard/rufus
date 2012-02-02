@@ -314,6 +314,142 @@ fallback:
 	}
 }
 
+/*
+ * Return the UTF8 path of a file selected through a load or save dialog
+ * Will use the newer IFileOpenDialog if *compiled* for Vista or later
+ * All string parameters are UTF-8
+ */
+char* FileDialog(BOOL save, char* path, char* filename, char* ext, char* ext_desc)
+{
+	DWORD tmp;
+	OPENFILENAMEA ofn;
+	char selected_name[MAX_PATH];
+	char* ext_string = NULL;
+	size_t i, ext_strlen;
+	BOOL r;
+	char* filepath = NULL;
+
+#if (_WIN32_WINNT >= 0x0600)	// Vista and later
+	HRESULT hr = FALSE;
+	IFileDialog *pfd;
+	IShellItem *psiResult;
+	COMDLG_FILTERSPEC filter_spec[2];
+	char* ext_filter;
+	wchar_t *wpath = NULL, *wfilename = NULL;
+	IShellItem *si_path = NULL;	// Automatically freed
+
+	INIT_VISTA_SHELL32;
+	if (IS_VISTA_SHELL32_AVAILABLE) {
+		// Setup the file extension filter table
+		ext_filter = (char*)malloc(strlen(ext)+3);
+		if (ext_filter != NULL) {
+			safe_sprintf(ext_filter, strlen(ext)+3, "*.%s", ext);
+			filter_spec[0].pszSpec = utf8_to_wchar(ext_filter);
+			safe_free(ext_filter);
+			filter_spec[0].pszName = utf8_to_wchar(ext_desc);
+			filter_spec[1].pszSpec = L"*.*";
+			filter_spec[1].pszName = L"All files";
+		}
+
+		hr = CoCreateInstance(save?&CLSID_FileSaveDialog:&CLSID_FileOpenDialog, NULL, CLSCTX_INPROC,
+			&IID_IFileDialog, (LPVOID)&pfd);
+
+		if (FAILED(hr)) {
+			uprintf("CoCreateInstance for FileOpenDialog failed: error %X\n", hr);
+			pfd = NULL;	// Just in case
+			goto fallback;
+		}
+
+		// Set the file extension filters
+		pfd->lpVtbl->SetFileTypes(pfd, 2, filter_spec);
+
+		// Set the default directory
+		wpath = utf8_to_wchar(path);
+		hr = (*pSHCreateItemFromParsingName)(wpath, NULL, &IID_IShellItem, (LPVOID) &si_path);
+		if (SUCCEEDED(hr)) {
+			pfd->lpVtbl->SetFolder(pfd, si_path);
+		}
+		safe_free(wpath);
+
+		// Set the default filename
+		wfilename = utf8_to_wchar(filename);
+		if (wfilename != NULL) {
+			pfd->lpVtbl->SetFileName(pfd, wfilename);
+		}
+
+		// Display the dialog
+		hr = pfd->lpVtbl->Show(pfd, hMainDialog);
+
+		// Cleanup
+		safe_free(wfilename);
+		safe_free(filter_spec[0].pszSpec);
+		safe_free(filter_spec[0].pszName);
+
+		if (SUCCEEDED(hr)) {
+			// Obtain the result of the user's interaction with the dialog.
+			hr = pfd->lpVtbl->GetResult(pfd, &psiResult);
+			if (SUCCEEDED(hr)) {
+				hr = psiResult->lpVtbl->GetDisplayName(psiResult, SIGDN_FILESYSPATH, &wpath);
+				if (SUCCEEDED(hr)) {
+					filepath = wchar_to_utf8(wpath);
+					CoTaskMemFree(wpath);
+				}
+				psiResult->lpVtbl->Release(psiResult);
+			}
+		} else if ((hr & 0xFFFF) != ERROR_CANCELLED) {
+			// If it's not a user cancel, assume the dialog didn't show and fallback
+			uprintf("could not show FileOpenDialog: error %X\n", hr);
+			goto fallback;
+		}
+		pfd->lpVtbl->Release(pfd);
+		return filepath;
+	}
+
+fallback:
+	if (pfd != NULL) {
+		pfd->lpVtbl->Release(pfd);
+	}
+#endif
+
+	memset(&ofn, 0, sizeof(ofn));
+	ofn.lStructSize = sizeof(ofn);
+	ofn.hwndOwner = hMainDialog;
+	// File name
+	safe_strcpy(selected_name, MAX_PATH, filename);
+	ofn.lpstrFile = selected_name;
+	ofn.nMaxFile = MAX_PATH;
+	// Set the file extension filters
+	ext_strlen = strlen(ext_desc) + 2*strlen(ext) + sizeof(" (*.)\0*.\0All Files (*.*)\0*.*\0\0");
+	ext_string = (char*)malloc(ext_strlen);
+	safe_sprintf(ext_string, ext_strlen, "%s (*.%s)\r*.%s\rAll Files (*.*)\r*.*\r\0", ext_desc, ext, ext);
+	// Microsoft could really have picked a better delimiter!
+	for (i=0; i<ext_strlen; i++) {
+		if (ext_string[i] == '\r') {
+			ext_string[i] = 0;
+		}
+	}
+	ofn.lpstrFilter = ext_string;
+	// Initial dir
+	ofn.lpstrInitialDir = path;
+	ofn.Flags = OFN_OVERWRITEPROMPT;
+	// Show Dialog
+	if (save) {
+		r = GetSaveFileNameU(&ofn);
+	} else {
+		r = GetOpenFileNameU(&ofn);
+	}
+	if (r) {
+		filepath = safe_strdup(selected_name);
+	} else {
+		tmp = CommDlgExtendedError();
+		if (tmp != 0) {
+			uprintf("Could not selected file for %s. Error %X\n", save?"save":"open", tmp);
+		}
+	}
+	safe_free(ext_string);
+	return filepath;
+}
+
 void CreateBoldFont(HDC dc) {
 	TEXTMETRIC tm;
 	LOGFONT lf;
@@ -559,7 +695,7 @@ BOOL Notification(int type, char* title, char* format, ...)
 	return TRUE;
 }
 
-struct {
+static struct {
 	HWND hTip;
 	WNDPROC original_proc;
 	LPWSTR wstring;
