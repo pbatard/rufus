@@ -137,7 +137,7 @@ static void CALLBACK PrintStatusTimeout(HWND hwnd, UINT uMsg, UINT_PTR idEvent, 
 	KillTimer(hMainDialog, TID_MESSAGE);
 }
 
-void PrintStatus(unsigned int duration, const char *format, ...)
+void PrintStatus(unsigned int duration, BOOL debug, const char *format, ...)
 {
 	char *p = szStatusMessage;
 	va_list args;
@@ -153,6 +153,9 @@ void PrintStatus(unsigned int duration, const char *format, ...)
 		*--p = '\0';
 
 	*p   = '\0';
+
+	if (debug)
+		uprintf("%s\n", szStatusMessage);
 
 	if ((duration) || (!bStatusTimerArmed)) {
 		SetDlgItemTextU(hMainDialog, IDC_STATUS, szStatusMessage);

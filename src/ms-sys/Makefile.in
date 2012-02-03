@@ -54,8 +54,8 @@ libmssys_a_AR = $(AR) $(ARFLAGS)
 libmssys_a_LIBADD =
 am_libmssys_a_OBJECTS = libmssys_a-fat12.$(OBJEXT) \
 	libmssys_a-fat16.$(OBJEXT) libmssys_a-fat32.$(OBJEXT) \
-	libmssys_a-partition_info.$(OBJEXT) libmssys_a-br.$(OBJEXT) \
-	libmssys_a-file.$(OBJEXT)
+	libmssys_a-ntfs.$(OBJEXT) libmssys_a-partition_info.$(OBJEXT) \
+	libmssys_a-br.$(OBJEXT) libmssys_a-file.$(OBJEXT)
 libmssys_a_OBJECTS = $(am_libmssys_a_OBJECTS)
 DEFAULT_INCLUDES = -I.@am__isrc@
 depcomp =
@@ -168,7 +168,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 noinst_LIBRARIES = libmssys.a
-libmssys_a_SOURCES = fat12.c fat16.c fat32.c partition_info.c br.c file.c
+libmssys_a_SOURCES = fat12.c fat16.c fat32.c ntfs.c partition_info.c br.c file.c
 libmssys_a_CFLAGS = -I./inc $(AM_CFLAGS)
 all: all-am
 
@@ -249,6 +249,14 @@ libmssys_a-fat32.o: fat32.c
 libmssys_a-fat32.obj: fat32.c
 	$(AM_V_CC) @AM_BACKSLASH@
 	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmssys_a_CFLAGS) $(CFLAGS) -c -o libmssys_a-fat32.obj `if test -f 'fat32.c'; then $(CYGPATH_W) 'fat32.c'; else $(CYGPATH_W) '$(srcdir)/fat32.c'; fi`
+
+libmssys_a-ntfs.o: ntfs.c
+	$(AM_V_CC) @AM_BACKSLASH@
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmssys_a_CFLAGS) $(CFLAGS) -c -o libmssys_a-ntfs.o `test -f 'ntfs.c' || echo '$(srcdir)/'`ntfs.c
+
+libmssys_a-ntfs.obj: ntfs.c
+	$(AM_V_CC) @AM_BACKSLASH@
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmssys_a_CFLAGS) $(CFLAGS) -c -o libmssys_a-ntfs.obj `if test -f 'ntfs.c'; then $(CYGPATH_W) 'ntfs.c'; else $(CYGPATH_W) '$(srcdir)/ntfs.c'; fi`
 
 libmssys_a-partition_info.o: partition_info.c
 	$(AM_V_CC) @AM_BACKSLASH@

@@ -453,7 +453,7 @@ BOOL CreatePartition(HANDLE hDrive)
 	BOOL r;
 	DWORD size;
 
-	PrintStatus(0, "Partitioning...");
+	PrintStatus(0, TRUE, "Partitioning...");
 	DriveLayoutEx->PartitionStyle = PARTITION_STYLE_MBR;
 	DriveLayoutEx->PartitionCount = 4;	// Must be multiple of 4 for MBR
 	DriveLayoutEx->Mbr.Signature = GetTickCount();
@@ -625,7 +625,7 @@ static void InitProgress(void)
 	}
 	if (IsChecked(IDC_DOS)) {
 		// 1 extra slot for PBR writing
-		// TODO: switch
+		// TODO: ISO
 		switch (ComboBox_GetItemData(hDOSType, ComboBox_GetCurSel(hDOSType))) {
 		case DT_WINME:
 			nb_slots[OP_DOS] = 3+1;
@@ -861,8 +861,8 @@ static void EnableControls(BOOL bEnable)
 	EnableWindow(GetDlgItem(hMainDialog, IDC_QUICKFORMAT), bEnable);
 	if (bEnable) {
 		fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
-		EnableWindow(GetDlgItem(hMainDialog, IDC_DOS), (fs == FS_FAT16) || (fs == FS_FAT32));
-		EnableWindow(GetDlgItem(hMainDialog, IDC_DOSTYPE), (fs == FS_FAT16) || (fs == FS_FAT32));
+		EnableWindow(GetDlgItem(hMainDialog, IDC_DOS), (fs == FS_FAT16) || (fs == FS_FAT32) || (fs == FS_NTFS));
+		EnableWindow(GetDlgItem(hMainDialog, IDC_DOSTYPE), (fs == FS_FAT16) || (fs == FS_FAT32) || (fs == FS_NTFS));
 	} else {
 		EnableWindow(GetDlgItem(hMainDialog, IDC_DOS), FALSE);
 		EnableWindow(GetDlgItem(hMainDialog, IDC_DOSTYPE), FALSE);
@@ -870,6 +870,8 @@ static void EnableControls(BOOL bEnable)
 	EnableWindow(GetDlgItem(hMainDialog, IDC_BADBLOCKS), bEnable);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_ABOUT), bEnable);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_START), bEnable);
+	EnableWindow(GetDlgItem(hMainDialog, IDC_SELECT_ISO), bEnable);
+	EnableWindow(GetDlgItem(hMainDialog, IDC_NBPASSES), bEnable);
 	SetDlgItemTextA(hMainDialog, IDCANCEL, bEnable?"Close":"Cancel");
 }
 
@@ -903,7 +905,8 @@ BOOL CALLBACK ISOProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 		switch (LOWORD(wParam)) {
 		case IDC_ISO_ABORT:
 			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANCELLED;
-			PrintStatus(0, "Cancelling - please wait...");
+			PrintStatus(0, FALSE, "Cancelling - please wait...");
+			uprintf("ISO: USER CANCEL\n");
 			return TRUE;
 		}
 	case WM_CLOSE:		// prevent closure using Alt-F4
@@ -917,11 +920,11 @@ void __cdecl ISOScanThread(void* param)
 {
 	int i;
 //	ExtractISO(ISO_IMAGE, ISO_DEST, TRUE);
-	PrintStatus(0, "Scanning ISO image...");
+	PrintStatus(0, TRUE, "Scanning ISO image...\n");
 	ExtractISO(iso_path, "", TRUE);
 	uprintf("Projected size: %lld\nHas 4GB: %s\n", iso_report.projected_size, iso_report.has_4GB_file?"TRUE":"FALSE");
 	for (i=safe_strlen(iso_path); (i>=0)&&(iso_path[i] != '\\'); i--);
-	PrintStatus(0, "Using ISO: '%s'", &iso_path[i+1]);
+	PrintStatus(0, TRUE, "Using ISO: '%s'\n", &iso_path[i+1]);
 	_endthread();
 }
 
@@ -1083,7 +1086,8 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 					// Operation may have completed in the meantime
 					if (format_thid != -1L) {
 						FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANCELLED;
-						PrintStatus(0, "Cancelling - please wait...");
+						PrintStatus(0, FALSE, "Cancelling - please wait...");
+						uprintf("USER CANCEL\n");
 					}
 				}
 				return (INT_PTR)TRUE;
@@ -1117,7 +1121,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		case IDC_DEVICE:
 			switch (HIWORD(wParam)) {
 			case CBN_SELCHANGE:
-				PrintStatus(0, "%d device%s found.", ComboBox_GetCount(hDeviceList),
+				PrintStatus(0, TRUE, "%d device%s found.", ComboBox_GetCount(hDeviceList),
 					(ComboBox_GetCount(hDeviceList)!=1)?"s":"");
 				PopulateProperties(ComboBox_GetCurSel(hDeviceList));
 				break;
@@ -1127,7 +1131,6 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			if (HIWORD(wParam) != CBN_SELCHANGE)
 				break;
 			fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
-			uprintf("fs = %d\n", fs);
 			SetClusterSizes(fs);
 			if (((fs == FS_EXFAT) || (fs <0)) && IsWindowEnabled(hDOS)) {
 				// unlikely to be supported by BIOSes => don't bother
@@ -1250,12 +1253,12 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		EnableControls(TRUE);
 		GetUSBDevices();
 		if (!IS_ERROR(FormatStatus)) {
-			PrintStatus(0, "DONE");
+			PrintStatus(0, FALSE, "DONE");
 		} else if (SCODE_CODE(FormatStatus) == ERROR_CANCELLED) {
-			PrintStatus(0, "Cancelled");
+			PrintStatus(0, FALSE, "Cancelled");
 			Notification(MSG_INFO, "Cancelled", "Operation cancelled by the user.");
 		} else {
-			PrintStatus(0, "FAILED");
+			PrintStatus(0, FALSE, "FAILED");
 			Notification(MSG_ERROR, "Error", "Error: %s", StrError(FormatStatus));
 		}
 		if (FormatStatus) {
@@ -1332,7 +1335,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 #ifdef DISABLE_AUTORUN
 			// Alt-D => Delete the NoDriveTypeAutorun key on exit (useful if the app crashed)
 			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'D')) {
-				PrintStatus(0, "NoDriveTypeAutorun will be deleted on exit.");
+				PrintStatus(0, FALSE, "NoDriveTypeAutorun will be deleted on exit.");
 				existing_key = FALSE;
 				continue;
 			}

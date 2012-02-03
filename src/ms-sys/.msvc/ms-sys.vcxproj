@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -34,6 +34,8 @@
     <ClInclude Include="..\inc\br_fat32_0x0.h" />
     <ClInclude Include="..\inc\br_fat32_0x3f0.h" />
     <ClInclude Include="..\inc\br_fat32_0x52.h" />
+    <ClInclude Include="..\inc\br_ntfs_0x0.h" />
+    <ClInclude Include="..\inc\br_ntfs_0x54.h" />
     <ClInclude Include="..\inc\fat12.h" />
     <ClInclude Include="..\inc\fat16.h" />
     <ClInclude Include="..\inc\fat32.h" />
@@ -47,6 +49,7 @@
     <ClInclude Include="..\inc\mbr_vista.h" />
     <ClInclude Include="..\inc\mbr_win7.h" />
     <ClInclude Include="..\inc\mbr_zero.h" />
+    <ClInclude Include="..\inc\ntfs.h" />
     <ClInclude Include="..\inc\partition_info.h" />
   </ItemGroup>
   <ItemGroup>
@@ -55,6 +58,7 @@
     <ClCompile Include="..\fat16.c" />
     <ClCompile Include="..\fat32.c" />
     <ClCompile Include="..\file.c" />
+    <ClCompile Include="..\ntfs.c" />
     <ClCompile Include="..\partition_info.c" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

@@ -35,6 +35,7 @@
 #include "br.h"
 #include "fat16.h"
 #include "fat32.h"
+#include "ntfs.h"
 #include "partition_info.h"
 #include "file.h"
 #include "format.h"
@@ -63,19 +64,17 @@ static BOOLEAN __stdcall FormatExCallback(FILE_SYSTEM_CALLBACK_COMMAND Command, 
 	switch(Command) {
 	case FCC_PROGRESS:
 		percent = (DWORD*)pData;
-		PrintStatus(0, "Formatting: %d%% completed.\n", *percent);
+		PrintStatus(0, FALSE, "Formatting: %d%% completed.", *percent);
 //		uprintf("%d percent completed.\n", *percent);
 		UpdateProgress(OP_FORMAT, 1.0f * (*percent));
 		break;
 	case FCC_STRUCTURE_PROGRESS:	// No progress on quick format
-		PrintStatus(0, "Creating file system: Task %d/%d completed.\n", ++task_number, nb_steps[fs_index]);
-		uprintf("Create FS: Task %d/%d completed.\n", task_number, nb_steps[fs_index]);
+		PrintStatus(0, TRUE, "Creating file system: Task %d/%d completed.", ++task_number, nb_steps[fs_index]);
 		format_percent += 100.0f / (1.0f * nb_steps[fs_index]);
 		UpdateProgress(OP_CREATE_FS, format_percent);
 		break;
 	case FCC_DONE:
-		PrintStatus(0, "Creating file system: Task %d/%d completed.\n", nb_steps[fs_index], nb_steps[fs_index]);
-		uprintf("Create FS: Task %d/%d completed.\n", nb_steps[fs_index], nb_steps[fs_index]);
+		PrintStatus(0, TRUE, "Creating file system: Task %d/%d completed.", nb_steps[fs_index], nb_steps[fs_index]);
 		UpdateProgress(OP_CREATE_FS, 100.0f);
 		if(*(BOOLEAN*)pData == FALSE) {
 			uprintf("Error while formatting.\n");
@@ -150,7 +149,7 @@ static BOOL FormatDrive(char DriveLetter)
 	size_t i;
 
 	wDriveRoot[0] = (WCHAR)DriveLetter;
-	PrintStatus(0, "Formatting...");
+	PrintStatus(0, TRUE, "Formatting...");
 	PF_INIT_OR_OUT(FormatEx, fmifs);
 
 	GetWindowTextW(hFileSystem, wFSType, ARRAYSIZE(wFSType));
@@ -340,7 +339,9 @@ static BOOL WritePBR(HANDLE hLogicalVolume, BOOL bFreeDOS)
 		uprintf("Confirmed new volume has a FAT16 boot sector\n");
 		if (bFreeDOS) {
 			if (!write_fat_16_fd_br(&fake_fd, 0)) break;
-		} else if (!write_fat_16_br(&fake_fd, 0)) break;
+		} else {
+			if (!write_fat_16_br(&fake_fd, 0)) break;
+		}
 		// Disk Drive ID needs to be corrected on XP
 		if (!write_partition_physical_disk_drive_id_fat16(&fake_fd))
 			break;
@@ -361,6 +362,16 @@ static BOOL WritePBR(HANDLE hLogicalVolume, BOOL bFreeDOS)
 				break;
 			fake_fd._cnt += 6 * (int)SelectedDrive.Geometry.BytesPerSector;
 		}
+		return TRUE;
+	case FS_NTFS:
+		if (!is_ntfs_fs(&fake_fd)) {
+			uprintf("New volume does not have an NTFS boot sector\n");
+			break;
+		}
+		uprintf("Confirmed new volume has an NTFS boot sector\n");
+		if (!write_ntfs_br(&fake_fd)) break;
+		// Note: NTFS requires a full remount after writing the PBR. We dismount when we lock
+		// so that's not an issue, but if you don't remount, you don't boot!
 		return TRUE;
 	default:
 		uprintf("unsupported FS for FS BR processing\n");
@@ -407,6 +418,7 @@ void __cdecl FormatThread(void* param)
 		goto out;
 	}
 	UnmountDrive(hLogicalVolume);
+	// TODO: DeleteVolumeMountPoint (and GetVolumeNameForVolumeMountPoint unless the GUID changes)
 
 	AnalyzeMBR(hPhysicalDrive);
 	AnalyzePBR(hLogicalVolume);
@@ -495,7 +507,7 @@ void __cdecl FormatThread(void* param)
 		goto out;
 	}
 
-	PrintStatus(0, "Writing master boot record...\n");
+	PrintStatus(0, TRUE, "Writing master boot record...");
 	if (!WriteMBR(hPhysicalDrive)) {
 		// Errorcode has already been set
 		goto out;
@@ -506,6 +518,7 @@ void __cdecl FormatThread(void* param)
 		switch (ComboBox_GetItemData(hDOSType, ComboBox_GetCurSel(hDOSType))) {
 		case DT_FREEDOS:
 		case DT_WINME:
+		case DT_ISO:
 			// We still have a lock, which we need to modify the volume boot record 
 			// => no need to reacquire the lock...
 			hLogicalVolume = GetDriveHandle(num, drive_name, TRUE, FALSE);
@@ -514,7 +527,11 @@ void __cdecl FormatThread(void* param)
 				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_OPEN_FAILED;
 				goto out;
 			}
-			PrintStatus(0, "Writing partition boot record...\n");
+			// Make sure the volume is dismounted before writing the PBR
+			// This is especially critical, as NTFS will only be made bootable
+			// after the FS is re-mounted by Windows
+			UnmountDrive(hLogicalVolume);
+			PrintStatus(0, TRUE, "Writing partition boot record...");
 			if (!WritePBR(hLogicalVolume, ComboBox_GetItemData(hDOSType, ComboBox_GetCurSel(hDOSType)) == DT_FREEDOS)) {
 				// Errorcode has already been set
 				goto out;
@@ -522,10 +539,12 @@ void __cdecl FormatThread(void* param)
 			// ...but we must have relinquished that lock to write the MS-DOS files 
 			safe_unlockclose(hLogicalVolume);
 			UpdateProgress(OP_DOS, -1.0f);
-			PrintStatus(0, "Copying DOS files...\n");
-			if (!ExtractDOS(drive_name)) {
-				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANNOT_COPY;
-				goto out;
+			if (ComboBox_GetItemData(hDOSType, ComboBox_GetCurSel(hDOSType)) != DT_ISO) {
+				PrintStatus(0, TRUE, "Copying DOS files...");
+				if (!ExtractDOS(drive_name)) {
+					FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANNOT_COPY;
+					goto out;
+				}
 			}
 			break;
 		// Syslinux requires patching of the PBR after the files have been extracted
@@ -537,6 +556,8 @@ void __cdecl FormatThread(void* param)
 			break;
 		}
 	}
+
+	// TODO: SetVolumeMountPoint
 
 out:
 	safe_unlockclose(hLogicalVolume);

@@ -174,7 +174,7 @@ extern RUFUS_ISO_REPORT iso_report;
  */
 extern const char *WindowsErrorString(void);
 extern void DumpBufferHex(void *buf, size_t size);
-extern void PrintStatus(unsigned int duration, const char *format, ...);
+extern void PrintStatus(unsigned int duration, BOOL debug, const char *format, ...);
 extern void UpdateProgress(int op, float percent);
 extern const char* StrError(DWORD error_code);
 extern void CenterDialog(HWND hDlg);
