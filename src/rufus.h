@@ -244,3 +244,4 @@ typedef struct {
 #define ERROR_BADBLOCKS_FAILURE        0x1206
 #define ERROR_ISO_SCAN                 0x1207
 #define ERROR_ISO_EXTRACT              0x1208
+#define ERROR_CANT_REMOUNT_VOLUME      0x1209

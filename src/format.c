@@ -390,7 +390,8 @@ void __cdecl FormatThread(void* param)
 	HANDLE hPhysicalDrive = INVALID_HANDLE_VALUE;
 	HANDLE hLogicalVolume = INVALID_HANDLE_VALUE;
 	SYSTEMTIME lt;
-	char drive_name[] = "?:";
+	char drive_name[] = "?:\\";
+	char drive_guid[50];
 	char bb_msg[512];
 	char logfile[MAX_PATH], *userdir;
 	FILE* log_fd;
@@ -418,7 +419,6 @@ void __cdecl FormatThread(void* param)
 		goto out;
 	}
 	UnmountDrive(hLogicalVolume);
-	// TODO: DeleteVolumeMountPoint (and GetVolumeNameForVolumeMountPoint unless the GUID changes)
 
 	AnalyzeMBR(hPhysicalDrive);
 	AnalyzePBR(hLogicalVolume);
@@ -481,7 +481,6 @@ void __cdecl FormatThread(void* param)
 	}
 	// Close the (unmounted) volume before formatting, but keep the lock
 	safe_closehandle(hLogicalVolume);
-	// TODO: do we have to sleep here for unmount to be effective?
 
 	// Especially after destructive badblocks test, you must zero the MBR completely
 	// before repartitioning. Else, all kind of bad things happen
@@ -499,7 +498,7 @@ void __cdecl FormatThread(void* param)
 	UpdateProgress(OP_PARTITION, -1.0f);
 
 	// Add a small delay after partitioning to be safe
-	Sleep(500);
+	Sleep(200);
 
 	if (!FormatDrive(drive_name[0])) {
 		// Error will be set by FormatDrive() in FormatStatus
@@ -536,7 +535,8 @@ void __cdecl FormatThread(void* param)
 				// Errorcode has already been set
 				goto out;
 			}
-			// ...but we must have relinquished that lock to write the MS-DOS files 
+
+			// We must close and unlock the volume to write files to it
 			safe_unlockclose(hLogicalVolume);
 			UpdateProgress(OP_DOS, -1.0f);
 			if (ComboBox_GetItemData(hDOSType, ComboBox_GetCurSel(hDOSType)) != DT_ISO) {
@@ -557,7 +557,23 @@ void __cdecl FormatThread(void* param)
 		}
 	}
 
-	// TODO: SetVolumeMountPoint
+	// We issue a complete remount of the filesystem at the end on account of:
+	// - Ensuring the file explorer properly detects that the volume was updated
+	// - Ensuring that an NTFS system will be reparsed so that it becomes bootable
+	if (GetVolumeNameForVolumeMountPointA(drive_name, drive_guid, sizeof(drive_guid))) {
+		if (DeleteVolumeMountPointA(drive_name)) {
+			Sleep(200);
+			if (SetVolumeMountPointA(drive_name, drive_guid)) {
+				uprintf("Successfully remounted %s on %s\n", drive_guid, drive_name);
+			} else {
+				uprintf("Failed to remount %s on %s\n", drive_guid, drive_name);
+				// This will leave the drive unaccessible and must be flagged as an error
+				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_REMOUNT_VOLUME);
+			}
+		} else {
+			uprintf("Could not remount %s %s\n", drive_name, WindowsErrorString());
+		}
+	}
 
 out:
 	safe_unlockclose(hLogicalVolume);
