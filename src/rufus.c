@@ -53,19 +53,20 @@ static BOOL existing_key = FALSE;
 HINSTANCE hMainInstance;
 HWND hMainDialog;
 char szFolderPath[MAX_PATH];
+char* iso_path = NULL;
 float fScale = 1.0f;
 int default_fs;
 HWND hDeviceList, hCapacity, hFileSystem, hClusterSize, hLabel, hDOSType, hNBPasses;
 HWND hISOProgressDlg = NULL, hISOProgressBar, hISOFileName;
 BOOL bWithFreeDOS, bWithSyslinux;
 
+static HANDLE format_thid = NULL;
 static HWND hDeviceTooltip = NULL, hFSTooltip = NULL, hProgress = NULL;
 static HWND hDOS = NULL, hSelectISO = NULL, hISOToolTip = NULL;
 static HICON hIconDisc;
 static StrArray DriveID, DriveLabel;
-static char szTimer[10] = "00:00:00";
+static char szTimer[12] = "00:00:00";
 static unsigned int timer;
-static char* iso_path = NULL;
 
 /*
  * The following is used to allocate slots within the progress bar
@@ -905,8 +906,10 @@ BOOL CALLBACK ISOProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 		switch (LOWORD(wParam)) {
 		case IDC_ISO_ABORT:
 			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANCELLED;
-			PrintStatus(0, FALSE, "Cancelling - please wait...");
-			uprintf("ISO: USER CANCEL\n");
+//			if (format_thid != NULL)
+//				CancelSynchronousIo(format_thid);
+			PrintStatus(0, FALSE, "Cancelling - This might take a while...");
+			uprintf("Cancelling (ISO)\n");
 			return TRUE;
 		}
 	case WM_CLOSE:		// prevent closure using Alt-F4
@@ -916,16 +919,27 @@ BOOL CALLBACK ISOProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 } 
 
 // The scanning process can be blocking for message processing => use a thread
-void __cdecl ISOScanThread(void* param)
+DWORD WINAPI ISOScanThread(LPVOID param)
 {
-	int i;
-//	ExtractISO(ISO_IMAGE, ISO_DEST, TRUE);
+	size_t i;
 	PrintStatus(0, TRUE, "Scanning ISO image...\n");
-	ExtractISO(iso_path, "", TRUE);
-	uprintf("Projected size: %lld\nHas 4GB: %s\n", iso_report.projected_size, iso_report.has_4GB_file?"TRUE":"FALSE");
-	for (i=safe_strlen(iso_path); (i>=0)&&(iso_path[i] != '\\'); i--);
-	PrintStatus(0, TRUE, "Using ISO: '%s'\n", &iso_path[i+1]);
-	_endthread();
+	if (!ExtractISO(iso_path, "", TRUE)) {
+		PrintStatus(0, TRUE, "Failed to scan ISO image.");
+		goto out;
+	}
+	uprintf("ISO size: %lld bytes, 4GB:%c, bootmgr:%c, isolinux:%c\n", iso_report.projected_size,
+		iso_report.has_4GB_file?'Y':'N', iso_report.has_bootmgr?'Y':'N', iso_report.has_isolinux?'Y':'N');
+	if (!iso_report.has_bootmgr) {
+		MessageBoxU(hMainDialog, "This version of Rufus supports only\n"
+			"ISO images that rely on 'bootmgr' - sorry.", "Unsupported ISO", MB_OK|MB_ICONINFORMATION);
+		safe_free(iso_path);
+	} else {
+		for (i=safe_strlen(iso_path); (i>=0)&&(iso_path[i] != '\\'); i--);
+		PrintStatus(0, TRUE, "Using ISO: '%s'\n", &iso_path[i+1]);
+	}
+
+out:
+	ExitThread(0);
 }
 
 // Helper function to obtain a handle to a DLL
@@ -964,6 +978,10 @@ void InitDialog(HWND hDlg)
 	int i16;
 	HICON hSmallIcon, hBigIcon;
 	char tmp[128];
+
+#ifdef RUFUS_TEST
+	ShowWindow(GetDlgItem(hDlg, IDC_TEST), SW_SHOW);
+#endif
 
 	// Quite a burden to carry around as parameters
 	hMainDialog = hDlg;
@@ -1009,8 +1027,7 @@ void InitDialog(HWND hDlg)
 	IGNORE_RETVAL(ComboBox_SetCurSel(hNBPasses, 1));
 	// Fill up the DOS type dropdown
 	IGNORE_RETVAL(ComboBox_SetItemData(hDOSType, ComboBox_AddStringU(hDOSType, "MS-DOS"), DT_WINME));
-	IGNORE_RETVAL(ComboBox_SetItemData(hDOSType, ComboBox_AddStringU(hDOSType, "ISO"), DT_ISO));
-	IGNORE_RETVAL(ComboBox_SetCurSel(hDOSType, bWithFreeDOS?DT_FREEDOS:DT_WINME));
+	IGNORE_RETVAL(ComboBox_SetCurSel(hDOSType, DT_WINME));
 	// Create the string array
 	StrArrayCreate(&DriveID, MAX_DRIVES);
 	StrArrayCreate(&DriveLabel, MAX_DRIVES);
@@ -1044,13 +1061,12 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	int nDeviceIndex, fs, dt;
 	DWORD DeviceNum;
 	char str[MAX_PATH], tmp[128];
-	static uintptr_t format_thid = -1L;
 	static UINT uDOSChecked = BST_CHECKED;
 
 	switch (message) {
 
 	case WM_DEVICECHANGE:
-		if ( (format_thid == -1L) &&
+		if ( (format_thid == NULL) &&
 			 ((wParam == DBT_DEVICEARRIVAL) || (wParam == DBT_DEVICEREMOVECOMPLETE)) ) {
 			GetUSBDevices();
 			return (INT_PTR)TRUE;
@@ -1079,15 +1095,16 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		switch(LOWORD(wParam)) {
 		case IDOK:			// close application
 		case IDCANCEL:
-			if (format_thid != -1L) {
+			if (format_thid != NULL) {
 				if (MessageBoxA(hMainDialog, "Cancelling may leave the device in an UNUSABLE state.\r\n"
 					"If you are sure you want to cancel, click YES. Otherwise, click NO.",
 					RUFUS_CANCELBOX_TITLE, MB_YESNO|MB_ICONWARNING) == IDYES) {
 					// Operation may have completed in the meantime
-					if (format_thid != -1L) {
+					if (format_thid != NULL) {
+//						CancelSynchronousIo(format_thid);
 						FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANCELLED;
-						PrintStatus(0, FALSE, "Cancelling - please wait...");
-						uprintf("USER CANCEL\n");
+						PrintStatus(0, FALSE, "Cancelling - Please wait...");
+						uprintf("Cancelling (General)\n");
 					}
 				}
 				return (INT_PTR)TRUE;
@@ -1103,19 +1120,6 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			break;
 #ifdef RUFUS_TEST
 		case IDC_TEST:
-			FormatStatus = 0;
-			// You'd think that Windows would let you instantiate a modeless dialog wherever
-			// but you'd be wrong. It has to be done in the main callback!
-			if (!IsWindow(hISOProgressDlg)) { 
-				hISOProgressDlg = CreateDialogA(hMainInstance, MAKEINTRESOURCEA(IDD_ISO_EXTRACT),
-					hDlg, (DLGPROC)ISOProc); 
-				// The window is not visible by default but takes focus => restore it
-				SetFocus(hDlg);
-			} 
-			if (_beginthread(ISOScanThread, 0, NULL) == -1L) {
-				uprintf("Unable to start ISO scanning thread");
-				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_START_THREAD);
-			}
 			break;
 #endif
 		case IDC_DEVICE:
@@ -1150,7 +1154,10 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				if (bWithSyslinux)
 					IGNORE_RETVAL(ComboBox_SetItemData(hDOSType, ComboBox_AddStringU(hDOSType, "Syslinux"), DT_SYSLINUX));
 			}
-			IGNORE_RETVAL(ComboBox_SetItemData(hDOSType, ComboBox_AddStringU(hDOSType, "ISO"), DT_ISO));
+			if (fs == FS_NTFS) {
+				// Only allow ISO with NTFS for the time being
+				IGNORE_RETVAL(ComboBox_SetItemData(hDOSType, ComboBox_AddStringU(hDOSType, "ISO..."), DT_ISO));
+			}
 			IGNORE_RETVAL(ComboBox_SetCurSel(hDOSType, (bWithFreeDOS && (fs != FS_NTFS))?1:0));
 			if (!IsWindowEnabled(hDOS)) {
 				EnableWindow(hDOS, TRUE);
@@ -1189,18 +1196,31 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				// The window is not visible by default but takes focus => restore it
 				SetFocus(hDlg);
 			} 
-			if (_beginthread(ISOScanThread, 0, NULL) == -1L) {
+			if (CreateThread(NULL, 0, ISOScanThread, NULL, 0, 0) == NULL) {
 				uprintf("Unable to start ISO scanning thread");
 				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_START_THREAD);
 			}
 			break;
 		case IDC_START:
-			if (format_thid != -1L) {
+			if (format_thid != NULL) {
 				return (INT_PTR)TRUE;
 			}
 			FormatStatus = 0;
 			nDeviceIndex = ComboBox_GetCurSel(hDeviceList);
 			if (nDeviceIndex != CB_ERR) {
+				if (ComboBox_GetItemData(hDOSType, ComboBox_GetCurSel(hDOSType)) == DT_ISO) {
+					if (iso_path == NULL) {
+						MessageBoxA(hMainDialog, "Please click on the disc button to select a bootable ISO,\n"
+							"or unselect the \"Create bootable disk...\" checkbox.",
+							"No ISO image selected...", MB_OK|MB_ICONERROR);
+						break;
+					}
+					if (iso_report.projected_size > (uint64_t)SelectedDrive.DiskSize) {
+						MessageBoxA(hMainDialog, "This ISO image is too big "
+							"for the selected target.", "ISO image too big...", MB_OK|MB_ICONERROR);
+						break;
+					}
+				}
 				GetWindowTextA(hDeviceList, tmp, sizeof(tmp));
 				safe_sprintf(str, sizeof(str), "WARNING: ALL DATA ON DEVICE %s\r\nWILL BE DESTROYED.\r\n"
 					"To continue with this operation, click OK. To quit click CANCEL.", tmp);
@@ -1216,8 +1236,8 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 						// The window is not visible by default but takes focus => restore it
 						SetFocus(hDlg);
 					} 
-					format_thid = _beginthread(FormatThread, 0, (void*)(uintptr_t)DeviceNum);
-					if (format_thid == -1L) {
+					format_thid = CreateThread(NULL, 0, FormatThread, (LPVOID)(uintptr_t)DeviceNum, 0, NULL);
+					if (format_thid == NULL) {
 						uprintf("Unable to start formatting thread");
 						FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_START_THREAD);
 						PostMessage(hMainDialog, UM_FORMAT_COMPLETED, 0, 0);
@@ -1236,16 +1256,14 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		return (INT_PTR)TRUE;
 
 	case WM_CLOSE:
-		if (format_thid != -1L) {
+		if (format_thid != NULL) {
 			return (INT_PTR)TRUE;
 		}
-		DestroyAllTooltips();
-		safe_free(iso_path);
 		PostQuitMessage(0);
 		break;
 
 	case UM_FORMAT_COMPLETED:
-		format_thid = -1L;
+		format_thid = NULL;
 		// Stop the timer
 		KillTimer(hMainDialog, TID_APP_TIMER);
 		// Close the cancel MessageBox if active
@@ -1256,7 +1274,8 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			PrintStatus(0, FALSE, "DONE");
 		} else if (SCODE_CODE(FormatStatus) == ERROR_CANCELLED) {
 			PrintStatus(0, FALSE, "Cancelled");
-			Notification(MSG_INFO, "Cancelled", "Operation cancelled by the user.");
+			Notification(MSG_INFO, "Cancelled", "Operation cancelled by the user.\n"
+				"If you aborted during file extraction, you should replug the drive...");
 		} else {
 			PrintStatus(0, FALSE, "FAILED");
 			Notification(MSG_ERROR, "Error", "Error: %s", StrError(FormatStatus));
@@ -1321,10 +1340,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		MessageBoxA(NULL, "Could not create Window", "DialogBox failure", MB_ICONSTOP);
 		goto out;
 	}
-//	CenterDialog(hDlg);
-#ifndef RUFUS_TEST
-	ShowWindow(GetDlgItem(hDlg, IDC_TEST), SW_HIDE);
-#endif
 	ShowWindow(hDlg, SW_SHOWNORMAL);
 	UpdateWindow(hDlg);
 
@@ -1346,6 +1361,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	}
 
 out:
+	DestroyAllTooltips();
+	safe_free(iso_path);
 #ifdef DISABLE_AUTORUN
 	SetLGP(TRUE, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer", "NoDriveTypeAutorun", 0);
 #endif

@@ -27,12 +27,6 @@
 
 /* Features not ready for prime time and that may *DESTROY* your data - USE AT YOUR OWN RISKS! */
 //#define RUFUS_TEST
-//#define ISO_DEST  "D:/tmp/iso"
-//#define ISO_IMAGE "D:\\Incoming\\Windows 8 Preview\\WindowsDeveloperPreview-64bit-English-Developer.iso"
-//#define ISO_IMAGE "D:\\fd11src.iso", "D:/tmp/iso"
-//#define ISO_IMAGE "D:\\Incoming\\GRMSDKX_EN_DVD.iso"
-//#define ISO_IMAGE "D:\\Incoming\\en_windows_driver_kit_3790.iso"
-//#define ISO_IMAGE "D:\\Incoming\\en_windows_7_ultimate_with_sp1_x64_dvd_618240.iso"
 
 #define STR_NO_LABEL                "NO_LABEL"
 #define RUFUS_CANCELBOX_TITLE       "Rufus - Cancellation"
@@ -152,6 +146,8 @@ typedef struct {
 typedef struct {
 	uint64_t projected_size;
 	BOOL has_4GB_file;
+	BOOL has_bootmgr;
+	BOOL has_isolinux;
 } RUFUS_ISO_REPORT;
 
 /*
@@ -163,6 +159,7 @@ extern HWND hFileSystem, hClusterSize, hLabel, hDOSType, hNBPasses;
 extern HWND hISOProgressDlg, hISOProgressBar, hISOFileName;
 extern float fScale;
 extern char szFolderPath[MAX_PATH];
+extern char* iso_path;
 extern DWORD FormatStatus;
 extern RUFUS_DRIVE_INFO SelectedDrive;
 extern const int nb_steps[FS_MAX];
@@ -187,7 +184,7 @@ extern BOOL Notification(int type, char* title, char* format, ...);
 extern BOOL ExtractDOS(const char* path);
 extern BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan);
 extern BOOL InstallSyslinux(DWORD num, const char* drive_name);
-extern void __cdecl FormatThread(void* param);
+DWORD WINAPI FormatThread(void* param);
 extern BOOL CreatePartition(HANDLE hDrive);
 extern HANDLE GetDriveHandle(DWORD DriveIndex, char* DriveLetter, BOOL bWriteAccess, BOOL bLockDrive);
 extern BOOL GetDriveLabel(DWORD DriveIndex, char* letter, char** label);

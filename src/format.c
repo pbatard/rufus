@@ -371,7 +371,8 @@ static BOOL WritePBR(HANDLE hLogicalVolume, BOOL bFreeDOS)
 		uprintf("Confirmed new volume has an NTFS boot sector\n");
 		if (!write_ntfs_br(&fake_fd)) break;
 		// Note: NTFS requires a full remount after writing the PBR. We dismount when we lock
-		// so that's not an issue, but if you don't remount, you don't boot!
+		// and also go through a forced remount, so that shouldn't be an issue.
+		// But with NTFS, if you don't remount, you don't boot!
 		return TRUE;
 	default:
 		uprintf("unsupported FS for FS BR processing\n");
@@ -384,7 +385,7 @@ static BOOL WritePBR(HANDLE hLogicalVolume, BOOL bFreeDOS)
 /*
  * Standalone thread for the formatting operation
  */
-void __cdecl FormatThread(void* param)
+DWORD WINAPI FormatThread(LPVOID param)
 {
 	DWORD num = (DWORD)(uintptr_t)param;
 	HANDLE hPhysicalDrive = INVALID_HANDLE_VALUE;
@@ -396,11 +397,6 @@ void __cdecl FormatThread(void* param)
 	char logfile[MAX_PATH], *userdir;
 	FILE* log_fd;
 	int r;
-
-#ifdef RUFUS_TEST
-	ExtractISO(ISO_IMAGE, ISO_DEST, FALSE);
-	goto out;
-#endif
 
 	hPhysicalDrive = GetDriveHandle(num, NULL, TRUE, TRUE);
 	if (hPhysicalDrive == INVALID_HANDLE_VALUE) {
@@ -542,21 +538,29 @@ void __cdecl FormatThread(void* param)
 			if (ComboBox_GetItemData(hDOSType, ComboBox_GetCurSel(hDOSType)) != DT_ISO) {
 				PrintStatus(0, TRUE, "Copying DOS files...");
 				if (!ExtractDOS(drive_name)) {
-					FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANNOT_COPY;
+					if (!FormatStatus)
+						FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANNOT_COPY;
 					goto out;
 				}
+			} else if (iso_path != NULL) {
+				PrintStatus(0, TRUE, "Copying ISO files...");
+				drive_name[2] = 0;
+				if ( (!ExtractISO(iso_path, drive_name, FALSE)) && (!FormatStatus)) {
+					FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANNOT_COPY;
+				}
+				drive_name[2] = '\\';
 			}
 			break;
 		// Syslinux requires patching of the PBR after the files have been extracted
 		case DT_SYSLINUX:
 			if (!InstallSyslinux(num, drive_name)) {
 				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_INSTALL_FAILURE;
-				goto out;
 			}
 			break;
 		}
 	}
 
+	// TODO: the only way to properly recover from a cancel will be through a device reset
 	// We issue a complete remount of the filesystem at the end on account of:
 	// - Ensuring the file explorer properly detects that the volume was updated
 	// - Ensuring that an NTFS system will be reparsed so that it becomes bootable
@@ -579,5 +583,5 @@ out:
 	safe_unlockclose(hLogicalVolume);
 	safe_unlockclose(hPhysicalDrive);
 	PostMessage(hMainDialog, UM_FORMAT_COMPLETED, 0, 0);
-	_endthread();
+	ExitThread(0);
 }

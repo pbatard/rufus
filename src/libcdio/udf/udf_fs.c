@@ -674,8 +674,10 @@ udf_readdir(udf_dirent_t *p_udf_dirent)
 	const unsigned int i_len = p_udf_dirent->fid->i_file_id;
 
 	if (DRIVER_OP_SUCCESS != udf_read_sectors(p_udf, &p_udf_dirent->fe, p_udf->i_part_start 
-			 + p_udf_dirent->fid->icb.loc.lba, 1))
+			 + p_udf_dirent->fid->icb.loc.lba, 1)) {
+		udf_dirent_free(p_udf_dirent);
 		return NULL;
+	}
 
 	if (strlen(p_udf_dirent->psz_name) < i_len) 
 	  p_udf_dirent->psz_name = (char *)
@@ -687,6 +689,7 @@ udf_readdir(udf_dirent_t *p_udf_dirent)
       }
       return p_udf_dirent;
     }
+  udf_dirent_free(p_udf_dirent);
   return NULL;
 }
 

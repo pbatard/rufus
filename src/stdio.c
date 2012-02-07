@@ -213,7 +213,7 @@ const char* StrError(DWORD error_code)
 	case ERROR_PARTITION_FAILURE:
 		return "Error while partitioning drive";
 	case ERROR_CANNOT_COPY:
-		return "Could not copy MS-DOS files";
+		return "Could not copy files to target drive";
 	case ERROR_CANCELLED:
 		return "Cancelled by user";
 	case ERROR_CANT_START_THREAD:
@@ -224,6 +224,9 @@ const char* StrError(DWORD error_code)
 		return "ISO image scan failure";
 	case ERROR_ISO_EXTRACT:
 		return "ISO image scan failure";
+	case ERROR_CANT_REMOUNT_VOLUME:
+		return "Unable to remount volume. You may have to use the\n"
+			"mountvol.exe command to make your device accessible again";
 	default:
 		uprintf("Unknown error: %08X\n", error_code);
 		SetLastError(error_code);
