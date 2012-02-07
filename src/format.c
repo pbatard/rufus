@@ -560,10 +560,10 @@ DWORD WINAPI FormatThread(LPVOID param)
 		}
 	}
 
-	// TODO: the only way to properly recover from a cancel will be through a device reset
 	// We issue a complete remount of the filesystem at the end on account of:
 	// - Ensuring the file explorer properly detects that the volume was updated
 	// - Ensuring that an NTFS system will be reparsed so that it becomes bootable
+	// TODO: on cancellation, this can leave the drive unmounted!
 	if (GetVolumeNameForVolumeMountPointA(drive_name, drive_guid, sizeof(drive_guid))) {
 		if (DeleteVolumeMountPointA(drive_name)) {
 			Sleep(200);

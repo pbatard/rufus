@@ -44,8 +44,8 @@ static const char* FileSystemLabel[FS_MAX] = { "FAT", "FAT32", "NTFS", "exFAT" }
 static const char* ClusterSizeLabel[] = { "512 bytes", "1024 bytes","2048 bytes","4096 bytes","8192 bytes",
 	"16 kilobytes", "32 kilobytes", "64 kilobytes", "128 kilobytes", "256 kilobytes", "512 kilobytes",
 	"1024 kilobytes","2048 kilobytes","4096 kilobytes","8192 kilobytes","16 megabytes","32 megabytes" };
-// For LGP set/restore
-static BOOL existing_key = FALSE;
+static BOOL existing_key = FALSE;	// For LGP set/restore
+static BOOL iso_size_check = TRUE;
 
 /*
  * Globals
@@ -67,6 +67,7 @@ static HICON hIconDisc;
 static StrArray DriveID, DriveLabel;
 static char szTimer[12] = "00:00:00";
 static unsigned int timer;
+static int64_t last_iso_blocking_status;
 
 /*
  * The following is used to allocate slots within the progress bar
@@ -472,7 +473,6 @@ BOOL CreatePartition(HANDLE hDrive)
 		break;
 	case FS_NTFS:
 	case FS_EXFAT:
-		// TODO: but how do we set this thing up afterwards?
 		DriveLayoutEx->PartitionEntry[0].Mbr.PartitionType = 0x07;	// NTFS
 		break;
 	default:
@@ -626,7 +626,6 @@ static void InitProgress(void)
 	}
 	if (IsChecked(IDC_DOS)) {
 		// 1 extra slot for PBR writing
-		// TODO: ISO
 		switch (ComboBox_GetItemData(hDOSType, ComboBox_GetCurSel(hDOSType))) {
 		case DT_WINME:
 			nb_slots[OP_DOS] = 3+1;
@@ -887,6 +886,35 @@ static void CALLBACK ClockTimer(HWND hWnd, UINT uMsg, UINT_PTR idEvent, DWORD dw
 	SendMessageA(GetDlgItem(hWnd, IDC_STATUS), SB_SETTEXTA, SBT_OWNERDRAW | 1, (LPARAM)szTimer);
 }
 
+/*
+ * Detect and notify about a blocking operation during ISO extraction cancellation
+ */
+static void CALLBACK BlockingTimer(HWND hWnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
+{
+	static BOOL user_notified = FALSE;
+	if (iso_blocking_status < 0) {
+		KillTimer(hMainDialog, TID_BLOCKING_TIMER);
+		user_notified = FALSE;
+		uprintf("Killed blocking I/O timer\n");
+	} else if(!user_notified) {
+		if (last_iso_blocking_status == iso_blocking_status) {
+		// A write or close operation hasn't made any progress since our last check
+		user_notified = TRUE;
+		uprintf("Blocking I/O operation detected\n");
+		MessageBoxU(hMainDialog,
+			"Rufus detected that Windows is still flushing its internal buffers\n"
+			"onto the USB device.\n\n"
+			"Depending on the speed of your USB device, this operation may\n"
+			"take a long time to complete, especially for large files.\n\n"
+			"We recommend that you let Windows finish, to avoid corruption.\n"
+			"But if you grow tired of waiting, you can just unplug the device...",
+			RUFUS_BLOCKING_IO_TITLE, MB_OK|MB_ICONINFORMATION);
+		} else {
+			last_iso_blocking_status = iso_blocking_status;
+		}
+	}
+}
+
 /* Callback for the modeless ISO extraction progress */
 BOOL CALLBACK ISOProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam) 
 {
@@ -906,10 +934,15 @@ BOOL CALLBACK ISOProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 		switch (LOWORD(wParam)) {
 		case IDC_ISO_ABORT:
 			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANCELLED;
-//			if (format_thid != NULL)
-//				CancelSynchronousIo(format_thid);
-			PrintStatus(0, FALSE, "Cancelling - This might take a while...");
-			uprintf("Cancelling (ISO)\n");
+			PrintStatus(0, FALSE, "Cancelling - Please wait...");
+			uprintf("Cancelling (from ISO proc.)\n");
+			EnableWindow(GetDlgItem(hISOProgressDlg, IDC_ISO_ABORT), FALSE);
+			EnableWindow(GetDlgItem(hMainDialog, IDCANCEL), FALSE);
+			//  Start a timer to detect blocking operations during ISO file extraction
+			if (iso_blocking_status >= 0) {
+				last_iso_blocking_status = iso_blocking_status;
+				SetTimer(hMainDialog, TID_BLOCKING_TIMER, 5000, BlockingTimer);
+			}
 			return TRUE;
 		}
 	case WM_CLOSE:		// prevent closure using Alt-F4
@@ -921,7 +954,10 @@ BOOL CALLBACK ISOProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 // The scanning process can be blocking for message processing => use a thread
 DWORD WINAPI ISOScanThread(LPVOID param)
 {
-	size_t i;
+	int i;
+
+	if (iso_path == NULL)
+		goto out;
 	PrintStatus(0, TRUE, "Scanning ISO image...\n");
 	if (!ExtractISO(iso_path, "", TRUE)) {
 		PrintStatus(0, TRUE, "Failed to scan ISO image.");
@@ -934,7 +970,7 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 			"ISO images that rely on 'bootmgr' - sorry.", "Unsupported ISO", MB_OK|MB_ICONINFORMATION);
 		safe_free(iso_path);
 	} else {
-		for (i=safe_strlen(iso_path); (i>=0)&&(iso_path[i] != '\\'); i--);
+		for (i=(int)safe_strlen(iso_path); (i>0)&&(iso_path[i]!='\\'); i--);
 		PrintStatus(0, TRUE, "Using ISO: '%s'\n", &iso_path[i+1]);
 	}
 
@@ -1095,17 +1131,26 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		switch(LOWORD(wParam)) {
 		case IDOK:			// close application
 		case IDCANCEL:
+			EnableWindow(GetDlgItem(hISOProgressDlg, IDC_ISO_ABORT), FALSE);
+			EnableWindow(GetDlgItem(hDlg, IDCANCEL), FALSE);
 			if (format_thid != NULL) {
 				if (MessageBoxA(hMainDialog, "Cancelling may leave the device in an UNUSABLE state.\r\n"
 					"If you are sure you want to cancel, click YES. Otherwise, click NO.",
 					RUFUS_CANCELBOX_TITLE, MB_YESNO|MB_ICONWARNING) == IDYES) {
 					// Operation may have completed in the meantime
 					if (format_thid != NULL) {
-//						CancelSynchronousIo(format_thid);
 						FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANCELLED;
 						PrintStatus(0, FALSE, "Cancelling - Please wait...");
-						uprintf("Cancelling (General)\n");
+						uprintf("Cancelling (from main app)\n");
+						//  Start a timer to detect blocking operations during ISO file extraction
+						if (iso_blocking_status >= 0) {
+							last_iso_blocking_status = iso_blocking_status;
+							SetTimer(hMainDialog, TID_BLOCKING_TIMER, 3000, BlockingTimer);
+						}
 					}
+				} else {
+					EnableWindow(GetDlgItem(hISOProgressDlg, IDC_ISO_ABORT), TRUE);
+					EnableWindow(GetDlgItem(hDlg, IDCANCEL), TRUE);
 				}
 				return (INT_PTR)TRUE;
 			}
@@ -1215,7 +1260,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 							"No ISO image selected...", MB_OK|MB_ICONERROR);
 						break;
 					}
-					if (iso_report.projected_size > (uint64_t)SelectedDrive.DiskSize) {
+					if ((iso_size_check) && (iso_report.projected_size > (uint64_t)SelectedDrive.DiskSize)) {
 						MessageBoxA(hMainDialog, "This ISO image is too big "
 							"for the selected target.", "ISO image too big...", MB_OK|MB_ICONERROR);
 						break;
@@ -1266,16 +1311,18 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		format_thid = NULL;
 		// Stop the timer
 		KillTimer(hMainDialog, TID_APP_TIMER);
-		// Close the cancel MessageBox if active
+		// Close the cancel MessageBox and Blocking notification if active
 		SendMessage(FindWindowA(MAKEINTRESOURCEA(32770), RUFUS_CANCELBOX_TITLE), WM_COMMAND, IDNO, 0);
+		SendMessage(FindWindowA(MAKEINTRESOURCEA(32770), RUFUS_BLOCKING_IO_TITLE), WM_COMMAND, IDYES, 0);
+		EnableWindow(GetDlgItem(hISOProgressDlg, IDC_ISO_ABORT), TRUE);
+		EnableWindow(GetDlgItem(hMainDialog, IDCANCEL), TRUE);
 		EnableControls(TRUE);
 		GetUSBDevices();
 		if (!IS_ERROR(FormatStatus)) {
 			PrintStatus(0, FALSE, "DONE");
 		} else if (SCODE_CODE(FormatStatus) == ERROR_CANCELLED) {
 			PrintStatus(0, FALSE, "Cancelled");
-			Notification(MSG_INFO, "Cancelled", "Operation cancelled by the user.\n"
-				"If you aborted during file extraction, you should replug the drive...");
+			Notification(MSG_INFO, "Cancelled", "Operation cancelled by the user.");
 		} else {
 			PrintStatus(0, FALSE, "FAILED");
 			Notification(MSG_ERROR, "Error", "Error: %s", StrError(FormatStatus));
@@ -1347,6 +1394,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	while(GetMessage(&msg, NULL, 0, 0)) {
 		// The following ensures the processing of the ISO progress window messages
 		if (!IsWindow(hISOProgressDlg) || !IsDialogMessage(hISOProgressDlg, &msg)) {
+			// Alt-S => Disable size limit
+			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'S')) {
+				iso_size_check = !iso_size_check;
+				PrintStatus(0, FALSE, "ISO size check %s", iso_size_check?"enabled":"disabled");
+				continue;
+			}
 #ifdef DISABLE_AUTORUN
 			// Alt-D => Delete the NoDriveTypeAutorun key on exit (useful if the app crashed)
 			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'D')) {

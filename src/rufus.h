@@ -22,14 +22,14 @@
 #pragma once
 
 /* Program options */
-#define RUFUS_DEBUG                 // print debug info to Debug facility (use debugview to consult)
+#define RUFUS_DEBUG                 // print debug info to Debug facility
 #define DISABLE_AUTORUN             // disable new USB drive notification from explorer when application is running
-
 /* Features not ready for prime time and that may *DESTROY* your data - USE AT YOUR OWN RISKS! */
 //#define RUFUS_TEST
 
 #define STR_NO_LABEL                "NO_LABEL"
 #define RUFUS_CANCELBOX_TITLE       "Rufus - Cancellation"
+#define RUFUS_BLOCKING_IO_TITLE     "Rufus - Flushing buffers"
 #define DRIVE_INDEX_MIN             0x80
 #define DRIVE_INDEX_MAX             0xC0
 #define MAX_DRIVES                  16
@@ -93,7 +93,8 @@ enum notification_type {
 enum timer_type {
 	TID_MESSAGE = 0x1000,
 	TID_BADBLOCKS_UPDATE,
-	TID_APP_TIMER
+	TID_APP_TIMER,
+	TID_BLOCKING_TIMER
 };
 
 /* Action type, for progress bar breakdown */
@@ -165,6 +166,7 @@ extern RUFUS_DRIVE_INFO SelectedDrive;
 extern const int nb_steps[FS_MAX];
 extern BOOL bWithFreeDOS;
 extern RUFUS_ISO_REPORT iso_report;
+extern int64_t iso_blocking_status;
 
 /*
  * Shared prototypes

@@ -53,7 +53,6 @@
 // How often should we update the progress bar (in 2K blocks) as updating
 // the progress bar for every block will bring extraction to a crawl
 #define PROGRESS_THRESHOLD        1024
-#define THREADED_CLOSE_THRESHOLD  (20 * 1024 * 1024)	// 20 MB
 #define FOUR_GIGABYTES            4294967296LL
 
 // Needed for UDF ISO access
@@ -61,7 +60,10 @@ CdIo_t* cdio_open (const char *psz_source, driver_id_t driver_id) {return NULL;}
 void cdio_destroy (CdIo_t *p_cdio) {}
 
 RUFUS_ISO_REPORT iso_report;
+int64_t iso_blocking_status = -1;
+#define ISO_BLOCKING(x) do {x; iso_blocking_status++; } while(0)
 static const char *psz_extract_dir;
+static const char *isolinux_name = "isolinux", *bootmgr_name = "bootmgr";
 static uint64_t total_blocks, nb_blocks;
 static BOOL scan_only = FALSE;
 
@@ -89,26 +91,12 @@ DWORD WINAPI ISOCloseHandleThread(LPVOID param)
 	ExitThread(0);
 }
 
-#define SAFE_CLOSEHANDLE_THREADED(handle)												\
-	if (!threaded_close) {																\
-		safe_closehandle(handle);														\
-	} else {																			\
-		thid = CreateThread(NULL, 0, ISOCloseHandleThread, (LPVOID)handle, 0, NULL);	\
-		while (WaitForSingleObject(thid, 1000) == WAIT_TIMEOUT) {						\
-			if (!FormatStatus) continue;												\
-			safe_closehandle(thid);														\
-			break;																		\
-		}																				\
-		handle = NULL;																	\
-		threaded_close = FALSE;															\
-	}
-
 // Returns 0 on success, nonzero on error
 static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const char *psz_path)
 {
-	HANDLE thid, file_handle = NULL;
+	HANDLE file_handle = NULL;
 	DWORD buf_size, wr_size;
-	BOOL threaded_close = FALSE;
+	BOOL r;
 	int i_length;
 	size_t i, nul_pos;
 	char* psz_fullpath;
@@ -138,7 +126,7 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 				_mkdir(psz_fullpath);
 			} else {
 				// Check for an "isolinux\" dir in root (psz_path = "")
-				if ((*psz_path == 0) && (safe_strcmp(psz_basename, "isolinux") == 0))
+				if ((*psz_path == 0) && (safe_strcmp(psz_basename, isolinux_name) == 0))
 					iso_report.has_isolinux = TRUE;
 			}
 			p_udf_dirent2 = udf_opendir(p_udf_dirent);
@@ -150,7 +138,7 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 			i_file_length = udf_get_file_length(p_udf_dirent);
 			if (scan_only) {
 				// Check for a "bootmgr" file in root (psz_path = "")
-				if ((*psz_path == 0) && (safe_strcmp(psz_basename, "bootmgr") == 0))
+				if ((*psz_path == 0) && (safe_strcmp(psz_basename, bootmgr_name) == 0))
 					iso_report.has_bootmgr = TRUE;
 				if (i_file_length >= FOUR_GIGABYTES)
 					iso_report.has_4GB_file = TRUE;
@@ -177,8 +165,6 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 				uprintf("  Unable to create file: %s\n", WindowsErrorString());
 				goto out;
 			}
-			threaded_close = (i_file_length > THREADED_CLOSE_THRESHOLD);
-			if (threaded_close) uprintf("will use threaded close\n");
 			while (i_file_length > 0) {
 				if (FormatStatus) goto out;
 				memset(buf, 0, UDF_BLOCKSIZE);
@@ -188,7 +174,8 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 					goto out;
 				}
 				buf_size = (DWORD)MIN(i_file_length, i_read);
-				if (!WriteFile(file_handle, buf, buf_size, &wr_size, NULL) || (buf_size != wr_size)) {
+				ISO_BLOCKING(r = WriteFile(file_handle, buf, buf_size, &wr_size, NULL));
+				if ((!r) || (buf_size != wr_size)) {
 					uprintf("  Error writing file: %s\n", WindowsErrorString());
 					goto out;
 				}
@@ -201,9 +188,8 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 			// excellent job at compensating for our small blocks read/writes to max out the
 			// device's bandwidth.
 			// The drawback however is with cancellation. With a large file, CloseHandle()
-			// may take forever to complete on a large file and is not an interruptible
-			// operation. To compensate for this, we create a thread when needed.
-			SAFE_CLOSEHANDLE_THREADED(file_handle);
+			// may take forever to complete and is not interruptible. We try to detect this.
+			ISO_BLOCKING(safe_closehandle(file_handle));
 		}
 		safe_free(psz_fullpath);
 	}
@@ -212,7 +198,7 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 out:
 	if (p_udf_dirent != NULL)
 		udf_dirent_free(p_udf_dirent);
-	SAFE_CLOSEHANDLE_THREADED(file_handle);
+	ISO_BLOCKING(safe_closehandle(file_handle));
 	safe_free(psz_fullpath);
 	return 1;
 }
@@ -220,9 +206,9 @@ out:
 // Returns 0 on success, nonzero on error
 static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 {
-	HANDLE thid, file_handle = NULL;
+	HANDLE file_handle = NULL;
 	DWORD buf_size, wr_size;
-	BOOL threaded_close = FALSE;
+	BOOL s;
 	int i_length, r = 1;
 	char psz_fullpath[1024], *psz_basename;
 	const char *psz_iso_name = &psz_fullpath[strlen(psz_extract_dir)];
@@ -259,7 +245,7 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 				_mkdir(psz_fullpath);
 			} else {
 				// Check for an "isolinux\" dir in root (psz_path = "")
-				if ((*psz_path == 0) && (safe_strcmp(psz_basename, "isolinux") == 0))
+				if ((*psz_path == 0) && (safe_strcmp(psz_basename, isolinux_name) == 0))
 					iso_report.has_isolinux = TRUE;
 			}
 			if (iso_extract_files(p_iso, psz_iso_name))
@@ -268,7 +254,7 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 			i_file_length = p_statbuf->size;
 			if (scan_only) {
 				// Check for a "bootmgr" file in root (psz_path = "")
-				if ((*psz_path == 0) && (safe_strcmp(psz_basename, "bootmgr") == 0))
+				if ((*psz_path == 0) && (safe_strcmp(psz_basename, bootmgr_name) == 0))
 					iso_report.has_bootmgr = TRUE;
 				if (i_file_length >= FOUR_GIGABYTES)
 					iso_report.has_4GB_file = TRUE;
@@ -293,7 +279,6 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 				uprintf("  Unable to create file: %s\n", WindowsErrorString());
 				goto out;
 			}
-			threaded_close = (i_file_length > THREADED_CLOSE_THRESHOLD);
 			for (i = 0; i_file_length > 0; i++) {
 				if (FormatStatus) goto out;
 				memset(buf, 0, ISO_BLOCKSIZE);
@@ -304,7 +289,8 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 					goto out;
 				}
 				buf_size = (DWORD)MIN(i_file_length, ISO_BLOCKSIZE);
-				if (!WriteFile(file_handle, buf, buf_size, &wr_size, NULL) || (buf_size != wr_size)) {
+				ISO_BLOCKING(s = WriteFile(file_handle, buf, buf_size, &wr_size, NULL));
+				if ((!s) || (buf_size != wr_size)) {
 					uprintf("  Error writing file: %s\n", WindowsErrorString());
 					goto out;
 				}
@@ -313,13 +299,13 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 					SendMessage(hISOProgressBar, PBM_SETPOS, (WPARAM)((MAX_PROGRESS*nb_blocks)/total_blocks), 0);
 				}
 			}
-			SAFE_CLOSEHANDLE_THREADED(file_handle);
+			ISO_BLOCKING(safe_closehandle(file_handle));
 		}
 	}
 	r = 0;
 
 out:
-	SAFE_CLOSEHANDLE_THREADED(file_handle);
+	ISO_BLOCKING(safe_closehandle(file_handle));
 	_cdio_list_free(p_entlist, true);
 	return r;
 }
@@ -360,6 +346,7 @@ BOOL ExtractISO(const char* src_iso, const char* dest_dir, bool scan)
 			goto out;
 		}
 		nb_blocks = 0;
+		iso_blocking_status = 0;
 		SetWindowLong(hISOProgressBar, GWL_STYLE, progress_style & (~PBS_MARQUEE));
 		SendMessage(hISOProgressBar, PBM_SETPOS, 0, 0);
 	}
@@ -390,6 +377,7 @@ try_iso:
 	r = iso_extract_files(p_iso, "");
 
 out:
+	iso_blocking_status = -1;
 	if (scan_only) {
 		// We use the fact that UDF_BLOCKSIZE and ISO_BLOCKSIZE are the same here
 		iso_report.projected_size = total_blocks * ISO_BLOCKSIZE;
