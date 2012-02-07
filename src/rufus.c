@@ -62,7 +62,7 @@ BOOL bWithFreeDOS, bWithSyslinux;
 
 static HANDLE format_thid = NULL;
 static HWND hDeviceTooltip = NULL, hFSTooltip = NULL, hProgress = NULL;
-static HWND hDOS = NULL, hSelectISO = NULL, hISOToolTip = NULL;
+static HWND hDOS = NULL, hSelectISO = NULL, hISOToolTip = NULL, hPassesToolTip = NULL;
 static HICON hIconDisc;
 static StrArray DriveID, DriveLabel;
 static char szTimer[12] = "00:00:00";
@@ -1061,6 +1061,7 @@ void InitDialog(HWND hDlg)
 	IGNORE_RETVAL(ComboBox_AddStringU(hNBPasses, "3 Passes"));
 	IGNORE_RETVAL(ComboBox_AddStringU(hNBPasses, "4 Passes"));
 	IGNORE_RETVAL(ComboBox_SetCurSel(hNBPasses, 1));
+	hPassesToolTip = CreateTooltip(hNBPasses, "Pattern: 0x55, 0xAA", -1);
 	// Fill up the DOS type dropdown
 	IGNORE_RETVAL(ComboBox_SetItemData(hDOSType, ComboBox_AddStringU(hDOSType, "MS-DOS"), DT_WINME));
 	IGNORE_RETVAL(ComboBox_SetCurSel(hDOSType, DT_WINME));
@@ -1094,7 +1095,7 @@ void InitDialog(HWND hDlg)
 static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	DRAWITEMSTRUCT* pDI;
-	int nDeviceIndex, fs, dt;
+	int nDeviceIndex, fs;
 	DWORD DeviceNum;
 	char str[MAX_PATH], tmp[128];
 	static UINT uDOSChecked = BST_CHECKED;
@@ -1176,6 +1177,26 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				break;
 			}
 			break;
+		case IDC_NBPASSES:
+			switch (HIWORD(wParam)) {
+			case CBN_SELCHANGE:
+				DestroyTooltip(hPassesToolTip);
+				switch(ComboBox_GetCurSel(hNBPasses)) {
+				case 0:
+					hPassesToolTip = CreateTooltip(hNBPasses, "Pattern: 0x55", -1);
+					break;
+				case 1:
+					hPassesToolTip = CreateTooltip(hNBPasses, "Pattern: 0x55, 0xAA", -1);
+					break;
+				case 2:
+					hPassesToolTip = CreateTooltip(hNBPasses, "Pattern: 0x55, 0xAA, 0xFF", -1);
+					break;
+				case 3:
+					hPassesToolTip = CreateTooltip(hNBPasses, "Pattern: 0x55, 0xAA, 0xFF, 0x00", -1);
+					break;
+				}
+			}
+			break;
 		case IDC_FILESYSTEM:
 			if (HIWORD(wParam) != CBN_SELCHANGE)
 				break;
@@ -1201,7 +1222,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			}
 			if (fs == FS_NTFS) {
 				// Only allow ISO with NTFS for the time being
-				IGNORE_RETVAL(ComboBox_SetItemData(hDOSType, ComboBox_AddStringU(hDOSType, "ISO..."), DT_ISO));
+				IGNORE_RETVAL(ComboBox_SetItemData(hDOSType, ComboBox_AddStringU(hDOSType, "ISO Image"), DT_ISO));
 			}
 			IGNORE_RETVAL(ComboBox_SetCurSel(hDOSType, (bWithFreeDOS && (fs != FS_NTFS))?1:0));
 			if (!IsWindowEnabled(hDOS)) {
@@ -1211,18 +1232,16 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			}
 			// Fall through to enable/disable the ISO selection
 		case IDC_DOSTYPE:
-			switch (HIWORD(wParam)) {
-			case CBN_SELCHANGE:
-				dt = (int)ComboBox_GetItemData(hDOSType, ComboBox_GetCurSel(hDOSType));
-				// Disable/Restore the DOS checkbox according to FS
-				if (dt == DT_ISO) {
-					ShowWindow(hSelectISO, SW_SHOW);
-				} else {
-					ShowWindow(hSelectISO, SW_HIDE);
-				}
+			if (HIWORD(wParam) != CBN_SELCHANGE)
+				break;
+			if (ComboBox_GetItemData(hDOSType, ComboBox_GetCurSel(hDOSType)) != DT_ISO) {
+				ShowWindow(hSelectISO, SW_HIDE);
 				break;
 			}
-			break;
+			ShowWindow(hSelectISO, SW_SHOW);
+			// Fall through if no ISO is selected
+			if ((iso_path != NULL) || (LOWORD(wParam) == IDC_FILESYSTEM))
+				break;
 		case IDC_SELECT_ISO:
 			DestroyTooltip(hISOToolTip);
 			safe_free(iso_path);
@@ -1256,7 +1275,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				if (ComboBox_GetItemData(hDOSType, ComboBox_GetCurSel(hDOSType)) == DT_ISO) {
 					if (iso_path == NULL) {
 						MessageBoxA(hMainDialog, "Please click on the disc button to select a bootable ISO,\n"
-							"or unselect the \"Create bootable disk...\" checkbox.",
+							"or uncheck the \"Create a bootable disk...\" checkbox.",
 							"No ISO image selected...", MB_OK|MB_ICONERROR);
 						break;
 					}

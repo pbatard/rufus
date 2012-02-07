@@ -1,4 +1,4 @@
-AC_INIT([rufus], [1.0.8], [https://github.com/pbatard/rufus/issues], [rufus], [http://rufus.akeo.ie])
+AC_INIT([rufus], [1.1.0], [https://github.com/pbatard/rufus/issues], [rufus], [http://rufus.akeo.ie])
 AM_INIT_AUTOMAKE([-Wno-portability foreign no-dist no-dependencies])
 AC_CONFIG_SRCDIR([src/rufus.c])
 AC_CONFIG_MACRO_DIR([m4])
@@ -15,25 +15,6 @@ AC_CHECK_TOOL(STRIP, strip, strip)
 AC_CHECK_TOOL(WINDRES, windres, windres)
 AC_C_INLINE
 AC_DEFINE([_GNU_SOURCE], [], [Use GNU extensions])
-
-## We don't actually use config.h for the time being
-#AM_CONFIG_HEADER([config.h])
-
-## The following creates config.guess and a bunch of polluting stuff
-## => avoid it for now
-#AC_CANONICAL_HOST
-#AC_MSG_CHECKING([development environment])
-#case $host in
-#*-mingw*)
-#	AC_MSG_RESULT([MinGW])
-#	AM_CFLAGS="-Wshadow"
-#	;;
-#*)
-#	AC_MSG_ERROR([unsupported development environment])
-#esac
-
-AC_MSG_RESULT([enabling Large File Support (for ISO images)])
-AM_CFLAGS="-D_FILE_OFFSET_BITS=64 -D_OFF_T_DEFINED -D_OFF_T_ -D_off_t=off64_t -Doff_t=off64_t"
 
 # Clang needs an explicit WIN32_WINNT defined else it produces warnings
 # in msapi_utf8.h - including winver.h only doesn't work
@@ -52,7 +33,7 @@ fi
 
 AC_ARG_WITH([syslinux],
 	[AS_HELP_STRING([--with-syslinux],
-		[embed SysLinux support (default=yes)])],
+		[embed Syslinux support (default=yes)])],
 	[],
 	[with_freedos=yes])
 if test "x$with_syslinux" != "xno" ; then
@@ -60,17 +41,21 @@ if test "x$with_syslinux" != "xno" ; then
 	EXESUFFIX="f"
 fi
 
-
 # Debug symbols
-AC_ARG_ENABLE(debug, AS_HELP_STRING([--enable-debug], [keep debug symbols for gdb (default=yes)]),
+AC_ARG_ENABLE([debug],
+	[AS_HELP_STRING([--enable-debug],
+		[keep debug symbols for gdb (default=yes)])],
 	[debug_enabled=$enableval],
 	[debug_enabled='yes'])
-if test "x$debug_enabled" = "xyes" ; then
+if test "x$debug_enabled" != "xno" ; then
   CFLAGS="-g -O2"
 else
   CFLAGS="-O2"
   LDFLAGS="-s"
 fi
+
+AC_MSG_RESULT([enabling Large File Support (ISO support)])
+AM_CFLAGS="$AM_CFLAGS -D_FILE_OFFSET_BITS=64 -D_OFF_T_DEFINED -D_OFF_T_ -D_off_t=off64_t -Doff_t=off64_t"
 
 # check for -Wno-pointer-sign compiler support (GCC >= 4)
 saved_CFLAGS="${CFLAGS}"
@@ -96,3 +81,7 @@ AC_CONFIG_FILES([src/libcdio/iso9660/Makefile])
 AC_CONFIG_FILES([src/libcdio/udf/Makefile])
 AC_CONFIG_FILES([src/libcdio/driver/Makefile])
 AC_OUTPUT
+
+AC_MSG_NOTICE([
+FreeDOS Support  : $(test "x$with_freedos" != "xno" && echo enabled || echo disabled)
+Syslinux Support : $(test "x$with_syslinux" != "xno" && echo enabled || echo disabled)])
