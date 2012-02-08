@@ -223,7 +223,7 @@ const char* StrError(DWORD error_code)
 	case ERROR_ISO_SCAN:
 		return "ISO image scan failure";
 	case ERROR_ISO_EXTRACT:
-		return "ISO image scan failure";
+		return "ISO image extraction failure";
 	case ERROR_CANT_REMOUNT_VOLUME:
 		return "Unable to remount volume. You may have to use the\n"
 			"mountvol.exe command to make your device accessible again";

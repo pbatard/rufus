@@ -74,13 +74,17 @@ static __inline char* size_to_hr(int64_t size)
 {
 	int suffix = 0;
 	static char str_size[24];
-	const char* sizes[] = { "bytes", "KB", "MB", "GB", "TB", "PB" };
+	const char* sizes[] = { "", "KB", "MB", "GB", "TB" };
 	double hr_size = (double)size;
 	while ((suffix < ARRAYSIZE(sizes)) && (hr_size >= 1024.0)) {
 		hr_size /= 1024.0;
 		suffix++;
 	}
-	safe_sprintf(str_size, sizeof(str_size), " (%0.1f %s)", hr_size, sizes[suffix]);
+	if (suffix == 0) {
+		safe_sprintf(str_size, sizeof(str_size), " (%d bytes)", (int)hr_size);
+	} else {
+		safe_sprintf(str_size, sizeof(str_size), " (%0.1f %s)", hr_size, sizes[suffix]);
+	}
 	return str_size;
 }
 
@@ -150,10 +154,7 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 			}
 			// Replace slashes with backslashes and append the size to the path for UI display
 			nul_pos = safe_strlen(psz_fullpath);
-			for (i=0; i<nul_pos; i++) {
-				if (psz_fullpath[i] == '/')
-					psz_fullpath[i] = '\\';
-			}
+			for (i=0; i<nul_pos; i++) if (psz_fullpath[i] == '/') psz_fullpath[i] = '\\';
 			safe_strcpy(&psz_fullpath[nul_pos], 24, size_to_hr(i_file_length));
 			uprintf("Extracting: %s\n", psz_fullpath);
 			SetWindowTextU(hISOFileName, psz_fullpath);
@@ -265,13 +266,12 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 			}
 			// Replace slashes with backslashes and append the size to the path for UI display
 			nul_pos = safe_strlen(psz_fullpath);
-			for (i=0; i<nul_pos; i++) {
-				if (psz_fullpath[i] == '/')
-					psz_fullpath[i] = '\\';
-			}
+			for (i=0; i<nul_pos; i++) if (psz_fullpath[i] == '/') psz_fullpath[i] = '\\';
 			safe_strcpy(&psz_fullpath[nul_pos], 24, size_to_hr(i_file_length));
 			uprintf("Extracting: %s\n", psz_fullpath);
 			SetWindowTextU(hISOFileName, psz_fullpath);
+			// ISO9660 cannot handle backslashes
+			for (i=0; i<nul_pos; i++) if (psz_fullpath[i] == '\\') psz_fullpath[i] = '/';
 			psz_fullpath[nul_pos] = 0;
 			file_handle = CreateFileU(psz_fullpath, GENERIC_READ | GENERIC_WRITE,
 				FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
