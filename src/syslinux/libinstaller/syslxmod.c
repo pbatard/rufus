@@ -110,7 +110,7 @@ int syslinux_patch(const sector_t *sectp, int nsectors,
     int nsect = ((boot_image_len + SECTOR_SIZE - 1) >> SECTOR_SHIFT) + 2;
     uint32_t csum;
     int i, dw, nptrs;
-    struct boot_sector *sbs = (struct boot_sector *)boot_sector;
+    struct fat_boot_sector *sbs = (struct fat_boot_sector *)boot_sector;
     uint64_t *advptrs;
 
     if (nsectors < nsect)

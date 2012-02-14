@@ -14,7 +14,6 @@
 #define SYSLINUX_H
 
 #include <inttypes.h>
-#include <sys/types.h>
 #include "advconst.h"
 #include "setadv.h"
 
@@ -41,10 +40,10 @@ extern const int syslinux_mbr_mtime;
 #define SECTOR_SIZE	(1 << SECTOR_SHIFT)
 
 /* This takes a boot sector and merges in the syslinux fields */
-void syslinux_make_bootsect(void *);
+void syslinux_make_bootsect(void *bs, int fs_type);
 
 /* Check to see that what we got was indeed an MS-DOS boot sector/superblock */
-const char *syslinux_check_bootsect(const void *bs);
+const char *syslinux_check_bootsect(const void *bs, int *fs_type);
 
 /* This patches the boot sector and ldlinux.sys based on a sector map */
 typedef uint64_t sector_t;

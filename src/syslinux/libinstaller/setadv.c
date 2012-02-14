@@ -20,6 +20,7 @@
  * Return 0 on success, -1 on error, and set errno.
  *
  */
+//#define  _GNU_SOURCE
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -28,6 +29,8 @@
 #include <string.h>
 #include <errno.h>
 #include "syslxint.h"
+#include "syslxcom.h"
+#include "syslxfs.h"
 
 unsigned char syslinux_adv[2 * ADV_SIZE];
 

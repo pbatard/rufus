@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -21,10 +21,12 @@
   <ItemGroup>
     <ClInclude Include="..\advconst.h" />
     <ClInclude Include="..\syslinux.h" />
+    <ClInclude Include="..\syslxcom.h" />
+    <ClInclude Include="..\syslxfs.h" />
     <ClInclude Include="..\syslxint.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\fat.c" />
+    <ClCompile Include="..\fs.c" />
     <ClCompile Include="..\setadv.c" />
     <ClCompile Include="..\syslxmod.c" />
   </ItemGroup>

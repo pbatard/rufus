@@ -63,7 +63,8 @@ RUFUS_ISO_REPORT iso_report;
 int64_t iso_blocking_status = -1;
 #define ISO_BLOCKING(x) do {x; iso_blocking_status++; } while(0)
 static const char *psz_extract_dir;
-static const char *isolinux_name = "isolinux", *bootmgr_name = "bootmgr";
+static const char *bootmgr_name = "bootmgr";
+static const char *isolinux_name[] = { "isolinux.cfg", "syslinux.cfg", "extlinux.conf"};
 static uint64_t total_blocks, nb_blocks;
 static BOOL scan_only = FALSE;
 
@@ -126,13 +127,7 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 			goto out;
 		}
 		if (udf_is_dir(p_udf_dirent)) {
-			if (!scan_only) {
-				_mkdir(psz_fullpath);
-			} else {
-				// Check for an "isolinux\" dir in root (psz_path = "")
-				if ((*psz_path == 0) && (safe_strcmp(psz_basename, isolinux_name) == 0))
-					iso_report.has_isolinux = TRUE;
-			}
+			if (!scan_only) _mkdir(psz_fullpath);
 			p_udf_dirent2 = udf_opendir(p_udf_dirent);
 			if (p_udf_dirent2 != NULL) {
 				if (udf_extract_files(p_udf, p_udf_dirent2, &psz_fullpath[strlen(psz_extract_dir)]))
@@ -144,6 +139,11 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 				// Check for a "bootmgr" file in root (psz_path = "")
 				if ((*psz_path == 0) && (safe_strcmp(psz_basename, bootmgr_name) == 0))
 					iso_report.has_bootmgr = TRUE;
+				// Check for a syslinux config file anywhere
+				for (i=0; i<ARRAYSIZE(isolinux_name); i++) {
+					if (safe_strcmp(psz_basename, isolinux_name[i]) == 0)
+						iso_report.has_isolinux = TRUE;
+				}
 				if (i_file_length >= FOUR_GIGABYTES)
 					iso_report.has_4GB_file = TRUE;
 				total_blocks += i_file_length/UDF_BLOCKSIZE;
@@ -242,13 +242,7 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 			continue;
 		iso9660_name_translate(p_statbuf->filename, psz_basename);
 		if (p_statbuf->type == _STAT_DIR) {
-			if (!scan_only) {
-				_mkdir(psz_fullpath);
-			} else {
-				// Check for an "isolinux\" dir in root (psz_path = "")
-				if ((*psz_path == 0) && (safe_strcmp(psz_basename, isolinux_name) == 0))
-					iso_report.has_isolinux = TRUE;
-			}
+			if (!scan_only) _mkdir(psz_fullpath);
 			if (iso_extract_files(p_iso, psz_iso_name))
 				goto out;
 		} else {
@@ -257,6 +251,11 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 				// Check for a "bootmgr" file in root (psz_path = "")
 				if ((*psz_path == 0) && (safe_strcmp(psz_basename, bootmgr_name) == 0))
 					iso_report.has_bootmgr = TRUE;
+				// Check for a syslinux config file anywhere
+				for (i=0; i<ARRAYSIZE(isolinux_name); i++) {
+					if (safe_strcmp(psz_basename, isolinux_name[i]) == 0)
+						iso_report.has_isolinux = TRUE;
+				}
 				if (i_file_length >= FOUR_GIGABYTES)
 					iso_report.has_4GB_file = TRUE;
 				total_blocks += i_file_length/ISO_BLOCKSIZE;

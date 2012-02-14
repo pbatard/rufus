@@ -12,6 +12,6 @@ USE_MSVCRT=1
 TARGETLIBS=$(SDK_LIB_PATH)\kernel32.lib \
            $(SDK_LIB_PATH)\user32.lib
 
-SOURCES=fat.c         \
+SOURCES=fs.c          \
         setadv.c      \
         syslxmod.c

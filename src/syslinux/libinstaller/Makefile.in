@@ -52,7 +52,7 @@ am__v_at_ = $(am__v_at_$(AM_DEFAULT_VERBOSITY))
 am__v_at_0 = @
 libinstaller_a_AR = $(AR) $(ARFLAGS)
 libinstaller_a_LIBADD =
-am_libinstaller_a_OBJECTS = libinstaller_a-fat.$(OBJEXT) \
+am_libinstaller_a_OBJECTS = libinstaller_a-fs.$(OBJEXT) \
 	libinstaller_a-setadv.$(OBJEXT) \
 	libinstaller_a-syslxmod.$(OBJEXT)
 libinstaller_a_OBJECTS = $(am_libinstaller_a_OBJECTS)
@@ -167,7 +167,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 noinst_LIBRARIES = libinstaller.a
-libinstaller_a_SOURCES = fat.c setadv.c syslxmod.c
+libinstaller_a_SOURCES = fs.c setadv.c syslxmod.c
 libinstaller_a_CFLAGS = $(AM_CFLAGS)
 all: all-am
 
@@ -225,13 +225,13 @@ distclean-compile:
 	$(AM_V_CC) @AM_BACKSLASH@
 	$(COMPILE) -c `$(CYGPATH_W) '$<'`
 
-libinstaller_a-fat.o: fat.c
+libinstaller_a-fs.o: fs.c
 	$(AM_V_CC) @AM_BACKSLASH@
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libinstaller_a_CFLAGS) $(CFLAGS) -c -o libinstaller_a-fat.o `test -f 'fat.c' || echo '$(srcdir)/'`fat.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libinstaller_a_CFLAGS) $(CFLAGS) -c -o libinstaller_a-fs.o `test -f 'fs.c' || echo '$(srcdir)/'`fs.c
 
-libinstaller_a-fat.obj: fat.c
+libinstaller_a-fs.obj: fs.c
 	$(AM_V_CC) @AM_BACKSLASH@
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libinstaller_a_CFLAGS) $(CFLAGS) -c -o libinstaller_a-fat.obj `if test -f 'fat.c'; then $(CYGPATH_W) 'fat.c'; else $(CYGPATH_W) '$(srcdir)/fat.c'; fi`
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libinstaller_a_CFLAGS) $(CFLAGS) -c -o libinstaller_a-fs.obj `if test -f 'fs.c'; then $(CYGPATH_W) 'fs.c'; else $(CYGPATH_W) '$(srcdir)/fs.c'; fi`
 
 libinstaller_a-setadv.o: setadv.c
 	$(AM_V_CC) @AM_BACKSLASH@

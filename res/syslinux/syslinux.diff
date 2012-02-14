@@ -1,0 +1,29 @@
+diff --git a/core/fs/lib/loadconfig.c b/core/fs/lib/loadconfig.c
+index c9652b6..4dfe1b9 100644
+--- a/core/fs/lib/loadconfig.c
++++ b/core/fs/lib/loadconfig.c
+@@ -10,6 +10,8 @@
+  * This searches for extlinux.conf and syslinux.cfg in the install
+  * directory, followed by a set of fallback directories.  If found,
+  * set the current working directory to match.
++ * isolinux configuration values are added for the case where ISO
++ * content has been duplicated to a disk (typically bootable USB).
+  */
+ int generic_load_config(void)
+ {
+@@ -17,12 +19,15 @@ int generic_load_config(void)
+ 	NULL,			/* CurrentDirName */
+ 	"/boot/syslinux",
+ 	"/syslinux",
++	"/boot/isolinux",
++	"/isolinux",
+ 	"/",
+ 	NULL
+     };
+     static const char *filenames[] = {
+ 	"extlinux.conf",
+ 	"syslinux.cfg",
++	"isolinux.cfg",
+ 	NULL
+     };
+ 

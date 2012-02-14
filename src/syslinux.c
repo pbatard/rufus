@@ -29,6 +29,7 @@
 #include "resource.h"
 
 #include "syslinux.h"
+#include "syslxfs.h"
 #include "libfat.h"
 #include "setadv.h"
 
@@ -199,7 +200,7 @@ BOOL InstallSyslinux(DWORD num, const char* drive_name)
 	}
 
 	/* Make the syslinux boot sector */
-	syslinux_make_bootsect(sectbuf);
+	syslinux_make_bootsect(sectbuf, VFAT);
 
 	/* Write boot sector back */
 	if (SetFilePointer(d_handle, 0, NULL, FILE_BEGIN) != 0 ||

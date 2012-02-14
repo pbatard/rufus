@@ -965,9 +965,10 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 	}
 	uprintf("ISO size: %lld bytes, 4GB:%c, bootmgr:%c, isolinux:%c\n", iso_report.projected_size,
 		iso_report.has_4GB_file?'Y':'N', iso_report.has_bootmgr?'Y':'N', iso_report.has_isolinux?'Y':'N');
-	if (!iso_report.has_bootmgr) {
-		MessageBoxU(hMainDialog, "This version of Rufus supports only\n"
-			"ISO images that rely on 'bootmgr' - sorry.", "Unsupported ISO", MB_OK|MB_ICONINFORMATION);
+	if ((!iso_report.has_bootmgr) && (!iso_report.has_isolinux)) {
+		MessageBoxU(hMainDialog, "This version of Rufus only supports bootable ISOs\n"
+			"based on 'bootmgr' or 'isolinux'.\n"
+			"This ISO image doesn't appear to use either...", "Unsupported ISO", MB_OK|MB_ICONINFORMATION);
 		safe_free(iso_path);
 	} else {
 		for (i=(int)safe_strlen(iso_path); (i>0)&&(iso_path[i]!='\\'); i--);
@@ -1095,7 +1096,7 @@ void InitDialog(HWND hDlg)
 static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	DRAWITEMSTRUCT* pDI;
-	int nDeviceIndex, fs;
+	int nDeviceIndex, fs, dt;
 	DWORD DeviceNum;
 	char str[MAX_PATH], tmp[128];
 	static UINT uDOSChecked = BST_CHECKED;
@@ -1218,11 +1219,10 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				if (bWithFreeDOS)
 					IGNORE_RETVAL(ComboBox_SetItemData(hDOSType, ComboBox_AddStringU(hDOSType, "FreeDOS"), DT_FREEDOS));
 				if (bWithSyslinux)
-					IGNORE_RETVAL(ComboBox_SetItemData(hDOSType, ComboBox_AddStringU(hDOSType, "Syslinux"), DT_SYSLINUX));
+					IGNORE_RETVAL(ComboBox_SetItemData(hDOSType, ComboBox_AddStringU(hDOSType, "ISO Image"), DT_ISO_FAT));
 			}
 			if (fs == FS_NTFS) {
-				// Only allow ISO with NTFS for the time being
-				IGNORE_RETVAL(ComboBox_SetItemData(hDOSType, ComboBox_AddStringU(hDOSType, "ISO Image"), DT_ISO));
+				IGNORE_RETVAL(ComboBox_SetItemData(hDOSType, ComboBox_AddStringU(hDOSType, "ISO Image"), DT_ISO_NTFS));
 			}
 			IGNORE_RETVAL(ComboBox_SetCurSel(hDOSType, (bWithFreeDOS && (fs != FS_NTFS))?1:0));
 			if (!IsWindowEnabled(hDOS)) {
@@ -1234,7 +1234,8 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		case IDC_DOSTYPE:
 			if (HIWORD(wParam) != CBN_SELCHANGE)
 				break;
-			if (ComboBox_GetItemData(hDOSType, ComboBox_GetCurSel(hDOSType)) != DT_ISO) {
+			dt = (int)ComboBox_GetItemData(hDOSType, ComboBox_GetCurSel(hDOSType));
+			if ((dt != DT_ISO_NTFS) && (dt != DT_ISO_FAT)) {
 				ShowWindow(hSelectISO, SW_HIDE);
 				break;
 			}
@@ -1272,7 +1273,8 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			FormatStatus = 0;
 			nDeviceIndex = ComboBox_GetCurSel(hDeviceList);
 			if (nDeviceIndex != CB_ERR) {
-				if (ComboBox_GetItemData(hDOSType, ComboBox_GetCurSel(hDOSType)) == DT_ISO) {
+				dt = (int)ComboBox_GetItemData(hDOSType, ComboBox_GetCurSel(hDOSType));
+				if ((dt == DT_ISO_NTFS) || (dt == DT_ISO_FAT)) {
 					if (iso_path == NULL) {
 						MessageBoxA(hMainDialog, "Please click on the disc button to select a bootable ISO,\n"
 							"or uncheck the \"Create a bootable disk...\" checkbox.",
@@ -1282,6 +1284,15 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 					if ((iso_size_check) && (iso_report.projected_size > (uint64_t)SelectedDrive.DiskSize)) {
 						MessageBoxA(hMainDialog, "This ISO image is too big "
 							"for the selected target.", "ISO image too big...", MB_OK|MB_ICONERROR);
+						break;
+					}
+					if ((dt == DT_ISO_NTFS) && (!iso_report.has_bootmgr)) {
+						MessageBoxA(hMainDialog, "Only 'bootmgr' based ISO "
+							"images can be used with NTFS.", "Unsupported ISO...", MB_OK|MB_ICONERROR);
+						break;
+					} else if ((dt == DT_ISO_FAT) && (!iso_report.has_isolinux)) {
+						MessageBoxA(hMainDialog, "Only 'isolinux' based ISO "
+							"images can be used with FAT.", "Unsupported ISO...", MB_OK|MB_ICONERROR);
 						break;
 					}
 				}

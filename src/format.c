@@ -307,7 +307,7 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 
 	fake_fd._ptr = (char*)hPhysicalDrive;
 	fake_fd._bufsiz = SelectedDrive.Geometry.BytesPerSector;
-	if (ComboBox_GetItemData(hDOSType, ComboBox_GetCurSel(hDOSType)) == DT_SYSLINUX) {
+	if (ComboBox_GetItemData(hDOSType, ComboBox_GetCurSel(hDOSType)) == DT_ISO_FAT) {
 		r = write_syslinux_mbr(&fake_fd);
 	} else {
 		r = write_95b_mbr(&fake_fd);
@@ -321,10 +321,11 @@ out:
 /*
  * Process the Partition Boot Record
  */
-static BOOL WritePBR(HANDLE hLogicalVolume, BOOL bFreeDOS)
+static BOOL WritePBR(HANDLE hLogicalVolume)
 {
 	int i;
 	FILE fake_fd = { 0 };
+	BOOL bFreeDOS = (ComboBox_GetItemData(hDOSType, ComboBox_GetCurSel(hDOSType)) == DT_FREEDOS);
 
 	fake_fd._ptr = (char*)hLogicalVolume;
 	fake_fd._bufsiz = SelectedDrive.Geometry.BytesPerSector;
@@ -510,10 +511,10 @@ DWORD WINAPI FormatThread(LPVOID param)
 	UpdateProgress(OP_FIX_MBR, -1.0f);
 
 	if (IsChecked(IDC_DOS)) {
-		switch (ComboBox_GetItemData(hDOSType, ComboBox_GetCurSel(hDOSType))) {
-		case DT_FREEDOS:
+		switch(ComboBox_GetItemData(hDOSType, ComboBox_GetCurSel(hDOSType))) {
 		case DT_WINME:
-		case DT_ISO:
+		case DT_FREEDOS:
+		case DT_ISO_NTFS:
 			// We still have a lock, which we need to modify the volume boot record 
 			// => no need to reacquire the lock...
 			hLogicalVolume = GetDriveHandle(num, drive_name, TRUE, FALSE);
@@ -527,32 +528,14 @@ DWORD WINAPI FormatThread(LPVOID param)
 			// after the FS is re-mounted by Windows
 			UnmountDrive(hLogicalVolume);
 			PrintStatus(0, TRUE, "Writing partition boot record...");
-			if (!WritePBR(hLogicalVolume, ComboBox_GetItemData(hDOSType, ComboBox_GetCurSel(hDOSType)) == DT_FREEDOS)) {
-				// Errorcode has already been set
+			if (!WritePBR(hLogicalVolume)) {
+				if (!FormatStatus)
+					FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_WRITE_FAULT;
 				goto out;
 			}
-
-			// We must close and unlock the volume to write files to it
-			safe_unlockclose(hLogicalVolume);
-			UpdateProgress(OP_DOS, -1.0f);
-			if (ComboBox_GetItemData(hDOSType, ComboBox_GetCurSel(hDOSType)) != DT_ISO) {
-				PrintStatus(0, TRUE, "Copying DOS files...");
-				if (!ExtractDOS(drive_name)) {
-					if (!FormatStatus)
-						FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANNOT_COPY;
-					goto out;
-				}
-			} else if (iso_path != NULL) {
-				PrintStatus(0, TRUE, "Copying ISO files...");
-				drive_name[2] = 0;
-				if ( (!ExtractISO(iso_path, drive_name, FALSE)) && (!FormatStatus)) {
-					FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANNOT_COPY;
-				}
-				drive_name[2] = '\\';
-			}
 			break;
-		// Syslinux requires patching of the PBR after the files have been extracted
-		case DT_SYSLINUX:
+		case DT_ISO_FAT:
+			PrintStatus(0, TRUE, "Installing Syslinux...");
 			if (!InstallSyslinux(num, drive_name)) {
 				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_INSTALL_FAILURE;
 			}
@@ -560,7 +543,7 @@ DWORD WINAPI FormatThread(LPVOID param)
 		}
 	}
 
-	// We issue a complete remount of the filesystem at the end on account of:
+	// We issue a complete remount of the filesystem at on account of:
 	// - Ensuring the file explorer properly detects that the volume was updated
 	// - Ensuring that an NTFS system will be reparsed so that it becomes bootable
 	// TODO: on cancellation, this can leave the drive unmounted!
@@ -573,9 +556,39 @@ DWORD WINAPI FormatThread(LPVOID param)
 				uprintf("Failed to remount %s on %s\n", drive_guid, drive_name);
 				// This will leave the drive unaccessible and must be flagged as an error
 				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_REMOUNT_VOLUME);
+				goto out;
 			}
 		} else {
 			uprintf("Could not remount %s %s\n", drive_name, WindowsErrorString());
+			// Try to continue regardless
+		}
+	}
+
+	if (IsChecked(IDC_DOS)) {
+		UpdateProgress(OP_DOS, -1.0f);
+		switch(ComboBox_GetItemData(hDOSType, ComboBox_GetCurSel(hDOSType))) {
+		case DT_WINME:
+		case DT_FREEDOS:
+			PrintStatus(0, TRUE, "Copying DOS files...");
+			if (!ExtractDOS(drive_name)) {
+				if (!FormatStatus)
+					FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANNOT_COPY;
+				goto out;
+			}
+			break;
+		case DT_ISO_NTFS:
+		case DT_ISO_FAT:
+			// TODO: ISO_FAT: ensure the ISO doesn't have ldlinux.sys as it will break the existing one
+			if (iso_path != NULL) {
+				PrintStatus(0, TRUE, "Copying ISO files...");
+				drive_name[2] = 0;
+				if ( (!ExtractISO(iso_path, drive_name, FALSE)) && (!FormatStatus)) {
+					FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANNOT_COPY;
+					goto out;
+				}
+				// TODO: ISO_FAT: create menu and stuff
+			}
+			break;
 		}
 	}
 
