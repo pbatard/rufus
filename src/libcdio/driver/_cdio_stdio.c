@@ -39,6 +39,7 @@
 #ifdef HAVE_ERRNO_H
 #include <errno.h>
 #endif
+#include <ctype.h>
 
 #include <cdio/logging.h>
 #include <cdio/util.h>
@@ -225,17 +226,34 @@ cdio_stdio_new(const char pathname[])
   cdio_stream_io_functions funcs = { NULL, NULL, NULL, NULL, NULL, NULL };
   _UserData *ud = NULL;
   struct CDIO_STAT statbuf;
-  
-  if (CDIO_STAT (pathname, &statbuf) == -1) 
+  char* pathdup;
+
+  if (pathname == NULL)
+    return NULL;
+
+  pathdup = strdup(pathname);
+  if (pathdup == NULL)
+    return NULL;
+
+#ifdef __MINGW32__
+  /* _stati64 requires using native Windows paths => convert "/c/..." to "c:/..." */
+  if ((strlen(pathdup) > 3) && (pathdup[0] == '/') && (pathdup[2] == '/') && (isalpha(pathdup[1])))
+    {
+      pathdup[0] = pathdup[1];
+      pathdup[1] = ':';
+    }
+#endif
+  if (CDIO_STAT (pathdup, &statbuf) == -1) 
     {
       cdio_warn ("could not retrieve file info for `%s': %s", 
-                 pathname, strerror (errno));
+                 pathdup, strerror (errno));
+      free(pathdup);
       return NULL;
     }
 
   ud = calloc (1, sizeof (_UserData));
 
-  ud->pathname = strdup(pathname);
+  ud->pathname = pathdup;
   ud->st_size  = statbuf.st_size; /* let's hope it doesn't change... */
 
   funcs.open   = _stdio_open;

@@ -64,6 +64,7 @@ int64_t iso_blocking_status = -1;
 #define ISO_BLOCKING(x) do {x; iso_blocking_status++; } while(0)
 static const char *psz_extract_dir;
 static const char *bootmgr_name = "bootmgr";
+static const char *ldlinux_name = "ldlinux.sys";
 static const char *isolinux_name[] = { "isolinux.cfg", "syslinux.cfg", "extlinux.conf"};
 static uint64_t total_blocks, nb_blocks;
 static BOOL scan_only = FALSE;
@@ -89,11 +90,15 @@ static __inline char* size_to_hr(int64_t size)
 	return str_size;
 }
 
-// Interruptible thread for handle closure on large files
-DWORD WINAPI ISOCloseHandleThread(LPVOID param)
+static void log_handler (cdio_log_level_t level, const char *message)
 {
-	CloseHandle((HANDLE)param);
-	ExitThread(0);
+	switch(level) {
+	case CDIO_LOG_DEBUG:
+	case CDIO_LOG_INFO:
+		return;
+	default:
+		uprintf("libcdio: %s\n", message);
+	}
 }
 
 // Returns 0 on success, nonzero on error
@@ -151,6 +156,12 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 					total_blocks++;
 				safe_free(psz_fullpath);
 				continue;
+			} else {
+				// In case there's an ldlinux.sys on the ISO, prevent it from overwriting ours
+				if ((*psz_path == 0) && (safe_strcmp(psz_basename, ldlinux_name) == 0)) {
+					uprintf("skipping % file from ISO image\n", ldlinux_name);
+					continue;
+				}
 			}
 			// Replace slashes with backslashes and append the size to the path for UI display
 			nul_pos = safe_strlen(psz_fullpath);
@@ -262,6 +273,12 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 				if ((i_file_length != 0) && (i_file_length%ISO_BLOCKSIZE == 0))
 					total_blocks++;
 				continue;
+			} else {
+				// In case there's an ldlinux.sys on the ISO, prevent it from overwriting ours
+				if ((*psz_path == 0) && (safe_strcmp(psz_basename, ldlinux_name) == 0)) {
+					uprintf("skipping % file from ISO image\n", ldlinux_name);
+					continue;
+				}
 			}
 			// Replace slashes with backslashes and append the size to the path for UI display
 			nul_pos = safe_strlen(psz_fullpath);
@@ -316,13 +333,14 @@ BOOL ExtractISO(const char* src_iso, const char* dest_dir, bool scan)
 	udf_t* p_udf = NULL; 
 	udf_dirent_t* p_udf_root;
 	LONG progress_style;
+	char* vol_id;
 	const char* scan_text = "Scanning ISO image...\n";
 
 	if ((src_iso == NULL) || (dest_dir == NULL))
 		return FALSE;
 
 	scan_only = scan;
-	cdio_loglevel_default = CDIO_LOG_DEBUG;
+	cdio_log_set_handler(log_handler);
 	psz_extract_dir = dest_dir;
 	progress_style = GetWindowLong(hISOProgressBar, GWL_STYLE);
 	if (scan_only) {
@@ -363,6 +381,10 @@ BOOL ExtractISO(const char* src_iso, const char* dest_dir, bool scan)
 		uprintf("Couldn't locate UDF root directory\n");
 		goto out;
 	}
+	if (scan_only) {
+		if (udf_get_logical_volume_id(p_udf, iso_report.label, sizeof(iso_report.label)) <= 0)
+			iso_report.label[0] = 0;
+	}
 	r = udf_extract_files(p_udf, p_udf_root, "");
 	goto out;
 
@@ -373,6 +395,12 @@ try_iso:
 		goto out;
 	}
 	uprintf("Disc image is an ISO9660 image\n");
+	if (scan_only) {
+		if (iso9660_ifs_get_volume_id(p_iso, &vol_id))
+			safe_strcpy(iso_report.label, sizeof(iso_report.label), vol_id);
+		else
+			iso_report.label[0] = 0;
+	}
 	r = iso_extract_files(p_iso, "");
 
 out:

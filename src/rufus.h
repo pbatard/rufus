@@ -145,6 +145,7 @@ typedef struct {
 
 /* ISO details that the application may want */
 typedef struct {
+	char label[64];
 	uint64_t projected_size;
 	BOOL has_4GB_file;
 	BOOL has_bootmgr;

@@ -427,7 +427,7 @@ udf_open (const char *psz_path)
 /**
  * Gets the Volume Identifier string, in 8bit unicode (latin-1)
  * psz_volid, place to put the string
- * i_volid_size, size of the buffer volid points to
+ * i_volid, size of the buffer psz_volid points to
  * returns the size of buffer needed for all data
  */
 int 
@@ -458,7 +458,7 @@ udf_get_volume_id(udf_t *p_udf, /*out*/ char *psz_volid,  unsigned int i_volid)
  * Gets the Volume Set Identifier, as a 128-byte dstring (not decoded)
  * WARNING This is not a null terminated string
  * volsetid, place to put the data
- * volsetid_size, size of the buffer volsetid points to 
+ * i_volsetid, size of the buffer psz_volsetid points to 
  * the buffer should be >=128 bytes to store the whole volumesetidentifier
  * returns the size of the available volsetid information (128)
  * or 0 on error
@@ -481,6 +481,31 @@ udf_get_volumeset_id(udf_t *p_udf, /*out*/ uint8_t *volsetid,
   memcpy(volsetid, p_pvd->volset_id, i_volsetid);
   
   return UDF_VOLSET_ID_SIZE;
+}
+
+/**
+ * Gets the Logical Volume Identifier string, in 8bit unicode (latin-1)
+ * psz_logvolid, place to put the string (should be at least 64 bytes)
+ * i_logvolid, size of the buffer psz_logvolid points to
+ * returns the size of buffer needed for all data
+ * A call to udf_get_root() should have been issued before this call
+ */
+int 
+udf_get_logical_volume_id(udf_t *p_udf, /*out*/ char *psz_logvolid,  unsigned int i_logvolid)
+{
+  uint8_t data[UDF_BLOCKSIZE];
+  logical_vol_desc_t *p_logvol = (logical_vol_desc_t *) &data;
+  int logvolid_len;
+
+  if (DRIVER_OP_SUCCESS != udf_read_sectors (p_udf, p_logvol, p_udf->lvd_lba, 1) ) 
+    return 0;
+
+  logvolid_len = (p_logvol->logvol_id[127]+1)/2;
+  if (i_logvolid > logvolid_len)
+    i_logvolid = logvolid_len;
+
+  unicode16_decode((uint8_t *) p_logvol->logvol_id, 2*i_logvolid, psz_logvolid);
+  return logvolid_len;
 }
 
 /*!

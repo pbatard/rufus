@@ -115,7 +115,7 @@ extern "C" {
   /**
    * Gets the Volume Identifier string, in 8bit unicode (latin-1)
    * psz_volid, place to put the string
-   * i_volid_size, size of the buffer volid points to
+   * i_volid, size of the buffer psz_volid points to
    * returns the size of buffer needed for all data
    */
   int udf_get_volume_id(udf_t *p_udf, /*out*/ char *psz_volid,  
@@ -125,14 +125,24 @@ extern "C" {
    * Gets the Volume Set Identifier, as a 128-byte dstring (not decoded)
    * WARNING This is not a null terminated string
    * volsetid, place to put the data
-   * volsetid_size, size of the buffer volsetid points to 
+   * i_volsetid, size of the buffer psz_volsetid points to 
    * the buffer should be >=128 bytes to store the whole volumesetidentifier
    * returns the size of the available volsetid information (128)
    * or 0 on error
    */
   int udf_get_volumeset_id(udf_t *p_udf, /*out*/ uint8_t *volsetid,
                            unsigned int i_volsetid);
-  
+
+  /**
+   * Gets the Logical Volume Identifier string, in 8bit unicode (latin-1)
+   * psz_logvolid, place to put the string
+   * i_logvolid, size of the buffer psz_logvolid points to
+   * returns the size of buffer needed for all data
+   * A call to udf_get_root() should have been issued before this call
+   */
+  int udf_get_logical_volume_id(udf_t *p_udf, /*out*/ char *psz_logvolid,  
+                        unsigned int i_logvolid);
+
   /*!
     Return a file pointer matching psz_name. 
   */

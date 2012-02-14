@@ -963,7 +963,8 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 		PrintStatus(0, TRUE, "Failed to scan ISO image.");
 		goto out;
 	}
-	uprintf("ISO size: %lld bytes, 4GB:%c, bootmgr:%c, isolinux:%c\n", iso_report.projected_size,
+	uprintf("ISO label: '%s'\n size: %lld bytes, 4GB:%c, bootmgr:%c, isolinux:%c\n",
+		iso_report.label, iso_report.projected_size,
 		iso_report.has_4GB_file?'Y':'N', iso_report.has_bootmgr?'Y':'N', iso_report.has_isolinux?'Y':'N');
 	if ((!iso_report.has_bootmgr) && (!iso_report.has_isolinux)) {
 		MessageBoxU(hMainDialog, "This version of Rufus only supports bootable ISOs\n"
@@ -973,6 +974,11 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 	} else {
 		for (i=(int)safe_strlen(iso_path); (i>0)&&(iso_path[i]!='\\'); i--);
 		PrintStatus(0, TRUE, "Using ISO: '%s'\n", &iso_path[i+1]);
+		// Some Linux distros, such as Arch Linux, require the USB drive to have
+		// a specific label => copy the one we got from the ISO image
+		if (iso_report.label[0] != 0) {
+			SetWindowTextU(hLabel, iso_report.label);
+		}
 	}
 
 out:
