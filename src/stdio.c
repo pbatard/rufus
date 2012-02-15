@@ -128,12 +128,13 @@ static char err_string[256];
  * message
  */
 static BOOL bStatusTimerArmed = FALSE;
-static char szStatusMessage[256] = { 0 };
+char szStatusMessage[256] = { 0 };
 static void CALLBACK PrintStatusTimeout(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
 {
 	bStatusTimerArmed = FALSE;
 	// potentially display lower priority message that was overridden
-	SetDlgItemTextU(hMainDialog, IDC_STATUS, szStatusMessage);
+	SendMessageLU(GetDlgItem(hMainDialog, IDC_STATUS), SB_SETTEXTW,
+						SBT_OWNERDRAW | 0, szStatusMessage);
 	KillTimer(hMainDialog, TID_MESSAGE);
 }
 
@@ -158,7 +159,8 @@ void PrintStatus(unsigned int duration, BOOL debug, const char *format, ...)
 		uprintf("%s\n", szStatusMessage);
 
 	if ((duration) || (!bStatusTimerArmed)) {
-		SetDlgItemTextU(hMainDialog, IDC_STATUS, szStatusMessage);
+		SendMessageLU(GetDlgItem(hMainDialog, IDC_STATUS), SB_SETTEXTA,
+						SBT_OWNERDRAW | 0, szStatusMessage);
 	}
 
 	if (duration) {

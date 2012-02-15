@@ -127,6 +127,18 @@ static __inline LRESULT SendMessageLU(HWND hWnd, UINT Msg, WPARAM wParam, const 
 	return ret;
 }
 
+static __inline int DrawTextExU(HDC hDC, LPCSTR lpchText, int nCount, LPRECT lpRect, UINT uFormat, LPDRAWTEXTPARAMS lpDTParams)
+{
+	int ret;
+	DWORD err = ERROR_INVALID_DATA;
+	wconvert(lpchText);
+	ret = DrawTextExW(hDC, wlpchText, nCount, lpRect, uFormat, lpDTParams);
+	err = GetLastError();
+	wfree(lpchText);
+	SetLastError(err);
+	return ret;
+}
+
 static __inline BOOL SHGetPathFromIDListU(LPCITEMIDLIST pidl, char* pszPath)
 {
 	BOOL ret = FALSE;

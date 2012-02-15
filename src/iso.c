@@ -109,7 +109,7 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 	BOOL r;
 	int i_length;
 	size_t i, nul_pos;
-	char* psz_fullpath;
+	char* psz_fullpath = NULL;
 	const char* psz_basename;
 	udf_dirent_t *p_udf_dirent2;
 	uint8_t buf[UDF_BLOCKSIZE];

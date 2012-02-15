@@ -161,6 +161,11 @@ static BOOL FormatDrive(char DriveLetter)
 		}
 	}
 	GetWindowTextW(hLabel, wLabel, ARRAYSIZE(wLabel));
+	// If using FAT/FAT32, truncate the label to 11 characters
+	// TODO: use a wchar_t to_valid_label() here
+	if ((wFSType[0] == 'F') && (wFSType[1] == 'A') && (wFSType[2] == 'T')) {
+		wLabel[11] = 0;
+	}
 	uprintf("Using cluster size: %d bytes\n", ComboBox_GetItemData(hClusterSize, ComboBox_GetCurSel(hClusterSize)));
 	format_percent = 0.0f;
 	task_number = 0;
@@ -533,6 +538,8 @@ DWORD WINAPI FormatThread(LPVOID param)
 					FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_WRITE_FAULT;
 				goto out;
 			}
+			// We must close and unlock the volume to write files to it
+			safe_unlockclose(hLogicalVolume);
 			break;
 		case DT_ISO_FAT:
 			PrintStatus(0, TRUE, "Installing Syslinux...");
@@ -546,7 +553,6 @@ DWORD WINAPI FormatThread(LPVOID param)
 	// We issue a complete remount of the filesystem at on account of:
 	// - Ensuring the file explorer properly detects that the volume was updated
 	// - Ensuring that an NTFS system will be reparsed so that it becomes bootable
-	// TODO: on cancellation, this can leave the drive unmounted!
 	if (GetVolumeNameForVolumeMountPointA(drive_name, drive_guid, sizeof(drive_guid))) {
 		if (DeleteVolumeMountPointA(drive_name)) {
 			Sleep(200);
