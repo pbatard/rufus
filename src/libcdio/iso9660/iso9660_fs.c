@@ -703,7 +703,7 @@ iso9660_seek_read_framesize (const iso9660_t *p_iso, void *ptr,
 			     uint16_t i_framesize)
 {
   long int ret;
-  long int i_byte_offset;
+  int64_t i_byte_offset;
   
   if (!p_iso) return 0;
   i_byte_offset = (start * p_iso->i_framesize) + p_iso->i_fuzzy_offset 

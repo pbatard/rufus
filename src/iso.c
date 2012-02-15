@@ -66,6 +66,7 @@ static const char *psz_extract_dir;
 static const char *bootmgr_name = "bootmgr";
 static const char *ldlinux_name = "ldlinux.sys";
 static const char *isolinux_name[] = { "isolinux.cfg", "syslinux.cfg", "extlinux.conf"};
+static uint8_t i_joliet_level = 0;
 static uint64_t total_blocks, nb_blocks;
 static BOOL scan_only = FALSE;
 
@@ -94,7 +95,6 @@ static void log_handler (cdio_log_level_t level, const char *message)
 {
 	switch(level) {
 	case CDIO_LOG_DEBUG:
-	case CDIO_LOG_INFO:
 		return;
 	default:
 		uprintf("libcdio: %s\n", message);
@@ -142,11 +142,11 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 			i_file_length = udf_get_file_length(p_udf_dirent);
 			if (scan_only) {
 				// Check for a "bootmgr" file in root (psz_path = "")
-				if ((*psz_path == 0) && (safe_strcmp(psz_basename, bootmgr_name) == 0))
+				if ((*psz_path == 0) && (_stricmp(psz_basename, bootmgr_name) == 0))
 					iso_report.has_bootmgr = TRUE;
 				// Check for a syslinux config file anywhere
 				for (i=0; i<ARRAYSIZE(isolinux_name); i++) {
-					if (safe_strcmp(psz_basename, isolinux_name[i]) == 0)
+					if (_stricmp(psz_basename, isolinux_name[i]) == 0)
 						iso_report.has_isolinux = TRUE;
 				}
 				if (i_file_length >= FOUR_GIGABYTES)
@@ -244,14 +244,14 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 	if (!p_entlist)
 		return 1;
 
-	_CDIO_LIST_FOREACH (p_entnode, p_entlist) {
+	_CDIO_LIST_FOREACH(p_entnode, p_entlist) {
 		if (FormatStatus) goto out;
 		p_statbuf = (iso9660_stat_t*) _cdio_list_node_data(p_entnode);
 		/* Eliminate . and .. entries */
 		if ( (strcmp(p_statbuf->filename, ".") == 0)
 			|| (strcmp(p_statbuf->filename, "..") == 0) )
 			continue;
-		iso9660_name_translate(p_statbuf->filename, psz_basename);
+		iso9660_name_translate_ext(p_statbuf->filename, psz_basename, i_joliet_level);
 		if (p_statbuf->type == _STAT_DIR) {
 			if (!scan_only) _mkdir(psz_fullpath);
 			if (iso_extract_files(p_iso, psz_iso_name))
@@ -260,11 +260,11 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 			i_file_length = p_statbuf->size;
 			if (scan_only) {
 				// Check for a "bootmgr" file in root (psz_path = "")
-				if ((*psz_path == 0) && (safe_strcmp(psz_basename, bootmgr_name) == 0))
+				if ((*psz_path == 0) && (_stricmp(psz_basename, bootmgr_name) == 0))
 					iso_report.has_bootmgr = TRUE;
 				// Check for a syslinux config file anywhere
 				for (i=0; i<ARRAYSIZE(isolinux_name); i++) {
-					if (safe_strcmp(psz_basename, isolinux_name[i]) == 0)
+					if (_stricmp(psz_basename, isolinux_name[i]) == 0)
 						iso_report.has_isolinux = TRUE;
 				}
 				if (i_file_length >= FOUR_GIGABYTES)
@@ -276,7 +276,7 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 			} else {
 				// In case there's an ldlinux.sys on the ISO, prevent it from overwriting ours
 				if ((*psz_path == 0) && (safe_strcmp(psz_basename, ldlinux_name) == 0)) {
-					uprintf("skipping % file from ISO image\n", ldlinux_name);
+					uprintf("Skipping % file from ISO image\n", ldlinux_name);
 					continue;
 				}
 			}
@@ -389,12 +389,15 @@ BOOL ExtractISO(const char* src_iso, const char* dest_dir, bool scan)
 	goto out;
 
 try_iso:
-	p_iso = iso9660_open(src_iso);
+	p_iso = iso9660_open_ext(src_iso, 0xFF);
 	if (p_iso == NULL) {
 		uprintf("Unable to open image '%s'.\n", src_iso);
 		goto out;
 	}
-	uprintf("Disc image is an ISO9660 image\n");
+	i_joliet_level = iso9660_ifs_get_joliet_level(p_iso);
+	uprintf("Disc image is an ISO9660 image (Joliet = %d)\n", i_joliet_level);
+	// FIXME: libcdio's Joliet detection seems broken => override
+	i_joliet_level = ISO_EXTENSION_JOLIET_LEVEL3;
 	if (scan_only) {
 		if (iso9660_ifs_get_volume_id(p_iso, &vol_id))
 			safe_strcpy(iso_report.label, sizeof(iso_report.label), vol_id);

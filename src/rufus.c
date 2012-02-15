@@ -952,41 +952,6 @@ BOOL CALLBACK ISOProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 	return FALSE; 
 } 
 
-/*
- * Converts a name + ext UTF-8 pair to a valid MS filename.
- * Returned string is allocated and needs to be freed manually
- */
-void to_valid_label(char* name)
-{
-	size_t i, j, k;
-	BOOL found;
-	char unauthorized[] = "*?.,;:/\\|+=<>[]";
-	char to_underscore[] = "\t";
-
-	if (name == NULL)
-		return;
-
-	for (i=0, k=0; i<strlen(name); i++) {
-		found = FALSE;
-		for (j=0; j<strlen(unauthorized); j++) {
-			if (name[i] == unauthorized[j]) {
-				found = TRUE; break;
-			}
-		}
-		if (found) continue;
-		found = FALSE;
-		for (j=0; j<strlen(to_underscore); j++) {
-			if (name[i] == to_underscore[j]) {
-				name[k++] = '_';
-				found = TRUE; break;
-			}
-		}
-		if (found) continue;
-		name[k++] = name[i];
-	}
-	name[k] = 0;
-}
-
 // The scanning process can be blocking for message processing => use a thread
 DWORD WINAPI ISOScanThread(LPVOID param)
 {
@@ -1013,7 +978,6 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 		// Some Linux distros, such as Arch Linux, require the USB drive to have
 		// a specific label => copy the one we got from the ISO image
 		if (iso_report.label[0] != 0) {
-			to_valid_label(iso_report.label);
 			SetWindowTextU(hLabel, iso_report.label);
 		}
 	}
@@ -1321,27 +1285,29 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			FormatStatus = 0;
 			nDeviceIndex = ComboBox_GetCurSel(hDeviceList);
 			if (nDeviceIndex != CB_ERR) {
-				dt = (int)ComboBox_GetItemData(hDOSType, ComboBox_GetCurSel(hDOSType));
-				if ((dt == DT_ISO_NTFS) || (dt == DT_ISO_FAT)) {
-					if (iso_path == NULL) {
-						MessageBoxA(hMainDialog, "Please click on the disc button to select a bootable ISO,\n"
-							"or uncheck the \"Create a bootable disk...\" checkbox.",
-							"No ISO image selected...", MB_OK|MB_ICONERROR);
-						break;
-					}
-					if ((iso_size_check) && (iso_report.projected_size > (uint64_t)SelectedDrive.DiskSize)) {
-						MessageBoxA(hMainDialog, "This ISO image is too big "
-							"for the selected target.", "ISO image too big...", MB_OK|MB_ICONERROR);
-						break;
-					}
-					if ((dt == DT_ISO_NTFS) && (!iso_report.has_bootmgr)) {
-						MessageBoxA(hMainDialog, "Only 'bootmgr' based ISO "
-							"images can be used with NTFS.", "Unsupported ISO...", MB_OK|MB_ICONERROR);
-						break;
-					} else if ((dt == DT_ISO_FAT) && (!iso_report.has_isolinux)) {
-						MessageBoxA(hMainDialog, "Only 'isolinux' based ISO "
-							"images can be used with FAT.", "Unsupported ISO...", MB_OK|MB_ICONERROR);
-						break;
+				if (IsChecked(IDC_DOS)) {
+					dt = (int)ComboBox_GetItemData(hDOSType, ComboBox_GetCurSel(hDOSType));
+					if ((dt == DT_ISO_NTFS) || (dt == DT_ISO_FAT)) {
+						if (iso_path == NULL) {
+							MessageBoxA(hMainDialog, "Please click on the disc button to select a bootable ISO,\n"
+								"or uncheck the \"Create a bootable disk...\" checkbox.",
+								"No ISO image selected...", MB_OK|MB_ICONERROR);
+							break;
+						}
+						if ((iso_size_check) && (iso_report.projected_size > (uint64_t)SelectedDrive.DiskSize)) {
+							MessageBoxA(hMainDialog, "This ISO image is too big "
+								"for the selected target.", "ISO image too big...", MB_OK|MB_ICONERROR);
+							break;
+						}
+						if ((dt == DT_ISO_NTFS) && (!iso_report.has_bootmgr)) {
+							MessageBoxA(hMainDialog, "Only 'bootmgr' based ISO "
+								"images can be used with NTFS.", "Unsupported ISO...", MB_OK|MB_ICONERROR);
+							break;
+						} else if ((dt == DT_ISO_FAT) && (!iso_report.has_isolinux)) {
+							MessageBoxA(hMainDialog, "Only 'isolinux' based ISO "
+								"images can be used with FAT.", "Unsupported ISO...", MB_OK|MB_ICONERROR);
+							break;
+						}
 					}
 				}
 				GetWindowTextA(hDeviceList, tmp, sizeof(tmp));

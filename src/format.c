@@ -137,6 +137,47 @@ static BOOLEAN __stdcall FormatExCallback(FILE_SYSTEM_CALLBACK_COMMAND Command, 
 }
 
 /*
+ * Converts an UTF-16 label to a valid FAT/NTFS one
+ */
+static void ToValidLabel(WCHAR* name, BOOL bFAT)
+{
+	size_t i, j, k;
+	BOOL found;
+	WCHAR unauthorized[] = L"*?.,;:/\\|+=<>[]";
+	WCHAR to_underscore[] = L"\t";
+
+	if (name == NULL)
+		return;
+
+	for (i=0, k=0; i<wcslen(name); i++) {
+		if (bFAT) {	// NTFS does allows all the FAT unauthorized above
+			found = FALSE;
+			for (j=0; j<wcslen(unauthorized); j++) {
+				if (name[i] == unauthorized[j]) {
+					found = TRUE; break;
+				}
+			}
+			if (found) continue;
+		}
+		found = FALSE;
+		for (j=0; j<wcslen(to_underscore); j++) {
+			if (name[i] == to_underscore[j]) {
+				name[k++] = '_';
+				found = TRUE; break;
+			}
+		}
+		if (found) continue;
+		name[k++] = name[i];
+	}
+	name[k] = 0;
+	if (bFAT) {
+		name[11] = 0;
+	} else {
+		name[32] = 0;
+	}
+}
+
+/*
  * Call on fmifs.dll's FormatEx() to format the drive
  */
 static BOOL FormatDrive(char DriveLetter)
@@ -145,7 +186,7 @@ static BOOL FormatDrive(char DriveLetter)
 	PF_DECL(FormatEx);
 	WCHAR wDriveRoot[] = L"?:\\";
 	WCHAR wFSType[32];
-	WCHAR wLabel[128];
+	WCHAR wLabel[64];
 	size_t i;
 
 	wDriveRoot[0] = (WCHAR)DriveLetter;
@@ -161,11 +202,8 @@ static BOOL FormatDrive(char DriveLetter)
 		}
 	}
 	GetWindowTextW(hLabel, wLabel, ARRAYSIZE(wLabel));
-	// If using FAT/FAT32, truncate the label to 11 characters
-	// TODO: use a wchar_t to_valid_label() here
-	if ((wFSType[0] == 'F') && (wFSType[1] == 'A') && (wFSType[2] == 'T')) {
-		wLabel[11] = 0;
-	}
+	// Make sure the label is valid
+	ToValidLabel(wLabel, (wFSType[0] == 'F') && (wFSType[1] == 'A') && (wFSType[2] == 'T'));
 	uprintf("Using cluster size: %d bytes\n", ComboBox_GetItemData(hClusterSize, ComboBox_GetCurSel(hClusterSize)));
 	format_percent = 0.0f;
 	task_number = 0;
