@@ -498,11 +498,20 @@ struct logvol_integrity_desc_s
   udf_extent_ad_t next_integrity_ext;
   udf_Uint8_t     logvol_contents_use[32];
   udf_Uint32_t    i_partitions;
-  udf_Uint32_t    imp_use_len;
-  union { /* MSVC workaround for multiple zero sized arrays */
-    udf_Uint32_t  freespace_table[0];
-    udf_Uint32_t  size_table[0];
-    udf_Uint8_t   imp_use[0];
+  union { /* Same MSVC workaround as with struct udf_fileid_desc_s */
+    udf_Uint32_t  imp_use_len;
+    struct {
+      udf_Uint32_t unused;
+      udf_Uint32_t data[0];
+    } freespace_table;
+    struct {
+      udf_Uint32_t unused;
+      udf_Uint32_t data[0];
+    } size_table;
+    struct {
+      udf_Uint32_t unused;
+      udf_Uint32_t data[0];
+    } imp_use;
   } u;
 } GNUC_PACKED;
 
@@ -572,11 +581,25 @@ struct udf_fileid_desc_s
   udf_Uint8_t	file_characteristics;
   udf_Uint8_t	i_file_id;
   udf_long_ad_t	icb;
-  udf_Uint16_t	i_imp_use;
-  union { /* MSVC workaround for multiple zero sized arrays */
-    udf_Uint8_t	imp_use[0];
-    udf_Uint8_t	file_id[0];
-    udf_Uint8_t	padding[0];
+  /* MSVC workaround for multiple zero sized arrays
+     Unlike what is the case with GNU, and against logic, an union of zero
+     sized arrays in the Microsoft world is not zero bytes but one byte!
+     Thus, for sizeof() is consistent across platforms, we have to use an
+     ugly workaround that attaches the union to the last non-zero member. */
+  union {
+    udf_Uint16_t	i_imp_use;
+    struct {
+      udf_Uint16_t	unused;
+      udf_Uint8_t	data[0];
+    } imp_use;
+    struct {
+      udf_Uint16_t	unused;
+      udf_Uint8_t	data[0];
+    } file_id;
+    struct {
+      udf_Uint16_t	unused;
+      udf_Uint8_t	data[0];
+    } padding;
   } u;
 } GNUC_PACKED;
 
@@ -998,6 +1021,7 @@ struct extended_file_entry
   union { /* MSVC workaround for multiple zero sized arrays */
     udf_Uint8_t   ext_attr[0];
     udf_Uint8_t   alloc_descs[0];
+	udf_Uint8_t	  pad_to_one_block[2048-216];
   } u;
 } GNUC_PACKED;
 

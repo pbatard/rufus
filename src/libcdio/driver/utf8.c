@@ -221,80 +221,110 @@ bool cdio_charset_to_utf8(char *src, size_t src_len, cdio_utf8_t **dst,
  * Converts an UTF-16 string to UTF8 (allocate returned string)
  * Returns NULL on error
  */
-static __inline char* wchar_to_utf8(const wchar_t* wstr)
-{
-	int size = 0;
-	char* str = NULL;
+static inline char* wchar_to_utf8(const wchar_t* wstr)
+  {
+  int size = 0;
+  char* str = NULL;
 
-	/* Find out the size we need to allocate for our converted string */
-	size = WideCharToMultiByte(CP_UTF8, 0, wstr, -1, NULL, 0, NULL, NULL);
-	if (size <= 1)	// An empty string would be size 1
-		return NULL;
+  /* Find out the size we need to allocate for our converted string */
+  size = WideCharToMultiByte(CP_UTF8, 0, wstr, -1, NULL, 0, NULL, NULL);
+  if (size <= 1) /* An empty string would be size 1 */
+    return NULL;
 
-	if ((str = (char*)calloc(size, 1)) == NULL)
-		return NULL;
+  if ((str = (char*)calloc(size, 1)) == NULL)
+    return NULL;
 
-	if (wchar_to_utf8_no_alloc(wstr, str, size) != size) {
-		free(str);
-		return NULL;
-	}
+  if (wchar_to_utf8_no_alloc(wstr, str, size) != size) {
+    free(str);
+    return NULL;
+  }
 
-	return str;
-}
+  return str;
+  }
 
 /*
  * Converts an UTF8 string to UTF-16 (allocate returned string)
  * Returns NULL on error
  */
-static __inline wchar_t* utf8_to_wchar(const char* str)
-{
-	int size = 0;
-	wchar_t* wstr = NULL;
+static inline wchar_t* utf8_to_wchar(const char* str)
+  {
+  int size = 0;
+  wchar_t* wstr = NULL;
 
-	/* Find out the size we need to allocate for our converted string */
-	size = MultiByteToWideChar(CP_UTF8, 0, str, -1, NULL, 0);
-	if (size <= 1)	// An empty string would be size 1
-		return NULL;
+  /* Find out the size we need to allocate for our converted string */
+  size = MultiByteToWideChar(CP_UTF8, 0, str, -1, NULL, 0);
+  if (size <= 1) /* An empty string would be size 1 */
+    return NULL;
 
-	if ((wstr = (wchar_t*)calloc(size, sizeof(wchar_t))) == NULL)
-		return NULL;
+  if ((wstr = (wchar_t*)calloc(size, sizeof(wchar_t))) == NULL)
+    return NULL;
 
-	if (utf8_to_wchar_no_alloc(str, wstr, size) != size) {
-		free(wstr);
-		return NULL;
-	}
-	return wstr;
-}
+  if (utf8_to_wchar_no_alloc(str, wstr, size) != size) {
+    free(wstr);
+    return NULL;
+  }
+  return wstr;
+  }
+
+bool cdio_charset_from_utf8(cdio_utf8_t * src, char ** dst,
+                            int * dst_len, const char * dst_charset)
+  {
+  wchar_t* le_dst;
+  size_t i, len;
+
+  if (src == NULL || dst == NULL || dst_len == NULL || dst_charset == NULL || strcmp(dst_charset, "UTF-8") != 0)
+    return false;
+
+  /* Eliminate empty strings */
+  le_dst = utf8_to_wchar(src);
+  if ((le_dst == NULL) || (le_dst[0] == 0)) {
+    free(le_dst);
+    return false;
+  }
+
+  /* Perform byte reversal */
+  len = wcslen(le_dst);
+  *dst = (char*)calloc(len+1, sizeof(wchar_t));
+  for (i=0; i<2*len; i++) {
+    (*dst)[i] = ((char*)le_dst)[i+1];
+    (*dst)[i+1] = ((char*)le_dst)[i];
+  }
+  free(le_dst);
+
+  return true;
+  }
 
 bool cdio_charset_to_utf8(char *src, size_t src_len, cdio_utf8_t **dst,
                           const char * src_charset)
-{
-	wchar_t* le_src;
+  {
+  wchar_t* le_src;
+  int i;
 
-	if (src == NULL || dst == NULL || src_charset == NULL || strcmp(src_charset, "UCS-2BE") != 0)
-		return false;
+  if (src == NULL || dst == NULL || src_charset == NULL || strcmp(src_charset, "UCS-2BE") != 0)
+    return false;
 
-	if (src_len == (size_t)-1) {
-		for (src_len = 0; ((uint16_t*)src)[src_len] !=0; src_len++);
-		src_len <<=2;
-	}
+  if (src_len == (size_t)-1) {
+    for (src_len = 0; ((uint16_t*)src)[src_len] !=0; src_len++);
+    src_len <<=2;
+  }
 
-	/* zero lenght is a headache (LCMapString doesn't support it)
-	   => eliminate this case first */
-	if (src_len == 0) {
-		*dst = (cdio_utf8_t*)malloc(1);
-		*dst[0] = 0;
-		return true;
-	}
+  /* Eliminate empty strings */
+  if ((src_len < 2) || ((src[0] == 0) && (src[1] == 0))) {
+    *dst = NULL;
+    return false;
+  }
 
-	le_src = (wchar_t*)malloc(src_len+2);
-	/* WideCharToMultiByte only takes UCS-2LE, and we are fed UCS-2BE 
-	   => perform byte reversal */
-	LCMapStringW(0, LCMAP_BYTEREV, (LPCWSTR)src, src_len, le_src, src_len);
-	*dst = wchar_to_utf8(le_src);
-	free(le_src);
+  /* Perform byte reversal */
+  le_src = (wchar_t*)malloc(src_len+2);
+  for (i=0; i<src_len; i+=2) {
+    ((char*)le_src)[i] = src[i+1];
+    ((char*)le_src)[i+1] = src[i];
+  }
+  le_src[src_len/2] = 0;
+  *dst = wchar_to_utf8(le_src);
+  free(le_src);
 
-	return (*dst != NULL);
+  return (*dst != NULL);
 }
 #endif /* HAVE_ICONV */
 

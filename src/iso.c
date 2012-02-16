@@ -241,8 +241,10 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 	psz_basename = &psz_fullpath[i_length];
 
 	p_entlist = iso9660_ifs_readdir(p_iso, psz_path);
-	if (!p_entlist)
+	if (!p_entlist) {
+		uprintf("Could not access directory %s\n", psz_path);
 		return 1;
+	}
 
 	_CDIO_LIST_FOREACH(p_entnode, p_entlist) {
 		if (FormatStatus) goto out;
@@ -389,19 +391,18 @@ BOOL ExtractISO(const char* src_iso, const char* dest_dir, bool scan)
 	goto out;
 
 try_iso:
-	p_iso = iso9660_open_ext(src_iso, 0xFF);
+	p_iso = iso9660_open_ext(src_iso, ISO_EXTENSION_ALL);
 	if (p_iso == NULL) {
 		uprintf("Unable to open image '%s'.\n", src_iso);
 		goto out;
 	}
 	i_joliet_level = iso9660_ifs_get_joliet_level(p_iso);
 	uprintf("Disc image is an ISO9660 image (Joliet = %d)\n", i_joliet_level);
-	// FIXME: libcdio's Joliet detection seems broken => override
-	i_joliet_level = ISO_EXTENSION_JOLIET_LEVEL3;
 	if (scan_only) {
-		if (iso9660_ifs_get_volume_id(p_iso, &vol_id))
+		if (iso9660_ifs_get_volume_id(p_iso, &vol_id)) {
 			safe_strcpy(iso_report.label, sizeof(iso_report.label), vol_id);
-		else
+			safe_free(vol_id);
+		} else
 			iso_report.label[0] = 0;
 	}
 	r = iso_extract_files(p_iso, "");

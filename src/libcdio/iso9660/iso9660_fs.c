@@ -85,6 +85,33 @@ struct _iso9660_s {
 			     */
 };
 
+/*!
+   Change trailing blanks in null-terminated *str to nulls
+   If the end result is an empty string, *str is freed
+*/
+static void
+strip_trail (char** str)
+{
+  int j;
+
+  if (*str == NULL)
+    return;
+
+  for (j = strlen (*str) - 1; j >= 0; j--)
+    {
+      if ((*str)[j] != ' ')
+        break;
+
+      (*str)[j] = '\0';
+    }
+
+  if ((*str)[0] == 0)
+    {
+      free(*str);
+      *str = NULL;
+    }
+}
+
 static long int iso9660_seek_read_framesize (const iso9660_t *p_iso, 
 					     void *ptr, lsn_t start, 
 					     long int size, 
@@ -294,10 +321,12 @@ iso9660_ifs_get_application_id(iso9660_t *p_iso,
      */
   if ( cdio_charset_to_utf8(p_iso->svd.application_id,
                             ISO_MAX_APPLICATION_ID,
-                            p_psz_app_id, "UCS-2BE"))
-      return true;
+                            p_psz_app_id, "UCS-2BE")) {
+      strip_trail(p_psz_app_id);
+      return (*p_psz_app_id != NULL);
+    }
   }
-#endif /*HAVE_JOLIET*/ 
+#endif /*HAVE_JOLIET*/
   *p_psz_app_id = iso9660_get_application_id( &(p_iso->pvd) );
   return *p_psz_app_id != NULL && strlen(*p_psz_app_id);
 }
@@ -332,8 +361,10 @@ iso9660_ifs_get_preparer_id(iso9660_t *p_iso,
        the PVD, do that.
      */
     if ( cdio_charset_to_utf8(p_iso->svd.preparer_id, ISO_MAX_PREPARER_ID,
-                              p_psz_preparer_id, "UCS-2BE") )
-      return true;
+                              p_psz_preparer_id, "UCS-2BE") ) {
+      strip_trail(p_psz_preparer_id);
+      return (*p_psz_preparer_id != NULL);
+    }
   }
 #endif /*HAVE_JOLIET*/
   *p_psz_preparer_id = iso9660_get_preparer_id( &(p_iso->pvd) );
@@ -360,8 +391,10 @@ bool iso9660_ifs_get_publisher_id(iso9660_t *p_iso,
        the PVD, do that.
      */
     if( cdio_charset_to_utf8(p_iso->svd.publisher_id, ISO_MAX_PUBLISHER_ID,
-                             p_psz_publisher_id, "UCS-2BE") )
-      return true;
+                             p_psz_publisher_id, "UCS-2BE") ) {
+      strip_trail(p_psz_publisher_id);
+      return (*p_psz_publisher_id != NULL);
+    }
   }
 #endif /*HAVE_JOLIET*/
   *p_psz_publisher_id = iso9660_get_publisher_id( &(p_iso->pvd) );
@@ -389,8 +422,10 @@ bool iso9660_ifs_get_system_id(iso9660_t *p_iso,
        the PVD, do that.
      */
     if ( cdio_charset_to_utf8(p_iso->svd.system_id, ISO_MAX_SYSTEM_ID,
-                              p_psz_system_id, "UCS-2BE") )
-      return true;
+                              p_psz_system_id, "UCS-2BE") ) {
+      strip_trail(p_psz_system_id);
+      return (*p_psz_system_id != NULL);
+    }
   }
 #endif /*HAVE_JOLIET*/
   *p_psz_system_id = iso9660_get_system_id( &(p_iso->pvd) );
@@ -418,10 +453,12 @@ bool iso9660_ifs_get_volume_id(iso9660_t *p_iso,
        the PVD, do that.
      */
     if ( cdio_charset_to_utf8(p_iso->svd.volume_id, ISO_MAX_VOLUME_ID,
-                              p_psz_volume_id, "UCS-2BE") )
-      return true;
+                              p_psz_volume_id, "UCS-2BE") ) {
+      strip_trail(p_psz_volume_id);
+      return (*p_psz_volume_id != NULL);
+    }
   }
-#endif /* HAVE_JOLIET */
+#endif /*HAVE_JOLIET*/
   *p_psz_volume_id = iso9660_get_volume_id( &(p_iso->pvd) );
   return *p_psz_volume_id != NULL && strlen(*p_psz_volume_id);
 }
@@ -449,8 +486,10 @@ bool iso9660_ifs_get_volumeset_id(iso9660_t *p_iso,
     if ( cdio_charset_to_utf8(p_iso->svd.volume_set_id, 
                               ISO_MAX_VOLUMESET_ID, 
                               p_psz_volumeset_id,
-                              "UCS-2BE") )
-      return true;
+                              "UCS-2BE") ) {
+      strip_trail(p_psz_volumeset_id);
+      return (*p_psz_volumeset_id != NULL);
+    }
   }
 #endif /*HAVE_JOLIET*/
   *p_psz_volumeset_id = iso9660_get_volumeset_id( &(p_iso->pvd) );
@@ -494,19 +533,25 @@ bool
 iso9660_ifs_read_superblock (iso9660_t *p_iso, 
 			     iso_extension_mask_t iso_extension_mask)
 {
-  iso9660_svd_t *p_svd;  /* Secondary volume descriptor. */
-  
+  iso9660_svd_t p_svd;  /* Secondary volume descriptor. */
+  int i;
+
   if (!p_iso || !iso9660_ifs_read_pvd(p_iso, &(p_iso->pvd)))
     return false;
 
-  p_svd = &(p_iso->svd);
   p_iso->i_joliet_level = 0;
 
-  if (0 != iso9660_iso_seek_read (p_iso, p_svd, ISO_PVD_SECTOR+1, 1)) {
-    if ( ISO_VD_SUPPLEMENTARY == from_711(p_svd->type) ) {
-      if (p_svd->escape_sequences[0] == 0x25 
-	  && p_svd->escape_sequences[1] == 0x2f) {
-	switch (p_svd->escape_sequences[2]) {
+  /* There may be multiple Secondary Volume Descriptors (eg. El Torito + Joliet) */
+  for (i=1; (0 != iso9660_iso_seek_read (p_iso, &p_svd, ISO_PVD_SECTOR+i, 1)); i++) {
+    if (ISO_VD_END == from_711(p_svd.type) ) /* Last SVD */
+      break;
+    if ( ISO_VD_SUPPLEMENTARY == from_711(p_svd.type) ) {
+      /* We're only interested in Joliet => make sure the SVD isn't overwritten */
+      if (p_iso->i_joliet_level == 0)
+        memcpy(&(p_iso->svd), &p_svd, sizeof(iso9660_svd_t));
+      if (p_svd.escape_sequences[0] == 0x25 
+	  && p_svd.escape_sequences[1] == 0x2f) {
+	switch (p_svd.escape_sequences[2]) {
 	case 0x40:
 	  if (iso_extension_mask & ISO_EXTENSION_JOLIET_LEVEL1) 
 	    p_iso->i_joliet_level = 1;
