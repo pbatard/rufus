@@ -384,6 +384,25 @@ static BOOL GetDriveInfo(void)
 	return SetClusterSizes((int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem)));
 }
 
+static void SetFSFromISO(void)
+{
+	int i, fs;
+
+	if (iso_path == NULL)
+		return;
+
+	for (i=ComboBox_GetCount(hFileSystem)-1; i>=0; i--) {
+		fs = ComboBox_GetItemData(hFileSystem, i);
+		if ( ((iso_report.has_bootmgr) && (fs == FS_NTFS))
+			|| ((iso_report.has_isolinux) && ((fs == FS_FAT32) || (fs == FS_FAT16))) ) {
+			IGNORE_RETVAL(ComboBox_SetCurSel(hFileSystem, i));
+			break;
+		}
+	}
+	SendMessage(hMainDialog, WM_COMMAND, (CBN_SELCHANGE<<16) | IDC_FILESYSTEM,
+		ComboBox_GetCurSel(hFileSystem));
+}
+
 /*
  * Populate the UI properties
  */
@@ -411,8 +430,9 @@ static BOOL PopulateProperties(int ComboIndex)
 	}
 
 	SelectedDrive.DeviceNumber = (DWORD)ComboBox_GetItemData(hDeviceList, ComboIndex);
-	if (!GetDriveInfo())
+	if (!GetDriveInfo())	// This also populates FS
 		return FALSE;
+	SetFSFromISO();
 
 	HumanReadableSize = (double)SelectedDrive.DiskSize;
 	for (i=0; i<ARRAYSIZE(suffix); i++) {
@@ -426,21 +446,25 @@ static BOOL PopulateProperties(int ComboIndex)
 	IGNORE_RETVAL(ComboBox_SetCurSel(hCapacity, 0));
 	hDeviceTooltip = CreateTooltip(hDeviceList, DriveID.Table[ComboIndex], -1);
 
-	// If no existing label is available, propose one according to the size (eg: "256MB", "8GB")
-	if (safe_strcmp(no_label, DriveLabel.Table[ComboIndex]) == 0) {
-		if (HumanReadableSize < 1.0) {
-			HumanReadableSize *= 1024.0;
-			i--;
-		}
-		// If we're beneath the tolerance, round proposed label to an integer, if not, show one decimal point
-		if (fabs(HumanReadableSize / ceil(HumanReadableSize) - 1.0) < PROPOSEDLABEL_TOLERANCE) {
-			safe_sprintf(proposed_label, sizeof(proposed_label), "%0.0f%s", ceil(HumanReadableSize), suffix[i]);
+	// If no existing label is available and no ISO is selected, propose one according to the size (eg: "256MB", "8GB")
+	if ((iso_path == NULL) || (iso_report.label[0] == 0)) {
+		if (safe_strcmp(no_label, DriveLabel.Table[ComboIndex]) == 0) {
+			if (HumanReadableSize < 1.0) {
+				HumanReadableSize *= 1024.0;
+				i--;
+			}
+			// If we're beneath the tolerance, round proposed label to an integer, if not, show one decimal point
+			if (fabs(HumanReadableSize / ceil(HumanReadableSize) - 1.0) < PROPOSEDLABEL_TOLERANCE) {
+				safe_sprintf(proposed_label, sizeof(proposed_label), "%0.0f%s", ceil(HumanReadableSize), suffix[i]);
+			} else {
+				safe_sprintf(proposed_label, sizeof(proposed_label), "%0.1f%s", HumanReadableSize, suffix[i]);
+			}
+			SetWindowTextU(hLabel, proposed_label);
 		} else {
-			safe_sprintf(proposed_label, sizeof(proposed_label), "%0.1f%s", HumanReadableSize, suffix[i]);
+			SetWindowTextU(hLabel, DriveLabel.Table[ComboIndex]);
 		}
-		SetWindowTextA(hLabel, proposed_label);
 	} else {
-		SetWindowTextA(hLabel, DriveLabel.Table[ComboIndex]);
+		SetWindowTextU(hLabel, iso_report.label);
 	}
 
 	return TRUE;
@@ -962,6 +986,7 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 	PrintStatus(0, TRUE, "Scanning ISO image...\n");
 	if (!ExtractISO(iso_path, "", TRUE)) {
 		PrintStatus(0, TRUE, "Failed to scan ISO image.");
+		safe_free(iso_path);
 		goto out;
 	}
 	uprintf("ISO label: '%s'\n size: %lld bytes, 4GB:%c, bootmgr:%c, isolinux:%c\n",
@@ -973,6 +998,9 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 			"This ISO image doesn't appear to use either...", "Unsupported ISO", MB_OK|MB_ICONINFORMATION);
 		safe_free(iso_path);
 	} else {
+		// Enable DOS, set DOS Type to ISO (last item) and set FS accordingly
+		CheckDlgButton(hMainDialog, IDC_DOS, BST_CHECKED);
+		SetFSFromISO();
 		for (i=(int)safe_strlen(iso_path); (i>0)&&(iso_path[i]!='\\'); i--);
 		PrintStatus(0, TRUE, "Using ISO: %s\n", &iso_path[i+1]);
 		// Some Linux distros, such as Arch Linux, require the USB drive to have
@@ -980,6 +1008,10 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 		if (iso_report.label[0] != 0) {
 			SetWindowTextU(hLabel, iso_report.label);
 		}
+		// Lose the focus on the select ISO (but place it on Close)
+		SendMessage(hMainDialog, WM_NEXTDLGCTL,  (WPARAM)FALSE, 0);
+		// Lose the focus from Close and set it back to Start
+		SendMessage(hMainDialog, WM_NEXTDLGCTL, (WPARAM)GetDlgItem(hMainDialog, IDC_START), TRUE);
 	}
 
 out:
@@ -1217,14 +1249,16 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				break;
 			fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
 			SetClusterSizes(fs);
-			if (((fs == FS_EXFAT) || (fs <0)) && IsWindowEnabled(hDOS)) {
-				// unlikely to be supported by BIOSes => don't bother
-				IGNORE_RETVAL(ComboBox_SetCurSel(hDOSType, 0));
-				uDOSChecked = IsDlgButtonChecked(hMainDialog, IDC_DOS);
-				CheckDlgButton(hDlg, IDC_DOS, BST_UNCHECKED);
-				EnableWindow(hDOS, FALSE);
-				EnableWindow(hDOSType, FALSE);
-				ShowWindow(hSelectISO, SW_HIDE);
+			if ((fs == FS_EXFAT) || (fs <0)) {
+				if (IsWindowEnabled(hDOS)) {
+					// unlikely to be supported by BIOSes => don't bother
+					IGNORE_RETVAL(ComboBox_SetCurSel(hDOSType, 0));
+					uDOSChecked = IsDlgButtonChecked(hMainDialog, IDC_DOS);
+					CheckDlgButton(hDlg, IDC_DOS, BST_UNCHECKED);
+					EnableWindow(hDOS, FALSE);
+					EnableWindow(hDOSType, FALSE);
+					EnableWindow(hSelectISO, FALSE);
+				}
 				break;
 			}
 			IGNORE_RETVAL(ComboBox_ResetContent(hDOSType));
@@ -1238,23 +1272,25 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			if (fs == FS_NTFS) {
 				IGNORE_RETVAL(ComboBox_SetItemData(hDOSType, ComboBox_AddStringU(hDOSType, "ISO Image"), DT_ISO_NTFS));
 			}
-			IGNORE_RETVAL(ComboBox_SetCurSel(hDOSType, (bWithFreeDOS && (fs != FS_NTFS))?1:0));
+			if (iso_path != NULL)
+				IGNORE_RETVAL(ComboBox_SetCurSel(hDOSType, ComboBox_GetCount(hDOSType) - 1));
+			else
+				IGNORE_RETVAL(ComboBox_SetCurSel(hDOSType, (bWithFreeDOS && (fs != FS_NTFS))?1:0));
 			if (!IsWindowEnabled(hDOS)) {
 				EnableWindow(hDOS, TRUE);
 				EnableWindow(hDOSType, TRUE);
+				EnableWindow(hSelectISO, TRUE);
 				CheckDlgButton(hDlg, IDC_DOS, uDOSChecked);
 			}
-			// Fall through to enable/disable the ISO selection
+			break;
 		case IDC_DOSTYPE:
 			if (HIWORD(wParam) != CBN_SELCHANGE)
 				break;
 			dt = (int)ComboBox_GetItemData(hDOSType, ComboBox_GetCurSel(hDOSType));
-			if ((dt != DT_ISO_NTFS) && (dt != DT_ISO_FAT)) {
-				ShowWindow(hSelectISO, SW_HIDE);
-				break;
+			if ((dt == DT_ISO_NTFS) || (dt == DT_ISO_FAT)) {
+				SendMessage(hMainDialog, WM_NEXTDLGCTL, (WPARAM)hSelectISO, TRUE);
 			}
-			ShowWindow(hSelectISO, SW_SHOW);
-			break;
+			return (INT_PTR)TRUE;
 		case IDC_SELECT_ISO:
 			DestroyTooltip(hISOToolTip);
 			safe_free(iso_path);
