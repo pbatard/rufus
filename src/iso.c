@@ -397,7 +397,7 @@ try_iso:
 		goto out;
 	}
 	i_joliet_level = iso9660_ifs_get_joliet_level(p_iso);
-	uprintf("Disc image is an ISO9660 image (Joliet = %d)\n", i_joliet_level);
+	uprintf("Disc image is an ISO9660 image\n");
 	if (scan_only) {
 		if (iso9660_ifs_get_volume_id(p_iso, &vol_id)) {
 			safe_strcpy(iso_report.label, sizeof(iso_report.label), vol_id);

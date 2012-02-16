@@ -392,7 +392,7 @@ static void SetFSFromISO(void)
 		return;
 
 	for (i=ComboBox_GetCount(hFileSystem)-1; i>=0; i--) {
-		fs = ComboBox_GetItemData(hFileSystem, i);
+		fs = (int)ComboBox_GetItemData(hFileSystem, i);
 		if ( ((iso_report.has_bootmgr) && (fs == FS_NTFS))
 			|| ((iso_report.has_isolinux) && ((fs == FS_FAT32) || (fs == FS_FAT16))) ) {
 			IGNORE_RETVAL(ComboBox_SetCurSel(hFileSystem, i));
@@ -521,9 +521,9 @@ BOOL CreatePartition(HANDLE hDrive)
 /*
  * Refresh the list of USB devices
  */
-static BOOL GetUSBDevices(void)
+static BOOL GetUSBDevices(DWORD devnum)
 {
-	BOOL r;
+	BOOL r, found = FALSE;
 	HDEVINFO dev_info = NULL;
 	SP_DEVINFO_DATA dev_info_data;
 	SP_DEVICE_INTERFACE_DATA devint_data;
@@ -626,7 +626,18 @@ static BOOL GetUSBDevices(void)
 		}
 	}
 	SetupDiDestroyDeviceInfoList(dev_info);
-	IGNORE_RETVAL(ComboBox_SetCurSel(hDeviceList, 0));
+
+	if (devnum >= DRIVE_INDEX_MIN) {
+		for (i=0; i<ComboBox_GetCount(hDeviceList); i++) {
+			if ((DWORD)ComboBox_GetItemData(hDeviceList, i) == devnum) {
+				found = TRUE;
+				break;
+			}
+		}
+	}
+	if (!found)
+		i = 0;
+	IGNORE_RETVAL(ComboBox_SetCurSel(hDeviceList, i));
 	SendMessage(hMainDialog, WM_COMMAND, (CBN_SELCHANGE<<16) | IDC_DEVICE, 0);
 	SendMessage(hMainDialog, WM_COMMAND, (CBN_SELCHANGE<<16) | IDC_FILESYSTEM,
 		ComboBox_GetCurSel(hFileSystem));
@@ -1136,7 +1147,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 {
 	DRAWITEMSTRUCT* pDI;
 	int nDeviceIndex, fs, dt;
-	DWORD DeviceNum;
+	static DWORD DeviceNum = 0;
 	char str[MAX_PATH], tmp[128];
 	static UINT uDOSChecked = BST_CHECKED;
 
@@ -1145,14 +1156,14 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	case WM_DEVICECHANGE:
 		if ( (format_thid == NULL) &&
 			 ((wParam == DBT_DEVICEARRIVAL) || (wParam == DBT_DEVICEREMOVECOMPLETE)) ) {
-			GetUSBDevices();
+			GetUSBDevices((DWORD)ComboBox_GetItemData(hDeviceList, ComboBox_GetCurSel(hDeviceList)));
 			return (INT_PTR)TRUE;
 		}
 		break;
 
 	case WM_INITDIALOG:
 		InitDialog(hDlg);
-		GetUSBDevices();
+		GetUSBDevices(0);
 		return (INT_PTR)TRUE;
 
 	// The things one must do to get an ellipsis on the status bar...
@@ -1289,6 +1300,9 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			dt = (int)ComboBox_GetItemData(hDOSType, ComboBox_GetCurSel(hDOSType));
 			if ((dt == DT_ISO_NTFS) || (dt == DT_ISO_FAT)) {
 				SendMessage(hMainDialog, WM_NEXTDLGCTL, (WPARAM)hSelectISO, TRUE);
+			} else {
+				SendMessage(hMainDialog, WM_NEXTDLGCTL,  (WPARAM)FALSE, 0);
+				SendMessage(hMainDialog, WM_NEXTDLGCTL, (WPARAM)GetDlgItem(hMainDialog, IDC_START), TRUE);
 			}
 			return (INT_PTR)TRUE;
 		case IDC_SELECT_ISO:
@@ -1352,7 +1366,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				if (MessageBoxA(hMainDialog, str, "Rufus", MB_OKCANCEL|MB_ICONWARNING) == IDOK) {
 					// Disable all controls except cancel
 					EnableControls(FALSE);
-					DeviceNum =  (DWORD)ComboBox_GetItemData(hDeviceList, nDeviceIndex);
+					DeviceNum = (DWORD)ComboBox_GetItemData(hDeviceList, nDeviceIndex);
 					FormatStatus = 0;
 					InitProgress();
 					if (!IsWindow(hISOProgressDlg)) { 
@@ -1397,7 +1411,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		EnableWindow(GetDlgItem(hISOProgressDlg, IDC_ISO_ABORT), TRUE);
 		EnableWindow(GetDlgItem(hMainDialog, IDCANCEL), TRUE);
 		EnableControls(TRUE);
-		GetUSBDevices();
+		GetUSBDevices(DeviceNum);
 		if (!IS_ERROR(FormatStatus)) {
 			PrintStatus(0, FALSE, "DONE");
 		} else if (SCODE_CODE(FormatStatus) == ERROR_CANCELLED) {
