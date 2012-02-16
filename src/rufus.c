@@ -58,7 +58,7 @@ float fScale = 1.0f;
 int default_fs;
 HWND hDeviceList, hCapacity, hFileSystem, hClusterSize, hLabel, hDOSType, hNBPasses;
 HWND hISOProgressDlg = NULL, hISOProgressBar, hISOFileName;
-BOOL bWithFreeDOS, bWithSyslinux;
+BOOL bWithFreeDOS;
 extern char szStatusMessage[256];
 
 static HANDLE format_thid = NULL;
@@ -1277,8 +1277,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				IGNORE_RETVAL(ComboBox_SetItemData(hDOSType, ComboBox_AddStringU(hDOSType, "MS-DOS"), DT_WINME));
 				if (bWithFreeDOS)
 					IGNORE_RETVAL(ComboBox_SetItemData(hDOSType, ComboBox_AddStringU(hDOSType, "FreeDOS"), DT_FREEDOS));
-				if (bWithSyslinux)
-					IGNORE_RETVAL(ComboBox_SetItemData(hDOSType, ComboBox_AddStringU(hDOSType, "ISO Image"), DT_ISO_FAT));
+				IGNORE_RETVAL(ComboBox_SetItemData(hDOSType, ComboBox_AddStringU(hDOSType, "ISO Image"), DT_ISO_FAT));
 			}
 			if (fs == FS_NTFS) {
 				IGNORE_RETVAL(ComboBox_SetItemData(hDOSType, ComboBox_AddStringU(hDOSType, "ISO Image"), DT_ISO_NTFS));
@@ -1471,10 +1470,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	bWithFreeDOS = (FindResource(hMainInstance, MAKEINTRESOURCE(IDR_FD_COMMAND_COM), RT_RCDATA) != NULL) &&
 		(FindResource(hMainInstance, MAKEINTRESOURCE(IDR_FD_KERNEL_SYS), RT_RCDATA) != NULL);
 	uprintf("FreeDOS resources are %sembedded with this app\n", bWithFreeDOS?"":"NOT ");
-	// Find out if the Syslinux resources are embedded in the app
-	bWithSyslinux = (FindResource(hMainInstance, MAKEINTRESOURCE(IDR_SL_LDLINUX_SYS), RT_RCDATA) != NULL) &&
-		(FindResource(hMainInstance, MAKEINTRESOURCE(IDR_SL_LDLINUX_BSS), RT_RCDATA) != NULL);
-	uprintf("Syslinux resources are %sembedded with this app\n", bWithSyslinux?"":"NOT ");
 
 	// Create the main Window
 	if ( (hDlg = CreateDialogA(hInstance, MAKEINTRESOURCEA(IDD_DIALOG), NULL, MainCallback)) == NULL ) {

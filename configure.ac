@@ -21,6 +21,7 @@ AC_DEFINE([_GNU_SOURCE], [], [Use GNU extensions])
 AM_CFLAGS="${AM_CFLAGS} -DWINVER=0x501 -D_WIN32_IE=0x501 -D_WIN32_WINNT=0x501"
 AM_LDFLAGS="${AM_LDFLAGS} -Wl,-no-undefined"
 
+# FreeDOS support
 AC_ARG_WITH([freedos],
 	[AS_HELP_STRING([--with-freedos],
 		[embed FreeDOS support (default=yes)])],
@@ -29,15 +30,6 @@ AC_ARG_WITH([freedos],
 if test "x$with_freedos" != "xno" ; then
 	AM_RCFLAGS="${AM_RCFLAGS} -DWITH_FREEDOS"
 	EXESUFFIX="f"
-fi
-
-AC_ARG_WITH([syslinux],
-	[AS_HELP_STRING([--with-syslinux],
-		[embed Syslinux support (default=yes)])],
-	[],
-	[with_freedos=yes])
-if test "x$with_syslinux" != "xno" ; then
-	AM_RCFLAGS="${AM_RCFLAGS} -DWITH_SYSLINUX"
 fi
 
 # Debug symbols
@@ -81,6 +73,4 @@ AC_CONFIG_FILES([src/libcdio/udf/Makefile])
 AC_CONFIG_FILES([src/libcdio/driver/Makefile])
 AC_OUTPUT
 
-AC_MSG_NOTICE([
-FreeDOS Support  : $(test "x$with_freedos" != "xno" && echo enabled || echo disabled)
-Syslinux Support : $(test "x$with_syslinux" != "xno" && echo enabled || echo disabled)])
+AC_MSG_RESULT([FreeDOS support: $(test "x$with_freedos" != "xno" && echo enabled || echo disabled)])

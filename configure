@@ -652,7 +652,6 @@ ac_user_opts='
 enable_option_checking
 enable_silent_rules
 with_freedos
-with_syslinux
 enable_debug
 '
       ac_precious_vars='build_alias
@@ -1287,7 +1286,6 @@ Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
   --with-freedos          embed FreeDOS support (default=yes)
-  --with-syslinux         embed Syslinux support (default=yes)
 
 Some influential environment variables:
   CC          C compiler command
@@ -3452,6 +3450,7 @@ $as_echo "#define _GNU_SOURCE /**/" >>confdefs.h
 AM_CFLAGS="${AM_CFLAGS} -DWINVER=0x501 -D_WIN32_IE=0x501 -D_WIN32_WINNT=0x501"
 AM_LDFLAGS="${AM_LDFLAGS} -Wl,-no-undefined"
 
+# FreeDOS support
 
 # Check whether --with-freedos was given.
 if test "${with_freedos+set}" = set; then :
@@ -3463,18 +3462,6 @@ fi
 if test "x$with_freedos" != "xno" ; then
 	AM_RCFLAGS="${AM_RCFLAGS} -DWITH_FREEDOS"
 	EXESUFFIX="f"
-fi
-
-
-# Check whether --with-syslinux was given.
-if test "${with_syslinux+set}" = set; then :
-  withval=$with_syslinux;
-else
-  with_freedos=yes
-fi
-
-if test "x$with_syslinux" != "xno" ; then
-	AM_RCFLAGS="${AM_RCFLAGS} -DWITH_SYSLINUX"
 fi
 
 # Debug symbols
@@ -4740,9 +4727,5 @@ $as_echo "$as_me: WARNING: unrecognized options: $ac_unrecognized_opts" >&2;}
 fi
 
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}:
-FreeDOS Support  : $(test \"x$with_freedos\" != \"xno\" && echo enabled || echo disabled)
-Syslinux Support : $(test \"x$with_syslinux\" != \"xno\" && echo enabled || echo disabled)" >&5
-$as_echo "$as_me:
-FreeDOS Support  : $(test \"x$with_freedos\" != \"xno\" && echo enabled || echo disabled)
-Syslinux Support : $(test \"x$with_syslinux\" != \"xno\" && echo enabled || echo disabled)" >&6;}
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: FreeDOS support: $(test \"x$with_freedos\" != \"xno\" && echo enabled || echo disabled)" >&5
+$as_echo "FreeDOS support: $(test \"x$with_freedos\" != \"xno\" && echo enabled || echo disabled)" >&6; }

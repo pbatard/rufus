@@ -33,7 +33,7 @@ LANGUAGE LANG_ENGLISH, SUBLANG_NEUTRAL
 IDD_DIALOG DIALOGEX 12, 12, 206, 278
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_APPWINDOW
-CAPTION "Rufus v1.1.1.138"
+CAPTION "Rufus v1.1.1.139"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     DEFPUSHBUTTON   "Start",IDC_START,94,236,50,14
@@ -71,7 +71,7 @@ BEGIN
     DEFPUSHBUTTON   "OK",IDOK,231,175,50,14,WS_GROUP
     CONTROL         "<a href=""http://rufus.akeo.ie"">http://rufus.akeo.ie</a>",IDC_ABOUT_RUFUS_URL,
                     "SysLink",WS_TABSTOP,46,47,114,9
-    LTEXT           "Version 1.1.1 (Build 138)",IDC_STATIC,46,19,78,8
+    LTEXT           "Version 1.1.1 (Build 139)",IDC_STATIC,46,19,78,8
     PUSHBUTTON      "License...",IDC_ABOUT_LICENSE,46,175,50,14,WS_GROUP
     EDITTEXT        IDC_ABOUT_COPYRIGHTS,46,107,235,63,ES_MULTILINE | ES_READONLY | WS_VSCROLL
     LTEXT           "Report bugs or request enhancements at:",IDC_STATIC,46,66,187,8
@@ -97,7 +97,7 @@ STYLE DS_SETFONT | DS_FIXEDSYS | WS_POPUP | WS_CAPTION
 CAPTION "Copying ISO files..."
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    LTEXT           "",IDC_ISO_FILENAME,8,10,246,13,SS_PATHELLIPSIS
+    LTEXT           "Opening ISO image - please wait...",IDC_ISO_FILENAME,8,10,246,13,SS_PATHELLIPSIS
     CONTROL         "",IDC_ISO_PROGRESS,"msctls_progress32",WS_BORDER,7,26,247,8
     PUSHBUTTON      "Cancel",IDC_ISO_ABORT,111,43,50,14
 END
@@ -138,6 +138,8 @@ END
 3 TEXTINCLUDE 
 BEGIN
     "\r\n"
+    "IDR_SL_LDLINUX_BSS      RCDATA                  ""../res/syslinux/ldlinux.bss""\r\n"
+    "IDR_SL_LDLINUX_SYS      RCDATA                  ""../res/syslinux/ldlinux.sys""\r\n"
     "// Only include these in rufus_fd\r\n"
     "#if defined(WITH_FREEDOS)\r\n"
     "IDR_FD_COMMAND_COM      RCDATA                  ""../res/freedos/COMMAND.COM""\r\n"
@@ -167,10 +169,6 @@ BEGIN
     "IDR_FD_EGA16_CPX        RCDATA                  ""../res/freedos/ega16.cpx""\r\n"
     "IDR_FD_EGA17_CPX        RCDATA                  ""../res/freedos/ega17.cpx""\r\n"
     "IDR_FD_EGA18_CPX        RCDATA                  ""../res/freedos/ega18.cpx""\r\n"
-    "#endif\r\n"
-    "#if defined(WITH_SYSLINUX)\r\n"
-    "IDR_SL_LDLINUX_BSS      RCDATA                  ""../res/syslinux/ldlinux.bss""\r\n"
-    "IDR_SL_LDLINUX_SYS      RCDATA                  ""../res/syslinux/ldlinux.sys""\r\n"
     "#endif\r\n"
     "\r\n"
     "// Must reference a manifest for visual styles and elevation\r\n"
@@ -222,8 +220,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,1,1,138
- PRODUCTVERSION 1,1,1,138
+ FILEVERSION 1,1,1,139
+ PRODUCTVERSION 1,1,1,139
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -240,13 +238,13 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "akeo.ie"
             VALUE "FileDescription", "Rufus"
-            VALUE "FileVersion", "1.1.1.138"
+            VALUE "FileVersion", "1.1.1.139"
             VALUE "InternalName", "Rufus"
             VALUE "LegalCopyright", "© 2011 Pete Batard (GPL v3)"
             VALUE "LegalTrademarks", "http://www.gnu.org/copyleft/gpl.html"
             VALUE "OriginalFilename", "rufus.exe"
             VALUE "ProductName", "Rufus"
-            VALUE "ProductVersion", "1.1.1.138"
+            VALUE "ProductVersion", "1.1.1.139"
         END
     END
     BLOCK "VarFileInfo"
@@ -275,6 +273,8 @@ IDI_ICON                ICON                    "../res/rufus.ico"
 // Generated from the TEXTINCLUDE 3 resource.
 //
 
+IDR_SL_LDLINUX_BSS      RCDATA                  "../res/syslinux/ldlinux.bss"
+IDR_SL_LDLINUX_SYS      RCDATA                  "../res/syslinux/ldlinux.sys"
 // Only include these in rufus_fd
 #if defined(WITH_FREEDOS)
 IDR_FD_COMMAND_COM      RCDATA                  "../res/freedos/COMMAND.COM"
@@ -304,10 +304,6 @@ IDR_FD_EGA15_CPX        RCDATA                  "../res/freedos/ega15.cpx"
 IDR_FD_EGA16_CPX        RCDATA                  "../res/freedos/ega16.cpx"
 IDR_FD_EGA17_CPX        RCDATA                  "../res/freedos/ega17.cpx"
 IDR_FD_EGA18_CPX        RCDATA                  "../res/freedos/ega18.cpx"
-#endif
-#if defined(WITH_SYSLINUX)
-IDR_SL_LDLINUX_BSS      RCDATA                  "../res/syslinux/ldlinux.bss"
-IDR_SL_LDLINUX_SYS      RCDATA                  "../res/syslinux/ldlinux.sys"
 #endif
 
 // Must reference a manifest for visual styles and elevation
