@@ -17,7 +17,7 @@ Compilation:
   ms-config.h (Visual Studio, WDK) or running "./configure --help" (MinGW).
   
 Additional information:
-  Rufus provides extensive information abour what it is doing through the Windows
+  Rufus provides extensive information about what it is doing through the Windows
   debug facility. This info can be accessed with an application such as DebugView.
 
 More info:
