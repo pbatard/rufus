@@ -145,7 +145,9 @@ typedef struct {
 
 /* ISO details that the application may want */
 typedef struct {
-	char label[64];
+	char label[192];		/* 3*64 to account for UTF-8 */
+	char usb_label[192];	/* converted USB label for workaround */
+	char cfg_path[128];		/* path to the ISO's isolinux.cfg */
 	uint64_t projected_size;
 	BOOL has_4GB_file;
 	BOOL has_bootmgr;
@@ -204,9 +206,8 @@ __inline static BOOL UnlockDrive(HANDLE hDrive)
 /* Basic String Array */
 typedef struct {
 	char** Table;
-	size_t Size;
-	size_t Index;
-	size_t Max;
+	size_t Index;	// Current array size
+	size_t Max;		// Maximum array size
 } StrArray;
 extern void StrArrayCreate(StrArray* arr, size_t initial_size);
 extern void StrArrayAdd(StrArray* arr, const char* str);

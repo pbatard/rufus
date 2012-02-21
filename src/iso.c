@@ -69,6 +69,7 @@ static const char *isolinux_name[] = { "isolinux.cfg", "syslinux.cfg", "extlinux
 static uint8_t i_joliet_level = 0;
 static uint64_t total_blocks, nb_blocks;
 static BOOL scan_only = FALSE;
+static StrArray config_path;
 
 // TODO: Timestamp & permissions preservation
 
@@ -101,12 +102,61 @@ static void log_handler (cdio_log_level_t level, const char *message)
 	}
 }
 
+/*
+ * Workaround for isolinux config files requiring an ISO label for kernel
+ * append that may be different from our USB label.
+ * NB: this is intended as a quick-and-dirty workaround, because it is the
+ * distro creator's job to make their config and labels also work with USB.
+ * As such, this process may fail if:
+ * - the label is on the block size limit, for cfg files of more than 2KB
+ * - the user changed the label to one that is larger than the one from the cfg
+ * - the cfg is weird (more than one label on the same line, etc.)
+ */
+static void process_config(char* buf, size_t buf_size, const char* cfg_name)
+{
+	char last_char, eol_char, *label;
+	size_t i, j, k;
+
+	// Don't apply workaround if USB label is the same or longer than ISO
+	if ( (strcmp(iso_report.label, iso_report.usb_label) == 0)
+	  || (strlen(iso_report.label) < strlen(iso_report.usb_label)) )
+		return;
+
+	// Make sure our buffer is NUL terminated
+	if (buf_size >= UDF_BLOCKSIZE)	// UDF_BLOCKSIZE = ISO_BLOCKSIZE = 2048
+		buf_size = UDF_BLOCKSIZE-1;
+	last_char = buf[buf_size];
+	buf[buf_size] = 0;
+
+	for (i=0; i<buf_size; i++) {
+		// Check if there is a line starting with "append" (case insensitive)
+		if (_strnicmp(&buf[i], "append", sizeof("append")-1) == 0) {
+			for (j=i; (buf[j]!=0x00)&&(buf[j]!=0x0A)&&(buf[j]!=0x0D); j++);	// EOL
+			eol_char = buf[j];	// Make sure the line is NUL terminated
+			buf[j] = 0;
+			label = strstr(&buf[i], iso_report.label);
+			if (label != NULL) {
+				// Since label is longer than usb_label we can replace it
+				for (k=0; k<strlen(iso_report.label); k++)
+					label[k] = (k<strlen(iso_report.usb_label))?iso_report.usb_label[k]:' ';
+				uprintf("  Patched config file to use USB label '%s'\n", iso_report.usb_label);
+//				uprintf("  Patched line: '%s'\n", &buf[i]);
+			}
+			// Revert EOL
+			buf[j] = eol_char;
+			i = j;
+		}
+	}
+	// Revert NUL terminator
+	buf[buf_size] = last_char;
+}
+
 // Returns 0 on success, nonzero on error
 static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const char *psz_path)
 {
 	HANDLE file_handle = NULL;
 	DWORD buf_size, wr_size;
-	BOOL r;
+	BOOL r, cfg_file;
 	int i_length;
 	size_t i, nul_pos;
 	char* psz_fullpath = NULL;
@@ -140,14 +190,19 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 			}
 		} else {
 			i_file_length = udf_get_file_length(p_udf_dirent);
+			// Check for an isolinux config file anywhere
+			cfg_file = FALSE;
+			for (i=0; i<ARRAYSIZE(isolinux_name); i++) {
+				if (_stricmp(psz_basename, isolinux_name[i]) == 0)
+					cfg_file = TRUE;
+			}
 			if (scan_only) {
 				// Check for a "bootmgr" file in root (psz_path = "")
 				if ((*psz_path == 0) && (_stricmp(psz_basename, bootmgr_name) == 0))
 					iso_report.has_bootmgr = TRUE;
-				// Check for a syslinux config file anywhere
-				for (i=0; i<ARRAYSIZE(isolinux_name); i++) {
-					if (_stricmp(psz_basename, isolinux_name[i]) == 0)
-						iso_report.has_isolinux = TRUE;
+				if (cfg_file) {
+					iso_report.has_isolinux = TRUE;
+					StrArrayAdd(&config_path, psz_fullpath);
 				}
 				if (i_file_length >= FOUR_GIGABYTES)
 					iso_report.has_4GB_file = TRUE;
@@ -186,6 +241,8 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 					goto out;
 				}
 				buf_size = (DWORD)MIN(i_file_length, i_read);
+				if (cfg_file)
+					process_config((char*)buf, (size_t)buf_size, psz_fullpath);
 				ISO_BLOCKING(r = WriteFile(file_handle, buf, buf_size, &wr_size, NULL));
 				if ((!r) || (buf_size != wr_size)) {
 					uprintf("  Error writing file: %s\n", WindowsErrorString());
@@ -220,7 +277,7 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 {
 	HANDLE file_handle = NULL;
 	DWORD buf_size, wr_size;
-	BOOL s;
+	BOOL s, cfg_file;
 	int i_length, r = 1;
 	char psz_fullpath[1024], *psz_basename;
 	const char *psz_iso_name = &psz_fullpath[strlen(psz_extract_dir)];
@@ -260,14 +317,19 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 				goto out;
 		} else {
 			i_file_length = p_statbuf->size;
+			// Check for an isolinux config file anywhere
+			cfg_file = FALSE;
+			for (i=0; i<ARRAYSIZE(isolinux_name); i++) {
+				if (_stricmp(psz_basename, isolinux_name[i]) == 0)
+					cfg_file = TRUE;
+			}
 			if (scan_only) {
 				// Check for a "bootmgr" file in root (psz_path = "")
 				if ((*psz_path == 0) && (_stricmp(psz_basename, bootmgr_name) == 0))
 					iso_report.has_bootmgr = TRUE;
-				// Check for a syslinux config file anywhere
-				for (i=0; i<ARRAYSIZE(isolinux_name); i++) {
-					if (_stricmp(psz_basename, isolinux_name[i]) == 0)
-						iso_report.has_isolinux = TRUE;
+				if (cfg_file) {
+					iso_report.has_isolinux = TRUE;
+					StrArrayAdd(&config_path, psz_fullpath);
 				}
 				if (i_file_length >= FOUR_GIGABYTES)
 					iso_report.has_4GB_file = TRUE;
@@ -307,6 +369,8 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 					goto out;
 				}
 				buf_size = (DWORD)MIN(i_file_length, ISO_BLOCKSIZE);
+				if (cfg_file)
+					process_config((char*)buf, (size_t)buf_size, psz_fullpath);
 				ISO_BLOCKING(s = WriteFile(file_handle, buf, buf_size, &wr_size, NULL));
 				if ((!s) || (buf_size != wr_size)) {
 					uprintf("  Error writing file: %s\n", WindowsErrorString());
@@ -330,13 +394,16 @@ out:
 
 BOOL ExtractISO(const char* src_iso, const char* dest_dir, bool scan)
 {
+	size_t i;
+	FILE* fd;
 	BOOL r = FALSE;
 	iso9660_t* p_iso = NULL;
 	udf_t* p_udf = NULL; 
 	udf_dirent_t* p_udf_root;
 	LONG progress_style;
 	char* vol_id;
-	const char* scan_text = "Scanning ISO image...\n";
+	char syslinux_path[64];
+	const char* scan_text = "Scanning ISO image...";
 
 	if ((src_iso == NULL) || (dest_dir == NULL))
 		return FALSE;
@@ -351,6 +418,8 @@ BOOL ExtractISO(const char* src_iso, const char* dest_dir, bool scan)
 		iso_report.has_4GB_file = FALSE;
 		iso_report.has_bootmgr = FALSE;
 		iso_report.has_isolinux = FALSE;
+		// String array of all isolinux/syslinux locations
+		StrArrayCreate(&config_path, 8);
 		// Change the Window title and static text
 		SetWindowTextU(hISOProgressDlg, scan_text);
 		SetWindowTextU(hISOFileName, scan_text);
@@ -412,6 +481,38 @@ out:
 	if (scan_only) {
 		// We use the fact that UDF_BLOCKSIZE and ISO_BLOCKSIZE are the same here
 		iso_report.projected_size = total_blocks * ISO_BLOCKSIZE;
+		// We will link the existing isolinux.cfg from a syslinux.cfg we create
+		// If multiple config file exist, choose the one with the shortest path
+		if (iso_report.has_isolinux) {
+			safe_strcpy(iso_report.cfg_path, sizeof(iso_report.cfg_path), config_path.Table[0]);
+			for (i=1; i<config_path.Index; i++) {
+				if (safe_strlen(iso_report.cfg_path) > safe_strlen(config_path.Table[i]))
+					safe_strcpy(iso_report.cfg_path, sizeof(iso_report.cfg_path), config_path.Table[i]);
+			}
+			uprintf("Will use %s for Syslinux\n", iso_report.cfg_path);
+		}
+		StrArrayDestroy(&config_path);
+	} else if (iso_report.has_isolinux) {
+		safe_sprintf(syslinux_path, sizeof(syslinux_path), "%s\\syslinux.cfg", dest_dir);
+		// Create a /syslinux.cfg (if none exists) that points to the existing isolinux cfg
+		fd = fopen(syslinux_path, "r");
+		if (fd == NULL) {
+			fd = fopen(syslinux_path, "w");	// No "/syslinux.cfg" => create a new one
+			if (fd == NULL) {
+				uprintf("Unable to create %s - booting from USB will not work\n", syslinux_path);
+				r = 1;
+			} else {
+				uprintf("Creating: %s\n", syslinux_path);
+				fprintf(fd, "DEFAULT loadconfig\n\nLABEL loadconfig\n  CONFIG %s\n", iso_report.cfg_path);
+				for (i=safe_strlen(iso_report.cfg_path); (i>0)&&(iso_report.cfg_path[i]!='/'); i--);
+				if (i>0) {
+					iso_report.cfg_path[i] = 0;
+					fprintf(fd, "  APPEND %s/\n", iso_report.cfg_path);
+					iso_report.cfg_path[i] = '/';
+				}
+			}
+		}
+		fclose(fd);
 	}
 	SendMessage(hISOProgressDlg, UM_ISO_EXIT, 0, 0);
 	if (p_iso != NULL)

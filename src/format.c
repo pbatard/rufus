@@ -28,6 +28,7 @@
 #include <stdlib.h>
 #include <process.h>
 #include <stddef.h>
+#include <ctype.h>
 
 #include "msapi_utf8.h"
 #include "rufus.h"
@@ -167,7 +168,7 @@ static void ToValidLabel(WCHAR* name, BOOL bFAT)
 			}
 		}
 		if (found) continue;
-		name[k++] = name[i];
+		name[k++] = bFAT?toupper(name[i]):name[i];
 	}
 	name[k] = 0;
 	if (bFAT) {
@@ -175,6 +176,8 @@ static void ToValidLabel(WCHAR* name, BOOL bFAT)
 	} else {
 		name[32] = 0;
 	}
+	/* Needed for disk by label isolinux.cfg workaround */
+	wchar_to_utf8_no_alloc(name, iso_report.usb_label, sizeof(iso_report.usb_label));
 }
 
 /*
@@ -427,6 +430,34 @@ static BOOL WritePBR(HANDLE hLogicalVolume)
 }
 
 /*
+ * Issue a complete remount of the volume
+ */
+static BOOL RemountVolume(char drive_letter)
+{
+	char drive_guid[50];
+	char drive_name[] = "?:\\";
+
+	drive_name[0] = drive_letter;
+	if (GetVolumeNameForVolumeMountPointA(drive_name, drive_guid, sizeof(drive_guid))) {
+		if (DeleteVolumeMountPointA(drive_name)) {
+			Sleep(200);
+			if (SetVolumeMountPointA(drive_name, drive_guid)) {
+				uprintf("Successfully remounted %s on %s\n", drive_guid, drive_name);
+			} else {
+				uprintf("Failed to remount %s on %s\n", drive_guid, drive_name);
+				// This will leave the drive unaccessible and must be flagged as an error
+				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_REMOUNT_VOLUME);
+				return FALSE;
+			}
+		} else {
+			uprintf("Could not remount %s %s\n", drive_name, WindowsErrorString());
+			// Try to continue regardless
+		}
+	}
+	return TRUE;
+}
+
+/*
  * Standalone thread for the formatting operation
  */
 DWORD WINAPI FormatThread(LPVOID param)
@@ -436,7 +467,6 @@ DWORD WINAPI FormatThread(LPVOID param)
 	HANDLE hLogicalVolume = INVALID_HANDLE_VALUE;
 	SYSTEMTIME lt;
 	char drive_name[] = "?:\\";
-	char drive_guid[50];
 	char bb_msg[512];
 	char logfile[MAX_PATH], *userdir;
 	FILE* log_fd;
@@ -591,22 +621,8 @@ DWORD WINAPI FormatThread(LPVOID param)
 	// We issue a complete remount of the filesystem at on account of:
 	// - Ensuring the file explorer properly detects that the volume was updated
 	// - Ensuring that an NTFS system will be reparsed so that it becomes bootable
-	if (GetVolumeNameForVolumeMountPointA(drive_name, drive_guid, sizeof(drive_guid))) {
-		if (DeleteVolumeMountPointA(drive_name)) {
-			Sleep(200);
-			if (SetVolumeMountPointA(drive_name, drive_guid)) {
-				uprintf("Successfully remounted %s on %s\n", drive_guid, drive_name);
-			} else {
-				uprintf("Failed to remount %s on %s\n", drive_guid, drive_name);
-				// This will leave the drive unaccessible and must be flagged as an error
-				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_REMOUNT_VOLUME);
-				goto out;
-			}
-		} else {
-			uprintf("Could not remount %s %s\n", drive_name, WindowsErrorString());
-			// Try to continue regardless
-		}
-	}
+	if (!RemountVolume(drive_name[0]))
+		goto out;
 
 	if (IsChecked(IDC_DOS)) {
 		UpdateProgress(OP_DOS, -1.0f);
@@ -622,7 +638,6 @@ DWORD WINAPI FormatThread(LPVOID param)
 			break;
 		case DT_ISO_NTFS:
 		case DT_ISO_FAT:
-			// TODO: ISO_FAT: ensure the ISO doesn't have ldlinux.sys as it will break the existing one
 			if (iso_path != NULL) {
 				PrintStatus(0, TRUE, "Copying ISO files...");
 				drive_name[2] = 0;
@@ -630,10 +645,11 @@ DWORD WINAPI FormatThread(LPVOID param)
 					FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANNOT_COPY;
 					goto out;
 				}
-				// TODO: ISO_FAT: create menu and stuff
 			}
 			break;
 		}
+		// Issue another complete remount before we exit, to ensure we're clean
+		RemountVolume(drive_name[0]);
 	}
 
 out:

@@ -303,24 +303,26 @@ bool cdio_charset_to_utf8(char *src, size_t src_len, cdio_utf8_t **dst,
   if (src == NULL || dst == NULL || src_charset == NULL || strcmp(src_charset, "UCS-2BE") != 0)
     return false;
 
+  /* Compute UCS-2 src length */
   if (src_len == (size_t)-1) {
     for (src_len = 0; ((uint16_t*)src)[src_len] !=0; src_len++);
-    src_len <<=2;
+  } else {
+    src_len >>=1;
   }
 
   /* Eliminate empty strings */
-  if ((src_len < 2) || ((src[0] == 0) && (src[1] == 0))) {
+  if ((src_len < 1) || ((src[0] == 0) && (src[1] == 0))) {
     *dst = NULL;
     return false;
   }
 
   /* Perform byte reversal */
-  le_src = (wchar_t*)malloc(src_len+2);
-  for (i=0; i<src_len; i+=2) {
-    ((char*)le_src)[i] = src[i+1];
-    ((char*)le_src)[i+1] = src[i];
+  le_src = (wchar_t*)malloc(2*src_len+2);
+  for (i=0; i<src_len; i++) {
+    ((char*)le_src)[2*i] = src[2*i+1];
+    ((char*)le_src)[2*i+1] = src[2*i];
   }
-  le_src[src_len/2] = 0;
+  le_src[src_len] = 0;
   *dst = wchar_to_utf8(le_src);
   free(le_src);
 

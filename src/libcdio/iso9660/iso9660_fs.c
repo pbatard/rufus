@@ -85,33 +85,6 @@ struct _iso9660_s {
 			     */
 };
 
-/*!
-   Change trailing blanks in null-terminated *str to nulls
-   If the end result is an empty string, *str is freed
-*/
-static void
-strip_trail (char** str)
-{
-  int j;
-
-  if (*str == NULL)
-    return;
-
-  for (j = strlen (*str) - 1; j >= 0; j--)
-    {
-      if ((*str)[j] != ' ')
-        break;
-
-      (*str)[j] = '\0';
-    }
-
-  if ((*str)[0] == 0)
-    {
-      free(*str);
-      *str = NULL;
-    }
-}
-
 static long int iso9660_seek_read_framesize (const iso9660_t *p_iso, 
 					     void *ptr, lsn_t start, 
 					     long int size, 
@@ -299,6 +272,72 @@ check_pvd (const iso9660_pvd_t *p_pvd, cdio_log_level_t log_level)
   return true;
 }
 
+
+/*!
+  Core procedure for the iso9660_ifs_get_###_id() calls.
+  pvd_member/svd_member is a pointer to an achar_t or dchar_t
+  ID string which we can superset as char.
+  If the Joliet converted string is the same as the achar_t/dchar_t
+  one, we fall back to using the latter, as it may be longer.
+*/
+static inline bool
+get_member_id(iso9660_t *p_iso, cdio_utf8_t **p_psz_member_id,
+              char* pvd_member, char* svd_member, size_t max_size)
+{
+  int j;
+  bool strip;
+
+  if (!p_iso) {
+    *p_psz_member_id = NULL;
+    return false;
+  }
+#ifdef HAVE_JOLIET  
+  if (p_iso->i_joliet_level) {
+    /* Translate USC-2 string from Secondary Volume Descriptor */
+    if (cdio_charset_to_utf8(svd_member, max_size,
+                            p_psz_member_id, "UCS-2BE")) {
+      /* NB: *p_psz_member_id is never NULL on success. */
+      if (strncmp(*p_psz_member_id, pvd_member,
+                  strlen(*p_psz_member_id)) != 0) {
+        /* Strip trailing spaces */
+        for (j = strlen(*p_psz_member_id)-1; j >= 0; j--) {
+          if ((*p_psz_member_id)[j] != ' ')
+            break;
+          (*p_psz_member_id)[j] = '\0';
+        }
+        if ((*p_psz_member_id)[0] != 0) {
+          /* Joliet string is not empty and differs from
+             non Joliet one => use it */
+          return true;
+        }
+      }
+      /* Joliet string was either empty or same */
+      free(*p_psz_member_id);
+    }
+  }
+#endif /*HAVE_JOLIET*/
+  *p_psz_member_id = calloc(max_size+1, sizeof(cdio_utf8_t));
+  if (!*p_psz_member_id) {
+    cdio_warn("Memory allocation error");
+    return false;
+  }
+  /* Copy string while removing trailing spaces */
+  (*p_psz_member_id)[max_size] = 0;
+  for (strip=true, j=max_size-1; j>=0; j--) {
+    if (strip && (pvd_member[j] == ' '))
+      continue;
+    strip = false;
+    (*p_psz_member_id)[j] = pvd_member[j];
+  }
+  if (strlen(*p_psz_member_id) == 0) {
+    free(*p_psz_member_id);
+    *p_psz_member_id = NULL;
+    return false;
+  }
+  return true;
+}
+
+
 /*!  
   Return the application ID.  NULL is returned in psz_app_id if there
   is some problem in getting this.
@@ -307,32 +346,14 @@ bool
 iso9660_ifs_get_application_id(iso9660_t *p_iso, 
 			       /*out*/ cdio_utf8_t **p_psz_app_id)
 {
-  if (!p_iso) {
-    *p_psz_app_id = NULL;
-    return false;
-  }
-
-#ifdef HAVE_JOLIET  
-  if (p_iso->i_joliet_level) {
-    /* TODO: check that we haven't reached the maximum size.
-       If we have, perhaps we've truncated and if we can get 
-       longer results *and* have the same character using
-       the PVD, do that.
-     */
-  if ( cdio_charset_to_utf8(p_iso->svd.application_id,
-                            ISO_MAX_APPLICATION_ID,
-                            p_psz_app_id, "UCS-2BE")) {
-      strip_trail(p_psz_app_id);
-      return (*p_psz_app_id != NULL);
-    }
-  }
-#endif /*HAVE_JOLIET*/
-  *p_psz_app_id = iso9660_get_application_id( &(p_iso->pvd) );
-  return *p_psz_app_id != NULL && strlen(*p_psz_app_id);
+  return get_member_id(p_iso, p_psz_app_id,
+                       (char*)p_iso->pvd.application_id,
+                       (char*)p_iso->svd.application_id,
+                       ISO_MAX_APPLICATION_ID);
 }
 
 /*!  
-  Return the Joliet level recognaized for p_iso.
+  Return the Joliet level recognized for p_iso.
 */
 uint8_t iso9660_ifs_get_joliet_level(iso9660_t *p_iso)
 {
@@ -348,27 +369,10 @@ bool
 iso9660_ifs_get_preparer_id(iso9660_t *p_iso,
 			/*out*/ cdio_utf8_t **p_psz_preparer_id)
 {
-  if (!p_iso) {
-    *p_psz_preparer_id = NULL;
-    return false;
-  }
-
-#ifdef HAVE_JOLIET  
-  if (p_iso->i_joliet_level) {
-    /* TODO: check that we haven't reached the maximum size.
-       If we have, perhaps we've truncated and if we can get 
-       longer results *and* have the same character using
-       the PVD, do that.
-     */
-    if ( cdio_charset_to_utf8(p_iso->svd.preparer_id, ISO_MAX_PREPARER_ID,
-                              p_psz_preparer_id, "UCS-2BE") ) {
-      strip_trail(p_psz_preparer_id);
-      return (*p_psz_preparer_id != NULL);
-    }
-  }
-#endif /*HAVE_JOLIET*/
-  *p_psz_preparer_id = iso9660_get_preparer_id( &(p_iso->pvd) );
-  return *p_psz_preparer_id != NULL && strlen(*p_psz_preparer_id);
+  return get_member_id(p_iso, p_psz_preparer_id,
+                       (char*)p_iso->pvd.preparer_id,
+                       (char*)p_iso->svd.preparer_id,
+                       ISO_MAX_PREPARER_ID);
 }
 
 /*!
@@ -378,29 +382,11 @@ iso9660_ifs_get_preparer_id(iso9660_t *p_iso,
 bool iso9660_ifs_get_publisher_id(iso9660_t *p_iso,
                                   /*out*/ cdio_utf8_t **p_psz_publisher_id)
 {
-  if (!p_iso) {
-    *p_psz_publisher_id = NULL;
-    return false;
-  }
-
-#ifdef HAVE_JOLIET  
-  if (p_iso->i_joliet_level) {
-    /* TODO: check that we haven't reached the maximum size.
-       If we have, perhaps we've truncated and if we can get 
-       longer results *and* have the same character using
-       the PVD, do that.
-     */
-    if( cdio_charset_to_utf8(p_iso->svd.publisher_id, ISO_MAX_PUBLISHER_ID,
-                             p_psz_publisher_id, "UCS-2BE") ) {
-      strip_trail(p_psz_publisher_id);
-      return (*p_psz_publisher_id != NULL);
-    }
-  }
-#endif /*HAVE_JOLIET*/
-  *p_psz_publisher_id = iso9660_get_publisher_id( &(p_iso->pvd) );
-  return *p_psz_publisher_id != NULL && strlen(*p_psz_publisher_id);
+  return get_member_id(p_iso, p_psz_publisher_id,
+                       (char*)p_iso->pvd.publisher_id,
+                       (char*)p_iso->svd.publisher_id,
+                       ISO_MAX_PUBLISHER_ID);
 }
-
 
 /*!
    Return a string containing the PVD's publisher id with trailing
@@ -409,29 +395,11 @@ bool iso9660_ifs_get_publisher_id(iso9660_t *p_iso,
 bool iso9660_ifs_get_system_id(iso9660_t *p_iso,
 			       /*out*/ cdio_utf8_t **p_psz_system_id)
 {
-  if (!p_iso) {
-    *p_psz_system_id = NULL;
-    return false;
-  }
-
-#ifdef HAVE_JOLIET  
-  if (p_iso->i_joliet_level) {
-    /* TODO: check that we haven't reached the maximum size.
-       If we have, perhaps we've truncated and if we can get 
-       longer results *and* have the same character using
-       the PVD, do that.
-     */
-    if ( cdio_charset_to_utf8(p_iso->svd.system_id, ISO_MAX_SYSTEM_ID,
-                              p_psz_system_id, "UCS-2BE") ) {
-      strip_trail(p_psz_system_id);
-      return (*p_psz_system_id != NULL);
-    }
-  }
-#endif /*HAVE_JOLIET*/
-  *p_psz_system_id = iso9660_get_system_id( &(p_iso->pvd) );
-  return *p_psz_system_id != NULL && strlen(*p_psz_system_id);
+  return get_member_id(p_iso, p_psz_system_id,
+                       (char*)p_iso->pvd.system_id,
+                       (char*)p_iso->svd.system_id,
+                       ISO_MAX_SYSTEM_ID);
 }
-
 
 /*!
    Return a string containing the PVD's publisher id with trailing
@@ -440,29 +408,11 @@ bool iso9660_ifs_get_system_id(iso9660_t *p_iso,
 bool iso9660_ifs_get_volume_id(iso9660_t *p_iso,
 			       /*out*/ cdio_utf8_t **p_psz_volume_id)
 {
-  if (!p_iso) {
-    *p_psz_volume_id = NULL;
-    return false;
-  }
-
-#ifdef HAVE_JOLIET  
-  if (p_iso->i_joliet_level) {
-    /* TODO: check that we haven't reached the maximum size.
-       If we have, perhaps we've truncated and if we can get 
-       longer results *and* have the same character using
-       the PVD, do that.
-     */
-    if ( cdio_charset_to_utf8(p_iso->svd.volume_id, ISO_MAX_VOLUME_ID,
-                              p_psz_volume_id, "UCS-2BE") ) {
-      strip_trail(p_psz_volume_id);
-      return (*p_psz_volume_id != NULL);
-    }
-  }
-#endif /*HAVE_JOLIET*/
-  *p_psz_volume_id = iso9660_get_volume_id( &(p_iso->pvd) );
-  return *p_psz_volume_id != NULL && strlen(*p_psz_volume_id);
+  return get_member_id(p_iso, p_psz_volume_id,
+                       (char*)p_iso->pvd.volume_id,
+                       (char*)p_iso->svd.volume_id,
+                       ISO_MAX_VOLUME_ID);
 }
-
 
 /*!
    Return a string containing the PVD's publisher id with trailing
@@ -471,29 +421,10 @@ bool iso9660_ifs_get_volume_id(iso9660_t *p_iso,
 bool iso9660_ifs_get_volumeset_id(iso9660_t *p_iso,
 				  /*out*/ cdio_utf8_t **p_psz_volumeset_id)
 {
-  if (!p_iso) {
-    *p_psz_volumeset_id = NULL;
-    return false;
-  }
-
-#ifdef HAVE_JOLIET  
-  if (p_iso->i_joliet_level) {
-    /* TODO: check that we haven't reached the maximum size.
-       If we have, perhaps we've truncated and if we can get 
-       longer results *and* have the same character using
-       the PVD, do that.
-     */
-    if ( cdio_charset_to_utf8(p_iso->svd.volume_set_id, 
-                              ISO_MAX_VOLUMESET_ID, 
-                              p_psz_volumeset_id,
-                              "UCS-2BE") ) {
-      strip_trail(p_psz_volumeset_id);
-      return (*p_psz_volumeset_id != NULL);
-    }
-  }
-#endif /*HAVE_JOLIET*/
-  *p_psz_volumeset_id = iso9660_get_volumeset_id( &(p_iso->pvd) );
-  return *p_psz_volumeset_id != NULL && strlen(*p_psz_volumeset_id);
+  return get_member_id(p_iso, p_psz_volumeset_id,
+                       (char*)p_iso->pvd.volume_set_id,
+                       (char*)p_iso->svd.volume_set_id,
+                       ISO_MAX_VOLUMESET_ID);
 }
 
 
