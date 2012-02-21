@@ -30,14 +30,14 @@ LANGUAGE LANG_ENGLISH, SUBLANG_NEUTRAL
 // Dialog
 //
 
-IDD_DIALOG DIALOGEX 12, 12, 206, 278
+IDD_DIALOG DIALOGEX 12, 12, 206, 289
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_APPWINDOW
-CAPTION "Rufus v1.1.1.141"
+CAPTION "Rufus v1.1.2.142"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    DEFPUSHBUTTON   "Start",IDC_START,94,236,50,14
-    PUSHBUTTON      "Close",IDCANCEL,148,236,50,14
+    DEFPUSHBUTTON   "Start",IDC_START,94,248,50,14
+    PUSHBUTTON      "Close",IDCANCEL,148,248,50,14
     COMBOBOX        IDC_DEVICE,8,17,190,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     CONTROL         "Device",IDC_STATIC,"Static",SS_LEFTNOWORDWRAP | WS_GROUP,9,6,22,8
     COMBOBOX        IDC_FILESYSTEM,8,75,190,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
@@ -46,18 +46,19 @@ BEGIN
     LTEXT           "Capacity",IDC_STATIC,9,35,29,8
     COMBOBOX        IDC_CLUSTERSIZE,8,104,190,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     LTEXT           "Cluster size",IDC_STATIC,9,93,105,10
-    PUSHBUTTON      "About...",IDC_ABOUT,8,236,50,14
-    GROUPBOX        "Format Options",IDC_STATIC,7,149,189,52
+    PUSHBUTTON      "About...",IDC_ABOUT,8,248,50,14
+    GROUPBOX        "Format Options",IDC_STATIC,7,149,189,64
     EDITTEXT        IDC_LABEL,7,131,190,13,ES_AUTOHSCROLL
     CONTROL         "Check device for bad blocks:",IDC_BADBLOCKS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,161,101,10
     CONTROL         "Quick Format",IDC_QUICKFORMAT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,173,58,10
     CONTROL         "Create a bootable disk using:",IDC_DOS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,185,104,10
+    CONTROL         "Set icon and extended label",IDC_SET_ICON,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,197,105,10
     LTEXT           "New volume label",IDC_STATIC,9,121,105,10
-    CONTROL         "",IDC_PROGRESS,"msctls_progress32",PBS_SMOOTH | WS_BORDER,7,210,189,9
-    COMBOBOX        IDC_DOSTYPE,119,183,49,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    CONTROL         "",IDC_PROGRESS,"msctls_progress32",PBS_SMOOTH | WS_BORDER,7,221,189,9
     COMBOBOX        IDC_NBPASSES,119,159,49,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    PUSHBUTTON      "Test",IDC_TEST,62,236,20,14,NOT WS_VISIBLE
+    COMBOBOX        IDC_DOSTYPE,119,183,49,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     PUSHBUTTON      "...",IDC_SELECT_ISO,171,182,22,14,BS_ICON
+    PUSHBUTTON      "Test",IDC_TEST,62,248,20,14,NOT WS_VISIBLE
 END
 
 IDD_ABOUTBOX DIALOGEX 0, 0, 287, 195
@@ -71,7 +72,7 @@ BEGIN
     DEFPUSHBUTTON   "OK",IDOK,231,175,50,14,WS_GROUP
     CONTROL         "<a href=""http://rufus.akeo.ie"">http://rufus.akeo.ie</a>",IDC_ABOUT_RUFUS_URL,
                     "SysLink",WS_TABSTOP,46,47,114,9
-    LTEXT           "Version 1.1.1 (Build 141)",IDC_STATIC,46,19,78,8
+    LTEXT           "Version 1.1.2 (Build 142)",IDC_STATIC,46,19,78,8
     PUSHBUTTON      "License...",IDC_ABOUT_LICENSE,46,175,50,14,WS_GROUP
     EDITTEXT        IDC_ABOUT_COPYRIGHTS,46,107,235,63,ES_MULTILINE | ES_READONLY | WS_VSCROLL
     LTEXT           "Report bugs or request enhancements at:",IDC_STATIC,46,66,187,8
@@ -192,6 +193,7 @@ GUIDELINES DESIGNINFO
 BEGIN
     IDD_DIALOG, DIALOG
     BEGIN
+        BOTTOMMARGIN, 288
     END
 
     IDD_ABOUTBOX, DIALOG
@@ -220,8 +222,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,1,1,141
- PRODUCTVERSION 1,1,1,141
+ FILEVERSION 1,1,2,142
+ PRODUCTVERSION 1,1,2,142
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -238,13 +240,13 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "akeo.ie"
             VALUE "FileDescription", "Rufus"
-            VALUE "FileVersion", "1.1.1.141"
+            VALUE "FileVersion", "1.1.2.142"
             VALUE "InternalName", "Rufus"
             VALUE "LegalCopyright", "© 2011 Pete Batard (GPL v3)"
             VALUE "LegalTrademarks", "http://www.gnu.org/copyleft/gpl.html"
             VALUE "OriginalFilename", "rufus.exe"
             VALUE "ProductName", "Rufus"
-            VALUE "ProductVersion", "1.1.1.141"
+            VALUE "ProductVersion", "1.1.2.142"
         END
     END
     BLOCK "VarFileInfo"

@@ -158,6 +158,11 @@ static void ToValidLabel(WCHAR* name, BOOL bFAT)
 					found = TRUE; break;
 				}
 			}
+			// A FAT label that contains extended chars will be rejected
+			if (name[i] >= 0x80) {
+				name[k++] = '_';
+				found = TRUE;
+			}
 			if (found) continue;
 		}
 		found = FALSE;
@@ -173,10 +178,20 @@ static void ToValidLabel(WCHAR* name, BOOL bFAT)
 	name[k] = 0;
 	if (bFAT) {
 		name[11] = 0;
+		for (i=0, j=0; name[i]!=0; i++)
+			if (name[i] == '_') j++;
+		if (i<2*j) {
+			// If the final label is mostly underscore, use the proposed label
+			uprintf("FAT label is mostly undercores. Using '%s' label instead.\n", SelectedDrive.proposed_label);
+			for(i=0; SelectedDrive.proposed_label[i]!=0; i++)
+				name[i] = SelectedDrive.proposed_label[i];
+			name[i] = 0;
+		}
 	} else {
 		name[32] = 0;
 	}
-	/* Needed for disk by label isolinux.cfg workaround */
+
+	// Needed for disk by label isolinux.cfg workaround
 	wchar_to_utf8_no_alloc(name, iso_report.usb_label, sizeof(iso_report.usb_label));
 }
 
@@ -616,6 +631,9 @@ DWORD WINAPI FormatThread(LPVOID param)
 			}
 			break;
 		}
+	} else {
+		if (IsChecked(IDC_SET_ICON))
+			SetAutorun(drive_name);
 	}
 
 	// We issue a complete remount of the filesystem at on account of:
@@ -648,6 +666,8 @@ DWORD WINAPI FormatThread(LPVOID param)
 			}
 			break;
 		}
+		if (IsChecked(IDC_SET_ICON))
+			SetAutorun(drive_name);
 		// Issue another complete remount before we exit, to ensure we're clean
 		RemountVolume(drive_name[0]);
 	}

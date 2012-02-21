@@ -151,12 +151,54 @@ static void process_config(char* buf, size_t buf_size, const char* cfg_name)
 	buf[buf_size] = last_char;
 }
 
+/*
+ * Scan and set ISO properties
+ * Returns true if the the current file does not need to be processed further
+ */
+static __inline BOOL check_iso_props(BOOL is_root, BOOL* is_syslinux_cfg, int64_t i_file_length,
+	const char* psz_basename, char* psz_fullpath)
+{
+	size_t i;
+
+	// Check for an isolinux/syslinux config file anywhere
+	*is_syslinux_cfg = FALSE;
+	for (i=0; i<ARRAYSIZE(isolinux_name); i++) {
+		if (_stricmp(psz_basename, isolinux_name[i]) == 0)
+			*is_syslinux_cfg = TRUE;
+	}
+
+	if (scan_only) {
+		// Check for a "bootmgr" file in root (psz_path = "")
+		if (is_root && (_stricmp(psz_basename, bootmgr_name) == 0))
+			iso_report.has_bootmgr = TRUE;
+		if (*is_syslinux_cfg) {
+			iso_report.has_isolinux = TRUE;
+			// Maintain a list of all the isolinux/syslinux configs identified so far
+			StrArrayAdd(&config_path, psz_fullpath);
+		}
+		if (i_file_length >= FOUR_GIGABYTES)
+			iso_report.has_4GB_file = TRUE;
+		// Compute projected size needed
+		total_blocks += i_file_length/UDF_BLOCKSIZE;
+		// NB: ISO_BLOCKSIZE = UDF_BLOCKSIZE
+		if ((i_file_length != 0) && (i_file_length%ISO_BLOCKSIZE == 0))	// 
+			total_blocks++;
+		return TRUE;
+	}
+	// In case there's an ldlinux.sys on the ISO, prevent it from overwriting ours
+	if (is_root && (safe_strcmp(psz_basename, ldlinux_name) == 0)) {
+		uprintf("skipping % file from ISO image\n", ldlinux_name);
+		return TRUE;
+	}
+	return FALSE;
+}
+
 // Returns 0 on success, nonzero on error
 static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const char *psz_path)
 {
 	HANDLE file_handle = NULL;
 	DWORD buf_size, wr_size;
-	BOOL r, cfg_file;
+	BOOL r, is_syslinux_cfg;
 	int i_length;
 	size_t i, nul_pos;
 	char* psz_fullpath = NULL;
@@ -190,33 +232,9 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 			}
 		} else {
 			i_file_length = udf_get_file_length(p_udf_dirent);
-			// Check for an isolinux config file anywhere
-			cfg_file = FALSE;
-			for (i=0; i<ARRAYSIZE(isolinux_name); i++) {
-				if (_stricmp(psz_basename, isolinux_name[i]) == 0)
-					cfg_file = TRUE;
-			}
-			if (scan_only) {
-				// Check for a "bootmgr" file in root (psz_path = "")
-				if ((*psz_path == 0) && (_stricmp(psz_basename, bootmgr_name) == 0))
-					iso_report.has_bootmgr = TRUE;
-				if (cfg_file) {
-					iso_report.has_isolinux = TRUE;
-					StrArrayAdd(&config_path, psz_fullpath);
-				}
-				if (i_file_length >= FOUR_GIGABYTES)
-					iso_report.has_4GB_file = TRUE;
-				total_blocks += i_file_length/UDF_BLOCKSIZE;
-				if ((i_file_length != 0) && (i_file_length%UDF_BLOCKSIZE == 0))
-					total_blocks++;
+			if (check_iso_props((*psz_path == 0), &is_syslinux_cfg, i_file_length, psz_basename, psz_fullpath)) {
 				safe_free(psz_fullpath);
 				continue;
-			} else {
-				// In case there's an ldlinux.sys on the ISO, prevent it from overwriting ours
-				if ((*psz_path == 0) && (safe_strcmp(psz_basename, ldlinux_name) == 0)) {
-					uprintf("skipping % file from ISO image\n", ldlinux_name);
-					continue;
-				}
 			}
 			// Replace slashes with backslashes and append the size to the path for UI display
 			nul_pos = safe_strlen(psz_fullpath);
@@ -241,7 +259,7 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 					goto out;
 				}
 				buf_size = (DWORD)MIN(i_file_length, i_read);
-				if (cfg_file)
+				if (is_syslinux_cfg)
 					process_config((char*)buf, (size_t)buf_size, psz_fullpath);
 				ISO_BLOCKING(r = WriteFile(file_handle, buf, buf_size, &wr_size, NULL));
 				if ((!r) || (buf_size != wr_size)) {
@@ -277,7 +295,7 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 {
 	HANDLE file_handle = NULL;
 	DWORD buf_size, wr_size;
-	BOOL s, cfg_file;
+	BOOL s, is_syslinux_cfg;
 	int i_length, r = 1;
 	char psz_fullpath[1024], *psz_basename;
 	const char *psz_iso_name = &psz_fullpath[strlen(psz_extract_dir)];
@@ -317,32 +335,8 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 				goto out;
 		} else {
 			i_file_length = p_statbuf->size;
-			// Check for an isolinux config file anywhere
-			cfg_file = FALSE;
-			for (i=0; i<ARRAYSIZE(isolinux_name); i++) {
-				if (_stricmp(psz_basename, isolinux_name[i]) == 0)
-					cfg_file = TRUE;
-			}
-			if (scan_only) {
-				// Check for a "bootmgr" file in root (psz_path = "")
-				if ((*psz_path == 0) && (_stricmp(psz_basename, bootmgr_name) == 0))
-					iso_report.has_bootmgr = TRUE;
-				if (cfg_file) {
-					iso_report.has_isolinux = TRUE;
-					StrArrayAdd(&config_path, psz_fullpath);
-				}
-				if (i_file_length >= FOUR_GIGABYTES)
-					iso_report.has_4GB_file = TRUE;
-				total_blocks += i_file_length/ISO_BLOCKSIZE;
-				if ((i_file_length != 0) && (i_file_length%ISO_BLOCKSIZE == 0))
-					total_blocks++;
+			if (check_iso_props((*psz_path == 0), &is_syslinux_cfg, i_file_length, psz_basename, psz_fullpath)) {
 				continue;
-			} else {
-				// In case there's an ldlinux.sys on the ISO, prevent it from overwriting ours
-				if ((*psz_path == 0) && (safe_strcmp(psz_basename, ldlinux_name) == 0)) {
-					uprintf("Skipping % file from ISO image\n", ldlinux_name);
-					continue;
-				}
 			}
 			// Replace slashes with backslashes and append the size to the path for UI display
 			nul_pos = safe_strlen(psz_fullpath);
@@ -369,7 +363,7 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 					goto out;
 				}
 				buf_size = (DWORD)MIN(i_file_length, ISO_BLOCKSIZE);
-				if (cfg_file)
+				if (is_syslinux_cfg)
 					process_config((char*)buf, (size_t)buf_size, psz_fullpath);
 				ISO_BLOCKING(s = WriteFile(file_handle, buf, buf_size, &wr_size, NULL));
 				if ((!s) || (buf_size != wr_size)) {
@@ -502,7 +496,6 @@ out:
 				uprintf("Unable to create %s - booting from USB will not work\n", syslinux_path);
 				r = 1;
 			} else {
-				uprintf("Creating: %s\n", syslinux_path);
 				fprintf(fd, "DEFAULT loadconfig\n\nLABEL loadconfig\n  CONFIG %s\n", iso_report.cfg_path);
 				for (i=safe_strlen(iso_report.cfg_path); (i>0)&&(iso_report.cfg_path[i]!='/'); i--);
 				if (i>0) {
@@ -510,6 +503,7 @@ out:
 					fprintf(fd, "  APPEND %s/\n", iso_report.cfg_path);
 					iso_report.cfg_path[i] = '/';
 				}
+				uprintf("Created: %s\n", syslinux_path);
 			}
 		}
 		fclose(fd);

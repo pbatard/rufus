@@ -411,7 +411,7 @@ static BOOL PopulateProperties(int ComboIndex)
 	double HumanReadableSize;
 	char capacity[64];
 	static char *suffix[] = { "KB", "MB", "GB", "TB", "PB"};
-	char proposed_label[16], no_label[] = STR_NO_LABEL;
+	char no_label[] = STR_NO_LABEL;
 	int i;
 
 	IGNORE_RETVAL(ComboBox_ResetContent(hCapacity));
@@ -446,20 +446,24 @@ static BOOL PopulateProperties(int ComboIndex)
 	IGNORE_RETVAL(ComboBox_SetCurSel(hCapacity, 0));
 	hDeviceTooltip = CreateTooltip(hDeviceList, DriveID.Table[ComboIndex], -1);
 
+	// Set a proposed label according to the size (eg: "256MB", "8GB")
+	if (HumanReadableSize < 1.0) {
+		HumanReadableSize *= 1024.0;
+		i--;
+	}
+	// If we're beneath the tolerance, round proposed label to an integer, if not, show one decimal point
+	if (fabs(HumanReadableSize / ceil(HumanReadableSize) - 1.0) < PROPOSEDLABEL_TOLERANCE) {
+		safe_sprintf(SelectedDrive.proposed_label, sizeof(SelectedDrive.proposed_label),
+			"%0.0f%s", ceil(HumanReadableSize), suffix[i]);
+	} else {
+		safe_sprintf(SelectedDrive.proposed_label, sizeof(SelectedDrive.proposed_label),
+			"%0.1f%s", HumanReadableSize, suffix[i]);
+	}
+
 	// If no existing label is available and no ISO is selected, propose one according to the size (eg: "256MB", "8GB")
 	if ((iso_path == NULL) || (iso_report.label[0] == 0)) {
 		if (safe_strcmp(no_label, DriveLabel.Table[ComboIndex]) == 0) {
-			if (HumanReadableSize < 1.0) {
-				HumanReadableSize *= 1024.0;
-				i--;
-			}
-			// If we're beneath the tolerance, round proposed label to an integer, if not, show one decimal point
-			if (fabs(HumanReadableSize / ceil(HumanReadableSize) - 1.0) < PROPOSEDLABEL_TOLERANCE) {
-				safe_sprintf(proposed_label, sizeof(proposed_label), "%0.0f%s", ceil(HumanReadableSize), suffix[i]);
-			} else {
-				safe_sprintf(proposed_label, sizeof(proposed_label), "%0.1f%s", HumanReadableSize, suffix[i]);
-			}
-			SetWindowTextU(hLabel, proposed_label);
+			SetWindowTextU(hLabel, SelectedDrive.proposed_label);
 		} else {
 			SetWindowTextU(hLabel, DriveLabel.Table[ComboIndex]);
 		}
@@ -908,6 +912,7 @@ static void EnableControls(BOOL bEnable)
 	EnableWindow(GetDlgItem(hMainDialog, IDC_START), bEnable);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_SELECT_ISO), bEnable);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_NBPASSES), bEnable);
+	EnableWindow(GetDlgItem(hMainDialog, IDC_SET_ICON), bEnable);
 	SetDlgItemTextA(hMainDialog, IDCANCEL, bEnable?"Close":"Cancel");
 }
 
@@ -1119,9 +1124,10 @@ void InitDialog(HWND hDlg)
 	// Create the string array
 	StrArrayCreate(&DriveID, MAX_DRIVES);
 	StrArrayCreate(&DriveLabel, MAX_DRIVES);
-	// Set the quick format & create DOS disk checkboxes
+	// Set the Quick format, Create bootable and Set icon checkboxes
 	CheckDlgButton(hDlg, IDC_QUICKFORMAT, BST_CHECKED);
 	CheckDlgButton(hDlg, IDC_DOS, BST_CHECKED);
+	CheckDlgButton(hDlg, IDC_SET_ICON, BST_CHECKED);
 
 	// Load system icons (NB: Use the excellent http://www.nirsoft.net/utils/iconsext.html to find icon IDs)
 	hDllInst = LoadLibraryA("shell32.dll");
@@ -1138,6 +1144,8 @@ void InitDialog(HWND hDlg)
 	SendMessage(GetDlgItem(hDlg, IDC_SELECT_ISO), 0x1602, 0, (LPARAM)&bi);	// BCM_SETIMAGELIST 
 
 	hISOToolTip = CreateTooltip(hSelectISO, "Click to select...", -1);
+	CreateTooltip(GetDlgItem(hDlg, IDC_SET_ICON), "Create an autorun.inf on the target drive, to set the icon. "
+		"Also allow the display of non-English labels.", 10000);
 }
 
 /*
@@ -1148,7 +1156,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	DRAWITEMSTRUCT* pDI;
 	int nDeviceIndex, fs, dt;
 	static DWORD DeviceNum = 0;
-	char str[MAX_PATH], tmp[128];
+	wchar_t wtmp[128], wstr[MAX_PATH];
 	static UINT uDOSChecked = BST_CHECKED;
 
 	switch (message) {
@@ -1359,10 +1367,10 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 						}
 					}
 				}
-				GetWindowTextA(hDeviceList, tmp, sizeof(tmp));
-				safe_sprintf(str, sizeof(str), "WARNING: ALL DATA ON DEVICE %s\r\nWILL BE DESTROYED.\r\n"
-					"To continue with this operation, click OK. To quit click CANCEL.", tmp);
-				if (MessageBoxA(hMainDialog, str, "Rufus", MB_OKCANCEL|MB_ICONWARNING) == IDOK) {
+				GetWindowTextW(hDeviceList, wtmp, ARRAYSIZE(wtmp));
+				_snwprintf(wstr, ARRAYSIZE(wstr), L"WARNING: ALL DATA ON DEVICE %s\r\nWILL BE DESTROYED.\r\n"
+					L"To continue with this operation, click OK. To quit click CANCEL.", wtmp);
+				if (MessageBoxW(hMainDialog, wstr, L"Rufus", MB_OKCANCEL|MB_ICONWARNING) == IDOK) {
 					// Disable all controls except cancel
 					EnableControls(FALSE);
 					DeviceNum = (DWORD)ComboBox_GetItemData(hDeviceList, nDeviceIndex);

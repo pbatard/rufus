@@ -31,6 +31,9 @@
 extern "C" {
 #endif
 
+#define _LTEXT(txt) L##txt
+#define LTEXT(txt) _LTEXT(txt)
+
 #define wchar_to_utf8_no_alloc(wsrc, dest, dest_size) \
 	WideCharToMultiByte(CP_UTF8, 0, wsrc, -1, dest, dest_size, NULL, NULL)
 #define utf8_to_wchar_no_alloc(src, wdest, wdest_size) \

@@ -32,6 +32,7 @@ SOURCES=rufus.c          \
         format.c         \
         stdio.c          \
         stdlg.c          \
+        icon.c           \
         iso.c            \
         dos.c            \
         dos_locale.c     \

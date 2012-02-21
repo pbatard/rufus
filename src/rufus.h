@@ -136,6 +136,7 @@ typedef struct {
 	LONGLONG DiskSize;
 	DISK_GEOMETRY Geometry;
 	DWORD FirstSector;
+	char proposed_label[16];
 	int FSType;
 	struct {
 		ULONG Allowed;
@@ -152,6 +153,7 @@ typedef struct {
 	BOOL has_4GB_file;
 	BOOL has_bootmgr;
 	BOOL has_isolinux;
+	BOOL has_autorun;
 } RUFUS_ISO_REPORT;
 
 /*
@@ -195,6 +197,7 @@ extern HANDLE GetDriveHandle(DWORD DriveIndex, char* DriveLetter, BOOL bWriteAcc
 extern BOOL GetDriveLabel(DWORD DriveIndex, char* letter, char** label);
 extern BOOL UnmountDrive(HANDLE hDrive);
 extern BOOL CreateProgress(void);
+extern BOOL SetAutorun(const char* path);
 extern char* FileDialog(BOOL save, char* path, char* filename, char* ext, char* ext_desc);
 
 __inline static BOOL UnlockDrive(HANDLE hDrive)

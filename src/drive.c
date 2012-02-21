@@ -147,20 +147,22 @@ out:
 BOOL GetDriveLabel(DWORD DriveIndex, char* letter, char** label)
 {
 	HANDLE hDrive;
-	char DrivePath[] = "#:\\";
-	static char volume_label[MAX_PATH+1];
+	wchar_t wDrivePath[] = L"#:\\";
+	wchar_t wVolumeLabel[MAX_PATH+1];
+	static char VolumeLabel[MAX_PATH+1];
 
 	*label = STR_NO_LABEL;
 
-	hDrive = GetDriveHandle(DriveIndex, DrivePath, FALSE, FALSE);
+	hDrive = GetDriveHandle(DriveIndex, letter, FALSE, FALSE);
 	if (hDrive == INVALID_HANDLE_VALUE)
 		return FALSE;
 	safe_closehandle(hDrive);
-	*letter = DrivePath[0];
+	wDrivePath[0] = *letter;
 
-	if (GetVolumeInformationA(DrivePath, volume_label, sizeof(volume_label),
-		NULL, NULL, NULL, NULL, 0) && *volume_label) {
-		*label = volume_label;
+	if (GetVolumeInformationW(wDrivePath, wVolumeLabel, sizeof(wVolumeLabel),
+		NULL, NULL, NULL, NULL, 0) && *wVolumeLabel) {
+		wchar_to_utf8_no_alloc(wVolumeLabel, VolumeLabel, sizeof(VolumeLabel));
+		*label = VolumeLabel;
 	}
 
 	return TRUE;

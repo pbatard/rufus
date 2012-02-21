@@ -49,7 +49,7 @@ void _uprintf(const char *format, ...)
 
 	p += (n < 0)?sizeof(buf)-3:n;
 
-	while((p>buf) && (isspace(p[-1])))
+	while((p>buf) && (isspace((unsigned char)p[-1])))
 		*--p = '\0';
 
 	*p++ = '\r';

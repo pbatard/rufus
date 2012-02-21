@@ -43,11 +43,12 @@ mkinstalldirs = $(install_sh) -d
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 PROGRAMS = $(noinst_PROGRAMS)
-am_rufus_OBJECTS = rufus-drive.$(OBJEXT) rufus-iso.$(OBJEXT) \
-	rufus-dos.$(OBJEXT) rufus-dos_locale.$(OBJEXT) \
-	rufus-badblocks.$(OBJEXT) rufus-syslinux.$(OBJEXT) \
-	rufus-format.$(OBJEXT) rufus-stdio.$(OBJEXT) \
-	rufus-stdlg.$(OBJEXT) rufus-rufus.$(OBJEXT)
+am_rufus_OBJECTS = rufus-drive.$(OBJEXT) rufus-icon.$(OBJEXT) \
+	rufus-iso.$(OBJEXT) rufus-dos.$(OBJEXT) \
+	rufus-dos_locale.$(OBJEXT) rufus-badblocks.$(OBJEXT) \
+	rufus-syslinux.$(OBJEXT) rufus-format.$(OBJEXT) \
+	rufus-stdio.$(OBJEXT) rufus-stdlg.$(OBJEXT) \
+	rufus-rufus.$(OBJEXT)
 rufus_OBJECTS = $(am_rufus_OBJECTS)
 rufus_DEPENDENCIES = rufus_rc.o ms-sys/libmssys.a \
 	syslinux/libfat/libfat.a syslinux/libinstaller/libinstaller.a \
@@ -184,7 +185,7 @@ SUBDIRS = ms-sys syslinux/libfat syslinux/libinstaller libcdio/iso9660 libcdio/u
 pkg_v_rc = $(pkg_v_rc_$(V))
 pkg_v_rc_ = $(pkg_v_rc_$(AM_DEFAULT_VERBOSITY))
 pkg_v_rc_0 = @echo "  RC     $@";
-rufus_SOURCES = drive.c iso.c dos.c dos_locale.c badblocks.c syslinux.c format.c stdio.c stdlg.c rufus.c
+rufus_SOURCES = drive.c icon.c iso.c dos.c dos_locale.c badblocks.c syslinux.c format.c stdio.c stdlg.c rufus.c
 rufus_CFLAGS = -I./ms-sys/inc -I./syslinux/libfat -I./syslinux/libinstaller -I./libcdio $(AM_CFLAGS)
 rufus_LDFLAGS = $(AM_LDFLAGS) -mwindows
 rufus_LDADD = rufus_rc.o ms-sys/libmssys.a syslinux/libfat/libfat.a syslinux/libinstaller/libinstaller.a \
@@ -252,6 +253,14 @@ rufus-drive.o: drive.c
 rufus-drive.obj: drive.c
 	$(AM_V_CC) @AM_BACKSLASH@
 	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_CFLAGS) $(CFLAGS) -c -o rufus-drive.obj `if test -f 'drive.c'; then $(CYGPATH_W) 'drive.c'; else $(CYGPATH_W) '$(srcdir)/drive.c'; fi`
+
+rufus-icon.o: icon.c
+	$(AM_V_CC) @AM_BACKSLASH@
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_CFLAGS) $(CFLAGS) -c -o rufus-icon.o `test -f 'icon.c' || echo '$(srcdir)/'`icon.c
+
+rufus-icon.obj: icon.c
+	$(AM_V_CC) @AM_BACKSLASH@
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_CFLAGS) $(CFLAGS) -c -o rufus-icon.obj `if test -f 'icon.c'; then $(CYGPATH_W) 'icon.c'; else $(CYGPATH_W) '$(srcdir)/icon.c'; fi`
 
 rufus-iso.o: iso.c
 	$(AM_V_CC) @AM_BACKSLASH@
