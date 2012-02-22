@@ -668,13 +668,13 @@ static void InitProgress(void)
 		// 1 extra slot for PBR writing
 		switch (ComboBox_GetItemData(hDOSType, ComboBox_GetCurSel(hDOSType))) {
 		case DT_WINME:
-			nb_slots[OP_DOS] = 3+1;
+			nb_slots[OP_DOS] = 4+1;
 			break;
 		case DT_FREEDOS:
-			nb_slots[OP_DOS] = 5+1;
+			nb_slots[OP_DOS] = 6+1;
 			break;
 		default:
-			nb_slots[OP_DOS] = 1+1;
+			nb_slots[OP_DOS] = 3+1;
 			break;
 		}
 	}
@@ -1306,10 +1306,18 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				break;
 			dt = (int)ComboBox_GetItemData(hDOSType, ComboBox_GetCurSel(hDOSType));
 			if ((dt == DT_ISO_NTFS) || (dt == DT_ISO_FAT)) {
-				SendMessage(hMainDialog, WM_NEXTDLGCTL, (WPARAM)hSelectISO, TRUE);
+				if ((iso_path == NULL) || (iso_report.label[0] == 0)) {
+					// Set focus to the Select ISO button
+					SendMessage(hMainDialog, WM_NEXTDLGCTL, (WPARAM)FALSE, 0);
+					SendMessage(hMainDialog, WM_NEXTDLGCTL, (WPARAM)hSelectISO, TRUE);
+				} else {
+					SetWindowTextU(hLabel, iso_report.label);
+				}
 			} else {
-				SendMessage(hMainDialog, WM_NEXTDLGCTL,  (WPARAM)FALSE, 0);
+				// Set focus on the start button
+				SendMessage(hMainDialog, WM_NEXTDLGCTL, (WPARAM)FALSE, 0);
 				SendMessage(hMainDialog, WM_NEXTDLGCTL, (WPARAM)GetDlgItem(hMainDialog, IDC_START), TRUE);
+				SetWindowTextU(hLabel, SelectedDrive.proposed_label);
 			}
 			return (INT_PTR)TRUE;
 		case IDC_SELECT_ISO:

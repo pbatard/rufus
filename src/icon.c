@@ -105,7 +105,7 @@ static BOOL SaveIcon(const char* filename)
 	icondir = (GRPICONDIR*)LockResource(res_handle);
 
 	hFile = CreateFileA(filename, GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ|FILE_SHARE_WRITE,
-			NULL, CREATE_ALWAYS, 0, 0);
+			NULL, CREATE_NEW, 0, 0);
 	if (hFile == INVALID_HANDLE_VALUE) {
 		uprintf("Unable to create icon '%s': %s.\n", filename, WindowsErrorString());
 		goto out;
@@ -169,7 +169,7 @@ BOOL SetAutorun(const char* path)
 	safe_sprintf(filename, sizeof(filename), "%s\\autorun.inf", path);
 	fd = fopen(filename, "r");	// If there's an existing autorun, don't overwrite
 	if (fd != NULL) {
-		uprintf("An existing autorun.inf already exists - keeping it\n");
+		uprintf("%s already exists - keeping it\n", filename);
 		fclose(fd);
 		return FALSE;
 	}
@@ -183,7 +183,7 @@ BOOL SetAutorun(const char* path)
 	GetWindowTextW(hLabel, wlabel, ARRAYSIZE(wlabel));
 	GetWindowTextW(hMainDialog, wRufusVersion, ARRAYSIZE(wRufusVersion));
 	fwprintf(fd, L"; Created by %s\n; " LTEXT(RUFUS_URL) L"\n", wRufusVersion);
-	fwprintf(fd, L"[autorun]\nlabel = %s\nicon = autorun.ico", wlabel);
+	fwprintf(fd, L"[autorun]\nicon  = autorun.ico\nlabel = %s\n", wlabel);
 	fclose(fd);
 	uprintf("Created: %s\n", filename);
 

@@ -110,9 +110,6 @@ enum action_type {
 };
 
 /* File system indexes in our FS combobox */
-// TODO: FormatEx should support "NTFS", "FAT", "FAT32", "UDF", and "EXFAT" as per
-// http://msdn.microsoft.com/en-us/library/windows/desktop/aa819439.aspx
-
 enum {
 	FS_UNKNOWN = -1,
 	FS_FAT16 = 0,
