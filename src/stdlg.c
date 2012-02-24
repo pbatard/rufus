@@ -331,7 +331,7 @@ char* FileDialog(BOOL save, char* path, char* filename, char* ext, char* ext_des
 
 #if (_WIN32_WINNT >= 0x0600)	// Vista and later
 	HRESULT hr = FALSE;
-	IFileDialog *pfd;
+	IFileDialog *pfd = NULL;
 	IShellItem *psiResult;
 	COMDLG_FILTERSPEC filter_spec[2];
 	char* ext_filter;

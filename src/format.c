@@ -66,6 +66,7 @@ static BOOLEAN __stdcall FormatExCallback(FILE_SYSTEM_CALLBACK_COMMAND Command, 
 	case FCC_PROGRESS:
 		percent = (DWORD*)pData;
 		PrintStatus(0, FALSE, "Formatting: %d%% completed.", *percent);
+//		uprintf("%d percent completed.\n", *percent);
 		UpdateProgress(OP_FORMAT, 1.0f * (*percent));
 		break;
 	case FCC_STRUCTURE_PROGRESS:	// No progress on quick format
@@ -667,7 +668,6 @@ DWORD WINAPI FormatThread(LPVOID param)
 		}
 		if (IsChecked(IDC_SET_ICON))
 			SetAutorun(drive_name);
-		UpdateProgress(OP_DOS, -1.0f);
 		// Issue another complete remount before we exit, to ensure we're clean
 		RemountVolume(drive_name[0]);
 	}

@@ -101,7 +101,9 @@ HANDLE GetDriveHandle(DWORD DriveIndex, char* DriveLetter, BOOL bWriteAccess, BO
 			   value there => Use GetDriveType() to filter out unwanted devices.
 			   See https://github.com/pbatard/rufus/issues/32 for details. */
 			drive_type = GetDriveTypeA(drive);
-			if ((drive_type != DRIVE_REMOVABLE) && (drive_type != DRIVE_FIXED))
+			// NB: the HP utility allows drive_type == DRIVE_FIXED, which we don't really really want for now
+			// TODO: allow fixed drives after partitioning/preserving of existing partitions has been sorted out
+			if (drive_type != DRIVE_REMOVABLE)
 				continue;
 
 			safe_sprintf(logical_drive, sizeof(logical_drive), "\\\\.\\%c:", drive[0]);

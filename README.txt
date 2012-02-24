@@ -8,7 +8,7 @@ Features:
 - Bad blocks check
 - Modern UI, with UAC elevation for Windows Vista and later
 - Very small footprint, no installation required
-- Fully Open Source (GPL v3)
+- 100% Free Source Software (GPL v3)
 
 Compilation:
   Use either Visual Studio 2010, WDK (Windows Driver Kit) or MinGW and then
