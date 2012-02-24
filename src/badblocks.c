@@ -428,7 +428,8 @@ static unsigned int test_rw(HANDLE hDrive, blk_t last_block, int block_size, blk
 	const unsigned int pattern[] = {0xaa, 0x55, 0xff, 0x00};
 	int i, tryout, got, pat_idx;
 	unsigned int bb_count = 0;
-	blk_t recover_block = ~0;
+	blk_t recover_block = ~0, *blk_id;
+	size_t id_offset;
 
 	if ((nb_passes < 1) || (nb_passes > 4)) {
 		uprintf("Invalid number of passes\n");
@@ -452,7 +453,10 @@ static unsigned int test_rw(HANDLE hDrive, blk_t last_block, int block_size, blk
 
 	for (pat_idx = 0; pat_idx < nb_passes; pat_idx++) {
 		if (cancel_ops) goto out;
+		srand((unsigned int)GetTickCount());
+		id_offset = rand()* (block_size-sizeof(blk_t)) / RAND_MAX;
 		pattern_fill(buffer, pattern[pat_idx], blocks_at_once * block_size);
+		uprintf("Block ID at offset: %d\n", id_offset);
 		num_blocks = last_block - 1;
 		currently_testing = first_block;
 		if (s_flag | v_flag)
@@ -472,6 +476,12 @@ static unsigned int test_rw(HANDLE hDrive, blk_t last_block, int block_size, blk
 			if (cancel_ops) goto out;
 			if (currently_testing + tryout > last_block)
 				tryout = last_block - currently_testing;
+			/* Add the block number at a fixed (random) offset during each pass to
+			   allow for the detection of 'fake' media (eg. 2GB USB masquerading as 16GB) */
+			for (i=0; i<(int)blocks_at_once; i++) {
+				blk_id = (blk_t*)(intptr_t)(buffer + id_offset+ i*block_size);
+				*blk_id = (blk_t)(currently_testing + i);
+			}
 			got = do_write(hDrive, buffer, tryout, block_size, currently_testing);
 			if (v_flag > 1)
 				print_status();
@@ -511,6 +521,10 @@ static unsigned int test_rw(HANDLE hDrive, blk_t last_block, int block_size, blk
 			}
 			if (currently_testing + tryout > last_block)
 				tryout = last_block - currently_testing;
+			for (i=0; i<(int)blocks_at_once; i++) {
+				blk_id = (blk_t*)(intptr_t)(buffer + id_offset+ i*block_size);
+				*blk_id = (blk_t)(currently_testing + i);
+			}
 			got = do_read(hDrive, read_buffer, tryout, block_size,
 				       currently_testing);
 			if (got == 0 && tryout == 1)
