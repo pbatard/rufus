@@ -25,9 +25,9 @@
 
 int is_ntfs_fs(FILE *fp)
 {
-   char *szMagic = "NTFS";
+   unsigned char aucMagic[] = {'N','T','F','S',' ',' ',' ',' '};
 
-   return contains_data(fp, 0x6F, szMagic, strlen(szMagic));
+   return contains_data(fp, 0x03, aucMagic, sizeof(aucMagic));
 } /* is_ntfs_fs */
 
 int is_ntfs_br(FILE *fp)
@@ -35,7 +35,7 @@ int is_ntfs_br(FILE *fp)
    /* A "file" is probably some kind of NTFS boot record if it contains the
       magic chars 0x55, 0xAA at positions 0x1FE */
    unsigned char aucRef[] = {0x55, 0xAA};
-   unsigned char aucMagic[] = {'N','T','F','S','0','0','0','0'};
+   unsigned char aucMagic[] = {'N','T','F','S',' ',' ',' ',' '};
 
    if( ! contains_data(fp, 0x1FE, aucRef, sizeof(aucRef)))
       return 0;

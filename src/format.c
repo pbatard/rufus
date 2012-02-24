@@ -66,7 +66,6 @@ static BOOLEAN __stdcall FormatExCallback(FILE_SYSTEM_CALLBACK_COMMAND Command, 
 	case FCC_PROGRESS:
 		percent = (DWORD*)pData;
 		PrintStatus(0, FALSE, "Formatting: %d%% completed.", *percent);
-//		uprintf("%d percent completed.\n", *percent);
 		UpdateProgress(OP_FORMAT, 1.0f * (*percent));
 		break;
 	case FCC_STRUCTURE_PROGRESS:	// No progress on quick format
@@ -611,10 +610,8 @@ DWORD WINAPI FormatThread(LPVOID param)
 				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_OPEN_FAILED;
 				goto out;
 			}
-			// Make sure the volume is dismounted before writing the PBR
-			// This is especially critical, as NTFS will only be made bootable
-			// after the FS is re-mounted by Windows
-			UnmountDrive(hLogicalVolume);
+			// NB: if you unmount the logical volume here, XP will report error:
+			// [0x00000456] The media in the drive may have changed
 			PrintStatus(0, TRUE, "Writing partition boot record...");
 			if (!WritePBR(hLogicalVolume)) {
 				if (!FormatStatus)
@@ -668,6 +665,7 @@ DWORD WINAPI FormatThread(LPVOID param)
 		}
 		if (IsChecked(IDC_SET_ICON))
 			SetAutorun(drive_name);
+		UpdateProgress(OP_DOS, -1.0f);
 		// Issue another complete remount before we exit, to ensure we're clean
 		RemountVolume(drive_name[0]);
 	}
