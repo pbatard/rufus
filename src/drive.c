@@ -34,6 +34,8 @@
  * Globals
  */
 RUFUS_DRIVE_INFO SelectedDrive;
+extern BOOL enable_fixed_disks;
+extern char* get_token_data(const char* filename, const char* token);
 
 /*
  * Open a drive or volume with optional write and lock access
@@ -103,7 +105,7 @@ HANDLE GetDriveHandle(DWORD DriveIndex, char* DriveLetter, BOOL bWriteAccess, BO
 			drive_type = GetDriveTypeA(drive);
 			// NB: the HP utility allows drive_type == DRIVE_FIXED, which we don't really really want for now
 			// TODO: allow fixed drives after partitioning/preserving of existing partitions has been sorted out
-			if (drive_type != DRIVE_REMOVABLE)
+			if ((drive_type != DRIVE_REMOVABLE) && ((!enable_fixed_disks) || (drive_type != DRIVE_FIXED)))
 				continue;
 
 			safe_sprintf(logical_drive, sizeof(logical_drive), "\\\\.\\%c:", drive[0]);
@@ -149,6 +151,7 @@ out:
 BOOL GetDriveLabel(DWORD DriveIndex, char* letter, char** label)
 {
 	HANDLE hDrive;
+	char AutorunPath[] = "#:\\autorun.inf", *AutorunLabel;
 	wchar_t wDrivePath[] = L"#:\\";
 	wchar_t wVolumeLabel[MAX_PATH+1];
 	static char VolumeLabel[MAX_PATH+1];
@@ -159,9 +162,17 @@ BOOL GetDriveLabel(DWORD DriveIndex, char* letter, char** label)
 	if (hDrive == INVALID_HANDLE_VALUE)
 		return FALSE;
 	safe_closehandle(hDrive);
+	AutorunPath[0] = *letter;
 	wDrivePath[0] = *letter;
 
-	if (GetVolumeInformationW(wDrivePath, wVolumeLabel, sizeof(wVolumeLabel),
+	// Try to read an extended label from autorun first. Fallback to regular label if not found.
+	AutorunLabel = get_token_data(AutorunPath, "label");
+	if (AutorunLabel != NULL) {
+		uprintf("Using autorun.inf label for device %c:\n", *letter);
+		strncpy(VolumeLabel, AutorunLabel, sizeof(VolumeLabel));
+		safe_free(AutorunLabel);
+		*label = VolumeLabel;
+	} else if (GetVolumeInformationW(wDrivePath, wVolumeLabel, sizeof(wVolumeLabel),
 		NULL, NULL, NULL, NULL, 0) && *wVolumeLabel) {
 		wchar_to_utf8_no_alloc(wVolumeLabel, VolumeLabel, sizeof(VolumeLabel));
 		*label = VolumeLabel;

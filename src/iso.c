@@ -71,6 +71,8 @@ static uint64_t total_blocks, nb_blocks;
 static BOOL scan_only = FALSE;
 static StrArray config_path;
 
+extern char* replace_in_token_data(const char* filename, const char* token, const char* src, const char* rep);
+
 // TODO: Timestamp & permissions preservation
 
 // Convert a file size to human readable
@@ -100,55 +102,6 @@ static void log_handler (cdio_log_level_t level, const char *message)
 	default:
 		uprintf("libcdio: %s\n", message);
 	}
-}
-
-/*
- * Workaround for isolinux config files requiring an ISO label for kernel
- * append that may be different from our USB label.
- * NB: this is intended as a quick-and-dirty workaround, because it is the
- * distro creator's job to make their config and labels also work with USB.
- * As such, this process may fail if:
- * - the label is on the block size limit, for cfg files of more than 2KB
- * - the user changed the label to one that is larger than the one from the cfg
- * - the cfg is weird (more than one label on the same line, etc.)
- */
-static void process_config(char* buf, size_t buf_size, const char* cfg_name)
-{
-	char last_char, eol_char, *label;
-	size_t i, j, k;
-
-	// Don't apply workaround if USB label is the same or longer than ISO
-	if ( (strcmp(iso_report.label, iso_report.usb_label) == 0)
-	  || (strlen(iso_report.label) < strlen(iso_report.usb_label)) )
-		return;
-
-	// Make sure our buffer is NUL terminated
-	if (buf_size >= UDF_BLOCKSIZE)	// UDF_BLOCKSIZE = ISO_BLOCKSIZE = 2048
-		buf_size = UDF_BLOCKSIZE-1;
-	last_char = buf[buf_size];
-	buf[buf_size] = 0;
-
-	for (i=0; i<buf_size; i++) {
-		// Check if there is a line starting with "append" (case insensitive)
-		if (_strnicmp(&buf[i], "append", sizeof("append")-1) == 0) {
-			for (j=i; (buf[j]!=0x00)&&(buf[j]!=0x0A)&&(buf[j]!=0x0D); j++);	// EOL
-			eol_char = buf[j];	// Make sure the line is NUL terminated
-			buf[j] = 0;
-			label = strstr(&buf[i], iso_report.label);
-			if (label != NULL) {
-				// Since label is longer than usb_label we can replace it
-				for (k=0; k<strlen(iso_report.label); k++)
-					label[k] = (k<strlen(iso_report.usb_label))?iso_report.usb_label[k]:' ';
-				uprintf("  Patched config file to use USB label '%s'\n", iso_report.usb_label);
-//				uprintf("  Patched line: '%s'\n", &buf[i]);
-			}
-			// Revert EOL
-			buf[j] = eol_char;
-			i = j;
-		}
-	}
-	// Revert NUL terminator
-	buf[buf_size] = last_char;
 }
 
 /*
@@ -259,8 +212,6 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 					goto out;
 				}
 				buf_size = (DWORD)MIN(i_file_length, i_read);
-				if (is_syslinux_cfg)
-					process_config((char*)buf, (size_t)buf_size, psz_fullpath);
 				ISO_BLOCKING(r = WriteFile(file_handle, buf, buf_size, &wr_size, NULL));
 				if ((!r) || (buf_size != wr_size)) {
 					uprintf("  Error writing file: %s\n", WindowsErrorString());
@@ -277,6 +228,12 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 			// The drawback however is with cancellation. With a large file, CloseHandle()
 			// may take forever to complete and is not interruptible. We try to detect this.
 			ISO_BLOCKING(safe_closehandle(file_handle));
+			if (is_syslinux_cfg) {
+				// Workaround for isolinux config files requiring an ISO label for kernel
+				// append that may be different from our USB label.
+				if (replace_in_token_data(psz_fullpath, "append", iso_report.label, iso_report.usb_label) != NULL)
+					uprintf("Patched %s: '%s' -> '%s'\n", psz_fullpath, iso_report.label, iso_report.usb_label);
+			}
 		}
 		safe_free(psz_fullpath);
 	}
@@ -363,8 +320,6 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 					goto out;
 				}
 				buf_size = (DWORD)MIN(i_file_length, ISO_BLOCKSIZE);
-				if (is_syslinux_cfg)
-					process_config((char*)buf, (size_t)buf_size, psz_fullpath);
 				ISO_BLOCKING(s = WriteFile(file_handle, buf, buf_size, &wr_size, NULL));
 				if ((!s) || (buf_size != wr_size)) {
 					uprintf("  Error writing file: %s\n", WindowsErrorString());
@@ -376,6 +331,10 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 				}
 			}
 			ISO_BLOCKING(safe_closehandle(file_handle));
+			if (is_syslinux_cfg) {
+				if (replace_in_token_data(psz_fullpath, "append", iso_report.label, iso_report.usb_label) != NULL)
+					uprintf("Patched %s: '%s' -> '%s'\n", psz_fullpath, iso_report.label, iso_report.usb_label);
+			}
 		}
 	}
 	r = 0;
@@ -506,7 +465,8 @@ out:
 				uprintf("Created: %s\n", syslinux_path);
 			}
 		}
-		fclose(fd);
+		if (fd != NULL)
+			fclose(fd);
 	}
 	SendMessage(hISOProgressDlg, UM_ISO_EXIT, 0, 0);
 	if (p_iso != NULL)

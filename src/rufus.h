@@ -196,6 +196,7 @@ extern BOOL UnmountDrive(HANDLE hDrive);
 extern BOOL CreateProgress(void);
 extern BOOL SetAutorun(const char* path);
 extern char* FileDialog(BOOL save, char* path, char* filename, char* ext, char* ext_desc);
+extern LONG GetEntryWidth(HWND hDropDown, const char *entry);
 
 __inline static BOOL UnlockDrive(HANDLE hDrive)
 {

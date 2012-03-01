@@ -46,6 +46,7 @@ static const char* ClusterSizeLabel[] = { "512 bytes", "1024 bytes","2048 bytes"
 	"1024 kilobytes","2048 kilobytes","4096 kilobytes","8192 kilobytes","16 megabytes","32 megabytes" };
 static BOOL existing_key = FALSE;	// For LGP set/restore
 static BOOL iso_size_check = TRUE;
+BOOL enable_fixed_disks = FALSE;
 
 /*
  * Globals
@@ -535,6 +536,8 @@ static BOOL GetUSBDevices(DWORD devnum)
 	STORAGE_DEVICE_NUMBER_REDEF device_number;
 	DWORD size, i, j, datatype;
 	HANDLE hDrive;
+	LONG maxwidth = 0;
+	RECT rect;
 	char drive_letter;
 	char *label, entry[MAX_PATH], buffer[MAX_PATH];
 	const char* usbstor_name = "USBSTOR";
@@ -544,6 +547,7 @@ static BOOL GetUSBDevices(DWORD devnum)
 	IGNORE_RETVAL(ComboBox_ResetContent(hDeviceList));
 	StrArrayClear(&DriveID);
 	StrArrayClear(&DriveLabel);
+	GetClientRect(hDeviceList, &rect);
 
 	dev_info = SetupDiGetClassDevsA(&_GUID_DEVINTERFACE_DISK, NULL, NULL, DIGCF_PRESENT|DIGCF_DEVICEINTERFACE);
 	if (dev_info == INVALID_HANDLE_VALUE) {
@@ -623,6 +627,7 @@ static BOOL GetUSBDevices(DWORD devnum)
 				safe_sprintf(entry, sizeof(entry), "%s (%c:)", label, drive_letter);
 				IGNORE_RETVAL(ComboBox_SetItemData(hDeviceList, ComboBox_AddStringU(hDeviceList, entry),
 					device_number.DeviceNumber + DRIVE_INDEX_MIN));
+				maxwidth = max(maxwidth, GetEntryWidth(hDeviceList, entry));
 				safe_closehandle(hDrive);
 				safe_free(devint_detail_data);
 				break;
@@ -630,6 +635,9 @@ static BOOL GetUSBDevices(DWORD devnum)
 		}
 	}
 	SetupDiDestroyDeviceInfoList(dev_info);
+
+	// Adjust the Dropdown width to the maximum text size
+	SendMessage(hDeviceList, CB_SETDROPPEDWIDTH, (WPARAM)maxwidth, 0);
 
 	if (devnum >= DRIVE_INDEX_MIN) {
 		for (i=0; i<ComboBox_GetCount(hDeviceList); i++) {
@@ -1503,6 +1511,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'S')) {
 				iso_size_check = !iso_size_check;
 				PrintStatus(0, FALSE, "ISO size check %s", iso_size_check?"enabled":"disabled");
+				continue;
+			}
+			// Alt-F => toggle detection of fixed disks
+			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'F')) {
+				enable_fixed_disks = !enable_fixed_disks;
+				PrintStatus(0, FALSE, "Fixed disks detection %s", enable_fixed_disks?"enabled":"disabled");
+				GetUSBDevices(0);
 				continue;
 			}
 #ifdef DISABLE_AUTORUN

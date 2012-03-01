@@ -806,3 +806,29 @@ void DestroyAllTooltips(void)
 		safe_free(ttlist[i].wstring);
 	}
 }
+
+/* Compute the width of a device list entry */
+LONG GetEntryWidth(HWND hDropDown, const char *entry)
+{ 
+	HDC hDC;
+	HFONT hFont, hDefFont;
+	SIZE size;
+	WCHAR* wentry = NULL;
+	int len;
+
+	hDC = GetDC(hDropDown);
+	hFont = (HFONT)SendMessage(hDropDown, WM_GETFONT, 0, 0);
+	if (hFont != NULL)
+		hDefFont = (HFONT)SelectObject(hDC, hFont);
+	
+	wentry = utf8_to_wchar(entry);
+	len = (int)wcslen(wentry)+1;
+	GetTextExtentPoint32W(hDC, wentry, len, &size);
+
+	if (hFont != NULL)
+		SelectObject(hDC, hDefFont);
+
+	ReleaseDC(hDropDown, hDC);
+	free(wentry);
+	return size.cx;
+}

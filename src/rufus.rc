@@ -33,12 +33,12 @@ LANGUAGE LANG_ENGLISH, SUBLANG_NEUTRAL
 IDD_DIALOG DIALOGEX 12, 12, 206, 289
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_APPWINDOW
-CAPTION "Rufus v1.1.4.147"
+CAPTION "Rufus v1.1.4.148"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     DEFPUSHBUTTON   "Start",IDC_START,94,248,50,14
     PUSHBUTTON      "Close",IDCANCEL,148,248,50,14
-    COMBOBOX        IDC_DEVICE,8,17,190,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_DEVICE,8,17,190,33,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     CONTROL         "Device",IDC_STATIC,"Static",SS_LEFTNOWORDWRAP | WS_GROUP,9,6,22,8
     COMBOBOX        IDC_FILESYSTEM,8,75,190,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     LTEXT           "File system",IDC_STATIC,9,64,51,10
@@ -73,7 +73,7 @@ BEGIN
     DEFPUSHBUTTON   "OK",IDOK,231,175,50,14,WS_GROUP
     CONTROL         "<a href=""http://rufus.akeo.ie"">http://rufus.akeo.ie</a>",IDC_ABOUT_RUFUS_URL,
                     "SysLink",WS_TABSTOP,46,47,114,9
-    LTEXT           "Version 1.1.4 (Build 147)",IDC_STATIC,46,19,78,8
+    LTEXT           "Version 1.1.4 (Build 148)",IDC_STATIC,46,19,78,8
     PUSHBUTTON      "License...",IDC_ABOUT_LICENSE,46,175,50,14,WS_GROUP
     EDITTEXT        IDC_ABOUT_COPYRIGHTS,46,107,235,63,ES_MULTILINE | ES_READONLY | WS_VSCROLL
     LTEXT           "Report bugs or request enhancements at:",IDC_STATIC,46,66,187,8
@@ -223,8 +223,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,1,4,147
- PRODUCTVERSION 1,1,4,147
+ FILEVERSION 1,1,4,148
+ PRODUCTVERSION 1,1,4,148
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -241,13 +241,13 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "akeo.ie"
             VALUE "FileDescription", "Rufus"
-            VALUE "FileVersion", "1.1.4.147"
+            VALUE "FileVersion", "1.1.4.148"
             VALUE "InternalName", "Rufus"
             VALUE "LegalCopyright", "© 2011 Pete Batard (GPL v3)"
             VALUE "LegalTrademarks", "http://www.gnu.org/copyleft/gpl.html"
             VALUE "OriginalFilename", "rufus.exe"
             VALUE "ProductName", "Rufus"
-            VALUE "ProductVersion", "1.1.4.147"
+            VALUE "ProductVersion", "1.1.4.148"
         END
     END
     BLOCK "VarFileInfo"

@@ -656,8 +656,9 @@ DWORD WINAPI FormatThread(LPVOID param)
 			if (iso_path != NULL) {
 				PrintStatus(0, TRUE, "Copying ISO files...");
 				drive_name[2] = 0;
-				if ( (!ExtractISO(iso_path, drive_name, FALSE)) && (!FormatStatus)) {
-					FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANNOT_COPY;
+				if (!ExtractISO(iso_path, drive_name, FALSE)) {
+					if (!FormatStatus)
+						FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANNOT_COPY;
 					goto out;
 				}
 			}

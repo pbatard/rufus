@@ -48,6 +48,9 @@
     <ClCompile Include="..\icon.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\parser.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\rufus.h">
