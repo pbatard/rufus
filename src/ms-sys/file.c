@@ -18,17 +18,25 @@
 ******************************************************************/
 #include <stdio.h>
 #include <string.h>
+#include <stdint.h>
 
 #include "../rufus.h"
 #include "file.h"
 
 /* Returns the number of bytes written or -1 on error */
-int write_sectors(HANDLE hDrive, size_t SectorSize,
-                  size_t StartSector, size_t nSectors,
-                  const void *pBuf)
+int64_t write_sectors(HANDLE hDrive, uint64_t SectorSize,
+                      uint64_t StartSector, uint64_t nSectors,
+                      const void *pBuf)
 {
    LARGE_INTEGER ptr;
-   DWORD Size = (DWORD)(nSectors*SectorSize);
+   DWORD Size;
+
+   if((nSectors*SectorSize) > 0xFFFFFFFFUL)
+   {
+      uprintf("write_sectors: nSectors x SectorSize is too big\n");
+      return -1;
+   }
+   Size = (DWORD)(nSectors*SectorSize);
 
    ptr.QuadPart = StartSector*SectorSize;
    if(!SetFilePointerEx(hDrive, ptr, NULL, FILE_BEGIN))
@@ -44,16 +52,23 @@ int write_sectors(HANDLE hDrive, size_t SectorSize,
       return Size;
    }
 
-   return Size;
+   return (int64_t)Size;
 }
 
 /* Returns the number of bytes read or -1 on error */
-int read_sectors(HANDLE hDrive, size_t SectorSize,
-                 size_t StartSector, size_t nSectors,
-                 void *pBuf)
+int64_t read_sectors(HANDLE hDrive, uint64_t SectorSize,
+                     uint64_t StartSector, uint64_t nSectors,
+                     void *pBuf)
 {
    LARGE_INTEGER ptr;
-   DWORD Size = (DWORD)(nSectors*SectorSize);
+   DWORD Size;
+
+   if((nSectors*SectorSize) > 0xFFFFFFFFUL)
+   {
+      uprintf("read_sectors: nSectors x SectorSize is too big\n");
+      return -1;
+   }
+   Size = (DWORD)(nSectors*SectorSize);
 
    ptr.QuadPart = StartSector*SectorSize;
    if(!SetFilePointerEx(hDrive, ptr, NULL, FILE_BEGIN))
@@ -68,7 +83,7 @@ int read_sectors(HANDLE hDrive, size_t SectorSize,
       uprintf("  StartSector:%0X, nSectors:%0X, SectorSize:%0X\n", StartSector, nSectors, SectorSize);
    }
 
-   return Size;
+   return (int64_t)Size;
 }
 
 /*
@@ -77,14 +92,49 @@ int read_sectors(HANDLE hDrive, size_t SectorSize,
  * fp->_bufsiz: the sector size
  * fp->_cnt: a file offset
  */
-int contains_data(FILE *fp, size_t Position,
-                  const void *pData, size_t Len)
+int contains_data(FILE *fp, uint64_t Position,
+                  const void *pData, uint64_t Len)
 {
    unsigned char aucBuf[MAX_DATA_LEN];
    HANDLE hDrive = (HANDLE)fp->_ptr;
-   size_t SectorSize = (size_t)fp->_bufsiz;
-   size_t StartSector, EndSector, NumSectors;
-   Position += (size_t)fp->_cnt;
+   uint64_t SectorSize = (uint64_t)fp->_bufsiz;
+   uint64_t StartSector, EndSector, NumSectors;
+   Position += (uint64_t)fp->_cnt;
+
+   StartSector = Position/SectorSize;
+   EndSector   = (Position+Len+SectorSize-1)/SectorSize;
+   NumSectors  = (size_t)(EndSector - StartSector);
+
+   if((NumSectors*SectorSize) > MAX_DATA_LEN)
+   {
+      uprintf("contains_data: please increase MAX_DATA_LEN in file.h\n");
+      return 0;
+   }
+
+   if(Len > 0xFFFFFFFFUL)
+   {
+      uprintf("contains_data: Len is too big\n");
+      return 0;
+   }
+
+   if(read_sectors(hDrive, SectorSize, StartSector,
+                     NumSectors, aucBuf) <= 0)
+      return 0;
+
+   if(memcmp(pData, &aucBuf[Position - StartSector*SectorSize], (size_t)Len))
+      return 0;
+   return 1;
+} /* contains_data */
+
+/* May read/write the same sector many times, but compatible with existing ms-sys */
+int write_data(FILE *fp, uint64_t Position,
+               const void *pData, uint64_t Len)
+{
+   unsigned char aucBuf[MAX_DATA_LEN];
+   HANDLE hDrive = (HANDLE)fp->_ptr;
+   uint64_t SectorSize = (uint64_t)fp->_bufsiz;
+   uint64_t StartSector, EndSector, NumSectors;
+   Position += (uint64_t)fp->_cnt;
 
    StartSector = Position/SectorSize;
    EndSector   = (Position+Len+SectorSize-1)/SectorSize;
@@ -96,32 +146,9 @@ int contains_data(FILE *fp, size_t Position,
       return 0;
    }
 
-   if(read_sectors(hDrive, SectorSize, StartSector,
-                     NumSectors, aucBuf) <= 0)
-      return 0;
-
-   if(memcmp(pData, &aucBuf[Position - StartSector*SectorSize], Len))
-      return 0;
-   return 1;
-} /* contains_data */
-
-/* May read/write the same sector many times, but compatible with existing ms-sys */
-int write_data(FILE *fp, size_t Position,
-               const void *pData, size_t Len)
-{
-   unsigned char aucBuf[MAX_DATA_LEN];
-   HANDLE hDrive = (HANDLE)fp->_ptr;
-   size_t SectorSize = (size_t)fp->_bufsiz;
-   size_t StartSector, EndSector, NumSectors;
-   Position += (size_t)fp->_cnt;
-
-   StartSector = Position/SectorSize;
-   EndSector   = (Position+Len+SectorSize-1)/SectorSize;
-   NumSectors  = EndSector - StartSector;
-
-   if((NumSectors*SectorSize) > MAX_DATA_LEN)
+   if(Len > 0xFFFFFFFFUL)
    {
-      uprintf("Please increase MAX_DATA_LEN in file.h\n");
+      uprintf("write_data: Len is too big\n");
       return 0;
    }
 
@@ -130,7 +157,7 @@ int write_data(FILE *fp, size_t Position,
                      NumSectors, aucBuf) <= 0)
       return 0;
 
-   if(!memcpy(&aucBuf[Position - StartSector*SectorSize], pData, Len))
+   if(!memcpy(&aucBuf[Position - StartSector*SectorSize], pData, (size_t)Len))
       return 0;
 
    if(write_sectors(hDrive, SectorSize, StartSector,

@@ -529,14 +529,16 @@ DWORD WINAPI FormatThread(LPVOID param)
 
 			if (!BadBlocks(hPhysicalDrive, SelectedDrive.DiskSize,
 				SelectedDrive.Geometry.BytesPerSector, ComboBox_GetCurSel(hNBPasses)+1, &report, log_fd)) {
-				uprintf("Bad blocks check failed.\n");
+				uprintf("Bad blocks: Check failed.\n");
 				if (!FormatStatus)
 					FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|
 						APPERR(ERROR_BADBLOCKS_FAILURE);
 				ClearMBR(hPhysicalDrive);
+				fclose(log_fd);
+				_unlink(logfile);
 				goto out;
 			}
-			uprintf("Check completed, %u bad block%s found. (%d/%d/%d errors)\n",
+			uprintf("Bad Blocks: Check completed, %u bad block%s found. (%d/%d/%d errors)\n",
 				report.bb_count, (report.bb_count==1)?"":"s",
 				report.num_read_errors, report.num_write_errors, report.num_corruption_errors);
 			r = IDOK;
@@ -547,13 +549,15 @@ DWORD WINAPI FormatThread(LPVOID param)
 					report.num_read_errors, report.num_write_errors, 
 					report.num_corruption_errors);
 				fprintf(log_fd, "%s", bb_msg);
+				GetLocalTime(&lt);
+				fprintf(log_fd, "Rufus bad blocks check ended on: %04d.%02d.%02d %02d:%02d:%02d\n",
+				lt.wYear, lt.wMonth, lt.wDay, lt.wHour, lt.wMinute, lt.wSecond);
 				fclose(log_fd);
 				safe_sprintf(&bb_msg[strlen(bb_msg)], sizeof(bb_msg)-strlen(bb_msg)-1,
 					"\nA more detailed report can be found in:\n%s\n", logfile);
 				r = MessageBoxU(hMainDialog, bb_msg, "Bad blocks found", MB_ABORTRETRYIGNORE|MB_ICONWARNING);
 			} else {
 				// We didn't get any errors => delete the log file
-				// NB: the log doesn't get deleted on abort
 				fclose(log_fd);
 				_unlink(logfile);
 			}

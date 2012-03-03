@@ -1,27 +1,29 @@
 #ifndef FILE_H
 #define FILE_H
 
+#include <stdint.h>
+
 /* Max valid value of uiLen for contains_data */
 #define MAX_DATA_LEN 8192
 
-/* Checks if a file contains a data pattern of length uiLen at position
-   ulPositoin. The file pointer will change when calling this function! */
-int contains_data(FILE *fp, size_t ulPosition,
-                  const void *pData, size_t uiLen);
+/* Checks if a file contains a data pattern of length Len at position
+   Position. The file pointer will change when calling this function! */
+int contains_data(FILE *fp, uint64_t Position,
+                  const void *pData, uint64_t Len);
 
-/* Writes a data pattern of length uiLen at position ulPositoin.
+/* Writes a data pattern of length Len at position Position.
    The file pointer will change when calling this function! */
-int write_data(FILE *fp, size_t ulPosition,
-               const void *pData, size_t uiLen);
+int write_data(FILE *fp, uint64_t Position,
+               const void *pData, uint64_t Len);
 
 /* Writes nSectors of size SectorSize starting at sector StartSector */
-int write_sectors(void *hDrive, size_t SectorSize,
-                  size_t StartSector, size_t nSectors,
-                  const void *pBuf);
+int64_t write_sectors(void *hDrive, uint64_t SectorSize,
+                      uint64_t StartSector, uint64_t nSectors,
+                      const void *pBuf);
 
 /* Reads nSectors of size SectorSize starting at sector StartSector */
-int read_sectors(void *hDrive, size_t SectorSize,
-                 size_t StartSector, size_t nSectors,
-                 void *pBuf);
+int64_t read_sectors(void *hDrive, uint64_t SectorSize,
+                     uint64_t StartSector, uint64_t nSectors,
+                     void *pBuf);
 
 #endif
