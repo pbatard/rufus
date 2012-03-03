@@ -24,6 +24,7 @@
 #include <commdlg.h>
 #include <shellapi.h>
 #include <setupapi.h>
+#include <direct.h>
 
 #pragma once
 
@@ -615,6 +616,15 @@ static __inline char* getenvU(const char* varname)
 	char* ret;
 	ret = wchar_to_utf8(_wgetenv(wvarname));
 	wfree(varname);
+	return ret;
+}
+
+static __inline int _mkdirU(const char* dirname)
+{
+	wconvert(dirname);
+	int ret;
+	ret = _wmkdir(wdirname);
+	wfree(dirname);
 	return ret;
 }
 

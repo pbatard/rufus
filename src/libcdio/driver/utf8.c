@@ -23,7 +23,6 @@
 # include "config.h"
 #endif
 
-#ifdef HAVE_JOLIET
 #ifdef HAVE_STRING_H
 # include <string.h>
 #endif
@@ -43,7 +42,66 @@
 #include <stdio.h>
 #endif
 
-// TODO: also remove the need for iconv on MinGW
+/* Windows requires some basic UTF-8 support outside of Joliet */
+#if defined(_WIN32)
+#include <windows.h>
+
+#define wchar_to_utf8_no_alloc(wsrc, dest, dest_size) \
+	WideCharToMultiByte(CP_UTF8, 0, wsrc, -1, dest, dest_size, NULL, NULL)
+#define utf8_to_wchar_no_alloc(src, wdest, wdest_size) \
+	MultiByteToWideChar(CP_UTF8, 0, src, -1, wdest, wdest_size)
+
+/*
+ * Converts an UTF-16 string to UTF8 (allocate returned string)
+ * Returns NULL on error
+ */
+char* cdio_wchar_to_utf8(const wchar_t* wstr)
+  {
+  int size = 0;
+  char* str = NULL;
+
+  /* Find out the size we need to allocate for our converted string */
+  size = WideCharToMultiByte(CP_UTF8, 0, wstr, -1, NULL, 0, NULL, NULL);
+  if (size <= 1) /* An empty string would be size 1 */
+    return NULL;
+
+  if ((str = (char*)calloc(size, 1)) == NULL)
+    return NULL;
+
+  if (wchar_to_utf8_no_alloc(wstr, str, size) != size) {
+    free(str);
+    return NULL;
+  }
+
+  return str;
+  }
+
+/*
+ * Converts an UTF8 string to UTF-16 (allocate returned string)
+ * Returns NULL on error
+ */
+wchar_t* cdio_utf8_to_wchar(const char* str)
+  {
+  int size = 0;
+  wchar_t* wstr = NULL;
+
+  /* Find out the size we need to allocate for our converted string */
+  size = MultiByteToWideChar(CP_UTF8, 0, str, -1, NULL, 0);
+  if (size <= 1) /* An empty string would be size 1 */
+    return NULL;
+
+  if ((wstr = (wchar_t*)calloc(size, sizeof(wchar_t))) == NULL)
+    return NULL;
+
+  if (utf8_to_wchar_no_alloc(str, wstr, size) != size) {
+    free(wstr);
+    return NULL;
+  }
+  return wstr;
+  }
+#endif
+
+#ifdef HAVE_JOLIET
 #ifdef HAVE_ICONV
 #include <iconv.h>
 struct cdio_charset_coverter_s
@@ -210,61 +268,6 @@ bool cdio_charset_to_utf8(char *src, size_t src_len, cdio_utf8_t **dst,
   return result;
   }
 #elif defined(_WIN32)
-#include <windows.h>
-
-#define wchar_to_utf8_no_alloc(wsrc, dest, dest_size) \
-	WideCharToMultiByte(CP_UTF8, 0, wsrc, -1, dest, dest_size, NULL, NULL)
-#define utf8_to_wchar_no_alloc(src, wdest, wdest_size) \
-	MultiByteToWideChar(CP_UTF8, 0, src, -1, wdest, wdest_size)
-
-/*
- * Converts an UTF-16 string to UTF8 (allocate returned string)
- * Returns NULL on error
- */
-static inline char* wchar_to_utf8(const wchar_t* wstr)
-  {
-  int size = 0;
-  char* str = NULL;
-
-  /* Find out the size we need to allocate for our converted string */
-  size = WideCharToMultiByte(CP_UTF8, 0, wstr, -1, NULL, 0, NULL, NULL);
-  if (size <= 1) /* An empty string would be size 1 */
-    return NULL;
-
-  if ((str = (char*)calloc(size, 1)) == NULL)
-    return NULL;
-
-  if (wchar_to_utf8_no_alloc(wstr, str, size) != size) {
-    free(str);
-    return NULL;
-  }
-
-  return str;
-  }
-
-/*
- * Converts an UTF8 string to UTF-16 (allocate returned string)
- * Returns NULL on error
- */
-static inline wchar_t* utf8_to_wchar(const char* str)
-  {
-  int size = 0;
-  wchar_t* wstr = NULL;
-
-  /* Find out the size we need to allocate for our converted string */
-  size = MultiByteToWideChar(CP_UTF8, 0, str, -1, NULL, 0);
-  if (size <= 1) /* An empty string would be size 1 */
-    return NULL;
-
-  if ((wstr = (wchar_t*)calloc(size, sizeof(wchar_t))) == NULL)
-    return NULL;
-
-  if (utf8_to_wchar_no_alloc(str, wstr, size) != size) {
-    free(wstr);
-    return NULL;
-  }
-  return wstr;
-  }
 
 bool cdio_charset_from_utf8(cdio_utf8_t * src, char ** dst,
                             int * dst_len, const char * dst_charset)
@@ -276,7 +279,7 @@ bool cdio_charset_from_utf8(cdio_utf8_t * src, char ** dst,
     return false;
 
   /* Eliminate empty strings */
-  le_dst = utf8_to_wchar(src);
+  le_dst = cdio_utf8_to_wchar(src);
   if ((le_dst == NULL) || (le_dst[0] == 0)) {
     free(le_dst);
     return false;
@@ -323,7 +326,7 @@ bool cdio_charset_to_utf8(char *src, size_t src_len, cdio_utf8_t **dst,
     ((char*)le_src)[2*i+1] = src[2*i];
   }
   le_src[src_len] = 0;
-  *dst = wchar_to_utf8(le_src);
+  *dst = cdio_wchar_to_utf8(le_src);
   free(le_src);
 
   return (*dst != NULL);

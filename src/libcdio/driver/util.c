@@ -38,6 +38,8 @@
 #include "inttypes.h"
 #endif
 
+#include <ctype.h>
+
 #include "cdio_assert.h"
 #include <cdio/types.h>
 #include <cdio/util.h>
@@ -134,6 +136,29 @@ _cdio_strdup_upper (const char str[])
     }
 
   return new_str;
+}
+
+/* Convert MinGW/MSYS paths that start in "/c/..." to "c:/..."
+   so that they can be used with fopen(), stat(), etc. */
+char * 
+_cdio_strdup_fixpath (const char path[])
+{
+  char *new_path = NULL;
+
+  if (path)
+    {
+       new_path = strdup (path);
+#if defined(_WIN32)
+       if (new_path && (strlen (new_path) >= 3) && (new_path[0] == '/') &&
+          (new_path[2] == '/') && (isalpha (new_path[1])))
+         {
+           new_path[0] = new_path[1];
+           new_path[1] = ':';
+         }
+#endif
+    }
+
+  return new_path;
 }
 
 uint8_t

@@ -122,8 +122,7 @@ enum {
 enum dos_type {
 	DT_WINME = 0,
 	DT_FREEDOS,
-	DT_ISO_FAT,
-	DT_ISO_NTFS,
+	DT_ISO,
 	DT_MAX
 };
 

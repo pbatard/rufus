@@ -63,10 +63,7 @@ char* get_token_data(const char* filename, const char* token)
 		goto out;
 	}
 	fd = _wfopen(wfilename, L"r, ccs=UNICODE");
-	if (fd == NULL) {
-		uprintf("Could not open file '%s'\n", filename);
-		goto out;
-	}
+	if (fd == NULL) goto out;
 
 	// Process individual lines. NUL is always appended.
 	// Ideally, we'd check that our buffer fits the line

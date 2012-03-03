@@ -314,6 +314,7 @@ static BOOL ClearMBR(HANDLE hPhysicalDrive)
 static BOOL WriteMBR(HANDLE hPhysicalDrive)
 {
 	BOOL r = FALSE;
+	int dt, fs;
 	unsigned char* buf = NULL;
 	size_t SecSize = SelectedDrive.Geometry.BytesPerSector;
 	size_t nSecs = (0x200 + SecSize -1) / SecSize;
@@ -367,7 +368,9 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 
 	fake_fd._ptr = (char*)hPhysicalDrive;
 	fake_fd._bufsiz = SelectedDrive.Geometry.BytesPerSector;
-	if (ComboBox_GetItemData(hDOSType, ComboBox_GetCurSel(hDOSType)) == DT_ISO_FAT) {
+	fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
+	dt = (int)ComboBox_GetItemData(hDOSType, ComboBox_GetCurSel(hDOSType));
+	if ((dt == DT_ISO) && ((fs == FS_FAT16) || (fs == FS_FAT32))) {
 		r = write_syslinux_mbr(&fake_fd);
 	} else {
 		r = write_95b_mbr(&fake_fd);
@@ -484,7 +487,7 @@ DWORD WINAPI FormatThread(LPVOID param)
 	char bb_msg[512];
 	char logfile[MAX_PATH], *userdir;
 	FILE* log_fd;
-	int r;
+	int r, fs, dt;
 
 	hPhysicalDrive = GetDriveHandle(num, NULL, TRUE, TRUE);
 	if (hPhysicalDrive == INVALID_HANDLE_VALUE) {
@@ -601,11 +604,10 @@ DWORD WINAPI FormatThread(LPVOID param)
 	}
 	UpdateProgress(OP_FIX_MBR, -1.0f);
 
+	fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
+	dt = (int)ComboBox_GetItemData(hDOSType, ComboBox_GetCurSel(hDOSType));
 	if (IsChecked(IDC_DOS)) {
-		switch(ComboBox_GetItemData(hDOSType, ComboBox_GetCurSel(hDOSType))) {
-		case DT_WINME:
-		case DT_FREEDOS:
-		case DT_ISO_NTFS:
+		if ((dt == DT_WINME) || (dt == DT_FREEDOS) || ((dt == DT_ISO) && (fs == FS_NTFS))) {
 			// We still have a lock, which we need to modify the volume boot record 
 			// => no need to reacquire the lock...
 			hLogicalVolume = GetDriveHandle(num, drive_name, TRUE, FALSE);
@@ -624,13 +626,11 @@ DWORD WINAPI FormatThread(LPVOID param)
 			}
 			// We must close and unlock the volume to write files to it
 			safe_unlockclose(hLogicalVolume);
-			break;
-		case DT_ISO_FAT:
+		} else if ((dt == DT_ISO) && ((fs == FS_FAT16) || (fs == FS_FAT32))) {
 			PrintStatus(0, TRUE, "Installing Syslinux...");
 			if (!InstallSyslinux(num, drive_name)) {
 				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_INSTALL_FAILURE;
 			}
-			break;
 		}
 	} else {
 		if (IsChecked(IDC_SET_ICON))
@@ -645,18 +645,14 @@ DWORD WINAPI FormatThread(LPVOID param)
 
 	if (IsChecked(IDC_DOS)) {
 		UpdateProgress(OP_DOS, -1.0f);
-		switch(ComboBox_GetItemData(hDOSType, ComboBox_GetCurSel(hDOSType))) {
-		case DT_WINME:
-		case DT_FREEDOS:
+		if ((dt == DT_WINME) || (dt == DT_FREEDOS)) {
 			PrintStatus(0, TRUE, "Copying DOS files...");
 			if (!ExtractDOS(drive_name)) {
 				if (!FormatStatus)
 					FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANNOT_COPY;
 				goto out;
 			}
-			break;
-		case DT_ISO_NTFS:
-		case DT_ISO_FAT:
+		} else if (dt == DT_ISO) {
 			if (iso_path != NULL) {
 				PrintStatus(0, TRUE, "Copying ISO files...");
 				drive_name[2] = 0;
@@ -666,7 +662,6 @@ DWORD WINAPI FormatThread(LPVOID param)
 					goto out;
 				}
 			}
-			break;
 		}
 		if (IsChecked(IDC_SET_ICON))
 			SetAutorun(drive_name);

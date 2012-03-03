@@ -46,6 +46,7 @@ static const char* ClusterSizeLabel[] = { "512 bytes", "1024 bytes","2048 bytes"
 	"1024 kilobytes","2048 kilobytes","4096 kilobytes","8192 kilobytes","16 megabytes","32 megabytes" };
 static BOOL existing_key = FALSE;	// For LGP set/restore
 static BOOL iso_size_check = TRUE;
+static int selection_default;
 BOOL enable_fixed_disks = FALSE;
 
 /*
@@ -387,19 +388,38 @@ static BOOL GetDriveInfo(void)
 
 static void SetFSFromISO(void)
 {
-	int i, fs;
+	int i, fs, selected_fs = FS_UNKNOWN;
+	uint32_t fs_mask = 0;
 
 	if (iso_path == NULL)
 		return;
 
-	for (i=ComboBox_GetCount(hFileSystem)-1; i>=0; i--) {
+	// Create a mask of all the FS's available
+	for (i=0; i<ComboBox_GetCount(hFileSystem); i++) {
 		fs = (int)ComboBox_GetItemData(hFileSystem, i);
-		if ( ((iso_report.has_bootmgr) && (fs == FS_NTFS))
-			|| ((iso_report.has_isolinux) && ((fs == FS_FAT32) || (fs == FS_FAT16))) ) {
-			IGNORE_RETVAL(ComboBox_SetCurSel(hFileSystem, i));
-			break;
+		fs_mask |= 1<<fs;
+	}
+
+	// Syslinux has precedence over bootmgr
+	if (iso_report.has_isolinux) {
+		if (fs_mask & (1<<FS_FAT32)) {
+			selected_fs = FS_FAT32;
+		} else if (fs_mask & (1<<FS_FAT16)) {
+			selected_fs = FS_FAT16;
+		}
+	} else if (iso_report.has_bootmgr) {
+		if (fs_mask & (1<<FS_NTFS)) {
+			selected_fs = FS_NTFS;
 		}
 	}
+
+	// Try to select the FS
+	for (i=0; i<ComboBox_GetCount(hFileSystem); i++) {
+		fs = (int)ComboBox_GetItemData(hFileSystem, i);
+		if (fs == selected_fs)
+			IGNORE_RETVAL(ComboBox_SetCurSel(hFileSystem, i));
+	}
+
 	SendMessage(hMainDialog, WM_COMMAND, (CBN_SELCHANGE<<16) | IDC_FILESYSTEM,
 		ComboBox_GetCurSel(hFileSystem));
 }
@@ -1113,6 +1133,9 @@ void InitDialog(HWND hDlg)
 		safe_sprintf(tmp, sizeof(tmp), "Rufus (with FreeDOS)");
 		tmp[20] = ' ';
 		SetWindowTextA(hDlg, tmp);
+		selection_default = DT_FREEDOS;
+	} else {
+		selection_default = DT_WINME;
 	}
 
 	// Create the status line
@@ -1162,7 +1185,7 @@ void InitDialog(HWND hDlg)
 static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	DRAWITEMSTRUCT* pDI;
-	int nDeviceIndex, fs, dt;
+	int nDeviceIndex, fs, i;
 	static DWORD DeviceNum = 0;
 	wchar_t wtmp[128], wstr[MAX_PATH];
 	static UINT uDOSChecked = BST_CHECKED;
@@ -1243,32 +1266,29 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			break;
 #endif
 		case IDC_DEVICE:
-			switch (HIWORD(wParam)) {
-			case CBN_SELCHANGE:
-				PrintStatus(0, TRUE, "%d device%s found.", ComboBox_GetCount(hDeviceList),
-					(ComboBox_GetCount(hDeviceList)!=1)?"s":"");
-				PopulateProperties(ComboBox_GetCurSel(hDeviceList));
+			if (HIWORD(wParam) != CBN_SELCHANGE)
 				break;
-			}
+			PrintStatus(0, TRUE, "%d device%s found.", ComboBox_GetCount(hDeviceList),
+				(ComboBox_GetCount(hDeviceList)!=1)?"s":"");
+			PopulateProperties(ComboBox_GetCurSel(hDeviceList));
 			break;
 		case IDC_NBPASSES:
-			switch (HIWORD(wParam)) {
-			case CBN_SELCHANGE:
-				DestroyTooltip(hPassesToolTip);
-				switch(ComboBox_GetCurSel(hNBPasses)) {
-				case 0:
-					hPassesToolTip = CreateTooltip(hNBPasses, "Pattern: 0x55", -1);
-					break;
-				case 1:
-					hPassesToolTip = CreateTooltip(hNBPasses, "Pattern: 0x55, 0xAA", -1);
-					break;
-				case 2:
-					hPassesToolTip = CreateTooltip(hNBPasses, "Pattern: 0x55, 0xAA, 0xFF", -1);
-					break;
-				case 3:
-					hPassesToolTip = CreateTooltip(hNBPasses, "Pattern: 0x55, 0xAA, 0xFF, 0x00", -1);
-					break;
-				}
+			if (HIWORD(wParam) != CBN_SELCHANGE)
+				break;
+			DestroyTooltip(hPassesToolTip);
+			switch(ComboBox_GetCurSel(hNBPasses)) {
+			case 0:
+				hPassesToolTip = CreateTooltip(hNBPasses, "Pattern: 0x55", -1);
+				break;
+			case 1:
+				hPassesToolTip = CreateTooltip(hNBPasses, "Pattern: 0x55, 0xAA", -1);
+				break;
+			case 2:
+				hPassesToolTip = CreateTooltip(hNBPasses, "Pattern: 0x55, 0xAA, 0xFF", -1);
+				break;
+			case 3:
+				hPassesToolTip = CreateTooltip(hNBPasses, "Pattern: 0x55, 0xAA, 0xFF, 0x00", -1);
+				break;
 			}
 			break;
 		case IDC_FILESYSTEM:
@@ -1293,15 +1313,18 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				IGNORE_RETVAL(ComboBox_SetItemData(hDOSType, ComboBox_AddStringU(hDOSType, "MS-DOS"), DT_WINME));
 				if (bWithFreeDOS)
 					IGNORE_RETVAL(ComboBox_SetItemData(hDOSType, ComboBox_AddStringU(hDOSType, "FreeDOS"), DT_FREEDOS));
-				IGNORE_RETVAL(ComboBox_SetItemData(hDOSType, ComboBox_AddStringU(hDOSType, "ISO Image"), DT_ISO_FAT));
 			}
-			if (fs == FS_NTFS) {
-				IGNORE_RETVAL(ComboBox_SetItemData(hDOSType, ComboBox_AddStringU(hDOSType, "ISO Image"), DT_ISO_NTFS));
+			IGNORE_RETVAL(ComboBox_SetItemData(hDOSType, ComboBox_AddStringU(hDOSType, "ISO Image"), DT_ISO));
+			if ((selection_default == DT_ISO) && (iso_path == NULL))
+				selection_default = (bWithFreeDOS)?DT_FREEDOS:DT_WINME;
+			for (i=0; i<ComboBox_GetCount(hDOSType); i++) {
+				if (ComboBox_GetItemData(hDOSType, i) == selection_default) {
+					IGNORE_RETVAL(ComboBox_SetCurSel(hDOSType, i));
+					break;
+				}
 			}
-			if (iso_path != NULL)
-				IGNORE_RETVAL(ComboBox_SetCurSel(hDOSType, ComboBox_GetCount(hDOSType) - 1));
-			else
-				IGNORE_RETVAL(ComboBox_SetCurSel(hDOSType, (bWithFreeDOS && (fs != FS_NTFS))?1:0));
+			if (i == ComboBox_GetCount(hDOSType))
+				IGNORE_RETVAL(ComboBox_SetCurSel(hDOSType, 0));
 			if (!IsWindowEnabled(hDOS)) {
 				EnableWindow(hDOS, TRUE);
 				EnableWindow(hDOSType, TRUE);
@@ -1312,8 +1335,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		case IDC_DOSTYPE:
 			if (HIWORD(wParam) != CBN_SELCHANGE)
 				break;
-			dt = (int)ComboBox_GetItemData(hDOSType, ComboBox_GetCurSel(hDOSType));
-			if ((dt == DT_ISO_NTFS) || (dt == DT_ISO_FAT)) {
+			if (ComboBox_GetItemData(hDOSType, ComboBox_GetCurSel(hDOSType)) == DT_ISO) {
 				if ((iso_path == NULL) || (iso_report.label[0] == 0)) {
 					// Set focus to the Select ISO button
 					SendMessage(hMainDialog, WM_NEXTDLGCTL, (WPARAM)FALSE, 0);
@@ -1336,6 +1358,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				hISOToolTip = CreateTooltip(hSelectISO, "Click to select...", -1);
 				break;
 			}
+			selection_default = DT_ISO;
 			hISOToolTip = CreateTooltip(hSelectISO, iso_path, -1);
 			FormatStatus = 0;
 			// You'd think that Windows would let you instantiate a modeless dialog wherever
@@ -1356,11 +1379,11 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				return (INT_PTR)TRUE;
 			}
 			FormatStatus = 0;
+			selection_default =  (int)ComboBox_GetItemData(hDOSType, ComboBox_GetCurSel(hDOSType));
 			nDeviceIndex = ComboBox_GetCurSel(hDeviceList);
 			if (nDeviceIndex != CB_ERR) {
 				if (IsChecked(IDC_DOS)) {
-					dt = (int)ComboBox_GetItemData(hDOSType, ComboBox_GetCurSel(hDOSType));
-					if ((dt == DT_ISO_NTFS) || (dt == DT_ISO_FAT)) {
+					if (ComboBox_GetItemData(hDOSType, ComboBox_GetCurSel(hDOSType)) == DT_ISO) {
 						if (iso_path == NULL) {
 							MessageBoxA(hMainDialog, "Please click on the disc button to select a bootable ISO,\n"
 								"or uncheck the \"Create a bootable disk...\" checkbox.",
@@ -1372,13 +1395,14 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 								"for the selected target.", "ISO image too big...", MB_OK|MB_ICONERROR);
 							break;
 						}
-						if ((dt == DT_ISO_NTFS) && (!iso_report.has_bootmgr)) {
+						fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
+						if ((fs == FS_NTFS) && (!iso_report.has_bootmgr)) {
 							MessageBoxA(hMainDialog, "Only 'bootmgr' based ISO "
-								"images can be used with NTFS.", "Unsupported ISO...", MB_OK|MB_ICONERROR);
+								"images can currently be used with NTFS.", "Unsupported ISO...", MB_OK|MB_ICONERROR);
 							break;
-						} else if ((dt == DT_ISO_FAT) && (!iso_report.has_isolinux)) {
+						} else if (((fs == FS_FAT16)||(fs == FS_FAT32)) && (!iso_report.has_isolinux)) {
 							MessageBoxA(hMainDialog, "Only 'isolinux' based ISO "
-								"images can be used with FAT.", "Unsupported ISO...", MB_OK|MB_ICONERROR);
+								"images can currently be used with FAT.", "Unsupported ISO...", MB_OK|MB_ICONERROR);
 							break;
 						}
 					}
