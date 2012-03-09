@@ -294,9 +294,9 @@ static BOOL GetDriveInfo(void)
 		return FALSE;
 
 	r = DeviceIoControl(hDrive, IOCTL_DISK_GET_DRIVE_GEOMETRY_EX, 
-			NULL, 0, geometry, sizeof(geometry), &size, NULL );
+			NULL, 0, geometry, sizeof(geometry), &size, NULL);
 	if (!r || size <= 0) {
-		uprintf("IOCTL_DISK_GET_DRIVE_GEOMETRY_EX failed: %s\n", WindowsErrorString());
+		uprintf("IOCTL_DISK_GET_DRIVE_GEOMETRY_EX failed for drive %c: %s\n", DrivePath[0], WindowsErrorString());
 		safe_closehandle(hDrive);
 		return FALSE;
 	}
@@ -309,7 +309,7 @@ static BOOL GetDriveInfo(void)
 	r = DeviceIoControl(hDrive, IOCTL_DISK_GET_DRIVE_LAYOUT_EX, 
 			NULL, 0, layout, sizeof(layout), &size, NULL );
 	if (!r || size <= 0) {
-		uprintf("IOCTL_DISK_GET_DRIVE_LAYOUT_EX failed: %s\n", WindowsErrorString());
+		uprintf("IOCTL_DISK_GET_DRIVE_LAYOUT_EX failed for drive %c: %s\n", DrivePath[0], WindowsErrorString());
 	} else {
 		DestroyTooltip(hFSTooltip);
 		hFSTooltip = NULL;
@@ -561,6 +561,7 @@ static BOOL GetUSBDevices(DWORD devnum)
 	char drive_letter;
 	char *label, entry[MAX_PATH], buffer[MAX_PATH];
 	const char* usbstor_name = "USBSTOR";
+	const char* generic_friendly_name = "USB Storage Device (Generic)";
 	GUID _GUID_DEVINTERFACE_DISK =			// only known to some...
 		{ 0x53f56307L, 0xb6bf, 0x11d0, {0x94, 0xf2, 0x00, 0xa0, 0xc9, 0x1e, 0xfb, 0x8b} };
 
@@ -571,7 +572,7 @@ static BOOL GetUSBDevices(DWORD devnum)
 
 	dev_info = SetupDiGetClassDevsA(&_GUID_DEVINTERFACE_DISK, NULL, NULL, DIGCF_PRESENT|DIGCF_DEVICEINTERFACE);
 	if (dev_info == INVALID_HANDLE_VALUE) {
-		uprintf("SetupDiGetClassDevs (Interface) failed: %d\n", WindowsErrorString());
+		uprintf("SetupDiGetClassDevs (Interface) failed: %s\n", WindowsErrorString());
 		return FALSE;
 	}
 
@@ -580,7 +581,7 @@ static BOOL GetUSBDevices(DWORD devnum)
 		memset(buffer, 0, sizeof(buffer));
 		if (!SetupDiGetDeviceRegistryPropertyA(dev_info, &dev_info_data, SPDRP_ENUMERATOR_NAME,
 				&datatype, (LPBYTE)buffer, sizeof(buffer), &size)) {
-			uprintf("SetupDiGetDeviceRegistryProperty (Enumerator Name) failed: %d\n", WindowsErrorString());
+			uprintf("SetupDiGetDeviceRegistryProperty (Enumerator Name) failed: %s\n", WindowsErrorString());
 			continue;
 		}
 
@@ -589,8 +590,9 @@ static BOOL GetUSBDevices(DWORD devnum)
 		memset(buffer, 0, sizeof(buffer));
 		if (!SetupDiGetDeviceRegistryPropertyA(dev_info, &dev_info_data, SPDRP_FRIENDLYNAME,
 				&datatype, (LPBYTE)buffer, sizeof(buffer), &size)) {
-			uprintf("SetupDiGetDeviceRegistryProperty (Friendly Name) failed: %d\n", WindowsErrorString());
-			continue;
+			uprintf("SetupDiGetDeviceRegistryProperty (Friendly Name) failed: %s\n", WindowsErrorString());
+			// We can afford a failure on this call - just replace the name
+			safe_strcpy(buffer, sizeof(buffer), generic_friendly_name);
 		}
 		uprintf("Found drive '%s'\n", buffer);
 
@@ -1508,11 +1510,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	// Initialize COM for folder selection
 	CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
 
-#ifdef DISABLE_AUTORUN
 	// We use local group policies rather than direct registry manipulation
 	// 0x9e disables removable and fixed drive notifications
 	SetLGP(FALSE, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer", "NoDriveTypeAutorun", 0x9e);
-#endif
 
 	// Find out if the FreeDOS resources are embedded in the app
 	bWithFreeDOS = (FindResource(hMainInstance, MAKEINTRESOURCE(IDR_FD_COMMAND_COM), RT_RCDATA) != NULL) &&
@@ -1544,14 +1544,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 				GetUSBDevices(0);
 				continue;
 			}
-#ifdef DISABLE_AUTORUN
 			// Alt-D => Delete the NoDriveTypeAutorun key on exit (useful if the app crashed)
 			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'D')) {
 				PrintStatus(0, FALSE, "NoDriveTypeAutorun will be deleted on exit.");
 				existing_key = FALSE;
 				continue;
 			}
-#endif
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
@@ -1560,9 +1558,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 out:
 	DestroyAllTooltips();
 	safe_free(iso_path);
-#ifdef DISABLE_AUTORUN
 	SetLGP(TRUE, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer", "NoDriveTypeAutorun", 0);
-#endif
 	CloseHandle(mutex);
 	uprintf("*** RUFUS EXIT ***\n");
 

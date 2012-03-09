@@ -23,7 +23,6 @@
 
 /* Program options */
 #define RUFUS_DEBUG                 // print debug info to Debug facility
-#define DISABLE_AUTORUN             // disable new USB drive notification from explorer when application is running
 /* Features not ready for prime time and that may *DESTROY* your data - USE AT YOUR OWN RISKS! */
 //#define RUFUS_TEST
 

@@ -137,6 +137,62 @@ static BOOLEAN __stdcall FormatExCallback(FILE_SYSTEM_CALLBACK_COMMAND Command, 
 }
 
 /*
+ * Chkdsk callback. Return FALSE to halt operations
+ */
+static BOOLEAN __stdcall ChkdskCallback(FILE_SYSTEM_CALLBACK_COMMAND Command, DWORD Action, PVOID pData)
+{
+	DWORD* percent;
+	if (IS_ERROR(FormatStatus))
+		return FALSE;
+
+	switch(Command) {
+	case FCC_PROGRESS:
+	case FCC_CHECKDISK_PROGRESS:
+		percent = (DWORD*)pData;
+		PrintStatus(0, FALSE, "NTFS Fixup: %d%% completed.", *percent);
+		break;
+	case FCC_DONE:
+		if(*(BOOLEAN*)pData == FALSE) {
+			uprintf("Error while checking disk.\n");
+			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_GEN_FAILURE;
+		}
+		break;
+	case FCC_UNKNOWN1A:
+	case FCC_DONE_WITH_STRUCTURE:
+		// Silence these specific calls
+		break;
+	case FCC_INCOMPATIBLE_FILE_SYSTEM:
+		uprintf("Incompatible File System\n");
+		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_INCOMPATIBLE_FS);
+		break;
+	case FCC_ACCESS_DENIED:
+		uprintf("Access denied\n");
+		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_ACCESS_DENIED;
+		break;
+	case FCC_MEDIA_WRITE_PROTECTED:
+		uprintf("Media is write protected\n");
+		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_WRITE_PROTECT;
+		break;
+	case FCC_VOLUME_IN_USE:
+		uprintf("Volume is in use\n");
+		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_DEVICE_IN_USE;
+		break;
+	case FCC_OUTPUT:
+		uprintf("%s\n", ((PTEXTOUTPUT)pData)->Output);
+		break;
+	case FCC_NO_MEDIA_IN_DRIVE:
+		uprintf("No media in drive\n");
+		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_NO_MEDIA_IN_DRIVE;
+		break;
+	default:
+		uprintf("ChkdskExCallback: received unhandled command %X\n", Command);
+		// Assume the command isn't an error
+		break;
+	}
+	return (!IS_ERROR(FormatStatus));
+}
+
+/*
  * Converts an UTF-16 label to a valid FAT/NTFS one
  */
 static void ToValidLabel(WCHAR* name, BOOL bFAT)
@@ -230,6 +286,41 @@ static BOOL FormatDrive(char DriveLetter)
 		FormatExCallback);
 	if (!IS_ERROR(FormatStatus)) {
 		uprintf("Format completed.\n");
+		r = TRUE;
+	}
+
+out:
+	return r;
+}
+
+/*
+ * Call on fmifs.dll's Chkdsk() to fixup the filesystem
+ */
+static BOOL CheckDisk(char DriveLetter)
+{
+	BOOL r = FALSE;
+	PF_DECL(Chkdsk);
+	WCHAR wDriveRoot[] = L"?:\\";
+	WCHAR wFSType[32];
+	size_t i;
+
+	wDriveRoot[0] = (WCHAR)DriveLetter;
+	PrintStatus(0, TRUE, "NTFS Fixup (Checkdisk)...");
+
+	PF_INIT_OR_OUT(Chkdsk, fmifs);
+
+	GetWindowTextW(hFileSystem, wFSType, ARRAYSIZE(wFSType));
+	// We may have a " (Default)" trail
+	for (i=0; i<wcslen(wFSType); i++) {
+		if (wFSType[i] == ' ') {
+			wFSType[i] = 0;
+			break;
+		}
+	}
+
+	pfChkdsk(wDriveRoot, wFSType, FALSE, FALSE, FALSE, FALSE, NULL, NULL, ChkdskCallback);
+	if (!IS_ERROR(FormatStatus)) {
+		uprintf("NTFS Fixup completed.\n");
 		r = TRUE;
 	}
 
@@ -668,6 +759,9 @@ DWORD WINAPI FormatThread(LPVOID param)
 		UpdateProgress(OP_DOS, -1.0f);
 		// Issue another complete remount before we exit, to ensure we're clean
 		RemountVolume(drive_name[0]);
+		// NTFS fixup (WinPE/AIK images don't seem to boot without an extra checkdisk)
+		if ((dt == DT_ISO) && (fs = FS_NTFS))
+			CheckDisk(drive_name[0]);
 	}
 
 out:

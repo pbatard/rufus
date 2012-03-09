@@ -70,6 +70,18 @@ typedef enum {
 	FCC_VOLUME_TOO_SMALL,
 	FCC_VOLUME_TOO_BIG,
 	FCC_NO_MEDIA_IN_DRIVE,
+	FCC_UNKNOWN15,
+	FCC_UNKNOWN16,
+	FCC_UNKNOWN17,
+	FCC_UNKNOWN18,
+	FCC_CHECKDISK_PROGRESS,
+	FCC_UNKNOWN1A,
+	FCC_UNKNOWN1B,
+	FCC_UNKNOWN1C,
+	FCC_UNKNOWN1D,
+	FCC_UNKNOWN1E,
+	FCC_UNKNOWN1F,
+	FCC_UNKNOWN20,
 } FILE_SYSTEM_CALLBACK_COMMAND;
 
 typedef struct {
@@ -94,6 +106,18 @@ typedef VOID (WINAPI *FormatEx_t)(
 	ULONG                DesiredUnitAllocationSize,
 	FILE_SYSTEM_CALLBACK Callback
 );
+
+/* Mostly from http://doxygen.reactos.org/df/d85/fmifs_8h_source.html */
+typedef LONG (WINAPI *Chkdsk_t)(
+	WCHAR*               DriveRoot,
+	WCHAR*               FileSystemTypeName,
+	BOOL                 CorrectErrors,
+	BOOL                 Verbose,
+	BOOL                 CheckOnlyIfDirty,
+	BOOL                 ScanDrive,
+	VOID*                Unused2,
+	VOID*                Unused3,
+	FILE_SYSTEM_CALLBACK Callback);
 
 /* http://msdn.microsoft.com/en-us/library/windows/desktop/aa383357.aspx */
 typedef enum  {

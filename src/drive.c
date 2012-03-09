@@ -150,8 +150,9 @@ out:
  */
 BOOL GetDriveLabel(DWORD DriveIndex, char* letter, char** label)
 {
-	HANDLE hDrive;
-	char AutorunPath[] = "#:\\autorun.inf", *AutorunLabel;
+	HANDLE hDrive, hPhysical;
+	DWORD size;
+	char AutorunPath[] = "#:\\autorun.inf", *AutorunLabel = NULL;
 	wchar_t wDrivePath[] = L"#:\\";
 	wchar_t wVolumeLabel[MAX_PATH+1];
 	static char VolumeLabel[MAX_PATH+1];
@@ -166,9 +167,17 @@ BOOL GetDriveLabel(DWORD DriveIndex, char* letter, char** label)
 	wDrivePath[0] = *letter;
 
 	// Try to read an extended label from autorun first. Fallback to regular label if not found.
-	AutorunLabel = get_token_data(AutorunPath, "label");
+	// In the case of card readers with no card, users can get an annoying popup asking them
+	// to insert media. Use IOCTL_STORAGE_CHECK_VERIFY to prevent this
+	hPhysical = GetDriveHandle(DriveIndex, NULL, FALSE, FALSE);
+	if (DeviceIoControl(hPhysical, IOCTL_STORAGE_CHECK_VERIFY, NULL, 0, NULL, 0, &size, NULL))
+		AutorunLabel = get_token_data(AutorunPath, "label");
+	else if (GetLastError() == ERROR_NOT_READY)
+		uprintf("Ignoring autorun.inf label for drive %c: %s\n", *letter,
+		(HRESULT_CODE(GetLastError()) == ERROR_NOT_READY)?"No media":WindowsErrorString());
+	safe_closehandle(hPhysical);
 	if (AutorunLabel != NULL) {
-		uprintf("Using autorun.inf label for device %c:\n", *letter);
+		uprintf("Using autorun.inf label for drive %c: '%s'\n", *letter, AutorunLabel);
 		strncpy(VolumeLabel, AutorunLabel, sizeof(VolumeLabel));
 		safe_free(AutorunLabel);
 		*label = VolumeLabel;
