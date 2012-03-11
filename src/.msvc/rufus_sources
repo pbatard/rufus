@@ -15,7 +15,6 @@ TARGETLIBS=$(SDK_LIB_PATH)\kernel32.lib \
            $(SDK_LIB_PATH)\user32.lib \
            $(SDK_LIB_PATH)\setupapi.lib \
            $(SDK_LIB_PATH)\ole32.lib \
-           $(SDK_LIB_PATH)\version.lib \
            $(SDK_LIB_PATH)\uuid.lib \
            $(SDK_LIB_PATH)\shell32.lib \
            .\ms-sys\ms-sys.lib \
@@ -34,6 +33,7 @@ SOURCES=rufus.c          \
         stdlg.c          \
         icon.c           \
         parser.c         \
+        net.c            \
         iso.c            \
         dos.c            \
         dos_locale.c     \

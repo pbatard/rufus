@@ -108,7 +108,7 @@ static char err_string[256];
 
 	safe_sprintf(err_string, sizeof(err_string), "[0x%08X] ", error_code);
 
-	size = FormatMessageU(FORMAT_MESSAGE_FROM_SYSTEM, NULL, error_code,
+	size = FormatMessageU(FORMAT_MESSAGE_FROM_SYSTEM|FORMAT_MESSAGE_IGNORE_INSERTS, NULL, error_code,
 		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), &err_string[strlen(err_string)],
 		sizeof(err_string)-(DWORD)strlen(err_string), NULL);
 	if (size == 0) {

@@ -21,31 +21,6 @@
 
 #pragma once
 
-/*
- * typedefs for the function prototypes. Use the something like:
- *   PF_DECL(FormatEx);
- * which translates to:
- *   FormatEx_t pfFormatEx = NULL;
- * in your code, to declare the entrypoint and then use:
- *   PF_INIT(FormatEx, fmifs);
- * which translates to:
- *   pfFormatEx = (FormatEx_t) GetProcAddress(GetDLLHandle("fmifs"), "FormatEx");
- * to make it accessible.
- */
-static __inline HMODULE GetDLLHandle(char* szDLLName)
-{
-	HMODULE h = NULL;
-	if ((h = GetModuleHandleA(szDLLName)) == NULL)
-		h = LoadLibraryA(szDLLName);
-	return h;
-}
-#define PF_DECL(proc) proc##_t pf##proc = NULL
-#define PF_INIT(proc, dllname) pf##proc = (proc##_t) GetProcAddress(GetDLLHandle(#dllname), #proc)
-#define PF_INIT_OR_OUT(proc, dllname) \
-	PF_INIT(proc, dllname); if (pf##proc == NULL) { \
-	uprintf("unable to access %s DLL: %s", #dllname, \
-	WindowsErrorString()); goto out; }
-
 /* Callback command types (some errorcode were filled from HPUSBFW V2.2.3 and their
    designation from msdn.microsoft.com/en-us/library/windows/desktop/aa819439.aspx */
 typedef enum {

@@ -41,15 +41,6 @@
 #include "msapi_utf8.h"
 #include "resource.h"
 
-#ifndef MIN
-#define MIN(a,b) (((a) < (b)) ? (a) : (b))
-#endif
-#ifndef PBS_MARQUEE
-#define PBS_MARQUEE 0x08
-#endif
-#ifndef PBM_SETMARQUEE
-#define PBM_SETMARQUEE (WM_USER+10)
-#endif
 // How often should we update the progress bar (in 2K blocks) as updating
 // the progress bar for every block will bring extraction to a crawl
 #define PROGRESS_THRESHOLD        1024
@@ -66,6 +57,8 @@ static const char *psz_extract_dir;
 static const char *bootmgr_name = "bootmgr";
 static const char *ldlinux_name = "ldlinux.sys";
 static const char *isolinux_name[] = { "isolinux.cfg", "syslinux.cfg", "extlinux.conf"};
+static const char *vesamenu_name = "vesamenu.c32";
+static int64_t old_vesamenu_threshold = 145000;
 static uint8_t i_joliet_level = 0;
 static uint64_t total_blocks, nb_blocks;
 static BOOL scan_only = FALSE;
@@ -108,8 +101,8 @@ static void log_handler (cdio_log_level_t level, const char *message)
  * Scan and set ISO properties
  * Returns true if the the current file does not need to be processed further
  */
-static __inline BOOL check_iso_props(BOOL is_root, BOOL* is_syslinux_cfg, int64_t i_file_length,
-	const char* psz_basename, char* psz_fullpath)
+static __inline BOOL check_iso_props(BOOL is_root, BOOL* is_syslinux_cfg, BOOL* is_old_vesamenu, 
+	int64_t i_file_length, const char* psz_basename, char* psz_fullpath)
 {
 	size_t i;
 
@@ -118,6 +111,12 @@ static __inline BOOL check_iso_props(BOOL is_root, BOOL* is_syslinux_cfg, int64_
 	for (i=0; i<ARRAYSIZE(isolinux_name); i++) {
 		if (_stricmp(psz_basename, isolinux_name[i]) == 0)
 			*is_syslinux_cfg = TRUE;
+	}
+
+	// Check for an old vesamenu.c32 file anywhere
+	*is_old_vesamenu = FALSE;
+	if ((_stricmp(psz_basename, vesamenu_name) == 0) && (i_file_length <= old_vesamenu_threshold)) {
+		*is_old_vesamenu = TRUE;
 	}
 
 	if (scan_only) {
@@ -129,6 +128,8 @@ static __inline BOOL check_iso_props(BOOL is_root, BOOL* is_syslinux_cfg, int64_
 			// Maintain a list of all the isolinux/syslinux configs identified so far
 			StrArrayAdd(&config_path, psz_fullpath);
 		}
+		if (*is_old_vesamenu)
+			iso_report.has_old_vesamenu = TRUE;
 		if (i_file_length >= FOUR_GIGABYTES)
 			iso_report.has_4GB_file = TRUE;
 		// Compute projected size needed
@@ -151,7 +152,7 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 {
 	HANDLE file_handle = NULL;
 	DWORD buf_size, wr_size;
-	BOOL r, is_syslinux_cfg;
+	BOOL r, is_syslinux_cfg, is_old_vesamenu;
 	int i_length;
 	size_t i, nul_pos;
 	char* psz_fullpath = NULL;
@@ -185,7 +186,7 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 			}
 		} else {
 			i_file_length = udf_get_file_length(p_udf_dirent);
-			if (check_iso_props((*psz_path == 0), &is_syslinux_cfg, i_file_length, psz_basename, psz_fullpath)) {
+			if (check_iso_props((*psz_path == 0), &is_syslinux_cfg, &is_old_vesamenu, i_file_length, psz_basename, psz_fullpath)) {
 				safe_free(psz_fullpath);
 				continue;
 			}
@@ -197,6 +198,13 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 			SetWindowTextU(hISOFileName, psz_fullpath);
 			// Remove the appended size for extraction
 			psz_fullpath[nul_pos] = 0;
+			if (is_old_vesamenu && use_own_vesamenu) {
+				if (CopyFileA("vesamenu.c32", psz_fullpath, FALSE)) {
+					uprintf("  Replaced with local version\n");
+					continue;
+				}
+				uprintf("  Could not replace file: %s\n", WindowsErrorString());
+			}
 			file_handle = CreateFileU(psz_fullpath, GENERIC_READ | GENERIC_WRITE,
 				FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 			if (file_handle == INVALID_HANDLE_VALUE) {
@@ -252,7 +260,7 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 {
 	HANDLE file_handle = NULL;
 	DWORD buf_size, wr_size;
-	BOOL s, is_syslinux_cfg;
+	BOOL s, is_syslinux_cfg, is_old_vesamenu;
 	int i_length, r = 1;
 	char psz_fullpath[1024], *psz_basename;
 	const char *psz_iso_name = &psz_fullpath[strlen(psz_extract_dir)];
@@ -292,7 +300,7 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 				goto out;
 		} else {
 			i_file_length = p_statbuf->size;
-			if (check_iso_props((*psz_path == 0), &is_syslinux_cfg, i_file_length, psz_basename, psz_fullpath)) {
+			if (check_iso_props((*psz_path == 0), &is_syslinux_cfg, &is_old_vesamenu, i_file_length, psz_basename, psz_fullpath)) {
 				continue;
 			}
 			// Replace slashes with backslashes and append the size to the path for UI display
@@ -304,6 +312,13 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 			// ISO9660 cannot handle backslashes
 			for (i=0; i<nul_pos; i++) if (psz_fullpath[i] == '\\') psz_fullpath[i] = '/';
 			psz_fullpath[nul_pos] = 0;
+			if (is_old_vesamenu && use_own_vesamenu) {
+				if (CopyFileA("vesamenu.c32", psz_fullpath, FALSE)) {
+					uprintf("  Replaced with local version\n");
+					continue;
+				}
+				uprintf("  Could not replace file: %s\n", WindowsErrorString());
+			}
 			file_handle = CreateFileU(psz_fullpath, GENERIC_READ | GENERIC_WRITE,
 				FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 			if (file_handle == INVALID_HANDLE_VALUE) {
@@ -367,10 +382,7 @@ BOOL ExtractISO(const char* src_iso, const char* dest_dir, bool scan)
 	progress_style = GetWindowLong(hISOProgressBar, GWL_STYLE);
 	if (scan_only) {
 		total_blocks = 0;
-		iso_report.projected_size = 0;
-		iso_report.has_4GB_file = FALSE;
-		iso_report.has_bootmgr = FALSE;
-		iso_report.has_isolinux = FALSE;
+		memset(&iso_report, 0, sizeof(iso_report));
 		// String array of all isolinux/syslinux locations
 		StrArrayCreate(&config_path, 8);
 		// Change the Window title and static text
@@ -468,7 +480,7 @@ out:
 		if (fd != NULL)
 			fclose(fd);
 	}
-	SendMessage(hISOProgressDlg, UM_ISO_EXIT, 0, 0);
+	ShowWindow(hISOProgressDlg, SW_HIDE);
 	if (p_iso != NULL)
 		iso9660_close(p_iso);
 	if (p_udf != NULL)

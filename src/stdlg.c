@@ -104,7 +104,6 @@ void DetectWindowsVersion(void)
 	}
 }
 
-
 /*
  * String array manipulation
  */

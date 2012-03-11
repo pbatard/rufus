@@ -17,6 +17,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/* Memory leaks detection - define _CRTDBG_MAP_ALLOC as preprocessor macro */
+#ifdef _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
+#endif
+
 #include <windows.h>
 #include <stdio.h>
 #include <string.h>

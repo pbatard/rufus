@@ -40,6 +40,7 @@
 #define SEPARATOR_GREY              RGB(223,223,223)
 #define RUFUS_URL                   "http://rufus.akeo.ie"
 #define BUG_URL                     "https://github.com/pbatard/rufus/issues"
+#define VESAMENU_URL                "http://cloud.github.com/downloads/pbatard/rufus/vesamenu.c32"
 #define IGNORE_RETVAL(expr)         do { (void)(expr); } while(0)
 #ifndef ARRAYSIZE
 #define ARRAYSIZE(A)                (sizeof(A)/sizeof((A)[0]))
@@ -149,6 +150,7 @@ typedef struct {
 	BOOL has_bootmgr;
 	BOOL has_isolinux;
 	BOOL has_autorun;
+	BOOL has_old_vesamenu;
 } RUFUS_ISO_REPORT;
 
 /*
@@ -164,9 +166,10 @@ extern char* iso_path;
 extern DWORD FormatStatus;
 extern RUFUS_DRIVE_INFO SelectedDrive;
 extern const int nb_steps[FS_MAX];
-extern BOOL bWithFreeDOS;
+extern BOOL bWithFreeDOS, use_own_vesamenu;
 extern RUFUS_ISO_REPORT iso_report;
 extern int64_t iso_blocking_status;
+extern int rufus_version[4];
 
 /*
  * Shared prototypes
@@ -194,7 +197,8 @@ extern BOOL UnmountDrive(HANDLE hDrive);
 extern BOOL CreateProgress(void);
 extern BOOL SetAutorun(const char* path);
 extern char* FileDialog(BOOL save, char* path, char* filename, char* ext, char* ext_desc);
-extern LONG GetEntryWidth(HWND hDropDown, const char *entry);
+extern LONG GetEntryWidth(HWND hDropDown, const char* entry);
+extern BOOL DownloadFile(const char* url, const char* file);
 
 __inline static BOOL UnlockDrive(HANDLE hDrive)
 {
@@ -213,7 +217,30 @@ extern void StrArrayAdd(StrArray* arr, const char* str);
 extern void StrArrayClear(StrArray* arr);
 extern void StrArrayDestroy(StrArray* arr);
 
-
+/*
+ * typedefs for the function prototypes. Use the something like:
+ *   PF_DECL(FormatEx);
+ * which translates to:
+ *   FormatEx_t pfFormatEx = NULL;
+ * in your code, to declare the entrypoint and then use:
+ *   PF_INIT(FormatEx, fmifs);
+ * which translates to:
+ *   pfFormatEx = (FormatEx_t) GetProcAddress(GetDLLHandle("fmifs"), "FormatEx");
+ * to make it accessible.
+ */
+static __inline HMODULE GetDLLHandle(char* szDLLName)
+{
+	HMODULE h = NULL;
+	if ((h = GetModuleHandleA(szDLLName)) == NULL)
+		h = LoadLibraryA(szDLLName);
+	return h;
+}
+#define PF_DECL(proc) proc##_t pf##proc = NULL
+#define PF_INIT(proc, dllname) pf##proc = (proc##_t) GetProcAddress(GetDLLHandle(#dllname), #proc)
+#define PF_INIT_OR_OUT(proc, dllname) \
+	PF_INIT(proc, dllname); if (pf##proc == NULL) { \
+	uprintf("unable to access %s DLL: %s", #dllname, \
+	WindowsErrorString()); goto out; }
 
 /* Clang/MinGW32 has an issue with intptr_t */
 #ifndef _UINTPTR_T_DEFINED
@@ -232,7 +259,6 @@ typedef struct {
 	ULONG PartitionNumber;
 } STORAGE_DEVICE_NUMBER_REDEF;
 
-
 /* Custom application errors */
 #define FAC(f)                         (f<<16)
 #define APPERR(err)                    (APPLICATION_ERROR_MASK|err)
@@ -245,3 +271,14 @@ typedef struct {
 #define ERROR_ISO_SCAN                 0x1207
 #define ERROR_ISO_EXTRACT              0x1208
 #define ERROR_CANT_REMOUNT_VOLUME      0x1209
+
+/* More niceties */
+#ifndef MIN
+#define MIN(a,b) (((a) < (b)) ? (a) : (b))
+#endif
+#ifndef PBS_MARQUEE
+#define PBS_MARQUEE 0x08
+#endif
+#ifndef PBM_SETMARQUEE
+#define PBM_SETMARQUEE (WM_USER+10)
+#endif

@@ -44,11 +44,11 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 PROGRAMS = $(noinst_PROGRAMS)
 am_rufus_OBJECTS = rufus-drive.$(OBJEXT) rufus-icon.$(OBJEXT) \
-	rufus-parser.$(OBJEXT) rufus-iso.$(OBJEXT) rufus-dos.$(OBJEXT) \
-	rufus-dos_locale.$(OBJEXT) rufus-badblocks.$(OBJEXT) \
-	rufus-syslinux.$(OBJEXT) rufus-format.$(OBJEXT) \
-	rufus-stdio.$(OBJEXT) rufus-stdlg.$(OBJEXT) \
-	rufus-rufus.$(OBJEXT)
+	rufus-parser.$(OBJEXT) rufus-iso.$(OBJEXT) rufus-net.$(OBJEXT) \
+	rufus-dos.$(OBJEXT) rufus-dos_locale.$(OBJEXT) \
+	rufus-badblocks.$(OBJEXT) rufus-syslinux.$(OBJEXT) \
+	rufus-format.$(OBJEXT) rufus-stdio.$(OBJEXT) \
+	rufus-stdlg.$(OBJEXT) rufus-rufus.$(OBJEXT)
 rufus_OBJECTS = $(am_rufus_OBJECTS)
 rufus_DEPENDENCIES = rufus_rc.o ms-sys/libmssys.a \
 	syslinux/libfat/libfat.a syslinux/libinstaller/libinstaller.a \
@@ -185,7 +185,7 @@ SUBDIRS = ms-sys syslinux/libfat syslinux/libinstaller libcdio/iso9660 libcdio/u
 pkg_v_rc = $(pkg_v_rc_$(V))
 pkg_v_rc_ = $(pkg_v_rc_$(AM_DEFAULT_VERBOSITY))
 pkg_v_rc_0 = @echo "  RC     $@";
-rufus_SOURCES = drive.c icon.c parser.c iso.c dos.c dos_locale.c badblocks.c syslinux.c format.c stdio.c stdlg.c rufus.c
+rufus_SOURCES = drive.c icon.c parser.c iso.c net.c dos.c dos_locale.c badblocks.c syslinux.c format.c stdio.c stdlg.c rufus.c
 rufus_CFLAGS = -I./ms-sys/inc -I./syslinux/libfat -I./syslinux/libinstaller -I./libcdio $(AM_CFLAGS)
 rufus_LDFLAGS = $(AM_LDFLAGS) -mwindows
 rufus_LDADD = rufus_rc.o ms-sys/libmssys.a syslinux/libfat/libfat.a syslinux/libinstaller/libinstaller.a \
@@ -277,6 +277,14 @@ rufus-iso.o: iso.c
 rufus-iso.obj: iso.c
 	$(AM_V_CC) @AM_BACKSLASH@
 	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_CFLAGS) $(CFLAGS) -c -o rufus-iso.obj `if test -f 'iso.c'; then $(CYGPATH_W) 'iso.c'; else $(CYGPATH_W) '$(srcdir)/iso.c'; fi`
+
+rufus-net.o: net.c
+	$(AM_V_CC) @AM_BACKSLASH@
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_CFLAGS) $(CFLAGS) -c -o rufus-net.o `test -f 'net.c' || echo '$(srcdir)/'`net.c
+
+rufus-net.obj: net.c
+	$(AM_V_CC) @AM_BACKSLASH@
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_CFLAGS) $(CFLAGS) -c -o rufus-net.obj `if test -f 'net.c'; then $(CYGPATH_W) 'net.c'; else $(CYGPATH_W) '$(srcdir)/net.c'; fi`
 
 rufus-dos.o: dos.c
 	$(AM_V_CC) @AM_BACKSLASH@

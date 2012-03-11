@@ -60,7 +60,8 @@ float fScale = 1.0f;
 int default_fs;
 HWND hDeviceList, hCapacity, hFileSystem, hClusterSize, hLabel, hDOSType, hNBPasses;
 HWND hISOProgressDlg = NULL, hISOProgressBar, hISOFileName;
-BOOL bWithFreeDOS;
+BOOL bWithFreeDOS, use_own_vesamenu = FALSE;
+int rufus_version[4];
 extern char szStatusMessage[256];
 
 static HANDLE format_thid = NULL;
@@ -1008,7 +1009,8 @@ BOOL CALLBACK ISOProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 			PrintStatus(0, FALSE, "Cancelling - Please wait...");
 			uprintf("Cancelling (from ISO proc.)\n");
 			EnableWindow(GetDlgItem(hISOProgressDlg, IDC_ISO_ABORT), FALSE);
-			EnableWindow(GetDlgItem(hMainDialog, IDCANCEL), FALSE);
+			if (format_thid != NULL)
+				EnableWindow(GetDlgItem(hMainDialog, IDCANCEL), FALSE);
 			//  Start a timer to detect blocking operations during ISO file extraction
 			if (iso_blocking_status >= 0) {
 				last_iso_blocking_status = iso_blocking_status;
@@ -1020,30 +1022,58 @@ BOOL CALLBACK ISOProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 		return TRUE;
 	}
 	return FALSE; 
-} 
+}
 
 // The scanning process can be blocking for message processing => use a thread
 DWORD WINAPI ISOScanThread(LPVOID param)
 {
 	int i;
+	FILE* fd;
+	const char* vesamenu_filename = "vesamenu.c32";
 
 	if (iso_path == NULL)
 		goto out;
 	PrintStatus(0, TRUE, "Scanning ISO image...\n");
 	if (!ExtractISO(iso_path, "", TRUE)) {
+		SendMessage(hISOProgressDlg, UM_ISO_EXIT, 0, 0);
 		PrintStatus(0, TRUE, "Failed to scan ISO image.");
 		safe_free(iso_path);
 		goto out;
 	}
-	uprintf("ISO label: '%s'\n size: %lld bytes, 4GB:%c, bootmgr:%c, isolinux:%c\n",
-		iso_report.label, iso_report.projected_size,
-		iso_report.has_4GB_file?'Y':'N', iso_report.has_bootmgr?'Y':'N', iso_report.has_isolinux?'Y':'N');
+	uprintf("ISO label: '%s'\n size: %lld bytes, 4GB:%c, bootmgr:%c, isolinux:%c, old vesa:%c\n",
+		iso_report.label, iso_report.projected_size, iso_report.has_4GB_file?'Y':'N',
+		iso_report.has_bootmgr?'Y':'N', iso_report.has_isolinux?'Y':'N', iso_report.has_old_vesamenu?'Y':'N');
 	if ((!iso_report.has_bootmgr) && (!iso_report.has_isolinux)) {
 		MessageBoxU(hMainDialog, "This version of Rufus only supports bootable ISOs\n"
 			"based on 'bootmgr' or 'isolinux'.\n"
 			"This ISO image doesn't appear to use either...", "Unsupported ISO", MB_OK|MB_ICONINFORMATION);
 		safe_free(iso_path);
 	} else {
+		if (iso_report.has_old_vesamenu) {
+			fd = fopen(vesamenu_filename, "rb");
+			if (fd != NULL) {
+				// If a file already exists in the current directory, use that one
+				uprintf("Will replace obsolete '%s' from ISO with the one found in current directory\n", vesamenu_filename);
+				fclose(fd);
+				use_own_vesamenu = TRUE;
+			} else {
+				PrintStatus(0, FALSE, "Obsolete vesamenu.c32 detected");
+				if (MessageBoxA(hMainDialog,
+					"This ISO image seems to use an obsolete version of vesamenu.c32\n"
+					"that may prevent boot menus from displaying properly...\n\n"
+					"Rufus can fix this issue by downloading a newer version for you:\n"
+					"- Select 'Yes' to connect to the internet and replace the file.\n"
+					"- Select 'No' to leave the existing ISO file unmodified.\n"
+					"If you don't know what to do, you should select 'Yes'.\n\n"
+					"Note: the file will be downloaded in the current directory. Once a\n"
+					"vesamenu.c32 exists there, it will always be used as replacement.\n", "Replace vesamenu.c32?",
+					MB_YESNO|MB_ICONWARNING) == IDYES) {
+					if (DownloadFile(VESAMENU_URL, vesamenu_filename))
+						use_own_vesamenu = TRUE;
+				}
+			}
+		}
+
 		// Enable DOS, set DOS Type to ISO (last item) and set FS accordingly
 		CheckDlgButton(hMainDialog, IDC_DOS, BST_CHECKED);
 		SetFSFromISO();
@@ -1061,16 +1091,8 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 	}
 
 out:
+	SendMessage(hISOProgressDlg, UM_ISO_EXIT, 0, 0);
 	ExitThread(0);
-}
-
-// Helper function to obtain a handle to a DLL
-static __inline HMODULE GetDLLHandle(char* szDLLName)
-{
-	HMODULE h = NULL;
-	if ((h = GetModuleHandleA(szDLLName)) == NULL)
-		h = LoadLibraryA(szDLLName);
-	return h;
 }
 
 void InitDialog(HWND hDlg)
@@ -1097,9 +1119,9 @@ void InitDialog(HWND hDlg)
 	} bi = {0};	// BUTTON_IMAGELIST
 	HINSTANCE hDllInst;
 	HDC hDC;
-	int i16;
+	int i, i16;
 	HICON hSmallIcon, hBigIcon;
-	char tmp[128];
+	char tmp[128], *token;
 
 #ifdef RUFUS_TEST
 	ShowWindow(GetDlgItem(hDlg, IDC_TEST), SW_SHOW);
@@ -1129,6 +1151,13 @@ void InitDialog(HWND hDlg)
 	SendMessage (hDlg, WM_SETICON, ICON_SMALL, (LPARAM)hSmallIcon);
 	hBigIcon = (HICON)LoadImage(hMainInstance, MAKEINTRESOURCE(IDI_ICON), IMAGE_ICON, 32, 32, 0);
 	SendMessage (hDlg, WM_SETICON, ICON_BIG, (LPARAM)hBigIcon);
+	GetWindowTextA(hDlg, tmp, sizeof(tmp));
+	// Count of Microsoft for making it more attractive to read a
+	// version using strtok() than using GetFileVersionInfo()
+	token = strtok(tmp, "v");
+	for (i=0; (i<4) && ((token = strtok(NULL, ".")) != NULL); i++)
+		rufus_version[i] = atoi(token);
+
 	// Update the title if we have FreeDOS support
 	if (bWithFreeDOS) {
 		GetWindowTextA(hDlg, &tmp[15], sizeof(tmp)-15);

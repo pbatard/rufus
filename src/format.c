@@ -760,11 +760,12 @@ DWORD WINAPI FormatThread(LPVOID param)
 		// Issue another complete remount before we exit, to ensure we're clean
 		RemountVolume(drive_name[0]);
 		// NTFS fixup (WinPE/AIK images don't seem to boot without an extra checkdisk)
-		if ((dt == DT_ISO) && (fs = FS_NTFS))
+		if ((dt == DT_ISO) && (fs == FS_NTFS))
 			CheckDisk(drive_name[0]);
 	}
 
 out:
+	SendMessage(hISOProgressDlg, UM_ISO_EXIT, 0, 0);
 	safe_unlockclose(hLogicalVolume);
 	safe_unlockclose(hPhysicalDrive);
 	PostMessage(hMainDialog, UM_FORMAT_COMPLETED, 0, 0);
