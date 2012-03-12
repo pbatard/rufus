@@ -196,7 +196,6 @@ BOOL DownloadFile(const char* url, const char* file)
 	SendMessage(hISOProgressBar, PBM_SETPOS, 0, 0);
 	ShowWindow(hISOProgressDlg, SW_SHOW);
 	UpdateWindow(hISOProgressDlg);
-//	Sleep(3000);
 
 	PrintStatus(0, FALSE, "Downloading %s: Connecting...\n", file);
 	uprintf("Downloading %s from %s\n", file, url);
@@ -258,8 +257,6 @@ BOOL DownloadFile(const char* url, const char* file)
 	while(1) {
 		if (IS_ERROR(FormatStatus))
 			goto out;
-
-		Sleep(250);
 
 		dwSize = 0;
 		if (!pfWinHttpQueryDataAvailable(hRequest, &dwSize))
