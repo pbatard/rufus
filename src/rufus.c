@@ -1040,12 +1040,13 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 		safe_free(iso_path);
 		goto out;
 	}
-	uprintf("ISO label: '%s'\n size: %lld bytes, 4GB:%c, bootmgr:%c, isolinux:%c, old vesa:%c\n",
+	uprintf("ISO label: '%s'\n size: %lld bytes, 4GB:%c, bootmgr:%c, winpe:%c, isolinux:%c, old vesa:%c\n",
 		iso_report.label, iso_report.projected_size, iso_report.has_4GB_file?'Y':'N',
-		iso_report.has_bootmgr?'Y':'N', iso_report.has_isolinux?'Y':'N', iso_report.has_old_vesamenu?'Y':'N');
-	if ((!iso_report.has_bootmgr) && (!iso_report.has_isolinux)) {
+		iso_report.has_bootmgr?'Y':'N', IS_WINPE(iso_report.winpe)?'Y':'N',
+		iso_report.has_isolinux?'Y':'N', iso_report.has_old_vesamenu?'Y':'N');
+	if ((!iso_report.has_bootmgr) && (!iso_report.has_isolinux) && (!IS_WINPE(iso_report.winpe))) {
 		MessageBoxU(hMainDialog, "This version of Rufus only supports bootable ISOs\n"
-			"based on 'bootmgr' or 'isolinux'.\n"
+			"based on 'bootmgr/WinPE' or 'isolinux'.\n"
 			"This ISO image doesn't appear to use either...", "Unsupported ISO", MB_OK|MB_ICONINFORMATION);
 		safe_free(iso_path);
 	} else {
@@ -1427,8 +1428,8 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 							break;
 						}
 						fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
-						if ((fs == FS_NTFS) && (!iso_report.has_bootmgr)) {
-							MessageBoxA(hMainDialog, "Only 'bootmgr' based ISO "
+						if ((fs == FS_NTFS) && (!iso_report.has_bootmgr) && (!IS_WINPE(iso_report.winpe))) {
+							MessageBoxA(hMainDialog, "Only 'bootmgr' or 'WinPE' based ISO "
 								"images can currently be used with NTFS.", "Unsupported ISO...", MB_OK|MB_ICONERROR);
 							break;
 						} else if (((fs == FS_FAT16)||(fs == FS_FAT32)) && (!iso_report.has_isolinux)) {

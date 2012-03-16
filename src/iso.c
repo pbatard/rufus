@@ -47,24 +47,24 @@
 #define FOUR_GIGABYTES            4294967296LL
 
 // Needed for UDF ISO access
-CdIo_t* cdio_open (const char *psz_source, driver_id_t driver_id) {return NULL;}
-void cdio_destroy (CdIo_t *p_cdio) {}
+CdIo_t* cdio_open (const char* psz_source, driver_id_t driver_id) {return NULL;}
+void cdio_destroy (CdIo_t* p_cdio) {}
 
 RUFUS_ISO_REPORT iso_report;
 int64_t iso_blocking_status = -1;
 #define ISO_BLOCKING(x) do {x; iso_blocking_status++; } while(0)
-static const char *psz_extract_dir;
-static const char *bootmgr_name = "bootmgr";
-static const char *ldlinux_name = "ldlinux.sys";
-static const char *isolinux_name[] = { "isolinux.cfg", "syslinux.cfg", "extlinux.conf"};
-static const char *vesamenu_name = "vesamenu.c32";
+static const char* psz_extract_dir;
+static const char* bootmgr_name = "bootmgr";
+static const char* ldlinux_name = "ldlinux.sys";
+static const char* isolinux_name[] = { "isolinux.cfg", "syslinux.cfg", "extlinux.conf"};
+static const char* vesamenu_name = "vesamenu.c32";
+static const char* pe_dirname[] = { "/i386", "/minint" };
+static const char* pe_file[] = { "ntdetect.com", "setupldr.bin", "txtsetup.sif" };
 static int64_t old_vesamenu_threshold = 145000;
 static uint8_t i_joliet_level = 0;
 static uint64_t total_blocks, nb_blocks;
 static BOOL scan_only = FALSE;
 static StrArray config_path;
-
-extern char* replace_in_token_data(const char* filename, const char* token, const char* src, const char* rep);
 
 // TODO: Timestamp & permissions preservation
 
@@ -101,28 +101,36 @@ static void log_handler (cdio_log_level_t level, const char *message)
  * Scan and set ISO properties
  * Returns true if the the current file does not need to be processed further
  */
-static __inline BOOL check_iso_props(BOOL is_root, BOOL* is_syslinux_cfg, BOOL* is_old_vesamenu, 
-	int64_t i_file_length, const char* psz_basename, char* psz_fullpath)
+static __inline BOOL check_iso_props(const char* psz_dirname, BOOL* is_syslinux_cfg, BOOL* is_old_vesamenu, 
+	int64_t i_file_length, const char* psz_basename, const char* psz_fullpath)
 {
-	size_t i;
+	size_t i, j;
 
 	// Check for an isolinux/syslinux config file anywhere
 	*is_syslinux_cfg = FALSE;
 	for (i=0; i<ARRAYSIZE(isolinux_name); i++) {
-		if (_stricmp(psz_basename, isolinux_name[i]) == 0)
+		if (safe_stricmp(psz_basename, isolinux_name[i]) == 0)
 			*is_syslinux_cfg = TRUE;
 	}
 
 	// Check for an old vesamenu.c32 file anywhere
 	*is_old_vesamenu = FALSE;
-	if ((_stricmp(psz_basename, vesamenu_name) == 0) && (i_file_length <= old_vesamenu_threshold)) {
+	if ((safe_stricmp(psz_basename, vesamenu_name) == 0) && (i_file_length <= old_vesamenu_threshold)) {
 		*is_old_vesamenu = TRUE;
 	}
 
 	if (scan_only) {
 		// Check for a "bootmgr" file in root (psz_path = "")
-		if (is_root && (_stricmp(psz_basename, bootmgr_name) == 0))
+		if ((*psz_dirname == 0) && (safe_stricmp(psz_basename, bootmgr_name) == 0))
 			iso_report.has_bootmgr = TRUE;
+
+		// Check for PE (XP) specific files in "/i386" or "/minint"
+		for (i=0; i<ARRAYSIZE(pe_dirname); i++)
+			if (safe_stricmp(psz_dirname, pe_dirname[i]) == 0)
+				for (j=0; j<ARRAYSIZE(pe_file); j++)
+					if (safe_stricmp(psz_basename, pe_file[j]) == 0)
+						iso_report.winpe |= (1<<i)<<(ARRAYSIZE(pe_dirname)*j);
+
 		if (*is_syslinux_cfg) {
 			iso_report.has_isolinux = TRUE;
 			// Maintain a list of all the isolinux/syslinux configs identified so far
@@ -140,7 +148,7 @@ static __inline BOOL check_iso_props(BOOL is_root, BOOL* is_syslinux_cfg, BOOL* 
 		return TRUE;
 	}
 	// In case there's an ldlinux.sys on the ISO, prevent it from overwriting ours
-	if (is_root && (safe_strcmp(psz_basename, ldlinux_name) == 0)) {
+	if ((*psz_dirname == 0) && (safe_strcmp(psz_basename, ldlinux_name) == 0)) {
 		uprintf("skipping % file from ISO image\n", ldlinux_name);
 		return TRUE;
 	}
@@ -186,7 +194,7 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 			}
 		} else {
 			i_file_length = udf_get_file_length(p_udf_dirent);
-			if (check_iso_props((*psz_path == 0), &is_syslinux_cfg, &is_old_vesamenu, i_file_length, psz_basename, psz_fullpath)) {
+			if (check_iso_props(psz_path, &is_syslinux_cfg, &is_old_vesamenu, i_file_length, psz_basename, psz_fullpath)) {
 				safe_free(psz_fullpath);
 				continue;
 			}
@@ -300,7 +308,7 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 				goto out;
 		} else {
 			i_file_length = p_statbuf->size;
-			if (check_iso_props((*psz_path == 0), &is_syslinux_cfg, &is_old_vesamenu, i_file_length, psz_basename, psz_fullpath)) {
+			if (check_iso_props(psz_path, &is_syslinux_cfg, &is_old_vesamenu, i_file_length, psz_basename, psz_fullpath)) {
 				continue;
 			}
 			// Replace slashes with backslashes and append the size to the path for UI display

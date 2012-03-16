@@ -35,7 +35,6 @@
  */
 RUFUS_DRIVE_INFO SelectedDrive;
 extern BOOL enable_fixed_disks;
-extern char* get_token_data(const char* filename, const char* token);
 
 /*
  * Open a drive or volume with optional write and lock access

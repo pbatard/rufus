@@ -58,6 +58,7 @@
 #define safe_strcmp(str1, str2) strcmp(((str1==NULL)?"<NULL>":str1), ((str2==NULL)?"<NULL>":str2))
 #define safe_stricmp(str1, str2) _stricmp(((str1==NULL)?"<NULL>":str1), ((str2==NULL)?"<NULL>":str2))
 #define safe_strncmp(str1, str2, count) strncmp(((str1==NULL)?"<NULL>":str1), ((str2==NULL)?"<NULL>":str2), count)
+#define safe_strnicmp(str1, str2, count) _strnicmp(((str1==NULL)?"<NULL>":str1), ((str2==NULL)?"<NULL>":str2), count)
 #define safe_closehandle(h) do {if (h != INVALID_HANDLE_VALUE) {CloseHandle(h); h = INVALID_HANDLE_VALUE;}} while(0)
 #define safe_unlockclose(h) do {if (h != INVALID_HANDLE_VALUE) {UnlockDrive(h); CloseHandle(h); h = INVALID_HANDLE_VALUE;}} while(0)
 #define safe_sprintf _snprintf
@@ -141,11 +142,15 @@ typedef struct {
 } RUFUS_DRIVE_INFO;
 
 /* ISO details that the application may want */
+#define WINPE_MININT    0x2A
+#define WINPE_I386      0x15
+#define IS_WINPE(r)     (((r&WINPE_MININT) == WINPE_MININT)||((r&WINPE_I386)==WINPE_I386))
 typedef struct {
 	char label[192];		/* 3*64 to account for UTF-8 */
 	char usb_label[192];	/* converted USB label for workaround */
 	char cfg_path[128];		/* path to the ISO's isolinux.cfg */
 	uint64_t projected_size;
+	uint8_t winpe;
 	BOOL has_4GB_file;
 	BOOL has_bootmgr;
 	BOOL has_isolinux;
@@ -199,6 +204,8 @@ extern BOOL SetAutorun(const char* path);
 extern char* FileDialog(BOOL save, char* path, char* filename, char* ext, char* ext_desc);
 extern LONG GetEntryWidth(HWND hDropDown, const char* entry);
 extern BOOL DownloadFile(const char* url, const char* file);
+extern char* get_token_data(const char* filename, const char* token);
+extern char* replace_in_token_data(const char* filename, const char* token, const char* src, const char* rep);
 
 __inline static BOOL UnlockDrive(HANDLE hDrive)
 {
