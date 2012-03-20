@@ -1,7 +1,7 @@
 /********************************************************************************/
 /* Rufus - The Reliable USB Formatting Utility, bootable USB MBR                */
 /*                                                                              */
-/* Copyright (c) 2011 Pete Batard <pete@akeo.ie>                                */
+/* Copyright (c) 2012 Pete Batard <pete@akeo.ie>                                */
 /*                                                                              */
 /* This program is free software; you can redistribute it and/or modify it      */
 /* under the terms of the GNU General Public License as published by the Free   */
@@ -26,6 +26,7 @@
 .code16			# MBR code is executed in x86 CPU real/16 bit mode
 /********************************************************************************/
 
+
 /********************************************************************************/
 /* Constants:                                                                   */
 /********************************************************************************/
@@ -34,14 +35,14 @@ DOT_NUMBER    = 0x04	# Number of dots to be printed before timeout
 MBR_ADDR      = 0x7c00	# Same address for both original MBR and copy
 MBR_SIZE      = 0x200
 MBR_RESERVED  = 0x1b8	# Start of the reserved section (partition table, etc.)
-BUF_SEGMENT   = 0x3000  # Segment for the buffer
 PT_MAX        = 0x04	# Number of partition entries in the partition table
 PT_ENTRY_SIZE = 0x10	# Size of a partition entry in the partition table
 INT_RTC       = 0x08
 INT_DSK       = 0x13
 
+
 /********************************************************************************/
-/* mbr: this section must reside at 0x00007c00, and be exactly 512 bytes        */
+/* MBR: this section must reside at 0x00007c00, and be exactly 512 bytes        */
 /********************************************************************************/
 .section main, "ax"
 .globl mbr			# label must be declared global for the linker
@@ -65,9 +66,9 @@ mbr:
 	push es
 	mov  ds, ax		# Original MBR is in segment 0
 	mov  bx, 0x0413		# McAfee thinks we are a virus if we use 413 directly...
-	mov  ax,[bx+0]
+	mov  ax,[bx]
 	dec  ax			# Remove 1KB from the RAM for our copy
-	mov  [bx+0],ax
+	mov  [bx],ax
 	shl  ax, 6		# Convert to segment address
 	sub  ax, MBR_ADDR>>4	# For convenience of disassembly, so that irrespective
 	mov  es, ax		# of the segment, our base address remains MBR_ADDR
@@ -79,60 +80,33 @@ mbr:
 
 # ---------------------------------------------------------------------------
 
-# From this point forward, we are running the copy at a different segment from seg 0
+# From this point forward, we are running the copy at the same base but different segment
 0:	mov  ds, ax		# AX = ES = CS, only DS points back to old seg => fix this
-	push es
-	xor  ax, ax
-	mov  es, ax
-	mov  bx, MBR_ADDR	# TODO optimize
-	mov  ax, 0x0201
-	mov  cx, 0x0001
-	mov  dx, 0x0081		# Check next bootable disk
-	int  0x13		# DISK - READ SECTORS INTO MEMORY
-				# AL = number of sectors to read, CH = track, CL = sector
-				# DH = head, DL = drive, ES:BX -> buffer to fill
-				# Return: CF set on error, AH = status, AL = number of sectors read
-	jnb  read_success
-
-read_failure:			# If we couldn't get data for second bootable, just boot USB
-	pop  es
-	jmp  boot_usb_no_rtc
+	push 0
+	pop  es			# ES remains set to segment 0 from here on
+	xor  ebx, ebx		# Sector #1 in 64 bit address mode (#0)
+	mov  cx, 0x0001		# Sector #1 in CHS address mode (#1)
+	mov  dx, 0x0081		# drive number (DL), track 0 (DH)
+	call read_sector
+	jb   boot_usb		# If we couldn't get data => just boot USB
 
 read_success:
+	mov  bx, offset partition_table
 	mov  cx, PT_MAX
-	mov  bp, offset partition_table
 
 check_table:			# check the partition table for an active (bootable) partition
-	cmpb es:[bp+0], 0x00
-	jl   active_partition	# 0x80 or greater means the partition is active
+	cmpb es:[bx], 0x00
+	jl   found_active	# 0x80 or greater means the partition is active
 	jnz  invalid_table	# anything between 0x01 and 0x7f is invalid
-	add  bp, PT_ENTRY_SIZE	# next partition
+	add  bx, PT_ENTRY_SIZE	# next partition
 	loop check_table
 
-no_active:
-	pop  es
-	jmp  exit
-
-active_partition:
-	push bp
-
-check_one_active:		# check that all subsequent partitions are zero (only one active)
-	add  bp, PT_ENTRY_SIZE
-	dec  cx
-	jz   valid_active
-	cmpb es:[bp+0], 0x00
-	jz   check_one_active
-	pop  bp
-
 invalid_table:
-	pop  es
-	jmp  exit
+	jmp  boot_usb
 
-valid_active:
-	pop  bp
-	pop  es
+found_active:
 	mov  si, offset prompt_string
-	call print_string
+	call print_string	# Prompt the user
 	call flush_keyboard
 
 set_rtc_int_vect:		# Set the interrupt vector for CMOS real-time clock
@@ -143,21 +117,21 @@ set_rtc_int_vect:		# Set the interrupt vector for CMOS real-time clock
 wait_for_keyboard:
 	mov  ah, 0x01
 	int  0x16		# KEYBOARD - CHECK BUFFER, DO NOT CLEAR
-	jnz  boot_usb		# Z is clear when characters are present in the buffer
+	jnz  boot_usb_rem_rtc	# Z is clear when characters are present in the buffer
 	mov  ah, 0x02
 	int  0x16		# KEYBOARD - GET SHIFT STATUS
 	and  al, 0x04		# AL = shift status bits
 	jnz  boot_usb
-	cmpw ds:counter_dot, 0x0000
+	cmpb ds:counter_dot, 0x00
 	jg   short check_timeout
 
-print_dot:
+print_dot:			# Every so often, we print a dot
 	mov  si, offset dot_string
 	call print_string
-	movw ds:counter_dot, DOT_TIMEOUT
+	movb ds:counter_dot, DOT_TIMEOUT
 
 check_timeout:
-	cmpw ds:counter_timeout, 0x0000
+	cmpb ds:counter_timeout, 0x00
 	jnz  wait_for_keyboard
 
 boot_fixed_disk:		# Timeout occured => boot second bootable disk (non USB)
@@ -169,25 +143,23 @@ boot_fixed_disk:		# Timeout occured => boot second bootable disk (non USB)
 boot_drive:
 	pop  es
 	pop  ds
-	mov  dl, 0x0080		# In both case, we pretend the disk is the first bootable
+	mov  dx, 0x0080		# In both case, we pretend the disk is the first bootable
 	jmp  0:MBR_ADDR
 
 # ---------------------------------------------------------------------------
 
-boot_usb:			# Boot USB drive (0x80)
+boot_usb_rem_rtc:		# Boot USB drive (0x80)
 	call restore_rtc_vect	# Remove our RTC override
+boot_usb:
 	call flush_keyboard	# Make sure the keyboard buffer is clear
-boot_usb_no_rtc:
 	mov  bx, offset partition_table
-	mov  dx, es:[bx]
-	mov  cx, es:[bx+2]
-	xor  ax, ax
-	mov  es, ax		# make sure ES is set to seg 0 for copy
-	mov  ax, 0x0201
-	mov  bx, MBR_ADDR
-	int  0x13
+	mov  dx, ds:[bx]
+	mov  cx, ds:[bx+2]
+	mov  ebx, ds:[bx+8]	# Must come last since it modifies BX
+	call read_sector
 	jnb  boot_drive
-exit:
+
+exit:				# failed to read PBR from USB - exit back to BIOS
 	pop  es
 	pop  ds
 	retf
@@ -197,17 +169,56 @@ exit:
 /* Subroutines                                                                  */
 /********************************************************************************/
 
+read_sector:			# Read a single sector in either CHS or LBA mode
+				# EBX = LBA sector address (32 bit), CH = track
+				# CL = sector,  DL = drive number, DH = head
+	pusha			# save all registers
+	mov  ah, 0x41
+	mov  bx, 0x55aa
+	int  0x13
+	jb   no_ext		# failure to get ext
+	cmp  bx, 0xaa55
+	jnz  no_ext
+	test cx, 1		# is packet access supported?
+	jz   no_ext
+
+ext:	# http://en.wikipedia.org/wiki/INT_13H#INT_13h_AH.3D42h:_Extended_Read_Sectors_From_Drive
+	popa
+	push ds
+	xor  eax, eax
+	mov  ds, ax		# We'll use the stack for DAP, which is in seg 0
+	push eax		# bits 32-63 of sector address (set to 0)
+	push ebx		# bits 0-31 of sector address (EBX)
+	push ax			# destination segment
+	push MBR_ADDR		# destination address
+	inc  ax
+	push ax			# number of sectors to be read (1)
+	push 0x0010		# size of DAP struct
+	mov  si, sp		# DAP address (= stack)
+	mov  ah, 0x42		# Extended Read Sectors From Drive
+	int  0x13
+	lahf
+	add  sp,0x10
+	sahf
+	pop  ds
+	ret
+
+no_ext:	# http://en.wikipedia.org/wiki/INT_13H#INT_13h_AH.3D02h:_Read_Sectors_From_Drive
+	popa
+	mov  bx, MBR_ADDR	# CL, CH, DL, DH, ES are already set
+	mov  ax, 0x0201
+	int  0x13
+	ret
+
+# ---------------------------------------------------------------------------
+
 set_int_vect:			# Set the interrupt vector
 	cli			# SI = pointer to backup vector (must contain the interrupt #)
-	push es			# DX = pointer to interrupt
-	xor  ax, ax
-	mov  es, ax
 	mov  bx, ds:[si]
 	mov  eax, es:[bx]	# Backup the original vector
 	mov  ds:[si], eax
 	mov  es:[bx], dx
 	mov  es:[bx+2], cs
-	pop  es
 	sti
 	ret
 
@@ -215,13 +226,9 @@ set_int_vect:			# Set the interrupt vector
 
 restore_rtc_vect:		# Restore the interrupt vector for RTC
 	cli
-	push es
-	xor  ax, ax
-	mov  es, ax
 	mov  bx, INT_RTC*4
 	mov  eax, ds:rtc_interrupt_org
 	mov  es:[bx], eax
-	pop  es
 	sti
 	ret
 
@@ -238,23 +245,15 @@ flush_keyboard:			# Flush the keyboard buffer
 
 # ---------------------------------------------------------------------------
 
-print_string:			# Print a NUL terminated string to console
-	push ax
-	push bx
-
-ps_putchar:
+print_string:			# Print NUL terminated string in DS:SI to console
 	lodsb
 	cmp  al, 0x00
-	jz   ps_exit
+	jz   0f
 	mov  ah, 0x0e
 	mov  bx, 0x0007		# BH = display page, BL = foreground color
 	int  0x10		# VIDEO - WRITE CHARACTER AND ADVANCE CURSOR
-	jmp  ps_putchar
-
-ps_exit:
-	pop  bx
-	pop  ax
-	ret
+	jmp  print_string
+0:	ret
 
 # ---------------------------------------------------------------------------
 
@@ -267,6 +266,23 @@ disk_swap:			# Swap disks 0x80 and 0x81
 	xor  dl, 0x01
 0:	ret
 
+# ---------------------------------------------------------------------------
+
+.if 0
+print_hex:			# Hex dump of the word at address ES:BX
+	mov  cx, 0x04
+	mov  dx, es:[bx]
+0:	rol  dx, 0x04
+	mov  ax, 0xe0f
+	and  al, dl
+	daa
+	add  al, 0xF0
+	adc  al, 0x40
+	int  0x10
+	loop 0b
+	ret
+.endif
+
 
 /********************************************************************************/
 /* Interrupt overrides                                                          */
@@ -276,10 +292,10 @@ disk_swap:			# Swap disks 0x80 and 0x81
 rtc_interrupt:
 	pushf
 	cli
-	cmpw cs:counter_timeout, 0x0000
+	cmpb cs:counter_timeout, 0x00
 	jz   rtc_exec_org
-	decw cs:counter_dot
-	decw cs:counter_timeout
+	decb cs:counter_dot
+	decb cs:counter_timeout
 
 rtc_exec_org:
 rtc_interrupt_org = .+1		# Same trick used by the LILO mapper
@@ -315,8 +331,8 @@ dsk_interrupt_org = .+1
 int13_cmd:	.byte 0x00
 prompt_string:	.string "\r\nPress any key to boot from USB."
 dot_string = 	.-2		# Reuse the end of previous string
-counter_timeout:.word DOT_NUMBER*DOT_TIMEOUT + 1
-counter_dot:	.word DOT_TIMEOUT
+counter_timeout:.byte DOT_NUMBER*DOT_TIMEOUT + 1
+counter_dot:	.byte DOT_TIMEOUT
 
 
 /********************************************************************************/
