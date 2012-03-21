@@ -309,18 +309,15 @@ dsk_interrupt:
 	pushf
 	cli
 	call disk_swap
-	mov cs:[int13_cmd], ah	# Keep a copy of the command for later referal
 
 dsk_interrupt_org = .+1
 	call 0:INT_DSK*4	# These CS:IP values will be changed at runtime
-	push ax
-	mov  ah, cs:[int13_cmd]	# Check the original command for swap exceptions
-	cmp  ah, 0x08 		# LILO's mapper has these 2 exceptions
-	je   0f
-	cmp  ah, 0x15
-	je   0f
+	# NB: subcommands 0x08 and 0x15 (disk props) modify DL, but they only 
+	# do so to return the number of drives => unless your computer has 128
+	# or 129 drives, disk_swap will not touch those values.
+	pushf			# Don't modify the returned flags
 	call disk_swap
-0:	pop  ax
+	popf
 	iret
 
 
@@ -328,11 +325,10 @@ dsk_interrupt_org = .+1
 /* Data section                                                                 */
 /********************************************************************************/
 
-int13_cmd:	.byte 0x00
-prompt_string:	.string "\r\nPress any key to boot from USB."
-dot_string = 	.-2		# Reuse the end of previous string
 counter_timeout:.byte DOT_NUMBER*DOT_TIMEOUT + 1
 counter_dot:	.byte DOT_TIMEOUT
+prompt_string:	.string "\r\nPress any key to boot from USB."
+dot_string = 	.-2		# Reuse the end of previous string
 
 
 /********************************************************************************/

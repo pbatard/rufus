@@ -56,6 +56,7 @@
 #define IDC_TEST                        1015
 #define IDC_SELECT_ISO                  1016
 #define IDC_SET_ICON                    1017
+#define IDC_RUFUS_MBR                   1018
 #define IDC_ISO_PROGRESS                1020
 #define IDC_ISO_FILENAME                1021
 #define IDC_ISO_ABORT                   1022

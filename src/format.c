@@ -464,7 +464,13 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 	if ((dt == DT_ISO) && ((fs == FS_FAT16) || (fs == FS_FAT32))) {
 		r = write_syslinux_mbr(&fake_fd);
 	} else {
-		r = write_win7_mbr(&fake_fd);
+		if (IsChecked(IDC_RUFUS_MBR)) {
+			uprintf("Using Rufus bootable USB selection MBR\n");
+			r = write_rufus_mbr(&fake_fd);
+		} else {
+			uprintf("Using Windows 7 MBR\n");
+			r = write_win7_mbr(&fake_fd);
+		}
 	}
 
 out:

@@ -944,6 +944,7 @@ static void EnableControls(BOOL bEnable)
 	EnableWindow(GetDlgItem(hMainDialog, IDC_SELECT_ISO), bEnable);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_NBPASSES), bEnable);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_SET_ICON), bEnable);
+	EnableWindow(GetDlgItem(hMainDialog, IDC_RUFUS_MBR), bEnable);
 	SetDlgItemTextA(hMainDialog, IDCANCEL, bEnable?"Close":"Cancel");
 }
 
@@ -1050,6 +1051,9 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 			"This ISO image doesn't appear to use either...", "Unsupported ISO", MB_OK|MB_ICONINFORMATION);
 		safe_free(iso_path);
 	} else {
+		EnableWindow(GetDlgItem(hMainDialog, IDC_RUFUS_MBR), (iso_report.has_bootmgr) || (IS_WINPE(iso_report.winpe)));
+		CheckDlgButton(hMainDialog, IDC_RUFUS_MBR,
+			((iso_report.winpe&WINPE_I386)==WINPE_I386)?BST_CHECKED:BST_UNCHECKED);
 		if (iso_report.has_old_vesamenu) {
 			fd = fopen(vesamenu_filename, "rb");
 			if (fd != NULL) {
@@ -1347,8 +1351,13 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 					IGNORE_RETVAL(ComboBox_SetItemData(hDOSType, ComboBox_AddStringU(hDOSType, "FreeDOS"), DT_FREEDOS));
 			}
 			IGNORE_RETVAL(ComboBox_SetItemData(hDOSType, ComboBox_AddStringU(hDOSType, "ISO Image"), DT_ISO));
-			if ((selection_default == DT_ISO) && (iso_path == NULL))
-				selection_default = (bWithFreeDOS)?DT_FREEDOS:DT_WINME;
+			if (selection_default == DT_ISO) {
+				if (iso_path == NULL)
+					selection_default = (bWithFreeDOS)?DT_FREEDOS:DT_WINME;
+				else 
+					EnableWindow(GetDlgItem(hMainDialog, IDC_RUFUS_MBR),
+					(iso_report.has_bootmgr) || (IS_WINPE(iso_report.winpe)));
+			}
 			for (i=0; i<ComboBox_GetCount(hDOSType); i++) {
 				if (ComboBox_GetItemData(hDOSType, i) == selection_default) {
 					IGNORE_RETVAL(ComboBox_SetCurSel(hDOSType, i));
@@ -1368,6 +1377,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			if (HIWORD(wParam) != CBN_SELCHANGE)
 				break;
 			if (ComboBox_GetItemData(hDOSType, ComboBox_GetCurSel(hDOSType)) == DT_ISO) {
+				EnableWindow(GetDlgItem(hMainDialog, IDC_RUFUS_MBR), (iso_report.has_bootmgr) || (IS_WINPE(iso_report.winpe)));
 				if ((iso_path == NULL) || (iso_report.label[0] == 0)) {
 					// Set focus to the Select ISO button
 					SendMessage(hMainDialog, WM_NEXTDLGCTL, (WPARAM)FALSE, 0);
@@ -1376,6 +1386,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 					SetWindowTextU(hLabel, iso_report.label);
 				}
 			} else {
+				EnableWindow(GetDlgItem(hMainDialog, IDC_RUFUS_MBR), TRUE);
 				// Set focus on the start button
 				SendMessage(hMainDialog, WM_NEXTDLGCTL, (WPARAM)FALSE, 0);
 				SendMessage(hMainDialog, WM_NEXTDLGCTL, (WPARAM)GetDlgItem(hMainDialog, IDC_START), TRUE);
