@@ -144,7 +144,7 @@ typedef struct {
 /* ISO details that the application may want */
 #define WINPE_MININT    0x2A
 #define WINPE_I386      0x15
-#define IS_WINPE(r)     (((r&WINPE_MININT) == WINPE_MININT)||((r&WINPE_I386)==WINPE_I386))
+#define IS_WINPE(r)     (((r&WINPE_MININT) == WINPE_MININT)||((r&WINPE_I386) == WINPE_I386))
 typedef struct {
 	char label[192];		/* 3*64 to account for UTF-8 */
 	char usb_label[192];	/* converted USB label for workaround */

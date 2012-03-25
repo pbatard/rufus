@@ -400,6 +400,33 @@ static BOOL ClearMBR(HANDLE hPhysicalDrive)
 }
 
 /*
+ * Our own MBR, not in ms-sys
+ */
+BOOL WriteRufusMBR(FILE *fp)
+{
+	HGLOBAL res_handle;
+	HRSRC res;
+	unsigned char aucRef[] = {0x55, 0xAA};
+	unsigned char* rufus_mbr;
+
+	res = FindResource(hMainInstance, MAKEINTRESOURCE(IDR_BR_MBR_BIN), RT_RCDATA);
+	if (res == NULL) {
+		uprintf("Unable to locate mbr.bin resource: %s\n", WindowsErrorString());
+		return FALSE;
+	}
+	res_handle = LoadResource(NULL, res);
+	if (res_handle == NULL) {
+		uprintf("Unable to load mbr.bin resource: %s\n", WindowsErrorString());
+		return FALSE;
+	}
+	rufus_mbr = (unsigned char*)LockResource(res_handle);
+
+	return
+		write_data(fp, 0x0, rufus_mbr, 0x1b8) &&
+		write_data(fp, 0x1fe, aucRef, sizeof(aucRef));
+}
+
+/*
  * Process the Master Boot Record
  */
 static BOOL WriteMBR(HANDLE hPhysicalDrive)
@@ -448,7 +475,8 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 		break;
 	}
 	if (IsChecked(IDC_DOS)) {
-		buf[0x1be] = 0x80;		// Set first partition bootable
+		// Set first partition bootable - masquerade as 0x81 for XP
+		buf[0x1be] = ((iso_report.winpe&WINPE_I386)==WINPE_I386)?0x81:0x80;	
 	}
 
 	if (!write_sectors(hPhysicalDrive, SecSize, 0, nSecs, buf)) {
@@ -466,7 +494,7 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 	} else {
 		if (IsChecked(IDC_RUFUS_MBR)) {
 			uprintf("Using Rufus bootable USB selection MBR\n");
-			r = write_rufus_mbr(&fake_fd);
+			r = WriteRufusMBR(&fake_fd);
 		} else {
 			uprintf("Using Windows 7 MBR\n");
 			r = write_win7_mbr(&fake_fd);
@@ -554,6 +582,7 @@ static BOOL SetupWinPE(char drive_letter)
 	const char* patch_str_org[] = { "\\minint\\txtsetup.sif", "\\minint\\system32\\" };
 	const char* patch_str_rep[] = { "\\$\\i386\\txtsetup.sif", "\\$\\i386\\system32\\" };
 	const char *win_nt_bt_org = "$win_nt$.~bt", *win_nt_bt_rep = "$\\i386";
+	const char *rdisk_zero = "rdisk(0)";
 	const char* winnt_sif = "[Data]\n     msdosinitiated = \"1\"\n";
 	const wchar_t* win_nt_ls = L"$win_nt$.~ls";
 	STARTUPINFOA si;
@@ -570,7 +599,7 @@ static BOOL SetupWinPE(char drive_letter)
 	buf = get_token_data(src, "OsLoadOptions");
 	if (buf != NULL) {
 		for (i=0; i<strlen(buf); i++)
-			buf[i] = tolower(buf[i]);
+			buf[i] = (char)tolower(buf[i]);
 		uprintf("OsLoadOptions = %s\n", buf);
 		minint = (strstr(buf, "/minint") != NULL);
 	}
@@ -635,11 +664,18 @@ static BOOL SetupWinPE(char drive_letter)
 	}else {
 		// Finish patching \bootmgr
 		for (i=0; i<size-32; i++) {
+			// $WIN_NT$_~BT -> $\i386
 			if (safe_strnicmp(&buf[i], win_nt_bt_org, strlen(win_nt_bt_org)-1) == 0) {
 				uprintf("  0x%08X: '%s' -> '%s%s'\n", i, &buf[i], win_nt_bt_rep, &buf[i+strlen(win_nt_bt_org)]);
 				strcpy(&buf[i], win_nt_bt_rep);
 				buf[i+strlen(win_nt_bt_rep)] = buf[i+strlen(win_nt_bt_org)];
 				buf[i+strlen(win_nt_bt_rep)+1] = 0;
+			}
+			// rdisk(0) -> rdisk(1) (MBR disk masquerading)
+			// TODO: only the first one seems to be needed
+			if (safe_strnicmp(&buf[i], rdisk_zero, strlen(rdisk_zero)-1) == 0) {
+				buf[i+6] = '1';
+				uprintf("  0x%08X: '%s' -> 'rdisk(1)'\n", i, rdisk_zero);
 			}
 		}
 
@@ -919,7 +955,8 @@ DWORD WINAPI FormatThread(LPVOID param)
 
 	PrintStatus(0, TRUE, "Writing master boot record...");
 	if (!WriteMBR(hPhysicalDrive)) {
-		// Errorcode has already been set
+		if (!FormatStatus)
+			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_WRITE_FAULT;
 		goto out;
 	}
 	UpdateProgress(OP_FIX_MBR, -1.0f);
