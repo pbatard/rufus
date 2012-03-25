@@ -45,7 +45,6 @@
     <ClInclude Include="..\inc\mbr_95b.h" />
     <ClInclude Include="..\inc\mbr_dos.h" />
     <ClInclude Include="..\inc\mbr_dos_f2.h" />
-    <ClInclude Include="..\inc\mbr_rufus.h" />
     <ClInclude Include="..\inc\mbr_syslinux.h" />
     <ClInclude Include="..\inc\mbr_vista.h" />
     <ClInclude Include="..\inc\mbr_win7.h" />

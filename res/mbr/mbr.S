@@ -1,5 +1,5 @@
 /********************************************************************************/
-/* Rufus - The Reliable USB Formatting Utility, bootable USB MBR                */
+/* Rufus - The Reliable USB Formatting Utility, bootable MBR with user prompt   */
 /*                                                                              */
 /* Copyright (c) 2012 Pete Batard <pete@akeo.ie>                                */
 /*                                                                              */
@@ -39,6 +39,7 @@ PT_MAX        = 0x04	# Number of partition entries in the partition table
 PT_ENTRY_SIZE = 0x10	# Size of a partition entry in the partition table
 INT_RTC       = 0x08
 INT_DSK       = 0x13
+DEBUG         = 0	# Set to 1 to debug INT13h (shows AH and DL values)
 
 
 /********************************************************************************/
@@ -82,10 +83,9 @@ mbr:
 
 # From this point forward, we are running the copy at the same base but different segment
 0:	mov  ds, ax		# AX = ES = CS, only DS points back to old seg => fix this
-	push 0
-	pop  es			# ES remains set to segment 0 from here on
 	xor  ebx, ebx		# Sector #1 in 64 bit address mode (#0)
-	mov  cx, 0x0001		# Sector #1 in CHS address mode (#1)
+	mov  es, bx		# ES remains set to segment 0 from here on
+	inc  cx			# Sector #1 in CHS address mode (#1) (and CX = 0 from rep movsb)
 	mov  dx, 0x0081		# drive number (DL), track 0 (DH)
 	call read_sector
 	jb   boot_usb		# If we couldn't get data => just boot USB
@@ -123,7 +123,7 @@ wait_for_keyboard:
 	and  al, 0x04		# AL = shift status bits
 	jnz  boot_usb
 	cmpb ds:counter_dot, 0x00
-	jg   short check_timeout
+	jg   check_timeout
 
 print_dot:			# Every so often, we print a dot
 	mov  si, offset dot_string
@@ -136,14 +136,17 @@ check_timeout:
 
 boot_fixed_disk:		# Timeout occured => boot second bootable disk (non USB)
 	call restore_rtc_vect	# Remove our RTC override
-	mov  dx, offset dsk_interrupt		# Set interrupt override to have
-	mov  si, offset dsk_interrupt_org	# disk 0x81 is seen as 0x80
-	call set_int_vect
+	movb ds:partition_table, 0x81	# target we want to swap with 0x80
+	push 0x0080
 
 boot_drive:
+	mov  dx, offset dsk_interrupt		# Set interrupt override for int13h
+	mov  si, offset dsk_interrupt_org
+	call set_int_vect
+
+	pop  dx			# retrieve disk index to feed BR
 	pop  es
 	pop  ds
-	mov  dx, 0x0080		# In both case, we pretend the disk is the first bootable
 	jmp  0:MBR_ADDR
 
 # ---------------------------------------------------------------------------
@@ -154,13 +157,13 @@ boot_usb:
 	call flush_keyboard	# Make sure the keyboard buffer is clear
 	mov  bx, offset partition_table
 	mov  dx, ds:[bx]
+	push dx
+	mov  dl, 0x80		# Override disk number, as we're not using our int yet
 	mov  cx, ds:[bx+2]
 	mov  ebx, ds:[bx+8]	# Must come last since it modifies BX
 	call read_sector
 	jnb  boot_drive
-
-exit:				# failed to read PBR from USB - exit back to BIOS
-	pop  es
+	pop  es			# failed to read PBR from USB - exit back to BIOS
 	pop  ds
 	retf
 
@@ -215,7 +218,7 @@ no_ext:	# http://en.wikipedia.org/wiki/INT_13H#INT_13h_AH.3D02h:_Read_Sectors_Fr
 set_int_vect:			# Set the interrupt vector
 	cli			# SI = pointer to backup vector (must contain the interrupt #)
 	mov  bx, ds:[si]
-	mov  eax, es:[bx]	# Backup the original vector
+	mov  eax, es:[bx]	# Backup the original vector (ES = 0)
 	mov  ds:[si], eax
 	mov  es:[bx], dx
 	mov  es:[bx+2], cs
@@ -257,21 +260,26 @@ print_string:			# Print NUL terminated string in DS:SI to console
 
 # ---------------------------------------------------------------------------
 
-disk_swap:			# Swap disks 0x80 and 0x81
-	push dx
-	and  dl, 0xfe
+disk_swap:			# Swap disk according to part table entry
+	push ax
+	mov  al, cs:partition_table
 	cmp  dl, 0x80
-	pop  dx
 	jne  0f
-	xor  dl, 0x01
-0:	ret
+	mov  dl, al	# 0x80 -> cs:pt
+	jmp  1f
+0:	cmp  dl, al	# cs:pt -> 0x80
+	jne  1f
+	mov  dl, 0x80
+1:	pop ax
+	ret
 
 # ---------------------------------------------------------------------------
 
-.if 0
-print_hex:			# Hex dump of the word at address ES:BX
+.if DEBUG
+print_hex:			# Hex dump of AH,DL
+	pusha
 	mov  cx, 0x04
-	mov  dx, es:[bx]
+	mov  dh, ah
 0:	rol  dx, 0x04
 	mov  ax, 0xe0f
 	and  al, dl
@@ -280,6 +288,7 @@ print_hex:			# Hex dump of the word at address ES:BX
 	adc  al, 0x40
 	int  0x10
 	loop 0b
+	popa
 	ret
 .endif
 
@@ -290,44 +299,56 @@ print_hex:			# Hex dump of the word at address ES:BX
 
 # RTC (INT 8) interrupt override
 rtc_interrupt:
-	pushf
 	cli
 	cmpb cs:counter_timeout, 0x00
-	jz   rtc_exec_org
+	jz   0f			# Don't decrement counters if timeout expired
 	decb cs:counter_dot
 	decb cs:counter_timeout
 
-rtc_exec_org:
 rtc_interrupt_org = .+1		# Same trick used by the LILO mapper
-	call 0:INT_RTC*4	# These CS:IP values will be changed at runtime
-	iret
+0:	jmp 0:INT_RTC*4		# These CS:IP values will be changed at runtime
 
 # ---------------------------------------------------------------------------
 
 # DISK (INT 13h) interrupt override
 dsk_interrupt:
 	pushf
-	cli
+.if DEBUG	
+	call print_hex
+.endif
+	# Some machines (eg. IBM T43p) have a BIOS that reenters INT 13h to issue
+	# an SCSI passthrough (AH = 50h). Therefore swapping the drive on each call
+	# would result in failure. To ensure that the disk is only swapped once
+	# we keep a counter, and swap only if that counter is 0.
+	# NB: If concurrent INT 13h calls are issued, this approach will break
+	incb cs:already_mapped
+	jnz  0f
 	call disk_swap
-
 dsk_interrupt_org = .+1
-	call 0:INT_DSK*4	# These CS:IP values will be changed at runtime
+0:	call 0:INT_DSK*4	# These CS:IP values will be changed at runtime
 	# NB: subcommands 0x08 and 0x15 (disk props) modify DL, but they only 
-	# do so to return the number of drives => unless your computer has 128
-	# or 129 drives, disk_swap will not touch those values.
+	# do so to return the number of drives => unless your computer has more
+	# than 128 drives, disk_swap will not touch those values.
 	pushf			# Don't modify the returned flags
+	decb cs:already_mapped
+	jns  0f
 	call disk_swap
-	popf
-	iret
+0:	popf
+	retf 2
 
 
 /********************************************************************************/
 /* Data section                                                                 */
 /********************************************************************************/
 
+already_mapped: .byte 0xff
 counter_timeout:.byte DOT_NUMBER*DOT_TIMEOUT + 1
 counter_dot:	.byte DOT_TIMEOUT
+.if !DEBUG
 prompt_string:	.string "\r\nPress any key to boot from USB."
+.else
+prompt_string:  .string "USB."
+.endif
 dot_string = 	.-2		# Reuse the end of previous string
 
 

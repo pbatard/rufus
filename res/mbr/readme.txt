@@ -4,10 +4,15 @@ Rufus: The Reliable USB Formatting Utility - Custom MBR
 
 This directory contains all the resources required to create an MBR that prompts
 the user for boot selection, when a second bootable device (typically bootable
-fixed HDD) is reported by the BIOS.
+fixed HDD) is reported by the BIOS at 0x81.
 
 This aims at mimicking the Microsoft Windows optical installation media feature,
 which may be necessary on for WinPE 2.x or earlier based installations.
+
+This MBR will also masquerade a bootable USB drive booted as 0x80 by the BIOS to
+a different ID according to the one found in its partition table entry. Eg. if
+the partition table lists the disk ID for the first partition as 0x81, then it
+will be swapped for 0x80.
 
 # Compilation
 
@@ -35,15 +40,19 @@ The way this bootloader achieves the feature highlighted above is as follows:
    BIOS disk access, behave as if there was no USB drive inserted.
 6. In case there was a failure to read the second bootable drive's MBR, or no
    active partition was detected there, the USB is booted without prompts.
+7. In case USB is booted, and the drive ID of first partition of the USB (which
+   is always assumed bootable) is read and if different from 0x80, then it is
+   also swapped with 0x80 in the INT_13h override.
 
 # Limitations
 
 * If you are using software RAID or a non-conventional setup, the second
   bootable disk may not be accessible through the BIOS and therefore the USB
-  will always be booted
-* If the bootable HDD uses LILO, a "LILO - Keytable read/checksum error" will
-  be displayed when trying to boot it.
-* This MBR currently does not masquerade the bootable USB drive as secondary
-  (0x81) therefore an installation program ran from USB to install an OS on
-  an HDD may still configure that disk as the second drive, and prevent it to
-  properly boot later on.
+  will always be booted.
+* Some processes (notably XP's ntdetect.com) do not seem to like gaps in the
+  bootable drive sequence, which means that if you set your bootable USB
+  partition as 0x82 or higher, and it leaves any of 0x80/0x81 free as a result
+  then these processes may report an error.
+* DOS also does not allow anything but 0x80 to be used as bootable disk. Thus
+  it is not possible to run MS-DOS or FreeDOS off an USB drive unless the disk
+  ID is 0x80 and not masqueraded.

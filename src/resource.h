@@ -9,6 +9,7 @@
 #define IDD_LICENSE                     105
 #define IDD_ISO_EXTRACT                 106
 #define IDS_VERSION                     107
+#define IDR_BR_MBR_BIN                  200
 #define IDR_FD_COMMAND_COM              300
 #define IDR_FD_KERNEL_SYS               301
 #define IDR_FD_DISPLAY_EXE              302
