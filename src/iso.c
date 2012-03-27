@@ -31,6 +31,7 @@
 #include <malloc.h>
 #include <errno.h>
 #include <direct.h>
+#include <ctype.h>
 
 #include <cdio/cdio.h>
 #include <cdio/logging.h>
@@ -520,7 +521,7 @@ out:
 BOOL ExtractISOFile(const char* iso, const char* iso_file, const char* dest_file)
 {
 	size_t i;
-	ssize_t read;
+	ssize_t read_size;
 	int64_t file_length;
 	char buf[UDF_BLOCKSIZE];
 	DWORD buf_size, wr_size;
@@ -558,18 +559,18 @@ BOOL ExtractISOFile(const char* iso, const char* iso_file, const char* dest_file
 	file_length = udf_get_file_length(p_udf_file);
 	while (file_length > 0) {
 		memset(buf, 0, UDF_BLOCKSIZE);
-		read = udf_read_block(p_udf_file, buf, 1);
-		if (read < 0) {
+		read_size = udf_read_block(p_udf_file, buf, 1);
+		if (read_size < 0) {
 			uprintf("Error reading UDF file %s\n", iso_file);
 			goto out;
 		}
-		buf_size = (DWORD)MIN(file_length, read);
+		buf_size = (DWORD)MIN(file_length, read_size);
 		s = WriteFile(file_handle, buf, buf_size, &wr_size, NULL);
 		if ((!s) || (buf_size != wr_size)) {
 			uprintf("  Error writing file %s: %s\n", dest_file, WindowsErrorString());
 			goto out;
 		}
-		file_length -= read;
+		file_length -= read_size;
 	}
 	r = TRUE;
 	goto out;
@@ -608,7 +609,8 @@ try_iso:
 
 out:
 	safe_closehandle(file_handle);
-	safe_free(p_statbuf->rr.psz_symlink);
+	if (p_statbuf != NULL)
+		safe_free(p_statbuf->rr.psz_symlink);
 	safe_free(p_statbuf);
 	if (p_udf_root != NULL)
 		udf_dirent_free(p_udf_root);

@@ -408,7 +408,7 @@ static void SetFSFromISO(void)
 		} else if (fs_mask & (1<<FS_FAT16)) {
 			selected_fs = FS_FAT16;
 		}
-	} else if (iso_report.has_bootmgr) {
+	} else if ((iso_report.has_bootmgr) || (IS_WINPE(iso_report.winpe))) {
 		if (fs_mask & (1<<FS_NTFS)) {
 			selected_fs = FS_NTFS;
 		}
@@ -1532,6 +1532,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	HANDLE mutex = NULL;
 	HWND hDlg = NULL;
 	MSG msg;
+	BOOL mbr_shown = FALSE;
 
 	uprintf("*** RUFUS INIT ***\n");
 
@@ -1588,6 +1589,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			// Alt-D => Delete the NoDriveTypeAutorun key on exit (useful if the app crashed)
 			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'D')) {
 				PrintStatus(0, FALSE, "NoDriveTypeAutorun will be deleted on exit.");
+				existing_key = FALSE;
+				continue;
+			}
+			// Alt M => make Rufus MBR choice visible
+			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'M')) {
+				mbr_shown = !mbr_shown;
+				ShowWindow(GetDlgItem(hDlg, IDC_RUFUS_MBR), mbr_shown?SW_SHOW:SW_HIDE);
 				existing_key = FALSE;
 				continue;
 			}
