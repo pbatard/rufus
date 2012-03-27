@@ -1041,9 +1041,9 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 		safe_free(iso_path);
 		goto out;
 	}
-	uprintf("ISO label: '%s'\n size: %lld bytes, 4GB:%c, bootmgr:%c, winpe:%c, isolinux:%c, old vesa:%c\n",
+	uprintf("ISO label: '%s'\n size: %lld bytes, 4GB:%c, bootmgr:%c, winpe:%c (/minint:%c), isolinux:%c, old vesa:%c\n",
 		iso_report.label, iso_report.projected_size, iso_report.has_4GB_file?'Y':'N',
-		iso_report.has_bootmgr?'Y':'N', IS_WINPE(iso_report.winpe)?'Y':'N',
+		iso_report.has_bootmgr?'Y':'N', IS_WINPE(iso_report.winpe)?'Y':'N', (iso_report.uses_minint)?'Y':'N',
 		iso_report.has_isolinux?'Y':'N', iso_report.has_old_vesamenu?'Y':'N');
 	if ((!iso_report.has_bootmgr) && (!iso_report.has_isolinux) && (!IS_WINPE(iso_report.winpe))) {
 		MessageBoxU(hMainDialog, "This version of Rufus only supports bootable ISOs\n"
@@ -1053,7 +1053,7 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 	} else {
 		EnableWindow(GetDlgItem(hMainDialog, IDC_RUFUS_MBR), (iso_report.has_bootmgr) || (IS_WINPE(iso_report.winpe)));
 		CheckDlgButton(hMainDialog, IDC_RUFUS_MBR,
-			((iso_report.winpe&WINPE_I386)==WINPE_I386)?BST_CHECKED:BST_UNCHECKED);
+			(((iso_report.winpe&WINPE_I386)==WINPE_I386)&&(!iso_report.uses_minint))?BST_CHECKED:BST_UNCHECKED);
 		if (iso_report.has_old_vesamenu) {
 			fd = fopen(vesamenu_filename, "rb");
 			if (fd != NULL) {

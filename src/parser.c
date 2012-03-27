@@ -118,11 +118,137 @@ out:
 	return ret;
 }
 
+// Insert entry 'data' under section 'section' of a config file
+// Section must include the relevant delimitors (eg '[', ']') if needed
+char* insert_section_data(const char* filename, const char* section, const char* data, BOOL dos2unix)
+{
+	const wchar_t* outmode[] = { L"w", L"w, ccs=UTF-8", L"w, ccs=UTF-16LE" };
+	wchar_t *wsection = NULL, *wfilename = NULL, *wtmpname = NULL, *wdata = NULL, bom = 0;
+	wchar_t wspace[] = L" \t";
+	wchar_t buf[1024];
+	FILE *fd_in = NULL, *fd_out = NULL;
+	size_t i, size;
+	int mode;
+	char *ret = NULL, tmp[2];
+
+	if ((filename == NULL) || (section == NULL) || (data == NULL))
+		return NULL;
+	if ((filename[0] == 0) || (section[0] == 0) || (data[0] == 0))
+		return NULL;
+
+	wfilename = utf8_to_wchar(filename);
+	if (wfilename == NULL) {
+		uprintf("Could not convert '%s' to UTF-16\n", filename);
+		goto out;
+	}
+	wsection = utf8_to_wchar(section);
+	if (wfilename == NULL) {
+		uprintf("Could not convert '%s' to UTF-16\n", section);
+		goto out;
+	}
+	wdata = utf8_to_wchar(data);
+	if (wdata == NULL) {
+		uprintf("Could not convert '%s' to UTF-16\n", data);
+		goto out;
+	}
+
+	fd_in = _wfopen(wfilename, L"r, ccs=UNICODE");
+	if (fd_in == NULL) {
+		uprintf("Could not open file '%s'\n", filename);
+		goto out;
+	}
+	// Check the input file's BOM and create an output file with the same
+	fread(&bom, sizeof(bom), 1, fd_in);
+	switch(bom) {
+	case 0xFEFF:
+		mode = 2;	// UTF-16 (LE)
+		break;
+	case 0xBBEF:	// Yeah, the UTF-8 BOM is really 0xEF,0xBB,0xBF, but
+		mode = 1;	// find me a non UTF-8 file that actually begins with "ï»"
+		break;
+	default:
+		mode = 0;	// ANSI
+		break;
+	}
+	fseek(fd_in, 0, SEEK_SET);
+//	uprintf("'%s' was detected as %s\n", filename, 
+//		(mode==0)?"ANSI/UTF8 (no BOM)":((mode==1)?"UTF8 (with BOM)":"UTF16 (with BOM"));
+
+
+	wtmpname = (wchar_t*)calloc(wcslen(wfilename)+2, sizeof(wchar_t));
+	if (wtmpname == NULL) {
+		uprintf("Could not allocate space for temporary output name\n");
+		goto out;
+	}
+	wcscpy(wtmpname, wfilename);
+	wtmpname[wcslen(wtmpname)] = '~';
+
+	fd_out = _wfopen(wtmpname, outmode[mode]);
+	if (fd_out == NULL) {
+		uprintf("Could not open temporary output file %s~\n", filename);
+		goto out;
+	}
+
+	// Process individual lines. NUL is always appended.
+	while (fgetws(buf, ARRAYSIZE(buf), fd_in) != NULL) {
+
+		i = 0;
+
+		// Skip leading spaces
+		i += wcsspn(&buf[i], wspace);
+
+		// Our token should begin a line
+		if (_wcsnicmp(&buf[i], wsection, wcslen(wsection)) != 0) {
+			fputws(buf, fd_out);
+			continue;
+		}
+
+		// Section was found, output it
+		fputws(buf, fd_out);
+		// Now output the new data
+		fwprintf(fd_out, L"%s\n", wdata);
+		ret = (char*)data;
+	}
+
+out:
+	if (fd_in != NULL) fclose(fd_in);
+	if (fd_out != NULL) fclose(fd_out);
+
+	// If an insertion occured, delete existing file and use the new one
+	if (ret != NULL) {
+		// We're in Windows text mode => Remove CRs if requested
+		fd_in = _wfopen(wtmpname, L"rb");
+		fd_out = _wfopen(wfilename, L"wb");
+		// Don't check fds
+		if ((fd_in != NULL) && (fd_out != NULL)) {
+			size = (mode==2)?2:1;
+			while(fread(tmp, size, 1, fd_in) == 1) {
+				if ((!dos2unix) || (tmp[0] != 0x0D))
+					fwrite(tmp, size, 1, fd_out);
+			}
+			fclose(fd_in);
+			fclose(fd_out);
+		} else {
+			uprintf("Could not write %s - original file has been left unmodifiedn", filename);
+			ret = NULL;
+			if (fd_in != NULL) fclose(fd_in);
+			if (fd_out != NULL) fclose(fd_out);
+		}
+	} 
+	_wunlink(wtmpname);
+	safe_free(wfilename);
+	safe_free(wtmpname);
+	safe_free(wsection);
+	safe_free(wdata);
+
+	return ret;
+}
+
 // Search for a specific 'src' substring the data for all occurences of 'token', and replace
 // if with 'rep'. File can be ANSI or UNICODE and is overwritten. Parameters are UTF-8.
 // The parsed line is of the form: [ ]token[ ]data
 // Returns a pointer to rep if replacement occured, NULL otherwise
-char* replace_in_token_data(const char* filename, const char* token, const char* src, const char* rep)
+char* replace_in_token_data(const char* filename, const char* token, const char* src, const char* rep, BOOL dos2unix)
 {
 	const wchar_t* outmode[] = { L"w", L"w, ccs=UTF-8", L"w, ccs=UTF-16LE" };
 	wchar_t *wtoken = NULL, *wfilename = NULL, *wtmpname = NULL, *wsrc = NULL, *wrep = NULL, bom = 0;
@@ -236,24 +362,25 @@ out:
 
 	// If a replacement occured, delete existing file and use the new one
 	if (ret != NULL) {
-		// We're in Windows text mode => Remove CRs
+		// We're in Windows text mode => Remove CRs if requested
 		fd_in = _wfopen(wtmpname, L"rb");
 		fd_out = _wfopen(wfilename, L"wb");
 		// Don't check fds
 		if ((fd_in != NULL) && (fd_out != NULL)) {
 			size = (mode==2)?2:1;
 			while(fread(tmp, size, 1, fd_in) == 1) {
-				if (tmp[0] != 0x0D)
+				if ((!dos2unix) || (tmp[0] != 0x0D))
 					fwrite(tmp, size, 1, fd_out);
 			}
 			fclose(fd_in);
 			fclose(fd_out);
 		} else {
-			uprintf("Dos2Unix conversion failed for %s - file will be unusable!\n", filename);
+			uprintf("Could not write %s - original file has been left unmodified.\n", filename);
+			ret = NULL;
 			if (fd_in != NULL) fclose(fd_in);
 			if (fd_out != NULL) fclose(fd_out);
 		}
-	} 
+	}
 	_wunlink(wtmpname);
 	safe_free(wfilename);
 	safe_free(wtmpname);

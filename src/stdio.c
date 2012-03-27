@@ -229,6 +229,8 @@ const char* StrError(DWORD error_code)
 	case ERROR_CANT_REMOUNT_VOLUME:
 		return "Unable to remount volume. You may have to use the\n"
 			"mountvol.exe command to make your device accessible again";
+	case ERROR_CANT_PATCH:
+		return "Unable to patch/setup files for boot";
 	default:
 		uprintf("Unknown error: %08X\n", error_code);
 		SetLastError(error_code);

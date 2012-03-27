@@ -475,8 +475,9 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 		break;
 	}
 	if (IsChecked(IDC_DOS)) {
-		// Set first partition bootable - masquerade as 0x81 for XP
-		buf[0x1be] = ((iso_report.winpe&WINPE_I386)==WINPE_I386)?0x81:0x80;	
+		// Set first partition bootable - masquerade as 0x81 for non /minint WinPE 
+		buf[0x1be] = (IS_WINPE(iso_report.winpe) && iso_report.uses_minint)?0x80:0x81;
+		uprintf("Set bootable USB partition as 0x%02X\n", buf[0x1be]);
 	}
 
 	if (!write_sectors(hPhysicalDrive, SecSize, 0, nSecs, buf)) {
@@ -492,7 +493,7 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 	if ((dt == DT_ISO) && ((fs == FS_FAT16) || (fs == FS_FAT32))) {
 		r = write_syslinux_mbr(&fake_fd);
 	} else {
-		if (IsChecked(IDC_RUFUS_MBR)) {
+		if ((IS_WINPE(iso_report.winpe) && !iso_report.uses_minint) || (IsChecked(IDC_RUFUS_MBR))) {
 			uprintf("Using Rufus bootable USB selection MBR\n");
 			r = WriteRufusMBR(&fake_fd);
 		} else {
@@ -579,44 +580,41 @@ static BOOL SetupWinPE(char drive_letter)
 {
 	char src[64], dst[32];
 	const char* basedir[] = { "i386", "minint" };
-	const char* patch_str_org[] = { "\\minint\\txtsetup.sif", "\\minint\\system32\\" };
-	const char* patch_str_rep[] = { "\\$\\i386\\txtsetup.sif", "\\$\\i386\\system32\\" };
-	const char *win_nt_bt_org = "$win_nt$.~bt", *win_nt_bt_rep = "$\\i386";
+	const char* patch_str_org[] = { "\\minint\\txtsetup.sif", "\\minint\\system32\\", "\\ntdetect.com" };
+	// NB: that last patched string will overflow onto the "ntdetect.com" used for net, which we don't care about
+	const char* patch_str_rep[] = { "\\i386\\txtsetup.sif", "\\i386\\system32\\", "\\i386\\ntdetect.com" };
+	const char *win_nt_bt_org = "$win_nt$.~bt", *win_nt_bt_rep = "i386";
 	const char *rdisk_zero = "rdisk(0)";
-	const char* winnt_sif = "[Data]\n     msdosinitiated = \"1\"\n";
-	const wchar_t* win_nt_ls = L"$win_nt$.~ls";
-	STARTUPINFOA si;
-	PROCESS_INFORMATION pi;
+	// TODO: allow other values than harddisk 1, as per user choice?
+	char* setupsrcdev = "SetupSourceDevice = \"\\device\\harddisk1\\partition1\"";
 	HANDLE handle = INVALID_HANDLE_VALUE;
-	DWORD i, j, size, rw_size, index = 0, exit_code;
-	BOOL minint = FALSE, r = FALSE;
+	DWORD i, j, size, rw_size, index = 0;
+	BOOL r = FALSE;
 	char* buf = NULL;
 
 	index = ((iso_report.winpe&WINPE_I386) == WINPE_I386)?0:1;
-
-	// Parse TXTSETUP.SIF to see if /minint was provided for OsLoadOptions
-	safe_sprintf(src, sizeof(src), "%c:\\%s\\txtsetup.sif", drive_letter, basedir[index]);
-	buf = get_token_data(src, "OsLoadOptions");
-	if (buf != NULL) {
-		for (i=0; i<strlen(buf); i++)
-			buf[i] = (char)tolower(buf[i]);
-		uprintf("OsLoadOptions = %s\n", buf);
-		minint = (strstr(buf, "/minint") != NULL);
+	if (!iso_report.uses_minint) {
+		// Create a copy of txtsetup.sif, as we want to keep the i386 files unmodified
+		safe_sprintf(src, sizeof(src), "%c:\\%s\\txtsetup.sif", drive_letter, basedir[index]);
+		safe_sprintf(dst, sizeof(dst), "%c:\\txtsetup.sif", drive_letter);
+		// TODO: detect if overwrite?
+		CopyFileA(src, dst, TRUE);
+		if (insert_section_data(dst, "[SetupData]", setupsrcdev, FALSE) == NULL) {
+			uprintf("Failed to add SetupSourceDevice in %s\n", dst);
+			goto out;
+		}
+		uprintf("Succesfully added '%s' to %s\n", setupsrcdev, dst);
 	}
-	safe_free(buf);
 
-	// TODO: detect if overwrite?
-	safe_sprintf(src, sizeof(src), "%c:\\%s\\ntdetect.com", drive_letter,  basedir[index]);
-	safe_sprintf(dst, sizeof(dst), "%c:\\ntdetect.com", drive_letter);
-	CopyFileA(src, dst, TRUE);
 	safe_sprintf(src, sizeof(src), "%c:\\%s\\setupldr.bin", drive_letter,  basedir[index]);
 	safe_sprintf(dst, sizeof(dst), "%c:\\BOOTMGR", drive_letter);
+	// TODO: detect if overwrite?
 	CopyFileA(src, dst, TRUE);
 
 	// \minint with /minint option doesn't require further processing => return true
 	// \minint and no \i386 without /minint is unclear => return error
 	if (iso_report.winpe&WINPE_MININT) {
-		if (minint) {
+		if (iso_report.uses_minint) {
 			uprintf("Detected \\minint directory with /minint option: nothing to patch\n");
 			r = TRUE;
 		} else if (!(iso_report.winpe&WINPE_I386)) {
@@ -645,155 +643,54 @@ static BOOL SetupWinPE(char drive_letter)
 	}
 	SetFilePointer(handle, 0, NULL, FILE_BEGIN);
 
-	/* Patch setupldr.bin so that [\$]\i386 can be used instead of \minint */
+	// Patch setupldr.bin
 	uprintf("Patching file %s\n", dst);
-	for (i=0; i<size-32; i++) {
+	// Remove CRC check for 32 bit part of setupldr.bin from Win2k3
+	if ((size > 0x2061) && (buf[0x2060] == 0x74) && (buf[0x2061] == 0x03)) {
+		// TODO: amend this is not all Win2k3 setupldr.bin use the same header
+		buf[0x2060] = 0xeb;
+		buf[0x2061] = 0x1a;
+		uprintf("  0x00002060: 0x74 0x03 -> 0xEB 0x1A (disable Win2k3 CRC check)\n");
+	}
+	for (i=1; i<size-32; i++) {
 		for (j=0; j<ARRAYSIZE(patch_str_org); j++) {
 			if (safe_strnicmp(&buf[i], patch_str_org[j], strlen(patch_str_org[j])-1) == 0) {
-				uprintf("  0x%08X: '%s' -> '%s'\n", i, &buf[i], &patch_str_rep[j][minint?2:0]);
-				strcpy(&buf[i], &patch_str_rep[j][minint?2:0]);
+				if ((j == 2) && (buf[i-1] == '6'))	// Avoid patching a later "\i386\ntdetect.com"
+					continue;
+				uprintf("  0x%08X: '%s' -> '%s'\n", i, &buf[i], patch_str_rep[j]);
+				strcpy(&buf[i], patch_str_rep[j]);
+				i += max(strlen(patch_str_org[j]), strlen(patch_str_rep[j]));	// in case org is a substring of rep
 			}
 		}
 	}
 
-	if (minint) {
-		if ((!WriteFile(handle, buf, size, &rw_size, NULL)) || (size != rw_size)) {
-			uprintf("Could not write patched file: %s\n", WindowsErrorString());
-			goto out;
-		}
-	}else {
-		// Finish patching \bootmgr
+	if (!iso_report.uses_minint) {
+		// Additional setupldr.bin/bootmgr patching
 		for (i=0; i<size-32; i++) {
-			// $WIN_NT$_~BT -> $\i386
-			if (safe_strnicmp(&buf[i], win_nt_bt_org, strlen(win_nt_bt_org)-1) == 0) {
-				uprintf("  0x%08X: '%s' -> '%s%s'\n", i, &buf[i], win_nt_bt_rep, &buf[i+strlen(win_nt_bt_org)]);
-				strcpy(&buf[i], win_nt_bt_rep);
-				buf[i+strlen(win_nt_bt_rep)] = buf[i+strlen(win_nt_bt_org)];
-				buf[i+strlen(win_nt_bt_rep)+1] = 0;
-			}
-			// rdisk(0) -> rdisk(1) (MBR disk masquerading)
+			// rdisk(0) -> rdisk(1) disk masquerading
 			// TODO: only the first one seems to be needed
 			if (safe_strnicmp(&buf[i], rdisk_zero, strlen(rdisk_zero)-1) == 0) {
 				buf[i+6] = '1';
 				uprintf("  0x%08X: '%s' -> 'rdisk(1)'\n", i, rdisk_zero);
 			}
-		}
-
-		if ((!WriteFile(handle, buf, size, &rw_size, NULL)) || (size != rw_size)) {
-			uprintf("Could not write patched file: %s\n", WindowsErrorString());
-			goto out;
-		}
-		safe_free(buf);
-		safe_closehandle(handle);
-
-		// Rename \i386 to \$\i386
-		safe_sprintf(src, sizeof(src), "%c:\\$", drive_letter);
-		if (!CreateDirectoryA(src, NULL)) {
-			uprintf("Could not create %s: %s\n", src, WindowsErrorString());
-			goto out;
-		}
-		safe_sprintf(src, sizeof(src), "%c:\\i386", drive_letter);
-		safe_sprintf(dst, sizeof(dst), "%c:\\$\\i386", drive_letter);
-		uprintf("Renaming '%s' to '%s'\n", src, dst);
-		if (!MoveFileA(src, dst)) {
-			uprintf("  failed: %s\n", WindowsErrorString());
-			goto out;
-		}
-
-		// Create a \$\i386\winnt.sif (avoids "Please insert" errors)
-		safe_sprintf(src, sizeof(src), "%c:\\$\\i386\\winnt.sif", drive_letter);
-		size = strlen(winnt_sif);
-		handle = CreateFileA(src, GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
-		if (handle == INVALID_HANDLE_VALUE) {
-			uprintf("Could not create %s: %s\n", src, WindowsErrorString());
-			goto out;
-		}
-		if ((!WriteFile(handle, winnt_sif, size, &rw_size, NULL)) || (size != rw_size)) {
-			uprintf("Could not write %s: %s\n", src, WindowsErrorString());
-			goto out;
-		}
-		safe_closehandle(handle);
-
-		// Uncompress $\\i386\\setupdd.sy_
-		// Don't bother calling Extract() from cabinet.dll - calling expand.exe is much simpler
-		// TODO: factorize CreateProcess()?
-		memset(&si, 0, sizeof(si));
-		si.cb = sizeof(si);
-		memset(&pi, 0, sizeof(pi));
-
-		uprintf("Decompressing %c:\\$\\i386\\setupdd.sy_\n", drive_letter);
-		safe_sprintf(src, sizeof(src), "expand %c:\\$\\i386\\setupdd.sy_ %c:\\$\\i386\\setupdd.sys", drive_letter, drive_letter);
-		if (!CreateProcessA(NULL, src, NULL, NULL, TRUE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi)) {
-			uprintf("Could not launch command '%s': %s", src, WindowsErrorString());
-			goto out;
-		}
-		WaitForSingleObject(pi.hProcess, INFINITE);
-		GetExitCodeProcess(pi.hProcess, &exit_code);
-		safe_closehandle(pi.hProcess);
-		safe_closehandle(pi.hThread);
-		if (exit_code != 0) {
-			uprintf("Command '%s' failed with exit code: %d\n", src, exit_code);
-			goto out;
-		}
-
-		// Patch the uncompressed $\\i386\\setupdd.sys
-		safe_sprintf(dst, sizeof(dst), "%c:\\$\\i386\\setupdd.sys", drive_letter);
-		handle = CreateFileA(dst, GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-		if (handle == INVALID_HANDLE_VALUE) {
-			uprintf("Could not open %s for patching: %s\n", dst, WindowsErrorString());
-			goto out;
-		}
-		size = GetFileSize(handle, NULL);
-		if (size == INVALID_FILE_SIZE) {
-			uprintf("Could not get size for file %s: %s\n", dst, WindowsErrorString());
-			goto out;
-		}
-		buf = (char*)malloc(size);
-		if (buf == NULL)
-			goto out;
-		if ((!ReadFile(handle, buf, size, &rw_size, NULL)) || (size != rw_size)) {
-			uprintf("Could not read file %s: %s\n", dst, WindowsErrorString());
-			goto out;
-		}
-		SetFilePointer(handle, 0, NULL, FILE_BEGIN);
-
-		uprintf("Patching %s\n", dst);
-		for (i=0; i<size-32; i++) {
-			if (_wcsnicmp((wchar_t*)&buf[i], win_nt_ls, wcslen(win_nt_ls)-1) == 0) {
-				uprintf("  0x%08X: '$win_nt$.~ls' -> '$'\n", i);
-				buf[i+2] = 0;
+			// $WIN_NT$_~BT -> i386
+			if (safe_strnicmp(&buf[i], win_nt_bt_org, strlen(win_nt_bt_org)-1) == 0) {
+				uprintf("  0x%08X: '%s' -> '%s%s'\n", i, &buf[i], win_nt_bt_rep, &buf[i+strlen(win_nt_bt_org)]);
+				strcpy(&buf[i], win_nt_bt_rep);
+				// This ensures that we keep the terminator backslash
+				buf[i+strlen(win_nt_bt_rep)] = buf[i+strlen(win_nt_bt_org)];
+				buf[i+strlen(win_nt_bt_rep)+1] = 0;
 			}
 		}
-
-		if ((!WriteFile(handle, buf, size, &rw_size, NULL)) || (size != rw_size)) {
-			uprintf("Could not write patched file: %s\n", WindowsErrorString());
-			goto out;
-		}
-		safe_closehandle(handle);
-
-		// Recompress to $\\i386\\setupdd.sy_
-		memset(&si, 0, sizeof(si));
-		si.cb = sizeof(si);
-		memset(&pi, 0, sizeof(pi));
-
-		uprintf("Compressing back %s\n", dst);
-		safe_sprintf(src, sizeof(src), "makecab %c:\\$\\i386\\setupdd.sys %c:\\$\\i386\\setupdd.sy_", drive_letter, drive_letter);
-		if (!CreateProcessA(NULL, src, NULL, NULL, TRUE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi)) {
-			uprintf("Could not launch command '%s': %s", src, WindowsErrorString());
-			goto out;
-		}
-		WaitForSingleObject(pi.hProcess, INFINITE);
-		GetExitCodeProcess(pi.hProcess, &exit_code);
-		safe_closehandle(pi.hProcess);
-		safe_closehandle(pi.hThread);
-		if (exit_code != 0) {
-			uprintf("Command '%s' failed with exit code: %d\n", src, exit_code);
-			goto out;
-		}
-
-		// Delete uncompressed file
-		_unlink(dst);
 	}
+
+	if ((!WriteFile(handle, buf, size, &rw_size, NULL)) || (size != rw_size)) {
+		uprintf("Could not write patched file: %s\n", WindowsErrorString());
+		goto out;
+	}
+	safe_free(buf);
+	safe_closehandle(handle);
+
 	r = TRUE;
 
 out:
@@ -1021,7 +918,8 @@ DWORD WINAPI FormatThread(LPVOID param)
 			}
 			if (IS_WINPE(iso_report.winpe)) {
 				// Apply WinPe fixup
-				SetupWinPE(drive_name[0]);
+				if (!SetupWinPE(drive_name[0]))
+					FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_PATCH);
 			}
 		}
 		if (IsChecked(IDC_SET_ICON))

@@ -156,6 +156,7 @@ typedef struct {
 	BOOL has_isolinux;
 	BOOL has_autorun;
 	BOOL has_old_vesamenu;
+	BOOL uses_minint;
 } RUFUS_ISO_REPORT;
 
 /*
@@ -193,6 +194,7 @@ extern void DestroyAllTooltips(void);
 extern BOOL Notification(int type, char* title, char* format, ...);
 extern BOOL ExtractDOS(const char* path);
 extern BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan);
+extern BOOL ExtractISOFile(const char* iso, const char* iso_file, const char* dest_file);
 extern BOOL InstallSyslinux(DWORD num, const char* drive_name);
 DWORD WINAPI FormatThread(void* param);
 extern BOOL CreatePartition(HANDLE hDrive);
@@ -205,7 +207,8 @@ extern char* FileDialog(BOOL save, char* path, char* filename, char* ext, char* 
 extern LONG GetEntryWidth(HWND hDropDown, const char* entry);
 extern BOOL DownloadFile(const char* url, const char* file);
 extern char* get_token_data(const char* filename, const char* token);
-extern char* replace_in_token_data(const char* filename, const char* token, const char* src, const char* rep);
+extern char* insert_section_data(const char* filename, const char* section, const char* data, BOOL dos2unix);
+extern char* replace_in_token_data(const char* filename, const char* token, const char* src, const char* rep, BOOL dos2unix);
 
 __inline static BOOL UnlockDrive(HANDLE hDrive)
 {
@@ -278,6 +281,7 @@ typedef struct {
 #define ERROR_ISO_SCAN                 0x1207
 #define ERROR_ISO_EXTRACT              0x1208
 #define ERROR_CANT_REMOUNT_VOLUME      0x1209
+#define ERROR_CANT_PATCH               0x1210
 
 /* More niceties */
 #ifndef MIN

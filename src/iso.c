@@ -247,7 +247,7 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 			if (is_syslinux_cfg) {
 				// Workaround for isolinux config files requiring an ISO label for kernel
 				// append that may be different from our USB label.
-				if (replace_in_token_data(psz_fullpath, "append", iso_report.label, iso_report.usb_label) != NULL)
+				if (replace_in_token_data(psz_fullpath, "append", iso_report.label, iso_report.usb_label, TRUE) != NULL)
 					uprintf("Patched %s: '%s' -> '%s'\n", psz_fullpath, iso_report.label, iso_report.usb_label);
 			}
 		}
@@ -355,7 +355,7 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 			}
 			ISO_BLOCKING(safe_closehandle(file_handle));
 			if (is_syslinux_cfg) {
-				if (replace_in_token_data(psz_fullpath, "append", iso_report.label, iso_report.usb_label) != NULL)
+				if (replace_in_token_data(psz_fullpath, "append", iso_report.label, iso_report.usb_label, TRUE) != NULL)
 					uprintf("Patched %s: '%s' -> '%s'\n", psz_fullpath, iso_report.label, iso_report.usb_label);
 			}
 		}
@@ -377,9 +377,11 @@ BOOL ExtractISO(const char* src_iso, const char* dest_dir, bool scan)
 	udf_t* p_udf = NULL; 
 	udf_dirent_t* p_udf_root;
 	LONG progress_style;
-	char* vol_id;
-	char syslinux_path[64];
+	char* tmp;
+	char path[64];
 	const char* scan_text = "Scanning ISO image...";
+	const char* basedir[] = { "i386", "minint" };
+	const char* tmp_sif = ".\\txtsetup.sif~";
 
 	if ((src_iso == NULL) || (dest_dir == NULL))
 		return FALSE;
@@ -441,9 +443,9 @@ try_iso:
 	i_joliet_level = iso9660_ifs_get_joliet_level(p_iso);
 	uprintf("Disc image is an ISO9660 image\n");
 	if (scan_only) {
-		if (iso9660_ifs_get_volume_id(p_iso, &vol_id)) {
-			safe_strcpy(iso_report.label, sizeof(iso_report.label), vol_id);
-			safe_free(vol_id);
+		if (iso9660_ifs_get_volume_id(p_iso, &tmp)) {
+			safe_strcpy(iso_report.label, sizeof(iso_report.label), tmp);
+			safe_free(tmp);
 		} else
 			iso_report.label[0] = 0;
 	}
@@ -464,15 +466,32 @@ out:
 			}
 			uprintf("Will use %s for Syslinux\n", iso_report.cfg_path);
 		}
+		if (IS_WINPE(iso_report.winpe)) {
+			// In case we have a WinPE 1.x based iso, we extract and parse txtsetup.sif
+			// during scan, to see if /minint was provided for OsLoadOptions, as it decides
+			// whether we should use 0x80 or 0x81 as the disk ID in the MBR
+			safe_sprintf(path, sizeof(path), "/%s/txtsetup.sif", 
+				basedir[((iso_report.winpe&WINPE_I386) == WINPE_I386)?0:1]);
+			ExtractISOFile(src_iso, path, tmp_sif);
+			tmp = get_token_data(tmp_sif, "OsLoadOptions");
+			if (tmp != NULL) {
+				for (i=0; i<strlen(tmp); i++)
+					tmp[i] = (char)tolower(tmp[i]);
+				uprintf("Checking txtsetup.sif:\n  OsLoadOptions = %s\n", tmp);
+				iso_report.uses_minint = (strstr(tmp, "/minint") != NULL);
+			}
+			_unlink(tmp_sif);
+			safe_free(tmp);
+		}
 		StrArrayDestroy(&config_path);
 	} else if (iso_report.has_isolinux) {
-		safe_sprintf(syslinux_path, sizeof(syslinux_path), "%s\\syslinux.cfg", dest_dir);
+		safe_sprintf(path, sizeof(path), "%s\\syslinux.cfg", dest_dir);
 		// Create a /syslinux.cfg (if none exists) that points to the existing isolinux cfg
-		fd = fopen(syslinux_path, "r");
+		fd = fopen(path, "r");
 		if (fd == NULL) {
-			fd = fopen(syslinux_path, "w");	// No "/syslinux.cfg" => create a new one
+			fd = fopen(path, "w");	// No "/syslinux.cfg" => create a new one
 			if (fd == NULL) {
-				uprintf("Unable to create %s - booting from USB will not work\n", syslinux_path);
+				uprintf("Unable to create %s - booting from USB will not work\n", path);
 				r = 1;
 			} else {
 				fprintf(fd, "DEFAULT loadconfig\n\nLABEL loadconfig\n  CONFIG %s\n", iso_report.cfg_path);
@@ -482,7 +501,7 @@ out:
 					fprintf(fd, "  APPEND %s/\n", iso_report.cfg_path);
 					iso_report.cfg_path[i] = '/';
 				}
-				uprintf("Created: %s\n", syslinux_path);
+				uprintf("Created: %s\n", path);
 			}
 		}
 		if (fd != NULL)
@@ -495,5 +514,109 @@ out:
 		udf_close(p_udf);
 	if ((r != 0) && (FormatStatus == 0))
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR((scan_only?ERROR_ISO_SCAN:ERROR_ISO_EXTRACT));
+	return (r == 0);
+}
+
+BOOL ExtractISOFile(const char* iso, const char* iso_file, const char* dest_file)
+{
+	size_t i;
+	ssize_t read;
+	int64_t file_length;
+	char buf[UDF_BLOCKSIZE];
+	DWORD buf_size, wr_size;
+	BOOL s, r = FALSE;
+	iso9660_t* p_iso = NULL;
+	udf_t* p_udf = NULL; 
+	udf_dirent_t *p_udf_root = NULL, *p_udf_file = NULL;
+	iso9660_stat_t *p_statbuf = NULL;
+	lsn_t lsn;
+	HANDLE file_handle = INVALID_HANDLE_VALUE;
+
+	file_handle = CreateFileU(dest_file, GENERIC_READ | GENERIC_WRITE,
+		FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+	if (file_handle == INVALID_HANDLE_VALUE) {
+		uprintf("  Unable to create file %s: %s\n", dest_file, WindowsErrorString());
+		goto out;
+	}
+
+	/* First try to open as UDF - fallback to ISO if it failed */
+	p_udf = udf_open(iso);
+	if (p_udf == NULL)
+		goto try_iso;
+	uprintf("Disc image is an UDF image\n");
+
+	p_udf_root = udf_get_root(p_udf, true, 0);
+	if (p_udf_root == NULL) {
+		uprintf("Couldn't locate UDF root directory\n");
+		goto out;
+	}
+	p_udf_file = udf_fopen(p_udf_root, iso_file);
+	if (!p_udf_file) {
+		uprintf("Couldn't locate file %s in ISO image\n", iso_file);
+		goto out;
+	}
+	file_length = udf_get_file_length(p_udf_file);
+	while (file_length > 0) {
+		memset(buf, 0, UDF_BLOCKSIZE);
+		read = udf_read_block(p_udf_file, buf, 1);
+		if (read < 0) {
+			uprintf("Error reading UDF file %s\n", iso_file);
+			goto out;
+		}
+		buf_size = (DWORD)MIN(file_length, read);
+		s = WriteFile(file_handle, buf, buf_size, &wr_size, NULL);
+		if ((!s) || (buf_size != wr_size)) {
+			uprintf("  Error writing file %s: %s\n", dest_file, WindowsErrorString());
+			goto out;
+		}
+		file_length -= read;
+	}
+	r = TRUE;
+	goto out;
+
+try_iso:
+	p_iso = iso9660_open(iso);
+	if (p_iso == NULL) {
+		uprintf("Unable to open image '%s'.\n", iso);
+		goto out;
+	}
+	uprintf("Disc image is an ISO9660 image\n");
+
+	p_statbuf = iso9660_ifs_stat_translate(p_iso, iso_file);
+	if (p_statbuf == NULL) {
+		uprintf("Could not get ISO-9660 file information for file %s\n", iso_file);
+		goto out;
+	}
+
+	file_length = p_statbuf->size;
+	for (i = 0; file_length > 0; i++) {
+		memset(buf, 0, ISO_BLOCKSIZE);
+		lsn = p_statbuf->lsn + (lsn_t)i;
+		if (iso9660_iso_seek_read(p_iso, buf, lsn, 1) != ISO_BLOCKSIZE) {
+			uprintf("  Error reading ISO9660 file %s at LSN %lu\n", iso_file, (long unsigned int)lsn);
+			goto out;
+		}
+		buf_size = (DWORD)MIN(file_length, ISO_BLOCKSIZE);
+		s = WriteFile(file_handle, buf, buf_size, &wr_size, NULL);
+		if ((!s) || (buf_size != wr_size)) {
+			uprintf("  Error writing file %s: %s\n", dest_file, WindowsErrorString());
+			goto out;
+		}
+		file_length -= ISO_BLOCKSIZE;
+	}
+	r = TRUE;
+
+out:
+	safe_closehandle(file_handle);
+	safe_free(p_statbuf->rr.psz_symlink);
+	safe_free(p_statbuf);
+	if (p_udf_root != NULL)
+		udf_dirent_free(p_udf_root);
+	if (p_udf_file != NULL)
+		udf_dirent_free(p_udf_file);
+	if (p_iso != NULL)
+		iso9660_close(p_iso);
+	if (p_udf != NULL)
+		udf_close(p_udf);
 	return (r == 0);
 }
