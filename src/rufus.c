@@ -60,7 +60,7 @@ float fScale = 1.0f;
 int default_fs;
 HWND hDeviceList, hCapacity, hFileSystem, hClusterSize, hLabel, hDOSType, hNBPasses;
 HWND hISOProgressDlg = NULL, hISOProgressBar, hISOFileName;
-BOOL bWithFreeDOS, use_own_vesamenu = FALSE;
+BOOL use_own_vesamenu = FALSE;
 int rufus_version[4];
 extern char szStatusMessage[256];
 
@@ -1163,16 +1163,8 @@ void InitDialog(HWND hDlg)
 	for (i=0; (i<4) && ((token = strtok(NULL, ".")) != NULL); i++)
 		rufus_version[i] = atoi(token);
 
-	// Update the title if we have FreeDOS support
-	if (bWithFreeDOS) {
-		GetWindowTextA(hDlg, &tmp[15], sizeof(tmp)-15);
-		safe_sprintf(tmp, sizeof(tmp), "Rufus (with FreeDOS)");
-		tmp[20] = ' ';
-		SetWindowTextA(hDlg, tmp);
-		selection_default = DT_FREEDOS;
-	} else {
-		selection_default = DT_WINME;
-	}
+	// Prefer FreeDOS to MS-DOS
+	selection_default = DT_FREEDOS;
 
 	// Create the status line
 	CreateStatusBar();
@@ -1347,13 +1339,12 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			IGNORE_RETVAL(ComboBox_ResetContent(hDOSType));
 			if ((fs == FS_FAT16) || (fs == FS_FAT32)) {
 				IGNORE_RETVAL(ComboBox_SetItemData(hDOSType, ComboBox_AddStringU(hDOSType, "MS-DOS"), DT_WINME));
-				if (bWithFreeDOS)
-					IGNORE_RETVAL(ComboBox_SetItemData(hDOSType, ComboBox_AddStringU(hDOSType, "FreeDOS"), DT_FREEDOS));
+				IGNORE_RETVAL(ComboBox_SetItemData(hDOSType, ComboBox_AddStringU(hDOSType, "FreeDOS"), DT_FREEDOS));
 			}
 			IGNORE_RETVAL(ComboBox_SetItemData(hDOSType, ComboBox_AddStringU(hDOSType, "ISO Image"), DT_ISO));
 			if (selection_default == DT_ISO) {
 				if (iso_path == NULL)
-					selection_default = (bWithFreeDOS)?DT_FREEDOS:DT_WINME;
+					selection_default = DT_FREEDOS;
 				else 
 					EnableWindow(GetDlgItem(hMainDialog, IDC_RUFUS_MBR),
 					(iso_report.has_bootmgr) || (IS_WINPE(iso_report.winpe)));
@@ -1555,11 +1546,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	// We use local group policies rather than direct registry manipulation
 	// 0x9e disables removable and fixed drive notifications
 	SetLGP(FALSE, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer", "NoDriveTypeAutorun", 0x9e);
-
-	// Find out if the FreeDOS resources are embedded in the app
-	bWithFreeDOS = (FindResource(hMainInstance, MAKEINTRESOURCE(IDR_FD_COMMAND_COM), RT_RCDATA) != NULL) &&
-		(FindResource(hMainInstance, MAKEINTRESOURCE(IDR_FD_KERNEL_SYS), RT_RCDATA) != NULL);
-	uprintf("FreeDOS resources are %sembedded with this app\n", bWithFreeDOS?"":"NOT ");
 
 	// Create the main Window
 	if ( (hDlg = CreateDialogA(hInstance, MAKEINTRESOURCEA(IDD_DIALOG), NULL, MainCallback)) == NULL ) {

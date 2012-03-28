@@ -8,9 +8,6 @@
 // Generated from the TEXTINCLUDE 2 resource.
 //
 #include <windows.h>
-#ifndef __MINGW32__
-#include "../ms-config.h"
-#endif
 #ifndef IDC_STATIC
 #define IDC_STATIC -1
 #endif
@@ -33,7 +30,7 @@ LANGUAGE LANG_ENGLISH, SUBLANG_NEUTRAL
 IDD_DIALOG DIALOGEX 12, 12, 206, 289
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_APPWINDOW
-CAPTION "Rufus v1.1.6.161"
+CAPTION "Rufus v1.2.0.162"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     DEFPUSHBUTTON   "Start",IDC_START,94,248,50,14
@@ -74,7 +71,7 @@ BEGIN
     DEFPUSHBUTTON   "OK",IDOK,231,175,50,14,WS_GROUP
     CONTROL         "<a href=""http://rufus.akeo.ie"">http://rufus.akeo.ie</a>",IDC_ABOUT_RUFUS_URL,
                     "SysLink",WS_TABSTOP,46,47,114,9
-    LTEXT           "Version 1.1.6 (Build 161)",IDC_STATIC,46,19,78,8
+    LTEXT           "Version 1.2.0 (Build 162)",IDC_STATIC,46,19,78,8
     PUSHBUTTON      "License...",IDC_ABOUT_LICENSE,46,175,50,14,WS_GROUP
     EDITTEXT        IDC_ABOUT_COPYRIGHTS,46,107,235,63,ES_MULTILINE | ES_READONLY | WS_VSCROLL
     LTEXT           "Report bugs or request enhancements at:",IDC_STATIC,46,66,187,8
@@ -129,9 +126,6 @@ END
 2 TEXTINCLUDE 
 BEGIN
     "#include <windows.h>\r\n"
-    "#ifndef __MINGW32__\r\n"
-    "#include ""../ms-config.h""\r\n"
-    "#endif\r\n"
     "#ifndef IDC_STATIC\r\n"
     "#define IDC_STATIC -1\r\n"
     "#endif\r\n"
@@ -144,8 +138,6 @@ BEGIN
     "IDR_SL_LDLINUX_BSS      RCDATA                  ""../res/syslinux/ldlinux.bss""\r\n"
     "IDR_SL_LDLINUX_SYS      RCDATA                  ""../res/syslinux/ldlinux.sys""\r\n"
     "IDR_BR_MBR_BIN          RCDATA                  ""../res/mbr/mbr.bin""\r\n"
-    "// Only include these in rufus_fd\r\n"
-    "#if defined(WITH_FREEDOS)\r\n"
     "IDR_FD_COMMAND_COM      RCDATA                  ""../res/freedos/COMMAND.COM""\r\n"
     "IDR_FD_KERNEL_SYS       RCDATA                  ""../res/freedos/KERNEL.SYS""\r\n"
     "IDR_FD_DISPLAY_EXE      RCDATA                  ""../res/freedos/DISPLAY.EXE""\r\n"
@@ -173,7 +165,6 @@ BEGIN
     "IDR_FD_EGA16_CPX        RCDATA                  ""../res/freedos/ega16.cpx""\r\n"
     "IDR_FD_EGA17_CPX        RCDATA                  ""../res/freedos/ega17.cpx""\r\n"
     "IDR_FD_EGA18_CPX        RCDATA                  ""../res/freedos/ega18.cpx""\r\n"
-    "#endif\r\n"
     "\r\n"
     "// Must reference a manifest for visual styles and elevation\r\n"
     "// Oh, and it must happen at the end, or MinGW will ignore it!\r\n"
@@ -225,8 +216,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,1,6,161
- PRODUCTVERSION 1,1,6,161
+ FILEVERSION 1,2,0,162
+ PRODUCTVERSION 1,2,0,162
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -243,13 +234,13 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "akeo.ie"
             VALUE "FileDescription", "Rufus"
-            VALUE "FileVersion", "1.1.6.161"
+            VALUE "FileVersion", "1.2.0.162"
             VALUE "InternalName", "Rufus"
             VALUE "LegalCopyright", "© 2011 Pete Batard (GPL v3)"
             VALUE "LegalTrademarks", "http://www.gnu.org/copyleft/gpl.html"
             VALUE "OriginalFilename", "rufus.exe"
             VALUE "ProductName", "Rufus"
-            VALUE "ProductVersion", "1.1.6.161"
+            VALUE "ProductVersion", "1.2.0.162"
         END
     END
     BLOCK "VarFileInfo"
@@ -281,8 +272,6 @@ IDI_ICON                ICON                    "../res/rufus.ico"
 IDR_SL_LDLINUX_BSS      RCDATA                  "../res/syslinux/ldlinux.bss"
 IDR_SL_LDLINUX_SYS      RCDATA                  "../res/syslinux/ldlinux.sys"
 IDR_BR_MBR_BIN          RCDATA                  "../res/mbr/mbr.bin"
-// Only include these in rufus_fd
-#if defined(WITH_FREEDOS)
 IDR_FD_COMMAND_COM      RCDATA                  "../res/freedos/COMMAND.COM"
 IDR_FD_KERNEL_SYS       RCDATA                  "../res/freedos/KERNEL.SYS"
 IDR_FD_DISPLAY_EXE      RCDATA                  "../res/freedos/DISPLAY.EXE"
@@ -310,7 +299,6 @@ IDR_FD_EGA15_CPX        RCDATA                  "../res/freedos/ega15.cpx"
 IDR_FD_EGA16_CPX        RCDATA                  "../res/freedos/ega16.cpx"
 IDR_FD_EGA17_CPX        RCDATA                  "../res/freedos/ega17.cpx"
 IDR_FD_EGA18_CPX        RCDATA                  "../res/freedos/ega18.cpx"
-#endif
 
 // Must reference a manifest for visual styles and elevation
 // Oh, and it must happen at the end, or MinGW will ignore it!

@@ -1,4 +1,4 @@
-AC_INIT([rufus], [1.1.6], [https://github.com/pbatard/rufus/issues], [rufus], [http://rufus.akeo.ie])
+AC_INIT([rufus], [1.2.0], [https://github.com/pbatard/rufus/issues], [rufus], [http://rufus.akeo.ie])
 AM_INIT_AUTOMAKE([-Wno-portability foreign no-dist no-dependencies])
 AC_CONFIG_SRCDIR([src/rufus.c])
 AC_CONFIG_MACRO_DIR([m4])
@@ -20,17 +20,6 @@ AC_DEFINE([_GNU_SOURCE], [], [Use GNU extensions])
 # in msapi_utf8.h - including winver.h only doesn't work
 AM_CFLAGS="${AM_CFLAGS} -DWINVER=0x501 -D_WIN32_IE=0x501 -D_WIN32_WINNT=0x501"
 AM_LDFLAGS="${AM_LDFLAGS} -Wl,-no-undefined"
-
-# FreeDOS support
-AC_ARG_WITH([freedos],
-	[AS_HELP_STRING([--with-freedos],
-		[embed FreeDOS support (default=yes)])],
-	[],
-	[with_freedos=yes])
-if test "x$with_freedos" != "xno" ; then
-	AM_RCFLAGS="${AM_RCFLAGS} -DWITH_FREEDOS"
-	EXESUFFIX="f"
-fi
 
 # Debug symbols
 AC_ARG_ENABLE([debug],
@@ -60,8 +49,6 @@ AM_CFLAGS="$AM_CFLAGS -std=gnu99 -Wshadow -Wall -Wundef -Wunused -Wstrict-protot
 AC_SUBST([VISIBILITY_CFLAGS])
 AC_SUBST([AM_CFLAGS])
 AC_SUBST([AM_LDFLAGS])
-AC_SUBST([AM_RCFLAGS])
-AC_SUBST([EXESUFFIX])
 
 AC_CONFIG_FILES([Makefile])
 AC_CONFIG_FILES([src/Makefile])
@@ -72,5 +59,3 @@ AC_CONFIG_FILES([src/libcdio/iso9660/Makefile])
 AC_CONFIG_FILES([src/libcdio/udf/Makefile])
 AC_CONFIG_FILES([src/libcdio/driver/Makefile])
 AC_OUTPUT
-
-AC_MSG_RESULT([FreeDOS support: $(test "x$with_freedos" != "xno" && echo enabled || echo disabled)])

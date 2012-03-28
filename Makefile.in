@@ -71,7 +71,6 @@ AMTAR = @AMTAR@
 AM_CFLAGS = @AM_CFLAGS@
 AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
 AM_LDFLAGS = @AM_LDFLAGS@
-AM_RCFLAGS = @AM_RCFLAGS@
 AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
@@ -85,7 +84,6 @@ ECHO_C = @ECHO_C@
 ECHO_N = @ECHO_N@
 ECHO_T = @ECHO_T@
 EXEEXT = @EXEEXT@
-EXESUFFIX = @EXESUFFIX@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
@@ -449,13 +447,8 @@ release: all
 	@mv src/$(TARGET)$(EXEEXT) .
 	@$(STRIP) $(TARGET)$(EXEEXT)
 	@upx $(TARGET)$(EXEEXT)
-	@mv $(TARGET)$(EXEEXT) $(TARGET)_v$(VERSION)$(EXESUFFIX)$(EXEEXT)
-# Don't want to enter a password twice => only sign when we have both release files
-	@if [ -f $(TARGET)_v$(VERSION)f$(EXEEXT) ]; then \
-		if [ -f $(TARGET)_v$(VERSION)$(EXEEXT) ]; then \
-			cmd.exe /k _sign.cmd $(TARGET)_v$(VERSION)$(EXEEXT) $(TARGET)_v$(VERSION)f$(EXEEXT); \
-		fi; \
-	fi
+	@mv $(TARGET)$(EXEEXT) $(TARGET)_v$(VERSION)$(EXEEXT)
+	@cmd.exe /k _sign.cmd $(TARGET)_v$(VERSION)$(EXEEXT)
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

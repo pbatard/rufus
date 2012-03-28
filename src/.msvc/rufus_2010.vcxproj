@@ -173,7 +173,6 @@
     <ClCompile Include="..\syslinux.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\ms-config.h" />
     <ClInclude Include="..\badblocks.h" />
     <ClInclude Include="..\format.h" />
     <ClInclude Include="..\libcdio\cdio\cdio.h" />

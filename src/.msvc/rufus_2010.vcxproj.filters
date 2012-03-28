@@ -80,9 +80,6 @@
     <ClInclude Include="..\resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\ms-config.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\libcdio\cdio\cdio.h">
       <Filter>Header Files</Filter>
     </ClInclude>

@@ -5,16 +5,14 @@ Features:
 - Creates DOS bootable USB drives, with no external files required
 - Creates bootable USB drives from bootable ISOs (Windows, Linux, etc.)
 - Twice as fast as Microsoft's USB/DVD tool or UNetbootin, on ISO->USB (1)
-- Bad blocks check
+- Bad blocks check, with detection for fake capacity
 - Modern UI, with UAC elevation for Windows Vista and later
-- Very small footprint, no installation required
+- Small footprint, no installation required
 - 100% Free Source Software (GPL v3)
 
 Compilation:
   Use either Visual Studio 2010, WDK (Windows Driver Kit) or MinGW and then
   invoke the .sln, wdk_build.cmd or configure/make respectively.
-  You can change the project options (FreeDOS support, etc) by editing the top-level
-  ms-config.h (Visual Studio, WDK) or running "./configure --help" (MinGW).
   
 Additional information:
   Rufus provides extensive information about what it is doing through the Windows
