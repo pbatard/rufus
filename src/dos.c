@@ -166,40 +166,51 @@ static void FatDateTimeToSystemTime(PLARGE_INTEGER SystemTime, PFAT_DATETIME Fat
  * IO.SYS            000003AA          75 -> EB
  * COMMAND.COM       00006510          75 -> EB
  */
-static BOOL Patch_COMMAND_COM(size_t filestart, size_t filesize)
+static BOOL Patch_COMMAND_COM(HANDLE hFile)
 {
 	const BYTE expected[8] = { 0x15, 0x80, 0xFA, 0x03, 0x75, 0x10, 0xB8, 0x0E };
+	BYTE data[sizeof(expected)] = { 0x00 };
+	DWORD size = sizeof(data);
 
 	uprintf("Patching COMMAND.COM...\n");
-	if (filesize != 93040) {
+	if (GetFileSize(hFile, NULL) != 93040) {
 		uprintf("  unexpected file size\n");
 		return FALSE;
 	}
-//	See #24: https://github.com/pbatard/rufus/issues/24
-//	uprintf("&DiskImage[filestart(=%x)+0x650c] = %p\n", filestart, &DiskImage[filestart+0x650c]);
-//	uprintf("&DiskImage[0] = %p\n", &DiskImage[0]);
-	if (memcmp(&DiskImage[filestart+0x650c], expected, sizeof(expected)) != 0) {
+	SetFilePointer(hFile, 0x650c, NULL, FILE_BEGIN);
+	ReadFile(hFile, data, size, &size, NULL);
+	if (memcmp(data, expected, sizeof(expected)) != 0) {
 		uprintf("  unexpected binary data\n");
 		return FALSE;
 	}
-	DiskImage[filestart+0x6510] = 0xeb;
+	data[4] = 0xeb;
+	SetFilePointer(hFile, 0x650c, NULL, FILE_BEGIN);
+	size = sizeof(data);
+	WriteFile(hFile, data, size, &size, NULL);
 	return TRUE;
 }
 
-static BOOL Patch_IO_SYS(size_t filestart, size_t filesize)
+static BOOL Patch_IO_SYS(HANDLE hFile)
 {
 	const BYTE expected[8] = { 0xFA, 0x80, 0x75, 0x09, 0x8D, 0xB6, 0x99, 0x00 };
+	BYTE data[sizeof(expected)] = { 0x00 };
+	DWORD size = sizeof(data);
 
 	uprintf("Patching IO.SYS...\n");
-	if (filesize != 116736) {
+	if (GetFileSize(hFile, NULL) != 116736) {
 		uprintf("  unexpected file size\n");
 		return FALSE;
 	}
-	if (memcmp(&DiskImage[filestart+0x3a8], expected, sizeof(expected)) != 0) {
+	SetFilePointer(hFile, 0x3a8, NULL, FILE_BEGIN);
+	ReadFile(hFile, data, size, &size, NULL);
+	if (memcmp(data, expected, sizeof(expected)) != 0) {
 		uprintf("  unexpected binary data\n");
 		return FALSE;
 	}
-	DiskImage[filestart+0x3aa] = 0xeb;
+	data[2] = 0xeb;
+	SetFilePointer(hFile, 0x3a8, NULL, FILE_BEGIN);
+	size = sizeof(data);
+	WriteFile(hFile, data, size, &size, NULL);
 	return TRUE;
 }
 
@@ -245,13 +256,6 @@ static BOOL ExtractFAT(int entry, const char* path)
 		return FALSE;
 	}
 
-	/* WinME DOS files need to be patched */
-	if (strcmp(&filename[fnamepos], "COMMAND.COM") == 0) {
-		Patch_COMMAND_COM(filestart, filesize);
-	} else if (strcmp(&filename[fnamepos], "IO.SYS") == 0) {
-		Patch_IO_SYS(filestart, filesize);
-	}
-
 	/* Create a file, using the same attributes as found in the FAT */
 	hFile = CreateFileA(filename, GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ|FILE_SHARE_WRITE,
 		NULL, CREATE_ALWAYS, dir_entry->Attributes, 0);
@@ -264,6 +268,13 @@ static BOOL ExtractFAT(int entry, const char* path)
 		uprintf("Couldn't write file '%s': %s.\n", filename, WindowsErrorString());
 		safe_closehandle(hFile);
 		return FALSE;
+	}
+
+	/* WinME DOS files need to be patched */
+	if (strcmp(&filename[fnamepos], "COMMAND.COM") == 0) {
+		Patch_COMMAND_COM(hFile);
+	} else if (strcmp(&filename[fnamepos], "IO.SYS") == 0) {
+		Patch_IO_SYS(hFile);
 	}
 
 	/* Restore timestamps from FAT */

@@ -126,8 +126,6 @@ static BOOL SaveIcon(const char* filename)
 	// Write icon data
 	offset = 3*sizeof(WORD) + icondir->idCount*sizeof(ICONDIRENTRY);
 	for (i=0; i<icondir->idCount; i++) {
-		// wPlanes is set to 0 in the original .ico => fix it
-		icondir->idEntries[i].wPlanes = 0;	// NB: this produces an exception which we don't care about
 		// Write the common part of ICONDIRENTRY
 		if ( (!WriteFile(hFile, &icondir->idEntries[i], sizeof(GRPICONDIRENTRY)-sizeof(WORD), &Size, NULL))
 		   || (Size != sizeof(GRPICONDIRENTRY)-sizeof(WORD)) ) {
