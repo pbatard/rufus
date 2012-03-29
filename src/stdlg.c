@@ -831,3 +831,116 @@ LONG GetEntryWidth(HWND hDropDown, const char *entry)
 	free(wentry);
 	return size.cx;
 }
+
+/*
+ * Windows 7 taskbar icon handling (progress bar overlay, etc)
+ * Some platforms don't have these, so we redefine
+ */
+typedef enum MY_STPFLAG
+{
+	MY_STPF_NONE = 0,
+	MY_STPF_USEAPPTHUMBNAILALWAYS = 0x1,
+	MY_STPF_USEAPPTHUMBNAILWHENACTIVE = 0x2,
+	MY_STPF_USEAPPPEEKALWAYS = 0x4,
+	MY_STPF_USEAPPPEEKWHENACTIVE = 0x8
+} MY_STPFLAG;
+
+typedef enum MY_THUMBBUTTONMASK
+{
+	MY_THB_BITMAP = 0x1,
+	MY_THB_ICON = 0x2,
+	MY_THB_TOOLTIP = 0x4,
+	MY_THB_FLAGS = 0x8
+} MY_THUMBBUTTONMASK;
+
+typedef enum MY_THUMBBUTTONFLAGS
+{
+	MY_THBF_ENABLED = 0,
+	MY_THBF_DISABLED = 0x1,
+	MY_THBF_DISMISSONCLICK = 0x2,
+	MY_THBF_NOBACKGROUND = 0x4,
+	MY_THBF_HIDDEN = 0x8,
+	MY_THBF_NONINTERACTIVE = 0x10
+} MY_THUMBBUTTONFLAGS;
+
+typedef struct MY_THUMBBUTTON
+{
+	MY_THUMBBUTTONMASK dwMask;
+	UINT iId;
+	UINT iBitmap;
+	HICON hIcon;
+	WCHAR szTip[260];
+	MY_THUMBBUTTONFLAGS dwFlags;
+} MY_THUMBBUTTON;
+
+/*
+typedef enum MY_TBPFLAG
+{
+	TASKBAR_NOPROGRESS = 0,
+	TASKBAR_INDETERMINATE = 0x1,
+	TASKBAR_NORMAL = 0x2,
+	TASKBAR_ERROR = 0x4,
+	TASKBAR_PAUSED = 0x8
+} MY_TBPFLAG;
+*/
+
+#pragma push_macro("INTERFACE")
+#undef  INTERFACE
+#define INTERFACE my_ITaskbarList3
+DECLARE_INTERFACE_(my_ITaskbarList3, IUnknown) {
+	STDMETHOD (QueryInterface) (THIS_ REFIID riid, LPVOID *ppvObj) PURE;
+	STDMETHOD_(ULONG, AddRef) (THIS) PURE;
+	STDMETHOD_(ULONG, Release) (THIS) PURE;
+	STDMETHOD (HrInit) (THIS) PURE;
+	STDMETHOD (AddTab) (THIS_ HWND hwnd) PURE;
+	STDMETHOD (DeleteTab) (THIS_ HWND hwnd) PURE;
+	STDMETHOD (ActivateTab) (THIS_ HWND hwnd) PURE;
+	STDMETHOD (SetActiveAlt) (THIS_ HWND hwnd) PURE;
+	STDMETHOD (MarkFullscreenWindow) (THIS_ HWND hwnd, int fFullscreen) PURE;
+	STDMETHOD (SetProgressValue) (THIS_ HWND hwnd, ULONGLONG ullCompleted, ULONGLONG ullTotal) PURE;
+	STDMETHOD (SetProgressState) (THIS_ HWND hwnd, TASKBAR_PROGRESS_FLAGS tbpFlags) PURE;
+	STDMETHOD (RegisterTab) (THIS_ HWND hwndTab,HWND hwndMDI) PURE;
+	STDMETHOD (UnregisterTab) (THIS_ HWND hwndTab) PURE;
+	STDMETHOD (SetTabOrder) (THIS_ HWND hwndTab, HWND hwndInsertBefore) PURE;
+	STDMETHOD (SetTabActive) (THIS_ HWND hwndTab, HWND hwndMDI, DWORD dwReserved) PURE;
+	STDMETHOD (ThumbBarAddButtons) (THIS_ HWND hwnd, UINT cButtons, MY_THUMBBUTTON* pButton) PURE;
+	STDMETHOD (ThumbBarUpdateButtons) (THIS_ HWND hwnd, UINT cButtons, MY_THUMBBUTTON* pButton) PURE;
+	STDMETHOD (ThumbBarSetImageList) (THIS_ HWND hwnd, HIMAGELIST himl) PURE;
+	STDMETHOD (SetOverlayIcon) (THIS_ HWND hwnd, HICON hIcon, LPCWSTR pszDescription) PURE;
+	STDMETHOD (SetThumbnailTooltip) (THIS_ HWND hwnd, LPCWSTR pszTip) PURE;
+	STDMETHOD (SetThumbnailClip) (THIS_ HWND hwnd, RECT *prcClip) PURE;
+};
+const IID my_IID_ITaskbarList3 = 
+	{ 0xea1afb91, 0x9e28, 0x4b86, { 0x90, 0xe9, 0x9e, 0x9f, 0x8a, 0x5e, 0xef, 0xaf } };
+const IID my_CLSID_TaskbarList = 
+	{ 0x56fdf344, 0xfd6d, 0x11d0, { 0x95, 0x8a ,0x0, 0x60, 0x97, 0xc9, 0xa0 ,0x90 } };
+
+static my_ITaskbarList3* ptbl = NULL;
+
+BOOL CreateTaskbarList(void)
+{
+	HRESULT hr;
+	// Create the taskbar icon progressbar
+	hr = CoCreateInstance(&my_CLSID_TaskbarList, NULL, CLSCTX_ALL, &my_IID_ITaskbarList3, (LPVOID)&ptbl);
+	if (FAILED(hr)) {
+		uprintf("CoCreateInstance for TaskbarList failed: error %X", hr);
+		ptbl = NULL;
+		return FALSE;
+	}
+	return TRUE;
+}
+
+BOOL SetTaskbarProgressState(TASKBAR_PROGRESS_FLAGS tbpFlags)
+{
+	if (ptbl == NULL)
+		return FALSE;
+	return !FAILED(ptbl->lpVtbl->SetProgressState(ptbl, hMainDialog, tbpFlags));
+}
+
+BOOL SetTaskbarProgressValue(ULONGLONG ullCompleted, ULONGLONG ullTotal)
+{
+	if (ptbl == NULL)
+		return FALSE;
+	return !FAILED(ptbl->lpVtbl->SetProgressValue(ptbl, hMainDialog, ullCompleted, ullTotal));
+}
+#pragma pop_macro("INTERFACE")

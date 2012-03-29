@@ -39,6 +39,20 @@
 #include "rufus.h"
 #include "sys_types.h"
 
+/* Redefinitions for the WDK */
+#ifndef PBM_SETSTATE
+#define PBM_SETSTATE (WM_USER+16)
+#endif
+#ifndef PBST_NORMAL
+#define PBST_NORMAL 1
+#endif
+#ifndef PBST_ERROR
+#define PBST_ERROR 2
+#endif
+#ifndef PBST_PAUSED
+#define PBST_PAUSED 3
+#endif
+
 static const char* FileSystemLabel[FS_MAX] = { "FAT", "FAT32", "NTFS", "exFAT" };
 // Don't ask me - just following the MS standard here
 static const char* ClusterSizeLabel[] = { "512 bytes", "1024 bytes","2048 bytes","4096 bytes","8192 bytes",
@@ -783,6 +797,7 @@ void UpdateProgress(int op, float percent)
 	}
 
 	SendMessage(hProgress, PBM_SETPOS, (WPARAM)pos, 0);
+	SetTaskbarProgressValue(pos, MAX_PROGRESS);
 }
 
 /*
@@ -1165,9 +1180,11 @@ void InitDialog(HWND hDlg)
 
 	// Prefer FreeDOS to MS-DOS
 	selection_default = DT_FREEDOS;
-
-	// Create the status line
+	// Create the status line and initialize the taskbar icon for progress overlay
 	CreateStatusBar();
+	CreateTaskbarList();
+	SetTaskbarProgressState(TASKBAR_NORMAL);
+
 	// Use maximum granularity for the progress bar
 	SendMessage(hProgress, PBM_SETRANGE, 0, MAX_PROGRESS<<16);
 	// Fill up the passes
@@ -1445,6 +1462,10 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				_snwprintf(wstr, ARRAYSIZE(wstr), L"WARNING: ALL DATA ON DEVICE %s\r\nWILL BE DESTROYED.\r\n"
 					L"To continue with this operation, click OK. To quit click CANCEL.", wtmp);
 				if (MessageBoxW(hMainDialog, wstr, L"Rufus", MB_OKCANCEL|MB_ICONWARNING) == IDOK) {
+					// Reset all progress bars
+					SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_NORMAL, 0);
+					SetTaskbarProgressState(TASKBAR_NORMAL);
+					SetTaskbarProgressValue(0, MAX_PROGRESS);
 					// Disable all controls except cancel
 					EnableControls(FALSE);
 					DeviceNum = (DWORD)ComboBox_GetItemData(hDeviceList, nDeviceIndex);
@@ -1494,21 +1515,22 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		EnableControls(TRUE);
 		GetUSBDevices(DeviceNum);
 		if (!IS_ERROR(FormatStatus)) {
-			PrintStatus(0, FALSE, "DONE");
-		} else if (SCODE_CODE(FormatStatus) == ERROR_CANCELLED) {
-			PrintStatus(0, FALSE, "Cancelled");
-			Notification(MSG_INFO, "Cancelled", "Operation cancelled by the user.");
-		} else {
-			PrintStatus(0, FALSE, "FAILED");
-			Notification(MSG_ERROR, "Error", "Error: %s", StrError(FormatStatus));
-		}
-		if (FormatStatus) {
-			SendMessage(hProgress, PBM_SETPOS, 0, 0);
-		} else {
-			// This is the only way to achieve instantenous progress transition
+			// This is the only way to achieve instantenous progress transition to 100%
 			SendMessage(hProgress, PBM_SETRANGE, 0, (MAX_PROGRESS+1)<<16);
 			SendMessage(hProgress, PBM_SETPOS, (MAX_PROGRESS+1), 0);
 			SendMessage(hProgress, PBM_SETRANGE, 0, MAX_PROGRESS<<16);
+			SetTaskbarProgressState(TASKBAR_NOPROGRESS);
+			PrintStatus(0, FALSE, "DONE");
+		} else if (SCODE_CODE(FormatStatus) == ERROR_CANCELLED) {
+			SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_PAUSED, 0);
+			SetTaskbarProgressState(TASKBAR_PAUSED);
+			PrintStatus(0, FALSE, "Cancelled");
+			Notification(MSG_INFO, "Cancelled", "Operation cancelled by the user.");
+		} else {
+			SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_ERROR, 0);
+			SetTaskbarProgressState(TASKBAR_ERROR);
+			PrintStatus(0, FALSE, "FAILED");
+			Notification(MSG_ERROR, "Error", "Error: %s", StrError(FormatStatus));
 		}
 		return (INT_PTR)TRUE;
 	}

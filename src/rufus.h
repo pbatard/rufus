@@ -159,6 +159,16 @@ typedef struct {
 	BOOL uses_minint;
 } RUFUS_ISO_REPORT;
 
+/* Duplication of the TBPFLAG enum for Windows 7 taskbar progress */
+typedef enum TASKBAR_PROGRESS_FLAGS
+{
+	TASKBAR_NOPROGRESS = 0,
+	TASKBAR_INDETERMINATE = 0x1,
+	TASKBAR_NORMAL = 0x2,
+	TASKBAR_ERROR = 0x4,
+	TASKBAR_PAUSED = 0x8
+} TASKBAR_PROGRESS_FLAGS;
+
 /*
  * Globals
  */
@@ -187,6 +197,9 @@ extern void UpdateProgress(int op, float percent);
 extern const char* StrError(DWORD error_code);
 extern void CenterDialog(HWND hDlg);
 extern void CreateStatusBar(void);
+extern BOOL CreateTaskbarList(void);
+extern BOOL SetTaskbarProgressState(TASKBAR_PROGRESS_FLAGS tbpFlags);
+extern BOOL SetTaskbarProgressValue(ULONGLONG ullCompleted, ULONGLONG ullTotal);
 extern INT_PTR CreateAboutBox(void);
 extern HWND CreateTooltip(HWND hControl, const char* message, int duration);
 extern void DestroyTooltip(HWND hWnd);
