@@ -107,6 +107,7 @@ enum action_type {
 	OP_CREATE_FS,
 	OP_FIX_MBR,
 	OP_DOS,
+	OP_FINALIZE,
 	OP_MAX
 };
 

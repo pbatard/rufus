@@ -566,6 +566,9 @@ BOOL BadBlocks(HANDLE hPhysicalDrive, ULONGLONG disk_size, size_t block_size,
 	blk_t first_block = 0, last_block = disk_size/block_size;
 
 	if (report == NULL) return FALSE;
+	num_read_errors = 0;
+	num_write_errors = 0;
+	num_corruption_errors = 0;
 	report->bb_count = 0;
 	if (fd != NULL) {
 		log_fd = fd;

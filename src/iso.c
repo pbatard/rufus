@@ -44,7 +44,7 @@
 
 // How often should we update the progress bar (in 2K blocks) as updating
 // the progress bar for every block will bring extraction to a crawl
-#define PROGRESS_THRESHOLD        1024
+#define PROGRESS_THRESHOLD        128
 #define FOUR_GIGABYTES            4294967296LL
 
 // Needed for UDF ISO access
@@ -237,6 +237,7 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 				i_file_length -= i_read;
 				if (nb_blocks++ % PROGRESS_THRESHOLD == 0) {
 					SendMessage(hISOProgressBar, PBM_SETPOS, (WPARAM)((MAX_PROGRESS*nb_blocks)/total_blocks), 0);
+					UpdateProgress(OP_DOS, 100.0f*nb_blocks/total_blocks);
 				}
 			}
 			// If you have a fast USB 3.0 device, the default Windows buffering does an
@@ -352,6 +353,7 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 				i_file_length -= ISO_BLOCKSIZE;
 				if (nb_blocks++ % PROGRESS_THRESHOLD == 0) {
 					SendMessage(hISOProgressBar, PBM_SETPOS, (WPARAM)((MAX_PROGRESS*nb_blocks)/total_blocks), 0);
+					UpdateProgress(OP_DOS, 100.0f*nb_blocks/total_blocks);
 				}
 			}
 			ISO_BLOCKING(safe_closehandle(file_handle));

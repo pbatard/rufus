@@ -659,7 +659,7 @@ static BOOL SetupWinPE(char drive_letter)
 					continue;
 				uprintf("  0x%08X: '%s' -> '%s'\n", i, &buf[i], patch_str_rep[j]);
 				strcpy(&buf[i], patch_str_rep[j]);
-				i += max(strlen(patch_str_org[j]), strlen(patch_str_rep[j]));	// in case org is a substring of rep
+				i += (DWORD)max(strlen(patch_str_org[j]), strlen(patch_str_rep[j]));	// in case org is a substring of rep
 			}
 		}
 	}
@@ -898,8 +898,8 @@ DWORD WINAPI FormatThread(LPVOID param)
 		goto out;
 
 	if (IsChecked(IDC_DOS)) {
-		UpdateProgress(OP_DOS, -1.0f);
 		if ((dt == DT_WINME) || (dt == DT_FREEDOS)) {
+			UpdateProgress(OP_DOS, -1.0f);
 			PrintStatus(0, TRUE, "Copying DOS files...");
 			if (!ExtractDOS(drive_name)) {
 				if (!FormatStatus)
@@ -908,6 +908,7 @@ DWORD WINAPI FormatThread(LPVOID param)
 			}
 		} else if (dt == DT_ISO) {
 			if (iso_path != NULL) {
+				UpdateProgress(OP_DOS, 0.0f);
 				PrintStatus(0, TRUE, "Copying ISO files...");
 				drive_name[2] = 0;
 				if (!ExtractISO(iso_path, drive_name, FALSE)) {
@@ -922,14 +923,17 @@ DWORD WINAPI FormatThread(LPVOID param)
 					FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_PATCH);
 			}
 		}
+		UpdateProgress(OP_FINALIZE, -1.0f);
+		PrintStatus(0, TRUE, "Finalizing...");
 		if (IsChecked(IDC_SET_ICON))
 			SetAutorun(drive_name);
-		UpdateProgress(OP_DOS, -1.0f);
 		// Issue another complete remount before we exit, to ensure we're clean
 		RemountVolume(drive_name[0]);
 		// NTFS fixup (WinPE/AIK images don't seem to boot without an extra checkdisk)
-		if ((dt == DT_ISO) && (fs == FS_NTFS))
+		if ((dt == DT_ISO) && (fs == FS_NTFS)) {
 			CheckDisk(drive_name[0]);
+			UpdateProgress(OP_FINALIZE, -1.0f);
+		}
 	}
 
 out:

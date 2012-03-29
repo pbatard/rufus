@@ -698,9 +698,11 @@ static BOOL GetUSBDevices(DWORD devnum)
  */
 static void InitProgress(void)
 {
-	int i;
+	int i, dt, fs;
 	float last_end = 0.0f, slots_discrete = 0.0f, slots_analog = 0.0f;
 
+	fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
+	dt = (int)ComboBox_GetItemData(hDOSType, ComboBox_GetCurSel(hDOSType));
 	memset(&nb_slots, 0, sizeof(nb_slots));
 	memset(&slot_end, 0, sizeof(slot_end));
 	previous_end = 0.0f;
@@ -711,15 +713,18 @@ static void InitProgress(void)
 	}
 	if (IsChecked(IDC_DOS)) {
 		// 1 extra slot for PBR writing
-		switch (ComboBox_GetItemData(hDOSType, ComboBox_GetCurSel(hDOSType))) {
+		switch (dt) {
 		case DT_WINME:
-			nb_slots[OP_DOS] = 4+1;
+			nb_slots[OP_DOS] = 3+1;
 			break;
 		case DT_FREEDOS:
-			nb_slots[OP_DOS] = 6+1;
+			nb_slots[OP_DOS] = 5+1;
+			break;
+		case DT_ISO:
+			nb_slots[OP_DOS] = -1;
 			break;
 		default:
-			nb_slots[OP_DOS] = 3+1;
+			nb_slots[OP_DOS] = 2+1;
 			break;
 		}
 	}
@@ -730,6 +735,7 @@ static void InitProgress(void)
 	if (!IsChecked(IDC_QUICKFORMAT)) {
 		nb_slots[OP_FORMAT] = -1;
 	}
+	nb_slots[OP_FINALIZE] = ((dt == DT_ISO) && (fs == FS_NTFS))?2:1;
 
 	for (i=0; i<OP_MAX; i++) {
 		if (nb_slots[i] > 0) {
@@ -1430,6 +1436,11 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				return (INT_PTR)TRUE;
 			}
 			FormatStatus = 0;
+			// Reset all progress bars
+			SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_NORMAL, 0);
+			SetTaskbarProgressState(TASKBAR_NORMAL);
+			SetTaskbarProgressValue(0, MAX_PROGRESS);
+			SendMessage(hProgress, PBM_SETPOS, 0, 0);
 			selection_default =  (int)ComboBox_GetItemData(hDOSType, ComboBox_GetCurSel(hDOSType));
 			nDeviceIndex = ComboBox_GetCurSel(hDeviceList);
 			if (nDeviceIndex != CB_ERR) {
@@ -1462,10 +1473,6 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				_snwprintf(wstr, ARRAYSIZE(wstr), L"WARNING: ALL DATA ON DEVICE %s\r\nWILL BE DESTROYED.\r\n"
 					L"To continue with this operation, click OK. To quit click CANCEL.", wtmp);
 				if (MessageBoxW(hMainDialog, wstr, L"Rufus", MB_OKCANCEL|MB_ICONWARNING) == IDOK) {
-					// Reset all progress bars
-					SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_NORMAL, 0);
-					SetTaskbarProgressState(TASKBAR_NORMAL);
-					SetTaskbarProgressValue(0, MAX_PROGRESS);
 					// Disable all controls except cancel
 					EnableControls(FALSE);
 					DeviceNum = (DWORD)ComboBox_GetItemData(hDeviceList, nDeviceIndex);
