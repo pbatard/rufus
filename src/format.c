@@ -476,7 +476,7 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 	}
 	if (IsChecked(IDC_DOS)) {
 		// Set first partition bootable - masquerade as 0x81 for non /minint WinPE 
-		buf[0x1be] = (IS_WINPE(iso_report.winpe) && iso_report.uses_minint)?0x80:0x81;
+		buf[0x1be] = ((!IS_WINPE(iso_report.winpe)) || ((IS_WINPE(iso_report.winpe) && iso_report.uses_minint)))?0x80:0x81;
 		uprintf("Set bootable USB partition as 0x%02X\n", buf[0x1be]);
 	}
 
@@ -580,9 +580,8 @@ static BOOL SetupWinPE(char drive_letter)
 {
 	char src[64], dst[32];
 	const char* basedir[] = { "i386", "minint" };
-	const char* patch_str_org[] = { "\\minint\\txtsetup.sif", "\\minint\\system32\\", "\\ntdetect.com" };
-	// NB: that last patched string will overflow onto the "ntdetect.com" used for net, which we don't care about
-	const char* patch_str_rep[] = { "\\i386\\txtsetup.sif", "\\i386\\system32\\", "\\i386\\ntdetect.com" };
+	const char* patch_str_org[] = { "\\minint\\txtsetup.sif", "\\minint\\system32\\" };
+	const char* patch_str_rep[] = { "\\i386\\txtsetup.sif", "\\i386\\system32\\" };
 	const char *win_nt_bt_org = "$win_nt$.~bt", *win_nt_bt_rep = "i386";
 	const char *rdisk_zero = "rdisk(0)";
 	// TODO: allow other values than harddisk 1, as per user choice?
@@ -593,6 +592,10 @@ static BOOL SetupWinPE(char drive_letter)
 	char* buf = NULL;
 
 	index = ((iso_report.winpe&WINPE_I386) == WINPE_I386)?0:1;
+	// Copy of ntdetect.com in root
+	safe_sprintf(src, sizeof(src), "%c:\\%s\\ntdetect.com", drive_letter, basedir[index]);
+	safe_sprintf(dst, sizeof(dst), "%c:\\ntdetect.com", drive_letter);
+	CopyFileA(src, dst, TRUE);
 	if (!iso_report.uses_minint) {
 		// Create a copy of txtsetup.sif, as we want to keep the i386 files unmodified
 		safe_sprintf(src, sizeof(src), "%c:\\%s\\txtsetup.sif", drive_letter, basedir[index]);
@@ -655,8 +658,6 @@ static BOOL SetupWinPE(char drive_letter)
 	for (i=1; i<size-32; i++) {
 		for (j=0; j<ARRAYSIZE(patch_str_org); j++) {
 			if (safe_strnicmp(&buf[i], patch_str_org[j], strlen(patch_str_org[j])-1) == 0) {
-				if ((j == 2) && (buf[i-1] == '6'))	// Avoid patching a later "\i386\ntdetect.com"
-					continue;
 				uprintf("  0x%08X: '%s' -> '%s'\n", i, &buf[i], patch_str_rep[j]);
 				strcpy(&buf[i], patch_str_rep[j]);
 				i += (DWORD)max(strlen(patch_str_org[j]), strlen(patch_str_rep[j]));	// in case org is a substring of rep
