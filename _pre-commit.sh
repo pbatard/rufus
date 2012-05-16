@@ -10,10 +10,9 @@
 # fi
 
 type -P sed &>/dev/null || { echo "sed command not found. Aborting." >&2; exit 1; }
-type -P grep &>/dev/null || { echo "grep command not found. Aborting." >&2; exit 1; }
 type -P git &>/dev/null || { echo "git command not found. Aborting." >&2; exit 1; }
 
-VER=`git shortlog | grep -E '^[ ]+' | wc -l`
+VER=`git log --oneline | wc -l`
 # trim spaces
 TAGVER=`echo $VER`
 # there may be a better way to prevent improper nano on amend. For now the detection
