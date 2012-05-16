@@ -448,7 +448,7 @@ static BOOL PopulateProperties(int ComboIndex)
 	char capacity[64];
 	static char *suffix[] = { "KB", "MB", "GB", "TB", "PB"};
 	char no_label[] = STR_NO_LABEL;
-	int i;
+	int i, fs;
 
 	IGNORE_RETVAL(ComboBox_ResetContent(hCapacity));
 	IGNORE_RETVAL(ComboBox_ResetContent(hFileSystem));
@@ -461,6 +461,9 @@ static BOOL PopulateProperties(int ComboIndex)
 	hFSTooltip = NULL;
 	memset(&SelectedDrive, 0, sizeof(SelectedDrive));
 
+	EnableWindow(GetDlgItem(hMainDialog, IDC_DOS), FALSE);
+	EnableWindow(GetDlgItem(hMainDialog, IDC_DOSTYPE), FALSE);
+
 	if (ComboIndex < 0) {
 		return TRUE;
 	}
@@ -469,6 +472,9 @@ static BOOL PopulateProperties(int ComboIndex)
 	if (!GetDriveInfo())	// This also populates FS
 		return FALSE;
 	SetFSFromISO();
+	fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
+	EnableWindow(GetDlgItem(hMainDialog, IDC_DOS), (fs == FS_FAT16) || (fs == FS_FAT32) || (fs == FS_NTFS));
+	EnableWindow(GetDlgItem(hMainDialog, IDC_DOSTYPE), (fs == FS_FAT16) || (fs == FS_FAT32) || (fs == FS_NTFS));
 
 	HumanReadableSize = (double)SelectedDrive.DiskSize;
 	for (i=0; i<ARRAYSIZE(suffix); i++) {
