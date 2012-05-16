@@ -29,6 +29,7 @@
 #include <process.h>
 #include <stddef.h>
 #include <ctype.h>
+#include <locale.h>
 
 #include "msapi_utf8.h"
 #include "rufus.h"
@@ -261,10 +262,16 @@ static BOOL FormatDrive(char DriveLetter)
 	WCHAR wFSType[32];
 	WCHAR wLabel[64];
 	size_t i;
+	char* locale;
 
 	wDriveRoot[0] = (WCHAR)DriveLetter;
 	PrintStatus(0, TRUE, "Formatting...");
+	// LoadLibrary("fmifs.dll") appears to changes the locale, which can lead to
+	// problems with tolower(). Make sure we restore the locale. For more details,
+	// see http://comments.gmane.org/gmane.comp.gnu.mingw.user/39300
+	locale = setlocale(LC_ALL, NULL);
 	PF_INIT_OR_OUT(FormatEx, fmifs);
+	setlocale(LC_ALL, locale);
 
 	GetWindowTextW(hFileSystem, wFSType, ARRAYSIZE(wFSType));
 	// We may have a " (Default)" trail
