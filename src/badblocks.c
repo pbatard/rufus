@@ -477,11 +477,13 @@ static unsigned int test_rw(HANDLE hDrive, blk_t last_block, size_t block_size, 
 			}
 			if (currently_testing + tryout > last_block)
 				tryout = last_block - currently_testing;
-			/* Add the block number at a fixed (random) offset during each pass to
-			   allow for the detection of 'fake' media (eg. 2GB USB masquerading as 16GB) */
-			for (i=0; i<(int)blocks_at_once; i++) {
-				blk_id = (blk_t*)(intptr_t)(buffer + id_offset+ i*block_size);
-				*blk_id = (blk_t)(currently_testing + i);
+			if (detect_fakes) {
+				/* Add the block number at a fixed (random) offset during each pass to
+				   allow for the detection of 'fake' media (eg. 2GB USB masquerading as 16GB) */
+				for (i=0; i<(int)blocks_at_once; i++) {
+					blk_id = (blk_t*)(intptr_t)(buffer + id_offset+ i*block_size);
+					*blk_id = (blk_t)(currently_testing + i);
+				}
 			}
 			got = do_write(hDrive, buffer, tryout, block_size, currently_testing);
 			if (v_flag > 1)
@@ -523,9 +525,11 @@ static unsigned int test_rw(HANDLE hDrive, blk_t last_block, size_t block_size, 
 			}
 			if (currently_testing + tryout > last_block)
 				tryout = last_block - currently_testing;
-			for (i=0; i<(int)blocks_at_once; i++) {
-				blk_id = (blk_t*)(intptr_t)(buffer + id_offset+ i*block_size);
-				*blk_id = (blk_t)(currently_testing + i);
+			if (detect_fakes) {
+				for (i=0; i<(int)blocks_at_once; i++) {
+					blk_id = (blk_t*)(intptr_t)(buffer + id_offset+ i*block_size);
+					*blk_id = (blk_t)(currently_testing + i);
+				}
 			}
 			got = do_read(hDrive, read_buffer, tryout, block_size,
 				       currently_testing);

@@ -374,7 +374,6 @@ static BOOL AnalyzePBR(HANDLE hLogicalVolume)
 	fake_fd._ptr = (char*)hLogicalVolume;
 	fake_fd._bufsiz = SelectedDrive.Geometry.BytesPerSector;
 
-	// TODO: Add/Eliminate FAT12?
 	if (!is_br(&fake_fd)) {
 		uprintf("Volume does not have an x86 partition boot record\n");
 		return FALSE;
@@ -416,6 +415,7 @@ BOOL WriteRufusMBR(FILE *fp)
 	unsigned char aucRef[] = {0x55, 0xAA};
 	unsigned char* rufus_mbr;
 
+	// TODO: will we need to edit the disk ID according to UI sel in the MBR as well?
 	res = FindResource(hMainInstance, MAKEINTRESOURCE(IDR_BR_MBR_BIN), RT_RCDATA);
 	if (res == NULL) {
 		uprintf("Unable to locate mbr.bin resource: %s\n", WindowsErrorString());
@@ -482,8 +482,8 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 		break;
 	}
 	if (IsChecked(IDC_DOS)) {
-		// Set first partition bootable - masquerade as 0x81 for non /minint WinPE 
-		buf[0x1be] = ((!IS_WINPE(iso_report.winpe)) || ((IS_WINPE(iso_report.winpe) && iso_report.uses_minint)))?0x80:0x81;
+		// Set first partition bootable - masquerade as per the DiskID selected
+		buf[0x1be] = (IsChecked(IDC_RUFUS_MBR))?(BYTE)ComboBox_GetItemData(hDiskID, ComboBox_GetCurSel(hDiskID)):0x80;
 		uprintf("Set bootable USB partition as 0x%02X\n", buf[0x1be]);
 	}
 
@@ -497,7 +497,7 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 	fake_fd._bufsiz = SelectedDrive.Geometry.BytesPerSector;
 	fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
 	dt = (int)ComboBox_GetItemData(hDOSType, ComboBox_GetCurSel(hDOSType));
-	if ((dt == DT_ISO) && ((fs == FS_FAT16) || (fs == FS_FAT32))) {
+	if ( (dt == DT_SYSLINUX) || ((dt == DT_ISO) && ((fs == FS_FAT16) || (fs == FS_FAT32))) ) {
 		r = write_syslinux_mbr(&fake_fd);
 	} else {
 		if ((IS_WINPE(iso_report.winpe) && !iso_report.uses_minint) || (IsChecked(IDC_RUFUS_MBR))) {
@@ -591,14 +591,16 @@ static BOOL SetupWinPE(char drive_letter)
 	const char* patch_str_rep[] = { "\\i386\\txtsetup.sif", "\\i386\\system32\\" };
 	const char *win_nt_bt_org = "$win_nt$.~bt", *win_nt_bt_rep = "i386";
 	const char *rdisk_zero = "rdisk(0)";
-	// TODO: allow other values than harddisk 1, as per user choice?
-	char* setupsrcdev = "SetupSourceDevice = \"\\device\\harddisk1\\partition1\"";
+	char setupsrcdev[64];
 	HANDLE handle = INVALID_HANDLE_VALUE;
 	DWORD i, j, size, rw_size, index = 0;
 	BOOL r = FALSE;
 	char* buf = NULL;
 
 	index = ((iso_report.winpe&WINPE_I386) == WINPE_I386)?0:1;
+	// Allow other values than harddisk 1, as per user choice for disk ID
+	safe_sprintf(setupsrcdev, sizeof(setupsrcdev),
+		"SetupSourceDevice = \"\\device\\harddisk%d\\partition1\"", ComboBox_GetCurSel(hDiskID));
 	// Copy of ntdetect.com in root
 	safe_sprintf(src, sizeof(src), "%c:\\%s\\ntdetect.com", drive_letter, basedir[index]);
 	safe_sprintf(dst, sizeof(dst), "%c:\\ntdetect.com", drive_letter);
@@ -657,7 +659,7 @@ static BOOL SetupWinPE(char drive_letter)
 	uprintf("Patching file %s\n", dst);
 	// Remove CRC check for 32 bit part of setupldr.bin from Win2k3
 	if ((size > 0x2061) && (buf[0x2060] == 0x74) && (buf[0x2061] == 0x03)) {
-		// TODO: amend this is not all Win2k3 setupldr.bin use the same header
+		// TODO: amend this if not all Win2k3 setupldr.bin's use the same header
 		buf[0x2060] = 0xeb;
 		buf[0x2061] = 0x1a;
 		uprintf("  0x00002060: 0x74 0x03 -> 0xEB 0x1A (disable Win2k3 CRC check)\n");
@@ -675,11 +677,11 @@ static BOOL SetupWinPE(char drive_letter)
 	if (!iso_report.uses_minint) {
 		// Additional setupldr.bin/bootmgr patching
 		for (i=0; i<size-32; i++) {
-			// rdisk(0) -> rdisk(1) disk masquerading
+			// rdisk(0) -> rdisk(#) disk masquerading
 			// TODO: only the first one seems to be needed
 			if (safe_strnicmp(&buf[i], rdisk_zero, strlen(rdisk_zero)-1) == 0) {
-				buf[i+6] = '1';
-				uprintf("  0x%08X: '%s' -> 'rdisk(1)'\n", i, rdisk_zero);
+				buf[i+6] = 0x20 + ComboBox_GetCurSel(hDiskID);
+				uprintf("  0x%08X: '%s' -> 'rdisk(%c)'\n", i, rdisk_zero, buf[i+6]);
 			}
 			// $WIN_NT$_~BT -> i386
 			if (safe_strnicmp(&buf[i], win_nt_bt_org, strlen(win_nt_bt_org)-1) == 0) {
@@ -888,7 +890,7 @@ DWORD WINAPI FormatThread(LPVOID param)
 			}
 			// We must close and unlock the volume to write files to it
 			safe_unlockclose(hLogicalVolume);
-		} else if ((dt == DT_ISO) && ((fs == FS_FAT16) || (fs == FS_FAT32))) {
+		} else if ( (dt == DT_SYSLINUX) || ((dt == DT_ISO) && ((fs == FS_FAT16) || (fs == FS_FAT32))) ) {
 			PrintStatus(0, TRUE, "Installing Syslinux...");
 			if (!InstallSyslinux(num, drive_name)) {
 				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_INSTALL_FAILURE;

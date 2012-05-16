@@ -9,6 +9,8 @@
 #define IDD_LICENSE                     105
 #define IDD_ISO_EXTRACT                 106
 #define IDS_VERSION                     107
+#define IDI_UP                          108
+#define IDI_DOWN                        109
 #define IDR_BR_MBR_BIN                  200
 #define IDR_FD_COMMAND_COM              300
 #define IDR_FD_KERNEL_SYS               301
@@ -58,9 +60,11 @@
 #define IDC_SELECT_ISO                  1016
 #define IDC_SET_ICON                    1017
 #define IDC_RUFUS_MBR                   1018
-#define IDC_ISO_PROGRESS                1020
-#define IDC_ISO_FILENAME                1021
-#define IDC_ISO_ABORT                   1022
+#define IDC_ISO_PROGRESS                1019
+#define IDC_ISO_FILENAME                1020
+#define IDC_ISO_ABORT                   1021
+#define IDC_DISK_ID                     1022
+#define IDC_EXTRA_PARTITION             1023
 #define IDC_ABOUT_LICENSE               1030
 #define IDC_ABOUT_ICON                  1031
 #define IDC_RUFUS_BOLD                  1032
@@ -71,15 +75,17 @@
 #define IDC_NOTIFICATION_ICON           1040
 #define IDC_NOTIFICATION_TEXT           1041
 #define IDC_NOTIFICATION_LINE           1042
+#define IDC_ADVANCED                    1043
+#define IDC_ADVANCED_GROUP              1044
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NO_MFC                     1
-#define _APS_NEXT_RESOURCE_VALUE        108
+#define _APS_NEXT_RESOURCE_VALUE        110
 #define _APS_NEXT_COMMAND_VALUE         40001
-#define _APS_NEXT_CONTROL_VALUE         1043
+#define _APS_NEXT_CONTROL_VALUE         1045
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

@@ -125,6 +125,7 @@ enum dos_type {
 	DT_WINME = 0,
 	DT_FREEDOS,
 	DT_ISO,
+	DT_SYSLINUX,
 	DT_MAX
 };
 
@@ -170,27 +171,41 @@ typedef enum TASKBAR_PROGRESS_FLAGS
 	TASKBAR_PAUSED = 0x8
 } TASKBAR_PROGRESS_FLAGS;
 
+/* Windows versions */
+enum WindowsVersion {
+	WINDOWS_UNDEFINED,
+	WINDOWS_UNSUPPORTED,
+	WINDOWS_2K,
+	WINDOWS_XP,
+	WINDOWS_2003_XP64,
+	WINDOWS_VISTA,
+	WINDOWS_7,
+	WINDOWS_8
+};
+
 /*
  * Globals
  */
 extern HINSTANCE hMainInstance;
 extern HWND hMainDialog, hStatus, hDeviceList, hCapacity;
 extern HWND hFileSystem, hClusterSize, hLabel, hDOSType, hNBPasses;
-extern HWND hISOProgressDlg, hISOProgressBar, hISOFileName;
+extern HWND hISOProgressDlg, hISOProgressBar, hISOFileName, hDiskID;
 extern float fScale;
 extern char szFolderPath[MAX_PATH];
 extern char* iso_path;
 extern DWORD FormatStatus;
 extern RUFUS_DRIVE_INFO SelectedDrive;
 extern const int nb_steps[FS_MAX];
-extern BOOL bWithFreeDOS, use_own_vesamenu;
+extern BOOL use_own_vesamenu, detect_fakes;
 extern RUFUS_ISO_REPORT iso_report;
 extern int64_t iso_blocking_status;
 extern int rufus_version[4];
+extern enum WindowsVersion nWindowsVersion;
 
 /*
  * Shared prototypes
  */
+extern void DetectWindowsVersion(void);
 extern const char *WindowsErrorString(void);
 extern void DumpBufferHex(void *buf, size_t size);
 extern void PrintStatus(unsigned int duration, BOOL debug, const char *format, ...);

@@ -7,7 +7,7 @@ the user for boot selection, when a second bootable device (typically bootable
 fixed HDD) is reported by the BIOS at 0x81.
 
 This aims at mimicking the Microsoft Windows optical installation media feature,
-which may be necessary on for WinPE 2.x or earlier based installations.
+which may be necessary on for WinPE based installations.
 
 This MBR will also masquerade a bootable USB drive booted as 0x80 by the BIOS to
 a different ID according to the one found in its partition table entry. Eg. if

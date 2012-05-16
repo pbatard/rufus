@@ -52,6 +52,33 @@
 #ifndef PBST_PAUSED
 #define PBST_PAUSED 3
 #endif
+#ifndef BUTTON_IMAGELIST_ALIGN_CENTER
+#define BUTTON_IMAGELIST_ALIGN_CENTER 4
+#endif
+#ifndef BCM_SETIMAGELIST
+#define BCM_SETIMAGELIST 0x1602
+#endif
+
+// MinGW fails to link those
+typedef HIMAGELIST (WINAPI *ImageList_Create_t)(
+	int cx,
+	int cy,
+	UINT flags,
+	int cInitial,
+	int cGrow
+);
+ImageList_Create_t pImageList_Create = NULL;
+typedef int (WINAPI *ImageList_ReplaceIcon_t)(
+	HIMAGELIST himl,
+	int i,
+	HICON hicon
+);
+ImageList_ReplaceIcon_t pImageList_ReplaceIcon = NULL;
+struct {
+	HIMAGELIST himl;
+	RECT margin;
+	UINT uAlign;
+} bi_iso = {0}, bi_up = {0}, bi_down = {0};	// BUTTON_IMAGELIST
 
 static const char* FileSystemLabel[FS_MAX] = { "FAT", "FAT32", "NTFS", "exFAT" };
 // Don't ask me - just following the MS standard here
@@ -61,7 +88,7 @@ static const char* ClusterSizeLabel[] = { "512 bytes", "1024 bytes","2048 bytes"
 static BOOL existing_key = FALSE;	// For LGP set/restore
 static BOOL iso_size_check = TRUE;
 static int selection_default;
-BOOL enable_fixed_disks = FALSE;
+BOOL enable_fixed_disks = FALSE, advanced_mode = TRUE;
 
 /*
  * Globals
@@ -73,15 +100,15 @@ char* iso_path = NULL;
 float fScale = 1.0f;
 int default_fs;
 HWND hDeviceList, hCapacity, hFileSystem, hClusterSize, hLabel, hDOSType, hNBPasses;
-HWND hISOProgressDlg = NULL, hISOProgressBar, hISOFileName;
-BOOL use_own_vesamenu = FALSE;
+HWND hISOProgressDlg = NULL, hISOProgressBar, hISOFileName, hDiskID;
+BOOL use_own_vesamenu = FALSE, detect_fakes = TRUE;
 int rufus_version[4];
 extern char szStatusMessage[256];
 
 static HANDLE format_thid = NULL;
 static HWND hDeviceTooltip = NULL, hFSTooltip = NULL, hProgress = NULL;
 static HWND hDOS = NULL, hSelectISO = NULL, hISOToolTip = NULL, hPassesToolTip = NULL;
-static HICON hIconDisc;
+static HICON hIconDisc, hIconDown, hIconUp;
 static StrArray DriveID, DriveLabel;
 static char szTimer[12] = "00:00:00";
 static unsigned int timer;
@@ -132,7 +159,6 @@ static BOOL DefineClusterSizes(void)
 	default_fs = FS_UNKNOWN;
 	memset(&SelectedDrive.ClusterSize, 0, sizeof(SelectedDrive.ClusterSize));
 	if (SelectedDrive.DiskSize < 8*MB) {
-		// TODO: muck with FAT12 and Small FAT16 like Microsoft does to support small drives?
 		uprintf("This application does not support volumes smaller than 8 MB\n");
 		goto out;
 	}
@@ -439,6 +465,24 @@ static void SetFSFromISO(void)
 		ComboBox_GetCurSel(hFileSystem));
 }
 
+void SetMBRProps(void)
+{
+	int fs, dt;
+	BOOL needs_masquerading = (iso_report.has_bootmgr) || (IS_WINPE(iso_report.winpe) && (!iso_report.uses_minint));
+
+	fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
+	dt = (int)ComboBox_GetItemData(hDOSType, ComboBox_GetCurSel(hDOSType));
+
+	if ((iso_path == NULL) || (dt != DT_ISO) || (fs != FS_NTFS)) {
+		CheckDlgButton(hMainDialog, IDC_RUFUS_MBR, BST_UNCHECKED);
+		IGNORE_RETVAL(ComboBox_SetCurSel(hDiskID, 0));
+		return;
+	}
+
+	CheckDlgButton(hMainDialog, IDC_RUFUS_MBR, needs_masquerading?BST_CHECKED:BST_UNCHECKED);
+	IGNORE_RETVAL(ComboBox_SetCurSel(hDiskID, needs_masquerading?1:0));
+}
+
 /*
  * Populate the UI properties
  */
@@ -461,8 +505,8 @@ static BOOL PopulateProperties(int ComboIndex)
 	hFSTooltip = NULL;
 	memset(&SelectedDrive, 0, sizeof(SelectedDrive));
 
-	EnableWindow(GetDlgItem(hMainDialog, IDC_DOS), FALSE);
-	EnableWindow(GetDlgItem(hMainDialog, IDC_DOSTYPE), FALSE);
+	EnableWindow(hDOS, FALSE);
+	EnableWindow(hDOSType, FALSE);
 
 	if (ComboIndex < 0) {
 		return TRUE;
@@ -473,8 +517,8 @@ static BOOL PopulateProperties(int ComboIndex)
 		return FALSE;
 	SetFSFromISO();
 	fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
-	EnableWindow(GetDlgItem(hMainDialog, IDC_DOS), (fs == FS_FAT16) || (fs == FS_FAT32) || (fs == FS_NTFS));
-	EnableWindow(GetDlgItem(hMainDialog, IDC_DOSTYPE), (fs == FS_FAT16) || (fs == FS_FAT32) || (fs == FS_NTFS));
+	EnableWindow(hDOS, (fs == FS_FAT16) || (fs == FS_FAT32) || (fs == FS_NTFS));
+	EnableWindow(hDOSType, (fs == FS_FAT16) || (fs == FS_FAT32) || (fs == FS_NTFS));
 
 	HumanReadableSize = (double)SelectedDrive.DiskSize;
 	for (i=0; i<ARRAYSIZE(suffix); i++) {
@@ -959,19 +1003,25 @@ static void EnableControls(BOOL bEnable)
 	EnableWindow(GetDlgItem(hMainDialog, IDC_QUICKFORMAT), bEnable);
 	if (bEnable) {
 		fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
-		EnableWindow(GetDlgItem(hMainDialog, IDC_DOS), (fs == FS_FAT16) || (fs == FS_FAT32) || (fs == FS_NTFS));
-		EnableWindow(GetDlgItem(hMainDialog, IDC_DOSTYPE), (fs == FS_FAT16) || (fs == FS_FAT32) || (fs == FS_NTFS));
+		EnableWindow(hDOS, (fs == FS_FAT16) || (fs == FS_FAT32) || (fs == FS_NTFS));
+		EnableWindow(hDOSType, (fs == FS_FAT16) || (fs == FS_FAT32) || (fs == FS_NTFS));
+		EnableWindow(hDiskID, (fs == FS_FAT16) || (fs == FS_FAT32) || (fs == FS_NTFS));
+		EnableWindow(GetDlgItem(hMainDialog, IDC_RUFUS_MBR), (fs == FS_FAT16) || (fs == FS_FAT32) || (fs == FS_NTFS));
+//		EnableWindow(GetDlgItem(hMainDialog, IDC_EXTRA_PARTITION), (fs == FS_FAT16) || (fs == FS_FAT32) || (fs == FS_NTFS));
 	} else {
-		EnableWindow(GetDlgItem(hMainDialog, IDC_DOS), FALSE);
-		EnableWindow(GetDlgItem(hMainDialog, IDC_DOSTYPE), FALSE);
+		EnableWindow(hDOS, FALSE);
+		EnableWindow(hDOSType, FALSE);
+		EnableWindow(hDiskID, FALSE);
+		EnableWindow(GetDlgItem(hMainDialog, IDC_RUFUS_MBR), FALSE);
+//		EnableWindow(GetDlgItem(hMainDialog, IDC_EXTRA_PARTITION), FALSE);
 	}
 	EnableWindow(GetDlgItem(hMainDialog, IDC_BADBLOCKS), bEnable);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_ABOUT), bEnable);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_START), bEnable);
-	EnableWindow(GetDlgItem(hMainDialog, IDC_SELECT_ISO), bEnable);
-	EnableWindow(GetDlgItem(hMainDialog, IDC_NBPASSES), bEnable);
+	EnableWindow(hSelectISO, bEnable);
+	EnableWindow(hNBPasses, bEnable);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_SET_ICON), bEnable);
-	EnableWindow(GetDlgItem(hMainDialog, IDC_RUFUS_MBR), bEnable);
+	EnableWindow(GetDlgItem(hMainDialog, IDC_ADVANCED), bEnable);
 	SetDlgItemTextA(hMainDialog, IDCANCEL, bEnable?"Close":"Cancel");
 }
 
@@ -1077,10 +1127,8 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 			"based on 'bootmgr/WinPE' or 'isolinux'.\n"
 			"This ISO image doesn't appear to use either...", "Unsupported ISO", MB_OK|MB_ICONINFORMATION);
 		safe_free(iso_path);
+		SetMBRProps();
 	} else {
-		EnableWindow(GetDlgItem(hMainDialog, IDC_RUFUS_MBR), (iso_report.has_bootmgr) || (IS_WINPE(iso_report.winpe)));
-		CheckDlgButton(hMainDialog, IDC_RUFUS_MBR,
-			(((iso_report.winpe&WINPE_I386)==WINPE_I386)&&(!iso_report.uses_minint))?BST_CHECKED:BST_UNCHECKED);
 		if (iso_report.has_old_vesamenu) {
 			fd = fopen(vesamenu_filename, "rb");
 			if (fd != NULL) {
@@ -1109,6 +1157,7 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 		// Enable DOS, set DOS Type to ISO (last item) and set FS accordingly
 		CheckDlgButton(hMainDialog, IDC_DOS, BST_CHECKED);
 		SetFSFromISO();
+		SetMBRProps();
 		for (i=(int)safe_strlen(iso_path); (i>0)&&(iso_path[i]!='\\'); i--);
 		PrintStatus(0, TRUE, "Using ISO: %s\n", &iso_path[i+1]);
 		// Some Linux distros, such as Arch Linux, require the USB drive to have
@@ -1127,28 +1176,60 @@ out:
 	ExitThread(0);
 }
 
+
+void MoveControl(int nID, float vertical_shift)
+{
+	RECT rect;
+	POINT point;
+	HWND hControl;
+
+	hControl = GetDlgItem(hMainDialog, nID);
+	GetWindowRect(hControl, &rect);
+	point.x = rect.left;
+	point.y = rect.top;
+	ScreenToClient(hMainDialog, &point);
+	GetClientRect(hControl, &rect);
+	MoveWindow(hControl, point.x, point.y + (int)(fScale*(advanced_mode?vertical_shift:-vertical_shift)),
+		(rect.right - rect.left), (rect.bottom - rect.top), TRUE);
+}
+
+// Toggle "advanced" mode
+void ToggleAdvanced(void)
+{
+	float dialog_shift = 60.0f;
+	RECT rect;
+	POINT point;
+	int toggle;
+
+	advanced_mode = !advanced_mode;
+
+	// Increase or decrease the Window size
+	GetWindowRect(hMainDialog, &rect);
+	point.x = (rect.right - rect.left);
+	point.y = (rect.bottom - rect.top);
+	MoveWindow(hMainDialog, rect.left, rect.top, point.x,
+		point.y + (int)(fScale*(advanced_mode?dialog_shift:-dialog_shift)), TRUE);
+
+	// Move the status bar up or down
+	MoveControl(IDC_STATUS, dialog_shift);
+	MoveControl(IDC_START, dialog_shift);
+	MoveControl(IDC_PROGRESS, dialog_shift);
+	MoveControl(IDC_ABOUT, dialog_shift);
+	MoveControl(IDCANCEL, dialog_shift);
+
+	// Hide or show the various advanced options
+	toggle = advanced_mode?SW_SHOW:SW_HIDE;
+	ShowWindow(GetDlgItem(hMainDialog, IDC_EXTRA_PARTITION), toggle);
+	ShowWindow(GetDlgItem(hMainDialog, IDC_RUFUS_MBR), toggle);
+	ShowWindow(GetDlgItem(hMainDialog, IDC_DISK_ID), toggle);
+	ShowWindow(GetDlgItem(hMainDialog, IDC_ADVANCED_GROUP), toggle);
+
+	// Toggle the up/down icon
+	SendMessage(GetDlgItem(hMainDialog, IDC_ADVANCED), BCM_SETIMAGELIST, 0, (LPARAM)(advanced_mode?&bi_up:&bi_down));
+}
+
 void InitDialog(HWND hDlg)
 {
-	// MinGW fails to link those
-	typedef HIMAGELIST (WINAPI *ImageList_Create_t)(
-		int cx,
-		int cy,
-		UINT flags,
-		int cInitial,
-		int cGrow
-	);
-	ImageList_Create_t pImageList_Create = NULL;
-	typedef int (WINAPI *ImageList_ReplaceIcon_t)(
-		HIMAGELIST himl,
-		int i,
-		HICON hicon
-	);
-	ImageList_ReplaceIcon_t pImageList_ReplaceIcon = NULL;
-	struct {
-		HIMAGELIST himl;
-		RECT margin;
-		UINT uAlign;
-	} bi = {0};	// BUTTON_IMAGELIST
 	HINSTANCE hDllInst;
 	HDC hDC;
 	int i, i16;
@@ -1171,6 +1252,7 @@ void InitDialog(HWND hDlg)
 	hDOSType = GetDlgItem(hDlg, IDC_DOSTYPE);
 	hSelectISO = GetDlgItem(hDlg, IDC_SELECT_ISO);
 	hNBPasses = GetDlgItem(hDlg, IDC_NBPASSES);
+	hDiskID = GetDlgItem(hDlg, IDC_DISK_ID);
 
 	// High DPI scaling
 	i16 = GetSystemMetrics(SM_CXSMICON);
@@ -1209,10 +1291,17 @@ void InitDialog(HWND hDlg)
 	// Fill up the DOS type dropdown
 	IGNORE_RETVAL(ComboBox_SetItemData(hDOSType, ComboBox_AddStringU(hDOSType, "MS-DOS"), DT_WINME));
 	IGNORE_RETVAL(ComboBox_SetCurSel(hDOSType, DT_WINME));
+	// Fill up the MBR disk IDs ("9 IDs should be enough for anybody")
+	for (i=0x80; i<=0x88; i++) {
+		sprintf(tmp, "0x%02x", i);
+		IGNORE_RETVAL(ComboBox_SetItemData(hDiskID, ComboBox_AddStringU(hDiskID, tmp), i));
+	}
+	IGNORE_RETVAL(ComboBox_SetCurSel(hDiskID, 0));
+
 	// Create the string array
 	StrArrayCreate(&DriveID, MAX_DRIVES);
 	StrArrayCreate(&DriveLabel, MAX_DRIVES);
-	// Set the Quick format, Create bootable and Set icon checkboxes
+	// Set various checkboxes
 	CheckDlgButton(hDlg, IDC_QUICKFORMAT, BST_CHECKED);
 	CheckDlgButton(hDlg, IDC_DOS, BST_CHECKED);
 	CheckDlgButton(hDlg, IDC_SET_ICON, BST_CHECKED);
@@ -1220,20 +1309,38 @@ void InitDialog(HWND hDlg)
 	// Load system icons (NB: Use the excellent http://www.nirsoft.net/utils/iconsext.html to find icon IDs)
 	hDllInst = LoadLibraryA("shell32.dll");
 	hIconDisc = (HICON)LoadImage(hDllInst, MAKEINTRESOURCE(12), IMAGE_ICON, i16, i16, LR_DEFAULTCOLOR|LR_SHARED);
+	if (nWindowsVersion >= WINDOWS_VISTA) {
+		hIconDown = (HICON)LoadImage(hDllInst, MAKEINTRESOURCE(16750), IMAGE_ICON, i16, i16, LR_DEFAULTCOLOR|LR_SHARED);
+		hIconUp = (HICON)LoadImage(hDllInst, MAKEINTRESOURCE(16749), IMAGE_ICON, i16, i16, LR_DEFAULTCOLOR|LR_SHARED);
+	} else {
+		hIconDown = (HICON)LoadImage(hMainInstance, MAKEINTRESOURCE(IDI_DOWN), IMAGE_ICON, 16, 16, 0);
+		hIconUp = (HICON)LoadImage(hMainInstance, MAKEINTRESOURCE(IDI_UP), IMAGE_ICON, 16, 16, 0);
+	}
 
-	// Set a disc icon on the select ISO button
+	// Set the icons on the the buttons
 	pImageList_Create = (ImageList_Create_t) GetProcAddress(GetDLLHandle("Comctl32.dll"), "ImageList_Create");
 	pImageList_ReplaceIcon = (ImageList_ReplaceIcon_t) GetProcAddress(GetDLLHandle("Comctl32.dll"), "ImageList_ReplaceIcon");
 
-	bi.himl = pImageList_Create(i16, i16, ILC_COLOR32 | ILC_MASK, 1, 0);
-	pImageList_ReplaceIcon(bi.himl, -1, hIconDisc);
-	SetRect(&bi.margin, 0, 1, 0, 0);
-	bi.uAlign = 4;	// BUTTON_IMAGELIST_ALIGN_CENTER
-	SendMessage(GetDlgItem(hDlg, IDC_SELECT_ISO), 0x1602, 0, (LPARAM)&bi);	// BCM_SETIMAGELIST 
+	bi_iso.himl = pImageList_Create(i16, i16, ILC_COLOR32 | ILC_MASK, 1, 0);
+	pImageList_ReplaceIcon(bi_iso.himl, -1, hIconDisc);
+	SetRect(&bi_iso.margin, 0, 1, 0, 0);
+	bi_iso.uAlign = BUTTON_IMAGELIST_ALIGN_CENTER;
+	bi_down.himl = pImageList_Create(i16, i16, ILC_COLOR32 | ILC_MASK, 1, 0);
+	pImageList_ReplaceIcon(bi_down.himl, -1, hIconDown);
+	SetRect(&bi_down.margin, 0, 0, 0, 0);
+	bi_down.uAlign = BUTTON_IMAGELIST_ALIGN_CENTER;
+	bi_up.himl = pImageList_Create(i16, i16, ILC_COLOR32 | ILC_MASK, 1, 0);
+	pImageList_ReplaceIcon(bi_up.himl, -1, hIconUp);
+	SetRect(&bi_up.margin, 0, 0, 0, 0);
+	bi_up.uAlign = BUTTON_IMAGELIST_ALIGN_CENTER;
 
+	SendMessage(hSelectISO, BCM_SETIMAGELIST, 0, (LPARAM)&bi_iso);
+	SendMessage(GetDlgItem(hDlg, IDC_ADVANCED), BCM_SETIMAGELIST, 0, (LPARAM)&bi_down);
 	hISOToolTip = CreateTooltip(hSelectISO, "Click to select...", -1);
 	CreateTooltip(GetDlgItem(hDlg, IDC_SET_ICON), "Create an autorun.inf on the target drive, to set the icon. "
 		"Also allow the display of non-English labels.", 10000);
+
+	ToggleAdvanced();	// We start in advanced mode => go to basic mode
 }
 
 /*
@@ -1322,6 +1429,11 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		case IDC_TEST:
 			break;
 #endif
+		case IDC_ADVANCED:
+			ToggleAdvanced();
+			SendMessage(hMainDialog, WM_COMMAND, (CBN_SELCHANGE<<16) | IDC_FILESYSTEM,
+				ComboBox_GetCurSel(hFileSystem));
+			break;
 		case IDC_DEVICE:
 			if (HIWORD(wParam) != CBN_SELCHANGE)
 				break;
@@ -1353,7 +1465,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				break;
 			fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
 			SetClusterSizes(fs);
-			if ((fs == FS_EXFAT) || (fs <0)) {
+			if ((fs == FS_EXFAT) || (fs < 0)) {
 				if (IsWindowEnabled(hDOS)) {
 					// unlikely to be supported by BIOSes => don't bother
 					IGNORE_RETVAL(ComboBox_SetCurSel(hDOSType, 0));
@@ -1363,6 +1475,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 					EnableWindow(hDOSType, FALSE);
 					EnableWindow(hSelectISO, FALSE);
 				}
+				SetMBRProps();
 				break;
 			}
 			IGNORE_RETVAL(ComboBox_ResetContent(hDOSType));
@@ -1371,12 +1484,12 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				IGNORE_RETVAL(ComboBox_SetItemData(hDOSType, ComboBox_AddStringU(hDOSType, "FreeDOS"), DT_FREEDOS));
 			}
 			IGNORE_RETVAL(ComboBox_SetItemData(hDOSType, ComboBox_AddStringU(hDOSType, "ISO Image"), DT_ISO));
-			if (selection_default == DT_ISO) {
-				if (iso_path == NULL)
-					selection_default = DT_FREEDOS;
-				else 
-					EnableWindow(GetDlgItem(hMainDialog, IDC_RUFUS_MBR),
-					(iso_report.has_bootmgr) || (IS_WINPE(iso_report.winpe)));
+			// If needed (advanced mode) also append a Syslinux option
+			if ( ((fs == FS_FAT16) || (fs == FS_FAT32)) && (advanced_mode) )
+				IGNORE_RETVAL(ComboBox_SetItemData(hDOSType, ComboBox_AddStringU(hDOSType, "SysLinux"), DT_SYSLINUX));
+			if ( ((!advanced_mode) && (selection_default == DT_SYSLINUX)) ) {
+				selection_default = DT_FREEDOS;
+				CheckDlgButton(hDlg, IDC_DISK_ID, BST_UNCHECKED);
 			}
 			for (i=0; i<ComboBox_GetCount(hDOSType); i++) {
 				if (ComboBox_GetItemData(hDOSType, i) == selection_default) {
@@ -1392,12 +1505,13 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				EnableWindow(hSelectISO, TRUE);
 				CheckDlgButton(hDlg, IDC_DOS, uDOSChecked);
 			}
+			SetMBRProps();
 			break;
 		case IDC_DOSTYPE:
 			if (HIWORD(wParam) != CBN_SELCHANGE)
 				break;
+			selection_default = ComboBox_GetItemData(hDOSType, ComboBox_GetCurSel(hDOSType));
 			if (ComboBox_GetItemData(hDOSType, ComboBox_GetCurSel(hDOSType)) == DT_ISO) {
-				EnableWindow(GetDlgItem(hMainDialog, IDC_RUFUS_MBR), (iso_report.has_bootmgr) || (IS_WINPE(iso_report.winpe)));
 				if ((iso_path == NULL) || (iso_report.label[0] == 0)) {
 					// Set focus to the Select ISO button
 					SendMessage(hMainDialog, WM_NEXTDLGCTL, (WPARAM)FALSE, 0);
@@ -1406,11 +1520,12 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 					SetWindowTextU(hLabel, iso_report.label);
 				}
 			} else {
-				EnableWindow(GetDlgItem(hMainDialog, IDC_RUFUS_MBR), TRUE);
 				// Set focus on the start button
 				SendMessage(hMainDialog, WM_NEXTDLGCTL, (WPARAM)FALSE, 0);
 				SendMessage(hMainDialog, WM_NEXTDLGCTL, (WPARAM)GetDlgItem(hMainDialog, IDC_START), TRUE);
 				SetWindowTextU(hLabel, SelectedDrive.proposed_label);
+				// Reset disk ID to 0x80 if Rufus MBR is used
+				IGNORE_RETVAL(ComboBox_SetCurSel(hDiskID, 0));
 			}
 			return (INT_PTR)TRUE;
 		case IDC_SELECT_ISO:
@@ -1558,7 +1673,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	HANDLE mutex = NULL;
 	HWND hDlg = NULL;
 	MSG msg;
-	BOOL mbr_shown = FALSE;
 
 	uprintf("*** RUFUS INIT ***\n");
 
@@ -1577,6 +1691,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	// Initialize COM for folder selection
 	CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
+
+	// Set the Windows version
+	DetectWindowsVersion();
 
 	// We use local group policies rather than direct registry manipulation
 	// 0x9e disables removable and fixed drive notifications
@@ -1613,11 +1730,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 				existing_key = FALSE;
 				continue;
 			}
-			// Alt M => make Rufus MBR choice visible
-			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'M')) {
-				mbr_shown = !mbr_shown;
-				ShowWindow(GetDlgItem(hDlg, IDC_RUFUS_MBR), mbr_shown?SW_SHOW:SW_HIDE);
-				existing_key = FALSE;
+			// Alt K => Toggle fake drive detection during bad blocks check (enabled by default)
+			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'K')) {
+				detect_fakes = !detect_fakes;
+				PrintStatus(0, FALSE, "Fake drive detection %s", detect_fakes?"enabled":"disabled");
 				continue;
 			}
 			TranslateMessage(&msg);

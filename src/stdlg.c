@@ -38,18 +38,6 @@
 #include "resource.h"
 #include "license.h"
 
-/* Windows versions */
-enum WindowsVersion {
-	WINDOWS_UNDEFINED,
-	WINDOWS_UNSUPPORTED,
-	WINDOWS_2K,
-	WINDOWS_XP,
-	WINDOWS_2003_XP64,
-	WINDOWS_VISTA,
-	WINDOWS_7,
-	WINDOWS_8
-};
-
 /* The following is only available on Vista and later */
 #if (_WIN32_WINNT >= 0x0600)
 static HRESULT (WINAPI *pSHCreateItemFromParsingName)(PCWSTR, IBindCtx*, REFIID, void **) = NULL;

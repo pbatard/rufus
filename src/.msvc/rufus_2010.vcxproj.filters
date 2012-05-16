@@ -100,6 +100,12 @@
     <None Include="..\..\res\rufus.ico">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="..\..\res\up.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\res\down.ico">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="..\common_controls_and_elevation.manifest">

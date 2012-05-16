@@ -191,7 +191,9 @@
     <Manifest Include="..\common_controls_and_elevation.manifest" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\res\down.ico" />
     <None Include="..\..\res\rufus.ico" />
+    <None Include="..\..\res\up.ico" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\rufus.rc" />
