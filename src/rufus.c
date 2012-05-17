@@ -1510,7 +1510,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		case IDC_DOSTYPE:
 			if (HIWORD(wParam) != CBN_SELCHANGE)
 				break;
-			selection_default = ComboBox_GetItemData(hDOSType, ComboBox_GetCurSel(hDOSType));
+			selection_default = (int) ComboBox_GetItemData(hDOSType, ComboBox_GetCurSel(hDOSType));
 			if (ComboBox_GetItemData(hDOSType, ComboBox_GetCurSel(hDOSType)) == DT_ISO) {
 				if ((iso_path == NULL) || (iso_report.label[0] == 0)) {
 					// Set focus to the Select ISO button
