@@ -569,16 +569,24 @@ BOOL CreatePartition(HANDLE hDrive)
 	PDRIVE_LAYOUT_INFORMATION_EX DriveLayoutEx = (PDRIVE_LAYOUT_INFORMATION_EX)layout;
 	BOOL r;
 	DWORD size;
+	LONGLONG sector_size;
 
 	PrintStatus(0, TRUE, "Partitioning...");
 	DriveLayoutEx->PartitionStyle = PARTITION_STYLE_MBR;
 	DriveLayoutEx->PartitionCount = 4;	// Must be multiple of 4 for MBR
 	DriveLayoutEx->Mbr.Signature = GetTickCount();
 	DriveLayoutEx->PartitionEntry[0].PartitionStyle = PARTITION_STYLE_MBR;
+	// TODO: CHS fixup (32 sectors/track) through a cheat mode, if requested
+	// NB: disk geometry is computed by BIOS & co. by finding a match between LBA and CHS value of first partition
 	DriveLayoutEx->PartitionEntry[0].StartingOffset.QuadPart = 
 		SelectedDrive.Geometry.BytesPerSector * SelectedDrive.Geometry.SectorsPerTrack;
-	DriveLayoutEx->PartitionEntry[0].PartitionLength.QuadPart = SelectedDrive.DiskSize -
-		DriveLayoutEx->PartitionEntry[0].StartingOffset.QuadPart;
+	sector_size = (SelectedDrive.DiskSize - DriveLayoutEx->PartitionEntry[0].StartingOffset.QuadPart) / SelectedDrive.Geometry.BytesPerSector;
+	// Align on sector boundary if the extra part option is checked
+	if (IsChecked(IDC_EXTRA_PARTITION)) {
+		sector_size = ((sector_size / SelectedDrive.Geometry.SectorsPerTrack)-1) * SelectedDrive.Geometry.SectorsPerTrack;
+		if (sector_size <= 0) return FALSE;
+	}
+	DriveLayoutEx->PartitionEntry[0].PartitionLength.QuadPart = sector_size * SelectedDrive.Geometry.BytesPerSector;
 	DriveLayoutEx->PartitionEntry[0].PartitionNumber = 1;
 	DriveLayoutEx->PartitionEntry[0].RewritePartition = TRUE;
 	DriveLayoutEx->PartitionEntry[0].Mbr.HiddenSectors = SelectedDrive.Geometry.SectorsPerTrack;
@@ -590,10 +598,27 @@ BOOL CreatePartition(HANDLE hDrive)
 	case FS_EXFAT:
 		DriveLayoutEx->PartitionEntry[0].Mbr.PartitionType = 0x07;	// NTFS
 		break;
-	default:
+	case FS_FAT32:
 		DriveLayoutEx->PartitionEntry[0].Mbr.PartitionType = 0x0c;	// FAT32 LBA
 		break;
+	default:
+		uprintf("Unsupported file system\n");
+		return FALSE;
 	}
+
+	// Create an extra partition on request - can improve BIOS detection as HDD for older BIOSes
+	if (IsChecked(IDC_EXTRA_PARTITION)) {
+		DriveLayoutEx->PartitionEntry[1].PartitionStyle = PARTITION_STYLE_MBR;
+		// Should end on a sector boundary
+		DriveLayoutEx->PartitionEntry[1].StartingOffset.QuadPart = DriveLayoutEx->PartitionEntry[0].StartingOffset.QuadPart +
+			DriveLayoutEx->PartitionEntry[0].PartitionLength.QuadPart;
+		DriveLayoutEx->PartitionEntry[1].PartitionLength.QuadPart = SelectedDrive.Geometry.SectorsPerTrack*SelectedDrive.Geometry.BytesPerSector;
+		DriveLayoutEx->PartitionEntry[1].PartitionNumber = 2;
+		DriveLayoutEx->PartitionEntry[1].RewritePartition = TRUE;
+		DriveLayoutEx->PartitionEntry[1].Mbr.HiddenSectors = SelectedDrive.Geometry.SectorsPerTrack*SelectedDrive.Geometry.BytesPerSector;
+		DriveLayoutEx->PartitionEntry[1].Mbr.PartitionType = DriveLayoutEx->PartitionEntry[0].Mbr.PartitionType + 0x10;	// Hidden whatever
+	}
+
 	// For the remaining partitions, PartitionStyle & PartitionType have already
 	// been zeroed => set to MBR/unused
 
@@ -1007,13 +1032,13 @@ static void EnableControls(BOOL bEnable)
 		EnableWindow(hDOSType, (fs == FS_FAT16) || (fs == FS_FAT32) || (fs == FS_NTFS));
 		EnableWindow(hDiskID, (fs == FS_FAT16) || (fs == FS_FAT32) || (fs == FS_NTFS));
 		EnableWindow(GetDlgItem(hMainDialog, IDC_RUFUS_MBR), (fs == FS_FAT16) || (fs == FS_FAT32) || (fs == FS_NTFS));
-//		EnableWindow(GetDlgItem(hMainDialog, IDC_EXTRA_PARTITION), (fs == FS_FAT16) || (fs == FS_FAT32) || (fs == FS_NTFS));
+		EnableWindow(GetDlgItem(hMainDialog, IDC_EXTRA_PARTITION), (fs == FS_FAT16) || (fs == FS_FAT32) || (fs == FS_NTFS));
 	} else {
 		EnableWindow(hDOS, FALSE);
 		EnableWindow(hDOSType, FALSE);
 		EnableWindow(hDiskID, FALSE);
 		EnableWindow(GetDlgItem(hMainDialog, IDC_RUFUS_MBR), FALSE);
-//		EnableWindow(GetDlgItem(hMainDialog, IDC_EXTRA_PARTITION), FALSE);
+		EnableWindow(GetDlgItem(hMainDialog, IDC_EXTRA_PARTITION), FALSE);
 	}
 	EnableWindow(GetDlgItem(hMainDialog, IDC_BADBLOCKS), bEnable);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_ABOUT), bEnable);
