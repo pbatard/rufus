@@ -560,46 +560,56 @@ static BOOL PopulateProperties(int ComboIndex)
 	return TRUE;
 }
 
+/* MinGW is unhappy about accessing partitions beside the first unless we redef */
+typedef struct _DRIVE_LAYOUT_INFORMATION_EX4 {
+	DWORD PartitionStyle;
+	DWORD PartitionCount;
+	union {
+		DRIVE_LAYOUT_INFORMATION_MBR Mbr;
+		DRIVE_LAYOUT_INFORMATION_GPT Gpt;
+	} Type;
+	PARTITION_INFORMATION_EX PartitionEntry[4];
+} DRIVE_LAYOUT_INFORMATION_EX4,*PDRIVE_LAYOUT_INFORMATION_EX4;
+
 /*
  * Create a partition table
  */
 BOOL CreatePartition(HANDLE hDrive)
 {
-	BYTE layout[sizeof(DRIVE_LAYOUT_INFORMATION_EX) + 3*sizeof(PARTITION_INFORMATION_EX)] = {0};
-	PDRIVE_LAYOUT_INFORMATION_EX DriveLayoutEx = (PDRIVE_LAYOUT_INFORMATION_EX)layout;
+	DRIVE_LAYOUT_INFORMATION_EX4 DriveLayoutEx = {0};
 	BOOL r;
 	DWORD size;
 	LONGLONG sector_size;
 
 	PrintStatus(0, TRUE, "Partitioning...");
-	DriveLayoutEx->PartitionStyle = PARTITION_STYLE_MBR;
-	DriveLayoutEx->PartitionCount = 4;	// Must be multiple of 4 for MBR
-	DriveLayoutEx->Mbr.Signature = GetTickCount();
-	DriveLayoutEx->PartitionEntry[0].PartitionStyle = PARTITION_STYLE_MBR;
+	DriveLayoutEx.PartitionStyle = PARTITION_STYLE_MBR;
+	DriveLayoutEx.PartitionCount = 4;	// Must be multiple of 4 for MBR
+	DriveLayoutEx.Type.Mbr.Signature = GetTickCount();
+	DriveLayoutEx.PartitionEntry[0].PartitionStyle = PARTITION_STYLE_MBR;
 	// TODO: CHS fixup (32 sectors/track) through a cheat mode, if requested
 	// NB: disk geometry is computed by BIOS & co. by finding a match between LBA and CHS value of first partition
-	DriveLayoutEx->PartitionEntry[0].StartingOffset.QuadPart = 
+	DriveLayoutEx.PartitionEntry[0].StartingOffset.QuadPart = 
 		SelectedDrive.Geometry.BytesPerSector * SelectedDrive.Geometry.SectorsPerTrack;
-	sector_size = (SelectedDrive.DiskSize - DriveLayoutEx->PartitionEntry[0].StartingOffset.QuadPart) / SelectedDrive.Geometry.BytesPerSector;
+	sector_size = (SelectedDrive.DiskSize - DriveLayoutEx.PartitionEntry[0].StartingOffset.QuadPart) / SelectedDrive.Geometry.BytesPerSector;
 	// Align on sector boundary if the extra part option is checked
 	if (IsChecked(IDC_EXTRA_PARTITION)) {
 		sector_size = ((sector_size / SelectedDrive.Geometry.SectorsPerTrack)-1) * SelectedDrive.Geometry.SectorsPerTrack;
 		if (sector_size <= 0) return FALSE;
 	}
-	DriveLayoutEx->PartitionEntry[0].PartitionLength.QuadPart = sector_size * SelectedDrive.Geometry.BytesPerSector;
-	DriveLayoutEx->PartitionEntry[0].PartitionNumber = 1;
-	DriveLayoutEx->PartitionEntry[0].RewritePartition = TRUE;
-	DriveLayoutEx->PartitionEntry[0].Mbr.HiddenSectors = SelectedDrive.Geometry.SectorsPerTrack;
+	DriveLayoutEx.PartitionEntry[0].PartitionLength.QuadPart = sector_size * SelectedDrive.Geometry.BytesPerSector;
+	DriveLayoutEx.PartitionEntry[0].PartitionNumber = 1;
+	DriveLayoutEx.PartitionEntry[0].RewritePartition = TRUE;
+	DriveLayoutEx.PartitionEntry[0].Mbr.HiddenSectors = SelectedDrive.Geometry.SectorsPerTrack;
 	switch (ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem))) {
 	case FS_FAT16:
-		DriveLayoutEx->PartitionEntry[0].Mbr.PartitionType = 0x0e;	// FAT16 LBA
+		DriveLayoutEx.PartitionEntry[0].Mbr.PartitionType = 0x0e;	// FAT16 LBA
 		break;
 	case FS_NTFS:
 	case FS_EXFAT:
-		DriveLayoutEx->PartitionEntry[0].Mbr.PartitionType = 0x07;	// NTFS
+		DriveLayoutEx.PartitionEntry[0].Mbr.PartitionType = 0x07;	// NTFS
 		break;
 	case FS_FAT32:
-		DriveLayoutEx->PartitionEntry[0].Mbr.PartitionType = 0x0c;	// FAT32 LBA
+		DriveLayoutEx.PartitionEntry[0].Mbr.PartitionType = 0x0c;	// FAT32 LBA
 		break;
 	default:
 		uprintf("Unsupported file system\n");
@@ -608,22 +618,22 @@ BOOL CreatePartition(HANDLE hDrive)
 
 	// Create an extra partition on request - can improve BIOS detection as HDD for older BIOSes
 	if (IsChecked(IDC_EXTRA_PARTITION)) {
-		DriveLayoutEx->PartitionEntry[1].PartitionStyle = PARTITION_STYLE_MBR;
+		DriveLayoutEx.PartitionEntry[1].PartitionStyle = PARTITION_STYLE_MBR;
 		// Should end on a sector boundary
-		DriveLayoutEx->PartitionEntry[1].StartingOffset.QuadPart = DriveLayoutEx->PartitionEntry[0].StartingOffset.QuadPart +
-			DriveLayoutEx->PartitionEntry[0].PartitionLength.QuadPart;
-		DriveLayoutEx->PartitionEntry[1].PartitionLength.QuadPart = SelectedDrive.Geometry.SectorsPerTrack*SelectedDrive.Geometry.BytesPerSector;
-		DriveLayoutEx->PartitionEntry[1].PartitionNumber = 2;
-		DriveLayoutEx->PartitionEntry[1].RewritePartition = TRUE;
-		DriveLayoutEx->PartitionEntry[1].Mbr.HiddenSectors = SelectedDrive.Geometry.SectorsPerTrack*SelectedDrive.Geometry.BytesPerSector;
-		DriveLayoutEx->PartitionEntry[1].Mbr.PartitionType = DriveLayoutEx->PartitionEntry[0].Mbr.PartitionType + 0x10;	// Hidden whatever
+		DriveLayoutEx.PartitionEntry[1].StartingOffset.QuadPart = DriveLayoutEx.PartitionEntry[0].StartingOffset.QuadPart +
+			DriveLayoutEx.PartitionEntry[0].PartitionLength.QuadPart;
+		DriveLayoutEx.PartitionEntry[1].PartitionLength.QuadPart = SelectedDrive.Geometry.SectorsPerTrack*SelectedDrive.Geometry.BytesPerSector;
+		DriveLayoutEx.PartitionEntry[1].PartitionNumber = 2;
+		DriveLayoutEx.PartitionEntry[1].RewritePartition = TRUE;
+		DriveLayoutEx.PartitionEntry[1].Mbr.HiddenSectors = SelectedDrive.Geometry.SectorsPerTrack*SelectedDrive.Geometry.BytesPerSector;
+		DriveLayoutEx.PartitionEntry[1].Mbr.PartitionType = DriveLayoutEx.PartitionEntry[0].Mbr.PartitionType + 0x10;	// Hidden whatever
 	}
 
 	// For the remaining partitions, PartitionStyle & PartitionType have already
 	// been zeroed => set to MBR/unused
 
 	r = DeviceIoControl(hDrive, IOCTL_DISK_SET_DRIVE_LAYOUT_EX, 
-			layout, sizeof(layout), NULL, 0, &size, NULL );
+			(BYTE*)&DriveLayoutEx, sizeof(DriveLayoutEx), NULL, 0, &size, NULL );
 	if (!r) {
 		uprintf("IOCTL_DISK_SET_DRIVE_LAYOUT_EX failed: %s\n", WindowsErrorString());
 		safe_closehandle(hDrive);
@@ -1683,7 +1693,8 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_ERROR, 0);
 			SetTaskbarProgressState(TASKBAR_ERROR);
 			PrintStatus(0, FALSE, "FAILED");
-			Notification(MSG_ERROR, "Error", "Error: %s", StrError(FormatStatus));
+			Notification(MSG_ERROR, "Error", "Error: %s.%s", StrError(FormatStatus), 
+				(strchr(StrError(FormatStatus), '\n') != NULL)?"":"\nFor more information, please try DebugView.");
 		}
 		return (INT_PTR)TRUE;
 	}
