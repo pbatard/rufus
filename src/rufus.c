@@ -106,8 +106,7 @@ int rufus_version[4];
 extern char szStatusMessage[256];
 
 static HANDLE format_thid = NULL;
-static HWND hDeviceTooltip = NULL, hFSTooltip = NULL, hProgress = NULL;
-static HWND hDOS = NULL, hSelectISO = NULL, hISOToolTip = NULL, hPassesToolTip = NULL;
+static HWND hProgress = NULL, hDOS = NULL, hSelectISO = NULL;
 static HICON hIconDisc, hIconDown, hIconUp;
 static StrArray DriveID, DriveLabel;
 static char szTimer[12] = "00:00:00";
@@ -352,19 +351,19 @@ static BOOL GetDriveInfo(void)
 	if (!r || size <= 0) {
 		uprintf("IOCTL_DISK_GET_DRIVE_LAYOUT_EX failed for drive %c: %s\n", DrivePath[0], WindowsErrorString());
 	} else {
-		DestroyTooltip(hFSTooltip);
-		hFSTooltip = NULL;
+		r = FALSE;
 		switch (DriveLayout->PartitionStyle) {
 		case PARTITION_STYLE_MBR:
 			for (i=0; i<DriveLayout->PartitionCount; i++) {
 				if (DriveLayout->PartitionEntry[i].Mbr.PartitionType != PARTITION_ENTRY_UNUSED) {
 					uprintf("Partition #%d:\n", ++nb_partitions);
-					if (hFSTooltip == NULL) {
+					if (!r) {
 						// TODO: provide all partitions FS on tooltip, not just the one
 						safe_sprintf(tmp, sizeof(tmp), "Current file system: %s (0x%02x)",
 							GetPartitionType(DriveLayout->PartitionEntry[i].Mbr.PartitionType),
 							DriveLayout->PartitionEntry[i].Mbr.PartitionType);
-						hFSTooltip = CreateTooltip(hFileSystem, tmp, -1);
+						CreateTooltip(hFileSystem, tmp, -1);
+						r = TRUE;
 					}
 					uprintf("  Type: %s (0x%02x)\n  Boot: %s\n  Recognized: %s\n  Hidden Sectors: %d\n",
 						GetPartitionType(DriveLayout->PartitionEntry[i].Mbr.PartitionType),
@@ -499,10 +498,6 @@ static BOOL PopulateProperties(int ComboIndex)
 	IGNORE_RETVAL(ComboBox_ResetContent(hClusterSize));
 	EnableWindow(GetDlgItem(hMainDialog, IDC_START), FALSE);
 	SetWindowTextA(hLabel, "");
-	DestroyTooltip(hDeviceTooltip);
-	DestroyTooltip(hFSTooltip);
-	hDeviceTooltip = NULL;
-	hFSTooltip = NULL;
 	memset(&SelectedDrive, 0, sizeof(SelectedDrive));
 
 	EnableWindow(hDOS, FALSE);
@@ -530,7 +525,7 @@ static BOOL PopulateProperties(int ComboIndex)
 	}
 	IGNORE_RETVAL(ComboBox_AddStringU(hCapacity, capacity));
 	IGNORE_RETVAL(ComboBox_SetCurSel(hCapacity, 0));
-	hDeviceTooltip = CreateTooltip(hDeviceList, DriveID.Table[ComboIndex], -1);
+	CreateTooltip(hDeviceList, DriveID.Table[ComboIndex], -1);
 
 	// Set a proposed label according to the size (eg: "256MB", "8GB")
 	if (HumanReadableSize < 1.0) {
@@ -1322,7 +1317,7 @@ void InitDialog(HWND hDlg)
 	IGNORE_RETVAL(ComboBox_AddStringU(hNBPasses, "3 Passes"));
 	IGNORE_RETVAL(ComboBox_AddStringU(hNBPasses, "4 Passes"));
 	IGNORE_RETVAL(ComboBox_SetCurSel(hNBPasses, 1));
-	hPassesToolTip = CreateTooltip(hNBPasses, "Pattern: 0x55, 0xAA", -1);
+	CreateTooltip(hNBPasses, "Pattern: 0x55, 0xAA", -1);
 	// Fill up the DOS type dropdown
 	IGNORE_RETVAL(ComboBox_SetItemData(hDOSType, ComboBox_AddStringU(hDOSType, "MS-DOS"), DT_WINME));
 	IGNORE_RETVAL(ComboBox_SetCurSel(hDOSType, DT_WINME));
@@ -1371,7 +1366,7 @@ void InitDialog(HWND hDlg)
 
 	SendMessage(hSelectISO, BCM_SETIMAGELIST, 0, (LPARAM)&bi_iso);
 	SendMessage(GetDlgItem(hDlg, IDC_ADVANCED), BCM_SETIMAGELIST, 0, (LPARAM)&bi_down);
-	hISOToolTip = CreateTooltip(hSelectISO, "Click to select...", -1);
+	CreateTooltip(hSelectISO, "Click to select...", -1);
 	CreateTooltip(GetDlgItem(hDlg, IDC_SET_ICON), "Create an autorun.inf on the target drive, to set the icon. "
 		"Also allow the display of non-English labels.", 10000);
 
@@ -1479,19 +1474,18 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		case IDC_NBPASSES:
 			if (HIWORD(wParam) != CBN_SELCHANGE)
 				break;
-			DestroyTooltip(hPassesToolTip);
 			switch(ComboBox_GetCurSel(hNBPasses)) {
 			case 0:
-				hPassesToolTip = CreateTooltip(hNBPasses, "Pattern: 0x55", -1);
+				CreateTooltip(hNBPasses, "Pattern: 0x55", -1);
 				break;
 			case 1:
-				hPassesToolTip = CreateTooltip(hNBPasses, "Pattern: 0x55, 0xAA", -1);
+				CreateTooltip(hNBPasses, "Pattern: 0x55, 0xAA", -1);
 				break;
 			case 2:
-				hPassesToolTip = CreateTooltip(hNBPasses, "Pattern: 0x55, 0xAA, 0xFF", -1);
+				CreateTooltip(hNBPasses, "Pattern: 0x55, 0xAA, 0xFF", -1);
 				break;
 			case 3:
-				hPassesToolTip = CreateTooltip(hNBPasses, "Pattern: 0x55, 0xAA, 0xFF, 0x00", -1);
+				CreateTooltip(hNBPasses, "Pattern: 0x55, 0xAA, 0xFF, 0x00", -1);
 				break;
 			}
 			break;
@@ -1564,15 +1558,14 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			}
 			return (INT_PTR)TRUE;
 		case IDC_SELECT_ISO:
-			DestroyTooltip(hISOToolTip);
 			safe_free(iso_path);
 			iso_path = FileDialog(FALSE, NULL, "*.iso", "iso", "ISO Image");
 			if (iso_path == NULL) {
-				hISOToolTip = CreateTooltip(hSelectISO, "Click to select...", -1);
+				CreateTooltip(hSelectISO, "Click to select...", -1);
 				break;
 			}
 			selection_default = DT_ISO;
-			hISOToolTip = CreateTooltip(hSelectISO, iso_path, -1);
+			CreateTooltip(hSelectISO, iso_path, -1);
 			FormatStatus = 0;
 			// You'd think that Windows would let you instantiate a modeless dialog wherever
 			// but you'd be wrong. It must be done in the main callback!

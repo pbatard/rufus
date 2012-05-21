@@ -683,7 +683,8 @@ BOOL Notification(int type, char* title, char* format, ...)
 }
 
 static struct {
-	HWND hTip;
+	HWND hTip;		// Tooltip handle
+	HWND hCtrl;		// Handle of the control the tooltip belongs to
 	WNDPROC original_proc;
 	LPWSTR wstring;
 } ttlist[MAX_TOOLTIPS] = { {0} };
@@ -721,14 +722,17 @@ INT_PTR CALLBACK TooltipCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM 
  * duration sets the duration in ms. Use -1 for default
  * message is an UTF-8 string
  */
-HWND CreateTooltip(HWND hControl, const char* message, int duration)
+BOOL CreateTooltip(HWND hControl, const char* message, int duration)
 {
 	TOOLINFOW toolInfo = {0};
 	int i;
 
 	if ( (hControl == NULL) || (message == NULL) ) {
-		return (HWND)NULL;
+		return FALSE;
 	}
+
+	// Destroy existing tooltip if any
+	DestroyTooltip(hControl);
 
 	// Find an empty slot
 	for (i=0; i<MAX_TOOLTIPS; i++) {
@@ -736,7 +740,7 @@ HWND CreateTooltip(HWND hControl, const char* message, int duration)
 	}
 	if (i == MAX_TOOLTIPS) {
 		uprintf("Maximum number of tooltips reached\n");
-		return (HWND)NULL;
+		return FALSE;
 	}
 
 	// Create the tooltip window
@@ -745,8 +749,9 @@ HWND CreateTooltip(HWND hControl, const char* message, int duration)
 		hMainInstance, NULL);
 
 	if (ttlist[i].hTip == NULL) {
-		return (HWND)NULL;
+		return FALSE;
 	}
+	ttlist[i].hCtrl = hControl;
 
 	// Subclass the tooltip to handle multiline
 	ttlist[i].original_proc = (WNDPROC)SetWindowLongPtr(ttlist[i].hTip, GWLP_WNDPROC, (LONG_PTR)TooltipCallback);
@@ -765,22 +770,24 @@ HWND CreateTooltip(HWND hControl, const char* message, int duration)
 	toolInfo.lpszText = LPSTR_TEXTCALLBACKW;
 	SendMessageW(ttlist[i].hTip, TTM_ADDTOOLW, 0, (LPARAM)&toolInfo);
 
-	return ttlist[i].hTip;
+	return TRUE;
 }
 
-void DestroyTooltip(HWND hWnd)
+/* Destroy a tooltip. hCtrl = handle of the control the tooltip is associated with */
+void DestroyTooltip(HWND hControl)
 {
 	int i;
 
-	if (hWnd == NULL) return;
+	if (hControl == NULL) return;
 	for (i=0; i<MAX_TOOLTIPS; i++) {
-		if (ttlist[i].hTip == hWnd) break;
+		if (ttlist[i].hCtrl == hControl) break;
 	}
 	if (i == MAX_TOOLTIPS) return;
-	DestroyWindow(hWnd);
+	DestroyWindow(ttlist[i].hTip);
 	safe_free(ttlist[i].wstring);
 	ttlist[i].original_proc = NULL;
 	ttlist[i].hTip = NULL;
+	ttlist[i].hCtrl = NULL;
 }
 
 void DestroyAllTooltips(void)
