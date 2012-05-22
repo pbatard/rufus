@@ -32,7 +32,7 @@
 #define DRIVE_INDEX_MIN             0x80
 #define DRIVE_INDEX_MAX             0xC0
 #define MAX_DRIVES                  16
-#define MAX_TOOLTIPS                16
+#define MAX_TOOLTIPS                32
 #define MAX_PROGRESS                (0xFFFF-1)	// leave room for 1 more for insta-progress workaround
 #define PROPOSEDLABEL_TOLERANCE     0.10
 #define FS_DEFAULT                  FS_FAT32

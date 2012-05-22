@@ -801,7 +801,7 @@ void DestroyAllTooltips(void)
 	}
 }
 
-/* Compute the width of a device list entry */
+/* Compute the width of a dropdown list entry */
 LONG GetEntryWidth(HWND hDropDown, const char *entry)
 { 
 	HDC hDC;

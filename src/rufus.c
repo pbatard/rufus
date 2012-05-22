@@ -1321,8 +1321,8 @@ void InitDialog(HWND hDlg)
 	// Fill up the DOS type dropdown
 	IGNORE_RETVAL(ComboBox_SetItemData(hDOSType, ComboBox_AddStringU(hDOSType, "MS-DOS"), DT_WINME));
 	IGNORE_RETVAL(ComboBox_SetCurSel(hDOSType, DT_WINME));
-	// Fill up the MBR disk IDs ("9 IDs should be enough for anybody")
-	for (i=0x80; i<=0x88; i++) {
+	// Fill up the MBR masqueraded disk IDs ("8 disks should be enough for anybody")
+	for (i=0x80; i<=0x87; i++) {
 		sprintf(tmp, "0x%02x", i);
 		IGNORE_RETVAL(ComboBox_SetItemData(hDiskID, ComboBox_AddStringU(hDiskID, tmp), i));
 	}
@@ -1366,9 +1366,26 @@ void InitDialog(HWND hDlg)
 
 	SendMessage(hSelectISO, BCM_SETIMAGELIST, 0, (LPARAM)&bi_iso);
 	SendMessage(GetDlgItem(hDlg, IDC_ADVANCED), BCM_SETIMAGELIST, 0, (LPARAM)&bi_down);
-	CreateTooltip(hSelectISO, "Click to select...", -1);
-	CreateTooltip(GetDlgItem(hDlg, IDC_SET_ICON), "Create an autorun.inf on the target drive, to set the icon. "
-		"Also allow the display of non-English labels.", 10000);
+
+	// Set the various tooltips
+	CreateTooltip(hCapacity, "Size of the current USB drive", -1);
+	CreateTooltip(hClusterSize, "Minimum size that each data block will occupy", -1);
+	CreateTooltip(hLabel, "Use this field to set the drive label\nInternational characters are accepted", -1);
+	CreateTooltip(GetDlgItem(hDlg, IDC_ADVANCED), "Toggle advanced options", -1);
+	CreateTooltip(GetDlgItem(hDlg, IDC_BADBLOCKS), "Test the device for bad blocks using a set byte pattern", -1);
+	CreateTooltip(GetDlgItem(hDlg, IDC_QUICKFORMAT), "Unchek this box to use the \"slow\" format method", -1);
+	CreateTooltip(hDOS, "Check this box to make the USB drive bootable", -1);
+	CreateTooltip(hDOSType, "Type of boot", -1);
+	CreateTooltip(hSelectISO, "Click to select an ISO...", -1);
+	CreateTooltip(GetDlgItem(hDlg, IDC_SET_ICON), "Check this box to allow the display of international labels "
+		"as well as set a device icon (through autorun.inf)", 10000);
+	CreateTooltip(GetDlgItem(hDlg, IDC_RUFUS_MBR), "Install an MBR that allows boot selection and can masquerade the BIOS USB drive ID", 10000);
+	CreateTooltip(hDiskID, "If not 0x80, masquerade USB drive to a different ID:\n0x81 = masquerade as 2nd disk, 0x82 = 3rd disk, etc.\n"
+		"This is mostly used for XP/WinPE 1.0 boot" , 10000);
+	CreateTooltip(GetDlgItem(hDlg, IDC_EXTRA_PARTITION), "Create an extra hidden partition and try to align partitions boundaries.\n"
+		"This can improve boot detection for older BIOSes", -1);
+	CreateTooltip(GetDlgItem(hDlg, IDC_START), "Format the drive. This will DESTROY any data on it", -1);
+	CreateTooltip(GetDlgItem(hDlg, IDC_ABOUT), "Licensing information and credits", -1);
 
 	ToggleAdvanced();	// We start in advanced mode => go to basic mode
 }
