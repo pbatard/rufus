@@ -101,7 +101,7 @@ float fScale = 1.0f;
 int default_fs;
 HWND hDeviceList, hCapacity, hFileSystem, hClusterSize, hLabel, hDOSType, hNBPasses;
 HWND hISOProgressDlg = NULL, hISOProgressBar, hISOFileName, hDiskID;
-BOOL use_own_vesamenu = FALSE, detect_fakes = TRUE;
+BOOL use_own_vesamenu = FALSE, detect_fakes = TRUE, mbr_selected_by_user = FALSE;
 int rufus_version[4];
 extern char szStatusMessage[256];
 
@@ -467,19 +467,28 @@ static void SetFSFromISO(void)
 void SetMBRProps(void)
 {
 	int fs, dt;
-	BOOL needs_masquerading = (iso_report.has_bootmgr) || (IS_WINPE(iso_report.winpe) && (!iso_report.uses_minint));
+	BOOL needs_masquerading = (IS_WINPE(iso_report.winpe) && (!iso_report.uses_minint));
 
 	fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
 	dt = (int)ComboBox_GetItemData(hDOSType, ComboBox_GetCurSel(hDOSType));
 
-	if ((iso_path == NULL) || (dt != DT_ISO) || (fs != FS_NTFS)) {
+	if ((!mbr_selected_by_user) && ((iso_path == NULL) || (dt != DT_ISO) || (fs != FS_NTFS))) {
 		CheckDlgButton(hMainDialog, IDC_RUFUS_MBR, BST_UNCHECKED);
 		IGNORE_RETVAL(ComboBox_SetCurSel(hDiskID, 0));
 		return;
 	}
 
-	CheckDlgButton(hMainDialog, IDC_RUFUS_MBR, needs_masquerading?BST_CHECKED:BST_UNCHECKED);
+	CheckDlgButton(hMainDialog, IDC_RUFUS_MBR, (needs_masquerading || mbr_selected_by_user)?BST_CHECKED:BST_UNCHECKED);
 	IGNORE_RETVAL(ComboBox_SetCurSel(hDiskID, needs_masquerading?1:0));
+}
+
+void EnableBootOptions(BOOL enable)
+{
+	EnableWindow(hDOS, enable);
+	EnableWindow(hDOSType, enable);
+	EnableWindow(hSelectISO, enable);
+	EnableWindow(GetDlgItem(hMainDialog, IDC_RUFUS_MBR), enable);
+	EnableWindow(hDiskID, enable);
 }
 
 /*
@@ -500,20 +509,15 @@ static BOOL PopulateProperties(int ComboIndex)
 	SetWindowTextA(hLabel, "");
 	memset(&SelectedDrive, 0, sizeof(SelectedDrive));
 
-	EnableWindow(hDOS, FALSE);
-	EnableWindow(hDOSType, FALSE);
-
-	if (ComboIndex < 0) {
+	if (ComboIndex < 0)
 		return TRUE;
-	}
 
 	SelectedDrive.DeviceNumber = (DWORD)ComboBox_GetItemData(hDeviceList, ComboIndex);
 	if (!GetDriveInfo())	// This also populates FS
 		return FALSE;
 	SetFSFromISO();
 	fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
-	EnableWindow(hDOS, (fs == FS_FAT16) || (fs == FS_FAT32) || (fs == FS_NTFS));
-	EnableWindow(hDOSType, (fs == FS_FAT16) || (fs == FS_FAT32) || (fs == FS_NTFS));
+	EnableBootOptions((fs == FS_FAT16) || (fs == FS_FAT32) || (fs == FS_NTFS));
 
 	HumanReadableSize = (double)SelectedDrive.DiskSize;
 	for (i=0; i<ARRAYSIZE(suffix); i++) {
@@ -1301,6 +1305,7 @@ void InitDialog(HWND hDlg)
 	token = strtok(tmp, "v");
 	for (i=0; (i<4) && ((token = strtok(NULL, ".")) != NULL); i++)
 		rufus_version[i] = atoi(token);
+	uprintf("Rufus version %d.%d.%d.%d\n", rufus_version[0], rufus_version[1], rufus_version[2], rufus_version[3]);
 
 	// Prefer FreeDOS to MS-DOS
 	selection_default = DT_FREEDOS;
@@ -1322,9 +1327,10 @@ void InitDialog(HWND hDlg)
 	IGNORE_RETVAL(ComboBox_SetItemData(hDOSType, ComboBox_AddStringU(hDOSType, "MS-DOS"), DT_WINME));
 	IGNORE_RETVAL(ComboBox_SetCurSel(hDOSType, DT_WINME));
 	// Fill up the MBR masqueraded disk IDs ("8 disks should be enough for anybody")
-	for (i=0x80; i<=0x87; i++) {
-		sprintf(tmp, "0x%02x", i);
-		IGNORE_RETVAL(ComboBox_SetItemData(hDiskID, ComboBox_AddStringU(hDiskID, tmp), i));
+	IGNORE_RETVAL(ComboBox_SetItemData(hDiskID, ComboBox_AddStringU(hDiskID, "0x80 (default)"), 0x80));
+	for (i=1; i<=7; i++) {
+		sprintf(tmp, "0x%02x (%d%s disk)", 0x80+i, i+1, (i==1)?"nd":((i==2)?"rd":"th"));
+		IGNORE_RETVAL(ComboBox_SetItemData(hDiskID, ComboBox_AddStringU(hDiskID, tmp), 0x80+i));
 	}
 	IGNORE_RETVAL(ComboBox_SetCurSel(hDiskID, 0));
 
@@ -1380,8 +1386,8 @@ void InitDialog(HWND hDlg)
 	CreateTooltip(GetDlgItem(hDlg, IDC_SET_ICON), "Check this box to allow the display of international labels "
 		"as well as set a device icon (through autorun.inf)", 10000);
 	CreateTooltip(GetDlgItem(hDlg, IDC_RUFUS_MBR), "Install an MBR that allows boot selection and can masquerade the BIOS USB drive ID", 10000);
-	CreateTooltip(hDiskID, "If not 0x80, masquerade USB drive to a different ID:\n0x81 = masquerade as 2nd disk, 0x82 = 3rd disk, etc.\n"
-		"This is mostly used for XP/WinPE 1.0 boot" , 10000);
+	CreateTooltip(hDiskID, "Try to masquerade first bootable USB drive (usually 0x80) as a different disk.\n"
+		"This should only be necessary for XP installation" , 10000);
 	CreateTooltip(GetDlgItem(hDlg, IDC_EXTRA_PARTITION), "Create an extra hidden partition and try to align partitions boundaries.\n"
 		"This can improve boot detection for older BIOSes", -1);
 	CreateTooltip(GetDlgItem(hDlg, IDC_START), "Format the drive. This will DESTROY any data on it", -1);
@@ -1511,15 +1517,23 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				break;
 			fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
 			SetClusterSizes(fs);
-			if ((fs == FS_EXFAT) || (fs < 0)) {
+			if (fs < 0) {
+				EnableBootOptions(TRUE);
+				SetMBRProps();
+				// Remove the SysLinux option if exists
+				if (ComboBox_GetItemData(hDOSType, ComboBox_GetCount(hDOSType)-1) == DT_SYSLINUX) {
+					IGNORE_RETVAL(ComboBox_DeleteString(hDOSType,  ComboBox_GetCount(hDOSType)-1));
+					IGNORE_RETVAL(ComboBox_SetCurSel(hDOSType, 1));
+				}
+				break;
+			}
+			if (fs == FS_EXFAT) {
 				if (IsWindowEnabled(hDOS)) {
 					// unlikely to be supported by BIOSes => don't bother
 					IGNORE_RETVAL(ComboBox_SetCurSel(hDOSType, 0));
 					uDOSChecked = IsDlgButtonChecked(hMainDialog, IDC_DOS);
 					CheckDlgButton(hDlg, IDC_DOS, BST_UNCHECKED);
-					EnableWindow(hDOS, FALSE);
-					EnableWindow(hDOSType, FALSE);
-					EnableWindow(hSelectISO, FALSE);
+					EnableBootOptions(FALSE);
 				}
 				SetMBRProps();
 				break;
@@ -1596,6 +1610,10 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				uprintf("Unable to start ISO scanning thread");
 				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_START_THREAD);
 			}
+			break;
+		case IDC_RUFUS_MBR:
+			if ((HIWORD(wParam)) == BN_CLICKED)
+				mbr_selected_by_user = IsChecked(IDC_RUFUS_MBR);
 			break;
 		case IDC_START:
 			if (format_thid != NULL) {
@@ -1760,26 +1778,26 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			// Alt-S => Disable size limit
 			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'S')) {
 				iso_size_check = !iso_size_check;
-				PrintStatus(0, FALSE, "ISO size check %s", iso_size_check?"enabled":"disabled");
+				PrintStatus(2000, FALSE, "ISO size check %s.", iso_size_check?"enabled":"disabled");
 				continue;
 			}
 			// Alt-F => toggle detection of fixed disks
 			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'F')) {
 				enable_fixed_disks = !enable_fixed_disks;
-				PrintStatus(0, FALSE, "Fixed disks detection %s", enable_fixed_disks?"enabled":"disabled");
+				PrintStatus(2000, FALSE, "Fixed disks detection %s.", enable_fixed_disks?"enabled":"disabled");
 				GetUSBDevices(0);
 				continue;
 			}
 			// Alt-D => Delete the NoDriveTypeAutorun key on exit (useful if the app crashed)
 			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'D')) {
-				PrintStatus(0, FALSE, "NoDriveTypeAutorun will be deleted on exit.");
+				PrintStatus(2000, FALSE, "NoDriveTypeAutorun will be deleted on exit.");
 				existing_key = FALSE;
 				continue;
 			}
 			// Alt K => Toggle fake drive detection during bad blocks check (enabled by default)
 			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'K')) {
 				detect_fakes = !detect_fakes;
-				PrintStatus(0, FALSE, "Fake drive detection %s", detect_fakes?"enabled":"disabled");
+				PrintStatus(2000, FALSE, "Fake drive detection %s.", detect_fakes?"enabled":"disabled");
 				continue;
 			}
 			TranslateMessage(&msg);
