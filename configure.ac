@@ -35,7 +35,7 @@ else
 fi
 
 AC_MSG_RESULT([enabling Large File Support (ISO support)])
-AM_CFLAGS="$AM_CFLAGS -D_FILE_OFFSET_BITS=64 -D_OFF_T_DEFINED -D_OFF_T_ -D_off_t=off64_t -Doff_t=off64_t"
+AM_CFLAGS="$AM_CFLAGS -D_FILE_OFFSET_BITS=64 -D_OFF_T_ -D_off_t=off64_t -Doff_t=off64_t -Doff32_t=long"
 
 # check for -Wno-pointer-sign compiler support (GCC >= 4)
 saved_CFLAGS="${CFLAGS}"

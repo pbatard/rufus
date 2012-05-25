@@ -3459,7 +3459,7 @@ fi
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: enabling Large File Support (ISO support)" >&5
 $as_echo "enabling Large File Support (ISO support)" >&6; }
-AM_CFLAGS="$AM_CFLAGS -D_FILE_OFFSET_BITS=64 -D_OFF_T_DEFINED -D_OFF_T_ -D_off_t=off64_t -Doff_t=off64_t"
+AM_CFLAGS="$AM_CFLAGS -D_FILE_OFFSET_BITS=64 -D_OFF_T_ -D_off_t=off64_t -Doff_t=off64_t -Doff32_t=long"
 
 # check for -Wno-pointer-sign compiler support (GCC >= 4)
 saved_CFLAGS="${CFLAGS}"
