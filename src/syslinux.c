@@ -55,7 +55,6 @@ int libfat_readfile(intptr_t pp, void *buf, size_t secsize,
 		!ReadFile((HANDLE) pp, buf, (DWORD)secsize, &bytes_read, NULL) ||
 		bytes_read != secsize) {
 		uprintf("Cannot read sector %u\n", sector);
-		// TODO -1?
 		return 0;
 	}
 

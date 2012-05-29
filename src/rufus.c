@@ -311,6 +311,25 @@ static BOOL SetClusterSizes(int FSType)
 	return TRUE;
 }
 
+// Convert a file size to human readable
+static __inline char* size_to_hr(LARGE_INTEGER size)
+{
+	int suffix = 0;
+	static char str_size[24];
+	const char* sizes[] = { "", "KB", "MB", "GB", "TB" };
+	double hr_size = (double)size.QuadPart;
+	while ((suffix < ARRAYSIZE(sizes)) && (hr_size >= 1024.0)) {
+		hr_size /= 1024.0;
+		suffix++;
+	}
+	if (suffix == 0) {
+		safe_sprintf(str_size, sizeof(str_size), "%d bytes", (int)hr_size);
+	} else {
+		safe_sprintf(str_size, sizeof(str_size), "%0.1f %s", hr_size, sizes[suffix]);
+	}
+	return str_size;
+}
+
 /*
  * Fill the drive properties (size, FS, etc)
  */
@@ -319,13 +338,14 @@ static BOOL GetDriveInfo(void)
 	BOOL r;
 	HANDLE hDrive;
 	DWORD size;
-	BYTE geometry[128], layout[1024];
+	BYTE geometry[128], layout[1024], part_type;
 	void* disk_geometry = (void*)geometry;
 	void* drive_layout = (void*)layout;
 	PDISK_GEOMETRY_EX DiskGeometry = (PDISK_GEOMETRY_EX)disk_geometry;
 	PDRIVE_LAYOUT_INFORMATION_EX DriveLayout = (PDRIVE_LAYOUT_INFORMATION_EX)drive_layout;
-	char DrivePath[] = "#:\\", tmp[128], fs_type[32];
+	char DrivePath[] = "#:\\", tmp[512], fs_type[32];
 	DWORD i, nb_partitions = 0;
+	int tmp_pos;
 
 	SelectedDrive.DiskSize = 0;
 
@@ -354,26 +374,23 @@ static BOOL GetDriveInfo(void)
 		r = FALSE;
 		switch (DriveLayout->PartitionStyle) {
 		case PARTITION_STYLE_MBR:
-			for (i=0; i<DriveLayout->PartitionCount; i++) {
+			for (tmp_pos=0, i=0; (i<DriveLayout->PartitionCount)&&(tmp_pos>=0); i++) {
 				if (DriveLayout->PartitionEntry[i].Mbr.PartitionType != PARTITION_ENTRY_UNUSED) {
-					uprintf("Partition #%d:\n", ++nb_partitions);
-					if (!r) {
-						// TODO: provide all partitions FS on tooltip, not just the one
-						safe_sprintf(tmp, sizeof(tmp), "Current file system: %s (0x%02x)",
-							GetPartitionType(DriveLayout->PartitionEntry[i].Mbr.PartitionType),
-							DriveLayout->PartitionEntry[i].Mbr.PartitionType);
-						CreateTooltip(hFileSystem, tmp, -1);
-						r = TRUE;
-					}
-					uprintf("  Type: %s (0x%02x)\n  Boot: %s\n  Recognized: %s\n  Hidden Sectors: %d\n",
-						GetPartitionType(DriveLayout->PartitionEntry[i].Mbr.PartitionType),
-						DriveLayout->PartitionEntry[i].Mbr.PartitionType,
+					nb_partitions++;
+					uprintf("Partition %d:\n", i+1);
+					part_type = DriveLayout->PartitionEntry[i].Mbr.PartitionType;
+					uprintf("  Type: %s (0x%02x)\n  Size: %s\n  Boot: %s\n  Recognized: %s\n  Hidden Sectors: %d\n",
+						GetPartitionType(part_type), part_type, size_to_hr(DriveLayout->PartitionEntry[i].PartitionLength),
 						DriveLayout->PartitionEntry[i].Mbr.BootIndicator?"Yes":"No",
 						DriveLayout->PartitionEntry[i].Mbr.RecognizedPartition?"Yes":"No",
 						DriveLayout->PartitionEntry[i].Mbr.HiddenSectors);
+					tmp_pos = safe_sprintf(&tmp[tmp_pos], sizeof(tmp)-tmp_pos, "Partition %d: %s (%s)\n",
+						i+1, GetPartitionType(part_type), size_to_hr(DriveLayout->PartitionEntry[i].PartitionLength));
 				}
 			}
 			uprintf("Partition type: MBR, NB Partitions: %d\n", nb_partitions);
+			tmp[sizeof(tmp)-1] = 0;
+			CreateTooltip(hCapacity, tmp, -1);
 			break;
 		case PARTITION_STYLE_GPT:
 			uprintf("Partition type: GPT, NB Partitions: %d\n", DriveLayout->PartitionCount);
@@ -587,6 +604,8 @@ BOOL CreatePartition(HANDLE hDrive)
 	DriveLayoutEx.PartitionEntry[0].PartitionStyle = PARTITION_STYLE_MBR;
 	// TODO: CHS fixup (32 sectors/track) through a cheat mode, if requested
 	// NB: disk geometry is computed by BIOS & co. by finding a match between LBA and CHS value of first partition
+	//     ms-sys's write_partition_number_of_heads() and write_partition_start_sector_number() can be used if needed
+
 	DriveLayoutEx.PartitionEntry[0].StartingOffset.QuadPart = 
 		SelectedDrive.Geometry.BytesPerSector * SelectedDrive.Geometry.SectorsPerTrack;
 	sector_size = (SelectedDrive.DiskSize - DriveLayoutEx.PartitionEntry[0].StartingOffset.QuadPart) / SelectedDrive.Geometry.BytesPerSector;
@@ -1374,23 +1393,23 @@ void InitDialog(HWND hDlg)
 	SendMessage(GetDlgItem(hDlg, IDC_ADVANCED), BCM_SETIMAGELIST, 0, (LPARAM)&bi_down);
 
 	// Set the various tooltips
-	CreateTooltip(hCapacity, "Size of the current USB drive", -1);
-	CreateTooltip(hClusterSize, "Minimum size that each data block will occupy", -1);
+	CreateTooltip(hFileSystem, "Sets the target filesystem", -1);
+	CreateTooltip(hClusterSize, "Minimum size that each data block occupies", -1);
 	CreateTooltip(hLabel, "Use this field to set the drive label\nInternational characters are accepted", -1);
 	CreateTooltip(GetDlgItem(hDlg, IDC_ADVANCED), "Toggle advanced options", -1);
 	CreateTooltip(GetDlgItem(hDlg, IDC_BADBLOCKS), "Test the device for bad blocks using a set byte pattern", -1);
 	CreateTooltip(GetDlgItem(hDlg, IDC_QUICKFORMAT), "Unchek this box to use the \"slow\" format method", -1);
 	CreateTooltip(hDOS, "Check this box to make the USB drive bootable", -1);
-	CreateTooltip(hDOSType, "Type of boot", -1);
+	CreateTooltip(hDOSType, "Boot method", -1);
 	CreateTooltip(hSelectISO, "Click to select an ISO...", -1);
 	CreateTooltip(GetDlgItem(hDlg, IDC_SET_ICON), "Check this box to allow the display of international labels "
-		"as well as set a device icon (through autorun.inf)", 10000);
+		"and set a device icon (creates an autorun.inf)", 10000);
 	CreateTooltip(GetDlgItem(hDlg, IDC_RUFUS_MBR), "Install an MBR that allows boot selection and can masquerade the BIOS USB drive ID", 10000);
 	CreateTooltip(hDiskID, "Try to masquerade first bootable USB drive (usually 0x80) as a different disk.\n"
 		"This should only be necessary for XP installation" , 10000);
 	CreateTooltip(GetDlgItem(hDlg, IDC_EXTRA_PARTITION), "Create an extra hidden partition and try to align partitions boundaries.\n"
 		"This can improve boot detection for older BIOSes", -1);
-	CreateTooltip(GetDlgItem(hDlg, IDC_START), "Format the drive. This will DESTROY any data on it", -1);
+	CreateTooltip(GetDlgItem(hDlg, IDC_START), "Start the formatting operation.\nThis will DESTROY any data on the target!", -1);
 	CreateTooltip(GetDlgItem(hDlg, IDC_ABOUT), "Licensing information and credits", -1);
 
 	ToggleAdvanced();	// We start in advanced mode => go to basic mode

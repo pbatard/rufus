@@ -937,7 +937,7 @@ BOOL SetDOSLocale(const char* path, BOOL bFreeDOS)
 	kbdrv = bFreeDOS?fd_get_kbdrv(kb):ms_get_kbdrv(kb);
 	if (kbdrv == NULL) {
 		uprintf("Keyboard id '%s' is not supported - falling back to 'us'\n", kb);
-		kb = "us";	// TODO: smarter fallback?
+		kb = "us";
 		kbdrv = bFreeDOS?fd_get_kbdrv(kb):ms_get_kbdrv(kb);	// Always succeeds
 	}
 	uprintf("Will use DOS keyboard '%s' [%s]\n", kb, kb_to_hr(kb));
@@ -1018,4 +1018,3 @@ BOOL SetDOSLocale(const char* path, BOOL bFreeDOS)
 
 	return TRUE;
 }
- 

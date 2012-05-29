@@ -415,7 +415,7 @@ BOOL WriteRufusMBR(FILE *fp)
 	unsigned char aucRef[] = {0x55, 0xAA};
 	unsigned char* rufus_mbr;
 
-	// TODO: will we need to edit the disk ID according to UI sel in the MBR as well?
+	// TODO: Will we need to edit the disk ID according to UI selection in the MBR as well?
 	res = FindResource(hMainInstance, MAKEINTRESOURCE(IDR_BR_MBR_BIN), RT_RCDATA);
 	if (res == NULL) {
 		uprintf("Unable to locate mbr.bin resource: %s\n", WindowsErrorString());
@@ -449,7 +449,7 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 
 	// FormatEx rewrites the MBR and removes the LBA attribute of FAT16
 	// and FAT32 partitions - we need to correct this in the MBR
-	// TODO: something else for bootable GPT
+	// TODO: Something else for bootable GPT
 	buf = (unsigned char*)malloc(SecSize * nSecs);
 	if (buf == NULL) {
 		uprintf("Could not allocate memory for MBR");
@@ -526,7 +526,6 @@ static BOOL WritePBR(HANDLE hLogicalVolume)
 	fake_fd._ptr = (char*)hLogicalVolume;
 	fake_fd._bufsiz = SelectedDrive.Geometry.BytesPerSector;
 
-	// TODO: call write_partition_number_of_heads() and write_partition_start_sector_number()?
 	switch (ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem))) {
 	case FS_FAT16:
 		if (!is_fat_16_fs(&fake_fd)) {
@@ -582,7 +581,6 @@ static BOOL WritePBR(HANDLE hLogicalVolume)
 /*
  * Setup WinPE for bootable USB
  */
-// TODO: set FormatError
 static BOOL SetupWinPE(char drive_letter)
 {
 	char src[64], dst[32];
@@ -609,8 +607,9 @@ static BOOL SetupWinPE(char drive_letter)
 		// Create a copy of txtsetup.sif, as we want to keep the i386 files unmodified
 		safe_sprintf(src, sizeof(src), "%c:\\%s\\txtsetup.sif", drive_letter, basedir[index]);
 		safe_sprintf(dst, sizeof(dst), "%c:\\txtsetup.sif", drive_letter);
-		// TODO: detect if overwrite?
-		CopyFileA(src, dst, TRUE);
+		if (!CopyFileA(src, dst, TRUE)) {
+			uprintf("Did not copy %s as %s: %s\n", src, dst, WindowsErrorString());
+		}
 		if (insert_section_data(dst, "[SetupData]", setupsrcdev, FALSE) == NULL) {
 			uprintf("Failed to add SetupSourceDevice in %s\n", dst);
 			goto out;
@@ -620,8 +619,9 @@ static BOOL SetupWinPE(char drive_letter)
 
 	safe_sprintf(src, sizeof(src), "%c:\\%s\\setupldr.bin", drive_letter,  basedir[index]);
 	safe_sprintf(dst, sizeof(dst), "%c:\\BOOTMGR", drive_letter);
-	// TODO: detect if overwrite?
-	CopyFileA(src, dst, TRUE);
+	if (!CopyFileA(src, dst, TRUE)) {
+		uprintf("Did not copy %s as %s: %s\n", src, dst, WindowsErrorString());
+	}
 
 	// \minint with /minint option doesn't require further processing => return true
 	// \minint and no \i386 without /minint is unclear => return error
@@ -659,7 +659,6 @@ static BOOL SetupWinPE(char drive_letter)
 	uprintf("Patching file %s\n", dst);
 	// Remove CRC check for 32 bit part of setupldr.bin from Win2k3
 	if ((size > 0x2061) && (buf[0x2060] == 0x74) && (buf[0x2061] == 0x03)) {
-		// TODO: amend this if not all Win2k3 setupldr.bin's use the same header
 		buf[0x2060] = 0xeb;
 		buf[0x2061] = 0x1a;
 		uprintf("  0x00002060: 0x74 0x03 -> 0xEB 0x1A (disable Win2k3 CRC check)\n");
@@ -678,7 +677,7 @@ static BOOL SetupWinPE(char drive_letter)
 		// Additional setupldr.bin/bootmgr patching
 		for (i=0; i<size-32; i++) {
 			// rdisk(0) -> rdisk(#) disk masquerading
-			// TODO: only the first one seems to be needed
+			// NB: only the first one seems to be needed
 			if (safe_strnicmp(&buf[i], rdisk_zero, strlen(rdisk_zero)-1) == 0) {
 				buf[i+6] = 0x20 + ComboBox_GetCurSel(hDiskID);
 				uprintf("  0x%08X: '%s' -> 'rdisk(%c)'\n", i, rdisk_zero, buf[i+6]);

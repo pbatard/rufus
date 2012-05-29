@@ -102,8 +102,8 @@ HANDLE GetDriveHandle(DWORD DriveIndex, char* DriveLetter, BOOL bWriteAccess, BO
 			   value there => Use GetDriveType() to filter out unwanted devices.
 			   See https://github.com/pbatard/rufus/issues/32 for details. */
 			drive_type = GetDriveTypeA(drive);
-			// NB: the HP utility allows drive_type == DRIVE_FIXED, which we don't really really want for now
-			// TODO: allow fixed drives after partitioning/preserving of existing partitions has been sorted out
+			// NB: the HP utility allows drive_type == DRIVE_FIXED, which we don't allow by default
+			// Using Alt-F in Rufus does enable listing, but this mode is unsupported.
 			if ((drive_type != DRIVE_REMOVABLE) && ((!enable_fixed_disks) || (drive_type != DRIVE_FIXED)))
 				continue;
 
