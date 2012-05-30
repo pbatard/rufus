@@ -374,6 +374,7 @@ out:
 BOOL ExtractISO(const char* src_iso, const char* dest_dir, bool scan)
 {
 	size_t i;
+	int j;
 	FILE* fd;
 	BOOL r = FALSE;
 	iso9660_t* p_iso = NULL;
@@ -457,6 +458,9 @@ try_iso:
 out:
 	iso_blocking_status = -1;
 	if (scan_only) {
+		// Remove trailing spaces from the label
+		for (j=safe_strlen(iso_report.label)-1; ((j>=0)&&(isspace(iso_report.label[j]))); j--)
+			iso_report.label[j] = 0;
 		// We use the fact that UDF_BLOCKSIZE and ISO_BLOCKSIZE are the same here
 		iso_report.projected_size = total_blocks * ISO_BLOCKSIZE;
 		// We will link the existing isolinux.cfg from a syslinux.cfg we create
@@ -546,7 +550,6 @@ BOOL ExtractISOFile(const char* iso, const char* iso_file, const char* dest_file
 	p_udf = udf_open(iso);
 	if (p_udf == NULL)
 		goto try_iso;
-	uprintf("Disc image is an UDF image\n");
 
 	p_udf_root = udf_get_root(p_udf, true, 0);
 	if (p_udf_root == NULL) {
@@ -583,7 +586,6 @@ try_iso:
 		uprintf("Unable to open image '%s'.\n", iso);
 		goto out;
 	}
-	uprintf("Disc image is an ISO9660 image\n");
 
 	p_statbuf = iso9660_ifs_stat_translate(p_iso, iso_file);
 	if (p_statbuf == NULL) {

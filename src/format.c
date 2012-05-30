@@ -84,7 +84,7 @@ static BOOLEAN __stdcall FormatExCallback(FILE_SYSTEM_CALLBACK_COMMAND Command, 
 		break;
 	case FCC_DONE_WITH_STRUCTURE:	// We get this message when formatting Small FAT16
 		// pData Seems to be a struct with at least one (32 BIT!!!) string pointer to the size in MB
-		uprintf("Done with that sort of thing: Action=%d pData=%0p\n", Action, pData);
+		// uprintf("Done with that sort of thing: Action=%d pData=%0p\n", Action, pData);
 		// /!\ THE FOLLOWING ONLY WORKS ON VISTA OR LATER - DO NOT ENABLE ON XP!
 		// DumpBufferHex(pData, 8);
 		// uprintf("Volume size: %s MB\n", (char*)(LONG_PTR)(*(ULONG32*)pData));
@@ -679,7 +679,7 @@ static BOOL SetupWinPE(char drive_letter)
 			// rdisk(0) -> rdisk(#) disk masquerading
 			// NB: only the first one seems to be needed
 			if (safe_strnicmp(&buf[i], rdisk_zero, strlen(rdisk_zero)-1) == 0) {
-				buf[i+6] = 0x20 + ComboBox_GetCurSel(hDiskID);
+				buf[i+6] = 0x30 + ComboBox_GetCurSel(hDiskID);
 				uprintf("  0x%08X: '%s' -> 'rdisk(%c)'\n", i, rdisk_zero, buf[i+6]);
 			}
 			// $WIN_NT$_~BT -> i386
