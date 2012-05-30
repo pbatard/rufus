@@ -32,6 +32,7 @@
 #include <string.h>
 #include <shlobj.h>
 #include <commdlg.h>
+#include <sddl.h>
 
 #include "rufus.h"
 #include "msapi_utf8.h"
@@ -140,6 +141,57 @@ void StrArrayDestroy(StrArray* arr)
 }
 
 /*
+ * Retrieve the SID of the current user. The returned PSID must be freed by the caller using LocalFree()
+ */
+static PSID GetSID(void) {
+	TOKEN_USER* tu = NULL;
+	DWORD len;
+	HANDLE token;
+	PSID ret = NULL;
+	char* psid_string = NULL;
+
+	if (!OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &token)) {
+		uprintf("OpenProcessToken failed: %s\n", WindowsErrorString());
+		return NULL;
+	}
+
+	if (!GetTokenInformation(token, TokenUser, tu, 0, &len)) {
+		if (GetLastError() != ERROR_INSUFFICIENT_BUFFER) {
+			uprintf("GetTokenInformation (pre) failed: %s\n", WindowsErrorString());
+			return NULL;
+		}
+		tu = (TOKEN_USER*)calloc(1, len);
+	}
+	if (tu == NULL) {
+		return NULL;
+	}
+
+	if (GetTokenInformation(token, TokenUser, tu, len, &len)) {
+		/*
+		 * now of course, the interesting thing is that if you return tu->User.Sid
+		 * but free tu, the PSID pointer becomes invalid after a while.
+		 * The workaround? Convert to string then back to PSID
+		 */
+		if (!ConvertSidToStringSidA(tu->User.Sid, &psid_string)) {
+			uprintf("Unable to convert SID to string: %s\n", WindowsErrorString());
+			ret = NULL;
+		} else {
+			if (!ConvertStringSidToSidA(psid_string, &ret)) {
+				uprintf("Unable to convert string back to SID: %s\n", WindowsErrorString());
+				ret = NULL;
+			}
+			// MUST use LocalFree()
+			LocalFree(psid_string);
+		}
+	} else {
+		ret = NULL;
+		uprintf("GetTokenInformation (real) failed: %s\n", WindowsErrorString());
+	}
+	free(tu);
+	return ret;
+}
+
+/*
  * We need a sub-callback to read the content of the edit box on exit and update
  * our path, else if what the user typed does match the selection, it is discarded.
  * Talk about a convoluted way of producing an intuitive folder selection dialog
@@ -224,13 +276,13 @@ void BrowseForFolder(void) {
 		hr = CoCreateInstance(&CLSID_FileOpenDialog, NULL, CLSCTX_INPROC,
 			&IID_IFileOpenDialog, (LPVOID)&pfod);
 		if (FAILED(hr)) {
-			uprintf("CoCreateInstance for FileOpenDialog failed: error %X", hr);
+			uprintf("CoCreateInstance for FileOpenDialog failed: error %X\n", hr);
 			pfod = NULL;	// Just in case
 			goto fallback;
 		}
 		hr = pfod->lpVtbl->SetOptions(pfod, FOS_PICKFOLDERS);
 		if (FAILED(hr)) {
-			uprintf("Failed to set folder option for FileOpenDialog: error %X", hr);
+			uprintf("Failed to set folder option for FileOpenDialog: error %X\n", hr);
 			goto fallback;
 		}
 		// Set the initial folder (if the path is invalid, will simply use last)
@@ -266,17 +318,17 @@ void BrowseForFolder(void) {
 				tmp_path = wchar_to_utf8(wpath);
 				CoTaskMemFree(wpath);
 				if (tmp_path == NULL) {
-					uprintf("Could not convert path");
+					uprintf("Could not convert path\n");
 				} else {
 					safe_strcpy(szFolderPath, MAX_PATH, tmp_path);
 					safe_free(tmp_path);
 				}
 			} else {
-				uprintf("Failed to set folder option for FileOpenDialog: error %X", hr);
+				uprintf("Failed to set folder option for FileOpenDialog: error %X\n", hr);
 			}
 		} else if ((hr & 0xFFFF) != ERROR_CANCELLED) {
 			// If it's not a user cancel, assume the dialog didn't show and fallback
-			uprintf("could not show FileOpenDialog: error %X", hr);
+			uprintf("Could not show FileOpenDialog: error %X\n", hr);
 			goto fallback;
 		}
 		pfod->lpVtbl->Release(pfod);
@@ -300,6 +352,76 @@ fallback:
 		CoTaskMemFree(pidl);
 	}
 }
+
+/*
+ * read or write I/O to a file
+ * buffer is allocated by the procedure. path is UTF-8
+ */
+BOOL FileIO(BOOL save, char* path, char** buffer, DWORD* size)
+{
+	SECURITY_ATTRIBUTES s_attr, *ps = NULL;
+	SECURITY_DESCRIPTOR s_desc;
+	PSID sid = NULL;
+	HANDLE handle;
+	BOOL r;
+	BOOL ret = FALSE;
+
+	// Change the owner from admin to regular user
+	sid = GetSID();
+	if ( (sid != NULL)
+	  && InitializeSecurityDescriptor(&s_desc, SECURITY_DESCRIPTOR_REVISION)
+	  && SetSecurityDescriptorOwner(&s_desc, sid, FALSE) ) {
+		s_attr.nLength = sizeof(SECURITY_ATTRIBUTES);
+		s_attr.bInheritHandle = FALSE;
+		s_attr.lpSecurityDescriptor = &s_desc;
+		ps = &s_attr;
+	} else {
+		uprintf("Could not set security descriptor: %s\n", WindowsErrorString());
+	}
+
+	if (!save) {
+		*buffer = NULL;
+	}
+	handle = CreateFileU(path, save?GENERIC_WRITE:GENERIC_READ, FILE_SHARE_READ,
+		ps, save?CREATE_ALWAYS:OPEN_EXISTING, 0, NULL);
+
+	if (handle == INVALID_HANDLE_VALUE) {
+		uprintf("Could not %s file '%s'\n", save?"create":"open", path);
+		goto out;
+	}
+
+	if (save) {
+		r = WriteFile(handle, *buffer, *size, size, NULL);
+	} else {
+		*size = GetFileSize(handle, NULL);
+		*buffer = (char*)malloc(*size);
+		if (*buffer == NULL) {
+			uprintf("Could not allocate buffer for reading file\n");
+			goto out;
+		}
+		r = ReadFile(handle, *buffer, *size, size, NULL);
+	}
+
+	if (!r) {
+		uprintf("I/O Error: %s\n", WindowsErrorString());
+		goto out;
+	}
+
+	PrintStatus(0, TRUE, "%s '%s'", save?"Saved":"Opened", path);
+	ret = TRUE;
+
+out:
+	CloseHandle(handle);
+	if (!ret) {
+		// Only leave a buffer allocated if successful
+		*size = 0;
+		if (!save) {
+			safe_free(*buffer);
+		}
+	}
+	return ret;
+}
+
 
 /*
  * Return the UTF8 path of a file selected through a load or save dialog
@@ -385,7 +507,7 @@ char* FileDialog(BOOL save, char* path, char* filename, char* ext, char* ext_des
 			}
 		} else if ((hr & 0xFFFF) != ERROR_CANCELLED) {
 			// If it's not a user cancel, assume the dialog didn't show and fallback
-			uprintf("could not show FileOpenDialog: error %X\n", hr);
+			uprintf("Could not show FileOpenDialog: error %X\n", hr);
 			goto fallback;
 		}
 		pfd->lpVtbl->Release(pfd);
@@ -612,7 +734,7 @@ INT_PTR CALLBACK NotificationCallback(HWND hDlg, UINT message, WPARAM wParam, LP
 		CenterDialog(hDlg);
 		// Change the default icon
 		if (Static_SetIcon(GetDlgItem(hDlg, IDC_NOTIFICATION_ICON), hMessageIcon) == 0) {
-			uprintf("could not set dialog icon");
+			uprintf("Could not set dialog icon\n");
 		}
 		// Set the dialog title
 		if (szMessageTitle != NULL) {
@@ -918,7 +1040,7 @@ BOOL CreateTaskbarList(void)
 	// Create the taskbar icon progressbar
 	hr = CoCreateInstance(&my_CLSID_TaskbarList, NULL, CLSCTX_ALL, &my_IID_ITaskbarList3, (LPVOID)&ptbl);
 	if (FAILED(hr)) {
-		uprintf("CoCreateInstance for TaskbarList failed: error %X", hr);
+		uprintf("CoCreateInstance for TaskbarList failed: error %X\n", hr);
 		ptbl = NULL;
 		return FALSE;
 	}

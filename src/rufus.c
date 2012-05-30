@@ -87,6 +87,7 @@ static const char* ClusterSizeLabel[] = { "512 bytes", "1024 bytes","2048 bytes"
 	"1024 kilobytes","2048 kilobytes","4096 kilobytes","8192 kilobytes","16 megabytes","32 megabytes" };
 static BOOL existing_key = FALSE;	// For LGP set/restore
 static BOOL iso_size_check = TRUE;
+static BOOL log_displayed = FALSE;
 static int selection_default;
 BOOL enable_fixed_disks = FALSE, advanced_mode = TRUE;
 
@@ -95,12 +96,12 @@ BOOL enable_fixed_disks = FALSE, advanced_mode = TRUE;
  */
 HINSTANCE hMainInstance;
 HWND hMainDialog;
-char szFolderPath[MAX_PATH];
+char szFolderPath[MAX_PATH], app_dir[MAX_PATH];
 char* iso_path = NULL;
 float fScale = 1.0f;
 int default_fs;
-HWND hDeviceList, hCapacity, hFileSystem, hClusterSize, hLabel, hDOSType, hNBPasses;
-HWND hISOProgressDlg = NULL, hISOProgressBar, hISOFileName, hDiskID;
+HWND hDeviceList, hCapacity, hFileSystem, hClusterSize, hLabel, hDOSType, hNBPasses, hLog = NULL;
+HWND hISOProgressDlg = NULL, hLogDlg = NULL, hISOProgressBar, hISOFileName, hDiskID;
 BOOL use_own_vesamenu = FALSE, detect_fakes = TRUE, mbr_selected_by_user = FALSE;
 int rufus_version[4];
 extern char szStatusMessage[256];
@@ -379,7 +380,7 @@ static BOOL GetDriveInfo(void)
 					nb_partitions++;
 					uprintf("Partition %d:\n", i+1);
 					part_type = DriveLayout->PartitionEntry[i].Mbr.PartitionType;
-					uprintf("  Type: %s (0x%02x)\n  Size: %s\n  Boot: %s\n  Recognized: %s\n  Hidden Sectors: %d\n",
+					uprintf("  Type: %s (0x%02x)\r\n  Size: %s\r\n  Boot: %s\r\n  Recognized: %s\r\n  Hidden Sectors: %d\n",
 						GetPartitionType(part_type), part_type, size_to_hr(DriveLayout->PartitionEntry[i].PartitionLength),
 						DriveLayout->PartitionEntry[i].Mbr.BootIndicator?"Yes":"No",
 						DriveLayout->PartitionEntry[i].Mbr.RecognizedPartition?"Yes":"No",
@@ -1078,6 +1079,67 @@ static void EnableControls(BOOL bEnable)
 	SetDlgItemTextA(hMainDialog, IDCANCEL, bEnable?"Close":"Cancel");
 }
 
+/* Callback for the log window */
+BOOL CALLBACK LogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam) 
+{
+	HDC hdc;
+	HFONT hf;
+	long lfHeight;
+	DWORD log_size;
+	char *log_buffer, *filepath;
+
+	switch (message) {
+	case WM_INITDIALOG:
+		hLog = GetDlgItem(hDlg, IDC_LOG_EDIT);
+		// Increase the size of our log textbox to MAX_LOG_SIZE (unsigned word)
+		PostMessage(hLog, EM_LIMITTEXT, MAX_LOG_SIZE , 0);
+		// Set the font to Unicode so that we can display anything
+		hdc = GetDC(NULL);
+		lfHeight = -MulDiv(8, GetDeviceCaps(hdc, LOGPIXELSY), 72);
+		ReleaseDC(NULL, hdc);
+		hf = CreateFontA(lfHeight, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE,
+			DEFAULT_CHARSET, 0, 0, PROOF_QUALITY, 0, "Arial Unicode MS");
+		SendDlgItemMessageA(hDlg, IDC_LOG_EDIT, WM_SETFONT, (WPARAM)hf, TRUE);
+		return TRUE;
+	case WM_COMMAND: 
+		switch (LOWORD(wParam)) {
+		case IDCANCEL:
+			ShowWindow(hDlg, SW_HIDE);
+			log_displayed = FALSE;
+			return TRUE;
+		case IDC_LOG_CLEAR:
+			SetWindowTextA(hLog, "");
+			return TRUE;
+		case IDC_LOG_SAVE:
+			log_size = GetWindowTextLengthU(hLog);
+			log_buffer = (char*)malloc(log_size);
+			if (log_buffer != NULL) {
+				log_size = GetDlgItemTextU(hDlg, IDC_LOG_EDIT, log_buffer, log_size);
+				if (log_size == 0) {
+					uprintf("Nothing to save.\n");
+				} else {
+					log_size--;	// remove NULL terminator
+					filepath =  FileDialog(TRUE, app_dir, "rufus.log", "log", "Rufus log");
+					if (filepath != NULL) {
+						FileIO(TRUE, filepath, &log_buffer, &log_size);
+					}
+					safe_free(filepath);
+				}
+				safe_free(log_buffer);
+			} else {
+				uprintf("Could not allocate buffer to save log\n");
+			}
+			break;
+		}
+		break;
+	case WM_CLOSE:
+		ShowWindow(hDlg, SW_HIDE);
+		log_displayed = FALSE;
+		return TRUE;
+	}
+	return FALSE; 
+}
+
 /*
  * Timer in the right part of the status area
  */
@@ -1171,7 +1233,7 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 		safe_free(iso_path);
 		goto out;
 	}
-	uprintf("ISO label: '%s'\n size: %lld bytes, 4GB:%c, bootmgr:%c, winpe:%c (/minint:%c), isolinux:%c, old vesa:%c\n",
+	uprintf("ISO label: '%s'\r\n size: %lld bytes, 4GB:%c, bootmgr:%c, winpe:%c (/minint:%c), isolinux:%c, old vesa:%c\n",
 		iso_report.label, iso_report.projected_size, iso_report.has_4GB_file?'Y':'N',
 		iso_report.has_bootmgr?'Y':'N', IS_WINPE(iso_report.winpe)?'Y':'N', (iso_report.uses_minint)?'Y':'N',
 		iso_report.has_isolinux?'Y':'N', iso_report.has_old_vesamenu?'Y':'N');
@@ -1249,7 +1311,7 @@ void MoveControl(int nID, float vertical_shift)
 // Toggle "advanced" mode
 void ToggleAdvanced(void)
 {
-	float dialog_shift = 60.0f;
+	float dialog_shift = 59.0f;
 	RECT rect;
 	POINT point;
 	int toggle;
@@ -1268,7 +1330,11 @@ void ToggleAdvanced(void)
 	MoveControl(IDC_START, dialog_shift);
 	MoveControl(IDC_PROGRESS, dialog_shift);
 	MoveControl(IDC_ABOUT, dialog_shift);
+	MoveControl(IDC_LOG, dialog_shift);
 	MoveControl(IDCANCEL, dialog_shift);
+#ifdef RUFUS_TEST
+	MoveControl(IDC_TEST, dialog_shift);
+#endif
 
 	// Hide or show the various advanced options
 	toggle = advanced_mode?SW_SHOW:SW_HIDE;
@@ -1421,10 +1487,13 @@ void InitDialog(HWND hDlg)
 static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	DRAWITEMSTRUCT* pDI;
-	int nDeviceIndex, fs, i;
+	POINT Point;
+	RECT DialogRect, DesktopRect;
+	int nDeviceIndex, fs, i, nWidth, nHeight;
 	static DWORD DeviceNum = 0;
 	wchar_t wtmp[128], wstr[MAX_PATH];
 	static UINT uDOSChecked = BST_CHECKED;
+	static BOOL first_log_display = TRUE;
 
 	switch (message) {
 
@@ -1437,6 +1506,8 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		break;
 
 	case WM_INITDIALOG:
+		// Create the log window (hidden)
+		hLogDlg = CreateDialogA(hMainInstance, MAKEINTRESOURCEA(IDD_LOG), hDlg, (DLGPROC)LogProc); 
 		InitDialog(hDlg);
 		GetUSBDevices(0);
 		return (INT_PTR)TRUE;
@@ -1451,7 +1522,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			switch(pDI->itemID) {
 			case 0:	// left part
 				DrawTextExU(pDI->hDC, szStatusMessage, -1, &pDI->rcItem,
-					DT_LEFT|DT_END_ELLIPSIS, NULL);
+					DT_LEFT|DT_END_ELLIPSIS|DT_PATH_ELLIPSIS, NULL);
 				return (INT_PTR)TRUE;
 			case 1:	// right part
 				SetTextColor(pDI->hDC, GetSysColor(COLOR_3DSHADOW));
@@ -1496,6 +1567,27 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			break;
 		case IDC_ABOUT:
 			CreateAboutBox();
+			break;
+		case IDC_LOG:
+			// Place the log Window to the right of our dialog on first display
+			if (first_log_display) {
+				GetClientRect(GetDesktopWindow(), &DesktopRect);
+				GetWindowRect(hLogDlg, &DialogRect);
+				nWidth = DialogRect.right - DialogRect.left;
+				nHeight = DialogRect.bottom - DialogRect.top;
+				GetWindowRect(hDlg, &DialogRect);
+				// TODO: adjust for high DPI
+				Point.x = min(DialogRect.right + 10, DesktopRect.right - nWidth);
+				Point.y = max(DialogRect.top, DesktopRect.top - nHeight);
+				MoveWindow(hLogDlg, Point.x, Point.y, nWidth, nHeight, FALSE);
+				first_log_display = FALSE;
+			}
+			// Display the log Window
+			log_displayed = !log_displayed;
+			ShowWindow(hLogDlg, log_displayed?SW_SHOW:SW_HIDE);
+			// Set focus on the start button
+			SendMessage(hMainDialog, WM_NEXTDLGCTL, (WPARAM)FALSE, 0);
+			SendMessage(hMainDialog, WM_NEXTDLGCTL, (WPARAM)GetDlgItem(hMainDialog, IDC_START), TRUE);
 			break;
 #ifdef RUFUS_TEST
 		case IDC_TEST:
@@ -1741,7 +1833,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			SetTaskbarProgressState(TASKBAR_ERROR);
 			PrintStatus(0, FALSE, "FAILED");
 			Notification(MSG_ERROR, "Error", "Error: %s.%s", StrError(FormatStatus), 
-				(strchr(StrError(FormatStatus), '\n') != NULL)?"":"\nFor more information, please try DebugView.");
+				(strchr(StrError(FormatStatus), '\n') != NULL)?"":"\nFor more information, please check the log.");
 		}
 		return (INT_PTR)TRUE;
 	}
@@ -1774,6 +1866,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	// Initialize COM for folder selection
 	CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
+
+	// Retrieve the current application directory
+	GetCurrentDirectoryU(MAX_PATH, app_dir);
 
 	// Set the Windows version
 	DetectWindowsVersion();

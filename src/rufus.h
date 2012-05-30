@@ -34,6 +34,7 @@
 #define MAX_DRIVES                  16
 #define MAX_TOOLTIPS                32
 #define MAX_PROGRESS                (0xFFFF-1)	// leave room for 1 more for insta-progress workaround
+#define MAX_LOG_SIZE                0x7FFFFFFE
 #define PROPOSEDLABEL_TOLERANCE     0.10
 #define FS_DEFAULT                  FS_FAT32
 #define WHITE                       RGB(255,255,255)
@@ -187,8 +188,8 @@ enum WindowsVersion {
  * Globals
  */
 extern HINSTANCE hMainInstance;
-extern HWND hMainDialog, hStatus, hDeviceList, hCapacity;
-extern HWND hFileSystem, hClusterSize, hLabel, hDOSType, hNBPasses;
+extern HWND hMainDialog, hLogDlg, hStatus, hDeviceList, hCapacity;
+extern HWND hFileSystem, hClusterSize, hLabel, hDOSType, hNBPasses, hLog;
 extern HWND hISOProgressDlg, hISOProgressBar, hISOFileName, hDiskID;
 extern float fScale;
 extern char szFolderPath[MAX_PATH];
@@ -233,6 +234,7 @@ extern BOOL UnmountDrive(HANDLE hDrive);
 extern BOOL CreateProgress(void);
 extern BOOL SetAutorun(const char* path);
 extern char* FileDialog(BOOL save, char* path, char* filename, char* ext, char* ext_desc);
+extern BOOL FileIO(BOOL save, char* path, char** buffer, DWORD* size);
 extern LONG GetEntryWidth(HWND hDropDown, const char* entry);
 extern BOOL DownloadFile(const char* url, const char* file);
 extern char* get_token_data(const char* filename, const char* token);
@@ -278,7 +280,7 @@ static __inline HMODULE GetDLLHandle(char* szDLLName)
 #define PF_INIT(proc, dllname) pf##proc = (proc##_t) GetProcAddress(GetDLLHandle(#dllname), #proc)
 #define PF_INIT_OR_OUT(proc, dllname) \
 	PF_INIT(proc, dllname); if (pf##proc == NULL) { \
-	uprintf("unable to access %s DLL: %s", #dllname, \
+	uprintf("Unable to access %s DLL: %s\n", #dllname, \
 	WindowsErrorString()); goto out; }
 
 /* Clang/MinGW32 has an issue with intptr_t */

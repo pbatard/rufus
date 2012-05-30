@@ -22,6 +22,7 @@
 #endif
 
 #include <windows.h>
+#include <windowsx.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -56,7 +57,11 @@ void _uprintf(const char *format, ...)
 	*p++ = '\n';
 	*p   = '\0';
 
+	// Send output to Windows debug facility
 	OutputDebugStringA(buf);
+	// Send output to our log Window
+	Edit_SetSel(hLog, MAX_LOG_SIZE, MAX_LOG_SIZE);
+	Edit_ReplaceSelU(hLog, buf);
 }
 #endif
 

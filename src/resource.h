@@ -8,9 +8,10 @@
 #define IDD_NOTIFICATION                104
 #define IDD_LICENSE                     105
 #define IDD_ISO_EXTRACT                 106
-#define IDS_VERSION                     107
-#define IDI_UP                          108
-#define IDI_DOWN                        109
+#define IDD_LOG                         107
+#define IDS_VERSION                     108
+#define IDI_UP                          109
+#define IDI_DOWN                        110
 #define IDR_BR_MBR_BIN                  200
 #define IDR_FD_COMMAND_COM              300
 #define IDR_FD_KERNEL_SYS               301
@@ -77,6 +78,10 @@
 #define IDC_NOTIFICATION_LINE           1042
 #define IDC_ADVANCED                    1043
 #define IDC_ADVANCED_GROUP              1044
+#define IDC_LOG                         1045
+#define IDC_LOG_EDIT                    1050
+#define IDC_LOG_SAVE                    1051
+#define IDC_LOG_CLEAR                   1052
 
 // Next default values for new objects
 // 
@@ -85,7 +90,7 @@
 #define _APS_NO_MFC                     1
 #define _APS_NEXT_RESOURCE_VALUE        110
 #define _APS_NEXT_COMMAND_VALUE         40001
-#define _APS_NEXT_CONTROL_VALUE         1045
+#define _APS_NEXT_CONTROL_VALUE         1053
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
