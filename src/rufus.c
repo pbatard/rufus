@@ -496,7 +496,8 @@ void SetMBRProps(void)
 		return;
 	}
 
-	CheckDlgButton(hMainDialog, IDC_RUFUS_MBR, (needs_masquerading || mbr_selected_by_user)?BST_CHECKED:BST_UNCHECKED);
+	CheckDlgButton(hMainDialog, IDC_RUFUS_MBR,
+		(needs_masquerading || iso_report.has_bootmgr || mbr_selected_by_user)?BST_CHECKED:BST_UNCHECKED);
 	IGNORE_RETVAL(ComboBox_SetCurSel(hDiskID, needs_masquerading?1:0));
 }
 
@@ -1585,6 +1586,8 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			// Display the log Window
 			log_displayed = !log_displayed;
 			ShowWindow(hLogDlg, log_displayed?SW_SHOW:SW_HIDE);
+			if (IsShown(hISOProgressDlg))
+				SetFocus(hISOProgressDlg);
 			// Set focus on the start button
 			SendMessage(hMainDialog, WM_NEXTDLGCTL, (WPARAM)FALSE, 0);
 			SendMessage(hMainDialog, WM_NEXTDLGCTL, (WPARAM)GetDlgItem(hMainDialog, IDC_START), TRUE);

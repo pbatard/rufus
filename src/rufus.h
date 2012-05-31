@@ -237,6 +237,7 @@ extern char* FileDialog(BOOL save, char* path, char* filename, char* ext, char* 
 extern BOOL FileIO(BOOL save, char* path, char** buffer, DWORD* size);
 extern LONG GetEntryWidth(HWND hDropDown, const char* entry);
 extern BOOL DownloadFile(const char* url, const char* file);
+extern BOOL IsShown(HWND hDlg);
 extern char* get_token_data(const char* filename, const char* token);
 extern char* insert_section_data(const char* filename, const char* section, const char* data, BOOL dos2unix);
 extern char* replace_in_token_data(const char* filename, const char* token, const char* src, const char* rep, BOOL dos2unix);

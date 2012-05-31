@@ -923,6 +923,23 @@ void DestroyAllTooltips(void)
 	}
 }
 
+/* Determine if a Windows is being displayed or not */
+BOOL IsShown(HWND hDlg)
+{
+	WINDOWPLACEMENT placement;
+	if (!GetWindowPlacement(hDlg, &placement))
+		return FALSE;
+	switch (placement.showCmd) {
+	case SW_SHOWNORMAL:
+	case SW_SHOWMAXIMIZED:
+	case SW_SHOW:
+	case SW_SHOWDEFAULT:
+		return TRUE;
+	default:
+		return FALSE;
+	}
+}
+
 /* Compute the width of a dropdown list entry */
 LONG GetEntryWidth(HWND hDropDown, const char *entry)
 { 
