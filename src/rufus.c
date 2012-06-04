@@ -1352,7 +1352,7 @@ void InitDialog(HWND hDlg)
 {
 	HINSTANCE hDllInst;
 	HDC hDC;
-	int i, i16;
+	int i, i16, s16, s32;
 	HICON hSmallIcon, hBigIcon;
 	char tmp[128], *token;
 
@@ -1379,11 +1379,30 @@ void InitDialog(HWND hDlg)
 	hDC = GetDC(hDlg);
 	fScale = GetDeviceCaps(hDC, LOGPIXELSX) / 96.0f;
 	ReleaseDC(hDlg, hDC);
+	// Adjust icon size lookup
+	s16 = i16;
+	s32 = (int)(32.0f*fScale);
+	if (s16 >= 54)
+		s16 = 64;
+	else if (s16 >= 40)
+		s16 = 48;
+	else if (s16 >= 28)
+		s16 = 32;
+	else if (s16 >= 20)
+		s16 = 24;
+	if (s32 >= 54)
+		s32 = 64;
+	else if (s32 >= 40)
+		s32 = 48;
+	else if (s32 >= 28)
+		s32 = 32;
+	else if (s32 >= 20)
+		s32 = 24;
 
 	// Create the title bar icon
-	hSmallIcon = (HICON)LoadImage(hMainInstance, MAKEINTRESOURCE(IDI_ICON), IMAGE_ICON, 16, 16, 0);
+	hSmallIcon = (HICON)LoadImage(hMainInstance, MAKEINTRESOURCE(IDI_ICON), IMAGE_ICON, s16, s16, 0);
 	SendMessage (hDlg, WM_SETICON, ICON_SMALL, (LPARAM)hSmallIcon);
-	hBigIcon = (HICON)LoadImage(hMainInstance, MAKEINTRESOURCE(IDI_ICON), IMAGE_ICON, 32, 32, 0);
+	hBigIcon = (HICON)LoadImage(hMainInstance, MAKEINTRESOURCE(IDI_ICON), IMAGE_ICON, s32, s32, 0);
 	SendMessage (hDlg, WM_SETICON, ICON_BIG, (LPARAM)hBigIcon);
 	GetWindowTextA(hDlg, tmp, sizeof(tmp));
 	// Count of Microsoft for making it more attractive to read a
@@ -1430,10 +1449,10 @@ void InitDialog(HWND hDlg)
 
 	// Load system icons (NB: Use the excellent http://www.nirsoft.net/utils/iconsext.html to find icon IDs)
 	hDllInst = LoadLibraryA("shell32.dll");
-	hIconDisc = (HICON)LoadImage(hDllInst, MAKEINTRESOURCE(12), IMAGE_ICON, i16, i16, LR_DEFAULTCOLOR|LR_SHARED);
+	hIconDisc = (HICON)LoadImage(hDllInst, MAKEINTRESOURCE(12), IMAGE_ICON, s16, s16, LR_DEFAULTCOLOR|LR_SHARED);
 	if (nWindowsVersion >= WINDOWS_VISTA) {
-		hIconDown = (HICON)LoadImage(hDllInst, MAKEINTRESOURCE(16750), IMAGE_ICON, i16, i16, LR_DEFAULTCOLOR|LR_SHARED);
-		hIconUp = (HICON)LoadImage(hDllInst, MAKEINTRESOURCE(16749), IMAGE_ICON, i16, i16, LR_DEFAULTCOLOR|LR_SHARED);
+		hIconDown = (HICON)LoadImage(hDllInst, MAKEINTRESOURCE(16750), IMAGE_ICON, s16, s16, LR_DEFAULTCOLOR|LR_SHARED);
+		hIconUp = (HICON)LoadImage(hDllInst, MAKEINTRESOURCE(16749), IMAGE_ICON, s16, s16, LR_DEFAULTCOLOR|LR_SHARED);
 	} else {
 		hIconDown = (HICON)LoadImage(hMainInstance, MAKEINTRESOURCE(IDI_DOWN), IMAGE_ICON, 16, 16, 0);
 		hIconUp = (HICON)LoadImage(hMainInstance, MAKEINTRESOURCE(IDI_UP), IMAGE_ICON, 16, 16, 0);
@@ -1577,8 +1596,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				nWidth = DialogRect.right - DialogRect.left;
 				nHeight = DialogRect.bottom - DialogRect.top;
 				GetWindowRect(hDlg, &DialogRect);
-				// TODO: adjust for high DPI
-				Point.x = min(DialogRect.right + 10, DesktopRect.right - nWidth);
+				Point.x = min(DialogRect.right + GetSystemMetrics(SM_CXSIZEFRAME)+(int)(2.0f * fScale), DesktopRect.right - nWidth);
 				Point.y = max(DialogRect.top, DesktopRect.top - nHeight);
 				MoveWindow(hLogDlg, Point.x, Point.y, nWidth, nHeight, FALSE);
 				first_log_display = FALSE;

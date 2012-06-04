@@ -1051,10 +1051,13 @@ const IID my_CLSID_TaskbarList =
 
 static my_ITaskbarList3* ptbl = NULL;
 
+// Create a taskbar icon progressbar
 BOOL CreateTaskbarList(void)
 {
 	HRESULT hr;
-	// Create the taskbar icon progressbar
+	if (nWindowsVersion < WINDOWS_7)
+		// Only valid for Windows 7 or later
+		return FALSE;
 	hr = CoCreateInstance(&my_CLSID_TaskbarList, NULL, CLSCTX_ALL, &my_IID_ITaskbarList3, (LPVOID)&ptbl);
 	if (FAILED(hr)) {
 		uprintf("CoCreateInstance for TaskbarList failed: error %X\n", hr);
