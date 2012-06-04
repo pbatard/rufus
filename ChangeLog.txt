@@ -1,0 +1,56 @@
+o Version 1.2.0 (2012.06.04)
+    Single version of Rufus, that includes FreeDOS support always
+    Add a toggleable advanced options panel
+    Add bare Syslinux installation for (FAT partitions only)
+    Add taskbar progress (Windows 7 or later)
+    Integrate logging output in the application
+    Fixes unavailable boot option when an empty card reader is plugged (reported by TheHive)
+    Works around the use of non-ISO compliant LiveXP images (reported by TheHive)
+    Various other bugfixes and improvements
+o Version 1.1.7 (2012.04.06):
+    Fixes wrong bootable disk ID introduced in 1.1.6 (reported by Jeff Byers)
+    Fixes support for minint WinPE 1.x images
+o Version 1.1.6 (2012.03.27):
+    Add ISO support for Windows XP (SP2 or later), Windows 2003 and BartPE
+o Version 1.1.5 (2012.03.12):
+    Fixes detection of devices without friendly name (reported by rschiang)
+    Fixes support of WinPE/AIK ISO images (reported by Dmitry Sokolov)
+    Fixes no disk at launch with empty card readers (reported by ChrisR
+    Add download of vesamenu.c32 for ISOs that need it
+o Version 1.1.4 (2012.03.03):
+    Fixes ISO support for directories with extended characters (reported by ChrisR)
+    Fixes bad blocks test issues (reported by steve6375)
+    Read extended labels from autorun.inf when present
+    Update FreeDOS files to latest versions
+o Version 1.1.3 (2012.02.24):
+    Fixes an issue on XP when using Windows ISOs (reported by wimb)
+    Disable listing of fixed drives (eg. HDDs)
+    Add 'fake' USB drive detection during bad blocks check
+o Version 1.1.2 (2012.02.22):
+    Fixes ISO support for Fedora, openSUSE and Hiren's Boot CD
+    Add icon and extended/international label support
+o Version 1.1.1 (2012.02.16):
+    ISO image support (syslinux) - targeted at Linux installation ISOs
+    ISO fixes and UI improvements
+o Version 1.1.0 Beta (2012.02.08):
+    ISO image support (NTFS, bootmgr only - targeted at Windows installation ISOs)
+o Version 1.0.7 (2012.02.02):
+    Fixes a detection issue on platforms with multiple optical drives (with thanks to ElGaton)
+    Add number of passes for bad blocks check
+    Improved locale selection for FreeDOS
+o Version 1.0.6 (2012.01.03):
+    Log report when bad blocks are found
+o Version 1.0.5 (2011.12.25):
+    Keyboard layout detection & support
+o Version 1.0.4 (2011.12.16):
+    FreeDOS support
+o Version 1.0.3 (2011.12.12):
+    First public release
+    Progress status improvements
+    Filtering of invalid cluster sizes
+    Disable Autoplay on Vista and later while the application is running
+o Version 1.0.2 (2011.12.06):
+    Beta release
+    Support for bad blocks check
+o Version 1.0.1 (2011.12.04):
+    Alpha release

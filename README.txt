@@ -15,8 +15,8 @@ Compilation:
   invoke the .sln, wdk_build.cmd or configure/make respectively.
   
 Additional information:
-  Rufus provides extensive information about what it is doing through the Windows
-  debug facility. This info can be accessed with an application such as DebugView.
+  Rufus provides extensive information about what it is doing through its easily
+  accessible log or the Windows debug facility.
 
 More info:
   http://rufus.akeo.ie
