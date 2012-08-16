@@ -446,8 +446,9 @@ iso9660_name_translate_ext(const char *psz_oldname, char *psz_newname,
     if (!c)
       break;
     
-    /* Lower case, unless we have Joliet extensions.  */
-    if (!i_joliet_level && isupper(c)) c = tolower(c);
+    /* We're supposed to lower the case when Joliet extensions are not in use
+     * but some images fail if we do that. I'm looking at you Arch Linux!!! */
+    /* if (!i_joliet_level && isupper(c)) c = tolower(c); */
     
     /* Drop trailing '.;1' (ISO 9660:1988 7.5.1 requires period) */
     if (c == '.' && i == len - 3 
