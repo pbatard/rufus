@@ -48,6 +48,7 @@ int64_t write_sectors(HANDLE hDrive, uint64_t SectorSize,
    if((!WriteFile(hDrive, pBuf, Size, &Size, NULL)) || (Size != nSectors*SectorSize))
    {
       uprintf("write_sectors: Write error - %s\n", WindowsErrorString());
+      uprintf("  Wrote: %d, Expected: %d\n",  Size, nSectors*SectorSize);
       uprintf("  StartSector:%0X, nSectors:%0X, SectorSize:%0X\n", StartSector, nSectors, SectorSize);
       return Size;
    }
@@ -80,6 +81,7 @@ int64_t read_sectors(HANDLE hDrive, uint64_t SectorSize,
    if((!ReadFile(hDrive, pBuf, Size, &Size, NULL)) || (Size != nSectors*SectorSize))
    {
       uprintf("read_sectors: Read error - %s\n", WindowsErrorString());
+      uprintf("  Read: %d, Expected: %d\n",  Size, nSectors*SectorSize);
       uprintf("  StartSector:%0X, nSectors:%0X, SectorSize:%0X\n", StartSector, nSectors, SectorSize);
    }
 

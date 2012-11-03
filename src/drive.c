@@ -64,7 +64,7 @@ HANDLE GetDriveHandle(DWORD DriveIndex, char* DriveLetter, BOOL bWriteAccess, BO
 	}
 	DriveIndex -= DRIVE_INDEX_MIN;
 
-	// If no drive letter is requested, open a phyical drive
+	// If no drive letter is requested, open a physical drive
 	if (DriveLetter == NULL) {
 		safe_sprintf(physical_drive, sizeof(physical_drive), "\\\\.\\PHYSICALDRIVE%d", DriveIndex);
 		hDrive = CreateFileA(physical_drive, GENERIC_READ|(bWriteAccess?GENERIC_WRITE:0),

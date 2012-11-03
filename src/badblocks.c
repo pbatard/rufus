@@ -457,7 +457,7 @@ static unsigned int test_rw(HANDLE hDrive, blk_t last_block, size_t block_size, 
 		srand((unsigned int)GetTickCount());
 		id_offset = rand()* (block_size-sizeof(blk_t)) / RAND_MAX;
 		pattern_fill(buffer, pattern[pat_idx], blocks_at_once * block_size);
-		uprintf("%sBlock ID at offset: %d\n", bb_prefix, id_offset);
+		uprintf("%sUsing offset %d for fake device check\n", bb_prefix, id_offset);
 		num_blocks = last_block - 1;
 		currently_testing = first_block;
 		if (s_flag | v_flag)

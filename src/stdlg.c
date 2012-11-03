@@ -944,7 +944,7 @@ BOOL IsShown(HWND hDlg)
 LONG GetEntryWidth(HWND hDropDown, const char *entry)
 { 
 	HDC hDC;
-	HFONT hFont, hDefFont;
+	HFONT hFont, hDefFont = NULL;
 	SIZE size;
 	WCHAR* wentry = NULL;
 	int len;
