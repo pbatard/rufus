@@ -124,7 +124,7 @@ static int64_t last_iso_blocking_status;
  */
 static int nb_slots[OP_MAX];
 static float slot_end[OP_MAX+1];	// shifted +1 so that we can substract 1 to OP indexes
-static float previous_end = 0.0f;
+static float previous_end;
 
 /*
  * Convert a partition type to its human readable form using
@@ -164,7 +164,7 @@ static BOOL DefineClusterSizes(void)
 	}
 
 /*
- * The following is MS's allowed cluster sizes for FAT16 and FAT32:
+ * The following are MS's allowed cluster sizes for FAT16 and FAT32:
  *
  * FAT16
  * 31M  :  512 - 4096
@@ -188,8 +188,9 @@ static BOOL DefineClusterSizes(void)
  * 4095M: 1024 - 32k
  * 7GB  : 2048 - 64k
  * 15GB : 4096 - 64k
- * 31GB : 8192 - 64k
- * 32GB+: possible but N/A from Microsoft (see below)
+ * 31GB : 8192 - 64k This is as far as Microsoft's FormatEx goes...
+ * 63GB :  16k - 64k ...but we can go higher using fat32format from RidgeCrop.
+ * 2TB+ : N/A
  */
 
 	// FAT 16
@@ -206,10 +207,11 @@ static BOOL DefineClusterSizes(void)
 	}
 
 	// FAT 32
-	// > 32GB FAT32 is not supported by MS (and likely FormatEx) but is feasible
+	// > 32GB FAT32 is not supported by MS and FormatEx but is achieved using fat32fomat
 	// See: http://www.ridgecrop.demon.co.uk/index.htm?fat32format.htm
-	// < 32 MB FAT32 is not allowed by FormatEx
-	if ((SelectedDrive.DiskSize >= 32*MB) && (SelectedDrive.DiskSize < 32*GB)) {
+	// < 32 MB FAT32 is not allowed by FormatEx, so we don't bother
+
+	if ((SelectedDrive.DiskSize >= 32*MB) && (SelectedDrive.DiskSize < 2*TB)) {
 		SelectedDrive.ClusterSize[FS_FAT32].Allowed = 0x000001F8;
 		for (i=32; i<=(32*1024); i<<=1) {			// 32 MB -> 32 GB
 			if (SelectedDrive.DiskSize < i*MB) {
@@ -221,13 +223,18 @@ static BOOL DefineClusterSizes(void)
 		SelectedDrive.ClusterSize[FS_FAT32].Allowed &= 0x0001FE00;
 
 		// Default cluster sizes in the 256MB to 32 GB range do not follow the rule above
-		if (SelectedDrive.DiskSize >= 256*MB) {
+		if ((SelectedDrive.DiskSize >= 256*MB) && (SelectedDrive.DiskSize < 32*GB)) {
 			for (i=8; i<=32; i<<=1) {				// 256 MB -> 32 GB
 				if (SelectedDrive.DiskSize < i*GB) {
 					SelectedDrive.ClusterSize[FS_FAT32].Default = ((ULONG)i/2)*1024;
 					break;
 				}
 			}
+		}
+		// More adjustments for large drives
+		if (SelectedDrive.DiskSize >= 32*GB) {
+			SelectedDrive.ClusterSize[FS_FAT32].Allowed &= 0x0001C000;
+			SelectedDrive.ClusterSize[FS_FAT32].Default = 0x00008000;
 		}
 	}
 
@@ -484,11 +491,9 @@ static void SetFSFromISO(void)
 
 void SetMBRProps(void)
 {
-	int fs, dt;
+	int fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
+	int dt = (int)ComboBox_GetItemData(hDOSType, ComboBox_GetCurSel(hDOSType));
 	BOOL needs_masquerading = (IS_WINPE(iso_report.winpe) && (!iso_report.uses_minint));
-
-	fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
-	dt = (int)ComboBox_GetItemData(hDOSType, ComboBox_GetCurSel(hDOSType));
 
 	if ((!mbr_selected_by_user) && ((iso_path == NULL) || (dt != DT_ISO) || (fs != FS_NTFS))) {
 		CheckDlgButton(hMainDialog, IDC_RUFUS_MBR, BST_UNCHECKED);
@@ -812,6 +817,10 @@ static void InitProgress(void)
 	memset(&slot_end, 0, sizeof(slot_end));
 	previous_end = 0.0f;
 
+	memset(nb_slots, 0, sizeof(nb_slots));
+	memset(slot_end, 0, sizeof(slot_end));
+	previous_end = 0.0f;
+
 	nb_slots[OP_ZERO_MBR] = 1;
 	if (IsChecked(IDC_BADBLOCKS)) {
 		nb_slots[OP_BADBLOCKS] = -1;
@@ -837,7 +846,8 @@ static void InitProgress(void)
 	nb_slots[OP_FIX_MBR] = 1;
 	nb_slots[OP_CREATE_FS] = 
 		nb_steps[ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem))];
-	if (!IsChecked(IDC_QUICKFORMAT)) {
+	if ( (!IsChecked(IDC_QUICKFORMAT))
+	  || ((fs == FS_FAT32) && (SelectedDrive.DiskSize >= LARGE_FAT32_SIZE)) ) {
 		nb_slots[OP_FORMAT] = -1;
 	}
 	nb_slots[OP_FINALIZE] = ((dt == DT_ISO) && (fs == FS_NTFS))?2:1;
@@ -1512,7 +1522,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	int nDeviceIndex, fs, i, nWidth, nHeight;
 	static DWORD DeviceNum = 0;
 	wchar_t wtmp[128], wstr[MAX_PATH];
-	static UINT uDOSChecked = BST_CHECKED;
+	static UINT uDOSChecked = BST_CHECKED, uQFChecked;
 	static BOOL first_log_display = TRUE;
 
 	switch (message) {
@@ -1625,6 +1635,8 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			PrintStatus(0, TRUE, "%d device%s found.", ComboBox_GetCount(hDeviceList),
 				(ComboBox_GetCount(hDeviceList)!=1)?"s":"");
 			PopulateProperties(ComboBox_GetCurSel(hDeviceList));
+			SendMessage(hMainDialog, WM_COMMAND, (CBN_SELCHANGE<<16) | IDC_FILESYSTEM,
+				ComboBox_GetCurSel(hFileSystem));
 			break;
 		case IDC_NBPASSES:
 			if (HIWORD(wParam) != CBN_SELCHANGE)
@@ -1649,6 +1661,19 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				break;
 			fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
 			SetClusterSizes(fs);
+			// Disable/restore the quick format control depending on large FAT32
+			if ((fs == FS_FAT32) && (SelectedDrive.DiskSize > LARGE_FAT32_SIZE)) {
+				if (IsWindowEnabled(GetDlgItem(hMainDialog, IDC_QUICKFORMAT))) {
+					uQFChecked = IsDlgButtonChecked(hMainDialog, IDC_QUICKFORMAT);
+					CheckDlgButton(hMainDialog, IDC_QUICKFORMAT, BST_CHECKED);
+					EnableWindow(GetDlgItem(hMainDialog, IDC_QUICKFORMAT), FALSE);
+				}
+			} else {
+				if (!IsWindowEnabled(GetDlgItem(hMainDialog, IDC_QUICKFORMAT))) {
+					CheckDlgButton(hMainDialog, IDC_QUICKFORMAT, uQFChecked);
+					EnableWindow(GetDlgItem(hMainDialog, IDC_QUICKFORMAT), TRUE);
+				}
+			}
 			if (fs < 0) {
 				EnableBootOptions(TRUE);
 				SetMBRProps();

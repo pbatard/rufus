@@ -1,6 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Formatting function calls
+ * Copyright (c) 2007-2009 Tom Thornhill/Ridgecrop
  * Copyright (c) 2011-2012 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -252,6 +253,349 @@ static void ToValidLabel(WCHAR* name, BOOL bFAT)
 }
 
 /*
+ * 28.2  CALCULATING THE VOLUME SERIAL NUMBER
+ *
+ * For example, say a disk was formatted on 26 Dec 95 at 9:55 PM and 41.94
+ * seconds.  DOS takes the date and time just before it writes it to the
+ * disk.
+ * 
+ * Low order word is calculated:               Volume Serial Number is:
+ * Month & Day         12/26   0c1ah
+ * Sec & Hundrenths    41:94   295eh               3578:1d02
+ * -----
+ * 3578h
+ * 
+ * High order word is calculated:
+ * Hours & Minutes     21:55   1537h
+ * Year                1995    07cbh
+ * -----
+ * 1d02h
+ */
+static DWORD GetVolumeID(void)
+{
+	SYSTEMTIME s;
+	DWORD d;
+	WORD lo,hi,tmp;
+
+	GetLocalTime(&s);
+
+	lo = s.wDay + (s.wMonth << 8);
+	tmp = (s.wMilliseconds/10) + (s.wSecond << 8);
+	lo += tmp;
+
+	hi = s.wMinute + (s.wHour << 8);
+	hi += s.wYear;
+
+	d = lo + (hi << 16);
+	return d;
+}
+
+/*
+ * This is the Microsoft calculation from FATGEN
+ * 
+ * DWORD RootDirSectors = 0;
+ * DWORD TmpVal1, TmpVal2, FATSz;
+ *
+ * TmpVal1 = DskSize - (ReservedSecCnt + RootDirSectors);
+ * TmpVal2 = (256 * SecPerClus) + NumFATs;
+ * TmpVal2 = TmpVal2 / 2;
+ * FATSz = (TmpVal1 + (TmpVal2 - 1)) / TmpVal2;
+ *
+ * return( FatSz );
+ */
+static DWORD GetFATSizeSectors(DWORD DskSize, DWORD ReservedSecCnt, DWORD SecPerClus, DWORD NumFATs, DWORD BytesPerSect)
+{
+	ULONGLONG Numerator, Denominator;
+	ULONGLONG FatElementSize = 4;
+	ULONGLONG FatSz;
+
+	// This is based on 
+	// http://hjem.get2net.dk/rune_moeller_barnkob/filesystems/fat.html
+	Numerator = FatElementSize * (DskSize - ReservedSecCnt);
+	Denominator = (SecPerClus * BytesPerSect) + (FatElementSize * NumFATs);
+	FatSz = Numerator / Denominator;
+	// round up
+	FatSz += 1;
+
+	return (DWORD)FatSz;
+}
+
+/*
+ * Large FAT32 volume formatting from fat32format by Tom Thornhill
+ * http://www.ridgecrop.demon.co.uk/index.htm?fat32format.htm
+ */
+// TODO: disable slow format for > 32 GB FAT32
+static BOOL FormatFAT32(DWORD DriveIndex)
+{
+	BOOL r = FALSE;
+	char DriveLetter;
+	DWORD i;
+	HANDLE hLogicalVolume;
+	DWORD cbRet;
+	DISK_GEOMETRY dgDrive;
+	PARTITION_INFORMATION piDrive;
+	// Recommended values
+	DWORD ReservedSectCount = 32;
+	DWORD NumFATs = 2;
+	DWORD BackupBootSect = 6;
+	DWORD VolumeId = 0; // calculated before format
+	WCHAR wLabel[64], wDriveName[] = L"#:\\";
+	DWORD BurstSize = 128; // Zero in blocks of 64K typically
+
+	// Calculated later
+	DWORD FatSize = 0; 
+	DWORD BytesPerSect = 0;
+	DWORD ClusterSize = 0;
+	DWORD SectorsPerCluster = 0;
+	DWORD TotalSectors = 0;
+	DWORD SystemAreaSize = 0;
+	DWORD UserAreaSize = 0;
+	ULONGLONG qTotalSectors = 0;
+
+	// Structures to be written to the disk
+	FAT_BOOTSECTOR32 *pFAT32BootSect = NULL;
+	FAT_FSINFO *pFAT32FsInfo = NULL;
+	DWORD *pFirstSectOfFat = NULL;
+	BYTE* pZeroSect = NULL;
+	char VolId[12] = "NO NAME    ";
+
+	// Debug temp vars
+	ULONGLONG FatNeeded, ClusterCount;
+
+	PrintStatus(0, TRUE, "Formatting...");
+	uprintf("Using large FAT32 format method\n");
+	VolumeId = GetVolumeID();
+
+	// Open the drive (volume should already be locked)
+	hLogicalVolume = GetDriveHandle(DriveIndex, &DriveLetter, TRUE, FALSE);
+	if (IS_ERROR(FormatStatus)) goto out;
+	if (hLogicalVolume == INVALID_HANDLE_VALUE)
+		die("Could not access logical volume\n", ERROR_OPEN_FAILED);
+
+	// Make sure we get exclusive access
+	if (!UnmountDrive(hLogicalVolume))
+		return r;
+
+	// Work out drive params
+	if (!DeviceIoControl (hLogicalVolume, IOCTL_DISK_GET_DRIVE_GEOMETRY, NULL, 0, &dgDrive,
+		sizeof(dgDrive), &cbRet, NULL)) {
+		die("Failed to get device geometry\n", ERROR_NOT_SUPPORTED);
+	}
+	if (IS_ERROR(FormatStatus)) goto out;
+	if (!DeviceIoControl (hLogicalVolume, IOCTL_DISK_GET_PARTITION_INFO, NULL, 0, &piDrive,
+		sizeof(piDrive), &cbRet, NULL)) {
+		die("Failed to get parition info\n", ERROR_NOT_SUPPORTED);
+	}
+
+	BytesPerSect = dgDrive.BytesPerSector;
+
+	// Checks on Disk Size
+	qTotalSectors = piDrive.PartitionLength.QuadPart/dgDrive.BytesPerSector;
+	// Low end limit - 65536 sectors
+	if (qTotalSectors < 65536) {
+		// Most FAT32 implementations would probably mount this volume just fine,
+		// but the spec says that we shouldn't do this, so we won't
+		die("This drive is too small for FAT32 - there must be at least 64K clusters\n", APPERR(ERROR_INVALID_CLUSTER_SIZE));
+	}
+
+	if (qTotalSectors >= 0xffffffff) {
+		// This is a more fundamental limitation on FAT32 - the total sector count in the root dir
+		// ís 32bit. With a bit of creativity, FAT32 could be extended to handle at least 2^28 clusters
+		// There would need to be an extra field in the FSInfo sector, and the old sector count could
+		// be set to 0xffffffff. This is non standard though, the Windows FAT driver FASTFAT.SYS won't
+		// understand this. Perhaps a future version of FAT32 and FASTFAT will handle this.
+		die ("This drive is too big for FAT32 - max 2TB supported\n", APPERR(ERROR_INVALID_VOLUME_SIZE));
+	}
+
+	pFAT32BootSect = (FAT_BOOTSECTOR32*) calloc(BytesPerSect, 1);
+	pFAT32FsInfo = (FAT_FSINFO*) calloc(BytesPerSect, 1);
+	pFirstSectOfFat = (DWORD*) calloc(BytesPerSect, 1);
+	if (!pFAT32BootSect || !pFAT32FsInfo || !pFirstSectOfFat) {
+		die("Failed to allocate memory\n", ERROR_NOT_ENOUGH_MEMORY);
+	}
+
+	// fill out the boot sector and fs info
+	pFAT32BootSect->sJmpBoot[0]=0xEB;
+	pFAT32BootSect->sJmpBoot[1]=0x5A;
+	pFAT32BootSect->sJmpBoot[2]=0x90;
+	strncpy((char*)pFAT32BootSect->sOEMName, "MSWIN4.1", 8);
+	pFAT32BootSect->wBytsPerSec = (WORD) BytesPerSect;
+
+	ClusterSize = ComboBox_GetItemData(hClusterSize, ComboBox_GetCurSel(hClusterSize));
+	SectorsPerCluster = ClusterSize / BytesPerSect;
+
+	pFAT32BootSect->bSecPerClus = (BYTE) SectorsPerCluster ;
+	pFAT32BootSect->wRsvdSecCnt = (WORD) ReservedSectCount;
+	pFAT32BootSect->bNumFATs = (BYTE) NumFATs;
+	pFAT32BootSect->wRootEntCnt = 0;
+	pFAT32BootSect->wTotSec16 = 0;
+	pFAT32BootSect->bMedia = 0xF8;
+	pFAT32BootSect->wFATSz16 = 0;
+	pFAT32BootSect->wSecPerTrk = (WORD) dgDrive.SectorsPerTrack;
+	pFAT32BootSect->wNumHeads = (WORD) dgDrive.TracksPerCylinder;
+	pFAT32BootSect->dHiddSec = (DWORD) piDrive.HiddenSectors;
+	TotalSectors = (DWORD)  (piDrive.PartitionLength.QuadPart/dgDrive.BytesPerSector);
+	pFAT32BootSect->dTotSec32 = TotalSectors;
+
+	FatSize = GetFATSizeSectors(pFAT32BootSect->dTotSec32, pFAT32BootSect->wRsvdSecCnt, 
+		pFAT32BootSect->bSecPerClus, pFAT32BootSect->bNumFATs, BytesPerSect);
+
+	pFAT32BootSect->dFATSz32 = FatSize;
+	pFAT32BootSect->wExtFlags = 0;
+	pFAT32BootSect->wFSVer = 0;
+	pFAT32BootSect->dRootClus = 2;
+	pFAT32BootSect->wFSInfo = 1;
+	pFAT32BootSect->wBkBootSec = (WORD) BackupBootSect;
+	pFAT32BootSect->bDrvNum = 0x80;
+	pFAT32BootSect->Reserved1 = 0;
+	pFAT32BootSect->bBootSig = 0x29;
+
+	pFAT32BootSect->dBS_VolID = VolumeId;
+	memcpy(pFAT32BootSect->sVolLab, VolId, 11);
+	memcpy(pFAT32BootSect->sBS_FilSysType, "FAT32   ", 8);
+	((BYTE*)pFAT32BootSect)[510] = 0x55;
+	((BYTE*)pFAT32BootSect)[511] = 0xaa;
+
+	// FATGEN103.DOC says "NOTE: Many FAT documents mistakenly say that this 0xAA55 signature occupies the "last 2 bytes of 
+	// the boot sector". This statement is correct if - and only if - BPB_BytsPerSec is 512. If BPB_BytsPerSec is greater than 
+	// 512, the offsets of these signature bytes do not change (although it is perfectly OK for the last two bytes at the end 
+	// of the boot sector to also contain this signature)." 
+	// 
+	// Windows seems to only check the bytes at offsets 510 and 511. Other OSs might check the ones at the end of the sector,
+	// so we'll put them there too.
+	if (BytesPerSect != 512) {
+		((BYTE*)pFAT32BootSect)[BytesPerSect-2] = 0x55;
+		((BYTE*)pFAT32BootSect)[BytesPerSect-1] = 0xaa;
+	}
+
+	// FSInfo sect
+	pFAT32FsInfo->dLeadSig = 0x41615252;
+	pFAT32FsInfo->dStrucSig = 0x61417272;
+	pFAT32FsInfo->dFree_Count = (DWORD) -1;
+	pFAT32FsInfo->dNxt_Free = (DWORD) -1;
+	pFAT32FsInfo->dTrailSig = 0xaa550000;
+
+	// First FAT Sector
+	pFirstSectOfFat[0] = 0x0ffffff8;  // Reserved cluster 1 media id in low byte
+	pFirstSectOfFat[1] = 0x0fffffff;  // Reserved cluster 2 EOC
+	pFirstSectOfFat[2] = 0x0fffffff;  // end of cluster chain for root dir
+
+	// Write boot sector, fats
+	// Sector 0 Boot Sector
+	// Sector 1 FSInfo 
+	// Sector 2 More boot code - we write zeros here
+	// Sector 3 unused
+	// Sector 4 unused
+	// Sector 5 unused
+	// Sector 6 Backup boot sector
+	// Sector 7 Backup FSInfo sector
+	// Sector 8 Backup 'more boot code'
+	// zero'd sectors upto ReservedSectCount
+	// FAT1  ReservedSectCount to ReservedSectCount + FatSize
+	// ...
+	// FATn  ReservedSectCount to ReservedSectCount + FatSize
+	// RootDir - allocated to cluster2
+
+	UserAreaSize = TotalSectors - ReservedSectCount - (NumFATs*FatSize);
+	ClusterCount = UserAreaSize / SectorsPerCluster;
+
+	// Sanity check for a cluster count of >2^28, since the upper 4 bits of the cluster values in 
+	// the FAT are reserved.
+	if (ClusterCount > 0x0FFFFFFF) {
+		die("This drive has more than 2^28 clusters, try to specify a larger cluster size or use the default\n",
+			ERROR_INVALID_CLUSTER_SIZE);
+	}
+
+	// Sanity check - < 64K clusters means that the volume will be misdetected as FAT16
+	if (ClusterCount < 65536) {
+		die("FAT32 must have at least 65536 clusters, try to specify a smaller cluster size or use the default\n",
+			ERROR_INVALID_CLUSTER_SIZE);
+	}
+
+	// Sanity check, make sure the fat is big enough
+	// Convert the cluster count into a Fat sector count, and check the fat size value we calculated 
+	// earlier is OK.
+	FatNeeded = ClusterCount * 4;
+	FatNeeded += (BytesPerSect-1);
+	FatNeeded /= BytesPerSect;
+	if (FatNeeded > FatSize) {
+		die("This drive is too big for large FAT32 format\n", APPERR(ERROR_INVALID_VOLUME_SIZE));
+	}
+
+	// Now we're commited - print some info first
+	uprintf("Size : %gGB %u sectors\n", (double) (piDrive.PartitionLength.QuadPart / (1000*1000*1000)), TotalSectors);
+	uprintf("Cluster size %d bytes, %d Bytes Per Sector\n", SectorsPerCluster*BytesPerSect, BytesPerSect);
+	uprintf("Volume ID is %x:%x\n", VolumeId>>16, VolumeId&0xffff);
+	uprintf("%d Reserved Sectors, %d Sectors per FAT, %d FATs\n", ReservedSectCount, FatSize, NumFATs);
+	uprintf("%d Total clusters\n", ClusterCount);
+
+	// Fix up the FSInfo sector
+	pFAT32FsInfo->dFree_Count = (UserAreaSize/SectorsPerCluster) - 1;
+	pFAT32FsInfo->dNxt_Free = 3; // clusters 0-1 resered, we used cluster 2 for the root dir
+
+	uprintf("%d Free Clusters\n", pFAT32FsInfo->dFree_Count);
+	// Work out the Cluster count
+
+	// First zero out ReservedSect + FatSize * NumFats + SectorsPerCluster
+	SystemAreaSize = ReservedSectCount + (NumFATs*FatSize) + SectorsPerCluster;
+	uprintf("Clearing out %d sectors for reserved sectors, FATs and root cluster...\n", SystemAreaSize);
+
+	// Not the most effective, but easy on RAM
+	pZeroSect = (BYTE*)calloc(BytesPerSect, BurstSize);
+	if (!pZeroSect) {
+		die("Failed to allocate memory\n", ERROR_NOT_ENOUGH_MEMORY);
+	}
+
+	format_percent = 0.0f;
+	for (i=0; i<(SystemAreaSize+BurstSize-1); i+=BurstSize) {
+		format_percent = (100.0f*i)/(1.0f*(SystemAreaSize+BurstSize));
+		PrintStatus(0, FALSE, "Formatting: %d%% completed.", (int)format_percent);
+		UpdateProgress(OP_FORMAT, format_percent);
+		if (IS_ERROR(FormatStatus)) goto out;	// For cancellation
+		if (write_sectors(hLogicalVolume, BytesPerSect, i, BurstSize, pZeroSect) != (BytesPerSect*BurstSize)) {
+			die("Error clearing reserved sectors\n", ERROR_WRITE_FAULT);
+		}
+	}
+
+	uprintf ("Initialising reserved sectors and FATs...\n");
+	// Now we should write the boot sector and fsinfo twice, once at 0 and once at the backup boot sect position
+	for (i=0; i<2; i++) {
+		int SectorStart = (i==0) ? 0 : BackupBootSect;
+		write_sectors(hLogicalVolume, BytesPerSect, SectorStart, 1, pFAT32BootSect);
+		write_sectors(hLogicalVolume, BytesPerSect, SectorStart+1, 1, pFAT32FsInfo);
+	}
+
+	// Write the first fat sector in the right places
+	for ( i=0; i<NumFATs; i++ ) {
+		int SectorStart = ReservedSectCount + (i * FatSize );
+		uprintf("FAT #%d sector at address: %d\n", i, SectorStart);
+		write_sectors(hLogicalVolume, BytesPerSect, SectorStart, 1, pFirstSectOfFat);
+	}
+
+	// Set the FAT32 volume label
+	GetWindowTextW(hLabel, wLabel, ARRAYSIZE(wLabel));
+	ToValidLabel(wLabel, TRUE);
+	wDriveName[0] = DriveLetter;
+	// Handle must be closed for SetVolumeLabel to work
+	safe_closehandle(hLogicalVolume);
+
+	PrintStatus(0, TRUE, "Setting Label (This can take while)...");
+	if (!SetVolumeLabelW(wDriveName, wLabel)) {
+		uprintf("Could not set label: %s\n", WindowsErrorString());
+	}
+	uprintf("Format completed.\n");
+	r = TRUE;
+
+out:
+	safe_closehandle(hLogicalVolume);
+	safe_free(pFAT32BootSect);
+	safe_free(pFAT32FsInfo);
+	safe_free(pFirstSectOfFat);
+	safe_free(pZeroSect);
+	return r;
+}
+
+/*
  * Call on fmifs.dll's FormatEx() to format the drive
  */
 static BOOL FormatDrive(char DriveLetter)
@@ -398,11 +742,24 @@ static BOOL AnalyzePBR(HANDLE hLogicalVolume)
 
 static BOOL ClearMBR(HANDLE hPhysicalDrive)
 {
-	FILE fake_fd = { 0 };
+	BOOL r = FALSE;
+	// Clearing the first 64K seems to help with reluctant access to large drive
+	size_t SectorSize = 65536;
+	unsigned char* pBuf = (unsigned char*) calloc(SectorSize, 1);
 
-	fake_fd._ptr = (char*)hPhysicalDrive;
-	fake_fd._bufsiz = SelectedDrive.Geometry.BytesPerSector;
-	return clear_mbr(&fake_fd);
+	PrintStatus(0, TRUE, "Clearing MBR...");
+	if (pBuf == NULL) {
+		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_NOT_ENOUGH_MEMORY;
+		goto out;
+	}
+	if ((IS_ERROR(FormatStatus)) || (write_sectors(hPhysicalDrive, SectorSize, 0, 1, pBuf) != SectorSize)) {
+		goto out;
+	}
+	r = TRUE;
+
+out:
+	safe_free(pBuf);
+	return r;
 }
 
 /*
@@ -741,6 +1098,10 @@ static BOOL RemountVolume(char drive_letter)
  */
 DWORD WINAPI FormatThread(LPVOID param)
 {
+	int r;
+	int fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
+	int dt = (int)ComboBox_GetItemData(hDOSType, ComboBox_GetCurSel(hDOSType));
+	BOOL ret;
 	DWORD num = (DWORD)(uintptr_t)param;
 	HANDLE hPhysicalDrive = INVALID_HANDLE_VALUE;
 	HANDLE hLogicalVolume = INVALID_HANDLE_VALUE;
@@ -749,7 +1110,6 @@ DWORD WINAPI FormatThread(LPVOID param)
 	char bb_msg[512];
 	char logfile[MAX_PATH], *userdir;
 	FILE* log_fd;
-	int r, fs, dt;
 
 	hPhysicalDrive = GetDriveHandle(num, NULL, TRUE, TRUE);
 	if (hPhysicalDrive == INVALID_HANDLE_VALUE) {
@@ -839,7 +1199,8 @@ DWORD WINAPI FormatThread(LPVOID param)
 	// before repartitioning. Else, all kind of bad things happen
 	if (!ClearMBR(hPhysicalDrive)) {
 		uprintf("unable to zero MBR\n");
-		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_WRITE_FAULT;
+		if (!FormatStatus)
+			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_WRITE_FAULT;
 		goto out;
 	} 
 	UpdateProgress(OP_ZERO_MBR, -1.0f);
@@ -853,7 +1214,11 @@ DWORD WINAPI FormatThread(LPVOID param)
 	// Add a small delay after partitioning to be safe
 	Sleep(200);
 
-	if (!FormatDrive(drive_name[0])) {
+	// If FAT32 is requested and we have a large drive (>32 GB) use 
+	// large FAT32 format, else use MS's FormatEx.
+	ret = ((fs == FS_FAT32) && (SelectedDrive.DiskSize > LARGE_FAT32_SIZE))?
+		FormatFAT32(num):FormatDrive(drive_name[0]);
+	if (!ret) {
 		// Error will be set by FormatDrive() in FormatStatus
 		uprintf("Format error: %s\n", StrError(FormatStatus));
 		goto out;
@@ -867,8 +1232,6 @@ DWORD WINAPI FormatThread(LPVOID param)
 	}
 	UpdateProgress(OP_FIX_MBR, -1.0f);
 
-	fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
-	dt = (int)ComboBox_GetItemData(hDOSType, ComboBox_GetCurSel(hDOSType));
 	if (IsChecked(IDC_DOS)) {
 		if ((dt == DT_WINME) || (dt == DT_FREEDOS) || ((dt == DT_ISO) && (fs == FS_NTFS))) {
 			// We still have a lock, which we need to modify the volume boot record 
