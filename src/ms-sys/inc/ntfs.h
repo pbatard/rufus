@@ -16,7 +16,7 @@ int is_ntfs_br(FILE *fp);
    The file position will change when this function is called! */
 int entire_ntfs_br_matches(FILE *fp);
 
-/* Writes a FAT32 DOS boot record to a file, returns TRUE on success, otherwise
+/* Writes a NTFS boot record to a file, returns TRUE on success, otherwise
    FALSE */
 int write_ntfs_br(FILE *fp);
 

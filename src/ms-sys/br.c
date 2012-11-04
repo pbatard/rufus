@@ -189,9 +189,3 @@ int write_zero_mbr(FILE *fp)
       write_data(fp, 0x0,   mbr_zero_0x0, sizeof(mbr_zero_0x0)) &&
       write_data(fp, 0x1FE, aucRef, sizeof(aucRef));
 } /* write_zero_mbr */
-
-int clear_mbr(FILE *fp)
-{
-	unsigned char buf[512] = { 0 };
-	return write_data(fp, 0x0, buf, sizeof(buf));
-} /* clear_mbr */
