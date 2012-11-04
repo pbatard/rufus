@@ -97,8 +97,6 @@ static inline void *ptr(void *img, uint16_t *offset_p)
  * Returns the number of modified bytes in ldlinux.sys if successful,
  * otherwise -1.
  */
-#define NADV 2
-
 int syslinux_patch(const sector_t *sectp, int nsectors,
 		   int stupid, int raid_mode,
 		   const char *subdir, const char *subvol)

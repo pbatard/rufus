@@ -23,6 +23,23 @@
 # define X86_MEM 0
 #endif
 
+#ifdef __GNUC__
+# ifdef __MINGW32__
+   /* gcc 4.7 miscompiles packed structures in MS-bitfield mode */
+#  define GNUC_PACKED __attribute__((packed,gcc_struct))
+# else
+#  define GNUC_PACKED __attribute__((packed))
+# endif
+# define PRAGMA_BEGIN_PACKED
+# define PRAGMA_END_PACKED
+#elif defined(_MSC_VER)
+# define GNUC_PACKED
+# define PRAGMA_BEGIN_PACKED __pragma(pack(push, 1))
+# define PRAGMA_END_PACKED   __pragma(pack(pop))
+#else
+# error "Need to define PACKED for this compiler"
+#endif
+
 /*
  * Access functions for littleendian numbers, possibly misaligned.
  */
@@ -187,11 +204,11 @@ struct ext_patch_area {
 };
 
 /* Sector extent */
-#pragma pack(push, 1)
+PRAGMA_BEGIN_PACKED
 struct syslinux_extent {
     uint64_t lba;
     uint16_t len;
-};
+} GNUC_PACKED;
 
 /* FAT bootsector format, also used by other disk-based derivatives */
 struct fat_boot_sector {
@@ -219,7 +236,7 @@ struct fat_boot_sector {
 	    char VolumeLabel[11];
 	    char FileSysType[8];
 	    uint8_t Code[442];
-	} bs16;
+	} GNUC_PACKED bs16;
 	struct {
 	    uint32_t FATSz32;
 	    uint16_t ExtFlags;
@@ -235,13 +252,13 @@ struct fat_boot_sector {
 	    char VolumeLabel[11];
 	    char FileSysType[8];
 	    uint8_t Code[414];
-	} bs32;
-    };
+	} GNUC_PACKED bs32;
+    } GNUC_PACKED;
 
     uint32_t bsMagic;
     uint16_t bsForwardPtr;
     uint16_t bsSignature;
-};
+} GNUC_PACKED;
 
 /* NTFS bootsector format */
 struct ntfs_boot_sector {
@@ -274,8 +291,8 @@ struct ntfs_boot_sector {
     uint32_t bsMagic;
     uint16_t bsForwardPtr;
     uint16_t bsSignature;
-};
-#pragma pack(pop)
+} GNUC_PACKED;
+PRAGMA_END_PACKED
 
 #define FAT_bsHead      bsJump
 #define FAT_bsHeadLen   offsetof(struct fat_boot_sector, bsBytesPerSec)

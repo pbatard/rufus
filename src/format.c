@@ -421,7 +421,7 @@ static BOOL FormatFAT32(DWORD DriveIndex)
 	strncpy((char*)pFAT32BootSect->sOEMName, "MSWIN4.1", 8);
 	pFAT32BootSect->wBytsPerSec = (WORD) BytesPerSect;
 
-	ClusterSize = ComboBox_GetItemData(hClusterSize, ComboBox_GetCurSel(hClusterSize));
+	ClusterSize = (DWORD)ComboBox_GetItemData(hClusterSize, ComboBox_GetCurSel(hClusterSize));
 	SectorsPerCluster = ClusterSize / BytesPerSect;
 
 	pFAT32BootSect->bSecPerClus = (BYTE) SectorsPerCluster ;
