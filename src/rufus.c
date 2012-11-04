@@ -1440,7 +1440,9 @@ void InitDialog(HWND hDlg)
 	CreateTooltip(hNBPasses, "Pattern: 0x55, 0xAA", -1);
 	// Fill up the DOS type dropdown
 	IGNORE_RETVAL(ComboBox_SetItemData(hDOSType, ComboBox_AddStringU(hDOSType, "MS-DOS"), DT_WINME));
-	IGNORE_RETVAL(ComboBox_SetCurSel(hDOSType, DT_WINME));
+	IGNORE_RETVAL(ComboBox_SetItemData(hDOSType, ComboBox_AddStringU(hDOSType, "FreeDOS"), DT_FREEDOS));
+	IGNORE_RETVAL(ComboBox_SetItemData(hDOSType, ComboBox_AddStringU(hDOSType, "ISO Image"), DT_ISO));
+	IGNORE_RETVAL(ComboBox_SetCurSel(hDOSType, selection_default));
 	// Fill up the MBR masqueraded disk IDs ("8 disks should be enough for anybody")
 	IGNORE_RETVAL(ComboBox_SetItemData(hDiskID, ComboBox_AddStringU(hDiskID, "0x80 (default)"), 0x80));
 	for (i=1; i<=7; i++) {
@@ -1523,7 +1525,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	static DWORD DeviceNum = 0;
 	wchar_t wtmp[128], wstr[MAX_PATH];
 	static UINT uDOSChecked = BST_CHECKED, uQFChecked;
-	static BOOL first_log_display = TRUE;
+	static BOOL first_log_display = TRUE, user_changed_label = FALSE;
 
 	switch (message) {
 
@@ -1531,6 +1533,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		if ( (format_thid == NULL) &&
 			 ((wParam == DBT_DEVICEARRIVAL) || (wParam == DBT_DEVICEREMOVECOMPLETE)) ) {
 			GetUSBDevices((DWORD)ComboBox_GetItemData(hDeviceList, ComboBox_GetCurSel(hDeviceList)));
+			user_changed_label = FALSE;
 			return (INT_PTR)TRUE;
 		}
 		break;
@@ -1628,6 +1631,10 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			ToggleAdvanced();
 			SendMessage(hMainDialog, WM_COMMAND, (CBN_SELCHANGE<<16) | IDC_FILESYSTEM,
 				ComboBox_GetCurSel(hFileSystem));
+			break;
+		case IDC_LABEL:
+			if (HIWORD(wParam) == EN_CHANGE)
+				user_changed_label = TRUE;
 			break;
 		case IDC_DEVICE:
 			if (HIWORD(wParam) != CBN_SELCHANGE)
@@ -1734,13 +1741,16 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 					SendMessage(hMainDialog, WM_NEXTDLGCTL, (WPARAM)FALSE, 0);
 					SendMessage(hMainDialog, WM_NEXTDLGCTL, (WPARAM)hSelectISO, TRUE);
 				} else {
+					// Some distros (eg. Arch Linux) want to see a specific label => ignore user one
 					SetWindowTextU(hLabel, iso_report.label);
 				}
 			} else {
 				// Set focus on the start button
 				SendMessage(hMainDialog, WM_NEXTDLGCTL, (WPARAM)FALSE, 0);
 				SendMessage(hMainDialog, WM_NEXTDLGCTL, (WPARAM)GetDlgItem(hMainDialog, IDC_START), TRUE);
-				SetWindowTextU(hLabel, SelectedDrive.proposed_label);
+				// For non ISO, if the user manually set a label, try to preserve it
+				if (!user_changed_label)
+					SetWindowTextU(hLabel, SelectedDrive.proposed_label);
 				// Reset disk ID to 0x80 if Rufus MBR is used
 				IGNORE_RETVAL(ComboBox_SetCurSel(hDiskID, 0));
 			}
