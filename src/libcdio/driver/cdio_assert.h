@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2008, 2011 Rocky Bernstein <rocky@gnu.org>
+  Copyright (C) 2008, 2011, 2012 Rocky Bernstein <rocky@gnu.org>
   Copyright (C) 2000 Herbert Valerio Riedel <hvr@gnu.org>
 
   This program is free software: you can redistribute it and/or modify
@@ -16,8 +16,8 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef __CDIO_ASSERT_H__
-#define __CDIO_ASSERT_H__
+#ifndef CDIO_ASSERT_H_
+#define CDIO_ASSERT_H_
 
 #if defined(__GNUC__) && !defined(__MINGW32__)
 
@@ -43,7 +43,7 @@
      __FILE__, __LINE__, __PRETTY_FUNCTION__); \
  }
 
-#else /* non GNU C or MinGW */
+#else /* non GNU C */
 
 #include <assert.h>
 
@@ -55,4 +55,4 @@
 
 #endif
 
-#endif /* __CDIO_ASSERT_H__ */
+#endif /* CDIO_ASSERT_H_ */

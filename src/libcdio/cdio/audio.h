@@ -21,8 +21,8 @@
  *         calls.  These control playing of the CD-ROM through its 
  *         line-out jack.
  */
-#ifndef __CDIO_AUDIO_H__
-#define __CDIO_AUDIO_H__
+#ifndef CDIO_AUDIO_H_
+#define CDIO_AUDIO_H_
 
 #include <cdio/types.h>
 
@@ -143,4 +143,4 @@ extern "C" {
 }
 #endif /* __cplusplus */
 
-#endif /* __CDIO_AUDIO_H__ */
+#endif /* CDIO_AUDIO_H_ */

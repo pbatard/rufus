@@ -1,7 +1,5 @@
 /*
-    $Id: iso9660.h,v 1.102 2008/07/16 00:28:54 rocky Exp $
-
-    Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008
+    Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2012
                   Rocky Bernstein <rocky@gnu.org>
     Copyright (C) 2000 Herbert Valerio Riedel <hvr@gnu.org>
 
@@ -33,8 +31,8 @@
 */
 
 
-#ifndef __CDIO_ISO9660_H__
-#define __CDIO_ISO9660_H__
+#ifndef CDIO_ISO9660_H_
+#define CDIO_ISO9660_H_
 
 #include <time.h>
 
@@ -71,7 +69,7 @@ typedef char     dchar_t;  /*! See section 7.4.1 */
 #undef ISODCL
 #endif
 /* This part borrowed from the bsd386 isofs */
-#define	ISODCL(from, to)	((to) - (from) + 1)
+#define ISODCL(from, to)        ((to) - (from) + 1)
 
 #define MIN_TRACK_SIZE 4*75
 #define MIN_ISO_SIZE MIN_TRACK_SIZE
@@ -107,14 +105,14 @@ extern enum iso_enum1_s {
 
 /*! ISO 9660 directory flags. */
 extern enum iso_flag_enum_s {
-  ISO_FILE	      =   0,   /**<  Not really a flag...	         */
-  ISO_EXISTENCE	      =   1,   /**< Do not make existence known (hidden) */
-  ISO_DIRECTORY	      =   2,   /**< This file is a directory		 */
-  ISO_ASSOCIATED      =   4,   /**< This file is an associated file	 */
-  ISO_RECORD	      =   8,   /**< Record format in extended attr. != 0 */
+  ISO_FILE            =   0,   /**<  Not really a flag...                */
+  ISO_EXISTENCE       =   1,   /**< Do not make existence known (hidden) */
+  ISO_DIRECTORY       =   2,   /**< This file is a directory             */
+  ISO_ASSOCIATED      =   4,   /**< This file is an associated file      */
+  ISO_RECORD          =   8,   /**< Record format in extended attr. != 0 */
   ISO_PROTECTION      =  16,   /**< No read/execute perm. in ext. attr.  */
-  ISO_DRESERVED1      =  32,   /**<, Reserved bit 5			 */
-  ISO_DRESERVED2      =  64,   /**<, Reserved bit 6			 */
+  ISO_DRESERVED1      =  32,   /**<, Reserved bit 5                      */
+  ISO_DRESERVED2      =  64,   /**<, Reserved bit 6                      */
   ISO_MULTIEXTENT     = 128,   /**< Not final entry of a mult. ext. file */
 } iso_flag_enums;
 
@@ -124,7 +122,7 @@ extern enum iso_vd_enum_s {
   ISO_VD_PRIMARY       =  1,  /**< Is in any ISO-9660 */
   ISO_VD_SUPPLEMENTARY =  2,  /**< Used by Joliet, for example */
   ISO_VD_PARITION      =  3,  /**< Indicates a partition of a CD */
-  ISO_VD_END	       = 255
+  ISO_VD_END           = 255
 } iso_vd_enums;
 
   
@@ -136,12 +134,12 @@ extern enum iso_vd_enum_s {
     For ISO-9660 Level 1, the maximum needed string length is:
 
 @code
-  	 30 chars (filename + ext)
-    +	  2 chars ('.' + ';')
-    +	  5 chars (strlen("32767"))
-    +	  1 null byte
+         30 chars (filename + ext)
+    +     2 chars ('.' + ';')
+    +     5 chars (strlen("32767"))
+    +     1 null byte
    ================================
-    =	 38 chars
+    =    38 chars
 @endcode
 
 */
@@ -183,15 +181,15 @@ PRAGMA_BEGIN_PACKED
   
   @see iso9660_dtime
  */
-struct	iso9660_dtime_s {
-  iso711_t 	dt_year;   /**< Number of years since 1900 */
-  iso711_t 	dt_month;  /**< Has value in range 1..12. Note starts
+struct  iso9660_dtime_s {
+  iso711_t      dt_year;   /**< Number of years since 1900 */
+  iso711_t      dt_month;  /**< Has value in range 1..12. Note starts
                               at 1, not 0 like a tm struct. */
-  iso711_t	dt_day;    /**< Day of the month from 1 to 31 */
-  iso711_t	dt_hour;   /**< Hour of the day from 0 to 23 */
-  iso711_t	dt_minute; /**< Minute of the hour from 0 to 59 */
-  iso711_t	dt_second; /**< Second of the minute from 0 to 59 */
-  iso712_t	dt_gmtoff; /**< GMT values -48 .. + 52 in 15 minute
+  iso711_t      dt_day;    /**< Day of the month from 1 to 31 */
+  iso711_t      dt_hour;   /**< Hour of the day from 0 to 23 */
+  iso711_t      dt_minute; /**< Minute of the hour from 0 to 59 */
+  iso711_t      dt_second; /**< Second of the minute from 0 to 59 */
+  iso712_t      dt_gmtoff; /**< GMT values -48 .. + 52 in 15 minute
                               intervals */
 } GNUC_PACKED;
 
@@ -206,19 +204,19 @@ typedef struct iso9660_dtime_s  iso9660_dtime_t;
   
   @see iso9660_ltime
  */
-struct	iso9660_ltime_s {
-  char	 lt_year	[ISODCL(   1,	4)];   /**< Add 1900 to value
+struct  iso9660_ltime_s {
+  char   lt_year        [ISODCL(   1,   4)];   /**< Add 1900 to value
                                                     for the Julian
                                                     year */
-  char	 lt_month	[ISODCL(   5,	6)];   /**< Has value in range
+  char   lt_month       [ISODCL(   5,   6)];   /**< Has value in range
                                                   1..12. Note starts
                                                   at 1, not 0 like a
                                                   tm struct. */
-  char	 lt_day		[ISODCL(   7,	8)];   /**< Day of month: 1..31 */
-  char	 lt_hour	[ISODCL(   9,	10)];  /**< hour: 0..23 */
-  char	 lt_minute	[ISODCL(  11,	12)];  /**< minute: 0..59 */
-  char	 lt_second	[ISODCL(  13,	14)];  /**< second: 0..59 */
-  char	 lt_hsecond	[ISODCL(  15,	16)];  /**< The value is in
+  char   lt_day         [ISODCL(   7,   8)];   /**< Day of month: 1..31 */
+  char   lt_hour        [ISODCL(   9,   10)];  /**< hour: 0..23 */
+  char   lt_minute      [ISODCL(  11,   12)];  /**< minute: 0..59 */
+  char   lt_second      [ISODCL(  13,   14)];  /**< second: 0..59 */
+  char   lt_hsecond     [ISODCL(  15,   16)];  /**< The value is in
                                                   units of 1/100's of
                                                   a second */
   iso712_t lt_gmtoff;  /**< Offset from Greenwich Mean Time in number
@@ -405,7 +403,7 @@ struct iso9660_svd_s {
   char             id[5];                        /**< ISO_STANDARD_ID "CD001" 
                                                   */
   iso711_t         version;                      /**< value 1 */
-  char             flags;			 /**< Section 8.5.3 */
+  char             flags;                        /**< Section 8.5.3 */
   achar_t          system_id[ISO_MAX_SYSTEM_ID]; /**< Section 8.5.4; each char 
                                                     is an achar */
   dchar_t          volume_id[ISO_MAX_VOLUME_ID]; /**< Section 8.5.5; each char
@@ -1133,7 +1131,7 @@ lsn_t iso9660_get_dir_extent(const iso9660_dir_t *p_idr);
 #endif /* __cplusplus */
 
 #undef ISODCL
-#endif /* __CDIO_ISO9660_H__ */
+#endif /* CDIO_ISO9660_H_ */
 
 /* 
  * Local variables:

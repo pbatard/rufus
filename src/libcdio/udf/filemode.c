@@ -1,7 +1,7 @@
 /*
   filemode.c -- make a string describing file modes
 
-  Copyright (C) 2005, 2008, 2011 Rocky Bernstein <rocky@gnu.org>
+  Copyright (C) 2005, 2008, 2011, 2012 Rocky Bernstein <rocky@gnu.org>
   Copyright (C) 1985, 1990, 1993, 1998-2000 Free Software Foundation, Inc.
 
   This program is free software: you can redistribute it and/or modify

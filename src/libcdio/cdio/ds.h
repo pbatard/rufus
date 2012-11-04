@@ -26,8 +26,8 @@
 */
 
 
-#ifndef __CDIO_DS_H__
-#define __CDIO_DS_H__
+#ifndef CDIO_DS_H_
+#define CDIO_DS_H_
 
 #include <cdio/types.h>
 
@@ -86,7 +86,7 @@ void *_cdio_list_node_data (CdioListNode_t *p_node);
 }
 #endif /* __cplusplus */
 
-#endif /* __CDIO_DS_H__ */
+#endif /* CDIO_DS_H_ */
 
 /* 
  * Local variables:

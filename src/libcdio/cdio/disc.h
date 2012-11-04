@@ -1,6 +1,6 @@
 /* -*- c -*-
 
-    Copyright (C) 2004, 2005, 2006, 2008, 2010 Rocky Bernstein
+    Copyright (C) 2004, 2005, 2006, 2008, 2010, 2012 Rocky Bernstein
     <rocky@gnu.org>
 
     This program is free software: you can redistribute it and/or modify
@@ -21,8 +21,8 @@
    \file disc.h 
    \brief  The top-level header for disc-related libcdio calls.
  */
-#ifndef __CDIO_DISC_H__
-#define __CDIO_DISC_H__
+#ifndef CDIO_DISC_H_
+#define CDIO_DISC_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -34,10 +34,10 @@ extern "C" {
        GNU/Linux /usr/include/linux/cdrom.h and we've added DVD.
     */
   typedef enum {
-    CDIO_DISC_MODE_CD_DA,	    /**< CD-DA */
-    CDIO_DISC_MODE_CD_DATA,	    /**< CD-ROM form 1 */
-    CDIO_DISC_MODE_CD_XA,	    /**< CD-ROM XA form2 */
-    CDIO_DISC_MODE_CD_MIXED,	    /**< Some combo of above. */
+    CDIO_DISC_MODE_CD_DA,           /**< CD-DA */
+    CDIO_DISC_MODE_CD_DATA,         /**< CD-ROM form 1 */
+    CDIO_DISC_MODE_CD_XA,           /**< CD-ROM XA form2 */
+    CDIO_DISC_MODE_CD_MIXED,        /**< Some combo of above. */
     CDIO_DISC_MODE_DVD_ROM,         /**< DVD ROM (e.g. movies) */
     CDIO_DISC_MODE_DVD_RAM,         /**< DVD-RAM */
     CDIO_DISC_MODE_DVD_R,           /**< DVD-R */
@@ -52,10 +52,11 @@ extern "C" {
     CDIO_DISC_MODE_DVD_OTHER,       /**< Unknown/unclassified DVD type */
     CDIO_DISC_MODE_NO_INFO,
     CDIO_DISC_MODE_ERROR,
-    CDIO_DISC_MODE_CD_I	        /**< CD-i. */
+    CDIO_DISC_MODE_CD_I         /**< CD-i. */
   } discmode_t;
 
   extern const char *discmode2str[];
+
   /**
     Get binary CD-Text information for a CdIo_t object.
 
@@ -133,4 +134,4 @@ extern "C" {
 }
 #endif /* __cplusplus */
 
-#endif /* __CDIO_DISC_H__ */
+#endif /* CDIO_DISC_H_ */

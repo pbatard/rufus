@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2003, 2004, 2005, 2008, 2009, 2011
+  Copyright (C) 2003, 2004, 2005, 2008, 2009, 2011, 2012
   Rocky Bernstein <rocky@gnu.org>
 
   This program is free software: you can redistribute it and/or modify
@@ -19,8 +19,8 @@
 /* Internal routines for CD I/O drivers. */
 
 
-#ifndef __CDIO_PRIVATE_H__
-#define __CDIO_PRIVATE_H__
+#ifndef CDIO_DRIVER_PRIVATE_H_
+#define CDIO_DRIVER_PRIVATE_H_
 
 #if defined(HAVE_CONFIG_H) && !defined(LIBCDIO_CONFIG_H)
 # include "config.h"
@@ -62,7 +62,7 @@ extern "C" {
       
     */
     driver_return_code_t (*audio_get_volume) 
-	 (void *p_env,  /*out*/ cdio_audio_volume_t *p_volume);
+         (void *p_env,  /*out*/ cdio_audio_volume_t *p_volume);
 
     /*!
       Pause playing CD through analog output
@@ -77,8 +77,8 @@ extern "C" {
       @param p_env the CD object to be acted upon.
     */
     driver_return_code_t (*audio_play_msf) ( void *p_env, 
-					     msf_t *p_start_msf,
-					     msf_t *p_end_msf );
+                                             msf_t *p_start_msf,
+                                             msf_t *p_end_msf );
 
     /*!
       Playing CD through analog output
@@ -86,7 +86,7 @@ extern "C" {
       @param p_env the CD object to be acted upon.
     */
     driver_return_code_t (*audio_play_track_index) 
-	 ( void *p_env, cdio_track_index_t *p_track_index );
+         ( void *p_env, cdio_track_index_t *p_track_index );
 
     /*!
       Get subchannel information.
@@ -94,7 +94,7 @@ extern "C" {
       @param p_env the CD object to be acted upon.
     */
     driver_return_code_t (*audio_read_subchannel) 
-	 ( void *p_env, cdio_subchannel_t *subchannel );
+         ( void *p_env, cdio_subchannel_t *subchannel );
 
     /*!
       Resume playing an audio CD.
@@ -111,7 +111,7 @@ extern "C" {
       
     */
     driver_return_code_t (*audio_set_volume) 
-	 ( void *p_env,  cdio_audio_volume_t *p_volume );
+         ( void *p_env,  cdio_audio_volume_t *p_volume );
 
     /*!
       Stop playing an audio CD.
@@ -204,9 +204,9 @@ extern "C" {
       See cd_types.h for a list of bitmasks for the drive type;
     */
     void (*get_drive_cap) (const void *p_env,
-			   cdio_drive_read_cap_t  *p_read_cap,
-			   cdio_drive_write_cap_t *p_write_cap,
-			   cdio_drive_misc_cap_t  *p_misc_cap);
+                           cdio_drive_read_cap_t  *p_read_cap,
+                           cdio_drive_write_cap_t *p_write_cap,
+                           cdio_drive_misc_cap_t  *p_misc_cap);
     /*!
       Return the number of of the first track. 
       CDIO_INVALID_TRACK is returned on error.
@@ -218,16 +218,16 @@ extern "C" {
       False is returned if we had an error getting the information.
     */
     bool (*get_hwinfo) 
-	 ( const CdIo_t *p_cdio, /* out*/ cdio_hwinfo_t *p_hw_info );
+         ( const CdIo_t *p_cdio, /* out*/ cdio_hwinfo_t *p_hw_info );
 
     /*! Get the LSN of the first track of the last session of
       on the CD.
-	   
+           
        @param p_cdio the CD object to be acted upon.
        @param i_last_session pointer to the session number to be returned.
     */
     driver_return_code_t (*get_last_session)
-	 ( void *p_env, /*out*/ lsn_t *i_last_session );
+         ( void *p_env, /*out*/ lsn_t *i_last_session );
 
     /*! 
       Find out if media has changed since the last call.
@@ -315,7 +315,7 @@ extern "C" {
       audio track?
     */
     track_flag_t (*get_track_preemphasis) 
-	 ( const void  *p_env, track_t i_track );
+         ( const void  *p_env, track_t i_track );
   
     /*!
       lseek - reposition read/write file offset
@@ -336,7 +336,7 @@ extern "C" {
       from lsn. Returns 0 if no error. 
     */
     int (*read_audio_sectors) ( void *p_env, void *p_buf, lsn_t i_lsn,
-				unsigned int i_blocks );
+                                unsigned int i_blocks );
     
     /*!
       Read a data sector
@@ -356,15 +356,15 @@ extern "C" {
       M2RAW_SECTOR_SIZE, or M2F2_SECTOR_SIZE. See comment above under p_buf.
     */
     driver_return_code_t (*read_data_sectors) 
-	 ( void *p_env, void *p_buf, lsn_t i_lsn, uint16_t i_blocksize,
-	   uint32_t i_blocks );
+         ( void *p_env, void *p_buf, lsn_t i_lsn, uint16_t i_blocksize,
+           uint32_t i_blocks );
     
     /*!
       Reads a single mode2 sector from cd device into buf starting
       from lsn. Returns 0 if no error. 
     */
     int (*read_mode2_sector) 
-	 ( void *p_env, void *p_buf, lsn_t i_lsn, bool b_mode2_form2 );
+         ( void *p_env, void *p_buf, lsn_t i_lsn, bool b_mode2_form2 );
     
     /*!
       Reads i_blocks of mode2 sectors from cd device into data starting
@@ -372,15 +372,15 @@ extern "C" {
       Returns 0 if no error. 
     */
     int (*read_mode2_sectors) 
-	 ( void *p_env, void *p_buf, lsn_t i_lsn, bool b_mode2_form2, 
-	   unsigned int i_blocks );
+         ( void *p_env, void *p_buf, lsn_t i_lsn, bool b_mode2_form2, 
+           unsigned int i_blocks );
     
     /*!
       Reads a single mode1 sector from cd device into buf starting
       from lsn. Returns 0 if no error. 
     */
     int (*read_mode1_sector) 
-	 ( void *p_env, void *p_buf, lsn_t i_lsn, bool mode1_form2 );
+         ( void *p_env, void *p_buf, lsn_t i_lsn, bool mode1_form2 );
     
     /*!
       Reads i_blocks of mode1 sectors from cd device into data starting
@@ -388,24 +388,24 @@ extern "C" {
       Returns 0 if no error. 
     */
     int (*read_mode1_sectors) 
-	 ( void *p_env, void *p_buf, lsn_t i_lsn, bool mode1_form2, 
-	   unsigned int i_blocks );
+         ( void *p_env, void *p_buf, lsn_t i_lsn, bool mode1_form2, 
+           unsigned int i_blocks );
     
     bool (*read_toc) ( void *p_env ) ;
 
     /*!
       Run a SCSI MMC command. 
       
-      cdio	        CD structure set by cdio_open().
+      cdio              CD structure set by cdio_open().
       i_timeout_ms      time in milliseconds we will wait for the command
                         to complete. 
       cdb_len           number of bytes in cdb (6, 10, or 12).
-      cdb	        CDB bytes. All values that are needed should be set on 
+      cdb               CDB bytes. All values that are needed should be set on 
                         input. 
-      b_return_data	TRUE if the command expects data to be returned in 
+      b_return_data     TRUE if the command expects data to be returned in 
                         the buffer
-      len	        Size of buffer
-      buf	        Buffer for data, both sending and receiving
+      len               Size of buffer
+      buf               Buffer for data, both sending and receiving
       
       Returns 0 if command completed successfully.
     */
@@ -420,7 +420,7 @@ extern "C" {
       Set the blocksize for subsequent reads. 
     */
     driver_return_code_t (*set_blocksize) ( void *p_env, 
-					    uint16_t i_blocksize );
+                                            uint16_t i_blocksize );
 
     /*!
       Set the drive speed. 
@@ -437,7 +437,7 @@ extern "C" {
   struct _CdIo {
     driver_id_t driver_id; /**< Particular driver opened. */
     cdio_funcs_t op;       /**< driver-specific routines handling
-			        implementation*/
+                                implementation*/
     void *env;             /**< environment. Passed to routine above. */
   };
 
@@ -464,7 +464,7 @@ extern "C" {
     bool (*have_driver) (void); 
     CdIo_t *(*driver_open) (const char *psz_source_name); 
     CdIo_t *(*driver_open_am) (const char *psz_source_name, 
-			     const char *psz_access_mode); 
+                             const char *psz_access_mode); 
     char *(*get_default_device) (void); 
     bool (*is_device) (const char *psz_source_name);
     char **(*get_devices) (void);
@@ -489,7 +489,7 @@ extern "C" {
     Use cdio_free_device_list() to free this device_list.
   */
   void cdio_add_device_list(char **device_list[], const char *psz_drive,
-			    unsigned int *i_drives);
+                            unsigned int *i_drives);
 
   driver_return_code_t close_tray_bsdi    (const char *psz_drive);
   driver_return_code_t close_tray_freebsd (const char *psz_drive);
@@ -512,7 +512,7 @@ extern "C" {
      @see cdio_open_cd, cdio_open
    */
   CdIo_t * cdio_open_am_netbsd (const char *psz_source,
-				const char *psz_access_mode);
+                                const char *psz_access_mode);
 
   /*! DEPRICATED: use cdio_have_driver().
     True if AIX driver is available. */
@@ -559,4 +559,4 @@ extern "C" {
 }
 #endif /* __cplusplus */
 
-#endif /* __CDIO_PRIVATE_H__ */
+#endif /* CDIO_DRIVER_PRIVATE_H_ */

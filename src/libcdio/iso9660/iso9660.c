@@ -36,19 +36,19 @@ const char ISO_STANDARD_ID[] = {'C', 'D', '0', '0', '1'};
 #include <time.h>
 #include <ctype.h>
 #ifdef HAVE_STRING_H
-#include <string.h>
+# include <string.h>
 #endif
 #ifdef HAVE_STDIO_H
-#include <stdio.h>
+# include <stdio.h>
 #endif
 #ifdef HAVE_LIMITS_H
-#include <limits.h>
+# include <limits.h>
 #endif
 #ifdef HAVE_STDLIB_H
-#include <stdlib.h>
+# include <stdlib.h>
 #endif
 #ifdef HAVE_SYS_STAT_H
-#include <sys/stat.h>
+# include <sys/stat.h>
 #endif
 
 #ifdef HAVE_ERRNO_H
@@ -335,15 +335,17 @@ iso9660_set_dtime_with_timezone (const struct tm *p_tm,
   Set time in format used in ISO 9660 directory index record
   from a Unix time structure. */
 void
-iso9660_set_dtime (const struct tm *p_tm, /*out*/ iso9660_dtime_t *p_idr_date)
+iso9660_set_dtime(const struct tm *p_tm, /*out*/ iso9660_dtime_t *p_idr_date)
 {
-  int time_zone;
+  int time_zone = 0;
+  if (p_tm) {
 #ifdef HAVE_TM_GMTOFF
-  /* Convert seconds to minutes */
-  time_zone = p_tm->tm_gmtoff / 60;
+    /* Convert seconds to minutes */
+    time_zone = p_tm->tm_gmtoff / 60;
 #else 
-  time_zone = (p_tm->tm_isdst > 0) ? -60 : 0;
+    time_zone = (p_tm->tm_isdst > 0) ? -60 : 0;
 #endif
+  }
   iso9660_set_dtime_with_timezone (p_tm, time_zone, p_idr_date);
 }
 
@@ -353,9 +355,9 @@ iso9660_set_dtime (const struct tm *p_tm, /*out*/ iso9660_dtime_t *p_idr_date)
   correction in minutes. 
 */
 void
-iso9660_set_ltime_with_timezone (const struct tm *p_tm, 
-                                 int time_zone,
-                                 /*out*/ iso9660_ltime_t *pvd_date)
+iso9660_set_ltime_with_timezone(const struct tm *p_tm, 
+                                int time_zone,
+                                /*out*/ iso9660_ltime_t *pvd_date)
 {
   char *_pvd_date = (char *) pvd_date; 
 
@@ -388,15 +390,17 @@ iso9660_set_ltime_with_timezone (const struct tm *p_tm,
   Set "long" time in format used in ISO 9660 primary volume descriptor
   from a Unix time structure. */
 void
-iso9660_set_ltime (const struct tm *p_tm, /*out*/ iso9660_ltime_t *pvd_date)
+iso9660_set_ltime(const struct tm *p_tm, /*out*/ iso9660_ltime_t *pvd_date)
 {
-  int time_zone;
+  int time_zone = 0;
+  if (p_tm) {
 #ifdef HAVE_TM_GMTOFF
-  /* Set time zone in 15-minute interval encoding. */
-  time_zone = p_tm->tm_gmtoff / 60;
+    /* Set time zone in 15-minute interval encoding. */
+    time_zone = p_tm->tm_gmtoff / 60;
 #else
-  time_zone = (p_tm->tm_isdst > 0) ? -60 : 0;
+    time_zone = (p_tm->tm_isdst > 0) ? -60 : 0;
 #endif
+  }
   iso9660_set_ltime_with_timezone (p_tm, time_zone, pvd_date);
 }
 
@@ -667,8 +671,8 @@ iso9660_set_pvd(void *pd,
   iso9660_set_ltime (&temp_tm, &(ipd.creation_date));
   gmtime_r(pvd_time, &temp_tm);
   iso9660_set_ltime (&temp_tm, &(ipd.modification_date));
-  iso9660_set_ltime (&temp_tm,     &(ipd.expiration_date));
-  iso9660_set_ltime (&temp_tm,     &(ipd.effective_date));
+  iso9660_set_ltime (NULL,     &(ipd.expiration_date));
+  iso9660_set_ltime (NULL,     &(ipd.effective_date));
 
   ipd.file_structure_version = to_711(1);
 

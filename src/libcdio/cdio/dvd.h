@@ -27,35 +27,40 @@
 
 */
 
-#ifndef __CDIO_DVD_H__
-#define __CDIO_DVD_H__
+#ifndef CDIO_DVD_H_
+#define CDIO_DVD_H_
 
 #include <cdio/types.h>
 
 /**
    Values used in a READ DVD STRUCTURE
  */
-
-#define CDIO_DVD_STRUCT_PHYSICAL	0x00
-#define CDIO_DVD_STRUCT_COPYRIGHT	0x01
-#define CDIO_DVD_STRUCT_DISCKEY	        0x02
-#define CDIO_DVD_STRUCT_BCA		0x03
-#define CDIO_DVD_STRUCT_MANUFACT	0x04
+typedef enum cdio_dvd_structure
+{
+	CDIO_DVD_STRUCT_PHYSICAL	= 0x00,
+	CDIO_DVD_STRUCT_COPYRIGHT	= 0x01,
+	CDIO_DVD_STRUCT_DISCKEY	        = 0x02,
+	CDIO_DVD_STRUCT_BCA		= 0x03,
+	CDIO_DVD_STRUCT_MANUFACT	= 0x04
+} cdio_dvd_structure;
 
 /**
     Media definitions for "DVD Book" from MMC-5 Table 400, page 419.
 */
-#define CDIO_DVD_BOOK_DVD_ROM     0x0 /**< DVD-ROM */
-#define CDIO_DVD_BOOK_DVD_RAM     0x1 /**< DVD-RAM */
-#define CDIO_DVD_BOOK_DVD_R       0x2 /**< DVD-R */
-#define CDIO_DVD_BOOK_DVD_RW      0x3 /**< DVD-RW */
-#define CDIO_DVD_BOOK_HD_DVD_ROM  0x4 /**< HD DVD-ROM */
-#define CDIO_DVD_BOOK_HD_DVD_RAM  0x5 /**< HD DVD-RAM */
-#define CDIO_DVD_BOOK_HD_DVD_R    0x6 /**< HD DVD-R */
-#define CDIO_DVD_BOOK_DVD_PRW     0x9 /**< DVD+RW */
-#define CDIO_DVD_BOOK_DVD_PR      0xa /**< DVD+R  */
-#define CDIO_DVD_BOOK_DVD_PRW_DL  0xd /**< DVD+RW DL  */
-#define CDIO_DVD_BOOK_DVD_PR_DL   0xe /**< DVD+R DL  */
+typedef enum cdio_dvd_book
+{
+	CDIO_DVD_BOOK_DVD_ROM    = 0x0, /**< DVD-ROM */
+	CDIO_DVD_BOOK_DVD_RAM    = 0x1, /**< DVD-RAM */
+	CDIO_DVD_BOOK_DVD_R      = 0x2, /**< DVD-R */
+	CDIO_DVD_BOOK_DVD_RW     = 0x3, /**< DVD-RW */
+	CDIO_DVD_BOOK_HD_DVD_ROM = 0x4, /**< HD DVD-ROM */
+	CDIO_DVD_BOOK_HD_DVD_RAM = 0x5, /**< HD DVD-RAM */
+	CDIO_DVD_BOOK_HD_DVD_R   = 0x6, /**< HD DVD-R */
+	CDIO_DVD_BOOK_DVD_PRW    = 0x9, /**< DVD+RW */
+	CDIO_DVD_BOOK_DVD_PR     = 0xa, /**< DVD+R  */
+	CDIO_DVD_BOOK_DVD_PRW_DL = 0xd, /**< DVD+RW DL  */
+	CDIO_DVD_BOOK_DVD_PR_DL  = 0xe  /**< DVD+R DL  */
+} cdio_dvd_book;
 
 typedef struct cdio_dvd_layer {
   unsigned int book_version	: 4;
@@ -124,4 +129,4 @@ typedef union {
   cdio_dvd_manufact_t	manufact;
 } cdio_dvd_struct_t;
 
-#endif /* __CDIO_DVD_H__ */
+#endif /* CDIO_DVD_H_ */

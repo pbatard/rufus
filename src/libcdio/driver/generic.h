@@ -1,5 +1,6 @@
 /*
-  Copyright (C) 2004, 2005, 2006, 2008, 2009 Rocky Bernstein <rocky@gnu.org>
+  Copyright (C) 2004, 2005, 2006, 2008, 2009, 2012
+  Rocky Bernstein <rocky@gnu.org>
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -18,8 +19,8 @@
 /* Internal routines for CD I/O drivers. */
 
 
-#ifndef __CDIO_GENERIC_H__
-#define __CDIO_GENERIC_H__
+#ifndef CDIO_DRIVER_GENERIC_H_
+#define CDIO_DRIVER_GENERIC_H_
 
 #if defined(HAVE_CONFIG_H) && !defined(LIBCDIO_CONFIG_H)
 # include "config.h"
@@ -28,6 +29,10 @@
 #include <cdio/cdio.h>
 #include <cdio/cdtext.h>
 #include <cdio/iso9660.h>
+
+#ifdef HAVE_STDBOOL_H
+# include <stdbool.h>
+#endif 
 
 #ifdef __cplusplus
 extern "C" {
@@ -57,7 +62,7 @@ extern "C" {
     track_t i_tracks;       /**< The number of tracks. */
 
     uint8_t i_joliet_level; /**< 0 = no Joliet extensions.
-			       1-3: Joliet level. */
+                               1-3: Joliet level. */
     iso9660_pvd_t pvd;      
     iso9660_svd_t svd;      
     CdIo_t   *cdio;         /**< a way to call general cdio routines. */
@@ -208,7 +213,7 @@ extern "C" {
     Is this meaningful if not an audio track?
   */
   track_flag_t get_track_copy_permit_generic(void *p_user_data, 
-					     track_t i_track);
+                                             track_t i_track);
   
   /*! Return 1 if track has pre-emphasis, 0 if not, or -1 for error.
     Is this meaningful if not an audio track?
@@ -216,7 +221,7 @@ extern "C" {
     pre-emphasis is a non linear frequency response.
   */
   track_flag_t get_track_preemphasis_generic(const void *p_user_data, 
-					     track_t i_track);
+                                             track_t i_track);
   
   /*!
     Read cdtext information for a CdIo object .
@@ -230,14 +235,14 @@ extern "C" {
   
   /*! Read mode 1 or mode2 sectors (using cooked mode).  */
   driver_return_code_t read_data_sectors_generic (void *p_user_data, 
-						  void *p_buf, lsn_t i_lsn, 
-						  uint16_t i_blocksize, 
-						  uint32_t i_blocks);
+                                                  void *p_buf, lsn_t i_lsn, 
+                                                  uint16_t i_blocksize, 
+                                                  uint32_t i_blocks);
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#endif /* __CDIO_GENERIC_H__ */
+#endif /* CDIO_DRIVER_GENERIC_H_ */
 
 
 /* 

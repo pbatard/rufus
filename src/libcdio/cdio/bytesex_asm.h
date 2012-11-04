@@ -1,7 +1,5 @@
 /*
-    $Id: bytesex_asm.h,v 1.3 2008/03/25 15:59:08 karl Exp $
-
-    Copyright (C) 2008 Rocky Bernstein <rocky@gnu.org>
+    Copyright (C) 2008, 2012 Rocky Bernstein <rocky@gnu.org>
                   2001, 2004, 2005 Herbert Valerio Riedel <hvr@gnu.org>
                   2001 Sven Ottemann <ac-logic@freenet.de>
 
@@ -26,8 +24,8 @@
     glib.h routines instead. 
 */
 
-#ifndef __CDIO_BYTESEX_ASM_H__
-#define __CDIO_BYTESEX_ASM_H__
+#ifndef CDIO_BYTESEX_ASM_H_
+#define CDIO_BYTESEX_ASM_H_
 #if !defined(DISABLE_ASM_OPTIMIZE)
 
 #include <cdio/types.h>
@@ -106,10 +104,10 @@ static CDIO_INLINE
 uint32_t uint32_swap_le_be_asm(uint32_t a)
 {
   __asm__("xchgb %b0,%h0\n\t"     /* swap lower bytes     */
-	  "rorl $16,%0\n\t"       /* swap words           */
-	  "xchgb %b0,%h0"         /* swap higher bytes    */
-	  :"=q" (a)
-	  : "0" (a));
+          "rorl $16,%0\n\t"       /* swap words           */
+          "xchgb %b0,%h0"         /* swap higher bytes    */
+          :"=q" (a)
+          : "0" (a));
 
   return(a);
 }
@@ -118,8 +116,8 @@ static CDIO_INLINE
 uint16_t uint16_swap_le_be_asm(uint16_t a)
 {
   __asm__("xchgb %b0,%h0"         /* swap bytes           */ 
-	  : "=q" (a) 
-	  :  "0" (a));
+          : "=q" (a) 
+          :  "0" (a));
   
   return(a);
 }
@@ -130,7 +128,7 @@ uint16_t uint16_swap_le_be_asm(uint16_t a)
 #endif
 
 #endif /* !defined(DISABLE_ASM_OPTIMIZE) */
-#endif /* __CDIO_BYTESEX_ASM_H__ */
+#endif /* CDIO_BYTESEX_ASM_H_ */
 
 
 /* 

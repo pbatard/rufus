@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2006, 2008, 2011 Rocky Bernstein <rocky@gnu.org>
+  Copyright (C) 2006, 2008, 2011, 2012 Rocky Bernstein <rocky@gnu.org>
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -21,8 +21,8 @@
    included other routines can be more portable.
 */
 
-#ifndef __CDIO_PORTABLE_H__
-#define __CDIO_PORTABLE_H__
+#ifndef CDIO_DRIVER_PORTABLE_H_
+#define CDIO_DRIVER_PORTABLE_H_
 
 #if defined(HAVE_CONFIG_H) && !defined(__CDIO_CONFIG_H__)
 # include "config.h"
@@ -51,4 +51,4 @@
 # define drand48()   (rand() / (double)RAND_MAX)
 #endif
 
-#endif /* __CDIO_PORTABLE_H__ */
+#endif /* CDIO_DRIVER_PORTABLE_H_ */

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2005, 2006, 2008, 2011 Rocky Bernstein <rocky@gnu.org>
+  Copyright (C) 2005, 2006, 2008, 2011, 2012 Rocky Bernstein <rocky@gnu.org>
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -15,13 +15,17 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef __CDIO_UDF_PRIVATE_H__
-#define __CDIO_UDF_PRIVATE_H__
+#ifndef CDIO_UDF_UDF_PRIVATE_H_
+#define CDIO_UDF_UDF_PRIVATE_H_
 
 #if defined(HAVE_CONFIG_H) && !defined(LIBCDIO_CONFIG_H) && !defined(__CDIO_CONFIG_H__)
 # include "config.h"
 # define __CDIO_CONFIG_H__ 1
 #endif
+
+#ifdef HAVE_STDBOOL_H
+# include <stdbool.h>
+#endif 
 
 #include <cdio/types.h>
 #include <cdio/ecma_167.h>
@@ -43,7 +47,7 @@ struct udf_s {
   uint32_t              fsd_offset;   /* lba of fileset descriptor */
 };
 
-#endif /* __CDIO_UDF_PRIVATE_H__ */
+#endif /* CDIO_UDF_UDF_PRIVATE_H_ */
 
 
 /* 

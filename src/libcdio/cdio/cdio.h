@@ -29,7 +29,7 @@
 /** Application Interface or Protocol version number. If the public
  *  interface changes, we increase this number.
  */
-#define CDIO_API_VERSION 5
+#define CDIO_API_VERSION 6
 
 #include <cdio/version.h>
 #include <cdio/types.h>
@@ -56,6 +56,9 @@ extern "C" {
 */
 #include <cdio/device.h>
 
+/* CD-Text-related functions. */
+#include <cdio/cdtext.h>
+
 /* Disc-related functions. */
 #include <cdio/disc.h>
 
@@ -63,9 +66,6 @@ extern "C" {
    from <cdio/device.h> so it should come after that. 
 */
 #include <cdio/read.h>
-
-/* CD-Text-related functions. */
-#include <cdio/cdtext.h>
 
 /* Track-related functions. */
 #include <cdio/track.h>

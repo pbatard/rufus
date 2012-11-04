@@ -1,7 +1,5 @@
 /*
-  $Id: udf_fs.h,v 1.3 2008/04/18 16:02:10 karl Exp $
-
-  Copyright (C) 2006, 2008 Rocky Bernstein <rockyb@gnu.org>
+  Copyright (C) 2006, 2008, 2012 Rocky Bernstein <rockyb@gnu.org>
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -17,8 +15,8 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef __CDIO_UDF_FS_H__
-#define __CDIO_UDF_FS_H__
+#ifndef CDIO_UDF_UDF_FS_H_
+#define CDIO_UDF_UDF_FS_H_
 
 #include <cdio/ecma_167.h>
 /**
@@ -27,7 +25,7 @@
  */
 int udf_checktag(const udf_tag_t *p_tag, udf_Uint16_t tag_id);
 
-#endif /* __CDIO_UDF_FS_H__ */
+#endif /* CDIO_UDF_UDF_FS_H_ */
 
 
 /* 

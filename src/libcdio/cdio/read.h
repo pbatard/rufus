@@ -1,7 +1,5 @@
 /*
-    $Id: read.h,v 1.15 2008/03/25 15:59:09 karl Exp $
-
-    Copyright (C) 2005, 2006, 2007, 2008 Rocky Bernstein <rocky@gnu.org>
+    Copyright (C) 2005, 2006, 2007, 2008, 2012 Rocky Bernstein <rocky@gnu.org>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -23,8 +21,8 @@
  *  libcdio calls. 
  */
 
-#ifndef __CDIO_READ_H__
-#define __CDIO_READ_H__
+#ifndef CDIO_READ_H_
+#define CDIO_READ_H_
 
 #include <cdio/types.h>
 
@@ -74,11 +72,11 @@ extern "C" {
     @param p_cdio object to read from
     @param p_buf place to read data into. The caller should make sure
                  this location can store at least CDIO_FRAMESIZE_RAW
-		 bytes.
+                 bytes.
     @param i_lsn sector to read
   */
   driver_return_code_t cdio_read_audio_sector (const CdIo_t *p_cdio, 
-					       void *p_buf, lsn_t i_lsn);
+                                               void *p_buf, lsn_t i_lsn);
 
   /*!
     Reads audio sectors
@@ -86,13 +84,13 @@ extern "C" {
     @param p_cdio object to read from
     @param p_buf place to read data into. The caller should make sure
                  this location can store at least CDIO_FRAMESIZE_RAW
-		 * i_blocks bytes.
+                 * i_blocks bytes.
     @param i_lsn sector to read
     @param i_blocks number of sectors to read
   */
   driver_return_code_t cdio_read_audio_sectors (const CdIo_t *p_cdio, 
-						void *p_buf, lsn_t i_lsn,
-						uint32_t i_blocks);
+                                                void *p_buf, lsn_t i_lsn,
+                                                uint32_t i_blocks);
 
   /*!
     Read data sectors
@@ -100,11 +98,11 @@ extern "C" {
     @param p_cdio object to read from
     @param p_buf place to read data into.  The caller should make sure
                  this location can store at least ISO_BLOCKSIZE, 
-		 M2RAW_SECTOR_SIZE, or M2F2_SECTOR_SIZE depending
-		 on the kind of sector getting read. If you don't 
-		 know whether you have a Mode 1/2, Form 1/ Form 2/Formless
-		 sector best to reserve space for the maximum, 
-		 M2RAW_SECTOR_SIZE.
+                 M2RAW_SECTOR_SIZE, or M2F2_SECTOR_SIZE depending
+                 on the kind of sector getting read. If you don't 
+                 know whether you have a Mode 1/2, Form 1/ Form 2/Formless
+                 sector best to reserve space for the maximum, 
+                 M2RAW_SECTOR_SIZE.
     @param i_lsn sector to read
     @param i_blocksize size of block. Should be either CDIO_CD_FRAMESIZE, 
     M2RAW_SECTOR_SIZE, or M2F2_SECTOR_SIZE. See comment above under p_buf.
@@ -112,9 +110,9 @@ extern "C" {
     @param i_blocks number of blocks to read
   */
   driver_return_code_t cdio_read_data_sectors ( const CdIo_t *p_cdio, 
-						void *p_buf, lsn_t i_lsn,
-						uint16_t i_blocksize,
-						uint32_t i_blocks );
+                                                void *p_buf, lsn_t i_lsn,
+                                                uint16_t i_blocksize,
+                                                uint32_t i_blocks );
   /*!
     Reads a mode 1 sector
 
@@ -125,8 +123,8 @@ extern "C" {
     mode 1 form 1 sectors.
   */
   driver_return_code_t cdio_read_mode1_sector (const CdIo_t *p_cdio, 
-					       void *p_buf, lsn_t i_lsn, 
-					       bool b_form2);
+                                               void *p_buf, lsn_t i_lsn, 
+                                               bool b_form2);
   /*!
     Reads mode 1 sectors
 
@@ -138,17 +136,17 @@ extern "C" {
     @param i_blocks number of sectors to read
   */
   driver_return_code_t cdio_read_mode1_sectors (const CdIo_t *p_cdio, 
-						void *p_buf, lsn_t i_lsn, 
-						bool b_form2, 
-						uint32_t i_blocks);
+                                                void *p_buf, lsn_t i_lsn, 
+                                                bool b_form2, 
+                                                uint32_t i_blocks);
   /*!
     Reads a mode 2 sector
 
     @param p_cdio object to read from
     @param p_buf place to read data into. The caller should make sure
                  this location can store at least 
-		 M2RAW_SECTOR_SIZE (for form 1) or CDIO_CD_FRAMESIZE (for 
-		 form 2) bytes.
+                 M2RAW_SECTOR_SIZE (for form 1) or CDIO_CD_FRAMESIZE (for 
+                 form 2) bytes.
     @param i_lsn sector to read
     @param b_form2 true for reading mode 2 form 2 sectors or false for 
     mode 2 form 1 sectors.
@@ -156,23 +154,23 @@ extern "C" {
     @return 0 if no error, nonzero otherwise.
   */
   driver_return_code_t cdio_read_mode2_sector (const CdIo_t *p_cdio, 
-					       void *p_buf, lsn_t i_lsn, 
-					       bool b_form2);
+                                               void *p_buf, lsn_t i_lsn, 
+                                               bool b_form2);
   
   /** The special case of reading a single block is a common one so we
       provide a routine for that as a convenience.
   */
   driver_return_code_t cdio_read_sector(const CdIo_t *p_cdio, void *p_buf, 
-					lsn_t i_lsn, 
-					cdio_read_mode_t read_mode);
+                                        lsn_t i_lsn, 
+                                        cdio_read_mode_t read_mode);
   /*!
     Reads mode 2 sectors
 
     @param p_cdio object to read from
     @param p_buf place to read data into. The caller should make sure
                  this location can store at least 
-		 M2RAW_SECTOR_SIZE (for form 1) or CDIO_CD_FRAMESIZE (for 
-		 form 2) * i_blocks bytes.
+                 M2RAW_SECTOR_SIZE (for form 1) or CDIO_CD_FRAMESIZE (for 
+                 form 2) * i_blocks bytes.
     @param i_lsn sector to read
     @param b_form2 true for reading mode2 form 2 sectors or false for 
            mode 2  form 1 sectors.
@@ -181,9 +179,9 @@ extern "C" {
     @return 0 if no error, nonzero otherwise.
   */
   driver_return_code_t cdio_read_mode2_sectors (const CdIo_t *p_cdio, 
-						void *p_buf, lsn_t i_lsn, 
-						bool b_form2, 
-						uint32_t i_blocks);
+                                                void *p_buf, lsn_t i_lsn, 
+                                                bool b_form2, 
+                                                uint32_t i_blocks);
   
   /*!
     Reads a number of sectors (AKA blocks).
@@ -215,12 +213,12 @@ extern "C" {
     
   */
   driver_return_code_t cdio_read_sectors(const CdIo_t *p_cdio, void *p_buf, 
-					 lsn_t i_lsn, 
-					 cdio_read_mode_t read_mode,
-					 uint32_t i_blocks);
+                                         lsn_t i_lsn, 
+                                         cdio_read_mode_t read_mode,
+                                         uint32_t i_blocks);
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#endif /* __CDIO_TRACK_H__ */
+#endif /* CDIO_READ_H_ */

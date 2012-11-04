@@ -1,8 +1,6 @@
 /*
-    $Id: bytesex.h,v 1.5 2008/03/25 15:59:08 karl Exp $
-
     Copyright (C) 2000, 2004 Herbert Valerio Riedel <hvr@gnu.org>
-    Copyright (C) 2005, 2008 Rocky Bernstein <rocky@gnu.org>
+    Copyright (C) 2005, 2008, 2012 Rocky Bernstein <rocky@gnu.org>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -25,8 +23,8 @@
  *   use glib.h routines instead.
 */
 
-#ifndef __CDIO_BYTESEX_H__
-#define __CDIO_BYTESEX_H__
+#ifndef CDIO_BYTESEX_H_
+#define CDIO_BYTESEX_H_
 
 #include <cdio/types.h>
 #include <cdio/bytesex_asm.h> /* also defines CDIO_INLINE */
@@ -208,7 +206,7 @@ from_733 (uint64_t p)
   return (UINT32_C(0xFFFFFFFF) & p);
 }
 
-#endif /* __CDIO_BYTESEX_H__ */
+#endif /* CDIO_BYTESEX_H_ */
 
 
 /* 

@@ -1,6 +1,6 @@
 /* -*- c -*-
 
-    Copyright (C) 2005, 2006, 2008, 2009, 2010, 2011 Rocky Bernstein
+    Copyright (C) 2005, 2006, 2008, 2009, 2010, 2011, 2012 Rocky Bernstein
     <rocky@gnu.org>
 
     This program is free software: you can redistribute it and/or modify
@@ -23,8 +23,8 @@
  *  \brief C header for driver- or device-related libcdio
  *          calls.  ("device" includes CD-image reading devices).
  */
-#ifndef __CDIO_DEVICE_H__
-#define __CDIO_DEVICE_H__
+#ifndef CDIO_DEVICE_H_
+#define CDIO_DEVICE_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -47,13 +47,13 @@ extern "C" {
   typedef enum {
     CDIO_DRIVE_CAP_ERROR             = 0x40000, /**< Error */
     CDIO_DRIVE_CAP_UNKNOWN           = 0x80000, /**< Dunno. It can be on if we
-					        have only partial information 
+                                                have only partial information 
                                                 or are not completely certain
-						*/
+                                                */
     CDIO_DRIVE_CAP_MISC_CLOSE_TRAY   = 0x00001, /**< caddy systems can't 
                                                      close... */
     CDIO_DRIVE_CAP_MISC_EJECT        = 0x00002, /**< but can eject.  */
-    CDIO_DRIVE_CAP_MISC_LOCK	     = 0x00004, /**< disable manual eject */
+    CDIO_DRIVE_CAP_MISC_LOCK         = 0x00004, /**< disable manual eject */
     CDIO_DRIVE_CAP_MISC_SELECT_SPEED = 0x00008, /**< programmable speed */
     CDIO_DRIVE_CAP_MISC_SELECT_DISC  = 0x00010, /**< select disc from 
                                                       juke-box */
@@ -61,7 +61,7 @@ extern "C" {
     CDIO_DRIVE_CAP_MISC_MEDIA_CHANGED= 0x00080, /**< media changed */
     CDIO_DRIVE_CAP_MISC_RESET        = 0x00100, /**< hard reset device */
     CDIO_DRIVE_CAP_MISC_FILE         = 0x20000 /**< drive is really a file,
-						  i.e a CD file image */
+                                                  i.e a CD file image */
   } cdio_drive_cap_misc_t;
 
   /** Reading masks.. */
@@ -151,7 +151,7 @@ extern "C" {
    */
   typedef enum  {
     DRIVER_UNKNOWN, /**< Used as input when we don't care what kind 
-		         of driver to use. */
+                         of driver to use. */
     DRIVER_AIX,     /**< AIX driver */
     DRIVER_BSDI,    /**< BSDI driver */
     DRIVER_FREEBSD, /**< FreeBSD driver - includes CAM and ioctl access */
@@ -161,13 +161,13 @@ extern "C" {
     DRIVER_OS2,     /**< IBM OS/2 Driver */
     DRIVER_OSX,     /**< Apple OSX Driver */
     DRIVER_WIN32,   /**< Microsoft Windows Driver. Includes ASPI and 
-		         ioctl access. */
+                         ioctl access. */
     DRIVER_CDRDAO,  /**< cdrdao format CD image. This is listed
-		         before BIN/CUE, to make the code prefer cdrdao
-		         over BIN/CUE when both exist. */
+                         before BIN/CUE, to make the code prefer cdrdao
+                         over BIN/CUE when both exist. */
     DRIVER_BINCUE,  /**< CDRWIN BIN/CUE format CD image. This is
-		         listed before NRG, to make the code prefer
-		         BIN/CUE over NRG when both exist. */
+                         listed before NRG, to make the code prefer
+                         BIN/CUE over NRG when both exist. */
     DRIVER_NRG,     /**< Nero NRG format CD image. */
     DRIVER_DEVICE   /**< Is really a set of the above; should come last */
   } driver_id_t;
@@ -200,10 +200,10 @@ extern "C" {
      enumeration in driver_id_t. Since we have a bogus (but useful) 0th
      entry above we don't have to add one.
   */
-#define CDIO_MIN_DRIVER        DRIVER_AIX
-#define CDIO_MIN_DEVICE_DRIVER CDIO_MIN_DRIVER
-#define CDIO_MAX_DRIVER        DRIVER_NRG
-#define CDIO_MAX_DEVICE_DRIVER DRIVER_WIN32
+LIBCDIO_DEPRECATED(static const driver_id_t CDIO_MIN_DRIVER, "please use cdio_drivers") = DRIVER_AIX;
+LIBCDIO_DEPRECATED(static const driver_id_t CDIO_MIN_DEVICE_DRIVER, "please use cdio_device_drivers") = DRIVER_AIX;
+LIBCDIO_DEPRECATED(static const driver_id_t CDIO_MAX_DRIVER, "please use cdio_drivers") = DRIVER_NRG;
+LIBCDIO_DEPRECATED(static const driver_id_t CDIO_MAX_DEVICE_DRIVER, "please use cdio_device_drivers") = DRIVER_WIN32;
 
   /**
       The following are status codes for completion of a given cdio
@@ -219,30 +219,30 @@ extern "C" {
   */
   typedef enum  {
     DRIVER_OP_SUCCESS        =  0, /**< in cases where an int is
-				    returned, like cdio_set_speed,
-				    more the negative return codes are
-				    for errors and the positive ones
-				    for success. */
+                                    returned, like cdio_set_speed,
+                                    more the negative return codes are
+                                    for errors and the positive ones
+                                    for success. */
     DRIVER_OP_ERROR          = -1, /**< operation returned an error */
     DRIVER_OP_UNSUPPORTED    = -2, /**< returned when a particular driver
-				      doesn't support a particular operation.
-				      For example an image driver which doesn't
-				      really "eject" a CD.
-				   */
+                                      doesn't support a particular operation.
+                                      For example an image driver which doesn't
+                                      really "eject" a CD.
+                                   */
     DRIVER_OP_UNINIT         = -3, /**< returned when a particular driver
-				      hasn't been initialized or a null
-				      pointer has been passed.
-				   */
+                                      hasn't been initialized or a null
+                                      pointer has been passed.
+                                   */
     DRIVER_OP_NOT_PERMITTED  = -4, /**< Operation not permitted.
-				      For example might be a permission
-				      problem.
-				   */
+                                      For example might be a permission
+                                      problem.
+                                   */
     DRIVER_OP_BAD_PARAMETER  = -5, /**< Bad parameter passed  */
     DRIVER_OP_BAD_POINTER    = -6, /**< Bad pointer to memory area  */
     DRIVER_OP_NO_DRIVER      = -7, /**< Operation called on a driver
-				      not available on this OS  */
+                                      not available on this OS  */
     DRIVER_OP_MMC_SENSE_DATA = -8, /**< MMC operation returned sense data,
-				      but no other error above recorded. */
+                                      but no other error above recorded. */
   } driver_return_code_t;
 
   /**
@@ -255,7 +255,7 @@ extern "C" {
     report back the driver used.
   */
   driver_return_code_t cdio_close_tray (const char *psz_drive, 
-					/*in/out*/ driver_id_t *p_driver_id);
+                                        /*in/out*/ driver_id_t *p_driver_id);
 
   /**
     @param drc the return code you want interpreted.
@@ -365,7 +365,7 @@ extern "C" {
      was found.
   */
   char ** cdio_get_devices_with_cap (/*in*/ char *ppsz_search_devices[],
-				     cdio_fs_anal_t capabilities, bool b_any);
+                                     cdio_fs_anal_t capabilities, bool b_any);
 
   /**
      Like cdio_get_devices_with_cap but we return the driver we found
@@ -374,9 +374,9 @@ extern "C" {
      and speeds things up for libcdio as well.
   */
   char ** cdio_get_devices_with_cap_ret (/*in*/ char* ppsz_search_devices[],
-					 cdio_fs_anal_t capabilities, 
-					 bool b_any,
-					 /*out*/ driver_id_t *p_driver_id);
+                                         cdio_fs_anal_t capabilities, 
+                                         bool b_any,
+                                         /*out*/ driver_id_t *p_driver_id);
 
   /**
      Like cdio_get_devices, but we may change the p_driver_id if we
@@ -401,9 +401,9 @@ extern "C" {
      NULL even though there isa hardware CD-ROM.
   */
   void cdio_get_drive_cap (const CdIo_t *p_cdio,
-			   cdio_drive_read_cap_t  *p_read_cap,
-			   cdio_drive_write_cap_t *p_write_cap,
-			   cdio_drive_misc_cap_t  *p_misc_cap);
+                           cdio_drive_read_cap_t  *p_read_cap,
+                           cdio_drive_write_cap_t *p_write_cap,
+                           cdio_drive_misc_cap_t  *p_misc_cap);
   
   /**
      Get the drive capabilities for a specified device.
@@ -415,9 +415,9 @@ extern "C" {
      NULL even though there isa hardware CD-ROM.
   */
   void cdio_get_drive_cap_dev (const char *device,
-			       cdio_drive_read_cap_t  *p_read_cap,
-			       cdio_drive_write_cap_t *p_write_cap,
-			       cdio_drive_misc_cap_t  *p_misc_cap);
+                               cdio_drive_read_cap_t  *p_read_cap,
+                               cdio_drive_write_cap_t *p_write_cap,
+                               cdio_drive_misc_cap_t  *p_misc_cap);
 
   /**
      Get a string containing the name of the driver in use.
@@ -441,7 +441,7 @@ extern "C" {
     False is returned if we had an error getting the information.
   */
   bool cdio_get_hwinfo ( const CdIo_t *p_cdio, 
-			 /*out*/ cdio_hwinfo_t *p_hw_info );
+                         /*out*/ cdio_hwinfo_t *p_hw_info );
 
 
   /**
@@ -452,7 +452,7 @@ extern "C" {
      @param i_last_session pointer to the session number to be returned.
   */
   driver_return_code_t cdio_get_last_session (CdIo_t *p_cdio,
-					      /*out*/ lsn_t *i_last_session);
+                                              /*out*/ lsn_t *i_last_session);
 
   /**
       Find out if media has changed since the last call.
@@ -508,7 +508,7 @@ extern "C" {
      @return the cdio object or NULL on error or no device.
   */
   CdIo_t * cdio_open_am (const char *psz_source, 
-			 driver_id_t driver_id, const char *psz_access_mode);
+                         driver_id_t driver_id, const char *psz_access_mode);
 
   /**
      Set up BIN/CUE CD disk-image for reading. Source is the .bin or 
@@ -525,7 +525,7 @@ extern "C" {
      @return the cdio object or NULL on error or no device..
    */
   CdIo_t * cdio_open_am_bincue (const char *psz_cue_name, 
-				const char *psz_access_mode);
+                                const char *psz_access_mode);
   
   /**
      Set up cdrdao CD disk-image for reading. Source is the .toc file
@@ -540,7 +540,7 @@ extern "C" {
      @return the cdio object or NULL on error or no device..
   */
   CdIo_t * cdio_open_am_cdrdao (const char *psz_toc_name, 
-				const char *psz_access_mode);
+                                const char *psz_access_mode);
   
   /**
      Return a string containing the default CUE file that would
@@ -578,7 +578,7 @@ extern "C" {
      NULL on error or there is no driver for a some sort of hardware CD-ROM.
   */
   CdIo_t * cdio_open_am_cd (const char *psz_device,
-			    const char *psz_access_mode);
+                            const char *psz_access_mode);
 
   /**
      CDRWIN BIN/CUE CD disc-image routines. Source is the .cue file
@@ -598,7 +598,7 @@ extern "C" {
      @see cdio_open
    */
   CdIo_t * cdio_open_am_aix (const char *psz_source,
-			     const char *psz_access_mode);
+                             const char *psz_access_mode);
   
   /**
      Set up CD-ROM for reading using the AIX driver. The device_name is
@@ -654,7 +654,7 @@ extern "C" {
      @see cdio_open
    */
   CdIo_t * cdio_open_am_bsdi (const char *psz_source,
-			      const char *psz_access_mode);
+                              const char *psz_access_mode);
   
   /**
      Return a string containing the default device name that the BSDI
@@ -696,7 +696,7 @@ extern "C" {
      @see cdio_open_cd, cdio_open
    */
   CdIo_t * cdio_open_am_freebsd (const char *psz_source,
-				 const char *psz_access_mode);
+                                 const char *psz_access_mode);
   
   /**
      Return a string containing the default device name that the
@@ -733,7 +733,7 @@ extern "C" {
      NULL on error or there is no GNU/Linux driver.
    */
   CdIo_t * cdio_open_am_linux (const char *psz_source,
-			       const char *access_mode);
+                               const char *access_mode);
 
   /**
      Return a string containing the default device name that the
@@ -773,7 +773,7 @@ extern "C" {
      NULL on error or there is no Solaris driver.
    */
   CdIo_t * cdio_open_am_solaris (const char *psz_source, 
-				 const char *psz_access_mode);
+                                 const char *psz_access_mode);
   
   /**
      Return a string containing the default device name that the
@@ -819,7 +819,7 @@ extern "C" {
      @see cdio_open_cd, cdio_open
    */
   CdIo_t * cdio_open_am_osx (const char *psz_source,
-			     const char *psz_access_mode);
+                             const char *psz_access_mode);
 
   /**
      Return a string containing the default device name that the OSX
@@ -855,7 +855,7 @@ extern "C" {
      NULL is returned on error or there is no Microsof Windows driver.
    */
   CdIo_t * cdio_open_am_win32 (const char *psz_source,
-			       const char *psz_access_mode);
+                               const char *psz_access_mode);
   
   /**
      Return a string containing the default device name that the 
@@ -929,7 +929,7 @@ Return a list of all of the CD-ROM devices that the OS/2 driver
      @return true on success; NULL on error or there is no Nero driver. 
    */
   CdIo_t * cdio_open_am_nrg (const char *psz_source,
-			     const char *psz_access_mode);
+                             const char *psz_access_mode);
   
   /**
      Get a string containing the default device name that the NRG
@@ -994,7 +994,7 @@ Return a list of all of the CD-ROM devices that the OS/2 driver
     Set the blocksize for subsequent reads. 
   */
   driver_return_code_t cdio_set_blocksize ( const CdIo_t *p_cdio, 
-					    int i_blocksize );
+                                            int i_blocksize );
 
   /**
      Set the drive speed. 
@@ -1013,7 +1013,7 @@ Return a list of all of the CD-ROM devices that the OS/2 driver
       @see mmc_set_speed and mmc_set_drive_speed
   */
   driver_return_code_t cdio_set_speed ( const CdIo_t *p_cdio, 
-					int i_drive_speed );
+                                        int i_drive_speed );
 
   /**
      Get the value associatied with key. 
@@ -1033,7 +1033,7 @@ Return a list of all of the CD-ROM devices that the OS/2 driver
      @param value the value to assocaiate with key
   */
   driver_return_code_t cdio_set_arg (CdIo_t *p_cdio, const char key[], 
-				     const char value[]);
+                                     const char value[]);
   
   /**
     Initialize CD Reading and control routines. Should be called first.
@@ -1055,4 +1055,4 @@ extern cdio_drive_cap_write_t         debug_drive_cap_write_t;
 extern cdio_mmc_hw_len_t              debug_cdio_mmc_hw_len;
 extern cdio_src_category_mask_t       debug_cdio_src_category_mask;
 
-#endif /* __CDIO_DEVICE_H__ */
+#endif /* CDIO_DEVICE_H_ */

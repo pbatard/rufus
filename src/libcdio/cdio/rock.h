@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2005, 2006 2008 Rocky Bernstein <rocky@gnu.org>
+    Copyright (C) 2005, 2006 2008, 2012 Rocky Bernstein <rocky@gnu.org>
 
     See also rock.c by Eric Youngdale (1993) from GNU/Linux 
     This is Copyright 1993 Yggdrasil Computing, Incorporated
@@ -26,8 +26,8 @@
 */
 
 
-#ifndef __CDIO_ROCK_H__
-#define __CDIO_ROCK_H__
+#ifndef CDIO_ROCK_H_
+#define CDIO_ROCK_H_
 
 #include <cdio/types.h>
 
@@ -152,10 +152,10 @@ typedef enum {
   ISO_ROCK_SL_ROOT     = 8
 } iso_rock_sl_flag_t;
 
-#define	ISO_ROCK_SL_CONTINUE 1
-#define	ISO_ROCK_SL_CURRENT  2
-#define	ISO_ROCK_SL_PARENT   4
-#define	ISO_ROCK_SL_ROOT     8
+#define ISO_ROCK_SL_CONTINUE 1
+#define ISO_ROCK_SL_CURRENT  2
+#define ISO_ROCK_SL_PARENT   4
+#define ISO_ROCK_SL_ROOT     8
 
 typedef struct iso_rock_sl_part_s {
   uint8_t flags;
@@ -178,9 +178,9 @@ typedef enum {
   ISO_ROCK_NM_PARENT   = 4,
 } iso_rock_nm_flag_t;
 
-#define	ISO_ROCK_NM_CONTINUE 1
-#define	ISO_ROCK_NM_CURRENT  2
-#define	ISO_ROCK_NM_PARENT   4
+#define ISO_ROCK_NM_CONTINUE 1
+#define ISO_ROCK_NM_CURRENT  2
+#define ISO_ROCK_NM_PARENT   4
 
 
 typedef struct iso_rock_nm_s {
@@ -373,7 +373,7 @@ extern iso_rock_tf_flag_t iso_rock_tf_flag;
 }
 #endif /* __cplusplus */
 
-#endif /* __ISO_ROCK_H__ */
+#endif /* CDIO_ROCK_H_ */
 
 /* 
  * Local variables:

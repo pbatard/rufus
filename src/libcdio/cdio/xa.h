@@ -1,7 +1,6 @@
 /*
-    $Id: xa.h,v 1.19 2008/03/25 15:59:10 karl Exp $
-
-    Copyright (C) 2003, 2004, 2005, 2006, 2008 Rocky Bernstein <rocky@gnu.org>
+    Copyright (C) 2003, 2004, 2005, 2006, 2008, 2012
+    Rocky Bernstein <rocky@gnu.org>
     Copyright (C) 2000 Herbert Valerio Riedel <hvr@gnu.org>
 
     See also iso9660.h by Eric Youngdale (1993) and in cdrtools. These are 
@@ -31,8 +30,8 @@
 */
 
 
-#ifndef __CDIO_XA_H__
-#define __CDIO_XA_H__
+#ifndef CDIO_XA_H_
+#define CDIO_XA_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -153,7 +152,7 @@ iso9660_get_xa_attr_str (uint16_t xa_attr);
 */
 iso9660_xa_t *
 iso9660_xa_init (iso9660_xa_t *_xa, uint16_t uid, uint16_t gid, uint16_t attr, 
-		 uint8_t filenum);
+                 uint8_t filenum);
 
 #ifdef __cplusplus
 }
@@ -168,7 +167,7 @@ extern xa_misc_enum_t debugger_xa_misc_enum;
   
 #endif /* __cplusplus */
 
-#endif /* __CDIO_XA_H__ */
+#endif /* CDIO_XA_H_ */
 
 /* 
  * Local variables:

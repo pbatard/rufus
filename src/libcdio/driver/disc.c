@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2003, 2004, 2005, 2008, 2011
+  Copyright (C) 2003, 2004, 2005, 2008, 2011, 2012
    Rocky Bernstein <rocky@gnu.org>
   Copyright (C) 2001 Herbert Valerio Riedel <hvr@gnu.org>
 
@@ -22,6 +22,10 @@
 # include "config.h"
 # define __CDIO_CONFIG_H__ 1
 #endif
+
+#ifdef HAVE_STDBOOL_H
+# include <stdbool.h>
+#endif 
 
 #include <cdio/cdio.h>
 #include "cdio_private.h"
@@ -124,7 +128,7 @@ cdio_get_discmode (CdIo_t *cd_obj)
 char *
 cdio_get_mcn (const CdIo_t *p_cdio) 
 {
-  if (p_cdio->op.get_mcn) {
+  if (p_cdio && p_cdio->op.get_mcn) {
     return p_cdio->op.get_mcn (p_cdio->env);
   } else {
     return NULL;

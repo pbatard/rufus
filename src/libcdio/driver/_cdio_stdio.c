@@ -56,39 +56,29 @@
 #define CDIO_FSEEK fseek
 #endif
 
-/* Windows'd fopen is not UTF-8 compliant - make it so */
-#if !defined(_WIN32)
-#define CDIO_FOPEN fopen
+/* Windows' fopen is not UTF-8 compliant, so we use our own */
+#if defined(_WIN32)
+#include <cdio/utf8.h>
+#define CDIO_FOPEN fopen_utf8
 #else
-#define CDIO_FOPEN fopenU
-extern wchar_t* cdio_utf8_to_wchar(const char* str);
-static inline FILE* fopenU(const char* filename, const char* mode)
-{
-  FILE* ret = NULL;
-  wchar_t* wfilename = cdio_utf8_to_wchar(filename);
-  wchar_t* wmode =  cdio_utf8_to_wchar(mode);
-  ret = _wfopen(wfilename, wmode);
-  free(wfilename);
-  free(wmode);
-  return ret;
-}
+#define CDIO_FOPEN fopen
 #endif
 
 /* Use _stati64 if needed, on platforms that don't have transparent LFS support */
 #if defined(HAVE__STATI64) && defined(_FILE_OFFSET_BITS) && (_FILE_OFFSET_BITS == 64)
 #define CDIO_STAT_STRUCT _stati64
-#if !defined(_WIN32)
-#define CDIO_STAT_CALL _stati64
-#else
-#define CDIO_STAT_CALL _stati64U
-/* Once more, we have to provide an UTF-8 compliant version on Windows */
-static inline int _stati64U(const char *path, struct _stati64 *buffer) {
+#if defined(_WIN32)
+/* Once again, use our own UTF-8 compliant version */
+static inline int _stati64_utf8(const char *path, struct _stati64 *buffer) {
   int ret;
   wchar_t* wpath = cdio_utf8_to_wchar(path);
   ret = _wstati64(wpath, buffer);
   free(wpath);
   return ret;
 }
+#define CDIO_STAT_CALL _stati64_utf8
+#else
+#define CDIO_STAT_CALL _stati64
 #endif
 #else
 #define CDIO_STAT_STRUCT stat

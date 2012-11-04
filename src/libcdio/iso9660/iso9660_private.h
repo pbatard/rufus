@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2003, 2004, 2005, 2008, 2011
+  Copyright (C) 2003, 2004, 2005, 2008, 2011, 2012
   Rocky Bernstein <rocky@gnu.org>
   Copyright (C) 2000 Herbert Valerio Riedel <hvr@gnu.org>
 
@@ -22,8 +22,8 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef __CDIO_ISO9660_PRIVATE_H__
-#define __CDIO_ISO9660_PRIVATE_H__
+#ifndef CDIO_ISO9660_ISO9660_PRIVATE_H_
+#define CDIO_ISO9660_ISO9660_PRIVATE_H_
 
 #if defined(HAVE_CONFIG_H) && !defined(__CDIO_CONFIG_H__)
 # include "config.h"
@@ -31,6 +31,10 @@
 #endif
 
 #include <cdio/types.h>
+
+#ifdef HAVE_STDBOOL_H
+# include <stdbool.h>
+#endif 
 
 #define ISO_VERSION             1
 
@@ -71,7 +75,7 @@ typedef struct iso_path_table_s {
 
 PRAGMA_END_PACKED
 
-#endif /* __CDIO_ISO9660_PRIVATE_H__ */
+#endif /* CDIO_ISO0660_ISO9660_PRIVATE_H_ */
 
 
 /* 

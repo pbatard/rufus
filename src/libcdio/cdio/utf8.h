@@ -1,7 +1,5 @@
 /*
-    $Id: utf8.h,v 1.2 2008/03/25 15:59:09 karl Exp $
-    
-    Copyright (C) 2008 Rocky Bernstein <rocky@gnu.org>
+    Copyright (C) 2008, 2012 Rocky Bernstein <rocky@gnu.org>
     Copyright (C) 2006 Burkhard Plaum <plaum@ipf.uni-stuttgart.de>
 
     This program is free software: you can redistribute it and/or modify
@@ -17,7 +15,10 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-/* UTF-8 support */
+/** \file utf8.h 
+ *
+ *  \brief UTF-8 support
+ */
 
 
 #include <cdio/types.h>
@@ -87,6 +88,21 @@ bool cdio_charset_from_utf8(cdio_utf8_t * src, char ** dst,
  */
 
 
-bool cdio_charset_to_utf8(char *src, size_t src_len, cdio_utf8_t **dst,
+bool cdio_charset_to_utf8(const char *src, size_t src_len, cdio_utf8_t **dst,
                           const char * src_charset);
 
+#ifdef _WIN32
+/** \brief Convert an UTF8 string to UTF-16 (allocate returned string)
+ *  \param str Source string
+ *  \returns NULL if the conversion was unsuccesful. Caller must free the
+ *  returned string.
+ *  This is a convenience function available on Windows platforms only.
+ */
+wchar_t* cdio_utf8_to_wchar(const char* str);
+
+#include <stdio.h> /* for FILE */
+/** \brief Provides an UTF-8 compliant version of fopen for Windows
+ *  The parameters and return value are the same as fopen().
+ */
+FILE* fopen_utf8(const char* filename, const char* mode);
+#endif

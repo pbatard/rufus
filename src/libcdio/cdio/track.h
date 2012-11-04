@@ -1,7 +1,5 @@
 /*
-    $Id: track.h,v 1.14 2008/03/25 15:59:09 karl Exp $
-
-    Copyright (C) 2005, 2006, 2008 Rocky Bernstein <rocky@gnu.org>
+    Copyright (C) 2005, 2006, 2008, 2012 Rocky Bernstein <rocky@gnu.org>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,8 +18,8 @@
 /** \file track.h 
  *  \brief  The top-level header for track-related libcdio calls.
  */
-#ifndef __CDIO_TRACK_H__
-#define __CDIO_TRACK_H__
+#ifndef CDIO_TRACK_H_
+#define CDIO_TRACK_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -36,8 +34,8 @@ extern "C" {
     TRACK_FORMAT_XA,      /**< Mode2 of some sort */
     TRACK_FORMAT_DATA,    /**< Mode1 of some sort */
     TRACK_FORMAT_PSX,     /**< Playstation CD. Like audio but only 2336 bytes
-			   *   of user data.
-			   */
+                           *   of user data.
+                           */
     TRACK_FORMAT_ERROR    /**< Dunno what is, or some other error. */
   } track_format_t;
 
@@ -53,8 +51,8 @@ extern "C" {
     track_flag_t preemphasis; /**< Linear preemphasis on an audio track */
     track_flag_t copy_permit; /**< Whether copying is permitted */
     int channels;             /**< Number of audio channels, 2, 4. -2 if not
-				   implemented or -1 for error.
-			      */
+                                   implemented or -1 for error.
+                              */
   } track_flags_t;
     
   /*! The leadout track is always 0xAA, regardless of # of tracks on
@@ -72,7 +70,7 @@ extern "C" {
   extern enum cdio_track_enums {
     CDIO_CDROM_LBA           = 0x01, /**< "logical block": first frame is #0 */
     CDIO_CDROM_MSF           = 0x02, /**< "minute-second-frame": binary, not
-					BCD here! */
+                                        BCD here! */
     CDIO_CDROM_DATA_TRACK    = 0x04, 
     CDIO_CDROM_CDI_TRACK     = 0x10,
     CDIO_CDROM_XA_TRACK      = 0x20,
@@ -88,14 +86,14 @@ extern "C" {
     reference: MMC-3 draft revsion - 10g
   */
   typedef enum {
-    AUDIO,			/**< 2352 byte block length */
-    MODE1,			/**< 2048 byte block length */
-    MODE1_RAW,			/**< 2352 byte block length */
-    MODE2,			/**< 2336 byte block length */
-    MODE2_FORM1,		/**< 2048 byte block length */
-    MODE2_FORM2,		/**< 2324 byte block length */
-    MODE2_FORM_MIX,		/**< 2336 byte block length */
-    MODE2_RAW			/**< 2352 byte block length */
+    AUDIO,                      /**< 2352 byte block length */
+    MODE1,                      /**< 2048 byte block length */
+    MODE1_RAW,                  /**< 2352 byte block length */
+    MODE2,                      /**< 2336 byte block length */
+    MODE2_FORM1,                /**< 2048 byte block length */
+    MODE2_FORM2,                /**< 2324 byte block length */
+    MODE2_FORM_MIX,             /**< 2336 byte block length */
+    MODE2_RAW                   /**< 2352 byte block length */
   } trackmode_t;
   
   /*!
@@ -132,7 +130,7 @@ extern "C" {
       if not an audio track?
    */
   track_flag_t cdio_get_track_copy_permit(const CdIo_t *p_cdio, 
-					  track_t i_track);
+                                          track_t i_track);
   
   /*!  
     Get the format (audio, mode2, mode1) of track. 
@@ -230,13 +228,13 @@ extern "C" {
     @return true if things worked or false if there is no track entry.
   */
   bool cdio_get_track_msf(const CdIo_t *p_cdio, track_t i_track, 
-			  /*out*/ msf_t *msf);
+                          /*out*/ msf_t *msf);
   
   /*! Get linear preemphasis status on an audio track 
       This is not meaningful if not an audio track?
    */
   track_flag_t cdio_get_track_preemphasis(const CdIo_t *p_cdio,
-					  track_t i_track);
+                                          track_t i_track);
   
   /*!  
     Get the number of sectors between this track an the next.  This
@@ -252,5 +250,4 @@ extern "C" {
 }
 #endif /* __cplusplus */
 
-#endif /* __CDIO_TRACK_H__ */
-
+#endif /* CDIO_TRACK_H_ */

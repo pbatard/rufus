@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002, 2003, 2004, 2005, 2006, 2008
+    Copyright (C) 2002, 2003, 2004, 2005, 2006, 2008, 2012
                   Rocky Bernstein <rocky@gnu.org>
     Copyright (C) 2000 Herbert Valerio Riedel <hvr@gnu.org>
 
@@ -22,8 +22,8 @@
  */
 
 
-#ifndef __CDIO_TYPES_H__
-#define __CDIO_TYPES_H__
+#ifndef CDIO_TYPES_H_
+#define CDIO_TYPES_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -116,7 +116,7 @@ typedef uint8_t ubyte;
 #ifdef _Bool
 #define bool _Bool
 #else
-#define bool int
+#define bool unsigned char
 #endif
 #define true 1
 #define false 0
@@ -151,21 +151,21 @@ typedef uint8_t ubyte;
 #define GNUC_PACKED
 #endif  /* !__GNUC__ */
   
-#if defined(__GNUC__)
-  /* for GCC we try to use GNUC_PACKED */
-# define PRAGMA_BEGIN_PACKED
-# define PRAGMA_END_PACKED
+#if defined(__MINGW32__)
+#  define PRAGMA_BEGIN_PACKED _Pragma("pack(push)") \
+                              _Pragma("pack(1)")
+#  define PRAGMA_END_PACKED   _Pragma("pack(pop)")
 #elif defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901)
-  /* should work with most EDG-frontend based compilers */
-# define PRAGMA_BEGIN_PACKED _Pragma("pack(1)")
-# define PRAGMA_END_PACKED   _Pragma("pack()")
+     /* should work with most EDG-frontend based compilers */
+#    define PRAGMA_BEGIN_PACKED _Pragma("pack(1)")
+#    define PRAGMA_END_PACKED   _Pragma("pack()")
 #elif defined(_MSC_VER)
-# define PRAGMA_BEGIN_PACKED __pragma(pack(push, 1))
-# define PRAGMA_END_PACKED   __pragma(pack(pop))
+#  define PRAGMA_BEGIN_PACKED __pragma(pack(push, 1))
+#  define PRAGMA_END_PACKED   __pragma(pack(pop))
 #else /* neither gcc nor _Pragma() available... */
-  /* ...so let's be naive and hope the regression testsuite is run... */
-# define PRAGMA_BEGIN_PACKED
-# define PRAGMA_END_PACKED
+   /* ...so let's be naive and hope the regression testsuite is run... */
+#  define PRAGMA_BEGIN_PACKED
+#  define PRAGMA_END_PACKED
 #endif
   
   /*
@@ -182,8 +182,22 @@ typedef uint8_t ubyte;
 #ifndef NULL
 # define NULL ((void*) 0)
 #endif
-  
-  /* our own offsetof()-like macro */
+
+  /** Provide a notice for deprecated elements. Before gcc 4.5 'deprecated'
+   takes no arguments. */
+#if defined(__GNUC__)
+# if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 5)
+#   define LIBCDIO_DEPRECATED(object, notice) object __attribute__ ((deprecated(notice)))
+# else
+#   define LIBCDIO_DEPRECATED(object, notice) object __attribute__ ((deprecated))
+# endif
+#elif defined(_MSC_VER)
+#define LIBCDIO_DEPRECATED(object, notice) __declspec(deprecated(notice)) object
+#else
+#define LIBCDIO_DEPRECATED(object, notice)
+#endif
+
+  /** our own offsetof()-like macro */
 #define __cd_offsetof(TYPE, MEMBER) ((size_t) &((TYPE *)0)->MEMBER)
   
   /*!
@@ -251,10 +265,10 @@ typedef uint8_t ubyte;
   typedef int32_t lsn_t;
   
   /* Address in either MSF or logical format */
-  union cdio_cdrom_addr		
+  union cdio_cdrom_addr         
   {
-    msf_t	msf;
-    lba_t	lba;
+    msf_t       msf;
+    lba_t       lba;
   };
 
   /*! The type of a track number 0..99. */
@@ -311,20 +325,20 @@ typedef uint8_t ubyte;
     Q Sub-channel Control Field (4.2.3.3)
   */
   typedef enum {
-    CDIO_TRACK_FLAG_NONE = 		 0x00,	/**< no flags set */
-    CDIO_TRACK_FLAG_PRE_EMPHASIS =	 0x01,	/**< audio track recorded with
+    CDIO_TRACK_FLAG_NONE =               0x00,  /**< no flags set */
+    CDIO_TRACK_FLAG_PRE_EMPHASIS =       0x01,  /**< audio track recorded with
                                                    pre-emphasis */
-    CDIO_TRACK_FLAG_COPY_PERMITTED =	 0x02,	/**< digital copy permitted */
-    CDIO_TRACK_FLAG_DATA =		 0x04,	/**< data track */
+    CDIO_TRACK_FLAG_COPY_PERMITTED =     0x02,  /**< digital copy permitted */
+    CDIO_TRACK_FLAG_DATA =               0x04,  /**< data track */
     CDIO_TRACK_FLAG_FOUR_CHANNEL_AUDIO = 0x08,  /**< 4 audio channels */
-  CDIO_TRACK_FLAG_SCMS =		 0x10	/**< SCMS (5.29.2.7) */
+  CDIO_TRACK_FLAG_SCMS =                 0x10   /**< SCMS (5.29.2.7) */
 } cdio_track_flag;
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#endif /* __CDIO_TYPES_H__ */
+#endif /* CDIO_TYPES_H_ */
 
 
 /* 

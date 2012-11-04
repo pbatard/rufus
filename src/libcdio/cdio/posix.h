@@ -1,7 +1,5 @@
 /*
-    $Id: posix.h,v 1.2 2008/03/25 15:59:09 karl Exp $
-
-    Copyright (C) 2005, 2008 Rocky Bernstein <rocky@gnu.org>
+    Copyright (C) 2005, 2008, 2012 Rocky Bernstein <rocky@gnu.org>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -22,8 +20,8 @@
  * \brief various POSIX definitions.
 */
 
-#ifndef __CDIO_POSIX_H__
-#define __CDIO_POSIX_H__
+#ifndef CDIO_POSIX_H_
+#define CDIO_POSIX_H_
 
 typedef uint32_t posix_mode_t;
 typedef uint32_t posix_nlink_t;
@@ -31,7 +29,7 @@ typedef uint32_t posix_uid_t;
 typedef uint32_t posix_gid_t;
 typedef uint16_t unicode16_t;
 
-#endif /* __CDIO_POSIX_H__ */
+#endif /* CDIO_POSIX_H_ */
 
 
 /* 

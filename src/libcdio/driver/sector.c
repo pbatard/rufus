@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2004, 2005, 2011 Rocky Bernstein <rocky@gnu.org>
+    Copyright (C) 2004, 2005, 2011, 2012 Rocky Bernstein <rocky@gnu.org>
     Copyright (C) 2000 Herbert Valerio Riedel <hvr@gnu.org>
 
     This program is free software; you can redistribute it and/or modify
@@ -195,7 +195,7 @@ cdio_mmssff_to_lba (const char *psz_mmssff)
 {
   int psz_field;
   lba_t ret;
-  char c;
+  unsigned char c;
   
   if (0 == strcmp (psz_mmssff, "0"))
     return 0;

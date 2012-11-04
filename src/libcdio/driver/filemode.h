@@ -1,7 +1,7 @@
 /*
   filemode.h -- file modes common definitions
 
-  Copyright (C) 2005, 2008, 2011 Rocky Bernstein <rocky@gnu.org>
+  Copyright (C) 2005, 2008, 2011, 2012 Rocky Bernstein <rocky@gnu.org>
   Copyright (C) 1985, 1990, 1993, 1998-2000 Free Software Foundation, Inc.
 
   This program is free software: you can redistribute it and/or modify
@@ -18,8 +18,8 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef __FILEMODE_H__
-#define __FILEMODE_H__
+#ifndef CDIO_DRIVER_FILEMODE_H_
+#define CDIO_DRIVER_FILEMODE_H_
 
 #ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
@@ -131,4 +131,4 @@
 # define S_ISCTG(m) (((m) & S_IFMT) == S_IFCTG)
 #endif
 
-#endif /* __FILEMODE_H__ */
+#endif /* CDIO_DRIVER_FILEMODE_H_ */

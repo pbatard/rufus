@@ -130,7 +130,7 @@ _cdio_strdup_upper (const char str[])
 
       while (*p)
         {
-          *p = toupper (*p);
+          *p = toupper ((unsigned char) *p);
           p++;
         }
     }

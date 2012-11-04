@@ -1,7 +1,5 @@
 /*
-  $Id: _cdio_stdio.h,v 1.3 2008/04/22 15:29:11 karl Exp $
-
-  Copyright (C) 2003, 2008 Rocky Bernstein <rocky@gnu.org>
+  Copyright (C) 2003, 2008, 2012 Rocky Bernstein <rocky@gnu.org>
   Copyright (C) 2000 Herbert Valerio Riedel <hvr@gnu.org>
 
   This program is free software: you can redistribute it and/or modify
@@ -19,8 +17,8 @@
 */
 
 
-#ifndef __CDIO_STDIO_H__
-#define __CDIO_STDIO_H__
+#ifndef CDIO_STDIO_H_
+#define CDIO_STDIO_H_
 
 #include "_cdio_stream.h"
 
@@ -39,7 +37,7 @@ CdioDataSource_t * cdio_stdio_new(const char psz_path[]);
 void cdio_stdio_destroy(CdioDataSource_t *p_obj);
 
 
-#endif /* __CDIO_STREAM_STDIO_H__ */
+#endif /* CDIO_STDIO_H_ */
 
 
 /* 

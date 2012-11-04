@@ -371,7 +371,7 @@ out:
 	return r;
 }
 
-BOOL ExtractISO(const char* src_iso, const char* dest_dir, bool scan)
+BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan)
 {
 	size_t i;
 	int j;

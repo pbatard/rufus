@@ -1,5 +1,6 @@
 /*
-  Copyright (C) 2003, 2004, 2005, 2008, 2011 Rocky Bernstein <rocky@gnu.org>
+  Copyright (C) 2003, 2004, 2005, 2008, 2011, 2012 
+  Rocky Bernstein <rocky@gnu.org>
   Copyright (C) 2001 Herbert Valerio Riedel <hvr@gnu.org>
 
   This program is free software: you can redistribute it and/or modify
@@ -20,10 +21,14 @@
 
 #ifdef HAVE_CONFIG_H
 # include "config.h"
-# define __CDIO_CONFIG_H__ 1
 #endif
 
+#ifdef HAVE_STDBOOL_H
+# include <stdbool.h>
+#endif 
+
 #include <cdio/cdio.h>
+#include <cdio/logging.h>
 #include "cdio_private.h"
 
 const char *track_format2str[6] = 
@@ -39,9 +44,13 @@ enum cdio_track_enums;
   CDIO_INVALID_TRACK is returned on error.
 */
 track_t
-cdio_get_first_track_num (const CdIo_t *p_cdio)
+cdio_get_first_track_num(const CdIo_t *p_cdio)
 {
-  if (NULL == p_cdio) return CDIO_INVALID_TRACK;
+  if (NULL == p_cdio) {
+    cdio_info("Null CdIo object passed\n");
+    return CDIO_INVALID_TRACK;
+  }
+  
 
   if (p_cdio->op.get_first_track_num) {
     return p_cdio->op.get_first_track_num (p_cdio->env);
@@ -57,7 +66,11 @@ cdio_get_first_track_num (const CdIo_t *p_cdio)
 track_t
 cdio_get_last_track_num (const CdIo_t *p_cdio)
 {
-  if (NULL == p_cdio) return CDIO_INVALID_TRACK;
+  if (NULL == p_cdio) {
+    cdio_info("Null CdIo object passed\n");
+    return CDIO_INVALID_TRACK;
+  }
+
   {
     const track_t i_first_track = cdio_get_first_track_num(p_cdio);
     if ( CDIO_INVALID_TRACK != i_first_track ) {
@@ -76,6 +89,15 @@ cdio_get_last_track_num (const CdIo_t *p_cdio)
 int
 cdio_get_track_channels(const CdIo_t *p_cdio, track_t i_track)
 {
+  if (NULL == p_cdio) {
+    cdio_info("Null CdIo object passed\n");
+    return -1;
+  }
+  if (i_track > CDIO_CD_MAX_TRACKS) {
+     cdio_log(CDIO_LOG_WARN, "Number of tracks exceeds maximum (%d vs. %d)\n",
+              i_track, CDIO_CD_MAX_TRACKS);
+     return -1;
+  }
   if (p_cdio->op.get_track_channels) {
     return p_cdio->op.get_track_channels (p_cdio->env, i_track);
   } else {
@@ -209,7 +231,10 @@ cdio_get_track_green(const CdIo_t *p_cdio, track_t i_track)
 lba_t
 cdio_get_track_lba(const CdIo_t *p_cdio, track_t i_track)
 {
-  if (!p_cdio) return CDIO_INVALID_LBA;
+  if (NULL == p_cdio) {
+    cdio_info("Null CdIo object passed\n");
+    return CDIO_INVALID_LBA;
+  }
 
   if (p_cdio->op.get_track_lba) {
     return p_cdio->op.get_track_lba (p_cdio->env, i_track);
@@ -232,7 +257,16 @@ cdio_get_track_lba(const CdIo_t *p_cdio, track_t i_track)
 lsn_t
 cdio_get_track_lsn(const CdIo_t *p_cdio, track_t i_track)
 {
-  if (p_cdio == NULL) return CDIO_INVALID_LSN;
+  if (NULL == p_cdio) {
+    cdio_info("Null CdIo object passed\n");
+    return CDIO_INVALID_LSN;
+  }
+  if (i_track > CDIO_CD_MAX_TRACKS && i_track != CDIO_CDROM_LEADOUT_TRACK) {
+     cdio_log(CDIO_LOG_WARN, "Number of tracks exceeds maximum (%d vs. %d)\n",
+              i_track, CDIO_CD_MAX_TRACKS);
+     return CDIO_INVALID_LSN;
+  }
+
 
   if (p_cdio->op.get_track_lba) {
     return cdio_lba_to_lsn(p_cdio->op.get_track_lba (p_cdio->env, i_track));
@@ -254,7 +288,16 @@ cdio_get_track_lsn(const CdIo_t *p_cdio, track_t i_track)
 char *
 cdio_get_track_isrc (const CdIo_t *p_cdio, track_t i_track)
 {
-  if (p_cdio == NULL) return NULL;
+  if (NULL == p_cdio) {
+    cdio_info("Null CdIo object passed\n");
+    return NULL;
+  }
+
+  if (i_track > CDIO_CD_MAX_TRACKS) {
+     cdio_log(CDIO_LOG_WARN, "Number of tracks exceeds maximum (%d vs. %d)\n",
+              i_track, CDIO_CD_MAX_TRACKS);
+     return NULL;
+  }
 
   if (p_cdio->op.get_track_isrc) {
     return p_cdio->op.get_track_isrc (p_cdio->env, i_track);
@@ -271,7 +314,10 @@ cdio_get_track_isrc (const CdIo_t *p_cdio, track_t i_track)
 lba_t
 cdio_get_track_pregap_lba(const CdIo_t *p_cdio, track_t i_track)
 {
-  if (p_cdio == NULL) return CDIO_INVALID_LBA;
+  if (NULL == p_cdio) {
+    cdio_info("Null CdIo object passed\n");
+    return CDIO_INVALID_LBA;
+  }
 
   if (p_cdio->op.get_track_pregap_lba) {
     return p_cdio->op.get_track_pregap_lba (p_cdio->env, i_track);

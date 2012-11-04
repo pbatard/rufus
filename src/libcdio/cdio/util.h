@@ -1,5 +1,6 @@
 /*
-    Copyright (C) 2004, 2005, 2006, 2008, 2010 Rocky Bernstein <rocky@gnu.org>
+    Copyright (C) 2004, 2005, 2006, 2008, 2010, 2012
+    Rocky Bernstein <rocky@gnu.org>
     Copyright (C) 2000 Herbert Valerio Riedel <hvr@gnu.org>
 
     This program is free software: you can redistribute it and/or modify
@@ -16,8 +17,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef __CDIO_UTIL_H__
-#define __CDIO_UTIL_H__
+#ifndef CDIO_UTIL_H_
+#define CDIO_UTIL_H_
 
 /*!
    \file util.h 
@@ -128,7 +129,7 @@ char *cdio_realpath (const char *psz_src, char *psz_dst);
 }
 #endif
 
-#endif /* __CDIO_UTIL_H__ */
+#endif /* CDIO_UTIL_H_ */
 
 
 /* 

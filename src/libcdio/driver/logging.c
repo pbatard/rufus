@@ -1,5 +1,6 @@
 /*
-  Copyright (C) 2003, 2004, 2008, 2011 Rocky Bernstein <rocky@gnu.org>
+  Copyright (C) 2003, 2004, 2008, 2011, 2012
+  Rocky Bernstein <rocky@gnu.org>
   Copyright (C) 2000 Herbert Valerio Riedel <hvr@gnu.org>
 
   This program is free software: you can redistribute it and/or modify
@@ -35,12 +36,10 @@
 #include "cdio_assert.h"
 #include "portable.h"
 
-static const char _rcsid[] = "$Id: logging.c,v 1.2 2008/04/22 15:29:12 karl Exp $";
-
 cdio_log_level_t cdio_loglevel_default = CDIO_LOG_WARN;
 
 static void
-default_cdio_log_handler (cdio_log_level_t level, const char message[])
+default_cdio_log_handler(cdio_log_level_t level, const char message[])
 {
   switch (level)
     {
@@ -84,7 +83,7 @@ default_cdio_log_handler (cdio_log_level_t level, const char message[])
 static cdio_log_handler_t _handler = default_cdio_log_handler;
 
 cdio_log_handler_t
-cdio_log_set_handler (cdio_log_handler_t new_handler)
+cdio_log_set_handler(cdio_log_handler_t new_handler)
 {
   cdio_log_handler_t old_handler = _handler;
 
@@ -94,7 +93,7 @@ cdio_log_set_handler (cdio_log_handler_t new_handler)
 }
 
 static void
-cdio_logv (cdio_log_level_t level, const char format[], va_list args)
+cdio_logv(cdio_log_level_t level, const char format[], va_list args)
 {
   char buf[1024] = { 0, };
   static int in_recursion = 0;
@@ -112,7 +111,7 @@ cdio_logv (cdio_log_level_t level, const char format[], va_list args)
 }
 
 void
-cdio_log (cdio_log_level_t level, const char format[], ...)
+cdio_log(cdio_log_level_t level, const char format[], ...)
 {
   va_list args;
   va_start (args, format);

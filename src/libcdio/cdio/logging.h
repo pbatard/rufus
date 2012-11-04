@@ -1,7 +1,5 @@
 /*
-    $Id: logging.h,v 1.11 2008/03/25 15:59:09 karl Exp $
-
-    Copyright (C) 2003, 2004, 2008 Rocky Bernstein <rocky@gnu.org>
+    Copyright (C) 2003, 2004, 2008, 2012 Rocky Bernstein <rocky@gnu.org>
     Copyright (C) 2000 Herbert Valerio Riedel <hvr@gnu.org>
 
     This program is free software: you can redistribute it and/or modify
@@ -23,8 +21,8 @@
  *         
  */
 
-#ifndef __LOGGING_H__
-#define __LOGGING_H__
+#ifndef CDIO_LOGGING_H_
+#define CDIO_LOGGING_H_
 
 #include <cdio/types.h>
 
@@ -128,7 +126,7 @@ void cdio_error (const char format[], ...) GNUC_PRINTF(1,2);
 }
 #endif
 
-#endif /* __LOGGING_H__ */
+#endif /* CDIO_LOGGING_H_ */
 
 
 /* 
