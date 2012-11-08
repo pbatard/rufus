@@ -33,6 +33,7 @@
 #include <shlobj.h>
 #include <commdlg.h>
 #include <sddl.h>
+#include <richedit.h>
 
 #include "rufus.h"
 #include "msapi_utf8.h"
@@ -667,10 +668,20 @@ INT_PTR CALLBACK LicenseCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM 
  */
 INT_PTR CALLBACK AboutCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
+	static HWND hCopyrights;
+	TEXTRANGEW tr;
+	ENLINK* enl;
+	wchar_t wUrl[256];
+
 	switch (message) {
 	case WM_INITDIALOG:
 		CenterDialog(hDlg);
+		hCopyrights = GetDlgItem(hDlg, IDC_ABOUT_COPYRIGHTS);
+		SendMessageA(hCopyrights, EM_AUTOURLDETECT, 1, 0);
 		SetDlgItemTextA(hDlg, IDC_ABOUT_COPYRIGHTS, additional_copyrights);
+		SendMessage(hCopyrights, EM_SETSEL, -1, -1);
+		SendMessage(hCopyrights, EM_SETEVENTMASK, 0, ENM_LINK);
+		SendMessageA(hCopyrights, EM_SETBKGNDCOLOR, 0, (LPARAM)GetSysColor(COLOR_BTNFACE));
 		break;
 	case WM_CTLCOLORSTATIC:
 		if ((HWND)lParam == GetDlgItem(hDlg, IDC_RUFUS_BOLD)) {
@@ -693,6 +704,16 @@ INT_PTR CALLBACK AboutCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 				break;
 			}
 			break;
+		case EN_LINK:
+			enl = (ENLINK*) lParam;
+			if (enl->msg == WM_LBUTTONUP) {
+				tr.lpstrText = wUrl;
+				tr.chrg.cpMin = enl->chrg.cpMin;
+				tr.chrg.cpMax = enl->chrg.cpMax;
+				SendMessageW(enl->nmhdr.hwndFrom, EM_GETTEXTRANGE, 0, (LPARAM)&tr);
+				ShellExecuteW(hDlg, L"open", wUrl, NULL, NULL, SW_SHOWNORMAL);
+			}
+			break;
 		}
 		break;
 	case WM_COMMAND:
@@ -712,6 +733,8 @@ INT_PTR CALLBACK AboutCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 
 INT_PTR CreateAboutBox(void)
 {
+	// Required to display the license in a rich edit control
+	LoadLibraryA("Riched20.dll");
 	return DialogBoxA(hMainInstance, MAKEINTRESOURCEA(IDD_ABOUTBOX), hMainDialog, AboutCallback);
 }
 
