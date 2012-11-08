@@ -1,6 +1,6 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
- * Networking functionality (web file download, etc.)
+ * Networking functionality (web file download, check for update, etc.)
  * Copyright (c) 2012 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -24,169 +24,227 @@
 #endif
 
 #include <windows.h>
+#include <wininet.h>
 #include <stdio.h>
+#include <malloc.h>
 #include <string.h>
+#include <inttypes.h>
 
 #include "msapi_utf8.h"
 #include "rufus.h"
+#include "registry.h"
 #include "resource.h"
-// winhttp.h is not available for WDK and MinGW32, so we have to use a replacement
-#include "net.h"
+
+/* Maximum download chunk size, in bytes */
+#define DOWNLOAD_BUFFER_SIZE    10240
+/* Default delay between update checks (1 day) */
+#define DEFAULT_UPDATE_INTERVAL (24*3600)
+
+
+/* Globals */
+DWORD error_code;
+
+/* MinGW is missing some of those */
+#if !defined(ERROR_INTERNET_DISCONNECTED)
+#define ERROR_INTERNET_DISCONNECTED (INTERNET_ERROR_BASE + 163)
+#endif
+#if !defined(ERROR_INTERNET_SERVER_UNREACHABLE)
+#define ERROR_INTERNET_SERVER_UNREACHABLE (INTERNET_ERROR_BASE + 164)
+#endif
+#if !defined(ERROR_INTERNET_PROXY_SERVER_UNREACHABLE)
+#define ERROR_INTERNET_PROXY_SERVER_UNREACHABLE (INTERNET_ERROR_BASE + 165)
+#endif
+#if !defined(ERROR_INTERNET_BAD_AUTO_PROXY_SCRIPT)
+#define ERROR_INTERNET_BAD_AUTO_PROXY_SCRIPT (INTERNET_ERROR_BASE + 166)
+#endif
+#if !defined(ERROR_INTERNET_UNABLE_TO_DOWNLOAD_SCRIPT)
+#define ERROR_INTERNET_UNABLE_TO_DOWNLOAD_SCRIPT (INTERNET_ERROR_BASE + 167)
+#endif
+#if !defined(ERROR_INTERNET_FAILED_DUETOSECURITYCHECK)
+#define ERROR_INTERNET_FAILED_DUETOSECURITYCHECK (INTERNET_ERROR_BASE + 171)
+#endif
+#if !defined(ERROR_INTERNET_NOT_INITIALIZED)
+#define ERROR_INTERNET_NOT_INITIALIZED (INTERNET_ERROR_BASE + 172)
+#endif
+#if !defined(ERROR_INTERNET_NEED_MSN_SSPI_PKG)
+#define ERROR_INTERNET_NEED_MSN_SSPI_PKG (INTERNET_ERROR_BASE + 173)
+#endif
+#if !defined(ERROR_INTERNET_LOGIN_FAILURE_DISPLAY_ENTITY_BODY)
+#define ERROR_INTERNET_LOGIN_FAILURE_DISPLAY_ENTITY_BODY (INTERNET_ERROR_BASE + 174)
+#endif
 
 /*
- * FormatMessage does not handle WinHTTP
+ * FormatMessage does not handle internet errors
+ * http://support.microsoft.com/kb/193625
  */
-const char* WinHTTPErrorString(void)
+const char* WinInetErrorString(void)
 {
-	static char err_string[34];
-	DWORD error_code;
+	static char error_string[256];
+	DWORD size = sizeof(error_string);
 
 	error_code = GetLastError();
 
-	if ((error_code < WINHTTP_ERROR_BASE) || (error_code > WINHTTP_ERROR_LAST))
+	if ((error_code < INTERNET_ERROR_BASE) || (error_code > INTERNET_ERROR_LAST))
 		return WindowsErrorString();
 
 	switch(error_code) {
-	case ERROR_WINHTTP_OUT_OF_HANDLES:
+	case ERROR_INTERNET_OUT_OF_HANDLES:
 		return "No more handles could be generated at this time.";
-	case ERROR_WINHTTP_TIMEOUT:
+	case ERROR_INTERNET_TIMEOUT:
 		return "The request has timed out.";
-	case ERROR_WINHTTP_INTERNAL_ERROR:
+	case ERROR_INTERNET_INTERNAL_ERROR:
 		return "An internal error has occurred.";
-	case ERROR_WINHTTP_INVALID_URL:
+	case ERROR_INTERNET_INVALID_URL:
 		return "The URL is invalid.";
-	case ERROR_WINHTTP_UNRECOGNIZED_SCHEME:
+	case ERROR_INTERNET_UNRECOGNIZED_SCHEME:
 		return "The URL scheme could not be recognized or is not supported.";
-	case ERROR_WINHTTP_NAME_NOT_RESOLVED:
+	case ERROR_INTERNET_NAME_NOT_RESOLVED:
 		return "The server name could not be resolved.";
-	case ERROR_WINHTTP_INVALID_OPTION:
-		return "The request specified an invalid option value.";
-	case ERROR_WINHTTP_OPTION_NOT_SETTABLE:
+	case ERROR_INTERNET_PROTOCOL_NOT_FOUND:
+		return "The requested protocol could not be located.";
+	case ERROR_INTERNET_INVALID_OPTION:
+		return "A request specified an invalid option value.";
+	case ERROR_INTERNET_BAD_OPTION_LENGTH:
+		return "The length of an option supplied is incorrect for the type of option specified.";
+	case ERROR_INTERNET_OPTION_NOT_SETTABLE:
 		return "The request option cannot be set, only queried.";
-	case ERROR_WINHTTP_SHUTDOWN:
-		return "The Win32 HTTP function support is being shut down or unloaded.";
-	case ERROR_WINHTTP_LOGIN_FAILURE:
-		return "The request to connect and log on to the server failed.";
-	case ERROR_WINHTTP_OPERATION_CANCELLED:
-		return "The operation was canceled";
-	case ERROR_WINHTTP_INCORRECT_HANDLE_TYPE:
+	case ERROR_INTERNET_SHUTDOWN:
+		return "The Win32 Internet function support is being shut down or unloaded.";
+	case ERROR_INTERNET_INCORRECT_USER_NAME:
+		return "The request to connect and log on to an FTP server could not be completed because the supplied user name is incorrect.";
+	case ERROR_INTERNET_INCORRECT_PASSWORD:
+		return "The request to connect and log on to an FTP server could not be completed because the supplied password is incorrect.";
+	case ERROR_INTERNET_LOGIN_FAILURE:
+		return "The request to connect to and log on to an FTP server failed.";
+	case ERROR_INTERNET_INVALID_OPERATION:
+		return "The requested operation is invalid.";
+	case ERROR_INTERNET_OPERATION_CANCELLED:
+		return "The operation was canceled, usually because the handle on which the request was operating was closed before the operation completed.";
+	case ERROR_INTERNET_INCORRECT_HANDLE_TYPE:
 		return "The type of handle supplied is incorrect for this operation.";
-	case ERROR_WINHTTP_INCORRECT_HANDLE_STATE:
+	case ERROR_INTERNET_INCORRECT_HANDLE_STATE:
 		return "The requested operation cannot be carried out because the handle supplied is not in the correct state.";
-	case ERROR_WINHTTP_CANNOT_CONNECT:
+	case ERROR_INTERNET_NOT_PROXY_REQUEST:
+		return "The request cannot be made via a proxy.";
+	case ERROR_INTERNET_REGISTRY_VALUE_NOT_FOUND:
+		return "A required registry value could not be located.";
+	case ERROR_INTERNET_BAD_REGISTRY_PARAMETER:
+		return "A required registry value was located but is an incorrect type or has an invalid value.";
+	case ERROR_INTERNET_NO_DIRECT_ACCESS:
+		return "Direct network access cannot be made at this time.";
+	case ERROR_INTERNET_NO_CONTEXT:
+		return "An asynchronous request could not be made because a zero context value was supplied.";
+	case ERROR_INTERNET_NO_CALLBACK:
+		return "An asynchronous request could not be made because a callback function has not been set.";
+	case ERROR_INTERNET_REQUEST_PENDING:
+		return "The required operation could not be completed because one or more requests are pending.";
+	case ERROR_INTERNET_INCORRECT_FORMAT:
+		return "The format of the request is invalid.";
+	case ERROR_INTERNET_ITEM_NOT_FOUND:
+		return "The requested item could not be located.";
+	case ERROR_INTERNET_CANNOT_CONNECT:
 		return "The attempt to connect to the server failed.";
-	case ERROR_WINHTTP_CONNECTION_ERROR:
+	case ERROR_INTERNET_CONNECTION_ABORTED:
 		return "The connection with the server has been terminated.";
-	case ERROR_WINHTTP_RESEND_REQUEST:
-		return "The Win32 HTTP function needs to redo the request.";
-	case ERROR_WINHTTP_SECURE_CERT_DATE_INVALID:
-		return "SSL certificate date indicates that the certificate is expired.";
-	case ERROR_WINHTTP_SECURE_CERT_CN_INVALID:
+	case ERROR_INTERNET_CONNECTION_RESET:
+		return "The connection with the server has been reset.";
+	case ERROR_INTERNET_FORCE_RETRY:
+		return "Calls for the Win32 Internet function to redo the request.";
+	case ERROR_INTERNET_INVALID_PROXY_REQUEST:
+		return "The request to the proxy was invalid.";
+	case ERROR_INTERNET_HANDLE_EXISTS:
+		return "The request failed because the handle already exists.";
+	case ERROR_INTERNET_SEC_CERT_DATE_INVALID:
+		return "SSL certificate date that was received from the server is bad. The certificate is expired.";
+	case ERROR_INTERNET_SEC_CERT_CN_INVALID:
 		return "SSL certificate common name (host name field) is incorrect.";
-	case ERROR_WINHTTP_CLIENT_AUTH_CERT_NEEDED:
+	case ERROR_INTERNET_HTTP_TO_HTTPS_ON_REDIR:
+		return "The application is moving from a non-SSL to an SSL connection because of a redirect.";
+	case ERROR_INTERNET_HTTPS_TO_HTTP_ON_REDIR:
+		return "The application is moving from an SSL to an non-SSL connection because of a redirect.";
+	case ERROR_INTERNET_MIXED_SECURITY:
+		return "Some of the content being viewed may have come from unsecured servers.";
+	case ERROR_INTERNET_CHG_POST_IS_NON_SECURE:
+		return "The application is posting and attempting to change multiple lines of text on a server that is not secure.";
+	case ERROR_INTERNET_POST_IS_NON_SECURE:
+		return "The application is posting data to a server that is not secure.";
+	case ERROR_FTP_TRANSFER_IN_PROGRESS:
+		return "The requested operation cannot be made on the FTP session handle because an operation is already in progress.";
+	case ERROR_FTP_DROPPED:
+		return "The FTP operation was not completed because the session was aborted.";
+	case ERROR_GOPHER_PROTOCOL_ERROR:
+	case ERROR_GOPHER_NOT_FILE:
+	case ERROR_GOPHER_DATA_ERROR:
+	case ERROR_GOPHER_END_OF_DATA:
+	case ERROR_GOPHER_INVALID_LOCATOR:
+	case ERROR_GOPHER_INCORRECT_LOCATOR_TYPE:
+	case ERROR_GOPHER_NOT_GOPHER_PLUS:
+	case ERROR_GOPHER_ATTRIBUTE_NOT_FOUND:
+	case ERROR_GOPHER_UNKNOWN_LOCATOR:
+		return "Gopher? Really??? What is this? 1994?";
+	case ERROR_HTTP_HEADER_NOT_FOUND:
+		return "The requested header could not be located.";
+	case ERROR_HTTP_DOWNLEVEL_SERVER:
+		return "The server did not return any headers.";
+	case ERROR_HTTP_INVALID_SERVER_RESPONSE:
+		return "The server response could not be parsed.";
+	case ERROR_HTTP_INVALID_HEADER:
+		return "The supplied header is invalid.";
+	case ERROR_HTTP_INVALID_QUERY_REQUEST:
+		return "The request made to HttpQueryInfo is invalid.";
+	case ERROR_HTTP_HEADER_ALREADY_EXISTS:
+		return "The header could not be added because it already exists.";
+	case ERROR_HTTP_REDIRECT_FAILED:
+		return "The redirection failed because either the scheme changed or all attempts made to redirect failed.";
+	case ERROR_INTERNET_CLIENT_AUTH_CERT_NEEDED:
 		return "Client Authentication certificate needed";
-	case ERROR_WINHTTP_SECURE_INVALID_CA:
-		return "SSL certificate has been issued by an invalid Certification Authority.";
-	case ERROR_WINHTTP_SECURE_CERT_REV_FAILED:
-		return "SSL certificate revocation check failed.";
-	case ERROR_WINHTTP_CANNOT_CALL_BEFORE_OPEN:
-		return "Cannot use this call before WinHttpOpen";
-	case ERROR_WINHTTP_CANNOT_CALL_BEFORE_SEND:
-		return "Cannot use this call before WinHttpSend";
-	case ERROR_WINHTTP_CANNOT_CALL_AFTER_SEND:
-		return "Cannot use this call after WinHttpSend";
-	case ERROR_WINHTTP_CANNOT_CALL_AFTER_OPEN:
-		return "Cannot use this call after WinHttpOpen";
-	case ERROR_WINHTTP_HEADER_NOT_FOUND:
-		return "HTTP header was not found.";
-	case ERROR_WINHTTP_INVALID_SERVER_RESPONSE:
-		return "Invalid HTTP server response.";
-	case ERROR_WINHTTP_INVALID_HEADER:
-		return "Invalid HTTP header.";
-	case ERROR_WINHTTP_INVALID_QUERY_REQUEST:
-		return "Invalid HTTP query request.";
-	case ERROR_WINHTTP_HEADER_ALREADY_EXISTS:
-		return "HTTP header already exists.";
-	case ERROR_WINHTTP_REDIRECT_FAILED:
-		return "HTTP redirect failed.";
-	case ERROR_WINHTTP_SECURE_CHANNEL_ERROR:
-		return "Unnable to establish secure HTTP channel.";
-	case ERROR_WINHTTP_BAD_AUTO_PROXY_SCRIPT:
+	case ERROR_INTERNET_BAD_AUTO_PROXY_SCRIPT:
 		return "Bad auto proxy script.";
-	case ERROR_WINHTTP_UNABLE_TO_DOWNLOAD_SCRIPT:
+	case ERROR_INTERNET_UNABLE_TO_DOWNLOAD_SCRIPT:
 		return "Unable to download script.";
-	case ERROR_WINHTTP_SECURE_INVALID_CERT:
-		return "SSL certificate is invalid.";
-	case ERROR_WINHTTP_SECURE_CERT_REVOKED:
-		return "SSL certificate has been revoked.";
-	case ERROR_WINHTTP_NOT_INITIALIZED:
-		return "WinHTTP has not be initialized.";
-	case ERROR_WINHTTP_SECURE_FAILURE:
-		return "SSL failure.";
-	case ERROR_WINHTTP_AUTO_PROXY_SERVICE_ERROR:
-		return "Auto proxy service error.";
-	case ERROR_WINHTTP_SECURE_CERT_WRONG_USAGE:
-		return "Wrong SSL certificate usage.";
-	case ERROR_WINHTTP_AUTODETECTION_FAILED:
-		return "HTTP autodetection failed.";
-	case ERROR_WINHTTP_HEADER_COUNT_EXCEEDED:
-		return "HTTP header count exceeded.";
-	case ERROR_WINHTTP_HEADER_SIZE_OVERFLOW:
-		return "HTTP header size overflow.";
-	case ERROR_WINHTTP_CHUNKED_ENCODING_HEADER_SIZE_OVERFLOW:
-		return "Chunked encoding HTTP header size overflow.";
-	case ERROR_WINHTTP_RESPONSE_DRAIN_OVERFLOW:
-		return "Response drain overflow.";
-	case ERROR_WINHTTP_CLIENT_CERT_NO_PRIVATE_KEY:
-		return "Certificate does not contain a private key.";
-	case ERROR_WINHTTP_CLIENT_CERT_NO_ACCESS_PRIVATE_KEY:
-		return "Unable to access client certificate's private key.";
+	case ERROR_INTERNET_NOT_INITIALIZED:
+		return "Internet has not be initialized.";
+	case ERROR_INTERNET_UNABLE_TO_CACHE_FILE:
+		return "Unable to cache the file.";
+	case ERROR_INTERNET_TCPIP_NOT_INSTALLED:
+		return "TPC/IP not installed.";
+	case ERROR_INTERNET_DISCONNECTED:
+		return "Internet is disconnected.";
+	case ERROR_INTERNET_SERVER_UNREACHABLE:
+		return "Server could not be reached.";
+	case ERROR_INTERNET_PROXY_SERVER_UNREACHABLE:
+		return "Proxy server could not be reached.";
+	case ERROR_INTERNET_FAILED_DUETOSECURITYCHECK:
+		return "A security check prevented internet connection.";
+	case ERROR_INTERNET_NEED_MSN_SSPI_PKG:
+		return "This connection requires an MSN Security Support Provider Interface package.";
+	case ERROR_INTERNET_LOGIN_FAILURE_DISPLAY_ENTITY_BODY:
+		return "Please ask Microsoft about that one!";
+	case ERROR_INTERNET_EXTENDED_ERROR:
+		InternetGetLastResponseInfoA(&error_code, error_string, &size);
+		return error_string;
 	default:
-		safe_sprintf(err_string, sizeof(err_string), "WinHTTP unknown error 0x%08X", error_code);
-		return err_string;
+		safe_sprintf(error_string, sizeof(error_string), "Unknown internet error 0x%08X", error_code);
+		return error_string;
 	}
 }
 
 /* 
  * Download a file from an URL
- * Mostly taken from http://msdn.microsoft.com/en-us/library/aa384270.aspx
+ * Mostly taken from http://support.microsoft.com/kb/234913
  */
 BOOL DownloadFile(const char* url, const char* file)
 {
-	BOOL r=FALSE;
-	DWORD dwSize, dwDownloaded, dwTotalSize, dwReadSize, dwTotalSizeSize = sizeof(dwTotalSize);
-	FILE* fd = NULL;
+	BOOL r = FALSE;
+	DWORD dwFlags, dwSize, dwDownloaded, dwTotalSize, dwStatus;
+	FILE* fd = NULL; 
 	LONG progress_style;
-	unsigned char* buf = NULL;
-	wchar_t wAgent[64], *wUrl = NULL, wHostName[64], wUrlPath[128];
-	HINTERNET hSession=NULL, hConnect=NULL, hRequest=NULL;
-	URL_COMPONENTSW UrlParts = {sizeof(URL_COMPONENTSW), NULL, 1, (INTERNET_SCHEME)0,
-		wHostName, ARRAYSIZE(wHostName), INTERNET_DEFAULT_PORT, NULL, 1, wUrlPath, ARRAYSIZE(wUrlPath), NULL, 1};
-
-	PF_DECL(WinHttpCrackUrl);
-	PF_DECL(WinHttpOpen);
-	PF_DECL(WinHttpConnect);
-	PF_DECL(WinHttpOpenRequest);
-	PF_DECL(WinHttpSendRequest);
-	PF_DECL(WinHttpReceiveResponse);
-	PF_DECL(WinHttpQueryHeaders);
-	PF_DECL(WinHttpQueryDataAvailable);
-	PF_DECL(WinHttpReadData);
-	PF_DECL(WinHttpCloseHandle);
-
-	PF_INIT_OR_OUT(WinHttpCrackUrl, winhttp);
-	PF_INIT_OR_OUT(WinHttpOpen, winhttp);
-	PF_INIT_OR_OUT(WinHttpConnect, winhttp);
-	PF_INIT_OR_OUT(WinHttpOpenRequest, winhttp);
-	PF_INIT_OR_OUT(WinHttpSendRequest, winhttp);
-	PF_INIT_OR_OUT(WinHttpReceiveResponse, winhttp);
-	PF_INIT_OR_OUT(WinHttpQueryHeaders, winhttp);
-	PF_INIT_OR_OUT(WinHttpQueryDataAvailable, winhttp);
-	PF_INIT_OR_OUT(WinHttpReadData, winhttp);
-	PF_INIT_OR_OUT(WinHttpCloseHandle, winhttp);
-
-	wUrl = utf8_to_wchar(url);
-	if (wUrl == NULL) goto out;
+	unsigned char buf[DOWNLOAD_BUFFER_SIZE];
+	char agent[64], hostname[64], urlpath[128];
+	HINTERNET hSession = NULL, hConnection = NULL, hRequest = NULL;
+	URL_COMPONENTSA UrlParts = {sizeof(URL_COMPONENTSA), NULL, 1, (INTERNET_SCHEME)0,
+		hostname, sizeof(hostname), 0, NULL, 1, urlpath, sizeof(urlpath), NULL, 1};
+	int i;
 
 	// We reuse the ISO progress dialog for download progress
 	SetWindowTextU(hISOProgressDlg, "Downloading file...");
@@ -200,111 +258,215 @@ BOOL DownloadFile(const char* url, const char* file)
 	PrintStatus(0, FALSE, "Downloading %s: Connecting...\n", file);
 	uprintf("Downloading %s from %s\n", file, url);
 
-	if (!pfWinHttpCrackUrl(wUrl, 0, 0, &UrlParts)) {
-		uprintf("Unable to decode URL: %s\n", WinHTTPErrorString());
+	if (!InternetCrackUrlA(url, safe_strlen(url), 0, &UrlParts)) {
+		uprintf("Unable to decode URL: %s\n", WindowsErrorString());
 		goto out;
 	}
 
-	_snwprintf(wAgent, ARRAYSIZE(wAgent), L"Rufus/%d.%d.%d.%d", rufus_version[0], rufus_version[1], rufus_version[2], rufus_version[3]);
-	// Use WinHttpOpen to obtain a session handle.
-	hSession = pfWinHttpOpen(wAgent, WINHTTP_ACCESS_TYPE_DEFAULT_PROXY, WINHTTP_NO_PROXY_NAME, WINHTTP_NO_PROXY_BYPASS, 0);
-	if (!hSession) {
-		uprintf("Could not open HTTP session: %s\n", WinHTTPErrorString());
+	// Open an Internet session
+	for (i=5; (i>0) && (!InternetGetConnectedState(&dwFlags, 0)); i--) {
+		Sleep(1000);
+	}
+	if (i <= 0) {
+		// http://msdn.microsoft.com/en-us/library/windows/desktop/aa384702.aspx is wrong...
+		SetLastError(ERROR_INTERNET_NOT_INITIALIZED);
+		uprintf("Network is unavailable: %s\n", WinInetErrorString());
+		goto out;
+	}
+	_snprintf(agent, ARRAYSIZE(agent), "Rufus/%d.%d.%d.%d", rufus_version[0], rufus_version[1], rufus_version[2], rufus_version[3]);
+	hSession = InternetOpenA(agent, INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
+	if (hSession == NULL) {
+		uprintf("Could not open internet session: %s\n", WinInetErrorString());
 		goto out;
 	}
 
-	// Specify an HTTP server.
-	hConnect = pfWinHttpConnect(hSession, UrlParts.lpszHostName, UrlParts.nPort, 0);
-	if (!hConnect) {
-		uprintf("Could not connect to HTTP server: %s\n", WinHTTPErrorString());
+	hConnection = InternetConnectA(hSession, UrlParts.lpszHostName, UrlParts.nPort, NULL, NULL, INTERNET_SERVICE_HTTP, 0, (DWORD_PTR)NULL);
+	if (hConnection == NULL) {
+		uprintf("Could not connect to server %s:%d: %s\n", UrlParts.lpszHostName, UrlParts.nPort, WinInetErrorString());
 		goto out;
 	}
 
-	// Create an HTTP request handle.
-	hRequest = pfWinHttpOpenRequest(hConnect, L"GET", UrlParts.lpszUrlPath,
-		NULL, WINHTTP_NO_REFERER, WINHTTP_DEFAULT_ACCEPT_TYPES,
-		(UrlParts.nScheme == INTERNET_SCHEME_HTTPS)?WINHTTP_FLAG_SECURE:0);
-	if (!hRequest) {
-		uprintf("Could not create server request: %s\n", WinHTTPErrorString());
+	hRequest = HttpOpenRequestA(hConnection, "GET", UrlParts.lpszUrlPath, NULL, NULL, (const char**)"*/*\0",
+		INTERNET_FLAG_HYPERLINK|INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTP|INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTPS|INTERNET_FLAG_NO_COOKIES|
+		INTERNET_FLAG_NO_UI|INTERNET_FLAG_NO_CACHE_WRITE, (DWORD_PTR)NULL);
+	if (hRequest == NULL) {
+		uprintf("Could not open url %s: %s\n", url, WindowsErrorString());
 		goto out;
 	}
 
-	if (!pfWinHttpSendRequest(hRequest, WINHTTP_NO_ADDITIONAL_HEADERS, 0, WINHTTP_NO_REQUEST_DATA, 0, 0, 0 )) {
-		uprintf("Could not send server request: %s\n", WinHTTPErrorString());
+	if (!HttpSendRequest(hRequest, NULL, 0, NULL, 0)) {
+		uprintf("Unable to send request: %s\n", WinInetErrorString());
 		goto out;
 	}
 
-	if (!pfWinHttpReceiveResponse(hRequest, NULL)) {
-		uprintf("Failure to receive server response: %s\n", WinHTTPErrorString());
+	// Get the file size
+	dwSize = sizeof(dwStatus);
+	dwStatus = 404;
+	HttpQueryInfoA(hRequest, HTTP_QUERY_STATUS_CODE|HTTP_QUERY_FLAG_NUMBER, (LPVOID)&dwStatus, &dwSize, NULL);
+	if (dwStatus != 200) {
+		error_code = ERROR_INTERNET_ITEM_NOT_FOUND;
+		uprintf("Unable to acess file. Server status %d\n", dwStatus);
 		goto out;
 	}
-
-	if (!pfWinHttpQueryHeaders(hRequest, WINHTTP_QUERY_CONTENT_LENGTH|WINHTTP_QUERY_FLAG_NUMBER,
-		WINHTTP_HEADER_NAME_BY_INDEX, &dwTotalSize, &dwTotalSizeSize, WINHTTP_NO_HEADER_INDEX)) {
-		uprintf("Could not retreive file length: %s\n", WinHTTPErrorString());
+	dwSize = sizeof(dwTotalSize);
+	if (!HttpQueryInfoA(hRequest, HTTP_QUERY_CONTENT_LENGTH|HTTP_QUERY_FLAG_NUMBER, (LPVOID)&dwTotalSize, &dwSize, NULL)) {
+		uprintf("Unable to retrieve file length: %s\n", WinInetErrorString());
 		goto out;
 	}
 	uprintf("File length: %d bytes\n", dwTotalSize);
 
 	fd = fopen(file, "wb");
 	if (fd == NULL) {
-		uprintf("Unable to create file %s\n", file);
+		uprintf("Unable to create file %s: %s\n", file, WinInetErrorString());
 		goto out;
 	}
 
 	// Keep checking for data until there is nothing left.
-	dwReadSize = 0;
-	while(1) {
+	dwSize = 0;
+	while (1) {
 		if (IS_ERROR(FormatStatus))
 			goto out;
 
-		dwSize = 0;
-		if (!pfWinHttpQueryDataAvailable(hRequest, &dwSize))
-			uprintf("Error in WinHttpQueryDataAvailable: %s\n", WinHTTPErrorString());
-		if (dwSize <= 0)
+		if (!InternetReadFile(hRequest, buf, sizeof(buf), &dwDownloaded) || (dwDownloaded == 0))
 			break;
-
-		// Allocate space for the buffer.
-		buf = (unsigned char*)malloc(dwSize+1);
-		if (buf == NULL) {
-			uprintf("Could not allocate buffer for download.\n");
+		dwSize += dwDownloaded;
+		SendMessage(hISOProgressBar, PBM_SETPOS, (WPARAM)(MAX_PROGRESS*((1.0f*dwSize)/(1.0f*dwTotalSize))), 0);
+		PrintStatus(0, FALSE, "Downloading %s: %0.1f%%\n", file, (100.0f*dwSize)/(1.0f*dwTotalSize));
+		if (fwrite(buf, 1, dwDownloaded, fd) != dwDownloaded) {
+			uprintf("Error writing file %s: %s\n", file, WinInetErrorString());
 			goto out;
 		}
-		if (!pfWinHttpReadData(hRequest, (LPVOID)buf, dwSize, &dwDownloaded)) {
-			uprintf("Error in WinHttpReadData: %s\n", WinHTTPErrorString());
-			goto out;
-		}
-		if (dwDownloaded != dwSize) {
-			uprintf("Error: expected %d bytes by received %d\n", dwSize, dwDownloaded);
-			goto out;
-		}
-		dwReadSize += dwDownloaded;
-		SendMessage(hISOProgressBar, PBM_SETPOS, (WPARAM)(MAX_PROGRESS*((1.0f*dwReadSize)/(1.0f*dwTotalSize))), 0);
-		PrintStatus(0, FALSE, "Downloading %s: %0.1f%%\n", file, (100.0f*dwReadSize)/(1.0f*dwTotalSize));
-		if (fwrite(buf, 1, dwSize, fd) != dwSize) {
-			uprintf("Error writing file %s\n", file);
-			goto out;
-		}
-		safe_free(buf);
 	}
-	r = (dwReadSize == dwTotalSize);
-	if (r)
+
+	if (dwSize != dwTotalSize) {
+		uprintf("Could not download complete file - read: %d bytes, expected: %d bytes\n", dwSize, dwTotalSize);
+		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_WRITE_FAULT;
+		goto out;
+	} else {
+		r = TRUE;
 		uprintf("Successfully downloaded %s\n", file);
+	}
 
 out:
 	ShowWindow(hISOProgressDlg, SW_HIDE);
-	safe_free(wUrl);
-	safe_free(buf);
 	if (fd != NULL) fclose(fd);
 	if (!r) {
 		_unlink(file);
 		PrintStatus(0, FALSE, "Failed to download file.");
-		MessageBoxA(hMainDialog, IS_ERROR(FormatStatus)?StrError(FormatStatus):WinHTTPErrorString(),
+		SetLastError(error_code);
+		MessageBoxA(hMainDialog, IS_ERROR(FormatStatus)?StrError(FormatStatus):WinInetErrorString(),
 		"File download", MB_OK|MB_ICONERROR);
 	}
-	if (hRequest) pfWinHttpCloseHandle(hRequest);
-	if (hConnect) pfWinHttpCloseHandle(hConnect);
-	if (hSession) pfWinHttpCloseHandle(hSession);
+	if (hRequest) InternetCloseHandle(hRequest);
+	if (hConnection) InternetCloseHandle(hConnection);
+	if (hSession) InternetCloseHandle(hSession);
 
+	return r;
+}
+
+#define uuprintf if(verbose) uprintf
+#define uuuprintf if(verbose>1) uprintf
+// TODO: call this from a thread that will launch the download if successful
+BOOL CheckForUpdates(const char* url)
+{
+	BOOL r = FALSE;
+	int verbose = 2;
+	DWORD dwFlags, dwSize, dwDownloaded, dwTotalSize, dwStatus;
+	char* buf = NULL;
+	char agent[64], hostname[64], urlpath[128], mime[32];
+	HINTERNET hSession = NULL, hConnection = NULL, hRequest = NULL;
+	URL_COMPONENTSA UrlParts = {sizeof(URL_COMPONENTSA), NULL, 1, (INTERNET_SCHEME)0,
+		hostname, sizeof(hostname), 0, NULL, 1, urlpath, sizeof(urlpath), NULL, 1};
+	SYSTEMTIME ServerTime, LocalTime;
+	FILETIME FileTime;
+	int64_t local_time, reg_time, server_time, update_interval;
+
+	verbose = ReadRegistryKey32(REGKEY_VERBOSE_UPDATES);
+	if (GetRegistryKeyBool(REGKEY_DISABLE_UPDATES)) {
+		uuprintf("Check for updates disabled, as per registry settings.\n");
+		return FALSE;
+	}
+	reg_time = ReadRegistryKey64(REGKEY_LAST_UPDATE);
+	update_interval = (int64_t)ReadRegistryKey32(REGKEY_UPDATE_INTERVAL);
+	if (update_interval == 0) {
+		WriteRegistryKey32(REGKEY_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL);
+		update_interval = DEFAULT_UPDATE_INTERVAL;
+	}
+	GetSystemTime(&LocalTime);
+	if (!SystemTimeToFileTime(&LocalTime, &FileTime))
+		goto out;
+	local_time = ((((int64_t)FileTime.dwHighDateTime)<<32) + FileTime.dwLowDateTime) / 10000000;
+	uuuprintf("Local time: %" PRId64 "\n", local_time);
+	if (local_time < reg_time + update_interval) {
+		uuprintf("Next update check in %" PRId64 " seconds.\n", reg_time + update_interval - local_time);
+		return FALSE;
+	}
+
+	PrintStatus(3000, FALSE, "Checking for Rufus updates...\n");
+
+	if ((!InternetCrackUrlA(url, safe_strlen(url), 0, &UrlParts)) || (!InternetGetConnectedState(&dwFlags, 0)))
+		goto out;
+
+	_snprintf(agent, ARRAYSIZE(agent), "Rufus/%d.%d.%d.%d", rufus_version[0], rufus_version[1], rufus_version[2], rufus_version[3]);
+	hSession = InternetOpenA(agent, INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
+	if (hSession == NULL)
+		goto out;
+	hConnection = InternetConnectA(hSession, UrlParts.lpszHostName, UrlParts.nPort, NULL, NULL, INTERNET_SERVICE_HTTP, 0, (DWORD_PTR)NULL);
+	if (hConnection == NULL)
+		goto out;
+
+	hRequest = HttpOpenRequestA(hConnection, "GET", UrlParts.lpszUrlPath, NULL, NULL, (const char**)"*/*\0",
+		INTERNET_FLAG_HYPERLINK|INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTP|INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTPS|INTERNET_FLAG_NO_COOKIES|
+		INTERNET_FLAG_NO_UI|INTERNET_FLAG_NO_CACHE_WRITE, (DWORD_PTR)NULL);
+	if ((hRequest == NULL) || (!HttpSendRequest(hRequest, NULL, 0, NULL, 0)))
+		goto out;
+
+	// Ensure that we get a text file
+	dwSize = sizeof(dwStatus);
+	dwStatus = 404;
+	HttpQueryInfoA(hRequest, HTTP_QUERY_STATUS_CODE|HTTP_QUERY_FLAG_NUMBER, (LPVOID)&dwStatus, &dwSize, NULL);
+	if (dwStatus != 200) goto out;
+	dwSize = sizeof(mime);
+	HttpQueryInfoA(hRequest, HTTP_QUERY_CONTENT_TYPE, (LPVOID)&mime, &dwSize, NULL);
+	if (strcmp(mime, "text/plain") != 0)
+		goto out;
+	// We also get a date from Apache, which we'll use to avoid out of sync check,
+	// in case some set their clock way into the future and back.
+	// On the other hand, if local clock is set way back in the past, we will never check.
+	dwSize = sizeof(ServerTime);
+	// If we can't get a date we can trust, don't bother...
+	if ( (!HttpQueryInfoA(hRequest, HTTP_QUERY_DATE|HTTP_QUERY_FLAG_SYSTEMTIME, (LPVOID)&ServerTime, &dwSize, NULL))
+	  || (!SystemTimeToFileTime(&ServerTime, &FileTime)) )
+		goto out;
+	server_time = ((((int64_t)FileTime.dwHighDateTime)<<32) + FileTime.dwLowDateTime) / 10000000;
+	uuuprintf("Server time: %" PRId64 "\n", server_time);
+	// Always store the server response time - the only clock we trust!
+	WriteRegistryKey64(REGKEY_LAST_UPDATE, server_time);
+	// Might as well let the user know
+	if (local_time > server_time + 600) {
+		uprintf("Your local clock seems more than 10 minutes early - You probably want to fix that...\n");
+	}
+	if (local_time < server_time - 600) {
+		uprintf("Your local clock seems more than 10 minutes late - you probably want to fix that...\n");
+	}
+
+	dwSize = sizeof(dwTotalSize);
+	if (!HttpQueryInfoA(hRequest, HTTP_QUERY_CONTENT_LENGTH|HTTP_QUERY_FLAG_NUMBER, (LPVOID)&dwTotalSize, &dwSize, NULL))
+		goto out;
+
+	buf = (char*)calloc(dwTotalSize+1, 1);
+	// Our buffer is always supposed to be large enough, and our read is always supposed to be in one go
+	if (!InternetReadFile(hRequest, buf, dwTotalSize, &dwDownloaded) || (dwDownloaded != dwTotalSize))
+		goto out;
+
+	uuprintf("Successfully downloaded version file %s (%d bytes)\n", url, dwTotalSize);
+	uuprintf("%s\n", buf);
+	r = TRUE;
+
+out:
+	safe_free(buf);
+	if (hRequest) InternetCloseHandle(hRequest);
+	if (hConnection) InternetCloseHandle(hConnection);
+	if (hSession) InternetCloseHandle(hSession);
 	return r;
 }

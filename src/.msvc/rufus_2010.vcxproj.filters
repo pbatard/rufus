@@ -92,7 +92,7 @@
     <ClInclude Include="..\libcdio\cdio\udf.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\net.h">
+    <ClInclude Include="..\registry.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

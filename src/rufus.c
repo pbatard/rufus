@@ -1625,6 +1625,17 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			break;
 #ifdef RUFUS_TEST
 		case IDC_TEST:
+			CheckForUpdates("http://rufus.akeo.ie/rufus.ver");
+/*
+			InitProgress();
+			if (!IsWindow(hISOProgressDlg)) { 
+				hISOProgressDlg = CreateDialogA(hMainInstance, MAKEINTRESOURCEA(IDD_ISO_EXTRACT),
+					hDlg, (DLGPROC)ISOProc); 
+				// The window is not visible by default but takes focus => restore it
+				SetFocus(hDlg);
+			} 
+			DownloadFile("http://cloud.github.com/downloads/pbatard/rufus/vesamenu.c32", "vesamenu.c32");
+*/
 			break;
 #endif
 		case IDC_ADVANCED:

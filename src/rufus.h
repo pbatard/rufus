@@ -24,7 +24,7 @@
 /* Program options */
 #define RUFUS_DEBUG                 // print debug info to Debug facility
 /* Features not ready for prime time and that may *DESTROY* your data - USE AT YOUR OWN RISKS! */
-//#define RUFUS_TEST
+#define RUFUS_TEST
 
 #define STR_NO_LABEL                "NO_LABEL"
 #define RUFUS_CANCELBOX_TITLE       "Rufus - Cancellation"
@@ -238,6 +238,7 @@ extern char* FileDialog(BOOL save, char* path, char* filename, char* ext, char* 
 extern BOOL FileIO(BOOL save, char* path, char** buffer, DWORD* size);
 extern LONG GetEntryWidth(HWND hDropDown, const char* entry);
 extern BOOL DownloadFile(const char* url, const char* file);
+extern BOOL CheckForUpdates(const char* url);
 extern BOOL IsShown(HWND hDlg);
 extern char* get_token_data(const char* filename, const char* token);
 extern char* insert_section_data(const char* filename, const char* section, const char* data, BOOL dos2unix);

@@ -17,6 +17,7 @@ TARGETLIBS=$(SDK_LIB_PATH)\kernel32.lib \
            $(SDK_LIB_PATH)\ole32.lib \
            $(SDK_LIB_PATH)\uuid.lib \
            $(SDK_LIB_PATH)\shell32.lib \
+           $(SDK_LIB_PATH)\wininet.lib \
            .\ms-sys\ms-sys.lib \
            .\syslinux\libfat\libfat.lib \
            .\syslinux\libinstaller\libinstaller.lib \
