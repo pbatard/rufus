@@ -34,11 +34,11 @@ extern "C" {
 /*
  * List of registry keys used by this application
  */
-// Dispa
 #define REGKEY_VERBOSE_UPDATES      "VerboseUpdateCheck"
 #define REGKEY_DISABLE_UPDATES      "DisableUpdateCheck"
 #define REGKEY_LAST_UPDATE          "LastUpdateCheck"
 #define REGKEY_UPDATE_INTERVAL      "UpdateCheckInterval"
+#define REGKEY_LAST_VERSION_SEEN    "LastVersionSeen"
 
 
 /* Read a generic registry key value (create the app key if it doesn't exist) */

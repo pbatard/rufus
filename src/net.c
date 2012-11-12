@@ -455,12 +455,14 @@ BOOL CheckForUpdates(const char* url)
 		goto out;
 
 	buf = (char*)calloc(dwTotalSize+1, 1);
-	// Our buffer is always supposed to be large enough, and our read is always supposed to be in one go
+	if (buf == NULL) goto out;
+	// This is a version file, so we should be able to do it in one go
 	if (!InternetReadFile(hRequest, buf, dwTotalSize, &dwDownloaded) || (dwDownloaded != dwTotalSize))
 		goto out;
 
 	uuprintf("Successfully downloaded version file %s (%d bytes)\n", url, dwTotalSize);
-	uuprintf("%s\n", buf);
+
+	parse_update(buf);
 	r = TRUE;
 
 out:

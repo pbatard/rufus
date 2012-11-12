@@ -170,7 +170,7 @@ BOOL GetDriveLabel(DWORD DriveIndex, char* letter, char** label)
 	// to insert media. Use IOCTL_STORAGE_CHECK_VERIFY to prevent this
 	hPhysical = GetDriveHandle(DriveIndex, NULL, FALSE, FALSE);
 	if (DeviceIoControl(hPhysical, IOCTL_STORAGE_CHECK_VERIFY, NULL, 0, NULL, 0, &size, NULL))
-		AutorunLabel = get_token_data(AutorunPath, "label");
+		AutorunLabel = get_token_data_file("label", AutorunPath);
 	else if (GetLastError() == ERROR_NOT_READY)
 		uprintf("Ignoring autorun.inf label for drive %c: %s\n", *letter,
 		(HRESULT_CODE(GetLastError()) == ERROR_NOT_READY)?"No media":WindowsErrorString());

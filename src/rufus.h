@@ -240,9 +240,11 @@ extern LONG GetEntryWidth(HWND hDropDown, const char* entry);
 extern BOOL DownloadFile(const char* url, const char* file);
 extern BOOL CheckForUpdates(const char* url);
 extern BOOL IsShown(HWND hDlg);
-extern char* get_token_data(const char* filename, const char* token);
+extern char* get_token_data_file(const char* token, const char* filename);
+extern char* get_token_data_buffer(const char* token, unsigned int n, const char* buffer, size_t buffer_size);
 extern char* insert_section_data(const char* filename, const char* section, const char* data, BOOL dos2unix);
 extern char* replace_in_token_data(const char* filename, const char* token, const char* src, const char* rep, BOOL dos2unix);
+extern void parse_update(char* buf);
 
 __inline static BOOL UnlockDrive(HANDLE hDrive)
 {

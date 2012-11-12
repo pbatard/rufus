@@ -480,7 +480,7 @@ out:
 			safe_sprintf(path, sizeof(path), "/%s/txtsetup.sif", 
 				basedir[((iso_report.winpe&WINPE_I386) == WINPE_I386)?0:1]);
 			ExtractISOFile(src_iso, path, tmp_sif);
-			tmp = get_token_data(tmp_sif, "OsLoadOptions");
+			tmp = get_token_data_file("OsLoadOptions", tmp_sif);
 			if (tmp != NULL) {
 				for (i=0; i<strlen(tmp); i++)
 					tmp[i] = (char)tolower(tmp[i]);
