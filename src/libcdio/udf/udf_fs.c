@@ -257,7 +257,8 @@ udf_fopen(udf_dirent_t *p_udf_root, const char *psz_name)
 		       p_udf_root->psz_name, p_udf_root->b_dir, 
 		       p_udf_root->b_parent);
       p_udf_file = udf_ff_traverse(p_udf_dirent, psz_token);
-      udf_dirent_free(p_udf_dirent);
+      if (p_udf_file != p_udf_dirent)
+        udf_dirent_free(p_udf_dirent);
     }
     else if ( 0 == strncmp("/", psz_name, sizeof("/")) ) {
       return udf_new_dirent(&p_udf_root->fe, p_udf_root->p_udf,
