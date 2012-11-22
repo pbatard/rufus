@@ -18,6 +18,7 @@
  */
 #include <windows.h>
 #include <stdint.h>
+#include "rufus.h"
 
 #pragma once
 
@@ -26,13 +27,8 @@ extern "C" {
 #endif
 
 /*
- * Application root subkey, under HKCU\Software
- * Typically "<Company Name>\<Application>"
- */
-#define REGKEY_APPLICATION          "Akeo Systems\\Rufus"
-
-/*
  * List of registry keys used by this application
+ * These keys go into HKCU\Software\COMPANY_NAME\APPLICATION_NAME\
  */
 #define REGKEY_VERBOSE_UPDATES      "VerboseUpdateCheck"
 #define REGKEY_DISABLE_UPDATES      "DisableUpdateCheck"
@@ -40,8 +36,29 @@ extern "C" {
 #define REGKEY_UPDATE_INTERVAL      "UpdateCheckInterval"
 #define REGKEY_LAST_VERSION_SEEN    "LastVersionSeen"
 
+/* Delete a registry key from HKCU\Software and all its subkeys
+   If the key has subkeys, this call will fail. */
+static __inline BOOL DeleteRegistryKey(const char* key_name)
+{
+	HKEY hSoftware = NULL;
+	LSTATUS s;
 
-/* Read a generic registry key value (create the app key if it doesn't exist) */
+	if (RegOpenKeyExA(HKEY_CURRENT_USER, "SOFTWARE", 0, KEY_READ|KEY_CREATE_SUB_KEY, &hSoftware) != ERROR_SUCCESS) {
+		return FALSE;
+	}
+	ERROR_SUCCESS;
+
+	s = RegDeleteKeyA(hSoftware, key_name);
+	if ((s != ERROR_SUCCESS) && (s != ERROR_FILE_NOT_FOUND)) {
+		SetLastError(s);
+		uprintf("Failed to delete registry key HKCU\\Software\\%s: %s", key_name,
+			(s == ERROR_ACCESS_DENIED)?"Key is not empty":WindowsErrorString());
+	}
+	RegCloseKey(hSoftware);
+	return ((s == ERROR_SUCCESS) || (s == ERROR_FILE_NOT_FOUND));
+}
+
+/* Read a generic registry key value (create the key if it doesn't exist) */
 static __inline BOOL _GetRegistryKey(const char* key_name, DWORD reg_type, LPBYTE dest, DWORD dest_size)
 {
 	BOOL r = FALSE;
@@ -51,7 +68,7 @@ static __inline BOOL _GetRegistryKey(const char* key_name, DWORD reg_type, LPBYT
 	memset(dest, 0, dest_size);
 
 	if ( (RegOpenKeyExA(HKEY_CURRENT_USER, "SOFTWARE", 0, KEY_READ|KEY_CREATE_SUB_KEY, &hSoftware) != ERROR_SUCCESS)
-	  || (RegCreateKeyExA(hSoftware, REGKEY_APPLICATION, 0, NULL, 0,
+	  || (RegCreateKeyExA(hSoftware, COMPANY_NAME "\\" APPLICATION_NAME, 0, NULL, 0,
 		KEY_SET_VALUE|KEY_QUERY_VALUE|KEY_CREATE_SUB_KEY, NULL, &hApp, &dwDisp) != ERROR_SUCCESS) ) {
 		goto out;
 	}
@@ -67,7 +84,7 @@ out:
 	return r;
 }
 
-/* Write a generic registry key value (create the app if it doesn't exist) */
+/* Write a generic registry key value (create the key if it doesn't exist) */
 static __inline BOOL _SetRegistryKey(const char* key_name, DWORD reg_type, LPBYTE src, DWORD src_size)
 {
 	BOOL r = FALSE;
@@ -75,7 +92,7 @@ static __inline BOOL _SetRegistryKey(const char* key_name, DWORD reg_type, LPBYT
 	DWORD dwDisp, dwType = reg_type;
 
 	if ( (RegOpenKeyExA(HKEY_CURRENT_USER, "SOFTWARE", 0, KEY_READ|KEY_CREATE_SUB_KEY, &hSoftware) != ERROR_SUCCESS)
-	  || (RegCreateKeyExA(hSoftware, REGKEY_APPLICATION, 0, NULL, 0,
+	  || (RegCreateKeyExA(hSoftware, COMPANY_NAME "\\" APPLICATION_NAME, 0, NULL, 0,
 		KEY_SET_VALUE|KEY_QUERY_VALUE|KEY_CREATE_SUB_KEY, NULL, &hApp, &dwDisp) != ERROR_SUCCESS) ) {
 		goto out;
 	}

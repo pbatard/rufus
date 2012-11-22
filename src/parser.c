@@ -208,19 +208,21 @@ static __inline char* get_sanitized_token_data_buffer(const char* token, unsigne
 }
 
 // Parse an update data file and populates a rufus_update structure.
-// NB: since this is remote data, and we're running elevated, even if it comes from a
-// supposedly trusted server, it *IS* considered potentially malicious, so we treat
-// it as such
-void parse_update(char* buf)
+// NB: since this is remote data, and we're running elevated, it *IS* considered
+// potentially malicioueven if it comes from a supposedly trusted server.
+// len should be the size of the buffer - 1, for the zero terminator
+void parse_update(char* buf, size_t len)
 {
-	size_t i, len = safe_strlen(buf);
+	size_t i;
 	char *data = NULL, *token;
 	char allowed_chars[] = " \t\r\nabcdefghijklmnopqrstuvwxyz"
 		"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!\"$%^&*()-_+=<>(){}[].,:;#@'/?|~";
 	rufus_update update;
 
+	if ((buf == NULL) || (len < 2) || (len > 65536) || (buf[len-1] != 0))
+		return;
 	// Sanitize the data - Of course not a silver bullet, but it helps
-	for (i=0; i<len; i++) {
+	for (i=0; i<len-1; i++) {
 		// Do not sanitize \n yet
 		// NB: we have a zero terminator, so we can afford a +1 without overflow
 		if ((strchr(allowed_chars, buf[i]) == NULL) && (buf[i] != '\\') && (buf[i+1] != 'n')) {
@@ -228,21 +230,21 @@ void parse_update(char* buf)
 		}
 	}
 
-	if ((data = get_sanitized_token_data_buffer("version", 1, buf, len+1)) != NULL) {
+	if ((data = get_sanitized_token_data_buffer("version", 1, buf, len)) != NULL) {
 		for (i=0; (i<4) && ((token = strtok((i==0)?data:NULL, ".")) != NULL); i++) {
 			update.version[i] = (uint8_t)atoi(token);
 		}
 		safe_free(data);
 	}
 	// TODO: use X-Macros?
-	update.type = get_sanitized_token_data_buffer("type", 1, buf, len+1);
-	update.platform = get_sanitized_token_data_buffer("platform", 1, buf, len+1);
-	update.platform_arch = get_sanitized_token_data_buffer("platform_arch", 1, buf, len+1);
-	update.platform_min = get_sanitized_token_data_buffer("platform_min", 1, buf, len+1);
+	update.type = get_sanitized_token_data_buffer("type", 1, buf, len);
+	update.platform = get_sanitized_token_data_buffer("platform", 1, buf, len);
+	update.platform_arch = get_sanitized_token_data_buffer("platform_arch", 1, buf, len);
+	update.platform_min = get_sanitized_token_data_buffer("platform_min", 1, buf, len);
 	for (i=0; i<ARRAYSIZE(update.download_url); i++) {
-		update.download_url[i] = get_sanitized_token_data_buffer("download_url", (unsigned int)i+1, buf, len+1);
+		update.download_url[i] = get_sanitized_token_data_buffer("download_url", (unsigned int)i+1, buf, len);
 	}
-	update.release_notes = get_sanitized_token_data_buffer("release_notes", 1, buf, len+1);
+	update.release_notes = get_sanitized_token_data_buffer("release_notes", 1, buf, len);
 
 	uprintf("UPDATE DATA:\n");
 	uprintf("  version: %d.%d.%d.%d\n", update.version[0], update.version[1], update.version[2], update.version[3]);

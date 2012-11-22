@@ -38,6 +38,7 @@
 #include "resource.h"
 #include "rufus.h"
 #include "sys_types.h"
+#include "registry.h"
 
 /* Redefinitions for the WDK */
 #ifndef PBM_SETSTATE
@@ -1625,7 +1626,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			break;
 #ifdef RUFUS_TEST
 		case IDC_TEST:
-			CheckForUpdates("http://rufus.akeo.ie/rufus.ver");
+			CheckForUpdates();
 /*
 			InitProgress();
 			if (!IsWindow(hISOProgressDlg)) { 
@@ -1956,13 +1957,18 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	while(GetMessage(&msg, NULL, 0, 0)) {
 		// The following ensures the processing of the ISO progress window messages
 		if (!IsWindow(hISOProgressDlg) || !IsDialogMessage(hISOProgressDlg, &msg)) {
-			// Alt-S => Disable size limit
+			// Alt-S => Disable size limit for ISOs
+			// By default, Rufus will not copy ISOs that are larger than in size than 
+			// the target USB drive. If this is enabled, the size check is disabled.
 			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'S')) {
 				iso_size_check = !iso_size_check;
 				PrintStatus(2000, FALSE, "ISO size check %s.", iso_size_check?"enabled":"disabled");
 				continue;
 			}
-			// Alt-F => toggle detection of fixed disks
+			// Alt-F => Toggle detection of fixed disks
+			// By default Rufus does not allow formatting USB fixed disk drives, such as USB HDDs
+			// This is a safety feature, to avoid someone unintentionally formatting a backup 
+			// drive instead of an USB key. If this is enabled, Rufus will allow fixed disk formatting.
 			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'F')) {
 				enable_fixed_disks = !enable_fixed_disks;
 				PrintStatus(2000, FALSE, "Fixed disks detection %s.", enable_fixed_disks?"enabled":"disabled");
@@ -1970,15 +1976,28 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 				continue;
 			}
 			// Alt-D => Delete the NoDriveTypeAutorun key on exit (useful if the app crashed)
+			// This key is used to disable Windows popup messages when an USB drive is plugged in.
 			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'D')) {
 				PrintStatus(2000, FALSE, "NoDriveTypeAutorun will be deleted on exit.");
 				existing_key = FALSE;
 				continue;
 			}
-			// Alt K => Toggle fake drive detection during bad blocks check (enabled by default)
+			// Alt K => Toggle fake drive detection during bad blocks check
+			// By default, Rufus will check for fake USB flash drives that mistakenly present 
+			// more capacity than they already have by looping over the flash. This check which
+			// is enabled by default is performed by writing the block number sequence and reading
+			// it back during the bad block check.
 			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'K')) {
 				detect_fakes = !detect_fakes;
 				PrintStatus(2000, FALSE, "Fake drive detection %s.", detect_fakes?"enabled":"disabled");
+				continue;
+			}
+			// Alt-R => Remove all the registry settings created by Rufus by deleting the registry key
+			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'R')) {
+				PrintStatus(2000, FALSE, "Application registry key %s deleted.",
+					DeleteRegistryKey(COMPANY_NAME "\\" APPLICATION_NAME)?"successfully":"could not be");
+				// Also try to delete the upper key (company name) if it's empty (don't care about the result)
+				DeleteRegistryKey(COMPANY_NAME);
 				continue;
 			}
 			TranslateMessage(&msg);

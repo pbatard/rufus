@@ -26,6 +26,8 @@
 /* Features not ready for prime time and that may *DESTROY* your data - USE AT YOUR OWN RISKS! */
 #define RUFUS_TEST
 
+#define APPLICATION_NAME            "Rufus"
+#define COMPANY_NAME                "Akeo Consulting"
 #define STR_NO_LABEL                "NO_LABEL"
 #define RUFUS_CANCELBOX_TITLE       "Rufus - Cancellation"
 #define RUFUS_BLOCKING_IO_TITLE     "Rufus - Flushing buffers"
@@ -75,6 +77,8 @@
 #ifdef RUFUS_DEBUG
 extern void _uprintf(const char *format, ...);
 #define uprintf(...) _uprintf(__VA_ARGS__)
+#define vuprintf(...) if (verbose) _uprintf(__VA_ARGS__)
+#define vvuprintf(...) if (verbose > 1) _uprintf(__VA_ARGS__)
 #else
 #define uprintf(...)
 #endif
@@ -238,13 +242,13 @@ extern char* FileDialog(BOOL save, char* path, char* filename, char* ext, char* 
 extern BOOL FileIO(BOOL save, char* path, char** buffer, DWORD* size);
 extern LONG GetEntryWidth(HWND hDropDown, const char* entry);
 extern BOOL DownloadFile(const char* url, const char* file);
-extern BOOL CheckForUpdates(const char* url);
+extern BOOL CheckForUpdates(void);
 extern BOOL IsShown(HWND hDlg);
 extern char* get_token_data_file(const char* token, const char* filename);
 extern char* get_token_data_buffer(const char* token, unsigned int n, const char* buffer, size_t buffer_size);
 extern char* insert_section_data(const char* filename, const char* section, const char* data, BOOL dos2unix);
 extern char* replace_in_token_data(const char* filename, const char* token, const char* src, const char* rep, BOOL dos2unix);
-extern void parse_update(char* buf);
+extern void parse_update(char* buf, size_t len);
 
 __inline static BOOL UnlockDrive(HANDLE hDrive)
 {

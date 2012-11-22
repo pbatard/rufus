@@ -273,7 +273,7 @@ BOOL DownloadFile(const char* url, const char* file)
 		uprintf("Network is unavailable: %s\n", WinInetErrorString());
 		goto out;
 	}
-	_snprintf(agent, ARRAYSIZE(agent), "Rufus/%d.%d.%d.%d", rufus_version[0], rufus_version[1], rufus_version[2], rufus_version[3]);
+	_snprintf(agent, ARRAYSIZE(agent), APPLICATION_NAME "/%d.%d.%d.%d", rufus_version[0], rufus_version[1], rufus_version[2], rufus_version[3]);
 	hSession = InternetOpenA(agent, INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
 	if (hSession == NULL) {
 		uprintf("Could not open internet session: %s\n", WinInetErrorString());
@@ -364,26 +364,32 @@ out:
 	return r;
 }
 
-#define uuprintf if(verbose) uprintf
-#define uuuprintf if(verbose>1) uprintf
-// TODO: call this from a thread that will launch the download if successful
-BOOL CheckForUpdates(const char* url)
+// TODO: check that no format operation is occurring
+DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 {
+	const char* server_url = RUFUS_URL "/";
 	BOOL r = FALSE;
-	int verbose = 2;
+	int i, j, verbose = 2, verpos[4];
+	static char* archname[] = {"win_x86", "win_x64"};
 	DWORD dwFlags, dwSize, dwDownloaded, dwTotalSize, dwStatus;
 	char* buf = NULL;
 	char agent[64], hostname[64], urlpath[128], mime[32];
+	OSVERSIONINFOA os_version = {sizeof(OSVERSIONINFOA), 0, 0, 0, 0, ""};
 	HINTERNET hSession = NULL, hConnection = NULL, hRequest = NULL;
 	URL_COMPONENTSA UrlParts = {sizeof(URL_COMPONENTSA), NULL, 1, (INTERNET_SCHEME)0,
 		hostname, sizeof(hostname), 0, NULL, 1, urlpath, sizeof(urlpath), NULL, 1};
 	SYSTEMTIME ServerTime, LocalTime;
 	FILETIME FileTime;
 	int64_t local_time, reg_time, server_time, update_interval;
+	BOOL is_x64 = FALSE, (__stdcall *pIsWow64Process)(HANDLE, PBOOL) = NULL;
 
-	verbose = ReadRegistryKey32(REGKEY_VERBOSE_UPDATES);
+	// Wait a while before checking for updates
+	// TODO: start the thread in sleep mode and only wake it on user inactivity?
+//	Sleep(15000);
+
+//	verbose = ReadRegistryKey32(REGKEY_VERBOSE_UPDATES);
 	if (GetRegistryKeyBool(REGKEY_DISABLE_UPDATES)) {
-		uuprintf("Check for updates disabled, as per registry settings.\n");
+		vuprintf("Check for updates disabled, as per registry settings.\n");
 		return FALSE;
 	}
 	reg_time = ReadRegistryKey64(REGKEY_LAST_UPDATE);
@@ -396,18 +402,35 @@ BOOL CheckForUpdates(const char* url)
 	if (!SystemTimeToFileTime(&LocalTime, &FileTime))
 		goto out;
 	local_time = ((((int64_t)FileTime.dwHighDateTime)<<32) + FileTime.dwLowDateTime) / 10000000;
-	uuuprintf("Local time: %" PRId64 "\n", local_time);
+	vvuprintf("Local time: %" PRId64 "\n", local_time);
 	if (local_time < reg_time + update_interval) {
-		uuprintf("Next update check in %" PRId64 " seconds.\n", reg_time + update_interval - local_time);
+		vuprintf("Next update check in %" PRId64 " seconds.\n", reg_time + update_interval - local_time);
 		return FALSE;
 	}
 
-	PrintStatus(3000, FALSE, "Checking for Rufus updates...\n");
+	PrintStatus(3000, FALSE, "Checking for " APPLICATION_NAME " updates...\n");
 
-	if ((!InternetCrackUrlA(url, safe_strlen(url), 0, &UrlParts)) || (!InternetGetConnectedState(&dwFlags, 0)))
+	if (!GetVersionExA(&os_version)) {
+		vuprintf("Could not read Windows version - Check for updates cancelled.\n");
+		return FALSE;
+	}
+
+	// Detect if the OS is 64 bit, without relying on external libs
+	if (sizeof(uintptr_t) < 8) {
+		// This application is not 64 bit, but it might be 32 bit running in WOW64
+		pIsWow64Process = (BOOL (__stdcall *)(HANDLE, PBOOL))
+			GetProcAddress(GetModuleHandleA("KERNEL32"), "IsWow64Process");
+		if (pIsWow64Process != NULL) {
+			(*pIsWow64Process)(GetCurrentProcess(), &is_x64);
+		}
+	} else {
+		is_x64 = TRUE;
+	}
+
+	if ((!InternetCrackUrlA(server_url, safe_strlen(server_url), 0, &UrlParts)) || (!InternetGetConnectedState(&dwFlags, 0)))
 		goto out;
 
-	_snprintf(agent, ARRAYSIZE(agent), "Rufus/%d.%d.%d.%d", rufus_version[0], rufus_version[1], rufus_version[2], rufus_version[3]);
+	_snprintf(agent, ARRAYSIZE(agent), APPLICATION_NAME "/%d.%d.%d.%d", rufus_version[0], rufus_version[1], rufus_version[2], rufus_version[3]);
 	hSession = InternetOpenA(agent, INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
 	if (hSession == NULL)
 		goto out;
@@ -415,17 +438,52 @@ BOOL CheckForUpdates(const char* url)
 	if (hConnection == NULL)
 		goto out;
 
-	hRequest = HttpOpenRequestA(hConnection, "GET", UrlParts.lpszUrlPath, NULL, NULL, (const char**)"*/*\0",
-		INTERNET_FLAG_HYPERLINK|INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTP|INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTPS|INTERNET_FLAG_NO_COOKIES|
-		INTERNET_FLAG_NO_UI|INTERNET_FLAG_NO_CACHE_WRITE, (DWORD_PTR)NULL);
-	if ((hRequest == NULL) || (!HttpSendRequest(hRequest, NULL, 0, NULL, 0)))
-		goto out;
+	// At this stage we can query the server for various update version files.
+	// We first try to lookup for "<appname>_<os_arch>_<os_version_major>_<os_version_minor>.ver"
+	// and then remove each each of the <os_> components until we find our match. For instance, we may first
+	// look for rufus_win_x64_6.2.ver (Win8 x64) but only get a match for rufus_win_x64_6.ver (Vista x64 or later)
+	// This allows sunsetting OS versions (eg XP) or providing different downloads for different archs/groups.
 
-	// Ensure that we get a text file
-	dwSize = sizeof(dwStatus);
-	dwStatus = 404;
-	HttpQueryInfoA(hRequest, HTTP_QUERY_STATUS_CODE|HTTP_QUERY_FLAG_NUMBER, (LPVOID)&dwStatus, &dwSize, NULL);
-	if (dwStatus != 200) goto out;
+	safe_sprintf(urlpath, sizeof(urlpath), "%s_%s_%d.%d.ver", APPLICATION_NAME,
+		archname[is_x64?1:0], os_version.dwMajorVersion, os_version.dwMinorVersion);
+	uprintf("Base update check: %s\n", urlpath);
+	for (i=0, j=safe_strlen(urlpath)-5; (j>0)&&(i<ARRAYSIZE(verpos)); j--) {
+		if ((urlpath[j] == '.') || (urlpath[j] == '_')) {
+			verpos[i++] = j;
+		}
+	}
+	if (i != ARRAYSIZE(verpos)) {
+		uprintf("Fix your code in CheckForUpdatesThread()!\n");
+		goto out;
+	}
+
+	UrlParts.lpszUrlPath = urlpath;
+	UrlParts.dwUrlPathLength = sizeof(urlpath);
+	for (i=0; i<ARRAYSIZE(verpos); i++) {
+		vvuprintf("Trying %s\n", UrlParts.lpszUrlPath);
+		hRequest = HttpOpenRequestA(hConnection, "GET", UrlParts.lpszUrlPath, NULL, NULL, (const char**)"*/*\0",
+			INTERNET_FLAG_HYPERLINK|INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTP|INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTPS|INTERNET_FLAG_NO_COOKIES|
+			INTERNET_FLAG_NO_UI|INTERNET_FLAG_NO_CACHE_WRITE, (DWORD_PTR)NULL);
+		if ((hRequest == NULL) || (!HttpSendRequest(hRequest, NULL, 0, NULL, 0)))
+			goto out;
+
+		// Ensure that we get a text file
+		dwSize = sizeof(dwStatus);
+		dwStatus = 404;
+		HttpQueryInfoA(hRequest, HTTP_QUERY_STATUS_CODE|HTTP_QUERY_FLAG_NUMBER, (LPVOID)&dwStatus, &dwSize, NULL);
+		if (dwStatus == 200) {
+			vvuprintf("Found.");
+			break;
+		}
+		InternetCloseHandle(hRequest);
+		hRequest = NULL;
+		safe_strcpy(&urlpath[verpos[i]], 5, ".ver");
+	}
+	if (dwStatus != 200) {
+		vuprintf("Unable to find a version file on server");
+		goto out;
+	}
+
 	dwSize = sizeof(mime);
 	HttpQueryInfoA(hRequest, HTTP_QUERY_CONTENT_TYPE, (LPVOID)&mime, &dwSize, NULL);
 	if (strcmp(mime, "text/plain") != 0)
@@ -439,7 +497,7 @@ BOOL CheckForUpdates(const char* url)
 	  || (!SystemTimeToFileTime(&ServerTime, &FileTime)) )
 		goto out;
 	server_time = ((((int64_t)FileTime.dwHighDateTime)<<32) + FileTime.dwLowDateTime) / 10000000;
-	uuuprintf("Server time: %" PRId64 "\n", server_time);
+	vvuprintf("Server time: %" PRId64 "\n", server_time);
 	// Always store the server response time - the only clock we trust!
 	WriteRegistryKey64(REGKEY_LAST_UPDATE, server_time);
 	// Might as well let the user know
@@ -454,15 +512,16 @@ BOOL CheckForUpdates(const char* url)
 	if (!HttpQueryInfoA(hRequest, HTTP_QUERY_CONTENT_LENGTH|HTTP_QUERY_FLAG_NUMBER, (LPVOID)&dwTotalSize, &dwSize, NULL))
 		goto out;
 
+	// Make sure the file is NUL terminated 
 	buf = (char*)calloc(dwTotalSize+1, 1);
 	if (buf == NULL) goto out;
 	// This is a version file, so we should be able to do it in one go
 	if (!InternetReadFile(hRequest, buf, dwTotalSize, &dwDownloaded) || (dwDownloaded != dwTotalSize))
 		goto out;
 
-	uuprintf("Successfully downloaded version file %s (%d bytes)\n", url, dwTotalSize);
+	vuprintf("Successfully downloaded version file (%d bytes)\n", dwTotalSize);
 
-	parse_update(buf);
+	parse_update(buf, dwTotalSize+1);
 	r = TRUE;
 
 out:
@@ -470,5 +529,17 @@ out:
 	if (hRequest) InternetCloseHandle(hRequest);
 	if (hConnection) InternetCloseHandle(hConnection);
 	if (hSession) InternetCloseHandle(hSession);
-	return r;
+
+	ExitThread(0);
+}
+
+BOOL CheckForUpdates(void)
+{
+	// TODO: check registry for disabled update
+	if (CreateThread(NULL, 0, CheckForUpdatesThread, NULL, 0, 0) == NULL) {
+		uprintf("Unable to start check for updates thread");
+		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_START_THREAD);
+	}
+
+	return TRUE;
 }
