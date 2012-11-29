@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Standard Dialog Routines (Browse for folder, About, etc)
- * Copyright (c) 2011-2012 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2012 Pete Batard <pete@akeo.ie>
  *
  * Based on zadig_stdlg.c, part of libwdi: http://libwdi.sf.net
  *
@@ -63,8 +63,10 @@ static char* szMessageTitle = NULL;
 enum WindowsVersion nWindowsVersion = WINDOWS_UNSUPPORTED;
 static HWND hBrowseEdit;
 static WNDPROC pOrgBrowseWndproc;
-HFONT hBoldFont = NULL;
 static const SETTEXTEX friggin_microsoft_unicode_amateurs = {ST_DEFAULT, CP_UTF8};
+static BOOL notification_is_question;
+static WORD notification_info_id;
+static Callback_t notification_info_callback;
 
 /*
  * Detect Windows version
@@ -561,30 +563,6 @@ fallback:
 	return filepath;
 }
 
-void CreateBoldFont(HDC dc) {
-	TEXTMETRIC tm;
-	LOGFONT lf;
-
-	if (hBoldFont != NULL)
-		return;
-	GetTextMetrics(dc, &tm);
-	lf.lfHeight = tm.tmHeight+1;
-	lf.lfWidth = tm.tmAveCharWidth+1;
-	lf.lfEscapement = 0;
-	lf.lfOrientation = 0;
-	lf.lfWeight = FW_BOLD;
-	lf.lfItalic = tm.tmItalic;
-	lf.lfUnderline = FALSE;
-	lf.lfStrikeOut = tm.tmStruckOut;
-	lf.lfCharSet = tm.tmCharSet;
-	lf.lfOutPrecision = OUT_DEFAULT_PRECIS;
-	lf.lfClipPrecision = CLIP_DEFAULT_PRECIS;
-	lf.lfQuality = DEFAULT_QUALITY;
-	lf.lfPitchAndFamily = tm.tmPitchAndFamily;
-	GetTextFace(dc, LF_FACESIZE, lf.lfFaceName);
-	hBoldFont = CreateFontIndirect(&lf);
-}
-
 /*
  * Create the application status bar
  */
@@ -696,14 +674,6 @@ INT_PTR CALLBACK AboutCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 			SendMessage(hEdit[i], EM_SETBKGNDCOLOR, 0, (LPARAM)GetSysColor(COLOR_BTNFACE));
 		}
 		break;
-	case WM_CTLCOLORSTATIC:
-		if ((HWND)lParam == GetDlgItem(hDlg, IDC_RUFUS_BOLD)) {
-			CreateBoldFont((HDC)wParam);
-			SetBkMode((HDC)wParam, TRANSPARENT);
-			SelectObject((HDC)wParam, hBoldFont);
-			return (INT_PTR)CreateSolidBrush(GetSysColor(COLOR_BTNFACE));
-		}
-		break;
 	case WM_NOTIFY:
 		switch (((LPNMHDR)lParam)->code) {
 		case EN_LINK:
@@ -739,53 +709,6 @@ INT_PTR CreateAboutBox(void)
 }
 
 /*
- * Update policy and settings dialog callback
- */
-INT_PTR CALLBACK UpdateCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
-{
-	HWND hPolicy, hCombo;
-
-	switch (message) {
-	case WM_INITDIALOG:
-		CenterDialog(hDlg);
-		hCombo = GetDlgItem(hDlg, IDC_UPDATE_FREQUENCY);
-		IGNORE_RETVAL(ComboBox_SetItemData(hCombo, ComboBox_AddStringU(hCombo, "Never (Disabled)"), -1));
-		IGNORE_RETVAL(ComboBox_SetItemData(hCombo, ComboBox_AddStringU(hCombo, "Daily (Default)"), 86400));
-		IGNORE_RETVAL(ComboBox_SetItemData(hCombo, ComboBox_AddStringU(hCombo, "Weekly"), 604800));
-		IGNORE_RETVAL(ComboBox_SetItemData(hCombo, ComboBox_AddStringU(hCombo, "Monthly"), 2629800));
-		IGNORE_RETVAL(ComboBox_SetCurSel(hCombo, 1));
-		hCombo = GetDlgItem(hDlg, IDC_INCLUDE_BETAS);
-		IGNORE_RETVAL(ComboBox_AddStringU(hCombo, "No"));
-		IGNORE_RETVAL(ComboBox_AddStringU(hCombo, "Yes"));
-		IGNORE_RETVAL(ComboBox_SetCurSel(hCombo, 0));
-		hPolicy = GetDlgItem(hDlg, IDC_UPDATES_POLICY);
-		SendMessage(hPolicy, EM_AUTOURLDETECT, 1, 0);
-		SendMessageA(hPolicy, EM_SETTEXTEX, (WPARAM)&friggin_microsoft_unicode_amateurs, (LPARAM)update_policy);
-		SendMessage(hPolicy, EM_SETSEL, -1, -1);
-		SendMessage(hPolicy, EM_SETEVENTMASK, 0, ENM_LINK);
-		SendMessageA(hPolicy, EM_SETBKGNDCOLOR, 0, (LPARAM)GetSysColor(COLOR_BTNFACE));
-		break;
-	case WM_CTLCOLORSTATIC:
-		if ((HWND)lParam == GetDlgItem(hDlg, IDC_RUFUS_BOLD)) {
-			CreateBoldFont((HDC)wParam);
-			SetBkMode((HDC)wParam, TRANSPARENT);
-			SelectObject((HDC)wParam, hBoldFont);
-			return (INT_PTR)CreateSolidBrush(GetSysColor(COLOR_BTNFACE));
-		}
-		break;
-	case WM_COMMAND:
-		switch (LOWORD(wParam)) {
-		case IDOK:
-		case IDCANCEL:
-			EndDialog(hDlg, LOWORD(wParam));
-			return (INT_PTR)TRUE;
-		}
-		break;
-	}
-	return (INT_PTR)FALSE;
-}
-
-/*
  * We use our own MessageBox for notifications to have greater control (center, no close button, etc)
  */
 INT_PTR CALLBACK NotificationCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
@@ -810,6 +733,15 @@ INT_PTR CALLBACK NotificationCallback(HWND hDlg, UINT message, WPARAM wParam, LP
 		if (szMessageTitle != NULL) {
 			SetWindowTextA(hDlg, szMessageTitle);
 		}
+		// Enable/disable the buttons and set text
+		if (!notification_is_question) {
+			SetWindowTextA(GetDlgItem(hDlg, IDNO), "Close");
+		} else {
+			ShowWindow(GetDlgItem(hDlg, IDYES), SW_SHOW);
+		}
+		if (notification_info_callback != NULL) {
+			ShowWindow(GetDlgItem(hDlg, IDC_MORE_INFO), SW_SHOW);
+		}
 		// Set the control text
 		if (szMessageText != NULL) {
 			SetWindowTextA(GetDlgItem(hDlg, IDC_NOTIFICATION_TEXT), szMessageText);
@@ -835,8 +767,13 @@ INT_PTR CALLBACK NotificationCallback(HWND hDlg, UINT message, WPARAM wParam, LP
 		switch (LOWORD(wParam)) {
 		case IDOK:
 		case IDCANCEL:
+		case IDYES:
+		case IDNO:
 			EndDialog(hDlg, LOWORD(wParam));
 			return (INT_PTR)TRUE;
+		case IDC_MORE_INFO:
+			DialogBoxA(hMainInstance, MAKEINTRESOURCEA(notification_info_id), hDlg, notification_info_callback);
+			break;
 		}
 		break;
 	}
@@ -846,8 +783,9 @@ INT_PTR CALLBACK NotificationCallback(HWND hDlg, UINT message, WPARAM wParam, LP
 /*
  * Display a custom notification
  */
-BOOL Notification(int type, char* title, char* format, ...)
+BOOL Notification(int type, WORD extra_id, Callback_t extra_callback, char* title, char* format, ...)
 {
+	BOOL ret;
 	va_list args;
 	szMessageText = (char*)malloc(MAX_PATH);
 	if (szMessageText == NULL) return FALSE;
@@ -856,6 +794,9 @@ BOOL Notification(int type, char* title, char* format, ...)
 	safe_vsnprintf(szMessageText, MAX_PATH-1, format, args);
 	va_end(args);
 	szMessageText[MAX_PATH-1] = 0;
+	notification_info_callback = extra_callback;
+	notification_info_id = extra_id;
+	notification_is_question = FALSE;
 
 	switch(type) {
 	case MSG_WARNING:
@@ -864,97 +805,16 @@ BOOL Notification(int type, char* title, char* format, ...)
 	case MSG_ERROR:
 		hMessageIcon = LoadIcon(NULL, IDI_ERROR);
 		break;
+	case MSG_QUESTION:
+		hMessageIcon = LoadIcon(NULL, IDI_QUESTION);
+		notification_is_question = TRUE;
+		break;
 	case MSG_INFO:
 	default:
 		hMessageIcon = LoadIcon(NULL, IDI_INFORMATION);
 		break;
 	}
-	DialogBox(hMainInstance, MAKEINTRESOURCE(IDD_NOTIFICATION), hMainDialog, NotificationCallback);
-	safe_free(szMessageText);
-	return TRUE;
-}
-
-
-/*
- * Same for custom questions
- */
-INT_PTR CALLBACK QuestionCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
-{
-	LRESULT loc;
-	int i;
-	// Prevent resizing
-	static LRESULT disabled[9] = { HTLEFT, HTRIGHT, HTTOP, HTBOTTOM, HTSIZE,
-		HTTOPLEFT, HTTOPRIGHT, HTBOTTOMLEFT, HTBOTTOMRIGHT };
-	static HBRUSH white_brush, separator_brush;
-
-	switch (message) {
-	case WM_INITDIALOG:
-		white_brush = CreateSolidBrush(WHITE);
-		separator_brush = CreateSolidBrush(SEPARATOR_GREY);
-		CenterDialog(hDlg);
-		// Change the default icon
-		if (Static_SetIcon(GetDlgItem(hDlg, IDC_NOTIFICATION_ICON), hMessageIcon) == 0) {
-			uprintf("Could not set dialog icon\n");
-		}
-		// Set the dialog title
-		if (szMessageTitle != NULL) {
-			SetWindowTextA(hDlg, szMessageTitle);
-		}
-		// Set the control text
-		if (szMessageText != NULL) {
-			SetWindowTextA(GetDlgItem(hDlg, IDC_NOTIFICATION_TEXT), szMessageText);
-		}
-		return (INT_PTR)TRUE;
-	case WM_CTLCOLORSTATIC:
-		// Change the background colour for static text and icon
-		SetBkMode((HDC)wParam, TRANSPARENT);
-		if ((HWND)lParam == GetDlgItem(hDlg, IDC_NOTIFICATION_LINE)) {
-			return (INT_PTR)separator_brush;
-		}
-		return (INT_PTR)white_brush;
-	case WM_NCHITTEST:
-		// Check coordinates to prevent resize actions
-		loc = DefWindowProc(hDlg, message, wParam, lParam);
-		for(i = 0; i < 9; i++) {
-			if (loc == disabled[i]) {
-				return (INT_PTR)TRUE;
-			}
-		}
-		return (INT_PTR)FALSE;
-	case WM_COMMAND:
-		switch (LOWORD(wParam)) {
-		case IDYES:
-		case IDNO:
-			EndDialog(hDlg, LOWORD(wParam));
-			return (INT_PTR)TRUE;
-		case IDC_QUESTION_MORE_INFO:
-			DialogBoxA(hMainInstance, MAKEINTRESOURCEA(IDD_UPDATE_POLICY), hDlg, UpdateCallback);
-			break;
-		}
-		break;
-	}
-	return (INT_PTR)FALSE;
-}
-
-/*
- * Display a custom question
- * returns TRUE if the user answered yes, FALSE if no
- * TODO: point to a static dialog for more info
- */
-BOOL Question(char* title, char* format, ...)
-{
-	va_list args;
-	BOOL ret;
-	szMessageText = (char*)malloc(MAX_PATH);
-	if (szMessageText == NULL) return FALSE;
-	szMessageTitle = title;
-	va_start(args, format);
-	safe_vsnprintf(szMessageText, MAX_PATH-1, format, args);
-	va_end(args);
-	szMessageText[MAX_PATH-1] = 0;
-
-	hMessageIcon = LoadIcon(NULL, IDI_QUESTION);
-	ret = (DialogBox(hMainInstance, MAKEINTRESOURCE(IDD_QUESTION), hMainDialog, QuestionCallback) == IDYES);
+	ret = (DialogBox(hMainInstance, MAKEINTRESOURCE(IDD_NOTIFICATION), hMainDialog, NotificationCallback) == IDYES);
 	safe_free(szMessageText);
 	return ret;
 }
@@ -1236,3 +1096,43 @@ BOOL SetTaskbarProgressValue(ULONGLONG ullCompleted, ULONGLONG ullTotal)
 	return !FAILED(ptbl->lpVtbl->SetProgressValue(ptbl, hMainDialog, ullCompleted, ullTotal));
 }
 #pragma pop_macro("INTERFACE")
+
+
+/*
+ * Update policy and settings dialog callback
+ */
+INT_PTR CALLBACK UpdateCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	HWND hPolicy, hCombo;
+
+	switch (message) {
+	case WM_INITDIALOG:
+		CenterDialog(hDlg);
+		hCombo = GetDlgItem(hDlg, IDC_UPDATE_FREQUENCY);
+		IGNORE_RETVAL(ComboBox_SetItemData(hCombo, ComboBox_AddStringU(hCombo, "Disabled"), -1));
+		IGNORE_RETVAL(ComboBox_SetItemData(hCombo, ComboBox_AddStringU(hCombo, "Daily (Default)"), 86400));
+		IGNORE_RETVAL(ComboBox_SetItemData(hCombo, ComboBox_AddStringU(hCombo, "Weekly"), 604800));
+		IGNORE_RETVAL(ComboBox_SetItemData(hCombo, ComboBox_AddStringU(hCombo, "Monthly"), 2629800));
+		IGNORE_RETVAL(ComboBox_SetCurSel(hCombo, 1));
+		hCombo = GetDlgItem(hDlg, IDC_INCLUDE_BETAS);
+		IGNORE_RETVAL(ComboBox_AddStringU(hCombo, "No"));
+		IGNORE_RETVAL(ComboBox_AddStringU(hCombo, "Yes"));
+		IGNORE_RETVAL(ComboBox_SetCurSel(hCombo, 0));
+		hPolicy = GetDlgItem(hDlg, IDC_UPDATES_POLICY);
+		SendMessage(hPolicy, EM_AUTOURLDETECT, 1, 0);
+		SendMessageA(hPolicy, EM_SETTEXTEX, (WPARAM)&friggin_microsoft_unicode_amateurs, (LPARAM)update_policy);
+		SendMessage(hPolicy, EM_SETSEL, -1, -1);
+		SendMessage(hPolicy, EM_SETEVENTMASK, 0, ENM_LINK);
+		SendMessageA(hPolicy, EM_SETBKGNDCOLOR, 0, (LPARAM)GetSysColor(COLOR_BTNFACE));
+		break;
+	case WM_COMMAND:
+		switch (LOWORD(wParam)) {
+		case IDOK:
+		case IDCANCEL:
+			EndDialog(hDlg, LOWORD(wParam));
+			return (INT_PTR)TRUE;
+		}
+		break;
+	}
+	return (INT_PTR)FALSE;
+}

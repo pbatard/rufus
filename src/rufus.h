@@ -1,6 +1,6 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
- * Copyright (c) 2011-2012 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2012 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -92,8 +92,10 @@ enum user_message_type {
 enum notification_type {
 	MSG_INFO,
 	MSG_WARNING,
-	MSG_ERROR
+	MSG_ERROR,
+	MSG_QUESTION,
 };
+typedef INT_PTR (CALLBACK *Callback_t)(HWND, UINT, WPARAM, LPARAM);
 
 /* Timers used throughout the program */
 enum timer_type {
@@ -225,7 +227,7 @@ extern INT_PTR CreateAboutBox(void);
 extern BOOL CreateTooltip(HWND hControl, const char* message, int duration);
 extern void DestroyTooltip(HWND hWnd);
 extern void DestroyAllTooltips(void);
-extern BOOL Notification(int type, char* title, char* format, ...);
+extern BOOL Notification(int type, WORD extra_id, Callback_t extra_callback, char* title, char* format, ...);
 extern BOOL Question(char* title, char* format, ...);
 extern BOOL ExtractDOS(const char* path);
 extern BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan);
@@ -242,6 +244,7 @@ extern char* FileDialog(BOOL save, char* path, char* filename, char* ext, char* 
 extern BOOL FileIO(BOOL save, char* path, char** buffer, DWORD* size);
 extern LONG GetEntryWidth(HWND hDropDown, const char* entry);
 extern BOOL DownloadFile(const char* url, const char* file);
+extern INT_PTR CALLBACK UpdateCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
 extern BOOL CheckForUpdates(void);
 extern BOOL IsShown(HWND hDlg);
 extern char* get_token_data_file(const char* token, const char* filename);

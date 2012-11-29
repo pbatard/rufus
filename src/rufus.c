@@ -1,6 +1,6 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
- * Copyright (c) 2011-2012 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2012 Pete Batard <pete@akeo.ie>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1627,7 +1627,8 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			break;
 #ifdef RUFUS_TEST
 		case IDC_TEST:
-			testme = Question("Rufus updates", "Do you want to allow " APPLICATION_NAME " to check for updates?\n");
+			testme = Notification(MSG_QUESTION, IDD_UPDATE_POLICY, UpdateCallback, 
+				"Rufus updates", "Do you want to allow " APPLICATION_NAME " to check for updates?\n");
 			uprintf("User said %s\n", testme?"YES":"NO");
 //			CheckForUpdates();
 /*
@@ -1903,12 +1904,12 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_PAUSED, 0);
 			SetTaskbarProgressState(TASKBAR_PAUSED);
 			PrintStatus(0, FALSE, "Cancelled");
-			Notification(MSG_INFO, "Cancelled", "Operation cancelled by the user.");
+			Notification(MSG_INFO, 0, NULL, "Cancelled", "Operation cancelled by the user.");
 		} else {
 			SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_ERROR, 0);
 			SetTaskbarProgressState(TASKBAR_ERROR);
 			PrintStatus(0, FALSE, "FAILED");
-			Notification(MSG_ERROR, "Error", "Error: %s.%s", StrError(FormatStatus), 
+			Notification(MSG_ERROR, 0, NULL, "Error", "Error: %s.%s", StrError(FormatStatus), 
 				(strchr(StrError(FormatStatus), '\n') != NULL)?"":"\nFor more information, please check the log.");
 		}
 		return (INT_PTR)TRUE;

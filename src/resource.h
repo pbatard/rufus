@@ -12,8 +12,7 @@
 #define IDS_VERSION                     108
 #define IDI_UP                          109
 #define IDI_DOWN                        110
-#define IDD_QUESTION                    111
-#define IDD_UPDATE_POLICY               112
+#define IDD_UPDATE_POLICY               111
 #define IDR_BR_MBR_BIN                  200
 #define IDR_FD_COMMAND_COM              300
 #define IDR_FD_KERNEL_SYS               301
@@ -70,10 +69,7 @@
 #define IDC_EXTRA_PARTITION             1023
 #define IDC_ABOUT_LICENSE               1030
 #define IDC_ABOUT_ICON                  1031
-#define IDC_RUFUS_BOLD                  1032
 #define IDC_ABOUT_COPYRIGHTS            1033
-#define IDC_ABOUT_RUFUS_URL             1034
-#define IDC_ABOUT_BUG_URL               1035
 #define IDC_LICENSE_TEXT                1036
 #define IDC_NOTIFICATION_ICON           1040
 #define IDC_NOTIFICATION_TEXT           1041
@@ -84,7 +80,7 @@
 #define IDC_LOG_EDIT                    1050
 #define IDC_LOG_SAVE                    1051
 #define IDC_LOG_CLEAR                   1052
-#define IDC_QUESTION_MORE_INFO          1060
+#define IDC_MORE_INFO                   1060
 #define IDC_UPDATES_POLICY              1061
 #define IDC_UPDATE_FREQUENCY            1062
 #define IDC_INCLUDE_BETAS               1063
@@ -95,7 +91,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NO_MFC                     1
-#define _APS_NEXT_RESOURCE_VALUE        113
+#define _APS_NEXT_RESOURCE_VALUE        112
 #define _APS_NEXT_COMMAND_VALUE         40001
 #define _APS_NEXT_CONTROL_VALUE         1065
 #define _APS_NEXT_SYMED_VALUE           101
