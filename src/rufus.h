@@ -43,7 +43,6 @@
 #define WHITE                       RGB(255,255,255)
 #define SEPARATOR_GREY              RGB(223,223,223)
 #define RUFUS_URL                   "http://rufus.akeo.ie"
-#define BUG_URL                     "https://github.com/pbatard/rufus/issues"
 #define VESAMENU_URL                "http://cloud.github.com/downloads/pbatard/rufus/vesamenu.c32"
 #define IGNORE_RETVAL(expr)         do { (void)(expr); } while(0)
 #ifndef ARRAYSIZE
@@ -227,6 +226,7 @@ extern BOOL CreateTooltip(HWND hControl, const char* message, int duration);
 extern void DestroyTooltip(HWND hWnd);
 extern void DestroyAllTooltips(void);
 extern BOOL Notification(int type, char* title, char* format, ...);
+extern BOOL Question(char* title, char* format, ...);
 extern BOOL ExtractDOS(const char* path);
 extern BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan);
 extern BOOL ExtractISOFile(const char* iso, const char* iso_file, const char* dest_file);

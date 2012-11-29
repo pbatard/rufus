@@ -209,7 +209,7 @@ static __inline char* get_sanitized_token_data_buffer(const char* token, unsigne
 
 // Parse an update data file and populates a rufus_update structure.
 // NB: since this is remote data, and we're running elevated, it *IS* considered
-// potentially malicioueven if it comes from a supposedly trusted server.
+// potentially malicious, even if it comes from a supposedly trusted server.
 // len should be the size of the buffer - 1, for the zero terminator
 void parse_update(char* buf, size_t len)
 {

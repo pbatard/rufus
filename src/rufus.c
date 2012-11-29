@@ -1521,6 +1521,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 {
 	DRAWITEMSTRUCT* pDI;
 	POINT Point;
+	BOOL testme;
 	RECT DialogRect, DesktopRect;
 	int nDeviceIndex, fs, i, nWidth, nHeight;
 	static DWORD DeviceNum = 0;
@@ -1626,7 +1627,9 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			break;
 #ifdef RUFUS_TEST
 		case IDC_TEST:
-			CheckForUpdates();
+			testme = Question("Rufus updates", "Do you want to allow " APPLICATION_NAME " to check for updates?\n");
+			uprintf("User said %s\n", testme?"YES":"NO");
+//			CheckForUpdates();
 /*
 			InitProgress();
 			if (!IsWindow(hISOProgressDlg)) { 
@@ -1822,8 +1825,13 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 						}
 						fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
 						if ((fs == FS_NTFS) && (!iso_report.has_bootmgr) && (!IS_WINPE(iso_report.winpe))) {
-							MessageBoxA(hMainDialog, "Only 'bootmgr' or 'WinPE' based ISO "
-								"images can currently be used with NTFS.", "Unsupported ISO...", MB_OK|MB_ICONERROR);
+							if (iso_report.has_isolinux) {
+								MessageBoxA(hMainDialog, "Only FAT32 is supported for this type of ISO. "
+									"Please revert the filesystem back from NTFS to FAT32.", "Unsupported filesystem...", MB_OK|MB_ICONERROR);
+							} else {
+								MessageBoxA(hMainDialog, "Only 'bootmgr' or 'WinPE' based ISO "
+									"images can currently be used with NTFS.", "Unsupported ISO...", MB_OK|MB_ICONERROR);
+							}
 							break;
 						} else if (((fs == FS_FAT16)||(fs == FS_FAT32)) && (!iso_report.has_isolinux)) {
 							MessageBoxA(hMainDialog, "Only 'isolinux' based ISO "
@@ -1941,6 +1949,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	// Set the Windows version
 	DetectWindowsVersion();
 
+	// Some dialogs have Rich Edit controls and won't display without this
+	if (LoadLibraryA("Riched20.dll") == NULL) {
+		uprintf("Could not load RichEdit library - some dialogs may not display: %s\n", WindowsErrorString());
+	}
+
 	// We use local group policies rather than direct registry manipulation
 	// 0x9e disables removable and fixed drive notifications
 	SetLGP(FALSE, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer", "NoDriveTypeAutorun", 0x9e);
@@ -1992,7 +2005,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 				PrintStatus(2000, FALSE, "Fake drive detection %s.", detect_fakes?"enabled":"disabled");
 				continue;
 			}
-			// Alt-R => Remove all the registry settings created by Rufus by deleting the registry key
+			// Alt-R => Remove all the registry keys created by Rufus
 			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'R')) {
 				PrintStatus(2000, FALSE, "Application registry key %s deleted.",
 					DeleteRegistryKey(COMPANY_NAME "\\" APPLICATION_NAME)?"successfully":"could not be");

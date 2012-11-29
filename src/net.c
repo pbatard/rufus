@@ -368,7 +368,6 @@ out:
 DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 {
 	const char* server_url = RUFUS_URL "/";
-	BOOL r = FALSE;
 	int i, j, verbose = 2, verpos[4];
 	static char* archname[] = {"win_x86", "win_x64"};
 	DWORD dwFlags, dwSize, dwDownloaded, dwTotalSize, dwStatus;
@@ -446,14 +445,14 @@ DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 
 	safe_sprintf(urlpath, sizeof(urlpath), "%s_%s_%d.%d.ver", APPLICATION_NAME,
 		archname[is_x64?1:0], os_version.dwMajorVersion, os_version.dwMinorVersion);
-	uprintf("Base update check: %s\n", urlpath);
+	vuprintf("Base update check: %s\n", urlpath);
 	for (i=0, j=safe_strlen(urlpath)-5; (j>0)&&(i<ARRAYSIZE(verpos)); j--) {
 		if ((urlpath[j] == '.') || (urlpath[j] == '_')) {
 			verpos[i++] = j;
 		}
 	}
 	if (i != ARRAYSIZE(verpos)) {
-		uprintf("Fix your code in CheckForUpdatesThread()!\n");
+		uprintf("Fix CheckForUpdatesThread()!\n");
 		goto out;
 	}
 
@@ -471,18 +470,17 @@ DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 		dwSize = sizeof(dwStatus);
 		dwStatus = 404;
 		HttpQueryInfoA(hRequest, HTTP_QUERY_STATUS_CODE|HTTP_QUERY_FLAG_NUMBER, (LPVOID)&dwStatus, &dwSize, NULL);
-		if (dwStatus == 200) {
-			vvuprintf("Found.");
+		if (dwStatus == 200) 
 			break;
-		}
 		InternetCloseHandle(hRequest);
 		hRequest = NULL;
 		safe_strcpy(&urlpath[verpos[i]], 5, ".ver");
 	}
 	if (dwStatus != 200) {
-		vuprintf("Unable to find a version file on server");
+		vuprintf("Could not find a version file on server %s", server_url);
 		goto out;
 	}
+	vuprintf("Found match for %s on server %s.", urlpath, server_url);
 
 	dwSize = sizeof(mime);
 	HttpQueryInfoA(hRequest, HTTP_QUERY_CONTENT_TYPE, (LPVOID)&mime, &dwSize, NULL);
@@ -522,7 +520,6 @@ DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 	vuprintf("Successfully downloaded version file (%d bytes)\n", dwTotalSize);
 
 	parse_update(buf, dwTotalSize+1);
-	r = TRUE;
 
 out:
 	safe_free(buf);

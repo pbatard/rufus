@@ -41,12 +41,11 @@ extern "C" {
 static __inline BOOL DeleteRegistryKey(const char* key_name)
 {
 	HKEY hSoftware = NULL;
-	LSTATUS s;
+	LONG s;
 
 	if (RegOpenKeyExA(HKEY_CURRENT_USER, "SOFTWARE", 0, KEY_READ|KEY_CREATE_SUB_KEY, &hSoftware) != ERROR_SUCCESS) {
 		return FALSE;
 	}
-	ERROR_SUCCESS;
 
 	s = RegDeleteKeyA(hSoftware, key_name);
 	if ((s != ERROR_SUCCESS) && (s != ERROR_FILE_NOT_FOUND)) {

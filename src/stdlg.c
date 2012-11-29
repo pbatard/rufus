@@ -64,6 +64,7 @@ enum WindowsVersion nWindowsVersion = WINDOWS_UNSUPPORTED;
 static HWND hBrowseEdit;
 static WNDPROC pOrgBrowseWndproc;
 HFONT hBoldFont = NULL;
+static const SETTEXTEX friggin_microsoft_unicode_amateurs = {ST_DEFAULT, CP_UTF8};
 
 /*
  * Detect Windows version
@@ -668,7 +669,11 @@ INT_PTR CALLBACK LicenseCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM 
  */
 INT_PTR CALLBACK AboutCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	static HWND hCopyrights;
+	int i;
+	const int edit_id[2] = {IDC_ABOUT_BLURB, IDC_ABOUT_COPYRIGHTS};
+	char about_blurb[1024];
+	const char* edit_text[2] = {about_blurb, additional_copyrights};
+	HWND hEdit[2];
 	TEXTRANGEW tr;
 	ENLINK* enl;
 	wchar_t wUrl[256];
@@ -676,12 +681,20 @@ INT_PTR CALLBACK AboutCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 	switch (message) {
 	case WM_INITDIALOG:
 		CenterDialog(hDlg);
-		hCopyrights = GetDlgItem(hDlg, IDC_ABOUT_COPYRIGHTS);
-		SendMessageA(hCopyrights, EM_AUTOURLDETECT, 1, 0);
-		SetDlgItemTextA(hDlg, IDC_ABOUT_COPYRIGHTS, additional_copyrights);
-		SendMessage(hCopyrights, EM_SETSEL, -1, -1);
-		SendMessage(hCopyrights, EM_SETEVENTMASK, 0, ENM_LINK);
-		SendMessageA(hCopyrights, EM_SETBKGNDCOLOR, 0, (LPARAM)GetSysColor(COLOR_BTNFACE));
+		safe_sprintf(about_blurb, sizeof(about_blurb), about_blurb_format, 
+			rufus_version[0], rufus_version[1], rufus_version[2], rufus_version[3]);
+		for (i=0; i<ARRAYSIZE(hEdit); i++) {
+			hEdit[i] = GetDlgItem(hDlg, edit_id[i]);
+			SendMessage(hEdit[i], EM_AUTOURLDETECT, 1, 0);
+			/* Can't use SetDlgItemText, because it only works with RichEdit20A... and VS insists
+			 * on reverting to RichEdit20W as soon as you edit the dialog. You can try all the W
+			 * methods you want, it JUST WON'T WORK unless you use EM_SETTEXTEX. Also see:
+			 * http://blog.kowalczyk.info/article/eny/Setting-unicode-rtf-text-in-rich-edit-control.html */
+			SendMessageA(hEdit[i], EM_SETTEXTEX, (WPARAM)&friggin_microsoft_unicode_amateurs, (LPARAM)edit_text[i]);
+			SendMessage(hEdit[i], EM_SETSEL, -1, -1);
+			SendMessage(hEdit[i], EM_SETEVENTMASK, 0, ENM_LINK);
+			SendMessage(hEdit[i], EM_SETBKGNDCOLOR, 0, (LPARAM)GetSysColor(COLOR_BTNFACE));
+		}
 		break;
 	case WM_CTLCOLORSTATIC:
 		if ((HWND)lParam == GetDlgItem(hDlg, IDC_RUFUS_BOLD)) {
@@ -693,17 +706,6 @@ INT_PTR CALLBACK AboutCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 		break;
 	case WM_NOTIFY:
 		switch (((LPNMHDR)lParam)->code) {
-		case NM_CLICK:
-		case NM_RETURN:
-			switch (LOWORD(wParam)) {
-			case IDC_ABOUT_RUFUS_URL:
-				ShellExecuteA(hDlg, "open", RUFUS_URL, NULL, NULL, SW_SHOWNORMAL);
-				break;
-			case IDC_ABOUT_BUG_URL:
-				ShellExecuteA(hDlg, "open", BUG_URL, NULL, NULL, SW_SHOWNORMAL);
-				break;
-			}
-			break;
 		case EN_LINK:
 			enl = (ENLINK*) lParam;
 			if (enl->msg == WM_LBUTTONUP) {
@@ -733,9 +735,54 @@ INT_PTR CALLBACK AboutCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 
 INT_PTR CreateAboutBox(void)
 {
-	// Required to display the license in a rich edit control
-	LoadLibraryA("Riched20.dll");
 	return DialogBoxA(hMainInstance, MAKEINTRESOURCEA(IDD_ABOUTBOX), hMainDialog, AboutCallback);
+}
+
+/*
+ * Update policy and settings dialog callback
+ */
+INT_PTR CALLBACK UpdateCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	HWND hPolicy, hCombo;
+
+	switch (message) {
+	case WM_INITDIALOG:
+		CenterDialog(hDlg);
+		hCombo = GetDlgItem(hDlg, IDC_UPDATE_FREQUENCY);
+		IGNORE_RETVAL(ComboBox_SetItemData(hCombo, ComboBox_AddStringU(hCombo, "Never (Disabled)"), -1));
+		IGNORE_RETVAL(ComboBox_SetItemData(hCombo, ComboBox_AddStringU(hCombo, "Daily (Default)"), 86400));
+		IGNORE_RETVAL(ComboBox_SetItemData(hCombo, ComboBox_AddStringU(hCombo, "Weekly"), 604800));
+		IGNORE_RETVAL(ComboBox_SetItemData(hCombo, ComboBox_AddStringU(hCombo, "Monthly"), 2629800));
+		IGNORE_RETVAL(ComboBox_SetCurSel(hCombo, 1));
+		hCombo = GetDlgItem(hDlg, IDC_INCLUDE_BETAS);
+		IGNORE_RETVAL(ComboBox_AddStringU(hCombo, "No"));
+		IGNORE_RETVAL(ComboBox_AddStringU(hCombo, "Yes"));
+		IGNORE_RETVAL(ComboBox_SetCurSel(hCombo, 0));
+		hPolicy = GetDlgItem(hDlg, IDC_UPDATES_POLICY);
+		SendMessage(hPolicy, EM_AUTOURLDETECT, 1, 0);
+		SendMessageA(hPolicy, EM_SETTEXTEX, (WPARAM)&friggin_microsoft_unicode_amateurs, (LPARAM)update_policy);
+		SendMessage(hPolicy, EM_SETSEL, -1, -1);
+		SendMessage(hPolicy, EM_SETEVENTMASK, 0, ENM_LINK);
+		SendMessageA(hPolicy, EM_SETBKGNDCOLOR, 0, (LPARAM)GetSysColor(COLOR_BTNFACE));
+		break;
+	case WM_CTLCOLORSTATIC:
+		if ((HWND)lParam == GetDlgItem(hDlg, IDC_RUFUS_BOLD)) {
+			CreateBoldFont((HDC)wParam);
+			SetBkMode((HDC)wParam, TRANSPARENT);
+			SelectObject((HDC)wParam, hBoldFont);
+			return (INT_PTR)CreateSolidBrush(GetSysColor(COLOR_BTNFACE));
+		}
+		break;
+	case WM_COMMAND:
+		switch (LOWORD(wParam)) {
+		case IDOK:
+		case IDCANCEL:
+			EndDialog(hDlg, LOWORD(wParam));
+			return (INT_PTR)TRUE;
+		}
+		break;
+	}
+	return (INT_PTR)FALSE;
 }
 
 /*
@@ -825,6 +872,91 @@ BOOL Notification(int type, char* title, char* format, ...)
 	DialogBox(hMainInstance, MAKEINTRESOURCE(IDD_NOTIFICATION), hMainDialog, NotificationCallback);
 	safe_free(szMessageText);
 	return TRUE;
+}
+
+
+/*
+ * Same for custom questions
+ */
+INT_PTR CALLBACK QuestionCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	LRESULT loc;
+	int i;
+	// Prevent resizing
+	static LRESULT disabled[9] = { HTLEFT, HTRIGHT, HTTOP, HTBOTTOM, HTSIZE,
+		HTTOPLEFT, HTTOPRIGHT, HTBOTTOMLEFT, HTBOTTOMRIGHT };
+	static HBRUSH white_brush, separator_brush;
+
+	switch (message) {
+	case WM_INITDIALOG:
+		white_brush = CreateSolidBrush(WHITE);
+		separator_brush = CreateSolidBrush(SEPARATOR_GREY);
+		CenterDialog(hDlg);
+		// Change the default icon
+		if (Static_SetIcon(GetDlgItem(hDlg, IDC_NOTIFICATION_ICON), hMessageIcon) == 0) {
+			uprintf("Could not set dialog icon\n");
+		}
+		// Set the dialog title
+		if (szMessageTitle != NULL) {
+			SetWindowTextA(hDlg, szMessageTitle);
+		}
+		// Set the control text
+		if (szMessageText != NULL) {
+			SetWindowTextA(GetDlgItem(hDlg, IDC_NOTIFICATION_TEXT), szMessageText);
+		}
+		return (INT_PTR)TRUE;
+	case WM_CTLCOLORSTATIC:
+		// Change the background colour for static text and icon
+		SetBkMode((HDC)wParam, TRANSPARENT);
+		if ((HWND)lParam == GetDlgItem(hDlg, IDC_NOTIFICATION_LINE)) {
+			return (INT_PTR)separator_brush;
+		}
+		return (INT_PTR)white_brush;
+	case WM_NCHITTEST:
+		// Check coordinates to prevent resize actions
+		loc = DefWindowProc(hDlg, message, wParam, lParam);
+		for(i = 0; i < 9; i++) {
+			if (loc == disabled[i]) {
+				return (INT_PTR)TRUE;
+			}
+		}
+		return (INT_PTR)FALSE;
+	case WM_COMMAND:
+		switch (LOWORD(wParam)) {
+		case IDYES:
+		case IDNO:
+			EndDialog(hDlg, LOWORD(wParam));
+			return (INT_PTR)TRUE;
+		case IDC_QUESTION_MORE_INFO:
+			DialogBoxA(hMainInstance, MAKEINTRESOURCEA(IDD_UPDATE_POLICY), hDlg, UpdateCallback);
+			break;
+		}
+		break;
+	}
+	return (INT_PTR)FALSE;
+}
+
+/*
+ * Display a custom question
+ * returns TRUE if the user answered yes, FALSE if no
+ * TODO: point to a static dialog for more info
+ */
+BOOL Question(char* title, char* format, ...)
+{
+	va_list args;
+	BOOL ret;
+	szMessageText = (char*)malloc(MAX_PATH);
+	if (szMessageText == NULL) return FALSE;
+	szMessageTitle = title;
+	va_start(args, format);
+	safe_vsnprintf(szMessageText, MAX_PATH-1, format, args);
+	va_end(args);
+	szMessageText[MAX_PATH-1] = 0;
+
+	hMessageIcon = LoadIcon(NULL, IDI_QUESTION);
+	ret = (DialogBox(hMainInstance, MAKEINTRESOURCE(IDD_QUESTION), hMainDialog, QuestionCallback) == IDYES);
+	safe_free(szMessageText);
+	return ret;
 }
 
 static struct {

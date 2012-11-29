@@ -12,6 +12,8 @@
 #define IDS_VERSION                     108
 #define IDI_UP                          109
 #define IDI_DOWN                        110
+#define IDD_QUESTION                    111
+#define IDD_UPDATE_POLICY               112
 #define IDR_BR_MBR_BIN                  200
 #define IDR_FD_COMMAND_COM              300
 #define IDR_FD_KERNEL_SYS               301
@@ -82,15 +84,20 @@
 #define IDC_LOG_EDIT                    1050
 #define IDC_LOG_SAVE                    1051
 #define IDC_LOG_CLEAR                   1052
+#define IDC_QUESTION_MORE_INFO          1060
+#define IDC_UPDATES_POLICY              1061
+#define IDC_UPDATE_FREQUENCY            1062
+#define IDC_INCLUDE_BETAS               1063
+#define IDC_ABOUT_BLURB                 1064
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NO_MFC                     1
-#define _APS_NEXT_RESOURCE_VALUE        110
+#define _APS_NEXT_RESOURCE_VALUE        113
 #define _APS_NEXT_COMMAND_VALUE         40001
-#define _APS_NEXT_CONTROL_VALUE         1053
+#define _APS_NEXT_CONTROL_VALUE         1065
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
