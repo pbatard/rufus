@@ -380,7 +380,6 @@ static BOOL GetDriveInfo(void)
 	if (!r || size <= 0) {
 		uprintf("IOCTL_DISK_GET_DRIVE_LAYOUT_EX failed for drive %c: %s\n", DrivePath[0], WindowsErrorString());
 	} else {
-		r = FALSE;
 		switch (DriveLayout->PartitionStyle) {
 		case PARTITION_STYLE_MBR:
 			for (tmp_pos=0, i=0; (i<DriveLayout->PartitionCount)&&(tmp_pos>=0); i++) {
@@ -1098,7 +1097,7 @@ BOOL CALLBACK LogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 	HFONT hf;
 	long lfHeight;
 	DWORD log_size;
-	char *log_buffer, *filepath;
+	char *log_buffer = NULL, *filepath;
 
 	switch (message) {
 	case WM_INITDIALOG:
@@ -1124,7 +1123,8 @@ BOOL CALLBACK LogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 			return TRUE;
 		case IDC_LOG_SAVE:
 			log_size = GetWindowTextLengthU(hLog);
-			log_buffer = (char*)malloc(log_size);
+			if (log_size > 0)
+				log_buffer = (char*)malloc(log_size);
 			if (log_buffer != NULL) {
 				log_size = GetDlgItemTextU(hDlg, IDC_LOG_EDIT, log_buffer, log_size);
 				if (log_size == 0) {

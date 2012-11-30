@@ -410,7 +410,7 @@ BOOL ExtractFreeDOS(const char* path)
 		res_data = (BYTE*)LockResource(res_handle);
 		res_size = SizeofResource(NULL, res);
 
-		strcpy(filename, (i<2)?path:locale_path);
+		safe_strcpy(filename, sizeof(filename), (i<2)?path:locale_path);
 		safe_strcat(filename, sizeof(filename), "\\");
 		safe_strcat(filename, sizeof(filename), res_name[i]);
 

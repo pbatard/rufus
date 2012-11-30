@@ -207,7 +207,7 @@ static
 udf_dirent_t *
 udf_ff_traverse(udf_dirent_t *p_udf_dirent, char *psz_token)
 {
-  while (udf_readdir(p_udf_dirent)) {
+  while ((p_udf_dirent = udf_readdir(p_udf_dirent))) {
     if (strcmp(psz_token, p_udf_dirent->psz_name) == 0) {
       char *next_tok = strtok(NULL, udf_PATH_DELIMITERS);
       
@@ -226,7 +226,8 @@ udf_ff_traverse(udf_dirent_t *p_udf_dirent, char *psz_token)
       }
     }
   }
-  free(p_udf_dirent->psz_name);
+  if (p_udf_dirent)
+    free(p_udf_dirent->psz_name);
   return NULL;
 }
 

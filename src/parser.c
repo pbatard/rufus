@@ -53,7 +53,7 @@ static wchar_t* get_token_data_line(const wchar_t* wtoken, wchar_t* wline)
 	const wchar_t wspace[] = L" \t";	// The only whitespaces we recognize as such
 	const wchar_t weol[] = L"\r\n";
 	size_t i, r;
-	BOOLEAN quoteth;
+	BOOLEAN quoteth = FALSE;
 
 	if ((wtoken == NULL) || (wline == NULL) || (wline[0] == 0))
 		return NULL;
@@ -230,6 +230,7 @@ void parse_update(char* buf, size_t len)
 		}
 	}
 
+	for (i=0; i<4; i++) update.version[i] = 0;
 	if ((data = get_sanitized_token_data_buffer("version", 1, buf, len)) != NULL) {
 		for (i=0; (i<4) && ((token = strtok((i==0)?data:NULL, ".")) != NULL); i++) {
 			update.version[i] = (uint8_t)atoi(token);

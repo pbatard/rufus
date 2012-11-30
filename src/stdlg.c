@@ -141,7 +141,8 @@ void StrArrayClear(StrArray* arr)
 void StrArrayDestroy(StrArray* arr)
 {
 	StrArrayClear(arr);
-	safe_free(arr->Table);
+	if (arr != NULL)
+		safe_free(arr->Table);
 }
 
 /*
