@@ -387,10 +387,11 @@ DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 //	Sleep(15000);
 
 //	verbose = ReadRegistryKey32(REGKEY_VERBOSE_UPDATES);
-	if (GetRegistryKeyBool(REGKEY_DISABLE_UPDATES)) {
-		vuprintf("Check for updates disabled, as per registry settings.\n");
-		return FALSE;
-	}
+// TODO: reenable this
+//	if (GetRegistryKeyBool(REGKEY_DISABLE_UPDATES)) {
+//		vuprintf("Check for updates disabled, as per registry settings.\n");
+//		return FALSE;
+//	}
 	reg_time = ReadRegistryKey64(REGKEY_LAST_UPDATE);
 	update_interval = (int64_t)ReadRegistryKey32(REGKEY_UPDATE_INTERVAL);
 	if (update_interval == 0) {

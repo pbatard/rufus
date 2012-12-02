@@ -69,6 +69,7 @@
 #define IDC_EXTRA_PARTITION             1023
 #define IDC_ABOUT_LICENSE               1030
 #define IDC_ABOUT_ICON                  1031
+#define IDC_ABOUT_UPDATES               1032
 #define IDC_ABOUT_COPYRIGHTS            1033
 #define IDC_LICENSE_TEXT                1036
 #define IDC_NOTIFICATION_ICON           1040
@@ -81,7 +82,7 @@
 #define IDC_LOG_SAVE                    1051
 #define IDC_LOG_CLEAR                   1052
 #define IDC_MORE_INFO                   1060
-#define IDC_UPDATES_POLICY              1061
+#define IDC_POLICY                      1061
 #define IDC_UPDATE_FREQUENCY            1062
 #define IDC_INCLUDE_BETAS               1063
 #define IDC_ABOUT_BLURB                 1064

@@ -1496,7 +1496,7 @@ void InitDialog(HWND hDlg)
 	CreateTooltip(hClusterSize, "Minimum size that each data block occupies", -1);
 	CreateTooltip(hLabel, "Use this field to set the drive label\nInternational characters are accepted", -1);
 	CreateTooltip(GetDlgItem(hDlg, IDC_ADVANCED), "Toggle advanced options", -1);
-	CreateTooltip(GetDlgItem(hDlg, IDC_BADBLOCKS), "Test the device for bad blocks using a set byte pattern", -1);
+	CreateTooltip(GetDlgItem(hDlg, IDC_BADBLOCKS), "Test the device for bad blocks using a byte pattern", -1);
 	CreateTooltip(GetDlgItem(hDlg, IDC_QUICKFORMAT), "Unchek this box to use the \"slow\" format method", -1);
 	CreateTooltip(hDOS, "Check this box to make the USB drive bootable", -1);
 	CreateTooltip(hDOSType, "Boot method", -1);
@@ -1528,6 +1528,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	wchar_t wtmp[128], wstr[MAX_PATH];
 	static UINT uDOSChecked = BST_CHECKED, uQFChecked;
 	static BOOL first_log_display = TRUE, user_changed_label = FALSE;
+	notification_info more_info = { IDD_UPDATE_POLICY, UpdateCallback };
 
 	switch (message) {
 
@@ -1541,6 +1542,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		break;
 
 	case WM_INITDIALOG:
+		SetUpdateCheck();
 		// Create the log window (hidden)
 		hLogDlg = CreateDialogA(hMainInstance, MAKEINTRESOURCEA(IDD_LOG), hDlg, (DLGPROC)LogProc); 
 		InitDialog(hDlg);
@@ -1627,20 +1629,6 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			break;
 #ifdef RUFUS_TEST
 		case IDC_TEST:
-			testme = Notification(MSG_QUESTION, IDD_UPDATE_POLICY, UpdateCallback, 
-				"Rufus updates", "Do you want to allow " APPLICATION_NAME " to check for updates?\n");
-			uprintf("User said %s\n", testme?"YES":"NO");
-//			CheckForUpdates();
-/*
-			InitProgress();
-			if (!IsWindow(hISOProgressDlg)) { 
-				hISOProgressDlg = CreateDialogA(hMainInstance, MAKEINTRESOURCEA(IDD_ISO_EXTRACT),
-					hDlg, (DLGPROC)ISOProc); 
-				// The window is not visible by default but takes focus => restore it
-				SetFocus(hDlg);
-			} 
-			DownloadFile("http://cloud.github.com/downloads/pbatard/rufus/vesamenu.c32", "vesamenu.c32");
-*/
 			break;
 #endif
 		case IDC_ADVANCED:
@@ -1904,12 +1892,12 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_PAUSED, 0);
 			SetTaskbarProgressState(TASKBAR_PAUSED);
 			PrintStatus(0, FALSE, "Cancelled");
-			Notification(MSG_INFO, 0, NULL, "Cancelled", "Operation cancelled by the user.");
+			Notification(MSG_INFO, NULL, "Cancelled", "Operation cancelled by the user.");
 		} else {
 			SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_ERROR, 0);
 			SetTaskbarProgressState(TASKBAR_ERROR);
 			PrintStatus(0, FALSE, "FAILED");
-			Notification(MSG_ERROR, 0, NULL, "Error", "Error: %s.%s", StrError(FormatStatus), 
+			Notification(MSG_ERROR, NULL, "Error", "Error: %s.%s", StrError(FormatStatus), 
 				(strchr(StrError(FormatStatus), '\n') != NULL)?"":"\nFor more information, please check the log.");
 		}
 		return (INT_PTR)TRUE;
@@ -1944,16 +1932,16 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	// Initialize COM for folder selection
 	CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
 
-	// Retrieve the current application directory
-	GetCurrentDirectoryU(MAX_PATH, app_dir);
-
-	// Set the Windows version
-	DetectWindowsVersion();
-
 	// Some dialogs have Rich Edit controls and won't display without this
 	if (LoadLibraryA("Riched20.dll") == NULL) {
 		uprintf("Could not load RichEdit library - some dialogs may not display: %s\n", WindowsErrorString());
 	}
+
+	// Retrieve the current application directory
+	GetCurrentDirectoryU(MAX_PATH, app_dir);
+
+	// Set the Windows version
+	nWindowsVersion = DetectWindowsVersion();
 
 	// We use local group policies rather than direct registry manipulation
 	// 0x9e disables removable and fixed drive notifications

@@ -37,6 +37,7 @@
 
 #include "rufus.h"
 #include "msapi_utf8.h"
+#include "registry.h"
 #include "resource.h"
 #include "license.h"
 
@@ -60,41 +61,43 @@ static LPITEMIDLIST (WINAPI *pSHSimpleIDListFromPath)(PCWSTR pszPath) = NULL;
 static HICON hMessageIcon = (HICON)INVALID_HANDLE_VALUE;
 static char* szMessageText = NULL;
 static char* szMessageTitle = NULL;
-enum WindowsVersion nWindowsVersion = WINDOWS_UNSUPPORTED;
+enum WindowsVersion nWindowsVersion = WINDOWS_UNDEFINED;
 static HWND hBrowseEdit;
 static WNDPROC pOrgBrowseWndproc;
 static const SETTEXTEX friggin_microsoft_unicode_amateurs = {ST_DEFAULT, CP_UTF8};
 static BOOL notification_is_question;
-static WORD notification_info_id;
-static Callback_t notification_info_callback;
+static const notification_info* notification_more_info;
+static BOOL reg_commcheck = FALSE;
 
 /*
  * Detect Windows version
  */
-void DetectWindowsVersion(void)
+enum WindowsVersion DetectWindowsVersion(void)
 {
 	OSVERSIONINFO OSVersion;
 
 	memset(&OSVersion, 0, sizeof(OSVERSIONINFO));
 	OSVersion.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
-	nWindowsVersion = WINDOWS_UNSUPPORTED;
-	if ((GetVersionEx(&OSVersion) != 0) && (OSVersion.dwPlatformId == VER_PLATFORM_WIN32_NT)) {
-		if ((OSVersion.dwMajorVersion == 5) && (OSVersion.dwMinorVersion == 0)) {
-			nWindowsVersion = WINDOWS_2K;
-		} else if ((OSVersion.dwMajorVersion == 5) && (OSVersion.dwMinorVersion == 1)) {
-			nWindowsVersion = WINDOWS_XP;
-		} else if ((OSVersion.dwMajorVersion == 5) && (OSVersion.dwMinorVersion == 2)) {
-			nWindowsVersion = WINDOWS_2003_XP64;
-		} else if (OSVersion.dwMajorVersion == 6) {
-			if (OSVersion.dwBuildNumber < 7000) {
-				nWindowsVersion = WINDOWS_VISTA;
-			} else {
-				nWindowsVersion = WINDOWS_7;
-			}
-		} else if (OSVersion.dwMajorVersion >= 8) {
-			nWindowsVersion = WINDOWS_8;
-		}
-	}
+	if (GetVersionEx(&OSVersion) == 0)
+		return WINDOWS_UNDEFINED;
+	if (OSVersion.dwPlatformId != VER_PLATFORM_WIN32_NT)
+		return WINDOWS_UNSUPPORTED;
+	// See the Remarks section from http://msdn.microsoft.com/en-us/library/windows/desktop/ms724833.aspx
+	if ((OSVersion.dwMajorVersion < 5) || ((OSVersion.dwMajorVersion == 5) && (OSVersion.dwMinorVersion == 0)))
+		return WINDOWS_UNSUPPORTED;		// Win2k or earlier
+	if ((OSVersion.dwMajorVersion == 5) && (OSVersion.dwMinorVersion == 1))
+		return WINDOWS_XP;
+	if ((OSVersion.dwMajorVersion == 5) && (OSVersion.dwMinorVersion == 2))
+		return  WINDOWS_2003;
+	if ((OSVersion.dwMajorVersion == 6) && (OSVersion.dwMinorVersion == 0))
+		return  WINDOWS_VISTA;
+	if ((OSVersion.dwMajorVersion == 6) && (OSVersion.dwMinorVersion == 1))
+		return  WINDOWS_7;
+	if ((OSVersion.dwMajorVersion == 6) && (OSVersion.dwMinorVersion == 2))
+		return  WINDOWS_8;
+	if ((OSVersion.dwMajorVersion > 6) || ((OSVersion.dwMajorVersion == 6) && (OSVersion.dwMinorVersion >= 3)))
+		return  WINDOWS_9;
+	return WINDOWS_UNSUPPORTED;
 }
 
 /*
@@ -660,6 +663,8 @@ INT_PTR CALLBACK AboutCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 	switch (message) {
 	case WM_INITDIALOG:
 		CenterDialog(hDlg);
+		if (reg_commcheck)
+			ShowWindow(GetDlgItem(hDlg, IDC_ABOUT_UPDATES), SW_SHOW);
 		safe_sprintf(about_blurb, sizeof(about_blurb), about_blurb_format, 
 			rufus_version[0], rufus_version[1], rufus_version[2], rufus_version[3]);
 		for (i=0; i<ARRAYSIZE(hEdit); i++) {
@@ -697,6 +702,9 @@ INT_PTR CALLBACK AboutCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 			return (INT_PTR)TRUE;
 		case IDC_ABOUT_LICENSE:
 			DialogBoxA(hMainInstance, MAKEINTRESOURCEA(IDD_LICENSE), hDlg, LicenseCallback);
+			break;
+		case IDC_ABOUT_UPDATES:
+			DialogBoxA(hMainInstance, MAKEINTRESOURCEA(IDD_UPDATE_POLICY), hDlg, UpdateCallback);
 			break;
 		}
 		break;
@@ -740,7 +748,7 @@ INT_PTR CALLBACK NotificationCallback(HWND hDlg, UINT message, WPARAM wParam, LP
 		} else {
 			ShowWindow(GetDlgItem(hDlg, IDYES), SW_SHOW);
 		}
-		if (notification_info_callback != NULL) {
+		if ((notification_more_info != NULL) && (notification_more_info->callback != NULL)) {
 			ShowWindow(GetDlgItem(hDlg, IDC_MORE_INFO), SW_SHOW);
 		}
 		// Set the control text
@@ -773,7 +781,9 @@ INT_PTR CALLBACK NotificationCallback(HWND hDlg, UINT message, WPARAM wParam, LP
 			EndDialog(hDlg, LOWORD(wParam));
 			return (INT_PTR)TRUE;
 		case IDC_MORE_INFO:
-			DialogBoxA(hMainInstance, MAKEINTRESOURCEA(notification_info_id), hDlg, notification_info_callback);
+			if (notification_more_info != NULL)
+				DialogBoxA(hMainInstance, MAKEINTRESOURCEA(notification_more_info->id),
+					hDlg, notification_more_info->callback);
 			break;
 		}
 		break;
@@ -784,7 +794,7 @@ INT_PTR CALLBACK NotificationCallback(HWND hDlg, UINT message, WPARAM wParam, LP
 /*
  * Display a custom notification
  */
-BOOL Notification(int type, WORD extra_id, Callback_t extra_callback, char* title, char* format, ...)
+BOOL Notification(int type, const notification_info* more_info, char* title, char* format, ...)
 {
 	BOOL ret;
 	va_list args;
@@ -795,8 +805,7 @@ BOOL Notification(int type, WORD extra_id, Callback_t extra_callback, char* titl
 	safe_vsnprintf(szMessageText, MAX_PATH-1, format, args);
 	va_end(args);
 	szMessageText[MAX_PATH-1] = 0;
-	notification_info_callback = extra_callback;
-	notification_info_id = extra_id;
+	notification_more_info = more_info;
 	notification_is_question = FALSE;
 
 	switch(type) {
@@ -1104,22 +1113,24 @@ BOOL SetTaskbarProgressValue(ULONGLONG ullCompleted, ULONGLONG ullTotal)
  */
 INT_PTR CALLBACK UpdateCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	HWND hPolicy, hCombo;
+	HWND hPolicy;
+	static HWND hFrequency, hBeta;
+	DWORD frequency = -1;
 
 	switch (message) {
 	case WM_INITDIALOG:
 		CenterDialog(hDlg);
-		hCombo = GetDlgItem(hDlg, IDC_UPDATE_FREQUENCY);
-		IGNORE_RETVAL(ComboBox_SetItemData(hCombo, ComboBox_AddStringU(hCombo, "Disabled"), -1));
-		IGNORE_RETVAL(ComboBox_SetItemData(hCombo, ComboBox_AddStringU(hCombo, "Daily (Default)"), 86400));
-		IGNORE_RETVAL(ComboBox_SetItemData(hCombo, ComboBox_AddStringU(hCombo, "Weekly"), 604800));
-		IGNORE_RETVAL(ComboBox_SetItemData(hCombo, ComboBox_AddStringU(hCombo, "Monthly"), 2629800));
-		IGNORE_RETVAL(ComboBox_SetCurSel(hCombo, 1));
-		hCombo = GetDlgItem(hDlg, IDC_INCLUDE_BETAS);
-		IGNORE_RETVAL(ComboBox_AddStringU(hCombo, "No"));
-		IGNORE_RETVAL(ComboBox_AddStringU(hCombo, "Yes"));
-		IGNORE_RETVAL(ComboBox_SetCurSel(hCombo, 0));
-		hPolicy = GetDlgItem(hDlg, IDC_UPDATES_POLICY);
+		hFrequency = GetDlgItem(hDlg, IDC_UPDATE_FREQUENCY);
+		IGNORE_RETVAL(ComboBox_SetItemData(hFrequency, ComboBox_AddStringU(hFrequency, "Disabled"), -1));
+		IGNORE_RETVAL(ComboBox_SetItemData(hFrequency, ComboBox_AddStringU(hFrequency, "Daily (Default)"), 86400));
+		IGNORE_RETVAL(ComboBox_SetItemData(hFrequency, ComboBox_AddStringU(hFrequency, "Weekly"), 604800));
+		IGNORE_RETVAL(ComboBox_SetItemData(hFrequency, ComboBox_AddStringU(hFrequency, "Monthly"), 2629800));
+		IGNORE_RETVAL(ComboBox_SetCurSel(hFrequency, 1));
+		hBeta = GetDlgItem(hDlg, IDC_INCLUDE_BETAS);
+		IGNORE_RETVAL(ComboBox_AddStringU(hBeta, "Yes"));
+		IGNORE_RETVAL(ComboBox_AddStringU(hBeta, "No"));
+		IGNORE_RETVAL(ComboBox_SetCurSel(hBeta, 1));
+		hPolicy = GetDlgItem(hDlg, IDC_POLICY);
 		SendMessage(hPolicy, EM_AUTOURLDETECT, 1, 0);
 		SendMessageA(hPolicy, EM_SETTEXTEX, (WPARAM)&friggin_microsoft_unicode_amateurs, (LPARAM)update_policy);
 		SendMessage(hPolicy, EM_SETSEL, -1, -1);
@@ -1128,12 +1139,55 @@ INT_PTR CALLBACK UpdateCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 		break;
 	case WM_COMMAND:
 		switch (LOWORD(wParam)) {
-		case IDOK:
+		case IDCLOSE:
 		case IDCANCEL:
 			EndDialog(hDlg, LOWORD(wParam));
+			return (INT_PTR)TRUE;
+		case IDC_UPDATE_FREQUENCY:
+			if (HIWORD(wParam) != CBN_SELCHANGE)
+				break;
+			WriteRegistryKey32(REGKEY_UPDATE_INTERVAL, (DWORD)ComboBox_GetItemData(hFrequency, ComboBox_GetCurSel(hFrequency)));
+			return (INT_PTR)TRUE;
+		case IDC_INCLUDE_BETAS:
+			if (HIWORD(wParam) != CBN_SELCHANGE)
+				break;
+			SetRegistryKeyBool(REGKEY_INCLUDE_BETAS, ComboBox_GetCurSel(hBeta) == 0);
 			return (INT_PTR)TRUE;
 		}
 		break;
 	}
 	return (INT_PTR)FALSE;
+}
+
+/*
+ * Initial update check setup
+ */
+BOOL SetUpdateCheck(void)
+{
+	BOOL enable_updates;
+	DWORD commcheck = GetTickCount();
+	notification_info more_info = { IDD_UPDATE_POLICY, UpdateCallback };
+
+	// Test if we have access to the registry. If not, forget it.
+	WriteRegistryKey32(REGKEY_COMM_CHECK, commcheck);
+	if (ReadRegistryKey32(REGKEY_COMM_CHECK) != commcheck)
+		return FALSE;
+	reg_commcheck = TRUE;
+
+	// If the update interval is not set, this is the first time we run so prompt the user
+	if (ReadRegistryKey32(REGKEY_UPDATE_INTERVAL) == 0) {
+		enable_updates = Notification(MSG_QUESTION, &more_info,
+			APPLICATION_NAME " updates", "Do you want to allow " APPLICATION_NAME " to check for updates?\n");
+		if (!enable_updates) {
+			WriteRegistryKey32(REGKEY_UPDATE_INTERVAL, -1);	// large enough
+			return FALSE;
+		}
+		// If the user hasn't set the interval in the dialog, set to default
+		if ( (ReadRegistryKey32(REGKEY_UPDATE_INTERVAL) == 0) ||
+			 ((ReadRegistryKey32(REGKEY_UPDATE_INTERVAL) == -1) && enable_updates) )
+			WriteRegistryKey32(REGKEY_UPDATE_INTERVAL, 86400);
+	}
+	// TODO: check for lastcheck + interval & launch the background thread here?
+	// TODO: make sure we check for updates if user just accepted
+	return TRUE;
 }

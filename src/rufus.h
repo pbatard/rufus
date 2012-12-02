@@ -24,7 +24,7 @@
 /* Program options */
 #define RUFUS_DEBUG                 // print debug info to Debug facility
 /* Features not ready for prime time and that may *DESTROY* your data - USE AT YOUR OWN RISKS! */
-#define RUFUS_TEST
+//#define RUFUS_TEST
 
 #define APPLICATION_NAME            "Rufus"
 #define COMPANY_NAME                "Akeo Consulting"
@@ -96,6 +96,10 @@ enum notification_type {
 	MSG_QUESTION,
 };
 typedef INT_PTR (CALLBACK *Callback_t)(HWND, UINT, WPARAM, LPARAM);
+typedef struct {
+	WORD id;
+	Callback_t callback;
+} notification_info;	// To provide a "More info..." on notifications
 
 /* Timers used throughout the program */
 enum timer_type {
@@ -182,12 +186,12 @@ typedef enum TASKBAR_PROGRESS_FLAGS
 enum WindowsVersion {
 	WINDOWS_UNDEFINED,
 	WINDOWS_UNSUPPORTED,
-	WINDOWS_2K,
 	WINDOWS_XP,
-	WINDOWS_2003_XP64,
+	WINDOWS_2003,
 	WINDOWS_VISTA,
 	WINDOWS_7,
-	WINDOWS_8
+	WINDOWS_8,
+	WINDOWS_9
 };
 
 /*
@@ -212,7 +216,7 @@ extern enum WindowsVersion nWindowsVersion;
 /*
  * Shared prototypes
  */
-extern void DetectWindowsVersion(void);
+extern enum WindowsVersion DetectWindowsVersion(void);
 extern const char *WindowsErrorString(void);
 extern void DumpBufferHex(void *buf, size_t size);
 extern void PrintStatus(unsigned int duration, BOOL debug, const char *format, ...);
@@ -227,7 +231,7 @@ extern INT_PTR CreateAboutBox(void);
 extern BOOL CreateTooltip(HWND hControl, const char* message, int duration);
 extern void DestroyTooltip(HWND hWnd);
 extern void DestroyAllTooltips(void);
-extern BOOL Notification(int type, WORD extra_id, Callback_t extra_callback, char* title, char* format, ...);
+extern BOOL Notification(int type, const notification_info* more_info, char* title, char* format, ...);
 extern BOOL Question(char* title, char* format, ...);
 extern BOOL ExtractDOS(const char* path);
 extern BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan);
@@ -245,6 +249,7 @@ extern BOOL FileIO(BOOL save, char* path, char** buffer, DWORD* size);
 extern LONG GetEntryWidth(HWND hDropDown, const char* entry);
 extern BOOL DownloadFile(const char* url, const char* file);
 extern INT_PTR CALLBACK UpdateCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
+extern BOOL SetUpdateCheck(void);
 extern BOOL CheckForUpdates(void);
 extern BOOL IsShown(HWND hDlg);
 extern char* get_token_data_file(const char* token, const char* filename);

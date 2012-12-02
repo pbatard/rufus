@@ -31,12 +31,13 @@ extern "C" {
  * These keys go into HKCU\Software\COMPANY_NAME\APPLICATION_NAME\
  */
 #define REGKEY_VERBOSE_UPDATES      "VerboseUpdateCheck"
-#define REGKEY_DISABLE_UPDATES      "DisableUpdateCheck"
 #define REGKEY_LAST_UPDATE          "LastUpdateCheck"
 #define REGKEY_UPDATE_INTERVAL      "UpdateCheckInterval"
 #define REGKEY_LAST_VERSION_SEEN    "LastVersionSeen"
+#define REGKEY_INCLUDE_BETAS        "CheckForBetas"
+#define REGKEY_COMM_CHECK           "CommCheck"
 
-/* Delete a registry key from HKCU\Software and all its subkeys
+/* Delete a registry key from HKCU\Software and all its values
    If the key has subkeys, this call will fail. */
 static __inline BOOL DeleteRegistryKey(const char* key_name)
 {
@@ -117,9 +118,9 @@ static __inline int64_t ReadRegistryKey64(const char* key) {
 	GetRegistryKey64(key, &val);
 	return (int64_t)val;
 }
-static __inline void WriteRegistryKey64(const char* key, int64_t val) {
+static __inline BOOL WriteRegistryKey64(const char* key, int64_t val) {
 	LONGLONG tmp = (LONGLONG)val;
-	SetRegistryKey64(key, tmp);
+	return SetRegistryKey64(key, tmp);
 }
 
 /* Helpers for 32 bit registry operations */
@@ -134,14 +135,14 @@ static __inline int32_t ReadRegistryKey32(const char* key) {
 	GetRegistryKey32(key, &val);
 	return (int32_t)val;
 }
-static __inline void WriteRegistryKey32(const char* key, int32_t val) {
+static __inline BOOL WriteRegistryKey32(const char* key, int32_t val) {
 	DWORD tmp = (DWORD)val;
-	SetRegistryKey32(key, tmp);
+	return SetRegistryKey32(key, tmp);
 }
 
 /* Helpers for boolean registry operations */
 #define GetRegistryKeyBool(key) (ReadRegistryKey32(key) != 0)
-#define SetRegistryKeyBool(key) WriteRegistryKey32(key, 1)
+#define SetRegistryKeyBool(key, b) WriteRegistryKey32(key, (b)?1:0)
 #define CheckRegistryKeyBool CheckRegistryKey32
 
 /* Helpers for String registry operations */
