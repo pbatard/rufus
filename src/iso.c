@@ -417,8 +417,7 @@ BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan)
 		SetWindowLong(hISOProgressBar, GWL_STYLE, progress_style & (~PBS_MARQUEE));
 		SendMessage(hISOProgressBar, PBM_SETPOS, 0, 0);
 	}
-	ShowWindow(hISOProgressDlg, SW_SHOW);
-	UpdateWindow(hISOProgressDlg);
+	SendMessage(hISOProgressDlg, UM_ISO_INIT, 0, 0);
 
 	/* First try to open as UDF - fallback to ISO if it failed */
 	p_udf = udf_open(src_iso);
@@ -514,7 +513,7 @@ out:
 		if (fd != NULL)
 			fclose(fd);
 	}
-	ShowWindow(hISOProgressDlg, SW_HIDE);
+	SendMessage(hISOProgressDlg, UM_ISO_EXIT, 0, 0);
 	if (p_iso != NULL)
 		iso9660_close(p_iso);
 	if (p_udf != NULL)

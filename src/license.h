@@ -85,7 +85,7 @@ const char* additional_copyrights =
 "All other references can be found in the source.\\line\n}";
 
 const char* update_policy =
-"{\\rtf1\\ansi{\\fonttbl{\\f0\\fnil\\fcharset0 Tahoma;}{\\f1\\fnil\\fcharset2 Symbol;}}\n"
+"{\\rtf1\\ansi{\\fonttbl{\\f0\\fnil\\fcharset0 Microsoft Sans Serif;}{\\f1\\fnil\\fcharset2 Symbol;}}\n"
 "\\fs16\\b Update Policy\\b0\\line\\line\n"
 "If you choose to allow update checks, you agree that the following information may be collected on our server(s):\\par\n"
 "\\pard{\\pntext\\f1\\'B7\\tab}{\\*\\pn\\pnlvlblt\\pnf2\\pnindent0{\\pntxtb\\'B7}}\\fi-150\\li220 Your Operating System's architecture and version\\par\n"

@@ -82,7 +82,7 @@ struct {
 } bi_iso = {0}, bi_up = {0}, bi_down = {0};	// BUTTON_IMAGELIST
 
 static const char* FileSystemLabel[FS_MAX] = { "FAT", "FAT32", "NTFS", "exFAT" };
-// Don't ask me - just following the MS standard here
+// Don't ask me - just following the MS "standard" here
 static const char* ClusterSizeLabel[] = { "512 bytes", "1024 bytes","2048 bytes","4096 bytes","8192 bytes",
 	"16 kilobytes", "32 kilobytes", "64 kilobytes", "128 kilobytes", "256 kilobytes", "512 kilobytes",
 	"1024 kilobytes","2048 kilobytes","4096 kilobytes","8192 kilobytes","16 megabytes","32 megabytes" };
@@ -104,6 +104,7 @@ int default_fs;
 HWND hDeviceList, hCapacity, hFileSystem, hClusterSize, hLabel, hDOSType, hNBPasses, hLog = NULL;
 HWND hISOProgressDlg = NULL, hLogDlg = NULL, hISOProgressBar, hISOFileName, hDiskID;
 BOOL use_own_vesamenu = FALSE, detect_fakes = TRUE, mbr_selected_by_user = FALSE;
+BOOL iso_op_in_progress = FALSE, format_op_in_progress = FALSE;
 int rufus_version[4];
 extern char szStatusMessage[256];
 
@@ -1192,20 +1193,26 @@ static void CALLBACK BlockingTimer(HWND hWnd, UINT uMsg, UINT_PTR idEvent, DWORD
 	}
 }
 
-/* Callback for the modeless ISO extraction progress */
+/* Callback for the modeless ISO extraction progress, and other progress dialogs */
 BOOL CALLBACK ISOProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam) 
 {
 	switch (message) {
 	case WM_INITDIALOG:
-		CenterDialog(hDlg);
 		hISOProgressBar = GetDlgItem(hDlg, IDC_ISO_PROGRESS);
 		hISOFileName = GetDlgItem(hDlg, IDC_ISO_FILENAME);
 		// Use maximum granularity for the progress bar
 		SendMessage(hISOProgressBar, PBM_SETRANGE, 0, MAX_PROGRESS<<16);
 		return TRUE;
+	case UM_ISO_INIT:
+		iso_op_in_progress = TRUE;
+		CenterDialog(hDlg);
+		ShowWindow(hDlg, SW_SHOW);
+		UpdateWindow(hDlg);
+		return TRUE;
 	case UM_ISO_EXIT:
-		DestroyWindow(hDlg);
-		hISOProgressDlg = NULL;
+		// Just hide and recentrer the dialog
+		ShowWindow(hDlg, SW_HIDE);
+		iso_op_in_progress = FALSE;
 		return TRUE;
 	case WM_COMMAND: 
 		switch (LOWORD(wParam)) {
@@ -1521,14 +1528,12 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 {
 	DRAWITEMSTRUCT* pDI;
 	POINT Point;
-	BOOL testme;
 	RECT DialogRect, DesktopRect;
 	int nDeviceIndex, fs, i, nWidth, nHeight;
 	static DWORD DeviceNum = 0;
 	wchar_t wtmp[128], wstr[MAX_PATH];
 	static UINT uDOSChecked = BST_CHECKED, uQFChecked;
 	static BOOL first_log_display = TRUE, user_changed_label = FALSE;
-	notification_info more_info = { IDD_UPDATE_POLICY, UpdateCallback };
 
 	switch (message) {
 
@@ -1547,6 +1552,8 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		hLogDlg = CreateDialogA(hMainInstance, MAKEINTRESOURCEA(IDD_LOG), hDlg, (DLGPROC)LogProc); 
 		InitDialog(hDlg);
 		GetUSBDevices(0);
+		CheckForUpdates();
+		PostMessage(hMainDialog, UM_ISO_CREATE, 0, 0);
 		return (INT_PTR)TRUE;
 
 	// The things one must do to get an ellipsis on the status bar...
@@ -1769,14 +1776,6 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			selection_default = DT_ISO;
 			CreateTooltip(hSelectISO, iso_path, -1);
 			FormatStatus = 0;
-			// You'd think that Windows would let you instantiate a modeless dialog wherever
-			// but you'd be wrong. It must be done in the main callback!
-			if (!IsWindow(hISOProgressDlg)) { 
-				hISOProgressDlg = CreateDialogA(hMainInstance, MAKEINTRESOURCEA(IDD_ISO_EXTRACT),
-					hDlg, (DLGPROC)ISOProc); 
-				// The window is not visible by default but takes focus => restore it
-				SetFocus(hDlg);
-			} 
 			if (CreateThread(NULL, 0, ISOScanThread, NULL, 0, 0) == NULL) {
 				uprintf("Unable to start ISO scanning thread");
 				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_START_THREAD);
@@ -1791,6 +1790,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				return (INT_PTR)TRUE;
 			}
 			FormatStatus = 0;
+			format_op_in_progress = TRUE;
 			// Reset all progress bars
 			SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_NORMAL, 0);
 			SetTaskbarProgressState(TASKBAR_NORMAL);
@@ -1838,12 +1838,6 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 					DeviceNum = (DWORD)ComboBox_GetItemData(hDeviceList, nDeviceIndex);
 					FormatStatus = 0;
 					InitProgress();
-					if (!IsWindow(hISOProgressDlg)) { 
-						hISOProgressDlg = CreateDialogA(hMainInstance, MAKEINTRESOURCEA(IDD_ISO_EXTRACT),
-							hDlg, (DLGPROC)ISOProc); 
-						// The window is not visible by default but takes focus => restore it
-						SetFocus(hDlg);
-					} 
 					format_thid = CreateThread(NULL, 0, FormatThread, (LPVOID)(uintptr_t)DeviceNum, 0, NULL);
 					if (format_thid == NULL) {
 						uprintf("Unable to start formatting thread");
@@ -1857,6 +1851,8 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 					SetTimer(hMainDialog, TID_APP_TIMER, 1000, ClockTimer);
 				}
 			}
+			if (format_thid == NULL)
+				format_op_in_progress = FALSE;
 			break;
 		default:
 			return (INT_PTR)FALSE;
@@ -1869,6 +1865,17 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		}
 		PostQuitMessage(0);
 		break;
+
+	case UM_ISO_CREATE:
+		// You'd think that Windows would let you instantiate a modeless dialog wherever
+		// but you'd be wrong. It must be done in the main callback, hence the custom message.
+		if (!IsWindow(hISOProgressDlg)) { 
+			hISOProgressDlg = CreateDialogA(hMainInstance, MAKEINTRESOURCEA(IDD_ISO_EXTRACT),
+				hDlg, (DLGPROC)ISOProc); 
+			// The window is not visible by default but takes focus => restore it
+			SetFocus(hDlg);
+		} 
+		return (INT_PTR)TRUE;
 
 	case UM_FORMAT_COMPLETED:
 		format_thid = NULL;
@@ -1900,6 +1907,8 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			Notification(MSG_ERROR, NULL, "Error", "Error: %s.%s", StrError(FormatStatus), 
 				(strchr(StrError(FormatStatus), '\n') != NULL)?"":"\nFor more information, please check the log.");
 		}
+		FormatStatus = 0;
+		format_op_in_progress = FALSE;
 		return (INT_PTR)TRUE;
 	}
 	return (INT_PTR)FALSE;

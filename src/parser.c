@@ -40,7 +40,7 @@ typedef struct {
 	char* platform;			// target platform ("windows", "linux", etc.)
 	char* platform_arch;	// "x86", "x64", "arm"
 	char* platform_min;		// minimum platform version required
-	char* download_url[2];
+	char* download_url;
 	char* release_notes;
 } rufus_update;
 
@@ -51,15 +51,11 @@ typedef struct {
 static wchar_t* get_token_data_line(const wchar_t* wtoken, wchar_t* wline)
 {
 	const wchar_t wspace[] = L" \t";	// The only whitespaces we recognize as such
-	const wchar_t weol[] = L"\r\n";
 	size_t i, r;
 	BOOLEAN quoteth = FALSE;
 
 	if ((wtoken == NULL) || (wline == NULL) || (wline[0] == 0))
 		return NULL;
-
-	// Eliminate trailing EOL characters
-	wline[wcscspn(wline, weol)] = 0;
 
 	i = 0;
 
@@ -97,6 +93,10 @@ static wchar_t* get_token_data_line(const wchar_t* wtoken, wchar_t* wline)
 	while ( (wline[i] != 0) && ((wline[i] != L'"') || ((wline[i] == L'"') && (!quoteth))) )
 		i++;
 	wline[i] = 0;
+
+	// Eliminate trailing EOL characters
+	while ((i>=r) && ((wline[i] == L'\r') || (wline[i] == L'\n')))
+		wline[i--] = 0;
 
 	return (wline[r] == 0)?NULL:&wline[r];
 }
@@ -150,7 +150,7 @@ out:
 // The returned string is UTF-8 and MUST be freed by the caller
 char* get_token_data_buffer(const char* token, unsigned int n, const char* buffer, size_t buffer_size)
 {
-	unsigned int j;
+	unsigned int j, curly_count;
 	wchar_t *wtoken = NULL, *wdata = NULL, *wbuffer = NULL, *wline = NULL;
 	size_t i;
 	BOOL done = FALSE;
@@ -169,11 +169,14 @@ char* get_token_data_buffer(const char* token, unsigned int n, const char* buffe
 	if ((wbuffer == NULL) || (wtoken == NULL))
 		goto out;
 
-	// Process individual lines
+	// Process individual lines (or multiple lines when between {}, for RTF)
 	for (i=0,j=0,done=FALSE; (j!=n)&&(!done); ) {
 		wline = &wbuffer[i];
 
-		for(;(wbuffer[i]!=L'\n')&&(wbuffer[i]!=L'\r')&&(wbuffer[i]!=0);i++);
+		for(curly_count=0;((curly_count>0)||((wbuffer[i]!=L'\n')&&(wbuffer[i]!=L'\r')))&&(wbuffer[i]!=0);i++) {
+			if (wbuffer[i] == L'{') curly_count++;
+			if (wbuffer[i] == L'}') curly_count--;
+		}
 		if (wbuffer[i]==0) {
 			done = TRUE;
 		} else {
@@ -210,22 +213,29 @@ static __inline char* get_sanitized_token_data_buffer(const char* token, unsigne
 // Parse an update data file and populates a rufus_update structure.
 // NB: since this is remote data, and we're running elevated, it *IS* considered
 // potentially malicious, even if it comes from a supposedly trusted server.
-// len should be the size of the buffer - 1, for the zero terminator
+// len should be the size of the buffer, including the zero terminator
+extern INT_PTR NewVersionDialog(const char* notes, const char* url);
 void parse_update(char* buf, size_t len)
 {
 	size_t i;
 	char *data = NULL, *token;
-	char allowed_chars[] = " \t\r\nabcdefghijklmnopqrstuvwxyz"
-		"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!\"$%^&*()-_+=<>(){}[].,:;#@'/?|~";
+	char allowed_rtf_chars[] = "abcdefghijklmnopqrstuvwxyz|~-_:*'";
+	char allowed_std_chars[] = "\r\n ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!\"$%^&+=<>(){}[].,;#@/?";
 	rufus_update update;
 
-	if ((buf == NULL) || (len < 2) || (len > 65536) || (buf[len-1] != 0))
+	// strchr includes the NUL terminator in the search, so take care of backslash before NUL
+	if ((buf == NULL) || (len < 2) || (len > 65536) || (buf[len-1] != 0) || (buf[len-2] == '\\'))
 		return;
-	// Sanitize the data - Of course not a silver bullet, but it helps
+	// Sanitize the data - Not a silver bullet, but it helps
+	len = safe_strlen(buf)+1;		// Someone may be inserting NULs
 	for (i=0; i<len-1; i++) {
-		// Do not sanitize \n yet
-		// NB: we have a zero terminator, so we can afford a +1 without overflow
-		if ((strchr(allowed_chars, buf[i]) == NULL) && (buf[i] != '\\') && (buf[i+1] != 'n')) {
+		// Check for valid RTF sequences as well as allowed chars if not RTF
+		if (buf[i] == '\\') {
+			// NB: we have a zero terminator, so we can afford a +1 without overflow
+			if (strchr(allowed_rtf_chars, buf[i+1]) == NULL) {
+				buf[i] = ' ';
+			}
+		} else if ((strchr(allowed_rtf_chars, buf[i]) == NULL) && (strchr(allowed_std_chars, buf[i]) == NULL)) {
 			buf[i] = ' ';
 		}
 	}
@@ -237,23 +247,24 @@ void parse_update(char* buf, size_t len)
 		}
 		safe_free(data);
 	}
-	// TODO: use X-Macros?
 	update.type = get_sanitized_token_data_buffer("type", 1, buf, len);
 	update.platform = get_sanitized_token_data_buffer("platform", 1, buf, len);
 	update.platform_arch = get_sanitized_token_data_buffer("platform_arch", 1, buf, len);
 	update.platform_min = get_sanitized_token_data_buffer("platform_min", 1, buf, len);
-	for (i=0; i<ARRAYSIZE(update.download_url); i++) {
-		update.download_url[i] = get_sanitized_token_data_buffer("download_url", (unsigned int)i+1, buf, len);
-	}
+	update.download_url = get_sanitized_token_data_buffer("download_url", 1, buf, len);
 	update.release_notes = get_sanitized_token_data_buffer("release_notes", 1, buf, len);
 
 	uprintf("UPDATE DATA:\n");
 	uprintf("  version: %d.%d.%d.%d\n", update.version[0], update.version[1], update.version[2], update.version[3]);
 	uprintf("  platform: %s\r\n  platform_arch: %s\r\n  platform_min: %s\n", update.platform, update.platform_arch, update.platform_min);
-	for (i=0; i<ARRAYSIZE(update.download_url); i++) {
-		uprintf("  url%d: %s\n", i+1, update.download_url[i]);
-	}
+	uprintf("  url: %s\n", update.download_url);
 	uprintf("RELEASE NOTES:\r\n%s\n", update.release_notes);
+
+	// User may have started formatting while we were checking
+	while (iso_op_in_progress || format_op_in_progress) {
+		Sleep(3000);
+	}
+	NewVersionDialog(update.release_notes, update.download_url);
 
 	// TODO: free all these strings!
 }

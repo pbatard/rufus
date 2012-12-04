@@ -252,13 +252,12 @@ BOOL DownloadFile(const char* url, const char* file)
 	progress_style = GetWindowLong(hISOProgressBar, GWL_STYLE);
 	SetWindowLong(hISOProgressBar, GWL_STYLE, progress_style & (~PBS_MARQUEE));
 	SendMessage(hISOProgressBar, PBM_SETPOS, 0, 0);
-	ShowWindow(hISOProgressDlg, SW_SHOW);
-	UpdateWindow(hISOProgressDlg);
+	SendMessage(hISOProgressDlg, UM_ISO_INIT, 0, 0);
 
 	PrintStatus(0, FALSE, "Downloading %s: Connecting...\n", file);
 	uprintf("Downloading %s from %s\n", file, url);
 
-	if (!InternetCrackUrlA(url, safe_strlen(url), 0, &UrlParts)) {
+	if (!InternetCrackUrlA(url, (DWORD)safe_strlen(url), 0, &UrlParts)) {
 		uprintf("Unable to decode URL: %s\n", WindowsErrorString());
 		goto out;
 	}
@@ -348,7 +347,7 @@ BOOL DownloadFile(const char* url, const char* file)
 	}
 
 out:
-	ShowWindow(hISOProgressDlg, SW_HIDE);
+	SendMessage(hISOProgressDlg, UM_ISO_EXIT, 0, 0);
 	if (fd != NULL) fclose(fd);
 	if (!r) {
 		_unlink(file);
@@ -383,15 +382,17 @@ DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 	BOOL is_x64 = FALSE, (__stdcall *pIsWow64Process)(HANDLE, PBOOL) = NULL;
 
 	// Wait a while before checking for updates
-	// TODO: start the thread in sleep mode and only wake it on user inactivity?
-//	Sleep(15000);
+	// TODO: Also check on inactivity
+	do {
+		Sleep(10000);
+	} while (iso_op_in_progress || format_op_in_progress);
 
-//	verbose = ReadRegistryKey32(REGKEY_VERBOSE_UPDATES);
-// TODO: reenable this
-//	if (GetRegistryKeyBool(REGKEY_DISABLE_UPDATES)) {
-//		vuprintf("Check for updates disabled, as per registry settings.\n");
-//		return FALSE;
-//	}
+	// TODO: reenable this
+	//	verbose = ReadRegistryKey32(REGKEY_VERBOSE_UPDATES);
+	if ((ReadRegistryKey32(REGKEY_UPDATE_INTERVAL) == -1)) {
+		vuprintf("Check for updates disabled, as per registry settings.\n");
+		goto out;
+	}
 	reg_time = ReadRegistryKey64(REGKEY_LAST_UPDATE);
 	update_interval = (int64_t)ReadRegistryKey32(REGKEY_UPDATE_INTERVAL);
 	if (update_interval == 0) {
@@ -405,14 +406,14 @@ DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 	vvuprintf("Local time: %" PRId64 "\n", local_time);
 	if (local_time < reg_time + update_interval) {
 		vuprintf("Next update check in %" PRId64 " seconds.\n", reg_time + update_interval - local_time);
-		return FALSE;
+		goto out;
 	}
 
 	PrintStatus(3000, FALSE, "Checking for " APPLICATION_NAME " updates...\n");
 
 	if (!GetVersionExA(&os_version)) {
 		vuprintf("Could not read Windows version - Check for updates cancelled.\n");
-		return FALSE;
+		goto out;
 	}
 
 	// Detect if the OS is 64 bit, without relying on external libs
@@ -427,7 +428,7 @@ DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 		is_x64 = TRUE;
 	}
 
-	if ((!InternetCrackUrlA(server_url, safe_strlen(server_url), 0, &UrlParts)) || (!InternetGetConnectedState(&dwFlags, 0)))
+	if ((!InternetCrackUrlA(server_url, (DWORD)safe_strlen(server_url), 0, &UrlParts)) || (!InternetGetConnectedState(&dwFlags, 0)))
 		goto out;
 
 	_snprintf(agent, ARRAYSIZE(agent), APPLICATION_NAME "/%d.%d.%d.%d", rufus_version[0], rufus_version[1], rufus_version[2], rufus_version[3]);
@@ -447,7 +448,7 @@ DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 	safe_sprintf(urlpath, sizeof(urlpath), "%s_%s_%d.%d.ver", APPLICATION_NAME,
 		archname[is_x64?1:0], os_version.dwMajorVersion, os_version.dwMinorVersion);
 	vuprintf("Base update check: %s\n", urlpath);
-	for (i=0, j=safe_strlen(urlpath)-5; (j>0)&&(i<ARRAYSIZE(verpos)); j--) {
+	for (i=0, j=(int)safe_strlen(urlpath)-5; (j>0)&&(i<ARRAYSIZE(verpos)); j--) {
 		if ((urlpath[j] == '.') || (urlpath[j] == '_')) {
 			verpos[i++] = j;
 		}
@@ -501,10 +502,10 @@ DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 	WriteRegistryKey64(REGKEY_LAST_UPDATE, server_time);
 	// Might as well let the user know
 	if (local_time > server_time + 600) {
-		uprintf("Your local clock seems more than 10 minutes early - You probably want to fix that...\n");
+		uprintf("Your local clock appears more than 10 minutes early - You ought to fix that...\n");
 	}
 	if (local_time < server_time - 600) {
-		uprintf("Your local clock seems more than 10 minutes late - you probably want to fix that...\n");
+		uprintf("Your local clock appears more than 10 minutes late - you ought to fix that...\n");
 	}
 
 	dwSize = sizeof(dwTotalSize);
@@ -533,11 +534,9 @@ out:
 
 BOOL CheckForUpdates(void)
 {
-	// TODO: check registry for disabled update
 	if (CreateThread(NULL, 0, CheckForUpdatesThread, NULL, 0, 0) == NULL) {
 		uprintf("Unable to start check for updates thread");
-		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_START_THREAD);
+		return FALSE;
 	}
-
 	return TRUE;
 }

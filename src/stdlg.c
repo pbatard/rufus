@@ -458,9 +458,9 @@ char* FileDialog(BOOL save, char* path, char* filename, char* ext, char* ext_des
 	INIT_VISTA_SHELL32;
 	if (IS_VISTA_SHELL32_AVAILABLE) {
 		// Setup the file extension filter table
-		ext_filter = (char*)malloc(strlen(ext)+3);
+		ext_filter = (char*)malloc(safe_strlen(ext)+3);
 		if (ext_filter != NULL) {
-			safe_sprintf(ext_filter, strlen(ext)+3, "*.%s", ext);
+			safe_sprintf(ext_filter, safe_strlen(ext)+3, "*.%s", ext);
 			filter_spec[0].pszSpec = utf8_to_wchar(ext_filter);
 			safe_free(ext_filter);
 			filter_spec[0].pszName = utf8_to_wchar(ext_desc);
@@ -536,7 +536,7 @@ fallback:
 	ofn.lpstrFile = selected_name;
 	ofn.nMaxFile = MAX_PATH;
 	// Set the file extension filters
-	ext_strlen = strlen(ext_desc) + 2*strlen(ext) + sizeof(" (*.)\0*.\0All Files (*.*)\0*.*\0\0");
+	ext_strlen = safe_strlen(ext_desc) + 2*safe_strlen(ext) + sizeof(" (*.)\0*.\0All Files (*.*)\0*.*\0\0");
 	ext_string = (char*)malloc(ext_strlen);
 	safe_sprintf(ext_string, ext_strlen, "%s (*.%s)\r*.%s\rAll Files (*.*)\r*.*\r\0", ext_desc, ext, ext);
 	// Microsoft could really have picked a better delimiter!
@@ -1115,7 +1115,6 @@ INT_PTR CALLBACK UpdateCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 {
 	HWND hPolicy;
 	static HWND hFrequency, hBeta;
-	DWORD frequency = -1;
 
 	switch (message) {
 	case WM_INITDIALOG:
@@ -1190,4 +1189,73 @@ BOOL SetUpdateCheck(void)
 	// TODO: check for lastcheck + interval & launch the background thread here?
 	// TODO: make sure we check for updates if user just accepted
 	return TRUE;
+}
+
+/*
+ * New version notification dialog
+ */
+static const char* release_notes;
+static const char* download_url;
+INT_PTR CALLBACK NewVersionCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	int i;
+	HWND hNotes;
+	TEXTRANGEW tr;
+	ENLINK* enl;
+	wchar_t wUrl[256];
+	char* filepath;
+
+	switch (message) {
+	case WM_INITDIALOG:
+		CenterDialog(hDlg);
+		hNotes = GetDlgItem(hDlg, IDC_RELEASE_NOTES);
+		SendMessage(hNotes, EM_AUTOURLDETECT, 1, 0);
+		SendMessageA(hNotes, EM_SETTEXTEX, (WPARAM)&friggin_microsoft_unicode_amateurs, (LPARAM)release_notes);
+		SendMessage(hNotes, EM_SETSEL, -1, -1);
+		SendMessage(hNotes, EM_SETEVENTMASK, 0, ENM_LINK);
+		break;
+	case WM_NOTIFY:
+		switch (((LPNMHDR)lParam)->code) {
+		case EN_LINK:
+			enl = (ENLINK*) lParam;
+			if (enl->msg == WM_LBUTTONUP) {
+				tr.lpstrText = wUrl;
+				tr.chrg.cpMin = enl->chrg.cpMin;
+				tr.chrg.cpMax = enl->chrg.cpMax;
+				SendMessageW(enl->nmhdr.hwndFrom, EM_GETTEXTRANGE, 0, (LPARAM)&tr);
+				ShellExecuteW(hDlg, L"open", wUrl, NULL, NULL, SW_SHOWNORMAL);
+			}
+			break;
+		}
+		break;
+	case WM_COMMAND:
+		switch (LOWORD(wParam)) {
+		case IDCLOSE:
+		case IDCANCEL:
+			EndDialog(hDlg, LOWORD(wParam));
+			return (INT_PTR)TRUE;
+		case IDC_DOWNLOAD:
+			if (download_url == NULL)
+				return (INT_PTR)TRUE;
+			for (i=(int)safe_strlen(download_url); (i>0)&&(download_url[i]!='/'); i--);
+			filepath = FileDialog(TRUE, app_dir, (char*)&download_url[i+1], "exe", "Application");
+			if (filepath != NULL) {
+				// TODO: Do we want to close the release notes once download starts?
+//				EndDialog(hDlg, 0);
+//				SetFocus(hMainDialog);
+				DownloadFile(download_url, filepath);
+				safe_free(filepath);
+			}
+			return (INT_PTR)TRUE;
+		}
+		break;
+	}
+	return (INT_PTR)FALSE;
+}
+
+INT_PTR NewVersionDialog(const char* notes, const char* url)
+{
+	release_notes = notes;
+	download_url = url;
+	return DialogBoxA(hMainInstance, MAKEINTRESOURCEA(IDD_NEW_VERSION), hMainDialog, NewVersionCallback);
 }

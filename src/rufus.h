@@ -85,6 +85,9 @@ extern void _uprintf(const char *format, ...);
 /* Custom Windows messages */
 enum user_message_type {
 	UM_FORMAT_COMPLETED = WM_APP,
+	// TODO: relabel "ISO" to a more generic "progress"
+	UM_ISO_CREATE,
+	UM_ISO_INIT,
 	UM_ISO_EXIT
 };
 
@@ -202,12 +205,12 @@ extern HWND hMainDialog, hLogDlg, hStatus, hDeviceList, hCapacity;
 extern HWND hFileSystem, hClusterSize, hLabel, hDOSType, hNBPasses, hLog;
 extern HWND hISOProgressDlg, hISOProgressBar, hISOFileName, hDiskID;
 extern float fScale;
-extern char szFolderPath[MAX_PATH];
+extern char szFolderPath[MAX_PATH], app_dir[MAX_PATH];
 extern char* iso_path;
 extern DWORD FormatStatus;
 extern RUFUS_DRIVE_INFO SelectedDrive;
 extern const int nb_steps[FS_MAX];
-extern BOOL use_own_vesamenu, detect_fakes;
+extern BOOL use_own_vesamenu, detect_fakes, iso_op_in_progress, format_op_in_progress;
 extern RUFUS_ISO_REPORT iso_report;
 extern int64_t iso_blocking_status;
 extern int rufus_version[4];
