@@ -106,6 +106,7 @@ HWND hISOProgressDlg = NULL, hLogDlg = NULL, hISOProgressBar, hISOFileName, hDis
 BOOL use_own_vesamenu = FALSE, detect_fakes = TRUE, mbr_selected_by_user = FALSE;
 BOOL iso_op_in_progress = FALSE, format_op_in_progress = FALSE;
 int rufus_version[4];
+RUFUS_UPDATE update;
 extern char szStatusMessage[256];
 
 static HANDLE format_thid = NULL;
@@ -1282,7 +1283,8 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 					"Note: the file will be downloaded in the current directory. Once a\n"
 					"vesamenu.c32 exists there, it will always be used as replacement.\n", "Replace vesamenu.c32?",
 					MB_YESNO|MB_ICONWARNING) == IDYES) {
-					if (DownloadFile(VESAMENU_URL, vesamenu_filename))
+					SetWindowTextU(hISOFileName, VESAMENU_URL);
+					if (DownloadFile(VESAMENU_URL, vesamenu_filename, hISOProgressDlg, hISOProgressBar))
 						use_own_vesamenu = TRUE;
 				}
 			}
@@ -1371,7 +1373,6 @@ void InitDialog(HWND hDlg)
 	HINSTANCE hDllInst;
 	HDC hDC;
 	int i, i16, s16, s32;
-	HICON hSmallIcon, hBigIcon;
 	char tmp[128], *token;
 
 #ifdef RUFUS_TEST
@@ -1418,10 +1419,7 @@ void InitDialog(HWND hDlg)
 		s32 = 24;
 
 	// Create the title bar icon
-	hSmallIcon = (HICON)LoadImage(hMainInstance, MAKEINTRESOURCE(IDI_ICON), IMAGE_ICON, s16, s16, 0);
-	SendMessage (hDlg, WM_SETICON, ICON_SMALL, (LPARAM)hSmallIcon);
-	hBigIcon = (HICON)LoadImage(hMainInstance, MAKEINTRESOURCE(IDI_ICON), IMAGE_ICON, s32, s32, 0);
-	SendMessage (hDlg, WM_SETICON, ICON_BIG, (LPARAM)hBigIcon);
+	SetTitleBarIcon(hDlg);
 	GetWindowTextA(hDlg, tmp, sizeof(tmp));
 	// Count of Microsoft for making it more attractive to read a
 	// version using strtok() than using GetFileVersionInfo()

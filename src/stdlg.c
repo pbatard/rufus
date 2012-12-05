@@ -662,6 +662,7 @@ INT_PTR CALLBACK AboutCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 
 	switch (message) {
 	case WM_INITDIALOG:
+		SetTitleBarIcon(hDlg);
 		CenterDialog(hDlg);
 		if (reg_commcheck)
 			ShowWindow(GetDlgItem(hDlg, IDC_ABOUT_UPDATES), SW_SHOW);
@@ -733,6 +734,7 @@ INT_PTR CALLBACK NotificationCallback(HWND hDlg, UINT message, WPARAM wParam, LP
 	case WM_INITDIALOG:
 		white_brush = CreateSolidBrush(WHITE);
 		separator_brush = CreateSolidBrush(SEPARATOR_GREY);
+		SetTitleBarIcon(hDlg);
 		CenterDialog(hDlg);
 		// Change the default icon
 		if (Static_SetIcon(GetDlgItem(hDlg, IDC_NOTIFICATION_ICON), hMessageIcon) == 0) {
@@ -1118,6 +1120,7 @@ INT_PTR CALLBACK UpdateCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 
 	switch (message) {
 	case WM_INITDIALOG:
+		SetTitleBarIcon(hDlg);
 		CenterDialog(hDlg);
 		hFrequency = GetDlgItem(hDlg, IDC_UPDATE_FREQUENCY);
 		IGNORE_RETVAL(ComboBox_SetItemData(hFrequency, ComboBox_AddStringU(hFrequency, "Disabled"), -1));
@@ -1194,8 +1197,6 @@ BOOL SetUpdateCheck(void)
 /*
  * New version notification dialog
  */
-static const char* release_notes;
-static const char* download_url;
 INT_PTR CALLBACK NewVersionCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	int i;
@@ -1203,19 +1204,36 @@ INT_PTR CALLBACK NewVersionCallback(HWND hDlg, UINT message, WPARAM wParam, LPAR
 	TEXTRANGEW tr;
 	ENLINK* enl;
 	wchar_t wUrl[256];
+	char tmp[128];
 	char* filepath;
+	static BOOL was_downloaded = FALSE;
 
 	switch (message) {
 	case WM_INITDIALOG:
+		SetTitleBarIcon(hDlg);
 		CenterDialog(hDlg);
 		hNotes = GetDlgItem(hDlg, IDC_RELEASE_NOTES);
 		SendMessage(hNotes, EM_AUTOURLDETECT, 1, 0);
-		SendMessageA(hNotes, EM_SETTEXTEX, (WPARAM)&friggin_microsoft_unicode_amateurs, (LPARAM)release_notes);
+		SendMessageA(hNotes, EM_SETTEXTEX, (WPARAM)&friggin_microsoft_unicode_amateurs, (LPARAM)update.release_notes);
 		SendMessage(hNotes, EM_SETSEL, -1, -1);
 		SendMessage(hNotes, EM_SETEVENTMASK, 0, ENM_LINK);
+		safe_sprintf(tmp, sizeof(tmp), "Your version: %d.%d.%d (Build %d)",
+			rufus_version[0], rufus_version[1], rufus_version[2], rufus_version[3]);
+		SetWindowTextA(GetDlgItem(hDlg, IDC_YOUR_VERSION), tmp);
+		safe_sprintf(tmp, sizeof(tmp), "Latest version: %d.%d.%d (Build %d)",
+			update.version[0], update.version[1], update.version[2], update.version[3]);
+		SetWindowTextA(GetDlgItem(hDlg, IDC_LATEST_VERSION), tmp);
+		SetWindowTextA(GetDlgItem(hDlg, IDC_DOWNLOAD_URL), update.download_url);
+		SendMessage(GetDlgItem(hDlg, IDC_UPDATE_PROGRESS), PBM_SETRANGE, 0, MAX_PROGRESS<<16);
 		break;
 	case WM_NOTIFY:
 		switch (((LPNMHDR)lParam)->code) {
+		case NM_CLICK:
+		case NM_RETURN:
+			if (LOWORD(wParam) == IDC_WEBSITE) {
+				ShellExecuteA(hDlg, "open", RUFUS_URL, NULL, NULL, SW_SHOWNORMAL);
+			}
+			break;
 		case EN_LINK:
 			enl = (ENLINK*) lParam;
 			if (enl->msg == WM_LBUTTONUP) {
@@ -1235,15 +1253,16 @@ INT_PTR CALLBACK NewVersionCallback(HWND hDlg, UINT message, WPARAM wParam, LPAR
 			EndDialog(hDlg, LOWORD(wParam));
 			return (INT_PTR)TRUE;
 		case IDC_DOWNLOAD:
-			if (download_url == NULL)
+			if (update.download_url == NULL)
 				return (INT_PTR)TRUE;
-			for (i=(int)safe_strlen(download_url); (i>0)&&(download_url[i]!='/'); i--);
-			filepath = FileDialog(TRUE, app_dir, (char*)&download_url[i+1], "exe", "Application");
+			for (i=(int)safe_strlen(update.download_url); (i>0)&&(update.download_url[i]!='/'); i--);
+			filepath = FileDialog(TRUE, app_dir, (char*)&update.download_url[i+1], "exe", "Application");
 			if (filepath != NULL) {
-				// TODO: Do we want to close the release notes once download starts?
-//				EndDialog(hDlg, 0);
-//				SetFocus(hMainDialog);
-				DownloadFile(download_url, filepath);
+				if (DownloadFile(update.download_url, filepath, NULL, GetDlgItem(hDlg, IDC_UPDATE_PROGRESS))) {
+					// TODO: create a thread and allow aborts + invoke a launcher when successful
+					SetWindowTextA(GetDlgItem(hDlg, IDC_DOWNLOAD), "Done");
+					EnableWindow(GetDlgItem(hDlg, IDC_DOWNLOAD), FALSE);
+				}
 				safe_free(filepath);
 			}
 			return (INT_PTR)TRUE;
@@ -1253,9 +1272,45 @@ INT_PTR CALLBACK NewVersionCallback(HWND hDlg, UINT message, WPARAM wParam, LPAR
 	return (INT_PTR)FALSE;
 }
 
-INT_PTR NewVersionDialog(const char* notes, const char* url)
+void DownloadNewVersion(void)
 {
-	release_notes = notes;
-	download_url = url;
-	return DialogBoxA(hMainInstance, MAKEINTRESOURCEA(IDD_NEW_VERSION), hMainDialog, NewVersionCallback);
+	DialogBoxA(hMainInstance, MAKEINTRESOURCEA(IDD_NEW_VERSION), hMainDialog, NewVersionCallback);
+}
+
+void SetTitleBarIcon(HWND hDlg)
+{
+	HDC hDC;
+	int i16, s16, s32;
+	HICON hSmallIcon, hBigIcon;
+
+	// High DPI scaling
+	i16 = GetSystemMetrics(SM_CXSMICON);
+	hDC = GetDC(hDlg);
+	fScale = GetDeviceCaps(hDC, LOGPIXELSX) / 96.0f;
+	ReleaseDC(hDlg, hDC);
+	// Adjust icon size lookup
+	s16 = i16;
+	s32 = (int)(32.0f*fScale);
+	if (s16 >= 54)
+		s16 = 64;
+	else if (s16 >= 40)
+		s16 = 48;
+	else if (s16 >= 28)
+		s16 = 32;
+	else if (s16 >= 20)
+		s16 = 24;
+	if (s32 >= 54)
+		s32 = 64;
+	else if (s32 >= 40)
+		s32 = 48;
+	else if (s32 >= 28)
+		s32 = 32;
+	else if (s32 >= 20)
+		s32 = 24;
+
+	// Create the title bar icon
+	hSmallIcon = (HICON)LoadImage(hMainInstance, MAKEINTRESOURCE(IDI_ICON), IMAGE_ICON, s16, s16, 0);
+	SendMessage (hDlg, WM_SETICON, ICON_SMALL, (LPARAM)hSmallIcon);
+	hBigIcon = (HICON)LoadImage(hMainInstance, MAKEINTRESOURCE(IDI_ICON), IMAGE_ICON, s32, s32, 0);
+	SendMessage (hDlg, WM_SETICON, ICON_BIG, (LPARAM)hBigIcon);
 }

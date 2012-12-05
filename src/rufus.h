@@ -175,6 +175,16 @@ typedef struct {
 	BOOL uses_minint;
 } RUFUS_ISO_REPORT;
 
+typedef struct {
+	uint8_t version[4];
+	char* type;				// "release", "beta", "notice"
+	char* platform;			// target platform ("windows", "linux", etc.)
+	char* platform_arch;	// "x86", "x64", "arm"
+	char* platform_min;		// minimum platform version required
+	char* download_url;
+	char* release_notes;
+} RUFUS_UPDATE;
+
 /* Duplication of the TBPFLAG enum for Windows 7 taskbar progress */
 typedef enum TASKBAR_PROGRESS_FLAGS
 {
@@ -215,6 +225,7 @@ extern RUFUS_ISO_REPORT iso_report;
 extern int64_t iso_blocking_status;
 extern int rufus_version[4];
 extern enum WindowsVersion nWindowsVersion;
+extern RUFUS_UPDATE update;
 
 /*
  * Shared prototypes
@@ -227,6 +238,7 @@ extern void UpdateProgress(int op, float percent);
 extern const char* StrError(DWORD error_code);
 extern void CenterDialog(HWND hDlg);
 extern void CreateStatusBar(void);
+extern void SetTitleBarIcon(HWND hDlg);
 extern BOOL CreateTaskbarList(void);
 extern BOOL SetTaskbarProgressState(TASKBAR_PROGRESS_FLAGS tbpFlags);
 extern BOOL SetTaskbarProgressValue(ULONGLONG ullCompleted, ULONGLONG ullTotal);
@@ -250,10 +262,11 @@ extern BOOL SetAutorun(const char* path);
 extern char* FileDialog(BOOL save, char* path, char* filename, char* ext, char* ext_desc);
 extern BOOL FileIO(BOOL save, char* path, char** buffer, DWORD* size);
 extern LONG GetEntryWidth(HWND hDropDown, const char* entry);
-extern BOOL DownloadFile(const char* url, const char* file);
+extern BOOL DownloadFile(const char* url, const char* file, HWND hProgressDialog, HWND hProgressBar);
 extern INT_PTR CALLBACK UpdateCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
 extern BOOL SetUpdateCheck(void);
 extern BOOL CheckForUpdates(void);
+extern void DownloadNewVersion(void);
 extern BOOL IsShown(HWND hDlg);
 extern char* get_token_data_file(const char* token, const char* filename);
 extern char* get_token_data_buffer(const char* token, unsigned int n, const char* buffer, size_t buffer_size);

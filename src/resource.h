@@ -89,6 +89,11 @@
 #define IDC_INCLUDE_BETAS               1063
 #define IDC_RELEASE_NOTES               1064
 #define IDC_DOWNLOAD                    1065
+#define IDC_UPDATE_PROGRESS             1066
+#define IDC_WEBSITE                     1067
+#define IDC_YOUR_VERSION                1068
+#define IDC_LATEST_VERSION              1069
+#define IDC_DOWNLOAD_URL                1070
 
 // Next default values for new objects
 // 
@@ -97,7 +102,7 @@
 #define _APS_NO_MFC                     1
 #define _APS_NEXT_RESOURCE_VALUE        113
 #define _APS_NEXT_COMMAND_VALUE         40001
-#define _APS_NEXT_CONTROL_VALUE         1066
+#define _APS_NEXT_CONTROL_VALUE         1071
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

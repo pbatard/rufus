@@ -34,17 +34,6 @@
 #include "rufus.h"
 #include "msapi_utf8.h"
 
-typedef struct {
-	uint8_t version[4];
-	char* type;				// "release", "beta", "notice"
-	char* platform;			// target platform ("windows", "linux", etc.)
-	char* platform_arch;	// "x86", "x64", "arm"
-	char* platform_min;		// minimum platform version required
-	char* download_url;
-	char* release_notes;
-} rufus_update;
-
-
 // Parse a line of UTF-16 text and return the data if it matches the 'token'
 // The parsed line is of the form: [ ]token[ ]=[ ]["]data["][ ] and the line
 // is modified by the parser
@@ -214,14 +203,12 @@ static __inline char* get_sanitized_token_data_buffer(const char* token, unsigne
 // NB: since this is remote data, and we're running elevated, it *IS* considered
 // potentially malicious, even if it comes from a supposedly trusted server.
 // len should be the size of the buffer, including the zero terminator
-extern INT_PTR NewVersionDialog(const char* notes, const char* url);
 void parse_update(char* buf, size_t len)
 {
 	size_t i;
 	char *data = NULL, *token;
 	char allowed_rtf_chars[] = "abcdefghijklmnopqrstuvwxyz|~-_:*'";
 	char allowed_std_chars[] = "\r\n ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!\"$%^&+=<>(){}[].,;#@/?";
-	rufus_update update;
 
 	// strchr includes the NUL terminator in the search, so take care of backslash before NUL
 	if ((buf == NULL) || (len < 2) || (len > 65536) || (buf[len-1] != 0) || (buf[len-2] == '\\'))
@@ -264,8 +251,7 @@ void parse_update(char* buf, size_t len)
 	while (iso_op_in_progress || format_op_in_progress) {
 		Sleep(3000);
 	}
-	NewVersionDialog(update.release_notes, update.download_url);
-
+	DownloadNewVersion();
 	// TODO: free all these strings!
 }
 

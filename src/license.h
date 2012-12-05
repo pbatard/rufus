@@ -81,6 +81,10 @@ const char* additional_copyrights =
 "http://winscp.net\\line\n"
 "GNU General Public License (GPL) v3 or later\\line\n"
 "\\line\n"
+"Check for Update dialog inspired by TortoiseSVN & TortoiseGit\\line\n"
+"http://tortoisesvn.net/, http://code.google.com/p/tortoisegit/\\line\n"
+"GNU General Public License (GPL) v2 or later\\line\n"
+"\\line\n"
 "\\line\n"
 "All other references can be found in the source.\\line\n}";
 

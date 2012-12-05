@@ -233,7 +233,7 @@ const char* WinInetErrorString(void)
  * Download a file from an URL
  * Mostly taken from http://support.microsoft.com/kb/234913
  */
-BOOL DownloadFile(const char* url, const char* file)
+BOOL DownloadFile(const char* url, const char* file, HWND hProgressDialog, HWND hProgressBar)
 {
 	BOOL r = FALSE;
 	DWORD dwFlags, dwSize, dwDownloaded, dwTotalSize, dwStatus;
@@ -247,12 +247,15 @@ BOOL DownloadFile(const char* url, const char* file)
 	int i;
 
 	// We reuse the ISO progress dialog for download progress
-	SetWindowTextU(hISOProgressDlg, "Downloading file...");
-	SetWindowTextU(hISOFileName, url);
-	progress_style = GetWindowLong(hISOProgressBar, GWL_STYLE);
-	SetWindowLong(hISOProgressBar, GWL_STYLE, progress_style & (~PBS_MARQUEE));
-	SendMessage(hISOProgressBar, PBM_SETPOS, 0, 0);
-	SendMessage(hISOProgressDlg, UM_ISO_INIT, 0, 0);
+	if (hProgressDialog != NULL)
+		SetWindowTextU(hProgressDialog, "Downloading file...");
+	if (hProgressBar != NULL) {
+		progress_style = GetWindowLong(hProgressBar, GWL_STYLE);
+		SetWindowLong(hProgressBar, GWL_STYLE, progress_style & (~PBS_MARQUEE));
+		SendMessage(hProgressBar, PBM_SETPOS, 0, 0);
+	}
+	if (hProgressDialog != NULL)
+		SendMessage(hProgressDialog, UM_ISO_INIT, 0, 0);
 
 	PrintStatus(0, FALSE, "Downloading %s: Connecting...\n", file);
 	uprintf("Downloading %s from %s\n", file, url);
@@ -329,7 +332,7 @@ BOOL DownloadFile(const char* url, const char* file)
 		if (!InternetReadFile(hRequest, buf, sizeof(buf), &dwDownloaded) || (dwDownloaded == 0))
 			break;
 		dwSize += dwDownloaded;
-		SendMessage(hISOProgressBar, PBM_SETPOS, (WPARAM)(MAX_PROGRESS*((1.0f*dwSize)/(1.0f*dwTotalSize))), 0);
+		SendMessage(hProgressBar, PBM_SETPOS, (WPARAM)(MAX_PROGRESS*((1.0f*dwSize)/(1.0f*dwTotalSize))), 0);
 		PrintStatus(0, FALSE, "Downloading %s: %0.1f%%\n", file, (100.0f*dwSize)/(1.0f*dwTotalSize));
 		if (fwrite(buf, 1, dwDownloaded, fd) != dwDownloaded) {
 			uprintf("Error writing file %s: %s\n", file, WinInetErrorString());
@@ -347,7 +350,8 @@ BOOL DownloadFile(const char* url, const char* file)
 	}
 
 out:
-	SendMessage(hISOProgressDlg, UM_ISO_EXIT, 0, 0);
+	if (hProgressDialog != NULL)
+		SendMessage(hProgressDialog, UM_ISO_EXIT, 0, 0);
 	if (fd != NULL) fclose(fd);
 	if (!r) {
 		_unlink(file);

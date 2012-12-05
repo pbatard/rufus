@@ -30,7 +30,7 @@ LANGUAGE LANG_ENGLISH, SUBLANG_NEUTRAL
 IDD_DIALOG DIALOGEX 12, 12, 206, 316
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_APPWINDOW
-CAPTION "Rufus v1.2.1.202"
+CAPTION "Rufus v1.2.1.203"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     DEFPUSHBUTTON   "Start",IDC_START,94,278,50,14
@@ -138,14 +138,23 @@ BEGIN
     GROUPBOX        "Settings",IDC_STATIC,46,145,173,45
 END
 
-IDD_NEW_VERSION DIALOGEX 0, 0, 287, 198
+IDD_NEW_VERSION DIALOGEX 0, 0, 384, 268
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "New version available"
+CAPTION "Check For Updates - Rufus"
 FONT 8, "Microsoft Sans Serif", 400, 0, 0x0
 BEGIN
-    PUSHBUTTON      "Close",IDCANCEL,229,177,50,14,WS_GROUP
-    CONTROL         "",IDC_RELEASE_NOTES,"RichEdit20W",ES_MULTILINE | ES_READONLY | WS_VSCROLL,4,4,279,167,WS_EX_STATICEDGE
-    DEFPUSHBUTTON   "Download",IDC_DOWNLOAD,173,177,50,14,WS_GROUP
+    PUSHBUTTON      "Close",IDCANCEL,167,244,50,14,WS_GROUP
+    CONTROL         "",IDC_RELEASE_NOTES,"RichEdit20W",ES_MULTILINE | ES_READONLY | WS_VSCROLL,15,77,352,88,WS_EX_STATICEDGE
+    DEFPUSHBUTTON   "Download",IDC_DOWNLOAD,293,211,74,14,WS_GROUP
+    CONTROL         "",IDC_UPDATE_PROGRESS,"msctls_progress32",WS_BORDER,15,212,270,11
+    GROUPBOX        "Release Notes",IDC_STATIC,8,63,367,111
+    LTEXT           "A newer version is available. Please download the latest version!",IDC_STATIC,10,32,229,8
+    LTEXT           "[...]",IDC_YOUR_VERSION,10,8,124,8
+    LTEXT           "[...]",IDC_LATEST_VERSION,10,19,129,8
+    CONTROL         "<a href=""http://rufus.akeo.ie"">Click here to go to the website</a>",IDC_WEBSITE,
+                    "SysLink",WS_TABSTOP,143,49,96,9
+    GROUPBOX        "Download",IDC_STATIC,8,177,367,58
+    EDITTEXT        IDC_DOWNLOAD_URL,15,191,351,13,ES_AUTOHSCROLL | ES_READONLY
 END
 
 
@@ -263,8 +272,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,2,1,202
- PRODUCTVERSION 1,2,1,202
+ FILEVERSION 1,2,1,203
+ PRODUCTVERSION 1,2,1,203
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -281,13 +290,13 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Akeo Consulting (http://akeo.ie)"
             VALUE "FileDescription", "Rufus"
-            VALUE "FileVersion", "1.2.1.202"
+            VALUE "FileVersion", "1.2.1.203"
             VALUE "InternalName", "Rufus"
             VALUE "LegalCopyright", "(c) 2011-2012 Pete Batard (GPL v3)"
             VALUE "LegalTrademarks", "http://www.gnu.org/copyleft/gpl.html"
             VALUE "OriginalFilename", "rufus.exe"
             VALUE "ProductName", "Rufus"
-            VALUE "ProductVersion", "1.2.1.202"
+            VALUE "ProductVersion", "1.2.1.203"
         END
     END
     BLOCK "VarFileInfo"
