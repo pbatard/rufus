@@ -42,7 +42,8 @@
 
 
 /* Globals */
-DWORD error_code;
+static DWORD error_code;
+static BOOL update_check_in_progress = FALSE;
 
 /* MinGW is missing some of those */
 #if !defined(ERROR_INTERNET_DISCONNECTED)
@@ -232,9 +233,13 @@ const char* WinInetErrorString(void)
 /* 
  * Download a file from an URL
  * Mostly taken from http://support.microsoft.com/kb/234913
+ * If hProgressDialog is not NULL, this function will send INIT and EXIT messages
+ * to the dialog in question, with WPARAM being set to nonzero for EXIT on success
+ * and also attempt to indicate progress using an IDC_PROGRESS control
  */
-BOOL DownloadFile(const char* url, const char* file, HWND hProgressDialog, HWND hProgressBar)
+BOOL DownloadFile(const char* url, const char* file, HWND hProgressDialog)
 {
+	HWND hProgressBar = NULL;
 	BOOL r = FALSE;
 	DWORD dwFlags, dwSize, dwDownloaded, dwTotalSize, dwStatus;
 	FILE* fd = NULL; 
@@ -246,16 +251,16 @@ BOOL DownloadFile(const char* url, const char* file, HWND hProgressDialog, HWND 
 		hostname, sizeof(hostname), 0, NULL, 1, urlpath, sizeof(urlpath), NULL, 1};
 	int i;
 
-	// We reuse the ISO progress dialog for download progress
-	if (hProgressDialog != NULL)
-		SetWindowTextU(hProgressDialog, "Downloading file...");
-	if (hProgressBar != NULL) {
-		progress_style = GetWindowLong(hProgressBar, GWL_STYLE);
-		SetWindowLong(hProgressBar, GWL_STYLE, progress_style & (~PBS_MARQUEE));
-		SendMessage(hProgressBar, PBM_SETPOS, 0, 0);
-	}
-	if (hProgressDialog != NULL)
+	if (hProgressDialog != NULL) {
+		// Use the progress control provided, if any
+		hProgressBar = GetDlgItem(hProgressDialog, IDC_PROGRESS);
+		if (hProgressBar != NULL) {
+			progress_style = GetWindowLong(hProgressBar, GWL_STYLE);
+			SetWindowLong(hProgressBar, GWL_STYLE, progress_style & (~PBS_MARQUEE));
+			SendMessage(hProgressBar, PBM_SETPOS, 0, 0);
+		}
 		SendMessage(hProgressDialog, UM_ISO_INIT, 0, 0);
+	}
 
 	PrintStatus(0, FALSE, "Downloading %s: Connecting...\n", file);
 	uprintf("Downloading %s from %s\n", file, url);
@@ -333,7 +338,7 @@ BOOL DownloadFile(const char* url, const char* file, HWND hProgressDialog, HWND 
 			break;
 		dwSize += dwDownloaded;
 		SendMessage(hProgressBar, PBM_SETPOS, (WPARAM)(MAX_PROGRESS*((1.0f*dwSize)/(1.0f*dwTotalSize))), 0);
-		PrintStatus(0, FALSE, "Downloading %s: %0.1f%%\n", file, (100.0f*dwSize)/(1.0f*dwTotalSize));
+		PrintStatus(0, FALSE, "Downloading: %0.1f%%\n", (100.0f*dwSize)/(1.0f*dwTotalSize));
 		if (fwrite(buf, 1, dwDownloaded, fd) != dwDownloaded) {
 			uprintf("Error writing file %s: %s\n", file, WinInetErrorString());
 			goto out;
@@ -351,7 +356,7 @@ BOOL DownloadFile(const char* url, const char* file, HWND hProgressDialog, HWND 
 
 out:
 	if (hProgressDialog != NULL)
-		SendMessage(hProgressDialog, UM_ISO_EXIT, 0, 0);
+		SendMessage(hProgressDialog, UM_ISO_EXIT, (WPARAM)r, 0);
 	if (fd != NULL) fclose(fd);
 	if (!r) {
 		_unlink(file);
@@ -367,9 +372,29 @@ out:
 	return r;
 }
 
-// TODO: check that no format operation is occurring
-DWORD WINAPI CheckForUpdatesThread(LPVOID param)
+/* Threaded download */
+static const char *_url, *_file;
+static HWND _hProgressDialog;
+static DWORD WINAPI _DownloadFileThread(LPVOID param)
 {
+	ExitThread(DownloadFile(_url, _file, _hProgressDialog));
+}
+
+HANDLE DownloadFileThreaded(const char* url, const char* file, HWND hProgressDialog)
+{
+	_url = url;
+	_file = file;
+	_hProgressDialog = hProgressDialog;
+	return CreateThread(NULL, 0, _DownloadFileThread, NULL, 0, NULL);
+}
+
+
+/*
+ * Background thread to check for updates
+ */
+static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
+{
+	BOOL force = (BOOL)param;
 	const char* server_url = RUFUS_URL "/";
 	int i, j, verbose = 2, verpos[4];
 	static char* archname[] = {"win_x86", "win_x64"};
@@ -382,35 +407,38 @@ DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 		hostname, sizeof(hostname), 0, NULL, 1, urlpath, sizeof(urlpath), NULL, 1};
 	SYSTEMTIME ServerTime, LocalTime;
 	FILETIME FileTime;
-	int64_t local_time, reg_time, server_time, update_interval;
+	int64_t local_time = 0, reg_time, server_time, update_interval;
 	BOOL is_x64 = FALSE, (__stdcall *pIsWow64Process)(HANDLE, PBOOL) = NULL;
 
-	// Wait a while before checking for updates
-	// TODO: Also check on inactivity
-	do {
-		Sleep(10000);
-	} while (iso_op_in_progress || format_op_in_progress);
+	update_check_in_progress = TRUE;
+	if (!force) {
+		// Wait a while before checking for updates
+		// TODO: Also check on inactivity
+		do {
+			Sleep(10000);
+		} while (iso_op_in_progress || format_op_in_progress);
 
-	// TODO: reenable this
-	//	verbose = ReadRegistryKey32(REGKEY_VERBOSE_UPDATES);
-	if ((ReadRegistryKey32(REGKEY_UPDATE_INTERVAL) == -1)) {
-		vuprintf("Check for updates disabled, as per registry settings.\n");
-		goto out;
-	}
-	reg_time = ReadRegistryKey64(REGKEY_LAST_UPDATE);
-	update_interval = (int64_t)ReadRegistryKey32(REGKEY_UPDATE_INTERVAL);
-	if (update_interval == 0) {
-		WriteRegistryKey32(REGKEY_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL);
-		update_interval = DEFAULT_UPDATE_INTERVAL;
-	}
-	GetSystemTime(&LocalTime);
-	if (!SystemTimeToFileTime(&LocalTime, &FileTime))
-		goto out;
-	local_time = ((((int64_t)FileTime.dwHighDateTime)<<32) + FileTime.dwLowDateTime) / 10000000;
-	vvuprintf("Local time: %" PRId64 "\n", local_time);
-	if (local_time < reg_time + update_interval) {
-		vuprintf("Next update check in %" PRId64 " seconds.\n", reg_time + update_interval - local_time);
-		goto out;
+		// TODO: reenable this
+		//	verbose = ReadRegistryKey32(REGKEY_VERBOSE_UPDATES);
+		if ((ReadRegistryKey32(REGKEY_UPDATE_INTERVAL) == -1)) {
+			vuprintf("Check for updates disabled, as per registry settings.\n");
+			goto out;
+		}
+		reg_time = ReadRegistryKey64(REGKEY_LAST_UPDATE);
+		update_interval = (int64_t)ReadRegistryKey32(REGKEY_UPDATE_INTERVAL);
+		if (update_interval == 0) {
+			WriteRegistryKey32(REGKEY_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL);
+			update_interval = DEFAULT_UPDATE_INTERVAL;
+		}
+		GetSystemTime(&LocalTime);
+		if (!SystemTimeToFileTime(&LocalTime, &FileTime))
+			goto out;
+		local_time = ((((int64_t)FileTime.dwHighDateTime)<<32) + FileTime.dwLowDateTime) / 10000000;
+		vvuprintf("Local time: %" PRId64 "\n", local_time);
+		if (local_time < reg_time + update_interval) {
+			vuprintf("Next update check in %" PRId64 " seconds.\n", reg_time + update_interval - local_time);
+			goto out;
+		}
 	}
 
 	PrintStatus(3000, FALSE, "Checking for " APPLICATION_NAME " updates...\n");
@@ -505,11 +533,13 @@ DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 	// Always store the server response time - the only clock we trust!
 	WriteRegistryKey64(REGKEY_LAST_UPDATE, server_time);
 	// Might as well let the user know
-	if (local_time > server_time + 600) {
-		uprintf("Your local clock appears more than 10 minutes early - You ought to fix that...\n");
-	}
-	if (local_time < server_time - 600) {
-		uprintf("Your local clock appears more than 10 minutes late - you ought to fix that...\n");
+	if (!force) {
+		if (local_time > server_time + 600) {
+			uprintf("Your local clock appears more than 10 minutes early - You ought to fix that...\n");
+		}
+		if (local_time < server_time - 600) {
+			uprintf("Your local clock appears more than 10 minutes late - you ought to fix that...\n");
+		}
 	}
 
 	dwSize = sizeof(dwTotalSize);
@@ -532,13 +562,18 @@ out:
 	if (hRequest) InternetCloseHandle(hRequest);
 	if (hConnection) InternetCloseHandle(hConnection);
 	if (hSession) InternetCloseHandle(hSession);
-
+	update_check_in_progress = FALSE;
 	ExitThread(0);
 }
 
-BOOL CheckForUpdates(void)
+/*
+ * Initiate a check for updates. If force is true, ignore the wait period
+ */
+BOOL CheckForUpdates(BOOL force)
 {
-	if (CreateThread(NULL, 0, CheckForUpdatesThread, NULL, 0, 0) == NULL) {
+	if (update_check_in_progress)
+		return FALSE;
+	if (CreateThread(NULL, 0, CheckForUpdatesThread, (LPVOID)force, 0, NULL) == NULL) {
 		uprintf("Unable to start check for updates thread");
 		return FALSE;
 	}

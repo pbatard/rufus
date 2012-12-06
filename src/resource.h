@@ -63,7 +63,6 @@
 #define IDC_SELECT_ISO                  1016
 #define IDC_SET_ICON                    1017
 #define IDC_RUFUS_MBR                   1018
-#define IDC_ISO_PROGRESS                1019
 #define IDC_ISO_FILENAME                1020
 #define IDC_ISO_ABORT                   1021
 #define IDC_DISK_ID                     1022
@@ -89,7 +88,6 @@
 #define IDC_INCLUDE_BETAS               1063
 #define IDC_RELEASE_NOTES               1064
 #define IDC_DOWNLOAD                    1065
-#define IDC_UPDATE_PROGRESS             1066
 #define IDC_WEBSITE                     1067
 #define IDC_YOUR_VERSION                1068
 #define IDC_LATEST_VERSION              1069

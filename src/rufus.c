@@ -1199,7 +1199,7 @@ BOOL CALLBACK ISOProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	switch (message) {
 	case WM_INITDIALOG:
-		hISOProgressBar = GetDlgItem(hDlg, IDC_ISO_PROGRESS);
+		hISOProgressBar = GetDlgItem(hDlg, IDC_PROGRESS);
 		hISOFileName = GetDlgItem(hDlg, IDC_ISO_FILENAME);
 		// Use maximum granularity for the progress bar
 		SendMessage(hISOProgressBar, PBM_SETRANGE, 0, MAX_PROGRESS<<16);
@@ -1283,8 +1283,9 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 					"Note: the file will be downloaded in the current directory. Once a\n"
 					"vesamenu.c32 exists there, it will always be used as replacement.\n", "Replace vesamenu.c32?",
 					MB_YESNO|MB_ICONWARNING) == IDYES) {
+					SetWindowTextU(hISOProgressDlg, "Downloading file...");
 					SetWindowTextU(hISOFileName, VESAMENU_URL);
-					if (DownloadFile(VESAMENU_URL, vesamenu_filename, hISOProgressDlg, hISOProgressBar))
+					if (DownloadFile(VESAMENU_URL, vesamenu_filename, hISOProgressDlg))
 						use_own_vesamenu = TRUE;
 				}
 			}
@@ -1550,7 +1551,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		hLogDlg = CreateDialogA(hMainInstance, MAKEINTRESOURCEA(IDD_LOG), hDlg, (DLGPROC)LogProc); 
 		InitDialog(hDlg);
 		GetUSBDevices(0);
-		CheckForUpdates();
+		CheckForUpdates(FALSE);
 		PostMessage(hMainDialog, UM_ISO_CREATE, 0, 0);
 		return (INT_PTR)TRUE;
 
@@ -1774,7 +1775,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			selection_default = DT_ISO;
 			CreateTooltip(hSelectISO, iso_path, -1);
 			FormatStatus = 0;
-			if (CreateThread(NULL, 0, ISOScanThread, NULL, 0, 0) == NULL) {
+			if (CreateThread(NULL, 0, ISOScanThread, NULL, 0, NULL) == NULL) {
 				uprintf("Unable to start ISO scanning thread");
 				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_START_THREAD);
 			}
@@ -1915,18 +1916,43 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 /*
  * Application Entrypoint
  */
+// If we ever need to process more than one commandline arguments, uncomment the following parts
+// typedef int (CDECL *__wgetmainargs_t)(int*, wchar_t***, wchar_t***, int, int*);
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
+//	int i, argc = 0, si = 0;
+//	char** argv = NULL;
+//	wchar_t **wenv, **wargv;
+//	PF_DECL(__wgetmainargs);
 	HANDLE mutex = NULL;
 	HWND hDlg = NULL;
 	MSG msg;
+	int wait_for_mutex = 0;
 
 	uprintf("*** RUFUS INIT ***\n");
 
-	// Prevent 2 applications from running at the same time
+//	PF_INIT(__wgetmainargs, msvcrt);
+//	if (pf__wgetmainargs != NULL) {
+//		pf__wgetmainargs(&argc, &wargv, &wenv, 1, &si);
+//		argv = (char**)calloc(argc, sizeof(char*));
+//		for (i=0; i<argc; i++) {
+//			argv[i] = wchar_to_utf8(wargv[i]);
+//		}
+//	} else {
+//		uprintf("unable to access UTF-16 args");
+//	}
+
+	// Prevent 2 applications from running at the same time, unless "/W" is passed as an option
+	// in which case we wait for the mutex to be relinquished
+	if ((safe_strlen(lpCmdLine)==2) && (lpCmdLine[0] == '/') && (lpCmdLine[1] == 'W'))
+		wait_for_mutex = 150;		// Try to acquire the mutex for 15 seconds
 	mutex = CreateMutexA(NULL, TRUE, "Global/RUFUS");
-	if ((mutex == NULL) || (GetLastError() == ERROR_ALREADY_EXISTS))
-	{
+	for (;(wait_for_mutex>0) && (mutex != NULL) && (GetLastError() == ERROR_ALREADY_EXISTS); wait_for_mutex--) {
+		CloseHandle(mutex);
+		Sleep(100);
+		mutex = CreateMutexA(NULL, TRUE, "Global/RUFUS");
+	}
+	if ((mutex == NULL) || (GetLastError() == ERROR_ALREADY_EXISTS)) {
 		MessageBoxA(NULL, "Another Rufus application is running.\n"
 			"Please close the first application before running another one.",
 			"Other instance detected", MB_ICONSTOP);
@@ -2007,6 +2033,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 					DeleteRegistryKey(COMPANY_NAME "\\" APPLICATION_NAME)?"successfully":"could not be");
 				// Also try to delete the upper key (company name) if it's empty (don't care about the result)
 				DeleteRegistryKey(COMPANY_NAME);
+				continue;
+			}
+			// Alt-U => Force an update check
+			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'U')) {
+				CheckForUpdates(TRUE);
 				continue;
 			}
 			TranslateMessage(&msg);

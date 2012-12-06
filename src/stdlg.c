@@ -1189,8 +1189,6 @@ BOOL SetUpdateCheck(void)
 			 ((ReadRegistryKey32(REGKEY_UPDATE_INTERVAL) == -1) && enable_updates) )
 			WriteRegistryKey32(REGKEY_UPDATE_INTERVAL, 86400);
 	}
-	// TODO: check for lastcheck + interval & launch the background thread here?
-	// TODO: make sure we check for updates if user just accepted
 	return TRUE;
 }
 
@@ -1205,11 +1203,14 @@ INT_PTR CALLBACK NewVersionCallback(HWND hDlg, UINT message, WPARAM wParam, LPAR
 	ENLINK* enl;
 	wchar_t wUrl[256];
 	char tmp[128];
-	char* filepath;
-	static BOOL was_downloaded = FALSE;
+	static char* filepath = NULL;
+	static int download_status = 0;
+	STARTUPINFOA si;
+	PROCESS_INFORMATION pi;
 
 	switch (message) {
 	case WM_INITDIALOG:
+		download_status = 0;
 		SetTitleBarIcon(hDlg);
 		CenterDialog(hDlg);
 		hNotes = GetDlgItem(hDlg, IDC_RELEASE_NOTES);
@@ -1224,7 +1225,9 @@ INT_PTR CALLBACK NewVersionCallback(HWND hDlg, UINT message, WPARAM wParam, LPAR
 			update.version[0], update.version[1], update.version[2], update.version[3]);
 		SetWindowTextA(GetDlgItem(hDlg, IDC_LATEST_VERSION), tmp);
 		SetWindowTextA(GetDlgItem(hDlg, IDC_DOWNLOAD_URL), update.download_url);
-		SendMessage(GetDlgItem(hDlg, IDC_UPDATE_PROGRESS), PBM_SETRANGE, 0, MAX_PROGRESS<<16);
+		SendMessage(GetDlgItem(hDlg, IDC_PROGRESS), PBM_SETRANGE, 0, MAX_PROGRESS<<16);
+		if (update.download_url == NULL)
+			EnableWindow(GetDlgItem(hDlg, IDC_DOWNLOAD), FALSE);
 		break;
 	case WM_NOTIFY:
 		switch (((LPNMHDR)lParam)->code) {
@@ -1250,24 +1253,55 @@ INT_PTR CALLBACK NewVersionCallback(HWND hDlg, UINT message, WPARAM wParam, LPAR
 		switch (LOWORD(wParam)) {
 		case IDCLOSE:
 		case IDCANCEL:
+			safe_free(filepath);
 			EndDialog(hDlg, LOWORD(wParam));
 			return (INT_PTR)TRUE;
-		case IDC_DOWNLOAD:
-			if (update.download_url == NULL)
-				return (INT_PTR)TRUE;
-			for (i=(int)safe_strlen(update.download_url); (i>0)&&(update.download_url[i]!='/'); i--);
-			filepath = FileDialog(TRUE, app_dir, (char*)&update.download_url[i+1], "exe", "Application");
-			if (filepath != NULL) {
-				if (DownloadFile(update.download_url, filepath, NULL, GetDlgItem(hDlg, IDC_UPDATE_PROGRESS))) {
-					// TODO: create a thread and allow aborts + invoke a launcher when successful
-					SetWindowTextA(GetDlgItem(hDlg, IDC_DOWNLOAD), "Done");
-					EnableWindow(GetDlgItem(hDlg, IDC_DOWNLOAD), FALSE);
+		case IDC_DOWNLOAD:	// Also doubles as abort and laucnh function
+			switch(download_status) {
+			case 1:		// Abort
+				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANCELLED;
+				break;
+			case 2:		// Launch newer version and close this one
+				for (i=(int)safe_strlen(filepath); (i>0)&&(filepath[i]!='\\'); i--);
+				safe_strcpy(tmp, sizeof(tmp), &filepath[i+1]);
+				safe_strcat(tmp, sizeof(tmp), " /W");
+				filepath[i] = 0;
+				memset(&si, 0, sizeof(si));
+				memset(&pi, 0, sizeof(pi));
+				si.cb = sizeof(si);
+				if (!CreateProcessU(NULL, tmp, NULL, NULL, FALSE, 0, NULL, filepath, &si, &pi)) {
+					PrintStatus(0, FALSE, "Failed to launch new application");
+					uprintf("Failed to launch new application: %s\n", WindowsErrorString());
+				} else {
+					PrintStatus(0, FALSE, "Launching new application...");
+					PostMessage(hDlg, WM_COMMAND, (WPARAM)IDCLOSE, 0);
+					PostMessage(hMainDialog, WM_CLOSE, 0, 0);
 				}
-				safe_free(filepath);
+				break;
+			default:	// Download
+				for (i=(int)safe_strlen(update.download_url); (i>0)&&(update.download_url[i]!='/'); i--);
+				filepath = FileDialog(TRUE, app_dir, (char*)&update.download_url[i+1], "exe", "Application");
+				if (filepath != NULL)
+					DownloadFileThreaded(update.download_url, filepath, hDlg);
+				break;
 			}
 			return (INT_PTR)TRUE;
 		}
 		break;
+	case UM_ISO_INIT:
+		FormatStatus = 0;
+		download_status = 1;
+		SetWindowTextA(GetDlgItem(hDlg, IDC_DOWNLOAD), "Abort");
+		return (INT_PTR)TRUE;
+	case UM_ISO_EXIT:
+		if (wParam) {
+			SetWindowTextA(GetDlgItem(hDlg, IDC_DOWNLOAD), "Launch");
+			download_status = 2;
+		} else {
+			SetWindowTextA(GetDlgItem(hDlg, IDC_DOWNLOAD), "Download");
+			download_status = 0;
+		}
+		return (INT_PTR)TRUE;
 	}
 	return (INT_PTR)FALSE;
 }
