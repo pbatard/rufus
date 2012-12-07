@@ -176,11 +176,8 @@ typedef struct {
 } RUFUS_ISO_REPORT;
 
 typedef struct {
-	uint8_t version[4];
-	char* type;				// "release", "beta", "notice"
-	char* platform;			// target platform ("windows", "linux", etc.)
-	char* platform_arch;	// "x86", "x64", "arm"
-	char* platform_min;		// minimum platform version required
+	uint16_t version[4];
+	uint32_t platform_min[2];		// minimum platform version required
 	char* download_url;
 	char* release_notes;
 } RUFUS_UPDATE;
@@ -223,9 +220,10 @@ extern const int nb_steps[FS_MAX];
 extern BOOL use_own_vesamenu, detect_fakes, iso_op_in_progress, format_op_in_progress;
 extern RUFUS_ISO_REPORT iso_report;
 extern int64_t iso_blocking_status;
-extern int rufus_version[4];
+extern uint16_t rufus_version[4];
 extern enum WindowsVersion nWindowsVersion;
 extern RUFUS_UPDATE update;
+extern int dialog_showing;
 
 /*
  * Shared prototypes

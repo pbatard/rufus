@@ -214,7 +214,7 @@ void parse_update(char* buf, size_t len)
 	if ((buf == NULL) || (len < 2) || (len > 65536) || (buf[len-1] != 0) || (buf[len-2] == '\\'))
 		return;
 	// Sanitize the data - Not a silver bullet, but it helps
-	len = safe_strlen(buf)+1;		// Someone may be inserting NULs
+	len = safe_strlen(buf)+1;	// Someone may be inserting NULs
 	for (i=0; i<len-1; i++) {
 		// Check for valid RTF sequences as well as allowed chars if not RTF
 		if (buf[i] == '\\') {
@@ -227,32 +227,26 @@ void parse_update(char* buf, size_t len)
 		}
 	}
 
-	for (i=0; i<4; i++) update.version[i] = 0;
+	for (i=0; i<4; i++)
+		update.version[i] = 0;
+	update.platform_min[0] = 5;
+	update.platform_min[1] = 2;	// XP or later
+	safe_free(update.download_url);
+	safe_free(update.release_notes);
 	if ((data = get_sanitized_token_data_buffer("version", 1, buf, len)) != NULL) {
 		for (i=0; (i<4) && ((token = strtok((i==0)?data:NULL, ".")) != NULL); i++) {
-			update.version[i] = (uint8_t)atoi(token);
+			update.version[i] = (uint16_t)atoi(token);
 		}
 		safe_free(data);
 	}
-	update.type = get_sanitized_token_data_buffer("type", 1, buf, len);
-	update.platform = get_sanitized_token_data_buffer("platform", 1, buf, len);
-	update.platform_arch = get_sanitized_token_data_buffer("platform_arch", 1, buf, len);
-	update.platform_min = get_sanitized_token_data_buffer("platform_min", 1, buf, len);
+	if ((data = get_sanitized_token_data_buffer("platform_min", 1, buf, len)) != NULL) {
+		for (i=0; (i<2) && ((token = strtok((i==0)?data:NULL, ".")) != NULL); i++) {
+			update.platform_min[i] = (uint32_t)atoi(token);
+		}
+		safe_free(data);
+	}
 	update.download_url = get_sanitized_token_data_buffer("download_url", 1, buf, len);
 	update.release_notes = get_sanitized_token_data_buffer("release_notes", 1, buf, len);
-
-	uprintf("UPDATE DATA:\n");
-	uprintf("  version: %d.%d.%d.%d\n", update.version[0], update.version[1], update.version[2], update.version[3]);
-	uprintf("  platform: %s\r\n  platform_arch: %s\r\n  platform_min: %s\n", update.platform, update.platform_arch, update.platform_min);
-	uprintf("  url: %s\n", update.download_url);
-	uprintf("RELEASE NOTES:\r\n%s\n", update.release_notes);
-
-	// User may have started formatting while we were checking
-	while (iso_op_in_progress || format_op_in_progress) {
-		Sleep(3000);
-	}
-	DownloadNewVersion();
-	// TODO: free all these strings!
 }
 
 // Insert entry 'data' under section 'section' of a config file

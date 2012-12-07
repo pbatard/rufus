@@ -33,7 +33,6 @@ extern "C" {
 #define REGKEY_VERBOSE_UPDATES      "VerboseUpdateCheck"
 #define REGKEY_LAST_UPDATE          "LastUpdateCheck"
 #define REGKEY_UPDATE_INTERVAL      "UpdateCheckInterval"
-#define REGKEY_LAST_VERSION_SEEN    "LastVersionSeen"
 #define REGKEY_INCLUDE_BETAS        "CheckForBetas"
 #define REGKEY_COMM_CHECK           "CommCheck"
 

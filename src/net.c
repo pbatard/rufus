@@ -388,16 +388,24 @@ HANDLE DownloadFileThreaded(const char* url, const char* file, HWND hProgressDia
 	return CreateThread(NULL, 0, _DownloadFileThread, NULL, 0, NULL);
 }
 
+static __inline uint64_t to_uint64_t(uint16_t x[4]) {
+	int i;
+	uint64_t ret = 0;
+	for (i=0; i<4; i++)
+		ret = (ret<<16) + x[i];
+	return ret;
+}
 
 /*
  * Background thread to check for updates
  */
 static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 {
-	BOOL force = (BOOL)param;
+	BOOL releases_only, force = (BOOL)param, found_new_version = FALSE;
 	const char* server_url = RUFUS_URL "/";
-	int i, j, verbose = 2, verpos[4];
-	static char* archname[] = {"win_x86", "win_x64"};
+	int i, j, k, verbose = 0, verpos[4];
+	static const char* archname[] = {"win_x86", "win_x64"};
+	static const char* channel[] = {"release", "beta"};		// release channel
 	DWORD dwFlags, dwSize, dwDownloaded, dwTotalSize, dwStatus;
 	char* buf = NULL;
 	char agent[64], hostname[64], urlpath[128], mime[32];
@@ -415,11 +423,10 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 		// Wait a while before checking for updates
 		// TODO: Also check on inactivity
 		do {
-			Sleep(10000);
-		} while (iso_op_in_progress || format_op_in_progress);
+			Sleep(15000);
+		} while (iso_op_in_progress || format_op_in_progress || (dialog_showing>0));
 
-		// TODO: reenable this
-		//	verbose = ReadRegistryKey32(REGKEY_VERBOSE_UPDATES);
+		verbose = ReadRegistryKey32(REGKEY_VERBOSE_UPDATES);
 		if ((ReadRegistryKey32(REGKEY_UPDATE_INTERVAL) == -1)) {
 			vuprintf("Check for updates disabled, as per registry settings.\n");
 			goto out;
@@ -471,97 +478,124 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 	if (hConnection == NULL)
 		goto out;
 
-	// At this stage we can query the server for various update version files.
-	// We first try to lookup for "<appname>_<os_arch>_<os_version_major>_<os_version_minor>.ver"
-	// and then remove each each of the <os_> components until we find our match. For instance, we may first
-	// look for rufus_win_x64_6.2.ver (Win8 x64) but only get a match for rufus_win_x64_6.ver (Vista x64 or later)
-	// This allows sunsetting OS versions (eg XP) or providing different downloads for different archs/groups.
+	releases_only = !GetRegistryKeyBool(REGKEY_INCLUDE_BETAS);
 
-	safe_sprintf(urlpath, sizeof(urlpath), "%s_%s_%d.%d.ver", APPLICATION_NAME,
-		archname[is_x64?1:0], os_version.dwMajorVersion, os_version.dwMinorVersion);
-	vuprintf("Base update check: %s\n", urlpath);
-	for (i=0, j=(int)safe_strlen(urlpath)-5; (j>0)&&(i<ARRAYSIZE(verpos)); j--) {
-		if ((urlpath[j] == '.') || (urlpath[j] == '_')) {
-			verpos[i++] = j;
+	for (k=0; (k<(releases_only?1:(int)ARRAYSIZE(channel))) && (!found_new_version); k++) {
+		uprintf("Checking %s channel...\n", channel[k]);
+		// At this stage we can query the server for various update version files.
+		// We first try to lookup for "<appname>_<os_arch>_<os_version_major>_<os_version_minor>.ver"
+		// and then remove each each of the <os_> components until we find our match. For instance, we may first
+		// look for rufus_win_x64_6.2.ver (Win8 x64) but only get a match for rufus_win_x64_6.ver (Vista x64 or later)
+		// This allows sunsetting OS versions (eg XP) or providing different downloads for different archs/groups.
+		safe_sprintf(urlpath, sizeof(urlpath), "%s%s%s_%s_%d.%d.ver", APPLICATION_NAME, (k==0)?"":"_",
+			(k==0)?"":channel[k], archname[is_x64?1:0], os_version.dwMajorVersion, os_version.dwMinorVersion);
+		vuprintf("Base update check: %s\n", urlpath);
+		for (i=0, j=(int)safe_strlen(urlpath)-5; (j>0)&&(i<ARRAYSIZE(verpos)); j--) {
+			if ((urlpath[j] == '.') || (urlpath[j] == '_')) {
+				verpos[i++] = j;
+			}
 		}
-	}
-	if (i != ARRAYSIZE(verpos)) {
-		uprintf("Fix CheckForUpdatesThread()!\n");
-		goto out;
-	}
+		if (i != ARRAYSIZE(verpos)) {
+			uprintf("Broken code in CheckForUpdatesThread()!\n");
+			goto out;
+		}
 
-	UrlParts.lpszUrlPath = urlpath;
-	UrlParts.dwUrlPathLength = sizeof(urlpath);
-	for (i=0; i<ARRAYSIZE(verpos); i++) {
-		vvuprintf("Trying %s\n", UrlParts.lpszUrlPath);
-		hRequest = HttpOpenRequestA(hConnection, "GET", UrlParts.lpszUrlPath, NULL, NULL, (const char**)"*/*\0",
-			INTERNET_FLAG_HYPERLINK|INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTP|INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTPS|INTERNET_FLAG_NO_COOKIES|
-			INTERNET_FLAG_NO_UI|INTERNET_FLAG_NO_CACHE_WRITE, (DWORD_PTR)NULL);
-		if ((hRequest == NULL) || (!HttpSendRequest(hRequest, NULL, 0, NULL, 0)))
+		UrlParts.lpszUrlPath = urlpath;
+		UrlParts.dwUrlPathLength = sizeof(urlpath);
+		for (i=0; i<ARRAYSIZE(verpos); i++) {
+			vvuprintf("Trying %s\n", UrlParts.lpszUrlPath);
+			hRequest = HttpOpenRequestA(hConnection, "GET", UrlParts.lpszUrlPath, NULL, NULL, (const char**)"*/*\0",
+				INTERNET_FLAG_HYPERLINK|INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTP|INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTPS|INTERNET_FLAG_NO_COOKIES|
+				INTERNET_FLAG_NO_UI|INTERNET_FLAG_NO_CACHE_WRITE, (DWORD_PTR)NULL);
+			if ((hRequest == NULL) || (!HttpSendRequest(hRequest, NULL, 0, NULL, 0)))
+				goto out;
+
+			// Ensure that we get a text file
+			dwSize = sizeof(dwStatus);
+			dwStatus = 404;
+			HttpQueryInfoA(hRequest, HTTP_QUERY_STATUS_CODE|HTTP_QUERY_FLAG_NUMBER, (LPVOID)&dwStatus, &dwSize, NULL);
+			if (dwStatus == 200) 
+				break;
+			InternetCloseHandle(hRequest);
+			hRequest = NULL;
+			safe_strcpy(&urlpath[verpos[i]], 5, ".ver");
+		}
+		if (dwStatus != 200) {
+			vuprintf("Could not find a %s version file on server %s", channel[k], server_url);
+			if ((releases_only) || (k+1 >= ARRAYSIZE(channel)))
+				goto out;
+			continue;
+		}
+		vuprintf("Found match for %s on server %s.", urlpath, server_url);
+
+		dwSize = sizeof(mime);
+		HttpQueryInfoA(hRequest, HTTP_QUERY_CONTENT_TYPE, (LPVOID)&mime, &dwSize, NULL);
+		if (strcmp(mime, "text/plain") != 0)
 			goto out;
 
-		// Ensure that we get a text file
-		dwSize = sizeof(dwStatus);
-		dwStatus = 404;
-		HttpQueryInfoA(hRequest, HTTP_QUERY_STATUS_CODE|HTTP_QUERY_FLAG_NUMBER, (LPVOID)&dwStatus, &dwSize, NULL);
-		if (dwStatus == 200) 
-			break;
-		InternetCloseHandle(hRequest);
-		hRequest = NULL;
-		safe_strcpy(&urlpath[verpos[i]], 5, ".ver");
-	}
-	if (dwStatus != 200) {
-		vuprintf("Could not find a version file on server %s", server_url);
-		goto out;
-	}
-	vuprintf("Found match for %s on server %s.", urlpath, server_url);
-
-	dwSize = sizeof(mime);
-	HttpQueryInfoA(hRequest, HTTP_QUERY_CONTENT_TYPE, (LPVOID)&mime, &dwSize, NULL);
-	if (strcmp(mime, "text/plain") != 0)
-		goto out;
-	// We also get a date from Apache, which we'll use to avoid out of sync check,
-	// in case some set their clock way into the future and back.
-	// On the other hand, if local clock is set way back in the past, we will never check.
-	dwSize = sizeof(ServerTime);
-	// If we can't get a date we can trust, don't bother...
-	if ( (!HttpQueryInfoA(hRequest, HTTP_QUERY_DATE|HTTP_QUERY_FLAG_SYSTEMTIME, (LPVOID)&ServerTime, &dwSize, NULL))
-	  || (!SystemTimeToFileTime(&ServerTime, &FileTime)) )
-		goto out;
-	server_time = ((((int64_t)FileTime.dwHighDateTime)<<32) + FileTime.dwLowDateTime) / 10000000;
-	vvuprintf("Server time: %" PRId64 "\n", server_time);
-	// Always store the server response time - the only clock we trust!
-	WriteRegistryKey64(REGKEY_LAST_UPDATE, server_time);
-	// Might as well let the user know
-	if (!force) {
-		if (local_time > server_time + 600) {
-			uprintf("Your local clock appears more than 10 minutes early - You ought to fix that...\n");
+		// We also get a date from Apache, which we'll use to avoid out of sync check,
+		// in case some set their clock way into the future and back.
+		// On the other hand, if local clock is set way back in the past, we will never check.
+		dwSize = sizeof(ServerTime);
+		// If we can't get a date we can trust, don't bother...
+		if ( (!HttpQueryInfoA(hRequest, HTTP_QUERY_DATE|HTTP_QUERY_FLAG_SYSTEMTIME, (LPVOID)&ServerTime, &dwSize, NULL))
+			|| (!SystemTimeToFileTime(&ServerTime, &FileTime)) )
+			goto out;
+		server_time = ((((int64_t)FileTime.dwHighDateTime)<<32) + FileTime.dwLowDateTime) / 10000000;
+		vvuprintf("Server time: %" PRId64 "\n", server_time);
+		// Always store the server response time - the only clock we trust!
+		WriteRegistryKey64(REGKEY_LAST_UPDATE, server_time);
+		// Might as well let the user know
+		if (!force) {
+			if (local_time > server_time + 600) {
+				uprintf("Your local clock appears more than 10 minutes early - You ought to fix that...\n");
+			}
+			if (local_time < server_time - 600) {
+				uprintf("Your local clock appears more than 10 minutes late - you ought to fix that...\n");
+			}
 		}
-		if (local_time < server_time - 600) {
-			uprintf("Your local clock appears more than 10 minutes late - you ought to fix that...\n");
-		}
+
+		dwSize = sizeof(dwTotalSize);
+		if (!HttpQueryInfoA(hRequest, HTTP_QUERY_CONTENT_LENGTH|HTTP_QUERY_FLAG_NUMBER, (LPVOID)&dwTotalSize, &dwSize, NULL))
+			goto out;
+
+		safe_free(buf);
+		// Make sure the file is NUL terminated
+		buf = (char*)calloc(dwTotalSize+1, 1);
+		if (buf == NULL) goto out;
+		// This is a version file - we should be able to gulp it down in one go
+		if (!InternetReadFile(hRequest, buf, dwTotalSize, &dwDownloaded) || (dwDownloaded != dwTotalSize))
+			goto out;
+
+		vuprintf("Successfully downloaded version file (%d bytes)\n", dwTotalSize);
+
+		parse_update(buf, dwTotalSize+1);
+
+		vuprintf("UPDATE DATA:\n");
+		vuprintf("  version: %d.%d.%d.%d (%s)\n", update.version[0], update.version[1], 
+			update.version[2], update.version[3], channel[k]);
+		vuprintf("  platform_min: %d.%d\n", update.platform_min[0], update.platform_min[1]);
+		vuprintf("  url: %s\n", update.download_url);
+
+		found_new_version = (to_uint64_t(update.version) > to_uint64_t(rufus_version))
+			&& ( (os_version.dwMajorVersion > update.platform_min[0])
+			  || ( (os_version.dwMajorVersion == update.platform_min[0]) && (os_version.dwMinorVersion >= update.platform_min[1])) );
+		uprintf("N%sew %s version found%c\n", found_new_version?"":"o n", channel[k], found_new_version?'!':'.');
 	}
-
-	dwSize = sizeof(dwTotalSize);
-	if (!HttpQueryInfoA(hRequest, HTTP_QUERY_CONTENT_LENGTH|HTTP_QUERY_FLAG_NUMBER, (LPVOID)&dwTotalSize, &dwSize, NULL))
-		goto out;
-
-	// Make sure the file is NUL terminated 
-	buf = (char*)calloc(dwTotalSize+1, 1);
-	if (buf == NULL) goto out;
-	// This is a version file, so we should be able to do it in one go
-	if (!InternetReadFile(hRequest, buf, dwTotalSize, &dwDownloaded) || (dwDownloaded != dwTotalSize))
-		goto out;
-
-	vuprintf("Successfully downloaded version file (%d bytes)\n", dwTotalSize);
-
-	parse_update(buf, dwTotalSize+1);
 
 out:
 	safe_free(buf);
 	if (hRequest) InternetCloseHandle(hRequest);
 	if (hConnection) InternetCloseHandle(hConnection);
 	if (hSession) InternetCloseHandle(hSession);
+	// Start the new download after cleanup
+	if (found_new_version) {
+		// User may have started an operation while we were checking
+		while (iso_op_in_progress || format_op_in_progress || (dialog_showing>0)) {
+			Sleep(3000);
+		}
+		DownloadNewVersion();
+	}
 	update_check_in_progress = FALSE;
 	ExitThread(0);
 }

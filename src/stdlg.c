@@ -277,6 +277,7 @@ void BrowseForFolder(void) {
 	WCHAR *fname;
 	char* tmp_path = NULL;
 
+	dialog_showing++;
 	// Even if we have Vista support with the compiler,
 	// it does not mean we have the Vista API available
 	INIT_VISTA_SHELL32;
@@ -340,12 +341,15 @@ void BrowseForFolder(void) {
 			goto fallback;
 		}
 		pfod->lpVtbl->Release(pfod);
+		dialog_showing--;
 		return;
 	}
 fallback:
 	if (pfod != NULL) {
 		pfod->lpVtbl->Release(pfod);
 	}
+#else
+	dialog_showing++;
 #endif
 	INIT_XP_SHELL32;
 	memset(&bi, 0, sizeof(BROWSEINFOW));
@@ -359,6 +363,7 @@ fallback:
 	if (pidl != NULL) {
 		CoTaskMemFree(pidl);
 	}
+	dialog_showing--;
 }
 
 /*
@@ -455,6 +460,7 @@ char* FileDialog(BOOL save, char* path, char* filename, char* ext, char* ext_des
 	wchar_t *wpath = NULL, *wfilename = NULL;
 	IShellItem *si_path = NULL;	// Automatically freed
 
+	dialog_showing++;
 	INIT_VISTA_SHELL32;
 	if (IS_VISTA_SHELL32_AVAILABLE) {
 		// Setup the file extension filter table
@@ -519,6 +525,7 @@ char* FileDialog(BOOL save, char* path, char* filename, char* ext, char* ext_des
 			goto fallback;
 		}
 		pfd->lpVtbl->Release(pfd);
+		dialog_showing--;
 		return filepath;
 	}
 
@@ -526,6 +533,8 @@ fallback:
 	if (pfd != NULL) {
 		pfd->lpVtbl->Release(pfd);
 	}
+#else
+	dialog_showing++;
 #endif
 
 	memset(&ofn, 0, sizeof(ofn));
@@ -564,6 +573,7 @@ fallback:
 		}
 	}
 	safe_free(ext_string);
+	dialog_showing--;
 	return filepath;
 }
 
@@ -715,7 +725,11 @@ INT_PTR CALLBACK AboutCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 
 INT_PTR CreateAboutBox(void)
 {
-	return DialogBoxA(hMainInstance, MAKEINTRESOURCEA(IDD_ABOUTBOX), hMainDialog, AboutCallback);
+	INT_PTR r;
+	dialog_showing++;
+	r = DialogBoxA(hMainInstance, MAKEINTRESOURCEA(IDD_ABOUTBOX), hMainDialog, AboutCallback);
+	dialog_showing--;
+	return r;
 }
 
 /*
@@ -800,6 +814,8 @@ BOOL Notification(int type, const notification_info* more_info, char* title, cha
 {
 	BOOL ret;
 	va_list args;
+
+	dialog_showing++;
 	szMessageText = (char*)malloc(MAX_PATH);
 	if (szMessageText == NULL) return FALSE;
 	szMessageTitle = title;
@@ -828,6 +844,7 @@ BOOL Notification(int type, const notification_info* more_info, char* title, cha
 	}
 	ret = (DialogBox(hMainInstance, MAKEINTRESOURCE(IDD_NOTIFICATION), hMainDialog, NotificationCallback) == IDYES);
 	safe_free(szMessageText);
+	dialog_showing--;
 	return ret;
 }
 
@@ -1117,6 +1134,7 @@ INT_PTR CALLBACK UpdateCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 {
 	HWND hPolicy;
 	static HWND hFrequency, hBeta;
+	uint32_t freq;
 
 	switch (message) {
 	case WM_INITDIALOG:
@@ -1127,11 +1145,30 @@ INT_PTR CALLBACK UpdateCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 		IGNORE_RETVAL(ComboBox_SetItemData(hFrequency, ComboBox_AddStringU(hFrequency, "Daily (Default)"), 86400));
 		IGNORE_RETVAL(ComboBox_SetItemData(hFrequency, ComboBox_AddStringU(hFrequency, "Weekly"), 604800));
 		IGNORE_RETVAL(ComboBox_SetItemData(hFrequency, ComboBox_AddStringU(hFrequency, "Monthly"), 2629800));
-		IGNORE_RETVAL(ComboBox_SetCurSel(hFrequency, 1));
+		freq = ReadRegistryKey32(REGKEY_UPDATE_INTERVAL);
+		switch(freq) {
+		case -1:
+			IGNORE_RETVAL(ComboBox_SetCurSel(hFrequency, 0));
+			break;
+		case 0:
+		case 86400:
+			IGNORE_RETVAL(ComboBox_SetCurSel(hFrequency, 1));
+			break;
+		case 604800:
+			IGNORE_RETVAL(ComboBox_SetCurSel(hFrequency, 2));
+			break;
+		case 2629800:
+			IGNORE_RETVAL(ComboBox_SetCurSel(hFrequency, 3));
+			break;
+		default:
+			IGNORE_RETVAL(ComboBox_SetItemData(hFrequency, ComboBox_AddStringU(hFrequency, "Custom"), freq));
+			IGNORE_RETVAL(ComboBox_SetCurSel(hFrequency, 4));
+			break;
+		}
 		hBeta = GetDlgItem(hDlg, IDC_INCLUDE_BETAS);
 		IGNORE_RETVAL(ComboBox_AddStringU(hBeta, "Yes"));
 		IGNORE_RETVAL(ComboBox_AddStringU(hBeta, "No"));
-		IGNORE_RETVAL(ComboBox_SetCurSel(hBeta, 1));
+		IGNORE_RETVAL(ComboBox_SetCurSel(hBeta, GetRegistryKeyBool(REGKEY_INCLUDE_BETAS)?0:1));
 		hPolicy = GetDlgItem(hDlg, IDC_POLICY);
 		SendMessage(hPolicy, EM_AUTOURLDETECT, 1, 0);
 		SendMessageA(hPolicy, EM_SETTEXTEX, (WPARAM)&friggin_microsoft_unicode_amateurs, (LPARAM)update_policy);

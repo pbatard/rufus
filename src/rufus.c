@@ -105,8 +105,9 @@ HWND hDeviceList, hCapacity, hFileSystem, hClusterSize, hLabel, hDOSType, hNBPas
 HWND hISOProgressDlg = NULL, hLogDlg = NULL, hISOProgressBar, hISOFileName, hDiskID;
 BOOL use_own_vesamenu = FALSE, detect_fakes = TRUE, mbr_selected_by_user = FALSE;
 BOOL iso_op_in_progress = FALSE, format_op_in_progress = FALSE;
-int rufus_version[4];
-RUFUS_UPDATE update;
+int dialog_showing = 0;
+uint16_t rufus_version[4];
+RUFUS_UPDATE update = { {0,0,0,0}, {0,0}, NULL, NULL};
 extern char szStatusMessage[256];
 
 static HANDLE format_thid = NULL;
@@ -1426,7 +1427,7 @@ void InitDialog(HWND hDlg)
 	// version using strtok() than using GetFileVersionInfo()
 	token = strtok(tmp, "v");
 	for (i=0; (i<4) && ((token = strtok(NULL, ".")) != NULL); i++)
-		rufus_version[i] = atoi(token);
+		rufus_version[i] = (uint16_t)atoi(token);
 	uprintf("Rufus version %d.%d.%d.%d\n", rufus_version[0], rufus_version[1], rufus_version[2], rufus_version[3]);
 
 	// Prefer FreeDOS to MS-DOS
@@ -2048,6 +2049,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 out:
 	DestroyAllTooltips();
 	safe_free(iso_path);
+	safe_free(update.download_url);
+	safe_free(update.release_notes);
 	SetLGP(TRUE, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer", "NoDriveTypeAutorun", 0);
 	CloseHandle(mutex);
 	uprintf("*** RUFUS EXIT ***\n");
