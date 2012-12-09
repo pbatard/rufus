@@ -62,6 +62,9 @@ void _uprintf(const char *format, ...)
 	// Send output to our log Window
 	Edit_SetSel(hLog, MAX_LOG_SIZE, MAX_LOG_SIZE);
 	Edit_ReplaceSelU(hLog, buf);
+	// Make sure the message scrolls into view
+	// (Or see code commented in LogProc:WM_SHOWWINDOW for a less forceful scroll)
+	SendMessage(hLog, EM_LINESCROLL, 0, SendMessage(hLog, EM_GETLINECOUNT, 0, 0));
 }
 #endif
 

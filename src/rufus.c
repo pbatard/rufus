@@ -1147,6 +1147,10 @@ BOOL CALLBACK LogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 			break;
 		}
 		break;
+//	case WM_SHOWWINDOW:
+//		if (wParam)
+//			SendMessage(hLog, EM_LINESCROLL, 0, SendMessage(hLog, EM_GETLINECOUNT, 0, 0));
+//		return FALSE;
 	case WM_CLOSE:
 		ShowWindow(hDlg, SW_HIDE);
 		log_displayed = FALSE;
