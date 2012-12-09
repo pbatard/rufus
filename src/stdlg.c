@@ -1146,6 +1146,7 @@ INT_PTR CALLBACK UpdateCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 		IGNORE_RETVAL(ComboBox_SetItemData(hFrequency, ComboBox_AddStringU(hFrequency, "Weekly"), 604800));
 		IGNORE_RETVAL(ComboBox_SetItemData(hFrequency, ComboBox_AddStringU(hFrequency, "Monthly"), 2629800));
 		freq = ReadRegistryKey32(REGKEY_UPDATE_INTERVAL);
+		EnableWindow(GetDlgItem(hDlg, IDC_CHECK_NOW), (freq != 0));
 		switch(freq) {
 		case -1:
 			IGNORE_RETVAL(ComboBox_SetCurSel(hFrequency, 0));
