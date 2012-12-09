@@ -30,7 +30,7 @@ LANGUAGE LANG_ENGLISH, SUBLANG_NEUTRAL
 IDD_DIALOG DIALOGEX 12, 12, 206, 316
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_APPWINDOW
-CAPTION "Rufus v1.3.0.206"
+CAPTION "Rufus v1.3.0.207"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     DEFPUSHBUTTON   "Start",IDC_START,94,278,50,14
@@ -128,14 +128,16 @@ STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Update policy and settings"
 FONT 8, "Microsoft Sans Serif", 400, 0, 0x0
 BEGIN
-    ICON            IDI_ICON,IDC_ABOUT_ICON,11,8,20,20
-    DEFPUSHBUTTON   "Close",IDCANCEL,224,176,50,14,WS_GROUP
+    ICON            IDI_ICON,IDC_ABOUT_ICON,11,8,21,20
+    DEFPUSHBUTTON   "Close",IDCANCEL,221,172,50,14,WS_GROUP
     CONTROL         "",IDC_POLICY,"RichEdit20W",ES_MULTILINE | ES_READONLY | WS_VSCROLL,46,8,235,130,WS_EX_STATICEDGE
-    COMBOBOX        IDC_UPDATE_FREQUENCY,133,155,66,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_UPDATE_FREQUENCY,133,155,66,12,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     LTEXT           "Check for updates:",IDC_STATIC,52,157,72,11
     LTEXT           "Include beta versions:",IDC_STATIC,52,173,93,11
     COMBOBOX        IDC_INCLUDE_BETAS,133,171,36,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    GROUPBOX        "Settings",IDC_STATIC,46,145,161,45
+    GROUPBOX        "Settings",IDC_STATIC,45,145,161,46
+    PUSHBUTTON      "Check Now",IDC_CHECK_NOW,221,154,50,14
+    GROUPBOX        "",IDC_STATIC,210,145,71,46
 END
 
 IDD_NEW_VERSION DIALOGEX 0, 0, 384, 268
@@ -272,8 +274,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,3,0,206
- PRODUCTVERSION 1,3,0,206
+ FILEVERSION 1,3,0,207
+ PRODUCTVERSION 1,3,0,207
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -290,13 +292,13 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Akeo Consulting (http://akeo.ie)"
             VALUE "FileDescription", "Rufus"
-            VALUE "FileVersion", "1.3.0.206"
+            VALUE "FileVersion", "1.3.0.207"
             VALUE "InternalName", "Rufus"
             VALUE "LegalCopyright", "(c) 2011-2012 Pete Batard (GPL v3)"
             VALUE "LegalTrademarks", "http://www.gnu.org/copyleft/gpl.html"
             VALUE "OriginalFilename", "rufus.exe"
             VALUE "ProductName", "Rufus"
-            VALUE "ProductVersion", "1.3.0.206"
+            VALUE "ProductVersion", "1.3.0.207"
         END
     END
     BLOCK "VarFileInfo"

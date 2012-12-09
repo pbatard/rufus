@@ -2040,11 +2040,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 				DeleteRegistryKey(COMPANY_NAME);
 				continue;
 			}
-			// Alt-U => Force an update check
-			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'U')) {
-				CheckForUpdates(TRUE);
-				continue;
-			}
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}

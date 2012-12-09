@@ -407,6 +407,7 @@ BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan)
 		SendMessage(hISOProgressBar, PBM_SETMARQUEE, TRUE, 0);
 	} else {
 		uprintf("Extracting files...\n");
+		SetWindowTextU(hISOProgressDlg, "Copying ISO files...");
 		if (total_blocks == 0) {
 			uprintf("Error: ISO has not been properly scanned.\n");
 			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_ISO_SCAN);

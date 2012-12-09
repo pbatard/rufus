@@ -90,18 +90,17 @@ const char* additional_copyrights =
 
 const char* update_policy =
 "{\\rtf1\\ansi{\\fonttbl{\\f0\\fnil\\fcharset0 Microsoft Sans Serif;}{\\f1\\fnil\\fcharset2 Symbol;}}\n"
-"\\fs16\\b Update Policy\\b0\\line\\line\n"
+"\\fs16\\b Update Policy:\\b0\\line\n"
 "If you choose to allow update checks, you agree that the following information may be collected on our server(s):\\par\n"
 "\\pard{\\pntext\\f1\\'B7\\tab}{\\*\\pn\\pnlvlblt\\pnf2\\pnindent0{\\pntxtb\\'B7}}\\fi-150\\li220 Your Operating System's architecture and version\\par\n"
 "{\\pntext\\f1\\'B7\\tab}The version of the application\\par\n"
 "{\\pntext\\f1\\'B7\\tab}Your IP address\\line\\pard\n"
 "\\line\n"
-"\\b None\\b0  of the data above will be disclosed to third parties.\\line\n"
-"However we reserve the right to keep the information collected, for at most a year, \n"
-"for the purpose of generating private usage statistics.\\line\n\\line\n"
-"\\b Update Process\\b0\\line\\line\n"
-APPLICATION_NAME " does not install or run any background services, therefore update checks are only performed when the main application is running. \n"
-"Internet access is required when checking for new versions.\n" 
+"For the purpose of generating private usage statistics, we reserve the right to keep the information collected, \n"
+"\\b for at most a year\\b0 . However \\b none\\b0  of the data provided above will be disclosed to third parties.\\line\n\\line\n"
+"\\b Update Process:\\b0\\line\n"
+APPLICATION_NAME " does not install or run any background services, therefore update checks are only performed when the main application is running.\\line\n"
+"Internet access will be required when checking for new versions.\n" 
 "}";
 
 const char* gplv3 =

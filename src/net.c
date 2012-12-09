@@ -44,6 +44,7 @@
 /* Globals */
 static DWORD error_code;
 static BOOL update_check_in_progress = FALSE;
+static BOOL force_update_check = FALSE;
 
 /* MinGW is missing some of those */
 #if !defined(ERROR_INTERNET_DISCONNECTED)
@@ -401,7 +402,7 @@ static __inline uint64_t to_uint64_t(uint16_t x[4]) {
  */
 static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 {
-	BOOL releases_only, force = (BOOL)param, found_new_version = FALSE;
+	BOOL releases_only, found_new_version = FALSE;
 	const char* server_url = RUFUS_URL "/";
 	int i, j, k, verbose = 0, verpos[4];
 	static const char* archname[] = {"win_x86", "win_x64"};
@@ -419,32 +420,36 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 	BOOL is_x64 = FALSE, (__stdcall *pIsWow64Process)(HANDLE, PBOOL) = NULL;
 
 	update_check_in_progress = TRUE;
-	if (!force) {
-		// Wait a while before checking for updates
+	verbose = ReadRegistryKey32(REGKEY_VERBOSE_UPDATES);
+	// Unless the update was forced, wait a while before performing the update check
+	if (!force_update_check) {
 		// TODO: Also check on inactivity
+		// It would of course be a lot nicer to use a timer and wake the thread, but my
+		// development time is limited and this is FASTER to implement.
 		do {
-			Sleep(15000);
-		} while (iso_op_in_progress || format_op_in_progress || (dialog_showing>0));
-
-		verbose = ReadRegistryKey32(REGKEY_VERBOSE_UPDATES);
-		if ((ReadRegistryKey32(REGKEY_UPDATE_INTERVAL) == -1)) {
-			vuprintf("Check for updates disabled, as per registry settings.\n");
-			goto out;
-		}
-		reg_time = ReadRegistryKey64(REGKEY_LAST_UPDATE);
-		update_interval = (int64_t)ReadRegistryKey32(REGKEY_UPDATE_INTERVAL);
-		if (update_interval == 0) {
-			WriteRegistryKey32(REGKEY_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL);
-			update_interval = DEFAULT_UPDATE_INTERVAL;
-		}
-		GetSystemTime(&LocalTime);
-		if (!SystemTimeToFileTime(&LocalTime, &FileTime))
-			goto out;
-		local_time = ((((int64_t)FileTime.dwHighDateTime)<<32) + FileTime.dwLowDateTime) / 10000000;
-		vvuprintf("Local time: %" PRId64 "\n", local_time);
-		if (local_time < reg_time + update_interval) {
-			vuprintf("Next update check in %" PRId64 " seconds.\n", reg_time + update_interval - local_time);
-			goto out;
+			for (i=0; (i<30) && (!force_update_check); i++)
+				Sleep(500);
+		} while ((!force_update_check) && ((iso_op_in_progress || format_op_in_progress || (dialog_showing>0))));
+		if (!force_update_check) {
+			if ((ReadRegistryKey32(REGKEY_UPDATE_INTERVAL) == -1)) {
+				vuprintf("Check for updates disabled, as per registry settings.\n");
+				goto out;
+			}
+			reg_time = ReadRegistryKey64(REGKEY_LAST_UPDATE);
+			update_interval = (int64_t)ReadRegistryKey32(REGKEY_UPDATE_INTERVAL);
+			if (update_interval == 0) {
+				WriteRegistryKey32(REGKEY_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL);
+				update_interval = DEFAULT_UPDATE_INTERVAL;
+			}
+			GetSystemTime(&LocalTime);
+			if (!SystemTimeToFileTime(&LocalTime, &FileTime))
+				goto out;
+			local_time = ((((int64_t)FileTime.dwHighDateTime)<<32) + FileTime.dwLowDateTime) / 10000000;
+			vvuprintf("Local time: %" PRId64 "\n", local_time);
+			if (local_time < reg_time + update_interval) {
+				vuprintf("Next update check in %" PRId64 " seconds.\n", reg_time + update_interval - local_time);
+				goto out;
+			}
 		}
 	}
 
@@ -546,7 +551,7 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 		// Always store the server response time - the only clock we trust!
 		WriteRegistryKey64(REGKEY_LAST_UPDATE, server_time);
 		// Might as well let the user know
-		if (!force) {
+		if (!force_update_check) {
 			if (local_time > server_time + 600) {
 				uprintf("Your local clock appears more than 10 minutes early - You ought to fix that...\n");
 			}
@@ -591,11 +596,12 @@ out:
 	// Start the new download after cleanup
 	if (found_new_version) {
 		// User may have started an operation while we were checking
-		while (iso_op_in_progress || format_op_in_progress || (dialog_showing>0)) {
-			Sleep(3000);
+		while ((!force_update_check) && (iso_op_in_progress || format_op_in_progress || (dialog_showing>0))) {
+			Sleep(15000);
 		}
 		DownloadNewVersion();
 	}
+	force_update_check = FALSE;
 	update_check_in_progress = FALSE;
 	ExitThread(0);
 }
@@ -605,9 +611,10 @@ out:
  */
 BOOL CheckForUpdates(BOOL force)
 {
+	force_update_check = force;
 	if (update_check_in_progress)
 		return FALSE;
-	if (CreateThread(NULL, 0, CheckForUpdatesThread, (LPVOID)force, 0, NULL) == NULL) {
+	if (CreateThread(NULL, 0, CheckForUpdatesThread, NULL, 0, NULL) == NULL) {
 		uprintf("Unable to start check for updates thread");
 		return FALSE;
 	}
