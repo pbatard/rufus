@@ -30,7 +30,7 @@ LANGUAGE LANG_ENGLISH, SUBLANG_NEUTRAL
 IDD_DIALOG DIALOGEX 12, 12, 206, 316
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_APPWINDOW
-CAPTION "Rufus v1.3.0.208"
+CAPTION "Rufus v1.3.0.209"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     DEFPUSHBUTTON   "Start",IDC_START,94,278,50,14
@@ -119,7 +119,7 @@ BEGIN
     ICON            32516,IDC_NOTIFICATION_ICON,6,6,20,20
     LTEXT           "",IDC_NOTIFICATION_TEXT,35,10,219,20
     DEFPUSHBUTTON   "No",IDNO,206,44,50,14
-    PUSHBUTTON      "More info...",IDC_MORE_INFO,8,44,50,14,NOT WS_VISIBLE
+    PUSHBUTTON      "More information",IDC_MORE_INFO,8,44,63,14,NOT WS_VISIBLE
     PUSHBUTTON      "Yes",IDYES,154,44,50,14,NOT WS_VISIBLE
 END
 
@@ -130,7 +130,7 @@ FONT 8, "Microsoft Sans Serif", 400, 0, 0x0
 BEGIN
     ICON            IDI_ICON,IDC_ABOUT_ICON,11,8,21,20
     DEFPUSHBUTTON   "Close",IDCANCEL,221,172,50,14,WS_GROUP
-    CONTROL         "",IDC_POLICY,"RichEdit20W",ES_MULTILINE | ES_READONLY | WS_VSCROLL,46,8,235,130,WS_EX_STATICEDGE
+    CONTROL         "",IDC_POLICY,"RichEdit20W",WS_VSCROLL | 0x804,46,8,235,130,WS_EX_STATICEDGE
     COMBOBOX        IDC_UPDATE_FREQUENCY,133,155,66,12,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     LTEXT           "Check for updates:",IDC_STATIC,52,157,72,11
     LTEXT           "Include beta versions:",IDC_STATIC,52,173,93,11
@@ -146,7 +146,7 @@ CAPTION "Check For Updates - Rufus"
 FONT 8, "Microsoft Sans Serif", 400, 0, 0x0
 BEGIN
     PUSHBUTTON      "Close",IDCANCEL,167,244,50,14,WS_GROUP
-    CONTROL         "",IDC_RELEASE_NOTES,"RichEdit20W",ES_MULTILINE | ES_READONLY | WS_VSCROLL,15,77,352,88,WS_EX_STATICEDGE
+    CONTROL         "",IDC_RELEASE_NOTES,"RichEdit20W",WS_VSCROLL | 0x804,15,77,352,88,WS_EX_STATICEDGE
     DEFPUSHBUTTON   "Download",IDC_DOWNLOAD,293,211,74,14,WS_GROUP
     CONTROL         "",IDC_PROGRESS,"msctls_progress32",WS_BORDER,15,212,270,11
     GROUPBOX        "Release Notes",IDC_STATIC,8,63,367,111
@@ -274,8 +274,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,3,0,208
- PRODUCTVERSION 1,3,0,208
+ FILEVERSION 1,3,0,209
+ PRODUCTVERSION 1,3,0,209
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -292,13 +292,13 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Akeo Consulting (http://akeo.ie)"
             VALUE "FileDescription", "Rufus"
-            VALUE "FileVersion", "1.3.0.208"
+            VALUE "FileVersion", "1.3.0.209"
             VALUE "InternalName", "Rufus"
             VALUE "LegalCopyright", "(c) 2011-2012 Pete Batard (GPL v3)"
             VALUE "LegalTrademarks", "http://www.gnu.org/copyleft/gpl.html"
             VALUE "OriginalFilename", "rufus.exe"
             VALUE "ProductName", "Rufus"
-            VALUE "ProductVersion", "1.3.0.208"
+            VALUE "ProductVersion", "1.3.0.209"
         END
     END
     BLOCK "VarFileInfo"
