@@ -186,6 +186,9 @@ static BOOLEAN __stdcall ChkdskCallback(FILE_SYSTEM_CALLBACK_COMMAND Command, DW
 		uprintf("No media in drive\n");
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_NO_MEDIA_IN_DRIVE;
 		break;
+	case FCC_READ_ONLY_MODE:
+		uprintf("Media has been switched to read-only - Leaving checkdisk\n");
+		break;
 	default:
 		uprintf("ChkdskExCallback: received unhandled command %X\n", Command);
 		// Assume the command isn't an error
