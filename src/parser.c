@@ -81,7 +81,7 @@ static wchar_t* get_token_data_line(const wchar_t* wtoken, wchar_t* wline)
 	// locate end of string or quote
 	while ( (wline[i] != 0) && ((wline[i] != L'"') || ((wline[i] == L'"') && (!quoteth))) )
 		i++;
-	wline[i] = 0;
+	wline[i--] = 0;
 
 	// Eliminate trailing EOL characters
 	while ((i>=r) && ((wline[i] == L'\r') || (wline[i] == L'\n')))

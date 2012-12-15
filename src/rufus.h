@@ -43,7 +43,6 @@
 #define WHITE                       RGB(255,255,255)
 #define SEPARATOR_GREY              RGB(223,223,223)
 #define RUFUS_URL                   "http://rufus.akeo.ie"
-#define VESAMENU_URL                "http://cloud.github.com/downloads/pbatard/rufus/vesamenu.c32"
 #define IGNORE_RETVAL(expr)         do { (void)(expr); } while(0)
 #ifndef ARRAYSIZE
 #define ARRAYSIZE(A)                (sizeof(A)/sizeof((A)[0]))
@@ -157,10 +156,17 @@ typedef struct {
 	} ClusterSize[FS_MAX];
 } RUFUS_DRIVE_INFO;
 
+/* Special handling for old .c32 files we need to replace */
+#define NB_OLD_C32          2
+#define OLD_C32_NAMES       {"menu.c32", "vesamenu.c32"}
+#define OLD_C32_THRESHOLD   {53500, 145000}
+#define NEW_C32_URL         {RUFUS_URL "/downloads/menu.c32", RUFUS_URL "/downloads/vesamenu.c32"}
+
 /* ISO details that the application may want */
 #define WINPE_MININT    0x2A
 #define WINPE_I386      0x15
 #define IS_WINPE(r)     (((r&WINPE_MININT) == WINPE_MININT)||((r&WINPE_I386) == WINPE_I386))
+
 typedef struct {
 	char label[192];		/* 3*64 to account for UTF-8 */
 	char usb_label[192];	/* converted USB label for workaround */
@@ -171,6 +177,7 @@ typedef struct {
 	BOOL has_bootmgr;
 	BOOL has_isolinux;
 	BOOL has_autorun;
+	BOOL has_old_c32[NB_OLD_C32];
 	BOOL has_old_vesamenu;
 	BOOL uses_minint;
 } RUFUS_ISO_REPORT;
@@ -217,7 +224,7 @@ extern char* iso_path;
 extern DWORD FormatStatus;
 extern RUFUS_DRIVE_INFO SelectedDrive;
 extern const int nb_steps[FS_MAX];
-extern BOOL use_own_vesamenu, detect_fakes, iso_op_in_progress, format_op_in_progress;
+extern BOOL use_own_c32[NB_OLD_C32], detect_fakes, iso_op_in_progress, format_op_in_progress;
 extern RUFUS_ISO_REPORT iso_report;
 extern int64_t iso_blocking_status;
 extern uint16_t rufus_version[4];

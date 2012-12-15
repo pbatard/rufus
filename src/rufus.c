@@ -103,7 +103,7 @@ float fScale = 1.0f;
 int default_fs;
 HWND hDeviceList, hCapacity, hFileSystem, hClusterSize, hLabel, hDOSType, hNBPasses, hLog = NULL;
 HWND hISOProgressDlg = NULL, hLogDlg = NULL, hISOProgressBar, hISOFileName, hDiskID;
-BOOL use_own_vesamenu = FALSE, detect_fakes = TRUE, mbr_selected_by_user = FALSE;
+BOOL use_own_c32[NB_OLD_C32] = {FALSE, FALSE}, detect_fakes = TRUE, mbr_selected_by_user = FALSE;
 BOOL iso_op_in_progress = FALSE, format_op_in_progress = FALSE;
 int dialog_showing = 0;
 uint16_t rufus_version[4];
@@ -1247,7 +1247,9 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 {
 	int i;
 	FILE* fd;
-	const char* vesamenu_filename = "vesamenu.c32";
+	const char* old_c32_name[NB_OLD_C32] = OLD_C32_NAMES;
+	const char* new_c32_url[NB_OLD_C32] = NEW_C32_URL;
+	char msg[1024], msg_title[32];
 
 	if (iso_path == NULL)
 		goto out;
@@ -1258,10 +1260,14 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 		safe_free(iso_path);
 		goto out;
 	}
-	uprintf("ISO label: '%s'\r\n size: %lld bytes, 4GB:%c, bootmgr:%c, winpe:%c (/minint:%c), isolinux:%c, old vesa:%c\n",
-		iso_report.label, iso_report.projected_size, iso_report.has_4GB_file?'Y':'N',
-		iso_report.has_bootmgr?'Y':'N', IS_WINPE(iso_report.winpe)?'Y':'N', (iso_report.uses_minint)?'Y':'N',
-		iso_report.has_isolinux?'Y':'N', iso_report.has_old_vesamenu?'Y':'N');
+	uprintf("ISO label: '%s'\r\n  Size: %lld bytes\r\n  Has a >4GB file: %s\r\n  Uses Bootmgr: %s\r\n  Uses WinPE: %s%s\r\n  Uses isolinux: %s\n",
+		iso_report.label, iso_report.projected_size, iso_report.has_4GB_file?"Yes":"No", iso_report.has_bootmgr?"Yes":"No",
+		IS_WINPE(iso_report.winpe)?"Yes":"No", (iso_report.uses_minint)?" (with /minint)":"", iso_report.has_isolinux?"Yes":"No");
+	if (iso_report.has_isolinux) {
+		for (i=0; i<NB_OLD_C32; i++) {
+			uprintf("    With an old %s: %s\n", old_c32_name[i], iso_report.has_old_c32[i]?"Yes":"No");
+		}
+	}
 	if ((!iso_report.has_bootmgr) && (!iso_report.has_isolinux) && (!IS_WINPE(iso_report.winpe))) {
 		MessageBoxU(hMainDialog, "This version of Rufus only supports bootable ISOs\n"
 			"based on 'bootmgr/WinPE' or 'isolinux'.\n"
@@ -1269,29 +1275,31 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 		safe_free(iso_path);
 		SetMBRProps();
 	} else {
-		if (iso_report.has_old_vesamenu) {
-			fd = fopen(vesamenu_filename, "rb");
-			if (fd != NULL) {
-				// If a file already exists in the current directory, use that one
-				uprintf("Will replace obsolete '%s' from ISO with the one found in current directory\n", vesamenu_filename);
-				fclose(fd);
-				use_own_vesamenu = TRUE;
-			} else {
-				PrintStatus(0, FALSE, "Obsolete vesamenu.c32 detected");
-				if (MessageBoxA(hMainDialog,
-					"This ISO image seems to use an obsolete version of vesamenu.c32\n"
-					"that may prevent boot menus from displaying properly...\n\n"
-					"Rufus can fix this issue by downloading a newer version for you:\n"
-					"- Select 'Yes' to connect to the internet and replace the file.\n"
-					"- Select 'No' to leave the existing ISO file unmodified.\n"
-					"If you don't know what to do, you should select 'Yes'.\n\n"
-					"Note: the file will be downloaded in the current directory. Once a\n"
-					"vesamenu.c32 exists there, it will always be used as replacement.\n", "Replace vesamenu.c32?",
-					MB_YESNO|MB_ICONWARNING) == IDYES) {
-					SetWindowTextU(hISOProgressDlg, "Downloading file...");
-					SetWindowTextU(hISOFileName, VESAMENU_URL);
-					if (DownloadFile(VESAMENU_URL, vesamenu_filename, hISOProgressDlg))
-						use_own_vesamenu = TRUE;
+		for(i=0; i<NB_OLD_C32; i++) {
+			if (iso_report.has_old_c32[i]) {
+				fd = fopen(old_c32_name[i], "rb");
+				if (fd != NULL) {
+					// If a file already exists in the current directory, use that one
+					uprintf("Will replace obsolete '%s' from ISO with the one found in current directory\n", old_c32_name[i]);
+					fclose(fd);
+					use_own_c32[i] = TRUE;
+				} else {
+					PrintStatus(0, FALSE, "Obsolete %s detected", old_c32_name[i]);
+					safe_sprintf(msg, sizeof(msg), "This ISO image seems to use an obsolete version of %s\n"
+						"that may prevent boot menus from displaying properly...\n\n"
+						"Rufus can fix this issue by downloading a newer version for you:\n"
+						"- Select 'Yes' to connect to the internet and replace the file.\n"
+						"- Select 'No' to leave the existing ISO file unmodified.\n"
+						"If you don't know what to do, you should select 'Yes'.\n\n"
+						"Note: the file will be downloaded in the current directory. Once a\n"
+						"%s exists there, it will always be used as replacement.\n", old_c32_name[i], old_c32_name[i]);
+					safe_sprintf(msg_title, sizeof(msg_title), "Replace %s?", old_c32_name[i]);
+					if (MessageBoxA(hMainDialog, msg, msg_title, MB_YESNO|MB_ICONWARNING) == IDYES) {
+						SetWindowTextU(hISOProgressDlg, "Downloading file...");
+						SetWindowTextU(hISOFileName, new_c32_url[i]);
+						if (DownloadFile(new_c32_url[i], old_c32_name[i], hISOProgressDlg))
+							use_own_c32[i] = TRUE;
+					}
 				}
 			}
 		}
