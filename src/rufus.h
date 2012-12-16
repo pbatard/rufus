@@ -29,8 +29,8 @@
 #define APPLICATION_NAME            "Rufus"
 #define COMPANY_NAME                "Akeo Consulting"
 #define STR_NO_LABEL                "NO_LABEL"
-#define RUFUS_CANCELBOX_TITLE       "Rufus - Cancellation"
-#define RUFUS_BLOCKING_IO_TITLE     "Rufus - Flushing buffers"
+#define RUFUS_CANCELBOX_TITLE       APPLICATION_NAME " - Cancellation"
+#define RUFUS_BLOCKING_IO_TITLE     APPLICATION_NAME " - Flushing buffers"
 #define DRIVE_INDEX_MIN             0x80
 #define DRIVE_INDEX_MAX             0xC0
 #define MAX_DRIVES                  16

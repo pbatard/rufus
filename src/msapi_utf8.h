@@ -337,7 +337,7 @@ static __inline BOOL GetTextExtentPointU(HDC hdc, const char* lpString, LPSIZE l
 
 static __inline DWORD GetCurrentDirectoryU(DWORD nBufferLength, char* lpBuffer)
 {
-	DWORD ret = 0, err  = ERROR_INVALID_DATA;
+	DWORD ret = 0, err = ERROR_INVALID_DATA;
 	walloc(lpBuffer, nBufferLength);
 	ret = GetCurrentDirectoryW(nBufferLength, wlpBuffer);
 	err = GetLastError();
@@ -345,6 +345,20 @@ static __inline DWORD GetCurrentDirectoryU(DWORD nBufferLength, char* lpBuffer)
 		err = GetLastError();
 	}
 	wfree(lpBuffer);
+	SetLastError(err);
+	return ret;
+}
+
+static __inline DWORD GetModuleFileNameU(HMODULE hModule, char* lpFilename, DWORD nSize)
+{
+	DWORD ret = 0, err = ERROR_INVALID_DATA;
+	walloc(lpFilename, nSize);
+	ret = GetModuleFileNameW(hModule, wlpFilename, nSize);
+	err = GetLastError();
+	if ((ret != 0) && ((ret = wchar_to_utf8_no_alloc(wlpFilename, lpFilename, nSize)) == 0)) {
+		err = GetLastError();
+	}
+	wfree(lpFilename);
 	SetLastError(err);
 	return ret;
 }

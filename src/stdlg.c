@@ -1190,7 +1190,7 @@ INT_PTR CALLBACK UpdateCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 		case IDC_UPDATE_FREQUENCY:
 			if (HIWORD(wParam) != CBN_SELCHANGE)
 				break;
-			freq = ComboBox_GetItemData(hFrequency, ComboBox_GetCurSel(hFrequency));
+			freq = (int32_t)ComboBox_GetItemData(hFrequency, ComboBox_GetCurSel(hFrequency));
 			WriteRegistryKey32(REGKEY_UPDATE_INTERVAL, (DWORD)freq);
 			EnableWindow(hBeta, (freq >= 0));
 			return (INT_PTR)TRUE;
@@ -1213,6 +1213,8 @@ BOOL SetUpdateCheck(void)
 	BOOL enable_updates;
 	DWORD commcheck = GetTickCount();
 	notification_info more_info = { IDD_UPDATE_POLICY, UpdateCallback };
+	char filename[MAX_PATH] = "", exename[] = APPLICATION_NAME ".exe";
+	size_t fn_len, exe_len;
 
 	// Test if we have access to the registry. If not, forget it.
 	WriteRegistryKey32(REGKEY_COMM_CHECK, commcheck);
@@ -1222,10 +1224,21 @@ BOOL SetUpdateCheck(void)
 
 	// If the update interval is not set, this is the first time we run so prompt the user
 	if (ReadRegistryKey32(REGKEY_UPDATE_INTERVAL) == 0) {
-		enable_updates = Notification(MSG_QUESTION, &more_info,
-			APPLICATION_NAME " update policy", "Do you want to allow " APPLICATION_NAME " to check for application updates?\n");
+
+		// Add a hack for people who'd prefer the app not to prompt about update settings on first run.
+		// If the executable is called "rufus.exe", without version, we disable the prompt
+		GetModuleFileNameU(NULL, filename, sizeof(filename));
+		fn_len = safe_strlen(filename);
+		exe_len = safe_strlen(exename);
+		if ((fn_len > exe_len) && (safe_stricmp(&filename[fn_len-exe_len], exename) == 0)) {
+			uprintf("Short name used - Disabling initial update policy prompt\n");
+			enable_updates = TRUE;
+		} else {
+			enable_updates = Notification(MSG_QUESTION, &more_info, APPLICATION_NAME " update policy",
+				"Do you want to allow " APPLICATION_NAME " to check for application updates?\n");
+		}
 		if (!enable_updates) {
-			WriteRegistryKey32(REGKEY_UPDATE_INTERVAL, -1);	// large enough
+			WriteRegistryKey32(REGKEY_UPDATE_INTERVAL, -1);
 			return FALSE;
 		}
 		// If the user hasn't set the interval in the dialog, set to default
@@ -1300,7 +1313,7 @@ INT_PTR CALLBACK NewVersionCallback(HWND hDlg, UINT message, WPARAM wParam, LPAR
 			safe_free(filepath);
 			EndDialog(hDlg, LOWORD(wParam));
 			return (INT_PTR)TRUE;
-		case IDC_DOWNLOAD:	// Also doubles as abort and laucnh function
+		case IDC_DOWNLOAD:	// Also doubles as abort and launch function
 			switch(download_status) {
 			case 1:		// Abort
 				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANCELLED;
