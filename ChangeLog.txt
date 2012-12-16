@@ -1,3 +1,12 @@
+o Version 1.3.0 (2012.12.16)
+    FAT32 format support for >32GB drives
+      Based on fat32format from Ridgecrop Consultants Ltd:
+      http://www.ridgecrop.demon.co.uk/index.htm?fat32format.htm
+    Automated update check
+    Relax ISO9660 compliance for Arch Linux images
+    Add support for VMWare ESXi 5.1 ISO images
+    Update Syslinux to v4.0.6 and libcdio to v0.90
+    Miscellaneous UI improvements and fixes
 o Version 1.2.0 (2012.06.04)
     Single version of Rufus, that includes FreeDOS support always
     Add a toggleable advanced options panel

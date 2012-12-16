@@ -21,6 +21,7 @@
 #endif
 
 #include <windows.h>
+#include <windowsx.h>
 #include <stdio.h>
 #include <malloc.h>
 #include <ctype.h>
@@ -83,6 +84,7 @@ BOOL InstallSyslinux(DWORD num, const char* drive_name)
 	int ldlinux_sectors;
 	uint32_t ldlinux_cluster;
 	int nsectors;
+	int dt = (int)ComboBox_GetItemData(hDOSType, ComboBox_GetCurSel(hDOSType));
 
 	ldlinux_name[0] = drive_name[0];
 
@@ -144,7 +146,8 @@ BOOL InstallSyslinux(DWORD num, const char* drive_name)
 	}
 
 	uprintf("Succesfully wrote 'ldlinux.sys'\n");
-	UpdateProgress(OP_DOS, -1.0f);
+	if (dt == DT_SYSLINUX)
+		UpdateProgress(OP_DOS, -1.0f);
 
 	/* Now flush the media */
 	if (!FlushFileBuffers(f_handle)) {
@@ -211,7 +214,8 @@ BOOL InstallSyslinux(DWORD num, const char* drive_name)
 	}
 
 	uprintf("Succesfully wrote Syslinux boot record\n");
-	UpdateProgress(OP_DOS, -1.0f);
+	if (dt == DT_SYSLINUX)
+		UpdateProgress(OP_DOS, -1.0f);
 
 	r = TRUE;
 
