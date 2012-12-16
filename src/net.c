@@ -403,6 +403,7 @@ static __inline uint64_t to_uint64_t(uint16_t x[4]) {
 static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 {
 	BOOL releases_only, found_new_version = FALSE;
+	int status = 0;
 	const char* server_url = RUFUS_URL "/";
 	int i, j, k, verbose = 0, verpos[4];
 	static const char* archname[] = {"win_x86", "win_x64"};
@@ -453,10 +454,11 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 		}
 	}
 
-	PrintStatus(3000, FALSE, "Checking for " APPLICATION_NAME " updates...\n");
+	PrintStatus(3000, TRUE, "Checking for " APPLICATION_NAME " updates...\n");
+	status++;	// 1
 
 	if (!GetVersionExA(&os_version)) {
-		vuprintf("Could not read Windows version - Check for updates cancelled.\n");
+		uprintf("Could not read Windows version - Check for updates cancelled.\n");
 		goto out;
 	}
 
@@ -483,6 +485,7 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 	if (hConnection == NULL)
 		goto out;
 
+	status++;	// 2
 	releases_only = !GetRegistryKeyBool(REGKEY_INCLUDE_BETAS);
 
 	for (k=0; (k<(releases_only?1:(int)ARRAYSIZE(channel))) && (!found_new_version); k++) {
@@ -572,6 +575,7 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 		if (!InternetReadFile(hRequest, buf, dwTotalSize, &dwDownloaded) || (dwDownloaded != dwTotalSize))
 			goto out;
 
+		status++;
 		vuprintf("Successfully downloaded version file (%d bytes)\n", dwTotalSize);
 
 		parse_update(buf, dwTotalSize+1);
@@ -593,6 +597,19 @@ out:
 	if (hRequest) InternetCloseHandle(hRequest);
 	if (hConnection) InternetCloseHandle(hConnection);
 	if (hSession) InternetCloseHandle(hSession);
+	switch(status) {
+	case 1:
+		PrintStatus(3000, TRUE, "Updates: Unable to connect to the internet.\n");
+		break;
+	case 2:
+		PrintStatus(3000, TRUE, "Updates: Unable to access version data.\n");
+		break;
+	case 3:
+		PrintStatus(3000, FALSE, " %s new version of " APPLICATION_NAME " %s\n",
+		found_new_version?"A":"No", found_new_version?"is available!":"was found.");
+	default:
+		break;
+	}
 	// Start the new download after cleanup
 	if (found_new_version) {
 		// User may have started an operation while we were checking

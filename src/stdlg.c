@@ -1134,19 +1134,21 @@ INT_PTR CALLBACK UpdateCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 {
 	HWND hPolicy;
 	static HWND hFrequency, hBeta;
-	uint32_t freq;
+	int32_t freq;
 
 	switch (message) {
 	case WM_INITDIALOG:
 		SetTitleBarIcon(hDlg);
 		CenterDialog(hDlg);
 		hFrequency = GetDlgItem(hDlg, IDC_UPDATE_FREQUENCY);
+		hBeta = GetDlgItem(hDlg, IDC_INCLUDE_BETAS);
 		IGNORE_RETVAL(ComboBox_SetItemData(hFrequency, ComboBox_AddStringU(hFrequency, "Disabled"), -1));
 		IGNORE_RETVAL(ComboBox_SetItemData(hFrequency, ComboBox_AddStringU(hFrequency, "Daily (Default)"), 86400));
 		IGNORE_RETVAL(ComboBox_SetItemData(hFrequency, ComboBox_AddStringU(hFrequency, "Weekly"), 604800));
 		IGNORE_RETVAL(ComboBox_SetItemData(hFrequency, ComboBox_AddStringU(hFrequency, "Monthly"), 2629800));
 		freq = ReadRegistryKey32(REGKEY_UPDATE_INTERVAL);
 		EnableWindow(GetDlgItem(hDlg, IDC_CHECK_NOW), (freq != 0));
+		EnableWindow(hBeta, (freq >= 0));
 		switch(freq) {
 		case -1:
 			IGNORE_RETVAL(ComboBox_SetCurSel(hFrequency, 0));
@@ -1166,7 +1168,6 @@ INT_PTR CALLBACK UpdateCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 			IGNORE_RETVAL(ComboBox_SetCurSel(hFrequency, 4));
 			break;
 		}
-		hBeta = GetDlgItem(hDlg, IDC_INCLUDE_BETAS);
 		IGNORE_RETVAL(ComboBox_AddStringU(hBeta, "Yes"));
 		IGNORE_RETVAL(ComboBox_AddStringU(hBeta, "No"));
 		IGNORE_RETVAL(ComboBox_SetCurSel(hBeta, GetRegistryKeyBool(REGKEY_INCLUDE_BETAS)?0:1));
@@ -1189,7 +1190,9 @@ INT_PTR CALLBACK UpdateCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 		case IDC_UPDATE_FREQUENCY:
 			if (HIWORD(wParam) != CBN_SELCHANGE)
 				break;
-			WriteRegistryKey32(REGKEY_UPDATE_INTERVAL, (DWORD)ComboBox_GetItemData(hFrequency, ComboBox_GetCurSel(hFrequency)));
+			freq = ComboBox_GetItemData(hFrequency, ComboBox_GetCurSel(hFrequency));
+			WriteRegistryKey32(REGKEY_UPDATE_INTERVAL, (DWORD)freq);
+			EnableWindow(hBeta, (freq >= 0));
 			return (INT_PTR)TRUE;
 		case IDC_INCLUDE_BETAS:
 			if (HIWORD(wParam) != CBN_SELCHANGE)
@@ -1220,7 +1223,7 @@ BOOL SetUpdateCheck(void)
 	// If the update interval is not set, this is the first time we run so prompt the user
 	if (ReadRegistryKey32(REGKEY_UPDATE_INTERVAL) == 0) {
 		enable_updates = Notification(MSG_QUESTION, &more_info,
-			APPLICATION_NAME " updates", "Do you want to allow " APPLICATION_NAME " to check for updates?\n");
+			APPLICATION_NAME " update policy", "Do you want to allow " APPLICATION_NAME " to check for application updates?\n");
 		if (!enable_updates) {
 			WriteRegistryKey32(REGKEY_UPDATE_INTERVAL, -1);	// large enough
 			return FALSE;
