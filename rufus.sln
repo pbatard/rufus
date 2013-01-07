@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{11411DA5-63FE-49DC-8D5C-CA379B95FF3C}") = "rufus", "src\.msvc\rufus_2010.vcxproj", "{731858A7-0303-4988-877B-9C0DD6471864}"
+Project("{11411DA5-63FE-49DC-8D5C-CA379B95FF3C}") = "rufus", "src\.msvc\rufus.vcxproj", "{731858A7-0303-4988-877B-9C0DD6471864}"
 	ProjectSection(ProjectDependencies) = postProject
 		{2B1D078D-8EB4-4398-9CA4-23457265A7F6} = {2B1D078D-8EB4-4398-9CA4-23457265A7F6}
 	EndProjectSection
