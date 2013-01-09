@@ -101,7 +101,7 @@ char szFolderPath[MAX_PATH], app_dir[MAX_PATH];
 char* iso_path = NULL;
 float fScale = 1.0f;
 int default_fs;
-HWND hDeviceList, hCapacity, hFileSystem, hClusterSize, hLabel, hDOSType, hNBPasses, hLog = NULL;
+HWND hDeviceList, hPartition, hFileSystem, hClusterSize, hLabel, hDOSType, hNBPasses, hLog = NULL;
 HWND hISOProgressDlg = NULL, hLogDlg = NULL, hISOProgressBar, hISOFileName, hDiskID;
 BOOL use_own_c32[NB_OLD_C32] = {FALSE, FALSE}, detect_fakes = TRUE, mbr_selected_by_user = FALSE;
 BOOL iso_op_in_progress = FALSE, format_op_in_progress = FALSE;
@@ -405,7 +405,7 @@ static BOOL GetDriveInfo(void)
 			}
 			uprintf("Partition type: MBR, NB Partitions: %d\n", nb_partitions);
 			tmp[sizeof(tmp)-1] = 0;
-			CreateTooltip(hCapacity, tmp, -1);
+			CreateTooltip(hPartition, tmp, -1);
 			break;
 		case PARTITION_STYLE_GPT:
 			uprintf("Partition type: GPT, NB Partitions: %d\n", DriveLayout->PartitionCount);
@@ -533,7 +533,7 @@ static BOOL PopulateProperties(int ComboIndex)
 	char no_label[] = STR_NO_LABEL;
 	int i, fs;
 
-	IGNORE_RETVAL(ComboBox_ResetContent(hCapacity));
+	IGNORE_RETVAL(ComboBox_ResetContent(hPartition));
 	IGNORE_RETVAL(ComboBox_ResetContent(hFileSystem));
 	IGNORE_RETVAL(ComboBox_ResetContent(hClusterSize));
 	EnableWindow(GetDlgItem(hMainDialog, IDC_START), FALSE);
@@ -554,12 +554,12 @@ static BOOL PopulateProperties(int ComboIndex)
 	for (i=1; i<ARRAYSIZE(suffix); i++) {
 		HumanReadableSize /= 1024.0;
 		if (HumanReadableSize < 512.0) {
-			safe_sprintf(capacity, sizeof(capacity), "%0.2f %s", HumanReadableSize, suffix[i]);
+			safe_sprintf(capacity, sizeof(capacity), "MBR (1 Partition of %0.2f %s)", HumanReadableSize, suffix[i]);
 			break;
 		}
 	}
-	IGNORE_RETVAL(ComboBox_AddStringU(hCapacity, capacity));
-	IGNORE_RETVAL(ComboBox_SetCurSel(hCapacity, 0));
+	IGNORE_RETVAL(ComboBox_AddStringU(hPartition, capacity));
+	IGNORE_RETVAL(ComboBox_SetCurSel(hPartition, 0));
 	CreateTooltip(hDeviceList, DriveID.Table[ComboIndex], -1);
 
 	// Set a proposed label according to the size (eg: "256MB", "8GB")
@@ -1072,7 +1072,7 @@ static void EnableControls(BOOL bEnable)
 	int fs;
 
 	EnableWindow(GetDlgItem(hMainDialog, IDC_DEVICE), bEnable);
-	EnableWindow(GetDlgItem(hMainDialog, IDC_CAPACITY), bEnable);
+	EnableWindow(GetDlgItem(hMainDialog, IDC_PARTITION), bEnable);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_FILESYSTEM), bEnable);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_CLUSTERSIZE), bEnable);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_LABEL), bEnable);
@@ -1404,7 +1404,7 @@ void InitDialog(HWND hDlg)
 	// Quite a burden to carry around as parameters
 	hMainDialog = hDlg;
 	hDeviceList = GetDlgItem(hDlg, IDC_DEVICE);
-	hCapacity = GetDlgItem(hDlg, IDC_CAPACITY);
+	hPartition = GetDlgItem(hDlg, IDC_PARTITION);
 	hFileSystem = GetDlgItem(hDlg, IDC_FILESYSTEM);
 	hClusterSize = GetDlgItem(hDlg, IDC_CLUSTERSIZE);
 	hLabel = GetDlgItem(hDlg, IDC_LABEL);
