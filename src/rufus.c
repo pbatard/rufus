@@ -268,7 +268,11 @@ out:
 	// Only add the filesystems we can service
 	for (fs=0; fs<FS_MAX; fs++) {
 		if (SelectedDrive.ClusterSize[fs].Allowed != 0) {
-			safe_sprintf(tmp, sizeof(tmp), FileSystemLabel[fs]);
+			tmp[0] = 0;
+			// Tell the user if we're going to use Large FAT32 or regular
+			if ((fs == FS_FAT32) && (SelectedDrive.DiskSize > LARGE_FAT32_SIZE))
+				safe_strcat(tmp, sizeof(tmp), "Large ");
+			safe_strcat(tmp, sizeof(tmp), FileSystemLabel[fs]);
 			if (default_fs == FS_UNKNOWN) {
 				safe_strcat(tmp, sizeof(tmp), " (Default)");
 				default_fs = fs;
