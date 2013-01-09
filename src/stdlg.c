@@ -1,9 +1,9 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Standard Dialog Routines (Browse for folder, About, etc)
- * Copyright © 2011-2012 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2013 Pete Batard <pete@akeo.ie>
  *
- * Based on zadig_stdlg.c, part of libwdi: http://libwdi.sf.net
+ * Based on zadig_stdlg.c, part of libwdi: http://libwdi.akeo.ie
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -114,12 +114,15 @@ void StrArrayCreate(StrArray* arr, size_t initial_size)
 
 void StrArrayAdd(StrArray* arr, const char* str)
 {
+	char** old_table;
 	if ((arr == NULL) || (arr->Table == NULL))
 		return;
 	if (arr->Index == arr->Max) {
 		arr->Max *= 2;
+		old_table = arr->Table;
 		arr->Table = (char**)realloc(arr->Table, arr->Max*sizeof(char*));
 		if (arr->Table == NULL) {
+			free(old_table);
 			uprintf("Could not reallocate string array\n");
 			return;
 		}
@@ -700,6 +703,7 @@ INT_PTR CALLBACK AboutCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 				tr.chrg.cpMin = enl->chrg.cpMin;
 				tr.chrg.cpMax = enl->chrg.cpMax;
 				SendMessageW(enl->nmhdr.hwndFrom, EM_GETTEXTRANGE, 0, (LPARAM)&tr);
+				wUrl[ARRAYSIZE(wUrl)-1] = 0;
 				ShellExecuteW(hDlg, L"open", wUrl, NULL, NULL, SW_SHOWNORMAL);
 			}
 			break;
@@ -970,7 +974,8 @@ void DestroyAllTooltips(void)
 /* Determine if a Windows is being displayed or not */
 BOOL IsShown(HWND hDlg)
 {
-	WINDOWPLACEMENT placement;
+	WINDOWPLACEMENT placement = {0};
+	placement.length = sizeof(WINDOWPLACEMENT);
 	if (!GetWindowPlacement(hDlg, &placement))
 		return FALSE;
 	switch (placement.showCmd) {
@@ -1282,7 +1287,7 @@ INT_PTR CALLBACK NewVersionCallback(HWND hDlg, UINT message, WPARAM wParam, LPAR
 			update.version[0], update.version[1], update.version[2], update.version[3]);
 		SetWindowTextA(GetDlgItem(hDlg, IDC_LATEST_VERSION), tmp);
 		SetWindowTextA(GetDlgItem(hDlg, IDC_DOWNLOAD_URL), update.download_url);
-		SendMessage(GetDlgItem(hDlg, IDC_PROGRESS), PBM_SETRANGE, 0, MAX_PROGRESS<<16);
+		SendMessage(GetDlgItem(hDlg, IDC_PROGRESS), PBM_SETRANGE, 0, (MAX_PROGRESS<<16) & 0xFFFF0000);
 		if (update.download_url == NULL)
 			EnableWindow(GetDlgItem(hDlg, IDC_DOWNLOAD), FALSE);
 		break;
@@ -1301,6 +1306,7 @@ INT_PTR CALLBACK NewVersionCallback(HWND hDlg, UINT message, WPARAM wParam, LPAR
 				tr.chrg.cpMin = enl->chrg.cpMin;
 				tr.chrg.cpMax = enl->chrg.cpMax;
 				SendMessageW(enl->nmhdr.hwndFrom, EM_GETTEXTRANGE, 0, (LPARAM)&tr);
+				wUrl[ARRAYSIZE(wUrl)-1] = 0;
 				ShellExecuteW(hDlg, L"open", wUrl, NULL, NULL, SW_SHOWNORMAL);
 			}
 			break;

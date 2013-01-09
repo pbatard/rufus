@@ -2,7 +2,7 @@
  * Rufus: The Reliable USB Formatting Utility
  * DOS boot file extraction, from the FAT12 floppy image in diskcopy.dll
  * (MS WinME DOS) or from the embedded FreeDOS resource files
- * Copyright (c) 2011-2012 Pete Batard <pete@akeo.ie>
+ * Copyright (c) 2011-2013 Pete Batard <pete@akeo.ie>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -178,7 +178,10 @@ static BOOL Patch_COMMAND_COM(HANDLE hFile)
 		return FALSE;
 	}
 	SetFilePointer(hFile, 0x650c, NULL, FILE_BEGIN);
-	ReadFile(hFile, data, size, &size, NULL);
+	if (!ReadFile(hFile, data, size, &size, NULL)) {
+		uprintf("  could not read data\n");
+		return FALSE;
+	}
 	if (memcmp(data, expected, sizeof(expected)) != 0) {
 		uprintf("  unexpected binary data\n");
 		return FALSE;
@@ -202,7 +205,10 @@ static BOOL Patch_IO_SYS(HANDLE hFile)
 		return FALSE;
 	}
 	SetFilePointer(hFile, 0x3a8, NULL, FILE_BEGIN);
-	ReadFile(hFile, data, size, &size, NULL);
+	if (!ReadFile(hFile, data, size, &size, NULL)) {
+		uprintf("  could not read data\n");
+		return FALSE;
+	}
 	if (memcmp(data, expected, sizeof(expected)) != 0) {
 		uprintf("  unexpected binary data\n");
 		return FALSE;
@@ -307,6 +313,7 @@ static BOOL ExtractMSDOS(const char* path)
 	int i, j;
 	BOOL r = TRUE;
 	HMODULE hDLL;
+	HGLOBAL hRes;
 	HRSRC hDiskImage;
 	char locale_path[MAX_PATH];
 	char* extractlist[] = { "MSDOS   SYS", "COMMAND COM", "IO      SYS", "MODE    COM",
@@ -331,8 +338,10 @@ static BOOL ExtractMSDOS(const char* path)
 		FreeLibrary(hDLL);
 		return FALSE;
 	}
-	DiskImage = (BYTE*)LockResource(LoadResource(hDLL, hDiskImage));
-	if (DiskImage == NULL) {
+	hRes = LoadResource(hDLL, hDiskImage);
+	if (hRes != NULL)
+		DiskImage = (BYTE*)LockResource(hRes);
+	if ((hRes == NULL) || (DiskImage == NULL) ){
 		uprintf("Unable to access disk image in %s: %s\n", dllname, WindowsErrorString());
 		FreeLibrary(hDLL);
 		return FALSE;

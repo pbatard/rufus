@@ -1,6 +1,6 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
- * Copyright © 2011-2012 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2013 Pete Batard <pete@akeo.ie>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -395,7 +395,7 @@ static BOOL GetDriveInfo(void)
 						DriveLayout->PartitionEntry[i].Mbr.BootIndicator?"Yes":"No",
 						DriveLayout->PartitionEntry[i].Mbr.RecognizedPartition?"Yes":"No",
 						DriveLayout->PartitionEntry[i].Mbr.HiddenSectors);
-					tmp_pos = safe_sprintf(&tmp[tmp_pos], sizeof(tmp)-tmp_pos, "Partition %d: %s (%s)\n",
+					tmp_pos = _snprintf(&tmp[tmp_pos], sizeof(tmp)-tmp_pos, "Partition %d: %s (%s)\n",
 						i+1, GetPartitionType(part_type), size_to_hr(DriveLayout->PartitionEntry[i].PartitionLength));
 				}
 			}
@@ -525,7 +525,7 @@ static BOOL PopulateProperties(int ComboIndex)
 {
 	double HumanReadableSize;
 	char capacity[64];
-	static char *suffix[] = { "KB", "MB", "GB", "TB", "PB"};
+	static char *suffix[] = { "B", "KB", "MB", "GB", "TB", "PB"};
 	char no_label[] = STR_NO_LABEL;
 	int i, fs;
 
@@ -547,7 +547,7 @@ static BOOL PopulateProperties(int ComboIndex)
 	EnableBootOptions((fs == FS_FAT16) || (fs == FS_FAT32) || (fs == FS_NTFS));
 
 	HumanReadableSize = (double)SelectedDrive.DiskSize;
-	for (i=0; i<ARRAYSIZE(suffix); i++) {
+	for (i=1; i<ARRAYSIZE(suffix); i++) {
 		HumanReadableSize /= 1024.0;
 		if (HumanReadableSize < 512.0) {
 			safe_sprintf(capacity, sizeof(capacity), "%0.2f %s", HumanReadableSize, suffix[i]);
@@ -750,6 +750,10 @@ static BOOL GetUSBDevices(DWORD devnum)
 					uprintf("SetupDiGetDeviceInterfaceDetail (dummy) failed: %s\n", WindowsErrorString());
 					continue;
 				}
+			}
+			if (devint_detail_data == NULL) {
+				uprintf("SetupDiGetDeviceInterfaceDetail (dummy) - no data was allocated\n");
+				continue;
 			}
 			if(!SetupDiGetDeviceInterfaceDetailA(dev_info, &devint_data, devint_detail_data, size, &size, NULL)) {
 				uprintf("SetupDiGetDeviceInterfaceDetail (actual) failed: %s\n", WindowsErrorString());
@@ -1207,7 +1211,7 @@ BOOL CALLBACK ISOProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 		hISOProgressBar = GetDlgItem(hDlg, IDC_PROGRESS);
 		hISOFileName = GetDlgItem(hDlg, IDC_ISO_FILENAME);
 		// Use maximum granularity for the progress bar
-		SendMessage(hISOProgressBar, PBM_SETRANGE, 0, MAX_PROGRESS<<16);
+		SendMessage(hISOProgressBar, PBM_SETRANGE, 0, (MAX_PROGRESS<<16) & 0xFFFF0000);
 		return TRUE;
 	case UM_ISO_INIT:
 		iso_op_in_progress = TRUE;
@@ -1450,7 +1454,7 @@ void InitDialog(HWND hDlg)
 	SetTaskbarProgressState(TASKBAR_NORMAL);
 
 	// Use maximum granularity for the progress bar
-	SendMessage(hProgress, PBM_SETRANGE, 0, MAX_PROGRESS<<16);
+	SendMessage(hProgress, PBM_SETRANGE, 0, (MAX_PROGRESS<<16) & 0xFFFF0000);
 	// Fill up the passes
 	IGNORE_RETVAL(ComboBox_AddStringU(hNBPasses, "1 Pass"));
 	IGNORE_RETVAL(ComboBox_AddStringU(hNBPasses, "2 Passes"));
@@ -1902,9 +1906,9 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		GetUSBDevices(DeviceNum);
 		if (!IS_ERROR(FormatStatus)) {
 			// This is the only way to achieve instantenous progress transition to 100%
-			SendMessage(hProgress, PBM_SETRANGE, 0, (MAX_PROGRESS+1)<<16);
+			SendMessage(hProgress, PBM_SETRANGE, 0, ((MAX_PROGRESS+1)<<16) & 0xFFFF0000);
 			SendMessage(hProgress, PBM_SETPOS, (MAX_PROGRESS+1), 0);
-			SendMessage(hProgress, PBM_SETRANGE, 0, MAX_PROGRESS<<16);
+			SendMessage(hProgress, PBM_SETRANGE, 0, (MAX_PROGRESS<<16) & 0xFFFF0000);
 			SetTaskbarProgressState(TASKBAR_NOPROGRESS);
 			PrintStatus(0, FALSE, "DONE");
 		} else if (SCODE_CODE(FormatStatus) == ERROR_CANCELLED) {
@@ -1931,7 +1935,11 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
  */
 // If we ever need to process more than one commandline arguments, uncomment the following parts
 // typedef int (CDECL *__wgetmainargs_t)(int*, wchar_t***, wchar_t***, int, int*);
+#if defined(_MSC_VER) && (_MSC_VER >= 1600)
+int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, _In_ int nShowCmd)
+#else
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
+#endif
 {
 //	int i, argc = 0, si = 0;
 //	char** argv = NULL;
@@ -1976,7 +1984,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	hMainInstance = hInstance;
 
 	// Initialize COM for folder selection
-	CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
+	IGNORE_RETVAL(CoInitializeEx(NULL, COINIT_APARTMENTTHREADED));
 
 	// Some dialogs have Rich Edit controls and won't display without this
 	if (LoadLibraryA("Riched20.dll") == NULL) {

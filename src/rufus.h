@@ -1,6 +1,6 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
- * Copyright © 2011-2012 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2013 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,11 @@
 #include <windows.h>
 #include <winioctl.h>               // for DISK_GEOMETRY
 #include <stdint.h>
+
+#if defined(_MSC_VER)
+// Disable some VS2012 Code Analysis warnings
+#pragma warning(disable: 28159)		// VS2012 wants us to use GetTickCount64(), but it's not available on XP
+#endif
 
 #pragma once
 
@@ -63,7 +68,7 @@
 #define safe_strnicmp(str1, str2, count) _strnicmp(((str1==NULL)?"<NULL>":str1), ((str2==NULL)?"<NULL>":str2), count)
 #define safe_closehandle(h) do {if (h != INVALID_HANDLE_VALUE) {CloseHandle(h); h = INVALID_HANDLE_VALUE;}} while(0)
 #define safe_unlockclose(h) do {if (h != INVALID_HANDLE_VALUE) {UnlockDrive(h); CloseHandle(h); h = INVALID_HANDLE_VALUE;}} while(0)
-#define safe_sprintf _snprintf
+#define safe_sprintf(dst, count, ...) do {_snprintf(dst, count, __VA_ARGS__); (dst)[(count)-1] = 0; } while(0)
 #define safe_strlen(str) ((((char*)str)==NULL)?0:strlen(str))
 #define safe_strdup _strdup
 #if defined(_MSC_VER)

@@ -2,7 +2,7 @@
  * MSAPI_UTF8: Common API calls using UTF-8 strings
  * Compensating for what Microsoft should have done a long long time ago.
  *
- * Copyright (c) 2010-2012 Pete Batard <pete@akeo.ie>
+ * Copyright (c) 2010-2013 Pete Batard <pete@akeo.ie>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -27,6 +27,10 @@
 #include <direct.h>
 
 #pragma once
+#if defined(_MSC_VER)
+// disable VS2012 Code Analysis warnings that are intentional
+#pragma warning(disable: 6387)	// Don't care about bad params
+#endif
 
 #ifdef __cplusplus
 extern "C" {

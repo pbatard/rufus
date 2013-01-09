@@ -180,7 +180,7 @@ BOOL GetDriveLabel(DWORD DriveIndex, char* letter, char** label)
 		strncpy(VolumeLabel, AutorunLabel, sizeof(VolumeLabel));
 		safe_free(AutorunLabel);
 		*label = VolumeLabel;
-	} else if (GetVolumeInformationW(wDrivePath, wVolumeLabel, sizeof(wVolumeLabel),
+	} else if (GetVolumeInformationW(wDrivePath, wVolumeLabel, ARRAYSIZE(wVolumeLabel),
 		NULL, NULL, NULL, NULL, 0) && *wVolumeLabel) {
 		wchar_to_utf8_no_alloc(wVolumeLabel, VolumeLabel, sizeof(VolumeLabel));
 		*label = VolumeLabel;

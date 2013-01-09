@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Networking functionality (web file download, check for update, etc.)
- * Copyright (c) 2012 Pete Batard <pete@akeo.ie>
+ * Copyright (c) 2012-2013 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -270,6 +270,7 @@ BOOL DownloadFile(const char* url, const char* file, HWND hProgressDialog)
 		uprintf("Unable to decode URL: %s\n", WindowsErrorString());
 		goto out;
 	}
+	hostname[sizeof(hostname)-1] = 0;
 
 	// Open an Internet session
 	for (i=5; (i>0) && (!InternetGetConnectedState(&dwFlags, 0)); i--) {
@@ -476,8 +477,9 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 
 	if ((!InternetCrackUrlA(server_url, (DWORD)safe_strlen(server_url), 0, &UrlParts)) || (!InternetGetConnectedState(&dwFlags, 0)))
 		goto out;
+	hostname[sizeof(hostname)-1] = 0;
 
-	_snprintf(agent, ARRAYSIZE(agent), APPLICATION_NAME "/%d.%d.%d.%d", rufus_version[0], rufus_version[1], rufus_version[2], rufus_version[3]);
+	safe_sprintf(agent, ARRAYSIZE(agent), APPLICATION_NAME "/%d.%d.%d.%d", rufus_version[0], rufus_version[1], rufus_version[2], rufus_version[3]);
 	hSession = InternetOpenA(agent, INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
 	if (hSession == NULL)
 		goto out;

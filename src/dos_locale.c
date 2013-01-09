@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * DOS keyboard locale setup
- * Copyright (c) 2011-2012 Pete Batard <pete@akeo.ie>
+ * Copyright (c) 2011-2013 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -410,7 +410,10 @@ static const char* get_kb(void)
 	// need an KLID which GetKeyboardLayoutNameA() does return ...but only as a
 	// string of an hex value...
 	GetKeyboardLayoutNameA(kbid_str);
-	sscanf(kbid_str, "%x", &kbid);
+	if (sscanf(kbid_str, "%x", &kbid) == 0) {
+		uprintf("Could not scan keyboard layout name - falling back to US as default\n");
+		kbid = 0x00000409;
+	}
 	uprintf("Windows KBID 0x%08x\n", kbid);
 
 	for (pass=0; pass<3; pass++) {

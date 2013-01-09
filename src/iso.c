@@ -1,9 +1,9 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * ISO file extraction
- * Copyright (c) 2011-2012 Pete Batard <pete@akeo.ie>
+ * Copyright (c) 2011-2013 Pete Batard <pete@akeo.ie>
  * Based on libcdio's iso & udf samples:
- * Copyright (c) 2003-2011 Rocky Bernstein <rocky@gnu.org>
+ * Copyright (c) 2003-2012 Rocky Bernstein <rocky@gnu.org>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -185,7 +185,7 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 			uprintf("Error allocating file name\n");
 			goto out;
 		}
-		i_length = safe_sprintf(psz_fullpath, i_length, "%s%s/%s", psz_extract_dir, psz_path, psz_basename);
+		i_length = _snprintf(psz_fullpath, i_length, "%s%s/%s", psz_extract_dir, psz_path, psz_basename);
 		if (i_length < 0) {
 			goto out;
 		}
@@ -292,7 +292,7 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 	if ((p_iso == NULL) || (psz_path == NULL))
 		return 1;
 
-	i_length = safe_sprintf(psz_fullpath, sizeof(psz_fullpath), "%s%s/", psz_extract_dir, psz_path);
+	i_length = _snprintf(psz_fullpath, sizeof(psz_fullpath), "%s%s/", psz_extract_dir, psz_path);
 	if (i_length < 0)
 		return 1;
 	psz_basename = &psz_fullpath[i_length];

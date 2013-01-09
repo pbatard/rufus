@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Standard I/O Routines (logging, status, etc.)
- * Copyright (c) 2011-2012 Pete Batard <pete@akeo.ie>
+ * Copyright (c) 2011-2013 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -107,7 +107,7 @@ void DumpBufferHex(void *buf, size_t size)
  */
 const char *WindowsErrorString(void)
 {
-static char err_string[256];
+static char err_string[256] = {0};
 
 	DWORD size;
 	DWORD error_code, format_error;
