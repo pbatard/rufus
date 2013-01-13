@@ -34,9 +34,9 @@
 #include "libfat.h"
 #include "setadv.h"
 
-unsigned char* syslinux_ldlinux;
+unsigned char* syslinux_ldlinux = NULL;
 unsigned int syslinux_ldlinux_len;
-unsigned char* syslinux_bootsect;
+unsigned char* syslinux_bootsect = NULL;
 unsigned int syslinux_bootsect_len;
 
 /*
@@ -102,8 +102,13 @@ BOOL InstallSyslinux(DWORD num, const char* drive_name)
 		uprintf("Unable to load ldlinux.sys resource: %s\n", WindowsErrorString());
 		goto out;
 	}
-	syslinux_ldlinux = (unsigned char*)LockResource(res_handle);
 	syslinux_ldlinux_len = SizeofResource(NULL, res);
+	syslinux_ldlinux = (unsigned char*)malloc(syslinux_ldlinux_len);
+	if (syslinux_ldlinux == NULL) {
+		uprintf("Unable to allocate ldlinux.sys resource\n");
+		goto out;
+	}
+	memcpy(syslinux_ldlinux, LockResource(res_handle), syslinux_ldlinux_len);
 
 	/* Access ldlinux.bss resource */
 	res = FindResource(hMainInstance, MAKEINTRESOURCE(IDR_SL_LDLINUX_BSS), RT_RCDATA);
@@ -116,8 +121,13 @@ BOOL InstallSyslinux(DWORD num, const char* drive_name)
 		uprintf("Unable to load ldlinux.bss resource: %s\n", WindowsErrorString());
 		goto out;
 	}
-	syslinux_bootsect = (unsigned char*)LockResource(res_handle);
 	syslinux_bootsect_len = SizeofResource(NULL, res);
+	syslinux_bootsect = (unsigned char*)malloc(syslinux_bootsect_len);
+	if (syslinux_bootsect == NULL) {
+		uprintf("Unable to allocate ldlinux.bss resource\n");
+		goto out;
+	}
+	memcpy(syslinux_bootsect, LockResource(res_handle), syslinux_bootsect_len);
 
 	/* Create ldlinux.sys file */
 	f_handle = CreateFileA(ldlinux_name, GENERIC_READ | GENERIC_WRITE,
@@ -220,6 +230,8 @@ BOOL InstallSyslinux(DWORD num, const char* drive_name)
 	r = TRUE;
 
 out:
+	safe_free(syslinux_ldlinux);
+	safe_free(syslinux_bootsect);
 	safe_free(sectors);
 	safe_closehandle(d_handle);
 	safe_closehandle(f_handle);
