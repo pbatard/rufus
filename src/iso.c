@@ -306,11 +306,16 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 	_CDIO_LIST_FOREACH(p_entnode, p_entlist) {
 		if (FormatStatus) goto out;
 		p_statbuf = (iso9660_stat_t*) _cdio_list_node_data(p_entnode);
-		/* Eliminate . and .. entries */
+		// Eliminate . and .. entries
 		if ( (strcmp(p_statbuf->filename, ".") == 0)
 			|| (strcmp(p_statbuf->filename, "..") == 0) )
 			continue;
-		iso9660_name_translate_ext(p_statbuf->filename, psz_basename, i_joliet_level);
+		// Rock Ridge requires an exception (Can't people just use Joliet?)
+		if (p_statbuf->rr.b3_rock != yep) {
+			iso9660_name_translate_ext(p_statbuf->filename, psz_basename, i_joliet_level);
+		} else {
+			safe_strcpy(psz_basename, sizeof(psz_fullpath)-i_length-1, p_statbuf->filename);
+		}
 		if (p_statbuf->type == _STAT_DIR) {
 			if (!scan_only) _mkdirU(psz_fullpath);
 			if (iso_extract_files(p_iso, psz_iso_name))
@@ -455,8 +460,8 @@ try_iso:
 		uprintf("Unable to open image '%s'.\n", src_iso);
 		goto out;
 	}
-	i_joliet_level = iso9660_ifs_get_joliet_level(p_iso);
 	uprintf("Disc image is an ISO9660 image\n");
+	i_joliet_level = iso9660_ifs_get_joliet_level(p_iso);
 	if (scan_only) {
 		if (iso9660_ifs_get_volume_id(p_iso, &tmp)) {
 			safe_strcpy(iso_report.label, sizeof(iso_report.label), tmp);
