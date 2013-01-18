@@ -57,6 +57,7 @@ int64_t iso_blocking_status = -1;
 static const char* psz_extract_dir;
 static const char* bootmgr_name = "bootmgr";
 static const char* ldlinux_name = "ldlinux.sys";
+static const char* efi_dirname = "/efi/boot";
 static const char* isolinux_name[] = { "isolinux.cfg", "syslinux.cfg", "extlinux.conf"};
 static const char* pe_dirname[] = { "/i386", "/minint" };
 static const char* pe_file[] = { "ntdetect.com", "setupldr.bin", "txtsetup.sif" };
@@ -125,6 +126,10 @@ static __inline BOOL check_iso_props(const char* psz_dirname, BOOL* is_syslinux_
 		// Check for a "bootmgr" file in root (psz_path = "")
 		if ((*psz_dirname == 0) && (safe_stricmp(psz_basename, bootmgr_name) == 0))
 			iso_report.has_bootmgr = TRUE;
+
+		// Check for the EFI boot directory
+		if (safe_stricmp(psz_dirname, efi_dirname) == 0)
+			iso_report.has_efi = TRUE;
 
 		// Check for PE (XP) specific files in "/i386" or "/minint"
 		for (i=0; i<ARRAYSIZE(pe_dirname); i++)

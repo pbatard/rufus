@@ -42,6 +42,9 @@
 #define MAX_TOOLTIPS                32
 #define MAX_PROGRESS                (0xFFFF-1)	// leave room for 1 more for insta-progress workaround
 #define MAX_LOG_SIZE                0x7FFFFFFE
+#define MAX_GUID_STRING_LENGTH      40
+#define MAX_GPT_PARTITIONS          128
+#define MAX_SECTORS_TO_CLEAR        128			// nb sectors to zap when clearing the MBR/GPT (must be >34)
 #define PROPOSEDLABEL_TOLERANCE     0.10
 #define FS_DEFAULT                  FS_FAT32
 #define LARGE_FAT32_SIZE            (32*1073741824LL)	// Size at which we need to use fat32format
@@ -147,6 +150,12 @@ enum dos_type {
 	DT_MAX
 };
 
+enum part_type {
+	PT_MBR = 0,
+	PT_GPT,
+	PT_MAX
+};
+
 /* Current drive info */
 typedef struct {
 	DWORD DeviceNumber;
@@ -154,6 +163,7 @@ typedef struct {
 	DISK_GEOMETRY Geometry;
 	DWORD FirstSector;
 	char proposed_label[16];
+	int PartitionType;
 	int FSType;
 	struct {
 		ULONG Allowed;
@@ -180,6 +190,7 @@ typedef struct {
 	uint8_t winpe;
 	BOOL has_4GB_file;
 	BOOL has_bootmgr;
+	BOOL has_efi;
 	BOOL has_isolinux;
 	BOOL has_autorun;
 	BOOL has_old_c32[NB_OLD_C32];
@@ -221,7 +232,7 @@ enum WindowsVersion {
  */
 extern HINSTANCE hMainInstance;
 extern HWND hMainDialog, hLogDlg, hStatus, hDeviceList, hCapacity;
-extern HWND hFileSystem, hClusterSize, hLabel, hDOSType, hNBPasses, hLog;
+extern HWND hPartitionScheme, hFileSystem, hClusterSize, hLabel, hDOSType, hNBPasses, hLog;
 extern HWND hISOProgressDlg, hISOProgressBar, hISOFileName, hDiskID;
 extern float fScale;
 extern char szFolderPath[MAX_PATH], app_dir[MAX_PATH];
@@ -246,6 +257,7 @@ extern void DumpBufferHex(void *buf, size_t size);
 extern void PrintStatus(unsigned int duration, BOOL debug, const char *format, ...);
 extern void UpdateProgress(int op, float percent);
 extern const char* StrError(DWORD error_code);
+extern char* GuidToString(const GUID* guid);
 extern void CenterDialog(HWND hDlg);
 extern void CreateStatusBar(void);
 extern void SetTitleBarIcon(HWND hDlg);

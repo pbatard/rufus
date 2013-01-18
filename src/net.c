@@ -607,7 +607,8 @@ out:
 		PrintStatus(3000, TRUE, "Updates: Unable to access version data.\n");
 		break;
 	case 3:
-		PrintStatus(3000, FALSE, " %s new version of " APPLICATION_NAME " %s\n",
+	case 4:
+		PrintStatus(3000, FALSE, "%s new version of " APPLICATION_NAME " %s\n",
 		found_new_version?"A":"No", found_new_version?"is available!":"was found.");
 	default:
 		break;

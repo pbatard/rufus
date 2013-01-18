@@ -86,6 +86,7 @@ static const char* FileSystemLabel[FS_MAX] = { "FAT", "FAT32", "NTFS", "exFAT" }
 static const char* ClusterSizeLabel[] = { "512 bytes", "1024 bytes","2048 bytes","4096 bytes","8192 bytes",
 	"16 kilobytes", "32 kilobytes", "64 kilobytes", "128 kilobytes", "256 kilobytes", "512 kilobytes",
 	"1024 kilobytes","2048 kilobytes","4096 kilobytes","8192 kilobytes","16 megabytes","32 megabytes" };
+static const char* PartitionSchemeName[PT_MAX] = { "MBR", "GPT" };
 static BOOL existing_key = FALSE;	// For LGP set/restore
 static BOOL iso_size_check = TRUE;
 static BOOL log_displayed = FALSE;
@@ -101,7 +102,7 @@ char szFolderPath[MAX_PATH], app_dir[MAX_PATH];
 char* iso_path = NULL;
 float fScale = 1.0f;
 int default_fs;
-HWND hDeviceList, hPartition, hFileSystem, hClusterSize, hLabel, hDOSType, hNBPasses, hLog = NULL;
+HWND hDeviceList, hPartitionScheme, hFileSystem, hClusterSize, hLabel, hDOSType, hNBPasses, hLog = NULL;
 HWND hISOProgressDlg = NULL, hLogDlg = NULL, hISOProgressBar, hISOFileName, hDiskID;
 BOOL use_own_c32[NB_OLD_C32] = {FALSE, FALSE}, detect_fakes = TRUE, mbr_selected_by_user = FALSE;
 BOOL iso_op_in_progress = FALSE, format_op_in_progress = FALSE;
@@ -359,9 +360,8 @@ static BOOL GetDriveInfo(void)
 	void* drive_layout = (void*)layout;
 	PDISK_GEOMETRY_EX DiskGeometry = (PDISK_GEOMETRY_EX)disk_geometry;
 	PDRIVE_LAYOUT_INFORMATION_EX DriveLayout = (PDRIVE_LAYOUT_INFORMATION_EX)drive_layout;
-	char DrivePath[] = "#:\\", tmp[512], fs_type[32];
+	char DrivePath[] = "#:\\", tmp[256], fs_type[32];
 	DWORD i, nb_partitions = 0;
-	int tmp_pos;
 
 	SelectedDrive.DiskSize = 0;
 
@@ -378,9 +378,9 @@ static BOOL GetDriveInfo(void)
 	}
 	SelectedDrive.DiskSize = DiskGeometry->DiskSize.QuadPart;
 	memcpy(&SelectedDrive.Geometry, &DiskGeometry->Geometry, sizeof(DISK_GEOMETRY));
-	uprintf("Cylinders: %lld, TracksPerCylinder: %d, SectorsPerTrack: %d, BytesPerSector: %d\n",
-		DiskGeometry->Geometry.Cylinders, DiskGeometry->Geometry.TracksPerCylinder,
-		DiskGeometry->Geometry.SectorsPerTrack, DiskGeometry->Geometry.BytesPerSector);
+	uprintf("Sector Size: %d bytes\n", DiskGeometry->Geometry.BytesPerSector);
+	uprintf("Cylinders: %lld, TracksPerCylinder: %d, SectorsPerTrack: %d\n",
+		DiskGeometry->Geometry.Cylinders, DiskGeometry->Geometry.TracksPerCylinder, DiskGeometry->Geometry.SectorsPerTrack);
 
 	r = DeviceIoControl(hDrive, IOCTL_DISK_GET_DRIVE_LAYOUT_EX, 
 			NULL, 0, layout, sizeof(layout), &size, NULL );
@@ -389,28 +389,46 @@ static BOOL GetDriveInfo(void)
 	} else {
 		switch (DriveLayout->PartitionStyle) {
 		case PARTITION_STYLE_MBR:
-			for (tmp_pos=0, i=0; (i<DriveLayout->PartitionCount)&&(tmp_pos>=0); i++) {
+			SelectedDrive.PartitionType = PT_MBR;
+			for (i=0; i<DriveLayout->PartitionCount; i++) {
 				if (DriveLayout->PartitionEntry[i].Mbr.PartitionType != PARTITION_ENTRY_UNUSED) {
 					nb_partitions++;
-					uprintf("Partition %d:\n", i+1);
-					part_type = DriveLayout->PartitionEntry[i].Mbr.PartitionType;
-					uprintf("  Type: %s (0x%02x)\r\n  Size: %s\r\n  Boot: %s\r\n  Recognized: %s\r\n  Hidden Sectors: %d\n",
-						GetPartitionType(part_type), part_type, size_to_hr(DriveLayout->PartitionEntry[i].PartitionLength),
-						DriveLayout->PartitionEntry[i].Mbr.BootIndicator?"Yes":"No",
-						DriveLayout->PartitionEntry[i].Mbr.RecognizedPartition?"Yes":"No",
-						DriveLayout->PartitionEntry[i].Mbr.HiddenSectors);
-					tmp_pos = _snprintf(&tmp[tmp_pos], sizeof(tmp)-tmp_pos, "Partition %d: %s (%s)\n",
-						i+1, GetPartitionType(part_type), size_to_hr(DriveLayout->PartitionEntry[i].PartitionLength));
 				}
 			}
 			uprintf("Partition type: MBR, NB Partitions: %d\n", nb_partitions);
-			tmp[sizeof(tmp)-1] = 0;
-			CreateTooltip(hPartition, tmp, -1);
+			uprintf("Disk ID: 0x%08X\n", DriveLayout->Mbr.Signature);
+			for (i=0; i<DriveLayout->PartitionCount; i++) {
+				if (DriveLayout->PartitionEntry[i].Mbr.PartitionType != PARTITION_ENTRY_UNUSED) {
+					uprintf("Partition %d:\n", DriveLayout->PartitionEntry[i].PartitionNumber);
+					part_type = DriveLayout->PartitionEntry[i].Mbr.PartitionType;
+					uprintf("  Type: %s (0x%02x)\r\n  Size: %s (%lld bytes)\r\n  Start Sector: %d, Boot: %s, Recognized: %s\n",
+						GetPartitionType(part_type), part_type, size_to_hr(DriveLayout->PartitionEntry[i].PartitionLength),
+						DriveLayout->PartitionEntry[i].PartitionLength, DriveLayout->PartitionEntry[i].Mbr.HiddenSectors,
+						DriveLayout->PartitionEntry[i].Mbr.BootIndicator?"Yes":"No",
+						DriveLayout->PartitionEntry[i].Mbr.RecognizedPartition?"Yes":"No");
+				}
+			}
 			break;
 		case PARTITION_STYLE_GPT:
+			SelectedDrive.PartitionType = PT_GPT;
 			uprintf("Partition type: GPT, NB Partitions: %d\n", DriveLayout->PartitionCount);
+			uprintf("Disk GUID: %s\n", GuidToString(&DriveLayout->Gpt.DiskId));
+			uprintf("Max parts: %d, Start Offset: %lld, Usable = %lld bytes\n",
+				DriveLayout->Gpt.MaxPartitionCount, DriveLayout->Gpt.StartingUsableOffset.QuadPart, DriveLayout->Gpt.UsableLength.QuadPart);
+			for (i=0; i<DriveLayout->PartitionCount; i++) {
+				nb_partitions++;
+				tmp[0] = 0;
+				wchar_to_utf8_no_alloc(DriveLayout->PartitionEntry[i].Gpt.Name, tmp, sizeof(tmp));
+				uprintf("Partition %d:\r\n  Type: %s\r\n  Name: '%s'\n", DriveLayout->PartitionEntry[i].PartitionNumber,
+					GuidToString(&DriveLayout->PartitionEntry[i].Gpt.PartitionType), tmp);
+				uprintf("  ID: %s\r\n  Size: %s (%lld bytes)\r\n  Start Sector: %lld, Attributes: 0x%016llX\n",
+					GuidToString(&DriveLayout->PartitionEntry[i].Gpt.PartitionId), size_to_hr(DriveLayout->PartitionEntry[i].PartitionLength),
+					DriveLayout->PartitionEntry[i].PartitionLength, DriveLayout->PartitionEntry[i].StartingOffset.QuadPart / DiskGeometry->Geometry.BytesPerSector,
+					DriveLayout->PartitionEntry[i].Gpt.Attributes);
+			}
 			break;
 		default:
+			SelectedDrive.PartitionType = PT_MBR;
 			uprintf("Partition type: RAW\n");
 			break;
 		}
@@ -472,8 +490,8 @@ static void SetFSFromISO(void)
 		fs_mask |= 1<<fs;
 	}
 
-	// Syslinux has precedence over bootmgr
-	if (iso_report.has_isolinux) {
+	// Syslinux and EFI have precedence over bootmgr
+	if ((iso_report.has_isolinux) || (iso_report.has_efi)) {
 		if (fs_mask & (1<<FS_FAT32)) {
 			selected_fs = FS_FAT32;
 		} else if (fs_mask & (1<<FS_FAT16)) {
@@ -529,11 +547,11 @@ static BOOL PopulateProperties(int ComboIndex)
 {
 	double HumanReadableSize;
 	char capacity[64];
-	static char *suffix[] = { "B", "KB", "MB", "GB", "TB", "PB"};
+	static char* suffix[] = { "B", "KB", "MB", "GB", "TB", "PB"};
 	char no_label[] = STR_NO_LABEL;
-	int i, fs;
+	int i, j, fs;
 
-	IGNORE_RETVAL(ComboBox_ResetContent(hPartition));
+	IGNORE_RETVAL(ComboBox_ResetContent(hPartitionScheme));
 	IGNORE_RETVAL(ComboBox_ResetContent(hFileSystem));
 	IGNORE_RETVAL(ComboBox_ResetContent(hClusterSize));
 	EnableWindow(GetDlgItem(hMainDialog, IDC_START), FALSE);
@@ -554,12 +572,17 @@ static BOOL PopulateProperties(int ComboIndex)
 	for (i=1; i<ARRAYSIZE(suffix); i++) {
 		HumanReadableSize /= 1024.0;
 		if (HumanReadableSize < 512.0) {
-			safe_sprintf(capacity, sizeof(capacity), "MBR (1 Partition of %0.2f %s)", HumanReadableSize, suffix[i]);
+			for (j=0; j<PT_MAX; j++) {
+				safe_sprintf(capacity, sizeof(capacity), "%s (1 Partition of %0.2f %s)",
+					PartitionSchemeName[j], HumanReadableSize, suffix[i]);
+				IGNORE_RETVAL(ComboBox_SetItemData(hPartitionScheme, ComboBox_AddStringU(hPartitionScheme, capacity), j));
+			}
 			break;
 		}
 	}
-	IGNORE_RETVAL(ComboBox_AddStringU(hPartition, capacity));
-	IGNORE_RETVAL(ComboBox_SetCurSel(hPartition, 0));
+	if (i >= ARRAYSIZE(suffix))
+		uprintf("Could not populate partition scheme data\n");
+	IGNORE_RETVAL(ComboBox_SetCurSel(hPartitionScheme, SelectedDrive.PartitionType));
 	CreateTooltip(hDeviceList, DriveID.Table[ComboIndex], -1);
 
 	// Set a proposed label according to the size (eg: "256MB", "8GB")
@@ -604,68 +627,131 @@ typedef struct _DRIVE_LAYOUT_INFORMATION_EX4 {
 /*
  * Create a partition table
  */
+// See http://technet.microsoft.com/en-us/library/cc739412.aspx for some background info
+#if !defined(PARTITION_BASIC_DATA_GUID)
+const GUID PARTITION_BASIC_DATA_GUID = { 0xebd0a0a2, 0xb9e5, 0x4433, {0x87, 0xc0, 0x68, 0xb6, 0xb7, 0x26, 0x99, 0xc7} };
+#endif
 BOOL CreatePartition(HANDLE hDrive)
 {
+	CREATE_DISK CreateDisk = {PARTITION_STYLE_RAW, {0}};
 	DRIVE_LAYOUT_INFORMATION_EX4 DriveLayoutEx = {0};
 	BOOL r;
 	DWORD size;
-	LONGLONG sector_size;
+	LONGLONG size_in_sectors;
+	int pt = (int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme));
 
-	PrintStatus(0, TRUE, "Partitioning...");
-	DriveLayoutEx.PartitionStyle = PARTITION_STYLE_MBR;
-	DriveLayoutEx.PartitionCount = 4;	// Must be multiple of 4 for MBR
-	DriveLayoutEx.Type.Mbr.Signature = GetTickCount();
-	DriveLayoutEx.PartitionEntry[0].PartitionStyle = PARTITION_STYLE_MBR;
-	// TODO: CHS fixup (32 sectors/track) through a cheat mode, if requested
-	// NB: disk geometry is computed by BIOS & co. by finding a match between LBA and CHS value of first partition
-	//     ms-sys's write_partition_number_of_heads() and write_partition_start_sector_number() can be used if needed
+	PrintStatus(0, TRUE, "Partitioning (%s)...",  PartitionSchemeName[pt]);
 
-	DriveLayoutEx.PartitionEntry[0].StartingOffset.QuadPart = 
-		SelectedDrive.Geometry.BytesPerSector * SelectedDrive.Geometry.SectorsPerTrack;
-	sector_size = (SelectedDrive.DiskSize - DriveLayoutEx.PartitionEntry[0].StartingOffset.QuadPart) / SelectedDrive.Geometry.BytesPerSector;
-	// Align on sector boundary if the extra part option is checked
-	if (IsChecked(IDC_EXTRA_PARTITION)) {
-		sector_size = ((sector_size / SelectedDrive.Geometry.SectorsPerTrack)-1) * SelectedDrive.Geometry.SectorsPerTrack;
-		if (sector_size <= 0) return FALSE;
+	if ((pt == PT_GPT) || (!IsChecked(IDC_EXTRA_PARTITION))) {
+		// Go with the MS 1 MB wastage at the beginning...
+		DriveLayoutEx.PartitionEntry[0].StartingOffset.QuadPart = 1024*1024;
+	} else {
+		// Align on Cylinder
+		DriveLayoutEx.PartitionEntry[0].StartingOffset.QuadPart = 
+			SelectedDrive.Geometry.BytesPerSector * SelectedDrive.Geometry.SectorsPerTrack;
 	}
-	DriveLayoutEx.PartitionEntry[0].PartitionLength.QuadPart = sector_size * SelectedDrive.Geometry.BytesPerSector;
-	DriveLayoutEx.PartitionEntry[0].PartitionNumber = 1;
-	DriveLayoutEx.PartitionEntry[0].RewritePartition = TRUE;
-	DriveLayoutEx.PartitionEntry[0].Mbr.HiddenSectors = SelectedDrive.Geometry.SectorsPerTrack;
-	switch (ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem))) {
-	case FS_FAT16:
-		DriveLayoutEx.PartitionEntry[0].Mbr.PartitionType = 0x0e;	// FAT16 LBA
+	size_in_sectors = (SelectedDrive.DiskSize - DriveLayoutEx.PartitionEntry[0].StartingOffset.QuadPart) / SelectedDrive.Geometry.BytesPerSector;
+
+	switch (pt) {
+	case PT_MBR:
+		CreateDisk.PartitionStyle = PARTITION_STYLE_MBR;
+		CreateDisk.Mbr.Signature = GetTickCount();
+
+		DriveLayoutEx.PartitionStyle = PARTITION_STYLE_MBR;
+		DriveLayoutEx.PartitionCount = 4;	// Must be multiple of 4 for MBR
+		DriveLayoutEx.Type.Mbr.Signature = CreateDisk.Mbr.Signature;
+		DriveLayoutEx.PartitionEntry[0].PartitionStyle = PARTITION_STYLE_MBR;
+		// TODO: CHS fixup (32 sectors/track) through a cheat mode, if requested
+		// NB: disk geometry is computed by BIOS & co. by finding a match between LBA and CHS value of first partition
+		//     ms-sys's write_partition_number_of_heads() and write_partition_start_sector_number() can be used if needed
+
+		// Align on sector boundary if the extra part option is checked
+		if (IsChecked(IDC_EXTRA_PARTITION)) {
+			size_in_sectors = ((size_in_sectors / SelectedDrive.Geometry.SectorsPerTrack)-1) * SelectedDrive.Geometry.SectorsPerTrack;
+			if (size_in_sectors <= 0)
+				return FALSE;
+		}
 		break;
-	case FS_NTFS:
-	case FS_EXFAT:
-		DriveLayoutEx.PartitionEntry[0].Mbr.PartitionType = 0x07;	// NTFS
-		break;
-	case FS_FAT32:
-		DriveLayoutEx.PartitionEntry[0].Mbr.PartitionType = 0x0c;	// FAT32 LBA
+	case PT_GPT:
+		CreateDisk.PartitionStyle = PARTITION_STYLE_GPT;
+		IGNORE_RETVAL(CoCreateGuid(&CreateDisk.Gpt.DiskId));
+		CreateDisk.Gpt.MaxPartitionCount = MAX_GPT_PARTITIONS;
+
+		DriveLayoutEx.PartitionStyle = PARTITION_STYLE_GPT;
+		DriveLayoutEx.PartitionCount = 1;
+		// At the very least, a GPT disk has atv least 34 reserved (512 bytes) blocks at the beginning
+		// and 33 at the end.
+		DriveLayoutEx.Type.Gpt.StartingUsableOffset.QuadPart = 34*512;
+		DriveLayoutEx.Type.Gpt.UsableLength.QuadPart = SelectedDrive.DiskSize - (34+33)*512;
+		DriveLayoutEx.Type.Gpt.MaxPartitionCount = MAX_GPT_PARTITIONS;
+		DriveLayoutEx.Type.Gpt.DiskId = CreateDisk.Gpt.DiskId;
+		DriveLayoutEx.PartitionEntry[0].PartitionStyle = PARTITION_STYLE_GPT;
+
+		size_in_sectors -= 33;	// Need 33 sectors at the end for secondary GPT
 		break;
 	default:
-		uprintf("Unsupported file system\n");
+		break;
+	}
+
+	DriveLayoutEx.PartitionEntry[0].PartitionLength.QuadPart = size_in_sectors * SelectedDrive.Geometry.BytesPerSector;
+	DriveLayoutEx.PartitionEntry[0].PartitionNumber = 1;
+	DriveLayoutEx.PartitionEntry[0].RewritePartition = TRUE;
+
+	switch (pt) {
+	case PT_MBR:
+		DriveLayoutEx.PartitionEntry[0].Mbr.HiddenSectors = SelectedDrive.Geometry.SectorsPerTrack;
+		switch (ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem))) {
+		case FS_FAT16:
+			DriveLayoutEx.PartitionEntry[0].Mbr.PartitionType = 0x0e;	// FAT16 LBA
+			break;
+		case FS_NTFS:
+		case FS_EXFAT:
+			DriveLayoutEx.PartitionEntry[0].Mbr.PartitionType = 0x07;	// NTFS
+			break;
+		case FS_FAT32:
+			DriveLayoutEx.PartitionEntry[0].Mbr.PartitionType = 0x0c;	// FAT32 LBA
+			break;
+		default:
+			uprintf("Unsupported file system\n");
+			return FALSE;
+		}
+		// Create an extra partition on request - can improve BIOS detection as HDD for older BIOSes
+		if (IsChecked(IDC_EXTRA_PARTITION)) {
+			DriveLayoutEx.PartitionEntry[1].PartitionStyle = PARTITION_STYLE_MBR;
+			// Should end on a sector boundary
+			DriveLayoutEx.PartitionEntry[1].StartingOffset.QuadPart = DriveLayoutEx.PartitionEntry[0].StartingOffset.QuadPart +
+				DriveLayoutEx.PartitionEntry[0].PartitionLength.QuadPart;
+			DriveLayoutEx.PartitionEntry[1].PartitionLength.QuadPart = SelectedDrive.Geometry.SectorsPerTrack*SelectedDrive.Geometry.BytesPerSector;
+			DriveLayoutEx.PartitionEntry[1].PartitionNumber = 2;
+			DriveLayoutEx.PartitionEntry[1].RewritePartition = TRUE;
+			DriveLayoutEx.PartitionEntry[1].Mbr.HiddenSectors = SelectedDrive.Geometry.SectorsPerTrack*SelectedDrive.Geometry.BytesPerSector;
+			DriveLayoutEx.PartitionEntry[1].Mbr.PartitionType = DriveLayoutEx.PartitionEntry[0].Mbr.PartitionType + 0x10;	// Hidden whatever
+		}
+		// For the remaining partitions, PartitionStyle & PartitionType have already
+		// been zeroed => already set to MBR/unused
+		break;
+	case PT_GPT:
+		DriveLayoutEx.PartitionEntry[0].Gpt.PartitionType = PARTITION_BASIC_DATA_GUID;
+		wcscpy(DriveLayoutEx.PartitionEntry[0].Gpt.Name, L"Microsoft Basic Data");
+		IGNORE_RETVAL(CoCreateGuid(&DriveLayoutEx.PartitionEntry[0].Gpt.PartitionId));
+		break;
+	default:
+		break;
+	}
+
+	// If you don't call IOCTL_DISK_CREATE_DISK, the next call will fail
+	size = sizeof(CreateDisk);
+	r = DeviceIoControl(hDrive, IOCTL_DISK_CREATE_DISK,
+			(BYTE*)&CreateDisk, size, NULL, 0, &size, NULL );
+	if (!r) {
+		uprintf("IOCTL_DISK_CREATE_DISK failed: %s\n", WindowsErrorString());
+		safe_closehandle(hDrive);
 		return FALSE;
 	}
 
-	// Create an extra partition on request - can improve BIOS detection as HDD for older BIOSes
-	if (IsChecked(IDC_EXTRA_PARTITION)) {
-		DriveLayoutEx.PartitionEntry[1].PartitionStyle = PARTITION_STYLE_MBR;
-		// Should end on a sector boundary
-		DriveLayoutEx.PartitionEntry[1].StartingOffset.QuadPart = DriveLayoutEx.PartitionEntry[0].StartingOffset.QuadPart +
-			DriveLayoutEx.PartitionEntry[0].PartitionLength.QuadPart;
-		DriveLayoutEx.PartitionEntry[1].PartitionLength.QuadPart = SelectedDrive.Geometry.SectorsPerTrack*SelectedDrive.Geometry.BytesPerSector;
-		DriveLayoutEx.PartitionEntry[1].PartitionNumber = 2;
-		DriveLayoutEx.PartitionEntry[1].RewritePartition = TRUE;
-		DriveLayoutEx.PartitionEntry[1].Mbr.HiddenSectors = SelectedDrive.Geometry.SectorsPerTrack*SelectedDrive.Geometry.BytesPerSector;
-		DriveLayoutEx.PartitionEntry[1].Mbr.PartitionType = DriveLayoutEx.PartitionEntry[0].Mbr.PartitionType + 0x10;	// Hidden whatever
-	}
-
-	// For the remaining partitions, PartitionStyle & PartitionType have already
-	// been zeroed => set to MBR/unused
-
-	r = DeviceIoControl(hDrive, IOCTL_DISK_SET_DRIVE_LAYOUT_EX, 
-			(BYTE*)&DriveLayoutEx, sizeof(DriveLayoutEx), NULL, 0, &size, NULL );
+	size = sizeof(DriveLayoutEx) - ((pt == PT_GPT)?(3*sizeof(PARTITION_INFORMATION_EX)):0);
+	r = DeviceIoControl(hDrive, IOCTL_DISK_SET_DRIVE_LAYOUT_EX,
+			(BYTE*)&DriveLayoutEx, size, NULL, 0, &size, NULL );
 	if (!r) {
 		uprintf("IOCTL_DISK_SET_DRIVE_LAYOUT_EX failed: %s\n", WindowsErrorString());
 		safe_closehandle(hDrive);
@@ -1072,7 +1158,7 @@ static void EnableControls(BOOL bEnable)
 	int fs;
 
 	EnableWindow(GetDlgItem(hMainDialog, IDC_DEVICE), bEnable);
-	EnableWindow(GetDlgItem(hMainDialog, IDC_PARTITION), bEnable);
+	EnableWindow(GetDlgItem(hMainDialog, IDC_PARTITION_SCHEME), bEnable);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_FILESYSTEM), bEnable);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_CLUSTERSIZE), bEnable);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_LABEL), bEnable);
@@ -1268,8 +1354,8 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 		safe_free(iso_path);
 		goto out;
 	}
-	uprintf("ISO label: '%s'\r\n  Size: %lld bytes\r\n  Has a >4GB file: %s\r\n  Uses Bootmgr: %s\r\n  Uses WinPE: %s%s\r\n  Uses isolinux: %s\n",
-		iso_report.label, iso_report.projected_size, iso_report.has_4GB_file?"Yes":"No", iso_report.has_bootmgr?"Yes":"No",
+	uprintf("ISO label: '%s'\r\n  Size: %lld bytes\r\n  Has a >4GB file: %s\r\n  Uses EFI: %s\r\n  Uses Bootmgr: %s\r\n  Uses WinPE: %s%s\r\n  Uses isolinux: %s\n",
+		iso_report.label, iso_report.projected_size, iso_report.has_4GB_file?"Yes":"No",  iso_report.has_efi?"Yes":"No", iso_report.has_bootmgr?"Yes":"No",
 		IS_WINPE(iso_report.winpe)?"Yes":"No", (iso_report.uses_minint)?" (with /minint)":"", iso_report.has_isolinux?"Yes":"No");
 	if (iso_report.has_isolinux) {
 		for (i=0; i<NB_OLD_C32; i++) {
@@ -1404,7 +1490,7 @@ void InitDialog(HWND hDlg)
 	// Quite a burden to carry around as parameters
 	hMainDialog = hDlg;
 	hDeviceList = GetDlgItem(hDlg, IDC_DEVICE);
-	hPartition = GetDlgItem(hDlg, IDC_PARTITION);
+	hPartitionScheme = GetDlgItem(hDlg, IDC_PARTITION_SCHEME);
 	hFileSystem = GetDlgItem(hDlg, IDC_FILESYSTEM);
 	hClusterSize = GetDlgItem(hDlg, IDC_CLUSTERSIZE);
 	hLabel = GetDlgItem(hDlg, IDC_LABEL);
@@ -1549,7 +1635,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	DRAWITEMSTRUCT* pDI;
 	POINT Point;
 	RECT DialogRect, DesktopRect;
-	int nDeviceIndex, fs, i, nWidth, nHeight;
+	int nDeviceIndex, fs, pt, i, nWidth, nHeight;
 	static DWORD DeviceNum = 0;
 	wchar_t wtmp[128], wstr[MAX_PATH];
 	static UINT uDOSChecked = BST_CHECKED, uQFChecked;
@@ -1694,10 +1780,12 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				break;
 			}
 			break;
+		case IDC_PARTITION_SCHEME:
 		case IDC_FILESYSTEM:
 			if (HIWORD(wParam) != CBN_SELCHANGE)
 				break;
 			fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
+			pt = (int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme));
 			SetClusterSizes(fs);
 			// Disable/restore the quick format control depending on large FAT32
 			if ((fs == FS_FAT32) && (SelectedDrive.DiskSize > LARGE_FAT32_SIZE)) {
@@ -1722,7 +1810,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				}
 				break;
 			}
-			if (fs == FS_EXFAT) {
+			if ((fs == FS_EXFAT) || ((pt == PT_GPT) && (fs == FS_NTFS)))  {
 				if (IsWindowEnabled(hDOS)) {
 					// unlikely to be supported by BIOSes => don't bother
 					IGNORE_RETVAL(ComboBox_SetCurSel(hDOSType, 0));
@@ -1734,13 +1822,13 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				break;
 			}
 			IGNORE_RETVAL(ComboBox_ResetContent(hDOSType));
-			if ((fs == FS_FAT16) || (fs == FS_FAT32)) {
+			if ((pt == PT_MBR) && ((fs == FS_FAT16) || (fs == FS_FAT32))) {
 				IGNORE_RETVAL(ComboBox_SetItemData(hDOSType, ComboBox_AddStringU(hDOSType, "MS-DOS"), DT_WINME));
 				IGNORE_RETVAL(ComboBox_SetItemData(hDOSType, ComboBox_AddStringU(hDOSType, "FreeDOS"), DT_FREEDOS));
 			}
 			IGNORE_RETVAL(ComboBox_SetItemData(hDOSType, ComboBox_AddStringU(hDOSType, "ISO Image"), DT_ISO));
 			// If needed (advanced mode) also append a Syslinux option
-			if ( ((fs == FS_FAT16) || (fs == FS_FAT32)) && (advanced_mode) )
+			if ( (pt == PT_MBR) && (((fs == FS_FAT16) || (fs == FS_FAT32)) && (advanced_mode)) )
 				IGNORE_RETVAL(ComboBox_SetItemData(hDOSType, ComboBox_AddStringU(hDOSType, "SysLinux"), DT_SYSLINUX));
 			if ( ((!advanced_mode) && (selection_default == DT_SYSLINUX)) ) {
 				selection_default = DT_FREEDOS;
@@ -1833,7 +1921,13 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 							break;
 						}
 						fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
-						if ((fs == FS_NTFS) && (!iso_report.has_bootmgr) && (!IS_WINPE(iso_report.winpe))) {
+						pt = (int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme));
+						if ((pt == PT_GPT) && ((!iso_report.has_efi) || ((fs > FS_FAT32)))) {
+							MessageBoxA(hMainDialog, "When using GPT, only EFI bootable ISOs are supported. "
+								"Please select an EFI bootable ISO or change the Partition Scheme to MBR.", "Unsupported GPT ISO...", MB_OK|MB_ICONERROR);
+							break;
+						}
+						else if ((fs == FS_NTFS) && (!iso_report.has_bootmgr) && (!IS_WINPE(iso_report.winpe))) {
 							if (iso_report.has_isolinux) {
 								MessageBoxA(hMainDialog, "Only FAT32 is supported for this type of ISO. "
 									"Please revert the filesystem back from NTFS to FAT32.", "Unsupported filesystem...", MB_OK|MB_ICONERROR);
@@ -1842,7 +1936,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 									"images can currently be used with NTFS.", "Unsupported ISO...", MB_OK|MB_ICONERROR);
 							}
 							break;
-						} else if (((fs == FS_FAT16)||(fs == FS_FAT32)) && (!iso_report.has_isolinux)) {
+						} else if (((fs == FS_FAT16)||(fs == FS_FAT32)) && ((!iso_report.has_isolinux) && (pt != PT_GPT))) {
 							MessageBoxA(hMainDialog, "Only 'isolinux' based ISO "
 								"images can currently be used with FAT.", "Unsupported ISO...", MB_OK|MB_ICONERROR);
 							break;

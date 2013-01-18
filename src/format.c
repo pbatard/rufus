@@ -2,7 +2,7 @@
  * Rufus: The Reliable USB Formatting Utility
  * Formatting function calls
  * Copyright (c) 2007-2009 Tom Thornhill/Ridgecrop
- * Copyright (c) 2011-2012 Pete Batard <pete@akeo.ie>
+ * Copyright (c) 2011-2013 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -743,20 +743,29 @@ static BOOL AnalyzePBR(HANDLE hLogicalVolume)
 	return TRUE;
 }
 
-static BOOL ClearMBR(HANDLE hPhysicalDrive)
+static BOOL ClearMBRGPT(HANDLE hPhysicalDrive, LONGLONG DiskSize, DWORD SectorSize)
 {
 	BOOL r = FALSE;
-	// Clearing the first 64K seems to help with reluctant access to large drive
-	size_t SectorSize = 65536;
+	uint64_t i, last_sector = DiskSize/SectorSize;
 	unsigned char* pBuf = (unsigned char*) calloc(SectorSize, 1);
 
-	PrintStatus(0, TRUE, "Clearing MBR...");
+	PrintStatus(0, TRUE, "Clearing MBR & GPT structures...");
 	if (pBuf == NULL) {
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_NOT_ENOUGH_MEMORY;
 		goto out;
 	}
-	if ((IS_ERROR(FormatStatus)) || (write_sectors(hPhysicalDrive, SectorSize, 0, 1, pBuf) != SectorSize)) {
-		goto out;
+	// http://en.wikipedia.org/wiki/GUID_Partition_Table tells us we should clear 34 sectors at the
+	// beginning and 33 at the end. We bump these values to MAX_SECTORS_TO_CLEAR each end to help
+	// with reluctant access to large drive.
+	for (i=0; i<MAX_SECTORS_TO_CLEAR; i++) {
+		if ((IS_ERROR(FormatStatus)) || (write_sectors(hPhysicalDrive, SectorSize, i, 1, pBuf) != SectorSize)) {
+			goto out;
+		}
+	}
+	for (i=last_sector-MAX_SECTORS_TO_CLEAR; i<last_sector; i++) {
+		if ((IS_ERROR(FormatStatus)) || (write_sectors(hPhysicalDrive, SectorSize, i, 1, pBuf) != SectorSize)) {
+			goto out;
+		}
 	}
 	r = TRUE;
 
@@ -1104,6 +1113,7 @@ DWORD WINAPI FormatThread(LPVOID param)
 	int r;
 	int fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
 	int dt = (int)ComboBox_GetItemData(hDOSType, ComboBox_GetCurSel(hDOSType));
+	int pt = (int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme));
 	BOOL ret;
 	DWORD num = (DWORD)(uintptr_t)param;
 	HANDLE hPhysicalDrive = INVALID_HANDLE_VALUE;
@@ -1161,7 +1171,7 @@ DWORD WINAPI FormatThread(LPVOID param)
 				if (!FormatStatus)
 					FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|
 						APPERR(ERROR_BADBLOCKS_FAILURE);
-				ClearMBR(hPhysicalDrive);
+				ClearMBRGPT(hPhysicalDrive, SelectedDrive.DiskSize, SelectedDrive.Geometry.BytesPerSector);
 				fclose(log_fd);
 				_unlink(logfile);
 				goto out;
@@ -1198,14 +1208,14 @@ DWORD WINAPI FormatThread(LPVOID param)
 	// Close the (unmounted) volume before formatting, but keep the lock
 	safe_closehandle(hLogicalVolume);
 
-	// Especially after destructive badblocks test, you must zero the MBR completely
-	// before repartitioning. Else, all kind of bad things happen
-	if (!ClearMBR(hPhysicalDrive)) {
-		uprintf("unable to zero MBR\n");
+	// Especially after destructive badblocks test, you must zero the MBR/GPT completely
+	// before repartitioning. Else, all kind of bad things can happen.
+	if (!ClearMBRGPT(hPhysicalDrive, SelectedDrive.DiskSize, SelectedDrive.Geometry.BytesPerSector)) {
+		uprintf("unable to zero MBR/GPT\n");
 		if (!FormatStatus)
 			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_WRITE_FAULT;
 		goto out;
-	} 
+	}
 	UpdateProgress(OP_ZERO_MBR, -1.0f);
 
 	if (!CreatePartition(hPhysicalDrive)) {
@@ -1227,16 +1237,25 @@ DWORD WINAPI FormatThread(LPVOID param)
 		goto out;
 	}
 
-	PrintStatus(0, TRUE, "Writing master boot record...");
-	if (!WriteMBR(hPhysicalDrive)) {
-		if (!FormatStatus)
-			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_WRITE_FAULT;
-		goto out;
+	if (pt == PT_MBR) {
+		PrintStatus(0, TRUE, "Writing master boot record...");
+		if (!WriteMBR(hPhysicalDrive)) {
+			if (!FormatStatus)
+				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_WRITE_FAULT;
+			goto out;
+		}
+		UpdateProgress(OP_FIX_MBR, -1.0f);
 	}
-	UpdateProgress(OP_FIX_MBR, -1.0f);
 
 	if (IsChecked(IDC_DOS)) {
-		if ((dt == DT_WINME) || (dt == DT_FREEDOS) || ((dt == DT_ISO) && (fs == FS_NTFS))) {
+		if (pt == PT_GPT) {
+			// For once, no need to do anything - just check our sanity
+			if ( (dt != DT_ISO) || (!iso_report.has_efi) || (fs > FS_FAT32) ) {
+				uprintf("Spock gone crazy error!\n");
+				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_INSTALL_FAILURE;
+				goto out;
+			}
+		} else if ((dt == DT_WINME) || (dt == DT_FREEDOS) || ((dt == DT_ISO) && (fs == FS_NTFS))) {
 			// We still have a lock, which we need to modify the volume boot record 
 			// => no need to reacquire the lock...
 			hLogicalVolume = GetDriveHandle(num, drive_name, TRUE, FALSE);
@@ -1292,7 +1311,7 @@ DWORD WINAPI FormatThread(LPVOID param)
 					goto out;
 				}
 			}
-			if (IS_WINPE(iso_report.winpe)) {
+			if ( (pt == PT_MBR) && (IS_WINPE(iso_report.winpe)) ) {
 				// Apply WinPe fixup
 				if (!SetupWinPE(drive_name[0]))
 					FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_PATCH);
