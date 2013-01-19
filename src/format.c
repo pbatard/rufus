@@ -1122,6 +1122,8 @@ DWORD WINAPI FormatThread(LPVOID param)
 	char drive_name[] = "?:\\";
 	char bb_msg[512];
 	char logfile[MAX_PATH], *userdir;
+	char wim_image[] = "?:\\sources\\install.wim";
+	char efi_dst[] = "?:\\efi\\boot\\bootx64.efi";
 	FILE* log_fd;
 
 	hPhysicalDrive = GetDriveHandle(num, NULL, TRUE, TRUE);
@@ -1250,7 +1252,7 @@ DWORD WINAPI FormatThread(LPVOID param)
 	if (IsChecked(IDC_DOS)) {
 		if (pt == PT_GPT) {
 			// For once, no need to do anything - just check our sanity
-			if ( (dt != DT_ISO) || (!iso_report.has_efi) || (fs > FS_FAT32) ) {
+			if ( (dt != DT_ISO) || (!IS_EFI(iso_report)) || (fs > FS_FAT32) ) {
 				uprintf("Spock gone crazy error!\n");
 				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_INSTALL_FAILURE;
 				goto out;
@@ -1309,6 +1311,23 @@ DWORD WINAPI FormatThread(LPVOID param)
 					if (!FormatStatus)
 						FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANNOT_COPY;
 					goto out;
+				}
+				if ((pt == PT_GPT) && (!iso_report.has_efi) && (iso_report.has_win7_efi)) {
+					// TODO: progress
+					PrintStatus(0, TRUE, "Win7 EFI boot setup (this may take a while)...");
+					wim_image[0] = drive_name[0];
+					efi_dst[0] = drive_name[0];
+					efi_dst[sizeof(efi_dst) - sizeof("\\bootx64.efi")] = 0;
+					if (!CreateDirectoryA(efi_dst, 0)) {
+						uprintf("Could not create directory '%s': %s\n", WindowsErrorString());
+						FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_PATCH);
+					} else {
+						efi_dst[sizeof(efi_dst) - sizeof("\\bootx64.efi")] = '\\';
+						if (!WIMExtractFile(wim_image, 1, "Windows\\Boot\\EFI\\bootmgfw.efi", efi_dst)) {
+							uprintf("Failed to setup Win7 EFI boot\n");
+							FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_PATCH);
+						}
+					}
 				}
 			}
 			if ( (pt == PT_MBR) && (IS_WINPE(iso_report.winpe)) ) {

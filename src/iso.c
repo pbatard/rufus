@@ -55,7 +55,7 @@ RUFUS_ISO_REPORT iso_report;
 int64_t iso_blocking_status = -1;
 #define ISO_BLOCKING(x) do {x; iso_blocking_status++; } while(0)
 static const char* psz_extract_dir;
-static const char* bootmgr_name = "bootmgr";
+static const char* bootmgr_efi_name = "bootmgr.efi";
 static const char* ldlinux_name = "ldlinux.sys";
 static const char* efi_dirname = "/efi/boot";
 static const char* isolinux_name[] = { "isolinux.cfg", "syslinux.cfg", "extlinux.conf"};
@@ -123,9 +123,14 @@ static __inline BOOL check_iso_props(const char* psz_dirname, BOOL* is_syslinux_
 	}
 
 	if (scan_only) {
-		// Check for a "bootmgr" file in root (psz_path = "")
-		if ((*psz_dirname == 0) && (safe_stricmp(psz_basename, bootmgr_name) == 0))
-			iso_report.has_bootmgr = TRUE;
+		// Check for a "bootmgr(.efi)" file in root (psz_path = "")
+		if (*psz_dirname == 0) {
+			if (safe_strnicmp(psz_basename, bootmgr_efi_name, sizeof(bootmgr_efi_name)-4) == 0)
+				iso_report.has_bootmgr = TRUE;
+			if (safe_stricmp(psz_basename, bootmgr_efi_name) == 0) {
+				iso_report.has_win7_efi = TRUE;
+			}
+		}
 
 		// Check for the EFI boot directory
 		if (safe_stricmp(psz_dirname, efi_dirname) == 0)

@@ -41,4 +41,5 @@ SOURCES=rufus.c          \
         badblocks.c      \
         drive.c          \
         syslinux.c       \
+        vhd.c            \
         rufus.rc

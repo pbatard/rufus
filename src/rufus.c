@@ -491,7 +491,7 @@ static void SetFSFromISO(void)
 	}
 
 	// Syslinux and EFI have precedence over bootmgr
-	if ((iso_report.has_isolinux) || (iso_report.has_efi)) {
+	if ((iso_report.has_isolinux) || (IS_EFI(iso_report))) {
 		if (fs_mask & (1<<FS_FAT32)) {
 			selected_fs = FS_FAT32;
 		} else if (fs_mask & (1<<FS_FAT16)) {
@@ -633,7 +633,7 @@ const GUID PARTITION_BASIC_DATA_GUID = { 0xebd0a0a2, 0xb9e5, 0x4433, {0x87, 0xc0
 #endif
 BOOL CreatePartition(HANDLE hDrive)
 {
-	CREATE_DISK CreateDisk = {PARTITION_STYLE_RAW, {0}};
+	CREATE_DISK CreateDisk = {PARTITION_STYLE_RAW, {{0}}};
 	DRIVE_LAYOUT_INFORMATION_EX4 DriveLayoutEx = {0};
 	BOOL r;
 	DWORD size;
@@ -1354,8 +1354,10 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 		safe_free(iso_path);
 		goto out;
 	}
-	uprintf("ISO label: '%s'\r\n  Size: %lld bytes\r\n  Has a >4GB file: %s\r\n  Uses EFI: %s\r\n  Uses Bootmgr: %s\r\n  Uses WinPE: %s%s\r\n  Uses isolinux: %s\n",
-		iso_report.label, iso_report.projected_size, iso_report.has_4GB_file?"Yes":"No",  iso_report.has_efi?"Yes":"No", iso_report.has_bootmgr?"Yes":"No",
+	// TODO: 4GB and UEFI = BAD!!!
+	uprintf("ISO label: '%s'\r\n  Size: %lld bytes\r\n  Has a >4GB file: %s\r\n  Uses EFI: %s%s\r\n  Uses Bootmgr: %s\r\n  Uses WinPE: %s%s\r\n  Uses isolinux: %s\n",
+		iso_report.label, iso_report.projected_size, iso_report.has_4GB_file?"Yes":"No", (iso_report.has_efi || iso_report.has_win7_efi)?"Yes":"No", 
+		(iso_report.has_win7_efi && (!iso_report.has_efi))?" (win7_x64)":"", iso_report.has_bootmgr?"Yes":"No",
 		IS_WINPE(iso_report.winpe)?"Yes":"No", (iso_report.uses_minint)?" (with /minint)":"", iso_report.has_isolinux?"Yes":"No");
 	if (iso_report.has_isolinux) {
 		for (i=0; i<NB_OLD_C32; i++) {
@@ -1922,7 +1924,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 						}
 						fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
 						pt = (int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme));
-						if ((pt == PT_GPT) && ((!iso_report.has_efi) || ((fs > FS_FAT32)))) {
+						if ((pt == PT_GPT) && ((!IS_EFI(iso_report)) || ((fs > FS_FAT32)))) {
 							MessageBoxA(hMainDialog, "When using GPT, only EFI bootable ISOs are supported. "
 								"Please select an EFI bootable ISO or change the Partition Scheme to MBR.", "Unsupported GPT ISO...", MB_OK|MB_ICONERROR);
 							break;
@@ -1937,8 +1939,8 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 							}
 							break;
 						} else if (((fs == FS_FAT16)||(fs == FS_FAT32)) && ((!iso_report.has_isolinux) && (pt != PT_GPT))) {
-							MessageBoxA(hMainDialog, "Only 'isolinux' based ISO "
-								"images can currently be used with FAT.", "Unsupported ISO...", MB_OK|MB_ICONERROR);
+							MessageBoxA(hMainDialog, "Only isolinux or EFI based ISO "
+								"images can currently be used with FAT/FAT32.", "Unsupported ISO...", MB_OK|MB_ICONERROR);
 							break;
 						}
 					}

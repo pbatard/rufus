@@ -181,6 +181,7 @@ typedef struct {
 #define WINPE_MININT    0x2A
 #define WINPE_I386      0x15
 #define IS_WINPE(r)     (((r&WINPE_MININT) == WINPE_MININT)||((r&WINPE_I386) == WINPE_I386))
+#define IS_EFI(r)       ((r.has_efi) || (r.has_win7_efi))
 
 typedef struct {
 	char label[192];		/* 3*64 to account for UTF-8 */
@@ -191,6 +192,7 @@ typedef struct {
 	BOOL has_4GB_file;
 	BOOL has_bootmgr;
 	BOOL has_efi;
+	BOOL has_win7_efi;
 	BOOL has_isolinux;
 	BOOL has_autorun;
 	BOOL has_old_c32[NB_OLD_C32];
@@ -296,6 +298,7 @@ extern char* get_token_data_buffer(const char* token, unsigned int n, const char
 extern char* insert_section_data(const char* filename, const char* section, const char* data, BOOL dos2unix);
 extern char* replace_in_token_data(const char* filename, const char* token, const char* src, const char* rep, BOOL dos2unix);
 extern void parse_update(char* buf, size_t len);
+extern BOOL WIMExtractFile(const char* wim_image, int index, const char* src, const char* dst);
 
 __inline static BOOL UnlockDrive(HANDLE hDrive)
 {

@@ -175,6 +175,7 @@
     <ClCompile Include="..\stdio.c" />
     <ClCompile Include="..\stdlg.c" />
     <ClCompile Include="..\syslinux.c" />
+    <ClCompile Include="..\vhd.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\badblocks.h" />
