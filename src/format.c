@@ -749,7 +749,7 @@ static BOOL ClearMBRGPT(HANDLE hPhysicalDrive, LONGLONG DiskSize, DWORD SectorSi
 	uint64_t i, last_sector = DiskSize/SectorSize;
 	unsigned char* pBuf = (unsigned char*) calloc(SectorSize, 1);
 
-	PrintStatus(0, TRUE, "Clearing MBR & GPT structures...");
+	PrintStatus(0, TRUE, "Clearing MBR/GPT structures...");
 	if (pBuf == NULL) {
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_NOT_ENOUGH_MEMORY;
 		goto out;
@@ -818,7 +818,6 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 
 	// FormatEx rewrites the MBR and removes the LBA attribute of FAT16
 	// and FAT32 partitions - we need to correct this in the MBR
-	// TODO: Something else for bootable GPT
 	buf = (unsigned char*)malloc(SecSize * nSecs);
 	if (buf == NULL) {
 		uprintf("Could not allocate memory for MBR");
@@ -1110,10 +1109,7 @@ static BOOL RemountVolume(char drive_letter)
  */
 DWORD WINAPI FormatThread(LPVOID param)
 {
-	int r;
-	int fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
-	int dt = (int)ComboBox_GetItemData(hDOSType, ComboBox_GetCurSel(hDOSType));
-	int pt = (int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme));
+	int r, pt, bt, fs, dt;
 	BOOL ret;
 	DWORD num = (DWORD)(uintptr_t)param;
 	HANDLE hPhysicalDrive = INVALID_HANDLE_VALUE;
@@ -1125,6 +1121,11 @@ DWORD WINAPI FormatThread(LPVOID param)
 	char wim_image[] = "?:\\sources\\install.wim";
 	char efi_dst[] = "?:\\efi\\boot\\bootx64.efi";
 	FILE* log_fd;
+
+	fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
+	dt = (int)ComboBox_GetItemData(hDOSType, ComboBox_GetCurSel(hDOSType));
+	pt = GETPARTTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
+	bt = GETBIOSTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
 
 	hPhysicalDrive = GetDriveHandle(num, NULL, TRUE, TRUE);
 	if (hPhysicalDrive == INVALID_HANDLE_VALUE) {
@@ -1239,7 +1240,7 @@ DWORD WINAPI FormatThread(LPVOID param)
 		goto out;
 	}
 
-	if (pt == PT_MBR) {
+	if (pt == PARTITION_STYLE_MBR) {
 		PrintStatus(0, TRUE, "Writing master boot record...");
 		if (!WriteMBR(hPhysicalDrive)) {
 			if (!FormatStatus)
@@ -1250,7 +1251,7 @@ DWORD WINAPI FormatThread(LPVOID param)
 	}
 
 	if (IsChecked(IDC_DOS)) {
-		if (pt == PT_GPT) {
+		if (bt == BT_UEFI) {
 			// For once, no need to do anything - just check our sanity
 			if ( (dt != DT_ISO) || (!IS_EFI(iso_report)) || (fs > FS_FAT32) ) {
 				uprintf("Spock gone crazy error!\n");
@@ -1312,7 +1313,7 @@ DWORD WINAPI FormatThread(LPVOID param)
 						FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANNOT_COPY;
 					goto out;
 				}
-				if ((pt == PT_GPT) && (!iso_report.has_efi) && (iso_report.has_win7_efi)) {
+				if ((bt == BT_UEFI) && (!iso_report.has_efi) && (iso_report.has_win7_efi)) {
 					// TODO: progress
 					PrintStatus(0, TRUE, "Win7 EFI boot setup (this may take a while)...");
 					wim_image[0] = drive_name[0];
@@ -1323,14 +1324,14 @@ DWORD WINAPI FormatThread(LPVOID param)
 						FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_PATCH);
 					} else {
 						efi_dst[sizeof(efi_dst) - sizeof("\\bootx64.efi")] = '\\';
-						if (!WIMExtractFile(wim_image, 1, "Windows\\Boot\\EFI\\bootmgfw.efi", efi_dst)) {
+						if (!WimExtractFile(wim_image, 1, "Windows\\Boot\\EFI\\bootmgfw.efi", efi_dst)) {
 							uprintf("Failed to setup Win7 EFI boot\n");
 							FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_PATCH);
 						}
 					}
 				}
 			}
-			if ( (pt == PT_MBR) && (IS_WINPE(iso_report.winpe)) ) {
+			if ( (bt == BT_BIOS) && (IS_WINPE(iso_report.winpe)) ) {
 				// Apply WinPe fixup
 				if (!SetupWinPE(drive_name[0]))
 					FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_PATCH);

@@ -57,24 +57,39 @@ static __inline BOOL DeleteRegistryKey(const char* key_name)
 	return ((s == ERROR_SUCCESS) || (s == ERROR_FILE_NOT_FOUND));
 }
 
-/* Read a generic registry key value (create the key if it doesn't exist) */
+/* Read a generic registry key value. If a short key_name is used, assume that it belongs to
+   the application and create the app subkey if required */
 static __inline BOOL _GetRegistryKey(const char* key_name, DWORD reg_type, LPBYTE dest, DWORD dest_size)
 {
 	BOOL r = FALSE;
+	size_t i = 0;
 	LONG s;
 	HKEY hSoftware = NULL, hApp = NULL;
 	DWORD dwDisp, dwType = -1, dwSize = dest_size;
+	char long_key_name[256] = "SOFTWARE\\";
 	memset(dest, 0, dest_size);
 
-	if ( (RegOpenKeyExA(HKEY_CURRENT_USER, "SOFTWARE", 0, KEY_READ|KEY_CREATE_SUB_KEY, &hSoftware) != ERROR_SUCCESS)
-	  || (RegCreateKeyExA(hSoftware, COMPANY_NAME "\\" APPLICATION_NAME, 0, NULL, 0,
-		KEY_SET_VALUE|KEY_QUERY_VALUE|KEY_CREATE_SUB_KEY, NULL, &hApp, &dwDisp) != ERROR_SUCCESS) ) {
+	for (i=safe_strlen(key_name); i>0; i--) {
+		if (key_name[i] == '\\')
+			break;
+	}
+
+	if (i != 0) {
+		safe_strcat(long_key_name, sizeof(long_key_name), key_name);
+		long_key_name[sizeof("SOFTWARE\\") + i-1] = 0;
+		i++;
+		if (RegOpenKeyExA(HKEY_CURRENT_USER, long_key_name, 0, KEY_READ, &hApp) != ERROR_SUCCESS)
+			goto out;
+	} else {
+		if ( (RegOpenKeyExA(HKEY_CURRENT_USER, "SOFTWARE", 0, KEY_READ|KEY_CREATE_SUB_KEY, &hSoftware) != ERROR_SUCCESS)
+			 || (RegCreateKeyExA(hSoftware, COMPANY_NAME "\\" APPLICATION_NAME, 0, NULL, 0,
+				KEY_SET_VALUE|KEY_QUERY_VALUE|KEY_CREATE_SUB_KEY, NULL, &hApp, &dwDisp) != ERROR_SUCCESS) )
 		goto out;
 	}
 
-	s = RegQueryValueExA(hApp, key_name, NULL, &dwType, (LPBYTE)dest, &dwSize);
+	s = RegQueryValueExA(hApp, &key_name[i], NULL, &dwType, (LPBYTE)dest, &dwSize);
 	// No key means default value of 0 or empty string
-	if ((s == ERROR_FILE_NOT_FOUND) || ((s == ERROR_SUCCESS) && (dwType = reg_type) && (dwSize = dest_size))) {
+	if ((s == ERROR_FILE_NOT_FOUND) || ((s == ERROR_SUCCESS) && (dwType = reg_type) && (dwSize > 0))) {
 		r = TRUE;
 	}
 out:

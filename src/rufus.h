@@ -51,6 +51,7 @@
 #define WHITE                       RGB(255,255,255)
 #define SEPARATOR_GREY              RGB(223,223,223)
 #define RUFUS_URL                   "http://rufus.akeo.ie"
+#define SEVENZIP_URL                "http://sourceforge.net/projects/sevenzip/files/7-Zip/"
 #define IGNORE_RETVAL(expr)         do { (void)(expr); } while(0)
 #ifndef ARRAYSIZE
 #define ARRAYSIZE(A)                (sizeof(A)/sizeof((A)[0]))
@@ -150,11 +151,14 @@ enum dos_type {
 	DT_MAX
 };
 
-enum part_type {
-	PT_MBR = 0,
-	PT_GPT,
-	PT_MAX
+enum bios_type {
+	BT_BIOS = 0,
+	BT_UEFI,
+	BT_MAX
 };
+// For the partition types we'll use Microsoft's PARTITION_STYLE_### constants
+#define GETBIOSTYPE(x) (((x) >> 16) & 0xFFFF)
+#define GETPARTTYPE(x) ((x) & 0xFFFF);
 
 /* Current drive info */
 typedef struct {
@@ -165,6 +169,7 @@ typedef struct {
 	char proposed_label[16];
 	int PartitionType;
 	int FSType;
+	BOOL has_protective_mbr;
 	struct {
 		ULONG Allowed;
 		ULONG Default;
@@ -298,7 +303,8 @@ extern char* get_token_data_buffer(const char* token, unsigned int n, const char
 extern char* insert_section_data(const char* filename, const char* section, const char* data, BOOL dos2unix);
 extern char* replace_in_token_data(const char* filename, const char* token, const char* src, const char* rep, BOOL dos2unix);
 extern void parse_update(char* buf, size_t len);
-extern BOOL WIMExtractFile(const char* wim_image, int index, const char* src, const char* dst);
+extern BOOL WimExtractCheck(void);
+extern BOOL WimExtractFile(const char* wim_image, int index, const char* src, const char* dst);
 
 __inline static BOOL UnlockDrive(HANDLE hDrive)
 {

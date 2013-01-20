@@ -86,7 +86,8 @@ static const char* FileSystemLabel[FS_MAX] = { "FAT", "FAT32", "NTFS", "exFAT" }
 static const char* ClusterSizeLabel[] = { "512 bytes", "1024 bytes","2048 bytes","4096 bytes","8192 bytes",
 	"16 kilobytes", "32 kilobytes", "64 kilobytes", "128 kilobytes", "256 kilobytes", "512 kilobytes",
 	"1024 kilobytes","2048 kilobytes","4096 kilobytes","8192 kilobytes","16 megabytes","32 megabytes" };
-static const char* PartitionSchemeName[PT_MAX] = { "MBR", "GPT" };
+static const char* BiosTypeName[BT_MAX] = { "BIOS", "UEFI" };
+static const char* PartitionTypeName[2] = { "MBR", "GPT" };
 static BOOL existing_key = FALSE;	// For LGP set/restore
 static BOOL iso_size_check = TRUE;
 static BOOL log_displayed = FALSE;
@@ -350,7 +351,7 @@ static __inline char* size_to_hr(LARGE_INTEGER size)
 /*
  * Fill the drive properties (size, FS, etc)
  */
-static BOOL GetDriveInfo(void)
+static BOOL GetDriveInfo(DWORD DeviceNumber)
 {
 	BOOL r;
 	HANDLE hDrive;
@@ -363,7 +364,8 @@ static BOOL GetDriveInfo(void)
 	char DrivePath[] = "#:\\", tmp[256], fs_type[32];
 	DWORD i, nb_partitions = 0;
 
-	SelectedDrive.DiskSize = 0;
+	memset(&SelectedDrive, 0, sizeof(SelectedDrive));
+	SelectedDrive.DeviceNumber = DeviceNumber;
 
 	hDrive = GetDriveHandle(SelectedDrive.DeviceNumber, DrivePath, FALSE, FALSE);
 	if (hDrive == INVALID_HANDLE_VALUE)
@@ -389,7 +391,7 @@ static BOOL GetDriveInfo(void)
 	} else {
 		switch (DriveLayout->PartitionStyle) {
 		case PARTITION_STYLE_MBR:
-			SelectedDrive.PartitionType = PT_MBR;
+			SelectedDrive.PartitionType = PARTITION_STYLE_MBR;
 			for (i=0; i<DriveLayout->PartitionCount; i++) {
 				if (DriveLayout->PartitionEntry[i].Mbr.PartitionType != PARTITION_ENTRY_UNUSED) {
 					nb_partitions++;
@@ -406,11 +408,13 @@ static BOOL GetDriveInfo(void)
 						DriveLayout->PartitionEntry[i].PartitionLength, DriveLayout->PartitionEntry[i].Mbr.HiddenSectors,
 						DriveLayout->PartitionEntry[i].Mbr.BootIndicator?"Yes":"No",
 						DriveLayout->PartitionEntry[i].Mbr.RecognizedPartition?"Yes":"No");
+					if (part_type == 0xee)	// Flag a protective MBR for non GPT platforms (XP)
+						SelectedDrive.has_protective_mbr = TRUE;
 				}
 			}
 			break;
 		case PARTITION_STYLE_GPT:
-			SelectedDrive.PartitionType = PT_GPT;
+			SelectedDrive.PartitionType = PARTITION_STYLE_GPT;
 			uprintf("Partition type: GPT, NB Partitions: %d\n", DriveLayout->PartitionCount);
 			uprintf("Disk GUID: %s\n", GuidToString(&DriveLayout->Gpt.DiskId));
 			uprintf("Max parts: %d, Start Offset: %lld, Usable = %lld bytes\n",
@@ -428,7 +432,7 @@ static BOOL GetDriveInfo(void)
 			}
 			break;
 		default:
-			SelectedDrive.PartitionType = PT_MBR;
+			SelectedDrive.PartitionType = PARTITION_STYLE_MBR;
 			uprintf("Partition type: RAW\n");
 			break;
 		}
@@ -480,6 +484,7 @@ static void SetFSFromISO(void)
 {
 	int i, fs, selected_fs = FS_UNKNOWN;
 	uint32_t fs_mask = 0;
+	int bt = GETBIOSTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
 
 	if (iso_path == NULL)
 		return;
@@ -490,8 +495,8 @@ static void SetFSFromISO(void)
 		fs_mask |= 1<<fs;
 	}
 
-	// Syslinux and EFI have precedence over bootmgr
-	if ((iso_report.has_isolinux) || (IS_EFI(iso_report))) {
+	// Syslinux and EFI have precedence over bootmgr (unless the user selected BIOS as target type)
+	if ((iso_report.has_isolinux) || ( (IS_EFI(iso_report)) && (bt == BT_UEFI))) {
 		if (fs_mask & (1<<FS_FAT32)) {
 			selected_fs = FS_FAT32;
 		} else if (fs_mask & (1<<FS_FAT16)) {
@@ -549,7 +554,7 @@ static BOOL PopulateProperties(int ComboIndex)
 	char capacity[64];
 	static char* suffix[] = { "B", "KB", "MB", "GB", "TB", "PB"};
 	char no_label[] = STR_NO_LABEL;
-	int i, j, fs;
+	int i, j, pt, bt, fs;
 
 	IGNORE_RETVAL(ComboBox_ResetContent(hPartitionScheme));
 	IGNORE_RETVAL(ComboBox_ResetContent(hFileSystem));
@@ -561,8 +566,7 @@ static BOOL PopulateProperties(int ComboIndex)
 	if (ComboIndex < 0)
 		return TRUE;
 
-	SelectedDrive.DeviceNumber = (DWORD)ComboBox_GetItemData(hDeviceList, ComboIndex);
-	if (!GetDriveInfo())	// This also populates FS
+	if (!GetDriveInfo((DWORD)ComboBox_GetItemData(hDeviceList, ComboIndex)))	// This also populates FS
 		return FALSE;
 	SetFSFromISO();
 	fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
@@ -572,17 +576,31 @@ static BOOL PopulateProperties(int ComboIndex)
 	for (i=1; i<ARRAYSIZE(suffix); i++) {
 		HumanReadableSize /= 1024.0;
 		if (HumanReadableSize < 512.0) {
-			for (j=0; j<PT_MAX; j++) {
-				safe_sprintf(capacity, sizeof(capacity), "%s (1 Partition of %0.2f %s)",
-					PartitionSchemeName[j], HumanReadableSize, suffix[i]);
-				IGNORE_RETVAL(ComboBox_SetItemData(hPartitionScheme, ComboBox_AddStringU(hPartitionScheme, capacity), j));
+			for (j=0; j<3; j++) {
+				// Populate BIOS/MBR, UEFI/MBR and UEFI/GPT targets, with an exception
+				// for XP, as it doesn't support GPT at all
+				if ((j == 2) && (nWindowsVersion <= WINDOWS_XP))
+					continue;
+				bt = (j==0)?BT_BIOS:BT_UEFI;
+				pt = (j==2)?PARTITION_STYLE_GPT:PARTITION_STYLE_MBR;
+				safe_sprintf(capacity, sizeof(capacity), "%s/%s (1 Partition of %0.2f %s)",
+					PartitionTypeName[pt], BiosTypeName[bt], HumanReadableSize, suffix[i]);
+				IGNORE_RETVAL(ComboBox_SetItemData(hPartitionScheme, ComboBox_AddStringU(hPartitionScheme, capacity), (bt<<16)|pt));
 			}
 			break;
 		}
 	}
 	if (i >= ARRAYSIZE(suffix))
 		uprintf("Could not populate partition scheme data\n");
-	IGNORE_RETVAL(ComboBox_SetCurSel(hPartitionScheme, SelectedDrive.PartitionType));
+	if (SelectedDrive.PartitionType == PARTITION_STYLE_GPT) {
+		j = 2;
+	} else if (SelectedDrive.has_protective_mbr) {
+		j = 1;
+	} else {
+		j = 0;
+	}
+	IGNORE_RETVAL(ComboBox_SetCurSel(hPartitionScheme, j));
+	// TODO: create a tooltip for hPartitionScheme
 	CreateTooltip(hDeviceList, DriveID.Table[ComboIndex], -1);
 
 	// Set a proposed label according to the size (eg: "256MB", "8GB")
@@ -638,11 +656,11 @@ BOOL CreatePartition(HANDLE hDrive)
 	BOOL r;
 	DWORD size;
 	LONGLONG size_in_sectors;
-	int pt = (int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme));
+	int pt = GETPARTTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
 
-	PrintStatus(0, TRUE, "Partitioning (%s)...",  PartitionSchemeName[pt]);
+	PrintStatus(0, TRUE, "Partitioning (%s)...",  PartitionTypeName[pt]);
 
-	if ((pt == PT_GPT) || (!IsChecked(IDC_EXTRA_PARTITION))) {
+	if ((pt == PARTITION_STYLE_GPT) || (!IsChecked(IDC_EXTRA_PARTITION))) {
 		// Go with the MS 1 MB wastage at the beginning...
 		DriveLayoutEx.PartitionEntry[0].StartingOffset.QuadPart = 1024*1024;
 	} else {
@@ -653,7 +671,7 @@ BOOL CreatePartition(HANDLE hDrive)
 	size_in_sectors = (SelectedDrive.DiskSize - DriveLayoutEx.PartitionEntry[0].StartingOffset.QuadPart) / SelectedDrive.Geometry.BytesPerSector;
 
 	switch (pt) {
-	case PT_MBR:
+	case PARTITION_STYLE_MBR:
 		CreateDisk.PartitionStyle = PARTITION_STYLE_MBR;
 		CreateDisk.Mbr.Signature = GetTickCount();
 
@@ -672,7 +690,7 @@ BOOL CreatePartition(HANDLE hDrive)
 				return FALSE;
 		}
 		break;
-	case PT_GPT:
+	case PARTITION_STYLE_GPT:
 		CreateDisk.PartitionStyle = PARTITION_STYLE_GPT;
 		IGNORE_RETVAL(CoCreateGuid(&CreateDisk.Gpt.DiskId));
 		CreateDisk.Gpt.MaxPartitionCount = MAX_GPT_PARTITIONS;
@@ -698,7 +716,7 @@ BOOL CreatePartition(HANDLE hDrive)
 	DriveLayoutEx.PartitionEntry[0].RewritePartition = TRUE;
 
 	switch (pt) {
-	case PT_MBR:
+	case PARTITION_STYLE_MBR:
 		DriveLayoutEx.PartitionEntry[0].Mbr.HiddenSectors = SelectedDrive.Geometry.SectorsPerTrack;
 		switch (ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem))) {
 		case FS_FAT16:
@@ -730,7 +748,7 @@ BOOL CreatePartition(HANDLE hDrive)
 		// For the remaining partitions, PartitionStyle & PartitionType have already
 		// been zeroed => already set to MBR/unused
 		break;
-	case PT_GPT:
+	case PARTITION_STYLE_GPT:
 		DriveLayoutEx.PartitionEntry[0].Gpt.PartitionType = PARTITION_BASIC_DATA_GUID;
 		wcscpy(DriveLayoutEx.PartitionEntry[0].Gpt.Name, L"Microsoft Basic Data");
 		IGNORE_RETVAL(CoCreateGuid(&DriveLayoutEx.PartitionEntry[0].Gpt.PartitionId));
@@ -749,7 +767,7 @@ BOOL CreatePartition(HANDLE hDrive)
 		return FALSE;
 	}
 
-	size = sizeof(DriveLayoutEx) - ((pt == PT_GPT)?(3*sizeof(PARTITION_INFORMATION_EX)):0);
+	size = sizeof(DriveLayoutEx) - ((pt == PARTITION_STYLE_GPT)?(3*sizeof(PARTITION_INFORMATION_EX)):0);
 	r = DeviceIoControl(hDrive, IOCTL_DISK_SET_DRIVE_LAYOUT_EX,
 			(BYTE*)&DriveLayoutEx, size, NULL, 0, &size, NULL );
 	if (!r) {
@@ -1241,10 +1259,6 @@ BOOL CALLBACK LogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 			break;
 		}
 		break;
-//	case WM_SHOWWINDOW:
-//		if (wParam)
-//			SendMessage(hLog, EM_LINESCROLL, 0, SendMessage(hLog, EM_GETLINECOUNT, 0, 0));
-//		return FALSE;
 	case WM_CLOSE:
 		ShowWindow(hDlg, SW_HIDE);
 		log_displayed = FALSE;
@@ -1637,7 +1651,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	DRAWITEMSTRUCT* pDI;
 	POINT Point;
 	RECT DialogRect, DesktopRect;
-	int nDeviceIndex, fs, pt, i, nWidth, nHeight;
+	int nDeviceIndex, fs, bt, i, nWidth, nHeight;
 	static DWORD DeviceNum = 0;
 	wchar_t wtmp[128], wstr[MAX_PATH];
 	static UINT uDOSChecked = BST_CHECKED, uQFChecked;
@@ -1787,7 +1801,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			if (HIWORD(wParam) != CBN_SELCHANGE)
 				break;
 			fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
-			pt = (int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme));
+			bt = GETBIOSTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
 			SetClusterSizes(fs);
 			// Disable/restore the quick format control depending on large FAT32
 			if ((fs == FS_FAT32) && (SelectedDrive.DiskSize > LARGE_FAT32_SIZE)) {
@@ -1812,7 +1826,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				}
 				break;
 			}
-			if ((fs == FS_EXFAT) || ((pt == PT_GPT) && (fs == FS_NTFS)))  {
+			if (fs == FS_EXFAT) {
 				if (IsWindowEnabled(hDOS)) {
 					// unlikely to be supported by BIOSes => don't bother
 					IGNORE_RETVAL(ComboBox_SetCurSel(hDOSType, 0));
@@ -1824,13 +1838,13 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				break;
 			}
 			IGNORE_RETVAL(ComboBox_ResetContent(hDOSType));
-			if ((pt == PT_MBR) && ((fs == FS_FAT16) || (fs == FS_FAT32))) {
+			if ((bt == BT_BIOS) && ((fs == FS_FAT16) || (fs == FS_FAT32))) {
 				IGNORE_RETVAL(ComboBox_SetItemData(hDOSType, ComboBox_AddStringU(hDOSType, "MS-DOS"), DT_WINME));
 				IGNORE_RETVAL(ComboBox_SetItemData(hDOSType, ComboBox_AddStringU(hDOSType, "FreeDOS"), DT_FREEDOS));
 			}
 			IGNORE_RETVAL(ComboBox_SetItemData(hDOSType, ComboBox_AddStringU(hDOSType, "ISO Image"), DT_ISO));
 			// If needed (advanced mode) also append a Syslinux option
-			if ( (pt == PT_MBR) && (((fs == FS_FAT16) || (fs == FS_FAT32)) && (advanced_mode)) )
+			if ( (bt == BT_BIOS) && (((fs == FS_FAT16) || (fs == FS_FAT32)) && (advanced_mode)) )
 				IGNORE_RETVAL(ComboBox_SetItemData(hDOSType, ComboBox_AddStringU(hDOSType, "SysLinux"), DT_SYSLINUX));
 			if ( ((!advanced_mode) && (selection_default == DT_SYSLINUX)) ) {
 				selection_default = DT_FREEDOS;
@@ -1923,24 +1937,37 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 							break;
 						}
 						fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
-						pt = (int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme));
-						if ((pt == PT_GPT) && ((!IS_EFI(iso_report)) || ((fs > FS_FAT32)))) {
-							MessageBoxA(hMainDialog, "When using GPT, only EFI bootable ISOs are supported. "
-								"Please select an EFI bootable ISO or change the Partition Scheme to MBR.", "Unsupported GPT ISO...", MB_OK|MB_ICONERROR);
-							break;
-						}
-						else if ((fs == FS_NTFS) && (!iso_report.has_bootmgr) && (!IS_WINPE(iso_report.winpe))) {
+						bt = GETBIOSTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
+						if (bt == BT_UEFI) {
+							if (!IS_EFI(iso_report)) {
+								MessageBoxA(hMainDialog, "When using UEFI Target Type, only EFI bootable ISO images are supported. "
+									"Please select an EFI bootable ISO or set the Target Type to BIOS.", "Unsupported ISO...", MB_OK|MB_ICONERROR);
+								break;
+							} else if (fs > FS_FAT32) {
+								MessageBoxA(hMainDialog, "When using UEFI Target Type, only FAT/FAT32 is supported. "
+									"Please select FAT/FAT32 as the File system or set the Target Type to BIOS.", "Unsupported filesystem...", MB_OK|MB_ICONERROR);
+								break;
+							}
+						} else if ((fs == FS_NTFS) && (!iso_report.has_bootmgr) && (!IS_WINPE(iso_report.winpe))) {
 							if (iso_report.has_isolinux) {
-								MessageBoxA(hMainDialog, "Only FAT32 is supported for this type of ISO. "
-									"Please revert the filesystem back from NTFS to FAT32.", "Unsupported filesystem...", MB_OK|MB_ICONERROR);
+								MessageBoxA(hMainDialog, "Only FAT/FAT32 is supported for this type of ISO. "
+									"Please select FAT/FAT32 as the File system.", "Unsupported filesystem...", MB_OK|MB_ICONERROR);
 							} else {
 								MessageBoxA(hMainDialog, "Only 'bootmgr' or 'WinPE' based ISO "
 									"images can currently be used with NTFS.", "Unsupported ISO...", MB_OK|MB_ICONERROR);
 							}
 							break;
-						} else if (((fs == FS_FAT16)||(fs == FS_FAT32)) && ((!iso_report.has_isolinux) && (pt != PT_GPT))) {
-							MessageBoxA(hMainDialog, "Only isolinux or EFI based ISO "
-								"images can currently be used with FAT/FAT32.", "Unsupported ISO...", MB_OK|MB_ICONERROR);
+						} else if (((fs == FS_FAT16)||(fs == FS_FAT32)) && (!iso_report.has_isolinux)) {
+							MessageBoxA(hMainDialog, "FAT/FAT32 can only be used for isolinux based ISO images "
+								"or when the Target Type is UEFI.", "Unsupported ISO...", MB_OK|MB_ICONERROR);
+							break;
+						}
+						if ((bt == BT_UEFI) && (iso_report.has_win7_efi) && (!WimExtractCheck())) {
+							if (MessageBoxA(hMainDialog, "Your platform cannot extract files from WIM archives. WIM extraction "
+								"is required to create EFI bootable Windows 7 and Windows Vista USB drives. You can fix that "
+								"by installing a recent version of 7-Zip.\r\nDo you want to visit the 7-zip download page?",
+								"Missing WIM support...", MB_YESNO|MB_ICONERROR) == IDYES)
+								ShellExecuteA(hDlg, "open", SEVENZIP_URL, NULL, NULL, SW_SHOWNORMAL);
 							break;
 						}
 					}
