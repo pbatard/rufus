@@ -1496,7 +1496,7 @@ void InitDialog(HWND hDlg)
 {
 	HINSTANCE hDllInst;
 	HDC hDC;
-	int i, i16, s16, s32;
+	int i, i16, s16;
 	char tmp[128], *token;
 
 #ifdef RUFUS_TEST
@@ -1524,7 +1524,6 @@ void InitDialog(HWND hDlg)
 	ReleaseDC(hDlg, hDC);
 	// Adjust icon size lookup
 	s16 = i16;
-	s32 = (int)(32.0f*fScale);
 	if (s16 >= 54)
 		s16 = 64;
 	else if (s16 >= 40)
@@ -1533,14 +1532,6 @@ void InitDialog(HWND hDlg)
 		s16 = 32;
 	else if (s16 >= 20)
 		s16 = 24;
-	if (s32 >= 54)
-		s32 = 64;
-	else if (s32 >= 40)
-		s32 = 48;
-	else if (s32 >= 28)
-		s32 = 32;
-	else if (s32 >= 20)
-		s32 = 24;
 
 	// Create the title bar icon
 	SetTitleBarIcon(hDlg);

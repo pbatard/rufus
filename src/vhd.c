@@ -210,6 +210,8 @@ BOOL WimExtractFile(const char* image, int index, const char* src, const char* d
 {
 	if ((!has_wimgapi) && (!has_7z) && (!WimExtractCheck()))
 		return FALSE;
+	if ((image == NULL) || (src == NULL) || (dst == NULL))
+		return FALSE;
 
 	// Prefer 7-Zip as, unsurprisingly, it's faster than the Microsoft way,
 	// but allow fallback if 7-Zip doesn't succeed

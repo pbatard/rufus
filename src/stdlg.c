@@ -550,6 +550,8 @@ fallback:
 	// Set the file extension filters
 	ext_strlen = safe_strlen(ext_desc) + 2*safe_strlen(ext) + sizeof(" (*.)\0*.\0All Files (*.*)\0*.*\0\0");
 	ext_string = (char*)malloc(ext_strlen);
+	if (ext_string == NULL)
+		return NULL;
 	safe_sprintf(ext_string, ext_strlen, "%s (*.%s)\r*.%s\rAll Files (*.*)\r*.*\r\0", ext_desc, ext, ext);
 	// Microsoft could really have picked a better delimiter!
 	for (i=0; i<ext_strlen; i++) {

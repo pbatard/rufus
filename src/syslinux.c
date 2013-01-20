@@ -175,6 +175,8 @@ BOOL InstallSyslinux(DWORD num, const char* drive_name)
 	/* Map the file (is there a better way to do this?) */
 	ldlinux_sectors = (syslinux_ldlinux_len + 2 * ADV_SIZE + SECTOR_SIZE - 1) >> SECTOR_SHIFT;
 	sectors = (libfat_sector_t*) calloc(ldlinux_sectors, sizeof *sectors);
+	if (sectors == NULL)
+		goto out;
 	fs = libfat_open(libfat_readfile, (intptr_t) d_handle);
 	ldlinux_cluster = libfat_searchdir(fs, 0, "LDLINUX SYS", NULL);
 	secp = sectors;
