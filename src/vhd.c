@@ -131,7 +131,7 @@ static BOOL WimExtractFile_API(const char* image, int index, const char* src, co
 		goto out;
 	}
 
-	uprintf("Extracting: %s (From \\%s)\n", dst, src);
+	uprintf("Extracting: %s (From %s)\n", dst, src);
 	if (!pfWIMExtractImagePath(hImage, wsrc, wdst, 0)) {
 		uprintf("  Could not extract file: %s\n", WindowsErrorString());
 		goto out;
@@ -181,8 +181,8 @@ static BOOL WimExtractFile_7z(const char* image, int index, const char* src, con
 	tmpdst[i] = 0;
 
 	si.cb = sizeof(si);
-	safe_sprintf(cmdline, sizeof(cmdline), "7z -y e \"%s\" %d\\Windows\\Boot\\EFI\\bootmgfw.efi", image, index);
-	uprintf("Extracting: %s (From \\%s)\n", dst, src);
+	safe_sprintf(cmdline, sizeof(cmdline), "7z -y e \"%s\" %d\\%s", image, index, src);
+	uprintf("Extracting: %s (From %s)\n", dst, src);
 	if (!CreateProcessU(sevenzip_path, cmdline, NULL, NULL, FALSE, CREATE_NO_WINDOW, NULL, tmpdst, &si, &pi)) {
 		uprintf("  Could not launch 7z.exe: %s\n", WindowsErrorString());
 		return FALSE;

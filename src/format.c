@@ -1221,7 +1221,7 @@ DWORD WINAPI FormatThread(LPVOID param)
 	}
 	UpdateProgress(OP_ZERO_MBR, -1.0f);
 
-	if (!CreatePartition(hPhysicalDrive)) {
+	if (!CreatePartition(hPhysicalDrive, pt, fs)) {
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_PARTITION_FAILURE;
 		goto out;
 	}

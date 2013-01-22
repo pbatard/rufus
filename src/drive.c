@@ -29,6 +29,7 @@
 #include "msapi_utf8.h"
 #include "rufus.h"
 #include "resource.h"
+#include "sys_types.h"
 
 /*
  * Globals
@@ -198,4 +199,166 @@ BOOL UnmountDrive(HANDLE hDrive)
 		return FALSE;
 	}
 	return TRUE;
+}
+
+/* MinGW is unhappy about accessing partitions beside the first unless we redef */
+typedef struct _DRIVE_LAYOUT_INFORMATION_EX4 {
+	DWORD PartitionStyle;
+	DWORD PartitionCount;
+	union {
+		DRIVE_LAYOUT_INFORMATION_MBR Mbr;
+		DRIVE_LAYOUT_INFORMATION_GPT Gpt;
+	} Type;
+	PARTITION_INFORMATION_EX PartitionEntry[4];
+} DRIVE_LAYOUT_INFORMATION_EX4,*PDRIVE_LAYOUT_INFORMATION_EX4;
+
+/*
+ * Create a partition table
+ */
+// See http://technet.microsoft.com/en-us/library/cc739412.aspx for some background info
+#if !defined(PARTITION_BASIC_DATA_GUID)
+const GUID PARTITION_BASIC_DATA_GUID = { 0xebd0a0a2, 0xb9e5, 0x4433, {0x87, 0xc0, 0x68, 0xb6, 0xb7, 0x26, 0x99, 0xc7} };
+#endif
+BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system)
+{
+	const char* PartitionTypeName[2] = { "MBR", "GPT" };
+	CREATE_DISK CreateDisk = {PARTITION_STYLE_RAW, {{0}}};
+	DRIVE_LAYOUT_INFORMATION_EX4 DriveLayoutEx = {0};
+	BOOL r;
+	DWORD size;
+	LONGLONG size_in_sectors;
+
+	PrintStatus(0, TRUE, "Partitioning (%s)...",  PartitionTypeName[partition_style]);
+
+	if ((partition_style == PARTITION_STYLE_GPT) || (!IsChecked(IDC_EXTRA_PARTITION))) {
+		// Go with the MS 1 MB wastage at the beginning...
+		DriveLayoutEx.PartitionEntry[0].StartingOffset.QuadPart = 1024*1024;
+	} else {
+		// Align on Cylinder
+		DriveLayoutEx.PartitionEntry[0].StartingOffset.QuadPart = 
+			SelectedDrive.Geometry.BytesPerSector * SelectedDrive.Geometry.SectorsPerTrack;
+	}
+	size_in_sectors = (SelectedDrive.DiskSize - DriveLayoutEx.PartitionEntry[0].StartingOffset.QuadPart) / SelectedDrive.Geometry.BytesPerSector;
+
+	switch (partition_style) {
+	case PARTITION_STYLE_MBR:
+		CreateDisk.PartitionStyle = PARTITION_STYLE_MBR;
+		CreateDisk.Mbr.Signature = GetTickCount();
+
+		DriveLayoutEx.PartitionStyle = PARTITION_STYLE_MBR;
+		DriveLayoutEx.PartitionCount = 4;	// Must be multiple of 4 for MBR
+		DriveLayoutEx.Type.Mbr.Signature = CreateDisk.Mbr.Signature;
+		DriveLayoutEx.PartitionEntry[0].PartitionStyle = PARTITION_STYLE_MBR;
+		// TODO: CHS fixup (32 sectors/track) through a cheat mode, if requested
+		// NB: disk geometry is computed by BIOS & co. by finding a match between LBA and CHS value of first partition
+		//     ms-sys's write_partition_number_of_heads() and write_partition_start_sector_number() can be used if needed
+
+		// Align on sector boundary if the extra part option is checked
+		if (IsChecked(IDC_EXTRA_PARTITION)) {
+			size_in_sectors = ((size_in_sectors / SelectedDrive.Geometry.SectorsPerTrack)-1) * SelectedDrive.Geometry.SectorsPerTrack;
+			if (size_in_sectors <= 0)
+				return FALSE;
+		}
+		break;
+	case PARTITION_STYLE_GPT:
+		CreateDisk.PartitionStyle = PARTITION_STYLE_GPT;
+		IGNORE_RETVAL(CoCreateGuid(&CreateDisk.Gpt.DiskId));
+		CreateDisk.Gpt.MaxPartitionCount = MAX_GPT_PARTITIONS;
+
+		DriveLayoutEx.PartitionStyle = PARTITION_STYLE_GPT;
+		DriveLayoutEx.PartitionCount = 1;
+		// At the very least, a GPT disk has atv least 34 reserved (512 bytes) blocks at the beginning
+		// and 33 at the end.
+		DriveLayoutEx.Type.Gpt.StartingUsableOffset.QuadPart = 34*512;
+		DriveLayoutEx.Type.Gpt.UsableLength.QuadPart = SelectedDrive.DiskSize - (34+33)*512;
+		DriveLayoutEx.Type.Gpt.MaxPartitionCount = MAX_GPT_PARTITIONS;
+		DriveLayoutEx.Type.Gpt.DiskId = CreateDisk.Gpt.DiskId;
+		DriveLayoutEx.PartitionEntry[0].PartitionStyle = PARTITION_STYLE_GPT;
+
+		size_in_sectors -= 33;	// Need 33 sectors at the end for secondary GPT
+		break;
+	default:
+		break;
+	}
+
+	DriveLayoutEx.PartitionEntry[0].PartitionLength.QuadPart = size_in_sectors * SelectedDrive.Geometry.BytesPerSector;
+	DriveLayoutEx.PartitionEntry[0].PartitionNumber = 1;
+	DriveLayoutEx.PartitionEntry[0].RewritePartition = TRUE;
+
+	switch (partition_style) {
+	case PARTITION_STYLE_MBR:
+		DriveLayoutEx.PartitionEntry[0].Mbr.HiddenSectors = SelectedDrive.Geometry.SectorsPerTrack;
+		switch (file_system) {
+		case FS_FAT16:
+			DriveLayoutEx.PartitionEntry[0].Mbr.PartitionType = 0x0e;	// FAT16 LBA
+			break;
+		case FS_NTFS:
+		case FS_EXFAT:
+			DriveLayoutEx.PartitionEntry[0].Mbr.PartitionType = 0x07;	// NTFS
+			break;
+		case FS_FAT32:
+			DriveLayoutEx.PartitionEntry[0].Mbr.PartitionType = 0x0c;	// FAT32 LBA
+			break;
+		default:
+			uprintf("Unsupported file system\n");
+			return FALSE;
+		}
+		// Create an extra partition on request - can improve BIOS detection as HDD for older BIOSes
+		if (IsChecked(IDC_EXTRA_PARTITION)) {
+			DriveLayoutEx.PartitionEntry[1].PartitionStyle = PARTITION_STYLE_MBR;
+			// Should end on a sector boundary
+			DriveLayoutEx.PartitionEntry[1].StartingOffset.QuadPart = DriveLayoutEx.PartitionEntry[0].StartingOffset.QuadPart +
+				DriveLayoutEx.PartitionEntry[0].PartitionLength.QuadPart;
+			DriveLayoutEx.PartitionEntry[1].PartitionLength.QuadPart = SelectedDrive.Geometry.SectorsPerTrack*SelectedDrive.Geometry.BytesPerSector;
+			DriveLayoutEx.PartitionEntry[1].PartitionNumber = 2;
+			DriveLayoutEx.PartitionEntry[1].RewritePartition = TRUE;
+			DriveLayoutEx.PartitionEntry[1].Mbr.HiddenSectors = SelectedDrive.Geometry.SectorsPerTrack*SelectedDrive.Geometry.BytesPerSector;
+			DriveLayoutEx.PartitionEntry[1].Mbr.PartitionType = DriveLayoutEx.PartitionEntry[0].Mbr.PartitionType + 0x10;	// Hidden whatever
+		}
+		// For the remaining partitions, PartitionStyle & PartitionType have already
+		// been zeroed => already set to MBR/unused
+		break;
+	case PARTITION_STYLE_GPT:
+		DriveLayoutEx.PartitionEntry[0].Gpt.PartitionType = PARTITION_BASIC_DATA_GUID;
+		wcscpy(DriveLayoutEx.PartitionEntry[0].Gpt.Name, L"Microsoft Basic Data");
+		IGNORE_RETVAL(CoCreateGuid(&DriveLayoutEx.PartitionEntry[0].Gpt.PartitionId));
+		break;
+	default:
+		break;
+	}
+
+	// If you don't call IOCTL_DISK_CREATE_DISK, the next call will fail
+	size = sizeof(CreateDisk);
+	r = DeviceIoControl(hDrive, IOCTL_DISK_CREATE_DISK,
+			(BYTE*)&CreateDisk, size, NULL, 0, &size, NULL );
+	if (!r) {
+		uprintf("IOCTL_DISK_CREATE_DISK failed: %s\n", WindowsErrorString());
+		safe_closehandle(hDrive);
+		return FALSE;
+	}
+
+	size = sizeof(DriveLayoutEx) - ((partition_style == PARTITION_STYLE_GPT)?(3*sizeof(PARTITION_INFORMATION_EX)):0);
+	r = DeviceIoControl(hDrive, IOCTL_DISK_SET_DRIVE_LAYOUT_EX,
+			(BYTE*)&DriveLayoutEx, size, NULL, 0, &size, NULL );
+	if (!r) {
+		uprintf("IOCTL_DISK_SET_DRIVE_LAYOUT_EX failed: %s\n", WindowsErrorString());
+		safe_closehandle(hDrive);
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
+/*
+ * Convert a partition type to its human readable form using
+ * (slightly modified) entries from GNU fdisk
+ */
+const char* GetPartitionType(BYTE Type)
+{
+	int i;
+	for (i=0; i<ARRAYSIZE(msdos_systypes); i++) {
+		if (msdos_systypes[i].type == Type)
+			return msdos_systypes[i].name;
+	}
+	return "Unknown";
 }

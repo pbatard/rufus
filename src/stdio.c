@@ -189,6 +189,25 @@ char* GuidToString(const GUID* guid)
 	return guid_string;
 }
 
+// Convert a file size to human readable
+char* SizeToHumanReadable(LARGE_INTEGER size)
+{
+	int suffix = 0;
+	static char str_size[24];
+	const char* sizes[] = { "", "KB", "MB", "GB", "TB" };
+	double hr_size = (double)size.QuadPart;
+	while ((suffix < ARRAYSIZE(sizes)) && (hr_size >= 1024.0)) {
+		hr_size /= 1024.0;
+		suffix++;
+	}
+	if (suffix == 0) {
+		safe_sprintf(str_size, sizeof(str_size), "%d bytes", (int)hr_size);
+	} else {
+		safe_sprintf(str_size, sizeof(str_size), "%0.1f %s", hr_size, sizes[suffix]);
+	}
+	return str_size;
+}
+
 const char* StrError(DWORD error_code)
 {
 	if ( (!IS_ERROR(error_code)) || (SCODE_CODE(error_code) == ERROR_SUCCESS)) {

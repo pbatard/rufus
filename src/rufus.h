@@ -265,6 +265,7 @@ extern void PrintStatus(unsigned int duration, BOOL debug, const char *format, .
 extern void UpdateProgress(int op, float percent);
 extern const char* StrError(DWORD error_code);
 extern char* GuidToString(const GUID* guid);
+extern char* SizeToHumanReadable(LARGE_INTEGER size);
 extern void CenterDialog(HWND hDlg);
 extern void CreateStatusBar(void);
 extern void SetTitleBarIcon(HWND hDlg);
@@ -282,7 +283,8 @@ extern BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan);
 extern BOOL ExtractISOFile(const char* iso, const char* iso_file, const char* dest_file);
 extern BOOL InstallSyslinux(DWORD num, const char* drive_name);
 DWORD WINAPI FormatThread(void* param);
-extern BOOL CreatePartition(HANDLE hDrive);
+extern BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system);
+extern const char* GetPartitionType(BYTE Type);
 extern HANDLE GetDriveHandle(DWORD DriveIndex, char* DriveLetter, BOOL bWriteAccess, BOOL bLockDrive);
 extern BOOL GetDriveLabel(DWORD DriveIndex, char* letter, char** label);
 extern BOOL UnmountDrive(HANDLE hDrive);
