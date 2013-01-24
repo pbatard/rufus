@@ -172,6 +172,7 @@
     <ClCompile Include="..\net.c" />
     <ClCompile Include="..\parser.c" />
     <ClCompile Include="..\rufus.c" />
+    <ClCompile Include="..\stdfn.c" />
     <ClCompile Include="..\stdio.c" />
     <ClCompile Include="..\stdlg.c" />
     <ClCompile Include="..\syslinux.c" />

@@ -451,7 +451,7 @@ BOOL ExtractFreeDOS(const char* path)
 
 BOOL ExtractDOS(const char* path)
 {
-	switch(ComboBox_GetItemData(hDOSType, ComboBox_GetCurSel(hDOSType))) {
+	switch(ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType))) {
 	case DT_WINME:
 		return ExtractMSDOS(path);
 	case DT_FREEDOS:

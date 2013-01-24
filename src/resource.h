@@ -54,10 +54,10 @@
 #define IDC_ABOUT                       1007
 #define IDC_LABEL                       1008
 #define IDC_QUICKFORMAT                 1009
-#define IDC_DOS                         1010
+#define IDC_BOOT                        1010
 #define IDC_BADBLOCKS                   1011
 #define IDC_PROGRESS                    1012
-#define IDC_DOSTYPE                     1013
+#define IDC_BOOTTYPE                    1013
 #define IDC_NBPASSES                    1014
 #define IDC_TEST                        1015
 #define IDC_SELECT_ISO                  1016

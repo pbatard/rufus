@@ -84,7 +84,7 @@ BOOL InstallSyslinux(DWORD num, const char* drive_name)
 	int ldlinux_sectors;
 	uint32_t ldlinux_cluster;
 	int nsectors;
-	int dt = (int)ComboBox_GetItemData(hDOSType, ComboBox_GetCurSel(hDOSType));
+	int dt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
 
 	ldlinux_name[0] = drive_name[0];
 

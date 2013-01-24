@@ -31,6 +31,7 @@ SXS_APPLICATION_MANIFEST=..\common_controls_and_elevation.manifest
 SOURCES=rufus.c          \
         format.c         \
         stdio.c          \
+        stdfn.c          \
         stdlg.c          \
         icon.c           \
         parser.c         \

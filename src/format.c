@@ -849,7 +849,7 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 		buf[0x1c2] = 0x0c;
 		break;
 	}
-	if (IsChecked(IDC_DOS)) {
+	if (IsChecked(IDC_BOOT)) {
 		// Set first partition bootable - masquerade as per the DiskID selected
 		buf[0x1be] = (IsChecked(IDC_RUFUS_MBR))?(BYTE)ComboBox_GetItemData(hDiskID, ComboBox_GetCurSel(hDiskID)):0x80;
 		uprintf("Set bootable USB partition as 0x%02X\n", buf[0x1be]);
@@ -864,7 +864,7 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 	fake_fd._ptr = (char*)hPhysicalDrive;
 	fake_fd._bufsiz = SelectedDrive.Geometry.BytesPerSector;
 	fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
-	dt = (int)ComboBox_GetItemData(hDOSType, ComboBox_GetCurSel(hDOSType));
+	dt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
 	if ( (dt == DT_SYSLINUX) || ((dt == DT_ISO) && ((fs == FS_FAT16) || (fs == FS_FAT32))) ) {
 		r = write_syslinux_mbr(&fake_fd);
 	} else {
@@ -889,7 +889,7 @@ static BOOL WritePBR(HANDLE hLogicalVolume)
 {
 	int i;
 	FILE fake_fd = { 0 };
-	BOOL bFreeDOS = (ComboBox_GetItemData(hDOSType, ComboBox_GetCurSel(hDOSType)) == DT_FREEDOS);
+	BOOL bFreeDOS = (ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType)) == DT_FREEDOS);
 
 	fake_fd._ptr = (char*)hLogicalVolume;
 	fake_fd._bufsiz = SelectedDrive.Geometry.BytesPerSector;
@@ -1123,7 +1123,7 @@ DWORD WINAPI FormatThread(LPVOID param)
 	FILE* log_fd;
 
 	fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
-	dt = (int)ComboBox_GetItemData(hDOSType, ComboBox_GetCurSel(hDOSType));
+	dt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
 	pt = GETPARTTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
 	bt = GETBIOSTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
 
@@ -1250,7 +1250,7 @@ DWORD WINAPI FormatThread(LPVOID param)
 		UpdateProgress(OP_FIX_MBR, -1.0f);
 	}
 
-	if (IsChecked(IDC_DOS)) {
+	if (IsChecked(IDC_BOOT)) {
 		if (bt == BT_UEFI) {
 			// For once, no need to do anything - just check our sanity
 			if ( (dt != DT_ISO) || (!IS_EFI(iso_report)) || (fs > FS_FAT32) ) {
@@ -1294,7 +1294,7 @@ DWORD WINAPI FormatThread(LPVOID param)
 	if (!RemountVolume(drive_name[0]))
 		goto out;
 
-	if (IsChecked(IDC_DOS)) {
+	if (IsChecked(IDC_BOOT)) {
 		if ((dt == DT_WINME) || (dt == DT_FREEDOS)) {
 			UpdateProgress(OP_DOS, -1.0f);
 			PrintStatus(0, TRUE, "Copying DOS files...");

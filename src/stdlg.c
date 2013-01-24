@@ -32,7 +32,6 @@
 #include <string.h>
 #include <shlobj.h>
 #include <commdlg.h>
-#include <sddl.h>
 #include <richedit.h>
 
 #include "rufus.h"
@@ -61,146 +60,12 @@ static LPITEMIDLIST (WINAPI *pSHSimpleIDListFromPath)(PCWSTR pszPath) = NULL;
 static HICON hMessageIcon = (HICON)INVALID_HANDLE_VALUE;
 static char* szMessageText = NULL;
 static char* szMessageTitle = NULL;
-enum WindowsVersion nWindowsVersion = WINDOWS_UNDEFINED;
 static HWND hBrowseEdit;
 static WNDPROC pOrgBrowseWndproc;
 static const SETTEXTEX friggin_microsoft_unicode_amateurs = {ST_DEFAULT, CP_UTF8};
 static BOOL notification_is_question;
 static const notification_info* notification_more_info;
 static BOOL reg_commcheck = FALSE;
-
-/*
- * Detect Windows version
- */
-enum WindowsVersion DetectWindowsVersion(void)
-{
-	OSVERSIONINFO OSVersion;
-
-	memset(&OSVersion, 0, sizeof(OSVERSIONINFO));
-	OSVersion.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
-	if (GetVersionEx(&OSVersion) == 0)
-		return WINDOWS_UNDEFINED;
-	if (OSVersion.dwPlatformId != VER_PLATFORM_WIN32_NT)
-		return WINDOWS_UNSUPPORTED;
-	// See the Remarks section from http://msdn.microsoft.com/en-us/library/windows/desktop/ms724833.aspx
-	if ((OSVersion.dwMajorVersion < 5) || ((OSVersion.dwMajorVersion == 5) && (OSVersion.dwMinorVersion == 0)))
-		return WINDOWS_UNSUPPORTED;		// Win2k or earlier
-	if ((OSVersion.dwMajorVersion == 5) && (OSVersion.dwMinorVersion == 1))
-		return WINDOWS_XP;
-	if ((OSVersion.dwMajorVersion == 5) && (OSVersion.dwMinorVersion == 2))
-		return  WINDOWS_2003;
-	if ((OSVersion.dwMajorVersion == 6) && (OSVersion.dwMinorVersion == 0))
-		return  WINDOWS_VISTA;
-	if ((OSVersion.dwMajorVersion == 6) && (OSVersion.dwMinorVersion == 1))
-		return  WINDOWS_7;
-	if ((OSVersion.dwMajorVersion == 6) && (OSVersion.dwMinorVersion == 2))
-		return  WINDOWS_8;
-	if ((OSVersion.dwMajorVersion > 6) || ((OSVersion.dwMajorVersion == 6) && (OSVersion.dwMinorVersion >= 3)))
-		return  WINDOWS_9;
-	return WINDOWS_UNSUPPORTED;
-}
-
-/*
- * String array manipulation
- */
-void StrArrayCreate(StrArray* arr, size_t initial_size)
-{
-	if (arr == NULL) return;
-	arr->Max = initial_size; arr->Index = 0;
-	arr->Table = (char**)calloc(arr->Max, sizeof(char*));
-	if (arr->Table == NULL)
-		uprintf("Could not allocate string array\n");
-}
-
-void StrArrayAdd(StrArray* arr, const char* str)
-{
-	char** old_table;
-	if ((arr == NULL) || (arr->Table == NULL))
-		return;
-	if (arr->Index == arr->Max) {
-		arr->Max *= 2;
-		old_table = arr->Table;
-		arr->Table = (char**)realloc(arr->Table, arr->Max*sizeof(char*));
-		if (arr->Table == NULL) {
-			free(old_table);
-			uprintf("Could not reallocate string array\n");
-			return;
-		}
-	}
-	arr->Table[arr->Index] = safe_strdup(str);
-	if (arr->Table[arr->Index++] == NULL) {
-		uprintf("Could not store string in array\n");
-	}
-}
-
-void StrArrayClear(StrArray* arr)
-{
-	size_t i;
-	if ((arr == NULL) || (arr->Table == NULL))
-		return;
-	for (i=0; i<arr->Index; i++) {
-		safe_free(arr->Table[i]);
-	}
-	arr->Index = 0;
-}
-
-void StrArrayDestroy(StrArray* arr)
-{
-	StrArrayClear(arr);
-	if (arr != NULL)
-		safe_free(arr->Table);
-}
-
-/*
- * Retrieve the SID of the current user. The returned PSID must be freed by the caller using LocalFree()
- */
-static PSID GetSID(void) {
-	TOKEN_USER* tu = NULL;
-	DWORD len;
-	HANDLE token;
-	PSID ret = NULL;
-	char* psid_string = NULL;
-
-	if (!OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &token)) {
-		uprintf("OpenProcessToken failed: %s\n", WindowsErrorString());
-		return NULL;
-	}
-
-	if (!GetTokenInformation(token, TokenUser, tu, 0, &len)) {
-		if (GetLastError() != ERROR_INSUFFICIENT_BUFFER) {
-			uprintf("GetTokenInformation (pre) failed: %s\n", WindowsErrorString());
-			return NULL;
-		}
-		tu = (TOKEN_USER*)calloc(1, len);
-	}
-	if (tu == NULL) {
-		return NULL;
-	}
-
-	if (GetTokenInformation(token, TokenUser, tu, len, &len)) {
-		/*
-		 * now of course, the interesting thing is that if you return tu->User.Sid
-		 * but free tu, the PSID pointer becomes invalid after a while.
-		 * The workaround? Convert to string then back to PSID
-		 */
-		if (!ConvertSidToStringSidA(tu->User.Sid, &psid_string)) {
-			uprintf("Unable to convert SID to string: %s\n", WindowsErrorString());
-			ret = NULL;
-		} else {
-			if (!ConvertStringSidToSidA(psid_string, &ret)) {
-				uprintf("Unable to convert string back to SID: %s\n", WindowsErrorString());
-				ret = NULL;
-			}
-			// MUST use LocalFree()
-			LocalFree(psid_string);
-		}
-	} else {
-		ret = NULL;
-		uprintf("GetTokenInformation (real) failed: %s\n", WindowsErrorString());
-	}
-	free(tu);
-	return ret;
-}
 
 /*
  * We need a sub-callback to read the content of the edit box on exit and update
@@ -368,76 +233,6 @@ fallback:
 	}
 	dialog_showing--;
 }
-
-/*
- * read or write I/O to a file
- * buffer is allocated by the procedure. path is UTF-8
- */
-BOOL FileIO(BOOL save, char* path, char** buffer, DWORD* size)
-{
-	SECURITY_ATTRIBUTES s_attr, *ps = NULL;
-	SECURITY_DESCRIPTOR s_desc;
-	PSID sid = NULL;
-	HANDLE handle;
-	BOOL r;
-	BOOL ret = FALSE;
-
-	// Change the owner from admin to regular user
-	sid = GetSID();
-	if ( (sid != NULL)
-	  && InitializeSecurityDescriptor(&s_desc, SECURITY_DESCRIPTOR_REVISION)
-	  && SetSecurityDescriptorOwner(&s_desc, sid, FALSE) ) {
-		s_attr.nLength = sizeof(SECURITY_ATTRIBUTES);
-		s_attr.bInheritHandle = FALSE;
-		s_attr.lpSecurityDescriptor = &s_desc;
-		ps = &s_attr;
-	} else {
-		uprintf("Could not set security descriptor: %s\n", WindowsErrorString());
-	}
-
-	if (!save) {
-		*buffer = NULL;
-	}
-	handle = CreateFileU(path, save?GENERIC_WRITE:GENERIC_READ, FILE_SHARE_READ,
-		ps, save?CREATE_ALWAYS:OPEN_EXISTING, 0, NULL);
-
-	if (handle == INVALID_HANDLE_VALUE) {
-		uprintf("Could not %s file '%s'\n", save?"create":"open", path);
-		goto out;
-	}
-
-	if (save) {
-		r = WriteFile(handle, *buffer, *size, size, NULL);
-	} else {
-		*size = GetFileSize(handle, NULL);
-		*buffer = (char*)malloc(*size);
-		if (*buffer == NULL) {
-			uprintf("Could not allocate buffer for reading file\n");
-			goto out;
-		}
-		r = ReadFile(handle, *buffer, *size, size, NULL);
-	}
-
-	if (!r) {
-		uprintf("I/O Error: %s\n", WindowsErrorString());
-		goto out;
-	}
-
-	PrintStatus(0, TRUE, "%s '%s'", save?"Saved":"Opened", path);
-	ret = TRUE;
-
-out:
-	CloseHandle(handle);
-	if (!ret) {
-		// Only leave a buffer allocated if successful
-		*size = 0;
-		if (!save) {
-			safe_free(*buffer);
-		}
-	}
-	return ret;
-}
-
 
 /*
  * Return the UTF8 path of a file selected through a load or save dialog

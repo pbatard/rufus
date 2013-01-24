@@ -190,6 +190,103 @@ BOOL GetDriveLabel(DWORD DriveIndex, char* letter, char** label)
 	return TRUE;
 }
 
+/*
+ * Fill the drive properties (size, FS, etc)
+ */
+BOOL GetDrivePartitionData(DWORD DeviceNumber, char* FileSystemName, DWORD FileSystemNameSize)
+{
+	BOOL r;
+	HANDLE hDrive;
+	DWORD size;
+	BYTE geometry[128], layout[1024], part_type;
+	void* disk_geometry = (void*)geometry;
+	void* drive_layout = (void*)layout;
+	PDISK_GEOMETRY_EX DiskGeometry = (PDISK_GEOMETRY_EX)disk_geometry;
+	PDRIVE_LAYOUT_INFORMATION_EX DriveLayout = (PDRIVE_LAYOUT_INFORMATION_EX)drive_layout;
+	char DrivePath[] = "#:\\", tmp[256];
+	DWORD i, nb_partitions = 0;
+
+	hDrive = GetDriveHandle(DeviceNumber, DrivePath, FALSE, FALSE);
+	if (hDrive == INVALID_HANDLE_VALUE)
+		return FALSE;
+
+	r = DeviceIoControl(hDrive, IOCTL_DISK_GET_DRIVE_GEOMETRY_EX, 
+			NULL, 0, geometry, sizeof(geometry), &size, NULL);
+	if (!r || size <= 0) {
+		uprintf("IOCTL_DISK_GET_DRIVE_GEOMETRY_EX failed for drive %c: %s\n", DrivePath[0], WindowsErrorString());
+		safe_closehandle(hDrive);
+		return FALSE;
+	}
+	SelectedDrive.DiskSize = DiskGeometry->DiskSize.QuadPart;
+	memcpy(&SelectedDrive.Geometry, &DiskGeometry->Geometry, sizeof(DISK_GEOMETRY));
+	uprintf("Sector Size: %d bytes\n", DiskGeometry->Geometry.BytesPerSector);
+	uprintf("Cylinders: %lld, TracksPerCylinder: %d, SectorsPerTrack: %d\n",
+		DiskGeometry->Geometry.Cylinders, DiskGeometry->Geometry.TracksPerCylinder, DiskGeometry->Geometry.SectorsPerTrack);
+
+	r = DeviceIoControl(hDrive, IOCTL_DISK_GET_DRIVE_LAYOUT_EX, 
+			NULL, 0, layout, sizeof(layout), &size, NULL );
+	if (!r || size <= 0) {
+		uprintf("IOCTL_DISK_GET_DRIVE_LAYOUT_EX failed for drive %c: %s\n", DrivePath[0], WindowsErrorString());
+		return FALSE;
+	}
+
+	switch (DriveLayout->PartitionStyle) {
+	case PARTITION_STYLE_MBR:
+		SelectedDrive.PartitionType = PARTITION_STYLE_MBR;
+		for (i=0; i<DriveLayout->PartitionCount; i++) {
+			if (DriveLayout->PartitionEntry[i].Mbr.PartitionType != PARTITION_ENTRY_UNUSED) {
+				nb_partitions++;
+			}
+		}
+		uprintf("Partition type: MBR, NB Partitions: %d\n", nb_partitions);
+		uprintf("Disk ID: 0x%08X\n", DriveLayout->Mbr.Signature);
+		for (i=0; i<DriveLayout->PartitionCount; i++) {
+			if (DriveLayout->PartitionEntry[i].Mbr.PartitionType != PARTITION_ENTRY_UNUSED) {
+				uprintf("Partition %d:\n", DriveLayout->PartitionEntry[i].PartitionNumber);
+				part_type = DriveLayout->PartitionEntry[i].Mbr.PartitionType;
+				uprintf("  Type: %s (0x%02x)\r\n  Size: %s (%lld bytes)\r\n  Start Sector: %d, Boot: %s, Recognized: %s\n",
+					GetPartitionType(part_type), part_type, SizeToHumanReadable(DriveLayout->PartitionEntry[i].PartitionLength),
+					DriveLayout->PartitionEntry[i].PartitionLength, DriveLayout->PartitionEntry[i].Mbr.HiddenSectors,
+					DriveLayout->PartitionEntry[i].Mbr.BootIndicator?"Yes":"No",
+					DriveLayout->PartitionEntry[i].Mbr.RecognizedPartition?"Yes":"No");
+				if (part_type == 0xee)	// Flag a protective MBR for non GPT platforms (XP)
+					SelectedDrive.has_protective_mbr = TRUE;
+			}
+		}
+		break;
+	case PARTITION_STYLE_GPT:
+		SelectedDrive.PartitionType = PARTITION_STYLE_GPT;
+		uprintf("Partition type: GPT, NB Partitions: %d\n", DriveLayout->PartitionCount);
+		uprintf("Disk GUID: %s\n", GuidToString(&DriveLayout->Gpt.DiskId));
+		uprintf("Max parts: %d, Start Offset: %lld, Usable = %lld bytes\n",
+			DriveLayout->Gpt.MaxPartitionCount, DriveLayout->Gpt.StartingUsableOffset.QuadPart, DriveLayout->Gpt.UsableLength.QuadPart);
+		for (i=0; i<DriveLayout->PartitionCount; i++) {
+			nb_partitions++;
+			tmp[0] = 0;
+			wchar_to_utf8_no_alloc(DriveLayout->PartitionEntry[i].Gpt.Name, tmp, sizeof(tmp));
+			uprintf("Partition %d:\r\n  Type: %s\r\n  Name: '%s'\n", DriveLayout->PartitionEntry[i].PartitionNumber,
+				GuidToString(&DriveLayout->PartitionEntry[i].Gpt.PartitionType), tmp);
+			uprintf("  ID: %s\r\n  Size: %s (%lld bytes)\r\n  Start Sector: %lld, Attributes: 0x%016llX\n",
+				GuidToString(&DriveLayout->PartitionEntry[i].Gpt.PartitionId), SizeToHumanReadable(DriveLayout->PartitionEntry[i].PartitionLength),
+				DriveLayout->PartitionEntry[i].PartitionLength, DriveLayout->PartitionEntry[i].StartingOffset.QuadPart / DiskGeometry->Geometry.BytesPerSector,
+				DriveLayout->PartitionEntry[i].Gpt.Attributes);
+		}
+		break;
+	default:
+		SelectedDrive.PartitionType = PARTITION_STYLE_MBR;
+		uprintf("Partition type: RAW\n");
+		break;
+	}
+	safe_closehandle(hDrive);
+
+	// Populate the filesystem data
+	if (!GetVolumeInformationA(DrivePath, NULL, 0, NULL, NULL, NULL, FileSystemName, FileSystemNameSize)) {
+		FileSystemName[0] = 0;
+	}
+
+	return TRUE;
+}
+
 BOOL UnmountDrive(HANDLE hDrive)
 {
 	DWORD size;

@@ -57,6 +57,9 @@
     <ClCompile Include="..\vhd.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\stdfn.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\rufus.h">

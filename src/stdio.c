@@ -1,6 +1,6 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
- * Standard I/O Routines (logging, status, etc.)
+ * Standard User I/O Routines (logging, status, etc.)
  * Copyright (c) 2011-2013 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -132,8 +132,7 @@ static char err_string[256] = {0};
 
 /*
  * Display a message on the status bar. If duration is non zero, ensures that message
- * is displayed for at least duration ms regardless, regardless of any other incoming
- * message
+ * is displayed for at least duration ms, regardless of any other incoming message
  */
 static BOOL bStatusTimerArmed = FALSE;
 char szStatusMessage[256] = { 0 };

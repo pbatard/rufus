@@ -102,7 +102,7 @@ char szFolderPath[MAX_PATH], app_dir[MAX_PATH];
 char* iso_path = NULL;
 float fScale = 1.0f;
 int default_fs;
-HWND hDeviceList, hPartitionScheme, hFileSystem, hClusterSize, hLabel, hDOSType, hNBPasses, hLog = NULL;
+HWND hDeviceList, hPartitionScheme, hFileSystem, hClusterSize, hLabel, hBootType, hNBPasses, hLog = NULL;
 HWND hISOProgressDlg = NULL, hLogDlg = NULL, hISOProgressBar, hISOFileName, hDiskID;
 BOOL use_own_c32[NB_OLD_C32] = {FALSE, FALSE}, detect_fakes = TRUE, mbr_selected_by_user = FALSE;
 BOOL iso_op_in_progress = FALSE, format_op_in_progress = FALSE;
@@ -112,7 +112,7 @@ RUFUS_UPDATE update = { {0,0,0,0}, {0,0}, NULL, NULL};
 extern char szStatusMessage[256];
 
 static HANDLE format_thid = NULL;
-static HWND hProgress = NULL, hDOS = NULL, hSelectISO = NULL;
+static HWND hProgress = NULL, hBoot = NULL, hSelectISO = NULL;
 static HICON hIconDisc, hIconDown, hIconUp;
 static StrArray DriveID, DriveLabel;
 static char szTimer[12] = "00:00:00";
@@ -319,92 +319,14 @@ static BOOL SetClusterSizes(int FSType)
  */
 static BOOL GetDriveInfo(int ComboIndex)
 {
-	BOOL r;
-	HANDLE hDrive;
-	DWORD size;
-	BYTE geometry[128], layout[1024], part_type;
-	void* disk_geometry = (void*)geometry;
-	void* drive_layout = (void*)layout;
-	PDISK_GEOMETRY_EX DiskGeometry = (PDISK_GEOMETRY_EX)disk_geometry;
-	PDRIVE_LAYOUT_INFORMATION_EX DriveLayout = (PDRIVE_LAYOUT_INFORMATION_EX)drive_layout;
-	char DrivePath[] = "#:\\", tmp[256], fs_type[32];
-	DWORD i, nb_partitions = 0;
+	DWORD i;
+	char fs_type[32];
 
 	memset(&SelectedDrive, 0, sizeof(SelectedDrive));
 	SelectedDrive.DeviceNumber = (DWORD)ComboBox_GetItemData(hDeviceList, ComboIndex);
 
-	hDrive = GetDriveHandle(SelectedDrive.DeviceNumber, DrivePath, FALSE, FALSE);
-	if (hDrive == INVALID_HANDLE_VALUE)
+	if (!GetDrivePartitionData(SelectedDrive.DeviceNumber, fs_type, sizeof(fs_type)))
 		return FALSE;
-
-	r = DeviceIoControl(hDrive, IOCTL_DISK_GET_DRIVE_GEOMETRY_EX, 
-			NULL, 0, geometry, sizeof(geometry), &size, NULL);
-	if (!r || size <= 0) {
-		uprintf("IOCTL_DISK_GET_DRIVE_GEOMETRY_EX failed for drive %c: %s\n", DrivePath[0], WindowsErrorString());
-		safe_closehandle(hDrive);
-		return FALSE;
-	}
-	SelectedDrive.DiskSize = DiskGeometry->DiskSize.QuadPart;
-	memcpy(&SelectedDrive.Geometry, &DiskGeometry->Geometry, sizeof(DISK_GEOMETRY));
-	uprintf("Sector Size: %d bytes\n", DiskGeometry->Geometry.BytesPerSector);
-	uprintf("Cylinders: %lld, TracksPerCylinder: %d, SectorsPerTrack: %d\n",
-		DiskGeometry->Geometry.Cylinders, DiskGeometry->Geometry.TracksPerCylinder, DiskGeometry->Geometry.SectorsPerTrack);
-
-	r = DeviceIoControl(hDrive, IOCTL_DISK_GET_DRIVE_LAYOUT_EX, 
-			NULL, 0, layout, sizeof(layout), &size, NULL );
-	if (!r || size <= 0) {
-		uprintf("IOCTL_DISK_GET_DRIVE_LAYOUT_EX failed for drive %c: %s\n", DrivePath[0], WindowsErrorString());
-	} else {
-		switch (DriveLayout->PartitionStyle) {
-		case PARTITION_STYLE_MBR:
-			SelectedDrive.PartitionType = PARTITION_STYLE_MBR;
-			for (i=0; i<DriveLayout->PartitionCount; i++) {
-				if (DriveLayout->PartitionEntry[i].Mbr.PartitionType != PARTITION_ENTRY_UNUSED) {
-					nb_partitions++;
-				}
-			}
-			uprintf("Partition type: MBR, NB Partitions: %d\n", nb_partitions);
-			uprintf("Disk ID: 0x%08X\n", DriveLayout->Mbr.Signature);
-			for (i=0; i<DriveLayout->PartitionCount; i++) {
-				if (DriveLayout->PartitionEntry[i].Mbr.PartitionType != PARTITION_ENTRY_UNUSED) {
-					uprintf("Partition %d:\n", DriveLayout->PartitionEntry[i].PartitionNumber);
-					part_type = DriveLayout->PartitionEntry[i].Mbr.PartitionType;
-					uprintf("  Type: %s (0x%02x)\r\n  Size: %s (%lld bytes)\r\n  Start Sector: %d, Boot: %s, Recognized: %s\n",
-						GetPartitionType(part_type), part_type, SizeToHumanReadable(DriveLayout->PartitionEntry[i].PartitionLength),
-						DriveLayout->PartitionEntry[i].PartitionLength, DriveLayout->PartitionEntry[i].Mbr.HiddenSectors,
-						DriveLayout->PartitionEntry[i].Mbr.BootIndicator?"Yes":"No",
-						DriveLayout->PartitionEntry[i].Mbr.RecognizedPartition?"Yes":"No");
-					if (part_type == 0xee)	// Flag a protective MBR for non GPT platforms (XP)
-						SelectedDrive.has_protective_mbr = TRUE;
-				}
-			}
-			break;
-		case PARTITION_STYLE_GPT:
-			SelectedDrive.PartitionType = PARTITION_STYLE_GPT;
-			uprintf("Partition type: GPT, NB Partitions: %d\n", DriveLayout->PartitionCount);
-			uprintf("Disk GUID: %s\n", GuidToString(&DriveLayout->Gpt.DiskId));
-			uprintf("Max parts: %d, Start Offset: %lld, Usable = %lld bytes\n",
-				DriveLayout->Gpt.MaxPartitionCount, DriveLayout->Gpt.StartingUsableOffset.QuadPart, DriveLayout->Gpt.UsableLength.QuadPart);
-			for (i=0; i<DriveLayout->PartitionCount; i++) {
-				nb_partitions++;
-				tmp[0] = 0;
-				wchar_to_utf8_no_alloc(DriveLayout->PartitionEntry[i].Gpt.Name, tmp, sizeof(tmp));
-				uprintf("Partition %d:\r\n  Type: %s\r\n  Name: '%s'\n", DriveLayout->PartitionEntry[i].PartitionNumber,
-					GuidToString(&DriveLayout->PartitionEntry[i].Gpt.PartitionType), tmp);
-				uprintf("  ID: %s\r\n  Size: %s (%lld bytes)\r\n  Start Sector: %lld, Attributes: 0x%016llX\n",
-					GuidToString(&DriveLayout->PartitionEntry[i].Gpt.PartitionId), SizeToHumanReadable(DriveLayout->PartitionEntry[i].PartitionLength),
-					DriveLayout->PartitionEntry[i].PartitionLength, DriveLayout->PartitionEntry[i].StartingOffset.QuadPart / DiskGeometry->Geometry.BytesPerSector,
-					DriveLayout->PartitionEntry[i].Gpt.Attributes);
-			}
-			break;
-		default:
-			SelectedDrive.PartitionType = PARTITION_STYLE_MBR;
-			uprintf("Partition type: RAW\n");
-			break;
-		}
-	}
-
-	safe_closehandle(hDrive);
 
 	if (!DefineClusterSizes()) {
 		uprintf("no file system is selectable for this drive\n");
@@ -412,8 +334,8 @@ static BOOL GetDriveInfo(int ComboIndex)
 	}
 
 	// re-select existing FS if it's one we know
-	if (GetVolumeInformationA(DrivePath, NULL, 0, NULL, NULL, NULL,
-		fs_type, sizeof(fs_type))) {
+	SelectedDrive.FSType = FS_UNKNOWN;
+	if (safe_strlen(fs_type) != 0) {
 		for (SelectedDrive.FSType=FS_MAX-1; SelectedDrive.FSType>=0; SelectedDrive.FSType--) {
 			if (safe_strcmp(fs_type, FileSystemLabel[SelectedDrive.FSType]) == 0) {
 				break;
@@ -488,7 +410,7 @@ static void SetFSFromISO(void)
 void SetMBRProps(void)
 {
 	int fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
-	int dt = (int)ComboBox_GetItemData(hDOSType, ComboBox_GetCurSel(hDOSType));
+	int dt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
 	BOOL needs_masquerading = (IS_WINPE(iso_report.winpe) && (!iso_report.uses_minint));
 
 	if ((!mbr_selected_by_user) && ((iso_path == NULL) || (dt != DT_ISO) || (fs != FS_NTFS))) {
@@ -504,8 +426,8 @@ void SetMBRProps(void)
 
 void EnableBootOptions(BOOL enable)
 {
-	EnableWindow(hDOS, enable);
-	EnableWindow(hDOSType, enable);
+	EnableWindow(hBoot, enable);
+	EnableWindow(hBootType, enable);
 	EnableWindow(hSelectISO, enable);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_RUFUS_MBR), enable);
 	EnableWindow(hDiskID, enable);
@@ -746,7 +668,7 @@ static void InitProgress(void)
 	float last_end = 0.0f, slots_discrete = 0.0f, slots_analog = 0.0f;
 
 	fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
-	dt = (int)ComboBox_GetItemData(hDOSType, ComboBox_GetCurSel(hDOSType));
+	dt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
 	memset(&nb_slots, 0, sizeof(nb_slots));
 	memset(&slot_end, 0, sizeof(slot_end));
 	previous_end = 0.0f;
@@ -759,7 +681,7 @@ static void InitProgress(void)
 	if (IsChecked(IDC_BADBLOCKS)) {
 		nb_slots[OP_BADBLOCKS] = -1;
 	}
-	if (IsChecked(IDC_DOS)) {
+	if (IsChecked(IDC_BOOT)) {
 		// 1 extra slot for PBR writing
 		switch (dt) {
 		case DT_WINME:
@@ -855,138 +777,6 @@ void UpdateProgress(int op, float percent)
 	SetTaskbarProgressValue(pos, MAX_PROGRESS);
 }
 
-/*
- * Set or restore a Local Group Policy DWORD key indexed by szPath/SzPolicy
- */
-#pragma push_macro("INTERFACE")
-#undef  INTERFACE
-#define INTERFACE IGroupPolicyObject
-#define REGISTRY_EXTENSION_GUID { 0x35378EAC, 0x683F, 0x11D2, {0xA8, 0x9A, 0x00, 0xC0, 0x4F, 0xBB, 0xCF, 0xA2} }
-#define GPO_OPEN_LOAD_REGISTRY  1
-#define GPO_SECTION_MACHINE     2
-typedef enum _GROUP_POLICY_OBJECT_TYPE {
-	GPOTypeLocal = 0, GPOTypeRemote, GPOTypeDS
-} GROUP_POLICY_OBJECT_TYPE, *PGROUP_POLICY_OBJECT_TYPE;
-DECLARE_INTERFACE_(IGroupPolicyObject, IUnknown) {
-	STDMETHOD(QueryInterface) (THIS_ REFIID riid, LPVOID *ppvObj) PURE;
-	STDMETHOD_(ULONG, AddRef) (THIS) PURE;
-	STDMETHOD_(ULONG, Release) (THIS) PURE;
-	STDMETHOD(New) (THIS_ LPOLESTR pszDomainName, LPOLESTR pszDisplayName, DWORD dwFlags) PURE;
-	STDMETHOD(OpenDSGPO) (THIS_ LPOLESTR pszPath, DWORD dwFlags) PURE;
-	STDMETHOD(OpenLocalMachineGPO) (THIS_ DWORD dwFlags) PURE;
-	STDMETHOD(OpenRemoteMachineGPO) (THIS_ LPOLESTR pszComputerName, DWORD dwFlags) PURE;
-	STDMETHOD(Save) (THIS_ BOOL bMachine, BOOL bAdd,GUID *pGuidExtension, GUID *pGuid) PURE;
-	STDMETHOD(Delete) (THIS) PURE;
-	STDMETHOD(GetName) (THIS_ LPOLESTR pszName, int cchMaxLength) PURE;
-	STDMETHOD(GetDisplayName) (THIS_ LPOLESTR pszName, int cchMaxLength) PURE;
-	STDMETHOD(SetDisplayName) (THIS_ LPOLESTR pszName) PURE;
-	STDMETHOD(GetPath) (THIS_ LPOLESTR pszPath, int cchMaxPath) PURE;
-	STDMETHOD(GetDSPath) (THIS_ DWORD dwSection, LPOLESTR pszPath ,int cchMaxPath) PURE;
-	STDMETHOD(GetFileSysPath) (THIS_ DWORD dwSection, LPOLESTR pszPath, int cchMaxPath) PURE;
-	STDMETHOD(GetRegistryKey) (THIS_ DWORD dwSection, HKEY *hKey) PURE;
-	STDMETHOD(GetOptions) (THIS_ DWORD *dwOptions) PURE;
-	STDMETHOD(SetOptions) (THIS_ DWORD dwOptions, DWORD dwMask) PURE;
-	STDMETHOD(GetType) (THIS_ GROUP_POLICY_OBJECT_TYPE *gpoType) PURE;
-	STDMETHOD(GetMachineName) (THIS_ LPOLESTR pszName, int cchMaxLength) PURE;
-	STDMETHOD(GetPropertySheetPages) (THIS_ HPROPSHEETPAGE **hPages, UINT *uPageCount) PURE;
-};
-typedef IGroupPolicyObject *LPGROUPPOLICYOBJECT;
-
-BOOL SetLGP(BOOL bRestore, const char* szPath, const char* szPolicy, DWORD dwValue)
-{
-	LONG r;
-	DWORD disp, regtype, val=0, val_size=sizeof(DWORD);
-	HRESULT hr;
-	IGroupPolicyObject* pLGPO;
-	// Along with global 'existing_key', this static value is used to restore initial state
-	static DWORD original_val;
-	HKEY path_key = NULL, policy_key = NULL;
-	// MSVC is finicky about these ones => redefine them
-	const IID my_IID_IGroupPolicyObject = 
-		{ 0xea502723, 0xa23d, 0x11d1, { 0xa7, 0xd3, 0x0, 0x0, 0xf8, 0x75, 0x71, 0xe3 } };
-	const IID my_CLSID_GroupPolicyObject = 
-		{ 0xea502722, 0xa23d, 0x11d1, { 0xa7, 0xd3, 0x0, 0x0, 0xf8, 0x75, 0x71, 0xe3 } };
-	GUID ext_guid = REGISTRY_EXTENSION_GUID;
-	// Can be anything really
-	GUID snap_guid = { 0x3D271CFC, 0x2BC6, 0x4AC2, {0xB6, 0x33, 0x3B, 0xDF, 0xF5, 0xBD, 0xAB, 0x2A} };
-
-	// We need an IGroupPolicyObject instance to set a Local Group Policy
-	hr = CoCreateInstance(&my_CLSID_GroupPolicyObject, NULL, CLSCTX_INPROC_SERVER, &my_IID_IGroupPolicyObject, (LPVOID*)&pLGPO);
-	if (FAILED(hr)) {
-		uprintf("SetLGP: CoCreateInstance failed; hr = %x\n", hr);
-		goto error;
-	}
-
-	hr = pLGPO->lpVtbl->OpenLocalMachineGPO(pLGPO, GPO_OPEN_LOAD_REGISTRY);
-	if (FAILED(hr)) {
-		uprintf("SetLGP: OpenLocalMachineGPO failed - error %x\n", hr);
-		goto error;
-	}
-
-	hr = pLGPO->lpVtbl->GetRegistryKey(pLGPO, GPO_SECTION_MACHINE, &path_key);
-	if (FAILED(hr)) {
-		uprintf("SetLGP: GetRegistryKey failed - error %x\n", hr);
-		goto error;
-	}
-
-	// The DisableSystemRestore is set in Software\Policies\Microsoft\Windows\DeviceInstall\Settings
-	r = RegCreateKeyExA(path_key, szPath, 0, NULL, 0, KEY_SET_VALUE | KEY_QUERY_VALUE,
-		NULL, &policy_key, &disp);
-	if (r != ERROR_SUCCESS) {
-		uprintf("SetLGP: Failed to open LGPO path %s - error %x\n", szPath, hr);
-		goto error;
-	}
-
-	if ((disp == REG_OPENED_EXISTING_KEY) && (!bRestore) && (!existing_key)) {
-		// backup existing value for restore
-		existing_key = TRUE;
-		regtype = REG_DWORD;
-		r = RegQueryValueExA(policy_key, szPolicy, NULL, &regtype, (LPBYTE)&original_val, &val_size);
-		if (r == ERROR_FILE_NOT_FOUND) {
-			// The Key exists but not its value, which is OK
-			existing_key = FALSE;
-		} else if (r != ERROR_SUCCESS) {
-			uprintf("SetLGP: Failed to read original %s policy value - error %x\n", szPolicy, r);
-		}
-	}
-
-	if ((!bRestore) || (existing_key)) {
-		val = (bRestore)?original_val:dwValue;
-		r = RegSetValueExA(policy_key, szPolicy, 0, REG_DWORD, (BYTE*)&val, sizeof(val));
-	} else {
-		r = RegDeleteValueA(policy_key, szPolicy);
-	}
-	if (r != ERROR_SUCCESS) {
-		uprintf("SetLGP: RegSetValueEx / RegDeleteValue failed - error %x\n", r);
-	}
-	RegCloseKey(policy_key);
-	policy_key = NULL;
-
-	// Apply policy
-	hr = pLGPO->lpVtbl->Save(pLGPO, TRUE, (bRestore)?FALSE:TRUE, &ext_guid, &snap_guid);
-	if (r != S_OK) {
-		uprintf("SetLGP: Unable to apply %s policy - error %x\n", szPolicy, hr);
-		goto error;
-	} else {
-		if ((!bRestore) || (existing_key)) {
-			uprintf("SetLGP: Successfully %s %s policy to 0x%08X\n", (bRestore)?"restored":"set", szPolicy, val);
-		} else {
-			uprintf("SetLGP: Successfully removed %s policy key\n", szPolicy);
-		}
-	}
-
-	RegCloseKey(path_key);
-	pLGPO->lpVtbl->Release(pLGPO);
-	return TRUE;
-
-error:
-	if (path_key != NULL) RegCloseKey(path_key);
-	if (policy_key != NULL) RegCloseKey(policy_key);
-	if (pLGPO != NULL) pLGPO->lpVtbl->Release(pLGPO);
-	return FALSE;
-}
-#pragma pop_macro("INTERFACE")
-
 /* 
  * Toggle controls according to operation
  */
@@ -1002,14 +792,14 @@ static void EnableControls(BOOL bEnable)
 	EnableWindow(GetDlgItem(hMainDialog, IDC_QUICKFORMAT), bEnable);
 	if (bEnable) {
 		fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
-		EnableWindow(hDOS, (fs == FS_FAT16) || (fs == FS_FAT32) || (fs == FS_NTFS));
-		EnableWindow(hDOSType, (fs == FS_FAT16) || (fs == FS_FAT32) || (fs == FS_NTFS));
+		EnableWindow(hBoot, (fs == FS_FAT16) || (fs == FS_FAT32) || (fs == FS_NTFS));
+		EnableWindow(hBootType, (fs == FS_FAT16) || (fs == FS_FAT32) || (fs == FS_NTFS));
 		EnableWindow(hDiskID, (fs == FS_FAT16) || (fs == FS_FAT32) || (fs == FS_NTFS));
 		EnableWindow(GetDlgItem(hMainDialog, IDC_RUFUS_MBR), (fs == FS_FAT16) || (fs == FS_FAT32) || (fs == FS_NTFS));
 		EnableWindow(GetDlgItem(hMainDialog, IDC_EXTRA_PARTITION), (fs == FS_FAT16) || (fs == FS_FAT32) || (fs == FS_NTFS));
 	} else {
-		EnableWindow(hDOS, FALSE);
-		EnableWindow(hDOSType, FALSE);
+		EnableWindow(hBoot, FALSE);
+		EnableWindow(hBootType, FALSE);
 		EnableWindow(hDiskID, FALSE);
 		EnableWindow(GetDlgItem(hMainDialog, IDC_RUFUS_MBR), FALSE);
 		EnableWindow(GetDlgItem(hMainDialog, IDC_EXTRA_PARTITION), FALSE);
@@ -1234,7 +1024,7 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 		}
 
 		// Enable DOS, set DOS Type to ISO (last item) and set FS accordingly
-		CheckDlgButton(hMainDialog, IDC_DOS, BST_CHECKED);
+		CheckDlgButton(hMainDialog, IDC_BOOT, BST_CHECKED);
 		SetFSFromISO();
 		SetMBRProps();
 		for (i=(int)safe_strlen(iso_path); (i>0)&&(iso_path[i]!='\\'); i--);
@@ -1254,7 +1044,6 @@ out:
 	SendMessage(hISOProgressDlg, UM_ISO_EXIT, 0, 0);
 	ExitThread(0);
 }
-
 
 void MoveControl(int nID, float vertical_shift)
 {
@@ -1330,8 +1119,8 @@ void InitDialog(HWND hDlg)
 	hClusterSize = GetDlgItem(hDlg, IDC_CLUSTERSIZE);
 	hLabel = GetDlgItem(hDlg, IDC_LABEL);
 	hProgress = GetDlgItem(hDlg, IDC_PROGRESS);
-	hDOS = GetDlgItem(hDlg, IDC_DOS);
-	hDOSType = GetDlgItem(hDlg, IDC_DOSTYPE);
+	hBoot = GetDlgItem(hDlg, IDC_BOOT);
+	hBootType = GetDlgItem(hDlg, IDC_BOOTTYPE);
 	hSelectISO = GetDlgItem(hDlg, IDC_SELECT_ISO);
 	hNBPasses = GetDlgItem(hDlg, IDC_NBPASSES);
 	hDiskID = GetDlgItem(hDlg, IDC_DISK_ID);
@@ -1379,10 +1168,10 @@ void InitDialog(HWND hDlg)
 	IGNORE_RETVAL(ComboBox_SetCurSel(hNBPasses, 1));
 	CreateTooltip(hNBPasses, "Pattern: 0x55, 0xAA", -1);
 	// Fill up the DOS type dropdown
-	IGNORE_RETVAL(ComboBox_SetItemData(hDOSType, ComboBox_AddStringU(hDOSType, "MS-DOS"), DT_WINME));
-	IGNORE_RETVAL(ComboBox_SetItemData(hDOSType, ComboBox_AddStringU(hDOSType, "FreeDOS"), DT_FREEDOS));
-	IGNORE_RETVAL(ComboBox_SetItemData(hDOSType, ComboBox_AddStringU(hDOSType, "ISO Image"), DT_ISO));
-	IGNORE_RETVAL(ComboBox_SetCurSel(hDOSType, selection_default));
+	IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, "MS-DOS"), DT_WINME));
+	IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, "FreeDOS"), DT_FREEDOS));
+	IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, "ISO Image"), DT_ISO));
+	IGNORE_RETVAL(ComboBox_SetCurSel(hBootType, selection_default));
 	// Fill up the MBR masqueraded disk IDs ("8 disks should be enough for anybody")
 	IGNORE_RETVAL(ComboBox_SetItemData(hDiskID, ComboBox_AddStringU(hDiskID, "0x80 (default)"), 0x80));
 	for (i=1; i<=7; i++) {
@@ -1396,7 +1185,7 @@ void InitDialog(HWND hDlg)
 	StrArrayCreate(&DriveLabel, MAX_DRIVES);
 	// Set various checkboxes
 	CheckDlgButton(hDlg, IDC_QUICKFORMAT, BST_CHECKED);
-	CheckDlgButton(hDlg, IDC_DOS, BST_CHECKED);
+	CheckDlgButton(hDlg, IDC_BOOT, BST_CHECKED);
 	CheckDlgButton(hDlg, IDC_SET_ICON, BST_CHECKED);
 
 	// Load system icons (NB: Use the excellent http://www.nirsoft.net/utils/iconsext.html to find icon IDs)
@@ -1437,8 +1226,8 @@ void InitDialog(HWND hDlg)
 	CreateTooltip(GetDlgItem(hDlg, IDC_ADVANCED), "Toggle advanced options", -1);
 	CreateTooltip(GetDlgItem(hDlg, IDC_BADBLOCKS), "Test the device for bad blocks using a byte pattern", -1);
 	CreateTooltip(GetDlgItem(hDlg, IDC_QUICKFORMAT), "Unchek this box to use the \"slow\" format method", -1);
-	CreateTooltip(hDOS, "Check this box to make the USB drive bootable", -1);
-	CreateTooltip(hDOSType, "Boot method", -1);
+	CreateTooltip(hBoot, "Check this box to make the USB drive bootable", -1);
+	CreateTooltip(hBootType, "Boot method", -1);
 	CreateTooltip(hSelectISO, "Click to select an ISO...", -1);
 	CreateTooltip(GetDlgItem(hDlg, IDC_SET_ICON), "Check this box to allow the display of international labels "
 		"and set a device icon (creates an autorun.inf)", 10000);
@@ -1630,57 +1419,57 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				EnableBootOptions(TRUE);
 				SetMBRProps();
 				// Remove the SysLinux option if exists
-				if (ComboBox_GetItemData(hDOSType, ComboBox_GetCount(hDOSType)-1) == DT_SYSLINUX) {
-					IGNORE_RETVAL(ComboBox_DeleteString(hDOSType,  ComboBox_GetCount(hDOSType)-1));
-					IGNORE_RETVAL(ComboBox_SetCurSel(hDOSType, 1));
+				if (ComboBox_GetItemData(hBootType, ComboBox_GetCount(hBootType)-1) == DT_SYSLINUX) {
+					IGNORE_RETVAL(ComboBox_DeleteString(hBootType,  ComboBox_GetCount(hBootType)-1));
+					IGNORE_RETVAL(ComboBox_SetCurSel(hBootType, 1));
 				}
 				break;
 			}
 			if (fs == FS_EXFAT) {
-				if (IsWindowEnabled(hDOS)) {
+				if (IsWindowEnabled(hBoot)) {
 					// unlikely to be supported by BIOSes => don't bother
-					IGNORE_RETVAL(ComboBox_SetCurSel(hDOSType, 0));
-					uDOSChecked = IsDlgButtonChecked(hMainDialog, IDC_DOS);
-					CheckDlgButton(hDlg, IDC_DOS, BST_UNCHECKED);
+					IGNORE_RETVAL(ComboBox_SetCurSel(hBootType, 0));
+					uDOSChecked = IsDlgButtonChecked(hMainDialog, IDC_BOOT);
+					CheckDlgButton(hDlg, IDC_BOOT, BST_UNCHECKED);
 					EnableBootOptions(FALSE);
 				}
 				SetMBRProps();
 				break;
 			}
-			IGNORE_RETVAL(ComboBox_ResetContent(hDOSType));
+			IGNORE_RETVAL(ComboBox_ResetContent(hBootType));
 			if ((bt == BT_BIOS) && ((fs == FS_FAT16) || (fs == FS_FAT32))) {
-				IGNORE_RETVAL(ComboBox_SetItemData(hDOSType, ComboBox_AddStringU(hDOSType, "MS-DOS"), DT_WINME));
-				IGNORE_RETVAL(ComboBox_SetItemData(hDOSType, ComboBox_AddStringU(hDOSType, "FreeDOS"), DT_FREEDOS));
+				IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, "MS-DOS"), DT_WINME));
+				IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, "FreeDOS"), DT_FREEDOS));
 			}
-			IGNORE_RETVAL(ComboBox_SetItemData(hDOSType, ComboBox_AddStringU(hDOSType, "ISO Image"), DT_ISO));
+			IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, "ISO Image"), DT_ISO));
 			// If needed (advanced mode) also append a Syslinux option
 			if ( (bt == BT_BIOS) && (((fs == FS_FAT16) || (fs == FS_FAT32)) && (advanced_mode)) )
-				IGNORE_RETVAL(ComboBox_SetItemData(hDOSType, ComboBox_AddStringU(hDOSType, "SysLinux"), DT_SYSLINUX));
+				IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, "SysLinux"), DT_SYSLINUX));
 			if ( ((!advanced_mode) && (selection_default == DT_SYSLINUX)) ) {
 				selection_default = DT_FREEDOS;
 				CheckDlgButton(hDlg, IDC_DISK_ID, BST_UNCHECKED);
 			}
-			for (i=0; i<ComboBox_GetCount(hDOSType); i++) {
-				if (ComboBox_GetItemData(hDOSType, i) == selection_default) {
-					IGNORE_RETVAL(ComboBox_SetCurSel(hDOSType, i));
+			for (i=0; i<ComboBox_GetCount(hBootType); i++) {
+				if (ComboBox_GetItemData(hBootType, i) == selection_default) {
+					IGNORE_RETVAL(ComboBox_SetCurSel(hBootType, i));
 					break;
 				}
 			}
-			if (i == ComboBox_GetCount(hDOSType))
-				IGNORE_RETVAL(ComboBox_SetCurSel(hDOSType, 0));
-			if (!IsWindowEnabled(hDOS)) {
-				EnableWindow(hDOS, TRUE);
-				EnableWindow(hDOSType, TRUE);
+			if (i == ComboBox_GetCount(hBootType))
+				IGNORE_RETVAL(ComboBox_SetCurSel(hBootType, 0));
+			if (!IsWindowEnabled(hBoot)) {
+				EnableWindow(hBoot, TRUE);
+				EnableWindow(hBootType, TRUE);
 				EnableWindow(hSelectISO, TRUE);
-				CheckDlgButton(hDlg, IDC_DOS, uDOSChecked);
+				CheckDlgButton(hDlg, IDC_BOOT, uDOSChecked);
 			}
 			SetMBRProps();
 			break;
-		case IDC_DOSTYPE:
+		case IDC_BOOTTYPE:
 			if (HIWORD(wParam) != CBN_SELCHANGE)
 				break;
-			selection_default = (int) ComboBox_GetItemData(hDOSType, ComboBox_GetCurSel(hDOSType));
-			if (ComboBox_GetItemData(hDOSType, ComboBox_GetCurSel(hDOSType)) == DT_ISO) {
+			selection_default = (int) ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
+			if (ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType)) == DT_ISO) {
 				if ((iso_path == NULL) || (iso_report.label[0] == 0)) {
 					// Set focus to the Select ISO button
 					SendMessage(hMainDialog, WM_NEXTDLGCTL, (WPARAM)FALSE, 0);
@@ -1730,11 +1519,11 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			SetTaskbarProgressState(TASKBAR_NORMAL);
 			SetTaskbarProgressValue(0, MAX_PROGRESS);
 			SendMessage(hProgress, PBM_SETPOS, 0, 0);
-			selection_default =  (int)ComboBox_GetItemData(hDOSType, ComboBox_GetCurSel(hDOSType));
+			selection_default =  (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
 			nDeviceIndex = ComboBox_GetCurSel(hDeviceList);
 			if (nDeviceIndex != CB_ERR) {
-				if (IsChecked(IDC_DOS)) {
-					if (ComboBox_GetItemData(hDOSType, ComboBox_GetCurSel(hDOSType)) == DT_ISO) {
+				if (IsChecked(IDC_BOOT)) {
+					if (ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType)) == DT_ISO) {
 						if (iso_path == NULL) {
 							MessageBoxA(hMainDialog, "Please click on the disc button to select a bootable ISO,\n"
 								"or uncheck the \"Create a bootable disk...\" checkbox.",
@@ -1936,7 +1725,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	// We use local group policies rather than direct registry manipulation
 	// 0x9e disables removable and fixed drive notifications
-	SetLGP(FALSE, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer", "NoDriveTypeAutorun", 0x9e);
+	SetLGP(FALSE, &existing_key, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer", "NoDriveTypeAutorun", 0x9e);
 
 	// Create the main Window
 	if ( (hDlg = CreateDialogA(hInstance, MAKEINTRESOURCEA(IDD_DIALOG), NULL, MainCallback)) == NULL ) {
@@ -2003,7 +1792,7 @@ out:
 	safe_free(iso_path);
 	safe_free(update.download_url);
 	safe_free(update.release_notes);
-	SetLGP(TRUE, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer", "NoDriveTypeAutorun", 0);
+	SetLGP(TRUE, &existing_key, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer", "NoDriveTypeAutorun", 0);
 	CloseHandle(mutex);
 	uprintf("*** RUFUS EXIT ***\n");
 

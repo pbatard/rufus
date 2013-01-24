@@ -30,7 +30,7 @@ LANGUAGE LANG_ENGLISH, SUBLANG_NEUTRAL
 IDD_DIALOG DIALOGEX 12, 12, 206, 316
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_APPWINDOW
-CAPTION "Rufus v1.3.2.227"
+CAPTION "Rufus v1.3.2.228"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     DEFPUSHBUTTON   "Start",IDC_START,94,278,50,14
@@ -48,13 +48,13 @@ BEGIN
     EDITTEXT        IDC_LABEL,7,131,190,13,ES_AUTOHSCROLL
     CONTROL         "Check device for bad blocks:",IDC_BADBLOCKS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,161,101,10
     CONTROL         "Quick Format",IDC_QUICKFORMAT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,173,55,10
-    CONTROL         "Create a bootable disk using:",IDC_DOS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,185,104,10
+    CONTROL         "Create a bootable disk using:",IDC_BOOT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,185,104,10
     CONTROL         "Create extended label and icon files",IDC_SET_ICON,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,198,131,10
     LTEXT           "New volume label",IDC_STATIC,9,121,105,10
     CONTROL         "",IDC_PROGRESS,"msctls_progress32",PBS_SMOOTH | WS_BORDER,8,259,189,9
     COMBOBOX        IDC_NBPASSES,119,159,49,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    COMBOBOX        IDC_DOSTYPE,119,183,49,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_BOOTTYPE,119,183,49,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     PUSHBUTTON      "...",IDC_SELECT_ISO,171,182,22,14,BS_ICON
     PUSHBUTTON      "T",IDC_TEST,80,278,12,14,NOT WS_VISIBLE
     CONTROL         "Use Rufus MBR with BIOS ID:",IDC_RUFUS_MBR,"Button",BS_AUTOCHECKBOX | NOT WS_VISIBLE | WS_TABSTOP,13,222,106,10
@@ -274,8 +274,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,3,2,227
- PRODUCTVERSION 1,3,2,227
+ FILEVERSION 1,3,2,228
+ PRODUCTVERSION 1,3,2,228
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -292,13 +292,13 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Akeo Consulting (http://akeo.ie)"
             VALUE "FileDescription", "Rufus"
-            VALUE "FileVersion", "1.3.2.227"
+            VALUE "FileVersion", "1.3.2.228"
             VALUE "InternalName", "Rufus"
             VALUE "LegalCopyright", "(c) 2011-2012 Pete Batard (GPL v3)"
             VALUE "LegalTrademarks", "http://www.gnu.org/copyleft/gpl.html"
             VALUE "OriginalFilename", "rufus.exe"
             VALUE "ProductName", "Rufus"
-            VALUE "ProductVersion", "1.3.2.227"
+            VALUE "ProductVersion", "1.3.2.228"
         END
     END
     BLOCK "VarFileInfo"

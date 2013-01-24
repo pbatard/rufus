@@ -239,7 +239,7 @@ enum WindowsVersion {
  */
 extern HINSTANCE hMainInstance;
 extern HWND hMainDialog, hLogDlg, hStatus, hDeviceList, hCapacity;
-extern HWND hPartitionScheme, hFileSystem, hClusterSize, hLabel, hDOSType, hNBPasses, hLog;
+extern HWND hPartitionScheme, hFileSystem, hClusterSize, hLabel, hBootType, hNBPasses, hLog;
 extern HWND hISOProgressDlg, hISOProgressBar, hISOFileName, hDiskID;
 extern float fScale;
 extern char szFolderPath[MAX_PATH], app_dir[MAX_PATH];
@@ -285,6 +285,7 @@ extern BOOL InstallSyslinux(DWORD num, const char* drive_name);
 DWORD WINAPI FormatThread(void* param);
 extern BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system);
 extern const char* GetPartitionType(BYTE Type);
+extern BOOL GetDrivePartitionData(DWORD DeviceNumber, char* FileSystemName, DWORD FileSystemNameSize);
 extern HANDLE GetDriveHandle(DWORD DriveIndex, char* DriveLetter, BOOL bWriteAccess, BOOL bLockDrive);
 extern BOOL GetDriveLabel(DWORD DriveIndex, char* letter, char** label);
 extern BOOL UnmountDrive(HANDLE hDrive);
@@ -292,6 +293,7 @@ extern BOOL CreateProgress(void);
 extern BOOL SetAutorun(const char* path);
 extern char* FileDialog(BOOL save, char* path, char* filename, char* ext, char* ext_desc);
 extern BOOL FileIO(BOOL save, char* path, char** buffer, DWORD* size);
+extern BOOL SetLGP(BOOL bRestore, BOOL* bExistingKey, const char* szPath, const char* szPolicy, DWORD dwValue);
 extern LONG GetEntryWidth(HWND hDropDown, const char* entry);
 extern BOOL DownloadFile(const char* url, const char* file, HWND hProgressDialog);
 extern HANDLE DownloadFileThreaded(const char* url, const char* file, HWND hProgressDialog);
