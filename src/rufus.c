@@ -987,9 +987,9 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 			uprintf("    With an old %s: %s\n", old_c32_name[i], iso_report.has_old_c32[i]?"Yes":"No");
 		}
 	}
-	if ((!iso_report.has_bootmgr) && (!iso_report.has_isolinux) && (!IS_WINPE(iso_report.winpe))) {
+	if ((!iso_report.has_bootmgr) && (!iso_report.has_isolinux) && (!IS_WINPE(iso_report.winpe)) && (!iso_report.has_efi)) {
 		MessageBoxU(hMainDialog, "This version of Rufus only supports bootable ISOs\n"
-			"based on 'bootmgr/WinPE' or 'isolinux'.\n"
+			"based on 'bootmgr/WinPE', 'isolinux' or EFI boot.\n"
 			"This ISO image doesn't appear to use either...", "Unsupported ISO", MB_OK|MB_ICONINFORMATION);
 		safe_free(iso_path);
 		SetMBRProps();
@@ -1061,6 +1061,14 @@ void MoveControl(int nID, float vertical_shift)
 		(rect.right - rect.left), (rect.bottom - rect.top), TRUE);
 }
 
+void SetPassesTooltip(void)
+{
+	char passes_tooltip[32];
+	safe_strcpy(passes_tooltip, sizeof(passes_tooltip), "Pattern: 0x55, 0xAA, 0xFF, 0x00");
+	passes_tooltip[13 + ComboBox_GetCurSel(hNBPasses)*6] = 0;
+	CreateTooltip(hNBPasses, passes_tooltip, -1);
+}
+
 // Toggle "advanced" mode
 void ToggleAdvanced(void)
 {
@@ -1099,6 +1107,61 @@ void ToggleAdvanced(void)
 	// Toggle the up/down icon
 	SendMessage(GetDlgItem(hMainDialog, IDC_ADVANCED), BCM_SETIMAGELIST, 0, (LPARAM)(advanced_mode?&bi_up:&bi_down));
 }
+
+static BOOL BootCheck(void)
+{
+	int fs, bt;
+
+	if (ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType)) == DT_ISO) {
+		if (iso_path == NULL) {
+			MessageBoxA(hMainDialog, "Please click on the disc button to select a bootable ISO,\n"
+				"or uncheck the \"Create a bootable disk...\" checkbox.",
+				"No ISO image selected...", MB_OK|MB_ICONERROR);
+			return FALSE;
+		}
+		if ((iso_size_check) && (iso_report.projected_size > (uint64_t)SelectedDrive.DiskSize)) {
+			MessageBoxA(hMainDialog, "This ISO image is too big "
+				"for the selected target.", "ISO image too big...", MB_OK|MB_ICONERROR);
+			return FALSE;
+		}
+		fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
+		bt = GETBIOSTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
+		if (bt == BT_UEFI) {
+			if (!IS_EFI(iso_report)) {
+				MessageBoxA(hMainDialog, "When using UEFI Target Type, only EFI bootable ISO images are supported. "
+					"Please select an EFI bootable ISO or set the Target Type to BIOS.", "Unsupported ISO...", MB_OK|MB_ICONERROR);
+				return FALSE;
+			} else if (fs > FS_FAT32) {
+				MessageBoxA(hMainDialog, "When using UEFI Target Type, only FAT/FAT32 is supported. "
+					"Please select FAT/FAT32 as the File system or set the Target Type to BIOS.", "Unsupported filesystem...", MB_OK|MB_ICONERROR);
+				return FALSE;
+			}
+		} else if ((fs == FS_NTFS) && (!iso_report.has_bootmgr) && (!IS_WINPE(iso_report.winpe))) {
+			if (iso_report.has_isolinux) {
+				MessageBoxA(hMainDialog, "Only FAT/FAT32 is supported for this type of ISO. "
+					"Please select FAT/FAT32 as the File system.", "Unsupported filesystem...", MB_OK|MB_ICONERROR);
+			} else {
+				MessageBoxA(hMainDialog, "Only 'bootmgr' or 'WinPE' based ISO "
+					"images can currently be used with NTFS.", "Unsupported ISO...", MB_OK|MB_ICONERROR);
+			}
+			return FALSE;
+		} else if (((fs == FS_FAT16)||(fs == FS_FAT32)) && (!iso_report.has_isolinux)) {
+			MessageBoxA(hMainDialog, "FAT/FAT32 can only be used for isolinux based ISO images "
+				"or when the Target Type is UEFI.", "Unsupported ISO...", MB_OK|MB_ICONERROR);
+			return FALSE;
+		}
+		if ((bt == BT_UEFI) && (iso_report.has_win7_efi) && (!WimExtractCheck())) {
+			if (MessageBoxA(hMainDialog, "Your platform cannot extract files from WIM archives. WIM extraction "
+				"is required to create EFI bootable Windows 7 and Windows Vista USB drives. You can fix that "
+				"by installing a recent version of 7-Zip.\r\nDo you want to visit the 7-zip download page?",
+				"Missing WIM support...", MB_YESNO|MB_ICONERROR) == IDYES)
+				ShellExecuteA(hMainDialog, "open", SEVENZIP_URL, NULL, NULL, SW_SHOWNORMAL);
+			return FALSE;
+		}
+	}
+	return TRUE;
+}
+
 
 void InitDialog(HWND hDlg)
 {
@@ -1161,12 +1224,12 @@ void InitDialog(HWND hDlg)
 	// Use maximum granularity for the progress bar
 	SendMessage(hProgress, PBM_SETRANGE, 0, (MAX_PROGRESS<<16) & 0xFFFF0000);
 	// Fill up the passes
-	IGNORE_RETVAL(ComboBox_AddStringU(hNBPasses, "1 Pass"));
-	IGNORE_RETVAL(ComboBox_AddStringU(hNBPasses, "2 Passes"));
-	IGNORE_RETVAL(ComboBox_AddStringU(hNBPasses, "3 Passes"));
-	IGNORE_RETVAL(ComboBox_AddStringU(hNBPasses, "4 Passes"));
+	for (i=0; i<4; i++) {
+		safe_sprintf(tmp, sizeof(tmp), "%d Pass%s", i+1, (i==0)?"":"es");
+		IGNORE_RETVAL(ComboBox_AddStringU(hNBPasses, tmp));
+	}
 	IGNORE_RETVAL(ComboBox_SetCurSel(hNBPasses, 1));
-	CreateTooltip(hNBPasses, "Pattern: 0x55, 0xAA", -1);
+	SetPassesTooltip();
 	// Fill up the DOS type dropdown
 	IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, "MS-DOS"), DT_WINME));
 	IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, "FreeDOS"), DT_FREEDOS));
@@ -1380,20 +1443,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		case IDC_NBPASSES:
 			if (HIWORD(wParam) != CBN_SELCHANGE)
 				break;
-			switch(ComboBox_GetCurSel(hNBPasses)) {
-			case 0:
-				CreateTooltip(hNBPasses, "Pattern: 0x55", -1);
-				break;
-			case 1:
-				CreateTooltip(hNBPasses, "Pattern: 0x55, 0xAA", -1);
-				break;
-			case 2:
-				CreateTooltip(hNBPasses, "Pattern: 0x55, 0xAA, 0xFF", -1);
-				break;
-			case 3:
-				CreateTooltip(hNBPasses, "Pattern: 0x55, 0xAA, 0xFF, 0x00", -1);
-				break;
-			}
+			SetPassesTooltip();
 			break;
 		case IDC_PARTITION_SCHEME:
 		case IDC_FILESYSTEM:
@@ -1522,55 +1572,8 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			selection_default =  (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
 			nDeviceIndex = ComboBox_GetCurSel(hDeviceList);
 			if (nDeviceIndex != CB_ERR) {
-				if (IsChecked(IDC_BOOT)) {
-					if (ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType)) == DT_ISO) {
-						if (iso_path == NULL) {
-							MessageBoxA(hMainDialog, "Please click on the disc button to select a bootable ISO,\n"
-								"or uncheck the \"Create a bootable disk...\" checkbox.",
-								"No ISO image selected...", MB_OK|MB_ICONERROR);
-							break;
-						}
-						if ((iso_size_check) && (iso_report.projected_size > (uint64_t)SelectedDrive.DiskSize)) {
-							MessageBoxA(hMainDialog, "This ISO image is too big "
-								"for the selected target.", "ISO image too big...", MB_OK|MB_ICONERROR);
-							break;
-						}
-						fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
-						bt = GETBIOSTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
-						if (bt == BT_UEFI) {
-							if (!IS_EFI(iso_report)) {
-								MessageBoxA(hMainDialog, "When using UEFI Target Type, only EFI bootable ISO images are supported. "
-									"Please select an EFI bootable ISO or set the Target Type to BIOS.", "Unsupported ISO...", MB_OK|MB_ICONERROR);
-								break;
-							} else if (fs > FS_FAT32) {
-								MessageBoxA(hMainDialog, "When using UEFI Target Type, only FAT/FAT32 is supported. "
-									"Please select FAT/FAT32 as the File system or set the Target Type to BIOS.", "Unsupported filesystem...", MB_OK|MB_ICONERROR);
-								break;
-							}
-						} else if ((fs == FS_NTFS) && (!iso_report.has_bootmgr) && (!IS_WINPE(iso_report.winpe))) {
-							if (iso_report.has_isolinux) {
-								MessageBoxA(hMainDialog, "Only FAT/FAT32 is supported for this type of ISO. "
-									"Please select FAT/FAT32 as the File system.", "Unsupported filesystem...", MB_OK|MB_ICONERROR);
-							} else {
-								MessageBoxA(hMainDialog, "Only 'bootmgr' or 'WinPE' based ISO "
-									"images can currently be used with NTFS.", "Unsupported ISO...", MB_OK|MB_ICONERROR);
-							}
-							break;
-						} else if (((fs == FS_FAT16)||(fs == FS_FAT32)) && (!iso_report.has_isolinux)) {
-							MessageBoxA(hMainDialog, "FAT/FAT32 can only be used for isolinux based ISO images "
-								"or when the Target Type is UEFI.", "Unsupported ISO...", MB_OK|MB_ICONERROR);
-							break;
-						}
-						if ((bt == BT_UEFI) && (iso_report.has_win7_efi) && (!WimExtractCheck())) {
-							if (MessageBoxA(hMainDialog, "Your platform cannot extract files from WIM archives. WIM extraction "
-								"is required to create EFI bootable Windows 7 and Windows Vista USB drives. You can fix that "
-								"by installing a recent version of 7-Zip.\r\nDo you want to visit the 7-zip download page?",
-								"Missing WIM support...", MB_YESNO|MB_ICONERROR) == IDYES)
-								ShellExecuteA(hDlg, "open", SEVENZIP_URL, NULL, NULL, SW_SHOWNORMAL);
-							break;
-						}
-					}
-				}
+				if ((IsChecked(IDC_BOOT)) && (!BootCheck()))
+					break;
 				GetWindowTextW(hDeviceList, wtmp, ARRAYSIZE(wtmp));
 				_snwprintf(wstr, ARRAYSIZE(wstr), L"WARNING: ALL DATA ON DEVICE %s\r\nWILL BE DESTROYED.\r\n"
 					L"To continue with this operation, click OK. To quit click CANCEL.", wtmp);
@@ -1654,6 +1657,11 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		return (INT_PTR)TRUE;
 	}
 	return (INT_PTR)FALSE;
+}
+
+static void PrintStatus2000(const char* str, BOOL val)
+{
+	PrintStatus(2000, FALSE, "%s %s.", str, (val)?"enabled":"disabled");
 }
 
 /*
@@ -1744,7 +1752,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			// the target USB drive. If this is enabled, the size check is disabled.
 			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'S')) {
 				iso_size_check = !iso_size_check;
-				PrintStatus(2000, FALSE, "ISO size check %s.", iso_size_check?"enabled":"disabled");
+				PrintStatus2000("ISO size check", iso_size_check);
 				continue;
 			}
 			// Alt-F => Toggle detection of fixed disks
@@ -1753,7 +1761,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			// drive instead of an USB key. If this is enabled, Rufus will allow fixed disk formatting.
 			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'F')) {
 				enable_fixed_disks = !enable_fixed_disks;
-				PrintStatus(2000, FALSE, "Fixed disks detection %s.", enable_fixed_disks?"enabled":"disabled");
+				PrintStatus2000("Fixed disks detection", enable_fixed_disks);
 				GetUSBDevices(0);
 				continue;
 			}
@@ -1771,7 +1779,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			// it back during the bad block check.
 			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'K')) {
 				detect_fakes = !detect_fakes;
-				PrintStatus(2000, FALSE, "Fake drive detection %s.", detect_fakes?"enabled":"disabled");
+				PrintStatus2000("Fake drive detection", detect_fakes);
 				continue;
 			}
 			// Alt-R => Remove all the registry keys created by Rufus

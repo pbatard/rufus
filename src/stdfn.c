@@ -231,6 +231,40 @@ out:
 	return ret;
 }
 
+unsigned char* GetResource(HMODULE module, char* name, char* type, const char* desc, DWORD* len, BOOL duplicate)
+{
+	HGLOBAL res_handle;
+	HRSRC res;
+	unsigned char* p = NULL;
+
+	res = FindResourceA(module, name, type);
+	if (res == NULL) {
+		uprintf("Unable to locate resource '%s': %s\n", desc, WindowsErrorString());
+		goto out;
+	}
+	res_handle = LoadResource(module, res);
+	if (res_handle == NULL) {
+		uprintf("Unable to load resource '%s': %s\n", desc, WindowsErrorString());
+		goto out;
+	}
+	*len = SizeofResource(module, res);
+
+	if (duplicate) {
+		p = (unsigned char*)malloc(*len);
+		if (p == NULL) {
+			uprintf("Unable to allocate ldlinux.sys resource\n");
+			goto out;
+		}
+		memcpy(p, LockResource(res_handle), *len);
+	} else {
+		p = (unsigned char*)LockResource(res_handle);
+	}
+
+out:
+	return p;
+}
+
+
 /*
  * Set or restore a Local Group Policy DWORD key indexed by szPath/SzPolicy
  */

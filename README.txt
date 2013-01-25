@@ -3,19 +3,19 @@ Rufus: The Reliable USB Formatting Utility
 Features:
 - Formats USB flash drives to FAT/FAT32/NTFS/exFAT
 - Creates DOS bootable USB drives, with no external files required
-- Creates bootable USB drives from bootable ISOs (Windows, Linux, etc.)
+- Creates bootable USB drives from bootable ISOs (Windows, Linux, EFI, etc.)
 - Twice as fast as Microsoft's USB/DVD tool or UNetbootin, on ISO->USB (1)
 - Bad blocks check, with detection for fake capacity
-- Modern UI, with UAC elevation for Windows Vista and later
+- Modern UI
 - Small footprint, no installation required
 - 100% Free Source Software (GPL v3)
 
 Compilation:
-  Use either Visual Studio 2010, WDK (Windows Driver Kit) or MinGW and then
+  Use either Visual Studio 2012, WDK 7.1 (Windows Driver Kit) or MinGW and then
   invoke the .sln, wdk_build.cmd or configure/make respectively.
   
 Additional information:
-  Rufus provides extensive information about what it is doing through its easily
+  Rufus provides extensive information about what it is doing, through its easily
   accessible log or the Windows debug facility.
 
 More info:

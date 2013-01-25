@@ -35,9 +35,9 @@
 #include "setadv.h"
 
 unsigned char* syslinux_ldlinux = NULL;
-unsigned int syslinux_ldlinux_len;
+DWORD syslinux_ldlinux_len;
 unsigned char* syslinux_bootsect = NULL;
-unsigned int syslinux_bootsect_len;
+DWORD syslinux_bootsect_len;
 
 /*
  * Wrapper for ReadFile suitable for libfat
@@ -73,8 +73,6 @@ BOOL InstallSyslinux(DWORD num, const char* drive_name)
 	DWORD bytes_read;
 	DWORD bytes_written;
 	BOOL r = FALSE;
-	HGLOBAL res_handle;
-	HRSRC res;
 
 	static unsigned char sectbuf[SECTOR_SIZE];
 	static char ldlinux_name[] = "?:\\ldlinux.sys";
@@ -91,43 +89,14 @@ BOOL InstallSyslinux(DWORD num, const char* drive_name)
 	/* Initialize the ADV -- this should be smarter */
 	syslinux_reset_adv(syslinux_adv);
 
-	/* Access ldlinux.sys resource */
-	res = FindResource(hMainInstance, MAKEINTRESOURCE(IDR_SL_LDLINUX_SYS), RT_RCDATA);
-	if (res == NULL) {
-		uprintf("Unable to locate ldlinux.sys resource: %s\n", WindowsErrorString());
+	/* Access a copy of the ldlinux.sys & ldlinux.bss resources */
+	syslinux_ldlinux = GetResource(hMainInstance, MAKEINTRESOURCEA(IDR_SL_LDLINUX_SYS),
+		_RT_RCDATA, "ldlinux.sys", &syslinux_ldlinux_len, TRUE);
+	syslinux_bootsect = GetResource(hMainInstance, MAKEINTRESOURCEA(IDR_SL_LDLINUX_BSS),
+		_RT_RCDATA,"ldlinux.bss", &syslinux_bootsect_len, TRUE);
+	if ((syslinux_ldlinux == NULL) || (syslinux_bootsect == NULL)) {
 		goto out;
 	}
-	res_handle = LoadResource(NULL, res);
-	if (res_handle == NULL) {
-		uprintf("Unable to load ldlinux.sys resource: %s\n", WindowsErrorString());
-		goto out;
-	}
-	syslinux_ldlinux_len = SizeofResource(NULL, res);
-	syslinux_ldlinux = (unsigned char*)malloc(syslinux_ldlinux_len);
-	if (syslinux_ldlinux == NULL) {
-		uprintf("Unable to allocate ldlinux.sys resource\n");
-		goto out;
-	}
-	memcpy(syslinux_ldlinux, LockResource(res_handle), syslinux_ldlinux_len);
-
-	/* Access ldlinux.bss resource */
-	res = FindResource(hMainInstance, MAKEINTRESOURCE(IDR_SL_LDLINUX_BSS), RT_RCDATA);
-	if (res == NULL) {
-		uprintf("Unable to locate ldlinux.bss resource: %s\n", WindowsErrorString());
-		goto out;
-	}
-	res_handle = LoadResource(NULL, res);
-	if (res_handle == NULL) {
-		uprintf("Unable to load ldlinux.bss resource: %s\n", WindowsErrorString());
-		goto out;
-	}
-	syslinux_bootsect_len = SizeofResource(NULL, res);
-	syslinux_bootsect = (unsigned char*)malloc(syslinux_bootsect_len);
-	if (syslinux_bootsect == NULL) {
-		uprintf("Unable to allocate ldlinux.bss resource\n");
-		goto out;
-	}
-	memcpy(syslinux_bootsect, LockResource(res_handle), syslinux_bootsect_len);
 
 	/* Create ldlinux.sys file */
 	f_handle = CreateFileA(ldlinux_name, GENERIC_READ | GENERIC_WRITE,

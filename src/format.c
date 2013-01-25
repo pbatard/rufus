@@ -779,23 +779,12 @@ out:
  */
 BOOL WriteRufusMBR(FILE *fp)
 {
-	HGLOBAL res_handle;
-	HRSRC res;
+	DWORD size;
 	unsigned char aucRef[] = {0x55, 0xAA};
 	unsigned char* rufus_mbr;
 
 	// TODO: Will we need to edit the disk ID according to UI selection in the MBR as well?
-	res = FindResource(hMainInstance, MAKEINTRESOURCE(IDR_BR_MBR_BIN), RT_RCDATA);
-	if (res == NULL) {
-		uprintf("Unable to locate mbr.bin resource: %s\n", WindowsErrorString());
-		return FALSE;
-	}
-	res_handle = LoadResource(NULL, res);
-	if (res_handle == NULL) {
-		uprintf("Unable to load mbr.bin resource: %s\n", WindowsErrorString());
-		return FALSE;
-	}
-	rufus_mbr = (unsigned char*)LockResource(res_handle);
+	rufus_mbr = GetResource(hMainInstance, MAKEINTRESOURCEA(IDR_BR_MBR_BIN), _RT_RCDATA, "mbr.bin", &size, FALSE);
 
 	return
 		write_data(fp, 0x0, rufus_mbr, 0x1b8) &&
@@ -1089,9 +1078,9 @@ static BOOL RemountVolume(char drive_letter)
 		if (DeleteVolumeMountPointA(drive_name)) {
 			Sleep(200);
 			if (SetVolumeMountPointA(drive_name, drive_guid)) {
-				uprintf("Successfully remounted %s on %s\n", drive_guid, drive_name);
+				uprintf("Successfully remounted %s on %s\n", &drive_guid[4], drive_name);
 			} else {
-				uprintf("Failed to remount %s on %s\n", drive_guid, drive_name);
+				uprintf("Failed to remount %s on %s\n", &drive_guid[4], drive_name);
 				// This will leave the drive unaccessible and must be flagged as an error
 				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_REMOUNT_VOLUME);
 				return FALSE;

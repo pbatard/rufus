@@ -13,17 +13,18 @@
 #ifndef SYSLINUX_H
 #define SYSLINUX_H
 
+#include <windows.h>
 #include <inttypes.h>
 #include "advconst.h"
 #include "setadv.h"
 
 /* The standard boot sector and ldlinux image */
 extern unsigned char* syslinux_bootsect;
-extern unsigned int syslinux_bootsect_len;
+extern DWORD syslinux_bootsect_len;
 extern const int syslinux_bootsect_mtime;
 
 extern unsigned char* syslinux_ldlinux;
-extern unsigned int syslinux_ldlinux_len;
+extern DWORD syslinux_ldlinux_len;
 extern const int syslinux_ldlinux_mtime;
 
 #define boot_sector	syslinux_bootsect

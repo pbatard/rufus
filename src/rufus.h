@@ -293,6 +293,7 @@ extern BOOL CreateProgress(void);
 extern BOOL SetAutorun(const char* path);
 extern char* FileDialog(BOOL save, char* path, char* filename, char* ext, char* ext_desc);
 extern BOOL FileIO(BOOL save, char* path, char** buffer, DWORD* size);
+extern unsigned char* GetResource(HMODULE module, char* name, char* type, const char* desc, DWORD* len, BOOL duplicate);
 extern BOOL SetLGP(BOOL bRestore, BOOL* bExistingKey, const char* szPath, const char* szPolicy, DWORD dwValue);
 extern LONG GetEntryWidth(HWND hDropDown, const char* entry);
 extern BOOL DownloadFile(const char* url, const char* file, HWND hProgressDialog);
@@ -393,3 +394,8 @@ typedef struct {
 #ifndef PBM_SETMARQUEE
 #define PBM_SETMARQUEE (WM_USER+10)
 #endif
+
+/* Why oh why does Microsoft has to make everybody suffer with their braindead use of Unicode */
+#define _RT_ICON			MAKEINTRESOURCEA(3)
+#define _RT_RCDATA			MAKEINTRESOURCEA(10)
+#define _RT_GROUP_ICON		MAKEINTRESOURCEA((ULONG_PTR)(MAKEINTRESOURCEA(3) + 11))

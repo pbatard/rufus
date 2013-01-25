@@ -27,14 +27,15 @@
 #include <windows.h>
 #include <windowsx.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "rufus.h"
 #include "dos.h"
 #include "resource.h"
 
-static BYTE* DiskImage;
-static size_t DiskImageSize;
+static BYTE* DiskImage = NULL;
+static DWORD DiskImageSize;
 
 /*
  * FAT time conversion, from ReactOS' time.c
@@ -166,57 +167,37 @@ static void FatDateTimeToSystemTime(PLARGE_INTEGER SystemTime, PFAT_DATETIME Fat
  * IO.SYS            000003AA          75 -> EB
  * COMMAND.COM       00006510          75 -> EB
  */
-static BOOL Patch_COMMAND_COM(HANDLE hFile)
+static BOOL Patch_COMMAND_COM(size_t filestart, size_t filesize)
 {
 	const BYTE expected[8] = { 0x15, 0x80, 0xFA, 0x03, 0x75, 0x10, 0xB8, 0x0E };
-	BYTE data[sizeof(expected)] = { 0x00 };
-	DWORD size = sizeof(data);
 
 	uprintf("Patching COMMAND.COM...\n");
-	if (GetFileSize(hFile, NULL) != 93040) {
+	if (filesize != 93040) {
 		uprintf("  unexpected file size\n");
 		return FALSE;
 	}
-	SetFilePointer(hFile, 0x650c, NULL, FILE_BEGIN);
-	if (!ReadFile(hFile, data, size, &size, NULL)) {
-		uprintf("  could not read data\n");
-		return FALSE;
-	}
-	if (memcmp(data, expected, sizeof(expected)) != 0) {
+	if (memcmp(&DiskImage[filestart+0x650c], expected, sizeof(expected)) != 0) {
 		uprintf("  unexpected binary data\n");
 		return FALSE;
 	}
-	data[4] = 0xeb;
-	SetFilePointer(hFile, 0x650c, NULL, FILE_BEGIN);
-	size = sizeof(data);
-	WriteFile(hFile, data, size, &size, NULL);
+	DiskImage[filestart+0x6510] = 0xeb;
 	return TRUE;
 }
 
-static BOOL Patch_IO_SYS(HANDLE hFile)
+static BOOL Patch_IO_SYS(size_t filestart, size_t filesize)
 {
 	const BYTE expected[8] = { 0xFA, 0x80, 0x75, 0x09, 0x8D, 0xB6, 0x99, 0x00 };
-	BYTE data[sizeof(expected)] = { 0x00 };
-	DWORD size = sizeof(data);
 
 	uprintf("Patching IO.SYS...\n");
-	if (GetFileSize(hFile, NULL) != 116736) {
+	if (filesize != 116736) {
 		uprintf("  unexpected file size\n");
 		return FALSE;
 	}
-	SetFilePointer(hFile, 0x3a8, NULL, FILE_BEGIN);
-	if (!ReadFile(hFile, data, size, &size, NULL)) {
-		uprintf("  could not read data\n");
-		return FALSE;
-	}
-	if (memcmp(data, expected, sizeof(expected)) != 0) {
+	if (memcmp(&DiskImage[filestart+0x3a8], expected, sizeof(expected)) != 0) {
 		uprintf("  unexpected binary data\n");
 		return FALSE;
 	}
-	data[2] = 0xeb;
-	SetFilePointer(hFile, 0x3a8, NULL, FILE_BEGIN);
-	size = sizeof(data);
-	WriteFile(hFile, data, size, &size, NULL);
+	DiskImage[filestart+0x3aa] = 0xeb;
 	return TRUE;
 }
 
@@ -239,7 +220,6 @@ static BOOL ExtractFAT(int entry, const char* path)
 	}
 	strcpy(filename, path);
 	pos = strlen(path);
-	filename[pos++] = '\\';
 	fnamepos = pos;
 
 	for(i=0; i<8; i++) {
@@ -262,6 +242,13 @@ static BOOL ExtractFAT(int entry, const char* path)
 		return FALSE;
 	}
 
+	/* WinME DOS files need to be patched */
+	if (strcmp(&filename[fnamepos], "COMMAND.COM") == 0) {
+		Patch_COMMAND_COM(filestart, filesize);
+	} else if (strcmp(&filename[fnamepos], "IO.SYS") == 0) {
+		Patch_IO_SYS(filestart, filesize);
+	}
+
 	/* Create a file, using the same attributes as found in the FAT */
 	hFile = CreateFileA(filename, GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ|FILE_SHARE_WRITE,
 		NULL, CREATE_ALWAYS, dir_entry->Attributes, 0);
@@ -274,13 +261,6 @@ static BOOL ExtractFAT(int entry, const char* path)
 		uprintf("Couldn't write file '%s': %s.\n", filename, WindowsErrorString());
 		safe_closehandle(hFile);
 		return FALSE;
-	}
-
-	/* WinME DOS files need to be patched */
-	if (strcmp(&filename[fnamepos], "COMMAND.COM") == 0) {
-		Patch_COMMAND_COM(hFile);
-	} else if (strcmp(&filename[fnamepos], "IO.SYS") == 0) {
-		Patch_IO_SYS(hFile);
 	}
 
 	/* Restore timestamps from FAT */
@@ -311,10 +291,8 @@ static BOOL ExtractMSDOS(const char* path)
 {
 	char dllname[MAX_PATH] = "C:\\Windows\\System32";
 	int i, j;
-	BOOL r = TRUE;
-	HMODULE hDLL;
-	HGLOBAL hRes;
-	HRSRC hDiskImage;
+	BOOL r = FALSE;
+	HMODULE hDLL = NULL;
 	char locale_path[MAX_PATH];
 	char* extractlist[] = { "MSDOS   SYS", "COMMAND COM", "IO      SYS", "MODE    COM",
 		"KEYB    COM", "KEYBOARDSYS", "KEYBRD2 SYS", "KEYBRD3 SYS", "KEYBRD4 SYS",
@@ -322,7 +300,7 @@ static BOOL ExtractMSDOS(const char* path)
 
 	// Reduce the visible mess by placing all the locale files into a subdir
 	safe_strcpy(locale_path, sizeof(locale_path), path);
-	safe_strcat(locale_path, sizeof(locale_path), "\\LOCALE");
+	safe_strcat(locale_path, sizeof(locale_path), "LOCALE\\");
 	CreateDirectoryA(locale_path, NULL);
 
 	GetSystemDirectoryA(dllname, sizeof(dllname));
@@ -330,31 +308,20 @@ static BOOL ExtractMSDOS(const char* path)
 	hDLL = LoadLibraryA(dllname);
 	if (hDLL == NULL) {
 		uprintf("Unable to open %s: %s\n", dllname, WindowsErrorString());
-		return FALSE;
+		goto out;
 	}
-	hDiskImage = FindResourceA(hDLL, MAKEINTRESOURCEA(1), "BINFILE");
-	if (hDiskImage == NULL) {
-		uprintf("Unable to locate disk image in %s: %s\n", dllname, WindowsErrorString());
-		FreeLibrary(hDLL);
-		return FALSE;
-	}
-	hRes = LoadResource(hDLL, hDiskImage);
-	if (hRes != NULL)
-		DiskImage = (BYTE*)LockResource(hRes);
-	if ((hRes == NULL) || (DiskImage == NULL) ){
-		uprintf("Unable to access disk image in %s: %s\n", dllname, WindowsErrorString());
-		FreeLibrary(hDLL);
-		return FALSE;
-	}
-	DiskImageSize = (size_t)SizeofResource(hDLL, hDiskImage);
+
+	DiskImage = (BYTE*)GetResource(hDLL, MAKEINTRESOURCEA(1), "BINFILE", "disk image", &DiskImageSize, TRUE);
+	if (DiskImage == NULL)
+		goto out;
+
 	// Sanity check
 	if (DiskImageSize < 700*1024) {
 		uprintf("MS-DOS disk image is too small (%d bytes)\n", dllname, DiskImageSize);
-		FreeLibrary(hDLL);
-		return FALSE;
+		goto out;
 	}
 
-	for (i=0; r && i<FAT_FN_DIR_ENTRY_LAST; i++) {
+	for (i=0, r=TRUE; r && i<FAT_FN_DIR_ENTRY_LAST; i++) {
 		if (DiskImage[FAT12_ROOTDIR_OFFSET + i*FAT_BYTES_PER_DIRENT] == FAT_DIRENT_DELETED)
 			continue;
 		for (j=0; r && j<ARRAYSIZE(extractlist); j++) {
@@ -365,10 +332,13 @@ static BOOL ExtractMSDOS(const char* path)
 			}
 		}
 	}
-	FreeLibrary(hDLL);
 	if (r)
 		r = SetDOSLocale(path, FALSE);
 
+out:
+	if (hDLL != NULL)
+		FreeLibrary(hDLL);
+	safe_free(DiskImage);
 	return r;
 }
 
@@ -388,8 +358,6 @@ BOOL ExtractFreeDOS(const char* path)
 		IDR_FD_EGA12_CPX, IDR_FD_EGA13_CPX, IDR_FD_EGA14_CPX, IDR_FD_EGA15_CPX, IDR_FD_EGA16_CPX,
 		IDR_FD_EGA17_CPX, IDR_FD_EGA18_CPX };
 	char filename[MAX_PATH], locale_path[MAX_PATH];
-	HGLOBAL res_handle;
-	HRSRC res;
 	BYTE* res_data;
 	DWORD res_size, Size;
 	HANDLE hFile;
@@ -402,25 +370,13 @@ BOOL ExtractFreeDOS(const char* path)
 
 	// Reduce the visible mess by placing all the locale files into a subdir
 	safe_strcpy(locale_path, sizeof(locale_path), path);
-	safe_strcat(locale_path, sizeof(locale_path), "\\LOCALE");
+	safe_strcat(locale_path, sizeof(locale_path), "LOCALE\\");
 	CreateDirectoryA(locale_path, NULL);
 
 	for (i=0; i<ARRAYSIZE(res_name); i++) {
-		res = FindResource(hMainInstance, MAKEINTRESOURCE(res_id[i]), RT_RCDATA);
-		if (res == NULL) {
-			uprintf("Unable to locate FreeDOS resource %s: %s\n", res_name[i], WindowsErrorString());
-			return FALSE;
-		}
-		res_handle = LoadResource(NULL, res);
-		if (res_handle == NULL) {
-			uprintf("Unable to load FreeDOS resource %s: %s\n", res_name[i], WindowsErrorString());
-			return FALSE;
-		}
-		res_data = (BYTE*)LockResource(res_handle);
-		res_size = SizeofResource(NULL, res);
+		res_data = (BYTE*)GetResource(hMainInstance, MAKEINTRESOURCEA(res_id[i]), _RT_RCDATA, res_name[i], &res_size, FALSE);
 
 		safe_strcpy(filename, sizeof(filename), ((i<2)?path:locale_path));
-		safe_strcat(filename, sizeof(filename), "\\");
 		safe_strcat(filename, sizeof(filename), res_name[i]);
 
 		hFile = CreateFileA(filename, GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ|FILE_SHARE_WRITE,

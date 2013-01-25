@@ -75,7 +75,7 @@ HANDLE GetDriveHandle(DWORD DriveIndex, char* DriveLetter, BOOL bWriteAccess, BO
 			goto out;
 		}
 		if (bWriteAccess) {
-			uprintf("Caution: Opened %s drive for write access\n", physical_drive);
+			uprintf("Caution: Opened %s drive for write access\n", &physical_drive[4]);
 		}
 	} else {
 		*DriveLetter = ' ';
@@ -130,7 +130,7 @@ HANDLE GetDriveHandle(DWORD DriveIndex, char* DriveLetter, BOOL bWriteAccess, BO
 			goto out;
 		}
 		if (bWriteAccess) {
-			uprintf("Caution: Opened %s drive for write access\n", logical_drive);
+			uprintf("Caution: Opened %s drive for write access\n", &logical_drive[4]);
 		}
 		*DriveLetter = *drive?*drive:' ';
 	}

@@ -98,17 +98,7 @@ static BOOL SaveIcon(const char* filename)
 	BOOL r = FALSE;
 	GRPICONDIR* icondir;
 
-	res = FindResource(hMainInstance, MAKEINTRESOURCE(IDI_ICON), RT_GROUP_ICON);
-	if (res == NULL) {
-		uprintf("Unable to locate icon resource: %s\n", WindowsErrorString());
-		goto out;
-	}
-	res_handle = LoadResource(NULL, res);
-	if (res_handle == NULL) {
-		uprintf("Unable to load icon resource: %s\n", WindowsErrorString());
-		goto out;
-	}
-	icondir = (GRPICONDIR*)LockResource(res_handle);
+	icondir = (GRPICONDIR*)GetResource(hMainInstance, MAKEINTRESOURCEA(IDI_ICON), _RT_GROUP_ICON, "icon", &res_size, FALSE);
 
 	hFile = CreateFileA(filename, GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ|FILE_SHARE_WRITE,
 			NULL, CREATE_NEW, 0, 0);
@@ -132,7 +122,7 @@ static BOOL SaveIcon(const char* filename)
 			uprintf("Couldn't write ICONDIRENTRY[%d]: %s.\n", i, WindowsErrorString());
 			goto out;
 		}
-		res = FindResource(hMainInstance, MAKEINTRESOURCE(icondir->idEntries[i].nID), RT_ICON);
+		res = FindResourceA(hMainInstance, MAKEINTRESOURCEA(icondir->idEntries[i].nID), _RT_ICON);
 		// Write the DWORD offset
 		if ( (!WriteFile(hFile, &offset, sizeof(offset), &Size, NULL)) || (Size != sizeof(offset)) ) {
 			uprintf("Couldn't write ICONDIRENTRY[%d] offset: %s.\n", i, WindowsErrorString());
@@ -142,7 +132,7 @@ static BOOL SaveIcon(const char* filename)
 	}
 	for (i=0; i<icondir->idCount; i++) {
 		// Write icon data
-		res = FindResource(hMainInstance, MAKEINTRESOURCE(icondir->idEntries[i].nID), RT_ICON);
+		res = FindResourceA(hMainInstance, MAKEINTRESOURCEA(icondir->idEntries[i].nID), _RT_ICON);
 		res_handle = LoadResource(NULL, res);
 		res_data = (BYTE*)LockResource(res_handle);
 		res_size = SizeofResource(NULL, res);
@@ -170,7 +160,7 @@ BOOL SetAutorun(const char* path)
 	char filename[64];
 	wchar_t wlabel[128], wRufusVersion[32];
 
-	safe_sprintf(filename, sizeof(filename), "%s\\autorun.inf", path);
+	safe_sprintf(filename, sizeof(filename), "%sautorun.inf", path);
 	fd = fopen(filename, "r");	// If there's an existing autorun, don't overwrite
 	if (fd != NULL) {
 		uprintf("%s already exists - keeping it\n", filename);
