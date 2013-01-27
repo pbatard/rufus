@@ -501,7 +501,7 @@ static BOOL PopulateProperties(int ComboIndex)
 		uprintf("Could not populate partition scheme data\n");
 	if (SelectedDrive.PartitionType == PARTITION_STYLE_GPT) {
 		j = 2;
-	} else if (SelectedDrive.has_protective_mbr) {
+	} else if (SelectedDrive.has_protective_mbr || SelectedDrive.has_mbr_uefi_marker) {
 		j = 1;
 	} else {
 		j = 0;
@@ -762,15 +762,15 @@ void UpdateProgress(int op, float percent)
 	int pos;
 
 	if ((op < 0) || (op > OP_MAX)) {
-		uprintf("UpdateProgress: invalid op %d\n", op);
+		duprintf("UpdateProgress: invalid op %d\n", op);
 		return;
 	}
 	if (percent > 100.1f) {
-		uprintf("UpdateProgress(%d): invalid percentage %0.2f\n", op, percent);
+		duprintf("UpdateProgress(%d): invalid percentage %0.2f\n", op, percent);
 		return;
 	}
 	if ((percent < 0.0f) && (nb_slots[op] <= 0)) {
-		uprintf("UpdateProgress(%d): error negative percentage sent for negative slot value\n", op);
+		duprintf("UpdateProgress(%d): error negative percentage sent for negative slot value\n", op);
 		return;
 	}
 	if (nb_slots[op] == 0)
@@ -787,7 +787,7 @@ void UpdateProgress(int op, float percent)
 		pos = (int)((previous_end + ((slot_end[op+1] - previous_end) * (percent / 100.0f))) / 100.0f * MAX_PROGRESS);
 	}
 	if (pos > MAX_PROGRESS) {
-		uprintf("UpdateProgress(%d): rounding error - pos %d is greater than %d\n", op, pos, MAX_PROGRESS);
+		duprintf("UpdateProgress(%d): rounding error - pos %d is greater than %d\n", op, pos, MAX_PROGRESS);
 		pos = MAX_PROGRESS;
 	}
 

@@ -239,7 +239,8 @@ BOOL GetDrivePartitionData(DWORD DeviceNumber, char* FileSystemName, DWORD FileS
 			}
 		}
 		uprintf("Partition type: MBR, NB Partitions: %d\n", nb_partitions);
-		uprintf("Disk ID: 0x%08X\n", DriveLayout->Mbr.Signature);
+		SelectedDrive.has_mbr_uefi_marker = (DriveLayout->Mbr.Signature == MBR_UEFI_MARKER);
+		uprintf("Disk ID: 0x%08X %s\n", DriveLayout->Mbr.Signature, SelectedDrive.has_mbr_uefi_marker?"(UEFI target)":"");
 		for (i=0; i<DriveLayout->PartitionCount; i++) {
 			if (DriveLayout->PartitionEntry[i].Mbr.PartitionType != PARTITION_ENTRY_UNUSED) {
 				uprintf("Partition %d:\n", DriveLayout->PartitionEntry[i].PartitionNumber);
@@ -311,12 +312,14 @@ typedef struct _DRIVE_LAYOUT_INFORMATION_EX4 {
 
 /*
  * Create a partition table
- */
-// See http://technet.microsoft.com/en-us/library/cc739412.aspx for some background info
+ * See http://technet.microsoft.com/en-us/library/cc739412.aspx for some background info
+ * NB: if you modify the MBR outside of using the Windows API, Windows still uses the cached
+ * copy it got from the last IOCTL, and ignore your changes until you replug the drive...
+ */ 
 #if !defined(PARTITION_BASIC_DATA_GUID)
 const GUID PARTITION_BASIC_DATA_GUID = { 0xebd0a0a2, 0xb9e5, 0x4433, {0x87, 0xc0, 0x68, 0xb6, 0xb7, 0x26, 0x99, 0xc7} };
 #endif
-BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system)
+BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL mbr_uefi_marker)
 {
 	const char* PartitionTypeName[2] = { "MBR", "GPT" };
 	CREATE_DISK CreateDisk = {PARTITION_STYLE_RAW, {{0}}};
@@ -340,7 +343,11 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system)
 	switch (partition_style) {
 	case PARTITION_STYLE_MBR:
 		CreateDisk.PartitionStyle = PARTITION_STYLE_MBR;
-		CreateDisk.Mbr.Signature = GetTickCount();
+		// If MBR+UEFI is selected, write an UEFI marker in lieu of the regular MBR signature.
+		// This helps us reselect the partition scheme option that was used when creating the
+		// drive in Rufus. As far as I can tell, Windows doesn't care much if this signature
+		// isn't unique for USB drives.
+		CreateDisk.Mbr.Signature = mbr_uefi_marker?MBR_UEFI_MARKER:GetTickCount();
 
 		DriveLayoutEx.PartitionStyle = PARTITION_STYLE_MBR;
 		DriveLayoutEx.PartitionCount = 4;	// Must be multiple of 4 for MBR

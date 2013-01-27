@@ -45,6 +45,7 @@
 #define MAX_GUID_STRING_LENGTH      40
 #define MAX_GPT_PARTITIONS          128
 #define MAX_SECTORS_TO_CLEAR        128			// nb sectors to zap when clearing the MBR/GPT (must be >34)
+#define MBR_UEFI_MARKER             0x49464555	// 'U', 'E', 'F', 'I', as a 32 bit little endian longword
 #define PROPOSEDLABEL_TOLERANCE     0.10
 #define FS_DEFAULT                  FS_FAT32
 #define LARGE_FAT32_SIZE            (32*1073741824LL)	// Size at which we need to use fat32format
@@ -86,8 +87,17 @@ extern void _uprintf(const char *format, ...);
 #define uprintf(...) _uprintf(__VA_ARGS__)
 #define vuprintf(...) if (verbose) _uprintf(__VA_ARGS__)
 #define vvuprintf(...) if (verbose > 1) _uprintf(__VA_ARGS__)
+#ifdef _CRTDBG_MAP_ALLOC
+// Use the _CRTDBG as our general debug flag
+#define duprintf(...) _uprintf(__VA_ARGS__)
+#else
+#define duprintf(...)
+#endif
 #else
 #define uprintf(...)
+#define vuprintf(...)
+#define vvuprintf(...)
+#define duprintf(...)
 #endif
 
 /* Custom Windows messages */
@@ -170,6 +180,7 @@ typedef struct {
 	int PartitionType;
 	int FSType;
 	BOOL has_protective_mbr;
+	BOOL has_mbr_uefi_marker;
 	struct {
 		ULONG Allowed;
 		ULONG Default;
@@ -284,7 +295,7 @@ extern BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan);
 extern BOOL ExtractISOFile(const char* iso, const char* iso_file, const char* dest_file);
 extern BOOL InstallSyslinux(DWORD num, const char* drive_name);
 DWORD WINAPI FormatThread(void* param);
-extern BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system);
+extern BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL mbr_uefi_marker);
 extern const char* GetPartitionType(BYTE Type);
 extern BOOL GetDrivePartitionData(DWORD DeviceNumber, char* FileSystemName, DWORD FileSystemNameSize);
 extern HANDLE GetDriveHandle(DWORD DriveIndex, char* DriveLetter, BOOL bWriteAccess, BOOL bLockDrive);

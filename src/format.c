@@ -1210,7 +1210,7 @@ DWORD WINAPI FormatThread(LPVOID param)
 	}
 	UpdateProgress(OP_ZERO_MBR, -1.0f);
 
-	if (!CreatePartition(hPhysicalDrive, pt, fs)) {
+	if (!CreatePartition(hPhysicalDrive, pt, fs, (pt==PARTITION_STYLE_MBR)&&(bt==BT_UEFI))) {
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_PARTITION_FAILURE;
 		goto out;
 	}
