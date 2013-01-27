@@ -1,7 +1,10 @@
-o Version 1.3.2 BETA (2012.01.20)
-    Re-Fix support for newer ArchLinux ISOs, that was removed in 1.3.1
-    Add support for UEFI boot, as well as GPT - This means Rufus can now produce UEFI
-      bootable UFDs from EFI compatible ISOs (Windows 7 x64, Windows 8, ArchLinux...)
+o Version 1.3.2 (2013.01.27)
+    Fix support for newer ArchLinux ISOs, that was removed in 1.3.1
+    Add support for UEFI boot, as well as GPT. What this means is that Rufus can
+      now produce UEFI bootable UFDs from EFI compatible ISOs, such as Windows 7 x64,
+      Windows 8, ArchLinux, etc.
+    The first partition is now always aligned to 1MB (unless advanced options are used)
+    Internal refactoring and fixes
 o Version 1.3.1 (2013.01.09)
     Fix Windows XP ISO support, that was broken in 1.3.0
     Drop support for newer ArchLinux ISOs - this will be fixed in 1.3.2
