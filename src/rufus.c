@@ -433,6 +433,25 @@ void EnableBootOptions(BOOL enable)
 	EnableWindow(hDiskID, enable);
 }
 
+static void SetPartitionSchemeTooltip(void)
+{
+	int bt, pt;
+	bt = GETBIOSTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
+	pt = GETPARTTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
+	if (bt == BT_BIOS) {
+		CreateTooltip(hPartitionScheme, "Usually the safest choice. If you have an UEFI computer and want to install "
+			"an OS in EFI mode however, you should select one of the options below", 15000);
+	} else {
+		if (pt == PARTITION_STYLE_MBR) {
+			CreateTooltip(hPartitionScheme, "Use this if you want to install an OS in EFI mode, but need to access "
+				"the USB content from Windows XP", 15000);
+		} else {
+			CreateTooltip(hPartitionScheme, "The preferred option to install an OS in EFI mode and when "
+				"USB access is not required for Windows XP", 15000);
+		}
+	}
+}
+
 /*
  * Populate the UI properties
  */
@@ -471,8 +490,8 @@ static BOOL PopulateProperties(int ComboIndex)
 					continue;
 				bt = (j==0)?BT_BIOS:BT_UEFI;
 				pt = (j==2)?PARTITION_STYLE_GPT:PARTITION_STYLE_MBR;
-				safe_sprintf(capacity, sizeof(capacity), "%s/%s (1 Partition of %0.2f %s)",
-					PartitionTypeLabel[pt], BiosTypeLabel[bt], HumanReadableSize, suffix[i]);
+				safe_sprintf(capacity, sizeof(capacity), "%s partition scheme for %s%s computer%s",
+					PartitionTypeLabel[pt], BiosTypeLabel[bt], (j==0)?" or UEFI":"", (j==0)?"s":"");
 				IGNORE_RETVAL(ComboBox_SetItemData(hPartitionScheme, ComboBox_AddStringU(hPartitionScheme, capacity), (bt<<16)|pt));
 			}
 			break;
@@ -488,8 +507,7 @@ static BOOL PopulateProperties(int ComboIndex)
 		j = 0;
 	}
 	IGNORE_RETVAL(ComboBox_SetCurSel(hPartitionScheme, j));
-	CreateTooltip(hPartitionScheme, "When using an EFI bootable image, and if your target system is UEFI based "
-		"(most post 2011 PCs), you should try to select an UEFI option here.", 15000);
+	SetPartitionSchemeTooltip();
 	CreateTooltip(hDeviceList, DriveID.Table[ComboIndex], -1);
 
 	// Set a proposed label according to the size (eg: "256MB", "8GB")
@@ -1446,6 +1464,11 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			SetPassesTooltip();
 			break;
 		case IDC_PARTITION_SCHEME:
+			if (HIWORD(wParam) != CBN_SELCHANGE)
+				break;
+			SetPartitionSchemeTooltip();
+			SetFSFromISO();
+			// fall-through
 		case IDC_FILESYSTEM:
 			if (HIWORD(wParam) != CBN_SELCHANGE)
 				break;

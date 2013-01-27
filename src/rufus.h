@@ -193,6 +193,7 @@ typedef struct {
 	char usb_label[192];	/* converted USB label for workaround */
 	char cfg_path[128];		/* path to the ISO's isolinux.cfg */
 	uint64_t projected_size;
+	// TODO: use a bitmask and #define tests for the following
 	uint8_t winpe;
 	BOOL has_4GB_file;
 	BOOL has_bootmgr;
@@ -395,7 +396,7 @@ typedef struct {
 #define PBM_SETMARQUEE (WM_USER+10)
 #endif
 
-/* Why oh why does Microsoft has to make everybody suffer with their braindead use of Unicode */
+/* Why oh why does Microsoft have to make everybody suffer with their braindead use of Unicode? */
 #define _RT_ICON			MAKEINTRESOURCEA(3)
 #define _RT_RCDATA			MAKEINTRESOURCEA(10)
 #define _RT_GROUP_ICON		MAKEINTRESOURCEA((ULONG_PTR)(MAKEINTRESOURCEA(3) + 11))

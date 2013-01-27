@@ -30,7 +30,7 @@ LANGUAGE LANG_ENGLISH, SUBLANG_NEUTRAL
 IDD_DIALOG DIALOGEX 12, 12, 206, 316
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_APPWINDOW
-CAPTION "Rufus v1.3.2.229"
+CAPTION "Rufus v1.3.2.230"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     DEFPUSHBUTTON   "Start",IDC_START,94,278,50,14
@@ -40,14 +40,14 @@ BEGIN
     COMBOBOX        IDC_FILESYSTEM,8,75,190,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     LTEXT           "File system",IDC_STATIC,9,64,51,10
     COMBOBOX        IDC_PARTITION_SCHEME,8,46,190,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Partition Scheme and Target Type",IDC_STATIC,9,35,176,8
+    LTEXT           "Partition scheme and target system type",IDC_STATIC,9,35,176,8
     COMBOBOX        IDC_CLUSTERSIZE,8,104,190,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     LTEXT           "Cluster size",IDC_STATIC,9,93,105,10
     PUSHBUTTON      "About...",IDC_ABOUT,8,278,50,14
     GROUPBOX        "Format Options       ",IDC_STATIC,7,149,192,66
     EDITTEXT        IDC_LABEL,7,131,190,13,ES_AUTOHSCROLL
     CONTROL         "Check device for bad blocks:",IDC_BADBLOCKS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,161,101,10
-    CONTROL         "Quick Format",IDC_QUICKFORMAT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,173,55,10
+    CONTROL         "Quick format",IDC_QUICKFORMAT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,173,55,10
     CONTROL         "Create a bootable disk using:",IDC_BOOT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,185,104,10
     CONTROL         "Create extended label and icon files",IDC_SET_ICON,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,198,131,10
@@ -274,8 +274,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,3,2,229
- PRODUCTVERSION 1,3,2,229
+ FILEVERSION 1,3,2,230
+ PRODUCTVERSION 1,3,2,230
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -292,13 +292,13 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Akeo Consulting (http://akeo.ie)"
             VALUE "FileDescription", "Rufus"
-            VALUE "FileVersion", "1.3.2.229"
+            VALUE "FileVersion", "1.3.2.230"
             VALUE "InternalName", "Rufus"
             VALUE "LegalCopyright", "(c) 2011-2012 Pete Batard (GPL v3)"
             VALUE "LegalTrademarks", "http://www.gnu.org/copyleft/gpl.html"
             VALUE "OriginalFilename", "rufus.exe"
             VALUE "ProductName", "Rufus"
-            VALUE "ProductVersion", "1.3.2.229"
+            VALUE "ProductVersion", "1.3.2.230"
         END
     END
     BLOCK "VarFileInfo"
