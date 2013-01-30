@@ -967,7 +967,7 @@ BOOL SetDOSLocale(const char* path, BOOL bFreeDOS)
 			return FALSE;
 		}
 		fprintf(fd, "@echo off\n");
-		fprintf(fd, "set PATH=.;C:\\;C:\\LOCALE\n");
+		fprintf(fd, "set PATH=.;\\;\\LOCALE\n");
 		fprintf(fd, "echo Using %s keyboard with %s codepage [%d]\n", kb_to_hr("us"), cp_to_hr(437), 437);
 		fclose(fd);
 		uprintf("Succesfully wrote 'AUTOEXEC.BAT'\n");
@@ -994,7 +994,7 @@ BOOL SetDOSLocale(const char* path, BOOL bFreeDOS)
 		bFreeDOS?"MENU ":"MENUITEM=", bFreeDOS?')':',', kb_to_hr(kb), cp_to_hr(cp), (int)cp);
 	fprintf(fd, "%s2%c Use %s keyboard with %s codepage [%d]\n",
 		bFreeDOS?"MENU ":"MENUITEM=", bFreeDOS?')':',', kb_to_hr("us"), cp_to_hr(437), 437);
-	fprintf(fd, "%s", bFreeDOS?"MENU\n12?\n":"[1]\ndevice=C:\\locale\\display.sys con=(ega,,1)\n[2]\n");
+	fprintf(fd, "%s", bFreeDOS?"MENU\n12?\n":"[1]\ndevice=\\locale\\display.sys con=(ega,,1)\n[2]\n");
 	fclose(fd);
 	uprintf("Succesfully wrote 'CONFIG.SYS'\n");
 
@@ -1007,14 +1007,14 @@ BOOL SetDOSLocale(const char* path, BOOL bFreeDOS)
 		return FALSE;
 	}
 	fprintf(fd, "@echo off\n");
-	fprintf(fd, "set PATH=.;C:\\;C:\\LOCALE\n");
+	fprintf(fd, "set PATH=.;\\;\\LOCALE\n");
 	if (bFreeDOS)
 		fprintf(fd, "display con=(ega,,1)\n");
 	fprintf(fd, "GOTO %%CONFIG%%\n");
 	fprintf(fd, ":1\n");
-	fprintf(fd, "mode con codepage prepare=((%d) C:\\locale\\%s) > NUL\n", (int)cp, egadrv);
+	fprintf(fd, "mode con codepage prepare=((%d) \\locale\\%s) > NUL\n", (int)cp, egadrv);
 	fprintf(fd, "mode con codepage select=%d > NUL\n", (int)cp);
-	fprintf(fd, "keyb %s,,C:\\locale\\%s\n", kb, kbdrv);
+	fprintf(fd, "keyb %s,,\\locale\\%s\n", kb, kbdrv);
 	fprintf(fd, ":2\n");
 	fclose(fd);
 	uprintf("Succesfully wrote 'AUTOEXEC.BAT'\n");
