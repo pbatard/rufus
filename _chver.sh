@@ -43,4 +43,4 @@ sed -f cmd.sed src/rufus.rc > src/rufus.rc~
 sed 's/$/\r/' src/rufus.rc~ > src/rufus.rc
 rm src/rufus.rc~
 rm cmd.sed
-source autogen.sh
+source bootstrap.sh

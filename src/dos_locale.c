@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * DOS keyboard locale setup
- * Copyright (c) 2011-2013 Pete Batard <pete@akeo.ie>
+ * Copyright ยฉ 2011-2013 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -984,7 +984,7 @@ BOOL SetDOSLocale(const char* path, BOOL bFreeDOS)
 	}
 	if (bFreeDOS) {
 		fprintf(fd, "!MENUCOLOR=7,0\nMENU\nMENU   FreeDOS Language Selection Menu\n");
-		fprintf(fd, "MENU   อออออออออออออออออออออออออออออออ\nMENU\n");
+		fprintf(fd, "MENU   รรรรรรรรรรรรรรรรรรรรรรรรรรรรรรร\nMENU\n");
 	} else {
 		fprintf(fd, "[MENU]\n");
 	}

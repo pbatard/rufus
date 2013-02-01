@@ -2,7 +2,7 @@
  * Rufus: The Reliable USB Formatting Utility
  * DOS boot file extraction, from the FAT12 floppy image in diskcopy.dll
  * (MS WinME DOS) or from the embedded FreeDOS resource files
- * Copyright (c) 2011-2013 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2013 Pete Batard <pete@akeo.ie>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

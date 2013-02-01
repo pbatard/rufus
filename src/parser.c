@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Elementary Unicode compliant find/replace parser
- * Copyright (c) 2012 Pete Batard <pete@akeo.ie>
+ * Copyright © 2012-2013 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -295,7 +295,7 @@ char* insert_section_data(const char* filename, const char* section, const char*
 		mode = 2;	// UTF-16 (LE)
 		break;
 	case 0xBBEF:	// Yeah, the UTF-8 BOM is really 0xEF,0xBB,0xBF, but
-		mode = 1;	// find me a non UTF-8 file that actually begins with "�"
+		mode = 1;	// find me a non UTF-8 file that actually begins with "ï»"
 		break;
 	default:
 		mode = 0;	// ANSI
@@ -430,7 +430,7 @@ char* replace_in_token_data(const char* filename, const char* token, const char*
 		mode = 2;	// UTF-16 (LE)
 		break;
 	case 0xBBEF:	// Yeah, the UTF-8 BOM is really 0xEF,0xBB,0xBF, but
-		mode = 1;	// find me a non UTF-8 file that actually begins with "�"
+		mode = 1;	// find me a non UTF-8 file that actually begins with "ï»"
 		break;
 	default:
 		mode = 0;	// ANSI

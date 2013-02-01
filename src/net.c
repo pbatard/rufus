@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Networking functionality (web file download, check for update, etc.)
- * Copyright (c) 2012-2013 Pete Batard <pete@akeo.ie>
+ * Copyright © 2012-2013 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -183,7 +183,7 @@ const char* WinInetErrorString(void)
 	case ERROR_GOPHER_NOT_GOPHER_PLUS:
 	case ERROR_GOPHER_ATTRIBUTE_NOT_FOUND:
 	case ERROR_GOPHER_UNKNOWN_LOCATOR:
-		return "Gopher? Really??? What is this? 1994?";
+		return "Gopher? Really??? What is this, 1994?";
 	case ERROR_HTTP_HEADER_NOT_FOUND:
 		return "The requested header could not be located.";
 	case ERROR_HTTP_DOWNLEVEL_SERVER:

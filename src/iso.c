@@ -1,9 +1,9 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * ISO file extraction
- * Copyright (c) 2011-2013 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2013 Pete Batard <pete@akeo.ie>
  * Based on libcdio's iso & udf samples:
- * Copyright (c) 2003-2012 Rocky Bernstein <rocky@gnu.org>
+ * Copyright © 2003-2012 Rocky Bernstein <rocky@gnu.org>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

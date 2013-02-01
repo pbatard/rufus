@@ -1,8 +1,8 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Formatting function calls
- * Copyright (c) 2007-2009 Tom Thornhill/Ridgecrop
- * Copyright (c) 2011-2013 Pete Batard <pete@akeo.ie>
+ * Copyright © 2007-2009 Tom Thornhill/Ridgecrop
+ * Copyright © 2011-2013 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -403,7 +403,7 @@ static BOOL FormatFAT32(DWORD DriveIndex)
 
 	if (qTotalSectors >= 0xffffffff) {
 		// This is a more fundamental limitation on FAT32 - the total sector count in the root dir
-		// �s 32bit. With a bit of creativity, FAT32 could be extended to handle at least 2^28 clusters
+		// ís 32bit. With a bit of creativity, FAT32 could be extended to handle at least 2^28 clusters
 		// There would need to be an extra field in the FSInfo sector, and the old sector count could
 		// be set to 0xffffffff. This is non standard though, the Windows FAT driver FASTFAT.SYS won't
 		// understand this. Perhaps a future version of FAT32 and FASTFAT will handle this.
