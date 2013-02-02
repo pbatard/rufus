@@ -1808,9 +1808,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			// Alt-R => Remove all the registry keys created by Rufus
 			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'R')) {
 				PrintStatus(2000, FALSE, "Application registry key %s deleted.",
-					DeleteRegistryKey(COMPANY_NAME "\\" APPLICATION_NAME)?"successfully":"could not be");
+					DeleteRegistryKey(REGKEY_HKCU, COMPANY_NAME "\\" APPLICATION_NAME)?"successfully":"could not be");
 				// Also try to delete the upper key (company name) if it's empty (don't care about the result)
-				DeleteRegistryKey(COMPANY_NAME);
+				DeleteRegistryKey(REGKEY_HKCU, COMPANY_NAME);
 				continue;
 			}
 			TranslateMessage(&msg);

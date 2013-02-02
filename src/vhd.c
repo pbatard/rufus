@@ -25,6 +25,7 @@
 #include "registry.h"
 
 static BOOL has_wimgapi = FALSE, has_7z = FALSE;
+static char sevenzip_path[MAX_PATH];
 
 #define WIM_GENERIC_READ	GENERIC_READ
 #define WIM_OPEN_EXISTING	OPEN_EXISTING
@@ -66,11 +67,19 @@ static PF_DECL(WIMLoadImage);
 static PF_DECL(WIMExtractImagePath);
 static PF_DECL(WIMCloseHandle);
 
+static BOOL Get7ZipPath(void)
+{
+	if ( (GetRegistryKeyStr(REGKEY_HKCU, "7-Zip\\Path", sevenzip_path, sizeof(sevenzip_path)))
+	  || (GetRegistryKeyStr(REGKEY_HKLM, "7-Zip\\Path", sevenzip_path, sizeof(sevenzip_path))) ) {
+		safe_strcat(sevenzip_path, sizeof(sevenzip_path), "\\7z.exe");
+		return (_access(sevenzip_path, 0) != -1);
+	}
+	return FALSE;
+}
+
 // Find out if we have any way to extraxt WIM files on this platform
 BOOL WimExtractCheck(void)
 {
-	char sevenzip_path[MAX_PATH];
-
 	PF_INIT(WIMCreateFile, wimgapi);
 	PF_INIT(WIMSetTemporaryPath, wimgapi);
 	PF_INIT(WIMLoadImage, wimgapi);
@@ -78,10 +87,7 @@ BOOL WimExtractCheck(void)
 	PF_INIT(WIMCloseHandle, wimgapi);
 
 	has_wimgapi = (pfWIMCreateFile && pfWIMSetTemporaryPath && pfWIMLoadImage && pfWIMExtractImagePath && pfWIMCloseHandle);
-	if (GetRegistryKeyStr("7-Zip\\Path", sevenzip_path, sizeof(sevenzip_path))) {
-		safe_strcat(sevenzip_path, sizeof(sevenzip_path), "\\7z.exe");
-		has_7z = (_access(sevenzip_path, 0) != -1);
-	}
+	has_7z = Get7ZipPath();
 
 	uprintf("WIM extraction method(s) supported: %s%s%s\n", has_7z?"7z":(has_wimgapi?"":"NONE"),
 		(has_wimgapi && has_7z)?", ":"", has_wimgapi?"wimgapi.dll":"");
@@ -162,17 +168,6 @@ static BOOL WimExtractFile_7z(const char* image, int index, const char* src, con
 	char tmpdst[MAX_PATH];
 
 	uprintf("Opening: %s:[%d] (7-Zip)\n", image, index);
-	if (!GetRegistryKeyStr("7-Zip\\Path", sevenzip_path, sizeof(sevenzip_path))) {
-		uprintf("  Could not read 7-Zip path from registry\n");
-		return FALSE;
-	}
-	safe_strcat(sevenzip_path, sizeof(sevenzip_path), "\\7z.exe");
-	
-	if (_access(sevenzip_path, 0) == -1) {
-		uprintf("  Could not locate 7z.exe at '%s'\n", sevenzip_path);
-		return FALSE;
-	}
-	
 	safe_strcpy(tmpdst, sizeof(tmpdst), dst);
 	for (i=safe_strlen(tmpdst); i>0; i--) {
 		if (tmpdst[i] == '\\')
