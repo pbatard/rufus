@@ -1,21 +1,20 @@
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
-Project("{11411DA5-63FE-49DC-8D5C-CA379B95FF3C}") = "rufus", "src\.msvc\rufus.vcxproj", "{731858A7-0303-4988-877B-9C0DD6471864}"
-	ProjectSection(ProjectDependencies) = postProject
-		{2B1D078D-8EB4-4398-9CA4-23457265A7F6} = {2B1D078D-8EB4-4398-9CA4-23457265A7F6}
-	EndProjectSection
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rufus", "src\.msvc\rufus.vcxproj", "{731858A7-0303-4988-877B-9C0DD6471864}"
 EndProject
-Project("{11411DA5-63FE-49DC-8D5C-CA379B95FF3C}") = "ms-sys", "src\ms-sys\.msvc\ms-sys.vcxproj", "{2B1D078D-8EB4-4398-9CA4-23457265A7F6}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ms-sys", "src\ms-sys\.msvc\ms-sys.vcxproj", "{2B1D078D-8EB4-4398-9CA4-23457265A7F6}"
 EndProject
-Project("{11411DA5-63FE-49DC-8D5C-CA379B95FF3C}") = "syslinux-libfat", "src\syslinux\libfat\.msvc\libfat.vcxproj", "{8390DCE0-859D-4F57-AD9C-AAEAC4D77EEF}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "syslinux-libfat", "src\syslinux\libfat\.msvc\libfat.vcxproj", "{8390DCE0-859D-4F57-AD9C-AAEAC4D77EEF}"
 EndProject
-Project("{11411DA5-63FE-49DC-8D5C-CA379B95FF3C}") = "syslinux-libinstaller", "src\syslinux\libinstaller\.msvc\libinstaller.vcxproj", "{266502AC-CD74-4581-B707-938A7D05AD7A}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "syslinux-libinstaller", "src\syslinux\libinstaller\.msvc\libinstaller.vcxproj", "{266502AC-CD74-4581-B707-938A7D05AD7A}"
 EndProject
-Project("{11411DA5-63FE-49DC-8D5C-CA379B95FF3C}") = "libcdio-iso9660", "src\libcdio\iso9660\.msvc\iso9660.vcxproj", "{D4E80F35-2604-40AC-B436-97B052ECB572}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libcdio-iso9660", "src\libcdio\iso9660\.msvc\iso9660.vcxproj", "{D4E80F35-2604-40AC-B436-97B052ECB572}"
 EndProject
-Project("{11411DA5-63FE-49DC-8D5C-CA379B95FF3C}") = "libcdio-udf", "src\libcdio\udf\.msvc\udf.vcxproj", "{0CEC40A6-A195-4BE5-A88B-0AB00EB142EC}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libcdio-udf", "src\libcdio\udf\.msvc\udf.vcxproj", "{0CEC40A6-A195-4BE5-A88B-0AB00EB142EC}"
 EndProject
-Project("{11411DA5-63FE-49DC-8D5C-CA379B95FF3C}") = "libcdio-driver", "src\libcdio\driver\.msvc\driver.vcxproj", "{FA1B1093-BA86-410A-B7A0-7A54C605F812}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libcdio-driver", "src\libcdio\driver\.msvc\driver.vcxproj", "{FA1B1093-BA86-410A-B7A0-7A54C605F812}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "getopt", "src\getopt\.msvc\getopt.vcxproj", "{AE83E1B4-CE06-47EE-B7A3-C3A1D7C2D71E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -81,6 +80,14 @@ Global
 		{FA1B1093-BA86-410A-B7A0-7A54C605F812}.Release|Win32.Build.0 = Release|Win32
 		{FA1B1093-BA86-410A-B7A0-7A54C605F812}.Release|x64.ActiveCfg = Release|x64
 		{FA1B1093-BA86-410A-B7A0-7A54C605F812}.Release|x64.Build.0 = Release|x64
+		{AE83E1B4-CE06-47EE-B7A3-C3A1D7C2D71E}.Debug|Win32.ActiveCfg = Debug|Win32
+		{AE83E1B4-CE06-47EE-B7A3-C3A1D7C2D71E}.Debug|Win32.Build.0 = Debug|Win32
+		{AE83E1B4-CE06-47EE-B7A3-C3A1D7C2D71E}.Debug|x64.ActiveCfg = Debug|x64
+		{AE83E1B4-CE06-47EE-B7A3-C3A1D7C2D71E}.Debug|x64.Build.0 = Debug|x64
+		{AE83E1B4-CE06-47EE-B7A3-C3A1D7C2D71E}.Release|Win32.ActiveCfg = Release|Win32
+		{AE83E1B4-CE06-47EE-B7A3-C3A1D7C2D71E}.Release|Win32.Build.0 = Release|Win32
+		{AE83E1B4-CE06-47EE-B7A3-C3A1D7C2D71E}.Release|x64.ActiveCfg = Release|x64
+		{AE83E1B4-CE06-47EE-B7A3-C3A1D7C2D71E}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

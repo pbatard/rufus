@@ -163,7 +163,6 @@ static BOOL WimExtractFile_7z(const char* image, int index, const char* src, con
 	size_t i;
 	STARTUPINFOA si = {0};
 	PROCESS_INFORMATION pi = {0};
-	char sevenzip_path[MAX_PATH];
 	char cmdline[MAX_PATH];
 	char tmpdst[MAX_PATH];
 

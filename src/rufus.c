@@ -33,6 +33,8 @@
 #include <winioctl.h>
 #include <process.h>
 #include <dbt.h>
+#include <io.h>
+#include <getopt.h>
 
 #include "msapi_utf8.h"
 #include "resource.h"
@@ -90,6 +92,7 @@ static const char* PartitionTypeLabel[2] = { "MBR", "GPT" };
 static BOOL existing_key = FALSE;	// For LGP set/restore
 static BOOL iso_size_check = TRUE;
 static BOOL log_displayed = FALSE;
+static BOOL iso_provided = FALSE;
 static int selection_default;
 BOOL enable_fixed_disks = FALSE, advanced_mode = TRUE;
 
@@ -1321,6 +1324,12 @@ void InitDialog(HWND hDlg)
 	CreateTooltip(GetDlgItem(hDlg, IDC_ABOUT), "Licensing information and credits", -1);
 
 	ToggleAdvanced();	// We start in advanced mode => go to basic mode
+
+	// Process commandline parameters
+	if (iso_provided) {
+		// Simulate a button click for ISO selection
+		PostMessage(hDlg, WM_COMMAND, IDC_SELECT_ISO, 0);
+	}
 }
 
 /*
@@ -1563,11 +1572,16 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			}
 			return (INT_PTR)TRUE;
 		case IDC_SELECT_ISO:
-			safe_free(iso_path);
-			iso_path = FileDialog(FALSE, NULL, "*.iso", "iso", "ISO Image");
-			if (iso_path == NULL) {
-				CreateTooltip(hSelectISO, "Click to select...", -1);
-				break;
+			if (iso_provided) {
+				uprintf("Commandline ISO image provided: '%s'\n", iso_path);
+				iso_provided = FALSE;	// One off thing...
+			} else {
+				safe_free(iso_path);
+				iso_path = FileDialog(FALSE, NULL, "*.iso", "iso", "ISO Image");
+				if (iso_path == NULL) {
+					CreateTooltip(hSelectISO, "Click to select...", -1);
+					break;
+				}
 			}
 			selection_default = DT_ISO;
 			CreateTooltip(hSelectISO, iso_path, -1);
@@ -1687,38 +1701,109 @@ static void PrintStatus2000(const char* str, BOOL val)
 	PrintStatus(2000, FALSE, "%s %s.", str, (val)?"enabled":"disabled");
 }
 
+static void PrintUsage(char* appname)
+{
+	char fname[_MAX_FNAME];
+
+	_splitpath(appname, NULL, NULL, fname, NULL);
+	printf("\nUsage: %s [-h] [-i] [-w <timeout>]\n", fname);
+}
+
+/* There's a massive annoyance when taking over the console in a win32 app
+ * in that it doesn't return the prompt on app exit. So we must handle that
+ * manually, but the *ONLY* frigging way to achieve it is by simulating a
+ * keypress... which means we first need to bring our console back on top.
+ * And people wonder why developing elegant Win32 apps takes forever...
+ */
+static void DetachConsole(void)
+{
+	INPUT input;
+	HWND hWnd;
+
+	hWnd = GetConsoleWindow();
+	SetWindowPos(hWnd, HWND_TOP, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
+	FreeConsole();
+	memset(&input, 0, sizeof(input));
+	input.type = INPUT_KEYBOARD;
+	input.ki.wVk = VK_RETURN;
+	SendInput(1, &input, sizeof(input));
+	input.ki.dwFlags = KEYEVENTF_KEYUP;
+	SendInput(1, &input, sizeof(input));
+}
+
 /*
  * Application Entrypoint
  */
-// If we ever need to process more than one commandline arguments, uncomment the following parts
-// typedef int (CDECL *__wgetmainargs_t)(int*, wchar_t***, wchar_t***, int, int*);
+typedef int (CDECL *__wgetmainargs_t)(int*, wchar_t***, wchar_t***, int, int*);
 #if defined(_MSC_VER) && (_MSC_VER >= 1600)
 int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, _In_ int nShowCmd)
 #else
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 #endif
 {
-//	int i, argc = 0, si = 0;
-//	char** argv = NULL;
-//	wchar_t **wenv, **wargv;
-//	PF_DECL(__wgetmainargs);
+	const char* old_wait_option = "/W";
+	int i, opt, option_index = 0, argc = 0, si = 0;
+	BOOL attached_console = FALSE;
+	char** argv = NULL;
+	wchar_t **wenv, **wargv;
+	PF_DECL(__wgetmainargs);
 	HANDLE mutex = NULL;
 	HWND hDlg = NULL;
 	MSG msg;
 	int wait_for_mutex = 0;
+	struct option long_options[] = {
+		{"help",    no_argument,       NULL, 'h'},
+		{"iso",     required_argument, NULL, 'i'},
+		{"wait",    required_argument, NULL, 'w'},
+		{0, 0, NULL, 0}
+	};
 
 	uprintf("*** RUFUS INIT ***\n");
 
-//	PF_INIT(__wgetmainargs, msvcrt);
-//	if (pf__wgetmainargs != NULL) {
-//		pf__wgetmainargs(&argc, &wargv, &wenv, 1, &si);
-//		argv = (char**)calloc(argc, sizeof(char*));
-//		for (i=0; i<argc; i++) {
-//			argv[i] = wchar_to_utf8(wargv[i]);
-//		}
-//	} else {
-//		uprintf("unable to access UTF-16 args");
-//	}
+	// Reattach the console, if we were started from commandline
+	if (AttachConsole(ATTACH_PARENT_PROCESS) != 0) {
+		attached_console = TRUE;
+		freopen("CONIN$", "r", stdin);
+		freopen("CONOUT$", "w", stdout);
+		freopen("CONOUT$", "w", stderr);
+		_flushall();
+		printf("\n");
+	}
+
+	PF_INIT(__wgetmainargs, msvcrt);
+	if (pf__wgetmainargs != NULL) {
+		pf__wgetmainargs(&argc, &wargv, &wenv, 1, &si);
+		argv = (char**)calloc(argc, sizeof(char*));
+		for (i=0; i<argc; i++) {
+			argv[i] = wchar_to_utf8(wargv[i]);
+			// Check for "/W" (wait for mutex release)
+			// TODO: phase out /W and use -w instead
+			if (safe_strcmp(argv[i], old_wait_option) == 0)
+				wait_for_mutex = 150;	// Try to acquire the mutex for 15 seconds
+		}
+
+		while ((opt = getopt_long(argc, argv, "?hi:w:", long_options, &option_index)) != EOF)
+			switch (opt) {
+			case 'i':
+				if (_access(optarg, 0) != -1) {
+					iso_path = safe_strdup(optarg);
+					iso_provided = TRUE;
+				} else {
+					printf("Could not find ISO image '%s'\n", optarg);
+				}
+				break;
+			case 'w':
+				wait_for_mutex = atoi(optarg);
+				break;
+			case '?':
+			case 'h':
+			default:
+				PrintUsage(argv[0]);
+				goto out;
+		}
+	} else {
+		uprintf("unable to access UTF-16 args");
+	}
 
 	// Prevent 2 applications from running at the same time, unless "/W" is passed as an option
 	// in which case we wait for the mutex to be relinquished
@@ -1823,10 +1908,15 @@ out:
 	safe_free(iso_path);
 	safe_free(update.download_url);
 	safe_free(update.release_notes);
+	if (argv != NULL) {
+		for (i=0; i<argc; i++) safe_free(argv[i]);
+		safe_free(argv);
+	}
 	SetLGP(TRUE, &existing_key, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer", "NoDriveTypeAutorun", 0);
+	if (attached_console)
+		DetachConsole();
 	CloseHandle(mutex);
 	uprintf("*** RUFUS EXIT ***\n");
-
 #ifdef _CRTDBG_MAP_ALLOC
 	_CrtDumpMemoryLeaks();
 #endif
