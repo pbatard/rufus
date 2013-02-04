@@ -410,7 +410,7 @@ static void SetFSFromISO(void)
 		ComboBox_GetCurSel(hFileSystem));
 }
 
-void SetMBRProps(void)
+static void SetMBRProps(void)
 {
 	int fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
 	int dt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
@@ -427,13 +427,27 @@ void SetMBRProps(void)
 	IGNORE_RETVAL(ComboBox_SetCurSel(hDiskID, needs_masquerading?1:0));
 }
 
-void EnableBootOptions(BOOL enable)
+static void EnableAdvancedBootOptions(BOOL enable)
 {
-	EnableWindow(hBoot, enable);
-	EnableWindow(hBootType, enable);
-	EnableWindow(hSelectISO, enable);
-	EnableWindow(GetDlgItem(hMainDialog, IDC_RUFUS_MBR), enable);
-	EnableWindow(hDiskID, enable);
+	BOOL actual_enable;
+	int bt = GETBIOSTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
+	actual_enable = (bt==BT_UEFI)?FALSE:enable;
+
+	EnableWindow(GetDlgItem(hMainDialog, IDC_RUFUS_MBR), actual_enable);
+	EnableWindow(GetDlgItem(hMainDialog, IDC_EXTRA_PARTITION), actual_enable);
+	EnableWindow(hDiskID, actual_enable);
+}
+
+static void EnableBootOptions(BOOL enable)
+{
+	BOOL actual_enable;
+	int fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
+	actual_enable = ((fs != FS_FAT16) && (fs != FS_FAT32) && (fs != FS_NTFS))?FALSE:enable;
+
+	EnableWindow(hBoot, actual_enable);
+	EnableWindow(hBootType, actual_enable);
+	EnableWindow(hSelectISO, actual_enable);
+	EnableAdvancedBootOptions(actual_enable);
 }
 
 static void SetPartitionSchemeTooltip(void)
@@ -464,7 +478,7 @@ static BOOL PopulateProperties(int ComboIndex)
 	char capacity[64];
 	static char* suffix[] = { "B", "KB", "MB", "GB", "TB", "PB"};
 	char no_label[] = STR_NO_LABEL;
-	int i, j, pt, bt, fs;
+	int i, j, pt, bt;
 
 	IGNORE_RETVAL(ComboBox_ResetContent(hPartitionScheme));
 	IGNORE_RETVAL(ComboBox_ResetContent(hFileSystem));
@@ -479,8 +493,7 @@ static BOOL PopulateProperties(int ComboIndex)
 	if (!GetDriveInfo(ComboIndex))	// This also populates FS
 		return FALSE;
 	SetFSFromISO();
-	fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
-	EnableBootOptions((fs == FS_FAT16) || (fs == FS_FAT32) || (fs == FS_NTFS));
+	EnableBootOptions(TRUE);
 
 	HumanReadableSize = (double)SelectedDrive.DiskSize;
 	for (i=1; i<ARRAYSIZE(suffix); i++) {
@@ -803,28 +816,13 @@ void UpdateProgress(int op, float percent)
  */
 static void EnableControls(BOOL bEnable)
 {
-	int fs;
-
 	EnableWindow(GetDlgItem(hMainDialog, IDC_DEVICE), bEnable);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_PARTITION_SCHEME), bEnable);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_FILESYSTEM), bEnable);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_CLUSTERSIZE), bEnable);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_LABEL), bEnable);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_QUICKFORMAT), bEnable);
-	if (bEnable) {
-		fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
-		EnableWindow(hBoot, (fs == FS_FAT16) || (fs == FS_FAT32) || (fs == FS_NTFS));
-		EnableWindow(hBootType, (fs == FS_FAT16) || (fs == FS_FAT32) || (fs == FS_NTFS));
-		EnableWindow(hDiskID, (fs == FS_FAT16) || (fs == FS_FAT32) || (fs == FS_NTFS));
-		EnableWindow(GetDlgItem(hMainDialog, IDC_RUFUS_MBR), (fs == FS_FAT16) || (fs == FS_FAT32) || (fs == FS_NTFS));
-		EnableWindow(GetDlgItem(hMainDialog, IDC_EXTRA_PARTITION), (fs == FS_FAT16) || (fs == FS_FAT32) || (fs == FS_NTFS));
-	} else {
-		EnableWindow(hBoot, FALSE);
-		EnableWindow(hBootType, FALSE);
-		EnableWindow(hDiskID, FALSE);
-		EnableWindow(GetDlgItem(hMainDialog, IDC_RUFUS_MBR), FALSE);
-		EnableWindow(GetDlgItem(hMainDialog, IDC_EXTRA_PARTITION), FALSE);
-	}
+	EnableBootOptions(bEnable);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_BADBLOCKS), bEnable);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_ABOUT), bEnable);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_START), bEnable);
@@ -1014,6 +1012,13 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 			"This ISO image doesn't appear to use either...", "Unsupported ISO", MB_OK|MB_ICONINFORMATION);
 		safe_free(iso_path);
 		SetMBRProps();
+	} else if ((iso_report.has_efi || iso_report.has_win7_efi) && (iso_report.has_4GB_file)) {
+		// Who the heck decided that using FAT32 for UEFI booting, in late 200x, was a great idea?!?
+		MessageBoxU(hMainDialog, "Congratulations! You have just exposed the shortshightedness of the UEFI committee, by simply "
+			"trying to use an EFI based image with a file that is larger than 4 GB.\nPlease address your complaints to any of "
+			"the companies listed at http://www.uefi.org/about/, for sticking with FAT32 as the default EFI filesystem and thus "
+			"preventing easy booting of large VHDs with UEFI.", "Who the heck couldn't see that one coming?", MB_OK|MB_ICONINFORMATION);
+		safe_free(iso_path);
 	} else {
 		for(i=0; i<NB_OLD_C32; i++) {
 			if (iso_report.has_old_c32[i]) {
@@ -1518,6 +1523,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				SetMBRProps();
 				break;
 			}
+			EnableAdvancedBootOptions(TRUE);
 			IGNORE_RETVAL(ComboBox_ResetContent(hBootType));
 			if ((bt == BT_BIOS) && ((fs == FS_FAT16) || (fs == FS_FAT32))) {
 				IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, "MS-DOS"), DT_WINME));
@@ -1706,7 +1712,14 @@ static void PrintUsage(char* appname)
 	char fname[_MAX_FNAME];
 
 	_splitpath(appname, NULL, NULL, fname, NULL);
-	printf("\nUsage: %s [-h] [-i] [-w <timeout>]\n", fname);
+	printf("\nUsage: %s [-h] [-i PATH] [-w TIMEOUT]\n", fname);
+	printf("  -i PATH, --iso=PATH\n");
+	printf("     Select the ISO image pointed by PATH to be used on startup\n");
+	printf("  -w TIMEOUT, --wait=TIMEOUT\n");
+	printf("     Wait TIMEOUT tens of a second for the global application mutex to be released.\n");
+	printf("     Used when launching a newer version of " APPLICATION_NAME " from a running application.\n");
+	printf("  -h, --help\n");
+	printf("     This usage guide.\n");
 }
 
 /* There's a massive annoyance when taking over the console in a win32 app
@@ -1763,21 +1776,21 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	// Reattach the console, if we were started from commandline
 	if (AttachConsole(ATTACH_PARENT_PROCESS) != 0) {
 		attached_console = TRUE;
-		freopen("CONIN$", "r", stdin);
-		freopen("CONOUT$", "w", stdout);
-		freopen("CONOUT$", "w", stderr);
+		IGNORE_RETVAL(freopen("CONIN$", "r", stdin));
+		IGNORE_RETVAL(freopen("CONOUT$", "w", stdout));
+		IGNORE_RETVAL(freopen("CONOUT$", "w", stderr));
 		_flushall();
 		printf("\n");
 	}
 
+	// We have to process the arguments before we acquire the lock
 	PF_INIT(__wgetmainargs, msvcrt);
 	if (pf__wgetmainargs != NULL) {
 		pf__wgetmainargs(&argc, &wargv, &wenv, 1, &si);
 		argv = (char**)calloc(argc, sizeof(char*));
 		for (i=0; i<argc; i++) {
 			argv[i] = wchar_to_utf8(wargv[i]);
-			// Check for "/W" (wait for mutex release)
-			// TODO: phase out /W and use -w instead
+			// Check for "/W" (wait for mutex release for pre 1.3.3 versions)
 			if (safe_strcmp(argv[i], old_wait_option) == 0)
 				wait_for_mutex = 150;	// Try to acquire the mutex for 15 seconds
 		}
@@ -1819,7 +1832,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		MessageBoxA(NULL, "Another Rufus application is running.\n"
 			"Please close the first application before running another one.",
 			"Other instance detected", MB_ICONSTOP);
-		return 0;
+		goto out;
 	}
 
 	// Save instance of the application for further reference

@@ -1124,7 +1124,7 @@ INT_PTR CALLBACK NewVersionCallback(HWND hDlg, UINT message, WPARAM wParam, LPAR
 			case 2:		// Launch newer version and close this one
 				for (i=(int)safe_strlen(filepath); (i>0)&&(filepath[i]!='\\'); i--);
 				safe_strcpy(tmp, sizeof(tmp), &filepath[i+1]);
-				safe_strcat(tmp, sizeof(tmp), " /W");
+				safe_strcat(tmp, sizeof(tmp), " -w 150");	// add 15 seconds delay to wait for lock release
 				filepath[i] = 0;
 				memset(&si, 0, sizeof(si));
 				memset(&pi, 0, sizeof(pi));
