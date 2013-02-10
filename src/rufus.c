@@ -94,7 +94,6 @@ static BOOL iso_size_check = TRUE;
 static BOOL log_displayed = FALSE;
 static BOOL iso_provided = FALSE;
 static int selection_default;
-BOOL enable_fixed_disks = FALSE, advanced_mode = TRUE;
 
 /*
  * Globals
@@ -109,6 +108,7 @@ HWND hDeviceList, hPartitionScheme, hFileSystem, hClusterSize, hLabel, hBootType
 HWND hISOProgressDlg = NULL, hLogDlg = NULL, hISOProgressBar, hISOFileName, hDiskID;
 BOOL use_own_c32[NB_OLD_C32] = {FALSE, FALSE}, detect_fakes = TRUE, mbr_selected_by_user = FALSE;
 BOOL iso_op_in_progress = FALSE, format_op_in_progress = FALSE;
+BOOL enable_fixed_disks = FALSE, advanced_mode = TRUE;
 int dialog_showing = 0;
 uint16_t rufus_version[4];
 RUFUS_UPDATE update = { {0,0,0,0}, {0,0}, NULL, NULL};
@@ -657,11 +657,22 @@ static BOOL GetUSBDevices(DWORD devnum)
 				continue;
 			}
 
+			if (device_number.DeviceNumber >= MAX_DRIVES) {
+				uprintf("Device Number %d is too big - ignoring device\n");
+				continue;
+			}
+
 			if (GetDriveLabel(device_number.DeviceNumber + DRIVE_INDEX_MIN, &drive_letter, &label)) {
 				// Must ensure that the combo box is UNSORTED for indexes to be the same
 				StrArrayAdd(&DriveID, buffer);
 				StrArrayAdd(&DriveLabel, label);
-				safe_sprintf(entry, sizeof(entry), "%s (%c:)", label, drive_letter);
+				// Drive letter ' ' is returned for drives that don't have a volume assigned yet
+				if (drive_letter == ' ') {
+					safe_sprintf(entry, sizeof(entry), "%s (Disk %d)", label, device_number.DeviceNumber);
+					device_number.DeviceNumber |= DRIVE_INDEX_RAW_DRIVE;
+				} else {
+					safe_sprintf(entry, sizeof(entry), "%s (%c:)", label, drive_letter);
+				}
 				IGNORE_RETVAL(ComboBox_SetItemData(hDeviceList, ComboBox_AddStringU(hDeviceList, entry),
 					device_number.DeviceNumber + DRIVE_INDEX_MIN));
 				maxwidth = max(maxwidth, GetEntryWidth(hDeviceList, entry));
@@ -904,6 +915,14 @@ static void CALLBACK ClockTimer(HWND hWnd, UINT uMsg, UINT_PTR idEvent, DWORD dw
 	safe_sprintf(szTimer, sizeof(szTimer), "%02d:%02d:%02d",
 		timer/3600, (timer%3600)/60, timer%60);
 	SendMessageA(GetDlgItem(hWnd, IDC_STATUS), SB_SETTEXTA, SBT_OWNERDRAW | 1, (LPARAM)szTimer);
+}
+
+/*
+ * Device Refresh Timer
+ */
+static void CALLBACK RefreshTimer(HWND hWnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
+{
+	SendMessage(hWnd, WM_DEVICECHANGE, DBT_CUSTOMEVENT, 0);
 }
 
 /*
@@ -1346,7 +1365,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	POINT Point;
 	RECT DialogRect, DesktopRect;
 	int nDeviceIndex, fs, bt, i, nWidth, nHeight;
-	static DWORD DeviceNum = 0;
+	static DWORD DeviceNum = 0, LastRefresh = 0;
 	wchar_t wtmp[128], wstr[MAX_PATH];
 	static UINT uDOSChecked = BST_CHECKED, uQFChecked;
 	static BOOL first_log_display = TRUE, user_changed_label = FALSE;
@@ -1354,11 +1373,33 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	switch (message) {
 
 	case WM_DEVICECHANGE:
-		if ( (format_thid == NULL) &&
-			 ((wParam == DBT_DEVICEARRIVAL) || (wParam == DBT_DEVICEREMOVECOMPLETE)) ) {
-			GetUSBDevices((DWORD)ComboBox_GetItemData(hDeviceList, ComboBox_GetCurSel(hDeviceList)));
-			user_changed_label = FALSE;
-			return (INT_PTR)TRUE;
+		// The Windows hotplug subsystem sucks. Among other things, if you insert a GPT partitioned
+		// USB drive with zero partitions, the only device messages you will get are a stream of
+		// DBT_DEVNODES_CHANGED and that's it. But those messages are also issued when you get a
+		// DBT_DEVICEARRIVAL and DBT_DEVICEREMOVECOMPLETE, and there's a whole slew of them so we
+		// can't really issue a refresh for each one we receive
+		// What we do then is arm a timer on DBT_DEVNODES_CHANGED, if it's been more than 1 second
+		// since last refresh/arm timer, and have that timer send DBT_CUSTOMEVENT when it expires.
+		if (format_thid == NULL) {
+			switch (wParam) {
+			case DBT_DEVICEARRIVAL:
+			case DBT_DEVICEREMOVECOMPLETE:
+			case DBT_CUSTOMEVENT:	// This last event is sent by our timer refresh function
+				LastRefresh = GetTickCount();	// Don't care about 49.7 days rollback of GetTickCount()
+				KillTimer(hMainDialog, TID_REFRESH_TIMER);
+				GetUSBDevices((DWORD)ComboBox_GetItemData(hDeviceList, ComboBox_GetCurSel(hDeviceList)));
+				user_changed_label = FALSE;
+				return (INT_PTR)TRUE;
+			case DBT_DEVNODES_CHANGED:
+				// If it's been more than a second since last device refresh, arm a refresh timer
+				if (GetTickCount() > LastRefresh + 1000) {
+					LastRefresh = GetTickCount();
+					SetTimer(hMainDialog, TID_REFRESH_TIMER, 1000, RefreshTimer);
+				}
+				break;
+			default:
+				break;
+			}
 		}
 		break;
 

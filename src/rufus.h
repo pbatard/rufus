@@ -36,9 +36,11 @@
 #define STR_NO_LABEL                "NO_LABEL"
 #define RUFUS_CANCELBOX_TITLE       APPLICATION_NAME " - Cancellation"
 #define RUFUS_BLOCKING_IO_TITLE     APPLICATION_NAME " - Flushing buffers"
-#define DRIVE_INDEX_MIN             0x80
-#define DRIVE_INDEX_MAX             0xC0
-#define MAX_DRIVES                  16
+#define DRIVE_INDEX_MIN             0x00000080
+#define DRIVE_INDEX_MAX             0x000000C0
+#define DRIVE_INDEX_MASK            0x0000FFFF
+#define DRIVE_INDEX_RAW_DRIVE       0x00010000	// Additional drive properties stored in the drive index
+#define MAX_DRIVES                  (DRIVE_INDEX_MAX - DRIVE_INDEX_MIN)
 #define MAX_TOOLTIPS                32
 #define MAX_PROGRESS                (0xFFFF-1)	// leave room for 1 more for insta-progress workaround
 #define MAX_LOG_SIZE                0x7FFFFFFE
@@ -127,7 +129,8 @@ enum timer_type {
 	TID_MESSAGE = 0x1000,
 	TID_BADBLOCKS_UPDATE,
 	TID_APP_TIMER,
-	TID_BLOCKING_TIMER
+	TID_BLOCKING_TIMER,
+	TID_REFRESH_TIMER
 };
 
 /* Action type, for progress bar breakdown */

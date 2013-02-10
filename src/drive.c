@@ -60,6 +60,7 @@ HANDLE GetDriveHandle(DWORD DriveIndex, char* DriveLetter, BOOL bWriteAccess, BO
 	char logical_drive[] = "\\\\.\\#:";
 	char physical_drive[24];
 
+	DriveIndex &= DRIVE_INDEX_MASK;
 	if ((DriveIndex < DRIVE_INDEX_MIN) || (DriveIndex > DRIVE_INDEX_MAX)) {
 		uprintf("WARNING: Bad index value. Please check the code!\n");
 	}
@@ -160,8 +161,10 @@ BOOL GetDriveLabel(DWORD DriveIndex, char* letter, char** label)
 	*label = STR_NO_LABEL;
 
 	hDrive = GetDriveHandle(DriveIndex, letter, FALSE, FALSE);
-	if (hDrive == INVALID_HANDLE_VALUE)
-		return FALSE;
+	if (hDrive == INVALID_HANDLE_VALUE) {
+		// Assume we have a raw drive without volume assigned if enable_fixed_disk is true
+		return enable_fixed_disks; 
+	}
 	safe_closehandle(hDrive);
 	AutorunPath[0] = *letter;
 	wDrivePath[0] = *letter;
@@ -206,7 +209,7 @@ BOOL GetDrivePartitionData(DWORD DeviceNumber, char* FileSystemName, DWORD FileS
 	char DrivePath[] = "#:\\", tmp[256];
 	DWORD i, nb_partitions = 0;
 
-	hDrive = GetDriveHandle(DeviceNumber, DrivePath, FALSE, FALSE);
+	hDrive = GetDriveHandle(DeviceNumber, NULL, FALSE, FALSE);
 	if (hDrive == INVALID_HANDLE_VALUE)
 		return FALSE;
 

@@ -1094,12 +1094,55 @@ static BOOL RemountVolume(char drive_letter)
 }
 
 /*
+ * Detect if a Windows Format prompt is active, by enumerating the
+ * whole Windows tree and looking for the relevant popup
+ */
+static BOOL CALLBACK FormatPromptCallback(HWND hWnd, LPARAM lParam)
+{
+	char str_buf[MAX_PATH];
+	HWND *hFound = (HWND*)lParam;
+	static const char* security_string = "Microsoft Windows";
+
+	// The format prompt has the popup window style
+	if (GetWindowLong(hWnd, GWL_STYLE) & WS_POPUPWINDOW) {
+		str_buf[0] = 0;
+		GetWindowTextA(hWnd, str_buf, MAX_PATH);
+		str_buf[MAX_PATH-1] = 0;
+		if (safe_strcmp(str_buf, security_string) == 0) {
+			*hFound = hWnd;
+			return TRUE;
+		}
+	}
+	return TRUE;
+}
+
+/*
+ * When we format a drive that doesn't have any existing partitions, we can't lock it
+ * prior to partitioning, which means that Windows will display a "You need to format the
+ * disk in drive X: before you can use it'. We have to close that popup manually.
+ */
+DWORD WINAPI CloseFormatPromptThread(LPVOID param) {
+	HWND hFormatPrompt;
+
+	while(format_op_in_progress) {
+		hFormatPrompt = NULL;
+		EnumChildWindows(GetDesktopWindow(), FormatPromptCallback, (LPARAM)&hFormatPrompt);
+		if (hFormatPrompt != NULL) {
+			SendMessage(hFormatPrompt, WM_COMMAND, (WPARAM)IDCANCEL, (LPARAM)0);
+			uprintf("Closed Windows format prompt\n");
+		}
+		Sleep(50);
+	}
+	ExitThread(0);
+}
+
+/*
  * Standalone thread for the formatting operation
  */
 DWORD WINAPI FormatThread(LPVOID param)
 {
 	int r, pt, bt, fs, dt;
-	BOOL ret;
+	BOOL ret, no_volume = FALSE;
 	DWORD num = (DWORD)(uintptr_t)param;
 	HANDLE hPhysicalDrive = INVALID_HANDLE_VALUE;
 	HANDLE hLogicalVolume = INVALID_HANDLE_VALUE;
@@ -1116,6 +1159,11 @@ DWORD WINAPI FormatThread(LPVOID param)
 	pt = GETPARTTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
 	bt = GETBIOSTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
 
+	if (num & DRIVE_INDEX_RAW_DRIVE) {
+		no_volume = TRUE;
+		uprintf("Using raw drive mode\n");
+	}
+
 	hPhysicalDrive = GetDriveHandle(num, NULL, TRUE, TRUE);
 	if (hPhysicalDrive == INVALID_HANDLE_VALUE) {
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_OPEN_FAILED;
@@ -1126,16 +1174,19 @@ DWORD WINAPI FormatThread(LPVOID param)
 	// ... but we can't write sectors that are part of a volume, even if we have 
 	// access to physical, unless we have a lock (which doesn't have to be write)
 	// Also, having a volume handle allows us to unmount the volume
-	hLogicalVolume = GetDriveHandle(num, drive_name, FALSE, TRUE);
-	if (hLogicalVolume == INVALID_HANDLE_VALUE) {
-		uprintf("Could not lock volume\n");
-		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_OPEN_FAILED;
-		goto out;
+	if (!no_volume) {
+		hLogicalVolume = GetDriveHandle(num, drive_name, FALSE, TRUE);
+		if (hLogicalVolume == INVALID_HANDLE_VALUE) {
+			uprintf("Could not lock volume\n");
+			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_OPEN_FAILED;
+			goto out;
+		}
+		UnmountDrive(hLogicalVolume);
 	}
-	UnmountDrive(hLogicalVolume);
 
 	AnalyzeMBR(hPhysicalDrive);
-	AnalyzePBR(hLogicalVolume);
+	if (!no_volume)
+		AnalyzePBR(hLogicalVolume);
 
 	if (IsChecked(IDC_BADBLOCKS)) {
 		do {
@@ -1198,7 +1249,8 @@ DWORD WINAPI FormatThread(LPVOID param)
 		}
 	}
 	// Close the (unmounted) volume before formatting, but keep the lock
-	safe_closehandle(hLogicalVolume);
+	if (!no_volume)
+		safe_closehandle(hLogicalVolume);
 
 	// Especially after destructive badblocks test, you must zero the MBR/GPT completely
 	// before repartitioning. Else, all kind of bad things can happen.
@@ -1210,6 +1262,7 @@ DWORD WINAPI FormatThread(LPVOID param)
 	}
 	UpdateProgress(OP_ZERO_MBR, -1.0f);
 
+	CreateThread(NULL, 0, CloseFormatPromptThread, NULL, 0, NULL);
 	if (!CreatePartition(hPhysicalDrive, pt, fs, (pt==PARTITION_STYLE_MBR)&&(bt==BT_UEFI))) {
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_PARTITION_FAILURE;
 		goto out;
@@ -1218,6 +1271,18 @@ DWORD WINAPI FormatThread(LPVOID param)
 
 	// Add a small delay after partitioning to be safe
 	Sleep(200);
+
+	if (no_volume) {
+		hLogicalVolume = GetDriveHandle(num, drive_name, FALSE, TRUE);
+		if (hLogicalVolume == INVALID_HANDLE_VALUE) {
+			uprintf("Could not lock volume\n");
+			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_OPEN_FAILED;
+			goto out;
+		}
+		UnmountDrive(hLogicalVolume);
+		safe_closehandle(hLogicalVolume);
+	}
+
 
 	// If FAT32 is requested and we have a large drive (>32 GB) use 
 	// large FAT32 format, else use MS's FormatEx.
