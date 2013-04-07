@@ -54,6 +54,7 @@ static int task_number = 0;
 /* Number of steps for each FS for FCC_STRUCTURE_PROGRESS */
 const int nb_steps[FS_MAX] = { 5, 5, 12, 10 };
 static int fs_index = 0;
+BOOL force_large_fat32 = FALSE;
 
 /*
  * FormatEx callback. Return FALSE to halt operations
@@ -274,6 +275,7 @@ static void ToValidLabel(WCHAR* name, BOOL bFAT)
  * -----
  * 1d02h
  */
+// TODO: use that for Format "classic"
 static DWORD GetVolumeID(void)
 {
 	SYSTEMTIME s;
@@ -331,7 +333,6 @@ static DWORD GetFATSizeSectors(DWORD DskSize, DWORD ReservedSecCnt, DWORD SecPer
 static BOOL FormatFAT32(DWORD DriveIndex)
 {
 	BOOL r = FALSE;
-	char DriveLetter;
 	DWORD i;
 	HANDLE hLogicalVolume;
 	DWORD cbRet;
@@ -342,7 +343,8 @@ static BOOL FormatFAT32(DWORD DriveIndex)
 	DWORD NumFATs = 2;
 	DWORD BackupBootSect = 6;
 	DWORD VolumeId = 0; // calculated before format
-	WCHAR wLabel[64], wDriveName[] = L"#:\\";
+	char* VolumeName = NULL;
+	WCHAR wLabel[64], *wVolumeName = NULL;
 	DWORD BurstSize = 128; // Zero in blocks of 64K typically
 
 	// Calculated later
@@ -365,18 +367,17 @@ static BOOL FormatFAT32(DWORD DriveIndex)
 	// Debug temp vars
 	ULONGLONG FatNeeded, ClusterCount;
 
-	PrintStatus(0, TRUE, "Formatting...");
-	uprintf("Using large FAT32 format method\n");
+	PrintStatus(0, TRUE, "Formatting (Large FAT32)...");
 	VolumeId = GetVolumeID();
 
 	// Open the drive (volume should already be locked)
-	hLogicalVolume = GetDriveHandle(DriveIndex, &DriveLetter, TRUE, FALSE);
+	hLogicalVolume = GetLogicalHandle(DriveIndex, TRUE, FALSE);
 	if (IS_ERROR(FormatStatus)) goto out;
 	if (hLogicalVolume == INVALID_HANDLE_VALUE)
 		die("Could not access logical volume\n", ERROR_OPEN_FAILED);
 
 	// Make sure we get exclusive access
-	if (!UnmountDrive(hLogicalVolume))
+	if (!UnmountVolume(hLogicalVolume))
 		return r;
 
 	// Work out drive params
@@ -526,7 +527,7 @@ static BOOL FormatFAT32(DWORD DriveIndex)
 	}
 
 	// Now we're commited - print some info first
-	uprintf("Size : %gGB %u sectors\n", (double) (piDrive.PartitionLength.QuadPart / (1000*1000*1000)), TotalSectors);
+	uprintf("Size : %s %u sectors\n", SizeToHumanReadable(piDrive.PartitionLength), TotalSectors);
 	uprintf("Cluster size %d bytes, %d Bytes Per Sector\n", SectorsPerCluster*BytesPerSect, BytesPerSect);
 	uprintf("Volume ID is %x:%x\n", VolumeId>>16, VolumeId&0xffff);
 	uprintf("%d Reserved Sectors, %d Sectors per FAT, %d FATs\n", ReservedSectCount, FatSize, NumFATs);
@@ -578,18 +579,22 @@ static BOOL FormatFAT32(DWORD DriveIndex)
 	// Set the FAT32 volume label
 	GetWindowTextW(hLabel, wLabel, ARRAYSIZE(wLabel));
 	ToValidLabel(wLabel, TRUE);
-	wDriveName[0] = DriveLetter;
 	// Handle must be closed for SetVolumeLabel to work
 	safe_closehandle(hLogicalVolume);
-
-	PrintStatus(0, TRUE, "Setting Label (This can take while)...");
-	if (!SetVolumeLabelW(wDriveName, wLabel)) {
+	PrintStatus(0, TRUE, "Setting Label (This may take while)...");
+	VolumeName = GetLogicalName(DriveIndex, TRUE);
+	wVolumeName = utf8_to_wchar(VolumeName);
+	if ((wVolumeName == NULL) || (!SetVolumeLabelW(wVolumeName, wLabel))) {
 		uprintf("Could not set label: %s\n", WindowsErrorString());
+		// Non fatal error
 	}
+
 	uprintf("Format completed.\n");
 	r = TRUE;
 
 out:
+	safe_free(VolumeName);
+	safe_free(wVolumeName);
 	safe_closehandle(hLogicalVolume);
 	safe_free(pFAT32BootSect);
 	safe_free(pFAT32FsInfo);
@@ -601,18 +606,28 @@ out:
 /*
  * Call on fmifs.dll's FormatEx() to format the drive
  */
-static BOOL FormatDrive(char DriveLetter)
+static BOOL FormatDrive(DWORD DriveIndex)
 {
 	BOOL r = FALSE;
 	PF_DECL(FormatEx);
-	WCHAR wDriveRoot[] = L"?:\\";
+	char* VolumeName = NULL;
+	WCHAR* wVolumeName = NULL;
+	char FSType[32], format_status[64];
 	WCHAR wFSType[32];
 	WCHAR wLabel[64];
 	size_t i;
 	char* locale;
 
-	wDriveRoot[0] = (WCHAR)DriveLetter;
-	PrintStatus(0, TRUE, "Formatting...");
+	GetWindowTextA(hFileSystem, FSType, ARRAYSIZE(FSType));
+	safe_sprintf(format_status, ARRAYSIZE(format_status), "Formatting (%s)...", FSType);
+	PrintStatus(0, TRUE, format_status);
+	VolumeName = GetLogicalName(DriveIndex, FALSE);
+	wVolumeName = utf8_to_wchar(VolumeName);
+	if (wVolumeName == NULL) {
+		uprintf("Could not read volume name\n");
+		goto out;
+	}
+
 	// LoadLibrary("fmifs.dll") appears to changes the locale, which can lead to
 	// problems with tolower(). Make sure we restore the locale. For more details,
 	// see http://comments.gmane.org/gmane.comp.gnu.mingw.user/39300
@@ -635,7 +650,7 @@ static BOOL FormatDrive(char DriveLetter)
 	format_percent = 0.0f;
 	task_number = 0;
 	fs_index = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
-	pfFormatEx(wDriveRoot, SelectedDrive.Geometry.MediaType, wFSType, wLabel,
+	pfFormatEx(wVolumeName, SelectedDrive.Geometry.MediaType, wFSType, wLabel,
 		IsChecked(IDC_QUICKFORMAT), (ULONG)ComboBox_GetItemData(hClusterSize, ComboBox_GetCurSel(hClusterSize)),
 		FormatExCallback);
 	if (!IS_ERROR(FormatStatus)) {
@@ -644,6 +659,8 @@ static BOOL FormatDrive(char DriveLetter)
 	}
 
 out:
+	safe_free(VolumeName);
+	safe_free(wVolumeName);
 	return r;
 }
 
@@ -737,12 +754,14 @@ static BOOL AnalyzePBR(HANDLE hLogicalVolume)
 		} else if (entire_fat_32_fd_br_matches(&fake_fd)) {
 			uprintf("Drive has a FAT32 FreeDOS partition boot record\n");
 		} else {
-			uprintf("Drive has a unknown FAT16 or FAT32 partition boot record\n");
+			uprintf("Drive has an unknown FAT16 or FAT32 partition boot record\n");
 		}
 	}
 	return TRUE;
 }
 
+// TODO: We may have to clear a few more sectors past the MBR buffer zone
+// so that Windows relinquishes access
 static BOOL ClearMBRGPT(HANDLE hPhysicalDrive, LONGLONG DiskSize, DWORD SectorSize)
 {
 	BOOL r = FALSE;
@@ -1138,15 +1157,24 @@ DWORD WINAPI CloseFormatPromptThread(LPVOID param) {
 
 /*
  * Standalone thread for the formatting operation
+ * According to http://msdn.microsoft.com/en-us/library/windows/desktop/aa364562.aspx
+ * To change a volume file system
+ *   Open a volume.
+ *   Lock the volume.
+ *   Format the volume.
+ *   Dismount the volume.
+ *   Unlock the volume.
+ *   Close the volume handle.
  */
 DWORD WINAPI FormatThread(LPVOID param)
 {
 	int r, pt, bt, fs, dt;
-	BOOL ret, no_volume = FALSE;
-	DWORD num = (DWORD)(uintptr_t)param;
+	BOOL ret;
+	DWORD DriveIndex = (DWORD)(uintptr_t)param;
 	HANDLE hPhysicalDrive = INVALID_HANDLE_VALUE;
 	HANDLE hLogicalVolume = INVALID_HANDLE_VALUE;
 	SYSTEMTIME lt;
+	char* guid_volume = NULL;
 	char drive_name[] = "?:\\";
 	char bb_msg[512];
 	char logfile[MAX_PATH], *userdir;
@@ -1159,34 +1187,41 @@ DWORD WINAPI FormatThread(LPVOID param)
 	pt = GETPARTTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
 	bt = GETBIOSTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
 
-	if (num & DRIVE_INDEX_RAW_DRIVE) {
-		no_volume = TRUE;
-		uprintf("Using raw drive mode\n");
-	}
-
-	hPhysicalDrive = GetDriveHandle(num, NULL, TRUE, TRUE);
+	PrintStatus(0, TRUE, "Requesting disk access...\n");
+	hPhysicalDrive = GetPhysicalHandle(DriveIndex, TRUE, TRUE);
 	if (hPhysicalDrive == INVALID_HANDLE_VALUE) {
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_OPEN_FAILED;
 		goto out;
 	}
-	// At this stage with have both a handle and a lock to the physical drive...
 
-	// ... but we can't write sectors that are part of a volume, even if we have 
-	// access to physical, unless we have a lock (which doesn't have to be write)
-	// Also, having a volume handle allows us to unmount the volume
-	if (!no_volume) {
-		hLogicalVolume = GetDriveHandle(num, drive_name, FALSE, TRUE);
-		if (hLogicalVolume == INVALID_HANDLE_VALUE) {
-			uprintf("Could not lock volume\n");
-			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_OPEN_FAILED;
+	// At this stage with have both a handle and a lock to the physical drive...
+	drive_name[0] = GetDriveLetter(DriveIndex);
+	if (drive_name[0] == ' ') {
+		uprintf("No drive letter was assigned...\n");
+		drive_name[0] =  GetUnusedDriveLetter();
+		if (drive_name[0] == ' ') {
+			uprintf("Could not find a suitable drive letter\n");
+			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_ASSIGN_LETTER);
 			goto out;
 		}
-		UnmountDrive(hLogicalVolume);
+	} else if (!DeleteVolumeMountPointA(drive_name)) {
+		uprintf("Failed to delete mountpoint %s: %s\n", drive_name, WindowsErrorString());
+		// TODO: generate an error?
 	}
+	uprintf("Will use '%c': as volume mountpoint\n", drive_name[0]);
 
+	hLogicalVolume = GetLogicalHandle(DriveIndex, FALSE, TRUE);
+	if (hLogicalVolume == INVALID_HANDLE_VALUE) {
+		uprintf("Could not lock volume\n");
+		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_OPEN_FAILED;
+		goto out;
+	}
+	UnmountVolume(hLogicalVolume);
+
+	PrintStatus(0, TRUE, "Analyzing existing boot records...\n");
 	AnalyzeMBR(hPhysicalDrive);
-	if (!no_volume)
-		AnalyzePBR(hLogicalVolume);
+	AnalyzePBR(hLogicalVolume);
+	UpdateProgress(OP_ANALYZE_MBR, -1.0f);
 
 	if (IsChecked(IDC_BADBLOCKS)) {
 		do {
@@ -1249,8 +1284,17 @@ DWORD WINAPI FormatThread(LPVOID param)
 		}
 	}
 	// Close the (unmounted) volume before formatting, but keep the lock
-	if (!no_volume)
-		safe_closehandle(hLogicalVolume);
+	// According to MS this relinquishes the lock, so...
+	PrintStatus(0, TRUE, "Closing existing volume...\n");
+	if (!CloseHandle(hLogicalVolume)) {
+		uprintf("Could not close volume: %s\n", WindowsErrorString());
+		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_ACCESS_DENIED;
+		goto out;
+	}
+	hLogicalVolume = INVALID_HANDLE_VALUE;
+
+	// TODO: check for cancel once in a while!
+	// TODO: our start button should become cancel instead of close
 
 	// Especially after destructive badblocks test, you must zero the MBR/GPT completely
 	// before repartitioning. Else, all kind of bad things can happen.
@@ -1272,27 +1316,23 @@ DWORD WINAPI FormatThread(LPVOID param)
 	// Add a small delay after partitioning to be safe
 	Sleep(200);
 
-	if (no_volume) {
-		hLogicalVolume = GetDriveHandle(num, drive_name, FALSE, TRUE);
-		if (hLogicalVolume == INVALID_HANDLE_VALUE) {
-			uprintf("Could not lock volume\n");
-			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_OPEN_FAILED;
-			goto out;
-		}
-		UnmountDrive(hLogicalVolume);
-		safe_closehandle(hLogicalVolume);
-	}
-
-
 	// If FAT32 is requested and we have a large drive (>32 GB) use 
 	// large FAT32 format, else use MS's FormatEx.
-	ret = ((fs == FS_FAT32) && (SelectedDrive.DiskSize > LARGE_FAT32_SIZE))?
-		FormatFAT32(num):FormatDrive(drive_name[0]);
+	ret = ((fs == FS_FAT32) && ((SelectedDrive.DiskSize > LARGE_FAT32_SIZE) || (force_large_fat32)))?
+		FormatFAT32(DriveIndex):FormatDrive(DriveIndex);
 	if (!ret) {
 		// Error will be set by FormatDrive() in FormatStatus
 		uprintf("Format error: %s\n", StrError(FormatStatus));
 		goto out;
 	}
+
+	guid_volume = GetLogicalName(DriveIndex, TRUE);
+	if (guid_volume == NULL) {
+		uprintf("Could not get GUID volume name\n");
+		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_NO_VOLUME_ID;
+		goto out;
+	}
+	uprintf("Found volume GUID %s\n", guid_volume);
 
 	if (pt == PARTITION_STYLE_MBR) {
 		PrintStatus(0, TRUE, "Writing master boot record...");
@@ -1302,6 +1342,12 @@ DWORD WINAPI FormatThread(LPVOID param)
 			goto out;
 		}
 		UpdateProgress(OP_FIX_MBR, -1.0f);
+	}
+
+	if (!SetVolumeMountPointA(drive_name, guid_volume)) {
+		uprintf("Could not remount %s on %s: %s\n", guid_volume, drive_name, WindowsErrorString());
+		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_MOUNT_VOLUME);
+		goto out;
 	}
 
 	if (IsChecked(IDC_BOOT)) {
@@ -1315,7 +1361,7 @@ DWORD WINAPI FormatThread(LPVOID param)
 		} else if ((dt == DT_WINME) || (dt == DT_FREEDOS) || ((dt == DT_ISO) && (fs == FS_NTFS))) {
 			// We still have a lock, which we need to modify the volume boot record 
 			// => no need to reacquire the lock...
-			hLogicalVolume = GetDriveHandle(num, drive_name, TRUE, FALSE);
+			hLogicalVolume = GetLogicalHandle(DriveIndex, TRUE, FALSE);
 			if (hLogicalVolume == INVALID_HANDLE_VALUE) {
 				uprintf("Could not re-mount volume for partition boot record access\n");
 				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_OPEN_FAILED;
@@ -1333,7 +1379,7 @@ DWORD WINAPI FormatThread(LPVOID param)
 			safe_unlockclose(hLogicalVolume);
 		} else if ( (dt == DT_SYSLINUX) || ((dt == DT_ISO) && ((fs == FS_FAT16) || (fs == FS_FAT32))) ) {
 			PrintStatus(0, TRUE, "Installing Syslinux...");
-			if (!InstallSyslinux(num, drive_name)) {
+			if (!InstallSyslinux(DriveIndex, drive_name[0])) {
 				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_INSTALL_FAILURE;
 			}
 		}
@@ -1368,7 +1414,8 @@ DWORD WINAPI FormatThread(LPVOID param)
 					goto out;
 				}
 				if ((bt == BT_UEFI) && (!iso_report.has_efi) && (iso_report.has_win7_efi)) {
-					// TODO: progress
+					// TODO: better progress
+					// TODO: check ISO with EFI only
 					PrintStatus(0, TRUE, "Win7 EFI boot setup (this may take a while)...");
 					wim_image[0] = drive_name[0];
 					efi_dst[0] = drive_name[0];
@@ -1392,7 +1439,7 @@ DWORD WINAPI FormatThread(LPVOID param)
 			}
 		}
 		UpdateProgress(OP_FINALIZE, -1.0f);
-		PrintStatus(0, TRUE, "Finalizing...");
+		PrintStatus(0, TRUE, "Finalizing, please wait...");
 		if (IsChecked(IDC_SET_ICON))
 			SetAutorun(drive_name);
 		// Issue another complete remount before we exit, to ensure we're clean
@@ -1405,9 +1452,10 @@ DWORD WINAPI FormatThread(LPVOID param)
 	}
 
 out:
+	safe_free(guid_volume);
 	SendMessage(hISOProgressDlg, UM_ISO_EXIT, 0, 0);
 	safe_unlockclose(hLogicalVolume);
-	safe_unlockclose(hPhysicalDrive);
+	safe_unlockclose(hPhysicalDrive);	// This can take a while
 	PostMessage(hMainDialog, UM_FORMAT_COMPLETED, 0, 0);
 	ExitThread(0);
 }

@@ -66,7 +66,7 @@ int libfat_readfile(intptr_t pp, void *buf, size_t secsize,
  * Extract the ldlinux.sys and ldlinux.bss from resources,
  * then patch and install them
  */
-BOOL InstallSyslinux(DWORD num, const char* drive_name)
+BOOL InstallSyslinux(DWORD drive_index, char drive_letter)
 {
 	HANDLE f_handle = INVALID_HANDLE_VALUE;
 	HANDLE d_handle = INVALID_HANDLE_VALUE;
@@ -84,7 +84,7 @@ BOOL InstallSyslinux(DWORD num, const char* drive_name)
 	int nsectors;
 	int dt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
 
-	ldlinux_name[0] = drive_name[0];
+	ldlinux_name[0] = drive_letter;
 
 	/* Initialize the ADV -- this should be smarter */
 	syslinux_reset_adv(syslinux_adv);
@@ -135,7 +135,7 @@ BOOL InstallSyslinux(DWORD num, const char* drive_name)
 	}
 
 	/* Reopen the volume (we already have a lock) */
-	d_handle = GetDriveHandle(num, (char*)drive_name, TRUE, FALSE);
+	d_handle = GetLogicalHandle(drive_index, TRUE, FALSE);
 	if (d_handle == INVALID_HANDLE_VALUE) {
 		uprintf("Could open volume for syslinux operation\n");
 		goto out;

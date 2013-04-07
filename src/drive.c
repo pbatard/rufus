@@ -38,106 +38,42 @@ RUFUS_DRIVE_INFO SelectedDrive;
 extern BOOL enable_fixed_disks;
 
 /*
- * Open a drive or volume with optional write and lock access
- * Returns INVALID_HANDLE_VALUE (/!\ which is DIFFERENT from NULL /!\) on failure.
- * This call is quite risky (left unchecked, inadvertently passing 0 as index would
- * return a handle to C:, which we might then proceed to unknowingly repartition!),
- * so we apply the following mitigation factors:
- * - Valid indexes must belong to a specific range [DRIVE_INDEX_MIN; DRIVE_INDEX_MAX]
- * - When opening for write access, we lock the volume. If that fails, which would
- *   typically be the case on C:\ or any other drive in use, we report failure
- * - We report the full path of any drive that was successfully opened for write acces
+ * Working with drive indexes quite risky (left unchecked,inadvertently passing 0 as
+ * index would return a handle to C:, which we might then proceed to unknowingly
+ * clear the MBR of!), so we mitigate the risk by forcing our indexes to belong to
+ * the specific range [DRIVE_INDEX_MIN; DRIVE_INDEX_MAX].
  */
-HANDLE GetDriveHandle(DWORD DriveIndex, char* DriveLetter, BOOL bWriteAccess, BOOL bLockDrive)
+#define CheckDriveIndex(DriveIndex) do { \
+	if ((DriveIndex < DRIVE_INDEX_MIN) || (DriveIndex > DRIVE_INDEX_MAX)) { \
+		uprintf("WARNING: Bad index value. Please check the code!\n"); \
+		goto out; \
+	} \
+	DriveIndex -= DRIVE_INDEX_MIN; } while (0)
+
+/*
+ * Open a drive or volume with optional write and lock access
+ * Return INVALID_HANDLE_VALUE (/!\ which is DIFFERENT from NULL /!\) on failure.
+ */
+static HANDLE GetHandle(char* Path, BOOL bWriteAccess, BOOL bLockDrive)
 {
-	BOOL r;
 	DWORD size;
 	HANDLE hDrive = INVALID_HANDLE_VALUE;
-	STORAGE_DEVICE_NUMBER_REDEF device_number = {0};
-	UINT drive_type;
-	char drives[26*4];	/* "D:\", "E:\", etc. */
-	char *drive = drives;
-	char logical_drive[] = "\\\\.\\#:";
-	char physical_drive[24];
 
-	DriveIndex &= DRIVE_INDEX_MASK;
-	if ((DriveIndex < DRIVE_INDEX_MIN) || (DriveIndex > DRIVE_INDEX_MAX)) {
-		uprintf("WARNING: Bad index value. Please check the code!\n");
+	if (Path == NULL)
+		goto out;
+	hDrive = CreateFileA(Path, GENERIC_READ|(bWriteAccess?GENERIC_WRITE:0),
+		FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, 0);
+	if (hDrive == INVALID_HANDLE_VALUE) {
+		uprintf("Could not open drive %s: %s\n", Path, WindowsErrorString());
+		goto out;
 	}
-	DriveIndex -= DRIVE_INDEX_MIN;
 
-	// If no drive letter is requested, open a physical drive
-	if (DriveLetter == NULL) {
-		safe_sprintf(physical_drive, sizeof(physical_drive), "\\\\.\\PHYSICALDRIVE%d", DriveIndex);
-		hDrive = CreateFileA(physical_drive, GENERIC_READ|(bWriteAccess?GENERIC_WRITE:0),
-			FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, 0);
-		if (hDrive == INVALID_HANDLE_VALUE) {
-			uprintf("Could not open drive %s: %s\n", physical_drive, WindowsErrorString());
-			goto out;
-		}
-		if (bWriteAccess) {
-			uprintf("Caution: Opened %s drive for write access\n", &physical_drive[4]);
-		}
-	} else {
-		*DriveLetter = ' ';
-		size = GetLogicalDriveStringsA(sizeof(drives), drives);
-		if (size == 0) {
-			uprintf("GetLogicalDriveStrings failed: %s\n", WindowsErrorString());
-			goto out;
-		}
-		if (size > sizeof(drives)) {
-			uprintf("GetLogicalDriveStrings: buffer too small (required %d vs %d)\n", size, sizeof(drives));
-			goto out;
-		}
-
-		hDrive = INVALID_HANDLE_VALUE;
-		for ( ;*drive; drive += safe_strlen(drive)+1) {
-			if (!isalpha(*drive))
-				continue;
-			*drive = (char)toupper((int)*drive);
-			if (*drive < 'C') {
-				continue;
-			}
-
-			/* IOCTL_STORAGE_GET_DEVICE_NUMBER's STORAGE_DEVICE_NUMBER.DeviceNumber is
-			   not unique! An HDD, a DVD and probably other drives can have the same
-			   value there => Use GetDriveType() to filter out unwanted devices.
-			   See https://github.com/pbatard/rufus/issues/32 for details. */
-			drive_type = GetDriveTypeA(drive);
-			// NB: the HP utility allows drive_type == DRIVE_FIXED, which we don't allow by default
-			// Using Alt-F in Rufus does enable listing, but this mode is unsupported.
-			if ((drive_type != DRIVE_REMOVABLE) && ((!enable_fixed_disks) || (drive_type != DRIVE_FIXED)))
-				continue;
-
-			safe_sprintf(logical_drive, sizeof(logical_drive), "\\\\.\\%c:", drive[0]);
-			hDrive = CreateFileA(logical_drive, GENERIC_READ|(bWriteAccess?GENERIC_WRITE:0),
-				FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, 0);
-			if (hDrive == INVALID_HANDLE_VALUE) {
-				uprintf("Warning: could not open drive %c: %s\n", drive[0], WindowsErrorString());
-				continue;
-			}
-
-			r = DeviceIoControl(hDrive, IOCTL_STORAGE_GET_DEVICE_NUMBER, NULL,
-				0, &device_number, sizeof(device_number), &size, NULL);
-			if ((!r) || (size <= 0)) {
-				uprintf("IOCTL_STORAGE_GET_DEVICE_NUMBER failed for device %s: %s\n",
-					logical_drive, WindowsErrorString());
-			} else if (device_number.DeviceNumber == DriveIndex) {
-				break;
-			}
-			safe_closehandle(hDrive);
-		}
-		if (hDrive == INVALID_HANDLE_VALUE) {
-			goto out;
-		}
-		if (bWriteAccess) {
-			uprintf("Caution: Opened %s drive for write access\n", &logical_drive[4]);
-		}
-		*DriveLetter = *drive?*drive:' ';
+	if (bWriteAccess) {
+		uprintf("Caution: Opened drive %s for write access\n", Path);
 	}
 
 	if ((bLockDrive) && (!DeviceIoControl(hDrive, FSCTL_LOCK_VOLUME, NULL, 0, NULL, 0, &size, NULL))) {
-		uprintf("Could not get exclusive access to %s %s\n", logical_drive, WindowsErrorString());
+		uprintf("Could not get exclusive access to device %s: %s\n", Path, WindowsErrorString());
 		safe_closehandle(hDrive);
 		goto out;
 	}
@@ -146,12 +82,244 @@ out:
 	return hDrive;
 }
 
+/* 
+ * Return the path to access the physical drive, or NULL on error.
+ * The string is allocated and must be freed (to ensure concurrent access)
+ */
+char* GetPhysicalName(DWORD DriveIndex)
+{
+	BOOL success = FALSE;
+	char physical_name[24];
+	char* r = NULL;
+
+	CheckDriveIndex(DriveIndex);
+	safe_sprintf(physical_name, sizeof(physical_name), "\\\\.\\PHYSICALDRIVE%d", DriveIndex);
+	success = TRUE;
+out:
+	return (success)?safe_strdup(physical_name):NULL;
+}
+
+/* 
+ * Return a handle to the physical drive identified by DriveIndex
+ */
+HANDLE GetPhysicalHandle(DWORD DriveIndex, BOOL bWriteAccess, BOOL bLockDrive)
+{
+	HANDLE hPhysical = INVALID_HANDLE_VALUE;
+	char* PhysicalPath = GetPhysicalName(DriveIndex);
+	hPhysical = GetHandle(PhysicalPath, bWriteAccess, bLockDrive);
+	safe_free(PhysicalPath);
+	return hPhysical;
+}
+
+// Return the first GUID volume name for the associated drive or NULL if not found
+// See http://msdn.microsoft.com/en-us/library/cc542456.aspx
+// The returned string is allocated and must be freed
+// TODO: a drive may have multiple volumes - should we handle those?
+char* GetLogicalName(DWORD DriveIndex, BOOL bKeepTrailingBackslash)
+{
+	BOOL success = FALSE;
+	char volume_name[MAX_PATH];
+	HANDLE hDrive = INVALID_HANDLE_VALUE, hVolume = INVALID_HANDLE_VALUE;
+	size_t len;
+	char path[MAX_PATH];
+	VOLUME_DISK_EXTENTS DiskExtents;
+	DWORD size;
+	UINT drive_type;
+	int i, j;
+	static const char* ignore_device[] = { "\\Device\\CdRom", "\\Device\\Floppy" };
+
+	CheckDriveIndex(DriveIndex);
+
+	for (i=0; hDrive == INVALID_HANDLE_VALUE; i++) {
+		if (i == 0) {
+			hVolume = FindFirstVolumeA(volume_name, sizeof(volume_name));
+			if (hVolume == INVALID_HANDLE_VALUE) {
+				uprintf("Could not access first GUID volume: %s\n", WindowsErrorString());
+				goto out;
+			}
+		} else {
+			if (!FindNextVolumeA(hVolume, volume_name, sizeof(volume_name))) {
+				if (GetLastError() != ERROR_NO_MORE_FILES) {
+					uprintf("Could not access next GUID volume: %s\n", WindowsErrorString());
+				}
+				goto out;
+			}
+		}
+
+		// Sanity checks
+		len = safe_strlen(volume_name);
+		if ((len <= 1) || (safe_strnicmp(volume_name, "\\\\?\\", 4) != 0) || (volume_name[len-1] != '\\')) {
+			uprintf("'%s' is not a GUID volume name\n", volume_name);
+			continue;
+		}
+
+		drive_type = GetDriveTypeA(volume_name);
+		// NB: the HP utility allows drive_type == DRIVE_FIXED, which we don't allow by default
+		// Using Alt-F in Rufus does enable listing, but this mode is unsupported.
+		if ((drive_type != DRIVE_REMOVABLE) && ((!enable_fixed_disks) || (drive_type != DRIVE_FIXED)))
+			continue;
+
+		volume_name[len-1] = 0;
+
+		if (QueryDosDeviceA(&volume_name[4], path, sizeof(path)) == 0) {
+			uprintf("Failed to get device path for GUID volume '%s': %s\n", volume_name, WindowsErrorString());
+			continue;
+		}
+
+		for (j=0; (j<ARRAYSIZE(ignore_device)) &&
+			(safe_strnicmp(path, ignore_device[j], safe_strlen(ignore_device[j])) != 0); j++);
+		if (j < ARRAYSIZE(ignore_device)) {
+			uprintf("Skipping GUID volume for '%s'\n", path);
+			continue;
+		}
+
+		// If we can't have FILE_SHARE_WRITE, forget it
+		hDrive = CreateFileA(volume_name, GENERIC_READ, FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, 0);
+		if (hDrive == INVALID_HANDLE_VALUE) {
+			uprintf("Could not open GUID volume '%s': %s\n", volume_name, WindowsErrorString());
+			continue;
+		}
+
+		if ((!DeviceIoControl(hDrive, IOCTL_VOLUME_GET_VOLUME_DISK_EXTENTS, NULL, 0,
+			&DiskExtents, sizeof(DiskExtents), &size, NULL)) || (size <= 0)) {
+			uprintf("Could not get Disk Extents: %s\n", WindowsErrorString());
+			safe_closehandle(hDrive);
+			continue;
+		}
+		safe_closehandle(hDrive);
+		if ((DiskExtents.NumberOfDiskExtents >= 1) && (DiskExtents.Extents[0].DiskNumber == DriveIndex)) {
+			if (bKeepTrailingBackslash)
+				volume_name[len-1] = '\\';
+			success = TRUE;
+			break;
+		}
+	}
+
+out:
+	if (hVolume != INVALID_HANDLE_VALUE)
+		FindVolumeClose(hVolume);
+	return (success)?safe_strdup(volume_name):NULL;
+}
+
+/* 
+ * Return a handle to the first logical volume on the disk identified by DriveIndex
+ */
+HANDLE GetLogicalHandle(DWORD DriveIndex, BOOL bWriteAccess, BOOL bLockDrive)
+{
+	HANDLE hLogical = INVALID_HANDLE_VALUE;
+	char* LogicalPath = GetLogicalName(DriveIndex, FALSE);
+	hLogical = GetHandle(LogicalPath, bWriteAccess, bLockDrive);
+	safe_free(LogicalPath);
+	return hLogical;
+}
+
+/*
+ * Returns the first drive letter for a volume located on the drive identified by DriveIndex
+ * TODO: should we return all the drive letters?
+ */
+char GetDriveLetter(DWORD DriveIndex)
+{
+	DWORD size;
+	BOOL r;
+	STORAGE_DEVICE_NUMBER_REDEF device_number = {0};
+	UINT drive_type;
+	HANDLE hDrive = INVALID_HANDLE_VALUE;
+	char *drive, drives[26*4];	/* "D:\", "E:\", etc. */
+	char logical_drive[] = "\\\\.\\#:";
+	char drive_letter = ' ';
+	CheckDriveIndex(DriveIndex);
+
+	size = GetLogicalDriveStringsA(sizeof(drives), drives);
+	if (size == 0) {
+		uprintf("GetLogicalDriveStrings failed: %s\n", WindowsErrorString());
+		goto out;
+	}
+	if (size > sizeof(drives)) {
+		uprintf("GetLogicalDriveStrings: buffer too small (required %d vs %d)\n", size, sizeof(drives));
+		goto out;
+	}
+
+	for (drive = drives ;*drive; drive += safe_strlen(drive)+1) {
+		if (!isalpha(*drive))
+			continue;
+		*drive = (char)toupper((int)*drive);
+		if (*drive < 'C') {
+			continue;
+		}
+
+		/* IOCTL_STORAGE_GET_DEVICE_NUMBER's STORAGE_DEVICE_NUMBER.DeviceNumber is
+			not unique! An HDD, a DVD and probably other drives can have the same
+			value there => Use GetDriveType() to filter out unwanted devices.
+			See https://github.com/pbatard/rufus/issues/32 for details. */
+		drive_type = GetDriveTypeA(drive);
+		// NB: the HP utility allows drive_type == DRIVE_FIXED, which we don't allow by default
+		// Using Alt-F in Rufus does enable listing, but this mode is unsupported.
+		if ((drive_type != DRIVE_REMOVABLE) && ((!enable_fixed_disks) || (drive_type != DRIVE_FIXED)))
+			continue;
+
+		safe_sprintf(logical_drive, sizeof(logical_drive), "\\\\.\\%c:", drive[0]);
+		hDrive = CreateFileA(logical_drive, GENERIC_READ, FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, 0);
+		if (hDrive == INVALID_HANDLE_VALUE) {
+			uprintf("Warning: could not open drive %c: %s\n", drive[0], WindowsErrorString());
+			continue;
+		}
+
+		r = DeviceIoControl(hDrive, IOCTL_STORAGE_GET_DEVICE_NUMBER, NULL,
+			0, &device_number, sizeof(device_number), &size, NULL);
+		safe_closehandle(hDrive);
+		if ((!r) || (size <= 0)) {
+			uprintf("Could not get device number for device %s: %s\n",
+				logical_drive, WindowsErrorString());
+		} else if (device_number.DeviceNumber == DriveIndex) {
+			drive_letter = *drive;
+			break;
+		}
+	}
+
+out:
+	return drive_letter;
+}
+
+/*
+ * Return the next unused drive letter from the system
+ */
+char GetUnusedDriveLetter(void)
+{
+	DWORD size;
+	char drive_letter, *drive, drives[26*4];	/* "D:\", "E:\", etc. */
+
+	size = GetLogicalDriveStringsA(sizeof(drives), drives);
+	if (size == 0) {
+		uprintf("GetLogicalDriveStrings failed: %s\n", WindowsErrorString());
+		goto out;
+	}
+	if (size > sizeof(drives)) {
+		uprintf("GetLogicalDriveStrings: buffer too small (required %d vs %d)\n", size, sizeof(drives));
+		goto out;
+	}
+
+	for (drive_letter = 'C'; drive_letter < 'Z'; drive_letter++) {
+		for (drive = drives ;*drive; drive += safe_strlen(drive)+1) {
+			if (!isalpha(*drive))
+				continue;
+			if (drive_letter == (char)toupper((int)*drive))
+				break;
+		}
+		if (!*drive)
+			break;
+	}
+
+out:
+	return (drive_letter>'Z')?' ':drive_letter;
+}
+
 /*
  * Return the drive letter and volume label
+ * If the drive doesn't have a volume assigned, space is returned for the letter
  */
 BOOL GetDriveLabel(DWORD DriveIndex, char* letter, char** label)
 {
-	HANDLE hDrive, hPhysical;
+	HANDLE hPhysical;
 	DWORD size;
 	char AutorunPath[] = "#:\\autorun.inf", *AutorunLabel = NULL;
 	wchar_t wDrivePath[] = L"#:\\";
@@ -160,19 +328,19 @@ BOOL GetDriveLabel(DWORD DriveIndex, char* letter, char** label)
 
 	*label = STR_NO_LABEL;
 
-	hDrive = GetDriveHandle(DriveIndex, letter, FALSE, FALSE);
-	if (hDrive == INVALID_HANDLE_VALUE) {
-		// Assume we have a raw drive without volume assigned if enable_fixed_disk is true
-		return enable_fixed_disks; 
+	*letter = GetDriveLetter(DriveIndex);
+	if (*letter == ' ') {
+		// Drive without volume assigned
+		// TODO: only with fixed?
+		return TRUE; 
 	}
-	safe_closehandle(hDrive);
 	AutorunPath[0] = *letter;
 	wDrivePath[0] = *letter;
 
 	// Try to read an extended label from autorun first. Fallback to regular label if not found.
 	// In the case of card readers with no card, users can get an annoying popup asking them
 	// to insert media. Use IOCTL_STORAGE_CHECK_VERIFY to prevent this
-	hPhysical = GetDriveHandle(DriveIndex, NULL, FALSE, FALSE);
+	hPhysical = GetPhysicalHandle(DriveIndex, FALSE, FALSE);
 	if (DeviceIoControl(hPhysical, IOCTL_STORAGE_CHECK_VERIFY, NULL, 0, NULL, 0, &size, NULL))
 		AutorunLabel = get_token_data_file("label", AutorunPath);
 	else if (GetLastError() == ERROR_NOT_READY)
@@ -196,28 +364,29 @@ BOOL GetDriveLabel(DWORD DriveIndex, char* letter, char** label)
 /*
  * Fill the drive properties (size, FS, etc)
  */
-BOOL GetDrivePartitionData(DWORD DeviceNumber, char* FileSystemName, DWORD FileSystemNameSize)
+BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSystemNameSize)
 {
 	BOOL r;
-	HANDLE hDrive;
+	HANDLE hPhysical;
 	DWORD size;
 	BYTE geometry[128], layout[1024], part_type;
 	void* disk_geometry = (void*)geometry;
 	void* drive_layout = (void*)layout;
 	PDISK_GEOMETRY_EX DiskGeometry = (PDISK_GEOMETRY_EX)disk_geometry;
 	PDRIVE_LAYOUT_INFORMATION_EX DriveLayout = (PDRIVE_LAYOUT_INFORMATION_EX)drive_layout;
-	char DrivePath[] = "#:\\", tmp[256];
+	char* volume_name;
+	char tmp[256];
 	DWORD i, nb_partitions = 0;
 
-	hDrive = GetDriveHandle(DeviceNumber, NULL, FALSE, FALSE);
-	if (hDrive == INVALID_HANDLE_VALUE)
+	hPhysical = GetPhysicalHandle(DriveIndex, FALSE, FALSE);
+	if (hPhysical == INVALID_HANDLE_VALUE)
 		return FALSE;
 
-	r = DeviceIoControl(hDrive, IOCTL_DISK_GET_DRIVE_GEOMETRY_EX, 
+	r = DeviceIoControl(hPhysical, IOCTL_DISK_GET_DRIVE_GEOMETRY_EX, 
 			NULL, 0, geometry, sizeof(geometry), &size, NULL);
 	if (!r || size <= 0) {
-		uprintf("IOCTL_DISK_GET_DRIVE_GEOMETRY_EX failed for drive %c: %s\n", DrivePath[0], WindowsErrorString());
-		safe_closehandle(hDrive);
+		uprintf("Could not get geometry for drive #%d: %s\n", DriveIndex, WindowsErrorString());
+		safe_closehandle(hPhysical);
 		return FALSE;
 	}
 	SelectedDrive.DiskSize = DiskGeometry->DiskSize.QuadPart;
@@ -226,10 +395,10 @@ BOOL GetDrivePartitionData(DWORD DeviceNumber, char* FileSystemName, DWORD FileS
 	uprintf("Cylinders: %lld, TracksPerCylinder: %d, SectorsPerTrack: %d\n",
 		DiskGeometry->Geometry.Cylinders, DiskGeometry->Geometry.TracksPerCylinder, DiskGeometry->Geometry.SectorsPerTrack);
 
-	r = DeviceIoControl(hDrive, IOCTL_DISK_GET_DRIVE_LAYOUT_EX, 
+	r = DeviceIoControl(hPhysical, IOCTL_DISK_GET_DRIVE_LAYOUT_EX, 
 			NULL, 0, layout, sizeof(layout), &size, NULL );
 	if (!r || size <= 0) {
-		uprintf("IOCTL_DISK_GET_DRIVE_LAYOUT_EX failed for drive %c: %s\n", DrivePath[0], WindowsErrorString());
+		uprintf("Could not get layout for drive #d: %s\n", DriveIndex, WindowsErrorString());
 		return FALSE;
 	}
 
@@ -281,17 +450,23 @@ BOOL GetDrivePartitionData(DWORD DeviceNumber, char* FileSystemName, DWORD FileS
 		uprintf("Partition type: RAW\n");
 		break;
 	}
-	safe_closehandle(hDrive);
+	safe_closehandle(hPhysical);
 
 	// Populate the filesystem data
-	if (!GetVolumeInformationA(DrivePath, NULL, 0, NULL, NULL, NULL, FileSystemName, FileSystemNameSize)) {
+	volume_name = GetLogicalName(DriveIndex, TRUE);
+	if ((volume_name == NULL) || (!GetVolumeInformationA(volume_name, NULL, 0, NULL, NULL, NULL, FileSystemName, FileSystemNameSize))) {
+		uprintf("Did not get volume information for disk 0x%02x\n", DriveIndex);
 		FileSystemName[0] = 0;
 	}
+	safe_free(volume_name);
 
 	return TRUE;
 }
 
-BOOL UnmountDrive(HANDLE hDrive)
+/*
+ * Unmount of volume using the DISMOUNT_VOLUME ioctl
+ */
+BOOL UnmountVolume(HANDLE hDrive)
 {
 	DWORD size;
 
@@ -439,7 +614,7 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 	r = DeviceIoControl(hDrive, IOCTL_DISK_CREATE_DISK,
 			(BYTE*)&CreateDisk, size, NULL, 0, &size, NULL );
 	if (!r) {
-		uprintf("IOCTL_DISK_CREATE_DISK failed: %s\n", WindowsErrorString());
+		uprintf("Could not reset disk: %s\n", WindowsErrorString());
 		safe_closehandle(hDrive);
 		return FALSE;
 	}
@@ -448,7 +623,7 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 	r = DeviceIoControl(hDrive, IOCTL_DISK_SET_DRIVE_LAYOUT_EX,
 			(BYTE*)&DriveLayoutEx, size, NULL, 0, &size, NULL );
 	if (!r) {
-		uprintf("IOCTL_DISK_SET_DRIVE_LAYOUT_EX failed: %s\n", WindowsErrorString());
+		uprintf("Could not set drive layout: %s\n", WindowsErrorString());
 		safe_closehandle(hDrive);
 		return FALSE;
 	}

@@ -93,6 +93,7 @@ static BOOL existing_key = FALSE;	// For LGP set/restore
 static BOOL iso_size_check = TRUE;
 static BOOL log_displayed = FALSE;
 static BOOL iso_provided = FALSE;
+extern BOOL force_large_fat32;
 static int selection_default;
 
 /*
@@ -605,7 +606,7 @@ static BOOL GetUSBDevices(DWORD devnum)
 			// We can afford a failure on this call - just replace the name
 			safe_strcpy(buffer, sizeof(buffer), generic_friendly_name);
 		}
-		uprintf("Found drive '%s'\n", buffer);
+		uprintf("Found device '%s'\n", buffer);
 
 		devint_data.cbSize = sizeof(devint_data);
 		hDrive = INVALID_HANDLE_VALUE;
@@ -617,6 +618,8 @@ static BOOL GetUSBDevices(DWORD devnum)
 			if (!SetupDiEnumDeviceInterfaces(dev_info, &dev_info_data, &_GUID_DEVINTERFACE_DISK, j, &devint_data)) {
 				if(GetLastError() != ERROR_NO_MORE_ITEMS) {
 					uprintf("SetupDiEnumDeviceInterfaces failed: %s\n", WindowsErrorString());
+				} else {
+					uprintf("Device was eliminated because it doesn't report itself as a disk\n");
 				}
 				break;
 			}
@@ -669,7 +672,6 @@ static BOOL GetUSBDevices(DWORD devnum)
 				// Drive letter ' ' is returned for drives that don't have a volume assigned yet
 				if (drive_letter == ' ') {
 					safe_sprintf(entry, sizeof(entry), "%s (Disk %d)", label, device_number.DeviceNumber);
-					device_number.DeviceNumber |= DRIVE_INDEX_RAW_DRIVE;
 				} else {
 					safe_sprintf(entry, sizeof(entry), "%s (%c:)", label, drive_letter);
 				}
@@ -722,6 +724,7 @@ static void InitProgress(void)
 	memset(slot_end, 0, sizeof(slot_end));
 	previous_end = 0.0f;
 
+	nb_slots[OP_ANALYZE_MBR] = 1;
 	nb_slots[OP_ZERO_MBR] = 1;
 	if (IsChecked(IDC_BADBLOCKS)) {
 		nb_slots[OP_BADBLOCKS] = -1;
@@ -751,7 +754,7 @@ static void InitProgress(void)
 	  || ((fs == FS_FAT32) && (SelectedDrive.DiskSize >= LARGE_FAT32_SIZE)) ) {
 		nb_slots[OP_FORMAT] = -1;
 	}
-	nb_slots[OP_FINALIZE] = ((dt == DT_ISO) && (fs == FS_NTFS))?2:1;
+	nb_slots[OP_FINALIZE] = ((dt == DT_ISO) && (fs == FS_NTFS))?3:2;
 
 	for (i=0; i<OP_MAX; i++) {
 		if (nb_slots[i] > 0) {
@@ -1015,7 +1018,6 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 		safe_free(iso_path);
 		goto out;
 	}
-	// TODO: 4GB and UEFI = BAD!!!
 	uprintf("ISO label: '%s'\r\n  Size: %lld bytes\r\n  Has a >4GB file: %s\r\n  Uses EFI: %s%s\r\n  Uses Bootmgr: %s\r\n  Uses WinPE: %s%s\r\n  Uses isolinux: %s\n",
 		iso_report.label, iso_report.projected_size, iso_report.has_4GB_file?"Yes":"No", (iso_report.has_efi || iso_report.has_win7_efi)?"Yes":"No", 
 		(iso_report.has_win7_efi && (!iso_report.has_efi))?" (win7_x64)":"", iso_report.has_bootmgr?"Yes":"No",
@@ -1391,6 +1393,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				user_changed_label = FALSE;
 				return (INT_PTR)TRUE;
 			case DBT_DEVNODES_CHANGED:
+				// TODO: figure out what the deal is with extra events when FILE_SHARE_WRITE is not enabled
 				// If it's been more than a second since last device refresh, arm a refresh timer
 				if (GetTickCount() > LastRefresh + 1000) {
 					LastRefresh = GetTickCount();
@@ -1673,6 +1676,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 						FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_START_THREAD);
 						PostMessage(hMainDialog, UM_FORMAT_COMPLETED, 0, 0);
 					}
+					PrintStatus(0, FALSE, "");
 					timer = 0;
 					safe_sprintf(szTimer, sizeof(szTimer), "00:00:00");
 					SendMessageA(GetDlgItem(hMainDialog, IDC_STATUS), SB_SETTEXTA,
@@ -1906,6 +1910,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	UpdateWindow(hDlg);
 
 	// Do our own event processing and process "magic" commands
+	// TODO: Cheat modes are not handled when the log is at the front - this sucks
 	while(GetMessage(&msg, NULL, 0, 0)) {
 		// The following ensures the processing of the ISO progress window messages
 		if (!IsWindow(hISOProgressDlg) || !IsDialogMessage(hISOProgressDlg, &msg)) {
@@ -1917,6 +1922,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 				PrintStatus2000("ISO size check", iso_size_check);
 				continue;
 			}
+			// TODO: move this option to advanced mode
 			// Alt-F => Toggle detection of fixed disks
 			// By default Rufus does not allow formatting USB fixed disk drives, such as USB HDDs
 			// This is a safety feature, to avoid someone unintentionally formatting a backup 
@@ -1925,6 +1931,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 				enable_fixed_disks = !enable_fixed_disks;
 				PrintStatus2000("Fixed disks detection", enable_fixed_disks);
 				GetUSBDevices(0);
+				continue;
+			}
+			// Alt-L => Force Large FAT32 format to be used on < 32 GB drives
+			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'L')) {
+				force_large_fat32 = !force_large_fat32;
+				PrintStatus2000("Force large FAT32 usage", force_large_fat32);
 				continue;
 			}
 			// Alt-D => Delete the NoDriveTypeAutorun key on exit (useful if the app crashed)

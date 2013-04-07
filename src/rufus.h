@@ -38,8 +38,6 @@
 #define RUFUS_BLOCKING_IO_TITLE     APPLICATION_NAME " - Flushing buffers"
 #define DRIVE_INDEX_MIN             0x00000080
 #define DRIVE_INDEX_MAX             0x000000C0
-#define DRIVE_INDEX_MASK            0x0000FFFF
-#define DRIVE_INDEX_RAW_DRIVE       0x00010000	// Additional drive properties stored in the drive index
 #define MAX_DRIVES                  (DRIVE_INDEX_MAX - DRIVE_INDEX_MIN)
 #define MAX_TOOLTIPS                32
 #define MAX_PROGRESS                (0xFFFF-1)	// leave room for 1 more for insta-progress workaround
@@ -135,6 +133,7 @@ enum timer_type {
 
 /* Action type, for progress bar breakdown */
 enum action_type {
+	OP_ANALYZE_MBR,
 	OP_BADBLOCKS,
 	OP_ZERO_MBR,
 	OP_PARTITION,
@@ -296,14 +295,19 @@ extern BOOL Question(char* title, char* format, ...);
 extern BOOL ExtractDOS(const char* path);
 extern BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan);
 extern BOOL ExtractISOFile(const char* iso, const char* iso_file, const char* dest_file);
-extern BOOL InstallSyslinux(DWORD num, const char* drive_name);
+extern BOOL InstallSyslinux(DWORD drive_index, char drive_letter);
 DWORD WINAPI FormatThread(void* param);
+extern char* GetPhysicalName(DWORD DriveIndex);
+extern HANDLE GetPhysicalHandle(DWORD DriveIndex, BOOL bWriteAccess, BOOL bLockDrive);
+extern char* GetLogicalName(DWORD DriveIndex, BOOL bKeepTrailingBackslash);
+extern HANDLE GetLogicalHandle(DWORD DriveIndex, BOOL bWriteAccess, BOOL bLockDrive);
+extern char GetDriveLetter(DWORD DriveIndex);
+extern char GetUnusedDriveLetter(void);
 extern BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL mbr_uefi_marker);
 extern const char* GetPartitionType(BYTE Type);
-extern BOOL GetDrivePartitionData(DWORD DeviceNumber, char* FileSystemName, DWORD FileSystemNameSize);
-extern HANDLE GetDriveHandle(DWORD DriveIndex, char* DriveLetter, BOOL bWriteAccess, BOOL bLockDrive);
+extern BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSystemNameSize);
 extern BOOL GetDriveLabel(DWORD DriveIndex, char* letter, char** label);
-extern BOOL UnmountDrive(HANDLE hDrive);
+extern BOOL UnmountVolume(HANDLE hDrive);
 extern BOOL CreateProgress(void);
 extern BOOL SetAutorun(const char* path);
 extern char* FileDialog(BOOL save, char* path, char* filename, char* ext, char* ext_desc);
@@ -397,7 +401,9 @@ typedef struct {
 #define ERROR_ISO_SCAN                 0x1207
 #define ERROR_ISO_EXTRACT              0x1208
 #define ERROR_CANT_REMOUNT_VOLUME      0x1209
-#define ERROR_CANT_PATCH               0x1210
+#define ERROR_CANT_PATCH               0x120A
+#define ERROR_CANT_ASSIGN_LETTER       0x120B
+#define ERROR_CANT_MOUNT_VOLUME        0x120C
 
 /* More niceties */
 #ifndef MIN

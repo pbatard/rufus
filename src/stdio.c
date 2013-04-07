@@ -269,6 +269,10 @@ const char* StrError(DWORD error_code)
 			"mountvol.exe command to make your device accessible again";
 	case ERROR_CANT_PATCH:
 		return "Unable to patch/setup files for boot";
+	case ERROR_CANT_ASSIGN_LETTER:
+		return "Unable to assign a drive letter";
+	case ERROR_CANT_MOUNT_VOLUME:
+		return "Can't mount GUID volume";
 	default:
 		uprintf("Unknown error: %08X\n", error_code);
 		SetLastError(error_code);
