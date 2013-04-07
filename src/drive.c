@@ -569,6 +569,7 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 
 	switch (partition_style) {
 	case PARTITION_STYLE_MBR:
+		DriveLayoutEx.PartitionEntry[0].Mbr.BootIndicator = TRUE;
 		DriveLayoutEx.PartitionEntry[0].Mbr.HiddenSectors = SelectedDrive.Geometry.SectorsPerTrack;
 		switch (file_system) {
 		case FS_FAT16:
@@ -594,6 +595,7 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 			DriveLayoutEx.PartitionEntry[1].PartitionLength.QuadPart = SelectedDrive.Geometry.SectorsPerTrack*SelectedDrive.Geometry.BytesPerSector;
 			DriveLayoutEx.PartitionEntry[1].PartitionNumber = 2;
 			DriveLayoutEx.PartitionEntry[1].RewritePartition = TRUE;
+			DriveLayoutEx.PartitionEntry[1].Mbr.BootIndicator = FALSE;
 			DriveLayoutEx.PartitionEntry[1].Mbr.HiddenSectors = SelectedDrive.Geometry.SectorsPerTrack*SelectedDrive.Geometry.BytesPerSector;
 			DriveLayoutEx.PartitionEntry[1].Mbr.PartitionType = DriveLayoutEx.PartitionEntry[0].Mbr.PartitionType + 0x10;	// Hidden whatever
 		}
