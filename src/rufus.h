@@ -192,7 +192,7 @@ typedef struct {
 /* Special handling for old .c32 files we need to replace */
 #define NB_OLD_C32          2
 #define OLD_C32_NAMES       {"menu.c32", "vesamenu.c32"}
-#define OLD_C32_THRESHOLD   {53500, 145000}
+#define OLD_C32_THRESHOLD   {53500, 148000}
 #define NEW_C32_URL         {RUFUS_URL "/downloads/menu.c32", RUFUS_URL "/downloads/vesamenu.c32"}
 
 /* ISO details that the application may want */

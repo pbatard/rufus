@@ -569,7 +569,7 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 
 	switch (partition_style) {
 	case PARTITION_STYLE_MBR:
-		DriveLayoutEx.PartitionEntry[0].Mbr.BootIndicator = TRUE;
+		DriveLayoutEx.PartitionEntry[0].Mbr.BootIndicator = IsChecked(IDC_BOOT);
 		DriveLayoutEx.PartitionEntry[0].Mbr.HiddenSectors = SelectedDrive.Geometry.SectorsPerTrack;
 		switch (file_system) {
 		case FS_FAT16:
