@@ -125,8 +125,9 @@ static __inline BOOL check_iso_props(const char* psz_dirname, BOOL* is_syslinux_
 	if (scan_only) {
 		// Check for a "bootmgr(.efi)" file in root (psz_path = "")
 		if (*psz_dirname == 0) {
-			if (safe_strnicmp(psz_basename, bootmgr_efi_name, sizeof(bootmgr_efi_name)-4) == 0)
+			if (safe_strnicmp(psz_basename, bootmgr_efi_name, safe_strlen(bootmgr_efi_name)-5) == 0) {
 				iso_report.has_bootmgr = TRUE;
+			}
 			if (safe_stricmp(psz_basename, bootmgr_efi_name) == 0) {
 				iso_report.has_win7_efi = TRUE;
 			}

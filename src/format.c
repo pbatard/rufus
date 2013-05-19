@@ -275,7 +275,6 @@ static void ToValidLabel(WCHAR* name, BOOL bFAT)
  * -----
  * 1d02h
  */
-// TODO: use that for Format "classic"
 static DWORD GetVolumeID(void)
 {
 	SYSTEMTIME s;

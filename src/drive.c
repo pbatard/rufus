@@ -127,6 +127,7 @@ char* GetLogicalName(DWORD DriveIndex, BOOL bKeepTrailingBackslash)
 	UINT drive_type;
 	int i, j;
 	static const char* ignore_device[] = { "\\Device\\CdRom", "\\Device\\Floppy" };
+	static const char* volume_start = "\\\\?\\";
 
 	CheckDriveIndex(DriveIndex);
 
@@ -148,7 +149,7 @@ char* GetLogicalName(DWORD DriveIndex, BOOL bKeepTrailingBackslash)
 
 		// Sanity checks
 		len = safe_strlen(volume_name);
-		if ((len <= 1) || (safe_strnicmp(volume_name, "\\\\?\\", 4) != 0) || (volume_name[len-1] != '\\')) {
+		if ((len <= 1) || (safe_strnicmp(volume_name, volume_start, 4) != 0) || (volume_name[len-1] != '\\')) {
 			uprintf("'%s' is not a GUID volume name\n", volume_name);
 			continue;
 		}
