@@ -67,6 +67,7 @@
 #define IDC_ISO_ABORT                   1021
 #define IDC_DISK_ID                     1022
 #define IDC_EXTRA_PARTITION             1023
+#define IDC_ENABLE_FIXED_DISKS          1024
 #define IDC_ABOUT_LICENSE               1030
 #define IDC_ABOUT_ICON                  1031
 #define IDC_ABOUT_UPDATES               1032

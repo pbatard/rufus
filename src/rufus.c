@@ -844,6 +844,7 @@ static void EnableControls(BOOL bEnable)
 	EnableWindow(hNBPasses, bEnable);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_SET_ICON), bEnable);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_ADVANCED), bEnable);
+	EnableWindow(GetDlgItem(hMainDialog, IDC_ENABLE_FIXED_DISKS), bEnable);
 	SetDlgItemTextA(hMainDialog, IDCANCEL, bEnable?"Close":"Cancel");
 }
 
@@ -1092,17 +1093,17 @@ out:
 	ExitThread(0);
 }
 
-void MoveControl(int nID, float vertical_shift)
+void MoveControl(HWND hDlg, int nID, float vertical_shift)
 {
 	RECT rect;
 	POINT point;
 	HWND hControl;
 
-	hControl = GetDlgItem(hMainDialog, nID);
+	hControl = GetDlgItem(hDlg, nID);
 	GetWindowRect(hControl, &rect);
 	point.x = rect.left;
 	point.y = rect.top;
-	ScreenToClient(hMainDialog, &point);
+	ScreenToClient(hDlg, &point);
 	GetClientRect(hControl, &rect);
 	MoveWindow(hControl, point.x, point.y + (int)(fScale*(advanced_mode?vertical_shift:-vertical_shift)),
 		(rect.right - rect.left), (rect.bottom - rect.top), TRUE);
@@ -1119,7 +1120,7 @@ void SetPassesTooltip(void)
 // Toggle "advanced" mode
 void ToggleAdvanced(void)
 {
-	float dialog_shift = 59.0f;
+	float dialog_shift = 80.0f;
 	RECT rect;
 	POINT point;
 	int toggle;
@@ -1134,18 +1135,35 @@ void ToggleAdvanced(void)
 		point.y + (int)(fScale*(advanced_mode?dialog_shift:-dialog_shift)), TRUE);
 
 	// Move the status bar up or down
-	MoveControl(IDC_STATUS, dialog_shift);
-	MoveControl(IDC_START, dialog_shift);
-	MoveControl(IDC_PROGRESS, dialog_shift);
-	MoveControl(IDC_ABOUT, dialog_shift);
-	MoveControl(IDC_LOG, dialog_shift);
-	MoveControl(IDCANCEL, dialog_shift);
+	MoveControl(hMainDialog, IDC_STATUS, dialog_shift);
+	MoveControl(hMainDialog, IDC_START, dialog_shift);
+	MoveControl(hMainDialog, IDC_PROGRESS, dialog_shift);
+	MoveControl(hMainDialog, IDC_ABOUT, dialog_shift);
+	MoveControl(hMainDialog, IDC_LOG, dialog_shift);
+	MoveControl(hMainDialog, IDCANCEL, dialog_shift);
 #ifdef RUFUS_TEST
-	MoveControl(IDC_TEST, dialog_shift);
+	MoveControl(hMainDialogm, IDC_TEST, dialog_shift);
 #endif
+
+	// And do the same for the log dialog while we're at it
+	GetWindowRect(hLogDlg, &rect);
+	point.x = (rect.right - rect.left);
+	point.y = (rect.bottom - rect.top);
+	MoveWindow(hLogDlg, rect.left, rect.top, point.x,
+		point.y + (int)(fScale*(advanced_mode?dialog_shift:-dialog_shift)), TRUE);
+	MoveControl(hLogDlg, IDC_LOG_CLEAR, dialog_shift);
+	MoveControl(hLogDlg, IDC_LOG_SAVE, dialog_shift);
+	MoveControl(hLogDlg, IDCANCEL, dialog_shift);
+	GetWindowRect(hLog, &rect);
+	point.x = (rect.right - rect.left);
+	point.y = (rect.bottom - rect.top) + (int)(fScale*(advanced_mode?dialog_shift:-dialog_shift));
+	SetWindowPos(hLog, 0, 0, 0, point.x, point.y, 0);
+	// Don't forget to scroll the edit to the bottom after resize
+	SendMessage(hLog, EM_LINESCROLL, 0, SendMessage(hLog, EM_GETLINECOUNT, 0, 0));
 
 	// Hide or show the various advanced options
 	toggle = advanced_mode?SW_SHOW:SW_HIDE;
+	ShowWindow(GetDlgItem(hMainDialog, IDC_ENABLE_FIXED_DISKS), toggle);
 	ShowWindow(GetDlgItem(hMainDialog, IDC_EXTRA_PARTITION), toggle);
 	ShowWindow(GetDlgItem(hMainDialog, IDC_RUFUS_MBR), toggle);
 	ShowWindow(GetDlgItem(hMainDialog, IDC_DISK_ID), toggle);
@@ -1346,6 +1364,8 @@ void InitDialog(HWND hDlg)
 		"This should only be necessary for XP installation" , 10000);
 	CreateTooltip(GetDlgItem(hDlg, IDC_EXTRA_PARTITION), "Create an extra hidden partition and try to align partitions boundaries.\n"
 		"This can improve boot detection for older BIOSes", -1);
+	CreateTooltip(GetDlgItem(hDlg, IDC_ENABLE_FIXED_DISKS), "Enable detection for disks not normally detected by Rufus. "
+		"USE AT YOUR OWN RISKS!!!", -1);
 	CreateTooltip(GetDlgItem(hDlg, IDC_START), "Start the formatting operation.\nThis will DESTROY any data on the target!", -1);
 	CreateTooltip(GetDlgItem(hDlg, IDC_ABOUT), "Licensing information and credits", -1);
 
@@ -1356,6 +1376,11 @@ void InitDialog(HWND hDlg)
 		// Simulate a button click for ISO selection
 		PostMessage(hDlg, WM_COMMAND, IDC_SELECT_ISO, 0);
 	}
+}
+
+static void PrintStatus2000(const char* str, BOOL val)
+{
+	PrintStatus(2000, FALSE, "%s %s.", str, (val)?"enabled":"disabled");
 }
 
 /*
@@ -1645,6 +1670,13 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			if ((HIWORD(wParam)) == BN_CLICKED)
 				mbr_selected_by_user = IsChecked(IDC_RUFUS_MBR);
 			break;
+		case IDC_ENABLE_FIXED_DISKS:
+			if ((HIWORD(wParam)) == BN_CLICKED) {
+				enable_fixed_disks = !enable_fixed_disks;
+				PrintStatus2000("Fixed disks detection", enable_fixed_disks);
+				GetUSBDevices(0);
+			}
+			break;
 		case IDC_START:
 			if (format_thid != NULL) {
 				return (INT_PTR)TRUE;
@@ -1747,11 +1779,6 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		return (INT_PTR)TRUE;
 	}
 	return (INT_PTR)FALSE;
-}
-
-static void PrintStatus2000(const char* str, BOOL val)
-{
-	PrintStatus(2000, FALSE, "%s %s.", str, (val)?"enabled":"disabled");
 }
 
 static void PrintUsage(char* appname)

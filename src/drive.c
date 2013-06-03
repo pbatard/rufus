@@ -330,9 +330,8 @@ BOOL GetDriveLabel(DWORD DriveIndex, char* letter, char** label)
 
 	*letter = GetDriveLetter(DriveIndex);
 	if (*letter == ' ') {
-		// Drive without volume assigned
-		// TODO: only with fixed?
-		return TRUE; 
+		// Drive without volume assigned - Tie to the display of fixed disks
+		return enable_fixed_disks;
 	}
 	AutorunPath[0] = *letter;
 	wDrivePath[0] = *letter;
