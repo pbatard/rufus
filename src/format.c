@@ -328,7 +328,7 @@ static DWORD GetFATSizeSectors(DWORD DskSize, DWORD ReservedSecCnt, DWORD SecPer
  * Large FAT32 volume formatting from fat32format by Tom Thornhill
  * http://www.ridgecrop.demon.co.uk/index.htm?fat32format.htm
  */
-// TODO: disable slow format for > 32 GB FAT32
+// TODO: (v1.3.4) disable slow format for > 32 GB FAT32
 static BOOL FormatFAT32(DWORD DriveIndex)
 {
 	BOOL r = FALSE;
@@ -759,15 +759,13 @@ static BOOL AnalyzePBR(HANDLE hLogicalVolume)
 	return TRUE;
 }
 
-// TODO: We may have to clear a few more sectors past the MBR buffer zone
-// so that Windows relinquishes access
 static BOOL ClearMBRGPT(HANDLE hPhysicalDrive, LONGLONG DiskSize, DWORD SectorSize)
 {
 	BOOL r = FALSE;
 	uint64_t i, last_sector = DiskSize/SectorSize;
 	unsigned char* pBuf = (unsigned char*) calloc(SectorSize, 1);
 
-	PrintStatus(0, TRUE, "Clearing MBR/GPT structures...");
+	PrintStatus(0, TRUE, "Clearing MBR/PBR/GPT structures...");
 	if (pBuf == NULL) {
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_NOT_ENOUGH_MEMORY;
 		goto out;
@@ -785,6 +783,13 @@ static BOOL ClearMBRGPT(HANDLE hPhysicalDrive, LONGLONG DiskSize, DWORD SectorSi
 			goto out;
 		}
 	}
+	// Also attempt to clear the PBR, usually located at the 1 MB mark
+	for (i=1024*1024/SectorSize; i<MAX_SECTORS_TO_CLEAR; i++) {
+		if ((IS_ERROR(FormatStatus)) || (write_sectors(hPhysicalDrive, SectorSize, i, 1, pBuf) != SectorSize)) {
+			goto out;
+		}
+	}
+
 	r = TRUE;
 
 out:
@@ -1205,7 +1210,7 @@ DWORD WINAPI FormatThread(LPVOID param)
 		}
 	} else if (!DeleteVolumeMountPointA(drive_name)) {
 		uprintf("Failed to delete mountpoint %s: %s\n", drive_name, WindowsErrorString());
-		// TODO: generate an error?
+		// Try to continue. We will bail out if this causes an issue.
 	}
 	uprintf("Will use '%c': as volume mountpoint\n", drive_name[0]);
 
@@ -1216,6 +1221,7 @@ DWORD WINAPI FormatThread(LPVOID param)
 		goto out;
 	}
 	UnmountVolume(hLogicalVolume);
+	if (FormatStatus) goto out;	// Check for user cancel
 
 	PrintStatus(0, TRUE, "Analyzing existing boot records...\n");
 	AnalyzeMBR(hPhysicalDrive);
@@ -1292,8 +1298,7 @@ DWORD WINAPI FormatThread(LPVOID param)
 	}
 	hLogicalVolume = INVALID_HANDLE_VALUE;
 
-	// TODO: check for cancel once in a while!
-	// TODO: our start button should become cancel instead of close
+	// TODO: (v1.4) Our start button should become cancel instead of close
 
 	// Especially after destructive badblocks test, you must zero the MBR/GPT completely
 	// before repartitioning. Else, all kind of bad things can happen.
@@ -1303,6 +1308,7 @@ DWORD WINAPI FormatThread(LPVOID param)
 			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_WRITE_FAULT;
 		goto out;
 	}
+	if (FormatStatus) goto out;	// Check for user cancel
 	UpdateProgress(OP_ZERO_MBR, -1.0f);
 
 	CreateThread(NULL, 0, CloseFormatPromptThread, NULL, 0, NULL);
@@ -1342,6 +1348,7 @@ DWORD WINAPI FormatThread(LPVOID param)
 		}
 		UpdateProgress(OP_FIX_MBR, -1.0f);
 	}
+	if (FormatStatus) goto out;	// Check for user cancel
 
 	if (!SetVolumeMountPointA(drive_name, guid_volume)) {
 		uprintf("Could not remount %s on %s: %s\n", guid_volume, drive_name, WindowsErrorString());
@@ -1386,12 +1393,14 @@ DWORD WINAPI FormatThread(LPVOID param)
 		if (IsChecked(IDC_SET_ICON))
 			SetAutorun(drive_name);
 	}
+	if (FormatStatus) goto out;	// Check for user cancel
 
 	// We issue a complete remount of the filesystem at on account of:
 	// - Ensuring the file explorer properly detects that the volume was updated
 	// - Ensuring that an NTFS system will be reparsed so that it becomes bootable
 	if (!RemountVolume(drive_name[0]))
 		goto out;
+	if (FormatStatus) goto out;	// Check for user cancel
 
 	if (IsChecked(IDC_BOOT)) {
 		if ((dt == DT_WINME) || (dt == DT_FREEDOS)) {
@@ -1413,8 +1422,7 @@ DWORD WINAPI FormatThread(LPVOID param)
 					goto out;
 				}
 				if ((bt == BT_UEFI) && (!iso_report.has_efi) && (iso_report.has_win7_efi)) {
-					// TODO: better progress
-					// TODO: check ISO with EFI only
+					// TODO: (v1.3.4) check ISO with EFI only
 					PrintStatus(0, TRUE, "Win7 EFI boot setup (this may take a while)...");
 					wim_image[0] = drive_name[0];
 					efi_dst[0] = drive_name[0];

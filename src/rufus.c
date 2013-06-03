@@ -1676,6 +1676,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 						FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_START_THREAD);
 						PostMessage(hMainDialog, UM_FORMAT_COMPLETED, 0, 0);
 					}
+					uprintf("\r\nFormat operation started");
 					PrintStatus(0, FALSE, "");
 					timer = 0;
 					safe_sprintf(szTimer, sizeof(szTimer), "00:00:00");
@@ -1720,6 +1721,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		EnableWindow(GetDlgItem(hISOProgressDlg, IDC_ISO_ABORT), TRUE);
 		EnableWindow(GetDlgItem(hMainDialog, IDCANCEL), TRUE);
 		EnableControls(TRUE);
+		uprintf("\r\n");
 		GetUSBDevices(DeviceNum);
 		if (!IS_ERROR(FormatStatus)) {
 			// This is the only way to achieve instantenous progress transition to 100%
@@ -1910,7 +1912,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	UpdateWindow(hDlg);
 
 	// Do our own event processing and process "magic" commands
-	// TODO: Cheat modes are not handled when the log is at the front - this sucks
+	// TODO: (v1.4) Cheat modes are not handled when the log is at the front - this sucks
 	while(GetMessage(&msg, NULL, 0, 0)) {
 		// The following ensures the processing of the ISO progress window messages
 		if (!IsWindow(hISOProgressDlg) || !IsDialogMessage(hISOProgressDlg, &msg)) {
@@ -1922,7 +1924,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 				PrintStatus2000("ISO size check", iso_size_check);
 				continue;
 			}
-			// TODO: move this option to advanced mode
+			// TODO: (v1.4) move this option to advanced mode
 			// Alt-F => Toggle detection of fixed disks
 			// By default Rufus does not allow formatting USB fixed disk drives, such as USB HDDs
 			// This is a safety feature, to avoid someone unintentionally formatting a backup 

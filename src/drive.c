@@ -216,7 +216,6 @@ HANDLE GetLogicalHandle(DWORD DriveIndex, BOOL bWriteAccess, BOOL bLockDrive)
 
 /*
  * Returns the first drive letter for a volume located on the drive identified by DriveIndex
- * TODO: should we return all the drive letters?
  */
 char GetDriveLetter(DWORD DriveIndex)
 {
@@ -456,7 +455,7 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 	// Populate the filesystem data
 	volume_name = GetLogicalName(DriveIndex, TRUE);
 	if ((volume_name == NULL) || (!GetVolumeInformationA(volume_name, NULL, 0, NULL, NULL, NULL, FileSystemName, FileSystemNameSize))) {
-		uprintf("Did not get volume information for disk 0x%02x\n", DriveIndex);
+		uprintf("No volume information for disk 0x%02x\n", DriveIndex);
 		FileSystemName[0] = 0;
 	}
 	safe_free(volume_name);
