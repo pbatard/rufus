@@ -90,7 +90,6 @@ char* GetPhysicalName(DWORD DriveIndex)
 {
 	BOOL success = FALSE;
 	char physical_name[24];
-	char* r = NULL;
 
 	CheckDriveIndex(DriveIndex);
 	safe_sprintf(physical_name, sizeof(physical_name), "\\\\.\\PHYSICALDRIVE%d", DriveIndex);
@@ -286,7 +285,7 @@ out:
 char GetUnusedDriveLetter(void)
 {
 	DWORD size;
-	char drive_letter, *drive, drives[26*4];	/* "D:\", "E:\", etc. */
+	char drive_letter = 'Z'+1, *drive, drives[26*4];	/* "D:\", "E:\", etc. */
 
 	size = GetLogicalDriveStringsA(sizeof(drives), drives);
 	if (size == 0) {

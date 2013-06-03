@@ -2,4 +2,4 @@
 rm -f rufus*.exe
 ./configure
 make clean
-make release -j2
+make release

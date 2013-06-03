@@ -41,7 +41,7 @@
 #include "rufus.h"
 #include "registry.h"
 
-/* Redefinitions for the WDK */
+/* Redefinitions for WDK and MinGW */
 #ifndef PBM_SETSTATE
 #define PBM_SETSTATE (WM_USER+16)
 #endif
@@ -59,6 +59,9 @@
 #endif
 #ifndef BCM_SETIMAGELIST
 #define BCM_SETIMAGELIST 0x1602
+#endif
+#ifndef DBT_CUSTOMEVENT
+#define DBT_CUSTOMEVENT 0x8006
 #endif
 
 // MinGW fails to link those
