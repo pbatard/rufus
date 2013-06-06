@@ -881,7 +881,7 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 		r = write_syslinux_mbr(&fake_fd);
 	} else {
 		if ((IS_WINPE(iso_report.winpe) && !iso_report.uses_minint) || (IsChecked(IDC_RUFUS_MBR))) {
-			uprintf("Using Rufus bootable USB selection MBR\n");
+			uprintf("Using " APPLICATION_NAME " bootable USB selection MBR\n");
 			r = WriteRufusMBR(&fake_fd);
 		} else {
 			uprintf("Using Windows 7 MBR\n");
@@ -1243,7 +1243,7 @@ DWORD WINAPI FormatThread(LPVOID param)
 			if (log_fd == NULL) {
 				uprintf("Could not create log file for bad blocks check\n");
 			} else {
-				fprintf(log_fd, "Rufus bad blocks check started on: %04d.%02d.%02d %02d:%02d:%02d\n",
+				fprintf(log_fd, APPLICATION_NAME " bad blocks check started on: %04d.%02d.%02d %02d:%02d:%02d\n",
 				lt.wYear, lt.wMonth, lt.wDay, lt.wHour, lt.wMinute, lt.wSecond);
 				fflush(log_fd);
 			}
@@ -1271,7 +1271,7 @@ DWORD WINAPI FormatThread(LPVOID param)
 					report.num_corruption_errors);
 				fprintf(log_fd, "%s", bb_msg);
 				GetLocalTime(&lt);
-				fprintf(log_fd, "Rufus bad blocks check ended on: %04d.%02d.%02d %02d:%02d:%02d\n",
+				fprintf(log_fd, APPLICATION_NAME " bad blocks check ended on: %04d.%02d.%02d %02d:%02d:%02d\n",
 				lt.wYear, lt.wMonth, lt.wDay, lt.wHour, lt.wMinute, lt.wSecond);
 				fclose(log_fd);
 				safe_sprintf(&bb_msg[strlen(bb_msg)], sizeof(bb_msg)-strlen(bb_msg)-1,

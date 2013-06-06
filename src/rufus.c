@@ -336,7 +336,7 @@ static BOOL GetDriveInfo(int ComboIndex)
 		return FALSE;
 
 	if (!DefineClusterSizes()) {
-		uprintf("no file system is selectable for this drive\n");
+		uprintf("No file system is selectable for this drive\n");
 		return FALSE;
 	}
 
@@ -622,7 +622,7 @@ static BOOL GetUSBDevices(DWORD devnum)
 				if(GetLastError() != ERROR_NO_MORE_ITEMS) {
 					uprintf("SetupDiEnumDeviceInterfaces failed: %s\n", WindowsErrorString());
 				} else {
-					uprintf("Device was eliminated because it doesn't report itself as a disk\n");
+					uprintf("Device was eliminated because it didn't report itself as a disk\n");
 				}
 				break;
 			}
@@ -631,7 +631,7 @@ static BOOL GetUSBDevices(DWORD devnum)
 				if(GetLastError() == ERROR_INSUFFICIENT_BUFFER) {
 					devint_detail_data = (PSP_DEVICE_INTERFACE_DETAIL_DATA_A)calloc(1, size);
 					if (devint_detail_data == NULL) {
-						uprintf("unable to allocate data for SP_DEVICE_INTERFACE_DETAIL_DATA\n");
+						uprintf("Unable to allocate data for SP_DEVICE_INTERFACE_DETAIL_DATA\n");
 						return FALSE;
 					}
 					devint_detail_data->cbSize = sizeof(SP_DEVICE_INTERFACE_DETAIL_DATA_A);
@@ -651,7 +651,7 @@ static BOOL GetUSBDevices(DWORD devnum)
 
 			hDrive = CreateFileA(devint_detail_data->DevicePath, GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
 			if(hDrive == INVALID_HANDLE_VALUE) {
-				uprintf("could not open '%s': %s\n", devint_detail_data->DevicePath, WindowsErrorString()); 
+				uprintf("Could not open '%s': %s\n", devint_detail_data->DevicePath, WindowsErrorString()); 
 				continue;
 			}
 
@@ -888,10 +888,8 @@ BOOL CALLBACK LogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 				log_buffer = (char*)malloc(log_size);
 			if (log_buffer != NULL) {
 				log_size = GetDlgItemTextU(hDlg, IDC_LOG_EDIT, log_buffer, log_size);
-				if (log_size == 0) {
-					uprintf("Nothing to save.\n");
-				} else {
-					log_size--;	// remove NULL terminator
+				if (log_size != 0) {
+					log_size--;	// remove NUL terminator
 					filepath =  FileDialog(TRUE, app_dir, "rufus.log", "log", "Rufus log");
 					if (filepath != NULL) {
 						FileIO(TRUE, filepath, &log_buffer, &log_size);
@@ -1033,16 +1031,14 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 	}
 	if ((!iso_report.has_bootmgr) && (!iso_report.has_isolinux) && (!IS_WINPE(iso_report.winpe)) && (!iso_report.has_efi)) {
 		MessageBoxU(hMainDialog, "This version of Rufus only supports bootable ISOs\n"
-			"based on 'bootmgr/WinPE', 'isolinux' or EFI boot.\n"
-			"This ISO image doesn't appear to use either...", "Unsupported ISO", MB_OK|MB_ICONINFORMATION);
+			"based on bootmgr/WinPE, isolinux or EFI.\n"
+			"This ISO doesn't appear to use either...", "Unsupported ISO", MB_OK|MB_ICONINFORMATION);
 		safe_free(iso_path);
 		SetMBRProps();
 	} else if ((iso_report.has_efi || iso_report.has_win7_efi) && (iso_report.has_4GB_file)) {
-		// Who the heck decided that using FAT32 for UEFI booting, in late 200x, was a great idea?!?
-		MessageBoxU(hMainDialog, "Congratulations! You have just exposed the shortshightedness of the UEFI committee, by simply "
-			"trying to use an EFI based image with a file that is larger than 4 GB.\nPlease address your complaints to any of "
-			"the companies listed at http://www.uefi.org/about/, for sticking with FAT32 as the default EFI filesystem and thus "
-			"preventing easy booting of large VHDs with UEFI.", "Who the heck couldn't see that one coming?", MB_OK|MB_ICONINFORMATION);
+		// Who the heck decided that using FAT32 for UEFI boot was a great idea?!?
+		MessageBoxU(hMainDialog, "This ISO image contains a file larger than 4 GB and cannot be used to boot in EFI mode from USB.\r\n"
+			"This is a technical limitation from the UEFI/FAT32 process, not from " APPLICATION_NAME ".", "Non USB-UEFI compatible ISO", MB_OK|MB_ICONINFORMATION);
 		safe_free(iso_path);
 	} else {
 		for(i=0; i<NB_OLD_C32; i++) {
@@ -1061,8 +1057,8 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 						"- Select 'Yes' to connect to the internet and replace the file.\n"
 						"- Select 'No' to leave the existing ISO file unmodified.\n"
 						"If you don't know what to do, you should select 'Yes'.\n\n"
-						"Note: the file will be downloaded in the current directory. Once a\n"
-						"%s exists there, it will always be used as replacement.\n", old_c32_name[i], old_c32_name[i]);
+						"Note that the file will be downloaded in the current directory and once a\n"
+						"'%s' exists there, it will always be used as replacement.\n", old_c32_name[i], old_c32_name[i]);
 					safe_sprintf(msg_title, sizeof(msg_title), "Replace %s?", old_c32_name[i]);
 					if (MessageBoxA(hMainDialog, msg, msg_title, MB_YESNO|MB_ICONWARNING) == IDYES) {
 						SetWindowTextU(hISOProgressDlg, "Downloading file...");
@@ -1280,7 +1276,7 @@ void InitDialog(HWND hDlg)
 	token = strtok(tmp, "v");
 	for (i=0; (i<4) && ((token = strtok(NULL, ".")) != NULL); i++)
 		rufus_version[i] = (uint16_t)atoi(token);
-	uprintf("Rufus version %d.%d.%d.%d\n", rufus_version[0], rufus_version[1], rufus_version[2], rufus_version[3]);
+	uprintf(APPLICATION_NAME " version %d.%d.%d.%d\n", rufus_version[0], rufus_version[1], rufus_version[2], rufus_version[3]);
 
 	// Prefer FreeDOS to MS-DOS
 	selection_default = DT_FREEDOS;
@@ -1367,7 +1363,7 @@ void InitDialog(HWND hDlg)
 		"This should only be necessary for XP installation" , 10000);
 	CreateTooltip(GetDlgItem(hDlg, IDC_EXTRA_PARTITION), "Create an extra hidden partition and try to align partitions boundaries.\n"
 		"This can improve boot detection for older BIOSes", -1);
-	CreateTooltip(GetDlgItem(hDlg, IDC_ENABLE_FIXED_DISKS), "Enable detection for disks not normally detected by Rufus. "
+	CreateTooltip(GetDlgItem(hDlg, IDC_ENABLE_FIXED_DISKS), "Enable detection for disks not normally detected by " APPLICATION_NAME ". "
 		"USE AT YOUR OWN RISKS!!!", -1);
 	CreateTooltip(GetDlgItem(hDlg, IDC_START), "Start the formatting operation.\nThis will DESTROY any data on the target!", -1);
 	CreateTooltip(GetDlgItem(hDlg, IDC_ABOUT), "Licensing information and credits", -1);
@@ -1696,10 +1692,11 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			if (nDeviceIndex != CB_ERR) {
 				if ((IsChecked(IDC_BOOT)) && (!BootCheck()))
 					break;
+				// TODO: use UTF-8 here with MessageBoxU
 				GetWindowTextW(hDeviceList, wtmp, ARRAYSIZE(wtmp));
-				_snwprintf(wstr, ARRAYSIZE(wstr), L"WARNING: ALL DATA ON DEVICE %s\r\nWILL BE DESTROYED.\r\n"
+				_snwprintf(wstr, ARRAYSIZE(wstr), L"WARNING: ALL DATA ON DEVICE '%s'\r\nWILL BE DESTROYED.\r\n"
 					L"To continue with this operation, click OK. To quit click CANCEL.", wtmp);
-				if (MessageBoxW(hMainDialog, wstr, L"Rufus", MB_OKCANCEL|MB_ICONWARNING) == IDOK) {
+				if (MessageBoxW(hMainDialog, wstr, LTEXT(APPLICATION_NAME), MB_OKCANCEL|MB_ICONWARNING) == IDOK) {
 					// Disable all controls except cancel
 					EnableControls(FALSE);
 					DeviceNum = (DWORD)ComboBox_GetItemData(hDeviceList, nDeviceIndex);
@@ -1848,7 +1845,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		{0, 0, NULL, 0}
 	};
 
-	uprintf("*** RUFUS INIT ***\n");
+	uprintf("*** " APPLICATION_NAME " init ***\n");
+
+	SetThreadLocale(MAKELCID(LANG_FRENCH, SUBLANG_FRENCH));
 
 	// Reattach the console, if we were started from commandline
 	if (AttachConsole(ATTACH_PARENT_PROCESS) != 0) {
@@ -1899,14 +1898,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	// in which case we wait for the mutex to be relinquished
 	if ((safe_strlen(lpCmdLine)==2) && (lpCmdLine[0] == '/') && (lpCmdLine[1] == 'W'))
 		wait_for_mutex = 150;		// Try to acquire the mutex for 15 seconds
-	mutex = CreateMutexA(NULL, TRUE, "Global/RUFUS");
+	mutex = CreateMutexA(NULL, TRUE, "Global/" APPLICATION_NAME);
 	for (;(wait_for_mutex>0) && (mutex != NULL) && (GetLastError() == ERROR_ALREADY_EXISTS); wait_for_mutex--) {
 		CloseHandle(mutex);
 		Sleep(100);
-		mutex = CreateMutexA(NULL, TRUE, "Global/RUFUS");
+		mutex = CreateMutexA(NULL, TRUE, "Global/" APPLICATION_NAME);
 	}
 	if ((mutex == NULL) || (GetLastError() == ERROR_ALREADY_EXISTS)) {
-		MessageBoxA(NULL, "Another Rufus application is running.\n"
+		MessageBoxA(NULL, "Another " APPLICATION_NAME " application is running.\n"
 			"Please close the first application before running another one.",
 			"Other instance detected", MB_ICONSTOP);
 		goto out;
@@ -2014,7 +2013,7 @@ out:
 	if (attached_console)
 		DetachConsole();
 	CloseHandle(mutex);
-	uprintf("*** RUFUS EXIT ***\n");
+	uprintf("*** " APPLICATION_NAME " exit ***\n");
 #ifdef _CRTDBG_MAP_ALLOC
 	_CrtDumpMemoryLeaks();
 #endif

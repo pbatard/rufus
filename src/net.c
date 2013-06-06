@@ -314,7 +314,7 @@ BOOL DownloadFile(const char* url, const char* file, HWND hProgressDialog)
 	HttpQueryInfoA(hRequest, HTTP_QUERY_STATUS_CODE|HTTP_QUERY_FLAG_NUMBER, (LPVOID)&dwStatus, &dwSize, NULL);
 	if (dwStatus != 200) {
 		error_code = ERROR_INTERNET_ITEM_NOT_FOUND;
-		uprintf("Unable to acess file. Server status %d\n", dwStatus);
+		uprintf("Unable to acess file: Server status %d\n", dwStatus);
 		goto out;
 	}
 	dwSize = sizeof(dwTotalSize);
@@ -326,7 +326,7 @@ BOOL DownloadFile(const char* url, const char* file, HWND hProgressDialog)
 
 	fd = fopen(file, "wb");
 	if (fd == NULL) {
-		uprintf("Unable to create file %s: %s\n", file, WinInetErrorString());
+		uprintf("Unable to create file '%s': %s\n", file, WinInetErrorString());
 		goto out;
 	}
 
@@ -342,7 +342,7 @@ BOOL DownloadFile(const char* url, const char* file, HWND hProgressDialog)
 		SendMessage(hProgressBar, PBM_SETPOS, (WPARAM)(MAX_PROGRESS*((1.0f*dwSize)/(1.0f*dwTotalSize))), 0);
 		PrintStatus(0, FALSE, "Downloading: %0.1f%%\n", (100.0f*dwSize)/(1.0f*dwTotalSize));
 		if (fwrite(buf, 1, dwDownloaded, fd) != dwDownloaded) {
-			uprintf("Error writing file %s: %s\n", file, WinInetErrorString());
+			uprintf("Error writing file '%s': %s\n", file, WinInetErrorString());
 			goto out;
 		}
 	}
@@ -353,7 +353,7 @@ BOOL DownloadFile(const char* url, const char* file, HWND hProgressDialog)
 		goto out;
 	} else {
 		r = TRUE;
-		uprintf("Successfully downloaded %s\n", file);
+		uprintf("Successfully downloaded '%s'\n", file);
 	}
 
 out:
@@ -536,7 +536,7 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 				goto out;
 			continue;
 		}
-		vuprintf("Found match for %s on server %s.", urlpath, server_url);
+		vuprintf("Found match for %s on server %s", urlpath, server_url);
 
 		dwSize = sizeof(mime);
 		HttpQueryInfoA(hRequest, HTTP_QUERY_CONTENT_TYPE, (LPVOID)&mime, &dwSize, NULL);
@@ -557,11 +557,9 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 		WriteRegistryKey64(REGKEY_HKCU, REGKEY_LAST_UPDATE, server_time);
 		// Might as well let the user know
 		if (!force_update_check) {
-			if (local_time > server_time + 600) {
-				uprintf("Your local clock appears more than 10 minutes early - You ought to fix that...\n");
-			}
-			if (local_time < server_time - 600) {
-				uprintf("Your local clock appears more than 10 minutes late - you ought to fix that...\n");
+			if ((local_time > server_time + 600) || (local_time < server_time - 600)) {
+				uprintf("IMPORTANT: Your local clock is more than 10 minutes in the %s. Unless you fix this, " APPLICATION_NAME " may not be able to check for updates...", 
+					(local_time > server_time + 600)?"future":"past");
 			}
 		}
 
@@ -635,7 +633,7 @@ BOOL CheckForUpdates(BOOL force)
 	if (update_check_in_progress)
 		return FALSE;
 	if (CreateThread(NULL, 0, CheckForUpdatesThread, NULL, 0, NULL) == NULL) {
-		uprintf("Unable to start check for updates thread");
+		uprintf("Unable to start update check thread");
 		return FALSE;
 	}
 	return TRUE;

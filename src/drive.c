@@ -383,7 +383,7 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 	r = DeviceIoControl(hPhysical, IOCTL_DISK_GET_DRIVE_GEOMETRY_EX, 
 			NULL, 0, geometry, sizeof(geometry), &size, NULL);
 	if (!r || size <= 0) {
-		uprintf("Could not get geometry for drive #%d: %s\n", DriveIndex, WindowsErrorString());
+		uprintf("Could not get geometry for drive 0x%02x: %s\n", DriveIndex, WindowsErrorString());
 		safe_closehandle(hPhysical);
 		return FALSE;
 	}
@@ -396,7 +396,7 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 	r = DeviceIoControl(hPhysical, IOCTL_DISK_GET_DRIVE_LAYOUT_EX, 
 			NULL, 0, layout, sizeof(layout), &size, NULL );
 	if (!r || size <= 0) {
-		uprintf("Could not get layout for drive #d: %s\n", DriveIndex, WindowsErrorString());
+		uprintf("Could not get layout for drive 0x%02x: %s\n", DriveIndex, WindowsErrorString());
 		return FALSE;
 	}
 
