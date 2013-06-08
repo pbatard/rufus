@@ -30,7 +30,7 @@ LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
 IDD_DIALOG DIALOGEX 12, 12, 206, 329
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_APPWINDOW
-CAPTION "Rufus v1.3.3.248"
+CAPTION "Rufus v1.3.3.249"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     DEFPUSHBUTTON   "Start",IDC_START,94,291,50,14
@@ -276,8 +276,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,3,3,248
- PRODUCTVERSION 1,3,3,248
+ FILEVERSION 1,3,3,249
+ PRODUCTVERSION 1,3,3,249
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -290,22 +290,22 @@ VS_VERSION_INFO VERSIONINFO
 BEGIN
     BLOCK "StringFileInfo"
     BEGIN
-        BLOCK "000904b0"
+        BLOCK "000004b0"
         BEGIN
             VALUE "CompanyName", "Akeo Consulting (http://akeo.ie)"
             VALUE "FileDescription", "Rufus"
-            VALUE "FileVersion", "1.3.3.248"
+            VALUE "FileVersion", "1.3.3.249"
             VALUE "InternalName", "Rufus"
-            VALUE "LegalCopyright", "(c) 2011-2013 Pete Batard (GPL v3)"
+            VALUE "LegalCopyright", "© 2011-2013 Pete Batard (GPL v3)"
             VALUE "LegalTrademarks", "http://www.gnu.org/copyleft/gpl.html"
             VALUE "OriginalFilename", "rufus.exe"
             VALUE "ProductName", "Rufus"
-            VALUE "ProductVersion", "1.3.3.248"
+            VALUE "ProductVersion", "1.3.3.249"
         END
     END
     BLOCK "VarFileInfo"
     BEGIN
-        VALUE "Translation", 0x9, 1200
+        VALUE "Translation", 0x0, 1200
     END
 END
 
@@ -321,315 +321,6 @@ IDI_ICON                ICON                    "../res/rufus.ico"
 IDI_UP                  ICON                    "../res/up.ico"
 IDI_DOWN                ICON                    "../res/down.ico"
 #endif    // Neutral resources
-/////////////////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////////////////
-// French (France) resources
-
-#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_FRA)
-LANGUAGE LANG_FRENCH, SUBLANG_FRENCH
-#pragma code_page(1252)
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Dialog
-//
-
-IDD_DIALOG DIALOGEX 12, 12, 206, 329
-STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
-EXSTYLE WS_EX_APPWINDOW
-CAPTION "Rufus v1.3.3.248"
-FONT 8, "MS Shell Dlg", 400, 0, 0x1
-BEGIN
-    DEFPUSHBUTTON   "Lancer",IDC_START,94,291,50,14
-    PUSHBUTTON      "Fermer",IDCANCEL,148,291,50,14
-    COMBOBOX        IDC_DEVICE,8,17,190,33,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    CONTROL         "Device",IDC_STATIC,"Static",SS_LEFTNOWORDWRAP | WS_GROUP,9,6,22,8
-    COMBOBOX        IDC_FILESYSTEM,8,75,190,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "File system",IDC_STATIC,9,64,51,10
-    COMBOBOX        IDC_PARTITION_SCHEME,8,46,190,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Partition scheme and target system type",IDC_STATIC,9,35,176,8
-    COMBOBOX        IDC_CLUSTERSIZE,8,104,190,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Cluster size",IDC_STATIC,9,93,105,10
-    PUSHBUTTON      "About...",IDC_ABOUT,8,291,50,14
-    GROUPBOX        "Format Options       ",IDC_STATIC,7,149,192,66
-    EDITTEXT        IDC_LABEL,7,131,190,13,ES_AUTOHSCROLL
-    CONTROL         "Check device for bad blocks:",IDC_BADBLOCKS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,161,101,10
-    CONTROL         "Quick format",IDC_QUICKFORMAT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,173,55,10
-    CONTROL         "Create a bootable disk using:",IDC_BOOT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,185,104,10
-    CONTROL         "Create extended label and icon files",IDC_SET_ICON,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,198,131,10
-    LTEXT           "New volume label",IDC_STATIC,9,121,105,10
-    CONTROL         "",IDC_PROGRESS,"msctls_progress32",PBS_SMOOTH | WS_BORDER,8,272,189,9
-    COMBOBOX        IDC_NBPASSES,119,159,49,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    COMBOBOX        IDC_BOOTTYPE,119,183,49,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    PUSHBUTTON      "...",IDC_SELECT_ISO,171,182,22,14,BS_ICON
-    PUSHBUTTON      "T",IDC_TEST,80,291,12,14,NOT WS_VISIBLE
-    CONTROL         "Use Rufus MBR with BIOS ID:",IDC_RUFUS_MBR,"Button",BS_AUTOCHECKBOX | NOT WS_VISIBLE | WS_TABSTOP,13,248,106,10
-    PUSHBUTTON      "",IDC_ADVANCED,63,148,14,10,BS_TOP | BS_FLAT
-    GROUPBOX        "Advanced Options",IDC_ADVANCED_GROUP,7,210,192,54,NOT WS_VISIBLE
-    COMBOBOX        IDC_DISK_ID,119,246,73,30,CBS_DROPDOWNLIST | NOT WS_VISIBLE | WS_VSCROLL | WS_TABSTOP
-    CONTROL         "Add fixes for old BIOSes (extra partition, align, etc.)",IDC_EXTRA_PARTITION,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,235,184,10
-    CONTROL         "List fixed (non-flash) or unpartitionned USB disks",IDC_ENABLE_FIXED_DISKS,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,222,185,10
-    PUSHBUTTON      "Log",IDC_LOG,62,291,18,14
-END
-
-IDD_ABOUTBOX DIALOGEX 0, 0, 287, 201
-STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "A propos de Rufus"
-FONT 8, "Microsoft Sans Serif", 400, 0, 0x0
-BEGIN
-    ICON            IDI_ICON,IDC_ABOUT_ICON,11,8,20,20
-    DEFPUSHBUTTON   "OK",IDOK,231,181,50,14,WS_GROUP
-    PUSHBUTTON      "License",IDC_ABOUT_LICENSE,46,181,50,14,WS_GROUP
-    CONTROL         "",IDC_ABOUT_COPYRIGHTS,"RichEdit20W",ES_MULTILINE | ES_READONLY | WS_VSCROLL,46,101,235,74,WS_EX_STATICEDGE
-    CONTROL         "",IDC_ABOUT_BLURB,"RichEdit20W",ES_MULTILINE | ES_AUTOHSCROLL | ES_READONLY | WS_TABSTOP,46,7,235,93
-    PUSHBUTTON      "Mises a jour",IDC_ABOUT_UPDATES,100,181,50,14,NOT WS_VISIBLE | WS_GROUP
-END
-
-IDD_ISO_EXTRACT DIALOGEX 0, 0, 262, 66
-STYLE DS_SETFONT | DS_FIXEDSYS | WS_POPUP | WS_CAPTION
-CAPTION "Copying ISO files..."
-FONT 8, "MS Shell Dlg", 400, 0, 0x1
-BEGIN
-    LTEXT           "Opening ISO image - please wait...",IDC_ISO_FILENAME,8,10,246,13,SS_PATHELLIPSIS
-    CONTROL         "",IDC_PROGRESS,"msctls_progress32",WS_BORDER,7,26,247,8
-    PUSHBUTTON      "Cancel",IDC_ISO_ABORT,111,43,50,14
-END
-
-IDD_LICENSE DIALOGEX 0, 0, 335, 205
-STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Rufus License"
-FONT 8, "MS Shell Dlg", 400, 0, 0x1
-BEGIN
-    DEFPUSHBUTTON   "Close",IDOK,278,187,50,14
-    EDITTEXT        IDC_LICENSE_TEXT,7,7,321,176,ES_MULTILINE | ES_READONLY | WS_VSCROLL
-END
-
-IDD_LOG DIALOGEX 0, 0, 366, 329
-STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION
-CAPTION "Log"
-FONT 8, "MS Shell Dlg", 400, 0, 0x1
-BEGIN
-    EDITTEXT        IDC_LOG_EDIT,0,0,366,301,ES_MULTILINE | ES_READONLY | NOT WS_BORDER | WS_VSCROLL,WS_EX_STATICEDGE
-    PUSHBUTTON      "Clear Log",IDC_LOG_CLEAR,198,308,50,14
-    PUSHBUTTON      "Save Log",IDC_LOG_SAVE,253,308,50,14
-    DEFPUSHBUTTON   "Close Log",IDCANCEL,308,308,50,14
-END
-
-IDD_NOTIFICATION DIALOGEX 0, 0, 263, 63
-STYLE DS_SETFONT | DS_FIXEDSYS | DS_NOFAILCREATE | DS_CENTER | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_THICKFRAME
-CAPTION "Rufus"
-FONT 8, "MS Shell Dlg", 400, 0, 0x1
-BEGIN
-    LTEXT           "",IDC_NOTIFICATION_LINE,0,0,263,39
-    CONTROL         "",IDC_STATIC,"Static",SS_WHITERECT,0,0,263,38
-    ICON            32516,IDC_NOTIFICATION_ICON,6,6,20,20
-    LTEXT           "",IDC_NOTIFICATION_TEXT,35,10,219,20
-    DEFPUSHBUTTON   "No",IDNO,206,44,50,14
-    PUSHBUTTON      "More information",IDC_MORE_INFO,8,44,63,14,NOT WS_VISIBLE
-    PUSHBUTTON      "Yes",IDYES,154,44,50,14,NOT WS_VISIBLE
-END
-
-IDD_UPDATE_POLICY DIALOGEX 0, 0, 287, 198
-STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Update policy and settings"
-FONT 8, "Microsoft Sans Serif", 400, 0, 0x0
-BEGIN
-    ICON            IDI_ICON,IDC_ABOUT_ICON,11,8,21,20
-    DEFPUSHBUTTON   "Close",IDCANCEL,221,172,50,14,WS_GROUP
-    CONTROL         "",IDC_POLICY,"RichEdit20W",WS_VSCROLL | 0x804,46,8,235,130,WS_EX_STATICEDGE
-    COMBOBOX        IDC_UPDATE_FREQUENCY,133,155,66,12,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Check for updates:",IDC_STATIC,52,157,72,11
-    LTEXT           "Include beta versions:",IDC_STATIC,52,173,93,11
-    COMBOBOX        IDC_INCLUDE_BETAS,133,171,36,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    GROUPBOX        "Settings",IDC_STATIC,45,145,161,46
-    PUSHBUTTON      "Check Now",IDC_CHECK_NOW,221,154,50,14
-    GROUPBOX        "",IDC_STATIC,210,145,71,46
-END
-
-IDD_NEW_VERSION DIALOGEX 0, 0, 384, 268
-STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Check For Updates - Rufus"
-FONT 8, "Microsoft Sans Serif", 400, 0, 0x0
-BEGIN
-    PUSHBUTTON      "Close",IDCANCEL,167,244,50,14,WS_GROUP
-    CONTROL         "",IDC_RELEASE_NOTES,"RichEdit20W",WS_VSCROLL | 0x804,15,77,352,88,WS_EX_STATICEDGE
-    DEFPUSHBUTTON   "Download",IDC_DOWNLOAD,293,211,74,14,WS_GROUP
-    CONTROL         "",IDC_PROGRESS,"msctls_progress32",WS_BORDER,15,212,270,11
-    GROUPBOX        "Release Notes",IDC_STATIC,8,63,367,111
-    LTEXT           "A newer version is available. Please download the latest version!",IDC_STATIC,10,32,229,8
-    LTEXT           "[...]",IDC_YOUR_VERSION,10,8,124,8
-    LTEXT           "[...]",IDC_LATEST_VERSION,10,19,129,8
-    CONTROL         "<a href=""http://rufus.akeo.ie"">Click here to go to the website</a>",IDC_WEBSITE,
-                    "SysLink",WS_TABSTOP,143,49,96,9
-    GROUPBOX        "Download",IDC_STATIC,8,177,367,58
-    EDITTEXT        IDC_DOWNLOAD_URL,15,191,351,13,ES_AUTOHSCROLL | ES_READONLY
-END
-
-
-#ifdef APSTUDIO_INVOKED
-/////////////////////////////////////////////////////////////////////////////
-//
-// TEXTINCLUDE
-//
-
-1 TEXTINCLUDE 
-BEGIN
-    "resource.h\0"
-END
-
-2 TEXTINCLUDE 
-BEGIN
-    "#include <windows.h>\r\n"
-    "#ifndef IDC_STATIC\r\n"
-    "#define IDC_STATIC -1\r\n"
-    "#endif\r\n"
-    "\0"
-END
-
-3 TEXTINCLUDE 
-BEGIN
-    "\r\n"
-    "IDR_SL_LDLINUX_BSS      RCDATA                  ""../res/syslinux/ldlinux.bss""\r\n"
-    "IDR_SL_LDLINUX_SYS      RCDATA                  ""../res/syslinux/ldlinux.sys""\r\n"
-    "IDR_BR_MBR_BIN          RCDATA                  ""../res/mbr/mbr.bin""\r\n"
-    "IDR_FD_COMMAND_COM      RCDATA                  ""../res/freedos/COMMAND.COM""\r\n"
-    "IDR_FD_KERNEL_SYS       RCDATA                  ""../res/freedos/KERNEL.SYS""\r\n"
-    "IDR_FD_DISPLAY_EXE      RCDATA                  ""../res/freedos/DISPLAY.EXE""\r\n"
-    "IDR_FD_KEYB_EXE         RCDATA                  ""../res/freedos/KEYB.EXE""\r\n"
-    "IDR_FD_MODE_COM         RCDATA                  ""../res/freedos/MODE.COM""\r\n"
-    "IDR_FD_KB1_SYS          RCDATA                  ""../res/freedos/KEYBOARD.SYS""\r\n"
-    "IDR_FD_KB2_SYS          RCDATA                  ""../res/freedos/KEYBRD2.SYS""\r\n"
-    "IDR_FD_KB3_SYS          RCDATA                  ""../res/freedos/KEYBRD3.SYS""\r\n"
-    "IDR_FD_KB4_SYS          RCDATA                  ""../res/freedos/KEYBRD4.SYS""\r\n"
-    "IDR_FD_EGA1_CPX         RCDATA                  ""../res/freedos/ega.cpx""\r\n"
-    "IDR_FD_EGA2_CPX         RCDATA                  ""../res/freedos/ega2.cpx""\r\n"
-    "IDR_FD_EGA3_CPX         RCDATA                  ""../res/freedos/ega3.cpx""\r\n"
-    "IDR_FD_EGA4_CPX         RCDATA                  ""../res/freedos/ega4.cpx""\r\n"
-    "IDR_FD_EGA5_CPX         RCDATA                  ""../res/freedos/ega5.cpx""\r\n"
-    "IDR_FD_EGA6_CPX         RCDATA                  ""../res/freedos/ega6.cpx""\r\n"
-    "IDR_FD_EGA7_CPX         RCDATA                  ""../res/freedos/ega7.cpx""\r\n"
-    "IDR_FD_EGA8_CPX         RCDATA                  ""../res/freedos/ega8.cpx""\r\n"
-    "IDR_FD_EGA9_CPX         RCDATA                  ""../res/freedos/ega9.cpx""\r\n"
-    "IDR_FD_EGA10_CPX        RCDATA                  ""../res/freedos/ega10.cpx""\r\n"
-    "IDR_FD_EGA11_CPX        RCDATA                  ""../res/freedos/ega11.cpx""\r\n"
-    "IDR_FD_EGA12_CPX        RCDATA                  ""../res/freedos/ega12.cpx""\r\n"
-    "IDR_FD_EGA13_CPX        RCDATA                  ""../res/freedos/ega13.cpx""\r\n"
-    "IDR_FD_EGA14_CPX        RCDATA                  ""../res/freedos/ega14.cpx""\r\n"
-    "IDR_FD_EGA15_CPX        RCDATA                  ""../res/freedos/ega15.cpx""\r\n"
-    "IDR_FD_EGA16_CPX        RCDATA                  ""../res/freedos/ega16.cpx""\r\n"
-    "IDR_FD_EGA17_CPX        RCDATA                  ""../res/freedos/ega17.cpx""\r\n"
-    "IDR_FD_EGA18_CPX        RCDATA                  ""../res/freedos/ega18.cpx""\r\n"
-    "\r\n"
-    "// Must reference a manifest for visual styles and elevation\r\n"
-    "// Oh, and it must happen at the end, or MinGW will ignore it!\r\n"
-    "#if defined(__GNUC__)\r\n"
-    "CREATEPROCESS_MANIFEST_RESOURCE_ID RT_MANIFEST ""common_controls_and_elevation.manifest""\r\n"
-    "#endif\r\n"
-    "\0"
-END
-
-#endif    // APSTUDIO_INVOKED
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// DESIGNINFO
-//
-
-#ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO
-BEGIN
-    IDD_DIALOG, DIALOG
-    BEGIN
-    END
-
-    IDD_ABOUTBOX, DIALOG
-    BEGIN
-    END
-
-    IDD_ISO_EXTRACT, DIALOG
-    BEGIN
-    END
-
-    IDD_LICENSE, DIALOG
-    BEGIN
-    END
-
-    IDD_LOG, DIALOG
-    BEGIN
-    END
-
-    IDD_NOTIFICATION, DIALOG
-    BEGIN
-    END
-
-    IDD_UPDATE_POLICY, DIALOG
-    BEGIN
-    END
-
-    IDD_NEW_VERSION, DIALOG
-    BEGIN
-    END
-END
-#endif    // APSTUDIO_INVOKED
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Version
-//
-
-VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,3,3,248
- PRODUCTVERSION 1,3,3,248
- FILEFLAGSMASK 0x3fL
-#ifdef _DEBUG
- FILEFLAGS 0x1L
-#else
- FILEFLAGS 0x0L
-#endif
- FILEOS 0x40004L
- FILETYPE 0x1L
- FILESUBTYPE 0x0L
-BEGIN
-    BLOCK "StringFileInfo"
-    BEGIN
-        BLOCK "000904b0"
-        BEGIN
-            VALUE "CompanyName", "Akeo Consulting (http://akeo.ie)"
-            VALUE "FileDescription", "Rufus"
-            VALUE "FileVersion", "1.3.3.248"
-            VALUE "InternalName", "Rufus"
-            VALUE "LegalCopyright", "(c) 2011-2013 Pete Batard (GPL v3)"
-            VALUE "LegalTrademarks", "http://www.gnu.org/copyleft/gpl.html"
-            VALUE "OriginalFilename", "rufus.exe"
-            VALUE "ProductName", "Rufus"
-            VALUE "ProductVersion", "1.3.3.248"
-        END
-    END
-    BLOCK "VarFileInfo"
-    BEGIN
-        VALUE "Translation", 0x9, 1200
-    END
-END
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Icon
-//
-
-// Icon with lowest ID value placed first to ensure application icon
-// remains consistent on all systems.
-IDI_ICON                ICON                    "../res/rufus.ico"
-IDI_UP                  ICON                    "../res/up.ico"
-IDI_DOWN                ICON                    "../res/down.ico"
-#endif    // French (France) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

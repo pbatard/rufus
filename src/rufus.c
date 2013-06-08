@@ -1392,7 +1392,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	RECT DialogRect, DesktopRect;
 	int nDeviceIndex, fs, bt, i, nWidth, nHeight;
 	static DWORD DeviceNum = 0, LastRefresh = 0;
-	wchar_t wtmp[128], wstr[MAX_PATH];
+	char tmp[128], str[MAX_PATH];
 	static UINT uDOSChecked = BST_CHECKED, uQFChecked;
 	static BOOL first_log_display = TRUE, user_changed_label = FALSE;
 
@@ -1692,11 +1692,10 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			if (nDeviceIndex != CB_ERR) {
 				if ((IsChecked(IDC_BOOT)) && (!BootCheck()))
 					break;
-				// TODO: use UTF-8 here with MessageBoxU
-				GetWindowTextW(hDeviceList, wtmp, ARRAYSIZE(wtmp));
-				_snwprintf(wstr, ARRAYSIZE(wstr), L"WARNING: ALL DATA ON DEVICE '%s'\r\nWILL BE DESTROYED.\r\n"
-					L"To continue with this operation, click OK. To quit click CANCEL.", wtmp);
-				if (MessageBoxW(hMainDialog, wstr, LTEXT(APPLICATION_NAME), MB_OKCANCEL|MB_ICONWARNING) == IDOK) {
+				GetWindowTextU(hDeviceList, tmp, ARRAYSIZE(tmp));
+				_snprintf(str, ARRAYSIZE(str), "WARNING: ALL DATA ON DEVICE '%s'\r\nWILL BE DESTROYED.\r\n"
+					"To continue with this operation, click OK. To quit click CANCEL.", tmp);
+				if (MessageBoxU(hMainDialog, str, APPLICATION_NAME, MB_OKCANCEL|MB_ICONWARNING) == IDOK) {
 					// Disable all controls except cancel
 					EnableControls(FALSE);
 					DeviceNum = (DWORD)ComboBox_GetItemData(hDeviceList, nDeviceIndex);
