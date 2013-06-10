@@ -1952,7 +1952,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 				PrintStatus2000("ISO size check", iso_size_check);
 				continue;
 			}
-			// TODO: (v1.4) move this option to advanced mode
 			// Alt-F => Toggle detection of fixed disks
 			// By default Rufus does not allow formatting USB fixed disk drives, such as USB HDDs
 			// This is a safety feature, to avoid someone unintentionally formatting a backup 

@@ -35,8 +35,8 @@
 #include "msapi_utf8.h"
 
 // Parse a line of UTF-16 text and return the data if it matches the 'token'
-// The parsed line is of the form: [ ]token[ ]=[ ]["]data["][ ] and the line
-// is modified by the parser
+// The parsed line is of the form: [ ]token[ ]=[ ]["]data["][ ] and is 
+// modified by the parser
 static wchar_t* get_token_data_line(const wchar_t* wtoken, wchar_t* wline)
 {
 	const wchar_t wspace[] = L" \t";	// The only whitespaces we recognize as such
@@ -375,7 +375,7 @@ out:
 	return ret;
 }
 
-// Search for a specific 'src' substring the data for all occurences of 'token', and replace
+// Search for a specific 'src' substring data for all occurences of 'token', and replace
 // it with 'rep'. File can be ANSI or UNICODE and is overwritten. Parameters are UTF-8.
 // The parsed line is of the form: [ ]token[ ]data
 // Returns a pointer to rep if replacement occured, NULL otherwise

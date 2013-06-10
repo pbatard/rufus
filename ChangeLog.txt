@@ -1,3 +1,11 @@
+o Version 1.3.3 (2013.06.10)
+    Drive handling and hotplug detection overhaul
+    Add support for raw/unpartitioned drives
+    Add (limited) commandline support, to specify the ISO image to open
+    Add option to list fixed/unpartitioned drives, in the advanced options
+    Fix broken detection of unsupported ISO images
+    Don't assume C: to be the drive letter for DOS
+    Various other fixes and improvements
 o Version 1.3.2 (2013.01.27)
     Fix support for newer ArchLinux ISOs, that was removed in 1.3.1
     Add support for UEFI boot, as well as GPT. What this means is that Rufus can
