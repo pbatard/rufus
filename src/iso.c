@@ -57,6 +57,7 @@ int64_t iso_blocking_status = -1;
 static const char* psz_extract_dir;
 static const char* bootmgr_efi_name = "bootmgr.efi";
 static const char* ldlinux_name = "ldlinux.sys";
+static const char* syslinux_v5_file = "ldlinux.c32";
 static const char* efi_dirname = "/efi/boot";
 static const char* isolinux_name[] = { "isolinux.cfg", "syslinux.cfg", "extlinux.conf"};
 static const char* pe_dirname[] = { "/i386", "/minint" };
@@ -113,6 +114,11 @@ static __inline BOOL check_iso_props(const char* psz_dirname, BOOL* is_syslinux_
 	for (i=0; i<ARRAYSIZE(isolinux_name); i++) {
 		if (safe_stricmp(psz_basename, isolinux_name[i]) == 0)
 			*is_syslinux_cfg = TRUE;
+	}
+
+	// Check for a syslinux v5.0 file anywhere
+	if (safe_stricmp(psz_basename, syslinux_v5_file) == 0) {
+		iso_report.has_syslinux_v5 = TRUE;
 	}
 
 	// Check for an old incompatible c32 file anywhere

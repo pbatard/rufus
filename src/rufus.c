@@ -1021,11 +1021,12 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 		safe_free(iso_path);
 		goto out;
 	}
-	uprintf("ISO label: '%s'\r\n  Size: %lld bytes\r\n  Has a >4GB file: %s\r\n  Uses EFI: %s%s\r\n  Uses Bootmgr: %s\r\n  Uses WinPE: %s%s\r\n  Uses isolinux: %s\n",
+	uprintf("ISO label: '%s'\r\n  Size: %lld bytes\r\n  Has a >4GB file: %s\r\n  Uses EFI: %s%s\r\n  Uses Bootmgr: %s\r\n  Uses WinPE: %s%s\r\n  Uses isolinux: %s (v%s)\n",
 		iso_report.label, iso_report.projected_size, iso_report.has_4GB_file?"Yes":"No", (iso_report.has_efi || iso_report.has_win7_efi)?"Yes":"No", 
 		(iso_report.has_win7_efi && (!iso_report.has_efi))?" (win7_x64)":"", iso_report.has_bootmgr?"Yes":"No",
-		IS_WINPE(iso_report.winpe)?"Yes":"No", (iso_report.uses_minint)?" (with /minint)":"", iso_report.has_isolinux?"Yes":"No");
-	if (iso_report.has_isolinux) {
+		IS_WINPE(iso_report.winpe)?"Yes":"No", (iso_report.uses_minint)?" (with /minint)":"", iso_report.has_isolinux?"Yes":"No",
+		iso_report.has_syslinux_v5?"5.0 or later":"4.x or earlier");
+	if (iso_report.has_isolinux && !iso_report.has_syslinux_v5) {
 		for (i=0; i<NB_OLD_C32; i++) {
 			uprintf("    With an old %s: %s\n", old_c32_name[i], iso_report.has_old_c32[i]?"Yes":"No");
 		}
@@ -1041,8 +1042,8 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 		MessageBoxU(hMainDialog, "This ISO image contains a file larger than 4 GB and cannot be used to boot in EFI mode from USB.\r\n"
 			"This is a technical limitation from the UEFI/FAT32 process, not from " APPLICATION_NAME ".", "Non USB-UEFI compatible ISO", MB_OK|MB_ICONINFORMATION);
 		safe_free(iso_path);
-	} else {
-		for(i=0; i<NB_OLD_C32; i++) {
+	} else if (!iso_report.has_syslinux_v5) {	// This check is for Syslinux v4.x or earlier
+		for (i=0; i<NB_OLD_C32; i++) {
 			if (iso_report.has_old_c32[i]) {
 				fd = fopen(old_c32_name[i], "rb");
 				if (fd != NULL) {
@@ -1052,13 +1053,13 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 					use_own_c32[i] = TRUE;
 				} else {
 					PrintStatus(0, FALSE, "Obsolete %s detected", old_c32_name[i]);
-					safe_sprintf(msg, sizeof(msg), "This ISO image seems to use an obsolete version of %s\n"
-						"that may prevent boot menus from displaying properly...\n\n"
+					safe_sprintf(msg, sizeof(msg), "This ISO image seems to use an obsolete version of '%s'.\n"
+						"Because of this, boot menus may not display properly.\n\n"
 						"Rufus can fix this issue by downloading a newer version for you:\n"
-						"- Select 'Yes' to connect to the internet and replace the file.\n"
-						"- Select 'No' to leave the existing ISO file unmodified.\n"
+						"- Choose 'Yes' to connect to the internet and replace the file.\n"
+						"- Choose 'No' to leave the existing ISO file unmodified.\n"
 						"If you don't know what to do, you should select 'Yes'.\n\n"
-						"Note that the file will be downloaded in the current directory and once a\n"
+						"Note: the new file will be downloaded in the current directory and once a "
 						"'%s' exists there, it will always be used as replacement.\n", old_c32_name[i], old_c32_name[i]);
 					safe_sprintf(msg_title, sizeof(msg_title), "Replace %s?", old_c32_name[i]);
 					if (MessageBoxA(hMainDialog, msg, msg_title, MB_YESNO|MB_ICONWARNING) == IDYES) {

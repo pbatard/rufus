@@ -216,6 +216,7 @@ typedef struct {
 	BOOL has_autorun;
 	BOOL has_old_c32[NB_OLD_C32];
 	BOOL has_old_vesamenu;
+	BOOL has_syslinux_v5;
 	BOOL uses_minint;
 } RUFUS_ISO_REPORT;
 
