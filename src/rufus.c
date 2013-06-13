@@ -138,6 +138,7 @@ static int nb_slots[OP_MAX];
 static float slot_end[OP_MAX+1];	// shifted +1 so that we can substract 1 to OP indexes
 static float previous_end;
 
+// TODO: Remember to update copyright year in both license.h and the RC when the year changes!
 
 #define KB          1024LL
 #define MB       1048576LL
