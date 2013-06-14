@@ -252,7 +252,7 @@ unsigned char* GetResource(HMODULE module, char* name, char* type, const char* d
 	if (duplicate) {
 		p = (unsigned char*)malloc(*len);
 		if (p == NULL) {
-			uprintf("Unable to allocate ldlinux.sys resource\n");
+			uprintf("Unable to allocate resource '%s'\n", desc);
 			goto out;
 		}
 		memcpy(p, LockResource(res_handle), *len);

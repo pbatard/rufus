@@ -877,7 +877,7 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 	fake_fd._bufsiz = SelectedDrive.Geometry.BytesPerSector;
 	fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
 	dt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
-	if ( (dt == DT_SYSLINUX) || ((dt == DT_ISO) && ((fs == FS_FAT16) || (fs == FS_FAT32))) ) {
+	if ( (dt == DT_SYSLINUX_V4) || (dt == DT_SYSLINUX_V5) || ((dt == DT_ISO) && ((fs == FS_FAT16) || (fs == FS_FAT32))) ) {
 		r = write_syslinux_mbr(&fake_fd);
 	} else {
 		if ((IS_WINPE(iso_report.winpe) && !iso_report.uses_minint) || (IsChecked(IDC_RUFUS_MBR))) {
@@ -1383,8 +1383,7 @@ DWORD WINAPI FormatThread(LPVOID param)
 			}
 			// We must close and unlock the volume to write files to it
 			safe_unlockclose(hLogicalVolume);
-		} else if ( (dt == DT_SYSLINUX) || ((dt == DT_ISO) && ((fs == FS_FAT16) || (fs == FS_FAT32))) ) {
-			PrintStatus(0, TRUE, "Installing Syslinux...");
+		} else if ( (dt == DT_SYSLINUX_V4) || (dt == DT_SYSLINUX_V5) || ((dt == DT_ISO) && ((fs == FS_FAT16) || (fs == FS_FAT32))) ) {
 			if (!InstallSyslinux(DriveIndex, drive_name[0])) {
 				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_INSTALL_FAILURE;
 			}

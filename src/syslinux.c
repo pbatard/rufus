@@ -75,7 +75,11 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter)
 	BOOL r = FALSE;
 
 	static unsigned char sectbuf[SECTOR_SIZE];
-	static char ldlinux_name[] = "?:\\ldlinux.sys";
+	static LPSTR resource[2][2] = {
+		{ MAKEINTRESOURCEA(IDR_SL_LDLINUX_V4_SYS),  MAKEINTRESOURCEA(IDR_SL_LDLINUX_V4_BSS) },
+		{ MAKEINTRESOURCEA(IDR_SL_LDLINUX_V5_SYS),  MAKEINTRESOURCEA(IDR_SL_LDLINUX_V5_BSS) } };
+	static char ldlinux_path[] = "?:\\ldlinux.sys";
+	static char* ldlinux_sys = &ldlinux_path[3];
 	struct libfat_filesystem *fs;
 	libfat_sector_t s, *secp;
 	libfat_sector_t *sectors = NULL;
@@ -83,30 +87,33 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter)
 	uint32_t ldlinux_cluster;
 	int nsectors;
 	int dt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
+	BOOL use_v5 = (dt == DT_SYSLINUX_V5) || ((dt == DT_ISO) && (iso_report.has_syslinux_v5));
 
-	ldlinux_name[0] = drive_letter;
+	PrintStatus(0, TRUE, "Installing Syslinux v%d...", use_v5?5:4);
+
+	ldlinux_path[0] = drive_letter;
 
 	/* Initialize the ADV -- this should be smarter */
 	syslinux_reset_adv(syslinux_adv);
 
 	/* Access a copy of the ldlinux.sys & ldlinux.bss resources */
-	syslinux_ldlinux = GetResource(hMainInstance, MAKEINTRESOURCEA(IDR_SL_LDLINUX_SYS),
-		_RT_RCDATA, "ldlinux.sys", &syslinux_ldlinux_len, TRUE);
-	syslinux_bootsect = GetResource(hMainInstance, MAKEINTRESOURCEA(IDR_SL_LDLINUX_BSS),
-		_RT_RCDATA,"ldlinux.bss", &syslinux_bootsect_len, TRUE);
+	syslinux_ldlinux = GetResource(hMainInstance, resource[use_v5?1:0][0],
+		_RT_RCDATA, ldlinux_sys, &syslinux_ldlinux_len, TRUE);
+	syslinux_bootsect = GetResource(hMainInstance, resource[use_v5?1:0][1],
+		_RT_RCDATA, "ldlinux.bss", &syslinux_bootsect_len, TRUE);
 	if ((syslinux_ldlinux == NULL) || (syslinux_bootsect == NULL)) {
 		goto out;
 	}
 
 	/* Create ldlinux.sys file */
-	f_handle = CreateFileA(ldlinux_name, GENERIC_READ | GENERIC_WRITE,
+	f_handle = CreateFileA(ldlinux_path, GENERIC_READ | GENERIC_WRITE,
 			  FILE_SHARE_READ | FILE_SHARE_WRITE,
 			  NULL, CREATE_ALWAYS,
 			  FILE_ATTRIBUTE_READONLY | FILE_ATTRIBUTE_SYSTEM |
 			  FILE_ATTRIBUTE_HIDDEN, NULL);
 
 	if (f_handle == INVALID_HANDLE_VALUE) {
-		uprintf("Unable to create ldlinux.sys\n");
+		uprintf("Unable to create '%s'\n", ldlinux_sys);
 		goto out;
 	}
 
@@ -114,18 +121,18 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter)
 	if (!WriteFile(f_handle, syslinux_ldlinux, syslinux_ldlinux_len,
 		   &bytes_written, NULL) ||
 		bytes_written != syslinux_ldlinux_len) {
-		uprintf("Could not write ldlinux.sys\n");
+		uprintf("Could not write '%s'\n", ldlinux_sys);
 		goto out;
 	}
 	if (!WriteFile(f_handle, syslinux_adv, 2 * ADV_SIZE,
 		   &bytes_written, NULL) ||
 		bytes_written != 2 * ADV_SIZE) {
-		uprintf("Could not write ADV to ldlinux.sys\n");
+		uprintf("Could not write ADV to '%s'\n", ldlinux_sys);
 		goto out;
 	}
 
-	uprintf("Succesfully wrote 'ldlinux.sys'\n");
-	if (dt == DT_SYSLINUX)
+	uprintf("Succesfully wrote '%s'\n", ldlinux_sys);
+	if (dt != DT_ISO)
 		UpdateProgress(OP_DOS, -1.0f);
 
 	/* Now flush the media */
@@ -166,7 +173,7 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter)
 		!WriteFile(f_handle, syslinux_ldlinux, syslinux_ldlinux_len,
 			   &bytes_written, NULL)
 		|| bytes_written != syslinux_ldlinux_len) {
-		uprintf("Could not write ldlinux.sys: %s\n", WindowsErrorString());
+		uprintf("Could not write '%s': %s\n", ldlinux_sys, WindowsErrorString());
 		goto out;
 	}
 
@@ -195,7 +202,7 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter)
 	}
 
 	uprintf("Succesfully wrote Syslinux boot record\n");
-	if (dt == DT_SYSLINUX)
+	if (dt != DT_ISO)
 		UpdateProgress(OP_DOS, -1.0f);
 
 	r = TRUE;

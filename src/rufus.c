@@ -1575,8 +1575,9 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			if (fs < 0) {
 				EnableBootOptions(TRUE);
 				SetMBRProps();
-				// Remove the SysLinux option if exists
-				if (ComboBox_GetItemData(hBootType, ComboBox_GetCount(hBootType)-1) == DT_SYSLINUX) {
+				// Remove the SysLinux options if they exists
+				if (ComboBox_GetItemData(hBootType, ComboBox_GetCount(hBootType)-1) == DT_SYSLINUX_V5) {
+					IGNORE_RETVAL(ComboBox_DeleteString(hBootType,  ComboBox_GetCount(hBootType)-1));
 					IGNORE_RETVAL(ComboBox_DeleteString(hBootType,  ComboBox_GetCount(hBootType)-1));
 					IGNORE_RETVAL(ComboBox_SetCurSel(hBootType, 1));
 				}
@@ -1601,9 +1602,11 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			}
 			IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, "ISO Image"), DT_ISO));
 			// If needed (advanced mode) also append a Syslinux option
-			if ( (bt == BT_BIOS) && (((fs == FS_FAT16) || (fs == FS_FAT32)) && (advanced_mode)) )
-				IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, "SysLinux"), DT_SYSLINUX));
-			if ( ((!advanced_mode) && (selection_default == DT_SYSLINUX)) ) {
+			if ( (bt == BT_BIOS) && (((fs == FS_FAT16) || (fs == FS_FAT32)) && (advanced_mode)) ) {
+				IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, "Syslinux 4"), DT_SYSLINUX_V4));
+				IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, "Syslinux 5"), DT_SYSLINUX_V5));
+			}
+			if ( ((!advanced_mode) && ((selection_default == DT_SYSLINUX_V4) || (selection_default == DT_SYSLINUX_V5))) ) {
 				selection_default = DT_FREEDOS;
 				CheckDlgButton(hDlg, IDC_DISK_ID, BST_UNCHECKED);
 			}

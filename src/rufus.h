@@ -159,7 +159,8 @@ enum dos_type {
 	DT_WINME = 0,
 	DT_FREEDOS,
 	DT_ISO,
-	DT_SYSLINUX,
+	DT_SYSLINUX_V4,
+	DT_SYSLINUX_V5,
 	DT_MAX
 };
 
