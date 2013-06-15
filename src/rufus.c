@@ -624,7 +624,7 @@ static BOOL GetUSBDevices(DWORD devnum)
 				if(GetLastError() != ERROR_NO_MORE_ITEMS) {
 					uprintf("SetupDiEnumDeviceInterfaces failed: %s\n", WindowsErrorString());
 				} else {
-					uprintf("Device was eliminated because it didn't report itself as a disk\n");
+					uprintf("A device was eliminated because it didn't report itself as a disk\n");
 				}
 				break;
 			}
@@ -678,6 +678,12 @@ static BOOL GetUSBDevices(DWORD devnum)
 				if (drive_letter == ' ') {
 					safe_sprintf(entry, sizeof(entry), "%s (Disk %d)", label, device_number.DeviceNumber);
 				} else {
+					if (drive_letter == app_dir[0]) {
+						uprintf("Removing %c: from the list: This is the disk from which " APPLICATION_NAME " is running!\n", drive_letter);
+						safe_closehandle(hDrive);
+						safe_free(devint_detail_data);
+						break;
+					}
 					safe_sprintf(entry, sizeof(entry), "%s (%c:)", label, drive_letter);
 				}
 				IGNORE_RETVAL(ComboBox_SetItemData(hDeviceList, ComboBox_AddStringU(hDeviceList, entry),
@@ -1978,7 +1984,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	UpdateWindow(hDlg);
 
 	// Do our own event processing and process "magic" commands
-	// TODO: (v1.4) Cheat modes are not handled when the log is at the front - this sucks
 	while(GetMessage(&msg, NULL, 0, 0)) {
 		// The following ensures the processing of the ISO progress window messages
 		if (!IsWindow(hISOProgressDlg) || !IsDialogMessage(hISOProgressDlg, &msg)) {
