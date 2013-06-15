@@ -73,6 +73,7 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter)
 	DWORD bytes_read;
 	DWORD bytes_written;
 	BOOL r = FALSE;
+	FILE* fd;
 
 	static unsigned char sectbuf[SECTOR_SIZE];
 	static LPSTR resource[2][2] = {
@@ -80,6 +81,7 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter)
 		{ MAKEINTRESOURCEA(IDR_SL_LDLINUX_V5_SYS),  MAKEINTRESOURCEA(IDR_SL_LDLINUX_V5_BSS) } };
 	static char ldlinux_path[] = "?:\\ldlinux.sys";
 	static char* ldlinux_sys = &ldlinux_path[3];
+	const char* ldlinux_c32 = "ldlinux.c32";
 	struct libfat_filesystem *fs;
 	libfat_sector_t s, *secp;
 	libfat_sector_t *sectors = NULL;
@@ -202,6 +204,22 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter)
 	}
 
 	uprintf("Succesfully wrote Syslinux boot record\n");
+
+	if (dt == DT_SYSLINUX_V5) {
+		fd = fopen(ldlinux_c32, "rb");
+		if (fd == NULL) {
+			uprintf("Caution: No '%s' was provided. The target will be missing a mandatory Syslinux file!\n", ldlinux_c32);
+		} else {
+			fclose(fd);
+			ldlinux_path[11] = 'c'; ldlinux_path[12] = '3'; ldlinux_path[13] = '2';
+			if (CopyFileA(ldlinux_c32, ldlinux_path, TRUE)) {
+				uprintf("Created '%s' (from local copy)", ldlinux_path);
+			} else {
+				uprintf("Failed to create '%s': %s\n", ldlinux_path, WindowsErrorString());
+			}
+		}
+	}
+
 	if (dt != DT_ISO)
 		UpdateProgress(OP_DOS, -1.0f);
 

@@ -195,6 +195,7 @@ typedef struct {
 #define OLD_C32_NAMES       {"menu.c32", "vesamenu.c32"}
 #define OLD_C32_THRESHOLD   {53500, 148000}
 #define NEW_C32_URL         {RUFUS_URL "/downloads/menu.c32", RUFUS_URL "/downloads/vesamenu.c32"}
+#define LDLINUX_C32_URL     RUFUS_URL "/downloads/ldlinux.c32"
 
 /* ISO details that the application may want */
 #define WINPE_MININT    0x2A

@@ -98,6 +98,7 @@ static BOOL log_displayed = FALSE;
 static BOOL iso_provided = FALSE;
 extern BOOL force_large_fat32;
 static int selection_default;
+char msgbox[1024], msgbox_title[32];
 
 /*
  * Globals
@@ -947,7 +948,7 @@ static void CALLBACK BlockingTimer(HWND hWnd, UINT uMsg, UINT_PTR idEvent, DWORD
 		user_notified = TRUE;
 		uprintf("Blocking I/O operation detected\n");
 		MessageBoxU(hMainDialog,
-			"Rufus detected that Windows is still flushing its internal buffers\n"
+			APPLICATION_NAME " detected that Windows is still flushing its internal buffers\n"
 			"onto the USB device.\n\n"
 			"Depending on the speed of your USB device, this operation may\n"
 			"take a long time to complete, especially for large files.\n\n"
@@ -1010,7 +1011,6 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 	FILE* fd;
 	const char* old_c32_name[NB_OLD_C32] = OLD_C32_NAMES;
 	const char* new_c32_url[NB_OLD_C32] = NEW_C32_URL;
-	char msg[1024], msg_title[32];
 
 	if (iso_path == NULL)
 		goto out;
@@ -1032,7 +1032,7 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 		}
 	}
 	if ((!iso_report.has_bootmgr) && (!iso_report.has_isolinux) && (!IS_WINPE(iso_report.winpe)) && (!iso_report.has_efi)) {
-		MessageBoxU(hMainDialog, "This version of Rufus only supports bootable ISOs\n"
+		MessageBoxU(hMainDialog, "This version of " APPLICATION_NAME " only supports bootable ISOs\n"
 			"based on bootmgr/WinPE, isolinux or EFI.\n"
 			"This ISO doesn't appear to use either...", "Unsupported ISO", MB_OK|MB_ICONINFORMATION);
 		safe_free(iso_path);
@@ -1053,16 +1053,16 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 					use_own_c32[i] = TRUE;
 				} else {
 					PrintStatus(0, FALSE, "Obsolete %s detected", old_c32_name[i]);
-					safe_sprintf(msg, sizeof(msg), "This ISO image seems to use an obsolete version of '%s'.\n"
+					safe_sprintf(msgbox, sizeof(msgbox), "This ISO image seems to use an obsolete version of '%s'.\n"
 						"Because of this, boot menus may not display properly.\n\n"
-						"Rufus can fix this issue by downloading a newer version for you:\n"
-						"- Choose 'Yes' to connect to the internet and replace the file.\n"
-						"- Choose 'No' to leave the existing ISO file unmodified.\n"
+						APPLICATION_NAME " can fix this issue by downloading a newer version for you:\n"
+						"- Choose 'Yes' to connect to the internet and replace the file\n"
+						"- Choose 'No' to leave the existing ISO file unmodified\n"
 						"If you don't know what to do, you should select 'Yes'.\n\n"
-						"Note: the new file will be downloaded in the current directory and once a "
-						"'%s' exists there, it will always be used as replacement.\n", old_c32_name[i], old_c32_name[i]);
-					safe_sprintf(msg_title, sizeof(msg_title), "Replace %s?", old_c32_name[i]);
-					if (MessageBoxA(hMainDialog, msg, msg_title, MB_YESNO|MB_ICONWARNING) == IDYES) {
+						"Note: The new file will be downloaded in the current directory and once a "
+						"'%s' exists there, it will be reused automatically.\n", old_c32_name[i], old_c32_name[i]);
+					safe_sprintf(msgbox_title, sizeof(msgbox_title), "Replace %s?", old_c32_name[i]);
+					if (MessageBoxA(hMainDialog, msgbox, msgbox_title, MB_YESNO|MB_ICONWARNING) == IDYES) {
 						SetWindowTextU(hISOProgressDlg, "Downloading file...");
 						SetWindowTextU(hISOFileName, new_c32_url[i]);
 						if (DownloadFile(new_c32_url[i], old_c32_name[i], hISOProgressDlg))
@@ -1176,9 +1176,12 @@ void ToggleAdvanced(void)
 
 static BOOL BootCheck(void)
 {
-	int fs, bt;
+	int fs, bt, dt, r;
+	FILE* fd;
+	const char* ldlinux_c32 = "ldlinux.c32";
 
-	if (ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType)) == DT_ISO) {
+	dt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
+	if (dt == DT_ISO) {
 		if (iso_path == NULL) {
 			MessageBoxA(hMainDialog, "Please click on the disc button to select a bootable ISO,\n"
 				"or uncheck the \"Create a bootable disk...\" checkbox.",
@@ -1223,6 +1226,31 @@ static BOOL BootCheck(void)
 				"Missing WIM support...", MB_YESNO|MB_ICONERROR) == IDYES)
 				ShellExecuteA(hMainDialog, "open", SEVENZIP_URL, NULL, NULL, SW_SHOWNORMAL);
 			return FALSE;
+		}
+	} else if (dt == DT_SYSLINUX_V5) {
+		fd = fopen(ldlinux_c32, "rb");
+		if (fd != NULL) {
+			uprintf("Will reuse '%s' for Syslinux v5\n", ldlinux_c32);
+			fclose(fd);
+		} else {
+			PrintStatus(0, FALSE, "Missing '%s' file", ldlinux_c32);
+			safe_sprintf(msgbox, sizeof(msgbox), "Syslinux v5.0 or later requires a '%s' file to be installed.\n"
+				"Because this file is more than 100 KB in size, and always present on Syslinux v5+ ISO images, "
+				"it is not embedded in " APPLICATION_NAME ".\n\n"
+				APPLICATION_NAME " can download the missing file for you:\n"
+				"- Select 'Yes' to connect to the internet and download the file\n"
+				"- Select 'No' if you will manually copy this file on the drive later\n\n"
+				"Note: The file will be downloaded in the current directory and once a "
+				"'%s' exists there, it will be reused automatically.\n", ldlinux_c32, ldlinux_c32, ldlinux_c32);
+			safe_sprintf(msgbox_title, sizeof(msgbox_title), "Download %s?", ldlinux_c32);
+			r = MessageBoxA(hMainDialog, msgbox, msgbox_title, MB_YESNOCANCEL|MB_ICONWARNING);
+			if (r == IDCANCEL) 
+				return FALSE;
+			if (r == IDYES) {
+				SetWindowTextU(hISOProgressDlg, "Downloading file...");
+				SetWindowTextU(hISOFileName, ldlinux_c32);
+				DownloadFile(LDLINUX_C32_URL, ldlinux_c32, hISOProgressDlg);
+			}
 		}
 	}
 	return TRUE;
@@ -1695,31 +1723,36 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			selection_default =  (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
 			nDeviceIndex = ComboBox_GetCurSel(hDeviceList);
 			if (nDeviceIndex != CB_ERR) {
-				if ((IsChecked(IDC_BOOT)) && (!BootCheck()))
+				if ((IsChecked(IDC_BOOT)) && (!BootCheck())) {
+					format_op_in_progress = FALSE;
 					break;
+				}
 				GetWindowTextU(hDeviceList, tmp, ARRAYSIZE(tmp));
 				_snprintf(str, ARRAYSIZE(str), "WARNING: ALL DATA ON DEVICE '%s'\r\nWILL BE DESTROYED.\r\n"
 					"To continue with this operation, click OK. To quit click CANCEL.", tmp);
-				if (MessageBoxU(hMainDialog, str, APPLICATION_NAME, MB_OKCANCEL|MB_ICONWARNING) == IDOK) {
-					// Disable all controls except cancel
-					EnableControls(FALSE);
-					DeviceNum = (DWORD)ComboBox_GetItemData(hDeviceList, nDeviceIndex);
-					FormatStatus = 0;
-					InitProgress();
-					format_thid = CreateThread(NULL, 0, FormatThread, (LPVOID)(uintptr_t)DeviceNum, 0, NULL);
-					if (format_thid == NULL) {
-						uprintf("Unable to start formatting thread");
-						FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_START_THREAD);
-						PostMessage(hMainDialog, UM_FORMAT_COMPLETED, 0, 0);
-					}
-					uprintf("\r\nFormat operation started");
-					PrintStatus(0, FALSE, "");
-					timer = 0;
-					safe_sprintf(szTimer, sizeof(szTimer), "00:00:00");
-					SendMessageA(GetDlgItem(hMainDialog, IDC_STATUS), SB_SETTEXTA,
-						SBT_OWNERDRAW | 1, (LPARAM)szTimer);
-					SetTimer(hMainDialog, TID_APP_TIMER, 1000, ClockTimer);
+				if (MessageBoxU(hMainDialog, str, APPLICATION_NAME, MB_OKCANCEL|MB_ICONWARNING) == IDCANCEL) {
+					format_op_in_progress = FALSE;
+					break;
 				}
+
+				// Disable all controls except cancel
+				EnableControls(FALSE);
+				DeviceNum = (DWORD)ComboBox_GetItemData(hDeviceList, nDeviceIndex);
+				FormatStatus = 0;
+				InitProgress();
+				format_thid = CreateThread(NULL, 0, FormatThread, (LPVOID)(uintptr_t)DeviceNum, 0, NULL);
+				if (format_thid == NULL) {
+					uprintf("Unable to start formatting thread");
+					FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_START_THREAD);
+					PostMessage(hMainDialog, UM_FORMAT_COMPLETED, 0, 0);
+				}
+				uprintf("\r\nFormat operation started");
+				PrintStatus(0, FALSE, "");
+				timer = 0;
+				safe_sprintf(szTimer, sizeof(szTimer), "00:00:00");
+				SendMessageA(GetDlgItem(hMainDialog, IDC_STATUS), SB_SETTEXTA,
+					SBT_OWNERDRAW | 1, (LPARAM)szTimer);
+				SetTimer(hMainDialog, TID_APP_TIMER, 1000, ClockTimer);
 			}
 			if (format_thid == NULL)
 				format_op_in_progress = FALSE;
