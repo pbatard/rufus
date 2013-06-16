@@ -1043,11 +1043,6 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 			"This ISO doesn't appear to use either...", "Unsupported ISO", MB_OK|MB_ICONINFORMATION);
 		safe_free(iso_path);
 		SetMBRProps();
-	} else if ((iso_report.has_efi || iso_report.has_win7_efi) && (iso_report.has_4GB_file)) {
-		// Who the heck decided that using FAT32 for UEFI boot was a great idea?!?
-		MessageBoxU(hMainDialog, "This ISO image contains a file larger than 4 GB and cannot be used to boot in EFI mode from USB.\r\n"
-			"This is a technical limitation from the UEFI/FAT32 process, not from " APPLICATION_NAME ".", "Non USB-UEFI compatible ISO", MB_OK|MB_ICONINFORMATION);
-		safe_free(iso_path);
 	} else if (!iso_report.has_syslinux_v5) {	// This check is for Syslinux v4.x or earlier
 		for (i=0; i<NB_OLD_C32; i++) {
 			if (iso_report.has_old_c32[i]) {
@@ -1068,8 +1063,8 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 						"Note: The new file will be downloaded in the current directory and once a "
 						"'%s' exists there, it will be reused automatically.\n", old_c32_name[i], old_c32_name[i]);
 					safe_sprintf(msgbox_title, sizeof(msgbox_title), "Replace %s?", old_c32_name[i]);
-					if (MessageBoxA(hMainDialog, msgbox, msgbox_title, MB_YESNO|MB_ICONWARNING) == IDYES) {
-						SetWindowTextU(hISOProgressDlg, "Downloading file...");
+					if (MessageBoxU(hMainDialog, msgbox, msgbox_title, MB_YESNO|MB_ICONWARNING) == IDYES) {
+						SetWindowTextU(hISOProgressDlg, "Downloading file");
 						SetWindowTextU(hISOFileName, new_c32_url[i]);
 						if (DownloadFile(new_c32_url[i], old_c32_name[i], hISOProgressDlg))
 							use_own_c32[i] = TRUE;
@@ -1189,47 +1184,57 @@ static BOOL BootCheck(void)
 	dt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
 	if (dt == DT_ISO) {
 		if (iso_path == NULL) {
-			MessageBoxA(hMainDialog, "Please click on the disc button to select a bootable ISO,\n"
+			MessageBoxU(hMainDialog, "Please click on the disc button to select a bootable ISO,\n"
 				"or uncheck the \"Create a bootable disk...\" checkbox.",
-				"No ISO image selected...", MB_OK|MB_ICONERROR);
+				"No ISO image selected", MB_OK|MB_ICONERROR);
 			return FALSE;
 		}
 		if ((iso_size_check) && (iso_report.projected_size > (uint64_t)SelectedDrive.DiskSize)) {
-			MessageBoxA(hMainDialog, "This ISO image is too big "
-				"for the selected target.", "ISO image too big...", MB_OK|MB_ICONERROR);
+			MessageBoxU(hMainDialog, "This ISO image is too big "
+				"for the selected target.", "ISO image too big", MB_OK|MB_ICONERROR);
 			return FALSE;
 		}
 		fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
 		bt = GETBIOSTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
 		if (bt == BT_UEFI) {
 			if (!IS_EFI(iso_report)) {
-				MessageBoxA(hMainDialog, "When using UEFI Target Type, only EFI bootable ISO images are supported. "
-					"Please select an EFI bootable ISO or set the Target Type to BIOS.", "Unsupported ISO...", MB_OK|MB_ICONERROR);
+				MessageBoxU(hMainDialog, "When using UEFI Target Type, only EFI bootable ISO images are supported. "
+					"Please select an EFI bootable ISO or set the Target Type to BIOS.", "Unsupported ISO", MB_OK|MB_ICONERROR);
 				return FALSE;
 			} else if (fs > FS_FAT32) {
-				MessageBoxA(hMainDialog, "When using UEFI Target Type, only FAT/FAT32 is supported. "
-					"Please select FAT/FAT32 as the File system or set the Target Type to BIOS.", "Unsupported filesystem...", MB_OK|MB_ICONERROR);
+				MessageBoxU(hMainDialog, "When using UEFI Target Type, only FAT/FAT32 is supported. "
+					"Please select FAT/FAT32 as the File system or set the Target Type to BIOS.", "Unsupported filesystem", MB_OK|MB_ICONERROR);
+				return FALSE;
+			} else if (iso_report.has_4GB_file) {
+				// Who the heck decided that using FAT32 for UEFI boot was a great idea?!?
+				MessageBoxU(hMainDialog, "This ISO image contains a file larger than 4 GB and cannot be used to create an EFI bootable USB.\r\n"
+					"This is a limitation from UEFI/FAT32, not from " APPLICATION_NAME ".",
+					"Non UEFI compatible ISO", MB_OK|MB_ICONINFORMATION);
 				return FALSE;
 			}
 		} else if ((fs == FS_NTFS) && (!iso_report.has_bootmgr) && (!IS_WINPE(iso_report.winpe))) {
 			if (iso_report.has_isolinux) {
-				MessageBoxA(hMainDialog, "Only FAT/FAT32 is supported for this type of ISO. "
-					"Please select FAT/FAT32 as the File system.", "Unsupported filesystem...", MB_OK|MB_ICONERROR);
+				MessageBoxU(hMainDialog, "Only FAT/FAT32 is supported for this type of ISO. "
+					"Please select FAT/FAT32 as the File system.", "Unsupported filesystem", MB_OK|MB_ICONERROR);
 			} else {
-				MessageBoxA(hMainDialog, "Only 'bootmgr' or 'WinPE' based ISO "
-					"images can currently be used with NTFS.", "Unsupported ISO...", MB_OK|MB_ICONERROR);
+				MessageBoxU(hMainDialog, "Only 'bootmgr' or 'WinPE' based ISO "
+					"images can currently be used with NTFS.", "Unsupported ISO", MB_OK|MB_ICONERROR);
 			}
 			return FALSE;
 		} else if (((fs == FS_FAT16)||(fs == FS_FAT32)) && (!iso_report.has_isolinux)) {
-			MessageBoxA(hMainDialog, "FAT/FAT32 can only be used for isolinux based ISO images "
-				"or when the Target Type is UEFI.", "Unsupported ISO...", MB_OK|MB_ICONERROR);
+			MessageBoxU(hMainDialog, "FAT/FAT32 can only be used for isolinux based ISO images "
+				"or when the Target Type is UEFI.", "Unsupported ISO", MB_OK|MB_ICONERROR);
+			return FALSE;
+		} else if (((fs == FS_FAT16)||(fs == FS_FAT32)) && (iso_report.has_4GB_file)) {
+			MessageBoxU(hMainDialog, "This iso image contains a file larger than 4GB file, which is more than the "
+				"maximum size allowed for a FAT or FAT32 file system.", "Filesystem limitation", MB_OK|MB_ICONERROR);
 			return FALSE;
 		}
 		if ((bt == BT_UEFI) && (iso_report.has_win7_efi) && (!WimExtractCheck())) {
-			if (MessageBoxA(hMainDialog, "Your platform cannot extract files from WIM archives. WIM extraction "
+			if (MessageBoxU(hMainDialog, "Your platform cannot extract files from WIM archives. WIM extraction "
 				"is required to create EFI bootable Windows 7 and Windows Vista USB drives. You can fix that "
 				"by installing a recent version of 7-Zip.\r\nDo you want to visit the 7-zip download page?",
-				"Missing WIM support...", MB_YESNO|MB_ICONERROR) == IDYES)
+				"Missing WIM support", MB_YESNO|MB_ICONERROR) == IDYES)
 				ShellExecuteA(hMainDialog, "open", SEVENZIP_URL, NULL, NULL, SW_SHOWNORMAL);
 			return FALSE;
 		}
@@ -1249,7 +1254,7 @@ static BOOL BootCheck(void)
 				"Note: The file will be downloaded in the current directory and once a "
 				"'%s' exists there, it will be reused automatically.\n", ldlinux_c32, ldlinux_c32, ldlinux_c32);
 			safe_sprintf(msgbox_title, sizeof(msgbox_title), "Download %s?", ldlinux_c32);
-			r = MessageBoxA(hMainDialog, msgbox, msgbox_title, MB_YESNOCANCEL|MB_ICONWARNING);
+			r = MessageBoxU(hMainDialog, msgbox, msgbox_title, MB_YESNOCANCEL|MB_ICONWARNING);
 			if (r == IDCANCEL) 
 				return FALSE;
 			if (r == IDYES) {
@@ -1503,7 +1508,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			EnableWindow(GetDlgItem(hISOProgressDlg, IDC_ISO_ABORT), FALSE);
 			EnableWindow(GetDlgItem(hDlg, IDCANCEL), FALSE);
 			if (format_thid != NULL) {
-				if (MessageBoxA(hMainDialog, "Cancelling may leave the device in an UNUSABLE state.\r\n"
+				if (MessageBoxU(hMainDialog, "Cancelling may leave the device in an UNUSABLE state.\r\n"
 					"If you are sure you want to cancel, click YES. Otherwise, click NO.",
 					RUFUS_CANCELBOX_TITLE, MB_YESNO|MB_ICONWARNING) == IDYES) {
 					// Operation may have completed in the meantime
@@ -1948,7 +1953,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		mutex = CreateMutexA(NULL, TRUE, "Global/" APPLICATION_NAME);
 	}
 	if ((mutex == NULL) || (GetLastError() == ERROR_ALREADY_EXISTS)) {
-		MessageBoxA(NULL, "Another " APPLICATION_NAME " application is running.\n"
+		MessageBoxU(NULL, "Another " APPLICATION_NAME " application is running.\n"
 			"Please close the first application before running another one.",
 			"Other instance detected", MB_ICONSTOP);
 		goto out;
@@ -1977,7 +1982,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	// Create the main Window
 	if ( (hDlg = CreateDialogA(hInstance, MAKEINTRESOURCEA(IDD_DIALOG), NULL, MainCallback)) == NULL ) {
-		MessageBoxA(NULL, "Could not create Window", "DialogBox failure", MB_ICONSTOP);
+		MessageBoxU(NULL, "Could not create Window", "DialogBox failure", MB_ICONSTOP);
 		goto out;
 	}
 	ShowWindow(hDlg, SW_SHOWNORMAL);
