@@ -34,6 +34,256 @@
 #include "rufus.h"
 #include "msapi_utf8.h"
 
+
+// What we need for localization
+// # Comment
+// v 1 1                    // UI target version (major, minor)
+// p IDD_DIALOG             // parent dialog for the following
+// d 1                      // set text direction 0: left to right, 1 right to left
+// f "MS Dialog" 12         // set font and font size
+// r IDD_DIALOG +30 +30     // resize dialog (delta_w, delta_h)
+// m IDC_START  -10 0       // move control (delta_x, delta_w)
+// r IDC_START  0 +1        // resize control
+// t IDC_START  "Demarrer"  // Change control text
+// t IDC_LONG_CONTROL "Some text here"
+//  "some continued text there"
+// all parsed commands return: cmd, control_id, text, num1, num2
+
+// TODO: display control name on mouseover
+// Link to http://www.resedit.net/
+
+typedef struct localization_command {
+	int command;
+	wchar_t* text1;
+	wchar_t* text2;
+	int32_t num1;
+	int32_t num2;
+} loc_cmd;
+
+int  loc_line_nr = 0;
+char loc_filename[32];
+#define luprintf(msg) uprintf("%s(%d): " msg "\n", loc_filename, loc_line_nr);
+
+// Parse localization command arguments and fill a localization command structure
+static void get_loc_data_args(char* arg_type, wchar_t* wline) {
+	const wchar_t wspace[] = L" \t";
+	size_t i, r, arg_index;
+	char str[1024];	// Fot testing only
+	long n;
+	wchar_t *endptr, *expected_endptr;
+
+	i = 0;
+	for (arg_index=0; arg_type[arg_index] != 0; arg_index++) {
+		// Skip leading spaces
+		i += wcsspn(&wline[i], wspace);
+		r = i;
+		switch(arg_type[arg_index]) {
+		case 's':	// quoted string
+			// search leading quote
+			if (wline[i++] != L'"') {
+				luprintf("missing leading quote");
+				return;
+			}
+			r = i;
+			// locate ending quote
+			while ((wline[i] != 0) && (wline[i] != L'"') || ((wline[i] == L'"') && (wline[i-1] == L'\\'))) {
+				if ((wline[i] == L'"') && (wline[i-1] == L'\\')) {
+					wcscpy_s(&wline[i-1], i+wcslen(&wline[i]), &wline[i]);
+				} else {
+					i++;
+				}
+			}
+			if (wline[i] == 0) {
+				luprintf("missing ending quote");
+				return;
+			}
+			wline[i++] = 0;
+			wchar_to_utf8_no_alloc(&wline[r], str, sizeof(str));
+			uprintf("Got string: '%s'\n", str);
+			break;
+		case 'w':	// single word
+			while ((wline[i] != 0) && (wline[i] != wspace[0]) && (wline[i] != wspace[1]))
+				i++;
+			if (wline[i] != 0)
+				wline[i++] = 0;
+			wchar_to_utf8_no_alloc(&wline[r], str, sizeof(str));
+			uprintf("Got word: %s\n", str);
+			break;
+		case 'i':	// integer
+			while ((wline[i] != 0) && (wline[i] != wspace[0]) && (wline[i] != wspace[1]))
+				i++;
+			expected_endptr = &wline[i];
+			if (wline[i] != 0)
+				wline[i++] = 0;
+			n = wcstol(&wline[r], &endptr, 10);
+			if (endptr != expected_endptr) {
+				luprintf("could not read integer data");
+				return;
+			} else {
+				uprintf("Got integer: %d\n", n);
+			}
+			break;
+		default:
+			uprintf("localization: unhandled arg_type '%c'\n", arg_type[arg_index]);
+			break;
+		}
+	}
+}
+
+// Parse an UTF-16 localization command line
+static void* get_loc_data_line(wchar_t* wline)
+{
+	const wchar_t wspace[] = L" \t";
+	size_t i;
+	wchar_t t;
+	BOOLEAN quoteth = FALSE;
+	char line[8192];
+
+	if ((wline == NULL) || (wline[0] == 0))
+		return NULL;
+
+	i = 0;
+
+	// Skip leading spaces
+	i += wcsspn(&wline[i], wspace);
+
+	// Read token (NUL character will be read if EOL)
+	t = wline[i++];
+	switch (t) {
+	case 't':
+		get_loc_data_args("ws", &wline[i]);
+		return NULL;
+	case 'f':
+		get_loc_data_args("si", &wline[i]);
+		return NULL;
+	case 'r':
+	case 'm':
+		get_loc_data_args("wii", &wline[i]);
+		return NULL;
+	case 'v':
+		get_loc_data_args("ii", &wline[i]);
+		return NULL;
+	case '#':	// comment
+		return NULL;
+	default:
+		wchar_to_utf8_no_alloc(wline, line, sizeof(line));
+		luprintf("syntax error");
+		return NULL;
+	}
+}
+
+static __inline void *_reallocf(void *ptr, size_t size)
+{
+	void *ret = realloc(ptr, size);
+	if (!ret)
+		free(ptr);
+	return ret;
+}
+
+// Parse a Rufus localization command file (ANSI, UTF-8 or UTF-16)
+char* get_loc_data_file(const char* filename)
+{
+	wchar_t *wdata= NULL, *wfilename = NULL, *wbuf = NULL;
+	size_t wbufsize = 1024;	// size in wchar_t
+	FILE* fd = NULL;
+	char *ret = NULL;
+	size_t i = 0;
+	int r, line_nr_incr = 1;
+	wchar_t wc = 0, last_wc;
+	BOOL eol = FALSE;
+
+	if ((filename == NULL) || (filename[0] == 0))
+		return NULL;
+
+	loc_line_nr = 0;
+	safe_strcpy(loc_filename, sizeof(loc_filename), filename);
+	wfilename = utf8_to_wchar(filename);
+	if (wfilename == NULL) {
+		uprintf("localization: could not convert '%s' filename to UTF-16\n", filename);
+		goto out;
+	}
+	fd = _wfopen(wfilename, L"r, ccs=UNICODE");
+	if (fd == NULL) goto out;
+
+	wbuf = (wchar_t*) malloc(wbufsize*sizeof(wchar_t));
+	if (wbuf == NULL) {
+		uprintf("localization: could not allocate line buffer\n");
+		goto out;
+	}
+
+	do {	// custom readline handling for string collation, realloc, line number handling, etc.
+		last_wc = wc;
+		wc = getwc(fd);
+		switch(wc) {
+		case WEOF:
+			wbuf[i] = 0;
+			get_loc_data_line(wbuf);
+			goto out;
+		case 0x0D:
+		case 0x0A:
+			// Process line numbers
+			if ((last_wc != 0x0D) && (last_wc != 0x0A)) {
+				if (eol) {
+					line_nr_incr++;
+				} else {
+					loc_line_nr += line_nr_incr;
+					line_nr_incr = 1;
+				}
+			}
+			wbuf[i] = 0;
+			if (!eol) {
+				// Strip trailing spaces (for string collation)
+				for (r = ((int)i)-1; (r>0) && ((wbuf[r]==0x20)||(wbuf[r]==0x09)); r--);
+				if (r < 0)
+					r = 0;
+				eol = TRUE;
+			}
+			break;
+		case 0x20:
+		case 0x09:
+			if (!eol) {
+				wbuf[i++] = wc;
+			}
+			break;
+		default:
+			// Collate multiline strings
+			if ((eol) && (wc == L'"') && (wbuf[r] == L'"')) {
+				i = r;
+				eol = FALSE;
+				break;
+			}
+			if (eol) {
+				get_loc_data_line(wbuf);
+				eol = FALSE;
+				i = 0;
+				r = 0;
+			}
+			wbuf[i++] = wc;
+			break;
+		}
+		if (i >= wbufsize-1) {
+			wbufsize *= 2;
+			if (wbufsize > 32768) {
+				uprintf("localization: requested line buffer is larger than 32K!\n");
+				goto out;
+			}
+			wbuf = (wchar_t*) _reallocf(wbuf, wbufsize*sizeof(wchar_t));
+			if (wbuf == NULL) {
+				uprintf("localization: could not grow line buffer\n");
+				goto out;
+			}
+		}
+	} while(1);
+
+out:
+	if (fd != NULL)
+		fclose(fd);
+	safe_free(wfilename);
+	safe_free(wbuf);
+	return ret;
+}
+
+
 // Parse a line of UTF-16 text and return the data if it matches the 'token'
 // The parsed line is of the form: [ ]token[ ]=[ ]["]data["][ ] and is 
 // modified by the parser

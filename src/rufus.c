@@ -1144,7 +1144,7 @@ void ToggleAdvanced(void)
 	MoveControl(hMainDialog, IDC_LOG, dialog_shift);
 	MoveControl(hMainDialog, IDCANCEL, dialog_shift);
 #ifdef RUFUS_TEST
-	MoveControl(hMainDialogm, IDC_TEST, dialog_shift);
+	MoveControl(hMainDialog, IDC_TEST, dialog_shift);
 #endif
 
 	// And do the same for the log dialog while we're at it
@@ -1423,6 +1423,9 @@ static void PrintStatus2000(const char* str, BOOL val)
 	PrintStatus(2000, FALSE, "%s %s.", str, (val)?"enabled":"disabled");
 }
 
+
+// TODO: remove me
+extern char* get_loc_data_file(const char* filename);
 /*
  * Main dialog callback
  */
@@ -1561,6 +1564,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			break;
 #ifdef RUFUS_TEST
 		case IDC_TEST:
+			get_loc_data_file("rufus.loc");
 			break;
 #endif
 		case IDC_ADVANCED:
