@@ -169,6 +169,7 @@
     <ClCompile Include="..\dos.c" />
     <ClCompile Include="..\icon.c" />
     <ClCompile Include="..\iso.c" />
+    <ClCompile Include="..\locale.c" />
     <ClCompile Include="..\net.c" />
     <ClCompile Include="..\parser.c" />
     <ClCompile Include="..\rufus.c" />
@@ -185,6 +186,7 @@
     <ClInclude Include="..\libcdio\cdio\iso9660.h" />
     <ClInclude Include="..\libcdio\cdio\logging.h" />
     <ClInclude Include="..\libcdio\cdio\udf.h" />
+    <ClInclude Include="..\locale.h" />
     <ClInclude Include="..\msapi_utf8.h" />
     <ClInclude Include="..\dos.h" />
     <ClInclude Include="..\registry.h" />

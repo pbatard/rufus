@@ -33,56 +33,47 @@
 
 #include "rufus.h"
 #include "msapi_utf8.h"
-
-
-// What we need for localization
-// # Comment
-// v 1 1                    // UI target version (major, minor)
-// p IDD_DIALOG             // parent dialog for the following
-// d 1                      // set text direction 0: left to right, 1 right to left
-// f "MS Dialog" 12         // set font and font size
-// r IDD_DIALOG +30 +30     // resize dialog (delta_w, delta_h)
-// m IDC_START  -10 0       // move control (delta_x, delta_w)
-// r IDC_START  0 +1        // resize control
-// t IDC_START  "Demarrer"  // Change control text
-// t IDC_LONG_CONTROL "Some text here"
-//  "some continued text there"
-// all parsed commands return: cmd, control_id, text, num1, num2
-
-// TODO: display control name on mouseover
-// Link to http://www.resedit.net/
-
-typedef struct localization_command {
-	int command;
-	wchar_t* text1;
-	wchar_t* text2;
-	int32_t num1;
-	int32_t num2;
-} loc_cmd;
+#include "locale.h"
 
 int  loc_line_nr = 0;
 char loc_filename[32];
 #define luprintf(msg) uprintf("%s(%d): " msg "\n", loc_filename, loc_line_nr);
 
-// Parse localization command arguments and fill a localization command structure
-static void get_loc_data_args(char* arg_type, wchar_t* wline) {
+// Fill a localization command buffer by parsing the line arguments
+// The command is allocated and must be freed by calling free_loc_cmd()
+static loc_cmd* get_loc_cmd(wchar_t wc, wchar_t* wline) {
 	const wchar_t wspace[] = L" \t";
-	size_t i, r, arg_index;
-	char str[1024];	// Fot testing only
-	long n;
+	size_t i, j, k, r, ti = 0, ii = 0;
 	wchar_t *endptr, *expected_endptr;
+	loc_cmd* lcmd = NULL;
+
+	for (j=0; j<PARSE_CMD_SIZE; j++) {
+		if (wc == (wchar_t)parse_cmd[j].c)
+			break;
+	}
+	if (j >= PARSE_CMD_SIZE) {
+		luprintf("unknown command");
+		return NULL;
+	}
+
+	lcmd = (loc_cmd*)calloc(sizeof(loc_cmd), 1);
+	if (lcmd == NULL) {
+		luprintf("could not allocate command");
+		return NULL;
+	}
+	lcmd->command = parse_cmd[j].cmd;
 
 	i = 0;
-	for (arg_index=0; arg_type[arg_index] != 0; arg_index++) {
+	for (k = 0; parse_cmd[j].arg_type[k] != 0; k++) {
 		// Skip leading spaces
 		i += wcsspn(&wline[i], wspace);
 		r = i;
-		switch(arg_type[arg_index]) {
+		switch(parse_cmd[j].arg_type[k]) {
 		case 's':	// quoted string
 			// search leading quote
 			if (wline[i++] != L'"') {
-				luprintf("missing leading quote");
-				return;
+				luprintf("no start quote");
+				goto err;
 			}
 			r = i;
 			// locate ending quote
@@ -94,82 +85,76 @@ static void get_loc_data_args(char* arg_type, wchar_t* wline) {
 				}
 			}
 			if (wline[i] == 0) {
-				luprintf("missing ending quote");
-				return;
+				luprintf("no end quote");
+				goto err;
 			}
 			wline[i++] = 0;
-			wchar_to_utf8_no_alloc(&wline[r], str, sizeof(str));
-			uprintf("Got string: '%s'\n", str);
+			lcmd->text[ti++] = wchar_to_utf8(&wline[r]);
 			break;
 		case 'w':	// single word
 			while ((wline[i] != 0) && (wline[i] != wspace[0]) && (wline[i] != wspace[1]))
 				i++;
 			if (wline[i] != 0)
 				wline[i++] = 0;
-			wchar_to_utf8_no_alloc(&wline[r], str, sizeof(str));
-			uprintf("Got word: %s\n", str);
+			lcmd->text[ti++] = wchar_to_utf8(&wline[r]);
 			break;
-		case 'i':	// integer
+		case 'i':	// 32 bit signed integer
 			while ((wline[i] != 0) && (wline[i] != wspace[0]) && (wline[i] != wspace[1]))
 				i++;
 			expected_endptr = &wline[i];
 			if (wline[i] != 0)
 				wline[i++] = 0;
-			n = wcstol(&wline[r], &endptr, 10);
+			lcmd->num[ii++] = (int32_t)wcstol(&wline[r], &endptr, 10);
 			if (endptr != expected_endptr) {
-				luprintf("could not read integer data");
-				return;
-			} else {
-				uprintf("Got integer: %d\n", n);
+				luprintf("invalid integer");
+				goto err;
 			}
 			break;
 		default:
-			uprintf("localization: unhandled arg_type '%c'\n", arg_type[arg_index]);
-			break;
+			uprintf("localization: unhandled arg_type '%c'\n", parse_cmd[j].arg_type[k]);
+			goto err;
 		}
 	}
+	return lcmd;
+
+err:
+	free_loc_cmd(lcmd);
+	return NULL;
 }
+
 
 // Parse an UTF-16 localization command line
 static void* get_loc_data_line(wchar_t* wline)
 {
 	const wchar_t wspace[] = L" \t";
-	size_t i;
+	size_t i = 0;
 	wchar_t t;
-	BOOLEAN quoteth = FALSE;
-	char line[8192];
+	loc_cmd* lcmd = NULL;
+	char* locale = "en-US";
+	BOOL seek_locale = TRUE;
 
 	if ((wline == NULL) || (wline[0] == 0))
 		return NULL;
-
-	i = 0;
 
 	// Skip leading spaces
 	i += wcsspn(&wline[i], wspace);
 
 	// Read token (NUL character will be read if EOL)
 	t = wline[i++];
-	switch (t) {
-	case 't':
-		get_loc_data_args("ws", &wline[i]);
+	if (t == L'#')	// Comment
 		return NULL;
-	case 'f':
-		get_loc_data_args("si", &wline[i]);
-		return NULL;
-	case 'r':
-	case 'm':
-		get_loc_data_args("wii", &wline[i]);
-		return NULL;
-	case 'v':
-		get_loc_data_args("ii", &wline[i]);
-		return NULL;
-	case '#':	// comment
-		return NULL;
-	default:
-		wchar_to_utf8_no_alloc(wline, line, sizeof(line));
+	if ((t == 0) || ((wline[i] != wspace[0]) && (wline[i] != wspace[1]))) {
 		luprintf("syntax error");
 		return NULL;
 	}
+
+	lcmd = get_loc_cmd(t, &wline[i]);
+	// TODO: process LC_LOCALE in seek_locale mode
+	// TODO: check return value?
+	execute_loc_cmd(lcmd);
+	free_loc_cmd(lcmd);
+
+	return NULL;
 }
 
 static __inline void *_reallocf(void *ptr, size_t size)

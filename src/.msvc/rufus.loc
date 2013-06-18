@@ -1,0 +1,20 @@
+﻿ataak
+l "en-US"
+ v 2 8
+# This is a comment
+t IDD_TEST "OHOH\"OLA\"LA\"BLA\"DI\""
+t 	ANY_MORE "国民生活センターの発表によ"
+ # another comment 
+ asasas  
+ 
+ sdsadsdaasd 12 
+m IDD_CONTROL -12 +4a5
+	r IDD_CONTROL2 +5 +10  
+t IDD_MORE_BLURB "Yoda dadada daaddadada"  	 
+	"THIS IS PART OF NEXT LINE"
+	 " could I have "    
+ " ANY MORE LINESUS???" 
+	# Test comment
+# end
+f "MS Dialog" 23
+ 
