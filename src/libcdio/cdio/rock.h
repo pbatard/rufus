@@ -361,7 +361,7 @@ int get_rock_ridge_filename(iso9660_dir_t * de, /*out*/ char * retname,
 */
 const char *iso9660_get_rock_attr_str(posix_mode_t st_mode);
 
-/** These variables are not used, but are defined to facilatate debugging
+/** These variables are not used, but are defined to facilitate debugging
     by letting us use enumerations values (which also correspond to 
     \#define's inside a debugged program.
  */

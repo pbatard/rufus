@@ -200,7 +200,7 @@ struct vol_struct_desc_s
 
 /** Standard Identifier (ECMA 167r3 2/9.1.2) */
 
-/* The below const definitions are to faciltate debugging of the
+/* The below const definitions are to facilitate debugging of the
    values #define'd below. */
 extern const char VSD_STD_ID_BEA01[sizeof("BEA01")-1];
 extern const char VSD_STD_ID_BOOT2[sizeof("BOOT2")-1];
