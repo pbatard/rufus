@@ -393,7 +393,7 @@ typedef struct iso9660_pvd_s  iso9660_pvd_t;
 /*! 
   \brief ISO-9660 Supplementary Volume Descriptor. 
 
-  This is used for Joliet Extentions and is almost the same as the
+  This is used for Joliet Extensions and is almost the same as the
   the primary descriptor but two unused fields, "unused1" and "unused3
   become "flags and "escape_sequences" respectively.
 */
