@@ -256,7 +256,7 @@ extern "C" {
     int (*get_track_channels) ( const void *p_env, track_t i_track );
   
     /*! Return 0 if track is copy protected, 1 if not, or -1 for error
-      or -2 if not implimented (yet). Is this meaningful if not an
+      or -2 if not implemented (yet). Is this meaningful if not an
       audio track?
     */
     track_flag_t (*get_track_copy_permit) ( void *p_env, track_t i_track );
@@ -311,7 +311,7 @@ extern "C" {
     bool (*get_track_msf) ( void *p_env, track_t i_track, msf_t *p_msf );
     
     /*! Return 1 if track has pre-emphasis, 0 if not, or -1 for error
-      or -2 if not implimented (yet). Is this meaningful if not an
+      or -2 if not implemented (yet). Is this meaningful if not an
       audio track?
     */
     track_flag_t (*get_track_preemphasis) 
