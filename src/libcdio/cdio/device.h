@@ -477,7 +477,7 @@ LIBCDIO_DEPRECATED(static const driver_id_t CDIO_MAX_DEVICE_DRIVER, "please use 
   void cdio_destroy (CdIo_t *p_cdio);
 
   /**
-    Get a string decribing driver_id. 
+    Get a string describing driver_id. 
 
     @param driver_id the driver you want the description for
     @return a string of driver description
