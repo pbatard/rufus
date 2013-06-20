@@ -121,7 +121,7 @@ extern enum iso_vd_enum_s {
   ISO_VD_BOOT_RECORD   =  0,  /**< CD is bootable */
   ISO_VD_PRIMARY       =  1,  /**< Is in any ISO-9660 */
   ISO_VD_SUPPLEMENTARY =  2,  /**< Used by Joliet, for example */
-  ISO_VD_PARITION      =  3,  /**< Indicates a partition of a CD */
+  ISO_VD_PARTITION      =  3,  /**< Indicates a partition of a CD */
   ISO_VD_END           = 255
 } iso_vd_enums;
 
