@@ -387,7 +387,7 @@ static BOOL FormatFAT32(DWORD DriveIndex)
 	if (IS_ERROR(FormatStatus)) goto out;
 	if (!DeviceIoControl (hLogicalVolume, IOCTL_DISK_GET_PARTITION_INFO, NULL, 0, &piDrive,
 		sizeof(piDrive), &cbRet, NULL)) {
-		die("Failed to get parition info\n", ERROR_NOT_SUPPORTED);
+		die("Failed to get partition info\n", ERROR_NOT_SUPPORTED);
 	}
 
 	BytesPerSect = dgDrive.BytesPerSector;
