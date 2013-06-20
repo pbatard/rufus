@@ -639,7 +639,7 @@ static const char* get_kb(void)
 		case 0x00000440: // Kyrgyz Cyrillic
 			return "ky";
 		case 0x00000043:
-		case 0x00000843: // Uzbek Crillic
+		case 0x00000843: // Uzbek Cyrillic
 			return "uz";
 		case 0x00000042:
 		case 0x00000442: // Turkmen
