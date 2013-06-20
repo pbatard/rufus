@@ -1104,7 +1104,7 @@ static BOOL RemountVolume(char drive_letter)
 				uprintf("Successfully remounted %s on %s\n", &drive_guid[4], drive_name);
 			} else {
 				uprintf("Failed to remount %s on %s\n", &drive_guid[4], drive_name);
-				// This will leave the drive unaccessible and must be flagged as an error
+				// This will leave the drive inaccessible and must be flagged as an error
 				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_REMOUNT_VOLUME);
 				return FALSE;
 			}
