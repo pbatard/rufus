@@ -852,7 +852,7 @@ LIBCDIO_DEPRECATED(static const driver_id_t CDIO_MAX_DEVICE_DRIVER, "please use 
      Set up CD-ROM for reading using the Microsoft Windows driver. The
      device_name is the some sort of device name.
 
-     NULL is returned on error or there is no Microsof Windows driver.
+     NULL is returned on error or there is no Microsoft Windows driver.
    */
   CdIo_t * cdio_open_am_win32 (const char *psz_source,
                                const char *psz_access_mode);
