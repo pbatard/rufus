@@ -534,7 +534,7 @@ static BOOL FormatFAT32(DWORD DriveIndex)
 
 	// Fix up the FSInfo sector
 	pFAT32FsInfo->dFree_Count = (UserAreaSize/SectorsPerCluster) - 1;
-	pFAT32FsInfo->dNxt_Free = 3; // clusters 0-1 resered, we used cluster 2 for the root dir
+	pFAT32FsInfo->dNxt_Free = 3; // clusters 0-1 reserved, we used cluster 2 for the root dir
 
 	uprintf("%d Free Clusters\n", pFAT32FsInfo->dFree_Count);
 	// Work out the Cluster count
