@@ -525,7 +525,7 @@ static BOOL FormatFAT32(DWORD DriveIndex)
 		die("This drive is too big for large FAT32 format\n", APPERR(ERROR_INVALID_VOLUME_SIZE));
 	}
 
-	// Now we're commited - print some info first
+	// Now we're committed - print some info first
 	uprintf("Size : %s %u sectors\n", SizeToHumanReadable(piDrive.PartitionLength), TotalSectors);
 	uprintf("Cluster size %d bytes, %d Bytes Per Sector\n", SectorsPerCluster*BytesPerSect, BytesPerSect);
 	uprintf("Volume ID is %x:%x\n", VolumeId>>16, VolumeId&0xffff);
