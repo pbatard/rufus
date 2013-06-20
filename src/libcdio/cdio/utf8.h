@@ -26,7 +26,7 @@
 /** \brief Opaque characterset converter
  */
 
-typedef struct cdio_charset_coverter_s cdio_charset_coverter_t;
+typedef struct cdio_charset_converter_s cdio_charset_converter_t;
 
 /** \brief Create a charset converter
  *  \param src_charset Source charset
@@ -34,7 +34,7 @@ typedef struct cdio_charset_coverter_s cdio_charset_coverter_t;
  *  \returns A newly allocated charset converter
  */
 
-cdio_charset_coverter_t *
+cdio_charset_converter_t *
 cdio_charset_converter_create(const char * src_charset,
                               const char * dst_charset);
 
@@ -42,7 +42,7 @@ cdio_charset_converter_create(const char * src_charset,
  *  \param cnv A characterset converter
  */
 
-void cdio_charset_converter_destroy(cdio_charset_coverter_t*cnv);
+void cdio_charset_converter_destroy(cdio_charset_converter_t*cnv);
 
 /** \brief Convert a string from one character set to another
  *  \param cnv A charset converter
@@ -50,13 +50,13 @@ void cdio_charset_converter_destroy(cdio_charset_coverter_t*cnv);
  *  \param src_len Length of source string
  *  \param dst Returns destination string
  *  \param dst_len If non NULL, returns the length of the destination string
- *  \returns true if conversion was sucessful, false else.
+ *  \returns true if conversion was successful, false else.
  *
  *  The destination string must be freed by the caller with free().
  *  If you pass -1 for src_len, strlen() will be used.
  */
 
-bool cdio_charset_convert(cdio_charset_coverter_t*cnv,
+bool cdio_charset_convert(cdio_charset_converter_t*cnv,
                           char * src, int src_len,
                           char ** dst, int * dst_len);
 
@@ -65,7 +65,7 @@ bool cdio_charset_convert(cdio_charset_coverter_t*cnv,
  *  \param dst Returns destination string
  *  \param dst_len If non NULL, returns the length of the destination string
  *  \param dst_charset The characterset to convert to
- *  \returns true if conversion was sucessful, false else.
+ *  \returns true if conversion was successful, false else.
  *
  *  This is a convenience function, which creates a charset converter,
  *  converts one string and destroys the charset converter.
@@ -80,7 +80,7 @@ bool cdio_charset_from_utf8(cdio_utf8_t * src, char ** dst,
  *  \param src_len Length of the source string
  *  \param dst Returns destination string (0 terminated)
  *  \param src_charset The characterset to convert from
- *  \returns true if conversion was sucessful, false else.
+ *  \returns true if conversion was successful, false else.
  *
  *  This is a convenience function, which creates a charset converter,
  *  converts one string and destroys the charset converter. If you pass -1
@@ -94,7 +94,7 @@ bool cdio_charset_to_utf8(const char *src, size_t src_len, cdio_utf8_t **dst,
 #ifdef _WIN32
 /** \brief Convert an UTF8 string to UTF-16 (allocate returned string)
  *  \param str Source string
- *  \returns NULL if the conversion was unsuccesful. Caller must free the
+ *  \returns NULL if the conversion was unsuccessful. Caller must free the
  *  returned string.
  *  This is a convenience function available on Windows platforms only.
  */

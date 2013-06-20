@@ -14,7 +14,7 @@
 /*
  * setadv.c
  *
- * (Over)write a data item in the auxilliary data vector.  To
+ * (Over)write a data item in the auxiliary data vector.  To
  * delete an item, set its length to zero.
  *
  * Return 0 on success, -1 on error, and set errno.

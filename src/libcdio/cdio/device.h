@@ -208,7 +208,7 @@ LIBCDIO_DEPRECATED(static const driver_id_t CDIO_MAX_DEVICE_DRIVER, "please use 
   /**
       The following are status codes for completion of a given cdio
       operation. By design 0 is successful completion and -1 is error
-      completion. This is compatable with ioctl so those routines that
+      completion. This is compatible with ioctl so those routines that
       call ioctl can just pass the value the get back (cast as this
       enum). Also, by using negative numbers for errors, the
       enumeration values below can be used in places where a positive
@@ -267,7 +267,7 @@ LIBCDIO_DEPRECATED(static const driver_id_t CDIO_MAX_DEVICE_DRIVER, "please use 
     Eject media in CD drive if there is a routine to do so. 
 
     @param p_cdio the CD object to be acted upon.
-    If the CD is ejected *p_cdio is free'd and p_cdio set to NULL.
+    If the CD is ejected *p_cdio is freed and p_cdio set to NULL.
   */
   driver_return_code_t cdio_eject_media (CdIo_t **p_cdio);
 
@@ -330,7 +330,7 @@ LIBCDIO_DEPRECATED(static const driver_id_t CDIO_MAX_DEVICE_DRIVER, "please use 
 
   /**
      Get an array of device names in search_devices that have at least
-     the capabilities listed by the capabities parameter.  If
+     the capabilities listed by the capabilities parameter.  If
      search_devices is NULL, then we'll search all possible CD drives.
 
      Capabilities have two parts to them, a "filesystem" part and an
@@ -347,7 +347,7 @@ LIBCDIO_DEPRECATED(static const driver_id_t CDIO_MAX_DEVICE_DRIVER, "please use 
      
      If "b_any" is set false then every capability listed in the
      analysis portion of capabilities (i.e. not the basic filesystem)
-     must be satisified. If no analysis capabilities are specified,
+     must be satisfied. If no analysis capabilities are specified,
      that's a match.
 
      If "b_any" is set true, then if any of the analysis capabilities
@@ -477,7 +477,7 @@ LIBCDIO_DEPRECATED(static const driver_id_t CDIO_MAX_DEVICE_DRIVER, "please use 
   void cdio_destroy (CdIo_t *p_cdio);
 
   /**
-    Get a string decribing driver_id. 
+    Get a string describing driver_id. 
 
     @param driver_id the driver you want the description for
     @return a string of driver description
@@ -852,7 +852,7 @@ LIBCDIO_DEPRECATED(static const driver_id_t CDIO_MAX_DEVICE_DRIVER, "please use 
      Set up CD-ROM for reading using the Microsoft Windows driver. The
      device_name is the some sort of device name.
 
-     NULL is returned on error or there is no Microsof Windows driver.
+     NULL is returned on error or there is no Microsoft Windows driver.
    */
   CdIo_t * cdio_open_am_win32 (const char *psz_source,
                                const char *psz_access_mode);
@@ -1016,11 +1016,11 @@ Return a list of all of the CD-ROM devices that the OS/2 driver
                                         int i_drive_speed );
 
   /**
-     Get the value associatied with key. 
+     Get the value associated with key. 
      
      @param p_cdio the CD object queried
      @param key the key to retrieve
-     @return the value associatd with "key" or NULL if p_cdio is NULL
+     @return the value associated with "key" or NULL if p_cdio is NULL
      or "key" does not exist.
   */
   const char * cdio_get_arg (const CdIo_t *p_cdio,  const char key[]);
@@ -1030,7 +1030,7 @@ Return a list of all of the CD-ROM devices that the OS/2 driver
      
      @param p_cdio the CD object to set
      @param key the key to set
-     @param value the value to assocaiate with key
+     @param value the value to associate with key
   */
   driver_return_code_t cdio_set_arg (CdIo_t *p_cdio, const char key[], 
                                      const char value[]);

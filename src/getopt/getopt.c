@@ -668,7 +668,7 @@ _getopt_internal (argc, argv, optstring, longopts, longind, long_only)
 	      }
 	    else if (pfound == NULL)
 	      {
-		/* First nonexact match found.  */
+		/* First inexact match found.  */
 		pfound = p;
 		indfound = option_index;
 	      }
@@ -676,7 +676,7 @@ _getopt_internal (argc, argv, optstring, longopts, longind, long_only)
 		     || pfound->has_arg != p->has_arg
 		     || pfound->flag != p->flag
 		     || pfound->val != p->val)
-	      /* Second or later nonexact match found.  */
+	      /* Second or later inexact match found.  */
 	      ambig = 1;
 	  }
 
@@ -859,12 +859,12 @@ _getopt_internal (argc, argv, optstring, longopts, longind, long_only)
 		}
 	      else if (pfound == NULL)
 		{
-		  /* First nonexact match found.  */
+		  /* First inexact match found.  */
 		  pfound = p;
 		  indfound = option_index;
 		}
 	      else
-		/* Second or later nonexact match found.  */
+		/* Second or later inexact match found.  */
 		ambig = 1;
 	    }
 	if (ambig && !exact)

@@ -90,7 +90,7 @@ static wchar_t* get_token_data_line(const wchar_t* wtoken, wchar_t* wline)
 	return (wline[r] == 0)?NULL:&wline[r];
 }
 
-// Parse a file (ANSI or UTF-8 or UTF-16) and return the data for the first occurence of 'token'
+// Parse a file (ANSI or UTF-8 or UTF-16) and return the data for the first occurrence of 'token'
 // The returned string is UTF-8 and MUST be freed by the caller
 char* get_token_data_file(const char* token, const char* filename)
 {
@@ -135,7 +135,7 @@ out:
 	return ret;
 }
 
-// Parse a buffer (ANSI or UTF-8) and return the data for the 'n'th occurence of 'token'
+// Parse a buffer (ANSI or UTF-8) and return the data for the 'n'th occurrence of 'token'
 // The returned string is UTF-8 and MUST be freed by the caller
 char* get_token_data_buffer(const char* token, unsigned int n, const char* buffer, size_t buffer_size)
 {
@@ -345,7 +345,7 @@ out:
 	if (fd_in != NULL) fclose(fd_in);
 	if (fd_out != NULL) fclose(fd_out);
 
-	// If an insertion occured, delete existing file and use the new one
+	// If an insertion occurred, delete existing file and use the new one
 	if (ret != NULL) {
 		// We're in Windows text mode => Remove CRs if requested
 		fd_in = _wfopen(wtmpname, L"rb");
@@ -375,10 +375,10 @@ out:
 	return ret;
 }
 
-// Search for a specific 'src' substring data for all occurences of 'token', and replace
+// Search for a specific 'src' substring data for all occurrences of 'token', and replace
 // it with 'rep'. File can be ANSI or UNICODE and is overwritten. Parameters are UTF-8.
 // The parsed line is of the form: [ ]token[ ]data
-// Returns a pointer to rep if replacement occured, NULL otherwise
+// Returns a pointer to rep if replacement occurred, NULL otherwise
 char* replace_in_token_data(const char* filename, const char* token, const char* src, const char* rep, BOOL dos2unix)
 {
 	const wchar_t* outmode[] = { L"w", L"w, ccs=UTF-8", L"w, ccs=UTF-16LE" };
@@ -491,7 +491,7 @@ out:
 	if (fd_in != NULL) fclose(fd_in);
 	if (fd_out != NULL) fclose(fd_out);
 
-	// If a replacement occured, delete existing file and use the new one
+	// If a replacement occurred, delete existing file and use the new one
 	if (ret != NULL) {
 		// We're in Windows text mode => Remove CRs if requested
 		fd_in = _wfopen(wtmpname, L"rb");

@@ -145,7 +145,7 @@ const char *
 iso9660_get_xa_attr_str (uint16_t xa_attr);
   
 /*! 
-  Allocates and initalizes a new iso9600_xa_t variable and returns
+  Allocates and initializes a new iso9600_xa_t variable and returns
   it. The caller should free the returned result.
 
   @see iso9660_xa

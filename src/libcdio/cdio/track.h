@@ -83,7 +83,7 @@ extern "C" {
 #define CDIO_CD_MIN_TRACK_NO  1 /**< Smallest CD track number */
 
   /*! track modes (Table 350)
-    reference: MMC-3 draft revsion - 10g
+    reference: MMC-3 draft revision - 10g
   */
   typedef enum {
     AUDIO,                      /**< 2352 byte block length */

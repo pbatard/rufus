@@ -92,7 +92,7 @@ extern "C" {
     Advances p_udf_direct to the the next directory entry in the
     pointed to by p_udf_dir. It also returns this as the value.  NULL
     is returned on reaching the end-of-file or if an error. Also
-    p_udf_dirent is free'd. If the end of is not reached the caller
+    p_udf_dirent is freed. If the end of is not reached the caller
     must call udf_dirent_free() with p_udf_dirent when done with it to 
     release resources.
   */

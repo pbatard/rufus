@@ -32,7 +32,7 @@
 CdioDataSource_t * cdio_stdio_new(const char psz_path[]);
 
 /*!
-  Deallocate resources assocaited with obj. After this obj is unusable.
+  Deallocate resources associated with obj. After this obj is unusable.
 */
 void cdio_stdio_destroy(CdioDataSource_t *p_obj);
 

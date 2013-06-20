@@ -1513,7 +1513,7 @@ iso9660_ifs_find_lsn_with_path(iso9660_t *p_iso, lsn_t i_lsn,
 }
 
 /*!
-  Return true if ISO 9660 image has extended attrributes (XA).
+  Return true if ISO 9660 image has extended attributes (XA).
 */
 bool 
 iso9660_ifs_is_xa (const iso9660_t * p_iso) 

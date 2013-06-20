@@ -81,7 +81,7 @@ setst (mode_t bits, char *chars)
    'l' for symbolic links
    's' for sockets
    'p' for fifos
-   'C' for contigous data files
+   'C' for contiguous data files
    '-' for regular files
    '?' for any other file type.  */
 

@@ -243,7 +243,7 @@ static void ToValidLabel(WCHAR* name, BOOL bFAT)
 			if (name[i] == '_') j++;
 		if (i<2*j) {
 			// If the final label is mostly underscore, use the proposed label
-			uprintf("FAT label is mostly undercores. Using '%s' label instead.\n", SelectedDrive.proposed_label);
+			uprintf("FAT label is mostly underscores. Using '%s' label instead.\n", SelectedDrive.proposed_label);
 			for(i=0; SelectedDrive.proposed_label[i]!=0; i++)
 				name[i] = SelectedDrive.proposed_label[i];
 			name[i] = 0;
@@ -265,7 +265,7 @@ static void ToValidLabel(WCHAR* name, BOOL bFAT)
  * 
  * Low order word is calculated:               Volume Serial Number is:
  * Month & Day         12/26   0c1ah
- * Sec & Hundrenths    41:94   295eh               3578:1d02
+ * Sec & Hundredths    41:94   295eh               3578:1d02
  * -----
  * 3578h
  * 
@@ -387,7 +387,7 @@ static BOOL FormatFAT32(DWORD DriveIndex)
 	if (IS_ERROR(FormatStatus)) goto out;
 	if (!DeviceIoControl (hLogicalVolume, IOCTL_DISK_GET_PARTITION_INFO, NULL, 0, &piDrive,
 		sizeof(piDrive), &cbRet, NULL)) {
-		die("Failed to get parition info\n", ERROR_NOT_SUPPORTED);
+		die("Failed to get partition info\n", ERROR_NOT_SUPPORTED);
 	}
 
 	BytesPerSect = dgDrive.BytesPerSector;
@@ -493,7 +493,7 @@ static BOOL FormatFAT32(DWORD DriveIndex)
 	// Sector 6 Backup boot sector
 	// Sector 7 Backup FSInfo sector
 	// Sector 8 Backup 'more boot code'
-	// zero'd sectors upto ReservedSectCount
+	// zeroed sectors upto ReservedSectCount
 	// FAT1  ReservedSectCount to ReservedSectCount + FatSize
 	// ...
 	// FATn  ReservedSectCount to ReservedSectCount + FatSize
@@ -525,7 +525,7 @@ static BOOL FormatFAT32(DWORD DriveIndex)
 		die("This drive is too big for large FAT32 format\n", APPERR(ERROR_INVALID_VOLUME_SIZE));
 	}
 
-	// Now we're commited - print some info first
+	// Now we're committed - print some info first
 	uprintf("Size : %s %u sectors\n", SizeToHumanReadable(piDrive.PartitionLength), TotalSectors);
 	uprintf("Cluster size %d bytes, %d Bytes Per Sector\n", SectorsPerCluster*BytesPerSect, BytesPerSect);
 	uprintf("Volume ID is %x:%x\n", VolumeId>>16, VolumeId&0xffff);
@@ -534,7 +534,7 @@ static BOOL FormatFAT32(DWORD DriveIndex)
 
 	// Fix up the FSInfo sector
 	pFAT32FsInfo->dFree_Count = (UserAreaSize/SectorsPerCluster) - 1;
-	pFAT32FsInfo->dNxt_Free = 3; // clusters 0-1 resered, we used cluster 2 for the root dir
+	pFAT32FsInfo->dNxt_Free = 3; // clusters 0-1 reserved, we used cluster 2 for the root dir
 
 	uprintf("%d Free Clusters\n", pFAT32FsInfo->dFree_Count);
 	// Work out the Cluster count
@@ -560,7 +560,7 @@ static BOOL FormatFAT32(DWORD DriveIndex)
 		}
 	}
 
-	uprintf ("Initialising reserved sectors and FATs...\n");
+	uprintf ("Initializing reserved sectors and FATs...\n");
 	// Now we should write the boot sector and fsinfo twice, once at 0 and once at the backup boot sect position
 	for (i=0; i<2; i++) {
 		int SectorStart = (i==0) ? 0 : BackupBootSect;
@@ -994,7 +994,7 @@ static BOOL SetupWinPE(char drive_letter)
 			uprintf("Failed to add SetupSourceDevice in %s\n", dst);
 			goto out;
 		}
-		uprintf("Succesfully added '%s' to %s\n", setupsrcdev, dst);
+		uprintf("Successfully added '%s' to %s\n", setupsrcdev, dst);
 	}
 
 	safe_sprintf(src, sizeof(src), "%c:\\%s\\setupldr.bin", drive_letter,  basedir[index]);
@@ -1104,7 +1104,7 @@ static BOOL RemountVolume(char drive_letter)
 				uprintf("Successfully remounted %s on %s\n", &drive_guid[4], drive_name);
 			} else {
 				uprintf("Failed to remount %s on %s\n", &drive_guid[4], drive_name);
-				// This will leave the drive unaccessible and must be flagged as an error
+				// This will leave the drive inaccessible and must be flagged as an error
 				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_REMOUNT_VOLUME);
 				return FALSE;
 			}

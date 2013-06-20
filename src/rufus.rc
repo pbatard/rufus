@@ -63,7 +63,7 @@ BEGIN
     COMBOBOX        IDC_DISK_ID,119,246,73,30,CBS_DROPDOWNLIST | NOT WS_VISIBLE | WS_VSCROLL | WS_TABSTOP
     CONTROL         "Add fixes for old BIOSes (extra partition, align, etc.)",IDC_EXTRA_PARTITION,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,235,184,10
-    CONTROL         "List fixed (non-flash) or unpartitionned USB disks",IDC_ENABLE_FIXED_DISKS,
+    CONTROL         "List fixed (non-flash) or unpartitioned USB disks",IDC_ENABLE_FIXED_DISKS,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,222,185,10
     PUSHBUTTON      "Log",IDC_LOG,62,291,18,14
 END

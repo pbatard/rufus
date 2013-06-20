@@ -27,7 +27,7 @@
  * filesystem library; applications include this.
  *
  * See also the ISO-9660 specification. The freely available European
- * equivalant standard is called ECMA-119.
+ * equivalent standard is called ECMA-119.
 */
 
 
@@ -78,7 +78,7 @@ typedef char     dchar_t;  /*! See section 7.4.1 */
     program; things are done this way so that in a debugger one can to
     refer to the enumeration value names such as in a debugger
     expression and get something. With the more common a \#define
-    mechanism, the name/value assocation is lost at run time.
+    mechanism, the name/value association is lost at run time.
   */
 extern enum iso_enum1_s {
   ISO_PVD_SECTOR      =   16, /**< Sector of Primary Volume Descriptor. */
@@ -121,7 +121,7 @@ extern enum iso_vd_enum_s {
   ISO_VD_BOOT_RECORD   =  0,  /**< CD is bootable */
   ISO_VD_PRIMARY       =  1,  /**< Is in any ISO-9660 */
   ISO_VD_SUPPLEMENTARY =  2,  /**< Used by Joliet, for example */
-  ISO_VD_PARITION      =  3,  /**< Indicates a partition of a CD */
+  ISO_VD_PARTITION      =  3,  /**< Indicates a partition of a CD */
   ISO_VD_END           = 255
 } iso_vd_enums;
 
@@ -393,7 +393,7 @@ typedef struct iso9660_pvd_s  iso9660_pvd_t;
 /*! 
   \brief ISO-9660 Supplementary Volume Descriptor. 
 
-  This is used for Joliet Extentions and is almost the same as the
+  This is used for Joliet Extensions and is almost the same as the
   the primary descriptor but two unused fields, "unused1" and "unused3
   become "flags and "escape_sequences" respectively.
 */
@@ -437,7 +437,7 @@ struct iso9660_svd_s {
   achar_t          publisher_id[ISO_MAX_PUBLISHER_ID]; /**< 
                                                           Publisher of volume.
                                                           If the first char-
-                                                          aracter is '_' 0x5F,
+                                                          character is '_' 0x5F,
                                                           the remaining bytes
                                                           specify a file 
                                                           containing the user.
@@ -810,7 +810,7 @@ typedef struct _iso9660_s iso9660_t;
   
   /*!  
     Take psz_path and a version number and turn that into a ISO-9660
-    pathname.  (That's just the pathname followd by ";" and the version
+    pathname.  (That's just the pathname followed by ";" and the version
     number. For example, mydir/file.ext -> MYDIR/FILE.EXT;1 for version
     1. The resulting ISO-9660 pathname is returned.
   */
@@ -1115,7 +1115,7 @@ lsn_t iso9660_get_dir_extent(const iso9660_dir_t *p_idr);
   void iso9660_set_evd (void *pd);
 
   /*!
-    Return true if ISO 9660 image has extended attrributes (XA).
+    Return true if ISO 9660 image has extended attributes (XA).
   */
   bool iso9660_ifs_is_xa (const iso9660_t * p_iso);
 

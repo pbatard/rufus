@@ -132,7 +132,7 @@ typedef struct iso_rock_px_s {
 /*! POSIX device number, PN. A PN is mandatory if the file type
   recorded in the "PX" File Mode field for a Directory Record
   indicates a character or block device (ISO_ROCK_ISCHR |
-  ISO_ROCK_ISBLK).  This entry is ignored for other (non-Direcotry)
+  ISO_ROCK_ISBLK).  This entry is ignored for other (non-Directory)
   file types. No more than one "PN" is recorded in the System Use Area
   of a Directory Record.
 
@@ -223,7 +223,7 @@ typedef enum {
 /*! Time stamp(s) for a file. See Rock Ridge Section 4.1.6 */
 typedef struct iso_rock_tf_s {
   uint8_t flags; /**< See ISO_ROCK_TF_* bits above. */
-  uint8_t time_bytes[EMPTY_ARRAY_SIZE]; /**< A homogenious array of
+  uint8_t time_bytes[EMPTY_ARRAY_SIZE]; /**< A homogeneous array of
                                            iso9660_ltime_t or
                                            iso9660_dtime_t entries
                                            depending on flags &
@@ -269,7 +269,7 @@ typedef struct iso_extension_record_s {
 
 typedef struct iso_rock_time_s {
   bool          b_used;     /**< If true, field has been set and  is valid. 
-                               Otherwise remaning fields are meaningless. */
+                               Otherwise remaining fields are meaningless. */
   bool          b_longdate;  /**< If true date format is a iso9660_ltime_t. 
                                Otherwise date is iso9660_dtime_t */
   union 
@@ -361,7 +361,7 @@ int get_rock_ridge_filename(iso9660_dir_t * de, /*out*/ char * retname,
 */
 const char *iso9660_get_rock_attr_str(posix_mode_t st_mode);
 
-/** These variables are not used, but are defined to facilatate debugging
+/** These variables are not used, but are defined to facilitate debugging
     by letting us use enumerations values (which also correspond to 
     \#define's inside a debugged program.
  */
