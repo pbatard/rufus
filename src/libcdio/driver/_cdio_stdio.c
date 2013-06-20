@@ -233,7 +233,7 @@ _stdio_read(void *user_data, void *buf, size_t count)
 }
 
 /*!
-  Deallocate resources assocaited with obj. After this obj is unusable.
+  Deallocate resources associated with obj. After this obj is unusable.
 */
 void
 cdio_stdio_destroy(CdioDataSource_t *p_obj)

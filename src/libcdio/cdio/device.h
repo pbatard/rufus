@@ -1016,11 +1016,11 @@ Return a list of all of the CD-ROM devices that the OS/2 driver
                                         int i_drive_speed );
 
   /**
-     Get the value associatied with key. 
+     Get the value associated with key. 
      
      @param p_cdio the CD object queried
      @param key the key to retrieve
-     @return the value associatd with "key" or NULL if p_cdio is NULL
+     @return the value associated with "key" or NULL if p_cdio is NULL
      or "key" does not exist.
   */
   const char * cdio_get_arg (const CdIo_t *p_cdio,  const char key[]);
@@ -1030,7 +1030,7 @@ Return a list of all of the CD-ROM devices that the OS/2 driver
      
      @param p_cdio the CD object to set
      @param key the key to set
-     @param value the value to assocaiate with key
+     @param value the value to associate with key
   */
   driver_return_code_t cdio_set_arg (CdIo_t *p_cdio, const char key[], 
                                      const char value[]);

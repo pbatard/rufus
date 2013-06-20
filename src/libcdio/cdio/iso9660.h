@@ -78,7 +78,7 @@ typedef char     dchar_t;  /*! See section 7.4.1 */
     program; things are done this way so that in a debugger one can to
     refer to the enumeration value names such as in a debugger
     expression and get something. With the more common a \#define
-    mechanism, the name/value assocation is lost at run time.
+    mechanism, the name/value association is lost at run time.
   */
 extern enum iso_enum1_s {
   ISO_PVD_SECTOR      =   16, /**< Sector of Primary Volume Descriptor. */
