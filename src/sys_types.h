@@ -94,7 +94,7 @@ SysType msdos_systypes[] = {
 	{ 0x88, N_("Linux Plaintext") },
 	{ 0x8e, N_("Linux LVM") },
 	{ 0x93, N_("Amoeba") },
-	/*This guys created a seperate partition for badblocks?! */
+	/*This guys created a separate partition for badblocks?! */
 	{ 0x94, N_("Amoeba BBT") },
 	{ 0x9f, N_("BSD/OS") },
 	{ 0xa0, N_("Thinkpad Hibernation") },
