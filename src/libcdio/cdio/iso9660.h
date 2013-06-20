@@ -1115,7 +1115,7 @@ lsn_t iso9660_get_dir_extent(const iso9660_dir_t *p_idr);
   void iso9660_set_evd (void *pd);
 
   /*!
-    Return true if ISO 9660 image has extended attrributes (XA).
+    Return true if ISO 9660 image has extended attributes (XA).
   */
   bool iso9660_ifs_is_xa (const iso9660_t * p_iso);
 
