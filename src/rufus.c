@@ -207,7 +207,7 @@ static BOOL DefineClusterSizes(void)
 	}
 
 	// FAT 32
-	// > 32GB FAT32 is not supported by MS and FormatEx but is achieved using fat32fomat
+	// > 32GB FAT32 is not supported by MS and FormatEx but is achieved using fat32format
 	// See: http://www.ridgecrop.demon.co.uk/index.htm?fat32format.htm
 	// < 32 MB FAT32 is not allowed by FormatEx, so we don't bother
 
