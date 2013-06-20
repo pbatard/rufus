@@ -493,7 +493,7 @@ static BOOL FormatFAT32(DWORD DriveIndex)
 	// Sector 6 Backup boot sector
 	// Sector 7 Backup FSInfo sector
 	// Sector 8 Backup 'more boot code'
-	// zero'd sectors upto ReservedSectCount
+	// zeroed sectors upto ReservedSectCount
 	// FAT1  ReservedSectCount to ReservedSectCount + FatSize
 	// ...
 	// FATn  ReservedSectCount to ReservedSectCount + FatSize
