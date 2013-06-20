@@ -132,7 +132,7 @@ typedef struct iso_rock_px_s {
 /*! POSIX device number, PN. A PN is mandatory if the file type
   recorded in the "PX" File Mode field for a Directory Record
   indicates a character or block device (ISO_ROCK_ISCHR |
-  ISO_ROCK_ISBLK).  This entry is ignored for other (non-Direcotry)
+  ISO_ROCK_ISBLK).  This entry is ignored for other (non-Directory)
   file types. No more than one "PN" is recorded in the System Use Area
   of a Directory Record.
 
