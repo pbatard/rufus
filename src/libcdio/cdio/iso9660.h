@@ -437,7 +437,7 @@ struct iso9660_svd_s {
   achar_t          publisher_id[ISO_MAX_PUBLISHER_ID]; /**< 
                                                           Publisher of volume.
                                                           If the first char-
-                                                          aracter is '_' 0x5F,
+                                                          character is '_' 0x5F,
                                                           the remaining bytes
                                                           specify a file 
                                                           containing the user.
