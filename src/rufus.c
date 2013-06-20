@@ -130,7 +130,7 @@ static int64_t last_iso_blocking_status;
 /*
  * The following is used to allocate slots within the progress bar
  * 0 means unused (no operation or no progress allocated to it)
- * +n means allocate exactly n bars (n percents of the progress bar)
+ * +n means allocate exactly n bars (n percent of the progress bar)
  * -n means allocate a weighted slot of n from all remaining
  *    bars. Eg if 80 slots remain and the sum of all negative entries
  *    is 10, -4 will allocate 4/10*80 = 32 bars (32%) for OP progress
