@@ -134,7 +134,7 @@ check_timeout:
 	cmpb ds:counter_timeout, 0x00
 	jnz  wait_for_keyboard
 
-boot_fixed_disk:		# Timeout occured => boot second bootable disk (non USB)
+boot_fixed_disk:		# Timeout occurred => boot second bootable disk (non USB)
 	call restore_rtc_vect	# Remove our RTC override
 	movb ds:partition_table, 0x81	# target we want to swap with 0x80
 	push 0x0080

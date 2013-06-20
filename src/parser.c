@@ -345,7 +345,7 @@ out:
 	if (fd_in != NULL) fclose(fd_in);
 	if (fd_out != NULL) fclose(fd_out);
 
-	// If an insertion occured, delete existing file and use the new one
+	// If an insertion occurred, delete existing file and use the new one
 	if (ret != NULL) {
 		// We're in Windows text mode => Remove CRs if requested
 		fd_in = _wfopen(wtmpname, L"rb");
@@ -378,7 +378,7 @@ out:
 // Search for a specific 'src' substring data for all occurences of 'token', and replace
 // it with 'rep'. File can be ANSI or UNICODE and is overwritten. Parameters are UTF-8.
 // The parsed line is of the form: [ ]token[ ]data
-// Returns a pointer to rep if replacement occured, NULL otherwise
+// Returns a pointer to rep if replacement occurred, NULL otherwise
 char* replace_in_token_data(const char* filename, const char* token, const char* src, const char* rep, BOOL dos2unix)
 {
 	const wchar_t* outmode[] = { L"w", L"w, ccs=UTF-8", L"w, ccs=UTF-16LE" };
@@ -491,7 +491,7 @@ out:
 	if (fd_in != NULL) fclose(fd_in);
 	if (fd_out != NULL) fclose(fd_out);
 
-	// If a replacement occured, delete existing file and use the new one
+	// If a replacement occurred, delete existing file and use the new one
 	if (ret != NULL) {
 		// We're in Windows text mode => Remove CRs if requested
 		fd_in = _wfopen(wtmpname, L"rb");
