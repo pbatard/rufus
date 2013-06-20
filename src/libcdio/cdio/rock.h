@@ -269,7 +269,7 @@ typedef struct iso_extension_record_s {
 
 typedef struct iso_rock_time_s {
   bool          b_used;     /**< If true, field has been set and  is valid. 
-                               Otherwise remaning fields are meaningless. */
+                               Otherwise remaining fields are meaningless. */
   bool          b_longdate;  /**< If true date format is a iso9660_ltime_t. 
                                Otherwise date is iso9660_dtime_t */
   union 
