@@ -984,7 +984,7 @@ BOOL CALLBACK ISOProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 		UpdateWindow(hDlg);
 		return TRUE;
 	case UM_ISO_EXIT:
-		// Just hide and recentrer the dialog
+		// Just hide and recenter the dialog
 		ShowWindow(hDlg, SW_HIDE);
 		iso_op_in_progress = FALSE;
 		return TRUE;
