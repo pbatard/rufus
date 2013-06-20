@@ -1804,7 +1804,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		uprintf("\r\n");
 		GetUSBDevices(DeviceNum);
 		if (!IS_ERROR(FormatStatus)) {
-			// This is the only way to achieve instantenous progress transition to 100%
+			// This is the only way to achieve instantaneous progress transition to 100%
 			SendMessage(hProgress, PBM_SETRANGE, 0, ((MAX_PROGRESS+1)<<16) & 0xFFFF0000);
 			SendMessage(hProgress, PBM_SETPOS, (MAX_PROGRESS+1), 0);
 			SendMessage(hProgress, PBM_SETRANGE, 0, (MAX_PROGRESS<<16) & 0xFFFF0000);
