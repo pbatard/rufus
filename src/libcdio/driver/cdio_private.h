@@ -141,7 +141,7 @@ extern "C" {
     const char * (*get_arg) (void *p_env, const char key[]);
     
     /*!
-      Get the block size for subsequest read requests, via a SCSI MMC 
+      Get the block size for subsequent read requests, via a SCSI MMC 
       MODE_SENSE 6 command.
     */
     int (*get_blocksize) ( void *p_env );
