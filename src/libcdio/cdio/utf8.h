@@ -26,7 +26,7 @@
 /** \brief Opaque characterset converter
  */
 
-typedef struct cdio_charset_coverter_s cdio_charset_coverter_t;
+typedef struct cdio_charset_converter_s cdio_charset_converter_t;
 
 /** \brief Create a charset converter
  *  \param src_charset Source charset
@@ -34,7 +34,7 @@ typedef struct cdio_charset_coverter_s cdio_charset_coverter_t;
  *  \returns A newly allocated charset converter
  */
 
-cdio_charset_coverter_t *
+cdio_charset_converter_t *
 cdio_charset_converter_create(const char * src_charset,
                               const char * dst_charset);
 
@@ -42,7 +42,7 @@ cdio_charset_converter_create(const char * src_charset,
  *  \param cnv A characterset converter
  */
 
-void cdio_charset_converter_destroy(cdio_charset_coverter_t*cnv);
+void cdio_charset_converter_destroy(cdio_charset_converter_t*cnv);
 
 /** \brief Convert a string from one character set to another
  *  \param cnv A charset converter
@@ -56,7 +56,7 @@ void cdio_charset_converter_destroy(cdio_charset_coverter_t*cnv);
  *  If you pass -1 for src_len, strlen() will be used.
  */
 
-bool cdio_charset_convert(cdio_charset_coverter_t*cnv,
+bool cdio_charset_convert(cdio_charset_converter_t*cnv,
                           char * src, int src_len,
                           char ** dst, int * dst_len);
 

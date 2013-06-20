@@ -116,16 +116,16 @@ FILE* fopen_utf8(const char* filename, const char* mode)
 #ifdef HAVE_JOLIET
 #ifdef HAVE_ICONV
 #include <iconv.h>
-struct cdio_charset_coverter_s
+struct cdio_charset_converter_s
   {
   iconv_t ic;
   };
 
-cdio_charset_coverter_t *
+cdio_charset_converter_t *
 cdio_charset_converter_create(const char * src_charset,
                               const char * dst_charset)
   {
-  cdio_charset_coverter_t * ret;
+  cdio_charset_converter_t * ret;
   ret = calloc(1, sizeof(*ret));
   ret->ic = iconv_open(dst_charset, src_charset);
   return ret;
@@ -158,7 +158,7 @@ static void bgav_hexdump(uint8_t * data, int len, int linebreak)
   }
 #endif
 
-void cdio_charset_converter_destroy(cdio_charset_coverter_t*cnv)
+void cdio_charset_converter_destroy(cdio_charset_converter_t*cnv)
   {
   iconv_close(cnv->ic);
   free(cnv);
@@ -246,7 +246,7 @@ do_convert(iconv_t cd, const char * src, int src_len,
   return true;
   }
 
-bool cdio_charset_convert(cdio_charset_coverter_t*cnv,
+bool cdio_charset_convert(cdio_charset_converter_t*cnv,
                           char * src, int src_len,
                           char ** dst, int * dst_len)
   {
