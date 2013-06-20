@@ -243,7 +243,7 @@ static void ToValidLabel(WCHAR* name, BOOL bFAT)
 			if (name[i] == '_') j++;
 		if (i<2*j) {
 			// If the final label is mostly underscore, use the proposed label
-			uprintf("FAT label is mostly undercores. Using '%s' label instead.\n", SelectedDrive.proposed_label);
+			uprintf("FAT label is mostly underscores. Using '%s' label instead.\n", SelectedDrive.proposed_label);
 			for(i=0; SelectedDrive.proposed_label[i]!=0; i++)
 				name[i] = SelectedDrive.proposed_label[i];
 			name[i] = 0;
