@@ -265,7 +265,7 @@ static void ToValidLabel(WCHAR* name, BOOL bFAT)
  * 
  * Low order word is calculated:               Volume Serial Number is:
  * Month & Day         12/26   0c1ah
- * Sec & Hundrenths    41:94   295eh               3578:1d02
+ * Sec & Hundredths    41:94   295eh               3578:1d02
  * -----
  * 3578h
  * 
