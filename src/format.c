@@ -560,7 +560,7 @@ static BOOL FormatFAT32(DWORD DriveIndex)
 		}
 	}
 
-	uprintf ("Initialising reserved sectors and FATs...\n");
+	uprintf ("Initializing reserved sectors and FATs...\n");
 	// Now we should write the boot sector and fsinfo twice, once at 0 and once at the backup boot sect position
 	for (i=0; i<2; i++) {
 		int SectorStart = (i==0) ? 0 : BackupBootSect;
