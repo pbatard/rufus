@@ -1511,7 +1511,7 @@ done
 { ac_configure_args0=; unset ac_configure_args0;}
 { ac_configure_args1=; unset ac_configure_args1;}
 
-# When interrupted or exit'd, cleanup temporary files, and complete
+# When interrupted or exited, cleanup temporary files, and complete
 # config.log.  We remove comments because anyway the quotes in there
 # would cause problems or look ugly.
 # WARNING: Use '\'' to represent an apostrophe within the trap.
