@@ -347,7 +347,7 @@ LIBCDIO_DEPRECATED(static const driver_id_t CDIO_MAX_DEVICE_DRIVER, "please use 
      
      If "b_any" is set false then every capability listed in the
      analysis portion of capabilities (i.e. not the basic filesystem)
-     must be satisified. If no analysis capabilities are specified,
+     must be satisfied. If no analysis capabilities are specified,
      that's a match.
 
      If "b_any" is set true, then if any of the analysis capabilities
