@@ -120,7 +120,7 @@ realloc_symlink(/*in/out*/ iso9660_stat_t *p_stat, uint8_t i_grow)
 
 /* Copy a long or short time from the iso_rock_tf_t into
    the specified field of a iso_rock_statbuf_t.
-   non-paramater variables are p_stat, rr, and cnt.
+   non-parameter variables are p_stat, rr, and cnt.
 */
 #define add_time(FLAG, TIME_FIELD)				  \
   if (rr->u.TF.flags & FLAG) {					  \
