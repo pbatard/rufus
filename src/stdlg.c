@@ -574,7 +574,7 @@ INT_PTR CALLBACK NotificationCallback(HWND hDlg, UINT message, WPARAM wParam, LP
 		}
 		return (INT_PTR)TRUE;
 	case WM_CTLCOLORSTATIC:
-		// Change the background colour for static text and icon
+		// Change the background color for static text and icon
 		SetBkMode((HDC)wParam, TRANSPARENT);
 		if ((HWND)lParam == GetDlgItem(hDlg, IDC_NOTIFICATION_LINE)) {
 			return (INT_PTR)separator_brush;
