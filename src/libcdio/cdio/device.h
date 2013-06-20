@@ -330,7 +330,7 @@ LIBCDIO_DEPRECATED(static const driver_id_t CDIO_MAX_DEVICE_DRIVER, "please use 
 
   /**
      Get an array of device names in search_devices that have at least
-     the capabilities listed by the capabities parameter.  If
+     the capabilities listed by the capabilities parameter.  If
      search_devices is NULL, then we'll search all possible CD drives.
 
      Capabilities have two parts to them, a "filesystem" part and an
