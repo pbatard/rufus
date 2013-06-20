@@ -154,7 +154,7 @@ static void FatDateTimeToSystemTime(PLARGE_INTEGER SystemTime, PFAT_DATETIME Fat
 	/* Fix seconds value that might get beyond the bound */
 	if (TimeFields.Second > 59) TimeFields.Second = 0;
 
-	/* Perform ceonversion to system time if possible */
+	/* Perform conversion to system time if possible */
 	if (!RtlTimeFieldsToTime(&TimeFields, SystemTime)) {
 		/* Set to default time if conversion failed */
 		SystemTime->QuadPart = 0;
