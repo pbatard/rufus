@@ -267,7 +267,7 @@ LIBCDIO_DEPRECATED(static const driver_id_t CDIO_MAX_DEVICE_DRIVER, "please use 
     Eject media in CD drive if there is a routine to do so. 
 
     @param p_cdio the CD object to be acted upon.
-    If the CD is ejected *p_cdio is free'd and p_cdio set to NULL.
+    If the CD is ejected *p_cdio is freed and p_cdio set to NULL.
   */
   driver_return_code_t cdio_eject_media (CdIo_t **p_cdio);
 

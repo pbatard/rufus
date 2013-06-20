@@ -220,7 +220,7 @@ udf_ff_traverse(udf_dirent_t *p_udf_dirent, char *psz_token)
 	  udf_dirent_t * p_udf_dirent3 = 
 	    udf_ff_traverse(p_udf_dirent2, next_tok);
 
-	  /* if p_udf_dirent3 is null p_udf_dirent2 is free'd. */
+	  /* if p_udf_dirent3 is null p_udf_dirent2 is freed. */
 	  return p_udf_dirent3;
 	}
       }
