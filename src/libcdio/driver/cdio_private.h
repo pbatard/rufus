@@ -475,7 +475,7 @@ extern "C" {
      on a particular host. */
   extern CdIo_driver_t CdIo_driver[];
 
-  /* The last valid entry of Cdio_driver. -1 means uninitialzed. -2 
+  /* The last valid entry of Cdio_driver. -1 means uninitialized. -2 
      means some sort of error.
    */
   extern int CdIo_last_driver; 
