@@ -314,7 +314,7 @@ BOOL DownloadFile(const char* url, const char* file, HWND hProgressDialog)
 	HttpQueryInfoA(hRequest, HTTP_QUERY_STATUS_CODE|HTTP_QUERY_FLAG_NUMBER, (LPVOID)&dwStatus, &dwSize, NULL);
 	if (dwStatus != 200) {
 		error_code = ERROR_INTERNET_ITEM_NOT_FOUND;
-		uprintf("Unable to acess file: Server status %d\n", dwStatus);
+		uprintf("Unable to access file: Server status %d\n", dwStatus);
 		goto out;
 	}
 	dwSize = sizeof(dwTotalSize);
