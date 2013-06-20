@@ -1103,7 +1103,7 @@ iso9660_pathname_valid_p (const char pathname[])
 
 /*!  
   Take pathname and a version number and turn that into a ISO-9660
-  pathname.  (That's just the pathname followd by ";" and the version
+  pathname.  (That's just the pathname followed by ";" and the version
   number. For example, mydir/file.ext -> mydir/file.ext;1 for version
   1. The resulting ISO-9660 pathname is returned.
 */

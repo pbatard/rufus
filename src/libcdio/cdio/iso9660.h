@@ -810,7 +810,7 @@ typedef struct _iso9660_s iso9660_t;
   
   /*!  
     Take psz_path and a version number and turn that into a ISO-9660
-    pathname.  (That's just the pathname followd by ";" and the version
+    pathname.  (That's just the pathname followed by ";" and the version
     number. For example, mydir/file.ext -> MYDIR/FILE.EXT;1 for version
     1. The resulting ISO-9660 pathname is returned.
   */
