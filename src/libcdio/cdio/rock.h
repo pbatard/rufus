@@ -223,7 +223,7 @@ typedef enum {
 /*! Time stamp(s) for a file. See Rock Ridge Section 4.1.6 */
 typedef struct iso_rock_tf_s {
   uint8_t flags; /**< See ISO_ROCK_TF_* bits above. */
-  uint8_t time_bytes[EMPTY_ARRAY_SIZE]; /**< A homogenious array of
+  uint8_t time_bytes[EMPTY_ARRAY_SIZE]; /**< A homogeneous array of
                                            iso9660_ltime_t or
                                            iso9660_dtime_t entries
                                            depending on flags &
