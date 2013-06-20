@@ -994,7 +994,7 @@ static BOOL SetupWinPE(char drive_letter)
 			uprintf("Failed to add SetupSourceDevice in %s\n", dst);
 			goto out;
 		}
-		uprintf("Succesfully added '%s' to %s\n", setupsrcdev, dst);
+		uprintf("Successfully added '%s' to %s\n", setupsrcdev, dst);
 	}
 
 	safe_sprintf(src, sizeof(src), "%c:\\%s\\setupldr.bin", drive_letter,  basedir[index]);

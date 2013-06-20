@@ -133,7 +133,7 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter)
 		goto out;
 	}
 
-	uprintf("Succesfully wrote '%s'\n", ldlinux_sys);
+	uprintf("Successfully wrote '%s'\n", ldlinux_sys);
 	if (dt != DT_ISO)
 		UpdateProgress(OP_DOS, -1.0f);
 
@@ -203,7 +203,7 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter)
 		goto out;
 	}
 
-	uprintf("Succesfully wrote Syslinux boot record\n");
+	uprintf("Successfully wrote Syslinux boot record\n");
 
 	if (dt == DT_SYSLINUX_V5) {
 		fd = fopen(ldlinux_c32, "rb");

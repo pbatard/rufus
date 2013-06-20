@@ -280,7 +280,7 @@ static BOOL ExtractFAT(int entry, const char* path)
 	}
 
 	safe_closehandle(hFile);
-	uprintf("Succesfully wrote '%s' (%d bytes)\n", filename, filesize);
+	uprintf("Successfully wrote '%s' (%d bytes)\n", filename, filesize);
 
 	return TRUE;
 }
@@ -396,7 +396,7 @@ BOOL ExtractFreeDOS(const char* path)
 		// thus we would need to have a separate header with each file's timestamps
 
 		safe_closehandle(hFile);
-		uprintf("Succesfully wrote '%s' (%d bytes)\n", filename, res_size);
+		uprintf("Successfully wrote '%s' (%d bytes)\n", filename, res_size);
 
 		if ((i == 4) || (i == 10) || (i == 16) || (i == 22) || (i == ARRAYSIZE(res_name)-1))
 			UpdateProgress(OP_DOS, -1.0f);
