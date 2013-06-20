@@ -27,7 +27,7 @@
  * filesystem library; applications include this.
  *
  * See also the ISO-9660 specification. The freely available European
- * equivalant standard is called ECMA-119.
+ * equivalent standard is called ECMA-119.
 */
 
 
