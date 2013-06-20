@@ -208,7 +208,7 @@ LIBCDIO_DEPRECATED(static const driver_id_t CDIO_MAX_DEVICE_DRIVER, "please use 
   /**
       The following are status codes for completion of a given cdio
       operation. By design 0 is successful completion and -1 is error
-      completion. This is compatable with ioctl so those routines that
+      completion. This is compatible with ioctl so those routines that
       call ioctl can just pass the value the get back (cast as this
       enum). Also, by using negative numbers for errors, the
       enumeration values below can be used in places where a positive
