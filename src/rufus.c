@@ -1252,7 +1252,7 @@ static BOOL BootCheck(void)
 				"- Select 'Yes' to connect to the internet and download the file\n"
 				"- Select 'No' if you will manually copy this file on the drive later\n\n"
 				"Note: The file will be downloaded in the current directory and once a "
-				"'%s' exists there, it will be reused automatically.\n", ldlinux_c32, ldlinux_c32, ldlinux_c32);
+				"'%s' exists there, it will be reused automatically.\n", ldlinux_c32, ldlinux_c32);
 			safe_sprintf(msgbox_title, sizeof(msgbox_title), "Download %s?", ldlinux_c32);
 			r = MessageBoxU(hMainDialog, msgbox, msgbox_title, MB_YESNOCANCEL|MB_ICONWARNING);
 			if (r == IDCANCEL) 

@@ -16,5 +16,36 @@ t IDD_MORE_BLURB "Yoda dadada daaddadada"
  " ANY MORE LINESUS???" 
 	# Test comment
 # end
-f "MS Dialog" 23
- 
+
+#l "fr-FR"
+#t IDS_FORMATOPTIONS_TXT "Options de Formattage       "
+#t IDS_LABEL_TXT "Nouveau label"
+#t IDS_FILESYSTEM_TXT "Système de fichier"
+#t IDS_CLUSTERSIZE_TXT "Taille de clusters"
+#t IDS_DEVICE_TXT "Periphérique"
+#t IDS_PARTITION_TYPE_TXT "Type de partition et système de destination"
+#t IDC_BADBLOCKS "Vérification de mauvais blocs:"
+#t IDC_QUICKFORMAT "Formattage rapide"
+#t IDC_BOOT "Disque de démarrage avec:"
+#t IDC_SET_ICON "Ajouter un label étendu et une icône"
+#m IDC_ADVANCED +37 0
+fake command
+
+l "zh-CN"
+t IDC_START "开始"
+t IDC_STOP "关闭"
+t IDS_DEVICE_TXT "设备"
+t IDS_PARTITION_TYPE_TXT "分区计划和目标系统类型"
+t IDS_FILESYSTEM_TXT "文件系统"
+t IDS_CLUSTERSIZE_TXT "簇的大小"
+t IDS_LABEL_TXT "新卷标"
+t IDS_FORMATOPTIONS_TXT "格式选项        "
+t IDC_BADBLOCKS "检查设备的坏块:"
+t IDC_QUICKFORMAT "快速格式化"
+t IDC_BOOT "创建一个可启动的磁盘使用："
+r IDC_BOOT +10 0
+t IDC_SET_ICON "创建扩展标签和图标文件"
+m IDC_ADVANCED -24 0
+m IDC_NBPASSES 8 0
+m IDC_BOOTTYPE 8 0
+m IDC_SELECT_ISO 6 0

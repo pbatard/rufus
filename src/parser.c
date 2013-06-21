@@ -35,14 +35,11 @@
 #include "msapi_utf8.h"
 #include "locale.h"
 
-int  loc_line_nr = 0;
-char loc_filename[32];
-#define luprintf(msg) uprintf("%s(%d): " msg "\n", loc_filename, loc_line_nr);
+static const wchar_t wspace[] = L" \t";
 
 // Fill a localization command buffer by parsing the line arguments
-// The command is allocated and must be freed by calling free_loc_cmd()
+// The command is allocated and must be freed (by calling free_loc_cmd)
 static loc_cmd* get_loc_cmd(wchar_t wc, wchar_t* wline) {
-	const wchar_t wspace[] = L" \t";
 	size_t i, j, k, r, ti = 0, ii = 0;
 	wchar_t *endptr, *expected_endptr;
 	loc_cmd* lcmd = NULL;
@@ -52,13 +49,13 @@ static loc_cmd* get_loc_cmd(wchar_t wc, wchar_t* wline) {
 			break;
 	}
 	if (j >= PARSE_CMD_SIZE) {
-		luprintf("unknown command");
+		luprint("unknown command");
 		return NULL;
 	}
 
 	lcmd = (loc_cmd*)calloc(sizeof(loc_cmd), 1);
 	if (lcmd == NULL) {
-		luprintf("could not allocate command");
+		luprint("could not allocate command");
 		return NULL;
 	}
 	lcmd->command = parse_cmd[j].cmd;
@@ -72,7 +69,7 @@ static loc_cmd* get_loc_cmd(wchar_t wc, wchar_t* wline) {
 		case 's':	// quoted string
 			// search leading quote
 			if (wline[i++] != L'"') {
-				luprintf("no start quote");
+				luprint("no start quote");
 				goto err;
 			}
 			r = i;
@@ -85,13 +82,13 @@ static loc_cmd* get_loc_cmd(wchar_t wc, wchar_t* wline) {
 				}
 			}
 			if (wline[i] == 0) {
-				luprintf("no end quote");
+				luprint("no end quote");
 				goto err;
 			}
 			wline[i++] = 0;
 			lcmd->text[ti++] = wchar_to_utf8(&wline[r]);
 			break;
-		case 'w':	// single word
+		case 'c':	// control ID (single word)
 			while ((wline[i] != 0) && (wline[i] != wspace[0]) && (wline[i] != wspace[1]))
 				i++;
 			if (wline[i] != 0)
@@ -106,7 +103,7 @@ static loc_cmd* get_loc_cmd(wchar_t wc, wchar_t* wline) {
 				wline[i++] = 0;
 			lcmd->num[ii++] = (int32_t)wcstol(&wline[r], &endptr, 10);
 			if (endptr != expected_endptr) {
-				luprintf("invalid integer");
+				luprint("invalid integer");
 				goto err;
 			}
 			break;
@@ -126,7 +123,6 @@ err:
 // Parse an UTF-16 localization command line
 static void* get_loc_data_line(wchar_t* wline)
 {
-	const wchar_t wspace[] = L" \t";
 	size_t i = 0;
 	wchar_t t;
 	loc_cmd* lcmd = NULL;
@@ -144,7 +140,7 @@ static void* get_loc_data_line(wchar_t* wline)
 	if (t == L'#')	// Comment
 		return NULL;
 	if ((t == 0) || ((wline[i] != wspace[0]) && (wline[i] != wspace[1]))) {
-		luprintf("syntax error");
+		luprint("syntax error");
 		return NULL;
 	}
 
@@ -202,10 +198,11 @@ char* get_loc_data_file(const char* filename)
 		switch(wc) {
 		case WEOF:
 			wbuf[i] = 0;
+			loc_line_nr += line_nr_incr;
 			get_loc_data_line(wbuf);
 			goto out;
-		case 0x0D:
-		case 0x0A:
+		case L'\r':
+		case L'\n':
 			// Process line numbers
 			if ((last_wc != 0x0D) && (last_wc != 0x0A)) {
 				if (eol) {
@@ -224,8 +221,8 @@ char* get_loc_data_file(const char* filename)
 				eol = TRUE;
 			}
 			break;
-		case 0x20:
-		case 0x09:
+		case L' ':
+		case L'\t':
 			if (!eol) {
 				wbuf[i++] = wc;
 			}
@@ -274,7 +271,6 @@ out:
 // modified by the parser
 static wchar_t* get_token_data_line(const wchar_t* wtoken, wchar_t* wline)
 {
-	const wchar_t wspace[] = L" \t";	// The only whitespaces we recognize as such
 	size_t i, r;
 	BOOLEAN quoteth = FALSE;
 
@@ -490,7 +486,6 @@ char* insert_section_data(const char* filename, const char* section, const char*
 {
 	const wchar_t* outmode[] = { L"w", L"w, ccs=UTF-8", L"w, ccs=UTF-16LE" };
 	wchar_t *wsection = NULL, *wfilename = NULL, *wtmpname = NULL, *wdata = NULL, bom = 0;
-	wchar_t wspace[] = L" \t";
 	wchar_t buf[1024];
 	FILE *fd_in = NULL, *fd_out = NULL;
 	size_t i, size;
@@ -551,7 +546,7 @@ char* insert_section_data(const char* filename, const char* section, const char*
 
 	fd_out = _wfopen(wtmpname, outmode[mode]);
 	if (fd_out == NULL) {
-		uprintf("Could not open temporary output file %s~\n", filename);
+		uprintf("Could not open temporary output file '%s~'\n", filename);
 		goto out;
 	}
 
@@ -595,7 +590,7 @@ out:
 			fclose(fd_in);
 			fclose(fd_out);
 		} else {
-			uprintf("Could not write %s - original file has been left unmodifiedn", filename);
+			uprintf("Could not write '%s' - original file has been left unmodified\n", filename);
 			ret = NULL;
 			if (fd_in != NULL) fclose(fd_in);
 			if (fd_out != NULL) fclose(fd_out);
@@ -618,7 +613,6 @@ char* replace_in_token_data(const char* filename, const char* token, const char*
 {
 	const wchar_t* outmode[] = { L"w", L"w, ccs=UTF-8", L"w, ccs=UTF-16LE" };
 	wchar_t *wtoken = NULL, *wfilename = NULL, *wtmpname = NULL, *wsrc = NULL, *wrep = NULL, bom = 0;
-	wchar_t wspace[] = L" \t";
 	wchar_t buf[1024], *torep;
 	FILE *fd_in = NULL, *fd_out = NULL;
 	size_t i, size;
@@ -686,7 +680,7 @@ char* replace_in_token_data(const char* filename, const char* token, const char*
 
 	fd_out = _wfopen(wtmpname, outmode[mode]);
 	if (fd_out == NULL) {
-		uprintf("Could not open temporary output file %s~\n", filename);
+		uprintf("Could not open temporary output file '%s~'\n", filename);
 		goto out;
 	}
 
@@ -741,7 +735,7 @@ out:
 			fclose(fd_in);
 			fclose(fd_out);
 		} else {
-			uprintf("Could not write %s - original file has been left unmodified.\n", filename);
+			uprintf("Could not write '%s' - original file has been left unmodified.\n", filename);
 			ret = NULL;
 			if (fd_in != NULL) fclose(fd_in);
 			if (fd_out != NULL) fclose(fd_out);

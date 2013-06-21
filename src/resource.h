@@ -3,17 +3,16 @@
 // Used by rufus.rc
 //
 #define IDD_DIALOG                      101
-#define IDI_ICON                        102
-#define IDD_ABOUTBOX                    103
-#define IDD_NOTIFICATION                104
-#define IDD_LICENSE                     105
-#define IDD_ISO_EXTRACT                 106
-#define IDD_LOG                         107
-#define IDS_VERSION                     108
-#define IDI_UP                          109
-#define IDI_DOWN                        110
-#define IDD_UPDATE_POLICY               111
-#define IDD_NEW_VERSION                 112
+#define IDD_ABOUTBOX                    102
+#define IDD_NOTIFICATION                103
+#define IDD_LICENSE                     104
+#define IDD_ISO_EXTRACT                 105
+#define IDD_LOG                         106
+#define IDD_UPDATE_POLICY               107
+#define IDD_NEW_VERSION                 108
+#define IDI_ICON                        110
+#define IDI_UP                          111
+#define IDI_DOWN                        112
 #define IDR_BR_MBR_BIN                  200
 #define IDR_FD_COMMAND_COM              300
 #define IDR_FD_KERNEL_SYS               301
@@ -95,15 +94,21 @@
 #define IDC_YOUR_VERSION                1068
 #define IDC_LATEST_VERSION              1069
 #define IDC_DOWNLOAD_URL                1070
+#define IDS_DEVICE_TXT                  2000
+#define IDS_PARTITION_TYPE_TXT          2001
+#define IDS_FILESYSTEM_TXT              2002
+#define IDS_CLUSTERSIZE_TXT             2003
+#define IDS_LABEL_TXT                   2004
+#define IDS_FORMATOPTIONS_TXT           2005
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NO_MFC                     1
-#define _APS_NEXT_RESOURCE_VALUE        113
+#define _APS_NEXT_RESOURCE_VALUE        404
 #define _APS_NEXT_COMMAND_VALUE         40001
-#define _APS_NEXT_CONTROL_VALUE         1071
-#define _APS_NEXT_SYMED_VALUE           101
+#define _APS_NEXT_CONTROL_VALUE         2020
+#define _APS_NEXT_SYMED_VALUE           3000
 #endif
 #endif

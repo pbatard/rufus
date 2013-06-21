@@ -36,15 +36,21 @@
 // TODO: display control name on mouseover
 // Link to http://www.resedit.net/
 
+// Commands that take a control ID *MUST* be at the top
+// The last command with a control ID *MUST* be LC_TEXT
+
+#define luprint(msg) uprintf("%s(%d): " msg "\n", loc_filename, loc_line_nr)
+#define luprintf(msg, ...) uprintf("%s(%d): " msg "\n", loc_filename, loc_line_nr, __VA_ARGS__)
+
 enum loc_command_type {
+	LC_PARENT,
+	LC_MOVE,
+	LC_RESIZE,
+	LC_TEXT,	// Delimits commands that take a Control ID and commands that don't
 	LC_VERSION,
 	LC_LOCALE,
 	LC_FONT,
-	LC_PARENT,
 	LC_DIRECTION,
-	LC_RESIZE,
-	LC_MOVE,
-	LC_TEXT
 };
 
 typedef struct loc_cmd_struct {
@@ -59,8 +65,15 @@ typedef struct loc_parse_struct {
 	char* arg_type;
 } loc_parse;
 
+typedef struct loc_control_id_struct {
+	const char* name;
+	const int id;
+} loc_control_id;
+
 loc_parse parse_cmd[];
 size_t PARSE_CMD_SIZE;
+int loc_line_nr;
+char loc_filename[32];
 
 void free_loc_cmd(loc_cmd* lcmd);
 BOOL execute_loc_cmd(loc_cmd* lcmd);
