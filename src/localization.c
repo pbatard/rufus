@@ -31,7 +31,7 @@
 #include "rufus.h"
 #include "resource.h"
 #include "msapi_utf8.h"
-#include "locale.h"
+#include "localization.h"
 
 #define LOC_CTRL(x) { #x, x }
 

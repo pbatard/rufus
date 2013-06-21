@@ -44,12 +44,13 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 PROGRAMS = $(noinst_PROGRAMS)
 am_rufus_OBJECTS = rufus-drive.$(OBJEXT) rufus-icon.$(OBJEXT) \
-	rufus-parser.$(OBJEXT) rufus-iso.$(OBJEXT) rufus-net.$(OBJEXT) \
-	rufus-dos.$(OBJEXT) rufus-dos_locale.$(OBJEXT) \
-	rufus-badblocks.$(OBJEXT) rufus-syslinux.$(OBJEXT) \
-	rufus-vhd.$(OBJEXT) rufus-format.$(OBJEXT) \
-	rufus-stdio.$(OBJEXT) rufus-stdfn.$(OBJEXT) \
-	rufus-stdlg.$(OBJEXT) rufus-rufus.$(OBJEXT)
+	rufus-parser.$(OBJEXT) rufus-localization.$(OBJEXT) \
+	rufus-iso.$(OBJEXT) rufus-net.$(OBJEXT) rufus-dos.$(OBJEXT) \
+	rufus-dos_locale.$(OBJEXT) rufus-badblocks.$(OBJEXT) \
+	rufus-syslinux.$(OBJEXT) rufus-vhd.$(OBJEXT) \
+	rufus-format.$(OBJEXT) rufus-stdio.$(OBJEXT) \
+	rufus-stdfn.$(OBJEXT) rufus-stdlg.$(OBJEXT) \
+	rufus-rufus.$(OBJEXT)
 rufus_OBJECTS = $(am_rufus_OBJECTS)
 rufus_DEPENDENCIES = rufus_rc.o ms-sys/libmssys.a \
 	syslinux/libfat/libfat.a syslinux/libinstaller/libinstaller.a \
@@ -184,7 +185,7 @@ SUBDIRS = ms-sys syslinux/libfat syslinux/libinstaller libcdio/iso9660 libcdio/u
 pkg_v_rc = $(pkg_v_rc_$(V))
 pkg_v_rc_ = $(pkg_v_rc_$(AM_DEFAULT_VERBOSITY))
 pkg_v_rc_0 = @echo "  RC     $@";
-rufus_SOURCES = drive.c icon.c parser.c iso.c net.c dos.c dos_locale.c badblocks.c syslinux.c vhd.c format.c stdio.c stdfn.c stdlg.c rufus.c
+rufus_SOURCES = drive.c icon.c parser.c localization.c iso.c net.c dos.c dos_locale.c badblocks.c syslinux.c vhd.c format.c stdio.c stdfn.c stdlg.c rufus.c
 rufus_CFLAGS = -I./ms-sys/inc -I./syslinux/libfat -I./syslinux/libinstaller -I./libcdio $(AM_CFLAGS)
 rufus_LDFLAGS = $(AM_LDFLAGS) -mwindows
 rufus_LDADD = rufus_rc.o ms-sys/libmssys.a syslinux/libfat/libfat.a syslinux/libinstaller/libinstaller.a \
@@ -268,6 +269,14 @@ rufus-parser.o: parser.c
 rufus-parser.obj: parser.c
 	$(AM_V_CC) @AM_BACKSLASH@
 	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_CFLAGS) $(CFLAGS) -c -o rufus-parser.obj `if test -f 'parser.c'; then $(CYGPATH_W) 'parser.c'; else $(CYGPATH_W) '$(srcdir)/parser.c'; fi`
+
+rufus-localization.o: localization.c
+	$(AM_V_CC) @AM_BACKSLASH@
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_CFLAGS) $(CFLAGS) -c -o rufus-localization.o `test -f 'localization.c' || echo '$(srcdir)/'`localization.c
+
+rufus-localization.obj: localization.c
+	$(AM_V_CC) @AM_BACKSLASH@
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_CFLAGS) $(CFLAGS) -c -o rufus-localization.obj `if test -f 'localization.c'; then $(CYGPATH_W) 'localization.c'; else $(CYGPATH_W) '$(srcdir)/localization.c'; fi`
 
 rufus-iso.o: iso.c
 	$(AM_V_CC) @AM_BACKSLASH@

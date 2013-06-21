@@ -33,7 +33,7 @@
 
 #include "rufus.h"
 #include "msapi_utf8.h"
-#include "locale.h"
+#include "localization.h"
 
 static const wchar_t wspace[] = L" \t";
 
@@ -74,9 +74,9 @@ static loc_cmd* get_loc_cmd(wchar_t wc, wchar_t* wline) {
 			}
 			r = i;
 			// locate ending quote
-			while ((wline[i] != 0) && (wline[i] != L'"') || ((wline[i] == L'"') && (wline[i-1] == L'\\'))) {
+			while ((wline[i] != 0) && ((wline[i] != L'"') || ((wline[i] == L'"') && (wline[i-1] == L'\\')))) {
 				if ((wline[i] == L'"') && (wline[i-1] == L'\\')) {
-					wcscpy_s(&wline[i-1], i+wcslen(&wline[i]), &wline[i]);
+					wcscpy(&wline[i-1], &wline[i]);
 				} else {
 					i++;
 				}
@@ -126,8 +126,8 @@ static void* get_loc_data_line(wchar_t* wline)
 	size_t i = 0;
 	wchar_t t;
 	loc_cmd* lcmd = NULL;
-	char* locale = "en-US";
-	BOOL seek_locale = TRUE;
+//	char* locale = "en-US";
+//	BOOL seek_locale = TRUE;
 
 	if ((wline == NULL) || (wline[0] == 0))
 		return NULL;
@@ -164,12 +164,12 @@ static __inline void *_reallocf(void *ptr, size_t size)
 // Parse a Rufus localization command file (ANSI, UTF-8 or UTF-16)
 char* get_loc_data_file(const char* filename)
 {
-	wchar_t *wdata= NULL, *wfilename = NULL, *wbuf = NULL;
+	wchar_t *wfilename = NULL, *wbuf = NULL;
 	size_t wbufsize = 1024;	// size in wchar_t
 	FILE* fd = NULL;
 	char *ret = NULL;
 	size_t i = 0;
-	int r, line_nr_incr = 1;
+	int r = 0, line_nr_incr = 1;
 	wchar_t wc = 0, last_wc;
 	BOOL eol = FALSE;
 

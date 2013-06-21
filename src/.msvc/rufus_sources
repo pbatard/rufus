@@ -36,6 +36,7 @@ SOURCES=rufus.c          \
         stdlg.c          \
         icon.c           \
         parser.c         \
+        localization.c   \
         net.c            \
         iso.c            \
         dos.c            \

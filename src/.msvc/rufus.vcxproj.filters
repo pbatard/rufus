@@ -60,7 +60,7 @@
     <ClCompile Include="..\stdfn.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\locale.c">
+    <ClCompile Include="..\localization.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -104,7 +104,7 @@
     <ClInclude Include="..\registry.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\locale.h">
+    <ClInclude Include="..\localization.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
