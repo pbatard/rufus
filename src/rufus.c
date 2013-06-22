@@ -130,7 +130,7 @@ static int64_t last_iso_blocking_status;
 /*
  * The following is used to allocate slots within the progress bar
  * 0 means unused (no operation or no progress allocated to it)
- * +n means allocate exactly n bars (n percents of the progress bar)
+ * +n means allocate exactly n bars (n percent of the progress bar)
  * -n means allocate a weighted slot of n from all remaining
  *    bars. Eg if 80 slots remain and the sum of all negative entries
  *    is 10, -4 will allocate 4/10*80 = 32 bars (32%) for OP progress
@@ -207,7 +207,7 @@ static BOOL DefineClusterSizes(void)
 	}
 
 	// FAT 32
-	// > 32GB FAT32 is not supported by MS and FormatEx but is achieved using fat32fomat
+	// > 32GB FAT32 is not supported by MS and FormatEx but is achieved using fat32format
 	// See: http://www.ridgecrop.demon.co.uk/index.htm?fat32format.htm
 	// < 32 MB FAT32 is not allowed by FormatEx, so we don't bother
 
@@ -984,7 +984,7 @@ BOOL CALLBACK ISOProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 		UpdateWindow(hDlg);
 		return TRUE;
 	case UM_ISO_EXIT:
-		// Just hide and recentrer the dialog
+		// Just hide and recenter the dialog
 		ShowWindow(hDlg, SW_HIDE);
 		iso_op_in_progress = FALSE;
 		return TRUE;
@@ -1808,7 +1808,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		uprintf("\r\n");
 		GetUSBDevices(DeviceNum);
 		if (!IS_ERROR(FormatStatus)) {
-			// This is the only way to achieve instantenous progress transition to 100%
+			// This is the only way to achieve instantanenous progress transition to 100%
 			SendMessage(hProgress, PBM_SETRANGE, 0, ((MAX_PROGRESS+1)<<16) & 0xFFFF0000);
 			SendMessage(hProgress, PBM_SETPOS, (MAX_PROGRESS+1), 0);
 			SendMessage(hProgress, PBM_SETRANGE, 0, (MAX_PROGRESS<<16) & 0xFFFF0000);
