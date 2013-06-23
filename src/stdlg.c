@@ -436,6 +436,25 @@ void CenterDialog(HWND hDlg)
 }
 
 /*
+ * Change the position and/or size of a control belonging to a specific dialog
+ */
+void ResizeMoveCtrl(HWND hDlg, HWND hCtrl, int dx, int dy, int dw, int dh)
+{
+	RECT rect;
+	POINT point;
+
+	GetWindowRect(hCtrl, &rect);
+	point.x = rect.left;
+	point.y = rect.top;
+	ScreenToClient(hDlg, &point);
+	GetClientRect(hCtrl, &rect);
+	MoveWindow(hCtrl, point.x + (int)(fScale*(float)dx), point.y + (int)(fScale*(float)dy),
+		(rect.right - rect.left) + (int)(fScale*(float)dw),
+		(rect.bottom - rect.top) + (int)(fScale*(float)dh), TRUE);
+	InvalidateRect(hCtrl, NULL, TRUE);
+}
+
+/*
  * License callback
  */
 INT_PTR CALLBACK LicenseCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)

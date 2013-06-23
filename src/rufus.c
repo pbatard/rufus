@@ -1095,20 +1095,10 @@ out:
 	ExitThread(0);
 }
 
-void MoveControl(HWND hDlg, int nID, float vertical_shift)
-{
-	RECT rect;
-	POINT point;
-	HWND hControl;
-
-	hControl = GetDlgItem(hDlg, nID);
-	GetWindowRect(hControl, &rect);
-	point.x = rect.left;
-	point.y = rect.top;
-	ScreenToClient(hDlg, &point);
-	GetClientRect(hControl, &rect);
-	MoveWindow(hControl, point.x, point.y + (int)(fScale*(advanced_mode?vertical_shift:-vertical_shift)),
-		(rect.right - rect.left), (rect.bottom - rect.top), TRUE);
+// Move a control along the Y axis according to the advanced mode setting
+void MoveCtrlY(HWND hDlg, int nID, float vertical_shift) {
+	ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, nID), 0,
+		(int)(advanced_mode?vertical_shift:-vertical_shift), 0, 0);
 }
 
 void SetPassesTooltip(void)
@@ -1137,14 +1127,14 @@ void ToggleAdvanced(void)
 		point.y + (int)(fScale*(advanced_mode?dialog_shift:-dialog_shift)), TRUE);
 
 	// Move the status bar up or down
-	MoveControl(hMainDialog, IDC_STATUS, dialog_shift);
-	MoveControl(hMainDialog, IDC_START, dialog_shift);
-	MoveControl(hMainDialog, IDC_PROGRESS, dialog_shift);
-	MoveControl(hMainDialog, IDC_ABOUT, dialog_shift);
-	MoveControl(hMainDialog, IDC_LOG, dialog_shift);
-	MoveControl(hMainDialog, IDCANCEL, dialog_shift);
+	MoveCtrlY(hMainDialog, IDC_STATUS, dialog_shift);
+	MoveCtrlY(hMainDialog, IDC_START, dialog_shift);
+	MoveCtrlY(hMainDialog, IDC_PROGRESS, dialog_shift);
+	MoveCtrlY(hMainDialog, IDC_ABOUT, dialog_shift);
+	MoveCtrlY(hMainDialog, IDC_LOG, dialog_shift);
+	MoveCtrlY(hMainDialog, IDCANCEL, dialog_shift);
 #ifdef RUFUS_TEST
-	MoveControl(hMainDialog, IDC_TEST, dialog_shift);
+	MoveCtrlY(hMainDialog, IDC_TEST, dialog_shift);
 #endif
 
 	// And do the same for the log dialog while we're at it
@@ -1153,9 +1143,9 @@ void ToggleAdvanced(void)
 	point.y = (rect.bottom - rect.top);
 	MoveWindow(hLogDlg, rect.left, rect.top, point.x,
 		point.y + (int)(fScale*(advanced_mode?dialog_shift:-dialog_shift)), TRUE);
-	MoveControl(hLogDlg, IDC_LOG_CLEAR, dialog_shift);
-	MoveControl(hLogDlg, IDC_LOG_SAVE, dialog_shift);
-	MoveControl(hLogDlg, IDCANCEL, dialog_shift);
+	MoveCtrlY(hLogDlg, IDC_LOG_CLEAR, dialog_shift);
+	MoveCtrlY(hLogDlg, IDC_LOG_SAVE, dialog_shift);
+	MoveCtrlY(hLogDlg, IDCANCEL, dialog_shift);
 	GetWindowRect(hLog, &rect);
 	point.x = (rect.right - rect.left);
 	point.y = (rect.bottom - rect.top) + (int)(fScale*(advanced_mode?dialog_shift:-dialog_shift));

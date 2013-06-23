@@ -284,6 +284,7 @@ extern const char* StrError(DWORD error_code);
 extern char* GuidToString(const GUID* guid);
 extern char* SizeToHumanReadable(LARGE_INTEGER size);
 extern void CenterDialog(HWND hDlg);
+extern void ResizeMoveCtrl(HWND hDlg, HWND hCtrl, int dx, int dy, int dw, int dh);
 extern void CreateStatusBar(void);
 extern void SetTitleBarIcon(HWND hDlg);
 extern BOOL CreateTaskbarList(void);

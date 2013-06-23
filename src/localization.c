@@ -78,24 +78,6 @@ void free_loc_cmd(loc_cmd* lcmd)
 	free(lcmd);
 }
 
-// TODO: factorize this with rufus.c's MoveControl()
-void ResizeMoveCtrl(HWND hDlg, HWND hCtrl, int mx, int my, int rx, int ry)
-{
-	RECT rect;
-	POINT point;
-
-	GetWindowRect(hCtrl, &rect);
-	point.x = rect.left;
-	point.y = rect.top;
-	ScreenToClient(hDlg, &point);
-	GetClientRect(hCtrl, &rect);
-	MoveWindow(hCtrl, point.x + (int)(fScale*(float)mx), point.y + (int)(fScale*(float)my),
-		(rect.right - rect.left) + (int)(fScale*(float)rx),
-		(rect.bottom - rect.top) + (int)(fScale*(float)ry), TRUE);
-	InvalidateRect(hCtrl, NULL, TRUE);
-}
-
-
 // TODO: we need to store a revert for every action we execute here,
 // or do we want to reinstantiate the dialogs?
 BOOL execute_loc_cmd(loc_cmd* lcmd)
