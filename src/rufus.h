@@ -242,14 +242,14 @@ typedef enum TASKBAR_PROGRESS_FLAGS
 
 /* Windows versions */
 enum WindowsVersion {
-	WINDOWS_UNDEFINED,
+	WINDOWS_UNDEFINED = 0,
 	WINDOWS_UNSUPPORTED,
 	WINDOWS_XP,
-	WINDOWS_2003,
+	WINDOWS_2003,	// Also XP x64
 	WINDOWS_VISTA,
 	WINDOWS_7,
-	WINDOWS_8,
-	WINDOWS_9
+	WINDOWS_8_OR_LATER,
+	WINDOWS_MAX
 };
 
 /*
@@ -277,6 +277,7 @@ extern int dialog_showing;
  * Shared prototypes
  */
 extern enum WindowsVersion DetectWindowsVersion(void);
+extern const char* PrintWindowsVersion(enum WindowsVersion version);
 extern const char *WindowsErrorString(void);
 extern void DumpBufferHex(void *buf, size_t size);
 extern void PrintStatus(unsigned int duration, BOOL debug, const char *format, ...);

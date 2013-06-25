@@ -1274,6 +1274,8 @@ void InitDialog(HWND hDlg)
 	HDC hDC;
 	int i, i16, s16;
 	char tmp[128], *token;
+	BOOL is_x64 = FALSE;
+	BOOL (__stdcall *pIsWow64Process)(HANDLE, PBOOL) = NULL;
 
 #ifdef RUFUS_TEST
 	ShowWindow(GetDlgItem(hDlg, IDC_TEST), SW_SHOW);
@@ -1318,6 +1320,18 @@ void InitDialog(HWND hDlg)
 	for (i=0; (i<4) && ((token = strtok(NULL, ".")) != NULL); i++)
 		rufus_version[i] = (uint16_t)atoi(token);
 	uprintf(APPLICATION_NAME " version %d.%d.%d.%d\n", rufus_version[0], rufus_version[1], rufus_version[2], rufus_version[3]);
+
+	// Detect if we're running a 32 or 64 bit system
+	if (sizeof(uintptr_t) < 8) {
+		pIsWow64Process = (BOOL (__stdcall *)(HANDLE, PBOOL))
+			GetProcAddress(GetModuleHandleA("KERNEL32"), "IsWow64Process");
+		if (pIsWow64Process != NULL) {
+			(*pIsWow64Process)(GetCurrentProcess(), &is_x64);
+		}
+	} else {
+		is_x64 = TRUE;
+	}
+	uprintf("Windows version: %s %d-bit\n", PrintWindowsVersion(nWindowsVersion), is_x64?64:32);
 
 	// Prefer FreeDOS to MS-DOS
 	selection_default = DT_FREEDOS;
@@ -1548,16 +1562,22 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				Point.x = min(DialogRect.right + GetSystemMetrics(SM_CXSIZEFRAME)+(int)(2.0f * fScale), DesktopRect.right - nWidth);
 				Point.y = max(DialogRect.top, DesktopRect.top - nHeight);
 				MoveWindow(hLogDlg, Point.x, Point.y, nWidth, nHeight, FALSE);
+				// The log may have been recentered to fit the screen, in which case, try to shift our main dialog left
+				nWidth = DialogRect.right - DialogRect.left;
+				nHeight = DialogRect.bottom - DialogRect.top;
+				MoveWindow(hDlg, max((DialogRect.left<0)?DialogRect.left:0,
+					Point.x - nWidth - GetSystemMetrics(SM_CXSIZEFRAME) - (int)(2.0f * fScale)), Point.y, nWidth, nHeight, TRUE);
 				first_log_display = FALSE;
 			}
 			// Display the log Window
 			log_displayed = !log_displayed;
-			ShowWindow(hLogDlg, log_displayed?SW_SHOW:SW_HIDE);
 			if (IsShown(hISOProgressDlg))
 				SetFocus(hISOProgressDlg);
 			// Set focus on the start button
 			SendMessage(hMainDialog, WM_NEXTDLGCTL, (WPARAM)FALSE, 0);
 			SendMessage(hMainDialog, WM_NEXTDLGCTL, (WPARAM)GetDlgItem(hMainDialog, IDC_START), TRUE);
+			// Must come last for the log window to get focus
+			ShowWindow(hLogDlg, log_displayed?SW_SHOW:SW_HIDE);
 			break;
 #ifdef RUFUS_TEST
 		case IDC_TEST:

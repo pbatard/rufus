@@ -27,6 +27,17 @@
 #include "msapi_utf8.h"
 #include "rufus.h"
 
+// Must be in the same order as enum WindowsVersion
+static const char* WindowsVersionName[WINDOWS_MAX] = {
+	"Undefined",
+	"Windows 2000 or earlier (unsupported)",
+	"Windows XP",
+	"Windows 2003 (or XP x64)",
+	"Windows Vista",
+	"Windows 7",
+	"Windows 8 or later",
+};
+
 enum WindowsVersion nWindowsVersion = WINDOWS_UNDEFINED;
 
 /*
@@ -48,16 +59,21 @@ enum WindowsVersion DetectWindowsVersion(void)
 	if ((OSVersion.dwMajorVersion == 5) && (OSVersion.dwMinorVersion == 1))
 		return WINDOWS_XP;
 	if ((OSVersion.dwMajorVersion == 5) && (OSVersion.dwMinorVersion == 2))
-		return  WINDOWS_2003;
+		return WINDOWS_2003;
 	if ((OSVersion.dwMajorVersion == 6) && (OSVersion.dwMinorVersion == 0))
-		return  WINDOWS_VISTA;
+		return WINDOWS_VISTA;
 	if ((OSVersion.dwMajorVersion == 6) && (OSVersion.dwMinorVersion == 1))
-		return  WINDOWS_7;
-	if ((OSVersion.dwMajorVersion == 6) && (OSVersion.dwMinorVersion == 2))
-		return  WINDOWS_8;
-	if ((OSVersion.dwMajorVersion > 6) || ((OSVersion.dwMajorVersion == 6) && (OSVersion.dwMinorVersion >= 3)))
-		return  WINDOWS_9;
+		return WINDOWS_7;
+	if ((OSVersion.dwMajorVersion > 6) || ((OSVersion.dwMajorVersion == 6) && (OSVersion.dwMinorVersion >= 2)))
+		return WINDOWS_8_OR_LATER;
 	return WINDOWS_UNSUPPORTED;
+}
+
+const char* PrintWindowsVersion(enum WindowsVersion version)
+{
+	if ((version < 0) || (version >= WINDOWS_MAX))
+		version = WINDOWS_UNDEFINED;
+	return WindowsVersionName[version];
 }
 
 /*

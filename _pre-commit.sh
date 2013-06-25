@@ -19,7 +19,7 @@ TAGVER=`echo $VER`
 # of a .amend file in the current directory will do
 if [ -f ./.amend ]; then
 	TAGVER=`expr $TAGVER - 1`
-	git tag -d "#$TAGVER"
+	git tag -d "b$TAGVER"
 	rm ./.amend;
 fi
 echo "setting nano to $TAGVER"
