@@ -219,60 +219,61 @@ const char* StrError(DWORD error_code)
 	}
 	switch (SCODE_CODE(error_code)) {
 	case ERROR_GEN_FAILURE:
-		return "Undetermined error while formatting";
+		return "Undetermined error while formatting.";
 	case ERROR_INCOMPATIBLE_FS:
-		return "Cannot use the selected file system for this media";
+		return "Cannot use the selected file system for this media.";
 	case ERROR_ACCESS_DENIED:
-		return "Access to the media is denied";
+		return "Access to the device is denied.";
 	case ERROR_WRITE_PROTECT:
-		return "Media is write protected";
+		return "Media is write protected.";
 	case ERROR_DEVICE_IN_USE:
-		return "The device is in use by another process\n"
-			"Please close any other process that may be accessing the device";
+		return "The device is in use by another process. "
+			"Please close any other process that may be accessing the device.";
 	case ERROR_CANT_QUICK_FORMAT:
-		return "Quick format is not available for this device";
+		return "Quick format is not available for this device.";
 	case ERROR_LABEL_TOO_LONG:
-		return "The volume label is invalid";
+		return "The volume label is invalid.";
+	case ERROR_INVALID_HANDLE:
+		return "The device handle is invalid.";
 	case ERROR_INVALID_CLUSTER_SIZE:
-		return "The selected cluster size is not valid for this device";
+		return "The selected cluster size is not valid for this device.";
 	case ERROR_INVALID_VOLUME_SIZE:
-		return "The volume size is invalid";
+		return "The volume size is invalid.";
 	case ERROR_NO_MEDIA_IN_DRIVE:
-		return "Please insert a media in drive";
+		return "Please insert a media in drive.";
 	case ERROR_NOT_SUPPORTED:
-		return "An unsupported command was received";
+		return "An unsupported command was received.";
 	case ERROR_NOT_ENOUGH_MEMORY:
-		return "Memory allocation error";
+		return "Memory allocation error.";
 	case ERROR_READ_FAULT:
-		return "Read error";
+		return "Read error.";
 	case ERROR_WRITE_FAULT:
-		return "Write error";
+		return "Write error.";
 	case ERROR_OPEN_FAILED:
-		return "Could not open media. It may be in use by another process.\n"
-			"Please re-plug the media and try again";
+		return "Could not open media. It may be in use by another process. "
+			"Please re-plug the media and try again.";
 	case ERROR_PARTITION_FAILURE:
-		return "Error while partitioning drive";
+		return "Error while partitioning drive.";
 	case ERROR_CANNOT_COPY:
-		return "Could not copy files to target drive";
+		return "Could not copy files to target drive.";
 	case ERROR_CANCELLED:
-		return "Cancelled by user";
+		return "Cancelled by user.";
 	case ERROR_CANT_START_THREAD:
-		return "Unable to create formatting thread";
+		return "Unable to create formatting thread.";
 	case ERROR_BADBLOCKS_FAILURE:
-		return "Bad blocks check didn't complete";
+		return "Bad blocks check didn't complete.";
 	case ERROR_ISO_SCAN:
-		return "ISO image scan failure";
+		return "ISO image scan failure.";
 	case ERROR_ISO_EXTRACT:
-		return "ISO image extraction failure";
+		return "ISO image extraction failure.";
 	case ERROR_CANT_REMOUNT_VOLUME:
-		return "Unable to remount volume. You may have to use the\n"
-			"mountvol.exe command to make your device accessible again";
+		return "Unable to remount volume.";
 	case ERROR_CANT_PATCH:
-		return "Unable to patch/setup files for boot";
+		return "Unable to patch/setup files for boot.";
 	case ERROR_CANT_ASSIGN_LETTER:
-		return "Unable to assign a drive letter";
+		return "Unable to assign a drive letter.";
 	case ERROR_CANT_MOUNT_VOLUME:
-		return "Can't mount GUID volume";
+		return "Can't mount GUID volume.";
 	default:
 		uprintf("Unknown error: %08X\n", error_code);
 		SetLastError(error_code);

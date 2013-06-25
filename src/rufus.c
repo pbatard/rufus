@@ -624,7 +624,7 @@ static BOOL GetUSBDevices(DWORD devnum)
 				if(GetLastError() != ERROR_NO_MORE_ITEMS) {
 					uprintf("SetupDiEnumDeviceInterfaces failed: %s\n", WindowsErrorString());
 				} else {
-					uprintf("A device was eliminated because it didn't report itself as a disk\n");
+					uprintf("A device was eliminated because it didn't report itself as a removable disk\n");
 				}
 				break;
 			}
@@ -1252,7 +1252,7 @@ static BOOL BootCheck(void)
 				"- Select 'Yes' to connect to the internet and download the file\n"
 				"- Select 'No' if you will manually copy this file on the drive later\n\n"
 				"Note: The file will be downloaded in the current directory and once a "
-				"'%s' exists there, it will be reused automatically.\n", ldlinux_c32, ldlinux_c32, ldlinux_c32);
+				"'%s' exists there, it will be reused automatically.\n", ldlinux_c32, ldlinux_c32);
 			safe_sprintf(msgbox_title, sizeof(msgbox_title), "Download %s?", ldlinux_c32);
 			r = MessageBoxU(hMainDialog, msgbox, msgbox_title, MB_YESNOCANCEL|MB_ICONWARNING);
 			if (r == IDCANCEL) 
@@ -1819,8 +1819,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_ERROR, 0);
 			SetTaskbarProgressState(TASKBAR_ERROR);
 			PrintStatus(0, FALSE, "FAILED");
-			Notification(MSG_ERROR, NULL, "Error", "Error: %s.%s", StrError(FormatStatus), 
-				(strchr(StrError(FormatStatus), '\n') != NULL)?"":"\nFor more information, please check the log.");
+			Notification(MSG_ERROR, NULL, "Error", "Error: %s", StrError(FormatStatus));
 		}
 		FormatStatus = 0;
 		format_op_in_progress = FALSE;
@@ -1919,8 +1918,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 				wait_for_mutex = 150;	// Try to acquire the mutex for 15 seconds
 		}
 
-		while ((opt = getopt_long(argc, argv, "?hi:w:", long_options, &option_index)) != EOF)
+		while ((opt = getopt_long(argc, argv, "?fhi:w:", long_options, &option_index)) != EOF)
 			switch (opt) {
+			case 'f':
+				enable_fixed_disks = TRUE;
+				break;
 			case 'i':
 				if (_access(optarg, 0) != -1) {
 					iso_path = safe_strdup(optarg);

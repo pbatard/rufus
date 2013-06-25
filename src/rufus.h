@@ -307,6 +307,7 @@ extern HANDLE GetLogicalHandle(DWORD DriveIndex, BOOL bWriteAccess, BOOL bLockDr
 extern char GetDriveLetter(DWORD DriveIndex);
 extern char GetUnusedDriveLetter(void);
 extern BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL mbr_uefi_marker);
+extern BOOL DeletePartitions(HANDLE hDrive);
 extern const char* GetPartitionType(BYTE Type);
 extern BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSystemNameSize);
 extern BOOL GetDriveLabel(DWORD DriveIndex, char* letter, char** label);

@@ -202,12 +202,18 @@ out:
 }
 
 /* 
- * Return a handle to the first logical volume on the disk identified by DriveIndex
+ * Obtain a handle to the first logical volume on the disk identified by DriveIndex
+ * Returns INVALID_HANDLE_VALUE on error or NULL if no logical path exists (typical
+ * of unpartitioned drives)
  */
 HANDLE GetLogicalHandle(DWORD DriveIndex, BOOL bWriteAccess, BOOL bLockDrive)
 {
 	HANDLE hLogical = INVALID_HANDLE_VALUE;
 	char* LogicalPath = GetLogicalName(DriveIndex, FALSE);
+	if (LogicalPath == NULL) {
+		return NULL;
+	}
+
 	hLogical = GetHandle(LogicalPath, bWriteAccess, bLockDrive);
 	safe_free(LogicalPath);
 	return hLogical;
@@ -490,8 +496,9 @@ typedef struct _DRIVE_LAYOUT_INFORMATION_EX4 {
  * Create a partition table
  * See http://technet.microsoft.com/en-us/library/cc739412.aspx for some background info
  * NB: if you modify the MBR outside of using the Windows API, Windows still uses the cached
- * copy it got from the last IOCTL, and ignore your changes until you replug the drive...
- */ 
+ * copy it got from the last IOCTL, and ignores your changes until you replug the drive
+ * or issue an IOCTL_DISK_UPDATE_PROPERTIES.
+ */
 #if !defined(PARTITION_BASIC_DATA_GUID)
 const GUID PARTITION_BASIC_DATA_GUID = { 0xebd0a0a2, 0xb9e5, 0x4433, {0x87, 0xc0, 0x68, 0xb6, 0xb7, 0x26, 0x99, 0xc7} };
 #endif
@@ -624,6 +631,38 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 			(BYTE*)&DriveLayoutEx, size, NULL, 0, &size, NULL );
 	if (!r) {
 		uprintf("Could not set drive layout: %s\n", WindowsErrorString());
+		safe_closehandle(hDrive);
+		return FALSE;
+	}
+	// Diskpart does call the following IOCTL this after updating the partition table, so we do too
+	r = DeviceIoControl(hDrive, IOCTL_DISK_UPDATE_PROPERTIES, NULL, 0, NULL, 0, &size, NULL );
+	if (!r) {
+		uprintf("Could not refresh drive layout: %s\n", WindowsErrorString());
+		safe_closehandle(hDrive);
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
+/* Delete the disk partition table */
+BOOL DeletePartitions(HANDLE hDrive)
+{
+	BOOL r;
+	DWORD size;
+
+	PrintStatus(0, TRUE, "Erasing Partitions...");
+
+	r = DeviceIoControl(hDrive, IOCTL_DISK_DELETE_DRIVE_LAYOUT, NULL, 0, NULL, 0, &size, NULL );
+	if (!r) {
+		uprintf("Could not delete drive layout: %s\n", WindowsErrorString());
+		safe_closehandle(hDrive);
+		return FALSE;
+	}
+
+	r = DeviceIoControl(hDrive, IOCTL_DISK_UPDATE_PROPERTIES, NULL, 0, NULL, 0, &size, NULL );
+	if (!r) {
+		uprintf("Could not refresh drive layout: %s\n", WindowsErrorString());
 		safe_closehandle(hDrive);
 		return FALSE;
 	}
