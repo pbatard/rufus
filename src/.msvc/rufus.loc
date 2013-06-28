@@ -55,7 +55,37 @@ m IDC_LOG -5 0
 r IDC_LOG +5 0
 t IDCANCEL "关闭"
 t IDC_START "开始"
+t IDC_ADVANCED_GROUP "高级选项"
+t IDC_ENABLE_FIXED_DISKS "列表固定(非flash)或USB磁盘分区"
+t IDC_EXTRA_PARTITION "添加修复旧的BIOS（额外的分区，校准等等）"
+t IDC_RUFUS_MBR "使用 Rufus MBR BIOS ID:"
+# TODO: dialog title
+t IDD_DIALOG "Does this work?"
+
 p IDD_ABOUTBOX
 t IDC_ABOUT_LICENSE "许可证"
 t IDC_ABOUT_UPDATES "更新"
 t IDOK "确定"
+t IDD_ABOUTBOX "关于"
+
+p IDD_LOG
+t IDC_LOG_CLEAR "清除日志"
+t IDC_LOG_SAVE "保存日志"
+t IDCANCEL "关闭日志"
+
+p IDD_LICENSE
+t IDOK "取消"
+
+p IDD_UPDATE_POLICY
+t IDS_UPDATE_SETTINGS_TXT "设置"
+t IDS_UPDATE_FREQUENCY_TXT "检查更新："
+t IDS_INCLUDE_BETAS_TXT "包括测试版本："
+t IDC_CHECK_NOW "立即检查"
+t IDCANCEL "取消"
+
+p IDD_NEW_VERSION
+t IDS_NEW_VERSION_AVAIL_TXT "更新的版本可用。请下载最新版本！"
+t IDC_WEBSITE "<a href="http://rufus.akeo.ie">点击这里进入网站</a>"
+t IDS_NEW_VERSION_NOTES_TXT "发行说明"
+t IDS_NEW_VERSION_DOWNLOAD_TXT "下载"
+t IDC_DOWNLOAD "下载"

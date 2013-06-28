@@ -871,6 +871,7 @@ BOOL CALLBACK LogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 
 	switch (message) {
 	case WM_INITDIALOG:
+		apply_localization(IDD_LOG, hDlg);
 		hLog = GetDlgItem(hDlg, IDC_LOG_EDIT);
 		// Increase the size of our log textbox to MAX_LOG_SIZE (unsigned word)
 		PostMessage(hLog, EM_LIMITTEXT, MAX_LOG_SIZE , 0);
@@ -893,8 +894,9 @@ BOOL CALLBACK LogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 			return TRUE;
 		case IDC_LOG_SAVE:
 			log_size = GetWindowTextLengthU(hLog);
-			if (log_size > 0)
-				log_buffer = (char*)malloc(log_size);
+			if (log_size <= 0)
+				break;
+			log_buffer = (char*)malloc(log_size);
 			if (log_buffer != NULL) {
 				log_size = GetDlgItemTextU(hDlg, IDC_LOG_EDIT, log_buffer, log_size);
 				if (log_size != 0) {
@@ -906,14 +908,13 @@ BOOL CALLBACK LogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 					safe_free(filepath);
 				}
 				safe_free(log_buffer);
-			} else {
-				uprintf("Could not allocate buffer to save log\n");
 			}
 			break;
 		}
 		break;
 	case WM_CLOSE:
 		ShowWindow(hDlg, SW_HIDE);
+		reset_localization(IDD_LOG);
 		log_displayed = FALSE;
 		return TRUE;
 	}

@@ -262,7 +262,7 @@ char* get_loc_data_file(const char* filename)
 	} while(1);
 
 out:
-	apply_localization(IDD_DIALOG, hMainDialog);
+	apply_localization(-1, NULL);
 	if (fd != NULL)
 		fclose(fd);
 	safe_free(wfilename);

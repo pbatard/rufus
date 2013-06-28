@@ -20,6 +20,8 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#pragma once
+
 // What we need for localization
 // # Comment
 // v 1 1                    // UI target version (major, minor)

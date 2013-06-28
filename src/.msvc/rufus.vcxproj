@@ -187,6 +187,7 @@
     <ClInclude Include="..\libcdio\cdio\logging.h" />
     <ClInclude Include="..\libcdio\cdio\udf.h" />
     <ClInclude Include="..\localization.h" />
+    <ClInclude Include="..\localization_data.h" />
     <ClInclude Include="..\msapi_utf8.h" />
     <ClInclude Include="..\dos.h" />
     <ClInclude Include="..\registry.h" />

@@ -100,6 +100,12 @@
 #define IDS_CLUSTERSIZE_TXT             2003
 #define IDS_LABEL_TXT                   2004
 #define IDS_FORMATOPTIONS_TXT           2005
+#define IDS_UPDATE_SETTINGS_TXT         2006
+#define IDS_UPDATE_FREQUENCY_TXT        2007
+#define IDS_INCLUDE_BETAS_TXT           2008
+#define IDS_NEW_VERSION_AVAIL_TXT       2009
+#define IDS_NEW_VERSION_DOWNLOAD_TXT    2010
+#define IDS_NEW_VERSION_NOTES_TXT       2011
 
 // Next default values for new objects
 // 
@@ -108,7 +114,7 @@
 #define _APS_NO_MFC                     1
 #define _APS_NEXT_RESOURCE_VALUE        404
 #define _APS_NEXT_COMMAND_VALUE         40001
-#define _APS_NEXT_CONTROL_VALUE         2020
+#define _APS_NEXT_CONTROL_VALUE         1071
 #define _APS_NEXT_SYMED_VALUE           3000
 #endif
 #endif
