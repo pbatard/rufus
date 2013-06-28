@@ -34,6 +34,7 @@
 #include "rufus.h"
 #include "msapi_utf8.h"
 #include "localization.h"
+#include "resource.h"	// TODO: remove_me - only needed for IDD_DIALOG
 
 static const wchar_t wspace[] = L" \t";
 
@@ -58,7 +59,9 @@ static loc_cmd* get_loc_cmd(wchar_t wc, wchar_t* wline) {
 		luprint("could not allocate command");
 		return NULL;
 	}
+	lcmd->ctrl_id = -1;
 	lcmd->command = parse_cmd[j].cmd;
+	lcmd->line_nr = loc_line_nr;
 
 	i = 0;
 	for (k = 0; parse_cmd[j].arg_type[k] != 0; k++) {
@@ -147,8 +150,7 @@ static void* get_loc_data_line(wchar_t* wline)
 	lcmd = get_loc_cmd(t, &wline[i]);
 	// TODO: process LC_LOCALE in seek_locale mode
 	// TODO: check return value?
-	execute_loc_cmd(lcmd);
-	free_loc_cmd(lcmd);
+	dispatch_loc_cmd(lcmd);
 
 	return NULL;
 }
@@ -176,6 +178,8 @@ char* get_loc_data_file(const char* filename)
 	if ((filename == NULL) || (filename[0] == 0))
 		return NULL;
 
+	// TODO: revert previous changes
+	free_loc_dlg();
 	loc_line_nr = 0;
 	safe_strcpy(loc_filename, sizeof(loc_filename), filename);
 	wfilename = utf8_to_wchar(filename);
@@ -258,6 +262,7 @@ char* get_loc_data_file(const char* filename)
 	} while(1);
 
 out:
+	apply_localization(IDD_DIALOG, hMainDialog);
 	if (fd != NULL)
 		fclose(fd);
 	safe_free(wfilename);

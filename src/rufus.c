@@ -40,6 +40,7 @@
 #include "resource.h"
 #include "rufus.h"
 #include "registry.h"
+#include "localization.h"
 
 /* Redefinitions for WDK and MinGW */
 #ifndef PBM_SETSTATE
@@ -1465,6 +1466,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		break;
 
 	case WM_INITDIALOG:
+		apply_localization(IDD_DIALOG, hDlg);
 		SetUpdateCheck();
 		// Create the log window (hidden)
 		hLogDlg = CreateDialogA(hMainInstance, MAKEINTRESOURCEA(IDD_LOG), hDlg, (DLGPROC)LogProc); 
@@ -1889,7 +1891,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	uprintf("*** " APPLICATION_NAME " init ***\n");
 
-	SetThreadLocale(MAKELCID(LANG_FRENCH, SUBLANG_FRENCH));
+	// Init localization
+	init_localization();
+
+// TODO: See what happens with this
+//	SetThreadLocale(MAKELCID(LANG_FRENCH, SUBLANG_FRENCH));
 
 	// Reattach the console, if we were started from commandline
 	if (AttachConsole(ATTACH_PARENT_PROCESS) != 0) {
@@ -1975,7 +1981,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	SetLGP(FALSE, &existing_key, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer", "NoDriveTypeAutorun", 0x9e);
 
 	// Create the main Window
-	if ( (hDlg = CreateDialogA(hInstance, MAKEINTRESOURCEA(IDD_DIALOG), NULL, MainCallback)) == NULL ) {
+	hDlg = CreateDialogA(hInstance, MAKEINTRESOURCEA(IDD_DIALOG), NULL, MainCallback);
+	if (hDlg == NULL) {
 		MessageBoxU(NULL, "Could not create Window", "DialogBox failure", MB_ICONSTOP);
 		goto out;
 	}
@@ -2042,6 +2049,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 out:
 	DestroyAllTooltips();
+	free_loc_dlg();
 	safe_free(iso_path);
 	safe_free(update.download_url);
 	safe_free(update.release_notes);

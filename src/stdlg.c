@@ -39,6 +39,7 @@
 #include "registry.h"
 #include "resource.h"
 #include "license.h"
+#include "localization.h"
 
 /* The following is only available on Vista and later */
 #if (_WIN32_WINNT >= 0x0600)
@@ -491,6 +492,8 @@ INT_PTR CALLBACK AboutCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 
 	switch (message) {
 	case WM_INITDIALOG:
+		// Execute dialog localization
+		apply_localization(IDD_ABOUTBOX, hDlg);
 		SetTitleBarIcon(hDlg);
 		CenterDialog(hDlg);
 		if (reg_commcheck)
@@ -529,6 +532,7 @@ INT_PTR CALLBACK AboutCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 		switch (LOWORD(wParam)) {
 		case IDOK:
 		case IDCANCEL:
+			reset_localization(IDD_ABOUTBOX);
 			EndDialog(hDlg, LOWORD(wParam));
 			return (INT_PTR)TRUE;
 		case IDC_ABOUT_LICENSE:
