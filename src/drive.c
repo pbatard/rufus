@@ -56,6 +56,7 @@ extern BOOL enable_fixed_disks;
  */
 static HANDLE GetHandle(char* Path, BOOL bWriteAccess, BOOL bLockDrive)
 {
+	int i;
 	DWORD size;
 	HANDLE hDrive = INVALID_HANDLE_VALUE;
 
@@ -72,10 +73,17 @@ static HANDLE GetHandle(char* Path, BOOL bWriteAccess, BOOL bLockDrive)
 		uprintf("Caution: Opened drive %s for write access\n", Path);
 	}
 
-	if ((bLockDrive) && (!DeviceIoControl(hDrive, FSCTL_LOCK_VOLUME, NULL, 0, NULL, 0, &size, NULL))) {
+	if (bLockDrive) {
+		for (i = 0; i < DRIVE_ACCESS_RETRIES; i++) {
+			if (DeviceIoControl(hDrive, FSCTL_LOCK_VOLUME, NULL, 0, NULL, 0, &size, NULL))
+				goto out;
+			if (IS_ERROR(FormatStatus))	// User cancel
+				break;
+			Sleep(DRIVE_ACCESS_TIMEOUT/DRIVE_ACCESS_RETRIES);
+		}
+		// If we reached this section, either we didn't manage to get a lock or the user cancelled
 		uprintf("Could not get exclusive access to device %s: %s\n", Path, WindowsErrorString());
 		safe_closehandle(hDrive);
-		goto out;
 	}
 
 out:
@@ -114,7 +122,8 @@ HANDLE GetPhysicalHandle(DWORD DriveIndex, BOOL bWriteAccess, BOOL bLockDrive)
 // See http://msdn.microsoft.com/en-us/library/cc542456.aspx
 // The returned string is allocated and must be freed
 // TODO: a drive may have multiple volumes - should we handle those?
-char* GetLogicalName(DWORD DriveIndex, BOOL bKeepTrailingBackslash)
+#define suprintf(...) if (!bSilent) uprintf(__VA_ARGS__)
+char* GetLogicalName(DWORD DriveIndex, BOOL bKeepTrailingBackslash, BOOL bSilent)
 {
 	BOOL success = FALSE;
 	char volume_name[MAX_PATH];
@@ -134,13 +143,13 @@ char* GetLogicalName(DWORD DriveIndex, BOOL bKeepTrailingBackslash)
 		if (i == 0) {
 			hVolume = FindFirstVolumeA(volume_name, sizeof(volume_name));
 			if (hVolume == INVALID_HANDLE_VALUE) {
-				uprintf("Could not access first GUID volume: %s\n", WindowsErrorString());
+				suprintf("Could not access first GUID volume: %s\n", WindowsErrorString());
 				goto out;
 			}
 		} else {
 			if (!FindNextVolumeA(hVolume, volume_name, sizeof(volume_name))) {
 				if (GetLastError() != ERROR_NO_MORE_FILES) {
-					uprintf("Could not access next GUID volume: %s\n", WindowsErrorString());
+					suprintf("Could not access next GUID volume: %s\n", WindowsErrorString());
 				}
 				goto out;
 			}
@@ -149,7 +158,7 @@ char* GetLogicalName(DWORD DriveIndex, BOOL bKeepTrailingBackslash)
 		// Sanity checks
 		len = safe_strlen(volume_name);
 		if ((len <= 1) || (safe_strnicmp(volume_name, volume_start, 4) != 0) || (volume_name[len-1] != '\\')) {
-			uprintf("'%s' is not a GUID volume name\n", volume_name);
+			suprintf("'%s' is not a GUID volume name\n", volume_name);
 			continue;
 		}
 
@@ -162,27 +171,27 @@ char* GetLogicalName(DWORD DriveIndex, BOOL bKeepTrailingBackslash)
 		volume_name[len-1] = 0;
 
 		if (QueryDosDeviceA(&volume_name[4], path, sizeof(path)) == 0) {
-			uprintf("Failed to get device path for GUID volume '%s': %s\n", volume_name, WindowsErrorString());
+			suprintf("Failed to get device path for GUID volume '%s': %s\n", volume_name, WindowsErrorString());
 			continue;
 		}
 
 		for (j=0; (j<ARRAYSIZE(ignore_device)) &&
 			(safe_strnicmp(path, ignore_device[j], safe_strlen(ignore_device[j])) != 0); j++);
 		if (j < ARRAYSIZE(ignore_device)) {
-			uprintf("Skipping GUID volume for '%s'\n", path);
+			suprintf("Skipping GUID volume for '%s'\n", path);
 			continue;
 		}
 
 		// If we can't have FILE_SHARE_WRITE, forget it
 		hDrive = CreateFileA(volume_name, GENERIC_READ, FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, 0);
 		if (hDrive == INVALID_HANDLE_VALUE) {
-			uprintf("Could not open GUID volume '%s': %s\n", volume_name, WindowsErrorString());
+			suprintf("Could not open GUID volume '%s': %s\n", volume_name, WindowsErrorString());
 			continue;
 		}
 
 		if ((!DeviceIoControl(hDrive, IOCTL_VOLUME_GET_VOLUME_DISK_EXTENTS, NULL, 0,
 			&DiskExtents, sizeof(DiskExtents), &size, NULL)) || (size <= 0)) {
-			uprintf("Could not get Disk Extents: %s\n", WindowsErrorString());
+			suprintf("Could not get Disk Extents: %s\n", WindowsErrorString());
 			safe_closehandle(hDrive);
 			continue;
 		}
@@ -201,13 +210,41 @@ out:
 	return (success)?safe_strdup(volume_name):NULL;
 }
 
+/* Wait for a logical drive to reappear - Used when a drive has just been repartitioned */
+BOOL WaitForLogical(DWORD DriveIndex)
+{
+	DWORD i;
+	char* LogicalPath = NULL;
+
+	for (i = 0; i < DRIVE_ACCESS_RETRIES; i++) {
+		LogicalPath = GetLogicalName(DriveIndex, FALSE, TRUE);
+		if (LogicalPath != NULL) {
+			free(LogicalPath);
+			return TRUE;
+		}
+		if (IS_ERROR(FormatStatus))	// User cancel
+			return FALSE;
+		Sleep(DRIVE_ACCESS_TIMEOUT/DRIVE_ACCESS_RETRIES);
+	}
+	uprintf("Timeout while waiting for logical drive\n");
+	return FALSE;
+}
+
 /* 
- * Return a handle to the first logical volume on the disk identified by DriveIndex
+ * Obtain a handle to the first logical volume on the disk identified by DriveIndex
+ * Returns INVALID_HANDLE_VALUE on error or NULL if no logical path exists (typical
+ * of unpartitioned drives)
  */
 HANDLE GetLogicalHandle(DWORD DriveIndex, BOOL bWriteAccess, BOOL bLockDrive)
 {
 	HANDLE hLogical = INVALID_HANDLE_VALUE;
-	char* LogicalPath = GetLogicalName(DriveIndex, FALSE);
+	char* LogicalPath = GetLogicalName(DriveIndex, FALSE, FALSE);
+
+	if (LogicalPath == NULL) {
+		uprintf("No logical drive found (unpartitioned?)\n");
+		return NULL;
+	}
+
 	hLogical = GetHandle(LogicalPath, bWriteAccess, bLockDrive);
 	safe_free(LogicalPath);
 	return hLogical;
@@ -451,7 +488,7 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 	safe_closehandle(hPhysical);
 
 	// Populate the filesystem data
-	volume_name = GetLogicalName(DriveIndex, TRUE);
+	volume_name = GetLogicalName(DriveIndex, TRUE, FALSE);
 	if ((volume_name == NULL) || (!GetVolumeInformationA(volume_name, NULL, 0, NULL, NULL, NULL, FileSystemName, FileSystemNameSize))) {
 		uprintf("No volume information for disk 0x%02x\n", DriveIndex);
 		FileSystemName[0] = 0;
@@ -490,8 +527,9 @@ typedef struct _DRIVE_LAYOUT_INFORMATION_EX4 {
  * Create a partition table
  * See http://technet.microsoft.com/en-us/library/cc739412.aspx for some background info
  * NB: if you modify the MBR outside of using the Windows API, Windows still uses the cached
- * copy it got from the last IOCTL, and ignore your changes until you replug the drive...
- */ 
+ * copy it got from the last IOCTL, and ignores your changes until you replug the drive
+ * or issue an IOCTL_DISK_UPDATE_PROPERTIES.
+ */
 #if !defined(PARTITION_BASIC_DATA_GUID)
 const GUID PARTITION_BASIC_DATA_GUID = { 0xebd0a0a2, 0xb9e5, 0x4433, {0x87, 0xc0, 0x68, 0xb6, 0xb7, 0x26, 0x99, 0xc7} };
 #endif
@@ -624,6 +662,41 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 			(BYTE*)&DriveLayoutEx, size, NULL, 0, &size, NULL );
 	if (!r) {
 		uprintf("Could not set drive layout: %s\n", WindowsErrorString());
+		safe_closehandle(hDrive);
+		return FALSE;
+	}
+	// Diskpart does call the following IOCTL this after updating the partition table, so we do too
+	r = DeviceIoControl(hDrive, IOCTL_DISK_UPDATE_PROPERTIES, NULL, 0, NULL, 0, &size, NULL );
+	if (!r) {
+		uprintf("Could not refresh drive layout: %s\n", WindowsErrorString());
+		safe_closehandle(hDrive);
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
+/* Delete the disk partition table */
+BOOL DeletePartitions(HANDLE hDrive)
+{
+	BOOL r;
+	DWORD size;
+
+	PrintStatus(0, TRUE, "Erasing Partitions...");
+
+	r = DeviceIoControl(hDrive, IOCTL_DISK_DELETE_DRIVE_LAYOUT, NULL, 0, NULL, 0, &size, NULL );
+	if (!r) {
+		// Ignore GEN_FAILURE as this is what XP returns for unpartitioned
+		if (GetLastError() != ERROR_GEN_FAILURE) {
+			uprintf("Could not delete drive layout: %s\n", WindowsErrorString());
+			safe_closehandle(hDrive);
+			return FALSE;
+		}
+	}
+
+	r = DeviceIoControl(hDrive, IOCTL_DISK_UPDATE_PROPERTIES, NULL, 0, NULL, 0, &size, NULL );
+	if (!r) {
+		uprintf("Could not refresh drive layout: %s\n", WindowsErrorString());
 		safe_closehandle(hDrive);
 		return FALSE;
 	}

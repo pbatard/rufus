@@ -36,6 +36,8 @@
 #define STR_NO_LABEL                "NO_LABEL"
 #define RUFUS_CANCELBOX_TITLE       APPLICATION_NAME " - Cancellation"
 #define RUFUS_BLOCKING_IO_TITLE     APPLICATION_NAME " - Flushing buffers"
+#define DRIVE_ACCESS_TIMEOUT        10000		// How long we should retry drive access (in ms)
+#define DRIVE_ACCESS_RETRIES        20			// How many times we should retry
 #define DRIVE_INDEX_MIN             0x00000080
 #define DRIVE_INDEX_MAX             0x000000C0
 #define MAX_DRIVES                  (DRIVE_INDEX_MAX - DRIVE_INDEX_MIN)
@@ -60,7 +62,6 @@
 #define IsChecked(CheckBox_ID)      (IsDlgButtonChecked(hMainDialog, CheckBox_ID) == BST_CHECKED)
 
 #define safe_free(p) do {free((void*)p); p = NULL;} while(0)
-#define safe_closehandle(h) do {if (h != INVALID_HANDLE_VALUE) {CloseHandle(h); h = INVALID_HANDLE_VALUE;}} while(0)
 #define safe_min(a, b) min((size_t)(a), (size_t)(b))
 #define safe_strcp(dst, dst_max, src, count) do {memcpy(dst, src, safe_min(count, dst_max)); \
 	((char*)dst)[safe_min(count, dst_max)-1] = 0;} while(0)
@@ -71,8 +72,8 @@
 #define safe_stricmp(str1, str2) _stricmp(((str1==NULL)?"<NULL>":str1), ((str2==NULL)?"<NULL>":str2))
 #define safe_strncmp(str1, str2, count) strncmp(((str1==NULL)?"<NULL>":str1), ((str2==NULL)?"<NULL>":str2), count)
 #define safe_strnicmp(str1, str2, count) _strnicmp(((str1==NULL)?"<NULL>":str1), ((str2==NULL)?"<NULL>":str2), count)
-#define safe_closehandle(h) do {if (h != INVALID_HANDLE_VALUE) {CloseHandle(h); h = INVALID_HANDLE_VALUE;}} while(0)
-#define safe_unlockclose(h) do {if (h != INVALID_HANDLE_VALUE) {UnlockDrive(h); CloseHandle(h); h = INVALID_HANDLE_VALUE;}} while(0)
+#define safe_closehandle(h) do {if ((h != INVALID_HANDLE_VALUE) && (h != NULL)) {CloseHandle(h); h = INVALID_HANDLE_VALUE;}} while(0)
+#define safe_unlockclose(h) do {if ((h != INVALID_HANDLE_VALUE) && (h != NULL)) {UnlockDrive(h); CloseHandle(h); h = INVALID_HANDLE_VALUE;}} while(0)
 #define safe_sprintf(dst, count, ...) do {_snprintf(dst, count, __VA_ARGS__); (dst)[(count)-1] = 0; } while(0)
 #define safe_strlen(str) ((((char*)str)==NULL)?0:strlen(str))
 #define safe_strdup _strdup
@@ -241,14 +242,14 @@ typedef enum TASKBAR_PROGRESS_FLAGS
 
 /* Windows versions */
 enum WindowsVersion {
-	WINDOWS_UNDEFINED,
+	WINDOWS_UNDEFINED = 0,
 	WINDOWS_UNSUPPORTED,
 	WINDOWS_XP,
-	WINDOWS_2003,
+	WINDOWS_2003,	// Also XP x64
 	WINDOWS_VISTA,
 	WINDOWS_7,
-	WINDOWS_8,
-	WINDOWS_9
+	WINDOWS_8_OR_LATER,
+	WINDOWS_MAX
 };
 
 /*
@@ -276,6 +277,7 @@ extern int dialog_showing;
  * Shared prototypes
  */
 extern enum WindowsVersion DetectWindowsVersion(void);
+extern const char* PrintWindowsVersion(enum WindowsVersion version);
 extern const char *WindowsErrorString(void);
 extern void DumpBufferHex(void *buf, size_t size);
 extern void PrintStatus(unsigned int duration, BOOL debug, const char *format, ...);
@@ -303,11 +305,13 @@ extern BOOL InstallSyslinux(DWORD drive_index, char drive_letter);
 DWORD WINAPI FormatThread(void* param);
 extern char* GetPhysicalName(DWORD DriveIndex);
 extern HANDLE GetPhysicalHandle(DWORD DriveIndex, BOOL bWriteAccess, BOOL bLockDrive);
-extern char* GetLogicalName(DWORD DriveIndex, BOOL bKeepTrailingBackslash);
+extern BOOL WaitForLogical(DWORD DriveIndex);
+extern char* GetLogicalName(DWORD DriveIndex, BOOL bKeepTrailingBackslash, BOOL bSilent);
 extern HANDLE GetLogicalHandle(DWORD DriveIndex, BOOL bWriteAccess, BOOL bLockDrive);
 extern char GetDriveLetter(DWORD DriveIndex);
 extern char GetUnusedDriveLetter(void);
 extern BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL mbr_uefi_marker);
+extern BOOL DeletePartitions(HANDLE hDrive);
 extern const char* GetPartitionType(BYTE Type);
 extern BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSystemNameSize);
 extern BOOL GetDriveLabel(DWORD DriveIndex, char* letter, char** label);

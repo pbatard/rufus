@@ -625,7 +625,7 @@ static BOOL GetUSBDevices(DWORD devnum)
 				if(GetLastError() != ERROR_NO_MORE_ITEMS) {
 					uprintf("SetupDiEnumDeviceInterfaces failed: %s\n", WindowsErrorString());
 				} else {
-					uprintf("A device was eliminated because it didn't report itself as a disk\n");
+					uprintf("A device was eliminated because it didn't report itself as a removable disk\n");
 				}
 				break;
 			}
@@ -1265,6 +1265,8 @@ void InitDialog(HWND hDlg)
 	HDC hDC;
 	int i, i16, s16;
 	char tmp[128], *token;
+	BOOL is_x64 = FALSE;
+	BOOL (__stdcall *pIsWow64Process)(HANDLE, PBOOL) = NULL;
 
 #ifdef RUFUS_TEST
 	ShowWindow(GetDlgItem(hDlg, IDC_TEST), SW_SHOW);
@@ -1309,6 +1311,18 @@ void InitDialog(HWND hDlg)
 	for (i=0; (i<4) && ((token = strtok(NULL, ".")) != NULL); i++)
 		rufus_version[i] = (uint16_t)atoi(token);
 	uprintf(APPLICATION_NAME " version %d.%d.%d.%d\n", rufus_version[0], rufus_version[1], rufus_version[2], rufus_version[3]);
+
+	// Detect if we're running a 32 or 64 bit system
+	if (sizeof(uintptr_t) < 8) {
+		pIsWow64Process = (BOOL (__stdcall *)(HANDLE, PBOOL))
+			GetProcAddress(GetModuleHandleA("KERNEL32"), "IsWow64Process");
+		if (pIsWow64Process != NULL) {
+			(*pIsWow64Process)(GetCurrentProcess(), &is_x64);
+		}
+	} else {
+		is_x64 = TRUE;
+	}
+	uprintf("Windows version: %s %d-bit\n", PrintWindowsVersion(nWindowsVersion), is_x64?64:32);
 
 	// Prefer FreeDOS to MS-DOS
 	selection_default = DT_FREEDOS;
@@ -1543,16 +1557,22 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				Point.x = min(DialogRect.right + GetSystemMetrics(SM_CXSIZEFRAME)+(int)(2.0f * fScale), DesktopRect.right - nWidth);
 				Point.y = max(DialogRect.top, DesktopRect.top - nHeight);
 				MoveWindow(hLogDlg, Point.x, Point.y, nWidth, nHeight, FALSE);
+				// The log may have been recentered to fit the screen, in which case, try to shift our main dialog left
+				nWidth = DialogRect.right - DialogRect.left;
+				nHeight = DialogRect.bottom - DialogRect.top;
+				MoveWindow(hDlg, max((DialogRect.left<0)?DialogRect.left:0,
+					Point.x - nWidth - GetSystemMetrics(SM_CXSIZEFRAME) - (int)(2.0f * fScale)), Point.y, nWidth, nHeight, TRUE);
 				first_log_display = FALSE;
 			}
 			// Display the log Window
 			log_displayed = !log_displayed;
-			ShowWindow(hLogDlg, log_displayed?SW_SHOW:SW_HIDE);
 			if (IsShown(hISOProgressDlg))
 				SetFocus(hISOProgressDlg);
 			// Set focus on the start button
 			SendMessage(hMainDialog, WM_NEXTDLGCTL, (WPARAM)FALSE, 0);
 			SendMessage(hMainDialog, WM_NEXTDLGCTL, (WPARAM)GetDlgItem(hMainDialog, IDC_START), TRUE);
+			// Must come last for the log window to get focus
+			ShowWindow(hLogDlg, log_displayed?SW_SHOW:SW_HIDE);
 			break;
 #ifdef RUFUS_TEST
 		case IDC_TEST:
@@ -1815,8 +1835,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_ERROR, 0);
 			SetTaskbarProgressState(TASKBAR_ERROR);
 			PrintStatus(0, FALSE, "FAILED");
-			Notification(MSG_ERROR, NULL, "Error", "Error: %s.%s", StrError(FormatStatus), 
-				(strchr(StrError(FormatStatus), '\n') != NULL)?"":"\nFor more information, please check the log.");
+			Notification(MSG_ERROR, NULL, "Error", "Error: %s", StrError(FormatStatus));
 		}
 		FormatStatus = 0;
 		format_op_in_progress = FALSE;
@@ -1919,8 +1938,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 				wait_for_mutex = 150;	// Try to acquire the mutex for 15 seconds
 		}
 
-		while ((opt = getopt_long(argc, argv, "?hi:w:", long_options, &option_index)) != EOF)
+		while ((opt = getopt_long(argc, argv, "?fhi:w:", long_options, &option_index)) != EOF)
 			switch (opt) {
+			case 'f':
+				enable_fixed_disks = TRUE;
+				break;
 			case 'i':
 				if (_access(optarg, 0) != -1) {
 					iso_path = safe_strdup(optarg);

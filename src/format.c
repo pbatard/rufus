@@ -328,7 +328,6 @@ static DWORD GetFATSizeSectors(DWORD DskSize, DWORD ReservedSecCnt, DWORD SecPer
  * Large FAT32 volume formatting from fat32format by Tom Thornhill
  * http://www.ridgecrop.demon.co.uk/index.htm?fat32format.htm
  */
-// TODO: (v1.3.4) disable slow format for > 32 GB FAT32
 static BOOL FormatFAT32(DWORD DriveIndex)
 {
 	BOOL r = FALSE;
@@ -369,15 +368,14 @@ static BOOL FormatFAT32(DWORD DriveIndex)
 	PrintStatus(0, TRUE, "Formatting (Large FAT32)...");
 	VolumeId = GetVolumeID();
 
-	// Open the drive (volume should already be locked)
-	hLogicalVolume = GetLogicalHandle(DriveIndex, TRUE, FALSE);
+	// Open the drive and lock it
+	hLogicalVolume = GetLogicalHandle(DriveIndex, TRUE, TRUE);
 	if (IS_ERROR(FormatStatus)) goto out;
-	if (hLogicalVolume == INVALID_HANDLE_VALUE)
-		die("Could not access logical volume\n", ERROR_OPEN_FAILED);
+	if ((hLogicalVolume == INVALID_HANDLE_VALUE) || (hLogicalVolume == NULL))
+		die("Invalid logical volume handle\n", ERROR_INVALID_HANDLE);
 
-	// Make sure we get exclusive access
-	if (!UnmountVolume(hLogicalVolume))
-		return r;
+	// Try to disappear the volume while we're formatting it
+	UnmountVolume(hLogicalVolume);
 
 	// Work out drive params
 	if (!DeviceIoControl (hLogicalVolume, IOCTL_DISK_GET_DRIVE_GEOMETRY, NULL, 0, &dgDrive,
@@ -581,7 +579,7 @@ static BOOL FormatFAT32(DWORD DriveIndex)
 	// Handle must be closed for SetVolumeLabel to work
 	safe_closehandle(hLogicalVolume);
 	PrintStatus(0, TRUE, "Setting Label (This may take while)...");
-	VolumeName = GetLogicalName(DriveIndex, TRUE);
+	VolumeName = GetLogicalName(DriveIndex, TRUE, TRUE);
 	wVolumeName = utf8_to_wchar(VolumeName);
 	if ((wVolumeName == NULL) || (!SetVolumeLabelW(wVolumeName, wLabel))) {
 		uprintf("Could not set label: %s\n", WindowsErrorString());
@@ -620,7 +618,7 @@ static BOOL FormatDrive(DWORD DriveIndex)
 	GetWindowTextA(hFileSystem, FSType, ARRAYSIZE(FSType));
 	safe_sprintf(format_status, ARRAYSIZE(format_status), "Formatting (%s)...", FSType);
 	PrintStatus(0, TRUE, format_status);
-	VolumeName = GetLogicalName(DriveIndex, FALSE);
+	VolumeName = GetLogicalName(DriveIndex, FALSE, TRUE);
 	wVolumeName = utf8_to_wchar(VolumeName);
 	if (wVolumeName == NULL) {
 		uprintf("Could not read volume name\n");
@@ -820,6 +818,7 @@ BOOL WriteRufusMBR(FILE *fp)
 static BOOL WriteMBR(HANDLE hPhysicalDrive)
 {
 	BOOL r = FALSE;
+	DWORD size;
 	int dt, fs;
 	unsigned char* buf = NULL;
 	size_t SecSize = SelectedDrive.Geometry.BytesPerSector;
@@ -888,6 +887,9 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 			r = write_win7_mbr(&fake_fd);
 		}
 	}
+
+	// Tell the system we've updated the disk properties
+	DeviceIoControl(hPhysicalDrive, IOCTL_DISK_UPDATE_PROPERTIES, NULL, 0, NULL, 0, &size, NULL );
 
 out:
 	safe_free(buf);
@@ -1089,18 +1091,45 @@ out:
 }
 
 /*
+ * Mount the volume identified by drive_guid to mountpoint drive_name
+ */
+static BOOL MountVolume(char* drive_name, char *drive_guid)
+{
+	char mounted_guid[52];	// You need at least 51 characters on XP
+
+	if (!SetVolumeMountPointA(drive_name, drive_guid)) {
+		// If the OS was faster than us at remounting the drive, this operation can fail
+		// with ERROR_DIR_NOT_EMPTY. If that's the case, just check that mountpoints match
+		if (GetLastError() == ERROR_DIR_NOT_EMPTY) {
+			if (!GetVolumeNameForVolumeMountPointA(drive_name, mounted_guid, sizeof(mounted_guid))) {
+				uprintf("%s already mounted, but volume GUID could not be checked: %s\n",
+					drive_name, WindowsErrorString());
+				return FALSE;
+			}
+			if (safe_strcmp(drive_guid, mounted_guid) != 0) {
+				uprintf("%s already mounted, but volume GUID doesn't match:\r\n  expected %s, got %s\n",
+					drive_name, drive_guid, mounted_guid);
+				return FALSE;
+			}
+			uprintf("%s was already mounted as %s\n", drive_guid, drive_name);
+		} else {
+			return FALSE;
+		}
+	}
+	return TRUE;
+}
+
+/*
  * Issue a complete remount of the volume
  */
-static BOOL RemountVolume(char drive_letter)
+static BOOL RemountVolume(char* drive_name)
 {
-	char drive_guid[50];
-	char drive_name[] = "?:\\";
+	char drive_guid[51];
 
-	drive_name[0] = drive_letter;
 	if (GetVolumeNameForVolumeMountPointA(drive_name, drive_guid, sizeof(drive_guid))) {
 		if (DeleteVolumeMountPointA(drive_name)) {
 			Sleep(200);
-			if (SetVolumeMountPointA(drive_name, drive_guid)) {
+			if (MountVolume(drive_name, drive_guid)) {
 				uprintf("Successfully remounted %s on %s\n", &drive_guid[4], drive_name);
 			} else {
 				uprintf("Failed to remount %s on %s\n", &drive_guid[4], drive_name);
@@ -1170,6 +1199,7 @@ DWORD WINAPI CloseFormatPromptThread(LPVOID param) {
  *   Unlock the volume.
  *   Close the volume handle.
  */
+#define CHECK_FOR_USER_CANCEL 	if (IS_ERROR(FormatStatus)) goto out
 DWORD WINAPI FormatThread(LPVOID param)
 {
 	int r, pt, bt, fs, dt;
@@ -1212,26 +1242,41 @@ DWORD WINAPI FormatThread(LPVOID param)
 		uprintf("Failed to delete mountpoint %s: %s\n", drive_name, WindowsErrorString());
 		// Try to continue. We will bail out if this causes an issue.
 	}
-	uprintf("Will use '%c': as volume mountpoint\n", drive_name[0]);
+	uprintf("Will use '%c:' as volume mountpoint\n", drive_name[0]);
 
+	// ...but we need a lock to the logical drive to be able to write anything to it
 	hLogicalVolume = GetLogicalHandle(DriveIndex, FALSE, TRUE);
 	if (hLogicalVolume == INVALID_HANDLE_VALUE) {
 		uprintf("Could not lock volume\n");
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_OPEN_FAILED;
 		goto out;
+	} else if (hLogicalVolume == NULL) {
+		// NULL is returned for cases where the drive is not yet partitioned
+		uprintf("Drive does not appear to be partitioned\n");
+	} else if (!UnmountVolume(hLogicalVolume)) {
+		uprintf("Trying to continue regardless...\n");
 	}
-	UnmountVolume(hLogicalVolume);
-	if (FormatStatus) goto out;	// Check for user cancel
+	CHECK_FOR_USER_CANCEL;
 
 	PrintStatus(0, TRUE, "Analyzing existing boot records...\n");
 	AnalyzeMBR(hPhysicalDrive);
-	AnalyzePBR(hLogicalVolume);
+	if (hLogicalVolume != NULL) {
+		AnalyzePBR(hLogicalVolume);
+	}
 	UpdateProgress(OP_ANALYZE_MBR, -1.0f);
+
+	// Zap any existing partitions. This should help to prevent access errors
+	// TODO: With this, we should be able to avoid having to deal with the logical volume above
+	if (!DeletePartitions(hPhysicalDrive)) {
+		uprintf("Could not reset partitions\n");
+		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_PARTITION_FAILURE;
+		goto out;
+	}
 
 	if (IsChecked(IDC_BADBLOCKS)) {
 		do {
 			// create a log file for bad blocks report. Since %USERPROFILE% may
-			// have localised characters, we use the UTF-8 API.
+			// have localized characters, we use the UTF-8 API.
 			userdir = getenvU("USERPROFILE");
 			safe_strcpy(logfile, MAX_PATH, userdir);
 			safe_free(userdir);
@@ -1251,9 +1296,8 @@ DWORD WINAPI FormatThread(LPVOID param)
 			if (!BadBlocks(hPhysicalDrive, SelectedDrive.DiskSize,
 				SelectedDrive.Geometry.BytesPerSector, ComboBox_GetCurSel(hNBPasses)+1, &report, log_fd)) {
 				uprintf("Bad blocks: Check failed.\n");
-				if (!FormatStatus)
-					FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|
-						APPERR(ERROR_BADBLOCKS_FAILURE);
+				if (!IS_ERROR(FormatStatus))
+					FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_BADBLOCKS_FAILURE);
 				ClearMBRGPT(hPhysicalDrive, SelectedDrive.DiskSize, SelectedDrive.Geometry.BytesPerSector);
 				fclose(log_fd);
 				_unlink(logfile);
@@ -1288,13 +1332,14 @@ DWORD WINAPI FormatThread(LPVOID param)
 			goto out;
 		}
 	}
-	// Close the (unmounted) volume before formatting, but keep the lock
-	// According to MS this relinquishes the lock, so...
-	PrintStatus(0, TRUE, "Closing existing volume...\n");
-	if (!CloseHandle(hLogicalVolume)) {
-		uprintf("Could not close volume: %s\n", WindowsErrorString());
-		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_ACCESS_DENIED;
-		goto out;
+	// Close the (unmounted) volume before formatting
+	if (hLogicalVolume != NULL) {
+		PrintStatus(0, TRUE, "Closing existing volume...\n");
+		if (!CloseHandle(hLogicalVolume)) {
+			uprintf("Could not close volume: %s\n", WindowsErrorString());
+			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_ACCESS_DENIED;
+			goto out;
+		}
 	}
 	hLogicalVolume = INVALID_HANDLE_VALUE;
 
@@ -1304,12 +1349,12 @@ DWORD WINAPI FormatThread(LPVOID param)
 	// before repartitioning. Else, all kind of bad things can happen.
 	if (!ClearMBRGPT(hPhysicalDrive, SelectedDrive.DiskSize, SelectedDrive.Geometry.BytesPerSector)) {
 		uprintf("unable to zero MBR/GPT\n");
-		if (!FormatStatus)
+		if (!IS_ERROR(FormatStatus))
 			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_WRITE_FAULT;
 		goto out;
 	}
-	if (FormatStatus) goto out;	// Check for user cancel
 	UpdateProgress(OP_ZERO_MBR, -1.0f);
+	CHECK_FOR_USER_CANCEL;
 
 	CreateThread(NULL, 0, CloseFormatPromptThread, NULL, 0, NULL);
 	if (!CreatePartition(hPhysicalDrive, pt, fs, (pt==PARTITION_STYLE_MBR)&&(bt==BT_UEFI))) {
@@ -1318,8 +1363,11 @@ DWORD WINAPI FormatThread(LPVOID param)
 	}
 	UpdateProgress(OP_PARTITION, -1.0f);
 
-	// Add a small delay after partitioning to be safe
+	// Wait for the logical drive we just created to appear
+	uprintf("Waiting for logical drive to reappear...\n");
 	Sleep(200);
+	WaitForLogical(DriveIndex);	// We try to continue even if this fails, just in case
+	CHECK_FOR_USER_CANCEL;
 
 	// If FAT32 is requested and we have a large drive (>32 GB) use 
 	// large FAT32 format, else use MS's FormatEx.
@@ -1331,7 +1379,22 @@ DWORD WINAPI FormatThread(LPVOID param)
 		goto out;
 	}
 
-	guid_volume = GetLogicalName(DriveIndex, TRUE);
+	// Thanks to Microsoft, we must fix the MBR AFTER the drive has been formatted
+	if (pt == PARTITION_STYLE_MBR) {
+		PrintStatus(0, TRUE, "Writing master boot record...");
+		if (!WriteMBR(hPhysicalDrive)) {
+			if (!IS_ERROR(FormatStatus))
+				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_WRITE_FAULT;
+			goto out;
+		}
+		UpdateProgress(OP_FIX_MBR, -1.0f);
+	}
+	Sleep(200);
+	WaitForLogical(DriveIndex);
+	// Try to continue
+	CHECK_FOR_USER_CANCEL;
+
+	guid_volume = GetLogicalName(DriveIndex, TRUE, TRUE);
 	if (guid_volume == NULL) {
 		uprintf("Could not get GUID volume name\n");
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_NO_VOLUME_ID;
@@ -1339,22 +1402,12 @@ DWORD WINAPI FormatThread(LPVOID param)
 	}
 	uprintf("Found volume GUID %s\n", guid_volume);
 
-	if (pt == PARTITION_STYLE_MBR) {
-		PrintStatus(0, TRUE, "Writing master boot record...");
-		if (!WriteMBR(hPhysicalDrive)) {
-			if (!FormatStatus)
-				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_WRITE_FAULT;
-			goto out;
-		}
-		UpdateProgress(OP_FIX_MBR, -1.0f);
-	}
-	if (FormatStatus) goto out;	// Check for user cancel
-
-	if (!SetVolumeMountPointA(drive_name, guid_volume)) {
+	if (!MountVolume(drive_name, guid_volume)) {
 		uprintf("Could not remount %s on %s: %s\n", guid_volume, drive_name, WindowsErrorString());
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_MOUNT_VOLUME);
 		goto out;
 	}
+	CHECK_FOR_USER_CANCEL;
 
 	if (IsChecked(IDC_BOOT)) {
 		if (bt == BT_UEFI) {
@@ -1368,7 +1421,7 @@ DWORD WINAPI FormatThread(LPVOID param)
 			// We still have a lock, which we need to modify the volume boot record 
 			// => no need to reacquire the lock...
 			hLogicalVolume = GetLogicalHandle(DriveIndex, TRUE, FALSE);
-			if (hLogicalVolume == INVALID_HANDLE_VALUE) {
+			if ((hLogicalVolume == INVALID_HANDLE_VALUE) || (hLogicalVolume == NULL)) {
 				uprintf("Could not re-mount volume for partition boot record access\n");
 				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_OPEN_FAILED;
 				goto out;
@@ -1377,7 +1430,7 @@ DWORD WINAPI FormatThread(LPVOID param)
 			// [0x00000456] The media in the drive may have changed
 			PrintStatus(0, TRUE, "Writing partition boot record...");
 			if (!WritePBR(hLogicalVolume)) {
-				if (!FormatStatus)
+				if (!IS_ERROR(FormatStatus))
 					FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_WRITE_FAULT;
 				goto out;
 			}
@@ -1392,21 +1445,21 @@ DWORD WINAPI FormatThread(LPVOID param)
 		if (IsChecked(IDC_SET_ICON))
 			SetAutorun(drive_name);
 	}
-	if (FormatStatus) goto out;	// Check for user cancel
+	CHECK_FOR_USER_CANCEL;
 
 	// We issue a complete remount of the filesystem at on account of:
 	// - Ensuring the file explorer properly detects that the volume was updated
 	// - Ensuring that an NTFS system will be reparsed so that it becomes bootable
-	if (!RemountVolume(drive_name[0]))
+	if (!RemountVolume(drive_name))
 		goto out;
-	if (FormatStatus) goto out;	// Check for user cancel
+	CHECK_FOR_USER_CANCEL;
 
 	if (IsChecked(IDC_BOOT)) {
 		if ((dt == DT_WINME) || (dt == DT_FREEDOS)) {
 			UpdateProgress(OP_DOS, -1.0f);
 			PrintStatus(0, TRUE, "Copying DOS files...");
 			if (!ExtractDOS(drive_name)) {
-				if (!FormatStatus)
+				if (!IS_ERROR(FormatStatus))
 					FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANNOT_COPY;
 				goto out;
 			}
@@ -1416,7 +1469,7 @@ DWORD WINAPI FormatThread(LPVOID param)
 				PrintStatus(0, TRUE, "Copying ISO files...");
 				drive_name[2] = 0;
 				if (!ExtractISO(iso_path, drive_name, FALSE)) {
-					if (!FormatStatus)
+					if (!IS_ERROR(FormatStatus))
 						FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANNOT_COPY;
 					goto out;
 				}
@@ -1449,7 +1502,7 @@ DWORD WINAPI FormatThread(LPVOID param)
 		if (IsChecked(IDC_SET_ICON))
 			SetAutorun(drive_name);
 		// Issue another complete remount before we exit, to ensure we're clean
-		RemountVolume(drive_name[0]);
+		RemountVolume(drive_name);
 		// NTFS fixup (WinPE/AIK images don't seem to boot without an extra checkdisk)
 		if ((dt == DT_ISO) && (fs == FS_NTFS)) {
 			CheckDisk(drive_name[0]);
