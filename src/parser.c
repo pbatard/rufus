@@ -45,11 +45,11 @@ static loc_cmd* get_loc_cmd(wchar_t wc, wchar_t* wline) {
 	wchar_t *endptr, *expected_endptr;
 	loc_cmd* lcmd = NULL;
 
-	for (j=0; j<PARSE_CMD_SIZE; j++) {
+	for (j=0; j<ARRAYSIZE(parse_cmd); j++) {
 		if (wc == (wchar_t)parse_cmd[j].c)
 			break;
 	}
-	if (j >= PARSE_CMD_SIZE) {
+	if (j >= ARRAYSIZE(parse_cmd)) {
 		luprint("unknown command");
 		return NULL;
 	}

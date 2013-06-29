@@ -857,7 +857,7 @@ static void EnableControls(BOOL bEnable)
 	EnableWindow(GetDlgItem(hMainDialog, IDC_SET_ICON), bEnable);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_ADVANCED), bEnable);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_ENABLE_FIXED_DISKS), bEnable);
-	SetDlgItemTextA(hMainDialog, IDCANCEL, bEnable?"Close":"Cancel");
+	SetDlgItemTextU(hMainDialog, IDCANCEL, bEnable?"Close":"Cancel");
 }
 
 /* Callback for the log window */
@@ -974,6 +974,7 @@ BOOL CALLBACK ISOProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	switch (message) {
 	case WM_INITDIALOG:
+		apply_localization(IDD_ISO_EXTRACT, hDlg);
 		hISOProgressBar = GetDlgItem(hDlg, IDC_PROGRESS);
 		hISOFileName = GetDlgItem(hDlg, IDC_ISO_FILENAME);
 		// Use maximum granularity for the progress bar
@@ -1484,7 +1485,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		apply_localization(IDD_DIALOG, hDlg);
 		SetUpdateCheck();
 		// Create the log window (hidden)
-		hLogDlg = CreateDialogA(hMainInstance, MAKEINTRESOURCEA(IDD_LOG), hDlg, (DLGPROC)LogProc); 
+		hLogDlg = CreateDialogW(hMainInstance, MAKEINTRESOURCEW(IDD_LOG), hDlg, (DLGPROC)LogProc); 
 		InitDialog(hDlg);
 		GetUSBDevices(0);
 		CheckForUpdates(FALSE);
@@ -1801,7 +1802,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		// You'd think that Windows would let you instantiate a modeless dialog wherever
 		// but you'd be wrong. It must be done in the main callback, hence the custom message.
 		if (!IsWindow(hISOProgressDlg)) { 
-			hISOProgressDlg = CreateDialogA(hMainInstance, MAKEINTRESOURCEA(IDD_ISO_EXTRACT),
+			hISOProgressDlg = CreateDialogW(hMainInstance, MAKEINTRESOURCEW(IDD_ISO_EXTRACT),
 				hDlg, (DLGPROC)ISOProc); 
 			// The window is not visible by default but takes focus => restore it
 			SetFocus(hDlg);
@@ -1813,6 +1814,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		// Stop the timer
 		KillTimer(hMainDialog, TID_APP_TIMER);
 		// Close the cancel MessageBox and Blocking notification if active
+		// TODO: if we allow localization to change the title of these Windows, we'll have to update this
 		SendMessage(FindWindowA(MAKEINTRESOURCEA(32770), RUFUS_CANCELBOX_TITLE), WM_COMMAND, IDNO, 0);
 		SendMessage(FindWindowA(MAKEINTRESOURCEA(32770), RUFUS_BLOCKING_IO_TITLE), WM_COMMAND, IDYES, 0);
 		EnableWindow(GetDlgItem(hISOProgressDlg, IDC_ISO_ABORT), TRUE);
@@ -2004,7 +2006,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	SetLGP(FALSE, &existing_key, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer", "NoDriveTypeAutorun", 0x9e);
 
 	// Create the main Window
-	hDlg = CreateDialogA(hInstance, MAKEINTRESOURCEA(IDD_DIALOG), NULL, MainCallback);
+	hDlg = CreateDialogW(hInstance, MAKEINTRESOURCEW(IDD_DIALOG), NULL, MainCallback);
 	if (hDlg == NULL) {
 		MessageBoxU(NULL, "Could not create Window", "DialogBox failure", MB_ICONSTOP);
 		goto out;

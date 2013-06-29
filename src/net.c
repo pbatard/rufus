@@ -364,7 +364,7 @@ out:
 		_unlink(file);
 		PrintStatus(0, FALSE, "Failed to download file.");
 		SetLastError(error_code);
-		MessageBoxA(hMainDialog, IS_ERROR(FormatStatus)?StrError(FormatStatus):WinInetErrorString(),
+		MessageBoxU(hMainDialog, IS_ERROR(FormatStatus)?StrError(FormatStatus):WinInetErrorString(),
 		"File download", MB_OK|MB_ICONERROR);
 	}
 	if (hRequest) InternetCloseHandle(hRequest);

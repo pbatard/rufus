@@ -150,8 +150,7 @@ typedef struct loc_dlg_list_struct {
 	struct list_head list;
 } loc_dlg_list;
 
-loc_parse parse_cmd[];
-const size_t PARSE_CMD_SIZE;
+extern const loc_parse parse_cmd[8];
 int loc_line_nr;
 char loc_filename[32];
 

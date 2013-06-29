@@ -36,7 +36,8 @@
 #include "localization_data.h"
 
 /* c control ID (no space, no quotes), s: quoted string, i: 32 bit signed integer,  */
-loc_parse parse_cmd[] = {
+// Remember to update the size of the array in localization.h when adding/removing elements
+const loc_parse parse_cmd[8] = {
 	{ 'l', LC_LOCALE, "s" },
 	{ 'v', LC_VERSION, "ii" },
 	{ 't', LC_TEXT, "cs" },
@@ -46,7 +47,6 @@ loc_parse parse_cmd[] = {
 	{ 'f', LC_FONT, "si" },
 	{ 'd', LC_DIRECTION, "i" },
 };
-const size_t PARSE_CMD_SIZE = ARRAYSIZE(parse_cmd);
 int  loc_line_nr = 0;
 char loc_filename[32];
 
@@ -123,7 +123,7 @@ void apply_localization(int dlg_id, HWND hDlg)
 			if (lcmd->command <= LC_TEXT) { // TODO: should always be the case
 				if (lcmd->ctrl_id == dlg_id) {
 					if (dlg_id == IDD_DIALOG) {
-						luprint("changing the title of the main dialog is not allowed");
+						luprint("operation forbidden (main dialog title cannot be changed)");
 						continue;
 					}
 					hCtrl = hDlg;

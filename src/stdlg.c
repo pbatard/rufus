@@ -67,6 +67,7 @@ static const SETTEXTEX friggin_microsoft_unicode_amateurs = {ST_DEFAULT, CP_UTF8
 static BOOL notification_is_question;
 static const notification_info* notification_more_info;
 static BOOL reg_commcheck = FALSE;
+static WNDPROC original_wndproc = NULL;
 
 /*
  * We need a sub-callback to read the content of the edit box on exit and update
@@ -538,10 +539,10 @@ INT_PTR CALLBACK AboutCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 			EndDialog(hDlg, LOWORD(wParam));
 			return (INT_PTR)TRUE;
 		case IDC_ABOUT_LICENSE:
-			DialogBoxA(hMainInstance, MAKEINTRESOURCEA(IDD_LICENSE), hDlg, LicenseCallback);
+			DialogBoxW(hMainInstance, MAKEINTRESOURCEW(IDD_LICENSE), hDlg, LicenseCallback);
 			break;
 		case IDC_ABOUT_UPDATES:
-			DialogBoxA(hMainInstance, MAKEINTRESOURCEA(IDD_UPDATE_POLICY), hDlg, UpdateCallback);
+			DialogBoxW(hMainInstance, MAKEINTRESOURCEW(IDD_UPDATE_POLICY), hDlg, UpdateCallback);
 			break;
 		}
 		break;
@@ -553,7 +554,7 @@ INT_PTR CreateAboutBox(void)
 {
 	INT_PTR r;
 	dialog_showing++;
-	r = DialogBoxA(hMainInstance, MAKEINTRESOURCEA(IDD_ABOUTBOX), hMainDialog, AboutCallback);
+	r = DialogBoxW(hMainInstance, MAKEINTRESOURCEW(IDD_ABOUTBOX), hMainDialog, AboutCallback);
 	dialog_showing--;
 	return r;
 }
@@ -582,11 +583,11 @@ INT_PTR CALLBACK NotificationCallback(HWND hDlg, UINT message, WPARAM wParam, LP
 		}
 		// Set the dialog title
 		if (szMessageTitle != NULL) {
-			SetWindowTextA(hDlg, szMessageTitle);
+			SetWindowTextU(hDlg, szMessageTitle);
 		}
 		// Enable/disable the buttons and set text
 		if (!notification_is_question) {
-			SetWindowTextA(GetDlgItem(hDlg, IDNO), "Close");
+			SetWindowTextU(GetDlgItem(hDlg, IDNO), "Close");
 		} else {
 			ShowWindow(GetDlgItem(hDlg, IDYES), SW_SHOW);
 		}
@@ -595,7 +596,7 @@ INT_PTR CALLBACK NotificationCallback(HWND hDlg, UINT message, WPARAM wParam, LP
 		}
 		// Set the control text
 		if (szMessageText != NULL) {
-			SetWindowTextA(GetDlgItem(hDlg, IDC_NOTIFICATION_TEXT), szMessageText);
+			SetWindowTextU(GetDlgItem(hDlg, IDC_NOTIFICATION_TEXT), szMessageText);
 		}
 		return (INT_PTR)TRUE;
 	case WM_CTLCOLORSTATIC:
@@ -624,7 +625,7 @@ INT_PTR CALLBACK NotificationCallback(HWND hDlg, UINT message, WPARAM wParam, LP
 			return (INT_PTR)TRUE;
 		case IDC_MORE_INFO:
 			if (notification_more_info != NULL)
-				DialogBoxA(hMainInstance, MAKEINTRESOURCEA(notification_more_info->id),
+				DialogBoxW(hMainInstance, MAKEINTRESOURCEW(notification_more_info->id),
 					hDlg, notification_more_info->callback);
 			break;
 		}
@@ -1078,6 +1079,48 @@ BOOL SetUpdateCheck(void)
 	return TRUE;
 }
 
+static void CreateStaticFont(HDC dc, HFONT* hyperlink_font) {
+	TEXTMETRIC tm;
+	LOGFONT lf;
+
+	if (*hyperlink_font != NULL)
+		return;
+	GetTextMetrics(dc, &tm);
+	lf.lfHeight = tm.tmHeight;
+	lf.lfWidth = 0;
+	lf.lfEscapement = 0;
+	lf.lfOrientation = 0;
+	lf.lfWeight = tm.tmWeight;
+	lf.lfItalic = tm.tmItalic;
+	lf.lfUnderline = TRUE;
+	lf.lfStrikeOut = tm.tmStruckOut;
+	lf.lfCharSet = tm.tmCharSet;
+	lf.lfOutPrecision = OUT_DEFAULT_PRECIS;
+	lf.lfClipPrecision = CLIP_DEFAULT_PRECIS;
+	lf.lfQuality = DEFAULT_QUALITY;
+	lf.lfPitchAndFamily = tm.tmPitchAndFamily;
+	GetTextFace(dc, LF_FACESIZE, lf.lfFaceName);
+	*hyperlink_font = CreateFontIndirect(&lf);
+}
+
+/*
+ * Work around the limitations of edit control, to display a hand cursor for hyperlinks
+ * NB: The LTEXT control must have SS_NOTIFY attribute for this to work
+ */
+INT_PTR CALLBACK subclass_callback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	switch (message)
+	{
+	case WM_SETCURSOR:
+		if ((HWND)wParam == GetDlgItem(hDlg, IDC_WEBSITE)) {
+			SetCursor(LoadCursor(NULL, IDC_HAND));
+			return (INT_PTR)TRUE;
+		}
+		break;
+	}
+	return CallWindowProc(original_wndproc, hDlg, message, wParam, lParam);
+}
+
 /*
  * New version notification dialog
  */
@@ -1085,20 +1128,21 @@ INT_PTR CALLBACK NewVersionCallback(HWND hDlg, UINT message, WPARAM wParam, LPAR
 {
 	int i;
 	HWND hNotes;
-	TEXTRANGEW tr;
-	ENLINK* enl;
-	wchar_t wUrl[256];
 	char tmp[128];
 	static char* filepath = NULL;
 	static int download_status = 0;
 	STARTUPINFOA si;
 	PROCESS_INFORMATION pi;
+	HFONT hyperlink_font = NULL;
 
 	switch (message) {
 	case WM_INITDIALOG:
+		apply_localization(IDD_NEW_VERSION, hDlg);
 		download_status = 0;
 		SetTitleBarIcon(hDlg);
 		CenterDialog(hDlg);
+		// Subclass the callback so that we can change the cursor
+		original_wndproc = (WNDPROC)SetWindowLongPtr(hDlg, GWLP_WNDPROC, (LONG_PTR)subclass_callback);
 		hNotes = GetDlgItem(hDlg, IDC_RELEASE_NOTES);
 		SendMessage(hNotes, EM_AUTOURLDETECT, 1, 0);
 		SendMessageA(hNotes, EM_SETTEXTEX, (WPARAM)&friggin_microsoft_unicode_amateurs, (LPARAM)update.release_notes);
@@ -1106,43 +1150,35 @@ INT_PTR CALLBACK NewVersionCallback(HWND hDlg, UINT message, WPARAM wParam, LPAR
 		SendMessage(hNotes, EM_SETEVENTMASK, 0, ENM_LINK);
 		safe_sprintf(tmp, sizeof(tmp), "Your version: %d.%d.%d (Build %d)",
 			rufus_version[0], rufus_version[1], rufus_version[2], rufus_version[3]);
-		SetWindowTextA(GetDlgItem(hDlg, IDC_YOUR_VERSION), tmp);
+		SetWindowTextU(GetDlgItem(hDlg, IDC_YOUR_VERSION), tmp);
 		safe_sprintf(tmp, sizeof(tmp), "Latest version: %d.%d.%d (Build %d)",
 			update.version[0], update.version[1], update.version[2], update.version[3]);
-		SetWindowTextA(GetDlgItem(hDlg, IDC_LATEST_VERSION), tmp);
-		SetWindowTextA(GetDlgItem(hDlg, IDC_DOWNLOAD_URL), update.download_url);
+		SetWindowTextU(GetDlgItem(hDlg, IDC_LATEST_VERSION), tmp);
+		SetWindowTextU(GetDlgItem(hDlg, IDC_DOWNLOAD_URL), update.download_url);
 		SendMessage(GetDlgItem(hDlg, IDC_PROGRESS), PBM_SETRANGE, 0, (MAX_PROGRESS<<16) & 0xFFFF0000);
 		if (update.download_url == NULL)
 			EnableWindow(GetDlgItem(hDlg, IDC_DOWNLOAD), FALSE);
 		break;
-	case WM_NOTIFY:
-		switch (((LPNMHDR)lParam)->code) {
-		case NM_CLICK:
-		case NM_RETURN:
-			if (LOWORD(wParam) == IDC_WEBSITE) {
-				ShellExecuteA(hDlg, "open", RUFUS_URL, NULL, NULL, SW_SHOWNORMAL);
-			}
-			break;
-		case EN_LINK:
-			enl = (ENLINK*) lParam;
-			if (enl->msg == WM_LBUTTONUP) {
-				tr.lpstrText = wUrl;
-				tr.chrg.cpMin = enl->chrg.cpMin;
-				tr.chrg.cpMax = enl->chrg.cpMax;
-				SendMessageW(enl->nmhdr.hwndFrom, EM_GETTEXTRANGE, 0, (LPARAM)&tr);
-				wUrl[ARRAYSIZE(wUrl)-1] = 0;
-				ShellExecuteW(hDlg, L"open", wUrl, NULL, NULL, SW_SHOWNORMAL);
-			}
-			break;
-		}
-		break;
+	case WM_CTLCOLORSTATIC:
+		if ((HWND)lParam != GetDlgItem(hDlg, IDC_WEBSITE))
+			return FALSE;
+		// Change the font for the hyperlink
+		SetBkMode((HDC)wParam, TRANSPARENT);
+		CreateStaticFont((HDC)wParam, &hyperlink_font);
+		SelectObject((HDC)wParam, hyperlink_font);
+		SetTextColor((HDC)wParam, RGB(0,0,125));	// DARK_BLUE
+		return (INT_PTR)CreateSolidBrush(GetSysColor(COLOR_BTNFACE));
 	case WM_COMMAND:
 		switch (LOWORD(wParam)) {
 		case IDCLOSE:
 		case IDCANCEL:
+			reset_localization(IDD_NEW_VERSION);
 			safe_free(filepath);
 			EndDialog(hDlg, LOWORD(wParam));
 			return (INT_PTR)TRUE;
+		case IDC_WEBSITE:
+			ShellExecuteA(hDlg, "open", RUFUS_URL, NULL, NULL, SW_SHOWNORMAL);
+			break;
 		case IDC_DOWNLOAD:	// Also doubles as abort and launch function
 			switch(download_status) {
 			case 1:		// Abort
@@ -1178,14 +1214,14 @@ INT_PTR CALLBACK NewVersionCallback(HWND hDlg, UINT message, WPARAM wParam, LPAR
 	case UM_ISO_INIT:
 		FormatStatus = 0;
 		download_status = 1;
-		SetWindowTextA(GetDlgItem(hDlg, IDC_DOWNLOAD), "Abort");
+		SetWindowTextU(GetDlgItem(hDlg, IDC_DOWNLOAD), "Abort");
 		return (INT_PTR)TRUE;
 	case UM_ISO_EXIT:
 		if (wParam) {
-			SetWindowTextA(GetDlgItem(hDlg, IDC_DOWNLOAD), "Launch");
+			SetWindowTextU(GetDlgItem(hDlg, IDC_DOWNLOAD), "Launch");
 			download_status = 2;
 		} else {
-			SetWindowTextA(GetDlgItem(hDlg, IDC_DOWNLOAD), "Download");
+			SetWindowTextU(GetDlgItem(hDlg, IDC_DOWNLOAD), "Download");
 			download_status = 0;
 		}
 		return (INT_PTR)TRUE;
@@ -1195,7 +1231,7 @@ INT_PTR CALLBACK NewVersionCallback(HWND hDlg, UINT message, WPARAM wParam, LPAR
 
 void DownloadNewVersion(void)
 {
-	DialogBoxA(hMainInstance, MAKEINTRESOURCEA(IDD_NEW_VERSION), hMainDialog, NewVersionCallback);
+	DialogBoxW(hMainInstance, MAKEINTRESOURCEW(IDD_NEW_VERSION), hMainDialog, NewVersionCallback);
 }
 
 void SetTitleBarIcon(HWND hDlg)

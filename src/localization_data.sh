@@ -42,10 +42,19 @@ const loc_control_id control_id[] = {\
 # Add the control entries - must be in IDD_, IDC_ or IDS_
 s/^#define \(ID[D|C|S][^ ]*\) .*/\	LOC_CTRL(\1),/
 
-# Add IDs that aren't present in resource.h and close table
+# Add standard IDs from windows.h and close table
 $a\
 	LOC_CTRL(IDOK),\
-	LOC_CTRL(IDCANCEL)\
+	LOC_CTRL(IDCANCEL),\
+	LOC_CTRL(IDABORT),\
+	LOC_CTRL(IDRETRY),\
+	LOC_CTRL(IDIGNORE),\
+	LOC_CTRL(IDYES),\
+	LOC_CTRL(IDNO),\
+	LOC_CTRL(IDCLOSE),\
+	LOC_CTRL(IDHELP),\
+	LOC_CTRL(IDTRYAGAIN),\
+	LOC_CTRL(IDCONTINUE)\
 \};\
 
 # Remove everything else
