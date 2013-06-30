@@ -892,8 +892,9 @@ BOOL CALLBACK LogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 			return TRUE;
 		case IDC_LOG_SAVE:
 			log_size = GetWindowTextLengthU(hLog);
-			if (log_size > 0)
-				log_buffer = (char*)malloc(log_size);
+			if (log_size <= 0)
+				break;
+			log_buffer = (char*)malloc(log_size);
 			if (log_buffer != NULL) {
 				log_size = GetDlgItemTextU(hDlg, IDC_LOG_EDIT, log_buffer, log_size);
 				if (log_size != 0) {
@@ -905,8 +906,6 @@ BOOL CALLBACK LogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 					safe_free(filepath);
 				}
 				safe_free(log_buffer);
-			} else {
-				uprintf("Could not allocate buffer to save log\n");
 			}
 			break;
 		}
@@ -1027,11 +1026,11 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 		safe_free(iso_path);
 		goto out;
 	}
-	uprintf("ISO label: '%s'\r\n  Size: %lld bytes\r\n  Has a >4GB file: %s\r\n  Uses EFI: %s%s\r\n  Uses Bootmgr: %s\r\n  Uses WinPE: %s%s\r\n  Uses isolinux: %s (v%s)\n",
+	uprintf("ISO label: '%s'\r\n  Size: %lld bytes\r\n  Has a >4GB file: %s\r\n  Uses EFI: %s%s\r\n  Uses Bootmgr: %s\r\n  Uses WinPE: %s%s\r\n  Uses isolinux: %s %s\n",
 		iso_report.label, iso_report.projected_size, iso_report.has_4GB_file?"Yes":"No", (iso_report.has_efi || iso_report.has_win7_efi)?"Yes":"No", 
 		(iso_report.has_win7_efi && (!iso_report.has_efi))?" (win7_x64)":"", iso_report.has_bootmgr?"Yes":"No",
 		IS_WINPE(iso_report.winpe)?"Yes":"No", (iso_report.uses_minint)?" (with /minint)":"", iso_report.has_isolinux?"Yes":"No",
-		iso_report.has_syslinux_v5?"5.0 or later":"4.x or earlier");
+		iso_report.has_syslinux_v5?"(v5.0 or later)":iso_report.has_isolinux?"(v4.x or earlier)":"");
 	if (iso_report.has_isolinux && !iso_report.has_syslinux_v5) {
 		for (i=0; i<NB_OLD_C32; i++) {
 			uprintf("    With an old %s: %s\n", old_c32_name[i], iso_report.has_old_c32[i]?"Yes":"No");
