@@ -1043,6 +1043,7 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 		safe_free(iso_path);
 		SetMBRProps();
 	} else if (!iso_report.has_syslinux_v5) {	// This check is for Syslinux v4.x or earlier
+		_chdirU(app_dir);
 		for (i=0; i<NB_OLD_C32; i++) {
 			if (iso_report.has_old_c32[i]) {
 				fd = fopen(old_c32_name[i], "rb");
@@ -1054,9 +1055,9 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 				} else {
 					PrintStatus(0, FALSE, "Obsolete %s detected", old_c32_name[i]);
 					safe_sprintf(msgbox, sizeof(msgbox), "This ISO image seems to use an obsolete version of '%s'.\n"
-						"Because of this, boot menus may not display properly.\n\n"
-						APPLICATION_NAME " can fix this issue by downloading a newer version for you:\n"
-						"- Choose 'Yes' to connect to the internet and replace the file\n"
+						"Boot menus may not may not display properly because of this.\n\n"
+						"A newer version can be downloaded by " APPLICATION_NAME " to fix this issue:\n"
+						"- Choose 'Yes' to connect to the internet and download the file\n"
 						"- Choose 'No' to leave the existing ISO file unmodified\n"
 						"If you don't know what to do, you should select 'Yes'.\n\n"
 						"Note: The new file will be downloaded in the current directory and once a "
@@ -1238,6 +1239,7 @@ static BOOL BootCheck(void)
 			return FALSE;
 		}
 	} else if (dt == DT_SYSLINUX_V5) {
+		_chdirU(app_dir);
 		fd = fopen(ldlinux_c32, "rb");
 		if (fd != NULL) {
 			uprintf("Will reuse '%s' for Syslinux v5\n", ldlinux_c32);
@@ -1249,7 +1251,7 @@ static BOOL BootCheck(void)
 				"it is not embedded in " APPLICATION_NAME ".\n\n"
 				APPLICATION_NAME " can download the missing file for you:\n"
 				"- Select 'Yes' to connect to the internet and download the file\n"
-				"- Select 'No' if you will manually copy this file on the drive later\n\n"
+				"- Select 'No' if you want to manually copy this file on the drive later\n\n"
 				"Note: The file will be downloaded in the current directory and once a "
 				"'%s' exists there, it will be reused automatically.\n", ldlinux_c32, ldlinux_c32);
 			safe_sprintf(msgbox_title, sizeof(msgbox_title), "Download %s?", ldlinux_c32);
