@@ -324,7 +324,7 @@ BOOL DownloadFile(const char* url, const char* file, HWND hProgressDialog)
 	}
 	uprintf("File length: %d bytes\n", dwTotalSize);
 
-	fd = fopen(file, "wb");
+	fd = fopenU(file, "wb");
 	if (fd == NULL) {
 		uprintf("Unable to create file '%s': %s\n", file, WinInetErrorString());
 		goto out;

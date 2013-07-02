@@ -616,6 +616,15 @@ out:
 	return ret;
 }
 
+static __inline int _chdirU(const char *dirname)
+{
+	int ret;
+	wconvert(dirname);
+	ret = _wchdir(wdirname);
+	wfree(dirname);
+	return ret;
+}
+
 static __inline FILE* fopenU(const char* filename, const char* mode)
 {
 	FILE* ret = NULL;
