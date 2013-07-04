@@ -676,34 +676,6 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 	return TRUE;
 }
 
-/* Delete the disk partition table */
-BOOL DeletePartitions(HANDLE hDrive)
-{
-	BOOL r;
-	DWORD size;
-
-	PrintStatus(0, TRUE, "Erasing Partitions...");
-
-	r = DeviceIoControl(hDrive, IOCTL_DISK_DELETE_DRIVE_LAYOUT, NULL, 0, NULL, 0, &size, NULL );
-	if (!r) {
-		// Ignore GEN_FAILURE as this is what XP returns for unpartitioned
-		if (GetLastError() != ERROR_GEN_FAILURE) {
-			uprintf("Could not delete drive layout: %s\n", WindowsErrorString());
-			safe_closehandle(hDrive);
-			return FALSE;
-		}
-	}
-
-	r = DeviceIoControl(hDrive, IOCTL_DISK_UPDATE_PROPERTIES, NULL, 0, NULL, 0, &size, NULL );
-	if (!r) {
-		uprintf("Could not refresh drive layout: %s\n", WindowsErrorString());
-		safe_closehandle(hDrive);
-		return FALSE;
-	}
-
-	return TRUE;
-}
-
 /*
  * Convert a partition type to its human readable form using
  * (slightly modified) entries from GNU fdisk

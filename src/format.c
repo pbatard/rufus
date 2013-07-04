@@ -1265,14 +1265,6 @@ DWORD WINAPI FormatThread(LPVOID param)
 	}
 	UpdateProgress(OP_ANALYZE_MBR, -1.0f);
 
-	// Zap any existing partitions. This should help to prevent access errors
-	// TODO: With this, we should be able to avoid having to deal with the logical volume above
-	if (!DeletePartitions(hPhysicalDrive)) {
-		uprintf("Could not reset partitions\n");
-		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_PARTITION_FAILURE;
-		goto out;
-	}
-
 	if (IsChecked(IDC_BADBLOCKS)) {
 		do {
 			// create a log file for bad blocks report. Since %USERPROFILE% may
@@ -1346,7 +1338,7 @@ DWORD WINAPI FormatThread(LPVOID param)
 	// TODO: (v1.4) Our start button should become cancel instead of close
 
 	// Especially after destructive badblocks test, you must zero the MBR/GPT completely
-	// before repartitioning. Else, all kind of bad things can happen.
+	// before repartitioning. Else, all kind of bad things happen.
 	if (!ClearMBRGPT(hPhysicalDrive, SelectedDrive.DiskSize, SelectedDrive.Geometry.BytesPerSector)) {
 		uprintf("unable to zero MBR/GPT\n");
 		if (!IS_ERROR(FormatStatus))
