@@ -36,8 +36,8 @@
 #define STR_NO_LABEL                "NO_LABEL"
 #define RUFUS_CANCELBOX_TITLE       APPLICATION_NAME " - Cancellation"
 #define RUFUS_BLOCKING_IO_TITLE     APPLICATION_NAME " - Flushing buffers"
-#define DRIVE_ACCESS_TIMEOUT        10000		// How long we should retry drive access (in ms)
-#define DRIVE_ACCESS_RETRIES        20			// How many times we should retry
+#define DRIVE_ACCESS_TIMEOUT        15000		// How long we should retry drive access (in ms)
+#define DRIVE_ACCESS_RETRIES        60			// How many times we should retry
 #define DRIVE_INDEX_MIN             0x00000080
 #define DRIVE_INDEX_MAX             0x000000C0
 #define MAX_DRIVES                  (DRIVE_INDEX_MAX - DRIVE_INDEX_MIN)
