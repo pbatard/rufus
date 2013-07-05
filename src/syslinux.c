@@ -146,7 +146,7 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter)
 	/* Reopen the volume (we already have a lock) */
 	d_handle = GetLogicalHandle(drive_index, TRUE, FALSE);
 	if (d_handle == INVALID_HANDLE_VALUE) {
-		uprintf("Could open volume for syslinux operation\n");
+		uprintf("Could open volume for Syslinux installation\n");
 		goto out;
 	}
 
@@ -156,6 +156,10 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter)
 	if (sectors == NULL)
 		goto out;
 	fs = libfat_open(libfat_readfile, (intptr_t) d_handle);
+	if (fs == NULL) {
+		uprintf("FAT access error\n");
+		goto out;
+	}
 	ldlinux_cluster = libfat_searchdir(fs, 0, "LDLINUX SYS", NULL);
 	secp = sectors;
 	nsectors = 0;
