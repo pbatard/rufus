@@ -157,7 +157,7 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter)
 		goto out;
 	fs = libfat_open(libfat_readfile, (intptr_t) d_handle);
 	if (fs == NULL) {
-		uprintf("FAT access error\n");
+		uprintf("Syslinux FAT access error\n");
 		goto out;
 	}
 	ldlinux_cluster = libfat_searchdir(fs, 0, "LDLINUX SYS", NULL);
@@ -203,7 +203,7 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter)
 		!WriteFile(d_handle, sectbuf, SECTOR_SIZE,
 			   &bytes_written, NULL)
 		|| bytes_written != SECTOR_SIZE) {
-		uprintf("Could not write boot record: %s\n", WindowsErrorString());
+		uprintf("Could not write Syslinux boot record: %s\n", WindowsErrorString());
 		goto out;
 	}
 
@@ -212,7 +212,7 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter)
 	if (dt == DT_SYSLINUX_V5) {
 		fd = fopen(ldlinux_c32, "rb");
 		if (fd == NULL) {
-			uprintf("Caution: No '%s' was provided. The target will be missing a mandatory Syslinux file!\n", ldlinux_c32);
+			uprintf("Caution: No '%s' was provided. The target will be missing a required Syslinux file!\n", ldlinux_c32);
 		} else {
 			fclose(fd);
 			ldlinux_path[11] = 'c'; ldlinux_path[12] = '3'; ldlinux_path[13] = '2';
