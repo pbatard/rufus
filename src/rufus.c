@@ -94,7 +94,7 @@ static const char* ClusterSizeLabel[] = { "512 bytes", "1024 bytes","2048 bytes"
 static const char* BiosTypeLabel[BT_MAX] = { "BIOS", "UEFI" };
 static const char* PartitionTypeLabel[2] = { "MBR", "GPT" };
 static BOOL existing_key = FALSE;	// For LGP set/restore
-static BOOL iso_size_check = TRUE;
+static BOOL size_check = TRUE;
 static BOOL log_displayed = FALSE;
 static BOOL iso_provided = FALSE;
 extern BOOL force_large_fat32;
@@ -160,7 +160,7 @@ static BOOL DefineClusterSizes(void)
 	default_fs = FS_UNKNOWN;
 	memset(&SelectedDrive.ClusterSize, 0, sizeof(SelectedDrive.ClusterSize));
 	if (SelectedDrive.DiskSize < 8*MB) {
-		uprintf("This application does not support volumes smaller than 8 MB\n");
+		uprintf("Device was eliminated because it is smaller than 8 MB\n");
 		goto out;
 	}
 
@@ -211,8 +211,11 @@ static BOOL DefineClusterSizes(void)
 	// > 32GB FAT32 is not supported by MS and FormatEx but is achieved using fat32format
 	// See: http://www.ridgecrop.demon.co.uk/index.htm?fat32format.htm
 	// < 32 MB FAT32 is not allowed by FormatEx, so we don't bother
+	// We also found issues with > 1TB drives, so we use our own max threshold (can be disabled with Alt-S)
+	if ((size_check) && (1.0f*SelectedDrive.DiskSize >= 1.0f*MAX_FAT32_SIZE*TB))
+		uprintf("FAT32 support is disabled for this device, as it is larger than %.1f TB\n", 1.0f*MAX_FAT32_SIZE);
 
-	if ((SelectedDrive.DiskSize >= 32*MB) && (SelectedDrive.DiskSize < 2*TB)) {
+	if ((SelectedDrive.DiskSize >= 32*MB) && ((!size_check) || (1.0f*SelectedDrive.DiskSize < 1.0f*MAX_FAT32_SIZE*TB))) {
 		SelectedDrive.ClusterSize[FS_FAT32].Allowed = 0x000001F8;
 		for (i=32; i<=(32*1024); i<<=1) {			// 32 MB -> 32 GB
 			if (SelectedDrive.DiskSize < i*MB) {
@@ -625,7 +628,7 @@ static BOOL GetUSBDevices(DWORD devnum)
 				if(GetLastError() != ERROR_NO_MORE_ITEMS) {
 					uprintf("SetupDiEnumDeviceInterfaces failed: %s\n", WindowsErrorString());
 				} else {
-					uprintf("A device was eliminated because it didn't report itself as a removable disk\n");
+					uprintf("A device was eliminated because it didn't report itself as a non fixed USB disk\n");
 				}
 				break;
 			}
@@ -1183,7 +1186,7 @@ static BOOL BootCheck(void)
 				"No ISO image selected", MB_OK|MB_ICONERROR);
 			return FALSE;
 		}
-		if ((iso_size_check) && (iso_report.projected_size > (uint64_t)SelectedDrive.DiskSize)) {
+		if ((size_check) && (iso_report.projected_size > (uint64_t)SelectedDrive.DiskSize)) {
 			MessageBoxU(hMainDialog, "This ISO image is too big "
 				"for the selected target.", "ISO image too big", MB_OK|MB_ICONERROR);
 			return FALSE;
@@ -1828,7 +1831,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		uprintf("\r\n");
 		GetUSBDevices(DeviceNum);
 		if (!IS_ERROR(FormatStatus)) {
-			// This is the only way to achieve instantanenous progress transition to 100%
+			// This is the only way to achieve instantaneous progress transition to 100%
 			SendMessage(hProgress, PBM_SETRANGE, 0, ((MAX_PROGRESS+1)<<16) & 0xFFFF0000);
 			SendMessage(hProgress, PBM_SETPOS, (MAX_PROGRESS+1), 0);
 			SendMessage(hProgress, PBM_SETRANGE, 0, (MAX_PROGRESS<<16) & 0xFFFF0000);
@@ -2024,8 +2027,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			// By default, Rufus will not copy ISOs that are larger than in size than 
 			// the target USB drive. If this is enabled, the size check is disabled.
 			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'S')) {
-				iso_size_check = !iso_size_check;
-				PrintStatus2000("ISO size check", iso_size_check);
+				size_check = !size_check;
+				PrintStatus2000("Size checks", size_check);
+				GetUSBDevices(0);
 				continue;
 			}
 			// Alt-F => Toggle detection of fixed disks

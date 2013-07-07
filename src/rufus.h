@@ -36,8 +36,8 @@
 #define STR_NO_LABEL                "NO_LABEL"
 #define RUFUS_CANCELBOX_TITLE       APPLICATION_NAME " - Cancellation"
 #define RUFUS_BLOCKING_IO_TITLE     APPLICATION_NAME " - Flushing buffers"
-#define DRIVE_ACCESS_TIMEOUT        10000		// How long we should retry drive access (in ms)
-#define DRIVE_ACCESS_RETRIES        20			// How many times we should retry
+#define DRIVE_ACCESS_TIMEOUT        15000		// How long we should retry drive access (in ms)
+#define DRIVE_ACCESS_RETRIES        60			// How many times we should retry
 #define DRIVE_INDEX_MIN             0x00000080
 #define DRIVE_INDEX_MAX             0x000000C0
 #define MAX_DRIVES                  (DRIVE_INDEX_MAX - DRIVE_INDEX_MIN)
@@ -51,6 +51,7 @@
 #define PROPOSEDLABEL_TOLERANCE     0.10
 #define FS_DEFAULT                  FS_FAT32
 #define LARGE_FAT32_SIZE            (32*1073741824LL)	// Size at which we need to use fat32format
+#define MAX_FAT32_SIZE              1.0f		// Threshold above which we disable FAT32 formatting (in TB)
 #define WHITE                       RGB(255,255,255)
 #define SEPARATOR_GREY              RGB(223,223,223)
 #define RUFUS_URL                   "http://rufus.akeo.ie"

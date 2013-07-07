@@ -576,9 +576,9 @@ static BOOL FormatFAT32(DWORD DriveIndex)
 	// Set the FAT32 volume label
 	GetWindowTextW(hLabel, wLabel, ARRAYSIZE(wLabel));
 	ToValidLabel(wLabel, TRUE);
+	PrintStatus(0, TRUE, "Setting Label (This may take while)...");
 	// Handle must be closed for SetVolumeLabel to work
 	safe_closehandle(hLogicalVolume);
-	PrintStatus(0, TRUE, "Setting Label (This may take while)...");
 	VolumeName = GetLogicalName(DriveIndex, TRUE, TRUE);
 	wVolumeName = utf8_to_wchar(VolumeName);
 	if ((wVolumeName == NULL) || (!SetVolumeLabelW(wVolumeName, wLabel))) {
@@ -708,22 +708,22 @@ static BOOL AnalyzeMBR(HANDLE hPhysicalDrive)
 		return FALSE;
 	}
 	if (is_dos_mbr(&fake_fd)) {
-		uprintf("Drive has a Microsoft DOS/NT/95A master boot record\n");
+		uprintf("Drive has a DOS/NT/95A master boot record\n");
 	} else if (is_dos_f2_mbr(&fake_fd)) {
-		uprintf("Drive has a Microsoft DOS/NT/95A master boot record "
+		uprintf("Drive has a DOS/NT/95A master boot record "
 			"with the undocumented F2 instruction\n");
 	} else if (is_95b_mbr(&fake_fd)) {
-		uprintf("Drive has a Microsoft 95B/98/98SE/ME master boot record\n");
+		uprintf("Drive has a Windows 95B/98/98SE/ME master boot record\n");
 	} else if (is_2000_mbr(&fake_fd)) {
-		uprintf("Drive has a Microsoft 2000/XP/2003 master boot record\n");
+		uprintf("Drive has a Windows 2000/XP/2003 master boot record\n");
 	} else if (is_vista_mbr(&fake_fd)) {
-		uprintf("Drive has a Microsoft Vista master boot record\n");
+		uprintf("Drive has a Windows Vista master boot record\n");
 	} else if (is_win7_mbr(&fake_fd)) {
-		uprintf("Drive has a Microsoft 7 master boot record\n");
+		uprintf("Drive has a Windows 7 master boot record\n");
 	} else if (is_zero_mbr(&fake_fd)) {
 		uprintf("Drive has a zeroed non-bootable master boot record\n");
 	} else {
-		uprintf("Unknown boot record\n");
+		uprintf("Drive has an unknown master boot record\n");
 	}
 	return TRUE;
 }
@@ -753,6 +753,8 @@ static BOOL AnalyzePBR(HANDLE hLogicalVolume)
 		} else {
 			uprintf("Drive has an unknown FAT16 or FAT32 partition boot record\n");
 		}
+	} else {
+		uprintf("Drive has an unknown partition boot record\n");
 	}
 	return TRUE;
 }
@@ -1260,14 +1262,14 @@ DWORD WINAPI FormatThread(LPVOID param)
 
 	PrintStatus(0, TRUE, "Analyzing existing boot records...\n");
 	AnalyzeMBR(hPhysicalDrive);
-	if (hLogicalVolume != NULL) {
+	if ((hLogicalVolume != NULL) && (hLogicalVolume != INVALID_HANDLE_VALUE)) {
 		AnalyzePBR(hLogicalVolume);
 	}
 	UpdateProgress(OP_ANALYZE_MBR, -1.0f);
 
-	// Zap any existing partitions. This should help to prevent access errors
-	// TODO: With this, we should be able to avoid having to deal with the logical volume above
-	if (!DeletePartitions(hPhysicalDrive)) {
+	// Zap any existing partitions. This helps prevent access errors.
+	// As this creates issues with FAT16 formatted MS drives, only do this for other filesystems
+	if ( (fs != FS_FAT16) && (!DeletePartitions(hPhysicalDrive)) ) {
 		uprintf("Could not reset partitions\n");
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_PARTITION_FAILURE;
 		goto out;
@@ -1333,7 +1335,7 @@ DWORD WINAPI FormatThread(LPVOID param)
 		}
 	}
 	// Close the (unmounted) volume before formatting
-	if (hLogicalVolume != NULL) {
+	if ((hLogicalVolume != NULL) && (hLogicalVolume != INVALID_HANDLE_VALUE)) {
 		PrintStatus(0, TRUE, "Closing existing volume...\n");
 		if (!CloseHandle(hLogicalVolume)) {
 			uprintf("Could not close volume: %s\n", WindowsErrorString());
@@ -1346,7 +1348,7 @@ DWORD WINAPI FormatThread(LPVOID param)
 	// TODO: (v1.4) Our start button should become cancel instead of close
 
 	// Especially after destructive badblocks test, you must zero the MBR/GPT completely
-	// before repartitioning. Else, all kind of bad things can happen.
+	// before repartitioning. Else, all kind of bad things happen.
 	if (!ClearMBRGPT(hPhysicalDrive, SelectedDrive.DiskSize, SelectedDrive.Geometry.BytesPerSector)) {
 		uprintf("unable to zero MBR/GPT\n");
 		if (!IS_ERROR(FormatStatus))

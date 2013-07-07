@@ -579,6 +579,10 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 		}
 		break;
 	case PARTITION_STYLE_GPT:
+		// TODO: (?) As per MSDN: "When specifying a GUID partition table (GPT) as the PARTITION_STYLE of the CREATE_DISK
+		// structure, an application should wait for the MSR partition arrival before sending the IOCTL_DISK_SET_DRIVE_LAYOUT_EX
+		// control code. For more information about device notification, see RegisterDeviceNotification."
+
 		CreateDisk.PartitionStyle = PARTITION_STYLE_GPT;
 		IGNORE_RETVAL(CoCreateGuid(&CreateDisk.Gpt.DiskId));
 		CreateDisk.Gpt.MaxPartitionCount = MAX_GPT_PARTITIONS;
@@ -681,17 +685,17 @@ BOOL DeletePartitions(HANDLE hDrive)
 {
 	BOOL r;
 	DWORD size;
+	CREATE_DISK CreateDisk = {PARTITION_STYLE_RAW, {{0}}};
 
-	PrintStatus(0, TRUE, "Erasing Partitions...");
+	PrintStatus(0, TRUE, "Deleting partitions...");
 
-	r = DeviceIoControl(hDrive, IOCTL_DISK_DELETE_DRIVE_LAYOUT, NULL, 0, NULL, 0, &size, NULL );
+	size = sizeof(CreateDisk);
+	r = DeviceIoControl(hDrive, IOCTL_DISK_CREATE_DISK,
+			(BYTE*)&CreateDisk, size, NULL, 0, &size, NULL );
 	if (!r) {
-		// Ignore GEN_FAILURE as this is what XP returns for unpartitioned
-		if (GetLastError() != ERROR_GEN_FAILURE) {
-			uprintf("Could not delete drive layout: %s\n", WindowsErrorString());
-			safe_closehandle(hDrive);
-			return FALSE;
-		}
+		uprintf("Could not delete drive layout: %s\n", WindowsErrorString());
+		safe_closehandle(hDrive);
+		return FALSE;
 	}
 
 	r = DeviceIoControl(hDrive, IOCTL_DISK_UPDATE_PROPERTIES, NULL, 0, NULL, 0, &size, NULL );
@@ -699,9 +703,9 @@ BOOL DeletePartitions(HANDLE hDrive)
 		uprintf("Could not refresh drive layout: %s\n", WindowsErrorString());
 		safe_closehandle(hDrive);
 		return FALSE;
-	}
+}
 
-	return TRUE;
+return TRUE;
 }
 
 /*

@@ -92,10 +92,13 @@ libfat_open(int (*readfunc) (intptr_t, void *, size_t, libfat_sector_t),
     } else
 	goto barf;		/* Impossibly many clusters */
 
+    /* This check doesn't hold for Large FAT32 => remove it */
+#if 0
     minfatsize = (minfatsize + LIBFAT_SECTOR_SIZE - 1) >> LIBFAT_SECTOR_SHIFT;
 
     if (minfatsize > fatsize)
 	goto barf;		/* The FATs don't fit */
+#endif
 
     if (fs->fat_type == FAT28)
 	fs->rootcluster = read32(&bs->u.fat32.bpb_rootclus);

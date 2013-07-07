@@ -249,6 +249,8 @@ const char* StrError(DWORD error_code)
 		return "Read error.";
 	case ERROR_WRITE_FAULT:
 		return "Write error.";
+	case ERROR_INSTALL_FAILURE:
+		return "Installation failure";
 	case ERROR_OPEN_FAILED:
 		return "Could not open media. It may be in use by another process. "
 			"Please re-plug the media and try again.";
