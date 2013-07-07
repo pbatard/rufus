@@ -34,15 +34,14 @@
 #include "rufus.h"
 #include "msapi_utf8.h"
 #include "localization.h"
-#include "resource.h"	// TODO: remove_me - only needed for IDD_DIALOG
 
 static const wchar_t wspace[] = L" \t";
 
 // Fill a localization command buffer by parsing the line arguments
 // The command is allocated and must be freed (by calling free_loc_cmd)
 static loc_cmd* get_loc_cmd(wchar_t wc, wchar_t* wline) {
-	size_t i, j, k, r, ti = 0, ii = 0;
-	wchar_t *endptr, *expected_endptr;
+	size_t i, j, k, l, r, ti = 0, ii = 0;
+	wchar_t *endptr, *expected_endptr, *wtoken;
 	loc_cmd* lcmd = NULL;
 
 	for (j=0; j<ARRAYSIZE(parse_cmd); j++) {
@@ -68,6 +67,10 @@ static loc_cmd* get_loc_cmd(wchar_t wc, wchar_t* wline) {
 		// Skip leading spaces
 		i += wcsspn(&wline[i], wspace);
 		r = i;
+		if (wline[i] == 0) {
+			luprintf("missing parameter for command '%c'", parse_cmd[j].c);
+			goto err;
+		}
 		switch(parse_cmd[j].arg_type[k]) {
 		case 's':	// quoted string
 			// search leading quote
@@ -89,24 +92,48 @@ static loc_cmd* get_loc_cmd(wchar_t wc, wchar_t* wline) {
 				goto err;
 			}
 			wline[i++] = 0;
-			lcmd->text[ti++] = wchar_to_utf8(&wline[r]);
+			lcmd->txt[ti++] = wchar_to_utf8(&wline[r]);
 			break;
 		case 'c':	// control ID (single word)
 			while ((wline[i] != 0) && (wline[i] != wspace[0]) && (wline[i] != wspace[1]))
 				i++;
 			if (wline[i] != 0)
 				wline[i++] = 0;
-			lcmd->text[ti++] = wchar_to_utf8(&wline[r]);
+			lcmd->txt[ti++] = wchar_to_utf8(&wline[r]);
 			break;
 		case 'i':	// 32 bit signed integer
-			while ((wline[i] != 0) && (wline[i] != wspace[0]) && (wline[i] != wspace[1]))
+			// allow commas or dots between values
+			if ((wline[i] == L',') || (wline[i] == L'.')) {
+				i += wcsspn(&wline[i+1], wspace);
+				r = i;
+			}
+			while ((wline[i] != 0) && (wline[i] != wspace[0]) && (wline[i] != wspace[1])
+				&& (wline[i] != L',') && (wline[i] != L'.'))
 				i++;
 			expected_endptr = &wline[i];
 			if (wline[i] != 0)
 				wline[i++] = 0;
-			lcmd->num[ii++] = (int32_t)wcstol(&wline[r], &endptr, 10);
+			lcmd->num[ii++] = (int32_t)wcstol(&wline[r], &endptr, 0);
 			if (endptr != expected_endptr) {
 				luprint("invalid integer");
+				goto err;
+			}
+			break;
+		case 'u':	// comma separated list of unsigned integers (to end of line)
+			// count the number of commas
+			lcmd->unum_size = 1;
+			for (l=i; wline[l] != 0; l++) {
+				if (wline[l] == L',')
+					lcmd->unum_size++;
+			}
+			lcmd->unum = (uint32_t*)malloc(lcmd->unum_size * sizeof(uint32_t));
+			wtoken = wcstok(&wline[i], L",");
+			for (l=0; (l<lcmd->unum_size) && (wtoken != NULL); l++) {
+				lcmd->unum[l] = (int32_t)wcstol(wtoken, &endptr, 0);
+				wtoken = wcstok(NULL, L",");
+			}
+			if ((wtoken != NULL) || (l != lcmd->unum_size)) {
+				luprint("internal error (unexpected number of numeric values)");
 				goto err;
 			}
 			break;
@@ -167,12 +194,12 @@ static __inline void *_reallocf(void *ptr, size_t size)
 char* get_loc_data_file(const char* filename)
 {
 	wchar_t *wfilename = NULL, *wbuf = NULL;
-	size_t wbufsize = 1024;	// size in wchar_t
+	size_t wbufsize = 1024;
 	FILE* fd = NULL;
 	char *ret = NULL;
 	size_t i = 0;
 	int r = 0, line_nr_incr = 1;
-	wchar_t wc = 0, last_wc;
+	wchar_t wc = 0, last_wc, eol_char = 0;
 	BOOL eol = FALSE;
 
 	if ((filename == NULL) || (filename[0] == 0))
@@ -196,19 +223,22 @@ char* get_loc_data_file(const char* filename)
 		goto out;
 	}
 
-	do {	// custom readline handling for string collation, realloc, line number handling, etc.
+	do {	// custom readline handling for string collation, realloc, line numbers, etc.
 		last_wc = wc;
 		wc = getwc(fd);
 		switch(wc) {
 		case WEOF:
 			wbuf[i] = 0;
-			loc_line_nr += line_nr_incr;
+			if (!eol)
+				loc_line_nr += line_nr_incr;
 			get_loc_data_line(wbuf);
 			goto out;
 		case L'\r':
 		case L'\n':
-			// Process line numbers
-			if ((last_wc != 0x0D) && (last_wc != 0x0A)) {
+			// This assumes that the EOL sequence is always the same throughout the file
+			if (eol_char == 0)
+				eol_char = wc;
+			if (wc = eol_char) {
 				if (eol) {
 					line_nr_incr++;
 				} else {
@@ -219,7 +249,7 @@ char* get_loc_data_file(const char* filename)
 			wbuf[i] = 0;
 			if (!eol) {
 				// Strip trailing spaces (for string collation)
-				for (r = ((int)i)-1; (r>0) && ((wbuf[r]==0x20)||(wbuf[r]==0x09)); r--);
+				for (r = ((int)i)-1; (r>0) && ((wbuf[r]==wspace[0])||(wbuf[r]==wspace[1])); r--);
 				if (r < 0)
 					r = 0;
 				eol = TRUE;

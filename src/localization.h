@@ -22,20 +22,6 @@
 
 #pragma once
 
-// What we need for localization
-// # Comment
-// v 1 1                    // UI target version (major, minor)
-// p IDD_DIALOG             // parent dialog for the following
-// d 1                      // set text direction 0: left to right, 1 right to left
-// f "MS Dialog" 12         // set font and font size
-// r IDD_DIALOG +30 +30     // resize dialog (delta_w, delta_h)
-// m IDC_START  -10 0       // move control (delta_x, delta_w)
-// r IDC_START  0 +1        // resize control
-// t IDC_START  "Demarrer"  // Change control text
-// t IDC_LONG_CONTROL "Some text here"
-//  "some continued text there"
-// all parsed commands return: cmd, control_id, text, num1, num2
-
 // TODO: display control name on mouseover
 // Link to http://www.resedit.net/
 
@@ -120,16 +106,19 @@ enum loc_command_type {
 	LC_TEXT,	// Delimits commands that take a Control ID and commands that don't
 	LC_VERSION,
 	LC_LOCALE,
+	LC_BASE,
 	LC_FONT,
 	LC_DIRECTION,
 };
 
 typedef struct loc_cmd_struct {
-	int command;
-	int ctrl_id;
-	uint32_t line_nr;
-	char* text[2];
-	int32_t num[2];
+	uint8_t		command;
+	uint8_t		unum_size;
+	uint16_t	line_nr;
+	int			ctrl_id;
+	int32_t		num[2];
+	uint32_t*	unum;
+	char*		txt[2];
 	struct list_head list;
 } loc_cmd;
 
@@ -150,7 +139,7 @@ typedef struct loc_dlg_list_struct {
 	struct list_head list;
 } loc_dlg_list;
 
-extern const loc_parse parse_cmd[8];
+extern const loc_parse parse_cmd[9];
 int loc_line_nr;
 char loc_filename[32];
 

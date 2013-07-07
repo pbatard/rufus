@@ -35,27 +35,41 @@
 #include "localization.h"
 #include "localization_data.h"
 
-/* c control ID (no space, no quotes), s: quoted string, i: 32 bit signed integer,  */
+/* c control ID (no space, no quotes), s: quoted string, i: 32 bit signed integer, u: 32 bit unsigned CSV list */
 // Remember to update the size of the array in localization.h when adding/removing elements
-const loc_parse parse_cmd[8] = {
-	{ 'l', LC_LOCALE, "s" },
-	{ 'v', LC_VERSION, "ii" },
-	{ 't', LC_TEXT, "cs" },
-	{ 'p', LC_PARENT, "c" },
-	{ 'r', LC_RESIZE, "cii" },
-	{ 'm', LC_MOVE, "cii" },
-	{ 'f', LC_FONT, "si" },
-	{ 'd', LC_DIRECTION, "i" },
+const loc_parse parse_cmd[9] = {
+	// Translation name and Windows LCIDs it should apply to
+	{ 'l', LC_LOCALE, "su" },	// l "English (US)" 0x0009,0x1009
+	// Base translation to add on top of (eg. "English (UK)" can be used to build on top of "English (US)"
+	{ 'b', LC_BASE, "s" },		// b "English (US)"		// TODO: NOT IMPLEMENTED YET
+	// Version to use for the localization commandset and API
+	{ 'v', LC_VERSION, "ii" },	// v 1.0				// TODO: NOT IMPLEMENTED YET
+	// Translate the text control associated with an ID
+	{ 't', LC_TEXT, "cs" },		// t IDC_CONTROL "Translation"
+	// Set the parent dialog to which the next commands should apply.
+	// Use 'p NONE' for text data that is not bound to a dialog
+	{ 'p', LC_PARENT, "c" },	// p IDD_DIALOG
+	// Resize a dialog (dx dy pixel increment)
+	{ 'r', LC_RESIZE, "cii" },	// t IDC_CONTROL +10 +10
+	// Move a dialog (dx dy pixed displacement)
+	{ 'm', LC_MOVE, "cii" },	// t IDC_CONTROL -5 0
+	// Set the font to use for the text controls that follow
+	// Use f "Default" 0 to reset the font
+	{ 'f', LC_FONT, "si" },		// f "MS Dialog" 10
+	// Set the direction to use for the text controls that follow
+	// 0 = Left to right, 1 = Right to left
+	{ 'd', LC_DIRECTION, "i" },	// d 1					// TODO: NOT IMPLEMENTED YET
 };
-int  loc_line_nr = 0;
+int  loc_line_nr;
 char loc_filename[32];
 
 void free_loc_cmd(loc_cmd* lcmd)
 {
 	if (lcmd == NULL)
 		return;
-	safe_free(lcmd->text[0]);
-	safe_free(lcmd->text[1]);
+	safe_free(lcmd->txt[0]);
+	safe_free(lcmd->txt[1]);
+	safe_free(lcmd->unum);
 	free(lcmd);
 }
 
@@ -123,6 +137,7 @@ void apply_localization(int dlg_id, HWND hDlg)
 			if (lcmd->command <= LC_TEXT) { // TODO: should always be the case
 				if (lcmd->ctrl_id == dlg_id) {
 					if (dlg_id == IDD_DIALOG) {
+						loc_line_nr = lcmd->line_nr;
 						luprint("operation forbidden (main dialog title cannot be changed)");
 						continue;
 					}
@@ -133,7 +148,7 @@ void apply_localization(int dlg_id, HWND hDlg)
 				if (hCtrl == NULL) {
 					loc_line_nr = lcmd->line_nr;
 					luprintf("control '%s' is not part of dialog '%s'\n",
-						lcmd->text[0], control_id[dlg_id-IDD_DIALOG].name);
+						lcmd->txt[0], control_id[dlg_id-IDD_DIALOG].name);
 				}
 			}
 
@@ -141,7 +156,7 @@ void apply_localization(int dlg_id, HWND hDlg)
 			// NB: For commands that take an ID, ctrl_id is always a valid index at this stage
 			case LC_TEXT:
 				if (hCtrl != NULL) {
-					SetWindowTextU(hCtrl, lcmd->text[1]);
+					SetWindowTextU(hCtrl, lcmd->txt[1]);
 				}
 				break;
 			case LC_MOVE:
@@ -182,19 +197,19 @@ BOOL dispatch_loc_cmd(loc_cmd* lcmd)
 	if (lcmd->command <= LC_TEXT) {
 		// Any command up to LC_TEXT takes a control ID in text[0]
 		for (i=0; i<ARRAYSIZE(control_id); i++) {
-			if (safe_strcmp(lcmd->text[0], control_id[i].name) == 0) {
+			if (safe_strcmp(lcmd->txt[0], control_id[i].name) == 0) {
 				lcmd->ctrl_id = control_id[i].id;
 				break;
 			}
 		}
 		if (lcmd->ctrl_id < 0) {
-			luprintf("unknown control '%s'\n", lcmd->text[0]);
+			luprintf("unknown control '%s'\n", lcmd->txt[0]);
 			goto err;
 		}
 	}
 
 	switch(lcmd->command) {
-	// NB: Form commands that take an ID, ctrl_id is always a valid index at this stage
+	// NB: For commands that take an ID, ctrl_id is always a valid index at this stage
 	case LC_TEXT:
 	case LC_MOVE:
 	case LC_RESIZE:
@@ -202,10 +217,20 @@ BOOL dispatch_loc_cmd(loc_cmd* lcmd)
 		break;
 	case LC_PARENT:
 		if ((lcmd->ctrl_id-IDD_DIALOG) > ARRAYSIZE(loc_dlg)) {
-			luprintf("'%s' is not a dialog ID\n", lcmd->text[0]);
+			luprintf("'%s' is not a dialog ID\n", lcmd->txt[0]);
 			goto err;
 		}
 		dlg_index = lcmd->ctrl_id - IDD_DIALOG;
+		free_loc_cmd(lcmd);
+		break;
+	case LC_VERSION:
+		luprintf("GOT VERSION: %d.%d\n", lcmd->num[0], lcmd->num[1]);
+		free_loc_cmd(lcmd);
+		break;
+	case LC_LOCALE:
+		luprintf("GOT LOCALE \"%s\", with LCIDs:\n", lcmd->txt[0]);
+		for (i=0; i<lcmd->unum_size; i++)
+			luprintf("  0x%04X\n", lcmd->unum[i]);
 		free_loc_cmd(lcmd);
 		break;
 	default:

@@ -1328,6 +1328,9 @@ void InitDialog(HWND hDlg)
 	}
 	uprintf("Windows version: %s %d-bit\n", PrintWindowsVersion(nWindowsVersion), is_x64?64:32);
 
+	// Detect the LCID
+	uprintf("LCID: 0x%04X\n", GetUserDefaultLCID());
+
 	// Prefer FreeDOS to MS-DOS
 	selection_default = DT_FREEDOS;
 	// Create the status line and initialize the taskbar icon for progress overlay
@@ -1917,9 +1920,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	// Init localization
 	init_localization();
-
-// TODO: See what happens with this
-//	SetThreadLocale(MAKELCID(LANG_FRENCH, SUBLANG_FRENCH));
 
 	// Reattach the console, if we were started from commandline
 	if (AttachConsole(ATTACH_PARENT_PROCESS) != 0) {
