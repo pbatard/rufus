@@ -303,7 +303,7 @@ BOOL DownloadFile(const char* url, const char* file, HWND hProgressDialog)
 		goto out;
 	}
 
-	if (!HttpSendRequest(hRequest, NULL, 0, NULL, 0)) {
+	if (!HttpSendRequestA(hRequest, NULL, 0, NULL, 0)) {
 		uprintf("Unable to send request: %s\n", WinInetErrorString());
 		goto out;
 	}
@@ -409,6 +409,7 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 	int i, j, k, verbose = 0, verpos[4];
 	static const char* archname[] = {"win_x86", "win_x64"};
 	static const char* channel[] = {"release", "beta"};		// release channel
+	const char* accept_types[] = {"*/*\0", NULL};
 	DWORD dwFlags, dwSize, dwDownloaded, dwTotalSize, dwStatus;
 	char* buf = NULL;
 	char agent[64], hostname[64], urlpath[128], mime[32];
@@ -514,10 +515,10 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 		UrlParts.dwUrlPathLength = sizeof(urlpath);
 		for (i=0; i<ARRAYSIZE(verpos); i++) {
 			vvuprintf("Trying %s\n", UrlParts.lpszUrlPath);
-			hRequest = HttpOpenRequestA(hConnection, "GET", UrlParts.lpszUrlPath, NULL, NULL, (const char**)"*/*\0",
+			hRequest = HttpOpenRequestA(hConnection, "GET", UrlParts.lpszUrlPath, NULL, NULL, accept_types,
 				INTERNET_FLAG_HYPERLINK|INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTP|INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTPS|INTERNET_FLAG_NO_COOKIES|
 				INTERNET_FLAG_NO_UI|INTERNET_FLAG_NO_CACHE_WRITE, (DWORD_PTR)NULL);
-			if ((hRequest == NULL) || (!HttpSendRequest(hRequest, NULL, 0, NULL, 0)))
+			if ((hRequest == NULL) || (!HttpSendRequestA(hRequest, NULL, 0, NULL, 0)))
 				goto out;
 
 			// Ensure that we get a text file
