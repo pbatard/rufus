@@ -413,6 +413,14 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 	char tmp[256];
 	DWORD i, nb_partitions = 0;
 
+	// Populate the filesystem data
+	FileSystemName[0] = 0;
+	volume_name = GetLogicalName(DriveIndex, TRUE, FALSE);
+	if ((volume_name == NULL) || (!GetVolumeInformationA(volume_name, NULL, 0, NULL, NULL, NULL, FileSystemName, FileSystemNameSize))) {
+		uprintf("No volume information for disk 0x%02x\n", DriveIndex);
+	}
+	safe_free(volume_name);
+
 	hPhysical = GetPhysicalHandle(DriveIndex, FALSE, FALSE);
 	if (hPhysical == INVALID_HANDLE_VALUE)
 		return FALSE;
@@ -453,7 +461,8 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 				uprintf("Partition %d:\n", DriveLayout->PartitionEntry[i].PartitionNumber);
 				part_type = DriveLayout->PartitionEntry[i].Mbr.PartitionType;
 				uprintf("  Type: %s (0x%02x)\r\n  Size: %s (%lld bytes)\r\n  Start Sector: %d, Boot: %s, Recognized: %s\n",
-					GetPartitionType(part_type), part_type, SizeToHumanReadable(DriveLayout->PartitionEntry[i].PartitionLength),
+					((part_type==0x07)&&(FileSystemName[0]!=0))?FileSystemName:GetPartitionType(part_type), part_type,
+					SizeToHumanReadable(DriveLayout->PartitionEntry[i].PartitionLength),
 					DriveLayout->PartitionEntry[i].PartitionLength, DriveLayout->PartitionEntry[i].Mbr.HiddenSectors,
 					DriveLayout->PartitionEntry[i].Mbr.BootIndicator?"Yes":"No",
 					DriveLayout->PartitionEntry[i].Mbr.RecognizedPartition?"Yes":"No");
@@ -487,15 +496,32 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 	}
 	safe_closehandle(hPhysical);
 
-	// Populate the filesystem data
-	volume_name = GetLogicalName(DriveIndex, TRUE, FALSE);
-	if ((volume_name == NULL) || (!GetVolumeInformationA(volume_name, NULL, 0, NULL, NULL, NULL, FileSystemName, FileSystemNameSize))) {
-		uprintf("No volume information for disk 0x%02x\n", DriveIndex);
-		FileSystemName[0] = 0;
-	}
-	safe_free(volume_name);
-
 	return TRUE;
+}
+
+/*
+ * Flush file data
+ */
+static BOOL FlushDrive(char drive_letter)
+{
+	HANDLE hDrive = INVALID_HANDLE_VALUE;
+	BOOL r = FALSE;
+	char logical_drive[] = "\\\\.\\#:";
+
+	logical_drive[4] = drive_letter;
+	hDrive = CreateFileA(logical_drive, GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ|FILE_SHARE_WRITE,
+		NULL, OPEN_EXISTING, 0, 0);
+	if (hDrive == INVALID_HANDLE_VALUE) {
+		uprintf("Failed to open %c: for flushing: %s\n", drive_letter, WindowsErrorString());
+		goto out;
+	}
+	r = FlushFileBuffers(hDrive);
+	if (r == FALSE)
+		uprintf("Failed to flush %c: %s\n", drive_letter, WindowsErrorString());
+
+out:
+	safe_closehandle(hDrive);
+	return r;
 }
 
 /*
@@ -508,6 +534,63 @@ BOOL UnmountVolume(HANDLE hDrive)
 	if (!DeviceIoControl(hDrive, FSCTL_DISMOUNT_VOLUME, NULL, 0, NULL, 0, &size, NULL)) {
 		uprintf("Could not ummount drive: %s\n", WindowsErrorString());
 		return FALSE;
+	}
+	return TRUE;
+}
+
+/*
+ * Mount the volume identified by drive_guid to mountpoint drive_name
+ */
+BOOL MountVolume(char* drive_name, char *drive_guid)
+{
+	char mounted_guid[52];	// You need at least 51 characters on XP
+
+	if (!SetVolumeMountPointA(drive_name, drive_guid)) {
+		// If the OS was faster than us at remounting the drive, this operation can fail
+		// with ERROR_DIR_NOT_EMPTY. If that's the case, just check that mountpoints match
+		if (GetLastError() == ERROR_DIR_NOT_EMPTY) {
+			if (!GetVolumeNameForVolumeMountPointA(drive_name, mounted_guid, sizeof(mounted_guid))) {
+				uprintf("%s already mounted, but volume GUID could not be checked: %s\n",
+					drive_name, WindowsErrorString());
+				return FALSE;
+			}
+			if (safe_strcmp(drive_guid, mounted_guid) != 0) {
+				uprintf("%s already mounted, but volume GUID doesn't match:\r\n  expected %s, got %s\n",
+					drive_name, drive_guid, mounted_guid);
+				return FALSE;
+			}
+			uprintf("%s was already mounted as %s\n", drive_guid, drive_name);
+		} else {
+			return FALSE;
+		}
+	}
+	return TRUE;
+}
+
+/*
+ * Issue a complete remount of the volume
+ */
+BOOL RemountVolume(char* drive_name)
+{
+	char drive_guid[51];
+
+	// UDF requires a sync/flush, and it's also a good idea for other FS's
+	FlushDrive(drive_name[0]);
+	if (GetVolumeNameForVolumeMountPointA(drive_name, drive_guid, sizeof(drive_guid))) {
+		if (DeleteVolumeMountPointA(drive_name)) {
+			Sleep(200);
+			if (MountVolume(drive_name, drive_guid)) {
+				uprintf("Successfully remounted %s on %s\n", &drive_guid[4], drive_name);
+			} else {
+				uprintf("Failed to remount %s on %s\n", &drive_guid[4], drive_name);
+				// This will leave the drive inaccessible and must be flagged as an error
+				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_REMOUNT_VOLUME);
+				return FALSE;
+			}
+		} else {
+			uprintf("Could not remount %s %s\n", drive_name, WindowsErrorString());
+			// Try to continue regardless
+		}
 	}
 	return TRUE;
 }
@@ -552,6 +635,7 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 		DriveLayoutEx.PartitionEntry[0].StartingOffset.QuadPart = 
 			SelectedDrive.Geometry.BytesPerSector * SelectedDrive.Geometry.SectorsPerTrack;
 	}
+	// TODO: should we try to align the following to the cluster size as well?
 	size_in_sectors = (SelectedDrive.DiskSize - DriveLayoutEx.PartitionEntry[0].StartingOffset.QuadPart) / SelectedDrive.Geometry.BytesPerSector;
 
 	switch (partition_style) {
@@ -617,6 +701,7 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 			break;
 		case FS_NTFS:
 		case FS_EXFAT:
+		case FS_UDF:
 			DriveLayoutEx.PartitionEntry[0].Mbr.PartitionType = 0x07;	// NTFS
 			break;
 		case FS_FAT32:

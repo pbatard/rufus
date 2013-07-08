@@ -153,6 +153,7 @@ enum {
 	FS_FAT16 = 0,
 	FS_FAT32,
 	FS_NTFS,
+	FS_UDF,
 	FS_EXFAT,
 	FS_MAX
 };
@@ -315,7 +316,9 @@ extern BOOL DeletePartitions(HANDLE hDrive);
 extern const char* GetPartitionType(BYTE Type);
 extern BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSystemNameSize);
 extern BOOL GetDriveLabel(DWORD DriveIndex, char* letter, char** label);
+extern BOOL MountVolume(char* drive_name, char *drive_guid);
 extern BOOL UnmountVolume(HANDLE hDrive);
+extern BOOL RemountVolume(char* drive_name);
 extern BOOL CreateProgress(void);
 extern BOOL SetAutorun(const char* path);
 extern char* FileDialog(BOOL save, char* path, char* filename, char* ext, char* ext_desc);
