@@ -41,7 +41,7 @@ SysType msdos_systypes[] = {
 	{ 0x04, N_("Small FAT16") },
 	{ 0x05, N_("Extended") },
 	{ 0x06, N_("FAT16") },
-	{ 0x07, N_("NTFS") },
+	{ 0x07, N_("NTFS/exFAT/UDF") },
 	{ 0x08, N_("AIX") },
 	{ 0x09, N_("AIX Bootable") },
 	{ 0x0a, N_("OS/2 Boot Manager") },

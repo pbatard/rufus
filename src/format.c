@@ -51,8 +51,7 @@ DWORD FormatStatus;
 badblocks_report report;
 static float format_percent = 0.0f;
 static int task_number = 0;
-/* Number of steps for each FS for FCC_STRUCTURE_PROGRESS */
-const int nb_steps[FS_MAX] = { 5, 5, 12, 10 };
+extern const int nb_steps[FS_MAX];
 static int fs_index = 0;
 BOOL force_large_fat32 = FALSE;
 
@@ -607,13 +606,13 @@ static BOOL FormatDrive(DWORD DriveIndex)
 {
 	BOOL r = FALSE;
 	PF_DECL(FormatEx);
-	char* VolumeName = NULL;
-	WCHAR* wVolumeName = NULL;
 	char FSType[32], format_status[64];
+	char *locale, *VolumeName = NULL;
+	WCHAR* wVolumeName = NULL;
 	WCHAR wFSType[32];
 	WCHAR wLabel[64];
+	ULONG ulClusterSize;
 	size_t i;
-	char* locale;
 
 	GetWindowTextA(hFileSystem, FSType, ARRAYSIZE(FSType));
 	safe_sprintf(format_status, ARRAYSIZE(format_status), "Formatting (%s)...", FSType);
@@ -643,13 +642,19 @@ static BOOL FormatDrive(DWORD DriveIndex)
 	GetWindowTextW(hLabel, wLabel, ARRAYSIZE(wLabel));
 	// Make sure the label is valid
 	ToValidLabel(wLabel, (wFSType[0] == 'F') && (wFSType[1] == 'A') && (wFSType[2] == 'T'));
-	uprintf("Using cluster size: %d bytes\n", ComboBox_GetItemData(hClusterSize, ComboBox_GetCurSel(hClusterSize)));
+	ulClusterSize = (ULONG)ComboBox_GetItemData(hClusterSize, ComboBox_GetCurSel(hClusterSize));
+	if (ulClusterSize < 0x200) {
+		// 0 is FormatEx's value for default, which we need to use for UDF
+		ulClusterSize = 0;
+		uprintf("Using default cluster size\n");
+	} else {
+		uprintf("Using cluster size: %d bytes\n", ulClusterSize);
+	}
 	format_percent = 0.0f;
 	task_number = 0;
 	fs_index = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
 	pfFormatEx(wVolumeName, SelectedDrive.Geometry.MediaType, wFSType, wLabel,
-		IsChecked(IDC_QUICKFORMAT), (ULONG)ComboBox_GetItemData(hClusterSize, ComboBox_GetCurSel(hClusterSize)),
-		FormatExCallback);
+		IsChecked(IDC_QUICKFORMAT), ulClusterSize, FormatExCallback);
 	if (!IS_ERROR(FormatStatus)) {
 		uprintf("Format completed.\n");
 		r = TRUE;
@@ -1090,61 +1095,6 @@ out:
 	safe_closehandle(handle);
 	safe_free(buf);
 	return r;
-}
-
-/*
- * Mount the volume identified by drive_guid to mountpoint drive_name
- */
-static BOOL MountVolume(char* drive_name, char *drive_guid)
-{
-	char mounted_guid[52];	// You need at least 51 characters on XP
-
-	if (!SetVolumeMountPointA(drive_name, drive_guid)) {
-		// If the OS was faster than us at remounting the drive, this operation can fail
-		// with ERROR_DIR_NOT_EMPTY. If that's the case, just check that mountpoints match
-		if (GetLastError() == ERROR_DIR_NOT_EMPTY) {
-			if (!GetVolumeNameForVolumeMountPointA(drive_name, mounted_guid, sizeof(mounted_guid))) {
-				uprintf("%s already mounted, but volume GUID could not be checked: %s\n",
-					drive_name, WindowsErrorString());
-				return FALSE;
-			}
-			if (safe_strcmp(drive_guid, mounted_guid) != 0) {
-				uprintf("%s already mounted, but volume GUID doesn't match:\r\n  expected %s, got %s\n",
-					drive_name, drive_guid, mounted_guid);
-				return FALSE;
-			}
-			uprintf("%s was already mounted as %s\n", drive_guid, drive_name);
-		} else {
-			return FALSE;
-		}
-	}
-	return TRUE;
-}
-
-/*
- * Issue a complete remount of the volume
- */
-static BOOL RemountVolume(char* drive_name)
-{
-	char drive_guid[51];
-
-	if (GetVolumeNameForVolumeMountPointA(drive_name, drive_guid, sizeof(drive_guid))) {
-		if (DeleteVolumeMountPointA(drive_name)) {
-			Sleep(200);
-			if (MountVolume(drive_name, drive_guid)) {
-				uprintf("Successfully remounted %s on %s\n", &drive_guid[4], drive_name);
-			} else {
-				uprintf("Failed to remount %s on %s\n", &drive_guid[4], drive_name);
-				// This will leave the drive inaccessible and must be flagged as an error
-				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_REMOUNT_VOLUME);
-				return FALSE;
-			}
-		} else {
-			uprintf("Could not remount %s %s\n", drive_name, WindowsErrorString());
-			// Try to continue regardless
-		}
-	}
-	return TRUE;
 }
 
 /*

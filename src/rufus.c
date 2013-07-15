@@ -86,9 +86,12 @@ struct {
 	UINT uAlign;
 } bi_iso = {0}, bi_up = {0}, bi_down = {0};	// BUTTON_IMAGELIST
 
-static const char* FileSystemLabel[FS_MAX] = { "FAT", "FAT32", "NTFS", "exFAT" };
+const char* FileSystemLabel[FS_MAX] = { "FAT", "FAT32", "NTFS", "UDF", "exFAT" };
+// Number of steps for each FS for FCC_STRUCTURE_PROGRESS
+const int nb_steps[FS_MAX] = { 5, 5, 12, 1, 10 };
 // Don't ask me - just following the MS "standard" here
-static const char* ClusterSizeLabel[] = { "512 bytes", "1024 bytes","2048 bytes","4096 bytes","8192 bytes",
+// We hijack 256 as a "Default" for UDF, since we can't set clustersize there
+static const char* ClusterSizeLabel[] = { "Default", "512 bytes", "1024 bytes","2048 bytes","4096 bytes","8192 bytes",
 	"16 kilobytes", "32 kilobytes", "64 kilobytes", "128 kilobytes", "256 kilobytes", "512 kilobytes",
 	"1024 kilobytes","2048 kilobytes","4096 kilobytes","8192 kilobytes","16 megabytes","32 megabytes" };
 static const char* BiosTypeLabel[BT_MAX] = { "BIOS", "UEFI" };
@@ -242,8 +245,8 @@ static BOOL DefineClusterSizes(void)
 		}
 	}
 
-	// NTFS
 	if (SelectedDrive.DiskSize < 256*TB) {
+		// NTFS
 		SelectedDrive.ClusterSize[FS_NTFS].Allowed = 0x0001FE00;
 		for (i=16; i<=256; i<<=1) {				// 7 MB -> 256 TB
 			if (SelectedDrive.DiskSize < i*TB) {
@@ -251,17 +254,23 @@ static BOOL DefineClusterSizes(void)
 				break;
 			}
 		}
-	}
 
-	// exFAT
-	if (SelectedDrive.DiskSize < 256*TB) {
-		SelectedDrive.ClusterSize[FS_EXFAT].Allowed = 0x03FFFE00;
-		if (SelectedDrive.DiskSize < 256*MB)	// < 256 MB
-			SelectedDrive.ClusterSize[FS_EXFAT].Default = 4*1024;
-		else if (SelectedDrive.DiskSize < 32*GB)	// < 32 GB
-			SelectedDrive.ClusterSize[FS_EXFAT].Default = 32*1024;
-		else
-			SelectedDrive.ClusterSize[FS_EXFAT].Default = 28*1024;
+		// exFAT (requires KB955704 installed on XP => don't bother)
+		if (nWindowsVersion > WINDOWS_XP) {
+			SelectedDrive.ClusterSize[FS_EXFAT].Allowed = 0x03FFFE00;
+			if (SelectedDrive.DiskSize < 256*MB)	// < 256 MB
+				SelectedDrive.ClusterSize[FS_EXFAT].Default = 4*1024;
+			else if (SelectedDrive.DiskSize < 32*GB)	// < 32 GB
+				SelectedDrive.ClusterSize[FS_EXFAT].Default = 32*1024;
+			else
+				SelectedDrive.ClusterSize[FS_EXFAT].Default = 28*1024;
+		}
+
+		// UDF (only supported for Vista and later)
+		if (nWindowsVersion >= WINDOWS_VISTA) {
+			SelectedDrive.ClusterSize[FS_UDF].Allowed = 0x00000100;
+			SelectedDrive.ClusterSize[FS_UDF].Default = 1;
+		}
 	}
 
 out:
@@ -311,7 +320,7 @@ static BOOL SetClusterSizes(int FSType)
 		return FALSE;
 	}
 
-	for(i=0,j=0x200,k=0;j<0x10000000;i++,j<<=1) {
+	for(i=0,j=0x100,k=0;j<0x10000000;i++,j<<=1) {
 		if (j & SelectedDrive.ClusterSize[FSType].Allowed) {
 			safe_sprintf(szClustSize, sizeof(szClustSize), "%s", ClusterSizeLabel[i]);
 			if (j == SelectedDrive.ClusterSize[FSType].Default) {
@@ -1452,7 +1461,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	int nDeviceIndex, fs, bt, i, nWidth, nHeight;
 	static DWORD DeviceNum = 0, LastRefresh = 0;
 	char tmp[128], str[MAX_PATH];
-	static UINT uDOSChecked = BST_CHECKED, uQFChecked;
+	static UINT uBootChecked = BST_CHECKED, uQFChecked;
 	static BOOL first_log_display = TRUE, user_changed_label = FALSE;
 
 	switch (message) {
@@ -1648,13 +1657,16 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				}
 				break;
 			}
-			if (fs == FS_EXFAT) {
+			if ((fs == FS_EXFAT) || (fs == FS_UDF)) {
 				if (IsWindowEnabled(hBoot)) {
 					// unlikely to be supported by BIOSes => don't bother
 					IGNORE_RETVAL(ComboBox_SetCurSel(hBootType, 0));
-					uDOSChecked = IsDlgButtonChecked(hMainDialog, IDC_BOOT);
+					uBootChecked = IsDlgButtonChecked(hMainDialog, IDC_BOOT);
 					CheckDlgButton(hDlg, IDC_BOOT, BST_UNCHECKED);
 					EnableBootOptions(FALSE);
+				} else if (IsDlgButtonChecked(hMainDialog, IDC_BOOT)) {
+					uBootChecked = TRUE;
+					CheckDlgButton(hDlg, IDC_BOOT, BST_UNCHECKED);
 				}
 				SetMBRProps();
 				break;
@@ -1687,7 +1699,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				EnableWindow(hBoot, TRUE);
 				EnableWindow(hBootType, TRUE);
 				EnableWindow(hSelectISO, TRUE);
-				CheckDlgButton(hDlg, IDC_BOOT, uDOSChecked);
+				CheckDlgButton(hDlg, IDC_BOOT, uBootChecked);
 			}
 			SetMBRProps();
 			break;
