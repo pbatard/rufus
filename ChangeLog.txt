@@ -2,7 +2,7 @@ o Version 1.3.4 (2013.07.15)
     Syslinux v5 support (NEW)
     UDF formatting support (NEW - Vista and later only)
     More drive handling improvements, to avoid "Could not open media" errors
-    Fixed support for ISOs with files larger than 4GB files
+    Fixed support for ISOs containing files larger than 4GB
     Fixed elevation request for unprivileged users
     Fixed download of c32 files into the application directory
     Better compression algorithm for the executable

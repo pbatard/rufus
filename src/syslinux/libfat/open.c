@@ -98,6 +98,8 @@ libfat_open(int (*readfunc) (intptr_t, void *, size_t, libfat_sector_t),
 
     if (minfatsize > fatsize)
 	goto barf;		/* The FATs don't fit */
+#else
+    (void)(minfatsize);		/* silence an unused warning in MinGW */
 #endif
 
     if (fs->fat_type == FAT28)
