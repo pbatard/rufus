@@ -159,46 +159,59 @@ static const char* fd_kb4[] = {
 
 typedef struct {
 	const char* name;
+	ULONG default_cp;
+} kb_default;
+
+static kb_default kbdrv_data[] = {
+	{ "keyboard.sys", 437 },
+	{ "keybrd2.sys", 850 },
+	{ "keybrd3.sys", 850 },
+	{ "keybrd4.sys", 853 }
+};
+
+typedef struct {
 	size_t size;
 	const char** list;
 } kb_list;
 
 static kb_list ms_kb_list[] = {
-	{"keyboard.sys", ARRAYSIZE(ms_kb1), ms_kb1},
-	{"kbrd2.sys", ARRAYSIZE(ms_kb2), ms_kb2},
-	{"kbrd3.sys", ARRAYSIZE(ms_kb3), ms_kb3},
-	{"kbrd3.sys", ARRAYSIZE(ms_kb4), ms_kb4} };
+	{ ARRAYSIZE(ms_kb1), ms_kb1 },
+	{ ARRAYSIZE(ms_kb2), ms_kb2 },
+	{ ARRAYSIZE(ms_kb3), ms_kb3 },
+	{ ARRAYSIZE(ms_kb4), ms_kb4 }
+};
 
 static kb_list fd_kb_list[] = {
-	{"keyboard.sys", ARRAYSIZE(fd_kb1), fd_kb1},
-	{"kbrd2.sys", ARRAYSIZE(fd_kb2), fd_kb2},
-	{"kbrd3.sys", ARRAYSIZE(fd_kb3), fd_kb3},
-	{"kbrd3.sys", ARRAYSIZE(fd_kb4), fd_kb4} };
+	{ ARRAYSIZE(fd_kb1), fd_kb1 },
+	{ ARRAYSIZE(fd_kb2), fd_kb2 },
+	{ ARRAYSIZE(fd_kb3), fd_kb3 },
+	{ ARRAYSIZE(fd_kb4), fd_kb4 }
+};
 
-static const char* ms_get_kbdrv(const char* kb)
+static int ms_get_kbdrv(const char* kb)
 {
 	unsigned int i, j;
 	for (i=0; i<ARRAYSIZE(ms_kb_list); i++) {
 		for (j=0; j<ms_kb_list[i].size; j++) {
 			if (safe_strcmp(ms_kb_list[i].list[j], kb) == 0) {
-				return ms_kb_list[i].name;
+				return i;
 			}
 		}
 	}
-	return NULL;
+	return -1;
 }
 
-static const char* fd_get_kbdrv(const char* kb)
+static int fd_get_kbdrv(const char* kb)
 {
 	unsigned int i, j;
 	for (i=0; i<ARRAYSIZE(fd_kb_list); i++) {
 		for (j=0; j<fd_kb_list[i].size; j++) {
 			if (safe_strcmp(fd_kb_list[i].list[j], kb) == 0) {
-				return fd_kb_list[i].name;
+				return i;
 			}
 		}
 	}
-	return NULL;
+	return -1;
 }
 
 /* 
@@ -206,7 +219,7 @@ static const char* fd_get_kbdrv(const char* kb)
  * As real estate might be limited, keep it short
  */
 static const char* kb_hr_list[][2] = {
-	{"ar", "Arabic"},
+	{"ar", "Arabic"},			// Left enabled, but doesn't seem to work in FreeDOS
 	{"bg", "Bulgarian"},
 	{"ch", "Chinese"},
 	{"cz", "Czech"},
@@ -332,6 +345,16 @@ static cp_list cp_hr_list[] = {
 	{ 1119, "Cyr-Russian (Alt)"},
 	{ 1125, "Cyr-Ukrainian"},
 	{ 1131, "Cyr-Belarusian"},
+	{ 1250, "Central European"},
+	{ 1251, "Cyrillic"},
+	{ 1252, "Western European"},
+	{ 1253, "Greek"},
+	{ 1254, "Turkish"},
+	{ 1255, "Hebrew"},
+	{ 1256, "Arabic"},
+	{ 1257, "Baltic"},
+	{ 1258, "Vietnamese"},
+	{ 1361, "Korean"},
 	{ 3012, "Cyr-Latvian"},
 	{ 3021, "Cyr-Bulgarian"},
 	{ 3845, "Hungarian"},
@@ -931,14 +954,14 @@ BOOL SetDOSLocale(const char* path, BOOL bFreeDOS)
 	char filename[MAX_PATH];
 	ULONG cp;
 	const char *kb;
-	const char* kbdrv;
+	int kbdrv;
 	const char* egadrv;
 
 	// First handle the codepage
 	kb = get_kb();
 	// We have a keyboard ID, but that doesn't mean it's supported
 	kbdrv = bFreeDOS?fd_get_kbdrv(kb):ms_get_kbdrv(kb);
-	if (kbdrv == NULL) {
+	if (kbdrv < 0) {
 		uprintf("Keyboard id '%s' is not supported - falling back to 'us'\n", kb);
 		kb = "us";
 		kbdrv = bFreeDOS?fd_get_kbdrv(kb):ms_get_kbdrv(kb);	// Always succeeds
@@ -949,9 +972,10 @@ BOOL SetDOSLocale(const char* path, BOOL bFreeDOS)
 	cp = GetOEMCP();
 	egadrv = bFreeDOS?fd_get_ega(cp):ms_get_ega(cp);
 	if (egadrv == NULL) {
-		uprintf("Unable to find EGA for codepage %d - falling back to 437\n");
-		cp = 437;
-		egadrv =  bFreeDOS?"eag.cpx":"ega.cpi";
+		// We need to use the fallback CP from the keyboard we got above, as 437 is not always available
+		uprintf("Unable to find an EGA file with codepage %d [%s]\n", cp, cp_to_hr(cp));
+		cp = kbdrv_data[kbdrv].default_cp;
+		egadrv =  bFreeDOS?"ega.cpx":"ega.cpi";
 	} else if (bFreeDOS) {
 		cp = fd_upgrade_cp(cp);
 	}
@@ -1015,7 +1039,7 @@ BOOL SetDOSLocale(const char* path, BOOL bFreeDOS)
 	fprintf(fd, ":1\n");
 	fprintf(fd, "mode con codepage prepare=((%d) \\locale\\%s) > NUL\n", (int)cp, egadrv);
 	fprintf(fd, "mode con codepage select=%d > NUL\n", (int)cp);
-	fprintf(fd, "keyb %s,,\\locale\\%s\n", kb, kbdrv);
+	fprintf(fd, "keyb %s,,\\locale\\%s\n", kb, kbdrv_data[kbdrv].name);
 	fprintf(fd, ":2\n");
 	fclose(fd);
 	uprintf("Successfully wrote 'AUTOEXEC.BAT'\n");
