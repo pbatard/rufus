@@ -1,0 +1,74 @@
+﻿l "Chinese (Simplified)" 0x0804, 0x1004, 0x0404, 0x0c04, 0x1404
+t IDC_START "开始"
+t IDC_STOP "关闭"
+t IDS_DEVICE_TXT "设备"
+t IDS_PARTITION_TYPE_TXT "分区计划和目标系统类型"
+t IDS_FILESYSTEM_TXT "文件系统"
+t IDS_CLUSTERSIZE_TXT "簇的大小"
+t IDS_LABEL_TXT "新卷标"
+t IDS_FORMATOPTIONS_TXT "格式选项        "
+t IDC_BADBLOCKS "检查设备的坏块:"
+t IDC_QUICKFORMAT "快速格式化"
+t IDC_BOOT "创建一个可启动的磁盘使用："
+r IDC_BOOT +10,0
+t IDC_SET_ICON "创建扩展标签和图标文件"
+m IDC_ADVANCED -24,0
+m IDC_NBPASSES 8,0
+m IDC_BOOTTYPE 8,0
+m IDC_SELECT_ISO 6,0
+t IDC_ABOUT "关于..."
+t IDC_LOG "日志"
+m IDC_LOG -5,0
+r IDC_LOG +5,0
+t IDCANCEL "关闭"
+t IDC_START "开始"
+t IDC_ADVANCED_GROUP "高级选项"
+t IDC_ENABLE_FIXED_DISKS "列表固定(非flash)或USB磁盘分区"
+t IDC_EXTRA_PARTITION "添加修复旧的BIOS（额外的分区，校准等等）"
+t IDC_RUFUS_MBR "使用 Rufus MBR BIOS ID:"
+
+p IDD_ABOUTBOX
+t IDD_ABOUTBOX "关于 Rufus"
+t IDC_ABOUT_LICENSE "许可证"
+t IDC_ABOUT_UPDATES "更新"
+t IDOK "确定"
+
+p IDD_ISO_EXTRACT
+t IDD_ISO_EXTRACT "复制ISO文件..."
+t IDC_ISO_FILENAME "打开ISO映像 - 请稍候..."
+t IDC_ISO_ABORT "取消"
+
+p IDD_LICENSE
+t IDD_LICENSE "Rufus 许可证"
+t IDOK "取消"
+
+p IDD_NOTIFICATION
+t IDC_MORE_INFO "更多信息"
+t IDYES "是"
+t IDNO "否"
+
+p IDD_LOG
+t IDD_LOG "日志"
+t IDC_LOG_CLEAR "清除日志"
+t IDC_LOG_SAVE "保存日志"
+t IDCANCEL "关闭日志"
+
+p IDD_LICENSE
+t IDOK "取消"
+
+p IDD_UPDATE_POLICY
+t IDD_UPDATE_POLICY "更新方案和设置"
+t IDS_UPDATE_SETTINGS_TXT "设置"
+t IDS_UPDATE_FREQUENCY_TXT "检查更新："
+t IDS_INCLUDE_BETAS_TXT "包括测试版本："
+t IDC_CHECK_NOW "立即检查"
+t IDCANCEL "取消"
+
+p IDD_NEW_VERSION
+t IDD_NEW_VERSION "检查更新 - Rufus"
+t IDS_NEW_VERSION_AVAIL_TXT "更新的版本可用。请下载最新版本！"
+t IDC_WEBSITE "点击这里进入网站"
+t IDS_NEW_VERSION_NOTES_TXT "发行说明"
+t IDS_NEW_VERSION_DOWNLOAD_TXT "下载"
+t IDC_DOWNLOAD "下载"
+t IDCANCEL "取消"

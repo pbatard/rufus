@@ -71,7 +71,7 @@ END
 IDD_ABOUTBOX DIALOGEX 0, 0, 287, 201
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "About Rufus"
-FONT 8, "Microsoft Sans Serif", 400, 0, 0x0
+FONT 8, "MS Shell Dlg", 400, 0, 0x0
 BEGIN
     ICON            IDI_ICON,IDC_ABOUT_ICON,11,8,20,20
     DEFPUSHBUTTON   "OK",IDOK,231,181,50,14,WS_GROUP
@@ -128,7 +128,7 @@ END
 IDD_UPDATE_POLICY DIALOGEX 0, 0, 287, 198
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Update policy and settings"
-FONT 8, "Microsoft Sans Serif", 400, 0, 0x0
+FONT 8, "MS Shell Dlg", 400, 0, 0x0
 BEGIN
     ICON            IDI_ICON,IDC_ABOUT_ICON,11,8,20,20
     DEFPUSHBUTTON   "Close",IDCANCEL,221,172,50,14,WS_GROUP
@@ -145,7 +145,7 @@ END
 IDD_NEW_VERSION DIALOGEX 0, 0, 384, 268
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Check For Updates - Rufus"
-FONT 8, "Microsoft Sans Serif", 400, 0, 0x0
+FONT 8, "MS Shell Dlg", 400, 0, 0x0
 BEGIN
     PUSHBUTTON      "Close",IDCANCEL,167,244,50,14,WS_GROUP
     CONTROL         "",IDC_RELEASE_NOTES,"RichEdit20W",ES_MULTILINE | ES_READONLY | WS_VSCROLL,15,77,352,88,WS_EX_STATICEDGE
@@ -184,6 +184,7 @@ END
 3 TEXTINCLUDE 
 BEGIN
     "\r\n"
+    "IDR_LC_RUFUS_LOC        RCDATA                  ""../res/locale/rufus.loc""\r\n"
     "IDR_SL_LDLINUX_V4_BSS   RCDATA                  ""../res/syslinux/ldlinux_v4.bss""\r\n"
     "IDR_SL_LDLINUX_V4_SYS   RCDATA                  ""../res/syslinux/ldlinux_v4.sys""\r\n"
     "IDR_SL_LDLINUX_V5_BSS   RCDATA                  ""../res/syslinux/ldlinux_v5.bss""\r\n"
@@ -332,6 +333,7 @@ IDI_DOWN                ICON                    "../res/down.ico"
 // Generated from the TEXTINCLUDE 3 resource.
 //
 
+IDR_LC_RUFUS_LOC        RCDATA                  "../res/locale/rufus.loc"
 IDR_SL_LDLINUX_V4_BSS   RCDATA                  "../res/syslinux/ldlinux_v4.bss"
 IDR_SL_LDLINUX_V4_SYS   RCDATA                  "../res/syslinux/ldlinux_v4.sys"
 IDR_SL_LDLINUX_V5_BSS   RCDATA                  "../res/syslinux/ldlinux_v5.bss"

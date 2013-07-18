@@ -199,7 +199,7 @@ char* get_loc_data_file(const char* filename)
 	char *ret = NULL;
 	size_t i = 0;
 	int r = 0, line_nr_incr = 1;
-	wchar_t wc = 0, last_wc, eol_char = 0;
+	wchar_t wc = 0, eol_char = 0;
 	BOOL eol = FALSE;
 
 	if ((filename == NULL) || (filename[0] == 0))
@@ -224,7 +224,6 @@ char* get_loc_data_file(const char* filename)
 	}
 
 	do {	// custom readline handling for string collation, realloc, line numbers, etc.
-		last_wc = wc;
 		wc = getwc(fd);
 		switch(wc) {
 		case WEOF:
@@ -238,7 +237,7 @@ char* get_loc_data_file(const char* filename)
 			// This assumes that the EOL sequence is always the same throughout the file
 			if (eol_char == 0)
 				eol_char = wc;
-			if (wc = eol_char) {
+			if (wc == eol_char) {
 				if (eol) {
 					line_nr_incr++;
 				} else {

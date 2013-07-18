@@ -1915,12 +1915,16 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 #endif
 {
 	const char* old_wait_option = "/W";
+	const char* loc_name = "rufus.loc";
 	int i, opt, option_index = 0, argc = 0, si = 0;
 	BOOL attached_console = FALSE;
+	BYTE* loc_data;
+	DWORD loc_size, Size;
+	char loc_path[MAX_PATH];
 	char** argv = NULL;
 	wchar_t **wenv, **wargv;
 	PF_DECL(__wgetmainargs);
-	HANDLE mutex = NULL;
+	HANDLE hFile = NULL, mutex = NULL;
 	HWND hDlg = NULL;
 	MSG msg;
 	int wait_for_mutex = 0;
@@ -2021,6 +2025,21 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	// We use local group policies rather than direct registry manipulation
 	// 0x9e disables removable and fixed drive notifications
 	SetLGP(FALSE, &existing_key, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer", "NoDriveTypeAutorun", 0x9e);
+
+	// Extract the embedded localization data into the user's temp dir
+	loc_data = (BYTE*)GetResource(hMainInstance, MAKEINTRESOURCEA(IDR_LC_RUFUS_LOC), _RT_RCDATA, loc_name, &loc_size, FALSE);
+	GetTempPathU(sizeof(loc_path), loc_path);
+	safe_strcat(loc_path, sizeof(loc_name), loc_name);
+
+	hFile = CreateFileU(loc_path, GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ|FILE_SHARE_WRITE,
+		NULL, CREATE_ALWAYS, 0, 0);
+	if ((hFile == INVALID_HANDLE_VALUE)|| (!WriteFile(hFile, loc_data, loc_size, &Size, 0)) || (loc_size != Size)) {
+		uprintf("Unable to create file '%s': %s.\n", loc_path, WindowsErrorString());
+	} else {
+		uprintf("Successfully extracted '%s'\n", loc_path);
+		get_loc_data_file(loc_path);
+	}
+	safe_closehandle(hFile);
 
 	// Create the main Window
 	hDlg = CreateDialogW(hInstance, MAKEINTRESOURCEW(IDD_DIALOG), NULL, MainCallback);
