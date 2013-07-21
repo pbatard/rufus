@@ -29,13 +29,26 @@
 /* Define to 1 if you have the <fcntl.h> header file. */
 #define HAVE_FCNTL_H 1
 
+/* Define to 1 if you have the `lseek64' function. */
+#define HAVE_LSEEK64 1
+/* The equivalent of lseek64 on MSVC is _lseeki64 */
+#define lseek64 _lseeki64
+
 /* Define to 1 if you have the `fseeko' function. */
 /* #undef HAVE_FSEEKO */
 
 /* Define to 1 if you have the `fseeko64' function. */
 #define HAVE_FSEEKO64 1
-/* The equivalent of fseeko64 for MSVC is _fseeki64 */
-#if defined(_MSC_VER)
+/* The equivalent of fseeko64 for MSVC is _fseeki64, however this */
+/* is not available on XP when build with WDK (but _lseeki64 is)  */
+#if defined(DDKBUILD)
+#include <windows.h>
+#include <stdio.h>
+#include <io.h>
+static __inline int fseeko64(FILE *stream, __int64 offset, int origin) {
+	return (lseek64(_fileno(stream), offset, origin) == -1L)?-1:0;
+}
+#else
 #define fseeko64 _fseeki64
 #endif
 
@@ -57,11 +70,6 @@
 
 /* Define to 1 if you have the <limits.h> header file. */
 #define HAVE_LIMITS_H 1
-
-/* Define to 1 if you have the `lseek64' function. */
-#define HAVE_LSEEK64 1
-/* The equivalent of lseek64 on MSVC is _lseeki64 */
-#define lseek64 _lseeki64
 
 /* Define to 1 if you have the `lstat' function. */
 /* #undef HAVE_LSTAT */

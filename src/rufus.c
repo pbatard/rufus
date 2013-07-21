@@ -1930,8 +1930,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	uprintf("*** " APPLICATION_NAME " init ***\n");
 
-	SetThreadLocale(MAKELCID(LANG_FRENCH, SUBLANG_FRENCH));
-
 	// Reattach the console, if we were started from commandline
 	if (AttachConsole(ATTACH_PARENT_PROCESS) != 0) {
 		attached_console = TRUE;
