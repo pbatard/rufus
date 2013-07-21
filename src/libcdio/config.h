@@ -39,6 +39,7 @@
 
 /* Define to 1 if you have the `fseeko64' function. */
 #define HAVE_FSEEKO64 1
+#if defined(_MSC_VER)
 /* The equivalent of fseeko64 for MSVC is _fseeki64, however this */
 /* is not available on XP when build with WDK (but _lseeki64 is)  */
 #if defined(DDKBUILD)
@@ -50,6 +51,7 @@ static __inline int fseeko64(FILE *stream, __int64 offset, int origin) {
 }
 #else
 #define fseeko64 _fseeki64
+#endif
 #endif
 
 /* Define to 1 if you have the `ftruncate' function. */
