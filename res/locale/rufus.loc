@@ -1,6 +1,5 @@
-﻿l "Chinese (Simplified)" 0x0804, 0x1004, 0x0404, 0x0c04, 0x1404
-t IDC_START "开始"
-t IDC_STOP "关闭"
+﻿# This file should be saved as UTF-8 no-BOM
+l "Chinese (Simplified)" 0x0804, 0x1004, 0x0404, 0x0c04, 0x1404
 t IDS_DEVICE_TXT "设备"
 t IDS_PARTITION_TYPE_TXT "分区计划和目标系统类型"
 t IDS_FILESYSTEM_TXT "文件系统"

@@ -60,7 +60,7 @@ static loc_cmd* get_loc_cmd(wchar_t wc, wchar_t* wline) {
 	}
 	lcmd->ctrl_id = -1;
 	lcmd->command = parse_cmd[j].cmd;
-	lcmd->line_nr = loc_line_nr;
+	lcmd->line_nr = (uint16_t)loc_line_nr;
 
 	i = 0;
 	for (k = 0; parse_cmd[j].arg_type[k] != 0; k++) {

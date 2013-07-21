@@ -1,6 +1,7 @@
 /*
  * MSAPI_UTF8: Common API calls using UTF-8 strings
  * Compensating for what Microsoft should have done a long long time ago.
+ * Also see http://utf8everywhere.org/
  *
  * Copyright © 2010-2013 Pete Batard <pete@akeo.ie>
  *
