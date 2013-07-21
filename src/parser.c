@@ -35,17 +35,18 @@
 #include "msapi_utf8.h"
 #include "localization.h"
 
+static const char space[] = " \t";
 static const wchar_t wspace[] = L" \t";
 
 // Fill a localization command buffer by parsing the line arguments
 // The command is allocated and must be freed (by calling free_loc_cmd)
-static loc_cmd* get_loc_cmd(wchar_t wc, wchar_t* wline) {
+static loc_cmd* get_loc_cmd(char c, char* line) {
 	size_t i, j, k, l, r, ti = 0, ii = 0;
-	wchar_t *endptr, *expected_endptr, *wtoken;
+	char *endptr, *expected_endptr, *token;
 	loc_cmd* lcmd = NULL;
 
 	for (j=0; j<ARRAYSIZE(parse_cmd); j++) {
-		if (wc == (wchar_t)parse_cmd[j].c)
+		if (c == parse_cmd[j].c)
 			break;
 	}
 	if (j >= ARRAYSIZE(parse_cmd)) {
@@ -65,55 +66,55 @@ static loc_cmd* get_loc_cmd(wchar_t wc, wchar_t* wline) {
 	i = 0;
 	for (k = 0; parse_cmd[j].arg_type[k] != 0; k++) {
 		// Skip leading spaces
-		i += wcsspn(&wline[i], wspace);
+		i += strspn(&line[i], space);
 		r = i;
-		if (wline[i] == 0) {
+		if (line[i] == 0) {
 			luprintf("missing parameter for command '%c'", parse_cmd[j].c);
 			goto err;
 		}
 		switch(parse_cmd[j].arg_type[k]) {
 		case 's':	// quoted string
 			// search leading quote
-			if (wline[i++] != L'"') {
+			if (line[i++] != '"') {
 				luprint("no start quote");
 				goto err;
 			}
 			r = i;
 			// locate ending quote
-			while ((wline[i] != 0) && ((wline[i] != L'"') || ((wline[i] == L'"') && (wline[i-1] == L'\\')))) {
-				if ((wline[i] == L'"') && (wline[i-1] == L'\\')) {
-					wcscpy(&wline[i-1], &wline[i]);
+			while ((line[i] != 0) && ((line[i] != '"') || ((line[i] == '"') && (line[i-1] == '\\')))) {
+				if ((line[i] == '"') && (line[i-1] == '\\')) {
+					strcpy(&line[i-1], &line[i]);
 				} else {
 					i++;
 				}
 			}
-			if (wline[i] == 0) {
+			if (line[i] == 0) {
 				luprint("no end quote");
 				goto err;
 			}
-			wline[i++] = 0;
-			lcmd->txt[ti++] = wchar_to_utf8(&wline[r]);
+			line[i++] = 0;
+			lcmd->txt[ti++] = safe_strdup(&line[r]);
 			break;
 		case 'c':	// control ID (single word)
-			while ((wline[i] != 0) && (wline[i] != wspace[0]) && (wline[i] != wspace[1]))
+			while ((line[i] != 0) && (line[i] != space[0]) && (line[i] != space[1]))
 				i++;
-			if (wline[i] != 0)
-				wline[i++] = 0;
-			lcmd->txt[ti++] = wchar_to_utf8(&wline[r]);
+			if (line[i] != 0)
+				line[i++] = 0;
+			lcmd->txt[ti++] = safe_strdup(&line[r]);
 			break;
 		case 'i':	// 32 bit signed integer
 			// allow commas or dots between values
-			if ((wline[i] == L',') || (wline[i] == L'.')) {
-				i += wcsspn(&wline[i+1], wspace);
+			if ((line[i] == ',') || (line[i] == '.')) {
+				i += strspn(&line[i+1], space);
 				r = i;
 			}
-			while ((wline[i] != 0) && (wline[i] != wspace[0]) && (wline[i] != wspace[1])
-				&& (wline[i] != L',') && (wline[i] != L'.'))
+			while ((line[i] != 0) && (line[i] != space[0]) && (line[i] != space[1])
+				&& (line[i] != ',') && (line[i] != '.'))
 				i++;
-			expected_endptr = &wline[i];
-			if (wline[i] != 0)
-				wline[i++] = 0;
-			lcmd->num[ii++] = (int32_t)wcstol(&wline[r], &endptr, 0);
+			expected_endptr = &line[i];
+			if (line[i] != 0)
+				line[i++] = 0;
+			lcmd->num[ii++] = (int32_t)strtol(&line[r], &endptr, 0);
 			if (endptr != expected_endptr) {
 				luprint("invalid integer");
 				goto err;
@@ -122,17 +123,17 @@ static loc_cmd* get_loc_cmd(wchar_t wc, wchar_t* wline) {
 		case 'u':	// comma separated list of unsigned integers (to end of line)
 			// count the number of commas
 			lcmd->unum_size = 1;
-			for (l=i; wline[l] != 0; l++) {
-				if (wline[l] == L',')
+			for (l=i; line[l] != 0; l++) {
+				if (line[l] == ',')
 					lcmd->unum_size++;
 			}
 			lcmd->unum = (uint32_t*)malloc(lcmd->unum_size * sizeof(uint32_t));
-			wtoken = wcstok(&wline[i], L",");
-			for (l=0; (l<lcmd->unum_size) && (wtoken != NULL); l++) {
-				lcmd->unum[l] = (int32_t)wcstol(wtoken, &endptr, 0);
-				wtoken = wcstok(NULL, L",");
+			token = strtok(&line[i], ",");
+			for (l=0; (l<lcmd->unum_size) && (token != NULL); l++) {
+				lcmd->unum[l] = (int32_t)strtol(token, &endptr, 0);
+				token = strtok(NULL, ",");
 			}
-			if ((wtoken != NULL) || (l != lcmd->unum_size)) {
+			if ((token != NULL) || (l != lcmd->unum_size)) {
 				luprint("internal error (unexpected number of numeric values)");
 				goto err;
 			}
@@ -150,31 +151,31 @@ err:
 }
 
 
-// Parse an UTF-16 localization command line
-static void* get_loc_data_line(wchar_t* wline)
+// Parse an UTF-8 localization command line
+static void* get_loc_data_line(char* line)
 {
 	size_t i = 0;
-	wchar_t t;
 	loc_cmd* lcmd = NULL;
+	char t;
 //	char* locale = "en-US";
 //	BOOL seek_locale = TRUE;
 
-	if ((wline == NULL) || (wline[0] == 0))
+	if ((line == NULL) || (line[0] == 0))
 		return NULL;
 
 	// Skip leading spaces
-	i += wcsspn(&wline[i], wspace);
+	i += strspn(&line[i], space);
 
 	// Read token (NUL character will be read if EOL)
-	t = wline[i++];
-	if (t == L'#')	// Comment
+	t = line[i++];
+	if (t == '#')	// Comment
 		return NULL;
-	if ((t == 0) || ((wline[i] != wspace[0]) && (wline[i] != wspace[1]))) {
+	if ((t == 0) || ((line[i] != space[0]) && (line[i] != space[1]))) {
 		luprint("syntax error");
 		return NULL;
 	}
 
-	lcmd = get_loc_cmd(t, &wline[i]);
+	lcmd = get_loc_cmd(t, &line[i]);
 	// TODO: process LC_LOCALE in seek_locale mode
 	// TODO: check return value?
 	dispatch_loc_cmd(lcmd);
@@ -190,22 +191,21 @@ static __inline void *_reallocf(void *ptr, size_t size)
 	return ret;
 }
 
-// Parse a Rufus localization command file (ANSI, UTF-8 or UTF-16)
+// Parse a Rufus localization command file (UTF-8, no BOM)
 char* get_loc_data_file(const char* filename)
 {
-	wchar_t *wfilename = NULL, *wbuf = NULL;
-	size_t wbufsize = 1024;
+	wchar_t *wfilename = NULL;
+	size_t bufsize = 1024;
 	FILE* fd = NULL;
-	char *ret = NULL;
+	char *ret = NULL, *buf = NULL;
 	size_t i = 0;
 	int r = 0, line_nr_incr = 1;
-	wchar_t wc = 0, eol_char = 0;
+	int c = 0, eol_char = 0;
 	BOOL eol = FALSE;
 
 	if ((filename == NULL) || (filename[0] == 0))
 		return NULL;
 
-	// TODO: revert previous changes
 	free_loc_dlg();
 	loc_line_nr = 0;
 	safe_strcpy(loc_filename, sizeof(loc_filename), filename);
@@ -214,30 +214,33 @@ char* get_loc_data_file(const char* filename)
 		uprintf("localization: could not convert '%s' filename to UTF-16\n", filename);
 		goto out;
 	}
-	fd = _wfopen(wfilename, L"r, ccs=UNICODE");
-	if (fd == NULL) goto out;
+	fd = _wfopen(wfilename, L"r");
+	if (fd == NULL) {
+		uprintf("localization: could not open '%s'\n", filename);
+		goto out;
+	}
 
-	wbuf = (wchar_t*) malloc(wbufsize*sizeof(wchar_t));
-	if (wbuf == NULL) {
+	buf = (char*) malloc(bufsize);
+	if (buf == NULL) {
 		uprintf("localization: could not allocate line buffer\n");
 		goto out;
 	}
 
 	do {	// custom readline handling for string collation, realloc, line numbers, etc.
-		wc = getwc(fd);
-		switch(wc) {
-		case WEOF:
-			wbuf[i] = 0;
+		c = getc(fd);
+		switch(c) {
+		case EOF:
+			buf[i] = 0;
 			if (!eol)
 				loc_line_nr += line_nr_incr;
-			get_loc_data_line(wbuf);
+			get_loc_data_line(buf);
 			goto out;
-		case L'\r':
-		case L'\n':
+		case '\r':
+		case '\n':
 			// This assumes that the EOL sequence is always the same throughout the file
 			if (eol_char == 0)
-				eol_char = wc;
-			if (wc == eol_char) {
+				eol_char = c;
+			if (c == eol_char) {
 				if (eol) {
 					line_nr_incr++;
 				} else {
@@ -245,45 +248,45 @@ char* get_loc_data_file(const char* filename)
 					line_nr_incr = 1;
 				}
 			}
-			wbuf[i] = 0;
+			buf[i] = 0;
 			if (!eol) {
 				// Strip trailing spaces (for string collation)
-				for (r = ((int)i)-1; (r>0) && ((wbuf[r]==wspace[0])||(wbuf[r]==wspace[1])); r--);
+				for (r = ((int)i)-1; (r>0) && ((buf[r]==space[0])||(buf[r]==space[1])); r--);
 				if (r < 0)
 					r = 0;
 				eol = TRUE;
 			}
 			break;
-		case L' ':
-		case L'\t':
+		case ' ':
+		case '\t':
 			if (!eol) {
-				wbuf[i++] = wc;
+				buf[i++] = (char)c;
 			}
 			break;
 		default:
 			// Collate multiline strings
-			if ((eol) && (wc == L'"') && (wbuf[r] == L'"')) {
+			if ((eol) && (c == '"') && (buf[r] == '"')) {
 				i = r;
 				eol = FALSE;
 				break;
 			}
 			if (eol) {
-				get_loc_data_line(wbuf);
+				get_loc_data_line(buf);
 				eol = FALSE;
 				i = 0;
 				r = 0;
 			}
-			wbuf[i++] = wc;
+			buf[i++] = (char)c;
 			break;
 		}
-		if (i >= wbufsize-1) {
-			wbufsize *= 2;
-			if (wbufsize > 32768) {
+		if (i >= bufsize-1) {
+			bufsize *= 2;
+			if (bufsize > 32768) {
 				uprintf("localization: requested line buffer is larger than 32K!\n");
 				goto out;
 			}
-			wbuf = (wchar_t*) _reallocf(wbuf, wbufsize*sizeof(wchar_t));
-			if (wbuf == NULL) {
+			buf = (char*) _reallocf(buf, bufsize);
+			if (buf == NULL) {
 				uprintf("localization: could not grow line buffer\n");
 				goto out;
 			}
@@ -295,7 +298,7 @@ out:
 	if (fd != NULL)
 		fclose(fd);
 	safe_free(wfilename);
-	safe_free(wbuf);
+	safe_free(buf);
 	return ret;
 }
 
