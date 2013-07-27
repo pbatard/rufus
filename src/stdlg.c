@@ -573,6 +573,7 @@ INT_PTR CALLBACK NotificationCallback(HWND hDlg, UINT message, WPARAM wParam, LP
 
 	switch (message) {
 	case WM_INITDIALOG:
+		apply_localization(IDD_NOTIFICATION, hDlg);
 		white_brush = CreateSolidBrush(WHITE);
 		separator_brush = CreateSolidBrush(SEPARATOR_GREY);
 		SetTitleBarIcon(hDlg);

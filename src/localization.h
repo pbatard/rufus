@@ -53,13 +53,13 @@ struct list_head {
  *  member - the list_head element in "pos"
  *  type - the type of the first parameter
  */
-#define list_for_each_entry(pos, head, member, type)			\
+#define list_for_each_entry(pos, head, type, member)			\
 	for (pos = list_entry((head)->next, type, member);			\
 		 &pos->member != (head);								\
 		 pos = list_entry(pos->member.next, type, member))
 
 
-#define list_for_each_entry_safe(pos, n, head, member, type)	\
+#define list_for_each_entry_safe(pos, n, head, type, member)	\
 	for (pos = list_entry((head)->next, type, member),			\
 		 n = list_entry(pos->member.next, type, member);		\
 		 &pos->member != (head);								\
@@ -140,12 +140,20 @@ typedef struct loc_dlg_list_struct {
 } loc_dlg_list;
 
 extern const loc_parse parse_cmd[9];
+extern struct list_head locale_list;
 int loc_line_nr;
 char loc_filename[32];
 
 void free_loc_cmd(loc_cmd* lcmd);
 BOOL dispatch_loc_cmd(loc_cmd* lcmd);
 void init_localization(void);
+void exit_localization(void);
 void apply_localization(int dlg_id, HWND hDlg);
 void reset_localization(int dlg_id);
 void free_loc_dlg(void);
+char* get_loc_msg(int id);
+BOOL get_supported_locales(const char* filename);
+char* get_loc_data_file(const char* filename, long offset, long end_offset);
+void free_locale_list(void);
+loc_cmd* get_locale_from_lcid(int lcid);
+loc_cmd* get_locale_from_name(char* locale_name);

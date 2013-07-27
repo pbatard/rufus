@@ -10,6 +10,7 @@
 #define IDD_LOG                         106
 #define IDD_UPDATE_POLICY               107
 #define IDD_NEW_VERSION                 108
+#define IDD_MESSAGES                    109
 #define IDI_ICON                        110
 #define IDI_UP                          111
 #define IDI_DOWN                        112
@@ -107,6 +108,8 @@
 #define IDS_NEW_VERSION_AVAIL_TXT       2009
 #define IDS_NEW_VERSION_DOWNLOAD_TXT    2010
 #define IDS_NEW_VERSION_NOTES_TXT       2011
+#define MSG_000                         3000
+#define MSG_001                         3001
 
 // Next default values for new objects
 // 

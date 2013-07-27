@@ -1448,8 +1448,6 @@ static void PrintStatus2000(const char* str, BOOL val)
 }
 
 
-// TODO: remove me
-extern char* get_loc_data_file(const char* filename);
 /*
  * Main dialog callback
  */
@@ -1463,6 +1461,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	char tmp[128], str[MAX_PATH];
 	static UINT uBootChecked = BST_CHECKED, uQFChecked;
 	static BOOL first_log_display = TRUE, user_changed_label = FALSE;
+	loc_cmd* selected_locale;
 
 	switch (message) {
 
@@ -1595,7 +1594,17 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			break;
 #ifdef RUFUS_TEST
 		case IDC_TEST:
-			get_loc_data_file("rufus.loc");
+			if ( (!get_supported_locales("rufus.loc"))
+//			  || ((selected_locale = get_locale_from_lcid(GetUserDefaultLCID())) == NULL) ) {
+			  || ((selected_locale = get_locale_from_name("French")) == NULL) ) {
+				  uprintf("FATAL: Could not get a default locale!\n");
+				MessageBoxU(NULL, "Default locale is missing - the application will now exit",
+					"Localization failure", MB_ICONSTOP);
+				break;
+			}
+			uprintf("Will use locale '%s'\n", selected_locale->txt[0]);
+			get_loc_data_file("rufus.loc", (long)selected_locale->num[0], (long)selected_locale->num[1]);
+			apply_localization(IDD_DIALOG, hDlg);
 			break;
 #endif
 		case IDC_ADVANCED:
@@ -1777,8 +1786,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 					break;
 				}
 				GetWindowTextU(hDeviceList, tmp, ARRAYSIZE(tmp));
-				_snprintf(str, ARRAYSIZE(str), "WARNING: ALL DATA ON DEVICE '%s'\r\nWILL BE DESTROYED.\r\n"
-					"To continue with this operation, click OK. To quit click CANCEL.", tmp);
+				_snprintf(str, ARRAYSIZE(str), get_loc_msg(MSG_001), tmp);
 				if (MessageBoxU(hMainDialog, str, APPLICATION_NAME, MB_OKCANCEL|MB_ICONWARNING) == IDCANCEL) {
 					format_op_in_progress = FALSE;
 					break;
@@ -2035,6 +2043,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	GetTempPathU(sizeof(loc_path), loc_path);
 	safe_strcat(loc_path, sizeof(loc_name), loc_name);
 
+	// TODO: make sure we fail if we can't extract the file as we'll miss all the messages
+
 	// Force Chinese localization from embedded rufus.loc file
 	// TODO: REMOVE ME!
 	hFile = CreateFileU(loc_path, GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ|FILE_SHARE_WRITE,
@@ -2118,7 +2128,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 out:
 	DestroyAllTooltips();
-	free_loc_dlg();
+	exit_localization();
 	safe_free(iso_path);
 	safe_free(update.download_url);
 	safe_free(update.release_notes);

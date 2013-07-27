@@ -143,6 +143,7 @@ static loc_cmd* get_loc_cmd(char c, char* line) {
 			goto err;
 		}
 	}
+
 	return lcmd;
 
 err:
@@ -152,35 +153,34 @@ err:
 
 
 // Parse an UTF-8 localization command line
-static void* get_loc_data_line(char* line)
+static void get_loc_data_line(char* line)
 {
-	size_t i = 0;
+	size_t i;
 	loc_cmd* lcmd = NULL;
 	char t;
-//	char* locale = "en-US";
-//	BOOL seek_locale = TRUE;
 
 	if ((line == NULL) || (line[0] == 0))
-		return NULL;
+		return;
 
 	// Skip leading spaces
-	i += strspn(&line[i], space);
+	i = strspn(line, space);
 
 	// Read token (NUL character will be read if EOL)
 	t = line[i++];
 	if (t == '#')	// Comment
-		return NULL;
+		return;
 	if ((t == 0) || ((line[i] != space[0]) && (line[i] != space[1]))) {
 		luprint("syntax error");
-		return NULL;
+		return;
 	}
 
 	lcmd = get_loc_cmd(t, &line[i]);
-	// TODO: process LC_LOCALE in seek_locale mode
-	// TODO: check return value?
-	dispatch_loc_cmd(lcmd);
 
-	return NULL;
+	if ((lcmd != NULL) && (lcmd->command != LC_LOCALE))
+		// TODO: check return value?
+		dispatch_loc_cmd(lcmd);
+	else
+		free_loc_cmd(lcmd);
 }
 
 static __inline void *_reallocf(void *ptr, size_t size)
@@ -191,8 +191,83 @@ static __inline void *_reallocf(void *ptr, size_t size)
 	return ret;
 }
 
+/*
+ * First pass of parsing the locale file, to construct the list
+ * of locales available. The locale file must be UTF-8 with NO BOM.
+ * TODO: merge this with the next call or factorize fopen
+ */
+BOOL get_supported_locales(const char* filename)
+{
+	wchar_t *wfilename = NULL;
+	FILE* fd = NULL;
+	BOOL r = FALSE;
+	char line[1024];
+	size_t i;
+	loc_cmd *lcmd = NULL, *last_lcmd = NULL;
+	long end_of_block;
+	
+	safe_strcpy(loc_filename, sizeof(loc_filename), filename);
+	wfilename = utf8_to_wchar(filename);
+	if (wfilename == NULL) {
+		uprintf("localization: could not convert '%s' filename to UTF-16\n", filename);
+		goto out;
+	}
+	fd = _wfopen(wfilename, L"r");
+	if (fd == NULL) {
+		uprintf("localization: could not open '%s'\n", filename);
+		goto out;
+	}
+
+	loc_line_nr = 0;
+	line[0] = 0;
+	free_locale_list();
+	do {
+		// adjust the last block
+		end_of_block = ftell(fd);
+		if (fgets(line, sizeof(line), fd) == NULL)
+			break;
+		loc_line_nr++;
+		// Skip leading spaces
+		i = strspn(line, space);
+		if (line[i] != 'l')
+			continue;
+//		uprintf("Found potential start of loc at line %d\n", loc_line_nr);
+		// line[i] is not NUL so i+1 is safe to access
+		lcmd = get_loc_cmd(line[i], &line[i+1]);
+		if ((lcmd == NULL) || (lcmd->command != LC_LOCALE)) {
+			free_loc_cmd(lcmd);
+			continue;
+		}
+		// we use num[0] and num[1] as block delimiter index for this locale in the file
+		if (last_lcmd != NULL) {
+			last_lcmd->num[1] = (int32_t)end_of_block;
+//			uprintf("ended locale block at offset %d\n", last_lcmd->num[1]);
+		}
+		lcmd->num[0] = (int32_t)ftell(fd);
+//		uprintf("started locale block for '%s' at offset %d\n", lcmd->txt[0], lcmd->num[0]);
+		// Add our locale command to the locale list
+		list_add_tail(&lcmd->list, &locale_list);
+		uprintf("localization: found locale '%s'\n", lcmd->txt[0]);
+		last_lcmd = lcmd;
+	} while (1);
+	if (last_lcmd != NULL)
+		last_lcmd->num[1] = (int32_t)ftell(fd);
+//	uprintf("ended locale block at offset %d\n", last_lcmd->num[1]);
+	r = !list_empty(&locale_list);
+	if (r == FALSE)
+		uprintf("localization: '%s' contains no locale sections\n", filename); 
+
+out:
+	if (fd != NULL)
+		fclose(fd);
+	safe_free(wfilename);
+	return r;
+}
+
 // Parse a Rufus localization command file (UTF-8, no BOM)
-char* get_loc_data_file(const char* filename)
+// TODO: detect if locale could not be found and fallback to En
+// TODO: change the return value and return an error if locale was not found
+char* get_loc_data_file(const char* filename, long offset, long end_offset)
 {
 	wchar_t *wfilename = NULL;
 	size_t bufsize = 1024;
@@ -201,7 +276,7 @@ char* get_loc_data_file(const char* filename)
 	size_t i = 0;
 	int r = 0, line_nr_incr = 1;
 	int c = 0, eol_char = 0;
-	BOOL eol = FALSE;
+	BOOL eol = FALSE, escape_sequence = FALSE;
 
 	if ((filename == NULL) || (filename[0] == 0))
 		return NULL;
@@ -226,7 +301,13 @@ char* get_loc_data_file(const char* filename)
 		goto out;
 	}
 
+	fseek(fd, offset, SEEK_SET);
+
 	do {	// custom readline handling for string collation, realloc, line numbers, etc.
+		if (offset++ > end_offset) {
+//			uprintf("found end of section at offset %d\n", end_offset);
+			goto out;
+		}
 		c = getc(fd);
 		switch(c) {
 		case EOF:
@@ -235,8 +316,16 @@ char* get_loc_data_file(const char* filename)
 				loc_line_nr += line_nr_incr;
 			get_loc_data_line(buf);
 			goto out;
+		case '\\':
+			if (!escape_sequence)
+				escape_sequence = TRUE;
+			break;
 		case '\r':
 		case '\n':
+			if (escape_sequence) {
+				escape_sequence = FALSE;
+				break;
+			}
 			// This assumes that the EOL sequence is always the same throughout the file
 			if (eol_char == 0)
 				eol_char = c;
@@ -259,27 +348,48 @@ char* get_loc_data_file(const char* filename)
 			break;
 		case ' ':
 		case '\t':
+			if (escape_sequence) {
+				escape_sequence = FALSE;
+				break;
+			}
 			if (!eol) {
 				buf[i++] = (char)c;
 			}
 			break;
 		default:
-			// Collate multiline strings
-			if ((eol) && (c == '"') && (buf[r] == '"')) {
-				i = r;
-				eol = FALSE;
-				break;
+			if (escape_sequence) {
+				switch (c) {
+				case 'n':	// \n -> CRLF
+					buf[i++] = '\r';
+					buf[i++] = '\n';
+					break;
+				case '"':	// \" carried as is
+					buf[i++] = '\\';
+					buf[i++] = '"';
+					break;
+				default:	// ignore any other escape sequence
+					break;
+				}
+				escape_sequence = FALSE;
+			} else {
+				// Collate multiline strings
+				if ((eol) && (c == '"') && (buf[r] == '"')) {
+					i = r;
+					eol = FALSE;
+					break;
+				}
+				if (eol) {
+					get_loc_data_line(buf);
+					eol = FALSE;
+					i = 0;
+					r = 0;
+				}
+				buf[i++] = (char)c;
 			}
-			if (eol) {
-				get_loc_data_line(buf);
-				eol = FALSE;
-				i = 0;
-				r = 0;
-			}
-			buf[i++] = (char)c;
 			break;
 		}
-		if (i >= bufsize-1) {
+		// Have at least 2 chars extra, for \r\n sequences
+		if (i >= bufsize-2) {
 			bufsize *= 2;
 			if (bufsize > 32768) {
 				uprintf("localization: requested line buffer is larger than 32K!\n");
@@ -294,6 +404,7 @@ char* get_loc_data_file(const char* filename)
 	} while(1);
 
 out:
+	// TODO: do we really need this here?
 	apply_localization(-1, NULL);
 	if (fd != NULL)
 		fclose(fd);

@@ -39,21 +39,21 @@ BEGIN
     PUSHBUTTON      "Log",IDC_LOG,62,291,18,14
     PUSHBUTTON      "T",IDC_TEST,80,291,12,14,NOT WS_VISIBLE
     COMBOBOX        IDC_DEVICE,8,17,190,33,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Device",IDS_DEVICE_TXT,9,6,188,8
+    LTEXT           "Device",IDS_DEVICE_TXT,9,6,186,8
     COMBOBOX        IDC_FILESYSTEM,8,75,190,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "File system",IDS_FILESYSTEM_TXT,9,64,188,10
+    LTEXT           "File system",IDS_FILESYSTEM_TXT,9,64,186,10
     COMBOBOX        IDC_PARTITION_SCHEME,8,46,190,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Partition scheme and target system type",IDS_PARTITION_TYPE_TXT,9,35,188,8
+    LTEXT           "Partition scheme and target system type",IDS_PARTITION_TYPE_TXT,9,35,186,8
     COMBOBOX        IDC_CLUSTERSIZE,8,104,190,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Cluster size",IDS_CLUSTERSIZE_TXT,9,93,189,10
+    LTEXT           "Cluster size",IDS_CLUSTERSIZE_TXT,9,93,186,10
     GROUPBOX        "Format Options       ",IDS_FORMATOPTIONS_TXT,7,149,192,66
-    LTEXT           "New volume label",IDS_LABEL_TXT,9,121,188,10
+    LTEXT           "New volume label",IDS_LABEL_TXT,9,121,186,10
     EDITTEXT        IDC_LABEL,7,131,190,13,ES_AUTOHSCROLL
     CONTROL         "Check device for bad blocks:",IDC_BADBLOCKS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,161,101,10
-    CONTROL         "Quick format",IDC_QUICKFORMAT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,173,184,10
+    CONTROL         "Quick format",IDC_QUICKFORMAT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,173,181,10
     CONTROL         "Create a bootable disk using:",IDC_BOOT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,185,104,10
     CONTROL         "Create extended label and icon files",IDC_SET_ICON,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,198,183,10
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,198,181,10
     CONTROL         "",IDC_PROGRESS,"msctls_progress32",PBS_SMOOTH | WS_BORDER,8,272,189,9
     COMBOBOX        IDC_NBPASSES,119,159,49,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     COMBOBOX        IDC_BOOTTYPE,119,183,49,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
@@ -63,9 +63,9 @@ BEGIN
     GROUPBOX        "Advanced Options",IDC_ADVANCED_GROUP,7,210,192,54
     COMBOBOX        IDC_DISK_ID,119,246,73,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     CONTROL         "Add fixes for old BIOSes (extra partition, align, etc.)",IDC_EXTRA_PARTITION,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,235,184,10
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,235,181,10
     CONTROL         "List fixed (non-flash) or unpartitioned USB disks",IDC_ENABLE_FIXED_DISKS,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,222,185,10
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,222,181,10
 END
 
 IDD_ABOUTBOX DIALOGEX 0, 0, 287, 201

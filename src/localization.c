@@ -62,6 +62,7 @@ const loc_parse parse_cmd[9] = {
 };
 int  loc_line_nr;
 char loc_filename[32];
+struct list_head locale_list = {NULL, NULL};
 
 void free_loc_cmd(loc_cmd* lcmd)
 {
@@ -91,10 +92,20 @@ void free_loc_dlg(void)
 	for (i=0; i<ARRAYSIZE(loc_dlg); i++) {
 		if (list_empty(&loc_dlg[i].list))
 			continue;
-		list_for_each_entry_safe(lcmd, next, &loc_dlg[i].list, list, loc_cmd) {
+		list_for_each_entry_safe(lcmd, next, &loc_dlg[i].list, loc_cmd, list) {
 			list_del(&lcmd->list);
 			free_loc_cmd(lcmd);
 		}
+	}
+}
+
+void free_locale_list(void)
+{
+	loc_cmd *lcmd, *next;
+
+	list_for_each_entry_safe(lcmd, next, &locale_list, loc_cmd, list) {
+		list_del(&lcmd->list);
+		free_loc_cmd(lcmd);
 	}
 }
 
@@ -106,6 +117,12 @@ void init_localization(void) {
 
 	for (i=0; i<ARRAYSIZE(loc_dlg); i++)
 		list_init(&loc_dlg[i].list);
+	list_init(&locale_list);
+}
+
+void exit_localization(void) {
+	free_loc_dlg();
+	free_locale_list();
 }
 
 /*
@@ -118,6 +135,9 @@ void apply_localization(int dlg_id, HWND hDlg)
 	loc_cmd* lcmd;
 	HWND hCtrl = NULL;
 	int id_start = IDD_DIALOG, id_end = IDD_DIALOG + ARRAYSIZE(loc_dlg);
+	LONG_PTR style;
+	BOOL left_to_right = FALSE;
+
 
 	if ((dlg_id >= id_start) && (dlg_id < id_end)) {
 		// If we have a valid dialog_id, just process that one dialog
@@ -133,10 +153,11 @@ void apply_localization(int dlg_id, HWND hDlg)
 		if ((!IsWindow(hDlg)) || (list_empty(&loc_dlg[dlg_id-IDD_DIALOG].list)))
 			continue;
 
-		list_for_each_entry(lcmd, &loc_dlg[dlg_id-IDD_DIALOG].list, list, loc_cmd) {
+		// TODO: storing the messages in an array indexed on the message ID - 3000 would be faster
+		list_for_each_entry(lcmd, &loc_dlg[dlg_id-IDD_DIALOG].list, loc_cmd, list) {
 			if (lcmd->command <= LC_TEXT) { // TODO: should always be the case
 				if (lcmd->ctrl_id == dlg_id) {
-					if (dlg_id == IDD_DIALOG) {
+					if ((dlg_id == IDD_DIALOG) && (lcmd->txt[1] != NULL) && (lcmd->txt[1][0] != 0)) {
 						loc_line_nr = lcmd->line_nr;
 						luprint("operation forbidden (main dialog title cannot be changed)");
 						continue;
@@ -156,7 +177,14 @@ void apply_localization(int dlg_id, HWND hDlg)
 			// NB: For commands that take an ID, ctrl_id is always a valid index at this stage
 			case LC_TEXT:
 				if (hCtrl != NULL) {
-					SetWindowTextU(hCtrl, lcmd->txt[1]);
+					if ((lcmd->txt[1] != NULL) && (lcmd->txt[1][0] != 0))
+						SetWindowTextU(hCtrl, lcmd->txt[1]);
+					if (left_to_right) {
+						style = GetWindowLongPtr(hCtrl, GWL_EXSTYLE);
+						style |= WS_EX_LAYOUTRTL; // WS_EX_RIGHT | WS_EX_RTLREADING
+						SetWindowLongPtr(hCtrl, GWL_EXSTYLE, style);
+						InvalidateRect(hCtrl, NULL, TRUE);
+					}
 				}
 				break;
 			case LC_MOVE:
@@ -181,7 +209,7 @@ void reset_localization(int dlg_id)
 	loc_dlg[dlg_id-IDD_DIALOG].hDlg = NULL;
 }
 
-// TODO: we need to store a revert for every action we execute here,
+// TODO: Do we need to store a revert for every action we execute here,
 // or do we want to reinstantiate the dialogs?
 BOOL dispatch_loc_cmd(loc_cmd* lcmd)
 {
@@ -190,9 +218,6 @@ BOOL dispatch_loc_cmd(loc_cmd* lcmd)
 
 	if (lcmd == NULL)
 		return FALSE;
-
-//	uprintf("cmd #%d: ('%s', '%s') (%d, %d)\n",
-//		lcmd->command, lcmd->text[0], lcmd->text[1], lcmd->num[0], lcmd->num[1]);
 
 	if (lcmd->command <= LC_TEXT) {
 		// Any command up to LC_TEXT takes a control ID in text[0]
@@ -227,12 +252,6 @@ BOOL dispatch_loc_cmd(loc_cmd* lcmd)
 		luprintf("GOT VERSION: %d.%d\n", lcmd->num[0], lcmd->num[1]);
 		free_loc_cmd(lcmd);
 		break;
-	case LC_LOCALE:
-		luprintf("GOT LOCALE \"%s\", with LCIDs:\n", lcmd->txt[0]);
-		for (i=0; i<lcmd->unum_size; i++)
-			luprintf("  0x%04X\n", lcmd->unum[i]);
-		free_loc_cmd(lcmd);
-		break;
 	default:
 		free_loc_cmd(lcmd);
 		break;
@@ -242,4 +261,60 @@ BOOL dispatch_loc_cmd(loc_cmd* lcmd)
 err:
 	free_loc_cmd(lcmd);
 	return FALSE;
+}
+
+char* get_loc_msg(int msg_id)
+{
+	loc_cmd* lcmd;
+
+	list_for_each_entry(lcmd, &loc_dlg[IDD_MESSAGES-IDD_DIALOG].list, loc_cmd, list) {
+		if ((lcmd->command == LC_TEXT) && (lcmd->ctrl_id == msg_id) && (lcmd->txt[1] != NULL)) {
+			return lcmd->txt[1];
+		}
+	}
+	// TODO: print the message ID or something
+	return "UNTRANSLATED MESSAGE";
+}
+
+loc_cmd* get_locale_from_lcid(int lcid)
+{
+	loc_cmd* lcmd = NULL;
+	int i;
+
+	if (list_empty(&locale_list)) {
+		uprintf("localization: the locale list is empty!\n");
+		return NULL;
+	}
+
+	list_for_each_entry(lcmd, &locale_list, loc_cmd, list) {
+		for (i=0; i<lcmd->unum_size; i++) {
+			if (lcmd->unum[i] == lcid) {
+				return lcmd;
+			}
+		}
+	}
+
+	lcmd = list_entry(locale_list.next, loc_cmd, list);
+	// If we couldn't find a supported locale, just pick the first one (usually English)
+	uprintf("localization: could not find locale for LCID: 0x%04X. Will default to '%s'\n", lcid, lcmd->txt[0]);
+	return lcmd;
+}
+
+loc_cmd* get_locale_from_name(char* locale_name)
+{
+	loc_cmd* lcmd = NULL;
+
+	if (list_empty(&locale_list)) {
+		uprintf("localization: the locale list is empty!\n");
+		return NULL;
+	}
+
+	list_for_each_entry(lcmd, &locale_list, loc_cmd, list) {
+		if (safe_strcmp(lcmd->txt[0], locale_name) == 0)
+			return lcmd;
+	}
+
+	lcmd = list_entry(locale_list.next, loc_cmd, list);
+	uprintf("localization: could not find locale for name '%s'. Will default to '%s'\n", locale_name, lcmd->txt[0]);
+	return lcmd;
 }
