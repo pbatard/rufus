@@ -1,8 +1,17 @@
+# This file should be saved as UTF-8, no-BOM
+
+################################################################################
 l "English" 0x0409, 0x0809, 0x0c09, 0x1009, 0x1409, 0x1809, 0x1c09, 0x2009, 0x2409, 0x2809, 0x2c09, 0x3009, 0x3409, 0x3809, 0x3c09, 0x4009, 0x4409, 0x4809
 s IDD_MESSAGES
-t MSG_001 "WARNING: ALL DATA ON DEVICE '%s' WILL BE DESTROYED.\n"
+t MSG_001 "Other instance detected"
+t MSG_002 "Another Rufus application is running.\n"
+	"Please close the first application before running another one."
+t MSG_003 "WARNING: ALL DATA ON DEVICE '%s' WILL BE DESTROYED.\n"
 	"To continue with this operation, click OK. To quit click CANCEL."
+t MSG_004 "Rufus update policy"
+t MSG_005 "Do you want to allow Rufus to check for application updates online?"
 
+################################################################################
 l "French" 0x040c, 0x080c, 0x0c0c, 0x100c, 0x140c, 0x180c, 0x1c0c, 0x200c, 0x240c, 0x280c, 0x2c0c, 0x300c, 0x340c, 0x380c, 0xe40c
 s IDD_DIALOG
 t IDS_FORMATOPTIONS_TXT "Options de Formattage       "
@@ -18,9 +27,15 @@ t IDC_SET_ICON "Ajouter un label étendu et une icône"
 m IDC_ADVANCED +36 0
 
 s IDD_MESSAGES
-t MSG_001 "ATTENTION: TOUTES LES DONNEES SUR LE VOLUME '%s' VONT ETRE EFFACEES.\n"
+t MSG_001 "Autre instance detectée"
+t MSG_002 "Une autre instance de Rufus est en cours d'exécution.\n"
+	"Veuillez fermer la première instance avant d'en lancer une seconde."
+t MSG_003 "ATTENTION: TOUTES LES DONNEES SUR LE VOLUME '%s' VONT ETRE EFFACEES.\n"
 	"Pour continuer cette operation, cliquez sur OK.\nPour quitter cliquez sur ANNULER."
+t MSG_004 "Mises à jour"
+t MSG_005 "Voulez-vous authoriser Rufus à chercher des mises à jour en ligne?"
 
+################################################################################
 l "Chinese (Traditional)" 0x0404, 0x0804, 0x0c04, 0x1004, 0x1404
 s IDD_DIALOG
 t IDS_DEVICE_TXT "设备"
@@ -94,3 +109,12 @@ t IDS_NEW_VERSION_NOTES_TXT "发行说明"
 t IDS_NEW_VERSION_DOWNLOAD_TXT "下载"
 t IDC_DOWNLOAD "下载"
 t IDCANCEL "取消"
+
+s IDD_MESSAGES
+t MSG_001 "Other instance detected"
+t MSG_002 "Another Rufus application is running.\n"
+	"Please close the first application before running another one."
+t MSG_003 "WARNING: ALL DATA ON DEVICE '%s' WILL BE DESTROYED.\n"
+	"To continue with this operation, click OK. To quit click CANCEL."
+t MSG_004 "更新方案和设置"
+t MSG_005 "你要允許此應用程序檢查更新？"

@@ -184,7 +184,7 @@ END
 3 TEXTINCLUDE 
 BEGIN
     "\r\n"
-    "IDR_LC_RUFUS_LOC        RCDATA                  ""../res/locale/rufus.loc""\r\n"
+    "IDR_LC_RUFUS_LOC        RCDATA                  ""../res/localization/rufus.loc""\r\n"
     "IDR_SL_LDLINUX_V4_BSS   RCDATA                  ""../res/syslinux/ldlinux_v4.bss""\r\n"
     "IDR_SL_LDLINUX_V4_SYS   RCDATA                  ""../res/syslinux/ldlinux_v4.sys""\r\n"
     "IDR_SL_LDLINUX_V5_BSS   RCDATA                  ""../res/syslinux/ldlinux_v5.bss""\r\n"
@@ -333,7 +333,7 @@ IDI_DOWN                ICON                    "../res/down.ico"
 // Generated from the TEXTINCLUDE 3 resource.
 //
 
-IDR_LC_RUFUS_LOC        RCDATA                  "../res/locale/rufus.loc"
+IDR_LC_RUFUS_LOC        RCDATA                  "../res/localization/rufus.loc"
 IDR_SL_LDLINUX_V4_BSS   RCDATA                  "../res/syslinux/ldlinux_v4.bss"
 IDR_SL_LDLINUX_V4_SYS   RCDATA                  "../res/syslinux/ldlinux_v4.sys"
 IDR_SL_LDLINUX_V5_BSS   RCDATA                  "../res/syslinux/ldlinux_v5.bss"

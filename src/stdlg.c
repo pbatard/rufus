@@ -1065,8 +1065,7 @@ BOOL SetUpdateCheck(void)
 			uprintf("Short name used - Disabling initial update policy prompt\n");
 			enable_updates = TRUE;
 		} else {
-			enable_updates = Notification(MSG_QUESTION, &more_info, APPLICATION_NAME " update policy",
-				"Do you want to allow " APPLICATION_NAME " to check for application updates?\n");
+			enable_updates = Notification(MSG_QUESTION, &more_info, lmprintf(MSG_004), lmprintf(MSG_005));
 		}
 		if (!enable_updates) {
 			WriteRegistryKey32(REGKEY_HKCU, REGKEY_UPDATE_INTERVAL, -1);

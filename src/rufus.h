@@ -17,6 +17,7 @@
  */
 #include <windows.h>
 #include <winioctl.h>               // for DISK_GEOMETRY
+#include <malloc.h>
 #include <stdint.h>
 
 #if defined(_MSC_VER)
@@ -29,7 +30,7 @@
 /* Program options */
 #define RUFUS_DEBUG                 // print debug info to Debug facility
 /* Features not ready for prime time and that may *DESTROY* your data - USE AT YOUR OWN RISKS! */
-#define RUFUS_TEST
+// #define RUFUS_TEST
 
 #define APPLICATION_NAME            "Rufus"
 #define COMPANY_NAME                "Akeo Consulting"

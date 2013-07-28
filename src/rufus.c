@@ -102,6 +102,7 @@ static BOOL log_displayed = FALSE;
 static BOOL iso_provided = FALSE;
 extern BOOL force_large_fat32;
 static int selection_default;
+static loc_cmd* selected_locale = NULL;
 char msgbox[1024], msgbox_title[32];
 
 /*
@@ -1461,7 +1462,6 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	char tmp[128];
 	static UINT uBootChecked = BST_CHECKED, uQFChecked;
 	static BOOL first_log_display = TRUE, user_changed_label = FALSE;
-	loc_cmd* selected_locale;
 
 	switch (message) {
 
@@ -1594,17 +1594,6 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			break;
 #ifdef RUFUS_TEST
 		case IDC_TEST:
-			if ( (!get_supported_locales("rufus.loc"))
-//			  || ((selected_locale = get_locale_from_lcid(GetUserDefaultLCID())) == NULL) ) {
-			  || ((selected_locale = get_locale_from_name("French")) == NULL) ) {
-				  uprintf("FATAL: Could not get a default locale!\n");
-				MessageBoxU(NULL, "Default locale is missing - the application will now exit",
-					"Localization failure", MB_ICONSTOP);
-				break;
-			}
-			uprintf("Will use locale '%s'\n", selected_locale->txt[0]);
-			get_loc_data_file("rufus.loc", (long)selected_locale->num[0], (long)selected_locale->num[1]);
-			apply_localization(IDD_DIALOG, hDlg);
 			break;
 #endif
 		case IDC_ADVANCED:
@@ -1786,7 +1775,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 					break;
 				}
 				GetWindowTextU(hDeviceList, tmp, ARRAYSIZE(tmp));
-				if (MessageBoxU(hMainDialog, lmprintf(MSG_001, tmp),
+				if (MessageBoxU(hMainDialog, lmprintf(MSG_003, tmp),
 					APPLICATION_NAME, MB_OKCANCEL|MB_ICONWARNING) == IDCANCEL) {
 					format_op_in_progress = FALSE;
 					break;
@@ -1925,10 +1914,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	const char* old_wait_option = "/W";
 	int i, opt, option_index = 0, argc = 0, si = 0;
 	BOOL attached_console = FALSE;
+	BYTE* loc_data;
+	DWORD loc_size, Size;
+	char tmp_path[MAX_PATH], loc_file[MAX_PATH] = "";
 	char** argv = NULL;
 	wchar_t **wenv, **wargv;
 	PF_DECL(__wgetmainargs);
-	HANDLE mutex = NULL;
+	HANDLE mutex = NULL, hFile = NULL;
 	HWND hDlg = NULL;
 	MSG msg;
 	int wait_for_mutex = 0;
@@ -1938,18 +1930,34 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		{"wait",    required_argument, NULL, 'w'},
 		{0, 0, NULL, 0}
 	};
-#ifndef RUFUS_TEST
-	const char* loc_name = "rufus.loc";
-	BYTE* loc_data;
-	char loc_path[MAX_PATH];
-	DWORD loc_size, Size;
-	HANDLE hFile = NULL;
-#endif
 
 	uprintf("*** " APPLICATION_NAME " init ***\n");
 
 	// Init localization
 	init_localization();
+	loc_data = (BYTE*)GetResource(hMainInstance, MAKEINTRESOURCEA(IDR_LC_RUFUS_LOC), _RT_RCDATA, "rufus.loc", &loc_size, FALSE);
+	GetTempPathU(sizeof(tmp_path), tmp_path);
+	GetTempFileNameU(tmp_path, APPLICATION_NAME, 0, loc_file);
+
+	hFile = CreateFileU(loc_file, GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ|FILE_SHARE_WRITE,
+		NULL, CREATE_ALWAYS, 0, 0);
+	if ((hFile == INVALID_HANDLE_VALUE)|| (!WriteFile(hFile, loc_data, loc_size, &Size, 0)) || (loc_size != Size)) {
+		safe_closehandle(hFile);
+		uprintf("localization: unable to extract '%s': %s.\n", loc_file, WindowsErrorString());
+	} else {
+		safe_closehandle(hFile);
+		uprintf("localization: extracted data to '%s'\n", loc_file);
+		if ( (!get_supported_locales(loc_file))
+//			  || ((selected_locale = get_locale_from_lcid(GetUserDefaultLCID())) == NULL) ) {
+			  || ((selected_locale = get_locale_from_name("French")) == NULL) ) {
+				  uprintf("FATAL: Could not access default locale!\n");
+				MessageBoxU(NULL, "The default locale data is missing. This application will now exit.",
+					"Fatal error", MB_ICONSTOP);
+				goto out;
+			}
+		uprintf("localization: using locale '%s'\n", selected_locale->txt[0]);
+		get_loc_data_file(loc_file, (long)selected_locale->num[0], (long)selected_locale->num[1]);
+	}
 
 	// Reattach the console, if we were started from commandline
 	if (AttachConsole(ATTACH_PARENT_PROCESS) != 0) {
@@ -2010,9 +2018,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		mutex = CreateMutexA(NULL, TRUE, "Global/" APPLICATION_NAME);
 	}
 	if ((mutex == NULL) || (GetLastError() == ERROR_ALREADY_EXISTS)) {
-		MessageBoxU(NULL, "Another " APPLICATION_NAME " application is running.\n"
-			"Please close the first application before running another one.",
-			"Other instance detected", MB_ICONSTOP);
+		MessageBoxU(NULL, lmprintf(MSG_002), lmprintf(MSG_001), MB_ICONSTOP);
 		goto out;
 	}
 
@@ -2036,27 +2042,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	// We use local group policies rather than direct registry manipulation
 	// 0x9e disables removable and fixed drive notifications
 	SetLGP(FALSE, &existing_key, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer", "NoDriveTypeAutorun", 0x9e);
-
-#ifndef RUFUS_TEST
-	// Extract the embedded localization data into the user's temp dir
-	loc_data = (BYTE*)GetResource(hMainInstance, MAKEINTRESOURCEA(IDR_LC_RUFUS_LOC), _RT_RCDATA, loc_name, &loc_size, FALSE);
-	GetTempPathU(sizeof(loc_path), loc_path);
-	safe_strcat(loc_path, sizeof(loc_name), loc_name);
-
-	// TODO: make sure we fail if we can't extract the file as we'll miss all the messages
-
-	// Force Chinese localization from embedded rufus.loc file
-	// TODO: REMOVE ME!
-	hFile = CreateFileU(loc_path, GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ|FILE_SHARE_WRITE,
-		NULL, CREATE_ALWAYS, 0, 0);
-	if ((hFile == INVALID_HANDLE_VALUE)|| (!WriteFile(hFile, loc_data, loc_size, &Size, 0)) || (loc_size != Size)) {
-		uprintf("Unable to create file '%s': %s.\n", loc_path, WindowsErrorString());
-	} else {
-		uprintf("Successfully extracted '%s'\n", loc_path);
-		get_loc_data_file(loc_path);
-	}
-	safe_closehandle(hFile);
-#endif
 
 	// Create the main Window
 	hDlg = CreateDialogW(hInstance, MAKEINTRESOURCEW(IDD_DIALOG), NULL, MainCallback);
@@ -2127,6 +2112,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	}
 
 out:
+	if (loc_file[0] != 0)
+		DeleteFileU(loc_file);
 	DestroyAllTooltips();
 	exit_localization();
 	safe_free(iso_path);
