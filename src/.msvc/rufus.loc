@@ -1,11 +1,10 @@
 l "English" 0x0409, 0x0809, 0x0c09, 0x1009, 0x1409, 0x1809, 0x1c09, 0x2009, 0x2409, 0x2809, 0x2c09, 0x3009, 0x3409, 0x3809, 0x3c09, 0x4009, 0x4409, 0x4809
-# TODO: replace 'p' with 's' for section
-p IDD_MESSAGES
+s IDD_MESSAGES
 t MSG_001 "WARNING: ALL DATA ON DEVICE '%s' WILL BE DESTROYED.\n"
 	"To continue with this operation, click OK. To quit click CANCEL."
 
 l "French" 0x040c, 0x080c, 0x0c0c, 0x100c, 0x140c, 0x180c, 0x1c0c, 0x200c, 0x240c, 0x280c, 0x2c0c, 0x300c, 0x340c, 0x380c, 0xe40c
-p IDD_DIALOG
+s IDD_DIALOG
 t IDS_FORMATOPTIONS_TXT "Options de Formattage       "
 t IDS_LABEL_TXT "Nouveau label"
 t IDS_FILESYSTEM_TXT "Système de fichier"
@@ -16,14 +15,14 @@ t IDC_BADBLOCKS "Vérification de mauvais blocs:"
 t IDC_QUICKFORMAT "Formattage rapide"
 t IDC_BOOT "Disque de démarrage avec:"
 t IDC_SET_ICON "Ajouter un label étendu et une icône"
-m IDC_ADVANCED +18 0
+m IDC_ADVANCED +36 0
 
-p IDD_MESSAGES
+s IDD_MESSAGES
 t MSG_001 "ATTENTION: TOUTES LES DONNEES SUR LE VOLUME '%s' VONT ETRE EFFACEES.\n"
 	"Pour continuer cette operation, cliquez sur OK.\nPour quitter cliquez sur ANNULER."
 
 l "Chinese (Traditional)" 0x0404, 0x0804, 0x0c04, 0x1004, 0x1404
-p IDD_DIALOG
+s IDD_DIALOG
 t IDS_DEVICE_TXT "设备"
 t IDS_PARTITION_TYPE_TXT "分区计划和目标系统类型"
 t IDS_FILESYSTEM_TXT "文件系统"
@@ -50,36 +49,36 @@ t IDC_ENABLE_FIXED_DISKS "列表固定(非flash)或USB磁盘分区"
 t IDC_EXTRA_PARTITION "添加修复旧的BIOS（额外的分区，校准等等）"
 t IDC_RUFUS_MBR "使用 Rufus MBR BIOS ID:"
 
-p IDD_ABOUTBOX
+s IDD_ABOUTBOX
 t IDD_ABOUTBOX "关于 Rufus"
 t IDC_ABOUT_LICENSE "许可证"
 t IDC_ABOUT_UPDATES "更新"
 t IDOK "确定"
 
-p IDD_ISO_EXTRACT
+s IDD_ISO_EXTRACT
 t IDD_ISO_EXTRACT "复制ISO文件..."
 t IDC_ISO_FILENAME "打开ISO映像 - 请稍候..."
 t IDC_ISO_ABORT "取消"
 
-p IDD_LICENSE
+s IDD_LICENSE
 t IDD_LICENSE "Rufus 许可证"
 t IDOK "取消"
 
-p IDD_NOTIFICATION
+s IDD_NOTIFICATION
 t IDC_MORE_INFO "更多信息"
 t IDYES "是"
 t IDNO "否"
 
-p IDD_LOG
+s IDD_LOG
 t IDD_LOG "日志"
 t IDC_LOG_CLEAR "清除日志"
 t IDC_LOG_SAVE "保存日志"
 t IDCANCEL "关闭日志"
 
-p IDD_LICENSE
+s IDD_LICENSE
 t IDOK "取消"
 
-p IDD_UPDATE_POLICY
+s IDD_UPDATE_POLICY
 t IDD_UPDATE_POLICY "更新方案和设置"
 t IDS_UPDATE_SETTINGS_TXT "设置"
 t IDS_UPDATE_FREQUENCY_TXT "检查更新："
@@ -87,7 +86,7 @@ t IDS_INCLUDE_BETAS_TXT "包括测试版本："
 t IDC_CHECK_NOW "立即检查"
 t IDCANCEL "取消"
 
-p IDD_NEW_VERSION
+s IDD_NEW_VERSION
 t IDD_NEW_VERSION "检查更新 - Rufus"
 t IDS_NEW_VERSION_AVAIL_TXT "更新的版本可用。请下载最新版本！"
 t IDC_WEBSITE "点击这里进入网站"

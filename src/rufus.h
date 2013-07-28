@@ -342,10 +342,18 @@ extern void parse_update(char* buf, size_t len);
 extern BOOL WimExtractCheck(void);
 extern BOOL WimExtractFile(const char* wim_image, int index, const char* src, const char* dst);
 
-__inline static BOOL UnlockDrive(HANDLE hDrive)
+static __inline BOOL UnlockDrive(HANDLE hDrive)
 {
 	DWORD size;
 	return DeviceIoControl(hDrive, FSCTL_UNLOCK_VOLUME, NULL, 0, NULL, 0, &size, NULL);
+}
+
+static __inline void *_reallocf(void *ptr, size_t size)
+{
+	void *ret = realloc(ptr, size);
+	if (!ret)
+		free(ptr);
+	return ret;
 }
 
 /* Basic String Array */

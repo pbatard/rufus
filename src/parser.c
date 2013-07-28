@@ -38,8 +38,10 @@
 static const char space[] = " \t";
 static const wchar_t wspace[] = L" \t";
 
-// Fill a localization command buffer by parsing the line arguments
-// The command is allocated and must be freed (by calling free_loc_cmd)
+/*
+ * Fill a localization command buffer by parsing the line arguments
+ * The command is allocated and must be freed (by calling free_loc_cmd)
+ */
 static loc_cmd* get_loc_cmd(char c, char* line) {
 	size_t i, j, k, l, r, ti = 0, ii = 0;
 	char *endptr, *expected_endptr, *token;
@@ -151,8 +153,9 @@ err:
 	return NULL;
 }
 
-
-// Parse an UTF-8 localization command line
+/*
+ * Parse an UTF-8 localization command line
+ */
 static void get_loc_data_line(char* line)
 {
 	size_t i;
@@ -183,17 +186,9 @@ static void get_loc_data_line(char* line)
 		free_loc_cmd(lcmd);
 }
 
-static __inline void *_reallocf(void *ptr, size_t size)
-{
-	void *ret = realloc(ptr, size);
-	if (!ret)
-		free(ptr);
-	return ret;
-}
-
 /*
- * First pass of parsing the locale file, to construct the list
- * of locales available. The locale file must be UTF-8 with NO BOM.
+ * Parse a localization file, to construct the list of available locales.
+ * The locale file must be UTF-8 with NO BOM.
  * TODO: merge this with the next call or factorize fopen
  */
 BOOL get_supported_locales(const char* filename)
@@ -264,9 +259,9 @@ out:
 	return r;
 }
 
-// Parse a Rufus localization command file (UTF-8, no BOM)
-// TODO: detect if locale could not be found and fallback to En
-// TODO: change the return value and return an error if locale was not found
+/*
+ * Parse a locale section in a localization file (UTF-8, no BOM)
+ */
 char* get_loc_data_file(const char* filename, long offset, long end_offset)
 {
 	wchar_t *wfilename = NULL;
@@ -281,7 +276,7 @@ char* get_loc_data_file(const char* filename, long offset, long end_offset)
 	if ((filename == NULL) || (filename[0] == 0))
 		return NULL;
 
-	free_loc_dlg();
+	free_dialog_list();
 	loc_line_nr = 0;
 	safe_strcpy(loc_filename, sizeof(loc_filename), filename);
 	wfilename = utf8_to_wchar(filename);
@@ -405,7 +400,7 @@ char* get_loc_data_file(const char* filename, long offset, long end_offset)
 
 out:
 	// TODO: do we really need this here?
-	apply_localization(-1, NULL);
+//	apply_localization(-1, NULL);
 	if (fd != NULL)
 		fclose(fd);
 	safe_free(wfilename);
@@ -414,9 +409,11 @@ out:
 }
 
 
-// Parse a line of UTF-16 text and return the data if it matches the 'token'
-// The parsed line is of the form: [ ]token[ ]=[ ]["]data["][ ] and is 
-// modified by the parser
+/*
+ * Parse a line of UTF-16 text and return the data if it matches the 'token'
+ * The parsed line is of the form: [ ]token[ ]=[ ]["]data["][ ] and is 
+ * modified by the parser
+ */
 static wchar_t* get_token_data_line(const wchar_t* wtoken, wchar_t* wline)
 {
 	size_t i, r;
@@ -469,8 +466,10 @@ static wchar_t* get_token_data_line(const wchar_t* wtoken, wchar_t* wline)
 	return (wline[r] == 0)?NULL:&wline[r];
 }
 
-// Parse a file (ANSI or UTF-8 or UTF-16) and return the data for the first occurrence of 'token'
-// The returned string is UTF-8 and MUST be freed by the caller
+/*
+ * Parse a file (ANSI or UTF-8 or UTF-16) and return the data for the first occurrence of 'token'
+ * The returned string is UTF-8 and MUST be freed by the caller
+ */
 char* get_token_data_file(const char* token, const char* filename)
 {
 	wchar_t *wtoken = NULL, *wdata= NULL, *wfilename = NULL;
@@ -514,8 +513,10 @@ out:
 	return ret;
 }
 
-// Parse a buffer (ANSI or UTF-8) and return the data for the 'n'th occurrence of 'token'
-// The returned string is UTF-8 and MUST be freed by the caller
+/*
+ * Parse a buffer (ANSI or UTF-8) and return the data for the 'n'th occurrence of 'token'
+ * The returned string is UTF-8 and MUST be freed by the caller
+ */
 char* get_token_data_buffer(const char* token, unsigned int n, const char* buffer, size_t buffer_size)
 {
 	unsigned int j, curly_count;
@@ -578,10 +579,12 @@ static __inline char* get_sanitized_token_data_buffer(const char* token, unsigne
 	return data;
 }
 
-// Parse an update data file and populates a rufus_update structure.
-// NB: since this is remote data, and we're running elevated, it *IS* considered
-// potentially malicious, even if it comes from a supposedly trusted server.
-// len should be the size of the buffer, including the zero terminator
+/*
+ * Parse an update data file and populates a rufus_update structure.
+ * NB: since this is remote data, and we're running elevated, it *IS* considered
+ * potentially malicious, even if it comes from a supposedly trusted server.
+ * len should be the size of the buffer, including the zero terminator
+ */
 void parse_update(char* buf, size_t len)
 {
 	size_t i;
@@ -628,8 +631,10 @@ void parse_update(char* buf, size_t len)
 	update.release_notes = get_sanitized_token_data_buffer("release_notes", 1, buf, len);
 }
 
-// Insert entry 'data' under section 'section' of a config file
-// Section must include the relevant delimitors (eg '[', ']') if needed
+/*
+ * Insert entry 'data' under section 'section' of a config file
+ * Section must include the relevant delimitors (eg '[', ']') if needed
+ */
 char* insert_section_data(const char* filename, const char* section, const char* data, BOOL dos2unix)
 {
 	const wchar_t* outmode[] = { L"w", L"w, ccs=UTF-8", L"w, ccs=UTF-16LE" };
@@ -753,10 +758,12 @@ out:
 	return ret;
 }
 
-// Search for a specific 'src' substring data for all occurrences of 'token', and replace
-// it with 'rep'. File can be ANSI or UNICODE and is overwritten. Parameters are UTF-8.
-// The parsed line is of the form: [ ]token[ ]data
-// Returns a pointer to rep if replacement occurred, NULL otherwise
+/*
+ * Search for a specific 'src' substring data for all occurrences of 'token', and replace
+ * it with 'rep'. File can be ANSI or UNICODE and is overwritten. Parameters are UTF-8.
+ * The parsed line is of the form: [ ]token[ ]data
+ * Returns a pointer to rep if replacement occurred, NULL otherwise
+ */
 char* replace_in_token_data(const char* filename, const char* token, const char* src, const char* rep, BOOL dos2unix)
 {
 	const wchar_t* outmode[] = { L"w", L"w, ccs=UTF-8", L"w, ccs=UTF-16LE" };

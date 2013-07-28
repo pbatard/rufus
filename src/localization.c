@@ -35,8 +35,14 @@
 #include "localization.h"
 #include "localization_data.h"
 
-/* c control ID (no space, no quotes), s: quoted string, i: 32 bit signed integer, u: 32 bit unsigned CSV list */
-// Remember to update the size of the array in localization.h when adding/removing elements
+/* 
+ * List of supported locale commands, with their parameter syntax:
+ *   c control ID (no space, no quotes)
+ *   s: quoted string
+ *   i: 32 bit signed integer
+ *   u: 32 bit unsigned CSV list
+ * Remember to update the size of the array in localization.h when adding/removing elements
+ */
 const loc_parse parse_cmd[9] = {
 	// Translation name and Windows LCIDs it should apply to
 	{ 'l', LC_LOCALE, "su" },	// l "English (US)" 0x0009,0x1009
@@ -46,9 +52,8 @@ const loc_parse parse_cmd[9] = {
 	{ 'v', LC_VERSION, "ii" },	// v 1.0				// TODO: NOT IMPLEMENTED YET
 	// Translate the text control associated with an ID
 	{ 't', LC_TEXT, "cs" },		// t IDC_CONTROL "Translation"
-	// Set the parent dialog to which the next commands should apply.
-	// Use 'p NONE' for text data that is not bound to a dialog
-	{ 'p', LC_PARENT, "c" },	// p IDD_DIALOG
+	// Set the section/dialog to which the next commands should apply
+	{ 's', LC_SECTION, "c" },	// p IDD_DIALOG
 	// Resize a dialog (dx dy pixel increment)
 	{ 'r', LC_RESIZE, "cii" },	// t IDC_CONTROL +10 +10
 	// Move a dialog (dx dy pixed displacement)
@@ -60,9 +65,22 @@ const loc_parse parse_cmd[9] = {
 	// 0 = Left to right, 1 = Right to left
 	{ 'd', LC_DIRECTION, "i" },	// d 1					// TODO: NOT IMPLEMENTED YET
 };
+
+/* Globals */
 int  loc_line_nr;
-char loc_filename[32];
 struct list_head locale_list = {NULL, NULL};
+
+/*
+ * Add a localization command to a dialog/section
+ */
+void add_dialog_command(int index, loc_cmd* lcmd)
+{
+	if ((lcmd == NULL) || (index < 0) || (index >= ARRAYSIZE(loc_dlg))) {
+		uprintf("add_dialog_command: invalid parameter\n");
+		return;
+	}
+	list_add(&lcmd->list, &loc_dlg[index].list);
+}
 
 void free_loc_cmd(loc_cmd* lcmd)
 {
@@ -74,17 +92,7 @@ void free_loc_cmd(loc_cmd* lcmd)
 	free(lcmd);
 }
 
-void loc_dlg_add(int index, loc_cmd* lcmd)
-{
-	if ((lcmd == NULL) || (index < 0) || (index >= ARRAYSIZE(loc_dlg))) {
-		uprintf("loc_dlg_add: invalid parameter\n");
-		return;
-	}
-	list_add(&lcmd->list, &loc_dlg[index].list);
-}
-
-// TODO: rename this to something_localization()
-void free_loc_dlg(void)
+void free_dialog_list(void)
 {
 	size_t i = 0;
 	loc_cmd *lcmd, *next;
@@ -110,25 +118,82 @@ void free_locale_list(void)
 }
 
 /*
- * We need to initialize the command lists
+ * Init/destroy our various localization lists
  */
 void init_localization(void) {
 	size_t i;
-
 	for (i=0; i<ARRAYSIZE(loc_dlg); i++)
 		list_init(&loc_dlg[i].list);
 	list_init(&locale_list);
 }
 
 void exit_localization(void) {
-	free_loc_dlg();
+	free_dialog_list();
 	free_locale_list();
 }
 
 /*
- * Yada. Should be called during init
- * if hDlg is NULL, we try to apply the commands against an active Window
- * if dlg_id is negative, we try to apply all
+ * Validate and store localization command data
+ *
+ * TODO: Do we need to store a revert for every action we execute here,
+ * or do we want to reinstantiate the dialogs?
+ */
+BOOL dispatch_loc_cmd(loc_cmd* lcmd)
+{
+	size_t i;
+	static int dlg_index = 0;
+
+	if (lcmd == NULL)
+		return FALSE;
+
+	if (lcmd->command <= LC_TEXT) {
+		// Any command up to LC_TEXT takes a control ID in text[0]
+		for (i=0; i<ARRAYSIZE(control_id); i++) {
+			if (safe_strcmp(lcmd->txt[0], control_id[i].name) == 0) {
+				lcmd->ctrl_id = control_id[i].id;
+				break;
+			}
+		}
+		if (lcmd->ctrl_id < 0) {
+			luprintf("unknown control '%s'\n", lcmd->txt[0]);
+			goto err;
+		}
+	}
+
+	switch(lcmd->command) {
+	// NB: For commands that take an ID, ctrl_id is always a valid index at this stage
+	case LC_TEXT:
+	case LC_MOVE:
+	case LC_RESIZE:
+		add_dialog_command(dlg_index, lcmd);
+		break;
+	case LC_SECTION:
+		if ((lcmd->ctrl_id-IDD_DIALOG) > ARRAYSIZE(loc_dlg)) {
+			luprintf("'%s' is not a section ID\n", lcmd->txt[0]);
+			goto err;
+		}
+		dlg_index = lcmd->ctrl_id - IDD_DIALOG;
+		free_loc_cmd(lcmd);
+		break;
+	case LC_VERSION:
+		luprintf("GOT VERSION: %d.%d\n", lcmd->num[0], lcmd->num[1]);
+		free_loc_cmd(lcmd);
+		break;
+	default:
+		free_loc_cmd(lcmd);
+		break;
+	}
+	return TRUE;
+
+err:
+	free_loc_cmd(lcmd);
+	return FALSE;
+}
+
+/*
+ * Apply stored localization commands to a specific dialog
+ * If hDlg is NULL, apply the commands against an active Window
+ * TODO: if dlg_id is <0, apply all
  */
 void apply_localization(int dlg_id, HWND hDlg)
 {
@@ -202,80 +267,53 @@ void apply_localization(int dlg_id, HWND hDlg)
 	}
 }
 
-// Can't use isWindow() against our existing HWND to avoid this call
-// as handles are recycled.
+/*
+ * This function should be called when a localized dialog is destroyed
+ * NB: we can't use isWindow() against our existing HWND to avoid this call
+ * as handles are recycled.
+ */
 void reset_localization(int dlg_id)
 {
 	loc_dlg[dlg_id-IDD_DIALOG].hDlg = NULL;
 }
 
-// TODO: Do we need to store a revert for every action we execute here,
-// or do we want to reinstantiate the dialogs?
-BOOL dispatch_loc_cmd(loc_cmd* lcmd)
+/*
+ * Produce a formatted localized message.
+ * Like printf, this call takes a variable number of argument, and uses
+ * the message ID to identify the formatted message to use.
+ * Uses a rolling list of buffers to allow concurrency
+ * TODO: use dynamic realloc'd buffer in case 2048 is not enough
+ */
+char* lmprintf(int msg_id, ...)
 {
-	size_t i;
-	static int dlg_index = 0;
-
-	if (lcmd == NULL)
-		return FALSE;
-
-	if (lcmd->command <= LC_TEXT) {
-		// Any command up to LC_TEXT takes a control ID in text[0]
-		for (i=0; i<ARRAYSIZE(control_id); i++) {
-			if (safe_strcmp(lcmd->txt[0], control_id[i].name) == 0) {
-				lcmd->ctrl_id = control_id[i].id;
-				break;
-			}
-		}
-		if (lcmd->ctrl_id < 0) {
-			luprintf("unknown control '%s'\n", lcmd->txt[0]);
-			goto err;
-		}
-	}
-
-	switch(lcmd->command) {
-	// NB: For commands that take an ID, ctrl_id is always a valid index at this stage
-	case LC_TEXT:
-	case LC_MOVE:
-	case LC_RESIZE:
-		loc_dlg_add(dlg_index, lcmd);
-		break;
-	case LC_PARENT:
-		if ((lcmd->ctrl_id-IDD_DIALOG) > ARRAYSIZE(loc_dlg)) {
-			luprintf("'%s' is not a dialog ID\n", lcmd->txt[0]);
-			goto err;
-		}
-		dlg_index = lcmd->ctrl_id - IDD_DIALOG;
-		free_loc_cmd(lcmd);
-		break;
-	case LC_VERSION:
-		luprintf("GOT VERSION: %d.%d\n", lcmd->num[0], lcmd->num[1]);
-		free_loc_cmd(lcmd);
-		break;
-	default:
-		free_loc_cmd(lcmd);
-		break;
-	}
-	return TRUE;
-
-err:
-	free_loc_cmd(lcmd);
-	return FALSE;
-}
-
-char* get_loc_msg(int msg_id)
-{
+	static int buf_id = 0;
+	static char buf[4][2048];
+	char *format = NULL;
+	va_list args;
 	loc_cmd* lcmd;
 
+	buf_id %= 4;
+	buf[buf_id][0] = 0;
 	list_for_each_entry(lcmd, &loc_dlg[IDD_MESSAGES-IDD_DIALOG].list, loc_cmd, list) {
 		if ((lcmd->command == LC_TEXT) && (lcmd->ctrl_id == msg_id) && (lcmd->txt[1] != NULL)) {
-			return lcmd->txt[1];
+			format = lcmd->txt[1];
 		}
 	}
-	// TODO: print the message ID or something
-	return "UNTRANSLATED MESSAGE";
+
+	if (format == NULL) {
+		safe_sprintf(buf[buf_id], 2047, "MSG_%03d UNTRANSLATED", msg_id);
+	} else {
+		va_start(args, msg_id);
+		safe_vsnprintf(buf[buf_id], 2047, format, args);
+		va_end(args);
+		buf[buf_id][2047] = '\0';
+	}
+	return buf[buf_id++];
 }
 
+/*
+ * These 2 functions are used to set the current locale
+ */
 loc_cmd* get_locale_from_lcid(int lcid)
 {
 	loc_cmd* lcmd = NULL;

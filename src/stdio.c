@@ -40,7 +40,8 @@ HWND hStatus;
 #ifdef RUFUS_DEBUG
 void _uprintf(const char *format, ...)
 {
-	char buf[4096], *p = buf;
+	static char buf[4096];
+	char* p = buf;
 	va_list args;
 	int n;
 

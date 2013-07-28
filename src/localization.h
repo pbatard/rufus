@@ -25,9 +25,6 @@
 // TODO: display control name on mouseover
 // Link to http://www.resedit.net/
 
-// Commands that take a control ID *MUST* be at the top
-// The last command with a control ID *MUST* be LC_TEXT
-
 #define luprint(msg) uprintf("%s(%d): " msg "\n", loc_filename, loc_line_nr)
 #define luprintf(msg, ...) uprintf("%s(%d): " msg "\n", loc_filename, loc_line_nr, __VA_ARGS__)
 
@@ -98,9 +95,10 @@ static __inline void list_del(struct list_head *entry)
 	entry->next = entry->prev = NULL;
 }
 
-
+// Commands that take a control ID *MUST* be at the top
+// The last command with a control ID *MUST* be LC_TEXT
 enum loc_command_type {
-	LC_PARENT,
+	LC_SECTION,
 	LC_MOVE,
 	LC_RESIZE,
 	LC_TEXT,	// Delimits commands that take a Control ID and commands that don't
@@ -150,8 +148,8 @@ void init_localization(void);
 void exit_localization(void);
 void apply_localization(int dlg_id, HWND hDlg);
 void reset_localization(int dlg_id);
-void free_loc_dlg(void);
-char* get_loc_msg(int id);
+void free_dialog_list(void);
+char* lmprintf(int msg_id, ...);
 BOOL get_supported_locales(const char* filename);
 char* get_loc_data_file(const char* filename, long offset, long end_offset);
 void free_locale_list(void);

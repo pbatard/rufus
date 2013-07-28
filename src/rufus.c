@@ -1458,7 +1458,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	RECT DialogRect, DesktopRect;
 	int nDeviceIndex, fs, bt, i, nWidth, nHeight;
 	static DWORD DeviceNum = 0, LastRefresh = 0;
-	char tmp[128], str[MAX_PATH];
+	char tmp[128];
 	static UINT uBootChecked = BST_CHECKED, uQFChecked;
 	static BOOL first_log_display = TRUE, user_changed_label = FALSE;
 	loc_cmd* selected_locale;
@@ -1786,8 +1786,8 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 					break;
 				}
 				GetWindowTextU(hDeviceList, tmp, ARRAYSIZE(tmp));
-				_snprintf(str, ARRAYSIZE(str), get_loc_msg(MSG_001), tmp);
-				if (MessageBoxU(hMainDialog, str, APPLICATION_NAME, MB_OKCANCEL|MB_ICONWARNING) == IDCANCEL) {
+				if (MessageBoxU(hMainDialog, lmprintf(MSG_001, tmp),
+					APPLICATION_NAME, MB_OKCANCEL|MB_ICONWARNING) == IDCANCEL) {
 					format_op_in_progress = FALSE;
 					break;
 				}
