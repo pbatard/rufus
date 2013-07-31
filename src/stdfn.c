@@ -26,6 +26,8 @@
 
 #include "msapi_utf8.h"
 #include "rufus.h"
+#include "resource.h"
+#include "localization.h"
 
 // Must be in the same order as enum WindowsVersion
 static const char* WindowsVersionName[WINDOWS_MAX] = {
@@ -232,7 +234,7 @@ BOOL FileIO(BOOL save, char* path, char** buffer, DWORD* size)
 		goto out;
 	}
 
-	PrintStatus(0, TRUE, "%s '%s'", save?"Saved":"Opened", path);
+	PrintStatus(0, TRUE, save?lmprintf(MSG_516, path):lmprintf(MSG_515, path));
 	ret = TRUE;
 
 out:

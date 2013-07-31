@@ -51,7 +51,7 @@ void _uprintf(const char *format, ...)
 
 	p += (n < 0)?sizeof(buf)-3:n;
 
-	while((p>buf) && (isspace((unsigned char)p[-1])))
+	while((p>buf) && (isspaceU(p[-1])))
 		*--p = '\0';
 
 	*p++ = '\r';
@@ -146,23 +146,9 @@ static void CALLBACK PrintStatusTimeout(HWND hwnd, UINT uMsg, UINT_PTR idEvent, 
 	KillTimer(hMainDialog, TID_MESSAGE);
 }
 
-void PrintStatus(unsigned int duration, BOOL debug, const char *format, ...)
+void PrintStatus(unsigned int duration, BOOL debug, const char* message)
 {
-	char *p = szStatusMessage;
-	va_list args;
-	int n;
-
-	va_start(args, format);
-	n = safe_vsnprintf(p, sizeof(szStatusMessage)-1, format, args); // room for NUL
-	va_end(args);
-
-	p += (n < 0)?sizeof(szStatusMessage)-1:n;
-
-	while((p>szStatusMessage) && (isspace(p[-1])))
-		*--p = '\0';
-
-	*p   = '\0';
-
+	safe_strcpy(szStatusMessage, sizeof(szStatusMessage), message);
 	if (debug)
 		uprintf("%s\n", szStatusMessage);
 

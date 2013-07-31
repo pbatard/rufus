@@ -1193,10 +1193,10 @@ INT_PTR CALLBACK NewVersionCallback(HWND hDlg, UINT message, WPARAM wParam, LPAR
 				memset(&pi, 0, sizeof(pi));
 				si.cb = sizeof(si);
 				if (!CreateProcessU(NULL, tmp, NULL, NULL, FALSE, 0, NULL, filepath, &si, &pi)) {
-					PrintStatus(0, FALSE, "Failed to launch new application");
+					PrintStatus(0, FALSE, lmprintf(MSG_514));
 					uprintf("Failed to launch new application: %s\n", WindowsErrorString());
 				} else {
-					PrintStatus(0, FALSE, "Launching new application...");
+					PrintStatus(0, FALSE, lmprintf(MSG_513));
 					PostMessage(hDlg, WM_COMMAND, (WPARAM)IDCLOSE, 0);
 					PostMessage(hMainDialog, WM_CLOSE, 0, 0);
 				}

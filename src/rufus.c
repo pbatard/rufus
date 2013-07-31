@@ -870,7 +870,7 @@ static void EnableControls(BOOL bEnable)
 	EnableWindow(GetDlgItem(hMainDialog, IDC_SET_ICON), bEnable);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_ADVANCED), bEnable);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_ENABLE_FIXED_DISKS), bEnable);
-	SetDlgItemTextU(hMainDialog, IDCANCEL, bEnable?"Close":"Cancel");
+	SetDlgItemTextU(hMainDialog, IDCANCEL, lmprintf(bEnable?MSG_006:MSG_007));
 }
 
 /* Callback for the log window */
@@ -1008,7 +1008,7 @@ BOOL CALLBACK ISOProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 		switch (LOWORD(wParam)) {
 		case IDC_ISO_ABORT:
 			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANCELLED;
-			PrintStatus(0, FALSE, "Cancelling - Please wait...");
+			PrintStatus(0, FALSE, lmprintf(MSG_501));
 			uprintf("Cancelling (from ISO proc.)\n");
 			EnableWindow(GetDlgItem(hISOProgressDlg, IDC_ISO_ABORT), FALSE);
 			if (format_thid != NULL)
@@ -1036,10 +1036,10 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 
 	if (iso_path == NULL)
 		goto out;
-	PrintStatus(0, TRUE, "Scanning ISO image...\n");
+	PrintStatus(0, TRUE, lmprintf(MSG_502));
 	if (!ExtractISO(iso_path, "", TRUE)) {
 		SendMessage(hISOProgressDlg, UM_ISO_EXIT, 0, 0);
-		PrintStatus(0, TRUE, "Failed to scan ISO image.");
+		PrintStatus(0, TRUE, lmprintf(MSG_503));
 		safe_free(iso_path);
 		goto out;
 	}
@@ -1070,7 +1070,7 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 					fclose(fd);
 					use_own_c32[i] = TRUE;
 				} else {
-					PrintStatus(0, FALSE, "Obsolete %s detected", old_c32_name[i]);
+					PrintStatus(0, FALSE, lmprintf(MSG_504, old_c32_name[i]));
 					safe_sprintf(msgbox, sizeof(msgbox), "This ISO image seems to use an obsolete version of '%s'.\n"
 						"Boot menus may not may not display properly because of this.\n\n"
 						"A newer version can be downloaded by " APPLICATION_NAME " to fix this issue:\n"
@@ -1095,7 +1095,7 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 		SetFSFromISO();
 		SetMBRProps();
 		for (i=(int)safe_strlen(iso_path); (i>0)&&(iso_path[i]!='\\'); i--);
-		PrintStatus(0, TRUE, "Using ISO: %s\n", &iso_path[i+1]);
+		PrintStatus(0, TRUE, lmprintf(MSG_505, &iso_path[i+1]));
 		// Some Linux distros, such as Arch Linux, require the USB drive to have
 		// a specific label => copy the one we got from the ISO image
 		if (iso_report.label[0] != 0) {
@@ -1252,7 +1252,7 @@ static BOOL BootCheck(void)
 			uprintf("Will reuse '%s' for Syslinux v5\n", ldlinux_c32);
 			fclose(fd);
 		} else {
-			PrintStatus(0, FALSE, "Missing '%s' file", ldlinux_c32);
+			PrintStatus(0, FALSE, lmprintf(MSG_506, ldlinux_c32));
 			safe_sprintf(msgbox, sizeof(msgbox), "Syslinux v5.0 or later requires a '%s' file to be installed.\n"
 				"Because this file is more than 100 KB in size, and always present on Syslinux v5+ ISO images, "
 				"it is not embedded in " APPLICATION_NAME ".\n\n"
@@ -1445,7 +1445,7 @@ void InitDialog(HWND hDlg)
 
 static void PrintStatus2000(const char* str, BOOL val)
 {
-	PrintStatus(2000, FALSE, "%s %s.", str, (val)?"enabled":"disabled");
+	PrintStatus(2000, FALSE, (lmprintf((val)?MSG_550:MSG_551, str)));
 }
 
 
@@ -1457,7 +1457,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	DRAWITEMSTRUCT* pDI;
 	POINT Point;
 	RECT DialogRect, DesktopRect;
-	int nDeviceIndex, fs, bt, i, nWidth, nHeight;
+	int nDeviceIndex, fs, bt, i, nWidth, nHeight, nb_devices;
 	static DWORD DeviceNum = 0, LastRefresh = 0;
 	char tmp[128];
 	static UINT uBootChecked = BST_CHECKED, uQFChecked;
@@ -1541,7 +1541,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 					// Operation may have completed in the meantime
 					if (format_thid != NULL) {
 						FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANCELLED;
-						PrintStatus(0, FALSE, "Cancelling - Please wait...");
+						PrintStatus(0, FALSE, lmprintf(MSG_501));
 						uprintf("Cancelling (from main app)\n");
 						//  Start a timer to detect blocking operations during ISO file extraction
 						if (iso_blocking_status >= 0) {
@@ -1608,8 +1608,8 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		case IDC_DEVICE:
 			if (HIWORD(wParam) != CBN_SELCHANGE)
 				break;
-			PrintStatus(0, TRUE, "%d device%s found.", ComboBox_GetCount(hDeviceList),
-				(ComboBox_GetCount(hDeviceList)!=1)?"s":"");
+			nb_devices = ComboBox_GetCount(hDeviceList);
+			PrintStatus(0, TRUE, lmprintf((nb_devices==1)?MSG_508:MSG_509, nb_devices));
 			PopulateProperties(ComboBox_GetCurSel(hDeviceList));
 			SendMessage(hMainDialog, WM_COMMAND, (CBN_SELCHANGE<<16) | IDC_FILESYSTEM,
 				ComboBox_GetCurSel(hFileSystem));
@@ -1752,7 +1752,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		case IDC_ENABLE_FIXED_DISKS:
 			if ((HIWORD(wParam)) == BN_CLICKED) {
 				enable_fixed_disks = !enable_fixed_disks;
-				PrintStatus2000("Fixed disks detection", enable_fixed_disks);
+				PrintStatus2000(lmprintf(MSG_553), enable_fixed_disks);
 				GetUSBDevices(0);
 			}
 			break;
@@ -1845,16 +1845,16 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			SendMessage(hProgress, PBM_SETPOS, (MAX_PROGRESS+1), 0);
 			SendMessage(hProgress, PBM_SETRANGE, 0, (MAX_PROGRESS<<16) & 0xFFFF0000);
 			SetTaskbarProgressState(TASKBAR_NOPROGRESS);
-			PrintStatus(0, FALSE, "DONE");
+			PrintStatus(0, FALSE, lmprintf(MSG_510));
 		} else if (SCODE_CODE(FormatStatus) == ERROR_CANCELLED) {
 			SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_PAUSED, 0);
 			SetTaskbarProgressState(TASKBAR_PAUSED);
-			PrintStatus(0, FALSE, "Cancelled");
-			Notification(MSG_INFO, NULL, "Cancelled", "Operation cancelled by the user.");
+			PrintStatus(0, FALSE, lmprintf(MSG_511));
+			Notification(MSG_INFO, NULL, lmprintf(MSG_511), "Operation cancelled by the user.");
 		} else {
 			SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_ERROR, 0);
 			SetTaskbarProgressState(TASKBAR_ERROR);
-			PrintStatus(0, FALSE, "FAILED");
+			PrintStatus(0, FALSE, lmprintf(MSG_512));
 			Notification(MSG_ERROR, NULL, "Error", "Error: %s", StrError(FormatStatus));
 		}
 		FormatStatus = 0;
@@ -2061,7 +2061,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			// the target USB drive. If this is enabled, the size check is disabled.
 			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'S')) {
 				size_check = !size_check;
-				PrintStatus2000("Size checks", size_check);
+				PrintStatus2000(lmprintf(MSG_552), size_check);
 				GetUSBDevices(0);
 				continue;
 			}
@@ -2071,20 +2071,20 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			// drive instead of an USB key. If this is enabled, Rufus will allow fixed disk formatting.
 			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'F')) {
 				enable_fixed_disks = !enable_fixed_disks;
-				PrintStatus2000("Fixed disks detection", enable_fixed_disks);
+				PrintStatus2000(lmprintf(MSG_553), enable_fixed_disks);
 				GetUSBDevices(0);
 				continue;
 			}
 			// Alt-L => Force Large FAT32 format to be used on < 32 GB drives
 			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'L')) {
 				force_large_fat32 = !force_large_fat32;
-				PrintStatus2000("Force large FAT32 usage", force_large_fat32);
+				PrintStatus2000(lmprintf(MSG_554), force_large_fat32);
 				continue;
 			}
 			// Alt-D => Delete the NoDriveTypeAutorun key on exit (useful if the app crashed)
 			// This key is used to disable Windows popup messages when an USB drive is plugged in.
 			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'D')) {
-				PrintStatus(2000, FALSE, "NoDriveTypeAutorun will be deleted on exit.");
+				PrintStatus(2000, FALSE, lmprintf(MSG_555));
 				existing_key = FALSE;
 				continue;
 			}
@@ -2095,13 +2095,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			// it back during the bad block check.
 			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'K')) {
 				detect_fakes = !detect_fakes;
-				PrintStatus2000("Fake drive detection", detect_fakes);
+				PrintStatus2000(lmprintf(MSG_556), detect_fakes);
 				continue;
 			}
 			// Alt-R => Remove all the registry keys created by Rufus
 			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'R')) {
-				PrintStatus(2000, FALSE, "Application registry key %s deleted.",
-					DeleteRegistryKey(REGKEY_HKCU, COMPANY_NAME "\\" APPLICATION_NAME)?"successfully":"could not be");
+				PrintStatus(2000, FALSE, lmprintf(DeleteRegistryKey(REGKEY_HKCU, COMPANY_NAME "\\" APPLICATION_NAME)?MSG_548:MSG_549));
 				// Also try to delete the upper key (company name) if it's empty (don't care about the result)
 				DeleteRegistryKey(REGKEY_HKCU, COMPANY_NAME);
 				continue;

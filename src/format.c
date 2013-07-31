@@ -43,6 +43,7 @@
 #include "file.h"
 #include "format.h"
 #include "badblocks.h"
+#include "localization.h"
 
 /*
  * Globals
@@ -67,16 +68,16 @@ static BOOLEAN __stdcall FormatExCallback(FILE_SYSTEM_CALLBACK_COMMAND Command, 
 	switch(Command) {
 	case FCC_PROGRESS:
 		percent = (DWORD*)pData;
-		PrintStatus(0, FALSE, "Formatting: %d%% completed.", *percent);
+		PrintStatus(0, FALSE, lmprintf(MSG_517, *percent));
 		UpdateProgress(OP_FORMAT, 1.0f * (*percent));
 		break;
 	case FCC_STRUCTURE_PROGRESS:	// No progress on quick format
-		PrintStatus(0, TRUE, "Creating file system: Task %d/%d completed.", ++task_number, nb_steps[fs_index]);
+		PrintStatus(0, TRUE, lmprintf(MSG_518, ++task_number, nb_steps[fs_index]));
 		format_percent += 100.0f / (1.0f * nb_steps[fs_index]);
 		UpdateProgress(OP_CREATE_FS, format_percent);
 		break;
 	case FCC_DONE:
-		PrintStatus(0, TRUE, "Creating file system: Task %d/%d completed.", nb_steps[fs_index], nb_steps[fs_index]);
+		PrintStatus(0, TRUE, lmprintf(MSG_518, nb_steps[fs_index], nb_steps[fs_index]));
 		UpdateProgress(OP_CREATE_FS, 100.0f);
 		if(*(BOOLEAN*)pData == FALSE) {
 			uprintf("Error while formatting.\n");
@@ -151,7 +152,7 @@ static BOOLEAN __stdcall ChkdskCallback(FILE_SYSTEM_CALLBACK_COMMAND Command, DW
 	case FCC_PROGRESS:
 	case FCC_CHECKDISK_PROGRESS:
 		percent = (DWORD*)pData;
-		PrintStatus(0, FALSE, "NTFS Fixup: %d%% completed.", *percent);
+		PrintStatus(0, FALSE, lmprintf(MSG_519, *percent));
 		break;
 	case FCC_DONE:
 		if(*(BOOLEAN*)pData == FALSE) {
@@ -364,7 +365,8 @@ static BOOL FormatFAT32(DWORD DriveIndex)
 	// Debug temp vars
 	ULONGLONG FatNeeded, ClusterCount;
 
-	PrintStatus(0, TRUE, "Formatting (Large FAT32)...");
+	// TODO: use another lmsg for Large FAT32
+	PrintStatus(0, TRUE, lmprintf(MSG_522, "Large FAT32"));
 	VolumeId = GetVolumeID();
 
 	// Open the drive and lock it
@@ -549,7 +551,7 @@ static BOOL FormatFAT32(DWORD DriveIndex)
 	format_percent = 0.0f;
 	for (i=0; i<(SystemAreaSize+BurstSize-1); i+=BurstSize) {
 		format_percent = (100.0f*i)/(1.0f*(SystemAreaSize+BurstSize));
-		PrintStatus(0, FALSE, "Formatting: %d%% completed.", (int)format_percent);
+		PrintStatus(0, FALSE, lmprintf(MSG_517, (int)format_percent));
 		UpdateProgress(OP_FORMAT, format_percent);
 		if (IS_ERROR(FormatStatus)) goto out;	// For cancellation
 		if (write_sectors(hLogicalVolume, BytesPerSect, i, BurstSize, pZeroSect) != (BytesPerSect*BurstSize)) {
@@ -575,7 +577,7 @@ static BOOL FormatFAT32(DWORD DriveIndex)
 	// Set the FAT32 volume label
 	GetWindowTextW(hLabel, wLabel, ARRAYSIZE(wLabel));
 	ToValidLabel(wLabel, TRUE);
-	PrintStatus(0, TRUE, "Setting Label (This may take while)...");
+	PrintStatus(0, TRUE, lmprintf(MSG_521));
 	// Handle must be closed for SetVolumeLabel to work
 	safe_closehandle(hLogicalVolume);
 	VolumeName = GetLogicalName(DriveIndex, TRUE, TRUE);
@@ -606,7 +608,7 @@ static BOOL FormatDrive(DWORD DriveIndex)
 {
 	BOOL r = FALSE;
 	PF_DECL(FormatEx);
-	char FSType[32], format_status[64];
+	char FSType[32];
 	char *locale, *VolumeName = NULL;
 	WCHAR* wVolumeName = NULL;
 	WCHAR wFSType[32];
@@ -615,8 +617,7 @@ static BOOL FormatDrive(DWORD DriveIndex)
 	size_t i;
 
 	GetWindowTextA(hFileSystem, FSType, ARRAYSIZE(FSType));
-	safe_sprintf(format_status, ARRAYSIZE(format_status), "Formatting (%s)...", FSType);
-	PrintStatus(0, TRUE, format_status);
+	PrintStatus(0, TRUE, lmprintf(MSG_522, FSType));
 	VolumeName = GetLogicalName(DriveIndex, FALSE, TRUE);
 	wVolumeName = utf8_to_wchar(VolumeName);
 	if (wVolumeName == NULL) {
@@ -678,7 +679,7 @@ static BOOL CheckDisk(char DriveLetter)
 	size_t i;
 
 	wDriveRoot[0] = (WCHAR)DriveLetter;
-	PrintStatus(0, TRUE, "NTFS Fixup (Checkdisk)...");
+	PrintStatus(0, TRUE, lmprintf(MSG_523));
 
 	PF_INIT_OR_OUT(Chkdsk, fmifs);
 
@@ -770,7 +771,7 @@ static BOOL ClearMBRGPT(HANDLE hPhysicalDrive, LONGLONG DiskSize, DWORD SectorSi
 	uint64_t i, last_sector = DiskSize/SectorSize;
 	unsigned char* pBuf = (unsigned char*) calloc(SectorSize, 1);
 
-	PrintStatus(0, TRUE, "Clearing MBR/PBR/GPT structures...");
+	PrintStatus(0, TRUE, lmprintf(MSG_524));
 	if (pBuf == NULL) {
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_NOT_ENOUGH_MEMORY;
 		goto out;
@@ -1173,7 +1174,7 @@ DWORD WINAPI FormatThread(LPVOID param)
 	pt = GETPARTTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
 	bt = GETBIOSTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
 
-	PrintStatus(0, TRUE, "Requesting disk access...\n");
+	PrintStatus(0, TRUE, lmprintf(MSG_525));
 	hPhysicalDrive = GetPhysicalHandle(DriveIndex, TRUE, TRUE);
 	if (hPhysicalDrive == INVALID_HANDLE_VALUE) {
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_OPEN_FAILED;
@@ -1210,7 +1211,7 @@ DWORD WINAPI FormatThread(LPVOID param)
 	}
 	CHECK_FOR_USER_CANCEL;
 
-	PrintStatus(0, TRUE, "Analyzing existing boot records...\n");
+	PrintStatus(0, TRUE, lmprintf(MSG_526));
 	AnalyzeMBR(hPhysicalDrive);
 	if ((hLogicalVolume != NULL) && (hLogicalVolume != INVALID_HANDLE_VALUE)) {
 		AnalyzePBR(hLogicalVolume);
@@ -1286,7 +1287,7 @@ DWORD WINAPI FormatThread(LPVOID param)
 	}
 	// Close the (unmounted) volume before formatting
 	if ((hLogicalVolume != NULL) && (hLogicalVolume != INVALID_HANDLE_VALUE)) {
-		PrintStatus(0, TRUE, "Closing existing volume...\n");
+		PrintStatus(0, TRUE, lmprintf(MSG_527));
 		if (!CloseHandle(hLogicalVolume)) {
 			uprintf("Could not close volume: %s\n", WindowsErrorString());
 			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_ACCESS_DENIED;
@@ -1333,7 +1334,7 @@ DWORD WINAPI FormatThread(LPVOID param)
 
 	// Thanks to Microsoft, we must fix the MBR AFTER the drive has been formatted
 	if (pt == PARTITION_STYLE_MBR) {
-		PrintStatus(0, TRUE, "Writing master boot record...");
+		PrintStatus(0, TRUE, lmprintf(MSG_528));
 		if (!WriteMBR(hPhysicalDrive)) {
 			if (!IS_ERROR(FormatStatus))
 				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_WRITE_FAULT;
@@ -1380,7 +1381,7 @@ DWORD WINAPI FormatThread(LPVOID param)
 			}
 			// NB: if you unmount the logical volume here, XP will report error:
 			// [0x00000456] The media in the drive may have changed
-			PrintStatus(0, TRUE, "Writing partition boot record...");
+			PrintStatus(0, TRUE, lmprintf(MSG_529));
 			if (!WritePBR(hLogicalVolume)) {
 				if (!IS_ERROR(FormatStatus))
 					FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_WRITE_FAULT;
@@ -1409,7 +1410,7 @@ DWORD WINAPI FormatThread(LPVOID param)
 	if (IsChecked(IDC_BOOT)) {
 		if ((dt == DT_WINME) || (dt == DT_FREEDOS)) {
 			UpdateProgress(OP_DOS, -1.0f);
-			PrintStatus(0, TRUE, "Copying DOS files...");
+			PrintStatus(0, TRUE, lmprintf(MSG_530));
 			if (!ExtractDOS(drive_name)) {
 				if (!IS_ERROR(FormatStatus))
 					FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANNOT_COPY;
@@ -1418,7 +1419,7 @@ DWORD WINAPI FormatThread(LPVOID param)
 		} else if (dt == DT_ISO) {
 			if (iso_path != NULL) {
 				UpdateProgress(OP_DOS, 0.0f);
-				PrintStatus(0, TRUE, "Copying ISO files...");
+				PrintStatus(0, TRUE, lmprintf(MSG_531));
 				drive_name[2] = 0;
 				if (!ExtractISO(iso_path, drive_name, FALSE)) {
 					if (!IS_ERROR(FormatStatus))
@@ -1427,7 +1428,7 @@ DWORD WINAPI FormatThread(LPVOID param)
 				}
 				if ((bt == BT_UEFI) && (!iso_report.has_efi) && (iso_report.has_win7_efi)) {
 					// TODO: (v1.3.4) check ISO with EFI only
-					PrintStatus(0, TRUE, "Win7 EFI boot setup (this may take a while)...");
+					PrintStatus(0, TRUE, lmprintf(MSG_532));
 					wim_image[0] = drive_name[0];
 					efi_dst[0] = drive_name[0];
 					efi_dst[sizeof(efi_dst) - sizeof("\\bootx64.efi")] = 0;
@@ -1450,7 +1451,7 @@ DWORD WINAPI FormatThread(LPVOID param)
 			}
 		}
 		UpdateProgress(OP_FINALIZE, -1.0f);
-		PrintStatus(0, TRUE, "Finalizing, please wait...");
+		PrintStatus(0, TRUE, lmprintf(MSG_533));
 		if (IsChecked(IDC_SET_ICON))
 			SetAutorun(drive_name);
 		// Issue another complete remount before we exit, to ensure we're clean

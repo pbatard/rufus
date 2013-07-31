@@ -492,7 +492,7 @@ out:
 	iso_blocking_status = -1;
 	if (scan_only) {
 		// Remove trailing spaces from the label
-		for (j=(int)safe_strlen(iso_report.label)-1; ((j>=0)&&(isspace(iso_report.label[j]))); j--)
+		for (j=(int)safe_strlen(iso_report.label)-1; ((j>=0)&&(isspaceU(iso_report.label[j]))); j--)
 			iso_report.label[j] = 0;
 		// We use the fact that UDF_BLOCKSIZE and ISO_BLOCKSIZE are the same here
 		iso_report.projected_size = total_blocks * ISO_BLOCKSIZE;

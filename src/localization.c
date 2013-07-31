@@ -301,7 +301,7 @@ char* lmprintf(int msg_id, ...)
 	}
 
 	if (format == NULL) {
-		safe_sprintf(buf[buf_id], 2047, "MSG_%03d UNTRANSLATED", msg_id);
+		safe_sprintf(buf[buf_id], 2047, "MSG_%03d UNTRANSLATED", msg_id - MSG_000);
 	} else {
 		va_start(args, msg_id);
 		safe_vsnprintf(buf[buf_id], 2047, format, args);

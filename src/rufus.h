@@ -283,7 +283,7 @@ extern enum WindowsVersion DetectWindowsVersion(void);
 extern const char* PrintWindowsVersion(enum WindowsVersion version);
 extern const char *WindowsErrorString(void);
 extern void DumpBufferHex(void *buf, size_t size);
-extern void PrintStatus(unsigned int duration, BOOL debug, const char *format, ...);
+extern void PrintStatus(unsigned int duration, BOOL debug, const char* message);
 extern void UpdateProgress(int op, float percent);
 extern const char* StrError(DWORD error_code);
 extern char* GuidToString(const GUID* guid);

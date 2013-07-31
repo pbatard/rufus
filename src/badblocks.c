@@ -45,6 +45,8 @@
 #include "badblocks.h"
 #include "file.h"
 #include "msapi_utf8.h"
+#include "resource.h"
+#include "localization.h"
 
 FILE* log_fd = NULL;
 static const char* abort_msg = "Too many bad blocks, aborting test\n";
@@ -326,12 +328,12 @@ static void print_status(void)
 	percent = calc_percent((unsigned long) currently_testing,
 					(unsigned long) num_blocks);
 	percent = (percent/2.0f) + ((cur_op==OP_READ)? 50.0f : 0.0f);
-	PrintStatus(0, FALSE, "Bad Blocks: PASS %d/%d - %0.2f%% (%d/%d/%d errors)",
+	PrintStatus(0, FALSE, lmprintf(MSG_535,
 				cur_pattern, nr_pattern,
-				percent, 
+				percent,
 				num_read_errors,
 				num_write_errors,
-				num_corruption_errors);
+				num_corruption_errors));
 	UpdateProgress(OP_BADBLOCKS, (((cur_pattern-1)*100.0f) + percent) / nr_pattern);
 }
 
@@ -357,7 +359,7 @@ static void pattern_fill(unsigned char *buffer, unsigned int pattern,
 		for (ptr = buffer; ptr < buffer + n; ptr++) {
 			(*ptr) = rand() % (1 << (8 * sizeof(char)));
 		}
-		PrintStatus(3500, FALSE, "Bad Blocks: Testing with random pattern.");
+		PrintStatus(3500, FALSE, lmprintf(MSG_536));
 	} else {
 		bpattern[0] = 0;
 		for (i = 0; i < sizeof(bpattern); i++) {
@@ -374,7 +376,7 @@ static void pattern_fill(unsigned char *buffer, unsigned int pattern,
 			else
 				i--;
 		}
-		PrintStatus(3500, FALSE, "Bad Blocks: Testing with pattern 0x%02X.", bpattern[i]);
+		PrintStatus(3500, FALSE, lmprintf(MSG_537, bpattern[i]));
 		cur_pattern++;
 	}
 }
