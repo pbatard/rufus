@@ -41,6 +41,7 @@
 #include "rufus.h"
 #include "msapi_utf8.h"
 #include "resource.h"
+#include "localization.h"
 
 // How often should we update the progress bar (in 2K blocks) as updating
 // the progress bar for every block will bring extraction to a crawl
@@ -76,16 +77,15 @@ static __inline char* size_to_hr(int64_t size)
 {
 	int suffix = 0;
 	static char str_size[24];
-	const char* sizes[] = { "", "KB", "MB", "GB", "TB" };
 	double hr_size = (double)size;
-	while ((suffix < ARRAYSIZE(sizes)) && (hr_size >= 1024.0)) {
+	while ((suffix < MAX_SIZE_SUFFIXES) && (hr_size >= 1024.0)) {
 		hr_size /= 1024.0;
 		suffix++;
 	}
 	if (suffix == 0) {
-		safe_sprintf(str_size, sizeof(str_size), " (%d bytes)", (int)hr_size);
+		safe_sprintf(str_size, sizeof(str_size), " (%d %s)", (int)hr_size, lmprintf(MSG_020));
 	} else {
-		safe_sprintf(str_size, sizeof(str_size), " (%0.1f %s)", hr_size, sizes[suffix]);
+		safe_sprintf(str_size, sizeof(str_size), " (%0.1f %s)", hr_size, lmprintf(MSG_020+suffix));
 	}
 	return str_size;
 }
@@ -416,7 +416,6 @@ BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan)
 	LONG progress_style;
 	char* tmp;
 	char path[64];
-	const char* scan_text = "Scanning ISO image...";
 	const char* basedir[] = { "i386", "minint" };
 	const char* tmp_sif = ".\\txtsetup.sif~";
 
@@ -433,14 +432,14 @@ BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan)
 		// String array of all isolinux/syslinux locations
 		StrArrayCreate(&config_path, 8);
 		// Change the Window title and static text
-		SetWindowTextU(hISOProgressDlg, scan_text);
-		SetWindowTextU(hISOFileName, scan_text);
+		SetWindowTextU(hISOProgressDlg, lmprintf(MSG_502));
+		SetWindowTextU(hISOFileName, lmprintf(MSG_502));
 		// Change progress style to marquee for scanning
 		SetWindowLong(hISOProgressBar, GWL_STYLE, progress_style | PBS_MARQUEE);
 		SendMessage(hISOProgressBar, PBM_SETMARQUEE, TRUE, 0);
 	} else {
 		uprintf("Extracting files...\n");
-		SetWindowTextU(hISOProgressDlg, "Copying ISO files...");
+		SetWindowTextU(hISOProgressDlg, lmprintf(MSG_531));
 		if (total_blocks == 0) {
 			uprintf("Error: ISO has not been properly scanned.\n");
 			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_ISO_SCAN);

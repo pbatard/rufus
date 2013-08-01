@@ -89,11 +89,6 @@ struct {
 const char* FileSystemLabel[FS_MAX] = { "FAT", "FAT32", "NTFS", "UDF", "exFAT" };
 // Number of steps for each FS for FCC_STRUCTURE_PROGRESS
 const int nb_steps[FS_MAX] = { 5, 5, 12, 1, 10 };
-// Don't ask me - just following the MS "standard" here
-// We hijack 256 as a "Default" for UDF, since we can't set clustersize there
-static const char* ClusterSizeLabel[] = { "Default", "512 bytes", "1024 bytes","2048 bytes","4096 bytes","8192 bytes",
-	"16 kilobytes", "32 kilobytes", "64 kilobytes", "128 kilobytes", "256 kilobytes", "512 kilobytes",
-	"1024 kilobytes","2048 kilobytes","4096 kilobytes","8192 kilobytes","16 megabytes","32 megabytes" };
 static const char* BiosTypeLabel[BT_MAX] = { "BIOS", "UEFI" };
 static const char* PartitionTypeLabel[2] = { "MBR", "GPT" };
 static BOOL existing_key = FALSE;	// For LGP set/restore
@@ -103,6 +98,7 @@ static BOOL iso_provided = FALSE;
 extern BOOL force_large_fat32;
 static int selection_default;
 static loc_cmd* selected_locale = NULL;
+char ClusterSizeLabel[MAX_CLUSTER_SIZES][64];
 char msgbox[1024], msgbox_title[32];
 
 /*
@@ -150,6 +146,23 @@ static float previous_end;
 #define MB       1048576LL
 #define GB    1073741824LL
 #define TB 1099511627776LL
+
+/*
+ * Fill in the cluster size names
+ */
+static void SetClusterSizeLabels(void)
+{
+	unsigned int i, j, k;
+	safe_sprintf(ClusterSizeLabel[0], 64, lmprintf(MSG_029));
+	for (i=512, j=1, k=MSG_026; j<MAX_CLUSTER_SIZES; i<<=1, j++) {
+		if (i > 8192) {
+			i /= 1024;
+			k++;
+		}
+		safe_sprintf(ClusterSizeLabel[j], 64, "%d %s", i, lmprintf(k));
+	}
+}
+
 /* 
  * Set cluster size values according to http://support.microsoft.com/kb/140365
  * this call will return FALSE if we can't find a supportable FS for the drive
@@ -159,7 +172,7 @@ static BOOL DefineClusterSizes(void)
 	LONGLONG i;
 	int fs;
 	BOOL r = FALSE;
-	char tmp[64] = "";
+	char tmp[64] = "", *entry;
 
 	default_fs = FS_UNKNOWN;
 	memset(&SelectedDrive.ClusterSize, 0, sizeof(SelectedDrive.ClusterSize));
@@ -284,11 +297,13 @@ out:
 				safe_strcat(tmp, sizeof(tmp), "Large ");
 			safe_strcat(tmp, sizeof(tmp), FileSystemLabel[fs]);
 			if (default_fs == FS_UNKNOWN) {
-				safe_strcat(tmp, sizeof(tmp), " (Default)");
+				entry = lmprintf(MSG_030, tmp);
 				default_fs = fs;
+			} else {
+				entry = tmp;
 			}
 			IGNORE_RETVAL(ComboBox_SetItemData(hFileSystem, 
-				ComboBox_AddStringU(hFileSystem, tmp), fs));
+				ComboBox_AddStringU(hFileSystem, entry), fs));
 			r = TRUE;
 		}
 	}
@@ -305,7 +320,7 @@ out:
  */
 static BOOL SetClusterSizes(int FSType)
 {
-	char szClustSize[64];
+	char* szClustSize;
 	int i, k, default_index = 0;
 	ULONG j;
 
@@ -323,10 +338,11 @@ static BOOL SetClusterSizes(int FSType)
 
 	for(i=0,j=0x100,k=0;j<0x10000000;i++,j<<=1) {
 		if (j & SelectedDrive.ClusterSize[FSType].Allowed) {
-			safe_sprintf(szClustSize, sizeof(szClustSize), "%s", ClusterSizeLabel[i]);
 			if (j == SelectedDrive.ClusterSize[FSType].Default) {
-				safe_strcat(szClustSize, sizeof(szClustSize), " (Default)");
+				szClustSize = lmprintf(MSG_030, ClusterSizeLabel[i]);
 				default_index = k;
+			} else {
+				szClustSize = ClusterSizeLabel[i];
 			}
 			IGNORE_RETVAL(ComboBox_SetItemData(hClusterSize, ComboBox_AddStringU(hClusterSize, szClustSize), j));
 			k++;
@@ -495,8 +511,6 @@ static void SetPartitionSchemeTooltip(void)
 static BOOL PopulateProperties(int ComboIndex)
 {
 	double HumanReadableSize;
-	char capacity[64];
-	static char* suffix[] = { "B", "KB", "MB", "GB", "TB", "PB"};
 	char no_label[] = STR_NO_LABEL;
 	int i, j, pt, bt;
 
@@ -516,7 +530,7 @@ static BOOL PopulateProperties(int ComboIndex)
 	EnableBootOptions(TRUE);
 
 	HumanReadableSize = (double)SelectedDrive.DiskSize;
-	for (i=1; i<ARRAYSIZE(suffix); i++) {
+	for (i=1; i<MAX_SIZE_SUFFIXES; i++) {
 		HumanReadableSize /= 1024.0;
 		if (HumanReadableSize < 512.0) {
 			for (j=0; j<3; j++) {
@@ -526,14 +540,14 @@ static BOOL PopulateProperties(int ComboIndex)
 					continue;
 				bt = (j==0)?BT_BIOS:BT_UEFI;
 				pt = (j==2)?PARTITION_STYLE_GPT:PARTITION_STYLE_MBR;
-				safe_sprintf(capacity, sizeof(capacity), "%s partition scheme for %s%s computer%s",
-					PartitionTypeLabel[pt], BiosTypeLabel[bt], (j==0)?" or UEFI":"", (j==0)?"s":"");
-				IGNORE_RETVAL(ComboBox_SetItemData(hPartitionScheme, ComboBox_AddStringU(hPartitionScheme, capacity), (bt<<16)|pt));
+				IGNORE_RETVAL(ComboBox_SetItemData(hPartitionScheme, ComboBox_AddStringU(hPartitionScheme,
+					lmprintf(MSG_031+j, PartitionTypeLabel[pt])), (bt<<16)|pt));
+
 			}
 			break;
 		}
 	}
-	if (i >= ARRAYSIZE(suffix))
+	if (i >= MAX_SIZE_SUFFIXES)
 		uprintf("Could not populate partition scheme data\n");
 	if (SelectedDrive.PartitionType == PARTITION_STYLE_GPT) {
 		j = 2;
@@ -554,10 +568,10 @@ static BOOL PopulateProperties(int ComboIndex)
 	// If we're beneath the tolerance, round proposed label to an integer, if not, show one decimal point
 	if (fabs(HumanReadableSize / ceil(HumanReadableSize) - 1.0) < PROPOSEDLABEL_TOLERANCE) {
 		safe_sprintf(SelectedDrive.proposed_label, sizeof(SelectedDrive.proposed_label),
-			"%0.0f%s", ceil(HumanReadableSize), suffix[i]);
+			"%0.0f%s", ceil(HumanReadableSize), lmprintf(MSG_020+i));
 	} else {
 		safe_sprintf(SelectedDrive.proposed_label, sizeof(SelectedDrive.proposed_label),
-			"%0.1f%s", HumanReadableSize, suffix[i]);
+			"%0.1f%s", HumanReadableSize, lmprintf(MSG_020+i));
 	}
 
 	// If no existing label is available and no ISO is selected, propose one according to the size (eg: "256MB", "8GB")
@@ -1344,6 +1358,8 @@ void InitDialog(HWND hDlg)
 	// Detect the LCID
 	uprintf("LCID: 0x%04X\n", GetUserDefaultLCID());
 
+	SetClusterSizeLabels();
+
 	// Prefer FreeDOS to MS-DOS
 	selection_default = DT_FREEDOS;
 	// Create the status line and initialize the taskbar icon for progress overlay
@@ -1355,15 +1371,14 @@ void InitDialog(HWND hDlg)
 	SendMessage(hProgress, PBM_SETRANGE, 0, (MAX_PROGRESS<<16) & 0xFFFF0000);
 	// Fill up the passes
 	for (i=0; i<4; i++) {
-		safe_sprintf(tmp, sizeof(tmp), "%d Pass%s", i+1, (i==0)?"":"es");
-		IGNORE_RETVAL(ComboBox_AddStringU(hNBPasses, tmp));
+		IGNORE_RETVAL(ComboBox_AddStringU(hNBPasses, lmprintf((i==0)?MSG_034:MSG_035, i+1)));
 	}
 	IGNORE_RETVAL(ComboBox_SetCurSel(hNBPasses, 1));
 	SetPassesTooltip();
 	// Fill up the DOS type dropdown
 	IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, "MS-DOS"), DT_WINME));
 	IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, "FreeDOS"), DT_FREEDOS));
-	IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, "ISO Image"), DT_ISO));
+	IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, lmprintf(MSG_036)), DT_ISO));
 	IGNORE_RETVAL(ComboBox_SetCurSel(hBootType, selection_default));
 	// Fill up the MBR masqueraded disk IDs ("8 disks should be enough for anybody")
 	IGNORE_RETVAL(ComboBox_SetItemData(hDiskID, ComboBox_AddStringU(hDiskID, "0x80 (default)"), 0x80));
@@ -1675,7 +1690,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, "MS-DOS"), DT_WINME));
 				IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, "FreeDOS"), DT_FREEDOS));
 			}
-			IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, "ISO Image"), DT_ISO));
+			IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, lmprintf(MSG_036)), DT_ISO));
 			// If needed (advanced mode) also append a Syslinux option
 			if ( (bt == BT_BIOS) && (((fs == FS_FAT16) || (fs == FS_FAT32)) && (advanced_mode)) ) {
 				IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, "Syslinux 4"), DT_SYSLINUX_V4));
@@ -1731,7 +1746,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				iso_provided = FALSE;	// One off thing...
 			} else {
 				safe_free(iso_path);
-				iso_path = FileDialog(FALSE, NULL, "*.iso", "iso", "ISO Image");
+				iso_path = FileDialog(FALSE, NULL, "*.iso", "iso", lmprintf(MSG_036));
 				if (iso_path == NULL) {
 					CreateTooltip(hSelectISO, "Click to select...", -1);
 					break;
@@ -1850,12 +1865,12 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_PAUSED, 0);
 			SetTaskbarProgressState(TASKBAR_PAUSED);
 			PrintStatus(0, FALSE, lmprintf(MSG_511));
-			Notification(MSG_INFO, NULL, lmprintf(MSG_511), "Operation cancelled by the user.");
+			Notification(MSG_INFO, NULL, lmprintf(MSG_511), lmprintf(MSG_041));
 		} else {
 			SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_ERROR, 0);
 			SetTaskbarProgressState(TASKBAR_ERROR);
 			PrintStatus(0, FALSE, lmprintf(MSG_512));
-			Notification(MSG_ERROR, NULL, "Error", "Error: %s", StrError(FormatStatus));
+			Notification(MSG_ERROR, NULL, lmprintf(MSG_042), lmprintf(MSG_043), StrError(FormatStatus));
 		}
 		FormatStatus = 0;
 		format_op_in_progress = FALSE;

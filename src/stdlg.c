@@ -588,7 +588,7 @@ INT_PTR CALLBACK NotificationCallback(HWND hDlg, UINT message, WPARAM wParam, LP
 		}
 		// Enable/disable the buttons and set text
 		if (!notification_is_question) {
-			SetWindowTextU(GetDlgItem(hDlg, IDNO), "Close");
+			SetWindowTextU(GetDlgItem(hDlg, IDNO), lmprintf(MSG_006));
 		} else {
 			ShowWindow(GetDlgItem(hDlg, IDYES), SW_SHOW);
 		}
@@ -972,10 +972,10 @@ INT_PTR CALLBACK UpdateCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 		CenterDialog(hDlg);
 		hFrequency = GetDlgItem(hDlg, IDC_UPDATE_FREQUENCY);
 		hBeta = GetDlgItem(hDlg, IDC_INCLUDE_BETAS);
-		IGNORE_RETVAL(ComboBox_SetItemData(hFrequency, ComboBox_AddStringU(hFrequency, "Disabled"), -1));
-		IGNORE_RETVAL(ComboBox_SetItemData(hFrequency, ComboBox_AddStringU(hFrequency, "Daily (Default)"), 86400));
-		IGNORE_RETVAL(ComboBox_SetItemData(hFrequency, ComboBox_AddStringU(hFrequency, "Weekly"), 604800));
-		IGNORE_RETVAL(ComboBox_SetItemData(hFrequency, ComboBox_AddStringU(hFrequency, "Monthly"), 2629800));
+		IGNORE_RETVAL(ComboBox_SetItemData(hFrequency, ComboBox_AddStringU(hFrequency, lmprintf(MSG_013)), -1));
+		IGNORE_RETVAL(ComboBox_SetItemData(hFrequency, ComboBox_AddStringU(hFrequency, lmprintf(MSG_030, lmprintf(MSG_014))), 86400));
+		IGNORE_RETVAL(ComboBox_SetItemData(hFrequency, ComboBox_AddStringU(hFrequency, lmprintf(MSG_015)), 604800));
+		IGNORE_RETVAL(ComboBox_SetItemData(hFrequency, ComboBox_AddStringU(hFrequency, lmprintf(MSG_016)), 2629800));
 		freq = ReadRegistryKey32(REGKEY_HKCU, REGKEY_UPDATE_INTERVAL);
 		EnableWindow(GetDlgItem(hDlg, IDC_CHECK_NOW), (freq != 0));
 		EnableWindow(hBeta, (freq >= 0));
@@ -994,12 +994,12 @@ INT_PTR CALLBACK UpdateCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 			IGNORE_RETVAL(ComboBox_SetCurSel(hFrequency, 3));
 			break;
 		default:
-			IGNORE_RETVAL(ComboBox_SetItemData(hFrequency, ComboBox_AddStringU(hFrequency, "Custom"), freq));
+			IGNORE_RETVAL(ComboBox_SetItemData(hFrequency, ComboBox_AddStringU(hFrequency, lmprintf(MSG_017)), freq));
 			IGNORE_RETVAL(ComboBox_SetCurSel(hFrequency, 4));
 			break;
 		}
-		IGNORE_RETVAL(ComboBox_AddStringU(hBeta, "Yes"));
-		IGNORE_RETVAL(ComboBox_AddStringU(hBeta, "No"));
+		IGNORE_RETVAL(ComboBox_AddStringU(hBeta, lmprintf(MSG_008)));
+		IGNORE_RETVAL(ComboBox_AddStringU(hBeta, lmprintf(MSG_009)));
 		IGNORE_RETVAL(ComboBox_SetCurSel(hBeta, GetRegistryKeyBool(REGKEY_HKCU, REGKEY_INCLUDE_BETAS)?0:1));
 		hPolicy = GetDlgItem(hDlg, IDC_POLICY);
 		SendMessage(hPolicy, EM_AUTOURLDETECT, 1, 0);
@@ -1148,12 +1148,10 @@ INT_PTR CALLBACK NewVersionCallback(HWND hDlg, UINT message, WPARAM wParam, LPAR
 		SendMessageA(hNotes, EM_SETTEXTEX, (WPARAM)&friggin_microsoft_unicode_amateurs, (LPARAM)update.release_notes);
 		SendMessage(hNotes, EM_SETSEL, -1, -1);
 		SendMessage(hNotes, EM_SETEVENTMASK, 0, ENM_LINK);
-		safe_sprintf(tmp, sizeof(tmp), "Your version: %d.%d.%d (Build %d)",
-			rufus_version[0], rufus_version[1], rufus_version[2], rufus_version[3]);
-		SetWindowTextU(GetDlgItem(hDlg, IDC_YOUR_VERSION), tmp);
-		safe_sprintf(tmp, sizeof(tmp), "Latest version: %d.%d.%d (Build %d)",
-			update.version[0], update.version[1], update.version[2], update.version[3]);
-		SetWindowTextU(GetDlgItem(hDlg, IDC_LATEST_VERSION), tmp);
+		SetWindowTextU(GetDlgItem(hDlg, IDC_YOUR_VERSION), lmprintf(MSG_018, 
+			rufus_version[0], rufus_version[1], rufus_version[2], rufus_version[3]));
+		SetWindowTextU(GetDlgItem(hDlg, IDC_LATEST_VERSION), lmprintf(MSG_019,
+			update.version[0], update.version[1], update.version[2], update.version[3]));
 		SetWindowTextU(GetDlgItem(hDlg, IDC_DOWNLOAD_URL), update.download_url);
 		SendMessage(GetDlgItem(hDlg, IDC_PROGRESS), PBM_SETRANGE, 0, (MAX_PROGRESS<<16) & 0xFFFF0000);
 		if (update.download_url == NULL)
@@ -1203,7 +1201,7 @@ INT_PTR CALLBACK NewVersionCallback(HWND hDlg, UINT message, WPARAM wParam, LPAR
 				break;
 			default:	// Download
 				for (i=(int)safe_strlen(update.download_url); (i>0)&&(update.download_url[i]!='/'); i--);
-				filepath = FileDialog(TRUE, app_dir, (char*)&update.download_url[i+1], "exe", "Application");
+				filepath = FileDialog(TRUE, app_dir, (char*)&update.download_url[i+1], "exe", lmprintf(MSG_037));
 				if (filepath != NULL)
 					DownloadFileThreaded(update.download_url, filepath, hDlg);
 				break;
@@ -1214,14 +1212,14 @@ INT_PTR CALLBACK NewVersionCallback(HWND hDlg, UINT message, WPARAM wParam, LPAR
 	case UM_ISO_INIT:
 		FormatStatus = 0;
 		download_status = 1;
-		SetWindowTextU(GetDlgItem(hDlg, IDC_DOWNLOAD), "Abort");
+		SetWindowTextU(GetDlgItem(hDlg, IDC_DOWNLOAD), lmprintf(MSG_038));
 		return (INT_PTR)TRUE;
 	case UM_ISO_EXIT:
 		if (wParam) {
-			SetWindowTextU(GetDlgItem(hDlg, IDC_DOWNLOAD), "Launch");
+			SetWindowTextU(GetDlgItem(hDlg, IDC_DOWNLOAD), lmprintf(MSG_039));
 			download_status = 2;
 		} else {
-			SetWindowTextU(GetDlgItem(hDlg, IDC_DOWNLOAD), "Download");
+			SetWindowTextU(GetDlgItem(hDlg, IDC_DOWNLOAD), lmprintf(MSG_040));
 			download_status = 0;
 		}
 		return (INT_PTR)TRUE;

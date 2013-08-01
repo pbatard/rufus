@@ -1161,9 +1161,8 @@ DWORD WINAPI FormatThread(LPVOID param)
 	HANDLE hPhysicalDrive = INVALID_HANDLE_VALUE;
 	HANDLE hLogicalVolume = INVALID_HANDLE_VALUE;
 	SYSTEMTIME lt;
-	char* guid_volume = NULL;
+	char *bb_msg, *guid_volume = NULL;
 	char drive_name[] = "?:\\";
-	char bb_msg[512];
 	char logfile[MAX_PATH], *userdir;
 	char wim_image[] = "?:\\sources\\install.wim";
 	char efi_dst[] = "?:\\efi\\boot\\bootx64.efi";
@@ -1261,19 +1260,15 @@ DWORD WINAPI FormatThread(LPVOID param)
 				report.num_read_errors, report.num_write_errors, report.num_corruption_errors);
 			r = IDOK;
 			if (report.bb_count) {
-				safe_sprintf(bb_msg, sizeof(bb_msg), "Check completed: %u bad block%s found.\n"
-					"  %d read errors\n  %d write errors\n  %d corruption errors\n",
-					report.bb_count, (report.bb_count==1)?"":"s",
-					report.num_read_errors, report.num_write_errors, 
+				bb_msg = lmprintf(MSG_011, report.num_read_errors, report.num_write_errors,
 					report.num_corruption_errors);
-				fprintf(log_fd, "%s", bb_msg);
+				fprintf(log_fd, bb_msg);
 				GetLocalTime(&lt);
 				fprintf(log_fd, APPLICATION_NAME " bad blocks check ended on: %04d.%02d.%02d %02d:%02d:%02d\n",
 				lt.wYear, lt.wMonth, lt.wDay, lt.wHour, lt.wMinute, lt.wSecond);
 				fclose(log_fd);
-				safe_sprintf(&bb_msg[strlen(bb_msg)], sizeof(bb_msg)-strlen(bb_msg)-1,
-					"\nA more detailed report can be found in:\n%s\n", logfile);
-				r = MessageBoxU(hMainDialog, bb_msg, "Bad blocks found", MB_ABORTRETRYIGNORE|MB_ICONWARNING);
+				r = MessageBoxU(hMainDialog, lmprintf(MSG_012, bb_msg, logfile),
+					lmprintf(MSG_010), MB_ABORTRETRYIGNORE|MB_ICONWARNING);
 			} else {
 				// We didn't get any errors => delete the log file
 				fclose(log_fd);

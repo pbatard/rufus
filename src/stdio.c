@@ -31,6 +31,7 @@
 #include "msapi_utf8.h"
 #include "rufus.h"
 #include "resource.h"
+#include "localization.h"
 
 /*
  * Globals
@@ -179,21 +180,21 @@ char* GuidToString(const GUID* guid)
 char* SizeToHumanReadable(LARGE_INTEGER size)
 {
 	int suffix = 0;
-	static char str_size[24];
-	const char* sizes[] = { "", "KB", "MB", "GB", "TB" };
+	static char str_size[32];
 	double hr_size = (double)size.QuadPart;
-	while ((suffix < ARRAYSIZE(sizes)) && (hr_size >= 1024.0)) {
+	while ((suffix < MAX_SIZE_SUFFIXES) && (hr_size >= 1024.0)) {
 		hr_size /= 1024.0;
 		suffix++;
 	}
 	if (suffix == 0) {
-		safe_sprintf(str_size, sizeof(str_size), "%d bytes", (int)hr_size);
+		safe_sprintf(str_size, sizeof(str_size), "%d %s", (int)hr_size, lmprintf(MSG_020));
 	} else {
-		safe_sprintf(str_size, sizeof(str_size), "%0.1f %s", hr_size, sizes[suffix]);
+		safe_sprintf(str_size, sizeof(str_size), "%0.1f %s", hr_size, lmprintf(MSG_020 + suffix));
 	}
 	return str_size;
 }
 
+// TODO: all of these need to be translated
 const char* StrError(DWORD error_code)
 {
 	if ( (!IS_ERROR(error_code)) || (SCODE_CODE(error_code) == ERROR_SUCCESS)) {

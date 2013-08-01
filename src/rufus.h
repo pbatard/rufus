@@ -43,6 +43,8 @@
 #define DRIVE_INDEX_MAX             0x000000C0
 #define MAX_DRIVES                  (DRIVE_INDEX_MAX - DRIVE_INDEX_MIN)
 #define MAX_TOOLTIPS                32
+#define MAX_SIZE_SUFFIXES           6			// bytes, KB, MB, GB, TB, PB
+#define MAX_CLUSTER_SIZES           18
 #define MAX_PROGRESS                (0xFFFF-1)	// leave room for 1 more for insta-progress workaround
 #define MAX_LOG_SIZE                0x7FFFFFFE
 #define MAX_GUID_STRING_LENGTH      40
