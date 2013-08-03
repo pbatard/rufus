@@ -432,14 +432,14 @@ BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan)
 		// String array of all isolinux/syslinux locations
 		StrArrayCreate(&config_path, 8);
 		// Change the Window title and static text
-		SetWindowTextU(hISOProgressDlg, lmprintf(MSG_502));
-		SetWindowTextU(hISOFileName, lmprintf(MSG_502));
+		SetWindowTextU(hISOProgressDlg, lmprintf(MSG_202));
+		SetWindowTextU(hISOFileName, lmprintf(MSG_202));
 		// Change progress style to marquee for scanning
 		SetWindowLong(hISOProgressBar, GWL_STYLE, progress_style | PBS_MARQUEE);
 		SendMessage(hISOProgressBar, PBM_SETMARQUEE, TRUE, 0);
 	} else {
 		uprintf("Extracting files...\n");
-		SetWindowTextU(hISOProgressDlg, lmprintf(MSG_531));
+		SetWindowTextU(hISOProgressDlg, lmprintf(MSG_231));
 		if (total_blocks == 0) {
 			uprintf("Error: ISO has not been properly scanned.\n");
 			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_ISO_SCAN);

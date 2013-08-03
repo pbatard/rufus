@@ -35,14 +35,12 @@
 #define APPLICATION_NAME            "Rufus"
 #define COMPANY_NAME                "Akeo Consulting"
 #define STR_NO_LABEL                "NO_LABEL"
-#define RUFUS_CANCELBOX_TITLE       APPLICATION_NAME " - Cancellation"
-#define RUFUS_BLOCKING_IO_TITLE     APPLICATION_NAME " - Flushing buffers"
 #define DRIVE_ACCESS_TIMEOUT        15000		// How long we should retry drive access (in ms)
 #define DRIVE_ACCESS_RETRIES        60			// How many times we should retry
 #define DRIVE_INDEX_MIN             0x00000080
 #define DRIVE_INDEX_MAX             0x000000C0
 #define MAX_DRIVES                  (DRIVE_INDEX_MAX - DRIVE_INDEX_MIN)
-#define MAX_TOOLTIPS                32
+#define MAX_TOOLTIPS                128
 #define MAX_SIZE_SUFFIXES           6			// bytes, KB, MB, GB, TB, PB
 #define MAX_CLUSTER_SIZES           18
 #define MAX_PROGRESS                (0xFFFF-1)	// leave room for 1 more for insta-progress workaround
@@ -53,6 +51,7 @@
 #define MBR_UEFI_MARKER             0x49464555	// 'U', 'E', 'F', 'I', as a 32 bit little endian longword
 #define PROPOSEDLABEL_TOLERANCE     0.10
 #define FS_DEFAULT                  FS_FAT32
+#define BADBLOCK_PATTERNS           {0xaa, 0x55, 0xff, 0x00}
 #define LARGE_FAT32_SIZE            (32*1073741824LL)	// Size at which we need to use fat32format
 #define MAX_FAT32_SIZE              1.0f		// Threshold above which we disable FAT32 formatting (in TB)
 #define WHITE                       RGB(255,255,255)

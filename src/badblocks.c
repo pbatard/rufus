@@ -328,7 +328,7 @@ static void print_status(void)
 	percent = calc_percent((unsigned long) currently_testing,
 					(unsigned long) num_blocks);
 	percent = (percent/2.0f) + ((cur_op==OP_READ)? 50.0f : 0.0f);
-	PrintStatus(0, FALSE, lmprintf(MSG_535,
+	PrintStatus(0, FALSE, lmprintf(MSG_235,
 				cur_pattern, nr_pattern,
 				percent,
 				num_read_errors,
@@ -359,7 +359,7 @@ static void pattern_fill(unsigned char *buffer, unsigned int pattern,
 		for (ptr = buffer; ptr < buffer + n; ptr++) {
 			(*ptr) = rand() % (1 << (8 * sizeof(char)));
 		}
-		PrintStatus(3500, FALSE, lmprintf(MSG_536));
+		PrintStatus(3500, FALSE, lmprintf(MSG_236));
 	} else {
 		bpattern[0] = 0;
 		for (i = 0; i < sizeof(bpattern); i++) {
@@ -376,7 +376,7 @@ static void pattern_fill(unsigned char *buffer, unsigned int pattern,
 			else
 				i--;
 		}
-		PrintStatus(3500, FALSE, lmprintf(MSG_537, bpattern[i]));
+		PrintStatus(3500, FALSE, lmprintf(MSG_237, bpattern[i]));
 		cur_pattern++;
 	}
 }
@@ -429,7 +429,7 @@ static unsigned int test_rw(HANDLE hDrive, blk_t last_block, size_t block_size, 
 	size_t blocks_at_once, int nb_passes)
 {
 	unsigned char *buffer = NULL, *read_buffer;
-	const unsigned int pattern[] = {0xaa, 0x55, 0xff, 0x00};
+	const unsigned int pattern[] = BADBLOCK_PATTERNS;
 	int i, pat_idx;
 	unsigned int bb_count = 0;
 	blk_t got, tryout, recover_block = ~0, *blk_id;

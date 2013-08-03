@@ -194,11 +194,10 @@ char* SizeToHumanReadable(LARGE_INTEGER size)
 	return str_size;
 }
 
-// TODO: all of these need to be translated
 const char* StrError(DWORD error_code)
 {
 	if ( (!IS_ERROR(error_code)) || (SCODE_CODE(error_code) == ERROR_SUCCESS)) {
-		return "Success";
+		return lmprintf(MSG_044);
 	}
 	if (SCODE_FACILITY(error_code) != FACILITY_STORAGE) {
 		uprintf("StrError: non storage - %08X (%X)\n", error_code, SCODE_FACILITY(error_code));
@@ -207,63 +206,61 @@ const char* StrError(DWORD error_code)
 	}
 	switch (SCODE_CODE(error_code)) {
 	case ERROR_GEN_FAILURE:
-		return "Undetermined error while formatting.";
+		return lmprintf(MSG_051);
 	case ERROR_INCOMPATIBLE_FS:
-		return "Cannot use the selected file system for this media.";
+		return lmprintf(MSG_052);
 	case ERROR_ACCESS_DENIED:
-		return "Access to the device is denied.";
+		return lmprintf(MSG_053);
 	case ERROR_WRITE_PROTECT:
-		return "Media is write protected.";
+		return lmprintf(MSG_054);
 	case ERROR_DEVICE_IN_USE:
-		return "The device is in use by another process. "
-			"Please close any other process that may be accessing the device.";
+		return lmprintf(MSG_055);
 	case ERROR_CANT_QUICK_FORMAT:
-		return "Quick format is not available for this device.";
+		return lmprintf(MSG_056);
 	case ERROR_LABEL_TOO_LONG:
-		return "The volume label is invalid.";
+		return lmprintf(MSG_057);
 	case ERROR_INVALID_HANDLE:
-		return "The device handle is invalid.";
+		return lmprintf(MSG_058);
 	case ERROR_INVALID_CLUSTER_SIZE:
-		return "The selected cluster size is not valid for this device.";
+		return lmprintf(MSG_059);
 	case ERROR_INVALID_VOLUME_SIZE:
-		return "The volume size is invalid.";
+		return lmprintf(MSG_060);
 	case ERROR_NO_MEDIA_IN_DRIVE:
-		return "Please insert a media in drive.";
+		return lmprintf(MSG_061);
 	case ERROR_NOT_SUPPORTED:
-		return "An unsupported command was received.";
+		return lmprintf(MSG_062);
 	case ERROR_NOT_ENOUGH_MEMORY:
-		return "Memory allocation error.";
+		return lmprintf(MSG_063);
 	case ERROR_READ_FAULT:
-		return "Read error.";
+		return lmprintf(MSG_064);
 	case ERROR_WRITE_FAULT:
-		return "Write error.";
+		return lmprintf(MSG_065);
 	case ERROR_INSTALL_FAILURE:
-		return "Installation failure";
+		return lmprintf(MSG_066);
 	case ERROR_OPEN_FAILED:
-		return "Could not open media. It may be in use by another process. "
-			"Please re-plug the media and try again.";
+		return lmprintf(MSG_067);
 	case ERROR_PARTITION_FAILURE:
-		return "Error while partitioning drive.";
+		return lmprintf(MSG_068);
 	case ERROR_CANNOT_COPY:
-		return "Could not copy files to target drive.";
+		return lmprintf(MSG_069);
 	case ERROR_CANCELLED:
-		return "Cancelled by user.";
+		return lmprintf(MSG_070);
 	case ERROR_CANT_START_THREAD:
-		return "Unable to create formatting thread.";
+		return lmprintf(MSG_071);
 	case ERROR_BADBLOCKS_FAILURE:
-		return "Bad blocks check didn't complete.";
+		return lmprintf(MSG_072);
 	case ERROR_ISO_SCAN:
-		return "ISO image scan failure.";
+		return lmprintf(MSG_073);
 	case ERROR_ISO_EXTRACT:
-		return "ISO image extraction failure.";
+		return lmprintf(MSG_074);
 	case ERROR_CANT_REMOUNT_VOLUME:
-		return "Unable to remount volume.";
+		return lmprintf(MSG_075);
 	case ERROR_CANT_PATCH:
-		return "Unable to patch/setup files for boot.";
+		return lmprintf(MSG_076);
 	case ERROR_CANT_ASSIGN_LETTER:
-		return "Unable to assign a drive letter.";
+		return lmprintf(MSG_077);
 	case ERROR_CANT_MOUNT_VOLUME:
-		return "Can't mount GUID volume.";
+		return lmprintf(MSG_078);
 	default:
 		uprintf("Unknown error: %08X\n", error_code);
 		SetLastError(error_code);

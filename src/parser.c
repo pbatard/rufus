@@ -173,7 +173,7 @@ static void get_loc_data_line(char* line)
 	if (t == '#')	// Comment
 		return;
 	if ((t == 0) || ((line[i] != space[0]) && (line[i] != space[1]))) {
-		luprint("syntax error");
+		luprintf("syntax error: '%s'", line);
 		return;
 	}
 
@@ -226,7 +226,6 @@ BOOL get_supported_locales(const char* filename)
 		i = strspn(line, space);
 		if (line[i] != 'l')
 			continue;
-//		uprintf("Found potential start of loc at line %d\n", loc_line_nr);
 		// line[i] is not NUL so i+1 is safe to access
 		lcmd = get_loc_cmd(line[i], &line[i+1]);
 		if ((lcmd == NULL) || (lcmd->command != LC_LOCALE)) {
@@ -236,10 +235,8 @@ BOOL get_supported_locales(const char* filename)
 		// we use num[0] and num[1] as block delimiter index for this locale in the file
 		if (last_lcmd != NULL) {
 			last_lcmd->num[1] = (int32_t)end_of_block;
-//			uprintf("ended locale block at offset %d\n", last_lcmd->num[1]);
 		}
 		lcmd->num[0] = (int32_t)ftell(fd);
-//		uprintf("started locale block for '%s' at offset %d\n", lcmd->txt[0], lcmd->num[0]);
 		// Add our locale command to the locale list
 		list_add_tail(&lcmd->list, &locale_list);
 		uprintf("localization: found locale '%s'\n", lcmd->txt[0]);
@@ -247,7 +244,6 @@ BOOL get_supported_locales(const char* filename)
 	} while (1);
 	if (last_lcmd != NULL)
 		last_lcmd->num[1] = (int32_t)ftell(fd);
-//	uprintf("ended locale block at offset %d\n", last_lcmd->num[1]);
 	r = !list_empty(&locale_list);
 	if (r == FALSE)
 		uprintf("localization: '%s' contains no locale sections\n", filename); 
@@ -262,7 +258,7 @@ out:
 /*
  * Parse a locale section in a localization file (UTF-8, no BOM)
  */
-char* get_loc_data_file(const char* filename, long offset, long end_offset)
+char* get_loc_data_file(const char* filename, long offset, long end_offset, int start_line)
 {
 	wchar_t *wfilename = NULL;
 	size_t bufsize = 1024;
@@ -277,7 +273,7 @@ char* get_loc_data_file(const char* filename, long offset, long end_offset)
 		return NULL;
 
 	free_dialog_list();
-	loc_line_nr = 0;
+	loc_line_nr = start_line;
 	safe_strcpy(loc_filename, sizeof(loc_filename), filename);
 	wfilename = utf8_to_wchar(filename);
 	if (wfilename == NULL) {
@@ -299,10 +295,6 @@ char* get_loc_data_file(const char* filename, long offset, long end_offset)
 	fseek(fd, offset, SEEK_SET);
 
 	do {	// custom readline handling for string collation, realloc, line numbers, etc.
-		if (offset++ > end_offset) {
-//			uprintf("found end of section at offset %d\n", end_offset);
-			goto out;
-		}
 		c = getc(fd);
 		switch(c) {
 		case EOF:
@@ -311,10 +303,6 @@ char* get_loc_data_file(const char* filename, long offset, long end_offset)
 				loc_line_nr += line_nr_incr;
 			get_loc_data_line(buf);
 			goto out;
-		case '\\':
-			if (!escape_sequence)
-				escape_sequence = TRUE;
-			break;
 		case '\r':
 		case '\n':
 			if (escape_sequence) {
@@ -351,6 +339,12 @@ char* get_loc_data_file(const char* filename, long offset, long end_offset)
 				buf[i++] = (char)c;
 			}
 			break;
+		case '\\':
+			if (!escape_sequence) {
+				escape_sequence = TRUE;
+				break;
+			}
+			// fall through on escape sequence
 		default:
 			if (escape_sequence) {
 				switch (c) {
@@ -361,6 +355,9 @@ char* get_loc_data_file(const char* filename, long offset, long end_offset)
 				case '"':	// \" carried as is
 					buf[i++] = '\\';
 					buf[i++] = '"';
+					break;
+				case '\\':
+					buf[i++] = '\\';
 					break;
 				default:	// ignore any other escape sequence
 					break;
@@ -383,6 +380,8 @@ char* get_loc_data_file(const char* filename, long offset, long end_offset)
 			}
 			break;
 		}
+		if (ftell(fd) > end_offset)
+			goto out;
 		// Have at least 2 chars extra, for \r\n sequences
 		if (i >= bufsize-2) {
 			bufsize *= 2;
@@ -399,8 +398,6 @@ char* get_loc_data_file(const char* filename, long offset, long end_offset)
 	} while(1);
 
 out:
-	// TODO: do we really need this here?
-//	apply_localization(-1, NULL);
 	if (fd != NULL)
 		fclose(fd);
 	safe_free(wfilename);

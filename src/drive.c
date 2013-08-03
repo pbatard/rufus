@@ -626,7 +626,7 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 	DWORD size;
 	LONGLONG size_in_sectors;
 
-	PrintStatus(0, TRUE, lmprintf(MSG_538, PartitionTypeName[partition_style]));
+	PrintStatus(0, TRUE, lmprintf(MSG_238, PartitionTypeName[partition_style]));
 
 	if ((partition_style == PARTITION_STYLE_GPT) || (!IsChecked(IDC_EXTRA_PARTITION))) {
 		// Go with the MS 1 MB wastage at the beginning...
@@ -773,7 +773,7 @@ BOOL DeletePartitions(HANDLE hDrive)
 	DWORD size;
 	CREATE_DISK CreateDisk = {PARTITION_STYLE_RAW, {{0}}};
 
-	PrintStatus(0, TRUE, lmprintf(MSG_539));
+	PrintStatus(0, TRUE, lmprintf(MSG_239));
 
 	size = sizeof(CreateDisk);
 	r = DeviceIoControl(hDrive, IOCTL_DISK_CREATE_DISK,

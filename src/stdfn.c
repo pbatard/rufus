@@ -234,7 +234,7 @@ BOOL FileIO(BOOL save, char* path, char** buffer, DWORD* size)
 		goto out;
 	}
 
-	PrintStatus(0, TRUE, save?lmprintf(MSG_516, path):lmprintf(MSG_515, path));
+	PrintStatus(0, TRUE, save?lmprintf(MSG_216, path):lmprintf(MSG_215, path));
 	ret = TRUE;
 
 out:

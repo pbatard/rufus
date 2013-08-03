@@ -89,7 +89,6 @@ struct {
 const char* FileSystemLabel[FS_MAX] = { "FAT", "FAT32", "NTFS", "UDF", "exFAT" };
 // Number of steps for each FS for FCC_STRUCTURE_PROGRESS
 const int nb_steps[FS_MAX] = { 5, 5, 12, 1, 10 };
-static const char* BiosTypeLabel[BT_MAX] = { "BIOS", "UEFI" };
 static const char* PartitionTypeLabel[2] = { "MBR", "GPT" };
 static BOOL existing_key = FALSE;	// For LGP set/restore
 static BOOL size_check = TRUE;
@@ -492,15 +491,12 @@ static void SetPartitionSchemeTooltip(void)
 	bt = GETBIOSTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
 	pt = GETPARTTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
 	if (bt == BT_BIOS) {
-		CreateTooltip(hPartitionScheme, "Usually the safest choice. If you have an UEFI computer and want to install "
-			"an OS in EFI mode however, you should select one of the options below", 15000);
+		CreateTooltip(hPartitionScheme, lmprintf(MSG_150), 15000);
 	} else {
 		if (pt == PARTITION_STYLE_MBR) {
-			CreateTooltip(hPartitionScheme, "Use this if you want to install an OS in EFI mode, but need to access "
-				"the USB content from Windows XP", 15000);
+			CreateTooltip(hPartitionScheme, lmprintf(MSG_151), 15000);
 		} else {
-			CreateTooltip(hPartitionScheme, "The preferred option to install an OS in EFI mode and when "
-				"USB access is not required for Windows XP", 15000);
+			CreateTooltip(hPartitionScheme, lmprintf(MSG_152), 15000);
 		}
 	}
 }
@@ -604,9 +600,8 @@ static BOOL GetUSBDevices(DWORD devnum)
 	LONG maxwidth = 0;
 	RECT rect;
 	char drive_letter;
-	char *label, entry[MAX_PATH], buffer[MAX_PATH];
+	char *label, *entry, buffer[MAX_PATH];
 	const char* usbstor_name = "USBSTOR";
-	const char* generic_friendly_name = "USB Storage Device (Generic)";
 	GUID _GUID_DEVINTERFACE_DISK =			// only known to some...
 		{ 0x53f56307L, 0xb6bf, 0x11d0, {0x94, 0xf2, 0x00, 0xa0, 0xc9, 0x1e, 0xfb, 0x8b} };
 
@@ -637,7 +632,7 @@ static BOOL GetUSBDevices(DWORD devnum)
 				&datatype, (LPBYTE)buffer, sizeof(buffer), &size)) {
 			uprintf("SetupDiGetDeviceRegistryProperty (Friendly Name) failed: %s\n", WindowsErrorString());
 			// We can afford a failure on this call - just replace the name
-			safe_strcpy(buffer, sizeof(buffer), generic_friendly_name);
+			safe_strcpy(buffer, sizeof(buffer), lmprintf(MSG_045));
 		}
 		uprintf("Found device '%s'\n", buffer);
 
@@ -704,7 +699,7 @@ static BOOL GetUSBDevices(DWORD devnum)
 				StrArrayAdd(&DriveLabel, label);
 				// Drive letter ' ' is returned for drives that don't have a volume assigned yet
 				if (drive_letter == ' ') {
-					safe_sprintf(entry, sizeof(entry), "%s (Disk %d)", label, device_number.DeviceNumber);
+					entry = lmprintf(MSG_046, label, device_number.DeviceNumber);
 				} else {
 					if (drive_letter == app_dir[0]) {
 						uprintf("Removing %c: from the list: This is the disk from which " APPLICATION_NAME " is running!\n", drive_letter);
@@ -712,7 +707,7 @@ static BOOL GetUSBDevices(DWORD devnum)
 						safe_free(devint_detail_data);
 						break;
 					}
-					safe_sprintf(entry, sizeof(entry), "%s (%c:)", label, drive_letter);
+					entry = lmprintf(MSG_047, label, drive_letter);
 				}
 				IGNORE_RETVAL(ComboBox_SetItemData(hDeviceList, ComboBox_AddStringU(hDeviceList, entry),
 					device_number.DeviceNumber + DRIVE_INDEX_MIN));
@@ -870,7 +865,7 @@ void UpdateProgress(int op, float percent)
 static void EnableControls(BOOL bEnable)
 {
 	EnableWindow(GetDlgItem(hMainDialog, IDC_DEVICE), bEnable);
-	EnableWindow(GetDlgItem(hMainDialog, IDC_PARTITION_SCHEME), bEnable);
+	EnableWindow(GetDlgItem(hMainDialog, IDC_PARTITION_TYPE), bEnable);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_FILESYSTEM), bEnable);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_CLUSTERSIZE), bEnable);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_LABEL), bEnable);
@@ -928,7 +923,7 @@ BOOL CALLBACK LogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 				log_size = GetDlgItemTextU(hDlg, IDC_LOG_EDIT, log_buffer, log_size);
 				if (log_size != 0) {
 					log_size--;	// remove NUL terminator
-					filepath =  FileDialog(TRUE, app_dir, "rufus.log", "log", "Rufus log");
+					filepath =  FileDialog(TRUE, app_dir, "rufus.log", "log", lmprintf(MSG_108));
 					if (filepath != NULL) {
 						FileIO(TRUE, filepath, &log_buffer, &log_size);
 					}
@@ -982,14 +977,7 @@ static void CALLBACK BlockingTimer(HWND hWnd, UINT uMsg, UINT_PTR idEvent, DWORD
 		// A write or close operation hasn't made any progress since our last check
 		user_notified = TRUE;
 		uprintf("Blocking I/O operation detected\n");
-		MessageBoxU(hMainDialog,
-			APPLICATION_NAME " detected that Windows is still flushing its internal buffers\n"
-			"onto the USB device.\n\n"
-			"Depending on the speed of your USB device, this operation may\n"
-			"take a long time to complete, especially for large files.\n\n"
-			"We recommend that you let Windows finish, to avoid corruption.\n"
-			"But if you grow tired of waiting, you can just unplug the device...",
-			RUFUS_BLOCKING_IO_TITLE, MB_OK|MB_ICONINFORMATION);
+		MessageBoxU(hMainDialog, lmprintf(MSG_080), lmprintf(MSG_048), MB_OK|MB_ICONINFORMATION);
 		} else {
 			last_iso_blocking_status = iso_blocking_status;
 		}
@@ -1022,7 +1010,7 @@ BOOL CALLBACK ISOProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 		switch (LOWORD(wParam)) {
 		case IDC_ISO_ABORT:
 			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANCELLED;
-			PrintStatus(0, FALSE, lmprintf(MSG_501));
+			PrintStatus(0, FALSE, lmprintf(MSG_201));
 			uprintf("Cancelling (from ISO proc.)\n");
 			EnableWindow(GetDlgItem(hISOProgressDlg, IDC_ISO_ABORT), FALSE);
 			if (format_thid != NULL)
@@ -1050,10 +1038,10 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 
 	if (iso_path == NULL)
 		goto out;
-	PrintStatus(0, TRUE, lmprintf(MSG_502));
+	PrintStatus(0, TRUE, lmprintf(MSG_202));
 	if (!ExtractISO(iso_path, "", TRUE)) {
 		SendMessage(hISOProgressDlg, UM_ISO_EXIT, 0, 0);
-		PrintStatus(0, TRUE, lmprintf(MSG_503));
+		PrintStatus(0, TRUE, lmprintf(MSG_203));
 		safe_free(iso_path);
 		goto out;
 	}
@@ -1068,9 +1056,7 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 		}
 	}
 	if ((!iso_report.has_bootmgr) && (!iso_report.has_isolinux) && (!IS_WINPE(iso_report.winpe)) && (!iso_report.has_efi)) {
-		MessageBoxU(hMainDialog, "This version of " APPLICATION_NAME " only supports bootable ISOs\n"
-			"based on bootmgr/WinPE, isolinux or EFI.\n"
-			"This ISO doesn't appear to use either...", "Unsupported ISO", MB_OK|MB_ICONINFORMATION);
+		MessageBoxU(hMainDialog, lmprintf(MSG_082), lmprintf(MSG_081), MB_OK|MB_ICONINFORMATION);
 		safe_free(iso_path);
 		SetMBRProps();
 	} else if (!iso_report.has_syslinux_v5) {	// This check is for Syslinux v4.x or earlier
@@ -1084,18 +1070,10 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 					fclose(fd);
 					use_own_c32[i] = TRUE;
 				} else {
-					PrintStatus(0, FALSE, lmprintf(MSG_504, old_c32_name[i]));
-					safe_sprintf(msgbox, sizeof(msgbox), "This ISO image seems to use an obsolete version of '%s'.\n"
-						"Boot menus may not may not display properly because of this.\n\n"
-						"A newer version can be downloaded by " APPLICATION_NAME " to fix this issue:\n"
-						"- Choose 'Yes' to connect to the internet and download the file\n"
-						"- Choose 'No' to leave the existing ISO file unmodified\n"
-						"If you don't know what to do, you should select 'Yes'.\n\n"
-						"Note: The new file will be downloaded in the current directory and once a "
-						"'%s' exists there, it will be reused automatically.\n", old_c32_name[i], old_c32_name[i]);
-					safe_sprintf(msgbox_title, sizeof(msgbox_title), "Replace %s?", old_c32_name[i]);
-					if (MessageBoxU(hMainDialog, msgbox, msgbox_title, MB_YESNO|MB_ICONWARNING) == IDYES) {
-						SetWindowTextU(hISOProgressDlg, "Downloading file");
+					PrintStatus(0, FALSE, lmprintf(MSG_204, old_c32_name[i]));
+					if (MessageBoxU(hMainDialog, lmprintf(MSG_084, old_c32_name[i], old_c32_name[i]),
+						 lmprintf(MSG_083, old_c32_name[i]), MB_YESNO|MB_ICONWARNING) == IDYES) {
+						SetWindowTextU(hISOProgressDlg, lmprintf(MSG_085, old_c32_name[i]));
 						SetWindowTextU(hISOFileName, new_c32_url[i]);
 						if (DownloadFile(new_c32_url[i], old_c32_name[i], hISOProgressDlg))
 							use_own_c32[i] = TRUE;
@@ -1109,7 +1087,7 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 		SetFSFromISO();
 		SetMBRProps();
 		for (i=(int)safe_strlen(iso_path); (i>0)&&(iso_path[i]!='\\'); i--);
-		PrintStatus(0, TRUE, lmprintf(MSG_505, &iso_path[i+1]));
+		PrintStatus(0, TRUE, lmprintf(MSG_205, &iso_path[i+1]));
 		// Some Linux distros, such as Arch Linux, require the USB drive to have
 		// a specific label => copy the one we got from the ISO image
 		if (iso_report.label[0] != 0) {
@@ -1134,10 +1112,9 @@ void MoveCtrlY(HWND hDlg, int nID, float vertical_shift) {
 
 void SetPassesTooltip(void)
 {
-	char passes_tooltip[32];
-	safe_strcpy(passes_tooltip, sizeof(passes_tooltip), "Pattern: 0x55, 0xAA, 0xFF, 0x00");
-	passes_tooltip[13 + ComboBox_GetCurSel(hNBPasses)*6] = 0;
-	CreateTooltip(hNBPasses, passes_tooltip, -1);
+	const unsigned char pattern[] = BADBLOCK_PATTERNS;
+	CreateTooltip(hNBPasses, lmprintf(MSG_153 + ComboBox_GetCurSel(hNBPasses),
+		pattern[0], pattern[1], pattern[2], pattern[3]), -1);
 }
 
 // Toggle "advanced" mode
@@ -1190,7 +1167,7 @@ void ToggleAdvanced(void)
 	ShowWindow(GetDlgItem(hMainDialog, IDC_EXTRA_PARTITION), toggle);
 	ShowWindow(GetDlgItem(hMainDialog, IDC_RUFUS_MBR), toggle);
 	ShowWindow(GetDlgItem(hMainDialog, IDC_DISK_ID), toggle);
-	ShowWindow(GetDlgItem(hMainDialog, IDC_ADVANCED_GROUP), toggle);
+	ShowWindow(GetDlgItem(hMainDialog, IDS_ADVANCED_OPTIONS_GRP), toggle);
 
 	// Toggle the up/down icon
 	SendMessage(GetDlgItem(hMainDialog, IDC_ADVANCED), BCM_SETIMAGELIST, 0, (LPARAM)(advanced_mode?&bi_up:&bi_down));
@@ -1200,89 +1177,67 @@ static BOOL BootCheck(void)
 {
 	int fs, bt, dt, r;
 	FILE* fd;
-	const char* ldlinux_c32 = "ldlinux.c32";
+	const char* ldlinux_name = "ldlinux.c32";
 
 	dt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
 	if (dt == DT_ISO) {
 		if (iso_path == NULL) {
-			MessageBoxU(hMainDialog, "Please click on the disc button to select a bootable ISO,\n"
-				"or uncheck the \"Create a bootable disk...\" checkbox.",
-				"No ISO image selected", MB_OK|MB_ICONERROR);
+			MessageBoxU(hMainDialog, lmprintf(MSG_087), lmprintf(MSG_086), MB_OK|MB_ICONERROR);
 			return FALSE;
 		}
 		if ((size_check) && (iso_report.projected_size > (uint64_t)SelectedDrive.DiskSize)) {
-			MessageBoxU(hMainDialog, "This ISO image is too big "
-				"for the selected target.", "ISO image too big", MB_OK|MB_ICONERROR);
+			MessageBoxU(hMainDialog, lmprintf(MSG_089), lmprintf(MSG_088), MB_OK|MB_ICONERROR);
 			return FALSE;
 		}
 		fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
 		bt = GETBIOSTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
 		if (bt == BT_UEFI) {
 			if (!IS_EFI(iso_report)) {
-				MessageBoxU(hMainDialog, "When using UEFI Target Type, only EFI bootable ISO images are supported. "
-					"Please select an EFI bootable ISO or set the Target Type to BIOS.", "Unsupported ISO", MB_OK|MB_ICONERROR);
+				MessageBoxU(hMainDialog, lmprintf(MSG_091), lmprintf(MSG_090), MB_OK|MB_ICONERROR);
 				return FALSE;
 			} else if (fs > FS_FAT32) {
-				MessageBoxU(hMainDialog, "When using UEFI Target Type, only FAT/FAT32 is supported. "
-					"Please select FAT/FAT32 as the File system or set the Target Type to BIOS.", "Unsupported filesystem", MB_OK|MB_ICONERROR);
+				MessageBoxU(hMainDialog, lmprintf(MSG_093), lmprintf(MSG_092), MB_OK|MB_ICONERROR);
 				return FALSE;
 			} else if (iso_report.has_4GB_file) {
 				// Who the heck decided that using FAT32 for UEFI boot was a great idea?!?
-				MessageBoxU(hMainDialog, "This ISO image contains a file larger than 4 GB and cannot be used to create an EFI bootable USB.\r\n"
-					"This is a limitation from UEFI/FAT32, not from " APPLICATION_NAME ".",
-					"Non UEFI compatible ISO", MB_OK|MB_ICONINFORMATION);
+				MessageBoxU(hMainDialog, lmprintf(MSG_095), lmprintf(MSG_094), MB_OK|MB_ICONINFORMATION);
 				return FALSE;
 			}
 		} else if ((fs == FS_NTFS) && (!iso_report.has_bootmgr) && (!IS_WINPE(iso_report.winpe))) {
 			if (iso_report.has_isolinux) {
-				MessageBoxU(hMainDialog, "Only FAT/FAT32 is supported for this type of ISO. "
-					"Please select FAT/FAT32 as the File system.", "Unsupported filesystem", MB_OK|MB_ICONERROR);
+				MessageBoxU(hMainDialog, lmprintf(MSG_096), lmprintf(MSG_092), MB_OK|MB_ICONERROR);
 			} else {
-				MessageBoxU(hMainDialog, "Only 'bootmgr' or 'WinPE' based ISO "
-					"images can currently be used with NTFS.", "Unsupported ISO", MB_OK|MB_ICONERROR);
+				MessageBoxU(hMainDialog, lmprintf(MSG_097), lmprintf(MSG_090), MB_OK|MB_ICONERROR);
 			}
 			return FALSE;
 		} else if (((fs == FS_FAT16)||(fs == FS_FAT32)) && (!iso_report.has_isolinux)) {
-			MessageBoxU(hMainDialog, "FAT/FAT32 can only be used for isolinux based ISO images "
-				"or when the Target Type is UEFI.", "Unsupported ISO", MB_OK|MB_ICONERROR);
+			MessageBoxU(hMainDialog, lmprintf(MSG_098), lmprintf(MSG_090), MB_OK|MB_ICONERROR);
 			return FALSE;
 		} else if (((fs == FS_FAT16)||(fs == FS_FAT32)) && (iso_report.has_4GB_file)) {
-			MessageBoxU(hMainDialog, "This iso image contains a file larger than 4GB file, which is more than the "
-				"maximum size allowed for a FAT or FAT32 file system.", "Filesystem limitation", MB_OK|MB_ICONERROR);
+			MessageBoxU(hMainDialog, lmprintf(MSG_100), lmprintf(MSG_099), MB_OK|MB_ICONERROR);
 			return FALSE;
 		}
 		if ((bt == BT_UEFI) && (iso_report.has_win7_efi) && (!WimExtractCheck())) {
-			if (MessageBoxU(hMainDialog, "Your platform cannot extract files from WIM archives. WIM extraction "
-				"is required to create EFI bootable Windows 7 and Windows Vista USB drives. You can fix that "
-				"by installing a recent version of 7-Zip.\r\nDo you want to visit the 7-zip download page?",
-				"Missing WIM support", MB_YESNO|MB_ICONERROR) == IDYES)
+			if (MessageBoxU(hMainDialog, lmprintf(MSG_102), lmprintf(MSG_101), MB_YESNO|MB_ICONERROR) == IDYES)
 				ShellExecuteA(hMainDialog, "open", SEVENZIP_URL, NULL, NULL, SW_SHOWNORMAL);
 			return FALSE;
 		}
 	} else if (dt == DT_SYSLINUX_V5) {
 		_chdirU(app_dir);
-		fd = fopen(ldlinux_c32, "rb");
+		fd = fopen(ldlinux_name, "rb");
 		if (fd != NULL) {
-			uprintf("Will reuse '%s' for Syslinux v5\n", ldlinux_c32);
+			uprintf("Will reuse '%s' for Syslinux v5\n", ldlinux_name);
 			fclose(fd);
 		} else {
-			PrintStatus(0, FALSE, lmprintf(MSG_506, ldlinux_c32));
-			safe_sprintf(msgbox, sizeof(msgbox), "Syslinux v5.0 or later requires a '%s' file to be installed.\n"
-				"Because this file is more than 100 KB in size, and always present on Syslinux v5+ ISO images, "
-				"it is not embedded in " APPLICATION_NAME ".\n\n"
-				APPLICATION_NAME " can download the missing file for you:\n"
-				"- Select 'Yes' to connect to the internet and download the file\n"
-				"- Select 'No' if you want to manually copy this file on the drive later\n\n"
-				"Note: The file will be downloaded in the current directory and once a "
-				"'%s' exists there, it will be reused automatically.\n", ldlinux_c32, ldlinux_c32);
-			safe_sprintf(msgbox_title, sizeof(msgbox_title), "Download %s?", ldlinux_c32);
-			r = MessageBoxU(hMainDialog, msgbox, msgbox_title, MB_YESNOCANCEL|MB_ICONWARNING);
+			PrintStatus(0, FALSE, lmprintf(MSG_206, ldlinux_name));
+			r = MessageBoxU(hMainDialog, lmprintf(MSG_104, ldlinux_name, ldlinux_name),
+				lmprintf(MSG_103, ldlinux_name), MB_YESNOCANCEL|MB_ICONWARNING);
 			if (r == IDCANCEL) 
 				return FALSE;
 			if (r == IDYES) {
-				SetWindowTextU(hISOProgressDlg, "Downloading file...");
-				SetWindowTextU(hISOFileName, ldlinux_c32);
-				DownloadFile(LDLINUX_C32_URL, ldlinux_c32, hISOProgressDlg);
+				SetWindowTextU(hISOProgressDlg, lmprintf(MSG_085, ldlinux_name));
+				SetWindowTextU(hISOFileName, LDLINUX_C32_URL);
+				DownloadFile(LDLINUX_C32_URL, ldlinux_name, hISOProgressDlg);
 			}
 		}
 	}
@@ -1306,7 +1261,7 @@ void InitDialog(HWND hDlg)
 	// Quite a burden to carry around as parameters
 	hMainDialog = hDlg;
 	hDeviceList = GetDlgItem(hDlg, IDC_DEVICE);
-	hPartitionScheme = GetDlgItem(hDlg, IDC_PARTITION_SCHEME);
+	hPartitionScheme = GetDlgItem(hDlg, IDC_PARTITION_TYPE);
 	hFileSystem = GetDlgItem(hDlg, IDC_FILESYSTEM);
 	hClusterSize = GetDlgItem(hDlg, IDC_CLUSTERSIZE);
 	hLabel = GetDlgItem(hDlg, IDC_LABEL);
@@ -1381,10 +1336,9 @@ void InitDialog(HWND hDlg)
 	IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, lmprintf(MSG_036)), DT_ISO));
 	IGNORE_RETVAL(ComboBox_SetCurSel(hBootType, selection_default));
 	// Fill up the MBR masqueraded disk IDs ("8 disks should be enough for anybody")
-	IGNORE_RETVAL(ComboBox_SetItemData(hDiskID, ComboBox_AddStringU(hDiskID, "0x80 (default)"), 0x80));
+	IGNORE_RETVAL(ComboBox_SetItemData(hDiskID, ComboBox_AddStringU(hDiskID, lmprintf(MSG_030, "0x80")), 0x80));
 	for (i=1; i<=7; i++) {
-		sprintf(tmp, "0x%02x (%d%s disk)", 0x80+i, i+1, (i==1)?"nd":((i==2)?"rd":"th"));
-		IGNORE_RETVAL(ComboBox_SetItemData(hDiskID, ComboBox_AddStringU(hDiskID, tmp), 0x80+i));
+		IGNORE_RETVAL(ComboBox_SetItemData(hDiskID, ComboBox_AddStringU(hDiskID, lmprintf(MSG_109, 0x80+i, i+1)), 0x80+i));
 	}
 	IGNORE_RETVAL(ComboBox_SetCurSel(hDiskID, 0));
 
@@ -1428,26 +1382,23 @@ void InitDialog(HWND hDlg)
 	SendMessage(GetDlgItem(hDlg, IDC_ADVANCED), BCM_SETIMAGELIST, 0, (LPARAM)&bi_down);
 
 	// Set the various tooltips
-	CreateTooltip(hFileSystem, "Sets the target filesystem", -1);
-	CreateTooltip(hClusterSize, "Minimum size that each data block occupies", -1);
-	CreateTooltip(hLabel, "Use this field to set the drive label\nInternational characters are accepted", -1);
-	CreateTooltip(GetDlgItem(hDlg, IDC_ADVANCED), "Toggle advanced options", -1);
-	CreateTooltip(GetDlgItem(hDlg, IDC_BADBLOCKS), "Test the device for bad blocks using a byte pattern", -1);
-	CreateTooltip(GetDlgItem(hDlg, IDC_QUICKFORMAT), "Unchek this box to use the \"slow\" format method", -1);
-	CreateTooltip(hBoot, "Check this box to make the USB drive bootable", -1);
-	CreateTooltip(hBootType, "Boot method", -1);
-	CreateTooltip(hSelectISO, "Click to select an ISO...", -1);
-	CreateTooltip(GetDlgItem(hDlg, IDC_SET_ICON), "Check this box to allow the display of international labels "
-		"and set a device icon (creates an autorun.inf)", 10000);
-	CreateTooltip(GetDlgItem(hDlg, IDC_RUFUS_MBR), "Install an MBR that allows boot selection and can masquerade the BIOS USB drive ID", 10000);
-	CreateTooltip(hDiskID, "Try to masquerade first bootable USB drive (usually 0x80) as a different disk.\n"
-		"This should only be necessary for XP installation" , 10000);
-	CreateTooltip(GetDlgItem(hDlg, IDC_EXTRA_PARTITION), "Create an extra hidden partition and try to align partitions boundaries.\n"
-		"This can improve boot detection for older BIOSes", -1);
-	CreateTooltip(GetDlgItem(hDlg, IDC_ENABLE_FIXED_DISKS), "Enable detection for disks not normally detected by " APPLICATION_NAME ". "
-		"USE AT YOUR OWN RISKS!!!", -1);
-	CreateTooltip(GetDlgItem(hDlg, IDC_START), "Start the formatting operation.\nThis will DESTROY any data on the target!", -1);
-	CreateTooltip(GetDlgItem(hDlg, IDC_ABOUT), "Licensing information and credits", -1);
+	CreateTooltip(hFileSystem, lmprintf(MSG_157), -1);
+	CreateTooltip(hClusterSize, lmprintf(MSG_158), -1);
+	CreateTooltip(hLabel, lmprintf(MSG_159), -1);
+	CreateTooltip(GetDlgItem(hDlg, IDC_ADVANCED), lmprintf(MSG_160), -1);
+	CreateTooltip(GetDlgItem(hDlg, IDC_BADBLOCKS), lmprintf(MSG_161), -1);
+	CreateTooltip(GetDlgItem(hDlg, IDC_QUICKFORMAT), lmprintf(MSG_162), -1);
+	CreateTooltip(hBoot, lmprintf(MSG_163), -1);
+	CreateTooltip(hBootType, lmprintf(MSG_164), -1);
+	CreateTooltip(hSelectISO, lmprintf(MSG_165), -1);
+	CreateTooltip(GetDlgItem(hDlg, IDC_SET_ICON), lmprintf(MSG_166), 10000);
+	CreateTooltip(GetDlgItem(hDlg, IDC_RUFUS_MBR), lmprintf(MSG_167), 10000);
+	CreateTooltip(hDiskID, lmprintf(MSG_168), 10000);
+	CreateTooltip(GetDlgItem(hDlg, IDC_EXTRA_PARTITION), lmprintf(MSG_169), -1);
+	CreateTooltip(GetDlgItem(hDlg, IDC_ENABLE_FIXED_DISKS), lmprintf(MSG_170), -1);
+	CreateTooltip(GetDlgItem(hDlg, IDC_START), lmprintf(MSG_171), -1);
+	CreateTooltip(GetDlgItem(hDlg, IDC_ABOUT), lmprintf(MSG_172), -1);
+	// TODO: add new tooltips
 
 	ToggleAdvanced();	// We start in advanced mode => go to basic mode
 
@@ -1460,7 +1411,7 @@ void InitDialog(HWND hDlg)
 
 static void PrintStatus2000(const char* str, BOOL val)
 {
-	PrintStatus(2000, FALSE, (lmprintf((val)?MSG_550:MSG_551, str)));
+	PrintStatus(2000, FALSE, (lmprintf((val)?MSG_250:MSG_251, str)));
 }
 
 
@@ -1550,13 +1501,12 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			EnableWindow(GetDlgItem(hISOProgressDlg, IDC_ISO_ABORT), FALSE);
 			EnableWindow(GetDlgItem(hDlg, IDCANCEL), FALSE);
 			if (format_thid != NULL) {
-				if (MessageBoxU(hMainDialog, "Cancelling may leave the device in an UNUSABLE state.\r\n"
-					"If you are sure you want to cancel, click YES. Otherwise, click NO.",
-					RUFUS_CANCELBOX_TITLE, MB_YESNO|MB_ICONWARNING) == IDYES) {
+				if (MessageBoxU(hMainDialog, lmprintf(MSG_105), lmprintf(MSG_049),
+					MB_YESNO|MB_ICONWARNING) == IDYES) {
 					// Operation may have completed in the meantime
 					if (format_thid != NULL) {
 						FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANCELLED;
-						PrintStatus(0, FALSE, lmprintf(MSG_501));
+						PrintStatus(0, FALSE, lmprintf(MSG_201));
 						uprintf("Cancelling (from main app)\n");
 						//  Start a timer to detect blocking operations during ISO file extraction
 						if (iso_blocking_status >= 0) {
@@ -1624,7 +1574,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			if (HIWORD(wParam) != CBN_SELCHANGE)
 				break;
 			nb_devices = ComboBox_GetCount(hDeviceList);
-			PrintStatus(0, TRUE, lmprintf((nb_devices==1)?MSG_508:MSG_509, nb_devices));
+			PrintStatus(0, TRUE, lmprintf((nb_devices==1)?MSG_208:MSG_209, nb_devices));
 			PopulateProperties(ComboBox_GetCurSel(hDeviceList));
 			SendMessage(hMainDialog, WM_COMMAND, (CBN_SELCHANGE<<16) | IDC_FILESYSTEM,
 				ComboBox_GetCurSel(hFileSystem));
@@ -1634,7 +1584,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				break;
 			SetPassesTooltip();
 			break;
-		case IDC_PARTITION_SCHEME:
+		case IDC_PARTITION_TYPE:
 			if (HIWORD(wParam) != CBN_SELCHANGE)
 				break;
 			SetPartitionSchemeTooltip();
@@ -1748,7 +1698,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				safe_free(iso_path);
 				iso_path = FileDialog(FALSE, NULL, "*.iso", "iso", lmprintf(MSG_036));
 				if (iso_path == NULL) {
-					CreateTooltip(hSelectISO, "Click to select...", -1);
+					CreateTooltip(hSelectISO, lmprintf(MSG_173), -1);
 					break;
 				}
 			}
@@ -1767,7 +1717,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		case IDC_ENABLE_FIXED_DISKS:
 			if ((HIWORD(wParam)) == BN_CLICKED) {
 				enable_fixed_disks = !enable_fixed_disks;
-				PrintStatus2000(lmprintf(MSG_553), enable_fixed_disks);
+				PrintStatus2000(lmprintf(MSG_253), enable_fixed_disks);
 				GetUSBDevices(0);
 			}
 			break;
@@ -1846,9 +1796,8 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		// Stop the timer
 		KillTimer(hMainDialog, TID_APP_TIMER);
 		// Close the cancel MessageBox and Blocking notification if active
-		// TODO: if we allow localization to change the title of these Windows, we'll have to update this
-		SendMessage(FindWindowA(MAKEINTRESOURCEA(32770), RUFUS_CANCELBOX_TITLE), WM_COMMAND, IDNO, 0);
-		SendMessage(FindWindowA(MAKEINTRESOURCEA(32770), RUFUS_BLOCKING_IO_TITLE), WM_COMMAND, IDYES, 0);
+		SendMessage(FindWindowA(MAKEINTRESOURCEA(32770), lmprintf(MSG_049)), WM_COMMAND, IDNO, 0);
+		SendMessage(FindWindowA(MAKEINTRESOURCEA(32770), lmprintf(MSG_049)), WM_COMMAND, IDYES, 0);
 		EnableWindow(GetDlgItem(hISOProgressDlg, IDC_ISO_ABORT), TRUE);
 		EnableWindow(GetDlgItem(hMainDialog, IDCANCEL), TRUE);
 		EnableControls(TRUE);
@@ -1860,16 +1809,16 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			SendMessage(hProgress, PBM_SETPOS, (MAX_PROGRESS+1), 0);
 			SendMessage(hProgress, PBM_SETRANGE, 0, (MAX_PROGRESS<<16) & 0xFFFF0000);
 			SetTaskbarProgressState(TASKBAR_NOPROGRESS);
-			PrintStatus(0, FALSE, lmprintf(MSG_510));
+			PrintStatus(0, FALSE, lmprintf(MSG_210));
 		} else if (SCODE_CODE(FormatStatus) == ERROR_CANCELLED) {
 			SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_PAUSED, 0);
 			SetTaskbarProgressState(TASKBAR_PAUSED);
-			PrintStatus(0, FALSE, lmprintf(MSG_511));
-			Notification(MSG_INFO, NULL, lmprintf(MSG_511), lmprintf(MSG_041));
+			PrintStatus(0, FALSE, lmprintf(MSG_211));
+			Notification(MSG_INFO, NULL, lmprintf(MSG_211), lmprintf(MSG_041));
 		} else {
 			SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_ERROR, 0);
 			SetTaskbarProgressState(TASKBAR_ERROR);
-			PrintStatus(0, FALSE, lmprintf(MSG_512));
+			PrintStatus(0, FALSE, lmprintf(MSG_212));
 			Notification(MSG_ERROR, NULL, lmprintf(MSG_042), lmprintf(MSG_043), StrError(FormatStatus));
 		}
 		FormatStatus = 0;
@@ -1962,6 +1911,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	} else {
 		safe_closehandle(hFile);
 		uprintf("localization: extracted data to '%s'\n", loc_file);
+		// TODO: Add a control for "X translation by Y"
 		if ( (!get_supported_locales(loc_file))
 //			  || ((selected_locale = get_locale_from_lcid(GetUserDefaultLCID())) == NULL) ) {
 			  || ((selected_locale = get_locale_from_name("French")) == NULL) ) {
@@ -1971,7 +1921,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 				goto out;
 			}
 		uprintf("localization: using locale '%s'\n", selected_locale->txt[0]);
-		get_loc_data_file(loc_file, (long)selected_locale->num[0], (long)selected_locale->num[1]);
+		get_loc_data_file(loc_file, (long)selected_locale->num[0], (long)selected_locale->num[1], selected_locale->line_nr);
 	}
 
 	// Reattach the console, if we were started from commandline
@@ -2076,7 +2026,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			// the target USB drive. If this is enabled, the size check is disabled.
 			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'S')) {
 				size_check = !size_check;
-				PrintStatus2000(lmprintf(MSG_552), size_check);
+				PrintStatus2000(lmprintf(MSG_252), size_check);
 				GetUSBDevices(0);
 				continue;
 			}
@@ -2086,20 +2036,20 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			// drive instead of an USB key. If this is enabled, Rufus will allow fixed disk formatting.
 			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'F')) {
 				enable_fixed_disks = !enable_fixed_disks;
-				PrintStatus2000(lmprintf(MSG_553), enable_fixed_disks);
+				PrintStatus2000(lmprintf(MSG_253), enable_fixed_disks);
 				GetUSBDevices(0);
 				continue;
 			}
 			// Alt-L => Force Large FAT32 format to be used on < 32 GB drives
 			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'L')) {
 				force_large_fat32 = !force_large_fat32;
-				PrintStatus2000(lmprintf(MSG_554), force_large_fat32);
+				PrintStatus2000(lmprintf(MSG_254), force_large_fat32);
 				continue;
 			}
 			// Alt-D => Delete the NoDriveTypeAutorun key on exit (useful if the app crashed)
 			// This key is used to disable Windows popup messages when an USB drive is plugged in.
 			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'D')) {
-				PrintStatus(2000, FALSE, lmprintf(MSG_555));
+				PrintStatus(2000, FALSE, lmprintf(MSG_255));
 				existing_key = FALSE;
 				continue;
 			}
@@ -2110,12 +2060,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			// it back during the bad block check.
 			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'K')) {
 				detect_fakes = !detect_fakes;
-				PrintStatus2000(lmprintf(MSG_556), detect_fakes);
+				PrintStatus2000(lmprintf(MSG_256), detect_fakes);
 				continue;
 			}
 			// Alt-R => Remove all the registry keys created by Rufus
 			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'R')) {
-				PrintStatus(2000, FALSE, lmprintf(DeleteRegistryKey(REGKEY_HKCU, COMPANY_NAME "\\" APPLICATION_NAME)?MSG_548:MSG_549));
+				PrintStatus(2000, FALSE, lmprintf(DeleteRegistryKey(REGKEY_HKCU, COMPANY_NAME "\\" APPLICATION_NAME)?MSG_248:MSG_249));
 				// Also try to delete the upper key (company name) if it's empty (don't care about the result)
 				DeleteRegistryKey(REGKEY_HKCU, COMPANY_NAME);
 				continue;

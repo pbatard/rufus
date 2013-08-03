@@ -53,11 +53,11 @@ const loc_parse parse_cmd[9] = {
 	// Translate the text control associated with an ID
 	{ 't', LC_TEXT, "cs" },		// t IDC_CONTROL "Translation"
 	// Set the section/dialog to which the next commands should apply
-	{ 's', LC_SECTION, "c" },	// p IDD_DIALOG
+	{ 'g', LC_GROUP, "c" },	// g IDD_DIALOG
 	// Resize a dialog (dx dy pixel increment)
-	{ 'r', LC_RESIZE, "cii" },	// t IDC_CONTROL +10 +10
+	{ 's', LC_SIZE, "cii" },	// s IDC_CONTROL +10 +10
 	// Move a dialog (dx dy pixed displacement)
-	{ 'm', LC_MOVE, "cii" },	// t IDC_CONTROL -5 0
+	{ 'm', LC_MOVE, "cii" },	// m IDC_CONTROL -5 0
 	// Set the font to use for the text controls that follow
 	// Use f "Default" 0 to reset the font
 	{ 'f', LC_FONT, "si" },		// f "MS Dialog" 10
@@ -164,12 +164,12 @@ BOOL dispatch_loc_cmd(loc_cmd* lcmd)
 	// NB: For commands that take an ID, ctrl_id is always a valid index at this stage
 	case LC_TEXT:
 	case LC_MOVE:
-	case LC_RESIZE:
+	case LC_SIZE:
 		add_dialog_command(dlg_index, lcmd);
 		break;
-	case LC_SECTION:
+	case LC_GROUP:
 		if ((lcmd->ctrl_id-IDD_DIALOG) > ARRAYSIZE(loc_dlg)) {
-			luprintf("'%s' is not a section ID\n", lcmd->txt[0]);
+			luprintf("'%s' is not a group ID\n", lcmd->txt[0]);
 			goto err;
 		}
 		dlg_index = lcmd->ctrl_id - IDD_DIALOG;
@@ -202,7 +202,6 @@ void apply_localization(int dlg_id, HWND hDlg)
 	int id_start = IDD_DIALOG, id_end = IDD_DIALOG + ARRAYSIZE(loc_dlg);
 	LONG_PTR style;
 	BOOL left_to_right = FALSE;
-
 
 	if ((dlg_id >= id_start) && (dlg_id < id_end)) {
 		// If we have a valid dialog_id, just process that one dialog
@@ -257,7 +256,7 @@ void apply_localization(int dlg_id, HWND hDlg)
 					ResizeMoveCtrl(hDlg, hCtrl, lcmd->num[0], lcmd->num[1], 0, 0);
 				}
 				break;
-			case LC_RESIZE:
+			case LC_SIZE:
 				if (hCtrl != NULL) {
 					ResizeMoveCtrl(hDlg, hCtrl, 0, 0, lcmd->num[0], lcmd->num[1]);
 				}
@@ -287,12 +286,11 @@ void reset_localization(int dlg_id)
 char* lmprintf(int msg_id, ...)
 {
 	static int buf_id = 0;
-	static char buf[4][2048];
+	static char buf[LOC_MESSAGE_NB][LOC_MESSAGE_SIZE];
 	char *format = NULL;
 	va_list args;
 	loc_cmd* lcmd;
-
-	buf_id %= 4;
+	buf_id %= LOC_MESSAGE_NB;
 	buf[buf_id][0] = 0;
 	list_for_each_entry(lcmd, &loc_dlg[IDD_MESSAGES-IDD_DIALOG].list, loc_cmd, list) {
 		if ((lcmd->command == LC_TEXT) && (lcmd->ctrl_id == msg_id) && (lcmd->txt[1] != NULL)) {
@@ -301,12 +299,13 @@ char* lmprintf(int msg_id, ...)
 	}
 
 	if (format == NULL) {
-		safe_sprintf(buf[buf_id], 2047, "MSG_%03d UNTRANSLATED", msg_id - MSG_000);
+		// TODO: fallback to English!
+		safe_sprintf(buf[buf_id], LOC_MESSAGE_SIZE-1, "MSG_%03d UNTRANSLATED", msg_id - MSG_000);
 	} else {
 		va_start(args, msg_id);
-		safe_vsnprintf(buf[buf_id], 2047, format, args);
+		safe_vsnprintf(buf[buf_id], LOC_MESSAGE_SIZE-1, format, args);
 		va_end(args);
-		buf[buf_id][2047] = '\0';
+		buf[buf_id][LOC_MESSAGE_SIZE-1] = '\0';
 	}
 	return buf[buf_id++];
 }

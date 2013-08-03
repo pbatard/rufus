@@ -22,6 +22,10 @@
 
 #pragma once
 
+// Number of concurrent localization messages. Must be a power of 2.
+#define LOC_MESSAGE_NB    8
+#define LOC_MESSAGE_SIZE  2048
+
 // TODO: display control name on mouseover
 // Link to http://www.resedit.net/
 
@@ -98,9 +102,9 @@ static __inline void list_del(struct list_head *entry)
 // Commands that take a control ID *MUST* be at the top
 // The last command with a control ID *MUST* be LC_TEXT
 enum loc_command_type {
-	LC_SECTION,
+	LC_GROUP,
 	LC_MOVE,
-	LC_RESIZE,
+	LC_SIZE,
 	LC_TEXT,	// Delimits commands that take a Control ID and commands that don't
 	LC_VERSION,
 	LC_LOCALE,
@@ -140,7 +144,7 @@ typedef struct loc_dlg_list_struct {
 extern const loc_parse parse_cmd[9];
 extern struct list_head locale_list;
 int loc_line_nr;
-char loc_filename[32];
+char loc_filename[MAX_PATH];
 
 void free_loc_cmd(loc_cmd* lcmd);
 BOOL dispatch_loc_cmd(loc_cmd* lcmd);
@@ -151,7 +155,7 @@ void reset_localization(int dlg_id);
 void free_dialog_list(void);
 char* lmprintf(int msg_id, ...);
 BOOL get_supported_locales(const char* filename);
-char* get_loc_data_file(const char* filename, long offset, long end_offset);
+char* get_loc_data_file(const char* filename, long offset, long end_offset, int start_line);
 void free_locale_list(void);
 loc_cmd* get_locale_from_lcid(int lcid);
 loc_cmd* get_locale_from_name(char* locale_name);

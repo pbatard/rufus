@@ -224,7 +224,7 @@ fallback:
 	INIT_XP_SHELL32;
 	memset(&bi, 0, sizeof(BROWSEINFOW));
 	bi.hwndOwner = hMainDialog;
-	bi.lpszTitle = L"Please select the installation folder:";
+	bi.lpszTitle = utf8_to_wchar(lmprintf(MSG_106));
 	bi.lpfn = BrowseInfoCallback;
 	// BIF_NONEWFOLDERBUTTON = 0x00000200 is unknown on MinGW
 	bi.ulFlags = BIF_RETURNFSANCESTORS | BIF_RETURNONLYFSDIRS |
@@ -233,6 +233,7 @@ fallback:
 	if (pidl != NULL) {
 		CoTaskMemFree(pidl);
 	}
+	safe_free(bi.lpszTitle);
 	dialog_showing--;
 }
 
@@ -246,7 +247,7 @@ char* FileDialog(BOOL save, char* path, char* filename, char* ext, char* ext_des
 	DWORD tmp;
 	OPENFILENAMEA ofn;
 	char selected_name[MAX_PATH];
-	char* ext_string = NULL;
+	char *ext_string = NULL, *all_files = NULL;
 	size_t i, ext_strlen;
 	BOOL r;
 	char* filepath = NULL;
@@ -261,6 +262,7 @@ char* FileDialog(BOOL save, char* path, char* filename, char* ext, char* ext_des
 	IShellItem *si_path = NULL;	// Automatically freed
 
 	dialog_showing++;
+	memset(filter_spec, 0, sizeof(filter_spec));
 	INIT_VISTA_SHELL32;
 	if (IS_VISTA_SHELL32_AVAILABLE) {
 		// Setup the file extension filter table
@@ -271,7 +273,7 @@ char* FileDialog(BOOL save, char* path, char* filename, char* ext, char* ext_des
 			safe_free(ext_filter);
 			filter_spec[0].pszName = utf8_to_wchar(ext_desc);
 			filter_spec[1].pszSpec = L"*.*";
-			filter_spec[1].pszName = L"All files";
+			filter_spec[1].pszName = utf8_to_wchar(lmprintf(MSG_107));
 		}
 
 		hr = CoCreateInstance(save?&CLSID_FileSaveDialog:&CLSID_FileOpenDialog, NULL, CLSCTX_INPROC,
@@ -307,6 +309,7 @@ char* FileDialog(BOOL save, char* path, char* filename, char* ext, char* ext_des
 		safe_free(wfilename);
 		safe_free(filter_spec[0].pszSpec);
 		safe_free(filter_spec[0].pszName);
+		safe_free(filter_spec[1].pszName);
 
 		if (SUCCEEDED(hr)) {
 			// Obtain the result of the user's interaction with the dialog.
@@ -345,11 +348,12 @@ fallback:
 	ofn.lpstrFile = selected_name;
 	ofn.nMaxFile = MAX_PATH;
 	// Set the file extension filters
-	ext_strlen = safe_strlen(ext_desc) + 2*safe_strlen(ext) + sizeof(" (*.)\0*.\0All Files (*.*)\0*.*\0\0");
+	all_files = lmprintf(MSG_107);
+	ext_strlen = safe_strlen(ext_desc) + 2*safe_strlen(ext) + sizeof(" (*.)\0*.\0 (*.*)\0*.*\0\0") + safe_strlen(all_files);
 	ext_string = (char*)malloc(ext_strlen);
 	if (ext_string == NULL)
 		return NULL;
-	safe_sprintf(ext_string, ext_strlen, "%s (*.%s)\r*.%s\rAll Files (*.*)\r*.*\r\0", ext_desc, ext, ext);
+	safe_sprintf(ext_string, ext_strlen, "%s (*.%s)\r*.%s\r%s (*.*)\r*.*\r\0", ext_desc, ext, ext, all_files);
 	// Microsoft could really have picked a better delimiter!
 	for (i=0; i<ext_strlen; i++) {
 		if (ext_string[i] == '\r') {
@@ -371,7 +375,7 @@ fallback:
 	} else {
 		tmp = CommDlgExtendedError();
 		if (tmp != 0) {
-			uprintf("Could not selected file for %s. Error %X\n", save?"save":"open", tmp);
+			uprintf("Could not select file for %s. Error %X\n", save?"save":"open", tmp);
 		}
 	}
 	safe_free(ext_string);
@@ -437,22 +441,40 @@ void CenterDialog(HWND hDlg)
 	MoveWindow(hDlg, Point.x, Point.y, nWidth, nHeight, FALSE);
 }
 
-/*
- * Change the position and/or size of a control belonging to a specific dialog
- */
+// http://stackoverflow.com/questions/431470/window-border-width-and-height-in-win32-how-do-i-get-it
+SIZE GetBorderSize(HWND hDlg)
+{
+	RECT rect = {0, 0, 0, 0};
+	SIZE size = {0, 0};
+	WINDOWINFO wi;
+	wi.cbSize = sizeof(WINDOWINFO);
+
+	GetWindowInfo(hDlg, &wi);
+
+	AdjustWindowRectEx(&rect, wi.dwStyle, FALSE, wi.dwExStyle);
+	size.cx = rect.right - rect.left;
+	size.cy = rect.bottom - rect.top;
+	return size;
+}
+
 void ResizeMoveCtrl(HWND hDlg, HWND hCtrl, int dx, int dy, int dw, int dh)
 {
 	RECT rect;
 	POINT point;
+	SIZE border = {0, 0};
 
 	GetWindowRect(hCtrl, &rect);
 	point.x = rect.left;
 	point.y = rect.top;
 	ScreenToClient(hDlg, &point);
 	GetClientRect(hCtrl, &rect);
+
+	// If we're dealing with a dialog, we must take the border into account
+	if (hCtrl == hDlg)
+		border = GetBorderSize(hDlg);
 	MoveWindow(hCtrl, point.x + (int)(fScale*(float)dx), point.y + (int)(fScale*(float)dy),
-		(rect.right - rect.left) + (int)(fScale*(float)dw),
-		(rect.bottom - rect.top) + (int)(fScale*(float)dh), TRUE);
+		(rect.right - rect.left) + (int)(fScale*(float)dw + border.cx),
+		(rect.bottom - rect.top) + border.cy, TRUE);
 	InvalidateRect(hCtrl, NULL, TRUE);
 }
 
@@ -486,7 +508,7 @@ INT_PTR CALLBACK AboutCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 {
 	int i;
 	const int edit_id[2] = {IDC_ABOUT_BLURB, IDC_ABOUT_COPYRIGHTS};
-	char about_blurb[1024];
+	char about_blurb[2048];
 	const char* edit_text[2] = {about_blurb, additional_copyrights};
 	HWND hEdit[2];
 	TEXTRANGEW tr;
@@ -501,8 +523,9 @@ INT_PTR CALLBACK AboutCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 		CenterDialog(hDlg);
 		if (reg_commcheck)
 			ShowWindow(GetDlgItem(hDlg, IDC_ABOUT_UPDATES), SW_SHOW);
-		safe_sprintf(about_blurb, sizeof(about_blurb), about_blurb_format, 
-			rufus_version[0], rufus_version[1], rufus_version[2], rufus_version[3]);
+		safe_sprintf(about_blurb, sizeof(about_blurb), about_blurb_format, lmprintf(MSG_174),
+			lmprintf(MSG_175, rufus_version[0], rufus_version[1], rufus_version[2], rufus_version[3]),
+			lmprintf(MSG_176), lmprintf(MSG_177), lmprintf(MSG_178));
 		for (i=0; i<ARRAYSIZE(hEdit); i++) {
 			hEdit[i] = GetDlgItem(hDlg, edit_id[i]);
 			SendMessage(hEdit[i], EM_AUTOURLDETECT, 1, 0);
@@ -964,6 +987,7 @@ INT_PTR CALLBACK UpdateCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 	HWND hPolicy;
 	static HWND hFrequency, hBeta;
 	int32_t freq;
+	char update_policy_text[4096];
 
 	switch (message) {
 	case WM_INITDIALOG:
@@ -1003,7 +1027,10 @@ INT_PTR CALLBACK UpdateCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 		IGNORE_RETVAL(ComboBox_SetCurSel(hBeta, GetRegistryKeyBool(REGKEY_HKCU, REGKEY_INCLUDE_BETAS)?0:1));
 		hPolicy = GetDlgItem(hDlg, IDC_POLICY);
 		SendMessage(hPolicy, EM_AUTOURLDETECT, 1, 0);
-		SendMessageA(hPolicy, EM_SETTEXTEX, (WPARAM)&friggin_microsoft_unicode_amateurs, (LPARAM)update_policy);
+		safe_sprintf(update_policy_text, sizeof(update_policy_text), update_policy, lmprintf(MSG_179),
+			lmprintf(MSG_180), lmprintf(MSG_181), lmprintf(MSG_182), lmprintf(MSG_183), lmprintf(MSG_184),
+			lmprintf(MSG_185), lmprintf(MSG_186));
+		SendMessageA(hPolicy, EM_SETTEXTEX, (WPARAM)&friggin_microsoft_unicode_amateurs, (LPARAM)update_policy_text);
 		SendMessage(hPolicy, EM_SETSEL, -1, -1);
 		SendMessage(hPolicy, EM_SETEVENTMASK, 0, ENM_LINK);
 		SendMessageA(hPolicy, EM_SETBKGNDCOLOR, 0, (LPARAM)GetSysColor(COLOR_BTNFACE));
@@ -1191,10 +1218,10 @@ INT_PTR CALLBACK NewVersionCallback(HWND hDlg, UINT message, WPARAM wParam, LPAR
 				memset(&pi, 0, sizeof(pi));
 				si.cb = sizeof(si);
 				if (!CreateProcessU(NULL, tmp, NULL, NULL, FALSE, 0, NULL, filepath, &si, &pi)) {
-					PrintStatus(0, FALSE, lmprintf(MSG_514));
+					PrintStatus(0, FALSE, lmprintf(MSG_214));
 					uprintf("Failed to launch new application: %s\n", WindowsErrorString());
 				} else {
-					PrintStatus(0, FALSE, lmprintf(MSG_513));
+					PrintStatus(0, FALSE, lmprintf(MSG_213));
 					PostMessage(hDlg, WM_COMMAND, (WPARAM)IDCLOSE, 0);
 					PostMessage(hMainDialog, WM_CLOSE, 0, 0);
 				}
