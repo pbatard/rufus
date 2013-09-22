@@ -227,11 +227,7 @@ static BOOL DefineClusterSizes(void)
 	// > 32GB FAT32 is not supported by MS and FormatEx but is achieved using fat32format
 	// See: http://www.ridgecrop.demon.co.uk/index.htm?fat32format.htm
 	// < 32 MB FAT32 is not allowed by FormatEx, so we don't bother
-	// We also found issues with > 1TB drives, so we use our own max threshold (can be disabled with Alt-S)
-	if ((size_check) && (1.0f*SelectedDrive.DiskSize >= 1.0f*MAX_FAT32_SIZE*TB))
-		uprintf("FAT32 support is disabled for this device, as it is larger than %.1f TB\n", 1.0f*MAX_FAT32_SIZE);
-
-	if ((SelectedDrive.DiskSize >= 32*MB) && ((!size_check) || (1.0f*SelectedDrive.DiskSize < 1.0f*MAX_FAT32_SIZE*TB))) {
+	if ((SelectedDrive.DiskSize >= 32*MB) && (1.0f*SelectedDrive.DiskSize < 1.0f*MAX_FAT32_SIZE*TB)) {
 		SelectedDrive.ClusterSize[FS_FAT32].Allowed = 0x000001F8;
 		for (i=32; i<=(32*1024); i<<=1) {			// 32 MB -> 32 GB
 			if (SelectedDrive.DiskSize < i*MB) {
@@ -561,13 +557,13 @@ static BOOL PopulateProperties(int ComboIndex)
 		HumanReadableSize *= 1024.0;
 		i--;
 	}
-	// If we're beneath the tolerance, round proposed label to an integer, if not, show one decimal point
+	// If we're beneath the tolerance, round proposed label to an integer, if not, show two decimal point
 	if (fabs(HumanReadableSize / ceil(HumanReadableSize) - 1.0) < PROPOSEDLABEL_TOLERANCE) {
 		safe_sprintf(SelectedDrive.proposed_label, sizeof(SelectedDrive.proposed_label),
 			"%0.0f%s", ceil(HumanReadableSize), lmprintf(MSG_020+i));
 	} else {
 		safe_sprintf(SelectedDrive.proposed_label, sizeof(SelectedDrive.proposed_label),
-			"%0.1f%s", HumanReadableSize, lmprintf(MSG_020+i));
+			"%0.2f%s", HumanReadableSize, lmprintf(MSG_020+i));
 	}
 
 	// If no existing label is available and no ISO is selected, propose one according to the size (eg: "256MB", "8GB")

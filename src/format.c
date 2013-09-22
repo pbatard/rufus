@@ -55,6 +55,7 @@ static int task_number = 0;
 extern const int nb_steps[FS_MAX];
 static int fs_index = 0;
 BOOL force_large_fat32 = FALSE;
+static BOOL WritePBR(HANDLE hLogicalDrive);
 
 /*
  * FormatEx callback. Return FALSE to halt operations
@@ -205,8 +206,8 @@ static void ToValidLabel(WCHAR* name, BOOL bFAT)
 {
 	size_t i, j, k;
 	BOOL found;
-	WCHAR unauthorized[] = L"*?.,;:/\\|+=<>[]";
-	WCHAR to_underscore[] = L"\t";
+	WCHAR unauthorized[] = L"*?,;:/\\|+=<>[]";
+	WCHAR to_underscore[] = L"\t.";
 
 	if (name == NULL)
 		return;
@@ -331,7 +332,7 @@ static DWORD GetFATSizeSectors(DWORD DskSize, DWORD ReservedSecCnt, DWORD SecPer
 static BOOL FormatFAT32(DWORD DriveIndex)
 {
 	BOOL r = FALSE;
-	DWORD i;
+	DWORD i, LastRefresh = 0;
 	HANDLE hLogicalVolume;
 	DWORD cbRet;
 	DISK_GEOMETRY dgDrive;
@@ -550,9 +551,12 @@ static BOOL FormatFAT32(DWORD DriveIndex)
 
 	format_percent = 0.0f;
 	for (i=0; i<(SystemAreaSize+BurstSize-1); i+=BurstSize) {
-		format_percent = (100.0f*i)/(1.0f*(SystemAreaSize+BurstSize));
-		PrintStatus(0, FALSE, lmprintf(MSG_217, (int)format_percent));
-		UpdateProgress(OP_FORMAT, format_percent);
+		if (GetTickCount() > LastRefresh + 25) {
+			LastRefresh = GetTickCount();
+			format_percent = (100.0f*i)/(1.0f*(SystemAreaSize+BurstSize));
+			PrintStatus(0, FALSE, lmprintf(MSG_217, format_percent));
+			UpdateProgress(OP_FORMAT, format_percent);
+		}
 		if (IS_ERROR(FormatStatus)) goto out;	// For cancellation
 		if (write_sectors(hLogicalVolume, BytesPerSect, i, BurstSize, pZeroSect) != (BytesPerSect*BurstSize)) {
 			die("Error clearing reserved sectors\n", ERROR_WRITE_FAULT);
@@ -572,6 +576,13 @@ static BOOL FormatFAT32(DWORD DriveIndex)
 		int SectorStart = ReservedSectCount + (i * FatSize );
 		uprintf("FAT #%d sector at address: %d\n", i, SectorStart);
 		write_sectors(hLogicalVolume, BytesPerSect, SectorStart, 1, pFirstSectOfFat);
+	}
+
+	// Must do it here, as have issues when trying to write the PBR after a remount
+	PrintStatus(0, TRUE, "Writing partition boot record...");
+	if (!WritePBR(hLogicalVolume)) {
+		// Non fatal error, but the drive probably won't boot
+		uprintf("Could not write partition boot record - drive may not boot...\n");
 	}
 
 	// Set the FAT32 volume label
@@ -779,7 +790,9 @@ static BOOL ClearMBRGPT(HANDLE hPhysicalDrive, LONGLONG DiskSize, DWORD SectorSi
 	// http://en.wikipedia.org/wiki/GUID_Partition_Table tells us we should clear 34 sectors at the
 	// beginning and 33 at the end. We bump these values to MAX_SECTORS_TO_CLEAR each end to help
 	// with reluctant access to large drive.
-	for (i=0; i<MAX_SECTORS_TO_CLEAR; i++) {
+
+	// Must clear at least 1MB + the PBR for large FAT32 format to work on a large drive
+	for (i=0; i<(2048+MAX_SECTORS_TO_CLEAR); i++) {
 		if ((IS_ERROR(FormatStatus)) || (write_sectors(hPhysicalDrive, SectorSize, i, 1, pBuf) != SectorSize)) {
 			goto out;
 		}
@@ -789,13 +802,6 @@ static BOOL ClearMBRGPT(HANDLE hPhysicalDrive, LONGLONG DiskSize, DWORD SectorSi
 			goto out;
 		}
 	}
-	// Also attempt to clear the PBR, usually located at the 1 MB mark
-	for (i=1024*1024/SectorSize; i<MAX_SECTORS_TO_CLEAR; i++) {
-		if ((IS_ERROR(FormatStatus)) || (write_sectors(hPhysicalDrive, SectorSize, i, 1, pBuf) != SectorSize)) {
-			goto out;
-		}
-	}
-
 	r = TRUE;
 
 out:
@@ -1156,7 +1162,7 @@ DWORD WINAPI CloseFormatPromptThread(LPVOID param) {
 DWORD WINAPI FormatThread(LPVOID param)
 {
 	int r, pt, bt, fs, dt;
-	BOOL ret;
+	BOOL ret, use_large_fat32;
 	DWORD DriveIndex = (DWORD)(uintptr_t)param;
 	HANDLE hPhysicalDrive = INVALID_HANDLE_VALUE;
 	HANDLE hLogicalVolume = INVALID_HANDLE_VALUE;
@@ -1172,6 +1178,7 @@ DWORD WINAPI FormatThread(LPVOID param)
 	dt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
 	pt = GETPARTTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
 	bt = GETBIOSTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
+	use_large_fat32 = (fs == FS_FAT32) && ((SelectedDrive.DiskSize > LARGE_FAT32_SIZE) || (force_large_fat32));
 
 	PrintStatus(0, TRUE, lmprintf(MSG_225));
 	hPhysicalDrive = GetPhysicalHandle(DriveIndex, TRUE, TRUE);
@@ -1319,8 +1326,7 @@ DWORD WINAPI FormatThread(LPVOID param)
 
 	// If FAT32 is requested and we have a large drive (>32 GB) use 
 	// large FAT32 format, else use MS's FormatEx.
-	ret = ((fs == FS_FAT32) && ((SelectedDrive.DiskSize > LARGE_FAT32_SIZE) || (force_large_fat32)))?
-		FormatFAT32(DriveIndex):FormatDrive(DriveIndex);
+	ret = use_large_fat32?FormatFAT32(DriveIndex):FormatDrive(DriveIndex);
 	if (!ret) {
 		// Error will be set by FormatDrive() in FormatStatus
 		uprintf("Format error: %s\n", StrError(FormatStatus));
@@ -1365,7 +1371,7 @@ DWORD WINAPI FormatThread(LPVOID param)
 				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_INSTALL_FAILURE;
 				goto out;
 			}
-		} else if ((dt == DT_WINME) || (dt == DT_FREEDOS) || ((dt == DT_ISO) && (fs == FS_NTFS))) {
+		} else if ((((dt == DT_WINME) || (dt == DT_FREEDOS)) && (!use_large_fat32)) || ((dt == DT_ISO) && (fs == FS_NTFS))) {
 			// We still have a lock, which we need to modify the volume boot record 
 			// => no need to reacquire the lock...
 			hLogicalVolume = GetLogicalHandle(DriveIndex, TRUE, FALSE);
@@ -1422,7 +1428,7 @@ DWORD WINAPI FormatThread(LPVOID param)
 					goto out;
 				}
 				if ((bt == BT_UEFI) && (!iso_report.has_efi) && (iso_report.has_win7_efi)) {
-					// TODO: (v1.3.4) check ISO with EFI only
+					// TODO: (v1.4.0) check ISO with EFI only
 					PrintStatus(0, TRUE, lmprintf(MSG_232));
 					wim_image[0] = drive_name[0];
 					efi_dst[0] = drive_name[0];

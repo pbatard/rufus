@@ -1,7 +1,7 @@
 Rufus: The Reliable USB Formatting Utility
 
 Features:
-- Formats USB flash drives to FAT/FAT32/NTFS/exFAT
+- Formats USB flash drives to FAT/FAT32/NTFS/UDF/exFAT
 - Creates DOS bootable USB drives, with no external files required
 - Creates MBR or GPT/UEFI bootable USB drives
 - Creates bootable USB drives from bootable ISOs (Windows, Linux, etc.)
