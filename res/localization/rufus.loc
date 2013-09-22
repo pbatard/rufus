@@ -645,6 +645,7 @@ t IDD_LICENSE "Rufus 许可证"
 t IDOK "取消"
 
 g IDD_NOTIFICATION
+t IDD_NOTIFICATION "更新方案和设置"
 t IDC_MORE_INFO "更多信息"
 t IDYES "是"
 t IDNO "否"
