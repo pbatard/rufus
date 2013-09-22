@@ -51,7 +51,7 @@
 #define PROPOSEDLABEL_TOLERANCE     0.10
 #define FS_DEFAULT                  FS_FAT32
 #define LARGE_FAT32_SIZE            (32*1073741824LL)	// Size at which we need to use fat32format
-#define MAX_FAT32_SIZE              1.0f		// Threshold above which we disable FAT32 formatting (in TB)
+#define MAX_FAT32_SIZE              2.0f		// Threshold above which we disable FAT32 formatting (in TB)
 #define WHITE                       RGB(255,255,255)
 #define SEPARATOR_GREY              RGB(223,223,223)
 #define RUFUS_URL                   "http://rufus.akeo.ie"
