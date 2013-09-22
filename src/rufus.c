@@ -545,13 +545,13 @@ static BOOL PopulateProperties(int ComboIndex)
 		HumanReadableSize *= 1024.0;
 		i--;
 	}
-	// If we're beneath the tolerance, round proposed label to an integer, if not, show one decimal point
+	// If we're beneath the tolerance, round proposed label to an integer, if not, show two decimal point
 	if (fabs(HumanReadableSize / ceil(HumanReadableSize) - 1.0) < PROPOSEDLABEL_TOLERANCE) {
 		safe_sprintf(SelectedDrive.proposed_label, sizeof(SelectedDrive.proposed_label),
 			"%0.0f%s", ceil(HumanReadableSize), suffix[i]);
 	} else {
 		safe_sprintf(SelectedDrive.proposed_label, sizeof(SelectedDrive.proposed_label),
-			"%0.1f%s", HumanReadableSize, suffix[i]);
+			"%0.2f%s", HumanReadableSize, suffix[i]);
 	}
 
 	// If no existing label is available and no ISO is selected, propose one according to the size (eg: "256MB", "8GB")

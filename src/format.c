@@ -205,8 +205,8 @@ static void ToValidLabel(WCHAR* name, BOOL bFAT)
 {
 	size_t i, j, k;
 	BOOL found;
-	WCHAR unauthorized[] = L"*?.,;:/\\|+=<>[]";
-	WCHAR to_underscore[] = L"\t";
+	WCHAR unauthorized[] = L"*?,;:/\\|+=<>[]";
+	WCHAR to_underscore[] = L"\t.";
 
 	if (name == NULL)
 		return;
@@ -331,7 +331,7 @@ static DWORD GetFATSizeSectors(DWORD DskSize, DWORD ReservedSecCnt, DWORD SecPer
 static BOOL FormatFAT32(DWORD DriveIndex)
 {
 	BOOL r = FALSE;
-	DWORD i;
+	DWORD i, LastRefresh = 0;
 	HANDLE hLogicalVolume;
 	DWORD cbRet;
 	DISK_GEOMETRY dgDrive;
@@ -549,9 +549,12 @@ static BOOL FormatFAT32(DWORD DriveIndex)
 
 	format_percent = 0.0f;
 	for (i=0; i<(SystemAreaSize+BurstSize-1); i+=BurstSize) {
-		format_percent = (100.0f*i)/(1.0f*(SystemAreaSize+BurstSize));
-		PrintStatus(0, FALSE, "Formatting: %d%% completed.", (int)format_percent);
-		UpdateProgress(OP_FORMAT, format_percent);
+		if (GetTickCount() > LastRefresh + 25) {
+			LastRefresh = GetTickCount();
+			format_percent = (100.0f*i)/(1.0f*(SystemAreaSize+BurstSize));
+			PrintStatus(0, FALSE, "Formatting: %0.1f%% completed.", format_percent);
+			UpdateProgress(OP_FORMAT, format_percent);
+		}
 		if (IS_ERROR(FormatStatus)) goto out;	// For cancellation
 		if (write_sectors(hLogicalVolume, BytesPerSect, i, BurstSize, pZeroSect) != (BytesPerSect*BurstSize)) {
 			die("Error clearing reserved sectors\n", ERROR_WRITE_FAULT);
