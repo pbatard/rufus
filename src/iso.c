@@ -53,6 +53,7 @@ void cdio_destroy (CdIo_t* p_cdio) {}
 
 RUFUS_ISO_REPORT iso_report;
 int64_t iso_blocking_status = -1;
+BOOL enable_joliet = TRUE, enable_rockridge = TRUE;
 #define ISO_BLOCKING(x) do {x; iso_blocking_status++; } while(0)
 static const char* psz_extract_dir;
 static const char* bootmgr_efi_name = "bootmgr.efi";
@@ -327,11 +328,13 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 		if ( (strcmp(p_statbuf->filename, ".") == 0)
 			|| (strcmp(p_statbuf->filename, "..") == 0) )
 			continue;
-		// Rock Ridge requires an exception (Can't people just use Joliet?)
-		if (p_statbuf->rr.b3_rock != yep) {
-			iso9660_name_translate_ext(p_statbuf->filename, psz_basename, i_joliet_level);
-		} else {
+		// Rock Ridge requires an exception
+		if ((p_statbuf->rr.b3_rock == yep) && enable_rockridge) {
 			safe_strcpy(psz_basename, sizeof(psz_fullpath)-i_length-1, p_statbuf->filename);
+			if (safe_strlen(p_statbuf->filename) > 64)
+				iso_report.has_long_filename = TRUE;
+		} else {
+			iso9660_name_translate_ext(p_statbuf->filename, psz_basename, i_joliet_level);
 		}
 		if (p_statbuf->type == _STAT_DIR) {
 			if (!scan_only) _mkdirU(psz_fullpath);
@@ -419,6 +422,7 @@ BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan)
 	const char* scan_text = "Scanning ISO image...";
 	const char* basedir[] = { "i386", "minint" };
 	const char* tmp_sif = ".\\txtsetup.sif~";
+	iso_extension_mask_t iso_extension_mask = ISO_EXTENSION_ALL;
 
 	if ((src_iso == NULL) || (dest_dir == NULL))
 		return FALSE;
@@ -472,7 +476,17 @@ BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan)
 	goto out;
 
 try_iso:
-	p_iso = iso9660_open_ext(src_iso, ISO_EXTENSION_ALL);
+	// Perform our first scan with Joliet disabled (if Rock Ridge is enabled), so that we can find if
+	// there exists a Rock Ridge file with a name > 64 chars. If that is the case (has_long_filename)
+	// then we also disable Joliet during the extract phase.
+	if ((!enable_joliet) || (scan_only && enable_rockridge) || (iso_report.has_long_filename && enable_rockridge)) {
+		iso_extension_mask &= ~ISO_EXTENSION_JOLIET;
+	}
+	if (!enable_rockridge) {
+		iso_extension_mask &= ~ISO_EXTENSION_ROCK_RIDGE;
+	}
+
+	p_iso = iso9660_open_ext(src_iso, iso_extension_mask);
 	if (p_iso == NULL) {
 		uprintf("Unable to open image '%s'.\n", src_iso);
 		goto out;
