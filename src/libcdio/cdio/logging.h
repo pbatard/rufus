@@ -16,9 +16,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/** \file logging.h 
+/** \file logging.h
  *  \brief Header to control logging and level of detail of output.
- *         
+ *
  */
 
 #ifndef CDIO_LOGGING_H_
@@ -35,7 +35,7 @@ extern "C" {
  */
 typedef enum {
   CDIO_LOG_DEBUG = 1, /**< Debug-level messages - helps debug what's up. */
-  CDIO_LOG_INFO,      /**< Informational - indicates perhaps something of 
+  CDIO_LOG_INFO,      /**< Informational - indicates perhaps something of
                            interest. */
   CDIO_LOG_WARN,      /**< Warning conditions - something that looks funny. */
   CDIO_LOG_ERROR,     /**< Error conditions - may terminate program.  */
@@ -43,7 +43,7 @@ typedef enum {
 } cdio_log_level_t;
 
 /**
- * The place to save the preference concerning how much verbosity 
+ * The place to save the preference concerning how much verbosity
  * is desired. This is used by the internal default log handler, but
  * it could be use by applications which provide their own log handler.
  */
@@ -60,8 +60,16 @@ extern cdio_log_level_t cdio_loglevel_default;
  * @param level   The log level.
  * @param message The log message.
  */
-typedef void (*cdio_log_handler_t) (cdio_log_level_t level, 
+typedef void (*cdio_log_handler_t) (cdio_log_level_t level,
                                     const char message[]);
+
+/**
+ * The initial or default log handler in effect.
+ *
+ * @param level   The log level.
+ * @param message The log message.
+ */
+extern void cdio_default_log_handler(cdio_log_level_t level, const char message[]);
 
 /**
  * Set a custom log handler for libcdio.  The return value is the log
@@ -87,7 +95,7 @@ cdio_log_handler_t cdio_log_set_handler (cdio_log_handler_t new_handler);
  * @param format  printf-style format string
  * @param ...     remaining arguments needed by format string
  */
-void cdio_log (cdio_log_level_t level, 
+void cdio_log (cdio_log_level_t level,
                const char format[], ...) GNUC_PRINTF(2, 3);
 #if defined(__GNUC__)
 /* See http://clang-analyzer.llvm.org/annotations.html#custom_assertions */
@@ -129,7 +137,7 @@ void cdio_error (const char format[], ...) GNUC_PRINTF(1,2);
 #endif /* CDIO_LOGGING_H_ */
 
 
-/* 
+/*
  * Local variables:
  *  c-file-style: "gnu"
  *  tab-width: 8
