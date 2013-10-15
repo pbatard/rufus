@@ -17,6 +17,7 @@
  */
 #include <windows.h>
 #include <winioctl.h>               // for DISK_GEOMETRY
+#include <malloc.h>
 #include <stdint.h>
 
 #if defined(_MSC_VER)
@@ -29,19 +30,19 @@
 /* Program options */
 #define RUFUS_DEBUG                 // print debug info to Debug facility
 /* Features not ready for prime time and that may *DESTROY* your data - USE AT YOUR OWN RISKS! */
-//#define RUFUS_TEST
+// #define RUFUS_TEST
 
 #define APPLICATION_NAME            "Rufus"
 #define COMPANY_NAME                "Akeo Consulting"
 #define STR_NO_LABEL                "NO_LABEL"
-#define RUFUS_CANCELBOX_TITLE       APPLICATION_NAME " - Cancellation"
-#define RUFUS_BLOCKING_IO_TITLE     APPLICATION_NAME " - Flushing buffers"
 #define DRIVE_ACCESS_TIMEOUT        15000		// How long we should retry drive access (in ms)
 #define DRIVE_ACCESS_RETRIES        60			// How many times we should retry
 #define DRIVE_INDEX_MIN             0x00000080
 #define DRIVE_INDEX_MAX             0x000000C0
 #define MAX_DRIVES                  (DRIVE_INDEX_MAX - DRIVE_INDEX_MIN)
-#define MAX_TOOLTIPS                32
+#define MAX_TOOLTIPS                128
+#define MAX_SIZE_SUFFIXES           6			// bytes, KB, MB, GB, TB, PB
+#define MAX_CLUSTER_SIZES           18
 #define MAX_PROGRESS                (0xFFFF-1)	// leave room for 1 more for insta-progress workaround
 #define MAX_LOG_SIZE                0x7FFFFFFE
 #define MAX_GUID_STRING_LENGTH      40
@@ -50,6 +51,7 @@
 #define MBR_UEFI_MARKER             0x49464555	// 'U', 'E', 'F', 'I', as a 32 bit little endian longword
 #define PROPOSEDLABEL_TOLERANCE     0.10
 #define FS_DEFAULT                  FS_FAT32
+#define BADBLOCK_PATTERNS           {0xaa, 0x55, 0xff, 0x00}
 #define LARGE_FAT32_SIZE            (32*1073741824LL)	// Size at which we need to use fat32format
 #define MAX_FAT32_SIZE              2.0f		// Threshold above which we disable FAT32 formatting (in TB)
 #define WHITE                       RGB(255,255,255)
@@ -283,12 +285,13 @@ extern enum WindowsVersion DetectWindowsVersion(void);
 extern const char* PrintWindowsVersion(enum WindowsVersion version);
 extern const char *WindowsErrorString(void);
 extern void DumpBufferHex(void *buf, size_t size);
-extern void PrintStatus(unsigned int duration, BOOL debug, const char *format, ...);
+extern void PrintStatus(unsigned int duration, BOOL debug, const char* message);
 extern void UpdateProgress(int op, float percent);
 extern const char* StrError(DWORD error_code);
 extern char* GuidToString(const GUID* guid);
 extern char* SizeToHumanReadable(LARGE_INTEGER size);
 extern void CenterDialog(HWND hDlg);
+extern void ResizeMoveCtrl(HWND hDlg, HWND hCtrl, int dx, int dy, int dw, int dh);
 extern void CreateStatusBar(void);
 extern void SetTitleBarIcon(HWND hDlg);
 extern BOOL CreateTaskbarList(void);
@@ -342,10 +345,18 @@ extern void parse_update(char* buf, size_t len);
 extern BOOL WimExtractCheck(void);
 extern BOOL WimExtractFile(const char* wim_image, int index, const char* src, const char* dst);
 
-__inline static BOOL UnlockDrive(HANDLE hDrive)
+static __inline BOOL UnlockDrive(HANDLE hDrive)
 {
 	DWORD size;
 	return DeviceIoControl(hDrive, FSCTL_UNLOCK_VOLUME, NULL, 0, NULL, 0, &size, NULL);
+}
+
+static __inline void *_reallocf(void *ptr, size_t size)
+{
+	void *ret = realloc(ptr, size);
+	if (!ret)
+		free(ptr);
+	return ret;
 }
 
 /* Basic String Array */

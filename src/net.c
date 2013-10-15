@@ -34,6 +34,7 @@
 #include "rufus.h"
 #include "registry.h"
 #include "resource.h"
+#include "localization.h"
 
 /* Maximum download chunk size, in bytes */
 #define DOWNLOAD_BUFFER_SIZE    10240
@@ -89,6 +90,7 @@ const char* WinInetErrorString(void)
 	if ((error_code < INTERNET_ERROR_BASE) || (error_code > INTERNET_ERROR_LAST))
 		return WindowsErrorString();
 
+	// TODO: These should be localized on an ad-hoc basis
 	switch(error_code) {
 	case ERROR_INTERNET_OUT_OF_HANDLES:
 		return "No more handles could be generated at this time.";
@@ -263,7 +265,7 @@ BOOL DownloadFile(const char* url, const char* file, HWND hProgressDialog)
 		SendMessage(hProgressDialog, UM_ISO_INIT, 0, 0);
 	}
 
-	PrintStatus(0, FALSE, "Downloading %s: Connecting...\n", file);
+	PrintStatus(0, FALSE, lmprintf(MSG_240, file));
 	uprintf("Downloading %s from %s\n", file, url);
 
 	if (!InternetCrackUrlA(url, (DWORD)safe_strlen(url), 0, &UrlParts)) {
@@ -340,7 +342,7 @@ BOOL DownloadFile(const char* url, const char* file, HWND hProgressDialog)
 			break;
 		dwSize += dwDownloaded;
 		SendMessage(hProgressBar, PBM_SETPOS, (WPARAM)(MAX_PROGRESS*((1.0f*dwSize)/(1.0f*dwTotalSize))), 0);
-		PrintStatus(0, FALSE, "Downloading: %0.1f%%\n", (100.0f*dwSize)/(1.0f*dwTotalSize));
+		PrintStatus(0, FALSE, lmprintf(MSG_241, (100.0f*dwSize)/(1.0f*dwTotalSize)));
 		if (fwrite(buf, 1, dwDownloaded, fd) != dwDownloaded) {
 			uprintf("Error writing file '%s': %s\n", file, WinInetErrorString());
 			goto out;
@@ -362,10 +364,10 @@ out:
 	if (fd != NULL) fclose(fd);
 	if (!r) {
 		_unlink(file);
-		PrintStatus(0, FALSE, "Failed to download file.");
+		PrintStatus(0, FALSE, lmprintf(MSG_242));
 		SetLastError(error_code);
-		MessageBoxA(hMainDialog, IS_ERROR(FormatStatus)?StrError(FormatStatus):WinInetErrorString(),
-		"File download", MB_OK|MB_ICONERROR);
+		MessageBoxU(hMainDialog, IS_ERROR(FormatStatus)?StrError(FormatStatus):WinInetErrorString(),
+		lmprintf(MSG_044), MB_OK|MB_ICONERROR);
 	}
 	if (hRequest) InternetCloseHandle(hRequest);
 	if (hConnection) InternetCloseHandle(hConnection);
@@ -456,7 +458,7 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 		}
 	}
 
-	PrintStatus(3000, TRUE, "Checking for " APPLICATION_NAME " updates...\n");
+	PrintStatus(3000, TRUE, lmprintf(MSG_243));
 	status++;	// 1
 
 	if (!GetVersionExA(&os_version)) {
@@ -600,15 +602,14 @@ out:
 	if (hSession) InternetCloseHandle(hSession);
 	switch(status) {
 	case 1:
-		PrintStatus(3000, TRUE, "Updates: Unable to connect to the internet.\n");
+		PrintStatus(3000, TRUE, lmprintf(MSG_244));
 		break;
 	case 2:
-		PrintStatus(3000, TRUE, "Updates: Unable to access version data.\n");
+		PrintStatus(3000, TRUE, lmprintf(MSG_245));
 		break;
 	case 3:
 	case 4:
-		PrintStatus(3000, FALSE, "%s new version of " APPLICATION_NAME " %s\n",
-		found_new_version?"A":"No", found_new_version?"is available!":"was found.");
+		PrintStatus(3000, FALSE, lmprintf(found_new_version?MSG_246:MSG_247));
 	default:
 		break;
 	}

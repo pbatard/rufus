@@ -60,6 +60,9 @@
     <ClCompile Include="..\stdfn.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\localization.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\rufus.h">
@@ -99,6 +102,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\registry.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\localization.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\localization_data.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

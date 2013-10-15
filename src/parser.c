@@ -33,13 +33,415 @@
 
 #include "rufus.h"
 #include "msapi_utf8.h"
+#include "localization.h"
 
-// Parse a line of UTF-16 text and return the data if it matches the 'token'
-// The parsed line is of the form: [ ]token[ ]=[ ]["]data["][ ] and is 
-// modified by the parser
+static const char space[] = " \t";
+static const wchar_t wspace[] = L" \t";
+
+/*
+ * Fill a localization command buffer by parsing the line arguments
+ * The command is allocated and must be freed (by calling free_loc_cmd)
+ */
+static loc_cmd* get_loc_cmd(char c, char* line) {
+	size_t i, j, k, l, r, ti = 0, ii = 0;
+	char *endptr, *expected_endptr, *token;
+	loc_cmd* lcmd = NULL;
+
+	for (j=0; j<ARRAYSIZE(parse_cmd); j++) {
+		if (c == parse_cmd[j].c)
+			break;
+	}
+	if (j >= ARRAYSIZE(parse_cmd)) {
+		luprint("unknown command");
+		return NULL;
+	}
+
+	lcmd = (loc_cmd*)calloc(sizeof(loc_cmd), 1);
+	if (lcmd == NULL) {
+		luprint("could not allocate command");
+		return NULL;
+	}
+	lcmd->ctrl_id = -1;
+	lcmd->command = parse_cmd[j].cmd;
+	lcmd->line_nr = (uint16_t)loc_line_nr;
+
+	i = 0;
+	for (k = 0; parse_cmd[j].arg_type[k] != 0; k++) {
+		// Skip leading spaces
+		i += strspn(&line[i], space);
+		r = i;
+		if (line[i] == 0) {
+			luprintf("missing parameter for command '%c'", parse_cmd[j].c);
+			goto err;
+		}
+		switch(parse_cmd[j].arg_type[k]) {
+		case 's':	// quoted string
+			// search leading quote
+			if (line[i++] != '"') {
+				luprint("no start quote");
+				goto err;
+			}
+			r = i;
+			// locate ending quote
+			while ((line[i] != 0) && ((line[i] != '"') || ((line[i] == '"') && (line[i-1] == '\\')))) {
+				if ((line[i] == '"') && (line[i-1] == '\\')) {
+					strcpy(&line[i-1], &line[i]);
+				} else {
+					i++;
+				}
+			}
+			if (line[i] == 0) {
+				luprint("no end quote");
+				goto err;
+			}
+			line[i++] = 0;
+			lcmd->txt[ti++] = safe_strdup(&line[r]);
+			break;
+		case 'c':	// control ID (single word)
+			while ((line[i] != 0) && (line[i] != space[0]) && (line[i] != space[1]))
+				i++;
+			if (line[i] != 0)
+				line[i++] = 0;
+			lcmd->txt[ti++] = safe_strdup(&line[r]);
+			break;
+		case 'i':	// 32 bit signed integer
+			// allow commas or dots between values
+			if ((line[i] == ',') || (line[i] == '.')) {
+				i += strspn(&line[i+1], space);
+				r = i;
+			}
+			while ((line[i] != 0) && (line[i] != space[0]) && (line[i] != space[1])
+				&& (line[i] != ',') && (line[i] != '.'))
+				i++;
+			expected_endptr = &line[i];
+			if (line[i] != 0)
+				line[i++] = 0;
+			lcmd->num[ii++] = (int32_t)strtol(&line[r], &endptr, 0);
+			if (endptr != expected_endptr) {
+				luprint("invalid integer");
+				goto err;
+			}
+			break;
+		case 'u':	// comma separated list of unsigned integers (to end of line)
+			// count the number of commas
+			lcmd->unum_size = 1;
+			for (l=i; line[l] != 0; l++) {
+				if (line[l] == ',')
+					lcmd->unum_size++;
+			}
+			lcmd->unum = (uint32_t*)malloc(lcmd->unum_size * sizeof(uint32_t));
+			token = strtok(&line[i], ",");
+			for (l=0; (l<lcmd->unum_size) && (token != NULL); l++) {
+				lcmd->unum[l] = (int32_t)strtol(token, &endptr, 0);
+				token = strtok(NULL, ",");
+			}
+			if ((token != NULL) || (l != lcmd->unum_size)) {
+				luprint("internal error (unexpected number of numeric values)");
+				goto err;
+			}
+			break;
+		default:
+			uprintf("localization: unhandled arg_type '%c'\n", parse_cmd[j].arg_type[k]);
+			goto err;
+		}
+	}
+
+	return lcmd;
+
+err:
+	free_loc_cmd(lcmd);
+	return NULL;
+}
+
+/*
+ * Parse an UTF-8 localization command line
+ */
+static void get_loc_data_line(char* line)
+{
+	size_t i;
+	loc_cmd* lcmd = NULL;
+	char t;
+
+	if ((line == NULL) || (line[0] == 0))
+		return;
+
+	// Skip leading spaces
+	i = strspn(line, space);
+
+	// Read token (NUL character will be read if EOL)
+	t = line[i++];
+	if (t == '#')	// Comment
+		return;
+	if ((t == 0) || ((line[i] != space[0]) && (line[i] != space[1]))) {
+		luprintf("syntax error: '%s'", line);
+		return;
+	}
+
+	lcmd = get_loc_cmd(t, &line[i]);
+
+	if ((lcmd != NULL) && (lcmd->command != LC_LOCALE))
+		// TODO: check return value?
+		dispatch_loc_cmd(lcmd);
+	else
+		free_loc_cmd(lcmd);
+}
+
+/*
+ * Open a localization file and store its file name, with special case
+ * when dealing with the embedded loc file.
+ */
+FILE* open_loc_file(const char* filename)
+{
+	FILE* fd = NULL;
+	wchar_t *wfilename = NULL;
+	const char* tmp_ext = ".tmp";
+
+	if (filename == NULL)
+		return NULL;
+
+	if (loc_filename != embedded_loc_filename) {
+		safe_free(loc_filename);
+	}
+	if (safe_strcmp(tmp_ext, &filename[safe_strlen(filename)-4]) == 0) {
+		loc_filename = embedded_loc_filename;
+	} else {
+		loc_filename = safe_strdup(filename);
+	}
+	wfilename = utf8_to_wchar(filename);
+	if (wfilename == NULL) {
+		uprintf("localization: could not convert '%s' filename to UTF-16\n", filename);
+		goto out;
+	}
+	fd = _wfopen(wfilename, L"r");
+	if (fd == NULL) {
+		uprintf("localization: could not open '%s'\n", filename);
+	}
+
+out:
+	safe_free(wfilename);
+	return fd;
+}
+
+/*
+ * Parse a localization file, to construct the list of available locales.
+ * The locale file must be UTF-8 with NO BOM.
+ */
+BOOL get_supported_locales(const char* filename)
+{
+	FILE* fd = NULL;
+	BOOL r = FALSE;
+	char line[1024];
+	size_t i;
+	loc_cmd *lcmd = NULL, *last_lcmd = NULL;
+	long end_of_block;
+	
+	fd = open_loc_file(filename);
+	if (fd == NULL)
+		goto out;
+
+	loc_line_nr = 0;
+	line[0] = 0;
+	free_locale_list();
+	do {
+		// adjust the last block
+		end_of_block = ftell(fd);
+		if (fgets(line, sizeof(line), fd) == NULL)
+			break;
+		loc_line_nr++;
+		// Skip leading spaces
+		i = strspn(line, space);
+		if (line[i] != 'l')
+			continue;
+		// line[i] is not NUL so i+1 is safe to access
+		lcmd = get_loc_cmd(line[i], &line[i+1]);
+		if ((lcmd == NULL) || (lcmd->command != LC_LOCALE)) {
+			free_loc_cmd(lcmd);
+			continue;
+		}
+		// we use num[0] and num[1] as block delimiter index for this locale in the file
+		if (last_lcmd != NULL) {
+			last_lcmd->num[1] = (int32_t)end_of_block;
+		}
+		lcmd->num[0] = (int32_t)ftell(fd);
+		// Add our locale command to the locale list
+		list_add_tail(&lcmd->list, &locale_list);
+		uprintf("localization: found locale '%s'\n", lcmd->txt[0]);
+		last_lcmd = lcmd;
+	} while (1);
+	if (last_lcmd != NULL)
+		last_lcmd->num[1] = (int32_t)ftell(fd);
+	r = !list_empty(&locale_list);
+	if (r == FALSE)
+		uprintf("localization: '%s' contains no locale sections\n", filename); 
+
+out:
+	if (fd != NULL)
+		fclose(fd);
+	return r;
+}
+
+/*
+ * Parse a locale section in a localization file (UTF-8, no BOM)
+ * NB: this call is reentrant for the "base" command support
+ */
+char* get_loc_data_file(const char* filename, long offset, long end_offset, int start_line)
+{
+	size_t bufsize = 1024;
+	static FILE* fd = NULL;
+	char *ret = NULL, *buf = NULL;
+	size_t i = 0;
+	int r = 0, line_nr_incr = 1;
+	int c = 0, eol_char = 0;
+	int old_loc_line_nr;
+	BOOL eol = FALSE, escape_sequence = FALSE, reentrant = (fd != NULL);
+	long cur_offset = -1;
+
+	if (reentrant) {
+		// Called, from a 'b' command - no need to reopen the file,
+		// just save the current offset and current line number
+		cur_offset = ftell(fd);
+		old_loc_line_nr = loc_line_nr;
+	} else {
+		if ((filename == NULL) || (filename[0] == 0))
+			return NULL;
+		free_dialog_list();
+		fd = open_loc_file(filename);
+		if (fd == NULL)
+			goto out;
+	}
+	loc_line_nr = start_line;
+	buf = (char*) malloc(bufsize);
+	if (buf == NULL) {
+		uprintf("localization: could not allocate line buffer\n");
+		goto out;
+	}
+
+	fseek(fd, offset, SEEK_SET);
+
+	do {	// custom readline handling for string collation, realloc, line numbers, etc.
+		c = getc(fd);
+		switch(c) {
+		case EOF:
+			buf[i] = 0;
+			if (!eol)
+				loc_line_nr += line_nr_incr;
+			get_loc_data_line(buf);
+			goto out;
+		case '\r':
+		case '\n':
+			if (escape_sequence) {
+				escape_sequence = FALSE;
+				break;
+			}
+			// This assumes that the EOL sequence is always the same throughout the file
+			if (eol_char == 0)
+				eol_char = c;
+			if (c == eol_char) {
+				if (eol) {
+					line_nr_incr++;
+				} else {
+					loc_line_nr += line_nr_incr;
+					line_nr_incr = 1;
+				}
+			}
+			buf[i] = 0;
+			if (!eol) {
+				// Strip trailing spaces (for string collation)
+				for (r = ((int)i)-1; (r>0) && ((buf[r]==space[0])||(buf[r]==space[1])); r--);
+				if (r < 0)
+					r = 0;
+				eol = TRUE;
+			}
+			break;
+		case ' ':
+		case '\t':
+			if (escape_sequence) {
+				escape_sequence = FALSE;
+				break;
+			}
+			if (!eol) {
+				buf[i++] = (char)c;
+			}
+			break;
+		case '\\':
+			if (!escape_sequence) {
+				escape_sequence = TRUE;
+				break;
+			}
+			// fall through on escape sequence
+		default:
+			if (escape_sequence) {
+				switch (c) {
+				case 'n':	// \n -> CRLF
+					buf[i++] = '\r';
+					buf[i++] = '\n';
+					break;
+				case '"':	// \" carried as is
+					buf[i++] = '\\';
+					buf[i++] = '"';
+					break;
+				case '\\':
+					buf[i++] = '\\';
+					break;
+				default:	// ignore any other escape sequence
+					break;
+				}
+				escape_sequence = FALSE;
+			} else {
+				// Collate multiline strings
+				if ((eol) && (c == '"') && (buf[r] == '"')) {
+					i = r;
+					eol = FALSE;
+					break;
+				}
+				if (eol) {
+					get_loc_data_line(buf);
+					eol = FALSE;
+					i = 0;
+					r = 0;
+				}
+				buf[i++] = (char)c;
+			}
+			break;
+		}
+		if (ftell(fd) > end_offset)
+			goto out;
+		// Have at least 2 chars extra, for \r\n sequences
+		if (i >= bufsize-2) {
+			bufsize *= 2;
+			if (bufsize > 32768) {
+				uprintf("localization: requested line buffer is larger than 32K!\n");
+				goto out;
+			}
+			buf = (char*) _reallocf(buf, bufsize);
+			if (buf == NULL) {
+				uprintf("localization: could not grow line buffer\n");
+				goto out;
+			}
+		}
+	} while(1);
+
+out:
+	// Don't close on a reentrant call
+	if (reentrant) {
+		fseek(fd, cur_offset, SEEK_SET);
+		loc_line_nr = old_loc_line_nr;
+	} else if (fd != NULL) {
+		fclose(fd);
+		fd = NULL;
+	}
+	safe_free(buf);
+	return ret;
+}
+
+
+/*
+ * Parse a line of UTF-16 text and return the data if it matches the 'token'
+ * The parsed line is of the form: [ ]token[ ]=[ ]["]data["][ ] and is 
+ * modified by the parser
+ */
 static wchar_t* get_token_data_line(const wchar_t* wtoken, wchar_t* wline)
 {
-	const wchar_t wspace[] = L" \t";	// The only whitespaces we recognize as such
 	size_t i, r;
 	BOOLEAN quoteth = FALSE;
 
@@ -90,8 +492,10 @@ static wchar_t* get_token_data_line(const wchar_t* wtoken, wchar_t* wline)
 	return (wline[r] == 0)?NULL:&wline[r];
 }
 
-// Parse a file (ANSI or UTF-8 or UTF-16) and return the data for the first occurrence of 'token'
-// The returned string is UTF-8 and MUST be freed by the caller
+/*
+ * Parse a file (ANSI or UTF-8 or UTF-16) and return the data for the first occurrence of 'token'
+ * The returned string is UTF-8 and MUST be freed by the caller
+ */
 char* get_token_data_file(const char* token, const char* filename)
 {
 	wchar_t *wtoken = NULL, *wdata= NULL, *wfilename = NULL;
@@ -135,8 +539,10 @@ out:
 	return ret;
 }
 
-// Parse a buffer (ANSI or UTF-8) and return the data for the 'n'th occurrence of 'token'
-// The returned string is UTF-8 and MUST be freed by the caller
+/*
+ * Parse a buffer (ANSI or UTF-8) and return the data for the 'n'th occurrence of 'token'
+ * The returned string is UTF-8 and MUST be freed by the caller
+ */
 char* get_token_data_buffer(const char* token, unsigned int n, const char* buffer, size_t buffer_size)
 {
 	unsigned int j, curly_count;
@@ -199,10 +605,12 @@ static __inline char* get_sanitized_token_data_buffer(const char* token, unsigne
 	return data;
 }
 
-// Parse an update data file and populates a rufus_update structure.
-// NB: since this is remote data, and we're running elevated, it *IS* considered
-// potentially malicious, even if it comes from a supposedly trusted server.
-// len should be the size of the buffer, including the zero terminator
+/*
+ * Parse an update data file and populates a rufus_update structure.
+ * NB: since this is remote data, and we're running elevated, it *IS* considered
+ * potentially malicious, even if it comes from a supposedly trusted server.
+ * len should be the size of the buffer, including the zero terminator
+ */
 void parse_update(char* buf, size_t len)
 {
 	size_t i;
@@ -249,13 +657,14 @@ void parse_update(char* buf, size_t len)
 	update.release_notes = get_sanitized_token_data_buffer("release_notes", 1, buf, len);
 }
 
-// Insert entry 'data' under section 'section' of a config file
-// Section must include the relevant delimitors (eg '[', ']') if needed
+/*
+ * Insert entry 'data' under section 'section' of a config file
+ * Section must include the relevant delimitors (eg '[', ']') if needed
+ */
 char* insert_section_data(const char* filename, const char* section, const char* data, BOOL dos2unix)
 {
 	const wchar_t* outmode[] = { L"w", L"w, ccs=UTF-8", L"w, ccs=UTF-16LE" };
 	wchar_t *wsection = NULL, *wfilename = NULL, *wtmpname = NULL, *wdata = NULL, bom = 0;
-	wchar_t wspace[] = L" \t";
 	wchar_t buf[1024];
 	FILE *fd_in = NULL, *fd_out = NULL;
 	size_t i, size;
@@ -316,7 +725,7 @@ char* insert_section_data(const char* filename, const char* section, const char*
 
 	fd_out = _wfopen(wtmpname, outmode[mode]);
 	if (fd_out == NULL) {
-		uprintf("Could not open temporary output file %s~\n", filename);
+		uprintf("Could not open temporary output file '%s~'\n", filename);
 		goto out;
 	}
 
@@ -360,7 +769,7 @@ out:
 			fclose(fd_in);
 			fclose(fd_out);
 		} else {
-			uprintf("Could not write %s - original file has been left unmodifiedn", filename);
+			uprintf("Could not write '%s' - original file has been left unmodified\n", filename);
 			ret = NULL;
 			if (fd_in != NULL) fclose(fd_in);
 			if (fd_out != NULL) fclose(fd_out);
@@ -375,15 +784,16 @@ out:
 	return ret;
 }
 
-// Search for a specific 'src' substring data for all occurrences of 'token', and replace
-// it with 'rep'. File can be ANSI or UNICODE and is overwritten. Parameters are UTF-8.
-// The parsed line is of the form: [ ]token[ ]data
-// Returns a pointer to rep if replacement occurred, NULL otherwise
+/*
+ * Search for a specific 'src' substring data for all occurrences of 'token', and replace
+ * it with 'rep'. File can be ANSI or UNICODE and is overwritten. Parameters are UTF-8.
+ * The parsed line is of the form: [ ]token[ ]data
+ * Returns a pointer to rep if replacement occurred, NULL otherwise
+ */
 char* replace_in_token_data(const char* filename, const char* token, const char* src, const char* rep, BOOL dos2unix)
 {
 	const wchar_t* outmode[] = { L"w", L"w, ccs=UTF-8", L"w, ccs=UTF-16LE" };
 	wchar_t *wtoken = NULL, *wfilename = NULL, *wtmpname = NULL, *wsrc = NULL, *wrep = NULL, bom = 0;
-	wchar_t wspace[] = L" \t";
 	wchar_t buf[1024], *torep;
 	FILE *fd_in = NULL, *fd_out = NULL;
 	size_t i, size;
@@ -451,7 +861,7 @@ char* replace_in_token_data(const char* filename, const char* token, const char*
 
 	fd_out = _wfopen(wtmpname, outmode[mode]);
 	if (fd_out == NULL) {
-		uprintf("Could not open temporary output file %s~\n", filename);
+		uprintf("Could not open temporary output file '%s~'\n", filename);
 		goto out;
 	}
 
@@ -506,7 +916,7 @@ out:
 			fclose(fd_in);
 			fclose(fd_out);
 		} else {
-			uprintf("Could not write %s - original file has been left unmodified.\n", filename);
+			uprintf("Could not write '%s' - original file has been left unmodified.\n", filename);
 			ret = NULL;
 			if (fd_in != NULL) fclose(fd_in);
 			if (fd_out != NULL) fclose(fd_out);

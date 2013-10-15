@@ -1,6 +1,7 @@
 /*
  * MSAPI_UTF8: Common API calls using UTF-8 strings
  * Compensating for what Microsoft should have done a long long time ago.
+ * Also see http://utf8everywhere.org/
  *
  * Copyright © 2010-2013 Pete Batard <pete@akeo.ie>
  *
@@ -52,6 +53,15 @@ extern "C" {
 #define ListView_SetItemTextU(hwndLV,i,iSubItem_,pszText_) { LVITEMW _ms_wlvi; _ms_wlvi.iSubItem = iSubItem_; \
 	_ms_wlvi.pszText = utf8_to_wchar(pszText_); \
 	SNDMSG((hwndLV),LVM_SETITEMTEXTW,(WPARAM)(i),(LPARAM)&_ms_wlvi); sfree(_ms_wlvi.pszText);}
+
+// Never ever use isdigit() or isspace(), etc. on UTF-8 strings!
+// These calls take an int and char is signed so MS compilers will produce an assert error on anything that's > 0x80
+#define isasciiU(c) isascii((unsigned char)(c))
+#define iscntrlU(c) iscntrl((unsigned char)(c))
+#define isdigitU(c) isdigit((unsigned char)(c))
+#define isspaceU(c) isspace((unsigned char)(c))
+#define isxdigitU(c) isxdigit((unsigned char)(c))
+// NB: other issomething() calls are not implemented as they may require multibyte UTF-8 sequences to be converted 
 
 #define sfree(p) do {if (p != NULL) {free((void*)(p)); p = NULL;}} while(0)
 #define wconvert(p)     wchar_t* w ## p = utf8_to_wchar(p)
@@ -350,6 +360,38 @@ static __inline DWORD GetCurrentDirectoryU(DWORD nBufferLength, char* lpBuffer)
 		err = GetLastError();
 	}
 	wfree(lpBuffer);
+	SetLastError(err);
+	return ret;
+}
+
+static __inline DWORD GetTempPathU(DWORD nBufferLength, char* lpBuffer)
+{
+	DWORD ret = 0, err = ERROR_INVALID_DATA;
+	walloc(lpBuffer, nBufferLength);
+	ret = GetTempPathW(nBufferLength, wlpBuffer);
+	err = GetLastError();
+	if ((ret != 0) && ((ret = wchar_to_utf8_no_alloc(wlpBuffer, lpBuffer, nBufferLength)) == 0)) {
+		err = GetLastError();
+	}
+	wfree(lpBuffer);
+	SetLastError(err);
+	return ret;
+}
+
+static __inline DWORD GetTempFileNameU(char* lpPathName, char* lpPrefixString, UINT uUnique, char* lpTempFileName)
+{
+	DWORD ret = 0, err = ERROR_INVALID_DATA;
+	wconvert(lpPathName);
+	wconvert(lpPrefixString);
+	walloc(lpTempFileName, MAX_PATH);
+	ret =GetTempFileNameW(wlpPathName, wlpPrefixString, uUnique, wlpTempFileName);
+	err = GetLastError();
+	if ((ret != 0) && ((ret = wchar_to_utf8_no_alloc(wlpTempFileName, lpTempFileName, MAX_PATH)) == 0)) {
+		err = GetLastError();
+	}
+	wfree(lpTempFileName);
+	wfree(lpPrefixString);
+	wfree(lpPathName);
 	SetLastError(err);
 	return ret;
 }

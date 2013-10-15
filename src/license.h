@@ -19,16 +19,17 @@
 
 const char* about_blurb_format =
 "{\\rtf1\\ansi\n"
-"{\\b\\fs20Rufus - The Reliable USB Formatting Utility}\\line\n"
-"\\fs18Version %d.%d.%d (Build %d)\\line\n"
+"{\\b\\fs20%s}\\line\n"
+"\\fs18%s\\line\n"
 "\\line\n"
 "Copyright © 2011-2013 Pete Batard / Akeo\\line\n"
 RUFUS_URL "\\line\n"
+"%s\\line\n"
 "\\line\n"
-"Report bugs or request enhancements at:\\line\n"
+"%s\\line\n"
 "https://github.com/pbatard/rufus/issues\\line\n"
 "\\line\n"
-"{\\b\\fs18Additional Copyrights:}}";
+"{\\b\\fs18 %s}}";
 
 const char* additional_copyrights =
 "{\\rtf1\\ansi\n"
@@ -90,17 +91,15 @@ const char* additional_copyrights =
 
 const char* update_policy =
 "{\\rtf1\\ansi{\\fonttbl{\\f0\\fnil\\fcharset0 Microsoft Sans Serif;}{\\f1\\fnil\\fcharset2 Symbol;}}\n"
-"\\fs16\\b Update Policy:\\b0\\line\n"
-"If you choose to allow this program to check for application updates, you agree that the following information may be collected on our server(s):\\par\n"
-"\\pard{\\pntext\\f1\\'B7\\tab}{\\*\\pn\\pnlvlblt\\pnf2\\pnindent0{\\pntxtb\\'B7}}\\fi-150\\li220 Your operating system's architecture and version\\par\n"
-"{\\pntext\\f1\\'B7\\tab}The version of the application you use\\par\n"
-"{\\pntext\\f1\\'B7\\tab}Your IP address\\line\\pard\n"
+"\\fs16\\b %s\\b0\\line\n"
+"%s:\\par\n"
+"\\pard{\\pntext\\f1\\'B7\\tab}{\\*\\pn\\pnlvlblt\\pnf2\\pnindent0{\\pntxtb\\'B7}}\\fi-150\\li220 %s\\par\n"
+"{\\pntext\\f1\\'B7\\tab}%s\\par\n"
+"{\\pntext\\f1\\'B7\\tab}%s\\line\\pard\n"
 "\\line\n"
-"For the purpose of generating private usage statistics, we may keep the information collected, \n"
-"\\b for at most a year\\b0 . However, we will not willingly disclose any of this individual data to third parties.\\line\n\\line\n"
-"\\b Update Process:\\b0\\line\n"
-APPLICATION_NAME " does not install or run background services, therefore update checks are performed only when the main application is running.\\line\n"
-"Internet access is of course required when checking for updates.\\line\n"
+"%s\\line\n\\line\n"
+"\\b %s\\b0\\line\n"
+"%s\\line\n"
 "}";
 
 const char* gplv3 =

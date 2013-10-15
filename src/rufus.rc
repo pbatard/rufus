@@ -30,48 +30,48 @@ LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
 IDD_DIALOG DIALOGEX 12, 12, 206, 329
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_APPWINDOW
-CAPTION "Rufus v1.4.0.280"
+CAPTION "Rufus v1.4.0.281"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     DEFPUSHBUTTON   "Start",IDC_START,94,291,50,14
     PUSHBUTTON      "Close",IDCANCEL,148,291,50,14
-    COMBOBOX        IDC_DEVICE,8,17,190,33,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    CONTROL         "Device",IDC_STATIC,"Static",SS_LEFTNOWORDWRAP | WS_GROUP,9,6,22,8
-    COMBOBOX        IDC_FILESYSTEM,8,75,190,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "File system",IDC_STATIC,9,64,51,10
-    COMBOBOX        IDC_PARTITION_SCHEME,8,46,190,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Partition scheme and target system type",IDC_STATIC,9,35,176,8
-    COMBOBOX        IDC_CLUSTERSIZE,8,104,190,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Cluster size",IDC_STATIC,9,93,105,10
     PUSHBUTTON      "About...",IDC_ABOUT,8,291,50,14
-    GROUPBOX        "Format Options       ",IDC_STATIC,7,149,192,66
+    PUSHBUTTON      "Log",IDC_LOG,62,291,18,14
+    PUSHBUTTON      "T",IDC_TEST,80,291,12,14,NOT WS_VISIBLE
+    COMBOBOX        IDC_DEVICE,8,17,190,33,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Device",IDS_DEVICE_TXT,9,6,186,8
+    COMBOBOX        IDC_FILESYSTEM,8,75,190,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "File system",IDS_FILESYSTEM_TXT,9,64,186,10
+    COMBOBOX        IDC_PARTITION_TYPE,8,46,190,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Partition scheme and target system type",IDS_PARTITION_TYPE_TXT,9,35,186,8
+    COMBOBOX        IDC_CLUSTERSIZE,8,104,190,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Cluster size",IDS_CLUSTERSIZE_TXT,9,93,186,10
+    GROUPBOX        "Format Options       ",IDS_FORMAT_OPTIONS_GRP,7,149,192,66
+    LTEXT           "New volume label",IDS_LABEL_TXT,9,121,186,10
     EDITTEXT        IDC_LABEL,7,131,190,13,ES_AUTOHSCROLL
     CONTROL         "Check device for bad blocks:",IDC_BADBLOCKS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,161,101,10
-    CONTROL         "Quick format",IDC_QUICKFORMAT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,173,55,10
+    CONTROL         "Quick format",IDC_QUICKFORMAT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,173,181,10
     CONTROL         "Create a bootable disk using:",IDC_BOOT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,185,104,10
     CONTROL         "Create extended label and icon files",IDC_SET_ICON,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,198,131,10
-    LTEXT           "New volume label",IDC_STATIC,9,121,105,10
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,198,181,10
     CONTROL         "",IDC_PROGRESS,"msctls_progress32",PBS_SMOOTH | WS_BORDER,8,272,189,9
     COMBOBOX        IDC_NBPASSES,119,159,49,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     COMBOBOX        IDC_BOOTTYPE,119,183,49,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     PUSHBUTTON      "...",IDC_SELECT_ISO,171,182,22,14,BS_ICON
-    PUSHBUTTON      "T",IDC_TEST,80,291,12,14,NOT WS_VISIBLE
-    CONTROL         "Use Rufus MBR with BIOS ID:",IDC_RUFUS_MBR,"Button",BS_AUTOCHECKBOX | NOT WS_VISIBLE | WS_TABSTOP,13,248,106,10
+    CONTROL         "Use Rufus MBR with BIOS ID:",IDC_RUFUS_MBR,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,248,106,10
     PUSHBUTTON      "",IDC_ADVANCED,63,148,14,10,BS_TOP | BS_FLAT
-    GROUPBOX        "Advanced Options",IDC_ADVANCED_GROUP,7,210,192,54,NOT WS_VISIBLE
-    COMBOBOX        IDC_DISK_ID,119,246,73,30,CBS_DROPDOWNLIST | NOT WS_VISIBLE | WS_VSCROLL | WS_TABSTOP
+    GROUPBOX        "Advanced Options",IDS_ADVANCED_OPTIONS_GRP,7,210,192,54
+    COMBOBOX        IDC_DISK_ID,119,246,73,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     CONTROL         "Add fixes for old BIOSes (extra partition, align, etc.)",IDC_EXTRA_PARTITION,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,235,184,10
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,235,181,10
     CONTROL         "List fixed (non-flash) or unpartitioned USB disks",IDC_ENABLE_FIXED_DISKS,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,222,185,10
-    PUSHBUTTON      "Log",IDC_LOG,62,291,18,14
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,222,181,10
 END
 
 IDD_ABOUTBOX DIALOGEX 0, 0, 287, 201
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "About Rufus"
-FONT 8, "Microsoft Sans Serif", 400, 0, 0x0
+FONT 8, "MS Shell Dlg", 400, 0, 0x0
 BEGIN
     ICON            IDI_ICON,IDC_ABOUT_ICON,11,8,20,20
     DEFPUSHBUTTON   "OK",IDOK,231,181,50,14,WS_GROUP
@@ -128,36 +128,35 @@ END
 IDD_UPDATE_POLICY DIALOGEX 0, 0, 287, 198
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Update policy and settings"
-FONT 8, "Microsoft Sans Serif", 400, 0, 0x0
+FONT 8, "MS Shell Dlg", 400, 0, 0x0
 BEGIN
-    ICON            IDI_ICON,IDC_ABOUT_ICON,11,8,21,20
+    ICON            IDI_ICON,IDC_ABOUT_ICON,11,8,20,20
     DEFPUSHBUTTON   "Close",IDCANCEL,221,172,50,14,WS_GROUP
     CONTROL         "",IDC_POLICY,"RichEdit20W",WS_VSCROLL | 0x804,46,8,235,130,WS_EX_STATICEDGE
     COMBOBOX        IDC_UPDATE_FREQUENCY,133,155,66,12,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Check for updates:",IDC_STATIC,52,157,72,11
-    LTEXT           "Include beta versions:",IDC_STATIC,52,173,93,11
+    LTEXT           "Check for updates:",IDS_UPDATE_FREQUENCY_TXT,52,157,80,11
+    LTEXT           "Include beta versions:",IDS_INCLUDE_BETAS_TXT,52,173,80,11
     COMBOBOX        IDC_INCLUDE_BETAS,133,171,36,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    GROUPBOX        "Settings",IDC_STATIC,45,145,161,46
+    GROUPBOX        "Settings",IDS_UPDATE_SETTINGS_GRP,45,145,161,46
     PUSHBUTTON      "Check Now",IDC_CHECK_NOW,221,154,50,14
-    GROUPBOX        "",IDC_STATIC,210,145,71,46
+    GROUPBOX        "",IDS_CHECK_NOW_GRP,210,145,71,46
 END
 
 IDD_NEW_VERSION DIALOGEX 0, 0, 384, 268
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Check For Updates - Rufus"
-FONT 8, "Microsoft Sans Serif", 400, 0, 0x0
+FONT 8, "MS Shell Dlg", 400, 0, 0x0
 BEGIN
     PUSHBUTTON      "Close",IDCANCEL,167,244,50,14,WS_GROUP
-    CONTROL         "",IDC_RELEASE_NOTES,"RichEdit20W",WS_VSCROLL | 0x804,15,77,352,88,WS_EX_STATICEDGE
+    CONTROL         "",IDC_RELEASE_NOTES,"RichEdit20W",ES_MULTILINE | ES_READONLY | WS_VSCROLL,15,77,352,88,WS_EX_STATICEDGE
     DEFPUSHBUTTON   "Download",IDC_DOWNLOAD,293,211,74,14,WS_GROUP
     CONTROL         "",IDC_PROGRESS,"msctls_progress32",WS_BORDER,15,212,270,11
-    GROUPBOX        "Release Notes",IDC_STATIC,8,63,367,111
-    LTEXT           "A newer version is available. Please download the latest version!",IDC_STATIC,10,32,229,8
+    GROUPBOX        "Release Notes",IDS_NEW_VERSION_NOTES_GRP,8,63,367,111
+    LTEXT           "A newer version is available. Please download the latest version!",IDS_NEW_VERSION_AVAIL_TXT,10,32,229,8
     LTEXT           "[...]",IDC_YOUR_VERSION,10,8,124,8
     LTEXT           "[...]",IDC_LATEST_VERSION,10,19,129,8
-    CONTROL         "<a href=""http://rufus.akeo.ie"">Click here to go to the website</a>",IDC_WEBSITE,
-                    "SysLink",WS_TABSTOP,143,49,96,9
-    GROUPBOX        "Download",IDC_STATIC,8,177,367,58
+    LTEXT           " Click here to go to the website",IDC_WEBSITE,138,49,108,9,SS_NOTIFY
+    GROUPBOX        "Download",IDS_NEW_VERSION_DOWNLOAD_GRP,8,177,367,58
     EDITTEXT        IDC_DOWNLOAD_URL,15,191,351,13,ES_AUTOHSCROLL | ES_READONLY
 END
 
@@ -185,6 +184,7 @@ END
 3 TEXTINCLUDE 
 BEGIN
     "\r\n"
+    "IDR_LC_RUFUS_LOC        RCDATA                  ""../res/localization/rufus.loc""\r\n"
     "IDR_SL_LDLINUX_V4_BSS   RCDATA                  ""../res/syslinux/ldlinux_v4.bss""\r\n"
     "IDR_SL_LDLINUX_V4_SYS   RCDATA                  ""../res/syslinux/ldlinux_v4.sys""\r\n"
     "IDR_SL_LDLINUX_V5_BSS   RCDATA                  ""../res/syslinux/ldlinux_v5.bss""\r\n"
@@ -278,8 +278,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,4,0,280
- PRODUCTVERSION 1,4,0,280
+ FILEVERSION 1,4,0,281
+ PRODUCTVERSION 1,4,0,281
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -296,13 +296,13 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Akeo Consulting (http://akeo.ie)"
             VALUE "FileDescription", "Rufus"
-            VALUE "FileVersion", "1.4.0.280"
+            VALUE "FileVersion", "1.4.0.281"
             VALUE "InternalName", "Rufus"
             VALUE "LegalCopyright", "© 2011-2013 Pete Batard (GPL v3)"
             VALUE "LegalTrademarks", "http://www.gnu.org/copyleft/gpl.html"
             VALUE "OriginalFilename", "rufus.exe"
             VALUE "ProductName", "Rufus"
-            VALUE "ProductVersion", "1.4.0.280"
+            VALUE "ProductVersion", "1.4.0.281"
         END
     END
     BLOCK "VarFileInfo"
@@ -333,6 +333,7 @@ IDI_DOWN                ICON                    "../res/down.ico"
 // Generated from the TEXTINCLUDE 3 resource.
 //
 
+IDR_LC_RUFUS_LOC        RCDATA                  "../res/localization/rufus.loc"
 IDR_SL_LDLINUX_V4_BSS   RCDATA                  "../res/syslinux/ldlinux_v4.bss"
 IDR_SL_LDLINUX_V4_SYS   RCDATA                  "../res/syslinux/ldlinux_v4.sys"
 IDR_SL_LDLINUX_V5_BSS   RCDATA                  "../res/syslinux/ldlinux_v5.bss"

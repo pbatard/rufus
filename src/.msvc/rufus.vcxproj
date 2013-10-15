@@ -87,6 +87,7 @@
       <AdditionalIncludeDirectories>..\msvc-missing;..\ms-sys\inc;..\syslinux\libinstaller;..\syslinux\libfat;..\libcdio;..\getopt;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <CompileAs>CompileAsC</CompileAs>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <ExceptionHandling>false</ExceptionHandling>
     </ClCompile>
     <Link>
       <AdditionalDependencies>setupapi.lib;comctl32.lib;wininet.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -113,6 +114,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <CompileAs>CompileAsC</CompileAs>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <ExceptionHandling>false</ExceptionHandling>
     </ClCompile>
     <Link>
       <AdditionalDependencies>setupapi.lib;comctl32.lib;wininet.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -135,6 +137,7 @@
       <AdditionalIncludeDirectories>..\msvc-missing;..\ms-sys\inc;..\syslinux\libinstaller;..\syslinux\libfat;..\libcdio;..\getopt;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <CompileAs>CompileAsC</CompileAs>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <ExceptionHandling>false</ExceptionHandling>
     </ClCompile>
     <Link>
       <AdditionalDependencies>setupapi.lib;comctl32.lib;wininet.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -160,6 +163,7 @@
       <AdditionalIncludeDirectories>..\msvc-missing;..\ms-sys\inc;..\syslinux\libinstaller;..\syslinux\libfat;..\libcdio;..\getopt;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <CompileAs>CompileAsC</CompileAs>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <ExceptionHandling>false</ExceptionHandling>
     </ClCompile>
     <Link>
       <AdditionalDependencies>setupapi.lib;comctl32.lib;wininet.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -181,6 +185,7 @@
     <ClCompile Include="..\dos.c" />
     <ClCompile Include="..\icon.c" />
     <ClCompile Include="..\iso.c" />
+    <ClCompile Include="..\localization.c" />
     <ClCompile Include="..\net.c" />
     <ClCompile Include="..\parser.c" />
     <ClCompile Include="..\rufus.c" />
@@ -197,6 +202,8 @@
     <ClInclude Include="..\libcdio\cdio\iso9660.h" />
     <ClInclude Include="..\libcdio\cdio\logging.h" />
     <ClInclude Include="..\libcdio\cdio\udf.h" />
+    <ClInclude Include="..\localization.h" />
+    <ClInclude Include="..\localization_data.h" />
     <ClInclude Include="..\msapi_utf8.h" />
     <ClInclude Include="..\dos.h" />
     <ClInclude Include="..\registry.h" />
