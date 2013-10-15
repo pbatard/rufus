@@ -1,6 +1,5 @@
 /*
-  Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2011, 2012
-    Rocky Bernstein <rocky@gnu.org>
+  Copyright (C) 2003-2008, 2011-2013 Rocky Bernstein <rocky@gnu.org>
   Copyright (C) 2001 Herbert Valerio Riedel <hvr@gnu.org>
 
   This program is free software: you can redistribute it and/or modify
@@ -25,7 +24,7 @@
 
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
-#endif 
+#endif
 
 #ifdef HAVE_STDIO_H
 #include <stdio.h>
@@ -54,82 +53,82 @@
 #include "_cdio_stdio.h"
 #include "cdio_private.h"
 
-static const char _rcsid[] = "$Id: iso9660_fs.c,v 1.47 2008/04/18 16:02:09 karl Exp $";
-
-/* Implementation of iso9660_t type */
+/** Implementation of iso9660_t type */
 struct _iso9660_s {
-  CdioDataSource_t *stream; /* Stream pointer */
-  bool_3way_t b_xa;         /* true if has XA attributes. */
-  bool_3way_t b_mode2;      /* true if has mode 2, false for mode 1. */
-  uint8_t  i_joliet_level;  /* 0 = no Joliet extensions.
-			       1-3: Joliet level. */
-  iso9660_pvd_t pvd;      
-  iso9660_svd_t svd;      
-  iso_extension_mask_t iso_extension_mask; /* What extensions we
-					      tolerate. */
-  uint32_t i_datastart;     /* Usually 0 when i_framesize is ISO_BLOCKSIZE.
-			       This is the normal condition. But in a fuzzy 
-			       read we may be reading a CD-image
-			       and not a true ISO 9660 image this might be
-			       CDIO_CD_SYNC_SIZE
-                            */ 
-  uint32_t i_framesize;     /* Usually ISO_BLOCKSIZE (2048), but in a
-			      fuzzy read, we may be reading a CD-image
-			      and not a true ISO 9660 image this might
-			      be CDIO_CD_FRAMESIZE_RAW (2352) or
-			      M2RAW_SECTOR_SIZE (2336).
-                            */ 
-  int i_fuzzy_offset;       /* Adjustment in bytes to make ISO_STANDARD_ID
-			       ("CD001") come out as ISO_PVD_SECTOR
-			       (frame 16).  Normally this should be 0
-			       for an ISO 9660 image, but if one is
-			       say reading a BIN/CUE or cdrdao BIN/TOC
-			       without having the CUE or TOC and
-			       trying to extract an ISO-9660
-			       filesystem inside that it may be
-			       different.
+  CdioDataSource_t *stream; /**< Stream pointer */
+  bool_3way_t b_xa;         /**< true if has XA attributes. */
+  bool_3way_t b_mode2;      /**< true if has mode 2, false for mode 1. */
+  uint8_t  u_joliet_level;  /**< 0 = no Joliet extensions.
+			         1-3: Joliet level. */
+  iso9660_pvd_t pvd;
+  iso9660_svd_t svd;
+  iso_extension_mask_t iso_extension_mask; /**< What extensions we
+					        tolerate. */
+  uint32_t i_datastart;     /**< Usually 0 when i_framesize is ISO_BLOCKSIZE.
+			         This is the normal condition. But in a fuzzy
+			         read we may be reading a CD-image
+			         and not a true ISO 9660 image this might be
+			         CDIO_CD_SYNC_SIZE
+                            */
+  uint32_t i_framesize;     /**< Usually ISO_BLOCKSIZE (2048), but in a
+			        fuzzy read, we may be reading a CD-image
+			        and not a true ISO 9660 image this might
+			        be CDIO_CD_FRAMESIZE_RAW (2352) or
+			        M2RAW_SECTOR_SIZE (2336).
+                            */
+  int i_fuzzy_offset;       /**< Adjustment in bytes to make ISO_STANDARD_ID
+			         ("CD001") come out as ISO_PVD_SECTOR
+			         (frame 16).  Normally this should be 0
+			         for an ISO 9660 image, but if one is
+			         say reading a BIN/CUE or cdrdao BIN/TOC
+			         without having the CUE or TOC and
+			         trying to extract an ISO-9660
+			         filesystem inside that it may be
+			         different.
 			     */
+    bool b_have_superblock; /**< Superblock has been read in? */
+
 };
 
-static long int iso9660_seek_read_framesize (const iso9660_t *p_iso, 
-					     void *ptr, lsn_t start, 
-					     long int size, 
+static long int iso9660_seek_read_framesize (const iso9660_t *p_iso,
+					     void *ptr, lsn_t start,
+					     long int size,
 					     uint16_t i_framesize);
 
-/* Adjust the p_iso's i_datastart, i_byte_offset and i_framesize 
+/* Adjust the p_iso's i_datastart, i_byte_offset and i_framesize
    based on whether we find a frame header or not.
 */
-static void 
+static void
 adjust_fuzzy_pvd( iso9660_t *p_iso )
 {
   long int i_byte_offset;
-  
+
   if (!p_iso) return;
 
-  i_byte_offset = (ISO_PVD_SECTOR * p_iso->i_framesize) 
+  i_byte_offset = (ISO_PVD_SECTOR * p_iso->i_framesize)
     + p_iso->i_fuzzy_offset + p_iso->i_datastart;
 
   /* If we have a raw 2352-byte frame then we should expect to see a sync
-     frame and a header. 
+     frame and a header.
    */
   if (CDIO_CD_FRAMESIZE_RAW == p_iso->i_framesize) {
     char buf[CDIO_CD_SYNC_SIZE + CDIO_CD_HEADER_SIZE + CDIO_CD_SUBHEADER_SIZE];
 
     i_byte_offset -= CDIO_CD_SYNC_SIZE + CDIO_CD_HEADER_SIZE + CDIO_CD_SUBHEADER_SIZE;
 
-    if ( DRIVER_OP_SUCCESS != cdio_stream_seek (p_iso->stream, i_byte_offset, 
+    if ( DRIVER_OP_SUCCESS != cdio_stream_seek (p_iso->stream, i_byte_offset,
 						SEEK_SET) )
       return;
     if (sizeof(buf) == cdio_stream_read (p_iso->stream, buf, sizeof(buf), 1)) {
       /* Does the sector frame header suggest Mode 1 format? */
-      if (!memcmp(CDIO_SECTOR_SYNC_HEADER, buf+CDIO_CD_SUBHEADER_SIZE, 
+      if (!memcmp(CDIO_SECTOR_SYNC_HEADER, buf+CDIO_CD_SUBHEADER_SIZE,
 		  CDIO_CD_SYNC_SIZE)) {
 	if (buf[14+CDIO_CD_SUBHEADER_SIZE] != 0x16) {
-	  cdio_warn ("Expecting the PVD sector header MSF to be 0x16, is: %x", 
+	  cdio_warn ("Expecting the PVD sector header MSF to be 0x16, is: %x",
 		     buf[14]);
 	}
 	if (buf[15+CDIO_CD_SUBHEADER_SIZE] != 0x1) {
-	  cdio_warn ("Expecting the PVD sector mode to be Mode 1 is: %x", 
+	  cdio_warn ("Expecting the PVD sector mode to be Mode 1 is: %x",
 		     buf[15]);
 	}
 	p_iso->b_mode2 = nope;
@@ -137,11 +136,11 @@ adjust_fuzzy_pvd( iso9660_t *p_iso )
       } else if (!memcmp(CDIO_SECTOR_SYNC_HEADER, buf, CDIO_CD_SYNC_SIZE)) {
 	/* Frame header indicates Mode 2 Form 1*/
 	if (buf[14] != 0x16) {
-	  cdio_warn ("Expecting the PVD sector header MSF to be 0x16, is: %x", 
+	  cdio_warn ("Expecting the PVD sector header MSF to be 0x16, is: %x",
 		     buf[14]);
 	}
 	if (buf[15] != 0x2) {
-	  cdio_warn ("Expecting the PVD sector mode to be Mode 2 is: %x", 
+	  cdio_warn ("Expecting the PVD sector mode to be Mode 2 is: %x",
 		     buf[15]);
 	}
 	p_iso->b_mode2 = yep;
@@ -149,14 +148,14 @@ adjust_fuzzy_pvd( iso9660_t *p_iso )
       } else {
 	  /* Has no frame header */
 	  p_iso->i_framesize = M2RAW_SECTOR_SIZE;
-	  p_iso->i_fuzzy_offset = (CDIO_CD_FRAMESIZE_RAW - M2RAW_SECTOR_SIZE) 
+	  p_iso->i_fuzzy_offset = (CDIO_CD_FRAMESIZE_RAW - M2RAW_SECTOR_SIZE)
 	    * ISO_PVD_SECTOR + p_iso->i_fuzzy_offset + p_iso->i_datastart;
 	  p_iso->i_datastart = 0;
 	}
     }
   }
 
-  
+
 }
 
 /*!
@@ -168,36 +167,35 @@ iso9660_open_ext_private (const char *psz_path,
 			  uint16_t i_fuzz, bool b_fuzzy)
 {
   iso9660_t *p_iso = (iso9660_t *) calloc(1, sizeof(iso9660_t)) ;
-  bool b_have_superblock;
 
   if (!p_iso) return NULL;
-  
+
   p_iso->stream = cdio_stdio_new( psz_path );
-  if (NULL == p_iso->stream) 
+  if (NULL == p_iso->stream)
     goto error;
 
   p_iso->i_framesize = ISO_BLOCKSIZE;
 
-  b_have_superblock = (b_fuzzy) 
+  p_iso->b_have_superblock = (b_fuzzy)
     ? iso9660_ifs_fuzzy_read_superblock(p_iso, iso_extension_mask, i_fuzz)
     : iso9660_ifs_read_superblock(p_iso, iso_extension_mask) ;
 
-  if ( ! b_have_superblock ) goto error;
-  
+  if ( ! p_iso->b_have_superblock ) goto error;
+
   /* Determine if image has XA attributes. */
-  
-  p_iso->b_xa = strncmp ((char *) &(p_iso->pvd) + ISO_XA_MARKER_OFFSET, 
+
+  p_iso->b_xa = strncmp ((char *) &(p_iso->pvd) + ISO_XA_MARKER_OFFSET,
 			 ISO_XA_MARKER_STRING,
-			 sizeof (ISO_XA_MARKER_STRING)) 
+			 sizeof (ISO_XA_MARKER_STRING))
     ? nope : yep;
-  
+
   p_iso->iso_extension_mask = iso_extension_mask;
   return p_iso;
 
  error:
   if (p_iso && p_iso->stream) cdio_stdio_destroy(p_iso->stream);
   free(p_iso);
-  
+
   return NULL;
 }
 
@@ -251,7 +249,7 @@ iso9660_open_fuzzy_ext (const char *psz_path,
   True is unconditionally returned. If there was an error false would
   be returned.
 */
-bool 
+bool
 iso9660_close (iso9660_t *p_iso)
 {
   if (NULL != p_iso) {
@@ -262,13 +260,13 @@ iso9660_close (iso9660_t *p_iso)
 }
 
 static bool
-check_pvd (const iso9660_pvd_t *p_pvd, cdio_log_level_t log_level) 
+check_pvd (const iso9660_pvd_t *p_pvd, cdio_log_level_t log_level)
 {
   if ( ISO_VD_PRIMARY != from_711(p_pvd->type) ) {
     cdio_log (log_level, "unexpected PVD type %d", p_pvd->type);
     return false;
   }
-  
+
   if (strncmp (p_pvd->id, ISO_STANDARD_ID, strlen (ISO_STANDARD_ID)))
     {
       cdio_log (log_level, "unexpected ID encountered (expected `"
@@ -297,8 +295,8 @@ get_member_id(iso9660_t *p_iso, cdio_utf8_t **p_psz_member_id,
     *p_psz_member_id = NULL;
     return false;
   }
-#ifdef HAVE_JOLIET  
-  if (p_iso->i_joliet_level) {
+#ifdef HAVE_JOLIET
+  if (p_iso->u_joliet_level) {
     /* Translate USC-2 string from Secondary Volume Descriptor */
     if (cdio_charset_to_utf8(svd_member, max_size,
                             p_psz_member_id, "UCS-2BE")) {
@@ -344,12 +342,12 @@ get_member_id(iso9660_t *p_iso, cdio_utf8_t **p_psz_member_id,
 }
 
 
-/*!  
+/*!
   Return the application ID.  NULL is returned in psz_app_id if there
   is some problem in getting this.
 */
 bool
-iso9660_ifs_get_application_id(iso9660_t *p_iso, 
+iso9660_ifs_get_application_id(iso9660_t *p_iso,
 			       /*out*/ cdio_utf8_t **p_psz_app_id)
 {
   return get_member_id(p_iso, p_psz_app_id,
@@ -358,13 +356,13 @@ iso9660_ifs_get_application_id(iso9660_t *p_iso,
                        ISO_MAX_APPLICATION_ID);
 }
 
-/*!  
+/*!
   Return the Joliet level recognized for p_iso.
 */
 uint8_t iso9660_ifs_get_joliet_level(iso9660_t *p_iso)
 {
   if (!p_iso) return 0;
-  return p_iso->i_joliet_level;
+  return p_iso->u_joliet_level;
 }
 
 /*!
@@ -438,9 +436,9 @@ bool iso9660_ifs_get_volumeset_id(iso9660_t *p_iso,
   Read the Primary Volume Descriptor for an ISO 9660 image.
   True is returned if read, and false if there was an error.
 */
-static bool 
-iso9660_ifs_read_pvd_loglevel (const iso9660_t *p_iso, 
-			       /*out*/ iso9660_pvd_t *p_pvd, 
+static bool
+iso9660_ifs_read_pvd_loglevel (const iso9660_t *p_iso,
+			       /*out*/ iso9660_pvd_t *p_pvd,
 			       cdio_log_level_t log_level)
 {
   if (0 == iso9660_iso_seek_read (p_iso, p_pvd, ISO_PVD_SECTOR, 1)) {
@@ -454,7 +452,7 @@ iso9660_ifs_read_pvd_loglevel (const iso9660_t *p_iso,
   Read the Primary Volume Descriptor for an ISO 9660 image.
   True is returned if read, and false if there was an error.
 */
-bool 
+bool
 iso9660_ifs_read_pvd (const iso9660_t *p_iso, /*out*/ iso9660_pvd_t *p_pvd)
 {
   return iso9660_ifs_read_pvd_loglevel(p_iso, p_pvd, CDIO_LOG_WARN);
@@ -462,12 +460,12 @@ iso9660_ifs_read_pvd (const iso9660_t *p_iso, /*out*/ iso9660_pvd_t *p_pvd)
 
 
 /*!
-  Read the Super block of an ISO 9660 image. This is the 
-  Primary Volume Descriptor (PVD) and perhaps a Supplemental Volume 
+  Read the Super block of an ISO 9660 image. This is the
+  Primary Volume Descriptor (PVD) and perhaps a Supplemental Volume
   Descriptor if (Joliet) extensions are acceptable.
 */
-bool 
-iso9660_ifs_read_superblock (iso9660_t *p_iso, 
+bool
+iso9660_ifs_read_superblock (iso9660_t *p_iso,
 			     iso_extension_mask_t iso_extension_mask)
 {
   iso9660_svd_t p_svd;  /* Secondary volume descriptor. */
@@ -476,7 +474,7 @@ iso9660_ifs_read_superblock (iso9660_t *p_iso,
   if (!p_iso || !iso9660_ifs_read_pvd(p_iso, &(p_iso->pvd)))
     return false;
 
-  p_iso->i_joliet_level = 0;
+  p_iso->u_joliet_level = 0;
 
   /* There may be multiple Secondary Volume Descriptors (eg. El Torito + Joliet) */
   for (i=1; (0 != iso9660_iso_seek_read (p_iso, &p_svd, ISO_PVD_SECTOR+i, 1)); i++) {
@@ -484,33 +482,33 @@ iso9660_ifs_read_superblock (iso9660_t *p_iso,
       break;
     if ( ISO_VD_SUPPLEMENTARY == from_711(p_svd.type) ) {
       /* We're only interested in Joliet => make sure the SVD isn't overwritten */
-      if (p_iso->i_joliet_level == 0)
+      if (p_iso->u_joliet_level == 0)
         memcpy(&(p_iso->svd), &p_svd, sizeof(iso9660_svd_t));
-      if (p_svd.escape_sequences[0] == 0x25 
+      if (p_svd.escape_sequences[0] == 0x25
 	  && p_svd.escape_sequences[1] == 0x2f) {
 	switch (p_svd.escape_sequences[2]) {
 	case 0x40:
-	  if (iso_extension_mask & ISO_EXTENSION_JOLIET_LEVEL1) 
-	    p_iso->i_joliet_level = 1;
+	  if (iso_extension_mask & ISO_EXTENSION_JOLIET_LEVEL1)
+	    p_iso->u_joliet_level = 1;
 	  break;
 	case 0x43:
-	  if (iso_extension_mask & ISO_EXTENSION_JOLIET_LEVEL2) 
-	    p_iso->i_joliet_level = 2;
+	  if (iso_extension_mask & ISO_EXTENSION_JOLIET_LEVEL2)
+	    p_iso->u_joliet_level = 2;
 	  break;
 	case 0x45:
-	  if (iso_extension_mask & ISO_EXTENSION_JOLIET_LEVEL3) 
-	    p_iso->i_joliet_level = 3;
+	  if (iso_extension_mask & ISO_EXTENSION_JOLIET_LEVEL3)
+	    p_iso->u_joliet_level = 3;
 	  break;
 	default:
 	  cdio_info("Supplementary Volume Descriptor found, but not Joliet");
 	}
-	if (p_iso->i_joliet_level > 0) {
-	  cdio_info("Found Extension: Joliet Level %d", p_iso->i_joliet_level);
+	if (p_iso->u_joliet_level > 0) {
+	  cdio_info("Found Extension: Joliet Level %d", p_iso->u_joliet_level);
 	}
       }
     }
   }
-  
+
   return true;
 }
 
@@ -520,14 +518,14 @@ iso9660_ifs_read_superblock (iso9660_t *p_iso,
   not reading an ISO 9660 image but a CD-Image which contains an ISO 9660
   filesystem.
 */
-bool 
-iso9660_ifs_fuzzy_read_superblock (iso9660_t *p_iso, 
+bool
+iso9660_ifs_fuzzy_read_superblock (iso9660_t *p_iso,
 				   iso_extension_mask_t iso_extension_mask,
 				   uint16_t i_fuzz)
 {
   /* Got some work to do to find ISO_STANDARD_ID ("CD001") */
   unsigned int i;
-  
+
   for (i=0; i<i_fuzz; i++) {
     unsigned int j;
     char *pvd = NULL;
@@ -535,23 +533,23 @@ iso9660_ifs_fuzzy_read_superblock (iso9660_t *p_iso,
     for (j = 0; j <= 1; j++ ) {
       lsn_t lsn;
       uint16_t k;
-      const uint16_t framesizes[] = { ISO_BLOCKSIZE, CDIO_CD_FRAMESIZE_RAW, 
+      const uint16_t framesizes[] = { ISO_BLOCKSIZE, CDIO_CD_FRAMESIZE_RAW,
 				      M2RAW_SECTOR_SIZE } ;
 
       /* We don't need to loop over a zero offset twice*/
       if (0==i && j)
 	continue;
-      
+
       lsn = (j) ? ISO_PVD_SECTOR - i : ISO_PVD_SECTOR + i;
-      
+
       for (k=0; k < 3; k++) {
 	char *p, *q;
 	char frame[CDIO_CD_FRAMESIZE_RAW] = {'\0',};
 	p_iso->i_framesize = framesizes[k];
-	p_iso->i_datastart = (ISO_BLOCKSIZE == framesizes[k]) ? 
+	p_iso->i_datastart = (ISO_BLOCKSIZE == framesizes[k]) ?
 			      0 : CDIO_CD_SYNC_SIZE;
 	p_iso->i_fuzzy_offset = 0;
-	if (0 == iso9660_seek_read_framesize (p_iso, frame, lsn, 1, 
+	if (0 == iso9660_seek_read_framesize (p_iso, frame, lsn, 1,
 					      p_iso->i_framesize)) {
 	  return false;
 	}
@@ -562,18 +560,18 @@ iso9660_ifs_fuzzy_read_superblock (iso9660_t *p_iso,
 	  if ( !q || (pvd = strstr(q, ISO_STANDARD_ID)) )
 	    break;
 	}
-	
+
 	if (pvd) {
 	  /* Yay! Found something */
-	  p_iso->i_fuzzy_offset = (pvd - frame - 1) - 
+	  p_iso->i_fuzzy_offset = (pvd - frame - 1) -
 	    ((ISO_PVD_SECTOR-lsn)*p_iso->i_framesize) ;
 	  /* But is it *really* a PVD? */
-	  if ( iso9660_ifs_read_pvd_loglevel(p_iso, &(p_iso->pvd), 
+	  if ( iso9660_ifs_read_pvd_loglevel(p_iso, &(p_iso->pvd),
 					     CDIO_LOG_DEBUG) ) {
 	    adjust_fuzzy_pvd(p_iso);
 	    return true;
 	  }
-	  
+
 	}
       }
     }
@@ -581,16 +579,16 @@ iso9660_ifs_fuzzy_read_superblock (iso9660_t *p_iso,
   return false;
 }
 
-  
+
 /*!
   Read the Primary Volume Descriptor for of CD.
 */
-bool 
+bool
 iso9660_fs_read_pvd(const CdIo_t *p_cdio, /*out*/ iso9660_pvd_t *p_pvd)
 {
   /* A bit of a hack, we'll assume track 1 contains ISO_PVD_SECTOR.*/
   char buf[CDIO_CD_FRAMESIZE_RAW] = { 0, };
-  driver_return_code_t driver_return = 
+  driver_return_code_t driver_return =
     cdio_read_data_sectors (p_cdio, buf, ISO_PVD_SECTOR, ISO_BLOCKSIZE, 1);
 
   if (DRIVER_OP_SUCCESS != driver_return) {
@@ -605,22 +603,22 @@ iso9660_fs_read_pvd(const CdIo_t *p_cdio, /*out*/ iso9660_pvd_t *p_pvd)
    */
   cdio_assert (sizeof(buf) >= sizeof (iso9660_pvd_t));
   memcpy(p_pvd, buf, sizeof(iso9660_pvd_t));
-  
+
   return check_pvd(p_pvd, CDIO_LOG_WARN);
 }
 
 
 /*!
-  Read the Super block of an ISO 9660 image. This is the 
-  Primary Volume Descriptor (PVD) and perhaps a Supplemental Volume 
+  Read the Super block of an ISO 9660 image. This is the
+  Primary Volume Descriptor (PVD) and perhaps a Supplemental Volume
   Descriptor if (Joliet) extensions are acceptable.
 */
-bool 
-iso9660_fs_read_superblock (CdIo_t *p_cdio, 
+bool
+iso9660_fs_read_superblock (CdIo_t *p_cdio,
 			    iso_extension_mask_t iso_extension_mask)
 {
   if (!p_cdio) return false;
-  
+
   {
     generic_img_private_t *p_env = (generic_img_private_t *) p_cdio->env;
     iso9660_pvd_t         *p_pvd = &(p_env->pvd);
@@ -630,10 +628,10 @@ iso9660_fs_read_superblock (CdIo_t *p_cdio,
 
     if ( !iso9660_fs_read_pvd(p_cdio, p_pvd) )
       return false;
-    
-    p_env->i_joliet_level = 0;
-    
-    driver_return = 
+
+    p_env->u_joliet_level = 0;
+
+    driver_return =
       cdio_read_data_sectors ( p_cdio, buf, ISO_PVD_SECTOR+1, ISO_BLOCKSIZE,
 			       1 );
 
@@ -644,29 +642,29 @@ iso9660_fs_read_superblock (CdIo_t *p_cdio,
       */
       cdio_assert (sizeof(buf) >= sizeof (iso9660_svd_t));
       memcpy(p_svd, buf, sizeof(iso9660_svd_t));
-  
+
       if ( ISO_VD_SUPPLEMENTARY == from_711(p_svd->type) ) {
-	if (p_svd->escape_sequences[0] == 0x25 
+	if (p_svd->escape_sequences[0] == 0x25
 	    && p_svd->escape_sequences[1] == 0x2f) {
 	  switch (p_svd->escape_sequences[2]) {
 	  case 0x40:
-	    if (iso_extension_mask & ISO_EXTENSION_JOLIET_LEVEL1) 
-	      p_env->i_joliet_level = 1;
+	    if (iso_extension_mask & ISO_EXTENSION_JOLIET_LEVEL1)
+	      p_env->u_joliet_level = 1;
 	    break;
 	  case 0x43:
-	    if (iso_extension_mask & ISO_EXTENSION_JOLIET_LEVEL2) 
-	      p_env->i_joliet_level = 2;
+	    if (iso_extension_mask & ISO_EXTENSION_JOLIET_LEVEL2)
+	      p_env->u_joliet_level = 2;
 	    break;
 	  case 0x45:
-	    if (iso_extension_mask & ISO_EXTENSION_JOLIET_LEVEL3) 
-	      p_env->i_joliet_level = 3;
+	    if (iso_extension_mask & ISO_EXTENSION_JOLIET_LEVEL3)
+	      p_env->u_joliet_level = 3;
 	    break;
 	  default:
 	    cdio_info("Supplementary Volume Descriptor found, but not Joliet");
 	  }
-	  if (p_env->i_joliet_level > 0) {
-	    cdio_info("Found Extension: Joliet Level %d", 
-		      p_env->i_joliet_level);
+	  if (p_env->u_joliet_level > 0) {
+	    cdio_info("Found Extension: Joliet Level %d",
+		      p_env->u_joliet_level);
 	  }
 	}
       }
@@ -679,17 +677,17 @@ iso9660_fs_read_superblock (CdIo_t *p_cdio,
 /*!
   Seek to a position and then read n blocks. Size read is returned.
 */
-static long int 
-iso9660_seek_read_framesize (const iso9660_t *p_iso, void *ptr, 
-			     lsn_t start, long int size, 
+static long int
+iso9660_seek_read_framesize (const iso9660_t *p_iso, void *ptr,
+			     lsn_t start, long int size,
 			     uint16_t i_framesize)
 {
   long int ret;
   int64_t i_byte_offset;
-  
+
   if (!p_iso) return 0;
-  i_byte_offset = (start * p_iso->i_framesize) + p_iso->i_fuzzy_offset 
-    + p_iso->i_datastart;
+  i_byte_offset = (start * (int64_t)(p_iso->i_framesize))
+    + p_iso->i_fuzzy_offset + p_iso->i_datastart;
 
   ret = cdio_stream_seek (p_iso->stream, i_byte_offset, SEEK_SET);
   if (ret!=0) return 0;
@@ -699,8 +697,8 @@ iso9660_seek_read_framesize (const iso9660_t *p_iso, void *ptr,
 /*!
   Seek to a position and then read n blocks. Size read is returned.
 */
-long int 
-iso9660_iso_seek_read (const iso9660_t *p_iso, void *ptr, lsn_t start, 
+long int
+iso9660_iso_seek_read (const iso9660_t *p_iso, void *ptr, lsn_t start,
 		       long int size)
 {
   return iso9660_seek_read_framesize(p_iso, ptr, start, size, ISO_BLOCKSIZE);
@@ -709,8 +707,8 @@ iso9660_iso_seek_read (const iso9660_t *p_iso, void *ptr, lsn_t start,
 
 
 static iso9660_stat_t *
-_iso9660_dir_to_statbuf (iso9660_dir_t *p_iso9660_dir, bool_3way_t b_xa, 
-			 uint8_t i_joliet_level)
+_iso9660_dir_to_statbuf (iso9660_dir_t *p_iso9660_dir, bool_3way_t b_xa,
+			 uint8_t u_joliet_level)
 {
   uint8_t dir_len= iso9660_get_dir_len(p_iso9660_dir);
   iso711_t i_fname;
@@ -730,28 +728,28 @@ _iso9660_dir_to_statbuf (iso9660_dir_t *p_iso9660_dir, bool_3way_t b_xa,
     cdio_warn("Couldn't calloc(1, %d)", stat_len);
     return NULL;
     }
-  p_stat->type    = (p_iso9660_dir->file_flags & ISO_DIRECTORY) 
+  p_stat->type    = (p_iso9660_dir->file_flags & ISO_DIRECTORY)
     ? _STAT_DIR : _STAT_FILE;
   p_stat->lsn     = from_733 (p_iso9660_dir->extent);
   p_stat->size    = from_733 (p_iso9660_dir->size);
   p_stat->secsize = _cdio_len2blocks (p_stat->size, ISO_BLOCKSIZE);
   p_stat->rr.b3_rock = dunno; /*FIXME should do based on mask */
-  p_stat->b_xa    = false; 
+  p_stat->b_xa    = false;
 
   {
     char rr_fname[256] = "";
 
-    int  i_rr_fname = 
+    int  i_rr_fname =
 #ifdef HAVE_ROCK
       get_rock_ridge_filename(p_iso9660_dir, rr_fname, p_stat);
 #else
       0;
 #endif
-    
+
     if (i_rr_fname > 0) {
       if (i_rr_fname > i_fname) {
 	/* realloc gives valgrind errors */
-	iso9660_stat_t *p_stat_new = 
+	iso9660_stat_t *p_stat_new =
 	  calloc(1, sizeof(iso9660_stat_t)+i_rr_fname+2);
         if (!p_stat_new)
           {
@@ -769,7 +767,7 @@ _iso9660_dir_to_statbuf (iso9660_dir_t *p_iso9660_dir, bool_3way_t b_xa,
       else if ('\1' == p_iso9660_dir->filename.str[1] && 1 == i_fname)
 	strncpy (p_stat->filename, "..", sizeof(".."));
 #ifdef HAVE_JOLIET
-      else if (i_joliet_level) {
+      else if (u_joliet_level) {
 	int i_inlen = i_fname;
 	cdio_utf8_t *p_psz_out = NULL;
 	if (cdio_charset_to_utf8(&p_iso9660_dir->filename.str[1], i_inlen,
@@ -788,7 +786,7 @@ _iso9660_dir_to_statbuf (iso9660_dir_t *p_iso9660_dir, bool_3way_t b_xa,
       }
     }
   }
-  
+
 
   iso9660_get_dtime(&(p_iso9660_dir->recording_time), true, &(p_stat->tm));
 
@@ -797,36 +795,36 @@ _iso9660_dir_to_statbuf (iso9660_dir_t *p_iso9660_dir, bool_3way_t b_xa,
     free(p_stat);
     return NULL;
   }
-  
+
 
   {
-    int su_length = iso9660_get_dir_len(p_iso9660_dir) 
+    int su_length = iso9660_get_dir_len(p_iso9660_dir)
       - sizeof (iso9660_dir_t);
     su_length -= i_fname;
-    
+
     if (su_length % 2)
       su_length--;
-    
+
     if (su_length < 0 || su_length < sizeof (iso9660_xa_t))
       return p_stat;
-    
+
     if (nope == b_xa) {
       return p_stat;
     } else {
-      iso9660_xa_t *xa_data = 
-	(void *) (((char *) p_iso9660_dir)  
+      iso9660_xa_t *xa_data =
+	(void *) (((char *) p_iso9660_dir)
 		  + (iso9660_get_dir_len(p_iso9660_dir) - su_length));
-      cdio_log_level_t loglevel = (yep == b_xa) 
+      cdio_log_level_t loglevel = (yep == b_xa)
 	? CDIO_LOG_WARN : CDIO_LOG_INFO;
-      
-      if (xa_data->signature[0] != 'X' 
+
+      if (xa_data->signature[0] != 'X'
 	  || xa_data->signature[1] != 'A')
 	{
-	  cdio_log (loglevel, 
+	  cdio_log (loglevel,
 		    "XA signature not found in ISO9660's system use area;"
 		     " ignoring XA attributes for this file entry.");
-	  cdio_debug ("%d %d %d, '%c%c' (%d, %d)", 
-		      iso9660_get_dir_len(p_iso9660_dir), 
+	  cdio_debug ("%d %d %d, '%c%c' (%d, %d)",
+		      iso9660_get_dir_len(p_iso9660_dir),
 		      i_fname,
 		      su_length,
 		      xa_data->signature[0], xa_data->signature[1],
@@ -838,7 +836,7 @@ _iso9660_dir_to_statbuf (iso9660_dir_t *p_iso9660_dir, bool_3way_t b_xa,
     }
   }
   return p_stat;
-    
+
 }
 
 /*!
@@ -857,7 +855,7 @@ iso9660_dir_to_name (const iso9660_dir_t *iso9660_dir)
   cdio_assert (len >= sizeof (iso9660_dir_t));
 
   /* (iso9660_dir->file_flags & ISO_DIRECTORY) */
-  
+
   if (iso9660_dir->filename.str[1] == '\0')
     return strdup(".");
   else if (iso9660_dir->filename.str[1] == '\1')
@@ -867,7 +865,7 @@ iso9660_dir_to_name (const iso9660_dir_t *iso9660_dir)
   }
 }
 
-/* 
+/*
    Return a pointer to a ISO 9660 stat buffer or NULL if there's an error
 */
 static iso9660_stat_t *
@@ -875,7 +873,7 @@ _fs_stat_root (CdIo_t *p_cdio)
 {
 
   if (!p_cdio) return NULL;
-  
+
   {
     iso_extension_mask_t iso_extension_mask = ISO_EXTENSION_ALL;
     generic_img_private_t *p_env = (generic_img_private_t *) p_cdio->env;
@@ -883,9 +881,9 @@ _fs_stat_root (CdIo_t *p_cdio)
     iso9660_stat_t *p_stat;
     bool_3way_t b_xa;
 
-    if (!p_env->i_joliet_level)
+    if (!p_env->u_joliet_level)
       iso_extension_mask &= ~ISO_EXTENSION_JOLIET;
-    
+
     /* FIXME try also with Joliet.*/
     if ( !iso9660_fs_read_superblock (p_cdio, iso_extension_mask) ) {
       cdio_warn("Could not read ISO-9660 Superblock.");
@@ -893,29 +891,29 @@ _fs_stat_root (CdIo_t *p_cdio)
     }
 
     switch(cdio_get_discmode(p_cdio)) {
-    case CDIO_DISC_MODE_CD_XA: 
+    case CDIO_DISC_MODE_CD_XA:
       b_xa = yep;
       break;
-    case CDIO_DISC_MODE_CD_DATA: 
+    case CDIO_DISC_MODE_CD_DATA:
       b_xa = nope;
       break;
-    default: 
+    default:
       b_xa = dunno;
     }
 
-#ifdef HAVE_JOLIET    
-    p_iso9660_dir = p_env->i_joliet_level 
-      ? &(p_env->svd.root_directory_record) 
+#ifdef HAVE_JOLIET
+    p_iso9660_dir = p_env->u_joliet_level
+      ? &(p_env->svd.root_directory_record)
       : &(p_env->pvd.root_directory_record) ;
 #else
     p_iso9660_dir = &(p_env->pvd.root_directory_record) ;
 #endif
-    
-    p_stat = _iso9660_dir_to_statbuf (p_iso9660_dir, b_xa, 
-				      p_env->i_joliet_level);
+
+    p_stat = _iso9660_dir_to_statbuf (p_iso9660_dir, b_xa,
+				      p_env->u_joliet_level);
     return p_stat;
   }
-  
+
 }
 
 static iso9660_stat_t *
@@ -925,20 +923,20 @@ _ifs_stat_root (iso9660_t *p_iso)
   iso9660_dir_t *p_iso9660_dir;
 
 #ifdef HAVE_JOLIET
-  p_iso9660_dir = p_iso->i_joliet_level 
+  p_iso9660_dir = p_iso->u_joliet_level
     ? &(p_iso->svd.root_directory_record)
     : &(p_iso->pvd.root_directory_record) ;
-#else 
+#else
   p_iso9660_dir = &(p_iso->pvd.root_directory_record) ;
 #endif
-  
+
   p_stat = _iso9660_dir_to_statbuf (p_iso9660_dir, p_iso->b_xa,
-				    p_iso->i_joliet_level);
+				    p_iso->u_joliet_level);
   return p_stat;
 }
 
 static iso9660_stat_t *
-_fs_stat_traverse (const CdIo_t *p_cdio, const iso9660_stat_t *_root, 
+_fs_stat_traverse (const CdIo_t *p_cdio, const iso9660_stat_t *_root,
 		   char **splitpath)
 {
   unsigned offset = 0;
@@ -952,7 +950,7 @@ _fs_stat_traverse (const CdIo_t *p_cdio, const iso9660_stat_t *_root,
       p_stat = calloc(1, len);
       memcpy(p_stat, _root, len);
       p_stat->rr.psz_symlink = calloc(1, p_stat->rr.i_symlink_max);
-      memcpy(p_stat->rr.psz_symlink, _root->rr.psz_symlink, 
+      memcpy(p_stat->rr.psz_symlink, _root->rr.psz_symlink,
 	     p_stat->rr.i_symlink_max);
       return p_stat;
     }
@@ -969,10 +967,10 @@ _fs_stat_traverse (const CdIo_t *p_cdio, const iso9660_stat_t *_root,
     return NULL;
     }
 
-  if (cdio_read_data_sectors (p_cdio, _dirbuf, _root->lsn, ISO_BLOCKSIZE, 
+  if (cdio_read_data_sectors (p_cdio, _dirbuf, _root->lsn, ISO_BLOCKSIZE,
 			      _root->secsize))
       return NULL;
-  
+
   while (offset < (_root->secsize * ISO_BLOCKSIZE))
     {
       iso9660_dir_t *p_iso9660_dir = (void *) &_dirbuf[offset];
@@ -984,34 +982,34 @@ _fs_stat_traverse (const CdIo_t *p_cdio, const iso9660_stat_t *_root,
 	  offset++;
 	  continue;
 	}
-      
-      p_iso9660_stat = _iso9660_dir_to_statbuf (p_iso9660_dir, dunno, 
-					p_env->i_joliet_level);
+
+      p_iso9660_stat = _iso9660_dir_to_statbuf (p_iso9660_dir, dunno,
+					p_env->u_joliet_level);
 
       cmp = strcmp(splitpath[0], p_iso9660_stat->filename);
 
-      if ( 0 != cmp && 0 == p_env->i_joliet_level 
+      if ( 0 != cmp && 0 == p_env->u_joliet_level
 	   && yep != p_iso9660_stat->rr.b3_rock ) {
 	char *trans_fname = NULL;
 	unsigned int i_trans_fname=strlen(p_iso9660_stat->filename);
-	
+
 	if (i_trans_fname) {
 	  trans_fname = calloc(1, i_trans_fname+1);
 	  if (!trans_fname) {
-	    cdio_warn("can't allocate %lu bytes", 
+	    cdio_warn("can't allocate %lu bytes",
 		      (long unsigned int) strlen(p_iso9660_stat->filename));
 	    free(p_iso9660_stat);
 	    return NULL;
 	  }
 	  iso9660_name_translate_ext(p_iso9660_stat->filename, trans_fname,
-				     p_env->i_joliet_level);
+				     p_env->u_joliet_level);
 	  cmp = strcmp(splitpath[0], trans_fname);
 	  free(trans_fname);
 	}
       }
-      
+
       if (!cmp) {
-	iso9660_stat_t *ret_stat 
+	iso9660_stat_t *ret_stat
 	  = _fs_stat_traverse (p_cdio, p_iso9660_stat, &splitpath[1]);
 	free(p_iso9660_stat->rr.psz_symlink);
 	free(p_iso9660_stat);
@@ -1021,19 +1019,19 @@ _fs_stat_traverse (const CdIo_t *p_cdio, const iso9660_stat_t *_root,
 
       free(p_iso9660_stat->rr.psz_symlink);
       free(p_iso9660_stat);
-	  
+
       offset += iso9660_get_dir_len(p_iso9660_dir);
     }
 
   cdio_assert (offset == (_root->secsize * ISO_BLOCKSIZE));
-  
+
   /* not found */
   free (_dirbuf);
   return NULL;
 }
 
 static iso9660_stat_t *
-_fs_iso_stat_traverse (iso9660_t *p_iso, const iso9660_stat_t *_root, 
+_fs_iso_stat_traverse (iso9660_t *p_iso, const iso9660_stat_t *_root,
 		       char **splitpath)
 {
   unsigned offset = 0;
@@ -1052,7 +1050,7 @@ _fs_iso_stat_traverse (iso9660_t *p_iso, const iso9660_stat_t *_root,
         }
       memcpy(p_stat, _root, len);
       p_stat->rr.psz_symlink = calloc(1, p_stat->rr.i_symlink_max);
-      memcpy(p_stat->rr.psz_symlink, _root->rr.psz_symlink, 
+      memcpy(p_stat->rr.psz_symlink, _root->rr.psz_symlink,
 	     p_stat->rr.i_symlink_max);
       return p_stat;
     }
@@ -1071,7 +1069,7 @@ _fs_iso_stat_traverse (iso9660_t *p_iso, const iso9660_stat_t *_root,
 
   ret = iso9660_iso_seek_read (p_iso, _dirbuf, _root->lsn, _root->secsize);
   if (ret!=ISO_BLOCKSIZE*_root->secsize) return NULL;
-  
+
   while (offset < (_root->secsize * ISO_BLOCKSIZE))
     {
       iso9660_dir_t *p_iso9660_dir = (void *) &_dirbuf[offset];
@@ -1083,34 +1081,34 @@ _fs_iso_stat_traverse (iso9660_t *p_iso, const iso9660_stat_t *_root,
 	  offset++;
 	  continue;
 	}
-      
-      p_stat = _iso9660_dir_to_statbuf (p_iso9660_dir, p_iso->b_xa, 
-					p_iso->i_joliet_level);
+
+      p_stat = _iso9660_dir_to_statbuf (p_iso9660_dir, p_iso->b_xa,
+					p_iso->u_joliet_level);
 
       cmp = strcmp(splitpath[0], p_stat->filename);
 
-      if ( 0 != cmp && 0 == p_iso->i_joliet_level 
+      if ( 0 != cmp && 0 == p_iso->u_joliet_level
 	   && yep != p_stat->rr.b3_rock ) {
 	char *trans_fname = NULL;
 	unsigned int i_trans_fname=strlen(p_stat->filename);
-	
+
 	if (i_trans_fname) {
 	  trans_fname = calloc(1, i_trans_fname+1);
 	  if (!trans_fname) {
-	    cdio_warn("can't allocate %lu bytes", 
+	    cdio_warn("can't allocate %lu bytes",
 		      (long unsigned int) strlen(p_stat->filename));
 	    free(p_stat);
 	    return NULL;
 	  }
-	  iso9660_name_translate_ext(p_stat->filename, trans_fname, 
-				     p_iso->i_joliet_level);
+	  iso9660_name_translate_ext(p_stat->filename, trans_fname,
+				     p_iso->u_joliet_level);
 	  cmp = strcmp(splitpath[0], trans_fname);
 	  free(trans_fname);
 	}
       }
-      
+
       if (!cmp) {
-	iso9660_stat_t *ret_stat 
+	iso9660_stat_t *ret_stat
 	  = _fs_iso_stat_traverse (p_iso, p_stat, &splitpath[1]);
 	free(p_stat->rr.psz_symlink);
 	free(p_stat);
@@ -1120,12 +1118,12 @@ _fs_iso_stat_traverse (iso9660_t *p_iso, const iso9660_stat_t *_root,
 
       free(p_stat->rr.psz_symlink);
       free(p_stat);
-	  
+
       offset += iso9660_get_dir_len(p_iso9660_dir);
     }
 
   cdio_assert (offset == (_root->secsize * ISO_BLOCKSIZE));
-  
+
   /* not found */
   free (_dirbuf);
   return NULL;
@@ -1167,7 +1165,7 @@ typedef iso9660_stat_t * (stat_traverse_t)
   are lowercased.
  */
 static iso9660_stat_t *
-fs_stat_translate (void *p_image, stat_root_t stat_root, 
+fs_stat_translate (void *p_image, stat_root_t stat_root,
 		   stat_traverse_t stat_traverse,
 		   const char psz_path[])
 {
@@ -1190,10 +1188,10 @@ fs_stat_translate (void *p_image, stat_root_t stat_root,
 }
 
 iso9660_stat_t *
-iso9660_fs_stat_translate (CdIo_t *p_cdio, const char psz_path[], 
+iso9660_fs_stat_translate (CdIo_t *p_cdio, const char psz_path[],
 			   bool b_mode2)
 {
-  return fs_stat_translate(p_cdio, (stat_root_t *) _fs_stat_root, 
+  return fs_stat_translate(p_cdio, (stat_root_t *) _fs_stat_root,
 			   (stat_traverse_t *) _fs_stat_traverse,
 			   psz_path);
 }
@@ -1207,7 +1205,7 @@ iso9660_fs_stat_translate (CdIo_t *p_cdio, const char psz_path[],
 iso9660_stat_t *
 iso9660_ifs_stat_translate (iso9660_t *p_iso, const char psz_path[])
 {
-  return fs_stat_translate(p_iso, (stat_root_t *) _ifs_stat_root, 
+  return fs_stat_translate(p_iso, (stat_root_t *) _ifs_stat_root,
 			   (stat_traverse_t *) _fs_iso_stat_traverse,
 			   psz_path);
 }
@@ -1237,13 +1235,13 @@ iso9660_ifs_stat (iso9660_t *p_iso, const char psz_path[])
   return stat;
 }
 
-/*! 
+/*!
   Read psz_path (a directory) and return a list of iso9660_stat_t
   of the files inside that. The caller must free the returned result.
 
   b_mode2 is historical. It is not used.
 */
-CdioList_t * 
+CdioList_t *
 iso9660_fs_readdir (CdIo_t *p_cdio, const char psz_path[], bool b_mode2)
 {
   generic_img_private_t *p_env;
@@ -1275,7 +1273,7 @@ iso9660_fs_readdir (CdIo_t *p_cdio, const char psz_path[], bool b_mode2)
       return NULL;
       }
 
-    if (cdio_read_data_sectors (p_cdio, _dirbuf, p_stat->lsn, 
+    if (cdio_read_data_sectors (p_cdio, _dirbuf, p_stat->lsn,
 				ISO_BLOCKSIZE, p_stat->secsize))
 	return NULL;
 
@@ -1283,7 +1281,7 @@ iso9660_fs_readdir (CdIo_t *p_cdio, const char psz_path[], bool b_mode2)
       {
 	iso9660_dir_t *p_iso9660_dir = (void *) &_dirbuf[offset];
 	iso9660_stat_t *p_iso9660_stat;
-	
+
 	if (!iso9660_get_dir_len(p_iso9660_dir))
 	  {
 	    offset++;
@@ -1291,7 +1289,7 @@ iso9660_fs_readdir (CdIo_t *p_cdio, const char psz_path[], bool b_mode2)
 	  }
 
 	p_iso9660_stat = _iso9660_dir_to_statbuf(p_iso9660_dir, dunno,
-						 p_env->i_joliet_level);
+						 p_env->u_joliet_level);
 	_cdio_list_append (retval, p_iso9660_stat);
 
 	offset += iso9660_get_dir_len(p_iso9660_dir);
@@ -1305,11 +1303,11 @@ iso9660_fs_readdir (CdIo_t *p_cdio, const char psz_path[], bool b_mode2)
   }
 }
 
-/*! 
+/*!
   Read psz_path (a directory) and return a list of iso9660_stat_t
   of the files inside that. The caller must free the returned result.
 */
-CdioList_t * 
+CdioList_t *
 iso9660_ifs_readdir (iso9660_t *p_iso, const char psz_path[])
 {
   iso9660_stat_t *p_stat;
@@ -1340,17 +1338,17 @@ iso9660_ifs_readdir (iso9660_t *p_iso, const char psz_path[])
       }
 
     ret = iso9660_iso_seek_read (p_iso, _dirbuf, p_stat->lsn, p_stat->secsize);
-    if (ret != ISO_BLOCKSIZE*p_stat->secsize) 
+    if (ret != ISO_BLOCKSIZE*p_stat->secsize)
 	  {
 	    free (_dirbuf);
 	    return NULL;
 	  }
-    
+
     while (offset < (p_stat->secsize * ISO_BLOCKSIZE))
       {
 	iso9660_dir_t *p_iso9660_dir = (void *) &_dirbuf[offset];
 	iso9660_stat_t *p_iso9660_stat;
-	
+
 	if (!iso9660_get_dir_len(p_iso9660_dir))
 	  {
 	    offset++;
@@ -1358,9 +1356,9 @@ iso9660_ifs_readdir (iso9660_t *p_iso, const char psz_path[])
 	  }
 
 	p_iso9660_stat = _iso9660_dir_to_statbuf(p_iso9660_dir, p_iso->b_xa,
-						 p_iso->i_joliet_level);
+						 p_iso->u_joliet_level);
 
-	if (p_iso9660_stat) 
+	if (p_iso9660_stat)
 	  _cdio_list_append (retval, p_iso9660_stat);
 
 	offset += iso9660_get_dir_len(p_iso9660_dir);
@@ -1380,7 +1378,7 @@ iso9660_ifs_readdir (iso9660_t *p_iso, const char psz_path[])
   }
 }
 
-typedef CdioList_t * (iso9660_readdir_t) 
+typedef CdioList_t * (iso9660_readdir_t)
   (void *p_image,  const char * psz_path);
 
 static iso9660_stat_t *
@@ -1391,23 +1389,23 @@ find_lsn_recurse (void *p_image, iso9660_readdir_t iso9660_readdir,
   CdioList_t *entlist = iso9660_readdir (p_image, psz_path);
   CdioList_t *dirlist =  _cdio_list_new ();
   CdioListNode_t *entnode;
-    
+
   cdio_assert (entlist != NULL);
 
   /* iterate over each entry in the directory */
-  
+
   _CDIO_LIST_FOREACH (entnode, entlist)
     {
       iso9660_stat_t *statbuf = _cdio_list_node_data (entnode);
       const char *psz_filename  = (char *) statbuf->filename;
       unsigned int len = strlen(psz_path) + strlen(psz_filename)+2;
-      
+
       if (*ppsz_full_filename != NULL) free(*ppsz_full_filename);
       *ppsz_full_filename = calloc(1, len);
       snprintf (*ppsz_full_filename, len, "%s%s/", psz_path, psz_filename);
 
       if (statbuf->type == _STAT_DIR
-          && strcmp ((char *) statbuf->filename, ".") 
+          && strcmp ((char *) statbuf->filename, ".")
           && strcmp ((char *) statbuf->filename, "..")) {
         _cdio_list_append (dirlist, strdup(*ppsz_full_filename));
       }
@@ -1425,7 +1423,7 @@ find_lsn_recurse (void *p_image, iso9660_readdir_t iso9660_readdir,
         _cdio_list_free (dirlist, true);
         return ret_stat;
       }
-      
+
     }
 
   _cdio_list_free (entlist, true);
@@ -1438,7 +1436,7 @@ find_lsn_recurse (void *p_image, iso9660_readdir_t iso9660_readdir,
       iso9660_stat_t *ret_stat;
       free(*ppsz_full_filename);
       *ppsz_full_filename = NULL;
-      ret_stat = find_lsn_recurse (p_image, iso9660_readdir, 
+      ret_stat = find_lsn_recurse (p_image, iso9660_readdir,
 				   psz_path_prefix, lsn,
 				   ppsz_full_filename);
 
@@ -1448,7 +1446,7 @@ find_lsn_recurse (void *p_image, iso9660_readdir_t iso9660_readdir,
       }
     }
 
-  if (*ppsz_full_filename != NULL) {      
+  if (*ppsz_full_filename != NULL) {
     free(*ppsz_full_filename);
     *ppsz_full_filename = NULL;
   }
@@ -1466,7 +1464,7 @@ iso9660_stat_t *
 iso9660_fs_find_lsn(CdIo_t *p_cdio, lsn_t i_lsn)
 {
   char *psz_full_filename = NULL;
-  return find_lsn_recurse (p_cdio, (iso9660_readdir_t *) iso9660_fs_readdir, 
+  return find_lsn_recurse (p_cdio, (iso9660_readdir_t *) iso9660_fs_readdir,
 			   "/", i_lsn, &psz_full_filename);
 }
 
@@ -1480,7 +1478,7 @@ iso9660_stat_t *
 iso9660_fs_find_lsn_with_path(CdIo_t *p_cdio, lsn_t i_lsn,
 			      /*out*/ char **ppsz_full_filename)
 {
-  return find_lsn_recurse (p_cdio, (iso9660_readdir_t *) iso9660_fs_readdir, 
+  return find_lsn_recurse (p_cdio, (iso9660_readdir_t *) iso9660_fs_readdir,
 			   "/", i_lsn, ppsz_full_filename);
 }
 
@@ -1494,7 +1492,7 @@ iso9660_stat_t *
 iso9660_ifs_find_lsn(iso9660_t *p_iso, lsn_t i_lsn)
 {
   char *psz_full_filename = NULL;
-  return find_lsn_recurse (p_iso, (iso9660_readdir_t *) iso9660_ifs_readdir, 
+  return find_lsn_recurse (p_iso, (iso9660_readdir_t *) iso9660_ifs_readdir,
 			   "/", i_lsn, &psz_full_filename);
 }
 
@@ -1508,15 +1506,15 @@ iso9660_stat_t *
 iso9660_ifs_find_lsn_with_path(iso9660_t *p_iso, lsn_t i_lsn,
 			       /*out*/ char **ppsz_full_filename)
 {
-  return find_lsn_recurse (p_iso, (iso9660_readdir_t *) iso9660_ifs_readdir, 
+  return find_lsn_recurse (p_iso, (iso9660_readdir_t *) iso9660_ifs_readdir,
 			   "/", i_lsn, ppsz_full_filename);
 }
 
 /*!
   Return true if ISO 9660 image has extended attrributes (XA).
 */
-bool 
-iso9660_ifs_is_xa (const iso9660_t * p_iso) 
+bool
+iso9660_ifs_is_xa (const iso9660_t * p_iso)
 {
   if (!p_iso) return false;
   return yep == p_iso->b_xa;

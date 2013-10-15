@@ -216,6 +216,7 @@ typedef struct {
 	// TODO: use a bitmask and #define tests for the following
 	uint8_t winpe;
 	BOOL has_4GB_file;
+	BOOL has_long_filename;
 	BOOL has_bootmgr;
 	BOOL has_efi;
 	BOOL has_win7_efi;

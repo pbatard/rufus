@@ -144,7 +144,7 @@ cdio_get_joliet_level(const CdIo_t *p_cdio)
   {
     const generic_img_private_t *p_env
       = (generic_img_private_t *) (p_cdio->env);
-    return p_env->i_joliet_level;
+    return p_env->u_joliet_level;
   }
 }
 

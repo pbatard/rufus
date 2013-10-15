@@ -38,8 +38,8 @@
 
 cdio_log_level_t cdio_loglevel_default = CDIO_LOG_WARN;
 
-static void
-default_cdio_log_handler(cdio_log_level_t level, const char message[])
+extern void
+cdio_default_log_handler(cdio_log_level_t level, const char message[])
 {
   switch (level)
     {
@@ -80,7 +80,7 @@ default_cdio_log_handler(cdio_log_level_t level, const char message[])
   fflush (stdout);
 }
 
-static cdio_log_handler_t _handler = default_cdio_log_handler;
+cdio_log_handler_t _handler = cdio_default_log_handler;
 
 cdio_log_handler_t
 cdio_log_set_handler(cdio_log_handler_t new_handler)
@@ -102,7 +102,7 @@ cdio_logv(cdio_log_level_t level, const char format[], va_list args)
     cdio_assert_not_reached ();
 
   in_recursion = 1;
-  
+
   vsnprintf(buf, sizeof(buf)-1, format, args);
 
   _handler(level, buf);
@@ -127,7 +127,7 @@ cdio_ ## level (const char format[], ...) \
   va_start (args, format); \
   cdio_logv (CDIO_LOG_ ## LEVEL, format, args); \
   va_end (args); \
-} 
+}
 
 CDIO_LOG_TEMPLATE(debug, DEBUG)
 CDIO_LOG_TEMPLATE(info, INFO)
@@ -137,7 +137,7 @@ CDIO_LOG_TEMPLATE(error, ERROR)
 #undef CDIO_LOG_TEMPLATE
 
 
-/* 
+/*
  * Local variables:
  *  c-file-style: "gnu"
  *  tab-width: 8

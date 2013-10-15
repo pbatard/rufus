@@ -1,6 +1,5 @@
 /*
-  Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2009
-  Rocky Bernstein <rocky@gnu.org>
+  Copyright (C) 2003-2009, 2013 Rocky Bernstein <rocky@gnu.org>
   Copyright (C) 2000 Herbert Valerio Riedel <hvr@gnu.org>
 
   This program is free software: you can redistribute it and/or modify
@@ -19,7 +18,7 @@
 
 /*! String inside frame which identifies an ISO 9660 filesystem. This
     string is the "id" field of an iso9660_pvd_t or an iso9660_svd_t.
-    Note should come *before* #include <cdio/iso9660.h> which does 
+    Note should come *before* #include <cdio/iso9660.h> which does
     a #define of this name.
 */
 const char ISO_STANDARD_ID[] = {'C', 'D', '0', '0', '1'};
@@ -77,7 +76,7 @@ timegm(struct tm *tm)
 {
   time_t ret;
   char *tz;
-  
+
   tz = getenv("TZ");
   setenv("TZ", "UTC", 1);
   tzset();
@@ -158,11 +157,11 @@ strip_trail (const char str[], size_t n)
 }
 
 static void
-pathtable_get_size_and_entries(const void *pt, unsigned int *size, 
+pathtable_get_size_and_entries(const void *pt, unsigned int *size,
                                unsigned int *entries);
 
 /*!
-  Get time structure from structure in an ISO 9660 directory index 
+  Get time structure from structure in an ISO 9660 directory index
   record. Even though tm_wday and tm_yday fields are not explicitly in
   idr_date, the are calculated from the other fields.
 
@@ -175,10 +174,10 @@ iso9660_get_dtime (const iso9660_dtime_t *idr_date, bool b_localtime,
 {
   if (!idr_date) return false;
 
-  /* 
-     Section 9.1.5 of ECMA 119 says: 
+  /*
+     Section 9.1.5 of ECMA 119 says:
      If all seven numbers are zero, it shall mean that the date and
-     time are not specified. 
+     time are not specified.
 
      HACK: However we've seen it happen that everything except gmtoff
      is zero and the expected date is the beginning of the epoch. So
@@ -192,11 +191,11 @@ iso9660_get_dtime (const iso9660_dtime_t *idr_date, bool b_localtime,
     time_t t = 0;
     struct tm temp_tm;
     localtime_r(&t, &temp_tm);
-    
+
     memcpy(p_tm, &temp_tm, sizeof(struct tm));
     return true;
   }
-  
+
   memset(p_tm, 0, sizeof(struct tm));
 
   p_tm->tm_year   = idr_date->dt_year;
@@ -214,7 +213,7 @@ iso9660_get_dtime (const iso9660_dtime_t *idr_date, bool b_localtime,
     struct tm temp_tm;
 
     t = timegm(p_tm);
-    
+
     if (b_localtime)
       localtime_r(&t, &temp_tm);
     else
@@ -227,7 +226,7 @@ iso9660_get_dtime (const iso9660_dtime_t *idr_date, bool b_localtime,
   return true;
 }
 
-/* 
+/*
    A note regarding the strange strtol() testing below as pointed out SMS.
    From man strtol:
 
@@ -253,13 +252,13 @@ iso9660_get_dtime (const iso9660_dtime_t *idr_date, bool b_localtime,
       return false;                                                     \
     p_tm->TM_FIELD = tmp + ADD_CONSTANT;                                \
   }
-    
+
 /*!
   Get "long" time in format used in ISO 9660 primary volume descriptor
-  from a Unix time structure. 
+  from a Unix time structure.
 */
 bool
-iso9660_get_ltime (const iso9660_ltime_t *p_ldate, 
+iso9660_get_ltime (const iso9660_ltime_t *p_ldate,
                    /*out*/ struct tm *p_tm)
 {
   if (!p_tm) return false;
@@ -297,10 +296,10 @@ iso9660_get_ltime (const iso9660_ltime_t *p_ldate,
 /*!
   Set time in format used in ISO 9660 directory index record
   from a Unix time structure. timezone is given as an offset
-  correction in minutes. 
+  correction in minutes.
 */
 void
-iso9660_set_dtime_with_timezone (const struct tm *p_tm, 
+iso9660_set_dtime_with_timezone (const struct tm *p_tm,
                                  int time_zone,
                                  /*out*/ iso9660_dtime_t *p_idr_date)
 {
@@ -320,12 +319,12 @@ iso9660_set_dtime_with_timezone (const struct tm *p_tm,
   p_idr_date->dt_gmtoff = time_zone / 15;
 
   if (p_idr_date->dt_gmtoff < -48 ) {
-    
-    cdio_warn ("Converted ISO 9660 timezone %d is less than -48. Adjusted", 
+
+    cdio_warn ("Converted ISO 9660 timezone %d is less than -48. Adjusted",
                p_idr_date->dt_gmtoff);
     p_idr_date->dt_gmtoff = -48;
   } else if (p_idr_date->dt_gmtoff > 52) {
-    cdio_warn ("Converted ISO 9660 timezone %d is over 52. Adjusted", 
+    cdio_warn ("Converted ISO 9660 timezone %d is over 52. Adjusted",
                p_idr_date->dt_gmtoff);
     p_idr_date->dt_gmtoff = 52;
   }
@@ -342,7 +341,7 @@ iso9660_set_dtime(const struct tm *p_tm, /*out*/ iso9660_dtime_t *p_idr_date)
 #ifdef HAVE_TM_GMTOFF
     /* Convert seconds to minutes */
     time_zone = p_tm->tm_gmtoff / 60;
-#else 
+#else
     time_zone = (p_tm->tm_isdst > 0) ? -60 : 0;
 #endif
   }
@@ -352,21 +351,21 @@ iso9660_set_dtime(const struct tm *p_tm, /*out*/ iso9660_dtime_t *p_idr_date)
 /*!
   Set "long" time in format used in ISO 9660 primary volume descriptor
   from a Unix time structure. timezone is given as an offset
-  correction in minutes. 
+  correction in minutes.
 */
 void
-iso9660_set_ltime_with_timezone(const struct tm *p_tm, 
+iso9660_set_ltime_with_timezone(const struct tm *p_tm,
                                 int time_zone,
                                 /*out*/ iso9660_ltime_t *pvd_date)
 {
-  char *_pvd_date = (char *) pvd_date; 
+  char *_pvd_date = (char *) pvd_date;
 
   memset (_pvd_date, '0', 16);
   pvd_date->lt_gmtoff = (iso712_t) 0; /* Start out with time zone GMT. */
 
   if (!p_tm) return;
 
-  snprintf(_pvd_date, 17, 
+  snprintf(_pvd_date, 17,
            "%4.4d%2.2d%2.2d" "%2.2d%2.2d%2.2d" "%2.2d",
            p_tm->tm_year + 1900, p_tm->tm_mon + 1, p_tm->tm_mday,
            p_tm->tm_hour, p_tm->tm_min, p_tm->tm_sec,
@@ -375,12 +374,12 @@ iso9660_set_ltime_with_timezone(const struct tm *p_tm,
   /* Set time zone in 15-minute interval encoding. */
   pvd_date->lt_gmtoff -= (time_zone / 15);
   if (pvd_date->lt_gmtoff < -48 ) {
-    
-    cdio_warn ("Converted ISO 9660 timezone %d is less than -48. Adjusted", 
+
+    cdio_warn ("Converted ISO 9660 timezone %d is less than -48. Adjusted",
                (int) pvd_date->lt_gmtoff);
     pvd_date->lt_gmtoff = -48;
   } else if (pvd_date->lt_gmtoff > 52) {
-    cdio_warn ("Converted ISO 9660 timezone %d is over 52. Adjusted", 
+    cdio_warn ("Converted ISO 9660 timezone %d is over 52. Adjusted",
                (int) pvd_date->lt_gmtoff);
     pvd_date->lt_gmtoff = 52;
   }
@@ -416,7 +415,7 @@ iso9660_set_ltime(const struct tm *p_tm, /*out*/ iso9660_ltime_t *pvd_date)
    @return length of the translated string is returned. It will be no greater
    than the length of psz_oldname.
 */
-int 
+int
 iso9660_name_translate(const char *psz_oldname, char *psz_newname)
 {
   return iso9660_name_translate_ext(psz_oldname, psz_newname, 0);
@@ -432,14 +431,14 @@ iso9660_name_translate(const char *psz_oldname, char *psz_newname)
    @param psz_oldname the ISO-9660 filename to be translated.
    @param psz_newname returned string. The caller allocates this and
    it should be at least the size of psz_oldname.
-   @param i_joliet_level 0 if not using Joliet Extension. Otherwise the
+   @param u_joliet_level 0 if not using Joliet Extension. Otherwise the
    Joliet level.
    @return length of the translated string is returned. It will be no greater
    than the length of psz_oldname.
 */
-int 
-iso9660_name_translate_ext(const char *psz_oldname, char *psz_newname, 
-                           uint8_t i_joliet_level)
+int
+iso9660_name_translate_ext(const char *psz_oldname, char *psz_newname,
+                           uint8_t u_joliet_level)
 {
   int len = strlen(psz_oldname);
   int i;
@@ -449,35 +448,35 @@ iso9660_name_translate_ext(const char *psz_oldname, char *psz_newname,
     unsigned char c = psz_oldname[i];
     if (!c)
       break;
-    
+
     /* Lower case, unless we have Joliet extensions.  */
-    if (!i_joliet_level && isupper(c)) c = tolower(c);
-    
+    if (!u_joliet_level && isupper(c)) c = tolower(c);
+
     /* Drop trailing '.;1' (ISO 9660:1988 7.5.1 requires period) */
-    if (c == '.' && i == len - 3 
+    if (c == '.' && i == len - 3
         && psz_oldname[i + 1] == ';' && psz_oldname[i + 2] == '1')
       break;
-    
+
     /* Drop trailing ';1' */
     if (c == ';' && i == len - 2 && psz_oldname[i + 1] == '1')
       break;
-    
+
     /* Convert remaining ';' to '.' */
     if (c == ';')
       c = '.';
-    
+
     psz_newname[i] = c;
   }
   psz_newname[i] = '\0';
   return i;
 }
 
-/*!  
+/*!
   Pad string src with spaces to size len and copy this to dst. If
   len is less than the length of src, dst will be truncated to the
   first len characters of src.
 
-  src can also be scanned to see if it contains only ACHARs, DCHARs, 
+  src can also be scanned to see if it contains only ACHARs, DCHARs,
   7-bit ASCII chars depending on the enumeration _check.
 
   In addition to getting changed, dst is the return value.
@@ -503,7 +502,7 @@ iso9660_strncpy_pad(char dst[], const char src[], size_t len,
       for (idx = 0; src[idx]; idx++)
         if ((int8_t) src[idx] < 0)
           {
-            cdio_warn ("string '%s' fails 7bit constraint (pos = %d)", 
+            cdio_warn ("string '%s' fails 7bit constraint (pos = %d)",
                       src, idx);
             break;
           }
@@ -537,7 +536,7 @@ iso9660_strncpy_pad(char dst[], const char src[], size_t len,
   rlen = strlen (src);
 
   if (rlen > len)
-    cdio_warn ("string '%s' is getting truncated to %d characters",  
+    cdio_warn ("string '%s' is getting truncated to %d characters",
               src, (unsigned int) len);
 
   strncpy (dst, src, len);
@@ -564,9 +563,9 @@ iso9660_is_dchar (int c)
 
 
 /*!
-   Return true if c is an ACHAR - 
-   These are the DCHAR's plus some ASCII symbols including the space 
-   symbol.   
+   Return true if c is an ACHAR -
+   These are the DCHAR's plus some ASCII symbols including the space
+   symbol.
 */
 bool
 iso9660_is_achar (int c)
@@ -580,7 +579,7 @@ iso9660_is_achar (int c)
   return true;
 }
 
-void 
+void
 iso9660_set_evd(void *pd)
 {
   iso_volume_descriptor_t ied;
@@ -588,11 +587,11 @@ iso9660_set_evd(void *pd)
   cdio_assert (sizeof(iso_volume_descriptor_t) == ISO_BLOCKSIZE);
 
   cdio_assert (pd != NULL);
-  
+
   memset(&ied, 0, sizeof(ied));
 
   ied.type = to_711(ISO_VD_END);
-  iso9660_strncpy_pad (ied.id, ISO_STANDARD_ID, sizeof(ied.id), 
+  iso9660_strncpy_pad (ied.id, ISO_STANDARD_ID, sizeof(ied.id),
                        ISO9660_DCHARS);
   ied.version = to_711(ISO_VERSION);
 
@@ -642,25 +641,25 @@ iso9660_set_pvd(void *pd,
   ipd.logical_block_size = to_723(ISO_BLOCKSIZE);
 
   ipd.path_table_size = to_733(path_table_size);
-  ipd.type_l_path_table = to_731(path_table_l_extent); 
-  ipd.type_m_path_table = to_732(path_table_m_extent); 
-  
+  ipd.type_l_path_table = to_731(path_table_l_extent);
+  ipd.type_m_path_table = to_732(path_table_m_extent);
+
   /* root_directory_record doesn't contain the 1-byte filename,
      so we add one for that. */
   cdio_assert (sizeof(ipd.root_directory_record) == 33);
-  memcpy(&(ipd.root_directory_record), root_dir, 
+  memcpy(&(ipd.root_directory_record), root_dir,
          sizeof(ipd.root_directory_record));
   ipd.root_directory_filename='\0';
   ipd.root_directory_record.length = sizeof(ipd.root_directory_record)+1;
-  iso9660_strncpy_pad (ipd.volume_set_id, VOLUME_SET_ID, 
+  iso9660_strncpy_pad (ipd.volume_set_id, VOLUME_SET_ID,
                        ISO_MAX_VOLUMESET_ID, ISO9660_DCHARS);
 
-  iso9660_strncpy_pad (ipd.publisher_id, publisher_id, ISO_MAX_PUBLISHER_ID, 
+  iso9660_strncpy_pad (ipd.publisher_id, publisher_id, ISO_MAX_PUBLISHER_ID,
                        ISO9660_ACHARS);
-  iso9660_strncpy_pad (ipd.preparer_id, preparer_id, ISO_MAX_PREPARER_ID, 
+  iso9660_strncpy_pad (ipd.preparer_id, preparer_id, ISO_MAX_PREPARER_ID,
                        ISO9660_ACHARS);
-  iso9660_strncpy_pad (ipd.application_id, application_id, 
-                       ISO_MAX_APPLICATION_ID, ISO9660_ACHARS); 
+  iso9660_strncpy_pad (ipd.application_id, application_id,
+                       ISO_MAX_APPLICATION_ID, ISO9660_ACHARS);
 
   iso9660_strncpy_pad (ipd.copyright_file_id    , "", 37, ISO9660_DCHARS);
   iso9660_strncpy_pad (ipd.abstract_file_id     , "", 37, ISO9660_DCHARS);
@@ -698,7 +697,7 @@ iso9660_dir_calc_record_size(unsigned int namelen, unsigned int su_len)
 
 void
 iso9660_dir_add_entry_su(void *dir,
-                         const char filename[], 
+                         const char filename[],
                          uint32_t extent,
                          uint32_t size,
                          uint8_t file_flags,
@@ -716,7 +715,7 @@ iso9660_dir_add_entry_su(void *dir,
 
   if (!dsize && !idr->length)
     dsize = ISO_BLOCKSIZE; /* for when dir lacks '.' entry */
-  
+
   cdio_assert (dsize > 0 && !(dsize % ISO_BLOCKSIZE));
   cdio_assert (dir != NULL);
   cdio_assert (extent > 17);
@@ -759,23 +758,23 @@ iso9660_dir_add_entry_su(void *dir,
   cdio_assert (offset + length <= dsize);
 
   idr = (iso9660_dir_t *) &dir8[offset];
-  
-  cdio_assert (offset+length < dsize); 
-  
+
+  cdio_assert (offset+length < dsize);
+
   memset(idr, 0, length);
 
   idr->length = to_711(length);
   idr->extent = to_733(extent);
   idr->size = to_733(size);
-  
+
   gmtime_r(entry_time, &temp_tm);
   iso9660_set_dtime (&temp_tm, &(idr->recording_time));
-  
+
   idr->file_flags = to_711(file_flags);
 
   idr->volume_sequence_number = to_723(1);
 
-  idr->filename.len = to_711(strlen(filename) 
+  idr->filename.len = to_711(strlen(filename)
                              ? strlen(filename) : 1); /* working hack! */
 
   memcpy(&idr->filename.str[1], filename, from_711(idr->filename.len));
@@ -790,11 +789,11 @@ iso9660_dir_init_new (void *dir,
                       uint32_t psize,
                       const time_t *dir_time)
 {
-  iso9660_dir_init_new_su (dir, self, ssize, NULL, 0, parent, psize, NULL, 
+  iso9660_dir_init_new_su (dir, self, ssize, NULL, 0, parent, psize, NULL,
                            0, dir_time);
 }
 
-void 
+void
 iso9660_dir_init_new_su (void *dir,
                          uint32_t self,
                          uint32_t ssize,
@@ -813,40 +812,40 @@ iso9660_dir_init_new_su (void *dir,
   memset (dir, 0, ssize);
 
   /* "\0" -- working hack due to padding  */
-  iso9660_dir_add_entry_su (dir, "\0", self, ssize, ISO_DIRECTORY, ssu_data, 
-                            ssu_size, dir_time); 
+  iso9660_dir_add_entry_su (dir, "\0", self, ssize, ISO_DIRECTORY, ssu_data,
+                            ssu_size, dir_time);
 
-  iso9660_dir_add_entry_su (dir, "\1", parent, psize, ISO_DIRECTORY, psu_data, 
+  iso9660_dir_add_entry_su (dir, "\1", parent, psize, ISO_DIRECTORY, psu_data,
                             psu_size, dir_time);
 }
 
 /* Zero's out pathable. Do this first.  */
-void 
+void
 iso9660_pathtable_init (void *pt)
 {
   cdio_assert (sizeof (iso_path_table_t) == 8);
 
   cdio_assert (pt != NULL);
-  
+
   memset (pt, 0, ISO_BLOCKSIZE); /* fixme */
 }
 
 /*!
   Returns POSIX mode bitstring for a given file.
 */
-mode_t 
-iso9660_get_posix_filemode(const iso9660_stat_t *p_iso_dirent) 
+mode_t
+iso9660_get_posix_filemode(const iso9660_stat_t *p_iso_dirent)
 {
   mode_t mode = 0;
 
-#ifdef HAVE_ROCK 
-  if (yep == p_iso_dirent->rr.b3_rock) { 
-      return iso9660_get_posix_filemode_from_rock(&p_iso_dirent->rr); 
-  } else 
-#endif 
-  if (p_iso_dirent->b_xa) { 
-    return iso9660_get_posix_filemode_from_xa(p_iso_dirent->xa.attributes); 
-  } 
+#ifdef HAVE_ROCK
+  if (yep == p_iso_dirent->rr.b3_rock) {
+      return iso9660_get_posix_filemode_from_rock(&p_iso_dirent->rr);
+  } else
+#endif
+  if (p_iso_dirent->b_xa) {
+    return iso9660_get_posix_filemode_from_xa(p_iso_dirent->xa.attributes);
+  }
   return mode;
 }
 
@@ -859,7 +858,7 @@ pathtable_get_entry (const void *pt, unsigned int entrynum)
 
   cdio_assert (pt != NULL);
 
-  while (from_711 (*tmp)) 
+  while (from_711 (*tmp))
     {
       if (count == entrynum)
         break;
@@ -881,7 +880,7 @@ pathtable_get_entry (const void *pt, unsigned int entrynum)
 }
 
 void
-pathtable_get_size_and_entries (const void *pt, 
+pathtable_get_size_and_entries (const void *pt,
                                 unsigned int *size,
                                 unsigned int *entries)
 {
@@ -891,7 +890,7 @@ pathtable_get_size_and_entries (const void *pt,
 
   cdio_assert (pt != NULL);
 
-  while (from_711 (*tmp)) 
+  while (from_711 (*tmp))
     {
       offset += sizeof (iso_path_table_t);
       offset += from_711 (*tmp);
@@ -916,13 +915,13 @@ iso9660_pathtable_get_size (const void *pt)
   return size;
 }
 
-uint16_t 
-iso9660_pathtable_l_add_entry (void *pt, 
-                               const char name[], 
-                               uint32_t extent, 
+uint16_t
+iso9660_pathtable_l_add_entry (void *pt,
+                               const char name[],
+                               uint32_t extent,
                                uint16_t parent)
 {
-  iso_path_table_t *ipt = 
+  iso_path_table_t *ipt =
     (iso_path_table_t *)((char *)pt + iso9660_pathtable_get_size (pt));
   size_t name_len = strlen (name) ? strlen (name) : 1;
   unsigned int entrynum = 0;
@@ -940,21 +939,21 @@ iso9660_pathtable_l_add_entry (void *pt,
 
   if (entrynum > 1)
     {
-      const iso_path_table_t *ipt2 
+      const iso_path_table_t *ipt2
         = pathtable_get_entry (pt, entrynum - 2);
 
       cdio_assert (ipt2 != NULL);
 
       cdio_assert (from_721 (ipt2->parent) <= parent);
     }
-  
+
   return entrynum;
 }
 
-uint16_t 
-iso9660_pathtable_m_add_entry (void *pt, 
-                               const char name[], 
-                               uint32_t extent, 
+uint16_t
+iso9660_pathtable_m_add_entry (void *pt,
+                               const char name[],
+                               uint32_t extent,
                                uint16_t parent)
 {
   iso_path_table_t *ipt =
@@ -975,7 +974,7 @@ iso9660_pathtable_m_add_entry (void *pt,
 
   if (entrynum > 1)
     {
-      const iso_path_table_t *ipt2 
+      const iso_path_table_t *ipt2
         = pathtable_get_entry (pt, entrynum - 2);
 
       cdio_assert (ipt2 != NULL);
@@ -989,10 +988,10 @@ iso9660_pathtable_m_add_entry (void *pt,
 /*!
   Check that pathname is a valid ISO-9660 directory name.
 
-  A valid directory name should not start out with a slash (/), 
-  dot (.) or null byte, should be less than 37 characters long, 
-  have no more than 8 characters in a directory component 
-  which is separated by a /, and consist of only DCHARs. 
+  A valid directory name should not start out with a slash (/),
+  dot (.) or null byte, should be less than 37 characters long,
+  have no more than 8 characters in a directory component
+  which is separated by a /, and consist of only DCHARs.
  */
 bool
 iso9660_dirname_valid_p (const char pathname[])
@@ -1007,7 +1006,7 @@ iso9660_dirname_valid_p (const char pathname[])
 
   if (strlen (pathname) > MAX_ISOPATHNAME)
     return false;
-  
+
   len = 0;
   for (; *p; p++)
     if (iso9660_is_dchar (*p))
@@ -1032,14 +1031,14 @@ iso9660_dirname_valid_p (const char pathname[])
 }
 
 /*!
-  Check that pathname is a valid ISO-9660 pathname.  
+  Check that pathname is a valid ISO-9660 pathname.
 
   A valid pathname contains a valid directory name, if one appears and
   the filename portion should be no more than 8 characters for the
   file prefix and 3 characters in the extension (or portion after a
   dot). There should be exactly one dot somewhere in the filename
   portion and the filename should be composed of only DCHARs.
-  
+
   True is returned if pathname is valid.
  */
 bool
@@ -1053,7 +1052,7 @@ iso9660_pathname_valid_p (const char pathname[])
     {
       bool rc;
       char *_tmp = strdup (pathname);
-      
+
       *strrchr (_tmp, '/') = '\0';
 
       rc = iso9660_dirname_valid_p (_tmp);
@@ -1101,7 +1100,7 @@ iso9660_pathname_valid_p (const char pathname[])
   return true;
 }
 
-/*!  
+/*!
   Take pathname and a version number and turn that into a ISO-9660
   pathname.  (That's just the pathname followd by ";" and the version
   number. For example, mydir/file.ext -> mydir/file.ext;1 for version
@@ -1111,7 +1110,7 @@ char *
 iso9660_pathname_isofy (const char pathname[], uint16_t version)
 {
   char tmpbuf[1024] = { 0, };
-    
+
   cdio_assert (strlen (pathname) < (sizeof (tmpbuf) - sizeof (";65535")));
 
   snprintf (tmpbuf, sizeof(tmpbuf), "%s;%d", pathname, version);
@@ -1121,9 +1120,9 @@ iso9660_pathname_isofy (const char pathname[], uint16_t version)
 
 /*!
   Return the PVD's application ID.
-  NULL is returned if there is some problem in getting this. 
+  NULL is returned if there is some problem in getting this.
 */
-char * 
+char *
 iso9660_get_application_id(iso9660_pvd_t *p_pvd)
 {
   if (NULL==p_pvd) return NULL;
@@ -1132,7 +1131,7 @@ iso9660_get_application_id(iso9660_pvd_t *p_pvd)
 
 #ifdef FIXME
 lsn_t
-iso9660_get_dir_extent(const iso9660_dir_t *idr) 
+iso9660_get_dir_extent(const iso9660_dir_t *idr)
 {
   if (NULL == idr) return 0;
   return from_733(idr->extent);
@@ -1140,7 +1139,7 @@ iso9660_get_dir_extent(const iso9660_dir_t *idr)
 #endif
 
 uint8_t
-iso9660_get_dir_len(const iso9660_dir_t *idr) 
+iso9660_get_dir_len(const iso9660_dir_t *idr)
 {
   if (NULL == idr) return 0;
   return idr->length;
@@ -1148,7 +1147,7 @@ iso9660_get_dir_len(const iso9660_dir_t *idr)
 
 #ifdef FIXME
 uint8_t
-iso9660_get_dir_size(const iso9660_dir_t *idr) 
+iso9660_get_dir_size(const iso9660_dir_t *idr)
 {
   if (NULL == idr) return 0;
   return from_733(idr->size);
@@ -1156,50 +1155,50 @@ iso9660_get_dir_size(const iso9660_dir_t *idr)
 #endif
 
 uint8_t
-iso9660_get_pvd_type(const iso9660_pvd_t *pvd) 
+iso9660_get_pvd_type(const iso9660_pvd_t *pvd)
 {
   if (NULL == pvd) return 255;
   return(pvd->type);
 }
 
 const char *
-iso9660_get_pvd_id(const iso9660_pvd_t *pvd) 
+iso9660_get_pvd_id(const iso9660_pvd_t *pvd)
 {
   if (NULL == pvd) return "ERR";
   return(pvd->id);
 }
 
 int
-iso9660_get_pvd_space_size(const iso9660_pvd_t *pvd) 
+iso9660_get_pvd_space_size(const iso9660_pvd_t *pvd)
 {
   if (NULL == pvd) return 0;
   return from_733(pvd->volume_space_size);
 }
 
 int
-iso9660_get_pvd_block_size(const iso9660_pvd_t *pvd) 
+iso9660_get_pvd_block_size(const iso9660_pvd_t *pvd)
 {
   if (NULL == pvd) return 0;
   return from_723(pvd->logical_block_size);
 }
 
 /*! Return the primary volume id version number (of pvd).
-    If there is an error 0 is returned. 
+    If there is an error 0 is returned.
  */
 int
-iso9660_get_pvd_version(const iso9660_pvd_t *pvd) 
+iso9660_get_pvd_version(const iso9660_pvd_t *pvd)
 {
   if (NULL == pvd) return 0;
   return pvd->version;
 }
 
 /*! Return the LSN of the root directory for pvd.
-    If there is an error CDIO_INVALID_LSN is returned. 
+    If there is an error CDIO_INVALID_LSN is returned.
  */
 lsn_t
-iso9660_get_root_lsn(const iso9660_pvd_t *pvd) 
+iso9660_get_root_lsn(const iso9660_pvd_t *pvd)
 {
-  if (NULL == pvd) 
+  if (NULL == pvd)
     return CDIO_INVALID_LSN;
   else {
     const iso9660_dir_t *idr = &(pvd->root_directory_record);
@@ -1245,7 +1244,7 @@ iso9660_get_system_id(const iso9660_pvd_t *pvd)
   Return the PVD's volume ID.
 */
 char *
-iso9660_get_volume_id(const iso9660_pvd_t *pvd) 
+iso9660_get_volume_id(const iso9660_pvd_t *pvd)
 {
   if (NULL == pvd) return NULL;
   return strdup(strip_trail(pvd->volume_id, ISO_MAX_VOLUME_ID));
@@ -1253,7 +1252,7 @@ iso9660_get_volume_id(const iso9660_pvd_t *pvd)
 
 /*!
   Return the PVD's volumeset ID.
-  NULL is returned if there is some problem in getting this. 
+  NULL is returned if there is some problem in getting this.
 */
 char *
 iso9660_get_volumeset_id(const iso9660_pvd_t *pvd)
@@ -1263,7 +1262,7 @@ iso9660_get_volumeset_id(const iso9660_pvd_t *pvd)
 }
 
 
-/* 
+/*
  * Local variables:
  *  c-file-style: "gnu"
  *  tab-width: 8

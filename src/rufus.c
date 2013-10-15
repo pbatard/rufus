@@ -94,7 +94,7 @@ static BOOL existing_key = FALSE;	// For LGP set/restore
 static BOOL size_check = TRUE;
 static BOOL log_displayed = FALSE;
 static BOOL iso_provided = FALSE;
-extern BOOL force_large_fat32;
+extern BOOL force_large_fat32, enable_joliet, enable_rockridge;
 static int selection_default;
 static loc_cmd* selected_locale = NULL;
 char ClusterSizeLabel[MAX_CLUSTER_SIZES][64];
@@ -1041,8 +1041,10 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 		safe_free(iso_path);
 		goto out;
 	}
-	uprintf("ISO label: '%s'\r\n  Size: %lld bytes\r\n  Has a >4GB file: %s\r\n  Uses EFI: %s%s\r\n  Uses Bootmgr: %s\r\n  Uses WinPE: %s%s\r\n  Uses isolinux: %s %s\n",
-		iso_report.label, iso_report.projected_size, iso_report.has_4GB_file?"Yes":"No", (iso_report.has_efi || iso_report.has_win7_efi)?"Yes":"No", 
+	uprintf("ISO label: '%s'\r\n  Size: %lld bytes\r\n  Has a >64 chars filename: %s\r\n  Has a >4GB file: %s\r\n"
+		"  Uses EFI: %s%s\r\n  Uses Bootmgr: %s\r\n  Uses WinPE: %s%s\r\n  Uses isolinux: %s %s\n",
+		iso_report.label, iso_report.projected_size, iso_report.has_long_filename?"Yes":"No",
+		iso_report.has_4GB_file?"Yes":"No", (iso_report.has_efi || iso_report.has_win7_efi)?"Yes":"No", 
 		(iso_report.has_win7_efi && (!iso_report.has_efi))?" (win7_x64)":"", iso_report.has_bootmgr?"Yes":"No",
 		IS_WINPE(iso_report.winpe)?"Yes":"No", (iso_report.uses_minint)?" (with /minint)":"", iso_report.has_isolinux?"Yes":"No",
 		iso_report.has_syslinux_v5?"(v5.0 or later)":iso_report.has_isolinux?"(v4.x or earlier)":"");
@@ -2061,12 +2063,27 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 				existing_key = FALSE;
 				continue;
 			}
-			// Alt K => Toggle fake drive detection during bad blocks check
+			// Alt J => Toggle Joliet support for ISO9660 images
+			// Some ISOs (Ubuntu) have Joliet extensions but expect applications not to use them,
+			// due to their reliance on filenames that are > 64 chars (the Joliet max length for
+			// a file name). This option allows users to ignore Joliet when using such images.
+			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'J')) {
+				enable_joliet = !enable_joliet;
+				PrintStatus2000("Joliet support", enable_joliet);
+				continue;
+			}
+			// Alt K => Toggle Rock Ridge support for ISO9660 image
+			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'K')) {
+				enable_rockridge = !enable_rockridge;
+				PrintStatus2000("Rock Ridge support", enable_rockridge);
+				continue;
+			}
+			// Alt L => Toggle fake drive detection during bad blocks check
 			// By default, Rufus will check for fake USB flash drives that mistakenly present 
 			// more capacity than they already have by looping over the flash. This check which
 			// is enabled by default is performed by writing the block number sequence and reading
 			// it back during the bad block check.
-			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'K')) {
+			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'L')) {
 				detect_fakes = !detect_fakes;
 				PrintStatus2000(lmprintf(MSG_256), detect_fakes);
 				continue;
