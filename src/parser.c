@@ -187,21 +187,26 @@ static void get_loc_data_line(char* line)
 }
 
 /*
- * Parse a localization file, to construct the list of available locales.
- * The locale file must be UTF-8 with NO BOM.
- * TODO: merge this with the next call or factorize fopen
+ * Open a localization file and store its file name, with special case
+ * when dealing with the embedded loc file.
  */
-BOOL get_supported_locales(const char* filename)
+FILE* open_loc_file(const char* filename)
 {
-	wchar_t *wfilename = NULL;
 	FILE* fd = NULL;
-	BOOL r = FALSE;
-	char line[1024];
-	size_t i;
-	loc_cmd *lcmd = NULL, *last_lcmd = NULL;
-	long end_of_block;
-	
-	safe_strcpy(loc_filename, sizeof(loc_filename), filename);
+	wchar_t *wfilename = NULL;
+	const char* tmp_ext = ".tmp";
+
+	if (filename == NULL)
+		return NULL;
+
+	if (loc_filename != embedded_loc_filename) {
+		safe_free(loc_filename);
+	}
+	if (safe_strcmp(tmp_ext, &filename[safe_strlen(filename)-4]) == 0) {
+		loc_filename = embedded_loc_filename;
+	} else {
+		loc_filename = safe_strdup(filename);
+	}
 	wfilename = utf8_to_wchar(filename);
 	if (wfilename == NULL) {
 		uprintf("localization: could not convert '%s' filename to UTF-16\n", filename);
@@ -210,8 +215,29 @@ BOOL get_supported_locales(const char* filename)
 	fd = _wfopen(wfilename, L"r");
 	if (fd == NULL) {
 		uprintf("localization: could not open '%s'\n", filename);
-		goto out;
 	}
+
+out:
+	safe_free(wfilename);
+	return fd;
+}
+
+/*
+ * Parse a localization file, to construct the list of available locales.
+ * The locale file must be UTF-8 with NO BOM.
+ */
+BOOL get_supported_locales(const char* filename)
+{
+	FILE* fd = NULL;
+	BOOL r = FALSE;
+	char line[1024];
+	size_t i;
+	loc_cmd *lcmd = NULL, *last_lcmd = NULL;
+	long end_of_block;
+	
+	fd = open_loc_file(filename);
+	if (fd == NULL)
+		goto out;
 
 	loc_line_nr = 0;
 	line[0] = 0;
@@ -251,41 +277,39 @@ BOOL get_supported_locales(const char* filename)
 out:
 	if (fd != NULL)
 		fclose(fd);
-	safe_free(wfilename);
 	return r;
 }
 
 /*
  * Parse a locale section in a localization file (UTF-8, no BOM)
+ * NB: this call is reentrant for the "base" command support
  */
 char* get_loc_data_file(const char* filename, long offset, long end_offset, int start_line)
 {
-	wchar_t *wfilename = NULL;
 	size_t bufsize = 1024;
-	FILE* fd = NULL;
+	static FILE* fd = NULL;
 	char *ret = NULL, *buf = NULL;
 	size_t i = 0;
 	int r = 0, line_nr_incr = 1;
 	int c = 0, eol_char = 0;
-	BOOL eol = FALSE, escape_sequence = FALSE;
+	int old_loc_line_nr;
+	BOOL eol = FALSE, escape_sequence = FALSE, reentrant = (fd != NULL);
+	long cur_offset = -1;
 
-	if ((filename == NULL) || (filename[0] == 0))
-		return NULL;
-
-	free_dialog_list();
+	if (reentrant) {
+		// Called, from a 'b' command - no need to reopen the file,
+		// just save the current offset and current line number
+		cur_offset = ftell(fd);
+		old_loc_line_nr = loc_line_nr;
+	} else {
+		if ((filename == NULL) || (filename[0] == 0))
+			return NULL;
+		free_dialog_list();
+		fd = open_loc_file(filename);
+		if (fd == NULL)
+			goto out;
+	}
 	loc_line_nr = start_line;
-	safe_strcpy(loc_filename, sizeof(loc_filename), filename);
-	wfilename = utf8_to_wchar(filename);
-	if (wfilename == NULL) {
-		uprintf("localization: could not convert '%s' filename to UTF-16\n", filename);
-		goto out;
-	}
-	fd = _wfopen(wfilename, L"r");
-	if (fd == NULL) {
-		uprintf("localization: could not open '%s'\n", filename);
-		goto out;
-	}
-
 	buf = (char*) malloc(bufsize);
 	if (buf == NULL) {
 		uprintf("localization: could not allocate line buffer\n");
@@ -398,9 +422,14 @@ char* get_loc_data_file(const char* filename, long offset, long end_offset, int 
 	} while(1);
 
 out:
-	if (fd != NULL)
+	// Don't close on a reentrant call
+	if (reentrant) {
+		fseek(fd, cur_offset, SEEK_SET);
+		loc_line_nr = old_loc_line_nr;
+	} else if (fd != NULL) {
 		fclose(fd);
-	safe_free(wfilename);
+		fd = NULL;
+	}
 	safe_free(buf);
 	return ret;
 }

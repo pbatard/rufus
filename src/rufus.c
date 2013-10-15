@@ -1876,7 +1876,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	BOOL attached_console = FALSE;
 	BYTE* loc_data;
 	DWORD loc_size, Size;
-	char tmp_path[MAX_PATH], loc_file[MAX_PATH] = "";
+	char tmp_path[MAX_PATH], loc_file[MAX_PATH] = "", *locale_name = NULL;
 	char** argv = NULL;
 	wchar_t **wenv, **wargv;
 	PF_DECL(__wgetmainargs);
@@ -1893,33 +1893,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	uprintf("*** " APPLICATION_NAME " init ***\n");
 
-	// Init localization
-	init_localization();
-	loc_data = (BYTE*)GetResource(hMainInstance, MAKEINTRESOURCEA(IDR_LC_RUFUS_LOC), _RT_RCDATA, "rufus.loc", &loc_size, FALSE);
-	GetTempPathU(sizeof(tmp_path), tmp_path);
-	GetTempFileNameU(tmp_path, APPLICATION_NAME, 0, loc_file);
-
-	hFile = CreateFileU(loc_file, GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ|FILE_SHARE_WRITE,
-		NULL, CREATE_ALWAYS, 0, 0);
-	if ((hFile == INVALID_HANDLE_VALUE)|| (!WriteFile(hFile, loc_data, loc_size, &Size, 0)) || (loc_size != Size)) {
-		safe_closehandle(hFile);
-		uprintf("localization: unable to extract '%s': %s.\n", loc_file, WindowsErrorString());
-	} else {
-		safe_closehandle(hFile);
-		uprintf("localization: extracted data to '%s'\n", loc_file);
-		// TODO: Add a control for "X translation by Y"
-		if ( (!get_supported_locales(loc_file))
-//			  || ((selected_locale = get_locale_from_lcid(GetUserDefaultLCID())) == NULL) ) {
-			  || ((selected_locale = get_locale_from_name("French")) == NULL) ) {
-				  uprintf("FATAL: Could not access default locale!\n");
-				MessageBoxU(NULL, "The default locale data is missing. This application will now exit.",
-					"Fatal error", MB_ICONSTOP);
-				goto out;
-			}
-		uprintf("localization: using locale '%s'\n", selected_locale->txt[0]);
-		get_loc_data_file(loc_file, (long)selected_locale->num[0], (long)selected_locale->num[1], selected_locale->line_nr);
-	}
-
 	// Reattach the console, if we were started from commandline
 	if (AttachConsole(ATTACH_PARENT_PROCESS) != 0) {
 		attached_console = TRUE;
@@ -1930,7 +1903,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		printf("\n");
 	}
 
-	// We have to process the arguments before we acquire the lock
+	// We have to process the arguments before we acquire the lock and process the locale
 	PF_INIT(__wgetmainargs, msvcrt);
 	if (pf__wgetmainargs != NULL) {
 		pf__wgetmainargs(&argc, &wargv, &wenv, 1, &si);
@@ -1942,7 +1915,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 				wait_for_mutex = 150;	// Try to acquire the mutex for 15 seconds
 		}
 
-		while ((opt = getopt_long(argc, argv, "?fhi:w:", long_options, &option_index)) != EOF)
+		while ((opt = getopt_long(argc, argv, "?fhi:w:l:", long_options, &option_index)) != EOF)
 			switch (opt) {
 			case 'f':
 				enable_fixed_disks = TRUE;
@@ -1954,6 +1927,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 				} else {
 					printf("Could not find ISO image '%s'\n", optarg);
 				}
+				break;
+			case 'l':
+				// TODO: accept a locale code such as 0x409
+				locale_name = optarg;
 				break;
 			case 'w':
 				wait_for_mutex = atoi(optarg);
@@ -1967,6 +1944,44 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	} else {
 		uprintf("unable to access UTF-16 args");
 	}
+
+	// Retrieve the current application directory
+	GetCurrentDirectoryU(MAX_PATH, app_dir);
+
+	// Init localization
+	init_localization();
+	// Seek for a loc file in the current directory
+	if (GetFileAttributesU("rufus.loc") == INVALID_FILE_ATTRIBUTES) {
+		uprintf("loc file not found in current directory - embedded one will be used");
+
+		loc_data = (BYTE*)GetResource(hMainInstance, MAKEINTRESOURCEA(IDR_LC_RUFUS_LOC), _RT_RCDATA, "rufus.loc", &loc_size, FALSE);
+		GetTempPathU(sizeof(tmp_path), tmp_path);
+		GetTempFileNameU(tmp_path, APPLICATION_NAME, 0, loc_file);
+
+		hFile = CreateFileU(loc_file, GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ|FILE_SHARE_WRITE,
+			NULL, CREATE_ALWAYS, 0, 0);
+		if ((hFile == INVALID_HANDLE_VALUE)|| (!WriteFile(hFile, loc_data, loc_size, &Size, 0)) || (loc_size != Size)) {
+			safe_closehandle(hFile);
+			uprintf("localization: unable to extract '%s': %s.\n", loc_file, WindowsErrorString());
+		} else {
+			safe_closehandle(hFile);
+			uprintf("localization: extracted data to '%s'\n", loc_file);
+		}
+	} else {
+		safe_sprintf(loc_file, sizeof(loc_file), "%s\\rufus.loc", app_dir);
+		uprintf("using external loc file '%s'", loc_file);
+	}
+
+	if ( (!get_supported_locales(loc_file))
+	  || ((selected_locale = ((locale_name == NULL)?get_locale_from_lcid(GetUserDefaultLCID()):get_locale_from_name(locale_name))) == NULL) ) {
+		uprintf("FATAL: Could not access locale!\n");
+		MessageBoxU(NULL, "The locale data is missing. This application will now exit.",
+			"Fatal error", MB_ICONSTOP);
+		goto out;
+	}
+	uprintf("localization: using locale '%s'\n", selected_locale->txt[0]);
+	get_loc_data_file(loc_file, (long)selected_locale->num[0], (long)selected_locale->num[1], selected_locale->line_nr);
+
 
 	// Prevent 2 applications from running at the same time, unless "/W" is passed as an option
 	// in which case we wait for the mutex to be relinquished
@@ -1993,9 +2008,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	if (LoadLibraryA("Riched20.dll") == NULL) {
 		uprintf("Could not load RichEdit library - some dialogs may not display: %s\n", WindowsErrorString());
 	}
-
-	// Retrieve the current application directory
-	GetCurrentDirectoryU(MAX_PATH, app_dir);
 
 	// Set the Windows version
 	nWindowsVersion = DetectWindowsVersion();

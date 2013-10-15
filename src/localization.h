@@ -26,9 +26,6 @@
 #define LOC_MESSAGE_NB    8
 #define LOC_MESSAGE_SIZE  2048
 
-// TODO: display control name on mouseover
-// Link to http://www.resedit.net/
-
 #define luprint(msg) uprintf("%s(%d): " msg "\n", loc_filename, loc_line_nr)
 #define luprintf(msg, ...) uprintf("%s(%d): " msg "\n", loc_filename, loc_line_nr, __VA_ARGS__)
 
@@ -144,7 +141,7 @@ typedef struct loc_dlg_list_struct {
 extern const loc_parse parse_cmd[9];
 extern struct list_head locale_list;
 int loc_line_nr;
-char loc_filename[MAX_PATH];
+char *loc_filename, *embedded_loc_filename;
 
 void free_loc_cmd(loc_cmd* lcmd);
 BOOL dispatch_loc_cmd(loc_cmd* lcmd);

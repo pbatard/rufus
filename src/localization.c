@@ -47,13 +47,13 @@ const loc_parse parse_cmd[9] = {
 	// Translation name and Windows LCIDs it should apply to
 	{ 'l', LC_LOCALE, "su" },	// l "English (US)" 0x0009,0x1009
 	// Base translation to add on top of (eg. "English (UK)" can be used to build on top of "English (US)"
-	{ 'b', LC_BASE, "s" },		// b "English (US)"		// TODO: NOT IMPLEMENTED YET
+	{ 'b', LC_BASE, "s" },		// b "English (US)"
 	// Version to use for the localization commandset and API
 	{ 'v', LC_VERSION, "ii" },	// v 1.0				// TODO: NOT IMPLEMENTED YET
 	// Translate the text control associated with an ID
 	{ 't', LC_TEXT, "cs" },		// t IDC_CONTROL "Translation"
 	// Set the section/dialog to which the next commands should apply
-	{ 'g', LC_GROUP, "c" },	// g IDD_DIALOG
+	{ 'g', LC_GROUP, "c" },		// g IDD_DIALOG
 	// Resize a dialog (dx dy pixel increment)
 	{ 's', LC_SIZE, "cii" },	// s IDC_CONTROL +10 +10
 	// Move a dialog (dx dy pixed displacement)
@@ -67,8 +67,9 @@ const loc_parse parse_cmd[9] = {
 };
 
 /* Globals */
-int  loc_line_nr;
+int    loc_line_nr;
 struct list_head locale_list = {NULL, NULL};
+char   *loc_filename = NULL, *embedded_loc_filename = "[embedded] rufus.loc";
 
 /*
  * Add a localization command to a dialog/section
@@ -142,6 +143,7 @@ BOOL dispatch_loc_cmd(loc_cmd* lcmd)
 {
 	size_t i;
 	static int dlg_index = 0;
+	loc_cmd* base_locale = NULL;
 
 	if (lcmd == NULL)
 		return FALSE;
@@ -177,6 +179,12 @@ BOOL dispatch_loc_cmd(loc_cmd* lcmd)
 		break;
 	case LC_VERSION:
 		luprintf("GOT VERSION: %d.%d\n", lcmd->num[0], lcmd->num[1]);
+		free_loc_cmd(lcmd);
+		break;
+	case LC_BASE:
+		uprintf("localization: using locale base '%s'", lcmd->txt[0]);
+		base_locale = get_locale_from_name(lcmd->txt[0]);
+		get_loc_data_file(NULL, (long)base_locale->num[0], (long)base_locale->num[1], base_locale->line_nr);
 		free_loc_cmd(lcmd);
 		break;
 	default:
@@ -281,7 +289,7 @@ void reset_localization(int dlg_id)
  * Like printf, this call takes a variable number of argument, and uses
  * the message ID to identify the formatted message to use.
  * Uses a rolling list of buffers to allow concurrency
- * TODO: use dynamic realloc'd buffer in case 2048 is not enough
+ * TODO: use dynamic realloc'd buffer in case LOC_MESSAGE_SIZE is not enough
  */
 char* lmprintf(int msg_id, ...)
 {
@@ -299,7 +307,6 @@ char* lmprintf(int msg_id, ...)
 	}
 
 	if (format == NULL) {
-		// TODO: fallback to English!
 		safe_sprintf(buf[buf_id], LOC_MESSAGE_SIZE-1, "MSG_%03d UNTRANSLATED", msg_id - MSG_000);
 	} else {
 		va_start(args, msg_id);
