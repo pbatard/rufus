@@ -579,7 +579,7 @@ static BOOL FormatFAT32(DWORD DriveIndex)
 	}
 
 	// Must do it here, as have issues when trying to write the PBR after a remount
-	PrintStatus(0, TRUE, "Writing partition boot record...");
+	PrintStatus(0, TRUE, lmprintf(MSG_229));
 	if (!WritePBR(hLogicalVolume)) {
 		// Non fatal error, but the drive probably won't boot
 		uprintf("Could not write partition boot record - drive may not boot...\n");

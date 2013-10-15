@@ -1,7 +1,7 @@
 # This file should be saved as UTF-8, no-BOM
 
 ################################################################################
-l "English" 0x0409, 0x0809, 0x0c09, 0x1009, 0x1409, 0x1809, 0x1c09, 0x2009, 0x2409, 0x2809, 0x2c09, 0x3009, 0x3409, 0x3809, 0x3c09, 0x4009, 0x4409, 0x4809
+l "en_US" "English (US)" 0x0409, 0x0809, 0x0c09, 0x1009, 0x1409, 0x1809, 0x1c09, 0x2009, 0x2409, 0x2809, 0x2c09, 0x3009, 0x3409, 0x3809, 0x3c09, 0x4009, 0x4409, 0x4809
 g IDD_MESSAGES
 t MSG_001 "Other instance detected"
 t MSG_002 "Another Rufus application is running.\n"
@@ -103,7 +103,7 @@ t MSG_082 "This version of Rufus only supports bootable ISOs based on bootmgr/Wi
 	"This ISO doesn't appear to use either..."
 t MSG_083 "Replace %s?"
 t MSG_084 "This ISO image seems to use an obsolete version of '%s'.\n"
-	"Boot menus may not may not display properly because of this.\n\n"
+	"Boot menus may not display properly because of this.\n\n"
 	"A newer version can be downloaded by Rufus to fix this issue:\n"
 	"- Choose 'Yes' to connect to the internet and download the file\n"
 	"- Choose 'No' to leave the existing ISO file unmodified\n"
@@ -269,9 +269,11 @@ t MSG_253 "Fixed disks detection"
 t MSG_254 "Force large FAT32 formatting"
 t MSG_255 "NoDriveTypeAutorun will be deleted on exit"
 t MSG_256 "Fake drive detection"
+t MSG_257 "Joliet support"
+t MSG_258 "Rock Ridge support"
 
 ################################################################################
-l "French" 0x040c, 0x080c, 0x0c0c, 0x100c, 0x140c, 0x180c, 0x1c0c, 0x200c, 0x240c, 0x280c, 0x2c0c, 0x300c, 0x340c, 0x380c, 0xe40c
+l "fr_FR" "French" 0x040c, 0x080c, 0x0c0c, 0x100c, 0x140c, 0x180c, 0x1c0c, 0x200c, 0x240c, 0x280c, 0x2c0c, 0x300c, 0x340c, 0x380c, 0xe40c
 g IDD_DIALOG
 t IDS_DEVICE_TXT "Periphérique"
 t IDS_PARTITION_TYPE_TXT "Type de partition et système de destination"
@@ -352,7 +354,6 @@ t IDC_ISO_FILENAME "Ouverture de l'image - veuillez patienter..."
 t IDC_ISO_ABORT "Annuler"
 
 g IDD_MESSAGES
-# éèêàç
 t MSG_001 "Autre instance detectée"
 t MSG_002 "Une autre instance de Rufus est en cours d'exécution.\n"
 	"Veuillez fermer la première instance avant d'en lancer une seconde."
@@ -439,7 +440,6 @@ t MSG_076 "Echec de modification des fichiers de démarrage."
 t MSG_077 "Echec d'assignation d'une lettre de volume."
 t MSG_078 "Impossible de monter le volume GUID."
 
-# éèêàçâûô
 t MSG_080 "Rufus a detecté que Windows est en train de finir de vider la mémoire tampon.\n\n"
 	"En fonction de la vitesse de votre périphérique, cette opération peut prendre beaucoup de temps, "
 	"surtout s'il s'agit d'un fichier volumineux.\n\nNous recommandons d'attendre que Windows "
@@ -604,9 +604,11 @@ t MSG_253 "Détection de disques fixes"
 t MSG_254 "Force 'large FAT32'"
 t MSG_255 "NoDriveTypeAutorun sera effacé en sortie"
 t MSG_256 "Test de contrefaçons"
+t MSG_257 "Support Joliet"
+t MSG_258 "Support Rock Ridge"
 
 ################################################################################
-l "Chinese (Traditional)" 0x0404, 0x0804, 0x0c04, 0x1004, 0x1404
+l "zh_CN" "Chinese (Traditional)" 0x0404, 0x0804, 0x0c04, 0x1004, 0x1404
 g IDD_DIALOG
 t IDS_DEVICE_TXT "设备"
 t IDS_PARTITION_TYPE_TXT "分区计划和目标系统类型"

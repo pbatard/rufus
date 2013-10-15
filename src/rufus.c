@@ -2069,13 +2069,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			// a file name). This option allows users to ignore Joliet when using such images.
 			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'J')) {
 				enable_joliet = !enable_joliet;
-				PrintStatus2000("Joliet support", enable_joliet);
+				PrintStatus2000(lmprintf(MSG_257), enable_joliet);
 				continue;
 			}
-			// Alt K => Toggle Rock Ridge support for ISO9660 image
+			// Alt K => Toggle Rock Ridge support for ISO9660 images
 			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'K')) {
 				enable_rockridge = !enable_rockridge;
-				PrintStatus2000("Rock Ridge support", enable_rockridge);
+				PrintStatus2000(lmprintf(MSG_258), enable_rockridge);
 				continue;
 			}
 			// Alt L => Toggle fake drive detection during bad blocks check

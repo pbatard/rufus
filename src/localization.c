@@ -45,9 +45,9 @@
  */
 const loc_parse parse_cmd[9] = {
 	// Translation name and Windows LCIDs it should apply to
-	{ 'l', LC_LOCALE, "su" },	// l "English (US)" 0x0009,0x1009
+	{ 'l', LC_LOCALE, "ssu" },	// l "en_US" "English (US)" 0x0009,0x1009
 	// Base translation to add on top of (eg. "English (UK)" can be used to build on top of "English (US)"
-	{ 'b', LC_BASE, "s" },		// b "English (US)"
+	{ 'b', LC_BASE, "s" },		// b "en_US"
 	// Version to use for the localization commandset and API
 	{ 'v', LC_VERSION, "ii" },	// v 1.0				// TODO: NOT IMPLEMENTED YET
 	// Translate the text control associated with an ID
