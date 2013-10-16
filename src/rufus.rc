@@ -7,6 +7,9 @@
 //
 // Generated from the TEXTINCLUDE 2 resource.
 //
+#ifndef _USING_V110_SDK71_
+#define _USING_V110_SDK71_
+#endif
 #include <windows.h>
 #ifndef IDC_STATIC
 #define IDC_STATIC -1
@@ -30,7 +33,7 @@ LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
 IDD_DIALOG DIALOGEX 12, 12, 206, 329
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_APPWINDOW
-CAPTION "Rufus v1.4.0.281"
+CAPTION "Rufus v1.4.0.282"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     DEFPUSHBUTTON   "Start",IDC_START,94,291,50,14
@@ -174,6 +177,9 @@ END
 
 2 TEXTINCLUDE 
 BEGIN
+    "#ifndef _USING_V110_SDK71_\r\n"
+    "#define _USING_V110_SDK71_\r\n"
+    "#endif\r\n"
     "#include <windows.h>\r\n"
     "#ifndef IDC_STATIC\r\n"
     "#define IDC_STATIC -1\r\n"
@@ -278,8 +284,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,4,0,281
- PRODUCTVERSION 1,4,0,281
+ FILEVERSION 1,4,0,282
+ PRODUCTVERSION 1,4,0,282
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -296,13 +302,13 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Akeo Consulting (http://akeo.ie)"
             VALUE "FileDescription", "Rufus"
-            VALUE "FileVersion", "1.4.0.281"
+            VALUE "FileVersion", "1.4.0.282"
             VALUE "InternalName", "Rufus"
             VALUE "LegalCopyright", "© 2011-2013 Pete Batard (GPL v3)"
             VALUE "LegalTrademarks", "http://www.gnu.org/copyleft/gpl.html"
             VALUE "OriginalFilename", "rufus.exe"
             VALUE "ProductName", "Rufus"
-            VALUE "ProductVersion", "1.4.0.281"
+            VALUE "ProductVersion", "1.4.0.282"
         END
     END
     BLOCK "VarFileInfo"
