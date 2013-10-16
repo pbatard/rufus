@@ -33,7 +33,7 @@ LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
 IDD_DIALOG DIALOGEX 12, 12, 206, 329
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_APPWINDOW
-CAPTION "Rufus v1.4.0.282"
+CAPTION "Rufus v1.4.0.283"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     DEFPUSHBUTTON   "Start",IDC_START,94,291,50,14
@@ -67,21 +67,21 @@ BEGIN
     COMBOBOX        IDC_DISK_ID,119,246,73,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     CONTROL         "Add fixes for old BIOSes (extra partition, align, etc.)",IDC_EXTRA_PARTITION,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,235,181,10
-    CONTROL         "List fixed (non-flash) or unpartitioned USB disks",IDC_ENABLE_FIXED_DISKS,
+    CONTROL         "List non removable or unpartitioned USB disks",IDC_ENABLE_FIXED_DISKS,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,222,181,10
 END
 
-IDD_ABOUTBOX DIALOGEX 0, 0, 287, 201
+IDD_ABOUTBOX DIALOGEX 0, 0, 287, 204
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "About Rufus"
 FONT 8, "MS Shell Dlg", 400, 0, 0x0
 BEGIN
-    ICON            IDI_ICON,IDC_ABOUT_ICON,11,8,20,20
-    DEFPUSHBUTTON   "OK",IDOK,231,181,50,14,WS_GROUP
-    PUSHBUTTON      "License",IDC_ABOUT_LICENSE,46,181,50,14,WS_GROUP
-    CONTROL         "",IDC_ABOUT_COPYRIGHTS,"RichEdit20W",WS_VSCROLL | 0x804,46,101,235,74,WS_EX_STATICEDGE
-    CONTROL         "",IDC_ABOUT_BLURB,"RichEdit20W",WS_TABSTOP | 0x884,46,7,235,93
-    PUSHBUTTON      "Updates",IDC_ABOUT_UPDATES,100,181,50,14,NOT WS_VISIBLE | WS_GROUP
+    ICON            IDI_ICON,IDC_ABOUT_ICON,11,8,21,20
+    DEFPUSHBUTTON   "OK",IDOK,231,183,50,14,WS_GROUP
+    PUSHBUTTON      "License",IDC_ABOUT_LICENSE,46,183,50,14,WS_GROUP
+    CONTROL         "",IDC_ABOUT_COPYRIGHTS,"RichEdit20W",ES_MULTILINE | ES_READONLY | WS_VSCROLL,46,103,235,74,WS_EX_STATICEDGE
+    CONTROL         "",IDC_ABOUT_BLURB,"RichEdit20W",ES_MULTILINE | ES_AUTOHSCROLL | ES_READONLY | WS_TABSTOP,46,7,235,95
+    PUSHBUTTON      "Updates",IDC_ABOUT_UPDATES,100,183,50,14,NOT WS_VISIBLE | WS_GROUP
 END
 
 IDD_ISO_EXTRACT DIALOGEX 0, 0, 262, 66
@@ -284,8 +284,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,4,0,282
- PRODUCTVERSION 1,4,0,282
+ FILEVERSION 1,4,0,283
+ PRODUCTVERSION 1,4,0,283
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -302,13 +302,13 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Akeo Consulting (http://akeo.ie)"
             VALUE "FileDescription", "Rufus"
-            VALUE "FileVersion", "1.4.0.282"
+            VALUE "FileVersion", "1.4.0.283"
             VALUE "InternalName", "Rufus"
             VALUE "LegalCopyright", "© 2011-2013 Pete Batard (GPL v3)"
             VALUE "LegalTrademarks", "http://www.gnu.org/copyleft/gpl.html"
             VALUE "OriginalFilename", "rufus.exe"
             VALUE "ProductName", "Rufus"
-            VALUE "ProductVersion", "1.4.0.282"
+            VALUE "ProductVersion", "1.4.0.283"
         END
     END
     BLOCK "VarFileInfo"

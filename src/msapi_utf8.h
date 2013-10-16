@@ -22,6 +22,7 @@
 #include <windows.h>
 #include <stdio.h>
 #include <shlobj.h>
+#include <ctype.h>
 #include <commdlg.h>
 #include <shellapi.h>
 #include <setupapi.h>

@@ -1874,8 +1874,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 #endif
 {
 	const char* old_wait_option = "/W";
-	int i, opt, option_index = 0, argc = 0, si = 0;
-	BOOL attached_console = FALSE;
+	int i, opt, option_index = 0, argc = 0, si = 0, lcid = GetUserDefaultLCID();
+	BOOL attached_console = FALSE, external_loc_file = FALSE;
 	BYTE* loc_data;
 	DWORD loc_size, Size;
 	char tmp_path[MAX_PATH], loc_file[MAX_PATH] = "", *locale_name = NULL;
@@ -1931,8 +1931,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 				}
 				break;
 			case 'l':
-				// TODO: accept a locale code such as 0x409
-				locale_name = optarg;
+				if (isdigitU(optarg[0])) {
+					lcid = (int)strtol(optarg, NULL, 0);
+				} else {
+					locale_name = optarg;
+				}
 				break;
 			case 'w':
 				wait_for_mutex = atoi(optarg);
@@ -1971,11 +1974,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		}
 	} else {
 		safe_sprintf(loc_file, sizeof(loc_file), "%s\\rufus.loc", app_dir);
+		external_loc_file = TRUE;
 		uprintf("using external loc file '%s'", loc_file);
 	}
 
 	if ( (!get_supported_locales(loc_file))
-	  || ((selected_locale = ((locale_name == NULL)?get_locale_from_lcid(GetUserDefaultLCID()):get_locale_from_name(locale_name))) == NULL) ) {
+	  || ((selected_locale = ((locale_name == NULL)?get_locale_from_lcid(lcid):get_locale_from_name(locale_name))) == NULL) ) {
 		uprintf("FATAL: Could not access locale!\n");
 		MessageBoxU(NULL, "The locale data is missing. This application will now exit.",
 			"Fatal error", MB_ICONSTOP);
@@ -2101,7 +2105,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	}
 
 out:
-	if (loc_file[0] != 0)
+	if ((!external_loc_file) && (loc_file[0] != 0))
 		DeleteFileU(loc_file);
 	DestroyAllTooltips();
 	exit_localization();

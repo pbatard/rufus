@@ -131,6 +131,7 @@ void init_localization(void) {
 void exit_localization(void) {
 	free_dialog_list();
 	free_locale_list();
+	safe_free(loc_filename);
 }
 
 /*

@@ -1,7 +1,7 @@
 # This file should be saved as UTF-8, no-BOM
 
 ################################################################################
-l "en_US" "English (US)" 0x0409, 0x0809, 0x0c09, 0x1009, 0x1409, 0x1809, 0x1c09, 0x2009, 0x2409, 0x2809, 0x2c09, 0x3009, 0x3409, 0x3809, 0x3c09, 0x4009, 0x4409, 0x4809
+l "en-US" "English (US)" 0x0409, 0x0809, 0x0c09, 0x1009, 0x1409, 0x1809, 0x1c09, 0x2009, 0x2409, 0x2809, 0x2c09, 0x3009, 0x3409, 0x3809, 0x3c09, 0x4009, 0x4409, 0x4809
 g IDD_MESSAGES
 t MSG_001 "Other instance detected"
 t MSG_002 "Another Rufus application is running.\n"
@@ -273,7 +273,7 @@ t MSG_257 "Joliet support"
 t MSG_258 "Rock Ridge support"
 
 ################################################################################
-l "fr_FR" "French" 0x040c, 0x080c, 0x0c0c, 0x100c, 0x140c, 0x180c, 0x1c0c, 0x200c, 0x240c, 0x280c, 0x2c0c, 0x300c, 0x340c, 0x380c, 0xe40c
+l "fr-FR" "Français" 0x040c, 0x080c, 0x0c0c, 0x100c, 0x140c, 0x180c, 0x1c0c, 0x200c, 0x240c, 0x280c, 0x2c0c, 0x300c, 0x340c, 0x380c, 0xe40c
 g IDD_DIALOG
 t IDS_DEVICE_TXT "Periphérique"
 t IDS_PARTITION_TYPE_TXT "Type de partition et système de destination"
@@ -303,11 +303,12 @@ s IDC_DISK_ID -2,0
 
 g IDD_ABOUTBOX
 t IDD_ABOUTBOX "A propos de Rufus"
-t IDC_ABOUT_LICENSE "License"
+t IDC_ABOUT_LICENSE "Licence"
 t IDC_ABOUT_UPDATES "Mises à jour"
 
 g IDD_LICENSE
-t IDD_LICENSE "License Rufus"
+t IDD_LICENSE "Licence Rufus"
+t IDOK "Fermer"
 
 g IDD_NOTIFICATION
 t IDC_MORE_INFO "Plus d'info..."
@@ -345,7 +346,7 @@ t IDS_NEW_VERSION_AVAIL_TXT "Une nouvelle version est disponible. Veuillez tél�
 t IDC_WEBSITE "Cliquez ici pour aller sur le site de Rufus"
 t IDS_NEW_VERSION_NOTES_GRP "Notes relatives à cette version"
 t IDS_NEW_VERSION_DOWNLOAD_GRP "Téléchargement"
-t IDC_DOWNLOAD ""Télécharger""
+t IDC_DOWNLOAD "Télécharger"
 t IDCANCEL "Fermer"
 
 g IDD_ISO_EXTRACT
@@ -526,7 +527,7 @@ t MSG_168 "Camoufle le premier disque USB démarrable (généralement 0x80) sous
 	"Changez cette option si vous installez Windows XP avec plus d’un disque dur"
 t MSG_169 "Créé une petite partition supplémentaire et essaye d’aligner les partitions.\n"
 	"Peut améliorer la détection USB pour les vieux BIOS"
-t MSG_170 "Active la détection de disque non normalement listés par Rufus. UTILISEZ  A VOS PROPRES RISQUES !!! "
+t MSG_170 "Active la détection de disque non normalement listés par Rufus. UTILISEZ A VOS PROPRES RISQUES !!! "
 t MSG_171 "Lance le formatage. DETRUIT toutes les données existantes sur la cible !"
 t MSG_172 "Licence d’utilisation et remerciements"
 t MSG_173 "Cliquez pour sélectionner..."
@@ -608,7 +609,7 @@ t MSG_257 "Support Joliet"
 t MSG_258 "Support Rock Ridge"
 
 ################################################################################
-l "zh_CN" "Chinese (Traditional)" 0x0404, 0x0804, 0x0c04, 0x1004, 0x1404
+l "zh-CN" "正體字" 0x0404, 0x0804, 0x0c04, 0x1004, 0x1404
 g IDD_DIALOG
 t IDS_DEVICE_TXT "设备"
 t IDS_PARTITION_TYPE_TXT "分区计划和目标系统类型"
