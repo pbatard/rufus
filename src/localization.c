@@ -183,12 +183,12 @@ BOOL dispatch_loc_cmd(loc_cmd* lcmd)
 		free_loc_cmd(lcmd);
 		break;
 	case LC_BASE:
-		base_locale = get_locale_from_name(lcmd->txt[0]);
+		base_locale = get_locale_from_name(lcmd->txt[0], FALSE);
 		if (base_locale != NULL) {
-			uprintf("localization: using locale base '%s'", lcmd->txt[0]);
+			uprintf("localization: using locale base '%s'\n", lcmd->txt[0]);
 			get_loc_data_file(NULL, (long)base_locale->num[0], (long)base_locale->num[1], base_locale->line_nr);
 		} else {
-			uprintf("localization: locale base '%s' not found", lcmd->txt[0]);
+			luprintf("locale base '%s' not found - ignoring", lcmd->txt[0]);
 		}
 		free_loc_cmd(lcmd);
 		break;
@@ -349,7 +349,7 @@ loc_cmd* get_locale_from_lcid(int lcid)
 	return lcmd;
 }
 
-loc_cmd* get_locale_from_name(char* locale_name)
+loc_cmd* get_locale_from_name(char* locale_name, BOOL default_to_first)
 {
 	loc_cmd* lcmd = NULL;
 
@@ -362,6 +362,9 @@ loc_cmd* get_locale_from_name(char* locale_name)
 		if (safe_strcmp(lcmd->txt[0], locale_name) == 0)
 			return lcmd;
 	}
+
+	if (!default_to_first)
+		return NULL;
 
 	lcmd = list_entry(locale_list.next, loc_cmd, list);
 	uprintf("localization: could not find locale for name '%s'. Will default to '%s'\n", locale_name, lcmd->txt[0]);

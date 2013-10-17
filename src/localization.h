@@ -155,4 +155,4 @@ BOOL get_supported_locales(const char* filename);
 char* get_loc_data_file(const char* filename, long offset, long end_offset, int start_line);
 void free_locale_list(void);
 loc_cmd* get_locale_from_lcid(int lcid);
-loc_cmd* get_locale_from_name(char* locale_name);
+loc_cmd* get_locale_from_name(char* locale_name, BOOL default_to_first);

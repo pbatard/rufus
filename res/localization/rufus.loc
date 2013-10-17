@@ -274,6 +274,7 @@ t MSG_258 "Rock Ridge support"
 
 ################################################################################
 l "fr-FR" "Français" 0x040c, 0x080c, 0x0c0c, 0x100c, 0x140c, 0x180c, 0x1c0c, 0x200c, 0x240c, 0x280c, 0x2c0c, 0x300c, 0x340c, 0x380c, 0xe40c
+b "en-US"
 g IDD_DIALOG
 t IDS_DEVICE_TXT "Periphérique"
 t IDS_PARTITION_TYPE_TXT "Type de partition et système de destination"
@@ -610,6 +611,7 @@ t MSG_258 "Support Rock Ridge"
 
 ################################################################################
 l "zh-CN" "正體字" 0x0404, 0x0804, 0x0c04, 0x1004, 0x1404
+b "en-US"
 g IDD_DIALOG
 t IDS_DEVICE_TXT "设备"
 t IDS_PARTITION_TYPE_TXT "分区计划和目标系统类型"

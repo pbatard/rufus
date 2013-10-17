@@ -1979,7 +1979,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	}
 
 	if ( (!get_supported_locales(loc_file))
-	  || ((selected_locale = ((locale_name == NULL)?get_locale_from_lcid(lcid):get_locale_from_name(locale_name))) == NULL) ) {
+	  || ((selected_locale = ((locale_name == NULL)?get_locale_from_lcid(lcid):get_locale_from_name(locale_name, TRUE))) == NULL) ) {
 		uprintf("FATAL: Could not access locale!\n");
 		MessageBoxU(NULL, "The locale data is missing. This application will now exit.",
 			"Fatal error", MB_ICONSTOP);
