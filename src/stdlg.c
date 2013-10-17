@@ -466,12 +466,12 @@ void ResizeMoveCtrl(HWND hDlg, HWND hCtrl, int dx, int dy, int dw, int dh)
 	GetWindowRect(hCtrl, &rect);
 	point.x = rect.left;
 	point.y = rect.top;
-	ScreenToClient((hDlg==hMainDialog)?hDlg:NULL, &point);
+	ScreenToClient(hDlg, &point);
 	GetClientRect(hCtrl, &rect);
 
 	// If we're dealing with a dialog, we must take the border into account
-	if (hCtrl == hDlg)
-		border = GetBorderSize(hDlg);
+	if ((hCtrl == hDlg) || (hDlg == NULL))
+		border = GetBorderSize(hCtrl);
 	MoveWindow(hCtrl, point.x + (int)(fScale*(float)dx), point.y + (int)(fScale*(float)dy),
 		(rect.right - rect.left) + (int)(fScale*(float)dw + border.cx),
 		(rect.bottom - rect.top) + border.cy, TRUE);

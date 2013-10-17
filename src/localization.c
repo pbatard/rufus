@@ -131,7 +131,8 @@ void init_localization(void) {
 void exit_localization(void) {
 	free_dialog_list();
 	free_locale_list();
-	safe_free(loc_filename);
+	if (loc_filename != embedded_loc_filename)
+		safe_free(loc_filename);
 }
 
 /*
@@ -240,6 +241,8 @@ void apply_localization(int dlg_id, HWND hDlg)
 						continue;
 					}
 					hCtrl = hDlg;
+					if (dlg_id == IDD_DIALOG)
+						hDlg = NULL;
 				} else {
 					hCtrl = GetDlgItem(hDlg, lcmd->ctrl_id);
 				}
