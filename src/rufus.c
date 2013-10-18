@@ -1380,6 +1380,7 @@ void InitDialog(HWND hDlg)
 	SendMessage(GetDlgItem(hDlg, IDC_ADVANCED), BCM_SETIMAGELIST, 0, (LPARAM)&bi_down);
 
 	// Set the various tooltips
+	uprintf("Create tooltip got MSG: %s\n", lmprintf(MSG_157));
 	CreateTooltip(hFileSystem, lmprintf(MSG_157), -1);
 	CreateTooltip(hClusterSize, lmprintf(MSG_158), -1);
 	CreateTooltip(hLabel, lmprintf(MSG_159), -1);
@@ -1979,7 +1980,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	}
 
 	if ( (!get_supported_locales(loc_file))
-	  || ((selected_locale = ((locale_name == NULL)?get_locale_from_lcid(lcid):get_locale_from_name(locale_name, TRUE))) == NULL) ) {
+	  || ((selected_locale = ((locale_name == NULL)?get_locale_from_lcid(lcid, TRUE):get_locale_from_name(locale_name, TRUE))) == NULL) ) {
 		uprintf("FATAL: Could not access locale!\n");
 		MessageBoxU(NULL, "The locale data is missing. This application will now exit.",
 			"Fatal error", MB_ICONSTOP);

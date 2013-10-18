@@ -87,6 +87,7 @@ t IDNO "No"
 
 # Log dialog
 g IDD_LOG
+t IDD_LOG "Log"
 t IDC_LOG_CLEAR "Clear Log"
 t IDC_LOG_SAVE "Save Log"
 t IDCANCEL "Close Log"

@@ -72,13 +72,197 @@ struct list_head locale_list = {NULL, NULL};
 char   *loc_filename = NULL, *embedded_loc_filename = "[embedded] rufus.loc";
 
 /*
+ * Hash table functions - modified From glibc 2.3.2:
+ * [Aho,Sethi,Ullman] Compilers: Principles, Techniques and Tools, 1986
+ * [Knuth]            The Art of Computer Programming, part 3 (6.4)
+ */
+typedef struct htab_entry {
+	uint32_t used;
+	char* str;
+	loc_cmd* dlg_cmd;
+} htab_entry;
+htab_entry* htab_table = NULL;
+size_t htab_size, htab_filled;
+
+/* 
+ * For the used double hash method the table size has to be a prime. To
+ * correct the user given table size we need a prime test.  This trivial
+ * algorithm is adequate because the code is called only during init and
+ * the number is likely to be small
+ */
+static uint32_t isprime(uint32_t number)
+{
+	// no even number will be passed
+	uint32_t divider = 3;
+
+	while((divider * divider < number) && (number % divider != 0))
+		divider += 2;
+
+	return (number % divider != 0);
+}
+
+/*
+ * Before using the hash table we must allocate memory for it.
+ * We allocate one element more as the found prime number says.
+ * This is done for more effective indexing as explained in the
+ * comment for the hash function.
+ */
+static BOOL htab_create(uint32_t nel)
+{
+	if (htab_table != NULL) {
+		return FALSE;
+	}
+
+	// Change nel to the first prime number not smaller as nel.
+	nel |= 1;
+	while(!isprime(nel))
+		nel += 2;
+
+	htab_size = nel;
+	uprintf("localization: using %d entries hash table\n", nel);
+	htab_filled = 0;
+
+	// allocate memory and zero out.
+	htab_table = (htab_entry*)calloc(htab_size + 1, sizeof(htab_entry));
+	if (htab_table == NULL) {
+		uprintf("localization: could not allocate space for hash table\n");
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
+/* After using the hash table it has to be destroyed.  */
+static void htab_destroy(void)
+{
+	size_t i;
+	if (htab_table == NULL) {
+		return;
+	}
+
+	for (i=0; i<htab_size; i++) {
+		if (htab_table[i].used) {
+			safe_free(htab_table[i].str);
+		}
+	}
+	safe_free(htab_table);
+}
+
+/*
+ * This is the search function. It uses double hashing with open addressing.
+ * We use a trick to speed up the lookup. The table is created with one
+ * more element available. This enables us to use the index zero special.
+ * This index will never be used because we store the first hash index in
+ * the field used where zero means not used. Every other value means used.
+ * The used field can be used as a first fast comparison for equality of
+ * the stored and the parameter value. This helps to prevent unnecessary
+ * expensive calls of strcmp.
+ */
+static uint32_t htab_hash(char* str)
+{
+	uint32_t hval, hval2;
+	uint32_t idx;
+	uint32_t r = 5381;
+	int c;
+	char* sz = str;
+
+	if (str == NULL)
+		return 0;
+
+	// Compute main hash value (algorithm suggested by Nokia)
+	// TODO: THIS ALGORITHM SUUUUUUUUUUUUUUCKS!!!!
+	// Uncomment 'uprintf("hash collision' below to find out why...
+	while ((c = *sz++) != 0)
+		r = ((r << 5) + r) + c;
+	if (r == 0)
+		++r;
+
+	// compute table hash: simply take the modulus
+	hval = r % htab_size;
+	if (hval == 0)
+		++hval;
+
+	// Try the first index
+	idx = hval;
+
+	if (htab_table[idx].used) {
+		if ( (htab_table[idx].used == hval)
+		  && (safe_strcmp(str, htab_table[idx].str) == 0) ) {
+			// existing hash
+			return idx;
+		}
+		// uprintf("hash collision ('%s' vs '%s')\n", str, htab_table[idx].str);
+
+		// Second hash function, as suggested in [Knuth]
+		hval2 = 1 + hval % (htab_size - 2);
+
+		do {
+			// Because size is prime this guarantees to step through all available indexes
+			if (idx <= hval2) {
+				idx = htab_size + idx - hval2;
+			} else {
+				idx -= hval2;
+			}
+
+			// If we visited all entries leave the loop unsuccessfully
+			if (idx == hval) {
+				break;
+			}
+
+			// If entry is found use it.
+			if ( (htab_table[idx].used == hval)
+			  && (safe_strcmp(str, htab_table[idx].str) == 0) ) {
+				return idx;
+			}
+		}
+		while (htab_table[idx].used);
+	}
+
+	// Not found => New entry
+
+	// If the table is full return an error
+	if (htab_filled >= htab_size) {
+		uprintf("localization: hash table is full (%d entries)", htab_size);
+		return 0;
+	}
+
+	safe_free(htab_table[idx].str);
+	htab_table[idx].used = hval;
+	htab_table[idx].str = (char*) malloc(safe_strlen(str)+1);
+	if (htab_table[idx].str == NULL) {
+		uprintf("localization: could not duplicate string for hash table\n");
+		return 0;
+	}
+	memcpy(htab_table[idx].str, str, safe_strlen(str)+1);
+	++htab_filled;
+
+	return idx;
+}
+
+/*
  * Add a localization command to a dialog/section
  */
 void add_dialog_command(int index, loc_cmd* lcmd)
 {
+	char str[128];
+	uint32_t i;
 	if ((lcmd == NULL) || (index < 0) || (index >= ARRAYSIZE(loc_dlg))) {
-		uprintf("add_dialog_command: invalid parameter\n");
+		uprintf("localization: invalid parameter for add_dialog_command\n");
 		return;
+	}
+
+	// A dialog command must be unique, so we use a hash to identify any
+	// command that may already have been populated, and ensure it is replaced
+	// with the new one.
+	str[0] = lcmd->command + 0x30;
+	safe_strcpy(&str[1], sizeof(str)-1, lcmd->txt[0]);
+	i = htab_hash(str);
+	if (i != 0) {
+		if (htab_table[i].dlg_cmd != NULL) {
+			list_del(&(htab_table[i].dlg_cmd->list));
+			free_loc_cmd(htab_table[i].dlg_cmd);
+		}
+		htab_table[i].dlg_cmd = lcmd;
 	}
 	list_add(&lcmd->list, &loc_dlg[index].list);
 }
@@ -126,11 +310,13 @@ void init_localization(void) {
 	for (i=0; i<ARRAYSIZE(loc_dlg); i++)
 		list_init(&loc_dlg[i].list);
 	list_init(&locale_list);
+	htab_create(LOC_HTAB_SIZE);
 }
 
 void exit_localization(void) {
 	free_dialog_list();
 	free_locale_list();
+	htab_destroy();
 	if (loc_filename != embedded_loc_filename)
 		safe_free(loc_filename);
 }
@@ -327,8 +513,10 @@ char* lmprintf(int msg_id, ...)
 
 /*
  * These 2 functions are used to set the current locale
+ * If fallback is true, the call will fall back to use the first
+ * translation listed in the loc file
  */
-loc_cmd* get_locale_from_lcid(int lcid)
+loc_cmd* get_locale_from_lcid(int lcid, BOOL fallback)
 {
 	loc_cmd* lcmd = NULL;
 	int i;
@@ -346,13 +534,16 @@ loc_cmd* get_locale_from_lcid(int lcid)
 		}
 	}
 
+	if (!fallback)
+		return NULL;
+
 	lcmd = list_entry(locale_list.next, loc_cmd, list);
 	// If we couldn't find a supported locale, just pick the first one (usually English)
 	uprintf("localization: could not find locale for LCID: 0x%04X. Will default to '%s'\n", lcid, lcmd->txt[0]);
 	return lcmd;
 }
 
-loc_cmd* get_locale_from_name(char* locale_name, BOOL default_to_first)
+loc_cmd* get_locale_from_name(char* locale_name, BOOL fallback)
 {
 	loc_cmd* lcmd = NULL;
 
@@ -366,7 +557,7 @@ loc_cmd* get_locale_from_name(char* locale_name, BOOL default_to_first)
 			return lcmd;
 	}
 
-	if (!default_to_first)
+	if (!fallback)
 		return NULL;
 
 	lcmd = list_entry(locale_list.next, loc_cmd, list);

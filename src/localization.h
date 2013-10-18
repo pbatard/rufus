@@ -25,6 +25,7 @@
 // Number of concurrent localization messages. Must be a power of 2.
 #define LOC_MESSAGE_NB    8
 #define LOC_MESSAGE_SIZE  2048
+#define LOC_HTAB_SIZE     512
 
 #define luprint(msg) uprintf("%s(%d): " msg "\n", loc_filename, loc_line_nr)
 #define luprintf(msg, ...) uprintf("%s(%d): " msg "\n", loc_filename, loc_line_nr, __VA_ARGS__)
@@ -154,5 +155,5 @@ char* lmprintf(int msg_id, ...);
 BOOL get_supported_locales(const char* filename);
 char* get_loc_data_file(const char* filename, long offset, long end_offset, int start_line);
 void free_locale_list(void);
-loc_cmd* get_locale_from_lcid(int lcid);
-loc_cmd* get_locale_from_name(char* locale_name, BOOL default_to_first);
+loc_cmd* get_locale_from_lcid(int lcid, BOOL fallback);
+loc_cmd* get_locale_from_name(char* locale_name, BOOL fallback);
