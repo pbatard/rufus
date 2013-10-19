@@ -78,6 +78,7 @@ t IDC_ABOUT_UPDATES "Updates"
 # About -> License dialog
 g IDD_LICENSE
 t IDD_LICENSE "Rufus License"
+t IDCANCEL "Close"
 
 # Notifications. You can trigger one of these by using Alt-R and re-launching Rufus
 g IDD_NOTIFICATION
