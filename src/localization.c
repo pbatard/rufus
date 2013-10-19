@@ -254,8 +254,12 @@ void add_dialog_command(int index, loc_cmd* lcmd)
 	// A dialog command must be unique, so we use a hash to identify any
 	// command that may already have been populated, and ensure it is replaced
 	// with the new one.
-	str[0] = lcmd->command + 0x30;
-	safe_strcpy(&str[1], sizeof(str)-1, lcmd->txt[0]);
+	// Two dialogs may have different "m IDC_CONTROL" lines, and also
+	// "m IDC_CONTROL" and "t IDC_CONTROL" are separate, so we compute two more
+	// unique identifiers for dialog and command at the beginning of our string
+	str[0] = index + 0x30;
+	str[1] = lcmd->command + 0x30;
+	safe_strcpy(&str[2], sizeof(str)-2, lcmd->txt[0]);
 	i = htab_hash(str);
 	if (i != 0) {
 		if (htab_table[i].dlg_cmd != NULL) {
