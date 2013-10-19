@@ -713,16 +713,14 @@ s IDC_BOOTTYPE +18,0
 m IDC_SELECT_ISO +3,0
 t IDC_SET_ICON "Crea etichetta estesa e file icone"
 t IDC_ABOUT "Info su..."
-s IDC_ABOUT -10,0
-m IDC_ABOUT +135,0
+s IDC_ABOUT -18,0
+m IDC_ABOUT -1,0
 t IDC_LOG "Registro"
-s IDC_LOG +30,0
-m IDC_LOG -10,0
+s IDC_LOG +23,0
+m IDC_LOG -20,0
 t IDCANCEL "Chiudi"
 s IDCANCEL 0,0
 t IDC_START "Avvia"
-s IDC_START -10,0
-m IDC_START -130,0
 t IDS_ADVANCED_OPTIONS_GRP "Opzioni avanzate"
 m IDC_ADVANCED +40,0
 t IDC_ENABLE_FIXED_DISKS "Elenca anche unità USB non rimuovibili/partizionati"
@@ -741,6 +739,7 @@ m IDC_ABOUT_UPDATES +100,0
 
 g IDD_LICENSE
 t IDD_LICENSE "Licenza Rufus"
+t IDCANCEL "Chiudi"
 
 g IDD_NOTIFICATION
 t IDC_MORE_INFO "Altre informazioni"
@@ -748,7 +747,7 @@ t IDYES "Sì"
 t IDNO "No"
 
 g IDD_LOG
-t IDD_LOG "Registro"
+t IDD_LOG "Registro eventi"
 t IDC_LOG_CLEAR "Azzera registro"
 s IDC_LOG_CLEAR +20,0
 m IDC_LOG_CLEAR -40,0
@@ -758,18 +757,19 @@ m IDC_LOG_SAVE -20,0
 t IDCANCEL "Chiudi"
 
 g IDD_UPDATE_POLICY
-s IDD_UPDATE_POLICY +30,0
+s IDD_UPDATE_POLICY +16,0
+s IDC_POLICY +18,0
 t IDD_UPDATE_POLICY "Impostazioni e policy aggiornamenti"
 t IDS_UPDATE_SETTINGS_GRP "Impostazioni"
-s IDS_UPDATE_SETTINGS_GRP +28,0
+s IDS_UPDATE_SETTINGS_GRP +32,0
 t IDS_UPDATE_FREQUENCY_TXT "Controllo aggiornamenti:"
 s IDS_UPDATE_FREQUENCY_TXT -3,0
-t IDS_INCLUDE_BETAS_TXT "Includi versioni beta:"
 m IDC_UPDATE_FREQUENCY -3,0
+s IDC_UPDATE_FREQUENCY +35,0
+t IDS_INCLUDE_BETAS_TXT "Includi versioni beta:"
 m IDC_INCLUDE_BETAS -3,0
-s IDC_UPDATE_FREQUENCY +20,0
-m IDS_CHECK_NOW_GRP +20,0
-s IDS_CHECK_NOW_GRP 0,0
+m IDS_CHECK_NOW_GRP +26,0
+s IDS_CHECK_NOW_GRP -9,0
 t IDC_CHECK_NOW "Controlla ora"
 m IDC_CHECK_NOW +20,0
 t IDCANCEL "Chiudi"
@@ -796,7 +796,7 @@ t MSG_002 "E' in esecuzione un altra applicazioen Rufus.\n"
 t MSG_003 "ATTENZIONE: TUTTI I DATI SULL'UNITA' '%s' SARANNO CANCELLATI.\n"
 	"To continue with this operation, click OK. To quit click CANCEL."
 t MSG_004 "Policy aggiornamenti Rufus"
-t MSG_005 "Vuoi permettere a Rufus di controllare gli aggironamenti online?"
+t MSG_005 "Vuoi permettere a Rufus di controllare gli aggiornamenti online?"
 t MSG_006 "Chiudi"
 t MSG_007 "Annulla"
 t MSG_008 "Sì"
@@ -967,7 +967,7 @@ t MSG_176 "Traduzione italiana a cura di bovirus"
 t MSG_177 "Segnala i problemi o richiedi nuove funzionalità a:"
 t MSG_178 "Diritti aggiuntivi:"
 t MSG_179 "Policy aggiornamenti:"
-t MSG_180 "Se scegli di permette a questo programma di controllare automaticamente gli aggironamenti, "
+t MSG_180 "Se scegli di permette a questo programma di controllare automaticamente gli aggiornamenti, "
 	"accetti che le seguenti informazioni sarranno catalogate nei nostri server:"
 t MSG_181 "L'architettura del tuo sistema operativo e la versione"
 t MSG_182 "La versioen dell'applicazione in uso"
@@ -1003,7 +1003,7 @@ t MSG_224 "Azzeramento struttura MBR/PBR/GPT..."
 t MSG_225 "Richiesta accesso disco..."
 t MSG_226 "Analisi dati avvio..."
 t MSG_227 "Chiusura volume esistente..."
-t MSG_228 "Writing master boot record..."
+t MSG_228 "Scrittura master boot record..."
 t MSG_229 "Scrittura partizione di avvio..."
 t MSG_230 "Copia file DOS..."
 t MSG_231 "Copia file immagine ISO..."
