@@ -44,8 +44,9 @@
 #   This early set of instructions is provided only for impatient translators! ;)
 
 ################################################################################
-l "zz-ZZ" "Your Language" 0x1234, 0xabcd
-# See http://download.microsoft.com/download/9/5/E/95EF66AF-9026-4BB0-A41D-A4F81802D92C/%5BMS-LCID%5D.pdf
+l "zz-ZZ" "LangName_EN (LangName_ZZ)" 0x1234, 0xabcd
+# See http://msdn.microsoft.com/en-us/goglobal/bb964664.aspx or 
+# http://download.microsoft.com/download/9/5/E/95EF66AF-9026-4BB0-A41D-A4F81802D92C/%5BMS-LCID%5D.pdf
 # for the LCID (0x####) codes you should use
 
 # Main dialog
