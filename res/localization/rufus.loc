@@ -271,6 +271,7 @@ t MSG_255 "NoDriveTypeAutorun will be deleted on exit"
 t MSG_256 "Fake drive detection"
 t MSG_257 "Joliet support"
 t MSG_258 "Rock Ridge support"
+t MSG_259 "Force update"
 
 ################################################################################
 l "fr-FR" "French (Français)" 0x040c, 0x080c, 0x0c0c, 0x100c, 0x140c, 0x180c, 0x1c0c, 0x200c, 0x240c, 0x280c, 0x2c0c, 0x300c, 0x340c, 0x380c, 0xe40c
@@ -333,13 +334,13 @@ t IDS_INCLUDE_BETAS_TXT "Inclure les bétas:"
 m IDC_UPDATE_FREQUENCY -3,0
 m IDC_INCLUDE_BETAS -3,0
 s IDC_UPDATE_FREQUENCY +25,0
-m IDS_CHECK_NOW_GRP 20,0
-s IDS_CHECK_NOW_GRP +10,0
+m IDS_CHECK_NOW_GRP 14,0
+s IDS_CHECK_NOW_GRP +16,0
 t IDC_CHECK_NOW "Chercher maintenant"
-m IDC_CHECK_NOW 9,0
-s IDC_CHECK_NOW +31,0
+m IDC_CHECK_NOW 5,0
+s IDC_CHECK_NOW +34,0
 t IDCANCEL "Fermer"
-m IDCANCEL 9,0
+m IDCANCEL 5,0
 
 g IDD_NEW_VERSION
 t IDD_NEW_VERSION "Mise à jour de Rufus"
@@ -443,22 +444,22 @@ t MSG_077 "Echec d'assignation d'une lettre de volume."
 t MSG_078 "Impossible de monter le volume GUID."
 
 t MSG_080 "Rufus a detecté que Windows est en train de finir de vider la mémoire tampon.\n\n"
-	"En fonction de la vitesse de votre périphérique, cette opération peut prendre beaucoup de temps, "
-	"surtout s'il s'agit d'un fichier volumineux.\n\nNous recommandons d'attendre que Windows "
-	"complète cette opération, afin d'éviter la corruption du périphérique. Mais si jamais cela prend "
-	"trop de temps, vous pouvez toujours essayer de déconnecter le média..."
+	"En fonction de la vitesse de votre périphérique et de la taille du fichier, cette opération peut "
+	"prendre beaucoup de temps.\n\nNous recommandons d'attendre que Windows complète cette opération "
+	"pour éviter la corruption du périphérique. Mais si jamais vous en avez marre d'attendre, vous "
+	"pouvez essayer de déconnecter le média..."
 t MSG_081 "Image ISO non supportée"
-t MSG_082 "Cette version de Rufus supporte seulement les ISOs démarrables qui utilisent bootmgr/WinPE, isolinux ou EFI.\n"
-	"Cette image ISO ne semble pas utiliser une de ces options..."
+t MSG_082 "Cette version de Rufus supporte uniquement les ISOs démarrables à base de bootmgr/WinPE, "
+	"isolinux ou EFI.\nCette image ISO semble n'utiliser aucune de ces options..."
 t MSG_083 "Remplacer %s?"
 t MSG_084 "Cette image ISO utilise une version obsolète du fichier '%s'.\n"
-	"A cause de cela, les menus de démarrage peuvent de pas fonctionner.\n\n"
-	"Une nouvelle version du fichier peut être téléchargée par Rufus pour addresser ce problème:\n"
+	"Les menus de démarrage peuvent de pas fonctionner à cause de cela.\n\n"
+	"Rufus peut télécharger une nouvelle version du fichier pour résoudre ce problème:\n"
 	"- Choisissez 'Oui' pour télécharger le fichier depuis Internet\n"
 	"- Choisissez 'Non' pour garder le fichier de l'image ISO\n"
 	"Si vous ne savez pas quoi faire, sélectionnez 'Oui'.\n\n"
-	"Note: Le nouveau fichier est téléchargé dans le répertoire courrant. Une fois qu'un fichier"
-	"'%s' existe à cet endroit, il sera réutilisé automatiquement."
+	"Note: Le nouveau fichier sera téléchargé dans le répertoire courrant. "
+	"Si un '%s' existe à cet endroit, il sera réutilisé automatiquement."
 t MSG_085 "Téléchargement de %s"
 t MSG_086 "Aucune image ISO sélectionnée"
 t MSG_087 "Veuillez cliquer sur le bouton avec un disque pour choisir une image ISO démarrable "
@@ -608,6 +609,7 @@ t MSG_255 "NoDriveTypeAutorun sera effacé en sortie"
 t MSG_256 "Test de contrefaçons"
 t MSG_257 "Support Joliet"
 t MSG_258 "Support Rock Ridge"
+t MSG_259 "Forçage de mise à jour"
 
 ################################################################################
 l "zh-CN" "Chinese Simplified (简体中文)" 0x0404, 0x0804, 0x0c04, 0x1004, 0x1404

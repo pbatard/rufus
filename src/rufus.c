@@ -113,7 +113,7 @@ HWND hDeviceList, hPartitionScheme, hFileSystem, hClusterSize, hLabel, hBootType
 HWND hISOProgressDlg = NULL, hLogDlg = NULL, hISOProgressBar, hISOFileName, hDiskID;
 BOOL use_own_c32[NB_OLD_C32] = {FALSE, FALSE}, detect_fakes = TRUE, mbr_selected_by_user = FALSE;
 BOOL iso_op_in_progress = FALSE, format_op_in_progress = FALSE;
-BOOL enable_fixed_disks = FALSE, advanced_mode = TRUE;
+BOOL enable_fixed_disks = FALSE, advanced_mode = TRUE, force_update = FALSE;
 int dialog_showing = 0;
 uint16_t rufus_version[4];
 RUFUS_UPDATE update = { {0,0,0,0}, {0,0}, NULL, NULL};
@@ -2097,6 +2097,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 				PrintStatus(2000, FALSE, lmprintf(DeleteRegistryKey(REGKEY_HKCU, COMPANY_NAME "\\" APPLICATION_NAME)?MSG_248:MSG_249));
 				// Also try to delete the upper key (company name) if it's empty (don't care about the result)
 				DeleteRegistryKey(REGKEY_HKCU, COMPANY_NAME);
+				continue;
+			}
+			// Alt U => Force the update check to be successful
+			// This will set the reported current version of Rufus to 0.0.0.0 when performing an update
+			// check, so that it always succeeds. This is useful for translators.
+			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'U')) {
+				force_update = !force_update;
+				PrintStatus2000(lmprintf(MSG_259), force_update);
 				continue;
 			}
 			TranslateMessage(&msg);

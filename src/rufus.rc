@@ -33,7 +33,7 @@ LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
 IDD_DIALOG DIALOGEX 12, 12, 206, 329
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_APPWINDOW
-CAPTION "Rufus v1.4.0.291"
+CAPTION "Rufus v1.4.0.292"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     DEFPUSHBUTTON   "Start",IDC_START,94,291,50,14
@@ -146,7 +146,7 @@ BEGIN
 END
 
 IDD_NEW_VERSION DIALOGEX 0, 0, 384, 268
-STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Check For Updates - Rufus"
 FONT 8, "MS Shell Dlg", 400, 0, 0x0
 BEGIN
@@ -155,10 +155,10 @@ BEGIN
     DEFPUSHBUTTON   "Download",IDC_DOWNLOAD,293,211,74,14,WS_GROUP
     CONTROL         "",IDC_PROGRESS,"msctls_progress32",WS_BORDER,15,212,270,11
     GROUPBOX        "Release Notes",IDS_NEW_VERSION_NOTES_GRP,8,63,367,111
-    LTEXT           "A newer version is available. Please download the latest version!",IDS_NEW_VERSION_AVAIL_TXT,10,32,229,8
-    LTEXT           "[...]",IDC_YOUR_VERSION,10,8,124,8
-    LTEXT           "[...]",IDC_LATEST_VERSION,10,19,129,8
-    LTEXT           " Click here to go to the website",IDC_WEBSITE,138,49,108,9,SS_NOTIFY
+    LTEXT           "A newer version is available. Please download the latest version!",IDS_NEW_VERSION_AVAIL_TXT,10,32,366,8
+    LTEXT           "[...]",IDC_YOUR_VERSION,10,8,366,8
+    LTEXT           "[...]",IDC_LATEST_VERSION,10,19,366,8
+    CTEXT           "Click here to go to the website",IDC_WEBSITE,10,49,366,9,SS_NOTIFY
     GROUPBOX        "Download",IDS_NEW_VERSION_DOWNLOAD_GRP,8,177,367,58
     EDITTEXT        IDC_DOWNLOAD_URL,15,191,351,13,ES_AUTOHSCROLL | ES_READONLY
 END
@@ -284,8 +284,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,4,0,291
- PRODUCTVERSION 1,4,0,291
+ FILEVERSION 1,4,0,292
+ PRODUCTVERSION 1,4,0,292
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -302,13 +302,13 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Akeo Consulting (http://akeo.ie)"
             VALUE "FileDescription", "Rufus"
-            VALUE "FileVersion", "1.4.0.291"
+            VALUE "FileVersion", "1.4.0.292"
             VALUE "InternalName", "Rufus"
             VALUE "LegalCopyright", "© 2011-2013 Pete Batard (GPL v3)"
             VALUE "LegalTrademarks", "http://www.gnu.org/copyleft/gpl.html"
             VALUE "OriginalFilename", "rufus.exe"
             VALUE "ProductName", "Rufus"
-            VALUE "ProductVersion", "1.4.0.291"
+            VALUE "ProductVersion", "1.4.0.292"
         END
     END
     BLOCK "VarFileInfo"

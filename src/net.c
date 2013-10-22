@@ -41,8 +41,7 @@
 /* Default delay between update checks (1 day) */
 #define DEFAULT_UPDATE_INTERVAL (24*3600)
 
-
-/* Globals */
+extern BOOL force_update;
 static DWORD error_code;
 static BOOL update_check_in_progress = FALSE;
 static BOOL force_update_check = FALSE;
@@ -589,7 +588,7 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 		vuprintf("  platform_min: %d.%d\n", update.platform_min[0], update.platform_min[1]);
 		vuprintf("  url: %s\n", update.download_url);
 
-		found_new_version = (to_uint64_t(update.version) > to_uint64_t(rufus_version))
+		found_new_version = ((to_uint64_t(update.version) > to_uint64_t(rufus_version)) || (force_update))
 			&& ( (os_version.dwMajorVersion > update.platform_min[0])
 			  || ( (os_version.dwMajorVersion == update.platform_min[0]) && (os_version.dwMinorVersion >= update.platform_min[1])) );
 		uprintf("N%sew %s version found%c\n", found_new_version?"":"o n", channel[k], found_new_version?'!':'.');
