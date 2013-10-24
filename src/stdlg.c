@@ -404,41 +404,29 @@ void CreateStatusBar(void)
 
 /*
  * Center a dialog with regards to the main application Window or the desktop
+ * See http://msdn.microsoft.com/en-us/library/windows/desktop/ms644996.aspx#init_box
  */
 void CenterDialog(HWND hDlg)
 {
-	POINT Point;
 	HWND hParent;
-	RECT DialogRect;
-	RECT ParentRect;
-	int nWidth;
-	int nHeight;
+	RECT rc, rcDlg, rcParent;
 
-	// Get the size of the dialog box.
-	GetWindowRect(hDlg, &DialogRect);
-
-	// Get the parent
-	hParent = GetParent(hDlg);
-	if (hParent == NULL) {
+	if ((hParent = GetParent(hDlg)) == NULL) {
 		hParent = GetDesktopWindow();
 	}
-	GetClientRect(hParent, &ParentRect);
 
-	// Calculate the height and width of the current dialog
-	nWidth = DialogRect.right - DialogRect.left;
-	nHeight = DialogRect.bottom - DialogRect.top;
+	GetWindowRect(hParent, &rcParent);
+	GetWindowRect(hDlg, &rcDlg);
+	CopyRect(&rc, &rcParent);
 
-	// Find the center point and convert to screen coordinates.
-	Point.x = (ParentRect.right - ParentRect.left) / 2;
-	Point.y = (ParentRect.bottom - ParentRect.top) / 2;
-	ClientToScreen(hParent, &Point);
+	// Offset the parent and dialog box rectangles so that right and bottom
+	// values represent the width and height, and then offset the parent again
+	// to discard space taken up by the dialog box.
+	OffsetRect(&rcDlg, -rcDlg.left, -rcDlg.top);
+	OffsetRect(&rc, -rc.left, -rc.top);
+	OffsetRect(&rc, -rcDlg.right, -rcDlg.bottom);
 
-	// Calculate the new x, y starting point.
-	Point.x -= nWidth / 2;
-	Point.y -= nHeight / 2 + 35;
-
-	// Move the window.
-	MoveWindow(hDlg, Point.x, Point.y, nWidth, nHeight, FALSE);
+	SetWindowPos(hDlg, HWND_TOP, rcParent.left + (rc.right / 2), rcParent.top + (rc.bottom / 2) - 25, 0, 0, SWP_NOSIZE);
 }
 
 // http://stackoverflow.com/questions/431470/window-border-width-and-height-in-win32-how-do-i-get-it
@@ -755,8 +743,8 @@ BOOL CreateTooltip(HWND hControl, const char* message, int duration)
 	for (i=0; i<MAX_TOOLTIPS; i++) {
 		if (ttlist[i].hTip == NULL) break;
 	}
-	if (i == MAX_TOOLTIPS) {
-		uprintf("Maximum number of tooltips reached\n");
+	if (i >= MAX_TOOLTIPS) {
+		uprintf("Maximum number of tooltips reached (%d)\n", MAX_TOOLTIPS);
 		return FALSE;
 	}
 
@@ -799,7 +787,7 @@ void DestroyTooltip(HWND hControl)
 	for (i=0; i<MAX_TOOLTIPS; i++) {
 		if (ttlist[i].hCtrl == hControl) break;
 	}
-	if (i == MAX_TOOLTIPS) return;
+	if (i >= MAX_TOOLTIPS) return;
 	DestroyWindow(ttlist[i].hTip);
 	safe_free(ttlist[i].wstring);
 	ttlist[i].original_proc = NULL;
@@ -809,12 +797,16 @@ void DestroyTooltip(HWND hControl)
 
 void DestroyAllTooltips(void)
 {
-	int i;
+	int i, j;
 
-	for (i=0; i<MAX_TOOLTIPS; i++) {
+	for (i=0, j=0; i<MAX_TOOLTIPS; i++) {
 		if (ttlist[i].hTip == NULL) continue;
+		j++;
 		DestroyWindow(ttlist[i].hTip);
 		safe_free(ttlist[i].wstring);
+		ttlist[i].original_proc = NULL;
+		ttlist[i].hTip = NULL;
+		ttlist[i].hCtrl = NULL;
 	}
 }
 

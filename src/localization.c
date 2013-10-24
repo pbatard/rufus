@@ -308,21 +308,25 @@ void free_locale_list(void)
 
 /*
  * Init/destroy our various localization lists
+ * keep the locale list and filename on reinit
  */
-void init_localization(void) {
+void _init_localization(BOOL reinit) {
 	size_t i;
 	for (i=0; i<ARRAYSIZE(loc_dlg); i++)
 		list_init(&loc_dlg[i].list);
-	list_init(&locale_list);
+	if (!reinit)
+		list_init(&locale_list);
 	htab_create(LOC_HTAB_SIZE);
 }
 
-void exit_localization(void) {
+void _exit_localization(BOOL reinit) {
+	if (!reinit) {
+		free_locale_list();
+		if (loc_filename != embedded_loc_filename)
+			safe_free(loc_filename);
+	}
 	free_dialog_list();
-	free_locale_list();
 	htab_destroy();
-	if (loc_filename != embedded_loc_filename)
-		safe_free(loc_filename);
 }
 
 /*

@@ -84,7 +84,7 @@ struct {
 	HIMAGELIST himl;
 	RECT margin;
 	UINT uAlign;
-} bi_iso = {0}, bi_up = {0}, bi_down = {0};	// BUTTON_IMAGELIST
+} bi_iso = {0}, bi_up = {0}, bi_down = {0}, bi_lang = {0};	// BUTTON_IMAGELIST
 
 const char* FileSystemLabel[FS_MAX] = { "FAT", "FAT32", "NTFS", "UDF", "exFAT" };
 // Number of steps for each FS for FCC_STRUCTURE_PROGRESS
@@ -94,9 +94,12 @@ static BOOL existing_key = FALSE;	// For LGP set/restore
 static BOOL size_check = TRUE;
 static BOOL log_displayed = FALSE;
 static BOOL iso_provided = FALSE;
+static BOOL relaunch = FALSE;
 extern BOOL force_large_fat32, enable_joliet, enable_rockridge;
 static int selection_default;
 static loc_cmd* selected_locale = NULL;
+static UINT_PTR UM_LANGUAGE_MENU_MAX = UM_LANGUAGE_MENU;
+static RECT relaunch_rc = { -65536, -65536, 0, 0};
 char ClusterSizeLabel[MAX_CLUSTER_SIZES][64];
 char msgbox[1024], msgbox_title[32];
 
@@ -121,7 +124,7 @@ extern char szStatusMessage[256];
 
 static HANDLE format_thid = NULL;
 static HWND hProgress = NULL, hBoot = NULL, hSelectISO = NULL;
-static HICON hIconDisc, hIconDown, hIconUp;
+static HICON hIconDisc, hIconDown, hIconUp, hIconLang;
 static StrArray DriveID, DriveLabel;
 static char szTimer[12] = "00:00:00";
 static unsigned int timer;
@@ -875,6 +878,7 @@ static void EnableControls(BOOL bEnable)
 	EnableWindow(GetDlgItem(hMainDialog, IDC_SET_ICON), bEnable);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_ADVANCED), bEnable);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_ENABLE_FIXED_DISKS), bEnable);
+	EnableWindow(GetDlgItem(hMainDialog, IDC_LANG), bEnable);
 	SetDlgItemTextU(hMainDialog, IDCANCEL, lmprintf(bEnable?MSG_006:MSG_007));
 }
 
@@ -1351,6 +1355,7 @@ void InitDialog(HWND hDlg)
 	// Load system icons (NB: Use the excellent http://www.nirsoft.net/utils/iconsext.html to find icon IDs)
 	hDllInst = LoadLibraryA("shell32.dll");
 	hIconDisc = (HICON)LoadImage(hDllInst, MAKEINTRESOURCE(12), IMAGE_ICON, s16, s16, LR_DEFAULTCOLOR|LR_SHARED);
+	hIconLang = (HICON)LoadImage(hDllInst, MAKEINTRESOURCE(244), IMAGE_ICON, s16, s16, LR_DEFAULTCOLOR|LR_SHARED);
 	if (nWindowsVersion >= WINDOWS_VISTA) {
 		hIconDown = (HICON)LoadImage(hDllInst, MAKEINTRESOURCE(16750), IMAGE_ICON, s16, s16, LR_DEFAULTCOLOR|LR_SHARED);
 		hIconUp = (HICON)LoadImage(hDllInst, MAKEINTRESOURCE(16749), IMAGE_ICON, s16, s16, LR_DEFAULTCOLOR|LR_SHARED);
@@ -1367,6 +1372,10 @@ void InitDialog(HWND hDlg)
 	pImageList_ReplaceIcon(bi_iso.himl, -1, hIconDisc);
 	SetRect(&bi_iso.margin, 0, 1, 0, 0);
 	bi_iso.uAlign = BUTTON_IMAGELIST_ALIGN_CENTER;
+	bi_lang.himl = pImageList_Create(i16, i16, ILC_COLOR32 | ILC_MASK, 1, 0);
+	pImageList_ReplaceIcon(bi_lang.himl, -1, hIconLang);
+	SetRect(&bi_lang.margin, 0, 1, 0, 0);
+	bi_lang.uAlign = BUTTON_IMAGELIST_ALIGN_CENTER;
 	bi_down.himl = pImageList_Create(i16, i16, ILC_COLOR32 | ILC_MASK, 1, 0);
 	pImageList_ReplaceIcon(bi_down.himl, -1, hIconDown);
 	SetRect(&bi_down.margin, 0, 0, 0, 0);
@@ -1377,6 +1386,7 @@ void InitDialog(HWND hDlg)
 	bi_up.uAlign = BUTTON_IMAGELIST_ALIGN_CENTER;
 
 	SendMessage(hSelectISO, BCM_SETIMAGELIST, 0, (LPARAM)&bi_iso);
+	SendMessage(GetDlgItem(hDlg, IDC_LANG), BCM_SETIMAGELIST, 0, (LPARAM)&bi_lang);
 	SendMessage(GetDlgItem(hDlg, IDC_ADVANCED), BCM_SETIMAGELIST, 0, (LPARAM)&bi_down);
 
 	// Set the various tooltips
@@ -1412,6 +1422,23 @@ static void PrintStatus2000(const char* str, BOOL val)
 	PrintStatus(2000, FALSE, (lmprintf((val)?MSG_250:MSG_251, str)));
 }
 
+void ShowLanguageMenu(HWND hDlg)
+{
+	POINT pt;
+	HMENU menu;
+	loc_cmd* lcmd = NULL;
+	UM_LANGUAGE_MENU_MAX = UM_LANGUAGE_MENU;
+
+	menu = CreatePopupMenu();
+	list_for_each_entry(lcmd, &locale_list, loc_cmd, list) {
+		InsertMenuU(menu, -1, MF_BYPOSITION|((selected_locale == lcmd)?MF_CHECKED:0), UM_LANGUAGE_MENU_MAX++, lcmd->txt[1]);
+	}
+
+	SetForegroundWindow(hDlg);
+	GetCursorPos(&pt);
+	TrackPopupMenu(menu, TPM_TOPALIGN|TPM_RIGHTALIGN, pt.x, pt.y, 0, hMainDialog, NULL);
+	DestroyMenu(menu);
+}
 
 /*
  * Main dialog callback
@@ -1421,11 +1448,12 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	DRAWITEMSTRUCT* pDI;
 	POINT Point;
 	RECT DialogRect, DesktopRect;
-	int nDeviceIndex, fs, bt, i, nWidth, nHeight, nb_devices;
+	int nDeviceIndex, fs, bt, i, nWidth, nHeight, nb_devices, selected_language;
 	static DWORD DeviceNum = 0, LastRefresh = 0;
 	char tmp[128];
 	static UINT uBootChecked = BST_CHECKED, uQFChecked;
 	static BOOL first_log_display = TRUE, user_changed_label = FALSE;
+	loc_cmd* lcmd = NULL;
 
 	switch (message) {
 
@@ -1464,7 +1492,10 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	case WM_INITDIALOG:
 		apply_localization(IDD_DIALOG, hDlg);
 		SetUpdateCheck();
+		advanced_mode = TRUE;
 		// Create the log window (hidden)
+		first_log_display = TRUE;
+		log_displayed = FALSE;
 		hLogDlg = CreateDialogW(hMainInstance, MAKEINTRESOURCEW(IDD_LOG), hDlg, (DLGPROC)LogProc); 
 		InitDialog(hDlg);
 		GetUSBDevices(0);
@@ -1493,6 +1524,22 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		break;
 
 	case WM_COMMAND:
+		if ((LOWORD(wParam) >= UM_LANGUAGE_MENU) && (LOWORD(wParam) < UM_LANGUAGE_MENU_MAX)) {
+			selected_language = LOWORD(wParam) - UM_LANGUAGE_MENU;
+			uprintf("Got language %d\n", selected_language);
+
+			i = 0;
+			list_for_each_entry(lcmd, &locale_list, loc_cmd, list) {
+				if (i++ == selected_language) {
+					if (selected_locale != lcmd) {
+						selected_locale = lcmd;
+						relaunch = TRUE;
+						PostMessage(hDlg, WM_COMMAND, IDCANCEL, 0);
+					}
+					break;
+				}
+			}
+		}
 		switch(LOWORD(wParam)) {
 		case IDOK:			// close application
 		case IDCANCEL:
@@ -1522,6 +1569,8 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			StrArrayDestroy(&DriveID);
 			StrArrayDestroy(&DriveLabel);
 			DestroyAllTooltips();
+			DestroyWindow(hLogDlg);
+			GetWindowRect(hDlg, &relaunch_rc);
 			EndDialog(hDlg, 0);
 			break;
 		case IDC_ABOUT:
@@ -1559,6 +1608,9 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		case IDC_TEST:
 			break;
 #endif
+		case IDC_LANG:
+			ShowLanguageMenu(GetDlgItem(hDlg, IDC_LANG));
+			break;
 		case IDC_ADVANCED:
 			ToggleAdvanced();
 			SendMessage(hMainDialog, WM_COMMAND, (CBN_SELCHANGE<<16) | IDC_FILESYSTEM,
@@ -1985,9 +2037,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			"Fatal error", MB_ICONSTOP);
 		goto out;
 	}
-	uprintf("localization: using locale '%s'\n", selected_locale->txt[0]);
-	get_loc_data_file(loc_file, (long)selected_locale->num[0], (long)selected_locale->num[1], selected_locale->line_nr);
-
 
 	// Prevent 2 applications from running at the same time, unless "/W" is passed as an option
 	// in which case we wait for the mutex to be relinquished
@@ -2022,12 +2071,18 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	// 0x9e disables removable and fixed drive notifications
 	SetLGP(FALSE, &existing_key, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer", "NoDriveTypeAutorun", 0x9e);
 
+relaunch:
+	uprintf("localization: using locale '%s'\n", selected_locale->txt[0]);
+	get_loc_data_file(loc_file, (long)selected_locale->num[0], (long)selected_locale->num[1], selected_locale->line_nr);
+
 	// Create the main Window
 	hDlg = CreateDialogW(hInstance, MAKEINTRESOURCEW(IDD_DIALOG), NULL, MainCallback);
 	if (hDlg == NULL) {
 		MessageBoxU(NULL, "Could not create Window", "DialogBox failure", MB_ICONSTOP);
 		goto out;
 	}
+	if ((relaunch_rc.left > -65536) && (relaunch_rc.top > -65536))
+		SetWindowPos(hDlg, HWND_TOP, relaunch_rc.left, relaunch_rc.top, 0, 0, SWP_NOSIZE);
 	ShowWindow(hDlg, SW_SHOWNORMAL);
 	UpdateWindow(hDlg);
 
@@ -2110,6 +2165,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
+	}
+	if (relaunch) {
+		relaunch = FALSE;
+		reinit_localization();
+		goto relaunch;
 	}
 
 out:

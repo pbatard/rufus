@@ -82,6 +82,7 @@
 #define IDC_ADVANCED                    1043
 #define IDS_ADVANCED_OPTIONS_GRP        1044
 #define IDC_LOG                         1045
+#define IDC_LANG                        1046
 #define IDC_LOG_EDIT                    1050
 #define IDC_LOG_SAVE                    1051
 #define IDC_LOG_CLEAR                   1052

@@ -146,8 +146,11 @@ char *loc_filename, *embedded_loc_filename;
 
 void free_loc_cmd(loc_cmd* lcmd);
 BOOL dispatch_loc_cmd(loc_cmd* lcmd);
-void init_localization(void);
-void exit_localization(void);
+void _init_localization(BOOL reinit);
+void _exit_localization(BOOL reinit);
+#define init_localization() _init_localization(FALSE)
+#define exit_localization() _exit_localization(FALSE)
+#define reinit_localization() do {_exit_localization(TRUE); _init_localization(TRUE);} while(0)
 void apply_localization(int dlg_id, HWND hDlg);
 void reset_localization(int dlg_id);
 void free_dialog_list(void);

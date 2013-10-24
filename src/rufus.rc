@@ -33,7 +33,7 @@ LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
 IDD_DIALOG DIALOGEX 12, 12, 206, 329
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_APPWINDOW
-CAPTION "Rufus v1.4.0.293"
+CAPTION "Rufus v1.4.0.294"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     DEFPUSHBUTTON   "Start",IDC_START,94,291,50,14
@@ -42,7 +42,7 @@ BEGIN
     PUSHBUTTON      "Log",IDC_LOG,62,291,18,14
     PUSHBUTTON      "T",IDC_TEST,80,291,12,14,NOT WS_VISIBLE
     COMBOBOX        IDC_DEVICE,8,17,190,33,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Device",IDS_DEVICE_TXT,9,6,186,8
+    LTEXT           "Device",IDS_DEVICE_TXT,9,6,171,8
     COMBOBOX        IDC_FILESYSTEM,8,75,190,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     LTEXT           "File system",IDS_FILESYSTEM_TXT,9,64,186,10
     COMBOBOX        IDC_PARTITION_TYPE,8,46,190,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
@@ -69,6 +69,7 @@ BEGIN
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,235,181,10
     CONTROL         "List non removable or unpartitioned USB disks",IDC_ENABLE_FIXED_DISKS,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,222,181,10
+    PUSHBUTTON      "",IDC_LANG,183,2,15,13,BS_TOP | BS_FLAT
 END
 
 IDD_ABOUTBOX DIALOGEX 0, 0, 287, 204
@@ -284,8 +285,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,4,0,293
- PRODUCTVERSION 1,4,0,293
+ FILEVERSION 1,4,0,294
+ PRODUCTVERSION 1,4,0,294
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -302,13 +303,13 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Akeo Consulting (http://akeo.ie)"
             VALUE "FileDescription", "Rufus"
-            VALUE "FileVersion", "1.4.0.293"
+            VALUE "FileVersion", "1.4.0.294"
             VALUE "InternalName", "Rufus"
             VALUE "LegalCopyright", "© 2011-2013 Pete Batard (GPL v3)"
             VALUE "LegalTrademarks", "http://www.gnu.org/copyleft/gpl.html"
             VALUE "OriginalFilename", "rufus.exe"
             VALUE "ProductName", "Rufus"
-            VALUE "ProductVersion", "1.4.0.293"
+            VALUE "ProductVersion", "1.4.0.294"
         END
     END
     BLOCK "VarFileInfo"

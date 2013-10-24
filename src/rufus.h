@@ -110,7 +110,9 @@ enum user_message_type {
 	// TODO: relabel "ISO" to a more generic "progress"
 	UM_ISO_CREATE,
 	UM_ISO_INIT,
-	UM_ISO_EXIT
+	UM_ISO_EXIT,
+	// Start of the WM IDs for the language menu items
+	UM_LANGUAGE_MENU = WM_APP + 0x100
 };
 
 /* Custom notifications */

@@ -291,6 +291,18 @@ static __inline BOOL SetDlgItemTextU(HWND hDlg, int nIDDlgItem, const char* lpSt
 	return ret;
 }
 
+static __inline BOOL InsertMenuU(HMENU hMenu, UINT uPosition, UINT uFlags, UINT_PTR uIDNewItem, const char* lpNewItem)
+{
+	BOOL ret = FALSE;
+	DWORD err = ERROR_INVALID_DATA;
+	wconvert(lpNewItem);
+	ret = InsertMenuW(hMenu, uPosition, uFlags, uIDNewItem, wlpNewItem);
+	err = GetLastError();
+	wfree(lpNewItem);
+	SetLastError(err);
+	return ret;
+}
+
 static __inline int ComboBox_GetLBTextU(HWND hCtrl, int index, char* lpString)
 {
 	int size;
