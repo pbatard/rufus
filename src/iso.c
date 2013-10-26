@@ -91,6 +91,25 @@ static __inline char* size_to_hr(int64_t size)
 	return str_size;
 }
 
+// Ensure filenames do not contain invalid FAT32 or NTFS characters
+static __inline BOOL sanitize_filename(char* filename)
+{
+	size_t i, j;
+	BOOL ret = FALSE;
+	char unauthorized[] = {'<', '>', ':', '|', '*', '?'};
+
+	// Must start after the drive part (D:\...) so that we don't eliminate the first column
+	for (i=2; i<safe_strlen(filename); i++) {
+		for (j=0; j<sizeof(unauthorized); j++) {
+			if (filename[i] == unauthorized[j]) {
+				filename[i] = '_';
+				ret = TRUE;
+			}
+		}
+	}
+	return ret;
+}
+
 static void log_handler (cdio_log_level_t level, const char *message)
 {
 	switch(level) {
@@ -222,7 +241,8 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 			}
 			// Replace slashes with backslashes and append the size to the path for UI display
 			nul_pos = safe_strlen(psz_fullpath);
-			for (i=0; i<nul_pos; i++) if (psz_fullpath[i] == '/') psz_fullpath[i] = '\\';
+			for (i=0; i<nul_pos; i++)
+				if (psz_fullpath[i] == '/') psz_fullpath[i] = '\\';
 			safe_strcpy(&psz_fullpath[nul_pos], 24, size_to_hr(i_file_length));
 			uprintf("Extracting: %s\n", psz_fullpath);
 			SetWindowTextU(hISOFileName, psz_fullpath);
@@ -239,6 +259,8 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 			}
 			if (i < NB_OLD_C32)
 				continue;
+			if (sanitize_filename(psz_fullpath))
+				uprintf("  File name sanitized to '%s'\n", psz_fullpath);
 			file_handle = CreateFileU(psz_fullpath, GENERIC_READ | GENERIC_WRITE,
 				FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 			if (file_handle == INVALID_HANDLE_VALUE) {
@@ -347,7 +369,8 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 			}
 			// Replace slashes with backslashes and append the size to the path for UI display
 			nul_pos = safe_strlen(psz_fullpath);
-			for (i=0; i<nul_pos; i++) if (psz_fullpath[i] == '/') psz_fullpath[i] = '\\';
+			for (i=0; i<nul_pos; i++)
+				if (psz_fullpath[i] == '/') psz_fullpath[i] = '\\';
 			safe_strcpy(&psz_fullpath[nul_pos], 24, size_to_hr(i_file_length));
 			uprintf("Extracting: %s\n", psz_fullpath);
 			SetWindowTextU(hISOFileName, psz_fullpath);
@@ -365,6 +388,8 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 			}
 			if (i < NB_OLD_C32)
 				continue;
+			if (sanitize_filename(psz_fullpath))
+				uprintf("  File name sanitized to '%s'\n", psz_fullpath);
 			file_handle = CreateFileU(psz_fullpath, GENERIC_READ | GENERIC_WRITE,
 				FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 			if (file_handle == INVALID_HANDLE_VALUE) {

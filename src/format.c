@@ -206,7 +206,7 @@ static void ToValidLabel(WCHAR* name, BOOL bFAT)
 {
 	size_t i, j, k;
 	BOOL found;
-	WCHAR unauthorized[] = L"*?,;:/\\|+=<>[]";
+	WCHAR unauthorized[] = L"*?,;:/\\|+=<>[]\"";
 	WCHAR to_underscore[] = L"\t.";
 
 	if (name == NULL)
