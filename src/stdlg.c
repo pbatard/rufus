@@ -462,7 +462,7 @@ void ResizeMoveCtrl(HWND hDlg, HWND hCtrl, int dx, int dy, int dw, int dh)
 		border = GetBorderSize(hCtrl);
 	MoveWindow(hCtrl, point.x + (int)(fScale*(float)dx), point.y + (int)(fScale*(float)dy),
 		(rect.right - rect.left) + (int)(fScale*(float)dw + border.cx),
-		(rect.bottom - rect.top) + border.cy, TRUE);
+		(rect.bottom - rect.top) + (int)(fScale*(float)dh + border.cy), TRUE);
 	InvalidateRect(hCtrl, NULL, TRUE);
 }
 
