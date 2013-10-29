@@ -2049,6 +2049,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		mutex = CreateMutexA(NULL, TRUE, "Global/" APPLICATION_NAME);
 	}
 	if ((mutex == NULL) || (GetLastError() == ERROR_ALREADY_EXISTS)) {
+		// Load the translation before we print the error
+		get_loc_data_file(loc_file, (long)selected_locale->num[0], (long)selected_locale->num[1], selected_locale->line_nr);
 		MessageBoxU(NULL, lmprintf(MSG_002), lmprintf(MSG_001), MB_ICONSTOP);
 		goto out;
 	}
