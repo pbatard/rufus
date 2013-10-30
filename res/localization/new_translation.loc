@@ -48,9 +48,10 @@
 
 ################################################################################
 l "zz-ZZ" "LangName_EN (LangName_ZZ)" 0x1234, 0xabcd
-# See http://msdn.microsoft.com/en-us/goglobal/bb964664.aspx or 
+# See http://msdn.microsoft.com/en-us/goglobal/bb964664.aspx or
 # http://download.microsoft.com/download/9/5/E/95EF66AF-9026-4BB0-A41D-A4F81802D92C/%5BMS-LCID%5D.pdf
 # for the LCID (0x####) codes you should use
+v 1.0.1
 
 # Main dialog
 g IDD_DIALOG
@@ -283,8 +284,8 @@ t MSG_151 "Use this if you want to install an OS in EFI mode, but need to access
 	"the USB content from Windows XP"
 t MSG_152 "The preferred option to install an OS in EFI mode and when "
 	"USB access is not required for Windows XP"
-t MSG_153 "Test pattern: 0x%02X"	
-t MSG_154 "Test pattern: 0x%02X, 0x%02X"	
+t MSG_153 "Test pattern: 0x%02X"
+t MSG_154 "Test pattern: 0x%02X, 0x%02X"
 t MSG_155 "Test pattern: 0x%02X, 0x%02X, 0x%02X"
 t MSG_156 "Test pattern: 0x%02X, 0x%02X, 0x%02X, 0x%02X"
 t MSG_157 "Sets the target filesystem"

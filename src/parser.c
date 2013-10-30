@@ -122,18 +122,18 @@ static loc_cmd* get_loc_cmd(char c, char* line) {
 				goto err;
 			}
 			break;
-		case 'u':	// comma separated list of unsigned integers (to end of line)
+		case 'u':	// comma or dot separated list of unsigned integers (to end of line)
 			// count the number of commas
 			lcmd->unum_size = 1;
 			for (l=i; line[l] != 0; l++) {
-				if (line[l] == ',')
+				if ((line[l] == '.') || (line[l] == ','))
 					lcmd->unum_size++;
 			}
 			lcmd->unum = (uint32_t*)malloc(lcmd->unum_size * sizeof(uint32_t));
-			token = strtok(&line[i], ",");
+			token = strtok(&line[i], ".,");
 			for (l=0; (l<lcmd->unum_size) && (token != NULL); l++) {
 				lcmd->unum[l] = (int32_t)strtol(token, &endptr, 0);
-				token = strtok(NULL, ",");
+				token = strtok(NULL, ".,");
 			}
 			if ((token != NULL) || (l != lcmd->unum_size)) {
 				luprint("internal error (unexpected number of numeric values)");
@@ -234,6 +234,8 @@ BOOL get_supported_locales(const char* filename)
 	size_t i;
 	loc_cmd *lcmd = NULL, *last_lcmd = NULL;
 	long end_of_block;
+	int version_line_nr = 0;
+	uint32_t loc_base_minor = -1, loc_base_micro = -1;
 	
 	fd = open_loc_file(filename);
 	if (fd == NULL)
@@ -250,29 +252,78 @@ BOOL get_supported_locales(const char* filename)
 		loc_line_nr++;
 		// Skip leading spaces
 		i = strspn(line, space);
-		if (line[i] != 'l')
+		if ((line[i] != 'l') && (line[i] != 'v'))
 			continue;
 		// line[i] is not NUL so i+1 is safe to access
 		lcmd = get_loc_cmd(line[i], &line[i+1]);
-		if ((lcmd == NULL) || (lcmd->command != LC_LOCALE)) {
+		if ((lcmd == NULL) || ((lcmd->command != LC_LOCALE) && (lcmd->command != LC_VERSION))) {
 			free_loc_cmd(lcmd);
 			continue;
 		}
-		// we use num[0] and num[1] as block delimiter index for this locale in the file
-		if (last_lcmd != NULL) {
-			last_lcmd->num[1] = (int32_t)end_of_block;
+		switch (lcmd->command) {
+		case LC_LOCALE:
+			// we use num[0] and num[1] as block delimiter index for this locale in the file
+			if (last_lcmd != NULL) {
+				if (version_line_nr == 0) {
+					uprintf("localization: no compatible version was found - this locale will be ignored\n");
+					list_del(&last_lcmd->list);
+					free_loc_cmd(last_lcmd);
+				} else {
+					last_lcmd->num[1] = (int32_t)end_of_block;
+				}
+			}
+			lcmd->num[0] = (int32_t)ftell(fd);
+			// Add our locale command to the locale list
+			list_add_tail(&lcmd->list, &locale_list);
+			uprintf("localization: found locale '%s'\n", lcmd->txt[0]);
+			last_lcmd = lcmd;
+			version_line_nr = 0;
+			break;
+		case LC_VERSION:
+			if (version_line_nr != 0) {
+				luprintf("[v]ersion was already provided at line %d", version_line_nr);
+			} else if (lcmd->unum_size != 3) {
+				luprint("[v]ersion format is invalid");
+			} else if (last_lcmd == NULL) {
+				luprint("[v]ersion cannot precede [l]ocale");
+			} else if (lcmd->unum[0] != LOC_FRAMEWORK_VERSION) {
+				// If the localization framework evolved in a manner that makes existing
+				// translations incompatible, we need to discard them.
+				luprint("[v]ersion is not compatible with this framework");
+			} else if (loc_base_minor == -1) {
+				// We use the first version from our loc file (usually en-US) as our base
+				// as it should always be the most up to date.
+				loc_base_minor = lcmd->unum[1];
+				loc_base_micro = lcmd->unum[0];
+				version_line_nr = loc_line_nr;
+			} else if (lcmd->unum[1] < loc_base_minor) {
+				luprintf("the version of this locale is incompatible with this version of " APPLICATION_NAME " and MUST be updated to at least v%d.%d.0",
+					LOC_FRAMEWORK_VERSION, loc_base_minor);
+			} else {
+				if (lcmd->unum[2] < loc_base_micro) {
+					luprintf("the version of this translation is older than the base one and may result in some messages not being properly translated.\n"
+						"If you are the translator, please update your translation with the changes that intervened between v%d.%d.%d and v%d.%d.%d.\n"
+						"See https://github.com/pbatard/rufus/blob/master/res/localization/ChangeLog.txt", 
+						LOC_FRAMEWORK_VERSION, loc_base_minor, lcmd->unum[2], LOC_FRAMEWORK_VERSION, loc_base_minor, loc_base_micro);
+				}
+				version_line_nr = loc_line_nr;
+			}
+			free_loc_cmd(lcmd);
+			break;
 		}
-		lcmd->num[0] = (int32_t)ftell(fd);
-		// Add our locale command to the locale list
-		list_add_tail(&lcmd->list, &locale_list);
-		uprintf("localization: found locale '%s'\n", lcmd->txt[0]);
-		last_lcmd = lcmd;
 	} while (1);
-	if (last_lcmd != NULL)
-		last_lcmd->num[1] = (int32_t)ftell(fd);
+	if (last_lcmd != NULL) {
+		if (version_line_nr == 0) {
+			uprintf("localization: no compatible version was found - this locale will be ignored\n");
+			list_del(&last_lcmd->list);
+			free_loc_cmd(last_lcmd);
+		} else {
+			last_lcmd->num[1] = (int32_t)ftell(fd);
+		}
+	}
 	r = !list_empty(&locale_list);
 	if (r == FALSE)
-		uprintf("localization: '%s' contains no locale sections\n", filename); 
+		uprintf("localization: '%s' contains no valid locale sections\n", filename); 
 
 out:
 	if (fd != NULL)

@@ -2033,7 +2033,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	if ( (!get_supported_locales(loc_file))
 	  || ((selected_locale = ((locale_name == NULL)?get_locale_from_lcid(lcid, TRUE):get_locale_from_name(locale_name, TRUE))) == NULL) ) {
 		uprintf("FATAL: Could not access locale!\n");
-		MessageBoxU(NULL, "The locale data is missing. This application will now exit.",
+		MessageBoxU(NULL, "The locale data is missing or invalid. This application will now exit."
+			// TODO: remove this line for release!
+			"\n\nTRANSLATORS: You need to add a 'v 1.0.0' line to your loc file. See the latest 'new_translation.loc'",
 			"Fatal error", MB_ICONSTOP);
 		goto out;
 	}

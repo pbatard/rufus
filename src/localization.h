@@ -23,9 +23,13 @@
 #pragma once
 
 // Number of concurrent localization messages. Must be a power of 2.
-#define LOC_MESSAGE_NB    8
-#define LOC_MESSAGE_SIZE  2048
-#define LOC_HTAB_SIZE     512
+#define LOC_MESSAGE_NB      8
+#define LOC_MESSAGE_SIZE    2048
+#define LOC_HTAB_SIZE       512
+
+// The [v]ersion major from a translation must match this number or
+// the translation will be ignored
+#define LOC_FRAMEWORK_VERSION  1
 
 #define luprint(msg) uprintf("%s(%d): " msg "\n", loc_filename, loc_line_nr)
 #define luprintf(msg, ...) uprintf("%s(%d): " msg "\n", loc_filename, loc_line_nr, __VA_ARGS__)

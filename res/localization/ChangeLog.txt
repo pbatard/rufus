@@ -1,0 +1,14 @@
+This file lists any change that has been applied to the en-US translation of
+rufus.loc since its original version. Translators are expected to keep their
+translations up to date by monitoring this file on regular basis and applying
+the same changes.
+
+Remember to also update the version number for your translation ('v x.y.z')
+once you have matched all the changes that occurred for the en-US translation.
+
+
+o Version 1.0.1 (2013.10.28)
+  - MSG_061 "Please insert a media in drive." -> "Please insert a removable media in drive."
+  - MSG_071 "Unable to create formatting thread." -> "Unable to start thread."
+o Version 1.0.0 (2013.10.20)
+  - Initial version

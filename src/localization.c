@@ -49,7 +49,7 @@ const loc_parse parse_cmd[9] = {
 	// Base translation to add on top of (eg. "English (UK)" can be used to build on top of "English (US)"
 	{ 'b', LC_BASE, "s" },		// b "en_US"
 	// Version to use for the localization commandset and API
-	{ 'v', LC_VERSION, "ii" },	// v 1.0				// TODO: NOT IMPLEMENTED YET
+	{ 'v', LC_VERSION, "u" },	// v 1.0.2
 	// Translate the text control associated with an ID
 	{ 't', LC_TEXT, "cs" },		// t IDC_CONTROL "Translation"
 	// Set the section/dialog to which the next commands should apply
@@ -331,9 +331,6 @@ void _exit_localization(BOOL reinit) {
 
 /*
  * Validate and store localization command data
- *
- * TODO: Do we need to store a revert for every action we execute here,
- * or do we want to reinstantiate the dialogs?
  */
 BOOL dispatch_loc_cmd(loc_cmd* lcmd)
 {
@@ -373,10 +370,6 @@ BOOL dispatch_loc_cmd(loc_cmd* lcmd)
 		dlg_index = lcmd->ctrl_id - IDD_DIALOG;
 		free_loc_cmd(lcmd);
 		break;
-	case LC_VERSION:
-		luprintf("GOT VERSION: %d.%d\n", lcmd->num[0], lcmd->num[1]);
-		free_loc_cmd(lcmd);
-		break;
 	case LC_BASE:
 		base_locale = get_locale_from_name(lcmd->txt[0], FALSE);
 		if (base_locale != NULL) {
@@ -401,7 +394,6 @@ err:
 /*
  * Apply stored localization commands to a specific dialog
  * If hDlg is NULL, apply the commands against an active Window
- * TODO: if dlg_id is <0, apply all
  */
 void apply_localization(int dlg_id, HWND hDlg)
 {
