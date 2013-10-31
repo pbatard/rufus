@@ -53,6 +53,8 @@
 #define FS_DEFAULT                  FS_FAT32
 #define BADBLOCK_PATTERNS           {0xaa, 0x55, 0xff, 0x00}
 #define LARGE_FAT32_SIZE            (32*1073741824LL)	// Size at which we need to use fat32format
+#define UDF_FORMAT_SPEED            3.1f		// Speed estimate at which we expect UDF drives to be formatted (GB/s)
+#define UDF_FORMAT_WARN             20			// Duration (in seconds) above which we warn about long UDF formatting times
 #define MAX_FAT32_SIZE              2.0f		// Threshold above which we disable FAT32 formatting (in TB)
 #define WHITE                       RGB(255,255,255)
 #define SEPARATOR_GREY              RGB(223,223,223)

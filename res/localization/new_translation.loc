@@ -51,7 +51,7 @@ l "zz-ZZ" "LangName_EN (LangName_ZZ)" 0x1234, 0xabcd
 # See http://msdn.microsoft.com/en-us/goglobal/bb964664.aspx or
 # http://download.microsoft.com/download/9/5/E/95EF66AF-9026-4BB0-A41D-A4F81802D92C/%5BMS-LCID%5D.pdf
 # for the LCID (0x####) codes you should use
-v 1.0.1
+v 1.0.2
 
 # Main dialog
 g IDD_DIALOG
@@ -255,7 +255,7 @@ t MSG_096 "Only FAT/FAT32 is supported for this type of ISO. Please select FAT/F
 t MSG_097 "Only 'bootmgr' or 'WinPE' based ISO images can currently be used with NTFS."
 t MSG_098 "FAT/FAT32 can only be used for isolinux based ISO images or when the Target Type is UEFI."
 t MSG_099 "Filesystem limitation"
-t MSG_100 "This iso image contains a file larger than 4GB file, which is more than the "
+t MSG_100 "This ISO image contains a file larger than 4GB file, which is more than the "
 	"maximum size allowed for a FAT or FAT32 file system."
 t MSG_101 "Missing WIM support"
 t MSG_102 "Your platform cannot extract files from WIM archives. WIM extraction "
@@ -275,6 +275,15 @@ t MSG_106 "Please select folder"
 t MSG_107 "All files"
 t MSG_108 "Rufus log"
 t MSG_109 "0x%02X (Disk %d)"
+# "Cluster size" below should be the same as the label for IDS_CLUSTERSIZE_TXT
+# "kilobytes" should be the same as in MSG_027
+t MSG_110 "MS-DOS cannot boot from a drive using a 64 kilobytes Cluster size.\n"
+	"Please change the Cluster size or use FreeDOS."
+t MSG_111 "Incompatible Cluster size"
+# "%d:%02d" below is a duration (mins:secs)
+t MSG_112 "Formatting a large UDF volumes can take a lot of time. At USB 2.0 speeds, the estimated formatting "
+	"duration is %d:%02d, during which the progress bar will appear frozen. Please be patient!"
+t MSG_113 "Large UDF volume"
 
 # Tootips
 # Partition Scheme and Target Type
@@ -352,6 +361,10 @@ t MSG_216 "Saved %s"
 t MSG_217 "Formatting: %0.1f%% completed"
 t MSG_218 "Creating file system: Task %d/%d completed"
 t MSG_219 "NTFS Fixup: %d%% completed"
+# Parameter: the file system and an estimated duration in mins and secs.
+# eg. "Formatting (UDF) - Estimated duration 3:21..."
+# NB: if "estimated duration" is too long, just use "estimated" or an abbreviation
+t MSG_220 "Formatting (%s) - estimated duration %d:%02d..."
 t MSG_221 "Setting Label (This may take while)..."
 # Parameter: the file system. eg. "Formatting (NTFS)..."
 t MSG_222 "Formatting (%s)..."

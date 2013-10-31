@@ -112,6 +112,7 @@ char szFolderPath[MAX_PATH], app_dir[MAX_PATH];
 char* iso_path = NULL;
 float fScale = 1.0f;
 int default_fs;
+uint32_t dur_mins, dur_secs;
 HWND hDeviceList, hPartitionScheme, hFileSystem, hClusterSize, hLabel, hBootType, hNBPasses, hLog = NULL;
 HWND hISOProgressDlg = NULL, hLogDlg = NULL, hISOProgressBar, hISOFileName, hDiskID;
 BOOL use_own_c32[NB_OLD_C32] = {FALSE, FALSE}, detect_fakes = TRUE, mbr_selected_by_user = FALSE;
@@ -1184,10 +1185,12 @@ static BOOL BootCheck(void)
 	dt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
 	if (dt == DT_ISO) {
 		if (iso_path == NULL) {
+			// Please click on the disc button to select a bootable ISO
 			MessageBoxU(hMainDialog, lmprintf(MSG_087), lmprintf(MSG_086), MB_OK|MB_ICONERROR);
 			return FALSE;
 		}
 		if ((size_check) && (iso_report.projected_size > (uint64_t)SelectedDrive.DiskSize)) {
+			// This ISO image is too big for the selected target
 			MessageBoxU(hMainDialog, lmprintf(MSG_089), lmprintf(MSG_088), MB_OK|MB_ICONERROR);
 			return FALSE;
 		}
@@ -1195,31 +1198,39 @@ static BOOL BootCheck(void)
 		bt = GETBIOSTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
 		if (bt == BT_UEFI) {
 			if (!IS_EFI(iso_report)) {
+				// Unsupported ISO
 				MessageBoxU(hMainDialog, lmprintf(MSG_091), lmprintf(MSG_090), MB_OK|MB_ICONERROR);
 				return FALSE;
 			} else if (fs > FS_FAT32) {
+				// When using UEFI Target Type, only FAT/FAT32 is supported.
 				MessageBoxU(hMainDialog, lmprintf(MSG_093), lmprintf(MSG_092), MB_OK|MB_ICONERROR);
 				return FALSE;
 			} else if (iso_report.has_4GB_file) {
+				// This ISO image contains a file larger than 4 GB and cannot be used to create an EFI bootable USB
 				// Who the heck decided that using FAT32 for UEFI boot was a great idea?!?
 				MessageBoxU(hMainDialog, lmprintf(MSG_095), lmprintf(MSG_094), MB_OK|MB_ICONINFORMATION);
 				return FALSE;
 			}
 		} else if ((fs == FS_NTFS) && (!iso_report.has_bootmgr) && (!IS_WINPE(iso_report.winpe))) {
 			if (iso_report.has_isolinux) {
+				// Only FAT/FAT32 is supported for this type of ISO
 				MessageBoxU(hMainDialog, lmprintf(MSG_096), lmprintf(MSG_092), MB_OK|MB_ICONERROR);
 			} else {
+				// Only 'bootmgr' or 'WinPE' based ISO images can currently be used with NTFS
 				MessageBoxU(hMainDialog, lmprintf(MSG_097), lmprintf(MSG_090), MB_OK|MB_ICONERROR);
 			}
 			return FALSE;
 		} else if (((fs == FS_FAT16)||(fs == FS_FAT32)) && (!iso_report.has_isolinux)) {
+			// FAT/FAT32 can only be used for isolinux based ISO images or when the Target Type is UEFI
 			MessageBoxU(hMainDialog, lmprintf(MSG_098), lmprintf(MSG_090), MB_OK|MB_ICONERROR);
 			return FALSE;
 		} else if (((fs == FS_FAT16)||(fs == FS_FAT32)) && (iso_report.has_4GB_file)) {
+			// This ISO image contains a file larger than 4GB file (FAT32)
 			MessageBoxU(hMainDialog, lmprintf(MSG_100), lmprintf(MSG_099), MB_OK|MB_ICONERROR);
 			return FALSE;
 		}
 		if ((bt == BT_UEFI) && (iso_report.has_win7_efi) && (!WimExtractCheck())) {
+			// Your platform cannot extract files from WIM archives => download 7-zip?
 			if (MessageBoxU(hMainDialog, lmprintf(MSG_102), lmprintf(MSG_101), MB_YESNO|MB_ICONERROR) == IDYES)
 				ShellExecuteA(hMainDialog, "open", SEVENZIP_URL, NULL, NULL, SW_SHOWNORMAL);
 			return FALSE;
@@ -1232,6 +1243,7 @@ static BOOL BootCheck(void)
 			fclose(fd);
 		} else {
 			PrintStatus(0, FALSE, lmprintf(MSG_206, ldlinux_name));
+			// Syslinux v5.0 or later requires a '%s' file to be installed
 			r = MessageBoxU(hMainDialog, lmprintf(MSG_104, ldlinux_name, ldlinux_name),
 				lmprintf(MSG_103, ldlinux_name), MB_YESNOCANCEL|MB_ICONWARNING);
 			if (r == IDCANCEL) 
@@ -1241,6 +1253,12 @@ static BOOL BootCheck(void)
 				SetWindowTextU(hISOFileName, LDLINUX_C32_URL);
 				DownloadFile(LDLINUX_C32_URL, ldlinux_name, hISOProgressDlg);
 			}
+		}
+	} else if (dt == DT_WINME) {
+		if ((size_check) && (ComboBox_GetItemData(hClusterSize, ComboBox_GetCurSel(hClusterSize)) >= 65536)) {
+			// MS-DOS cannot boot from a drive using a 64 kilobytes Cluster size
+			MessageBoxU(hMainDialog, lmprintf(MSG_110), lmprintf(MSG_111), MB_OK|MB_ICONERROR);
+			return FALSE;
 		}
 	}
 	return TRUE;
@@ -1789,6 +1807,21 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 					format_op_in_progress = FALSE;
 					break;
 				}
+
+				// Display a warning about UDF formatting times
+				fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
+				if (fs == FS_UDF) {
+					dur_secs = (uint32_t)(((double)SelectedDrive.DiskSize)/1073741824.0f/UDF_FORMAT_SPEED);
+					if (dur_secs > UDF_FORMAT_WARN) {
+						dur_mins = dur_secs/60;
+						dur_secs -= dur_mins*60;
+						MessageBoxU(hMainDialog, lmprintf(MSG_112, dur_mins, dur_secs), lmprintf(MSG_113), MB_OK|MB_ICONASTERISK);
+					} else {
+						dur_secs = 0;
+						dur_mins = 0;
+					}
+				}
+
 				GetWindowTextU(hDeviceList, tmp, ARRAYSIZE(tmp));
 				if (MessageBoxU(hMainDialog, lmprintf(MSG_003, tmp),
 					APPLICATION_NAME, MB_OKCANCEL|MB_ICONWARNING) == IDCANCEL) {

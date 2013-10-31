@@ -53,6 +53,7 @@ badblocks_report report;
 static float format_percent = 0.0f;
 static int task_number = 0;
 extern const int nb_steps[FS_MAX];
+extern uint32_t dur_mins, dur_secs;
 static int fs_index = 0;
 BOOL force_large_fat32 = FALSE;
 static BOOL WritePBR(HANDLE hLogicalDrive);
@@ -626,9 +627,15 @@ static BOOL FormatDrive(DWORD DriveIndex)
 	WCHAR wLabel[64];
 	ULONG ulClusterSize;
 	size_t i;
+	int fs;
 
 	GetWindowTextU(hFileSystem, FSType, ARRAYSIZE(FSType));
-	PrintStatus(0, TRUE, lmprintf(MSG_222, FSType));
+	fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
+	if ((fs == FS_UDF) && !((dur_mins == 0) && (dur_secs == 0))) {
+		PrintStatus(0, TRUE, lmprintf(MSG_220, FSType, dur_mins, dur_secs));
+	} else {
+		PrintStatus(0, TRUE, lmprintf(MSG_222, FSType));
+	}
 	VolumeName = GetLogicalName(DriveIndex, FALSE, TRUE);
 	wVolumeName = utf8_to_wchar(VolumeName);
 	if (wVolumeName == NULL) {
@@ -1298,7 +1305,7 @@ DWORD WINAPI FormatThread(LPVOID param)
 	}
 	hLogicalVolume = INVALID_HANDLE_VALUE;
 
-	// TODO: (v1.4) Our start button should become cancel instead of close
+	// TODO: (v1.5) Our start button should become cancel instead of close
 
 	// Especially after destructive badblocks test, you must zero the MBR/GPT completely
 	// before repartitioning. Else, all kind of bad things happen.

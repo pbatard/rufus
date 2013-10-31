@@ -2,7 +2,7 @@
 
 ################################################################################
 l "en-US" "English (English)" 0x0409, 0x0809, 0x0c09, 0x1009, 0x1409, 0x1809, 0x1c09, 0x2009, 0x2409, 0x2809, 0x2c09, 0x3009, 0x3409, 0x3809, 0x3c09, 0x4009, 0x4409, 0x4809
-v 1.0.1
+v 1.0.2
 g IDD_MESSAGES
 t MSG_001 "Other instance detected"
 t MSG_002 "Another Rufus application is running.\n"
@@ -132,7 +132,7 @@ t MSG_096 "Only FAT/FAT32 is supported for this type of ISO. Please select FAT/F
 t MSG_097 "Only 'bootmgr' or 'WinPE' based ISO images can currently be used with NTFS."
 t MSG_098 "FAT/FAT32 can only be used for isolinux based ISO images or when the Target Type is UEFI."
 t MSG_099 "Filesystem limitation"
-t MSG_100 "This iso image contains a file larger than 4GB file, which is more than the "
+t MSG_100 "This ISO image contains a file larger than 4GB file, which is more than the "
 	"maximum size allowed for a FAT or FAT32 file system."
 t MSG_101 "Missing WIM support"
 t MSG_102 "Your platform cannot extract files from WIM archives. WIM extraction "
@@ -152,6 +152,12 @@ t MSG_106 "Please select folder"
 t MSG_107 "All files"
 t MSG_108 "Rufus log"
 t MSG_109 "0x%02X (Disk %d)"
+t MSG_110 "MS-DOS cannot boot from a drive using a 64 kilobyte Cluster size.\n"
+	"Please change the Cluster size or use FreeDOS."
+t MSG_111 "Incompatible Cluster size"
+t MSG_112 "Formatting a large UDF volumes can take a lot of time. At USB 2.0 speeds, the estimated formatting "
+	"duration is %d:%02d, during which the progress bar will appear frozen. Please be patient!"
+t MSG_113 "Large UDF volume"
 
 # Tootips
 # Partition Scheme and Target Type
@@ -229,8 +235,9 @@ t MSG_216 "Saved %s"
 t MSG_217 "Formatting: %0.1f%% completed"
 t MSG_218 "Creating file system: Task %d/%d completed"
 t MSG_219 "NTFS Fixup: %d%% completed"
+# Parameter: the file system and an estimated duration in mins and secs
+t MSG_220 "Formatting (%s) - estimated duration %d:%02d..."
 t MSG_221 "Setting Label (This may take while)..."
-# Parameter: the file system. eg. "Formatting (NTFS)..."
 t MSG_222 "Formatting (%s)..."
 t MSG_223 "NTFS Fixup (Checkdisk)..."
 t MSG_224 "Clearing MBR/PBR/GPT structures..."
@@ -358,7 +365,7 @@ t MSG_007 "撤消"
 
 ################################################################################
 l "fr-FR" "French (Français)" 0x040c, 0x080c, 0x0c0c, 0x100c, 0x140c, 0x180c, 0x1c0c, 0x200c, 0x240c, 0x280c, 0x2c0c, 0x300c, 0x340c, 0x380c, 0xe40c
-v 1.0.1
+v 1.0.2
 b "en-US"
 
 g IDD_DIALOG
@@ -584,6 +591,12 @@ t MSG_106 "Sélection de répertoire"
 t MSG_107 "Tous les fichiers"
 t MSG_108 "Log Rufus"
 t MSG_109 "0x%02X (disque %d)"
+t MSG_110 "MS-DOS ne peut pas être utilisé sur un disque avec une Taille de clusters de 64 kilo-octets.\n"
+	"Veuillez changer la Taille de clusters ou utilisez FreeDOS."
+t MSG_111 "Taille de clusters incompatible"
+t MSG_112 "Le formattage d'un volume UDF de grande taille peut prendre beaucoup de temps. Aux vitesses USB 2.0, "
+	"la durée de formattage estimée est %d:%02d, pendant laquelle la barre de progrès semblera gelée. Veuillez être patient !"
+t MSG_113 "Volume UDF de grand taille"
 
 # Tootips
 t MSG_150 "Ce choix est le plus sûr. Mais si vous possédez un ordinateur à base de UEFI et voulez installer "
@@ -656,6 +669,7 @@ t MSG_216 "%s sauvegardé"
 t MSG_217 "Formatage: %0.1f%% complet"
 t MSG_218 "Création du système de fichiers: Tâche %d/%d complète"
 t MSG_219 "Finalisation NTFS: %d%% complète"
+t MSG_220 "Formatage (%s) - durée estimée %d:%02d..."
 t MSG_221 "Ecriture du label (peut prendre du temps)..."
 t MSG_222 "Formatage (%s)..."
 t MSG_223 "Finalisation NTFS (Checkdisk)..."
