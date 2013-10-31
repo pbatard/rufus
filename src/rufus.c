@@ -572,7 +572,8 @@ static BOOL PopulateProperties(int ComboIndex)
 
 	// If no existing label is available and no ISO is selected, propose one according to the size (eg: "256MB", "8GB")
 	if ((iso_path == NULL) || (iso_report.label[0] == 0)) {
-		if (safe_strcmp(no_label, DriveLabel.Table[ComboIndex]) == 0) {
+		if ( (safe_stricmp(no_label, DriveLabel.Table[ComboIndex]) == 0) 
+		  || (safe_stricmp(lmprintf(MSG_207), DriveLabel.Table[ComboIndex]) == 0) ) {
 			SetWindowTextU(hLabel, SelectedDrive.proposed_label);
 		} else {
 			SetWindowTextU(hLabel, DriveLabel.Table[ComboIndex]);

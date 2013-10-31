@@ -219,6 +219,9 @@ t MSG_204 "Obsolete %s detected"
 t MSG_205 "Using ISO: %s"
 # Typically "Missing ldlinux.c32 file"
 t MSG_206 "Missing %s file"
+# The name proposed by Windows' Computer Management -> Disk Management when you try to format a drive
+# with an empty label. See http://rufus.akeo.ie/pics/default_name.png
+t MSG_207 "New Volume"
 # Same message, once for singular and plural ("1 device found", "2 devices found")
 t MSG_208 "%d device found"
 t MSG_209 "%d devices found"
@@ -657,6 +660,7 @@ t MSG_203 "Echec d'analyse de l'image ISO"
 t MSG_204 "Fichier %s obsolète detecté"
 t MSG_205 "ISO utilisée: %s"
 t MSG_206 "Fichier %s manquant"
+t MSG_207 "Nouveau volume"
 t MSG_208 "%d périphérique détecté"
 t MSG_209 "%d périphériques détectés"
 t MSG_210 "Opération terminée."

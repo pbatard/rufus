@@ -12,7 +12,7 @@ o Version 1.0.2 (2013.10.30)
   - *NEW* MSG_112 "Formatting a large UDF volumes can take a lot of time..."
   - *NEW* MSG_113 "Large UDF volume"
   - *NEW* MSG_220 "Formatting (%s) - estimated duration %d:%02d..."
-  - [ANOTHER MESSAGE TO FOLLOW]
+  - *NEW* MSG_207 "New Volume"
 o Version 1.0.1 (2013.10.28)
   - MSG_061 "Please insert a media in drive." -> "Please insert a removable media in drive."
   - MSG_071 "Unable to create formatting thread." -> "Unable to start thread."
