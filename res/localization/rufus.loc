@@ -1878,3 +1878,404 @@ t MSG_255 "Verrà eliminato NoDriveTypeAutorun all'uscita"
 t MSG_256 "Rilevamento unità fittizie"
 t MSG_257 "Supporto Joliet"
 t MSG_258 "Supporto Rock Ridge"
+
+################################################################################
+l "tr-TR" "Turkish (Türkçe)" 0x041F
+v 1.0.2
+b "en-US"
+
+# Main dialog
+g IDD_DIALOG
+t IDS_DEVICE_TXT "Aygıt"
+t IDS_PARTITION_TYPE_TXT "Disk Bölüm Düzeni ve Hedef Sistem Türü"
+t IDS_FILESYSTEM_TXT "Dosya Sistemi"
+t IDS_CLUSTERSIZE_TXT "Ayırma Birimi Boyutu"
+t IDS_LABEL_TXT "Yeni Birim Etiketi"
+t IDS_FORMAT_OPTIONS_GRP "Biçimlendirme Seçenekleri       "
+m IDC_ADVANCED +46,0
+t IDC_BADBLOCKS "Hatalı Bloklar için Aygıtı Denetle:"
+s IDC_BADBLOCKS +15,0
+m IDC_NBPASSES +30,0
+s IDC_NBPASSES +12,0
+t IDC_QUICKFORMAT "Hızlı Biçimlendir"
+t IDC_BOOT "Açılış Diski Oluşturma Yöntemi:"
+s IDC_BOOT +2,0
+m IDC_BOOTTYPE +3,0
+s IDC_BOOTTYPE +7,0
+m IDC_SELECT_ISO +7,0
+s IDC_SELECT_ISO -1,0
+t IDC_SET_ICON "Genişletilmiş Etiket ve Simge Dosyaları Oluştur"
+t IDC_ABOUT "Hakkında..."
+s IDC_ABOUT -5,0
+t IDC_LOG "Günlük"
+m IDC_LOG -10,0
+s IDC_LOG +15,0
+t IDCANCEL "Kapat"
+m IDCANCEL +10,0
+s IDCANCEL -10,0
+t IDC_START "Başlat"
+m IDC_START +20,0
+s IDC_START -10,0
+t IDS_ADVANCED_OPTIONS_GRP "Gelişmiş Seçenekler"
+t IDC_ENABLE_FIXED_DISKS "Sabit sürücüleri ve Ham USB sürücüleri de listele"
+t IDC_EXTRA_PARTITION "Eski BIOSlar için düzeltme ekle(ekstra bölüm, hiza vs.)"
+t IDC_RUFUS_MBR "Rufus MBR kullan. BIOS Kimliği:"
+s IDC_RUFUS_MBR +5,0
+m IDC_DISK_ID +6,0
+
+# About dialog
+g IDD_ABOUTBOX
+t IDD_ABOUTBOX "Rufus Hakkında"
+t IDC_ABOUT_LICENSE "Lisans"
+t IDC_ABOUT_UPDATES "Güncellemeler"
+s IDC_ABOUT_UPDATES +10,0
+t IDOK "Tamam"
+
+# About -> License dialog
+g IDD_LICENSE
+t IDD_LICENSE "Rufus Lisansı"
+t IDCANCEL "Kapat"
+
+# Notifications. You can trigger one of these by using Alt-R and re-launching Rufus
+g IDD_NOTIFICATION
+t IDC_MORE_INFO "Daha fazla bilgi"
+t IDYES "Evet"
+t IDNO "Hayır"
+
+# Log dialog
+g IDD_LOG
+t IDD_LOG "Günlük"
+t IDC_LOG_CLEAR "Günlüğü Temizle"
+s IDC_LOG_CLEAR +15,0
+m IDC_LOG_CLEAR -30,0
+t IDC_LOG_SAVE "Günlüğü Kaydet"
+s IDC_LOG_SAVE +15,0
+m IDC_LOG_SAVE -20,0
+t IDCANCEL "Günlüğü Kapat"
+s IDCANCEL +15,0
+m IDCANCEL -10,0
+
+# About -> Updates
+g IDD_UPDATE_POLICY
+t IDD_UPDATE_POLICY "Güncelleme İlkesi ve Ayarlar"
+t IDS_UPDATE_SETTINGS_GRP "Ayarlar"
+s IDS_UPDATE_SETTINGS_GRP +6,0
+t IDS_UPDATE_FREQUENCY_TXT "Güncellemeleri Denetle:"
+m IDS_UPDATE_FREQUENCY_TXT -4,0
+m IDC_UPDATE_FREQUENCY -6,0
+s IDC_UPDATE_FREQUENCY +16,0
+t IDS_INCLUDE_BETAS_TXT "Beta sürümlerini içersin:"
+m IDS_INCLUDE_BETAS_TXT -4,0
+m IDC_INCLUDE_BETAS -6,0
+t IDC_CHECK_NOW "Şimdi Denetle"
+m IDC_CHECK_NOW +3,0
+m IDS_CHECK_NOW_GRP +6,0
+s IDS_CHECK_NOW_GRP -6,0
+t IDCANCEL "Kapat"
+m IDCANCEL +3,0
+
+# Dialog that appears when a new version is available
+g IDD_NEW_VERSION
+t IDD_NEW_VERSION "Güncellemeleri Denetle - Rufus"
+t IDS_NEW_VERSION_AVAIL_TXT "Yeni bir sürüm mevcut. Lütfen son sürümü indirin!"
+t IDC_WEBSITE "Websitesine gitmek için buraya tıklayın"
+t IDS_NEW_VERSION_NOTES_GRP "Sürüm Notları"
+t IDS_NEW_VERSION_DOWNLOAD_GRP "İndir"
+t IDC_DOWNLOAD "İndir"
+t IDCANCEL "Kapat"
+
+# Dialog that appears when scanning/extracting ISO files
+g IDD_ISO_EXTRACT
+t IDD_ISO_EXTRACT "ISO Dosyaları Kopyalanıyor ..."
+t IDC_ISO_FILENAME "ISO Görüntüsü Açılıyor - Lütfen Bekleyin..."
+t IDC_ISO_ABORT "Vazgeç"
+
+# Messages used throughout the application
+g IDD_MESSAGES
+t MSG_001 "Rufus'un zaten çalıştığı algılandı"
+t MSG_002 "Başka bir Rufus uygulaması çalışıyor.\n"
+	"Lütfen başka bir uygulama çalıştırmak için ilkini kapatın."
+t MSG_003 "UYARI: '%s' AYGITINDAKİ TÜM VERİ YOK EDİLECEK.\n"
+	"İşleme devam etmek için Tamam'a tıklayın. Çıkmak için İPTAL'e tıklayın."
+t MSG_004 "Rufus güncelleme ilkesi"
+t MSG_005 "Rufus'un uygulama güncellemelerini çevrimiçi denetlemesine izin vermek istiyor musunuz?"
+# Must be the same as IDD_DIALOG:IDCANCEL (i.e. "Close" - I know it's confusing)
+t MSG_006 "Kapat"
+t MSG_007 "Vazgeç"
+t MSG_008 "Evet"
+t MSG_009 "Hayır"
+t MSG_010 "Hatalı bloklar bulundu"
+t MSG_011 "Denetim Tamamlandı: %u hatalı blok bulundu\n"
+	"  %d okuma hatası\n  %d yazma hatası\n  %d hata oluşumu\n"
+# The following will contain the formatted message above as well as the name of the bad blocks logfile
+t MSG_012 "%s\nDaha ayrıntılı rapor burada:\n%s"
+t MSG_013 "Devredışı"
+t MSG_014 "Günlük"
+t MSG_015 "Haftalık"
+t MSG_016 "Aylık"
+t MSG_017 "Özel"
+t MSG_018 "Mevcut Sürüm: %d.%d.%d (Yapı %d)"
+t MSG_019 "En son sürüm: %d.%d.%d (Yapı %d)"
+# *Short* size names. These can be used as suffixes
+t MSG_020 "byte"
+t MSG_021 "KB"
+t MSG_022 "MB"
+t MSG_023 "GB"
+t MSG_024 "TB"
+t MSG_025 "PB"
+# *Long* size names, as they are displayed for the cluster size in the MS format dialog.
+t MSG_026 "byte"	# Yes, this is a repeat from MSG_020
+t MSG_027 "kilobyte"
+t MSG_028 "megabyte"
+t MSG_029 "Varsayılan"
+# The following gets appended to the file system, cluster size, etc.
+t MSG_030 "%s (Varsayılan)"
+t MSG_031 "BIOS Bilgisayarlar için %s Bölüm Düzeni"
+t MSG_032 "UEFI Bilgisayarlar için %s Bölüm Düzeni"
+t MSG_033 "BIOS yada UEFI Bilgisayarlar için %s Bölüm Düzeni"
+# Number of bad block check passes (singular for 1 pass, plural for 2 or more passes)
+t MSG_034 "%d Geçiş"
+t MSG_035 "%d Geçiş"
+t MSG_036 "ISO Dosyası"
+t MSG_037 "Uygulama"
+t MSG_038 "Vazgeç"
+t MSG_039 "Başlat"
+t MSG_040 "İndir"
+t MSG_041 "Kullanıcı tarafından işlemden vazgeçildi"
+t MSG_042 "Hata"
+t MSG_043 "Hata: %s"
+t MSG_044 "Dosya indirme"
+t MSG_045 "USB Depolama Aygıtı (Genel)"
+t MSG_046 "%s (Disk %d)"
+t MSG_047 "%s (%c:)"
+t MSG_048 "Rufus - Tamponlanıyor"
+t MSG_049 "Rufus - Vazgeçme"
+
+# Error messages
+t MSG_050 "Başarılı."
+t MSG_051 "Biçimlendirilirken beklenmeyen hata."
+t MSG_052 "Seçilen dosya sistemi bu medya için kullanılamaz."
+t MSG_053 "Aygıta erişim engellendi."
+t MSG_054 "Medya yazma korumalı."
+t MSG_055 "Aygıt başka bir işlem tarafından kullanılıyor. "
+	"Lütfen aygıta erişilebilmesi için diğer işlemi kapatın."
+t MSG_056 "Bu aygıt için Hızlı Biçimlendirme yapılamaz."
+t MSG_057 "Birim etiketi geçersiz."
+t MSG_058 "Aygıt tanıtıcısı geçersiz."
+t MSG_059 "Seçilen ayırma boyutu bu aygıt için geçerli değil."
+t MSG_060 "Birim boyutu geçersiz."
+t MSG_061 "Lütfen sürücüdeki kaldırılabilir medyayı takın."
+t MSG_062 "Destelenmeyen bir komut alındı."
+t MSG_063 "Bellek ayırma hatası."
+t MSG_064 "Okuma Hatası."
+t MSG_065 "Yazma Hatası."
+t MSG_066 "Yükleme Hatası"
+t MSG_067 "Medya açılamadı. Başka bir işlem tarafından kullanılıyor olabilir. "
+	"Lütfen medyayı yeniden takın ve deneyin."
+t MSG_068 "Sürücü bölümlendirilirken hata."
+t MSG_069 "Dosyalar hedef sürücüye kopyalanamadı."
+t MSG_070 "Kullanıcı tarafından vazgeçildi."
+# See http://en.wikipedia.org/wiki/Thread_%28computing%29
+t MSG_071 "İş parçacığı başlatılamadı."
+t MSG_072 "Hatalı blokların denetimi tamamlanamadı."
+t MSG_073 "ISO görüntüsü taranamadı."
+t MSG_074 "ISO görüntüsü ayrıştırma hatası."
+t MSG_075 "Birim yeniden yerleştirilemedi."
+t MSG_076 "Açılış için dosyalar yamalanamadı/kurulamadı."
+t MSG_077 "Sürücü harfi atanamadı."
+t MSG_078 "GUID birimi yerleştirilemedi."
+
+t MSG_080 "Rufus Windows'un USB aygıtını kendi işlemlerinde hala kullandığını algıladı.\n\n"
+	"USB aygıtınızın hızına bağlı olarak, bu işlemin tamamlanması özellikle büyük dosyalar için, "
+	"uzun bir süre alabilir.\n\nBozulmayı önlemek için Windows'un işini bitirmesine izin vermenizi öneriyoruz. "
+	"Fakat beklemekten yorulduysanız, yalnız aygıtı çıkarabilirsiniz..."
+t MSG_081 "Desteklenmeyen ISO"
+t MSG_082 "Rufus'un bu sürümü sadece açılabilir bootmgr/WinPE, isolinux yada EFI tabanlı ISOları destekler.\n"
+	"Bu ISO öyle görünmüyor..."
+t MSG_083 "%s yerdeğiştirilsin mi?"
+t MSG_084 "Bu ISO görüntüsü '%s'in eski bir sürümünü kullanıyor gibi görünüyor.\n"
+	"Açılış menüsü bundan dolayı düzgün görüntülenmeyebilir.\n\n"
+	"Bu durumu düzeltmek için yeni sürümü Rufus tarafından indirilebilir:\n"
+	"- İnternete bağlanıp dosyayı indirmek için 'Evet'i ssçin\n"
+	"- Varolan ISO dosyasını olduğu gibi bırakmak için 'Hayır'ı seçin\n"
+	"Ne yapacağınızı bilmiyorsanız, 'Evet'i seçmelisiniz.\n\n"
+	"Not: Yeni dosya mevcut dizine indirilecek ve  "
+	"'%s'  orda varolunca, otomatik olarak kullanılacak."
+t MSG_085 "%s indiriliyor"
+t MSG_086 "ISO görüntüsü seçilmedi"
+# The content between the quotes below (\"Create a bootable disk\") should match
+# the beginning of the IDC_BOOT text
+t MSG_087 "Lütfen açılabilir bir ISO seçmek için disk butonuna tıklayın, "
+	"yada \"Açılış Diski Oluşturma Yöntemi:\" onay kutusundan seçimi kaldırın."
+t MSG_088 "ISO çok büyük"
+t MSG_089 "Bu ISO görüntüsü seçilen hedef için çok büyük."
+t MSG_090 "Desteklenmeyen ISO"
+t MSG_091 "EFI Hedef Türünü kullanıyorken, sadece EFI açılabilir ISO görüntüleri desteklenir. "
+	"Lütfen bir EFI açılabilir ISO'su seçin yada Hedef Türüni BIOSa ayarlayın."
+t MSG_092 "Desteklenmeyen Dosya Sistemi"
+t MSG_093 "UEFI Hedef Türünü kullanıyorken, sadece FAT/FAT32 desteklenir. "
+	"Lütfen dosya sistemi olarak FAT/FAT32 seçin yada Hedef Türüni BIOSa ayarlayın."
+t MSG_094 "UEFI uyumlu olmayan ISO"
+t MSG_095 "Bu ISO görüntüsü 4 GB tan daha büyük bir dosya içeriyor ve EFI açılabilir USB oluşturmak için kullanılamaz.\n"
+	"Bu UEFI/FAT32'nin sınırlandırmasıdır, Rufus'un değil."
+t MSG_096 "Bu tür ISOlar için sadece FAT/FAT32 desteklenir. Lütfen Dosya Sistemi olarak FAT/FAT32 seçin."
+t MSG_097 "Şuanda sadece 'bootmgr' yada 'WinPE' tabanlı ISO görüntüleri NTFS ile kullanılabilir."
+t MSG_098 "FAT/FAT32 sadece isolinux tabanlı ISO görüntüleri için yada Hedef türü UEFI ise kullanılabilir."
+t MSG_099 "Dosya Sistemi Sınırlandırması"
+t MSG_100 "Bu ISO görüntüsü, FAT yada FAT32 dosya sisteminin desteklediği en fazla boyut olan 4GB'tan "
+	"daha büyük bir dosya içeriyor."
+t MSG_101 "Eksik WIM desteği"
+t MSG_102 "Platformunuz WIM arşivlerinden dosyaları ayrıştıramaz. WIM ayrıştırması "
+	"EFI açılabilir Windows 7 ve Windows Vista USB sürücüleri oluşturmak için ereklidir. Bu durumu "
+	"7-Zip son sürümünü yükleyerek aşabilirsiniz.\n7-zip indirme sayfasına gitmek istiyor musunuz?"
+t MSG_103 "%s indirilsin mi?"
+t MSG_104 "Syslinux v5.0 yada daha üstünün yüklenebilmesi için '%s' dosyası gerekir.\n"
+	"Çünkü bu dosya boyutu 100 KB tan daha büyük ve Syslinux v5+ ISO görüntülerinde her zaman bulunur, "
+	"Rufus'a gömülü değildir.\n\nRufus eksik dosyayı sizin için indirebilir:\n"
+	"- İnternete bağlanıp dosyayı indirmek için 'Evet'i ssçin\n"
+	"- Dosyayı daha sonra sürücüye elle kopyalamak istiyorsanız 'Hayır'ı seçin\n\n"
+	"Not: Dosya mevcut dizine indirilecek ve "
+	"'%s' orda varolunca, otomatik olarak kullanılacak.\n"
+t MSG_105 "Vazgeçmek aygıtı KULLANILAMAZ hale getirebilir.\n"
+	"Vazgeçmek istediğinize eminseniz, Evet'e tıklayın. Aksi halde Hayır'a tıklayın."
+t MSG_106 "Lütfen Klasör Seçin"
+t MSG_107 "Tüm Dosyalar"
+t MSG_108 "Rufus günlüğü"
+t MSG_109 "0x%02X (Disk %d)"
+# "Cluster size" below should be the same as the label for IDS_CLUSTERSIZE_TXT
+# "kilobytes" should be the same as in MSG_027
+t MSG_110 "MS-DOS, 64 kilobyte Ayırma Birimi Boyutu kullanan bir sürücüden başlatılamaz.\n"
+	"Lütfen farklı bir Ayırma Birimi Boyutu seçin yada FreeDOS kullanın."
+t MSG_111 "Uyumsuz Ayırma Boyutu"
+# "%d:%02d" below is a duration (mins:secs)
+t MSG_112 "Geniş bir UDF Biriminin biçimlendirilmesi çok uzun bir süre alabilir. USB 2.0 hızında, Tahmini biçimlendirme "
+	"süresi %d:%02d, İlerleme çubuğu donmuş görünüyorken. Lütfen sabırlı olun!"
+t MSG_113 "Geniş UDF Birimi"
+
+# Tootips
+# Partition Scheme and Target Type
+t MSG_150 "Genellikle en güvenli seçenektir. UEFI destekli bir bilgisayara sahipseniz ve bir işletim sistemini "
+	"EFI modunda yüklemek istiyorsanız ancak diğer seçeneklerden birini seçmelisiniz"
+t MSG_151 "Bir işletim sistemini EFI modunda yüklemek istiyorsanız fakat "
+	"USB içeriğine Windows XP den erişmeniz gerekiyorsa bunu kullanın"
+t MSG_152 "Bir işletim sistemini EFI modunda yüklemek için ve Windows XP için USB erişimi gerekmediğinde "
+	" tercih edilen seçenek"
+t MSG_153 "Kalıbı Dene: 0x%02X"
+t MSG_154 "Kalıbı Dene: 0x%02X, 0x%02X"
+t MSG_155 "Kalıbı Dene: 0x%02X, 0x%02X, 0x%02X"
+t MSG_156 "Kalıbı Dene: 0x%02X, 0x%02X, 0x%02X, 0x%02X"
+t MSG_157 "Hedef Dosya Sistemini Ayarlar"
+t MSG_158 "Dosya sisteminde tutulacak en küçük veri bloğu boyutu"
+t MSG_159 "Bu alanı sürücü etiketini ayarlamak için kullanın\nUluslararası karakterler kabul edilir"
+t MSG_160 "Gelişmiş seçeneklere geçiş"
+t MSG_161 "Kalıp denemesi kullanarak hatalı blokları denetle"
+t MSG_162 "\"Yavaş\" biçimlendirme yöntemini kullanmak için bu onay kutusu seçimini kaldırın"
+t MSG_163 "Açılabilir USB sürücüsü oluşturmak için bu onay kutusunu seçin"
+t MSG_164 "Sürücüyü açılabilir yapmak için kullanılacak yöntem"
+t MSG_165 "ISO seçmek için tıklayın..."
+t MSG_166 "Uluslararası etiketleri görüntülemek için bu onay kutusunu seçin "
+	"ve  aygıt simgesini belirleyin (autorun.inf oluşturur)"
+t MSG_167 "Açılış seçimine izin veren ve BIOS USB Sürücü kimliğini taklit edebilen bir MBR yükle"
+t MSG_168 "İlk açılabilir USB sürücüsünü farklı bir disk olarak taklit etmeye çalış (genellikle 0x80).\n"
+	"Bu sadece Windows XP yüklemesinde ve birden fazla diske varsa gerekebilir"
+t MSG_169 "Ekstra gizli bir bölüm oluşturur ve bölümlerin sınırlarını hizalamaya çalışır.\n"
+	"Bu işlem eski BIOSlar için açılış algılamasını geliştirir"
+t MSG_170 "Rufus tarafından normal olarak algılanamayan diskler için algılamayı etkinleştirir. SORUMLULUK SİZE AİTTİR!!!"
+t MSG_171 "Biçimlendirme işlemini başlat.\nBu hedef üzerinde tüm veriyi yok edecek!"
+t MSG_172 "Lisans bilgisi ve Emeği Geçenler"
+t MSG_173 "Seçmek için tıklayın..."
+# The following will appear in the about dialog
+t MSG_174 "Rufus - Güvenilir USB Biçimlendirme Programı"
+t MSG_175 "Sürüm %d.%d.%d (Yapı %d)"
+t MSG_176 "Türkçe Çeviri: Mehmetali KURAN <mailto:mehmetalikuran@gmail.com>"
+t MSG_177 "Hataları yada geliştirme isteklerini buraya raporlayın:"
+t MSG_178 "Ek Telif Hakları:"
+t MSG_179 "Güncelleme İlkesi:"
+t MSG_180 "Programa güncellemelerini denetlemesi için izin vermeyi seçerseniz, "
+	"aşağıdaki bilgilerin sunucu(lar)ımızda depolanabilmesini kabul etmiş olursunuz"
+t MSG_181 "İşletim Sistemi mimarisi ve sürümü"
+t MSG_182 "Kullandığınız uygulamanın sürümü"
+t MSG_183 "IP Adresiniz"
+t MSG_184 "Özel kullanım istatistikleri oluşturmak amacıyla, bilgi toplamaya \\b en fazla bir yıl için\\b0 "
+	" devam edebiliriz. Fakat, Üçüncü şahıslarla isteyerek herhangi bir veri paylaşılmaz."
+t MSG_185 "Güncelleme İlerlemesi:"
+t MSG_186 "Güncelleme denetiminin sadece ana uygulama çalışırken gerçekleşmesinden dolayı, Rufus arkaplan hizmeti yüklemez yada çalıştırmaz.\\line\n"
+	"Güncellemeler denetlenirken doğal olarak internet erişimi gerekir."
+
+# Status messages - these messages will appear on the status bar
+t MSG_201 "Vazgeçiliyor - Lütfen Bekleyin..."
+t MSG_202 "ISO görüntüsü taranıyor..."
+t MSG_203 "ISO görüntüsü taranamadı"
+# Parameter: the name of an obsolete Syslinux .c32 module. eg: "Obsolete vesamenu.c32 detected"
+t MSG_204 "Eski %s algılandı"
+# Display the name of the ISO selected. eg: "Using ISO: en_win7_x64_sp1.iso"
+t MSG_205 "Kullanılan ISO: %s"
+# Typically "Missing ldlinux.c32 file"
+t MSG_206 "Eksik %s dosyası"
+# The name proposed by Windows' Computer Management -> Disk Management when you try to format a drive
+# with an empty label. See http://rufus.akeo.ie/pics/default_name.png
+t MSG_207 "Yeni Birim"
+# Same message, once for singular and plural ("1 device found", "2 devices found")
+t MSG_208 "%d aygıt bulundu"
+t MSG_209 "%d aygıt bulundu"
+t MSG_210 "TAMAM."
+t MSG_211 "Vazgeçildi."
+t MSG_212 "BAŞARISIZ."
+# Used when a new update has been downloaded and lauched
+t MSG_213 "Yeni uygulama başlatılıyor..."
+t MSG_214 "Yeni uygulama başlatılamadı"
+# Open/Save file
+t MSG_215 "%s Açıldı"
+t MSG_216 "%s Kaydedildi"
+# Formatting status (make sure you use a double % to print the percent sign)
+t MSG_217 "Biçimlendiriliyor: %0.1f%% tamamlandı"
+t MSG_218 "Dosya sistemi oluşturuluyor: Görev %d/%d tamamlandı"
+t MSG_219 "NTFS Düzeltme: %d%% tamamlandı"
+# Parameter: the file system and an estimated duration in mins and secs.
+# eg. "Formatting (UDF) - Estimated duration 3:21..."
+# NB: if "estimated duration" is too long, just use "estimated" or an abbreviation
+t MSG_220 "Biçimlendiriliyor (%s) - Tahmini Süre %d:%02d..."
+t MSG_221 "Etiket Ayarlanıyor (Biraz zaman alabilir)..."
+# Parameter: the file system. eg. "Formatting (NTFS)..."
+t MSG_222 "Biçimlendiriliyor (%s)..."
+t MSG_223 "NTFS Düzeltme (Checkdisk)..."
+t MSG_224 "MBR/PBR/GPT yapıları temizleniyor..."
+t MSG_225 "Disk erişimi sorgulanıyor..."
+t MSG_226 "Varolan açılış kayıtları inceleniyor..."
+t MSG_227 "Varolan birim kapatılıyor..."
+t MSG_228 "MBR Yazılıyor..."
+t MSG_229 "PBR Yazılıyor..."
+t MSG_230 "DOS Dosyaları Kopyalanıyor..."
+t MSG_231 "ISO Dosyaları Kopyalanıyor..."
+t MSG_232 "Win7 EFI Açılış Kurulumu (Biraz zaman alabilir)..."
+t MSG_233 "Bitiriliyor, Lütfen Bekleyin..."
+# Takes the Syslinux version as paramete. eg. "Installing Syslinux v5..."
+t MSG_234 "Syslinux v%d Yükleniyor..."
+# Bad blocks status. eg: "Bad Blocks: PASS 1/2 - 12.34% (0/0/1 errors)"
+t MSG_235 "Hatalı Bloklar: Geçiş %d/%d - %0.2f%% (%d/%d/%d hata)"
+t MSG_236 "Hatalı Bloklar: Rasgele kalıpla deneniyor"
+t MSG_237 "Hatalı Bloklar: 0x%02X kalıbıyla deneniyor"
+# eg. "Formatting (MBR)..."
+t MSG_238 "Bölümlendiriliyor (%s)..."
+t MSG_239 "Bölümler Siliniyor..."
+t MSG_240 "%s İndiriliyor: Bağlanıyor..."
+t MSG_241 "İndiriliyor: %0.1f%%"
+t MSG_242 "Dosya indirilemedi."
+t MSG_243 "Rufus güncellemeleri denetleniyor..."
+t MSG_244 "Güncellemeler: İnternet erişimi yok"
+t MSG_245 "Güncellemeler: Sürüm bilgisine erişilemedi"
+t MSG_246 "Rufus'un yeni sürüm mevcut!"
+t MSG_247 "Rufus'un yeni sürümü bulunamadı"
+t MSG_248 "Uygulama kayıt defteri anahtarları başarıyla silindi"
+t MSG_249 "Uygulama kayıt defteri anahtarları silinemedi"
+# eg. "Fixed disk detection enabled" "ISO size check disabled"
+t MSG_250 "%s etkin"
+t MSG_251 "%s devredışı"
+t MSG_252 "Boyut Denetlemeleri"
+t MSG_253 "Sabit Disk Algılama"
+t MSG_254 "Geniş FAT32 biçimlendirmeye zorla"
+t MSG_255 "NoDriveTypeAutorun çıkışta silinecek"
+t MSG_256 "Sahte sürücü algılama"
+t MSG_257 "Joliet desteği"
+t MSG_258 "Rock Ridge desteği"
+t MSG_259 "Güncellemeye zorla"
