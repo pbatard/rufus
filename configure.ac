@@ -10,6 +10,7 @@ m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])],
 AC_PREREQ([2.50])
 AC_PROG_CC
 AC_PROG_RANLIB
+AC_PROG_SED
 AC_PATH_PROG(RM, rm, rm)
 AC_CHECK_TOOL(STRIP, strip, strip)
 AC_CHECK_TOOL(WINDRES, windres, windres)
@@ -58,4 +59,5 @@ AC_CONFIG_FILES([src/syslinux/libinstaller/Makefile])
 AC_CONFIG_FILES([src/libcdio/iso9660/Makefile])
 AC_CONFIG_FILES([src/libcdio/udf/Makefile])
 AC_CONFIG_FILES([src/libcdio/driver/Makefile])
+AC_CONFIG_FILES([res/localization/Makefile])
 AC_OUTPUT

@@ -1,8 +1,134 @@
-# This file should be saved as UTF-8, no-BOM
+# This file should be saved as UTF-8, no-BOM, with CR/LF
+
+######################## HOW TO ADD A NEW TRANSLATION ###########################
+# For a more comprehensive set of instructions, please see the *FULL* Localization guide at:
+# https://github.com/pbatard/rufus/wiki/Localization
+#
+# 0. Download the latest Rufus executable, start it and check the log for a line starting with 'LCID'
+#    (eg. LCID 0x1809).
+# 1. Save this file in the same directory where you have the Rufus executable.
+# 2. Copy the lines between ### TRANSLATOR START COPY ### and ### TRANSLATOR END COPY ### and paste them at
+#    the end of the file.
+# 3. Edit the 'l' line in the section you copied and:
+#    - replace the "en-US" IETF language tag for your language, eg: "fr-FR", "zh-CN".
+#      See http://en.wikipedia.org/wiki/IETF_language_tag as well as the table on page 9 of
+#      http://download.microsoft.com/download/9/5/E/95EF66AF-9026-4BB0-A41D-A4F81802D92C/%5BMS-LCID%5D.pdf
+#    - set the name of your language first in English and then, in parenthesis, in your own language.
+#      eg: "Chinese Simplified (简体中文)"
+#    - remove the end of the line starting with 0x0409 and replaced it with the LCID code you got in step 0.
+#      You also may want to look at the table on page 9 of the PDF above to add all the LCID codes your
+#      translation should cover. Make sure you separate these codes with a comma.
+# 4. Translate the messages that appear below into your language. The 'g' lines indicate the group a translated
+#    element belongs to. You shouldn't have to modify them.
+# 5. (Re)launch Rufus. If a 'rufus.loc' file is found in the current directory, it will be used over the one
+#    embedded in the application. Since there is only one translation in this file, it will be used by default
+# 6. Repeat steps 4 & 5 until you're happy with that translated elements. Note that you MUST restart Rufus every
+#    time you change your .loc file as there is no reload option.
+# 7. Once you are satisfied with your translation, you should pick up the official rufus.loc from:
+#    https://github.com/pbatard/rufus/raw/master/res/localization/rufus.loc
+#    You should then add your translation at the end of it, and confirm that it is still picked as the default
+#    for your system  You can also force the use of a translation by passing the option -l when starting Rufus.
+#    For instance, to have the "zh_CN" translation below apply, you could use either one of:
+#      rufus.exe -l zh-CN
+#      rufus.exe -l 0x0404
+#      rufus.exe -l 0x0804
+# 8. If you need to resize a control or a dialog to fid the translated text, use the 'm' (Move) or 's' (reSize)
+#    options. For an example of how these commands work, see https://github.com/pbatard/rufus/wiki/Localization
+#
+# Tips:
+# - Please make sure that you edit the language include *your* name and e-mail in MSG_176. It will be displayed
+#   in the About dialog and I want to give you credit for your work!
+# - I strongly recommend installing and using DbgView to check for translation errors, as you will get more
+#   information about how Rufus initallly parses the translation file plus reports of any issue found (with
+#   the line number). Download DbgView from: http://technet.microsoft.com/en-us/sysinternals/bb896647.aspx
+# - As shown below, you can break a long message over multiple lines, as long as these fragments begin and end
+#   with a double quote ("). Also be careful to keep the special symbols such as %d, %s, \\b, \",  \n.
+# - Don't forget to check the translation guide from https://github.com/pbatard/rufus/wiki/Localization
+
 
 ################################################################################
+############################ TRANSLATOR START COPY #############################
+################################################################################
+# See http://msdn.microsoft.com/en-us/goglobal/bb964664.aspx or
+# http://download.microsoft.com/download/9/5/E/95EF66AF-9026-4BB0-A41D-A4F81802D92C/%5BMS-LCID%5D.pdf
+# for the LCID (0x####) codes you should use
 l "en-US" "English (English)" 0x0409, 0x0809, 0x0c09, 0x1009, 0x1409, 0x1809, 0x1c09, 0x2009, 0x2409, 0x2809, 0x2c09, 0x3009, 0x3409, 0x3809, 0x3c09, 0x4009, 0x4409, 0x4809
 v 1.0.2
+
+# Main dialog
+g IDD_DIALOG
+t IDS_DEVICE_TXT "Device"
+t IDS_PARTITION_TYPE_TXT "Partition scheme and target system type"
+t IDS_FILESYSTEM_TXT "File system"
+t IDS_CLUSTERSIZE_TXT "Cluster size"
+t IDS_LABEL_TXT "New volume label"
+t IDS_FORMAT_OPTIONS_GRP "Format Options       "
+t IDC_BADBLOCKS "Check device for bad blocks:"
+t IDC_QUICKFORMAT "Quick format"
+t IDC_BOOT "Create a bootable disk using:"
+t IDC_SET_ICON "Create extended label and icon files"
+t IDC_ABOUT "About..."
+t IDC_LOG "Log"
+t IDCANCEL "Close"
+t IDC_START "Start"
+t IDS_ADVANCED_OPTIONS_GRP "Advanced Options"
+t IDC_ENABLE_FIXED_DISKS "List non removable or unpartitioned USB disks"
+t IDC_EXTRA_PARTITION "Add fixes for old BIOSes (extra partition, align, etc.)"
+# 'MBR': See bhttp://en.wikipedia.org/wiki/Master_boot_record
+# Rufus can install it's own custom MBR (the Rufus MBR), which also allows users
+# to specify a custom disk ID for the BIOS. Note: the tooltip for this control is MSG_167.
+t IDC_RUFUS_MBR "Use Rufus MBR with BIOS ID:"
+
+# About dialog
+g IDD_ABOUTBOX
+t IDD_ABOUTBOX "About Rufus"
+t IDC_ABOUT_LICENSE "License"
+t IDC_ABOUT_UPDATES "Updates"
+
+# About -> License dialog
+g IDD_LICENSE
+t IDD_LICENSE "Rufus License"
+t IDCANCEL "Close"
+
+# Notifications. You can trigger one of these by using Alt-R and re-launching Rufus
+g IDD_NOTIFICATION
+t IDC_MORE_INFO "More information"
+t IDYES "Yes"
+t IDNO "No"
+
+# Log dialog
+g IDD_LOG
+t IDD_LOG "Log"
+t IDC_LOG_CLEAR "Clear Log"
+t IDC_LOG_SAVE "Save Log"
+t IDCANCEL "Close Log"
+
+# About -> Updates
+g IDD_UPDATE_POLICY
+t IDD_UPDATE_POLICY "Update policy and settings"
+t IDS_UPDATE_SETTINGS_GRP "Settings"
+t IDS_UPDATE_FREQUENCY_TXT "Check for updates:"
+t IDS_INCLUDE_BETAS_TXT "Include beta versions:"
+t IDC_CHECK_NOW "Check Now"
+t IDCANCEL "Close"
+
+# Dialog that appears when a new version is available
+g IDD_NEW_VERSION
+t IDD_NEW_VERSION "Check For Updates - Rufus"
+t IDS_NEW_VERSION_AVAIL_TXT "A newer version is available. Please download the latest version!"
+t IDC_WEBSITE "Click here to go to the website"
+t IDS_NEW_VERSION_NOTES_GRP "Release Notes"
+t IDS_NEW_VERSION_DOWNLOAD_GRP "Download"
+t IDC_DOWNLOAD "Download"
+t IDCANCEL "Close"
+
+# Dialog that appears when scanning/extracting ISO files
+g IDD_ISO_EXTRACT
+t IDD_ISO_EXTRACT "Copying ISO files..."
+t IDC_ISO_FILENAME "Opening ISO image - please wait..."
+t IDC_ISO_ABORT "Cancel"
+
+# Messages used throughout the application
 g IDD_MESSAGES
 t MSG_001 "Other instance detected"
 t MSG_002 "Another Rufus application is running.\n"
@@ -11,7 +137,8 @@ t MSG_003 "WARNING: ALL DATA ON DEVICE '%s' WILL BE DESTROYED.\n"
 	"To continue with this operation, click OK. To quit click CANCEL."
 t MSG_004 "Rufus update policy"
 t MSG_005 "Do you want to allow Rufus to check for application updates online?"
-t MSG_006 "Close"	# Must be the same as IDD_DIALOG:IDCANCEL (i.e. "Close" - I know it's confusing)
+# Must be the same as IDD_DIALOG:IDCANCEL (i.e. "Close" - I know it's confusing)
+t MSG_006 "Close"
 t MSG_007 "Cancel"
 t MSG_008 "Yes"
 t MSG_009 "No"
@@ -86,6 +213,7 @@ t MSG_067 "Could not open media. It may be in use by another process. "
 t MSG_068 "Error while partitioning drive."
 t MSG_069 "Could not copy files to target drive."
 t MSG_070 "Cancelled by user."
+# See http://en.wikipedia.org/wiki/Thread_%28computing%29
 t MSG_071 "Unable to start thread."
 t MSG_072 "Bad blocks check didn't complete."
 t MSG_073 "ISO image scan failure."
@@ -152,9 +280,12 @@ t MSG_106 "Please select folder"
 t MSG_107 "All files"
 t MSG_108 "Rufus log"
 t MSG_109 "0x%02X (Disk %d)"
-t MSG_110 "MS-DOS cannot boot from a drive using a 64 kilobyte Cluster size.\n"
+# "Cluster size" below should be the same as the label for IDS_CLUSTERSIZE_TXT
+# "kilobytes" should be the same as in MSG_027
+t MSG_110 "MS-DOS cannot boot from a drive using a 64 kilobytes Cluster size.\n"
 	"Please change the Cluster size or use FreeDOS."
 t MSG_111 "Incompatible Cluster size"
+# "%d:%02d" below is a duration (mins:secs)
 t MSG_112 "Formatting a large UDF volumes can take a lot of time. At USB 2.0 speeds, the estimated formatting "
 	"duration is %d:%02d, during which the progress bar will appear frozen. Please be patient!"
 t MSG_113 "Large UDF volume"
@@ -194,7 +325,7 @@ t MSG_173 "Click to select..."
 # The following will appear in the about dialog
 t MSG_174 "Rufus - The Reliable USB Formatting Utility"
 t MSG_175 "Version %d.%d.%d (Build %d)"
-t MSG_176 ""
+t MSG_176 "English translation: Pete Batard <mailto:pete@akeo.ie>"
 t MSG_177 "Report bugs or request enhancements at:"
 t MSG_178 "Additional Copyrights:"
 t MSG_179 "Update Policy:"
@@ -238,9 +369,12 @@ t MSG_216 "Saved %s"
 t MSG_217 "Formatting: %0.1f%% completed"
 t MSG_218 "Creating file system: Task %d/%d completed"
 t MSG_219 "NTFS Fixup: %d%% completed"
-# Parameter: the file system and an estimated duration in mins and secs
+# Parameter: the file system and an estimated duration in mins and secs.
+# eg. "Formatting (UDF) - Estimated duration 3:21..."
+# NB: if "estimated duration" is too long, just use "estimated" or an abbreviation
 t MSG_220 "Formatting (%s) - estimated duration %d:%02d..."
 t MSG_221 "Setting Label (This may take while)..."
+# Parameter: the file system. eg. "Formatting (NTFS)..."
 t MSG_222 "Formatting (%s)..."
 t MSG_223 "NTFS Fixup (Checkdisk)..."
 t MSG_224 "Clearing MBR/PBR/GPT structures..."
@@ -283,6 +417,10 @@ t MSG_256 "Fake drive detection"
 t MSG_257 "Joliet support"
 t MSG_258 "Rock Ridge support"
 t MSG_259 "Force update"
+################################################################################
+############################# TRANSLATOR END COPY ##############################
+################################################################################
+
 
 ################################################################################
 l "zh-CN" "Chinese Simplified (简体中文)" 0x0404, 0x0804, 0x0c04, 0x1004, 0x1404

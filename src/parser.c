@@ -294,7 +294,7 @@ BOOL get_supported_locales(const char* filename)
 				// We use the first version from our loc file (usually en-US) as our base
 				// as it should always be the most up to date.
 				loc_base_minor = lcmd->unum[1];
-				loc_base_micro = lcmd->unum[0];
+				loc_base_micro = lcmd->unum[2];
 				version_line_nr = loc_line_nr;
 			} else if (lcmd->unum[1] < loc_base_minor) {
 				luprintf("the version of this locale is incompatible with this version of " APPLICATION_NAME " and MUST be updated to at least v%d.%d.0",

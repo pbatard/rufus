@@ -2045,7 +2045,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	if (GetFileAttributesU("rufus.loc") == INVALID_FILE_ATTRIBUTES) {
 		uprintf("loc file not found in current directory - embedded one will be used");
 
-		loc_data = (BYTE*)GetResource(hMainInstance, MAKEINTRESOURCEA(IDR_LC_RUFUS_LOC), _RT_RCDATA, "rufus.loc", &loc_size, FALSE);
+		loc_data = (BYTE*)GetResource(hMainInstance, MAKEINTRESOURCEA(IDR_LC_RUFUS_LOC), _RT_RCDATA, "embedded.loc", &loc_size, FALSE);
 		GetTempPathU(sizeof(tmp_path), tmp_path);
 		GetTempFileNameU(tmp_path, APPLICATION_NAME, 0, loc_file);
 

@@ -97,7 +97,7 @@
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
     <ResourceCompile>
-      <PreprocessorDefinitions>_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_UNICODE;UNICODE;RUFUS_LOC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <Culture />
     </ResourceCompile>
   </ItemDefinitionGroup>
@@ -124,7 +124,7 @@
       <TargetMachine>MachineX64</TargetMachine>
     </Link>
     <ResourceCompile>
-      <PreprocessorDefinitions>_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_UNICODE;UNICODE;RUFUS_LOC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <Culture />
     </ResourceCompile>
   </ItemDefinitionGroup>
@@ -147,7 +147,7 @@
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
     <ResourceCompile>
-      <PreprocessorDefinitions>_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_UNICODE;UNICODE;RUFUS_LOC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <Culture />
     </ResourceCompile>
   </ItemDefinitionGroup>
@@ -173,7 +173,7 @@
       <TargetMachine>MachineX64</TargetMachine>
     </Link>
     <ResourceCompile>
-      <PreprocessorDefinitions>_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_UNICODE;UNICODE;RUFUS_LOC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <Culture />
     </ResourceCompile>
   </ItemDefinitionGroup>
@@ -217,6 +217,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\res\down.ico" />
+    <None Include="..\..\res\localization\rufus.loc" />
     <None Include="..\..\res\rufus.ico" />
     <None Include="..\..\res\up.ico" />
   </ItemGroup>

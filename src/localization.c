@@ -69,7 +69,7 @@ const loc_parse parse_cmd[9] = {
 /* Globals */
 int    loc_line_nr;
 struct list_head locale_list = {NULL, NULL};
-char   *loc_filename = NULL, *embedded_loc_filename = "[embedded] rufus.loc";
+char   *loc_filename = NULL, *embedded_loc_filename = "embedded.loc";
 
 /*
  * Hash table functions - modified From glibc 2.3.2:
