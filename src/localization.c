@@ -140,7 +140,7 @@ static void htab_destroy(void)
 		return;
 	}
 
-	for (i=0; i<htab_size; i++) {
+	for (i=0; i<htab_size+1; i++) {
 		if (htab_table[i].used) {
 			safe_free(htab_table[i].str);
 		}
@@ -162,18 +162,18 @@ static uint32_t htab_hash(char* str)
 {
 	uint32_t hval, hval2;
 	uint32_t idx;
-	uint32_t r = 5381;
+	uint32_t r = 0;
 	int c;
 	char* sz = str;
 
 	if (str == NULL)
 		return 0;
 
-	// Compute main hash value (algorithm suggested by Nokia)
-	// TODO: THIS ALGORITHM SUUUUUUUUUUUUUUCKS!!!!
-	// Uncomment 'uprintf("hash collision' below to find out why...
+	// Compute main hash value using sdbm's algorithm (empirically
+	// shown to produce half the collisions as djb2's).
+	// See http://www.cse.yorku.ca/~oz/hash.html
 	while ((c = *sz++) != 0)
-		r = ((r << 5) + r) + c;
+		r = c + (r << 6) + (r << 16) - r;
 	if (r == 0)
 		++r;
 

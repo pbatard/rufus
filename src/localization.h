@@ -22,10 +22,11 @@
 
 #pragma once
 
-// Number of concurrent localization messages. Must be a power of 2.
+// Number of concurrent localization messages (i.e. messages we can concurrently
+// reference at the same time). Must be a power of 2.
 #define LOC_MESSAGE_NB      8
 #define LOC_MESSAGE_SIZE    2048
-#define LOC_HTAB_SIZE       512
+#define LOC_HTAB_SIZE       1031	// Using a prime speeds up the hash table init
 
 // The [v]ersion major from a translation must match this number or
 // the translation will be ignored
