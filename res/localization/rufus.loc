@@ -1595,7 +1595,7 @@ t MSG_259 "'Erőszakos' frissítés"
 
 ################################################################################
 l "it-IT" "Italian (Italiano)" 0x0410, 0x0810
-v 1.0.0
+v 1.0.2
 b "en-US"
 
 g IDD_DIALOG
@@ -1604,10 +1604,10 @@ t IDS_PARTITION_TYPE_TXT "Schema partizione e tipo sistema destinazione"
 t IDS_FILESYSTEM_TXT "File system"
 t IDS_CLUSTERSIZE_TXT "Dimensione cluster"
 t IDS_LABEL_TXT "Nuova etichetta volume"
-t IDS_FORMAT_OPTIONS_GRP "Opzioni formattazione"
+t IDS_FORMAT_OPTIONS_GRP "Opzioni formattazione       "
 t IDC_BADBLOCKS "Test controllo blocchi errati unità:"
 s IDC_BADBLOCKS +30,0
-m IDC_NBPASSES +30,0
+m IDC_NBPASSES +29,0
 s IDC_NBPASSES +10,0
 t IDC_QUICKFORMAT "Formattazione rapida"
 t IDC_BOOT "Crea disco avviabile con:"
@@ -1626,12 +1626,11 @@ t IDCANCEL "Chiudi"
 s IDCANCEL 0,0
 t IDC_START "Avvia"
 t IDS_ADVANCED_OPTIONS_GRP "Opzioni avanzate"
-m IDC_ADVANCED +40,0
+m IDC_ADVANCED +31,0
 t IDC_ENABLE_FIXED_DISKS "Elenca anche unità USB non rimuovibili/partizionati"
 t IDC_EXTRA_PARTITION "Aggiungi correzioni per vecchi BIOS"
 t IDC_RUFUS_MBR "Usa MBR Rufus con ID BIOS:"
-m IDC_DISK_ID +5,0
-s IDC_DISK_ID -2,0
+m IDC_DISK_ID 3,0
 
 g IDD_ABOUTBOX
 t IDD_ABOUTBOX "Info su Rufus"
@@ -1834,7 +1833,18 @@ t MSG_106 "Seleziona la cartella"
 t MSG_107 "Tutti i file"
 t MSG_108 "Registro eventi Rufus"
 t MSG_109 "0x%02X (disco %d)"
+# "Cluster size" below should be the same as the label for IDS_CLUSTERSIZE_TXT
+# "kilobytes" should be the same as in MSG_027
+t MSG_110 "Non si può avviare MS-DOS da una unità che usa una dimensione del cluster di 64 kilobyte.\n"
+	"Modifica la dimensione del cluster o usa FreeDOS."
+t MSG_111 "Dimensione cluster incompatibile"
+# "%d:%02d" below is a duration (mins:secs)
+t MSG_112 "La formattazione di un volume UDF di grandi dimensioni può richiedere molto tempo. in modo USB 2.0, il tempo stimato "
+	"per la formattazione sarà di %d:%02d, durante il quale la barra di progresso non verrà aggiornata. Attendi il completamento dell'operazione!"
+t MSG_113 "Voume UDF di grandi dimensioni"
 
+# Tootips
+# Partition Scheme and Target Type
 t MSG_150 "Questa impostazione è la scelta più sicura. Se hai un computer UEFI e vuoi installare "
 	"un sistema operativo in modo EFI, puoi selezionare una delle opzioni sottostanti"
 t MSG_151 "Usa questa impostazione se vuoi installare un sistema operativo in modo EFI, ma devi accedere "
@@ -1888,6 +1898,9 @@ t MSG_203 "Analisi fallita immagine ISO"
 t MSG_204 "Rilevato %s obsoleto"
 t MSG_205 "Uso ISO: %s"
 t MSG_206 "File %s mancante"
+# The name proposed by Windows' Computer Management -> Disk Management when you try to format a drive
+# with an empty label. See http://rufus.akeo.ie/pics/default_name.png
+t MSG_207 "Nuovo volume"
 t MSG_208 "Rilevati %d dispositivo"
 t MSG_209 "Rilevati %d dispositivi"
 t MSG_210 "OPERAZIONE COMPLETATA."
@@ -1900,6 +1913,10 @@ t MSG_216 "Salvato %s"
 t MSG_217 "Formattazione: %0.1f%% completata"
 t MSG_218 "Creazione filesystem: attivitò %d/%d completata"
 t MSG_219 "Corerzione NTFS: %d%% completata"
+# Parameter: the file system and an estimated duration in mins and secs.
+# eg. "Formatting (UDF) - Estimated duration 3:21..."
+# NB: if "estimated duration" is too long, just use "estimated" or an abbreviation
+t MSG_220 "Formattazione (%s) - durata stimata %d:%02d..."
 t MSG_221 "Impostazione etichetta (potrebbe richiedere del tempo)..."
 t MSG_222 "Formattazione (%s)..."
 t MSG_223 "Correzione NTFS (controllo disco)..."
