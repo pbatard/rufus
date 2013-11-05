@@ -854,7 +854,7 @@ t MSG_259 "Forçage de mise à jour"
 
 ################################################################################
 l "de-DE" "German (Deutsch)" 0x0407, 0x0807, 0x0c07, 0x1007, 0x1407
-v 1.0.0
+v 1.0.2
 b "en-US"
 
 g IDD_DIALOG
@@ -1025,7 +1025,7 @@ t MSG_057 "Die Laufwerksbezeichnung ist ungültig."
 t MSG_058 "Das Geräte-Handle ist ungültig."
 t MSG_059 "Die ausgewählte Größe der Zuordnungseinheit ist für dieses Laufwerk nicht gültig."
 t MSG_060 "Die Volumen-Größe ist ungültig."
-t MSG_061 "Bitte legen Sie einen Datenträger ein."
+t MSG_061 "Bitte legen Sie einen Wechseldatenträger ein."
 t MSG_062 "Ein nicht unterstütztes Kommando wurde erkannt."
 t MSG_063 "Fehler bei der Speicherzuweisung."
 t MSG_064 "Lesefehler."
@@ -1036,7 +1036,7 @@ t MSG_067 "Datenträger konnte nicht geöffnet werden. Möglicherweise wird er v
 t MSG_068 "Fehler beim Partitionieren des Laufwerks."
 t MSG_069 "Dateien konnten nicht auf das Ziellaufwerk kopiert werden."
 t MSG_070 "Vom Benutzer abgebrochen."
-t MSG_071 "Befehl zur Formatierung konnte nicht ausgeführt werden."
+t MSG_071 "Thread konnte nicht gestartet werden."
 t MSG_072 "Prüfung auf fehlerhafte Blöcke nicht abgeschlossen."
 t MSG_073 "Fehler beim analysieren des ISO-Abbilds."
 t MSG_074 "Fehler beim entpacken des ISO-Abbilds."
@@ -1063,7 +1063,7 @@ t MSG_085 "Download %s"
 t MSG_086 "Kein ISO-Abbild gewählt"
 # The content between the quotes below (\"Create a bootable disk\") should match
 # the beginning of the IDC_BOOT text
-t MSG_087 "Wählen sie ein startfähiges ISO-Abbild aus "
+t MSG_087 "Wählen Sie ein startfähiges ISO-Abbild aus "
 	"oder Sie deaktivieren \"Startfähiges Laufwerk erstellen...\"."
 t MSG_088 "ISO-Abbild ist zu groß"
 t MSG_089 "Dieses ISO-Abbild ist zu groß für das gewählte Ziel."
@@ -1100,6 +1100,10 @@ t MSG_106 "Ordner wählen"
 t MSG_107 "Alle Dateien"
 t MSG_108 "Rufus Log"
 t MSG_109 "0x%02X (Disk %d)"
+t MSG_110 "MS-DOS kann nicht von einem Laufwerk starten, das 64 Kilobyte große Zuordnungseinheiten verwendet..."
+t MSG_111 "Inkompatible Zuordnungseinheitengröße"
+t MSG_112 "Großes UDF-Laufwerke zu formatieren, kann viel Zeit benötigen..."
+t MSG_113 "Großes UDF-Laufwerk"
 
 t MSG_150 "Normalerweise die beste Wahl. Wenn Sie einen UEFI-Computer haben und das Betriebssystem "
 	"im EFI-Modus installieren wollen, sollten sie eine der anderen Einstellungen wählen."
@@ -1158,6 +1162,9 @@ t MSG_204 "Überflüssige %s erkannt"
 t MSG_205 "Verwende ISO: %s"
 # Typically "Missing ldlinux.c32 file"
 t MSG_206 "Fehlende %s Datei"
+
+t MSG_207 "Neues Volume"
+
 # Same message, once for singular and plural ("1 device found", "2 devices found")
 t MSG_208 "%d Laufwerk gefunden"
 t MSG_209 "%d Laufwerke gefunden"
@@ -1174,6 +1181,9 @@ t MSG_216 "Gespeichert %s"
 t MSG_217 "Formatieren: %0.1f%% erledigt"
 t MSG_218 "Dateisystem erzeugen: Aufgabe %d/%d abgeschlossen"
 t MSG_219 "NTFS Fixup: %d%% erledigt"
+
+t MSG_220 "Formatiere (%s) - geschätzte Dauer %d:%02d..."
+
 t MSG_221 "Setzte Bezeichnung (kann etwas dauern)..."
 # Parameter: the file system. eg. "Formatting (NTFS)..."
 t MSG_222 "Formatiere (%s)..."
