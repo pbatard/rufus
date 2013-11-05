@@ -359,7 +359,7 @@ t MSG_209 "%d devices found"
 t MSG_210 "DONE."
 t MSG_211 "Cancelled."
 t MSG_212 "FAILED."
-# Used when a new update has been downloaded and lauched
+# Used when a new update has been downloaded and launched
 t MSG_213 "Launching new application..."
 t MSG_214 "Failed to launch new application"
 # Open/Save file
@@ -387,7 +387,7 @@ t MSG_230 "Copying DOS files..."
 t MSG_231 "Copying ISO files..."
 t MSG_232 "Win7 EFI boot setup (this may take a while)..."
 t MSG_233 "Finalizing, please wait..."
-# Takes the Syslinux version as paramete. eg. "Installing Syslinux v5..."
+# Takes the Syslinux version as parameter, eg. "Installing Syslinux v5..."
 t MSG_234 "Installing Syslinux v%d..."
 # Bad blocks status. eg: "Bad Blocks: PASS 1/2 - 12.34% (0/0/1 errors)"
 t MSG_235 "Bad Blocks: PASS %d/%d - %0.2f%% (%d/%d/%d errors)"
@@ -1171,7 +1171,7 @@ t MSG_209 "%d Laufwerke gefunden"
 t MSG_210 "FERTIG."
 t MSG_211 "Abgebrochen."
 t MSG_212 "FEHLGESCHLAGEN."
-# Used when a new update has been downloaded and lauched
+# Used when a new update has been downloaded and launched
 t MSG_213 "Starte Anwendung neu..."
 t MSG_214 "Fehler beim Anwendungsneustart"
 # Open/Save file
@@ -1198,7 +1198,7 @@ t MSG_230 "Kopiere DOS-Dateien..."
 t MSG_231 "Kopiere ISO-Dateien..."
 t MSG_232 "Win7 EFI Boot setup (kann etwas dauern)..."
 t MSG_233 "Abschließen, bitte warten..."
-# Takes the Syslinux version as paramete. eg. "Installing Syslinux v5..."
+# Takes the Syslinux version as parameter, eg. "Installing Syslinux v5..."
 t MSG_234 "Installiere Syslinux v%d..."
 # Bad blocks status. eg: "Bad Blocks: PASS 1/2 - 12.34% (0/0/1 errors)"
 t MSG_235 "Fehlerhafte Blöcke: Durchlauf %d/%d - %0.2f%% (%d/%d/%d Fehler)"
@@ -1231,9 +1231,10 @@ t MSG_259 "Update erzwingen"
 
 ################################################################################
 l "hu-HU" "Hungarian (Magyar)" 0x040e
-v 1.0.0
+v 1.0.2
 b "en-US"
 
+# Main dialog
 g IDD_DIALOG
 t IDS_DEVICE_TXT "Eszköz"
 t IDS_PARTITION_TYPE_TXT "Partíció sémája és fájlrendszer"
@@ -1256,24 +1257,29 @@ t IDC_RUFUS_MBR "MBR-es Rufus BIOS azonosítóval:"
 s IDC_NBPASSES +30,0
 m IDC_ADVANCED +28,0
 
+# About dialog
 g IDD_ABOUTBOX
 t IDD_ABOUTBOX "A Rufus-ról"
 t IDC_ABOUT_LICENSE "Licensz"
 t IDC_ABOUT_UPDATES "Frissítések"
 
+# About -> License dialog
 g IDD_LICENSE
 t IDD_LICENSE "Rufus Licensz"
 
+# Notifications. You can trigger one of these by using Alt-R and re-launching Rufus
 g IDD_NOTIFICATION
 t IDC_MORE_INFO "Több információ"
 t IDYES "Igen"
 t IDNO "Nem"
 
+# Log dialog
 g IDD_LOG
 t IDC_LOG_CLEAR "Törlés"
 t IDC_LOG_SAVE "Mentés"
 t IDCANCEL "Bezárás"
 
+# About -> Updates
 g IDD_UPDATE_POLICY
 t IDD_UPDATE_POLICY "Beállítások frissítése"
 t IDS_UPDATE_SETTINGS_GRP "Beállítások"
@@ -1282,6 +1288,7 @@ t IDS_INCLUDE_BETAS_TXT "Beta verziókat is:"
 t IDC_CHECK_NOW "Ellenőrzés"
 t IDCANCEL "Bezárás"
 
+# Dialog that appears when a new version is available
 g IDD_NEW_VERSION
 t IDD_NEW_VERSION "Frissítések keresése - Rufus"
 t IDS_NEW_VERSION_AVAIL_TXT "Egy újabb verzió elérhető. Kérlek, töltsd le a legfrissebb verziót!"
@@ -1291,11 +1298,13 @@ t IDS_NEW_VERSION_DOWNLOAD_GRP "Letöltés"
 t IDC_DOWNLOAD "Letöltés"
 t IDCANCEL "Bezárás"
 
+# Dialog that appears when scanning/extracting ISO files
 g IDD_ISO_EXTRACT
 t IDD_ISO_EXTRACT "ISO fájlok másolása..."
 t IDC_ISO_FILENAME "ISO fájl megnyitása - kérlek, várj..."
 t IDC_ISO_ABORT "Mégse"
 
+# Messages used throughout the application
 g IDD_MESSAGES
 t MSG_001 "Másik folyamat"
 t MSG_002 "Egy másik Rufus is fut.\n"
@@ -1304,6 +1313,7 @@ t MSG_003 "FIGYELEM: MINDEN ADAT A(Z) '%s' NEVŰ ESZKÖZÖN TÖRLŐDNI FOG.\n"
 	"A folyamat folytatásához kattints az OK gombra. A kilépépshez kattints a MÉGSE gombra."
 t MSG_004 "Rufus frissítés"
 t MSG_005 "Engedélyezed a Rufus-nak a frissítések utáni keresést?"
+# Must be the same as IDD_DIALOG:IDCANCEL (i.e. "Close" - I know it's confusing)
 t MSG_006 "Bezárás"
 t MSG_007 "Mégse"
 t MSG_008 "Igen"
@@ -1311,6 +1321,7 @@ t MSG_009 "Nem"
 t MSG_010 "Rossz blokkokat találtam"
 t MSG_011 "Ellenörzés befejezve: %u rossz blokk találva\n"
 	"  %d olvasási hiba,\n  %d írási hiba\n  %d osszeomlásra hajlamos hiba\n"
+# The following will contain the formatted message above as well as the name of the bad blocks logfile
 t MSG_012 "%s\nEgy részletesebb jelentés itt található:\n%s"
 t MSG_013 "Letiltva"
 t MSG_014 "Naponta"
@@ -1319,20 +1330,24 @@ t MSG_016 "Havonta"
 t MSG_017 "Egyéni"
 t MSG_018 "A Te verziód %d.%d.%d (%d)"
 t MSG_019 "Legfrissebb verzió: %d.%d.%d (%d)"
+# *Short* size names. These can be used as suffixes
 t MSG_020 "bytes"
 t MSG_021 "KB"
 t MSG_022 "MB"
 t MSG_023 "GB"
 t MSG_024 "TB"
 t MSG_025 "PB"
+# *Long* size names, as they are displayed for the cluster size in the MS format dialog.
 t MSG_026 "byte"	# Yes, this is a repeat from MSG_020
 t MSG_027 "kilobyte"
 t MSG_028 "megabyte"
 t MSG_029 "Alap"
+# The following gets appended to the file system, cluster size, etc.
 t MSG_030 "%s (Alap)"
 t MSG_031 "%s partíciós séma BIOS-os gépekhez"
 t MSG_032 "%s partíciós séma UEFI-s gépekhez"
 t MSG_033 "%s partíciós séma BIOS-os vagy UEFI-s gépekhez"
+# Number of bad block check passes (singular for 1 pass, plural for 2 or more passes)
 t MSG_034 "%d vizsgálat"
 t MSG_035 "%d vizsgálat"
 t MSG_036 "ISO kép"
@@ -1350,6 +1365,7 @@ t MSG_047 "%s (%c:)"
 t MSG_048 "Rufus - Bufferelés"
 t MSG_049 "Rufus - Megszakítás"
 
+# Error messages
 t MSG_050 "Siker!"
 t MSG_051 "Ismeretlen hiba formázás közben."
 t MSG_052 "A kiválasztott fájl nem használható."
@@ -1362,8 +1378,8 @@ t MSG_057 "A cimke érvénytelen."
 t MSG_058 "Az eszköz kezelése érvénytelen."
 t MSG_059 "A kiválasztott kluszter méret nem elérhető ehhez az eszközhöz."
 t MSG_060 "A kötet mérete érvénytelen."
-t MSG_061 "Kérlek, helyezz be egy eszközt."
-t MSG_062 "Egy nem tmogatott parancs."
+t MSG_061 "Kérlek, helyezz be egy eltávolítható eszközt."
+t MSG_062 "Egy nem támogatott parancs."
 t MSG_063 "Memória hiba."
 t MSG_064 "Olvasási hiba."
 t MSG_065 "Írási hiba."
@@ -1373,7 +1389,7 @@ t MSG_067 "Nem nyitható meg az eszköz. Talán egy másik folyamat hazsnálja. 
 t MSG_068 "Az eszköz particionálása közben hiba lépett fel."
 t MSG_069 "Nem sikerült a fájlokat az eszközre másolni."
 t MSG_070 "A felhasználó által megszakítva."
-t MSG_071 "Nem lehetséges a firmázás."
+t MSG_071 "Nem lehet elindítani a formázást."
 t MSG_072 "A rossz blokkok utáni keresés nincs befejezve."
 t MSG_073 "ISO kép ellenörzése sikertelen."
 t MSG_074 "ISO kép kicsomagolása sikertelen."
@@ -1400,6 +1416,8 @@ t MSG_084 "Ez az iso fájl valószínűleg a(z) '%s' elavult verzióját haszná
 	"'%s' létezik, akkor az automatikusan újra lesz használva."
 t MSG_085 "Letöltés: %s"
 t MSG_086 "Nincs ISO fájl kiválasztva"
+# The content between the quotes below (\"Create a bootable disk\") should match
+# the beginning of the IDC_BOOT text
 t MSG_087 "Kérlek, kattints a Lemez gombra bootolhato ISO kiválasztásához, "
 	"vagy vedd ki a pipát a \"Bootolható lemez készítése...\" elől."
 t MSG_088 "Az ISO fájl túl nagy"
@@ -1437,7 +1455,18 @@ t MSG_106 "Kérlek, válassz mappát"
 t MSG_107 "Minden fájl"
 t MSG_108 "Rufus log"
 t MSG_109 "0x%02X (Lemez: %d)"
+# "Cluster size" below should be the same as the label for IDS_CLUSTERSIZE_TXT
+# "kilobytes" should be the same as in MSG_027
+t MSG_110 "MS-DOS nem tudo bootolni 64 kilobájtos klaszter méret használatával erről az eszközről.\n"
+	"Kérlek, változtasd meg a Klaszter méretet, vagy használj FreeDOS-t."
+t MSG_111 "Nem kompatibilis Klaszter méret"
+# "%d:%02d" below is a duration (mins:secs)
+t MSG_112 "Nagy UDF kötetek formázása sok időt igénybe vehet. USB 2.0 sebessgégével számolva a formázás "
+	"ennyi addig fog tartani ( %d:%02d ), amíg a folyamat jelző meg nem fagy. KÉrlek, légy türelemmel!"
+t MSG_113 "Nagy UDF kötet"
 
+# Tootips
+# Partition Scheme and Target Type
 t MSG_150 "Általában a leggyorsabb választás. Ha UEFI-s géped van, és azt szeretnéd telepíteni "
 	"egy oprendszerre EFI módban, akkor az alább lévő oprciók közül kell egyet választanod."
 t MSG_151 "Használd ezt, hagy egy oprendszert szeretnél telepíteni EFI módban, de szükséged "
@@ -1468,6 +1497,7 @@ t MSG_170 "Az olyan eszközök észlelésének engedélyzése, amit normál eset
 t MSG_171 "A formázás elkezdése.\nEz MINDEN ADATOT TÖRÖL az adattárolón!"
 t MSG_172 "Licenszszel kapcsolatos információk és készítők"
 t MSG_173 "Kattints a kiválasztáshoz..."
+# The following will appear in the about dialog
 t MSG_174 "Rufus - A megbízható USB formázó"
 t MSG_175 "Verzió: %d.%d.%d (Build %d)"
 t MSG_176 "Magyar fordítás: georg1136 <mailto:georg1136@freemail.hu>"
@@ -1485,25 +1515,41 @@ t MSG_185 "Frissítési folyamat:"
 t MSG_186 "A Rufus nem telepít, vagy futtat a háttérben más szolgáltatásokat, a frissítések ellenörzése a főalkalmazáson belül történik.\\line\n"
 	"Interenet kapcsolat szükséges a frissítések ellenörzéséhez."
 
+# Status messages - these messages will appear on the status bar
 t MSG_201 "Megszakítás - Kérlek, várj..."
 t MSG_202 "ISO kép viszgálata..."
 t MSG_203 "Nem sikerült az ISO képet megvizsgálni"
+# Parameter: the name of an obsolete Syslinux .c32 module. eg: "Obsolete vesamenu.c32 detected"
 t MSG_204 "Elavult %s észlelve"
+# Display the name of the ISO selected. eg: "Using ISO: en_win7_x64_sp1.iso"
 t MSG_205 "Iso kép használaza: %s"
+# Typically "Missing ldlinux.c32 file"
 t MSG_206 "Hiányzó %s fájl"
+# The name proposed by Windows' Computer Management -> Disk Management when you try to format a drive
+# with an empty label. See http://rufus.akeo.ie/pics/default_name.png
+t MSG_207 "Új kötet"
+# Same message, once for singular and plural ("1 device found", "2 devices found")
 t MSG_208 "%d eszközt találtam"
 t MSG_209 "%d eszközt találtam"
 t MSG_210 "KÉSZ!"
 t MSG_211 "Megszakítva!"
 t MSG_212 "SIKERTELEN!"
+# Used when a new update has been downloaded and launched
 t MSG_213 "Az új alkalmazás elindítása..."
 t MSG_214 "Nem sikerült az új alkalmazást elindítani"
+# Open/Save file
 t MSG_215 "Megnyitva: %s"
 t MSG_216 "Mentve: %s"
+# Formatting status (make sure you use a double % to print the percent sign)
 t MSG_217 "Formázás: %0.1f%% kész"
 t MSG_218 "Fájlrendszer készítése:  %d/%d teljesítve"
 t MSG_219 "NTFS Fixup: %d%% kész"
-t MSG_221 "Címke készítése (Egy majd eltart egy kis ideig)..."
+# Parameter: the file system and an estimated duration in mins and secs.
+# eg. "Formatting (UDF) - Estimated duration 3:21..."
+# NB: if "estimated duration" is too long, just use "estimated" or an abbreviation
+t MSG_220 "Formázás (%s) - becsült idő: %d:%02d..."
+t MSG_221 "Címke készítése (Ez eltarhat egy kis ideig)..."
+# Parameter: the file system. eg. "Formatting (NTFS)..."
 t MSG_222 "Formázás (%s)..."
 t MSG_223 "NTFS Fixup (Checkdisk)..."
 t MSG_224 "MBR/PBR/GPT struktúrák tisztítása..."
@@ -1516,10 +1562,13 @@ t MSG_230 "DOS fájlok másolása..."
 t MSG_231 "ISO fájlok másolása..."
 t MSG_232 "Win7 EFI boot telepítő (ez eltarthat egy kis ideig)..."
 t MSG_233 "Véglegesítés, kérlek, várj..."
+# Takes the Syslinux version as parameter, eg. "Installing Syslinux v5..."
 t MSG_234 "Syslinux v%d telepítése..."
+# Bad blocks status. eg: "Bad Blocks: PASS 1/2 - 12.34% (0/0/1 errors)"
 t MSG_235 "Rossz blokkok: Próbálkozás %d/%d - %0.2f%% (%d/%d/%d hiba)"
 t MSG_236 "Rossz blokkok: Véletlenszerű paraméterrel való tesztelés"
 t MSG_237 "Rossz blokkok: Tesztelés 0x%02X paraméterrel"
+# eg. "Partitioning (MBR)..."
 t MSG_238 "Particionálás (%s)..."
 t MSG_239 "Partíciók törlése..."
 t MSG_240 "Letöltés %s: Csatlakozás..."
@@ -1532,6 +1581,7 @@ t MSG_246 "Elérhető egy új Rufus verzió!"
 t MSG_247 "Nem találtam újabb Rufust"
 t MSG_248 "A program regisztációs kulcsa sikeresen eltávolítva"
 t MSG_249 "Nem sikerült a regisztációs kuclsokat eltávolítani"
+# eg. "Fixed disk detection enabled" "ISO size check disabled"
 t MSG_250 "%s engedélyezve"
 t MSG_251 "%s letiltva"
 t MSG_252 "Méret ellenörzések"
@@ -2231,7 +2281,7 @@ t MSG_209 "%d aygıt bulundu"
 t MSG_210 "TAMAM."
 t MSG_211 "Vazgeçildi."
 t MSG_212 "BAŞARISIZ."
-# Used when a new update has been downloaded and lauched
+# Used when a new update has been downloaded and launched
 t MSG_213 "Yeni uygulama başlatılıyor..."
 t MSG_214 "Yeni uygulama başlatılamadı"
 # Open/Save file
@@ -2259,7 +2309,7 @@ t MSG_230 "DOS Dosyaları Kopyalanıyor..."
 t MSG_231 "ISO Dosyaları Kopyalanıyor..."
 t MSG_232 "Win7 EFI Açılış Kurulumu (Biraz zaman alabilir)..."
 t MSG_233 "Bitiriliyor, Lütfen Bekleyin..."
-# Takes the Syslinux version as paramete. eg. "Installing Syslinux v5..."
+# Takes the Syslinux version as parameter, eg. "Installing Syslinux v5..."
 t MSG_234 "Syslinux v%d Yükleniyor..."
 # Bad blocks status. eg: "Bad Blocks: PASS 1/2 - 12.34% (0/0/1 errors)"
 t MSG_235 "Hatalı Bloklar: Geçiş %d/%d - %0.2f%% (%d/%d/%d hata)"
