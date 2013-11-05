@@ -1272,8 +1272,6 @@ void InitDialog(HWND hDlg)
 	HDC hDC;
 	int i, i16, s16;
 	char tmp[128], *token;
-	BOOL is_x64 = FALSE;
-	BOOL (__stdcall *pIsWow64Process)(HANDLE, PBOOL) = NULL;
 
 #ifdef RUFUS_TEST
 	ShowWindow(GetDlgItem(hDlg, IDC_TEST), SW_SHOW);
@@ -1318,20 +1316,7 @@ void InitDialog(HWND hDlg)
 	for (i=0; (i<4) && ((token = strtok(NULL, ".")) != NULL); i++)
 		rufus_version[i] = (uint16_t)atoi(token);
 	uprintf(APPLICATION_NAME " version %d.%d.%d.%d\n", rufus_version[0], rufus_version[1], rufus_version[2], rufus_version[3]);
-
-	// Detect if we're running a 32 or 64 bit system
-	if (sizeof(uintptr_t) < 8) {
-		pIsWow64Process = (BOOL (__stdcall *)(HANDLE, PBOOL))
-			GetProcAddress(GetModuleHandleA("KERNEL32"), "IsWow64Process");
-		if (pIsWow64Process != NULL) {
-			(*pIsWow64Process)(GetCurrentProcess(), &is_x64);
-		}
-	} else {
-		is_x64 = TRUE;
-	}
-	uprintf("Windows version: %s %d-bit\n", PrintWindowsVersion(nWindowsVersion), is_x64?64:32);
-
-	// Detect the LCID
+	uprintf("Windows version: %s\n", WindowsVersionStr);
 	uprintf("LCID: 0x%04X\n", GetUserDefaultLCID());
 
 	SetClusterSizeLabels();
@@ -2103,7 +2088,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	}
 
 	// Set the Windows version
-	nWindowsVersion = DetectWindowsVersion();
+	GetWindowsVersion();
 
 	// We use local group policies rather than direct registry manipulation
 	// 0x9e disables removable and fixed drive notifications

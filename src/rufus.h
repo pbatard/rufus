@@ -251,13 +251,14 @@ typedef enum TASKBAR_PROGRESS_FLAGS
 
 /* Windows versions */
 enum WindowsVersion {
-	WINDOWS_UNDEFINED = 0,
-	WINDOWS_UNSUPPORTED,
-	WINDOWS_XP,
-	WINDOWS_2003,	// Also XP x64
-	WINDOWS_VISTA,
-	WINDOWS_7,
-	WINDOWS_8_OR_LATER,
+	WINDOWS_UNDEFINED = -1,
+	WINDOWS_UNSUPPORTED = 0,
+	WINDOWS_XP = 0x51,
+	WINDOWS_2003 = 0x52,	// Also XP x64
+	WINDOWS_VISTA = 0x60,
+	WINDOWS_7 = 0x61,
+	WINDOWS_8 = 0x62,
+	WINDOWS_8_1_OR_LATER = 0x63,
 	WINDOWS_MAX
 };
 
@@ -278,14 +279,15 @@ extern BOOL use_own_c32[NB_OLD_C32], detect_fakes, iso_op_in_progress, format_op
 extern RUFUS_ISO_REPORT iso_report;
 extern int64_t iso_blocking_status;
 extern uint16_t rufus_version[4];
-extern enum WindowsVersion nWindowsVersion;
+extern int nWindowsVersion;
+extern char WindowsVersionStr[128];
 extern RUFUS_UPDATE update;
 extern int dialog_showing;
 
 /*
  * Shared prototypes
  */
-extern enum WindowsVersion DetectWindowsVersion(void);
+extern void GetWindowsVersion(void);
 extern const char* PrintWindowsVersion(enum WindowsVersion version);
 extern const char *WindowsErrorString(void);
 extern void DumpBufferHex(void *buf, size_t size);
