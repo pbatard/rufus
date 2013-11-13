@@ -38,6 +38,9 @@
 RUFUS_DRIVE_INFO SelectedDrive;
 extern BOOL enable_fixed_disks;
 
+// TODO: add a DetectSectorSize()?
+// http://msdn.microsoft.com/en-us/library/ff800831.aspx
+
 /*
  * Working with drive indexes quite risky (left unchecked,inadvertently passing 0 as
  * index would return a handle to C:, which we might then proceed to unknowingly

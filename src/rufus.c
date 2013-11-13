@@ -730,6 +730,8 @@ static BOOL GetUSBDevices(DWORD devnum)
 				continue;
 			}
 
+//			Identify(hDrive);
+
 			if (GetDriveLabel(device_number.DeviceNumber + DRIVE_INDEX_MIN, &drive_letter, &label)) {
 				// Must ensure that the combo box is UNSORTED for indexes to be the same
 				StrArrayAdd(&DriveID, buffer);

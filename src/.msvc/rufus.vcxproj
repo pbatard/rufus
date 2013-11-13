@@ -189,6 +189,7 @@
     <ClCompile Include="..\net.c" />
     <ClCompile Include="..\parser.c" />
     <ClCompile Include="..\rufus.c" />
+    <ClCompile Include="..\smart.c" />
     <ClCompile Include="..\stdfn.c" />
     <ClCompile Include="..\stdio.c" />
     <ClCompile Include="..\stdlg.c" />
@@ -210,6 +211,7 @@
     <ClInclude Include="..\resource.h" />
     <ClInclude Include="..\rufus.h" />
     <ClInclude Include="..\license.h" />
+    <ClInclude Include="..\smart.h" />
     <ClInclude Include="..\sys_types.h" />
   </ItemGroup>
   <ItemGroup>

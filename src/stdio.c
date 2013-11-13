@@ -129,6 +129,8 @@ static char err_string[256] = {0};
 		else
 			safe_sprintf(err_string, sizeof(err_string), "Unknown error 0x%08X", error_code);
 	}
+
+	SetLastError(error_code);	// Make sure we don't change the errorcode on exit
 	return err_string;
 }
 

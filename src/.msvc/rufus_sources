@@ -43,6 +43,7 @@ SOURCES=rufus.c          \
         dos_locale.c     \
         badblocks.c      \
         drive.c          \
+        smart.c          \
         syslinux.c       \
         vhd.c            \
         rufus.rc

@@ -63,6 +63,9 @@
     <ClCompile Include="..\localization.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\smart.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\rufus.h">
@@ -108,6 +111,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\localization_data.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\smart.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

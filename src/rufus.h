@@ -350,6 +350,7 @@ extern char* replace_in_token_data(const char* filename, const char* token, cons
 extern void parse_update(char* buf, size_t len);
 extern BOOL WimExtractCheck(void);
 extern BOOL WimExtractFile(const char* wim_image, int index, const char* src, const char* dst);
+extern BOOL Identify(HANDLE hPhysical);
 
 static __inline BOOL UnlockDrive(HANDLE hDrive)
 {
