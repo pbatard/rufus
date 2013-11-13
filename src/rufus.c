@@ -596,13 +596,16 @@ static BOOL GetUSBDevices(DWORD devnum)
 	SP_DEVICE_INTERFACE_DATA devint_data;
 	PSP_DEVICE_INTERFACE_DETAIL_DATA_A devint_detail_data;
 	STORAGE_DEVICE_NUMBER_REDEF device_number;
-	DWORD size, i, j, datatype;
+	DEVINST parent_inst, device_inst;
+	DWORD size, i, j, k, datatype;
+	ULONG list_size;
 	HANDLE hDrive;
 	LONG maxwidth = 0;
 	RECT rect;
-	char drive_letter;
-	char *label, *entry, buffer[MAX_PATH];
+	char drive_letter, *devid, *devid_list = NULL;
+	char *label, *entry, buffer[MAX_PATH], str[sizeof("0000:0000")+1];
 	const char* usbstor_name = "USBSTOR";
+	uint16_t vid, pid;
 	GUID _GUID_DEVINTERFACE_DISK =			// only known to some...
 		{ 0x53f56307L, 0xb6bf, 0x11d0, {0x94, 0xf2, 0x00, 0xa0, 0xc9, 0x1e, 0xfb, 0x8b} };
 
@@ -617,6 +620,18 @@ static BOOL GetUSBDevices(DWORD devnum)
 		return FALSE;
 	}
 
+	// Get a list of hardware IDs for all USB storage devices
+	// This will be used to retrieve the VID:PID of our devices
+	CM_Get_Device_ID_List_SizeA(&list_size, usbstor_name, CM_GETIDLIST_FILTER_SERVICE);
+	if (list_size == 0) 
+		return FALSE;
+	devid_list = (char*)malloc(list_size);
+	if (devid_list == NULL) {
+		uprintf("Could not allocate Dev ID list\n");
+		return FALSE;
+	}
+	CM_Get_Device_ID_ListA(usbstor_name, devid_list, list_size, CM_GETIDLIST_FILTER_SERVICE);
+
 	dev_info_data.cbSize = sizeof(dev_info_data);
 	for (i=0; SetupDiEnumDeviceInfo(dev_info, i, &dev_info_data); i++) {
 		memset(buffer, 0, sizeof(buffer));
@@ -629,13 +644,34 @@ static BOOL GetUSBDevices(DWORD devnum)
 		if (safe_strcmp(buffer, usbstor_name) != 0)
 			continue;
 		memset(buffer, 0, sizeof(buffer));
+		vid = 0; pid = 0;
 		if (!SetupDiGetDeviceRegistryPropertyA(dev_info, &dev_info_data, SPDRP_FRIENDLYNAME,
 				&datatype, (LPBYTE)buffer, sizeof(buffer), &size)) {
 			uprintf("SetupDiGetDeviceRegistryProperty (Friendly Name) failed: %s\n", WindowsErrorString());
-			// We can afford a failure on this call - just replace the name
+			// We can afford a failure on this call - just replace the name with "USB Storage Device (Generic)"
 			safe_strcpy(buffer, sizeof(buffer), lmprintf(MSG_045));
+		} else {
+			// Get the VID:PID of the device. We could avoid doing this lookup every time by keeping
+			// a lookup table, but there shouldn't be that many USB storage devices connected...
+			for (devid = devid_list; *devid; devid += strlen(devid_list) + 1) {
+				if ( (CM_Locate_DevNodeA(&parent_inst, devid, 0) == 0)
+				  && (CM_Get_Child(&device_inst, parent_inst, 0) == 0)
+				  && (device_inst == dev_info_data.DevInst) ) {
+					for (j=0, k=0; (j<strlen(devid))&&(k<2); j++) {
+						if (devid[j] == '_') {
+							pid = (uint16_t)strtoul(&devid[j+1], NULL, 16);
+							// We could have used a vid_pid[] table, but keeping vid/pid separate is clearer
+							if (k++==0) vid = pid;
+						}
+					}
+				}
+			}
 		}
-		uprintf("Found device '%s'\n", buffer);
+		if ((vid == 0) && (pid == 0))
+			safe_strcpy(str, sizeof(str), "????:????");	// Couldn't figure VID:PID
+		else
+			safe_sprintf(str, sizeof(str), "%04X:%04X", vid, pid);
+		uprintf("Found device '%s' (%s)\n", buffer, str);
 
 		devint_data.cbSize = sizeof(devint_data);
 		hDrive = INVALID_HANDLE_VALUE;
@@ -738,6 +774,7 @@ static BOOL GetUSBDevices(DWORD devnum)
 	SendMessage(hMainDialog, WM_COMMAND, (CBN_SELCHANGE<<16) | IDC_DEVICE, 0);
 	SendMessage(hMainDialog, WM_COMMAND, (CBN_SELCHANGE<<16) | IDC_FILESYSTEM,
 		ComboBox_GetCurSel(hFileSystem));
+	safe_free(devid_list);
 	return TRUE;
 }
 
