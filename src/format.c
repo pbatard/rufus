@@ -1195,7 +1195,11 @@ DWORD WINAPI FormatThread(LPVOID param)
 	}
 
 	// At this stage with have both a handle and a lock to the physical drive...
-	drive_name[0] = GetDriveLetter(DriveIndex);
+	if (!GetDriveLetter(DriveIndex, &drive_name[0])) {
+		uprintf("Failed to get a drive letter\n");
+		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_ASSIGN_LETTER);
+		goto out;
+	}
 	if (drive_name[0] == ' ') {
 		uprintf("No drive letter was assigned...\n");
 		drive_name[0] =  GetUnusedDriveLetter();

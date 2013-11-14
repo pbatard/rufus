@@ -117,7 +117,8 @@ HWND hDeviceList, hPartitionScheme, hFileSystem, hClusterSize, hLabel, hBootType
 HWND hISOProgressDlg = NULL, hLogDlg = NULL, hISOProgressBar, hISOFileName, hDiskID;
 BOOL use_own_c32[NB_OLD_C32] = {FALSE, FALSE}, detect_fakes = TRUE, mbr_selected_by_user = FALSE;
 BOOL iso_op_in_progress = FALSE, format_op_in_progress = FALSE;
-BOOL enable_fixed_disks = FALSE, advanced_mode = TRUE, force_update = FALSE;
+BOOL enable_HDDs = FALSE, advanced_mode = TRUE, force_update = FALSE;
+UINT drive_type = DRIVE_UNKNOWN;
 int dialog_showing = 0;
 uint16_t rufus_version[4];
 RUFUS_UPDATE update = { {0,0,0,0}, {0,0}, NULL, NULL};
@@ -602,6 +603,7 @@ static BOOL GetUSBDevices(DWORD devnum)
 	HANDLE hDrive;
 	LONG maxwidth = 0;
 	RECT rect;
+	int score;
 	char drive_letter, *devid, *devid_list = NULL;
 	char *label, *entry, buffer[MAX_PATH], str[sizeof("0000:0000")+1];
 	const char* usbstor_name = "USBSTOR";
@@ -653,7 +655,7 @@ static BOOL GetUSBDevices(DWORD devnum)
 		} else {
 			// Get the VID:PID of the device. We could avoid doing this lookup every time by keeping
 			// a lookup table, but there shouldn't be that many USB storage devices connected...
-			for (devid = devid_list; *devid; devid += strlen(devid_list) + 1) {
+			for (devid = devid_list; *devid; devid += strlen(devid) + 1) {
 				if ( (CM_Locate_DevNodeA(&parent_inst, devid, 0) == 0)
 				  && (CM_Get_Child(&device_inst, parent_inst, 0) == 0)
 				  && (device_inst == dev_info_data.DevInst) ) {
@@ -684,7 +686,7 @@ static BOOL GetUSBDevices(DWORD devnum)
 				if(GetLastError() != ERROR_NO_MORE_ITEMS) {
 					uprintf("SetupDiEnumDeviceInterfaces failed: %s\n", WindowsErrorString());
 				} else {
-					uprintf("A device was eliminated because it didn't report itself as a non fixed USB disk\n");
+					uprintf("A device was eliminated because it didn't report itself as a disk\n");
 				}
 				break;
 			}
@@ -730,12 +732,19 @@ static BOOL GetUSBDevices(DWORD devnum)
 				continue;
 			}
 
-//			Identify(hDrive);
-
 			if (GetDriveLabel(device_number.DeviceNumber + DRIVE_INDEX_MIN, &drive_letter, &label)) {
 				// Must ensure that the combo box is UNSORTED for indexes to be the same
 				StrArrayAdd(&DriveID, buffer);
 				StrArrayAdd(&DriveLabel, label);
+
+				if ((!enable_HDDs) && ((score = IsHDD(drive_type, vid, pid, buffer)) > IS_HDD_THRESHOLD)) {
+					uprintf("USB HDD device removed (score %d > %d) "
+						"[Note: You can enable USB HDDs in the Advanced Options]\n", score, IS_HDD_THRESHOLD);
+					safe_closehandle(hDrive);
+					safe_free(devint_detail_data);
+					break;
+				}
+
 				// Drive letter ' ' is returned for drives that don't have a volume assigned yet
 				if (drive_letter == ' ') {
 					entry = lmprintf(MSG_046, label, device_number.DeviceNumber);
@@ -1809,8 +1818,8 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			break;
 		case IDC_ENABLE_FIXED_DISKS:
 			if ((HIWORD(wParam)) == BN_CLICKED) {
-				enable_fixed_disks = !enable_fixed_disks;
-				PrintStatus2000(lmprintf(MSG_253), enable_fixed_disks);
+				enable_HDDs = !enable_HDDs;
+				PrintStatus2000(lmprintf(MSG_253), enable_HDDs);
 				GetUSBDevices(0);
 			}
 			break;
@@ -2030,7 +2039,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		while ((opt = getopt_long(argc, argv, "?fhi:w:l:", long_options, &option_index)) != EOF)
 			switch (opt) {
 			case 'f':
-				enable_fixed_disks = TRUE;
+				enable_HDDs = TRUE;
 				break;
 			case 'i':
 				if (_access(optarg, 0) != -1) {
@@ -2166,8 +2175,8 @@ relaunch:
 			// This is a safety feature, to avoid someone unintentionally formatting a backup 
 			// drive instead of an USB key. If this is enabled, Rufus will allow fixed disk formatting.
 			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'F')) {
-				enable_fixed_disks = !enable_fixed_disks;
-				PrintStatus2000(lmprintf(MSG_253), enable_fixed_disks);
+				enable_HDDs = !enable_HDDs;
+				PrintStatus2000(lmprintf(MSG_253), enable_HDDs);
 				GetUSBDevices(0);
 				continue;
 			}

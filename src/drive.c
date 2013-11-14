@@ -36,7 +36,7 @@
  * Globals
  */
 RUFUS_DRIVE_INFO SelectedDrive;
-extern BOOL enable_fixed_disks;
+extern UINT drive_type;
 
 // TODO: add a DetectSectorSize()?
 // http://msdn.microsoft.com/en-us/library/ff800831.aspx
@@ -136,11 +136,11 @@ char* GetLogicalName(DWORD DriveIndex, BOOL bKeepTrailingBackslash, BOOL bSilent
 	char path[MAX_PATH];
 	VOLUME_DISK_EXTENTS DiskExtents;
 	DWORD size;
-	UINT drive_type;
 	int i, j;
 	static const char* ignore_device[] = { "\\Device\\CdRom", "\\Device\\Floppy" };
 	static const char* volume_start = "\\\\?\\";
 
+	drive_type = DRIVE_UNKNOWN;
 	CheckDriveIndex(DriveIndex);
 
 	for (i=0; hDrive == INVALID_HANDLE_VALUE; i++) {
@@ -167,9 +167,7 @@ char* GetLogicalName(DWORD DriveIndex, BOOL bKeepTrailingBackslash, BOOL bSilent
 		}
 
 		drive_type = GetDriveTypeA(volume_name);
-		// NB: the HP utility allows drive_type == DRIVE_FIXED, which we don't allow by default
-		// Using Alt-F in Rufus does enable listing, but this mode is unsupported.
-		if ((drive_type != DRIVE_REMOVABLE) && ((!enable_fixed_disks) || (drive_type != DRIVE_FIXED)))
+		if ((drive_type != DRIVE_REMOVABLE) && (drive_type != DRIVE_FIXED))
 			continue;
 
 		volume_name[len-1] = 0;
@@ -257,16 +255,17 @@ HANDLE GetLogicalHandle(DWORD DriveIndex, BOOL bWriteAccess, BOOL bLockDrive)
 /*
  * Returns the first drive letter for a volume located on the drive identified by DriveIndex
  */
-char GetDriveLetter(DWORD DriveIndex)
+BOOL GetDriveLetter(DWORD DriveIndex, char* drive_letter)
 {
 	DWORD size;
-	BOOL r;
+	BOOL r = FALSE;
 	STORAGE_DEVICE_NUMBER_REDEF device_number = {0};
-	UINT drive_type;
 	HANDLE hDrive = INVALID_HANDLE_VALUE;
 	char *drive, drives[26*4];	/* "D:\", "E:\", etc. */
 	char logical_drive[] = "\\\\.\\#:";
-	char drive_letter = ' ';
+
+	drive_type = DRIVE_UNKNOWN;
+	*drive_letter = ' ';
 	CheckDriveIndex(DriveIndex);
 
 	size = GetLogicalDriveStringsA(sizeof(drives), drives);
@@ -279,6 +278,7 @@ char GetDriveLetter(DWORD DriveIndex)
 		goto out;
 	}
 
+	r = TRUE;
 	for (drive = drives ;*drive; drive += safe_strlen(drive)+1) {
 		if (!isalpha(*drive))
 			continue;
@@ -292,9 +292,8 @@ char GetDriveLetter(DWORD DriveIndex)
 			value there => Use GetDriveType() to filter out unwanted devices.
 			See https://github.com/pbatard/rufus/issues/32 for details. */
 		drive_type = GetDriveTypeA(drive);
-		// NB: the HP utility allows drive_type == DRIVE_FIXED, which we don't allow by default
-		// Using Alt-F in Rufus does enable listing, but this mode is unsupported.
-		if ((drive_type != DRIVE_REMOVABLE) && ((!enable_fixed_disks) || (drive_type != DRIVE_FIXED)))
+
+		if ((drive_type != DRIVE_REMOVABLE) && (drive_type != DRIVE_FIXED))
 			continue;
 
 		safe_sprintf(logical_drive, sizeof(logical_drive), "\\\\.\\%c:", drive[0]);
@@ -305,19 +304,19 @@ char GetDriveLetter(DWORD DriveIndex)
 		}
 
 		r = DeviceIoControl(hDrive, IOCTL_STORAGE_GET_DEVICE_NUMBER, NULL,
-			0, &device_number, sizeof(device_number), &size, NULL);
+			0, &device_number, sizeof(device_number), &size, NULL) && (size > 0);
 		safe_closehandle(hDrive);
-		if ((!r) || (size <= 0)) {
+		if (!r) {
 			uprintf("Could not get device number for device %s: %s\n",
 				logical_drive, WindowsErrorString());
 		} else if (device_number.DeviceNumber == DriveIndex) {
-			drive_letter = *drive;
+			*drive_letter = *drive;
 			break;
 		}
 	}
 
 out:
-	return drive_letter;
+	return r;
 }
 
 /*
@@ -368,10 +367,11 @@ BOOL GetDriveLabel(DWORD DriveIndex, char* letter, char** label)
 
 	*label = STR_NO_LABEL;
 
-	*letter = GetDriveLetter(DriveIndex);
+	if (!GetDriveLetter(DriveIndex, letter))
+		return FALSE;
 	if (*letter == ' ') {
-		// Drive without volume assigned - Tie to the display of fixed disks
-		return enable_fixed_disks;
+		// Drive without volume assigned - always enabled
+		return TRUE;
 	}
 	AutorunPath[0] = *letter;
 	wDrivePath[0] = *letter;

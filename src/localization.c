@@ -199,7 +199,7 @@ static uint32_t htab_hash(char* str)
 		do {
 			// Because size is prime this guarantees to step through all available indexes
 			if (idx <= hval2) {
-				idx = htab_size + idx - hval2;
+				idx = ((uint32_t)htab_size) + idx - hval2;
 			} else {
 				idx -= hval2;
 			}

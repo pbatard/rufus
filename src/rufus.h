@@ -56,6 +56,7 @@
 #define UDF_FORMAT_SPEED            3.1f		// Speed estimate at which we expect UDF drives to be formatted (GB/s)
 #define UDF_FORMAT_WARN             20			// Duration (in seconds) above which we warn about long UDF formatting times
 #define MAX_FAT32_SIZE              2.0f		// Threshold above which we disable FAT32 formatting (in TB)
+#define IS_HDD_THRESHOLD            5
 #define WHITE                       RGB(255,255,255)
 #define SEPARATOR_GREY              RGB(223,223,223)
 #define RUFUS_URL                   "http://rufus.akeo.ie"
@@ -319,7 +320,7 @@ extern HANDLE GetPhysicalHandle(DWORD DriveIndex, BOOL bWriteAccess, BOOL bLockD
 extern BOOL WaitForLogical(DWORD DriveIndex);
 extern char* GetLogicalName(DWORD DriveIndex, BOOL bKeepTrailingBackslash, BOOL bSilent);
 extern HANDLE GetLogicalHandle(DWORD DriveIndex, BOOL bWriteAccess, BOOL bLockDrive);
-extern char GetDriveLetter(DWORD DriveIndex);
+extern BOOL GetDriveLetter(DWORD DriveIndex, char* drive_letter);
 extern char GetUnusedDriveLetter(void);
 extern BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL mbr_uefi_marker);
 extern BOOL DeletePartitions(HANDLE hDrive);
@@ -350,7 +351,7 @@ extern char* replace_in_token_data(const char* filename, const char* token, cons
 extern void parse_update(char* buf, size_t len);
 extern BOOL WimExtractCheck(void);
 extern BOOL WimExtractFile(const char* wim_image, int index, const char* src, const char* dst);
-extern BOOL Identify(HANDLE hPhysical);
+extern int IsHDD(UINT drive_type, uint16_t vid, uint16_t pid, const char* strid);
 
 static __inline BOOL UnlockDrive(HANDLE hDrive)
 {

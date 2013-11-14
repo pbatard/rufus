@@ -397,4 +397,117 @@ BOOL SmartGetVersion(HANDLE hdevice)
  * - if IDENTIFY reports SMART capabilities
  * - if it has extra non hidden partitions that aren't Windows
  * - if the VID:PID (or VID) is of known USB to IDE/SATA bridge or known UFD maker
+ * - removable flag (how do you actually find that one?)
  */
+
+typedef struct {
+	const char* name;
+	const int score;
+} str_score;
+
+typedef struct {
+	const uint16_t vid;
+	const int score;
+} vid_score;
+
+// If a disk ID starts with these, we consider it likely to be an HDD
+// The info from http://knowledge.seagate.com/articles/en_US/FAQ/204763en is a start, but not
+// entirely accurate for our usage as some models will be prefixed with the manufacturer name
+// '#' below means any number in [0-9]
+static str_score manufacturer_str[] = {
+	{ "HP ", 10 },
+	{ "ST#", 10 },
+	{ "MX#", 10 },
+	{ "WDC", 10 },
+	{ "IBM", 10 },
+	{ "STM#", 10 },
+	{ "HTS#", 10 },
+	{ "MAXTOR", 10 },
+	{ "HITACHI", 10 },
+	{ "SEAGATE", 10 },
+	{ "SAMSUNG", 10 },
+	{ "FUJITSU", 10 },
+	{ "TOSHIBA", 10 },
+	{ "QUANTUM", 10 },
+};
+
+// http://www.linux-usb.org/usb.ids
+static vid_score manufacturer_vid[] = {
+	{ 0x04b4, 10 },	// Cypress
+	{ 0x067b, 10 },	// Prolific
+	{ 0x0bc2, 10 },	// Seagate
+	{ 0x152d, 10 }, // JMicron
+};
+
+/*
+ * This attempts to detect whether a drive is an USB HDD or an USB Flash Drive (UFD).
+ * If someone already has an USB HDD plugged in (say as a backup drive) and plugs an
+ * UFD we *try* to do what we can to avoid them formatting that drive by mistake.
+ * But because there is no foolproof (let alone easy), way to differentiate UFDs from
+ * HDDs, thanks to every manufacturer, Microsoft, and their mothers making it 
+ * exceedingly troublesome to find out what type of hardware we are actually accessing
+ * please pay heed to the following warning:
+ *
+ * WARNING: NO PROMISE IS MADE  ABOUT THIS ALGORITHM BEING ABLE TO CORRECTLY
+ * DIFFERENTIATE AN USB HDD FROM A FLASH DRIVE. ALSO, REMEMBER THAT THE LICENSE OF THIS
+ * APPLICATION MAKES ABSOLUETLY NO PROMISE ABOUT DATA PRESERVATION (PROVIDED "AS IS").
+ * THUS, IF DATA LOSS IS INCURRED DUE TO THE ALGORITHM BELOW, OR ANY OTHER PART OF THIS
+ * APPLICATION, THE RESPONSIBILITY IS ENTIRELY ON YOU!
+ *
+ * But let me just elaborate further on why differentiating UFDs from HDDs is not as
+ * 'simple' as it seems:
+ * - many USB flash drives manufacturer will present UFDs as non-removable, which used
+ *   to be reserved for HDDs => we can't use that as differentiator.
+ * - some UFDs (SanDisk Extreme) have added S.M.A.R.T. support, which also used to be
+ *   reserved for HDDs => can't use that either
+ * - even if S.M.A.R.T. was enough, not all USB->IDE or USB->SATA bridges support ATA
+ *   passthrough, which is required S.M.A.R.T. data, and each manufacturer of an 
+ *   USB<->(S)ATA bridge seem to have their own method of implementing passthrough.
+ * - SSDs have also changed the deal completely, as you can get something that looks
+ *   like Flash but that is really an HDD.
+ * - Some manufacturers (eg. ALI) provide both USB Flash controllers and USB IDE/SATA
+ *   controllers, so we can't exactly use the VID to say for sure what we're looking at.
+ * - Finally, Microsoft is abdsolutely no help either (which is kind of understandable
+ *   from the above) => there is no magic API we can query that will tell us what we're
+ *   really looking at.
+ *
+ * What you have below, then, is our *current best guess* at differentiating an UFD from
+ * an HDD. Short of a crystal ball however, this remains just a guess, which may be way
+ * off mark. Still, Rufus does produce PROMINENT warnings before you format a drive, and
+ * also provides extensive info about the drive (from the toolips and the log) => PAY
+ * ATTENTION TO THESE OR PAY THE PRICE!
+ */
+int IsHDD(UINT drive_type, uint16_t vid, uint16_t pid, const char* strid)
+{
+	int score = 0;
+	size_t i, mlen, ilen;
+	BOOL wc;
+
+	if (drive_type == DRIVE_FIXED)
+		score += 3;
+
+	ilen = safe_strlen(strid);
+	for (i=0; i<ARRAYSIZE(manufacturer_str); i++) {
+		mlen = strlen(manufacturer_str[i].name);
+		if (mlen > ilen)
+			break;
+		wc = (manufacturer_str[i].name[mlen-1] == '#');
+		if ( (_strnicmp(strid, manufacturer_str[i].name, mlen-((wc)?1:0)) == 0)
+		  && ((!wc) || ((strid[mlen] >= '0') && (strid[mlen] <= '9'))) ) {
+			score += manufacturer_str[i].score;
+			break;
+		}
+	}
+
+	for (i=0; i<ARRAYSIZE(manufacturer_vid); i++) {
+		if (vid == manufacturer_vid[i].vid) {
+			score += manufacturer_vid[i].score;
+			break;
+		}
+	}
+
+	// TODO: try to perform inquiry if uncertain
+	// TODO: lower the score for well known UFD manufacturers (ADATA, SanDisk, etc.)
+	return score;
+}
+
