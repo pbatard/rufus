@@ -53,7 +53,7 @@
 # http://download.microsoft.com/download/9/5/E/95EF66AF-9026-4BB0-A41D-A4F81802D92C/%5BMS-LCID%5D.pdf
 # for the LCID (0x####) codes you should use
 l "en-US" "English (English)" 0x0409, 0x0809, 0x0c09, 0x1009, 0x1409, 0x1809, 0x1c09, 0x2009, 0x2409, 0x2809, 0x2c09, 0x3009, 0x3409, 0x3809, 0x3c09, 0x4009, 0x4409, 0x4809
-v 1.0.2
+v 1.0.3
 
 # Main dialog
 g IDD_DIALOG
@@ -72,7 +72,7 @@ t IDC_LOG "Log"
 t IDCANCEL "Close"
 t IDC_START "Start"
 t IDS_ADVANCED_OPTIONS_GRP "Advanced Options"
-t IDC_ENABLE_FIXED_DISKS "List non removable or unpartitioned USB disks"
+t IDC_ENABLE_FIXED_DISKS "List USB Hard Drives"
 t IDC_EXTRA_PARTITION "Add fixes for old BIOSes (extra partition, align, etc.)"
 # 'MBR': See bhttp://en.wikipedia.org/wiki/Master_boot_record
 # Rufus can install it's own custom MBR (the Rufus MBR), which also allows users
@@ -318,7 +318,7 @@ t MSG_168 "Try to masquerade first bootable USB drive (usually 0x80) as a differ
 	"This should only be necessary if you install Windows XP and have more than one disk"
 t MSG_169 "Create an extra hidden partition and try to align partitions boundaries.\n"
 	"This can improve boot detection for older BIOSes"
-t MSG_170 "Enable detection for disks not normally detected by Rufus. USE AT YOUR OWN RISKS!!!"
+t MSG_170 "Enable the listing of USB Hard Drive enclosures. USE AT YOUR OWN RISKS!!!"
 t MSG_171 "Start the formatting operation.\nThis will DESTROY any data on the target!"
 t MSG_172 "Licensing information and credits"
 t MSG_173 "Click to select..."

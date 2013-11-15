@@ -33,7 +33,7 @@ LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
 IDD_DIALOG DIALOGEX 12, 12, 206, 329
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_APPWINDOW
-CAPTION "Rufus v1.4.0.316"
+CAPTION "Rufus v1.4.0.317"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     DEFPUSHBUTTON   "Start",IDC_START,94,291,50,14
@@ -67,8 +67,7 @@ BEGIN
     COMBOBOX        IDC_DISK_ID,119,246,73,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     CONTROL         "Add fixes for old BIOSes (extra partition, align, etc.)",IDC_EXTRA_PARTITION,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,235,181,10
-    CONTROL         "List non removable or unpartitioned USB disks",IDC_ENABLE_FIXED_DISKS,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,222,181,10
+    CONTROL         "List USB Hard Drives",IDC_ENABLE_FIXED_DISKS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,222,181,10
     PUSHBUTTON      "",IDC_LANG,183,2,15,13,BS_TOP | BS_FLAT
 END
 
@@ -289,8 +288,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,4,0,316
- PRODUCTVERSION 1,4,0,316
+ FILEVERSION 1,4,0,317
+ PRODUCTVERSION 1,4,0,317
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -307,13 +306,13 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Akeo Consulting (http://akeo.ie)"
             VALUE "FileDescription", "Rufus"
-            VALUE "FileVersion", "1.4.0.316"
+            VALUE "FileVersion", "1.4.0.317"
             VALUE "InternalName", "Rufus"
             VALUE "LegalCopyright", "© 2011-2013 Pete Batard (GPL v3)"
             VALUE "LegalTrademarks", "http://www.gnu.org/copyleft/gpl.html"
             VALUE "OriginalFilename", "rufus.exe"
             VALUE "ProductName", "Rufus"
-            VALUE "ProductVersion", "1.4.0.316"
+            VALUE "ProductVersion", "1.4.0.317"
         END
     END
     BLOCK "VarFileInfo"
