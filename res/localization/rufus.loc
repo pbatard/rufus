@@ -854,7 +854,7 @@ t MSG_259 "Forçage de mise à jour"
 
 ################################################################################
 l "de-DE" "German (Deutsch)" 0x0407, 0x0807, 0x0c07, 0x1007, 0x1407
-v 1.0.2
+v 1.0.3
 b "en-US"
 
 g IDD_DIALOG
@@ -897,7 +897,7 @@ t IDC_LOG "Log"
 t IDCANCEL "Schließen"
 t IDC_START "Start"
 t IDS_ADVANCED_OPTIONS_GRP "Erweiterte Einstellungen"
-t IDC_ENABLE_FIXED_DISKS "Nicht wechselbare und unpartitionierte USB-Sticks anzeigen"
+t IDC_ENABLE_FIXED_DISKS "USB-Festplatten anzeigen"
 t IDC_EXTRA_PARTITION "Fix für ältere BIOSe verwenden (zus. Partition, usw.)"
 t IDC_RUFUS_MBR "Rufus MBR benutzen mit BIOS ID:"
 
@@ -1132,7 +1132,7 @@ t MSG_168 "Das erste startfähige USB-Laufwerk maskieren (normalerweise 0x80) al
 	"Das sollte nur notwendig sein, wenn Sie Windows XP instllieren und mehr als ein Festplatte haben."
 t MSG_169 "Eine extra Partition erzeugen und die Partitionsgrenzen ausrichten.\n"
 	"Das kann die Starterkennung unter älteren BIOSen verbessern"
-t MSG_170 "Erkennung für Laufwerke, die normalerweise nicht von Rufus erkannt werden. VERWENDUNG AUF EIGENES RISIKO!!!"
+t MSG_170 "Erkennung von USB-Festplatten Gehäusen aktivieren. VERWENDUNG AUF EIGENES RISIKO!!!"
 t MSG_171 "Formatierung starten.\nAlle Daten auf dem Ziellaufwerk werden GELÖSCHT!"
 t MSG_172 "Lizenzinformationen und Mitwirkende"
 t MSG_173 "Klicken Sie, um auszuwählen..."
