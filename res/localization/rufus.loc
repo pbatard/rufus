@@ -1231,7 +1231,7 @@ t MSG_259 "Update erzwingen"
 
 ################################################################################
 l "hu-HU" "Hungarian (Magyar)" 0x040e
-v 1.0.2
+v 1.0.3
 b "en-US"
 
 # Main dialog
@@ -1251,7 +1251,7 @@ t IDC_LOG "Log"
 t IDCANCEL "Bezárás"
 t IDC_START "Indítás"
 t IDS_ADVANCED_OPTIONS_GRP "Haladó beállítások"
-t IDC_ENABLE_FIXED_DISKS "Nem particionált és nem eltávolítható USB eszközök"
+t IDC_ENABLE_FIXED_DISKS "USB-s merevlemezek mutatása"
 t IDC_EXTRA_PARTITION "Régi BIOS-ok javítása (extra partíció, sor, stb.)"
 t IDC_RUFUS_MBR "MBR-es Rufus BIOS azonosítóval:"
 s IDC_NBPASSES +30,0
@@ -1493,7 +1493,7 @@ t MSG_168 "Pórbál meg a USB eszköz paraméterét megváltoztatni (általában
 	"Ez akkor jó, ha Windows XP-t telepítesz, és egynél több lemez van"
 t MSG_169 "KÉszíts egy extra rejtett partíciót, és próbáld meg a partíciók határát 'besorozni'.\n"
 	"Ezzel könnyebbé teszed a régi BIOSok észrevételét"
-t MSG_170 "Az olyan eszközök észlelésének engedélyzése, amit normál esetben a Rufus nem észlel. CSAK SAJÁT FELELŐSSÉGRE HASZNÁLD!!!"
+t MSG_170 "USB-s meevlemezek mutatása. CSAK SAJÁT FELELŐSSÉGRE HASZNÁLD!!!"
 t MSG_171 "A formázás elkezdése.\nEz MINDEN ADATOT TÖRÖL az adattárolón!"
 t MSG_172 "Licenszszel kapcsolatos információk és készítők"
 t MSG_173 "Kattints a kiválasztáshoz..."
