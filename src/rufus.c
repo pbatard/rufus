@@ -1937,7 +1937,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_ERROR, 0);
 			SetTaskbarProgressState(TASKBAR_ERROR);
 			PrintStatus(0, FALSE, lmprintf(MSG_212));
-			Notification(MSG_ERROR, NULL, lmprintf(MSG_042), lmprintf(MSG_043), StrError(FormatStatus));
+			Notification(MSG_ERROR, NULL, lmprintf(MSG_042), lmprintf(MSG_043, StrError(FormatStatus)), StrError(FormatStatus));
 		}
 		FormatStatus = 0;
 		format_op_in_progress = FALSE;
@@ -2171,10 +2171,10 @@ relaunch:
 				GetUSBDevices(0);
 				continue;
 			}
-			// Alt-F => Toggle detection of fixed disks
-			// By default Rufus does not allow formatting USB fixed disk drives, such as USB HDDs
-			// This is a safety feature, to avoid someone unintentionally formatting a backup 
-			// drive instead of an USB key. If this is enabled, Rufus will allow fixed disk formatting.
+			// Alt-F => Toggle detection of USB HDDs
+			// By default Rufus does not list USB HDDs. This is a safety feature aimed at avoiding
+			// unintentional formattings of backup drives instead of USB keys.
+			// When enabled, Rufus will list and allow the formatting of USB HDDs.
 			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'F')) {
 				enable_HDDs = !enable_HDDs;
 				PrintStatus2000(lmprintf(MSG_253), enable_HDDs);

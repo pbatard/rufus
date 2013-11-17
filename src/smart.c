@@ -455,16 +455,18 @@ int IsHDD(DWORD DriveIndex, uint16_t vid, uint16_t pid, const char* strid)
 		score -= 10;
 
 	// Check the string against well known HDD identifiers
-	ilen = safe_strlen(strid);
-	for (i=0; i<ARRAYSIZE(str_score); i++) {
-		mlen = strlen(str_score[i].name);
-		if (mlen > ilen)
-			break;
-		wc = (str_score[i].name[mlen-1] == '#');
-		if ( (_strnicmp(strid, str_score[i].name, mlen-((wc)?1:0)) == 0)
-		  && ((!wc) || ((strid[mlen] >= '0') && (strid[mlen] <= '9'))) ) {
-			score += str_score[i].score;
-			break;
+	if (strid != NULL) {
+		ilen = strlen(strid);
+		for (i=0; i<ARRAYSIZE(str_score); i++) {
+			mlen = strlen(str_score[i].name);
+			if (mlen > ilen)
+				break;
+			wc = (str_score[i].name[mlen-1] == '#');
+			if ( (_strnicmp(strid, str_score[i].name, mlen-((wc)?1:0)) == 0)
+			  && ((!wc) || ((strid[mlen] >= '0') && (strid[mlen] <= '9'))) ) {
+				score += str_score[i].score;
+				break;
+			}
 		}
 	}
 

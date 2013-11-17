@@ -47,6 +47,7 @@
 // the progress bar for every block will bring extraction to a crawl
 #define PROGRESS_THRESHOLD        128
 #define FOUR_GIGABYTES            4294967296LL
+#define WRITE_RETRIES             3
 
 // Needed for UDF ISO access
 CdIo_t* cdio_open (const char* psz_source, driver_id_t driver_id) {return NULL;}
@@ -64,6 +65,7 @@ static const char* efi_dirname = "/efi/boot";
 static const char* isolinux_name[] = { "isolinux.cfg", "syslinux.cfg", "extlinux.conf"};
 static const char* pe_dirname[] = { "/i386", "/minint" };
 static const char* pe_file[] = { "ntdetect.com", "setupldr.bin", "txtsetup.sif" };
+static const char* autorun_name = "autorun.inf";
 static const char* old_c32_name[NB_OLD_C32] = OLD_C32_NAMES;
 static const int64_t old_c32_threshold[NB_OLD_C32] = OLD_C32_THRESHOLD;
 static uint8_t i_joliet_level = 0;
@@ -200,7 +202,7 @@ static __inline BOOL check_iso_props(const char* psz_dirname, BOOL* is_syslinux_
 static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const char *psz_path)
 {
 	HANDLE file_handle = NULL;
-	DWORD buf_size, wr_size;
+	DWORD buf_size, wr_size, err;
 	BOOL r, is_syslinux_cfg, is_old_c32[NB_OLD_C32];
 	int i_length;
 	size_t i, nul_pos;
@@ -266,7 +268,12 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 			file_handle = CreateFileU(psz_fullpath, GENERIC_READ | GENERIC_WRITE,
 				FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 			if (file_handle == INVALID_HANDLE_VALUE) {
+				err = GetLastError();
 				uprintf("  Unable to create file: %s\n", WindowsErrorString());
+				if ((err == ERROR_ACCESS_DENIED) && (safe_strcmp(&psz_fullpath[3], autorun_name) == 0)) {
+					uprintf("  NOTE: This may be caused by a poorly designed security solution. "
+						"See http://rufus.akeo.ie/compatibility.");
+				}
 				goto out;
 			}
 			while (i_file_length > 0) {
@@ -274,15 +281,21 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 				memset(buf, 0, UDF_BLOCKSIZE);
 				i_read = udf_read_block(p_udf_dirent, buf, 1);
 				if (i_read < 0) {
-					uprintf("  Error reading UDF file %s\n", &psz_fullpath[strlen(psz_extract_dir)]);
+					uprintf("  Error reading UDF file %s", &psz_fullpath[strlen(psz_extract_dir)]);
 					goto out;
 				}
 				buf_size = (DWORD)MIN(i_file_length, i_read);
-				ISO_BLOCKING(r = WriteFile(file_handle, buf, buf_size, &wr_size, NULL));
-				if ((!r) || (buf_size != wr_size)) {
-					uprintf("  Error writing file: %s\n", WindowsErrorString());
-					goto out;
+				for (i=0; i<WRITE_RETRIES; i++) {
+					ISO_BLOCKING(r = WriteFile(file_handle, buf, buf_size, &wr_size, NULL));
+					if ((!r) || (buf_size != wr_size)) {
+						uprintf("  Error writing file: %s", WindowsErrorString());
+						if (i < WRITE_RETRIES-1)
+							uprintf("  RETRYING...\n");
+					} else {
+						break;
+					}
 				}
+				if (i >= WRITE_RETRIES) goto out;
 				i_file_length -= i_read;
 				if (nb_blocks++ % PROGRESS_THRESHOLD == 0) {
 					SendMessage(hISOProgressBar, PBM_SETPOS, (WPARAM)((MAX_PROGRESS*nb_blocks)/total_blocks), 0);
@@ -318,7 +331,7 @@ out:
 static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 {
 	HANDLE file_handle = NULL;
-	DWORD buf_size, wr_size;
+	DWORD buf_size, wr_size, err;
 	BOOL s, is_syslinux_cfg, is_old_c32[NB_OLD_C32];
 	int i_length, r = 1;
 	char psz_fullpath[1024], *psz_basename;
@@ -395,7 +408,12 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 			file_handle = CreateFileU(psz_fullpath, GENERIC_READ | GENERIC_WRITE,
 				FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 			if (file_handle == INVALID_HANDLE_VALUE) {
+				err = GetLastError();
 				uprintf("  Unable to create file: %s\n", WindowsErrorString());
+				if ((err == ERROR_ACCESS_DENIED) && (safe_strcmp(&psz_fullpath[3], autorun_name) == 0)) {
+					uprintf("  NOTE: This may be caused by a poorly designed security solution. "
+						"See http://rufus.akeo.ie/compatibility.");
+				}
 				goto out;
 			}
 			for (i = 0; i_file_length > 0; i++) {
@@ -408,11 +426,18 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 					goto out;
 				}
 				buf_size = (DWORD)MIN(i_file_length, ISO_BLOCKSIZE);
-				ISO_BLOCKING(s = WriteFile(file_handle, buf, buf_size, &wr_size, NULL));
-				if ((!s) || (buf_size != wr_size)) {
-					uprintf("  Error writing file: %s\n", WindowsErrorString());
-					goto out;
+
+				for (i=0; i<WRITE_RETRIES; i++) {
+					ISO_BLOCKING(s = WriteFile(file_handle, buf, buf_size, &wr_size, NULL));
+					if ((!s) || (buf_size != wr_size)) {
+						uprintf("  Error writing file: %s", WindowsErrorString());
+						if (i < WRITE_RETRIES-1)
+							uprintf("  RETRYING...\n");
+					} else {
+						break;
+					}
 				}
+				if (i >= WRITE_RETRIES) goto out;
 				i_file_length -= ISO_BLOCKSIZE;
 				if (nb_blocks++ % PROGRESS_THRESHOLD == 0) {
 					SendMessage(hISOProgressBar, PBM_SETPOS, (WPARAM)((MAX_PROGRESS*nb_blocks)/total_blocks), 0);

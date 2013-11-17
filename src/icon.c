@@ -171,6 +171,8 @@ BOOL SetAutorun(const char* path)
 	fd = fopen(filename, "w, ccs=UTF-16LE");
 	if (fd == NULL) {
 		uprintf("Unable to create %s\n", filename);
+		uprintf("NOTE: This may be caused by a poorly designed security solution. "
+			"See http://rufus.akeo.ie/compatibility.");
 		return FALSE;
 	}
 
