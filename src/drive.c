@@ -36,7 +36,6 @@
  * Globals
  */
 RUFUS_DRIVE_INFO SelectedDrive;
-extern UINT drive_type;
 
 // TODO: add a DetectSectorSize()?
 // http://msdn.microsoft.com/en-us/library/ff800831.aspx
@@ -122,10 +121,12 @@ HANDLE GetPhysicalHandle(DWORD DriveIndex, BOOL bWriteAccess, BOOL bLockDrive)
 	return hPhysical;
 }
 
-// Return the first GUID volume name for the associated drive or NULL if not found
-// See http://msdn.microsoft.com/en-us/library/cc542456.aspx
-// The returned string is allocated and must be freed
-// TODO: a drive may have multiple volumes - should we handle those?
+/*
+ * Return the first GUID volume name for the associated drive or NULL if not found
+ * See http://msdn.microsoft.com/en-us/library/cc542456.aspx
+ * The returned string is allocated and must be freed
+ * TODO: a drive may have multiple volumes - should we handle those?
+ */
 #define suprintf(...) if (!bSilent) uprintf(__VA_ARGS__)
 char* GetLogicalName(DWORD DriveIndex, BOOL bKeepTrailingBackslash, BOOL bSilent)
 {
@@ -136,11 +137,11 @@ char* GetLogicalName(DWORD DriveIndex, BOOL bKeepTrailingBackslash, BOOL bSilent
 	char path[MAX_PATH];
 	VOLUME_DISK_EXTENTS DiskExtents;
 	DWORD size;
+	UINT drive_type;
 	int i, j;
 	static const char* ignore_device[] = { "\\Device\\CdRom", "\\Device\\Floppy" };
 	static const char* volume_start = "\\\\?\\";
 
-	drive_type = DRIVE_UNKNOWN;
 	CheckDriveIndex(DriveIndex);
 
 	for (i=0; hDrive == INVALID_HANDLE_VALUE; i++) {
@@ -253,19 +254,23 @@ HANDLE GetLogicalHandle(DWORD DriveIndex, BOOL bWriteAccess, BOOL bLockDrive)
 }
 
 /*
- * Returns the first drive letter for a volume located on the drive identified by DriveIndex
+ * Returns the first drive letter for a volume located on the drive identified by DriveIndex,
+ * as well as the drive type. This is used as base for the 2 function calls that follow.
  */
-BOOL GetDriveLetter(DWORD DriveIndex, char* drive_letter)
+static BOOL _GetDriveLetterAndType(DWORD DriveIndex, char* drive_letter, UINT* drive_type)
 {
 	DWORD size;
 	BOOL r = FALSE;
 	STORAGE_DEVICE_NUMBER_REDEF device_number = {0};
 	HANDLE hDrive = INVALID_HANDLE_VALUE;
+	UINT _drive_type;
 	char *drive, drives[26*4];	/* "D:\", "E:\", etc. */
 	char logical_drive[] = "\\\\.\\#:";
 
-	drive_type = DRIVE_UNKNOWN;
-	*drive_letter = ' ';
+	if (drive_letter != NULL)
+		*drive_letter = ' ';
+	if (drive_type != NULL)
+		*drive_type = DRIVE_UNKNOWN;
 	CheckDriveIndex(DriveIndex);
 
 	size = GetLogicalDriveStringsA(sizeof(drives), drives);
@@ -291,9 +296,9 @@ BOOL GetDriveLetter(DWORD DriveIndex, char* drive_letter)
 			not unique! An HDD, a DVD and probably other drives can have the same
 			value there => Use GetDriveType() to filter out unwanted devices.
 			See https://github.com/pbatard/rufus/issues/32 for details. */
-		drive_type = GetDriveTypeA(drive);
+		_drive_type = GetDriveTypeA(drive);
 
-		if ((drive_type != DRIVE_REMOVABLE) && (drive_type != DRIVE_FIXED))
+		if ((_drive_type != DRIVE_REMOVABLE) && (_drive_type != DRIVE_FIXED))
 			continue;
 
 		safe_sprintf(logical_drive, sizeof(logical_drive), "\\\\.\\%c:", drive[0]);
@@ -310,13 +315,30 @@ BOOL GetDriveLetter(DWORD DriveIndex, char* drive_letter)
 			uprintf("Could not get device number for device %s: %s\n",
 				logical_drive, WindowsErrorString());
 		} else if (device_number.DeviceNumber == DriveIndex) {
-			*drive_letter = *drive;
+			if (drive_letter != NULL)
+				*drive_letter = *drive;
+			if (drive_type != NULL)
+				*drive_type = _drive_type;
 			break;
 		}
 	}
 
 out:
 	return r;
+}
+
+// Could have used a #define, but this is clearer
+BOOL GetDriveLetter(DWORD DriveIndex, char* drive_letter)
+{
+	return _GetDriveLetterAndType(DriveIndex, drive_letter, NULL);
+}
+
+// There's already a GetDriveType in the Windows API
+UINT GetDriveTypeFromIndex(DWORD DriveIndex)
+{
+	UINT drive_type;
+	_GetDriveLetterAndType(DriveIndex, NULL, &drive_type);
+	return drive_type;
 }
 
 /*
@@ -401,6 +423,30 @@ BOOL GetDriveLabel(DWORD DriveIndex, char* letter, char** label)
 }
 
 /*
+ * Return the drive size
+ */
+uint64_t GetDriveSize(DWORD DriveIndex)
+{
+	BOOL r;
+	HANDLE hPhysical;
+	DWORD size;
+	BYTE geometry[128];
+	void* disk_geometry = (void*)geometry;
+	PDISK_GEOMETRY_EX DiskGeometry = (PDISK_GEOMETRY_EX)disk_geometry;
+
+	hPhysical = GetPhysicalHandle(DriveIndex, FALSE, FALSE);
+	if (hPhysical == INVALID_HANDLE_VALUE)
+		return FALSE;
+
+	r = DeviceIoControl(hPhysical, IOCTL_DISK_GET_DRIVE_GEOMETRY_EX,
+		NULL, 0, geometry, sizeof(geometry), &size, NULL);
+	safe_closehandle(hPhysical);
+	if (!r || size <= 0)
+		return 0;
+	return DiskGeometry->DiskSize.QuadPart;
+}
+
+/*
  * Fill the drive properties (size, FS, etc)
  */
 BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSystemNameSize)
@@ -429,7 +475,7 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 	if (hPhysical == INVALID_HANDLE_VALUE)
 		return FALSE;
 
-	r = DeviceIoControl(hPhysical, IOCTL_DISK_GET_DRIVE_GEOMETRY_EX, 
+	r = DeviceIoControl(hPhysical, IOCTL_DISK_GET_DRIVE_GEOMETRY_EX,
 			NULL, 0, geometry, sizeof(geometry), &size, NULL);
 	if (!r || size <= 0) {
 		uprintf("Could not get geometry for drive 0x%02x: %s\n", DriveIndex, WindowsErrorString());

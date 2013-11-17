@@ -391,19 +391,6 @@ BOOL SmartGetVersion(HANDLE hdevice)
 }
 #endif
 
-/* 
- * TODO: SMART HDD vs UFD detection:
- * - if the USB ID starts with 
- * "WDC", "IBM", "ST" + number, "STM", "HTS", "HITACHI", "SEAGATE", "MAXTOR", "SAMSUNG", "HP ", "FUJITSU", "TOSHIBA", "QUANTUM"
- * - if IDENTIFY reports SMART capabilities
- * - if it has extra non hidden partitions that aren't Windows
- * - if the VID:PID (or VID) is of known USB to IDE/SATA bridge or known UFD maker
- * - removable flag (how do you actually find that one?)
- */
-
-
-
-
 /*
  * This attempts to detect whether a drive is an USB HDD or an USB Flash Drive (UFD).
  * A positive score means that we think it's an USB HDD, zero or negative means that
@@ -447,15 +434,25 @@ BOOL SmartGetVersion(HANDLE hdevice)
  *   from the above) => there is no magic API we can query that will tell us what we're
  *   really looking at.
  */
-int IsHDD(UINT drive_type, uint16_t vid, uint16_t pid, const char* strid)
+#define GB 1073741824LL
+int IsHDD(DWORD DriveIndex, uint16_t vid, uint16_t pid, const char* strid)
 {
 	int score = 0;
 	size_t i, mlen, ilen;
 	BOOL wc;
+	uint64_t drive_size;
 
 	// Boost the score if fixed, as these are *generally* HDDs
-	if (drive_type == DRIVE_FIXED)
+	// NB: Due to a Windows API limitation, drives with no mounted partition will never have DRIVE_FIXED
+	if (GetDriveTypeFromIndex(DriveIndex) == DRIVE_FIXED)
 		score += 3;
+
+	// Adjust the score depending on the size
+	drive_size = GetDriveSize(DriveIndex);
+	if (drive_size > 512*GB)
+		score += 10;
+	else if (drive_size < 8*GB)
+		score -= 10;
 
 	// Check the string against well known HDD identifiers
 	ilen = safe_strlen(strid);

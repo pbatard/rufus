@@ -320,6 +320,8 @@ extern BOOL WaitForLogical(DWORD DriveIndex);
 extern char* GetLogicalName(DWORD DriveIndex, BOOL bKeepTrailingBackslash, BOOL bSilent);
 extern HANDLE GetLogicalHandle(DWORD DriveIndex, BOOL bWriteAccess, BOOL bLockDrive);
 extern BOOL GetDriveLetter(DWORD DriveIndex, char* drive_letter);
+extern UINT GetDriveTypeFromIndex(DWORD DriveIndex);
+extern uint64_t GetDriveSize(DWORD DriveIndex);
 extern char GetUnusedDriveLetter(void);
 extern BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL mbr_uefi_marker);
 extern BOOL DeletePartitions(HANDLE hDrive);
@@ -350,7 +352,7 @@ extern char* replace_in_token_data(const char* filename, const char* token, cons
 extern void parse_update(char* buf, size_t len);
 extern BOOL WimExtractCheck(void);
 extern BOOL WimExtractFile(const char* wim_image, int index, const char* src, const char* dst);
-extern int IsHDD(UINT drive_type, uint16_t vid, uint16_t pid, const char* strid);
+extern int IsHDD(DWORD DriveIndex, uint16_t vid, uint16_t pid, const char* strid);
 
 static __inline BOOL UnlockDrive(HANDLE hDrive)
 {

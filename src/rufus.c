@@ -118,7 +118,6 @@ HWND hISOProgressDlg = NULL, hLogDlg = NULL, hISOProgressBar, hISOFileName, hDis
 BOOL use_own_c32[NB_OLD_C32] = {FALSE, FALSE}, detect_fakes = TRUE, mbr_selected_by_user = FALSE;
 BOOL iso_op_in_progress = FALSE, format_op_in_progress = FALSE;
 BOOL enable_HDDs = FALSE, advanced_mode = TRUE, force_update = FALSE;
-UINT drive_type = DRIVE_UNKNOWN;
 int dialog_showing = 0;
 uint16_t rufus_version[4];
 RUFUS_UPDATE update = { {0,0,0,0}, {0,0}, NULL, NULL};
@@ -598,7 +597,7 @@ static BOOL GetUSBDevices(DWORD devnum)
 	PSP_DEVICE_INTERFACE_DETAIL_DATA_A devint_detail_data;
 	STORAGE_DEVICE_NUMBER_REDEF device_number;
 	DEVINST parent_inst, device_inst;
-	DWORD size, i, j, k, datatype;
+	DWORD size, i, j, k, datatype, drive_index;
 	ULONG list_size;
 	HANDLE hDrive;
 	LONG maxwidth = 0;
@@ -732,12 +731,13 @@ static BOOL GetUSBDevices(DWORD devnum)
 				continue;
 			}
 
-			if (GetDriveLabel(device_number.DeviceNumber + DRIVE_INDEX_MIN, &drive_letter, &label)) {
+			drive_index = device_number.DeviceNumber + DRIVE_INDEX_MIN;
+			if (GetDriveLabel(drive_index, &drive_letter, &label)) {
 				// Must ensure that the combo box is UNSORTED for indexes to be the same
 				StrArrayAdd(&DriveID, buffer);
 				StrArrayAdd(&DriveLabel, label);
 
-				if ((!enable_HDDs) && ((score = IsHDD(drive_type, vid, pid, buffer)) > 0)) {
+				if ((!enable_HDDs) && ((score = IsHDD(drive_index, vid, pid, buffer)) > 0)) {
 					uprintf("Device eliminated because it was detected as an USB Hard Drive (score %d > 0)\n", score);
 					uprintf("If this device is not an USB Hard Drive, please e-mail the author of this application\n");
 					uprintf("NOTE: You can enable the listing of USB Hard Drives in 'Advanced Options' (white triangle)");

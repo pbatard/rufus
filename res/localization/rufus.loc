@@ -506,7 +506,7 @@ t MSG_007 "撤消"
 
 ################################################################################
 l "fr-FR" "French (Français)" 0x040c, 0x080c, 0x0c0c, 0x100c, 0x140c, 0x180c, 0x1c0c, 0x200c, 0x240c, 0x280c, 0x2c0c, 0x300c, 0x340c, 0x380c, 0xe40c
-v 1.0.2
+v 1.0.3
 b "en-US"
 
 g IDD_DIALOG
@@ -530,7 +530,7 @@ t IDC_ABOUT "A propos..."
 t IDCANCEL "Fermer"
 t IDC_START "Démarrer"
 t IDS_ADVANCED_OPTIONS_GRP "Options avancées"
-t IDC_ENABLE_FIXED_DISKS "Lister les disques fixes ou non partitionés"
+t IDC_ENABLE_FIXED_DISKS "Lister les disques durs USB"
 t IDC_EXTRA_PARTITION "Options de compatibilité avec anciens BIOS"
 t IDC_RUFUS_MBR "Ajout du MBR Rufus, ID BIOS:"
 m IDC_DISK_ID +5,0
@@ -768,7 +768,7 @@ t MSG_168 "Camoufle le premier disque USB démarrable (généralement 0x80) sous
 	"Changez cette option si vous installez Windows XP avec plus d’un disque dur"
 t MSG_169 "Créé une petite partition supplémentaire et essaye d’aligner les partitions.\n"
 	"Peut améliorer la détection USB pour les vieux BIOS"
-t MSG_170 "Active la détection de disque non normalement listés par Rufus. UTILISEZ A VOS PROPRES RISQUES !!! "
+t MSG_170 "Liste les disques durs localisés dans des enceintes USB. UTILISEZ A VOS PROPRES RISQUES !!! "
 t MSG_171 "Lance le formatage. DETRUIT toutes les données existantes sur la cible !"
 t MSG_172 "Licence d’utilisation et remerciements"
 t MSG_173 "Cliquez pour sélectionner..."
