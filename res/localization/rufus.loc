@@ -2315,7 +2315,7 @@ t MSG_259 "Actualizare forţată"
 
 ################################################################################
 l "tr-TR" "Turkish (Türkçe)" 0x041F
-v 1.0.2
+v 1.0.3
 b "en-US"
 
 # Main dialog
@@ -2351,7 +2351,7 @@ t IDC_START "Başlat"
 m IDC_START +20,0
 s IDC_START -10,0
 t IDS_ADVANCED_OPTIONS_GRP "Gelişmiş Seçenekler"
-t IDC_ENABLE_FIXED_DISKS "Sabit sürücüleri ve Ham USB sürücüleri de listele"
+t IDC_ENABLE_FIXED_DISKS "USB sabit sürücüleri listele"
 t IDC_EXTRA_PARTITION "Eski BIOSlar için düzeltme ekle(ekstra bölüm, hiza vs.)"
 t IDC_RUFUS_MBR "Rufus MBR kullan. BIOS Kimliği:"
 s IDC_RUFUS_MBR +5,0
@@ -2609,12 +2609,12 @@ t MSG_164 "Sürücüyü açılabilir yapmak için kullanılacak yöntem"
 t MSG_165 "ISO seçmek için tıklayın..."
 t MSG_166 "Uluslararası etiketleri görüntülemek için bu onay kutusunu seçin "
 	"ve  aygıt simgesini belirleyin (autorun.inf oluşturur)"
-t MSG_167 "Açılış seçimine izin veren ve BIOS USB Sürücü kimliğini taklit edebilen bir MBR yükle"
+t MSG_167 "Açılış seçimine izin veren ve BIOS USB Sürücü kimliğini taklit edebilen bir MBR yükler"
 t MSG_168 "İlk açılabilir USB sürücüsünü farklı bir disk olarak taklit etmeye çalış (genellikle 0x80).\n"
 	"Bu sadece Windows XP yüklemesinde ve birden fazla diske varsa gerekebilir"
 t MSG_169 "Ekstra gizli bir bölüm oluşturur ve bölümlerin sınırlarını hizalamaya çalışır.\n"
 	"Bu işlem eski BIOSlar için açılış algılamasını geliştirir"
-t MSG_170 "Rufus tarafından normal olarak algılanamayan diskler için algılamayı etkinleştirir. SORUMLULUK SİZE AİTTİR!!!"
+t MSG_170 "USB sabit sürücü eklerini listelemeyi etkinleştirir. SORUMLULUK SİZE AİTTİR!!!"
 t MSG_171 "Biçimlendirme işlemini başlat.\nBu hedef üzerinde tüm veriyi yok edecek!"
 t MSG_172 "Lisans bilgisi ve Emeği Geçenler"
 t MSG_173 "Seçmek için tıklayın..."
@@ -2698,7 +2698,7 @@ t MSG_242 "Dosya indirilemedi."
 t MSG_243 "Rufus güncellemeleri denetleniyor..."
 t MSG_244 "Güncellemeler: İnternet erişimi yok"
 t MSG_245 "Güncellemeler: Sürüm bilgisine erişilemedi"
-t MSG_246 "Rufus'un yeni sürüm mevcut!"
+t MSG_246 "Rufus'un yeni sürümü mevcut!"
 t MSG_247 "Rufus'un yeni sürümü bulunamadı"
 t MSG_248 "Uygulama kayıt defteri anahtarları başarıyla silindi"
 t MSG_249 "Uygulama kayıt defteri anahtarları silinemedi"
