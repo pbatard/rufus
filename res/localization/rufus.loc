@@ -1595,7 +1595,7 @@ t MSG_259 "'Erőszakos' frissítés"
 
 ################################################################################
 l "it-IT" "Italian (Italiano)" 0x0410, 0x0810
-v 1.0.2
+v 1.0.3
 b "en-US"
 
 g IDD_DIALOG
@@ -1627,8 +1627,8 @@ s IDCANCEL 0,0
 t IDC_START "Avvia"
 t IDS_ADVANCED_OPTIONS_GRP "Opzioni avanzate"
 m IDC_ADVANCED +31,0
-t IDC_ENABLE_FIXED_DISKS "Elenca anche unità USB non rimuovibili/partizionati"
-t IDC_EXTRA_PARTITION "Aggiungi correzioni per vecchi BIOS"
+t IDC_ENABLE_FIXED_DISKS "Elenca dischi fissi USB"
+t IDC_EXTRA_PARTITION "Aggiungi correzzioni per vecchi BIOS"
 t IDC_RUFUS_MBR "Usa MBR Rufus con ID BIOS:"
 m IDC_DISK_ID 3,0
 
@@ -1871,7 +1871,7 @@ t MSG_168 "Prova prima a macsherare l'unità avviabile USB (normalmente 0x80) co
 	"Questo potrebbe essere necessario solo se installi Windows XP e hai più di un disco"
 t MSG_169 "Crea una partizione aggiuntiva e nascosta e prova ad allineare le diverse partizioni.\n"
 	"Questo può migliorare il rilevamento all'avvio con vecchi BIOS"
-t MSG_170 "Abilita il rilevamento per i dischi normalmente non rilevati da Rufus. USALO A TUO RISCHIOP!!!"
+t MSG_170 "Abilita il rilevamento per i dischi USB. USALO A TUO RISCHIOP!!!"
 t MSG_171 "Avvia l'operazione di formattazione.\nQuesta operazione DISTRUGGERA' qualsiasi dato sul'unità destinazione!"
 t MSG_172 "Informazioni licenza e ringraziamenti"
 t MSG_173 "Fai clic per selezionare..."
@@ -1901,7 +1901,7 @@ t MSG_206 "File %s mancante"
 # The name proposed by Windows' Computer Management -> Disk Management when you try to format a drive
 # with an empty label. See http://rufus.akeo.ie/pics/default_name.png
 t MSG_207 "Nuovo volume"
-t MSG_208 "Rilevati %d dispositivo"
+t MSG_208 "Rilevato %d dispositivo"
 t MSG_209 "Rilevati %d dispositivi"
 t MSG_210 "OPERAZIONE COMPLETATA."
 t MSG_211 "Annullata."

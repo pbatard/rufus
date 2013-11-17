@@ -9,6 +9,7 @@ once you have matched all the changes that occurred for the en-US translation.
 o Version 1.0.3 (2013.11.15)
   - IDC_ENABLE_FIXED_DISKS "List non removable or unpartitioned USB disks" -> "List USB Hard Drives"
   - MSG_170 "Enable detection for disks not normally detected by Rufus" -> "Enable the listing of USB Hard Drive enclosures"
+
 o Version 1.0.2 (2013.10.30)
   - *NEW* MSG_110 "MS-DOS cannot boot from a drive using a 64 kilobyte Cluster size..."
   - *NEW* MSG_111 "Incompatible Cluster size"
@@ -16,8 +17,10 @@ o Version 1.0.2 (2013.10.30)
   - *NEW* MSG_113 "Large UDF volume"
   - *NEW* MSG_220 "Formatting (%s) - estimated duration %d:%02d..."
   - *NEW* MSG_207 "New Volume"
+
 o Version 1.0.1 (2013.10.28)
   - MSG_061 "Please insert a media in drive." -> "Please insert a removable media in drive."
   - MSG_071 "Unable to create formatting thread." -> "Unable to start thread."
+
 o Version 1.0.0 (2013.10.20)
   - Initial version
