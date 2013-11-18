@@ -2365,7 +2365,7 @@ t MSG_258 "Supporto Rock Ridge"
 
 ################################################################################
 l "ro-RO" "Romanian (Română)" 0x0418, 0x0818
-v 1.0.2
+v 1.0.3
 b "en-US"
 
 g IDD_DIALOG
@@ -2399,7 +2399,7 @@ s IDC_START -2,0
 m IDC_START +6,0
 t IDS_ADVANCED_OPTIONS_GRP "Opţiuni avansate"
 m IDC_ADVANCED +26,0
-t IDC_ENABLE_FIXED_DISKS "Lista discurilor USB nedetaşabile şi nepartiţionate"
+t IDC_ENABLE_FIXED_DISKS "Lista Hard-uri USB"
 t IDC_EXTRA_PARTITION "Adaugă remedieri pentru BIOS-ul vechi"
 t IDC_RUFUS_MBR "Utilizaţi MBR Rufus cu BIOS-ul:"
 s IDC_RUFUS_MBR +4,0
@@ -2478,7 +2478,7 @@ t MSG_008 "Da"
 t MSG_009 "Nu"
 t MSG_010 "Bloc defect Detectat"
 t MSG_011 "Verificare completă: s-au găsit %u blocuri defecte\n"
-	"  %d erori de citire\n  %d erori scriere\n  %d erori de corupţie\n"
+	"  %d erori de citire\n  %d erori de scriere\n  %d erori de corupţie\n"
 t MSG_012 "%s\n Un raport mai detaliat este disponibil în:\n%s"
 t MSG_013 "Invalid"
 t MSG_014 "Zilnic"
@@ -2639,7 +2639,7 @@ t MSG_168 "În primul rând încearcă să mascheze unitatea de boot USB (de obi
 	"Acest lucru ar putea fi necesar numai dacă aţi instalat Windows XP şi aveţi mai mult de un singur disc"
 t MSG_169 "Creaţi o partiţie suplimentară şi să încerce să alinieze diferite partiţii.\n"
 	"Acest lucru poate îmbunătăţi detectarea cu un vechi BIOS"
-t MSG_170 "Permite detectarea de discuri nu în mod normal detectate de către Rufus. O FOLOSESTI PE PROPRIUL RISC!!!"
+t MSG_170 "Activați lista de USB Hard Drive anexate. O FOLOSESTI PE PROPRIUL RISC!!!"
 t MSG_171 "Începe operaţiunea de formatare.\n Aceasta va distruge orice date de pe dispozitiv!"
 t MSG_172 "Informaţii licenţă şi confirmări"
 t MSG_173 "Faceţi clic pentru a selecta..."
