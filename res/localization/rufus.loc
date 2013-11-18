@@ -1943,7 +1943,7 @@ t MSG_243 "Verifica disponibilità aggiornamenti Rufus..."
 t MSG_244 "Aggiornamento: impossibiel colelgarsi a internet"
 t MSG_245 "Aggiornamento: impossibiel accedere alle info versione"
 t MSG_246 "E' disponibile una nuova versione di Rufus!"
-t MSG_247 "La versione installata è aggiornata!"
+t MSG_247 "La versione installata è aggiornata"
 t MSG_248 "Registro applicazione correttamente eliminato"
 t MSG_249 "Impossibile eliminare il registro applicazione"
 t MSG_250 "Abilitato %s"
@@ -2299,7 +2299,7 @@ t MSG_243 "Verificare actualizări Rufus..."
 t MSG_244 "Actualizare: Nu se poate conecta la internet"
 t MSG_245 "Actualizare: Imposibil pentru a accesa informaţii versiune"
 t MSG_246 "Este o nouă versiune Rufus!"
-t MSG_247 "Versiunea instalată este actualizată!"
+t MSG_247 "Versiunea instalată este actualizată"
 t MSG_248 "Registrul de aplicaţii şters cu succes"
 t MSG_249 "Imposibilitatea de a şterge registrul de aplicaţii"
 t MSG_250 "Activat %s"
@@ -2312,6 +2312,402 @@ t MSG_256 "Unităţi fictive de detectare"
 t MSG_257 "Suport Joliet"
 t MSG_258 "Suport Rock Ridge"
 t MSG_259 "Actualizare forţată"
+
+################################################################################
+l "ru-RU" "Russian (Русский)" 0x0419, 0x0819
+v 1.0.3
+b "en-US"
+
+# Main dialog
+g IDD_DIALOG
+s IDD_DIALOG +22,0
+
+m IDC_LANG +22,0
+s IDS_FORMAT_OPTIONS_GRP +20,0
+s IDS_ADVANCED_OPTIONS_GRP +20,0
+s IDC_NBPASSES +30,0
+m IDC_ABOUT -2,0
+s IDC_ABOUT +15,0
+m IDC_LOG +9,0
+s IDC_LOG +30,0
+m IDC_START +47,0
+s IDC_START -10,0
+m IDCANCEL +33,0
+s IDCANCEL -10,0
+m IDC_PROGRESS -1,0
+s IDC_PROGRESS +24,0
+
+m IDC_NBPASSES +12,0
+s IDC_NBPASSES +44,0
+m IDC_BOOTTYPE +12,0
+s IDC_BOOTTYPE +9,0
+m IDC_SELECT_ISO +20,0
+s IDC_BADBLOCKS +10,0
+m IDC_DISK_ID +12,0
+s IDC_DISK_ID +8,0
+
+t IDS_DEVICE_TXT "Устройство"
+s IDC_DEVICE +22,0
+t IDS_PARTITION_TYPE_TXT "Схема раздела и тип системного интерфейса"
+s IDC_PARTITION_TYPE +22,0
+t IDS_FILESYSTEM_TXT "Файловая система"
+s IDC_FILESYSTEM +22,0
+t IDS_CLUSTERSIZE_TXT "Размер кластера"
+s IDC_CLUSTERSIZE +22,0
+t IDS_LABEL_TXT "Новая метка тома"
+s IDC_LABEL +27,0
+t IDS_FORMAT_OPTIONS_GRP "Параметры форматирования       "
+t IDC_BADBLOCKS "Проверить на плохие блоки:"
+t IDC_QUICKFORMAT "Быстрое форматирование"
+t IDC_BOOT "Создать загрузочный диск:"
+t IDC_SET_ICON "Создать расширенную метку и значок устройства"
+t IDC_ABOUT "О программе..."
+t IDC_LOG "Журнал"
+t IDCANCEL "Закрыть"
+t IDC_START "Старт"
+m IDC_ADVANCED +72,0
+t IDS_ADVANCED_OPTIONS_GRP "Дополнительные параметры"
+t IDC_ENABLE_FIXED_DISKS "Показать внешние USB накопители"
+t IDC_EXTRA_PARTITION "Добавить исправления для старых BIOS"
+t IDC_RUFUS_MBR "Использовать MBR с BIOS ID:"
+s IDC_RUFUS_MBR +10,0
+
+# About dialog
+g IDD_ABOUTBOX
+t IDD_ABOUTBOX "О программе Rufus"
+t IDC_ABOUT_LICENSE "Лицензия"
+t IDC_ABOUT_UPDATES "Обновления"
+
+# About -> License dialog
+g IDD_LICENSE
+t IDD_LICENSE "Лицензия Rufus"
+t IDCANCEL "Закрыть"
+
+# Notifications. You can trigger one of these by using Alt-R and re-launching Rufus
+g IDD_NOTIFICATION
+t IDC_MORE_INFO "Больше информации"
+t IDYES "Да"
+t IDNO "Нет"
+
+# Log dialog
+g IDD_LOG
+t IDD_LOG "Журнал"
+t IDC_LOG_CLEAR "Очистить журнал"
+m IDC_LOG_CLEAR -78,0
+s IDC_LOG_CLEAR +30,0
+t IDC_LOG_SAVE "Сохранить журнал"
+m IDC_LOG_SAVE -54,0
+s IDC_LOG_SAVE +30,0
+t IDCANCEL "Закрыть журнал"
+m IDCANCEL -29,0
+s IDCANCEL +30,0
+
+# About -> Updates
+g IDD_UPDATE_POLICY
+s IDD_UPDATE_POLICY +80,0
+s IDC_POLICY +80,0
+m IDS_CHECK_NOW_GRP +94,0
+s IDS_CHECK_NOW_GRP -16,0
+m IDC_UPDATE_FREQUENCY +40,0
+s IDC_UPDATE_FREQUENCY +62,0
+m IDC_INCLUDE_BETAS +40,0
+t IDD_UPDATE_POLICY "Политика обновления и параметры"
+t IDS_UPDATE_SETTINGS_GRP "Параметры"
+s IDS_UPDATE_SETTINGS_GRP +100,0
+t IDS_UPDATE_FREQUENCY_TXT "Проверка наличия обновлений:"
+s IDS_UPDATE_FREQUENCY_TXT +40,0
+t IDS_INCLUDE_BETAS_TXT "Включая бета-версии:"
+t IDC_CHECK_NOW "Проверить"
+m IDC_CHECK_NOW +85,0
+t IDCANCEL "Закрыть"
+m IDCANCEL +85,0
+
+# Dialog that appears when a new version is available
+g IDD_NEW_VERSION
+t IDD_NEW_VERSION "Проверка наличия обновлений - Rufus"
+t IDS_NEW_VERSION_AVAIL_TXT "Доступна новая версия. Пожалуйста, загрузите последнюю версию!"
+t IDC_WEBSITE " Щелкните здесь, чтобы перейти на домашнюю страницу"
+t IDS_NEW_VERSION_NOTES_GRP "Заметки о выпуске"
+t IDS_NEW_VERSION_DOWNLOAD_GRP "Загрузка"
+t IDC_DOWNLOAD "Загрузить"
+t IDCANCEL "Закрыть"
+
+# Dialog that appears when scanning/extracting ISO files
+g IDD_ISO_EXTRACT
+t IDD_ISO_EXTRACT "Копирование ISO-файлов..."
+t IDC_ISO_FILENAME "Открытие ISO-образа - пожалуйста, ждите..."
+t IDC_ISO_ABORT "Отмена"
+
+# Messages used throughout the application
+g IDD_MESSAGES
+t MSG_001 "Запущено другое приложение Rufus"
+t MSG_002 "Запущено другое приложение Rufus.\n"
+	"Закройте первое приложение перед запуском еще одного."
+t MSG_003 "ВНИМАНИЕ: ВСЕ ДАННЫЕ НА ДИСКЕ '%s' БУДУТ УНИЧТОЖЕНЫ.\n"
+	"Чтобы продолжить, нажмите ОК. Для выхода нажмите Отмена."
+t MSG_004 "Политика обновления Rufus"
+t MSG_005 "Do you want to allow Rufus to check for application updates online?"
+# Must be the same as IDD_DIALOG:IDCANCEL (i.e. "Close" - I know it's confusing)
+t MSG_006 "Закрыть"
+t MSG_007 "Отмена"
+t MSG_008 "Да"
+t MSG_009 "Нет"
+t MSG_010 "Найдены плохие блоки"
+t MSG_011 "Проверка закончена: %u плохих блоков найдено\n"
+	"  %d ошибок чтения\n  %d ошибок записи\n  %d поврежденных блоков\n"
+# The following will contain the formatted message above as well as the name of the bad blocks logfile
+t MSG_012 "%s\nБолее подробный отчет можно найти в:\n%s"
+t MSG_013 "Отключено"
+t MSG_014 "Ежедневно"
+t MSG_015 "Еженедельно"
+t MSG_016 "Ежемесячно"
+t MSG_017 "Custom"
+t MSG_018 "Ваша версия: %d.%d.%d (Build %d)"
+t MSG_019 "Последняя версия: %d.%d.%d (Build %d)"
+# *Short* size names. These can be used as suffixes
+t MSG_020 "байт"
+t MSG_021 " Кб"
+t MSG_022 " Мб"
+t MSG_023 " Гб"
+t MSG_024 " Тб"
+t MSG_025 " Пб"
+# *Long* size names, as they are displayed for the cluster size in the MS format dialog.
+t MSG_026 "байт"	# Yes, this is a repeat from MSG_020
+t MSG_027 "КБ"
+t MSG_028 "МБ"
+t MSG_029 "По умолчанию"
+# The following gets appended to the file system, cluster size, etc.
+t MSG_030 "%s (по умолчанию)"
+t MSG_031 "%s для компьютеров с интерфейсом BIOS"
+t MSG_032 "%s для компьютеров с интерфейсом UEFI"
+t MSG_033 "%s для компьютеров с BIOS или UEFI"
+# Number of bad block check passes (singular for 1 pass, plural for 2 or more passes)
+t MSG_034 "%d проход"
+t MSG_035 "%d прохода"
+t MSG_036 "ISO-образ"
+t MSG_037 "Application"
+t MSG_038 "Отменить"
+t MSG_039 "Запустить"
+t MSG_040 "Скачать"
+t MSG_041 "Операция прервана пользователем"
+t MSG_042 "Ошибка"
+t MSG_043 "Ошибка: %s"
+t MSG_044 "Загрузка файла"
+t MSG_045 "USB-устройство хранения данных"
+t MSG_046 "%s (Диск %d)"
+t MSG_047 "%s (%c:)"
+t MSG_048 "Rufus - Flushing buffers"
+t MSG_049 "Rufus - Cancellation"
+
+# Error messages
+t MSG_050 "Успешно."
+t MSG_051 "Неизвестные ошибки при форматировании."
+t MSG_052 "Невозможно использовать выбранную файловую систему для выбранного устройства."
+t MSG_053 "Доступ к устройству запрещен."
+t MSG_054 "Выбранное устройство защищено от записи."
+t MSG_055 "Выбранное устройство используется другим процессом. "
+	"Пожалуйста, завершите процесс перед использованием выбранного устройства."
+t MSG_056 "Быстрый формат не доступен для выбранного устройства."
+t MSG_057 "Недопустимая метка устройства."
+t MSG_058 "Недопустимый дескриптор устройства."
+t MSG_059 "Выбранный размер кластера не является допустимым для выбранного устройства."
+t MSG_060 "Неправильный размер тома."
+t MSG_061 "Вставьте носитель информации в устройство."
+t MSG_062 "Была получена неподдерживаемая команда."
+t MSG_063 "Ошибка распределения памяти."
+t MSG_064 "Ошибка чтения."
+t MSG_065 "Ошибка записи."
+t MSG_066 "Ошибка установки."
+t MSG_067 "Невозможно считать носитель информации. Возможно он используется другим процессом. "
+	"Пожалуйта, извлеките носитель информации и вставьте его вновь."
+t MSG_068 "Ошибка при создании раздела."
+t MSG_069 "Невозможно скопировать файлы на выбранное устройство."
+t MSG_070 "Отменено пользователем"
+t MSG_071 "Невозмозно запутить поток выполнения."
+t MSG_072 "Проверка на плохие блоки не завершена."
+t MSG_073 "Ошибка проверки ISO-образа."
+t MSG_074 "Ошибка извлечения ISO-образа."
+t MSG_075 "Невозможно смонтировать том."
+t MSG_076 "Невозможно пропатчить установочные файлы для загрузки."
+t MSG_077 "Невозможно назначить букву диска."
+t MSG_078 "Невозможно смонтировать GUID-том."
+
+t MSG_080 "Rufus обнаружил, что все еще Windows очищает внутренний буфер USB-устройства.\n\n"
+	"В зависимости от скорости вашего USB-устройства, эта операция может занять много времени, "
+	"особенно для больших файлов.\n\nДождитесь пока Windows закончит, чтобы избежать повреждения устройства. "
+	"Но если вы устали от ожидания, можете просто отключить устройство..."
+t MSG_081 "Неподдерживаемый ISO-образ"
+t MSG_082 "Данная версия Rufus поддерживает только ISO-образы на основе 'bootmgr' или 'WinPE', 'isolinux' или 'EFI'.\n"
+t MSG_083 "Переместить %s?"
+t MSG_084 "Выбранный ISO-образ использует устаревшие '%s'.\n"
+	"Из-за этого загрузочного меню может отображаться неправильно.\n\n"
+	"Новые версии можно загрузить с помощью Rufus:\n"
+	"- Выберите 'Да', чтобы загрузить файл из интернета\n"
+	"- Выберите 'Нет', чтобы не модифицировать ISO-образ\n"
+	"Если вы не знаете что делать, то выберите 'Да'.\n\n"
+	"Файл будет загружен в текущую директорию, а в случае наличия '%s' - заменен автоматически."
+t MSG_085 "Загрузка %s"
+t MSG_086 "Не выбран ISO-образ"
+# The content between the quotes below (\"Create a bootable disk\") should match
+# the beginning of the IDC_BOOT text
+t MSG_087 "Пожалуйста, нажмите на кнопку с диском для выбора загрузочного ISO-образа, "
+	"или снимите флажок с \"Создать загрузочный диск...\"."
+t MSG_088 "ISO-образ слишком большой"
+t MSG_089 "ISO-образ слишком большой для выбранного устройства."
+t MSG_090 "Неподдерживаемый ISO-образ"
+t MSG_091 "When using UEFI Target Type, only EFI bootable ISO images are supported. "
+	"Please select an EFI bootable ISO or set the Target Type to BIOS."
+t MSG_092 "Неподдерживаемая файловая система"
+t MSG_093 "При использовании UEFI в качестве целевой системы, поддерживается только FAT/FAT32. "
+	"Пожалуйста, выберите FAT/FAT32 в качестве файловой системы или установите типом целевой системы BIOS."
+t MSG_094 "ISO-образ не совместим с UEFI"
+t MSG_095 "This ISO image contains a file larger than 4 GB and cannot be used to create an EFI bootable USB.\n"
+	"This is a limitation of UEFI/FAT32, not Rufus."
+t MSG_096 "Для данного ISO-образа необходима файловая система FAT/FAT32. Пожалуйста, выберите FAT/FAT32 в качестве файловой системы."
+t MSG_097 "Только ISO-образы на основе 'bootmgr' или 'WinPE' могут использоваться с NTFS."
+t MSG_098 "Только ISO-образы на основе 'isolinux' могут использоваться с FAT/FAT32 или если тип целевой системы UEFI."
+t MSG_099 "Ограничения файловой системы"
+t MSG_100 "Этот ISO-образ содержит файл размером более 4 Гб, что недопустимо при использовании файловой системы FAT или FAT32"
+t MSG_101 "Отсутствует поддержка WIM"
+t MSG_102 "Ваша система не может извлечь файлы из WIM-архивов, но это необходимо для создания загрузочного USB-диска с Windows 7 или Windows Vista."
+	"Вы можете исправить это установив последнюю версию 7-Zip"\nХотите посетить страницу загрузки 7-zip?"
+t MSG_103 "Загрузка %s?"
+t MSG_104 "Syslinux v5.0 или поздней версии требует наличия '%s'.\n"
+	"Поскольку этот файл >100 Кб, и всегда присутствует в Syslinux v5+ ISO-образах, "
+	"он не был встроен в Rufus.\n\nRufus может скачать недостающий файл:\n"
+	"- Выберите 'Да', если хотите скачать этот файл\n"
+	"- Выберите 'Нет', если хотите скачать его вручную позже\n\n"
+	"Примечание: Файл будет скачан в текущую директорию. При наличии "
+	"'%s', он будет перезаписан автоматически.\n"
+t MSG_105 "Отмена может оставить устройство в НЕРАБОЧЕМ состоянии.\n"
+	"Если вы уверены, что хотите отменить, нажмите кнопку Да. В противном случае нажмите кнопку Нет."
+t MSG_106 "Пожалуйтсв, выберите папку"
+t MSG_107 "Все файлы"
+t MSG_108 "Журнал Rufus"
+t MSG_109 "0x%02X (Диск %d)"
+t MSG_110 "MS-DOS не может загрузиться, при использовании размера кластера 64 Кб..."
+t MSG_111 "Несовместимый размер кластера"
+t MSG_112 "Форматирование в Large UDF-тома занимает много времени..."
+t MSG_113 "Large UDF-том"
+t MSG_220 "Форматирование (%s) - Окончание через %d:%02d..."
+t MSG_207 "Новый том"
+
+# Tootips
+# Partition Scheme and Target Type
+t MSG_150 "Вариант для большинства компьютеров с интерфейсом BIOS (или выключенным UEFI)"
+t MSG_151 "Вариант для компьютеров с интерфейсом UEFI\n(При установке Windows XP с доступом к USB)"
+t MSG_152 "Вариант для компьютеров с BIOS или UEFI\n(При установке Windows XP без доступа к USB)"
+t MSG_153 "Проверка на плохие блоки, используя 1 проход"
+t MSG_154 "Проверка на плохие блоки, используя 2 прохода"
+t MSG_155 "Проверка на плохие блоки, используя 3 прохода"
+t MSG_156 "Проверка на плохие блоки, используя 4 прохода"
+t MSG_157 "Выбор необходимой файловой системы"
+t MSG_158 "Выбор минимального размера кластера, который занимает каждый блок данных"
+t MSG_159 "Запись новой метки тома\nПоддерживаются международные символы"
+t MSG_160 "Развернуть дополнительные параметры"
+t MSG_161 "Проверка устройства на наличие плохих (поврежденных) блоков с помощью таблицы байтов"
+t MSG_162 "Быстрое форматирование устройства"
+t MSG_163 "Создать загрузочный USB-диск"
+t MSG_164 "Метод загрузки"
+t MSG_165 "Нажмите, чтобы выбрать ISO-образ..."
+t MSG_166 "Разрешить отображение меток с международными символами и задать значок устройства\n(Создается autorun.inf)"
+t MSG_167 "Использовать MBR, который разрешает выбор загрузчика и может маскироваться под идентификатором устройства в BIOS"
+t MSG_168 "Попробуйте замаскировать первый загрузочный\n"
+	"USB-диск (обычно 0x80) как другой диск.\n"
+	"Это необходимо для установки только Windows XP.\n"
+t MSG_169 "Добавить дополнительный скрытый раздел и выровнить границы разделов.\n"
+	"Это поможет улучшить обнаружение загрузчика в старых версия BIOS."
+t MSG_170 "Показать внешние USB накопители, подключенные к компьютеру.\n"
+t MSG_171 "Начать форматирование устройства.\nВсе данные на диске будут уничтожены!"
+t MSG_172 "Сведения о лицензировании и разработчиках"
+t MSG_173 "Нажмите для выбора..."
+# The following will appear in the about dialog
+t MSG_174 "Rufus - The Reliable USB Formatting Utility"
+t MSG_175 "Версия %d.%d.%d (Build %d)"
+t MSG_176 "Русский перевод: Кирилл Иванов <mailto:tchack@rambler.ru>"
+t MSG_177 "Сообщить об ошибке или предложить улучшение на веб-сайте:"
+t MSG_178 "Дополнительные авторские права:"
+t MSG_179 "Политика обновления:"
+t MSG_180 "Если вы разрешите этой программе проверять наличие обновлений приложения, то "
+	"вы соглашаетесь, что следующая информация может собираться на наших серверах:"
+t MSG_181 "Версия вашей операционной системы и архитектура"
+t MSG_182 "Версия используемого приложения"
+t MSG_183 "Ваш IP-адрес"
+t MSG_184 "Для получения статистики использования программы, мы можем хранить собранную "
+	"информацию\\b до одного года\\b0 . Однако мы не будем раскрывать любые личные данные третьим сторонам."
+t MSG_185 "Процесс обновления:"
+t MSG_186 "Приложение Rufus не устанавливает и не запускает фоновые службы, поэтому проверка наличия обновлений выполняется только тогда, когда запущено основное приложение.\\line\n"
+	"Для проверки наличия обновлений требуется доступ к Интернету."
+
+# Status messages - these messages will appear on the status bar
+t MSG_201 "Отмена - Пожалуйста, ждите..."
+t MSG_202 "Сканирование ISO-образа..."
+t MSG_203 "Не удалось отсканировать ISO-образ"
+# Parameter: the name of an obsolete Syslinux .c32 module. eg: "Obsolete vesamenu.c32 detected"
+t MSG_204 "Обнаружен устаревший %s"
+# Display the name of the ISO selected. eg: "Using ISO: en_win7_x64_sp1.iso"
+t MSG_205 "Использован ISO: %s"
+# Typically "Missing ldlinux.c32 file"
+t MSG_206 "Отсутствует %s"
+# Same message, once for singular and plural ("1 device found", "2 devices found")
+t MSG_208 "Обнаружено устройств: %d"
+t MSG_209 "Обнаружено устройств: %d"
+t MSG_210 "Готово."
+t MSG_211 "Отменено."
+t MSG_212 "Неудачно."
+# Used when a new update has been downloaded and lauched
+t MSG_213 "Запуск новой версии..."
+t MSG_214 "Не удалось запустить новую версию"
+# Open/Save file
+t MSG_215 "Открыт %s"
+t MSG_216 "Сохранен %s"
+# Formatting status (make sure you use a double % to print the percent sign)
+t MSG_217 "Форматирование: %0.1f%% выполнено"
+t MSG_218 "Создание файловой системы: %d/%d выполнено"
+t MSG_219 "Создание NTFS-области Fixup: %d%% выполнено"
+t MSG_221 "Установка метки (Это может занять время)..."
+# Parameter: the file system. eg. "Formatting (NTFS)..."
+t MSG_222 "Форматирование (%s)..."
+t MSG_223 "Проверка NTFS-области Fixup..."
+t MSG_224 "Очистка структуры MBR/PBR/GPT..."
+t MSG_225 "Запрос доступа к диску..."
+t MSG_226 "Анализ загрузочных записей..."
+t MSG_227 "Закрытие существующего раздела..."
+t MSG_228 "Создание главной загрузочной записи..."
+t MSG_229 "Создание загрузочной записи раздела..."
+t MSG_230 "Копирование DOS-файлов..."
+t MSG_231 "Копирование ISO-файлов..."
+t MSG_232 "Настройка Win7 EFI boot (Это может занять время)..."
+t MSG_233 "Завершение, пожалуйста, ждите..."
+# Takes the Syslinux version as paramete. eg. "Installing Syslinux v5..."
+t MSG_234 "Установка Syslinux v%d..."
+# Bad blocks status. eg: "Bad Blocks: PASS 1/2 - 12.34% (0/0/1 errors)"
+t MSG_235 "Плохие блоки: Проход %d/%d - %0.2f%% (%d/%d/%d ошибок)"
+t MSG_236 "Плохие блоки: Тестирование случайным образом"
+t MSG_237 "Плохие блоки: Тестирование 0x%02X"
+# eg. "Partitioning (MBR)..."
+t MSG_238 "Разметка раздела (%s)..."
+t MSG_239 "Удаление разделов..."
+t MSG_240 "Загрузка %s: Соединение..."
+t MSG_241 "Загрузка: %0.1f%%"
+t MSG_242 "Не удалось скачать файл."
+t MSG_243 "Проверка наличия обновлений..."
+t MSG_244 "Ошибка: Необходим доступ к Интернету"
+t MSG_245 "Обновление: Невозможно получить доступ к данным о версии"
+t MSG_246 "Доступна новая версия Rufus!"
+t MSG_247 "Новых версий Rufus не найдено"
+t MSG_248 "Ключи приложения в реестре успешно удалены"
+t MSG_249 "Не удалось удалить ключи приложения в реестре"
+# eg. "Fixed disk detection enabled" "ISO size check disabled"
+t MSG_250 "%s включено"
+t MSG_251 "%s выключено"
+t MSG_252 "Size checks"
+t MSG_253 "Определение USB накопителей"
+t MSG_254 "Форматирование в расширенный FAT32"
+t MSG_255 "NoDriveTypeAutorun будет удален при выходе"
+t MSG_256 "Обнаружен фальшивый диск"
+t MSG_257 "Joliet поддержка"
+t MSG_258 "Rock Ridge поддержка"
 
 ################################################################################
 l "tr-TR" "Turkish (Türkçe)" 0x041F
