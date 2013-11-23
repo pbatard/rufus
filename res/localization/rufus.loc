@@ -73,6 +73,8 @@ t IDCANCEL "Close"
 t IDC_START "Start"
 t IDS_ADVANCED_OPTIONS_GRP "Advanced Options"
 t IDC_ENABLE_FIXED_DISKS "List USB Hard Drives"
+# Note: it is acceptable to drop the parenthesis () below if you are running out of space
+# as there is a tooltip (MSG_169) providing these details
 t IDC_EXTRA_PARTITION "Add fixes for old BIOSes (extra partition, align, etc.)"
 # 'MBR': See http://en.wikipedia.org/wiki/Master_boot_record
 # Rufus can install it's own custom MBR (the Rufus MBR), which also allows users
@@ -1955,6 +1957,388 @@ t MSG_255 "Verrà eliminato NoDriveTypeAutorun all'uscita"
 t MSG_256 "Rilevamento unità fittizie"
 t MSG_257 "Supporto Joliet"
 t MSG_258 "Supporto Rock Ridge"
+
+################################################################################
+l "ko-KR" "Korean (한국어)" 0x0412
+v 1.0.3
+b "en-US"
+
+# Main dialog
+g IDD_DIALOG
+t IDS_DEVICE_TXT "장치"
+t IDS_PARTITION_TYPE_TXT "디스크 형식과 부팅 시스템 유형"
+t IDS_FILESYSTEM_TXT "파일 시스템"
+t IDS_CLUSTERSIZE_TXT "할당 단위 크기"
+t IDS_LABEL_TXT "새 볼륨 레이블"
+t IDS_FORMAT_OPTIONS_GRP "포맷 옵션       "
+m IDC_ADVANCED -23,0
+t IDC_BADBLOCKS "배드 섹터 검사:"
+m IDC_NBPASSES +3,0
+s IDC_NBPASSES +35,0
+t IDC_QUICKFORMAT "빠른 포맷"
+t IDC_BOOT "부팅 가능한 디스크 만들기:"
+s IDC_BOOT +3,0
+m IDC_BOOTTYPE +3,0
+m IDC_SELECT_ISO +2,0
+t IDC_SET_ICON "확장 레이블 및 아이콘 파일 만들기"
+t IDC_ABOUT "프로그램 정보"
+s IDC_ABOUT +10,0
+t IDC_LOG "로그"
+s IDC_LOG +2,0
+m IDC_LOG +8,0
+t IDCANCEL "닫기"
+t IDC_START "시작"
+m IDC_START +2,0
+t IDS_ADVANCED_OPTIONS_GRP "고급 옵션"
+t IDC_ENABLE_FIXED_DISKS "기타 USB 장치를 목록에 추가"
+# Note: it is acceptable to drop the parenthesis () below if you are running out of space
+# as there is a tooltip (MSG_169) providing these details
+t IDC_EXTRA_PARTITION "구형BIOS를 위한 수정"
+# 'MBR': See http://en.wikipedia.org/wiki/Master_boot_record
+# Rufus can install it's own custom MBR (the Rufus MBR), which also allows users
+# to specify a custom disk ID for the BIOS. Note: the tooltip for this control is MSG_167.
+t IDC_RUFUS_MBR "USB용 MBR 사용(ID):"
+m IDC_DISK_ID +3,0
+
+# About dialog
+g IDD_ABOUTBOX
+t IDD_ABOUTBOX "Rufus"
+t IDC_ABOUT_LICENSE "라이센스"
+t IDC_ABOUT_UPDATES "업데이트"
+
+# About -> License dialog
+g IDD_LICENSE
+t IDD_LICENSE "라이센스"
+t IDCANCEL "닫기"
+
+# Notifications. You can trigger one of these by using Alt-R and re-launching Rufus
+g IDD_NOTIFICATION
+t IDC_MORE_INFO "정보 더 보기"
+t IDYES "예"
+t IDNO "아니오"
+
+# Log dialog
+g IDD_LOG
+t IDD_LOG "로그"
+t IDC_LOG_CLEAR "로그 삭제"
+t IDC_LOG_SAVE "로그 저장"
+t IDCANCEL "로그 닫기"
+
+# About -> Updates
+g IDD_UPDATE_POLICY
+t IDD_UPDATE_POLICY "업데이트 정책과 설정"
+t IDS_UPDATE_SETTINGS_GRP "설정"
+t IDS_UPDATE_FREQUENCY_TXT "업데이트 확인:"
+t IDS_INCLUDE_BETAS_TXT "테스트 버전 포함:"
+s IDC_INCLUDE_BETAS +5,0
+t IDC_CHECK_NOW "지금 확인"
+t IDCANCEL "닫기"
+
+# Dialog that appears when a new version is available
+g IDD_NEW_VERSION
+t IDD_NEW_VERSION "업데이트 확인 - Rufus"
+t IDS_NEW_VERSION_AVAIL_TXT "최신 버전을 사용할 수 있습니다.최신 버전을 다운로드하십시오!"
+t IDC_WEBSITE "웹 사이트로 이동하려면 여기를 클릭하십시오"
+t IDS_NEW_VERSION_NOTES_GRP "업데이트 목록"
+t IDS_NEW_VERSION_DOWNLOAD_GRP "다운로드"
+t IDC_DOWNLOAD "다운로드"
+t IDCANCEL "닫기"
+
+# Dialog that appears when scanning/extracting ISO files
+g IDD_ISO_EXTRACT
+t IDD_ISO_EXTRACT "ISO 파일을 복사하는 중..."
+t IDC_ISO_FILENAME "ISO 이미지 파일을 여는 중입니다. - 잠시만..."
+t IDC_ISO_ABORT "취소"
+
+# Messages used throughout the application
+g IDD_MESSAGES
+t MSG_001 "다른 인스턴스가 감지 됨."
+t MSG_002 "Rufus가 이미 실행 중입니다.\n"
+	"실행하기 전에 먼저 실행된 프로그램을 닫으십시오."
+t MSG_003 "WARNING: 장치 '%s'에 있는 데이터가 모두 삭제됩니다.\n"
+	"계속하려면 확인을, 종료하려면 취소를 선택하십시오."
+t MSG_004 "업데이트 정책"
+t MSG_005 "인터넷에 연결해서 프로그램의 업데이트를 확인하시겠습니까?"
+# Must be the same as IDD_DIALOG:IDCANCEL (i.e. "Close" - I know it's confusing)
+t MSG_006 "닫기"
+t MSG_007 "취소"
+t MSG_008 "예"
+t MSG_009 "아니오"
+t MSG_010 "배드 섹터 발견 됨."
+t MSG_011 "검사 완료: %u 개의 배트섹터가 발견되었습니다.\n"
+	"  %d 읽기 오류\n  %d 쓰기 오류\n  %d 손상 섹터\n"
+# The following will contain the formatted message above as well as the name of the bad blocks logfile
+t MSG_012 "%s\nA more detailed report can be found in:\n%s"
+t MSG_013 "사용 안 함"
+t MSG_014 "매일"
+t MSG_015 "매주"
+t MSG_016 "매월"
+t MSG_017 "사용자 정의"
+t MSG_018 "버전: %d.%d.%d (Build %d)"
+t MSG_019 "죄신 버전: %d.%d.%d (Build %d)"
+# *Short* size names. These can be used as suffixes
+t MSG_020 "bytes"
+t MSG_021 "KB"
+t MSG_022 "MB"
+t MSG_023 "GB"
+t MSG_024 "TB"
+t MSG_025 "PB"
+# *Long* size names, as they are displayed for the cluster size in the MS format dialog.
+t MSG_026 "bytes"	# Yes, this is a repeat from MSG_020
+t MSG_027 "KB"
+t MSG_028 "MB"
+t MSG_029 "기본"
+# The following gets appended to the file system, cluster size, etc.
+t MSG_030 "%s (기본)"
+t MSG_031 "%s 파티션 형식의 BIOS 컴퓨터"
+t MSG_032 "%s 파티션 형식의 UEFI 컴퓨터"
+t MSG_033 "%s 파티션 형식의 BIOS 또는 UEFI 컴퓨터"
+# Number of bad block check passes (singular for 1 pass, plural for 2 or more passes)
+t MSG_034 "한번만 검사"
+t MSG_035 "%d회 검사"
+t MSG_036 "ISO Image"
+t MSG_037 "프로그램"
+t MSG_038 "취소"
+t MSG_039 "실행"
+t MSG_040 "다운로드"
+t MSG_041 "사용자에 의해 작업이 취소 됨"
+t MSG_042 "오류"
+t MSG_043 "오류: %s"
+t MSG_044 "다운로드 파일"
+t MSG_045 "USB 저장 장치 (일반)"
+t MSG_046 "%s (디스크 %d)"
+t MSG_047 "%s (%c:)"
+t MSG_048 "Rufus - 버퍼 비움"
+t MSG_049 "Rufus - 해제"
+
+# Error messages
+t MSG_050 "성공."
+t MSG_051 "포맷 중 알 수 없는 오류 발생."
+t MSG_052 "이 미디어는 선택한 파일 시스템을 사용할 수 없습니다."
+t MSG_053 "장치에 대한 액세스가 거부됩니다."
+t MSG_054 "미디어에 쓰기 보호가 되어 있습니다."
+t MSG_055 "이 장치는 다른 프로세스에서 사용 중 입니다. "
+	"장치에 액세스 하려면 다른 프로세스를 닫으십시오."
+t MSG_056 "이 장치는 빠른 포맷을 사용할 수 없습니다."
+t MSG_057 "볼륨 레이블이 잘못되었습니다."
+t MSG_058 "장치 핸들이 잘못되었습니다."
+t MSG_059 "선택한 클러스터 크기는 이 장치에 유효하지 않습니다."
+t MSG_060 "볼륨 크기가 유효하지 않습니다."
+t MSG_061 "드라이브에 이동식 미디어를 넣으십시오."
+t MSG_062 "지원되지 않는 명령이 수신되었습니다."
+t MSG_063 "메모리 할당 오류."
+t MSG_064 "읽기 오류."
+t MSG_065 "쓰기 오류."
+t MSG_066 "설치 실패"
+t MSG_067 "미디어를 열 수 없습니다. 다른 프로세스에서 사용 중일 수 있습니다. "
+	"미디어를 다시 연결하고 시도하십시오."
+t MSG_068 "드라이브를 분할하는 중 오류 발생."
+t MSG_069 "파일을 대상 드라이브로 복사 할 수 없습니다."
+t MSG_070 "사용자에 의해 취소 됨."
+# See http://en.wikipedia.org/wiki/Thread_%28computing%29
+t MSG_071 "스레드를 시작할 수 없습니다."
+t MSG_072 "불량 섹터 검사가 완료되지 않았습니다."
+t MSG_073 "ISO 이미지 스캔 오류가 발생했습니다."
+t MSG_074 "ISO 이미지 추출 오류가 발생했습니다."
+t MSG_075 "볼륨을 다시 마운트 할 수 없습니다."
+t MSG_076 "부팅하기 위한 패치 또는 설치 파일이 없습니다."
+t MSG_077 "드라이브 문자를 할당 할 수 없습니다."
+t MSG_078 "GUID 볼륨을 마운트 할 수 없습니다."
+
+t MSG_080 "윈도우즈가 여전히 USB 장치에 내부 버퍼를 플러시하고 있습니다.\n\n"
+	"USB 장치의 속도에 따라, 특히 큰 파일의 경우에는 "
+	"이 작업은 완료하는 데 시간이 오래 걸릴 수 있습니다.\n\n손상을 방지하기 위해, 윈도우를 종료하는 것이 좋습니다. "
+	"하지만 기다릴 수 없다면, 강제로 장치를 분리할 수도 있습니다."
+t MSG_081 "지원되지 않는 ISO"
+t MSG_082 "이 버전은 Bootmgr/WinPE, ISOLINUX 또는 EFI 기반의 부팅 가능한 ISO만을 지원합니다.\n"
+	"이 ISO는 위의 조건에 포함되지 않습니다."
+t MSG_083 "%s 교체?"
+t MSG_084 "이 ISO 이미지는 '%s'의 구 버전이기에\n"
+	"부팅 메뉴가 제대로 표시되지 않을 수 있습니다.\n\n"
+	"최신 버전으로 이 문제를 해결하려면 지금 최신 버전을 다운로드 할 수 있습니다:\n"
+	"- 인터넷에 연결하여 파일을 다운로드 하려면 '예'를 선택하시고,\n"
+	"- 수정되지 않은 기존의 ISO 파일을 그대로 유지하려면 '아니오'를 선택하십시오.\n"
+	"잘 모르는 경우, '예'를 선택하십시오.\n\n"
+	"알림: 새 파일은 현재 디렉토리에 다운로드가 되며 이미 "
+	"'%s'가 있다면, 자동으로 다시 사용됩니다."
+t MSG_085 "%s 다운로드 중..."
+t MSG_086 "선택된 ISO 이미지가 없습니다"
+# The content between the quotes below (\"Create a bootable disk\") should match
+# the beginning of the IDC_BOOT text
+t MSG_087 "부팅 가능한 ISO를 선택하고 "디스크" 버튼을 클릭하거나, "
+	"\"부팅 디스크 만들기...\"의 확인란을 해제하십시오."
+t MSG_088 "ISO가 너무 큽니다."
+t MSG_089 "이 ISO 이미지는 선택한 대상에 비해 너무 큽니다."
+t MSG_090 "지원되지 않는 ISO"
+t MSG_091 "UEFI 대상 유형을 사용하는 경우에만 EFI 부팅 가능한 ISO 이미지가 지원됩니다. "
+	"EFI 부팅 가능한 ISO를 선택하거나 BIOS에 대상 유형을 설정하십시오."
+t MSG_092 "지원되지 않는 파일 시스템"
+t MSG_093 "UEFI 대상 유형을 사용하는 경우에만 FAT/FAT32이 지원됩니다. "
+	"파일 시스템으로 FAT/FAT32를 선택하거나 BIOS에 대상 유형을 설정하십시오."
+t MSG_094 "비 UEFI 호환 ISO"
+t MSG_095 "이 ISO 이미지는 4GB보다 큰 파일이 포함되어 있어 EFI 부팅 USB를 만드는 데 사용할 수 없습니다.\n"
+	"이것은 이 프로그램의 제한 사항이 아니고 UEFI/FAT32의 제한 사항입니다."
+t MSG_096 "이 ISO 유형은 FAT/FAT32만 지원합니다. 파일 시스템으로 FAT/FAT32를 선택하십시오."
+t MSG_097 "현재 'bootmgr' 또는 'WinPE' 기반의 ISO 이미지만 NTFS와 함께 사용할 수 있습니다."
+t MSG_098 "FAT/FAT32는 isolinux 기반의 ISO 이미지 또는 대상 유형이 UEFI일 때만 사용할 수 있습니다."
+t MSG_099 "파일 시스템 제한"
+t MSG_100 "이 ISO 이미지는 FAT 또는 FAT32 파일 시스템에 허용되는 최대 크기 4GB보다 "
+	"더 큰 파일이 포함되어 있습니다."
+t MSG_101 "WIM 이미지 지원 안 함"
+t MSG_102 "이 플랫폼은 WIM 아카이브에서 파일을 추출 할 수 없습니다. WIM에서 추출하려면 "
+	"EFI 부팅 가능한 Windows 7 및 Windows Vista의 USB 드라이브를 생성해야합니다. 최신 버전의 "
+	"7-Zip으로 이 문제를 해결할 수 있습니다.\n지금 7-ZIP을 다운로드 하시겠습니까?"
+t MSG_103 "%s 다운로드?"
+t MSG_104 "Syslinux v5.0과 그 이후의 버전의 설치에는 '%s' 파일이 필요합니다.\n"
+	"그러나 파일의 크기가 100KB 이상으로 크고 Syslinux v5+ ISO 이미지에는 항상 들어있는 파일이므로, "
+	"이 프로그램에는 포함시키지 않았습니다.\n\n필요하다면 지금 이 파일을 다운로드할 수 있습니다:\n"
+	"- 인터넷에 연결하여 이 파일을 다운로드하려면 '예'를 선택하고\n"
+	"- 나중에 이 파일을 직접 드라이브에 복사하려면 '아니오'를 선택하십시오.\n\n"
+	"알림: 이 파일은 현재 디렉토리에 다운로드 되며 이미 '%s' 파일이 "
+	"존재한다면 자동으로 재 사용됩니다.\n"
+t MSG_105 "취소하게 되면 이 장치를 사용 불가능 상태로 만들 수도 있습니다.\n"
+	"그래도 취소하려면 '예'를 아니라면 '아니오'를 클릭하십시오."
+t MSG_106 "폴더를 선택하십시오"
+t MSG_107 "모든 파일"
+t MSG_108 "로그"
+t MSG_109 "0x%02X (디스크 %d)"
+# "Cluster size" below should be the same as the label for IDS_CLUSTERSIZE_TXT
+# "kilobytes" should be the same as in MSG_027
+t MSG_110 "MS-DOS는 64KB 클러스터 크기를 사용하는 드라이브에서 부팅 할 수 없습니다.\n"
+	"클러스터 크기를 변경하거나 FreeDOS를 사용하십시오."
+t MSG_111 "호환되지 않는 클러스터 크기"
+# "%d:%02d" below is a duration (mins:secs)
+t MSG_112 "큰 UDF 볼륨을 포맷하려면 시간이 많이 걸릴 수 있습니다. USB 2.0의 속도로 추정했을 때, 예상 시간은 "
+	"%d:%02d 입니다. 포맷 중 진행바가 멈춤상태로 있을 수도 있습니다. 기다려주십시오!"
+t MSG_113 "큰 UDF 볼륨"
+
+# Tootips
+# Partition Scheme and Target Type
+t MSG_150 "일반적으로 가장 안전한 방법입니다. 하지만 UEFI 컴퓨터의 EFI모드에서 운영체제를 설치하는 경우에는 "
+	"다른 옵션 중에서 하나를 선택해야 합니다."
+t MSG_151 "EFI 모드에서 운영체제를 설치하려고 하지만, Windows XP에서도 "
+	"USB의 내용에 액세스를 해야 한다면 이 옵션을 선택하십시오."
+t MSG_152 "EFI 모드에서 운영체제를 설치하는 기본 옵션입니다. "
+	"Windows XP에서는 USB에 액세스 할 필요가 없을 때 선택하십시오."
+t MSG_153 "테스트 패턴: 0x%02X"
+t MSG_154 "테스트 패턴: 0x%02X, 0x%02X"
+t MSG_155 "테스트 패턴: 0x%02X, 0x%02X, 0x%02X"
+t MSG_156 "테스트 패턴: 0x%02X, 0x%02X, 0x%02X, 0x%02X"
+t MSG_157 "대상 파일 시스템을 설정합니다"
+t MSG_158 "파일 시스템에서 차지하는 데이터 블록의 최소 크기"
+t MSG_159 "드라이브 레이블에 사용 중인 문자체계를\n허용하려면 이 필드를 이용해서 설정하십시오."
+t MSG_160 "고급 옵션으로 전환"
+t MSG_161 "테스트 패턴을 사용하여 장치의 불량 섹터를 확인"
+t MSG_162 "빠른 포맷을 사용하지 않고 포맷하려면 선택을 취소하시면 됩니다."
+t MSG_163 "USB 드라이브를 부팅 가능하게 하려면 선택하십시오."
+t MSG_164 "드라이브를 부팅할 수 있도록 만듭니다."
+t MSG_165 "ISO 파일을 선택합니다..."
+t MSG_166 "사용 중인 언어로 레이블을 표시하고 장치 아이콘을 설정하려면 선택하십시오. "
+	"(autorun.inf 파일을 만듭니다.)"
+t MSG_167 "부팅 선택과 BIOS에 USB drive ID로 가장할 수 있는 MBR을 설치"
+t MSG_168 "다른 디스크를 첫 번째 부팅 USB 드라이브로 위장합니다. (보통은 0x80)\n"
+	"Windows XP를 설치하는 경우 필요하지만, 하나 이상의 디스크가 있어야만 합니다"
+t MSG_169 "여분의 숨김 파티션을 만들고 파티션의 경계를 정렬합니다."
+	"구형 BIOS에서 부팅 속도를 향상시킬 수 있습니다."
+t MSG_170 "USB 하드 드라이브의 목록을 사용할 수 있게 합니다.   주의!!! 사용상의 위험에 대한 책임은 모두 사용자에게 있습니다."
+t MSG_171 "포맷을 시작합니다.\n이 대상 드라이브의 모든 데이터가 삭제됩니다!"
+t MSG_172 "라이센스 정보와 신용"
+t MSG_173 "선택하려면 클릭..."
+# The following will appear in the about dialog
+t MSG_174 "Rufus - 믿을 수 있는 USB 포맷 유틸리티"
+t MSG_175 "버전 %d.%d.%d (빌드 %d)"
+t MSG_176 "한국어 번역: 나두야간다 - 세상사는 이야기"
+t MSG_177 "버그에 대한 보고나 프로그램의 개선을 요청:"
+t MSG_178 ""
+t MSG_179 "업데이트 정책:\\line\n"
+t MSG_180 "프로그램을 업데이트 하도록 선택한 경우, "
+	"다음의 정보는 우리의 서버에 수집 될 수 있음에 동의하는 것을 의미합니다.\\line\n"
+t MSG_181 "사용 중인 운영 체제의 아키텍처와 버전"
+t MSG_182 "현재 사용 중인 프로그램의 버전"
+t MSG_183 "사용자의 IP 주소"
+t MSG_184 "수집된 정보는 사용자의 년간 통계와 프로그램의 성능 향상을 위한 목적으로만 사용되어지며, "
+	"제 3자에게 수집된 정보를 공개하지 않습니다."
+t MSG_185 "업데이트 프로세스:\\line\n"
+t MSG_186 "이 프로그램은 백그라운드 서비스를 설치하거나 실행하지 않으므로 주 프로그램이 실행 중일 때에만 업데이트가 수행됩니다.\\line\n"
+	"업데이트에는 인터넷 연결이 필요합니다."
+
+# Status messages - these messages will appear on the status bar
+t MSG_201 "쥐소 중 - 잠시만..."
+t MSG_202 "ISO image 스캔..."
+t MSG_203 "ISO 이미지를 스캔 할 수 없습니다"
+# Parameter: the name of an obsolete Syslinux .c32 module. eg: "Obsolete vesamenu.c32 detected"
+t MSG_204 "오래된 %s 가 감지 됨."
+# Display the name of the ISO selected. eg: "Using ISO: en_win7_x64_sp1.iso"
+t MSG_205 "사용 ISO: %s"
+# Typically "Missing ldlinux.c32 file"
+t MSG_206 "%s 파일이 없습니다."
+# The name proposed by Windows' Computer Management -> Disk Management when you try to format a drive
+# with an empty label. See http://rufus.akeo.ie/pics/default_name.png
+t MSG_207 "새 볼륨"
+# Same message, once for singular and plural ("1 device found", "2 devices found")
+t MSG_208 "%d개의 장치를 찾음"
+t MSG_209 "%d개의 장치를 찾음"
+t MSG_210 "완료."
+t MSG_211 "취소 됨."
+t MSG_212 "실패."
+# Used when a new update has been downloaded and launched
+t MSG_213 "새 버전의 프로그램을 시작 중..."
+t MSG_214 "새 버전의 프로그램을 시작하지 못했습니다."
+# Open/Save file
+t MSG_215 "%s 열림"
+t MSG_216 "%s 저장 됨"
+# Formatting status (make sure you use a double % to print the percent sign)
+t MSG_217 "포맷 중: %0.1f%% 완료"
+t MSG_218 "파일 시스템 만들기: 작업 %d/%d 완료 됨"
+t MSG_219 "NTFS 오류 복구: %d%% 완료 됨"
+# Parameter: the file system and an estimated duration in mins and secs.
+# eg. "Formatting (UDF) - Estimated duration 3:21..."
+# NB: if "estimated duration" is too long, just use "estimated" or an abbreviation
+t MSG_220 "(%s) 포맷 중... - 예상 소요 시간 %d:%02d..."
+t MSG_221 "라벨 설정 중 잠시만..."
+# Parameter: the file system. eg. "Formatting (NTFS)..."
+t MSG_222 "포맷 (%s)..."
+t MSG_223 "NTFS 오류 복구 (Checkdisk)..."
+t MSG_224 "MBR/PBR/GPT 구조를 초기화..."
+t MSG_225 "디스크 액세스를 요청..."
+t MSG_226 "기존 부트 레코드를 분석..."
+t MSG_227 "기존 볼륨 닫기..."
+t MSG_228 "마스터 부트 레코드를 작성..."
+t MSG_229 "파티션 부트 레코드를 작성..."
+t MSG_230 "DOS 파일을 복사..."
+t MSG_231 "ISO 파일을 복사..."
+t MSG_232 "WIN7 EFI 부팅 설정 (잠시만)..."
+t MSG_233 "마무리 하는 중... 잠시만..."
+# Takes the Syslinux version as parameter, eg. "Installing Syslinux v5..."
+t MSG_234 "Syslinux v%d를 설치..."
+# Bad blocks status. eg: "Bad Blocks: PASS 1/2 - 12.34% (0/0/1 errors)"
+t MSG_235 "배드 섹터: PASS %d/%d - %0.2f%% (%d/%d/%d errors)"
+t MSG_236 "배드 섹터: 랜덤 패턴 테스트"
+t MSG_237 "배드 섹터: 0x%02X 패턴으로 테스트"
+# eg. "Partitioning (MBR)..."
+t MSG_238 "파티션 작업 (%s)..."
+t MSG_239 "파티션 삭제..."
+t MSG_240 "%s 다운로드: 연결..."
+t MSG_241 "다운로드: %0.1f%%"
+t MSG_242 "파일을 다운로드하지 못했습니다."
+t MSG_243 "업데이트를 확인하고 있습니다..."
+t MSG_244 "업데이트: 인터넷에 연결할 수 없습니다"
+t MSG_245 "업데이트: 버전 테이터에 액세스할 수 없습니다."
+t MSG_246 "새 버전을 사용할 수 있습니다!"
+t MSG_247 "새 버전이 없습니다."
+t MSG_248 "프로그램의 레지스트리 키를 성공적으로 삭제"
+t MSG_249 "프로그램의 레지스트리 키를 삭제하는 데 실패"
+# eg. "Fixed disk detection enabled" "ISO size check disabled"
+t MSG_250 "%s 가능"
+t MSG_251 "%s 비활성화"
+t MSG_252 "크기 확인"
+t MSG_253 "고정 디스크 감지"
+t MSG_254 "Large FAT32를 강제로 포맷"
+t MSG_255 "NoDriveTypeAutoRun은 종료시 삭제됩니다."
+t MSG_256 "드라이브를 가장한 드라이브 감지"
+t MSG_257 "Joliet support"
+t MSG_258 "Rock Ridge 지원"
+t MSG_259 "강제 업데이트"
 
 ################################################################################
 l "ro-RO" "Romanian (Română)" 0x0418, 0x0818
