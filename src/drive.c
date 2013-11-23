@@ -66,7 +66,7 @@ static HANDLE GetHandle(char* Path, BOOL bWriteAccess, BOOL bLockDrive)
 	if (Path == NULL)
 		goto out;
 	hDrive = CreateFileA(Path, GENERIC_READ|(bWriteAccess?GENERIC_WRITE:0),
-		FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, 0);
+		FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL);
 	if (hDrive == INVALID_HANDLE_VALUE) {
 		uprintf("Could not open drive %s: %s\n", Path, WindowsErrorString());
 		goto out;
@@ -77,6 +77,10 @@ static HANDLE GetHandle(char* Path, BOOL bWriteAccess, BOOL bLockDrive)
 	}
 
 	if (bLockDrive) {
+		if (DeviceIoControl(hDrive, FSCTL_ALLOW_EXTENDED_DASD_IO, NULL, 0, NULL, 0, &size, NULL)) {
+			uprintf("I/O boundary checks disabled\n");
+		}
+
 		for (i = 0; i < DRIVE_ACCESS_RETRIES; i++) {
 			if (DeviceIoControl(hDrive, FSCTL_LOCK_VOLUME, NULL, 0, NULL, 0, &size, NULL))
 				goto out;
@@ -186,7 +190,7 @@ char* GetLogicalName(DWORD DriveIndex, BOOL bKeepTrailingBackslash, BOOL bSilent
 		}
 
 		// If we can't have FILE_SHARE_WRITE, forget it
-		hDrive = CreateFileA(volume_name, GENERIC_READ, FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, 0);
+		hDrive = CreateFileA(volume_name, GENERIC_READ, FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL);
 		if (hDrive == INVALID_HANDLE_VALUE) {
 			suprintf("Could not open GUID volume '%s': %s\n", volume_name, WindowsErrorString());
 			continue;
@@ -302,7 +306,7 @@ static BOOL _GetDriveLetterAndType(DWORD DriveIndex, char* drive_letter, UINT* d
 			continue;
 
 		safe_sprintf(logical_drive, sizeof(logical_drive), "\\\\.\\%c:", drive[0]);
-		hDrive = CreateFileA(logical_drive, GENERIC_READ, FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, 0);
+		hDrive = CreateFileA(logical_drive, GENERIC_READ, FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL);
 		if (hDrive == INVALID_HANDLE_VALUE) {
 			uprintf("Warning: could not open drive %c: %s\n", drive[0], WindowsErrorString());
 			continue;
@@ -560,7 +564,7 @@ static BOOL FlushDrive(char drive_letter)
 
 	logical_drive[4] = drive_letter;
 	hDrive = CreateFileA(logical_drive, GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ|FILE_SHARE_WRITE,
-		NULL, OPEN_EXISTING, 0, 0);
+		NULL, OPEN_EXISTING, 0, NULL);
 	if (hDrive == INVALID_HANDLE_VALUE) {
 		uprintf("Failed to open %c: for flushing: %s\n", drive_letter, WindowsErrorString());
 		goto out;

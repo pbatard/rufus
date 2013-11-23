@@ -338,6 +338,7 @@ static BOOL FormatFAT32(DWORD DriveIndex)
 	DWORD cbRet;
 	DISK_GEOMETRY dgDrive;
 	PARTITION_INFORMATION piDrive;
+	PARTITION_INFORMATION_EX xpiDrive;
 	// Recommended values
 	DWORD ReservedSectCount = 32;
 	DWORD NumFATs = 2;
@@ -387,7 +388,15 @@ static BOOL FormatFAT32(DWORD DriveIndex)
 	if (IS_ERROR(FormatStatus)) goto out;
 	if (!DeviceIoControl (hLogicalVolume, IOCTL_DISK_GET_PARTITION_INFO, NULL, 0, &piDrive,
 		sizeof(piDrive), &cbRet, NULL)) {
-		die("Failed to get partition info\n", ERROR_NOT_SUPPORTED);
+		if (!DeviceIoControl (hLogicalVolume, IOCTL_DISK_GET_PARTITION_INFO_EX, NULL, 0, &xpiDrive,
+			sizeof(xpiDrive), &cbRet, NULL)) {
+			die("Failed to get partition info (both regular and _ex)", ERROR_NOT_SUPPORTED);
+		}
+
+		memset (&piDrive, 0, sizeof(piDrive));
+		piDrive.StartingOffset.QuadPart = xpiDrive.StartingOffset.QuadPart;
+		piDrive.PartitionLength.QuadPart = xpiDrive.PartitionLength.QuadPart;
+		piDrive.HiddenSectors = (DWORD) (xpiDrive.StartingOffset.QuadPart / dgDrive.BytesPerSector);
 	}
 
 	BytesPerSect = dgDrive.BytesPerSector;
@@ -419,7 +428,7 @@ static BOOL FormatFAT32(DWORD DriveIndex)
 
 	// fill out the boot sector and fs info
 	pFAT32BootSect->sJmpBoot[0]=0xEB;
-	pFAT32BootSect->sJmpBoot[1]=0x5A;
+	pFAT32BootSect->sJmpBoot[1]=0x58; // jmp.s $+0x5a is 0xeb 0x58, not 0xeb 0x5a. Thanks Marco!
 	pFAT32BootSect->sJmpBoot[2]=0x90;
 	strncpy((char*)pFAT32BootSect->sOEMName, "MSWIN4.1", 8);
 	pFAT32BootSect->wBytsPerSec = (WORD) BytesPerSect;
