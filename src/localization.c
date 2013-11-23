@@ -246,7 +246,7 @@ void add_dialog_command(int index, loc_cmd* lcmd)
 {
 	char str[128];
 	uint32_t i;
-	if ((lcmd == NULL) || (index < 0) || (index >= ARRAYSIZE(loc_dlg))) {
+	if ((lcmd == NULL) || (lcmd->txt[0] == NULL) || (index < 0) || (index >= ARRAYSIZE(loc_dlg))) {
 		uprintf("localization: invalid parameter for add_dialog_command\n");
 		return;
 	}

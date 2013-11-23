@@ -11,7 +11,10 @@ s/[ \t]*$//
 
 # remove the UI controls for "en-US" as they are just here for translators
 # 1,300 means we only do this for the the first 300 lines
-1,300 {/g IDD_DIALOG/,/g IDD_MESSAGES/{/g IDD_MESSAGES/!d}}
+1,300 {/^g IDD_DIALOG/,/^g IDD_MESSAGES/{/^g IDD_MESSAGES/!d}}
+
+# also remove the "translated by" line for English
+1,500{/^t MSG_176/d}
 
 # output file *MUST* be CR/LF
 s/$/\r/

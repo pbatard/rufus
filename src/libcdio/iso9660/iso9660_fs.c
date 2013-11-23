@@ -1519,3 +1519,102 @@ iso9660_ifs_is_xa (const iso9660_t * p_iso)
   if (!p_iso) return false;
   return yep == p_iso->b_xa;
 }
+
+static bool_3way_t
+iso_have_rr_traverse (iso9660_t *p_iso, const iso9660_stat_t *_root,
+		      char **splitpath, uint64_t *pu_file_limit)
+{
+  unsigned offset = 0;
+  uint8_t *_dirbuf = NULL;
+  int ret;
+  bool_3way_t have_rr = nope;
+
+  if (!splitpath[0]) return false;
+
+  if (_root->type == _STAT_FILE) return nope;
+  if (*pu_file_limit == 0) return dunno;
+
+  cdio_assert (_root->type == _STAT_DIR);
+
+  _dirbuf = calloc(1, _root->secsize * ISO_BLOCKSIZE);
+  if (!_dirbuf)
+    {
+    cdio_warn("Couldn't calloc(1, %d)", _root->secsize * ISO_BLOCKSIZE);
+    return dunno;
+    }
+
+  ret = iso9660_iso_seek_read (p_iso, _dirbuf, _root->lsn, _root->secsize);
+  if (ret!=ISO_BLOCKSIZE*_root->secsize) return false;
+
+  while (offset < (_root->secsize * ISO_BLOCKSIZE))
+    {
+      iso9660_dir_t *p_iso9660_dir = (void *) &_dirbuf[offset];
+      iso9660_stat_t *p_stat;
+
+      if (!iso9660_get_dir_len(p_iso9660_dir))
+	{
+	  offset++;
+	  continue;
+	}
+
+      p_stat = _iso9660_dir_to_statbuf (p_iso9660_dir, p_iso->b_xa,
+					p_iso->u_joliet_level);
+      have_rr = p_stat->rr.b3_rock;
+      if ( have_rr != yep) {
+	have_rr = iso_have_rr_traverse (p_iso, p_stat, &splitpath[1], pu_file_limit);
+      }
+      if (have_rr != nope) {
+	free (_dirbuf);
+	return have_rr;
+      }
+      free(p_stat);
+
+      offset += iso9660_get_dir_len(p_iso9660_dir);
+      *pu_file_limit = (*pu_file_limit)-1;
+      if ((*pu_file_limit) == 0) {
+	free (_dirbuf);
+	return dunno;
+      }
+    }
+
+  cdio_assert (offset == (_root->secsize * ISO_BLOCKSIZE));
+
+  /* not found */
+  free (_dirbuf);
+  return nope;
+}
+
+/*!
+  Return "yup" if any file has Rock-Ridge extensions. Warning: this can
+  be time consuming. On an ISO 9600 image with lots of files but no Rock-Ridge
+  extensions, the entire directory structure will be scanned up to u_file_limit.
+
+  @param p_iso the ISO-9660 file image to get data from
+
+  @param u_file_limit the maximimum number of (non-rock-ridge) files
+  to consider before giving up and returning "dunno".
+
+  "dunno" can also be returned if there was some error encountered
+  such as not being able to allocate memory in processing.
+
+*/
+extern bool_3way_t
+iso9660_have_rr(iso9660_t *p_iso, uint64_t u_file_limit)
+{
+  iso9660_stat_t *p_root;
+  char *p_psz_splitpath[2] = {strdup("/"), strdup("")};
+  bool_3way_t is_rr = nope;
+
+  if (!p_iso) return false;
+
+  p_root = _ifs_stat_root (p_iso);
+  if (!p_root) return dunno;
+
+  if (u_file_limit == 0) u_file_limit = UINT64_MAX;
+
+  is_rr = iso_have_rr_traverse (p_iso, p_root, p_psz_splitpath, &u_file_limit);
+  free(p_root);
+  // _cdio_strfreev (p_psz_splitpath);
+
+  return is_rr;
+}

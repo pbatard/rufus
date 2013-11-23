@@ -367,7 +367,6 @@ static BOOL FormatFAT32(DWORD DriveIndex)
 	// Debug temp vars
 	ULONGLONG FatNeeded, ClusterCount;
 
-	// TODO: use another lmsg for Large FAT32
 	PrintStatus(0, TRUE, lmprintf(MSG_222, "Large FAT32"));
 	VolumeId = GetVolumeID();
 
@@ -1439,7 +1438,7 @@ DWORD WINAPI FormatThread(LPVOID param)
 					goto out;
 				}
 				if ((bt == BT_UEFI) && (!iso_report.has_efi) && (iso_report.has_win7_efi)) {
-					// TODO: (v1.4.0) check ISO with EFI only
+					// TODO: Check ISO with EFI only
 					PrintStatus(0, TRUE, lmprintf(MSG_232));
 					wim_image[0] = drive_name[0];
 					efi_dst[0] = drive_name[0];

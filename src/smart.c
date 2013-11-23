@@ -36,7 +36,7 @@
 #include "smart.h"
 #include "hdd_vs_ufd.h"
 
-
+#if defined(RUFUS_TEST)
 /* Helper functions */
 static uint8_t GetAtaDirection(uint8_t AtaCmd, uint8_t Features) {
 	// Far from complete -- only the commands we *may* use.
@@ -352,6 +352,7 @@ BOOL Identify(HANDLE hPhysical)
 	_aligned_free(idd);
 	return TRUE;
 }
+#endif
 
 /* Generic SMART access. Kept for reference, as it doesn't work for USB to ATA/SATA bridges */
 #if 0
