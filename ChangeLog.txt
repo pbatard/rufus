@@ -1,3 +1,21 @@
+o Version 1.4.0 (2013.12.??)
+    Add localization support, with native integration for the following languages:
+    - French, courtesy of myself ("Je vais me gêner !")
+    - German, courtesy of Thilo Langbein
+    - Hugarian, courtesy of georg1136
+    - Italian, courtesy of bovirus
+    - Romanian, courtesy of Gîrlea Alexandru
+    - Russian, courtesy of Кирилл Иванов
+    - Spanish, courtesy of José Pineda
+    - Turkish, courtesy of Mehmetali KURAN
+    - More to come, more wanted! See http://rufus.akeo.ie/translations
+    Add "smart" detection of USB HDD vs USB Flash Drive
+    Add retry when writing ISO files
+    Add detection and display VID:PID for the target device (in the log)
+    Updated Syslinux to v4.0.7
+    Fixed some issues with DOS localization
+    Fixed FAT32 formatting for large disks
+    Fixed support for Ubuntu, Scientific Linux, unofficial Windows and other ISOs
 o Version 1.3.4 (2013.07.15)
     Syslinux v5 support (NEW)
     UDF formatting support (NEW - Vista and later only)

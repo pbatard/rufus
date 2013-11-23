@@ -1,4 +1,4 @@
-# This file should be saved as UTF-8, no-BOM, with CR/LF
+# This file should be saved as UTF-8, no-BOM, ***IN DOS MODE!!!*** (i.e. CR/LF as line terminators)
 
 ######################## HOW TO ADD A NEW TRANSLATION ###########################
 # For a more comprehensive set of instructions, please see the *FULL* Localization guide at:
@@ -1228,413 +1228,6 @@ t MSG_256 "Gefälschte Laufwerke erkennen"
 t MSG_257 "Joliet-Unterstützung"
 t MSG_258 "Rock Ridge-Unterstützung"
 t MSG_259 "Update erzwingen"
-
-################################################################################
-l "es-ES" "Spanish (Español)" 0x040a, 0x080a, 0x0c0a, 0x100a, 0x140a, 0x180a, 0x1c0a, 0x200a, 0x240a, 0x280a, 0x2c0a, 0x300a, 0x340a, 0x380a, 0x3c0a, 0x400a, 0x440a, 0x480a, 0x4c0a, 0x500a, 0x540a, 0x580a
-v 1.0.2
-b "en-US"
-
-# Main dialog
-g IDD_DIALOG
-s IDD_DIALOG +5,0
-s IDC_DEVICE +5,0
-m IDC_LANG +5,0
-s IDC_PARTITION_TYPE +5,0
-s IDC_FILESYSTEM +5,0
-s IDC_CLUSTERSIZE +5,0
-s IDC_LABEL +10,0
-s IDC_PROGRESS +7,0
-t IDS_DEVICE_TXT "Dispositivo"
-t IDS_PARTITION_TYPE_TXT "Tipo de la partición y del sistema destino"
-t IDS_FILESYSTEM_TXT "Sistema de archivos"
-t IDS_CLUSTERSIZE_TXT "Tamaño de clúster"
-t IDS_LABEL_TXT "Etiqueta nueva"
-t IDS_FORMAT_OPTIONS_GRP "Opciones de formateo        "
-s IDS_FORMAT_OPTIONS_GRP +5, 0
-m IDC_ADVANCED +34,0
-t IDC_BADBLOCKS "Buscar bloques dañados en la USB:"
-s IDC_BADBLOCKS +35, 0
-t IDC_QUICKFORMAT "Formateo rápido"
-t IDC_BOOT "Crear disco de arranque con:"
-s IDC_BOOTTYPE +7,0
-m IDC_BOOTTYPE -2,0
-t IDC_SET_ICON "Añadir etiquetas extendidas e iconos"
-t IDC_ABOUT "Acerca de..."
-s IDC_ABOUT -5,0
-t IDC_LOG "Historial..."
-s IDC_LOG +40,0
-m IDC_LOG -5,0
-t IDCANCEL "Cerrar"
-s IDCANCEL -20,0
-m IDCANCEL +25,0
-t IDC_START "Empezar"
-s IDC_START -10,0
-m IDC_START +35,0
-t IDS_ADVANCED_OPTIONS_GRP "Opciones avanzadas"
-s IDS_ADVANCED_OPTIONS_GRP +5, 0
-t IDC_ENABLE_FIXED_DISKS "Enlistar los discos USB fijos o sin particionar"
-t IDC_EXTRA_PARTITION "Opciones de compatibilidad para BIOS viejos"
-# 'MBR': See http://en.wikipedia.org/wiki/Master_boot_record
-# Rufus can install it's own custom MBR (the Rufus MBR), which also allows users
-# to specify a custom disk ID for the BIOS. Note: the tooltip for this control is MSG_167.
-t IDC_RUFUS_MBR "Usar el MBR de Rufus, ID de BIOS:"
-s IDC_RUFUS_MBR +25,0
-
-m IDC_NBPASSES +30,0
-s IDC_NBPASSES +14,0
-s IDC_DISK_ID -17,0
-m IDC_DISK_ID +25,0
-m IDC_SELECT_ISO +8,0
-m IDC_BOOTTYPE +2,0
-
-# About dialog
-g IDD_ABOUTBOX
-t IDD_ABOUTBOX "Acerca de Rufus"
-t IDC_ABOUT_LICENSE "Licencia"
-t IDC_ABOUT_UPDATES "Actualizaciones"
-s IDC_ABOUT_UPDATES +25, 0
-
-# About -> License dialog
-g IDD_LICENSE
-t IDD_LICENSE "Licencia de Rufus"
-t IDCANCEL "Cerrar"
-
-# Notifications. You can trigger one of these by using Alt-R and re-launching Rufus
-g IDD_NOTIFICATION
-t IDC_MORE_INFO "Más información"
-t IDYES "Sí"
-t IDNO "No"
-
-# Log dialog
-g IDD_LOG
-t IDD_LOG "Historial de eventos"
-t IDC_LOG_CLEAR "Borrar el historial"
-s IDC_LOG_CLEAR +15, 0
-m IDC_LOG_CLEAR -35, 0
-t IDC_LOG_SAVE "Guardar el historial"
-s IDC_LOG_SAVE +23, 0
-m IDC_LOG_SAVE -23 , 0
-t IDCANCEL "Cerrar"
-
-# About -> Updates
-g IDD_UPDATE_POLICY
-t IDD_UPDATE_POLICY "Configuración de auto-actualización"
-t IDS_UPDATE_SETTINGS_GRP "Configuraciones"
-t IDS_UPDATE_FREQUENCY_TXT "Buscar actualizaciones:"
-t IDS_INCLUDE_BETAS_TXT "Incluir versiones beta:"
-t IDC_CHECK_NOW "Buscar ahora"
-t IDCANCEL "Cerrar"
-
-# Dialog that appears when a new version is available
-g IDD_NEW_VERSION
-t IDD_NEW_VERSION "Buscar actualizaciones de Rufus"
-t IDS_NEW_VERSION_AVAIL_TXT "Hay una nueva versión disponible. ¡Por favor, descargue la última versión!"
-t IDC_WEBSITE "Haga clic aquí para ir al sitio de Rufus"
-t IDS_NEW_VERSION_NOTES_GRP "Notas relativas a esta versión"
-t IDS_NEW_VERSION_DOWNLOAD_GRP "Descarga"
-t IDC_DOWNLOAD "Descargar"
-t IDCANCEL "Cerrar"
-
-# Dialog that appears when scanning/extracting ISO files
-g IDD_ISO_EXTRACT
-t IDD_ISO_EXTRACT "Copiando los archivos ISO..."
-t IDC_ISO_FILENAME "Abriendo la imagen ISO - por favor, espere..."
-t IDC_ISO_ABORT "Cancelar"
-
-# Messages used throughout the application
-g IDD_MESSAGES
-t MSG_001 "Se detectó otra instancia"
-t MSG_002 "Ya hay una intancia de Rufus ejecutándose.\n"
-	"Cierre la primer instancia antes de lanzar otra."
-t MSG_003 "ADVERTENCIA: TODOS LOS DATOS DEL DISPOSITIVO %s SERÁN ELIMINADOS.\n"
-	"Para continuar con esta operación, haga clic en OK. Para detenerla, haga clic en CANCELAR."
-t MSG_004 "Actualización de Rufus"
-t MSG_005 "¿Permitir que Rufus busque actualizaciones en línea?"
-# Must be the same as IDD_DIALOG:IDCANCEL (i.e. "Close" - I know it's confusing)
-t MSG_006 "Cerrar"
-t MSG_007 "Cancelar"
-t MSG_008 "Sí"
-t MSG_009 "No"
-t MSG_010 "Se encontraron bloques defectuosos"
-t MSG_011 "Verificación completa: se encontraron %u bloques dañados\n"
-	"  %d errores de lectura\n  %d errores de escritura\n  %d errores de corrupción\n"
-# The following will contain the formatted message above as well as the name of the bad blocks logfile
-t MSG_012 "%s\nEl informe detallado se puede encontrar en:\n%s"
-t MSG_013 "Nunca"
-t MSG_014 "Diario"
-t MSG_015 "Semanalmente"
-t MSG_016 "Mensualmente"
-t MSG_017 "Personalizado"
-t MSG_018 "Su versión: %d.%d.%d (Build %d)"
-t MSG_019 "Última versión: %d.%d.%d (Build %d)"
-# *Short* size names. These can be used as suffixes
-t MSG_020 "bytes"
-t MSG_021 "KB"
-t MSG_022 "MB"
-t MSG_023 "GB"
-t MSG_024 "TB"
-t MSG_025 "PB"
-# *Long* size names, as they are displayed for the cluster size in the MS format dialog.
-t MSG_026 "bytes"	# Yes, this is a repeat from MSG_020
-t MSG_027 "kilobytes"
-t MSG_028 "megabytes"
-t MSG_029 "Default"
-# The following gets appended to the file system, cluster size, etc.
-t MSG_030 "%s (Default)"
-t MSG_031 "Tipo de partición %s para computadora BIOS"
-t MSG_032 "Tipo de partición %s para computadora UEFI"
-t MSG_033 "Tipo de partición %s para computadora BIOS o UEFI"
-# Number of bad block check passes (singular for 1 pass, plural for 2 or more passes)
-t MSG_034 "%d paso"
-t MSG_035 "%d pasos"
-t MSG_036 "Imagen ISO"
-t MSG_037 "Aplicación"
-t MSG_038 "Abortar"
-t MSG_039 "Lanzar"
-t MSG_040 "Descargar"
-t MSG_041 "Operación cancelada por el usuario"
-t MSG_042 "Error"
-t MSG_043 "Error: %s"
-t MSG_044 "Descarga de archivo"
-t MSG_045 "Dispositivo de almacenamiento USB (Genérico)"
-t MSG_046 "%s (Disco %d)"
-t MSG_047 "%s (%c:)"
-t MSG_048 "Rufus - Purgando los búfers"
-t MSG_049 "Rufus - Cancelación"
-
-# Error messages
-t MSG_050 "Success."
-t MSG_051 "Error indeterminado durante el formateo."
-t MSG_052 "No se puede usar el sistema de archivos seleccionado para este dispositivo."
-t MSG_053 "No se permite el acceso al dispositivo."
-t MSG_054 "El dispositivo está protegido contra escritura."
-t MSG_055 "El dispositivo está en uso por otra aplicación. "
-	"Cierre todas las aplicaciones que pudieran estar usando el dispositivo."
-t MSG_056 "El formateo rápido no está disponible para este dispositivo."
-t MSG_057 "La etiqueta de volumen no es válida."
-t MSG_058 "El gestor de dispositivo no es válido."
-t MSG_059 "El tamaño de clúster indicado no es válido para este dispositivo."
-t MSG_060 "El tamaño del volúmen no es válido."
-t MSG_061 "Inserte un dispositivo en el lector."
-t MSG_062 "Comando no soportado."
-t MSG_063 "Error en la alocación de memoria."
-t MSG_064 "Error de lectura."
-t MSG_065 "Error de escritura."
-t MSG_066 "Fallo en la instalación"
-t MSG_067 "No se pudo abrir el medio - puede estar en uso por otro proceso. "
-	"Por favor desconecte y vuelva a conectar la unidad e inténtelo de nuevo."
-t MSG_068 "Error al particionar la unidad."
-t MSG_069 "No se pudieron copiar los archivos al dispositivo destino."
-t MSG_070 "Cancelado por el usuario."
-# See http://en.wikipedia.org/wiki/Thread_%28computing%29
-t MSG_071 "No se pudo crear el hilo."
-t MSG_072 "La verificación de bloques defectuosos fue interrumpida."
-t MSG_073 "Falló el análisis de la imagen ISO."
-t MSG_074 "Falló la extracción de la imagen ISO."
-t MSG_075 "No se pudo volver a montar el volumen."
-t MSG_076 "Unable to patch/setup files for boot."
-t MSG_077 "No se pudo asignar una letra de unidad."
-t MSG_078 "No se pudo montar el volumen GUID."
-
-t MSG_080 "Rufus detectó que Windows aún está purgando sus búfers internos en el dispositivo USB.\n\n"
-	"Dependiendo de la velocidad de su dispositivo USB, esta operación puede tomar mucho tiempo para acabar, "
-	"especialmente para archivos grandes.\n\nRecomendamos que se deje a Windows terminar para evitar corrupción; "
-	"por otro lado, si ya se cansó de esperar, puede simplemente desconectar el dispositivo..."
-t MSG_081 "Tipo de imagen ISO no soportada"
-t MSG_082 "Esta versión de Rufus soporta sólo ISOs booteables bsados en bootmgr/WinPE, isolinux o EFI.\n"
-	"Este ISO parece no usar ninguna de estas opciones..."
-t MSG_083 "¿Reemplazar %s?"
-t MSG_084 "Esta imagen ISO usa una versión obsoleta del archivo '%s'.\n"
-	"Esto puede hacer que los menúes de arranque no se desplieguen correctamente.\n\n"
-	"Rufus puede descargar una versión más reciente para resolver este problema:\n"
-	"- Seleccione 'Sí' para conectarse al Internet y descargar el archivo\n"
-	"- Seleccione 'No' para dejar el archivo ISO tal como está\n"
-	"Si no sabe qué hacer, se recomienda seleccionar 'Sí'.\n\n"
-	"Nota: El nuevo archivo se descargará en el directorio actual, una vez que "
-	"un archivo '%s' exista ahí, será reusado automáticamente."
-t MSG_085 "Descargando %s"
-t MSG_086 "No se seleccionó ninguna imagen ISO"
-# The content between the quotes below (\"Create a bootable disk\") should match
-# the beginning of the IDC_BOOT text
-t MSG_087 "Presione en el botón de disco para seleccionar un ISO booteable, "
-	"o desmarque la casilla de \"Crear un disco de arranque...\" ."
-t MSG_088 "Imagen ISO demasiado grande"
-t MSG_089 "La imagen ISO es demasiado grande para el destino seleccionado."
-t MSG_090 "ISO no soportado"
-t MSG_091 "Cuando se usa UEFI como tipo de destino, sólo se soportan imágenes ISO booteables tipo EFI. "
-	"Seleccione una imagen booteable ISO de tipo EFI o cambie el tipo de destino a BIOS."
-t MSG_092 "Sistema de archivos no soportado"
-t MSG_093 "Al usar el tipo de dispositivo destino UEFI, sólo se soporta FAT/FAT32. "
-	"Seleccione FAT/FAT32 como sistema de archivos o seleccione el tipo de dispositivo destino a BIOS."
-t MSG_094 "Imagen ISO no compatible con UEFI "
-t MSG_095 "Esta imagen ISO contiene un archivo de tamaño mayor a 4 GB y no se puede usar para crear un USB booteable tipo EFI.\n"
-	"Ésta es una limitación de UEFI/FAT32, no de Rufus."
-t MSG_096 "Sólo se soporta FAT/FAT32 para este tipo de ISO. Por favor seleccione FAT/FAT32 como sistema de archivos."
-t MSG_097 Con NTFS sólo se pueden usar imágenes ISO basadas en 'bootmgr' o 'WinPE'."
-t MSG_098 "FAT/FAT32 se puede usar sólo cuando el tipo de dispositivo destino es UEFI o se usan imágenes basadas en isolinux."
-t MSG_099 "Limitación del sistema de archivos"
-t MSG_100 "Esta imagen ISO contiene un archivo de más de 4GB, sobrepasando el tamaño máximo"
-	"permitido para un sistema de archivos FAT o FAT32."
-t MSG_101 "El soporte para archivos WIM no está disponible"
-t MSG_102 "Su plataforma no puede extraer archivos de comprimidos WIM. La extracción WIM "
-	"se requiere para crear dispositivos USB booteables tipo EFI con Windows 7 y Windows Vista. "
-	"Para esto podría instalar una versión reciente de 7-Zip.\n¿Desea visitar el sitio de descargas de 7-zip?"
-t MSG_103 "¿Descargar %s?"
-t MSG_104 "Syslinux v5.0 o posterr requiere que esté instalado un archivo '%s' .\n"
-	"Dado que este archivo pesa más de 100 KB y siempre está presente en las imágenes ISO Syslinux v5+ , "
-	"Rufus no la incluye en su distribución.\n\nRufus puede descargar el archivo faltante:\n"
-	"- Seleccione 'Sí' para conectarse a Internet y descargar el archivo\n"
-	"- Seleccione 'No' si desea copiar manualmente este archivo en la unidad después\n\n"
-	"Nota: El archivo será descargado en la carpeta actual y una vez que haya "
-	"un archivo '%s' ahí, será usado automáticamente.\n"
-t MSG_105 "Cancelar ahora puede dejar el dispositivo en un estado INUTILIZABLE.\n"
-	"Si está seguro de cancelar, seleccione SÍ. De lo contrario, seleccione NO."
-t MSG_106 "Seleccione la carpeta"
-t MSG_107 "Todos los archivos"
-t MSG_108 "Registro de eventos de Rufus"
-t MSG_109 "0x%02X (Disco %d)"
-# "Cluster size" below should be the same as the label for IDS_CLUSTERSIZE_TXT
-# "kilobytes" should be the same as in MSG_027
-t MSG_110 "MS-DOS no puede arrancar desde un disco con un tamaño de cluster de 64 kilobytes.\n"
-	"Por favor cambie el tamaño del cluster o use FreeDOS."
-t MSG_111 "Tamaño de cluster incompatible"
-# "%d:%02d" below is a duration (mins:secs)
-t MSG_112 "Formatear un volumen UDF de gran tamaño puede tomar mucho tiempo. A la velocidad de USB 2.0, "
-	"el tiempo estimado de formateo es %d:%02d, durante el cual la barra de progreso parecerá congelada. "
-	"¡Por favor, sea paciente!"
-t MSG_113 "Volumen UDF de gran tamaño"
-
-# Tootips
-# Partition Scheme and Target Type
-t MSG_150 "Usualmente la opción más segura. Empero, si tiene una computadora basada en UEFI y quiere instalar "
-	"un sistema operativo en modo EFI, debe seleccionar una de las otras opciones"
-t MSG_151 "Use esta opción si quiere instalar un sistema operativo en modo EFI, pero necesita poder accedar "
-	"al contenido de la USB desde Windows XP"
-t MSG_152 "La opción preferida para instalar un sistema operativo en modo EFI y "
-	"no se necesita poder leer la USB desde Windows XP"
-t MSG_153 "Patrón de pruebas: 0x%02X"
-t MSG_154 "Patrón de pruebas: 0x%02X, 0x%02X"
-t MSG_155 "Patrón de pruebas: 0x%02X, 0x%02X, 0x%02X"
-t MSG_156 "Patrón de pruebas: 0x%02X, 0x%02X, 0x%02X, 0x%02X"
-t MSG_157 "Seleccione el sistema de archivos destino"
-t MSG_158 "Tamaño mínimo que un bloque de datos ocupará en el sistema de archivos"
-t MSG_159 "Use este campo para establecer el nombre del volumen\nSe aceptan caracteres acentuados"
-t MSG_160 "Mostrar opciones avanzadas"
-t MSG_161 "Revisa el dispositivo buscando bloques defectuosos aplicando un patrón de pruebas"
-t MSG_162 "Desmarque esta opción para usar el método de formateo \"lento\" "
-t MSG_163 "Marque esta opción para hacer booteable la unidad USB"
-t MSG_164 "Método a usar para hacer la unidad booteable"
-t MSG_165 "Haga clic para seleccionar una imagen ISO..."
-t MSG_166 "Seleccione esta opción para permitir el desplegado de caracteres acentuados "
-	"y establecer un icono para la unidad (crea un archivo autorun.inf)"
-t MSG_167 "Instala un MBR que permite seleccionar el dispositivo de arranque y puede enmascarar "
-	"el ID de identificación del dispositivo USB del BIOS"
-t MSG_168 "Trata de enmascarar el primer dispositivo USB de arranque (normalmente 0x80) como un disco diferente.\n"
-	"Sólo debiera ser necesario si instala Windows XP y tiene más de un disco duro"
-t MSG_169 "Crea una partición oculta extra y trata de alinear los límites de las particiones.\n"
-	"Esto puede mejorar la detección de USB de arranque para los BIOS viejos"
-t MSG_170 "Activa la detección de discos que Rufus normalmente no detecta. ¡¡¡ÚSESE BAJO SU PROPIO RIESGO!!!"
-t MSG_171 "Comienza la operación de formateo.\n¡Todos los datos en el dispositivo serán DESTRUIDOS!"
-t MSG_172 "Información de licencia y créditos"
-t MSG_173 "Haga clic para seleccionar..."
-# The following will appear in the about dialog
-t MSG_174 "Rufus - La utilería de formateo USB confiable"
-t MSG_175 "Versión %d.%d.%d (Build %d)"
-t MSG_176 "Traducción al castellano: José Pineda <mailto:battletroll@gmail.com>"
-t MSG_177 "Para reportar bugs o sugerir mejoras, diríjase a:"
-t MSG_178 "Derechos de autor adicionales:"
-t MSG_179 "Política de actualización:"
-t MSG_180 "Si usted autoriza que este programa busque e instale por sí mismo"
-	" actualizaciones, acepta que la siguiente información podrá ser recolectada"
-	" en nuestros servidores"
-t MSG_181 "La arquitectura y versión de su sistema operativo"
-t MSG_182 "La versión de la aplicación que está usando"
-t MSG_183 "Su dirección IP"
-t MSG_184 "A fin de generar estadísticas de uso privadas, la información recolectada puede ser"
-	" retenida \\b hasta por un año\\b0 . A menos que así sea requerido por la ley, no transmitiremos"
-	" nada de esta información a terceros."
-t MSG_185 "Proceso de actualización:"
-t MSG_186 "Rufus no instala ni ejecuta ningún servicio ni tarea programada. Por tanto la búsqueda"
-	" de actualizaciones sólo se realiza cuando la aplicación principal se está ejecutando.\\line\n"
-	"Por supuesto, se requiere acceso a Internet."
-
-# Status messages - these messages will appear on the status bar
-t MSG_201 "Cancelando - por favor espere..."
-t MSG_202 "Analizando la imagen ISO..."
-t MSG_203 "Fallo al analizar la imagen ISO"
-# Parameter: the name of an obsolete Syslinux .c32 module. eg: "Obsolete vesamenu.c32 detected"
-t MSG_204 "Se detectó un archivo %s obsoleto"
-# Display the name of the ISO selected. eg: "Using ISO: en_win7_x64_sp1.iso"
-t MSG_205 "Usando el archivo ISO: %s"
-# Typically "Missing ldlinux.c32 file"
-t MSG_206 "Falta el archivo %s"
-# The name proposed by Windows' Computer Management -> Disk Management when you try to format a drive
-# with an empty label. See http://rufus.akeo.ie/pics/default_name.png
-t MSG_207 "New Volume"
-# Same message, once for singular and plural ("1 device found", "2 devices found")
-t MSG_208 "%d dispositivo encontrado"
-t MSG_209 "%d dispositivos encontrados"
-t MSG_210 "Operación realizada."
-t MSG_211 "Operación cancelada."
-t MSG_212 "La operación FALLÓ."
-# Used when a new update has been downloaded and launched
-t MSG_213 "Lanzando la nueva aplicación..."
-t MSG_214 "Error al lanzar la nueva aplicación"
-# Open/Save file
-t MSG_215 "%s abierto"
-t MSG_216 "%s guardado"
-# Formatting status (make sure you use a double % to print the percent sign)
-t MSG_217 "Formateando: %0.1f%% completo"
-t MSG_218 "Creando sistema de archivos: Tarea %d/%d completa"
-t MSG_219 "Finalización de NTFS: %d%% completo"
-# Parameter: the file system and an estimated duration in mins and secs.
-# eg. "Formatting (UDF) - Estimated duration 3:21..."
-# NB: if "estimated duration" is too long, just use "estimated" or an abbreviation
-t MSG_220 "Formateando (%s) - duración estimada %d:%02d..."
-t MSG_221 "Escribiendo la etiqueta del volumen (puede tardar un rato)..."
-# Parameter: the file system. eg. "Formatting (NTFS)..."
-t MSG_222 "Formateando (%s)..."
-t MSG_223 "Finalización de NTFS (Checkdisk)..."
-t MSG_224 "Limpiando las estructuras MBR/PBR/GPT..."
-t MSG_225 "Solicitando acceso al disco..."
-t MSG_226 "Analizando las estructuras de arranque existentes..."
-t MSG_227 "Cerrando el volumen existente..."
-t MSG_228 "Escribiendo el registro maestro de arranque (Master Boot Record)..."
-t MSG_229 "Escribiendo el registro de arranque de la partición (Partition Boot Record)..."
-t MSG_230 "Copiando archivos DOS..."
-t MSG_231 "Copiando archivos ISO..."
-t MSG_232 "Configuración de arranque Win7 EFI (puede tardar un rato)..."
-t MSG_233 "Finalización, por favor espere..."
-# Takes the Syslinux version as parameter, eg. "Installing Syslinux v5..."
-t MSG_234 "Instalando Syslinux v%d..."
-# Bad blocks status. eg: "Bad Blocks: PASS 1/2 - 12.34% (0/0/1 errors)"
-t MSG_235 "Bloques dañados: PASO %d/%d - %0.2f%% (%d/%d/%d errores)"
-t MSG_236 "Bloques dañados: Probando con patrones aleatorios"
-t MSG_237 "Bloques dañados: Probando con el patrón 0x%02X"
-# eg. "Partitioning (MBR)..."
-t MSG_238 "Particionando (%s)..."
-t MSG_239 "Borrando particiones..."
-t MSG_240 "Descargando %s: Conectando..."
-t MSG_241 "Descargando: %0.1f%%"
-t MSG_242 "Error al descargar el archivo."
-t MSG_243 "Buscando actualizaciones de Rufus..."
-t MSG_244 "Actualizaciones: Imposible conectarse a Internet"
-t MSG_245 "Actualizaciones: Imposible acceder a la información de posibles actalizaciones"
-t MSG_246 "¡Hay una nueva versión de Rufus disponible!"
-t MSG_247 "No hay nuevas versiones de Rufus"
-t MSG_248 "Se borraron las llaves de registro de la aplicación"
-t MSG_249 "Fallo al borrar las llaves de registro de la aplicación"
-# eg. "Fixed disk detection enabled" "ISO size check disabled"
-t MSG_250 "%s activada"
-t MSG_251 "%s desactivada"
-t MSG_252 "Verificación de tamaño"
-t MSG_253 "Detección de discos duros"
-t MSG_254 "Forzar el formateo FAT32 largo"
-t MSG_255 "NoDriveTypeAutorun será borrado al salir"
-t MSG_256 "Simulación de detección de dispositivo"
-t MSG_257 "Soporte a Joliet"
-t MSG_258 "Soporte a Rock Ridge"
-t MSG_259 "Forzar actualización"
 
 ################################################################################
 l "hu-HU" "Hungarian (Magyar)" 0x040e
@@ -3115,6 +2708,413 @@ t MSG_255 "NoDriveTypeAutorun будет удален при выходе"
 t MSG_256 "Обнаружен фальшивый диск"
 t MSG_257 "Joliet поддержка"
 t MSG_258 "Rock Ridge поддержка"
+
+################################################################################
+l "es-ES" "Spanish (Español)" 0x040a, 0x080a, 0x0c0a, 0x100a, 0x140a, 0x180a, 0x1c0a, 0x200a, 0x240a, 0x280a, 0x2c0a, 0x300a, 0x340a, 0x380a, 0x3c0a, 0x400a, 0x440a, 0x480a, 0x4c0a, 0x500a, 0x540a, 0x580a
+v 1.0.2
+b "en-US"
+
+# Main dialog
+g IDD_DIALOG
+s IDD_DIALOG +5,0
+s IDC_DEVICE +5,0
+m IDC_LANG +5,0
+s IDC_PARTITION_TYPE +5,0
+s IDC_FILESYSTEM +5,0
+s IDC_CLUSTERSIZE +5,0
+s IDC_LABEL +10,0
+s IDC_PROGRESS +7,0
+t IDS_DEVICE_TXT "Dispositivo"
+t IDS_PARTITION_TYPE_TXT "Tipo de la partición y del sistema destino"
+t IDS_FILESYSTEM_TXT "Sistema de archivos"
+t IDS_CLUSTERSIZE_TXT "Tamaño de clúster"
+t IDS_LABEL_TXT "Etiqueta nueva"
+t IDS_FORMAT_OPTIONS_GRP "Opciones de formateo        "
+s IDS_FORMAT_OPTIONS_GRP +5, 0
+m IDC_ADVANCED +34,0
+t IDC_BADBLOCKS "Buscar bloques dañados en la USB:"
+s IDC_BADBLOCKS +35, 0
+t IDC_QUICKFORMAT "Formateo rápido"
+t IDC_BOOT "Crear disco de arranque con:"
+s IDC_BOOTTYPE +7,0
+m IDC_BOOTTYPE -2,0
+t IDC_SET_ICON "Añadir etiquetas extendidas e iconos"
+t IDC_ABOUT "Acerca de..."
+s IDC_ABOUT -5,0
+t IDC_LOG "Historial..."
+s IDC_LOG +40,0
+m IDC_LOG -5,0
+t IDCANCEL "Cerrar"
+s IDCANCEL -20,0
+m IDCANCEL +25,0
+t IDC_START "Empezar"
+s IDC_START -10,0
+m IDC_START +35,0
+t IDS_ADVANCED_OPTIONS_GRP "Opciones avanzadas"
+s IDS_ADVANCED_OPTIONS_GRP +5, 0
+t IDC_ENABLE_FIXED_DISKS "Enlistar los discos USB fijos o sin particionar"
+t IDC_EXTRA_PARTITION "Opciones de compatibilidad para BIOS viejos"
+# 'MBR': See http://en.wikipedia.org/wiki/Master_boot_record
+# Rufus can install it's own custom MBR (the Rufus MBR), which also allows users
+# to specify a custom disk ID for the BIOS. Note: the tooltip for this control is MSG_167.
+t IDC_RUFUS_MBR "Usar el MBR de Rufus, ID de BIOS:"
+s IDC_RUFUS_MBR +25,0
+
+m IDC_NBPASSES +30,0
+s IDC_NBPASSES +14,0
+s IDC_DISK_ID -17,0
+m IDC_DISK_ID +25,0
+m IDC_SELECT_ISO +8,0
+m IDC_BOOTTYPE +2,0
+
+# About dialog
+g IDD_ABOUTBOX
+t IDD_ABOUTBOX "Acerca de Rufus"
+t IDC_ABOUT_LICENSE "Licencia"
+t IDC_ABOUT_UPDATES "Actualizaciones"
+s IDC_ABOUT_UPDATES +25, 0
+
+# About -> License dialog
+g IDD_LICENSE
+t IDD_LICENSE "Licencia de Rufus"
+t IDCANCEL "Cerrar"
+
+# Notifications. You can trigger one of these by using Alt-R and re-launching Rufus
+g IDD_NOTIFICATION
+t IDC_MORE_INFO "Más información"
+t IDYES "Sí"
+t IDNO "No"
+
+# Log dialog
+g IDD_LOG
+t IDD_LOG "Historial de eventos"
+t IDC_LOG_CLEAR "Borrar el historial"
+s IDC_LOG_CLEAR +15, 0
+m IDC_LOG_CLEAR -35, 0
+t IDC_LOG_SAVE "Guardar el historial"
+s IDC_LOG_SAVE +23, 0
+m IDC_LOG_SAVE -23 , 0
+t IDCANCEL "Cerrar"
+
+# About -> Updates
+g IDD_UPDATE_POLICY
+t IDD_UPDATE_POLICY "Configuración de auto-actualización"
+t IDS_UPDATE_SETTINGS_GRP "Configuraciones"
+t IDS_UPDATE_FREQUENCY_TXT "Buscar actualizaciones:"
+t IDS_INCLUDE_BETAS_TXT "Incluir versiones beta:"
+t IDC_CHECK_NOW "Buscar ahora"
+t IDCANCEL "Cerrar"
+
+# Dialog that appears when a new version is available
+g IDD_NEW_VERSION
+t IDD_NEW_VERSION "Buscar actualizaciones de Rufus"
+t IDS_NEW_VERSION_AVAIL_TXT "Hay una nueva versión disponible. ¡Por favor, descargue la última versión!"
+t IDC_WEBSITE "Haga clic aquí para ir al sitio de Rufus"
+t IDS_NEW_VERSION_NOTES_GRP "Notas relativas a esta versión"
+t IDS_NEW_VERSION_DOWNLOAD_GRP "Descarga"
+t IDC_DOWNLOAD "Descargar"
+t IDCANCEL "Cerrar"
+
+# Dialog that appears when scanning/extracting ISO files
+g IDD_ISO_EXTRACT
+t IDD_ISO_EXTRACT "Copiando los archivos ISO..."
+t IDC_ISO_FILENAME "Abriendo la imagen ISO - por favor, espere..."
+t IDC_ISO_ABORT "Cancelar"
+
+# Messages used throughout the application
+g IDD_MESSAGES
+t MSG_001 "Se detectó otra instancia"
+t MSG_002 "Ya hay una intancia de Rufus ejecutándose.\n"
+	"Cierre la primer instancia antes de lanzar otra."
+t MSG_003 "ADVERTENCIA: TODOS LOS DATOS DEL DISPOSITIVO %s SERÁN ELIMINADOS.\n"
+	"Para continuar con esta operación, haga clic en OK. Para detenerla, haga clic en CANCELAR."
+t MSG_004 "Actualización de Rufus"
+t MSG_005 "¿Permitir que Rufus busque actualizaciones en línea?"
+# Must be the same as IDD_DIALOG:IDCANCEL (i.e. "Close" - I know it's confusing)
+t MSG_006 "Cerrar"
+t MSG_007 "Cancelar"
+t MSG_008 "Sí"
+t MSG_009 "No"
+t MSG_010 "Se encontraron bloques defectuosos"
+t MSG_011 "Verificación completa: se encontraron %u bloques dañados\n"
+	"  %d errores de lectura\n  %d errores de escritura\n  %d errores de corrupción\n"
+# The following will contain the formatted message above as well as the name of the bad blocks logfile
+t MSG_012 "%s\nEl informe detallado se puede encontrar en:\n%s"
+t MSG_013 "Nunca"
+t MSG_014 "Diario"
+t MSG_015 "Semanalmente"
+t MSG_016 "Mensualmente"
+t MSG_017 "Personalizado"
+t MSG_018 "Su versión: %d.%d.%d (Build %d)"
+t MSG_019 "Última versión: %d.%d.%d (Build %d)"
+# *Short* size names. These can be used as suffixes
+t MSG_020 "bytes"
+t MSG_021 "KB"
+t MSG_022 "MB"
+t MSG_023 "GB"
+t MSG_024 "TB"
+t MSG_025 "PB"
+# *Long* size names, as they are displayed for the cluster size in the MS format dialog.
+t MSG_026 "bytes"	# Yes, this is a repeat from MSG_020
+t MSG_027 "kilobytes"
+t MSG_028 "megabytes"
+t MSG_029 "Default"
+# The following gets appended to the file system, cluster size, etc.
+t MSG_030 "%s (Default)"
+t MSG_031 "Tipo de partición %s para computadora BIOS"
+t MSG_032 "Tipo de partición %s para computadora UEFI"
+t MSG_033 "Tipo de partición %s para computadora BIOS o UEFI"
+# Number of bad block check passes (singular for 1 pass, plural for 2 or more passes)
+t MSG_034 "%d paso"
+t MSG_035 "%d pasos"
+t MSG_036 "Imagen ISO"
+t MSG_037 "Aplicación"
+t MSG_038 "Abortar"
+t MSG_039 "Lanzar"
+t MSG_040 "Descargar"
+t MSG_041 "Operación cancelada por el usuario"
+t MSG_042 "Error"
+t MSG_043 "Error: %s"
+t MSG_044 "Descarga de archivo"
+t MSG_045 "Dispositivo de almacenamiento USB (Genérico)"
+t MSG_046 "%s (Disco %d)"
+t MSG_047 "%s (%c:)"
+t MSG_048 "Rufus - Purgando los búfers"
+t MSG_049 "Rufus - Cancelación"
+
+# Error messages
+t MSG_050 "Success."
+t MSG_051 "Error indeterminado durante el formateo."
+t MSG_052 "No se puede usar el sistema de archivos seleccionado para este dispositivo."
+t MSG_053 "No se permite el acceso al dispositivo."
+t MSG_054 "El dispositivo está protegido contra escritura."
+t MSG_055 "El dispositivo está en uso por otra aplicación. "
+	"Cierre todas las aplicaciones que pudieran estar usando el dispositivo."
+t MSG_056 "El formateo rápido no está disponible para este dispositivo."
+t MSG_057 "La etiqueta de volumen no es válida."
+t MSG_058 "El gestor de dispositivo no es válido."
+t MSG_059 "El tamaño de clúster indicado no es válido para este dispositivo."
+t MSG_060 "El tamaño del volúmen no es válido."
+t MSG_061 "Inserte un dispositivo en el lector."
+t MSG_062 "Comando no soportado."
+t MSG_063 "Error en la alocación de memoria."
+t MSG_064 "Error de lectura."
+t MSG_065 "Error de escritura."
+t MSG_066 "Fallo en la instalación"
+t MSG_067 "No se pudo abrir el medio - puede estar en uso por otro proceso. "
+	"Por favor desconecte y vuelva a conectar la unidad e inténtelo de nuevo."
+t MSG_068 "Error al particionar la unidad."
+t MSG_069 "No se pudieron copiar los archivos al dispositivo destino."
+t MSG_070 "Cancelado por el usuario."
+# See http://en.wikipedia.org/wiki/Thread_%28computing%29
+t MSG_071 "No se pudo crear el hilo."
+t MSG_072 "La verificación de bloques defectuosos fue interrumpida."
+t MSG_073 "Falló el análisis de la imagen ISO."
+t MSG_074 "Falló la extracción de la imagen ISO."
+t MSG_075 "No se pudo volver a montar el volumen."
+t MSG_076 "Unable to patch/setup files for boot."
+t MSG_077 "No se pudo asignar una letra de unidad."
+t MSG_078 "No se pudo montar el volumen GUID."
+
+t MSG_080 "Rufus detectó que Windows aún está purgando sus búfers internos en el dispositivo USB.\n\n"
+	"Dependiendo de la velocidad de su dispositivo USB, esta operación puede tomar mucho tiempo para acabar, "
+	"especialmente para archivos grandes.\n\nRecomendamos que se deje a Windows terminar para evitar corrupción; "
+	"por otro lado, si ya se cansó de esperar, puede simplemente desconectar el dispositivo..."
+t MSG_081 "Tipo de imagen ISO no soportada"
+t MSG_082 "Esta versión de Rufus soporta sólo ISOs booteables bsados en bootmgr/WinPE, isolinux o EFI.\n"
+	"Este ISO parece no usar ninguna de estas opciones..."
+t MSG_083 "¿Reemplazar %s?"
+t MSG_084 "Esta imagen ISO usa una versión obsoleta del archivo '%s'.\n"
+	"Esto puede hacer que los menúes de arranque no se desplieguen correctamente.\n\n"
+	"Rufus puede descargar una versión más reciente para resolver este problema:\n"
+	"- Seleccione 'Sí' para conectarse al Internet y descargar el archivo\n"
+	"- Seleccione 'No' para dejar el archivo ISO tal como está\n"
+	"Si no sabe qué hacer, se recomienda seleccionar 'Sí'.\n\n"
+	"Nota: El nuevo archivo se descargará en el directorio actual, una vez que "
+	"un archivo '%s' exista ahí, será reusado automáticamente."
+t MSG_085 "Descargando %s"
+t MSG_086 "No se seleccionó ninguna imagen ISO"
+# The content between the quotes below (\"Create a bootable disk\") should match
+# the beginning of the IDC_BOOT text
+t MSG_087 "Presione en el botón de disco para seleccionar un ISO booteable, "
+	"o desmarque la casilla de \"Crear un disco de arranque...\" ."
+t MSG_088 "Imagen ISO demasiado grande"
+t MSG_089 "La imagen ISO es demasiado grande para el destino seleccionado."
+t MSG_090 "ISO no soportado"
+t MSG_091 "Cuando se usa UEFI como tipo de destino, sólo se soportan imágenes ISO booteables tipo EFI. "
+	"Seleccione una imagen booteable ISO de tipo EFI o cambie el tipo de destino a BIOS."
+t MSG_092 "Sistema de archivos no soportado"
+t MSG_093 "Al usar el tipo de dispositivo destino UEFI, sólo se soporta FAT/FAT32. "
+	"Seleccione FAT/FAT32 como sistema de archivos o seleccione el tipo de dispositivo destino a BIOS."
+t MSG_094 "Imagen ISO no compatible con UEFI "
+t MSG_095 "Esta imagen ISO contiene un archivo de tamaño mayor a 4 GB y no se puede usar para crear un USB booteable tipo EFI.\n"
+	"Ésta es una limitación de UEFI/FAT32, no de Rufus."
+t MSG_096 "Sólo se soporta FAT/FAT32 para este tipo de ISO. Por favor seleccione FAT/FAT32 como sistema de archivos."
+t MSG_097 Con NTFS sólo se pueden usar imágenes ISO basadas en 'bootmgr' o 'WinPE'."
+t MSG_098 "FAT/FAT32 se puede usar sólo cuando el tipo de dispositivo destino es UEFI o se usan imágenes basadas en isolinux."
+t MSG_099 "Limitación del sistema de archivos"
+t MSG_100 "Esta imagen ISO contiene un archivo de más de 4GB, sobrepasando el tamaño máximo"
+	"permitido para un sistema de archivos FAT o FAT32."
+t MSG_101 "El soporte para archivos WIM no está disponible"
+t MSG_102 "Su plataforma no puede extraer archivos de comprimidos WIM. La extracción WIM "
+	"se requiere para crear dispositivos USB booteables tipo EFI con Windows 7 y Windows Vista. "
+	"Para esto podría instalar una versión reciente de 7-Zip.\n¿Desea visitar el sitio de descargas de 7-zip?"
+t MSG_103 "¿Descargar %s?"
+t MSG_104 "Syslinux v5.0 o posterr requiere que esté instalado un archivo '%s' .\n"
+	"Dado que este archivo pesa más de 100 KB y siempre está presente en las imágenes ISO Syslinux v5+ , "
+	"Rufus no la incluye en su distribución.\n\nRufus puede descargar el archivo faltante:\n"
+	"- Seleccione 'Sí' para conectarse a Internet y descargar el archivo\n"
+	"- Seleccione 'No' si desea copiar manualmente este archivo en la unidad después\n\n"
+	"Nota: El archivo será descargado en la carpeta actual y una vez que haya "
+	"un archivo '%s' ahí, será usado automáticamente.\n"
+t MSG_105 "Cancelar ahora puede dejar el dispositivo en un estado INUTILIZABLE.\n"
+	"Si está seguro de cancelar, seleccione SÍ. De lo contrario, seleccione NO."
+t MSG_106 "Seleccione la carpeta"
+t MSG_107 "Todos los archivos"
+t MSG_108 "Registro de eventos de Rufus"
+t MSG_109 "0x%02X (Disco %d)"
+# "Cluster size" below should be the same as the label for IDS_CLUSTERSIZE_TXT
+# "kilobytes" should be the same as in MSG_027
+t MSG_110 "MS-DOS no puede arrancar desde un disco con un tamaño de cluster de 64 kilobytes.\n"
+	"Por favor cambie el tamaño del cluster o use FreeDOS."
+t MSG_111 "Tamaño de cluster incompatible"
+# "%d:%02d" below is a duration (mins:secs)
+t MSG_112 "Formatear un volumen UDF de gran tamaño puede tomar mucho tiempo. A la velocidad de USB 2.0, "
+	"el tiempo estimado de formateo es %d:%02d, durante el cual la barra de progreso parecerá congelada. "
+	"¡Por favor, sea paciente!"
+t MSG_113 "Volumen UDF de gran tamaño"
+
+# Tootips
+# Partition Scheme and Target Type
+t MSG_150 "Usualmente la opción más segura. Empero, si tiene una computadora basada en UEFI y quiere instalar "
+	"un sistema operativo en modo EFI, debe seleccionar una de las otras opciones"
+t MSG_151 "Use esta opción si quiere instalar un sistema operativo en modo EFI, pero necesita poder accedar "
+	"al contenido de la USB desde Windows XP"
+t MSG_152 "La opción preferida para instalar un sistema operativo en modo EFI y "
+	"no se necesita poder leer la USB desde Windows XP"
+t MSG_153 "Patrón de pruebas: 0x%02X"
+t MSG_154 "Patrón de pruebas: 0x%02X, 0x%02X"
+t MSG_155 "Patrón de pruebas: 0x%02X, 0x%02X, 0x%02X"
+t MSG_156 "Patrón de pruebas: 0x%02X, 0x%02X, 0x%02X, 0x%02X"
+t MSG_157 "Seleccione el sistema de archivos destino"
+t MSG_158 "Tamaño mínimo que un bloque de datos ocupará en el sistema de archivos"
+t MSG_159 "Use este campo para establecer el nombre del volumen\nSe aceptan caracteres acentuados"
+t MSG_160 "Mostrar opciones avanzadas"
+t MSG_161 "Revisa el dispositivo buscando bloques defectuosos aplicando un patrón de pruebas"
+t MSG_162 "Desmarque esta opción para usar el método de formateo \"lento\" "
+t MSG_163 "Marque esta opción para hacer booteable la unidad USB"
+t MSG_164 "Método a usar para hacer la unidad booteable"
+t MSG_165 "Haga clic para seleccionar una imagen ISO..."
+t MSG_166 "Seleccione esta opción para permitir el desplegado de caracteres acentuados "
+	"y establecer un icono para la unidad (crea un archivo autorun.inf)"
+t MSG_167 "Instala un MBR que permite seleccionar el dispositivo de arranque y puede enmascarar "
+	"el ID de identificación del dispositivo USB del BIOS"
+t MSG_168 "Trata de enmascarar el primer dispositivo USB de arranque (normalmente 0x80) como un disco diferente.\n"
+	"Sólo debiera ser necesario si instala Windows XP y tiene más de un disco duro"
+t MSG_169 "Crea una partición oculta extra y trata de alinear los límites de las particiones.\n"
+	"Esto puede mejorar la detección de USB de arranque para los BIOS viejos"
+t MSG_170 "Activa la detección de discos que Rufus normalmente no detecta. ¡¡¡ÚSESE BAJO SU PROPIO RIESGO!!!"
+t MSG_171 "Comienza la operación de formateo.\n¡Todos los datos en el dispositivo serán DESTRUIDOS!"
+t MSG_172 "Información de licencia y créditos"
+t MSG_173 "Haga clic para seleccionar..."
+# The following will appear in the about dialog
+t MSG_174 "Rufus - La utilería de formateo USB confiable"
+t MSG_175 "Versión %d.%d.%d (Build %d)"
+t MSG_176 "Traducción al castellano: José Pineda <mailto:battletroll@gmail.com>"
+t MSG_177 "Para reportar bugs o sugerir mejoras, diríjase a:"
+t MSG_178 "Derechos de autor adicionales:"
+t MSG_179 "Política de actualización:"
+t MSG_180 "Si usted autoriza que este programa busque e instale por sí mismo"
+	" actualizaciones, acepta que la siguiente información podrá ser recolectada"
+	" en nuestros servidores"
+t MSG_181 "La arquitectura y versión de su sistema operativo"
+t MSG_182 "La versión de la aplicación que está usando"
+t MSG_183 "Su dirección IP"
+t MSG_184 "A fin de generar estadísticas de uso privadas, la información recolectada puede ser"
+	" retenida \\b hasta por un año\\b0 . A menos que así sea requerido por la ley, no transmitiremos"
+	" nada de esta información a terceros."
+t MSG_185 "Proceso de actualización:"
+t MSG_186 "Rufus no instala ni ejecuta ningún servicio ni tarea programada. Por tanto la búsqueda"
+	" de actualizaciones sólo se realiza cuando la aplicación principal se está ejecutando.\\line\n"
+	"Por supuesto, se requiere acceso a Internet."
+
+# Status messages - these messages will appear on the status bar
+t MSG_201 "Cancelando - por favor espere..."
+t MSG_202 "Analizando la imagen ISO..."
+t MSG_203 "Fallo al analizar la imagen ISO"
+# Parameter: the name of an obsolete Syslinux .c32 module. eg: "Obsolete vesamenu.c32 detected"
+t MSG_204 "Se detectó un archivo %s obsoleto"
+# Display the name of the ISO selected. eg: "Using ISO: en_win7_x64_sp1.iso"
+t MSG_205 "Usando el archivo ISO: %s"
+# Typically "Missing ldlinux.c32 file"
+t MSG_206 "Falta el archivo %s"
+# The name proposed by Windows' Computer Management -> Disk Management when you try to format a drive
+# with an empty label. See http://rufus.akeo.ie/pics/default_name.png
+t MSG_207 "New Volume"
+# Same message, once for singular and plural ("1 device found", "2 devices found")
+t MSG_208 "%d dispositivo encontrado"
+t MSG_209 "%d dispositivos encontrados"
+t MSG_210 "Operación realizada."
+t MSG_211 "Operación cancelada."
+t MSG_212 "La operación FALLÓ."
+# Used when a new update has been downloaded and launched
+t MSG_213 "Lanzando la nueva aplicación..."
+t MSG_214 "Error al lanzar la nueva aplicación"
+# Open/Save file
+t MSG_215 "%s abierto"
+t MSG_216 "%s guardado"
+# Formatting status (make sure you use a double % to print the percent sign)
+t MSG_217 "Formateando: %0.1f%% completo"
+t MSG_218 "Creando sistema de archivos: Tarea %d/%d completa"
+t MSG_219 "Finalización de NTFS: %d%% completo"
+# Parameter: the file system and an estimated duration in mins and secs.
+# eg. "Formatting (UDF) - Estimated duration 3:21..."
+# NB: if "estimated duration" is too long, just use "estimated" or an abbreviation
+t MSG_220 "Formateando (%s) - duración estimada %d:%02d..."
+t MSG_221 "Escribiendo la etiqueta del volumen (puede tardar un rato)..."
+# Parameter: the file system. eg. "Formatting (NTFS)..."
+t MSG_222 "Formateando (%s)..."
+t MSG_223 "Finalización de NTFS (Checkdisk)..."
+t MSG_224 "Limpiando las estructuras MBR/PBR/GPT..."
+t MSG_225 "Solicitando acceso al disco..."
+t MSG_226 "Analizando las estructuras de arranque existentes..."
+t MSG_227 "Cerrando el volumen existente..."
+t MSG_228 "Escribiendo el registro maestro de arranque (Master Boot Record)..."
+t MSG_229 "Escribiendo el registro de arranque de la partición (Partition Boot Record)..."
+t MSG_230 "Copiando archivos DOS..."
+t MSG_231 "Copiando archivos ISO..."
+t MSG_232 "Configuración de arranque Win7 EFI (puede tardar un rato)..."
+t MSG_233 "Finalización, por favor espere..."
+# Takes the Syslinux version as parameter, eg. "Installing Syslinux v5..."
+t MSG_234 "Instalando Syslinux v%d..."
+# Bad blocks status. eg: "Bad Blocks: PASS 1/2 - 12.34% (0/0/1 errors)"
+t MSG_235 "Bloques dañados: PASO %d/%d - %0.2f%% (%d/%d/%d errores)"
+t MSG_236 "Bloques dañados: Probando con patrones aleatorios"
+t MSG_237 "Bloques dañados: Probando con el patrón 0x%02X"
+# eg. "Partitioning (MBR)..."
+t MSG_238 "Particionando (%s)..."
+t MSG_239 "Borrando particiones..."
+t MSG_240 "Descargando %s: Conectando..."
+t MSG_241 "Descargando: %0.1f%%"
+t MSG_242 "Error al descargar el archivo."
+t MSG_243 "Buscando actualizaciones de Rufus..."
+t MSG_244 "Actualizaciones: Imposible conectarse a Internet"
+t MSG_245 "Actualizaciones: Imposible acceder a la información de posibles actalizaciones"
+t MSG_246 "¡Hay una nueva versión de Rufus disponible!"
+t MSG_247 "No hay nuevas versiones de Rufus"
+t MSG_248 "Se borraron las llaves de registro de la aplicación"
+t MSG_249 "Fallo al borrar las llaves de registro de la aplicación"
+# eg. "Fixed disk detection enabled" "ISO size check disabled"
+t MSG_250 "%s activada"
+t MSG_251 "%s desactivada"
+t MSG_252 "Verificación de tamaño"
+t MSG_253 "Detección de discos duros"
+t MSG_254 "Forzar el formateo FAT32 largo"
+t MSG_255 "NoDriveTypeAutorun será borrado al salir"
+t MSG_256 "Simulación de detección de dispositivo"
+t MSG_257 "Soporte a Joliet"
+t MSG_258 "Soporte a Rock Ridge"
+t MSG_259 "Forzar actualización"
 
 ################################################################################
 l "tr-TR" "Turkish (Türkçe)" 0x041F

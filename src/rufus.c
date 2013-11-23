@@ -1579,8 +1579,6 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	case WM_COMMAND:
 		if ((LOWORD(wParam) >= UM_LANGUAGE_MENU) && (LOWORD(wParam) < UM_LANGUAGE_MENU_MAX)) {
 			selected_language = LOWORD(wParam) - UM_LANGUAGE_MENU;
-			uprintf("Got language %d\n", selected_language);
-
 			i = 0;
 			list_for_each_entry(lcmd, &locale_list, loc_cmd, list) {
 				if (i++ == selected_language) {

@@ -75,7 +75,7 @@ const char* additional_copyrights =
 "http://svn.reactos.org/svn/reactos/trunk/reactos\\line\n"
 "GNU General Public License (GPL) v3 compatible\\line\n"
 "\\line\n"
-"Some generic function calls from smartmontools:\\line\n"
+"USB vs HDD and additional functions calls derived from smartmontools:\\line\n"
 "https://sourceforge.net/projects/smartmontools\\line\n"
 "GNU General Public License (GPL) v2 or later\\line\n"
 "\\line\n"

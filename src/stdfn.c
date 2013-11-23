@@ -32,7 +32,7 @@
 int  nWindowsVersion = WINDOWS_UNDEFINED;
 char WindowsVersionStr[128] = "Windows ";
 
-static BOOL is_x64(void)
+BOOL is_x64(void)
 {
 	BOOL ret = FALSE;
 	BOOL (__stdcall *pIsWow64Process)(HANDLE, PBOOL) = NULL;

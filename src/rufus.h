@@ -288,6 +288,7 @@ extern int dialog_showing;
  * Shared prototypes
  */
 extern void GetWindowsVersion(void);
+extern BOOL is_x64(void);
 extern const char* PrintWindowsVersion(enum WindowsVersion version);
 extern const char *WindowsErrorString(void);
 extern void DumpBufferHex(void *buf, size_t size);

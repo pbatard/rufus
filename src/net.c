@@ -421,7 +421,6 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 	SYSTEMTIME ServerTime, LocalTime;
 	FILETIME FileTime;
 	int64_t local_time = 0, reg_time, server_time, update_interval;
-	BOOL is_x64 = FALSE, (__stdcall *pIsWow64Process)(HANDLE, PBOOL) = NULL;
 
 	update_check_in_progress = TRUE;
 	verbose = ReadRegistryKey32(REGKEY_HKCU, REGKEY_VERBOSE_UPDATES);
@@ -465,18 +464,6 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 		goto out;
 	}
 
-	// Detect if the OS is 64 bit, without relying on external libs
-	if (sizeof(uintptr_t) < 8) {
-		// This application is not 64 bit, but it might be 32 bit running in WOW64
-		pIsWow64Process = (BOOL (__stdcall *)(HANDLE, PBOOL))
-			GetProcAddress(GetModuleHandleA("KERNEL32"), "IsWow64Process");
-		if (pIsWow64Process != NULL) {
-			(*pIsWow64Process)(GetCurrentProcess(), &is_x64);
-		}
-	} else {
-		is_x64 = TRUE;
-	}
-
 	if ((!InternetCrackUrlA(server_url, (DWORD)safe_strlen(server_url), 0, &UrlParts)) || (!InternetGetConnectedState(&dwFlags, 0)))
 		goto out;
 	hostname[sizeof(hostname)-1] = 0;
@@ -500,7 +487,7 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 		// look for rufus_win_x64_6.2.ver (Win8 x64) but only get a match for rufus_win_x64_6.ver (Vista x64 or later)
 		// This allows sunsetting OS versions (eg XP) or providing different downloads for different archs/groups.
 		safe_sprintf(urlpath, sizeof(urlpath), "%s%s%s_%s_%d.%d.ver", APPLICATION_NAME, (k==0)?"":"_",
-			(k==0)?"":channel[k], archname[is_x64?1:0], os_version.dwMajorVersion, os_version.dwMinorVersion);
+			(k==0)?"":channel[k], archname[is_x64()?1:0], os_version.dwMajorVersion, os_version.dwMinorVersion);
 		vuprintf("Base update check: %s\n", urlpath);
 		for (i=0, j=(int)safe_strlen(urlpath)-5; (j>0)&&(i<ARRAYSIZE(verpos)); j--) {
 			if ((urlpath[j] == '.') || (urlpath[j] == '_')) {
