@@ -292,7 +292,7 @@ out:
 		if (SelectedDrive.ClusterSize[fs].Allowed != 0) {
 			tmp[0] = 0;
 			// Tell the user if we're going to use Large FAT32 or regular
-			if ((fs == FS_FAT32) && (SelectedDrive.DiskSize > LARGE_FAT32_SIZE))
+			if ((fs == FS_FAT32) && ((SelectedDrive.DiskSize > LARGE_FAT32_SIZE) || (force_large_fat32)))
 				safe_strcat(tmp, sizeof(tmp), "Large ");
 			safe_strcat(tmp, sizeof(tmp), FileSystemLabel[fs]);
 			if (default_fs == FS_UNKNOWN) {
@@ -835,7 +835,7 @@ static void InitProgress(void)
 	nb_slots[OP_CREATE_FS] = 
 		nb_steps[ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem))];
 	if ( (!IsChecked(IDC_QUICKFORMAT))
-	  || ((fs == FS_FAT32) && (SelectedDrive.DiskSize >= LARGE_FAT32_SIZE)) ) {
+	  || ((fs == FS_FAT32) && ((SelectedDrive.DiskSize >= LARGE_FAT32_SIZE) || (force_large_fat32))) ) {
 		nb_slots[OP_FORMAT] = -1;
 	}
 	nb_slots[OP_FINALIZE] = ((dt == DT_ISO) && (fs == FS_NTFS))?3:2;
@@ -1698,7 +1698,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			bt = GETBIOSTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
 			SetClusterSizes(fs);
 			// Disable/restore the quick format control depending on large FAT32
-			if ((fs == FS_FAT32) && (SelectedDrive.DiskSize > LARGE_FAT32_SIZE)) {
+			if ((fs == FS_FAT32) && ((SelectedDrive.DiskSize > LARGE_FAT32_SIZE) || (force_large_fat32))) {
 				if (IsWindowEnabled(GetDlgItem(hMainDialog, IDC_QUICKFORMAT))) {
 					uQFChecked = IsDlgButtonChecked(hMainDialog, IDC_QUICKFORMAT);
 					CheckDlgButton(hMainDialog, IDC_QUICKFORMAT, BST_CHECKED);
@@ -2168,18 +2168,20 @@ relaunch:
 			}
 			// Alt-F => Toggle detection of USB HDDs
 			// By default Rufus does not list USB HDDs. This is a safety feature aimed at avoiding
-			// unintentional formattings of backup drives instead of USB keys.
+			// unintentional formatting of backup drives instead of USB keys.
 			// When enabled, Rufus will list and allow the formatting of USB HDDs.
 			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'F')) {
 				enable_HDDs = !enable_HDDs;
 				PrintStatus2000(lmprintf(MSG_253), enable_HDDs);
 				GetUSBDevices(0);
+				CheckDlgButton(hMainDialog, IDC_ENABLE_FIXED_DISKS, enable_HDDs?BST_CHECKED:BST_UNCHECKED);
 				continue;
 			}
 			// Alt-L => Force Large FAT32 format to be used on < 32 GB drives
 			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'L')) {
 				force_large_fat32 = !force_large_fat32;
 				PrintStatus2000(lmprintf(MSG_254), force_large_fat32);
+				GetUSBDevices(0);
 				continue;
 			}
 			// Alt-D => Delete the NoDriveTypeAutorun key on exit (useful if the app crashed)
