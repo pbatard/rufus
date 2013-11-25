@@ -2341,6 +2341,409 @@ t MSG_258 "Rock Ridge 지원"
 t MSG_259 "강제 업데이트"
 
 ################################################################################
+l "lt-LT" "Lithuanian (Lietuvių)" 0x0427
+v 1.0.3
+b "en-US"
+
+# Main dialog
+g IDD_DIALOG
+s IDD_DIALOG +12,0
+m IDC_LANG +12,0
+s IDC_DEVICE +12,0
+s IDC_PARTITION_TYPE +12,0
+s IDC_FILESYSTEM +12.0
+s IDC_CLUSTERSIZE +12,0
+s IDC_LABEL +16,0
+s IDC_PROGRESS +12,0
+t IDS_DEVICE_TXT "Įrenginys"
+t IDS_PARTITION_TYPE_TXT "Skaidinių schema ir paskirties sistemos tipas"
+t IDS_FILESYSTEM_TXT "Failų sistema"
+t IDS_CLUSTERSIZE_TXT "Klasterio dydis"
+t IDS_LABEL_TXT "Nauja tomo žymė"
+t IDS_FORMAT_OPTIONS_GRP "Formatavimo parinktys       "
+s IDS_FORMAT_OPTIONS_GRP +10,0
+m IDC_ADVANCED +35,0
+s IDC_BADBLOCKS +10,0
+t IDC_BADBLOCKS "Tikrinti įrenginį dėl blogų blokų:"
+m IDC_NBPASSES +6,0
+s IDC_NBPASSES +11,0
+t IDC_QUICKFORMAT "Greitas formatavimas"
+t IDC_BOOT "Kurti įkelties diską naudojant:"
+s IDC_BOOTTYPE +17,0
+m IDC_SELECT_ISO +15,0
+t IDC_SET_ICON "Kurti išplėstinės žymės ir piktogramos failus"
+s IDC_ABOUT -15,0
+t IDC_ABOUT "Apie..."
+m IDC_LOG -15,0
+s IDC_LOG 30,0
+t IDC_LOG "Dienynas"
+t IDCANCEL "Uždaryti"
+m IDCANCEL +12,0
+t IDC_START "Pradėti"
+m IDC_START +12,0
+t IDS_ADVANCED_OPTIONS_GRP "Išsamios parinktys"
+t IDC_ENABLE_FIXED_DISKS "Rodyti USB kietuosius diskus"
+t IDC_EXTRA_PARTITION "Pataisos seniems BIOS (papildomas skaidinys, ir kt.)"
+# 'MBR': See bhttp://en.wikipedia.org/wiki/Master_boot_record
+# Rufus can install it's own custom MBR (the Rufus MBR), which also allows users
+# to specify a custom disk ID for the BIOS. Note: the tooltip for this control is MSG_167.
+s IDC_RUFUS_MBR +10,0
+m IDC_DISK_ID +10,0
+s IDC_DISK_ID -10,0
+t IDC_RUFUS_MBR "Naudoti Rufus MBR su BIOS ID:"
+
+# About dialog
+g IDD_ABOUTBOX
+t IDD_ABOUTBOX "Apie Rufus"
+t IDC_ABOUT_LICENSE "Licencija"
+t IDC_ABOUT_UPDATES "Naujiniai"
+t IDOK "Gerai"
+
+# About -> License dialog
+g IDD_LICENSE
+t IDD_LICENSE "Rufus licencija"
+t IDCANCEL "Uždaryti"
+
+# Notifications. You can trigger one of these by using Alt-R and re-launching Rufus
+g IDD_NOTIFICATION
+s IDC_MORE_INFO 18,0
+t IDC_MORE_INFO "Daugiau informacijos"
+t IDYES "Taip"
+t IDNO "Ne"
+
+# Log dialog
+g IDD_LOG
+t IDD_LOG "Dienynas"
+t IDC_LOG_CLEAR "Valyti"
+t IDC_LOG_SAVE "Išsaugoti"
+t IDCANCEL "Uždaryti"
+
+# About -> Updates
+g IDD_UPDATE_POLICY
+t IDD_UPDATE_POLICY "Naujinių politika ir nuostatos"
+t IDS_UPDATE_SETTINGS_GRP "Nuostatos"
+s IDS_UPDATE_SETTINGS_GRP +11,0
+m IDS_CHECK_NOW_GRP +5,0
+s IDS_CHECK_NOW_GRP -5,0
+s IDS_UPDATE_FREQUENCY_TXT -12,0
+t IDS_UPDATE_FREQUENCY_TXT "Tikrinti, ar yra naujinių:"
+m IDC_UPDATE_FREQUENCY -12,0
+s IDC_UPDATE_FREQUENCY +20,0
+s IDS_INCLUDE_BETAS_TXT -12,0
+t IDS_INCLUDE_BETAS_TXT "Įtraukti beta versijas:"
+m IDC_INCLUDE_BETAS -12,0
+t IDC_CHECK_NOW "Tikrinti dabar"
+m IDC_CHECK_NOW +2,0
+t IDCANCEL "Uždaryti"
+m IDCANCEL +2,0
+
+# Dialog that appears when a new version is available
+g IDD_NEW_VERSION
+t IDD_NEW_VERSION "Tikrinti, ar yra naujinių - Rufus"
+t IDS_NEW_VERSION_AVAIL_TXT "Yra naujesnė versija. Prašau atsisiųsti naujausią versiją!"
+t IDC_WEBSITE "Spausk čia, kad patektum į Rufus svetainę"
+t IDS_NEW_VERSION_NOTES_GRP "Leidimo pastabos"
+t IDS_NEW_VERSION_DOWNLOAD_GRP "Siųstis"
+t IDC_DOWNLOAD "Siųstis"
+t IDCANCEL "Uždaryti"
+
+# Dialog that appears when scanning/extracting ISO files
+g IDD_ISO_EXTRACT
+t IDD_ISO_EXTRACT "Kopijuojami ISO failai..."
+t IDC_ISO_FILENAME "Atidaromas ISO atvaizdas - palaukite..."
+t IDC_ISO_ABORT "Atšaukti"
+
+# Messages used throughout the application
+g IDD_MESSAGES
+t MSG_001 "Aptiktas kitas programos atvejis"
+t MSG_002 "Vykdoma kita Rufus programa.\n"
+	"Prašau uždaryti pirmą programą prieš vykdant kitą."
+t MSG_003 "ĮSPĖJIMAS: VISI DUOMENYS ĮRENGINYJE '%s' BUS SUNAIKINTI.\n"
+	"Norėdami tęsti šį veiksmą, spauskite Gerai. Išeiti - spauskite Atšaukti."
+t MSG_004 "Rufus naujinių politika"
+t MSG_005 "Ar norite leisti Rufus tikrinti programos naujinius internete?"
+# Must be the same as IDD_DIALOG:IDCANCEL (i.e. "Close" - I know it's confusing)
+t MSG_006 "Uždaryti"
+t MSG_007 "Atšaukti"
+t MSG_008 "Taip"
+t MSG_009 "Ne"
+t MSG_010 "Rasta blogų blokų"
+t MSG_011 "Tikrinimas baigtas: rasta %u blogų blokų\n"
+	"  %d skaitymo klaidų\n  %d rašymo klaidų\n  %d iškraipymo klaidų\n"
+# The following will contain the formatted message above as well as the name of the bad blocks logfile
+t MSG_012 "%s\nIšsamesnę ataskaitą rasite:\n%s"
+t MSG_013 "Išjungta"
+t MSG_014 "Kasdien"
+t MSG_015 "Kas savaitę"
+t MSG_016 "Kas mėnesį"
+t MSG_017 "Pasirinktinai"
+t MSG_018 "Jūsų versija: %d.%d.%d (sąranka %d)"
+t MSG_019 "Naujausia versija: %d.%d.%d (sąranka %d)"
+# *Short* size names. These can be used as suffixes
+t MSG_020 "baitai"
+t MSG_021 "KB"
+t MSG_022 "MB"
+t MSG_023 "GB"
+t MSG_024 "TB"
+t MSG_025 "PB"
+# *Long* size names, as they are displayed for the cluster size in the MS format dialog.
+t MSG_026 "baitai"	# Yes, this is a repeat from MSG_020
+t MSG_027 "kilobaitai"
+t MSG_028 "megabaitai"
+t MSG_029 "Numatytas"
+# The following gets appended to the file system, cluster size, etc.
+t MSG_030 "%s (numatytas)"
+t MSG_031 "%s skaidinių schema BIOS kompiuteriui"
+t MSG_032 "%s skaidinių schema UEFI kompiuteriui"
+t MSG_033 "%s skaidinių schema BIOS ar UEFI kompiuteriui"
+# Number of bad block check passes (singular for 1 pass, plural for 2 or more passes)
+t MSG_034 "%d bandymas"
+t MSG_035 "%d bandymai"
+t MSG_036 "ISO atvaizdas"
+t MSG_037 "Programa"
+t MSG_038 "Nutraukti"
+t MSG_039 "Vykdyti"
+t MSG_040 "Atsiųsti"
+t MSG_041 "Veiksmas atšauktas naudotojo"
+t MSG_042 "Klaida"
+t MSG_043 "Klaida: %s"
+t MSG_044 "Failo atsisiuntimas"
+t MSG_045 "USB saugyklos įrenginys (bendrinis)"
+t MSG_046 "%s (diskas %d)"
+t MSG_047 "%s (%c:)"
+t MSG_048 "Rufus - išvalomi buferiai"
+t MSG_049 "Rufus - atšaukimas"
+
+# Error messages
+t MSG_050 "Sėkmingai."
+t MSG_051 "Nenustatyta klaida formatuojant."
+t MSG_052 "Negalima naudoti parinktos failų sistemos šiai laikmenai."
+t MSG_053 "Prieiga prie šio įrenginio uždrausta."
+t MSG_054 "Laikmena apsaugota nuo įrašymo."
+t MSG_055 "Įrenginį naudoja kitas procesas. "
+	"Prašau uždaryti kitus procesus, kurie gali kreiptis į įrenginį."
+t MSG_056 "Greitas formatavimas negalimas šiam įrenginiui."
+t MSG_057 "Tomo žymė negaliojanti."
+t MSG_058 "Įrenginio klasės vardas negaliojantis."
+t MSG_059 "Pasirinktas klasterio dydis negalioja šiam įrenginiui."
+t MSG_060 "Tomo dydis negaliojantis."
+t MSG_061 "Įterpkite keičiamą laikmeną į įrenginį."
+t MSG_062 "Gauta nepalaikoma komanda."
+t MSG_063 "Atminties paskirstymo klaida."
+t MSG_064 "Skaitymo klaida."
+t MSG_065 "Rašymo klaida."
+t MSG_066 "Įdiegimo triktis"
+t MSG_067 "Nepavyko atverti laikmenos. Ji gali būti naudojama kito proceso. "
+	"Prašau įterpti laikmeną iš naujo ir bandykite vėl."
+t MSG_068 "Klaida skaidant diską."
+t MSG_069 "Nepavyko nukopijuoti failų į paskirties diską."
+t MSG_070 "Atšaukta naudotojo."
+# See http://en.wikipedia.org/wiki/Thread_%28computing%29
+t MSG_071 "Negalima pradėti gijos."
+t MSG_072 "Blogų blokų tikrinimas nebuvo baigtas."
+t MSG_073 "ISO atvaizdo peržiūros triktis."
+t MSG_074 "ISO atvaizdo išskleidimo triktis."
+t MSG_075 "Negalima prijungti tomo."
+t MSG_076 "Negalima papildyti/paruošti failų įkelčiai."
+t MSG_077 "Negalima priskirti disko raidės."
+t MSG_078 "Negalima prijungti GUID tomo."
+
+t MSG_080 "Rufus aptiko, kad Windows vis dar išvalo savo vidinius buferius į USB įrenginį.\n\n"
+	"Priklausomai nuo jūsų USB įrenginio spartos, šis veiksmas gali užtrukti ilgai, "
+	"ypač su dideliais failais.\n\nMes patariame jums leisti Windows pabaigti, kad išvengtumėte iškraipymų. "
+	"Bet jei jums nusibos laukti, galite tiesiog ištraukti įrenginį..."
+t MSG_081 "Nepalaikomas ISO"
+t MSG_082 "Ši Rufus versija palaiko tik įkelties ISO, naudojančius bootmgr/WinPE, isolinux ar EFI.\n"
+	"Šis ISO, atrodo, nenaudoja nė vieno..."
+t MSG_083 "Pakeisti %s?"
+t MSG_084 "Atrodo, šis ISO atvaizdas naudoja pasenusią '%s' versiją.\n"
+	"Įkelties meniu dėl to gali būti vaizduojamas blogai.\n\n"
+	"Galima atsisiųsti naujesnę Rufus versiją išspręsti problemai:\n"
+	"- Pasirinkite 'Taip' norėdami prisijungti prie interneto ir atsisiųsti failą\n"
+	"- Pasirinkite 'Ne' norėdami palikti esamą ISO failą nepakeistą\n"
+	"Jei nežinote ką daryti, reikėtų pasirinkti 'Taip'.\n\n"
+	"Pastaba: naujas failas bus atsiųstas į dabartinį katalogą ir jei "
+	"'%s' ten jau yra, jis bus panaudotas iš naujo automatiškai."
+t MSG_085 "Siunčiu %s"
+t MSG_086 "Neparinktas ISO atvaizdas"
+# The content between the quotes below (\"Create a bootable disk\") should match
+# the beginning of the IDC_BOOT text
+t MSG_087 "Prašau spausti disko mygtuką norėdami pasirinkti įkelties ISO, "
+	"arba nežymėkite \"Kurti įkelties diską...\" langelio."
+t MSG_088 "ISO per didelis"
+t MSG_089 "Šis ISO atvaizdas yra per didelis pasirinktai paskirčiai."
+t MSG_090 "Nepalaikomas ISO"
+t MSG_091 "Naudojant UEFI paskirties tipą, tiktai EFI įkelties ISO atvaizdai yra palaikomi. "
+	"Prašau pasirinkti EFI įkelties ISO arba pakeisti paskirties tipą į BIOS."
+t MSG_092 "Nepalaikoma failų sistema"
+t MSG_093 "Naudojant UEFI paskirties tipą, tiktai FAT/FAT32 yra palaikomi. "
+	"Prašau pasirinkti FAT/FAT32 failų sistemą arba pakeisti paskirties tipą į BIOS."
+t MSG_094 "Ne UEFI suderinamas ISO"
+t MSG_095 "Šiame ISO atvaizde yra failas, didesnis negu 4 GB, todėl jis negali būti naudojamas kurti EFI įkelties USB.\n"
+	"Tai yra UEFI/FAT32 apribojimas, ne Rufus."
+t MSG_096 "Tik FAT/FAT32 yra palaikoma šiam ISO tipui. Prašau pasirinkti FAT/FAT32 failų sistemą."
+t MSG_097 "Tik 'bootmgr' ar 'WinPE' pagrindo ISO atvaizdai šiuo metu gali būti naudojami su NTFS."
+t MSG_098 "FAT/FAT32 gali būti naudojama tik isolinux pagrindo ISO atvaizdams arba kai paskirties tipas yra UEFI."
+t MSG_099 "Failų sistemos apribojimas"
+t MSG_100 "Šiame ISO atvaizde yra failas, didesnis negu 4 GB, tai daugiau negu "
+	"maksimalus leistinas dydis FAT arba FAT32 failų sistemai."
+t MSG_101 "Trūksta WIM palaikymo"
+t MSG_102 "Jūsų platforma negali išskleisti failų iš WIM archyvų. WIM išskleidimas "
+	"būtinas norint sukurti EFI įkeliamus Windows 7 ir Windows Vista USB diskus. Jūs galite tai sutvarkyti "
+	"įdiegdami dabartinę 7-Zip versiją.\nAr norite apsilankyti 7-zip atsisiuntimo puslapyje?"
+t MSG_103 "Atsiųsti %s?"
+t MSG_104 "Syslinux v5.0 ar vėlesniam reikia, kad '%s' failas būtų įdiegtas.\n"
+	"Kadangi šis failas didesnis nei 100 KB ir yra visada įtrauktas į Syslinux v5+ ISO atvaizdus, "
+	"jis nėra įjungtas į Rufus.\n\nRufus gali jums atsiųsti trūkstamą failą:\n"
+	"- Pasirinkite 'Taip' norėdami prisijungti prie interneto ir atsisiųsti failą\n"
+	"- Pasirinkite 'Ne' norėdami rankiniu būdu nukopijuoti šį failą į diską vėliau\n\n"
+	"Pastaba: Failas bus atsiųstas į dabartinį katalogą ir kai "
+	"'%s' bus ten, jis bus pakartotinai naudojamas automatiškai.\n"
+t MSG_105 "Atšaukus dabar, įrenginys gali likti NEPRIEINAMOJE būsenoje.\n"
+	"Jei tikrai norite atšaukti, spauskite TAIP. Kitu atveju, spauskite NE."
+t MSG_106 "Pasirinkite katalogą"
+t MSG_107 "Visi failai"
+t MSG_108 "Rufus dienynas"
+t MSG_109 "0x%02X (Diskas %d)"
+# "Cluster size" below should be the same as the label for IDS_CLUSTERSIZE_TXT
+# "kilobytes" should be the same as in MSG_027
+t MSG_110 "MS-DOS negali įsikelti iš disko naudojant 64 kilobaitų Klasterio dydį.\n"
+	"Prašau pakeiskite Klasterio dydį arba naudokite FreeDOS."
+t MSG_111 "Nesuderinamas Klasterio dydis"
+# "%d:%02d" below is a duration (mins:secs)
+t MSG_112 "Didelių UDF tomų formatavimas gali užimti daug laiko. USB 2.0 greičiu numatoma formatavimo "
+	"trukmė yra %d:%02d, tuo metu eigos juosta gali atrodyti sustingusi. Prašau kantrybės!"
+t MSG_113 "Didelis UDF tomas"
+
+# Tootips
+# Partition Scheme and Target Type
+t MSG_150 "Paprastai saugiausias pasirinkimas. Bet jei turite UEFI kompiuterį ir norite įdiegti "
+	"operacinę sistemą EFI režimu, turėtumėte pasirinkit vieną iš kitų parinkčių"
+t MSG_151 "Naudokite šią parinktį, jei norite įdiegti operacinę sistemą EFI režimu, "
+	"bet norėsite pasiekti USB turinį iš Windows XP"
+t MSG_152 "Rekomenduojama parinktis įdiegiant operacinę sistemą EFI režimu ir kai "
+	"USB prieiga nebūtina iš Windows XP"
+t MSG_153 "Testo šablonas: 0x%02X"
+t MSG_154 "Testo šablonas: 0x%02X, 0x%02X"
+t MSG_155 "Testo šablonas: 0x%02X, 0x%02X, 0x%02X"
+t MSG_156 "Testo šablonas: 0x%02X, 0x%02X, 0x%02X, 0x%02X"
+t MSG_157 "Nustato paskirties failų sistemą"
+t MSG_158 "Mažiausias dydis, kurį duomenų blokas užims failų sistemoje"
+t MSG_159 "Šiame laukelyje įrašykite disko žymę\nGalite naudoti tarptautinius simbolius"
+t MSG_160 "Įjungti išsamias parinktis"
+t MSG_161 "Tikrinti įrenginį dėl blogų blokų naudojant testo šabloną"
+t MSG_162 "Nuimkite šio langelio žymę norėdami naudoti \"lėtą\" formatavimo būdą"
+t MSG_163 "Pažymėkite šį langelį norėdami padaryti USB diską įkeliamą"
+t MSG_164 "Būdas, kuris bus naudojamas padaryti diską įkeliamą"
+t MSG_165 "Spauskite, kad pasirinktumėte ISO..."
+t MSG_166 "Pažymėkite šį langelį, norėdami įgalinti tarptautinių žymių rodymą "
+	"ir įrenginio piktogramos nustatymą (sukuria autorun.inf)"
+t MSG_167 "Įdiegia MBR, kuris įgalina įkelties pasirinkimą ir gali maskuoti BIOS USB disko ID"
+t MSG_168 "Bandyti maskuoti pirmą įkeliamą USB diską (paprastai 0x80) kaip kitą diską.\n"
+	"To turėtų prireikti tik jei diegsite Windows XP ir bus daugiau nei vienas diskas"
+t MSG_169 "Sukurti papildomą slaptą skaidinį ir bandyti sulygiuoti skaidinių ribas.\n"
+	"Tai gali pagerinti įkelties aptikimą su senais BIOSais"
+t MSG_170 "Įgalinti išorinių USB kietųjų diskų pateiktį. NAUDOTI SAVO RIZIKA!!!"
+t MSG_171 "Pradėti formatavimo veiksmą.\nTai SUNAIKINS visus duomenis paskirtyje!"
+t MSG_172 "Licencijavimo informacija ir kreditai"
+t MSG_173 "Spauskite pasirinkti..."
+# The following will appear in the about dialog
+t MSG_174 "Rufus - patikima USB formatavimo priemonė"
+t MSG_175 "Versija %d.%d.%d (sąranka %d)"
+t MSG_176 "Lietuviškas vertimas: Gintaras Venslovas (gintaras.venslovas@gmail.com)"
+t MSG_177 "Dėl pastebėtų klaidų ar pageidaujamų patobulinimų kreipkitės:"
+t MSG_178 "Kitos autorių teisės:"
+t MSG_179 "Naujinių politika:"
+t MSG_180 "Jei leisite šiai programai tikrinti, ar yra naujinių, "
+	"jūs sutinkate, kad mūsų serveriuose gali būti renkama ši informacija"
+t MSG_181 "Jūsų operacinės sistemos architektūra ir versija"
+t MSG_182 "Programos, kurią naudojate, versija"
+t MSG_183 "Jūsų IP adresas"
+t MSG_184 "Asmeninio naudojimo statistikos generavimo tikslu mes galime saugoti surinktą informaciją "
+	"\\b ne daugiau kaip metus\\b0 . Tačiau mes savo valia neatskleisime nieko iš šios informacijos trečiosioms šalims."
+t MSG_185 "Atnaujinimo procesas:"
+t MSG_186 "Rufus neįdiegia ir nevykdo foninių tarnybų, todėl naujinių tikrinimai yra atliekami tik vykdant pagrindinę programą.\\line\n"
+	"Interneto prieiga, be abejo, yra reikalinga naujinių tikrinimui."
+
+# Status messages - these messages will appear on the status bar
+t MSG_201 "Atšaukiama - prašome palaukti..."
+t MSG_202 "Peržiūrimas ISO atvaizdas..."
+t MSG_203 "Nepavyko peržiūrėti ISO atvaizdo"
+# Parameter: the name of an obsolete Syslinux .c32 module. eg: "Obsolete vesamenu.c32 detected"
+t MSG_204 "Aptiktas pasenęs %s"
+# Display the name of the ISO selected. eg: "Using ISO: en_win7_x64_sp1.iso"
+t MSG_205 "Naudojamas ISO: %s"
+# Typically "Missing ldlinux.c32 file"
+t MSG_206 "Trūksta %s failo"
+# The name proposed by Windows' Computer Management -> Disk Management when you try to format a drive
+# with an empty label. See http://rufus.akeo.ie/pics/default_name.png
+t MSG_207 "Naujas tomas"
+# Same message, once for singular and plural ("1 device found", "2 devices found")
+t MSG_208 "%d įrenginys rastas"
+t MSG_209 "%d įrenginiai rasti"
+t MSG_210 "ATLIKTA."
+t MSG_211 "Atšaukta."
+t MSG_212 "NEPAVYKO."
+# Used when a new update has been downloaded and launched
+t MSG_213 "Paleidžiama nauja programa..."
+t MSG_214 "Nepavyko paleisti naujos programos"
+# Open/Save file
+t MSG_215 "Atidarytas %s"
+t MSG_216 "Išsaugotas %s"
+# Formatting status (make sure you use a double % to print the percent sign)
+t MSG_217 "Formatuojama: %0.1f%% baigta"
+t MSG_218 "Kuriama failų sistema: Užduotis %d/%d atlikta"
+t MSG_219 "NTFS tvarkymas: %d%% baigta"
+# Parameter: the file system and an estimated duration in mins and secs.
+# eg. "Formatting (UDF) - Estimated duration 3:21..."
+# NB: if "estimated duration" is too long, just use "estimated" or an abbreviation
+t MSG_220 "Formatuojama (%s) - numatoma trukmė %d:%02d..."
+t MSG_221 "Rašoma žymė (gali užtrukti)..."
+# Parameter: the file system. eg. "Formatting (NTFS)..."
+t MSG_222 "Formatuojama (%s)..."
+t MSG_223 "NTFS tvarkymas (disko tikrinimas)..."
+t MSG_224 "Išvalomos MBR/PBR/GPT struktūros..."
+t MSG_225 "Užsakoma disko prieiga..."
+t MSG_226 "Tiriami esami įkelties įrašai..."
+t MSG_227 "Uždaromas esamas tomas..."
+t MSG_228 "Rašomas valdantysis įkelties įrašas (MBR)..."
+t MSG_229 "Rašomas skaidinio įkelties įrašas..."
+t MSG_230 "Kopijuojami DOS failai..."
+t MSG_231 "Kopijuojami ISO failai..."
+t MSG_232 "Win7 EFI įkelties sąranka (gali užtrukti)..."
+t MSG_233 "Baigiama, prašome palaukti..."
+# Takes the Syslinux version as parameter, eg. "Installing Syslinux v5..."
+t MSG_234 "Įdiegiama Syslinux v%d..."
+# Bad blocks status. eg: "Bad Blocks: PASS 1/2 - 12.34% (0/0/1 errors)"
+t MSG_235 "Blogi blokai: BANDYMAS %d/%d - %0.2f%% (%d/%d/%d klaidos)"
+t MSG_236 "Blogi blokai: tikrinama su atsitiktiniu šablonu"
+t MSG_237 "Blogi blokai: tikrinama su šablonu 0x%02X"
+# eg. "Skaidoma (MBR)..."
+t MSG_238 "Skaidoma (%s)..."
+t MSG_239 "Trinami skaidiniai..."
+t MSG_240 "Atsiunčiamas %s: Jungiamasi..."
+t MSG_241 "Atsiunčiama: %0.1f%%"
+t MSG_242 "Nepavyko atsiųsti failo."
+t MSG_243 "Tikrinama, ar yra Rufus naujinių..."
+t MSG_244 "Naujiniai: negaliu prisijungti prie interneto"
+t MSG_245 "Naujiniai: negaliu pasiekti versijos duomenų"
+t MSG_246 "Yra nauja Rufus versija!"
+t MSG_247 "Naujos Rufus versijos nerasta"
+t MSG_248 "Programos registro raktai sėkmingai ištrinti"
+t MSG_249 "Nepavyko ištrinti programos registro raktų"
+# eg. "Fixed disk detection enabled" "ISO size check disabled"
+t MSG_250 "%s įjungtas"
+t MSG_251 "%s išjungtas"
+t MSG_252 "Dydžio tikrinimas"
+t MSG_253 "Fiksuotųjų diskų aptikimas"
+t MSG_254 "Priversti didelį FAT32 formatavimą"
+t MSG_255 "NoDriveTypeAutorun bus ištrintas išeinant"
+t MSG_256 "Netikrų diskų aptikimas"
+t MSG_257 "Joliet palaikymas"
+t MSG_258 "Rock Ridge palaikymas"
+t MSG_259 "Priversti naujintis"
+
+################################################################################
 l "ro-RO" "Romanian (Română)" 0x0418, 0x0818
 v 1.0.3
 b "en-US"
