@@ -425,7 +425,7 @@ t MSG_259 "Force update"
 
 
 ################################################################################
-l "zh-CN" "Chinese Simplified (简体中文)" 0x0404, 0x0804, 0x0c04, 0x1004, 0x1404
+l "zh-CN" "Chinese Simplified (简体中文)" 0x0804, 0x1004
 v 1.0.0
 b "en-US"
 
@@ -505,6 +505,359 @@ t MSG_004 "更新方案和设置"
 t MSG_005 "你要允許此應用程序檢查更新？"
 t MSG_006 "关闭"
 t MSG_007 "撤消"
+
+################################################################################
+l "zh-TW" "Chinese Traditional (正體中文)" 0x0404, 0x0c04, 0x1404, 0x7c04
+v 1.0.3
+b "en-US"
+
+# Main dialog
+g IDD_DIALOG
+t IDS_DEVICE_TXT "裝置"
+t IDS_PARTITION_TYPE_TXT "資料分割配置及系統類型"
+t IDS_FILESYSTEM_TXT "檔案系統"
+t IDS_CLUSTERSIZE_TXT "配置單元大小"
+t IDS_LABEL_TXT "磁碟區標籤"
+t IDS_FORMAT_OPTIONS_GRP "選項       "
+m IDC_ADVANCED -50,0
+t IDC_BADBLOCKS "檢查損毀磁區，測試次數:"
+t IDC_QUICKFORMAT "快速格式化"
+t IDC_BOOT "使用映像檔建立開機片:"
+t IDC_SET_ICON "建立延伸標籤及圖示"
+t IDC_ABOUT "關於..."
+s IDC_ABOUT -20,0
+t IDC_LOG "記錄檔"
+s IDC_LOG +30,0
+m IDC_LOG -20,0
+t IDCANCEL "離開"
+s IDCANCEL -15,0
+m IDCANCEL +15,0
+t IDC_START "執行"
+s IDC_START +5,0
+m IDC_START +10,0
+t IDS_ADVANCED_OPTIONS_GRP "進階選項"
+t IDC_ENABLE_FIXED_DISKS "顯示 USB 外接硬碟"
+t IDC_EXTRA_PARTITION "相容性模式"
+t IDC_RUFUS_MBR "客製 MBR 並設 ID 為:"
+
+# About dialog
+g IDD_ABOUTBOX
+t IDD_ABOUTBOX "關於 Rufus"
+t IDC_ABOUT_LICENSE "授權合約"
+t IDC_ABOUT_UPDATES "版本更新"
+
+# About -> License dialog
+g IDD_LICENSE
+t IDD_LICENSE "Rufus 授權合約"
+t IDCANCEL "關閉"
+
+# Notifications. You can trigger one of these by using Alt-R and re-launching Rufus
+g IDD_NOTIFICATION
+t IDC_MORE_INFO "進階說明"
+t IDYES "是"
+t IDNO "否"
+
+# Log dialog
+g IDD_LOG
+t IDD_LOG "記錄檔"
+t IDC_LOG_CLEAR "清除"
+t IDC_LOG_SAVE "儲存"
+t IDCANCEL "關閉"
+
+# About -> Updates
+g IDD_UPDATE_POLICY
+t IDD_UPDATE_POLICY "版本更新"
+t IDS_UPDATE_SETTINGS_GRP "設定"
+t IDS_UPDATE_FREQUENCY_TXT "自動檢查更新:"
+t IDS_INCLUDE_BETAS_TXT "包含測試版本:"
+t IDC_CHECK_NOW "立即檢查"
+t IDCANCEL "關閉"
+
+# Dialog that appears when a new version is available
+# I will provide a way to trigger this dialog in future versions
+g IDD_NEW_VERSION
+t IDD_NEW_VERSION "線上更新 - Rufus"
+t IDS_NEW_VERSION_AVAIL_TXT "找到更新版本，請下載更新!"
+t IDC_WEBSITE "前往官方網頁下載 (點選會開啟瀏覽器)"
+t IDS_NEW_VERSION_NOTES_GRP "版本說明"
+t IDS_NEW_VERSION_DOWNLOAD_GRP "下載"
+t IDC_DOWNLOAD "下載"
+t IDCANCEL "關閉"
+
+# Dialog that appears when scanning/extracting ISO files
+g IDD_ISO_EXTRACT
+t IDD_ISO_EXTRACT "正在複製映像檔..."
+t IDC_ISO_FILENAME "讀取映像檔中，請稍候..."
+t IDC_ISO_ABORT "取消"
+
+# Messages used throughout the application
+g IDD_MESSAGES
+t MSG_001 "錯誤"
+t MSG_002 "已有 Rufus 視窗執行中\n"
+	"若要重新開啟，請先終止執行中的視窗"
+t MSG_003 "警告: 此動作將完全清除此裝置上的資料: '%s'\n"
+	"請再次確認是否繼續"
+t MSG_004 "Rufus 線上更新規則"
+t MSG_005 "是否啟用自動線上檢查更新機制?"
+# Must be the same as IDD_DIALOG:IDCANCEL (i.e. "Close" - I know it's confusing)
+t MSG_006 "關閉"
+t MSG_007 "取消"
+t MSG_008 "是"
+t MSG_009 "否"
+t MSG_010 "偵測到損毀磁區"
+t MSG_011 "掃描結果: %u 個異常\n"
+	"  %d 讀取錯誤\n  %d 寫入錯誤\n  %d 損毀錯誤\n"
+# The following will contain the formatted message above as well as the name of the bad blocks logfile
+t MSG_012 "%s\n詳細報告位於:\n%s"
+t MSG_013 "停用"
+t MSG_014 "每天"
+t MSG_015 "每週"
+t MSG_016 "每月"
+t MSG_017 "自訂"
+t MSG_018 "目前版本: %d.%d.%d (Build %d)"
+t MSG_019 "最新版本: %d.%d.%d (Build %d)"
+# *Short* size names. These can be used as suffixes
+t MSG_020 "bytes"
+t MSG_021 "KB"
+t MSG_022 "MB"
+t MSG_023 "GB"
+t MSG_024 "TB"
+t MSG_025 "PB"
+# *Long* size names, as they are displayed for the cluster size in the MS format dialog.
+t MSG_026 "bytes"	# Yes, this is a repeat from MSG_020
+t MSG_027 "kilobytes"
+t MSG_028 "megabytes"
+t MSG_029 "預設"
+# The following gets appended to the file system, cluster size, etc.
+t MSG_030 "%s (預設)"
+t MSG_031 "%s BIOS 資料分割配置"
+t MSG_032 "%s UEFI 資料分割配置"
+t MSG_033 "%s 可兼容 BIOS 和 UEFI 之資料分割配置"
+# Number of bad block check passes (singular for 1 pass, plural for 2 or more passes)
+t MSG_034 "%d 回"
+t MSG_035 "%d 回"
+t MSG_036 "ISO"
+t MSG_037 "程式"
+t MSG_038 "終止"
+t MSG_039 "執行"
+t MSG_040 "下載"
+t MSG_041 "作業遭使用者中斷"
+t MSG_042 "錯誤"
+t MSG_043 "錯誤: %s"
+t MSG_044 "檔案下載"
+t MSG_045 "USB 裝置"
+t MSG_046 "%s (磁碟 %d)"
+t MSG_047 "%s (%c:)"
+t MSG_048 "Rufus - 排清緩衝區"
+t MSG_049 "Rufus - 取消"
+
+# Error messages
+t MSG_050 "完成"
+t MSG_051 "格式化發生不明錯誤"
+t MSG_052 "此裝置無法使用選取之檔案系統"
+t MSG_053 "裝置存取遭拒"
+t MSG_054 "裝置唯讀模式無法寫入"
+t MSG_055 "偵測到其他程序使用裝置"
+	"請先關閉正在存取裝置的程序"
+t MSG_056 "此裝置不支援快速格式化"
+t MSG_057 "磁碟區標籤輸入錯誤"
+t MSG_058 "裝置控制代碼錯誤"
+t MSG_059 "此裝置不支援選取之配置單元大小"
+t MSG_060 "磁碟區大小錯誤"
+t MSG_061 "請插入可卸除式裝置"
+t MSG_062 "接收到錯誤的指令"
+t MSG_063 "記憶體配置錯誤"
+t MSG_064 "讀取錯誤"
+t MSG_065 "寫入錯誤"
+t MSG_066 "安裝失敗"
+t MSG_067 "無法開啟裝置，可能被其他程序占用"
+	"請重新插拔一次試試"
+t MSG_068 "磁碟分割發生錯誤"
+t MSG_069 "無法複製檔案到裝置"
+t MSG_070 "工作遭使用者中斷"
+t MSG_071 "無法起始執行緒"
+t MSG_072 "損毀磁區檢查工作未完成"
+t MSG_073 "ISO 映像檔掃描失敗"
+t MSG_074 "ISO 映像檔解壓縮失敗"
+t MSG_075 "無法裝載磁碟區"
+t MSG_076 "無法建置開機機制"
+t MSG_077 "無法指定磁碟機代號"
+t MSG_078 "無法裝載 GUID 磁碟區"
+
+t MSG_080 "Rufus 偵測到 Windows 正在排清緩衝區，此作業可能需要一段時間才完成 (視裝置速度及系統效能而定)。\n\n"
+	"原則上建議耐心等候作業完成、以免發生資料損毀或其他不可預期的問題，但如果等得不耐煩了是可以直接移除裝置"
+t MSG_081 "不支援的 ISO 映像檔"
+t MSG_082 "目前 Rufus 僅支援 bootmgr/WinPE, isolinux or EFI 建置的可開機的 ISO 映像檔\n"
+	"此 ISO 映像檔規格不符"
+t MSG_083 "取代 %s?"
+t MSG_084 "此 ISO 映像檔似乎使用較舊版本的 '%s'，\n開機選單可能因此無法正常運作。\n\n"
+	"Rufus 可協助下載較新版本來修正問題:\n"
+	"- 選「是」，立即連上網路下載\n"
+	"- 選「否」，保留原始 ISO 內容\n"
+	"如果你看不懂或不知該如何抉擇，強烈建議選「是」\n\n"
+	"注意: 一經下載後，Rufus 未來會自動套用新版 '%s'"
+t MSG_085 "下載中: %s"
+t MSG_086 "未選取任何 ISO 映像檔"
+# The content between the quotes below (\"Create a bootable disk\") should match
+# the beginning of the IDC_BOOT text
+t MSG_087 "請點擊 【使用映像檔建立開機片】 選項旁的光碟圖示，\n接著選取可開機的 ISO 映像檔，或是取消勾選該選項"
+t MSG_088 "ISO 檔案大小過大"
+t MSG_089 "此 ISO 檔案大小超過裝置可支援的空間"
+t MSG_090 "不支援的 ISO 映像檔"
+t MSG_091 "當選擇 UEFI 目標型別時，僅支援 EFI boot ISO 映像檔"
+	"請選取可 EFI 開機的 ISO 檔，或將目標型別改為 BIOS"
+t MSG_092 "不支援的檔案系統"
+t MSG_093 "當選擇 UEFI 目標型別時，僅支援 FAT/FAT32 格式"
+	"請指定 FAT/FAT32 為檔案系統，或將目標型別改為 BIOS"
+t MSG_094 "此 ISO 映像檔不相容 UEFI"
+t MSG_095 "此映像檔內含大於 4GB 的單一檔案大小，故無法作為開機片；此為 UEFI/FAT32 之設計限制"
+t MSG_096 "此 ISO 映像檔僅可使用 FAT/FAT32，請指定 FAT/FAT32 為檔案系統"
+t MSG_097 "NTFS 僅可使用 bootmgr 或 WinPE 作為開機載入之 ISO 映像檔"
+t MSG_098 "FAT/FAT32 僅支援 isolinux 作為開機載入之 ISO 映像檔；或指定 UEFI 為目標型別時可支援"
+t MSG_099 "檔案系統限制"
+t MSG_100 "此映像檔內含大於 4GB 的單一檔案大小，超出 FAT/FAT32 檔案系統可支援的上限"
+t MSG_101 "缺少 WIM 支援"
+t MSG_102 "目前系統環境不支援解壓縮 WIM 檔案，此功能為製作 EFI Win7/Vista 開機片之要件。"
+	"此問題可利用 7-Zip (免費的開放軟體) 解決，是否要立即前往 7-Zip 網站下載?"
+t MSG_103 "是否下載 %s?"
+t MSG_104 "Syslinux v5.0 或更新版本需要同時安裝 '%s' 檔案方可支援。\n"
+	"由於這個檔案大於 100KB 且存在於每一版 Syslinux v5+ ISO 映像檔，故 Rufus 未預載。"
+	"\n\n如欲下載這份檔案，請選擇「是」，Rufus 將會自動上網下載。若要自行手動下載安裝，請選擇「否」\n\n"
+	"注意: 一經下載後，Rufus 未來會自動套用 '%s'\n"
+t MSG_105 "現在取消可能導致裝置異常，請再次確認是否確定取消?"
+t MSG_106 "請選擇資料夾"
+t MSG_107 "所有檔案"
+t MSG_108 "Rufus 記錄檔"
+t MSG_109 "0x%02X (Disk %d)"
+# "Cluster size" below should be the same as the label for IDS_CLUSTERSIZE_TXT
+# "kilobytes" should be the same as in MSG_027
+t MSG_110 "MS-DOS 無法自 64 kilobytes 配置單元大小的磁區開機，請更改配置單元大小或改用 FreeDOS\n"
+t MSG_111 "不相容的配置單元大小"
+# "%d:%02d" below is a duration (mins:secs)
+t MSG_112 "磁碟區較大的 UDF 格式化作業時間較久，過程中進度列表可能會呈現靜止狀態、乃屬正常現象，請耐心等候。"
+	"估計剩餘時間: %d:%02d"
+t MSG_113 "大 UDF 磁碟區"
+
+# Tootips
+# Partition Scheme and Target Type
+t MSG_150 "一般而言最安全、最保險的選項。如果確定系統支援 UEFI 且欲在 EFI 模式下安裝 OS，則建議選擇下列其他選項"
+t MSG_151 "欲在 EFI 模式下安裝 OS 卻須使用 Windows XP 存取 USB 內容"
+t MSG_152 "欲在 EFI 模式下安裝 OS 且無須使用 Windows XP 存取 USB 內容，建議選此項目"
+t MSG_153 "測試模式: 0x%02X"	
+t MSG_154 "測試模式: 0x%02X, 0x%02X"	
+t MSG_155 "測試模式: 0x%02X, 0x%02X, 0x%02X"
+t MSG_156 "測試模式: 0x%02X, 0x%02X, 0x%02X, 0x%02X"
+t MSG_157 "設定檔案系統類型"
+t MSG_158 "資料區塊於檔案系統中最小的配置單元"
+t MSG_159 "自訂磁區標籤名稱，可支援英數以外的字元 (如中文)"
+t MSG_160 "顯示/隱藏進階選項"
+t MSG_161 "使用右方選項測試模式檢查裝置磁區有無損毀區塊"
+t MSG_162 "取消勾選可執行完整格式化"
+t MSG_163 "設定 USB 裝置為可開機"
+t MSG_164 "開機方法"
+t MSG_165 "選取 ISO 映像檔..."
+t MSG_166 "允許顯示多國語言標籤及裝置圖示 (建立 autorun.inf)"
+t MSG_167 "於裝置上建立 Rufus 客製化的 MBR，可支援開機選單及偽裝 BIOS 中的 USB ID"
+t MSG_168 "偽裝第一個可開機的 USB 磁碟為其他序列的磁碟\n"
+	"主要適用情境: 於多磁碟系統安裝 Windows XP"
+t MSG_169 "建立隱藏磁區分割並對齊資料分割界限值，可提高較舊的 BIOS 偵測開機片的機率\n"
+t MSG_170 "顯示所有連接到電腦的 USB 外接硬碟\n***請謹慎使用，後果自負!***"
+t MSG_171 "立即開始格式化作業\n注意: 裝置上所有的資料將被清除!"
+t MSG_172 "授權合約、開發者資料等資訊"
+t MSG_173 "選取內容..."
+# The following will appear in the about dialog
+t MSG_174 "Rufus - 快速可靠的 USB 格式化工具"
+t MSG_175 "版本 %d.%d.%d (Build %d)"
+t MSG_176 "正體中文譯者: 佚 <mailto:mmmeow@gmail.com>"
+t MSG_177 "Bug 回報或請求新功能請至: (英文網頁)"
+t MSG_178 "其他著作權資訊:"
+t MSG_179 "線上更新規則:"
+t MSG_180 "若選擇啟用自動線上檢查更新機制，表示您同意並授權本軟體蒐集、回傳以下資訊"
+t MSG_181 "作業系統架構及版本"
+t MSG_182 "本軟體目前的版本"
+t MSG_183 "您的 IP 位置"
+t MSG_184 "所蒐集之資料\\b最多保留一年\\b0 ，目的僅供內部統計分析 Rufus 使用概況，絕不會主動將資料提供給第三方。"
+t MSG_185 "更新流程:"
+t MSG_186 "Rufus 沒有常駐或背景程式，因此當主程式執行時才會進行自動線上檢查更新。"
+	"當然，還必須是在連網狀態。"
+
+# Status messages - these messages will appear on the status bar
+t MSG_201 "取消中，請稍候..."
+t MSG_202 "掃描 ISO 映像檔中..."
+t MSG_203 "ISO 映像檔掃描失敗"
+# Parameter: the name of an obsolete Syslinux .c32 module. eg: "Obsolete vesamenu.c32 detected"
+t MSG_204 "偵測到過時檔案: %s"
+# Display the name of the ISO selected. eg: "Using ISO: en_win7_x64_sp1.iso"
+t MSG_205 "目前選取映像檔: %s"
+# Typically "Missing ldlinux.c32 file"
+t MSG_206 "缺少檔案: %s"
+# The name proposed by Windows' Computer Management -> Disk Management when you try to format a drive
+# with an empty label. See http://rufus.akeo.ie/pics/default_name.png
+t MSG_207 "新增磁碟區"
+# Same message, once for singular and plural ("1 device found", "2 devices found")
+t MSG_208 "偵測到 %d 個可用裝置"
+t MSG_209 "偵測到 %d 個可用裝置"
+t MSG_210 "已完成"
+t MSG_211 "已取消"
+t MSG_212 "作業失敗"
+# Used when a new update has been downloaded and lauched
+t MSG_213 "新版本啟動中..."
+t MSG_214 "無法啟動新版本"
+# Open/Save file
+t MSG_215 "已開啟: %s"
+t MSG_216 "已儲存: %s"
+# Formatting status (make sure you use a double % to print the percent sign)
+t MSG_217 "格式化中，已完成: %0.1f%%"
+t MSG_218 "建立檔案系統中，已完成作業: %d/%d"
+t MSG_219 "NTFS 修復中，已完成: %d%%"
+# Parameter: the file system and an estimated duration in mins and secs.
+# eg. "Formatting (UDF) - Estimated duration 3:21..."
+# NB: if "estimated duration" is too long, just use "estimated" or an abbreviation
+t MSG_220 "格式化 (%s) - 剩餘時間: %d:%02d..."
+t MSG_221 "設定標籤中 (可能要一段時間，請耐心等候)..."
+# Parameter: the file system. eg. "Formatting (NTFS)..."
+t MSG_222 "格式化中 (%s)..."
+t MSG_223 "NTFS 修復中 (Checkdisk)..."
+t MSG_224 "清除 MBR/PBR/GPT 架構..."
+t MSG_225 "請求磁碟存取..."
+t MSG_226 "分析既有開機記錄..."
+t MSG_227 "關閉既有磁碟區..."
+t MSG_228 "建置主開機記錄..."
+t MSG_229 "建立磁區分割開機記錄..."
+t MSG_230 "複製 DOS 檔案..."
+t MSG_231 "複製 ISO 檔案..."
+t MSG_232 "建置 Win7 EFI 開機架構 (可能要一段時間，請耐心等候)..."
+t MSG_233 "收尾中，請稍候..."
+# Takes the Syslinux version as paramete. eg. "Installing Syslinux v5..."
+t MSG_234 "Syslinux v%d 安裝中..."
+# Bad blocks status. eg: "Bad Blocks: PASS 1/2 - 12.34% (0/0/1 errors)"
+t MSG_235 "損毀磁區: 第 %d/%d 回 - %0.2f%% (%d/%d/%d 錯誤)"
+t MSG_236 "損毀磁區: 掃描中 (隨機模式)"
+t MSG_237 "損毀磁區: 掃描中 (0x%02X 模式)"
+# eg. "Partitioning (MBR)..."
+t MSG_238 "磁區分割中 (%s)..."
+t MSG_239 "刪除磁區分割..."
+t MSG_240 "下載 %s: 連線中..."
+t MSG_241 "下載中: %0.1f%%"
+t MSG_242 "檔案下載失敗"
+t MSG_243 "線上更新: 檢查更新版本中..."
+t MSG_244 "線上更新: 無法存取網路"
+t MSG_245 "線上更新: 無法確認軟體版本"
+t MSG_246 "線上更新: 有更新版本!"
+t MSG_247 "線上更新: 已是最新版"
+t MSG_248 "Rufus 登錄檔已成功清除"
+t MSG_249 "Rufus 登錄檔清除失敗"
+# eg. "Fixed disk detection enabled" "ISO size check disabled"
+t MSG_250 "%s 已啟用"
+t MSG_251 "%s 已停用"
+t MSG_252 "Size checks"
+t MSG_253 "Fixed disks detection"
+t MSG_254 "Force large FAT32 formatting"
+t MSG_255 "NoDriveTypeAutorun will be deleted on exit"
+t MSG_256 "Fake drive detection"
+t MSG_257 "Joliet support"
+t MSG_258 "Rock Ridge support"
+t MSG_259 "Force update"
 
 ################################################################################
 l "fr-FR" "French (Français)" 0x040c, 0x080c, 0x0c0c, 0x100c, 0x140c, 0x180c, 0x1c0c, 0x200c, 0x240c, 0x280c, 0x2c0c, 0x300c, 0x340c, 0x380c, 0xe40c
@@ -2380,6 +2733,7 @@ t IDCANCEL "Uždaryti"
 m IDCANCEL +12,0
 t IDC_START "Pradėti"
 m IDC_START +12,0
+s IDS_ADVANCED_OPTIONS_GRP +10,0
 t IDS_ADVANCED_OPTIONS_GRP "Išsamios parinktys"
 t IDC_ENABLE_FIXED_DISKS "Rodyti USB kietuosius diskus"
 t IDC_EXTRA_PARTITION "Pataisos seniems BIOS (papildomas skaidinys, ir kt.)"
