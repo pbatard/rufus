@@ -4315,7 +4315,7 @@ g IDD_DIALOG
 s IDD_DIALOG +156,0
 t IDS_DEVICE_TXT "Συσκευή"
 s IDC_DEVICE +158,0
-# m IDC_LANG +158,0
+m IDC_LANG +158,0
 t IDS_PARTITION_TYPE_TXT "Σύστημα διαμερισμού και τύπος συστήματος"
 s IDC_PARTITION_TYPE +158,0
 t IDS_FILESYSTEM_TXT "Σύστημα αρχείων"
@@ -4362,12 +4362,17 @@ s IDC_PROGRESS +158,0
 
 # About dialog
 g IDD_ABOUTBOX
+s IDD_ABOUTBOX 0,30
+m IDC_ABOUT_COPYRIGHTS 0,30
+s IDC_ABOUT_BLURB +0,30
 t IDD_ABOUTBOX "Σχετικά με το Rufus"
 t IDC_ABOUT_LICENSE "Άδεια χρήσης"
 s IDC_ABOUT_LICENSE +5,0
+m IDC_ABOUT_LICENSE +0,30
 t IDC_ABOUT_UPDATES "Αναβαθμίσεις"
-m IDC_ABOUT_UPDATES +4,0
+m IDC_ABOUT_UPDATES +4,30
 s IDC_ABOUT_UPDATES +5,0
+m IDOK +0,30
 
 # About -> License dialog
 g IDD_LICENSE
@@ -4630,7 +4635,7 @@ t MSG_173 "Κάντε κλικ για επιλογή..."
 # The following will appear in the about dialog
 t MSG_174 "Rufus - Μία αξιόπιστη εφαρμογή διαμόρφωσης USB"
 t MSG_175 "Έκδοση %d.%d.%d (Build %d)"
-t MSG_176 "Μετάφραση: Konstantinos Margaritis, Nikolaos Margaritis"
+t MSG_176 "Μετάφραση στα ελληνικά:\\line                       Konstantinos Margaritis <kotsos.marga@gmail.com> \\line                       Nikolaos Margaritis <marga.nikos@gmail.com>"
 t MSG_177 "Για αναφορά σφαλμάτων ή βελτιώσεων επισκεφθείτε το:"
 t MSG_178 "Επιπλέον Πνευματικά δικαιώματα:"
 t MSG_179 "Πολιτική ενημέρωσης:"
