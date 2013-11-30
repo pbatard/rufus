@@ -1147,7 +1147,7 @@ INT_PTR CALLBACK NewVersionCallback(HWND hDlg, UINT message, WPARAM wParam, LPAR
 {
 	int i;
 	HWND hNotes;
-	char tmp[128];
+	char tmp[128], cmdline[] = APPLICATION_NAME " -w 150";
 	static char* filepath = NULL;
 	static int download_status = 0;
 	STARTUPINFOA si;
@@ -1202,15 +1202,12 @@ INT_PTR CALLBACK NewVersionCallback(HWND hDlg, UINT message, WPARAM wParam, LPAR
 				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANCELLED;
 				break;
 			case 2:		// Launch newer version and close this one
-				for (i=(int)safe_strlen(filepath); (i>0)&&(filepath[i]!='\\'); i--);
-				safe_strcpy(tmp, sizeof(tmp), &filepath[i+1]);
-				safe_strcat(tmp, sizeof(tmp), " -w 150");	// add 15 seconds delay to wait for lock release
-				filepath[i] = 0;
 				memset(&si, 0, sizeof(si));
 				memset(&pi, 0, sizeof(pi));
 				si.cb = sizeof(si);
-				if (!CreateProcessU(NULL, tmp, NULL, NULL, FALSE, 0, NULL, filepath, &si, &pi)) {
+				if (!CreateProcessU(filepath, cmdline, NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi)) {
 					PrintStatus(0, FALSE, lmprintf(MSG_214));
+					// TODO: produce a message box and add a retry, as the file may be scanned by the Antivirus
 					uprintf("Failed to launch new application: %s\n", WindowsErrorString());
 				} else {
 					PrintStatus(0, FALSE, lmprintf(MSG_213));

@@ -118,7 +118,7 @@ static char err_string[256] = {0};
 
 	safe_sprintf(err_string, sizeof(err_string), "[0x%08X] ", error_code);
 
-	size = FormatMessageU(FORMAT_MESSAGE_FROM_SYSTEM|FORMAT_MESSAGE_IGNORE_INSERTS, NULL, error_code,
+	size = FormatMessageU(FORMAT_MESSAGE_FROM_SYSTEM|FORMAT_MESSAGE_IGNORE_INSERTS, NULL, HRESULT_CODE(error_code),
 		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), &err_string[strlen(err_string)],
 		sizeof(err_string)-(DWORD)strlen(err_string), NULL);
 	if (size == 0) {
@@ -144,8 +144,7 @@ static void CALLBACK PrintStatusTimeout(HWND hwnd, UINT uMsg, UINT_PTR idEvent, 
 {
 	bStatusTimerArmed = FALSE;
 	// potentially display lower priority message that was overridden
-	SendMessageLU(GetDlgItem(hMainDialog, IDC_STATUS), SB_SETTEXTW,
-						SBT_OWNERDRAW | 0, szStatusMessage);
+	SendMessageLU(GetDlgItem(hMainDialog, IDC_STATUS), SB_SETTEXTW, SBT_OWNERDRAW, szStatusMessage);
 	KillTimer(hMainDialog, TID_MESSAGE);
 }
 
@@ -158,8 +157,7 @@ void PrintStatus(unsigned int duration, BOOL debug, const char* message)
 		uprintf("%s\n", szStatusMessage);
 
 	if ((duration) || (!bStatusTimerArmed)) {
-		SendMessageLU(GetDlgItem(hMainDialog, IDC_STATUS), SB_SETTEXTA,
-						SBT_OWNERDRAW | 0, szStatusMessage);
+		SendMessageLU(GetDlgItem(hMainDialog, IDC_STATUS), SB_SETTEXTW, SBT_OWNERDRAW, szStatusMessage);
 	}
 
 	if (duration) {

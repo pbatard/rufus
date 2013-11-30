@@ -789,9 +789,9 @@ t MSG_184 "Afin de générer des statistiques d’utilisation privées, il se pe
 	"les informations ainsi obtenues \\b au plus un an\\b0 . A moins d’y être contraint par la loi, "
 	"nous nous engageons aussi à ne pas diffuser ces informations à de tierce parties."
 t MSG_185 "Processus de mise à jour:"
-t MSG_186 "Aucun service ou tâche de fond ne sont installés ou lancés par Rufus. Cela veut dire que les "
-	"test de mises à jour interviennent seulement lorsque l’application principale s'exécute.\\line\n"
-	"Bien entendu, un accès à internet est requis pour vérifier la disponibilité des mises à jour."
+t MSG_186 "Aucun service ou tâche de fond n'est installé ou lancé par Rufus ; la vérification "
+	"de mises à jour intervient seulement lorsque l’application principale s'exécute.\\line\n"
+	"Bien entendu, un accès à internet est requis pour vérifier les mises à jour."
 
 # Status messages
 t MSG_201 "Annulation - Veuillez patienter..."
@@ -1981,11 +1981,10 @@ s IDC_BOOT +3,0
 m IDC_BOOTTYPE +3,0
 m IDC_SELECT_ISO +2,0
 t IDC_SET_ICON "확장 레이블 및 아이콘 파일 만들기"
-t IDC_ABOUT "프로그램 정보"
-s IDC_ABOUT +10,0
+t IDC_ABOUT "정보..."
 t IDC_LOG "로그"
-s IDC_LOG +2,0
-m IDC_LOG +8,0
+s IDC_LOG +5,0
+m IDC_LOG -2,0
 t IDCANCEL "닫기"
 t IDC_START "시작"
 m IDC_START +2,0
@@ -2247,18 +2246,18 @@ t MSG_173 "선택하려면 클릭..."
 # The following will appear in the about dialog
 t MSG_174 "Rufus - 믿을 수 있는 USB 포맷 유틸리티"
 t MSG_175 "버전 %d.%d.%d (빌드 %d)"
-t MSG_176 "한국어 번역: 나두야간다 - 세상사는 이야기"
+t MSG_176 "한국어 번역: 나두야간다 <mailto:true.sys@hotmail.com>"
 t MSG_177 "버그에 대한 보고나 프로그램의 개선을 요청:"
-t MSG_178 ""
-t MSG_179 "업데이트 정책:\\line\n"
+t MSG_178 "추가 저작권:"
+t MSG_179 "업데이트 정책:"
 t MSG_180 "프로그램을 업데이트 하도록 선택한 경우, "
-	"다음의 정보는 우리의 서버에 수집 될 수 있음에 동의하는 것을 의미합니다.\\line\n"
+	"다음의 정보는 우리의 서버에 수집 될 수 있음에 동의하는 것을 의미합니다."
 t MSG_181 "사용 중인 운영 체제의 아키텍처와 버전"
 t MSG_182 "현재 사용 중인 프로그램의 버전"
 t MSG_183 "사용자의 IP 주소"
 t MSG_184 "수집된 정보는 사용자의 년간 통계와 프로그램의 성능 향상을 위한 목적으로만 사용되어지며, "
 	"제 3자에게 수집된 정보를 공개하지 않습니다."
-t MSG_185 "업데이트 프로세스:\\line\n"
+t MSG_185 "업데이트 프로세스:"
 t MSG_186 "이 프로그램은 백그라운드 서비스를 설치하거나 실행하지 않으므로 주 프로그램이 실행 중일 때에만 업데이트가 수행됩니다.\\line\n"
 	"업데이트에는 인터넷 연결이 필요합니다."
 

@@ -298,7 +298,7 @@ typedef struct {
 } cp_list;
 
 // From FreeDOS CPX pack as well as
-// http://msdn.microsoft.com/en-us/library/windows/desktop/dd317756.aspx
+// http://msdn.microsoft.com/en-us/library/dd317756.aspx
 static cp_list cp_hr_list[] = {
 	{ 113, "Lat-Yugoslavian"},
 	{ 437, "US-English"},
@@ -336,8 +336,13 @@ static cp_list cp_hr_list[] = {
 	{ 867, "Czech Kamenicky"},
 	{ 869, "Modern Greek"},
 	{ 872, "Cyr-South-Slavic (Euro)"},
+	{ 874, "Thai"},
 	{ 895, "Czech Kamenicky (Alt)"},
 	{ 899, "Armenian"},
+	{ 932, "Japanese"},
+	{ 936, "Chinese (Simplified)"},
+	{ 949, "Korean"},
+	{ 950, "Chinese (Traditional)"},
 	{ 991, "Mazovian-Polish (Zloty)"},
 	{ 1116, "Estonian"},
 	{ 1117, "Latvian"},

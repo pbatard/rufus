@@ -509,6 +509,7 @@ static BOOL PopulateProperties(int ComboIndex)
 	double HumanReadableSize;
 	char no_label[] = STR_NO_LABEL;
 	int i, j, pt, bt;
+	char* device_tooltip;
 
 	IGNORE_RETVAL(ComboBox_ResetContent(hPartitionScheme));
 	IGNORE_RETVAL(ComboBox_ResetContent(hFileSystem));
@@ -554,21 +555,32 @@ static BOOL PopulateProperties(int ComboIndex)
 	}
 	IGNORE_RETVAL(ComboBox_SetCurSel(hPartitionScheme, j));
 	SetPartitionSchemeTooltip();
-	CreateTooltip(hDeviceList, DriveID.Table[ComboIndex], -1);
+	device_tooltip = (char*) malloc(safe_strlen(DriveID.Table[ComboIndex]) + 16);
 
 	// Set a proposed label according to the size (eg: "256MB", "8GB")
 	if (HumanReadableSize < 1.0) {
 		HumanReadableSize *= 1024.0;
 		i--;
 	}
-	// If we're beneath the tolerance, round proposed label to an integer, if not, show two decimal point
+	// If we're beneath the tolerance, round proposed label to an integer, if not, show two decimal points
 	if (fabs(HumanReadableSize / ceil(HumanReadableSize) - 1.0) < PROPOSEDLABEL_TOLERANCE) {
 		safe_sprintf(SelectedDrive.proposed_label, sizeof(SelectedDrive.proposed_label),
 			"%0.0f%s", ceil(HumanReadableSize), lmprintf(MSG_020+i));
+		if (device_tooltip != NULL)
+			safe_sprintf(device_tooltip, safe_strlen(DriveID.Table[ComboIndex]) + 16,
+				"%s (%0.0f%s)", DriveID.Table[ComboIndex], ceil(HumanReadableSize), lmprintf(MSG_020+i));
 	} else {
 		safe_sprintf(SelectedDrive.proposed_label, sizeof(SelectedDrive.proposed_label),
 			"%0.2f%s", HumanReadableSize, lmprintf(MSG_020+i));
+		if (device_tooltip != NULL)
+			safe_sprintf(device_tooltip, safe_strlen(DriveID.Table[ComboIndex]) + 16,
+				"%s (%0.2f%s)", DriveID.Table[ComboIndex], HumanReadableSize, lmprintf(MSG_020+i));
 	}
+
+	// Add a tooltip (with the size of the device in parenthesis)
+	if (device_tooltip != NULL)
+		CreateTooltip(hDeviceList, device_tooltip, -1);
+	safe_free(device_tooltip);
 
 	// If no existing label is available and no ISO is selected, propose one according to the size (eg: "256MB", "8GB")
 	if ((iso_path == NULL) || (iso_report.label[0] == 0)) {
@@ -733,10 +745,6 @@ static BOOL GetUSBDevices(DWORD devnum)
 
 			drive_index = device_number.DeviceNumber + DRIVE_INDEX_MIN;
 			if (GetDriveLabel(drive_index, &drive_letter, &label)) {
-				// Must ensure that the combo box is UNSORTED for indexes to be the same
-				StrArrayAdd(&DriveID, buffer);
-				StrArrayAdd(&DriveLabel, label);
-
 				if ((!enable_HDDs) && ((score = IsHDD(drive_index, vid, pid, buffer)) > 0)) {
 					uprintf("Device eliminated because it was detected as an USB Hard Drive (score %d > 0)\n", score);
 					uprintf("If this device is not an USB Hard Drive, please e-mail the author of this application\n");
@@ -758,6 +766,11 @@ static BOOL GetUSBDevices(DWORD devnum)
 					}
 					entry = lmprintf(MSG_047, label, drive_letter);
 				}
+
+				// Must ensure that the combo box is UNSORTED for indexes to be the same
+				StrArrayAdd(&DriveID, buffer);
+				StrArrayAdd(&DriveLabel, label);
+
 				IGNORE_RETVAL(ComboBox_SetItemData(hDeviceList, ComboBox_AddStringU(hDeviceList, entry),
 					device_number.DeviceNumber + DRIVE_INDEX_MIN));
 				maxwidth = max(maxwidth, GetEntryWidth(hDeviceList, entry));

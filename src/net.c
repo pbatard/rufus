@@ -84,7 +84,7 @@ const char* WinInetErrorString(void)
 	static char error_string[256];
 	DWORD size = sizeof(error_string);
 
-	error_code = GetLastError();
+	error_code = HRESULT_CODE(GetLastError());
 
 	if ((error_code < INTERNET_ERROR_BASE) || (error_code > INTERNET_ERROR_LAST))
 		return WindowsErrorString();
