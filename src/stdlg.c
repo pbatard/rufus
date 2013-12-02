@@ -1147,7 +1147,7 @@ INT_PTR CALLBACK NewVersionCallback(HWND hDlg, UINT message, WPARAM wParam, LPAR
 {
 	int i;
 	HWND hNotes;
-	char tmp[128], cmdline[] = APPLICATION_NAME " -w 150";
+	char cmdline[] = APPLICATION_NAME " -w 150";
 	static char* filepath = NULL;
 	static int download_status = 0;
 	STARTUPINFOA si;
@@ -1216,10 +1216,17 @@ INT_PTR CALLBACK NewVersionCallback(HWND hDlg, UINT message, WPARAM wParam, LPAR
 				}
 				break;
 			default:	// Download
-				for (i=(int)safe_strlen(update.download_url); (i>0)&&(update.download_url[i]!='/'); i--);
+				if (update.download_url == NULL) {
+					uprintf("Could not get download URL\n");
+					break;
+				}
+				for (i=(int)strlen(update.download_url); (i>0)&&(update.download_url[i]!='/'); i--);
 				filepath = FileDialog(TRUE, app_dir, (char*)&update.download_url[i+1], "exe", lmprintf(MSG_037));
-				if (filepath != NULL)
-					DownloadFileThreaded(update.download_url, filepath, hDlg);
+				if (filepath == NULL) {
+					uprintf("Could not get save path\n");
+					break;
+				}
+				DownloadFileThreaded(update.download_url, filepath, hDlg);
 				break;
 			}
 			return (INT_PTR)TRUE;

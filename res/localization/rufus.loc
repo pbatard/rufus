@@ -505,6 +505,7 @@ t MSG_004 "更新方案和设置"
 t MSG_005 "你要允許此應用程序檢查更新？"
 t MSG_006 "关闭"
 t MSG_007 "撤消"
+t MSG_176 ""
 
 ################################################################################
 l "zh-TW" "Chinese Traditional (正體中文)" 0x0404, 0x0c04, 0x1404, 0x7c04
@@ -574,7 +575,6 @@ t IDC_CHECK_NOW "立即檢查"
 t IDCANCEL "關閉"
 
 # Dialog that appears when a new version is available
-# I will provide a way to trigger this dialog in future versions
 g IDD_NEW_VERSION
 t IDD_NEW_VERSION "線上更新 - Rufus"
 t IDS_NEW_VERSION_AVAIL_TXT "找到更新版本，請下載更新!"
@@ -952,7 +952,6 @@ m IDCANCEL +25,0
 s IDS_UPDATE_SETTINGS_GRP 25,0
 
 # Dialog that appears when a new  is available
-# I will provide a way to trigger this dialog in future versions
 g IDD_NEW_VERSION
 t IDD_NEW_VERSION "Controleer op updates - Rufus"
 t IDS_NEW_VERSION_AVAIL_TXT "Een nieuwere versie is beschikbaar. Download de laatste versie a.u.b!"
