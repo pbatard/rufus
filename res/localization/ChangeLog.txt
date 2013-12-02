@@ -6,6 +6,11 @@ the same changes.
 Remember to also update the version number for your translation ('v x.y.z')
 once you have matched all the changes that occurred for the en-US translation.
 
+o Version 1.0.4 (2013.12.02)
+  - MSG_033 -> MSG_031
+  - MSG_031 -> MSG_032
+  - MSG_032 -> MSG_033
+
 o Version 1.0.3 (2013.11.15)
   - IDC_ENABLE_FIXED_DISKS "List non removable or unpartitioned USB disks" -> "List USB Hard Drives"
   - MSG_170 "Enable detection for disks not normally detected by Rufus" -> "Enable the listing of USB Hard Drive enclosures"
