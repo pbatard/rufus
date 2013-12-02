@@ -538,7 +538,7 @@ static BOOL PopulateProperties(int ComboIndex)
 				bt = (j==0)?BT_BIOS:BT_UEFI;
 				pt = (j==2)?PARTITION_STYLE_GPT:PARTITION_STYLE_MBR;
 				IGNORE_RETVAL(ComboBox_SetItemData(hPartitionScheme, ComboBox_AddStringU(hPartitionScheme,
-					lmprintf(MSG_031+j, PartitionTypeLabel[pt])), (bt<<16)|pt));
+					lmprintf((j==0)?MSG_031:MSG_033, PartitionTypeLabel[pt])), (bt<<16)|pt));
 
 			}
 			break;
