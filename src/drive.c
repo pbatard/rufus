@@ -458,7 +458,7 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 	BOOL r;
 	HANDLE hPhysical;
 	DWORD size;
-	BYTE geometry[128], layout[1024], part_type;
+	BYTE geometry[128], layout[4096], part_type;
 	void* disk_geometry = (void*)geometry;
 	void* drive_layout = (void*)layout;
 	PDISK_GEOMETRY_EX DiskGeometry = (PDISK_GEOMETRY_EX)disk_geometry;

@@ -5,7 +5,7 @@ o Version 1.4.0 (2013.12.02)
     - French, courtesy of myself ("Je vais me gêner !")
     - German, courtesy of Thilo Langbein
     - Greek, courtesy of Konstantinos and Nikolaos Margaritis
-    - Hugarian, courtesy of georg1136
+    - Hungarian, courtesy of georg1136
     - Italian, courtesy of bovirus
     - Korean, courtesy of 나두야간다
     - Lithuanian, courtesy of Gintaras Venslovas
@@ -17,7 +17,7 @@ o Version 1.4.0 (2013.12.02)
     - More to come, more wanted! See http://rufus.akeo.ie/translations
     Add "smart" detection of USB HDD vs USB Flash Drive
     Add retry when writing ISO files
-    Add detection and display VID:PID for the target device (in the log)
+    Add detection and display of VID:PID for the target device (in the log)
     Updated Syslinux to v4.0.7
     Fixed some issues with DOS localization
     Fixed FAT32 formatting for large and GPT disks
