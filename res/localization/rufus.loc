@@ -5058,6 +5058,399 @@ t MSG_257 "Joliet поддержка"
 t MSG_258 "Rock Ridge поддержка"
 
 ################################################################################
+l "sl-SI" "Slovenian (Slovenščina)" 0x0424
+v 1.0.4
+b "en-US"
+
+# Main dialog
+g IDD_DIALOG
+t IDS_DEVICE_TXT "Naprava"
+t IDS_PARTITION_TYPE_TXT "Particijska shema in vrsta ciljnega sistema"
+t IDS_FILESYSTEM_TXT "Datotečni sistem"
+t IDS_CLUSTERSIZE_TXT "Velikost gruče"
+t IDS_LABEL_TXT "Oznaka novega nosilca"
+t IDS_FORMAT_OPTIONS_GRP "Možnosti formatiranja       "
+t IDC_BADBLOCKS "Odkrij slabe bloke:"
+s IDC_BADBLOCKS -10,0
+m IDC_NBPASSES -10,0
+s IDC_NBPASSES +10,0
+t IDC_QUICKFORMAT "Hitro formatiranje"
+t IDC_BOOT "Ustvari zagonski disk z:"
+s IDC_BOOT -10,0
+m IDC_BOOTTYPE -10,0
+s IDC_BOOTTYPE +10,0
+t IDC_SET_ICON "Ustvari datoteki za ikono in podaljšano oznako"
+t IDC_ABOUT "O programu"
+s IDC_ABOUT -2,0
+t IDC_LOG "Zapisnik"
+s IDC_LOG +28,0
+m IDC_LOG -4,0
+t IDCANCEL "Zapri"
+m IDCANCEL +6,0
+s IDCANCEL -7,0
+t IDC_START "Začni"
+m IDC_START +15,0
+s IDC_START -7,0
+t IDS_ADVANCED_OPTIONS_GRP "Dodatne možnosti"
+m IDC_ADVANCED +30,0
+t IDC_ENABLE_FIXED_DISKS "Naštej USB trde diske"
+# Note: it is acceptable to drop the parenthesis () below if you are running out of space
+# as there is a tooltip (MSG_169) providing these details
+t IDC_EXTRA_PARTITION "Dodaj popravke za stare BIOSe"
+# 'MBR': See http://en.wikipedia.org/wiki/Master_boot_record
+# Rufus can install it's own custom MBR (the Rufus MBR), which also allows users
+# to specify a custom disk ID for the BIOS. Note: the tooltip for this control is MSG_167.
+t IDC_RUFUS_MBR "Rufusov MBR z BIOS ID:"
+s IDC_RUFUS_MBR -10,0
+m IDC_DISK_ID -10,0
+s IDC_DISK_ID +10,0
+
+# About dialog
+g IDD_ABOUTBOX
+t IDD_ABOUTBOX "O Rufusu"
+t IDC_ABOUT_LICENSE "Licenca"
+t IDC_ABOUT_UPDATES "Posodobitve"
+
+# About -> License dialog
+g IDD_LICENSE
+t IDD_LICENSE "Rufusova licenca"
+t IDCANCEL "Zapri"
+
+# Notifications. You can trigger one of these by using Alt-R and re-launching Rufus
+g IDD_NOTIFICATION
+t IDC_MORE_INFO "Več informacij"
+t IDYES "Da"
+t IDNO "Ne"
+
+# Log dialog
+g IDD_LOG
+t IDD_LOG "Zapisnik"
+t IDC_LOG_CLEAR "Izprazni"
+t IDC_LOG_SAVE "Shrani"
+t IDCANCEL "Zapri"
+
+# About -> Updates
+g IDD_UPDATE_POLICY
+t IDD_UPDATE_POLICY "Posodobitvena politika in nastavitve"
+t IDS_UPDATE_SETTINGS_GRP "Nastavitve"
+s IDS_UPDATE_SETTINGS_GRP +6,0
+t IDS_UPDATE_FREQUENCY_TXT "Preveri za posodobitve:"
+s IDS_UPDATE_FREQUENCY_TXT -5,0
+m IDC_UPDATE_FREQUENCY -5,0
+s IDC_UPDATE_FREQUENCY +10,0
+t IDS_INCLUDE_BETAS_TXT "Upoštevaj beta verzije:"
+s IDS_INCLUDE_BETAS_TXT -5,0
+m IDC_INCLUDE_BETAS -5,0
+t IDC_CHECK_NOW "Preveri zdaj"
+t IDCANCEL "Zapri"
+
+# Dialog that appears when a new version is available
+g IDD_NEW_VERSION
+t IDD_NEW_VERSION "Rufus - posodobitve"
+t IDS_NEW_VERSION_AVAIL_TXT "Novejša verzija je na voljo. Prosim, prenesite jo!"
+t IDC_WEBSITE "Kliknite sem, da greste na spletno stran"
+t IDS_NEW_VERSION_NOTES_GRP "Opombe ob izdaji"
+t IDS_NEW_VERSION_DOWNLOAD_GRP "Prenesi"
+t IDC_DOWNLOAD "Prenesi"
+t IDCANCEL "Zapri"
+
+# Dialog that appears when scanning/extracting ISO files
+g IDD_ISO_EXTRACT
+t IDD_ISO_EXTRACT "Kopiram ISO datoteke…"
+t IDC_ISO_FILENAME "Odpiram ISO sliko - prosim, počakajte…"
+t IDC_ISO_ABORT "Prekliči"
+
+# Messages used throughout the application
+g IDD_MESSAGES
+t MSG_001 "Drug primerek zaznan"
+t MSG_002 "Še en primerek Rufusa se izvaja.\n"
+	"Prosim, zaprite ga, preden zaženete še enega."
+t MSG_003 "OPOZORILO: VSI PODATKI NA NAPRAVI \"%s\" BODO UNIČENI.\n"
+	"Če želite nadaljevati s to operacijo, izberite \"V redu\", drugače izberite \"Prekliči\"."
+t MSG_004 "Rufusova posodobitvena politika"
+t MSG_005 "Ali dovolite, da Rufus na internetu išče posodobitve zase?"
+# Must be the same as IDD_DIALOG:IDCANCEL (i.e. "Close" - I know it's confusing)
+t MSG_006 "Zapri"
+t MSG_007 "Prekliči"
+t MSG_008 "Da"
+t MSG_009 "Ne"
+t MSG_010 "Slabi bloki najdeni"
+t MSG_011 "Preizkus končan: %u slabih blokov najdenih\n"
+	"  Napak pri branju: %d\n  Napak pri pisanju: %d\n  %d corruption error(s)\n"
+# The following will contain the formatted message above as well as the name of the bad blocks logfile
+t MSG_012 "%s\nPodrobnejše poročilo lahko najdete v datoteki\n%s"
+t MSG_013 "onemogočeno"
+t MSG_014 "dnevno"
+t MSG_015 "tedensko"
+t MSG_016 "mesečno"
+t MSG_017 "po meri"
+t MSG_018 "Vaša verzija: %d.%d.%d (izgradnja %d)"
+t MSG_019 "Najnovejša verzija: %d.%d.%d (izgradnja %d)"
+# *Short* size names. These can be used as suffixes
+t MSG_020 "bajtov"
+t MSG_021 "KB"
+t MSG_022 "MB"
+t MSG_023 "GB"
+t MSG_024 "TB"
+t MSG_025 "PB"
+# *Long* size names, as they are displayed for the cluster size in the MS format dialog.
+t MSG_026 "bajtov"	# Yes, this is a repeat from MSG_020
+t MSG_027 "kilobajtov"
+t MSG_028 "megabajtov"
+t MSG_029 "Privzeto"
+# The following gets appended to the file system, cluster size, etc.
+t MSG_030 "%s (privzeto)"
+t MSG_031 "%s particijska shema za BIOS ali UEFI računalnike"
+t MSG_032 "%s particijska shema za BIOS računalnike"
+t MSG_033 "%s particijska shema za UEFI računalnike"
+# Number of bad block check passes (singular for 1 pass, plural for 2 or more passes)
+t MSG_034 "%d prehod"
+t MSG_035 "%d prehoda/-i"
+t MSG_036 "ISO sliko"
+t MSG_037 "Aplikacija"
+t MSG_038 "Prekini"
+t MSG_039 "Zaženi"
+t MSG_040 "Prenesi"
+t MSG_041 "Operacijo je prekinil uporabnik"
+t MSG_042 "Napaka"
+t MSG_043 "Napaka: %s"
+t MSG_044 "Prenos datoteke"
+t MSG_045 "USB podatkovni nosilec (generičen)"
+t MSG_046 "%s (disk %d)"
+t MSG_047 "%s (%c:)"
+t MSG_048 "Rufus - izpiranje medpomnilnika"
+t MSG_049 "Rufus - preklic"
+
+# Error messages
+t MSG_050 "Uspešno zaključeno."
+t MSG_051 "Nedoločena napaka med formatiranjem."
+t MSG_052 "Za ta medij tega datotečnega sistema ni mogoče uporabiti."
+t MSG_053 "Dostop do naprave je zavrnjen."
+t MSG_054 "Na medij ni mogoče pisati."
+t MSG_055 "Napravo uporablja drug proces. "
+	"Prosim, zaprite vse procese, ki bi lahko uporabljali to napravo."
+t MSG_056 "Za to napravo hitro formatiranje ni na voljo."
+t MSG_057 "Oznaka nosilca je neveljavna."
+t MSG_058 "Napravin oprimek je neveljaven."
+t MSG_059 "Izbrana velikost gruče ni veljavna za to napravo."
+t MSG_060 "Velikost nosilca je neveljavna."
+t MSG_061 "Prosim, vstavite izmenljiv medij v pogon."
+t MSG_062 "Prejet je bil nepodprt ukaz."
+t MSG_063 "Napaka pri dodelitvi spomina."
+t MSG_064 "Napaka pri branju."
+t MSG_065 "Napaka pri pisanju."
+t MSG_066 "Napaka pri nameščanju"
+t MSG_067 "Ni mogoče odpreti medija. Morda ga uporablja drug proces. "
+	"Prosim, ponovno priključite medij in poskusite znova."
+t MSG_068 "Napaka pri ustvarjanju particije."
+t MSG_069 "Ni bilo mogoče kopirati datotek na ciljni pogon."
+t MSG_070 "Uporabnik je prekinil operacijo."
+# See http://en.wikipedia.org/wiki/Thread_%28computing%29
+t MSG_071 "Niti ni mogoče zagnati."
+t MSG_072 "Preizkus blokov se ni zaključil."
+t MSG_073 "Napaka pri preiskovanju ISO slike."
+t MSG_074 "Napaka pri vlečenju iz ISO slike."
+t MSG_075 "Nosilca ni mogoče ponovno priklopiti."
+t MSG_076 "Ni mogoče popraviti oz. pripraviti zagonskih datotek."
+t MSG_077 "Pogonu ni mogoče dodeliti črke."
+t MSG_078 "Ni mogoče priklopiti nosilca z GUID."
+
+t MSG_080 "Rufus je zaznal, da Windows še vedno izpira svoje notranje medpomnilnike na napravo USB.\n\n"
+	"Odvisno od hitrosti naprave to lahko traja veliko časa, "
+	"še posebej za velike datoteke.\n\nPriporočamo vam, da počakate, da Windows opravi svoje, da se izognete poškodbi podatkov. "
+	"Če pa se čakanja naveličate, lahko napravo kar izvlečete…"
+t MSG_081 "Nepodprt ISO"
+t MSG_082 "Ta verzija Rufusa podpira samo zagonske ISO datoteke, ki temeljijo na bootmgr/WinPE, isolinux-u ali EFI.\n"
+	"Ta ISO očitno ne uporablja nobenega izmed njih…"
+t MSG_083 "Zamenjam %s?"
+t MSG_084 "Zdi se, da ta ISO slika uporablja zastarelo verzijo \"%s\".\n"
+	"Zaradi tega se zagonski meniji  morda ne bodo prikazovali pravilno.\n\n"
+	"Rufus lahko prenese novejšo verzijo, da to težavo odpravi.\n"
+	"- Izberite \"Da\", da se povežete na internet in prenesete datoteko.\n"
+	"- Izberite \"Ne\", da slike ne spreminjate.\n"
+	"Če ne veste, kaj storiti, izberite \"Da\".\n\n"
+	"Opomba: nova datoteka bo prenesena v trenutni imenik in ko datoteka "
+	"\"%s\" tam enkrat obstaja, bo samodejno uporabljena tudi v bodoče."
+t MSG_085 "Prenašam %s"
+t MSG_086 "Izbrana ni nobena ISO slika"
+# The content between the quotes below (\"Create a bootable disk\") should match
+# the beginning of the IDC_BOOT text
+t MSG_087 "Prosim, kliknite gumb s ploščo, da izberete ISO, s katerega se da zagnati, "
+	"ali od-odkljukajte \"Ustvari zagonski disk z…\"."
+t MSG_088 "ISO je prevelik"
+t MSG_089 "Ta slika je prevelika za izbrani cilj."
+t MSG_090 "Nepodprt ISO"
+t MSG_091 "Za cilj UEFI so podprte samo zagonske ISO slike, združljive z EFI. "
+	"Prosim, izberite zagonski ISO, združljiv z EFI, ali nastavite cilj na BIOS."
+t MSG_092 "Nepodprt datotečni sistem"
+t MSG_093 "Za cilj UEFI sta podprta samo FAT in FAT32. "
+	"Prosim, izberite datotečni sistem FAT ali FAT32 ali nastavite cilj na BIOS."
+t MSG_094 "ISO ni združljiv z UEFI"
+t MSG_095 "Ta slika vsebuje datoteko, večjo od 4 GB, in ne more biti uporabljena za ustvarjanje zagonske naprave USB, združljive z EFI.\n"
+	"To je omejitev UEFI oz. FAT32 in ne Rufusa."
+t MSG_096 "Za to vrsto slike sta podprta samo FAT in FAT32. Prosim, izberite FAT ali FAT32 za datotečni sistem."
+t MSG_097 "Z NTFS se trenutno lahko uporabljajo samo slike, ki temeljijo na bootmgr ali WinPE."
+t MSG_098 "FAT in FAT32 se lahko uporabljata samo za ISO slike, ki temeljijo na isolinux-u, ali za cilj UEFI."
+t MSG_099 "Omejitev datotečnega sistema"
+t MSG_100 "Ta slika vsebuje datoteko, večjo od 4 GB, kar je več od največje velikosti, "
+	"ki jo dopuščata datotečna sistema FAT in FAT32."
+t MSG_101 "Manjkajoča podpora za WIM"
+t MSG_102 "Vaš sistem ne more vleči datotek iz arhivov WIM. To je potrebno "
+	"za ustvarjanje zagonskih pogonov USB z operacijskim sistemom Windows Vista ali Windows 7. "
+	"To lahko popravite, če namestite nedavno verzijo programa 7-Zip.\nŽelite obiskati spletno stran, kjer lahko 7-Zip prenesete?"
+t MSG_103 "Prenesem %s?"
+t MSG_104 "Syslinux 5.0 ali novejši zahteva, da je nameščena datoteka \"%s\".\n"
+	"Ker je ta datoteka večja od 100 KB in je vedno prisotna na ISO slikah s Syslinux 5.0 ali novejšim, "
+	"ni vgrajena v Rufus.\n\nRufus jo lahko prenese namesto vas.\n"
+	"- Izberite \"Da\", da se povežete na internet in prenesete datoteko.\n"
+	"- Izberite \"Ne\", če želite to datoteko pozneje sami kopirati na pogon.\n\n"
+	"Opomba: nova datoteka bo prenesena v trenutni imenik in ko datoteka "
+	"\"%s\" tam enkrat obstaja, bo samodejno uporabljena tudi v bodoče.\n"
+t MSG_105 "Preklic lahko pusti napravo v NEUPORABNEM stanju.\n"
+	"Če ste prepričani, da želite operacijo preklicati, izberite DA, drugače izberite NE."
+t MSG_106 "Prosim, izberite mapo"
+t MSG_107 "Vse datoteke"
+t MSG_108 "Rufusov zapisnik"
+t MSG_109 "0x%02X (disk %d)"
+# "Cluster size" below should be the same as the label for IDS_CLUSTERSIZE_TXT
+# "kilobytes" should be the same as in MSG_027
+t MSG_110 "MS-DOS se ne more zagnati s pogona, na katerem so gruče velike 64 KB.\n"
+	"Prosim, spremenite velikost gruče ali uporabite FreeDOS."
+t MSG_111 "Nezdružljiva velikost gruče"
+# "%d:%02d" below is a duration (mins:secs)
+t MSG_112 "Formatiranje velikih nosilcev UDF lahko traja veliko časa. Pri hitrostih USB 2.0 je predvideno "
+	"trajanje formatiranja %d:%02d, med čimer se kazalnik poteka ne bo premaknil. Prosim, bodite potrpežljivi!"
+t MSG_113 "Velik nosilec UDF"
+
+# Tootips
+# Partition Scheme and Target Type
+t MSG_150 "To je navadno najvarnejša izbira, če pa imate računalnik UEFI in želite namestiti "
+	"operacijski sistem v načinu EFI, izberite eno od ostalih možnosti."
+t MSG_151 "To možnost izberite, če želite namestiti operacijski sistem v načinu EFI, toda morate dostopati "
+	"do naprave USB iz operacijskega sistema Windows XP."
+t MSG_152 "To je zaželena možnost za namestitev operacijskega sistema v načinu EFI, ko dostop do naprave USB ni "
+	"zahtevan iz operacijskega sistema Windows XP."
+t MSG_153 "Testni vzorec: 0x%02X"
+t MSG_154 "Testni vzorec: 0x%02X, 0x%02X"
+t MSG_155 "Testni vzorec: 0x%02X, 0x%02X, 0x%02X"
+t MSG_156 "Testni vzorec: 0x%02X, 0x%02X, 0x%02X, 0x%02X"
+t MSG_157 "Nastavi ciljni datotečni sistem."
+t MSG_158 "Minimalna velikost, ki jo bo zasedel kos podatkov v datotečnem sistemu."
+t MSG_159 "S tem poljem nastavite oznako pogona.\nLahko uporabite mednarodne znake (npr. Č, Š, Ž)."
+t MSG_160 "Prikaže ali skrije dodatne možnosti."
+t MSG_161 "Preveri, ali so na napravi slabi bloki z uporabo testnega vzorca."
+t MSG_162 "To možnost od-odkljukajte za \"počasen\" način formatiranja."
+t MSG_163 "To možnost odkljukajte, če želite, da se da z naprave USB zagnati računalnik."
+t MSG_164 "Metoda, ki bo uporabljena, da se bo s pogona dalo zagnati računalnik."
+t MSG_165 "Kliknite, da izberete ISO…"
+t MSG_166 "To možnost odkljukajte, če želite omogočiti prikaz \"mednarodnih\" oznak nosilca "
+	"in nastaviti ikono za napravo (to ustvari datoteko autorun.inf)."
+t MSG_167 "Ta možnost namesti zagonski sektor, ki omogoča izbiro pri zagonu in lahko \"zamaskira\" BIOS ID pogona USB."
+t MSG_168 "Poskuša \"zamaskirati\" prvi zagonski pogon USB (navadno 0x80) kot drug disk.\n"
+	"Navadno je to potrebno samo, če nameščate Windows XP in imate več kot en disk."
+t MSG_169 "Ta možnost ustvari dodatno skrito particijo in poskuša poravnati particije.\n"
+	"To lahko izboljša zaznavo zagonskih naprav v starih BIOS verzijah."
+t MSG_170 "Omogoči naštevanje trdih diskov, priključenih preko USB. TO JE NA VAŠO ODGOVORNOST!"
+t MSG_171 "Začne formatirati.\nTo bo UNIČILO vse podatke na ciljni napravi!"
+t MSG_172 "Licenčne informacije in zasluge"
+t MSG_173 "Kliknite, da izberete…"
+# The following will appear in the about dialog
+t MSG_174 "Rufus - zanesljivi pripomoček za USB formatiranje"
+t MSG_175 "Verzija %d.%d.%d (izgradnja %d)"
+t MSG_176 "V slovenščino prevedel Matej Horvat (mailto:matej.horvat@guest.arnes.si)"
+t MSG_177 "Prijavite hrošče ali zahtevajte izboljšave na:"
+t MSG_178 "Dodatne avtorske pravice:"
+t MSG_179 "Politika posodobitev:"
+t MSG_180 "Če programu dovolite, da preverja za posodobitve, "
+	"se strinjate, da se na naših strežnikih lahko zbirajo naslednje informacije:"
+t MSG_181 "arhitekturo in verzijo vašega operacijskega sistema"
+t MSG_182 "verzijo programa, ki jo uporabljate"
+t MSG_183 "vaš IP naslov"
+t MSG_184 "Za računanje zasebne statistike o uporabi programa bomo morda te informacije obdržali "
+	"\\b največ eno leto\\b0 . Ne bomo pa jih nalašč predali nikomur drugemu."
+t MSG_185 "Postopek posodobitve:"
+t MSG_186 "Rufus ne namesti ali zaganja storitev v ozadju, zato se posodobitve prenašajo samo, ko Rufus zaženete sami.\\line\n"
+	"Za preverjanje in prenos posodobitev seveda potrebujete povezavo z internetom."
+
+# Status messages - these messages will appear on the status bar
+t MSG_201 "Preklicujem - prosim, počakajte…"
+t MSG_202 "Preiskujem sliko…"
+t MSG_203 "Preiskava slike ni uspela"
+# Parameter: the name of an obsolete Syslinux .c32 module. eg: "Obsolete vesamenu.c32 detected"
+t MSG_204 "Zaznan je bil zastarel %s"
+# Display the name of the ISO selected. eg: "Using ISO: en_win7_x64_sp1.iso"
+t MSG_205 "Uporabljam ISO: %s"
+# Typically "Missing ldlinux.c32 file"
+t MSG_206 "Manjkajoča datoteka %s"
+# The name proposed by Windows' Computer Management -> Disk Management when you try to format a drive
+# with an empty label. See http://rufus.akeo.ie/pics/default_name.png
+t MSG_207 "Nov nosilec"
+# Same message, once for singular and plural ("1 device found", "2 devices found")
+t MSG_208 "%d naprava najdena"
+t MSG_209 "%d naprav najdenih"
+t MSG_210 "KONČANO."
+t MSG_211 "Preklicano."
+t MSG_212 "NI USPELO."
+# Used when a new update has been downloaded and launched
+t MSG_213 "Zaganjam novo aplikacijo…"
+t MSG_214 "Ni mogoče zagnati nove aplikacije"
+# Open/Save file
+t MSG_215 "Odprl %s"
+t MSG_216 "Shranil %s"
+# Formatting status (make sure you use a double % to print the percent sign)
+t MSG_217 "Formatiranje: %0.1f%% končano"
+t MSG_218 "Ustvarjam datotečni sistem: opravilo %d/%d končano"
+t MSG_219 "Popravki za NTFS: %d%% končano"
+# Parameter: the file system and an estimated duration in mins and secs.
+# eg. "Formatting (UDF) - Estimated duration 3:21…"
+# NB: if "estimated duration" is too long, just use "estimated" or an abbreviation
+t MSG_220 "Formatiranje (%s) - predviden čas trajanja %d:%02d…"
+t MSG_221 "Nastavljam oznako (to utegne trajati nekaj časa)…"
+# Parameter: the file system. eg. "Formatting (NTFS)…"
+t MSG_222 "Formatiranje (%s)…"
+t MSG_223 "Popravki za NTFS (chkdsk)…"
+t MSG_224 "Brišem strukture MBR/PBR/GPT…"
+t MSG_225 "Zahtevam dostop do diska…"
+t MSG_226 "Pregledujem obstoječe zagonske vnose…"
+t MSG_227 "Zapiram obstoječi nosilec…"
+t MSG_228 "Zapisujem glavni zagonski sektor (MBR)…"
+t MSG_229 "Zapisujem particijske podatke…"
+t MSG_230 "Kopiram DOS datoteke…"
+t MSG_231 "Kopiram ISO datoteke…"
+t MSG_232 "Pripravljam pogon za zagon Windows 7 na EFI (to lahko traja)…"
+t MSG_233 "Zaključujem; prosim, počakajte…"
+# Takes the Syslinux version as parameter, eg. "Installing Syslinux v5…"
+t MSG_234 "Nameščam Syslinux v%d…"
+# Bad blocks status. eg: "Bad Blocks: PASS 1/2 - 12.34% (0/0/1 errors)"
+t MSG_235 "Slabi bloki: prehod %d/%d - %0.2f%% (%d/%d/%d napak)"
+t MSG_236 "Slabi bloki: testiram z naključnim vzorcem"
+t MSG_237 "Slabi bloki: testiram z vzorcem 0x%02X"
+# eg. "Partitioning (MBR)…"
+t MSG_238 "Ustvarjam particije (%s)…"
+t MSG_239 "Brišem particije…"
+t MSG_240 "Prenos %s: povezovanje…"
+t MSG_241 "Prenos: %0.1f%%"
+t MSG_242 "Ni mogoče prenesti datoteke."
+t MSG_243 "Preverjam za posodobitve Rufusa…"
+t MSG_244 "Posodobitve: ni se mogoče povezati na internet"
+t MSG_245 "Posodobitve: ni mogoče dostopati do podatka o verziji"
+t MSG_246 "Nova verzija Rufusa je na voljo!"
+t MSG_247 "Najdena ni bila nobena novejša verzija"
+t MSG_248 "Registrski ključi uspešno izbrisani"
+t MSG_249 "Brisanje registrskih ključev ni uspelo"
+# eg. "Fixed disk detection enabled" "ISO size check disabled"
+t MSG_250 "%s omogočena"
+t MSG_251 "%s onemogočena"
+t MSG_252 "Preverjanje velikosti"
+t MSG_253 "Zaznava fiksnih diskov"
+t MSG_254 "Prisili véliko formatiranje FAT32"
+t MSG_255 "NoDriveTypeAutorun bo izbrisan ob izhodu"
+t MSG_256 "Zaznava lažnih pogonov"
+t MSG_257 "Podpora za Joliet"
+t MSG_258 "Podpora za Rock Ridge"
+t MSG_259 "Prisili posodobitev"
+
+################################################################################
 l "es-ES" "Spanish (Español)" 0x040a, 0x080a, 0x0c0a, 0x100a, 0x140a, 0x180a, 0x1c0a, 0x200a, 0x240a, 0x280a, 0x2c0a, 0x300a, 0x340a, 0x380a, 0x3c0a, 0x400a, 0x440a, 0x480a, 0x4c0a, 0x500a, 0x540a, 0x580a
 v 1.0.4
 b "en-US"
