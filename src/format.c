@@ -791,7 +791,7 @@ static BOOL AnalyzePBR(HANDLE hLogicalVolume)
 	return TRUE;
 }
 
-static BOOL ClearMBRGPT(HANDLE hPhysicalDrive, LONGLONG DiskSize, DWORD SectorSize)
+static BOOL ClearMBRGPT(HANDLE hPhysicalDrive, LONGLONG DiskSize, DWORD SectorSize, BOOL add1MB)
 {
 	BOOL r = FALSE;
 	uint64_t i, last_sector = DiskSize/SectorSize;
@@ -807,7 +807,9 @@ static BOOL ClearMBRGPT(HANDLE hPhysicalDrive, LONGLONG DiskSize, DWORD SectorSi
 	// with reluctant access to large drive.
 
 	// Must clear at least 1MB + the PBR for large FAT32 format to work on a large drive
-	for (i=0; i<(2048+MAX_SECTORS_TO_CLEAR); i++) {
+	// Don't do it if Large FAT32 is not enabled, as it can take time for slow drives.
+	uprintf("Erasing %d sectors", (add1MB?2048:0)+MAX_SECTORS_TO_CLEAR);
+	for (i=0; i<((add1MB?2048:0)+MAX_SECTORS_TO_CLEAR); i++) {
 		if ((IS_ERROR(FormatStatus)) || (write_sectors(hPhysicalDrive, SectorSize, i, 1, pBuf) != SectorSize)) {
 			goto out;
 		}
@@ -1276,7 +1278,7 @@ DWORD WINAPI FormatThread(LPVOID param)
 				uprintf("Bad blocks: Check failed.\n");
 				if (!IS_ERROR(FormatStatus))
 					FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_BADBLOCKS_FAILURE);
-				ClearMBRGPT(hPhysicalDrive, SelectedDrive.DiskSize, SelectedDrive.Geometry.BytesPerSector);
+				ClearMBRGPT(hPhysicalDrive, SelectedDrive.DiskSize, SelectedDrive.Geometry.BytesPerSector, FALSE);
 				fclose(log_fd);
 				_unlink(logfile);
 				goto out;
@@ -1321,7 +1323,7 @@ DWORD WINAPI FormatThread(LPVOID param)
 
 	// Especially after destructive badblocks test, you must zero the MBR/GPT completely
 	// before repartitioning. Else, all kind of bad things happen.
-	if (!ClearMBRGPT(hPhysicalDrive, SelectedDrive.DiskSize, SelectedDrive.Geometry.BytesPerSector)) {
+	if (!ClearMBRGPT(hPhysicalDrive, SelectedDrive.DiskSize, SelectedDrive.Geometry.BytesPerSector, use_large_fat32)) {
 		uprintf("unable to zero MBR/GPT\n");
 		if (!IS_ERROR(FormatStatus))
 			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_WRITE_FAULT;
