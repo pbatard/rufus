@@ -212,7 +212,7 @@ FILE* open_loc_file(const char* filename)
 		uprintf("localization: could not convert '%s' filename to UTF-16\n", filename);
 		goto out;
 	}
-	fd = _wfopen(wfilename, L"r");
+	fd = _wfopen(wfilename, L"rb");
 	if (fd == NULL) {
 		uprintf("localization: could not open '%s'\n", filename);
 	}
@@ -240,6 +240,24 @@ BOOL get_supported_locales(const char* filename)
 	fd = open_loc_file(filename);
 	if (fd == NULL)
 		goto out;
+
+	// Check that the file doesn't contain a BOM and was saved in DOS mode
+	i = fread(line, 1, sizeof(line), fd);
+	if (i < sizeof(line)) {
+		uprintf("Invalid loc file: the file is too small!");
+		goto out;
+	}
+	if (((uint8_t)line[0]) > 0x80) {
+		uprintf("Invalid loc file: the file should not have a BOM (Byte Order Mark)");
+		goto out;
+	}
+	for (i=0; i<sizeof(line)-1; i++)
+		if ((((uint8_t)line[i]) == 0x0D) && (((uint8_t)line[i+1]) == 0x0A)) break;
+	if (i >= sizeof(line)-1) {
+		uprintf("Invalid loc file: the file MUST be saved in DOS mode (CR/LF)");
+		goto out;
+	}
+	fseek(fd, 0, SEEK_SET);
 
 	loc_line_nr = 0;
 	line[0] = 0;
