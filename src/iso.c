@@ -47,7 +47,6 @@
 // the progress bar for every block will bring extraction to a crawl
 #define PROGRESS_THRESHOLD        128
 #define FOUR_GIGABYTES            4294967296LL
-#define WRITE_RETRIES             3
 
 // Needed for UDF ISO access
 CdIo_t* cdio_open (const char* psz_source, driver_id_t driver_id) {return NULL;}
@@ -281,21 +280,15 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 				memset(buf, 0, UDF_BLOCKSIZE);
 				i_read = udf_read_block(p_udf_dirent, buf, 1);
 				if (i_read < 0) {
-					uprintf("  Error reading UDF file %s", &psz_fullpath[strlen(psz_extract_dir)]);
+					uprintf("  Error reading UDF file %s\n", &psz_fullpath[strlen(psz_extract_dir)]);
 					goto out;
 				}
 				buf_size = (DWORD)MIN(i_file_length, i_read);
-				for (i=0; i<WRITE_RETRIES; i++) {
-					ISO_BLOCKING(r = WriteFile(file_handle, buf, buf_size, &wr_size, NULL));
-					if ((!r) || (buf_size != wr_size)) {
-						uprintf("  Error writing file: %s", WindowsErrorString());
-						if (i < WRITE_RETRIES-1)
-							uprintf("  RETRYING...\n");
-					} else {
-						break;
-					}
+				ISO_BLOCKING(r = WriteFile(file_handle, buf, buf_size, &wr_size, NULL));
+				if ((!r) || (buf_size != wr_size)) {
+					uprintf("  Error writing file: %s\n", WindowsErrorString());
+					goto out;
 				}
-				if (i >= WRITE_RETRIES) goto out;
 				i_file_length -= i_read;
 				if (nb_blocks++ % PROGRESS_THRESHOLD == 0) {
 					SendMessage(hISOProgressBar, PBM_SETPOS, (WPARAM)((MAX_PROGRESS*nb_blocks)/total_blocks), 0);
@@ -426,18 +419,11 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 					goto out;
 				}
 				buf_size = (DWORD)MIN(i_file_length, ISO_BLOCKSIZE);
-
-				for (i=0; i<WRITE_RETRIES; i++) {
-					ISO_BLOCKING(s = WriteFile(file_handle, buf, buf_size, &wr_size, NULL));
-					if ((!s) || (buf_size != wr_size)) {
-						uprintf("  Error writing file: %s", WindowsErrorString());
-						if (i < WRITE_RETRIES-1)
-							uprintf("  RETRYING...\n");
-					} else {
-						break;
-					}
+				ISO_BLOCKING(s = WriteFile(file_handle, buf, buf_size, &wr_size, NULL));
+				if ((!s) || (buf_size != wr_size)) {
+					uprintf("  Error writing file: %s\n", WindowsErrorString());
+					goto out;
 				}
-				if (i >= WRITE_RETRIES) goto out;
 				i_file_length -= ISO_BLOCKSIZE;
 				if (nb_blocks++ % PROGRESS_THRESHOLD == 0) {
 					SendMessage(hISOProgressBar, PBM_SETPOS, (WPARAM)((MAX_PROGRESS*nb_blocks)/total_blocks), 0);
