@@ -598,6 +598,18 @@ BOOL UnmountVolume(HANDLE hDrive)
 BOOL MountVolume(char* drive_name, char *drive_guid)
 {
 	char mounted_guid[52];	// You need at least 51 characters on XP
+	char mounted_letter[16] = {0};
+	DWORD size;
+
+	// For fixed disks, Windows may already have remounted the volume, but with a different letter
+	// than the one we want. If that's the case, we need to unmount first.
+	if ( (GetVolumePathNamesForVolumeNameA(drive_guid, mounted_letter, sizeof(mounted_letter), &size))
+	  && (size > 2) && (safe_strcmp(mounted_letter, drive_name) != 0) ) {
+		uprintf("Volume is already mounted, but as %s instead of %s - Unmounting...\n", mounted_letter, drive_name);
+		if (!DeleteVolumeMountPointA(mounted_letter))
+			uprintf("Failed to unmount volume: %s", WindowsErrorString());
+		Sleep(200);
+	}
 
 	if (!SetVolumeMountPointA(drive_name, drive_guid)) {
 		// If the OS was faster than us at remounting the drive, this operation can fail
