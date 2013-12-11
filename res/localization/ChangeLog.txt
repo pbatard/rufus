@@ -6,6 +6,9 @@ the same changes.
 Remember to also update the version number for your translation ('v x.y.z')
 once you have matched all the changes that occurred for the en-US translation.
 
+o Version 1.0.5 (2013.12.11)
+  - Removed MSG_092 to MSG_094
+
 o Version 1.0.4 (2013.12.02)
   - MSG_033 -> MSG_031
   - MSG_031 -> MSG_032

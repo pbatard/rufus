@@ -1264,14 +1264,11 @@ static BOOL BootCheck(void)
 				// Unsupported ISO
 				MessageBoxU(hMainDialog, lmprintf(MSG_091), lmprintf(MSG_090), MB_OK|MB_ICONERROR);
 				return FALSE;
-			} else if (fs > FS_FAT32) {
-				// When using UEFI Target Type, only FAT/FAT32 is supported.
-				MessageBoxU(hMainDialog, lmprintf(MSG_093), lmprintf(MSG_092), MB_OK|MB_ICONERROR);
-				return FALSE;
-			} else if (iso_report.has_4GB_file) {
-				// This ISO image contains a file larger than 4 GB and cannot be used to create an EFI bootable USB
-				// Who the heck decided that using FAT32 for UEFI boot was a great idea?!?
-				MessageBoxU(hMainDialog, lmprintf(MSG_095), lmprintf(MSG_094), MB_OK|MB_ICONINFORMATION);
+			}
+			if ((iso_report.has_win7_efi) && (!WimExtractCheck())) {
+				// Your platform cannot extract files from WIM archives => download 7-zip?
+				if (MessageBoxU(hMainDialog, lmprintf(MSG_102), lmprintf(MSG_101), MB_YESNO|MB_ICONERROR) == IDYES)
+					ShellExecuteA(hMainDialog, "open", SEVENZIP_URL, NULL, NULL, SW_SHOWNORMAL);
 				return FALSE;
 			}
 		} else if ((fs == FS_NTFS) && (!iso_report.has_bootmgr) && (!IS_WINPE(iso_report.winpe))) {
@@ -1287,15 +1284,10 @@ static BOOL BootCheck(void)
 			// FAT/FAT32 can only be used for isolinux based ISO images or when the Target Type is UEFI
 			MessageBoxU(hMainDialog, lmprintf(MSG_098), lmprintf(MSG_090), MB_OK|MB_ICONERROR);
 			return FALSE;
-		} else if (((fs == FS_FAT16)||(fs == FS_FAT32)) && (iso_report.has_4GB_file)) {
+		}
+		if (((fs == FS_FAT16)||(fs == FS_FAT32)) && (iso_report.has_4GB_file)) {
 			// This ISO image contains a file larger than 4GB file (FAT32)
 			MessageBoxU(hMainDialog, lmprintf(MSG_100), lmprintf(MSG_099), MB_OK|MB_ICONERROR);
-			return FALSE;
-		}
-		if ((bt == BT_UEFI) && (iso_report.has_win7_efi) && (!WimExtractCheck())) {
-			// Your platform cannot extract files from WIM archives => download 7-zip?
-			if (MessageBoxU(hMainDialog, lmprintf(MSG_102), lmprintf(MSG_101), MB_YESNO|MB_ICONERROR) == IDYES)
-				ShellExecuteA(hMainDialog, "open", SEVENZIP_URL, NULL, NULL, SW_SHOWNORMAL);
 			return FALSE;
 		}
 	} else if (dt == DT_SYSLINUX_V5) {

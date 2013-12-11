@@ -1387,7 +1387,7 @@ DWORD WINAPI FormatThread(LPVOID param)
 	if (IsChecked(IDC_BOOT)) {
 		if (bt == BT_UEFI) {
 			// For once, no need to do anything - just check our sanity
-			if ( (dt != DT_ISO) || (!IS_EFI(iso_report)) || (fs > FS_FAT32) ) {
+			if ( (dt != DT_ISO) || (!IS_EFI(iso_report)) || (fs > FS_NTFS) ) {
 				uprintf("Spock gone crazy error!\n");
 				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_INSTALL_FAILURE;
 				goto out;

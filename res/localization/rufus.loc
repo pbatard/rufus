@@ -1,4 +1,4 @@
-# This file should be saved as UTF-8, no-BOM, ***IN DOS MODE!!!*** (i.e. CR/LF as line terminators)
+# This file should be saved as UTF-8, no-BOM, in DOS mode (i.e. CR/LF as line terminators)
 
 ######################## HOW TO ADD A NEW TRANSLATION ###########################
 # For a more comprehensive set of instructions, please see the *FULL* Localization guide at:
@@ -53,7 +53,7 @@
 # http://download.microsoft.com/download/9/5/E/95EF66AF-9026-4BB0-A41D-A4F81802D92C/%5BMS-LCID%5D.pdf
 # for the LCID (0x####) codes you should use
 l "en-US" "English (English)" 0x0409, 0x0809, 0x0c09, 0x1009, 0x1409, 0x1809, 0x1c09, 0x2009, 0x2409, 0x2809, 0x2c09, 0x3009, 0x3409, 0x3809, 0x3c09, 0x4009, 0x4409, 0x4809
-v 1.0.4
+v 1.0.5
 
 # Main dialog
 g IDD_DIALOG
@@ -252,12 +252,6 @@ t MSG_089 "This ISO image is too big for the selected target."
 t MSG_090 "Unsupported ISO"
 t MSG_091 "When using UEFI Target Type, only EFI bootable ISO images are supported. "
 	"Please select an EFI bootable ISO or set the Target Type to BIOS."
-t MSG_092 "Unsupported filesystem"
-t MSG_093 "When using UEFI Target Type, only FAT/FAT32 is supported. "
-	"Please select FAT/FAT32 as the File system or set the Target Type to BIOS."
-t MSG_094 "Non UEFI compatible ISO"
-t MSG_095 "This ISO image contains a file larger than 4 GB and cannot be used to create an EFI bootable USB.\n"
-	"This is a limitation of UEFI/FAT32, not Rufus."
 t MSG_096 "Only FAT/FAT32 is supported for this type of ISO. Please select FAT/FAT32 as the File system."
 t MSG_097 "Only 'bootmgr' or 'WinPE' based ISO images can currently be used with NTFS."
 t MSG_098 "FAT/FAT32 can only be used for isolinux based ISO images or when the Target Type is UEFI."
@@ -509,7 +503,7 @@ t MSG_176 ""
 
 ################################################################################
 l "zh-TW" "Chinese Traditional (正體中文)" 0x0404, 0x0c04, 0x1404, 0x7c04
-v 1.0.4
+v 1.0.5
 b "en-US"
 
 # Main dialog
@@ -706,11 +700,6 @@ t MSG_089 "此 ISO 檔案大小超過裝置可支援的空間"
 t MSG_090 "不支援的 ISO 映像檔"
 t MSG_091 "當選擇 UEFI 目標型別時，僅支援 EFI boot ISO 映像檔"
 	"請選取可 EFI 開機的 ISO 檔，或將目標型別改為 BIOS"
-t MSG_092 "不支援的檔案系統"
-t MSG_093 "當選擇 UEFI 目標型別時，僅支援 FAT/FAT32 格式"
-	"請指定 FAT/FAT32 為檔案系統，或將目標型別改為 BIOS"
-t MSG_094 "此 ISO 映像檔不相容 UEFI"
-t MSG_095 "此映像檔內含大於 4GB 的單一檔案大小，故無法作為開機片；此為 UEFI/FAT32 之設計限制"
 t MSG_096 "此 ISO 映像檔僅可使用 FAT/FAT32，請指定 FAT/FAT32 為檔案系統"
 t MSG_097 "NTFS 僅可使用 bootmgr 或 WinPE 作為開機載入之 ISO 映像檔"
 t MSG_098 "FAT/FAT32 僅支援 isolinux 作為開機載入之 ISO 映像檔；或指定 UEFI 為目標型別時可支援"
@@ -861,7 +850,7 @@ t MSG_259 "Force update"
 
 ################################################################################
 l "nl-NL" "Dutch (Netherlands)" 0x0413, 0x0813
-v 1.0.4
+v 1.0.5
 b "en-US"
 
 # Main dialog
@@ -1088,12 +1077,6 @@ t MSG_089 "Deze ISO image is te groot voor het geselecteerde doel apparaat."
 t MSG_090 "niet-ondersteund ISO"
 t MSG_091 "Wanneer voor type computer UEFI is geselecteerd, zijn alleen EFI opstartbare ISO images ondersteund."
 	"Selecteer een EFI opstartbare ISO of kies als type "MBR partitie-indeling voor BIOS computer."
-t MSG_092 "Niet-ondersteund bestandssysteem"
-t MSG_093 "Wanneer als type computer UEFI geselecteerd wordt, is alleen FAT/FAT32 ondersteund."
-	"Selecteer FAT/FAT32 als bestandssysteem of stel type computer in als BIOS."
-t MSG_094 "Niet-compatibel UEFI ISO."
-t MSG_095 "Deze ISO image bevat een bestand dat groter is dan 4 GB en kan niet gebruikt worden voor een UEFI bootable USB.\n "
-	"Dit is een beperking van UEFI/FAT32, niet van Rufus."
 t MSG_096 "Alleen FAT/FAT32 wordt ondersteund voor dit type ISO. Selecteer FAT/FAT32 als bestandssysteem a.u.b."
 t MSG_097 "Alleen 'bootmgr' of 'WinPE' gebasseerde ISO images kunnen momenteel worden gebruikt met NTFS."
 t MSG_098 "FAT/FAT32 kan alleen gebruikt worden voor op isolinux gebasseerde ISO images of wanneer het doel type computer UEFI is."
@@ -1247,7 +1230,7 @@ t MSG_259 "Forceer update"
 
 ################################################################################
 l "fr-FR" "French (Français)" 0x040c, 0x080c, 0x0c0c, 0x100c, 0x140c, 0x180c, 0x1c0c, 0x200c, 0x240c, 0x280c, 0x2c0c, 0x300c, 0x340c, 0x380c, 0xe40c
-v 1.0.4
+v 1.0.5
 b "en-US"
 
 g IDD_DIALOG
@@ -1443,12 +1426,6 @@ t MSG_089 "Cette ISO image est trop large pour le périphérique sélectionné."
 t MSG_090 "Image ISO on supportée"
 t MSG_091 "Quand UEFI est séelectionné, seules les images ISO basées sur EFI sont supportées. "
 	"Veuillez sélectionner une image ISO démarrable avec EFI ou sélectionner BIOS pour le système de destination."
-t MSG_092 "Système de fichiers non supporté"
-t MSG_093 "Quand UEFI est séelectionné, seul le système de fichiers FAT/FAT32 est supporté. "
-	"Veuillez sélectionner FAT/FAT32 comme système de fichiers ou sélectionner BIOS pour le système de destination."
-t MSG_094 "Image ISO incompatible avec UEFI"
-t MSG_095 "Cette image ISO contient un fichier de plus de 4 Go et ne peut pas être utilisée pour créer un USB démarrable par UEFI.\n"
-	"Ceci est une limitation de UEFI/FAT32, pas de Rufus."
 t MSG_096 "Seul FAT/FAT32 est supporté avec ce type d'image ISO. Veuillez sélectionner FAT/FAT32 pour le système de fichiers."
 t MSG_097 "Seules les images ISO utilisant 'bootmgr' ou 'WinPE' peuvent être utilisées avec NTFS."
 t MSG_098 "FAT/FAT32 peut seulement être utilisé pour les images ISO utilisant 'isolinux' ou lorsque que le système de destination est UEFI."
@@ -1595,7 +1572,7 @@ t MSG_259 "Forçage de mise à jour"
 
 ################################################################################
 l "de-DE" "German (Deutsch)" 0x0407, 0x0807, 0x0c07, 0x1007, 0x1407
-v 1.0.4
+v 1.0.5
 b "en-US"
 
 g IDD_DIALOG
@@ -1811,12 +1788,6 @@ t MSG_089 "Dieses ISO-Abbild ist zu groß für das gewählte Ziel."
 t MSG_090 "ISO-Abbild nicht unterstützt"
 t MSG_091 "When using UEFI Target Type, only EFI bootable ISO images are supported. "
 	"Please select an EFI bootable ISO or set the Target Type to BIOS."
-t MSG_092 "Nicht unterstütztes Dateisystem"
-t MSG_093 "When using UEFI Target Type, only FAT/FAT32 is supported. "
-	"Please select FAT/FAT32 as the File system or set the Target Type to BIOS."
-t MSG_094 "Keine UEFI-kompatibles ISO-Abbild"
-t MSG_095 "Dieses ISO-Abbild enthält eine Datei größer 4 GB und kann nicht verwendet werden um einen EFI-startfähigen USB-Stick zu erzeugen.\n"
-	"Diese Einschränkung ist aufgrund UEFI/FAT32, und nicht wegen Rufus."
 t MSG_096 "Nur FAT/FAT32 sind unterstützt für diesen Typ des ISO-Abbilds. Bitte wählen Sie FAT/FAT32 als Dateisystem."
 t MSG_097 "Nur 'bootmgr' oder 'WinPE' basierende ISO-Abbilder können derzeit mit NTFS verwendet werden."
 t MSG_098 "FAT/FAT32 kann nur für isolinux basierte ISO-Abbilder oder den Zieltyp UEFI verwendet werden."
@@ -1972,7 +1943,7 @@ t MSG_259 "Update erzwingen"
 
 ################################################################################
 l "el-GR" "Greek (Ελληνικά)" 0x0408
-v 1.0.4
+v 1.0.5
 b "en-US"
 
 # Main dialog
@@ -2222,13 +2193,6 @@ t MSG_089 "Το μέγεθος του επιλεγμένου ειδώλου ISO 
 t MSG_090 "Μη υποστηριζόμενο είδωλο ISO"
 t MSG_091 "Όταν χρησιμοποιείτε ως επιθυμητό τύπο το UEFI μόνο είδωλα ISO με δυνατότητα εκκίνησης τύπου EFI υποστηρίζονται."
 	"Παρακαλώ επιλέξτε ένα είδωλο ISO με δυνατότητα εκκίνησης τύπου EFI ή επιλέξτε ως επιθυμητό τύπο το BIOS."
-t MSG_092 "Μη υποστηριζόμενο σύστημα αρχείων"
-t MSG_093 "Όταν χρησιμοποιείτε ως επιθυμητό τύπο το UEFI, μόνο ο τύπος FAT/FAT32 υποστηρίζεται."
-	"Παρακαλώ επιλέξτε FAT/FAT32 ως σύστημα αρχείων ή επιλέξτε ως επιθυμητό τύπο το BIOS."
-t MSG_094 "Μη συμβατό ISO με UEFI"
-t MSG_095 "Αυτό το είδωλο ISO περιέχει ένα αρχείο μεγαλύτερο από 4 GB και δεν μπορεί να χρησιμοποιηθεί \n"
-	"για τη δημιουργία ενός USB με δυνατότητα εκκίνησης τύπου EFI.\n"
-	"Αυτός ο περιορισμός προέρχεται από ένα εκ των UEFI/FAT32, και όχι από το Rufus."
 t MSG_096 "Μόνο το FAT/FAT32 υποστηρίζεται για αυτόν τον τύπο ειδώλου ISO. Παρακαλώ επιλέξτε FAT/FAT32 ως σύστημα αρχείων."
 t MSG_097 "Μόνο τα είδωλα που βασίζονται στον τύπο 'bootmgr' ή 'WinPE' μπορούν να χρησιμοποιηθούν με το NTFS."
 t MSG_098 "Ο τύπος FAT/FAT32 μπορεί να χρησιμοποιηθεί μόνο με είδωλα που βασίζονται στον τύπο isolinux ή όταν ο επιθυμητός τύπος είναι το UEFI."
@@ -2388,7 +2352,7 @@ t MSG_259 "Εξαναγκασμένη ενημέρωση"
 
 ################################################################################
 l "hu-HU" "Hungarian (Magyar)" 0x040e
-v 1.0.4
+v 1.0.5
 b "en-US"
 
 # Main dialog
@@ -2582,12 +2546,6 @@ t MSG_089 "Az ISO fájl túl nagy a kiválasztott háttértárnak."
 t MSG_090 "Nem támogatott ISO"
 t MSG_091 "Amikor UEFI-t használsz céltípusnak, akkor csak az EFI-s ISO képek vannak támogatva. "
 	"Kérlek, válassz egy EFI-s bootolható ISO-t, vagy rakd a Céltípust BIOS-ra."
-t MSG_092 "NEm támogatott fájlrendszer"
-t MSG_093 "Amikor UEFI-t használsz, akkor csak a FAT/FAT32 támogatott. "
-	"KÉrlek, válaszd FAT/FAT32-t Fájlrendszernek, vagy állítsd be a Céltípust BIOS-ra."
-t MSG_094 "Nem UEFI kompatibilis ISO"
-t MSG_095 "Ez az ISO kép nagyobb, mint 4 GB, és nem használható EFI-s USB kép készítéséhez.\n"
-	"Ez az UEFI/FAT32 korlátozása, nem a Rufus-é."
 t MSG_096 "Csak a FAT/FAT32 támogatott ehhez az ISO-hoz. KÉrlek, válaszd ki a FAT/FAT32 Fájlrendszernek."
 t MSG_097 "Csak 'bootmgr' vagy 'WinPE' alapú ISO képek használhatóak NTFS-el."
 t MSG_098 "FAT/FAT32 csak isolinux alapú ISO lpekhez ahsználhatóak, vagy akkor, mikor a Céltípus UEFI."
@@ -2752,7 +2710,7 @@ t MSG_259 "'Erőszakos' frissítés"
 
 ################################################################################
 l "it-IT" "Italian (Italiano)" 0x0410, 0x0810
-v 1.0.4
+v 1.0.5
 b "en-US"
 
 g IDD_DIALOG
@@ -2960,12 +2918,6 @@ t MSG_089 "Questa immagine ISO è troppo garnde per l'unità destinazione."
 t MSG_090 "Formato ISO non supportato"
 t MSG_091 "Quando usi una destinazione di tipo UEFI, sono supportate solo immagini ISO avviabili EFI. "
 	"Scegli un'immagien avviabile EFI o imposta una destinazione di tipo BIOS."
-t MSG_092 "Filesystem non supportato"
-t MSG_093 "Quando usi una destinazione di tipo UEFI, sono supportati solo filesystem FAT/FAT32. "
-	"Seleziona FAT/FAT32 come fileystem o imposta uan destianzioen di tipo BIOS."
-t MSG_094 "Imamgien ISO non compatibile UEFI"
-t MSG_095 "Questa immagine ISO contiene un file più grande di 4 GB ae non può essere usata in una unità USB EFI avviabile.\n"
-	"Questa è una limitazione di UEFI/FAT32, non di Rufus."
 t MSG_096 "Per questo tipo di ISO, sono supportate solo FAT/FAT32. Seleziona FAT/FAT32 come filesystem."
 t MSG_097 "Con NTFS attualmente possono essere usate solo immagini ISO basate su 'bootmgr' o 'WinPE'."
 t MSG_098 "FAT/FAT32 può essere usata solo per immagini ISO basate su isolinux o quando il tipo destinazione è UEFI."
@@ -3115,7 +3067,7 @@ t MSG_258 "Supporto Rock Ridge"
 
 ################################################################################
 l "ko-KR" "Korean (한국어)" 0x0412
-v 1.0.4
+v 1.0.5
 b "en-US"
 
 # Main dialog
@@ -3326,12 +3278,6 @@ t MSG_089 "이 ISO 이미지는 선택한 대상에 비해 너무 큽니다."
 t MSG_090 "지원되지 않는 ISO"
 t MSG_091 "UEFI 대상 유형을 사용하는 경우에만 EFI 부팅 가능한 ISO 이미지가 지원됩니다. "
 	"EFI 부팅 가능한 ISO를 선택하거나 BIOS에 대상 유형을 설정하십시오."
-t MSG_092 "지원되지 않는 파일 시스템"
-t MSG_093 "UEFI 대상 유형을 사용하는 경우에만 FAT/FAT32이 지원됩니다. "
-	"파일 시스템으로 FAT/FAT32를 선택하거나 BIOS에 대상 유형을 설정하십시오."
-t MSG_094 "비 UEFI 호환 ISO"
-t MSG_095 "이 ISO 이미지는 4GB보다 큰 파일이 포함되어 있어 EFI 부팅 USB를 만드는 데 사용할 수 없습니다.\n"
-	"이것은 이 프로그램의 제한 사항이 아니고 UEFI/FAT32의 제한 사항입니다."
 t MSG_096 "이 ISO 유형은 FAT/FAT32만 지원합니다. 파일 시스템으로 FAT/FAT32를 선택하십시오."
 t MSG_097 "현재 'bootmgr' 또는 'WinPE' 기반의 ISO 이미지만 NTFS와 함께 사용할 수 있습니다."
 t MSG_098 "FAT/FAT32는 isolinux 기반의 ISO 이미지 또는 대상 유형이 UEFI일 때만 사용할 수 있습니다."
@@ -3496,7 +3442,7 @@ t MSG_259 "강제 업데이트"
 
 ################################################################################
 l "lt-LT" "Lithuanian (Lietuvių)" 0x0427
-v 1.0.4
+v 1.0.5
 b "en-US"
 
 # Main dialog
@@ -3730,12 +3676,6 @@ t MSG_089 "Šis ISO atvaizdas yra per didelis pasirinktai paskirčiai."
 t MSG_090 "Nepalaikomas ISO"
 t MSG_091 "Naudojant UEFI paskirties tipą, tiktai EFI įkelties ISO atvaizdai yra palaikomi. "
 	"Prašau pasirinkti EFI įkelties ISO arba pakeisti paskirties tipą į BIOS."
-t MSG_092 "Nepalaikoma failų sistema"
-t MSG_093 "Naudojant UEFI paskirties tipą, tiktai FAT/FAT32 yra palaikomi. "
-	"Prašau pasirinkti FAT/FAT32 failų sistemą arba pakeisti paskirties tipą į BIOS."
-t MSG_094 "Ne UEFI suderinamas ISO"
-t MSG_095 "Šiame ISO atvaizde yra failas, didesnis negu 4 GB, todėl jis negali būti naudojamas kurti EFI įkelties USB.\n"
-	"Tai yra UEFI/FAT32 apribojimas, ne Rufus."
 t MSG_096 "Tik FAT/FAT32 yra palaikoma šiam ISO tipui. Prašau pasirinkti FAT/FAT32 failų sistemą."
 t MSG_097 "Tik 'bootmgr' ar 'WinPE' pagrindo ISO atvaizdai šiuo metu gali būti naudojami su NTFS."
 t MSG_098 "FAT/FAT32 gali būti naudojama tik isolinux pagrindo ISO atvaizdams arba kai paskirties tipas yra UEFI."
@@ -3900,7 +3840,7 @@ t MSG_259 "Priversti naujintis"
 
 ################################################################################
 l "pl-PL" "Polish (Polski)" 0x0415
-v 1.0.4
+v 1.0.5
 b "en-US"
 # my internal info: 01.12.2013,21:03 (finito); DONE: szerokości głównego
 
@@ -4136,12 +4076,6 @@ t MSG_089 "Ten obraz ISO jest zbyt duży dla wybranego celu."
 t MSG_090 "Niewspierane ISO"
 t MSG_091 "Podczas używania Systemu Typu UEFI, tylko bootowalne obrazy ISO EFI są wspierane. "
 	"Proszę wybrać bootowalny obraz ISO EFI lub ustawić System Docelowy na BIOS."
-t MSG_092 "Niewspierany system plików"
-t MSG_093 "Podczas używania Systemu Docelowego UEFI, tylko FAT/FAT32 jest wspierane. "
-	"Proszę wybrać FAT/FAT32 jako System plików lub ustaw System Docelowy na BIOS."
-t MSG_094 "ISO niekompatybilne z UEFI"
-t MSG_095 "Ten obraz ISO zawiera pliki większe od 4 GB i nie może sostać użyte do stworzenia bootowalnego EFI USB.\n"
-	"To jest ograniczenie UEFI/FAT32, nie Rufusa."
 t MSG_096 "Tylko FAT/FAT32 jest wpierane dla tego typu ISO. Proszę wybrać FAT/FAT32 jako System plików."
 t MSG_097 "Obecnie tylko obrazy ISO oparte na 'bootmgr' lub 'WinPE' mogą być użyte z NTFS."
 t MSG_098 "FAT/FAT32 może zostać użyte tylko dla obrazów ISO opartych na isolinux lub gdy System Docelowy to UEFI."
@@ -4306,7 +4240,7 @@ t MSG_259 "Siłowa aktualizacja"
 
 ################################################################################
 l "ro-RO" "Romanian (Română)" 0x0418, 0x0818
-v 1.0.4
+v 1.0.5
 b "en-US"
 
 g IDD_DIALOG
@@ -4516,12 +4450,6 @@ t MSG_089 "Această imagine ISO este prea mare pentru acest dispozitiv."
 t MSG_090 "Formatul ISO nu este acceptat"
 t MSG_091 "Cînd se foloseşte un tip de destinaţie UEFI imagini ISO boot-abile sunt acceptate doar EFI. "
 	"Alegeţi un UEFI boot sau stabileşte o destinaţie de tip BIOS."
-t MSG_092 "Sistem de fişiere neacceptat"
-t MSG_093 "Cînd se utilizează un tip de destinaţie UEFI, sunt acceptate numai fişiere de sistem FAT/FAT32. "
-	"Selectaţi FAT/FAT32 ca un sistem de fişiere sau stabileşte o destinaţie de tip BIOS."
-t MSG_094 "Imaginea ISO nu este compatibilă cu UEFI"
-t MSG_095 "Această imagine ISO conţine un fişier mai mare de 4 GB şi nu poate fi utilizat într-o unitate USB bootabil EFI.\n"
-	"Aceasta este o limitare de UEFI/FAT32, nu de Rufus."
 t MSG_096 "Pentru acest tip de ISO, sunt acceptate numai FAT/FAT32. Selectaţi FAT/FAT32 ca sistem de fişiere."
 t MSG_097 "Cu NTFS prezent, poate fi utilizat numai imagini ISO pe bază de "Bootmgr" sau "WinPE"."
 t MSG_098 "FAT/FAT32 pot fi utilizate numai pentru imaginile ISO pe baza isolinux sau cînd tipul ţintă este UEFI."
@@ -4663,7 +4591,7 @@ t MSG_259 "Actualizare forţată"
 
 ################################################################################
 l "ru-RU" "Russian (Русский)" 0x0419, 0x0819
-v 1.0.4
+v 1.0.5
 b "en-US"
 
 # Main dialog
@@ -4905,12 +4833,6 @@ t MSG_089 "ISO-образ слишком большой для выбранно�
 t MSG_090 "Неподдерживаемый ISO-образ"
 t MSG_091 "When using UEFI Target Type, only EFI bootable ISO images are supported. "
 	"Please select an EFI bootable ISO or set the Target Type to BIOS."
-t MSG_092 "Неподдерживаемая файловая система"
-t MSG_093 "При использовании UEFI в качестве целевой системы, поддерживается только FAT/FAT32. "
-	"Пожалуйста, выберите FAT/FAT32 в качестве файловой системы или установите типом целевой системы BIOS."
-t MSG_094 "ISO-образ не совместим с UEFI"
-t MSG_095 "This ISO image contains a file larger than 4 GB and cannot be used to create an EFI bootable USB.\n"
-	"This is a limitation of UEFI/FAT32, not Rufus."
 t MSG_096 "Для данного ISO-образа необходима файловая система FAT/FAT32. Пожалуйста, выберите FAT/FAT32 в качестве файловой системы."
 t MSG_097 "Только ISO-образы на основе 'bootmgr' или 'WinPE' могут использоваться с NTFS."
 t MSG_098 "Только ISO-образы на основе 'isolinux' могут использоваться с FAT/FAT32 или если тип целевой системы UEFI."
@@ -5059,7 +4981,7 @@ t MSG_258 "Rock Ridge поддержка"
 
 ################################################################################
 l "sl-SI" "Slovenian (Slovenščina)" 0x0424
-v 1.0.4
+v 1.0.5
 b "en-US"
 
 # Main dialog
@@ -5282,12 +5204,6 @@ t MSG_089 "Ta slika je prevelika za izbrani cilj."
 t MSG_090 "Nepodprt ISO"
 t MSG_091 "Za cilj UEFI so podprte samo zagonske ISO slike, združljive z EFI. "
 	"Prosim, izberite zagonski ISO, združljiv z EFI, ali nastavite cilj na BIOS."
-t MSG_092 "Nepodprt datotečni sistem"
-t MSG_093 "Za cilj UEFI sta podprta samo FAT in FAT32. "
-	"Prosim, izberite datotečni sistem FAT ali FAT32 ali nastavite cilj na BIOS."
-t MSG_094 "ISO ni združljiv z UEFI"
-t MSG_095 "Ta slika vsebuje datoteko, večjo od 4 GB, in ne more biti uporabljena za ustvarjanje zagonske naprave USB, združljive z EFI.\n"
-	"To je omejitev UEFI oz. FAT32 in ne Rufusa."
 t MSG_096 "Za to vrsto slike sta podprta samo FAT in FAT32. Prosim, izberite FAT ali FAT32 za datotečni sistem."
 t MSG_097 "Z NTFS se trenutno lahko uporabljajo samo slike, ki temeljijo na bootmgr ali WinPE."
 t MSG_098 "FAT in FAT32 se lahko uporabljata samo za ISO slike, ki temeljijo na isolinux-u, ali za cilj UEFI."
@@ -5452,7 +5368,7 @@ t MSG_259 "Prisili posodobitev"
 
 ################################################################################
 l "es-ES" "Spanish (Español)" 0x040a, 0x080a, 0x0c0a, 0x100a, 0x140a, 0x180a, 0x1c0a, 0x200a, 0x240a, 0x280a, 0x2c0a, 0x300a, 0x340a, 0x380a, 0x3c0a, 0x400a, 0x440a, 0x480a, 0x4c0a, 0x500a, 0x540a, 0x580a
-v 1.0.4
+v 1.0.5
 b "en-US"
 
 # Main dialog
@@ -5684,12 +5600,6 @@ t MSG_089 "La imagen ISO es demasiado grande para el destino seleccionado."
 t MSG_090 "ISO no soportado"
 t MSG_091 "Cuando se usa UEFI como tipo de destino, sólo se soportan imágenes ISO booteables tipo EFI. "
 	"Seleccione una imagen booteable ISO de tipo EFI o cambie el tipo de destino a BIOS."
-t MSG_092 "Sistema de archivos no soportado"
-t MSG_093 "Al usar el tipo de dispositivo destino UEFI, sólo se soporta FAT/FAT32. "
-	"Seleccione FAT/FAT32 como sistema de archivos o seleccione el tipo de dispositivo destino a BIOS."
-t MSG_094 "Imagen ISO no compatible con UEFI "
-t MSG_095 "Esta imagen ISO contiene un archivo de tamaño mayor a 4 GB y no se puede usar para crear un USB booteable tipo EFI.\n"
-	"Ésta es una limitación de UEFI/FAT32, no de Rufus."
 t MSG_096 "Sólo se soporta FAT/FAT32 para este tipo de ISO. Por favor seleccione FAT/FAT32 como sistema de archivos."
 t MSG_097 Con NTFS sólo se pueden usar imágenes ISO basadas en 'bootmgr' o 'WinPE'."
 t MSG_098 "FAT/FAT32 se puede usar sólo cuando el tipo de dispositivo destino es UEFI o se usan imágenes basadas en isolinux."
@@ -5860,7 +5770,7 @@ t MSG_259 "Forzar actualización"
 
 ################################################################################
 l "tr-TR" "Turkish (Türkçe)" 0x041F
-v 1.0.4
+v 1.0.5
 b "en-US"
 
 # Main dialog
@@ -6091,12 +6001,6 @@ t MSG_089 "Bu ISO görüntüsü seçilen hedef için çok büyük."
 t MSG_090 "Desteklenmeyen ISO"
 t MSG_091 "EFI Hedef Türünü kullanıyorken, sadece EFI açılabilir ISO görüntüleri desteklenir. "
 	"Lütfen bir EFI açılabilir ISO'su seçin yada Hedef Türüni BIOSa ayarlayın."
-t MSG_092 "Desteklenmeyen Dosya Sistemi"
-t MSG_093 "UEFI Hedef Türünü kullanıyorken, sadece FAT/FAT32 desteklenir. "
-	"Lütfen dosya sistemi olarak FAT/FAT32 seçin yada Hedef Türüni BIOSa ayarlayın."
-t MSG_094 "UEFI uyumlu olmayan ISO"
-t MSG_095 "Bu ISO görüntüsü 4 GB tan daha büyük bir dosya içeriyor ve EFI açılabilir USB oluşturmak için kullanılamaz.\n"
-	"Bu UEFI/FAT32'nin sınırlandırmasıdır, Rufus'un değil."
 t MSG_096 "Bu tür ISOlar için sadece FAT/FAT32 desteklenir. Lütfen Dosya Sistemi olarak FAT/FAT32 seçin."
 t MSG_097 "Şuanda sadece 'bootmgr' yada 'WinPE' tabanlı ISO görüntüleri NTFS ile kullanılabilir."
 t MSG_098 "FAT/FAT32 sadece isolinux tabanlı ISO görüntüleri için yada Hedef türü UEFI ise kullanılabilir."
