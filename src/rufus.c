@@ -2001,7 +2001,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	BOOL attached_console = FALSE, external_loc_file = FALSE;
 	BYTE* loc_data;
 	DWORD loc_size, Size;
-	char tmp_path[MAX_PATH], loc_file[MAX_PATH] = "", *locale_name = NULL;
+	char tmp_path[MAX_PATH], loc_file[MAX_PATH] = "", *tmp, *locale_name = NULL;
 	char** argv = NULL;
 	wchar_t **wenv, **wargv;
 	PF_DECL(__wgetmainargs);
@@ -2026,6 +2026,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		IGNORE_RETVAL(freopen("CONOUT$", "w", stderr));
 		_flushall();
 		printf("\n");
+	}
+
+	// Use the Locale specified in the registry, if any
+	tmp = ReadRegistryKeyStr(REGKEY_HKCU, REGKEY_LOCALE);
+	if (tmp[0] != 0) {
+		locale_name = safe_strdup(tmp);
+		uprintf("found registry locale '%s'", locale_name);
 	}
 
 	// We have to process the arguments before we acquire the lock and process the locale
@@ -2057,7 +2064,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 				if (isdigitU(optarg[0])) {
 					lcid = (int)strtol(optarg, NULL, 0);
 				} else {
-					locale_name = optarg;
+					safe_free(locale_name);
+					locale_name =safe_strdup(optarg);
 				}
 				break;
 			case 'w':
@@ -2252,6 +2260,7 @@ out:
 	DestroyAllTooltips();
 	exit_localization();
 	safe_free(iso_path);
+	safe_free(locale_name);
 	safe_free(update.download_url);
 	safe_free(update.release_notes);
 	if (argv != NULL) {

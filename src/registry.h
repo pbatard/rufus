@@ -38,6 +38,7 @@ extern "C" {
 #define REGKEY_UPDATE_INTERVAL      "UpdateCheckInterval"
 #define REGKEY_INCLUDE_BETAS        "CheckForBetas"
 #define REGKEY_COMM_CHECK           "CommCheck"
+#define REGKEY_LOCALE               "Locale"
 
 /* Delete a registry key from <key_root>\Software and all its values
    If the key has subkeys, this call will fail. */
@@ -168,6 +169,7 @@ static __inline BOOL WriteRegistryKey32(HKEY root, const char* key, int32_t val)
 // Use a static buffer - don't allocate
 static __inline char* ReadRegistryKeyStr(HKEY root, const char* key) {
 	static char str[512];
+	str[0] = 0;
 	_GetRegistryKey(root, key, REG_SZ, (LPBYTE)str, (DWORD)sizeof(str)-1);
 	return str;
 }
