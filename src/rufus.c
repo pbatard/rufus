@@ -748,7 +748,7 @@ static BOOL GetUSBDevices(DWORD devnum)
 				if ((!enable_HDDs) && ((score = IsHDD(drive_index, vid, pid, buffer)) > 0)) {
 					uprintf("Device eliminated because it was detected as an USB Hard Drive (score %d > 0)\n", score);
 					uprintf("If this device is not an USB Hard Drive, please e-mail the author of this application\n");
-					uprintf("NOTE: You can enable the listing of USB Hard Drives in 'Advanced Options' (white triangle)");
+					uprintf("NOTE: You can enable the listing of USB Hard Drives in 'Advanced Options' (click the white triangle first)");
 					safe_closehandle(hDrive);
 					safe_free(devint_detail_data);
 					break;

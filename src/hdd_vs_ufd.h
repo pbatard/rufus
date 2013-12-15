@@ -49,59 +49,6 @@ typedef struct {
 	const int score;
 } vidpid_score_t;
 
-/*
- * (UNUSED) The list below contains the most common flash VIDs
- * according to (partial browsing of) http://flashboot.ru/iflash/saved/
- *
- * 0011 = Kingston
- * 03f0 = HP
- * 0420 = Chipsbank
- * 046d = Logitech
- * 048d = ITE
- * 04f3 = Elan
- * 058f = Alcor ALSO HDD
- * 05dc = Lexar
- * 05e3 = Genesys Logic
- * 0718 = Imation Corp.
- * 0781 = SanDisk
- * 090c = Silicon Motion
- * 0930 = Toshiba
- * 093a = Pixart
- * 0951 = Kingston
- * 09da = A4 Tech
- * 0bda = Realtek
- * 0b27 = Ritek
- * 0c76 = JMTek
- * 0cf2 = ENE
- * 1000 = Speed Tech
- * 1002 = Hisun
- * 1005 = Apacer Technology
- * 1043 = iCreate
- * 1221 = Kingston?
- * 12d1 = Huawei
- * 125f = Adata
- * 1307 = USBest
- * 13fe = Kingston
- * 14cd = Super Top
- * 1516 = CompUSA
- * 1687 = Kingmax
- * 18a5 = Verbatim ALSO HDD
- * 18ec = Arkmicro
- * 1908 = Ax216
- * 1b1c = Corsair
- * 1e3d = Chipsbank
- * 1f75 = Innostor ALSO HDD
- * 2001 = Micov
- * 201e = Evdo
- * 2188 = SMI
- * 3538 = PQI
- * 413c = Ameco
- * 5136 = Skymedi
- * 8564 = Transcend
- * 8644 = NandTec
- * eeee = ???
- */
-
 /* String identifiers:
  * Some info comes from http://knowledge.seagate.com/articles/en_US/FAQ/204763en,
  * other http://svn.code.sf.net/p/smartmontools/code/trunk/smartmontools/drivedb.h
@@ -143,32 +90,78 @@ static str_score_t str_score[] = {
  *    in the vidpid table (so that the default will be UFD, and HDD the exception)
  * 4. If only a few flash devices are returned, add the VID to our list with a positive score and
  *    add the flash entries in the VID:PID list with a negative score
+ * 5. Add common UFD providers from http://flashboot.ru/iflash/saved/ with a negative score
  * These lists MUST be kept in increasing VID/VID:PID order
  */
 static vid_score_t vid_score[] = {
+	{ 0x0011, -5 },		// Kingston
+	{ 0x03f0, -5 },		// HP
 	{ 0x0411, 5 },		// Buffalo
+	{ 0x0420, -5 },		// Chipsbank
+	{ 0x046d, -5 },		// Logitech
 	{ 0x0480, 5 },		// Toshiba
+	{ 0x048d, -5 },		// ITE
 	{ 0x04b4, 10 },		// Cypress
-	{ 0x04e8, 5 },		// Samsung
 	{ 0x04c5, 7 },		// Fujitsu
+	{ 0x04e8, 5 },		// Samsung
+	{ 0x04f3, -5 },		// Elan
 	{ 0x04fc, 5 },		// Sunplus
+	{ 0x058f, -2 },		// Alcor
 	{ 0x059b, 7 },		// Iomega
 	{ 0x059f, 5 },		// LaCie
 	{ 0x05ab, 10 },		// In-System Design
+	{ 0x05dc, -5 },		// Lexar
+	{ 0x05e3, -5 },		// Genesys Logic
 	{ 0x067b, 7 },		// Prolific
+	{ 0x0718, -2 },		// Imation
+	{ 0x0781, -5 },		// SanDisk
 	{ 0x07ab, 8 },		// Freecom
+	{ 0x090c, -5 },		// Silicon Motion
 	{ 0x0928, 10 },		// PLX Technology
-	{ 0x0930, 5 },		// Toshiba
+	{ 0x0930, -2 },		// Toshiba
+	{ 0x093a, -5 },		// Pixart
+	{ 0x0951, -5 },		// Kingston
+	{ 0x09da, -5 },		// A4 Tech
+	{ 0x0b27, -5 },		// Ritek
 	{ 0x0bc2, 10 },		// Seagate
+	{ 0x0c76, -5 },		// JMTek
+	{ 0x0cf2, -5 },		// ENE
 	{ 0x0d49, 10 },		// Maxtor
 	{ 0x0dc4, 10 },		// Macpower Peripherals
+	{ 0x1000, -5 },		// Speed Tech
+	{ 0x1002, -5 },		// Hisun
+	{ 0x1005, -5 },		// Apacer
+	{ 0x1043, -5 },		// iCreate
 	{ 0x1058, 10 },		// Western Digital
+	{ 0x1221, -5 },		// Kingston (?)
+	{ 0x12d1, -5 },		// Huawei
+	{ 0x125f, -5 },		// Adata
+	{ 0x1307, -5 },		// USBest
 	{ 0x13fd, 10 },		// Initio
+	{ 0x13fe, -5 },		// Kingston
+	{ 0x14cd, -5 },		// Super Top
+	{ 0x1516, -5 },		// CompUSA
 	{ 0x152d, 10 },		// JMicron
+	{ 0x1687, -5 },		// Kingmax
 	{ 0x174c, 8 },		// ASMedia
 	{ 0x1759, 8 },		// LucidPort
+	{ 0x18a5, -2 },		// Verbatim
+	{ 0x18ec, -5 },		// Arkmicro
+	{ 0x1908, -5 },		// Ax216
 	{ 0x1a4a, 10 },		// Silicon Image
+	{ 0x1b1c, -5 },		// Corsair
+	{ 0x1e3d, -5 },		// Chipsbank
+	{ 0x1f75, -2 },		// Innostor
+	{ 0x2001, -5 },		// Micov
+	{ 0x201e, -5 },		// Evdo
+	{ 0x2188, -5 },		// SMI
+	{ 0x3538, -5 },		// PQI
+	{ 0x413c, -5 },		// Ameco
 	{ 0x4971, 10 },		// Hitachi
+	{ 0x5136, -5 },		// Skymedi
+	{ 0x8564, -5 },		// Transcend
+	{ 0x8644, -5 },		// NandTec
+	{ 0xeeee, -5 },		// ????
 };
 
 static vidpid_score_t vidpid_score[] = {
