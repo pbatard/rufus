@@ -10,7 +10,6 @@
 #define IDD_LOG                         106
 #define IDD_UPDATE_POLICY               107
 #define IDD_NEW_VERSION                 108
-#define IDD_MESSAGES                    109
 #define IDI_ICON                        110
 #define IDI_UP                          111
 #define IDI_DOWN                        112
@@ -370,6 +369,7 @@
 #define MSG_257                         3257
 #define MSG_258                         3258
 #define MSG_259                         3259
+#define MSG_MAX                         3260
 
 // Next default values for new objects
 // 

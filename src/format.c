@@ -183,6 +183,7 @@ static BOOLEAN __stdcall ChkdskCallback(FILE_SYSTEM_CALLBACK_COMMAND Command, DW
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_DEVICE_IN_USE;
 		break;
 	case FCC_OUTPUT:
+		// TODO: convert from sys CP to UTF-8
 		uprintf("%s\n", ((PTEXTOUTPUT)pData)->Output);
 		break;
 	case FCC_NO_MEDIA_IN_DRIVE:
@@ -718,6 +719,7 @@ static BOOL CheckDisk(char DriveLetter)
 		}
 	}
 
+// TODO: set locale to en-US
 	pfChkdsk(wDriveRoot, wFSType, FALSE, FALSE, FALSE, FALSE, NULL, NULL, ChkdskCallback);
 	if (!IS_ERROR(FormatStatus)) {
 		uprintf("NTFS Fixup completed.\n");

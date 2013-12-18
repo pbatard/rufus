@@ -71,6 +71,17 @@ int    loc_line_nr;
 struct list_head locale_list = {NULL, NULL};
 char   *loc_filename = NULL, *embedded_loc_filename = "embedded.loc";
 
+/* Message table */
+char* msg_table[MSG_MAX-MSG_000] = {0};
+
+static void mtab_destroy(void)
+{
+	size_t j;
+	for (j=0; j<MSG_MAX-MSG_000; j++) {
+		safe_free(msg_table[j]);
+	}
+}
+
 /*
  * Hash table functions - modified From glibc 2.3.2:
  * [Aho,Sethi,Ullman] Compilers: Principles, Techniques and Tools, 1986
@@ -271,6 +282,26 @@ void add_dialog_command(int index, loc_cmd* lcmd)
 	list_add(&lcmd->list, &loc_dlg[index].list);
 }
 
+/*
+ * Add a translated message to a direct lookup table
+ */
+void add_message_command(loc_cmd* lcmd)
+{
+	if (lcmd == NULL) {
+		uprintf("localization: invalid parameter for add_message_command\n");
+		return;
+	}
+
+	if ((lcmd->ctrl_id <= MSG_000) || (lcmd->ctrl_id >= MSG_MAX)) {
+		uprintf("localization: invalid MSG_ index\n");
+		return;
+	}
+	
+	safe_free(msg_table[lcmd->ctrl_id-MSG_000]);
+	msg_table[lcmd->ctrl_id-MSG_000] = lcmd->txt[1];
+	lcmd->txt[1] = NULL;	// String would be freed after this call otherwise
+}
+
 void free_loc_cmd(loc_cmd* lcmd)
 {
 	if (lcmd == NULL)
@@ -314,8 +345,10 @@ void _init_localization(BOOL reinit) {
 	size_t i;
 	for (i=0; i<ARRAYSIZE(loc_dlg); i++)
 		list_init(&loc_dlg[i].list);
-	if (!reinit)
+	if (!reinit) {
 		list_init(&locale_list);
+		mtab_destroy();
+	}
 	htab_create(LOC_HTAB_SIZE);
 }
 
@@ -326,6 +359,7 @@ void _exit_localization(BOOL reinit) {
 			safe_free(loc_filename);
 	}
 	free_dialog_list();
+	mtab_destroy();
 	htab_destroy();
 }
 
@@ -337,12 +371,29 @@ BOOL dispatch_loc_cmd(loc_cmd* lcmd)
 	size_t i;
 	static int dlg_index = 0;
 	loc_cmd* base_locale = NULL;
+	const char* msg_prefix = "MSG_";
 
 	if (lcmd == NULL)
 		return FALSE;
 
 	if (lcmd->command <= LC_TEXT) {
 		// Any command up to LC_TEXT takes a control ID in text[0]
+		if (safe_strncmp(lcmd->txt[0], msg_prefix, 4) == 0) {
+			if (lcmd->command != LC_TEXT) {
+				luprint("only the 't' command can be applied to a message (MSG_###)\n");
+				goto err;
+			}
+			// Try to convert the numeric part of a MSG_#### to a numeric
+			lcmd->ctrl_id = MSG_000 + atoi(&lcmd->txt[0][4]);
+			if (lcmd->ctrl_id == MSG_000) {
+				// Conversion could not be performed
+				luprintf("failed to convert the numeric value in '%'\n", lcmd->txt[0]);
+				goto err;
+			}
+			add_message_command(lcmd);
+			free_loc_cmd(lcmd);
+			return TRUE;
+		}
 		for (i=0; i<ARRAYSIZE(control_id); i++) {
 			if (safe_strcmp(lcmd->txt[0], control_id[i].name) == 0) {
 				lcmd->ctrl_id = control_id[i].id;
@@ -417,9 +468,8 @@ void apply_localization(int dlg_id, HWND hDlg)
 		if ((!IsWindow(hDlg)) || (list_empty(&loc_dlg[dlg_id-IDD_DIALOG].list)))
 			continue;
 
-		// TODO: storing the messages in an array indexed on the message ID - 3000 would be faster
 		list_for_each_entry(lcmd, &loc_dlg[dlg_id-IDD_DIALOG].list, loc_cmd, list) {
-			if (lcmd->command <= LC_TEXT) { // TODO: should always be the case
+			if (lcmd->command <= LC_TEXT) {
 				if (lcmd->ctrl_id == dlg_id) {
 					if ((dlg_id == IDD_DIALOG) && (lcmd->txt[1] != NULL) && (lcmd->txt[1][0] != 0)) {
 						loc_line_nr = lcmd->line_nr;
@@ -440,14 +490,13 @@ void apply_localization(int dlg_id, HWND hDlg)
 			}
 
 			switch(lcmd->command) {
-			// NB: For commands that take an ID, ctrl_id is always a valid index at this stage
 			case LC_TEXT:
 				if (hCtrl != NULL) {
 					if ((lcmd->txt[1] != NULL) && (lcmd->txt[1][0] != 0))
 						SetWindowTextU(hCtrl, lcmd->txt[1]);
 					if (left_to_right) {
 						style = GetWindowLongPtr(hCtrl, GWL_EXSTYLE);
-						style |= WS_EX_LAYOUTRTL; // WS_EX_RIGHT | WS_EX_RTLREADING
+						style |= WS_EX_LAYOUTRTL; // TODO: WS_EX_RIGHT | WS_EX_RTLREADING
 						SetWindowLongPtr(hCtrl, GWL_EXSTYLE, style);
 						InvalidateRect(hCtrl, NULL, TRUE);
 					}
@@ -491,13 +540,11 @@ char* lmprintf(int msg_id, ...)
 	static char buf[LOC_MESSAGE_NB][LOC_MESSAGE_SIZE];
 	char *format = NULL;
 	va_list args;
-	loc_cmd* lcmd;
 	buf_id %= LOC_MESSAGE_NB;
 	buf[buf_id][0] = 0;
-	list_for_each_entry(lcmd, &loc_dlg[IDD_MESSAGES-IDD_DIALOG].list, loc_cmd, list) {
-		if ((lcmd->command == LC_TEXT) && (lcmd->ctrl_id == msg_id) && (lcmd->txt[1] != NULL)) {
-			format = lcmd->txt[1];
-		}
+
+	if ((msg_id > MSG_000) && (msg_id < MSG_MAX)) {
+		format = msg_table[msg_id - MSG_000];
 	}
 
 	if (format == NULL) {

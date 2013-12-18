@@ -53,7 +53,7 @@
 # http://download.microsoft.com/download/9/5/E/95EF66AF-9026-4BB0-A41D-A4F81802D92C/%5BMS-LCID%5D.pdf
 # for the LCID (0x####) codes you should use
 l "en-US" "English (English)" 0x0409, 0x0809, 0x0c09, 0x1009, 0x1409, 0x1809, 0x1c09, 0x2009, 0x2409, 0x2809, 0x2c09, 0x3009, 0x3409, 0x3809, 0x3c09, 0x4009, 0x4409, 0x4809
-v 1.0.5
+v 1.0.6
 
 # Main dialog
 g IDD_DIALOG
@@ -131,7 +131,6 @@ t IDC_ISO_FILENAME "Opening ISO image - please wait..."
 t IDC_ISO_ABORT "Cancel"
 
 # Messages used throughout the application
-g IDD_MESSAGES
 t MSG_001 "Other instance detected"
 t MSG_002 "Another Rufus application is running.\n"
 	"Please close the first application before running another one."
@@ -494,7 +493,7 @@ t IDD_ISO_EXTRACT "复制ISO文件..."
 t IDC_ISO_FILENAME "打开ISO映像 - 请稍候..."
 t IDC_ISO_ABORT "取消"
 
-g IDD_MESSAGES
+# Messages used throughout the application
 t MSG_004 "更新方案和设置"
 t MSG_005 "你要允許此應用程序檢查更新？"
 t MSG_006 "关闭"
@@ -503,7 +502,7 @@ t MSG_176 ""
 
 ################################################################################
 l "zh-TW" "Chinese Traditional (正體中文)" 0x0404, 0x0c04, 0x1404, 0x7c04
-v 1.0.5
+v 1.0.6
 b "en-US"
 
 # Main dialog
@@ -585,7 +584,6 @@ t IDC_ISO_FILENAME "讀取映像檔中，請稍候..."
 t IDC_ISO_ABORT "取消"
 
 # Messages used throughout the application
-g IDD_MESSAGES
 t MSG_001 "錯誤"
 t MSG_002 "已有 Rufus 視窗執行中\n"
 	"若要重新開啟，請先終止執行中的視窗"
@@ -850,7 +848,7 @@ t MSG_259 "Force update"
 
 ################################################################################
 l "nl-NL" "Dutch (Netherlands)" 0x0413, 0x0813
-v 1.0.5
+v 1.0.6
 b "en-US"
 
 # Main dialog
@@ -957,7 +955,6 @@ t IDC_ISO_FILENAME "Bezig met openen ISO image - Een moment geduld a.u.b...."
 t IDC_ISO_ABORT "Annuleer"
 
 # Messages used throughout the application
-g IDD_MESSAGES
 t MSG_001 "Ander programma gedetecteerd"
 t MSG_002 "Een andere Rufus applicatie is geopend.\n"
 	"Sluit de eerste applicatie voordat u een andere opent a.u.b."
@@ -1230,7 +1227,7 @@ t MSG_259 "Forceer update"
 
 ################################################################################
 l "fr-FR" "French (Français)" 0x040c, 0x080c, 0x0c0c, 0x100c, 0x140c, 0x180c, 0x1c0c, 0x200c, 0x240c, 0x280c, 0x2c0c, 0x300c, 0x340c, 0x380c, 0xe40c
-v 1.0.5
+v 1.0.6
 b "en-US"
 
 g IDD_DIALOG
@@ -1313,7 +1310,7 @@ t IDD_ISO_EXTRACT "Copie des fichier ISO..."
 t IDC_ISO_FILENAME "Ouverture de l'image - veuillez patienter..."
 t IDC_ISO_ABORT "Annuler"
 
-g IDD_MESSAGES
+# Messages used throughout the application
 t MSG_001 "Autre instance detectée"
 t MSG_002 "Une autre instance de Rufus est en cours d'exécution.\n"
 	"Veuillez fermer la première instance avant d'en lancer une seconde."
@@ -1572,7 +1569,7 @@ t MSG_259 "Forçage de mise à jour"
 
 ################################################################################
 l "de-DE" "German (Deutsch)" 0x0407, 0x0807, 0x0c07, 0x1007, 0x1407
-v 1.0.5
+v 1.0.6
 b "en-US"
 
 g IDD_DIALOG
@@ -1671,7 +1668,7 @@ t IDD_ISO_EXTRACT "Kopiere ISO-Dateien..."
 t IDC_ISO_FILENAME "Öffne ISO-Abbild - bitte warten..."
 t IDC_ISO_ABORT "Abbruch"
 
-g IDD_MESSAGES
+# Messages used throughout the application
 t MSG_001 "Rufus ist bereits gestartet"
 t MSG_002 "Rufus ist bereits gestartet.\n"
 	"Bitte schließen Sie es erst, bevor Sie es neue starten."
@@ -1943,7 +1940,7 @@ t MSG_259 "Update erzwingen"
 
 ################################################################################
 l "el-GR" "Greek (Ελληνικά)" 0x0408
-v 1.0.5
+v 1.0.6
 b "en-US"
 
 # Main dialog
@@ -2073,7 +2070,6 @@ t IDC_ISO_FILENAME "Άνοιγμα αρχείου ISO - παρακαλώ περ�
 t IDC_ISO_ABORT "Ακύρωση"
 
 # Messages used throughout the application
-g IDD_MESSAGES
 t MSG_001 "Ανιχνεύθηκε άλλη εφαρμογή Rufus"
 t MSG_002 "Η εφαρμογή Rufus εκτελείται ήδη.\n"
 	"Παρακαλώ κλείστε την πρώτη εφαρμογή πριν εκτελέσετε μία άλλη."
@@ -2352,7 +2348,7 @@ t MSG_259 "Εξαναγκασμένη ενημέρωση"
 
 ################################################################################
 l "hu-HU" "Hungarian (Magyar)" 0x040e
-v 1.0.5
+v 1.0.6
 b "en-US"
 
 # Main dialog
@@ -2426,7 +2422,6 @@ t IDC_ISO_FILENAME "ISO fájl megnyitása - kérlek, várj..."
 t IDC_ISO_ABORT "Mégse"
 
 # Messages used throughout the application
-g IDD_MESSAGES
 t MSG_001 "Másik folyamat"
 t MSG_002 "Egy másik Rufus is fut.\n"
 	"Kérlek, zárd be a másikat, mielőtt ezt futtatnád."
@@ -2710,7 +2705,7 @@ t MSG_259 "'Erőszakos' frissítés"
 
 ################################################################################
 l "it-IT" "Italian (Italiano)" 0x0410, 0x0810
-v 1.0.5
+v 1.0.6
 b "en-US"
 
 g IDD_DIALOG
@@ -2807,7 +2802,7 @@ t IDD_ISO_EXTRACT "Copia file ISO..."
 t IDC_ISO_FILENAME "Apertura file immagine ISO..."
 t IDC_ISO_ABORT "Annulla"
 
-g IDD_MESSAGES
+# Messages used throughout the application
 t MSG_001 "Rilevata altra istanza Rufus"
 t MSG_002 "E' in esecuzione un altra applicazioen Rufus.\n"
 	"Chiudi la prima applicazione prima di eseguirna una seconda."
@@ -3067,7 +3062,7 @@ t MSG_258 "Supporto Rock Ridge"
 
 ################################################################################
 l "ko-KR" "Korean (한국어)" 0x0412
-v 1.0.5
+v 1.0.6
 b "en-US"
 
 # Main dialog
@@ -3157,7 +3152,6 @@ t IDC_ISO_FILENAME "ISO 이미지 파일을 여는 중입니다. - 잠시만..."
 t IDC_ISO_ABORT "취소"
 
 # Messages used throughout the application
-g IDD_MESSAGES
 t MSG_001 "다른 인스턴스가 감지 됨."
 t MSG_002 "Rufus가 이미 실행 중입니다.\n"
 	"실행하기 전에 먼저 실행된 프로그램을 닫으십시오."
@@ -3442,7 +3436,7 @@ t MSG_259 "강제 업데이트"
 
 ################################################################################
 l "lt-LT" "Lithuanian (Lietuvių)" 0x0427
-v 1.0.5
+v 1.0.6
 b "en-US"
 
 # Main dialog
@@ -3555,7 +3549,6 @@ t IDC_ISO_FILENAME "Atidaromas ISO atvaizdas - palaukite..."
 t IDC_ISO_ABORT "Atšaukti"
 
 # Messages used throughout the application
-g IDD_MESSAGES
 t MSG_001 "Aptiktas kitas programos atvejis"
 t MSG_002 "Vykdoma kita Rufus programa.\n"
 	"Prašau uždaryti pirmą programą prieš vykdant kitą."
@@ -3840,7 +3833,7 @@ t MSG_259 "Priversti naujintis"
 
 ################################################################################
 l "ms-MY" "Malay (Bahasa Malaysia)" 0x043e, 0x083e
-v 1.0.5
+v 1.0.6
 b "en-US"
 
 # Main dialog
@@ -3956,7 +3949,6 @@ t IDC_ISO_FILENAME "Membuka imej ISO - tunggu sebentar..."
 t IDC_ISO_ABORT "Batal"
 
 # Messages used throughout the application
-g IDD_MESSAGES
 t MSG_001 "Proses Rufus lain dikesan"
 t MSG_002 "Terdapat aplikasi Rufus sedang berjalan.\n"
 	"Sila tutup aplikasi tersebut sebelum melancarkan aplikasi Rufus baharu."
@@ -4242,7 +4234,7 @@ t MSG_259 "Paksa kemas kini"
 
 ################################################################################
 l "pl-PL" "Polish (Polski)" 0x0415
-v 1.0.5
+v 1.0.6
 b "en-US"
 # my internal info: 01.12.2013,21:03 (finito); DONE: szerokości głównego
 
@@ -4357,7 +4349,6 @@ t IDC_ISO_FILENAME "Otwieranie obrazu ISO - proszę czekać..."
 t IDC_ISO_ABORT "Anuluj"
 
 # Messages used throughout the application
-g IDD_MESSAGES
 t MSG_001 "Wykryto inną instancję"
 t MSG_002 "Inna aplikacja Rufus jest uruchomiona.\n"
 	"Proszę zamknąć pierwszą aplikację przed otwarciem innej."
@@ -4642,7 +4633,7 @@ t MSG_259 "Siłowa aktualizacja"
 
 ################################################################################
 l "ro-RO" "Romanian (Română)" 0x0418, 0x0818
-v 1.0.5
+v 1.0.6
 b "en-US"
 
 g IDD_DIALOG
@@ -4741,7 +4732,7 @@ t IDD_ISO_EXTRACT "Copiere fişiere ISO..."
 t IDC_ISO_FILENAME "Deschiderea fişier imagine ISO..."
 t IDC_ISO_ABORT "Anulează"
 
-g IDD_MESSAGES
+# Messages used throughout the application
 t MSG_001 "Un alt exemplu detectat Rufus"
 t MSG_002 "Rulează o altă aplicaţie Rufus. \ N"
 	"Închideţi prima aplicaţie înainte de a efectua a doua."
@@ -4993,7 +4984,7 @@ t MSG_259 "Actualizare forţată"
 
 ################################################################################
 l "ru-RU" "Russian (Русский)" 0x0419, 0x0819
-v 1.0.5
+v 1.0.6
 b "en-US"
 
 # Main dialog
@@ -5117,7 +5108,6 @@ t IDC_ISO_FILENAME "Открытие ISO-образа - пожалуйста, ж
 t IDC_ISO_ABORT "Отмена"
 
 # Messages used throughout the application
-g IDD_MESSAGES
 t MSG_001 "Запущено другое приложение Rufus"
 t MSG_002 "Запущено другое приложение Rufus.\n"
 	"Закройте первое приложение перед запуском еще одного."
@@ -5383,7 +5373,7 @@ t MSG_258 "Rock Ridge поддержка"
 
 ################################################################################
 l "sl-SI" "Slovenian (Slovenščina)" 0x0424
-v 1.0.5
+v 1.0.6
 b "en-US"
 
 # Main dialog
@@ -5485,7 +5475,6 @@ t IDC_ISO_FILENAME "Odpiram ISO sliko - prosim, počakajte…"
 t IDC_ISO_ABORT "Prekliči"
 
 # Messages used throughout the application
-g IDD_MESSAGES
 t MSG_001 "Drug primerek zaznan"
 t MSG_002 "Še en primerek Rufusa se izvaja.\n"
 	"Prosim, zaprite ga, preden zaženete še enega."
@@ -5770,7 +5759,7 @@ t MSG_259 "Prisili posodobitev"
 
 ################################################################################
 l "es-ES" "Spanish (Español)" 0x040a, 0x080a, 0x0c0a, 0x100a, 0x140a, 0x180a, 0x1c0a, 0x200a, 0x240a, 0x280a, 0x2c0a, 0x300a, 0x340a, 0x380a, 0x3c0a, 0x400a, 0x440a, 0x480a, 0x4c0a, 0x500a, 0x540a, 0x580a
-v 1.0.5
+v 1.0.6
 b "en-US"
 
 # Main dialog
@@ -5881,7 +5870,6 @@ t IDC_ISO_FILENAME "Abriendo la imagen ISO - por favor, espere..."
 t IDC_ISO_ABORT "Cancelar"
 
 # Messages used throughout the application
-g IDD_MESSAGES
 t MSG_001 "Se detectó otra instancia"
 t MSG_002 "Ya hay una intancia de Rufus ejecutándose.\n"
 	"Cierre la primer instancia antes de lanzar otra."
@@ -6172,7 +6160,7 @@ t MSG_259 "Forzar actualización"
 
 ################################################################################
 l "tr-TR" "Turkish (Türkçe)" 0x041F
-v 1.0.5
+v 1.0.6
 b "en-US"
 
 # Main dialog
@@ -6282,7 +6270,6 @@ t IDC_ISO_FILENAME "ISO Görüntüsü Açılıyor - Lütfen Bekleyin..."
 t IDC_ISO_ABORT "Vazgeç"
 
 # Messages used throughout the application
-g IDD_MESSAGES
 t MSG_001 "Rufus'un zaten çalıştığı algılandı"
 t MSG_002 "Başka bir Rufus uygulaması çalışıyor.\n"
 	"Lütfen başka bir uygulama çalıştırmak için ilkini kapatın."
