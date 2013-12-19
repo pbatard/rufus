@@ -72,13 +72,17 @@ struct list_head locale_list = {NULL, NULL};
 char   *loc_filename = NULL, *embedded_loc_filename = "embedded.loc";
 
 /* Message table */
-char* msg_table[MSG_MAX-MSG_000] = {0};
+char* default_msg_table[MSG_MAX-MSG_000] = {0};
+char* current_msg_table[MSG_MAX-MSG_000] = {0};
+char** msg_table = NULL;
 
-static void mtab_destroy(void)
+static void mtab_destroy(BOOL reinit)
 {
 	size_t j;
 	for (j=0; j<MSG_MAX-MSG_000; j++) {
-		safe_free(msg_table[j]);
+		safe_free(current_msg_table[j]);
+		if (!reinit)
+			safe_free(default_msg_table[j]);
 	}
 }
 
@@ -345,10 +349,8 @@ void _init_localization(BOOL reinit) {
 	size_t i;
 	for (i=0; i<ARRAYSIZE(loc_dlg); i++)
 		list_init(&loc_dlg[i].list);
-	if (!reinit) {
+	if (!reinit)
 		list_init(&locale_list);
-		mtab_destroy();
-	}
 	htab_create(LOC_HTAB_SIZE);
 }
 
@@ -359,7 +361,7 @@ void _exit_localization(BOOL reinit) {
 			safe_free(loc_filename);
 	}
 	free_dialog_list();
-	mtab_destroy();
+	mtab_destroy(reinit);
 	htab_destroy();
 }
 
@@ -380,7 +382,7 @@ BOOL dispatch_loc_cmd(loc_cmd* lcmd)
 		// Any command up to LC_TEXT takes a control ID in text[0]
 		if (safe_strncmp(lcmd->txt[0], msg_prefix, 4) == 0) {
 			if (lcmd->command != LC_TEXT) {
-				luprint("only the 't' command can be applied to a message (MSG_###)\n");
+				luprint("only the [t]ext command can be applied to a message (MSG_###)\n");
 				goto err;
 			}
 			// Try to convert the numeric part of a MSG_#### to a numeric
@@ -406,6 +408,12 @@ BOOL dispatch_loc_cmd(loc_cmd* lcmd)
 		}
 	}
 
+	// Don't process UI commands when we're dealing with the default
+	if (msg_table == default_msg_table) {
+		free_loc_cmd(lcmd);
+		return TRUE;
+	}
+
 	switch(lcmd->command) {
 	// NB: For commands that take an ID, ctrl_id is always a valid index at this stage
 	case LC_TEXT:
@@ -425,7 +433,7 @@ BOOL dispatch_loc_cmd(loc_cmd* lcmd)
 		base_locale = get_locale_from_name(lcmd->txt[0], FALSE);
 		if (base_locale != NULL) {
 			uprintf("localization: using locale base '%s'\n", lcmd->txt[0]);
-			get_loc_data_file(NULL, (long)base_locale->num[0], (long)base_locale->num[1], base_locale->line_nr);
+			get_loc_data_file(NULL, base_locale);
 		} else {
 			luprintf("locale base '%s' not found - ignoring", lcmd->txt[0]);
 		}
@@ -559,6 +567,70 @@ char* lmprintf(int msg_id, ...)
 }
 
 /*
+ * Display a localized message on the status bar as well as its English counterpart in the
+ * log (if debug is set). If duration is non zero, ensures that message is displayed for at
+ * least duration ms, regardless of any other incoming message
+ */
+static BOOL bStatusTimerArmed = FALSE;
+char szStatusMessage[256] = { 0 };
+static void CALLBACK PrintStatusTimeout(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
+{
+	bStatusTimerArmed = FALSE;
+	// potentially display lower priority message that was overridden
+	SendMessageLU(GetDlgItem(hMainDialog, IDC_STATUS), SB_SETTEXTW, SBT_OWNERDRAW, szStatusMessage);
+	KillTimer(hMainDialog, TID_MESSAGE);
+}
+
+void PrintStatus(unsigned int duration, BOOL debug, int msg_id, ...)
+{
+	char *format = NULL, buf[sizeof(szStatusMessage)];
+	va_list args;
+
+	if (msg_id < 0) {
+		//A negative msg_id clears the status
+		SendMessageLU(GetDlgItem(hMainDialog, IDC_STATUS), SB_SETTEXTW, SBT_OWNERDRAW, "");
+		return;
+	}
+
+	if ((msg_id <= MSG_000) || (msg_id >= MSG_MAX)) {
+		uprintf("PrintStatus: invalid MSG_ID\n");
+		return;
+	}
+
+	format = msg_table[msg_id - MSG_000];
+	if (format == NULL) {
+		safe_sprintf(szStatusMessage, sizeof(szStatusMessage), "MSG_%03d UNTRANSLATED", msg_id - MSG_000);
+		return;
+	}
+
+	va_start(args, msg_id);
+	safe_vsnprintf(szStatusMessage, sizeof(szStatusMessage), format, args);
+	va_end(args);
+	szStatusMessage[sizeof(szStatusMessage)-1] = '\0';
+
+	if ((duration) || (!bStatusTimerArmed)) {
+		SendMessageLU(GetDlgItem(hMainDialog, IDC_STATUS), SB_SETTEXTW, SBT_OWNERDRAW, szStatusMessage);
+	}
+
+	if (duration) {
+		SetTimer(hMainDialog, TID_MESSAGE, duration, PrintStatusTimeout);
+		bStatusTimerArmed = TRUE;
+	}
+
+	if (debug) {
+		format = default_msg_table[msg_id - MSG_000];
+		if (format == NULL) {
+			safe_sprintf(buf, sizeof(szStatusMessage), "(default) MSG_%03d UNTRANSLATED", msg_id - MSG_000);
+			return;
+		}
+		va_start(args, msg_id);
+		safe_vsnprintf(buf, sizeof(szStatusMessage)-1, format, args);
+		va_end(args);
+		uprintf(buf);
+	}
+}
+
+/*
  * These 2 functions are used to set the current locale
  * If fallback is true, the call will fall back to use the first
  * translation listed in the loc file
@@ -610,4 +682,21 @@ loc_cmd* get_locale_from_name(char* locale_name, BOOL fallback)
 	lcmd = list_entry(locale_list.next, loc_cmd, list);
 	uprintf("localization: could not find locale for name '%s'. Will default to '%s'\n", locale_name, lcmd->txt[0]);
 	return lcmd;
+}
+
+/* 
+ * This call is used to toggle the issuing of messages with the default locale
+ * (usually en-US) instead of the current (usually non en) one.
+ */
+void toggle_default_locale(void)
+{
+	static char** old_msg_table = NULL;
+
+	if (old_msg_table == NULL) {
+		old_msg_table = msg_table;
+		msg_table = default_msg_table;
+	} else {
+		msg_table = old_msg_table;
+		old_msg_table = NULL;
+	}
 }

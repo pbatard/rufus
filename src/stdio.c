@@ -134,38 +134,6 @@ static char err_string[256] = {0};
 	return err_string;
 }
 
-/*
- * Display a message on the status bar. If duration is non zero, ensures that message
- * is displayed for at least duration ms, regardless of any other incoming message
- */
-static BOOL bStatusTimerArmed = FALSE;
-char szStatusMessage[256] = { 0 };
-static void CALLBACK PrintStatusTimeout(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
-{
-	bStatusTimerArmed = FALSE;
-	// potentially display lower priority message that was overridden
-	SendMessageLU(GetDlgItem(hMainDialog, IDC_STATUS), SB_SETTEXTW, SBT_OWNERDRAW, szStatusMessage);
-	KillTimer(hMainDialog, TID_MESSAGE);
-}
-
-void PrintStatus(unsigned int duration, BOOL debug, const char* message)
-{
-	if (message == NULL)
-		return;
-	safe_strcpy(szStatusMessage, sizeof(szStatusMessage), message);
-	if (debug)
-		uprintf("%s\n", szStatusMessage);
-
-	if ((duration) || (!bStatusTimerArmed)) {
-		SendMessageLU(GetDlgItem(hMainDialog, IDC_STATUS), SB_SETTEXTW, SBT_OWNERDRAW, szStatusMessage);
-	}
-
-	if (duration) {
-		SetTimer(hMainDialog, TID_MESSAGE, duration, PrintStatusTimeout);
-		bStatusTimerArmed = TRUE;
-	}
-}
-
 char* GuidToString(const GUID* guid)
 {
 	static char guid_string[MAX_GUID_STRING_LENGTH];
@@ -196,7 +164,7 @@ char* SizeToHumanReadable(LARGE_INTEGER size)
 	return str_size;
 }
 
-const char* StrError(DWORD error_code)
+const char* _StrError(DWORD error_code)
 {
 	if ( (!IS_ERROR(error_code)) || (SCODE_CODE(error_code) == ERROR_SUCCESS)) {
 		return lmprintf(MSG_044);
@@ -268,4 +236,15 @@ const char* StrError(DWORD error_code)
 		SetLastError(error_code);
 		return WindowsErrorString();
 	}
+}
+
+const char* StrError(DWORD error_code, BOOL use_default_locale)
+{
+	const char* ret;
+	if (use_default_locale)
+		toggle_default_locale();
+	ret = _StrError(error_code);
+	if (use_default_locale)
+		toggle_default_locale();
+	return ret;
 }

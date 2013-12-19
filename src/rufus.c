@@ -144,6 +144,7 @@ static float slot_end[OP_MAX+1];	// shifted +1 so that we can substract 1 to OP 
 static float previous_end;
 
 // TODO: Remember to update copyright year in both license.h and the RC when the year changes!
+// Also localization_data.sh
 
 #define KB          1024LL
 #define MB       1048576LL
@@ -1074,7 +1075,7 @@ BOOL CALLBACK ISOProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 		switch (LOWORD(wParam)) {
 		case IDC_ISO_ABORT:
 			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANCELLED;
-			PrintStatus(0, FALSE, lmprintf(MSG_201));
+			PrintStatus(0, FALSE, MSG_201);
 			uprintf("Cancelling (from ISO proc.)\n");
 			EnableWindow(GetDlgItem(hISOProgressDlg, IDC_ISO_ABORT), FALSE);
 			if (format_thid != NULL)
@@ -1102,10 +1103,10 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 
 	if (iso_path == NULL)
 		goto out;
-	PrintStatus(0, TRUE, lmprintf(MSG_202));
+	PrintStatus(0, TRUE, MSG_202);
 	if (!ExtractISO(iso_path, "", TRUE)) {
 		SendMessage(hISOProgressDlg, UM_ISO_EXIT, 0, 0);
-		PrintStatus(0, TRUE, lmprintf(MSG_203));
+		PrintStatus(0, TRUE, MSG_203);
 		safe_free(iso_path);
 		goto out;
 	}
@@ -1136,7 +1137,7 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 					fclose(fd);
 					use_own_c32[i] = TRUE;
 				} else {
-					PrintStatus(0, FALSE, lmprintf(MSG_204, old_c32_name[i]));
+					PrintStatus(0, FALSE, MSG_204, old_c32_name[i]);
 					if (MessageBoxU(hMainDialog, lmprintf(MSG_084, old_c32_name[i], old_c32_name[i]),
 						 lmprintf(MSG_083, old_c32_name[i]), MB_YESNO|MB_ICONWARNING) == IDYES) {
 						SetWindowTextU(hISOProgressDlg, lmprintf(MSG_085, old_c32_name[i]));
@@ -1153,7 +1154,7 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 		SetFSFromISO();
 		SetMBRProps();
 		for (i=(int)safe_strlen(iso_path); (i>0)&&(iso_path[i]!='\\'); i--);
-		PrintStatus(0, TRUE, lmprintf(MSG_205, &iso_path[i+1]));
+		PrintStatus(0, TRUE, MSG_205, &iso_path[i+1]);
 		// Some Linux distros, such as Arch Linux, require the USB drive to have
 		// a specific label => copy the one we got from the ISO image
 		if (iso_report.label[0] != 0) {
@@ -1297,7 +1298,7 @@ static BOOL BootCheck(void)
 			uprintf("Will reuse '%s' for Syslinux v5\n", ldlinux_name);
 			fclose(fd);
 		} else {
-			PrintStatus(0, FALSE, lmprintf(MSG_206, ldlinux_name));
+			PrintStatus(0, FALSE, MSG_206, ldlinux_name);
 			// Syslinux v5.0 or later requires a '%s' file to be installed
 			r = MessageBoxU(hMainDialog, lmprintf(MSG_104, ldlinux_name, ldlinux_name),
 				lmprintf(MSG_103, ldlinux_name), MB_YESNOCANCEL|MB_ICONWARNING);
@@ -1477,7 +1478,7 @@ void InitDialog(HWND hDlg)
 
 static void PrintStatus2000(const char* str, BOOL val)
 {
-	PrintStatus(2000, FALSE, (lmprintf((val)?MSG_250:MSG_251, str)));
+	PrintStatus(2000, FALSE, (val)?MSG_250:MSG_251, str);
 }
 
 void ShowLanguageMenu(HWND hDlg)
@@ -1607,7 +1608,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 					// Operation may have completed in the meantime
 					if (format_thid != NULL) {
 						FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANCELLED;
-						PrintStatus(0, FALSE, lmprintf(MSG_201));
+						PrintStatus(0, FALSE, MSG_201);
 						uprintf("Cancelling (from main app)\n");
 						//  Start a timer to detect blocking operations during ISO file extraction
 						if (iso_blocking_status >= 0) {
@@ -1680,7 +1681,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			if (HIWORD(wParam) != CBN_SELCHANGE)
 				break;
 			nb_devices = ComboBox_GetCount(hDeviceList);
-			PrintStatus(0, TRUE, lmprintf((nb_devices==1)?MSG_208:MSG_209, nb_devices));
+			PrintStatus(0, TRUE, (nb_devices==1)?MSG_208:MSG_209, nb_devices);
 			PopulateProperties(ComboBox_GetCurSel(hDeviceList));
 			SendMessage(hMainDialog, WM_COMMAND, (CBN_SELCHANGE<<16) | IDC_FILESYSTEM,
 				ComboBox_GetCurSel(hFileSystem));
@@ -1879,7 +1880,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 					PostMessage(hMainDialog, UM_FORMAT_COMPLETED, 0, 0);
 				}
 				uprintf("\r\nFormat operation started");
-				PrintStatus(0, FALSE, "");
+				PrintStatus(0, FALSE, -1);
 				timer = 0;
 				safe_sprintf(szTimer, sizeof(szTimer), "00:00:00");
 				SendMessageA(GetDlgItem(hMainDialog, IDC_STATUS), SB_SETTEXTA,
@@ -1930,17 +1931,17 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			SendMessage(hProgress, PBM_SETPOS, (MAX_PROGRESS+1), 0);
 			SendMessage(hProgress, PBM_SETRANGE, 0, (MAX_PROGRESS<<16) & 0xFFFF0000);
 			SetTaskbarProgressState(TASKBAR_NOPROGRESS);
-			PrintStatus(0, FALSE, lmprintf(MSG_210));
+			PrintStatus(0, FALSE, MSG_210);
 		} else if (SCODE_CODE(FormatStatus) == ERROR_CANCELLED) {
 			SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_PAUSED, 0);
 			SetTaskbarProgressState(TASKBAR_PAUSED);
-			PrintStatus(0, FALSE, lmprintf(MSG_211));
+			PrintStatus(0, FALSE, MSG_211);
 			Notification(MSG_INFO, NULL, lmprintf(MSG_211), lmprintf(MSG_041));
 		} else {
 			SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_ERROR, 0);
 			SetTaskbarProgressState(TASKBAR_ERROR);
-			PrintStatus(0, FALSE, lmprintf(MSG_212));
-			Notification(MSG_ERROR, NULL, lmprintf(MSG_042), lmprintf(MSG_043, StrError(FormatStatus)), StrError(FormatStatus));
+			PrintStatus(0, FALSE, MSG_212);
+			Notification(MSG_ERROR, NULL, lmprintf(MSG_042), lmprintf(MSG_043, StrError(FormatStatus, FALSE)), StrError(FormatStatus, FALSE));
 		}
 		FormatStatus = 0;
 		format_op_in_progress = FALSE;
@@ -2128,7 +2129,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	}
 	if ((mutex == NULL) || (GetLastError() == ERROR_ALREADY_EXISTS)) {
 		// Load the translation before we print the error
-		get_loc_data_file(loc_file, (long)selected_locale->num[0], (long)selected_locale->num[1], selected_locale->line_nr);
+		get_loc_data_file(loc_file, selected_locale);
 		MessageBoxU(NULL, lmprintf(MSG_002), lmprintf(MSG_001), MB_ICONSTOP);
 		goto out;
 	}
@@ -2151,9 +2152,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	// 0x9e disables removable and fixed drive notifications
 	SetLGP(FALSE, &existing_key, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer", "NoDriveTypeAutorun", 0x9e);
 
+	// Populate the default locale (so that we can produce English messages in the log)
+	get_loc_data_file(loc_file, NULL);
+
 relaunch:
 	uprintf("localization: using locale '%s'\n", selected_locale->txt[0]);
-	get_loc_data_file(loc_file, (long)selected_locale->num[0], (long)selected_locale->num[1], selected_locale->line_nr);
+	get_loc_data_file(loc_file, selected_locale);
 
 	// Create the main Window
 	hDlg = CreateDialogW(hInstance, MAKEINTRESOURCEW(IDD_DIALOG), NULL, MainCallback);
@@ -2200,7 +2204,7 @@ relaunch:
 			// Alt-D => Delete the NoDriveTypeAutorun key on exit (useful if the app crashed)
 			// This key is used to disable Windows popup messages when an USB drive is plugged in.
 			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'D')) {
-				PrintStatus(2000, FALSE, lmprintf(MSG_255));
+				PrintStatus(2000, FALSE, MSG_255);
 				existing_key = FALSE;
 				continue;
 			}
@@ -2231,7 +2235,7 @@ relaunch:
 			}
 			// Alt-R => Remove all the registry keys created by Rufus
 			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'R')) {
-				PrintStatus(2000, FALSE, lmprintf(DeleteRegistryKey(REGKEY_HKCU, COMPANY_NAME "\\" APPLICATION_NAME)?MSG_248:MSG_249));
+				PrintStatus(2000, FALSE, DeleteRegistryKey(REGKEY_HKCU, COMPANY_NAME "\\" APPLICATION_NAME)?MSG_248:MSG_249);
 				// Also try to delete the upper key (company name) if it's empty (don't care about the result)
 				DeleteRegistryKey(REGKEY_HKCU, COMPANY_NAME);
 				continue;

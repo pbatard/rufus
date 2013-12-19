@@ -264,7 +264,7 @@ BOOL DownloadFile(const char* url, const char* file, HWND hProgressDialog)
 		SendMessage(hProgressDialog, UM_ISO_INIT, 0, 0);
 	}
 
-	PrintStatus(0, FALSE, lmprintf(MSG_240, file));
+	PrintStatus(0, FALSE, MSG_240, file);
 	uprintf("Downloading %s from %s\n", file, url);
 
 	if (!InternetCrackUrlA(url, (DWORD)safe_strlen(url), 0, &UrlParts)) {
@@ -341,7 +341,7 @@ BOOL DownloadFile(const char* url, const char* file, HWND hProgressDialog)
 			break;
 		dwSize += dwDownloaded;
 		SendMessage(hProgressBar, PBM_SETPOS, (WPARAM)(MAX_PROGRESS*((1.0f*dwSize)/(1.0f*dwTotalSize))), 0);
-		PrintStatus(0, FALSE, lmprintf(MSG_241, (100.0f*dwSize)/(1.0f*dwTotalSize)));
+		PrintStatus(0, FALSE, MSG_241, (100.0f*dwSize)/(1.0f*dwTotalSize));
 		if (fwrite(buf, 1, dwDownloaded, fd) != dwDownloaded) {
 			uprintf("Error writing file '%s': %s\n", file, WinInetErrorString());
 			goto out;
@@ -363,9 +363,9 @@ out:
 	if (fd != NULL) fclose(fd);
 	if (!r) {
 		_unlink(file);
-		PrintStatus(0, FALSE, lmprintf(MSG_242));
+		PrintStatus(0, FALSE, MSG_242);
 		SetLastError(error_code);
-		MessageBoxU(hMainDialog, IS_ERROR(FormatStatus)?StrError(FormatStatus):WinInetErrorString(),
+		MessageBoxU(hMainDialog, IS_ERROR(FormatStatus)?StrError(FormatStatus, FALSE):WinInetErrorString(),
 		lmprintf(MSG_044), MB_OK|MB_ICONERROR);
 	}
 	if (hRequest) InternetCloseHandle(hRequest);
@@ -456,7 +456,7 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 		}
 	}
 
-	PrintStatus(3000, TRUE, lmprintf(MSG_243));
+	PrintStatus(3000, TRUE, MSG_243);
 	status++;	// 1
 
 	if (!GetVersionExA(&os_version)) {
@@ -588,14 +588,14 @@ out:
 	if (hSession) InternetCloseHandle(hSession);
 	switch(status) {
 	case 1:
-		PrintStatus(3000, TRUE, lmprintf(MSG_244));
+		PrintStatus(3000, TRUE, MSG_244);
 		break;
 	case 2:
-		PrintStatus(3000, TRUE, lmprintf(MSG_245));
+		PrintStatus(3000, TRUE, MSG_245);
 		break;
 	case 3:
 	case 4:
-		PrintStatus(3000, FALSE, lmprintf(found_new_version?MSG_246:MSG_247));
+		PrintStatus(3000, FALSE, found_new_version?MSG_246:MSG_247);
 	default:
 		break;
 	}

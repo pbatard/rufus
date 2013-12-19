@@ -1206,11 +1206,11 @@ INT_PTR CALLBACK NewVersionCallback(HWND hDlg, UINT message, WPARAM wParam, LPAR
 				memset(&pi, 0, sizeof(pi));
 				si.cb = sizeof(si);
 				if (!CreateProcessU(filepath, cmdline, NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi)) {
-					PrintStatus(0, FALSE, lmprintf(MSG_214));
+					PrintStatus(0, FALSE, MSG_214);
 					// TODO: produce a message box and add a retry, as the file may be scanned by the Antivirus
 					uprintf("Failed to launch new application: %s\n", WindowsErrorString());
 				} else {
-					PrintStatus(0, FALSE, lmprintf(MSG_213));
+					PrintStatus(0, FALSE, MSG_213);
 					PostMessage(hDlg, WM_COMMAND, (WPARAM)IDCLOSE, 0);
 					PostMessage(hMainDialog, WM_CLOSE, 0, 0);
 				}

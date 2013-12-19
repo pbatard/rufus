@@ -146,8 +146,10 @@ typedef struct loc_dlg_list_struct {
 
 extern const loc_parse parse_cmd[9];
 extern struct list_head locale_list;
+extern char *default_msg_table[], *current_msg_table[], **msg_table;
 int loc_line_nr;
 char *loc_filename, *embedded_loc_filename;
+BOOL en_msg_mode;
 
 void free_loc_cmd(loc_cmd* lcmd);
 BOOL dispatch_loc_cmd(loc_cmd* lcmd);
@@ -161,7 +163,8 @@ void reset_localization(int dlg_id);
 void free_dialog_list(void);
 char* lmprintf(int msg_id, ...);
 BOOL get_supported_locales(const char* filename);
-char* get_loc_data_file(const char* filename, long offset, long end_offset, int start_line);
+BOOL get_loc_data_file(const char* filename, loc_cmd* lcmd);
 void free_locale_list(void);
 loc_cmd* get_locale_from_lcid(int lcid, BOOL fallback);
 loc_cmd* get_locale_from_name(char* locale_name, BOOL fallback);
+void toggle_default_locale(void);

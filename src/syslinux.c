@@ -92,7 +92,7 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter)
 	int dt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
 	BOOL use_v5 = (dt == DT_SYSLINUX_V5) || ((dt == DT_ISO) && (iso_report.has_syslinux_v5));
 
-	PrintStatus(0, TRUE, lmprintf(MSG_234, use_v5?5:4));
+	PrintStatus(0, TRUE, MSG_234, use_v5?5:4);
 
 	ldlinux_path[0] = drive_letter;
 

@@ -328,12 +328,12 @@ static void print_status(void)
 	percent = calc_percent((unsigned long) currently_testing,
 					(unsigned long) num_blocks);
 	percent = (percent/2.0f) + ((cur_op==OP_READ)? 50.0f : 0.0f);
-	PrintStatus(0, FALSE, lmprintf(MSG_235,
+	PrintStatus(0, FALSE, MSG_235,
 				cur_pattern, nr_pattern,
 				percent,
 				num_read_errors,
 				num_write_errors,
-				num_corruption_errors));
+				num_corruption_errors);
 	UpdateProgress(OP_BADBLOCKS, (((cur_pattern-1)*100.0f) + percent) / nr_pattern);
 }
 
@@ -359,7 +359,7 @@ static void pattern_fill(unsigned char *buffer, unsigned int pattern,
 		for (ptr = buffer; ptr < buffer + n; ptr++) {
 			(*ptr) = rand() % (1 << (8 * sizeof(char)));
 		}
-		PrintStatus(3500, FALSE, lmprintf(MSG_236));
+		PrintStatus(3500, FALSE, MSG_236);
 	} else {
 		bpattern[0] = 0;
 		for (i = 0; i < sizeof(bpattern); i++) {
@@ -376,7 +376,7 @@ static void pattern_fill(unsigned char *buffer, unsigned int pattern,
 			else
 				i--;
 		}
-		PrintStatus(3500, FALSE, lmprintf(MSG_237, bpattern[i]));
+		PrintStatus(3500, FALSE, MSG_237, bpattern[i]);
 		cur_pattern++;
 	}
 }

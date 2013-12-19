@@ -353,31 +353,60 @@ out:
  * Parse a locale section in a localization file (UTF-8, no BOM)
  * NB: this call is reentrant for the "base" command support
  */
-char* get_loc_data_file(const char* filename, long offset, long end_offset, int start_line)
+BOOL get_loc_data_file(const char* filename, loc_cmd* lcmd)
 {
 	size_t bufsize = 1024;
 	static FILE* fd = NULL;
-	char *ret = NULL, *buf = NULL;
+	char *buf = NULL;
 	size_t i = 0;
 	int r = 0, line_nr_incr = 1;
 	int c = 0, eol_char = 0;
-	int old_loc_line_nr;
-	BOOL eol = FALSE, escape_sequence = FALSE, reentrant = (fd != NULL);
-	long cur_offset = -1;
+	int start_line, old_loc_line_nr;
+	BOOL ret = FALSE, eol = FALSE, escape_sequence = FALSE, reentrant = (fd != NULL);
+	long offset, cur_offset = -1, end_offset;
+	// The default locale is always the first one
+	loc_cmd* default_locale = list_entry(locale_list.next, loc_cmd, list);
 
-	if (reentrant) {
-		// Called, from a 'b' command - no need to reopen the file,
-		// just save the current offset and current line number
-		cur_offset = ftell(fd);
-		old_loc_line_nr = loc_line_nr;
-	} else {
+	// We keep a default message table populated with the en-US messages.
+	// Ensure that it got properly initialized first.
+	if ((msg_table == NULL) && (lcmd != NULL)) {
+		uprintf("localization: default message table has not been populated!");
+		return FALSE;
+	} else if ((msg_table != NULL) && (lcmd == NULL)) {
+		uprintf("localization: default message table has already been populated!");
+		return FALSE;
+	}
+
+	if (!reentrant) {
 		if ((filename == NULL) || (filename[0] == 0))
-			return NULL;
+			return FALSE;
+		if (lcmd == default_locale) {
+			// The default locale has already been populated => nothing to do
+			msg_table = default_msg_table;
+			return TRUE;
+		}
+		if (lcmd == NULL) {
+			// Fill the default table
+			lcmd = default_locale;
+			msg_table = default_msg_table;
+		} else {
+			// Fill the current table
+			msg_table = current_msg_table;
+		}
 		free_dialog_list();
 		fd = open_loc_file(filename);
 		if (fd == NULL)
 			goto out;
+	} else {
+		// Called, from a 'b' command - no need to reopen the file,
+		// just save the current offset and current line number
+		cur_offset = ftell(fd);
+		old_loc_line_nr = loc_line_nr;
 	}
+
+	offset = (long)lcmd->num[0];
+	end_offset = (long)lcmd->num[1];
+	start_line = lcmd->line_nr;
 	loc_line_nr = start_line;
 	buf = (char*) malloc(bufsize);
 	if (buf == NULL) {
@@ -489,6 +518,7 @@ char* get_loc_data_file(const char* filename, long offset, long end_offset, int 
 			}
 		}
 	} while(1);
+	ret = TRUE;
 
 out:
 	// Don't close on a reentrant call
