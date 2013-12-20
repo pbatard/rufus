@@ -58,6 +58,45 @@ static int fs_index = 0;
 BOOL force_large_fat32 = FALSE;
 static BOOL WritePBR(HANDLE hLogicalDrive);
 
+/* 
+ * Convert the fmifs outputs messages (that use an OEM code page) to UTF-8
+ */
+static void OutputUTF8Message(const char* src)
+{
+	int len;
+	char *dst = NULL;
+	wchar_t* wdst = NULL;
+	PF_DECL(GetThreadUILanguage);
+	PF_INIT_OR_OUT(GetThreadUILanguage, kernel32);
+
+	if (src == NULL)
+		goto out;
+	len = (int)safe_strlen(src);
+	while ((len > 0) && ((src[len-1] == 0x0A) || (src[len-1] == 0x0D) || (src[len-1] == ' ')))
+		len--;
+	if (len == 0)
+		goto out;
+
+	if (PRIMARYLANGID(pfGetThreadUILanguage()) != LANG_ENGLISH) {
+		len = MultiByteToWideChar(CP_OEMCP, 0, src, len, NULL, 0);
+		if (len == 0)
+			goto out;
+		wdst = (wchar_t*)calloc(len+1, sizeof(wchar_t));
+		if ((wdst == NULL) || (MultiByteToWideChar(CP_OEMCP, 0, src, len, wdst, len+1) == 0))
+			goto out;
+		dst = wchar_to_utf8(wdst);
+		if (dst == NULL)
+			goto out;
+		uprintf("%s", dst);
+	} else {
+		uprintf("%s", src);
+	}
+
+out:
+	safe_free(dst);
+	safe_free(wdst);
+}
+
 /*
  * FormatEx callback. Return FALSE to halt operations
  */
@@ -70,7 +109,7 @@ static BOOLEAN __stdcall FormatExCallback(FILE_SYSTEM_CALLBACK_COMMAND Command, 
 	switch(Command) {
 	case FCC_PROGRESS:
 		percent = (DWORD*)pData;
-		PrintStatus(0, FALSE, MSG_217, *percent);
+		PrintStatus(0, FALSE, MSG_217, 1.0f * (*percent));
 		UpdateProgress(OP_FORMAT, 1.0f * (*percent));
 		break;
 	case FCC_STRUCTURE_PROGRESS:	// No progress on quick format
@@ -118,7 +157,7 @@ static BOOLEAN __stdcall FormatExCallback(FILE_SYSTEM_CALLBACK_COMMAND Command, 
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_LABEL_TOO_LONG;
 		break;
 	case FCC_OUTPUT:
-		uprintf("%s\n", ((PTEXTOUTPUT)pData)->Output);
+		OutputUTF8Message(((PTEXTOUTPUT)pData)->Output);
 		break;
 	case FCC_CLUSTER_SIZE_TOO_BIG:
 	case FCC_CLUSTER_SIZE_TOO_SMALL:
@@ -183,8 +222,7 @@ static BOOLEAN __stdcall ChkdskCallback(FILE_SYSTEM_CALLBACK_COMMAND Command, DW
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_DEVICE_IN_USE;
 		break;
 	case FCC_OUTPUT:
-		// TODO: convert from sys CP to UTF-8
-		uprintf("%s\n", ((PTEXTOUTPUT)pData)->Output);
+		OutputUTF8Message(((PTEXTOUTPUT)pData)->Output);
 		break;
 	case FCC_NO_MEDIA_IN_DRIVE:
 		uprintf("No media in drive\n");
@@ -719,7 +757,6 @@ static BOOL CheckDisk(char DriveLetter)
 		}
 	}
 
-// TODO: set locale to en-US
 	pfChkdsk(wDriveRoot, wFSType, FALSE, FALSE, FALSE, FALSE, NULL, NULL, ChkdskCallback);
 	if (!IS_ERROR(FormatStatus)) {
 		uprintf("NTFS Fixup completed.\n");
@@ -1192,12 +1229,21 @@ DWORD WINAPI FormatThread(LPVOID param)
 	char wim_image[] = "?:\\sources\\install.wim";
 	char efi_dst[] = "?:\\efi\\boot\\bootx64.efi";
 	FILE* log_fd;
+	PF_DECL(GetThreadUILanguage);
+	PF_DECL(SetThreadUILanguage);
+	PF_INIT_OR_OUT(GetThreadUILanguage, kernel32);
+	PF_INIT_OR_OUT(SetThreadUILanguage, kernel32);
 
 	fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
 	dt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
 	pt = GETPARTTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
 	bt = GETBIOSTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
 	use_large_fat32 = (fs == FS_FAT32) && ((SelectedDrive.DiskSize > LARGE_FAT32_SIZE) || (force_large_fat32));
+
+	// Try to ensure that all messages from Format and Checkdisk, which we report in the log, will be in English
+	pfSetThreadUILanguage(MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US));
+	if (PRIMARYLANGID(pfGetThreadUILanguage()) != LANG_ENGLISH)
+		uprintf("Note: the formatting thread could not be set to English");
 
 	PrintStatus(0, TRUE, MSG_225);
 	hPhysicalDrive = GetPhysicalHandle(DriveIndex, TRUE, TRUE);

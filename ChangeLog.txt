@@ -113,7 +113,7 @@ o Version 1.1.1 (2012.02.16):
     ISO image support (syslinux) - targeted at Linux installation ISOs
     ISO fixes and UI improvements
 
-o Version 1.1.0 Beta (2012.02.08):
+o Version 1.1.0 (2012.02.08):
     ISO image support (NTFS, bootmgr only - targeted at Windows installation ISOs)
 
 o Version 1.0.7 (2012.02.02):

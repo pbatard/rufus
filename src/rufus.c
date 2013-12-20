@@ -1372,7 +1372,7 @@ void InitDialog(HWND hDlg)
 		rufus_version[i] = (uint16_t)atoi(token);
 	uprintf(APPLICATION_NAME " version %d.%d.%d.%d\n", rufus_version[0], rufus_version[1], rufus_version[2], rufus_version[3]);
 	uprintf("Windows version: %s\n", WindowsVersionStr);
-	uprintf("LCID: 0x%04X\n", GetUserDefaultLCID());
+	uprintf("LCID: 0x%04X\n", GetUserDefaultUILanguage());
 
 	SetClusterSizeLabels();
 
@@ -1998,7 +1998,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 #endif
 {
 	const char* old_wait_option = "/W";
-	int i, opt, option_index = 0, argc = 0, si = 0, lcid = GetUserDefaultLCID();
+	int i, opt, option_index = 0, argc = 0, si = 0, lcid = GetUserDefaultUILanguage();
 	BOOL attached_console = FALSE, external_loc_file = FALSE;
 	BYTE* loc_data;
 	DWORD loc_size, Size;
