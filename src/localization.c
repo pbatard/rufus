@@ -134,7 +134,6 @@ static BOOL htab_create(uint32_t nel)
 		nel += 2;
 
 	htab_size = nel;
-	uprintf("localization: using %d entries hash table\n", nel);
 	htab_filled = 0;
 
 	// allocate memory and zero out.

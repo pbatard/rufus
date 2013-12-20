@@ -109,6 +109,7 @@ extern void _uprintf(const char *format, ...);
 /* Custom Windows messages */
 enum user_message_type {
 	UM_FORMAT_COMPLETED = WM_APP,
+	UM_MEDIA_CHANGE,
 	// TODO: relabel "ISO" to a more generic "progress"
 	UM_ISO_CREATE,
 	UM_ISO_INIT,
@@ -329,6 +330,7 @@ extern BOOL DeletePartitions(HANDLE hDrive);
 extern const char* GetPartitionType(BYTE Type);
 extern BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSystemNameSize);
 extern BOOL GetDriveLabel(DWORD DriveIndex, char* letter, char** label);
+extern BOOL IsMediaPresent(DWORD DriveIndex);
 extern BOOL MountVolume(char* drive_name, char *drive_guid);
 extern BOOL UnmountVolume(HANDLE hDrive);
 extern BOOL RemountVolume(char* drive_name);

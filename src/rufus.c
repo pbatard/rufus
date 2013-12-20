@@ -31,6 +31,7 @@
 #include <commctrl.h>
 #include <setupapi.h>
 #include <winioctl.h>
+#include <shlobj.h>
 #include <process.h>
 #include <dbt.h>
 #include <io.h>
@@ -65,7 +66,7 @@
 #define DBT_CUSTOMEVENT 0x8006
 #endif
 
-// MinGW fails to link those
+// MinGW fails to link those...
 typedef HIMAGELIST (WINAPI *ImageList_Create_t)(
 	int cx,
 	int cy,
@@ -85,6 +86,25 @@ struct {
 	RECT margin;
 	UINT uAlign;
 } bi_iso = {0}, bi_up = {0}, bi_down = {0}, bi_lang = {0};	// BUTTON_IMAGELIST
+
+// ...and MinGW doesn't know these.
+typedef struct
+{
+	LPCITEMIDLIST pidl;
+	BOOL   fRecursive;
+} MY_SHChangeNotifyEntry;
+
+typedef BOOL (WINAPI *SHChangeNotifyDeregister_t)(
+	ULONG ulID
+);
+typedef ULONG (WINAPI *SHChangeNotifyRegister_t)(
+	HWND hwnd,
+	int fSources,
+	LONG fEvents,
+	UINT wMsg,
+	int cEntries,
+	const MY_SHChangeNotifyEntry *pshcne
+);
 
 const char* FileSystemLabel[FS_MAX] = { "FAT", "FAT32", "NTFS", "UDF", "exFAT" };
 // Number of steps for each FS for FCC_STRUCTURE_PROGRESS
@@ -745,6 +765,13 @@ static BOOL GetUSBDevices(DWORD devnum)
 			}
 
 			drive_index = device_number.DeviceNumber + DRIVE_INDEX_MIN;
+			if (!IsMediaPresent(drive_index)) {
+				uprintf("Device eliminated because it appears to contain no media\n");
+				safe_closehandle(hDrive);
+				safe_free(devint_detail_data);
+				break;
+			}
+
 			if (GetDriveLabel(drive_index, &drive_letter, &label)) {
 				if ((!enable_HDDs) && ((score = IsHDD(drive_index, vid, pid, buffer)) > 0)) {
 					uprintf("Device eliminated because it was detected as an USB Hard Drive (score %d > 0)\n", score);
@@ -1512,10 +1539,18 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	char tmp[128];
 	static UINT uBootChecked = BST_CHECKED, uQFChecked;
 	static BOOL first_log_display = TRUE, user_changed_label = FALSE;
+	static ULONG ulRegister = 0;
+	static LPITEMIDLIST pidlDesktop = NULL;
+	static MY_SHChangeNotifyEntry NotifyEntry;
 	loc_cmd* lcmd = NULL;
+	PF_DECL(SHChangeNotifyRegister);
+	PF_DECL(SHChangeNotifyDeregister);
 
 	switch (message) {
 
+	case UM_MEDIA_CHANGE:
+		wParam = DBT_CUSTOMEVENT;
+		// Fall through
 	case WM_DEVICECHANGE:
 		// The Windows hotplug subsystem sucks. Among other things, if you insert a GPT partitioned
 		// USB drive with zero partitions, the only device messages you will get are a stream of
@@ -1528,7 +1563,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			switch (wParam) {
 			case DBT_DEVICEARRIVAL:
 			case DBT_DEVICEREMOVECOMPLETE:
-			case DBT_CUSTOMEVENT:	// This last event is sent by our timer refresh function
+			case DBT_CUSTOMEVENT:	// Sent by our timer refresh function or for card reader media change
 				LastRefresh = GetTickCount();	// Don't care about 49.7 days rollback of GetTickCount()
 				KillTimer(hMainDialog, TID_REFRESH_TIMER);
 				GetUSBDevices((DWORD)ComboBox_GetItemData(hDeviceList, ComboBox_GetCurSel(hDeviceList)));
@@ -1549,6 +1584,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		break;
 
 	case WM_INITDIALOG:
+		PF_INIT(SHChangeNotifyRegister, shell32);
 		apply_localization(IDD_DIALOG, hDlg);
 		SetUpdateCheck();
 		advanced_mode = TRUE;
@@ -1559,6 +1595,15 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		InitDialog(hDlg);
 		GetUSBDevices(0);
 		CheckForUpdates(FALSE);
+		// Register MEDIA_INSERTED/MEDIA_REMOVED notifications for card readers
+		if ((pfSHChangeNotifyRegister != NULL) && (SUCCEEDED(SHGetSpecialFolderLocation(0, CSIDL_DESKTOP, &pidlDesktop)))) {
+			NotifyEntry.pidl = pidlDesktop;
+			NotifyEntry.fRecursive = TRUE;
+			// NB: The following only works if the media is already formatted.
+			// If you insert a blank card, notifications will not be sent... :(
+			ulRegister = pfSHChangeNotifyRegister(hDlg, 0x0001|0x0002|0x8000,
+				SHCNE_MEDIAINSERTED|SHCNE_MEDIAREMOVED, UM_MEDIA_CHANGE, 1, &NotifyEntry);
+		}
 		PostMessage(hMainDialog, UM_ISO_CREATE, 0, 0);
 		return (INT_PTR)TRUE;
 
@@ -1600,6 +1645,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		switch(LOWORD(wParam)) {
 		case IDOK:			// close application
 		case IDCANCEL:
+			PF_INIT(SHChangeNotifyDeregister, shell32);
 			EnableWindow(GetDlgItem(hISOProgressDlg, IDC_ISO_ABORT), FALSE);
 			EnableWindow(GetDlgItem(hDlg, IDCANCEL), FALSE);
 			if (format_thid != NULL) {
@@ -1622,6 +1668,8 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				}
 				return (INT_PTR)TRUE;
 			}
+			if ((pfSHChangeNotifyDeregister != NULL) && (ulRegister != 0))
+				pfSHChangeNotifyDeregister(ulRegister);
 			PostQuitMessage(0);
 			StrArrayDestroy(&DriveID);
 			StrArrayDestroy(&DriveLabel);

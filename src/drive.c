@@ -451,6 +451,23 @@ uint64_t GetDriveSize(DWORD DriveIndex)
 }
 
 /*
+ * GET_DRIVE_GEOMETRY is used to tell if there is an actual media
+ */
+BOOL IsMediaPresent(DWORD DriveIndex)
+{
+	BOOL r;
+	HANDLE hPhysical;
+	DWORD size;
+	BYTE geometry[128];
+
+	hPhysical = GetPhysicalHandle(DriveIndex, FALSE, FALSE);
+	r = DeviceIoControl(hPhysical, IOCTL_DISK_GET_DRIVE_GEOMETRY_EX,
+			NULL, 0, geometry, sizeof(geometry), &size, NULL) || (size <= 0);
+	safe_closehandle(hPhysical);
+	return r;
+}
+
+/*
  * Fill the drive properties (size, FS, etc)
  */
 BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSystemNameSize)

@@ -1243,7 +1243,7 @@ DWORD WINAPI FormatThread(LPVOID param)
 	// Try to ensure that all messages from Format and Checkdisk, which we report in the log, will be in English
 	pfSetThreadUILanguage(MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US));
 	if (PRIMARYLANGID(pfGetThreadUILanguage()) != LANG_ENGLISH)
-		uprintf("Note: the formatting thread could not be set to English");
+		uprintf("Note: some formatting messages may still be localized");
 
 	PrintStatus(0, TRUE, MSG_225);
 	hPhysicalDrive = GetPhysicalHandle(DriveIndex, TRUE, TRUE);
