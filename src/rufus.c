@@ -522,6 +522,22 @@ static void SetPartitionSchemeTooltip(void)
 	}
 }
 
+static void SetTargetSystem(void)
+{
+	int ts;
+
+	if (SelectedDrive.PartitionType == PARTITION_STYLE_GPT) {
+		ts = 2;	// GPT/UEFI
+	} else if (SelectedDrive.has_protective_mbr || SelectedDrive.has_mbr_uefi_marker || (IS_EFI(iso_report) &&
+		(!iso_report.has_isolinux) && (!iso_report.has_bootmgr) && (!IS_WINPE(iso_report.winpe))) ) {
+		ts = 1;	// MBR/UEFI
+	} else {
+		ts = 0;	// MBR/BIOS|UEFI
+	}
+	IGNORE_RETVAL(ComboBox_SetCurSel(hPartitionScheme, ts));
+	SetPartitionSchemeTooltip();
+}
+
 /*
  * Populate the UI properties
  */
@@ -544,8 +560,6 @@ static BOOL PopulateProperties(int ComboIndex)
 
 	if (!GetDriveInfo(ComboIndex))	// This also populates FS
 		return FALSE;
-	SetFSFromISO();
-	EnableBootOptions(TRUE);
 
 	HumanReadableSize = (double)SelectedDrive.DiskSize;
 	for (i=1; i<MAX_SIZE_SUFFIXES; i++) {
@@ -567,15 +581,10 @@ static BOOL PopulateProperties(int ComboIndex)
 	}
 	if (i >= MAX_SIZE_SUFFIXES)
 		uprintf("Could not populate partition scheme data\n");
-	if (SelectedDrive.PartitionType == PARTITION_STYLE_GPT) {
-		j = 2;
-	} else if (SelectedDrive.has_protective_mbr || SelectedDrive.has_mbr_uefi_marker) {
-		j = 1;
-	} else {
-		j = 0;
-	}
-	IGNORE_RETVAL(ComboBox_SetCurSel(hPartitionScheme, j));
-	SetPartitionSchemeTooltip();
+
+	SetTargetSystem();
+	SetFSFromISO();
+	EnableBootOptions(TRUE);
 	device_tooltip = (char*) malloc(safe_strlen(DriveID.Table[ComboIndex]) + 16);
 
 	// Set a proposed label according to the size (eg: "256MB", "8GB")
@@ -1176,8 +1185,9 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 			}
 		}
 
-		// Enable DOS, set DOS Type to ISO (last item) and set FS accordingly
+		// Enable bootable and set Target System and FS accordingly
 		CheckDlgButton(hMainDialog, IDC_BOOT, BST_CHECKED);
+		SetTargetSystem();
 		SetFSFromISO();
 		SetMBRProps();
 		for (i=(int)safe_strlen(iso_path); (i>0)&&(iso_path[i]!='\\'); i--);

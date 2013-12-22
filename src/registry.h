@@ -165,7 +165,7 @@ static __inline BOOL WriteRegistryKey32(HKEY root, const char* key, int32_t val)
 
 /* Helpers for String registry operations */
 #define GetRegistryKeyStr(root, key, str, len) _GetRegistryKey(root, key, REG_SZ, (LPBYTE)str, (DWORD)len)
-#define SetRegistryKeyStr(root, key, str) _SetRegistryKey(root, key, REG_SZ, (LPBYTE)str, safe_strlen(str))
+#define SetRegistryKeyStr(root, key, str) _SetRegistryKey(root, key, REG_SZ, (LPBYTE)str, (DWORD)safe_strlen(str))
 // Use a static buffer - don't allocate
 static __inline char* ReadRegistryKeyStr(HKEY root, const char* key) {
 	static char str[512];

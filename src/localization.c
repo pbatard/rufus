@@ -380,12 +380,13 @@ BOOL dispatch_loc_cmd(loc_cmd* lcmd)
 	if (lcmd->command <= LC_TEXT) {
 		// Any command up to LC_TEXT takes a control ID in text[0]
 		if (safe_strncmp(lcmd->txt[0], msg_prefix, 4) == 0) {
-			if (lcmd->command != LC_TEXT) {
+			// The unneeded NULL check is to silence a VS warning
+			if ((lcmd->txt[0] == NULL) || (lcmd->command != LC_TEXT)) {
 				luprint("only the [t]ext command can be applied to a message (MSG_###)\n");
 				goto err;
 			}
 			// Try to convert the numeric part of a MSG_#### to a numeric
-			lcmd->ctrl_id = MSG_000 + atoi(&lcmd->txt[0][4]);
+			lcmd->ctrl_id = MSG_000 + atoi(&(lcmd->txt[0][4]));
 			if (lcmd->ctrl_id == MSG_000) {
 				// Conversion could not be performed
 				luprintf("failed to convert the numeric value in '%'\n", lcmd->txt[0]);

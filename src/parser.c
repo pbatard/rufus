@@ -404,6 +404,10 @@ BOOL get_loc_data_file(const char* filename, loc_cmd* lcmd)
 		old_loc_line_nr = loc_line_nr;
 	}
 
+	if (lcmd == NULL) {
+		uprintf("Spock gone crazy error!\n");
+		goto out;
+	}
 	offset = (long)lcmd->num[0];
 	end_offset = (long)lcmd->num[1];
 	start_line = lcmd->line_nr;

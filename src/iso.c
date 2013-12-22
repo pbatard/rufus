@@ -126,7 +126,7 @@ static void log_handler (cdio_log_level_t level, const char *message)
  * Scan and set ISO properties
  * Returns true if the the current file does not need to be processed further
  */
-static __inline BOOL check_iso_props(const char* psz_dirname, BOOL* is_syslinux_cfg, BOOL* is_old_c32, 
+static BOOL check_iso_props(const char* psz_dirname, BOOL* is_syslinux_cfg, BOOL* is_old_c32, 
 	int64_t i_file_length, const char* psz_basename, const char* psz_fullpath)
 {
 	size_t i, j;

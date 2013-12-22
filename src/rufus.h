@@ -180,8 +180,8 @@ enum bios_type {
 	BT_MAX
 };
 // For the partition types we'll use Microsoft's PARTITION_STYLE_### constants
-#define GETBIOSTYPE(x) (((x) >> 16) & 0xFFFF)
-#define GETPARTTYPE(x) ((x) & 0xFFFF);
+#define GETBIOSTYPE(x) (((x)>0)?(((x) >> 16) & 0xFFFF):0)
+#define GETPARTTYPE(x) (((x)>0)?((x) & 0xFFFF):0);
 
 /* Current drive info */
 typedef struct {
