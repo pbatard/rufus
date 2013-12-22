@@ -424,7 +424,7 @@ BOOL get_loc_data_file(const char* filename, loc_cmd* lcmd)
 			if (!eol)
 				loc_line_nr += line_nr_incr;
 			get_loc_data_line(buf);
-			goto out;
+			break;
 		case '\r':
 		case '\n':
 			if (escape_sequence) {
@@ -502,8 +502,8 @@ BOOL get_loc_data_file(const char* filename, loc_cmd* lcmd)
 			}
 			break;
 		}
-		if (ftell(fd) > end_offset)
-			goto out;
+		if ((c == EOF) || (ftell(fd) > end_offset))
+			break;
 		// Have at least 2 chars extra, for \r\n sequences
 		if (i >= bufsize-2) {
 			bufsize *= 2;

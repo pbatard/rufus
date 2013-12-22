@@ -2205,7 +2205,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 relaunch:
 	uprintf("localization: using locale '%s'\n", selected_locale->txt[0]);
-	get_loc_data_file(loc_file, selected_locale);
+	if (get_loc_data_file(loc_file, selected_locale))
+		WriteRegistryKeyStr(REGKEY_HKCU, REGKEY_LOCALE, selected_locale->txt[0]);
 
 	// Create the main Window
 	hDlg = CreateDialogW(hInstance, MAKEINTRESOURCEW(IDD_DIALOG), NULL, MainCallback);

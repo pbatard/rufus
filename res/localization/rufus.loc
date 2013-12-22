@@ -3872,7 +3872,7 @@ t IDC_START "Mula"
 m IDC_START +18,0
 t IDS_ADVANCED_OPTIONS_GRP "Pilihan Lanjutan"
 s IDS_ADVANCED_OPTIONS_GRP +19,0
-t IDC_ENABLE_FIXED_DISKS "Senaraiakan cakera keras USB"
+t IDC_ENABLE_FIXED_DISKS "Senaraikan cakera keras USB"
 s IDC_ENABLE_FIXED_DISKS +20,0
 # Note: it is acceptable to drop the parenthesis () below if you are running out of space
 # as there is a tooltip (MSG_169) providing these details
