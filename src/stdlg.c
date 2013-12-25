@@ -681,7 +681,7 @@ BOOL Notification(int type, const notification_info* more_info, char* title, cha
 		hMessageIcon = LoadIcon(NULL, IDI_INFORMATION);
 		break;
 	}
-	ret = (DialogBox(hMainInstance, MAKEINTRESOURCE(IDD_NOTIFICATION), hMainDialog, NotificationCallback) == IDYES);
+	ret = (DialogBoxW(hMainInstance, MAKEINTRESOURCEW(IDD_NOTIFICATION), hMainDialog, NotificationCallback) == IDYES);
 	safe_free(szMessageText);
 	dialog_showing--;
 	return ret;

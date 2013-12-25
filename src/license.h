@@ -97,7 +97,7 @@ const char* additional_copyrights =
 const char* update_policy =
 "{\\rtf1\\ansi{\\fonttbl{\\f0\\fnil\\fcharset0 Microsoft Sans Serif;}{\\f1\\fnil\\fcharset2 Symbol;}}\n"
 "\\fs16\\b %s\\b0\\line\n"
-"%s:\\par\n"
+"%s\\par\n"
 "\\pard{\\pntext\\f1\\'B7\\tab}{\\*\\pn\\pnlvlblt\\pnf2\\pnindent0{\\pntxtb\\'B7}}\\fi-150\\li220 %s\\par\n"
 "{\\pntext\\f1\\'B7\\tab}%s\\par\n"
 "{\\pntext\\f1\\'B7\\tab}%s\\line\\pard\n"
