@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Copyright © 2011-2013 Pete Batard <pete@akeo.ie>
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -187,7 +187,7 @@ static void SetClusterSizeLabels(void)
 	}
 }
 
-/* 
+/*
  * Set cluster size values according to http://support.microsoft.com/kb/140365
  * this call will return FALSE if we can't find a supportable FS for the drive
  */
@@ -322,7 +322,7 @@ out:
 			} else {
 				entry = tmp;
 			}
-			IGNORE_RETVAL(ComboBox_SetItemData(hFileSystem, 
+			IGNORE_RETVAL(ComboBox_SetItemData(hFileSystem,
 				ComboBox_AddStringU(hFileSystem, entry), fs));
 			r = TRUE;
 		}
@@ -614,7 +614,7 @@ static BOOL PopulateProperties(int ComboIndex)
 
 	// If no existing label is available and no ISO is selected, propose one according to the size (eg: "256MB", "8GB")
 	if ((iso_path == NULL) || (iso_report.label[0] == 0)) {
-		if ( (safe_stricmp(no_label, DriveLabel.Table[ComboIndex]) == 0) 
+		if ( (safe_stricmp(no_label, DriveLabel.Table[ComboIndex]) == 0)
 		  || (safe_stricmp(lmprintf(MSG_207), DriveLabel.Table[ComboIndex]) == 0) ) {
 			SetWindowTextU(hLabel, SelectedDrive.proposed_label);
 		} else {
@@ -666,7 +666,7 @@ static BOOL GetUSBDevices(DWORD devnum)
 	// Get a list of hardware IDs for all USB storage devices
 	// This will be used to retrieve the VID:PID of our devices
 	CM_Get_Device_ID_List_SizeA(&list_size, usbstor_name, CM_GETIDLIST_FILTER_SERVICE);
-	if (list_size == 0) 
+	if (list_size == 0)
 		return FALSE;
 	devid_list = (char*)malloc(list_size);
 	if (devid_list == NULL) {
@@ -756,12 +756,12 @@ static BOOL GetUSBDevices(DWORD devnum)
 
 			hDrive = CreateFileA(devint_detail_data->DevicePath, GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
 			if(hDrive == INVALID_HANDLE_VALUE) {
-				uprintf("Could not open '%s': %s\n", devint_detail_data->DevicePath, WindowsErrorString()); 
+				uprintf("Could not open '%s': %s\n", devint_detail_data->DevicePath, WindowsErrorString());
 				continue;
 			}
 
 			memset(&device_number, 0, sizeof(device_number));
-			r = DeviceIoControl(hDrive, IOCTL_STORAGE_GET_DEVICE_NUMBER, 
+			r = DeviceIoControl(hDrive, IOCTL_STORAGE_GET_DEVICE_NUMBER,
 						NULL, 0, &device_number, sizeof(device_number), &size, NULL );
 			if (!r || size <= 0) {
 				uprintf("IOCTL_STORAGE_GET_DEVICE_NUMBER (GetUSBDevices) failed: %s\n", WindowsErrorString());
@@ -882,7 +882,7 @@ static void InitProgress(void)
 	}
 	nb_slots[OP_PARTITION] = 1;
 	nb_slots[OP_FIX_MBR] = 1;
-	nb_slots[OP_CREATE_FS] = 
+	nb_slots[OP_CREATE_FS] =
 		nb_steps[ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem))];
 	if ( (!IsChecked(IDC_QUICKFORMAT))
 	  || ((fs == FS_FAT32) && ((SelectedDrive.DiskSize >= LARGE_FAT32_SIZE) || (force_large_fat32))) ) {
@@ -959,7 +959,7 @@ void UpdateProgress(int op, float percent)
 	SetTaskbarProgressValue(pos, MAX_PROGRESS);
 }
 
-/* 
+/*
  * Toggle controls according to operation
  */
 static void EnableControls(BOOL bEnable)
@@ -984,7 +984,7 @@ static void EnableControls(BOOL bEnable)
 }
 
 /* Callback for the log window */
-BOOL CALLBACK LogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam) 
+BOOL CALLBACK LogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	HDC hdc;
 	HFONT hf;
@@ -1006,7 +1006,7 @@ BOOL CALLBACK LogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 			DEFAULT_CHARSET, 0, 0, PROOF_QUALITY, 0, "Arial Unicode MS");
 		SendDlgItemMessageA(hDlg, IDC_LOG_EDIT, WM_SETFONT, (WPARAM)hf, TRUE);
 		return TRUE;
-	case WM_COMMAND: 
+	case WM_COMMAND:
 		switch (LOWORD(wParam)) {
 		case IDCANCEL:
 			ShowWindow(hDlg, SW_HIDE);
@@ -1041,7 +1041,7 @@ BOOL CALLBACK LogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 		log_displayed = FALSE;
 		return TRUE;
 	}
-	return FALSE; 
+	return FALSE;
 }
 
 /*
@@ -1086,7 +1086,7 @@ static void CALLBACK BlockingTimer(HWND hWnd, UINT uMsg, UINT_PTR idEvent, DWORD
 }
 
 /* Callback for the modeless ISO extraction progress, and other progress dialogs */
-BOOL CALLBACK ISOProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam) 
+BOOL CALLBACK ISOProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	switch (message) {
 	case WM_INITDIALOG:
@@ -1098,6 +1098,7 @@ BOOL CALLBACK ISOProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 		return TRUE;
 	case UM_ISO_INIT:
 		iso_op_in_progress = TRUE;
+		EnableWindow(GetDlgItem(hISOProgressDlg, IDC_ISO_ABORT), TRUE);
 		CenterDialog(hDlg);
 		ShowWindow(hDlg, SW_SHOW);
 		UpdateWindow(hDlg);
@@ -1107,7 +1108,7 @@ BOOL CALLBACK ISOProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 		ShowWindow(hDlg, SW_HIDE);
 		iso_op_in_progress = FALSE;
 		return TRUE;
-	case WM_COMMAND: 
+	case WM_COMMAND:
 		switch (LOWORD(wParam)) {
 		case IDC_ISO_ABORT:
 			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANCELLED;
@@ -1126,13 +1127,14 @@ BOOL CALLBACK ISOProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 	case WM_CLOSE:		// prevent closure using Alt-F4
 		return TRUE;
 	}
-	return FALSE; 
+	return FALSE;
 }
 
 // The scanning process can be blocking for message processing => use a thread
 DWORD WINAPI ISOScanThread(LPVOID param)
 {
 	int i;
+	BOOL r;
 	FILE* fd;
 	const char* old_c32_name[NB_OLD_C32] = OLD_C32_NAMES;
 	const char* new_c32_url[NB_OLD_C32] = NEW_C32_URL;
@@ -1140,7 +1142,10 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 	if (iso_path == NULL)
 		goto out;
 	PrintStatus(0, TRUE, MSG_202);
-	if (!ExtractISO(iso_path, "", TRUE)) {
+	EnableControls(FALSE);
+	r = ExtractISO(iso_path, "", TRUE);
+	EnableControls(TRUE);
+	if (!r) {
 		SendMessage(hISOProgressDlg, UM_ISO_EXIT, 0, 0);
 		PrintStatus(0, TRUE, MSG_203);
 		safe_free(iso_path);
@@ -1149,7 +1154,7 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 	uprintf("ISO label: '%s'\r\n  Size: %lld bytes\r\n  Has a >64 chars filename: %s\r\n  Has a >4GB file: %s\r\n"
 		"  Uses EFI: %s%s\r\n  Uses Bootmgr: %s\r\n  Uses WinPE: %s%s\r\n  Uses isolinux: %s %s\n",
 		iso_report.label, iso_report.projected_size, iso_report.has_long_filename?"Yes":"No",
-		iso_report.has_4GB_file?"Yes":"No", (iso_report.has_efi || iso_report.has_win7_efi)?"Yes":"No", 
+		iso_report.has_4GB_file?"Yes":"No", (iso_report.has_efi || iso_report.has_win7_efi)?"Yes":"No",
 		(iso_report.has_win7_efi && (!iso_report.has_efi))?" (win7_x64)":"", iso_report.has_bootmgr?"Yes":"No",
 		IS_WINPE(iso_report.winpe)?"Yes":"No", (iso_report.uses_minint)?" (with /minint)":"", iso_report.has_isolinux?"Yes":"No",
 		iso_report.has_syslinux_v5?"(v5.0 or later)":iso_report.has_isolinux?"(v4.x or earlier)":"");
@@ -1339,7 +1344,7 @@ static BOOL BootCheck(void)
 			// Syslinux v5.0 or later requires a '%s' file to be installed
 			r = MessageBoxU(hMainDialog, lmprintf(MSG_104, ldlinux_name, ldlinux_name),
 				lmprintf(MSG_103, ldlinux_name), MB_YESNOCANCEL|MB_ICONWARNING);
-			if (r == IDCANCEL) 
+			if (r == IDCANCEL)
 				return FALSE;
 			if (r == IDYES) {
 				SetWindowTextU(hISOProgressDlg, lmprintf(MSG_085, ldlinux_name));
@@ -1601,7 +1606,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		// Create the log window (hidden)
 		first_log_display = TRUE;
 		log_displayed = FALSE;
-		hLogDlg = CreateDialogW(hMainInstance, MAKEINTRESOURCEW(IDD_LOG), hDlg, (DLGPROC)LogProc); 
+		hLogDlg = CreateDialogW(hMainInstance, MAKEINTRESOURCEW(IDD_LOG), hDlg, (DLGPROC)LogProc);
 		InitDialog(hDlg);
 		GetUSBDevices(0);
 		CheckForUpdates(FALSE);
@@ -1965,10 +1970,11 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		// but you'd be wrong. It must be done in the main callback, hence the custom message.
 		if (!IsWindow(hISOProgressDlg)) { 
 			hISOProgressDlg = CreateDialogW(hMainInstance, MAKEINTRESOURCEW(IDD_ISO_EXTRACT),
-				hDlg, (DLGPROC)ISOProc); 
+				hDlg, (DLGPROC)ISOProc);
+
 			// The window is not visible by default but takes focus => restore it
 			SetFocus(hDlg);
-		} 
+		}
 		return (INT_PTR)TRUE;
 
 	case UM_FORMAT_COMPLETED:
@@ -2218,6 +2224,12 @@ relaunch:
 	if (get_loc_data_file(loc_file, selected_locale))
 		WriteRegistryKeyStr(REGKEY_HKCU, REGKEY_LOCALE, selected_locale->txt[0]);
 
+	// Destroy the ISO progress window, if it exists
+	if (hISOProgressDlg != NULL) {
+		DestroyWindow(hISOProgressDlg);
+		hISOProgressDlg = NULL;
+	}
+
 	// Create the main Window
 	hDlg = CreateDialogW(hInstance, MAKEINTRESOURCEW(IDD_DIALOG), NULL, MainCallback);
 	if (hDlg == NULL) {
@@ -2234,7 +2246,7 @@ relaunch:
 		// The following ensures the processing of the ISO progress window messages
 		if (!IsWindow(hISOProgressDlg) || !IsDialogMessage(hISOProgressDlg, &msg)) {
 			// Alt-S => Disable size limit for ISOs
-			// By default, Rufus will not copy ISOs that are larger than in size than 
+			// By default, Rufus will not copy ISOs that are larger than in size than
 			// the target USB drive. If this is enabled, the size check is disabled.
 			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'S')) {
 				size_check = !size_check;
@@ -2283,7 +2295,7 @@ relaunch:
 				continue;
 			}
 			// Alt L => Toggle fake drive detection during bad blocks check
-			// By default, Rufus will check for fake USB flash drives that mistakenly present 
+			// By default, Rufus will check for fake USB flash drives that mistakenly present
 			// more capacity than they already have by looping over the flash. This check which
 			// is enabled by default is performed by writing the block number sequence and reading
 			// it back during the bad block check.

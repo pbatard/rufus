@@ -938,7 +938,7 @@ m IDC_POLICY -15,0
 m IDCANCEL +25,0
 s IDS_UPDATE_SETTINGS_GRP 25,0
 
-# Dialog that appears when a new  is available
+# Dialog that appears when a new version is available
 g IDD_NEW_VERSION
 t IDD_NEW_VERSION "Controleer op updates - Rufus"
 t IDS_NEW_VERSION_AVAIL_TXT "Een nieuwere versie is beschikbaar. Download de laatste versie a.u.b!"
