@@ -114,6 +114,7 @@ static BOOL existing_key = FALSE;	// For LGP set/restore
 static BOOL size_check = TRUE;
 static BOOL log_displayed = FALSE;
 static BOOL iso_provided = FALSE;
+static BOOL user_notified = FALSE;
 static BOOL relaunch = FALSE;
 extern BOOL force_large_fat32, enable_joliet, enable_rockridge;
 static int selection_default;
@@ -1068,7 +1069,6 @@ static void CALLBACK RefreshTimer(HWND hWnd, UINT uMsg, UINT_PTR idEvent, DWORD 
  */
 static void CALLBACK BlockingTimer(HWND hWnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
 {
-	static BOOL user_notified = FALSE;
 	if (iso_blocking_status < 0) {
 		KillTimer(hMainDialog, TID_BLOCKING_TIMER);
 		user_notified = FALSE;
@@ -1142,6 +1142,7 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 	if (iso_path == NULL)
 		goto out;
 	PrintStatus(0, TRUE, MSG_202);
+	user_notified = FALSE;
 	EnableControls(FALSE);
 	r = ExtractISO(iso_path, "", TRUE);
 	EnableControls(TRUE);

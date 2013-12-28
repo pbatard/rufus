@@ -1240,11 +1240,6 @@ DWORD WINAPI FormatThread(LPVOID param)
 	bt = GETBIOSTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
 	use_large_fat32 = (fs == FS_FAT32) && ((SelectedDrive.DiskSize > LARGE_FAT32_SIZE) || (force_large_fat32));
 
-	// Try to ensure that all messages from Format and Checkdisk, which we report in the log, will be in English
-	pfSetThreadUILanguage(MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US));
-	if (PRIMARYLANGID(pfGetThreadUILanguage()) != LANG_ENGLISH)
-		uprintf("Note: some formatting messages may still be localized");
-
 	PrintStatus(0, TRUE, MSG_225);
 	hPhysicalDrive = GetPhysicalHandle(DriveIndex, TRUE, TRUE);
 	if (hPhysicalDrive == INVALID_HANDLE_VALUE) {
@@ -1497,7 +1492,6 @@ DWORD WINAPI FormatThread(LPVOID param)
 					goto out;
 				}
 				if ((bt == BT_UEFI) && (!iso_report.has_efi) && (iso_report.has_win7_efi)) {
-					// TODO: Check ISO with EFI only
 					PrintStatus(0, TRUE, MSG_232);
 					wim_image[0] = drive_name[0];
 					efi_dst[0] = drive_name[0];
@@ -1528,6 +1522,12 @@ DWORD WINAPI FormatThread(LPVOID param)
 		RemountVolume(drive_name);
 		// NTFS fixup (WinPE/AIK images don't seem to boot without an extra checkdisk)
 		if ((dt == DT_ISO) && (fs == FS_NTFS)) {
+			// Try to ensure that all messages from Checkdisk will be in English
+			if (PRIMARYLANGID(pfGetThreadUILanguage()) != LANG_ENGLISH) {
+				pfSetThreadUILanguage(MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US));
+				if (PRIMARYLANGID(pfGetThreadUILanguage()) != LANG_ENGLISH)
+					uprintf("Note: CheckDisk messages may be localized");
+			}
 			CheckDisk(drive_name[0]);
 			UpdateProgress(OP_FINALIZE, -1.0f);
 		}
