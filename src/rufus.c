@@ -2064,7 +2064,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 {
 	const char* old_wait_option = "/W";
 	int i, opt, option_index = 0, argc = 0, si = 0, lcid = GetUserDefaultUILanguage();
-	BOOL attached_console = FALSE, external_loc_file = FALSE;
+	BOOL attached_console = FALSE, external_loc_file = FALSE, lgp_set = FALSE;
 	BYTE* loc_data;
 	DWORD loc_size, Size;
 	char tmp_path[MAX_PATH], loc_file[MAX_PATH] = "", *tmp, *locale_name = NULL;
@@ -2215,10 +2215,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	// We use local group policies rather than direct registry manipulation
 	// 0x9e disables removable and fixed drive notifications
-	SetLGP(FALSE, &existing_key, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer", "NoDriveTypeAutorun", 0x9e);
-
-	// Populate the default locale (so that we can produce English messages in the log)
-	get_loc_data_file(loc_file, NULL);
+	lgp_set = SetLGP(FALSE, &existing_key, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer", "NoDriveTypeAutorun", 0x9e);
 
 relaunch:
 	uprintf("localization: using locale '%s'\n", selected_locale->txt[0]);
@@ -2343,7 +2340,8 @@ out:
 		for (i=0; i<argc; i++) safe_free(argv[i]);
 		safe_free(argv);
 	}
-	SetLGP(TRUE, &existing_key, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer", "NoDriveTypeAutorun", 0);
+	if (lgp_set)
+		SetLGP(TRUE, &existing_key, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer", "NoDriveTypeAutorun", 0);
 	if (attached_console)
 		DetachConsole();
 	CloseHandle(mutex);

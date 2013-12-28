@@ -352,11 +352,13 @@ out:
 /*
  * Parse a locale section in a localization file (UTF-8, no BOM)
  * NB: this call is reentrant for the "base" command support
+ * TODO: Working on memory rather than on file would improve performance
  */
 BOOL get_loc_data_file(const char* filename, loc_cmd* lcmd)
 {
 	size_t bufsize = 1024;
 	static FILE* fd = NULL;
+	static BOOL populate_default = FALSE;
 	char *buf = NULL;
 	size_t i = 0;
 	int r = 0, line_nr_incr = 1;
@@ -367,30 +369,29 @@ BOOL get_loc_data_file(const char* filename, loc_cmd* lcmd)
 	// The default locale is always the first one
 	loc_cmd* default_locale = list_entry(locale_list.next, loc_cmd, list);
 
-	// We keep a default message table populated with the en-US messages.
-	// Ensure that it got properly initialized first.
-	if ((msg_table == NULL) && (lcmd != NULL)) {
-		uprintf("localization: default message table has not been populated!");
-		return FALSE;
-	} else if ((msg_table != NULL) && (lcmd == NULL)) {
-		uprintf("localization: default message table has already been populated!");
-		return FALSE;
+	if ((lcmd == NULL) || (default_locale == NULL)) {
+		uprintf("localization: no %slocale", (default_locale == NULL)?"default ":" ");
+		goto out;
+	}
+
+	if (msg_table == NULL) {
+		// Initialize the default message table (usually en-US)
+		msg_table = default_msg_table;
+		uprintf("localization: initializing default message table");
+		populate_default = TRUE;
+		get_loc_data_file(filename, default_locale);
+		populate_default = FALSE;
 	}
 
 	if (!reentrant) {
 		if ((filename == NULL) || (filename[0] == 0))
 			return FALSE;
-		if (lcmd == default_locale) {
-			// The default locale has already been populated => nothing to do
-			msg_table = default_msg_table;
-			return TRUE;
-		}
-		if (lcmd == NULL) {
-			// Fill the default table
-			lcmd = default_locale;
-			msg_table = default_msg_table;
-		} else {
-			// Fill the current table
+		if (!populate_default) {
+			if (lcmd == default_locale) {
+				// The default locale has already been populated => nothing to do
+				msg_table = default_msg_table;
+				return TRUE;
+			}
 			msg_table = current_msg_table;
 		}
 		free_dialog_list();
@@ -404,10 +405,6 @@ BOOL get_loc_data_file(const char* filename, loc_cmd* lcmd)
 		old_loc_line_nr = loc_line_nr;
 	}
 
-	if (lcmd == NULL) {
-		uprintf("Spock gone crazy error!\n");
-		goto out;
-	}
 	offset = (long)lcmd->num[0];
 	end_offset = (long)lcmd->num[1];
 	start_line = lcmd->line_nr;
