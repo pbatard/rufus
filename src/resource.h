@@ -45,6 +45,7 @@
 #define IDR_SL_LDLINUX_V4_SYS           401
 #define IDR_SL_LDLINUX_V5_BSS           402
 #define IDR_SL_LDLINUX_V5_SYS           403
+#define IDR_SL_MBOOT_C32                404
 #define IDR_LC_RUFUS_LOC                500
 #define IDC_DEVICE                      1001
 #define IDC_FILESYSTEM                  1002

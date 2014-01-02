@@ -1,6 +1,6 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
- * Copyright © 2011-2013 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2014 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -212,11 +212,13 @@ typedef struct {
 #define WINPE_I386      0x15
 #define IS_WINPE(r)     (((r&WINPE_MININT) == WINPE_MININT)||((r&WINPE_I386) == WINPE_I386))
 #define IS_EFI(r)       ((r.has_efi) || (r.has_win7_efi))
+#define IS_REACTOS(r)   (r.reactos_path[0] != 0)
 
 typedef struct {
 	char label[192];		/* 3*64 to account for UTF-8 */
 	char usb_label[192];	/* converted USB label for workaround */
 	char cfg_path[128];		/* path to the ISO's isolinux.cfg */
+	char reactos_path[128];	/* path to the ISO's freeldr.sys or setupldr.sys */
 	uint64_t projected_size;
 	// TODO: use a bitmask and #define tests for the following
 	uint8_t winpe;

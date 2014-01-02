@@ -1,6 +1,6 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
- * Copyright © 2011-2013 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2014 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1153,9 +1153,9 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 		goto out;
 	}
 	uprintf("ISO label: '%s'\r\n  Size: %lld bytes\r\n  Has a >64 chars filename: %s\r\n  Has a >4GB file: %s\r\n"
-		"  Uses EFI: %s%s\r\n  Uses Bootmgr: %s\r\n  Uses WinPE: %s%s\r\n  Uses isolinux: %s %s\n",
-		iso_report.label, iso_report.projected_size, iso_report.has_long_filename?"Yes":"No",
-		iso_report.has_4GB_file?"Yes":"No", (iso_report.has_efi || iso_report.has_win7_efi)?"Yes":"No",
+		"  ReactOS: %s\r\n  Uses EFI: %s%s\r\n  Uses Bootmgr: %s\r\n  Uses WinPE: %s%s\r\n  Uses isolinux: %s %s\r\n",
+		iso_report.label, iso_report.projected_size, iso_report.has_long_filename?"Yes":"No", iso_report.has_4GB_file?"Yes":"No",
+		IS_REACTOS(iso_report)?"Yes":"No", (iso_report.has_efi || iso_report.has_win7_efi)?"Yes":"No",
 		(iso_report.has_win7_efi && (!iso_report.has_efi))?" (win7_x64)":"", iso_report.has_bootmgr?"Yes":"No",
 		IS_WINPE(iso_report.winpe)?"Yes":"No", (iso_report.uses_minint)?" (with /minint)":"", iso_report.has_isolinux?"Yes":"No",
 		iso_report.has_syslinux_v5?"(v5.0 or later)":iso_report.has_isolinux?"(v4.x or earlier)":"");
@@ -1164,7 +1164,8 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 			uprintf("    With an old %s: %s\n", old_c32_name[i], iso_report.has_old_c32[i]?"Yes":"No");
 		}
 	}
-	if ((!iso_report.has_bootmgr) && (!iso_report.has_isolinux) && (!IS_WINPE(iso_report.winpe)) && (!iso_report.has_efi)) {
+	if ( (!iso_report.has_bootmgr) && (!iso_report.has_isolinux) && (!IS_WINPE(iso_report.winpe)) 
+	  && (!iso_report.has_efi) && (!IS_REACTOS(iso_report)) ) {
 		MessageBoxU(hMainDialog, lmprintf(MSG_082), lmprintf(MSG_081), MB_OK|MB_ICONINFORMATION);
 		safe_free(iso_path);
 		SetMBRProps();
@@ -1324,7 +1325,7 @@ static BOOL BootCheck(void)
 				MessageBoxU(hMainDialog, lmprintf(MSG_097), lmprintf(MSG_090), MB_OK|MB_ICONERROR);
 			}
 			return FALSE;
-		} else if (((fs == FS_FAT16)||(fs == FS_FAT32)) && (!iso_report.has_isolinux)) {
+		} else if (((fs == FS_FAT16)||(fs == FS_FAT32)) && (!iso_report.has_isolinux) && (!IS_REACTOS(iso_report))) {
 			// FAT/FAT32 can only be used for isolinux based ISO images or when the Target Type is UEFI
 			MessageBoxU(hMainDialog, lmprintf(MSG_098), lmprintf(MSG_090), MB_OK|MB_ICONERROR);
 			return FALSE;

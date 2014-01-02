@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * ISO file extraction
- * Copyright © 2011-2013 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2014 Pete Batard <pete@akeo.ie>
  * Based on libcdio's iso & udf samples:
  * Copyright © 2003-2012 Rocky Bernstein <rocky@gnu.org>
  *
@@ -65,6 +65,7 @@ static const char* efi_dirname = "/efi/boot";
 static const char* isolinux_name[] = { "isolinux.cfg", "syslinux.cfg", "extlinux.conf"};
 static const char* pe_dirname[] = { "/i386", "/minint" };
 static const char* pe_file[] = { "ntdetect.com", "setupldr.bin", "txtsetup.sif" };
+static const char* reactos_name = "setupldr.sys"; // TODO: freeldr.sys doesn't seem to work
 static const char* autorun_name = "autorun.inf";
 static const char* old_c32_name[NB_OLD_C32] = OLD_C32_NAMES;
 static const int64_t old_c32_threshold[NB_OLD_C32] = OLD_C32_THRESHOLD;
@@ -160,6 +161,10 @@ static BOOL check_iso_props(const char* psz_dirname, BOOL* is_syslinux_cfg, BOOL
 				iso_report.has_win7_efi = TRUE;
 			}
 		}
+
+		// Check for ReactOS' setupldr.sys anywhere
+		if ((iso_report.reactos_path[0] == 0) && (safe_stricmp(psz_basename, reactos_name) == 0))
+			safe_strcpy(iso_report.reactos_path, sizeof(iso_report.reactos_path), psz_fullpath);
 
 		// Check for the EFI boot directory
 		if (safe_stricmp(psz_dirname, efi_dirname) == 0)

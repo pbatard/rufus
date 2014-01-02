@@ -2,7 +2,7 @@
  *
  *   Copyright 2003 Lars Munch Christensen - All Rights Reserved
  *   Copyright 1998-2008 H. Peter Anvin - All Rights Reserved
- *   Copyright 2012-2013 Pete Batard
+ *   Copyright 2012-2014 Pete Batard
  *
  *   Based on the Linux installer program for SYSLINUX by H. Peter Anvin
  *
@@ -39,6 +39,8 @@ unsigned char* syslinux_ldlinux = NULL;
 DWORD syslinux_ldlinux_len;
 unsigned char* syslinux_bootsect = NULL;
 DWORD syslinux_bootsect_len;
+unsigned char* syslinux_mboot = NULL;
+DWORD syslinux_mboot_len;
 
 /*
  * Wrapper for ReadFile suitable for libfat
@@ -77,12 +79,14 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter)
 	FILE* fd;
 
 	static unsigned char sectbuf[SECTOR_SIZE];
-	static LPSTR resource[2][2] = {
-		{ MAKEINTRESOURCEA(IDR_SL_LDLINUX_V4_SYS),  MAKEINTRESOURCEA(IDR_SL_LDLINUX_V4_BSS) },
-		{ MAKEINTRESOURCEA(IDR_SL_LDLINUX_V5_SYS),  MAKEINTRESOURCEA(IDR_SL_LDLINUX_V5_BSS) } };
+	static char* resource[2][2] = {
+		{ MAKEINTRESOURCEA(IDR_SL_LDLINUX_V4_SYS), MAKEINTRESOURCEA(IDR_SL_LDLINUX_V4_BSS) },
+		{ MAKEINTRESOURCEA(IDR_SL_LDLINUX_V5_SYS), MAKEINTRESOURCEA(IDR_SL_LDLINUX_V5_BSS) } };
 	static char ldlinux_path[] = "?:\\ldlinux.sys";
 	static char* ldlinux_sys = &ldlinux_path[3];
 	const char* ldlinux_c32 = "ldlinux.c32";
+	const char* mboot_c32 = "mboot.c32";
+	char path[MAX_PATH];
 	struct libfat_filesystem *fs;
 	libfat_sector_t s, *secp;
 	libfat_sector_t *sectors = NULL;
@@ -223,6 +227,39 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter)
 				uprintf("Failed to create '%s': %s\n", ldlinux_path, WindowsErrorString());
 			}
 		}
+	} else if (IS_REACTOS(iso_report)) {
+		uprintf("Setting up ReactOS...\n");
+		syslinux_mboot = GetResource(hMainInstance, MAKEINTRESOURCEA(IDR_SL_MBOOT_C32),
+			_RT_RCDATA, "mboot.c32", &syslinux_mboot_len, FALSE);
+		if (syslinux_mboot == NULL) {
+			goto out;
+		}
+		/* Create mboot.c32 file */
+		safe_sprintf(path, sizeof(path), "%c:\\%s", drive_letter, mboot_c32);
+		f_handle = CreateFileA(path, GENERIC_READ | GENERIC_WRITE,
+				  FILE_SHARE_READ | FILE_SHARE_WRITE,
+				  NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+		if (f_handle == INVALID_HANDLE_VALUE) {
+			uprintf("Unable to create '%s'\n", path);
+			goto out;
+		}
+		if (!WriteFile(f_handle, syslinux_mboot, syslinux_mboot_len,
+			   &bytes_written, NULL) ||
+			bytes_written != syslinux_mboot_len) {
+			uprintf("Could not write '%s'\n", path);
+			goto out;
+		}
+		safe_closehandle(f_handle);
+		safe_sprintf(path, sizeof(path), "%c:\\syslinux.cfg", drive_letter);
+		fd = fopen(path, "w");
+		if (fd == NULL) {
+			uprintf("Could not create ReactOS 'syslinux.cfg'\n");
+			goto out;
+		}
+		/* Write the syslinux.cfg for ReactOS */
+		fprintf(fd, "DEFAULT ReactOS\nLABEL ReactOS\n  KERNEL %s\n  APPEND %s\n",
+			mboot_c32, iso_report.reactos_path);
+		fclose(fd);
 	}
 
 	if (dt != DT_ISO)
