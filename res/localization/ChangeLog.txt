@@ -6,6 +6,10 @@ the same changes.
 Remember to also update the version number for your translation ('v x.y.z')
 once you have matched all the changes that occurred for the en-US translation.
 
+o Version 1.0.7 (2014.01.01)
+  - Added MSG_092 again
+  - Added English example for OK button in About box (IDOK)
+
 o Version 1.0.6 (2013.12.17)
   - Removed IDD_MESSAGES (and the need for 'g IDD_MESSAGES')
 

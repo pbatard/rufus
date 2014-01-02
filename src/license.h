@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Licensing Data
- * Copyright © 2011-2013 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2014 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@ const char* about_blurb_format =
 "{\\b\\fs20%s}\\line\n"
 "\\fs18%s\\line\n"
 "\\line\n"
-"Copyright © 2011-2013 Pete Batard / Akeo\\line\n"
+"Copyright © 2011-2014 Pete Batard / Akeo\\line\n"
 RUFUS_URL "\\line\n"
 "\\fs6 \\line\n"
 "\\fs18%s\\line\n"
