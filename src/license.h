@@ -24,13 +24,13 @@ const char* about_blurb_format =
 "\\line\n"
 "Copyright © 2011-2014 Pete Batard / Akeo\\line\n"
 RUFUS_URL "\\line\n"
-"\\fs6 \\line\n"
+"\\fs3 \\line\n"
 "\\fs18%s\\line\n"
 "\\line\n"
 "%s\\line\n"
 "https://github.com/pbatard/rufus/issues\\line\n"
 "\\line\n"
-"{\\b %s}}";
+"{\\b\\fs19 %s}}";
 
 const char* additional_copyrights =
 "{\\rtf1\\ansi\n"

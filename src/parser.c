@@ -363,7 +363,7 @@ BOOL get_loc_data_file(const char* filename, loc_cmd* lcmd)
 	size_t i = 0;
 	int r = 0, line_nr_incr = 1;
 	int c = 0, eol_char = 0;
-	int start_line, old_loc_line_nr;
+	int start_line, old_loc_line_nr = 0;
 	BOOL ret = FALSE, eol = FALSE, escape_sequence = FALSE, reentrant = (fd != NULL);
 	long offset, cur_offset = -1, end_offset;
 	// The default locale is always the first one
@@ -383,7 +383,12 @@ BOOL get_loc_data_file(const char* filename, loc_cmd* lcmd)
 		populate_default = FALSE;
 	}
 
-	if (!reentrant) {
+	if (reentrant) {
+		// Called, from a 'b' command - no need to reopen the file,
+		// just save the current offset and current line number
+		cur_offset = ftell(fd);
+		old_loc_line_nr = loc_line_nr;
+	} else {
 		if ((filename == NULL) || (filename[0] == 0))
 			return FALSE;
 		if (!populate_default) {
@@ -398,11 +403,6 @@ BOOL get_loc_data_file(const char* filename, loc_cmd* lcmd)
 		fd = open_loc_file(filename);
 		if (fd == NULL)
 			goto out;
-	} else {
-		// Called, from a 'b' command - no need to reopen the file,
-		// just save the current offset and current line number
-		cur_offset = ftell(fd);
-		old_loc_line_nr = loc_line_nr;
 	}
 
 	offset = (long)lcmd->num[0];
