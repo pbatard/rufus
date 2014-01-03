@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Standard Dialog Routines (Browse for folder, About, etc)
- * Copyright © 2011-2013 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2014 Pete Batard <pete@akeo.ie>
  *
  * Based on zadig_stdlg.c, part of libwdi: http://libwdi.akeo.ie
  *
@@ -581,9 +581,32 @@ INT_PTR CALLBACK NotificationCallback(HWND hDlg, UINT message, WPARAM wParam, LP
 	static LRESULT disabled[9] = { HTLEFT, HTRIGHT, HTTOP, HTBOTTOM, HTSIZE,
 		HTTOPLEFT, HTTOPRIGHT, HTBOTTOMLEFT, HTBOTTOMRIGHT };
 	static HBRUSH white_brush, separator_brush;
+	// To use the system message font
+	NONCLIENTMETRICS ncm;
+	HFONT hDlgFont;
 
 	switch (message) {
 	case WM_INITDIALOG:
+		// Get the system message box font. See http://stackoverflow.com/a/6057761
+		ncm.cbSize = sizeof(ncm);
+		// If we're compiling with the Vista SDK or later, the NONCLIENTMETRICS struct
+		// will be the wrong size for previous versions, so we need to adjust it.
+		#if defined(_MSC_VER) && (_MSC_VER >= 1500) && (WINVER >= 0x0600)
+		if (nWindowsVersion >= WINDOWS_VISTA) {
+			// In versions of Windows prior to Vista, the iPaddedBorderWidth member
+			// is not present, so we need to subtract its size from cbSize.
+			ncm.cbSize -= sizeof(ncm.iPaddedBorderWidth);
+		}
+		#endif
+		SystemParametersInfo(SPI_GETNONCLIENTMETRICS, ncm.cbSize, &ncm, 0);
+		hDlgFont = CreateFontIndirect(&(ncm.lfMessageFont));
+		// Set the dialog to use the system message box font
+		SendMessage(hDlg, WM_SETFONT, (WPARAM)hDlgFont, MAKELPARAM(TRUE, 0));
+		SendMessage(GetDlgItem(hDlg, IDC_NOTIFICATION_TEXT), WM_SETFONT, (WPARAM)hDlgFont, MAKELPARAM(TRUE, 0));
+		SendMessage(GetDlgItem(hDlg, IDC_MORE_INFO), WM_SETFONT, (WPARAM)hDlgFont, MAKELPARAM(TRUE, 0));
+		SendMessage(GetDlgItem(hDlg, IDYES), WM_SETFONT, (WPARAM)hDlgFont, MAKELPARAM(TRUE, 0));
+		SendMessage(GetDlgItem(hDlg, IDNO), WM_SETFONT, (WPARAM)hDlgFont, MAKELPARAM(TRUE, 0));
+
 		apply_localization(IDD_NOTIFICATION, hDlg);
 		white_brush = CreateSolidBrush(WHITE);
 		separator_brush = CreateSolidBrush(SEPARATOR_GREY);
