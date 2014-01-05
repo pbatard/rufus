@@ -2,7 +2,7 @@
  * Rufus: The Reliable USB Formatting Utility
  * Formatting function calls
  * Copyright © 2007-2009 Tom Thornhill/Ridgecrop
- * Copyright © 2011-2013 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2014 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,6 +41,7 @@
 #include "ntfs.h"
 #include "partition_info.h"
 #include "file.h"
+#include "drive.h"
 #include "format.h"
 #include "badblocks.h"
 #include "localization.h"
@@ -767,69 +768,6 @@ out:
 	return r;
 }
 
-static BOOL AnalyzeMBR(HANDLE hPhysicalDrive)
-{
-	FILE fake_fd = { 0 };
-
-	fake_fd._ptr = (char*)hPhysicalDrive;
-	fake_fd._bufsiz = SelectedDrive.Geometry.BytesPerSector;
-
-	if (!is_br(&fake_fd)) {
-		uprintf("Drive does not have an x86 master boot record\n");
-		return FALSE;
-	}
-	if (is_dos_mbr(&fake_fd)) {
-		uprintf("Drive has a DOS/NT/95A master boot record\n");
-	} else if (is_dos_f2_mbr(&fake_fd)) {
-		uprintf("Drive has a DOS/NT/95A master boot record "
-			"with the undocumented F2 instruction\n");
-	} else if (is_95b_mbr(&fake_fd)) {
-		uprintf("Drive has a Windows 95B/98/98SE/ME master boot record\n");
-	} else if (is_2000_mbr(&fake_fd)) {
-		uprintf("Drive has a Windows 2000/XP/2003 master boot record\n");
-	} else if (is_vista_mbr(&fake_fd)) {
-		uprintf("Drive has a Windows Vista master boot record\n");
-	} else if (is_win7_mbr(&fake_fd)) {
-		uprintf("Drive has a Windows 7 master boot record\n");
-	} else if (is_zero_mbr(&fake_fd)) {
-		uprintf("Drive has a zeroed non-bootable master boot record\n");
-	} else {
-		uprintf("Drive has an unknown master boot record\n");
-	}
-	return TRUE;
-}
-
-static BOOL AnalyzePBR(HANDLE hLogicalVolume)
-{
-	FILE fake_fd = { 0 };
-
-	fake_fd._ptr = (char*)hLogicalVolume;
-	fake_fd._bufsiz = SelectedDrive.Geometry.BytesPerSector;
-
-	if (!is_br(&fake_fd)) {
-		uprintf("Volume does not have an x86 partition boot record\n");
-		return FALSE;
-	}
-	if (is_fat_16_br(&fake_fd) || is_fat_32_br(&fake_fd)) {
-		if (entire_fat_16_br_matches(&fake_fd)) {
-			uprintf("Drive has a FAT16 DOS partition boot record\n");
-		} else if (entire_fat_16_fd_br_matches(&fake_fd)) {
-			uprintf("Drive has a FAT16 FreeDOS partition boot record\n");
-		} else if (entire_fat_32_br_matches(&fake_fd)) {
-			uprintf("Drive has a FAT32 DOS partition boot record\n");
-		} else if (entire_fat_32_nt_br_matches(&fake_fd)) {
-			uprintf("Drive has a FAT32 NT partition boot record\n");
-		} else if (entire_fat_32_fd_br_matches(&fake_fd)) {
-			uprintf("Drive has a FAT32 FreeDOS partition boot record\n");
-		} else {
-			uprintf("Drive has an unknown FAT16 or FAT32 partition boot record\n");
-		}
-	} else {
-		uprintf("Drive has an unknown partition boot record\n");
-	}
-	return TRUE;
-}
-
 static BOOL ClearMBRGPT(HANDLE hPhysicalDrive, LONGLONG DiskSize, DWORD SectorSize, BOOL add1MB)
 {
 	BOOL r = FALSE;
@@ -866,23 +804,6 @@ out:
 }
 
 /*
- * Our own MBR, not in ms-sys
- */
-BOOL WriteRufusMBR(FILE *fp)
-{
-	DWORD size;
-	unsigned char aucRef[] = {0x55, 0xAA};
-	unsigned char* rufus_mbr;
-
-	// TODO: Will we need to edit the disk ID according to UI selection in the MBR as well?
-	rufus_mbr = GetResource(hMainInstance, MAKEINTRESOURCEA(IDR_BR_MBR_BIN), _RT_RCDATA, "mbr.bin", &size, FALSE);
-
-	return
-		write_data(fp, 0x0, rufus_mbr, 0x1b8) &&
-		write_data(fp, 0x1fe, aucRef, sizeof(aucRef));
-}
-
-/*
  * Process the Master Boot Record
  */
 static BOOL WriteMBR(HANDLE hPhysicalDrive)
@@ -894,6 +815,7 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 	size_t SecSize = SelectedDrive.Geometry.BytesPerSector;
 	size_t nSecs = (0x200 + SecSize -1) / SecSize;
 	FILE fake_fd = { 0 };
+	const char* using_msg = "Using %s MBR\n";
 
 	if (!AnalyzeMBR(hPhysicalDrive)) return FALSE;
 
@@ -947,13 +869,17 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 	fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
 	dt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
 	if ( (dt == DT_SYSLINUX_V4) || (dt == DT_SYSLINUX_V5) || ((dt == DT_ISO) && ((fs == FS_FAT16) || (fs == FS_FAT32))) ) {
+		uprintf(using_msg, "Syslinux");
 		r = write_syslinux_mbr(&fake_fd);
+	} else if (dt == DT_REACTOS) {
+		uprintf(using_msg, "ReactOS");
+		r = write_reactos_mbr(&fake_fd);
 	} else {
 		if ((IS_WINPE(iso_report.winpe) && !iso_report.uses_minint) || (IsChecked(IDC_RUFUS_MBR))) {
-			uprintf("Using " APPLICATION_NAME " bootable USB selection MBR\n");
-			r = WriteRufusMBR(&fake_fd);
+			uprintf(using_msg, APPLICATION_NAME);
+			r = write_rufus_mbr(&fake_fd);
 		} else {
-			uprintf("Using Windows 7 MBR\n");
+			uprintf(using_msg, "Windows 7");
 			r = write_win7_mbr(&fake_fd);
 		}
 	}
@@ -969,24 +895,35 @@ out:
 /*
  * Process the Partition Boot Record
  */
+static __inline const char* dt_to_name(int dt) {
+	switch (dt) {
+	case DT_FREEDOS: return "FreeDOS";
+	case DT_REACTOS: return "ReactOS";
+	default: return "Standard";
+	}
+}
 static BOOL WritePBR(HANDLE hLogicalVolume)
 {
 	int i;
 	FILE fake_fd = { 0 };
-	BOOL bFreeDOS = (ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType)) == DT_FREEDOS);
+	int dt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
+	const char* using_msg = "Using %s %s partition boot record\n";
 
 	fake_fd._ptr = (char*)hLogicalVolume;
 	fake_fd._bufsiz = SelectedDrive.Geometry.BytesPerSector;
 
 	switch (ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem))) {
 	case FS_FAT16:
+		uprintf(using_msg, dt_to_name(dt), "FAT16");
 		if (!is_fat_16_fs(&fake_fd)) {
-			uprintf("New volume does not have a FAT16 boot sector\n");
+			uprintf("New volume does not have a FAT16 boot sector - aborting\n");
 			break;
 		}
 		uprintf("Confirmed new volume has a FAT16 boot sector\n");
-		if (bFreeDOS) {
+		if (dt == DT_FREEDOS) {
 			if (!write_fat_16_fd_br(&fake_fd, 0)) break;
+		} else if (dt == DT_REACTOS) {
+			if (!write_fat_16_ros_br(&fake_fd, 0)) break;
 		} else {
 			if (!write_fat_16_br(&fake_fd, 0)) break;
 		}
@@ -995,16 +932,21 @@ static BOOL WritePBR(HANDLE hLogicalVolume)
 			break;
 		return TRUE;
 	case FS_FAT32:
+		uprintf(using_msg, dt_to_name(dt), "FAT32");
 		for (i=0; i<2; i++) {
 			if (!is_fat_32_fs(&fake_fd)) {
-				uprintf("New volume does not have a %s FAT32 boot sector\n", i?"secondary":"primary");
+				uprintf("New volume does not have a %s FAT32 boot sector - aborting\n", i?"secondary":"primary");
 				break;
 			}
 			uprintf("Confirmed new volume has a %s FAT32 boot sector\n", i?"secondary":"primary");
-			uprintf("Setting %s FAT32 boot sector for DOS boot...\n", i?"secondary":"primary");
-			if (bFreeDOS) {
+			uprintf("Setting %s FAT32 boot sector for boot...\n", i?"secondary":"primary");
+			if (dt == DT_FREEDOS) {
 				if (!write_fat_32_fd_br(&fake_fd, 0)) break;
-			} else if (!write_fat_32_br(&fake_fd, 0)) break;
+			} else if (dt == DT_REACTOS) {
+				if (!write_fat_32_ros_br(&fake_fd, 0)) break;
+			} else {
+				if (!write_fat_32_br(&fake_fd, 0)) break;
+			}
 			// Disk Drive ID needs to be corrected on XP
 			if (!write_partition_physical_disk_drive_id_fat32(&fake_fd))
 				break;
@@ -1012,8 +954,9 @@ static BOOL WritePBR(HANDLE hLogicalVolume)
 		}
 		return TRUE;
 	case FS_NTFS:
+		uprintf(using_msg, dt_to_name(dt), "NTFS");
 		if (!is_ntfs_fs(&fake_fd)) {
-			uprintf("New volume does not have an NTFS boot sector\n");
+			uprintf("New volume does not have an NTFS boot sector - aborting\n");
 			break;
 		}
 		uprintf("Confirmed new volume has an NTFS boot sector\n");
@@ -1023,7 +966,7 @@ static BOOL WritePBR(HANDLE hLogicalVolume)
 		// But with NTFS, if you don't remount, you don't boot!
 		return TRUE;
 	default:
-		uprintf("unsupported FS for FS BR processing\n");
+		uprintf("Unsupported FS for FS BR processing - aborting\n");
 		break;
 	}
 	FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_WRITE_FAULT;
@@ -1399,7 +1342,7 @@ DWORD WINAPI FormatThread(LPVOID param)
 
 	// Thanks to Microsoft, we must fix the MBR AFTER the drive has been formatted
 	if (pt == PARTITION_STYLE_MBR) {
-		PrintStatus(0, TRUE, MSG_228);
+		PrintStatus(0, TRUE, MSG_228);	// "Writing master boot record..."
 		if (!WriteMBR(hPhysicalDrive)) {
 			if (!IS_ERROR(FormatStatus))
 				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_WRITE_FAULT;
@@ -1435,7 +1378,8 @@ DWORD WINAPI FormatThread(LPVOID param)
 				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_INSTALL_FAILURE;
 				goto out;
 			}
-		} else if ((((dt == DT_WINME) || (dt == DT_FREEDOS)) && (!use_large_fat32)) || ((dt == DT_ISO) && (fs == FS_NTFS))) {
+		} else if ((((dt == DT_WINME) || (dt == DT_FREEDOS) || (dt == DT_REACTOS)) &&
+			(!use_large_fat32)) || ((dt == DT_ISO) && (fs == FS_NTFS))) {
 			// We still have a lock, which we need to modify the volume boot record 
 			// => no need to reacquire the lock...
 			hLogicalVolume = GetLogicalHandle(DriveIndex, TRUE, FALSE);

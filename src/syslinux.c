@@ -27,6 +27,7 @@
 #include <ctype.h>
 
 #include "rufus.h"
+#include "drive.h"
 #include "resource.h"
 #include "localization.h"
 

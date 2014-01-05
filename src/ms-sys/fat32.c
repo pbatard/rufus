@@ -70,7 +70,7 @@ int write_fat_32_br(FILE *fp, int bKeepLabel)
 	 ( write_data(fp, 0x0, br_fat32_0x0, sizeof(br_fat32_0x0)) &&
 	   /* BIOS Parameter Block should not be overwritten */
 	   write_data(fp, 0x52, br_fat32_0x52, sizeof(br_fat32_0x52)) &&
-	   /* Cluster information is not overwritten, however, it would bo OK
+	   /* Cluster information is not overwritten, however, it would be OK
 	      to write 0xff 0xff 0xff 0xff 0xff 0xff 0xff 0xff here. */
 	   write_data(fp, 0x3f0, br_fat32_0x3f0, sizeof(br_fat32_0x3f0)) );
    else
@@ -79,7 +79,7 @@ int write_fat_32_br(FILE *fp, int bKeepLabel)
 	   /* BIOS Parameter Block should not be overwritten */
 	   write_data(fp, 0x47, label_11_char, sizeof(label_11_char)) &&
 	   write_data(fp, 0x52, br_fat32_0x52, sizeof(br_fat32_0x52)) &&
-	   /* Cluster information is not overwritten, however, it would bo OK
+	   /* Cluster information is not overwritten, however, it would be OK
 	      to write 0xff 0xff 0xff 0xff 0xff 0xff 0xff 0xff here. */
 	   write_data(fp, 0x3f0, br_fat32_0x3f0, sizeof(br_fat32_0x3f0)) );
 } /* write_fat_32_br */
@@ -110,7 +110,7 @@ int write_fat_32_fd_br(FILE *fp, int bKeepLabel)
 	 ( write_data(fp, 0x0, br_fat32_0x0, sizeof(br_fat32_0x0)) &&
 	   /* BIOS Parameter Block should not be overwritten */
 	   write_data(fp, 0x52, br_fat32_0x52, sizeof(br_fat32_0x52)) &&
-	   /* Cluster information is not overwritten, however, it would bo OK
+	   /* Cluster information is not overwritten, however, it would be OK
 	      to write 0xff 0xff 0xff 0xff 0xff 0xff 0xff 0xff here. */
 	   write_data(fp, 0x3f0, br_fat32_0x3f0, sizeof(br_fat32_0x3f0)) );
    else
@@ -119,20 +119,20 @@ int write_fat_32_fd_br(FILE *fp, int bKeepLabel)
 	   /* BIOS Parameter Block should not be overwritten */
 	   write_data(fp, 0x47, label_11_char, sizeof(label_11_char)) &&
 	   write_data(fp, 0x52, br_fat32_0x52, sizeof(br_fat32_0x52)) &&
-	   /* Cluster information is not overwritten, however, it would bo OK
+	   /* Cluster information is not overwritten, however, it would be OK
 	      to write 0xff 0xff 0xff 0xff 0xff 0xff 0xff 0xff here. */
 	   write_data(fp, 0x3f0, br_fat32_0x3f0, sizeof(br_fat32_0x3f0)) );
-} /* write_fat_32_nt_br */
+} /* write_fat_32_fd_br */
 
 int entire_fat_32_nt_br_matches(FILE *fp)
 {
-   #include "br_fat32nt_0x0.h"
+   #include "br_fat32_0x0.h"
    #include "br_fat32nt_0x52.h"
    #include "br_fat32nt_0x3f0.h"
    #include "br_fat32nt_0x1800.h"
 
    return
-      ( contains_data(fp, 0x0, br_fat32nt_0x0, sizeof(br_fat32nt_0x0)) &&
+      ( contains_data(fp, 0x0, br_fat32_0x0, sizeof(br_fat32_0x0)) &&
 	/* BIOS Parameter Block might differ between systems */
 	contains_data(fp, 0x52, br_fat32nt_0x52, sizeof(br_fat32nt_0x52)) &&
 	/* Cluster information might differ between systems */
@@ -144,30 +144,79 @@ int entire_fat_32_nt_br_matches(FILE *fp)
 int write_fat_32_nt_br(FILE *fp, int bKeepLabel)
 {
    #include "label_11_char.h"
-   #include "br_fat32nt_0x0.h"
+   #include "br_fat32_0x0.h"
    #include "br_fat32nt_0x52.h"
    #include "br_fat32nt_0x3f0.h"
    #include "br_fat32nt_0x1800.h"
 
    if(bKeepLabel)
       return
-	 ( write_data(fp, 0x0, br_fat32nt_0x0, sizeof(br_fat32nt_0x0)) &&
+	 ( write_data(fp, 0x0, br_fat32_0x0, sizeof(br_fat32_0x0)) &&
 	   /* BIOS Parameter Block should not be overwritten */
 	   write_data(fp, 0x52, br_fat32nt_0x52, sizeof(br_fat32nt_0x52)) &&
-   /* Cluster information is not overwritten, however, it would bo OK
+   /* Cluster information is not overwritten, however, it would be OK
       to write 0xff 0xff 0xff 0xff 0xff 0xff 0xff 0xff here. */
 	   write_data(fp, 0x3f0, br_fat32nt_0x3f0, sizeof(br_fat32nt_0x3f0)) &&
 	   write_data(fp, 0x1800, br_fat32nt_0x1800, sizeof(br_fat32nt_0x1800))
 	    );
    else
       return
-	 ( write_data(fp, 0x0, br_fat32nt_0x0, sizeof(br_fat32nt_0x0)) &&
+	 ( write_data(fp, 0x0, br_fat32_0x0, sizeof(br_fat32_0x0)) &&
 	   /* BIOS Parameter Block should not be overwritten */
 	   write_data(fp, 0x47, label_11_char, sizeof(label_11_char)) &&
 	   write_data(fp, 0x52, br_fat32nt_0x52, sizeof(br_fat32nt_0x52)) &&
-   /* Cluster information is not overwritten, however, it would bo OK
+   /* Cluster information is not overwritten, however, it would be OK
       to write 0xff 0xff 0xff 0xff 0xff 0xff 0xff 0xff here. */
 	   write_data(fp, 0x3f0, br_fat32nt_0x3f0, sizeof(br_fat32nt_0x3f0)) &&
 	   write_data(fp, 0x1800, br_fat32nt_0x1800, sizeof(br_fat32nt_0x1800))
 	    );
 } /* write_fat_32_nt_br */
+
+int entire_fat_32_ros_br_matches(FILE *fp)
+{
+   #include "br_fat32_0x0.h"
+   #include "br_fat32ros_0x52.h"
+   #include "br_fat32ros_0x3f0.h"
+   #include "br_fat32ros_0x1c00.h"
+
+   return
+      ( contains_data(fp, 0x0, br_fat32_0x0, sizeof(br_fat32_0x0)) &&
+	/* BIOS Parameter Block might differ between systems */
+	contains_data(fp, 0x52, br_fat32ros_0x52, sizeof(br_fat32ros_0x52)) &&
+	/* Cluster information might differ between systems */
+	contains_data(fp, 0x3f0, br_fat32ros_0x3f0, sizeof(br_fat32ros_0x3f0)) &&
+	contains_data(fp, 0x1c00, br_fat32ros_0x1c00, sizeof(br_fat32ros_0x1c00))
+	 );
+} /* entire_fat_32_ros_br_matches */
+
+/* See http://doxygen.reactos.org/dc/d83/bootsup_8c_source.html#l01596 */
+int write_fat_32_ros_br(FILE *fp, int bKeepLabel)
+{
+   #include "label_11_char.h"
+   #include "br_fat32_0x0.h"
+   #include "br_fat32ros_0x52.h"
+   #include "br_fat32ros_0x3f0.h"
+   #include "br_fat32ros_0x1c00.h"
+
+   if(bKeepLabel)
+      return
+	 ( write_data(fp, 0x0, br_fat32_0x0, sizeof(br_fat32_0x0)) &&
+	   /* BIOS Parameter Block should not be overwritten */
+	   write_data(fp, 0x52, br_fat32ros_0x52, sizeof(br_fat32ros_0x52)) &&
+   /* Cluster information is not overwritten, however, it would be OK
+      to write 0xff 0xff 0xff 0xff 0xff 0xff 0xff 0xff here. */
+	   write_data(fp, 0x3f0, br_fat32ros_0x3f0, sizeof(br_fat32ros_0x3f0)) &&
+	   write_data(fp, 0x1c00, br_fat32ros_0x1c00, sizeof(br_fat32ros_0x1c00))
+	    );
+   else
+      return
+	 ( write_data(fp, 0x0, br_fat32_0x0, sizeof(br_fat32_0x0)) &&
+	   /* BIOS Parameter Block should not be overwritten */
+	   write_data(fp, 0x47, label_11_char, sizeof(label_11_char)) &&
+	   write_data(fp, 0x52, br_fat32ros_0x52, sizeof(br_fat32ros_0x52)) &&
+   /* Cluster information is not overwritten, however, it would be OK
+      to write 0xff 0xff 0xff 0xff 0xff 0xff 0xff 0xff here. */
+	   write_data(fp, 0x3f0, br_fat32ros_0x3f0, sizeof(br_fat32ros_0x3f0)) &&
+	   write_data(fp, 0x1c00, br_fat32ros_0x1c00, sizeof(br_fat32ros_0x1c00))
+	    );
+} /* write_fat_32_ros_br */

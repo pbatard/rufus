@@ -119,6 +119,9 @@
     <ClInclude Include="..\hdd_vs_ufd.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\drive.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\res\rufus.ico">

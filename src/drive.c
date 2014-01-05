@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Drive access function calls
- * Copyright © 2011-2013 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2014 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,8 +28,13 @@
 
 #include "msapi_utf8.h"
 #include "rufus.h"
+#include "drive.h"
 #include "resource.h"
 #include "sys_types.h"
+#include "br.h"
+#include "fat16.h"
+#include "fat32.h"
+#include "ntfs.h"
 #include "localization.h"
 
 /*
@@ -467,6 +472,81 @@ BOOL IsMediaPresent(DWORD DriveIndex)
 	return r;
 }
 
+// TODO: use an (fn,str) table and simplify this whole thing
+BOOL AnalyzeMBR(HANDLE hPhysicalDrive)
+{
+	FILE fake_fd = { 0 };
+
+	fake_fd._ptr = (char*)hPhysicalDrive;
+	fake_fd._bufsiz = SelectedDrive.Geometry.BytesPerSector;
+
+	if (!is_br(&fake_fd)) {
+		uprintf("Drive does not have an x86 master boot record\n");
+		return FALSE;
+	}
+	if (is_dos_mbr(&fake_fd)) {
+		uprintf("Drive has a DOS/NT/95A master boot record\n");
+	} else if (is_dos_f2_mbr(&fake_fd)) {
+		uprintf("Drive has a DOS/NT/95A master boot record "
+			"with the undocumented F2 instruction\n");
+	} else if (is_95b_mbr(&fake_fd)) {
+		uprintf("Drive has a Windows 95B/98/98SE/ME master boot record\n");
+	} else if (is_2000_mbr(&fake_fd)) {
+		uprintf("Drive has a Windows 2000/XP/2003 master boot record\n");
+	} else if (is_vista_mbr(&fake_fd)) {
+		uprintf("Drive has a Windows Vista master boot record\n");
+	} else if (is_win7_mbr(&fake_fd)) {
+		uprintf("Drive has a Windows 7 master boot record\n");
+	} else if (is_rufus_mbr(&fake_fd)) {
+		uprintf("Drive has a Rufus master boot record\n");
+	} else if (is_syslinux_mbr(&fake_fd)) {
+		uprintf("Drive has a Syslinux master boot record\n");
+	} else if (is_reactos_mbr(&fake_fd)) {
+		uprintf("Drive has a ReactOS master boot record\n");
+	} else if (is_zero_mbr(&fake_fd)) {
+		uprintf("Drive has a zeroed non-bootable master boot record\n");
+	} else {
+		uprintf("Drive has an unknown master boot record\n");
+	}
+	return TRUE;
+}
+
+// TODO: use an (fn,str) table and simplify this whole thing
+BOOL AnalyzePBR(HANDLE hLogicalVolume)
+{
+	FILE fake_fd = { 0 };
+
+	fake_fd._ptr = (char*)hLogicalVolume;
+	fake_fd._bufsiz = SelectedDrive.Geometry.BytesPerSector;
+
+	if (!is_br(&fake_fd)) {
+		uprintf("Volume does not have an x86 partition boot record\n");
+		return FALSE;
+	}
+	if (is_fat_16_br(&fake_fd) || is_fat_32_br(&fake_fd)) {
+		if (entire_fat_16_br_matches(&fake_fd)) {
+			uprintf("Drive has a FAT16 DOS partition boot record\n");
+		} else if (entire_fat_16_fd_br_matches(&fake_fd)) {
+			uprintf("Drive has a FAT16 FreeDOS partition boot record\n");
+		} else if (entire_fat_16_ros_br_matches(&fake_fd)) {
+			uprintf("Drive has a FAT16 ReactOS partition boot record\n");
+		} else if (entire_fat_32_br_matches(&fake_fd)) {
+			uprintf("Drive has a FAT32 DOS partition boot record\n");
+		} else if (entire_fat_32_nt_br_matches(&fake_fd)) {
+			uprintf("Drive has a FAT32 NT partition boot record\n");
+		} else if (entire_fat_32_fd_br_matches(&fake_fd)) {
+			uprintf("Drive has a FAT32 FreeDOS partition boot record\n");
+		} else if (entire_fat_32_ros_br_matches(&fake_fd)) {
+			uprintf("Drive has a FAT32 ReactOS partition boot record\n");
+		} else {
+			uprintf("Drive has an unknown FAT16 or FAT32 partition boot record\n");
+		}
+	} else {
+		uprintf("Drive has an unknown partition boot record\n");
+	}
+	return TRUE;
+}
+
 /*
  * Fill the drive properties (size, FS, etc)
  */
@@ -527,6 +607,7 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 		uprintf("Partition type: MBR, NB Partitions: %d\n", nb_partitions);
 		SelectedDrive.has_mbr_uefi_marker = (DriveLayout->Mbr.Signature == MBR_UEFI_MARKER);
 		uprintf("Disk ID: 0x%08X %s\n", DriveLayout->Mbr.Signature, SelectedDrive.has_mbr_uefi_marker?"(UEFI target)":"");
+		AnalyzeMBR(hPhysical);
 		for (i=0; i<DriveLayout->PartitionCount; i++) {
 			if (DriveLayout->PartitionEntry[i].Mbr.PartitionType != PARTITION_ENTRY_UNUSED) {
 				uprintf("Partition %d:\n", DriveLayout->PartitionEntry[i].PartitionNumber);

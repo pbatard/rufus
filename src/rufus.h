@@ -169,8 +169,9 @@ enum dos_type {
 	DT_WINME = 0,
 	DT_FREEDOS,
 	DT_ISO,
-	DT_SYSLINUX_V4,
+	DT_SYSLINUX_V4,		// Start of indexes that only display in advanced mode
 	DT_SYSLINUX_V5,
+	DT_REACTOS,
 	DT_MAX
 };
 
@@ -318,24 +319,6 @@ extern BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan);
 extern BOOL ExtractISOFile(const char* iso, const char* iso_file, const char* dest_file);
 extern BOOL InstallSyslinux(DWORD drive_index, char drive_letter);
 DWORD WINAPI FormatThread(void* param);
-extern char* GetPhysicalName(DWORD DriveIndex);
-extern HANDLE GetPhysicalHandle(DWORD DriveIndex, BOOL bWriteAccess, BOOL bLockDrive);
-extern BOOL WaitForLogical(DWORD DriveIndex);
-extern char* GetLogicalName(DWORD DriveIndex, BOOL bKeepTrailingBackslash, BOOL bSilent);
-extern HANDLE GetLogicalHandle(DWORD DriveIndex, BOOL bWriteAccess, BOOL bLockDrive);
-extern BOOL GetDriveLetter(DWORD DriveIndex, char* drive_letter);
-extern UINT GetDriveTypeFromIndex(DWORD DriveIndex);
-extern uint64_t GetDriveSize(DWORD DriveIndex);
-extern char GetUnusedDriveLetter(void);
-extern BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL mbr_uefi_marker);
-extern BOOL DeletePartitions(HANDLE hDrive);
-extern const char* GetPartitionType(BYTE Type);
-extern BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSystemNameSize);
-extern BOOL GetDriveLabel(DWORD DriveIndex, char* letter, char** label);
-extern BOOL IsMediaPresent(DWORD DriveIndex);
-extern BOOL MountVolume(char* drive_name, char *drive_guid);
-extern BOOL UnmountVolume(HANDLE hDrive);
-extern BOOL RemountVolume(char* drive_name);
 extern BOOL CreateProgress(void);
 extern BOOL SetAutorun(const char* path);
 extern char* FileDialog(BOOL save, char* path, char* filename, char* ext, char* ext_desc);

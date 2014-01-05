@@ -198,6 +198,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\badblocks.h" />
+    <ClInclude Include="..\drive.h" />
     <ClInclude Include="..\format.h" />
     <ClInclude Include="..\hdd_vs_ufd.h" />
     <ClInclude Include="..\libcdio\cdio\cdio.h" />

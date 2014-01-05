@@ -100,6 +100,26 @@ int is_win7_mbr(FILE *fp)
       contains_data(fp, 0x1FE, aucRef, sizeof(aucRef));
 } /* is_win7_mbr */
 
+int is_rufus_mbr(FILE *fp)
+{
+   #include "mbr_rufus.h"
+   unsigned char aucRef[] = {0x55, 0xAA};
+
+   return
+      contains_data(fp, 0x0, mbr_rufus_0x0, sizeof(mbr_rufus_0x0)) &&
+      contains_data(fp, 0x1FE, aucRef, sizeof(aucRef));
+} /* is_rufus_mbr */
+
+int is_reactos_mbr(FILE *fp)
+{
+   #include "mbr_reactos.h"
+   unsigned char aucRef[] = {0x55, 0xAA};
+
+   return
+      contains_data(fp, 0x0, mbr_reactos_0x0, sizeof(mbr_reactos_0x0)) &&
+      contains_data(fp, 0x1FE, aucRef, sizeof(aucRef));
+} /* is_reactos_mbr */
+
 int is_syslinux_mbr(FILE *fp)
 {
    #include "mbr_syslinux.h"
@@ -169,6 +189,26 @@ int write_win7_mbr(FILE *fp)
       write_data(fp, 0x0, mbr_win7_0x0, sizeof(mbr_win7_0x0)) &&
       write_data(fp, 0x1FE, aucRef, sizeof(aucRef));
 } /* write_win7_mbr */
+
+int write_rufus_mbr(FILE *fp)
+{
+   #include "mbr_rufus.h"
+   unsigned char aucRef[] = {0x55, 0xAA};
+
+   return
+      write_data(fp, 0x0, mbr_rufus_0x0, sizeof(mbr_rufus_0x0)) &&
+      write_data(fp, 0x1FE, aucRef, sizeof(aucRef));
+} /* write_rufus_mbr */
+
+int write_reactos_mbr(FILE *fp)
+{
+   #include "mbr_reactos.h"
+   unsigned char aucRef[] = {0x55, 0xAA};
+
+   return
+      write_data(fp, 0x0, mbr_reactos_0x0, sizeof(mbr_reactos_0x0)) &&
+      write_data(fp, 0x1FE, aucRef, sizeof(aucRef));
+} /* write_reactos_mbr */
 
 int write_syslinux_mbr(FILE *fp)
 {

@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * SMART HDD vs Flash detection (using ATA over USB, S.M.A.R.T., etc.)
- * Copyright © 2013 Pete Batard <pete@akeo.ie>
+ * Copyright © 2014 Pete Batard <pete@akeo.ie>
  *
  * Based in part on scsiata.cpp from Smartmontools: http://smartmontools.sourceforge.net
  * Copyright © 2006-12 Douglas Gilbert <dgilbert@interlog.com>
@@ -33,6 +33,7 @@
 
 #include "msapi_utf8.h"
 #include "rufus.h"
+#include "drive.h"
 #include "smart.h"
 #include "hdd_vs_ufd.h"
 

@@ -40,6 +40,7 @@
 #include "msapi_utf8.h"
 #include "resource.h"
 #include "rufus.h"
+#include "drive.h"
 #include "registry.h"
 #include "localization.h"
 
@@ -444,7 +445,7 @@ static void SetFSFromISO(void)
 	}
 
 	// Syslinux and EFI have precedence over bootmgr (unless the user selected BIOS as target type)
-	if ((iso_report.has_isolinux) || ( (IS_EFI(iso_report)) && (bt == BT_UEFI))) {
+	if ((iso_report.has_isolinux) || (IS_REACTOS(iso_report)) || ( (IS_EFI(iso_report)) && (bt == BT_UEFI))) {
 		if (fs_mask & (1<<FS_FAT32)) {
 			selected_fs = FS_FAT32;
 		} else if (fs_mask & (1<<FS_FAT16)) {
@@ -1784,10 +1785,10 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			if (fs < 0) {
 				EnableBootOptions(TRUE);
 				SetMBRProps();
-				// Remove the SysLinux options if they exists
-				if (ComboBox_GetItemData(hBootType, ComboBox_GetCount(hBootType)-1) == DT_SYSLINUX_V5) {
-					IGNORE_RETVAL(ComboBox_DeleteString(hBootType,  ComboBox_GetCount(hBootType)-1));
-					IGNORE_RETVAL(ComboBox_DeleteString(hBootType,  ComboBox_GetCount(hBootType)-1));
+				// Remove the SysLinux and ReactOS options if they exists
+				if (ComboBox_GetItemData(hBootType, ComboBox_GetCount(hBootType)-1) == (DT_MAX-1)) {
+					for (i=DT_SYSLINUX_V4; i<DT_MAX; i++)
+						IGNORE_RETVAL(ComboBox_DeleteString(hBootType,  ComboBox_GetCount(hBootType)-1));
 					IGNORE_RETVAL(ComboBox_SetCurSel(hBootType, 1));
 				}
 				break;
@@ -1817,8 +1818,9 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			if ( (bt == BT_BIOS) && (((fs == FS_FAT16) || (fs == FS_FAT32)) && (advanced_mode)) ) {
 				IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, "Syslinux 4"), DT_SYSLINUX_V4));
 				IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, "Syslinux 5"), DT_SYSLINUX_V5));
+				IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, "ReactOS"), DT_REACTOS));
 			}
-			if ( ((!advanced_mode) && ((selection_default == DT_SYSLINUX_V4) || (selection_default == DT_SYSLINUX_V5))) ) {
+			if ((!advanced_mode) && (selection_default >= DT_SYSLINUX_V4)) {
 				selection_default = DT_FREEDOS;
 				CheckDlgButton(hDlg, IDC_DISK_ID, BST_UNCHECKED);
 			}
@@ -1842,7 +1844,11 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			if (HIWORD(wParam) != CBN_SELCHANGE)
 				break;
 			selection_default = (int) ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
-			if (ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType)) == DT_ISO) {
+			// The Rufus MBR can't apply for Syslinux or ReactOS
+			// TODO: we should also disable this for isolinux based ISOs
+			EnableWindow(GetDlgItem(hMainDialog, IDC_RUFUS_MBR), selection_default < DT_SYSLINUX_V4);
+			EnableWindow(hDiskID, selection_default < DT_SYSLINUX_V4);
+			if (selection_default == DT_ISO) {
 				if ((iso_path == NULL) || (iso_report.label[0] == 0)) {
 					// Set focus to the Select ISO button
 					SendMessage(hMainDialog, WM_NEXTDLGCTL, (WPARAM)FALSE, 0);
@@ -2064,11 +2070,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 #endif
 {
 	const char* old_wait_option = "/W";
+	const char* rufus_loc = "rufus.loc";
 	int i, opt, option_index = 0, argc = 0, si = 0, lcid = GetUserDefaultUILanguage();
 	BOOL attached_console = FALSE, external_loc_file = FALSE, lgp_set = FALSE;
 	BYTE* loc_data;
 	DWORD loc_size, Size;
-	char tmp_path[MAX_PATH], loc_file[MAX_PATH] = "", *tmp, *locale_name = NULL;
+	char tmp_path[MAX_PATH] = "", loc_file[MAX_PATH] = "", *tmp, *locale_name = NULL;
 	char** argv = NULL;
 	wchar_t **wenv, **wargv;
 	PF_DECL(__wgetmainargs);
@@ -2154,24 +2161,28 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	// Init localization
 	init_localization();
 	// Seek for a loc file in the current directory
-	if (GetFileAttributesU("rufus.loc") == INVALID_FILE_ATTRIBUTES) {
+	if (GetFileAttributesU(rufus_loc) == INVALID_FILE_ATTRIBUTES) {
 		uprintf("loc file not found in current directory - embedded one will be used");
 
 		loc_data = (BYTE*)GetResource(hMainInstance, MAKEINTRESOURCEA(IDR_LC_RUFUS_LOC), _RT_RCDATA, "embedded.loc", &loc_size, FALSE);
-		GetTempPathU(sizeof(tmp_path), tmp_path);
-		GetTempFileNameU(tmp_path, APPLICATION_NAME, 0, loc_file);
+		if ( (GetTempPathU(sizeof(tmp_path), tmp_path) == 0)
+		  || (GetTempFileNameU(tmp_path, APPLICATION_NAME, 0, loc_file) == 0)
+		  || (loc_file[0] == 0) ) {
+			// Last ditch effort to get a loc file - just extract it to the current directory
+			safe_strcpy(loc_file, sizeof(loc_file), rufus_loc);
+		}
 
 		hFile = CreateFileU(loc_file, GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ|FILE_SHARE_WRITE,
 			NULL, CREATE_ALWAYS, 0, 0);
-		if ((hFile == INVALID_HANDLE_VALUE)|| (!WriteFile(hFile, loc_data, loc_size, &Size, 0)) || (loc_size != Size)) {
-			safe_closehandle(hFile);
+		if ((hFile == INVALID_HANDLE_VALUE) || (!WriteFile(hFile, loc_data, loc_size, &Size, 0)) || (loc_size != Size)) {
 			uprintf("localization: unable to extract '%s': %s.\n", loc_file, WindowsErrorString());
-		} else {
 			safe_closehandle(hFile);
-			uprintf("localization: extracted data to '%s'\n", loc_file);
+			goto out;
 		}
+		uprintf("localization: extracted data to '%s'\n", loc_file);
+		safe_closehandle(hFile);
 	} else {
-		safe_sprintf(loc_file, sizeof(loc_file), "%s\\rufus.loc", app_dir);
+		safe_sprintf(loc_file, sizeof(loc_file), "%s\\%s", app_dir, rufus_loc);
 		external_loc_file = TRUE;
 		uprintf("using external loc file '%s'", loc_file);
 	}

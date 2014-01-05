@@ -47,9 +47,6 @@
     <ClInclude Include="..\inc\br_fat32fd_0x52.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\inc\br_fat32nt_0x0.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\inc\br_fat32nt_0x1800.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -105,6 +102,27 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\inc\br_ntfs_0x54.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\inc\mbr_reactos.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\inc\br_fat32ros_0x1c00.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\inc\br_fat32ros_0x3f0.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\inc\br_fat32ros_0x52.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\inc\br_fat16ros_0x3e.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\inc\br_fat16ros_0x0.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\inc\mbr_rufus.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

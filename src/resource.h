@@ -13,7 +13,6 @@
 #define IDI_ICON                        110
 #define IDI_UP                          111
 #define IDI_DOWN                        112
-#define IDR_BR_MBR_BIN                  200
 #define IDR_FD_COMMAND_COM              300
 #define IDR_FD_KERNEL_SYS               301
 #define IDR_FD_DISPLAY_EXE              302
