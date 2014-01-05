@@ -1,3 +1,17 @@
+o Version 1.4.2 (2014.01.??)
+    Add ReactOS support
+    Add EFI/NTFS boot support, for targets that support it
+    Add card hotplug detection for USB memory card readers
+    Add retry when writing ISO files... again
+    Add Malay translation, courtesy of Muhammad Aman
+    Speed up boot record cleanup, for slow drives
+    Improve initial locale detection
+    Save user selected locale between sessions
+    Always use English locale in the log, where possible
+    Fix detection of SanDisk, Kingston and Toshiba drives
+    Fix an issue with drive letter assignation
+    Many other minor fixes and improvements
+
 o Version 1.4.1 (2013.12.05) [BUGFIX RELEASE]
     Fix broken Syslinux support (reported by ank91)
     Add Slovenian support, courtesy of Matej Horvat

@@ -268,7 +268,7 @@ BOOL DownloadFile(const char* url, const char* file, HWND hProgressDialog)
 	uprintf("Downloading %s from %s\n", file, url);
 
 	if (!InternetCrackUrlA(url, (DWORD)safe_strlen(url), 0, &UrlParts)) {
-		uprintf("Unable to decode URL: %s\n", WindowsErrorString());
+		uprintf("Unable to decode URL: %s\n", WinInetErrorString());
 		goto out;
 	}
 	hostname[sizeof(hostname)-1] = 0;
@@ -300,7 +300,7 @@ BOOL DownloadFile(const char* url, const char* file, HWND hProgressDialog)
 		INTERNET_FLAG_HYPERLINK|INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTP|INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTPS|INTERNET_FLAG_NO_COOKIES|
 		INTERNET_FLAG_NO_UI|INTERNET_FLAG_NO_CACHE_WRITE, (DWORD_PTR)NULL);
 	if (hRequest == NULL) {
-		uprintf("Could not open url %s: %s\n", url, WindowsErrorString());
+		uprintf("Could not open url %s: %s\n", url, WinInetErrorString());
 		goto out;
 	}
 

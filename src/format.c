@@ -1482,6 +1482,14 @@ out:
 	SendMessage(hISOProgressDlg, UM_ISO_EXIT, 0, 0);
 	safe_unlockclose(hLogicalVolume);
 	safe_unlockclose(hPhysicalDrive);	// This can take a while
+	if (IS_ERROR(FormatStatus)) {
+		guid_volume = GetLogicalName(DriveIndex, TRUE, FALSE);
+		if (guid_volume != NULL) {
+			if (MountVolume(drive_name, guid_volume))
+				uprintf("Re-mounted volume as '%c:' after error\n", drive_name[0]);
+			free(guid_volume);
+		}
+	}
 	PostMessage(hMainDialog, UM_FORMAT_COMPLETED, 0, 0);
 	ExitThread(0);
 }
