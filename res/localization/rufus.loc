@@ -2712,6 +2712,403 @@ t MSG_258 "Rock Ridge támogatás"
 t MSG_259 "'Erőszakos' frissítés"
 
 ################################################################################
+l "id-ID" "Indonesian (Bahasa Indonesia)" 0x0421
+v 1.0.7
+b "en-US"
+
+# Main dialog
+g IDD_DIALOG
+
+s IDD_DIALOG +62,0
+s IDC_ABOUT +10,0
+s IDS_ADVANCED_OPTIONS_GRP +62,0
+s IDC_BADBLOCKS +63,0
+s IDC_BOOT +62,0
+s IDC_CLUSTERSIZE +62,0
+s IDC_DEVICE +62,0
+s IDC_ENABLE_FIXED_DISKS +10,0
+s IDC_EXTRA_PARTITION +10,0
+s IDC_EXTRA_PARTITION +62,0
+s IDC_FILESYSTEM +62,0
+s IDS_FORMAT_OPTIONS_GRP +62,0
+s IDC_LABEL +67,0
+s IDC_NBPASSES +0,0
+s IDC_PARTITION_TYPE +62,0
+s IDC_PROGRESS +62,0
+s IDC_RUFUS_MBR +38,0
+
+m IDC_BOOTTYPE +62,0
+m IDC_DISK_ID +62,0
+m IDC_LANG +62,0
+m IDC_LOG +10,0
+m IDC_NBPASSES +62,0
+m IDC_START +62,0
+m IDC_SELECT_ISO +62,0
+m IDCANCEL +62,0
+m IDC_ADVANCED -5,0
+
+t IDS_DEVICE_TXT "Perangkat"
+t IDS_PARTITION_TYPE_TXT "Skema partisi dan tipe target sistem"
+t IDS_FILESYSTEM_TXT "Sistem file"
+t IDS_CLUSTERSIZE_TXT "Ukuran Cluster"
+t IDS_LABEL_TXT "Label baru volume"
+t IDS_FORMAT_OPTIONS_GRP "Pilihan Format        "
+t IDC_BADBLOCKS "Periksa perangkat untuk blok yang buruk:"
+t IDC_QUICKFORMAT "Format Cepat"
+t IDC_BOOT "Buat bootable disk dengan menggunakan:"
+t IDC_SET_ICON "Membuat icon dan memperpanjang label"
+t IDC_ABOUT "Tentang..."
+t IDC_LOG "Log"
+t IDCANCEL "Tutup"
+t IDC_START "Mulai"
+t IDS_ADVANCED_OPTIONS_GRP "Pilihan Lanjutan"
+t IDC_ENABLE_FIXED_DISKS "Daftar Hard Drives USB"
+# Note: it is acceptable to drop the parenthesis () below if you are running out of space
+# as there is a tooltip (MSG_169) providing these details
+t IDC_EXTRA_PARTITION "Tambah perbaikan untuk BIOS lama"
+# 'MBR': See http://en.wikipedia.org/wiki/Master_boot_record
+# Rufus can install it's own custom MBR (the Rufus MBR), which also allows users
+# to specify a custom disk ID for the BIOS. Note: the tooltip for this control is MSG_167.
+t IDC_RUFUS_MBR "Gunakan MBR Rufus dengan ID BIOS:"
+
+# About dialog
+g IDD_ABOUTBOX
+t IDD_ABOUTBOX "Tentang Rufus"
+t IDC_ABOUT_LICENSE "Lisensi"
+t IDC_ABOUT_UPDATES "Pembaruan"
+t IDOK "OK"
+
+# About -> License dialog
+g IDD_LICENSE
+t IDD_LICENSE "Lisensi Rufus"
+t IDCANCEL "Tutup"
+
+# Notifications. You can trigger one of these by using Alt-R and re-launching Rufus
+g IDD_NOTIFICATION
+t IDC_MORE_INFO "Informasi Lengkap"
+t IDYES "Ya"
+t IDNO "Tidak"
+
+# Log dialog
+g IDD_LOG
+t IDD_LOG "Log"
+t IDC_LOG_CLEAR "Bersihkan Log"
+t IDC_LOG_SAVE "Simpan Log"
+t IDCANCEL "Tutup Log"
+
+# About -> Updates
+g IDD_UPDATE_POLICY
+t IDD_UPDATE_POLICY "Kebijakan pembaruan dan pengaturan"
+t IDS_UPDATE_SETTINGS_GRP "Pengaturan"
+t IDS_UPDATE_FREQUENCY_TXT "Periksa pembaruan:"
+s IDC_UPDATE_FREQUENCY +2,0
+t IDS_INCLUDE_BETAS_TXT "Sertakan versi beta:"
+t IDC_CHECK_NOW "Periksa Sekarang"
+s IDC_CHECK_NOW +20,0
+m IDC_CHECK_NOW -10,0
+t IDCANCEL "Tutup"
+
+# Dialog that appears when a new version is available
+g IDD_NEW_VERSION
+t IDD_NEW_VERSION "Periksa Pembaharuan - Rufus"
+t IDS_NEW_VERSION_AVAIL_TXT "Versi yang lebih baru tersedia. Silahkan download versi terbaru!"
+t IDC_WEBSITE "Klik di sini untuk pergi ke situs web"
+t IDS_NEW_VERSION_NOTES_GRP "Catatan Rilis"
+t IDS_NEW_VERSION_DOWNLOAD_GRP "Download"
+t IDC_DOWNLOAD "Download"
+t IDCANCEL "Tutup"
+
+# Dialog that appears when scanning/extracting ISO files
+g IDD_ISO_EXTRACT
+t IDD_ISO_EXTRACT "Menyalin file ISO..."
+t IDC_ISO_FILENAME "Membuka image ISO - mohon tunggu..."
+t IDC_ISO_ABORT "Batal"
+
+# Messages used throughout the application
+t MSG_001 "Aplikasi lain terdeteksi"
+t MSG_002 "Aplikasi Rufus lain sedang berjalan.\n"
+	"Silakan tutup aplikasi pertama sebelum menjalankan yang lain."
+t MSG_003 "PERINGATAN: SEMUA DATA DI PERANGKAT '%s' AKAN DIHANCURKAN.\n"
+	"Untuk melanjutkan, klik OK. Untuk keluar klik BATAL."
+t MSG_004 "Kebijakan Pembaruan Rufus"
+t MSG_005 "Apakah Anda ingin memperbolehkan Rufus untuk memeriksa pembaruan aplikasi online?"
+# Must be the same as IDD_DIALOG:IDCANCEL (i.e. "Close" - I know it's confusing)
+t MSG_006 "Tutup"
+t MSG_007 "Batal"
+t MSG_008 "Ya"
+t MSG_009 "Tidak"
+t MSG_010 "Blok buruk ditemukan"
+t MSG_011 "Pemeriksaan selesai: %u blok buruk ditemukan\n"
+	"  %d read error(s)\n  %d write error(s)\n  %d corruption error(s)\n"
+# The following will contain the formatted message above as well as the name of the bad blocks logfile
+t MSG_012 "%s\nLaporan yang lebih rinci dapat ditemukan di:\n%s"
+t MSG_013 "Disabled"
+t MSG_014 "Harian"
+t MSG_015 "Mingguan"
+t MSG_016 "Bulanan"
+t MSG_017 "Custom"
+t MSG_018 "Versi Anda: %d.%d.%d (Build %d)"
+t MSG_019 "Versi Terbaru: %d.%d.%d (Build %d)"
+# *Short* size names. These can be used as suffixes
+t MSG_020 "bit"
+t MSG_021 "KB"
+t MSG_022 "MB"
+t MSG_023 "GB"
+t MSG_024 "TB"
+t MSG_025 "PB"
+# *Long* size names, as they are displayed for the cluster size in the MS format dialog.
+t MSG_026 "bit"	# Yes, this is a repeat from MSG_020
+t MSG_027 "kilobit"
+t MSG_028 "megabit"
+t MSG_029 "Standar"
+# The following gets appended to the file system, cluster size, etc.
+t MSG_030 "%s (Standar)"
+t MSG_031 "%s skema partisi untuk BIOS atau UEFI komputer"
+t MSG_032 "%s skema partisi untuk komputer BIOS"
+t MSG_033 "%s skema partisi untuk komputer UEFI"
+# Number of bad block check passes (singular for 1 pass, plural for 2 or more passes)
+t MSG_034 "%d Pass"
+t MSG_035 "%d Passes"
+t MSG_036 "ISO Image"
+t MSG_037 "Aplikasi"
+t MSG_038 "Gugur"
+t MSG_039 "Luncur"
+t MSG_040 "Download"
+t MSG_041 "Operasi dibatalkan oleh pengguna"
+t MSG_042 "Kesalahan"
+t MSG_043 "Kesalahan: %s"
+t MSG_044 "File download"
+t MSG_045 "Perangkat Penyimpanan USB(Generic)"
+t MSG_046 "%s (Disk %d)"
+t MSG_047 "%s (%c:)"
+t MSG_048 "Rufus - Flushing buffers"
+t MSG_049 "Rufus - Pembatalan"
+
+# Error messages
+t MSG_050 "Berhasil."
+t MSG_051 "Kesalahan saat memformat."
+t MSG_052 "Tidak dapat menggunakan sistem file yang dipilih untuk media ini."
+t MSG_053 "Akses ke perangkat ditolak."
+t MSG_054 "Penulisan media dilindungi."
+t MSG_055 "Perangkat ini digunakan oleh proses lain. "
+	"Silakan tutup proses lainnya yang mungkin mengakses perangkat."
+t MSG_056 "Format cepat tidak tersedia untuk perangkat ini."
+t MSG_057 "Label vllume tidak sah."
+t MSG_058 "Perangkat tidak sah."
+t MSG_059 "Ukuran cluster yang dipilih tidak berlaku untuk perangkat ini."
+t MSG_060 "Ukuran volume tidak sah."
+t MSG_061 "Masukkanlah perangkat media dalam drive."
+t MSG_062 "Perintah tidak dikenal."
+t MSG_063 "Kesalahan alokasi memori."
+t MSG_064 "Baca error."
+t MSG_065 "Menulis error."
+t MSG_066 "Pemasangan gagal"
+t MSG_067 "Tidak bisa membuka media. Mungkin digunakan oleh proses lain. "
+	"Silahkan pasang kembali media dan coba lagi."
+t MSG_068 "Kesalahan saat partisi."
+t MSG_069 "Tidak bisa menyalin file ke target tersebut."
+t MSG_070 "Dibatalkan oleh pengguna."
+# See http://en.wikipedia.org/wiki/Thread_%28computing%29
+t MSG_071 "Tidak dapat memulai thread."
+t MSG_072 "Pemeriksaan blok rusak belum selesai."
+t MSG_073 "kegagalan pemindaian image ISO."
+t MSG_074 "kegagalan ekstraksi image ISO."
+t MSG_075 "Tidak dapat memasang ulang volume."
+t MSG_076 "Tidak dapat menambal/pengaturan file untuk booting."
+t MSG_077 "Tidak dapat menetapkan huruf drive."
+t MSG_078 "Tidak bisa membuka volume GUID."
+
+t MSG_080 "Rufus mendeteksi bahwa Windows masih mem-buffer ke perangkat USB.\n\n"
+	"Tergantung pada kecepatan perangkat USB Anda , operasi ini mungkin memakan waktu lama untuk selesai, "
+	"terutama untuk file besar.\n\nKami menyarankan Anda membiarkan Windows selesai, untuk menghindari kerusakan. "
+	"Tapi jika Anda bosan menunggu, Anda dapat mencabut perangkat..."
+t MSG_081 "ISO tidak didukung"
+t MSG_082 "Rufus versi ini hanya mendukung ISO bootable berdasarkan bootmgr/WinPE, isolinux atau EFI.\n"
+	"ISO ini tidak tampil untuk digunakan dengan baik..."
+t MSG_083 "Ganti %s?"
+t MSG_084 "ISO ini tampaknya menggunakan versi lama '%s'.\n"
+	"Menu Boot mungkin tidak ditampilkan dengan benar karena hal ini.\n\n"
+	"Versi Rufus yang lebih baru dapat didownload untuk memperbaiki masalah ini:\n"
+	"- Pilih 'Ya' untuk terhubung ke internet dan men-download file\n"
+	"- Pilih 'Tidak' untuk meninggalkan file ISO yang tidak dimodifikasi\n"
+	"Jika Anda tidak tahu apa yang harus dilakukan, sebaiknya pilih 'Ya'.\n\n"
+	"Catatan: file baru akan di-download di direktori saat ini "
+	"'%s' yang ada di sana, akan dipakai kembali secara otomatis."
+t MSG_085 "Mengunduh %s"
+t MSG_086 "Tidak ada ISO terpilih"
+# The content between the quotes below (\"Create a bootable disk\") should match
+# the beginning of the IDC_BOOT text
+t MSG_087 "Silakan klik pada tombol disc untuk memilih ISO bootable, "
+	"atau hapus tercentang \"Buat bootable disk...\"checkbox."
+t MSG_088 "ISO terlalu besar"
+t MSG_089 "ISO ini terlalu besar untuk target yang dipilih."
+t MSG_090 "ISO tidak didukung"
+t MSG_091 "Bila menggunakan tipe UEFI, hanya EFI bootable ISO yang didukung. "
+	"Silakan pilih bootable ISO EFI atau atur Target Tipe ke BIOS."
+t MSG_092 "File sistem tidak didukung"
+t MSG_096 "Hanya FAT/FAT32 yang didukung jenis ISO ini. Silakan pilih FAT/FAT32 sebagai sistem file."
+t MSG_097 "Hanya 'bootmgr' atau 'WinPE' berbasis ISO yang saat ini dapat digunakan dengan NTFS."
+t MSG_098 "FAT/FAT32 hanya dapat digunakan untuk isolinux berbasis ISO atau target tipe UEFI."
+t MSG_099 "Pembatasan file sistem"
+t MSG_100 "ISO ini berisi file yang lebih besar dari file yang 4GB , yang lebih dari "
+	"ukuran maksimum yang diizinkan untuk FAT atau sistem file FAT32."
+t MSG_101 "Dukungan WIM hilang"
+t MSG_102 "Platform tidak dapat mengekstrak file dari arsip WIM. ekstraksi WIM "
+	"diperlukan untuk membuat EFI USB bootable Windows 7 dan Windows Vista. Anda dapat memperbaikinya "
+	"dengan memasang versi terbaru dari 7-Zip.\nApakah Anda ingin mengunjungi halaan download 7-zip?"
+t MSG_103 "Download %s?"
+t MSG_104 "Syslinux v5.0 membutuhkan '%s' file yang akan diinstal.\n"
+	"Karena ukuran file ini kurang lebih 100 KB, dan selalu ada dalam Syslinux v5+ ISO images, "
+	"ini tidak ada dalam Rufus.\n\nRufus dapat mengunduh file yang hilang untuk Anda:\n"
+	"- Select 'Yes' untuk terhubung ke internet dan mengunduh file\n"
+	"- Select 'No' jika Anda ingin secara manual menyalin file ini pada drive\n\n"
+	"Note: file baru akan di-download di direktori saat ini "
+	"'%s' yang ada di sana, akan dipakai kembali secara otomatis.\n"
+t MSG_105 "Membatalkan dapat berakibat perangkat TIDAK DAPAT DIGUNAKAN.\n"
+	"Jika Anda yakin ingin membatalkan, klik YA. Jika tidak, klik TIDAK."
+t MSG_106 "Silahkan pilih folder"
+t MSG_107 "Semua file"
+t MSG_108 "Log Rufus"
+t MSG_109 "0x%02X (Disk %d)"
+# "Cluster size" below should be the same as the label for IDS_CLUSTERSIZE_TXT
+# "kilobytes" should be the same as in MSG_027
+t MSG_110 "MS-DOS tidak dapat boot dari drive menggunakan ukuran Cluster 64 kilobyte.\n"
+	"Silahkan ubah ukuran Cluster atau menggunakan FreeDOS."
+t MSG_111 "Ukuran Cluster cocok"
+# "%d:%02d" below is a duration (mins:secs)
+t MSG_112 "Memformat volume UDF yang besar dapat mengambil banyak waktu. Pada kecepatan USB 2.0, format diperkirakan "
+	"Durasi adalah %d:%02d, progress bar yang akan muncul mungkin beku, Harap bersabar!"
+t MSG_113 "Volume UDF besar"
+
+# Tootips
+# Partition Scheme and Target Type
+t MSG_150 "Biasanya pilihan paling aman . Jika Anda memiliki komputer UEFI dan ingin memasangnya "
+	"OS dalam mode EFI Namun, Anda harus memilih salah satu dari pilihan lain"
+t MSG_151 "Gunakan ini jika Anda ingin menginstal OS dalam mode EFI , tetapi perlu mengakses "
+	"isi USB dari Windows XP"
+t MSG_152 "Pilihan untuk menginstal OS dalam mode EFI dan ketika "
+	"Akses USB tidak diperlukan untuk Windows XP"
+t MSG_153 "Tes Pola: 0x%02X"
+t MSG_154 "Tes Pola: 0x%02X, 0x%02X"
+t MSG_155 "Tes Pola: 0x%02X, 0x%02X, 0x%02X"
+t MSG_156 "Tes Pola: 0x%02X, 0x%02X, 0x%02X, 0x%02X"
+t MSG_157 "Mengatur filesystem target"
+t MSG_158 "Ukuran minimum blok data akan ditempatkan di filesystem"
+t MSG_159 "Gunakan kolom ini untuk mengatur label drive\nkarakter International diterima"
+t MSG_160 "Pilihan lanjutan"
+t MSG_161 "Periksa perangkat untuk blok buruk menggunakan tes pola"
+t MSG_162 "Jangan centang kotak ini untuk menggunakan \"mode format\"lambat"
+t MSG_163 "Centang kotak ini untuk membuat bootable USB drive"
+t MSG_164 "Metode yang akan digunakan untuk membuat drive bootable"
+t MSG_165 "Klik untuk memilih ISO..."
+t MSG_166 "Centang kotak ini untuk memungkinkan tampilan label internasional "
+	"dan menetapkan ikon perangkat (membuat autorun.inf)"
+t MSG_167 "Install MBR yang memungkinkan pemilihan boot dan bisa memanipulasi ID BIOS USB drive"
+t MSG_168 "Cobalah untuk memanipulasi bootable drive USB (biasanya 0x80) sebagai disk yang berbeda.\n"
+	"Biasanya hanya diperlukan jika Anda memasang Windows XP dan memiliki lebih dari satu disk"
+t MSG_169 "Buat partisi tersembunyi yang ekstra dan mencoba untuk menyelaraskan batas partisi.\n"
+	"Dapat meningkatkan deteksi boot BIOS yang lebih tua"
+t MSG_170 "Aktifkan pencatatan kandang USB Hard Drive. RESIKO DITANGGUNG ANDA SENDIRI!!!"
+t MSG_171 "Mulai operasi format.\nIni akan MENGHANCURKAN data pada target!"
+t MSG_172 "Informasi Perizinan dan kredit"
+t MSG_173 "Klik untuk memilih..."
+# The following will appear in the about dialog
+t MSG_174 "Rufus - The Reliable USB Formatting Utility"
+t MSG_175 "Versi %d.%d.%d (Build %d)"
+t MSG_176 "Terjemahan Indonesia: Abe Akatsuki <mailto:abeapple@live.com>"
+t MSG_177 "Laporan bug atau permintaan perangkat tambahan di:"
+t MSG_178 "Hak Cipta Tambahan:"
+t MSG_179 "Kebijakan Pembaruan:"
+t MSG_180 "Jika Anda memilih untuk memungkinkan program ini untuk memeriksa pembaruan aplikasi, "
+	"Anda setuju bahwa informasi berikut dapat dikumpulkan pada server kami:"
+t MSG_181 "Arsitektur dan Sistem Operasi Anda"
+t MSG_182 "Versi aplikasi yang Anda gunakan"
+t MSG_183 "Alamat IP Anda"
+t MSG_184 "Untuk tujuan menghasilkan statistik penggunaan pribadi, kami dapat menyimpan informasi yang dikumpulkan, "
+	"\\b untuk satu tahun\\b0 . Namun, kami tidak akan memberikan semua data individu ini kepada pihak ketiga."
+t MSG_185 "Proses Pembaruan:"
+t MSG_186 "Rufus tidak memasang atau menjalankan layanan latar belakang, oleh karena itu memperbarui pemeriksaan dilakukan hanya ketika aplikasi utama berjalan.\\line\n"
+	"Akses internet tentu saja diperlukan bila memeriksa pembaruan."
+
+# Status messages - these messages will appear on the status bar
+t MSG_201 "Membatalkan - Silakan tunggu..."
+t MSG_202 "Memindai ISO image..."
+t MSG_203 "Gagal untuk memindai ISO image"
+# Parameter: the name of an obsolete Syslinux .c32 module. eg: "Obsolete vesamenu.c32 detected"
+t MSG_204 "Lama %s terdeteksi"
+# Display the name of the ISO selected. eg: "Using ISO: en_win7_x64_sp1.iso"
+t MSG_205 "Menggunakan ISO: %s"
+# Typically "Missing ldlinux.c32 file"
+t MSG_206 "File hilang %s "
+# The name proposed by Windows' Computer Management -> Disk Management when you try to format a drive
+# with an empty label. See http://rufus.akeo.ie/pics/default_name.png
+t MSG_207 "Volume Baru"
+# Same message, once for singular and plural ("1 device found", "2 devices found")
+t MSG_208 "%d perangkat ditemukan"
+t MSG_209 "%d perangkat ditemukan"
+t MSG_210 "SELESAI."
+t MSG_211 "Dibatalkan."
+t MSG_212 "GAGAL"
+# Used when a new update has been downloaded and launched
+t MSG_213 "Memulai aplikasi baru.."
+t MSG_214 "Gagal untuk memulai aplikasi baru"
+# Open/Save file
+t MSG_215 "Dibuka %s"
+t MSG_216 "Disimpan %s"
+# Formatting status (make sure you use a double % to print the percent sign)
+t MSG_217 "Format: %0.1f%% selesai"
+t MSG_218 "Membuat file sistem: Tugas %d/%d selesai"
+t MSG_219 "NTFS Fixup: %d%% selesai"
+# Parameter: the file system and an estimated duration in mins and secs.
+# eg. "Formatting (UDF) - Estimated duration 3:21..."
+# NB: if "estimated duration" is too long, just use "estimated" or an abbreviation
+t MSG_220 "Mem-format (%s) - perkiraan durasi %d:%02d..."
+t MSG_221 "Pengaturan Label (ini mungkin memakan waktu)..."
+# Parameter: the file system. eg. "Formatting (NTFS)..."
+t MSG_222 "Mem-format (%s)..."
+t MSG_223 "NTFS Fixup (Checkdisk)..."
+t MSG_224 "Membersihkan struktur MBR/PBR/GPT..."
+t MSG_225 "Meminta akses disk..."
+t MSG_226 "Menganalisis boot record yang ada..."
+t MSG_227 "Menutup volume yang ada..."
+t MSG_228 "Menulis Master Boot Record..."
+t MSG_229 "Menulis partisi boot record..."
+t MSG_230 "Menyalin file DOS..."
+t MSG_231 "Menyalin file ISO..."
+t MSG_232 "Konfigurasi Win7 EFI boot (ini mungkin memakan waktu cukup lama)..."
+t MSG_233 "Menyelesaikan, harap tunggu..."
+# Takes the Syslinux version as parameter, eg. "Installing Syslinux v5..."
+t MSG_234 "Memasang Syslinux v%d..."
+# Bad blocks status. eg: "Bad Blocks: PASS 1/2 - 12.34% (0/0/1 errors)"
+t MSG_235 "Blok Buruk: LULUS %d/%d - %0.2f%% (%d/%d/%d kerusakan)"
+t MSG_236 "Blok Buruk: Pengujian dengan pola acak"
+t MSG_237 "Blok Buruk: Pengujian dengan pola 0x%02X"
+# eg. "Partitioning (MBR)..."
+t MSG_238 "Mempartisi (%s)..."
+t MSG_239 "Menghapus partisi..."
+t MSG_240 "Mengunduh %s: Menghubungkan..."
+t MSG_241 "Mengunduh: %0.1f%%"
+t MSG_242 "Gagal untuk Mengunduh file."
+t MSG_243 "Memeriksa pembaruan Rufus..."
+t MSG_244 "Pembaruan: Tidak dapat terhubung ke internet"
+t MSG_245 "Pembaruan: Tidak dapat mengakses versi data"
+t MSG_246 "Versi baru Rufus tersedia!"
+t MSG_247 "Tidak ada versi baru Rufus ditemukan"
+t MSG_248 "Tombol registri aplikasi berhasil dihapus"
+t MSG_249 "Gagal menghapus kunci registri aplikasi"
+# eg. "Fixed disk detection enabled" "ISO size check disabled"
+t MSG_250 "%s diaktifkan"
+t MSG_251 "%s dinonaktifkan"
+t MSG_252 "Cek ukuran"
+t MSG_253 "Deteksi perbaikan disk"
+t MSG_254 "Format paksa FAT32 yang besar"
+t MSG_255 "NoDriveTypeAutorun akan dihapus saat keluar"
+t MSG_256 "Deteksi drive yang palsu"
+t MSG_257 "Dukungan penggabugan"
+t MSG_258 "Dukungan Rock Ridge"
+t MSG_259 "Pembaruan Paksa"
+
+################################################################################
 l "it-IT" "Italian (Italiano)" 0x0410, 0x0810
 v 1.0.7
 b "en-US"
