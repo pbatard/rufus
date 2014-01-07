@@ -634,7 +634,11 @@ static BOOL PopulateProperties(int ComboIndex)
  */
 static BOOL GetUSBDevices(DWORD devnum)
 {
-	BOOL r, found = FALSE;
+	// The first two are standard Microsoft drivers (including the Windows 8 UASP one).
+	// The rest are the vendor UASP drivers I know of so far - list may be incomplete!
+	const char* usbstor_name[] = { "USBSTOR", "UASPSTOR", "VUSBSTOR", "EtronSTOR" };
+	const char* scsi_name = "SCSI";
+	BOOL r, found = FALSE, is_SCSI, is_UASP;
 	HDEVINFO dev_info = NULL;
 	SP_DEVINFO_DATA dev_info_data;
 	SP_DEVICE_INTERFACE_DATA devint_data;
@@ -642,14 +646,13 @@ static BOOL GetUSBDevices(DWORD devnum)
 	STORAGE_DEVICE_NUMBER_REDEF device_number;
 	DEVINST parent_inst, device_inst;
 	DWORD size, i, j, k, datatype, drive_index;
-	ULONG list_size;
+	ULONG list_size[ARRAYSIZE(usbstor_name)], full_list_size;
 	HANDLE hDrive;
 	LONG maxwidth = 0;
 	RECT rect;
-	int score;
+	int s, score;
 	char drive_letter, *devid, *devid_list = NULL;
 	char *label, *entry, buffer[MAX_PATH], str[sizeof("0000:0000")+1];
-	const char* usbstor_name = "USBSTOR";
 	uint16_t vid, pid;
 	GUID _GUID_DEVINTERFACE_DISK =			// only known to some...
 		{ 0x53f56307L, 0xb6bf, 0x11d0, {0x94, 0xf2, 0x00, 0xa0, 0xc9, 0x1e, 0xfb, 0x8b} };
@@ -665,17 +668,30 @@ static BOOL GetUSBDevices(DWORD devnum)
 		return FALSE;
 	}
 
-	// Get a list of hardware IDs for all USB storage devices
-	// This will be used to retrieve the VID:PID of our devices
-	CM_Get_Device_ID_List_SizeA(&list_size, usbstor_name, CM_GETIDLIST_FILTER_SERVICE);
-	if (list_size == 0)
+	full_list_size = 0;
+	for (s=0; s<ARRAYSIZE(usbstor_name); s++) {
+		// Get a list of hardware IDs for all USB storage devices
+		// This will be used to retrieve the VID:PID of our devices
+		CM_Get_Device_ID_List_SizeA(&list_size[s], usbstor_name[s], CM_GETIDLIST_FILTER_SERVICE);
+		if (list_size[s] != 0)
+			full_list_size += list_size[s]-1;	// remove extra NUL terminator
+	}
+	full_list_size += 1;	// add extra NUL terminator
+	if (full_list_size < 2)
 		return FALSE;
-	devid_list = (char*)malloc(list_size);
+	devid_list = (char*)malloc(full_list_size);
 	if (devid_list == NULL) {
 		uprintf("Could not allocate Dev ID list\n");
 		return FALSE;
 	}
-	CM_Get_Device_ID_ListA(usbstor_name, devid_list, list_size, CM_GETIDLIST_FILTER_SERVICE);
+
+	// Build a single list from all the storage enumerators we know of
+	for (s=0, i=0; s<ARRAYSIZE(usbstor_name); s++) {
+		if (list_size[s] > 1) {
+			CM_Get_Device_ID_ListA(usbstor_name[s], &devid_list[i], list_size[s], CM_GETIDLIST_FILTER_SERVICE);
+			i += list_size[s]-1;
+		}
+	}
 
 	dev_info_data.cbSize = sizeof(dev_info_data);
 	for (i=0; SetupDiEnumDeviceInfo(dev_info, i, &dev_info_data); i++) {
@@ -685,11 +701,13 @@ static BOOL GetUSBDevices(DWORD devnum)
 			uprintf("SetupDiGetDeviceRegistryProperty (Enumerator Name) failed: %s\n", WindowsErrorString());
 			continue;
 		}
-
-		if (safe_strcmp(buffer, usbstor_name) != 0)
+		// UASP drives are listed under SCSI (along with regular SYSTEM drives => "DANGER, WILL ROBINSON!!!")
+		is_SCSI = (safe_stricmp(buffer, scsi_name) == 0);
+		if ((safe_stricmp(buffer, usbstor_name[0]) != 0) && (!is_SCSI))
 			continue;
 		memset(buffer, 0, sizeof(buffer));
 		vid = 0; pid = 0;
+		is_UASP = FALSE;
 		if (!SetupDiGetDeviceRegistryPropertyA(dev_info, &dev_info_data, SPDRP_FRIENDLYNAME,
 				&datatype, (LPBYTE)buffer, sizeof(buffer), &size)) {
 			uprintf("SetupDiGetDeviceRegistryProperty (Friendly Name) failed: %s\n", WindowsErrorString());
@@ -702,7 +720,15 @@ static BOOL GetUSBDevices(DWORD devnum)
 				if ( (CM_Locate_DevNodeA(&parent_inst, devid, 0) == 0)
 				  && (CM_Get_Child(&device_inst, parent_inst, 0) == 0)
 				  && (device_inst == dev_info_data.DevInst) ) {
+					BOOL post_backslash = FALSE;
+					// If we're not dealing with the USBSTOR part of our list, then this is an UASP device
+					is_UASP = ((((uintptr_t)devid)+2) >= ((uintptr_t)devid_list)+list_size[0]);
 					for (j=0, k=0; (j<strlen(devid))&&(k<2); j++) {
+						// The ID is in the form USB_VENDOR_BUSID\VID_xxxx&PID_xxxx\...
+						if (devid[j] == '\\')
+							post_backslash = TRUE;
+						if (!post_backslash)
+							continue;
 						if (devid[j] == '_') {
 							pid = (uint16_t)strtoul(&devid[j+1], NULL, 16);
 							// We could have used a vid_pid[] table, but keeping vid/pid separate is clearer
@@ -712,11 +738,17 @@ static BOOL GetUSBDevices(DWORD devnum)
 				}
 			}
 		}
-		if ((vid == 0) && (pid == 0))
+		if ((vid == 0) && (pid == 0)) {
+			if (is_SCSI) {
+				// If we have an SCSI drive and couldn't get a VID:PID, we are most likely
+				// dealing with a system drive => eliminate it!
+				continue;
+			}
 			safe_strcpy(str, sizeof(str), "????:????");	// Couldn't figure VID:PID
-		else
+		} else {
 			safe_sprintf(str, sizeof(str), "%04X:%04X", vid, pid);
-		uprintf("Found device '%s' (%s)\n", buffer, str);
+		}
+		uprintf("Found %s device '%s' (%s)\n", is_UASP?"UAS":"USB", buffer, str);
 
 		devint_data.cbSize = sizeof(devint_data);
 		hDrive = INVALID_HANDLE_VALUE;
@@ -787,7 +819,7 @@ static BOOL GetUSBDevices(DWORD devnum)
 				if ((!enable_HDDs) && ((score = IsHDD(drive_index, vid, pid, buffer)) > 0)) {
 					uprintf("Device eliminated because it was detected as an USB Hard Drive (score %d > 0)\n", score);
 					uprintf("If this device is not an USB Hard Drive, please e-mail the author of this application\n");
-					uprintf("NOTE: You can enable the listing of USB Hard Drives in 'Advanced Options' (click the white triangle first)");
+					uprintf("NOTE: You can enable the listing of USB Hard Drives in 'Advanced Options' (after clicking the white triangle)");
 					safe_closehandle(hDrive);
 					safe_free(devint_detail_data);
 					break;

@@ -1,15 +1,18 @@
 o Version 1.4.2 (2014.01.??)
+    Add USB Attached SCSI (UAS) support
     Add ReactOS support
-    Add EFI/NTFS boot support, for targets that support it
-    Add card hotplug detection for USB memory card readers
+    Add NTFS UEFI support, for targets that can support it
+    Add insertion detection for USB memory card readers
     Add retry when writing ISO files... again
+    Add Indonesian translation, courtesy of Abe Akatsuki
     Add Malay translation, courtesy of Muhammad Aman
+    Add Portuguese (Portugal) translation, courtesy of Fernando Baptista
     Speed up boot record cleanup, for slow drives
     Improve initial locale detection
     Save user selected locale between sessions
     Always use English locale in the log, where possible
-    Fix detection of SanDisk, Kingston and Toshiba drives
-    Fix an issue with drive letter assignation
+    Fix detection for some SanDisk, Kingston and Toshiba drives
+    Fix a potential issue with drive letter assignation
     Many other minor fixes and improvements
 
 o Version 1.4.1 (2013.12.05) [BUGFIX RELEASE]
