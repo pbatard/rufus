@@ -421,86 +421,345 @@ t MSG_259 "Force update"
 
 ################################################################################
 l "zh-CN" "Chinese Simplified (简体中文)" 0x0804, 0x1004
-v 1.0.0
+v 1.0.7
 b "en-US"
 
+# Main dialog
 g IDD_DIALOG
 t IDS_DEVICE_TXT "设备"
-t IDS_PARTITION_TYPE_TXT "分区计划和目标系统类型"
+t IDS_PARTITION_TYPE_TXT "分区方案和目标系统类型"
 t IDS_FILESYSTEM_TXT "文件系统"
-t IDS_CLUSTERSIZE_TXT "簇的大小"
+t IDS_CLUSTERSIZE_TXT "簇大小"
 t IDS_LABEL_TXT "新卷标"
 t IDS_FORMAT_OPTIONS_GRP "格式选项        "
-t IDC_BADBLOCKS "检查设备的坏块:"
+t IDC_BADBLOCKS "检查设备坏块："
 t IDC_QUICKFORMAT "快速格式化"
-t IDC_BOOT "创建一个可启动的磁盘使用："
-s IDC_BOOT +10,0
+t IDC_BOOT "创建一个启动盘使用："
 t IDC_SET_ICON "创建扩展标签和图标文件"
 m IDC_ADVANCED -24,0
-m IDC_NBPASSES 8,0
-m IDC_BOOTTYPE 8,0
-m IDC_SELECT_ISO 6,0
 t IDC_ABOUT "关于..."
 t IDC_LOG "日志"
-m IDC_LOG -5,0
-s IDC_LOG +5,0
+s IDC_LOG +16,0
 t IDCANCEL "关闭"
 t IDC_START "开始"
 t IDS_ADVANCED_OPTIONS_GRP "高级选项"
-t IDC_ENABLE_FIXED_DISKS "列表固定(非flash)或USB磁盘分区"
-t IDC_EXTRA_PARTITION "添加修复旧的BIOS（额外的分区，校准等等）"
-t IDC_RUFUS_MBR "使用 Rufus MBR BIOS ID:"
+t IDC_ENABLE_FIXED_DISKS "显示 USB 外置硬盘"
+t IDC_EXTRA_PARTITION "旧 BIOS 修正（额外的分区，校准等等）"
+t IDC_RUFUS_MBR "使用 Rufus MBR BIOS ID："
 
+# About dialog
 g IDD_ABOUTBOX
 t IDD_ABOUTBOX "关于 Rufus"
 t IDC_ABOUT_LICENSE "许可证"
 t IDC_ABOUT_UPDATES "更新"
 t IDOK "确定"
 
+# About -> License dialog
 g IDD_LICENSE
 t IDD_LICENSE "Rufus 许可证"
-t IDCANCEL "取消"
+t IDCANCEL "关闭"
 
+# Notifications.
 g IDD_NOTIFICATION
-t IDD_NOTIFICATION "更新方案和设置"
 t IDC_MORE_INFO "更多信息"
 t IDYES "是"
 t IDNO "否"
 
+# Log dialog
 g IDD_LOG
 t IDD_LOG "日志"
 t IDC_LOG_CLEAR "清除日志"
 t IDC_LOG_SAVE "保存日志"
 t IDCANCEL "关闭日志"
 
+# About -> Updates
 g IDD_UPDATE_POLICY
 t IDD_UPDATE_POLICY "更新方案和设置"
 t IDS_UPDATE_SETTINGS_GRP "设置"
 t IDS_UPDATE_FREQUENCY_TXT "检查更新："
 t IDS_INCLUDE_BETAS_TXT "包括测试版本："
 t IDC_CHECK_NOW "立即检查"
-t IDCANCEL "取消"
+t IDCANCEL "关闭"
 
+# Dialog that appears when a new version is available
 g IDD_NEW_VERSION
 t IDD_NEW_VERSION "检查更新 - Rufus"
-t IDS_NEW_VERSION_AVAIL_TXT "更新的版本可用。请下载最新版本！"
+t IDS_NEW_VERSION_AVAIL_TXT "更新版本可用，请下载最新版本！"
 t IDC_WEBSITE "点击这里进入网站"
 t IDS_NEW_VERSION_NOTES_GRP "发行说明"
 t IDS_NEW_VERSION_DOWNLOAD_GRP "下载"
 t IDC_DOWNLOAD "下载"
-t IDCANCEL "取消"
+t IDCANCEL "关闭"
 
+# Dialog that appears when scanning/extracting ISO files
 g IDD_ISO_EXTRACT
-t IDD_ISO_EXTRACT "复制ISO文件..."
-t IDC_ISO_FILENAME "打开ISO映像 - 请稍候..."
+t IDD_ISO_EXTRACT "复制 ISO 文件..."
+t IDC_ISO_FILENAME "打开 ISO 映像，请稍候..."
 t IDC_ISO_ABORT "取消"
 
 # Messages used throughout the application
-t MSG_004 "更新方案和设置"
-t MSG_005 "你要允許此應用程序檢查更新？"
+t MSG_001 "重复进程"
+t MSG_002 "检测到另有 Rufus 程序正在运行，\n请关闭正在运行的程序后重试。"
+t MSG_003 "警告：'%s' 设备上所有数据将会被清除。\n请单击 '确定' 继续此项操作。"
+t MSG_004 "Rufus 更新方案"
+t MSG_005 "是否允许 Rufus 自动联网检查程序更新？"
+# Must be the same as IDD_DIALOG：IDCANCEL
 t MSG_006 "关闭"
-t MSG_007 "撤消"
-t MSG_176 ""
+t MSG_007 "取消"
+t MSG_008 "是"
+t MSG_009 "否"
+t MSG_010 "检测到坏快"
+t MSG_011 "扫描结果：检测到 %u 个坏快\n"
+	"  %d 读取错误\n  %d 写入错误\n  %d 损坏错误\n"
+# The following will contain the formatted message above as well as the name of the bad blocks logfile
+t MSG_012 "%s\n详细报告位于：\n%s"
+t MSG_013 "禁用"
+t MSG_014 "每日"
+t MSG_015 "每周"
+t MSG_016 "每月"
+t MSG_017 "自定义"
+t MSG_018 "目前版本：%d.%d.%d (Build %d)"
+t MSG_019 "最新版本：%d.%d.%d (Build %d)"
+# *Short* size names. These can be used as suffixes
+t MSG_020 "B"
+t MSG_021 "KB"
+t MSG_022 "MB"
+t MSG_023 "GB"
+t MSG_024 "TB"
+t MSG_025 "PB"
+# *Long* size names, as they are displayed for the cluster size in the MS format dialog.
+t MSG_026 "字节"
+# Yes, this is a repeat from MSG_020
+t MSG_027 "K 字节"
+t MSG_028 "M 字节"
+t MSG_029 "默认"
+# The following gets appended to the file system, cluster size, etc.
+t MSG_030 "%s (默认)"
+t MSG_031 "%s 分区方案，BIOS 或 UEFI 系统"
+t MSG_032 "%s 分区方案，BIOS 系统"
+t MSG_033 "%s 分区方案，UEFI 系统"
+# Number of bad block check passes
+t MSG_034 "%d 遍"
+t MSG_035 "%d 遍"
+t MSG_036 "ISO 镜像"
+t MSG_037 "程序"
+t MSG_038 "停止"
+t MSG_039 "运行"
+t MSG_040 "下载"
+t MSG_041 "用户取消操作。"
+t MSG_042 "错误"
+t MSG_043 "错误：%s"
+t MSG_044 "文件下载"
+t MSG_045 "通用 USB 存储设备"
+t MSG_046 "%s (磁盘 %d)"
+t MSG_047 "%s (%c:)"
+t MSG_048 "Rufus - 刷新缓冲区"
+t MSG_049 "Rufus - 取消"
+
+# Error messages
+t MSG_050 "成功。"
+t MSG_051 "格式化未知错误。"
+t MSG_052 "该设备媒体无法使用选定文件系统。"
+t MSG_053 "该设备无法访问。"
+t MSG_054 "该设备媒体当前被写保护。"
+t MSG_055 "该设备正在使用中，请关闭可能使用该设备的所有程序窗口。"
+t MSG_056 "该设备不支持快速格式化。"
+t MSG_057 "卷标无效。"
+t MSG_058 "设备句柄无效。"
+t MSG_059 "该设备不支持指定的簇大小。"
+t MSG_060 "卷大小无效。"
+t MSG_061 "请插入可移动设备。"
+t MSG_062 "无效命令。"
+t MSG_063 "内存分配错误。"
+t MSG_064 "读取错误。"
+t MSG_065 "写入错误。"
+t MSG_066 "安装失败。"
+t MSG_067 "无法打开设备媒体。其他进程可能正在使用该设备，请重新插入设备后再试。"
+t MSG_068 "驱动器分区错误。"
+t MSG_069 "无法复制文件到目标驱动器。"
+t MSG_070 "用户取消操作。"
+# See http：//en.wikipedia.org/wiki/Thread_%28computing%29
+t MSG_071 "无法创建线程。"
+t MSG_072 "坏快检查未完成。"
+t MSG_073 "ISO 镜像检查失败。"
+t MSG_074 "ISO 镜像解压失败。"
+t MSG_075 "无法重新装载卷。"
+t MSG_076 "无法设置启动文件。"
+t MSG_077 "无法分配盘符。"
+t MSG_078 "无法装载 GUID 卷。"
+
+t MSG_080 "Rufus 检测到 Windows 正在清空设备缓存。\n"
+	"取决于设备速度和文件大小，此项操作可能需要很长时间。\n"
+	"请耐心等待，以免损坏文件或设备；否则请直接移除设备。"
+t MSG_081 "不支持的 ISO 镜像"
+t MSG_082 "此版本的 Rufus 仅支持基于 bootmgr/WinPE, isolinux 或 EFI 的启动 ISO 镜像。\n"
+	"此 ISO 镜像格式不被支持..."
+t MSG_083 "替换 %s?"
+t MSG_084 "此 ISO 镜像使用的是过时的 '%s'。\n"
+	"启动菜单可能无法正常显示。\n\n"
+	"Rufus 可以下载更新版本解决此问题：\n"
+	"- 选择 '是' 连接网络下载文件\n"
+	"- 选择 '否' 保留原始文件\n"
+	"如果不知道如何选择，请选择 '是'。\n\n"
+	"注意：'%s' 文件将会被下载到当前目录，自动选用。"
+t MSG_085 "下载 %s"
+t MSG_086 "未选择 ISO 镜像"
+# The content between the quotes below should match the beginning of the IDC_BOOT text
+t MSG_087 "请单击光盘图标选择启动 ISO 镜像，\n或者取消 '创建一个启动盘...' 复选框。"
+t MSG_088 "ISO 镜像文件过大"
+t MSG_089 "此 ISO 镜像文件超过设备支持大小。"
+t MSG_090 "不支持的 ISO 镜像"
+t MSG_091 "选择 UEFI 系统类型时，只支持 EFI 启动 ISO 镜像。\n"
+	"请选择可 EFI 启动的 ISO 镜像，或者将目标系统类型改为 BIOS。"
+t MSG_092 "不支持的文件系统"
+t MSG_096 "此 ISO 镜像仅支持 FAT/FAT32 文件系统，\n请选择 FAT/FAT32 文件系统。"
+t MSG_097 "目前只有基于 bootmgr/WinPE 的 ISO 镜像支持 NTFS 文件系统。"
+t MSG_098 "选择 FAT/FAT32 文件系统时，只支持基于 isolinux 的 ISO 镜像，\n或者 UEFI 系统类型。"
+t MSG_099 "文件系统限制"
+t MSG_100 "此 ISO 镜像包含大于 4 GB 的单一文件，\n超出 FAT/FAT32 文件系统限制。"
+t MSG_101 "缺少 WIM 支持"
+t MSG_102 "目前系统不支持解压 WIM 镜像。"
+	"创建 Windows 7 或 Windows Vista 支持 EFI 的启动盘必要此功能。"
+	"安装免费开源的 7-Zip 软件可以解决此问题。\n是否前往 7-Zip 网站下载？"
+t MSG_103 "是否下载 %s ？"
+t MSG_104 "Syslinux v5.0 或更新版本需要同时安装 '%s' 文件支持。\n"
+	"由于此文件大于 100 KB 且内置于所有 Syslinux v5+ ISO 镜像中，"
+	"所以 Rufus 并未内置此文件。\n\nRufus 可以提供此文件下载：\n"
+	"- 选择 '是' 连接网络下载文件\n"
+	"- 选择 '否' 自行下载到磁盘\n"
+	"注意：'%s' 文件将会被下载到当前目录，自动选用。\n"
+t MSG_105 "现在取消可能导致设备异常，请单击 '是' 取消。"
+t MSG_106 "请选择目录"
+t MSG_107 "全部文件"
+t MSG_108 "Rufus 日志"
+t MSG_109 "0x%02X (Disk %d)"
+# "Cluster size" below should be the same as the label for IDS_CLUSTERSIZE_TXT
+# "kilobytes" should be the same as in MSG_027
+t MSG_110 "MS-DOS 无法从 64 KB 簇大小磁盘启动。\n请更改簇大小或者改用 FreeDOS。"
+t MSG_111 "不兼容的簇大小"
+# "%d:%02d" below is a duration (mins:secs)
+t MSG_112 "格式化较大的 UDF 卷可能需要很长时间。 过程中进度条可能会呈禁止状态，属于正常现象。"
+	"请耐心等待！\nUSB 2.0 设备预计剩余时间：%d:%02d"
+t MSG_113 "大容量 UDF 卷"
+
+# Tootips
+# Partition Scheme and Target Type
+t MSG_150 "一般最保险的选项。 若想在支持 UEFI 的计算机上使用 EFI 模式安装系统，请选择其他选项。"
+t MSG_151 "若想使用 EFI 模式安装系统却须使用 Windows XP 访问磁盘内容。"
+t MSG_152 "若想使用 EFI 模式安装系统且无须使用 Windows XP 访问磁盘内容，推荐选择此项。"
+t MSG_153 "测试模式：0x%02X"
+t MSG_154 "测试模式：0x%02X, 0x%02X"
+t MSG_155 "测试模式：0x%02X, 0x%02X, 0x%02X"
+t MSG_156 "测试模式：0x%02X, 0x%02X, 0x%02X, 0x%02X"
+t MSG_157 "设置目标文件系统"
+t MSG_158 "设置文件系统簇大小"
+t MSG_159 "设置卷标，支持国际字符"
+t MSG_160 "显示/隐藏高级选项"
+t MSG_161 "选择模式检查设备坏快"
+t MSG_162 "取消复选框执行完全格式化"
+t MSG_163 "设置为可启动的 USB 设备"
+t MSG_164 "启动模式"
+t MSG_165 "选择 ISO 镜像..."
+t MSG_166 "显示多国语言卷标和设备图标 (autorun.inf)"
+t MSG_167 "安装支持启动选项，伪装设备 ID 的 MBR"
+t MSG_168 "伪装 USB 启动设备为其他磁盘，一般只用于在多磁盘系统安装 Windows XP。"
+t MSG_169 "创建隐藏并对齐分区，可提高旧 BIOS 启动盘检测率"
+t MSG_170 "显示链接到计算机的 USB 外置硬盘设备\n***请谨慎使用，后果自负！***"
+t MSG_171 "开始格式化，设备上所有数据将会被清除！"
+t MSG_172 "许可证和开发者信息"
+t MSG_173 "单击选择..."
+# The following will appear in the about dialog
+t MSG_174 "Rufus - 快速可靠的 USB 格式化工具"
+t MSG_175 "版本 %d.%d.%d (Build %d)"
+t MSG_176 "简体中文翻译者：佚名 <mailto:acc_reg@aol.com>"
+t MSG_177 "报告错误或请求新功能："
+t MSG_178 "更多版权信息："
+t MSG_179 "更新方案："
+t MSG_180 "使用自动联网检查更新，表示您同意并授权本程序收集以下信息并上传至服务器："
+t MSG_181 "操作系统架构和版本"
+t MSG_182 "程序目前版本"
+t MSG_183 "您的 IP 地址"
+t MSG_184 "所收集的资料\\b 最多保存一年\\b0 ，并且仅供内部统计分析使用情况，绝不会主动将资料提供给第三方。"
+t MSG_185 "更新进程："
+t MSG_186 "Rufus 没有常住后台的服务进程，因此只有当主程序联网运行时才会自动检查更新。"
+
+# Status messages - these messages will appear on the status bar
+t MSG_201 "取消中，请稍后..."
+t MSG_202 "扫描 ISO 镜像..."
+t MSG_203 "无法扫描 ISO 镜像"
+# Parameter：the name of an obsolete Syslinux .c32 module.
+t MSG_204 "检测到过时的 %s"
+# Display the name of the ISO selected. 
+t MSG_205 "选用镜像：%s"
+# Typically "Missing ldlinux.c32 file"
+t MSG_206 "缺少 %s 文件"
+# The name proposed by Windows' Computer Management -> Disk Management when you try to format a drive
+# with an empty label. See http：//rufus.akeo.ie/pics/default_name.png
+t MSG_207 "新加卷"
+# Same message, once for singular and plural ("1 device found", "2 devices found")
+t MSG_208 "检测到 %d 个可用设备"
+t MSG_209 "检测到 %d 个可用设备"
+t MSG_210 "已完成"
+t MSG_211 "已取消"
+t MSG_212 "操作失败"
+# Used when a new update has been downloaded and launched
+t MSG_213 "正在启动新版本..."
+t MSG_214 "无法启动新版本"
+# Open/Save file
+t MSG_215 "已打开 %s"
+t MSG_216 "已保存 %s"
+# Formatting status (make sure you use a double % to print the percent sign)
+t MSG_217 "格式化：已完成 %0.1f%%"
+t MSG_218 "创建文件系统：已完成 %d/%d 项"
+t MSG_219 "修复 NTFS：已完成 %d%%"
+# Parameter：the file system and an estimated duration in mins and secs.
+# eg. "Formatting (UDF) - Estimated duration 3:21..."
+# NB：if "estimated duration" is too long, just use "estimated" or an abbreviation
+t MSG_220 "格式化 (%s)：剩余时间 %d:%02d"
+t MSG_221 "设置卷标，请耐心等待..."
+# Parameter：the file system. eg. "Formatting (NTFS)..."
+t MSG_222 "格式化 (%s)..."
+t MSG_223 "修复 NTFS (Checkdisk)..."
+t MSG_224 "清除 MBR/PBR/GPT 架构..."
+t MSG_225 "请求访问磁盘..."
+t MSG_226 "检查现有引导记录..."
+t MSG_227 "关闭现有卷..."
+t MSG_228 "写入主引导记录..."
+t MSG_229 "写入分区引导记录..."
+t MSG_230 "复制 DOS 文件..."
+t MSG_231 "复制 ISO 文件..."
+t MSG_232 "设置 Win7 EFI 启动，请耐心等待..."
+t MSG_233 "完成中，请稍等候..."
+# Takes the Syslinux version as parameter.
+t MSG_234 "安装 Syslinux v%d..."
+# Bad blocks status.
+t MSG_235 "检查坏块：第 %d/%d 遍 - %0.2f%% (%d/%d/%d 错误)"
+t MSG_236 "检查坏块：测试中 - 随机模式"
+t MSG_237 "检查坏块：测试中 - 0x%02X 模式"
+# eg. "Partitioning (MBR)..."
+t MSG_238 "分区 (%s)..."
+t MSG_239 "删除分区..."
+t MSG_240 "下载 %s：连接中..."
+t MSG_241 "下载：%0.1f%%"
+t MSG_242 "无法下载文件。"
+t MSG_243 "检查更新：获取新版本..."
+t MSG_244 "检查更新：无法连接网络"
+t MSG_245 "检查更新：无法确认版本"
+t MSG_246 "检查更新：发现更新版本"
+t MSG_247 "检查更新：已是最新版本"
+t MSG_248 "已删除程序注册表"
+t MSG_249 "无法删除程序注册表"
+# eg. "Fixed disk detection enabled" "ISO size check disabled"
+t MSG_250 "%s 已启用"
+t MSG_251 "%s 已禁用"
+t MSG_252 "检测大小"
+t MSG_253 "固定磁盘检测"
+t MSG_254 "强制格式化 FAT32"
+t MSG_255 "删除 NoDriveTypeAutorun 注册表键"
+t MSG_256 "检测扩容盘"
+t MSG_257 "Joliet 支持"
+t MSG_258 "Rock Ridge 支持"
+t MSG_259 "强制更新"
 
 ################################################################################
 l "zh-TW" "Chinese Traditional (正體中文)" 0x0404, 0x0c04, 0x1404, 0x7c04
