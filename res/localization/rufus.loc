@@ -5302,7 +5302,7 @@ t MSG_259 "Siłowa aktualizacja"
 
 ################################################################################
 l "pt-PT" "Portuguese Standard (Português)" 0x0816
-v 1.0.6
+v 1.0.7
 b "en-US"
 
 # Main dialog
@@ -5540,6 +5540,7 @@ t MSG_089 "A imagem ISO é demasiado grande para o destino selecionado."
 t MSG_090 "ISO não suportado"
 t MSG_091 "Quando se usa UEFI como tipo de destino, só são suportadas imagens ISO bootables tipo EFI. "
 	"Selecione uma imagem ISO bootable do tipo EFI ou altere o tipo de destino para BIOS."
+t MSG_092 "Sistema de arquivos não suportado"
 t MSG_096 "Só é suportado FAT/FAT32 para este tipo de ISO. Por favor selecione FAT/FAT32 como sistema de arquivos."
 t MSG_097 "Com NTFS só se podem usar imagens ISO baseadas em 'bootmgr' ou 'WinPE'."
 t MSG_098 "FAT/FAT32 somente se pode usar quando o tipo de dispositivo destino é UEFI ou se usam imagens baseadas em isolinux."
