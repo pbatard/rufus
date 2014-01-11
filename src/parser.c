@@ -768,7 +768,7 @@ char* insert_section_data(const char* filename, const char* section, const char*
 	wchar_t buf[1024];
 	FILE *fd_in = NULL, *fd_out = NULL;
 	size_t i, size;
-	int mode;
+	int mode = 0;
 	char *ret = NULL, tmp[2];
 
 	if ((filename == NULL) || (section == NULL) || (data == NULL))
@@ -897,7 +897,7 @@ char* replace_in_token_data(const char* filename, const char* token, const char*
 	wchar_t buf[1024], *torep;
 	FILE *fd_in = NULL, *fd_out = NULL;
 	size_t i, size;
-	int mode;
+	int mode = 0;
 	char *ret = NULL, tmp[2];
 
 	if ((filename == NULL) || (token == NULL) || (src == NULL) || (rep == NULL))

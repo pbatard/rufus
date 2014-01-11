@@ -504,7 +504,7 @@ BOOL AnalyzeMBR(HANDLE hPhysicalDrive)
 	} else if (is_reactos_mbr(&fake_fd)) {
 		uprintf("Drive has a ReactOS master boot record\n");
 	} else if (is_zero_mbr(&fake_fd)) {
-		uprintf("Drive has a zeroed non-bootable master boot record\n");
+		uprintf("Drive has a zeroed master boot record\n");
 	} else {
 		uprintf("Drive has an unknown master boot record\n");
 	}
@@ -702,8 +702,8 @@ BOOL MountVolume(char* drive_name, char *drive_guid)
 	// For fixed disks, Windows may already have remounted the volume, but with a different letter
 	// than the one we want. If that's the case, we need to unmount first.
 	if ( (GetVolumePathNamesForVolumeNameA(drive_guid, mounted_letter, sizeof(mounted_letter), &size))
-	  && (size > 2) && (safe_strcmp(mounted_letter, drive_name) != 0) ) {
-		uprintf("Volume is already mounted, but as %s instead of %s - Unmounting...\n", mounted_letter, drive_name);
+	  && (size > 1) && (mounted_letter[0] != drive_name[0]) ) {
+		uprintf("Volume is already mounted, but as %c: instead of %c: - Unmounting...\n", mounted_letter[0], drive_name[0]);
 		if (!DeleteVolumeMountPointA(mounted_letter))
 			uprintf("Failed to unmount volume: %s", WindowsErrorString());
 		Sleep(200);

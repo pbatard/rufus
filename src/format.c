@@ -810,7 +810,7 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 {
 	BOOL r = FALSE;
 	DWORD size;
-	int dt, fs;
+	int dt, fs, bt;
 	unsigned char* buf = NULL;
 	size_t SecSize = SelectedDrive.Geometry.BytesPerSector;
 	size_t nSecs = (0x200 + SecSize -1) / SecSize;
@@ -868,7 +868,11 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 	fake_fd._bufsiz = SelectedDrive.Geometry.BytesPerSector;
 	fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
 	dt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
-	if ( (dt == DT_SYSLINUX_V4) || (dt == DT_SYSLINUX_V5) || ((dt == DT_ISO) && ((fs == FS_FAT16) || (fs == FS_FAT32))) ) {
+	bt = GETBIOSTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
+	if (bt == BT_UEFI) {
+		uprintf(using_msg, "zeroed");
+		r = write_zero_mbr(&fake_fd);	// Force UEFI boot only by zeroing the MBR
+	} else if ( (dt == DT_SYSLINUX_V4) || (dt == DT_SYSLINUX_V5) || ((dt == DT_ISO) && ((fs == FS_FAT16) || (fs == FS_FAT32))) ) {
 		uprintf(using_msg, "Syslinux");
 		r = write_syslinux_mbr(&fake_fd);
 	} else if (dt == DT_REACTOS) {
