@@ -5613,7 +5613,7 @@ t MSG_173 "Faça clic para selecionar..."
 # The following will appear in the about dialog
 t MSG_174 "Rufus - O utilitário de formatação USB mais seguro"
 t MSG_175 "Versão %d.%d.%d (Build %d)"
-t MSG_176 "Tradução para Português: Fernando Baptista <mailto:gbatold@gmail.com>"
+t MSG_176 "Tradução para Português: Fernando Baptista mailto:gbatold@gmail.com"
 t MSG_177 "Para reportar bugs ou sugerir melhoras, dirija-se a:"
 t MSG_178 "Direitos de autor adicionais:"
 t MSG_179 "Politica de atualização:"

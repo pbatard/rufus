@@ -886,7 +886,7 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 			DriveLayoutEx.PartitionEntry[1].RewritePartition = TRUE;
 			DriveLayoutEx.PartitionEntry[1].Mbr.BootIndicator = FALSE;
 			DriveLayoutEx.PartitionEntry[1].Mbr.HiddenSectors = SelectedDrive.Geometry.SectorsPerTrack*SelectedDrive.Geometry.BytesPerSector;
-			DriveLayoutEx.PartitionEntry[1].Mbr.PartitionType = DriveLayoutEx.PartitionEntry[0].Mbr.PartitionType + 0x10;	// Hidden whatever
+			DriveLayoutEx.PartitionEntry[1].Mbr.PartitionType = RUFUS_EXTRA_PARTITION_TYPE;
 		}
 		// For the remaining partitions, PartitionStyle & PartitionType have already
 		// been zeroed => already set to MBR/unused

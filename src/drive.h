@@ -22,6 +22,8 @@
 
 #pragma once
 
+#define RUFUS_EXTRA_PARTITION_TYPE	0xea
+
 char* GetPhysicalName(DWORD DriveIndex);
 HANDLE GetPhysicalHandle(DWORD DriveIndex, BOOL bWriteAccess, BOOL bLockDrive);
 char* GetLogicalName(DWORD DriveIndex, BOOL bKeepTrailingBackslash, BOOL bSilent);
