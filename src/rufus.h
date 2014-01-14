@@ -196,6 +196,7 @@ typedef struct {
 	DWORD FirstSector;
 	char proposed_label[16];
 	int PartitionType;
+	int nPartitions;
 	int FSType;
 	BOOL has_protective_mbr;
 	BOOL has_mbr_uefi_marker;

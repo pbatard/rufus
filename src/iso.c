@@ -693,10 +693,10 @@ int64_t ExtractISOFile(const char* iso, const char* iso_file, const char* dest_f
 {
 	size_t i;
 	ssize_t read_size;
-	int64_t file_length;
+	int64_t file_length, r = 0;
 	char buf[UDF_BLOCKSIZE];
 	DWORD buf_size, wr_size;
-	BOOL s, r = 0;
+	BOOL s;
 	iso9660_t* p_iso = NULL;
 	udf_t* p_udf = NULL; 
 	udf_dirent_t *p_udf_root = NULL, *p_udf_file = NULL;

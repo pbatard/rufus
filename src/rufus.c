@@ -387,7 +387,8 @@ static BOOL GetDriveInfo(int ComboIndex)
 	memset(&SelectedDrive, 0, sizeof(SelectedDrive));
 	SelectedDrive.DeviceNumber = (DWORD)ComboBox_GetItemData(hDeviceList, ComboIndex);
 
-	if (!GetDrivePartitionData(SelectedDrive.DeviceNumber, fs_type, sizeof(fs_type)))
+	SelectedDrive.nPartitions = GetDrivePartitionData(SelectedDrive.DeviceNumber, fs_type, sizeof(fs_type));
+	if (SelectedDrive.nPartitions == 0)
 		return FALSE;
 
 	if (!DefineClusterSizes()) {
@@ -639,6 +640,7 @@ static BOOL GetUSBDevices(DWORD devnum)
 	// The rest are the vendor UASP drivers I know of so far - list may be incomplete!
 	const char* usbstor_name[] = { "USBSTOR", "UASPSTOR", "VUSBSTOR", "EtronSTOR" };
 	const char* scsi_name = "SCSI";
+	char letter_name[] = " (?:)";
 	BOOL r, found = FALSE, is_SCSI, is_UASP;
 	HDEVINFO dev_info = NULL;
 	SP_DEVINFO_DATA dev_info_data;
@@ -652,7 +654,7 @@ static BOOL GetUSBDevices(DWORD devnum)
 	LONG maxwidth = 0;
 	RECT rect;
 	int s, score;
-	char drive_letter, *devid, *devid_list = NULL;
+	char drive_letters[27], *devid, *devid_list = NULL, entry_msg[128];
 	char *label, *entry, buffer[MAX_PATH], str[sizeof("0000:0000")+1];
 	uint16_t vid, pid;
 	GUID _GUID_DEVINTERFACE_DISK =			// only known to some...
@@ -816,7 +818,7 @@ static BOOL GetUSBDevices(DWORD devnum)
 				break;
 			}
 
-			if (GetDriveLabel(drive_index, &drive_letter, &label)) {
+			if (GetDriveLabel(drive_index, drive_letters, &label)) {
 				if ((!enable_HDDs) && ((score = IsHDD(drive_index, vid, pid, buffer)) > 0)) {
 					uprintf("Device eliminated because it was detected as an USB Hard Drive (score %d > 0)\n", score);
 					uprintf("If this device is not an USB Hard Drive, please e-mail the author of this application\n");
@@ -826,17 +828,28 @@ static BOOL GetUSBDevices(DWORD devnum)
 					break;
 				}
 
-				// Drive letter ' ' is returned for drives that don't have a volume assigned yet
-				if (drive_letter == ' ') {
+				// The empty string is returned for drives that don't have any volumes assigned
+				if (drive_letters[0] == 0) {
 					entry = lmprintf(MSG_046, label, device_number.DeviceNumber);
 				} else {
-					if (drive_letter == app_dir[0]) {
-						uprintf("Removing %c: from the list: This is the disk from which " APPLICATION_NAME " is running!\n", drive_letter);
+					// We have multiple volumes assigned to the same device (multiple partitions)
+					// If that is the case, use "Multiple Volumes" instead of the label
+					safe_strcpy(entry_msg, sizeof(entry_msg), ((drive_letters[0] != 0) && (drive_letters[1] != 0))?
+						lmprintf(MSG_047):label);
+					for (k=0; drive_letters[k]; k++) {
+						// Append all the drive letters we detected
+						letter_name[2] = drive_letters[k];
+						safe_strcat(entry_msg, sizeof(entry_msg), letter_name);
+						if (drive_letters[k] == app_dir[0]) break;
+					}
+					// Repeat as we need to break the outside loop
+					if (drive_letters[k] == app_dir[0]) {
+						uprintf("Removing %c: from the list: This is the disk from which " APPLICATION_NAME " is running!\n", app_dir[0]);
 						safe_closehandle(hDrive);
 						safe_free(devint_detail_data);
 						break;
 					}
-					entry = lmprintf(MSG_047, label, drive_letter);
+					entry = entry_msg;
 				}
 
 				// Must ensure that the combo box is UNSORTED for indexes to be the same
@@ -1380,9 +1393,9 @@ static BOOL BootCheck(void)
 		}
 		if ((SL_MAJOR(iso_report.sl_version) >= 5) && (iso_report.sl_version != embedded_sl_version[1])) {
 			// Unlike what was the case for v4 and earlier, Syslinux v5+ versions are INCOMPATIBLE with one another!
-			_chdirU(app_dir);
-			_mkdir(FILES_DIR);
-			_chdir(FILES_DIR);
+			IGNORE_RETVAL(_chdirU(app_dir));
+			IGNORE_RETVAL(_mkdir(FILES_DIR));
+			IGNORE_RETVAL(_chdir(FILES_DIR));
 			for (i=0; i<2; i++) {
 				// Check if we already have the relevant ldlinux_v#.##.sys & ldlinux_v#.##.bss files
 				static_sprintf(tmp, "%s-%s/%s.%s", syslinux, &iso_report.sl_version_str[1], ldlinux, ldlinux_ext[i]);
@@ -1403,7 +1416,7 @@ static BOOL BootCheck(void)
 					return FALSE;
 				for (i=0; i<2; i++) {
 					static_sprintf(tmp, "%s-%s", syslinux, &iso_report.sl_version_str[1]);
-					_mkdir(tmp);
+					IGNORE_RETVAL(_mkdir(tmp));
 					static_sprintf(tmp, "%s.%s %s", ldlinux, ldlinux_ext[i], iso_report.sl_version_str);
 					SetWindowTextU(hISOProgressDlg, lmprintf(MSG_085, tmp));
 					static_sprintf(tmp, "%s/%s-%s/%s.%s", FILES_URL, syslinux, &iso_report.sl_version_str[1], ldlinux, ldlinux_ext[i]);
@@ -1417,9 +1430,9 @@ static BOOL BootCheck(void)
 			}
 		}
 	} else if (dt == DT_SYSLINUX_V5) {
-		_chdirU(app_dir);
-		_mkdir(FILES_DIR);
-		_chdir(FILES_DIR);
+		IGNORE_RETVAL(_chdirU(app_dir));
+		IGNORE_RETVAL(_mkdir(FILES_DIR));
+		IGNORE_RETVAL(_chdir(FILES_DIR));
 		static_sprintf(tmp, "%s-%s/%s.%s", syslinux, &embedded_sl_version_str[1][1], ldlinux, ldlinux_ext[2]);
 		fd = fopenU(tmp, "rb");
 		if (fd != NULL) {
@@ -1435,7 +1448,7 @@ static BOOL BootCheck(void)
 				return FALSE;
 			if (r == IDYES) {
 				static_sprintf(tmp, "%s-%s", syslinux, &embedded_sl_version_str[1][1]);
-				_mkdir(tmp);
+				IGNORE_RETVAL(_mkdir(tmp));
 				static_sprintf(tmp, "%s/%s-%s/%s.%s", FILES_URL, syslinux, &embedded_sl_version_str[1][1], ldlinux, ldlinux_ext[2]);
 				SetWindowTextU(hISOProgressDlg, lmprintf(MSG_085, tmp));
 				SetWindowTextU(hISOFileName, tmp);
@@ -2034,6 +2047,11 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				GetWindowTextU(hDeviceList, tmp, ARRAYSIZE(tmp));
 				if (MessageBoxU(hMainDialog, lmprintf(MSG_003, tmp),
 					APPLICATION_NAME, MB_OKCANCEL|MB_ICONWARNING) == IDCANCEL) {
+					format_op_in_progress = FALSE;
+					break;
+				}
+				if ((SelectedDrive.nPartitions > 1) && (MessageBoxU(hMainDialog, lmprintf(MSG_093),
+					lmprintf(MSG_094), MB_OKCANCEL|MB_ICONWARNING) == IDCANCEL)) {
 					format_op_in_progress = FALSE;
 					break;
 				}

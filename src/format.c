@@ -1158,7 +1158,7 @@ DWORD WINAPI CloseFormatPromptThread(LPVOID param) {
 #define CHECK_FOR_USER_CANCEL 	if (IS_ERROR(FormatStatus)) goto out
 DWORD WINAPI FormatThread(LPVOID param)
 {
-	int r, pt, bt, fs, dt;
+	int i, r, pt, bt, fs, dt;
 	BOOL ret, use_large_fat32;
 	DWORD DriveIndex = (DWORD)(uintptr_t)param;
 	HANDLE hPhysicalDrive = INVALID_HANDLE_VALUE;
@@ -1166,6 +1166,7 @@ DWORD WINAPI FormatThread(LPVOID param)
 	SYSTEMTIME lt;
 	char *bb_msg, *guid_volume = NULL;
 	char drive_name[] = "?:\\";
+	char drive_letters[27];
 	char logfile[MAX_PATH], *userdir;
 	char wim_image[] = "?:\\sources\\install.wim";
 	char efi_dst[] = "?:\\efi\\boot\\bootx64.efi";
@@ -1189,22 +1190,29 @@ DWORD WINAPI FormatThread(LPVOID param)
 	}
 
 	// At this stage with have both a handle and a lock to the physical drive...
-	if (!GetDriveLetter(DriveIndex, &drive_name[0])) {
+	if (!GetDriveLetters(DriveIndex, drive_letters)) {
 		uprintf("Failed to get a drive letter\n");
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_ASSIGN_LETTER);
 		goto out;
 	}
-	if (drive_name[0] == ' ') {
+	if (drive_letters[0] == 0) {
 		uprintf("No drive letter was assigned...\n");
 		drive_name[0] =  GetUnusedDriveLetter();
-		if (drive_name[0] == ' ') {
+		if (drive_name[0] == 0) {
 			uprintf("Could not find a suitable drive letter\n");
 			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_ASSIGN_LETTER);
 			goto out;
 		}
-	} else if (!DeleteVolumeMountPointA(drive_name)) {
-		uprintf("Failed to delete mountpoint %s: %s\n", drive_name, WindowsErrorString());
-		// Try to continue. We will bail out if this causes an issue.
+	} else {
+		// Unmount all mounted volumes that belong to this drive
+		// Do it in reverse so that we always end on the first volume letter
+		for (i=(int)safe_strlen(drive_letters); i>0; i--) {
+			drive_name[0] = drive_letters[i-1];
+			if (!DeleteVolumeMountPointA(drive_name)) {
+				uprintf("Failed to delete mountpoint %s: %s\n", drive_name, WindowsErrorString());
+				// Try to continue. We will bail out if this causes an issue.
+			}
+		}
 	}
 	uprintf("Will use '%c:' as volume mountpoint\n", drive_name[0]);
 

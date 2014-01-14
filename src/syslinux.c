@@ -104,7 +104,7 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter)
 
 	/* Access a copy of the ldlinux.sys & ldlinux.bss resources (downloaded or embedded) */
 	if ((syslinux_ldlinux_len[0] != 0) && (syslinux_ldlinux_len[1] != 0)) {
-		_chdirU(app_dir);
+		IGNORE_RETVAL(_chdirU(app_dir));
 		for (i=0; i<2; i++) {
 			syslinux_ldlinux[i] = (unsigned char*) malloc(syslinux_ldlinux_len[i]);
 			if (syslinux_ldlinux[i] == NULL)
@@ -237,9 +237,9 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter)
 	uprintf("Successfully wrote Syslinux boot record\n");
 
 	if (dt == DT_SYSLINUX_V5) {
-		_chdirU(app_dir);
+		IGNORE_RETVAL(_chdirU(app_dir));
 		static_sprintf(path, "%s/%s-%s", FILES_DIR, syslinux, &embedded_sl_version_str[1][1]);
-		_chdir(path);
+		IGNORE_RETVAL(_chdir(path));
 		static_sprintf(path, "%C:\\%s.%s", drive_letter, ldlinux, ldlinux_ext[2]);
 		fd = fopen(&path[3], "rb");
 		if (fd == NULL) {

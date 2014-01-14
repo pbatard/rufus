@@ -263,21 +263,22 @@ HANDLE GetLogicalHandle(DWORD DriveIndex, BOOL bWriteAccess, BOOL bLockDrive)
 }
 
 /*
- * Returns the first drive letter for a volume located on the drive identified by DriveIndex,
+ * Returns the drive letters for all volumes located on the drive identified by DriveIndex,
  * as well as the drive type. This is used as base for the 2 function calls that follow.
  */
-static BOOL _GetDriveLetterAndType(DWORD DriveIndex, char* drive_letter, UINT* drive_type)
+static BOOL _GetDriveLettersAndType(DWORD DriveIndex, char* drive_letters, UINT* drive_type)
 {
 	DWORD size;
 	BOOL r = FALSE;
 	STORAGE_DEVICE_NUMBER_REDEF device_number = {0};
 	HANDLE hDrive = INVALID_HANDLE_VALUE;
 	UINT _drive_type;
+	int i = 0;
 	char *drive, drives[26*4];	/* "D:\", "E:\", etc. */
 	char logical_drive[] = "\\\\.\\#:";
 
-	if (drive_letter != NULL)
-		*drive_letter = ' ';
+	if (drive_letters != NULL)
+		drive_letters[0] = 0;
 	if (drive_type != NULL)
 		*drive_type = DRIVE_UNKNOWN;
 	CheckDriveIndex(DriveIndex);
@@ -324,29 +325,31 @@ static BOOL _GetDriveLetterAndType(DWORD DriveIndex, char* drive_letter, UINT* d
 			uprintf("Could not get device number for device %s: %s\n",
 				logical_drive, WindowsErrorString());
 		} else if (device_number.DeviceNumber == DriveIndex) {
-			if (drive_letter != NULL)
-				*drive_letter = *drive;
+			if (drive_letters != NULL)
+				drive_letters[i++] = *drive;
+			// The drive type should be the same for all volumes, so we can overwrite
 			if (drive_type != NULL)
 				*drive_type = _drive_type;
-			break;
 		}
 	}
 
 out:
+	if (drive_letters != NULL)
+		drive_letters[i] = 0;
 	return r;
 }
 
 // Could have used a #define, but this is clearer
-BOOL GetDriveLetter(DWORD DriveIndex, char* drive_letter)
+BOOL GetDriveLetters(DWORD DriveIndex, char* drive_letters)
 {
-	return _GetDriveLetterAndType(DriveIndex, drive_letter, NULL);
+	return _GetDriveLettersAndType(DriveIndex, drive_letters, NULL);
 }
 
 // There's already a GetDriveType in the Windows API
 UINT GetDriveTypeFromIndex(DWORD DriveIndex)
 {
 	UINT drive_type;
-	_GetDriveLetterAndType(DriveIndex, NULL, &drive_type);
+	_GetDriveLettersAndType(DriveIndex, NULL, &drive_type);
 	return drive_type;
 }
 
@@ -380,14 +383,14 @@ char GetUnusedDriveLetter(void)
 	}
 
 out:
-	return (drive_letter>'Z')?' ':drive_letter;
+	return (drive_letter>'Z')?0:drive_letter;
 }
 
 /*
  * Return the drive letter and volume label
  * If the drive doesn't have a volume assigned, space is returned for the letter
  */
-BOOL GetDriveLabel(DWORD DriveIndex, char* letter, char** label)
+BOOL GetDriveLabel(DWORD DriveIndex, char* letters, char** label)
 {
 	HANDLE hPhysical;
 	DWORD size;
@@ -398,14 +401,15 @@ BOOL GetDriveLabel(DWORD DriveIndex, char* letter, char** label)
 
 	*label = STR_NO_LABEL;
 
-	if (!GetDriveLetter(DriveIndex, letter))
+	if (!GetDriveLetters(DriveIndex, letters))
 		return FALSE;
-	if (*letter == ' ') {
+	if (letters[0] == 0) {
 		// Drive without volume assigned - always enabled
 		return TRUE;
 	}
-	AutorunPath[0] = *letter;
-	wDrivePath[0] = *letter;
+	// We only care about an autorun.inf if we have a single volume
+	AutorunPath[0] = letters[0];
+	wDrivePath[0] = letters[0];
 
 	// Try to read an extended label from autorun first. Fallback to regular label if not found.
 	// In the case of card readers with no card, users can get an annoying popup asking them
@@ -414,11 +418,11 @@ BOOL GetDriveLabel(DWORD DriveIndex, char* letter, char** label)
 	if (DeviceIoControl(hPhysical, IOCTL_STORAGE_CHECK_VERIFY, NULL, 0, NULL, 0, &size, NULL))
 		AutorunLabel = get_token_data_file("label", AutorunPath);
 	else if (GetLastError() == ERROR_NOT_READY)
-		uprintf("Ignoring autorun.inf label for drive %c: %s\n", *letter,
+		uprintf("Ignoring autorun.inf label for drive %c: %s\n", letters[0],
 		(HRESULT_CODE(GetLastError()) == ERROR_NOT_READY)?"No media":WindowsErrorString());
 	safe_closehandle(hPhysical);
 	if (AutorunLabel != NULL) {
-		uprintf("Using autorun.inf label for drive %c: '%s'\n", *letter, AutorunLabel);
+		uprintf("Using autorun.inf label for drive %c: '%s'\n", letters[0], AutorunLabel);
 		strncpy(VolumeLabel, AutorunLabel, sizeof(VolumeLabel));
 		safe_free(AutorunLabel);
 		*label = VolumeLabel;
@@ -550,9 +554,9 @@ BOOL AnalyzePBR(HANDLE hLogicalVolume)
 /*
  * Fill the drive properties (size, FS, etc)
  */
-BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSystemNameSize)
+int GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSystemNameSize)
 {
-	BOOL r;
+	BOOL r, hasRufusExtra = FALSE;
 	HANDLE hPhysical;
 	DWORD size;
 	BYTE geometry[128], layout[4096], part_type;
@@ -574,14 +578,14 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 
 	hPhysical = GetPhysicalHandle(DriveIndex, FALSE, FALSE);
 	if (hPhysical == INVALID_HANDLE_VALUE)
-		return FALSE;
+		return 0;
 
 	r = DeviceIoControl(hPhysical, IOCTL_DISK_GET_DRIVE_GEOMETRY_EX,
 			NULL, 0, geometry, sizeof(geometry), &size, NULL);
 	if (!r || size <= 0) {
 		uprintf("Could not get geometry for drive 0x%02x: %s\n", DriveIndex, WindowsErrorString());
 		safe_closehandle(hPhysical);
-		return FALSE;
+		return 0;
 	}
 	SelectedDrive.DiskSize = DiskGeometry->DiskSize.QuadPart;
 	memcpy(&SelectedDrive.Geometry, &DiskGeometry->Geometry, sizeof(DISK_GEOMETRY));
@@ -593,7 +597,7 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 			NULL, 0, layout, sizeof(layout), &size, NULL );
 	if (!r || size <= 0) {
 		uprintf("Could not get layout for drive 0x%02x: %s\n", DriveIndex, WindowsErrorString());
-		return FALSE;
+		return 0;
 	}
 
 	switch (DriveLayout->PartitionStyle) {
@@ -618,6 +622,8 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 					DriveLayout->PartitionEntry[i].PartitionLength, DriveLayout->PartitionEntry[i].Mbr.HiddenSectors,
 					DriveLayout->PartitionEntry[i].Mbr.BootIndicator?"Yes":"No",
 					DriveLayout->PartitionEntry[i].Mbr.RecognizedPartition?"Yes":"No");
+				if (part_type == RUFUS_EXTRA_PARTITION_TYPE)	// This is a partition Rufus created => we can safely ignore it
+					hasRufusExtra = TRUE;
 				if (part_type == 0xee)	// Flag a protective MBR for non GPT platforms (XP)
 					SelectedDrive.has_protective_mbr = TRUE;
 			}
@@ -648,7 +654,9 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 	}
 	safe_closehandle(hPhysical);
 
-	return TRUE;
+	if (hasRufusExtra)
+		nb_partitions--;
+	return (int)nb_partitions;
 }
 
 /*
