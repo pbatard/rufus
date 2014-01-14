@@ -4,6 +4,7 @@ o Version 1.4.2 (2014.01.??)
     Add NTFS UEFI support, for targets that can support it
     Add insertion detection for USB memory card readers
     Add retry when writing ISO files... again
+    Add Chinese (Simplified) translation, courtesy of 佚名
     Add Indonesian translation, courtesy of Abe Akatsuki
     Add Malay translation, courtesy of Muhammad Aman
     Add Portuguese (Portugal) translation, courtesy of Fernando Baptista
