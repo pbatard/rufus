@@ -1,4 +1,4 @@
-o Version 1.4.2 (2014.01.??)
+o Version 1.4.2 (2014.01.18)
     Add USB Attached SCSI (UAS) support
     Add ReactOS support
     Add NTFS UEFI support, for targets that can support it
@@ -14,7 +14,7 @@ o Version 1.4.2 (2014.01.??)
     Always use English locale in the log, where possible
     Fix detection for some SanDisk, Kingston, HP and Toshiba drives
     Fix a potential issue with drive letter assignation
-    Many other minor fixes and improvements
+    Various other fixes and improvements
 
 o Version 1.4.1 (2013.12.05) [BUGFIX RELEASE]
     Fix broken Syslinux support (reported by ank91)

@@ -7,7 +7,7 @@ Features:
 - Creates bootable USB drives from bootable ISOs (Windows, Linux, etc.)
 - Twice as fast as Microsoft's USB/DVD tool or UNetbootin, on ISO->USB (1)
 - Can perform bad blocks check, with fake drive detection
-- Modern and familiar UI, with 15 languages supported natively (2)
+- Modern and familiar UI, with more than 20 languages supported natively (2)
 - Small footprint, no installation required
 - 100% Free Software (GPL v3)
 
