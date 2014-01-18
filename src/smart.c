@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * SMART HDD vs Flash detection (using ATA over USB, S.M.A.R.T., etc.)
- * Copyright © 2014 Pete Batard <pete@akeo.ie>
+ * Copyright © 2013-2014 Pete Batard <pete@akeo.ie>
  *
  * Based in part on scsiata.cpp from Smartmontools: http://smartmontools.sourceforge.net
  * Copyright © 2006-12 Douglas Gilbert <dgilbert@interlog.com>
@@ -493,6 +493,5 @@ int IsHDD(DWORD DriveIndex, uint16_t vid, uint16_t pid, const char* strid)
 	}
 
 	// TODO: try to perform inquiry if below a specific threshold (Verbatim, etc)?
-	// TODO: lower the score for well known UFD manufacturers (ADATA, SanDisk, etc.)?
 	return score;
 }
