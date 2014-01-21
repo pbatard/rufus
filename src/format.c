@@ -67,8 +67,6 @@ static void OutputUTF8Message(const char* src)
 	int len;
 	char *dst = NULL;
 	wchar_t* wdst = NULL;
-	PF_DECL(GetThreadUILanguage);
-	PF_INIT_OR_OUT(GetThreadUILanguage, kernel32);
 
 	if (src == NULL)
 		goto out;
@@ -78,20 +76,16 @@ static void OutputUTF8Message(const char* src)
 	if (len == 0)
 		goto out;
 
-	if (PRIMARYLANGID(pfGetThreadUILanguage()) != LANG_ENGLISH) {
-		len = MultiByteToWideChar(CP_OEMCP, 0, src, len, NULL, 0);
-		if (len == 0)
-			goto out;
-		wdst = (wchar_t*)calloc(len+1, sizeof(wchar_t));
-		if ((wdst == NULL) || (MultiByteToWideChar(CP_OEMCP, 0, src, len, wdst, len+1) == 0))
-			goto out;
-		dst = wchar_to_utf8(wdst);
-		if (dst == NULL)
-			goto out;
-		uprintf("%s", dst);
-	} else {
-		uprintf("%s", src);
-	}
+	len = MultiByteToWideChar(CP_OEMCP, 0, src, len, NULL, 0);
+	if (len == 0)
+		goto out;
+	wdst = (wchar_t*)calloc(len+1, sizeof(wchar_t));
+	if ((wdst == NULL) || (MultiByteToWideChar(CP_OEMCP, 0, src, len, wdst, len+1) == 0))
+		goto out;
+	dst = wchar_to_utf8(wdst);
+	if (dst == NULL)
+		goto out;
+	uprintf("%s", dst);
 
 out:
 	safe_free(dst);
@@ -1178,8 +1172,8 @@ DWORD WINAPI FormatThread(LPVOID param)
 	FILE* log_fd;
 	PF_DECL(GetThreadUILanguage);
 	PF_DECL(SetThreadUILanguage);
-	PF_INIT_OR_OUT(GetThreadUILanguage, kernel32);
-	PF_INIT_OR_OUT(SetThreadUILanguage, kernel32);
+	PF_INIT(GetThreadUILanguage, kernel32);
+	PF_INIT(SetThreadUILanguage, kernel32);
 
 	fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
 	dt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
@@ -1471,7 +1465,7 @@ DWORD WINAPI FormatThread(LPVOID param)
 		// NTFS fixup (WinPE/AIK images don't seem to boot without an extra checkdisk)
 		if ((dt == DT_ISO) && (fs == FS_NTFS)) {
 			// Try to ensure that all messages from Checkdisk will be in English
-			if (PRIMARYLANGID(pfGetThreadUILanguage()) != LANG_ENGLISH) {
+			if ((pfGetThreadUILanguage != NULL) && (PRIMARYLANGID(pfGetThreadUILanguage()) != LANG_ENGLISH)) {
 				pfSetThreadUILanguage(MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US));
 				if (PRIMARYLANGID(pfGetThreadUILanguage()) != LANG_ENGLISH)
 					uprintf("Note: CheckDisk messages may be localized");
