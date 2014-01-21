@@ -1,3 +1,6 @@
+o Version 1.4.3 (2013.01.21) [BUGFIX RELEASE]
+    Fix format operation not starting on Windows XP (reported by ank91)
+
 o Version 1.4.2 (2014.01.18)
     Add USB Attached SCSI (UAS) support
     Add ReactOS support
