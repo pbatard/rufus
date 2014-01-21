@@ -141,7 +141,8 @@ BOOL use_own_c32[NB_OLD_C32] = {FALSE, FALSE}, detect_fakes = TRUE, mbr_selected
 BOOL iso_op_in_progress = FALSE, format_op_in_progress = FALSE;
 BOOL enable_HDDs = FALSE, advanced_mode = TRUE, force_update = FALSE;
 int dialog_showing = 0;
-uint16_t rufus_version[4];
+uint16_t rufus_version[4], embedded_sl_version[2];
+char embedded_sl_version_str[2][12] = { "v?.??", "v?.??" };
 RUFUS_UPDATE update = { {0,0,0,0}, {0,0}, NULL, NULL};
 extern char szStatusMessage[256];
 
@@ -445,7 +446,7 @@ static void SetFSFromISO(void)
 	}
 
 	// Syslinux and EFI have precedence over bootmgr (unless the user selected BIOS as target type)
-	if ((iso_report.has_isolinux) || (IS_REACTOS(iso_report)) || ( (IS_EFI(iso_report)) && (bt == BT_UEFI))) {
+	if ((HAS_SYSLINUX(iso_report)) || (IS_REACTOS(iso_report)) || ( (IS_EFI(iso_report)) && (bt == BT_UEFI))) {
 		if (fs_mask & (1<<FS_FAT32)) {
 			selected_fs = FS_FAT32;
 		} else if (fs_mask & (1<<FS_FAT16)) {
@@ -531,7 +532,7 @@ static void SetTargetSystem(void)
 	if (SelectedDrive.PartitionType == PARTITION_STYLE_GPT) {
 		ts = 2;	// GPT/UEFI
 	} else if (SelectedDrive.has_protective_mbr || SelectedDrive.has_mbr_uefi_marker || (IS_EFI(iso_report) &&
-		(!iso_report.has_isolinux) && (!iso_report.has_bootmgr) && (!IS_WINPE(iso_report.winpe))) ) {
+		(!HAS_SYSLINUX(iso_report)) && (!iso_report.has_bootmgr) && (!IS_WINPE(iso_report.winpe))) ) {
 		ts = 1;	// MBR/UEFI
 	} else {
 		ts = 0;	// MBR/BIOS|UEFI
@@ -1171,6 +1172,7 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 	FILE* fd;
 	const char* old_c32_name[NB_OLD_C32] = OLD_C32_NAMES;
 	const char* new_c32_url[NB_OLD_C32] = NEW_C32_URL;
+	char isolinux_str[16] = "No";
 
 	if (iso_path == NULL)
 		goto out;
@@ -1185,41 +1187,45 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 		safe_free(iso_path);
 		goto out;
 	}
+	if (HAS_SYSLINUX(iso_report)) {
+		safe_sprintf(isolinux_str, sizeof(isolinux_str), "Yes (%s)", iso_report.sl_version_str);
+	}
 	uprintf("ISO label: '%s'\r\n  Size: %lld bytes\r\n  Has a >64 chars filename: %s\r\n  Has a >4GB file: %s\r\n"
-		"  ReactOS: %s\r\n  Uses EFI: %s%s\r\n  Uses Bootmgr: %s\r\n  Uses WinPE: %s%s\r\n  Uses isolinux: %s %s\r\n",
+		"  ReactOS: %s\r\n  Uses EFI: %s%s\r\n  Uses Bootmgr: %s\r\n  Uses WinPE: %s%s\r\n  Uses isolinux: %s\r\n",
 		iso_report.label, iso_report.projected_size, iso_report.has_long_filename?"Yes":"No", iso_report.has_4GB_file?"Yes":"No",
 		IS_REACTOS(iso_report)?"Yes":"No", (iso_report.has_efi || iso_report.has_win7_efi)?"Yes":"No",
 		(iso_report.has_win7_efi && (!iso_report.has_efi))?" (win7_x64)":"", iso_report.has_bootmgr?"Yes":"No",
-		IS_WINPE(iso_report.winpe)?"Yes":"No", (iso_report.uses_minint)?" (with /minint)":"", iso_report.has_isolinux?"Yes":"No",
-		iso_report.has_syslinux_v5?"(v5.0 or later)":iso_report.has_isolinux?"(v4.x or earlier)":"");
-	if (iso_report.has_isolinux && !iso_report.has_syslinux_v5) {
+		IS_WINPE(iso_report.winpe)?"Yes":"No", (iso_report.uses_minint)?" (with /minint)":"", isolinux_str);
+	if (HAS_SYSLINUX(iso_report) && (SL_MAJOR(iso_report.sl_version) < 5)) {
 		for (i=0; i<NB_OLD_C32; i++) {
 			uprintf("    With an old %s: %s\n", old_c32_name[i], iso_report.has_old_c32[i]?"Yes":"No");
 		}
 	}
-	if ( (!iso_report.has_bootmgr) && (!iso_report.has_isolinux) && (!IS_WINPE(iso_report.winpe)) 
+	if ( (!iso_report.has_bootmgr) && (!HAS_SYSLINUX(iso_report)) && (!IS_WINPE(iso_report.winpe)) 
 	  && (!iso_report.has_efi) && (!IS_REACTOS(iso_report)) ) {
 		MessageBoxU(hMainDialog, lmprintf(MSG_082), lmprintf(MSG_081), MB_OK|MB_ICONINFORMATION);
 		safe_free(iso_path);
 		SetMBRProps();
-	} else if (!iso_report.has_syslinux_v5) {	// This check is for Syslinux v4.x or earlier
-		_chdirU(app_dir);
-		for (i=0; i<NB_OLD_C32; i++) {
-			if (iso_report.has_old_c32[i]) {
-				fd = fopen(old_c32_name[i], "rb");
-				if (fd != NULL) {
-					// If a file already exists in the current directory, use that one
-					uprintf("Will replace obsolete '%s' from ISO with the one found in current directory\n", old_c32_name[i]);
-					fclose(fd);
-					use_own_c32[i] = TRUE;
-				} else {
-					PrintStatus(0, FALSE, MSG_204, old_c32_name[i]);
-					if (MessageBoxU(hMainDialog, lmprintf(MSG_084, old_c32_name[i], old_c32_name[i]),
-						 lmprintf(MSG_083, old_c32_name[i]), MB_YESNO|MB_ICONWARNING) == IDYES) {
-						SetWindowTextU(hISOProgressDlg, lmprintf(MSG_085, old_c32_name[i]));
-						SetWindowTextU(hISOFileName, new_c32_url[i]);
-						if (DownloadFile(new_c32_url[i], old_c32_name[i], hISOProgressDlg))
-							use_own_c32[i] = TRUE;
+	} else if (HAS_SYSLINUX(iso_report)) {
+		if (SL_MAJOR(iso_report.sl_version) < 5) {
+			_chdirU(app_dir);
+			for (i=0; i<NB_OLD_C32; i++) {
+				if (iso_report.has_old_c32[i]) {
+					fd = fopen(old_c32_name[i], "rb");
+					if (fd != NULL) {
+						// If a file already exists in the current directory, use that one
+						uprintf("Will replace obsolete '%s' from ISO with the one found in current directory\n", old_c32_name[i]);
+						fclose(fd);
+						use_own_c32[i] = TRUE;
+					} else {
+						PrintStatus(0, FALSE, MSG_204, old_c32_name[i]);
+						if (MessageBoxU(hMainDialog, lmprintf(MSG_084, old_c32_name[i], old_c32_name[i]),
+							 lmprintf(MSG_083, old_c32_name[i]), MB_YESNO|MB_ICONWARNING) == IDYES) {
+							SetWindowTextU(hISOProgressDlg, lmprintf(MSG_085, old_c32_name[i]));
+							SetWindowTextU(hISOFileName, new_c32_url[i]);
+							if (DownloadFile(new_c32_url[i], old_c32_name[i], hISOProgressDlg))
+								use_own_c32[i] = TRUE;
+						}
 					}
 				}
 			}
@@ -1319,10 +1325,14 @@ void ToggleAdvanced(void)
 
 static BOOL BootCheck(void)
 {
-	int fs, bt, dt, r;
+	int i, fs, bt, dt, r;
 	FILE* fd;
-	const char* ldlinux_name = "ldlinux.c32";
+	const char* ldlinux = "ldlinux";
+	const char* syslinux = "syslinux";
+	const char* ldlinux_ext[3] = { "sys", "bss", "c32" };
+	char tmp[MAX_PATH];
 
+	syslinux_ldlinux_len[0] = 0; syslinux_ldlinux_len[1] = 0;
 	dt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
 	if (dt == DT_ISO) {
 		if (iso_path == NULL) {
@@ -1350,7 +1360,7 @@ static BOOL BootCheck(void)
 				return FALSE;
 			}
 		} else if ((fs == FS_NTFS) && (!iso_report.has_bootmgr) && (!IS_WINPE(iso_report.winpe))) {
-			if (iso_report.has_isolinux) {
+			if (HAS_SYSLINUX(iso_report)) {
 				// Only FAT/FAT32 is supported for this type of ISO
 				MessageBoxU(hMainDialog, lmprintf(MSG_096), lmprintf(MSG_092), MB_OK|MB_ICONERROR);
 			} else {
@@ -1358,7 +1368,7 @@ static BOOL BootCheck(void)
 				MessageBoxU(hMainDialog, lmprintf(MSG_097), lmprintf(MSG_090), MB_OK|MB_ICONERROR);
 			}
 			return FALSE;
-		} else if (((fs == FS_FAT16)||(fs == FS_FAT32)) && (!iso_report.has_isolinux) && (!IS_REACTOS(iso_report))) {
+		} else if (((fs == FS_FAT16)||(fs == FS_FAT32)) && (!HAS_SYSLINUX(iso_report)) && (!IS_REACTOS(iso_report))) {
 			// FAT/FAT32 can only be used for isolinux based ISO images or when the Target Type is UEFI
 			MessageBoxU(hMainDialog, lmprintf(MSG_098), lmprintf(MSG_090), MB_OK|MB_ICONERROR);
 			return FALSE;
@@ -1368,23 +1378,68 @@ static BOOL BootCheck(void)
 			MessageBoxU(hMainDialog, lmprintf(MSG_100), lmprintf(MSG_099), MB_OK|MB_ICONERROR);
 			return FALSE;
 		}
+		if ((SL_MAJOR(iso_report.sl_version) >= 5) && (iso_report.sl_version != embedded_sl_version[1])) {
+			// Unlike what was the case for v4 and earlier, Syslinux v5+ versions are INCOMPATIBLE with one another!
+			_chdirU(app_dir);
+			_mkdir(FILES_DIR);
+			_chdir(FILES_DIR);
+			for (i=0; i<2; i++) {
+				// Check if we already have the relevant ldlinux_v#.##.sys & ldlinux_v#.##.bss files
+				static_sprintf(tmp, "%s-%s/%s.%s", syslinux, &iso_report.sl_version_str[1], ldlinux, ldlinux_ext[i]);
+				fd = fopen(tmp, "rb");
+				if (fd != NULL) {
+					fseek(fd, 0, SEEK_END);
+					syslinux_ldlinux_len[i] = (DWORD)ftell(fd);
+					fclose(fd);
+				}
+			}
+			if ((syslinux_ldlinux_len[0] != 0) && (syslinux_ldlinux_len[1] != 0)) {
+				uprintf("Will reuse '%s.%s' and '%s.%s' from './%s/%s-%s/' for Syslinux installation\n",
+					ldlinux, ldlinux_ext[0], ldlinux, ldlinux_ext[1], FILES_DIR, syslinux, &iso_report.sl_version_str[1]);
+			} else {
+				r = MessageBoxU(hMainDialog, lmprintf(MSG_114, iso_report.sl_version_str, embedded_sl_version_str[1]),
+					lmprintf(MSG_115), MB_YESNO|MB_ICONWARNING);
+				if (r != IDYES)
+					return FALSE;
+				for (i=0; i<2; i++) {
+					static_sprintf(tmp, "%s-%s", syslinux, &iso_report.sl_version_str[1]);
+					_mkdir(tmp);
+					static_sprintf(tmp, "%s.%s %s", ldlinux, ldlinux_ext[i], iso_report.sl_version_str);
+					SetWindowTextU(hISOProgressDlg, lmprintf(MSG_085, tmp));
+					static_sprintf(tmp, "%s/%s-%s/%s.%s", FILES_URL, syslinux, &iso_report.sl_version_str[1], ldlinux, ldlinux_ext[i]);
+					SetWindowTextU(hISOFileName, tmp);
+					syslinux_ldlinux_len[i] = DownloadFile(tmp, &tmp[sizeof(FILES_URL)], hISOProgressDlg);
+					if (syslinux_ldlinux_len[i] == 0) {
+						uprintf("Couldn't download the files - cancelling\n");
+						return FALSE;
+					}
+				}
+			}
+		}
 	} else if (dt == DT_SYSLINUX_V5) {
 		_chdirU(app_dir);
-		fd = fopen(ldlinux_name, "rb");
+		_mkdir(FILES_DIR);
+		_chdir(FILES_DIR);
+		static_sprintf(tmp, "%s-%s/%s.%s", syslinux, &embedded_sl_version_str[1][1], ldlinux, ldlinux_ext[2]);
+		fd = fopenU(tmp, "rb");
 		if (fd != NULL) {
-			uprintf("Will reuse '%s' for Syslinux v5\n", ldlinux_name);
+			uprintf("Will reuse './%s/%s' for Syslinux installation\n", FILES_DIR, tmp);
 			fclose(fd);
 		} else {
-			PrintStatus(0, FALSE, MSG_206, ldlinux_name);
-			// Syslinux v5.0 or later requires a '%s' file to be installed
-			r = MessageBoxU(hMainDialog, lmprintf(MSG_104, ldlinux_name, ldlinux_name),
-				lmprintf(MSG_103, ldlinux_name), MB_YESNOCANCEL|MB_ICONWARNING);
+			static_sprintf(tmp, "%s.%s", ldlinux, ldlinux_ext[2]);
+			PrintStatus(0, FALSE, MSG_206, tmp);
+			// MSG_104: "Syslinux v5.0 or later requires a '%s' file to be installed"
+			r = MessageBoxU(hMainDialog, lmprintf(MSG_104, tmp, tmp),
+				lmprintf(MSG_103, tmp), MB_YESNOCANCEL|MB_ICONWARNING);
 			if (r == IDCANCEL)
 				return FALSE;
 			if (r == IDYES) {
-				SetWindowTextU(hISOProgressDlg, lmprintf(MSG_085, ldlinux_name));
-				SetWindowTextU(hISOFileName, LDLINUX_C32_URL);
-				DownloadFile(LDLINUX_C32_URL, ldlinux_name, hISOProgressDlg);
+				static_sprintf(tmp, "%s-%s", syslinux, &embedded_sl_version_str[1][1]);
+				_mkdir(tmp);
+				static_sprintf(tmp, "%s/%s-%s/%s.%s", FILES_URL, syslinux, &embedded_sl_version_str[1][1], ldlinux, ldlinux_ext[2]);
+				SetWindowTextU(hISOProgressDlg, lmprintf(MSG_085, tmp));
+				SetWindowTextU(hISOFileName, tmp);
+				DownloadFile(tmp, &tmp[sizeof(FILES_URL)], hISOProgressDlg);
 			}
 		}
 	} else if (dt == DT_WINME) {
@@ -1401,9 +1456,11 @@ static BOOL BootCheck(void)
 void InitDialog(HWND hDlg)
 {
 	HINSTANCE hDllInst;
+	DWORD len;
 	HDC hDC;
 	int i, i16, s16;
-	char tmp[128], *token;
+	char tmp[128], *token, *buf;
+	static char* resource[2] = { MAKEINTRESOURCEA(IDR_SL_LDLINUX_V4_SYS), MAKEINTRESOURCEA(IDR_SL_LDLINUX_V5_SYS) };
 
 #ifdef RUFUS_TEST
 	ShowWindow(GetDlgItem(hDlg, IDC_TEST), SW_SHOW);
@@ -1449,6 +1506,16 @@ void InitDialog(HWND hDlg)
 		rufus_version[i] = (uint16_t)atoi(token);
 	uprintf(APPLICATION_NAME " version %d.%d.%d.%d\n", rufus_version[0], rufus_version[1], rufus_version[2], rufus_version[3]);
 	uprintf("Windows version: %s\n", WindowsVersionStr);
+	for (i=0; i<ARRAYSIZE(resource); i++) {
+		buf = (char*)GetResource(hMainInstance, resource[i], _RT_RCDATA, "ldlinux_sys", &len, FALSE);
+		if ((buf == NULL) || (len < 16)) {
+			uprintf("Warning: could not read embedded Syslinux v%d version", i+4);
+		} else {
+			embedded_sl_version[i] = (((uint8_t)strtoul(&buf[0xb], &token, 10))<<8) + (uint8_t)strtoul(&token[1], NULL, 10);
+			static_sprintf(embedded_sl_version_str[i], "v%d.%02d", SL_MAJOR(embedded_sl_version[i]), SL_MINOR(embedded_sl_version[i]));
+		}
+	}
+	uprintf("Syslinux version: %s, %s", embedded_sl_version_str[0], embedded_sl_version_str[1]);
 	uprintf("LCID: 0x%04X\n", GetUserDefaultUILanguage());
 
 	SetClusterSizeLabels();

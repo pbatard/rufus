@@ -19,18 +19,14 @@
 #include "setadv.h"
 
 /* The standard boot sector and ldlinux image */
-extern unsigned char* syslinux_bootsect;
-extern DWORD syslinux_bootsect_len;
-extern const int syslinux_bootsect_mtime;
+extern unsigned char* syslinux_ldlinux[2];
+extern DWORD syslinux_ldlinux_len[2];
+extern const int syslinux_ldlinux_mtime[2];
 
-extern unsigned char* syslinux_ldlinux;
-extern DWORD syslinux_ldlinux_len;
-extern const int syslinux_ldlinux_mtime;
-
-#define boot_sector	syslinux_bootsect
-#define boot_sector_len syslinux_bootsect_len
-#define boot_image	syslinux_ldlinux
-#define boot_image_len	syslinux_ldlinux_len
+#define boot_sector	syslinux_ldlinux[1]
+#define boot_sector_len syslinux_ldlinux_len[1]
+#define boot_image	syslinux_ldlinux[0]
+#define boot_image_len	syslinux_ldlinux_len[0]
 
 extern unsigned char syslinux_mbr[];
 extern const unsigned int syslinux_mbr_len;

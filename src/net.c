@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Networking functionality (web file download, check for update, etc.)
- * Copyright © 2012-2013 Pete Batard <pete@akeo.ie>
+ * Copyright © 2012-2014 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -239,7 +239,7 @@ const char* WinInetErrorString(void)
  * to the dialog in question, with WPARAM being set to nonzero for EXIT on success
  * and also attempt to indicate progress using an IDC_PROGRESS control
  */
-BOOL DownloadFile(const char* url, const char* file, HWND hProgressDialog)
+DWORD DownloadFile(const char* url, const char* file, HWND hProgressDialog)
 {
 	HWND hProgressBar = NULL;
 	BOOL r = FALSE;
@@ -251,6 +251,7 @@ BOOL DownloadFile(const char* url, const char* file, HWND hProgressDialog)
 	HINTERNET hSession = NULL, hConnection = NULL, hRequest = NULL;
 	URL_COMPONENTSA UrlParts = {sizeof(URL_COMPONENTSA), NULL, 1, (INTERNET_SCHEME)0,
 		hostname, sizeof(hostname), 0, NULL, 1, urlpath, sizeof(urlpath), NULL, 1};
+	size_t last_slash;
 	int i;
 
 	if (hProgressDialog != NULL) {
@@ -264,8 +265,15 @@ BOOL DownloadFile(const char* url, const char* file, HWND hProgressDialog)
 		SendMessage(hProgressDialog, UM_ISO_INIT, 0, 0);
 	}
 
-	PrintStatus(0, FALSE, MSG_240, file);
-	uprintf("Downloading %s from %s\n", file, url);
+	for (last_slash = safe_strlen(file); last_slash != 0; last_slash--) {
+		if ((file[last_slash] == '/') || (file[last_slash] == '\\')) {
+			last_slash++;
+			break;
+		}
+	}
+
+	PrintStatus(0, FALSE, MSG_240, &file[last_slash]);
+	uprintf("Downloading '%s' from %s\n", &file[last_slash], url);
 
 	if (!InternetCrackUrlA(url, (DWORD)safe_strlen(url), 0, &UrlParts)) {
 		uprintf("Unable to decode URL: %s\n", WinInetErrorString());
@@ -286,7 +294,7 @@ BOOL DownloadFile(const char* url, const char* file, HWND hProgressDialog)
 	_snprintf(agent, ARRAYSIZE(agent), APPLICATION_NAME "/%d.%d.%d.%d", rufus_version[0], rufus_version[1], rufus_version[2], rufus_version[3]);
 	hSession = InternetOpenA(agent, INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
 	if (hSession == NULL) {
-		uprintf("Could not open internet session: %s\n", WinInetErrorString());
+		uprintf("Could not open Internet session: %s\n", WinInetErrorString());
 		goto out;
 	}
 
@@ -300,7 +308,7 @@ BOOL DownloadFile(const char* url, const char* file, HWND hProgressDialog)
 		INTERNET_FLAG_HYPERLINK|INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTP|INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTPS|INTERNET_FLAG_NO_COOKIES|
 		INTERNET_FLAG_NO_UI|INTERNET_FLAG_NO_CACHE_WRITE, (DWORD_PTR)NULL);
 	if (hRequest == NULL) {
-		uprintf("Could not open url %s: %s\n", url, WinInetErrorString());
+		uprintf("Could not open URL %s: %s\n", url, WinInetErrorString());
 		goto out;
 	}
 
@@ -327,7 +335,7 @@ BOOL DownloadFile(const char* url, const char* file, HWND hProgressDialog)
 
 	fd = fopenU(file, "wb");
 	if (fd == NULL) {
-		uprintf("Unable to create file '%s': %s\n", file, WinInetErrorString());
+		uprintf("Unable to create file '%s': %s\n", &file[last_slash], WinInetErrorString());
 		goto out;
 	}
 
@@ -343,7 +351,7 @@ BOOL DownloadFile(const char* url, const char* file, HWND hProgressDialog)
 		SendMessage(hProgressBar, PBM_SETPOS, (WPARAM)(MAX_PROGRESS*((1.0f*dwSize)/(1.0f*dwTotalSize))), 0);
 		PrintStatus(0, FALSE, MSG_241, (100.0f*dwSize)/(1.0f*dwTotalSize));
 		if (fwrite(buf, 1, dwDownloaded, fd) != dwDownloaded) {
-			uprintf("Error writing file '%s': %s\n", file, WinInetErrorString());
+			uprintf("Error writing file '%s': %s\n", &file[last_slash], WinInetErrorString());
 			goto out;
 		}
 	}
@@ -354,7 +362,7 @@ BOOL DownloadFile(const char* url, const char* file, HWND hProgressDialog)
 		goto out;
 	} else {
 		r = TRUE;
-		uprintf("Successfully downloaded '%s'\n", file);
+		uprintf("Successfully downloaded '%s'\n", &file[last_slash]);
 	}
 
 out:
@@ -372,7 +380,7 @@ out:
 	if (hConnection) InternetCloseHandle(hConnection);
 	if (hSession) InternetCloseHandle(hSession);
 
-	return r;
+	return r?dwSize:0;
 }
 
 /* Threaded download */
@@ -380,7 +388,7 @@ static const char *_url, *_file;
 static HWND _hProgressDialog;
 static DWORD WINAPI _DownloadFileThread(LPVOID param)
 {
-	ExitThread(DownloadFile(_url, _file, _hProgressDialog));
+	ExitThread(DownloadFile(_url, _file, _hProgressDialog) != 0);
 }
 
 HANDLE DownloadFileThreaded(const char* url, const char* file, HWND hProgressDialog)

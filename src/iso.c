@@ -55,14 +55,16 @@ void cdio_destroy (CdIo_t* p_cdio) {}
 
 RUFUS_ISO_REPORT iso_report;
 int64_t iso_blocking_status = -1;
-BOOL enable_joliet = TRUE, enable_rockridge = TRUE;
+BOOL enable_joliet = TRUE, enable_rockridge = TRUE, has_ldlinux_c32;
 #define ISO_BLOCKING(x) do {x; iso_blocking_status++; } while(0)
 static const char* psz_extract_dir;
 static const char* bootmgr_efi_name = "bootmgr.efi";
 static const char* ldlinux_name = "ldlinux.sys";
-static const char* syslinux_v5_file = "ldlinux.c32";
+static const char* ldlinux_c32 = "ldlinux.c32";
 static const char* efi_dirname = "/efi/boot";
-static const char* isolinux_name[] = { "isolinux.cfg", "syslinux.cfg", "extlinux.conf"};
+static const char* syslinux_cfg[] = { "isolinux.cfg", "syslinux.cfg", "extlinux.conf"};
+static const char dot_isolinux_bin[] = ".\\isolinux.bin";
+static const char* isolinux_bin = &dot_isolinux_bin[2];
 static const char* pe_dirname[] = { "/i386", "/minint" };
 static const char* pe_file[] = { "ntdetect.com", "setupldr.bin", "txtsetup.sif" };
 static const char* reactos_name = "setupldr.sys"; // TODO: freeldr.sys doesn't seem to work
@@ -72,7 +74,7 @@ static const int64_t old_c32_threshold[NB_OLD_C32] = OLD_C32_THRESHOLD;
 static uint8_t i_joliet_level = 0;
 static uint64_t total_blocks, nb_blocks;
 static BOOL scan_only = FALSE;
-static StrArray config_path;
+static StrArray config_path, isolinux_path;
 
 // TODO: Timestamp & permissions preservation
 
@@ -117,6 +119,7 @@ static void log_handler (cdio_log_level_t level, const char *message)
 {
 	switch(level) {
 	case CDIO_LOG_DEBUG:
+		// TODO: use a registry key to enable libcdio debug?
 		return;
 	default:
 		uprintf("libcdio: %s\n", message);
@@ -134,14 +137,14 @@ static BOOL check_iso_props(const char* psz_dirname, BOOL* is_syslinux_cfg, BOOL
 
 	// Check for an isolinux/syslinux config file anywhere
 	*is_syslinux_cfg = FALSE;
-	for (i=0; i<ARRAYSIZE(isolinux_name); i++) {
-		if (safe_stricmp(psz_basename, isolinux_name[i]) == 0)
+	for (i=0; i<ARRAYSIZE(syslinux_cfg); i++) {
+		if (safe_stricmp(psz_basename, syslinux_cfg[i]) == 0)
 			*is_syslinux_cfg = TRUE;
 	}
 
-	// Check for a syslinux v5.0 file anywhere
-	if (safe_stricmp(psz_basename, syslinux_v5_file) == 0) {
-		iso_report.has_syslinux_v5 = TRUE;
+	// Check for a syslinux v5.0+ file anywhere
+	if (safe_stricmp(psz_basename, ldlinux_c32) == 0) {
+		has_ldlinux_c32 = TRUE;
 	}
 
 	// Check for an old incompatible c32 file anywhere
@@ -178,10 +181,14 @@ static BOOL check_iso_props(const char* psz_dirname, BOOL* is_syslinux_cfg, BOOL
 						iso_report.winpe |= (1<<i)<<(ARRAYSIZE(pe_dirname)*j);
 
 		if (*is_syslinux_cfg) {
-			iso_report.has_isolinux = TRUE;
 			// Maintain a list of all the isolinux/syslinux configs identified so far
 			StrArrayAdd(&config_path, psz_fullpath);
 		}
+		if (safe_stricmp(psz_basename, isolinux_bin) == 0) {
+			// Maintain a list of all the isolinux.bin files found
+			StrArrayAdd(&isolinux_path, psz_fullpath);
+		}
+
 		for (i=0; i<NB_OLD_C32; i++) {
 			if (is_old_c32[i])
 				iso_report.has_old_c32[i] = TRUE;
@@ -465,18 +472,20 @@ out:
 
 BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan)
 {
-	size_t i;
+	size_t i, k, size;
 	int j;
+	uint16_t sl_version;
 	FILE* fd;
 	BOOL r = FALSE;
 	iso9660_t* p_iso = NULL;
 	udf_t* p_udf = NULL; 
 	udf_dirent_t* p_udf_root;
 	LONG progress_style;
-	char* tmp;
-	char path[64];
+	char *tmp, *buf;
+	char path[MAX_PATH];
 	const char* basedir[] = { "i386", "minint" };
 	const char* tmp_sif = ".\\txtsetup.sif~";
+	const char ISOLINUX[] = { 'I', 'S', 'O', 'L', 'I', 'N', 'U', 'X', ' ' };
 	iso_extension_mask_t iso_extension_mask = ISO_EXTENSION_ALL;
 
 	if ((src_iso == NULL) || (dest_dir == NULL))
@@ -489,8 +498,10 @@ BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan)
 	if (scan_only) {
 		total_blocks = 0;
 		memset(&iso_report, 0, sizeof(iso_report));
+		has_ldlinux_c32 = FALSE;
 		// String array of all isolinux/syslinux locations
 		StrArrayCreate(&config_path, 8);
+		StrArrayCreate(&isolinux_path, 8);
 		// Change the Window title and static text
 		SetWindowTextU(hISOProgressDlg, lmprintf(MSG_202));
 		SetWindowTextU(hISOFileName, lmprintf(MSG_202));
@@ -566,14 +577,65 @@ out:
 		// We use the fact that UDF_BLOCKSIZE and ISO_BLOCKSIZE are the same here
 		iso_report.projected_size = total_blocks * ISO_BLOCKSIZE;
 		// We will link the existing isolinux.cfg from a syslinux.cfg we create
-		// If multiple config file exist, choose the one with the shortest path
-		if (iso_report.has_isolinux) {
+		// If multiple config files exist, choose the one with the shortest path
+		// (so that a '/syslinux.cfg' is preferred over a '/isolinux/isolinux.cfg')
+		if (!IsStrArrayEmpty(config_path)) {
 			safe_strcpy(iso_report.cfg_path, sizeof(iso_report.cfg_path), config_path.Table[0]);
 			for (i=1; i<config_path.Index; i++) {
 				if (safe_strlen(iso_report.cfg_path) > safe_strlen(config_path.Table[i]))
 					safe_strcpy(iso_report.cfg_path, sizeof(iso_report.cfg_path), config_path.Table[i]);
 			}
 			uprintf("Will use %s for Syslinux\n", iso_report.cfg_path);
+			// Extract all of the isolinux.bin files we found to identify their versions
+			for (i=0; i<isolinux_path.Index; i++) {
+				size = (size_t)ExtractISOFile(src_iso, isolinux_path.Table[i], dot_isolinux_bin);
+				if (size == 0) {
+					uprintf("Could not access %s\n", isolinux_path.Table[i]);
+				} else {
+					buf = (char*)calloc(size, 1);
+					if (buf == NULL) break;
+					fd = fopen(dot_isolinux_bin, "rb");
+					if (fd == NULL) {
+						free(buf);
+						continue;
+					}
+					fread(buf, 1, size, fd);
+					fclose(fd);
+					for (k=0; k<size-16; k++) {
+						if (memcmp(&buf[k], ISOLINUX, sizeof(ISOLINUX)) == 0) {
+							k += sizeof(ISOLINUX);
+							sl_version = (((uint8_t)strtoul(&buf[k], &tmp, 10))<<8) + (uint8_t)strtoul(&tmp[1], NULL, 10);
+							if (iso_report.sl_version == 0) {
+								iso_report.sl_version = sl_version;
+								j = (int)i;
+							} else if (iso_report.sl_version != sl_version) {
+								uprintf("Found conflicting %s versions:\n  '%s' (v%d.%02d) vs '%s' (v%d.%02d)\n", isolinux_bin,
+									isolinux_path.Table[j], SL_MAJOR(iso_report.sl_version), SL_MINOR(iso_report.sl_version),
+									isolinux_path.Table[i], SL_MAJOR(sl_version), SL_MINOR(sl_version));
+							}
+							break;
+						}
+					}
+					free(buf);
+					_unlink(dot_isolinux_bin);
+				}
+			}
+			if (iso_report.sl_version != 0) {
+				static_sprintf(iso_report.sl_version_str, "v%d.%02d",
+					SL_MAJOR(iso_report.sl_version), SL_MINOR(iso_report.sl_version));
+				uprintf("Detected Isolinux version: %s (from '%s')",
+					iso_report.sl_version_str, isolinux_path.Table[j]);
+				if ( (has_ldlinux_c32 && (SL_MAJOR(iso_report.sl_version) < 5))
+				  || (!has_ldlinux_c32 && (SL_MAJOR(iso_report.sl_version) >= 5)) )
+					uprintf("Warning: Conflict between Isolinux version and the presence of ldlinux.c32...\n");
+			} else {
+				// Couldn't find a version from isolinux.bin. Force set to the versions we embed
+				iso_report.sl_version = embedded_sl_version[has_ldlinux_c32?1:0];
+				static_sprintf(iso_report.sl_version_str, "v%d.%02d",
+					SL_MAJOR(iso_report.sl_version), SL_MINOR(iso_report.sl_version));
+				uprintf("Warning: Could not detect Isolinux version - Forcing to %s (embedded)",
+					iso_report.sl_version_str);
+			}
 		}
 		if (IS_WINPE(iso_report.winpe)) {
 			// In case we have a WinPE 1.x based iso, we extract and parse txtsetup.sif
@@ -593,7 +655,8 @@ out:
 			safe_free(tmp);
 		}
 		StrArrayDestroy(&config_path);
-	} else if (iso_report.has_isolinux) {
+		StrArrayDestroy(&isolinux_path);
+	} else if (!IsStrArrayEmpty(config_path)) {
 		safe_sprintf(path, sizeof(path), "%s\\syslinux.cfg", dest_dir);
 		// Create a /syslinux.cfg (if none exists) that points to the existing isolinux cfg
 		fd = fopen(path, "r");
@@ -626,14 +689,14 @@ out:
 	return (r == 0);
 }
 
-BOOL ExtractISOFile(const char* iso, const char* iso_file, const char* dest_file)
+int64_t ExtractISOFile(const char* iso, const char* iso_file, const char* dest_file)
 {
 	size_t i;
 	ssize_t read_size;
 	int64_t file_length;
 	char buf[UDF_BLOCKSIZE];
 	DWORD buf_size, wr_size;
-	BOOL s, r = FALSE;
+	BOOL s, r = 0;
 	iso9660_t* p_iso = NULL;
 	udf_t* p_udf = NULL; 
 	udf_dirent_t *p_udf_root = NULL, *p_udf_file = NULL;
@@ -678,8 +741,8 @@ BOOL ExtractISOFile(const char* iso, const char* iso_file, const char* dest_file
 			goto out;
 		}
 		file_length -= read_size;
+		r += read_size;
 	}
-	r = TRUE;
 	goto out;
 
 try_iso:
@@ -710,8 +773,8 @@ try_iso:
 			goto out;
 		}
 		file_length -= ISO_BLOCKSIZE;
+		r += ISO_BLOCKSIZE;
 	}
-	r = TRUE;
 
 out:
 	safe_closehandle(file_handle);
@@ -726,5 +789,5 @@ out:
 		iso9660_close(p_iso);
 	if (p_udf != NULL)
 		udf_close(p_udf);
-	return (r == 0);
+	return r;
 }

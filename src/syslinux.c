@@ -30,16 +30,15 @@
 #include "drive.h"
 #include "resource.h"
 #include "localization.h"
+#include "msapi_utf8.h"
 
 #include "syslinux.h"
 #include "syslxfs.h"
 #include "libfat.h"
 #include "setadv.h"
 
-unsigned char* syslinux_ldlinux = NULL;
-DWORD syslinux_ldlinux_len;
-unsigned char* syslinux_bootsect = NULL;
-DWORD syslinux_bootsect_len;
+unsigned char* syslinux_ldlinux[2] = { NULL, NULL };
+DWORD syslinux_ldlinux_len[2];
 unsigned char* syslinux_mboot = NULL;
 DWORD syslinux_mboot_len;
 
@@ -78,68 +77,90 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter)
 	DWORD bytes_written;
 	BOOL r = FALSE;
 	FILE* fd;
+	size_t len;
 
 	static unsigned char sectbuf[SECTOR_SIZE];
 	static char* resource[2][2] = {
 		{ MAKEINTRESOURCEA(IDR_SL_LDLINUX_V4_SYS), MAKEINTRESOURCEA(IDR_SL_LDLINUX_V4_BSS) },
 		{ MAKEINTRESOURCEA(IDR_SL_LDLINUX_V5_SYS), MAKEINTRESOURCEA(IDR_SL_LDLINUX_V5_BSS) } };
-	static char ldlinux_path[] = "?:\\ldlinux.sys";
-	static char* ldlinux_sys = &ldlinux_path[3];
-	const char* ldlinux_c32 = "ldlinux.c32";
+	const char* ldlinux = "ldlinux";
+	const char* syslinux = "syslinux";
+	const char* ldlinux_ext[3] = { "sys", "bss", "c32" };
 	const char* mboot_c32 = "mboot.c32";
-	char path[MAX_PATH];
+	char path[MAX_PATH], tmp[64];
 	struct libfat_filesystem *fs;
 	libfat_sector_t s, *secp;
 	libfat_sector_t *sectors = NULL;
 	int ldlinux_sectors;
 	uint32_t ldlinux_cluster;
-	int nsectors;
+	int i, nsectors;
 	int dt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
-	BOOL use_v5 = (dt == DT_SYSLINUX_V5) || ((dt == DT_ISO) && (iso_report.has_syslinux_v5));
+	BOOL use_v5 = (dt == DT_SYSLINUX_V5) || ((dt == DT_ISO) && (SL_MAJOR(iso_report.sl_version) >= 5));
 
-	PrintStatus(0, TRUE, MSG_234, use_v5?5:4);
-
-	ldlinux_path[0] = drive_letter;
+	PrintStatus(0, TRUE, MSG_234, (dt == DT_ISO)?iso_report.sl_version_str:embedded_sl_version_str[use_v5?1:0]);
 
 	/* Initialize the ADV -- this should be smarter */
 	syslinux_reset_adv(syslinux_adv);
 
-	/* Access a copy of the ldlinux.sys & ldlinux.bss resources */
-	syslinux_ldlinux = GetResource(hMainInstance, resource[use_v5?1:0][0],
-		_RT_RCDATA, ldlinux_sys, &syslinux_ldlinux_len, TRUE);
-	syslinux_bootsect = GetResource(hMainInstance, resource[use_v5?1:0][1],
-		_RT_RCDATA, "ldlinux.bss", &syslinux_bootsect_len, TRUE);
-	if ((syslinux_ldlinux == NULL) || (syslinux_bootsect == NULL)) {
-		goto out;
+	/* Access a copy of the ldlinux.sys & ldlinux.bss resources (downloaded or embedded) */
+	if ((syslinux_ldlinux_len[0] != 0) && (syslinux_ldlinux_len[1] != 0)) {
+		_chdirU(app_dir);
+		for (i=0; i<2; i++) {
+			syslinux_ldlinux[i] = (unsigned char*) malloc(syslinux_ldlinux_len[i]);
+			if (syslinux_ldlinux[i] == NULL)
+				goto out;
+			static_sprintf(path, "%s/%s-%s/%s.%s", FILES_DIR, syslinux, &iso_report.sl_version_str[1], ldlinux, i==0?"sys":"bss");
+			fd = fopen(path, "rb");
+			if (fd == NULL) {
+				uprintf("Could not open %s\n", path);
+				goto out;
+			}
+			len = fread(syslinux_ldlinux[i], 1, (size_t)syslinux_ldlinux_len[i], fd);
+			fclose(fd);
+			if (len != (size_t)syslinux_ldlinux_len[i]) {
+				uprintf("Could not read %s\n", path);
+				goto out;
+			}
+			uprintf("Using existing './%s'\n", path);
+		}
+	} else {
+		for (i=0; i<2; i++) {
+		static_sprintf(tmp, "%s.%s", ldlinux, ldlinux_ext[i]);
+		syslinux_ldlinux[i] = GetResource(hMainInstance, resource[use_v5?1:0][i],
+			_RT_RCDATA, tmp, &syslinux_ldlinux_len[i], TRUE);
+		if (syslinux_ldlinux[i] == NULL)
+			goto out;
+		}
 	}
 
 	/* Create ldlinux.sys file */
-	f_handle = CreateFileA(ldlinux_path, GENERIC_READ | GENERIC_WRITE,
+	static_sprintf(path, "%C:\\%s.%s", drive_letter, ldlinux, ldlinux_ext[0]);
+	f_handle = CreateFileA(path, GENERIC_READ | GENERIC_WRITE,
 			  FILE_SHARE_READ | FILE_SHARE_WRITE,
 			  NULL, CREATE_ALWAYS,
 			  FILE_ATTRIBUTE_READONLY | FILE_ATTRIBUTE_SYSTEM |
 			  FILE_ATTRIBUTE_HIDDEN, NULL);
 
 	if (f_handle == INVALID_HANDLE_VALUE) {
-		uprintf("Unable to create '%s'\n", ldlinux_sys);
+		uprintf("Unable to create '%s'\n", &path[3]);
 		goto out;
 	}
 
 	/* Write ldlinux.sys file */
-	if (!WriteFile(f_handle, syslinux_ldlinux, syslinux_ldlinux_len,
+	if (!WriteFile(f_handle, syslinux_ldlinux[0], syslinux_ldlinux_len[0],
 		   &bytes_written, NULL) ||
-		bytes_written != syslinux_ldlinux_len) {
-		uprintf("Could not write '%s'\n", ldlinux_sys);
+		bytes_written != syslinux_ldlinux_len[0]) {
+		uprintf("Could not write '%s'\n", &path[3]);
 		goto out;
 	}
 	if (!WriteFile(f_handle, syslinux_adv, 2 * ADV_SIZE,
 		   &bytes_written, NULL) ||
 		bytes_written != 2 * ADV_SIZE) {
-		uprintf("Could not write ADV to '%s'\n", ldlinux_sys);
+		uprintf("Could not write ADV to '%s'\n", &path[3]);
 		goto out;
 	}
 
-	uprintf("Successfully wrote '%s'\n", ldlinux_sys);
+	uprintf("Successfully wrote '%s'\n", &path[3]);
 	if (dt != DT_ISO)
 		UpdateProgress(OP_DOS, -1.0f);
 
@@ -157,7 +178,7 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter)
 	}
 
 	/* Map the file (is there a better way to do this?) */
-	ldlinux_sectors = (syslinux_ldlinux_len + 2 * ADV_SIZE + SECTOR_SIZE - 1) >> SECTOR_SHIFT;
+	ldlinux_sectors = (syslinux_ldlinux_len[0] + 2 * ADV_SIZE + SECTOR_SIZE - 1) >> SECTOR_SHIFT;
 	sectors = (libfat_sector_t*) calloc(ldlinux_sectors, sizeof *sectors);
 	if (sectors == NULL)
 		goto out;
@@ -182,10 +203,10 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter)
 
 	/* Rewrite the file */
 	if (SetFilePointer(f_handle, 0, NULL, FILE_BEGIN) != 0 ||
-		!WriteFile(f_handle, syslinux_ldlinux, syslinux_ldlinux_len,
+		!WriteFile(f_handle, syslinux_ldlinux[0], syslinux_ldlinux_len[0],
 			   &bytes_written, NULL)
-		|| bytes_written != syslinux_ldlinux_len) {
-		uprintf("Could not write '%s': %s\n", ldlinux_sys, WindowsErrorString());
+		|| bytes_written != syslinux_ldlinux_len[0]) {
+		uprintf("Could not write '%s': %s\n", &path[3], WindowsErrorString());
 		goto out;
 	}
 
@@ -216,16 +237,19 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter)
 	uprintf("Successfully wrote Syslinux boot record\n");
 
 	if (dt == DT_SYSLINUX_V5) {
-		fd = fopen(ldlinux_c32, "rb");
+		_chdirU(app_dir);
+		static_sprintf(path, "%s/%s-%s", FILES_DIR, syslinux, &embedded_sl_version_str[1][1]);
+		_chdir(path);
+		static_sprintf(path, "%C:\\%s.%s", drive_letter, ldlinux, ldlinux_ext[2]);
+		fd = fopen(&path[3], "rb");
 		if (fd == NULL) {
-			uprintf("Caution: No '%s' was provided. The target will be missing a required Syslinux file!\n", ldlinux_c32);
+			uprintf("Caution: No '%s' was provided. The target will be missing a required Syslinux file!\n", &path[3]);
 		} else {
 			fclose(fd);
-			ldlinux_path[11] = 'c'; ldlinux_path[12] = '3'; ldlinux_path[13] = '2';
-			if (CopyFileA(ldlinux_c32, ldlinux_path, TRUE)) {
-				uprintf("Created '%s' (from local copy)", ldlinux_path);
+			if (CopyFileA(&path[3], path, TRUE)) {
+				uprintf("Created '%s' (from '%s/%s-%s/%s')", path, FILES_DIR, syslinux, &embedded_sl_version_str[1][1], &path[3]);
 			} else {
-				uprintf("Failed to create '%s': %s\n", ldlinux_path, WindowsErrorString());
+				uprintf("Failed to create '%s': %s\n", path, WindowsErrorString());
 			}
 		}
 	} else if (IS_REACTOS(iso_report)) {
@@ -236,7 +260,7 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter)
 			goto out;
 		}
 		/* Create mboot.c32 file */
-		safe_sprintf(path, sizeof(path), "%c:\\%s", drive_letter, mboot_c32);
+		static_sprintf(path, "%C:\\%s", drive_letter, mboot_c32);
 		f_handle = CreateFileA(path, GENERIC_READ | GENERIC_WRITE,
 				  FILE_SHARE_READ | FILE_SHARE_WRITE,
 				  NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
@@ -251,7 +275,7 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter)
 			goto out;
 		}
 		safe_closehandle(f_handle);
-		safe_sprintf(path, sizeof(path), "%c:\\syslinux.cfg", drive_letter);
+		static_sprintf(path, "%C:\\syslinux.cfg", drive_letter);
 		fd = fopen(path, "w");
 		if (fd == NULL) {
 			uprintf("Could not create ReactOS 'syslinux.cfg'\n");
@@ -269,8 +293,8 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter)
 	r = TRUE;
 
 out:
-	safe_free(syslinux_ldlinux);
-	safe_free(syslinux_bootsect);
+	safe_free(syslinux_ldlinux[0]);
+	safe_free(syslinux_ldlinux[1]);
 	safe_free(sectors);
 	safe_closehandle(d_handle);
 	safe_closehandle(f_handle);

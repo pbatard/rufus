@@ -59,7 +59,10 @@
 #define WHITE                       RGB(255,255,255)
 #define SEPARATOR_GREY              RGB(223,223,223)
 #define RUFUS_URL                   "http://rufus.akeo.ie"
+#define DOWNLOAD_URL                RUFUS_URL "/downloads"
+#define FILES_URL                   RUFUS_URL "/files"
 #define SEVENZIP_URL                "http://sourceforge.net/projects/sevenzip/files/7-Zip/"
+#define FILES_DIR                   "rufus_files"
 #define IGNORE_RETVAL(expr)         do { (void)(expr); } while(0)
 #ifndef ARRAYSIZE
 #define ARRAYSIZE(A)                (sizeof(A)/sizeof((A)[0]))
@@ -80,6 +83,7 @@
 #define safe_closehandle(h) do {if ((h != INVALID_HANDLE_VALUE) && (h != NULL)) {CloseHandle(h); h = INVALID_HANDLE_VALUE;}} while(0)
 #define safe_unlockclose(h) do {if ((h != INVALID_HANDLE_VALUE) && (h != NULL)) {UnlockDrive(h); CloseHandle(h); h = INVALID_HANDLE_VALUE;}} while(0)
 #define safe_sprintf(dst, count, ...) do {_snprintf(dst, count, __VA_ARGS__); (dst)[(count)-1] = 0; } while(0)
+#define static_sprintf(dst, ...) safe_sprintf(dst, sizeof(dst), __VA_ARGS__)
 #define safe_strlen(str) ((((char*)str)==NULL)?0:strlen(str))
 #define safe_strdup _strdup
 #if defined(_MSC_VER)
@@ -203,14 +207,14 @@ typedef struct {
 
 /* Special handling for old .c32 files we need to replace */
 #define NB_OLD_C32          2
-#define OLD_C32_NAMES       {"menu.c32", "vesamenu.c32"}
-#define OLD_C32_THRESHOLD   {53500, 148000}
-#define NEW_C32_URL         {RUFUS_URL "/downloads/menu.c32", RUFUS_URL "/downloads/vesamenu.c32"}
-#define LDLINUX_C32_URL     RUFUS_URL "/downloads/ldlinux.c32"
+#define OLD_C32_NAMES       { "menu.c32", "vesamenu.c32" }
+#define OLD_C32_THRESHOLD   { 53500, 148000 }
+#define NEW_C32_URL         { DOWNLOAD_URL "/menu.c32", DOWNLOAD_URL "/vesamenu.c32" }
 
 /* ISO details that the application may want */
 #define WINPE_MININT    0x2A
 #define WINPE_I386      0x15
+#define HAS_SYSLINUX(r) (r.sl_version != 0)
 #define IS_WINPE(r)     (((r&WINPE_MININT) == WINPE_MININT)||((r&WINPE_I386) == WINPE_I386))
 #define IS_EFI(r)       ((r.has_efi) || (r.has_win7_efi))
 #define IS_REACTOS(r)   (r.reactos_path[0] != 0)
@@ -228,13 +232,17 @@ typedef struct {
 	BOOL has_bootmgr;
 	BOOL has_efi;
 	BOOL has_win7_efi;
-	BOOL has_isolinux;
 	BOOL has_autorun;
 	BOOL has_old_c32[NB_OLD_C32];
 	BOOL has_old_vesamenu;
-	BOOL has_syslinux_v5;
 	BOOL uses_minint;
+	uint16_t sl_version;	// Syslinux/Isolinux version
+	char sl_version_str[12];
 } RUFUS_ISO_REPORT;
+
+/* Isolate the Syslinux version numbers */
+#define SL_MAJOR(x) ((uint8_t)((x)>>8))
+#define SL_MINOR(x) ((uint8_t)(x))
 
 typedef struct {
 	uint16_t version[4];
@@ -277,14 +285,16 @@ extern float fScale;
 extern char szFolderPath[MAX_PATH], app_dir[MAX_PATH];
 extern char* iso_path;
 extern DWORD FormatStatus;
+extern DWORD syslinux_ldlinux_len[2];
 extern RUFUS_DRIVE_INFO SelectedDrive;
 extern const int nb_steps[FS_MAX];
 extern BOOL use_own_c32[NB_OLD_C32], detect_fakes, iso_op_in_progress, format_op_in_progress;
 extern RUFUS_ISO_REPORT iso_report;
 extern int64_t iso_blocking_status;
-extern uint16_t rufus_version[4];
+extern uint16_t rufus_version[4], embedded_sl_version[2];
 extern int nWindowsVersion;
 extern char WindowsVersionStr[128];
+extern char embedded_sl_version_str[2][12];
 extern RUFUS_UPDATE update;
 extern int dialog_showing;
 
@@ -316,7 +326,7 @@ extern BOOL Notification(int type, const notification_info* more_info, char* tit
 extern BOOL Question(char* title, char* format, ...);
 extern BOOL ExtractDOS(const char* path);
 extern BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan);
-extern BOOL ExtractISOFile(const char* iso, const char* iso_file, const char* dest_file);
+extern int64_t ExtractISOFile(const char* iso, const char* iso_file, const char* dest_file);
 extern BOOL InstallSyslinux(DWORD drive_index, char drive_letter);
 DWORD WINAPI FormatThread(void* param);
 extern BOOL CreateProgress(void);
@@ -326,7 +336,7 @@ extern BOOL FileIO(BOOL save, char* path, char** buffer, DWORD* size);
 extern unsigned char* GetResource(HMODULE module, char* name, char* type, const char* desc, DWORD* len, BOOL duplicate);
 extern BOOL SetLGP(BOOL bRestore, BOOL* bExistingKey, const char* szPath, const char* szPolicy, DWORD dwValue);
 extern LONG GetEntryWidth(HWND hDropDown, const char* entry);
-extern BOOL DownloadFile(const char* url, const char* file, HWND hProgressDialog);
+extern DWORD DownloadFile(const char* url, const char* file, HWND hProgressDialog);
 extern HANDLE DownloadFileThreaded(const char* url, const char* file, HWND hProgressDialog);
 extern INT_PTR CALLBACK UpdateCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
 extern BOOL SetUpdateCheck(void);
@@ -358,6 +368,7 @@ static __inline void *_reallocf(void *ptr, size_t size)
 
 /* Basic String Array */
 typedef struct {
+	// TODO: rename 'Table' to 'String'
 	char** Table;
 	size_t Index;	// Current array size
 	size_t Max;		// Maximum array size
@@ -366,6 +377,7 @@ extern void StrArrayCreate(StrArray* arr, size_t initial_size);
 extern void StrArrayAdd(StrArray* arr, const char* str);
 extern void StrArrayClear(StrArray* arr);
 extern void StrArrayDestroy(StrArray* arr);
+#define IsStrArrayEmpty(arr) (arr.Index == 0)
 
 /*
  * typedefs for the function prototypes. Use the something like:
@@ -389,7 +401,7 @@ static __inline HMODULE GetDLLHandle(char* szDLLName)
 #define PF_INIT(proc, dllname) pf##proc = (proc##_t) GetProcAddress(GetDLLHandle(#dllname), #proc)
 #define PF_INIT_OR_OUT(proc, dllname) \
 	PF_INIT(proc, dllname); if (pf##proc == NULL) { \
-	uprintf("Unable to access %s DLL: %s\n", #dllname, \
+	uprintf("Unable to locate %s() in %s.dll: %s\n", #proc, #dllname, \
 	WindowsErrorString()); goto out; }
 
 /* Clang/MinGW32 has an issue with intptr_t */
