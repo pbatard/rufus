@@ -75,7 +75,7 @@ static str_score_t str_score[] = {
 	{ "SEAGATE", 10 },
 	{ "SAMSUNG", 10 },
 	{ "FUJITSU", 10 },
-	{ "TOSHIBA", 10 },
+	{ "TOSHIBA", 5 },
 	{ "QUANTUM", 10 },
 	{ "EXCELSTOR", 10 },
 };
@@ -117,7 +117,7 @@ static vid_score_t vid_score[] = {
 	{ 0x07ab, 8 },		// Freecom
 	{ 0x090c, -5 },		// Silicon Motion
 	{ 0x0928, 10 },		// PLX Technology
-	{ 0x0930, -2 },		// Toshiba
+	{ 0x0930, -8 },		// Toshiba
 	{ 0x093a, -5 },		// Pixart
 	{ 0x0951, -5 },		// Kingston
 	{ 0x09da, -5 },		// A4 Tech
