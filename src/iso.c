@@ -580,17 +580,17 @@ out:
 		// If multiple config files exist, choose the one with the shortest path
 		// (so that a '/syslinux.cfg' is preferred over a '/isolinux/isolinux.cfg')
 		if (!IsStrArrayEmpty(config_path)) {
-			safe_strcpy(iso_report.cfg_path, sizeof(iso_report.cfg_path), config_path.Table[0]);
+			safe_strcpy(iso_report.cfg_path, sizeof(iso_report.cfg_path), config_path.String[0]);
 			for (i=1; i<config_path.Index; i++) {
-				if (safe_strlen(iso_report.cfg_path) > safe_strlen(config_path.Table[i]))
-					safe_strcpy(iso_report.cfg_path, sizeof(iso_report.cfg_path), config_path.Table[i]);
+				if (safe_strlen(iso_report.cfg_path) > safe_strlen(config_path.String[i]))
+					safe_strcpy(iso_report.cfg_path, sizeof(iso_report.cfg_path), config_path.String[i]);
 			}
 			uprintf("Will use %s for Syslinux\n", iso_report.cfg_path);
 			// Extract all of the isolinux.bin files we found to identify their versions
 			for (i=0; i<isolinux_path.Index; i++) {
-				size = (size_t)ExtractISOFile(src_iso, isolinux_path.Table[i], dot_isolinux_bin);
+				size = (size_t)ExtractISOFile(src_iso, isolinux_path.String[i], dot_isolinux_bin);
 				if (size == 0) {
-					uprintf("Could not access %s\n", isolinux_path.Table[i]);
+					uprintf("Could not access %s\n", isolinux_path.String[i]);
 				} else {
 					buf = (char*)calloc(size, 1);
 					if (buf == NULL) break;
@@ -610,8 +610,8 @@ out:
 								j = (int)i;
 							} else if (iso_report.sl_version != sl_version) {
 								uprintf("Found conflicting %s versions:\n  '%s' (v%d.%02d) vs '%s' (v%d.%02d)\n", isolinux_bin,
-									isolinux_path.Table[j], SL_MAJOR(iso_report.sl_version), SL_MINOR(iso_report.sl_version),
-									isolinux_path.Table[i], SL_MAJOR(sl_version), SL_MINOR(sl_version));
+									isolinux_path.String[j], SL_MAJOR(iso_report.sl_version), SL_MINOR(iso_report.sl_version),
+									isolinux_path.String[i], SL_MAJOR(sl_version), SL_MINOR(sl_version));
 							}
 							break;
 						}
@@ -624,7 +624,7 @@ out:
 				static_sprintf(iso_report.sl_version_str, "v%d.%02d",
 					SL_MAJOR(iso_report.sl_version), SL_MINOR(iso_report.sl_version));
 				uprintf("Detected Isolinux version: %s (from '%s')",
-					iso_report.sl_version_str, isolinux_path.Table[j]);
+					iso_report.sl_version_str, isolinux_path.String[j]);
 				if ( (has_ldlinux_c32 && (SL_MAJOR(iso_report.sl_version) < 5))
 				  || (!has_ldlinux_c32 && (SL_MAJOR(iso_report.sl_version) >= 5)) )
 					uprintf("Warning: Conflict between Isolinux version and the presence of ldlinux.c32...\n");
@@ -656,7 +656,7 @@ out:
 		}
 		StrArrayDestroy(&config_path);
 		StrArrayDestroy(&isolinux_path);
-	} else if (!IsStrArrayEmpty(config_path)) {
+	} else if (HAS_SYSLINUX(iso_report)) {
 		safe_sprintf(path, sizeof(path), "%s\\syslinux.cfg", dest_dir);
 		// Create a /syslinux.cfg (if none exists) that points to the existing isolinux cfg
 		fd = fopen(path, "r");

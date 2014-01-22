@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Standard Windows function calls
- * Copyright © 2013 Pete Batard <pete@akeo.ie>
+ * Copyright © 2013-2014 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -151,28 +151,28 @@ void StrArrayCreate(StrArray* arr, size_t initial_size)
 {
 	if (arr == NULL) return;
 	arr->Max = initial_size; arr->Index = 0;
-	arr->Table = (char**)calloc(arr->Max, sizeof(char*));
-	if (arr->Table == NULL)
+	arr->String = (char**)calloc(arr->Max, sizeof(char*));
+	if (arr->String == NULL)
 		uprintf("Could not allocate string array\n");
 }
 
 void StrArrayAdd(StrArray* arr, const char* str)
 {
 	char** old_table;
-	if ((arr == NULL) || (arr->Table == NULL))
+	if ((arr == NULL) || (arr->String == NULL))
 		return;
 	if (arr->Index == arr->Max) {
 		arr->Max *= 2;
-		old_table = arr->Table;
-		arr->Table = (char**)realloc(arr->Table, arr->Max*sizeof(char*));
-		if (arr->Table == NULL) {
+		old_table = arr->String;
+		arr->String = (char**)realloc(arr->String, arr->Max*sizeof(char*));
+		if (arr->String == NULL) {
 			free(old_table);
 			uprintf("Could not reallocate string array\n");
 			return;
 		}
 	}
-	arr->Table[arr->Index] = safe_strdup(str);
-	if (arr->Table[arr->Index++] == NULL) {
+	arr->String[arr->Index] = safe_strdup(str);
+	if (arr->String[arr->Index++] == NULL) {
 		uprintf("Could not store string in array\n");
 	}
 }
@@ -180,10 +180,10 @@ void StrArrayAdd(StrArray* arr, const char* str)
 void StrArrayClear(StrArray* arr)
 {
 	size_t i;
-	if ((arr == NULL) || (arr->Table == NULL))
+	if ((arr == NULL) || (arr->String == NULL))
 		return;
 	for (i=0; i<arr->Index; i++) {
-		safe_free(arr->Table[i]);
+		safe_free(arr->String[i]);
 	}
 	arr->Index = 0;
 }
@@ -192,7 +192,7 @@ void StrArrayDestroy(StrArray* arr)
 {
 	StrArrayClear(arr);
 	if (arr != NULL)
-		safe_free(arr->Table);
+		safe_free(arr->String);
 }
 
 /*

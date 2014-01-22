@@ -589,7 +589,7 @@ static BOOL PopulateProperties(int ComboIndex)
 	SetTargetSystem();
 	SetFSFromISO();
 	EnableBootOptions(TRUE);
-	device_tooltip = (char*) malloc(safe_strlen(DriveID.Table[ComboIndex]) + 16);
+	device_tooltip = (char*) malloc(safe_strlen(DriveID.String[ComboIndex]) + 16);
 
 	// Set a proposed label according to the size (eg: "256MB", "8GB")
 	if (HumanReadableSize < 1.0) {
@@ -601,14 +601,14 @@ static BOOL PopulateProperties(int ComboIndex)
 		safe_sprintf(SelectedDrive.proposed_label, sizeof(SelectedDrive.proposed_label),
 			"%0.0f%s", ceil(HumanReadableSize), lmprintf(MSG_020+i));
 		if (device_tooltip != NULL)
-			safe_sprintf(device_tooltip, safe_strlen(DriveID.Table[ComboIndex]) + 16,
-				"%s (%0.0f%s)", DriveID.Table[ComboIndex], ceil(HumanReadableSize), lmprintf(MSG_020+i));
+			safe_sprintf(device_tooltip, safe_strlen(DriveID.String[ComboIndex]) + 16,
+				"%s (%0.0f%s)", DriveID.String[ComboIndex], ceil(HumanReadableSize), lmprintf(MSG_020+i));
 	} else {
 		safe_sprintf(SelectedDrive.proposed_label, sizeof(SelectedDrive.proposed_label),
 			"%0.2f%s", HumanReadableSize, lmprintf(MSG_020+i));
 		if (device_tooltip != NULL)
-			safe_sprintf(device_tooltip, safe_strlen(DriveID.Table[ComboIndex]) + 16,
-				"%s (%0.2f%s)", DriveID.Table[ComboIndex], HumanReadableSize, lmprintf(MSG_020+i));
+			safe_sprintf(device_tooltip, safe_strlen(DriveID.String[ComboIndex]) + 16,
+				"%s (%0.2f%s)", DriveID.String[ComboIndex], HumanReadableSize, lmprintf(MSG_020+i));
 	}
 
 	// Add a tooltip (with the size of the device in parenthesis)
@@ -618,11 +618,11 @@ static BOOL PopulateProperties(int ComboIndex)
 
 	// If no existing label is available and no ISO is selected, propose one according to the size (eg: "256MB", "8GB")
 	if ((iso_path == NULL) || (iso_report.label[0] == 0)) {
-		if ( (safe_stricmp(no_label, DriveLabel.Table[ComboIndex]) == 0)
-		  || (safe_stricmp(lmprintf(MSG_207), DriveLabel.Table[ComboIndex]) == 0) ) {
+		if ( (safe_stricmp(no_label, DriveLabel.String[ComboIndex]) == 0)
+		  || (safe_stricmp(lmprintf(MSG_207), DriveLabel.String[ComboIndex]) == 0) ) {
 			SetWindowTextU(hLabel, SelectedDrive.proposed_label);
 		} else {
-			SetWindowTextU(hLabel, DriveLabel.Table[ComboIndex]);
+			SetWindowTextU(hLabel, DriveLabel.String[ComboIndex]);
 		}
 	} else {
 		SetWindowTextU(hLabel, iso_report.label);

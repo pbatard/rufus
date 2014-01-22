@@ -369,8 +369,7 @@ static __inline void *_reallocf(void *ptr, size_t size)
 
 /* Basic String Array */
 typedef struct {
-	// TODO: rename 'Table' to 'String'
-	char** Table;
+	char** String;
 	size_t Index;	// Current array size
 	size_t Max;		// Maximum array size
 } StrArray;
