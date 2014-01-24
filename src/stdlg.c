@@ -452,7 +452,7 @@ void ResizeMoveCtrl(HWND hDlg, HWND hCtrl, int dx, int dy, int dw, int dh)
 	SIZE border = {0, 0};
 
 	GetWindowRect(hCtrl, &rect);
-	point.x = rect.left;
+	point.x = right_to_left_mode?rect.right:rect.left;
 	point.y = rect.top;
 	ScreenToClient(hDlg, &point);
 	GetClientRect(hCtrl, &rect);
@@ -550,10 +550,10 @@ INT_PTR CALLBACK AboutCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 			EndDialog(hDlg, LOWORD(wParam));
 			return (INT_PTR)TRUE;
 		case IDC_ABOUT_LICENSE:
-			DialogBoxW(hMainInstance, MAKEINTRESOURCEW(IDD_LICENSE), hDlg, LicenseCallback);
+			DialogBoxW(hMainInstance, MAKEINTRESOURCEW(IDD_LICENSE + IDD_IS_RTL), hDlg, LicenseCallback);
 			break;
 		case IDC_ABOUT_UPDATES:
-			DialogBoxW(hMainInstance, MAKEINTRESOURCEW(IDD_UPDATE_POLICY), hDlg, UpdateCallback);
+			DialogBoxW(hMainInstance, MAKEINTRESOURCEW(IDD_UPDATE_POLICY + IDD_IS_RTL), hDlg, UpdateCallback);
 			break;
 		}
 		break;
@@ -565,7 +565,7 @@ INT_PTR CreateAboutBox(void)
 {
 	INT_PTR r;
 	dialog_showing++;
-	r = DialogBoxW(hMainInstance, MAKEINTRESOURCEW(IDD_ABOUTBOX), hMainDialog, AboutCallback);
+	r = DialogBoxW(hMainInstance, MAKEINTRESOURCEW(IDD_ABOUTBOX + IDD_IS_RTL), hMainDialog, AboutCallback);
 	dialog_showing--;
 	return r;
 }
@@ -704,7 +704,7 @@ BOOL Notification(int type, const notification_info* more_info, char* title, cha
 		hMessageIcon = LoadIcon(NULL, IDI_INFORMATION);
 		break;
 	}
-	ret = (DialogBoxW(hMainInstance, MAKEINTRESOURCEW(IDD_NOTIFICATION), hMainDialog, NotificationCallback) == IDYES);
+	ret = (DialogBoxW(hMainInstance, MAKEINTRESOURCEW(IDD_NOTIFICATION + IDD_IS_RTL), hMainDialog, NotificationCallback) == IDYES);
 	safe_free(szMessageText);
 	dialog_showing--;
 	return ret;
@@ -1275,7 +1275,7 @@ INT_PTR CALLBACK NewVersionCallback(HWND hDlg, UINT message, WPARAM wParam, LPAR
 
 void DownloadNewVersion(void)
 {
-	DialogBoxW(hMainInstance, MAKEINTRESOURCEW(IDD_NEW_VERSION), hMainDialog, NewVersionCallback);
+	DialogBoxW(hMainInstance, MAKEINTRESOURCEW(IDD_NEW_VERSION + IDD_IS_RTL), hMainDialog, NewVersionCallback);
 }
 
 void SetTitleBarIcon(HWND hDlg)

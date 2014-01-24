@@ -138,7 +138,7 @@ uint32_t dur_mins, dur_secs;
 HWND hDeviceList, hPartitionScheme, hFileSystem, hClusterSize, hLabel, hBootType, hNBPasses, hLog = NULL;
 HWND hISOProgressDlg = NULL, hLogDlg = NULL, hISOProgressBar, hISOFileName, hDiskID;
 BOOL use_own_c32[NB_OLD_C32] = {FALSE, FALSE}, detect_fakes = TRUE, mbr_selected_by_user = FALSE;
-BOOL iso_op_in_progress = FALSE, format_op_in_progress = FALSE;
+BOOL iso_op_in_progress = FALSE, format_op_in_progress = FALSE, right_to_left_mode = FALSE;
 BOOL enable_HDDs = FALSE, advanced_mode = TRUE, force_update = FALSE;
 int dialog_showing = 0;
 uint16_t rufus_version[4], embedded_sl_version[2];
@@ -199,7 +199,7 @@ static BOOL DefineClusterSizes(void)
 	LONGLONG i;
 	int fs;
 	BOOL r = FALSE;
-	char tmp[64] = "", *entry;
+	char tmp[128] = "", *entry;
 
 	default_fs = FS_UNKNOWN;
 	memset(&SelectedDrive.ClusterSize, 0, sizeof(SelectedDrive.ClusterSize));
@@ -839,6 +839,8 @@ static BOOL GetUSBDevices(DWORD devnum)
 					for (k=0; drive_letters[k]; k++) {
 						// Append all the drive letters we detected
 						letter_name[2] = drive_letters[k];
+						if (right_to_left_mode)
+							safe_strcat(entry_msg, sizeof(entry_msg), RIGHT_TO_LEFT_MARK);
 						safe_strcat(entry_msg, sizeof(entry_msg), letter_name);
 						if (drive_letters[k] == app_dir[0]) break;
 					}
@@ -1122,10 +1124,10 @@ static void CALLBACK BlockingTimer(HWND hWnd, UINT uMsg, UINT_PTR idEvent, DWORD
 		uprintf("Killed blocking I/O timer\n");
 	} else if(!user_notified) {
 		if (last_iso_blocking_status == iso_blocking_status) {
-		// A write or close operation hasn't made any progress since our last check
-		user_notified = TRUE;
-		uprintf("Blocking I/O operation detected\n");
-		MessageBoxU(hMainDialog, lmprintf(MSG_080), lmprintf(MSG_048), MB_OK|MB_ICONINFORMATION);
+			// A write or close operation hasn't made any progress since our last check
+			user_notified = TRUE;
+			uprintf("Blocking I/O operation detected\n");
+			MessageBoxU(hMainDialog, lmprintf(MSG_080), lmprintf(MSG_048), MB_OK|MB_ICONINFORMATION|MB_IS_RTL);
 		} else {
 			last_iso_blocking_status = iso_blocking_status;
 		}
@@ -1216,7 +1218,7 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 	}
 	if ( (!iso_report.has_bootmgr) && (!HAS_SYSLINUX(iso_report)) && (!IS_WINPE(iso_report.winpe)) 
 	  && (!iso_report.has_efi) && (!IS_REACTOS(iso_report)) ) {
-		MessageBoxU(hMainDialog, lmprintf(MSG_082), lmprintf(MSG_081), MB_OK|MB_ICONINFORMATION);
+		MessageBoxU(hMainDialog, lmprintf(MSG_082), lmprintf(MSG_081), MB_OK|MB_ICONINFORMATION|MB_IS_RTL);
 		safe_free(iso_path);
 		SetMBRProps();
 	} else if (HAS_SYSLINUX(iso_report)) {
@@ -1233,7 +1235,7 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 					} else {
 						PrintStatus(0, FALSE, MSG_204, old_c32_name[i]);
 						if (MessageBoxU(hMainDialog, lmprintf(MSG_084, old_c32_name[i], old_c32_name[i]),
-							 lmprintf(MSG_083, old_c32_name[i]), MB_YESNO|MB_ICONWARNING) == IDYES) {
+							 lmprintf(MSG_083, old_c32_name[i]), MB_YESNO|MB_ICONWARNING|MB_IS_RTL) == IDYES) {
 							SetWindowTextU(hISOProgressDlg, lmprintf(MSG_085, old_c32_name[i]));
 							SetWindowTextU(hISOFileName, new_c32_url[i]);
 							if (DownloadFile(new_c32_url[i], old_c32_name[i], hISOProgressDlg))
@@ -1350,12 +1352,12 @@ static BOOL BootCheck(void)
 	if (dt == DT_ISO) {
 		if (iso_path == NULL) {
 			// Please click on the disc button to select a bootable ISO
-			MessageBoxU(hMainDialog, lmprintf(MSG_087), lmprintf(MSG_086), MB_OK|MB_ICONERROR);
+			MessageBoxU(hMainDialog, lmprintf(MSG_087), lmprintf(MSG_086), MB_OK|MB_ICONERROR|MB_IS_RTL);
 			return FALSE;
 		}
 		if ((size_check) && (iso_report.projected_size > (uint64_t)SelectedDrive.DiskSize)) {
 			// This ISO image is too big for the selected target
-			MessageBoxU(hMainDialog, lmprintf(MSG_089), lmprintf(MSG_088), MB_OK|MB_ICONERROR);
+			MessageBoxU(hMainDialog, lmprintf(MSG_089), lmprintf(MSG_088), MB_OK|MB_ICONERROR|MB_IS_RTL);
 			return FALSE;
 		}
 		fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
@@ -1363,32 +1365,32 @@ static BOOL BootCheck(void)
 		if (bt == BT_UEFI) {
 			if (!IS_EFI(iso_report)) {
 				// Unsupported ISO
-				MessageBoxU(hMainDialog, lmprintf(MSG_091), lmprintf(MSG_090), MB_OK|MB_ICONERROR);
+				MessageBoxU(hMainDialog, lmprintf(MSG_091), lmprintf(MSG_090), MB_OK|MB_ICONERROR|MB_IS_RTL);
 				return FALSE;
 			}
 			if ((iso_report.has_win7_efi) && (!WimExtractCheck())) {
 				// Your platform cannot extract files from WIM archives => download 7-zip?
-				if (MessageBoxU(hMainDialog, lmprintf(MSG_102), lmprintf(MSG_101), MB_YESNO|MB_ICONERROR) == IDYES)
+				if (MessageBoxU(hMainDialog, lmprintf(MSG_102), lmprintf(MSG_101), MB_YESNO|MB_ICONERROR|MB_IS_RTL) == IDYES)
 					ShellExecuteA(hMainDialog, "open", SEVENZIP_URL, NULL, NULL, SW_SHOWNORMAL);
 				return FALSE;
 			}
 		} else if ((fs == FS_NTFS) && (!iso_report.has_bootmgr) && (!IS_WINPE(iso_report.winpe))) {
 			if (HAS_SYSLINUX(iso_report)) {
 				// Only FAT/FAT32 is supported for this type of ISO
-				MessageBoxU(hMainDialog, lmprintf(MSG_096), lmprintf(MSG_092), MB_OK|MB_ICONERROR);
+				MessageBoxU(hMainDialog, lmprintf(MSG_096), lmprintf(MSG_092), MB_OK|MB_ICONERROR|MB_IS_RTL);
 			} else {
 				// Only 'bootmgr' or 'WinPE' based ISO images can currently be used with NTFS
-				MessageBoxU(hMainDialog, lmprintf(MSG_097), lmprintf(MSG_090), MB_OK|MB_ICONERROR);
+				MessageBoxU(hMainDialog, lmprintf(MSG_097), lmprintf(MSG_090), MB_OK|MB_ICONERROR|MB_IS_RTL);
 			}
 			return FALSE;
 		} else if (((fs == FS_FAT16)||(fs == FS_FAT32)) && (!HAS_SYSLINUX(iso_report)) && (!IS_REACTOS(iso_report))) {
 			// FAT/FAT32 can only be used for isolinux based ISO images or when the Target Type is UEFI
-			MessageBoxU(hMainDialog, lmprintf(MSG_098), lmprintf(MSG_090), MB_OK|MB_ICONERROR);
+			MessageBoxU(hMainDialog, lmprintf(MSG_098), lmprintf(MSG_090), MB_OK|MB_ICONERROR|MB_IS_RTL);
 			return FALSE;
 		}
 		if (((fs == FS_FAT16)||(fs == FS_FAT32)) && (iso_report.has_4GB_file)) {
 			// This ISO image contains a file larger than 4GB file (FAT32)
-			MessageBoxU(hMainDialog, lmprintf(MSG_100), lmprintf(MSG_099), MB_OK|MB_ICONERROR);
+			MessageBoxU(hMainDialog, lmprintf(MSG_100), lmprintf(MSG_099), MB_OK|MB_ICONERROR|MB_IS_RTL);
 			return FALSE;
 		}
 		if ((SL_MAJOR(iso_report.sl_version) >= 5) && (iso_report.sl_version != embedded_sl_version[1])) {
@@ -1411,7 +1413,7 @@ static BOOL BootCheck(void)
 					ldlinux, ldlinux_ext[0], ldlinux, ldlinux_ext[1], FILES_DIR, syslinux, &iso_report.sl_version_str[1]);
 			} else {
 				r = MessageBoxU(hMainDialog, lmprintf(MSG_114, iso_report.sl_version_str, embedded_sl_version_str[1]),
-					lmprintf(MSG_115), MB_YESNO|MB_ICONWARNING);
+					lmprintf(MSG_115), MB_YESNO|MB_ICONWARNING|MB_IS_RTL);
 				if (r != IDYES)
 					return FALSE;
 				for (i=0; i<2; i++) {
@@ -1443,7 +1445,7 @@ static BOOL BootCheck(void)
 			PrintStatus(0, FALSE, MSG_206, tmp);
 			// MSG_104: "Syslinux v5.0 or later requires a '%s' file to be installed"
 			r = MessageBoxU(hMainDialog, lmprintf(MSG_104, tmp, tmp),
-				lmprintf(MSG_103, tmp), MB_YESNOCANCEL|MB_ICONWARNING);
+				lmprintf(MSG_103, tmp), MB_YESNOCANCEL|MB_ICONWARNING|MB_IS_RTL);
 			if (r == IDCANCEL)
 				return FALSE;
 			if (r == IDYES) {
@@ -1458,7 +1460,7 @@ static BOOL BootCheck(void)
 	} else if (dt == DT_WINME) {
 		if ((size_check) && (ComboBox_GetItemData(hClusterSize, ComboBox_GetCurSel(hClusterSize)) >= 65536)) {
 			// MS-DOS cannot boot from a drive using a 64 kilobytes Cluster size
-			MessageBoxU(hMainDialog, lmprintf(MSG_110), lmprintf(MSG_111), MB_OK|MB_ICONERROR);
+			MessageBoxU(hMainDialog, lmprintf(MSG_110), lmprintf(MSG_111), MB_OK|MB_ICONERROR|MB_IS_RTL);
 			return FALSE;
 		}
 	}
@@ -1643,11 +1645,24 @@ void ShowLanguageMenu(HWND hDlg)
 	POINT pt;
 	HMENU menu;
 	loc_cmd* lcmd = NULL;
-	UM_LANGUAGE_MENU_MAX = UM_LANGUAGE_MENU;
+	char lang[256];
+	char *search = "()";
+	char *l, *r, *dup;
 
+	UM_LANGUAGE_MENU_MAX = UM_LANGUAGE_MENU;
 	menu = CreatePopupMenu();
 	list_for_each_entry(lcmd, &locale_list, loc_cmd, list) {
-		InsertMenuU(menu, -1, MF_BYPOSITION|((selected_locale == lcmd)?MF_CHECKED:0), UM_LANGUAGE_MENU_MAX++, lcmd->txt[1]);
+		// The appearance of LTR languages must be fixed for RTL menus
+		if ((right_to_left_mode) && (!(lcmd->ctrl_id & LOC_RIGHT_TO_LEFT)))  {
+			dup = safe_strdup(lcmd->txt[1]);
+			l = strtok(dup, search);
+			r = strtok(NULL, search);
+			static_sprintf(lang, LEFT_TO_RIGHT_MARK "(%s) " LEFT_TO_RIGHT_MARK "%s", r, l);
+			safe_free(dup);
+		} else {
+			safe_strcpy(lang, sizeof(lang), lcmd->txt[1]);
+		}
+		InsertMenuU(menu, -1, MF_BYPOSITION|((selected_locale == lcmd)?MF_CHECKED:0), UM_LANGUAGE_MENU_MAX++, lang);
 	}
 
 	SetForegroundWindow(hDlg);
@@ -1721,7 +1736,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		// Create the log window (hidden)
 		first_log_display = TRUE;
 		log_displayed = FALSE;
-		hLogDlg = CreateDialogW(hMainInstance, MAKEINTRESOURCEW(IDD_LOG), hDlg, (DLGPROC)LogProc);
+		hLogDlg = CreateDialogW(hMainInstance, MAKEINTRESOURCEW(IDD_LOG + IDD_IS_RTL), hDlg, (DLGPROC)LogProc);
 		InitDialog(hDlg);
 		GetUSBDevices(0);
 		CheckForUpdates(FALSE);
@@ -1780,7 +1795,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			EnableWindow(GetDlgItem(hDlg, IDCANCEL), FALSE);
 			if (format_thid != NULL) {
 				if (MessageBoxU(hMainDialog, lmprintf(MSG_105), lmprintf(MSG_049),
-					MB_YESNO|MB_ICONWARNING) == IDYES) {
+					MB_YESNO|MB_ICONWARNING|MB_IS_RTL) == IDYES) {
 					// Operation may have completed in the meantime
 					if (format_thid != NULL) {
 						FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANCELLED;
@@ -1812,21 +1827,32 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			CreateAboutBox();
 			break;
 		case IDC_LOG:
-			// Place the log Window to the right of our dialog on first display
+			// Place the log Window to the right (or left for RTL) of our dialog on first display
 			if (first_log_display) {
 				GetClientRect(GetDesktopWindow(), &DesktopRect);
 				GetWindowRect(hLogDlg, &DialogRect);
 				nWidth = DialogRect.right - DialogRect.left;
 				nHeight = DialogRect.bottom - DialogRect.top;
 				GetWindowRect(hDlg, &DialogRect);
-				Point.x = min(DialogRect.right + GetSystemMetrics(SM_CXSIZEFRAME)+(int)(2.0f * fScale), DesktopRect.right - nWidth);
+				if (right_to_left_mode)
+					Point.x = max(DialogRect.left - GetSystemMetrics(SM_CXSIZEFRAME)-(int)(2.0f * fScale) - nWidth, 0);
+				else
+					Point.x = min(DialogRect.right + GetSystemMetrics(SM_CXSIZEFRAME)+(int)(2.0f * fScale), DesktopRect.right - nWidth);
+				
 				Point.y = max(DialogRect.top, DesktopRect.top - nHeight);
 				MoveWindow(hLogDlg, Point.x, Point.y, nWidth, nHeight, FALSE);
-				// The log may have been recentered to fit the screen, in which case, try to shift our main dialog left
+				// The log may have been recentered to fit the screen, in which case, try to shift our main dialog left (or right for RTL)
 				nWidth = DialogRect.right - DialogRect.left;
 				nHeight = DialogRect.bottom - DialogRect.top;
-				MoveWindow(hDlg, max((DialogRect.left<0)?DialogRect.left:0,
-					Point.x - nWidth - GetSystemMetrics(SM_CXSIZEFRAME) - (int)(2.0f * fScale)), Point.y, nWidth, nHeight, TRUE);
+				if (right_to_left_mode) {
+					Point.x = DialogRect.left;
+					GetWindowRect(hLogDlg, &DialogRect);
+					Point.x = max(Point.x, DialogRect.right - DialogRect.left + GetSystemMetrics(SM_CXSIZEFRAME) + (int)(2.0f * fScale));
+				} else {
+					Point.x = max((DialogRect.left<0)?DialogRect.left:0,
+						Point.x - nWidth - GetSystemMetrics(SM_CXSIZEFRAME) - (int)(2.0f * fScale));
+				}
+				MoveWindow(hDlg, Point.x, Point.y, nWidth, nHeight, TRUE);
 				first_log_display = FALSE;
 			}
 			// Display the log Window
@@ -2037,7 +2063,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 					if (dur_secs > UDF_FORMAT_WARN) {
 						dur_mins = dur_secs/60;
 						dur_secs -= dur_mins*60;
-						MessageBoxU(hMainDialog, lmprintf(MSG_112, dur_mins, dur_secs), lmprintf(MSG_113), MB_OK|MB_ICONASTERISK);
+						MessageBoxU(hMainDialog, lmprintf(MSG_112, dur_mins, dur_secs), lmprintf(MSG_113), MB_OK|MB_ICONASTERISK|MB_IS_RTL);
 					} else {
 						dur_secs = 0;
 						dur_mins = 0;
@@ -2046,12 +2072,12 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 
 				GetWindowTextU(hDeviceList, tmp, ARRAYSIZE(tmp));
 				if (MessageBoxU(hMainDialog, lmprintf(MSG_003, tmp),
-					APPLICATION_NAME, MB_OKCANCEL|MB_ICONWARNING) == IDCANCEL) {
+					APPLICATION_NAME, MB_OKCANCEL|MB_ICONWARNING|MB_IS_RTL) == IDCANCEL) {
 					format_op_in_progress = FALSE;
 					break;
 				}
 				if ((SelectedDrive.nPartitions > 1) && (MessageBoxU(hMainDialog, lmprintf(MSG_093),
-					lmprintf(MSG_094), MB_OKCANCEL|MB_ICONWARNING) == IDCANCEL)) {
+					lmprintf(MSG_094), MB_OKCANCEL|MB_ICONWARNING|MB_IS_RTL) == IDCANCEL)) {
 					format_op_in_progress = FALSE;
 					break;
 				}
@@ -2094,7 +2120,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		// You'd think that Windows would let you instantiate a modeless dialog wherever
 		// but you'd be wrong. It must be done in the main callback, hence the custom message.
 		if (!IsWindow(hISOProgressDlg)) { 
-			hISOProgressDlg = CreateDialogW(hMainInstance, MAKEINTRESOURCEW(IDD_ISO_EXTRACT),
+			hISOProgressDlg = CreateDialogW(hMainInstance, MAKEINTRESOURCEW(IDD_ISO_EXTRACT + IDD_IS_RTL),
 				hDlg, (DLGPROC)ISOProc);
 
 			// The window is not visible by default but takes focus => restore it
@@ -2307,7 +2333,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	if ( (!get_supported_locales(loc_file))
 	  || ((selected_locale = ((locale_name == NULL)?get_locale_from_lcid(lcid, TRUE):get_locale_from_name(locale_name, TRUE))) == NULL) ) {
 		uprintf("FATAL: Could not access locale!\n");
-		MessageBoxU(NULL, "The locale data is missing or invalid. This application will now exit.", "Fatal error", MB_ICONSTOP);
+		MessageBoxU(NULL, "The locale data is missing or invalid. This application will now exit.", "Fatal error", MB_ICONSTOP|MB_IS_RTL);
 		goto out;
 	}
 
@@ -2324,7 +2350,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	if ((mutex == NULL) || (GetLastError() == ERROR_ALREADY_EXISTS)) {
 		// Load the translation before we print the error
 		get_loc_data_file(loc_file, selected_locale);
-		MessageBoxU(NULL, lmprintf(MSG_002), lmprintf(MSG_001), MB_ICONSTOP);
+		MessageBoxU(NULL, lmprintf(MSG_002), lmprintf(MSG_001), MB_ICONSTOP|MB_IS_RTL);
 		goto out;
 	}
 
@@ -2348,6 +2374,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 relaunch:
 	uprintf("localization: using locale '%s'\n", selected_locale->txt[0]);
+	right_to_left_mode = ((selected_locale->ctrl_id) & LOC_RIGHT_TO_LEFT);
+	SetProcessDefaultLayout(right_to_left_mode?LAYOUT_RTL:0);
 	if (get_loc_data_file(loc_file, selected_locale))
 		WriteRegistryKeyStr(REGKEY_HKCU, REGKEY_LOCALE, selected_locale->txt[0]);
 
@@ -2357,10 +2385,26 @@ relaunch:
 		hISOProgressDlg = NULL;
 	}
 
-	// Create the main Window
-	hDlg = CreateDialogW(hInstance, MAKEINTRESOURCEW(IDD_DIALOG), NULL, MainCallback);
+	/*
+	 * Create the main Window
+	 *
+	 * Oh yeah, thanks to Microsoft limitations for dialog boxes this is SUPER SUCKY:
+	 * As per the MSDN [http://msdn.microsoft.com/en-ie/goglobal/bb688119.aspx], "The only way
+	 *   to switch between mirrored and nonmirrored dialog resources at run time is to have two
+	 *   sets of dialog resources: one mirrored and one nonmirrored."
+	 * Unfortunately, this limitation is VERY REAL, so that's what we have to go through, and
+	 * furthermore, trying to switch part of the dialogs back to LTR is also a major exercise
+	 * in frustration, because it's next to impossible which combination of WS_EX_RTLREADING,
+	 * WS_EX_RIGHT, WS_EX_LAYOUTRTL, WS_EX_LEFTSCROLLBAR and ES_RIGHT will work, plus there's
+	 * no way to toggle ES_RIGHT at runtime anyway.
+	 * So, just like Microsoft advocates, we go through a massive duplication of all our RC
+	 * dialogs (our RTL dialogs having their IDD's offset by +100 - see IDD_IS_RTL), just to
+	 * add a handful of stupid flags. And of course, now we'll have to figure out a way to keep
+	 * the RTL and non RTL duplicated dialogs always in sync...
+	 */
+	hDlg = CreateDialogW(hInstance, MAKEINTRESOURCEW(IDD_DIALOG + IDD_IS_RTL), NULL, MainCallback);
 	if (hDlg == NULL) {
-		MessageBoxU(NULL, "Could not create Window", "DialogBox failure", MB_ICONSTOP);
+		MessageBoxU(NULL, "Could not create Window", "DialogBox failure", MB_ICONSTOP|MB_IS_RTL);
 		goto out;
 	}
 	if ((relaunch_rc.left > -65536) && (relaunch_rc.top > -65536))

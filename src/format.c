@@ -1288,7 +1288,7 @@ DWORD WINAPI FormatThread(LPVOID param)
 				lt.wYear, lt.wMonth, lt.wDay, lt.wHour, lt.wMinute, lt.wSecond);
 				fclose(log_fd);
 				r = MessageBoxU(hMainDialog, lmprintf(MSG_012, bb_msg, logfile),
-					lmprintf(MSG_010), MB_ABORTRETRYIGNORE|MB_ICONWARNING);
+					lmprintf(MSG_010), MB_ABORTRETRYIGNORE|MB_ICONWARNING|MB_IS_RTL);
 			} else {
 				// We didn't get any errors => delete the log file
 				fclose(log_fd);

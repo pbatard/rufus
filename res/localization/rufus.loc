@@ -430,6 +430,61 @@ t MSG_259 "Force update"
 ############################# TRANSLATOR END COPY ##############################
 ################################################################################
 
+l "ar-AR" "Arabic (العربية)" 0x0401
+a "ra"
+v 1.0.8
+b "en-US"
+
+g IDD_DIALOG
+t IDS_DEVICE_TXT "جهاز"
+t IDS_PARTITION_TYPE_TXT "نوع مخطط التقسيم وهدف النظام"
+t IDS_FILESYSTEM_TXT "نظام الملفات"
+t IDS_CLUSTERSIZE_TXT "حجم الكتلة"
+t IDS_LABEL_TXT "تسمية وحدة التخزين الجديدة"
+t IDS_FORMAT_OPTIONS_GRP "خيارات تنسيق       "
+m IDC_ADVANCED -8,0
+t IDC_BADBLOCKS "تحقق الجهاز لكتل سيئة:"
+t IDC_QUICKFORMAT "تهيئة سريعة"
+t IDC_BOOT "إنشاء قرص تمهيد باستخدام:"
+t IDC_SET_ICON "إنشاء التسمية ورمز ملفات موسعة"
+t IDC_ABOUT "حول ..."
+t IDC_LOG "ثقيل"
+t IDCANCEL "قريب"
+t IDC_START "إقلاع"
+t IDS_ADVANCED_OPTIONS_GRP "خيارات متقدمة"
+t IDC_ENABLE_FIXED_DISKS "محركات الأقراص الصلبة USB قائمة"
+t IDC_EXTRA_PARTITION "إصلاحات BIOS القديمة"
+t IDC_RUFUS_MBR "استخدام روفوس MBR مع BIOS ID:"
+
+# About dialog
+g IDD_ABOUTBOX
+t IDD_ABOUTBOX "حول Rufus"
+t IDC_ABOUT_LICENSE "ترخيص"
+t IDC_ABOUT_UPDATES "تحديثات"
+t IDOK "حسنا"
+
+t MSG_003 "تحذير: كل البيانات على الجهاز '%s' سيتم تدمير. \n"
+	"الاستمرار في هذه العملية، انقر فوق موافق. لإنهاء انقر فوق إلغاء الأمر."
+t MSG_026 "بايت"
+t MSG_027 "كيلو بايت"
+t MSG_028 "ميغابايت"
+
+t MSG_030 "%s (الافتراضي)"
+t MSG_034 "%d يمر"
+t MSG_035 "%d تمريرات"
+t MSG_109 "0x%02X (أسطوانة %d)"
+# The following will appear in the about dialog
+t MSG_174 "Rufus وموثوق USB تنسيق المساعدة"
+t MSG_175 "الإصدار‏ ‎%d.%d.%d‏ (Build %d)"
+t MSG_176 "ترجمة: هارون الرشيد <mailto:pete@akeo.ie>"
+t MSG_177 "البق تقرير أو طلب تعزيزات في:"
+t MSG_178 "حقوق الطبع والنشر إضافية:"
+
+t MSG_208 "%d جهاز تم العثور عليه"
+t MSG_209 "%d  الأجهزة الموجودة"
+t MSG_210 "منجز"
+t MSG_211 "ألغي"
+t MSG_212 "فشل"
 
 ################################################################################
 l "zh-CN" "Chinese Simplified (简体中文)" 0x0804, 0x1004

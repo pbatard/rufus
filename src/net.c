@@ -374,7 +374,7 @@ out:
 		PrintStatus(0, FALSE, MSG_242);
 		SetLastError(error_code);
 		MessageBoxU(hMainDialog, IS_ERROR(FormatStatus)?StrError(FormatStatus, FALSE):WinInetErrorString(),
-		lmprintf(MSG_044), MB_OK|MB_ICONERROR);
+		lmprintf(MSG_044), MB_OK|MB_ICONERROR|MB_IS_RTL);
 	}
 	if (hRequest) InternetCloseHandle(hRequest);
 	if (hConnection) InternetCloseHandle(hConnection);

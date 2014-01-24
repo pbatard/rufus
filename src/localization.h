@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Localization functions, a.k.a. "Everybody is doing it wrong but me!"
- * Copyright © 2013 Pete Batard <pete@akeo.ie>
+ * Copyright © 2013-2014 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,9 +24,14 @@
 
 // Number of concurrent localization messages (i.e. messages we can concurrently
 // reference at the same time). Must be a power of 2.
-#define LOC_MESSAGE_NB      8
-#define LOC_MESSAGE_SIZE    2048
-#define LOC_HTAB_SIZE       1031	// Using a prime speeds up the hash table init
+#define LOC_MESSAGE_NB          8
+#define LOC_MESSAGE_SIZE        2048
+#define LOC_HTAB_SIZE           1031	// Using a prime speeds up the hash table init
+
+// Attributes that can be set by a translation
+#define LOC_RIGHT_TO_LEFT       0x00000001
+#define LOC_ARABIC_NUMERALS     0x00000002
+#define LOC_JAPANESE_NUMERALS   0x00000004
 
 // The [v]ersion major from a translation must match this number or
 // the translation will be ignored
@@ -113,14 +118,14 @@ enum loc_command_type {
 	LC_LOCALE,
 	LC_BASE,
 	LC_FONT,
-	LC_DIRECTION,
+	LC_ATTRIBUTES,
 };
 
 typedef struct loc_cmd_struct {
 	uint8_t		command;
 	uint8_t		unum_size;
 	uint16_t	line_nr;
-	int			ctrl_id;
+	int			ctrl_id;	// Also used as the attributes mask
 	int32_t		num[2];
 	uint32_t*	unum;
 	char*		txt[2];

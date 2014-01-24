@@ -13,6 +13,14 @@
 #define IDI_ICON                        110
 #define IDI_UP                          111
 #define IDI_DOWN                        112
+#define RTL_IDD_DIALOG                  201
+#define RTL_IDD_ABOUTBOX                202
+#define RTL_IDD_NOTIFICATION            203
+#define RTL_IDD_LICENSE                 204
+#define RTL_IDD_ISO_EXTRACT             205
+#define RTL_IDD_LOG                     206
+#define RTL_IDD_UPDATE_POLICY           207
+#define RTL_IDD_NEW_VERSION             208
 #define IDR_FD_COMMAND_COM              300
 #define IDR_FD_KERNEL_SYS               301
 #define IDR_FD_DISPLAY_EXE              302

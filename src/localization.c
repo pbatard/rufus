@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Localization functions, a.k.a. "Everybody is doing it wrong but me!"
- * Copyright © 2013 Pete Batard <pete@akeo.ie>
+ * Copyright © 2013-2014 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -61,9 +61,8 @@ const loc_parse parse_cmd[9] = {
 	// Set the font to use for the text controls that follow
 	// Use f "Default" 0 to reset the font
 	{ 'f', LC_FONT, "si" },		// f "MS Dialog" 10
-	// Set the direction to use for the text controls that follow
-	// 0 = Left to right, 1 = Right to left
-	{ 'd', LC_DIRECTION, "i" },	// d 1					// TODO: NOT IMPLEMENTED YET
+	// Set translations attributes such as right-to-left, numerals to use, etc
+	{ 'a', LC_ATTRIBUTES, "s" },	// a "ra"
 };
 
 /* Globals */
@@ -459,8 +458,6 @@ void apply_localization(int dlg_id, HWND hDlg)
 	loc_cmd* lcmd;
 	HWND hCtrl = NULL;
 	int id_start = IDD_DIALOG, id_end = IDD_DIALOG + ARRAYSIZE(loc_dlg);
-	LONG_PTR style;
-	BOOL left_to_right = FALSE;
 
 	if ((dlg_id >= id_start) && (dlg_id < id_end)) {
 		// If we have a valid dialog_id, just process that one dialog
@@ -502,12 +499,6 @@ void apply_localization(int dlg_id, HWND hDlg)
 				if (hCtrl != NULL) {
 					if ((lcmd->txt[1] != NULL) && (lcmd->txt[1][0] != 0))
 						SetWindowTextU(hCtrl, lcmd->txt[1]);
-					if (left_to_right) {
-						style = GetWindowLongPtr(hCtrl, GWL_EXSTYLE);
-						style |= WS_EX_LAYOUTRTL; // TODO: WS_EX_RIGHT | WS_EX_RTLREADING
-						SetWindowLongPtr(hCtrl, GWL_EXSTYLE, style);
-						InvalidateRect(hCtrl, NULL, TRUE);
-					}
 				}
 				break;
 			case LC_MOVE:

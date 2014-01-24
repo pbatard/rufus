@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Elementary Unicode compliant find/replace parser
- * Copyright © 2012-2013 Pete Batard <pete@akeo.ie>
+ * Copyright © 2012-2014 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,6 +38,12 @@
 static const char space[] = " \t";
 static const wchar_t wspace[] = L" \t";
 
+const struct {char c; int flag;} attr_parse[] = {
+	{ 'r', LOC_RIGHT_TO_LEFT },
+	{ 'a', LOC_ARABIC_NUMERALS },
+	{ 'j', LOC_JAPANESE_NUMERALS },
+};
+
 /*
  * Fill a localization command buffer by parsing the line arguments
  * The command is allocated and must be freed (by calling free_loc_cmd)
@@ -61,8 +67,8 @@ static loc_cmd* get_loc_cmd(char c, char* line) {
 		luprint("could not allocate command");
 		return NULL;
 	}
-	lcmd->ctrl_id = -1;
 	lcmd->command = parse_cmd[j].cmd;
+	lcmd->ctrl_id = (lcmd->command <= LC_TEXT)?-1:0;
 	lcmd->line_nr = (uint16_t)loc_line_nr;
 
 	i = 0;
@@ -231,7 +237,7 @@ BOOL get_supported_locales(const char* filename)
 	FILE* fd = NULL;
 	BOOL r = FALSE;
 	char line[1024];
-	size_t i;
+	size_t i, j, k;
 	loc_cmd *lcmd = NULL, *last_lcmd = NULL;
 	long end_of_block;
 	int version_line_nr = 0;
@@ -270,11 +276,11 @@ BOOL get_supported_locales(const char* filename)
 		loc_line_nr++;
 		// Skip leading spaces
 		i = strspn(line, space);
-		if ((line[i] != 'l') && (line[i] != 'v'))
+		if ((line[i] != 'l') && (line[i] != 'v') && (line[i] != 'a'))
 			continue;
 		// line[i] is not NUL so i+1 is safe to access
 		lcmd = get_loc_cmd(line[i], &line[i+1]);
-		if ((lcmd == NULL) || ((lcmd->command != LC_LOCALE) && (lcmd->command != LC_VERSION))) {
+		if ((lcmd == NULL) || ((lcmd->command != LC_LOCALE) && (lcmd->command != LC_VERSION) && (lcmd->command != LC_ATTRIBUTES))) {
 			free_loc_cmd(lcmd);
 			continue;
 		}
@@ -296,6 +302,23 @@ BOOL get_supported_locales(const char* filename)
 			uprintf("localization: found locale '%s'\n", lcmd->txt[0]);
 			last_lcmd = lcmd;
 			version_line_nr = 0;
+			break;
+		case LC_ATTRIBUTES:
+			if (last_lcmd == NULL) {
+				luprint("[a]ttributes cannot precede [l]ocale");
+			}
+			for(j=0; lcmd->txt[0][j] != 0; j++) {
+				for (k=0; k<ARRAYSIZE(attr_parse); k++) {
+					if (attr_parse[k].c == lcmd->txt[0][j]) {
+						// Repurpose ctrl_id as an attributes mask
+						last_lcmd->ctrl_id |= attr_parse[k].flag;
+						break;
+					}
+				}
+				if (k >= ARRAYSIZE(attr_parse))
+					luprintf("unknown attribute '%c' - ignored", lcmd->txt[0][j]);
+			}
+			free_loc_cmd(lcmd);
 			break;
 		case LC_VERSION:
 			if (version_line_nr != 0) {

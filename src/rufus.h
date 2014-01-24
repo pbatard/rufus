@@ -35,6 +35,8 @@
 #define APPLICATION_NAME            "Rufus"
 #define COMPANY_NAME                "Akeo Consulting"
 #define STR_NO_LABEL                "NO_LABEL"
+#define LEFT_TO_RIGHT_MARK          "‎"			// Yes, there is a character between the quotes!
+#define RIGHT_TO_LEFT_MARK          "‏"
 #define DRIVE_ACCESS_TIMEOUT        15000		// How long we should retry drive access (in ms)
 #define DRIVE_ACCESS_RETRIES        60			// How many times we should retry
 #define DRIVE_INDEX_MIN             0x00000080
@@ -68,6 +70,8 @@
 #define ARRAYSIZE(A)                (sizeof(A)/sizeof((A)[0]))
 #endif
 #define IsChecked(CheckBox_ID)      (IsDlgButtonChecked(hMainDialog, CheckBox_ID) == BST_CHECKED)
+#define MB_IS_RTL                   (right_to_left_mode?MB_RTLREADING:0)
+#define IDD_IS_RTL                  (right_to_left_mode?100:0)
 
 #define safe_free(p) do {free((void*)p); p = NULL;} while(0)
 #define safe_min(a, b) min((size_t)(a), (size_t)(b))
@@ -289,7 +293,7 @@ extern DWORD FormatStatus;
 extern DWORD syslinux_ldlinux_len[2];
 extern RUFUS_DRIVE_INFO SelectedDrive;
 extern const int nb_steps[FS_MAX];
-extern BOOL use_own_c32[NB_OLD_C32], detect_fakes, iso_op_in_progress, format_op_in_progress;
+extern BOOL use_own_c32[NB_OLD_C32], detect_fakes, iso_op_in_progress, format_op_in_progress, right_to_left_mode;
 extern RUFUS_ISO_REPORT iso_report;
 extern int64_t iso_blocking_status;
 extern uint16_t rufus_version[4], embedded_sl_version[2];
