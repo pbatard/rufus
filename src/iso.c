@@ -609,7 +609,7 @@ out:
 								iso_report.sl_version = sl_version;
 								j = (int)i;
 							} else if (iso_report.sl_version != sl_version) {
-								uprintf("Found conflicting %s versions:\n  '%s' (v%d.%02d) vs '%s' (v%d.%02d)\n", isolinux_bin,
+								uprintf("Found conflicting %s versions:\n  '%s' (%d.%02d) vs '%s' (%d.%02d)\n", isolinux_bin,
 									isolinux_path.String[j], SL_MAJOR(iso_report.sl_version), SL_MINOR(iso_report.sl_version),
 									isolinux_path.String[i], SL_MAJOR(sl_version), SL_MINOR(sl_version));
 							}
@@ -621,7 +621,7 @@ out:
 				}
 			}
 			if (iso_report.sl_version != 0) {
-				static_sprintf(iso_report.sl_version_str, "v%d.%02d",
+				static_sprintf(iso_report.sl_version_str, "%d.%02d",
 					SL_MAJOR(iso_report.sl_version), SL_MINOR(iso_report.sl_version));
 				uprintf("Detected Isolinux version: %s (from '%s')",
 					iso_report.sl_version_str, isolinux_path.String[j]);
@@ -631,7 +631,7 @@ out:
 			} else {
 				// Couldn't find a version from isolinux.bin. Force set to the versions we embed
 				iso_report.sl_version = embedded_sl_version[has_ldlinux_c32?1:0];
-				static_sprintf(iso_report.sl_version_str, "v%d.%02d",
+				static_sprintf(iso_report.sl_version_str, "%d.%02d",
 					SL_MAJOR(iso_report.sl_version), SL_MINOR(iso_report.sl_version));
 				uprintf("Warning: Could not detect Isolinux version - Forcing to %s (embedded)",
 					iso_report.sl_version_str);

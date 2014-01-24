@@ -22,7 +22,7 @@ const char* about_blurb_format =
 "{\\b\\fs20%s}\\line\n"
 "\\fs18%s\\line\n"
 "\\line\n"
-"Copyright © 2011-2014 Pete Batard / Akeo\\line\n"
+"%s\\line\n"
 RUFUS_URL "\\line\n"
 "\\fs3 \\line\n"
 "\\fs18%s\\line\n"

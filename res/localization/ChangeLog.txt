@@ -10,7 +10,7 @@ o Version 1.0.8 (2014.01.21)
   - Changed MSG_047 "%s (%c:)" -> "Multiple Volumes" (non-updated ones have been commented out)
   - *NEW* MSG_093 "IMPORTANT: THIS DRIVE CONTAINS MULTIPLE PARTITIONS OR VOLUMES!!"
   - *NEW* MSG_094 "Multiple partitions detected"
-  - *NEW* MSG_114 "This image uses Syslinux %s but this application only includes Syslinux %s
+  - *NEW* MSG_114 "This image uses Syslinux %s but this application only includes the installation files for Syslinux %s."
   - *NEW* MSG_115 "Download required"
   - Changed MSG_234: 'v%d' is replaced with '%s' (change already applied to existing translations)
 

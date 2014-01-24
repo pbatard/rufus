@@ -142,7 +142,7 @@ BOOL iso_op_in_progress = FALSE, format_op_in_progress = FALSE, right_to_left_mo
 BOOL enable_HDDs = FALSE, advanced_mode = TRUE, force_update = FALSE;
 int dialog_showing = 0;
 uint16_t rufus_version[4], embedded_sl_version[2];
-char embedded_sl_version_str[2][12] = { "v?.??", "v?.??" };
+char embedded_sl_version_str[2][12] = { "?.??", "?.??" };
 RUFUS_UPDATE update = { {0,0,0,0}, {0,0}, NULL, NULL};
 extern char szStatusMessage[256];
 
@@ -1400,7 +1400,7 @@ static BOOL BootCheck(void)
 			IGNORE_RETVAL(_chdir(FILES_DIR));
 			for (i=0; i<2; i++) {
 				// Check if we already have the relevant ldlinux_v#.##.sys & ldlinux_v#.##.bss files
-				static_sprintf(tmp, "%s-%s/%s.%s", syslinux, &iso_report.sl_version_str[1], ldlinux, ldlinux_ext[i]);
+				static_sprintf(tmp, "%s-%s/%s.%s", syslinux, iso_report.sl_version_str, ldlinux, ldlinux_ext[i]);
 				fd = fopen(tmp, "rb");
 				if (fd != NULL) {
 					fseek(fd, 0, SEEK_END);
@@ -1410,18 +1410,18 @@ static BOOL BootCheck(void)
 			}
 			if ((syslinux_ldlinux_len[0] != 0) && (syslinux_ldlinux_len[1] != 0)) {
 				uprintf("Will reuse '%s.%s' and '%s.%s' from './%s/%s-%s/' for Syslinux installation\n",
-					ldlinux, ldlinux_ext[0], ldlinux, ldlinux_ext[1], FILES_DIR, syslinux, &iso_report.sl_version_str[1]);
+					ldlinux, ldlinux_ext[0], ldlinux, ldlinux_ext[1], FILES_DIR, syslinux, iso_report.sl_version_str);
 			} else {
 				r = MessageBoxU(hMainDialog, lmprintf(MSG_114, iso_report.sl_version_str, embedded_sl_version_str[1]),
 					lmprintf(MSG_115), MB_YESNO|MB_ICONWARNING|MB_IS_RTL);
 				if (r != IDYES)
 					return FALSE;
 				for (i=0; i<2; i++) {
-					static_sprintf(tmp, "%s-%s", syslinux, &iso_report.sl_version_str[1]);
+					static_sprintf(tmp, "%s-%s", syslinux, iso_report.sl_version_str);
 					IGNORE_RETVAL(_mkdir(tmp));
 					static_sprintf(tmp, "%s.%s %s", ldlinux, ldlinux_ext[i], iso_report.sl_version_str);
 					SetWindowTextU(hISOProgressDlg, lmprintf(MSG_085, tmp));
-					static_sprintf(tmp, "%s/%s-%s/%s.%s", FILES_URL, syslinux, &iso_report.sl_version_str[1], ldlinux, ldlinux_ext[i]);
+					static_sprintf(tmp, "%s/%s-%s/%s.%s", FILES_URL, syslinux, iso_report.sl_version_str, ldlinux, ldlinux_ext[i]);
 					SetWindowTextU(hISOFileName, tmp);
 					syslinux_ldlinux_len[i] = DownloadFile(tmp, &tmp[sizeof(FILES_URL)], hISOProgressDlg);
 					if (syslinux_ldlinux_len[i] == 0) {
@@ -1435,7 +1435,7 @@ static BOOL BootCheck(void)
 		IGNORE_RETVAL(_chdirU(app_dir));
 		IGNORE_RETVAL(_mkdir(FILES_DIR));
 		IGNORE_RETVAL(_chdir(FILES_DIR));
-		static_sprintf(tmp, "%s-%s/%s.%s", syslinux, &embedded_sl_version_str[1][1], ldlinux, ldlinux_ext[2]);
+		static_sprintf(tmp, "%s-%s/%s.%s", syslinux, embedded_sl_version_str[1], ldlinux, ldlinux_ext[2]);
 		fd = fopenU(tmp, "rb");
 		if (fd != NULL) {
 			uprintf("Will reuse './%s/%s' for Syslinux installation\n", FILES_DIR, tmp);
@@ -1449,9 +1449,9 @@ static BOOL BootCheck(void)
 			if (r == IDCANCEL)
 				return FALSE;
 			if (r == IDYES) {
-				static_sprintf(tmp, "%s-%s", syslinux, &embedded_sl_version_str[1][1]);
+				static_sprintf(tmp, "%s-%s", syslinux, embedded_sl_version_str[1]);
 				IGNORE_RETVAL(_mkdir(tmp));
-				static_sprintf(tmp, "%s/%s-%s/%s.%s", FILES_URL, syslinux, &embedded_sl_version_str[1][1], ldlinux, ldlinux_ext[2]);
+				static_sprintf(tmp, "%s/%s-%s/%s.%s", FILES_URL, syslinux, embedded_sl_version_str[1], ldlinux, ldlinux_ext[2]);
 				SetWindowTextU(hISOProgressDlg, lmprintf(MSG_085, tmp));
 				SetWindowTextU(hISOFileName, tmp);
 				DownloadFile(tmp, &tmp[sizeof(FILES_URL)], hISOProgressDlg);
@@ -1516,22 +1516,26 @@ void InitDialog(HWND hDlg)
 	GetWindowTextA(hDlg, tmp, sizeof(tmp));
 	// Count of Microsoft for making it more attractive to read a
 	// version using strtok() than using GetFileVersionInfo()
-	token = strtok(tmp, "v");
+	token = strtok(tmp, " ");
 	for (i=0; (i<4) && ((token = strtok(NULL, ".")) != NULL); i++)
 		rufus_version[i] = (uint16_t)atoi(token);
-	uprintf(APPLICATION_NAME " version %d.%d.%d.%d\n", rufus_version[0], rufus_version[1], rufus_version[2], rufus_version[3]);
-	uprintf("Windows version: %s\n", WindowsVersionStr);
+	if (right_to_left_mode) {
+		static_sprintf(tmp, "%d.%d.%d.%d " APPLICATION_NAME, rufus_version[0], rufus_version[1], rufus_version[2], rufus_version[3]);
+		SetWindowTextU(hDlg, tmp);
+	}
+	uprintf(APPLICATION_NAME " version: %d.%d.%d.%d\n", rufus_version[0], rufus_version[1], rufus_version[2], rufus_version[3]);
 	for (i=0; i<ARRAYSIZE(resource); i++) {
 		buf = (char*)GetResource(hMainInstance, resource[i], _RT_RCDATA, "ldlinux_sys", &len, FALSE);
 		if ((buf == NULL) || (len < 16)) {
 			uprintf("Warning: could not read embedded Syslinux v%d version", i+4);
 		} else {
 			embedded_sl_version[i] = (((uint8_t)strtoul(&buf[0xb], &token, 10))<<8) + (uint8_t)strtoul(&token[1], NULL, 10);
-			static_sprintf(embedded_sl_version_str[i], "v%d.%02d", SL_MAJOR(embedded_sl_version[i]), SL_MINOR(embedded_sl_version[i]));
+			static_sprintf(embedded_sl_version_str[i], "%d.%02d", SL_MAJOR(embedded_sl_version[i]), SL_MINOR(embedded_sl_version[i]));
 		}
 	}
-	uprintf("Syslinux version: %s, %s", embedded_sl_version_str[0], embedded_sl_version_str[1]);
-	uprintf("LCID: 0x%04X\n", GetUserDefaultUILanguage());
+	uprintf("Syslinux versions: %s, %s", embedded_sl_version_str[0], embedded_sl_version_str[1]);
+	uprintf("Windows version: %s\n", WindowsVersionStr);
+	uprintf("Locale ID: 0x%04X\n", GetUserDefaultUILanguage());
 
 	SetClusterSizeLabels();
 
@@ -2394,13 +2398,13 @@ relaunch:
 	 *   sets of dialog resources: one mirrored and one nonmirrored."
 	 * Unfortunately, this limitation is VERY REAL, so that's what we have to go through, and
 	 * furthermore, trying to switch part of the dialogs back to LTR is also a major exercise
-	 * in frustration, because it's next to impossible which combination of WS_EX_RTLREADING,
-	 * WS_EX_RIGHT, WS_EX_LAYOUTRTL, WS_EX_LEFTSCROLLBAR and ES_RIGHT will work, plus there's
-	 * no way to toggle ES_RIGHT at runtime anyway.
+	 * in frustration, because it's next to impossible to figure out which combination of
+	 * WS_EX_RTLREADING, WS_EX_RIGHT, WS_EX_LAYOUTRTL, WS_EX_LEFTSCROLLBAR and ES_RIGHT will
+	 * work... and there's no way to toggle ES_RIGHT at runtime anyway.
 	 * So, just like Microsoft advocates, we go through a massive duplication of all our RC
 	 * dialogs (our RTL dialogs having their IDD's offset by +100 - see IDD_IS_RTL), just to
-	 * add a handful of stupid flags. And of course, now we'll have to figure out a way to keep
-	 * the RTL and non RTL duplicated dialogs always in sync...
+	 * add a handful of stupid flags. And of course, we also have to go through a whole other
+	 * exercise just so that our RTL and non RTL duplicated dialogs are kept in sync...
 	 */
 	hDlg = CreateDialogW(hInstance, MAKEINTRESOURCEW(IDD_DIALOG + IDD_IS_RTL), NULL, MainCallback);
 	if (hDlg == NULL) {

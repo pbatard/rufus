@@ -109,7 +109,7 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter)
 			syslinux_ldlinux[i] = (unsigned char*) malloc(syslinux_ldlinux_len[i]);
 			if (syslinux_ldlinux[i] == NULL)
 				goto out;
-			static_sprintf(path, "%s/%s-%s/%s.%s", FILES_DIR, syslinux, &iso_report.sl_version_str[1], ldlinux, i==0?"sys":"bss");
+			static_sprintf(path, "%s/%s-%s/%s.%s", FILES_DIR, syslinux, iso_report.sl_version_str, ldlinux, i==0?"sys":"bss");
 			fd = fopen(path, "rb");
 			if (fd == NULL) {
 				uprintf("Could not open %s\n", path);
@@ -238,7 +238,7 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter)
 
 	if (dt == DT_SYSLINUX_V5) {
 		IGNORE_RETVAL(_chdirU(app_dir));
-		static_sprintf(path, "%s/%s-%s", FILES_DIR, syslinux, &embedded_sl_version_str[1][1]);
+		static_sprintf(path, "%s/%s-%s", FILES_DIR, syslinux, embedded_sl_version_str[1]);
 		IGNORE_RETVAL(_chdir(path));
 		static_sprintf(path, "%C:\\%s.%s", drive_letter, ldlinux, ldlinux_ext[2]);
 		fd = fopen(&path[3], "rb");
@@ -247,7 +247,7 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter)
 		} else {
 			fclose(fd);
 			if (CopyFileA(&path[3], path, TRUE)) {
-				uprintf("Created '%s' (from '%s/%s-%s/%s')", path, FILES_DIR, syslinux, &embedded_sl_version_str[1][1], &path[3]);
+				uprintf("Created '%s' (from '%s/%s-%s/%s')", path, FILES_DIR, syslinux, embedded_sl_version_str[1], &path[3]);
 			} else {
 				uprintf("Failed to create '%s': %s\n", path, WindowsErrorString());
 			}

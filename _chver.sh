@@ -32,7 +32,7 @@ s/^[ \t]*FILEVERSION[ \t]*.*,.*,.*,\(.*\)/ FILEVERSION @@MAJOR@@,@@MINOR@@,@@MIC
 s/^[ \t]*PRODUCTVERSION[ \t]*.*,.*,.*,\(.*\)/ PRODUCTVERSION @@MAJOR@@,@@MINOR@@,@@MICRO@@,\1/
 s/^\([ \t]*\)VALUE[ \t]*"FileVersion",[ \t]*".*\..*\..*\.\(.*\)"/\1VALUE "FileVersion", "@@MAJOR@@.@@MINOR@@.@@MICRO@@.\2"/
 s/^\([ \t]*\)VALUE[ \t]*"ProductVersion",[ \t]*".*\..*\..*\.\(.*\)"/\1VALUE "ProductVersion", "@@MAJOR@@.@@MINOR@@.@@MICRO@@.\2"/
-s/^\(.*\)"Rufus v\(.*\)\.\(.*\)"\(.*\)/\1"Rufus v@@MAJOR@@.@@MINOR@@.@@MICRO@@.\3"\4/
+s/^\(.*\)"Rufus \(.*\)\.\(.*\)"\(.*\)/\1"Rufus @@MAJOR@@.@@MINOR@@.@@MICRO@@.\3"\4/
 s/^\(.*\)"Version \(.*\) (\(.*\)"\(.*\)/\1"Version @@MAJOR@@.@@MINOR@@.@@MICRO@@ (\3"\4/
 _EOF
 
