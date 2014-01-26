@@ -4985,9 +4985,9 @@ t MSG_259 "Paksa kemas kini"
 
 ################################################################################
 l "pl-PL" "Polish (Polski)" 0x0415
-v 1.0.7
+v 1.0.8
 b "en-US"
-# my internal info: 01.12.2013,21:03 (finito); DONE: szerokości głównego
+# my internal info: 26.01.2014,22:21; done: all things
 
 # Main dialog
 g IDD_DIALOG
@@ -5155,7 +5155,7 @@ t MSG_043 "Błąd: %s"
 t MSG_044 "Pobieranie pliku"
 t MSG_045 "Urządzenie pamięci masowej USB (Ogólny)"
 t MSG_046 "%s (Dysk %d)"
-# t MSG_047 "Multiple Partitions"
+t MSG_047 "Wiele Partycji"
 t MSG_048 "Rufus - Czyszczenie buforów"
 t MSG_049 "Rufus - Anulowanie"
 
@@ -5221,6 +5221,8 @@ t MSG_090 "Niewspierane ISO"
 t MSG_091 "Podczas używania Systemu Typu UEFI, tylko bootowalne obrazy ISO EFI są wspierane. "
 	"Proszę wybrać bootowalny obraz ISO EFI lub ustawić System Docelowy na BIOS."
 t MSG_092 "Niewspierany system plików"
+t MSG_093 "WAŻNET: TEN NAPĘD ZAWIERA WIELE PARTYCJI LUB WOLUMINÓW!!"
+t MSG_094 "Wykryto wiele partycji"
 t MSG_096 "Tylko FAT/FAT32 jest wpierane dla tego typu ISO. Proszę wybrać FAT/FAT32 jako System plików."
 t MSG_097 "Obecnie tylko obrazy ISO oparte na 'bootmgr' lub 'WinPE' mogą być użyte z NTFS."
 t MSG_098 "FAT/FAT32 może zostać użyte tylko dla obrazów ISO opartych na isolinux lub gdy System Docelowy to UEFI."
@@ -5254,6 +5256,8 @@ t MSG_111 "Niekompatybilny Rozmiar jednostki alokacji"
 t MSG_112 "Formatowanie dużych woluminów UDF może zająć dużo czasu. Przy prędkości USB 2.0 , szacunkowy czas "
 	"formatowania wynosi %d:%02d, podczas którego pasek postępu będzie wysawał się być zamrożony. Proszę być cierpliwym!"
 t MSG_113 "Duży wolumin UDF"
+t MSG_114 "Ten obraz używa Syslinux %s ale ta aplikacja dołącza tylko pliki instalacyjne dla Syslinux %s."
+t MSG_115 "Wymagane pobieranie"
 
 # Tootips
 # Partition Scheme and Target Type
