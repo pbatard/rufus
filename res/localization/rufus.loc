@@ -1,5 +1,5 @@
 # This file should be saved as UTF-8, no-BOM, in DOS mode (i.e. CR/LF as line terminators)
-
+rst in English and then, in parenthesis, in your own language.#      eg: "Chinese Simplified (简体中文)"#    - remove the end of the line starting with 0x0409 and replaced it with the LCID code you got in step 0.#      You also may want to look at the table on page 9 of the PDF above to add all the LCID codes your#      translation should cover. Make sure you separate these codes with a comma.# 4. Translate the messages that appear below into your language. The 'g' lines indicate the group a translated#    element belongs to. You shouldn't have to modify them.# 5. (Re)launch Rufus. If a 'rufus.loc' file is found in the current directory, it will be used over the one#    embedded in the application. Since there is only one translation in this file, it will be used by default# 6. Repeat steps 4 & 5 until you're happy with that translated elements. Note that you MUST restart Rufus every#    time you change your .loc file as there is no reload option.# 7. Once you are satisfied with your translation, you should pick up the official rufus.loc from:#    https://github.com/pbatard/rufus/raw/master/res/localization/rufus.loc#    You should then add your translati
 ######################## HOW TO ADD A NEW TRANSLATION ###########################
 # For a more comprehensive set of instructions, please see the *FULL* Localization guide at:
 # https://github.com/pbatard/rufus/wiki/Localization
@@ -188,7 +188,7 @@ t MSG_044 "File download"
 t MSG_045 "USB Storage Device (Generic)"
 t MSG_046 "%s (Disk %d)"
 # Used when a drive is detected that contains more than one partition
-t MSG_047 "Wiele Partycji"
+t MSG_047 "Multiple Partitions"
 t MSG_048 "Rufus - Flushing buffers"
 t MSG_049 "Rufus - Cancellation"
 
@@ -5167,7 +5167,7 @@ t MSG_043 "Błąd: %s"
 t MSG_044 "Pobieranie pliku"
 t MSG_045 "Urządzenie pamięci masowej USB (Ogólny)"
 t MSG_046 "%s (Dysk %d)"
-# t MSG_047 "Multiple Partitions"
+t MSG_047 "Wiele Partycji"
 t MSG_048 "Rufus - Czyszczenie buforów"
 t MSG_049 "Rufus - Anulowanie"
 
