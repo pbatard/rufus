@@ -3,6 +3,13 @@ rufus.loc since its original version. Translators are expected to keep their
 translations up to date by monitoring this file on regular basis and applying
 the same changes.
 
+!!IMPORTANT!! The changes below only tell you WHERE you need to look in the
+English version, to find what has changed. But it may not give you the complete
+details of the changes, especially if a message spans multiple lines.
+PLEASE do not just look at this Changelog when updating your translation, but
+make sure you also look at the English translation. For instance, MSG_114, that
+was introduced in v1.0.8 is MORE than one line!
+
 Remember to also update the version number for your translation ('v x.y.z')
 once you have matched all the changes that occurred for the en-US translation.
 

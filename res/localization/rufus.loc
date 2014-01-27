@@ -3452,7 +3452,7 @@ t MSG_259 "Pembaruan Paksa"
 
 ################################################################################
 l "it-IT" "Italian (Italiano)" 0x0410, 0x0810
-v 1.0.7
+v 1.0.8
 b "en-US"
 
 g IDD_DIALOG
@@ -3599,7 +3599,7 @@ t MSG_043 "Errore: %s"
 t MSG_044 "Download file"
 t MSG_045 "Unità memorizzazione USB (generica)"
 t MSG_046 "%s (disco %d)"
-# t MSG_047 "Multiple Partitions"
+t MSG_047 "Partizioni multiple"
 t MSG_048 "Rufus - Svuotamento buffer"
 t MSG_049 "Rufus - Cancellazione"
 
@@ -3661,6 +3661,10 @@ t MSG_090 "Formato ISO non supportato"
 t MSG_091 "Quando usi una destinazione di tipo UEFI, sono supportate solo immagini ISO avviabili EFI. "
 	"Scegli un'immagien avviabile EFI o imposta una destinazione di tipo BIOS."
 t MSG_092 "Filesystem non supportato"
+t MSG_093 "IMPORTANTE: QUESTA UNITA' CONTIENE PARTIZIONI MULTIPLE!!\n\n"
+	"Questo può includere partizioni/volumi che non sono elencati anche se visibili da Windows."
+	"Se vuoi procedere, sei responsabile per qualsiasi perdita di dati in queste partizioni."
+t MSG_094 "Rilevate partizioni multiple"
 t MSG_096 "Per questo tipo di ISO, sono supportate solo FAT/FAT32. Seleziona FAT/FAT32 come filesystem."
 t MSG_097 "Con NTFS attualmente possono essere usate solo immagini ISO basate su 'bootmgr' o 'WinPE'."
 t MSG_098 "FAT/FAT32 può essere usata solo per immagini ISO basate su isolinux o quando il tipo destinazione è UEFI."
@@ -3694,7 +3698,15 @@ t MSG_111 "Dimensione cluster incompatibile"
 t MSG_112 "La formattazione di un volume UDF di grandi dimensioni può richiedere molto tempo. in modo USB 2.0, il tempo stimato "
 	"per la formattazione sarà di %d:%02d, durante il quale la barra di progresso non verrà aggiornata. Attendi il completamento dell'operazione!"
 t MSG_113 "Voume UDF di grandi dimensioni"
-
+t MSG_114 "Questa immagine usa Syslinux %s ma questa applicazione include solo i file di installazione per "
+	"Syslinux %s.\n\nQueste nuove versioni Syslinux non sono compatibili con le precedenti, e potrebbe "
+	"non esser possibile per Rufus includerle. E' comnue richiesto il download da internet di due file aggiuntivi "
+	"('ldlinux.sys' e 'ldlinux.bss'):\n"
+	"- Seleziona 'Sì' per collegarti a internet e scaricare questi due file\n"
+	"- Seleziona 'No' per annullare l'operazione\n\n"
+	"Nota: questi file verranno scaricati nella cartella corrente dell'applicazione e se presenti "
+	"verranno riusati automaticamente.\n"
+t MSG_115 "Richiede download"
 # Tootips
 # Partition Scheme and Target Type
 t MSG_150 "Questa impostazione è la scelta più sicura. Se hai un computer UEFI e vuoi installare "
