@@ -7337,7 +7337,7 @@ t MSG_259 "Forzar actualización"
 
 ################################################################################
 l "tr-TR" "Turkish (Türkçe)" 0x041F
-v 1.0.7
+v 1.0.8
 b "en-US"
 
 # Main dialog
@@ -7502,7 +7502,7 @@ t MSG_043 "Hata: %s"
 t MSG_044 "Dosya indirme"
 t MSG_045 "USB Depolama Aygıtı (Genel)"
 t MSG_046 "%s (Disk %d)"
-# t MSG_047 "Multiple Partitions"
+t MSG_047 "Çoklu Disk Birimleri"
 t MSG_048 "Rufus - Tamponlanıyor"
 t MSG_049 "Rufus - Vazgeçme"
 
@@ -7568,6 +7568,10 @@ t MSG_090 "Desteklenmeyen ISO"
 t MSG_091 "EFI Hedef Türünü kullanıyorken, sadece EFI açılabilir ISO görüntüleri desteklenir. "
 	"Lütfen bir EFI açılabilir ISO'su seçin yada Hedef Türüni BIOSa ayarlayın."
 t MSG_092 "Desteklenmeyen Dosya Sistemi"
+t MSG_093 "ÖNEMLİ: BU SÜRÜCÜ ÇOKLU DİSK BÖLÜMÜ İÇERİYOR!!\n\n"
+	"Listelenmeyen ya da Windows'un göremediği disk bölümü/birimi içeriyor olabilir. "
+	"İşlem yapmayı tercih ederseniz, bu disk bölümlerindeki herhangi bir veri kaybında sorumluluğu kabul etmiş olursunuz."
+t MSG_094 "Çoklu disk bölümü algılandı"
 t MSG_096 "Bu tür ISOlar için sadece FAT/FAT32 desteklenir. Lütfen Dosya Sistemi olarak FAT/FAT32 seçin."
 t MSG_097 "Şuanda sadece 'bootmgr' yada 'WinPE' tabanlı ISO görüntüleri NTFS ile kullanılabilir."
 t MSG_098 "FAT/FAT32 sadece isolinux tabanlı ISO görüntüleri için yada Hedef türü UEFI ise kullanılabilir."
@@ -7580,7 +7584,7 @@ t MSG_102 "Platformunuz WIM arşivlerinden dosyaları ayrıştıramaz. WIM ayrı
 	"7-Zip son sürümünü yükleyerek aşabilirsiniz.\n7-zip indirme sayfasına gitmek istiyor musunuz?"
 t MSG_103 "%s indirilsin mi?"
 t MSG_104 "Syslinux v5.0 yada daha üstünün yüklenebilmesi için '%s' dosyası gerekir.\n"
-	"Çünkü bu dosya boyutu 100 KB tan daha büyük ve Syslinux v5+ ISO görüntülerinde her zaman bulunur, "
+	"Çünkü bu dosyanın boyutu 100 KB tan daha büyüktür ve Syslinux v5+ ISO yansımalarında mutlaka bulunur, "
 	"Rufus'a gömülü değildir.\n\nRufus eksik dosyayı sizin için indirebilir:\n"
 	"- İnternete bağlanıp dosyayı indirmek için 'Evet'i ssçin\n"
 	"- Dosyayı daha sonra sürücüye elle kopyalamak istiyorsanız 'Hayır'ı seçin\n\n"
@@ -7601,6 +7605,15 @@ t MSG_111 "Uyumsuz Ayırma Boyutu"
 t MSG_112 "Geniş bir UDF Biriminin biçimlendirilmesi çok uzun bir süre alabilir. USB 2.0 hızında, Tahmini biçimlendirme "
 	"süresi %d:%02d, İlerleme çubuğu donmuş görünüyorken. Lütfen sabırlı olun!"
 t MSG_113 "Geniş UDF Birimi"
+t MSG_114 "Bu yansıma Syslinux %s kullanıyor fakat bu uygulama yalnız Syslinux %s için yükleme dosyalarını "
+	"içeriyor.\n\nSyslinux'un yeni sürümleri bir başkasıyla uyumlu olmadığından ve Rufus'un bunların"
+	"tamamını içermesi mümkün olmadığından, iki ek dosyanın('ldlinux.sys' ve 'ldlinux.bss') internet üzerinden "
+	"indirilmesi gerekli:\n"
+	"- İnternete bağlanıp bu dosyaları indirmek için 'Evet'i seçin\n"
+	"- İşlemden vazgeçmek için 'Hayır'ı seçin\n\n"
+	"Not: Dosyalar mevcut uygulama dizinine indirilecek ve "
+	"hazır olduğunda otomatik olarak kullanılacak.\n"
+t MSG_115 "İndirme gerekli"
 
 # Tootips
 # Partition Scheme and Target Type
