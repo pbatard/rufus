@@ -188,7 +188,7 @@ t MSG_044 "File download"
 t MSG_045 "USB Storage Device (Generic)"
 t MSG_046 "%s (Disk %d)"
 # Used when a drive is detected that contains more than one partition
-t MSG_047 "Multiple Partitions"
+t MSG_047 "Wiele Partycji"
 t MSG_048 "Rufus - Flushing buffers"
 t MSG_049 "Rufus - Cancellation"
 
