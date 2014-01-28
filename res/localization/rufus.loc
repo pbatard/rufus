@@ -1181,7 +1181,7 @@ t MSG_258 "Rock Ridge support"
 t MSG_259 "Force update"
 
 ################################################################################
-l "nl-NL" "Dutch (Netherlands)" 0x0413, 0x0813
+l "nl-NL" "Dutch (Nederlands)" 0x0413, 0x0813
 v 1.0.7
 b "en-US"
 
@@ -1916,7 +1916,7 @@ t MSG_259 "Forçage de mise à jour"
 
 ################################################################################
 l "de-DE" "German (Deutsch)" 0x0407, 0x0807, 0x0c07, 0x1007, 0x1407
-v 1.0.7
+v 1.0.8
 b "en-US"
 
 g IDD_DIALOG
@@ -2071,7 +2071,7 @@ t MSG_043 "Fehler: %s"
 t MSG_044 "Dateidownload"
 t MSG_045 "USB Massenspeichergerät (Allgemein)"
 t MSG_046 "%s (Disk %d)"
-# t MSG_047 "Multiple Partitions"
+t MSG_047 "Mehrere Partitionen"
 t MSG_048 "Rufus - Leere Puffer"
 t MSG_049 "Rufus - Abbrechen"
 
@@ -2132,7 +2132,11 @@ t MSG_089 "Dieses ISO-Abbild ist zu groß für das gewählte Ziel."
 t MSG_090 "ISO-Abbild nicht unterstützt"
 t MSG_091 "Wenn UEFI als Typ des Zielsystems gewählt ist, sind nur EFI-bootfähige ISO-Abbilder unterstützt."
 	"Bitte wählen Sie ein EFI-bootfähiges ISO-Abbild oder ändern Sie den Typ des Zielsystems zu BIOS."
-t MSG_092 "Nicht unterstütztes Dateisystem"	
+t MSG_092 "Nicht unterstütztes Dateisystem"
+t MSG_093 "ACHTUNG! DIESES LAUFWERK VERFÜGT ÜBER MEHRERE PARTITIONEN ODER VOLUMES!!\n\n"
+	"Darunter sind möglicherweise Partitionen, die unter Windows nicht sicht- bzw. nutzbar sind."
+	"Wenn Sie fortfahren, sind Sie selbst für den Datenverlust auf diesen Partitionen verantwortlich."
+t MSG_094 "Mehrere Partitionen erkannt"	
 t MSG_096 "Nur FAT/FAT32 sind unterstützt für diesen Typ des ISO-Abbilds. Bitte wählen Sie FAT/FAT32 als Dateisystem."
 t MSG_097 "Nur 'bootmgr' oder 'WinPE' basierende ISO-Abbilder können derzeit mit NTFS verwendet werden."
 t MSG_098 "FAT/FAT32 kann nur für isolinux basierte ISO-Abbilder oder den Zieltyp UEFI verwendet werden."
@@ -2161,6 +2165,13 @@ t MSG_110 "MS-DOS kann nicht von einem Laufwerk starten, das 64 Kilobyte große 
 t MSG_111 "Inkompatible Zuordnungseinheitengröße"
 t MSG_112 "Großes UDF-Laufwerke zu formatieren, kann viel Zeit benötigen..."
 t MSG_113 "Großes UDF-Laufwerk"
+t MSG_114 "Dieses Abbild benutzt Syslinux %s, aber diese Anwendung verfügt nur über Installationsdateien für Syslinux %s.\n\n"
+	"Neuere Syslinux-Versionen sind untereinander nicht kompatibel. Rufus kann nicht alle Versionen unterstützen. "
+	"Zwei zusätzliche Dateien müssen vom Internet heruntergeladen werden ('ldlinux.sys' and 'ldlinux.bss'):\n"
+	"- Wählen Sie 'Ja', um dem Download zuzustimmen oder\n"
+	"- Wählen Sie 'Nein', um den Vorgang abzubrechen\n\n"
+	"Hinweis: Die Dateien werden in das Programmverzeichnis heruntergeladen und können bei Bedarf wiederverwendet werden.\n"
+t MSG_115 "Download erforderlich"
 
 t MSG_150 "Normalerweise die beste Wahl. Wenn Sie einen UEFI-Computer haben und das Betriebssystem "
 	"im EFI-Modus installieren wollen, sollten sie eine der anderen Einstellungen wählen."
