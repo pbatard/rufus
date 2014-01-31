@@ -2,7 +2,7 @@
  * Rufus: The Reliable USB Formatting Utility
  * Formatting function calls
  * Copyright © 2007-2009 Tom Thornhill/Ridgecrop
- * Copyright © 2011-2013 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2014 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -97,12 +97,12 @@ typedef LONG (WINAPI *Chkdsk_t)(
 
 /* http://msdn.microsoft.com/en-us/library/windows/desktop/aa383357.aspx */
 typedef enum  {
-	FPF_COMPRESSED   = 0x01 
+	FPF_COMPRESSED       = 0x01 
 } FILE_SYSTEM_PROP_FLAG;
 
 typedef BOOLEAN (WINAPI* EnableVolumeCompression_t)(
-	WCHAR*          DriveRoot,
-	ULONG           CompressionFlags	// FILE_SYSTEM_PROP_FLAG
+	WCHAR*               DriveRoot,
+	ULONG                CompressionFlags	// FILE_SYSTEM_PROP_FLAG
 );
 
 /* Large FAT32 */

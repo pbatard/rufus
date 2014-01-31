@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Virtual Disk Handling functions
- * Copyright © 2013 Pete Batard <pete@akeo.ie>
+ * Copyright © 2013-2014 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -96,7 +96,8 @@ BOOL WimExtractCheck(void)
 
 
 // Extract a file from a WIM image using wimgapi.dll (Windows 7 or later)
-// NB: Don't bother trying to get progress from a WIM callback - it doesn't work!
+// NB: if you want progress from a WIM callback, you must run the WIM API call in its own thread
+// (which we don't do here) as it won't work otherwise. Thanks go to Erwan for figuring this out!
 static BOOL WimExtractFile_API(const char* image, int index, const char* src, const char* dst)
 {
 	BOOL r = FALSE;

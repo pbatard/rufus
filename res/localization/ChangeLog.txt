@@ -3,15 +3,19 @@ rufus.loc since its original version. Translators are expected to keep their
 translations up to date by monitoring this file on regular basis and applying
 the same changes.
 
-!!IMPORTANT!! The changes below only tell you WHERE you need to look in the
-English version, to find what has changed. But it may not give you the complete
-details of the changes, especially if a message spans multiple lines.
-PLEASE do not just look at this Changelog when updating your translation, but
-make sure you also look at the English translation. For instance, MSG_114, that
-was introduced in v1.0.8 is MORE than one line!
-
 Remember to also update the version number for your translation ('v x.y.z')
 once you have matched all the changes that occurred for the en-US translation.
+
+!!IMPORTANT!! The changes below do NOT contain the full message and only tell
+you WHERE, in the English translation, you should look to find the full message
+content. PLEASE, do not just look at this Changelog when updating your
+translation, but always use the English section of rufus.loc as your base.
+For instance, MSG_114, that was introduced in v1.0.8 is MORE than one line!
+
+
+o Version 1.0.9 (2014.01.31)
+  - *NEW* MSG_260 "NTFS compression"
+    Note: Since this is a cheat-mode message, I don't specially care if it gets translated for the next version
 
 o Version 1.0.8 (2014.01.21)
   - Changed MSG_047 "%s (%c:)" -> "Multiple Volumes" (non-updated ones have been commented out)

@@ -614,7 +614,7 @@ int GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSyst
 		AnalyzeMBR(hPhysical);
 		for (i=0; i<DriveLayout->PartitionCount; i++) {
 			if (DriveLayout->PartitionEntry[i].Mbr.PartitionType != PARTITION_ENTRY_UNUSED) {
-				uprintf("Partition %d:\n", DriveLayout->PartitionEntry[i].PartitionNumber);
+				uprintf("Partition %d:\n", i+1);
 				part_type = DriveLayout->PartitionEntry[i].Mbr.PartitionType;
 				uprintf("  Type: %s (0x%02x)\r\n  Size: %s (%lld bytes)\r\n  Start Sector: %d, Boot: %s, Recognized: %s\n",
 					((part_type==0x07)&&(FileSystemName[0]!=0))?FileSystemName:GetPartitionType(part_type), part_type,

@@ -117,7 +117,7 @@ static BOOL log_displayed = FALSE;
 static BOOL iso_provided = FALSE;
 static BOOL user_notified = FALSE;
 static BOOL relaunch = FALSE;
-extern BOOL force_large_fat32, enable_joliet, enable_rockridge;
+extern BOOL force_large_fat32, enable_joliet, enable_rockridge, enable_ntfs_compression;
 static int selection_default;
 static loc_cmd* selected_locale = NULL;
 static UINT_PTR UM_LANGUAGE_MENU_MAX = UM_LANGUAGE_MENU;
@@ -2477,6 +2477,12 @@ relaunch:
 			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'L')) {
 				detect_fakes = !detect_fakes;
 				PrintStatus2000(lmprintf(MSG_256), detect_fakes);
+				continue;
+			}
+			// Alt N => Enable NTFS compression
+			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'N')) {
+				enable_ntfs_compression = !enable_ntfs_compression;
+				PrintStatus2000(lmprintf(MSG_260), enable_ntfs_compression);
 				continue;
 			}
 			// Alt-R => Remove all the registry keys created by Rufus

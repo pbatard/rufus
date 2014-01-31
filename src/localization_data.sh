@@ -1,6 +1,6 @@
 #!/bin/sh
 
-echo This file recreates localization_data.c according resource.h
+echo This file recreates localization_data.h according resource.h
 echo
 
 # check that sed is available

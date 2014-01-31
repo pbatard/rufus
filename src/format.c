@@ -56,7 +56,7 @@ static int task_number = 0;
 extern const int nb_steps[FS_MAX];
 extern uint32_t dur_mins, dur_secs;
 static int fs_index = 0;
-BOOL force_large_fat32 = FALSE;
+BOOL force_large_fat32 = FALSE, enable_ntfs_compression = FALSE;
 static BOOL WritePBR(HANDLE hLogicalDrive);
 
 /* 
@@ -662,6 +662,7 @@ static BOOL FormatDrive(DWORD DriveIndex)
 {
 	BOOL r = FALSE;
 	PF_DECL(FormatEx);
+	PF_DECL(EnableVolumeCompression);
 	char FSType[32];
 	char *locale, *VolumeName = NULL;
 	WCHAR* wVolumeName = NULL;
@@ -678,18 +679,22 @@ static BOOL FormatDrive(DWORD DriveIndex)
 	} else {
 		PrintStatus(0, TRUE, MSG_222, FSType);
 	}
-	VolumeName = GetLogicalName(DriveIndex, FALSE, TRUE);
+	VolumeName = GetLogicalName(DriveIndex, TRUE, TRUE);
 	wVolumeName = utf8_to_wchar(VolumeName);
 	if (wVolumeName == NULL) {
 		uprintf("Could not read volume name\n");
 		goto out;
 	}
+	// Hey, nice consistency here, Microsoft! -  FormatEx() fails if wVolumeName has
+	// a trailing backslash, but EnableCompression() fails without...
+	wVolumeName[wcslen(wVolumeName)-1] = 0;		// Remove trailing backslash
 
 	// LoadLibrary("fmifs.dll") appears to changes the locale, which can lead to
 	// problems with tolower(). Make sure we restore the locale. For more details,
 	// see http://comments.gmane.org/gmane.comp.gnu.mingw.user/39300
 	locale = setlocale(LC_ALL, NULL);
 	PF_INIT_OR_OUT(FormatEx, fmifs);
+	PF_INIT(EnableVolumeCompression, fmifs);
 	setlocale(LC_ALL, locale);
 
 	GetWindowTextW(hFileSystem, wFSType, ARRAYSIZE(wFSType));
@@ -714,8 +719,19 @@ static BOOL FormatDrive(DWORD DriveIndex)
 	format_percent = 0.0f;
 	task_number = 0;
 	fs_index = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
+
 	pfFormatEx(wVolumeName, SelectedDrive.Geometry.MediaType, wFSType, wLabel,
 		IsChecked(IDC_QUICKFORMAT), ulClusterSize, FormatExCallback);
+
+	if ((fs == FS_NTFS) && (enable_ntfs_compression) && (pfEnableVolumeCompression != NULL)) {
+		wVolumeName[wcslen(wVolumeName)] = '\\';	// Add trailing backslash back again
+		if (pfEnableVolumeCompression(wVolumeName, FPF_COMPRESSED)) {
+			uprintf("Enabled NTFS compression\n");
+		} else {
+			uprintf("Could not enable NTFS compression: %s\n", WindowsErrorString());
+		}
+	}
+
 	if (!IS_ERROR(FormatStatus)) {
 		uprintf("Format completed.\n");
 		r = TRUE;
