@@ -13,8 +13,8 @@ type -P sed &>/dev/null || { echo "sed command not found. Aborting." >&2; exit 1
 type -P git &>/dev/null || { echo "git command not found. Aborting." >&2; exit 1; }
 
 VER=`git log --oneline | wc -l`
-# trim spaces
-TAGVER=`echo $VER`
+# adjust so that we match the github commit count
+TAGVER=`expr $VER + 1`
 # there may be a better way to prevent improper nano on amend. For now the detection
 # of a .amend file in the current directory will do
 if [ -f ./.amend ]; then

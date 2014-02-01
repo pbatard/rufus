@@ -29,9 +29,9 @@ AC_ARG_ENABLE([debug],
 	[debug_enabled=$enableval],
 	[debug_enabled='yes'])
 if test "x$debug_enabled" != "xno" ; then
-  CFLAGS="-g -O2"
+  CFLAGS="-g -O0"
 else
-  CFLAGS="-O2"
+  CFLAGS="-Os"
   LDFLAGS="-s"
 fi
 

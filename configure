@@ -3522,9 +3522,9 @@ else
 fi
 
 if test "x$debug_enabled" != "xno" ; then
-  CFLAGS="-g -O2"
+  CFLAGS="-g -O0"
 else
-  CFLAGS="-O2"
+  CFLAGS="-Os"
   LDFLAGS="-s"
 fi
 
