@@ -34,15 +34,13 @@ s/^\(.*\)"Rufus \(.*\)\.\(.*\)"\(.*\)/\1"Rufus \2.@@TAGVER@@"\4/
 _EOF
 
 # First run sed to substitute our variable in the sed command file
-sed -e "s/@@TAGVER@@/$TAGVER/g" cmd.sed > cmd.sed~
-mv cmd.sed~ cmd.sed
+sed -i -e "s/@@TAGVER@@/$TAGVER/g" cmd.sed
 
 # Run sed to update the nano version
-# NB: we need to run git add else the modified files may be ignored
-sed -f cmd.sed src/rufus.rc > src/rufus.rc~
+sed -i -f cmd.sed src/rufus.rc
 # MinGW's sed has the bad habit of eating CRLFs - make sure we keep 'em
-sed 's/$/\r/' src/rufus.rc~ > src/rufus.rc
-rm src/rufus.rc~
+sed -i 's/$/\r/' src/rufus.rc
+# NB: we need to run git add else the modified files may be ignored
 git add src/rufus.rc
 
 rm cmd.sed
