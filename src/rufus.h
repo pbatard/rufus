@@ -214,7 +214,6 @@ typedef struct {
 #define NB_OLD_C32          2
 #define OLD_C32_NAMES       { "menu.c32", "vesamenu.c32" }
 #define OLD_C32_THRESHOLD   { 53500, 148000 }
-#define NEW_C32_URL         { DOWNLOAD_URL "/menu.c32", DOWNLOAD_URL "/vesamenu.c32" }
 
 /* ISO details that the application may want */
 #define WINPE_MININT    0x2A

@@ -118,6 +118,7 @@ static BOOL iso_provided = FALSE;
 static BOOL user_notified = FALSE;
 static BOOL relaunch = FALSE;
 extern BOOL force_large_fat32, enable_joliet, enable_rockridge, enable_ntfs_compression;
+extern const char* old_c32_name[NB_OLD_C32];
 static int selection_default;
 static loc_cmd* selected_locale = NULL;
 static UINT_PTR UM_LANGUAGE_MENU_MAX = UM_LANGUAGE_MENU;
@@ -1184,9 +1185,6 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 {
 	int i;
 	BOOL r;
-	FILE* fd;
-	const char* old_c32_name[NB_OLD_C32] = OLD_C32_NAMES;
-	const char* new_c32_url[NB_OLD_C32] = NEW_C32_URL;
 	char isolinux_str[16] = "No";
 
 	if (iso_path == NULL)
@@ -1222,30 +1220,6 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 		safe_free(iso_path);
 		SetMBRProps();
 	} else if (HAS_SYSLINUX(iso_report)) {
-		if (SL_MAJOR(iso_report.sl_version) < 5) {
-			_chdirU(app_dir);
-			for (i=0; i<NB_OLD_C32; i++) {
-				if (iso_report.has_old_c32[i]) {
-					fd = fopen(old_c32_name[i], "rb");
-					if (fd != NULL) {
-						// If a file already exists in the current directory, use that one
-						uprintf("Will replace obsolete '%s' from ISO with the one found in current directory\n", old_c32_name[i]);
-						fclose(fd);
-						use_own_c32[i] = TRUE;
-					} else {
-						PrintStatus(0, FALSE, MSG_204, old_c32_name[i]);
-						if (MessageBoxU(hMainDialog, lmprintf(MSG_084, old_c32_name[i], old_c32_name[i]),
-							 lmprintf(MSG_083, old_c32_name[i]), MB_YESNO|MB_ICONWARNING|MB_IS_RTL) == IDYES) {
-							SetWindowTextU(hISOProgressDlg, lmprintf(MSG_085, old_c32_name[i]));
-							SetWindowTextU(hISOFileName, new_c32_url[i]);
-							if (DownloadFile(new_c32_url[i], old_c32_name[i], hISOProgressDlg))
-								use_own_c32[i] = TRUE;
-						}
-					}
-				}
-			}
-		}
-
 		// Enable bootable and set Target System and FS accordingly
 		CheckDlgButton(hMainDialog, IDC_BOOT, BST_CHECKED);
 		SetTargetSystem();
@@ -1342,6 +1316,7 @@ static BOOL BootCheck(void)
 {
 	int i, fs, bt, dt, r;
 	FILE* fd;
+	DWORD len;
 	const char* ldlinux = "ldlinux";
 	const char* syslinux = "syslinux";
 	const char* ldlinux_ext[3] = { "sys", "bss", "c32" };
@@ -1393,40 +1368,77 @@ static BOOL BootCheck(void)
 			MessageBoxU(hMainDialog, lmprintf(MSG_100), lmprintf(MSG_099), MB_OK|MB_ICONERROR|MB_IS_RTL);
 			return FALSE;
 		}
-		if ((SL_MAJOR(iso_report.sl_version) >= 5) && (iso_report.sl_version != embedded_sl_version[1])) {
-			// Unlike what was the case for v4 and earlier, Syslinux v5+ versions are INCOMPATIBLE with one another!
-			IGNORE_RETVAL(_chdirU(app_dir));
-			IGNORE_RETVAL(_mkdir(FILES_DIR));
-			IGNORE_RETVAL(_chdir(FILES_DIR));
-			for (i=0; i<2; i++) {
-				// Check if we already have the relevant ldlinux_v#.##.sys & ldlinux_v#.##.bss files
-				static_sprintf(tmp, "%s-%s/%s.%s", syslinux, iso_report.sl_version_str, ldlinux, ldlinux_ext[i]);
-				fd = fopen(tmp, "rb");
-				if (fd != NULL) {
-					fseek(fd, 0, SEEK_END);
-					syslinux_ldlinux_len[i] = (DWORD)ftell(fd);
-					fclose(fd);
+
+		if (HAS_SYSLINUX(iso_report)) {
+			if (SL_MAJOR(iso_report.sl_version) < 5) {
+				IGNORE_RETVAL(_chdirU(app_dir));
+				for (i=0; i<NB_OLD_C32; i++) {
+					if (iso_report.has_old_c32[i]) {
+						if (i==0) {
+							IGNORE_RETVAL(_mkdir(FILES_DIR));
+							IGNORE_RETVAL(_chdir(FILES_DIR));
+						}
+						static_sprintf(tmp, "%s-%s/%s", syslinux, embedded_sl_version_str[0], old_c32_name[i]);
+						fd = fopen(tmp, "rb");
+						if (fd != NULL) {
+							// If a file already exists in the current directory, use that one
+							uprintf("Will replace obsolete '%s' from ISO with the one found in './%s'\n", old_c32_name[i], tmp);
+							fclose(fd);
+							use_own_c32[i] = TRUE;
+						} else {
+							PrintStatus(0, FALSE, MSG_204, old_c32_name[i]);
+							if (MessageBoxU(hMainDialog, lmprintf(MSG_084, old_c32_name[i], old_c32_name[i]),
+									lmprintf(MSG_083, old_c32_name[i]), MB_YESNO|MB_ICONWARNING|MB_IS_RTL) == IDYES) {
+								static_sprintf(tmp, "%s-%s", syslinux, embedded_sl_version_str[0]);
+								IGNORE_RETVAL(_mkdir(tmp));
+								SetWindowTextU(hISOProgressDlg, lmprintf(MSG_085, old_c32_name[i]));
+								static_sprintf(tmp, "%s/%s-%s/%s", FILES_URL, syslinux, embedded_sl_version_str[0], old_c32_name[i]);
+								SetWindowTextU(hISOFileName, tmp);
+								len = DownloadFile(tmp, &tmp[sizeof(FILES_URL)], hISOProgressDlg);
+								if (len == 0) {
+									uprintf("Couldn't download the files - cancelling\n");
+									return FALSE;
+								}
+								use_own_c32[i] = TRUE;
+							}
+						}
+					}
 				}
-			}
-			if ((syslinux_ldlinux_len[0] != 0) && (syslinux_ldlinux_len[1] != 0)) {
-				uprintf("Will reuse '%s.%s' and '%s.%s' from './%s/%s-%s/' for Syslinux installation\n",
-					ldlinux, ldlinux_ext[0], ldlinux, ldlinux_ext[1], FILES_DIR, syslinux, iso_report.sl_version_str);
-			} else {
-				r = MessageBoxU(hMainDialog, lmprintf(MSG_114, iso_report.sl_version_str, embedded_sl_version_str[1]),
-					lmprintf(MSG_115), MB_YESNO|MB_ICONWARNING|MB_IS_RTL);
-				if (r != IDYES)
-					return FALSE;
+			} else if (iso_report.sl_version != embedded_sl_version[1]) {
+				// Unlike what was the case for v4 and earlier, Syslinux v5+ versions are INCOMPATIBLE with one another!
+				IGNORE_RETVAL(_chdirU(app_dir));
+				IGNORE_RETVAL(_mkdir(FILES_DIR));
+				IGNORE_RETVAL(_chdir(FILES_DIR));
 				for (i=0; i<2; i++) {
-					static_sprintf(tmp, "%s-%s", syslinux, iso_report.sl_version_str);
-					IGNORE_RETVAL(_mkdir(tmp));
-					static_sprintf(tmp, "%s.%s %s", ldlinux, ldlinux_ext[i], iso_report.sl_version_str);
-					SetWindowTextU(hISOProgressDlg, lmprintf(MSG_085, tmp));
-					static_sprintf(tmp, "%s/%s-%s/%s.%s", FILES_URL, syslinux, iso_report.sl_version_str, ldlinux, ldlinux_ext[i]);
-					SetWindowTextU(hISOFileName, tmp);
-					syslinux_ldlinux_len[i] = DownloadFile(tmp, &tmp[sizeof(FILES_URL)], hISOProgressDlg);
-					if (syslinux_ldlinux_len[i] == 0) {
-						uprintf("Couldn't download the files - cancelling\n");
+					// Check if we already have the relevant ldlinux_v#.##.sys & ldlinux_v#.##.bss files
+					static_sprintf(tmp, "%s-%s/%s.%s", syslinux, iso_report.sl_version_str, ldlinux, ldlinux_ext[i]);
+					fd = fopen(tmp, "rb");
+					if (fd != NULL) {
+						fseek(fd, 0, SEEK_END);
+						syslinux_ldlinux_len[i] = (DWORD)ftell(fd);
+						fclose(fd);
+					}
+				}
+				if ((syslinux_ldlinux_len[0] != 0) && (syslinux_ldlinux_len[1] != 0)) {
+					uprintf("Will reuse '%s.%s' and '%s.%s' from './%s/%s-%s/' for Syslinux installation\n",
+						ldlinux, ldlinux_ext[0], ldlinux, ldlinux_ext[1], FILES_DIR, syslinux, iso_report.sl_version_str);
+				} else {
+					r = MessageBoxU(hMainDialog, lmprintf(MSG_114, iso_report.sl_version_str, embedded_sl_version_str[1]),
+						lmprintf(MSG_115), MB_YESNO|MB_ICONWARNING|MB_IS_RTL);
+					if (r != IDYES)
 						return FALSE;
+					for (i=0; i<2; i++) {
+						static_sprintf(tmp, "%s-%s", syslinux, iso_report.sl_version_str);
+						IGNORE_RETVAL(_mkdir(tmp));
+						static_sprintf(tmp, "%s.%s %s", ldlinux, ldlinux_ext[i], iso_report.sl_version_str);
+						SetWindowTextU(hISOProgressDlg, lmprintf(MSG_085, tmp));
+						static_sprintf(tmp, "%s/%s-%s/%s.%s", FILES_URL, syslinux, iso_report.sl_version_str, ldlinux, ldlinux_ext[i]);
+						SetWindowTextU(hISOFileName, tmp);
+						syslinux_ldlinux_len[i] = DownloadFile(tmp, &tmp[sizeof(FILES_URL)], hISOProgressDlg);
+						if (syslinux_ldlinux_len[i] == 0) {
+							uprintf("Couldn't download the files - cancelling\n");
+							return FALSE;
+						}
 					}
 				}
 			}

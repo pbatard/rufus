@@ -69,7 +69,7 @@ static const char* pe_dirname[] = { "/i386", "/minint" };
 static const char* pe_file[] = { "ntdetect.com", "setupldr.bin", "txtsetup.sif" };
 static const char* reactos_name = "setupldr.sys"; // TODO: freeldr.sys doesn't seem to work
 static const char* autorun_name = "autorun.inf";
-static const char* old_c32_name[NB_OLD_C32] = OLD_C32_NAMES;
+const char* old_c32_name[NB_OLD_C32] = OLD_C32_NAMES;
 static const int64_t old_c32_threshold[NB_OLD_C32] = OLD_C32_THRESHOLD;
 static uint8_t i_joliet_level = 0;
 static uint64_t total_blocks, nb_blocks;
@@ -218,7 +218,7 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 	BOOL r, is_syslinux_cfg, is_old_c32[NB_OLD_C32];
 	int i_length;
 	size_t i, nul_pos;
-	char* psz_fullpath = NULL;
+	char tmp[128], *psz_fullpath = NULL;
 	const char* psz_basename;
 	udf_dirent_t *p_udf_dirent2;
 	uint8_t buf[UDF_BLOCKSIZE];
@@ -266,7 +266,8 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 			psz_fullpath[nul_pos] = 0;
 			for (i=0; i<NB_OLD_C32; i++) {
 				if (is_old_c32[i] && use_own_c32[i]) {
-					if (CopyFileA(old_c32_name[i], psz_fullpath, FALSE)) {
+					static_sprintf(tmp, "%s/syslinux-%s/%s", FILES_DIR, embedded_sl_version_str[0], old_c32_name[i]);
+					if (CopyFileA(tmp, psz_fullpath, FALSE)) {
 						uprintf("  Replaced with local version\n");
 						break;
 					}
@@ -346,7 +347,7 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 	DWORD buf_size, wr_size, err;
 	BOOL s, is_syslinux_cfg, is_old_c32[NB_OLD_C32];
 	int i_length, r = 1;
-	char psz_fullpath[1024], *psz_basename;
+	char tmp[128], psz_fullpath[1024], *psz_basename;
 	const char *psz_iso_name = &psz_fullpath[strlen(psz_extract_dir)];
 	unsigned char buf[ISO_BLOCKSIZE];
 	CdioListNode_t* p_entnode;
@@ -406,7 +407,8 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 			psz_fullpath[nul_pos] = 0;
 			for (i=0; i<NB_OLD_C32; i++) {
 				if (is_old_c32[i] && use_own_c32[i]) {
-					if (CopyFileA(old_c32_name[i], psz_fullpath, FALSE)) {
+					static_sprintf(tmp, "%s/syslinux-%s/%s", FILES_DIR, embedded_sl_version_str[0], old_c32_name[i]);
+					if (CopyFileA(tmp, psz_fullpath, FALSE)) {
 						uprintf("  Replaced with local version\n");
 						break;
 					}
@@ -510,6 +512,7 @@ BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan)
 		SendMessage(hISOProgressBar, PBM_SETMARQUEE, TRUE, 0);
 	} else {
 		uprintf("Extracting files...\n");
+		IGNORE_RETVAL(_chdirU(app_dir));
 		SetWindowTextU(hISOProgressDlg, lmprintf(MSG_231));
 		if (total_blocks == 0) {
 			uprintf("Error: ISO has not been properly scanned.\n");
