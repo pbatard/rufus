@@ -476,42 +476,41 @@ BOOL IsMediaPresent(DWORD DriveIndex)
 	return r;
 }
 
-// TODO: use an (fn,str) table and simplify this whole thing
-BOOL AnalyzeMBR(HANDLE hPhysicalDrive)
+const struct {int (*fn)(FILE *fp); char* str; BOOL bootable;} known_mbr[] = {
+	{ is_dos_mbr, "DOS/NT/95A", TRUE },
+	{ is_dos_f2_mbr, "DOS/NT/95A (F2)", TRUE },
+	{ is_95b_mbr, "Windows 95B/98/98SE/ME", TRUE },
+	{ is_2000_mbr, "Windows 2000/XP/2003", TRUE },
+	{ is_vista_mbr, "Windows Vista", TRUE },
+	{ is_win7_mbr, "Windows 7", TRUE },
+	{ is_rufus_mbr, "Rufus", TRUE },
+	{ is_syslinux_mbr, "Syslinux", TRUE },
+	{ is_reactos_mbr, "Reactos", TRUE },
+	{ is_zero_mbr, "Zeroed", FALSE },
+};
+
+// Returns TRUE if the drive seems bootable, FALSE otherwise
+BOOL AnalyzeMBR(HANDLE hPhysicalDrive, const char* TargetName)
 {
+	const char* mbr_name = "Master Boot Record";
 	FILE fake_fd = { 0 };
+	int i;
 
 	fake_fd._ptr = (char*)hPhysicalDrive;
 	fake_fd._bufsiz = SelectedDrive.Geometry.BytesPerSector;
 
 	if (!is_br(&fake_fd)) {
-		uprintf("Drive does not have an x86 master boot record\n");
+		uprintf("%s does not have an x86 %s\n", TargetName, mbr_name);
 		return FALSE;
 	}
-	if (is_dos_mbr(&fake_fd)) {
-		uprintf("Drive has a DOS/NT/95A master boot record\n");
-	} else if (is_dos_f2_mbr(&fake_fd)) {
-		uprintf("Drive has a DOS/NT/95A master boot record "
-			"with the undocumented F2 instruction\n");
-	} else if (is_95b_mbr(&fake_fd)) {
-		uprintf("Drive has a Windows 95B/98/98SE/ME master boot record\n");
-	} else if (is_2000_mbr(&fake_fd)) {
-		uprintf("Drive has a Windows 2000/XP/2003 master boot record\n");
-	} else if (is_vista_mbr(&fake_fd)) {
-		uprintf("Drive has a Windows Vista master boot record\n");
-	} else if (is_win7_mbr(&fake_fd)) {
-		uprintf("Drive has a Windows 7 master boot record\n");
-	} else if (is_rufus_mbr(&fake_fd)) {
-		uprintf("Drive has a Rufus master boot record\n");
-	} else if (is_syslinux_mbr(&fake_fd)) {
-		uprintf("Drive has a Syslinux master boot record\n");
-	} else if (is_reactos_mbr(&fake_fd)) {
-		uprintf("Drive has a ReactOS master boot record\n");
-	} else if (is_zero_mbr(&fake_fd)) {
-		uprintf("Drive has a zeroed master boot record\n");
-	} else {
-		uprintf("Drive has an unknown master boot record\n");
+	for (i=0; i<ARRAYSIZE(known_mbr); i++) {
+		if (known_mbr[i].fn(&fake_fd)) {
+			uprintf("%s has a %s %s\n", TargetName, known_mbr[i].str, mbr_name);
+			return known_mbr[i].bootable;
+		}
 	}
+
+	uprintf("%s has an unknown %s\n", TargetName, mbr_name);
 	return TRUE;
 }
 
@@ -611,7 +610,7 @@ int GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSyst
 		uprintf("Partition type: MBR, NB Partitions: %d\n", nb_partitions);
 		SelectedDrive.has_mbr_uefi_marker = (DriveLayout->Mbr.Signature == MBR_UEFI_MARKER);
 		uprintf("Disk ID: 0x%08X %s\n", DriveLayout->Mbr.Signature, SelectedDrive.has_mbr_uefi_marker?"(UEFI target)":"");
-		AnalyzeMBR(hPhysical);
+		AnalyzeMBR(hPhysical, "Drive");
 		for (i=0; i<DriveLayout->PartitionCount; i++) {
 			if (DriveLayout->PartitionEntry[i].Mbr.PartitionType != PARTITION_ENTRY_UNUSED) {
 				uprintf("Partition %d:\n", i+1);

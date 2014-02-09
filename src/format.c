@@ -827,7 +827,7 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 	FILE fake_fd = { 0 };
 	const char* using_msg = "Using %s MBR\n";
 
-	if (!AnalyzeMBR(hPhysicalDrive)) return FALSE;
+	AnalyzeMBR(hPhysicalDrive, "Drive");
 
 	// FormatEx rewrites the MBR and removes the LBA attribute of FAT16
 	// and FAT32 partitions - we need to correct this in the MBR
@@ -1172,21 +1172,26 @@ DWORD WINAPI CloseFormatPromptThread(LPVOID param) {
  *   Close the volume handle.
  */
 #define CHECK_FOR_USER_CANCEL 	if (IS_ERROR(FormatStatus)) goto out
-DWORD WINAPI FormatThread(LPVOID param)
+#define BSIZE 65536	// TODO: dual buffer and overlapped when writing an image
+DWORD WINAPI FormatThread(void* param)
 {
 	int i, r, pt, bt, fs, dt;
-	BOOL ret, use_large_fat32;
-	DWORD DriveIndex = (DWORD)(uintptr_t)param;
+	BOOL s, ret, use_large_fat32;
+	DWORD rSize, wSize, LastRefresh = 0, DriveIndex = (DWORD)(uintptr_t)param;
 	HANDLE hPhysicalDrive = INVALID_HANDLE_VALUE;
 	HANDLE hLogicalVolume = INVALID_HANDLE_VALUE;
+	HANDLE hSourceImage = INVALID_HANDLE_VALUE;
 	SYSTEMTIME lt;
+	FILE* log_fd;
+	LARGE_INTEGER li;
+	uint64_t wb;
+	uint8_t buffer[BSIZE];
 	char *bb_msg, *guid_volume = NULL;
 	char drive_name[] = "?:\\";
 	char drive_letters[27];
 	char logfile[MAX_PATH], *userdir;
 	char wim_image[] = "?:\\sources\\install.wim";
 	char efi_dst[] = "?:\\efi\\boot\\bootx64.efi";
-	FILE* log_fd;
 	PF_DECL(GetThreadUILanguage);
 	PF_DECL(SetThreadUILanguage);
 	PF_INIT(GetThreadUILanguage, kernel32);
@@ -1247,7 +1252,7 @@ DWORD WINAPI FormatThread(LPVOID param)
 	CHECK_FOR_USER_CANCEL;
 
 	PrintStatus(0, TRUE, MSG_226);
-	AnalyzeMBR(hPhysicalDrive);
+	AnalyzeMBR(hPhysicalDrive, "Drive");
 	if ((hLogicalVolume != NULL) && (hLogicalVolume != INVALID_HANDLE_VALUE)) {
 		AnalyzePBR(hLogicalVolume);
 	}
@@ -1316,6 +1321,50 @@ DWORD WINAPI FormatThread(LPVOID param)
 			goto out;
 		}
 	}
+
+	// Write an image file
+	if (dt == DT_IMG) {
+		// We poked the MBR, so we need to rewind
+		li.QuadPart = 0;
+		SetFilePointerEx(hPhysicalDrive, li, NULL, FILE_BEGIN);
+		hSourceImage = CreateFileU(iso_path, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
+		if (hSourceImage == INVALID_HANDLE_VALUE) {
+			uprintf("Could not open image '%s': %s", iso_path, WindowsErrorString());
+			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_OPEN_FAILED;
+			goto out;
+		}
+
+		uprintf("Writing Image...");
+		for (wb = 0; ; wb += wSize) {
+			s = ReadFile(hSourceImage, buffer, BSIZE, &rSize, NULL);
+			if (!s) {
+				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_READ_FAULT;
+				uprintf("read error: %s", WindowsErrorString());
+			}
+			if (rSize == 0)
+				break;
+			if (GetTickCount() > LastRefresh + 25) {
+				LastRefresh = GetTickCount();
+				format_percent = (100.0f*wb)/(1.0f*iso_report.projected_size);
+				PrintStatus(0, FALSE, MSG_261, format_percent);
+				UpdateProgress(OP_FORMAT, format_percent);
+			}
+			CHECK_FOR_USER_CANCEL;
+			// TODO: add a retry on write?
+			s = WriteFile(hPhysicalDrive, buffer, rSize, &wSize, NULL);
+			if (!s || wSize != rSize) {
+				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_WRITE_FAULT;
+				if (s)
+					uprintf("write error: Wrote %d bytes, expected %d bytes\n", wSize, rSize);
+				else
+					uprintf("write error: %s", WindowsErrorString());
+				goto out;
+			}	
+		}
+		uprintf("Done");
+		goto out;
+	}
+
 	// Close the (unmounted) volume before formatting
 	if ((hLogicalVolume != NULL) && (hLogicalVolume != INVALID_HANDLE_VALUE)) {
 		PrintStatus(0, TRUE, MSG_227);

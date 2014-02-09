@@ -478,7 +478,7 @@ BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan)
 	int j;
 	uint16_t sl_version;
 	FILE* fd;
-	BOOL r = FALSE;
+	int r = 1;
 	iso9660_t* p_iso = NULL;
 	udf_t* p_udf = NULL; 
 	udf_dirent_t* p_udf_root;
@@ -557,7 +557,8 @@ try_iso:
 
 	p_iso = iso9660_open_ext(src_iso, iso_extension_mask);
 	if (p_iso == NULL) {
-		uprintf("Unable to open image '%s'.\n", src_iso);
+		uprintf("Unable to open '%s' as an ISO image.\n", src_iso);
+		r = 1;
 		goto out;
 	}
 	uprintf("Disc image is an ISO9660 image\n");

@@ -177,6 +177,7 @@ enum dos_type {
 	DT_WINME = 0,
 	DT_FREEDOS,
 	DT_ISO,
+	DT_IMG,
 	DT_SYSLINUX_V4,		// Start of indexes that only display in advanced mode
 	DT_SYSLINUX_V5,
 	DT_REACTOS,
@@ -240,6 +241,7 @@ typedef struct {
 	BOOL has_old_c32[NB_OLD_C32];
 	BOOL has_old_vesamenu;
 	BOOL uses_minint;
+	BOOL is_bootable_img;
 	uint16_t sl_version;	// Syslinux/Isolinux version
 	char sl_version_str[12];
 } RUFUS_ISO_REPORT;
