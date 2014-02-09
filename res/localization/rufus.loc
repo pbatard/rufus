@@ -5767,8 +5767,8 @@ t MSG_184 "A fim de gerar estatísticas de uso privadas, a informação recolhid
 	" retida \\b até um ano\\b0 . A menos que assim seja requerido por lei, não transmitiremos"
 	" nenhuma desta informação a terceiros."
 t MSG_185 "Processo de atualização:"
-t MSG_186 "Rufus não instala nem executa nenhum serviço nem programada em background. Portanto a procura"
-	" de atualizações só se realiza quando a aplicação principal está em execução.\\line\n"
+t MSG_186 "Rufus não instala nem executa nenhum serviço nem programada em background. Portanto a procura "
+	"de atualizações só se realiza quando a aplicação principal está em execução.\\line\n"
 	"Por isso, é necessário acesso à Internet."
 
 # Status messages - these messages will appear on the status bar
@@ -5851,14 +5851,14 @@ t MSG_259 "Forçar atualização"
 
 ################################################################################
 l "ro-RO" "Romanian (Română)" 0x0418, 0x0818
-v 1.0.7
+v 1.0.9
 b "en-US"
 
 g IDD_DIALOG
 t IDS_DEVICE_TXT "Dispozitiv"
 t IDS_PARTITION_TYPE_TXT "Sistemul de partiţie şi tipul de sistem ţintă"
 t IDS_FILESYSTEM_TXT "Sistemul de fişiere"
-t IDS_CLUSTERSIZE_TXT "Dimensiune cluster"
+t IDS_CLUSTERSIZE_TXT "Mărime unitate de alocare"
 t IDS_LABEL_TXT "Eticheta de volum nou"
 t IDS_FORMAT_OPTIONS_GRP "Opţiuni de formatare       "
 t IDC_BADBLOCKS "Testarea blocurilor defecte:"
@@ -6000,7 +6000,7 @@ t MSG_043 "Eroare: %s"
 t MSG_044 "Descărcare fişier"
 t MSG_045 "Unitate de stocare USB (generic)"
 t MSG_046 "%s (disc %d)"
-# t MSG_047 "Multiple Partitions"
+t MSG_047 "Volume multiple"
 t MSG_048 "Rufus - Ştergere bufer"
 t MSG_049 "Rufus - Anulare"
 
@@ -6062,6 +6062,10 @@ t MSG_090 "Formatul ISO nu este acceptat"
 t MSG_091 "Cînd se foloseşte un tip de destinaţie UEFI imagini ISO boot-abile sunt acceptate doar EFI. "
 	"Alegeţi un UEFI boot sau stabileşte o destinaţie de tip BIOS."
 t MSG_092 "Sistem de fişiere neacceptat"
+t MSG_093 "IMPORTANT: Această unitate conţine mai multe partiții sau volume!!! "
+	"Aceasta poate include paravane / volume care nu sunt listate sau chiar vizibile de la Windows. "
+	"Dacă doriți să continuați, sunteți responsabil pentru orice pierderi de date de pe aceste partiții. "
+t MSG_094 "Mai multe partiții detectate "
 t MSG_096 "Pentru acest tip de ISO, sunt acceptate numai FAT/FAT32. Selectaţi FAT/FAT32 ca sistem de fişiere."
 t MSG_097 "Cu NTFS prezent, poate fi utilizat numai imagini ISO pe bază de "Bootmgr" sau "WinPE"."
 t MSG_098 "FAT/FAT32 pot fi utilizate numai pentru imaginile ISO pe baza isolinux sau cînd tipul ţintă este UEFI."
@@ -6093,6 +6097,15 @@ t MSG_111 "Dimensiune Cluster incompatibilă"
 t MSG_112 "Formatarea volumului mare UDF, poate dura ceva timp. Viteza formatării USB 2.0, estimează "
 	"durata este %d:%02d, în care va apărea pe bara de progres. Vă rugăm să aveţi răbdare!"
 t MSG_113 "Volumul UDF mare"
+t MSG_114 "Această imagine foloseste Syslinux %s, dar această aplicație include doar fișierele de instalare pentru Syslinux %s . "
+	"Syslinux %s.\n\nNoile versiuni ale syslinux, nu sunt compatibile cu altele, și nu ar fi "
+	"este posibil ca Rufus să le includă, două fișiere suplimentare, ele trebuie să fi descărcate de pe "
+	"Internet ('ldlinux.sys' şi 'ldlinux.bss'):\n"
+	"- Selectați 'Da' pentru a vă conecta la Internet și de a descărca aceste fișiere\n"
+	"- Selectați 'Nu' pentru a anula operațiunea\n\n"
+	"Notă: Fișierele vor fi descărcate în aplicația curentă director și vor fi reutilizate "
+	"în mod automat în cazul în prezent.\n"
+t MSG_115 "Descărcare necesară"
 
 t MSG_150 "Această setare este cea mai sigură alegere. Dacă aveţi un calculator şi doriţi să instalaţi UEFI "
 	"un sistem de operare pentru EFI, puteţi selecta una dintre opţiunile de mai jos"
@@ -6200,6 +6213,7 @@ t MSG_256 "Unităţi fictive de detectare"
 t MSG_257 "Suport Joliet"
 t MSG_258 "Suport Rock Ridge"
 t MSG_259 "Actualizare forţată"
+t MSG_260 "Compresie NTFS"
 
 ################################################################################
 l "ru-RU" "Russian (Русский)" 0x0419, 0x0819
