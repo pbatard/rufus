@@ -47,7 +47,6 @@
 // the progress bar for every block will bring extraction to a crawl
 #define PROGRESS_THRESHOLD        128
 #define FOUR_GIGABYTES            4294967296LL
-#define WRITE_RETRIES             3
 
 // Needed for UDF ISO access
 CdIo_t* cdio_open (const char* psz_source, driver_id_t driver_id) {return NULL;}
@@ -69,6 +68,9 @@ static const char* pe_dirname[] = { "/i386", "/minint" };
 static const char* pe_file[] = { "ntdetect.com", "setupldr.bin", "txtsetup.sif" };
 static const char* reactos_name = "setupldr.sys"; // TODO: freeldr.sys doesn't seem to work
 static const char* autorun_name = "autorun.inf";
+static const char* stupid_antivirus = "  NOTE: This is usually caused by a poorly designed security solution. "
+	"See http://rufus.akeo.ie/compatibility.\r\n  This file will be skipped for now, but you should really "
+	"look into using a *SMARTER* antivirus solution.";
 const char* old_c32_name[NB_OLD_C32] = OLD_C32_NAMES;
 static const int64_t old_c32_threshold[NB_OLD_C32] = OLD_C32_THRESHOLD;
 static uint8_t i_joliet_level = 0;
@@ -283,13 +285,11 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 			if (file_handle == INVALID_HANDLE_VALUE) {
 				err = GetLastError();
 				uprintf("  Unable to create file: %s\n", WindowsErrorString());
-				if ((err == ERROR_ACCESS_DENIED) && (safe_strcmp(&psz_fullpath[3], autorun_name) == 0)) {
-					uprintf("  NOTE: This may be caused by a poorly designed security solution. "
-						"See http://rufus.akeo.ie/compatibility.");
-				}
-				goto out;
-			}
-			while (i_file_length > 0) {
+				if ((err == ERROR_ACCESS_DENIED) && (safe_strcmp(&psz_fullpath[3], autorun_name) == 0))
+					uprintf(stupid_antivirus);
+				else
+					goto out;
+			} else while (i_file_length > 0) {
 				if (FormatStatus) goto out;
 				memset(buf, 0, UDF_BLOCKSIZE);
 				i_read = udf_read_block(p_udf_dirent, buf, 1);
@@ -424,13 +424,11 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 			if (file_handle == INVALID_HANDLE_VALUE) {
 				err = GetLastError();
 				uprintf("  Unable to create file: %s\n", WindowsErrorString());
-				if ((err == ERROR_ACCESS_DENIED) && (safe_strcmp(&psz_fullpath[3], autorun_name) == 0)) {
-					uprintf("  NOTE: This may be caused by a poorly designed security solution. "
-						"See http://rufus.akeo.ie/compatibility.");
-				}
-				goto out;
-			}
-			for (i=0; i_file_length>0; i++) {
+				if ((err == ERROR_ACCESS_DENIED) && (safe_strcmp(&psz_fullpath[3], autorun_name) == 0))
+					uprintf(stupid_antivirus);
+				else
+					goto out;
+			} else for (i=0; i_file_length>0; i++) {
 				if (FormatStatus) goto out;
 				memset(buf, 0, ISO_BLOCKSIZE);
 				lsn = p_statbuf->lsn + (lsn_t)i;

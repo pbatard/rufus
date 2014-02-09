@@ -17,8 +17,12 @@ o Version 1.0.10 (2014.02.09)
   - *NEW* MSG_261 "Writing image: %0.1f%% completed"
   - *NEW* MSG_187 "Invalid image for selected boot option"
   - *NEW* MSG_188 "The current image doesn't match the boot option selected..." (see rufus.loc for full text)
+  - Changed MSG_086 "No ISO image selected" -> "No image selected"
+  - Changed MSG_087 "Please click on the disc button to select a bootable ISO..." -> "Please click on the disc button to select a bootable image..." (see rufus.loc for full text)
   - Changed MSG_088 "ISO too big" -> "Image is too big"
   - Changed MSG_089 "This ISO image is too big for the selected target." -> "The image is too big for the selected target."
+  - Changed MSG_202 "Scanning ISO image..." -> "Scanning image..."
+  - Changed MSG_203 "Failed to scan ISO image" -> "Failed to scan image"
 
 o Version 1.0.9 (2014.01.31)
   - *NEW* MSG_260 "NTFS compression"

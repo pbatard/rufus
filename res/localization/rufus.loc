@@ -63,9 +63,9 @@ t IDS_FILESYSTEM_TXT "File system"
 t IDS_CLUSTERSIZE_TXT "Cluster size"
 t IDS_LABEL_TXT "New volume label"
 t IDS_FORMAT_OPTIONS_GRP "Format Options       "
-t IDC_BADBLOCKS "Check device for bad blocks:"
+t IDC_BADBLOCKS "Check device for bad blocks"
 t IDC_QUICKFORMAT "Quick format"
-t IDC_BOOT "Create a bootable disk using:"
+t IDC_BOOT "Create a bootable disk using"
 t IDC_SET_ICON "Create extended label and icon files"
 t IDC_ABOUT "About..."
 t IDC_LOG "Log"
@@ -79,7 +79,7 @@ t IDC_EXTRA_PARTITION "Add fixes for old BIOSes (extra partition, align, etc.)"
 # 'MBR': See http://en.wikipedia.org/wiki/Master_boot_record
 # Rufus can install it's own custom MBR (the Rufus MBR), which also allows users
 # to specify a custom disk ID for the BIOS. Note: the tooltip for this control is MSG_167.
-t IDC_RUFUS_MBR "Use Rufus MBR with BIOS ID:"
+t IDC_RUFUS_MBR "Use Rufus MBR with BIOS ID"
 
 # About dialog
 g IDD_ABOUTBOX
@@ -243,11 +243,11 @@ t MSG_084 "This ISO image seems to use an obsolete version of '%s'.\n"
 	"Note: The new file will be downloaded in the current directory and once a "
 	"'%s' exists there, it will be reused automatically."
 t MSG_085 "Downloading %s"
-t MSG_086 "No ISO image selected"
+t MSG_086 "No image selected"
 # The content between the quotes below (\"Create a bootable disk\") should match
 # the beginning of the IDC_BOOT text
-t MSG_087 "Please click on the disc button to select a bootable ISO, "
-	"or uncheck the \"Create a bootable disk...\" checkbox."
+t MSG_087 "Please click on the disc button to select a bootable image, "
+	"or uncheck the \"Create a bootable disk using\" checkbox."
 t MSG_088 "Image is too big"
 t MSG_089 "The image is too big for the selected target."
 t MSG_090 "Unsupported ISO"
@@ -355,8 +355,8 @@ t MSG_188 "The current image doesn't match the boot option selected. Please use 
 
 # Status messages - these messages will appear on the status bar
 t MSG_201 "Cancelling - Please wait..."
-t MSG_202 "Scanning ISO image..."
-t MSG_203 "Failed to scan ISO image"
+t MSG_202 "Scanning image..."
+t MSG_203 "Failed to scan image"
 # Parameter: the name of an obsolete Syslinux .c32 module. eg: "Obsolete vesamenu.c32 detected"
 t MSG_204 "Obsolete %s detected"
 # Display the name of the ISO selected. eg: "Using ISO: en_win7_x64_sp1.iso"
@@ -1766,9 +1766,9 @@ t MSG_084 "Cette image ISO utilise une version obsolète du fichier '%s'.\n"
 	"Note : Le nouveau fichier sera téléchargé dans le répertoire courant. "
 	"Si un '%s' existe à cet endroit, il sera réutilisé automatiquement."
 t MSG_085 "Téléchargement de %s"
-t MSG_086 "Aucune image ISO sélectionnée"
-t MSG_087 "Veuillez cliquer sur le bouton avec un disque pour choisir une image ISO démarrable "
-	"ou décochez l'option \"Disque de démarrage...\"."
+t MSG_086 "Aucune image sélectionnée"
+t MSG_087 "Veuillez cliquer sur le bouton avec un disque pour sélectionner une image démarrable "
+	"ou décochez l'option \"Créer un disque de démarrage\"."
 t MSG_088 "Image trop large"
 t MSG_089 "L'image est trop large pour être copiée sur le périphérique sélectionné."
 t MSG_090 "Image ISO on supportée"
@@ -1874,8 +1874,8 @@ t MSG_188 "L'image choisie ne correspond pas à l'option de démarrage sélectio
 
 # Status messages
 t MSG_201 "Annulation - Veuillez patienter..."
-t MSG_202 "Analyse de l'image ISO..."
-t MSG_203 "Echec d'analyse de l'image ISO"
+t MSG_202 "Analyse de l'image..."
+t MSG_203 "Echec d'analyse de l'image"
 t MSG_204 "Fichier %s obsolète détecté"
 t MSG_205 "ISO utilisée : %s"
 t MSG_206 "Fichier %s manquant"

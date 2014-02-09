@@ -52,6 +52,7 @@
 #define MAX_SECTORS_TO_CLEAR        128			// nb sectors to zap when clearing the MBR/GPT (must be >34)
 #define MBR_UEFI_MARKER             0x49464555	// 'U', 'E', 'F', 'I', as a 32 bit little endian longword
 #define PROPOSEDLABEL_TOLERANCE     0.10
+#define WRITE_RETRIES               3
 #define FS_DEFAULT                  FS_FAT32
 #define BADBLOCK_PATTERNS           {0xaa, 0x55, 0xff, 0x00}
 #define LARGE_FAT32_SIZE            (32*1073741824LL)	// Size at which we need to use fat32format

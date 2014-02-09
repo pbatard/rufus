@@ -2,7 +2,7 @@ o Version 1.4.4 (2013.02.??)
     Add *uncompressed* DD Image support (FreeBSD, FreeNAS, etc.)
     Add right-to-left language support
     Add NTFS Compression support (unofficial)
-    Improve Syslinux v5+ support (requires an internet connection)
+    Improve Syslinux v5+ support (requires an internet connection to download extra files)
     Improve hotplug detection
     Fix detection for Toshiba drives (again)
     Fix support for latest gparted, ArchLinux, and other Syslinux v5+ based ISOs 

@@ -1172,7 +1172,6 @@ DWORD WINAPI CloseFormatPromptThread(LPVOID param) {
  *   Close the volume handle.
  */
 #define CHECK_FOR_USER_CANCEL 	if (IS_ERROR(FormatStatus)) goto out
-#define BSIZE 65536	// TODO: dual buffer and overlapped when writing an image
 DWORD WINAPI FormatThread(void* param)
 {
 	int i, r, pt, bt, fs, dt;
@@ -1185,7 +1184,7 @@ DWORD WINAPI FormatThread(void* param)
 	FILE* log_fd;
 	LARGE_INTEGER li;
 	uint64_t wb;
-	uint8_t buffer[BSIZE];
+	uint8_t buffer[65536];
 	char *bb_msg, *guid_volume = NULL;
 	char drive_name[] = "?:\\";
 	char drive_letters[27];
@@ -1327,7 +1326,7 @@ DWORD WINAPI FormatThread(void* param)
 		// We poked the MBR, so we need to rewind
 		li.QuadPart = 0;
 		SetFilePointerEx(hPhysicalDrive, li, NULL, FILE_BEGIN);
-		hSourceImage = CreateFileU(iso_path, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
+		hSourceImage = CreateFileU(iso_path, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, NULL);
 		if (hSourceImage == INVALID_HANDLE_VALUE) {
 			uprintf("Could not open image '%s': %s", iso_path, WindowsErrorString());
 			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_OPEN_FAILED;
@@ -1335,11 +1334,15 @@ DWORD WINAPI FormatThread(void* param)
 		}
 
 		uprintf("Writing Image...");
+		// Don't bother trying for something clever, using double buffering overlapped and whatnot:
+		// With Windows' default optimizations, sync read + sync write for sequential operations
+		// will be as fast, if not faster, than whatever async scheme you can come up with.
 		for (wb = 0; ; wb += wSize) {
-			s = ReadFile(hSourceImage, buffer, BSIZE, &rSize, NULL);
+			s = ReadFile(hSourceImage, buffer, sizeof(buffer), &rSize, NULL);
 			if (!s) {
 				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_READ_FAULT;
 				uprintf("read error: %s", WindowsErrorString());
+				goto out;
 			}
 			if (rSize == 0)
 				break;
@@ -1350,16 +1353,24 @@ DWORD WINAPI FormatThread(void* param)
 				UpdateProgress(OP_FORMAT, format_percent);
 			}
 			CHECK_FOR_USER_CANCEL;
-			// TODO: add a retry on write?
-			s = WriteFile(hPhysicalDrive, buffer, rSize, &wSize, NULL);
-			if (!s || wSize != rSize) {
-				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_WRITE_FAULT;
+			for (i=0; i<WRITE_RETRIES; i++) {
+				s = WriteFile(hPhysicalDrive, buffer, rSize, &wSize, NULL);
+				if ((s) && (wSize == rSize))
+					break;
 				if (s)
 					uprintf("write error: Wrote %d bytes, expected %d bytes\n", wSize, rSize);
 				else
 					uprintf("write error: %s", WindowsErrorString());
-				goto out;
-			}	
+				if (i < WRITE_RETRIES-1) {
+					li.QuadPart = wb;
+					SetFilePointerEx(hPhysicalDrive, li, NULL, FILE_BEGIN);
+					uprintf("  RETRYING...\n");
+				} else {
+					FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_WRITE_FAULT;
+					goto out;
+				}
+			}
+			if (i >= WRITE_RETRIES) goto out;
 		}
 		uprintf("Done");
 		goto out;
@@ -1551,6 +1562,7 @@ DWORD WINAPI FormatThread(void* param)
 out:
 	safe_free(guid_volume);
 	SendMessage(hISOProgressDlg, UM_ISO_EXIT, 0, 0);
+	safe_closehandle(hSourceImage);
 	safe_unlockclose(hLogicalVolume);
 	safe_unlockclose(hPhysicalDrive);	// This can take a while
 	if (IS_ERROR(FormatStatus)) {
