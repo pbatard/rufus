@@ -345,7 +345,7 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 {
 	HANDLE file_handle = NULL;
 	DWORD buf_size, wr_size, err;
-	BOOL s, is_syslinux_cfg, is_old_c32[NB_OLD_C32];
+	BOOL s, is_syslinux_cfg, is_old_c32[NB_OLD_C32], is_symlink;
 	int i_length, r = 1;
 	char tmp[128], psz_fullpath[1024], *psz_basename;
 	const char *psz_iso_name = &psz_fullpath[strlen(psz_extract_dir)];
@@ -379,10 +379,18 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 			|| (strcmp(p_statbuf->filename, "..") == 0) )
 			continue;
 		// Rock Ridge requires an exception
+		is_symlink = FALSE;
 		if ((p_statbuf->rr.b3_rock == yep) && enable_rockridge) {
 			safe_strcpy(psz_basename, sizeof(psz_fullpath)-i_length-1, p_statbuf->filename);
 			if (safe_strlen(p_statbuf->filename) > 64)
 				iso_report.has_long_filename = TRUE;
+			// libcdio has a memleak for Rock Ridge symlinks. It doesn't look like there's an easy fix there as
+			// a generic list that's unaware of RR extensions is being used, so we prevent that memleak ourselves
+			is_symlink = (p_statbuf->rr.psz_symlink != NULL);
+			if (is_symlink)
+				iso_report.has_symlinks = TRUE;
+			if (scan_only)
+				safe_free(p_statbuf->rr.psz_symlink);
 		} else {
 			iso9660_name_translate_ext(p_statbuf->filename, psz_basename, i_joliet_level);
 		}
@@ -419,6 +427,11 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 				continue;
 			if (sanitize_filename(psz_fullpath))
 				uprintf("  File name sanitized to '%s'\n", psz_fullpath);
+			if (is_symlink) {
+				if (i_file_length == 0)
+					uprintf("  Ignoring Rock Ridge symbolic link to '%s'\n", p_statbuf->rr.psz_symlink);
+				safe_free(p_statbuf->rr.psz_symlink);
+			}
 			file_handle = CreateFileU(psz_fullpath, GENERIC_READ | GENERIC_WRITE,
 				FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 			if (file_handle == INVALID_HANDLE_VALUE) {
@@ -544,9 +557,9 @@ BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan)
 
 try_iso:
 	// Perform our first scan with Joliet disabled (if Rock Ridge is enabled), so that we can find if
-	// there exists a Rock Ridge file with a name > 64 chars. If that is the case (has_long_filename)
-	// then we also disable Joliet during the extract phase.
-	if ((!enable_joliet) || (scan_only && enable_rockridge) || (iso_report.has_long_filename && enable_rockridge)) {
+	// there exists a Rock Ridge file with a name > 64 chars or if there are symlinks. If that is the
+	// case then we also disable Joliet during the extract phase.
+	if ((!enable_joliet) || (enable_rockridge && (scan_only || iso_report.has_long_filename || iso_report.has_symlinks))) {
 		iso_extension_mask &= ~ISO_EXTENSION_JOLIET;
 	}
 	if (!enable_rockridge) {
@@ -567,6 +580,12 @@ try_iso:
 			safe_free(tmp);
 		} else
 			iso_report.label[0] = 0;
+	} else {
+		if (iso_extension_mask & (ISO_EXTENSION_JOLIET|ISO_EXTENSION_ROCK_RIDGE))
+			uprintf("This image will be extracted using %s extensions (if present)", 
+				(iso_extension_mask & ISO_EXTENSION_JOLIET)?"Joliet":"Rock Ridge");
+		else
+			uprintf("This image will not be extracted using any ISO extensions");
 	}
 	r = iso_extract_files(p_iso, "");
 

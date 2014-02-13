@@ -1242,10 +1242,10 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 		if (HAS_SYSLINUX(iso_report)) {
 			safe_sprintf(isolinux_str, sizeof(isolinux_str), "Yes (%s)", iso_report.sl_version_str);
 		}
-		uprintf("ISO label: '%s'\r\n  Size: %lld bytes\r\n  Has a >64 chars filename: %s\r\n  Has a >4GB file: %s\r\n"
+		uprintf("ISO label: '%s'\r\n  Size: %lld bytes\r\n  Has a >64 chars filename: %s\r\n  Has Symlinks: %s\r\n  Has a >4GB file: %s\r\n"
 			"  ReactOS: %s\r\n  Uses EFI: %s%s\r\n  Uses Bootmgr: %s\r\n  Uses WinPE: %s%s\r\n  Uses isolinux: %s\r\n",
-			iso_report.label, iso_report.projected_size, iso_report.has_long_filename?"Yes":"No", iso_report.has_4GB_file?"Yes":"No",
-			IS_REACTOS(iso_report)?"Yes":"No", (iso_report.has_efi || iso_report.has_win7_efi)?"Yes":"No",
+			iso_report.label, iso_report.projected_size, iso_report.has_long_filename?"Yes":"No", iso_report.has_symlinks?"Yes":"No",
+			iso_report.has_4GB_file?"Yes":"No", IS_REACTOS(iso_report)?"Yes":"No", (iso_report.has_efi || iso_report.has_win7_efi)?"Yes":"No",
 			(iso_report.has_win7_efi && (!iso_report.has_efi))?" (win7_x64)":"", iso_report.has_bootmgr?"Yes":"No",
 			IS_WINPE(iso_report.winpe)?"Yes":"No", (iso_report.uses_minint)?" (with /minint)":"", isolinux_str);
 		if (HAS_SYSLINUX(iso_report) && (SL_MAJOR(iso_report.sl_version) < 5)) {
