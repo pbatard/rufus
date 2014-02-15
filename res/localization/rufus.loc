@@ -5029,9 +5029,9 @@ t MSG_259 "Paksa kemas kini"
 
 ################################################################################
 l "pl-PL" "Polish (Polski)" 0x0415
-v 1.0.8
+v 1.0.10
 b "en-US"
-# my internal info: 27.01.2014,10:13; done:everything
+# my info: 15.02.2014,16:14
 
 # Main dialog
 g IDD_DIALOG
@@ -5254,13 +5254,13 @@ t MSG_084 "Ten plik ISO wydaje się być przestarzałą wersją '%s'.\n"
 	"Informacja: Nowy plik będzie pobrany do aktualnej lokalizacji i gdy "
 	"'%s' jest tutaj, zostanie użyte automatycznie."
 t MSG_085 "Pobieranie %s"
-t MSG_086 "Nie wybrano pliku ISO"
+t MSG_086 "Nie wybrano obrazu"
 # The content between the quotes below (\"Create a bootable disk\") should match
 # the beginning of the IDC_BOOT text
-t MSG_087 "Proszę kliknąć na przycisku dysku aby wybrać bootowalne ISO, "
+t MSG_087 "Proszę kliknąć na przycisku dysku aby wybrać bootowalny obraz, "
 	"lub odznaczyć pole \"Uwórz bootowalny dysk...\"."
-t MSG_088 "ISO jest zbyt duże"
-t MSG_089 "Ten obraz ISO jest zbyt duży dla wybranego celu."
+t MSG_088 "Obraz jest zbyt duży"
+t MSG_089 "Ten obraz jest zbyt duży dla wybranego celu."
 t MSG_090 "Niewspierane ISO"
 t MSG_091 "Podczas używania Systemu Typu UEFI, tylko bootowalne obrazy ISO EFI są wspierane. "
 	"Proszę wybrać bootowalny obraz ISO EFI lub ustawić System Docelowy na BIOS."
@@ -5269,6 +5269,7 @@ t MSG_093 "WAŻNE: TEN NAPĘD ZAWIERA WIELE PARTYCJI!!\n\n"
 	"To może dołączyć partycje/woluminy które nie są wymienione lub nawet widoczne z poziomu Windows. "
 	"Jeżeli chcesz kontunuować, jesteś odpowiedzialny za utratę danych na tych partycjach."
 t MSG_094 "Wykryto wiele partycji"
+t MSG_095 "Obraz DD"
 t MSG_096 "Tylko FAT/FAT32 jest wpierane dla tego typu ISO. Proszę wybrać FAT/FAT32 jako System plików."
 t MSG_097 "Obecnie tylko obrazy ISO oparte na 'bootmgr' lub 'WinPE' mogą być użyte z NTFS."
 t MSG_098 "FAT/FAT32 może zostać użyte tylko dla obrazów ISO opartych na isolinux lub gdy System Docelowy to UEFI."
@@ -5361,11 +5362,13 @@ t MSG_184 "W celu generowania poufnych statystyk używania , możemy trzymać ze
 t MSG_185 "Proces Aktualizacji:"
 t MSG_186 "Rufus nie instaluje lub uruchamia procesów w tle, dlatego aktualizacje są sprawdzane tylko kiedy jest uruchomione główne okno aplikacji.\\line\n"
 	"Dostęp do internetu jest oczywiście wymagany podczas sprawdzania aktualizacji."
+t MSG_187 "Obraz nieprawidłowy dla wybranej opcji bootowania"
+t MSG_188 "Obecny obraz nie pasuje do wybranej opcji bootowania. Proszę uzyć innego obrazu lub wybrać inną opcję bootowania"
 
 # Status messages - these messages will appear on the status bar
 t MSG_201 "Anulowanie - Proszę czekać..."
-t MSG_202 "Skanowanie obrazu ISO..."
-t MSG_203 "Niepowodzenie skanowania obrazu ISO"
+t MSG_202 "Skanowanie obrazu..."
+t MSG_203 "Niepowodzenie skanowania obrazu"
 # Parameter: the name of an obsolete Syslinux .c32 module. eg: "Obsolete vesamenu.c32 detected"
 t MSG_204 "wykryto przestarzałe %s"
 # Display the name of the ISO selected. eg: "Using ISO: en_win7_x64_sp1.iso"
@@ -5439,6 +5442,8 @@ t MSG_256 "Fałszywe wykrywanie dysku"
 t MSG_257 "Wsparcie Joliet"
 t MSG_258 "Wsparcie Rock Ridge"
 t MSG_259 "Siłowa aktualizacja"
+t MSG_260 "Kompresja NTFS"
+t MSG_261 "Zapisywanie obrazu: ukończono %0.1f%%"
 
 ################################################################################
 l "pt-PT" "Portuguese Standard (Português)" 0x0816
