@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2005, 2006, 2008, 2011 Rocky Bernstein <rocky@gnu.org>
+  Copyright (C) 2005-2006, 2008, 2011, 2013 Rocky Bernstein <rocky@gnu.org>
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -59,7 +59,7 @@
 #endif
 
 /* These definitions are also to make debugging easy. Note that they
-   have to come *before* #include <cdio/ecma_167.h> which sets 
+   have to come *before* #include <cdio/ecma_167.h> which sets
    #defines for these.
 */
 const char VSD_STD_ID_BEA01[] = {'B', 'E', 'A', '0', '1'};
@@ -70,6 +70,9 @@ const char VSD_STD_ID_NSR03[] = {'N', 'S', 'R', '0', '3'};
 const char VSD_STD_ID_TEA01[] = {'T', 'E', 'A', '0', '1'};
 
 #include <cdio/bytesex.h>
+#include <cdio/utf8.h>
+#include <cdio/util.h>
+
 #include "udf_private.h"
 #include "udf_fs.h"
 #include "cdio_assert.h"
@@ -131,24 +134,28 @@ udf_checktag(const udf_tag_t *p_tag, udf_Uint16_t tag_id)
   uint8_t *itag;
   uint8_t i;
   uint8_t cksum = 0;
-  
+
   itag = (uint8_t *)p_tag;
-  
+
+#ifdef WORDS_BIGENDIAN
+  tag_id = UINT16_SWAP_LE_BE(tag_id);
+#endif
+
   if (p_tag->id != tag_id)
     return -1;
-  
+
   for (i = 0; i < 15; i++)
     cksum = cksum + itag[i];
   cksum = cksum - itag[4];
-  
+
   if (cksum == p_tag->cksum)
     return 0;
-  
+
   return -1;
 }
 
-bool 
-udf_get_lba(const udf_file_entry_t *p_udf_fe, 
+bool
+udf_get_lba(const udf_file_entry_t *p_udf_fe,
 	    /*out*/ uint32_t *start, /*out*/ uint32_t *end)
 {
   if (! p_udf_fe->i_alloc_descs)
@@ -158,11 +165,11 @@ udf_get_lba(const udf_file_entry_t *p_udf_fe,
   case ICBTAG_FLAG_AD_SHORT:
     {
       /* The allocation descriptor field is filled with short_ad's. */
-      udf_short_ad_t *p_ad = (udf_short_ad_t *) 
+      udf_short_ad_t *p_ad = (udf_short_ad_t *)
 	(p_udf_fe->u.ext_attr + p_udf_fe->i_extended_attr);
-      
+
       *start = uint32_from_le(p_ad->pos);
-      *end = *start + 
+      *end = *start +
 	((uint32_from_le(p_ad->len) & UDF_LENGTH_MASK) - 1) / UDF_BLOCKSIZE;
       return true;
     }
@@ -170,11 +177,11 @@ udf_get_lba(const udf_file_entry_t *p_udf_fe,
   case ICBTAG_FLAG_AD_LONG:
     {
       /* The allocation descriptor field is filled with long_ad's */
-      udf_long_ad_t *p_ad = (udf_long_ad_t *) 
+      udf_long_ad_t *p_ad = (udf_long_ad_t *)
 	(p_udf_fe->u.ext_attr + p_udf_fe->i_extended_attr);
-      
+
       *start = uint32_from_le(p_ad->loc.lba); /* ignore partition number */
-      *end = *start + 
+      *end = *start +
 	((uint32_from_le(p_ad->len) & UDF_LENGTH_MASK) - 1) / UDF_BLOCKSIZE;
       return true;
     }
@@ -183,9 +190,9 @@ udf_get_lba(const udf_file_entry_t *p_udf_fe,
     {
       udf_ext_ad_t *p_ad = (udf_ext_ad_t *)
 	(p_udf_fe->u.ext_attr + p_udf_fe->i_extended_attr);
-      
+
       *start = uint32_from_le(p_ad->ext_loc.lba); /* ignore partition number */
-      *end = *start + 
+      *end = *start +
 	((uint32_from_le(p_ad->len) & UDF_LENGTH_MASK) - 1) / UDF_BLOCKSIZE;
       return true;
     }
@@ -203,21 +210,21 @@ udf_get_lba(const udf_file_entry_t *p_udf_fe,
    not found p_udf_dirent is useless and thus the caller should
    not use it afterwards.
 */
-static 
+static
 udf_dirent_t *
 udf_ff_traverse(udf_dirent_t *p_udf_dirent, char *psz_token)
 {
   while ((p_udf_dirent = udf_readdir(p_udf_dirent))) {
     if (strcmp(psz_token, p_udf_dirent->psz_name) == 0) {
       char *next_tok = strtok(NULL, udf_PATH_DELIMITERS);
-      
+
       if (!next_tok)
 	return p_udf_dirent; /* found */
       else if (p_udf_dirent->b_dir) {
 	udf_dirent_t * p_udf_dirent2 = udf_opendir(p_udf_dirent);
-	
+
 	if (p_udf_dirent2) {
-	  udf_dirent_t * p_udf_dirent3 = 
+	  udf_dirent_t * p_udf_dirent3 =
 	    udf_ff_traverse(p_udf_dirent2, next_tok);
 
 	  /* if p_udf_dirent3 is null p_udf_dirent2 is free'd. */
@@ -234,11 +241,11 @@ udf_ff_traverse(udf_dirent_t *p_udf_dirent, char *psz_token)
 /* FIXME! */
 #define udf_MAX_PATHLEN 2048
 
-udf_dirent_t * 
+udf_dirent_t *
 udf_fopen(udf_dirent_t *p_udf_root, const char *psz_name)
 {
   udf_dirent_t *p_udf_file = NULL;
-  
+
   if (p_udf_root) {
     char tokenline[udf_MAX_PATHLEN];
     char *psz_token;
@@ -251,11 +258,11 @@ udf_fopen(udf_dirent_t *p_udf_root, const char *psz_name)
     if (psz_token) {
       /*** FIXME??? udf_dirent can be variable size due to the
 	   extended attributes and descriptors. Given that, is this
-	   correct? 
+	   correct?
        */
-      udf_dirent_t *p_udf_dirent = 
+      udf_dirent_t *p_udf_dirent =
 	udf_new_dirent(&p_udf_root->fe, p_udf_root->p_udf,
-		       p_udf_root->psz_name, p_udf_root->b_dir, 
+		       p_udf_root->psz_name, p_udf_root->b_dir,
 		       p_udf_root->b_parent);
       p_udf_file = udf_ff_traverse(p_udf_dirent, psz_token);
       if (p_udf_file != p_udf_dirent)
@@ -263,67 +270,75 @@ udf_fopen(udf_dirent_t *p_udf_root, const char *psz_name)
     }
     else if ( 0 == strncmp("/", psz_name, sizeof("/")) ) {
       return udf_new_dirent(&p_udf_root->fe, p_udf_root->p_udf,
-			    p_udf_root->psz_name, p_udf_root->b_dir, 
+			    p_udf_root->psz_name, p_udf_root->b_dir,
 			    p_udf_root->b_parent);
     }
   }
   return p_udf_file;
 }
 
-/* Convert unicode16 to 8-bit char by dripping MSB. 
-   Wonder if iconv can be used here
+/* Convert unicode16 to UTF-8.
+   The returned string is allocated and must be freed by the caller
 */
-static int 
-unicode16_decode( const uint8_t *data, int i_len, char *target ) 
+static char*
+unicode16_decode(const uint8_t *data, int i_len)
 {
-  int p = 1, i = 0;
-  
-  if( ( data[ 0 ] == 8 ) || ( data[ 0 ] == 16 ) ) do {
-    if( data[ 0 ] == 16 ) p++;  /* Ignore MSB of unicode16 */
-    if( p < i_len ) {
-      target[ i++ ] = data[ p++ ];
-    }
-  } while( p < i_len );
-  
-  target[ i ] = '\0';
-  return 0;
+  int i;
+  char* r = NULL;
+
+  switch (data[0])
+  {
+  case 8:
+    r = (char*)malloc(i_len);
+    if (r == NULL)
+      return r;
+    for (i=0; i<i_len-1; i++)
+      r[i] = data[i+1];
+    r[i] = 0;
+    return r;
+  case 16:
+    cdio_charset_to_utf8((char*)&data[1], i_len-1, &r, "UCS-2BE");
+    return r;
+  default:
+    return NULL;
+  }
 }
 
 
 static udf_dirent_t *
 udf_new_dirent(udf_file_entry_t *p_udf_fe, udf_t *p_udf,
-	       const char *psz_name, bool b_dir, bool b_parent) 
+	       const char *psz_name, bool b_dir, bool b_parent)
 {
-  udf_dirent_t *p_udf_dirent = (udf_dirent_t *) 
+  udf_dirent_t *p_udf_dirent = (udf_dirent_t *)
     calloc(1, sizeof(udf_dirent_t));
   if (!p_udf_dirent) return NULL;
-  
+
   p_udf_dirent->psz_name     = strdup(psz_name);
   p_udf_dirent->b_dir        = b_dir;
   p_udf_dirent->b_parent     = b_parent;
   p_udf_dirent->p_udf        = p_udf;
   p_udf_dirent->i_part_start = p_udf->i_part_start;
-  p_udf_dirent->dir_left     = uint64_from_le(p_udf_fe->info_len); 
+  p_udf_dirent->dir_left     = uint64_from_le(p_udf_fe->info_len);
 
-  memcpy(&(p_udf_dirent->fe), p_udf_fe, 
+  memcpy(&(p_udf_dirent->fe), p_udf_fe,
 	 sizeof(udf_file_entry_t));
-  udf_get_lba( p_udf_fe, &(p_udf_dirent->i_loc), 
+  udf_get_lba( p_udf_fe, &(p_udf_dirent->i_loc),
 	       &(p_udf_dirent->i_loc_end) );
   return p_udf_dirent;
 }
 
 /*!
-  Seek to a position i_start and then read i_blocks. Number of blocks read is 
+  Seek to a position i_start and then read i_blocks. Number of blocks read is
   returned. One normally expects the return to be equal to i_blocks.
 */
 driver_return_code_t
-udf_read_sectors (const udf_t *p_udf, void *ptr, lsn_t i_start, 
-		 long i_blocks) 
+udf_read_sectors (const udf_t *p_udf, void *ptr, lsn_t i_start,
+		 long i_blocks)
 {
   driver_return_code_t ret;
   long i_read;
   off_t i_byte_offset;
-  
+
   if (!p_udf) return 0;
   /* Without the cast, i_start * UDF_BLOCKSIZE may be evaluated as 32 bit */
   i_byte_offset = ((off_t)i_start) * UDF_BLOCKSIZE;
@@ -369,7 +384,7 @@ udf_open (const char *psz_path)
        encapsulated as a CD-ROM Image (e.g. often .UDF or (sic) .ISO)
     */
     p_udf->stream = cdio_stdio_new( psz_path );
-    if (!p_udf->stream) 
+    if (!p_udf->stream)
       goto error;
     p_udf->b_stream = true;
   }
@@ -379,36 +394,36 @@ udf_open (const char *psz_path)
    */
   if (DRIVER_OP_SUCCESS != udf_read_sectors (p_udf, &data, 256, 1) )
     goto error;
-  
+
   memcpy(&(p_udf->anchor_vol_desc_ptr), &data, sizeof(anchor_vol_desc_ptr_t));
 
   if (udf_checktag((udf_tag_t *)&(p_udf->anchor_vol_desc_ptr), TAGID_ANCHOR))
     goto error;
-  
+
   /*
    * Then try to find a reference to a Primary Volume Descriptor.
    */
   {
-    const anchor_vol_desc_ptr_t *p_avdp = &p_udf->anchor_vol_desc_ptr;
-    const uint32_t mvds_start = 
+    anchor_vol_desc_ptr_t *p_avdp = &p_udf->anchor_vol_desc_ptr;
+
+    const uint32_t mvds_start =
       uint32_from_le(p_avdp->main_vol_desc_seq_ext.loc);
-    const uint32_t mvds_end   = mvds_start + 
+    const uint32_t mvds_end   = mvds_start +
       (uint32_from_le(p_avdp->main_vol_desc_seq_ext.len) - 1) / UDF_BLOCKSIZE;
 
     uint32_t i_lba;
 
     for (i_lba = mvds_start; i_lba < mvds_end; i_lba++) {
-
       udf_pvd_t *p_pvd = (udf_pvd_t *) &data;
-      
-      if (DRIVER_OP_SUCCESS != udf_read_sectors (p_udf, p_pvd, i_lba, 1) ) 
+
+      if (DRIVER_OP_SUCCESS != udf_read_sectors (p_udf, p_pvd, i_lba, 1) )
 	goto error;
 
       if (!udf_checktag(&p_pvd->tag, TAGID_PRI_VOL)) {
 	p_udf->pvd_lba = i_lba;
 	break;
       }
-      
+
     }
 
     /*
@@ -427,17 +442,23 @@ udf_open (const char *psz_path)
 }
 
 /**
- * Gets the Volume Identifier string, in 8bit unicode (latin-1)
+ * Gets the Volume Identifier, as an UTF-8 string
  * psz_volid, place to put the string
  * i_volid, size of the buffer psz_volid points to
  * returns the size of buffer needed for all data
+ * Note: this call accepts a NULL psz_volid, to retrieve the length required.
  */
 int 
-udf_get_volume_id(udf_t *p_udf, /*out*/ char *psz_volid,  unsigned int i_volid)
+udf_get_volume_id(udf_t *p_udf, /*out*/ char *psz_volid, unsigned int i_volid)
 {
   uint8_t data[UDF_BLOCKSIZE];
   const udf_pvd_t *p_pvd = (udf_pvd_t *) &data;
+  char* r;
   unsigned int volid_len;
+
+  /* clear the output to empty string */
+  if (psz_volid != NULL)
+    psz_volid[0] = 0;
 
   /* get primary volume descriptor */
   if ( DRIVER_OP_SUCCESS != udf_read_sectors(p_udf, &data, p_udf->pvd_lba, 1) )
@@ -448,11 +469,18 @@ udf_get_volume_id(udf_t *p_udf, /*out*/ char *psz_volid,  unsigned int i_volid)
     /* this field is only UDF_VOLID_SIZE bytes something is wrong */
     volid_len = UDF_VOLID_SIZE-1;
   }
-  if(i_volid > volid_len) {
-    i_volid = volid_len;
+
+  r = unicode16_decode((uint8_t *) p_pvd->vol_ident, volid_len);
+  if (r == NULL)
+    return 0;
+
+  volid_len = strlen(r)+1;	/* +1 for NUL terminator */
+  if (psz_volid != NULL) {
+    strncpy(psz_volid, r, MIN(volid_len, i_volid));
+    psz_volid[i_volid-1] = 0;	/* strncpy does not always terminate the dest */
   }
-  unicode16_decode((uint8_t *) p_pvd->vol_ident, i_volid, psz_volid);
-  
+  free(r);
+
   return volid_len;
 }
 
@@ -460,12 +488,12 @@ udf_get_volume_id(udf_t *p_udf, /*out*/ char *psz_volid,  unsigned int i_volid)
  * Gets the Volume Set Identifier, as a 128-byte dstring (not decoded)
  * WARNING This is not a null terminated string
  * volsetid, place to put the data
- * i_volsetid, size of the buffer psz_volsetid points to 
+ * i_volsetid, size of the buffer psz_volsetid points to
  * the buffer should be >=128 bytes to store the whole volumesetidentifier
  * returns the size of the available volsetid information (128)
  * or 0 on error
  */
-int 
+int
 udf_get_volumeset_id(udf_t *p_udf, /*out*/ uint8_t *volsetid,
 		     unsigned int i_volsetid)
 {
@@ -479,34 +507,46 @@ udf_get_volumeset_id(udf_t *p_udf, /*out*/ uint8_t *volsetid,
   if (i_volsetid > UDF_VOLSET_ID_SIZE) {
     i_volsetid = UDF_VOLSET_ID_SIZE;
   }
-  
+
   memcpy(volsetid, p_pvd->volset_id, i_volsetid);
-  
+
   return UDF_VOLSET_ID_SIZE;
 }
 
 /**
- * Gets the Logical Volume Identifier string, in 8bit unicode (latin-1)
+ * Gets the Logical Volume Identifier string, as an UTF-8 string
  * psz_logvolid, place to put the string (should be at least 64 bytes)
  * i_logvolid, size of the buffer psz_logvolid points to
- * returns the size of buffer needed for all data
+ * returns the size of buffer needed for all data, including NUL terminator
  * A call to udf_get_root() should have been issued before this call
+ * Note: this call accepts a NULL psz_volid, to retrieve the length required.
  */
-int 
-udf_get_logical_volume_id(udf_t *p_udf, /*out*/ char *psz_logvolid,  unsigned int i_logvolid)
+int
+udf_get_logical_volume_id(udf_t *p_udf, /*out*/ char *psz_logvolid, unsigned int i_logvolid)
 {
   uint8_t data[UDF_BLOCKSIZE];
   logical_vol_desc_t *p_logvol = (logical_vol_desc_t *) &data;
+  char* r;
   int logvolid_len;
+
+  /* clear the output to empty string */
+  if (psz_logvolid != NULL)
+    psz_logvolid[0] = 0;
 
   if (DRIVER_OP_SUCCESS != udf_read_sectors (p_udf, p_logvol, p_udf->lvd_lba, 1) ) 
     return 0;
 
-  logvolid_len = (p_logvol->logvol_id[127]+1)/2;
-  if (i_logvolid > logvolid_len)
-    i_logvolid = logvolid_len;
+  r = unicode16_decode((uint8_t *) p_logvol->logvol_id, p_logvol->logvol_id[127]);
+  if (r == NULL)
+    return 0;
 
-  unicode16_decode((uint8_t *) p_logvol->logvol_id, 2*i_logvolid, psz_logvolid);
+  logvolid_len = strlen(r)+1;	/* +1 for NUL terminator */
+  if (psz_logvolid != NULL) {
+    strncpy(psz_logvolid, r, MIN(logvolid_len, i_logvolid));
+    psz_logvolid[i_logvolid-1] = 0;	/* strncpy does not always terminate the dest */
+  }
+  free(r);
+
   return logvolid_len;
 }
 
@@ -522,14 +562,14 @@ udf_dirent_t *
 udf_get_root (udf_t *p_udf, bool b_any_partition, partition_num_t i_partition)
 {
   const anchor_vol_desc_ptr_t *p_avdp = &p_udf->anchor_vol_desc_ptr;
-  const uint32_t mvds_start = 
+  const uint32_t mvds_start =
     uint32_from_le(p_avdp->main_vol_desc_seq_ext.loc);
-  const uint32_t mvds_end   = mvds_start + 
+  const uint32_t mvds_end   = mvds_start +
     (uint32_from_le(p_avdp->main_vol_desc_seq_ext.len) - 1) / UDF_BLOCKSIZE;
   uint32_t i_lba;
   uint8_t data[UDF_BLOCKSIZE];
 
-  /* 
+  /*
      Now we have the joy of finding the Partition Descriptor and the
      Logical Volume Descriptor for the Main Volume Descriptor
      Sequence. Once we've got that, we use the Logical Volume
@@ -538,14 +578,14 @@ udf_get_root (udf_t *p_udf, bool b_any_partition, partition_num_t i_partition)
   */
   for (i_lba = mvds_start; i_lba < mvds_end; i_lba++) {
     uint8_t data2[UDF_BLOCKSIZE];
-    
+
     partition_desc_t *p_partition = (partition_desc_t *) &data2;
-    
-    if (DRIVER_OP_SUCCESS != udf_read_sectors (p_udf, p_partition, i_lba, 1) ) 
+
+    if (DRIVER_OP_SUCCESS != udf_read_sectors (p_udf, p_partition, i_lba, 1) )
       return NULL;
-    
+
     if (!udf_checktag(&p_partition->tag, TAGID_PARTITION)) {
-      const partition_num_t i_partition_check 
+      const partition_num_t i_partition_check
 	= uint16_from_le(p_partition->number);
       if (b_any_partition || i_partition_check == i_partition) {
 	/* Squirrel away some data regarding partition */
@@ -556,37 +596,37 @@ udf_get_root (udf_t *p_udf, bool b_any_partition, partition_num_t i_partition)
     } else if (!udf_checktag(&p_partition->tag, TAGID_LOGVOL)) {
       /* Get fileset descriptor */
       logical_vol_desc_t *p_logvol = (logical_vol_desc_t *) &data2;
-      bool b_valid = 
+      bool b_valid =
 	UDF_BLOCKSIZE == uint32_from_le(p_logvol->logical_blocksize);
-      
+
       if (b_valid) {
 	p_udf->lvd_lba = i_lba;
-	p_udf->fsd_offset = 
+	p_udf->fsd_offset =
 	  uint32_from_le(p_logvol->lvd_use.fsd_loc.loc.lba);
 	if (p_udf->i_part_start) break;
       }
-    } 
+    }
   }
   if (p_udf->lvd_lba && p_udf->i_part_start) {
     udf_fsd_t *p_fsd = (udf_fsd_t *) &data;
-    
-    driver_return_code_t ret = 
+
+    driver_return_code_t ret =
       udf_read_sectors(p_udf, p_fsd, p_udf->i_part_start + p_udf->fsd_offset,
 		       1);
-    
+
     if (DRIVER_OP_SUCCESS == ret && !udf_checktag(&p_fsd->tag, TAGID_FSD)) {
       udf_file_entry_t *p_udf_fe = (udf_file_entry_t *) &data;
       const uint32_t parent_icb = uint32_from_le(p_fsd->root_icb.loc.lba);
-      
+
       /* Check partition numbers match of last-read block?  */
-      
-      ret = udf_read_sectors(p_udf, p_udf_fe, 
+
+      ret = udf_read_sectors(p_udf, p_udf_fe,
 			     p_udf->i_part_start + parent_icb, 1);
-      if (ret == DRIVER_OP_SUCCESS && 
+      if (ret == DRIVER_OP_SUCCESS &&
 	  !udf_checktag(&p_udf_fe->tag, TAGID_FILE_ENTRY)) {
-	
+
 	/* Check partition numbers match of last-read block? */
-	
+
 	/* We win! - Save root directory information. */
 	return udf_new_dirent(p_udf_fe, p_udf, "/", true, false );
       }
@@ -598,13 +638,13 @@ udf_get_root (udf_t *p_udf, bool b_any_partition, partition_num_t i_partition)
 
 #define free_and_null(x) \
   free(x);		 \
-  x=NULL		 
+  x=NULL
 
 /*!
   Close UDF and free resources associated with p_udf.
 */
-bool 
-udf_close (udf_t *p_udf) 
+bool
+udf_close (udf_t *p_udf)
 {
   if (!p_udf) return true;
   if (p_udf->b_stream) {
@@ -619,22 +659,22 @@ udf_close (udf_t *p_udf)
   return true;
 }
 
-udf_dirent_t * 
+udf_dirent_t *
 udf_opendir(const udf_dirent_t *p_udf_dirent)
 {
   if (p_udf_dirent->b_dir && !p_udf_dirent->b_parent && p_udf_dirent->fid) {
     udf_t *p_udf = p_udf_dirent->p_udf;
     udf_file_entry_t udf_fe;
-    
-    driver_return_code_t i_ret = 
-      udf_read_sectors(p_udf, &udf_fe, p_udf->i_part_start 
+
+    driver_return_code_t i_ret =
+      udf_read_sectors(p_udf, &udf_fe, p_udf->i_part_start
 		       + p_udf_dirent->fid->icb.loc.lba, 1);
 
-    if (DRIVER_OP_SUCCESS == i_ret 
+    if (DRIVER_OP_SUCCESS == i_ret
 	&& !udf_checktag(&udf_fe.tag, TAGID_FILE_ENTRY)) {
-      
+
       if (ICBTAG_FILE_TYPE_DIRECTORY == udf_fe.icb_tag.file_type) {
-	udf_dirent_t *p_udf_dirent_new = 
+	udf_dirent_t *p_udf_dirent_new =
 	  udf_new_dirent(&udf_fe, p_udf, p_udf_dirent->psz_name, true, true);
 	return p_udf_dirent_new;
       }
@@ -647,7 +687,8 @@ udf_dirent_t *
 udf_readdir(udf_dirent_t *p_udf_dirent)
 {
   udf_t *p_udf;
-  
+  uint8_t* p;
+
   if (p_udf_dirent->dir_left <= 0) {
     udf_dirent_free(p_udf_dirent);
     return NULL;
@@ -657,62 +698,58 @@ udf_readdir(udf_dirent_t *p_udf_dirent)
   p_udf = p_udf_dirent->p_udf;
   p_udf->i_position = 0;
 
-  if (p_udf_dirent->fid) { 
+  if (p_udf_dirent->fid) {
     /* advance to next File Identifier Descriptor */
     /* FIXME: need to advance file entry (fe) as well.  */
-    uint32_t ofs = 4 * 
-      ((sizeof(*(p_udf_dirent->fid)) + p_udf_dirent->fid->u.i_imp_use 
+    uint32_t ofs = 4 *
+      ((sizeof(*(p_udf_dirent->fid)) + p_udf_dirent->fid->u.i_imp_use
 	+ p_udf_dirent->fid->i_file_id + 3) / 4);
-    
-    p_udf_dirent->fid = 
+
+    p_udf_dirent->fid =
       (udf_fileid_desc_t *)((uint8_t *)p_udf_dirent->fid + ofs);
   }
-  
+
   if (!p_udf_dirent->fid) {
-    uint32_t i_sectors = 
+    uint32_t i_sectors =
       (p_udf_dirent->i_loc_end - p_udf_dirent->i_loc + 1);
     uint32_t size = UDF_BLOCKSIZE * i_sectors;
     driver_return_code_t i_ret;
 
     if (!p_udf_dirent->sector)
       p_udf_dirent->sector = (uint8_t*) malloc(size);
-    i_ret = udf_read_sectors(p_udf, p_udf_dirent->sector, 
-			     p_udf_dirent->i_part_start+p_udf_dirent->i_loc, 
+    i_ret = udf_read_sectors(p_udf, p_udf_dirent->sector,
+			     p_udf_dirent->i_part_start+p_udf_dirent->i_loc,
 			     i_sectors);
     if (DRIVER_OP_SUCCESS == i_ret)
       p_udf_dirent->fid = (udf_fileid_desc_t *) p_udf_dirent->sector;
     else
       p_udf_dirent->fid = NULL;
   }
-  
+
   if (p_udf_dirent->fid && !udf_checktag(&(p_udf_dirent->fid->tag), TAGID_FID))
     {
-      uint32_t ofs = 
-	4 * ((sizeof(*p_udf_dirent->fid) + p_udf_dirent->fid->u.i_imp_use 
+      uint32_t ofs =
+	4 * ((sizeof(*p_udf_dirent->fid) + p_udf_dirent->fid->u.i_imp_use
 	      + p_udf_dirent->fid->i_file_id + 3) / 4);
-      
+
       p_udf_dirent->dir_left -= ofs;
-      p_udf_dirent->b_dir = 
+      p_udf_dirent->b_dir =
 	(p_udf_dirent->fid->file_characteristics & UDF_FILE_DIRECTORY) != 0;
-      p_udf_dirent->b_parent = 
+      p_udf_dirent->b_parent =
 	(p_udf_dirent->fid->file_characteristics & UDF_FILE_PARENT) != 0;
 
       {
 	const unsigned int i_len = p_udf_dirent->fid->i_file_id;
 
-	if (DRIVER_OP_SUCCESS != udf_read_sectors(p_udf, &p_udf_dirent->fe, p_udf->i_part_start 
+	if (DRIVER_OP_SUCCESS != udf_read_sectors(p_udf, &p_udf_dirent->fe, p_udf->i_part_start
 			 + p_udf_dirent->fid->icb.loc.lba, 1)) {
 		udf_dirent_free(p_udf_dirent);
 		return NULL;
 	}
 
-	if (strlen(p_udf_dirent->psz_name) < i_len) 
-	  p_udf_dirent->psz_name = (char *)
-	    realloc(p_udf_dirent->psz_name, sizeof(char)*i_len+1);
-	
-	unicode16_decode(p_udf_dirent->fid->u.imp_use.data 
-			 + p_udf_dirent->fid->u.i_imp_use, 
-			 i_len, p_udf_dirent->psz_name);
+	free_and_null(p_udf_dirent->psz_name);
+	p = (uint8_t*)p_udf_dirent->fid->u.imp_use.data + p_udf_dirent->fid->u.i_imp_use;
+	p_udf_dirent->psz_name = unicode16_decode(p, i_len);
       }
       return p_udf_dirent;
     }
@@ -723,8 +760,8 @@ udf_readdir(udf_dirent_t *p_udf_dirent)
 /*!
   free free resources associated with p_udf_dirent.
 */
-bool 
-udf_dirent_free(udf_dirent_t *p_udf_dirent) 
+bool
+udf_dirent_free(udf_dirent_t *p_udf_dirent)
 {
   if (p_udf_dirent) {
     p_udf_dirent->fid = NULL;

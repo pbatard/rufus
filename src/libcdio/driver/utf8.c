@@ -113,7 +113,6 @@ FILE* fopen_utf8(const char* filename, const char* mode)
 }
 #endif
 
-#ifdef HAVE_JOLIET
 #ifdef HAVE_ICONV
 #include <iconv.h>
 struct cdio_charset_coverter_s
@@ -344,5 +343,3 @@ bool cdio_charset_to_utf8(const char *src, size_t src_len, cdio_utf8_t **dst,
   return (*dst != NULL);
 }
 #endif /* HAVE_ICONV */
-
-#endif /* HAVE_JOLIET */
