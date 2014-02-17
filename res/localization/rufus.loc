@@ -1937,7 +1937,7 @@ t MSG_261 "Ecriture d'image : %0.1f%% complété"
 
 ################################################################################
 l "de-DE" "German (Deutsch)" 0x0407, 0x0807, 0x0c07, 0x1007, 0x1407
-v 1.0.8
+v 1.0.10
 b "en-US"
 
 g IDD_DIALOG
@@ -2033,7 +2033,7 @@ t IDCANCEL "Schließen"
 
 g IDD_ISO_EXTRACT
 t IDD_ISO_EXTRACT "Kopiere ISO-Dateien..."
-t IDC_ISO_FILENAME "Öffne ISO-Abbild - bitte warten..."
+t IDC_ISO_FILENAME "Öffne ISO-Abbild-Datei - bitte warten..."
 t IDC_ISO_ABORT "Abbruch"
 
 # Messages used throughout the application
@@ -2121,8 +2121,8 @@ t MSG_069 "Dateien konnten nicht auf das Ziellaufwerk kopiert werden."
 t MSG_070 "Vom Benutzer abgebrochen."
 t MSG_071 "Thread konnte nicht gestartet werden."
 t MSG_072 "Prüfung auf fehlerhafte Blöcke nicht abgeschlossen."
-t MSG_073 "Fehler beim analysieren des ISO-Abbilds."
-t MSG_074 "Fehler beim entpacken des ISO-Abbilds."
+t MSG_073 "Fehler beim analysieren der ISO-Abbild-Datei."
+t MSG_074 "Fehler beim entpacken der ISO-Abbild-Datei."
 t MSG_075 "Volume konnte nicht neu angelegt werden."
 t MSG_076 "Startfähige Dateien konnten nicht erstellt werden."
 t MSG_077 "Laufwerksbuchstabe konnte nicht zugewiesen werden."
@@ -2130,11 +2130,11 @@ t MSG_078 "GUID-Laufwerk konnte nicht angelegt werden."
 t MSG_080 "Rufus hat erkannt, dass Inhalte des Datenpuffer auf das USB-Laufwerk geschrieben werden.\n\n"
 	"Abhängig von der Geschwindigkeit des USB-Laufwerks, kann dieser Vorgang lange dauern; speziell für große Dateien.\n\nWir empfehlen, dass Sie Windows den Vorgang beenden lassen, um eine Problem zu vermeiden. "
 	"Wenn Ihnen der Vorgang zu lange dauert, können Sie das Gerät einfach entfernen..."
-t MSG_081 "Nicht unterstütztes ISO-Abbild"
+t MSG_081 "Nicht unterstützte ISO-Abbild-Datei"
 t MSG_082 "Diese Version von Rufus unterstützt nur startfähige ISO-Abbilder auf Basis von bootmgr/WinPE, isolinux oder EFI.\n"
 	"Dieses ISO-Abbild verwendet ein anderes Verfahren."
 t MSG_083 "Ersetze %s?"
-t MSG_084 "Dieses ISO-Abbild verwendet eine veraltete Version von '%s'.\n"
+t MSG_084 "Diese ISO-Abbild-Datei verwendet eine veraltete Version von '%s'.\n"
 	"Bootmenüs werden deswegen möglicherweise fehlerhaft dargestellt.\n\n"
 	"Eine neuere Version kann von Rufus heruntergeladen werden, um diese Problem zu vermeiden:\n"
 	"- Wählen Sie 'Ja', um die Datei herunterzuladen\n"
@@ -2143,13 +2143,13 @@ t MSG_084 "Dieses ISO-Abbild verwendet eine veraltete Version von '%s'.\n"
 	"Hinweis: Die neue Datei wird in das aktuelle Verzeichnis heruntergeladen und falls "
 	"'%s' bereits vorhanden ist, wird sie automatisch wiederverwendet."
 t MSG_085 "Download %s"
-t MSG_086 "Kein ISO-Abbild gewählt"
+t MSG_086 "Keine Abbild-Datei gewählt"
 # The content between the quotes below (\"Create a bootable disk\") should match
 # the beginning of the IDC_BOOT text
-t MSG_087 "Wählen Sie ein startfähiges ISO-Abbild aus "
-	"oder Sie deaktivieren \"Startfähiges Laufwerk erstellen...\"."
-t MSG_088 "ISO-Abbild ist zu groß"
-t MSG_089 "Dieses ISO-Abbild ist zu groß für das gewählte Ziel."
+t MSG_087 "Bitte klicken das auf das Disk-Symbol um eine startfähige Abbild-Datei zu wählen "
+	"oder deaktivieren Sie \"Startfähiges Laufwerk erstellen...\"."
+t MSG_088 "Abbild ist zu groß"
+t MSG_089 "Dieses Abbild ist zu groß für das gewählte Ziel."
 t MSG_090 "ISO-Abbild nicht unterstützt"
 t MSG_091 "Wenn UEFI als Typ des Zielsystems gewählt ist, sind nur EFI-bootfähige ISO-Abbilder unterstützt."
 	"Bitte wählen Sie ein EFI-bootfähiges ISO-Abbild oder ändern Sie den Typ des Zielsystems zu BIOS."
@@ -2158,11 +2158,12 @@ t MSG_093 "ACHTUNG! DIESES LAUFWERK VERFÜGT ÜBER MEHRERE PARTITIONEN ODER VOLU
 	"Darunter sind möglicherweise Partitionen, die unter Windows nicht sicht- bzw. nutzbar sind."
 	"Wenn Sie fortfahren, sind Sie selbst für den Datenverlust auf diesen Partitionen verantwortlich."
 t MSG_094 "Mehrere Partitionen erkannt"	
+t MSG_095 "DD Abbild"
 t MSG_096 "Nur FAT/FAT32 sind unterstützt für diesen Typ des ISO-Abbilds. Bitte wählen Sie FAT/FAT32 als Dateisystem."
 t MSG_097 "Nur 'bootmgr' oder 'WinPE' basierende ISO-Abbilder können derzeit mit NTFS verwendet werden."
 t MSG_098 "FAT/FAT32 kann nur für isolinux basierte ISO-Abbilder oder den Zieltyp UEFI verwendet werden."
 t MSG_099 "Dateisystembeschränkung"
-t MSG_100 "Dieses ISO-Abbild enthält eine Datei größer 4GB. Diese Dateigröße ist für "
+t MSG_100 "Diese ISO-Abbild-Datei enthält eine Datei größer 4GB. Diese Dateigröße ist für "
 	"FAT oder FAT32 Dateisysteme nicht zulässig."
 t MSG_101 "Fehlende WIM-Unterstützung"
 t MSG_102 "Ihre Plattform kann keine Dateien aus WIM-Containern extrahieren. WIM-Extraktion "
@@ -2242,18 +2243,19 @@ t MSG_184 "Zum privaten Statistikzwecken speichern wir diese Informationen "
 t MSG_185 "Update-Vorgang:"
 t MSG_186 "Rufus verwendet keine Hintergrundprozesse, deshalb wird nur auf Updates geprüft, wenn die Anwendung läuft.\\line\n"
 	"Eine Internetverbindung ist natürlich für die Prüfung auf neue Versionen erforderlich."
+t MSG_187 "Abbild-Datei für die gewählte Boot-Option nicht passend"
+t MSG_188 "Die derzeitige Abbild-Datei passt nicht zur gewählten Boot-Option. Bitte wählen sie eine andere Abbild-Datei oder eine andere Boot-Option."
+
 t MSG_201 "Abbrechen - Bitte warten..."
-t MSG_202 "Lese ISO-Abbild..."
-t MSG_203 "Fehler beim Lesen des ISO-Abbild"
+t MSG_202 "Lese Abbild-Datei..."
+t MSG_203 "Fehler beim Lesen der Abbild-Datei"
 # Parameter: the name of an obsolete Syslinux .c32 module. eg: "Obsolete vesamenu.c32 detected"
 t MSG_204 "Überflüssige %s erkannt"
 # Display the name of the ISO selected. eg: "Using ISO: en_win7_x64_sp1.iso"
 t MSG_205 "Verwende ISO: %s"
 # Typically "Missing ldlinux.c32 file"
 t MSG_206 "Fehlende %s Datei"
-
 t MSG_207 "Neues Volume"
-
 # Same message, once for singular and plural ("1 device found", "2 devices found")
 t MSG_208 "%d Laufwerk gefunden"
 t MSG_209 "%d Laufwerke gefunden"
@@ -2317,6 +2319,8 @@ t MSG_256 "Gefälschte Laufwerke erkennen"
 t MSG_257 "Joliet-Unterstützung"
 t MSG_258 "Rock Ridge-Unterstützung"
 t MSG_259 "Update erzwingen"
+t MSG_260 "NTFS-Komprimierung"
+t MSG_261 "Schreibe Abbild-Datei: %0.1f%% fertiggestellt"
 
 ################################################################################
 l "el-GR" "Greek (Ελληνικά)" 0x0408
