@@ -3488,7 +3488,7 @@ t MSG_259 "Pembaruan Paksa"
 
 ################################################################################
 l "it-IT" "Italian (Italiano)" 0x0410, 0x0810
-v 1.0.8
+v 1.0.10
 b "en-US"
 
 g IDD_DIALOG
@@ -3688,11 +3688,11 @@ t MSG_084 "Questa iammgine sembra che usi uan vesrioen obsoleta di '%s'.\n"
 	"Nota: il nuovo file verrà scaricato nella cartella attuale e una volta "
 	"scaricato '%s', verrà riusato automaticamente."
 t MSG_085 "Download %s"
-t MSG_086 "Nessuna immagine ISO selezionata"
-t MSG_087 "Fai clic sul pulsante disco per slezionare uf ile immagine ISO avviabile, "
+t MSG_086 "Nessuna immagine selezionata"
+t MSG_087 "Fai clic sul pulsante disco per selezionare una immagine avviabile, "
 	"o deseleziona \"Crea un disco avviabile usando\"."
-t MSG_088 "Immagine ISO troppo grande"
-t MSG_089 "Questa immagine ISO è troppo garnde per l'unità destinazione."
+t MSG_088 "Immagine troppo grande"
+t MSG_089 "Questa immagine è troppo garnde per l'unità destinazione."
 t MSG_090 "Formato ISO non supportato"
 t MSG_091 "Quando usi una destinazione di tipo UEFI, sono supportate solo immagini ISO avviabili EFI. "
 	"Scegli un'immagien avviabile EFI o imposta una destinazione di tipo BIOS."
@@ -3701,6 +3701,7 @@ t MSG_093 "IMPORTANTE: QUESTA UNITA' CONTIENE PARTIZIONI MULTIPLE!!\n\n"
 	"Questo può includere partizioni/volumi che non sono elencati anche se visibili da Windows."
 	"Se vuoi procedere, sei responsabile per qualsiasi perdita di dati in queste partizioni."
 t MSG_094 "Rilevate partizioni multiple"
+t MSG_095 "Immagine DD"
 t MSG_096 "Per questo tipo di ISO, sono supportate solo FAT/FAT32. Seleziona FAT/FAT32 come filesystem."
 t MSG_097 "Con NTFS attualmente possono essere usate solo immagini ISO basate su 'bootmgr' o 'WinPE'."
 t MSG_098 "FAT/FAT32 può essere usata solo per immagini ISO basate su isolinux o quando il tipo destinazione è UEFI."
@@ -3791,10 +3792,12 @@ t MSG_184 "Potremo mantenere le informazioni al solo scopo di creare una sttaits
 t MSG_185 "Processo aggiornamento:"
 t MSG_186 "Rufus non installa o esegue servizi in background. Il controllo aggiornamenti verrà effettuato solo quando l'applicazione è in esecuzione.\\line\n"
 	"L'accesso internet è ovviamente richeisto quando si effettua il controllo aggiornamenti."
+t MSG_187 "Immagine non valida per opzione boot selezionata"
+t MSG_188 "L'immagine selezionata non corrisponde all'opzione boot scelta. Usa un'immagine differente o scegli un'opzione boot differente."
 
 t MSG_201 "Annullamneto..."
-t MSG_202 "Analisi immagine ISO..."
-t MSG_203 "Analisi fallita immagine ISO"
+t MSG_202 "Analisi immagine..."
+t MSG_203 "Analisi immagine fallita"
 t MSG_204 "Rilevato %s obsoleto"
 t MSG_205 "Uso ISO: %s"
 t MSG_206 "File %s mancante"
@@ -3855,6 +3858,9 @@ t MSG_255 "Verrà eliminato NoDriveTypeAutorun all'uscita"
 t MSG_256 "Rilevamento unità fittizie"
 t MSG_257 "Supporto Joliet"
 t MSG_258 "Supporto Rock Ridge"
+t MSG_259 "Forza update"
+t MSG_260 "Compressione NTFS"
+t MSG_261 "Scrittura immagine: %0.1f%% completata"
 
 ################################################################################
 l "ko-KR" "Korean (한국어)" 0x0412
