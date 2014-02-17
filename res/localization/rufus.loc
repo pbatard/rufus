@@ -498,7 +498,7 @@ t MSG_212 "فشل"
 
 ################################################################################
 l "zh-CN" "Chinese Simplified (简体中文)" 0x0804, 0x1004
-v 1.0.9
+v 1.0.10
 b "en-US"
 
 # Main dialog
@@ -508,12 +508,12 @@ t IDS_PARTITION_TYPE_TXT "分区方案和目标系统类型"
 t IDS_FILESYSTEM_TXT "文件系统"
 t IDS_CLUSTERSIZE_TXT "簇大小"
 t IDS_LABEL_TXT "新卷标"
-t IDS_FORMAT_OPTIONS_GRP "格式选项        "
+t IDS_FORMAT_OPTIONS_GRP "格式化选项        "
 t IDC_BADBLOCKS "检查设备坏块："
 t IDC_QUICKFORMAT "快速格式化"
 t IDC_BOOT "创建一个启动盘使用："
 t IDC_SET_ICON "创建扩展标签和图标文件"
-m IDC_ADVANCED -24,0
+m IDC_ADVANCED -12,0
 t IDC_ABOUT "关于..."
 t IDC_LOG "日志"
 s IDC_LOG +16,0
@@ -635,7 +635,7 @@ t MSG_049 "Rufus - 取消"
 
 # Error messages
 t MSG_050 "成功。"
-t MSG_051 "格式化未知错误。"
+t MSG_051 "未知格式化错误。"
 t MSG_052 "该设备媒体无法使用选定文件系统。"
 t MSG_053 "该设备无法访问。"
 t MSG_054 "该设备媒体当前被写保护。"
@@ -680,22 +680,23 @@ t MSG_084 "此 ISO 镜像使用的是过时的 '%s'。\n"
 	"如果不知道如何选择，请选择 '是'。\n\n"
 	"注意：'%s' 文件将会被下载到当前目录，自动选用。"
 t MSG_085 "下载 %s"
-t MSG_086 "未选择 ISO 镜像"
+t MSG_086 "未选择镜像"
 # The content between the quotes below should match the beginning of the IDC_BOOT text
-t MSG_087 "请单击光盘图标选择启动 ISO 镜像，\n或者取消 '创建一个启动盘...' 复选框。"
-t MSG_088 "ISO 镜像文件过大"
-t MSG_089 "此 ISO 镜像文件超过设备支持大小。"
+t MSG_087 "请单击光盘图标选择启动镜像，\n或取消 '创建一个启动盘...' 复选框。"
+t MSG_088 "镜像文件过大"
+t MSG_089 "此镜像文件超过设备支持大小。"
 t MSG_090 "不支持的 ISO 镜像"
 t MSG_091 "选择 UEFI 系统类型时，只支持 EFI 启动 ISO 镜像。\n"
-	"请选择可 EFI 启动的 ISO 镜像，或者将目标系统类型改为 BIOS。"
+	"请选择可 EFI 启动的 ISO 镜像，或将目标系统类型改为 BIOS。"
 t MSG_092 "不支持的文件系统"
 t MSG_093 "警告：此磁盘包含多分区！\n\n"
 	"Windows 可能无法访问访问这些分区。\n"
-	"继续操作可能造成数据丢失，请自行负责。"
+	"继续操作可能造成数据丢失，后果自负。"
 t MSG_094 "检测到多分区磁盘"
+t MSG_095 "DD 镜像"
 t MSG_096 "此 ISO 镜像仅支持 FAT/FAT32 文件系统，\n请选择 FAT/FAT32 文件系统。"
 t MSG_097 "目前只有基于 bootmgr/WinPE 的 ISO 镜像支持 NTFS 文件系统。"
-t MSG_098 "选择 FAT/FAT32 文件系统时，只支持基于 isolinux 的 ISO 镜像，\n或者 UEFI 系统类型。"
+t MSG_098 "选择 FAT/FAT32 文件系统时，只支持基于 isolinux 的 ISO 镜像，\n或 UEFI 系统类型。"
 t MSG_099 "文件系统限制"
 t MSG_100 "此 ISO 镜像包含大于 4 GB 的单一文件，\n超出 FAT/FAT32 文件系统限制。"
 t MSG_101 "缺少 WIM 支持"
@@ -716,10 +717,10 @@ t MSG_108 "Rufus 日志"
 t MSG_109 "0x%02X (Disk %d)"
 # "Cluster size" below should be the same as the label for IDS_CLUSTERSIZE_TXT
 # "kilobytes" should be the same as in MSG_027
-t MSG_110 "MS-DOS 无法从 64 KB 簇大小磁盘启动。\n请更改簇大小或者改用 FreeDOS。"
-t MSG_111 "不兼容的簇大小"
+t MSG_110 "MS-DOS 无法从 64 KB 簇大小磁盘启动。\n请更改簇大小或改用 FreeDOS。"
+t MSG_111 "不支持的簇大小"
 # "%d:%02d" below is a duration (mins:secs)
-t MSG_112 "格式化较大的 UDF 卷可能需要很长时间。 过程中进度条可能会呈禁止状态，属于正常现象。"
+t MSG_112 "格式化较大的 UDF 卷可能需要很长时间。过程中进度条可能会呈禁止状态，属于正常现象。"
 	"请耐心等待！\nUSB 2.0 设备预计剩余时间：%d:%02d"
 t MSG_113 "大容量 UDF 卷"
 t MSG_114 "此镜像使用的更新版本的 Syslinux %s，此程序内置的 Syslinux %s 不支持更新版本。\n\n"
@@ -769,11 +770,13 @@ t MSG_183 "您的 IP 地址"
 t MSG_184 "所收集的资料\\b 最多保存一年\\b0 ，并且仅供内部统计分析使用情况，绝不会主动将资料提供给第三方。"
 t MSG_185 "更新进程："
 t MSG_186 "Rufus 没有常住后台的服务进程，因此只有当主程序联网运行时才会自动检查更新。"
+t MSG_187 "不支持的启动镜像"
+t MSG_188 "目前选择的镜像不支持启动模式，请重新选择镜像或启动模式。"
 
 # Status messages - these messages will appear on the status bar
 t MSG_201 "取消中，请稍后..."
-t MSG_202 "扫描 ISO 镜像..."
-t MSG_203 "无法扫描 ISO 镜像"
+t MSG_202 "扫描镜像..."
+t MSG_203 "无法扫描镜像"
 # Parameter：the name of an obsolete Syslinux .c32 module.
 t MSG_204 "检测到过时的 %s"
 # Display the name of the ISO selected. 
@@ -801,7 +804,6 @@ t MSG_218 "创建文件系统：已完成 %d/%d 项"
 t MSG_219 "修复 NTFS：已完成 %d%%"
 # Parameter：the file system and an estimated duration in mins and secs.
 # eg. "Formatting (UDF) - Estimated duration 3:21..."
-# NB：if "estimated duration" is too long, just use "estimated" or an abbreviation
 t MSG_220 "格式化 (%s)：剩余时间 %d:%02d"
 t MSG_221 "设置卷标，请耐心等待..."
 # Parameter：the file system. eg. "Formatting (NTFS)..."
@@ -848,6 +850,7 @@ t MSG_257 "Joliet 支持"
 t MSG_258 "Rock Ridge 支持"
 t MSG_259 "强制更新"
 t MSG_260 "NTFS 压缩"
+t MSG_261 "写入镜像：已完成 %0.1f%%"
 
 ################################################################################
 l "zh-TW" "Chinese Traditional (正體中文)" 0x0404, 0x0c04, 0x1404, 0x7c04
