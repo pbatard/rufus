@@ -2,10 +2,11 @@ o Version 1.4.4 (2013.02.??)
     Add *uncompressed* DD Image support (FreeBSD, FreeNAS, etc.)
     Add right-to-left language support
     Add NTFS Compression support (unofficial)
-    Improve Syslinux v5+ support (requires an internet connection to download extra files)
     Improve hotplug detection
-    Fix detection for Toshiba drives (again)
+    Improve Syslinux v5+ support (requires an internet connection to download extra files)
     Fix support for latest gparted, ArchLinux, and other Syslinux v5+ based ISOs 
+    Fix detection for Toshiba drives (again)
+    Fix UDF Unicode support
 
 o Version 1.4.3 (2013.01.21) [BUGFIX RELEASE]
     Fix format operation not starting on Windows XP (reported by ank91)

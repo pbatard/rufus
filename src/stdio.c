@@ -147,19 +147,20 @@ char* GuidToString(const GUID* guid)
 }
 
 // Convert a file size to human readable
-char* SizeToHumanReadable(LARGE_INTEGER size)
+char* SizeToHumanReadable(uint64_t size, BOOL log)
 {
 	int suffix = 0;
 	static char str_size[32];
-	double hr_size = (double)size.QuadPart;
+	double hr_size = (double)size;
+	char **_msg_table = log?default_msg_table:msg_table;
 	while ((suffix < MAX_SIZE_SUFFIXES) && (hr_size >= 1024.0)) {
 		hr_size /= 1024.0;
 		suffix++;
 	}
 	if (suffix == 0) {
-		safe_sprintf(str_size, sizeof(str_size), "%d %s", (int)hr_size, lmprintf(MSG_020));
+		safe_sprintf(str_size, sizeof(str_size), "%d %s", (int)hr_size, _msg_table[MSG_020-MSG_000]);
 	} else {
-		safe_sprintf(str_size, sizeof(str_size), "%0.1f %s", hr_size, lmprintf(MSG_020 + suffix));
+		safe_sprintf(str_size, sizeof(str_size), "%0.1f %s", hr_size, _msg_table[MSG_020+suffix-MSG_000]);
 	}
 	return str_size;
 }

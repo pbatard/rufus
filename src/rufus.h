@@ -59,6 +59,7 @@
 #define UDF_FORMAT_SPEED            3.1f		// Speed estimate at which we expect UDF drives to be formatted (GB/s)
 #define UDF_FORMAT_WARN             20			// Duration (in seconds) above which we warn about long UDF formatting times
 #define MAX_FAT32_SIZE              2.0f		// Threshold above which we disable FAT32 formatting (in TB)
+#define DD_BUFFER_SIZE              65536		// Size of the buffer we use for DD operations
 #define WHITE                       RGB(255,255,255)
 #define SEPARATOR_GREY              RGB(223,223,223)
 #define RUFUS_URL                   "http://rufus.akeo.ie"
@@ -318,7 +319,7 @@ extern void PrintStatus(unsigned int duration, BOOL debug, int msg_id, ...);
 extern void UpdateProgress(int op, float percent);
 extern const char* StrError(DWORD error_code, BOOL use_default_locale);
 extern char* GuidToString(const GUID* guid);
-extern char* SizeToHumanReadable(LARGE_INTEGER size);
+extern char* SizeToHumanReadable(uint64_t size, BOOL log);
 extern void CenterDialog(HWND hDlg);
 extern void ResizeMoveCtrl(HWND hDlg, HWND hCtrl, int dx, int dy, int dw, int dh);
 extern void CreateStatusBar(void);

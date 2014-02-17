@@ -569,7 +569,7 @@ static BOOL FormatFAT32(DWORD DriveIndex)
 	}
 
 	// Now we're committed - print some info first
-	uprintf("Size : %s %u sectors\n", SizeToHumanReadable(piDrive.PartitionLength), TotalSectors);
+	uprintf("Size : %s %u sectors\n", SizeToHumanReadable(piDrive.PartitionLength.QuadPart, TRUE), TotalSectors);
 	uprintf("Cluster size %d bytes, %d Bytes Per Sector\n", SectorsPerCluster*BytesPerSect, BytesPerSect);
 	uprintf("Volume ID is %x:%x\n", VolumeId>>16, VolumeId&0xffff);
 	uprintf("%d Reserved Sectors, %d Sectors per FAT, %d FATs\n", ReservedSectCount, FatSize, NumFATs);
@@ -1184,7 +1184,7 @@ DWORD WINAPI FormatThread(void* param)
 	FILE* log_fd;
 	LARGE_INTEGER li;
 	uint64_t wb;
-	uint8_t buffer[65536];
+	uint8_t *buffer = NULL;
 	char *bb_msg, *guid_volume = NULL;
 	char drive_name[] = "?:\\";
 	char drive_letters[27];
@@ -1334,11 +1334,18 @@ DWORD WINAPI FormatThread(void* param)
 		}
 
 		uprintf("Writing Image...");
+		buffer = (uint8_t*)malloc(DD_BUFFER_SIZE);
+		if (buffer == NULL) {
+			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_NOT_ENOUGH_MEMORY;
+			uprintf("could not allocate DD buffer");
+			goto out;
+		}
+
 		// Don't bother trying for something clever, using double buffering overlapped and whatnot:
 		// With Windows' default optimizations, sync read + sync write for sequential operations
 		// will be as fast, if not faster, than whatever async scheme you can come up with.
 		for (wb = 0; ; wb += wSize) {
-			s = ReadFile(hSourceImage, buffer, sizeof(buffer), &rSize, NULL);
+			s = ReadFile(hSourceImage, buffer, DD_BUFFER_SIZE, &rSize, NULL);
 			if (!s) {
 				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_READ_FAULT;
 				uprintf("read error: %s", WindowsErrorString());
@@ -1561,6 +1568,7 @@ DWORD WINAPI FormatThread(void* param)
 
 out:
 	safe_free(guid_volume);
+	safe_free(buffer);
 	SendMessage(hISOProgressDlg, UM_ISO_EXIT, 0, 0);
 	safe_closehandle(hSourceImage);
 	safe_unlockclose(hLogicalVolume);

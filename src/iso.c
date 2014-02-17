@@ -78,26 +78,6 @@ static uint64_t total_blocks, nb_blocks;
 static BOOL scan_only = FALSE;
 static StrArray config_path, isolinux_path;
 
-// TODO: Timestamp & permissions preservation
-
-// Convert a file size to human readable
-static __inline char* size_to_hr(int64_t size)
-{
-	int suffix = 0;
-	static char str_size[24];
-	double hr_size = (double)size;
-	while ((suffix < MAX_SIZE_SUFFIXES) && (hr_size >= 1024.0)) {
-		hr_size /= 1024.0;
-		suffix++;
-	}
-	if (suffix == 0) {
-		safe_sprintf(str_size, sizeof(str_size), " (%d %s)", (int)hr_size, lmprintf(MSG_020));
-	} else {
-		safe_sprintf(str_size, sizeof(str_size), " (%0.1f %s)", hr_size, lmprintf(MSG_020+suffix));
-	}
-	return str_size;
-}
-
 // Ensure filenames do not contain invalid FAT32 or NTFS characters
 static __inline BOOL sanitize_filename(char* filename)
 {
@@ -261,8 +241,9 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 			nul_pos = safe_strlen(psz_fullpath);
 			for (i=0; i<nul_pos; i++)
 				if (psz_fullpath[i] == '/') psz_fullpath[i] = '\\';
-			safe_strcpy(&psz_fullpath[nul_pos], 24, size_to_hr(i_file_length));
+			safe_sprintf(&psz_fullpath[nul_pos], 24, " (%s)", SizeToHumanReadable(i_file_length, TRUE));
 			uprintf("Extracting: %s\n", psz_fullpath);
+			safe_sprintf(&psz_fullpath[nul_pos], 24, " (%s)", SizeToHumanReadable(i_file_length, FALSE));
 			SetWindowTextU(hISOFileName, psz_fullpath);
 			// Remove the appended size for extraction
 			psz_fullpath[nul_pos] = 0;
@@ -407,8 +388,9 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 			nul_pos = safe_strlen(psz_fullpath);
 			for (i=0; i<nul_pos; i++)
 				if (psz_fullpath[i] == '/') psz_fullpath[i] = '\\';
-			safe_strcpy(&psz_fullpath[nul_pos], 24, size_to_hr(i_file_length));
+			safe_sprintf(&psz_fullpath[nul_pos], 24, " (%s)", SizeToHumanReadable(i_file_length, TRUE));
 			uprintf("Extracting: %s\n", psz_fullpath);
+			safe_sprintf(&psz_fullpath[nul_pos], 24, " (%s)", SizeToHumanReadable(i_file_length, FALSE));
 			SetWindowTextU(hISOFileName, psz_fullpath);
 			// ISO9660 cannot handle backslashes
 			for (i=0; i<nul_pos; i++) if (psz_fullpath[i] == '\\') psz_fullpath[i] = '/';
