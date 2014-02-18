@@ -289,18 +289,19 @@ unicode16_decode(const uint8_t *data, int i_len)
   switch (data[0])
   {
   case 8:
-    r = (char*)malloc(i_len);
+    r = (char*)calloc(i_len, 1);
     if (r == NULL)
       return r;
     for (i=0; i<i_len-1; i++)
       r[i] = data[i+1];
-    r[i] = 0;
     return r;
   case 16:
     cdio_charset_to_utf8((char*)&data[1], i_len-1, &r, "UCS-2BE");
     return r;
   default:
-    return NULL;
+    /* Empty string, for calls that can't take a NULL pointer */ 
+    r = (char*)calloc(1, 1);
+    return r;
   }
 }
 
