@@ -47,7 +47,8 @@
 #include <stdio.h>
 #include <io.h>
 static __inline int fseeko64(FILE *stream, __int64 offset, int origin) {
-	return (lseek64(_fileno(stream), offset, origin) == -1L)?-1:0;
+	fflush(stream);		/* VERY IMPORTANT! */
+	return (lseek64(_fileno(stream), offset, origin) == -1LL)?-1:0;
 }
 #else
 #define fseeko64 _fseeki64

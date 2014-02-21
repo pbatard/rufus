@@ -1,7 +1,9 @@
 o Version 1.4.4 (2013.02.??)
-    Add *uncompressed* DD Image support (FreeBSD, FreeNAS, etc.)
+    Add *uncompressed* Disk Image support (FreeBSD, FreeNAS, etc.)
     Add right-to-left language support
-    Add NTFS Compression support (unofficial)
+    Add an alert when multiple partitions are about to be erased
+    Add (unofficial) NTFS Compression support 
+    Ignore failure on ISO autorun.inf creation, to keep dumb security applications happy
     Improve hotplug detection
     Improve Syslinux v5+ support (requires an internet connection to download extra files)
     Fix support for latest gparted, ArchLinux, and other Syslinux v5+ based ISOs 
