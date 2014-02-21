@@ -3867,7 +3867,7 @@ t MSG_261 "Scrittura immagine: %0.1f%% completata"
 
 ################################################################################
 l "ko-KR" "Korean (한국어)" 0x0412
-v 1.0.7
+v 1.0.10
 b "en-US"
 
 # Main dialog
@@ -3883,7 +3883,7 @@ t IDC_BADBLOCKS "배드 섹터 검사:"
 m IDC_NBPASSES +3,0
 s IDC_NBPASSES +35,0
 t IDC_QUICKFORMAT "빠른 포맷"
-t IDC_BOOT "부팅 가능한 디스크 만들기:"
+t IDC_BOOT "부팅 가능 디스크 만들기:"
 s IDC_BOOT +3,0
 m IDC_BOOTTYPE +3,0
 m IDC_SELECT_ISO +2,0
@@ -3911,6 +3911,7 @@ g IDD_ABOUTBOX
 t IDD_ABOUTBOX "Rufus"
 t IDC_ABOUT_LICENSE "라이센스"
 t IDC_ABOUT_UPDATES "업데이트"
+t IDOK "확인"
 
 # About -> License dialog
 g IDD_LICENSE
@@ -3960,7 +3961,7 @@ t IDC_ISO_ABORT "취소"
 t MSG_001 "다른 인스턴스가 감지 됨."
 t MSG_002 "Rufus가 이미 실행 중입니다.\n"
 	"실행하기 전에 먼저 실행된 프로그램을 닫으십시오."
-t MSG_003 "WARNING: 장치 '%s'에 있는 데이터가 모두 삭제됩니다.\n"
+t MSG_003 "경고: 장치 '%s'에 있는 데이터가 모두 삭제됩니다.\n"
 	"계속하려면 확인을, 종료하려면 취소를 선택하십시오."
 t MSG_004 "업데이트 정책"
 t MSG_005 "인터넷에 연결해서 프로그램의 업데이트를 확인하시겠습니까?"
@@ -3973,7 +3974,7 @@ t MSG_010 "배드 섹터 발견 됨."
 t MSG_011 "검사 완료: %u 개의 배트섹터가 발견되었습니다.\n"
 	"  %d 읽기 오류\n  %d 쓰기 오류\n  %d 손상 섹터\n"
 # The following will contain the formatted message above as well as the name of the bad blocks logfile
-t MSG_012 "%s\nA more detailed report can be found in:\n%s"
+t MSG_012 "%s\n보고에 대한 상세 정보:\n%s"
 t MSG_013 "사용 안 함"
 t MSG_014 "매일"
 t MSG_015 "매주"
@@ -4012,7 +4013,7 @@ t MSG_043 "오류: %s"
 t MSG_044 "다운로드 파일"
 t MSG_045 "USB 저장 장치 (일반)"
 t MSG_046 "%s (디스크 %d)"
-# t MSG_047 "Multiple Partitions"
+t MSG_047 "다중 파티션"
 t MSG_048 "Rufus - 버퍼 비움"
 t MSG_049 "Rufus - 해제"
 
@@ -4078,6 +4079,11 @@ t MSG_090 "지원되지 않는 ISO"
 t MSG_091 "UEFI 대상 유형을 사용하는 경우에만 EFI 부팅 가능한 ISO 이미지가 지원됩니다. "
 	"EFI 부팅 가능한 ISO를 선택하거나 BIOS에 대상 유형을 설정하십시오."
 t MSG_092 "지원되지 않는 파일 시스템"
+t MSG_093 "중요: 이 드라이브는 여러 개의 파티션을 포함하고 있습니다.!!\n\n"
+	"포함된 파티션과 볼륨은 표시되지 않을 수 있습니다. "
+	"계속 진행하고자 하는 경우, 이 파티션의 데이터가 손실될 수 있습니다."
+t MSG_094 "다중 파티션이 감지 됨."
+t MSG_095 "DD Image"
 t MSG_096 "이 ISO 유형은 FAT/FAT32만 지원합니다. 파일 시스템으로 FAT/FAT32를 선택하십시오."
 t MSG_097 "현재 'bootmgr' 또는 'WinPE' 기반의 ISO 이미지만 NTFS와 함께 사용할 수 있습니다."
 t MSG_098 "FAT/FAT32는 isolinux 기반의 ISO 이미지 또는 대상 유형이 UEFI일 때만 사용할 수 있습니다."
@@ -4111,6 +4117,14 @@ t MSG_111 "호환되지 않는 클러스터 크기"
 t MSG_112 "큰 UDF 볼륨을 포맷하려면 시간이 많이 걸릴 수 있습니다. USB 2.0의 속도로 추정했을 때, 예상 시간은 "
 	"%d:%02d 입니다. 포맷 중 진행바가 멈춤상태로 있을 수도 있습니다. 기다려주십시오!"
 t MSG_113 "큰 UDF 볼륨"
+t MSG_114 "이 이미지는 Syslinux를 하지만 %s 이 프로그램에는 Syslinux의 설치 파일만 포함되어 있습니다. "
+	"Syslinux %s.\n\nSyslinux의 새 버전은 서로 호환되지 않으며, Rufus가 새 버전 모두를 포함하는 것은 불가능합니다."
+	"다음 두 개의 추가 파일을 인터넷에서 다운로드 하십시오."
+	"('ldlinux.sys' and 'ldlinux.bss'):\n"
+	"- '예'를 선택하면 인터넷에 연결하여 두 개의 파일을 다운로드합니다.\n"
+	"- '아니오'를 선택하면 작업은 취소됩니다.\n\n"
+	"알림: 이 파일들은 프로그램이 위치한 폴더에 저장되며, 같은 파일들이 있으면 자동으로 재 사용되어집니다. \n"
+t MSG_115 "다운로드가 필요합니다."
 
 # Tootips
 # Partition Scheme and Target Type
@@ -4147,7 +4161,7 @@ t MSG_173 "선택하려면 클릭..."
 # The following will appear in the about dialog
 t MSG_174 "Rufus - 믿을 수 있는 USB 포맷 유틸리티"
 t MSG_175 "버전 %d.%d.%d (빌드 %d)"
-t MSG_176 "한국어 번역: 나두야간다 <mailto:true.sys@hotmail.com>"
+t MSG_176 "한국어 번역: 세상사는이야기-나두 <mailto:sesangsa3@gmail.com>"
 t MSG_177 "버그에 대한 보고나 프로그램의 개선을 요청:"
 t MSG_178 "추가 저작권:"
 t MSG_179 "업데이트 정책:"
@@ -4161,7 +4175,8 @@ t MSG_184 "수집된 정보는 사용자의 년간 통계와 프로그램의 성
 t MSG_185 "업데이트 프로세스:"
 t MSG_186 "이 프로그램은 백그라운드 서비스를 설치하거나 실행하지 않으므로 주 프로그램이 실행 중일 때에만 업데이트가 수행됩니다.\\line\n"
 	"업데이트에는 인터넷 연결이 필요합니다."
-
+t MSG_187 "선택한 부팅 옵션에 대한 잘못된 이미지"
+t MSG_188 "이 이미지는 선택된 부팅 옵션과 일치하지 않습니다. 다른 이미지를 사용하거나 다른 부트 옵션을 선택하세요."
 # Status messages - these messages will appear on the status bar
 t MSG_201 "쥐소 중 - 잠시만..."
 t MSG_202 "ISO image 스캔..."
@@ -4239,6 +4254,8 @@ t MSG_256 "드라이브를 가장한 드라이브 감지"
 t MSG_257 "Joliet support"
 t MSG_258 "Rock Ridge 지원"
 t MSG_259 "강제 업데이트"
+t MSG_260 "NTFS 압축"
+t MSG_261 "이미지 만들기: %0.1f%% 완료"
 
 ################################################################################
 l "lt-LT" "Lithuanian (Lietuvių)" 0x0427
