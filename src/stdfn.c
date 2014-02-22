@@ -121,8 +121,13 @@ void GetWindowsVersion(void)
 				break;
 			case 0x63: w = (ws?"8.1":"2012_R2");
 				break;
+			case 0x64: w = (ws?"8.2":"2012_R3");
+				break;
 			default:
-				nWindowsVersion = WINDOWS_UNSUPPORTED;
+				if (nWindowsVersion < 0x50)
+					nWindowsVersion = WINDOWS_UNSUPPORTED;
+				else
+					w = "9 or later";
 				break;
 			}
 		}
