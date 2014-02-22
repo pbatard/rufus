@@ -1580,6 +1580,404 @@ t MSG_258 "Rock Ridge ondersteuning"
 t MSG_259 "Forceer update"
 
 ################################################################################
+l "fi-FI" "Finnish (Suomi)" 0x040B
+v 1.0.10
+b "en-US"
+
+# Main dialog
+g IDD_DIALOG
+m IDC_ADVANCED +9,0
+t IDS_DEVICE_TXT "Laite"
+t IDS_PARTITION_TYPE_TXT "Osion ja kohdejärjestelmän tyyppi"
+t IDS_FILESYSTEM_TXT "Tiedostojärjestelmä"
+t IDS_CLUSTERSIZE_TXT "Tilanvarausyksikkö"
+t IDS_LABEL_TXT "Uuden aseman nimi"
+t IDS_FORMAT_OPTIONS_GRP "Alustusasetukset       "
+t IDC_BADBLOCKS "Vioittuneiden lohkojen tarkistus:"
+s IDC_BADBLOCKS +16,0
+m IDC_NBPASSES +12,0
+s IDC_NBPASSES -6,0
+t IDC_QUICKFORMAT "Pika-alustus"
+t IDC_BOOT "Luo käynnistyslevy käyttäen:"
+m IDC_BOOTTYPE +12,0
+s IDC_BOOTTYPE -6,0
+m IDC_SELECT_ISO +3,0
+t IDC_SET_ICON "Luo laajennetut nimi- ja kuvaketiedostot"
+t IDC_ABOUT "Lisätietoja..."
+t IDC_LOG "Loki"
+s IDC_LOG +5,0
+t IDCANCEL "Sulje"
+t IDC_START "Aloita"
+t IDS_ADVANCED_OPTIONS_GRP "Lisäasetukset"
+t IDC_ENABLE_FIXED_DISKS "Näytä USB-kiintolevyt"
+# Note: it is acceptable to drop the parenthesis () below if you are running out of space
+# as there is a tooltip (MSG_169) providing these details
+t IDC_EXTRA_PARTITION "Lisää korjauksia vanhoja BIOS-versioita varten"
+# 'MBR': See http://en.wikipedia.org/wiki/Master_boot_record
+# Rufus can install it's own custom MBR (the Rufus MBR), which also allows users
+# to specify a custom disk ID for the BIOS. Note: the tooltip for this control is MSG_167.
+t IDC_RUFUS_MBR "Käytä Rufus-MBR:ää, BIOS ID:"
+s IDC_RUFUS_MBR +10,0
+m IDC_DISK_ID +12,0
+s IDC_DISK_ID -9,0
+
+# About dialog
+g IDD_ABOUTBOX
+t IDD_ABOUTBOX "Tietoja Rufus-sovelluksesta"
+t IDC_ABOUT_LICENSE "Lisenssi"
+t IDC_ABOUT_UPDATES "Päivitykset"
+t IDOK "OK"
+
+# About -> License dialog
+g IDD_LICENSE
+t IDD_LICENSE "Rufus-lisenssi"
+t IDCANCEL "Sulje"
+
+# Notifications. You can trigger one of these by using Alt-R and re-launching Rufus
+g IDD_NOTIFICATION
+t IDC_MORE_INFO "Lisätietoja"
+t IDYES "Kyllä"
+t IDNO "Ei"
+
+# Log dialog
+g IDD_LOG
+t IDD_LOG "Loki"
+t IDC_LOG_CLEAR "Tyhjennä loki"
+t IDC_LOG_SAVE "Tallenna loki"
+t IDCANCEL "Sulje loki"
+
+# About -> Updates
+g IDD_UPDATE_POLICY
+t IDD_UPDATE_POLICY "Päivityskäytäntö ja -asetukset"
+t IDS_UPDATE_SETTINGS_GRP "Asetukset"
+s IDS_UPDATE_SETTINGS_GRP 0,0
+t IDS_UPDATE_FREQUENCY_TXT "Tarkista päivitykset:"
+t IDS_INCLUDE_BETAS_TXT "Sisällytä beta-versiot:"
+m IDC_UPDATE_FREQUENCY -2,0
+s IDC_UPDATE_FREQUENCY +8,0
+m IDC_INCLUDE_BETAS -2,0
+t IDC_CHECK_NOW "Tarkista nyt"
+t IDCANCEL "Sulje"
+
+# Dialog that appears when a new version is available
+g IDD_NEW_VERSION
+t IDD_NEW_VERSION "Tarkista päivitysten varalta - Rufus"
+t IDS_NEW_VERSION_AVAIL_TXT "Saatavilla on uudempi versio. Ole hyvä ja lataa ohjelman uusin versio!"
+t IDC_WEBSITE "Klikkaa tästä päästäksesi verkkosivulle"
+t IDS_NEW_VERSION_NOTES_GRP "Julkaisutiedotteet"
+t IDS_NEW_VERSION_DOWNLOAD_GRP "Lataa"
+t IDC_DOWNLOAD "Lataa"
+t IDCANCEL "Sulje"
+
+# Dialog that appears when scanning/extracting ISO files
+g IDD_ISO_EXTRACT
+t IDD_ISO_EXTRACT "Kopioidaan ISO-tiedostoja..."
+t IDC_ISO_FILENAME "Avataan ISO-tiedostokuvaa - ole hyvä ja odota..."
+t IDC_ISO_ABORT "Peruuta"
+
+# Messages used throughout the application
+t MSG_001 "Toinen prosessi käynnissä"
+t MSG_002 "Rufus-sovellus on jo käynnissä.\n"
+	"Sulje ensimmäinen Rufus-sovellus jatkaaksesi tämän sovelluksen käyttöä."
+t MSG_003 "VAROITUS: KAIKKI TIEDOT LAITTEESSA '%s' POISTETAAN.\n"
+	"Jatkaaksesi toimenpidettä valitse OK. Lopettaaksesi valitse PERUUTA."
+t MSG_004 "Rufus-päivityskäytäntö"
+t MSG_005 "Haluatko sallia Rufuksen etsiä uusia päivityksiä verkosta?"
+# Must be the same as IDD_DIALOG:IDCANCEL (i.e. "Close" - I know it's confusing)
+t MSG_006 "Sulje"
+t MSG_007 "Peruuta"
+t MSG_008 "Kyllä"
+t MSG_009 "Ei"
+t MSG_010 "Viallisia lohkoja löydetty"
+t MSG_011 "Tarkistus valmis: %u viallista lohkoa löydetty\n"
+	"  %d lukuvirhe(ttä)\n  %d kirjoitusvirhe(ttä)\n  %d korruptiovirhe(ttä)\n"
+# The following will contain the formatted message above as well as the name of the bad blocks logfile
+t MSG_012 "%s\nA voit tarkastella tarkempaa raporttia kohteessa:\n%s"
+t MSG_013 "Pois käytöstä"
+t MSG_014 "Päivittäin"
+t MSG_015 "Viikoittain"
+t MSG_016 "Kuukausittain"
+t MSG_017 "Mukautettu"
+t MSG_018 "Tämä versio: %d.%d.%d (Build %d)"
+t MSG_019 "Viimeisin versio: %d.%d.%d (Build %d)"
+# *Short* size names. These can be used as suffixes
+t MSG_020 "tavua"
+t MSG_021 "KB"
+t MSG_022 "MB"
+t MSG_023 "GB"
+t MSG_024 "TB"
+t MSG_025 "PB"
+# *Long* size names, as they are displayed for the cluster size in the MS format dialog.
+t MSG_026 "tavua"	# Yes, this is a repeat from MSG_020
+t MSG_027 "kilotavua"
+t MSG_028 "megatavua"
+t MSG_029 "Oletus"
+# The following gets appended to the file system, cluster size, etc.
+t MSG_030 "%s (Oletus)"
+t MSG_031 "%s-osiotyyppi BIOS- tai UEFI-tietokoneille"
+t MSG_032 "%s-osiotyyppi BIOS-tietokoneelle"
+t MSG_033 "%s-osiotyyppi UEFI-tietokoneelle"
+# Number of bad block check passes (singular for 1 pass, plural for 2 or more passes)
+t MSG_034 "%d testi"
+t MSG_035 "%d testiä"
+t MSG_036 "ISO-kuva"
+t MSG_037 "Sovellus"
+t MSG_038 "Keskeytä"
+t MSG_039 "Käynnistä"
+t MSG_040 "Lataa"
+t MSG_041 "Käyttäjä peruutti toiminnon"
+t MSG_042 "Virhe"
+t MSG_043 "Virhe: %s"
+t MSG_044 "Tiedoston lataus"
+t MSG_045 "USB-tallennuslaite (Yleinen)"
+t MSG_046 "%s (Levy %d)"
+# Used when a drive is detected that contains more than one partition
+t MSG_047 "Useita osioita"
+t MSG_048 "Rufus - Tyhjennetään puskuria"
+t MSG_049 "Rufus - Peruutus"
+
+# Error messages
+t MSG_050 "Onnistui."
+t MSG_051 "Määrittämätön virhe alustaessa."
+t MSG_052 "Valittua tiedostojärjestelmää ei voida käyttää tässä tietovälineessä."
+t MSG_053 "Pääsy laitteeseen on evätty."
+t MSG_054 "Tietoväline on kirjoitussuojattu."
+t MSG_055 "Laite on toisen prosessin käytössä. "
+	"Sulje prosessit, jotka saattavat käyttää laitetta."
+t MSG_056 "Tälle laitteelle ei voida suorittaa pika-alustusta."
+t MSG_057 "Aseman nimi ei kelpaa."
+t MSG_058 "Laitteen tunniste ei kelpaa."
+t MSG_059 "Valittua tilanvarausyksikköä ei voida käyttää tämän laitteen kanssa."
+t MSG_060 "Aseman koko ei kelpaa."
+t MSG_061 "Aseta ."
+t MSG_062 "An unsupported command was received."
+t MSG_063 "Memory allocation error."
+t MSG_064 "Virhe lukiessa."
+t MSG_065 "Virhe kirjoittaessa."
+t MSG_066 "Asennus epäonnistui"
+t MSG_067 "Tietovälinettä ei voitu avata. Se voi olla toisen prosessin käytössä. "
+	"Irroita ja yhdistä tietoväline ja yritä uudelleen."
+t MSG_068 "Virhe osioidessa levyä."
+t MSG_069 "Tietoja ei voitu kopioida kohdelevylle."
+t MSG_070 "Käyttäjä peruutti."
+# See http://en.wikipedia.org/wiki/Thread_%28computing%29
+t MSG_071 "Säiettä ei voitu käynnistää."
+t MSG_072 "Lohkojen tarkistus ei valmistunut."
+t MSG_073 "ISO-levykuvan skannaus epäonnistui."
+t MSG_074 "ISO-levykuvan purkaminen epäonnistui."
+t MSG_075 "Asemaa ei voitu ottaa uudelleen käyttöön."
+t MSG_076 "Tiedostoja ei voitu päivittää/asentaa käynnistystä varten."
+t MSG_077 "Levykirjainta ei voitu asettaa."
+t MSG_078 "GUID-asemaa ei voitu ottaa käyttöön."
+
+t MSG_080 "Rufus havaitsi, että Windows tyhjentää sisäistä puskuria USB-laitteelle.\n\n"
+	"USB-laitteesi nopeudesta riippuen toiminnon suorittamisessa voi kestää kauan, "
+	"varsinkin suurilla tiedostoilla.\n\nSuosittelemme, että annat Windowsin suorittaa toiminnon loppuun välttyäksesi virheiltä. "
+	"Jos et kuitenkaan jaksa enää odottaa, voit ottaa laitteen irti..."
+t MSG_081 "ISO-levykuvaa ei tueta"
+t MSG_082 "Tämä Rufuksen versio tukee vain bootmgr/WinPE, isolinux tai EFI- pohjaisia bootattavia ISO-levykuvia.\n"
+	"Tämä ISO ei vaikuta olevan tuettu..."
+t MSG_083 "Korvataanko %s?"
+t MSG_084 "Tämä ISO-levykuva vaikuttaisi käyttävän vanhentunutta '%s'-versiota.\n"
+	"Tämän vuoksi käynnistysvalikot saattavat näkyä väärin.\n\n"
+	"Rufus voi ladata uudemman version ongelman korjaamiseksi:\n"
+	"- Valitse 'Kyllä' yhdistääksesi internetiin ja ladataksesi tiedoston\n"
+	"- Valitse 'Ei' jättääksesi ISO-levykuvan alkuperäiseen muotoonsa\n"
+	"Jos et ole varma, sinun kannattaa valita 'Kyllä'.\n\n"
+	"Huomio: Uusi tiedosto ladataan nykyiseen sijaintiin ja kun  "
+	"'%s' löytyy sijainnista, sitä käytetään automaattisesti."
+t MSG_085 "Ladataan %s"
+t MSG_086 "ISO-levykuvaa ei valittu"
+# The content between the quotes below (\"Create a bootable disk\") should match
+# the beginning of the IDC_BOOT text
+t MSG_087 "Paina levykuvakkeesta valitaksesi bootattavan ISO-levykuvan "
+	"tai poista valinta \"Luo käynnistyslevy...\" -valintaruudusta."
+t MSG_088 "Levykuva on liian suuri"
+t MSG_089 "Levykuva on liian suuri valittuun kohteeseen."
+t MSG_090 "ISO-levykuvaa ei tueta"
+t MSG_091 "UEFI-kohdetyyppiä käytettäessä vain EFI-bootattavat ISO-levykuvat ovat tuettuna. "
+	"Valitse EFI-bootattava ISO-levykuva tai valitse kohdetyypiksi BIOS."
+t MSG_092 "Tiedostojärjestelmää ei tueta"
+t MSG_093 "TÄRKEÄÄ: TÄMÄ LEVYASEMA SISÄLTÄÄ USEITA OSIOITA!!\n\n"
+	"Siihen saattaa kuulua osioita/asemia, joita ei ole listattuna tai edes näkyvissä Windowsissa. "
+	"Jos haluat jatkaa, olet vastuussa mahdollisesta tietojen häviämisestä näillä osioilla."
+t MSG_094 "Useita osioita havaittu"
+t MSG_095 "DD-kuva"
+t MSG_096 "Vain FAT/FAT32 on tuettuna tämän tyyppiselle ISO-levykuvalle. Valitse FAT/FAT32 tiedostojärjestelmäksi."
+t MSG_097 "Vain 'bootmgr' tai 'WinPE' -pohjaisia ISO-levykuvia voidaan tällä hetkellä käyttää NTFS-muodon kanssa."
+t MSG_098 "FAT/FAT32 -muotoa voidaan käyttää vain isolinux-pohjaisille ISO-levykuville tai kohdetyypin ollessa UEFI."
+t MSG_099 "Tiedostojärjestelmärajoitus"
+t MSG_100 "Tämä ISO-levykuva sisältää yli 4GB-kokoisen tiedoston, joka ylittää "
+	"FAT ja FAT32 -tiedostojärjestelmien maksimikoon."
+t MSG_101 "WIM-tuki puuttuu"
+t MSG_102 "Käytössä oleva alusta ei kykene purkamaan tiedostoja WIM-arkistoista. WIM-purkaminen "
+	"on välttämätöntä EFI-bootattavien Windows 7 ja Windows Vista USB-asemien luomisessa. Voit korjata tilanteen"
+	"asentamalla viimeaikaisen version 7-Zip-ohjelmasta.\nHaluatko vierailla 7-Zip-lataussivustolla?"
+t MSG_103 "Ladataanko %s?"
+t MSG_104 "Syslinux v5.0 tai uudempi vaatii '%s'-tiedoston asennuksen.\n"
+	"Koska kyseinen tiedosto on kooltaan aina yli 100 KB, ja se löytyy aina Syslinux v5+ ISO-levykuvista, "
+	"sitä ei ole sisällytetty Rufukseen.\n\nRufus voi ladata puuttuvan tiedoston puolestasi:\n"
+	"- Valitse 'Kyllä' yhdistääksesi internetiin ja ladataksesi tiedoston\n"
+	"- Valitse 'Ei' jos haluat manuaalisesti kopioida tämän tiedoston asemalle myöhemmin\n\n"
+	"Huomio: Tiedosto ladataan nykyseen sijaintiin ja kun "
+	"'%s' löytyy sijainnista, sitä käytetään automaattisesti.\n"
+t MSG_105 "Peruuttaminen saattaa jättää laitteen KÄYTTÖKELVOTTOMAAN tilaan.\n"
+	"Jos haluat varmasti peruuttaa, valitse KYLLÄ. Muuten, valitse EI."
+t MSG_106 "Valitse kansio"
+t MSG_107 "Kaikki tiedostot"
+t MSG_108 "Rufuksen loki"
+t MSG_109 "0x%02X (Levy %d)"
+# "Cluster size" below should be the same as the label for IDS_CLUSTERSIZE_TXT
+# "kilobytes" should be the same as in MSG_027
+t MSG_110 "MS-DOS ei voi käynnistyä laitteelta, joka käyttää 64 kilotavun tilanvarausyksikköä.\n"
+	"Vaihda tilanvarausyksikköä tai käytä FreeDOSia."
+t MSG_111 "Epäsopiva tilanvarausyksikkö"
+# "%d:%02d" below is a duration (mins:secs)
+t MSG_112 "Suurten UDF-asemien alustus voi kestää kauan. USB 2.0-nopeuksilla arvioitu alustuksen "
+	"kesto on %d:%02d, minkä aikana etenemispalkki vaikuttaa pysähtyneeltä. Ole kärsivällinen!"
+t MSG_113 "Suuri UDF-asema"
+t MSG_114 "Tämä kuva käyttää Syslinuxia %s ,mutta tämä sovellus sisältää asennustiedostot vain "
+	"Syslinuxille %s.\n\nKoska Syslinuxin uudet versiot eivät ole keskenään yhteensopivia, eikä Rufus  "
+	"voisi sisältää niitä kaikkia, on kaksi lisätiedostoa ladattava internetistä "
+	"('ldlinux.sys' ja 'ldlinux.bss'):\n"
+	"- Valitse 'Kyllä' yhdistääksesi internetiin ja ladataksesi nämä tiedostot\n"
+	"- Valitse 'Ei' peruaksesi toiminnon\n\n"
+	"Huomio: Tiedostot ladataan nykyiseen sovelluskansioon ja niitä käytetään"
+	"automaattisesti uudelleen niiden löytyessä.\n"
+t MSG_115 "Lataus vaaditaan"
+# Tootips
+# Partition Scheme and Target Type
+t MSG_150 "Yleensä turvallisin vaihtoehto. Jos sinulla kuitenkin on UEFI-tietokone ja haluat asentaa "
+	"käyttöjärjestelmän EFI-tilassa, tulisi sinun valita muista vaihtoehdoista"
+t MSG_151 "Käytä tätä asentaessasi käyttöjärjestelmän EFI-tilassa, kun "
+	"tarvitset pääsyn USB-sisältöön Windows XP:ssä"
+t MSG_152 "Suositeltu vaihtoehto käyttöjärjestelmän asentamiseksi EFI-tilassa, kun "
+	"USB-pääsyä ei tarvita Windows XP:lle"
+t MSG_153 "Testikuvio: 0x%02X"
+t MSG_154 "Testikuvio: 0x%02X, 0x%02X"
+t MSG_155 "Testikuvio: 0x%02X, 0x%02X, 0x%02X"
+t MSG_156 "Testikuvio: 0x%02X, 0x%02X, 0x%02X, 0x%02X"
+t MSG_157 "Asettaa kohteen tiedostojärjestelmän"
+t MSG_158 "Minimikoko, jonka datalohko varaa tiedostojärjestelmässä"
+t MSG_159 "Käytä tätä kenttää valitaksesi aseman nimen\nVoit käyttää kansainvälisiä merkkejä"
+t MSG_160 "Näytä tai piilota lisäasetukset"
+t MSG_161 "Tarkista laite testikuviolla vioittuneiden lohkojen varalta"
+t MSG_162 "Poista valintaruudun valinta käyttääksesi \"hidasta\" alustustapaa"
+t MSG_163 "Valitse valintaruutu tehdäksesi USB-asemasta bootattavan"
+t MSG_164 "Tapa, jolla asemasta tehdään bootattava"
+t MSG_165 "Paina valitaksesi ISO-levykuva..."
+t MSG_166 "Valitse valintaruutu salliaksesi kansainvälisten merkkien näyttämisen "
+	"ja asettaaksesi laitekuvakkeen (luo autorun.inf-tiedoston)"
+t MSG_167 "Asenna MBR, joka sallii käynnistysvalinnan ja voi naamioida USB-aseman BIOS ID:n"
+t MSG_168 "Yritä naamioida ensimmäinen bootattava USB-asema (yleensä 0x80) eri asemaksi.\n"
+	"Tämän tulisi olla tarpeellista vain asennettaessa Windows XP:tä, kun levyjä on useampia."
+t MSG_169 "Luo ylimääräinen, piilotettu osio ja yritä kohdistaa osioiden rajoja.\n"
+	"Tämä voi parantaa USB-laitteiden havaitsemista käynnistyksessä vanhemmissa BIOSeissa"
+t MSG_170 "Ota käyttöön USB-kiintolevyjen listaus. KÄYTÄ OMALLA VASTUULLA!!!"
+t MSG_171 "Käynnistä alustustoiminto.\nTämä POISTAA kaiken tiedon kohteesta!"
+t MSG_172 "Lisenssitiedot ja tekijät"
+t MSG_173 "Paina valitaksesi..."
+# The following will appear in the about dialog
+t MSG_174 "Rufus - Luotettava USB-alustusohjelma"
+t MSG_175 "Versio %d.%d.%d (Build %d)"
+t MSG_176 "Suomenkielinen käännös: Riku Brander"
+t MSG_177 "Raportoi virheitä tai pyydä parannuksia osoitteessa:"
+t MSG_178 "Muut tekijänoikeudet:"
+t MSG_179 "Päivityskäytäntö:"
+t MSG_180 "Jos annat ohjelman etsiä sovelluspäivityksiä, "
+	"hyväksyt, että seuraavia tietoja saatetaan kerätä palvelimillemme:"
+t MSG_181 "Käyttöjärjestelmäsi arkkitehtuuri ja versio"
+t MSG_182 "Käyttämäsi sovelluksen versio"
+t MSG_183 "IP-osoitteesi"
+t MSG_184 "Yksityisten käyttötilastojen luomiseksi saatamme pitää tietoja kerättynä "
+	"\\b enimmillään vuoden\\b0 . Emme kuitenkaan anna vapaaehtoisesti mitään yksittäistietoja kolmansille osapuolille."
+t MSG_185 "Päivitysprosessi:"
+t MSG_186 "Rufus ei asenna tai aja taustapalveluja, siksi päivitystarkistukset suoritetaan vain pääsovelluksen ollessa käynnissä.\\line\n"
+	"Internetyhteys toki vaaditaan päivityksiä tarkistettaessa."
+t MSG_187 "Levykuva ei ole sopiva valitulle käynnistysvalinnalle"
+t MSG_188 "Nykyinen levykuva ei vastaa valittua käynnistysvalintaa. Käytä toista levykuvaa tai valitse eri käynnistysvalinta."
+
+# Status messages - these messages will appear on the status bar
+t MSG_201 "Peruutetaan - Odota..."
+t MSG_202 "Skannataan ISO-levykuvaa..."
+t MSG_203 "ISO-levykuvan skannaus epäonnistui"
+# Parameter: the name of an obsolete Syslinux .c32 module. eg: "Obsolete vesamenu.c32 detected"
+t MSG_204 "Vanhentunut %s havaittu"
+# Display the name of the ISO selected. eg: "Using ISO: en_win7_x64_sp1.iso"
+t MSG_205 "Käytössä oleva ISO: %s"
+# Typically "Missing ldlinux.c32 file"
+t MSG_206 "Tiedosto %s puuttuu"
+# The name proposed by Windows' Computer Management -> Disk Management when you try to format a drive
+# with an empty label. See http://rufus.akeo.ie/pics/default_name.png
+t MSG_207 "Uusi asema"
+# Same message, once for singular and plural ("1 device found", "2 devices found")
+t MSG_208 "%d laite havaittu"
+t MSG_209 "%d laitetta havaittu"
+t MSG_210 "VALMIS"
+t MSG_211 "Peruutettu"
+t MSG_212 "EPÄONNISTUI"
+# Used when a new update has been downloaded and launched
+t MSG_213 "Käynnistetään uutta sovellusta..."
+t MSG_214 "Uuden sovelluksen käynnistäminen epäonnistui"
+# Open/Save file
+t MSG_215 "Avattu %s"
+t MSG_216 "Tallennettu %s"
+# Formatting status (make sure you use a double % to print the percent sign)
+t MSG_217 "Alustus: %0.1f%% valmiina"
+t MSG_218 "Luodaan tiedostojärjestelmää: Toiminto %d/%d suoritettu"
+t MSG_219 "NTFS-korjaus: %d%% valmiina"
+# Parameter: the file system and an estimated duration in mins and secs.
+# eg. "Formatting (UDF) - Estimated duration 3:21..."
+# NB: if "estimated duration" is too long, just use "estimated" or an abbreviation
+t MSG_220 "Alustetaan (%s) - arvioitu kesto %d:%02d..."
+t MSG_221 "Asetetaan nimeä (Tämä voi viedä hetken)..."
+# Parameter: the file system. eg. "Formatting (NTFS)..."
+t MSG_222 "Alustetaan (%s)..."
+t MSG_223 "NTFS-korjaus (Checkdisk)..."
+t MSG_224 "Selvitetään MBR/PBR/GPT -rakenteita..."
+t MSG_225 "Pyydetään pääsyä levylle..."
+t MSG_226 "Analysoidaan löytyviä käynnistyslistauksia..."
+t MSG_227 "Suljetaan olemassaolevaa asemaa..."
+t MSG_228 "Kirjoitetaan master boot record..."
+t MSG_229 "Kirjoitetaan partition boot record..."
+t MSG_230 "Kopioidaan DOS-tiedostoja..."
+t MSG_231 "Kopioidaan ISO-tiedostoja..."
+t MSG_232 "Win7 EFI -käynnistysasetus (tämä voi viedä hetken)..."
+t MSG_233 "Viimeistellään, odota..."
+# Takes a Syslinux version as parameter, eg. "Installing Syslinux v5.10..."
+t MSG_234 "Asennetaan Syslinux %s..."
+# Bad blocks status. eg: "Bad Blocks: PASS 1/2 - 12.34% (0/0/1 errors)"
+t MSG_235 "Lohkot: Testi %d/%d - %0.2f%% (%d/%d/%d virhettä)"
+t MSG_236 "Lohkot: Testataan satunnaisella kuviolla"
+t MSG_237 "Lohkot: Testataan kuviolla 0x%02X"
+# eg. "Partitioning (MBR)..."
+t MSG_238 "Osioidaan (%s)..."
+t MSG_239 "Poistetaan osioita..."
+t MSG_240 "Ladataan %s: Yhdistetään..."
+t MSG_241 "Ladataan: %0.1f%%"
+t MSG_242 "Tiedoston lataaminen epäonnistui."
+t MSG_243 "Tarkistetaan Rufus-päivityksiä..."
+t MSG_244 "Päivitykset: Ei saatu yhteyttä internetiin"
+t MSG_245 "Päivitykset: Ei päästy käsiksi versiotietoihin"
+t MSG_246 "Uusi Rufus-versio on saatavilla!"
+t MSG_247 "Ei löytynyt uudempaa Rufus-versiota"
+t MSG_248 "Rekisteriavaimet poistettu onnistuneesti"
+t MSG_249 "Rekisteriavainten poistaminen epäonnistui"
+# eg. "Fixed disk detection enabled" "ISO size check disabled"
+t MSG_250 "%s päällä"
+t MSG_251 "%s pois päältä"
+t MSG_252 "Kokotarkistukset"
+t MSG_253 "Kiintolevyjen havaitseminen"
+t MSG_254 "Laajan FAT32-alustuksen pakotus"
+t MSG_255 "NoDriveTypeAutorun poistetaan suljettaessa"
+t MSG_256 "Valeasemien havaitseminen"
+t MSG_257 "Joliet-tuki"
+t MSG_258 "Rock Ridge -tuki"
+t MSG_259 "Päivityksen pakotus"
+t MSG_260 "NTFS-pakkaaminen"
+t MSG_261 "Kirjoitetaan levykuvaa: %0.1f%% valmiina"
+
+################################################################################
 l "fr-FR" "French (Français)" 0x040c, 0x080c, 0x0c0c, 0x100c, 0x140c, 0x180c, 0x1c0c, 0x200c, 0x240c, 0x280c, 0x2c0c, 0x300c, 0x340c, 0x380c, 0xe40c
 v 1.0.10
 b "en-US"
