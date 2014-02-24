@@ -854,7 +854,7 @@ t MSG_261 "写入镜像：已完成 %0.1f%%"
 
 ################################################################################
 l "zh-TW" "Chinese Traditional (正體中文)" 0x0404, 0x0c04, 0x1404, 0x7c04
-v 1.0.7
+v 1.0.10
 b "en-US"
 
 # Main dialog
@@ -867,8 +867,14 @@ t IDS_LABEL_TXT "磁碟區標籤"
 t IDS_FORMAT_OPTIONS_GRP "選項       "
 m IDC_ADVANCED -50,0
 t IDC_BADBLOCKS "檢查損毀磁區，測試次數:"
+s IDC_BADBLOCKS -5,0
+m IDC_NBPASSES -5,0
+s IDC_NBPASSES +5,0
 t IDC_QUICKFORMAT "快速格式化"
 t IDC_BOOT "使用映像檔建立開機片:"
+s IDC_BOOT -5,0
+m IDC_BOOTTYPE -5,0
+s IDC_BOOTTYPE +5,0
 t IDC_SET_ICON "建立延伸標籤及圖示"
 t IDC_ABOUT "關於..."
 s IDC_ABOUT -20,0
@@ -885,6 +891,9 @@ t IDS_ADVANCED_OPTIONS_GRP "進階選項"
 t IDC_ENABLE_FIXED_DISKS "顯示 USB 外接硬碟"
 t IDC_EXTRA_PARTITION "相容性模式"
 t IDC_RUFUS_MBR "客製 MBR 並設 ID 為:"
+s IDC_RUFUS_MBR -5,0
+m IDC_DISK_ID -5,0
+s IDC_DISK_ID +5,0
 
 # About dialog
 g IDD_ABOUTBOX
@@ -1041,16 +1050,20 @@ t MSG_084 "此 ISO 映像檔似乎使用較舊版本的 '%s'，\n開機選單可
 	"如果你看不懂或不知該如何抉擇，強烈建議選「是」\n\n"
 	"注意: 一經下載後，Rufus 未來會自動套用新版 '%s'"
 t MSG_085 "下載中: %s"
-t MSG_086 "未選取任何 ISO 映像檔"
+t MSG_086 "未選取任何映像檔"
 # The content between the quotes below (\"Create a bootable disk\") should match
 # the beginning of the IDC_BOOT text
-t MSG_087 "請點擊 【使用映像檔建立開機片】 選項旁的光碟圖示，\n接著選取可開機的 ISO 映像檔，或是取消勾選該選項"
-t MSG_088 "ISO 檔案大小過大"
-t MSG_089 "此 ISO 檔案大小超過裝置可支援的空間"
+t MSG_087 "請點擊 【使用映像檔建立開機片】 選項旁的光碟圖示，\n接著選取可開機的映像檔，或是取消勾選該選項"
+t MSG_088 "映像檔之檔案大小過大"
+t MSG_089 "此映像檔之檔案大小超過裝置可支援的空間"
 t MSG_090 "不支援的 ISO 映像檔"
 t MSG_091 "當選擇 UEFI 目標型別時，僅支援 EFI boot ISO 映像檔"
 	"請選取可 EFI 開機的 ISO 檔，或將目標型別改為 BIOS"
 t MSG_092 "不支援的檔案系統"
+t MSG_093 "注意! 此裝置具有多重磁碟分割配置，可能包含 Windows 無法辨識或顯示的磁碟分割\n\n"
+	"請確認是否繼續執行，所造成任何磁碟分割資料遺失請自行負責"
+t MSG_094 "偵測到多重磁碟分割"
+t MSG_095 "DD 映像檔"
 t MSG_096 "此 ISO 映像檔僅可使用 FAT/FAT32，請指定 FAT/FAT32 為檔案系統"
 t MSG_097 "NTFS 僅可使用 bootmgr 或 WinPE 作為開機載入之 ISO 映像檔"
 t MSG_098 "FAT/FAT32 僅支援 isolinux 作為開機載入之 ISO 映像檔；或指定 UEFI 為目標型別時可支援"
@@ -1077,7 +1090,12 @@ t MSG_111 "不相容的配置單元大小"
 t MSG_112 "磁碟區較大的 UDF 格式化作業時間較久，過程中進度列表可能會呈現靜止狀態、乃屬正常現象，請耐心等候。"
 	"估計剩餘時間: %d:%02d"
 t MSG_113 "大 UDF 磁碟區"
-
+t MSG_114 "此映像檔使用到 Syslinux %s ，但本軟體僅支援 Syslinux %s 安裝檔案。\n\n"
+	"由於不同版本的 Syslinux 互不相容，因此需額外下載以下擴充檔案: \n"
+	"'ldlinux.sys' 和 'ldlinux.bss'\n"
+	"如欲下載這份檔案，請選擇「是」，Rufus 將會自動上網下載。若要終止作業，請選擇「否」\n\n"
+	"(僅需下載一次，以後可直接沿用不須再次下載)"
+t MSG_115 "需額外下載擴充檔案"
 # Tootips
 # Partition Scheme and Target Type
 t MSG_150 "一般而言最安全、最保險的選項。如果確定系統支援 UEFI 且欲在 EFI 模式下安裝 OS，則建議選擇下列其他選項"
@@ -1120,11 +1138,13 @@ t MSG_184 "所蒐集之資料\\b最多保留一年\\b0 ，目的僅供內部統�
 t MSG_185 "更新流程:"
 t MSG_186 "Rufus 沒有常駐或背景程式，因此當主程式執行時才會進行自動線上檢查更新。"
 	"當然，還必須是在連網狀態。"
+t MSG_187 "選取的開機方法不支援此映像檔"
+t MSG_188 "此映像檔與選取的開機方法不匹配，請更換映像檔或開機方法"
 
 # Status messages - these messages will appear on the status bar
 t MSG_201 "取消中，請稍候..."
-t MSG_202 "掃描 ISO 映像檔中..."
-t MSG_203 "ISO 映像檔掃描失敗"
+t MSG_202 "掃描映像檔中..."
+t MSG_203 "映像檔掃描失敗"
 # Parameter: the name of an obsolete Syslinux .c32 module. eg: "Obsolete vesamenu.c32 detected"
 t MSG_204 "偵測到過時檔案: %s"
 # Display the name of the ISO selected. eg: "Using ISO: en_win7_x64_sp1.iso"
@@ -1190,14 +1210,16 @@ t MSG_249 "Rufus 登錄檔清除失敗"
 # eg. "Fixed disk detection enabled" "ISO size check disabled"
 t MSG_250 "%s 已啟用"
 t MSG_251 "%s 已停用"
-t MSG_252 "Size checks"
-t MSG_253 "Fixed disks detection"
-t MSG_254 "Force large FAT32 formatting"
-t MSG_255 "NoDriveTypeAutorun will be deleted on exit"
-t MSG_256 "Fake drive detection"
-t MSG_257 "Joliet support"
-t MSG_258 "Rock Ridge support"
-t MSG_259 "Force update"
+t MSG_252 "大小偵測"
+t MSG_253 "固定式磁碟偵測"
+t MSG_254 "強制大容量 FAT32 格式化模式"
+t MSG_255 "離開時清除 NoDriveTypeAutorun"
+t MSG_256 "假磁碟偵測"
+t MSG_257 "Joliet 格式支援"
+t MSG_258 "Rock Ridge 格式支援"
+t MSG_259 "強制更新"
+t MSG_260 "NTFS 壓縮"
+t MSG_261 "映像檔寫入中，已完成: %0.1f%%"
 
 ################################################################################
 l "nl-NL" "Dutch (Nederlands)" 0x0413, 0x0813
