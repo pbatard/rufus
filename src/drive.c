@@ -269,8 +269,8 @@ HANDLE GetLogicalHandle(DWORD DriveIndex, BOOL bWriteAccess, BOOL bLockDrive)
 static BOOL _GetDriveLettersAndType(DWORD DriveIndex, char* drive_letters, UINT* drive_type)
 {
 	DWORD size;
-	BOOL r = FALSE;
-	STORAGE_DEVICE_NUMBER_REDEF device_number = {0};
+	BOOL s, r = FALSE;
+	VOLUME_DISK_EXTENTS DiskExtents;
 	HANDLE hDrive = INVALID_HANDLE_VALUE;
 	UINT _drive_type;
 	int i = 0;
@@ -293,7 +293,7 @@ static BOOL _GetDriveLettersAndType(DWORD DriveIndex, char* drive_letters, UINT*
 		goto out;
 	}
 
-	r = TRUE;
+	r = TRUE;	// Required to detect drives that don't have volumes assigned
 	for (drive = drives ;*drive; drive += safe_strlen(drive)+1) {
 		if (!isalpha(*drive))
 			continue;
@@ -318,13 +318,15 @@ static BOOL _GetDriveLettersAndType(DWORD DriveIndex, char* drive_letters, UINT*
 			continue;
 		}
 
-		r = DeviceIoControl(hDrive, IOCTL_STORAGE_GET_DEVICE_NUMBER, NULL,
-			0, &device_number, sizeof(device_number), &size, NULL) && (size > 0);
+		s = DeviceIoControl(hDrive, IOCTL_VOLUME_GET_VOLUME_DISK_EXTENTS, NULL, 0,
+			&DiskExtents, sizeof(DiskExtents), &size, NULL) && (size > 0) && (DiskExtents.NumberOfDiskExtents >= 1);
 		safe_closehandle(hDrive);
-		if (!r) {
-			uprintf("Could not get device number for device %s: %s\n",
-				logical_drive, WindowsErrorString());
-		} else if (device_number.DeviceNumber == DriveIndex) {
+		if (!s) {
+			uprintf("Could not get device number for %c: - %s\n", drive[0], WindowsErrorString());
+		} else if (DiskExtents.NumberOfDiskExtents >= 2) {
+			uprintf("Ignoring drive %c: as it spans multiple disks (RAID?)", drive[0]);
+		} else if (DiskExtents.Extents[0].DiskNumber == DriveIndex) {
+			r = TRUE;
 			if (drive_letters != NULL)
 				drive_letters[i++] = *drive;
 			// The drive type should be the same for all volumes, so we can overwrite

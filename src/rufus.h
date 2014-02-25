@@ -422,13 +422,6 @@ static __inline HMODULE GetDLLHandle(char* szDLLName)
 #endif
 #endif
 
-/* We need a redef of this MS structure */
-typedef struct {
-	DWORD DeviceType;
-	ULONG DeviceNumber;
-	ULONG PartitionNumber;
-} STORAGE_DEVICE_NUMBER_REDEF;
-
 /* Custom application errors */
 #define FAC(f)                         (f<<16)
 #define APPERR(err)                    (APPLICATION_ERROR_MASK|err)
