@@ -1143,7 +1143,8 @@ static BOOL CALLBACK FormatPromptCallback(HWND hWnd, LPARAM lParam)
 /*
  * When we format a drive that doesn't have any existing partitions, we can't lock it
  * prior to partitioning, which means that Windows will display a "You need to format the
- * disk in drive X: before you can use it'. We have to close that popup manually.
+ * disk in drive X: before you can use it'. You will also get that popup if you start a
+ * bad blocks check and cancel it before it completes. We have to close that popup manually.
  */
 DWORD WINAPI CloseFormatPromptThread(LPVOID param) {
 	HWND hFormatPrompt;
@@ -1155,7 +1156,7 @@ DWORD WINAPI CloseFormatPromptThread(LPVOID param) {
 			SendMessage(hFormatPrompt, WM_COMMAND, (WPARAM)IDCANCEL, (LPARAM)0);
 			uprintf("Closed Windows format prompt\n");
 		}
-		Sleep(50);
+		Sleep(100);
 	}
 	ExitThread(0);
 }
@@ -1265,6 +1266,7 @@ DWORD WINAPI FormatThread(void* param)
 		goto out;
 	}
 
+	CreateThread(NULL, 0, CloseFormatPromptThread, NULL, 0, NULL);
 	if (IsChecked(IDC_BADBLOCKS)) {
 		do {
 			// create a log file for bad blocks report. Since %USERPROFILE% may
@@ -1394,8 +1396,6 @@ DWORD WINAPI FormatThread(void* param)
 	}
 	hLogicalVolume = INVALID_HANDLE_VALUE;
 
-	// TODO: (v1.5) Our start button should become cancel instead of close
-
 	// Especially after destructive badblocks test, you must zero the MBR/GPT completely
 	// before repartitioning. Else, all kind of bad things happen.
 	if (!ClearMBRGPT(hPhysicalDrive, SelectedDrive.DiskSize, SelectedDrive.Geometry.BytesPerSector, use_large_fat32)) {
@@ -1407,7 +1407,6 @@ DWORD WINAPI FormatThread(void* param)
 	UpdateProgress(OP_ZERO_MBR, -1.0f);
 	CHECK_FOR_USER_CANCEL;
 
-	CreateThread(NULL, 0, CloseFormatPromptThread, NULL, 0, NULL);
 	if (!CreatePartition(hPhysicalDrive, pt, fs, (pt==PARTITION_STYLE_MBR)&&(bt==BT_UEFI))) {
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_PARTITION_FAILURE;
 		goto out;

@@ -1,4 +1,4 @@
-o Version 1.4.4 (2013.02.??)
+o Version 1.4.4 (2013.02.26)
     Add *uncompressed* Disk Image support (FreeBSD, FreeNAS, etc.)
     Add right-to-left language support
     Add an alert when multiple partitions are about to be erased
