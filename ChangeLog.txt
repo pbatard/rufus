@@ -1,4 +1,7 @@
-o Version 1.4.4 (2013.02.26)
+o Version 1.4.5 (2014.02.27) [BUGFIX RELEASE]
+    Fix detection of fixed drives (reported by dominiquesb)
+
+o Version 1.4.4 (2014.02.26)
     Add *uncompressed* Disk Image support (FreeBSD, FreeNAS, etc.)
     Add right-to-left language support
     Add an alert when multiple partitions are about to be erased
@@ -11,7 +14,7 @@ o Version 1.4.4 (2013.02.26)
     Fix detection for Toshiba drives (again)
     Fix UDF Unicode support
 
-o Version 1.4.3 (2013.01.21) [BUGFIX RELEASE]
+o Version 1.4.3 (2014.01.21) [BUGFIX RELEASE]
     Fix format operation not starting on Windows XP (reported by ank91)
 
 o Version 1.4.2 (2014.01.18)

@@ -7,5 +7,5 @@ release: all
 	@mv src/$(TARGET)$(EXEEXT) .
 	@$(STRIP) $(TARGET)$(EXEEXT)
 	@upx --lzma $(TARGET)$(EXEEXT)
-	@mv $(TARGET)$(EXEEXT) $(TARGET)_$(VERSION)$(EXEEXT)
-	@cmd.exe /k _sign.cmd $(TARGET)_$(VERSION)$(EXEEXT)
+	@mv $(TARGET)$(EXEEXT) $(TARGET)-$(VERSION)$(EXEEXT)
+	@cmd.exe /k _sign.cmd $(TARGET)-$(VERSION)$(EXEEXT)
