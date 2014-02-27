@@ -263,14 +263,47 @@ HANDLE GetLogicalHandle(DWORD DriveIndex, BOOL bWriteAccess, BOOL bLockDrive)
 }
 
 /*
+ * Who would have thought that Microsoft would make it so unbelievably hard to
+ * get the frickin' device number for a drive? You have to use TWO different
+ * methods to have a chance to get it!
+ */
+int GetDriveNumber(HANDLE hDrive, char* path)
+{
+	STORAGE_DEVICE_NUMBER_REDEF DeviceNumber;
+	VOLUME_DISK_EXTENTS_REDEF DiskExtents;
+	DWORD size;
+	int r = -1;
+
+	if (!DeviceIoControl(hDrive, IOCTL_VOLUME_GET_VOLUME_DISK_EXTENTS, NULL, 0,
+		&DiskExtents, sizeof(DiskExtents), &size, NULL) || (size <= 0) || (DiskExtents.NumberOfDiskExtents < 1) ) {
+		// DiskExtents are NO_GO (which is the case for external USB HDDs...)
+		if(!DeviceIoControl(hDrive, IOCTL_STORAGE_GET_DEVICE_NUMBER, NULL, 0,
+			&DeviceNumber, sizeof(DeviceNumber), &size, NULL ) || (size <= 0)) {
+			uprintf("Could not get device number for device %s: %s", path, WindowsErrorString());
+			return -1;
+		}
+		r = (int)DeviceNumber.DeviceNumber;
+	} else if (DiskExtents.NumberOfDiskExtents >= 2) {
+		uprintf("Ignoring drive '%s' as it spans multiple disks (RAID?)", path);
+		return -1;
+	} else {
+		r = (int)DiskExtents.Extents[0].DiskNumber;
+	}
+	if (r >= MAX_DRIVES) {
+		uprintf("Device Number for device %s is too big (%d) - ignoring device", path, r);
+		return -1;
+	}
+	return r;
+}
+
+/*
  * Returns the drive letters for all volumes located on the drive identified by DriveIndex,
  * as well as the drive type. This is used as base for the 2 function calls that follow.
  */
 static BOOL _GetDriveLettersAndType(DWORD DriveIndex, char* drive_letters, UINT* drive_type)
 {
 	DWORD size;
-	BOOL s, r = FALSE;
-	VOLUME_DISK_EXTENTS DiskExtents;
+	BOOL r = FALSE;
 	HANDLE hDrive = INVALID_HANDLE_VALUE;
 	UINT _drive_type;
 	int i = 0;
@@ -318,14 +351,7 @@ static BOOL _GetDriveLettersAndType(DWORD DriveIndex, char* drive_letters, UINT*
 			continue;
 		}
 
-		s = DeviceIoControl(hDrive, IOCTL_VOLUME_GET_VOLUME_DISK_EXTENTS, NULL, 0,
-			&DiskExtents, sizeof(DiskExtents), &size, NULL) && (size > 0) && (DiskExtents.NumberOfDiskExtents >= 1);
-		safe_closehandle(hDrive);
-		if (!s) {
-			uprintf("Could not get device number for %c: - %s\n", drive[0], WindowsErrorString());
-		} else if (DiskExtents.NumberOfDiskExtents >= 2) {
-			uprintf("Ignoring drive %c: as it spans multiple disks (RAID?)", drive[0]);
-		} else if (DiskExtents.Extents[0].DiskNumber == DriveIndex) {
+		if (GetDriveNumber(hDrive, logical_drive) == DriveIndex) {
 			r = TRUE;
 			if (drive_letters != NULL)
 				drive_letters[i++] = *drive;

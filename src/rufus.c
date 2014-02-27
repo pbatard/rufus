@@ -647,14 +647,13 @@ static BOOL GetUSBDevices(DWORD devnum)
 	SP_DEVINFO_DATA dev_info_data;
 	SP_DEVICE_INTERFACE_DATA devint_data;
 	PSP_DEVICE_INTERFACE_DETAIL_DATA_A devint_detail_data;
-	VOLUME_DISK_EXTENTS DiskExtents;
 	DEVINST parent_inst, device_inst;
 	DWORD size, i, j, k, datatype, drive_index;
 	ULONG list_size[ARRAYSIZE(usbstor_name)], full_list_size;
 	HANDLE hDrive;
 	LONG maxwidth = 0;
 	RECT rect;
-	int s, score;
+	int s, score, drive_number;
 	char drive_letters[27], *devid, *devid_list = NULL, entry_msg[128];
 	char *label, *entry, buffer[MAX_PATH], str[sizeof("0000:0000")+1];
 	uint16_t vid, pid;
@@ -798,21 +797,11 @@ static BOOL GetUSBDevices(DWORD devnum)
 				continue;
 			}
 
-			if (!DeviceIoControl(hDrive, IOCTL_VOLUME_GET_VOLUME_DISK_EXTENTS, NULL, 0,
-				&DiskExtents, sizeof(DiskExtents), &size, NULL) || (size <= 0) || (DiskExtents.NumberOfDiskExtents < 1) ) {
-				uprintf("Could not get device number for device %s: %s\n", devint_detail_data->DevicePath, WindowsErrorString());
+			drive_number = GetDriveNumber(hDrive, devint_detail_data->DevicePath);
+			if (drive_number < 0)
 				continue;
-			}
 
-			if (DiskExtents.NumberOfDiskExtents >= 2) {
-				uprintf("Ignoring drive '%s' as it spans multiple disks (RAID?)", devint_detail_data->DevicePath);
-				continue;
-			} else if (DiskExtents.Extents[0].DiskNumber >= MAX_DRIVES) {
-				uprintf("Device Number %d is too big - ignoring device\n");
-				continue;
-			}
-
-			drive_index = DiskExtents.Extents[0].DiskNumber + DRIVE_INDEX_MIN;
+			drive_index = drive_number + DRIVE_INDEX_MIN;
 			if (!IsMediaPresent(drive_index)) {
 				uprintf("Device eliminated because it appears to contain no media\n");
 				safe_closehandle(hDrive);
@@ -832,7 +821,7 @@ static BOOL GetUSBDevices(DWORD devnum)
 
 				// The empty string is returned for drives that don't have any volumes assigned
 				if (drive_letters[0] == 0) {
-					entry = lmprintf(MSG_046, label, DiskExtents.Extents[0].DiskNumber);
+					entry = lmprintf(MSG_046, label, drive_number);
 				} else {
 					// We have multiple volumes assigned to the same device (multiple partitions)
 					// If that is the case, use "Multiple Volumes" instead of the label
@@ -860,8 +849,7 @@ static BOOL GetUSBDevices(DWORD devnum)
 				StrArrayAdd(&DriveID, buffer);
 				StrArrayAdd(&DriveLabel, label);
 
-				IGNORE_RETVAL(ComboBox_SetItemData(hDeviceList, ComboBox_AddStringU(hDeviceList, entry),
-					DiskExtents.Extents[0].DiskNumber + DRIVE_INDEX_MIN));
+				IGNORE_RETVAL(ComboBox_SetItemData(hDeviceList, ComboBox_AddStringU(hDeviceList, entry), drive_index));
 				maxwidth = max(maxwidth, GetEntryWidth(hDeviceList, entry));
 				safe_closehandle(hDrive);
 				safe_free(devint_detail_data);

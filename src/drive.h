@@ -24,11 +24,25 @@
 
 #define RUFUS_EXTRA_PARTITION_TYPE	0xea
 
+/* We need a redef of these MS structure */
+typedef struct {
+	DWORD DeviceType;
+	ULONG DeviceNumber;
+	ULONG PartitionNumber;
+} STORAGE_DEVICE_NUMBER_REDEF;
+
+typedef struct {
+	DWORD NumberOfDiskExtents;
+	// The one from MS uses ANYSIZE_ARRAY, which can lead to all kind of problems
+	DISK_EXTENT Extents[8];
+} VOLUME_DISK_EXTENTS_REDEF;
+
 char* GetPhysicalName(DWORD DriveIndex);
 HANDLE GetPhysicalHandle(DWORD DriveIndex, BOOL bWriteAccess, BOOL bLockDrive);
 char* GetLogicalName(DWORD DriveIndex, BOOL bKeepTrailingBackslash, BOOL bSilent);
 BOOL WaitForLogical(DWORD DriveIndex);
 HANDLE GetLogicalHandle(DWORD DriveIndex, BOOL bWriteAccess, BOOL bLockDrive);
+int GetDriveNumber(HANDLE hDrive, char* path);
 BOOL GetDriveLetters(DWORD DriveIndex, char* drive_letters);
 UINT GetDriveTypeFromIndex(DWORD DriveIndex);
 char GetUnusedDriveLetter(void);
