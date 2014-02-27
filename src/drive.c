@@ -306,7 +306,7 @@ static BOOL _GetDriveLettersAndType(DWORD DriveIndex, char* drive_letters, UINT*
 	BOOL r = FALSE;
 	HANDLE hDrive = INVALID_HANDLE_VALUE;
 	UINT _drive_type;
-	int i = 0;
+	int i = 0, drive_number;
 	char *drive, drives[26*4];	/* "D:\", "E:\", etc. */
 	char logical_drive[] = "\\\\.\\#:";
 
@@ -351,7 +351,9 @@ static BOOL _GetDriveLettersAndType(DWORD DriveIndex, char* drive_letters, UINT*
 			continue;
 		}
 
-		if (GetDriveNumber(hDrive, logical_drive) == DriveIndex) {
+		drive_number = GetDriveNumber(hDrive, logical_drive);
+		safe_closehandle(hDrive);
+		if (drive_number == DriveIndex) {
 			r = TRUE;
 			if (drive_letters != NULL)
 				drive_letters[i++] = *drive;
