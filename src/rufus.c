@@ -380,9 +380,10 @@ static BOOL SetClusterSizes(int FSType)
 /*
  * Fill the drive properties (size, FS, etc)
  */
-static BOOL GetDriveInfo(int ComboIndex)
+static BOOL SetDriveInfo(int ComboIndex)
 {
 	DWORD i;
+	int pt, bt;
 	char fs_type[32];
 
 	memset(&SelectedDrive, 0, sizeof(SelectedDrive));
@@ -424,6 +425,17 @@ static BOOL GetDriveInfo(int ComboIndex)
 				break;
 			}
 		}
+	}
+
+	for (i=0; i<3; i++) {
+		// Populate MBR/BIOS, MBR/UEFI and GPT/UEFI targets, with an exception
+		// for XP, as it doesn't support GPT at all
+		if ((i == 2) && (nWindowsVersion <= WINDOWS_XP))
+			continue;
+		bt = (i==0)?BT_BIOS:BT_UEFI;
+		pt = (i==2)?PARTITION_STYLE_GPT:PARTITION_STYLE_MBR;
+		IGNORE_RETVAL(ComboBox_SetItemData(hPartitionScheme, ComboBox_AddStringU(hPartitionScheme,
+			lmprintf((i==0)?MSG_031:MSG_033, PartitionTypeLabel[pt])), (bt<<16)|pt));
 	}
 
 	// At least one filesystem is go => enable formatting
@@ -548,9 +560,7 @@ static void SetTargetSystem(void)
  */
 static BOOL PopulateProperties(int ComboIndex)
 {
-	double HumanReadableSize;
-	char no_label[] = STR_NO_LABEL;
-	int i, j, pt, bt;
+	const char no_label[] = STR_NO_LABEL;
 	char* device_tooltip;
 
 	IGNORE_RETVAL(ComboBox_ResetContent(hPartitionScheme));
@@ -563,59 +573,24 @@ static BOOL PopulateProperties(int ComboIndex)
 	if (ComboIndex < 0)
 		return TRUE;
 
-	if (!GetDriveInfo(ComboIndex))	// This also populates FS
+	if (!SetDriveInfo(ComboIndex))	// This also populates FS
 		return FALSE;
-
-	HumanReadableSize = (double)SelectedDrive.DiskSize;
-	for (i=1; i<MAX_SIZE_SUFFIXES; i++) {
-		HumanReadableSize /= 1024.0;
-		if (HumanReadableSize < 512.0) {
-			for (j=0; j<3; j++) {
-				// Populate MBR/BIOS, MBR/UEFI and GPT/UEFI targets, with an exception
-				// for XP, as it doesn't support GPT at all
-				if ((j == 2) && (nWindowsVersion <= WINDOWS_XP))
-					continue;
-				bt = (j==0)?BT_BIOS:BT_UEFI;
-				pt = (j==2)?PARTITION_STYLE_GPT:PARTITION_STYLE_MBR;
-				IGNORE_RETVAL(ComboBox_SetItemData(hPartitionScheme, ComboBox_AddStringU(hPartitionScheme,
-					lmprintf((j==0)?MSG_031:MSG_033, PartitionTypeLabel[pt])), (bt<<16)|pt));
-
-			}
-			break;
-		}
-	}
-	if (i >= MAX_SIZE_SUFFIXES)
-		uprintf("Could not populate partition scheme data\n");
-
 	SetTargetSystem();
 	SetFSFromISO();
 	EnableBootOptions(TRUE);
-	device_tooltip = (char*) malloc(safe_strlen(DriveID.String[ComboIndex]) + 16);
 
 	// Set a proposed label according to the size (eg: "256MB", "8GB")
-	if (HumanReadableSize < 1.0) {
-		HumanReadableSize *= 1024.0;
-		i--;
-	}
-	// If we're beneath the tolerance, round proposed label to an integer, if not, show two decimal points
-	if (fabs(HumanReadableSize / ceil(HumanReadableSize) - 1.0) < PROPOSEDLABEL_TOLERANCE) {
-		safe_sprintf(SelectedDrive.proposed_label, sizeof(SelectedDrive.proposed_label),
-			"%0.0f%s", ceil(HumanReadableSize), lmprintf(MSG_020+i));
-		if (device_tooltip != NULL)
-			safe_sprintf(device_tooltip, safe_strlen(DriveID.String[ComboIndex]) + 16,
-				"%s (%0.0f%s)", DriveID.String[ComboIndex], ceil(HumanReadableSize), lmprintf(MSG_020+i));
-	} else {
-		safe_sprintf(SelectedDrive.proposed_label, sizeof(SelectedDrive.proposed_label),
-			"%0.2f%s", HumanReadableSize, lmprintf(MSG_020+i));
-		if (device_tooltip != NULL)
-			safe_sprintf(device_tooltip, safe_strlen(DriveID.String[ComboIndex]) + 16,
-				"%s (%0.2f%s)", DriveID.String[ComboIndex], HumanReadableSize, lmprintf(MSG_020+i));
-	}
+	safe_sprintf(SelectedDrive.proposed_label, sizeof(SelectedDrive.proposed_label),
+		SizeToHumanReadable(SelectedDrive.DiskSize, FALSE, TRUE));
 
 	// Add a tooltip (with the size of the device in parenthesis)
-	if (device_tooltip != NULL)
+	device_tooltip = (char*) malloc(safe_strlen(DriveID.String[ComboIndex]) + 16);
+	if (device_tooltip != NULL) {
+		safe_sprintf(device_tooltip, safe_strlen(DriveID.String[ComboIndex]) + 16, "%s (%s)",
+			DriveID.String[ComboIndex], SizeToHumanReadable(SelectedDrive.DiskSize, FALSE, FALSE));
 		CreateTooltip(hDeviceList, device_tooltip, -1);
-	safe_free(device_tooltip);
+		free(device_tooltip);
+	}
 
 	// If no existing label is available and no ISO is selected, propose one according to the size (eg: "256MB", "8GB")
 	if ((iso_path == NULL) || (iso_report.label[0] == 0)) {
@@ -821,7 +796,7 @@ static BOOL GetUSBDevices(DWORD devnum)
 
 				// The empty string is returned for drives that don't have any volumes assigned
 				if (drive_letters[0] == 0) {
-					entry = lmprintf(MSG_046, label, drive_number);
+					entry = lmprintf(MSG_046, label, drive_number, SizeToHumanReadable(GetDriveSize(drive_index), FALSE, TRUE));
 				} else {
 					// We have multiple volumes assigned to the same device (multiple partitions)
 					// If that is the case, use "Multiple Volumes" instead of the label
@@ -842,6 +817,8 @@ static BOOL GetUSBDevices(DWORD devnum)
 						safe_free(devint_detail_data);
 						break;
 					}
+					safe_sprintf(&entry_msg[strlen(entry_msg)], sizeof(entry_msg) - strlen(entry_msg),
+						" [%s]", SizeToHumanReadable(GetDriveSize(drive_index), FALSE, TRUE));
 					entry = entry_msg;
 				}
 

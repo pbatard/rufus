@@ -51,7 +51,6 @@
 #define MAX_GPT_PARTITIONS          128
 #define MAX_SECTORS_TO_CLEAR        128			// nb sectors to zap when clearing the MBR/GPT (must be >34)
 #define MBR_UEFI_MARKER             0x49464555	// 'U', 'E', 'F', 'I', as a 32 bit little endian longword
-#define PROPOSEDLABEL_TOLERANCE     0.10
 #define WRITE_RETRIES               3
 #define FS_DEFAULT                  FS_FAT32
 #define BADBLOCK_PATTERNS           {0xaa, 0x55, 0xff, 0x00}
@@ -319,7 +318,7 @@ extern void PrintStatus(unsigned int duration, BOOL debug, int msg_id, ...);
 extern void UpdateProgress(int op, float percent);
 extern const char* StrError(DWORD error_code, BOOL use_default_locale);
 extern char* GuidToString(const GUID* guid);
-extern char* SizeToHumanReadable(uint64_t size, BOOL log);
+extern char* SizeToHumanReadable(uint64_t size, BOOL log, BOOL fake_units);
 extern void CenterDialog(HWND hDlg);
 extern void ResizeMoveCtrl(HWND hDlg, HWND hCtrl, int dx, int dy, int dw, int dh);
 extern void CreateStatusBar(void);

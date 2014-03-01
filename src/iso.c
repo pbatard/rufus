@@ -241,9 +241,9 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 			nul_pos = safe_strlen(psz_fullpath);
 			for (i=0; i<nul_pos; i++)
 				if (psz_fullpath[i] == '/') psz_fullpath[i] = '\\';
-			safe_sprintf(&psz_fullpath[nul_pos], 24, " (%s)", SizeToHumanReadable(i_file_length, TRUE));
+			safe_sprintf(&psz_fullpath[nul_pos], 24, " (%s)", SizeToHumanReadable(i_file_length, TRUE, FALSE));
 			uprintf("Extracting: %s\n", psz_fullpath);
-			safe_sprintf(&psz_fullpath[nul_pos], 24, " (%s)", SizeToHumanReadable(i_file_length, FALSE));
+			safe_sprintf(&psz_fullpath[nul_pos], 24, " (%s)", SizeToHumanReadable(i_file_length, FALSE, FALSE));
 			SetWindowTextU(hISOFileName, psz_fullpath);
 			// Remove the appended size for extraction
 			psz_fullpath[nul_pos] = 0;
@@ -388,9 +388,9 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 			nul_pos = safe_strlen(psz_fullpath);
 			for (i=0; i<nul_pos; i++)
 				if (psz_fullpath[i] == '/') psz_fullpath[i] = '\\';
-			safe_sprintf(&psz_fullpath[nul_pos], 24, " (%s)", SizeToHumanReadable(i_file_length, TRUE));
+			safe_sprintf(&psz_fullpath[nul_pos], 24, " (%s)", SizeToHumanReadable(i_file_length, TRUE, FALSE));
 			uprintf("Extracting: %s\n", psz_fullpath);
-			safe_sprintf(&psz_fullpath[nul_pos], 24, " (%s)", SizeToHumanReadable(i_file_length, FALSE));
+			safe_sprintf(&psz_fullpath[nul_pos], 24, " (%s)", SizeToHumanReadable(i_file_length, FALSE, FALSE));
 			SetWindowTextU(hISOFileName, psz_fullpath);
 			// ISO9660 cannot handle backslashes
 			for (i=0; i<nul_pos; i++) if (psz_fullpath[i] == '\\') psz_fullpath[i] = '/';

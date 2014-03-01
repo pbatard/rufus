@@ -569,7 +569,7 @@ static BOOL FormatFAT32(DWORD DriveIndex)
 	}
 
 	// Now we're committed - print some info first
-	uprintf("Size : %s %u sectors\n", SizeToHumanReadable(piDrive.PartitionLength.QuadPart, TRUE), TotalSectors);
+	uprintf("Size : %s %u sectors\n", SizeToHumanReadable(piDrive.PartitionLength.QuadPart, TRUE, FALSE), TotalSectors);
 	uprintf("Cluster size %d bytes, %d Bytes Per Sector\n", SectorsPerCluster*BytesPerSect, BytesPerSect);
 	uprintf("Volume ID is %x:%x\n", VolumeId>>16, VolumeId&0xffff);
 	uprintf("%d Reserved Sectors, %d Sectors per FAT, %d FATs\n", ReservedSectCount, FatSize, NumFATs);
@@ -673,6 +673,13 @@ static BOOL FormatDrive(DWORD DriveIndex)
 	int fs;
 
 	GetWindowTextU(hFileSystem, FSType, ARRAYSIZE(FSType));
+	// Might have a (Default) suffix => remove it
+	for (i=strlen(FSType); i>2; i--) {
+		if (FSType[i] == '(') {
+			FSType[i-1] = 0;
+			break;
+		}
+	}
 	fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
 	if ((fs == FS_UDF) && !((dur_mins == 0) && (dur_secs == 0))) {
 		PrintStatus(0, TRUE, MSG_220, FSType, dur_mins, dur_secs);

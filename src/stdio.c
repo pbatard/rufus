@@ -27,6 +27,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <math.h>
 
 #include "msapi_utf8.h"
 #include "rufus.h"
@@ -146,19 +147,46 @@ char* GuidToString(const GUID* guid)
 	return guid_string;
 }
 
-// Convert a file size to human readable
-char* SizeToHumanReadable(uint64_t size, BOOL log)
+// find upper power of 2
+static __inline uint16_t upo2(uint16_t v)
+{
+	v--;
+	v |= v >> 1;
+	v |= v >> 2;
+	v |= v >> 4;
+	v |= v >> 8;
+	v++;
+	return v;
+}
+
+// Convert a size to human readable
+char* SizeToHumanReadable(uint64_t size, BOOL log, BOOL fake_units)
 {
 	int suffix = 0;
 	static char str_size[32];
 	double hr_size = (double)size;
+	double t;
+	uint16_t i_size;
 	char **_msg_table = log?default_msg_table:msg_table;
-	while ((suffix < MAX_SIZE_SUFFIXES) && (hr_size >= 1024.0)) {
-		hr_size /= 1024.0;
-		suffix++;
+	const double divider = fake_units?1000.0:1024.0;
+
+	for (suffix=1; suffix<MAX_SIZE_SUFFIXES; suffix++) {
+		hr_size /= divider;
+		if (hr_size < divider) {
+			break;
+		}
 	}
 	if (suffix == 0) {
 		safe_sprintf(str_size, sizeof(str_size), "%d %s", (int)hr_size, _msg_table[MSG_020-MSG_000]);
+	} else if (fake_units) {
+		if (hr_size < 8) {
+			safe_sprintf(str_size, sizeof(str_size), (fabs((hr_size*10.0)-(floor(hr_size + 0.5)*10.0)) < 0.5)?"%0.0f%s":"%0.1f%s",
+			hr_size, _msg_table[MSG_020+suffix-MSG_000]);
+		} else {
+			t = (double)upo2((uint16_t)hr_size);
+			i_size = (uint16_t)((fabs(1.0f-(hr_size / t)) < 0.05f)?t:hr_size);
+			safe_sprintf(str_size, sizeof(str_size), "%d%s", i_size, _msg_table[MSG_020+suffix-MSG_000]);
+		}
 	} else {
 		safe_sprintf(str_size, sizeof(str_size), "%0.1f %s", hr_size, _msg_table[MSG_020+suffix-MSG_000]);
 	}
