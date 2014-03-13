@@ -1340,6 +1340,7 @@ static BOOL BootCheck(void)
 	int i, fs, bt, dt, r;
 	FILE* fd;
 	DWORD len;
+	BOOL in_files_dir = FALSE;
 	const char* ldlinux = "ldlinux";
 	const char* syslinux = "syslinux";
 	const char* ldlinux_ext[3] = { "sys", "bss", "c32" };
@@ -1403,15 +1404,16 @@ static BOOL BootCheck(void)
 				IGNORE_RETVAL(_chdirU(app_dir));
 				for (i=0; i<NB_OLD_C32; i++) {
 					if (iso_report.has_old_c32[i]) {
-						if (i==0) {
+						if (!in_files_dir) {
 							IGNORE_RETVAL(_mkdir(FILES_DIR));
 							IGNORE_RETVAL(_chdir(FILES_DIR));
+							in_files_dir = TRUE;
 						}
 						static_sprintf(tmp, "%s-%s/%s", syslinux, embedded_sl_version_str[0], old_c32_name[i]);
 						fd = fopen(tmp, "rb");
 						if (fd != NULL) {
 							// If a file already exists in the current directory, use that one
-							uprintf("Will replace obsolete '%s' from ISO with the one found in './%s'\n", old_c32_name[i], tmp);
+							uprintf("Will replace obsolete '%s' from ISO with the one found in './" FILES_DIR "/%s'\n", old_c32_name[i], tmp);
 							fclose(fd);
 							use_own_c32[i] = TRUE;
 						} else {
@@ -1449,7 +1451,7 @@ static BOOL BootCheck(void)
 					}
 				}
 				if ((syslinux_ldlinux_len[0] != 0) && (syslinux_ldlinux_len[1] != 0)) {
-					uprintf("Will reuse '%s.%s' and '%s.%s' from './%s/%s-%s/' for Syslinux installation\n",
+					uprintf("Will reuse '%s.%s' and '%s.%s' from './" FILES_DIR "/%s/%s-%s/' for Syslinux installation\n",
 						ldlinux, ldlinux_ext[0], ldlinux, ldlinux_ext[1], FILES_DIR, syslinux, iso_report.sl_version_str);
 				} else {
 					r = MessageBoxU(hMainDialog, lmprintf(MSG_114, iso_report.sl_version_str, embedded_sl_version_str[1]),
