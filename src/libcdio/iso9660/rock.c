@@ -202,6 +202,7 @@ get_rock_ridge_filename(iso9660_dir_t * p_iso9660_dir,
 	if (rr->u.NM.flags & ISO_ROCK_NM_PARENT) {
 	  i_namelen = sizeof("..");
 	  strncat(psz_name, "..", i_namelen);
+	  break;
 	} else if (rr->u.NM.flags & ISO_ROCK_NM_CURRENT) {
 	  i_namelen = sizeof(".");
 	  strncat(psz_name, ".", i_namelen);
