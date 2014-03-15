@@ -502,21 +502,23 @@ static void SetMBRProps(void)
 	IGNORE_RETVAL(ComboBox_SetCurSel(hDiskID, needs_masquerading?1:0));
 }
 
-static void EnableAdvancedBootOptions(BOOL enable)
+static void EnableAdvancedBootOptions(BOOL enable, BOOL remove_checkboxes)
 {
 	int bt = GETBIOSTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
-	BOOL actual_enable = ((bt==BT_UEFI)||(selection_default>=DT_IMG)||!IsDlgButtonChecked(hMainDialog, IDC_BOOT))?FALSE:enable;
+	BOOL actual_enable = ((bt==BT_UEFI)||(selection_default>=DT_IMG)||!IsChecked(IDC_BOOT))?FALSE:enable;
 	static UINT uXPartChecked = BST_UNCHECKED;
 
-	// Store/Restore the checkbox states
-	if (IsWindowEnabled(GetDlgItem(hMainDialog, IDC_RUFUS_MBR)) && !actual_enable) {
-		uMBRChecked = IsDlgButtonChecked(hMainDialog, IDC_RUFUS_MBR);
-		CheckDlgButton(hMainDialog, IDC_RUFUS_MBR, BST_UNCHECKED);
-		uXPartChecked = IsDlgButtonChecked(hMainDialog, IDC_EXTRA_PARTITION);
-		CheckDlgButton(hMainDialog, IDC_EXTRA_PARTITION, BST_UNCHECKED);
-	} else if (!IsWindowEnabled(GetDlgItem(hMainDialog, IDC_RUFUS_MBR)) && actual_enable) {
-		CheckDlgButton(hMainDialog, IDC_RUFUS_MBR, uMBRChecked);
-		CheckDlgButton(hMainDialog, IDC_EXTRA_PARTITION, uXPartChecked);
+	if (remove_checkboxes) {
+		// Store/Restore the checkbox states
+		if (IsWindowEnabled(GetDlgItem(hMainDialog, IDC_RUFUS_MBR)) && !actual_enable) {
+			uMBRChecked = IsChecked(IDC_RUFUS_MBR);
+			CheckDlgButton(hMainDialog, IDC_RUFUS_MBR, BST_UNCHECKED);
+			uXPartChecked = IsChecked(IDC_EXTRA_PARTITION);
+			CheckDlgButton(hMainDialog, IDC_EXTRA_PARTITION, BST_UNCHECKED);
+		} else if (!IsWindowEnabled(GetDlgItem(hMainDialog, IDC_RUFUS_MBR)) && actual_enable) {
+			CheckDlgButton(hMainDialog, IDC_RUFUS_MBR, uMBRChecked);
+			CheckDlgButton(hMainDialog, IDC_EXTRA_PARTITION, uXPartChecked);
+		}
 	}
 
 	EnableWindow(GetDlgItem(hMainDialog, IDC_EXTRA_PARTITION), actual_enable);
@@ -524,7 +526,7 @@ static void EnableAdvancedBootOptions(BOOL enable)
 	EnableWindow(hDiskID, actual_enable);
 }
 
-static void EnableBootOptions(BOOL enable)
+static void EnableBootOptions(BOOL enable, BOOL remove_checkboxes)
 {
 	int fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
 	BOOL actual_enable = ((fs != FS_FAT16) && (fs != FS_FAT32) && (fs != FS_NTFS) && (selection_default == DT_IMG))?FALSE:enable;
@@ -532,7 +534,7 @@ static void EnableBootOptions(BOOL enable)
 	EnableWindow(hBoot, actual_enable);
 	EnableWindow(hBootType, actual_enable);
 	EnableWindow(hSelectISO, actual_enable);
-	EnableAdvancedBootOptions(actual_enable);
+	EnableAdvancedBootOptions(actual_enable, remove_checkboxes);
 }
 
 static void SetPartitionSchemeTooltip(void)
@@ -588,7 +590,7 @@ static BOOL PopulateProperties(int ComboIndex)
 		return FALSE;
 	SetTargetSystem();
 	SetFSFromISO();
-	EnableBootOptions(TRUE);
+	EnableBootOptions(TRUE, TRUE);
 
 	// Set a proposed label according to the size (eg: "256MB", "8GB")
 	safe_sprintf(SelectedDrive.proposed_label, sizeof(SelectedDrive.proposed_label),
@@ -1002,7 +1004,7 @@ static void EnableControls(BOOL bEnable)
 	EnableWindow(GetDlgItem(hMainDialog, IDC_START), bEnable);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_ABOUT), bEnable);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_BADBLOCKS), bEnable);
-	EnableBootOptions(bEnable);
+	EnableBootOptions(bEnable, FALSE);
 	EnableWindow(hSelectISO, bEnable);
 	EnableWindow(hNBPasses, bEnable);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_ADVANCED), bEnable);
@@ -2003,9 +2005,9 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				break;
 			fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
 			bt = GETBIOSTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
-			if ((selection_default == DT_IMG) && IsDlgButtonChecked(hMainDialog, IDC_BOOT)) {
+			if ((selection_default == DT_IMG) && IsChecked(IDC_BOOT)) {
 				ToggleImage(FALSE);
-				EnableAdvancedBootOptions(FALSE);
+				EnableAdvancedBootOptions(FALSE, TRUE);
 				SetBoot(fs, bt);
 				break;
 			}
@@ -2013,7 +2015,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			// Disable/restore the quick format control depending on large FAT32
 			if ((fs == FS_FAT32) && ((SelectedDrive.DiskSize > LARGE_FAT32_SIZE) || (force_large_fat32))) {
 				if (IsWindowEnabled(GetDlgItem(hMainDialog, IDC_QUICKFORMAT))) {
-					uQFChecked = IsDlgButtonChecked(hMainDialog, IDC_QUICKFORMAT);
+					uQFChecked = IsChecked(IDC_QUICKFORMAT);
 					CheckDlgButton(hMainDialog, IDC_QUICKFORMAT, BST_CHECKED);
 					EnableWindow(GetDlgItem(hMainDialog, IDC_QUICKFORMAT), FALSE);
 				}
@@ -2024,7 +2026,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				}
 			}
 			if (fs < 0) {
-				EnableBootOptions(TRUE);
+				EnableBootOptions(TRUE, TRUE);
 				SetMBRProps();
 				// Remove the SysLinux and ReactOS options if they exists
 				if (ComboBox_GetItemData(hBootType, ComboBox_GetCount(hBootType)-1) == (DT_MAX-1)) {
@@ -2038,31 +2040,31 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				if (IsWindowEnabled(hBoot)) {
 					// unlikely to be supported by BIOSes => don't bother
 					IGNORE_RETVAL(ComboBox_SetCurSel(hBootType, 0));
-					uBootChecked = IsDlgButtonChecked(hMainDialog, IDC_BOOT);
+					uBootChecked = IsChecked(IDC_BOOT);
 					CheckDlgButton(hDlg, IDC_BOOT, BST_UNCHECKED);
-					EnableBootOptions(FALSE);
-				} else if (IsDlgButtonChecked(hMainDialog, IDC_BOOT)) {
+					EnableBootOptions(FALSE, TRUE);
+				} else if (IsChecked(IDC_BOOT)) {
 					uBootChecked = TRUE;
 					CheckDlgButton(hDlg, IDC_BOOT, BST_UNCHECKED);
 				}
 				SetMBRProps();
 				break;
 			}
-			EnableAdvancedBootOptions(TRUE);
+			EnableAdvancedBootOptions(TRUE, TRUE);
 			SetBoot(fs, bt);
 			SetMBRProps();
 			break;
 		case IDC_BOOT:
-			EnableAdvancedBootOptions(TRUE);
+			EnableAdvancedBootOptions(TRUE, TRUE);
 			if (selection_default == DT_IMG)
-				ToggleImage(!IsDlgButtonChecked(hMainDialog, IDC_BOOT));
+				ToggleImage(!IsChecked(IDC_BOOT));
 			break;
 		case IDC_BOOTTYPE:
 			if (HIWORD(wParam) != CBN_SELCHANGE)
 				break;
 			selection_default = (int) ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
-			EnableAdvancedBootOptions(TRUE);
-			ToggleImage(!IsDlgButtonChecked(hMainDialog, IDC_BOOT) || (selection_default != DT_IMG));
+			EnableAdvancedBootOptions(TRUE, TRUE);
+			ToggleImage(!IsChecked(IDC_BOOT) || (selection_default != DT_IMG));
 			if ((selection_default == DT_ISO) || (selection_default == DT_IMG)) {
 				if ((iso_path == NULL) || (iso_report.label[0] == 0)) {
 					// Set focus to the Select ISO button
