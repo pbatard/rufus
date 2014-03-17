@@ -339,7 +339,7 @@ extern BOOL InstallSyslinux(DWORD drive_index, char drive_letter);
 DWORD WINAPI FormatThread(void* param);
 extern BOOL CreateProgress(void);
 extern BOOL SetAutorun(const char* path);
-extern char* FileDialog(BOOL save, char* path, char* filename, char* ext, char* ext_desc);
+extern char* FileDialog(BOOL save, char* path, char* filename, char* ext, char* ext_desc, DWORD options);
 extern BOOL FileIO(BOOL save, char* path, char** buffer, DWORD* size);
 extern unsigned char* GetResource(HMODULE module, char* name, char* type, const char* desc, DWORD* len, BOOL duplicate);
 extern BOOL SetLGP(BOOL bRestore, BOOL* bExistingKey, const char* szPath, const char* szPolicy, DWORD dwValue);

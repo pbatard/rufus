@@ -433,9 +433,10 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 
 	update_check_in_progress = TRUE;
 	verbose = ReadRegistryKey32(REGKEY_HKCU, REGKEY_VERBOSE_UPDATES);
+	// Without this the FileDialog will produce error 0x8001010E when compiled for Vista or later
+	IGNORE_RETVAL(CoInitializeEx(NULL, COINIT_APARTMENTTHREADED));
 	// Unless the update was forced, wait a while before performing the update check
 	if (!force_update_check) {
-		// TODO: Also check on inactivity
 		// It would of course be a lot nicer to use a timer and wake the thread, but my
 		// development time is limited and this is FASTER to implement.
 		do {

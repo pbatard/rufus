@@ -241,8 +241,11 @@ fallback:
  * Return the UTF8 path of a file selected through a load or save dialog
  * Will use the newer IFileOpenDialog if *compiled* for Vista or later
  * All string parameters are UTF-8
+ * IMPORTANT NOTE: On Vista and later, remember that you need to call
+ * CoInitializeEx() for *EACH* thread you invoke FileDialog from, as
+ * GetDisplayName() will return error 0x8001010E otherwise.
  */
-char* FileDialog(BOOL save, char* path, char* filename, char* ext, char* ext_desc)
+char* FileDialog(BOOL save, char* path, char* filename, char* ext, char* ext_desc, DWORD options)
 {
 	DWORD tmp;
 	OPENFILENAMEA ofn;
@@ -280,7 +283,8 @@ char* FileDialog(BOOL save, char* path, char* filename, char* ext, char* ext_des
 			&IID_IFileDialog, (LPVOID)&pfd);
 
 		if (FAILED(hr)) {
-			uprintf("CoCreateInstance for FileOpenDialog failed: error %X\n", hr);
+			SetLastError(hr);
+			uprintf("CoCreateInstance for FileOpenDialog failed: %s\n", WindowsErrorString());
 			pfd = NULL;	// Just in case
 			goto fallback;
 		}
@@ -319,12 +323,16 @@ char* FileDialog(BOOL save, char* path, char* filename, char* ext, char* ext_des
 				if (SUCCEEDED(hr)) {
 					filepath = wchar_to_utf8(wpath);
 					CoTaskMemFree(wpath);
+				} else {
+					SetLastError(hr);
+					uprintf("Unable to access file path: %s\n", WindowsErrorString());
 				}
 				psiResult->lpVtbl->Release(psiResult);
 			}
 		} else if ((hr & 0xFFFF) != ERROR_CANCELLED) {
 			// If it's not a user cancel, assume the dialog didn't show and fallback
-			uprintf("Could not show FileOpenDialog: error %X\n", hr);
+			SetLastError(hr);
+			uprintf("Could not show FileOpenDialog: %s\n", WindowsErrorString());
 			goto fallback;
 		}
 		pfd->lpVtbl->Release(pfd);
@@ -363,7 +371,7 @@ fallback:
 	ofn.lpstrFilter = ext_string;
 	// Initial dir
 	ofn.lpstrInitialDir = path;
-	ofn.Flags = OFN_OVERWRITEPROMPT;
+	ofn.Flags = OFN_OVERWRITEPROMPT | options;
 	// Show Dialog
 	if (save) {
 		r = GetSaveFileNameU(&ofn);
@@ -1245,7 +1253,7 @@ INT_PTR CALLBACK NewVersionCallback(HWND hDlg, UINT message, WPARAM wParam, LPAR
 					break;
 				}
 				for (i=(int)strlen(update.download_url); (i>0)&&(update.download_url[i]!='/'); i--);
-				filepath = FileDialog(TRUE, app_dir, (char*)&update.download_url[i+1], "exe", lmprintf(MSG_037));
+				filepath = FileDialog(TRUE, app_dir, (char*)&update.download_url[i+1], "exe", lmprintf(MSG_037), OFN_NOCHANGEDIR);
 				if (filepath == NULL) {
 					uprintf("Could not get save path\n");
 					break;

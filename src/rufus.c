@@ -1062,7 +1062,7 @@ BOOL CALLBACK LogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 				log_size = GetDlgItemTextU(hDlg, IDC_LOG_EDIT, log_buffer, log_size);
 				if (log_size != 0) {
 					log_size--;	// remove NUL terminator
-					filepath =  FileDialog(TRUE, app_dir, "rufus.log", "log", lmprintf(MSG_108));
+					filepath =  FileDialog(TRUE, app_dir, "rufus.log", "log", lmprintf(MSG_108), 0);
 					if (filepath != NULL) {
 						FileIO(TRUE, filepath, &log_buffer, &log_size);
 					}
@@ -2092,9 +2092,9 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			} else {
 				safe_free(iso_path);
 				if (selection_default == DT_IMG)
-					iso_path = FileDialog(FALSE, NULL, "*.img", "img", "DD Image");
+					iso_path = FileDialog(FALSE, NULL, "*.img", "img", "DD Image", 0);
 				else
-					iso_path = FileDialog(FALSE, NULL, "*.iso", "iso", lmprintf(MSG_036));
+					iso_path = FileDialog(FALSE, NULL, "*.iso", "iso", lmprintf(MSG_036), 0);
 				if (iso_path == NULL) {
 					CreateTooltip(hSelectISO, lmprintf(MSG_173), -1);
 					break;
