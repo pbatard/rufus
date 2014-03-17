@@ -1,3 +1,12 @@
+o Version 1.4.6 (2014.03.17)
+    Display USB size in the dropdown list
+    Add Bulgarian translation, courtesy of Krasimir Nevenov
+    Improve checkbox handling in the UI and fix UDF/exFAT formatting issues
+    Fix replacement of obsolete vesamenu.c32 (reported by Liang)
+    Fix an issue that could prevent the download of files from the Rufus website
+    Fix untimely libcdio messages when processing Rock-Ridge ISOs (such as Ubuntu)
+    Other fixes
+
 o Version 1.4.5 (2014.02.27) [BUGFIX RELEASE]
     Fix detection of fixed drives (reported by dominiquesb)
 
