@@ -5123,7 +5123,7 @@ t MSG_261 "이미지 만들기: %0.1f%% 완료"
 
 ################################################################################
 l "lt-LT" "Lithuanian (Lietuvių)" 0x0427
-v 1.0.7
+v 1.0.10
 b "en-US"
 
 # Main dialog
@@ -5291,7 +5291,7 @@ t MSG_043 "Klaida: %s"
 t MSG_044 "Failo atsisiuntimas"
 t MSG_045 "USB saugyklos įrenginys (bendrinis)"
 t MSG_046 "%s (diskas %d) [%s]"
-# t MSG_047 "Multiple Partitions"
+t MSG_047 "Keli skaidiniai"
 t MSG_048 "Rufus - išvalomi buferiai"
 t MSG_049 "Rufus - atšaukimas"
 
@@ -5346,17 +5346,22 @@ t MSG_084 "Atrodo, šis ISO atvaizdas naudoja pasenusią '%s' versiją.\n"
 	"Pastaba: naujas failas bus atsiųstas į dabartinį katalogą ir jei "
 	"'%s' ten jau yra, jis bus panaudotas iš naujo automatiškai."
 t MSG_085 "Siunčiu %s"
-t MSG_086 "Neparinktas ISO atvaizdas"
+t MSG_086 "Nepasirinktas atvaizdas"
 # The content between the quotes below (\"Create a bootable disk\") should match
 # the beginning of the IDC_BOOT text
-t MSG_087 "Prašau spausti disko mygtuką norėdami pasirinkti įkelties ISO, "
+t MSG_087 "Prašau spausti disko mygtuką norėdami pasirinkti įkelties atvaizdą, "
 	"arba nežymėkite \"Kurti įkelties diską...\" langelio."
-t MSG_088 "ISO per didelis"
-t MSG_089 "Šis ISO atvaizdas yra per didelis pasirinktai paskirčiai."
+t MSG_088 "Atvaizdas per didelis"
+t MSG_089 "Atvaizdas yra per didelis pasirinktai paskirčiai."
 t MSG_090 "Nepalaikomas ISO"
 t MSG_091 "Naudojant UEFI paskirties tipą, tiktai EFI įkelties ISO atvaizdai yra palaikomi. "
 	"Prašau pasirinkti EFI įkelties ISO arba pakeisti paskirties tipą į BIOS."
 t MSG_092 "Nepalaikoma failų sistema"
+t MSG_093 "SVARBU: ŠIS DISKAS TURI KELETĄ SKAIDINIŲ!!\n\n"
+	"Tarp jų gali būti skaidinių/tomų, neparodytų ar net nematomų iš Windows. "
+	"Jei norėsite tęsti, būsite atsakingi dėl galimo duomenų praradimo šiuose skaidiniuose."
+t MSG_094 "Aptikta keletas skaidinių"
+t MSG_095 "DD atvaizdas"
 t MSG_096 "Tik FAT/FAT32 yra palaikoma šiam ISO tipui. Prašau pasirinkti FAT/FAT32 failų sistemą."
 t MSG_097 "Tik 'bootmgr' ar 'WinPE' pagrindo ISO atvaizdai šiuo metu gali būti naudojami su NTFS."
 t MSG_098 "FAT/FAT32 gali būti naudojama tik isolinux pagrindo ISO atvaizdams arba kai paskirties tipas yra UEFI."
@@ -5390,6 +5395,15 @@ t MSG_111 "Nesuderinamas Klasterio dydis"
 t MSG_112 "Didelių UDF tomų formatavimas gali užimti daug laiko. USB 2.0 greičiu numatoma formatavimo "
 	"trukmė yra %d:%02d, tuo metu eigos juosta gali atrodyti sustingusi. Prašau kantrybės!"
 t MSG_113 "Didelis UDF tomas"
+t MSG_114 "Šis atvaizdas naudoja Syslinux %s, bet ši programa turi tik diegimo failus, skirtus "
+	"Syslinux %s.\n\nKadangi naujos Syslinux versijos tarpusavyje nesuderinamos, ir nėra galimybės "
+	"į Rufus įtraukti jas visas, du papildomi failai turi būti atsisiųsti iš "
+	"interneto ('ldlinux.sys' ir 'ldlinux.bss'):\n"
+	"- Pasirinkite 'Taip' norėdami prisijungti prie interneto ir atsisiųsti šiuos failus\n"
+	"- Pasirinkite 'Ne' norėdami veiksmą atšaukti\n\n"
+	"Pastaba: Failai bus atsiųsti į dabartinį programos katalogą ir bus naudojami vėl "
+	"automatiškai, juos ten radus.\n"
+t MSG_115 "Reikalingas atsisiuntimas"
 
 # Tootips
 # Partition Scheme and Target Type
@@ -5440,11 +5454,13 @@ t MSG_184 "Asmeninio naudojimo statistikos generavimo tikslu mes galime saugoti 
 t MSG_185 "Atnaujinimo procesas:"
 t MSG_186 "Rufus neįdiegia ir nevykdo foninių tarnybų, todėl naujinių tikrinimai yra atliekami tik vykdant pagrindinę programą.\\line\n"
 	"Interneto prieiga, be abejo, yra reikalinga naujinių tikrinimui."
+t MSG_187 "Negaliojantis atvaizdas pasirinktai įkelties parinkčiai"
+t MSG_188 "Dabartinis atvaizdas neatitinka pasirinktos įkelties parinkties. Prašau naudoti kitą atvaizdą arba rinktis kitą įkelties parinktį."
 
 # Status messages - these messages will appear on the status bar
 t MSG_201 "Atšaukiama - prašome palaukti..."
-t MSG_202 "Peržiūrimas ISO atvaizdas..."
-t MSG_203 "Nepavyko peržiūrėti ISO atvaizdo"
+t MSG_202 "Peržiūrimas atvaizdas..."
+t MSG_203 "Nepavyko peržiūrėti atvaizdo"
 # Parameter: the name of an obsolete Syslinux .c32 module. eg: "Obsolete vesamenu.c32 detected"
 t MSG_204 "Aptiktas pasenęs %s"
 # Display the name of the ISO selected. eg: "Using ISO: en_win7_x64_sp1.iso"
@@ -5518,6 +5534,8 @@ t MSG_256 "Netikrų diskų aptikimas"
 t MSG_257 "Joliet palaikymas"
 t MSG_258 "Rock Ridge palaikymas"
 t MSG_259 "Priversti naujintis"
+t MSG_260 "NTFS glaudinimas"
+t MSG_261 "Rašomas atvaizdas: %0.1f%% baigta"
 
 ################################################################################
 l "ms-MY" "Malay (Bahasa Malaysia)" 0x043e, 0x083e
