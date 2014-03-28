@@ -631,17 +631,18 @@ static BOOL GetUSBDevices(DWORD devnum)
 {
 	// The first two are standard Microsoft drivers (including the Windows 8 UASP one).
 	// The rest are the vendor UASP drivers I know of so far - list may be incomplete!
-	const char* usbstor_name[] = { "USBSTOR", "UASPSTOR", "VUSBSTOR", "EtronSTOR" };
+	const char* storage_name[] = { "USBSTOR", "UASPSTOR", "VUSBSTOR", "ETRONSTOR" };
 	const char* scsi_name = "SCSI";
+	const char* vhd_name = "Microsoft Virtual Disk";
 	char letter_name[] = " (?:)";
-	BOOL found = FALSE, is_SCSI, is_UASP;
+	BOOL found = FALSE, is_SCSI, is_UASP, is_VHD;
 	HDEVINFO dev_info = NULL;
 	SP_DEVINFO_DATA dev_info_data;
 	SP_DEVICE_INTERFACE_DATA devint_data;
 	PSP_DEVICE_INTERFACE_DETAIL_DATA_A devint_detail_data;
 	DEVINST parent_inst, device_inst;
 	DWORD size, i, j, k, datatype, drive_index;
-	ULONG list_size[ARRAYSIZE(usbstor_name)], full_list_size;
+	ULONG list_size[ARRAYSIZE(storage_name)], full_list_size;
 	HANDLE hDrive;
 	LONG maxwidth = 0;
 	RECT rect;
@@ -664,10 +665,10 @@ static BOOL GetUSBDevices(DWORD devnum)
 	}
 
 	full_list_size = 0;
-	for (s=0; s<ARRAYSIZE(usbstor_name); s++) {
+	for (s=0; s<ARRAYSIZE(storage_name); s++) {
 		// Get a list of hardware IDs for all USB storage devices
 		// This will be used to retrieve the VID:PID of our devices
-		CM_Get_Device_ID_List_SizeA(&list_size[s], usbstor_name[s], CM_GETIDLIST_FILTER_SERVICE);
+		CM_Get_Device_ID_List_SizeA(&list_size[s], storage_name[s], CM_GETIDLIST_FILTER_SERVICE);
 		if (list_size[s] != 0)
 			full_list_size += list_size[s]-1;	// remove extra NUL terminator
 	}
@@ -681,10 +682,14 @@ static BOOL GetUSBDevices(DWORD devnum)
 	}
 
 	// Build a single list from all the storage enumerators we know of
-	for (s=0, i=0; s<ARRAYSIZE(usbstor_name); s++) {
+	for (s=0, i=0; s<ARRAYSIZE(storage_name); s++) {
 		if (list_size[s] > 1) {
-			CM_Get_Device_ID_ListA(usbstor_name[s], &devid_list[i], list_size[s], CM_GETIDLIST_FILTER_SERVICE);
-			i += list_size[s]-1;
+			CM_Get_Device_ID_ListA(storage_name[s], &devid_list[i], list_size[s], CM_GETIDLIST_FILTER_SERVICE);
+			// list_size is sometimes larger than required thus we need to find the real end
+			for (i += list_size[s]; i > 2; i--) {
+				if ((devid_list[i-2] != '\0') && (devid_list[i-1] == '\0') && (devid_list[i] == '\0'))
+					break;
+			}
 		}
 	}
 
@@ -698,16 +703,18 @@ static BOOL GetUSBDevices(DWORD devnum)
 		}
 		// UASP drives are listed under SCSI (along with regular SYSTEM drives => "DANGER, WILL ROBINSON!!!")
 		is_SCSI = (safe_stricmp(buffer, scsi_name) == 0);
-		if ((safe_stricmp(buffer, usbstor_name[0]) != 0) && (!is_SCSI))
+		if ((safe_stricmp(buffer, storage_name[0]) != 0) && (!is_SCSI))
 			continue;
 		memset(buffer, 0, sizeof(buffer));
 		vid = 0; pid = 0;
-		is_UASP = FALSE;
+		is_UASP = FALSE, is_VHD = FALSE;
 		if (!SetupDiGetDeviceRegistryPropertyA(dev_info, &dev_info_data, SPDRP_FRIENDLYNAME,
 				&datatype, (LPBYTE)buffer, sizeof(buffer), &size)) {
 			uprintf("SetupDiGetDeviceRegistryProperty (Friendly Name) failed: %s\n", WindowsErrorString());
 			// We can afford a failure on this call - just replace the name with "USB Storage Device (Generic)"
 			safe_strcpy(buffer, sizeof(buffer), lmprintf(MSG_045));
+		} else if (safe_stricmp(buffer, vhd_name) == 0) {
+			is_VHD = TRUE;
 		} else {
 			// Get the VID:PID of the device. We could avoid doing this lookup every time by keeping
 			// a lookup table, but there shouldn't be that many USB storage devices connected...
@@ -733,18 +740,21 @@ static BOOL GetUSBDevices(DWORD devnum)
 				}
 			}
 		}
-		if ((vid == 0) && (pid == 0)) {
-			if (is_SCSI) {
-				// If we have an SCSI drive and couldn't get a VID:PID, we are most likely
-				// dealing with a system drive => eliminate it!
-				continue;
-			}
-			safe_strcpy(str, sizeof(str), "????:????");	// Couldn't figure VID:PID
+		if (is_VHD) {
+			uprintf("Found VHD device '%s'\n", buffer);
 		} else {
-			safe_sprintf(str, sizeof(str), "%04X:%04X", vid, pid);
+			if ((vid == 0) && (pid == 0)) {
+				if (is_SCSI) {
+					// If we have an SCSI drive and couldn't get a VID:PID, we are most likely
+					// dealing with a system drive => eliminate it!
+					continue;
+				}
+				safe_strcpy(str, sizeof(str), "????:????");	// Couldn't figure VID:PID
+			} else {
+				safe_sprintf(str, sizeof(str), "%04X:%04X", vid, pid);
+			}
+			uprintf("Found %s device '%s' (%s)\n", is_UASP?"UAS":"USB", buffer, str);
 		}
-		uprintf("Found %s device '%s' (%s)\n", is_UASP?"UAS":"USB", buffer, str);
-
 		devint_data.cbSize = sizeof(devint_data);
 		hDrive = INVALID_HANDLE_VALUE;
 		devint_detail_data = NULL;
