@@ -627,10 +627,13 @@ static BOOL GetUSBDevices(DWORD devnum)
 {
 	// The first two are standard Microsoft drivers (including the Windows 8 UASP one).
 	// The rest are the vendor UASP drivers I know of so far - list may be incomplete!
-	const char* usbstor_name[] = { "USBSTOR", "UASPSTOR", "VUSBSTOR", "EtronSTOR" };
+	// The last is Microsofts VHD Mount driver to mount a VHD to a drive letter.
+	const char* usbstor_name[] = { "USBSTOR", "UASPSTOR", "VUSBSTOR", "EtronSTOR", "vhdmp" };
 	const char* scsi_name = "SCSI";
+	// Microsoft VHD Loopback Controller name
+	const char* msvhd_name = "MsVhdHba";
 	char letter_name[] = " (?:)";
-	BOOL found = FALSE, is_SCSI, is_UASP;
+	BOOL found = FALSE, is_SCSI, is_UASP, is_MSVHD;
 	HDEVINFO dev_info = NULL;
 	SP_DEVINFO_DATA dev_info_data;
 	SP_DEVICE_INTERFACE_DATA devint_data;
@@ -680,7 +683,11 @@ static BOOL GetUSBDevices(DWORD devnum)
 	for (s=0, i=0; s<ARRAYSIZE(usbstor_name); s++) {
 		if (list_size[s] > 1) {
 			CM_Get_Device_ID_ListA(usbstor_name[s], &devid_list[i], list_size[s], CM_GETIDLIST_FILTER_SERVICE);
-			i += list_size[s]-1;
+			// list_size is sometimes larger than required thus we need to find the real end
+			for (i += list_size[s]; i > 2; i--) {
+				if ((devid_list[i-2] != '\0') && (devid_list[i-1] == '\0') && (devid_list[i] == '\0'))
+					break;
+			}
 		}
 	}
 
@@ -699,6 +706,7 @@ static BOOL GetUSBDevices(DWORD devnum)
 		memset(buffer, 0, sizeof(buffer));
 		vid = 0; pid = 0;
 		is_UASP = FALSE;
+		is_MSVHD = FALSE;
 		if (!SetupDiGetDeviceRegistryPropertyA(dev_info, &dev_info_data, SPDRP_FRIENDLYNAME,
 				&datatype, (LPBYTE)buffer, sizeof(buffer), &size)) {
 			uprintf("SetupDiGetDeviceRegistryProperty (Friendly Name) failed: %s\n", WindowsErrorString());
@@ -718,6 +726,10 @@ static BOOL GetUSBDevices(DWORD devnum)
 						// The ID is in the form USB_VENDOR_BUSID\VID_xxxx&PID_xxxx\...
 						if (devid[j] == '\\')
 							post_backslash = TRUE;
+							// Check if this is a VHD
+							is_MSVHD = (safe_strstr(devid, msvhd_name) != NULL);
+						if (is_MSVHD)
+							break;
 						if (!post_backslash)
 							continue;
 						if (devid[j] == '_') {
@@ -729,7 +741,7 @@ static BOOL GetUSBDevices(DWORD devnum)
 				}
 			}
 		}
-		if ((vid == 0) && (pid == 0)) {
+		if ((vid == 0) && (pid == 0) && !is_MSVHD) {
 			if (is_SCSI) {
 				// If we have an SCSI drive and couldn't get a VID:PID, we are most likely
 				// dealing with a system drive => eliminate it!
