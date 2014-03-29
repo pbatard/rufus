@@ -53,7 +53,7 @@
 # http://download.microsoft.com/download/9/5/E/95EF66AF-9026-4BB0-A41D-A4F81802D92C/%5BMS-LCID%5D.pdf
 # for the LCID (0x####) codes you should use
 l "en-US" "English (English)" 0x0409, 0x0809, 0x0c09, 0x1009, 0x1409, 0x1809, 0x1c09, 0x2009, 0x2409, 0x2809, 0x2c09, 0x3009, 0x3409, 0x3809, 0x3c09, 0x4009, 0x4409, 0x4809
-v 1.0.10
+v 1.0.11
 
 # Main dialog
 g IDD_DIALOG
@@ -145,7 +145,7 @@ t MSG_007 "Cancel"
 t MSG_008 "Yes"
 t MSG_009 "No"
 t MSG_010 "Bad blocks found"
-t MSG_011 "Check completed: %u bad block(s) found\n"
+t MSG_011 "Check completed: %d bad block(s) found\n"
 	"  %d read error(s)\n  %d write error(s)\n  %d corruption error(s)\n"
 # The following will contain the formatted message above as well as the name of the bad blocks logfile
 t MSG_012 "%s\nA more detailed report can be found in:\n%s"
@@ -498,7 +498,7 @@ t MSG_212 "فشل"
 
 ######################################################################
 l "bg-BG" "Bulgarian (Български)" 0x0402
-v 1.0.10
+v 1.0.11
 b "en-US"
 
 # Main dialog
@@ -635,7 +635,7 @@ t MSG_007 "Прекрати"
 t MSG_008 "Да"
 t MSG_009 "Не"
 t MSG_010 "Намерени са лоши блокове"
-t MSG_011 "Проверката завършена: намерени са %u лоши блокове\n"
+t MSG_011 "Проверката завършена: намерени са %d лоши блокове\n"
 	"  %d грешки при четене\n  %d грешки при запис\n  %d повредени\n"
 # The following will contain the formatted message above as well as the name of the bad blocks logfile
 t MSG_012 "%s\nA По подробен доклад може да намерите в:\n%s"
@@ -926,7 +926,7 @@ t MSG_261 "Писане на образ: %0.1f%% завършено"
 
 ################################################################################
 l "zh-CN" "Chinese Simplified (简体中文)" 0x0804, 0x1004
-v 1.0.10
+v 1.0.11
 b "en-US"
 
 # Main dialog
@@ -1014,7 +1014,7 @@ t MSG_007 "取消"
 t MSG_008 "是"
 t MSG_009 "否"
 t MSG_010 "检测到坏快"
-t MSG_011 "扫描结果：检测到 %u 个坏快\n"
+t MSG_011 "扫描结果：检测到 %d 个坏快\n"
 	"  %d 读取错误\n  %d 写入错误\n  %d 损坏错误\n"
 # The following will contain the formatted message above as well as the name of the bad blocks logfile
 t MSG_012 "%s\n详细报告位于：\n%s"
@@ -1282,7 +1282,7 @@ t MSG_261 "写入镜像：已完成 %0.1f%%"
 
 ################################################################################
 l "zh-TW" "Chinese Traditional (正體中文)" 0x0404, 0x0c04, 0x1404, 0x7c04
-v 1.0.10
+v 1.0.11
 b "en-US"
 
 # Main dialog
@@ -1386,7 +1386,7 @@ t MSG_007 "取消"
 t MSG_008 "是"
 t MSG_009 "否"
 t MSG_010 "偵測到損毀磁區"
-t MSG_011 "掃描結果: %u 個異常\n"
+t MSG_011 "掃描結果: %d 個異常\n"
 	"  %d 讀取錯誤\n  %d 寫入錯誤\n  %d 損毀錯誤\n"
 # The following will contain the formatted message above as well as the name of the bad blocks logfile
 t MSG_012 "%s\n詳細報告位於:\n%s"
@@ -1771,7 +1771,7 @@ t MSG_007 "Annuleren"
 t MSG_008 "Ja"
 t MSG_009 "Nee"
 t MSG_010 "Slechte blokken gevonden"
-t MSG_011 "Controle voltooid: %u slechte blok(ken) gevonden\n"
+t MSG_011 "Controle voltooid: %d slechte blok(ken) gevonden\n"
 	"  %d leesfout(en)\n  %d schrijffout(en)\n  %d corruptiefout(en)\n"
 # The following will contain the formatted message above as well as the name of the bad blocks logfile
 t MSG_012 "%s\nEen meer gedetailleerder rapport kan worden gevonden in:\n%s"
@@ -2031,7 +2031,7 @@ t MSG_259 "Forceer update"
 
 ################################################################################
 l "fi-FI" "Finnish (Suomi)" 0x040B
-v 1.0.10
+v 1.0.11
 b "en-US"
 
 # Main dialog
@@ -2139,7 +2139,7 @@ t MSG_007 "Peruuta"
 t MSG_008 "Kyllä"
 t MSG_009 "Ei"
 t MSG_010 "Viallisia lohkoja löydetty"
-t MSG_011 "Tarkistus valmis: %u viallista lohkoa löydetty\n"
+t MSG_011 "Tarkistus valmis: %d viallista lohkoa löydetty\n"
 	"  %d lukuvirhe(ttä)\n  %d kirjoitusvirhe(ttä)\n  %d korruptiovirhe(ttä)\n"
 # The following will contain the formatted message above as well as the name of the bad blocks logfile
 t MSG_012 "%s\nA voit tarkastella tarkempaa raporttia kohteessa:\n%s"
@@ -2429,7 +2429,7 @@ t MSG_261 "Kirjoitetaan levykuvaa: %0.1f%% valmiina"
 
 ################################################################################
 l "fr-FR" "French (Français)" 0x040c, 0x080c, 0x0c0c, 0x100c, 0x140c, 0x180c, 0x1c0c, 0x200c, 0x240c, 0x280c, 0x2c0c, 0x300c, 0x340c, 0x380c, 0xe40c
-v 1.0.10
+v 1.0.11
 b "en-US"
 
 g IDD_DIALOG
@@ -2525,7 +2525,7 @@ t MSG_007 "Annuler"
 t MSG_008 "Oui"
 t MSG_009 "Non"
 t MSG_010 "Blocs défectueux détectés"
-t MSG_011 "Vérification complète : %u bloc(s) défectueux détecté(s)\n"
+t MSG_011 "Vérification complète : %d bloc(s) défectueux détecté(s)\n"
 	"  %d erreur(s) de lecture\n  %d erreur(s) d'écriture\n  %d erreur(s) de corruption\n"
 t MSG_012 "%s\nUn rapport plus détaillé peut être obtenu à :\n%s"
 t MSG_013 "Jamais"
@@ -2788,7 +2788,7 @@ t MSG_261 "Ecriture d'image : %0.1f%% complété"
 
 ################################################################################
 l "de-DE" "German (Deutsch)" 0x0407, 0x0807, 0x0c07, 0x1007, 0x1407
-v 1.0.10
+v 1.0.11
 b "en-US"
 
 g IDD_DIALOG
@@ -2901,7 +2901,7 @@ t MSG_007 "Abbruch"
 t MSG_008 "Ja"
 t MSG_009 "Nein"
 t MSG_010 "Fehlerhafte Blöcke gefunden"
-t MSG_011 "Prüfung abgeschlossen: %u fehlerhafte Blöcke gefunden\n"
+t MSG_011 "Prüfung abgeschlossen: %d fehlerhafte Blöcke gefunden\n"
 	"  %d Lesefehler\n  %d Schreibfehler\n  %d Defekt(e)\n"
 # The following will contain the formatted message above as well as the name of the bad blocks logfile
 t MSG_012 "%s\nEin detaillierter Bericht ist hier zu finden:\n%s"
@@ -3175,7 +3175,7 @@ t MSG_261 "Schreibe Abbild-Datei: %0.1f%% fertiggestellt"
 
 ################################################################################
 l "el-GR" "Greek (Ελληνικά)" 0x0408
-v 1.0.10
+v 1.0.11
 b "en-US"
 
 # Main dialog
@@ -3319,7 +3319,7 @@ t MSG_007 "Άκυρο"
 t MSG_008 "Ναι"
 t MSG_009 "Όχι"
 t MSG_010 "Βρέθηκαν κατεστραμμένοι τομείς"
-t MSG_011 "Ο έλεγχος ολοκληρώθηκε: βρέθηκαν %u κατεστραμμένοι τομείς \n"
+t MSG_011 "Ο έλεγχος ολοκληρώθηκε: βρέθηκαν %d κατεστραμμένοι τομείς \n"
 	" %d σφάλματα ανάγνωσης\n %d σφάλματα εγγραφής\n %d σφάλματα διαστρέβλωσης\n"
 # The following will contain the formatted message above as well as the name of the bad blocks logfile
 t MSG_012 "%s\nΜια πιο λεπτομερής αναφορά μπορεί να βρεθεί στο:\n%s"
@@ -3687,7 +3687,7 @@ t MSG_007 "Mégse"
 t MSG_008 "Igen"
 t MSG_009 "Nem"
 t MSG_010 "Hibás blokkokat találtam"
-t MSG_011 "Ellenörzés befejezve: %u hibás blokk találva\n"
+t MSG_011 "Ellenörzés befejezve: %d hibás blokk találva\n"
 	"  %d olvasási hiba,\n  %d írási hiba\n  %d összeomlásra hajlamos hiba\n"
 # The following will contain the formatted message above as well as the name of the bad blocks logfile
 t MSG_012 "%s\nEgy részletesebb jelentés itt található:\n%s"
@@ -4083,7 +4083,7 @@ t MSG_007 "Batal"
 t MSG_008 "Ya"
 t MSG_009 "Tidak"
 t MSG_010 "Blok buruk ditemukan"
-t MSG_011 "Pemeriksaan selesai: %u blok buruk ditemukan\n"
+t MSG_011 "Pemeriksaan selesai: %d blok buruk ditemukan\n"
 	"  %d read error(s)\n  %d write error(s)\n  %d corruption error(s)\n"
 # The following will contain the formatted message above as well as the name of the bad blocks logfile
 t MSG_012 "%s\nLaporan yang lebih rinci dapat ditemukan di:\n%s"
@@ -4355,7 +4355,7 @@ t MSG_259 "Pembaruan Paksa"
 
 ################################################################################
 l "it-IT" "Italian (Italiano)" 0x0410, 0x0810
-v 1.0.10
+v 1.0.11
 b "en-US"
 
 g IDD_DIALOG
@@ -4465,7 +4465,7 @@ t MSG_007 "Annulla"
 t MSG_008 "Sì"
 t MSG_009 "No"
 t MSG_010 "Rilevato blocco difettoso"
-t MSG_011 "Controllo completato: trovati %u blocchi difettosi\n"
+t MSG_011 "Controllo completato: trovati %d blocchi difettosi\n"
 	"  %d errori lettura\n  %d errori scrittura\n  %d errori corruzione\n"
 t MSG_012 "%s\nUn report più dettagliato è disponibile in:\n%s"
 t MSG_013 "Disabilitato"
@@ -4731,7 +4731,7 @@ t MSG_261 "Scrittura immagine: %0.1f%% completata"
 
 ################################################################################
 l "ko-KR" "Korean (한국어)" 0x0412
-v 1.0.10
+v 1.0.11
 b "en-US"
 
 # Main dialog
@@ -4835,7 +4835,7 @@ t MSG_007 "취소"
 t MSG_008 "예"
 t MSG_009 "아니오"
 t MSG_010 "배드 섹터 발견 됨."
-t MSG_011 "검사 완료: %u 개의 배트섹터가 발견되었습니다.\n"
+t MSG_011 "검사 완료: %d 개의 배트섹터가 발견되었습니다.\n"
 	"  %d 읽기 오류\n  %d 쓰기 오류\n  %d 손상 섹터\n"
 # The following will contain the formatted message above as well as the name of the bad blocks logfile
 t MSG_012 "%s\n보고에 대한 상세 정보:\n%s"
@@ -5123,7 +5123,7 @@ t MSG_261 "이미지 만들기: %0.1f%% 완료"
 
 ################################################################################
 l "lt-LT" "Lithuanian (Lietuvių)" 0x0427
-v 1.0.10
+v 1.0.11
 b "en-US"
 
 # Main dialog
@@ -5249,7 +5249,7 @@ t MSG_007 "Atšaukti"
 t MSG_008 "Taip"
 t MSG_009 "Ne"
 t MSG_010 "Rasta blogų blokų"
-t MSG_011 "Tikrinimas baigtas: rasta %u blogų blokų\n"
+t MSG_011 "Tikrinimas baigtas: rasta %d blogų blokų\n"
 	"  %d skaitymo klaidų\n  %d rašymo klaidų\n  %d iškraipymo klaidų\n"
 # The following will contain the formatted message above as well as the name of the bad blocks logfile
 t MSG_012 "%s\nIšsamesnę ataskaitą rasite:\n%s"
@@ -5539,7 +5539,7 @@ t MSG_261 "Rašomas atvaizdas: %0.1f%% baigta"
 
 ################################################################################
 l "ms-MY" "Malay (Bahasa Malaysia)" 0x043e, 0x083e
-v 1.0.7
+v 1.0.11
 b "en-US"
 
 # Main dialog
@@ -5668,7 +5668,7 @@ t MSG_007 "batal"
 t MSG_008 "Ya"
 t MSG_009 "Tidak"
 t MSG_010 "Blok rosak dijumpai"
-t MSG_011 "Semak selsesai: %u blok rosak dijumpai\n"
+t MSG_011 "Semak selsesai: %d blok rosak dijumpai\n"
 	"  %d error membaca\n  %d error menulis\n  %d error korupsi\n"
 # The following will contain the formatted message above as well as the name of the bad blocks logfile
 t MSG_012 "%s\nA more detailed report can be found in:\n%s"
@@ -5711,7 +5711,7 @@ t MSG_043 "Error: %s"
 t MSG_044 "Muat turun fail"
 t MSG_045 "Peranti storan USB (Generik)"
 t MSG_046 "%s (Disk %d) [%s]"
-# t MSG_047 "Multiple Partitions"
+t MSG_047 "Beberapa Partition"
 t MSG_048 "Rufus - Mengeflush buffer"
 t MSG_049 "Rufus - Dibatalkan"
 
@@ -5766,17 +5766,22 @@ t MSG_084 "Imej ISO ini menggunakan versi '%s' yang telah usang.\n"
 	"Perhatian: Fail yang dimuat turun akan disimpan di dalam direktori bersamaan dengan Rufus dan apabila terdapat "
 	"'%s' , ia akan digunakan secara automatik."
 t MSG_085 "Muat turun %s"
-t MSG_086 "Imej ISO tidak dapat dikesan"
+t MSG_086 "Tiada imej yang dipilih"
 # The content between the quotes below (\"Create a bootable disk\") should match
 # the beginning of the IDC_BOOT text
-t MSG_087 "Sila kilik pada butang disk untuk memilih ISO boleh boot, "
-	"atau nyahtandakan kotak semak \"Cipta disk boleh boot...\"."
-t MSG_088 "ISO terlalu besar"
-t MSG_089 "Imej ISO ini terlalu besar untuk sasaran yang dipilih."
+t MSG_087 "Sila kilik pada butang disk untuk memilih imej yang boleh boot, "
+	"atau nyahtandakan kotak semak \"Cipta disk boleh boot menggunakan\"."
+t MSG_088 "Imej terlalu besar"
+t MSG_089 "Imej ini terlalu besar untuk sasaran yang dipilih."
 t MSG_090 "ISO tidak disokong"
 t MSG_091 "Apabila menggunakan jenis sasaran UEFI , hanya imej boleh boot jenis EFI sahaja disokong. "
 	"Tolong pilih ISO boleh boot jenis EFI atau tukarkan jenis sasaran kepada BIOS."
 t MSG_092 "Sistem fail tidak disokong"
+t MSG_093 "PENTING: PERANTI INI MEMPUNYAI BEBERAPA PARTITION!!\n\n"
+	"Ini mungkin termasuk partition/jilid yang tidak disenaraikan atau tidak boleh dilihat dari Windows. "
+	"Jika anda mahu meneruskannya, anda bertanggungjawab ke atas kehilangan data dalam partition tersebut."
+t MSG_094 "Beberapa partition dikesan"
+t MSG_095 "DD Imej"
 t MSG_096 "Hanya FAT/FAT32 diskong untuk ISO ini. Tolong pilih FAT/FAT32 sebagai fail sistem."
 t MSG_097 "Hanya imej ISO yang berdasarkan 'bootmgr' atau 'WinPE' boleh digunakan dengan NTFS."
 t MSG_098 "FAT/FAT32 hanya boleh digunakan untuk imej ISO yang berdasarkan isolinux atau apabila jenis sasaran adalah UEFI."
@@ -5797,7 +5802,7 @@ t MSG_104 "Syslinux v5.0 atau kemudian memerlukan fail '%s' di komputer anda.\n"
 	"'%s' ada di sana, ia akan digunakan semula secara automatik.\n"
 t MSG_105 "Pembatalan boleh menyebabkan peranti ini TIDAK BOLEH DIGUNAKAN SEMULA.\n"
 	"Jika anda pasti anda mahu membatalkannya, klik Ya. Sebaliknya, klik Tidak."
-t MSG_106 "Silih pilih folder"
+t MSG_106 "Sila pilih folder"
 t MSG_107 "Semua fail"
 t MSG_108 "Log Rufus"
 t MSG_109 "0x%02X (Disk %d)"
@@ -5810,7 +5815,16 @@ t MSG_111 "Incompatible Cluster size"
 t MSG_112 "Pemformattan jilid UDF yang besar mengambil masa yang amat lama. Pada kelajuan USB 2.0 anggaran masa pemformatan "
 	"adalah %d:%02d, di mana bar kemajuan akan lihat seperti ia tidak bergerak. Tolong bersabar"
 t MSG_113 "Jilid UDF besar"
-
+t MSG_114 "Imej ini menggunakan Syslinux %s tetapi aplikasi ini hanya mempunyai fail pemasangan untuk"
+	"Syslinux %s.\n\nOleh kerana versi-versi baharu Syslinux tidak serasi dengan satu sama lain, maka tidak"
+	"wajarlah Rufus menyediakan semuanya, dua fail tambahan perlu dimuat turun dari"
+	"Internet ('ldlinux.sys' dan 'ldlinux.bss'):\n"
+	"- Pilih 'Ya' untuk menyambung ke Internet dan memuat turun fail tersebut\n"
+	"- Pilih 'Tidak' untuk membatalkan operasi\n\n"
+	"NOTA:Fail akan dimuat turun ke dalam direktori aplikasi ini dan akan digunakan semula"
+	"secara automatik sekiranya sedia ada.\n"
+t MSG_115 "Muat turun diperlukan"
+	
 # Tootips
 # Partition Scheme and Target Type
 t MSG_150 "Selalunya pilihan ini paling selamat. Namun, jika anda ada komputer UEFI dan mahu "
@@ -5860,11 +5874,13 @@ t MSG_184 "Untuk tujuan menjana statistik penggunaan peribadi , kami mungkin men
 t MSG_185 "Proses mengemas kini:"
 t MSG_186 "Rufus tidak memasang atau menjalankan servis di latar belakang. Oleh itu, semakan kemas kini hanya dijalankan apabila aplikasi utama berjalan.\\line\n"
 	"Akses internet diperlukan untuk menymeak untuk versi baru."
+t MSG_187 "Imej tidak sah untuk pilihan boot yang dipilih"
+t MSG_188 "Imej	tidak serasi dengan pilihan boot yang dipilih. Tolong gunakan imej lain atau pilih pilihan boot lain."
 
 # Status messages - these messages will appear on the status bar
 t MSG_201 "Sedang membatalkan - Sila tunggu..."
-t MSG_202 "Mengimbas imej ISO..."
-t MSG_203 "Imbasan imej ISO gagal"
+t MSG_202 "Mengimbas imej..."
+t MSG_203 "Imbasan imej gagal"
 # Parameter: the name of an obsolete Syslinux .c32 module. eg: "Obsolete vesamenu.c32 detected"
 t MSG_204 "%s usang dikesan"
 # Display the name of the ISO selected. eg: "Using ISO: en_win7_x64_sp1.iso"
@@ -5938,10 +5954,12 @@ t MSG_256 "Pengesanan cakera palsu"
 t MSG_257 "Sokongan Joliet"
 t MSG_258 "Sokongan Rock Ridge"
 t MSG_259 "Paksa kemas kini"
+t MSG_260 "Mampatan NTFS"
+t MSG_261 "Menulis imej: %0.1f%% selesai"
 
 ################################################################################
 l "pl-PL" "Polish (Polski)" 0x0415
-v 1.0.10
+v 1.0.11
 b "en-US"
 # my info: 15.02.2014,16:14
 
@@ -6069,7 +6087,7 @@ t MSG_007 "Anuluj"
 t MSG_008 "Tak"
 t MSG_009 "Nie"
 t MSG_010 "Znaleziono uskodzone sektory"
-t MSG_011 "Sprawdzanie zakończone: znaleziono %u uskodzone sektory(ów)\n"
+t MSG_011 "Sprawdzanie zakończone: znaleziono %d uskodzone sektory(ów)\n"
 	" %d błędów odczytu\n %d błędów zapisu\n %d błędy(ów) uszkodzeń\n"
 # The following will contain the formatted message above as well as the name of the bad blocks logfile
 t MSG_012 "%s\nRaport szczegółowy jest dostępny w:\n%s"
@@ -6266,7 +6284,7 @@ t MSG_178 "Dodatkowe Prawa Autorskie:"
 t MSG_179 "Polityka Aktualizacji:"
 t MSG_180 "Jeśli pozwolisz temu programowi szukać aktualizacji aplikacji, "
 	"Zgadzasz się na to, że następujące informacje mogą być zbierane na naszy, serwerze (serwerach):"
-t MSG_181 "Architektura i wersja twojego systemy operacyjnego"
+t MSG_181 "Architektura i wersja twojego systemu operacyjnego"
 t MSG_182 "Wersja aplikacji z której korzystasz"
 t MSG_183 "Twój adres IP"
 t MSG_184 "W celu generowania poufnych statystyk używania , możemy trzymać zebrane informacje, "
@@ -6490,7 +6508,7 @@ t MSG_007 "Cancelar"
 t MSG_008 "Sim"
 t MSG_009 "Não"
 t MSG_010 "Foram encontrados erros no disco"
-t MSG_011 "Verificação completa: %u erros encontrados\n"
+t MSG_011 "Verificação completa: %d erros encontrados\n"
 	"  %d erros de leitura\n  %d erros de escrita\n  %d erros de corrupção\n"
 # The following will contain the formatted message above as well as the name of the bad blocks logfile
 t MSG_012 "%s\nMais informações disponíveis em:\n%s"
@@ -6880,7 +6898,7 @@ t MSG_007 "Anulează"
 t MSG_008 "Da"
 t MSG_009 "Nu"
 t MSG_010 "Bloc defect Detectat"
-t MSG_011 "Verificare completă: s-au găsit %u blocuri defecte\n"
+t MSG_011 "Verificare completă: s-au găsit %d blocuri defecte\n"
 	"  %d erori de citire\n  %d erori de scriere\n  %d erori de corupţie\n"
 t MSG_012 "%s\n Un raport mai detaliat este disponibil în:\n%s"
 t MSG_013 "Invalid"
@@ -7134,7 +7152,7 @@ t MSG_260 "Compresie NTFS"
 
 ################################################################################
 l "ru-RU" "Russian (Русский)" 0x0419, 0x0819
-v 1.0.10
+v 1.0.11
 b "en-US"
 
 # Main dialog
@@ -7271,7 +7289,7 @@ t MSG_007 "Отмена"
 t MSG_008 "Да"
 t MSG_009 "Нет"
 t MSG_010 "Найдены плохие блоки"
-t MSG_011 "Проверка закончена: %u плохих блоков найдено\n"
+t MSG_011 "Проверка закончена: %d плохих блоков найдено\n"
 	"  %d ошибок чтения\n  %d ошибок записи\n  %d поврежденных блоков\n"
 # The following will contain the formatted message above as well as the name of the bad blocks logfile
 t MSG_012 "%s\nБолее подробный отчет можно найти в:\n%s"
@@ -7540,7 +7558,7 @@ t MSG_261 "Запись образа: %0.1f%% выполнено"
 
 ################################################################################
 l "sl-SI" "Slovene (Slovenščina)" 0x0424
-v 1.0.10
+v 1.0.11
 b "en-US"
 
 # Main dialog
@@ -7655,7 +7673,7 @@ t MSG_007 "Prekliči"
 t MSG_008 "Da"
 t MSG_009 "Ne"
 t MSG_010 "Slabi bloki najdeni"
-t MSG_011 "Preizkus končan: %u slabih blokov najdenih\n"
+t MSG_011 "Preizkus končan: %d slabih blokov najdenih\n"
 	"  Napak pri branju: %d\n  Napak pri pisanju: %d\n  %d corruption error(s)\n"
 # The following will contain the formatted message above as well as the name of the bad blocks logfile
 t MSG_012 "%s\nPodrobnejše poročilo lahko najdete v datoteki\n%s"
@@ -8068,7 +8086,7 @@ t MSG_007 "Cancelar"
 t MSG_008 "Sí"
 t MSG_009 "No"
 t MSG_010 "Se encontraron bloques defectuosos"
-t MSG_011 "Verificación completa: se encontraron %u bloques dañados\n"
+t MSG_011 "Verificación completa: se encontraron %d bloques dañados\n"
 	"  %d errores de lectura\n  %d errores de escritura\n  %d errores de corrupción\n"
 # The following will contain the formatted message above as well as the name of the bad blocks logfile
 t MSG_012 "%s\nEl informe detallado se puede encontrar en:\n%s"
@@ -8469,7 +8487,7 @@ t MSG_007 "Vazgeç"
 t MSG_008 "Evet"
 t MSG_009 "Hayır"
 t MSG_010 "Hatalı bloklar bulundu"
-t MSG_011 "Denetim Tamamlandı: %u hatalı blok bulundu\n"
+t MSG_011 "Denetim Tamamlandı: %d hatalı blok bulundu\n"
 	"  %d okuma hatası\n  %d yazma hatası\n  %d hata oluşumu\n"
 # The following will contain the formatted message above as well as the name of the bad blocks logfile
 t MSG_012 "%s\nDaha ayrıntılı rapor burada:\n%s"

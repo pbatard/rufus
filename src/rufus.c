@@ -107,7 +107,7 @@ typedef ULONG (WINAPI *SHChangeNotifyRegister_t)(
 	const MY_SHChangeNotifyEntry *pshcne
 );
 
-const char* FileSystemLabel[FS_MAX] = { "FAT", "FAT32", "NTFS", "UDF", "exFAT" };
+const char* FileSystemLabel[FS_MAX] = { "FAT", "FAT32", "NTFS", "UDF", "exFAT", "ReFS" };
 // Number of steps for each FS for FCC_STRUCTURE_PROGRESS
 const int nb_steps[FS_MAX] = { 5, 5, 12, 1, 10 };
 static const char* PartitionTypeLabel[2] = { "MBR", "GPT" };
@@ -310,6 +310,12 @@ static BOOL DefineClusterSizes(void)
 			SelectedDrive.ClusterSize[FS_UDF].Allowed = 0x00000100;
 			SelectedDrive.ClusterSize[FS_UDF].Default = 1;
 		}
+
+		// ReFS (only supported for Windows 8.1 and later and for fixed disks)
+		if ((nWindowsVersion >= WINDOWS_8_1_OR_LATER) && (SelectedDrive.Geometry.MediaType == FixedMedia)) {
+			SelectedDrive.ClusterSize[FS_REFS].Allowed = 0x00000100;
+			SelectedDrive.ClusterSize[FS_REFS].Default = 1;
+		}
 	}
 
 out:
@@ -391,8 +397,6 @@ static BOOL SetDriveInfo(int ComboIndex)
 	SelectedDrive.DeviceNumber = (DWORD)ComboBox_GetItemData(hDeviceList, ComboIndex);
 
 	SelectedDrive.nPartitions = GetDrivePartitionData(SelectedDrive.DeviceNumber, fs_type, sizeof(fs_type));
-	if (SelectedDrive.nPartitions == 0)
-		return FALSE;
 
 	if (!DefineClusterSizes()) {
 		uprintf("No file system is selectable for this drive\n");
@@ -627,20 +631,18 @@ static BOOL GetUSBDevices(DWORD devnum)
 {
 	// The first two are standard Microsoft drivers (including the Windows 8 UASP one).
 	// The rest are the vendor UASP drivers I know of so far - list may be incomplete!
-	// The last is Microsofts VHD Mount driver to mount a VHD to a drive letter.
-	const char* usbstor_name[] = { "USBSTOR", "UASPSTOR", "VUSBSTOR", "EtronSTOR", "vhdmp" };
+	const char* storage_name[] = { "USBSTOR", "UASPSTOR", "VUSBSTOR", "ETRONSTOR" };
 	const char* scsi_name = "SCSI";
-	// Microsoft VHD Loopback Controller name
-	const char* msvhd_name = "MsVhdHba";
+	const char* vhd_name[] = { "Microsoft Virtual Disk", "Msft Virtual Disk SCSI Disk Device" };
 	char letter_name[] = " (?:)";
-	BOOL found = FALSE, is_SCSI, is_UASP, is_MSVHD;
+	BOOL found = FALSE, is_SCSI, is_UASP, is_VHD;
 	HDEVINFO dev_info = NULL;
 	SP_DEVINFO_DATA dev_info_data;
 	SP_DEVICE_INTERFACE_DATA devint_data;
 	PSP_DEVICE_INTERFACE_DETAIL_DATA_A devint_detail_data;
 	DEVINST parent_inst, device_inst;
 	DWORD size, i, j, k, datatype, drive_index;
-	ULONG list_size[ARRAYSIZE(usbstor_name)], full_list_size;
+	ULONG list_size[ARRAYSIZE(storage_name)], full_list_size;
 	HANDLE hDrive;
 	LONG maxwidth = 0;
 	RECT rect;
@@ -663,10 +665,10 @@ static BOOL GetUSBDevices(DWORD devnum)
 	}
 
 	full_list_size = 0;
-	for (s=0; s<ARRAYSIZE(usbstor_name); s++) {
+	for (s=0; s<ARRAYSIZE(storage_name); s++) {
 		// Get a list of hardware IDs for all USB storage devices
 		// This will be used to retrieve the VID:PID of our devices
-		CM_Get_Device_ID_List_SizeA(&list_size[s], usbstor_name[s], CM_GETIDLIST_FILTER_SERVICE);
+		CM_Get_Device_ID_List_SizeA(&list_size[s], storage_name[s], CM_GETIDLIST_FILTER_SERVICE);
 		if (list_size[s] != 0)
 			full_list_size += list_size[s]-1;	// remove extra NUL terminator
 	}
@@ -680,9 +682,9 @@ static BOOL GetUSBDevices(DWORD devnum)
 	}
 
 	// Build a single list from all the storage enumerators we know of
-	for (s=0, i=0; s<ARRAYSIZE(usbstor_name); s++) {
+	for (s=0, i=0; s<ARRAYSIZE(storage_name); s++) {
 		if (list_size[s] > 1) {
-			CM_Get_Device_ID_ListA(usbstor_name[s], &devid_list[i], list_size[s], CM_GETIDLIST_FILTER_SERVICE);
+			CM_Get_Device_ID_ListA(storage_name[s], &devid_list[i], list_size[s], CM_GETIDLIST_FILTER_SERVICE);
 			// list_size is sometimes larger than required thus we need to find the real end
 			for (i += list_size[s]; i > 2; i--) {
 				if ((devid_list[i-2] != '\0') && (devid_list[i-1] == '\0') && (devid_list[i] == '\0'))
@@ -701,58 +703,63 @@ static BOOL GetUSBDevices(DWORD devnum)
 		}
 		// UASP drives are listed under SCSI (along with regular SYSTEM drives => "DANGER, WILL ROBINSON!!!")
 		is_SCSI = (safe_stricmp(buffer, scsi_name) == 0);
-		if ((safe_stricmp(buffer, usbstor_name[0]) != 0) && (!is_SCSI))
+		if ((safe_stricmp(buffer, storage_name[0]) != 0) && (!is_SCSI))
 			continue;
 		memset(buffer, 0, sizeof(buffer));
 		vid = 0; pid = 0;
-		is_UASP = FALSE;
-		is_MSVHD = FALSE;
+		is_UASP = FALSE, is_VHD = FALSE;
 		if (!SetupDiGetDeviceRegistryPropertyA(dev_info, &dev_info_data, SPDRP_FRIENDLYNAME,
 				&datatype, (LPBYTE)buffer, sizeof(buffer), &size)) {
 			uprintf("SetupDiGetDeviceRegistryProperty (Friendly Name) failed: %s\n", WindowsErrorString());
 			// We can afford a failure on this call - just replace the name with "USB Storage Device (Generic)"
 			safe_strcpy(buffer, sizeof(buffer), lmprintf(MSG_045));
 		} else {
-			// Get the VID:PID of the device. We could avoid doing this lookup every time by keeping
-			// a lookup table, but there shouldn't be that many USB storage devices connected...
-			for (devid = devid_list; *devid; devid += strlen(devid) + 1) {
-				if ( (CM_Locate_DevNodeA(&parent_inst, devid, 0) == 0)
-				  && (CM_Get_Child(&device_inst, parent_inst, 0) == 0)
-				  && (device_inst == dev_info_data.DevInst) ) {
-					BOOL post_backslash = FALSE;
-					// If we're not dealing with the USBSTOR part of our list, then this is an UASP device
-					is_UASP = ((((uintptr_t)devid)+2) >= ((uintptr_t)devid_list)+list_size[0]);
-					for (j=0, k=0; (j<strlen(devid))&&(k<2); j++) {
-						// The ID is in the form USB_VENDOR_BUSID\VID_xxxx&PID_xxxx\...
-						if (devid[j] == '\\')
-							post_backslash = TRUE;
-							// Check if this is a VHD
-							is_MSVHD = (safe_strstr(devid, msvhd_name) != NULL);
-						if (is_MSVHD)
-							break;
-						if (!post_backslash)
-							continue;
-						if (devid[j] == '_') {
-							pid = (uint16_t)strtoul(&devid[j+1], NULL, 16);
-							// We could have used a vid_pid[] table, but keeping vid/pid separate is clearer
-							if (k++==0) vid = pid;
+			for (j = 0; j < ARRAYSIZE(vhd_name); j++) {
+				if (safe_stricmp(buffer, vhd_name[j]) == 0) {
+					is_VHD = TRUE;
+				}
+			}
+			if (is_VHD == FALSE) {
+				// Get the VID:PID of the device. We could avoid doing this lookup every time by keeping
+				// a lookup table, but there shouldn't be that many USB storage devices connected...
+				for (devid = devid_list; *devid; devid += strlen(devid) + 1) {
+					if ( (CM_Locate_DevNodeA(&parent_inst, devid, 0) == 0)
+					  && (CM_Get_Child(&device_inst, parent_inst, 0) == 0)
+					  && (device_inst == dev_info_data.DevInst) ) {
+						BOOL post_backslash = FALSE;
+						// If we're not dealing with the USBSTOR part of our list, then this is an UASP device
+						is_UASP = ((((uintptr_t)devid)+2) >= ((uintptr_t)devid_list)+list_size[0]);
+						for (j=0, k=0; (j<strlen(devid))&&(k<2); j++) {
+							// The ID is in the form USB_VENDOR_BUSID\VID_xxxx&PID_xxxx\...
+							if (devid[j] == '\\')
+								post_backslash = TRUE;
+							if (!post_backslash)
+								continue;
+							if (devid[j] == '_') {
+								pid = (uint16_t)strtoul(&devid[j+1], NULL, 16);
+								// We could have used a vid_pid[] table, but keeping vid/pid separate is clearer
+								if (k++==0) vid = pid;
+							}
 						}
 					}
 				}
 			}
 		}
-		if ((vid == 0) && (pid == 0) && !is_MSVHD) {
-			if (is_SCSI) {
-				// If we have an SCSI drive and couldn't get a VID:PID, we are most likely
-				// dealing with a system drive => eliminate it!
-				continue;
-			}
-			safe_strcpy(str, sizeof(str), "????:????");	// Couldn't figure VID:PID
+		if (is_VHD) {
+			uprintf("Found VHD device '%s'\n", buffer);
 		} else {
-			safe_sprintf(str, sizeof(str), "%04X:%04X", vid, pid);
+			if ((vid == 0) && (pid == 0)) {
+				if (is_SCSI) {
+					// If we have an SCSI drive and couldn't get a VID:PID, we are most likely
+					// dealing with a system drive => eliminate it!
+					continue;
+				}
+				safe_strcpy(str, sizeof(str), "????:????");	// Couldn't figure VID:PID
+			} else {
+				safe_sprintf(str, sizeof(str), "%04X:%04X", vid, pid);
+			}
+			uprintf("Found %s device '%s' (%s)\n", is_UASP?"UAS":"USB", buffer, str);
 		}
-		uprintf("Found %s device '%s' (%s)\n", is_UASP?"UAS":"USB", buffer, str);
-
 		devint_data.cbSize = sizeof(devint_data);
 		hDrive = INVALID_HANDLE_VALUE;
 		devint_detail_data = NULL;
@@ -2024,8 +2031,8 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				break;
 			}
 			SetClusterSizes(fs);
-			// Disable/restore the quick format control depending on large FAT32
-			if ((fs == FS_FAT32) && ((SelectedDrive.DiskSize > LARGE_FAT32_SIZE) || (force_large_fat32))) {
+			// Disable/restore the quick format control depending on large FAT32 or ReFS
+			if ( ((fs == FS_FAT32) && ((SelectedDrive.DiskSize > LARGE_FAT32_SIZE) || (force_large_fat32))) || (fs == FS_REFS) ) {
 				if (IsWindowEnabled(GetDlgItem(hMainDialog, IDC_QUICKFORMAT))) {
 					uQFChecked = IsChecked(IDC_QUICKFORMAT);
 					CheckDlgButton(hMainDialog, IDC_QUICKFORMAT, BST_CHECKED);
@@ -2048,7 +2055,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				}
 				break;
 			}
-			if ((fs == FS_EXFAT) || (fs == FS_UDF)) {
+			if ((fs == FS_EXFAT) || (fs == FS_UDF) || (fs == FS_REFS)) {
 				if (IsWindowEnabled(hBoot)) {
 					// unlikely to be supported by BIOSes => don't bother
 					IGNORE_RETVAL(ComboBox_SetCurSel(hBootType, 0));

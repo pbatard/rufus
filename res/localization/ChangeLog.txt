@@ -3,6 +3,9 @@ rufus.loc since its original version. Translators are expected to keep their
 translations up to date by monitoring this file on regular basis and applying
 the same changes.
 
+When editing an existing translation, make sure you always follow:
+https://github.com/pbatard/rufus/wiki/Localization#Editing_a_translation
+
 Remember to also update the version number for your translation ('v x.y.z')
 once you have matched all the changes that occurred for the en-US translation.
 
@@ -11,6 +14,10 @@ you WHERE, in the English translation, you should look to find the full message
 content. PLEASE, do not just look at this Changelog when updating your
 translation, but always use the English section of rufus.loc as your base.
 For instance, MSG_114, that was introduced in v1.0.8 is MORE than one line!
+
+o Version 1.0.11 (2014.03.29)
+  - Changed MSG_011 "%u bad block(s) found" -> "%d bad block(s) found"
+  Note: since this doesn't require translator involvement, I have applied the change to existing translations.
 
 o Version 1.0.10 (2014.02.09)
   - *NEW* MSG_095 "DD Image"

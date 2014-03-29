@@ -172,6 +172,7 @@ enum {
 	FS_NTFS,
 	FS_UDF,
 	FS_EXFAT,
+	FS_REFS,
 	FS_MAX
 };
 

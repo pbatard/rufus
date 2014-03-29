@@ -196,6 +196,7 @@ char* SizeToHumanReadable(uint64_t size, BOOL log, BOOL fake_units)
 const char* _StrError(DWORD error_code)
 {
 	if ( (!IS_ERROR(error_code)) || (SCODE_CODE(error_code) == ERROR_SUCCESS)) {
+		// TODO: this message is wrong!
 		return lmprintf(MSG_044);
 	}
 	if (SCODE_FACILITY(error_code) != FACILITY_STORAGE) {
