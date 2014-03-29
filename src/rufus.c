@@ -633,7 +633,7 @@ static BOOL GetUSBDevices(DWORD devnum)
 	// The rest are the vendor UASP drivers I know of so far - list may be incomplete!
 	const char* storage_name[] = { "USBSTOR", "UASPSTOR", "VUSBSTOR", "ETRONSTOR" };
 	const char* scsi_name = "SCSI";
-	const char* vhd_name = "Microsoft Virtual Disk";
+	const char* vhd_name = "Virtual Disk";
 	char letter_name[] = " (?:)";
 	BOOL found = FALSE, is_SCSI, is_UASP, is_VHD;
 	HDEVINFO dev_info = NULL;
@@ -713,7 +713,7 @@ static BOOL GetUSBDevices(DWORD devnum)
 			uprintf("SetupDiGetDeviceRegistryProperty (Friendly Name) failed: %s\n", WindowsErrorString());
 			// We can afford a failure on this call - just replace the name with "USB Storage Device (Generic)"
 			safe_strcpy(buffer, sizeof(buffer), lmprintf(MSG_045));
-		} else if (safe_stricmp(buffer, vhd_name) == 0) {
+		} else if (safe_strstr(buffer, vhd_name) != NULL) {
 			is_VHD = TRUE;
 		} else {
 			// Get the VID:PID of the device. We could avoid doing this lookup every time by keeping

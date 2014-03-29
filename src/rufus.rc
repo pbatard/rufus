@@ -32,7 +32,7 @@ LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
 
 IDD_DIALOG DIALOGEX 12, 12, 206, 329
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Rufus 1.4.7.446"
+CAPTION "Rufus 1.4.7.447"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     DEFPUSHBUTTON   "Start",IDC_START,94,291,50,14
@@ -165,7 +165,7 @@ END
 RTL_IDD_DIALOG DIALOGEX 12, 12, 206, 329
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_RTLREADING | WS_EX_APPWINDOW | WS_EX_LAYOUTRTL
-CAPTION "Rufus 1.4.7.446"
+CAPTION "Rufus 1.4.7.447"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     DEFPUSHBUTTON   "Start",IDC_START,94,291,50,14
@@ -427,8 +427,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,4,7,446
- PRODUCTVERSION 1,4,7,446
+ FILEVERSION 1,4,7,447
+ PRODUCTVERSION 1,4,7,447
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -445,13 +445,13 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Akeo Consulting (http://akeo.ie)"
             VALUE "FileDescription", "Rufus"
-            VALUE "FileVersion", "1.4.7.446"
+            VALUE "FileVersion", "1.4.7.447"
             VALUE "InternalName", "Rufus"
             VALUE "LegalCopyright", "© 2011-2014 Pete Batard (GPL v3)"
             VALUE "LegalTrademarks", "http://www.gnu.org/copyleft/gpl.html"
             VALUE "OriginalFilename", "rufus.exe"
             VALUE "ProductName", "Rufus"
-            VALUE "ProductVersion", "1.4.7.446"
+            VALUE "ProductVersion", "1.4.7.447"
         END
     END
     BLOCK "VarFileInfo"
