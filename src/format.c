@@ -116,7 +116,7 @@ static BOOLEAN __stdcall FormatExCallback(FILE_SYSTEM_CALLBACK_COMMAND Command, 
 		PrintStatus(0, TRUE, MSG_218, nb_steps[fs_index], nb_steps[fs_index]);
 		UpdateProgress(OP_CREATE_FS, 100.0f);
 		if(*(BOOLEAN*)pData == FALSE) {
-			uprintf("Error while formatting.\n");
+			uprintf("Error while formatting");
 			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_GEN_FAILURE;
 		}
 		break;
@@ -128,27 +128,29 @@ static BOOLEAN __stdcall FormatExCallback(FILE_SYSTEM_CALLBACK_COMMAND Command, 
 		// uprintf("Volume size: %s MB\n", (char*)(LONG_PTR)(*(ULONG32*)pData));
 		break;
 	case FCC_INCOMPATIBLE_FILE_SYSTEM:
-		uprintf("Incompatible File System\n");
+		uprintf("Incompatible File System");
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_INCOMPATIBLE_FS);
 		break;
 	case FCC_ACCESS_DENIED:
-		uprintf("Access denied\n");
+		uprintf("Access denied");
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_ACCESS_DENIED;
 		break;
 	case FCC_MEDIA_WRITE_PROTECTED:
-		uprintf("Media is write protected\n");
+		uprintf("Media is write protected");
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_WRITE_PROTECT;
 		break;
 	case FCC_VOLUME_IN_USE:
-		uprintf("Volume is in use\n");
+		uprintf("Volume is in use");
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_DEVICE_IN_USE;
 		break;
+	case FCC_DEVICE_NOT_READY:
+		uprintf("The device is not ready");
 	case FCC_CANT_QUICK_FORMAT:
-		uprintf("Cannot quick format this volume\n");
+		uprintf("Cannot quick format this volume");
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_QUICK_FORMAT);
 		break;
 	case FCC_BAD_LABEL:
-		uprintf("Bad label\n");
+		uprintf("Bad label");
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_LABEL_TOO_LONG;
 		break;
 	case FCC_OUTPUT:
@@ -156,19 +158,19 @@ static BOOLEAN __stdcall FormatExCallback(FILE_SYSTEM_CALLBACK_COMMAND Command, 
 		break;
 	case FCC_CLUSTER_SIZE_TOO_BIG:
 	case FCC_CLUSTER_SIZE_TOO_SMALL:
-		uprintf("Unsupported cluster size\n");
+		uprintf("Unsupported cluster size");
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_INVALID_CLUSTER_SIZE);
 		break;
 	case FCC_VOLUME_TOO_BIG:
 	case FCC_VOLUME_TOO_SMALL:
-		uprintf("Volume is too %s\n", FCC_VOLUME_TOO_BIG?"big":"small");
+		uprintf("Volume is too %s", FCC_VOLUME_TOO_BIG?"big":"small");
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_INVALID_VOLUME_SIZE);
 	case FCC_NO_MEDIA_IN_DRIVE:
-		uprintf("No media in drive\n");
+		uprintf("No media in drive");
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_NO_MEDIA_IN_DRIVE;
 		break;
 	default:
-		uprintf("FormatExCallback: received unhandled command %X\n", Command);
+		uprintf("FormatExCallback: Received unhandled command 0x02%X - aborting", Command);
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_NOT_SUPPORTED;
 		break;
 	}
@@ -371,6 +373,8 @@ static BOOL FormatFAT32(DWORD DriveIndex)
 	HANDLE hLogicalVolume;
 	DWORD cbRet;
 	DISK_GEOMETRY dgDrive;
+	BYTE geometry_ex[256]; // DISK_GEOMETRY_EX is variable size
+	PDISK_GEOMETRY_EX xdgDrive = (PDISK_GEOMETRY_EX)(void*)geometry_ex;
 	PARTITION_INFORMATION piDrive;
 	PARTITION_INFORMATION_EX xpiDrive;
 	// Recommended values
@@ -417,21 +421,28 @@ static BOOL FormatFAT32(DWORD DriveIndex)
 	// Work out drive params
 	if (!DeviceIoControl (hLogicalVolume, IOCTL_DISK_GET_DRIVE_GEOMETRY, NULL, 0, &dgDrive,
 		sizeof(dgDrive), &cbRet, NULL)) {
-		die("Failed to get device geometry\n", ERROR_NOT_SUPPORTED);
+		if (!DeviceIoControl (hLogicalVolume, IOCTL_DISK_GET_DRIVE_GEOMETRY_EX, NULL, 0, xdgDrive,
+			sizeof(geometry_ex), &cbRet, NULL)) {
+			uprintf("IOCTL_DISK_GET_DRIVE_GEOMETRY error: %s\n", WindowsErrorString());
+			die("Failed to get device geometry (both regular and _ex)\n", ERROR_NOT_SUPPORTED);
+		}
+		memcpy(&dgDrive, &xdgDrive->Geometry, sizeof(dgDrive));
 	}
 	if (IS_ERROR(FormatStatus)) goto out;
 	if (!DeviceIoControl (hLogicalVolume, IOCTL_DISK_GET_PARTITION_INFO, NULL, 0, &piDrive,
 		sizeof(piDrive), &cbRet, NULL)) {
 		if (!DeviceIoControl (hLogicalVolume, IOCTL_DISK_GET_PARTITION_INFO_EX, NULL, 0, &xpiDrive,
 			sizeof(xpiDrive), &cbRet, NULL)) {
-			die("Failed to get partition info (both regular and _ex)", ERROR_NOT_SUPPORTED);
+			uprintf("IOCTL_DISK_GET_PARTITION_INFO error: %s\n", WindowsErrorString());
+			die("Failed to get partition info (both regular and _ex)\n", ERROR_NOT_SUPPORTED);
 		}
 
-		memset (&piDrive, 0, sizeof(piDrive));
+		memset(&piDrive, 0, sizeof(piDrive));
 		piDrive.StartingOffset.QuadPart = xpiDrive.StartingOffset.QuadPart;
 		piDrive.PartitionLength.QuadPart = xpiDrive.PartitionLength.QuadPart;
 		piDrive.HiddenSectors = (DWORD) (xpiDrive.StartingOffset.QuadPart / dgDrive.BytesPerSector);
 	}
+	if (IS_ERROR(FormatStatus)) goto out;
 
 	BytesPerSect = dgDrive.BytesPerSector;
 
@@ -450,7 +461,7 @@ static BOOL FormatFAT32(DWORD DriveIndex)
 		// There would need to be an extra field in the FSInfo sector, and the old sector count could
 		// be set to 0xffffffff. This is non standard though, the Windows FAT driver FASTFAT.SYS won't
 		// understand this. Perhaps a future version of FAT32 and FASTFAT will handle this.
-		die ("This drive is too big for FAT32 - max 2TB supported\n", APPERR(ERROR_INVALID_VOLUME_SIZE));
+		die("This drive is too big for FAT32 - max 2TB supported\n", APPERR(ERROR_INVALID_VOLUME_SIZE));
 	}
 
 	pFAT32BootSect = (FAT_BOOTSECTOR32*) calloc(BytesPerSect, 1);

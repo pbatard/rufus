@@ -473,9 +473,8 @@ uint64_t GetDriveSize(DWORD DriveIndex)
 	BOOL r;
 	HANDLE hPhysical;
 	DWORD size;
-	BYTE geometry[128];
-	void* disk_geometry = (void*)geometry;
-	PDISK_GEOMETRY_EX DiskGeometry = (PDISK_GEOMETRY_EX)disk_geometry;
+	BYTE geometry[256];
+	PDISK_GEOMETRY_EX DiskGeometry = (PDISK_GEOMETRY_EX)(void*)geometry;
 
 	hPhysical = GetPhysicalHandle(DriveIndex, FALSE, FALSE);
 	if (hPhysical == INVALID_HANDLE_VALUE)
@@ -588,11 +587,9 @@ int GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSyst
 	BOOL r, hasRufusExtra = FALSE;
 	HANDLE hPhysical;
 	DWORD size;
-	BYTE geometry[128], layout[4096], part_type;
-	void* disk_geometry = (void*)geometry;
-	void* drive_layout = (void*)layout;
-	PDISK_GEOMETRY_EX DiskGeometry = (PDISK_GEOMETRY_EX)disk_geometry;
-	PDRIVE_LAYOUT_INFORMATION_EX DriveLayout = (PDRIVE_LAYOUT_INFORMATION_EX)drive_layout;
+	BYTE geometry[256], layout[4096], part_type;
+	PDISK_GEOMETRY_EX DiskGeometry = (PDISK_GEOMETRY_EX)(void*)geometry;
+	PDRIVE_LAYOUT_INFORMATION_EX DriveLayout = (PDRIVE_LAYOUT_INFORMATION_EX)(void*)layout;
 	char* volume_name;
 	char tmp[256];
 	DWORD i, nb_partitions = 0;
