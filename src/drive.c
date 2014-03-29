@@ -615,7 +615,8 @@ int GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSyst
 	}
 	SelectedDrive.DiskSize = DiskGeometry->DiskSize.QuadPart;
 	memcpy(&SelectedDrive.Geometry, &DiskGeometry->Geometry, sizeof(DISK_GEOMETRY));
-	uprintf("Sector Size: %d bytes\n", DiskGeometry->Geometry.BytesPerSector);
+	uprintf("Disk type: %s, Sector Size: %d bytes\n", (DiskGeometry->Geometry.MediaType == FixedMedia)?"Fixed":"Removable",
+		DiskGeometry->Geometry.BytesPerSector);
 	uprintf("Cylinders: %lld, TracksPerCylinder: %d, SectorsPerTrack: %d\n",
 		DiskGeometry->Geometry.Cylinders, DiskGeometry->Geometry.TracksPerCylinder, DiskGeometry->Geometry.SectorsPerTrack);
 
@@ -900,7 +901,8 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 		case FS_NTFS:
 		case FS_EXFAT:
 		case FS_UDF:
-			DriveLayoutEx.PartitionEntry[0].Mbr.PartitionType = 0x07;	// NTFS
+		case FS_REFS:
+			DriveLayoutEx.PartitionEntry[0].Mbr.PartitionType = 0x07;
 			break;
 		case FS_FAT32:
 			DriveLayoutEx.PartitionEntry[0].Mbr.PartitionType = 0x0c;	// FAT32 LBA

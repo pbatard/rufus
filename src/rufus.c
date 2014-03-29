@@ -107,7 +107,7 @@ typedef ULONG (WINAPI *SHChangeNotifyRegister_t)(
 	const MY_SHChangeNotifyEntry *pshcne
 );
 
-const char* FileSystemLabel[FS_MAX] = { "FAT", "FAT32", "NTFS", "UDF", "exFAT" };
+const char* FileSystemLabel[FS_MAX] = { "FAT", "FAT32", "NTFS", "UDF", "exFAT", "ReFS" };
 // Number of steps for each FS for FCC_STRUCTURE_PROGRESS
 const int nb_steps[FS_MAX] = { 5, 5, 12, 1, 10 };
 static const char* PartitionTypeLabel[2] = { "MBR", "GPT" };
@@ -309,6 +309,12 @@ static BOOL DefineClusterSizes(void)
 		if (nWindowsVersion >= WINDOWS_VISTA) {
 			SelectedDrive.ClusterSize[FS_UDF].Allowed = 0x00000100;
 			SelectedDrive.ClusterSize[FS_UDF].Default = 1;
+		}
+
+		// ReFS (only supported for Windows 8.1 and later and for fixed disks)
+		if ((nWindowsVersion >= WINDOWS_8_1_OR_LATER) && (SelectedDrive.Geometry.MediaType == FixedMedia)) {
+			SelectedDrive.ClusterSize[FS_REFS].Allowed = 0x00000100;
+			SelectedDrive.ClusterSize[FS_REFS].Default = 1;
 		}
 	}
 
@@ -2012,8 +2018,8 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				break;
 			}
 			SetClusterSizes(fs);
-			// Disable/restore the quick format control depending on large FAT32
-			if ((fs == FS_FAT32) && ((SelectedDrive.DiskSize > LARGE_FAT32_SIZE) || (force_large_fat32))) {
+			// Disable/restore the quick format control depending on large FAT32 or ReFS
+			if ( ((fs == FS_FAT32) && ((SelectedDrive.DiskSize > LARGE_FAT32_SIZE) || (force_large_fat32))) || (fs == FS_REFS) ) {
 				if (IsWindowEnabled(GetDlgItem(hMainDialog, IDC_QUICKFORMAT))) {
 					uQFChecked = IsChecked(IDC_QUICKFORMAT);
 					CheckDlgButton(hMainDialog, IDC_QUICKFORMAT, BST_CHECKED);
@@ -2036,7 +2042,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				}
 				break;
 			}
-			if ((fs == FS_EXFAT) || (fs == FS_UDF)) {
+			if ((fs == FS_EXFAT) || (fs == FS_UDF) || (fs == FS_REFS)) {
 				if (IsWindowEnabled(hBoot)) {
 					// unlikely to be supported by BIOSes => don't bother
 					IGNORE_RETVAL(ComboBox_SetCurSel(hBootType, 0));
