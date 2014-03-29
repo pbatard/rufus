@@ -633,7 +633,7 @@ static BOOL GetUSBDevices(DWORD devnum)
 	// The rest are the vendor UASP drivers I know of so far - list may be incomplete!
 	const char* storage_name[] = { "USBSTOR", "UASPSTOR", "VUSBSTOR", "ETRONSTOR" };
 	const char* scsi_name = "SCSI";
-	const char* vhd_name[] = { "Microsoft Virtual Disk", "Msft Virtual Disk SCSI Disk Device" };
+	const char* vhd_name = "Microsoft Virtual Disk";
 	char letter_name[] = " (?:)";
 	BOOL found = FALSE, is_SCSI, is_UASP, is_VHD;
 	HDEVINFO dev_info = NULL;
@@ -713,33 +713,28 @@ static BOOL GetUSBDevices(DWORD devnum)
 			uprintf("SetupDiGetDeviceRegistryProperty (Friendly Name) failed: %s\n", WindowsErrorString());
 			// We can afford a failure on this call - just replace the name with "USB Storage Device (Generic)"
 			safe_strcpy(buffer, sizeof(buffer), lmprintf(MSG_045));
+		} else if (safe_stricmp(buffer, vhd_name) == 0) {
+			is_VHD = TRUE;
 		} else {
-			for (j = 0; j < ARRAYSIZE(vhd_name); j++) {
-				if (safe_stricmp(buffer, vhd_name[j]) == 0) {
-					is_VHD = TRUE;
-				}
-			}
-			if (is_VHD == FALSE) {
-				// Get the VID:PID of the device. We could avoid doing this lookup every time by keeping
-				// a lookup table, but there shouldn't be that many USB storage devices connected...
-				for (devid = devid_list; *devid; devid += strlen(devid) + 1) {
-					if ( (CM_Locate_DevNodeA(&parent_inst, devid, 0) == 0)
-					  && (CM_Get_Child(&device_inst, parent_inst, 0) == 0)
-					  && (device_inst == dev_info_data.DevInst) ) {
-						BOOL post_backslash = FALSE;
-						// If we're not dealing with the USBSTOR part of our list, then this is an UASP device
-						is_UASP = ((((uintptr_t)devid)+2) >= ((uintptr_t)devid_list)+list_size[0]);
-						for (j=0, k=0; (j<strlen(devid))&&(k<2); j++) {
-							// The ID is in the form USB_VENDOR_BUSID\VID_xxxx&PID_xxxx\...
-							if (devid[j] == '\\')
-								post_backslash = TRUE;
-							if (!post_backslash)
-								continue;
-							if (devid[j] == '_') {
-								pid = (uint16_t)strtoul(&devid[j+1], NULL, 16);
-								// We could have used a vid_pid[] table, but keeping vid/pid separate is clearer
-								if (k++==0) vid = pid;
-							}
+			// Get the VID:PID of the device. We could avoid doing this lookup every time by keeping
+			// a lookup table, but there shouldn't be that many USB storage devices connected...
+			for (devid = devid_list; *devid; devid += strlen(devid) + 1) {
+				if ( (CM_Locate_DevNodeA(&parent_inst, devid, 0) == 0)
+				  && (CM_Get_Child(&device_inst, parent_inst, 0) == 0)
+				  && (device_inst == dev_info_data.DevInst) ) {
+					BOOL post_backslash = FALSE;
+					// If we're not dealing with the USBSTOR part of our list, then this is an UASP device
+					is_UASP = ((((uintptr_t)devid)+2) >= ((uintptr_t)devid_list)+list_size[0]);
+					for (j=0, k=0; (j<strlen(devid))&&(k<2); j++) {
+						// The ID is in the form USB_VENDOR_BUSID\VID_xxxx&PID_xxxx\...
+						if (devid[j] == '\\')
+							post_backslash = TRUE;
+						if (!post_backslash)
+							continue;
+						if (devid[j] == '_') {
+							pid = (uint16_t)strtoul(&devid[j+1], NULL, 16);
+							// We could have used a vid_pid[] table, but keeping vid/pid separate is clearer
+							if (k++==0) vid = pid;
 						}
 					}
 				}
