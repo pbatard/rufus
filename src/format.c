@@ -1315,12 +1315,12 @@ DWORD WINAPI FormatThread(void* param)
 				_unlink(logfile);
 				goto out;
 			}
-			uprintf("Bad Blocks: Check completed, %u bad block%s found. (%d/%d/%d errors)\n",
+			uprintf("Bad Blocks: Check completed, %d bad block%s found. (%d/%d/%d errors)\n",
 				report.bb_count, (report.bb_count==1)?"":"s",
 				report.num_read_errors, report.num_write_errors, report.num_corruption_errors);
 			r = IDOK;
 			if (report.bb_count) {
-				bb_msg = lmprintf(MSG_011, report.num_read_errors, report.num_write_errors,
+				bb_msg = lmprintf(MSG_011, report.bb_count, report.num_read_errors, report.num_write_errors,
 					report.num_corruption_errors);
 				fprintf(log_fd, bb_msg);
 				GetLocalTime(&lt);
