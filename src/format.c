@@ -145,6 +145,9 @@ static BOOLEAN __stdcall FormatExCallback(FILE_SYSTEM_CALLBACK_COMMAND Command, 
 		break;
 	case FCC_DEVICE_NOT_READY:
 		uprintf("The device is not ready");
+		// TODO: set to ERROR_NOT_READY and add relevant translation
+		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_ACCESS_DENIED;
+		break;
 	case FCC_CANT_QUICK_FORMAT:
 		uprintf("Cannot quick format this volume");
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_QUICK_FORMAT);
@@ -163,8 +166,9 @@ static BOOLEAN __stdcall FormatExCallback(FILE_SYSTEM_CALLBACK_COMMAND Command, 
 		break;
 	case FCC_VOLUME_TOO_BIG:
 	case FCC_VOLUME_TOO_SMALL:
-		uprintf("Volume is too %s", FCC_VOLUME_TOO_BIG?"big":"small");
+		uprintf("Volume is too %s", (Command == FCC_VOLUME_TOO_BIG)?"big":"small");
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_INVALID_VOLUME_SIZE);
+		break;
 	case FCC_NO_MEDIA_IN_DRIVE:
 		uprintf("No media in drive");
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_NO_MEDIA_IN_DRIVE;
@@ -701,6 +705,7 @@ static BOOL FormatDrive(DWORD DriveIndex)
 	wVolumeName = utf8_to_wchar(VolumeName);
 	if (wVolumeName == NULL) {
 		uprintf("Could not read volume name\n");
+		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_GEN_FAILURE;
 		goto out;
 	}
 	// Hey, nice consistency here, Microsoft! -  FormatEx() fails if wVolumeName has

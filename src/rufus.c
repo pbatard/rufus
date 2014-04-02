@@ -141,7 +141,7 @@ HWND hDeviceList, hPartitionScheme, hFileSystem, hClusterSize, hLabel, hBootType
 HWND hISOProgressDlg = NULL, hLogDlg = NULL, hISOProgressBar, hISOFileName, hDiskID;
 BOOL use_own_c32[NB_OLD_C32] = {FALSE, FALSE}, detect_fakes = TRUE, mbr_selected_by_user = FALSE;
 BOOL iso_op_in_progress = FALSE, format_op_in_progress = FALSE, right_to_left_mode = FALSE;
-BOOL enable_HDDs = FALSE, advanced_mode = TRUE, force_update = FALSE;
+BOOL enable_HDDs = FALSE, advanced_mode = TRUE, force_update = FALSE, use_fake_units = TRUE;
 int dialog_showing = 0;
 uint16_t rufus_version[4], embedded_sl_version[2];
 char embedded_sl_version_str[2][12] = { "?.??", "?.??" };
@@ -312,9 +312,11 @@ static BOOL DefineClusterSizes(void)
 		}
 
 		// ReFS (only supported for Windows 8.1 and later and for fixed disks)
-		if ((nWindowsVersion >= WINDOWS_8_1_OR_LATER) && (SelectedDrive.Geometry.MediaType == FixedMedia)) {
-			SelectedDrive.ClusterSize[FS_REFS].Allowed = 0x00000100;
-			SelectedDrive.ClusterSize[FS_REFS].Default = 1;
+		if (SelectedDrive.DiskSize >= 512*MB) {
+			if ((nWindowsVersion >= WINDOWS_8_1_OR_LATER) && (SelectedDrive.Geometry.MediaType == FixedMedia)) {
+				SelectedDrive.ClusterSize[FS_REFS].Allowed = 0x00000100;
+				SelectedDrive.ClusterSize[FS_REFS].Default = 1;
+			}
 		}
 	}
 
@@ -598,7 +600,7 @@ static BOOL PopulateProperties(int ComboIndex)
 
 	// Set a proposed label according to the size (eg: "256MB", "8GB")
 	safe_sprintf(SelectedDrive.proposed_label, sizeof(SelectedDrive.proposed_label),
-		SizeToHumanReadable(SelectedDrive.DiskSize, FALSE, TRUE));
+		SizeToHumanReadable(SelectedDrive.DiskSize, FALSE, use_fake_units));
 
 	// Add a tooltip (with the size of the device in parenthesis)
 	device_tooltip = (char*) malloc(safe_strlen(DriveID.String[ComboIndex]) + 16);
@@ -823,7 +825,8 @@ static BOOL GetUSBDevices(DWORD devnum)
 
 				// The empty string is returned for drives that don't have any volumes assigned
 				if (drive_letters[0] == 0) {
-					entry = lmprintf(MSG_046, label, drive_number, SizeToHumanReadable(GetDriveSize(drive_index), FALSE, TRUE));
+					entry = lmprintf(MSG_046, label, drive_number,
+						SizeToHumanReadable(GetDriveSize(drive_index), FALSE, use_fake_units));
 				} else {
 					// We have multiple volumes assigned to the same device (multiple partitions)
 					// If that is the case, use "Multiple Volumes" instead of the label
@@ -845,7 +848,7 @@ static BOOL GetUSBDevices(DWORD devnum)
 						break;
 					}
 					safe_sprintf(&entry_msg[strlen(entry_msg)], sizeof(entry_msg) - strlen(entry_msg),
-						" [%s]", SizeToHumanReadable(GetDriveSize(drive_index), FALSE, TRUE));
+						" [%s]", SizeToHumanReadable(GetDriveSize(drive_index), FALSE, use_fake_units));
 					entry = entry_msg;
 				}
 
@@ -2512,13 +2515,21 @@ relaunch:
 	while(GetMessage(&msg, NULL, 0, 0)) {
 		// The following ensures the processing of the ISO progress window messages
 		if (!IsWindow(hISOProgressDlg) || !IsDialogMessage(hISOProgressDlg, &msg)) {
-			// Alt-S => Disable size limit for ISOs
-			// By default, Rufus will not copy ISOs that are larger than in size than
-			// the target USB drive. If this is enabled, the size check is disabled.
-			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'S')) {
-				size_check = !size_check;
-				PrintStatus2000(lmprintf(MSG_252), size_check);
-				GetUSBDevices(0);
+			// Alt-B => Toggle fake drive detection during bad blocks check
+			// By default, Rufus will check for fake USB flash drives that mistakenly present
+			// more capacity than they already have by looping over the flash. This check which
+			// is enabled by default is performed by writing the block number sequence and reading
+			// it back during the bad block check.
+			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'B')) {
+				detect_fakes = !detect_fakes;
+				PrintStatus2000(lmprintf(MSG_256), detect_fakes);
+				continue;
+			}
+			// Alt-D => Delete the NoDriveTypeAutorun key on exit (useful if the app crashed)
+			// This key is used to disable Windows popup messages when an USB drive is plugged in.
+			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'D')) {
+				PrintStatus(2000, FALSE, MSG_255);
+				existing_key = FALSE;
 				continue;
 			}
 			// Alt-F => Toggle detection of USB HDDs
@@ -2530,20 +2541,6 @@ relaunch:
 				PrintStatus2000(lmprintf(MSG_253), enable_HDDs);
 				GetUSBDevices(0);
 				CheckDlgButton(hMainDialog, IDC_ENABLE_FIXED_DISKS, enable_HDDs?BST_CHECKED:BST_UNCHECKED);
-				continue;
-			}
-			// Alt-L => Force Large FAT32 format to be used on < 32 GB drives
-			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'L')) {
-				force_large_fat32 = !force_large_fat32;
-				PrintStatus2000(lmprintf(MSG_254), force_large_fat32);
-				GetUSBDevices(0);
-				continue;
-			}
-			// Alt-D => Delete the NoDriveTypeAutorun key on exit (useful if the app crashed)
-			// This key is used to disable Windows popup messages when an USB drive is plugged in.
-			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'D')) {
-				PrintStatus(2000, FALSE, MSG_255);
-				existing_key = FALSE;
 				continue;
 			}
 			// Alt J => Toggle Joliet support for ISO9660 images
@@ -2561,14 +2558,11 @@ relaunch:
 				PrintStatus2000(lmprintf(MSG_258), enable_rockridge);
 				continue;
 			}
-			// Alt L => Toggle fake drive detection during bad blocks check
-			// By default, Rufus will check for fake USB flash drives that mistakenly present
-			// more capacity than they already have by looping over the flash. This check which
-			// is enabled by default is performed by writing the block number sequence and reading
-			// it back during the bad block check.
+			// Alt-L => Force Large FAT32 format to be used on < 32 GB drives
 			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'L')) {
-				detect_fakes = !detect_fakes;
-				PrintStatus2000(lmprintf(MSG_256), detect_fakes);
+				force_large_fat32 = !force_large_fat32;
+				PrintStatus2000(lmprintf(MSG_254), force_large_fat32);
+				GetUSBDevices(0);
 				continue;
 			}
 			// Alt N => Enable NTFS compression
@@ -2577,11 +2571,27 @@ relaunch:
 				PrintStatus2000(lmprintf(MSG_260), enable_ntfs_compression);
 				continue;
 			}
+			// Alt-Q => Use PROPER size units, instead of this whole Kibi/Gibi nonsense
+			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'Q')) {
+				use_fake_units = !use_fake_units;
+				PrintStatus2000("Use PROPER size units:", !use_fake_units);
+				GetUSBDevices(0);
+				continue;
+			}
 			// Alt-R => Remove all the registry keys created by Rufus
 			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'R')) {
 				PrintStatus(2000, FALSE, DeleteRegistryKey(REGKEY_HKCU, COMPANY_NAME "\\" APPLICATION_NAME)?MSG_248:MSG_249);
 				// Also try to delete the upper key (company name) if it's empty (don't care about the result)
 				DeleteRegistryKey(REGKEY_HKCU, COMPANY_NAME);
+				continue;
+			}
+			// Alt-S => Disable size limit for ISOs
+			// By default, Rufus will not copy ISOs that are larger than in size than
+			// the target USB drive. If this is enabled, the size check is disabled.
+			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'S')) {
+				size_check = !size_check;
+				PrintStatus2000(lmprintf(MSG_252), size_check);
+				GetUSBDevices(0);
 				continue;
 			}
 			// Alt U => Force the update check to be successful

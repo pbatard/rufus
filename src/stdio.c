@@ -188,7 +188,8 @@ char* SizeToHumanReadable(uint64_t size, BOOL log, BOOL fake_units)
 			safe_sprintf(str_size, sizeof(str_size), "%d%s", i_size, _msg_table[MSG_020+suffix-MSG_000]);
 		}
 	} else {
-		safe_sprintf(str_size, sizeof(str_size), "%0.1f %s", hr_size, _msg_table[MSG_020+suffix-MSG_000]);
+		safe_sprintf(str_size, sizeof(str_size), (hr_size * 10.0 - (floor(hr_size) * 10.0)) < 1.0?
+			"%0.0f %s":"%0.1f %s", hr_size, _msg_table[MSG_020+suffix-MSG_000]);
 	}
 	return str_size;
 }
