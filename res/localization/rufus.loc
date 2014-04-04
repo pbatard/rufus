@@ -4729,6 +4729,421 @@ t MSG_259 "Forza update"
 t MSG_260 "Compressione NTFS"
 t MSG_261 "Scrittura immagine: %0.1f%% completata"
 
+######################################################################
+l "ja-JP" "Japanese (日本語)" 0x0411
+v 1.0.11
+b "en-US"
+
+# Main dialog
+g IDD_DIALOG
+
+s IDD_DIALOG +35,0
+m IDC_LANG +35,0
+s IDC_PROGRESS +35,0
+s IDC_DEVICE +35,0
+s IDC_PARTITION_TYPE +35,0
+s IDC_FILESYSTEM +35,0
+s IDC_CLUSTERSIZE +35,0
+s IDC_LABEL +40,0
+s IDS_FORMAT_OPTIONS_GRP +32,0
+s IDS_ADVANCED_OPTIONS_GRP +32,0
+s IDC_ENABLE_FIXED_DISKS +35,0
+s IDC_EXTRA_PARTITION +35,0
+m IDC_NBPASSES +10,0
+s IDC_NBPASSES +21,0
+m IDC_BOOTTYPE +10,0
+s IDC_BOOTTYPE +21,0
+m IDC_SELECT_ISO +33,0
+s IDC_RUFUS_MBR +16,0
+s IDC_RUFUS_MBR +10,0
+m IDC_DISK_ID +10,0
+s IDC_DISK_ID +22,0
+s IDC_ABOUT +5,0
+m IDC_LOG +5,0
+s IDC_LOG +10,0
+s IDC_START +5,0
+m IDC_START +24,0
+s IDCANCEL +5,0
+m IDCANCEL +29,0
+
+t IDS_DEVICE_TXT "デバイス"
+t IDS_PARTITION_TYPE_TXT "パーティション構成とターゲットシステムの種類"
+t IDS_FILESYSTEM_TXT "ファイルシステム"
+t IDS_CLUSTERSIZE_TXT "クラスタサイズ"
+t IDS_LABEL_TXT "ボリュームの新ラベル"
+t IDS_FORMAT_OPTIONS_GRP "フォーマット設定       "
+t IDC_BADBLOCKS "破損したブロックを検索する"
+t IDC_QUICKFORMAT "クイックフォーマット"
+t IDC_BOOT "ブートディスクを作る"
+t IDC_SET_ICON "インターナショナルラベルとアイコンファイルを作る"
+t IDC_ABOUT "Rufusについて"
+t IDC_LOG "ログ"
+t IDCANCEL "閉じる"
+t IDC_START "スタート"
+t IDS_ADVANCED_OPTIONS_GRP "アドバンス（高度な）設定"
+t IDC_ENABLE_FIXED_DISKS "USBハードドライブを一覧表示する"
+t IDC_EXTRA_PARTITION "古いのバイオスのためにフィクスを追加する"
+t IDC_RUFUS_MBR "バイオスIDでRufusのMBRを作る"
+
+# About dialog
+g IDD_ABOUTBOX
+t IDD_ABOUTBOX "Rufusについて"
+t IDC_ABOUT_LICENSE "ライセンス"
+t IDC_ABOUT_UPDATES "アップデート"
+t IDOK "閉じる"
+
+# About -> License dialog
+g IDD_LICENSE
+t IDD_LICENSE "Rufusライセンス"
+t IDCANCEL "閉じる"
+
+# Notifications. You can trigger one of these by using Alt-R and re-launching Rufus
+g IDD_NOTIFICATION
+t IDC_MORE_INFO "詳細情報"
+t IDYES "はい"
+t IDNO "いいえ"
+
+# Log dialog
+g IDD_LOG
+t IDD_LOG "Log"
+t IDC_LOG_CLEAR "ログを消去する"
+m IDC_LOG_CLEAR -10,0
+s IDC_LOG_CLEAR +5,0
+t IDC_LOG_SAVE "ログを保存する"
+m IDC_LOG_SAVE -5,0
+s IDC_LOG_SAVE +5,0
+t IDCANCEL "ログを閉じる"
+s IDCANCEL +5,0
+
+# About -> Updates
+g IDD_UPDATE_POLICY
+t IDD_UPDATE_POLICY "アップデートポリシーと設定"
+t IDS_UPDATE_SETTINGS_GRP "設定"
+t IDS_UPDATE_FREQUENCY_TXT "アップデートを探す:"
+t IDS_INCLUDE_BETAS_TXT "ベータバージョンを含める:"
+t IDC_CHECK_NOW "今すぐに探す"
+t IDCANCEL "閉じる"
+s IDC_UPDATE_FREQUENCY +2,0
+s IDS_UPDATE_SETTINGS_GRP +5,0
+
+# Dialog that appears when a new version is available
+g IDD_NEW_VERSION
+t IDD_NEW_VERSION "アップデートを探す - Rufus"
+t IDS_NEW_VERSION_AVAIL_TXT "新バージョンは利用出来ます。新バージョンをダウンロードして下さい！"
+t IDC_WEBSITE "ウェブサイトへ行くためにここでクリックして下さい。"
+t IDS_NEW_VERSION_NOTES_GRP "リリースノート"
+t IDS_NEW_VERSION_DOWNLOAD_GRP "ダウンロード"
+t IDC_DOWNLOAD "ダウンロード"
+t IDCANCEL "閉じる"
+
+# Dialog that appears when scanning/extracting ISO files
+g IDD_ISO_EXTRACT
+t IDD_ISO_EXTRACT "ISOファイルをコピー中．．．．．．"
+t IDC_ISO_FILENAME "ISOを開く中・そろそろお待ち下さい．．．．．．"
+t IDC_ISO_ABORT "取消"
+
+# Messages used throughout the application
+t MSG_001 "他のインスタンスは検出した"
+t MSG_002 "Rufusはもう実行している。\n"
+	"もう一度実行する前に実行中Rufusを閉じて下さい。"
+t MSG_003 "警告：デバイス '%s' にデーターは削除します。\n"
+	"続くには、OKをクリックします。止めるには、CANCELをクリックします。"
+t MSG_004 "Rufus update policy"
+t MSG_005 "Do you want to allow Rufus to check for application updates online?"
+# Must be the same as IDD_DIALOG:IDCANCEL (i.e. "Close" - I know it's confusing)
+t MSG_006 "閉じる"
+t MSG_007 "取消"
+t MSG_008 "はい"
+t MSG_009 "いいえ"
+t MSG_010 "破損したブロックは見つけられた。"
+t MSG_011 "検索完成：破損したブロックの数・ %d\n"
+	"  リードエラーの数 %d \n  ライトエラーの数 %d \n  破損エラーの数 %d \n"
+# The following will contain the formatted message above as well as the name of the bad blocks logfile
+t MSG_012 "%s\n詳細なレポートはここに見つけれます：\n%s"
+t MSG_013 "使用禁止"
+t MSG_014 "毎日"
+t MSG_015 "毎週"
+t MSG_016 "毎月"
+t MSG_017 "Custom"
+t MSG_018 "このバージョン： %d.%d.%d (Build %d)"
+t MSG_019 "最近バージョン： %d.%d.%d (Build %d)"
+# *Short* size names. These can be used as suffixes
+t MSG_020 "バイト"
+t MSG_021 "KB"
+t MSG_022 "MB"
+t MSG_023 "GB"
+t MSG_024 "TB"
+t MSG_025 "PB"
+# *Long* size names, as they are displayed for the cluster size in the MS format dialog.
+t MSG_026 "バイト"	# Yes, this is a repeat from MSG_020
+t MSG_027 "キロバイト"
+t MSG_028 "メガバイト"
+t MSG_029 "デフォルト"
+# The following gets appended to the file system, cluster size, etc.
+t MSG_030 "%s (デフォルト)"
+t MSG_031 "%s バイオスまたはUEFIコンピューターのためにパーティション構成"
+t MSG_032 "%s バイオスコンピューターのためにパーティション構成"
+t MSG_033 "%s UEFIコンピューターのためにパーティション構成"
+# Number of bad block check passes (singular for 1 pass, plural for 2 or more passes)
+t MSG_034 "%d パス"
+t MSG_035 "%d パス"
+t MSG_036 "ISOイメージ"
+t MSG_037 "アプリケーション"
+t MSG_038 "停止"
+t MSG_039 "起動"
+t MSG_040 "ダウンロード"
+t MSG_041 "操作はユーザーで取消しました。"
+t MSG_042 "エラー"
+t MSG_043 "エラー： %s"
+t MSG_044 "ファイルダウンロード"
+t MSG_045 "USB記憶装置（汎用）"
+t MSG_046 "%s (ディスク %d) [%s]"
+# Used when a drive is detected that contains more than one partition
+t MSG_047 "複数のパーティション"
+t MSG_048 "Rufus - バッファをフラッシュ中"
+t MSG_049 "Rufus - 取り消し中"
+
+# Error messages
+t MSG_050 "成功しました。"
+t MSG_051 "フォーマットしていた時未決定エラーは起こった。"
+t MSG_052 "このメディアのために選択したシステムは使えません。"
+t MSG_053 "このデバイスのアクセスは拒否しました。"
+t MSG_054 "メディア書き込み禁止です。"
+t MSG_055 "デバイスは他人で使われています。 "
+	"ドライバーが恐らくアクセスしているプロセスを停止して下さい。"
+t MSG_056 "このデバイスのためにクイックフォーマットは利用出来ません。"
+t MSG_057 "ボリュームラベルは無効です。"
+t MSG_058 "デバイスハンドルは無効です。"
+t MSG_059 "選択されたクラスタサイズはこのデバイスのために無効です。"
+t MSG_060 "ボリュームサイズは無効です。"
+t MSG_061 "ドライブにリムーバブルメディアを挿入して下さい。"
+t MSG_062 "非対応コマンドを貰えました。"
+t MSG_063 "メモリ割り当てエラー"
+t MSG_064 "リードエラー"
+t MSG_065 "ライトエラー"
+t MSG_066 "インストールを失敗しました。"
+t MSG_067 "メディアは開けなかった。他のプログラムで恐らく使われています。 "
+	"接続して、もう一度やり直して下さい。 "
+t MSG_068 "ドライブをパーティションしていた時エラーを起こりました。"
+t MSG_069 "ファイルはターゲットドライブにコピー出来ませんでした。"
+t MSG_070 "ユーザーで取消しました。"
+# See http://en.wikipedia.org/wiki/Thread_%28computing%29
+t MSG_071 "スレッドを始めれませんでした。"
+t MSG_072 "破損したブロックの検索は仕上げませんでした。"
+t MSG_073 "ISOイメージスキャンは仕上げませんでした。"
+t MSG_074 "ISOイメージスは抜き出し仕上げませんでした。"
+t MSG_075 "ボリュームは再マウント出来ません。"
+t MSG_076 "起動のファイルはパッチ・セット出来ません。"
+t MSG_077 "ドライブ文字は割り当てれません。"
+t MSG_078 "GUIDボリュームはマウント出来ません。"
+
+t MSG_080 "RufusはWindowsがUSBデバイスに内部バッファをフラッシュしていること検出しました。\n\n"
+	"USBデバイスのスピードに応じて、この操作は時間がかかるかもしれません。 "
+	"大きいファイルと特にのためにです。\n\n破損を避けるためにWindowsを完了させること薦めます。 "
+	"もう待ちたくなければ、デバイスのプラグは抜けますけど．．．．．．"
+t MSG_081 "ISOは非対応です。"
+t MSG_082 "RufusのこのバージョンはWinPE、isolinux、またはEFLに基づいたISOだけサポートします。\n"
+	"このISOはどちら使うように見えません。"
+t MSG_083 "%s を交換しますか？"
+t MSG_084 "このISOは '%s' の古いバージョンを使うように見えます。\n"
+	"それから、起動メニューは正しく見せないかもしれません。\n\n"
+	"問題を直すためにRufusで新バージョンはダウンロード出来ます：\n"
+	"- インタネットに接続しファイルをダウンロードするために、「Yes」をクリックして下さい。\n"
+	"- 既存のISOは変更しないのために、「No」をクリックして下さい。\n"
+	"何をするが知らなければ、「Yes」はクリックするはずです。\n\n"
+	"注意： 新しいファイルは現在ディレクトリにダウンロードします。 "
+	"'%s' はディレクトリにある場合、すぐに再利用します。"
+t MSG_085 "%s　ダウンロード中"
+t MSG_086 "イメージは選択しません。"
+# The content between the quotes below (\"Create a bootable disk\") should match
+# the beginning of the IDC_BOOT text
+t MSG_087 "ブート可能なイメージを選択ためにディスクボタンをクリックして下さい。 "
+	"それとも、「ブートディスクを作る」チェックボックスをオフにします。 "
+t MSG_088 "イメージは大きすぎます。"
+t MSG_089 "イメージは選択したターゲットには大き過ぎます。"
+t MSG_090 "ISOは非対応です。"
+t MSG_091 "UEFIターゲットタイプが使う時、EFIに起動可能なISOだけサポートします。 "
+	"EFIに起動可能なISOを選択して下さい、それともターゲットタイプバイオスをセットして下さい。"
+t MSG_092 "ファイルシステムは非対応です。"
+t MSG_093 "重要：このドライブは複数のパーティションを含んでいます！！ \n\n"
+	"Windowsが見れないパーティション・ボリュームとかリストされないパーティション・ボリュームに含めるかもしれません。 "
+	"進みたければ、このパーティションのオーナーはデータ損失を責任があります。"
+t MSG_094 "複数のパーティションを検出しました。"
+t MSG_095 "DD イメージ"
+t MSG_096 "こんなISOでFAT・FAT32だけサポートします。FAT・FAT32はファイルシステムのために選択して下さい。"
+t MSG_097 "現在、NTSFで「bootmgr」または「WinPE」に基づいたISOだけは使えます。"
+t MSG_098 "FAT・FAT32はターゲット·タイプがUEFI時isolinuxに基づいたISOのために使えます。"
+t MSG_099 "ファイルシステム制限"
+t MSG_100 "ISOイメージに４GBより大きいファイルがあります。 "
+	"FAT・FAT32ファイルシステムの可能な最大のサイズより大きいです。"
+t MSG_101 "行方不明のWIMサポート"
+t MSG_102 "ごプラットフォームはWIM引き出せません。Windows 7とWindows Vista USBドライブ "
+	"を作るためにWIM引き出しは必要です。 "
+	"7-zipの最近バージョンとインストールでそれは直せます。\n7-zipダウンロードページに行きたいですか？"
+t MSG_103 "%s? ダウンロード中"
+t MSG_104 "Syslinux v5.0以降のために '%s' ファイルがインストールしなければなれません。\n"
+	"このファイルは100KBより大きいそしてSyslinux v5+ISOにいつもあるから、 "
+	"Rufusに埋め込みません。\n\nRufusは不足しているファイルをダウンロードしてあげます：\n"
+	"- インタネットに接続しファイルをダウンロードするために、「Yes」を選択して下さい。\n"
+	"- 後にファイルを手動でコピーするために、「No」を選択して下さい。\n\n"
+	"注意： 新しいファイルは現在ディレクトリにダウンロードします。 "
+	"'%s' はディレクトリにある場合、すぐに再利用します。\n"
+t MSG_105 "取消せば、デバイスは使用できなくなるかもしれません。\n"
+	"取消してもよろしければ、「はい」をクリックして下さい。さもないと、「いいえ」をクリックして下さい。"
+t MSG_106 "フォルダを選択して下さい。"
+t MSG_107 "ファイルがすべて"
+t MSG_108 "Rufusログ"
+t MSG_109 "0x%02X (ディスク %d)"
+# "Cluster size" below should be the same as the label for IDS_CLUSTERSIZE_TXT
+# "kilobytes" should be the same as in MSG_027
+t MSG_110 "MS-DOSは64キロバイトクラスタサイズが使うドライブから起動出来ません。\n"
+	"クラスタサイズを変えて下さい、またはFreeDOSを使って下さい。"
+t MSG_111 "互換性がないクラスタサイズです。"
+# "%d:%02d" below is a duration (mins:secs)
+t MSG_112 "大きいUDFボリュームがフォーマットするは時間がかかれます。USB2.0スピードで、 "
+	"フォーマットの推定持続は%d:%02d。この時間の間にプログレスバーは凍結用に見えます。こんな時間にちょっと待って下さい。"
+t MSG_113 "大きいUDFボリューム"
+t MSG_114 "このイメージは Syslinux %s を使うが、このアプリケーションは Syslinux % のインストール "
+	"ファイルだけあります。\n\nSyslinuxの新バージョンは互いに互換性のないから、RufusはSyslinkのすべて "
+	"を含めれません。インタネットから二つのファイルはダウンロードしなければならない。 "
+	"（'ldlinux.sys' and 'ldlinux.bss'）:\n"
+	"- インタネットに接続しファイルをダウンロードするために、「Yes」を選択して下さい。\n"
+	"- 取り消したければ、「No」を選択して下さい。\n\n"
+	"注意： 新しいファイルは現在ディレクトリにある場合、 "
+	"ダウンロードし再利用します。\n"
+t MSG_115 "ダウンロード必須"
+# Tootips
+# Partition Scheme and Target Type
+t MSG_150 "たいていもっとも安全選択です。でも、UEFIコンピューターにEFIモードOS "
+	"をインストール食べたければ、他のオプションを選択するはずです。"
+t MSG_151 "EFIモードOSをインストールし、Windows XPからUSBコンテンツを "
+	"アクセスしなければならない場合、これを使って下さい。"
+t MSG_152 "Windows XPのUSBアクセスは必要じゃなければ "
+	"EFIモードOSは望ましいです。"
+t MSG_153 "テストパターン： 0x%02X"
+t MSG_154 "テストパターン： 0x%02X, 0x%02X"
+t MSG_155 "テストパターン： 0x%02X, 0x%02X, 0x%02X"
+t MSG_156 "テストパターン： 0x%02X, 0x%02X, 0x%02X, 0x%02X"
+t MSG_157 "ターゲットファイルシステムを設定します。"
+t MSG_158 "ファイルシステムに占めるデーターブロックの最小サイズ"
+t MSG_159 "ここでドライブのラベルは設定可能・国際文字が出来ます"
+t MSG_160 "詳細設定に切り替えます"
+t MSG_161 "テストパターンで破損したブロックを検索する"
+t MSG_162 "「遅い」フォーマットメソッドと使うためにチェックボックスをオフにします。"
+t MSG_163 "起動可能なUSBドライブを作るためにチェックボックスをオンにします。"
+t MSG_164 "ドライブは起動可能になる方法"
+t MSG_165 "ISOが選択するためにクリックして下さい。"
+t MSG_166 "国際ラベルが見れデバイスアイコン（autorun.inf は作られる） "
+	"を設定するためにチェックボックスをオンにします。"
+t MSG_167 "ブート選択許可しバイオスUSBドライブID装えるMBRをインストールする"
+t MSG_168 "第一起動可能なUSBドライブ(普通に 0x80)は別のディスクに装ってみる\n"
+	"Windows XPは複数ディスクにインストールする時だけこれは必要です。"
+t MSG_169 "他の隠れたパーティションを作りパーティション境界を揃えてみる\n"
+	"古いバイオスのためにブートの検出を磨ける"
+t MSG_170 "USBハードドライブエンクロージャのリストを有効にします。自己責任でこれを使います。"
+t MSG_171 "フォーマットを始める。\n ターゲットにデーターが全部は削除します。"
+t MSG_172 "ライセンスインフォメーションとクレジット"
+t MSG_173 "選択するにはクリック"
+# The following will appear in the about dialog
+t MSG_174 "Rufus - 信頼出来るUSBフォーマットユーティリティ "
+t MSG_175 "バージョン %d.%d.%d (Build %d)"
+t MSG_176 "日本語翻訳: チャンテラ・ジャクソン <mailto:chantella-eng@live.com>"
+t MSG_177 "バグを伝えるまたはお問い合わせ等のためにはこちら："
+t MSG_178 "雑多な著作権："
+t MSG_179 "アップデートポリシー："
+t MSG_180 "このプログラムはアップデートが探すこと許可しれば、 "
+	"以下の情報はサーバーに集めると同意します。"
+t MSG_181 "ご使用のオペレーティング·システムのアーキテクチャとバージョン"
+t MSG_182 "ご使用のアプリケーションのバーション"
+t MSG_183 "IPアドレス"
+t MSG_184 "私的な利用統計を作るために、集めたインフォメーションは\\b一年間以内に\\b0 維持するかもしれません。 "
+	"だけど、第三者へ私的なデーターは唯々諾々に全然開示しません。"
+t MSG_185 "アップデート方法："
+t MSG_186 "Rufusはバックグラウンドに全然実行しませんので、アップデートはマインアプリケーションは実行する時だけです。\\line\n"
+	"アップデートのためにインタネットは必要です。"
+t MSG_187 "選択したブート設定には無効イメージです。"
+t MSG_188 "現在イメージと選択したブート設定は同じではありません。別のイメージを使って下さい、または別のブート設定を使って下さい。"
+
+# Status messages - these messages will appear on the status bar
+t MSG_201 "キャンセル中 - ちょっと待って下さい．．．．．．"
+t MSG_202 "イメージをスキャン中．．．．．．"
+t MSG_203 "イメージはスキャンし失敗しました。"
+# Parameter: the name of an obsolete Syslinux .c32 module. eg: "Obsolete vesamenu.c32 detected"
+t MSG_204 "廃止された %s 検出しました"
+# Display the name of the ISO selected. eg: "Using ISO: en_win7_x64_sp1.iso"
+t MSG_205 "%s を使ってる"
+# Typically "Missing ldlinux.c32 file"
+t MSG_206 "見つけれないファイル： %s"
+# The name proposed by Windows' Computer Management -> Disk Management when you try to format a drive
+# with an empty label. See http://rufus.akeo.ie/pics/default_name.png
+t MSG_207 "新ボリューム"
+# Same message, once for singular and plural ("1 device found", "2 devices found")
+t MSG_208 "%d のデバイスは見つけた"
+t MSG_209 "%d のデバイスは見つけた"
+t MSG_210 "完了しました"
+t MSG_211 "取消しました。"
+t MSG_212 "失敗しました。"
+# Used when a new update has been downloaded and launched
+t MSG_213 "新アプリケーション実行中．．．．．．"
+t MSG_214 "新アプリケーションの実行は失敗しました。"
+# Open/Save file
+t MSG_215 "開いた %s"
+t MSG_216 "保存した %s"
+# Formatting status (make sure you use a double % to print the percent sign)
+t MSG_217 "フォーマット中： %0.1f%%"
+t MSG_218 "ファイルシステムを作ってる: %d/%d"
+t MSG_219 "NTFS フィックスアップ: %d%% completed"
+# Parameter: the file system and an estimated duration in mins and secs.
+# eg. "Formatting (UDF) - Estimated duration 3:21..."
+# NB: if "estimated duration" is too long, just use "estimated" or an abbreviation
+t MSG_220 "フォーマット中： (%s) - 推定持続 %d:%02d..."
+t MSG_221 "ラベル作ってる（時間がかかるかも．．．．．．）"
+# Parameter: the file system. eg. "Formatting (NTFS)..."
+t MSG_222 "フォーマット中： (%s)..."
+t MSG_223 "NTFS フィックスアップ （チェックディスク）..."
+t MSG_224 "MBR/PBR/GPTストラクチャーで働いてる．．．．．．"
+t MSG_225 "ディスクアクセスを要求している．．．．．．"
+t MSG_226 "既存のブートレコード分析してる．．．．．．"
+t MSG_227 "既存のボリュームを閉じてる．．．．．．"
+t MSG_228 "マスターブートレコードを書き込んでる．．．．．．"
+t MSG_229 "パーティションブートレコードを書き込んでる．．．．．．"
+t MSG_230 "DOSファイルをコピー中．．．．．．"
+t MSG_231 "ISOファイルをコピー中．．．．．．"
+t MSG_232 "Win7 EFI　ブートセットアップ（時間がかかるかも．．．．．．）"
+t MSG_233 "完成してる、ちょっと待って下さい．．．．．．"
+# Takes a Syslinux version as parameter, eg. "Installing Syslinux v5.10..."
+t MSG_234 "Syslinux %s をインストール中．．．．．．"
+# Bad blocks status. eg: "Bad Blocks: PASS 1/2 - 12.34% (0/0/1 errors)"
+t MSG_235 "破損したブロック：パス %d/%d - %0.2f%% (%d/%d/%d エラー)"
+t MSG_236 "破損したブロック：ランダム模様でテスト"
+t MSG_237 "破損したブロック：模様 0x%02X でテスト"
+# eg. "パーティションしてる(MBR)．．．．．．"
+t MSG_238 "パーティションしてる(%s)．．．．．．"
+t MSG_239 "パーティション削除中．．．．．．"
+t MSG_240 "ダウンロード中 %s: 接続中"
+t MSG_241 "ダウンロード中: %0.1f%%"
+t MSG_242 "ダウンロードは失敗しました。"
+t MSG_243 "Rufusアップデートを探してる．．．．．．"
+t MSG_244 "アップデート：インタネット接続は失敗しました。"
+t MSG_245 "アップデート：バージョンデーターはアクセス出来ません。"
+t MSG_246 "Rufusの新バージョンは利用出来ます！"
+t MSG_247 "Rufusの新バージョンは見つけれませんでした。"
+t MSG_248 "アプリケーションレジストリキーはうまく削除しました。"
+t MSG_249 "レジストリキーの削除は失敗しました。"
+# eg. "固定ディスク検出可能" "ISOサイズチェック使用禁止"
+t MSG_250 "%s 可能"
+t MSG_251 "%s 使用禁止"
+t MSG_252 "サイズチェック"
+t MSG_253 "固定ディスク検出"
+t MSG_254 "大きいFAT32フォーマットを強いる"
+t MSG_255 "NoDriveTypeAutorun はエグジットする時削除します。"
+t MSG_256 "偽のドライブ検出"
+t MSG_257 "Julietのサポート"
+t MSG_258 "Rock Ridgeのサポート"
+t MSG_259 "アップデートを強いる"
+t MSG_260 "NTFS圧縮"
+t MSG_261 "イメージを書き込んで： %0.1f%% 完了しました。"
+
 ################################################################################
 l "ko-KR" "Korean (한국어)" 0x0412
 v 1.0.11

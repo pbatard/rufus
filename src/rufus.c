@@ -238,6 +238,8 @@ static BOOL DefineClusterSizes(void)
  * 31GB : 8192 - 64k This is as far as Microsoft's FormatEx goes...
  * 63GB :  16k - 64k ...but we can go higher using fat32format from RidgeCrop.
  * 2TB+ : N/A
+ *
+ * TODO: 256MB FAT32 + 4K clusters -> unsupported cluster size
  */
 
 	// FAT 16
