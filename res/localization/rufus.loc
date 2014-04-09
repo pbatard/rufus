@@ -2804,13 +2804,12 @@ m IDC_ADVANCED +58,0
 s IDS_ADVANCED_OPTIONS_GRP +29,0
 s IDC_ENABLE_FIXED_DISKS +30,0
 s IDC_EXTRA_PARTITION +30,0
-s IDC_RUFUS_MBR +16,0
+s IDC_RUFUS_MBR +25,0
 s IDC_NBPASSES +36,0
 m IDC_NBPASSES +30,0
 s IDC_BOOT +32,0
 m IDC_BOOTTYPE +30,0
 m IDC_SELECT_ISO +30,0
-s IDC_RUFUS_MBR +25,0
 m IDC_DISK_ID +30,0
 m IDC_LANG +28,0
 m IDC_START +28,0
@@ -7970,6 +7969,404 @@ t MSG_257 "Joliet поддержка"
 t MSG_258 "Rock Ridge поддержка"
 t MSG_260 "NTFS-компрессия"
 t MSG_261 "Запись образа: %0.1f%% выполнено"
+
+################################################################################
+l "sk-SK" "Slovak (Slovensky)" 0x041B
+v 1.0.11
+b "en-US"
+
+# Main dialog
+g IDD_DIALOG
+
+m IDC_ADVANCED +50,0
+s IDC_LOG +35,0
+m IDC_LOG -2,0
+m IDC_START +22,0
+s IDC_START -15,0
+s IDCANCEL -5,0
+m IDCANCEL +5,0
+
+t IDS_DEVICE_TXT "Zariadenie"
+t IDS_PARTITION_TYPE_TXT "Schéma oddielu a typ cieľového systému"
+t IDS_FILESYSTEM_TXT "Súborový systém"
+t IDS_CLUSTERSIZE_TXT "Veľkosť klastra"
+t IDS_LABEL_TXT "Nový názov zväzku"
+t IDS_FORMAT_OPTIONS_GRP "Nastavenia formátovania         "
+t IDC_BADBLOCKS "Skontrolovať chybné bloky"
+t IDC_QUICKFORMAT "Rýchle formátovanie"
+t IDC_BOOT "Vytvoriť bootovateľný disk"
+t IDC_SET_ICON "Použiť poskytnutú menovku a súbory miniatúry"
+t IDC_ABOUT "O programe"
+t IDC_LOG "Záznam"
+t IDCANCEL "Zatvoriť"
+t IDC_START "Štart"
+t IDS_ADVANCED_OPTIONS_GRP "Pokročilé nastavenia formátovania "
+t IDC_ENABLE_FIXED_DISKS "Zobraziť zoznam USB pevných diskov (USB HDD)"
+# Note: it is acceptable to drop the parenthesis () below if you are running out of space
+# as there is a tooltip (MSG_169) providing these details
+t IDC_EXTRA_PARTITION "Pridať úpravy pre staré BIOSy"
+# 'MBR': See http://en.wikipedia.org/wiki/Master_boot_record
+# Rufus can install it's own custom MBR (the Rufus MBR), which also allows users
+# to specify a custom disk ID for the BIOS. Note: the tooltip for this control is MSG_167.
+t IDC_RUFUS_MBR "Použiť MBR s BIOS ID"
+
+# About dialog
+g IDD_ABOUTBOX
+t IDD_ABOUTBOX "O programe Rufus"
+t IDC_ABOUT_LICENSE "Licencia"
+t IDC_ABOUT_UPDATES "Aktualizácia"
+t IDOK "OK"
+
+# About -> License dialog
+g IDD_LICENSE
+t IDD_LICENSE "Licencia programu Rufus"
+t IDCANCEL "Zatvoriť"
+
+# Notifications. You can trigger one of these by using Alt-R and re-launching Rufus
+g IDD_NOTIFICATION
+t IDC_MORE_INFO "Viac informácií"
+t IDYES "Áno"
+t IDNO "Nie"
+
+# Log dialog
+g IDD_LOG
+t IDD_LOG "Záznam činnosti programu Rufus"
+t IDC_LOG_CLEAR "Vyčistiť"
+t IDC_LOG_SAVE "Uložiť"
+t IDCANCEL "Zatvoriť"
+
+# About -> Updates
+g IDD_UPDATE_POLICY
+t IDD_UPDATE_POLICY "Zásady aktualizácií a nastavenia"
+t IDS_UPDATE_SETTINGS_GRP "Nastavenia automatických aktualizácií"
+t IDS_UPDATE_FREQUENCY_TXT "Aktualizácia:"
+s IDS_UPDATE_FREQUENCY_TXT -10,0
+m IDC_UPDATE_FREQUENCY -10,0
+s IDC_UPDATE_FREQUENCY +10,0
+t IDS_INCLUDE_BETAS_TXT "Zahrnúť beta verzie:"
+s IDS_INCLUDE_BETAS_TXT -10,0
+m IDC_INCLUDE_BETAS -10,0
+s IDC_INCLUDE_BETAS +10,0
+t IDC_CHECK_NOW "Skontrolovať"
+t IDCANCEL "Zavrieť"
+
+# Dialog that appears when a new version is available
+g IDD_NEW_VERSION
+t IDD_NEW_VERSION "Kontrola aktualizácií - Rufus"
+t IDS_NEW_VERSION_AVAIL_TXT "Je dostupná nová verzia. Stiahnite si poslednú verziu!"
+t IDC_WEBSITE "Kliknite tu, ak chcete prejsť na stránku a stiahnuť program manuálne"
+t IDS_NEW_VERSION_NOTES_GRP "Poznámky k vydaniu"
+t IDS_NEW_VERSION_DOWNLOAD_GRP "Sťahovanie"
+t IDC_DOWNLOAD "Stiahnuť"
+t IDCANCEL "Zatvoriť"
+
+# Dialog that appears when scanning/extracting ISO files
+g IDD_ISO_EXTRACT
+t IDD_ISO_EXTRACT "Kopírovanie súborov z ISO obrazu..."
+t IDC_ISO_FILENAME "Otváranie ISO obrazu, čakajte prosím..."
+t IDC_ISO_ABORT "Zrušiť"
+
+# Messages used throughout the application
+t MSG_001 "Zistený spustený program"
+t MSG_002 "Program Rufus je už spustený.\n"
+	"Pred spustením ďalšieho programu musíte zavrieť spustený program."
+t MSG_003 "VAROVANIE: PO SPUSTENÍ FORMÁTOVANIA SA VYMAŽÚ VŠETKY ÚDAJE NA CIEĽOVOM DISKU: %s.\n"
+	"Ak chcete spustiť formátovanie disk stlačte tlačidlo OK.\nAk chcete operáciu ukončiť, stlačte tlačidlo ZRUŠIŤ."
+t MSG_004 "Nastavenie aktualizácií programu Rufus"
+t MSG_005 "Chcete povoliť kontrolu aktualizácií programu Rufus?"
+# Must be the same as IDD_DIALOG:IDCANCEL (i.e. "Close" - I know it's confusing)
+t MSG_006 "Zatvoriť"
+t MSG_007 "Zrušiť"
+t MSG_008 "Áno"
+t MSG_009 "Nie"
+t MSG_010 "Boli nájdené chybné bloky"
+t MSG_011 "Kontrola dokončená:\n  počet chybných blokov: %d \n"
+	"  počet chýb pri čítaní: %d\n  počet chýb pri zapisovaní: %d\n  počet poškodzujúcich chýb: %d\n"
+# The following will contain the formatted message above as well as the name of the bad blocks logfile
+t MSG_012 "%s\nPodrobnejšiu správu nájdete tu:\n%s"
+t MSG_013 "Zakázané"
+t MSG_014 "Denne"
+t MSG_015 "Týždenne"
+t MSG_016 "Mesačne"
+t MSG_017 "Vlastné"
+t MSG_018 "Vaša verzia: %d.%d.%d (Build %d)"
+t MSG_019 "Posledná verzia: %d.%d.%d (Build %d)"
+# *Short* size names. These can be used as suffixes
+t MSG_020 "B"
+t MSG_021 "KB"
+t MSG_022 "MB"
+t MSG_023 "GB"
+t MSG_024 "TB"
+t MSG_025 "PB"
+# *Long* size names, as they are displayed for the cluster size in the MS format dialog.
+t MSG_026 "bitov"	# Yes, this is a repeat from MSG_020
+t MSG_027 "kilobitov"
+t MSG_028 "megabitov"
+t MSG_029 "Predvolené"
+# The following gets appended to the file system, cluster size, etc.
+t MSG_030 "%s (Pôvodné)"
+t MSG_031 "%s schéma oddielu pre BIOS or UEFI počítač"
+t MSG_032 "%s schéma oddielu pre BIOS počítač"
+t MSG_033 "%s schéma oddielu pre UEFI počítač"
+# Number of bad block check passes (singular for 1 pass, plural for 2 or more passes)
+t MSG_034 "%d pokus"
+t MSG_035 "%d pokusy"
+t MSG_036 "Obraz ISO"
+t MSG_037 "Aplikácia"
+t MSG_038 "Ukončiť"
+t MSG_039 "Spustiť"
+t MSG_040 "Stiahnuť"
+t MSG_041 "Operácia bola prerušená používateľom"
+t MSG_042 "Chyba"
+t MSG_043 "Chyba: %s"
+t MSG_044 "Stiahnuť súbor"
+t MSG_045 "USB Storage Device (Generic)"
+t MSG_046 "%s (Disk %d) [%s]"
+# Used when a drive is detected that contains more than one partition
+t MSG_047 "Viacnásobné oddiely"
+t MSG_048 "Rufus - Vyprázdňovanie bufferov"
+t MSG_049 "Rufus - Ukončovanie"
+
+# Error messages
+t MSG_050 "Hotovo."
+t MSG_051 "Neurčitá chyba počas formátovania."
+t MSG_052 "Nie je možné použiť vybraný súborový systém pre toto médium."
+t MSG_053 "Prístup na disk bol odmietnutý."
+t MSG_054 "Médium je chránené proti zápisu."
+t MSG_055 "Disk je používaný iným procesom. "
+	"Zatvorte procesy, ktoré môžu pristupovať na disk."
+t MSG_056 "Rýchle formátovanie tohto disku nie je dovolené."
+t MSG_057 "Názov disku je neplatný."
+t MSG_058 "Identifikátor zariadenia je neplatný."
+t MSG_059 "Vybraný klaster nie je platný pre toto zariadenie."
+t MSG_060 "Názov zväzku je neplatný."
+t MSG_061 "Pripojte výmenné médium."
+t MSG_062 "Bol prijatý nepodporovaný príkaz."
+t MSG_063 "Chyba pri pridelení pamäte."
+t MSG_064 "Chyba čítania."
+t MSG_065 "Chyba zápisu."
+t MSG_066 "Inštalácia zlyhala"
+t MSG_067 "Nie je možné otvoriť zariadenie. Možno je používané iným procesom. "
+	"Skúste odpojiť a znovu pripojiť zariadenie a vyskúšajte to znovu."
+t MSG_068 "Chyba počas vytvárania oddielov."
+t MSG_069 "Nie je možné  kopírovať súbory do cieľovej jednotky."
+t MSG_070 "Prerušené používateľom."
+# See http://en.wikipedia.org/wiki/Thread_%28computing%29
+t MSG_071 "Nie je možné spustiť vlákno."
+t MSG_072 "Kontrola chybných blokov nebola dokončená."
+t MSG_073 "Analýza ISO obrazu zlyhala."
+t MSG_074 "Rozbaľovanie ISO obrazu zlyhalo."
+t MSG_075 "Nie je možné znovu pripojiť zväzok."
+t MSG_076 "Nie je možné opraviť/inštalovať súbory pre bootovanie."
+t MSG_077 "Nie je možné priradiť písmeno jednotky."
+t MSG_078 "Nie je možné pripojiť GUID zväzok."
+
+t MSG_080 "Program Rufus zistil, že Windows stále vyprázdňuje interné buffery na USB zariadení.\n\n"
+	"Doba tejto operácie závisí na rýchlosti vášho USB disku,  môže trvať dlhší čas, "
+	"špeciálne pri veľkých súboroch.\n\nDoporučujeme nechať Windows dokončiť akciu, zabránite tak poškodeniu dát."
+	"Ak bude operácia trvať príliš dlho, môžete odpojiť zariadenie..."
+t MSG_081 "Nepodporovaný ISO obraz"
+t MSG_082 "Táto verzia programu Rufus podporuje bootovateľné ISO obrazy, založené na bootmgr/WinPE, isolinux alebo EFI.\n"
+	"Tento ISO obraz zrejme nie je používaný iným..."
+t MSG_083 "Premiestniť %s?"
+t MSG_084 "Zdá sa, že tento ISO obraz používa zastaralú verziu „%s".\n"
+	"Bootovacie menu sa nemusí zobrazovať správne.\n\n"
+	"Nová verzia programu Rufus môže odstrániť tieto problémy:\n"
+	"- Stlačte „Áno" pre pripojenie na internet a stiahnutie súboru\n"
+	"- Stlačte „Nie" a nechajte existujúci ISO súbor nezmenený\n"
+	"Ak neviete, čo máte robiť, vyberte „Áno".\n\n"
+	"Poznámka: Nový súbor %s bude stiahnutý "
+	"do aktuálneho priečinka a potom bude automaticky použitý."
+t MSG_085 "Sťahovanie: %s"
+t MSG_086 "Nebol vybraný žiadny obraz disku"
+# The content between the quotes below (\"Create a bootable disk\") should match
+# the beginning of the IDC_BOOT text
+t MSG_087 "Stlačte tlačidlo disku a vyberte bootovateľný obraz, "
+	"alebo odznačte voľbu \"Vytvoriť bootovateľný disk\"."
+t MSG_088 "Obraz disku je príliš veľký"
+t MSG_089 "Obraz disku je príliš veľký pre vybraný disk."
+t MSG_090 "Nepodporovaný ISO obraz"
+t MSG_091 "Ak použijete typ UEFI, iba EFI bootovateľné ISO obrazy budú podporované. "
+	"Vyberte EFI bootovateľné ISO alebo nastavte cieľový typ ako BIOS."
+t MSG_092 "Nepodporovaný súborový systém"
+t MSG_093 "DÔLEŽITÉ: TOTO ZARIADENIE OBSAHUJE NIEKOĽKO ODDIELOV!!\n\n"
+	"Zariadenie môže obsahovať oddiely alebo zväzky, ktorú nie sú čitateľné alebo dokonca viditeľné pre Windows. "
+	"Ak budete pokračovať, môžete stratiť všetky údaje na týchto oddieloch."
+t MSG_094 "Boli zistené viaceré oddiely"
+t MSG_095 "Obraz DD"
+t MSG_096 "Pre tento typ ISO obrazu sú podporované iba FAT/FAT32. Vyberte FAT/FAT32 ako súborový systém."
+t MSG_097 "Iba ISO obrazy založené na bootmgr alebo WinPE môžu byť práve použité s NTFS."
+t MSG_098 "FAT/FAT32 môžu byť použité pre ISO obrazy založené na isolinux alebo keď je cieľový typ UEFI."
+t MSG_099 "Obmedzenie súborového systému"
+t MSG_100 "Tento ISO obraz obsahuje súbor s veľkosťou viac ako 4GB, "
+	"čo je viac ako podporuje súborový systém FAT alebo FAT32."
+t MSG_101 "Chýba podpora WIM"
+t MSG_102 "Vaša platforma nedokáže rozbaliť súbory z WIM archívov. WIM extrakcia "
+	"požaduje vytvorenie EFI bootovateľnej USB jednotky s Windows 7 a Windows Vista "
+	"nainštalovaním novej verzie programu 7-Zip.\nChcete navštíviť webstránku 7-Zip?"
+t MSG_103 "Stiahnúť %s?"
+t MSG_104 "Syslinux v5.0 alebo vyššie požadujú nainštalovať súbor %s.\n"
+	"Pretože tento súbor je väčší ako 100 KB a vždy prítomný v Syslinux v5+ ISO obrazoch, "
+	"nie je implementovaný v programe Rufus.\n\nProgram Rufus môže za vás stiahnuť chýbajúci súbor:\n"
+	"- Stlačte „Áno" pre pripojenie na internet a stiahnutie súboru\n"
+	"- Stlačte „Nie" ak chcete manuálne skopírovať tento súbor na jednotku neskôr\n\n"
+	"Poznámka: Súbor %s bude stiahnutý do aktuálneho priečinku "
+	"a potom bude automaticky znovu použitý.\n"
+t MSG_105 "Po zrušení akcie bude zariadenie v NEPOUŽITEĽNOM stave.\n"
+	"Ak ste si istý, že chcete zrušiť akciu, stlačte tlačidlo ÁNO. V opačnom prípade stlačte tlačidlo NIE."
+t MSG_106 "Vyberte priečinok"
+t MSG_107 "Všetky súbory"
+t MSG_108 "Záznam programu Rufus"
+t MSG_109 "0x%02X (Disk %d)"
+# "Cluster size" below should be the same as the label for IDS_CLUSTERSIZE_TXT
+# "kilobytes" should be the same as in MSG_027
+t MSG_110 "MS-DOS nemôže byť bootovaný z jednotky používajúcich klastre s veľkosťou 64kb.\n"
+	"Zmeňte veľkosť klastra alebo použite FREDOS."
+t MSG_111 "Nekompatibilná veľkosť klastra"
+# "%d:%02d" trvanie (mins:secs)
+t MSG_112 "Formátovanie veľkých UDF zväzkov môže trvať dlhý čas. Rýchlosť USB 2.0 určuje "
+	"trvanie formátovania (približne %d:%02d), počas procesu sa vám môže zdať, že aplikácia zamrzla. Budte trpezlivý! "
+t MSG_113 "Veľkosť UDF zväzku"
+t MSG_114 "Tento obraz používa Syslinux %s ale tento program obsahuje inštaláciu pre "
+	"Syslinux %s.\n\nAk nová verzia Syslinuxu nie je kompaktibilná s ďalším obrazom,  "
+	"je možné, že program Rufus neobsahuje dva doplnkové súbory, ktoré budú musieť byť stiahnuté "
+	"z internetu (ldlinux.sys a ldlinux.bss):\n"
+	"- Stlačte „Áno" pre stiahnutie týchto súborov z internetu\n"
+	"- Stlačte „Nie" pre zrušenie operácie\n\n"
+	"Poznámka: Súbory budú stiahnuté do aktuálneho priečinku programu a budú použité "
+	"automaticky po stiahnutí.\n"
+t MSG_115 "Sťahovanie požadované"
+# Tootips
+# Partition Scheme and Target Type
+t MSG_150 "Zvyčajne najbezpečnejšia voľba. Ak máte UEFI počítač a predsa len chcete inštalovať "
+	"OS v EFI móde, mali by ste si vybrať niektorú z ostatných nastavení"
+t MSG_151 "Použite ak chcete inštalovať OS v EFI móde, ale budete potrebovať "
+	"prístup k obsahu USB disku z Windowsu XP"
+t MSG_152 "Preferovaná voľba pre inštaláciu OS v EFI móde a keď prístup  "
+	"na USB disk nie je požadovaný vo Windows XP"
+t MSG_153 "Skúšobná vzorka: 0x%02X"
+t MSG_154 "Skúšobné vzorka: 0x%02X, 0x%02X"
+t MSG_155 "Skúšobná vzorka: 0x%02X, 0x%02X, 0x%02X"
+t MSG_156 "Skúšobná vzorka: 0x%02X, 0x%02X, 0x%02X, 0x%02X"
+t MSG_157 "Nastavte cieľový súborový systém"
+t MSG_158 "Minimálna veľkosť bloku použitého v súborovom systéme"
+t MSG_159 "Ak chcete nastaviť menovku disku, vyplňte pole.\nSú podporované aj medzinárodné znaky."
+t MSG_160 "Prepínač pokročilých nastavení"
+t MSG_161 "Skontrolovať zariadenie na prítomnosť chybných\nblokov použitím skúšobných vzoriek"
+t MSG_162 "Odznačením tohto políčka použijete pomalú metódu formátovania"
+t MSG_163 "Označením tohto políčka povolíte vytvorenie bootovacieho USB zariadenia"
+t MSG_164 "Vyberte metódu, ktorá bude použitá na vytvorenie bootovateľného zariadenia"
+t MSG_165 "Stlačte tlačidlo a vyberte ISO obraz..."
+t MSG_166 "Označením tohto políčka povolíte v názve disku zobrazenie medzinárodných znakov "
+	"a vytvorenie ikony zariadenia (vytvorením súboru autorun.inf)"
+t MSG_167 "Inštalovaním MBR programu povolíte výber pri bootovaní a možnosť maskovania použitím BIOS USB drive ID"
+t MSG_168 "Vyskúšajte maskovanie prvej bootovacej USB jednotky (zvyčajne 0x80) ako odlišného disku.\n"
+	"Toto je nevyhnutné ak chcete inštalovať Windows XP a máte viac ako jeden disk"
+t MSG_169 "Bude naviac vytvorený skrytý oddiel, program sa pokúsi nastaviť hranice oddielov, atď.\n"
+	"Toto nastavenie zlepší boot detekciu pre staršie BIOSy"
+t MSG_170 "Povolí zobrazovanie USB pevných diskov (USB HDD). POUŽITIE LEN NA VLASTNÉ RIZIKO!!!"
+t MSG_171 "Stlačením tohto tlačidla spustíte formátovanie.\nFormátovaním sa VYMAŽÚ všetky údaje na disku!"
+t MSG_172 "Informácie o licencii, aktualizácii a kredity"
+t MSG_173 "Stlačením vybrať..."
+# The following will appear in the about dialog
+t MSG_174 "Rufus - Spoľahlivý program pre formátovanie USB"
+t MSG_175 "Verzia %d.%d.%d (Build %d)"
+t MSG_176 "Preklad do slovenčiny: martinco78 <mailto:martinco78@azet.sk>"
+t MSG_177 "Oznámenie chýb alebo žiadosti o zlepšenie programu:"
+t MSG_178 "Doplnkové Copyrighty:"
+t MSG_179 "Zásady aktuálizácií"
+t MSG_180 "Ak povolíte tomuto programu kontrolu aktualizácií, "
+	"súhlasíte s tým, že nasledujúce informácie budú zbierané našimi servermi:"
+t MSG_181 "Architektúra vášho operačného systému a verzia"
+t MSG_182 "Verzia používaného programu Rufus"
+t MSG_183 "Vaša IP adresa"
+t MSG_184 "Pre účel vytvárania osobných štatistík používania programu, môžeme uschovávať tieto zhromaždené informácie, "
+	"\\b väčšinou rok\\b0 . Avšak, tieto osobné informácie neposkytujeme dobrovoľne tretím stranám."
+t MSG_185 "Aktualizačný proces"
+t MSG_186 "Program Rufus nepobeží ako služba na pozadí a nenainštaluje aktualizáciu. Pre kontrolu aktualizácií, musí byť spustené hlavné okno.\\line\n"
+	"Pre aktualizáciu programu je potrebný prístup na internet."
+t MSG_187 "Neplatný obraz pre vybrané nastavenie bootovania"
+t MSG_188 "Aktuálny obraz sa nehodí pre vybrané nastavenia bootovania. Použite iný obraz alebo zmeňte nastavenia bootovania."
+
+# Status messages - these messages will appear on the status bar
+t MSG_201 "Ukončuje sa operácia - čakajte..."
+t MSG_202 "Analýza obrazu disku..."
+t MSG_203 "Analýza obrazu zlyhala"
+# Parameter: the name of an obsolete Syslinux .c32 module. eg: "Obsolete vesamenu.c32 detected"
+t MSG_204 "Zistený zastaralý modul: %s"
+# Display the name of the ISO selected. eg: "Using ISO: en_win7_x64_sp1.iso"
+t MSG_205 "Použítý ISO obraz: %s"
+# Typically "Chýbajúci súbor: ldlinux.c32"
+t MSG_206 "Chýbajúci súbor: %s"
+# The name proposed by Windows' Computer Management -> Disk Management when you try to format a drive
+# with an empty label. See http://rufus.akeo.ie/pics/default_name.png
+t MSG_207 "Nový zväzok"
+# Same message, once for singular and plural ("1 device found", "2 devices found")
+t MSG_208 "Bolo nájdené %d zariadenie"
+t MSG_209 "Počet nájdených zariadení: %d"
+t MSG_210 "HOTOVO"
+t MSG_211 "Zrušené"
+t MSG_212 "NEÚSPEŠNÉ"
+# Used when a new update has been downloaded and launched
+t MSG_213 "Spúšťanie nového programu..."
+t MSG_214 "Neúspešné spustenie nového programu"
+# Open/Save file
+t MSG_215 "Otvorený súbor: %s"
+t MSG_216 "Uložený súbor: %s"
+# Formatting status (make sure you use a double % to print the percent sign)
+t MSG_217 "Formátovanie: %0.1f%% dokončených"
+t MSG_218 "Vytváranie súborového systému: %d/%d"
+t MSG_219 "NTFS Fixup: %d%% dokončených"
+# Parameter: the file system and an estimated duration in mins and secs.
+# eg. "Formatting (UDF) - Estimated duration 3:21..."
+# NB: if "estimated duration" is too long, just use "estimated" or an abbreviation
+t MSG_220 "Formátovanie (%s) - zostávajúci čas: %d:%02d"
+t MSG_221 "Nastavovanie menovky (môže chvíľu trvať)..."
+# Parameter: the file system. eg. "Formatting (NTFS)..."
+t MSG_222 "Formátovanie (%s)..."
+t MSG_223 "NTFS Fixup (Kontrola disku)..."
+t MSG_224 "Vymazávanie MBR/PBR/GPT štruktúr..."
+t MSG_225 "Požiadavka na prístup na disk..."
+t MSG_226 "Analyzovanie existujúcich boot zápisov..."
+t MSG_227 "Uzatváranie existujúceho zväzku..."
+t MSG_228 "Zapisovanie hlavné boot záznamu..."
+t MSG_229 "Zapisovanie boot záznamu oddielu..."
+t MSG_230 "Kopírovanie DOS súborov..."
+t MSG_231 "Kopírovanie ISO súborov..."
+t MSG_232 "Win7 EFI boot inštalácia (môže chvíľu trvať)..."
+t MSG_233 "Dokončovanie, čakajte..."
+# Takes a Syslinux version as parameter, eg. "Installing Syslinux v5.10..."
+t MSG_234 "Inštaluje sa Syslinux %s"
+# Bad blocks status. eg: "Bad Blocks: PASS 1/2 - 12.34% (0/0/1 errors)"
+t MSG_235 "Chybné bloky: %d/%d - %0.2f%% (Chyby: %d/%d/%d)"
+t MSG_236 "Chybné bloky: Testovanie s náhodným vzorkami"
+t MSG_237 "Chybné bloky: Testovanie s vzorkou 0x%02X"
+# eg. "Vytváranie oddielov (MBR)..."
+t MSG_238 "Vytváranie oddielov (%s)..."
+t MSG_239 "Vymazávanie oddielov..."
+t MSG_240 "Sťahovanie: %s - pripájanie..."
+t MSG_241 "Sťahovanie: %0.1f%% dokonených"
+t MSG_242 "Neúspešné sťahovanie súboru."
+t MSG_243 "Kontrola aktualizácií programu Rufus..."
+t MSG_244 "Aktualizácia: Chyba pripojenia"
+t MSG_245 "Aktualizácia: Neprístupné údaje o verzii"
+t MSG_246 "Je dostuná nová verzia programu Rufus!"
+t MSG_247 "Nebola nájdená nová verzia programu"
+t MSG_248 "Kľúče registrov programu boli vymazané"
+t MSG_249 "Kľúče registrov programu neboli vymazané"
+# eg. "Fixed disk detection enabled" "ISO size check disabled"
+t MSG_250 "%s: povolené"
+t MSG_251 "%s: zakázané"
+t MSG_252 "Kontrola veľkosti"
+t MSG_253 "Vyhľadávanie USB HDD"
+t MSG_254 "Formátovanie force large FAT32"
+t MSG_255 "NoDriveTypeAutorun bol vymazaný pri ukončení"
+t MSG_256 "Zistená imitácia jednotky"
+t MSG_257 "Joliet podpora"
+t MSG_258 "Rock Ridge podpora"
+t MSG_259 "Vynútená aktualizácia"
+t MSG_260 "NTFS kompresia"
+t MSG_261 "Zápis obrazu: %0.1f%% dokončených"
 
 ################################################################################
 l "sl-SI" "Slovene (Slovenščina)" 0x0424
