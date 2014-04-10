@@ -226,7 +226,7 @@ static BOOL DefineClusterSizes(void)
  *
  * FAT32
  * 31M  : N/A
- * 63M  : N/A			(NB unlike MS, we're allowing 512-512 here - UNTESTED)
+ * 63M  : N/A			(NB unlike MS, we're allowing 512-512 here)
  * 127M :  512 - 1024
  * 255M :  512 - 2048
  * 511M :  512 - 4096
@@ -239,7 +239,6 @@ static BOOL DefineClusterSizes(void)
  * 63GB :  16k - 64k ...but we can go higher using fat32format from RidgeCrop.
  * 2TB+ : N/A
  *
- * TODO: 256MB FAT32 + 4K clusters -> unsupported cluster size
  */
 
 	// FAT 16

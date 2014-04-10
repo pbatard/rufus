@@ -162,7 +162,7 @@ static __inline uint16_t upo2(uint16_t v)
 // Convert a size to human readable
 char* SizeToHumanReadable(uint64_t size, BOOL log, BOOL fake_units)
 {
-	int suffix = 0;
+	int suffix;
 	static char str_size[32];
 	double hr_size = (double)size;
 	double t;
@@ -170,11 +170,10 @@ char* SizeToHumanReadable(uint64_t size, BOOL log, BOOL fake_units)
 	char **_msg_table = log?default_msg_table:msg_table;
 	const double divider = fake_units?1000.0:1024.0;
 
-	for (suffix=1; suffix<MAX_SIZE_SUFFIXES; suffix++) {
-		hr_size /= divider;
-		if (hr_size < divider) {
+	for (suffix=0; suffix<MAX_SIZE_SUFFIXES-1; suffix++) {
+		if (hr_size < divider)
 			break;
-		}
+		hr_size /= divider;
 	}
 	if (suffix == 0) {
 		safe_sprintf(str_size, sizeof(str_size), "%d %s", (int)hr_size, _msg_table[MSG_020-MSG_000]);
@@ -188,7 +187,7 @@ char* SizeToHumanReadable(uint64_t size, BOOL log, BOOL fake_units)
 			safe_sprintf(str_size, sizeof(str_size), "%d%s", i_size, _msg_table[MSG_020+suffix-MSG_000]);
 		}
 	} else {
-		safe_sprintf(str_size, sizeof(str_size), (hr_size * 10.0 - (floor(hr_size) * 10.0)) < 1.0?
+		safe_sprintf(str_size, sizeof(str_size), (hr_size * 10.0 - (floor(hr_size) * 10.0)) < 0.5?
 			"%0.0f %s":"%0.1f %s", hr_size, _msg_table[MSG_020+suffix-MSG_000]);
 	}
 	return str_size;
