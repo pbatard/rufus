@@ -9175,6 +9175,416 @@ t MSG_258 "Soporte a Rock Ridge"
 t MSG_259 "Forzar actualización"
 
 ################################################################################
+l "sv-SE" "Swedish (Svenska)" 0x041d, 0x081d
+v 1.0.11
+b "en-US"
+
+# Main dialog
+g IDD_DIALOG
+s IDD_DIALOG 60,0
+t IDS_DEVICE_TXT "Enhet"
+t IDS_PARTITION_TYPE_TXT "Partitionsschema och måltypssystem"
+t IDS_FILESYSTEM_TXT "Filsystem"
+t IDS_CLUSTERSIZE_TXT "Klusterstorlek"
+t IDS_LABEL_TXT "Ny volumetikett"
+t IDS_FORMAT_OPTIONS_GRP "Formateringsinställningar       "
+t IDC_BADBLOCKS "Kontrollera enheten efter trasiga block"
+t IDC_QUICKFORMAT "Snabbformatering"
+t IDC_BOOT "Skapa startbar disk med"
+t IDC_SET_ICON "Skapa utökat namn och ikonfiler"
+t IDC_ABOUT "Om..."
+t IDC_LOG "Logg"
+t IDCANCEL "Stäng"
+t IDC_START "Starta"
+t IDS_ADVANCED_OPTIONS_GRP "Avancerade inställningar"
+t IDC_ENABLE_FIXED_DISKS "Lista USB-hårddiskar"
+# Note: it is acceptable to drop the parenthesis () below if you are running out of space
+# as there is a tooltip (MSG_169) providing these details
+t IDC_EXTRA_PARTITION "Lägg till korrigeringar för äldre BIOS:ar"
+# 'MBR': See http://en.wikipedia.org/wiki/Master_boot_record
+# Rufus can install it's own custom MBR (the Rufus MBR), which also allows users
+# to specify a custom disk ID for the BIOS. Note: the tooltip for this control is MSG_167.
+t IDC_RUFUS_MBR "Använd Rufus MBR med BIOS-ID"
+s IDC_RUFUS_MBR 20,0
+m IDC_LANG 60,0
+s IDC_DEVICE 60,0
+s IDC_PARTITION_TYPE 60,0
+s IDC_FILESYSTEM 60,0
+s IDC_CLUSTERSIZE 60,0
+s IDC_LABEL 64,0
+s IDC_BOOT 60,0
+s IDC_PROGRESS 60,0
+m IDCANCEL 60,0
+m IDC_START 60,0
+s IDS_FORMAT_OPTIONS_GRP 60,0
+s IDS_ADVANCED_OPTIONS_GRP 60,0
+m IDC_NBPASSES 60,0
+m IDC_ADVANCED 46,0
+m IDC_DISK_ID 60,0
+s IDC_BADBLOCKS 60,0
+s IDC_LOG 42,0
+m IDC_SELECT_ISO 60,0
+m IDC_BOOTTYPE 60,0
+
+# About dialog
+g IDD_ABOUTBOX
+t IDD_ABOUTBOX "Om Rufus"
+t IDC_ABOUT_LICENSE "Licens"
+t IDC_ABOUT_UPDATES "Uppdateringar"
+t IDOK "OK"
+s IDC_ABOUT_UPDATES 30,0
+
+# About -> License dialog
+g IDD_LICENSE
+t IDD_LICENSE "Rufus licens"
+t IDCANCEL "Stäng"
+
+# Notifications. You can trigger one of these by using Alt-R and re-launching Rufus
+g IDD_NOTIFICATION
+t IDC_MORE_INFO "Mer information"
+t IDYES "Ja"
+t IDNO "Nej"
+
+# Log dialog
+g IDD_LOG
+t IDD_LOG "Logg"
+t IDC_LOG_CLEAR "Rensa logg"
+t IDC_LOG_SAVE "Spara logg"
+t IDCANCEL "Stäng logg"
+
+# About -> Updates
+g IDD_UPDATE_POLICY
+t IDD_UPDATE_POLICY "Uppdateringspolicy och inställningar"
+t IDS_UPDATE_SETTINGS_GRP "Inställningar"
+t IDS_UPDATE_FREQUENCY_TXT "Kontrollera:"
+t IDS_INCLUDE_BETAS_TXT "Även beta-versioner:"
+t IDC_CHECK_NOW "Uppdatera nu"
+t IDCANCEL "Stäng"
+s IDC_UPDATE_FREQUENCY 20,0
+m IDC_UPDATE_FREQUENCY -15,0
+s IDS_UPDATE_FREQUENCY_TXT -15,0
+m IDC_INCLUDE_BETAS -15,0
+s IDC_CHECK_NOW 10,0
+s IDCANCEL 10,0
+
+# Dialog that appears when a new version is available
+g IDD_NEW_VERSION
+t IDD_NEW_VERSION "Kontrollera efter uppdateringar - Rufus"
+t IDS_NEW_VERSION_AVAIL_TXT "En nyare version finns tillgänglig. Ladda gärna ned senaste versionen!"
+t IDC_WEBSITE "Tryck här för att komma till hemsidan"
+t IDS_NEW_VERSION_NOTES_GRP "Programinformation"
+t IDS_NEW_VERSION_DOWNLOAD_GRP "Nedladdning"
+t IDC_DOWNLOAD "Nedladdning"
+t IDCANCEL "Stäng"
+
+# Dialog that appears when scanning/extracting ISO files
+g IDD_ISO_EXTRACT
+t IDD_ISO_EXTRACT "Kopierar ISO-filer..."
+t IDC_ISO_FILENAME "Öppnar ISO-avbilden - vänta..."
+t IDC_ISO_ABORT "Avbryt"
+
+# Messages used throughout the application
+t MSG_001 "Program redan i gång"
+t MSG_002 "Rufus körs redan.\n"
+	"Stäng det andra programmet innan du startar ännu ett."
+t MSG_003 "VARNING: ALL DATA PÅ ENHETEN '%s'\nKOMMER ATT FÖRSVINNA.\n"
+	"För att fortsätta, tryck OK. För att avbryta tryck AVBRYT."
+t MSG_004 "Rufus uppdateringspolicy"
+t MSG_005 "Tillåter du att Rufus söker efter uppdateringar på nätet?"
+# Must be the same as IDD_DIALOG:IDCANCEL (i.e. "Close" - I know it's confusing)
+t MSG_006 "Stäng"
+t MSG_007 "Avbryt"
+t MSG_008 "Ja"
+t MSG_009 "Nej"
+t MSG_010 "Trasiga block funna"
+t MSG_011 "Kontroll klar: %d trasiga block funna\n"
+	"  %d läsfel\n  %d skrivfel\n  %d korruptionsfel\n"
+# The following will contain the formatted message above as well as the name of the bad blocks logfile
+t MSG_012 "%s\nEn mer detaljerad rapport hittar du i:\n%s"
+t MSG_013 "Inaktiverad"
+t MSG_014 "Dagligen"
+t MSG_015 "Veckovis"
+t MSG_016 "Månadsvis"
+t MSG_017 "Egen"
+t MSG_018 "Din version: %d.%d.%d (Build %d)"
+t MSG_019 "Senaste version: %d.%d.%d (Build %d)"
+# *Short* size names. These can be used as suffixes
+t MSG_020 "bytes"
+t MSG_021 "KB"
+t MSG_022 "MB"
+t MSG_023 "GB"
+t MSG_024 "TB"
+t MSG_025 "PB"
+# *Long* size names, as they are displayed for the cluster size in the MS format dialog.
+t MSG_026 "bytes"	# Yes, this is a repeat from MSG_020
+t MSG_027 "kilobytes"
+t MSG_028 "megabytes"
+t MSG_029 "Standard"
+# The following gets appended to the file system, cluster size, etc.
+t MSG_030 "%s (Standard)"
+t MSG_031 "%s partitionsschema för BIOS- eller UEFI-datorer"
+t MSG_032 "%s partitionsschema för datorer med BIOS"
+t MSG_033 "%s partitionsschema för datorer med UEFI"
+# Number of bad block check passes (singular for 1 pass, plural for 2 or more passes)
+t MSG_034 "%d gång"
+t MSG_035 "%d gånger"
+t MSG_036 "ISO-avbild"
+t MSG_037 "Program"
+t MSG_038 "Avbryt"
+t MSG_039 "Starta"
+t MSG_040 "Nedladdning"
+t MSG_041 "Operationen avbröts av användaren"
+t MSG_042 "Fel"
+t MSG_043 "Fel: %s"
+t MSG_044 "Filnedladdning"
+t MSG_045 "USB Storage Device (Generic)"
+t MSG_046 "%s (Disk %d) [%s]"
+# Used when a drive is detected that contains more than one partition
+t MSG_047 "Flera partitioner"
+t MSG_048 "Rufus - Tömmer buffertar"
+t MSG_049 "Rufus - Avbryter"
+
+# Error messages
+t MSG_050 "Lyckades."
+t MSG_051 "Obestämd fel vid formatering."
+t MSG_052 "Kan inte använda valt filsystem för detta media."
+t MSG_053 "Åtkomst till enheten nekades."
+t MSG_054 "Mediet är skrivskyddat."
+t MSG_055 "Enheten används redan av en annan process. "
+	"Stäng andra processer som kan tänkas använda enheten."
+t MSG_056 "Enheten går inte att snabbformatera."
+t MSG_057 "Volumens namn är ogiltigt."
+t MSG_058 "Hantering av enheten är ogiltig."
+t MSG_059 "Klusterstorlek är ogiltig för denna enheten."
+t MSG_060 "Volumens storlek är ogiltig."
+t MSG_061 "Sätt i ett flyttbart media i enheten."
+t MSG_062 "Tog emot ett ogiltigt kommando."
+t MSG_063 "Minnesfel."
+t MSG_064 "Läsfel."
+t MSG_065 "Skrivfel."
+t MSG_066 "Installationsfel"
+t MSG_067 "Kunde inte öppna mediet. Det verkar redan användas av en annan process. "
+	"Prova ta ur och stoppa in mediet igen."
+t MSG_068 "Fel när partitionering av enheten gjordes."
+t MSG_069 "Kunde inte kopiera filer till målenheten."
+t MSG_070 "Avbruten av användaren."
+# See http://en.wikipedia.org/wiki/Thread_%28computing%29
+t MSG_071 "Kunde inte starta tråd."
+t MSG_072 "Kontroll efter trasiga block slutfördes inte."
+t MSG_073 "Misslyckades söka av ISO-avbilden."
+t MSG_074 "Misslyckades packa upp ISO-avbilden."
+t MSG_075 "Kunde inte återmontera volumen."
+t MSG_076 "Kunde inte installera filer för uppstarten (boot)."
+t MSG_077 "Kunde inte tilldela enhetsbokstav."
+t MSG_078 "Kan inte montera GUID-volymen."
+t MSG_080 "Rufus har upptäckt att Windows fortfarande tömmer den interna bufferten till USB-enheten.\n\n"
+	"Beroende på hastigheten på din USB-enhet, kan detta ta en lång stund innan det är klart, "
+	"speciellt för stora filer.\n\nVi rekommenderar att du låter Windows få slutföra, för att undvika problem. "
+	"Men tröttnar du på att vänta, kan du helt enkelt bara dra ur enheten..."
+t MSG_081 "ISO-formatet stöds ej"
+t MSG_082 "Denna versionen av Rufus har endast stöd för startbara ISO-filer baserade på bootmgr/WinPE, isolinux eller EFI.\n"
+	"Denna ISO-fil verkar inte använda någon av dem..."
+t MSG_083 "Ersätt %s?"
+t MSG_084 "Denna ISO-avbild verkar använda en gammal version av '%s'.\n"
+	"Startmenyn visas kanske inte på ett korrekt sätt på grund av detta.\n\n"
+	"Ladda ned en nyare version av Rufus så löser det problemet:\n"
+	"- Välj 'Ja' för att ansluta till internet och ladda ned filen\n"
+	"- Välj 'Nej' för att låta befintlig ISO-fil vara omodifierad\n"
+	"Vet du inte vad du ska välja, så ska du välja 'Ja'.\n\n"
+	"Obs: Filen kommer att laddas ned i nuvarande katalog och när "
+	"'%s' sedan finns där, kommer den automatiskt att återanvändas."
+t MSG_085 "Laddar ned %s"
+t MSG_086 "Ingen avbild vald"
+# The content between the quotes below (\"Create a bootable disk\") should match
+# the beginning of the IDC_BOOT text
+t MSG_087 "Tryck på diskikonen för att välja startbar avbild, "
+	"eller avmarkera \"Skapa en startbar disk med\" rutan."
+t MSG_088 "Avbilden är för stor"
+t MSG_089 "Avbilden är för stor för det valda målet."
+t MSG_090 "ISO-filen stöds ej"
+t MSG_091 "När UEFI används som måltyp, kan endast EFI-startbara ISO-avbilder användas. "
+	"Välj en EFI-startbar ISO-fil eller sätt måltypen till BIOS."
+t MSG_092 "Filsystemet stöds ej"
+t MSG_093 "VIKTIGT: DENNA ENHETEN INNEHÅLLER FLERA PARTITIONER!!\n\n"
+	"Detta kan inkludera partitioner/volumer som inte är listade eller synliga i Windows. "
+	"Fortsätter du, är du själv ansvarig för all data som kan försvinna på dessa partitioner."
+t MSG_094 "Flera partitioner upptäcktes"
+t MSG_095 "DD-avbild"
+t MSG_096 "Endast FAT/FAT32 stöds för denna ISO-typen. Välj FAT/FAT32 som filsystem."
+t MSG_097 "Endast 'bootmgr' eller 'WinPE' baserade ISO-avbilder kan för närvarande använda NTFS."
+t MSG_098 "FAT/FAT32 kan endast användas för isolinux baserade ISO-avbilder eller när måltypen är UEFI."
+t MSG_099 "Begränsningar i filsystem"
+t MSG_100 "Denna ISO-avbild innehåller en fil som är större än 4GB, vilket är mer än "
+	"maximal storlek tillåtet för FAT- och FAT32-filsystemen."
+t MSG_101 "Stöd för WIM saknas"
+t MSG_102 "Din dator kan inte packa upp filer från ett WIM-arkiv. WIM-uppackning "
+	"krävs för att skapa EFI-startbar Windows 7 och Windows Vista USB-enheter. Du kan lösa detta "
+	"genom att installera 7-Zip.\nVill du besöka 7-zip nedladdningssida?"
+t MSG_103 "Ladda ned %s?"
+t MSG_104 "Syslinux v5.0 eller senare kräver en '%s' fil för att bli installerad.\n"
+	"Eftersom filen är större än 100 KB, och alltid finns på Syslinux v5+ ISO-avbilder, "
+	"finns den inte inbyggd i Rufus.\n\nRufus kan ladda ned denna filen åt dig:\n"
+	"- Välj 'Ja' för att ansluta till internet och ladda ned filen\n"
+	"- Välj 'Nej' om du själv senare vill kopiera in filen på enheten\n\n"
+	"Obs: Filen kommer att laddas ned i nuvarande katalog och när "
+	"'%s' sedan finns där, kommer den automatiskt att återanvändas.\n"
+t MSG_105 "Avbryter du, finns det risk enheten blir oanvändbar.\n"
+	"Är du säker du vill avbryta, tryck JA. Annars tryck NEJ."
+t MSG_106 "Välj mapp"
+t MSG_107 "Alla filer"
+t MSG_108 "Rufus logg"
+t MSG_109 "0x%02X (Disk %d)"
+# "Cluster size" below should be the same as the label for IDS_CLUSTERSIZE_TXT
+# "kilobytes" should be the same as in MSG_027
+t MSG_110 "MS-DOS kan inte starta från en enhet som använder 64 kilobytes i klusterstorlek.\n"
+	"Ändra klusterstorleken eller använd FreeDOS."
+t MSG_111 "Klusterstorlek stöds ej"
+# "%d:%02d" below is a duration (mins:secs)
+t MSG_112 "Att formatera en stor UDF-volum kan ta lång tid. Vid USB 2.0-hastigheter, är den beräknade formaterings- "
+	"tiden runt %d:%02d, och under tiden kan förloppsindikatorn se ut att stå stilla."
+t MSG_113 "Stor UDF-volum"
+t MSG_114 "Denna avbild använder Syslinux %s men detta programmet innehåller endast installationsfiler för "
+	"Syslinux %s.\n\nEftersom nya versioner av Syslinux inte är kompatibla med varandra, skulle det vara "
+	"omöjligt att alla fanns med i Rufus, så därför måste två filer laddas ned från "
+	"internet ('ldlinux.sys' och 'ldlinux.bss'):\n"
+	"- Välj 'Ja' för att ansluta till internet och ladda ned filerna\n"
+	"- Välj 'Nej' för att avbryta det hela\n\n"
+	"Obs: Filerna kommer att laddas ned i programmets katalog och kommer att användas igen "
+	"automatiskt om de finns där.\n"
+t MSG_115 "Nedladdning krävs"
+# Tootips
+# Partition Scheme and Target Type
+t MSG_150 "Oftast det säkraste valet. Har du en UEFI-dator och vill installera "
+	"ett OS i EFI-läge ska du dock välja något av de andra valen"
+t MSG_151 "Använd detta om du vill installera ett OS i EFI-läge, men du behöver "
+	"komma åt USB-innehållet från Windows XP"
+t MSG_152 "Det optimala valet för att installera ett OS i EFI-läge och när "
+	"USB-innehållet inte kräver tillgång från Windows XP"
+t MSG_153 "Testmönster: 0x%02X"
+t MSG_154 "Testmönster: 0x%02X, 0x%02X"
+t MSG_155 "Testmönster: 0x%02X, 0x%02X, 0x%02X"
+t MSG_156 "Testmönster: 0x%02X, 0x%02X, 0x%02X, 0x%02X"
+t MSG_157 "Ställer in målets filsystem"
+t MSG_158 "Minsta storlek som ett block av data kommer att ta plats i filsystemet"
+t MSG_159 "Använd detta fältet till att ange enhetens namn\nInternationella bokstäver är tillåtna"
+t MSG_160 "Visa/Göm avancerade inställningar"
+t MSG_161 "Kontrollera enheter om den har trasiga block genom att köra ett testmönster"
+t MSG_162 "Avmarkera om du vill använda \"långsam\" formateringsmetod"
+t MSG_163 "Markera för att göra enheten startbar"
+t MSG_164 "Metod som kommer att användas för att göra enheten startbar"
+t MSG_165 "Klicka för att välja ISO-fil..."
+t MSG_166 "Markera för att tillåta visa internationella namn "
+	"och sätt en enhetsikon (en autorun.inf skapas)"
+t MSG_167 "Installera en MBR som tillåter flera uppstartsmöjligheter och som kan maskera bort BIOS USB enhets-ID"
+t MSG_168 "Prova att maskera bort den första startbara USB-enheten (vanligtvis 0x80) som en annan disk.\n"
+	"Detta är endast nödvändigt om du installerar Windows XP och du har mer än en disk"
+t MSG_169 "Skapa en extra gömd partition och prova att justera om partitionsuppbyggnaden.\n"
+	"Detta kan förbättra uppstarten för äldre BIOS:ar"
+t MSG_170 "Lista alla USB-hårddiskar (även icke flyttbara).\nANVÄND PÅ EGEN RISK!!!"
+t MSG_171 "Starta formateringen.\nDetta kommer att RADERA all data på målenheten!"
+t MSG_172 "Licensinformation och beröm"
+t MSG_173 "Tryck för att välja..."
+# The following will appear in the about dialog
+t MSG_174 "Rufus - Det pålitliga USB-formateringsverktyget"
+t MSG_175 "Version %d.%d.%d (Build %d)"
+t MSG_176 "Svensk översättning: Sopor <mailto:sopor@hotmail.com>"
+t MSG_177 "Rapportera fel eller om du har några idéer:"
+t MSG_178 "Andra upphovsrätter:"
+t MSG_179 "Uppdateringspolicy:"
+t MSG_180 "Om du väljer att tillåta detta program att leta efter uppdateringar, "
+	"tillåter du även att följande information sparar på våra servrar:"
+t MSG_181 "Information om ditt operativsystem och version"
+t MSG_182 "Version på programmet du använder"
+t MSG_183 "Din IP-adress"
+t MSG_184 "För att kunna skapa användarstatestik, kommer vi att spara informationen, "
+	"\\b i högst ett år\\b0 . Vi kommer dock behålla informationen för oss själva."
+t MSG_185 "Uppdateringsprocess:"
+t MSG_186 "Rufus installerar inga bakgrundsprogram, därför sker endast uppdateringskontrollen när det körs.\\line\n"
+	"För att kontrollera efter uppdateringar krävs naturligtvis internettillgång."
+t MSG_187 "Ogiltig avbild för vald startinställning"
+t MSG_188 "Nuvarande avbild matchar inte det startbara valet. Välj en annan avbild eller ändra de startbara valet."
+
+# Status messages - these messages will appear on the status bar
+t MSG_201 "Avbryter - Vänta..."
+t MSG_202 "Söker igenom avbild..."
+t MSG_203 "Misslyckades att söka igenom avbilden"
+# Parameter: the name of an obsolete Syslinux .c32 module. eg: "Obsolete vesamenu.c32 detected"
+t MSG_204 "Upptäckte en gammal %s"
+# Display the name of the ISO selected. eg: "Using ISO: en_win7_x64_sp1.iso"
+t MSG_205 "Använder ISO-fil: %s"
+# Typically "Missing ldlinux.c32 file"
+t MSG_206 "Fil %s saknas"
+# The name proposed by Windows' Computer Management -> Disk Management when you try to format a drive
+# with an empty label. See http://rufus.akeo.ie/pics/default_name.png
+t MSG_207 "Ny volum"
+# Same message, once for singular and plural ("1 device found", "2 devices found")
+t MSG_208 "Hittade %d enhet"
+t MSG_209 "Hittade %d enheter"
+t MSG_210 "KLART"
+t MSG_211 "Avbruten"
+t MSG_212 "MISSLYCKADES"
+# Used when a new update has been downloaded and launched
+t MSG_213 "Startar uppdaterad version..."
+t MSG_214 "Kunde inte starta den nya versionen"
+# Open/Save file
+t MSG_215 "Öppnad %s"
+t MSG_216 "Sparad %s"
+# Formatting status (make sure you use a double % to print the percent sign)
+t MSG_217 "Formaterar: %0.1f%% klart"
+t MSG_218 "Skapar filsystem: Uppgift %d/%d klart"
+t MSG_219 "NTFS-Fixup: %d%% klart"
+# Parameter: the file system and an estimated duration in mins and secs.
+# eg. "Formatting (UDF) - Estimated duration 3:21..."
+# NB: if "estimated duration" is too long, just use "estimated" or an abbreviation
+t MSG_220 "Formaterar (%s) - beräknad tid %d:%02d..."
+t MSG_221 "Skriver etikett (detta kan ta lång tid)..."
+# Parameter: the file system. eg. "Formatting (NTFS)..."
+t MSG_222 "Formaterar (%s)..."
+t MSG_223 "NTFS-Fixup (Checkdisk)..."
+t MSG_224 "Rensar MBR/PBR/GPT strukturer..."
+t MSG_225 "Begära diskåtkomst..."
+t MSG_226 "Analyserar nuvarande startsektor..."
+t MSG_227 "Stänger nuvarande volum..."
+t MSG_228 "Skriver huvudstartsektor..."
+t MSG_229 "Skriver partitionsstartsektor..."
+t MSG_230 "Kopierar DOS-filer..."
+t MSG_231 "Kopierar ISO-filer..."
+t MSG_232 "Win7 EFI boot setup (detta kan ta lång tid)..."
+t MSG_233 "Slutbehandlar, vänta..."
+# Takes a Syslinux version as parameter, eg. "Installing Syslinux v5.10..."
+t MSG_234 "Installerar Syslinux %s..."
+# Bad blocks status. eg: "Bad Blocks: PASS 1/2 - 12.34% (0/0/1 errors)"
+t MSG_235 "Trasiga Block: TEST %d/%d - %0.2f%% (%d/%d/%d fel)"
+t MSG_236 "Trasiga Block: Testar med varierande mönster"
+t MSG_237 "Trasiga Block: Testar med mönster 0x%02X"
+# eg. "Partitioning (MBR)..."
+t MSG_238 "Partitionerar (%s)..."
+t MSG_239 "Raderar partitioner..."
+t MSG_240 "Laddar ned %s: Ansluter..."
+t MSG_241 "Laddar ned: %0.1f%%"
+t MSG_242 "Kunde inte ladda ned filen."
+t MSG_243 "Kontrollerar efter Rufus uppdateringar..."
+t MSG_244 "Uppdateringar: Kunde inte ansluta till internet"
+t MSG_245 "Uppdateringar: Har ingen tillgång till versionsdata"
+t MSG_246 "Det finns en ny version av Rufus!"
+t MSG_247 "Det finns ingen ny version av Rufus"
+t MSG_248 "Programmets registernycklar har tagits bort"
+t MSG_249 "Kunde inte radera programmets registernycklar"
+# eg. "Fixed disk detection enabled" "ISO size check disabled"
+t MSG_250 "%s aktiverad"
+t MSG_251 "%s inaktiverad"
+t MSG_252 "Storlekskontroll"
+t MSG_253 "Upptäckt fixerade diskar"
+t MSG_254 "Tvinga formatera "large FAT32""
+t MSG_255 "NoDriveTypeAutorun kommer att raderas vid avslut"
+t MSG_256 "Upptäckte en falsk enhet"
+t MSG_257 "Joliet-stöd"
+t MSG_258 "Rock Ridge-stöd"
+t MSG_259 "Tvinga uppdatering"
+t MSG_260 "NTFS-kompression"
+t MSG_261 "Skriver avbild: %0.1f%% klart"
+
+################################################################################
 l "tr-TR" "Turkish (Türkçe)" 0x041F
 v 1.0.8
 b "en-US"
