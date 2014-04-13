@@ -54,7 +54,7 @@ void cdio_destroy (CdIo_t* p_cdio) {}
 
 RUFUS_ISO_REPORT iso_report;
 int64_t iso_blocking_status = -1;
-BOOL enable_joliet = TRUE, enable_rockridge = TRUE, has_ldlinux_c32;
+BOOL enable_iso = TRUE, enable_joliet = TRUE, enable_rockridge = TRUE, has_ldlinux_c32;
 #define ISO_BLOCKING(x) do {x; iso_blocking_status++; } while(0)
 static const char* psz_extract_dir;
 static const char* bootmgr_efi_name = "bootmgr.efi";
@@ -483,7 +483,7 @@ BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan)
 	const char ISOLINUX[] = { 'I', 'S', 'O', 'L', 'I', 'N', 'U', 'X', ' ' };
 	iso_extension_mask_t iso_extension_mask = ISO_EXTENSION_ALL;
 
-	if ((src_iso == NULL) || (dest_dir == NULL))
+	if ((!enable_iso) || (src_iso == NULL) || (dest_dir == NULL))
 		return FALSE;
 
 	scan_only = scan;

@@ -80,5 +80,6 @@ o Version 1.0.0 (2013.10.20)
 [TODO] (NOTE: THIS PART IS ONLY FOR THE RUFUS DEVELOPER, NOT TRANSLATORS)
   - MSG_165 should be altered to say image
   - NEW message for wrong MSG_044 in _StrError()
-  - NEW message for Alt-Q toggle
+  - NEW message for Alt-I toggle
+  - NEW message for Alt-U toggle
   - NEW message for ERROR_NOT_READY

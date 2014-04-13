@@ -117,7 +117,7 @@ static BOOL log_displayed = FALSE;
 static BOOL iso_provided = FALSE;
 static BOOL user_notified = FALSE;
 static BOOL relaunch = FALSE;
-extern BOOL force_large_fat32, enable_joliet, enable_rockridge, enable_ntfs_compression;
+extern BOOL force_large_fat32, enable_iso, enable_joliet, enable_rockridge, enable_ntfs_compression;
 extern const char* old_c32_name[NB_OLD_C32];
 static int selection_default;
 static loc_cmd* selected_locale = NULL;
@@ -261,7 +261,7 @@ static BOOL DefineClusterSizes(void)
 	if ((SelectedDrive.DiskSize >= 32*MB) && (1.0f*SelectedDrive.DiskSize < 1.0f*MAX_FAT32_SIZE*TB)) {
 		SelectedDrive.ClusterSize[FS_FAT32].Allowed = 0x000001F8;
 		for (i=32; i<=(32*1024); i<<=1) {			// 32 MB -> 32 GB
-			if (SelectedDrive.DiskSize < i*MB) {
+			if (SelectedDrive.DiskSize*1.0f < i*MB*FAT32_CLUSTER_THRESHOLD) {	// MS
 				SelectedDrive.ClusterSize[FS_FAT32].Default = 8*(ULONG)i;
 				break;
 			}
@@ -272,7 +272,7 @@ static BOOL DefineClusterSizes(void)
 		// Default cluster sizes in the 256MB to 32 GB range do not follow the rule above
 		if ((SelectedDrive.DiskSize >= 256*MB) && (SelectedDrive.DiskSize < 32*GB)) {
 			for (i=8; i<=32; i<<=1) {				// 256 MB -> 32 GB
-				if (SelectedDrive.DiskSize < i*GB) {
+				if (SelectedDrive.DiskSize*1.0f < i*GB*FAT32_CLUSTER_THRESHOLD) {
 					SelectedDrive.ClusterSize[FS_FAT32].Default = ((ULONG)i/2)*1024;
 					break;
 				}
@@ -2105,7 +2105,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			return (INT_PTR)TRUE;
 		case IDC_SELECT_ISO:
 			if (iso_provided) {
-				uprintf("Commandline Image provided: '%s'\n", iso_path);
+				uprintf("Image provided: '%s'\n", iso_path);
 				iso_provided = FALSE;	// One off thing...
 			} else {
 				safe_free(iso_path);
@@ -2526,6 +2526,14 @@ relaunch:
 				PrintStatus2000(lmprintf(MSG_256), detect_fakes);
 				continue;
 			}
+			// Alt C => Force the update check to be successful
+			// This will set the reported current version of Rufus to 0.0.0.0 when performing an update
+			// check, so that it always succeeds. This is useful for translators.
+			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'C')) {
+				force_update = !force_update;
+				PrintStatus2000(lmprintf(MSG_259), force_update);
+				continue;
+			}
 			// Alt-D => Delete the NoDriveTypeAutorun key on exit (useful if the app crashed)
 			// This key is used to disable Windows popup messages when an USB drive is plugged in.
 			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'D')) {
@@ -2542,6 +2550,18 @@ relaunch:
 				PrintStatus2000(lmprintf(MSG_253), enable_HDDs);
 				GetUSBDevices(0);
 				CheckDlgButton(hMainDialog, IDC_ENABLE_FIXED_DISKS, enable_HDDs?BST_CHECKED:BST_UNCHECKED);
+				continue;
+			}
+			// Alt-I => Toggle ISO support
+			// This is useful if you have a dual ISO/DD image and you want to force Rufus to use
+			// DD-mode when writing the data.
+			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'I')) {
+				enable_iso = !enable_iso;
+				PrintStatus2000("ISO support:", enable_iso);
+				if (iso_path != NULL) {
+					iso_provided = TRUE;
+					PostMessage(hDlg, WM_COMMAND, IDC_SELECT_ISO, 0);
+				}
 				continue;
 			}
 			// Alt J => Toggle Joliet support for ISO9660 images
@@ -2572,13 +2592,6 @@ relaunch:
 				PrintStatus2000(lmprintf(MSG_260), enable_ntfs_compression);
 				continue;
 			}
-			// Alt-Q => Use PROPER size units, instead of this whole Kibi/Gibi nonsense
-			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'Q')) {
-				use_fake_units = !use_fake_units;
-				PrintStatus2000("Use PROPER size units:", !use_fake_units);
-				GetUSBDevices(0);
-				continue;
-			}
 			// Alt-R => Remove all the registry keys created by Rufus
 			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'R')) {
 				PrintStatus(2000, FALSE, DeleteRegistryKey(REGKEY_HKCU, COMPANY_NAME "\\" APPLICATION_NAME)?MSG_248:MSG_249);
@@ -2595,12 +2608,11 @@ relaunch:
 				GetUSBDevices(0);
 				continue;
 			}
-			// Alt U => Force the update check to be successful
-			// This will set the reported current version of Rufus to 0.0.0.0 when performing an update
-			// check, so that it always succeeds. This is useful for translators.
+			// Alt-U => Use PROPER size units, instead of this whole Kibi/Gibi nonsense
 			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'U')) {
-				force_update = !force_update;
-				PrintStatus2000(lmprintf(MSG_259), force_update);
+				use_fake_units = !use_fake_units;
+				PrintStatus2000("Use PROPER size units:", !use_fake_units);
+				GetUSBDevices(0);
 				continue;
 			}
 			TranslateMessage(&msg);
