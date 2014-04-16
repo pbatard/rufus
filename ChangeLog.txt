@@ -1,3 +1,15 @@
+o Version 1.4.7 (2014.04.??)
+    Add VHD support as a target, courtesy of Scott
+    Add ReFS support (only for Windows 8.1 or later and only for fixed drives)
+    Add a cheat mode to force the use of DD image writing for dual ISOs
+    Add Japanese translation, courtesy of Chantella Jackson
+    Add Slovak translation, courtesy of martinco78
+    Add Swedish translation, courtesy of Sopor
+    Improve the display of filesizes when copying content
+    Fix FAT32 cluster transitions
+    Fix unpartitioned drives not always being listed
+    Fix bad blocks report
+
 o Version 1.4.6 (2014.03.17)
     Display USB size in the dropdown list
     Add Bulgarian translation, courtesy of Krasimir Nevenov

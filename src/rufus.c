@@ -815,7 +815,7 @@ static BOOL GetUSBDevices(DWORD devnum)
 			}
 
 			if (GetDriveLabel(drive_index, drive_letters, &label)) {
-				if ((!enable_HDDs) && ((score = IsHDD(drive_index, vid, pid, buffer)) > 0)) {
+				if ((!enable_HDDs) && (!is_VHD) && ((score = IsHDD(drive_index, vid, pid, buffer)) > 0)) {
 					uprintf("Device eliminated because it was detected as an USB Hard Drive (score %d > 0)\n", score);
 					uprintf("If this device is not an USB Hard Drive, please e-mail the author of this application\n");
 					uprintf("NOTE: You can enable the listing of USB Hard Drives in 'Advanced Options' (after clicking the white triangle)");
@@ -1240,7 +1240,7 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 			safe_sprintf(isolinux_str, sizeof(isolinux_str), "Yes (%s)", iso_report.sl_version_str);
 		}
 		uprintf("ISO label: '%s'\r\n  Size: %lld bytes\r\n  Has a >64 chars filename: %s\r\n  Has Symlinks: %s\r\n  Has a >4GB file: %s\r\n"
-			"  ReactOS: %s\r\n  Uses EFI: %s%s\r\n  Uses Bootmgr: %s\r\n  Uses WinPE: %s%s\r\n  Uses isolinux: %s\r\n",
+			"  Uses ReactOS: %s\r\n  Uses EFI: %s%s\r\n  Uses Bootmgr: %s\r\n  Uses WinPE: %s%s\r\n  Uses isolinux: %s\r\n",
 			iso_report.label, iso_report.projected_size, iso_report.has_long_filename?"Yes":"No", iso_report.has_symlinks?"Yes":"No",
 			iso_report.has_4GB_file?"Yes":"No", IS_REACTOS(iso_report)?"Yes":"No", (iso_report.has_efi || iso_report.has_win7_efi)?"Yes":"No",
 			(iso_report.has_win7_efi && (!iso_report.has_efi))?" (win7_x64)":"", iso_report.has_bootmgr?"Yes":"No",
@@ -2557,7 +2557,7 @@ relaunch:
 			// DD-mode when writing the data.
 			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'I')) {
 				enable_iso = !enable_iso;
-				PrintStatus2000("ISO support:", enable_iso);
+				PrintStatus2000("ISO support", enable_iso);
 				if (iso_path != NULL) {
 					iso_provided = TRUE;
 					PostMessage(hDlg, WM_COMMAND, IDC_SELECT_ISO, 0);
@@ -2611,7 +2611,7 @@ relaunch:
 			// Alt-U => Use PROPER size units, instead of this whole Kibi/Gibi nonsense
 			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'U')) {
 				use_fake_units = !use_fake_units;
-				PrintStatus2000("Use PROPER size units:", !use_fake_units);
+				PrintStatus2000("Use PROPER size units", !use_fake_units);
 				GetUSBDevices(0);
 				continue;
 			}
