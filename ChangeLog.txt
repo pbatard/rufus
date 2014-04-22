@@ -1,4 +1,4 @@
-o Version 1.4.7 (2014.04.??)
+o Version 1.4.7 (2014.04.22)
     Add VHD support as a target, courtesy of Scott
     Add ReFS support (only for Windows 8.1 or later and only for fixed drives)
     Add a cheat mode to force the use of DD image writing for dual ISOs
