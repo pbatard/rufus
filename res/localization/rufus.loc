@@ -2043,7 +2043,7 @@ t MSG_261 "Zapisujem: %0.1f%% završeno"
 
 ################################################################################
 l "nl-NL" "Dutch (Nederlands)" 0x0413, 0x0813
-v 1.0.7
+v 1.0.11
 b "en-US"
 
 # Main dialog
@@ -2060,7 +2060,7 @@ t IDS_CLUSTERSIZE_TXT "Clustergrootte"
 s IDC_CLUSTERSIZE 40,0
 t IDS_LABEL_TXT "Nieuw volume naam"
 s IDC_LABEL 45,0
-t IDS_FORMAT_OPTIONS_GRP "Formateer Opties       "
+t IDS_FORMAT_OPTIONS_GRP "Formatteer Opties       "
 t IDC_BADBLOCKS "Controleer op slechte blokken:"
 s IDC_BADBLOCKS 10,0
 t IDC_QUICKFORMAT "Snelformatteren"
@@ -2080,7 +2080,7 @@ s IDC_EXTRA_PARTITION 40,0
 t IDC_RUFUS_MBR "Gebruik Rufus MBR met BIOS ID:"
 s IDC_RUFUS_MBR 13,0
 m IDC_DISK_ID 20,0
-m IDC_ADVANCED 10,0
+m IDC_ADVANCED 14,0
 m IDC_NBPASSES 20,0
 s IDS_FORMAT_OPTIONS_GRP 40,0
 s IDS_ADVANCED_OPTIONS_GRP 40,0
@@ -2107,7 +2107,7 @@ t IDNO "Nee"
 
 # Log dialog
 g IDD_LOG
-t IDD_LOG "Log"
+t IDD_LOG "Log scherm"
 t IDC_LOG_CLEAR "Verwijder Log"
 t IDC_LOG_SAVE "Bewaar Log"
 t IDCANCEL "Sluit Log"
@@ -2119,7 +2119,7 @@ t IDD_UPDATE_POLICY "Update beleid en instellingen"
 t IDS_UPDATE_SETTINGS_GRP "Instellingen"
 t IDS_UPDATE_FREQUENCY_TXT "Controleer op updates:"
 s IDS_UPDATE_FREQUENCY_TXT -5,0
-t IDS_INCLUDE_BETAS_TXT "Inclusief beta versies:"
+t IDS_INCLUDE_BETAS_TXT "Inclusief bèta versies:"
 s IDS_INCLUDE_BETAS_TXT -5,0
 t IDC_CHECK_NOW "Controleer nu"
 m IDC_CHECK_NOW +25,0
@@ -2132,11 +2132,12 @@ s IDC_POLICY +45,0
 m IDC_POLICY -15,0
 m IDCANCEL +25,0
 s IDS_UPDATE_SETTINGS_GRP 25,0
+t IDOK "OK"
 
 # Dialog that appears when a new version is available
 g IDD_NEW_VERSION
 t IDD_NEW_VERSION "Controleer op updates - Rufus"
-t IDS_NEW_VERSION_AVAIL_TXT "Een nieuwere versie is beschikbaar. Download de laatste versie a.u.b!"
+t IDS_NEW_VERSION_AVAIL_TXT "Een nieuwere versie is beschikbaar. Download de laatste versie a.u.b.!"
 t IDC_WEBSITE "Klik hier om naar de website te gaan"
 t IDS_NEW_VERSION_NOTES_GRP "Uitgave opmerkingen"
 t IDS_NEW_VERSION_DOWNLOAD_GRP "Download"
@@ -2146,7 +2147,7 @@ t IDCANCEL "Sluiten"
 # Dialog that appears when scanning/extracting ISO files
 g IDD_ISO_EXTRACT
 t IDD_ISO_EXTRACT "Bezig met kopiëren van ISO bestanden..."
-t IDC_ISO_FILENAME "Bezig met openen ISO image - Een moment geduld a.u.b...."
+t IDC_ISO_FILENAME "Bezig met openen ISO image - Een moment geduld a.u.b. ..."
 t IDC_ISO_ABORT "Annuleer"
 
 # Messages used throughout the application
@@ -2205,13 +2206,13 @@ t MSG_043 "Fout: %s"
 t MSG_044 "Bestand download"
 t MSG_045 "USB Opslag Apparaat (Algemeen)"
 t MSG_046 "%s (Disk %d) [%s]"
-# t MSG_047 "Multiple Partitions"
+t MSG_047 "Meerdere partities"
 t MSG_048 "Rufus - Buffers aan het legen"
 t MSG_049 "Rufus - Annulering"
 
 # Error messages
 t MSG_050 "Succesvol."
-t MSG_051 "Onbepaalde fout tijdens formateren."
+t MSG_051 "Onbepaalde fout tijdens formatteren."
 t MSG_052 "Kan geselecteerde bestandssysteem niet gebruiken voor dit medium."
 t MSG_053 "Geen toegang tot het apparaat."
 t MSG_054 "Medium is schrijfbeveiligd."
@@ -2247,32 +2248,37 @@ t MSG_080 " Rufus heeft gedetecteerd dat Windows nog steeds bezig is om zijn int
 	"Zeker voor grote bestanden.\n\nHet is aanbevolen om Windows de taak volledig te laten voltooien om data corruptie te voorkomen.\n"
 	"Als het erg lang duurt dan kunt u het apparaat ontkoppelen..."
 t MSG_081 "Niet-ondersteunde ISO"
-t MSG_082 "Deze versie van Rufus ondersteund alleen opstartbare ISO's gebasseerd op  bootmgr/WinPE, isolinux of EFI.\n"
+t MSG_082 "Deze versie van Rufus ondersteund alleen opstartbare ISO's gebaseerd op  bootmgr/WinPE, isolinux of EFI.\n"
 	"Deze ISO lijkt dit geen van allen te zijn..."
 t MSG_083 "Vervang %s?"
 t MSG_084 "Deze ISO image lijkt een verouderde versie te gebruiken van'%s'.\n"
-	"Opstart menu's worden mogelijk niet goed getoont.\n\n"
+	"Opstart menu's worden mogelijk niet goed getoond.\n\n"
 	"Een nieuwere versie kan gedownload worden door Rufus om dit probleem op te lossen:\n"
 	"- Kies 'Ja' om een connectie met het internet te maken en het bestand te downloaden\n"
 	"- Kies 'Nee' om het bestaande ISO bestand ongewijzigd te laten.\n"
 	"Als u niet wat u moet doen, selecteer dan 'Ja'.\n\n"
-	"Opmerking: Het nieuwe bestand wordt gedownload in de huidige map en wanneer er al een"
+	"Opmerking: Het nieuwe bestand wordt naar de huidige map gedownload en wanneer er al een"
 	"'%s' bestaat, zal deze automatisch vervangen worden."
 t MSG_085 "Bezig met downloaden van %s"
-t MSG_086 "Geen ISO image geselecteerd."
+t MSG_086 "Geen image geselecteerd."
 # The content between the quotes below (\"Create a bootable disk\") should match
 # the beginning of the IDC_BOOT text
-t MSG_087 "Klik op de disk knop om een opstartbare ISO te selecteren a.u.b.\n"
-	"Of vink de \"Creëer een opstartbare disk...\" optie uit."
-t MSG_088 "ISO is te groot"
-t MSG_089 "Deze ISO image is te groot voor het geselecteerde doel apparaat."
-t MSG_090 "niet-ondersteund ISO"
+t MSG_087 "Klik a.u.b. op de CD knop om een opstartbare image te selecteren.\n"
+	"Of vink de optie \"Creëer een opstartbare disk met:\" uit."
+t MSG_088 "Image is te groot"
+t MSG_089 "De image is te groot voor het geselecteerde doelapparaat."
+t MSG_090 "niet-ondersteunde ISO"
 t MSG_091 "Wanneer voor type computer UEFI is geselecteerd, zijn alleen EFI opstartbare ISO images ondersteund."
 	"Selecteer een EFI opstartbare ISO of kies als type "MBR partitie-indeling voor BIOS computer."
-t MSG_092 "Niet-ondersteund bestandssysteem"
+t MSG_092 "Niet ondersteund bestandssysteem"
+t MSG_093 "BELANGRIJK: DEZE DRIVE BEVAT MEERDERE PARTITIES!!\n\n"
+	"Dit kunnen partities/volumes zijn die niet in de lijst voor komen of zelfs niet zichtbaar zijn voor Windows. "
+	"Als je verder wilt gaan, ben je zelf verantwoordelijk voor gegevensverlies op deze partities."
+t MSG_094 "Meerdere partities gedetecteerd"
+t MSG_095 "DD Image"
 t MSG_096 "Alleen FAT/FAT32 wordt ondersteund voor dit type ISO. Selecteer FAT/FAT32 als bestandssysteem a.u.b."
-t MSG_097 "Alleen 'bootmgr' of 'WinPE' gebasseerde ISO images kunnen momenteel worden gebruikt met NTFS."
-t MSG_098 "FAT/FAT32 kan alleen gebruikt worden voor op isolinux gebasseerde ISO images of wanneer het doel type computer UEFI is."
+t MSG_097 "Alleen 'bootmgr' of 'WinPE' gebaseerde ISO images kunnen momenteel worden gebruikt met NTFS."
+t MSG_098 "FAT/FAT32 kan alleen gebruikt worden voor op isolinux gebaseerde ISO images of wanneer het doel type computer UEFI is."
 t MSG_099 "Beperking van bestandssysteem"
 t MSG_100 "Deze ISO image bevat een bestand dat groter is dan 4 GB wat groter is dan de"
          "maximum toegestane grootte voor een FAT of FAT32 bestandssysteem."
@@ -2287,7 +2293,7 @@ t MSG_104 "Syslinux v5.0 of hoger vereist een '%s' bestand om het te kunnen inst
 	"- Selecteer 'Nee' als u later dit bestand handmatig naar de drive wilt kopiëren\n\n"
 	"Opmerking: Het bestand wordt gedownload in de huidige map en wanneer er een"
 	"%s'al bestaat zal deze automatisch vervangen worden."
-t MSG_105 "Als u annuleert kan het apparaat ONBRUIKBAAR worden.\n"
+t MSG_105 "Wanneer u annuleert kan het apparaat ONBRUIKBAAR worden.\n"
 	"Als u zeker weet dat u wilt annuleren, klik op JA. Anders klik op NEE."
 t MSG_106 "Selecteer een map a.u.b."
 t MSG_107 "Alle bestanden"
@@ -2297,33 +2303,39 @@ t MSG_110 "MS-DOS kan niet opstarten van een apparaat met een clustergrootte van
 t MSG_111 "Incompatibel Clustergrootte"
 t MSG_112 "Het formatteren van grote UDF volumes kan een lange tijd duren..."
 t MSG_113 "Grote UDF volume"
-
+t MSG_114 "Deze image maakt gebruik van Syslinux %s maar de applicatie bevat alleen de installatiebestanden voor" 
+	"Syslinux %s.\n\nOmdat oude en nieuwe versies van Syslinux niet compatibel zijn met elkaar, en het niet mogelijk is voor Rufus om alle versies te beheren,"
+	"moeten twee extra bestanden gedownload worden van het internet ('ldlinux.sys' en 'ldlinux.bss'):\n"
+"- Klik op "Ja" om via internet deze bestanden te downloaden\n"     
+"- Klik op "Nee" om de opdracht te annuleren\n\n
+"Let op: De bestanden worden in de huidige applicatiemap opgeslagen en zullen automatisch vervangen worden als het bestand al bestaat.\n"
+t MSG_115 "Download is vereist"
 
 # Tooltips
 # Partition Scheme and Target Type
 t MSG_150 "Normaal gesproken de veiligste keuze. Als u een UEFI computer hebt maar u wilt"
          "\neen besturingssysteem in EFI mode installeren, selecteer dan één van de andere opties"
 t MSG_151 "Gebruik deze optie als u een besturingssysteem in EFI mode wilt installeren, maar toegang nodig hebt tot\n"
-         "de USB inhoud van Window XP"
+         "de USB inhoud van Windows XP"
 t MSG_152 "Aanbevolen optie om een besturingssysteem in EFI mode te installeren en wanneer USB toegang niet nodig is voor Windows XP"
-t MSG_153 "Test patroon 0x%02X"	
+t MSG_153 "Test patroon: 0x%02X"	
 t MSG_154 "Test patroon: 0x%02X, 0x%02X"	
 t MSG_155 "Test patroon: 0x%02X, 0x%02X, 0x%02X"
 t MSG_156 "Test patroon: 0x%02X, 0x%02X, 0x%02X, 0x%02X"
 t MSG_157 "Selecteer hier uw type bestandssysteem"
 t MSG_158 "Minimum grootte dat een datablok inneemt in het bestandssysteem"
-t MSG_159 "Gebruik dit veld om de drive naam in te stellen\nInternationale tekens worden geaccepteerd"
+t MSG_159 "Gebruik dit veld om de drive naam in te stellen.\nInternationale tekens worden geaccepteerd"
 t MSG_160 "Wisselen naar geavanceerde opties"
 t MSG_161 "Controleer het apparaat op slechte blokken tijdens een testpatroon"
-t MSG_162 "Uitvinken om een \"langzamere\" formateer methode te gebruiken"
+t MSG_162 "Uitvinken om een \"langzamere\" formatteer methode te gebruiken"
 t MSG_163 "Aanvinken om de USB drive opstartbaar te maken"
 t MSG_164 "Gebruikte methode om de drive opstartbaar te maken"
 t MSG_165 "Klik om een ISO te selecteren..."
 t MSG_166 "Vink aan om internationale labels te zien en een apparaat\n"
-         "pictogram in te stellen (creëert een autrun.inf bestand)"
+         "pictogram in te stellen (creëert een autorun.inf bestand)"
 t MSG_167 "Installeert een MBR die een opstartselectie toestaat en de BIOS USB drive ID kan verbergen"
 t MSG_168 "Probeert de eerste opstartbare USB drive (gewoonlijk 0x80) voor te laten doen als een andere disk.\n"
-	"Dit is alleen nodig als u Windows XP installeerd en meer dan één disk heeft"
+	"Dit is alleen nodig als u Windows XP installeert en meer dan één disk heeft"
 t MSG_169 "Creëert een extra verborgen partitie en probeert de partitiegrenzen uit te lijnen.\n"
 	"Dit kan de opstart detectie verbeteren voor oudere BIOS'en"
 t MSG_170 "Activeer de lijst met externe USB HD's.\nGEBRUIK OP EIGEN RISICO!!!"
@@ -2333,25 +2345,27 @@ t MSG_173 "Klik om te selecteren..."
 # The following will appear in the about dialog
 t MSG_174 "Rufus - De betrouwbare USB Formatteer Tool"
 t MSG_175 "Versie %d.%d.%d (Build %d)"
-t MSG_176 "Dutch translation: Roberto Pino <mailto:rcpac@ziggo.nl>"
+t MSG_176 "Nederlandse vertaling: Roberto Pino <mailto:rcpac@ziggo.nl>"
 t MSG_177 "Meld fouten of verbeteringsverzoeken naar:"
-t MSG_178 "Aanvullende Copyrights:"
+t MSG_178 "Aanvullende Auteursrechten:"
 t MSG_179 "Update Beleid:"
-t MSG_180 "Als u ervoor kiest dat dit programma op updates controleerd,"
+t MSG_180 "Als u ervoor kiest dat dit programma op updates controleert,"
 	"dan gaat u akkoord dat de volgende informatie verzameld kan worden op onze server(s):"
 t MSG_181 "Type besturingssysteem en versienummer"
 t MSG_182 "Versienummer van de applicatie die u gebruikt"
 t MSG_183 "Uw IP adres"
-t MSG_184 "Ten behoeve van het genereren van statistieken voor privegebruik, kunnen we de informatie blijven verzamelen"
+t MSG_184 "Ten behoeve van het genereren van statistieken voor privégebruik, kunnen we de informatie blijven verzamelen"
 	"\\b van ten hoogste een jaar\\b0 . Wij zullen deze individuele gegevens echter niet vrijwillig openbaar maken aan derden."
 t MSG_185 "Update Proces:"
 t MSG_186 "Rufus voert geen installatie van of achtergrond services uit, Daarom worden updatecontroles alleen uitgevoerd als de toepassing wordt uitgevoerd.\\line\n"
 	"Internet toegang is natuurlijk vereist wanneer er op updates gecontroleerd wordt."
+t MSG_187 "Ongeldige image voor geselecteerde opstart optie"
+t MSG_188 "De huidige image komt niet overeen met de opstart optie die geselecteerd is. Gebruik a.u.b. een andere image of kies een andere opstart optie."
 
 # Status messages - these messages will appear on the status bar
-t MSG_201 "Bezig met annuleren - Een moment geduld a.u.b..."
-t MSG_202 "Bezig ISO image aan het onderzoeken..."
-t MSG_203 "Onderzoeken van ISO image mislukt"
+t MSG_201 "Bezig met annuleren - Een moment geduld a.u.b. ..."
+t MSG_202 "Bezig met onderzoeken van image..."
+t MSG_203 "Onderzoeken van image mislukt"
 # Parameter: de naam van een verouderd Syslinux .c32 module. b.v.: "Verouderde vesamenu.c32 gedetecteerd"
 t MSG_204 "Verouderde %s gedetecteerd"
 # Display the name of the ISO selected. eg: "Using ISO: en_win7_x64_sp1.iso"
@@ -2375,10 +2389,10 @@ t MSG_216 "Opgeslagen %s"
 t MSG_217 "Formatteren: %0.1f%% voltooid"
 t MSG_218 "Bestandssysteem aan het maken: Taak %d/%d voltooid"
 t MSG_219 "NTFS herstellen: %d%% voltooid"
-t MSG_220 "Formateren (UDF) (%s) - Geschatte duur %d:%02d..."
+t MSG_220 "Formatteren (UDF) (%s) - Geschatte duur %d:%02d..."
 t MSG_221 "Creëer volumenaam (Dit kan een tijdje duren)..."
 # Parameter: the file system. eg. "Formatting (NTFS)..."
-t MSG_222 "Formateren (%s)..."
+t MSG_222 "Formatteren (%s)..."
 t MSG_223 "NTFS herstellen (Checkdisk)..."
 t MSG_224 "Schoon MBR/PBR/GPT structuren op..."
 t MSG_225 "Verzoek tot disk toegang..."
@@ -2389,7 +2403,7 @@ t MSG_229 "Partitie opstart record aan het schrijven..."
 t MSG_230 "DOS files aan het kopiëren..."
 t MSG_231 "ISO bestanden aan het kopiëren..."
 t MSG_232 "Win7 EFI opstart setup (Dit kan een tijdje duren)..."
-t MSG_233 "Finaliseren, een moment geduld a.u.b..."
+t MSG_233 "Finaliseren, een moment geduld a.u.b. ..."
 # Takes the Syslinux version as paramete. eg. "Installing Syslinux v5..."
 t MSG_234 "Bezig met installeren Syslinux %s..."
 # Bad blocks status. eg: "Bad Blocks: PASS 1/2 - 12.34% (0/0/1 errors)"
@@ -2412,14 +2426,16 @@ t MSG_249 "Registersleutels van applicatie verwijderen mislukt"
 # eg. "Fixed disk detection enabled" "ISO size check disabled"
 t MSG_250 "%s ingeschakeld"
 t MSG_251 "%s uitgeschakeld"
-t MSG_252 "Controles op grootte"
+t MSG_252 "Controles op image grootte"
 t MSG_253 "Detectie vaste schijven"
 t MSG_254 "Forceer uitgebreide FAT32 formattering"
 t MSG_255 "NoDriveTypeAutorun zal worden verwijderd tijdens afsluiten"
 t MSG_256 "Valse drive detectie"
 t MSG_257 "Joliet ondersteuning"
 t MSG_258 "Rock Ridge ondersteuning"
-t MSG_259 "Forceer update"
+t MSG_259 "Update forceren"
+t MSG_260 "NTFS compressie"
+t MSG_261 "Bezig met schrijven van image: %0.1f%% voltooid"
 
 ################################################################################
 l "fi-FI" "Finnish (Suomi)" 0x040B
