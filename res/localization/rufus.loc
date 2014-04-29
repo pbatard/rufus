@@ -2306,9 +2306,9 @@ t MSG_113 "Grote UDF volume"
 t MSG_114 "Deze image maakt gebruik van Syslinux %s maar de applicatie bevat alleen de installatiebestanden voor" 
 	"Syslinux %s.\n\nOmdat oude en nieuwe versies van Syslinux niet compatibel zijn met elkaar, en het niet mogelijk is voor Rufus om alle versies te beheren,"
 	"moeten twee extra bestanden gedownload worden van het internet ('ldlinux.sys' en 'ldlinux.bss'):\n"
-"- Klik op "Ja" om via internet deze bestanden te downloaden\n"     
-"- Klik op "Nee" om de opdracht te annuleren\n\n
-"Let op: De bestanden worden in de huidige applicatiemap opgeslagen en zullen automatisch vervangen worden als het bestand al bestaat.\n"
+	"- Klik op 'Ja' om via internet deze bestanden te downloaden\n"     
+	"- Klik op 'Nee' om de opdracht te annuleren\n\n"
+	"Let op: De bestanden worden in de huidige applicatiemap opgeslagen en zullen automatisch vervangen worden als het bestand al bestaat.\n"
 t MSG_115 "Download is vereist"
 
 # Tooltips
