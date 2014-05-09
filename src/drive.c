@@ -505,17 +505,17 @@ BOOL IsMediaPresent(DWORD DriveIndex)
 	return r;
 }
 
-const struct {int (*fn)(FILE *fp); char* str; BOOL bootable;} known_mbr[] = {
-	{ is_dos_mbr, "DOS/NT/95A", TRUE },
-	{ is_dos_f2_mbr, "DOS/NT/95A (F2)", TRUE },
-	{ is_95b_mbr, "Windows 95B/98/98SE/ME", TRUE },
-	{ is_2000_mbr, "Windows 2000/XP/2003", TRUE },
-	{ is_vista_mbr, "Windows Vista", TRUE },
-	{ is_win7_mbr, "Windows 7", TRUE },
-	{ is_rufus_mbr, "Rufus", TRUE },
-	{ is_syslinux_mbr, "Syslinux", TRUE },
-	{ is_reactos_mbr, "Reactos", TRUE },
-	{ is_zero_mbr, "Zeroed", FALSE },
+const struct {int (*fn)(FILE *fp); char* str;} known_mbr[] = {
+	{ is_dos_mbr, "DOS/NT/95A" },
+	{ is_dos_f2_mbr, "DOS/NT/95A (F2)" },
+	{ is_95b_mbr, "Windows 95B/98/98SE/ME" },
+	{ is_2000_mbr, "Windows 2000/XP/2003" },
+	{ is_vista_mbr, "Windows Vista" },
+	{ is_win7_mbr, "Windows 7" },
+	{ is_rufus_mbr, "Rufus" },
+	{ is_syslinux_mbr, "Syslinux" },
+	{ is_reactos_mbr, "Reactos" },
+	{ is_zero_mbr, "Zeroed" },
 };
 
 // Returns TRUE if the drive seems bootable, FALSE otherwise
@@ -535,7 +535,7 @@ BOOL AnalyzeMBR(HANDLE hPhysicalDrive, const char* TargetName)
 	for (i=0; i<ARRAYSIZE(known_mbr); i++) {
 		if (known_mbr[i].fn(&fake_fd)) {
 			uprintf("%s has a %s %s\n", TargetName, known_mbr[i].str, mbr_name);
-			return known_mbr[i].bootable;
+			return TRUE;
 		}
 	}
 
@@ -543,38 +543,40 @@ BOOL AnalyzeMBR(HANDLE hPhysicalDrive, const char* TargetName)
 	return TRUE;
 }
 
-// TODO: use an (fn,str) table and simplify this whole thing
+const struct {int (*fn)(FILE *fp); char* str;} known_pbr[] = {
+	{ entire_fat_16_br_matches, "FAT16 DOS" },
+	{ entire_fat_16_fd_br_matches, "FAT16 FreeDOS" },
+	{ entire_fat_16_ros_br_matches, "FAT16 ReactOS" },
+	{ entire_fat_32_br_matches, "FAT32 DOS" },
+	{ entire_fat_32_nt_br_matches, "FAT32 NT" },
+	{ entire_fat_32_fd_br_matches, "FAT32 FreeDOS" },
+	{ entire_fat_32_ros_br_matches, "FAT32 ReactOS" },
+};
+
 BOOL AnalyzePBR(HANDLE hLogicalVolume)
 {
+	const char* pbr_name = "Partition Boot Record";
 	FILE fake_fd = { 0 };
+	int i;
 
 	fake_fd._ptr = (char*)hLogicalVolume;
 	fake_fd._bufsiz = SelectedDrive.Geometry.BytesPerSector;
 
 	if (!is_br(&fake_fd)) {
-		uprintf("Volume does not have an x86 partition boot record\n");
+		uprintf("Volume does not have an x86 %s\n", pbr_name);
 		return FALSE;
 	}
+
 	if (is_fat_16_br(&fake_fd) || is_fat_32_br(&fake_fd)) {
-		if (entire_fat_16_br_matches(&fake_fd)) {
-			uprintf("Drive has a FAT16 DOS partition boot record\n");
-		} else if (entire_fat_16_fd_br_matches(&fake_fd)) {
-			uprintf("Drive has a FAT16 FreeDOS partition boot record\n");
-		} else if (entire_fat_16_ros_br_matches(&fake_fd)) {
-			uprintf("Drive has a FAT16 ReactOS partition boot record\n");
-		} else if (entire_fat_32_br_matches(&fake_fd)) {
-			uprintf("Drive has a FAT32 DOS partition boot record\n");
-		} else if (entire_fat_32_nt_br_matches(&fake_fd)) {
-			uprintf("Drive has a FAT32 NT partition boot record\n");
-		} else if (entire_fat_32_fd_br_matches(&fake_fd)) {
-			uprintf("Drive has a FAT32 FreeDOS partition boot record\n");
-		} else if (entire_fat_32_ros_br_matches(&fake_fd)) {
-			uprintf("Drive has a FAT32 ReactOS partition boot record\n");
-		} else {
-			uprintf("Drive has an unknown FAT16 or FAT32 partition boot record\n");
+		for (i=0; i<ARRAYSIZE(known_pbr); i++) {
+			if (known_pbr[i].fn(&fake_fd)) {
+				uprintf("Drive has a %s %s\n", known_pbr[i].str, pbr_name);
+				return TRUE;
+			}
 		}
+		uprintf("Volume has an unknown FAT16 or FAT32 %s\n", pbr_name);
 	} else {
-		uprintf("Drive has an unknown partition boot record\n");
+		uprintf("Volume has an unknown %s\n", pbr_name);
 	}
 	return TRUE;
 }
