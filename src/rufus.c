@@ -130,6 +130,7 @@ char msgbox[1024], msgbox_title[32];
 /*
  * Globals
  */
+OPEN_LIBRARIES_TRACKING_VARS;
 HINSTANCE hMainInstance;
 HWND hMainDialog;
 char szFolderPath[MAX_PATH], app_dir[MAX_PATH];
@@ -779,7 +780,7 @@ static BOOL GetUSBDevices(DWORD devnum)
 					devint_detail_data = (PSP_DEVICE_INTERFACE_DETAIL_DATA_A)calloc(1, size);
 					if (devint_detail_data == NULL) {
 						uprintf("Unable to allocate data for SP_DEVICE_INTERFACE_DETAIL_DATA\n");
-						return FALSE;
+						continue;
 					}
 					devint_detail_data->cbSize = sizeof(SP_DEVICE_INTERFACE_DETAIL_DATA_A);
 				} else {
@@ -979,7 +980,7 @@ void UpdateProgress(int op, float percent)
 {
 	int pos;
 
-	if ((op < 0) || (op > OP_MAX)) {
+	if ((op < 0) || (op >= OP_MAX)) {
 		duprintf("UpdateProgress: invalid op %d\n", op);
 		return;
 	}
@@ -1649,7 +1650,7 @@ void InitDialog(HWND hDlg)
 	CheckDlgButton(hDlg, IDC_SET_ICON, BST_CHECKED);
 
 	// Load system icons (NB: Use the excellent http://www.nirsoft.net/utils/iconsext.html to find icon IDs)
-	hDllInst = LoadLibraryA("shell32.dll");
+	hDllInst = GetDLLHandle("shell32.dll");
 	hIconDisc = (HICON)LoadImage(hDllInst, MAKEINTRESOURCE(12), IMAGE_ICON, s16, s16, LR_DEFAULTCOLOR|LR_SHARED);
 	hIconLang = (HICON)LoadImage(hDllInst, MAKEINTRESOURCE(244), IMAGE_ICON, s16, s16, LR_DEFAULTCOLOR|LR_SHARED);
 	if (nWindowsVersion >= WINDOWS_VISTA) {
@@ -2461,7 +2462,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	IGNORE_RETVAL(CoInitializeEx(NULL, COINIT_APARTMENTTHREADED));
 
 	// Some dialogs have Rich Edit controls and won't display without this
-	if (LoadLibraryA("Riched20.dll") == NULL) {
+	if (GetDLLHandle("Riched20.dll") == NULL) {
 		uprintf("Could not load RichEdit library - some dialogs may not display: %s\n", WindowsErrorString());
 	}
 
@@ -2643,6 +2644,7 @@ out:
 	if (attached_console)
 		DetachConsole();
 	CloseHandle(mutex);
+	OPEN_LIBRARIES_CLOSE_ALL;
 	uprintf("*** " APPLICATION_NAME " exit ***\n");
 #ifdef _CRTDBG_MAP_ALLOC
 	_CrtDumpMemoryLeaks();

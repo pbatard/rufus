@@ -192,6 +192,7 @@ static BOOL WimExtractFile_7z(const char* image, int index, const char* src, con
 		uprintf("  7z.exe did not extract %s\n", tmpdst);
 		return FALSE;
 	}
+	// coverity[toctou]
 	if (rename(tmpdst, dst) != 0) {
 		uprintf("  Could not rename %s to %s\n", tmpdst, dst);
 		return FALSE;

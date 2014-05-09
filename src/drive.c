@@ -188,7 +188,7 @@ char* GetLogicalName(DWORD DriveIndex, BOOL bKeepTrailingBackslash, BOOL bSilent
 		}
 
 		for (j=0; (j<ARRAYSIZE(ignore_device)) &&
-			(safe_strnicmp(path, ignore_device[j], safe_strlen(ignore_device[j])) != 0); j++);
+			(_strnicmp(path, ignore_device[j], safe_strlen(ignore_device[j])) != 0); j++);
 		if (j < ARRAYSIZE(ignore_device)) {
 			suprintf("Skipping GUID volume for '%s'\n", path);
 			continue;
@@ -258,7 +258,7 @@ HANDLE GetLogicalHandle(DWORD DriveIndex, BOOL bWriteAccess, BOOL bLockDrive)
 	}
 
 	hLogical = GetHandle(LogicalPath, bWriteAccess, bLockDrive);
-	safe_free(LogicalPath);
+	free(LogicalPath);
 	return hLogical;
 }
 
@@ -453,7 +453,7 @@ BOOL GetDriveLabel(DWORD DriveIndex, char* letters, char** label)
 	safe_closehandle(hPhysical);
 	if (AutorunLabel != NULL) {
 		uprintf("Using autorun.inf label for drive %c: '%s'\n", letters[0], AutorunLabel);
-		strncpy(VolumeLabel, AutorunLabel, sizeof(VolumeLabel));
+		safe_strcpy(VolumeLabel, sizeof(VolumeLabel), AutorunLabel);
 		safe_free(AutorunLabel);
 		*label = VolumeLabel;
 	} else if (GetVolumeInformationW(wDrivePath, wVolumeLabel, ARRAYSIZE(wVolumeLabel),
@@ -626,6 +626,7 @@ int GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSyst
 			NULL, 0, layout, sizeof(layout), &size, NULL );
 	if (!r || size <= 0) {
 		uprintf("Could not get layout for drive 0x%02x: %s\n", DriveIndex, WindowsErrorString());
+		safe_closehandle(hPhysical);
 		return 0;
 	}
 

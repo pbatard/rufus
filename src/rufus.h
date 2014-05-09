@@ -400,11 +400,23 @@ extern void StrArrayDestroy(StrArray* arr);
  *   pfFormatEx = (FormatEx_t) GetProcAddress(GetDLLHandle("fmifs"), "FormatEx");
  * to make it accessible.
  */
+#define MAX_LIBRARY_HANDLES 32
+extern HMODULE OpenLibraryHandle[MAX_LIBRARY_HANDLES];
+extern uint16_t OpenLibraryHandleSize;
+#define OPEN_LIBRARIES_TRACKING_VARS HMODULE OpenLibraryHandle[MAX_LIBRARY_HANDLES]; uint16_t OpenLibraryHandleSize = 0
+#define OPEN_LIBRARIES_CLOSE_ALL while(OpenLibraryHandleSize > 0) FreeLibrary(OpenLibraryHandle[--OpenLibraryHandleSize])
 static __inline HMODULE GetDLLHandle(char* szDLLName)
 {
 	HMODULE h = NULL;
-	if ((h = GetModuleHandleA(szDLLName)) == NULL)
-		h = LoadLibraryA(szDLLName);
+	if ((h = GetModuleHandleA(szDLLName)) == NULL) {
+		if (OpenLibraryHandleSize >= MAX_LIBRARY_HANDLES) {
+			uprintf("Error: MAX_LIBRARY_HANDLES is too small\n");
+		} else {
+			h = LoadLibraryA(szDLLName);
+			if (h != NULL)
+				OpenLibraryHandle[OpenLibraryHandleSize++] = h;
+		}
+	}
 	return h;
 }
 #define PF_DECL(proc) proc##_t pf##proc = NULL

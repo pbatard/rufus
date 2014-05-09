@@ -276,7 +276,8 @@ DWORD DownloadFile(const char* url, const char* file, HWND hProgressDialog)
 	PrintStatus(0, FALSE, MSG_240, &file[last_slash]);
 	uprintf("Downloading '%s' from %s\n", &file[last_slash], url);
 
-	if (!InternetCrackUrlA(url, (DWORD)safe_strlen(url), 0, &UrlParts)) {
+	if ( (!InternetCrackUrlA(url, (DWORD)safe_strlen(url), 0, &UrlParts))
+	  || (UrlParts.lpszHostName == NULL) || (UrlParts.lpszUrlPath == NULL)) {
 		uprintf("Unable to decode URL: %s\n", WinInetErrorString());
 		goto out;
 	}

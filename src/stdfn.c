@@ -39,7 +39,7 @@ BOOL is_x64(void)
 	// Detect if we're running a 32 or 64 bit system
 	if (sizeof(uintptr_t) < 8) {
 		pIsWow64Process = (BOOL (__stdcall *)(HANDLE, PBOOL))
-			GetProcAddress(GetModuleHandleA("KERNEL32"), "IsWow64Process");
+			GetProcAddress(GetDLLHandle("KERNEL32"), "IsWow64Process");
 		if (pIsWow64Process != NULL) {
 			(*pIsWow64Process)(GetCurrentProcess(), &ret);
 		}

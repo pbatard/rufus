@@ -47,14 +47,14 @@ static HRESULT (WINAPI *pSHCreateItemFromParsingName)(PCWSTR, IBindCtx*, REFIID,
 #endif
 #define INIT_VISTA_SHELL32 if (pSHCreateItemFromParsingName == NULL) {						\
 	pSHCreateItemFromParsingName = (HRESULT (WINAPI *)(PCWSTR, IBindCtx*, REFIID, void **))	\
-			GetProcAddress(GetModuleHandleA("SHELL32"), "SHCreateItemFromParsingName");		\
+			GetProcAddress(GetDLLHandle("SHELL32"), "SHCreateItemFromParsingName");		\
 	}
 #define IS_VISTA_SHELL32_AVAILABLE (pSHCreateItemFromParsingName != NULL)
 // And this one is simply not available in MinGW32
 static LPITEMIDLIST (WINAPI *pSHSimpleIDListFromPath)(PCWSTR pszPath) = NULL;
 #define INIT_XP_SHELL32 if (pSHSimpleIDListFromPath == NULL) {								\
 	pSHSimpleIDListFromPath = (LPITEMIDLIST (WINAPI *)(PCWSTR))								\
-			GetProcAddress(GetModuleHandleA("SHELL32"), "SHSimpleIDListFromPath");			\
+			GetProcAddress(GetDLLHandle("SHELL32"), "SHSimpleIDListFromPath");			\
 	}
 
 /* Globals */

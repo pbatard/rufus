@@ -306,8 +306,7 @@ BOOL get_supported_locales(const char* filename)
 		case LC_ATTRIBUTES:
 			if (last_lcmd == NULL) {
 				luprint("[a]ttributes cannot precede [l]ocale");
-			}
-			for(j=0; lcmd->txt[0][j] != 0; j++) {
+			} else for(j=0; lcmd->txt[0][j] != 0; j++) {
 				for (k=0; k<ARRAYSIZE(attr_parse); k++) {
 					if (attr_parse[k].c == lcmd->txt[0][j]) {
 						// Repurpose ctrl_id as an attributes mask
@@ -438,7 +437,10 @@ BOOL get_loc_data_file(const char* filename, loc_cmd* lcmd)
 		goto out;
 	}
 
-	fseek(fd, offset, SEEK_SET);
+	if (fseek(fd, offset, SEEK_SET) != 0) {
+		uprintf("localization: could not rewind\n");
+		goto out;
+	}
 
 	do {	// custom readline handling for string collation, realloc, line numbers, etc.
 		c = getc(fd);
@@ -547,7 +549,10 @@ BOOL get_loc_data_file(const char* filename, loc_cmd* lcmd)
 out:
 	// Don't close on a reentrant call
 	if (reentrant) {
-		fseek(fd, cur_offset, SEEK_SET);
+		if ((cur_offset < 0) || (fseek(fd, cur_offset, SEEK_SET) != 0)) {
+			uprintf("localization: unable to reset reentrant position\n");
+			ret = FALSE;
+		}
 		loc_line_nr = old_loc_line_nr;
 	} else if (fd != NULL) {
 		fclose(fd);
@@ -718,7 +723,7 @@ static __inline char* get_sanitized_token_data_buffer(const char* token, unsigne
 	size_t i;
 	char* data = get_token_data_buffer(token, n, buffer, buffer_size);
 	if (data != NULL) {
-		for (i=0; i<safe_strlen(data); i++) {
+		for (i=0; i<strlen(data); i++) {
 			if ((data[i] == '\\') && (data[i+1] == 'n')) {
 				data[i] = '\r';
 				data[i+1] = '\n';
@@ -821,7 +826,10 @@ char* insert_section_data(const char* filename, const char* section, const char*
 		goto out;
 	}
 	// Check the input file's BOM and create an output file with the same
-	fread(&bom, sizeof(bom), 1, fd_in);
+	if (fread(&bom, sizeof(bom), 1, fd_in) != 1) {
+		uprintf("Could not read file '%s'\n", filename);
+		goto out;
+	}
 	switch(bom) {
 	case 0xFEFF:
 		mode = 2;	// UTF-16 (LE)
@@ -897,8 +905,9 @@ out:
 			if (fd_in != NULL) fclose(fd_in);
 			if (fd_out != NULL) fclose(fd_out);
 		}
-	} 
-	_wunlink(wtmpname);
+	}
+	if (wtmpname != NULL)
+		_wunlink(wtmpname);
 	safe_free(wfilename);
 	safe_free(wtmpname);
 	safe_free(wsection);
@@ -957,7 +966,10 @@ char* replace_in_token_data(const char* filename, const char* token, const char*
 		goto out;
 	}
 	// Check the input file's BOM and create an output file with the same
-	fread(&bom, sizeof(bom), 1, fd_in);
+	if (fread(&bom, sizeof(bom), 1, fd_in) != 1) {
+		uprintf("Could not read file '%s'\n", filename);
+		goto out;
+	}
 	switch(bom) {
 	case 0xFEFF:
 		mode = 2;	// UTF-16 (LE)
@@ -1045,7 +1057,8 @@ out:
 			if (fd_out != NULL) fclose(fd_out);
 		}
 	}
-	_wunlink(wtmpname);
+	if (wtmpname != NULL)
+		_wunlink(wtmpname);
 	safe_free(wfilename);
 	safe_free(wtmpname);
 	safe_free(wtoken);

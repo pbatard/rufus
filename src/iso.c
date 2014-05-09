@@ -225,7 +225,7 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 			goto out;
 		}
 		if (udf_is_dir(p_udf_dirent)) {
-			if (!scan_only) _mkdirU(psz_fullpath);
+			if (!scan_only) IGNORE_RETVAL(_mkdirU(psz_fullpath));
 			p_udf_dirent2 = udf_opendir(p_udf_dirent);
 			if (p_udf_dirent2 != NULL) {
 				if (udf_extract_files(p_udf, p_udf_dirent2, &psz_fullpath[strlen(psz_extract_dir)]))
@@ -376,7 +376,7 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 			iso9660_name_translate_ext(p_statbuf->filename, psz_basename, i_joliet_level);
 		}
 		if (p_statbuf->type == _STAT_DIR) {
-			if (!scan_only) _mkdirU(psz_fullpath);
+			if (!scan_only) IGNORE_RETVAL(_mkdirU(psz_fullpath));
 			if (iso_extract_files(p_iso, psz_iso_name))
 				goto out;
 		} else {
