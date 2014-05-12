@@ -35,13 +35,12 @@ char WindowsVersionStr[128] = "Windows ";
 BOOL is_x64(void)
 {
 	BOOL ret = FALSE;
-	BOOL (__stdcall *pIsWow64Process)(HANDLE, PBOOL) = NULL;
+	PF_TYPE_DECL(__stdcall, BOOL, IsWow64Process, (HANDLE, PBOOL));
 	// Detect if we're running a 32 or 64 bit system
 	if (sizeof(uintptr_t) < 8) {
-		pIsWow64Process = (BOOL (__stdcall *)(HANDLE, PBOOL))
-			GetProcAddress(GetDLLHandle("KERNEL32"), "IsWow64Process");
-		if (pIsWow64Process != NULL) {
-			(*pIsWow64Process)(GetCurrentProcess(), &ret);
+		PF_INIT(IsWow64Process, Kernel32);
+		if (pfIsWow64Process != NULL) {
+			(*pfIsWow64Process)(GetCurrentProcess(), &ret);
 		}
 	} else {
 		ret = TRUE;

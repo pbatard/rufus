@@ -67,45 +67,26 @@
 #define DBT_CUSTOMEVENT 0x8006
 #endif
 
-// MinGW fails to link those...
-typedef HIMAGELIST (WINAPI *ImageList_Create_t)(
-	int cx,
-	int cy,
-	UINT flags,
-	int cInitial,
-	int cGrow
-);
-ImageList_Create_t pImageList_Create = NULL;
-typedef int (WINAPI *ImageList_ReplaceIcon_t)(
-	HIMAGELIST himl,
-	int i,
-	HICON hicon
-);
-ImageList_ReplaceIcon_t pImageList_ReplaceIcon = NULL;
 struct {
 	HIMAGELIST himl;
 	RECT margin;
 	UINT uAlign;
 } bi_iso = {0}, bi_up = {0}, bi_down = {0}, bi_lang = {0};	// BUTTON_IMAGELIST
 
-// ...and MinGW doesn't know these.
 typedef struct
 {
 	LPCITEMIDLIST pidl;
-	BOOL   fRecursive;
+	BOOL fRecursive;
 } MY_SHChangeNotifyEntry;
 
-typedef BOOL (WINAPI *SHChangeNotifyDeregister_t)(
-	ULONG ulID
-);
-typedef ULONG (WINAPI *SHChangeNotifyRegister_t)(
-	HWND hwnd,
-	int fSources,
-	LONG fEvents,
-	UINT wMsg,
-	int cEntries,
-	const MY_SHChangeNotifyEntry *pshcne
-);
+// MinGW doesn't know these
+PF_TYPE(WINAPI, HIMAGELIST, ImageList_Create, (int, int, UINT, int, int));
+PF_TYPE(WINAPI, int, ImageList_ReplaceIcon, (HIMAGELIST, int, HICON));
+// WDK blows up when trying to using PF_TYPE_DECL() for the ImageList calls... so we don't.
+PF_DECL(ImageList_Create);
+PF_DECL(ImageList_ReplaceIcon);
+PF_TYPE_DECL(WINAPI, BOOL, SHChangeNotifyDeregister, (ULONG));
+PF_TYPE_DECL(WINAPI, ULONG, SHChangeNotifyRegister, (HWND, int, LONG, UINT, int, const MY_SHChangeNotifyEntry*));
 
 const char* FileSystemLabel[FS_MAX] = { "FAT", "FAT32", "NTFS", "UDF", "exFAT", "ReFS" };
 // Number of steps for each FS for FCC_STRUCTURE_PROGRESS
@@ -130,7 +111,7 @@ char msgbox[1024], msgbox_title[32];
 /*
  * Globals
  */
-OPEN_LIBRARIES_TRACKING_VARS;
+OPENED_LIBRARIES_VARS;
 HINSTANCE hMainInstance;
 HWND hMainDialog;
 char szFolderPath[MAX_PATH], app_dir[MAX_PATH];
@@ -1650,7 +1631,7 @@ void InitDialog(HWND hDlg)
 	CheckDlgButton(hDlg, IDC_SET_ICON, BST_CHECKED);
 
 	// Load system icons (NB: Use the excellent http://www.nirsoft.net/utils/iconsext.html to find icon IDs)
-	hDllInst = GetDLLHandle("shell32.dll");
+	hDllInst = GetLibraryHandle("Shell32");
 	hIconDisc = (HICON)LoadImage(hDllInst, MAKEINTRESOURCE(12), IMAGE_ICON, s16, s16, LR_DEFAULTCOLOR|LR_SHARED);
 	hIconLang = (HICON)LoadImage(hDllInst, MAKEINTRESOURCE(244), IMAGE_ICON, s16, s16, LR_DEFAULTCOLOR|LR_SHARED);
 	if (nWindowsVersion >= WINDOWS_VISTA) {
@@ -1662,29 +1643,31 @@ void InitDialog(HWND hDlg)
 	}
 
 	// Set the icons on the the buttons
-	pImageList_Create = (ImageList_Create_t) GetProcAddress(GetDLLHandle("Comctl32.dll"), "ImageList_Create");
-	pImageList_ReplaceIcon = (ImageList_ReplaceIcon_t) GetProcAddress(GetDLLHandle("Comctl32.dll"), "ImageList_ReplaceIcon");
+	PF_INIT(ImageList_Create, Comctl32);
+	PF_INIT(ImageList_ReplaceIcon, Comctl32);
+	if ((pfImageList_Create != NULL) && (pfImageList_ReplaceIcon != NULL)) {
 
-	bi_iso.himl = pImageList_Create(i16, i16, ILC_COLOR32 | ILC_MASK, 1, 0);
-	pImageList_ReplaceIcon(bi_iso.himl, -1, hIconDisc);
-	SetRect(&bi_iso.margin, 0, 1, 0, 0);
-	bi_iso.uAlign = BUTTON_IMAGELIST_ALIGN_CENTER;
-	bi_lang.himl = pImageList_Create(i16, i16, ILC_COLOR32 | ILC_MASK, 1, 0);
-	pImageList_ReplaceIcon(bi_lang.himl, -1, hIconLang);
-	SetRect(&bi_lang.margin, 0, 1, 0, 0);
-	bi_lang.uAlign = BUTTON_IMAGELIST_ALIGN_CENTER;
-	bi_down.himl = pImageList_Create(i16, i16, ILC_COLOR32 | ILC_MASK, 1, 0);
-	pImageList_ReplaceIcon(bi_down.himl, -1, hIconDown);
-	SetRect(&bi_down.margin, 0, 0, 0, 0);
-	bi_down.uAlign = BUTTON_IMAGELIST_ALIGN_CENTER;
-	bi_up.himl = pImageList_Create(i16, i16, ILC_COLOR32 | ILC_MASK, 1, 0);
-	pImageList_ReplaceIcon(bi_up.himl, -1, hIconUp);
-	SetRect(&bi_up.margin, 0, 0, 0, 0);
-	bi_up.uAlign = BUTTON_IMAGELIST_ALIGN_CENTER;
+		bi_iso.himl = pfImageList_Create(i16, i16, ILC_COLOR32 | ILC_MASK, 1, 0);
+		pfImageList_ReplaceIcon(bi_iso.himl, -1, hIconDisc);
+		SetRect(&bi_iso.margin, 0, 1, 0, 0);
+		bi_iso.uAlign = BUTTON_IMAGELIST_ALIGN_CENTER;
+		bi_lang.himl = pfImageList_Create(i16, i16, ILC_COLOR32 | ILC_MASK, 1, 0);
+		pfImageList_ReplaceIcon(bi_lang.himl, -1, hIconLang);
+		SetRect(&bi_lang.margin, 0, 1, 0, 0);
+		bi_lang.uAlign = BUTTON_IMAGELIST_ALIGN_CENTER;
+		bi_down.himl = pfImageList_Create(i16, i16, ILC_COLOR32 | ILC_MASK, 1, 0);
+		pfImageList_ReplaceIcon(bi_down.himl, -1, hIconDown);
+		SetRect(&bi_down.margin, 0, 0, 0, 0);
+		bi_down.uAlign = BUTTON_IMAGELIST_ALIGN_CENTER;
+		bi_up.himl = pfImageList_Create(i16, i16, ILC_COLOR32 | ILC_MASK, 1, 0);
+		pfImageList_ReplaceIcon(bi_up.himl, -1, hIconUp);
+		SetRect(&bi_up.margin, 0, 0, 0, 0);
+		bi_up.uAlign = BUTTON_IMAGELIST_ALIGN_CENTER;
 
-	SendMessage(hSelectISO, BCM_SETIMAGELIST, 0, (LPARAM)&bi_iso);
-	SendMessage(GetDlgItem(hDlg, IDC_LANG), BCM_SETIMAGELIST, 0, (LPARAM)&bi_lang);
-	SendMessage(GetDlgItem(hDlg, IDC_ADVANCED), BCM_SETIMAGELIST, 0, (LPARAM)&bi_down);
+		SendMessage(hSelectISO, BCM_SETIMAGELIST, 0, (LPARAM)&bi_iso);
+		SendMessage(GetDlgItem(hDlg, IDC_LANG), BCM_SETIMAGELIST, 0, (LPARAM)&bi_lang);
+		SendMessage(GetDlgItem(hDlg, IDC_ADVANCED), BCM_SETIMAGELIST, 0, (LPARAM)&bi_down);
+	}
 
 	// Set the various tooltips
 	CreateTooltip(hFileSystem, lmprintf(MSG_157), -1);
@@ -1804,8 +1787,6 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	static LPITEMIDLIST pidlDesktop = NULL;
 	static MY_SHChangeNotifyEntry NotifyEntry;
 	loc_cmd* lcmd = NULL;
-	PF_DECL(SHChangeNotifyRegister);
-	PF_DECL(SHChangeNotifyDeregister);
 
 	switch (message) {
 
@@ -1908,7 +1889,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		switch(LOWORD(wParam)) {
 		case IDOK:			// close application
 		case IDCANCEL:
-			PF_INIT(SHChangeNotifyDeregister, shell32);
+			PF_INIT(SHChangeNotifyDeregister, Shell32);
 			EnableWindow(GetDlgItem(hISOProgressDlg, IDC_ISO_ABORT), FALSE);
 			EnableWindow(GetDlgItem(hDlg, IDCANCEL), FALSE);
 			if (format_thid != NULL) {
@@ -2306,7 +2287,6 @@ static void DetachConsole(void)
 /*
  * Application Entrypoint
  */
-typedef int (CDECL *__wgetmainargs_t)(int*, wchar_t***, wchar_t***, int, int*);
 #if defined(_MSC_VER) && (_MSC_VER >= 1600)
 int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, _In_ int nShowCmd)
 #else
@@ -2322,7 +2302,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	char tmp_path[MAX_PATH] = "", loc_file[MAX_PATH] = "", *tmp, *locale_name = NULL;
 	char** argv = NULL;
 	wchar_t **wenv, **wargv;
-	PF_DECL(__wgetmainargs);
+	PF_TYPE_DECL(CDECL, int,  __wgetmainargs, (int*, wchar_t***, wchar_t***, int, int*));
 	HANDLE mutex = NULL, hFile = NULL;
 	HWND hDlg = NULL;
 	MSG msg;
@@ -2354,7 +2334,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	}
 
 	// We have to process the arguments before we acquire the lock and process the locale
-	PF_INIT(__wgetmainargs, msvcrt);
+	PF_INIT(__wgetmainargs, Msvcrt);
 	if (pf__wgetmainargs != NULL) {
 		pf__wgetmainargs(&argc, &wargv, &wenv, 1, &si);
 		argv = (char**)calloc(argc, sizeof(char*));
@@ -2462,7 +2442,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	IGNORE_RETVAL(CoInitializeEx(NULL, COINIT_APARTMENTTHREADED));
 
 	// Some dialogs have Rich Edit controls and won't display without this
-	if (GetDLLHandle("Riched20.dll") == NULL) {
+	if (GetLibraryHandle("Riched20") == NULL) {
 		uprintf("Could not load RichEdit library - some dialogs may not display: %s\n", WindowsErrorString());
 	}
 
@@ -2644,7 +2624,7 @@ out:
 	if (attached_console)
 		DetachConsole();
 	CloseHandle(mutex);
-	OPEN_LIBRARIES_CLOSE_ALL;
+	CLOSE_OPENED_LIBRARIES;
 	uprintf("*** " APPLICATION_NAME " exit ***\n");
 #ifdef _CRTDBG_MAP_ALLOC
 	_CrtDumpMemoryLeaks();

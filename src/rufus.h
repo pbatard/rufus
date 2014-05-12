@@ -395,36 +395,37 @@ extern void StrArrayDestroy(StrArray* arr);
  * which translates to:
  *   FormatEx_t pfFormatEx = NULL;
  * in your code, to declare the entrypoint and then use:
- *   PF_INIT(FormatEx, fmifs);
+ *   PF_INIT(FormatEx, Fmifs);
  * which translates to:
  *   pfFormatEx = (FormatEx_t) GetProcAddress(GetDLLHandle("fmifs"), "FormatEx");
  * to make it accessible.
  */
-#define MAX_LIBRARY_HANDLES 32
-extern HMODULE OpenLibraryHandle[MAX_LIBRARY_HANDLES];
-extern uint16_t OpenLibraryHandleSize;
-#define OPEN_LIBRARIES_TRACKING_VARS HMODULE OpenLibraryHandle[MAX_LIBRARY_HANDLES]; uint16_t OpenLibraryHandleSize = 0
-#define OPEN_LIBRARIES_CLOSE_ALL while(OpenLibraryHandleSize > 0) FreeLibrary(OpenLibraryHandle[--OpenLibraryHandleSize])
-static __inline HMODULE GetDLLHandle(char* szDLLName)
-{
+#define         MAX_LIBRARY_HANDLES 32
+extern HMODULE  OpenedLibrariesHandle[MAX_LIBRARY_HANDLES];
+extern uint16_t OpenedLibrariesHandleSize;
+#define         OPENED_LIBRARIES_VARS HMODULE OpenedLibrariesHandle[MAX_LIBRARY_HANDLES]; uint16_t OpenedLibrariesHandleSize = 0
+#define         CLOSE_OPENED_LIBRARIES while(OpenedLibrariesHandleSize > 0) FreeLibrary(OpenedLibrariesHandle[--OpenedLibrariesHandleSize])
+static __inline HMODULE GetLibraryHandle(char* szLibraryName) {
 	HMODULE h = NULL;
-	if ((h = GetModuleHandleA(szDLLName)) == NULL) {
-		if (OpenLibraryHandleSize >= MAX_LIBRARY_HANDLES) {
+	if ((h = GetModuleHandleA(szLibraryName)) == NULL) {
+		if (OpenedLibrariesHandleSize >= MAX_LIBRARY_HANDLES) {
 			uprintf("Error: MAX_LIBRARY_HANDLES is too small\n");
 		} else {
-			h = LoadLibraryA(szDLLName);
+			h = LoadLibraryA(szLibraryName);
 			if (h != NULL)
-				OpenLibraryHandle[OpenLibraryHandleSize++] = h;
+				OpenedLibrariesHandle[OpenedLibrariesHandleSize++] = h;
 		}
 	}
 	return h;
 }
-#define PF_DECL(proc) proc##_t pf##proc = NULL
-#define PF_INIT(proc, dllname) pf##proc = (proc##_t) GetProcAddress(GetDLLHandle(#dllname), #proc)
-#define PF_INIT_OR_OUT(proc, dllname) \
-	PF_INIT(proc, dllname); if (pf##proc == NULL) { \
-	uprintf("Unable to locate %s() in %s.dll: %s\n", #proc, #dllname, \
-	WindowsErrorString()); goto out; }
+#define PF_TYPE(api, ret, proc, args)		typedef ret (api *proc##_t)args
+#define PF_DECL(proc)						static proc##_t pf##proc = NULL
+#define PF_TYPE_DECL(api, ret, proc, args)	PF_TYPE(api, ret, proc, args); PF_DECL(proc)
+#define PF_INIT(proc, name)					if (pf##proc == NULL) pf##proc = \
+	(proc##_t) GetProcAddress(GetLibraryHandle(#name), #proc)
+#define PF_INIT_OR_OUT(proc, name)			do {PF_INIT(proc, name);         \
+	if (pf##proc == NULL) {uprintf("Unable to locate %s() in %s.dll: %s\n",  \
+	#proc, #name, WindowsErrorString()); goto out;} } while(0)
 
 /* Clang/MinGW32 has an issue with intptr_t */
 #ifndef _UINTPTR_T_DEFINED

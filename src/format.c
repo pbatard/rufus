@@ -717,8 +717,8 @@ static BOOL FormatDrive(DWORD DriveIndex)
 	// problems with tolower(). Make sure we restore the locale. For more details,
 	// see http://comments.gmane.org/gmane.comp.gnu.mingw.user/39300
 	locale = setlocale(LC_ALL, NULL);
-	PF_INIT_OR_OUT(FormatEx, fmifs);
-	PF_INIT(EnableVolumeCompression, fmifs);
+	PF_INIT_OR_OUT(FormatEx, Fmifs);
+	PF_INIT(EnableVolumeCompression, Fmifs);
 	setlocale(LC_ALL, locale);
 
 	GetWindowTextW(hFileSystem, wFSType, ARRAYSIZE(wFSType));
@@ -782,7 +782,7 @@ static BOOL CheckDisk(char DriveLetter)
 	wDriveRoot[0] = (WCHAR)DriveLetter;
 	PrintStatus(0, TRUE, MSG_223);
 
-	PF_INIT_OR_OUT(Chkdsk, fmifs);
+	PF_INIT_OR_OUT(Chkdsk, Fmifs);
 
 	GetWindowTextW(hFileSystem, wFSType, ARRAYSIZE(wFSType));
 	// We may have a " (Default)" trail
@@ -1218,10 +1218,11 @@ DWORD WINAPI FormatThread(void* param)
 	char logfile[MAX_PATH], *userdir;
 	char wim_image[] = "?:\\sources\\install.wim";
 	char efi_dst[] = "?:\\efi\\boot\\bootx64.efi";
-	PF_DECL(GetThreadUILanguage);
-	PF_DECL(SetThreadUILanguage);
-	PF_INIT(GetThreadUILanguage, kernel32);
-	PF_INIT(SetThreadUILanguage, kernel32);
+	
+	PF_TYPE_DECL(WINAPI, LANGID, GetThreadUILanguage, (void));
+	PF_TYPE_DECL(WINAPI, LANGID, SetThreadUILanguage, (LANGID));
+	PF_INIT(GetThreadUILanguage, Kernel32);
+	PF_INIT(SetThreadUILanguage, Kernel32);
 
 	fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
 	dt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));

@@ -27,45 +27,14 @@
 static BOOL has_wimgapi = FALSE, has_7z = FALSE;
 static char sevenzip_path[MAX_PATH];
 
+// WIM API Prototypes
 #define WIM_GENERIC_READ	GENERIC_READ
 #define WIM_OPEN_EXISTING	OPEN_EXISTING
-
-typedef HANDLE (WINAPI *WIMCreateFile_t)(
-	PWSTR   pszWimPath,
-	DWORD   dwDesiredAccess,
-	DWORD   dwCreationDisposition,
-	DWORD   dwFlagsAndAttributes,
-	DWORD   dwCompressionType,
-	PDWORD  pdwCreationResult
-);
-
-typedef BOOL (WINAPI *WIMSetTemporaryPath_t)(
-	HANDLE  hWim,
-	PWSTR   pszPath
-);
-
-typedef HANDLE (WINAPI *WIMLoadImage_t)(
-	HANDLE  hWim,
-	DWORD   dwImageIndex
-);
-
-typedef BOOL (WINAPI *WIMExtractImagePath_t)(
-	HANDLE  hImage,
-	PWSTR   pszImagePath,
-	PWSTR   pszDestinationPath,
-	DWORD   dwExtractFlags
-);
-
-typedef BOOL (WINAPI *WIMCloseHandle_t)(
-	HANDLE  hObj
-);
-
-// WIM API Prototypes
-static PF_DECL(WIMCreateFile);
-static PF_DECL(WIMSetTemporaryPath);
-static PF_DECL(WIMLoadImage);
-static PF_DECL(WIMExtractImagePath);
-static PF_DECL(WIMCloseHandle);
+PF_TYPE_DECL(WINAPI, HANDLE, WIMCreateFile, (PWSTR, DWORD, DWORD, DWORD, DWORD, PDWORD));
+PF_TYPE_DECL(WINAPI, BOOL, WIMSetTemporaryPath, (HANDLE, PWSTR));
+PF_TYPE_DECL(WINAPI, HANDLE, WIMLoadImage, (HANDLE, DWORD));
+PF_TYPE_DECL(WINAPI, BOOL, WIMExtractImagePath, (HANDLE, PWSTR, PWSTR, DWORD));
+PF_TYPE_DECL(WINAPI, BOOL, WIMCloseHandle, (HANDLE));
 
 static BOOL Get7ZipPath(void)
 {
@@ -80,11 +49,11 @@ static BOOL Get7ZipPath(void)
 // Find out if we have any way to extraxt WIM files on this platform
 BOOL WimExtractCheck(void)
 {
-	PF_INIT(WIMCreateFile, wimgapi);
-	PF_INIT(WIMSetTemporaryPath, wimgapi);
-	PF_INIT(WIMLoadImage, wimgapi);
-	PF_INIT(WIMExtractImagePath, wimgapi);
-	PF_INIT(WIMCloseHandle, wimgapi);
+	PF_INIT(WIMCreateFile, Wimgapi);
+	PF_INIT(WIMSetTemporaryPath, Wimgapi);
+	PF_INIT(WIMLoadImage, Wimgapi);
+	PF_INIT(WIMExtractImagePath, Wimgapi);
+	PF_INIT(WIMCloseHandle, Wimgapi);
 
 	has_wimgapi = (pfWIMCreateFile && pfWIMSetTemporaryPath && pfWIMLoadImage && pfWIMExtractImagePath && pfWIMCloseHandle);
 	has_7z = Get7ZipPath();
@@ -109,11 +78,11 @@ static BOOL WimExtractFile_API(const char* image, int index, const char* src, co
 	wchar_t* wsrc = utf8_to_wchar(src);
 	wchar_t* wdst = utf8_to_wchar(dst);
 
-	PF_INIT_OR_OUT(WIMCreateFile, wimgapi);
-	PF_INIT_OR_OUT(WIMSetTemporaryPath, wimgapi);
-	PF_INIT_OR_OUT(WIMLoadImage, wimgapi);
-	PF_INIT_OR_OUT(WIMExtractImagePath, wimgapi);
-	PF_INIT_OR_OUT(WIMCloseHandle, wimgapi);
+	PF_INIT_OR_OUT(WIMCreateFile, Wimgapi);
+	PF_INIT_OR_OUT(WIMSetTemporaryPath, Wimgapi);
+	PF_INIT_OR_OUT(WIMLoadImage, Wimgapi);
+	PF_INIT_OR_OUT(WIMExtractImagePath, Wimgapi);
+	PF_INIT_OR_OUT(WIMCloseHandle, Wimgapi);
 
 	uprintf("Opening: %s:[%d] (API)\n", image, index);
 	if (GetTempPathW(ARRAYSIZE(wtemp), wtemp) == 0) {

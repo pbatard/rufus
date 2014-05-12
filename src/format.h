@@ -154,7 +154,3 @@ typedef struct {
 #define die(msg, err) do { uprintf(msg); \
 	FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|err; \
 	goto out; } while(0)
-
-/* Locale */
-typedef LANGID (WINAPI *SetThreadUILanguage_t)(LANGID LangId);
-typedef LANGID (WINAPI *GetThreadUILanguage_t)(void);
