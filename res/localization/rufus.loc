@@ -5944,6 +5944,428 @@ t MSG_260 "NTFS 압축"
 t MSG_261 "이미지 만들기: %0.1f%% 완료"
 
 ################################################################################
+l "lv-LV" "Latvian (Latviešu)" 0x0426
+v 1.0.11
+
+# Main dialog
+g IDD_DIALOG
+s IDD_DIALOG 20,0
+m IDC_LANG 20,0
+s IDC_DEVICE 20,0
+s IDC_PARTITION_TYPE 20,0
+s IDC_FILESYSTEM 20,0
+s IDC_CLUSTERSIZE 20,0
+s IDC_LABEL 25,0
+s IDC_PROGRESS 20,0
+t IDS_DEVICE_TXT "Ierīce"
+t IDS_PARTITION_TYPE_TXT "Partīcijas veids un sistēmas tips"
+t IDS_FILESYSTEM_TXT "Failu sistēma"
+t IDS_CLUSTERSIZE_TXT "Bloka izmērs"
+t IDS_LABEL_TXT "Datu nesēja nosaukums"
+t IDS_FORMAT_OPTIONS_GRP "Formatēšanas opcijas       "
+s IDS_FORMAT_OPTIONS_GRP 20,0
+m IDC_ADVANCED +30,0
+s IDC_BADBLOCKS 45,0
+t IDC_BADBLOCKS "Pārbaudīt ierīci uz bojātiem sektoriem"
+m IDC_NBPASSES 40,0
+s IDC_NBPASSES 15,0
+t IDC_QUICKFORMAT "Ātrā formatēšana"
+t IDC_BOOT "Izveidot boot disku izmantojot"
+s IDC_BOOT 10,0
+m IDC_BOOTTYPE 10,0
+m IDC_SELECT_ISO 15,0
+s IDC_SELECT_ISO 5,0
+t IDC_SET_ICON "Izveidot papildus nosaukumu un failu ikonas"
+s IDC_ABOUT -10,0
+t IDC_ABOUT "Par..."
+s IDC_LOG 35,0
+m IDC_LOG -10,0
+t IDC_LOG "Logs"
+t IDCANCEL "Aizvērt"
+m IDCANCEL 20,0
+t IDC_START "Sākt"
+m IDC_START 15,0
+s IDC_START 10,0
+m IDC_START 10,0
+t IDS_ADVANCED_OPTIONS_GRP "Papildopcijas"
+s IDS_ADVANCED_OPTIONS_GRP 20,0
+t IDC_ENABLE_FIXED_DISKS "USB ierīču saraksts"
+# Note: it is acceptable to drop the parenthesis () below if you are running out of space
+# as there is a tooltip (MSG_169) providing these details
+t IDC_EXTRA_PARTITION "Pievienot vecāku BIOSu fiksus (partīcijām, dalījumam, u.c.)"
+s IDC_EXTRA_PARTITION 25,0
+# 'MBR': See http://en.wikipedia.org/wiki/Master_boot_record
+# Rufus can install it's own custom MBR (the Rufus MBR), which also allows users
+# to specify a custom disk ID for the BIOS. Note: the tooltip for this control is MSG_167.
+s IDC_RUFUS_MBR +10,0
+m IDC_DISK_ID 13,0
+s IDC_DISK_ID 10,0
+t IDC_RUFUS_MBR "Izmantot Rufus MBR ar BIOS ID"
+
+# About dialog
+g IDD_ABOUTBOX
+t IDD_ABOUTBOX "Par Rufus"
+t IDC_ABOUT_LICENSE "Licence"
+t IDC_ABOUT_UPDATES "Jauninājumi"
+t IDOK "Aizvērt"
+
+# About -> License dialog
+g IDD_LICENSE
+t IDD_LICENSE "Rufus licence"
+t IDCANCEL "Aizvērt"
+
+# Notifications. You can trigger one of these by using Alt-R and re-launching Rufus
+g IDD_NOTIFICATION
+t IDC_MORE_INFO "Vairāk informācijas"
+t IDYES "Jā"
+t IDNO "Nē"
+
+# Log dialog
+g IDD_LOG
+t IDD_LOG "Logs"
+t IDC_LOG_CLEAR "Notīrīt logu"
+t IDC_LOG_SAVE "Ierakstīt logu"
+t IDCANCEL "Aizvērt logu"
+
+# About -> Updates
+g IDD_UPDATE_POLICY
+t IDD_UPDATE_POLICY "Jaunināšanas noteikumi un uzstādījumi"
+t IDS_UPDATE_SETTINGS_GRP "Uzstādījumi"
+s IDS_UPDATE_SETTINGS_GRP +25,0
+t IDS_UPDATE_FREQUENCY_TXT "Pārbaudīt jauninājumus:"
+s IDS_UPDATE_FREQUENCY_TXT -5,0
+m IDC_UPDATE_FREQUENCY -5,0
+s IDC_UPDATE_FREQUENCY +32,0
+t IDS_INCLUDE_BETAS_TXT "Ieskaitot Beta versijas:"
+s IDS_INCLUDE_BETAS_TXT -5,0
+m IDC_INCLUDE_BETAS -5,0
+m IDS_CHECK_NOW_GRP +19,0
+s IDS_CHECK_NOW_GRP -19,0
+t IDC_CHECK_NOW "Pārbaudīt"
+m IDC_CHECK_NOW +10,0
+s IDC_CHECK_NOW -3,0
+t IDCANCEL "Aizvērt"
+m IDCANCEL +10,0
+s IDCANCEL -3,0
+
+# Dialog that appears when a new version is available
+g IDD_NEW_VERSION
+t IDD_NEW_VERSION "Jaunākas versijas meklēšana"
+t IDS_NEW_VERSION_AVAIL_TXT "Ir pieejama jaunāka programmas versija. Varat to lejuplādēt!"
+t IDC_WEBSITE "Piespiediet šeit lai pāriet uz saitu"
+t IDS_NEW_VERSION_NOTES_GRP "Piezīmes"
+t IDS_NEW_VERSION_DOWNLOAD_GRP "Lejuplādēt"
+t IDC_DOWNLOAD "Lejuplādēt"
+t IDCANCEL "Aizvērt"
+
+# Dialog that appears when scanning/extracting ISO files
+g IDD_ISO_EXTRACT
+t IDD_ISO_EXTRACT "Tiek kopēti ISO faili..."
+t IDC_ISO_FILENAME "Atveras ISO imidžs, lūdzu uzgaidiet..."
+t IDC_ISO_ABORT "Atcelt"
+
+# Messages used throughout the application
+t MSG_001 "Noteikta cita procesa esamība"
+t MSG_002 "Cits Rufus eksemplārs darbojas.\n"
+	"Lūdzu aizveriet iepriekš startēto aplikāciju pirms palaist no jauna."
+t MSG_003 "UZMANĪBU: VISI DATI NO NESĒJA '%s' TIKS IZDZĒSTI!!!\n"
+	"Turpinājumam piespiediet OK. Lai atcelt, piespiediet Atcelt."
+t MSG_004 "Rufus jaunināšanas noteikumi"
+t MSG_005 "Vai vēlaties programmai meklēt jauninājumus internetā?"
+# Must be the same as IDD_DIALOG:IDCANCEL (i.e. "Close" - I know it's confusing)
+t MSG_006 "Aizvērt"
+t MSG_007 "Atcelt"
+t MSG_008 "Jā"
+t MSG_009 "Nē"
+t MSG_010 "Atrasti slikti sektori"
+t MSG_011 "Pārbaude pabeigta: atrasts(-i) %d bojāts(-i) sektors(-i)\n"
+	"  %d nolasīšanas kļūda(-s)\n  %d ieraksta kļūda(-s)\n  %d bojājuma(-u) kļūda(-s)\n"
+# The following will contain the formatted message above as well as the name of the bad blocks logfile
+t MSG_012 "%s\nSīkāku atskaiti var atrast:\n%s"
+t MSG_013 "Atslēgt"
+t MSG_014 "Ik dienu"
+t MSG_015 "Ik nedēļu"
+t MSG_016 "Ik mēnesi"
+t MSG_017 "Citādi"
+t MSG_018 "Jūsu versija: %d.%d.%d (Build %d)"
+t MSG_019 "Pēdējā versija: %d.%d.%d (Build %d)"
+# *Short* size names. These can be used as suffixes
+t MSG_020 "baiti"
+t MSG_021 "KB"
+t MSG_022 "MB"
+t MSG_023 "GB"
+t MSG_024 "TB"
+t MSG_025 "PB"
+# *Long* size names, as they are displayed for the cluster size in the MS format dialog.
+t MSG_026 "baiti"	# Yes, this is a repeat from MSG_020
+t MSG_027 "kilobaiti"
+t MSG_028 "megabaiti"
+t MSG_029 "Noklusējums"
+# The following gets appended to the file system, cluster size, etc.
+t MSG_030 "%s (Noklusējums)"
+t MSG_031 "%s formāts datoriem ar BIOS vai UEFI"
+t MSG_032 "%s formāts datoriem ar BIOS"
+t MSG_033 "%s formāts datoriem ar UEFI"
+# Number of bad block check passes (singular for 1 pass, plural for 2 or more passes)
+t MSG_034 "%d mēģ."
+t MSG_035 "%d mēģ."
+t MSG_036 "ISO imidžs"
+t MSG_037 "Aplikācija"
+t MSG_038 "Pārtraukt"
+t MSG_039 "Startēt"
+t MSG_040 "Lejuplādēt"
+t MSG_041 "Darbību atcēla lietotājs"
+t MSG_042 "Kļūda"
+t MSG_043 "Kļūda: %s"
+t MSG_044 "Fails lejulādēts"
+t MSG_045 "USB atmiņas ierīce (Generic)"
+t MSG_046 "%s (Disks %d) [%s]"
+# Used when a drive is detected that contains more than one partition
+t MSG_047 "Multi partīcijas"
+t MSG_048 "Ātraipmaiņas buferis"
+t MSG_049 "Atcelšana"
+
+# Error messages
+t MSG_050 "Veiksmīgi."
+t MSG_051 "Nezināma formatēšanas kļūda."
+t MSG_052 "Šim nesējam nevar izmantot izvēlēto failu sistēmu."
+t MSG_053 "Piekļuve iekārtai liegta."
+t MSG_054 "Iekārta aizsargāta no ieraksta."
+t MSG_055 "Iekārtu izmanto kāds cits process. "
+	"Lai izmantot izvēlēto iekārtu aizveriet citu procesu."
+t MSG_056 "Šai ierīcei ātrā formatēšana nav iespējama."
+t MSG_057 "Ierīces nosaukums nav korekts."
+t MSG_058 "Ierīces pazīme nav korekta."
+t MSG_059 "Izvēlētais klastera izmērs nesader ar šo ierīci."
+t MSG_060 "Nekorekts partīcijas izmērs."
+t MSG_061 "Lūdzu ievietojiet datu nesēju."
+t MSG_062 "Tika saņemta neatbalstāma komanda."
+t MSG_063 "Atmiņas kļūda."
+t MSG_064 "Nolasīšanas kļūda."
+t MSG_065 "Ieraksta kļūda."
+t MSG_066 "Nesekmīga instalācija"
+t MSG_067 "Nevar atvērt ierīci. Iespējams, to izmanto kāds cits process. "
+	"Atvienojiet ierīci, un pieslēdziet no jauna."
+t MSG_068 "Diska veidošanas kļūda."
+t MSG_069 "Neizdevēs nokopēt failus uz ierīci."
+t MSG_070 "Darbību atcēla lietotājs."
+# See http://en.wikipedia.org/wiki/Thread_%28computing%29
+t MSG_071 "Neizdevās palaist izpildes plūsmu."
+t MSG_072 "Bojāto sektoru pārbaude netika pabeigta."
+t MSG_073 "ISO imidža pārbaudes kļūda."
+t MSG_074 "ISO imidža atpakošanas kļūda."
+t MSG_075 "Neizdevās izveidot disku."
+t MSG_076 "Neizdevās izveidot failus ielādei."
+t MSG_077 "Neizdevās diskam piešķirt burtu."
+t MSG_078 "Neizdevās izveidot GUID disku."
+
+t MSG_080 "Rufus noteica ka Windows nav beidzis darbu ar USB ierīces ātrpikļuves buferi.\n\n"
+	"Atkarībā no USB ierīces ātruma šīs operācijas pabeigšana var aizņemt ilgāku laiku, "
+	"īpaši lielākiem failiem.\n\nIeteikums sagaidīt Windows darbības beigas, lai nesabojāt ierīci. "
+	"Ja jums nav iespējas gaidīt, varat vienkārši atvienot ierīci..."
+t MSG_081 "Neatbalstāms ISO formāts"
+t MSG_082 "Šī Rufus versija atbalsta tikai ISO imidžus izveidotus kā bootmgr/WinPE, isolinux vai EFI.\n"
+	"Šis ISO neatbilst minētajām prasībām..."
+t MSG_083 "Aizvietot %s?"
+t MSG_084 "Šis ISO imidžs izmanto novecojušas versijas '%s'.\n"
+	"Ielādes komnadkarte var attēloties nekorekti.\n\n"
+	"Šīs kļūdas novēršanai jāielādē jaunāka Rufus versija:\n"
+	"- Izvēlieties 'Jā' lai pieslēgtos pie interneta un ielādētu jaunāku versiju\n"
+	"- Izvēlieties 'Nē' lai ISO fails paliktu nemainīts\n"
+	"Ja nezinat ko darīt, izvēlieties 'Jā'.\n\n"
+	"Piezīme: Jaunais fails tiks lejuplādēts tekošajā mapē, un eksistējot "
+	"'%s' automātiski tiks samainīts."
+t MSG_085 "Lejuplādēts %s"
+t MSG_086 "Nav izvēlēts imidžs"
+# The content between the quotes below (\"Create a bootable disk\") should match
+# the beginning of the IDC_BOOT text
+t MSG_087 "Piespiedit uz pogas ar disku lai norādītu ielādes imidžu, "
+	"vai atķeksējiet \"Izveidot boot disku izmantojot...\" izvēlni."
+t MSG_088 "Imidžs pārāk liels"
+t MSG_089 "Izvēlētajam nesējam imidžs pārāk liels."
+t MSG_090 "Neatbalstāms ISO formāts"
+t MSG_091 "Izmantojot sistēmas interfeisu UEFI tikai EFI atbalstās tikai ISO ielādes imidži. "
+	"Izvēlieties EFI ielādes ISO vai izvēlieties interfeisu BIOS."
+t MSG_092 "Neatbalstāma failu sistēma"
+t MSG_093 "SVARĪGI: ŠIS NESĒJS SATUR VAIRĀKAS PARTĪCIJAS!!\n\n"
+	"Nesējs var saturēt sadaļas kuras nav attēlotas vai redzamas no Windows. "
+	"Ja vēlaties turpināt, paši atbildat par datu zaudēšanu uz šadām partīcijām."
+t MSG_094 "Konstatētas vairākas partīcijas"
+t MSG_095 "DD imidžs"
+t MSG_096 "Šis ISO tips atbalsta tikai FAT/FAT32 failu sistēmas."
+t MSG_097 "Tikai 'bootmgr' vai 'WinPE' bāzēti ISO imidži var tikt izmantoti ar NTFS failu sistēmu."
+t MSG_098 "Tikai 'isolinux' bāzēti ISO imidži var tikt izmantoti ar FAT/FAT32 vai sistēmas interfeiss UEFI."
+t MSG_099 "Failu sistēmas ierobežojums"
+t MSG_100 "Šis ISO imidžs satur failu lielāku kā 4GB, kas ir vairāk nekā "
+	"maksimāli pieļaujamais apjoms izmantojotFAT vai FAT32 failu sistēmu."
+t MSG_101 "Kļūdains WIM atbalsts"
+t MSG_102 "Jūsu OS nevar atpakot failus no WIM arhīviem. Savukārt tas "
+	"nepieciešams EFI ielādes diska izveidei OS Windows 7 vai Windows Vista USB diskiem. To var izlabot "
+	"instalējot pēdējo 7-Zip versiju.\nVai vēlaties apmeklēt 7-zip ielādes saitu?"
+t MSG_103 "Lejuplādēts %s?"
+t MSG_104 "Faila '%s' instalācijai nepieciešama Syslinux v5.0 vai jaunāka versija.\n"
+	"Par cik fails ir lielāks par 100 KB, un pieder Syslinux v5+ ISO imidžiem, "
+	"tas netika iekļauts programmā Rufus.\n\nRufus var ielādēt nepieciešamo failu:\n"
+	"- Izvēlieties 'Jā' lai pieslēgties internetam un ielādētu failu\n"
+	"- Izvēlieties 'Nē' ja vēlaties failu ielādēt vēlāk patstāvīgi\n\n"
+	"Piezīme: Fails tiks lejuplādēts tekošajā mapē un ja "
+	"'%s' jau ir, tas tiks pārrakstīts automātiski.\n"
+t MSG_105 "Darbības atcelšana var iekārtu atstāt kā NEIZMANTOJAMU.\n"
+	"Ja vēlaties atcelt, spiediet JĀ, pretējā gadījumā spiediet NĒ."
+t MSG_106 "Izvēlieties mapi"
+t MSG_107 "Visi faili"
+t MSG_108 "Rufus logs"
+t MSG_109 "0x%02X (Disks %d)"
+# "Cluster size" below should be the same as the label for IDS_CLUSTERSIZE_TXT
+# "kilobytes" should be the same as in MSG_027
+t MSG_110 "MS-DOS nevar ielādēties no nesēja ar klastera zimēru 64 Kb.\n"
+	"Pamainiet klastera izmēru izmantojot FreeDOS."
+t MSG_111 "Nekorekts klastera izmērs"
+# "%d:%02d" below is a duration (mins:secs)
+t MSG_112 "Large UDF disku formatēšana var aizņemt daudz laika. Izmantojot USB 2.0 aprēķinātais formatēšanas "
+	"ilgums ir %d:%02d, kura laikā izpildes līnija var apstāties. Esiet pacietīgi!"
+t MSG_113 "Large UDF disks"
+t MSG_114 "Šis imidžs izmanto Syslinux %s, bet aplikācija satur instalācijas failus "
+	"Syslinux %s.\n\nTā kā jaunās Syslinux versijas nav savstarpēji atbalstāmas, nepieciešams "
+	"no ineterneta ielādēt nepieciešamos failus ('ldlinux.sys' and 'ldlinux.bss'):\n"
+	"- Izvēlieties 'Jā' lai pieslēgtos pie interneta un ielātu šos failus\n"
+	"- Izvēlietis 'Nē' lai atceltu šo operāciju\n\n"
+	"Note: Faili tiks lejuplādēti tekošajā mapē, un ja tādi eksistē, automātiski "
+	"tiks pārraktīti.\n"
+t MSG_115 "Nepieciešams lejuplādēt"
+# Tootips
+# Partition Scheme and Target Type
+t MSG_150 "Parasti izmantojamā izvēle. Ja jums ir  UEFI dators un vēlaties OS instalēt "
+	"EFI režīmā, izvēlieties šo opciju"
+t MSG_151 "Izmantojiet šo izvēli lai instalēt OS EFI režīmā, bet nepieciešama USB "
+	"piekļuve no Windows XP"
+t MSG_152 "Izmantojiet šo izvēli lai instalēt OS EFI režīmā kad nav nepieciešama "
+	"USB piekļuve no Windows XP"
+t MSG_153 "Bojāto sektoru noteikšana izmantojot 1 mēģinājumu"
+t MSG_154 "Bojāto sektoru noteikšana izmantojot 2 mēģinājumus"
+t MSG_155 "Bojāto sektoru noteikšana izmantojot 3 mēģinājumus"
+t MSG_156 "Bojāto sektoru noteikšana izmantojot 4 mēģinājumus"
+t MSG_157 "Failu sistēmas izvēlne"
+t MSG_158 "Minimālais failu sistēmas izmantojamā bloka izmērs"
+t MSG_159 "Ievadiet nesēja nosaukumu\nAtbalstās starptautiskie simboli"
+t MSG_160 "Atvērt papildus parametrus"
+t MSG_161 "Atzīmējiet lai pārbaudīt ierīci uz bojātiem sektoriem"
+t MSG_162 "Noņemiet atzīmi lai izmantot \"lēno\" formatēšanu"
+t MSG_163 "Atzīmējiet lai USB nesēju izmantot kā ielādes ierīci"
+t MSG_164 "Ielādes varianti"
+t MSG_165 "Piespiediet ISO izvēlei..."
+t MSG_166 "Atzīmējiet starptautisko simbolu atbalstam un ierīces "
+	"ikonas izveidei (tiek izveidots fails autorun.inf)"
+t MSG_167 "Instalēt MBR, kur var izvēlēties ielādi un kurš var maskēties BIOS'ā ar ierīces identifikatoru"
+t MSG_168 "Mēģināt maskēt pirmo USB ielādes ierīci (parasti 0x80) kā citu disku.\n"
+	"Tas nepieciešams, kad instalējat Windows XP un izmantojat vairāk nekā vienu dieskus"
+t MSG_169 "IZveidot papildus slēpto partīciju un izlīdzināt partīciju robežas.\n"
+	"Šī opcija var atvieglot ielādes noteikšanu vecākās BIOS versijās."
+t MSG_170 "Rādīt ārējos USB pieslēguma HDD."
+t MSG_171 "Tiks sākta formatēšana.\nVisi dati no nesēja tiks IZNĪCINĀTI!!!"
+t MSG_172 "Informācija par licencēm un izstrādātājiem"
+t MSG_173 "Piespiediet izvēlei..."
+# The following will appear in the about dialog
+t MSG_174 "Rufus - uzticama un vienkārša USB formatēšanas utilīta"
+t MSG_175 "Versija %d.%d.%d (Build %d)"
+t MSG_176 "Latviešu tulkojums: Aldis Tutins <mailto:alibaba@inbox.lv>"
+t MSG_177 "Paziņot par kļūdu vai ietikt uzlabojumus:"
+t MSG_178 "Papildus autortiesības:"
+t MSG_179 "Jauninājumu politika:"
+t MSG_180 "Ja jūs ļaujat programmai veikt jauninājumus, "
+	"jūs piekrītat tam ka uz mūsu serveriem tiks saglabāta sekojoša informācija:"
+t MSG_181 "Jūsu OS arhitektūra un versija"
+t MSG_182 "Izmantojamās programmas versija"
+t MSG_183 "Jūsu IP adrese"
+t MSG_184 "Statisktikas nolūkos apkopotā informācija var tikt uzglabāta "
+	"\\b gada laikā\\b0 . Savukārt apkopotā informācija netiks izpausta jebkādai trešai pusei."
+t MSG_185 "Jaunināšanas process:"
+t MSG_186 "Rufus netiek instalēta kā OS serviss, tāpēc jauninājumu pārbaude iespējama tikai tad, kad programma darbojas.\\line\n\n"
+	"Jauninājumu pārbaudei un ielādei nepieciešams interneta pieslēgums."
+t MSG_187 "Izvēlētajai ielādes opcijai nederīgs imidžs"
+t MSG_188 "Izvēlētais imidžs neatbalsta izvēlēto ielādes variantu. Lūdzu izvēlieties citu imidžu vai citas ielādes opcijas."
+
+# Status messages - these messages will appear on the status bar
+t MSG_201 "Atcelšana - lūdzu uzgaidiet..."
+t MSG_202 "Diska imidža pārskats..."
+t MSG_203 "Kļūda pārskatot diska imidžu"
+# Parameter: the name of an obsolete Syslinux .c32 module. eg: "Obsolete vesamenu.c32 detected"
+t MSG_204 "Noteikts novecojis %s modulis"
+# Display the name of the ISO selected. eg: "Using ISO: en_win7_x64_sp1.iso"
+t MSG_205 "Tiek izmantots ISO: %s"
+# Typically "Kļūdains ldlinux.c32 fails"
+t MSG_206 "Kļūdains %s fails"
+# The name proposed by Windows' Computer Management -> Disk Management when you try to format a drive
+# with an empty label. See http://rufus.akeo.ie/pics/default_name.png
+t MSG_207 "Jauns Disks"
+# Same message, once for singular and plural ("1 device found", "2 devices found")
+t MSG_208 "Atrasta %d ierīce"
+t MSG_209 "Atrastas %d ierīces"
+t MSG_210 "Gatavs"
+t MSG_211 "Atcelts"
+t MSG_212 "Kļūda"
+# Used when a new update has been downloaded and launched
+t MSG_213 "Tiek startēta jaunā versija..."
+t MSG_214 "Kļūda jaunās versijas palaišanā"
+# Open/Save file
+t MSG_215 "Atvērts %s"
+t MSG_216 "Saglabāts %s"
+# Formatting status (make sure you use a double % to print the percent sign)
+t MSG_217 "Formatēšana: Paveikts %0.1f%%"
+t MSG_218 "Failu sistēmas izveide: Paveikts %d/%d"
+t MSG_219 "NTFS labojums: Paveikts %d%%"
+# Parameter: the file system and an estimated duration in mins and secs.
+# eg. "Formatting (UDF) - Estimated duration 3:21..."
+# NB: if "estimated duration" is too long, just use "estimated" or an abbreviation
+t MSG_220 "Formatēšana (%s) - aprēķinātais laiks %d:%02d..."
+t MSG_221 "Nosaukuma ieraksts (var aizņemt laiku)..."
+# Parameter: the file system. eg. "Formatting (NTFS)..."
+t MSG_222 "Formatēšana (%s)..."
+t MSG_223 "NTFS labojums (Checkdisk)..."
+t MSG_224 "MBR/PBR/GPT struktūras attīrīšana..."
+t MSG_225 "Nepieciešama piekļuve diskam..."
+t MSG_226 "Esošā ielādes ieraksta analīze..."
+t MSG_227 "Eksistējošā diska aizvēršana..."
+t MSG_228 "Galvenā ielādes ieraksta (MBR) izveide..."
+t MSG_229 "Sadaļas ielādes ieraksta izveide..."
+t MSG_230 "Kopē DOS failus..."
+t MSG_231 "Kopē ISO failus..."
+t MSG_232 "Win7 EFI ielādes uzstādīšana (var aizņemt laiku)..."
+t MSG_233 "Pabeigšana, lūdzu uzgaidiet..."
+# Takes a Syslinux version as parameter, eg. "Installing Syslinux v5.10..."
+t MSG_234 "Instalējas Syslinux %s..."
+# Bad blocks status. eg: "Bad Blocks: PASS 1/2 - 12.34% (0/0/1 errors)"
+t MSG_235 "Bojātie sektori: Pabeigts %d/%d - %0.2f%% (%d/%d/%d kļūdu)"
+t MSG_236 "Bojātie sektori: Testēšana ar gadījuma paraugu"
+t MSG_237 "Bojātie sektori: Testēšana ar 0x%02X"
+# eg. "Partitioning (MBR)..."
+t MSG_238 "Sadaļas izveide (%s)..."
+t MSG_239 "Sadaļas dzēšana..."
+t MSG_240 "Lejuplādē %s: Savienojums..."
+t MSG_241 "Ielādējas: %0.1f%%"
+t MSG_242 "Kļūda lejuplādējot failu."
+t MSG_243 "Tiek pārbaudīti Rufus jauninājumi..."
+t MSG_244 "Jauninājumi: Nevar pieslēgties internetam"
+t MSG_245 "Jauninājumi: Nav piekļuves versijas datiem"
+t MSG_246 "Ir pieejama jaunāka Rufus versija!"
+t MSG_247 "Nav atrasta jaunāka Rufus versija."
+t MSG_248 "Programmas reģistru ieraksti veiksmīgi dzēsti"
+t MSG_249 "Kļūda programmas reģistru dzēšanā"
+# eg. "Fixed disk detection enabled" "ISO size check disabled"
+t MSG_250 "%s ieslēgta"
+t MSG_251 "%s izslēgta"
+t MSG_252 "Izmēra pārbaude"
+t MSG_253 "USB disku noteikšana"
+t MSG_254 "Paplašinātā FAT32 formatēšana"
+t MSG_255 "NoDriveTypeAutorun pārtraucot darbu tiks nodzēsts"
+t MSG_256 "Konstatēts neeksistējošs disks"
+t MSG_257 "Joliet atbalsts"
+t MSG_258 "Rock Ridge atbalsts"
+t MSG_259 "Ātrā jaunināšana"
+t MSG_260 "NTFS kompresija"
+t MSG_261 "Imidža ieraksts: Pabeigts %0.1f%%"
+
+################################################################################
 l "lt-LT" "Lithuanian (Lietuvių)" 0x0427
 v 1.0.11
 b "en-US"
