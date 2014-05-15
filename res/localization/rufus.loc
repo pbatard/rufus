@@ -6318,26 +6318,21 @@ m IDC_START 10,0
 t IDS_ADVANCED_OPTIONS_GRP "Papildopcijas"
 s IDS_ADVANCED_OPTIONS_GRP 20,0
 t IDC_ENABLE_FIXED_DISKS "USB ierīču saraksts"
-# Note: it is acceptable to drop the parenthesis () below if you are running out of space
-# as there is a tooltip (MSG_169) providing these details
-t IDC_EXTRA_PARTITION "Pievienot vecāku BIOSu fiksus (partīcijām, dalījumam, u.c.)"
+
+t IDC_EXTRA_PARTITION "Pievienot vecāku BIOSu labojumus (partīcijām, dalījumam, u.c.)"
 s IDC_EXTRA_PARTITION 25,0
-# 'MBR': See http://en.wikipedia.org/wiki/Master_boot_record
-# Rufus can install it's own custom MBR (the Rufus MBR), which also allows users
-# to specify a custom disk ID for the BIOS. Note: the tooltip for this control is MSG_167.
+
 s IDC_RUFUS_MBR +10,0
 m IDC_DISK_ID 13,0
 s IDC_DISK_ID 10,0
 t IDC_RUFUS_MBR "Izmantot Rufus MBR ar BIOS ID"
 
-# About dialog
 g IDD_ABOUTBOX
 t IDD_ABOUTBOX "Par Rufus"
 t IDC_ABOUT_LICENSE "Licence"
 t IDC_ABOUT_UPDATES "Jauninājumi"
 t IDOK "Aizvērt"
 
-# About -> License dialog
 g IDD_LICENSE
 t IDD_LICENSE "Rufus licence"
 t IDCANCEL "Aizvērt"
@@ -6405,7 +6400,7 @@ t MSG_006 "Aizvērt"
 t MSG_007 "Atcelt"
 t MSG_008 "Jā"
 t MSG_009 "Nē"
-t MSG_010 "Atrasti slikti sektori"
+t MSG_010 "Atrasti bojāti sektori"
 t MSG_011 "Pārbaude pabeigta: atrasts(-i) %d bojāts(-i) sektors(-i)\n"
 	"  %d nolasīšanas kļūda(-s)\n  %d ieraksta kļūda(-s)\n  %d bojājuma(-u) kļūda(-s)\n"
 # The following will contain the formatted message above as well as the name of the bad blocks logfile
@@ -6445,12 +6440,12 @@ t MSG_040 "Lejuplādēt"
 t MSG_041 "Darbību atcēla lietotājs"
 t MSG_042 "Kļūda"
 t MSG_043 "Kļūda: %s"
-t MSG_044 "Fails lejulādēts"
+t MSG_044 "Fails lejuplādēts"
 t MSG_045 "USB atmiņas ierīce (Generic)"
 t MSG_046 "%s (Disks %d) [%s]"
 # Used when a drive is detected that contains more than one partition
 t MSG_047 "Multi partīcijas"
-t MSG_048 "Ātraipmaiņas buferis"
+t MSG_048 "Ātrapmaiņas buferis"
 t MSG_049 "Atcelšana"
 
 # Error messages
@@ -6475,7 +6470,7 @@ t MSG_066 "Nesekmīga instalācija"
 t MSG_067 "Nevar atvērt ierīci. Iespējams, to izmanto kāds cits process. "
 	"Atvienojiet ierīci, un pieslēdziet no jauna."
 t MSG_068 "Diska veidošanas kļūda."
-t MSG_069 "Neizdevēs nokopēt failus uz ierīci."
+t MSG_069 "Neizdevās nokopēt failus uz ierīci."
 t MSG_070 "Darbību atcēla lietotājs."
 # See http://en.wikipedia.org/wiki/Thread_%28computing%29
 t MSG_071 "Neizdevās palaist izpildes plūsmu."
@@ -6496,28 +6491,28 @@ t MSG_082 "Šī Rufus versija atbalsta tikai ISO imidžus izveidotus kā bootmgr
 	"Šis ISO neatbilst minētajām prasībām..."
 t MSG_083 "Aizvietot %s?"
 t MSG_084 "Šis ISO imidžs izmanto novecojušas versijas '%s'.\n"
-	"Ielādes komnadkarte var attēloties nekorekti.\n\n"
+	"Ielādes komandkarte var attēloties nekorekti.\n\n"
 	"Šīs kļūdas novēršanai jāielādē jaunāka Rufus versija:\n"
 	"- Izvēlieties 'Jā' lai pieslēgtos pie interneta un ielādētu jaunāku versiju\n"
 	"- Izvēlieties 'Nē' lai ISO fails paliktu nemainīts\n"
-	"Ja nezinat ko darīt, izvēlieties 'Jā'.\n\n"
+	"Ja nezināt ko darīt, izvēlieties 'Jā'.\n\n"
 	"Piezīme: Jaunais fails tiks lejuplādēts tekošajā mapē, un eksistējot "
 	"'%s' automātiski tiks samainīts."
 t MSG_085 "Lejuplādēts %s"
 t MSG_086 "Nav izvēlēts imidžs"
 # The content between the quotes below (\"Create a bootable disk\") should match
 # the beginning of the IDC_BOOT text
-t MSG_087 "Piespiedit uz pogas ar disku lai norādītu ielādes imidžu, "
+t MSG_087 "Piespiediet uz pogas ar disku lai norādītu ielādes imidžu, "
 	"vai atķeksējiet \"Izveidot boot disku izmantojot...\" izvēlni."
 t MSG_088 "Imidžs pārāk liels"
 t MSG_089 "Izvēlētajam nesējam imidžs pārāk liels."
 t MSG_090 "Neatbalstāms ISO formāts"
-t MSG_091 "Izmantojot sistēmas interfeisu UEFI tikai EFI atbalstās tikai ISO ielādes imidži. "
+t MSG_091 "Izmantojot sistēmas interfeisu UEFI tikai EFI atbalsta ISO ielādes imidžu. "
 	"Izvēlieties EFI ielādes ISO vai izvēlieties interfeisu BIOS."
 t MSG_092 "Neatbalstāma failu sistēma"
 t MSG_093 "SVARĪGI: ŠIS NESĒJS SATUR VAIRĀKAS PARTĪCIJAS!!\n\n"
 	"Nesējs var saturēt sadaļas kuras nav attēlotas vai redzamas no Windows. "
-	"Ja vēlaties turpināt, paši atbildat par datu zaudēšanu uz šadām partīcijām."
+	"Ja vēlaties turpināt, paši atbildat par datu zaudēšanu uz šādām partīcijām."
 t MSG_094 "Konstatētas vairākas partīcijas"
 t MSG_095 "DD imidžs"
 t MSG_096 "Šis ISO tips atbalsta tikai FAT/FAT32 failu sistēmas."
@@ -6546,7 +6541,7 @@ t MSG_108 "Rufus logs"
 t MSG_109 "0x%02X (Disks %d)"
 # "Cluster size" below should be the same as the label for IDS_CLUSTERSIZE_TXT
 # "kilobytes" should be the same as in MSG_027
-t MSG_110 "MS-DOS nevar ielādēties no nesēja ar klastera zimēru 64 Kb.\n"
+t MSG_110 "MS-DOS nevar ielādēties no nesēja ar klastera izmēru 64 Kb.\n"
 	"Pamainiet klastera izmēru izmantojot FreeDOS."
 t MSG_111 "Nekorekts klastera izmērs"
 # "%d:%02d" below is a duration (mins:secs)
@@ -6555,11 +6550,11 @@ t MSG_112 "Large UDF disku formatēšana var aizņemt daudz laika. Izmantojot US
 t MSG_113 "Large UDF disks"
 t MSG_114 "Šis imidžs izmanto Syslinux %s, bet aplikācija satur instalācijas failus "
 	"Syslinux %s.\n\nTā kā jaunās Syslinux versijas nav savstarpēji atbalstāmas, nepieciešams "
-	"no ineterneta ielādēt nepieciešamos failus ('ldlinux.sys' and 'ldlinux.bss'):\n"
-	"- Izvēlieties 'Jā' lai pieslēgtos pie interneta un ielātu šos failus\n"
-	"- Izvēlietis 'Nē' lai atceltu šo operāciju\n\n"
-	"Note: Faili tiks lejuplādēti tekošajā mapē, un ja tādi eksistē, automātiski "
-	"tiks pārraktīti.\n"
+	"no interneta ielādēt nepieciešamos failus ('ldlinux.sys' un 'ldlinux.bss'):\n"
+	"- Izvēlieties 'Jā' lai pieslēgtos pie interneta un ielādētu šos failus\n"
+	"- Izvēlieties 'Nē' lai atceltu šo operāciju\n\n"
+	"Piezīme: Faili tiks lejuplādēti tekošajā mapē, un ja tādi eksistē, automātiski "
+	"tiks pārrakstīti.\n"
 t MSG_115 "Nepieciešams lejuplādēt"
 # Tootips
 # Partition Scheme and Target Type
@@ -6597,7 +6592,7 @@ t MSG_173 "Piespiediet izvēlei..."
 t MSG_174 "Rufus - uzticama un vienkārša USB formatēšanas utilīta"
 t MSG_175 "Versija %d.%d.%d (Build %d)"
 t MSG_176 "Latviešu tulkojums: Aldis Tutins <mailto:alibaba@inbox.lv>"
-t MSG_177 "Paziņot par kļūdu vai ietikt uzlabojumus:"
+t MSG_177 "Paziņot par kļūdu vai ieteikt uzlabojumus:"
 t MSG_178 "Papildus autortiesības:"
 t MSG_179 "Jauninājumu politika:"
 t MSG_180 "Ja jūs ļaujat programmai veikt jauninājumus, "
@@ -6605,7 +6600,7 @@ t MSG_180 "Ja jūs ļaujat programmai veikt jauninājumus, "
 t MSG_181 "Jūsu OS arhitektūra un versija"
 t MSG_182 "Izmantojamās programmas versija"
 t MSG_183 "Jūsu IP adrese"
-t MSG_184 "Statisktikas nolūkos apkopotā informācija var tikt uzglabāta "
+t MSG_184 "Statistikas nolūkos apkopotā informācija var tikt uzglabāta "
 	"\\b gada laikā\\b0 . Savukārt apkopotā informācija netiks izpausta jebkādai trešai pusei."
 t MSG_185 "Jaunināšanas process:"
 t MSG_186 "Rufus netiek instalēta kā OS serviss, tāpēc jauninājumu pārbaude iespējama tikai tad, kad programma darbojas.\\line\n\n"
