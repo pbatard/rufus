@@ -67,6 +67,7 @@ static const char* isolinux_bin = &dot_isolinux_bin[2];
 static const char* pe_dirname[] = { "/i386", "/minint" };
 static const char* pe_file[] = { "ntdetect.com", "setupldr.bin", "txtsetup.sif" };
 static const char* reactos_name = "setupldr.sys"; // TODO: freeldr.sys doesn't seem to work
+static const char* kolibri_name = "kolibri.img";
 static const char* autorun_name = "autorun.inf";
 static const char* stupid_antivirus = "  NOTE: This is usually caused by a poorly designed security solution. "
 	"See http://rufus.akeo.ie/compatibility.\r\n  This file will be skipped for now, but you should really "
@@ -137,13 +138,16 @@ static BOOL check_iso_props(const char* psz_dirname, BOOL* is_syslinux_cfg, BOOL
 	}
 
 	if (scan_only) {
-		// Check for a "bootmgr(.efi)" file in root (psz_path = "")
+		// Check for various files in root (psz_dirname = "")
 		if (*psz_dirname == 0) {
 			if (safe_strnicmp(psz_basename, bootmgr_efi_name, safe_strlen(bootmgr_efi_name)-5) == 0) {
 				iso_report.has_bootmgr = TRUE;
 			}
 			if (safe_stricmp(psz_basename, bootmgr_efi_name) == 0) {
 				iso_report.has_win7_efi = TRUE;
+			}
+			if (safe_stricmp(psz_basename, kolibri_name) == 0) {
+				iso_report.has_kolibrios = TRUE;
 			}
 		}
 
@@ -591,7 +595,7 @@ out:
 			uprintf("Will use %s for Syslinux\n", iso_report.cfg_path);
 			// Extract all of the isolinux.bin files we found to identify their versions
 			for (i=0; i<isolinux_path.Index; i++) {
-				size = (size_t)ExtractISOFile(src_iso, isolinux_path.String[i], dot_isolinux_bin);
+				size = (size_t)ExtractISOFile(src_iso, isolinux_path.String[i], dot_isolinux_bin, FILE_ATTRIBUTE_NORMAL);
 				if (size == 0) {
 					uprintf("Could not access %s\n", isolinux_path.String[i]);
 				} else {
@@ -646,7 +650,7 @@ out:
 			// whether we should use 0x80 or 0x81 as the disk ID in the MBR
 			safe_sprintf(path, sizeof(path), "/%s/txtsetup.sif", 
 				basedir[((iso_report.winpe&WINPE_I386) == WINPE_I386)?0:1]);
-			ExtractISOFile(src_iso, path, tmp_sif);
+			ExtractISOFile(src_iso, path, tmp_sif, FILE_ATTRIBUTE_NORMAL);
 			tmp = get_token_data_file("OsLoadOptions", tmp_sif);
 			if (tmp != NULL) {
 				for (i=0; i<strlen(tmp); i++)
@@ -692,7 +696,7 @@ out:
 	return (r == 0);
 }
 
-int64_t ExtractISOFile(const char* iso, const char* iso_file, const char* dest_file)
+int64_t ExtractISOFile(const char* iso, const char* iso_file, const char* dest_file, DWORD attributes)
 {
 	size_t i;
 	ssize_t read_size;
@@ -708,7 +712,7 @@ int64_t ExtractISOFile(const char* iso, const char* iso_file, const char* dest_f
 	HANDLE file_handle = INVALID_HANDLE_VALUE;
 
 	file_handle = CreateFileU(dest_file, GENERIC_READ | GENERIC_WRITE,
-		FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+		FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, attributes, NULL);
 	if (file_handle == INVALID_HANDLE_VALUE) {
 		uprintf("  Unable to create file %s: %s\n", dest_file, WindowsErrorString());
 		goto out;

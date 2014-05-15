@@ -907,6 +907,9 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 	if (bt == BT_UEFI) {
 		uprintf(using_msg, "zeroed");
 		r = write_zero_mbr(&fake_fd);	// Force UEFI boot only by zeroing the MBR
+	} else if ( (dt == DT_ISO) && (iso_report.has_kolibrios) && (fs == FS_FAT32)) {
+		uprintf(using_msg, "KolibriOS");
+		r = write_kolibri_mbr(&fake_fd);
 	} else if ( (dt == DT_SYSLINUX_V4) || (dt == DT_SYSLINUX_V5) || ((dt == DT_ISO) && ((fs == FS_FAT16) || (fs == FS_FAT32))) ) {
 		uprintf(using_msg, "Syslinux");
 		r = write_syslinux_mbr(&fake_fd);
@@ -939,7 +942,8 @@ static __inline const char* dt_to_name(int dt) {
 	switch (dt) {
 	case DT_FREEDOS: return "FreeDOS";
 	case DT_REACTOS: return "ReactOS";
-	default: return "Standard";
+	default: 
+		return ((dt==DT_ISO)&&(iso_report.has_kolibrios))?"KolibriOS":"Standard";
 	}
 }
 static BOOL WritePBR(HANDLE hLogicalVolume)
@@ -964,6 +968,8 @@ static BOOL WritePBR(HANDLE hLogicalVolume)
 			if (!write_fat_16_fd_br(&fake_fd, 0)) break;
 		} else if (dt == DT_REACTOS) {
 			if (!write_fat_16_ros_br(&fake_fd, 0)) break;
+		} else if ((dt == DT_ISO) && (iso_report.has_kolibrios)) {
+			uprintf("FAT16 is not supported for KolibriOS\n"); break;
 		} else {
 			if (!write_fat_16_br(&fake_fd, 0)) break;
 		}
@@ -984,6 +990,8 @@ static BOOL WritePBR(HANDLE hLogicalVolume)
 				if (!write_fat_32_fd_br(&fake_fd, 0)) break;
 			} else if (dt == DT_REACTOS) {
 				if (!write_fat_32_ros_br(&fake_fd, 0)) break;
+			} else if ((dt == DT_ISO) && (iso_report.has_kolibrios)) {
+				if (!write_fat_32_kos_br(&fake_fd, 0)) break;
 			} else {
 				if (!write_fat_32_br(&fake_fd, 0)) break;
 			}
@@ -1218,6 +1226,7 @@ DWORD WINAPI FormatThread(void* param)
 	char logfile[MAX_PATH], *userdir;
 	char wim_image[] = "?:\\sources\\install.wim";
 	char efi_dst[] = "?:\\efi\\boot\\bootx64.efi";
+	char kolibri_dst[] = "?:\\MTLD_F32";
 	
 	PF_TYPE_DECL(WINAPI, LANGID, GetThreadUILanguage, (void));
 	PF_TYPE_DECL(WINAPI, LANGID, SetThreadUILanguage, (LANGID));
@@ -1494,7 +1503,7 @@ DWORD WINAPI FormatThread(void* param)
 				goto out;
 			}
 		} else if ((((dt == DT_WINME) || (dt == DT_FREEDOS) || (dt == DT_REACTOS)) &&
-			(!use_large_fat32)) || ((dt == DT_ISO) && (fs == FS_NTFS))) {
+			(!use_large_fat32)) || ((dt == DT_ISO) && ((fs == FS_NTFS)||(iso_report.has_kolibrios)))) {
 			// We still have a lock, which we need to modify the volume boot record 
 			// => no need to reacquire the lock...
 			hLogicalVolume = GetLogicalHandle(DriveIndex, TRUE, FALSE);
@@ -1549,6 +1558,14 @@ DWORD WINAPI FormatThread(void* param)
 					if (!IS_ERROR(FormatStatus))
 						FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANNOT_COPY;
 					goto out;
+				}
+				if (iso_report.has_kolibrios) {
+					kolibri_dst[0] = drive_name[0];
+					uprintf("Installing: %s (KolibriOS loader)\n", kolibri_dst);
+					if (ExtractISOFile(iso_path, "HD_Load/USB_Boot/MTLD_F32", kolibri_dst,
+						FILE_ATTRIBUTE_HIDDEN|FILE_ATTRIBUTE_SYSTEM) == 0) {
+						uprintf("Warning: loader installation failed - KolibriOS will not boot!\n");
+					}
 				}
 				if ((bt == BT_UEFI) && (!iso_report.has_efi) && (iso_report.has_win7_efi)) {
 					PrintStatus(0, TRUE, MSG_232);

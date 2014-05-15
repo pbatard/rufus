@@ -125,6 +125,12 @@
     <ClInclude Include="..\inc\mbr_rufus.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\inc\br_fat32kos_0x52.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\inc\mbr_kolibri.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\br.c">

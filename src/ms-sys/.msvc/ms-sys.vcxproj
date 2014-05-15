@@ -29,6 +29,7 @@
     <ClInclude Include="..\inc\br_fat16_0x3e.h" />
     <ClInclude Include="..\inc\br_fat32fd_0x3f0.h" />
     <ClInclude Include="..\inc\br_fat32fd_0x52.h" />
+    <ClInclude Include="..\inc\br_fat32kos_0x52.h" />
     <ClInclude Include="..\inc\br_fat32nt_0x1800.h" />
     <ClInclude Include="..\inc\br_fat32nt_0x3f0.h" />
     <ClInclude Include="..\inc\br_fat32nt_0x52.h" />
@@ -49,6 +50,7 @@
     <ClInclude Include="..\inc\mbr_95b.h" />
     <ClInclude Include="..\inc\mbr_dos.h" />
     <ClInclude Include="..\inc\mbr_dos_f2.h" />
+    <ClInclude Include="..\inc\mbr_kolibri.h" />
     <ClInclude Include="..\inc\mbr_reactos.h" />
     <ClInclude Include="..\inc\mbr_rufus.h" />
     <ClInclude Include="..\inc\mbr_syslinux.h" />

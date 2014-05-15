@@ -120,6 +120,16 @@ int is_reactos_mbr(FILE *fp)
       contains_data(fp, 0x1FE, aucRef, sizeof(aucRef));
 } /* is_reactos_mbr */
 
+int is_kolibri_mbr(FILE *fp)
+{
+   #include "mbr_kolibri.h"
+   unsigned char aucRef[] = {0x55, 0xAA};
+
+   return
+      contains_data(fp, 0x0, mbr_kolibri_0x0, sizeof(mbr_kolibri_0x0)) &&
+      contains_data(fp, 0x1FE, aucRef, sizeof(aucRef));
+} /* is_kolibri_mbr */
+
 int is_syslinux_mbr(FILE *fp)
 {
    #include "mbr_syslinux.h"
@@ -209,6 +219,16 @@ int write_reactos_mbr(FILE *fp)
       write_data(fp, 0x0, mbr_reactos_0x0, sizeof(mbr_reactos_0x0)) &&
       write_data(fp, 0x1FE, aucRef, sizeof(aucRef));
 } /* write_reactos_mbr */
+
+int write_kolibri_mbr(FILE *fp)
+{
+   #include "mbr_kolibri.h"
+   unsigned char aucRef[] = {0x55, 0xAA};
+
+   return
+      write_data(fp, 0x0, mbr_kolibri_0x0, sizeof(mbr_kolibri_0x0)) &&
+      write_data(fp, 0x1FE, aucRef, sizeof(aucRef));
+} /* write_kolibri_mbr */
 
 int write_syslinux_mbr(FILE *fp)
 {

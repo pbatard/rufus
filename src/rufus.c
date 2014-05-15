@@ -450,10 +450,10 @@ static void SetFSFromISO(void)
 	}
 
 	// Syslinux and EFI have precedence over bootmgr (unless the user selected BIOS as target type)
-	if ((HAS_SYSLINUX(iso_report)) || (IS_REACTOS(iso_report)) || ( (IS_EFI(iso_report)) && (bt == BT_UEFI))) {
+	if ((HAS_SYSLINUX(iso_report)) || (IS_REACTOS(iso_report)) || (iso_report.has_kolibrios) || ( (IS_EFI(iso_report)) && (bt == BT_UEFI))) {
 		if (fs_mask & (1<<FS_FAT32)) {
 			selected_fs = FS_FAT32;
-		} else if (fs_mask & (1<<FS_FAT16)) {
+		} else if ((fs_mask & (1<<FS_FAT16)) && (!iso_report.has_kolibrios)) {
 			selected_fs = FS_FAT16;
 		}
 	} else if ((iso_report.has_bootmgr) || (IS_WINPE(iso_report.winpe))) {
@@ -1221,10 +1221,11 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 		if (HAS_SYSLINUX(iso_report)) {
 			safe_sprintf(isolinux_str, sizeof(isolinux_str), "Yes (%s)", iso_report.sl_version_str);
 		}
+		// TODO: This should become a DisplayISOProps() call or something
 		uprintf("ISO label: '%s'\r\n  Size: %lld bytes\r\n  Has a >64 chars filename: %s\r\n  Has Symlinks: %s\r\n  Has a >4GB file: %s\r\n"
-			"  Uses ReactOS: %s\r\n  Uses EFI: %s%s\r\n  Uses Bootmgr: %s\r\n  Uses WinPE: %s%s\r\n  Uses isolinux: %s\r\n",
+			"  Uses ReactOS: %s\r\n  Uses KolibriOS: %s\r\n  Uses EFI: %s%s\r\n  Uses Bootmgr: %s\r\n  Uses WinPE: %s%s\r\n  Uses isolinux: %s\r\n",
 			iso_report.label, iso_report.projected_size, iso_report.has_long_filename?"Yes":"No", iso_report.has_symlinks?"Yes":"No",
-			iso_report.has_4GB_file?"Yes":"No", IS_REACTOS(iso_report)?"Yes":"No", (iso_report.has_efi || iso_report.has_win7_efi)?"Yes":"No",
+			iso_report.has_4GB_file?"Yes":"No", IS_REACTOS(iso_report)?"Yes":"No", iso_report.has_kolibrios?"Yes":"No", (iso_report.has_efi || iso_report.has_win7_efi)?"Yes":"No",
 			(iso_report.has_win7_efi && (!iso_report.has_efi))?" (win7_x64)":"", iso_report.has_bootmgr?"Yes":"No",
 			IS_WINPE(iso_report.winpe)?"Yes":"No", (iso_report.uses_minint)?" (with /minint)":"", isolinux_str);
 		if (HAS_SYSLINUX(iso_report) && (SL_MAJOR(iso_report.sl_version) < 5)) {
@@ -1234,7 +1235,7 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 		}
 	}
 	if ( (!iso_report.has_bootmgr) && (!HAS_SYSLINUX(iso_report)) && (!IS_WINPE(iso_report.winpe)) 
-		&& (!iso_report.has_efi) && (!IS_REACTOS(iso_report) && (!iso_report.is_bootable_img)) ) {
+		&& (!iso_report.has_efi) && (!IS_REACTOS(iso_report) && (!iso_report.has_kolibrios) && (!iso_report.is_bootable_img)) ) {
 		MessageBoxU(hMainDialog, lmprintf(MSG_082), lmprintf(MSG_081), MB_OK|MB_ICONINFORMATION|MB_IS_RTL);
 		safe_free(iso_path);
 		SetMBRProps();
@@ -1401,7 +1402,12 @@ static BOOL BootCheck(void)
 				MessageBoxU(hMainDialog, lmprintf(MSG_097), lmprintf(MSG_090), MB_OK|MB_ICONERROR|MB_IS_RTL);
 			}
 			return FALSE;
-		} else if (((fs == FS_FAT16)||(fs == FS_FAT32)) && (!HAS_SYSLINUX(iso_report)) && (!IS_REACTOS(iso_report))) {
+		} else if ((fs == FS_FAT16) && (iso_report.has_kolibrios)) {
+			// KolibriOS doesn't support FAT16
+			MessageBoxU(hMainDialog, "This ISO is not compatible with the selected filesystem", lmprintf(MSG_099), MB_OK|MB_ICONERROR|MB_IS_RTL);
+			return FALSE;
+		} else if (((fs == FS_FAT16)||(fs == FS_FAT32)) && (!HAS_SYSLINUX(iso_report)) &&
+			(!IS_REACTOS(iso_report)) && (!iso_report.has_kolibrios)) {
 			// FAT/FAT32 can only be used for isolinux based ISO images or when the Target Type is UEFI
 			MessageBoxU(hMainDialog, lmprintf(MSG_098), lmprintf(MSG_090), MB_OK|MB_ICONERROR|MB_IS_RTL);
 			return FALSE;

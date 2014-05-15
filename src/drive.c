@@ -514,7 +514,8 @@ const struct {int (*fn)(FILE *fp); char* str;} known_mbr[] = {
 	{ is_win7_mbr, "Windows 7" },
 	{ is_rufus_mbr, "Rufus" },
 	{ is_syslinux_mbr, "Syslinux" },
-	{ is_reactos_mbr, "Reactos" },
+	{ is_reactos_mbr, "ReactOS" },
+	{ is_kolibri_mbr, "KolibriOS" },
 	{ is_zero_mbr, "Zeroed" },
 };
 
@@ -551,6 +552,7 @@ const struct {int (*fn)(FILE *fp); char* str;} known_pbr[] = {
 	{ entire_fat_32_nt_br_matches, "FAT32 NT" },
 	{ entire_fat_32_fd_br_matches, "FAT32 FreeDOS" },
 	{ entire_fat_32_ros_br_matches, "FAT32 ReactOS" },
+	{ entire_fat_32_kos_br_matches, "FAT32 KolibriOS" },
 };
 
 BOOL AnalyzePBR(HANDLE hLogicalVolume)

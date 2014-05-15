@@ -220,3 +220,30 @@ int write_fat_32_ros_br(FILE *fp, int bKeepLabel)
 	   write_data(fp, 0x1c00, br_fat32ros_0x1c00, sizeof(br_fat32ros_0x1c00))
 	    );
 } /* write_fat_32_ros_br */
+
+int entire_fat_32_kos_br_matches(FILE *fp)
+{
+   #include "br_fat32_0x0.h"
+   #include "br_fat32kos_0x52.h"
+
+   return
+      ( contains_data(fp, 0x0, br_fat32_0x0, sizeof(br_fat32_0x0)) &&
+        contains_data(fp, 0x52, br_fat32kos_0x52, sizeof(br_fat32kos_0x52)) );
+} /* entire_fat_32_kos_br_matches */
+
+int write_fat_32_kos_br(FILE *fp, int bKeepLabel)
+{
+   #include "label_11_char.h"
+   #include "br_fat32_0x0.h"
+   #include "br_fat32kos_0x52.h"
+
+   if(bKeepLabel)
+      return
+	 ( write_data(fp, 0x0, br_fat32_0x0, sizeof(br_fat32_0x0)) &&
+	   write_data(fp, 0x52, br_fat32kos_0x52, sizeof(br_fat32kos_0x52)) );
+   else
+      return
+	 ( write_data(fp, 0x0, br_fat32_0x0, sizeof(br_fat32_0x0)) &&
+	   write_data(fp, 0x47, label_11_char, sizeof(label_11_char)) &&
+	   write_data(fp, 0x52, br_fat32kos_0x52, sizeof(br_fat32kos_0x52)) );
+} /* write_fat_32_kos_br */

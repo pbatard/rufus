@@ -245,6 +245,7 @@ typedef struct {
 	BOOL has_autorun;
 	BOOL has_old_c32[NB_OLD_C32];
 	BOOL has_old_vesamenu;
+	BOOL has_kolibrios;
 	BOOL uses_minint;
 	BOOL is_bootable_img;
 	uint16_t sl_version;	// Syslinux/Isolinux version
@@ -337,7 +338,7 @@ extern BOOL Notification(int type, const notification_info* more_info, char* tit
 extern BOOL Question(char* title, char* format, ...);
 extern BOOL ExtractDOS(const char* path);
 extern BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan);
-extern int64_t ExtractISOFile(const char* iso, const char* iso_file, const char* dest_file);
+extern int64_t ExtractISOFile(const char* iso, const char* iso_file, const char* dest_file, DWORD attributes);
 extern BOOL InstallSyslinux(DWORD drive_index, char drive_letter);
 DWORD WINAPI FormatThread(void* param);
 extern BOOL CreateProgress(void);
