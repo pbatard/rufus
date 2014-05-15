@@ -794,7 +794,7 @@ BOOL CreateTooltip(HWND hControl, const char* message, int duration)
 	// Associate the tooltip to the control
 	toolInfo.cbSize = sizeof(toolInfo);
 	toolInfo.hwnd = ttlist[i].hTip;	// Set to the tooltip itself to ease up subclassing
-	toolInfo.uFlags = TTF_IDISHWND | TTF_SUBCLASS;
+	toolInfo.uFlags = TTF_IDISHWND | TTF_SUBCLASS | ((right_to_left_mode)?TTF_RTLREADING:0);
 	toolInfo.uId = (UINT_PTR)hControl;
 	toolInfo.lpszText = LPSTR_TEXTCALLBACKW;
 	SendMessageW(ttlist[i].hTip, TTM_ADDTOOLW, 0, (LPARAM)&toolInfo);

@@ -164,31 +164,33 @@ char* SizeToHumanReadable(uint64_t size, BOOL log, BOOL fake_units)
 {
 	int suffix;
 	static char str_size[32];
+	char dir[4];
 	double hr_size = (double)size;
 	double t;
 	uint16_t i_size;
 	char **_msg_table = log?default_msg_table:msg_table;
 	const double divider = fake_units?1000.0:1024.0;
 
+	static_sprintf(dir, right_to_left_mode?RIGHT_TO_LEFT_MARK:"");
 	for (suffix=0; suffix<MAX_SIZE_SUFFIXES-1; suffix++) {
 		if (hr_size < divider)
 			break;
 		hr_size /= divider;
 	}
 	if (suffix == 0) {
-		safe_sprintf(str_size, sizeof(str_size), "%d %s", (int)hr_size, _msg_table[MSG_020-MSG_000]);
+		static_sprintf(str_size, "%s%d%s %s", dir, (int)hr_size, dir, _msg_table[MSG_020-MSG_000]);
 	} else if (fake_units) {
 		if (hr_size < 8) {
-			safe_sprintf(str_size, sizeof(str_size), (fabs((hr_size*10.0)-(floor(hr_size + 0.5)*10.0)) < 0.5)?"%0.0f%s":"%0.1f%s",
+			static_sprintf(str_size, (fabs((hr_size*10.0)-(floor(hr_size + 0.5)*10.0)) < 0.5)?"%0.0f%s":"%0.1f%s",
 			hr_size, _msg_table[MSG_020+suffix-MSG_000]);
 		} else {
 			t = (double)upo2((uint16_t)hr_size);
 			i_size = (uint16_t)((fabs(1.0f-(hr_size / t)) < 0.05f)?t:hr_size);
-			safe_sprintf(str_size, sizeof(str_size), "%d%s", i_size, _msg_table[MSG_020+suffix-MSG_000]);
+			static_sprintf(str_size, "%s%d%s%s", dir, i_size, dir, _msg_table[MSG_020+suffix-MSG_000]);
 		}
 	} else {
-		safe_sprintf(str_size, sizeof(str_size), (hr_size * 10.0 - (floor(hr_size) * 10.0)) < 0.5?
-			"%0.0f %s":"%0.1f %s", hr_size, _msg_table[MSG_020+suffix-MSG_000]);
+		static_sprintf(str_size, (hr_size * 10.0 - (floor(hr_size) * 10.0)) < 0.5?
+			"%s%0.0f%s %s":"%s%0.1f%s %s", dir, hr_size, dir, _msg_table[MSG_020+suffix-MSG_000]);
 	}
 	return str_size;
 }
