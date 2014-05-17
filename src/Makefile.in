@@ -47,10 +47,11 @@ am_rufus_OBJECTS = rufus-drive.$(OBJEXT) rufus-icon.$(OBJEXT) \
 	rufus-parser.$(OBJEXT) rufus-localization.$(OBJEXT) \
 	rufus-iso.$(OBJEXT) rufus-net.$(OBJEXT) rufus-dos.$(OBJEXT) \
 	rufus-dos_locale.$(OBJEXT) rufus-badblocks.$(OBJEXT) \
-	rufus-syslinux.$(OBJEXT) rufus-vhd.$(OBJEXT) \
-	rufus-format.$(OBJEXT) rufus-smart.$(OBJEXT) \
-	rufus-stdio.$(OBJEXT) rufus-stdfn.$(OBJEXT) \
-	rufus-stdlg.$(OBJEXT) rufus-rufus.$(OBJEXT)
+	rufus-syslinux.$(OBJEXT) rufus-usb.$(OBJEXT) \
+	rufus-vhd.$(OBJEXT) rufus-format.$(OBJEXT) \
+	rufus-smart.$(OBJEXT) rufus-stdio.$(OBJEXT) \
+	rufus-stdfn.$(OBJEXT) rufus-stdlg.$(OBJEXT) \
+	rufus-rufus.$(OBJEXT)
 rufus_OBJECTS = $(am_rufus_OBJECTS)
 rufus_DEPENDENCIES = rufus_rc.o ms-sys/libmssys.a \
 	syslinux/libfat/libfat.a syslinux/libinstaller/libinstaller.a \
@@ -186,7 +187,7 @@ SUBDIRS = ms-sys syslinux/libfat syslinux/libinstaller libcdio/iso9660 libcdio/u
 pkg_v_rc = $(pkg_v_rc_$(V))
 pkg_v_rc_ = $(pkg_v_rc_$(AM_DEFAULT_VERBOSITY))
 pkg_v_rc_0 = @echo "  RC     $@";
-rufus_SOURCES = drive.c icon.c parser.c localization.c iso.c net.c dos.c dos_locale.c badblocks.c syslinux.c vhd.c format.c smart.c stdio.c stdfn.c stdlg.c rufus.c
+rufus_SOURCES = drive.c icon.c parser.c localization.c iso.c net.c dos.c dos_locale.c badblocks.c syslinux.c usb.c vhd.c format.c smart.c stdio.c stdfn.c stdlg.c rufus.c
 rufus_CFLAGS = -I./ms-sys/inc -I./syslinux/libfat -I./syslinux/libinstaller -I./libcdio $(AM_CFLAGS)
 rufus_LDFLAGS = $(AM_LDFLAGS) -mwindows
 rufus_LDADD = rufus_rc.o ms-sys/libmssys.a syslinux/libfat/libfat.a syslinux/libinstaller/libinstaller.a \
@@ -326,6 +327,14 @@ rufus-syslinux.o: syslinux.c
 rufus-syslinux.obj: syslinux.c
 	$(AM_V_CC) @AM_BACKSLASH@
 	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_CFLAGS) $(CFLAGS) -c -o rufus-syslinux.obj `if test -f 'syslinux.c'; then $(CYGPATH_W) 'syslinux.c'; else $(CYGPATH_W) '$(srcdir)/syslinux.c'; fi`
+
+rufus-usb.o: usb.c
+	$(AM_V_CC) @AM_BACKSLASH@
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_CFLAGS) $(CFLAGS) -c -o rufus-usb.o `test -f 'usb.c' || echo '$(srcdir)/'`usb.c
+
+rufus-usb.obj: usb.c
+	$(AM_V_CC) @AM_BACKSLASH@
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_CFLAGS) $(CFLAGS) -c -o rufus-usb.obj `if test -f 'usb.c'; then $(CYGPATH_W) 'usb.c'; else $(CYGPATH_W) '$(srcdir)/usb.c'; fi`
 
 rufus-vhd.o: vhd.c
 	$(AM_V_CC) @AM_BACKSLASH@

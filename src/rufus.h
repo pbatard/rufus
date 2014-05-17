@@ -346,6 +346,7 @@ extern BOOL SetAutorun(const char* path);
 extern char* FileDialog(BOOL save, char* path, char* filename, char* ext, char* ext_desc, DWORD options);
 extern BOOL FileIO(BOOL save, char* path, char** buffer, DWORD* size);
 extern unsigned char* GetResource(HMODULE module, char* name, char* type, const char* desc, DWORD* len, BOOL duplicate);
+extern BOOL GetUSBDevices(DWORD devnum);
 extern BOOL SetLGP(BOOL bRestore, BOOL* bExistingKey, const char* szPath, const char* szPolicy, DWORD dwValue);
 extern LONG GetEntryWidth(HWND hDropDown, const char* entry);
 extern DWORD DownloadFile(const char* url, const char* file, HWND hProgressDialog);
@@ -378,14 +379,30 @@ static __inline void *_reallocf(void *ptr, size_t size)
 	return ret;
 }
 
+/* Hash tables */
+typedef struct htab_entry {
+	uint32_t used;
+	char* str;
+	void* data;
+} htab_entry;
+typedef struct htab_table {
+	htab_entry *table;
+	uint32_t size;
+	uint32_t filled;
+} htab_table;
+#define HTAB_EMPTY {NULL, 0, 0}
+extern BOOL htab_create(uint32_t nel, htab_table* htab);
+extern void htab_destroy(htab_table* htab);
+extern uint32_t htab_hash(char* str, htab_table* htab);
+
 /* Basic String Array */
 typedef struct {
-	char** String;
-	size_t Index;	// Current array size
-	size_t Max;		// Maximum array size
+	char**   String;
+	uint32_t Index;		// Current array size
+	uint32_t Max;		// Maximum array size
 } StrArray;
-extern void StrArrayCreate(StrArray* arr, size_t initial_size);
-extern void StrArrayAdd(StrArray* arr, const char* str);
+extern void StrArrayCreate(StrArray* arr, uint32_t initial_size);
+extern int32_t StrArrayAdd(StrArray* arr, const char* str);
 extern void StrArrayClear(StrArray* arr);
 extern void StrArrayDestroy(StrArray* arr);
 #define IsStrArrayEmpty(arr) (arr.Index == 0)
@@ -469,12 +486,3 @@ static __inline HMODULE GetLibraryHandle(char* szLibraryName) {
 #define _RT_ICON			MAKEINTRESOURCEA(3)
 #define _RT_RCDATA			MAKEINTRESOURCEA(10)
 #define _RT_GROUP_ICON		MAKEINTRESOURCEA((ULONG_PTR)(MAKEINTRESOURCEA(3) + 11))
-
-/* The CM calls used in GetUSBDevices() - from MinGW's cfgmgr32.h header */
-typedef DWORD CONFIGRET, DEVINST, *PDEVINST;
-typedef CHAR *DEVINSTID_A;
-#define CM_GETIDLIST_FILTER_SERVICE 2
-DECLSPEC_IMPORT CONFIGRET WINAPI CM_Get_Device_ID_List_SizeA(PULONG pulLen, PCSTR pszFilter, ULONG ulFlags);
-DECLSPEC_IMPORT CONFIGRET WINAPI CM_Get_Device_ID_ListA(PCSTR pszFilter, PCHAR Buffer, ULONG  BufferLen, ULONG ulFlags);
-DECLSPEC_IMPORT CONFIGRET WINAPI CM_Locate_DevNodeA(PDEVINST pdnDevInst, DEVINSTID_A pDeviceID, ULONG ulFlags);
-DECLSPEC_IMPORT CONFIGRET WINAPI CM_Get_Child(PDEVINST pdnDevInst, DEVINST dnDevInst, ULONG ulFlags);

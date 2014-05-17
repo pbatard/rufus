@@ -32,6 +32,174 @@
 int  nWindowsVersion = WINDOWS_UNDEFINED;
 char WindowsVersionStr[128] = "Windows ";
 
+/*
+ * Hash table functions - modified From glibc 2.3.2:
+ * [Aho,Sethi,Ullman] Compilers: Principles, Techniques and Tools, 1986
+ * [Knuth]            The Art of Computer Programming, part 3 (6.4)
+ */
+
+/* 
+ * For the used double hash method the table size has to be a prime. To
+ * correct the user given table size we need a prime test.  This trivial
+ * algorithm is adequate because the code is called only during init and
+ * the number is likely to be small
+ */
+static uint32_t isprime(uint32_t number)
+{
+	// no even number will be passed
+	uint32_t divider = 3;
+
+	while((divider * divider < number) && (number % divider != 0))
+		divider += 2;
+
+	return (number % divider != 0);
+}
+
+/*
+ * Before using the hash table we must allocate memory for it.
+ * We allocate one element more as the found prime number says.
+ * This is done for more effective indexing as explained in the
+ * comment for the hash function.
+ */
+BOOL htab_create(uint32_t nel, htab_table* htab)
+{
+	if (htab == NULL) {
+		return FALSE;
+	}
+	if (htab->table != NULL) {
+		uprintf("warning: htab_create() was called with a non empty table");
+		return FALSE;
+	}
+
+	// Change nel to the first prime number not smaller as nel.
+	nel |= 1;
+	while(!isprime(nel))
+		nel += 2;
+
+	htab->size = nel;
+	htab->filled = 0;
+
+	// allocate memory and zero out.
+	htab->table = (htab_entry*)calloc(htab->size + 1, sizeof(htab_entry));
+	if (htab->table == NULL) {
+		uprintf("could not allocate space for hash table\n");
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
+/* After using the hash table it has to be destroyed.  */
+void htab_destroy(htab_table* htab)
+{
+	size_t i;
+
+	if ((htab == NULL) || (htab->table == NULL)) {
+		return;
+	}
+
+	for (i=0; i<htab->size+1; i++) {
+		if (htab->table[i].used) {
+			safe_free(htab->table[i].str);
+		}
+	}
+	htab->filled = 0; htab->size = 0;
+	safe_free(htab->table);
+	htab->table = NULL;
+}
+
+/*
+ * This is the search function. It uses double hashing with open addressing.
+ * We use a trick to speed up the lookup. The table is created with one
+ * more element available. This enables us to use the index zero special.
+ * This index will never be used because we store the first hash index in
+ * the field used where zero means not used. Every other value means used.
+ * The used field can be used as a first fast comparison for equality of
+ * the stored and the parameter value. This helps to prevent unnecessary
+ * expensive calls of strcmp.
+ */
+uint32_t htab_hash(char* str, htab_table* htab)
+{
+	uint32_t hval, hval2;
+	uint32_t idx;
+	uint32_t r = 0;
+	int c;
+	char* sz = str;
+
+	if ((htab == NULL) || (htab->table == NULL) || (str == NULL)) {
+		return 0;
+	}
+
+	// Compute main hash value using sdbm's algorithm (empirically
+	// shown to produce half the collisions as djb2's).
+	// See http://www.cse.yorku.ca/~oz/hash.html
+	while ((c = *sz++) != 0)
+		r = c + (r << 6) + (r << 16) - r;
+	if (r == 0)
+		++r;
+
+	// compute table hash: simply take the modulus
+	hval = r % htab->size;
+	if (hval == 0)
+		++hval;
+
+	// Try the first index
+	idx = hval;
+
+	if (htab->table[idx].used) {
+		if ( (htab->table[idx].used == hval)
+		  && (safe_strcmp(str, htab->table[idx].str) == 0) ) {
+			// existing hash
+			return idx;
+		}
+		// uprintf("hash collision ('%s' vs '%s')\n", str, htab_table[idx].str);
+
+		// Second hash function, as suggested in [Knuth]
+		hval2 = 1 + hval % (htab->size - 2);
+
+		do {
+			// Because size is prime this guarantees to step through all available indexes
+			if (idx <= hval2) {
+				idx = ((uint32_t)htab->size) + idx - hval2;
+			} else {
+				idx -= hval2;
+			}
+
+			// If we visited all entries leave the loop unsuccessfully
+			if (idx == hval) {
+				break;
+			}
+
+			// If entry is found use it.
+			if ( (htab->table[idx].used == hval)
+			  && (safe_strcmp(str, htab->table[idx].str) == 0) ) {
+				return idx;
+			}
+		}
+		while (htab->table[idx].used);
+	}
+
+	// Not found => New entry
+
+	// If the table is full return an error
+	if (htab->filled >= htab->size) {
+		uprintf("hash table is full (%d entries)", htab->size);
+		return 0;
+	}
+
+	safe_free(htab->table[idx].str);
+	htab->table[idx].used = hval;
+	htab->table[idx].str = (char*) malloc(safe_strlen(str)+1);
+	if (htab->table[idx].str == NULL) {
+		uprintf("could not duplicate string for hash table\n");
+		return 0;
+	}
+	memcpy(htab->table[idx].str, str, safe_strlen(str)+1);
+	++htab->filled;
+
+	return idx;
+}
+
 BOOL is_x64(void)
 {
 	BOOL ret = FALSE;
@@ -151,7 +319,7 @@ void GetWindowsVersion(void)
 /*
  * String array manipulation
  */
-void StrArrayCreate(StrArray* arr, size_t initial_size)
+void StrArrayCreate(StrArray* arr, uint32_t initial_size)
 {
 	if (arr == NULL) return;
 	arr->Max = initial_size; arr->Index = 0;
@@ -160,11 +328,11 @@ void StrArrayCreate(StrArray* arr, size_t initial_size)
 		uprintf("Could not allocate string array\n");
 }
 
-void StrArrayAdd(StrArray* arr, const char* str)
+int32_t StrArrayAdd(StrArray* arr, const char* str)
 {
 	char** old_table;
 	if ((arr == NULL) || (arr->String == NULL))
-		return;
+		return -1;
 	if (arr->Index == arr->Max) {
 		arr->Max *= 2;
 		old_table = arr->String;
@@ -172,13 +340,15 @@ void StrArrayAdd(StrArray* arr, const char* str)
 		if (arr->String == NULL) {
 			free(old_table);
 			uprintf("Could not reallocate string array\n");
-			return;
+			return -1;
 		}
 	}
 	arr->String[arr->Index] = safe_strdup(str);
-	if (arr->String[arr->Index++] == NULL) {
+	if (arr->String[arr->Index] == NULL) {
 		uprintf("Could not store string in array\n");
+		return -1;
 	}
+	return arr->Index++;
 }
 
 void StrArrayClear(StrArray* arr)

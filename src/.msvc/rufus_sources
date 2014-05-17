@@ -45,5 +45,6 @@ SOURCES=rufus.c          \
         drive.c          \
         smart.c          \
         syslinux.c       \
+        usb.c            \
         vhd.c            \
         rufus.rc

@@ -65,6 +65,9 @@ const loc_parse parse_cmd[9] = {
 	{ 'a', LC_ATTRIBUTES, "s" },	// a "ra"
 };
 
+/* Hash table for reused translation commands */
+static htab_table htab_loc = HTAB_EMPTY;
+
 /* Globals */
 int    loc_line_nr;
 struct list_head locale_list = {NULL, NULL};
@@ -86,178 +89,12 @@ static void mtab_destroy(BOOL reinit)
 }
 
 /*
- * Hash table functions - modified From glibc 2.3.2:
- * [Aho,Sethi,Ullman] Compilers: Principles, Techniques and Tools, 1986
- * [Knuth]            The Art of Computer Programming, part 3 (6.4)
- */
-typedef struct htab_entry {
-	uint32_t used;
-	char* str;
-	loc_cmd* dlg_cmd;
-} htab_entry;
-htab_entry* htab_table = NULL;
-size_t htab_size, htab_filled;
-
-/* 
- * For the used double hash method the table size has to be a prime. To
- * correct the user given table size we need a prime test.  This trivial
- * algorithm is adequate because the code is called only during init and
- * the number is likely to be small
- */
-static uint32_t isprime(uint32_t number)
-{
-	// no even number will be passed
-	uint32_t divider = 3;
-
-	while((divider * divider < number) && (number % divider != 0))
-		divider += 2;
-
-	return (number % divider != 0);
-}
-
-/*
- * Before using the hash table we must allocate memory for it.
- * We allocate one element more as the found prime number says.
- * This is done for more effective indexing as explained in the
- * comment for the hash function.
- */
-static BOOL htab_create(uint32_t nel)
-{
-	if (htab_table != NULL) {
-		return FALSE;
-	}
-
-	// Change nel to the first prime number not smaller as nel.
-	nel |= 1;
-	while(!isprime(nel))
-		nel += 2;
-
-	htab_size = nel;
-	htab_filled = 0;
-
-	// allocate memory and zero out.
-	htab_table = (htab_entry*)calloc(htab_size + 1, sizeof(htab_entry));
-	if (htab_table == NULL) {
-		uprintf("localization: could not allocate space for hash table\n");
-		return FALSE;
-	}
-
-	return TRUE;
-}
-
-/* After using the hash table it has to be destroyed.  */
-static void htab_destroy(void)
-{
-	size_t i;
-	if (htab_table == NULL) {
-		return;
-	}
-
-	for (i=0; i<htab_size+1; i++) {
-		if (htab_table[i].used) {
-			safe_free(htab_table[i].str);
-		}
-	}
-	safe_free(htab_table);
-}
-
-/*
- * This is the search function. It uses double hashing with open addressing.
- * We use a trick to speed up the lookup. The table is created with one
- * more element available. This enables us to use the index zero special.
- * This index will never be used because we store the first hash index in
- * the field used where zero means not used. Every other value means used.
- * The used field can be used as a first fast comparison for equality of
- * the stored and the parameter value. This helps to prevent unnecessary
- * expensive calls of strcmp.
- */
-static uint32_t htab_hash(char* str)
-{
-	uint32_t hval, hval2;
-	uint32_t idx;
-	uint32_t r = 0;
-	int c;
-	char* sz = str;
-
-	if (str == NULL)
-		return 0;
-
-	// Compute main hash value using sdbm's algorithm (empirically
-	// shown to produce half the collisions as djb2's).
-	// See http://www.cse.yorku.ca/~oz/hash.html
-	while ((c = *sz++) != 0)
-		r = c + (r << 6) + (r << 16) - r;
-	if (r == 0)
-		++r;
-
-	// compute table hash: simply take the modulus
-	hval = r % htab_size;
-	if (hval == 0)
-		++hval;
-
-	// Try the first index
-	idx = hval;
-
-	if (htab_table[idx].used) {
-		if ( (htab_table[idx].used == hval)
-		  && (safe_strcmp(str, htab_table[idx].str) == 0) ) {
-			// existing hash
-			return idx;
-		}
-		// uprintf("hash collision ('%s' vs '%s')\n", str, htab_table[idx].str);
-
-		// Second hash function, as suggested in [Knuth]
-		hval2 = 1 + hval % (htab_size - 2);
-
-		do {
-			// Because size is prime this guarantees to step through all available indexes
-			if (idx <= hval2) {
-				idx = ((uint32_t)htab_size) + idx - hval2;
-			} else {
-				idx -= hval2;
-			}
-
-			// If we visited all entries leave the loop unsuccessfully
-			if (idx == hval) {
-				break;
-			}
-
-			// If entry is found use it.
-			if ( (htab_table[idx].used == hval)
-			  && (safe_strcmp(str, htab_table[idx].str) == 0) ) {
-				return idx;
-			}
-		}
-		while (htab_table[idx].used);
-	}
-
-	// Not found => New entry
-
-	// If the table is full return an error
-	if (htab_filled >= htab_size) {
-		uprintf("localization: hash table is full (%d entries)", htab_size);
-		return 0;
-	}
-
-	safe_free(htab_table[idx].str);
-	htab_table[idx].used = hval;
-	htab_table[idx].str = (char*) malloc(safe_strlen(str)+1);
-	if (htab_table[idx].str == NULL) {
-		uprintf("localization: could not duplicate string for hash table\n");
-		return 0;
-	}
-	memcpy(htab_table[idx].str, str, safe_strlen(str)+1);
-	++htab_filled;
-
-	return idx;
-}
-
-/*
  * Add a localization command to a dialog/section
  */
 void add_dialog_command(int index, loc_cmd* lcmd)
 {
 	char str[128];
+	loc_cmd* htab_lcmd;
 	uint32_t i;
 	if ((lcmd == NULL) || (lcmd->txt[0] == NULL) || (index < 0) || (index >= ARRAYSIZE(loc_dlg))) {
 		uprintf("localization: invalid parameter for add_dialog_command\n");
@@ -273,13 +110,14 @@ void add_dialog_command(int index, loc_cmd* lcmd)
 	str[0] = index + 0x30;
 	str[1] = lcmd->command + 0x30;
 	safe_strcpy(&str[2], sizeof(str)-2, lcmd->txt[0]);
-	i = htab_hash(str);
+	i = htab_hash(str, &htab_loc);
 	if (i != 0) {
-		if (htab_table[i].dlg_cmd != NULL) {
-			list_del(&(htab_table[i].dlg_cmd->list));
-			free_loc_cmd(htab_table[i].dlg_cmd);
+		htab_lcmd = (loc_cmd*)(htab_loc.table[i].data);
+		if (htab_lcmd != NULL) {
+			list_del(&(htab_lcmd->list));
+			free_loc_cmd(htab_lcmd);
 		}
-		htab_table[i].dlg_cmd = lcmd;
+		htab_loc.table[i].data = (void*)lcmd;
 	}
 	list_add(&lcmd->list, &loc_dlg[index].list);
 }
@@ -349,7 +187,7 @@ void _init_localization(BOOL reinit) {
 		list_init(&loc_dlg[i].list);
 	if (!reinit)
 		list_init(&locale_list);
-	htab_create(LOC_HTAB_SIZE);
+	htab_create(LOC_HTAB_SIZE, &htab_loc);
 }
 
 void _exit_localization(BOOL reinit) {
@@ -360,7 +198,7 @@ void _exit_localization(BOOL reinit) {
 	}
 	free_dialog_list();
 	mtab_destroy(reinit);
-	htab_destroy();
+	htab_destroy(&htab_loc);
 }
 
 /*
