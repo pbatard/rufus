@@ -34,6 +34,7 @@ typedef struct usb_device_props {
 	uint32_t  port;
 	BOOL      is_UASP;
 	BOOL      is_VHD;
+	BOOL      is_LowerSpeed;
 } usb_device_props;
 
 /*
@@ -47,7 +48,8 @@ typedef CHAR *DEVINSTID_A;
 
 #define CR_SUCCESS                              0x00000000
 #define CR_NO_SUCH_DEVNODE                      0x0000000D
-#define CM_GETIDLIST_FILTER_SERVICE             2
+#define CM_GETIDLIST_FILTER_SERVICE             0x00000002
+#define CM_GETIDLIST_FILTER_PRESENT             0x00000100
 #define CM_DRP_ADDRESS                          0x0000001D
 
 #ifndef METHOD_BUFFERED

@@ -203,7 +203,7 @@ uint32_t htab_hash(char* str, htab_table* htab)
 BOOL is_x64(void)
 {
 	BOOL ret = FALSE;
-	PF_TYPE_DECL(__stdcall, BOOL, IsWow64Process, (HANDLE, PBOOL));
+	PF_TYPE_DECL(WINAPI, BOOL, IsWow64Process, (HANDLE, PBOOL));
 	// Detect if we're running a 32 or 64 bit system
 	if (sizeof(uintptr_t) < 8) {
 		PF_INIT(IsWow64Process, Kernel32);

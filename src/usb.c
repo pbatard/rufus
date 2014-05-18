@@ -50,11 +50,20 @@ static void GetUSBProperties(char* parent_path, char* device_id, usb_device_prop
 {
 	HANDLE handle = INVALID_HANDLE_VALUE;
 	DWORD size;
+	DEVINST device_inst;
 	USB_NODE_CONNECTION_INFORMATION_EX conn_info;
 	USB_NODE_CONNECTION_INFORMATION_EX_V2 conn_info_v2;
+	PF_INIT(CM_Get_DevNode_Registry_PropertyA, Cfgmgr32);
 
-	if ((parent_path == NULL) || (device_id == NULL) || (props == NULL) || (props->port == 0)) {
+	if ((parent_path == NULL) || (device_id == NULL) || (props == NULL)) {
 		return;
+	}
+
+	props->port = 0;
+	size = sizeof(props->port);
+	if ( (pfCM_Get_DevNode_Registry_PropertyA != NULL) && 
+		 (CM_Locate_DevNodeA(&device_inst, device_id, 0) == CR_SUCCESS) ) {
+		pfCM_Get_DevNode_Registry_PropertyA(device_inst, CM_DRP_ADDRESS, NULL, (PVOID)&props->port, &size, 0);
 	}
 
 	handle = CreateFileA(parent_path, GENERIC_WRITE, FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_FLAG_OVERLAPPED, NULL);
@@ -86,6 +95,8 @@ static void GetUSBProperties(char* parent_path, char* device_id, usb_device_prop
 			uprintf("could not get node connection information (V2) for device '%s': %s", device_id, WindowsErrorString());
 		} else if (conn_info_v2.Flags.DeviceIsOperatingAtSuperSpeedOrHigher) {
 			props->speed = USB_SPEED_SUPER_OR_LATER;
+		} else if (conn_info_v2.Flags.DeviceIsSuperSpeedCapableOrHigher) {
+			props->is_LowerSpeed = TRUE;
 		}
 	}
 
@@ -103,39 +114,40 @@ BOOL GetUSBDevices(DWORD devnum)
 	const char* storage_name[] = { "USBSTOR", "UASPSTOR", "VUSBSTOR", "ETRONSTOR" };
 	const char* scsi_name = "SCSI";
 	const char* vhd_name = "Virtual Disk";
-	const char* usb_speed_name[USB_SPEED_MAX] = { "", " 1.0", " 1.1", " 2.0", " 3.0" };
+	const char* usb_speed_name[USB_SPEED_MAX] = { "USB", "USB 1.0", "USB 1.1", "USB 2.0", "USB 3.0" };
 	// Hash table and String Array used to match a Device ID with the parent hub's Device Interface Path
 	htab_table htab_devid = HTAB_EMPTY;
 	StrArray dev_if_path;
 	char letter_name[] = " (?:)";
-	BOOL found = FALSE, is_SCSI;
+	BOOL r = FALSE, found = FALSE, is_SCSI;
 	HDEVINFO dev_info = NULL;
 	SP_DEVINFO_DATA dev_info_data;
 	SP_DEVICE_INTERFACE_DATA devint_data;
 	PSP_DEVICE_INTERFACE_DETAIL_DATA_A devint_detail_data;
 	DEVINST parent_inst, device_inst;
-	DWORD size, i, j, k, datatype, drive_index, port;
+	DWORD size, i, j, k, datatype, drive_index;
 	ULONG list_size[ARRAYSIZE(storage_name)], full_list_size;
 	HANDLE hDrive;
 	LONG maxwidth = 0;
-	RECT rect;
 	int s, score, drive_number;
-	char drive_letters[27], *devid, *devid_list = NULL, entry_msg[128];
-	char *label, *entry, device_id[MAX_PATH], buffer[MAX_PATH], str[128];
+	char drive_letters[27], *device_id, *devid_list = NULL, entry_msg[128];
+	char *label, *entry, buffer[MAX_PATH], str[128];
 	usb_device_props props;
-	PF_INIT(CM_Get_DevNode_Registry_PropertyA, Cfgmgr32);
 
 	IGNORE_RETVAL(ComboBox_ResetContent(hDeviceList));
 	StrArrayClear(&DriveID);
 	StrArrayClear(&DriveLabel);
 	StrArrayCreate(&dev_if_path, 128);
-	GetClientRect(hDeviceList, &rect);
+
+	device_id = (char*)malloc(MAX_PATH);
+	if (device_id == NULL)
+		goto out;
 
 	// Build a hash table associating a CM Device ID of an USB device with the SetupDI Device Interface Path
 	// of its parent hub - this is needed to retrieve the device speed
 	dev_info = SetupDiGetClassDevsA(&_GUID_DEVINTERFACE_USB_HUB, NULL, NULL, DIGCF_PRESENT|DIGCF_DEVICEINTERFACE);
 	if (dev_info != INVALID_HANDLE_VALUE) {
-		if (htab_create(257, &htab_devid)) {
+		if (htab_create(DEVID_HTAB_SIZE, &htab_devid)) {
 			dev_info_data.cbSize = sizeof(dev_info_data);
 			for (i=0; SetupDiEnumDeviceInfo(dev_info, i, &dev_info_data); i++) {
 
@@ -148,34 +160,26 @@ BOOL GetUSBDevices(DWORD devnum)
 				  && ((devint_detail_data = (PSP_DEVICE_INTERFACE_DETAIL_DATA_A)calloc(1, size)) != NULL) ) {
 					devint_detail_data->cbSize = sizeof(SP_DEVICE_INTERFACE_DETAIL_DATA_A);
 					if (SetupDiGetDeviceInterfaceDetailA(dev_info, &devint_data, devint_detail_data, size, &size, NULL)) {
-					
-						// Find the Device ID for all the children of this hub
+
+						// Find the Device IDs for all the children of this hub
 						if (CM_Get_Child(&device_inst, dev_info_data.DevInst, 0) == CR_SUCCESS) {
 							device_id[0] = 0;
 							s = StrArrayAdd(&dev_if_path, devint_detail_data->DevicePath);
-							if ((s>= 0) && (CM_Get_Device_IDA(device_inst, device_id, sizeof(device_id), 0) == CR_SUCCESS)) {
-								// Lookup port in case SPDRP_ADDRESS doesn't work (which is the case of UASP)
-								port = 0;
-								size = sizeof(port);
-								if (pfCM_Get_DevNode_Registry_PropertyA != NULL)
-									pfCM_Get_DevNode_Registry_PropertyA(device_inst, CM_DRP_ADDRESS, NULL, (PVOID)&port, &size, 0);
+							if ((s>= 0) && (CM_Get_Device_IDA(device_inst, device_id, MAX_PATH, 0) == CR_SUCCESS)) {
 								if ((k = htab_hash(device_id, &htab_devid)) != 0) {
-									htab_devid.table[k].data = (void*)(uintptr_t)((port<<16)|s);
+									htab_devid.table[k].data = (void*)(uintptr_t)s;
 								}
 								while (CM_Get_Sibling(&device_inst, device_inst, 0) == CR_SUCCESS) {
-									port = 0; size = sizeof(port);
-									if (pfCM_Get_DevNode_Registry_PropertyA != NULL)
-										pfCM_Get_DevNode_Registry_PropertyA(device_inst, CM_DRP_ADDRESS, NULL, (PVOID)&port, &size, 0);
 									device_id[0] = 0;
-									if (CM_Get_Device_IDA(device_inst, device_id, sizeof(device_id), 0) == CR_SUCCESS) {
+									if (CM_Get_Device_IDA(device_inst, device_id, MAX_PATH, 0) == CR_SUCCESS) {
 										if ((k = htab_hash(device_id, &htab_devid)) != 0) {
-											// store both string index and fallback port in data
-											htab_devid.table[k].data = (void*)(uintptr_t)((port<<16)|s);
+											htab_devid.table[k].data = (void*)(uintptr_t)s;
 										}
 									}
 								}
 							}
 						}
+
 					}
 					free(devint_detail_data);
 				}
@@ -183,18 +187,15 @@ BOOL GetUSBDevices(DWORD devnum)
 		}
 		SetupDiDestroyDeviceInfoList(dev_info);
 	}
+	free(device_id);
 
-	dev_info = SetupDiGetClassDevsA(&_GUID_DEVINTERFACE_DISK, NULL, NULL, DIGCF_PRESENT|DIGCF_DEVICEINTERFACE);
-	if (dev_info == INVALID_HANDLE_VALUE) {
-		uprintf("SetupDiGetClassDevs (Interface) failed: %s\n", WindowsErrorString());
-		return FALSE;
-	}
-
+	// Build a single list of Device IDs from all the storage enumerators we know of
 	full_list_size = 0;
 	for (s=0; s<ARRAYSIZE(storage_name); s++) {
-		// Get a list of hardware IDs for all USB storage devices
-		// This will be used to retrieve the VID:PID of our devices
-		CM_Get_Device_ID_List_SizeA(&list_size[s], storage_name[s], CM_GETIDLIST_FILTER_SERVICE);
+		// Get a list of device IDs for all USB storage devices
+		// This will be used to find if a device is UASP
+		CM_Get_Device_ID_List_SizeA(&list_size[s], storage_name[s],
+			CM_GETIDLIST_FILTER_SERVICE|CM_GETIDLIST_FILTER_PRESENT);
 		if (list_size[s] != 0)
 			full_list_size += list_size[s]-1;	// remove extra NUL terminator
 	}
@@ -203,15 +204,14 @@ BOOL GetUSBDevices(DWORD devnum)
 		return FALSE;
 	devid_list = (char*)malloc(full_list_size);
 	if (devid_list == NULL) {
-		uprintf("Could not allocate Dev ID list\n");
+		uprintf("Could not allocate Device ID list\n");
 		return FALSE;
 	}
-
-	// Build a single list from all the storage enumerators we know of
 	for (s=0, i=0; s<ARRAYSIZE(storage_name); s++) {
 		if (list_size[s] > 1) {
-			CM_Get_Device_ID_ListA(storage_name[s], &devid_list[i], list_size[s], CM_GETIDLIST_FILTER_SERVICE);
-			// list_size is sometimes larger than required thus we need to find the real end
+			CM_Get_Device_ID_ListA(storage_name[s], &devid_list[i], list_size[s],
+				CM_GETIDLIST_FILTER_SERVICE|CM_GETIDLIST_FILTER_PRESENT);	// 
+			// The list_size is sometimes larger than required thus we need to find the real end
 			for (i += list_size[s]; i > 2; i--) {
 				if ((devid_list[i-2] != '\0') && (devid_list[i-1] == '\0') && (devid_list[i] == '\0'))
 					break;
@@ -219,6 +219,12 @@ BOOL GetUSBDevices(DWORD devnum)
 		}
 	}
 
+	// Now use SetupDi to enumerate all our storage devices
+	dev_info = SetupDiGetClassDevsA(&_GUID_DEVINTERFACE_DISK, NULL, NULL, DIGCF_PRESENT|DIGCF_DEVICEINTERFACE);
+	if (dev_info == INVALID_HANDLE_VALUE) {
+		uprintf("SetupDiGetClassDevs (Interface) failed: %s\n", WindowsErrorString());
+		goto out;
+	}
 	dev_info_data.cbSize = sizeof(dev_info_data);
 	for (i=0; SetupDiEnumDeviceInfo(dev_info, i, &dev_info_data); i++) {
 		memset(buffer, 0, sizeof(buffer));
@@ -241,46 +247,20 @@ BOOL GetUSBDevices(DWORD devnum)
 		} else if (safe_strstr(buffer, vhd_name) != NULL) {
 			props.is_VHD = TRUE;
 		} else {
-			// Get the VID:PID of the device. We could avoid doing this lookup every time by keeping
+			// Get the properties of the device. We could avoid doing this lookup every time by keeping
 			// a lookup table, but there shouldn't be that many USB storage devices connected...
-			for (devid = devid_list; *devid; devid += strlen(devid) + 1) {
-				if ( (CM_Locate_DevNodeA(&parent_inst, devid, 0) == CR_SUCCESS)
+			// NB: Each of these Device IDs have an _only_ child, from which we get the Device Instance match.
+			for (device_id = devid_list; *device_id; device_id += strlen(device_id) + 1) {
+				if ( (CM_Locate_DevNodeA(&parent_inst, device_id, 0) == CR_SUCCESS)
 				  && (CM_Get_Child(&device_inst, parent_inst, 0) == CR_SUCCESS)
 				  && (device_inst == dev_info_data.DevInst) ) {
-					BOOL post_backslash = FALSE;
-
 					// If we're not dealing with the USBSTOR part of our list, then this is an UASP device
-					props.is_UASP = ((((uintptr_t)devid)+2) >= ((uintptr_t)devid_list)+list_size[0]);
-
-					// Now get the port number of the device, and its Device ID, which we need to populate the properties
-					if ( (htab_devid.table != NULL) && (SetupDiGetDeviceRegistryPropertyA(dev_info, &dev_info_data,
-						  SPDRP_ADDRESS, &datatype, (BYTE*)&props.port, sizeof(props.port), &size)) &&
-						 (CM_Get_Device_IDA(parent_inst, device_id, sizeof(device_id), 0) == CR_SUCCESS) ) {
-						j = htab_hash(device_id, &htab_devid);
-						if (props.port == 0)	// UAS devices will return port 0 from SPDRP_ADDRESS
-							props.port = ((uint32_t)htab_devid.table[j].data)>>16;
-						if (j > 0) {
-							GetUSBProperties(dev_if_path.String[((uint32_t)htab_devid.table[j].data)&0xFFFF], device_id, &props);
-						}
+					props.is_UASP = ((((uintptr_t)device_id)+2) >= ((uintptr_t)devid_list)+list_size[0]);
+					// Now get the properties of the device, and its Device ID, which we need to populate the properties
+					j = htab_hash(device_id, &htab_devid);
+					if (j > 0) {
+						GetUSBProperties(dev_if_path.String[(uint32_t)htab_devid.table[j].data], device_id, &props);
 					}
-
-					// If the previous calls didn't succeed in getting the VID:PID, try from the device_id
-					// This will be the case for UASP devices for instance
-					if ((props.vid == 0) && (props.pid == 0)) {
-						for (j=0, k=0; (j<strlen(devid))&&(k<2); j++) {
-							// The ID is in the form USB_VENDOR_BUSID\VID_xxxx&PID_xxxx\...
-							if (devid[j] == '\\')
-								post_backslash = TRUE;
-							if (!post_backslash)
-								continue;
-							if (devid[j] == '_') {
-								props.pid = (uint16_t)strtoul(&devid[j+1], NULL, 16);
-								if (k++==0)
-									props.vid = props.pid;
-							}
-						}
-					}
-
 				}
 			}
 		}
@@ -299,7 +279,10 @@ BOOL GetUSBDevices(DWORD devnum)
 			}
 			if (props.speed >= USB_SPEED_MAX)
 				props.speed = 0;
-			uprintf("Found %s%s device '%s' (%s)\n", props.is_UASP?"UAS":"USB", usb_speed_name[props.speed], buffer, str);
+			uprintf("Found %s%s%s device '%s' (%s)\n", props.is_UASP?"UAS (":"", 
+				usb_speed_name[props.speed], props.is_UASP?")":"", buffer, str);
+			if (props.is_LowerSpeed)
+				uprintf("NOTE: This device is an USB 3.0 device operating at lower speed...");
 		}
 		devint_data.cbSize = sizeof(devint_data);
 		hDrive = INVALID_HANDLE_VALUE;
@@ -428,8 +411,11 @@ BOOL GetUSBDevices(DWORD devnum)
 	SendMessage(hMainDialog, WM_COMMAND, (CBN_SELCHANGE<<16) | IDC_DEVICE, 0);
 	SendMessage(hMainDialog, WM_COMMAND, (CBN_SELCHANGE<<16) | IDC_FILESYSTEM,
 		ComboBox_GetCurSel(hFileSystem));
+	r = TRUE;
+
+out:
 	safe_free(devid_list);
 	StrArrayDestroy(&dev_if_path);
 	htab_destroy(&htab_devid);
-	return TRUE;
+	return r;
 }
