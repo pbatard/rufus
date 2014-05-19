@@ -15,6 +15,13 @@ content. PLEASE, do not just look at this Changelog when updating your
 translation, but always use the English section of rufus.loc as your base.
 For instance, MSG_114, that was introduced in v1.0.8 is MORE than one line!
 
+o Version 1.0.12 (2014.05.19)
+  - *NEW* MSG_079 "The device is not ready."
+  - *NEW* MSG_189 "This ISO image is not compatible with the selected filesystem"
+  - *NEW* MSG_262 "ISO Support" (If you want to know what it's about, see comment in English translation)
+  - *NEW* MSG_263 "Use PROPER size units" (If you want to know what it's about, see comment from English translation) 
+  - Changed MSG_165 "Click to select an ISO..." -> "Click to select an image..."
+
 o Version 1.0.11 (2014.03.29)
   - Changed MSG_011 "%u bad block(s) found" -> "%d bad block(s) found"
   Note: since this doesn't require translator involvement, I have applied the change to existing translations.
@@ -76,11 +83,3 @@ o Version 1.0.1 (2013.10.28)
 
 o Version 1.0.0 (2013.10.20)
   - Initial version
-  
-[TODO] (NOTE: THIS PART IS ONLY INTENDED FOR THE RUFUS DEVELOPER, NOT THE TRANSLATORS)
-  - MSG_165 should be altered to say image
-  - NEW message for wrong MSG_044 in _StrError()
-  - NEW message for Alt-I toggle
-  - NEW message for Alt-U toggle
-  - NEW message for ERROR_NOT_READY
-  - NEW message for "This ISO is not compatible with the selected filesystem" (rufus.c ~1407)

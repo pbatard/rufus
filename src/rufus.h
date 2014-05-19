@@ -121,10 +121,9 @@ extern void _uprintf(const char *format, ...);
 enum user_message_type {
 	UM_FORMAT_COMPLETED = WM_APP,
 	UM_MEDIA_CHANGE,
-	// TODO: relabel "ISO" to a more generic "progress"
-	UM_ISO_CREATE,
-	UM_ISO_INIT,
-	UM_ISO_EXIT,
+	UM_PROGRESS_CREATE,
+	UM_PROGRESS_INIT,
+	UM_PROGRESS_EXIT,
 	// Start of the WM IDs for the language menu items
 	UM_LANGUAGE_MENU = WM_APP + 0x100
 };

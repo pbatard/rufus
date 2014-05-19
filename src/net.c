@@ -263,7 +263,7 @@ DWORD DownloadFile(const char* url, const char* file, HWND hProgressDialog)
 			SetWindowLong(hProgressBar, GWL_STYLE, progress_style & (~PBS_MARQUEE));
 			SendMessage(hProgressBar, PBM_SETPOS, 0, 0);
 		}
-		SendMessage(hProgressDialog, UM_ISO_INIT, 0, 0);
+		SendMessage(hProgressDialog, UM_PROGRESS_INIT, 0, 0);
 	}
 
 	for (last_slash = safe_strlen(file); last_slash != 0; last_slash--) {
@@ -369,7 +369,7 @@ DWORD DownloadFile(const char* url, const char* file, HWND hProgressDialog)
 
 out:
 	if (hProgressDialog != NULL)
-		SendMessage(hProgressDialog, UM_ISO_EXIT, (WPARAM)r, 0);
+		SendMessage(hProgressDialog, UM_PROGRESS_EXIT, (WPARAM)r, 0);
 	if (fd != NULL) fclose(fd);
 	if (!r) {
 		_unlink(file);

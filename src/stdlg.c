@@ -1256,12 +1256,12 @@ INT_PTR CALLBACK NewVersionCallback(HWND hDlg, UINT message, WPARAM wParam, LPAR
 			return (INT_PTR)TRUE;
 		}
 		break;
-	case UM_ISO_INIT:
+	case UM_PROGRESS_INIT:
 		FormatStatus = 0;
 		download_status = 1;
 		SetWindowTextU(GetDlgItem(hDlg, IDC_DOWNLOAD), lmprintf(MSG_038));
 		return (INT_PTR)TRUE;
-	case UM_ISO_EXIT:
+	case UM_PROGRESS_EXIT:
 		if (wParam) {
 			SetWindowTextU(GetDlgItem(hDlg, IDC_DOWNLOAD), lmprintf(MSG_039));
 			download_status = 2;

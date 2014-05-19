@@ -53,7 +53,7 @@
 # http://download.microsoft.com/download/9/5/E/95EF66AF-9026-4BB0-A41D-A4F81802D92C/%5BMS-LCID%5D.pdf
 # for the LCID (0x####) codes you should use
 l "en-US" "English (English)" 0x0409, 0x0809, 0x0c09, 0x1009, 0x1409, 0x1809, 0x1c09, 0x2009, 0x2409, 0x2809, 0x2c09, 0x3009, 0x3409, 0x3809, 0x3c09, 0x4009, 0x4409, 0x4809
-v 1.0.11
+v 1.0.12
 
 # Main dialog
 g IDD_DIALOG
@@ -225,6 +225,7 @@ t MSG_075 "Unable to remount volume."
 t MSG_076 "Unable to patch/setup files for boot."
 t MSG_077 "Unable to assign a drive letter."
 t MSG_078 "Can't mount GUID volume."
+t MSG_079 "The device is not ready."
 
 t MSG_080 "Rufus detected that Windows is still flushing its internal buffers onto the USB device.\n\n"
 	"Depending on the speed of your USB device, this operation may take a long time to complete, "
@@ -321,7 +322,7 @@ t MSG_161 "Check the device for bad blocks using a test pattern"
 t MSG_162 "Uncheck this box to use the \"slow\" format method"
 t MSG_163 "Check this box to make the USB drive bootable"
 t MSG_164 "Method that will be used to make the drive bootable"
-t MSG_165 "Click to select an ISO..."
+t MSG_165 "Click to select an image..."
 t MSG_166 "Check this box to allow the display of international labels "
 	"and set a device icon (creates an autorun.inf)"
 t MSG_167 "Install an MBR that allows boot selection and can masquerade the BIOS USB drive ID"
@@ -352,6 +353,7 @@ t MSG_186 "Rufus does not install or run background services, therefore update c
 	"Internet access is of course required when checking for updates."
 t MSG_187 "Invalid image for selected boot option"
 t MSG_188 "The current image doesn't match the boot option selected. Please use a different image or choose a different boot option."
+t MSG_189 "This ISO image is not compatible with the selected filesystem"
 
 # Status messages - these messages will appear on the status bar
 t MSG_201 "Cancelling - Please wait..."
@@ -432,6 +434,10 @@ t MSG_258 "Rock Ridge support"
 t MSG_259 "Force update"
 t MSG_260 "NTFS compression"
 t MSG_261 "Writing image: %0.1f%% completed"
+# Cheat mode message to disable ISO Support so that only DD images can be opened
+t MSG_262 "ISO Support"
+# Cheat mode to force legacy size units, where 1 KB is 1024 bytes and NOT that fake 1000 bytes abomination!
+t MSG_263 "Use PROPER size units"
 ################################################################################
 ############################# TRANSLATOR END COPY ##############################
 ################################################################################
@@ -3165,7 +3171,7 @@ t MSG_261 "Kirjoitetaan levykuvaa: %0.1f%% valmiina"
 
 ################################################################################
 l "fr-FR" "French (Français)" 0x040c, 0x080c, 0x0c0c, 0x100c, 0x140c, 0x180c, 0x1c0c, 0x200c, 0x240c, 0x280c, 0x2c0c, 0x300c, 0x340c, 0x380c, 0xe40c
-v 1.0.11
+v 1.0.12
 b "en-US"
 
 g IDD_DIALOG
@@ -3334,6 +3340,7 @@ t MSG_075 "Echec lors du remontage du volume."
 t MSG_076 "Echec de modification des fichiers de démarrage."
 t MSG_077 "Echec d'assignation d'une lettre de volume."
 t MSG_078 "Impossible de monter le volume GUID."
+t MSG_079 "Le périphérique n'est pas prêt."
 
 t MSG_080 "Rufus a détecté que Windows est en train de finir de vider la mémoire tampon.\n\n"
 	"En fonction de la vitesse de votre périphérique et de la taille du fichier, cette opération peut "
@@ -3425,7 +3432,7 @@ t MSG_161 "Détecte la présence de blocs défectueux en écrivant d'un motif de
 t MSG_162 "Décochez cette case si vous voulez utiliser la méthode de formatage \"lente\" "
 t MSG_163 "Cochez cette case pour rendre le périphérique démarrable"
 t MSG_164 "Méthode à utiliser pour rendre le périphérique démarrable "
-t MSG_165 "Cliquez ici pour sélectionner une image ISO..."
+t MSG_165 "Cliquez ici pour sélectionner une image..."
 t MSG_166 "Cochez cette case pour permettre l’affichage des caractères étendus/internationaux "
 	"et ajouter une icône (ceci créera un fichier autorun.inf)"
 t MSG_167 "Installe un MBR permettant la sélection du périphérique de démarrage. Peut aussi "
@@ -3458,6 +3465,7 @@ t MSG_186 "Aucun service ou tâche de fond n'est installé ou lancé par Rufus ;
 	"Bien entendu, un accès à internet est requis pour vérifier les mises à jour."
 t MSG_187 "Image invalide pour l'option de démarrage sélectionnée"
 t MSG_188 "L'image choisie ne correspond pas à l'option de démarrage sélectionnée. Veuillez utiliser une image ou une option de démarrage différente."
+t MSG_189 "Cette image ISO n'est pas compatible avec le système de fichiers sélectionné"
 
 # Status messages
 t MSG_201 "Annulation - Veuillez patienter..."
@@ -3521,6 +3529,8 @@ t MSG_258 "Support Rock Ridge"
 t MSG_259 "Forçage de mise à jour"
 t MSG_260 "Compression NTFS"
 t MSG_261 "Ecriture d'image : %0.1f%% complété"
+t MSG_262 "Support ISO"
+t MSG_263 "Affich. tailles avec de VRAIES unités"
 
 ################################################################################
 l "de-DE" "German (Deutsch)" 0x0407, 0x0807, 0x0c07, 0x1007, 0x1407

@@ -145,8 +145,7 @@ static BOOLEAN __stdcall FormatExCallback(FILE_SYSTEM_CALLBACK_COMMAND Command, 
 		break;
 	case FCC_DEVICE_NOT_READY:
 		uprintf("The device is not ready");
-		// TODO: set to ERROR_NOT_READY and add relevant translation
-		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_ACCESS_DENIED;
+		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_NOT_READY;
 		break;
 	case FCC_CANT_QUICK_FORMAT:
 		uprintf("Cannot quick format this volume");
@@ -1612,7 +1611,7 @@ DWORD WINAPI FormatThread(void* param)
 out:
 	safe_free(guid_volume);
 	safe_free(buffer);
-	SendMessage(hISOProgressDlg, UM_ISO_EXIT, 0, 0);
+	SendMessage(hISOProgressDlg, UM_PROGRESS_EXIT, 0, 0);
 	safe_closehandle(hSourceImage);
 	safe_unlockclose(hLogicalVolume);
 	safe_unlockclose(hPhysicalDrive);	// This can take a while

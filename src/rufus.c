@@ -871,14 +871,14 @@ BOOL CALLBACK ISOProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 		// Use maximum granularity for the progress bar
 		SendMessage(hISOProgressBar, PBM_SETRANGE, 0, (MAX_PROGRESS<<16) & 0xFFFF0000);
 		return TRUE;
-	case UM_ISO_INIT:
+	case UM_PROGRESS_INIT:
 		iso_op_in_progress = TRUE;
 		EnableWindow(GetDlgItem(hISOProgressDlg, IDC_ISO_ABORT), TRUE);
 		CenterDialog(hDlg);
 		ShowWindow(hDlg, SW_SHOW);
 		UpdateWindow(hDlg);
 		return TRUE;
-	case UM_ISO_EXIT:
+	case UM_PROGRESS_EXIT:
 		// Just hide and recenter the dialog
 		ShowWindow(hDlg, SW_HIDE);
 		iso_op_in_progress = FALSE;
@@ -948,7 +948,7 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 	r = ExtractISO(iso_path, "", TRUE) || IsImage(iso_path);
 	EnableControls(TRUE);
 	if (!r) {
-		SendMessage(hISOProgressDlg, UM_ISO_EXIT, 0, 0);
+		SendMessage(hISOProgressDlg, UM_PROGRESS_EXIT, 0, 0);
 		PrintStatus(0, TRUE, MSG_203);
 		safe_free(iso_path);
 		goto out;
@@ -1001,7 +1001,7 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 	}
 
 out:
-	SendMessage(hISOProgressDlg, UM_ISO_EXIT, 0, 0);
+	SendMessage(hISOProgressDlg, UM_PROGRESS_EXIT, 0, 0);
 	ExitThread(0);
 }
 
@@ -1141,7 +1141,7 @@ static BOOL BootCheck(void)
 			return FALSE;
 		} else if ((fs == FS_FAT16) && (iso_report.has_kolibrios)) {
 			// KolibriOS doesn't support FAT16
-			MessageBoxU(hMainDialog, "This ISO is not compatible with the selected filesystem", lmprintf(MSG_099), MB_OK|MB_ICONERROR|MB_IS_RTL);
+			MessageBoxU(hMainDialog, lmprintf(MSG_189), lmprintf(MSG_099), MB_OK|MB_ICONERROR|MB_IS_RTL);
 			return FALSE;
 		} else if (((fs == FS_FAT16)||(fs == FS_FAT32)) && (!HAS_SYSLINUX(iso_report)) &&
 			(!IS_REACTOS(iso_report)) && (!iso_report.has_kolibrios)) {
@@ -1591,7 +1591,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			ulRegister = pfSHChangeNotifyRegister(hDlg, 0x0001|0x0002|0x8000,
 				SHCNE_MEDIAINSERTED|SHCNE_MEDIAREMOVED, UM_MEDIA_CHANGE, 1, &NotifyEntry);
 		}
-		PostMessage(hMainDialog, UM_ISO_CREATE, 0, 0);
+		PostMessage(hMainDialog, UM_PROGRESS_CREATE, 0, 0);
 		return (INT_PTR)TRUE;
 
 	// The things one must do to get an ellipsis on the status bar...
@@ -1941,7 +1941,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		PostQuitMessage(0);
 		break;
 
-	case UM_ISO_CREATE:
+	case UM_PROGRESS_CREATE:
 		// You'd think that Windows would let you instantiate a modeless dialog wherever
 		// but you'd be wrong. It must be done in the main callback, hence the custom message.
 		if (!IsWindow(hISOProgressDlg)) { 
@@ -2281,7 +2281,7 @@ relaunch:
 			// DD-mode when writing the data.
 			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'I')) {
 				enable_iso = !enable_iso;
-				PrintStatus2000("ISO support", enable_iso);
+				PrintStatus2000(lmprintf(MSG_262), enable_iso);
 				if (iso_path != NULL) {
 					iso_provided = TRUE;
 					PostMessage(hDlg, WM_COMMAND, IDC_SELECT_ISO, 0);
@@ -2335,7 +2335,7 @@ relaunch:
 			// Alt-U => Use PROPER size units, instead of this whole Kibi/Gibi nonsense
 			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'U')) {
 				use_fake_units = !use_fake_units;
-				PrintStatus2000("Use PROPER size units", !use_fake_units);
+				PrintStatus2000(lmprintf(MSG_263), !use_fake_units);
 				GetUSBDevices(0);
 				continue;
 			}
