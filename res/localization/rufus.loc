@@ -6295,7 +6295,7 @@ t MSG_261 "이미지 만들기: %0.1f%% 완료"
 
 ################################################################################
 l "lv-LV" "Latvian (Latviešu)" 0x0426
-v 1.0.11
+v 1.0.12
 
 # Main dialog
 g IDD_DIALOG
@@ -6503,7 +6503,7 @@ t MSG_075 "Neizdevās izveidot disku."
 t MSG_076 "Neizdevās izveidot failus ielādei."
 t MSG_077 "Neizdevās diskam piešķirt burtu."
 t MSG_078 "Neizdevās izveidot GUID disku."
-
+t MSG_079 "Ierīce nav gatava."
 t MSG_080 "Rufus noteica ka Windows nav beidzis darbu ar USB ierīces ātrpikļuves buferi.\n\n"
 	"Atkarībā no USB ierīces ātruma šīs operācijas pabeigšana var aizņemt ilgāku laiku, "
 	"īpaši lielākiem failiem.\n\nIeteikums sagaidīt Windows darbības beigas, lai nesabojāt ierīci. "
@@ -6598,7 +6598,7 @@ t MSG_161 "Atzīmējiet lai pārbaudīt ierīci uz bojātiem sektoriem"
 t MSG_162 "Noņemiet atzīmi lai izmantot \"lēno\" formatēšanu"
 t MSG_163 "Atzīmējiet lai USB nesēju izmantot kā ielādes ierīci"
 t MSG_164 "Ielādes varianti"
-t MSG_165 "Piespiediet ISO izvēlei..."
+t MSG_165 "Piespiediet imidža izvēlei..."
 t MSG_166 "Atzīmējiet starptautisko simbolu atbalstam un ierīces "
 	"ikonas izveidei (tiek izveidots fails autorun.inf)"
 t MSG_167 "Instalēt MBR, kur var izvēlēties ielādi un kurš var maskēties BIOS'ā ar ierīces identifikatoru"
@@ -6629,7 +6629,7 @@ t MSG_186 "Rufus netiek instalēta kā OS serviss, tāpēc jauninājumu pārbaud
 	"Jauninājumu pārbaudei un ielādei nepieciešams interneta pieslēgums."
 t MSG_187 "Izvēlētajai ielādes opcijai nederīgs imidžs"
 t MSG_188 "Izvēlētais imidžs neatbalsta izvēlēto ielādes variantu. Lūdzu izvēlieties citu imidžu vai citas ielādes opcijas."
-
+t MSG_189 "Šis ISO imidžs neatbalstās ar izvēlēto failu sistēmu"
 # Status messages - these messages will appear on the status bar
 t MSG_201 "Atcelšana - lūdzu uzgaidiet..."
 t MSG_202 "Diska imidža pārskats..."
@@ -6709,6 +6709,8 @@ t MSG_258 "Rock Ridge atbalsts"
 t MSG_259 "Ātrā jaunināšana"
 t MSG_260 "NTFS kompresija"
 t MSG_261 "Imidža ieraksts: Pabeigts %0.1f%%"
+t MSG_262 "ISO atbalsts"
+t MSG_263 "Izvēlieties atbilstošas vienības"
 
 ################################################################################
 l "lt-LT" "Lithuanian (Lietuvių)" 0x0427
