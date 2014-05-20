@@ -3534,7 +3534,7 @@ t MSG_263 "Affich. tailles avec de VRAIES unités"
 
 ################################################################################
 l "de-DE" "German (Deutsch)" 0x0407, 0x0807, 0x0c07, 0x1007, 0x1407
-v 1.0.11
+v 1.0.12
 b "en-US"
 
 g IDD_DIALOG
@@ -3723,6 +3723,7 @@ t MSG_075 "Volume konnte nicht neu angelegt werden."
 t MSG_076 "Startfähige Dateien konnten nicht erstellt werden."
 t MSG_077 "Laufwerksbuchstabe konnte nicht zugewiesen werden."
 t MSG_078 "GUID-Laufwerk konnte nicht angelegt werden."
+t MSG_079 "Das Laufwerk ist nicht bereit."
 t MSG_080 "Rufus hat erkannt, dass Inhalte des Datenpuffer auf das USB-Laufwerk geschrieben werden.\n\n"
 	"Abhängig von der Geschwindigkeit des USB-Laufwerks, kann dieser Vorgang lange dauern; speziell für große Dateien.\n\nWir empfehlen, dass Sie Windows den Vorgang beenden lassen, um eine Problem zu vermeiden. "
 	"Wenn Ihnen der Vorgang zu lange dauert, können Sie das Gerät einfach entfernen..."
@@ -3809,7 +3810,7 @@ t MSG_161 "Das Laufwerk mittels eines Musters auf fehlerhafte Blöcke prüfen"
 t MSG_162 "Wenn nicht aktiviert, wird die \"langsame\" Formatierung verwendet"
 t MSG_163 "Aktivieren, um das Laufwerk startfähig zu machen"
 t MSG_164 "Methode, um das Laufwerk startfähig zu machen"
-t MSG_165 "Wählen Sie ein ISO..."
+t MSG_165 "Wählen Sie eine Abbild-Datei..."
 t MSG_166 "Wählen Sie diesed Option, um die Anzeige internationaler Bezeichnungen zu ermöglichen "
 	"und und Gerätesymbol zu erzeugen (Datei autorun.inf)"
 t MSG_167 "Erzeugt einen MBR, der eine Bootmenü erzeugt und die ID des BIOS USB-Laufwerks maskieren kann"
@@ -3841,6 +3842,7 @@ t MSG_186 "Rufus verwendet keine Hintergrundprozesse, deshalb wird nur auf Updat
 	"Eine Internetverbindung ist natürlich für die Prüfung auf neue Versionen erforderlich."
 t MSG_187 "Abbild-Datei für die gewählte Boot-Option nicht passend"
 t MSG_188 "Die derzeitige Abbild-Datei passt nicht zur gewählten Boot-Option. Bitte wählen sie eine andere Abbild-Datei oder eine andere Boot-Option."
+t MSG_189 "Dieses ISO-Abbild ist mit dem gewählten Dateisystem nicht kompatibel"
 
 t MSG_201 "Abbrechen - Bitte warten..."
 t MSG_202 "Lese Abbild-Datei..."
@@ -3917,6 +3919,8 @@ t MSG_258 "Rock Ridge-Unterstützung"
 t MSG_259 "Update erzwingen"
 t MSG_260 "NTFS-Komprimierung"
 t MSG_261 "Schreibe Abbild-Datei: %0.1f%% fertiggestellt"
+t MSG_262 "ISO-Unterstützung"
+t MSG_263 "Verwenden Sie korrekten Größeneinheiten"
 
 ################################################################################
 l "el-GR" "Greek (Ελληνικά)" 0x0408
