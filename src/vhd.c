@@ -27,6 +27,9 @@
 static BOOL has_wimgapi = FALSE, has_7z = FALSE;
 static char sevenzip_path[MAX_PATH];
 
+// TODO: Add a call to generate a Fixed Hard Disk VHD footer, This would allow the saving of an existing USB to VHD. See VHD specs at:
+// http://download.microsoft.com/download/f/f/e/ffef50a5-07dd-4cf8-aaa3-442c0673a029/Virtual%20Hard%20Disk%20Format%20Spec_10_18_06.doc
+
 // WIM API Prototypes
 #define WIM_GENERIC_READ	GENERIC_READ
 #define WIM_OPEN_EXISTING	OPEN_EXISTING
@@ -46,7 +49,7 @@ static BOOL Get7ZipPath(void)
 	return FALSE;
 }
 
-// Find out if we have any way to extraxt WIM files on this platform
+// Find out if we have any way to extract WIM files on this platform
 BOOL WimExtractCheck(void)
 {
 	PF_INIT(WIMCreateFile, Wimgapi);

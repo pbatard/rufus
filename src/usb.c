@@ -199,22 +199,23 @@ BOOL GetUSBDevices(DWORD devnum)
 		if (list_size[s] != 0)
 			full_list_size += list_size[s]-1;	// remove extra NUL terminator
 	}
-	full_list_size += 1;	// add extra NUL terminator
-	if (full_list_size < 2)
-		return FALSE;
-	devid_list = (char*)malloc(full_list_size);
-	if (devid_list == NULL) {
-		uprintf("Could not allocate Device ID list\n");
-		return FALSE;
-	}
-	for (s=0, i=0; s<ARRAYSIZE(storage_name); s++) {
-		if (list_size[s] > 1) {
-			CM_Get_Device_ID_ListA(storage_name[s], &devid_list[i], list_size[s],
-				CM_GETIDLIST_FILTER_SERVICE|CM_GETIDLIST_FILTER_PRESENT);	// 
-			// The list_size is sometimes larger than required thus we need to find the real end
-			for (i += list_size[s]; i > 2; i--) {
-				if ((devid_list[i-2] != '\0') && (devid_list[i-1] == '\0') && (devid_list[i] == '\0'))
-					break;
+	devid_list = NULL;
+	if (full_list_size != 0) {
+		full_list_size += 1;	// add extra NUL terminator
+		devid_list = (char*)malloc(full_list_size);
+		if (devid_list == NULL) {
+			uprintf("Could not allocate Device ID list\n");
+			return FALSE;
+		}
+		for (s=0, i=0; s<ARRAYSIZE(storage_name); s++) {
+			if (list_size[s] > 1) {
+				CM_Get_Device_ID_ListA(storage_name[s], &devid_list[i], list_size[s],
+					CM_GETIDLIST_FILTER_SERVICE|CM_GETIDLIST_FILTER_PRESENT);	// 
+				// The list_size is sometimes larger than required thus we need to find the real end
+				for (i += list_size[s]; i > 2; i--) {
+					if ((devid_list[i-2] != '\0') && (devid_list[i-1] == '\0') && (devid_list[i] == '\0'))
+						break;
+				}
 			}
 		}
 	}
@@ -246,11 +247,11 @@ BOOL GetUSBDevices(DWORD devnum)
 			safe_strcpy(buffer, sizeof(buffer), lmprintf(MSG_045));
 		} else if (safe_strstr(buffer, vhd_name) != NULL) {
 			props.is_VHD = TRUE;
-		} else {
+		} else if (devid_list != NULL) {
 			// Get the properties of the device. We could avoid doing this lookup every time by keeping
 			// a lookup table, but there shouldn't be that many USB storage devices connected...
 			// NB: Each of these Device IDs have an _only_ child, from which we get the Device Instance match.
-			for (device_id = devid_list; *device_id; device_id += strlen(device_id) + 1) {
+			for (device_id = devid_list; *device_id != 0; device_id += strlen(device_id) + 1) {
 				if ( (CM_Locate_DevNodeA(&parent_inst, device_id, 0) == CR_SUCCESS)
 				  && (CM_Get_Child(&device_inst, parent_inst, 0) == CR_SUCCESS)
 				  && (device_inst == dev_info_data.DevInst) ) {

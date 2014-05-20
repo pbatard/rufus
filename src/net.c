@@ -122,7 +122,7 @@ const char* WinInetErrorString(void)
 	case ERROR_INTERNET_INVALID_OPERATION:
 		return "The requested operation is invalid.";
 	case ERROR_INTERNET_OPERATION_CANCELLED:
-		return "The operation was canceled, usually because the handle on which the request was operating was closed before the operation completed.";
+		return "The operation was cancelled, usually because the handle on which the request was operating was closed before the operation completed.";
 	case ERROR_INTERNET_INCORRECT_HANDLE_TYPE:
 		return "The type of handle supplied is incorrect for this operation.";
 	case ERROR_INTERNET_INCORRECT_HANDLE_STATE:

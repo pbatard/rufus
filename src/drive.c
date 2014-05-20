@@ -724,7 +724,7 @@ BOOL UnmountVolume(HANDLE hDrive)
 	DWORD size;
 
 	if (!DeviceIoControl(hDrive, FSCTL_DISMOUNT_VOLUME, NULL, 0, NULL, 0, &size, NULL)) {
-		uprintf("Could not ummount drive: %s\n", WindowsErrorString());
+		uprintf("Could not unmount drive: %s\n", WindowsErrorString());
 		return FALSE;
 	}
 	return TRUE;
@@ -877,8 +877,7 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 
 		DriveLayoutEx.PartitionStyle = PARTITION_STYLE_GPT;
 		DriveLayoutEx.PartitionCount = 1;
-		// At the very least, a GPT disk has atv least 34 reserved (512 bytes) blocks at the beginning
-		// and 33 at the end.
+		// At the very least, a GPT disk has 34 reserved blocks (512 bytes) at the beginning and 33 at the end.
 		DriveLayoutEx.Type.Gpt.StartingUsableOffset.QuadPart = 34*512;
 		DriveLayoutEx.Type.Gpt.UsableLength.QuadPart = SelectedDrive.DiskSize - (34+33)*512;
 		DriveLayoutEx.Type.Gpt.MaxPartitionCount = MAX_GPT_PARTITIONS;

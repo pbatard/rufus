@@ -141,11 +141,11 @@ static int64_t last_iso_blocking_status;
  * 0 means unused (no operation or no progress allocated to it)
  * +n means allocate exactly n bars (n percent of the progress bar)
  * -n means allocate a weighted slot of n from all remaining
- *    bars. Eg if 80 slots remain and the sum of all negative entries
+ *    bars. E.g. if 80 slots remain and the sum of all negative entries
  *    is 10, -4 will allocate 4/10*80 = 32 bars (32%) for OP progress
  */
 static int nb_slots[OP_MAX];
-static float slot_end[OP_MAX+1];	// shifted +1 so that we can substract 1 to OP indexes
+static float slot_end[OP_MAX+1];	// shifted +1 so that we can subtract 1 to OP indexes
 static float previous_end;
 
 // TODO: Remember to update copyright year in both license.h and the RC when the year changes!
@@ -1546,7 +1546,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		// since last refresh/arm timer, and have that timer send DBT_CUSTOMEVENT when it expires.
 		// DO *NOT* USE WM_DEVICECHANGE AS THE MESSAGE FROM THE TIMER PROC, as it may be filtered!
 		// For instance filtering will occur when (un)plugging in a FreeBSD UFD on Windows 8.
-		// Intead, use a custom user message, such as UM_MEDIA_CHANGE, to set DBT_CUSTOMEVENT.
+		// Instead, use a custom user message, such as UM_MEDIA_CHANGE, to set DBT_CUSTOMEVENT.
 		if (format_thid == NULL) {
 			switch (wParam) {
 			case DBT_DEVICEARRIVAL:

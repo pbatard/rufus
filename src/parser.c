@@ -787,7 +787,7 @@ void parse_update(char* buf, size_t len)
 
 /*
  * Insert entry 'data' under section 'section' of a config file
- * Section must include the relevant delimitors (eg '[', ']') if needed
+ * Section must include the relevant delimiters (eg '[', ']') if needed
  */
 char* insert_section_data(const char* filename, const char* section, const char* data, BOOL dos2unix)
 {
