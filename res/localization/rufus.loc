@@ -5100,7 +5100,7 @@ t MSG_259 "Pembaruan Paksa"
 
 ################################################################################
 l "it-IT" "Italian (Italiano)" 0x0410, 0x0810
-v 1.0.11
+v 1.0.12
 b "en-US"
 
 g IDD_DIALOG
@@ -5282,6 +5282,7 @@ t MSG_075 "Impossibile rimontare l'unità."
 t MSG_076 "Impossibile correggere/impostare i file per il boot."
 t MSG_077 "Impossibile assegnare una lettera all'unità."
 t MSG_078 "Impossibile montare volume GUID."
+t MSG_079 "L'unità non è pronto."
 
 t MSG_080 "Rufus ha rilevato che Windows sta ancora svuotando i buffer interni relativi all'unità USB.\n\n"
 	"A seconda della velocità dell'unità USB, questa operazione potrebbe richiedere un certo tempo per essere completata, "
@@ -5376,7 +5377,7 @@ t MSG_161 "Abilita questa opzione per effettuare un controllo dei blocchi danneg
 t MSG_162 "Deseleziona questa opzione per usare il metodo di formattazione completo ma 'lento'"
 t MSG_163 "Abilita questa opzione per rendere l'unità USB avviabile"
 t MSG_164 "Definisce il metodo che verrà usato per rendere l'unità USB avviabile"
-t MSG_165 "Seleziona l'immagine ISO..."
+t MSG_165 "Seleziona l'immagine..."
 t MSG_166 "Abilita questa opzione per permettere la visualizzazione delle etichette internazionali "
 	"e impostare una icona dispositivo (creerà un file autorun.inf)"
 t MSG_167 "Installa un MBR che permette la selezione all'avvio e maschera l'ID unità USB del BIOS"
@@ -5406,6 +5407,7 @@ t MSG_186 "Rufus non installa o esegue servizi in background. Il controllo aggio
 	"L'accesso internet è ovviamente richeisto quando si effettua il controllo aggiornamenti."
 t MSG_187 "Immagine non valida per opzione boot selezionata"
 t MSG_188 "L'immagine selezionata non corrisponde all'opzione boot scelta. Usa un'immagine differente o scegli un'opzione boot differente."
+t MSG_189 "Questa immagine non è compatibile con il filesystem selezionato"
 
 t MSG_201 "Annullamneto..."
 t MSG_202 "Analisi immagine..."
@@ -5473,6 +5475,8 @@ t MSG_258 "Supporto Rock Ridge"
 t MSG_259 "Forza update"
 t MSG_260 "Compressione NTFS"
 t MSG_261 "Scrittura immagine: %0.1f%% completata"
+t MSG_262 "Supporto ISO"
+t MSG_263 "Usa unita dimensione CORRETTA"
 
 ######################################################################
 l "ja-JP" "Japanese (日本語)" 0x0411
