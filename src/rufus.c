@@ -113,7 +113,7 @@ OPENED_LIBRARIES_VARS;
 HINSTANCE hMainInstance;
 HWND hMainDialog;
 char szFolderPath[MAX_PATH], app_dir[MAX_PATH];
-char* iso_path = NULL;
+char* image_path = NULL;
 float fScale = 1.0f;
 int default_fs;
 uint32_t dur_mins, dur_secs;
@@ -438,7 +438,7 @@ static void SetFSFromISO(void)
 	uint32_t fs_mask = 0;
 	int bt = GETBIOSTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
 
-	if (iso_path == NULL)
+	if (image_path == NULL)
 		return;
 
 	// Create a mask of all the FS's available
@@ -477,7 +477,7 @@ static void SetMBRProps(void)
 	int dt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
 	BOOL needs_masquerading = (IS_WINPE(iso_report.winpe) && (!iso_report.uses_minint));
 
-	if ((!mbr_selected_by_user) && ((iso_path == NULL) || (dt != DT_ISO) || (fs != FS_NTFS))) {
+	if ((!mbr_selected_by_user) && ((image_path == NULL) || (dt != DT_ISO) || (fs != FS_NTFS))) {
 		CheckDlgButton(hMainDialog, IDC_RUFUS_MBR, BST_UNCHECKED);
 		IGNORE_RETVAL(ComboBox_SetCurSel(hDiskID, 0));
 		return;
@@ -593,7 +593,7 @@ static BOOL PopulateProperties(int ComboIndex)
 	}
 
 	// If no existing label is available and no ISO is selected, propose one according to the size (eg: "256MB", "8GB")
-	if ((iso_path == NULL) || (iso_report.label[0] == 0)) {
+	if ((image_path == NULL) || (iso_report.label[0] == 0)) {
 		if ( (safe_stricmp(no_label, DriveLabel.String[ComboIndex]) == 0)
 		  || (safe_stricmp(lmprintf(MSG_207), DriveLabel.String[ComboIndex]) == 0) ) {
 			SetWindowTextU(hLabel, SelectedDrive.proposed_label);
@@ -766,6 +766,9 @@ BOOL CALLBACK LogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 	long lfHeight;
 	DWORD log_size;
 	char *log_buffer = NULL, *filepath;
+	const char* log_x[] = { "*.log" };
+	const char* log_d[] = { lmprintf(MSG_108) };
+	ext_t log_ext = {ARRAYSIZE(log_x), "rufus.log", log_x, log_d };
 
 	switch (message) {
 	case WM_INITDIALOG:
@@ -799,7 +802,7 @@ BOOL CALLBACK LogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 				log_size = GetDlgItemTextU(hDlg, IDC_LOG_EDIT, log_buffer, log_size);
 				if (log_size != 0) {
 					log_size--;	// remove NUL terminator
-					filepath =  FileDialog(TRUE, app_dir, "rufus.log", "log", lmprintf(MSG_108), 0);
+					filepath =  FileDialog(TRUE, app_dir, &log_ext, 0);
 					if (filepath != NULL) {
 						FileIO(TRUE, filepath, &log_buffer, &log_size);
 					}
@@ -905,34 +908,6 @@ BOOL CALLBACK ISOProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 	return FALSE;
 }
 
-BOOL IsImage(const char* src_img)
-{
-	HANDLE handle = INVALID_HANDLE_VALUE;
-	LARGE_INTEGER liImageSize;
-
-	handle = CreateFileU(src_img, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
-	if (handle == INVALID_HANDLE_VALUE) {
-		uprintf("Could not open image '%s'", src_img);
-		goto out;
-	}
-	iso_report.is_bootable_img = AnalyzeMBR(handle, "Image");
-
-	if (!GetFileSizeEx(handle, &liImageSize)) {
-		uprintf("Could not get image size: %s", WindowsErrorString());
-		goto out;
-	}
-	iso_report.projected_size = (uint64_t)liImageSize.QuadPart;
-
-	if (iso_report.is_bootable_img) {
-		uprintf("Using bootable disk image: '%s'", src_img);
-		selection_default = DT_IMG;
-	}
-
-out:
-	safe_closehandle(handle);
-	return iso_report.is_bootable_img;
-}
-
 // The scanning process can be blocking for message processing => use a thread
 DWORD WINAPI ISOScanThread(LPVOID param)
 {
@@ -940,21 +915,24 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 	BOOL r;
 	char isolinux_str[16] = "No";
 
-	if (iso_path == NULL)
+	if (image_path == NULL)
 		goto out;
 	PrintStatus(0, TRUE, MSG_202);
 	user_notified = FALSE;
 	EnableControls(FALSE);
-	r = ExtractISO(iso_path, "", TRUE) || IsImage(iso_path);
+	r = ExtractISO(image_path, "", TRUE) || IsHDImage(image_path);
 	EnableControls(TRUE);
 	if (!r) {
 		SendMessage(hISOProgressDlg, UM_PROGRESS_EXIT, 0, 0);
 		PrintStatus(0, TRUE, MSG_203);
-		safe_free(iso_path);
+		safe_free(image_path);
 		goto out;
 	}
 
-	if (!iso_report.is_bootable_img) {
+	if (iso_report.is_bootable_img) {
+		uprintf("Using bootable %s image: '%s'", iso_report.is_vhd?"VHD":"disk", image_path);
+		selection_default = DT_IMG;
+	} else {
 		if (HAS_SYSLINUX(iso_report)) {
 			safe_sprintf(isolinux_str, sizeof(isolinux_str), "Yes (%s)", iso_report.sl_version_str);
 		}
@@ -974,7 +952,7 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 	if ( (!iso_report.has_bootmgr) && (!HAS_SYSLINUX(iso_report)) && (!IS_WINPE(iso_report.winpe)) 
 		&& (!iso_report.has_efi) && (!IS_REACTOS(iso_report) && (!iso_report.has_kolibrios) && (!iso_report.is_bootable_img)) ) {
 		MessageBoxU(hMainDialog, lmprintf(MSG_082), lmprintf(MSG_081), MB_OK|MB_ICONINFORMATION|MB_IS_RTL);
-		safe_free(iso_path);
+		safe_free(image_path);
 		SetMBRProps();
 	} else {
 		// Enable bootable and set Target System and FS accordingly
@@ -992,8 +970,8 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 			SendMessage(hMainDialog, WM_COMMAND, (CBN_SELCHANGE<<16) | IDC_FILESYSTEM,
 				ComboBox_GetCurSel(hFileSystem));
 		}
-		for (i=(int)safe_strlen(iso_path); (i>0)&&(iso_path[i]!='\\'); i--);
-		PrintStatus(0, TRUE, MSG_205, &iso_path[i+1]);
+		for (i=(int)safe_strlen(image_path); (i>0)&&(image_path[i]!='\\'); i--);
+		PrintStatus(0, TRUE, MSG_205, &image_path[i+1]);
 		// Lose the focus on the select ISO (but place it on Close)
 		SendMessage(hMainDialog, WM_NEXTDLGCTL,  (WPARAM)FALSE, 0);
 		// Lose the focus from Close and set it back to Start
@@ -1100,7 +1078,7 @@ static BOOL BootCheck(void)
 	syslinux_ldlinux_len[0] = 0; syslinux_ldlinux_len[1] = 0;
 	dt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
 	if ((dt == DT_ISO) || (dt == DT_IMG)) {
-		if (iso_path == NULL) {
+		if (image_path == NULL) {
 			// Please click on the disc button to select a bootable ISO
 			MessageBoxU(hMainDialog, lmprintf(MSG_087), lmprintf(MSG_086), MB_OK|MB_ICONERROR|MB_IS_RTL);
 			return FALSE;
@@ -1530,6 +1508,13 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	static LPITEMIDLIST pidlDesktop = NULL;
 	static MY_SHChangeNotifyEntry NotifyEntry;
 	loc_cmd* lcmd = NULL;
+	// TODO: Add "*.img;*.vhd" / "All Supported Images" to the list below and use a generic "%s Image" in the .loc
+	const char* img_x[] = { "*.img", "*.vhd" };
+	const char* img_d[] = { lmprintf(MSG_095), "VHD Image" };
+	ext_t img_ext = {ARRAYSIZE(img_x), NULL, img_x, img_d};
+	const char* iso_x[] = { "*.iso" };
+	const char* iso_d[] = { lmprintf(MSG_036) };
+	ext_t iso_ext = {ARRAYSIZE(iso_x), NULL, iso_x, iso_d };
 
 	switch (message) {
 
@@ -1809,7 +1794,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			EnableAdvancedBootOptions(TRUE, TRUE);
 			ToggleImage(!IsChecked(IDC_BOOT) || (selection_default != DT_IMG));
 			if ((selection_default == DT_ISO) || (selection_default == DT_IMG)) {
-				if ((iso_path == NULL) || (iso_report.label[0] == 0)) {
+				if ((image_path == NULL) || (iso_report.label[0] == 0)) {
 					// Set focus to the Select ISO button
 					SendMessage(hMainDialog, WM_NEXTDLGCTL, (WPARAM)FALSE, 0);
 					SendMessage(hMainDialog, WM_NEXTDLGCTL, (WPARAM)hSelectISO, TRUE);
@@ -1830,21 +1815,21 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			return (INT_PTR)TRUE;
 		case IDC_SELECT_ISO:
 			if (iso_provided) {
-				uprintf("Image provided: '%s'\n", iso_path);
+				uprintf("Image provided: '%s'\n", image_path);
 				iso_provided = FALSE;	// One off thing...
 			} else {
-				safe_free(iso_path);
+				safe_free(image_path);
 				if (selection_default == DT_IMG)
-					iso_path = FileDialog(FALSE, NULL, "*.img", "img", "DD Image", 0);
+					image_path = FileDialog(FALSE, NULL, &img_ext, 0);
 				else
-					iso_path = FileDialog(FALSE, NULL, "*.iso", "iso", lmprintf(MSG_036), 0);
-				if (iso_path == NULL) {
+					image_path = FileDialog(FALSE, NULL, &iso_ext, 0);
+				if (image_path == NULL) {
 					CreateTooltip(hSelectISO, lmprintf(MSG_173), -1);
 					break;
 				}
 			}
 			selection_default = DT_ISO;
-			CreateTooltip(hSelectISO, iso_path, -1);
+			CreateTooltip(hSelectISO, image_path, -1);
 			FormatStatus = 0;
 			if (CreateThread(NULL, 0, ISOScanThread, NULL, 0, NULL) == NULL) {
 				uprintf("Unable to start ISO scanning thread");
@@ -2095,7 +2080,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 				break;
 			case 'i':
 				if (_access(optarg, 0) != -1) {
-					iso_path = safe_strdup(optarg);
+					image_path = safe_strdup(optarg);
 					iso_provided = TRUE;
 				} else {
 					printf("Could not find ISO image '%s'\n", optarg);
@@ -2282,7 +2267,7 @@ relaunch:
 			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'I')) {
 				enable_iso = !enable_iso;
 				PrintStatus2000(lmprintf(MSG_262), enable_iso);
-				if (iso_path != NULL) {
+				if (image_path != NULL) {
 					iso_provided = TRUE;
 					PostMessage(hDlg, WM_COMMAND, IDC_SELECT_ISO, 0);
 				}
@@ -2354,7 +2339,7 @@ out:
 		DeleteFileU(loc_file);
 	DestroyAllTooltips();
 	exit_localization();
-	safe_free(iso_path);
+	safe_free(image_path);
 	safe_free(locale_name);
 	safe_free(update.download_url);
 	safe_free(update.release_notes);

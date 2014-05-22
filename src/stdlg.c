@@ -237,13 +237,13 @@ fallback:
  * CoInitializeEx() for *EACH* thread you invoke FileDialog from, as
  * GetDisplayName() will return error 0x8001010E otherwise.
  */
-char* FileDialog(BOOL save, char* path, char* filename, char* ext, char* ext_desc, DWORD options)
+char* FileDialog(BOOL save, char* path, const ext_t* ext, DWORD options)
 {
 	DWORD tmp;
 	OPENFILENAMEA ofn;
 	char selected_name[MAX_PATH];
 	char *ext_string = NULL, *all_files = NULL;
-	size_t i, ext_strlen;
+	size_t i, j, ext_strlen;
 	BOOL r;
 	char* filepath = NULL;
 
@@ -251,25 +251,26 @@ char* FileDialog(BOOL save, char* path, char* filename, char* ext, char* ext_des
 	HRESULT hr = FALSE;
 	IFileDialog *pfd = NULL;
 	IShellItem *psiResult;
-	COMDLG_FILTERSPEC filter_spec[2];
-	char* ext_filter;
+	COMDLG_FILTERSPEC* filter_spec;
 	wchar_t *wpath = NULL, *wfilename = NULL;
 	IShellItem *si_path = NULL;	// Automatically freed
+#endif
 
+	if ((ext == NULL) || (ext->count == 0) || (ext->extension == NULL) || (ext->description == NULL))
+		return NULL;
 	dialog_showing++;
-	memset(filter_spec, 0, sizeof(filter_spec));
+
+#if (_WIN32_WINNT >= 0x0600)	// Vista and later
 	INIT_VISTA_SHELL32;
-	if (IS_VISTA_SHELL32_AVAILABLE) {
+	filter_spec = (COMDLG_FILTERSPEC*)calloc(ext->count + 1, sizeof(COMDLG_FILTERSPEC));
+	if ((IS_VISTA_SHELL32_AVAILABLE) && (filter_spec != NULL)) {
 		// Setup the file extension filter table
-		ext_filter = (char*)malloc(safe_strlen(ext)+3);
-		if (ext_filter != NULL) {
-			safe_sprintf(ext_filter, safe_strlen(ext)+3, "*.%s", ext);
-			filter_spec[0].pszSpec = utf8_to_wchar(ext_filter);
-			safe_free(ext_filter);
-			filter_spec[0].pszName = utf8_to_wchar(ext_desc);
-			filter_spec[1].pszSpec = L"*.*";
-			filter_spec[1].pszName = utf8_to_wchar(lmprintf(MSG_107));
+		for (i=0; i<ext->count; i++) {
+			filter_spec[i].pszSpec = utf8_to_wchar(ext->extension[i]);
+			filter_spec[i].pszName = utf8_to_wchar(ext->description[i]);
 		}
+		filter_spec[i].pszSpec = L"*.*";
+		filter_spec[i].pszName = utf8_to_wchar(lmprintf(MSG_107));
 
 		hr = CoCreateInstance(save?&CLSID_FileSaveDialog:&CLSID_FileOpenDialog, NULL, CLSCTX_INPROC,
 			&IID_IFileDialog, (LPVOID)&pfd);
@@ -282,7 +283,7 @@ char* FileDialog(BOOL save, char* path, char* filename, char* ext, char* ext_des
 		}
 
 		// Set the file extension filters
-		pfd->lpVtbl->SetFileTypes(pfd, 2, filter_spec);
+		pfd->lpVtbl->SetFileTypes(pfd, ext->count+1, filter_spec);
 
 		// Set the default directory
 		wpath = utf8_to_wchar(path);
@@ -293,7 +294,7 @@ char* FileDialog(BOOL save, char* path, char* filename, char* ext, char* ext_des
 		safe_free(wpath);
 
 		// Set the default filename
-		wfilename = utf8_to_wchar(filename);
+		wfilename = utf8_to_wchar((ext->filename == NULL)?ext->extension[0]:ext->filename);
 		if (wfilename != NULL) {
 			pfd->lpVtbl->SetFileName(pfd, wfilename);
 		}
@@ -303,9 +304,12 @@ char* FileDialog(BOOL save, char* path, char* filename, char* ext, char* ext_des
 
 		// Cleanup
 		safe_free(wfilename);
-		safe_free(filter_spec[0].pszSpec);
-		safe_free(filter_spec[0].pszName);
-		safe_free(filter_spec[1].pszName);
+		for (i=0; i<ext->count; i++) {
+			safe_free(filter_spec[i].pszSpec);
+			safe_free(filter_spec[i].pszName);
+		}
+		safe_free(filter_spec[i].pszName);
+		safe_free(filter_spec);
 
 		if (SUCCEEDED(hr)) {
 			// Obtain the result of the user's interaction with the dialog.
@@ -336,24 +340,30 @@ fallback:
 	if (pfd != NULL) {
 		pfd->lpVtbl->Release(pfd);
 	}
-#else
-	dialog_showing++;
 #endif
 
 	memset(&ofn, 0, sizeof(ofn));
 	ofn.lStructSize = sizeof(ofn);
 	ofn.hwndOwner = hMainDialog;
-	// File name
-	safe_strcpy(selected_name, MAX_PATH, filename);
+	// Selected File name
+	static_sprintf(selected_name, "%s", (ext->filename == NULL)?ext->extension[0]:ext->filename);
 	ofn.lpstrFile = selected_name;
 	ofn.nMaxFile = MAX_PATH;
 	// Set the file extension filters
 	all_files = lmprintf(MSG_107);
-	ext_strlen = safe_strlen(ext_desc) + 2*safe_strlen(ext) + sizeof(" (*.)\0*.\0 (*.*)\0*.*\0\0") + safe_strlen(all_files);
-	ext_string = (char*)malloc(ext_strlen);
+	ext_strlen = 0;
+	for (i=0; i<ext->count; i++) {
+		ext_strlen += safe_strlen(ext->description[i]) + 2*safe_strlen(ext->extension[i]) + sizeof(" ()\r\r");
+	}
+	ext_strlen += safe_strlen(all_files) + sizeof(" (*.*)\r*.*\r");
+	ext_string = (char*)malloc(ext_strlen+1);
+	ext_string[0] = 0;
 	if (ext_string == NULL)
 		return NULL;
-	safe_sprintf(ext_string, ext_strlen, "%s (*.%s)\r*.%s\r%s (*.*)\r*.*\r\0", ext_desc, ext, ext, all_files);
+	for (i=0, j=0; i<ext->count; i++) {
+		j += _snprintf(&ext_string[j], ext_strlen-j, "%s (%s)\r%s\r", ext->description[i], ext->extension[i], ext->extension[i]);
+	}
+	j = _snprintf(&ext_string[j], ext_strlen-j, "%s (*.*)\r*.*\r", all_files);
 	// Microsoft could really have picked a better delimiter!
 	for (i=0; i<ext_strlen; i++) {
 		if (ext_string[i] == '\r') {
@@ -361,7 +371,7 @@ fallback:
 		}
 	}
 	ofn.lpstrFilter = ext_string;
-	// Initial dir
+	ofn.nFilterIndex = 1;
 	ofn.lpstrInitialDir = path;
 	ofn.Flags = OFN_OVERWRITEPROMPT | options;
 	// Show Dialog
@@ -1177,6 +1187,9 @@ INT_PTR CALLBACK NewVersionCallback(HWND hDlg, UINT message, WPARAM wParam, LPAR
 	STARTUPINFOA si;
 	PROCESS_INFORMATION pi;
 	HFONT hyperlink_font = NULL;
+	const char* dl_x[] = { "*.exe" };
+	const char* dl_d[] = { lmprintf(MSG_037) };
+	ext_t dl_ext = { ARRAYSIZE(dl_x), "rufus.log", dl_x, dl_d };
 
 	switch (message) {
 	case WM_INITDIALOG:
@@ -1245,7 +1258,8 @@ INT_PTR CALLBACK NewVersionCallback(HWND hDlg, UINT message, WPARAM wParam, LPAR
 					break;
 				}
 				for (i=(int)strlen(update.download_url); (i>0)&&(update.download_url[i]!='/'); i--);
-				filepath = FileDialog(TRUE, app_dir, (char*)&update.download_url[i+1], "exe", lmprintf(MSG_037), OFN_NOCHANGEDIR);
+				dl_ext.filename = &update.download_url[i+1];
+				filepath = FileDialog(TRUE, app_dir, &dl_ext, OFN_NOCHANGEDIR);
 				if (filepath == NULL) {
 					uprintf("Could not get save path\n");
 					break;

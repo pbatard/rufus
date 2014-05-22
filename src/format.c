@@ -1360,12 +1360,13 @@ DWORD WINAPI FormatThread(void* param)
 
 	// Write an image file
 	if (dt == DT_IMG) {
-		// We poked the MBR, so we need to rewind
+		// We poked the MBR and other stuff, so we need to rewind
 		li.QuadPart = 0;
-		SetFilePointerEx(hPhysicalDrive, li, NULL, FILE_BEGIN);
-		hSourceImage = CreateFileU(iso_path, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, NULL);
+		if (!SetFilePointerEx(hPhysicalDrive, li, NULL, FILE_BEGIN))
+			uprintf("Warning: Unable to rewind image position - wrong data might be copied!");
+		hSourceImage = CreateFileU(image_path, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, NULL);
 		if (hSourceImage == INVALID_HANDLE_VALUE) {
-			uprintf("Could not open image '%s': %s", iso_path, WindowsErrorString());
+			uprintf("Could not open image '%s': %s", image_path, WindowsErrorString());
 			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_OPEN_FAILED;
 			goto out;
 		}
@@ -1397,6 +1398,10 @@ DWORD WINAPI FormatThread(void* param)
 				UpdateProgress(OP_FORMAT, format_percent);
 			}
 			CHECK_FOR_USER_CANCEL;
+			// Don't overflow our projected size (mostly for VHDs)
+			if (wb + rSize > iso_report.projected_size) {
+				rSize = (DWORD)(iso_report.projected_size - wb);
+			}
 			for (i=0; i<WRITE_RETRIES; i++) {
 				s = WriteFile(hPhysicalDrive, buffer, rSize, &wSize, NULL);
 				if ((s) && (wSize == rSize))
@@ -1549,11 +1554,11 @@ DWORD WINAPI FormatThread(void* param)
 				goto out;
 			}
 		} else if (dt == DT_ISO) {
-			if (iso_path != NULL) {
+			if (image_path != NULL) {
 				UpdateProgress(OP_DOS, 0.0f);
 				PrintStatus(0, TRUE, MSG_231);
 				drive_name[2] = 0;
-				if (!ExtractISO(iso_path, drive_name, FALSE)) {
+				if (!ExtractISO(image_path, drive_name, FALSE)) {
 					if (!IS_ERROR(FormatStatus))
 						FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANNOT_COPY;
 					goto out;
@@ -1561,7 +1566,7 @@ DWORD WINAPI FormatThread(void* param)
 				if (iso_report.has_kolibrios) {
 					kolibri_dst[0] = drive_name[0];
 					uprintf("Installing: %s (KolibriOS loader)\n", kolibri_dst);
-					if (ExtractISOFile(iso_path, "HD_Load/USB_Boot/MTLD_F32", kolibri_dst,
+					if (ExtractISOFile(image_path, "HD_Load/USB_Boot/MTLD_F32", kolibri_dst,
 						FILE_ATTRIBUTE_HIDDEN|FILE_ATTRIBUTE_SYSTEM) == 0) {
 						uprintf("Warning: loader installation failed - KolibriOS will not boot!\n");
 					}

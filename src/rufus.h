@@ -247,6 +247,7 @@ typedef struct {
 	BOOL has_kolibrios;
 	BOOL uses_minint;
 	BOOL is_bootable_img;
+	BOOL is_vhd;
 	uint16_t sl_version;	// Syslinux/Isolinux version
 	char sl_version_str[12];
 } RUFUS_ISO_REPORT;
@@ -285,6 +286,15 @@ enum WindowsVersion {
 	WINDOWS_MAX
 };
 
+/* Extensions structure used by FileDialog() */
+typedef struct ext_t {
+	const size_t count;
+	const char* filename;
+	const char** extension;
+	const char** description;
+} ext_t;
+
+
 /*
  * Globals
  */
@@ -294,7 +304,7 @@ extern HWND hPartitionScheme, hFileSystem, hClusterSize, hLabel, hBootType, hNBP
 extern HWND hISOProgressDlg, hISOProgressBar, hISOFileName, hDiskID;
 extern float fScale;
 extern char szFolderPath[MAX_PATH], app_dir[MAX_PATH];
-extern char* iso_path;
+extern char* image_path;
 extern DWORD FormatStatus;
 extern DWORD syslinux_ldlinux_len[2];
 extern RUFUS_DRIVE_INFO SelectedDrive;
@@ -342,7 +352,7 @@ extern BOOL InstallSyslinux(DWORD drive_index, char drive_letter);
 DWORD WINAPI FormatThread(void* param);
 extern BOOL CreateProgress(void);
 extern BOOL SetAutorun(const char* path);
-extern char* FileDialog(BOOL save, char* path, char* filename, char* ext, char* ext_desc, DWORD options);
+extern char* FileDialog(BOOL save, char* path, const ext_t* ext, DWORD options);
 extern BOOL FileIO(BOOL save, char* path, char** buffer, DWORD* size);
 extern unsigned char* GetResource(HMODULE module, char* name, char* type, const char* desc, DWORD* len, BOOL duplicate);
 extern BOOL GetUSBDevices(DWORD devnum);
@@ -362,6 +372,7 @@ extern char* replace_in_token_data(const char* filename, const char* token, cons
 extern void parse_update(char* buf, size_t len);
 extern BOOL WimExtractCheck(void);
 extern BOOL WimExtractFile(const char* wim_image, int index, const char* src, const char* dst);
+extern BOOL IsHDImage(const char* path);
 extern int IsHDD(DWORD DriveIndex, uint16_t vid, uint16_t pid, const char* strid);
 
 static __inline BOOL UnlockDrive(HANDLE hDrive)

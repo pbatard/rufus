@@ -18,17 +18,56 @@
  */
 
 #include <windows.h>
+#include <stdlib.h>
 #include <io.h>
 
 #include "rufus.h"
 #include "msapi_utf8.h"
+#include "drive.h"
 #include "registry.h"
 
-static BOOL has_wimgapi = FALSE, has_7z = FALSE;
-static char sevenzip_path[MAX_PATH];
+#if defined(_MSC_VER)
+#define bswap_uint64 _byteswap_uint64
+#define bswap_uint32 _byteswap_ulong
+#define bswap_uint16 _byteswap_ushort
+#else
+#define bswap_uint64 __builtin_bswap64
+#define bswap_uint32 __builtin_bswap32
+#define bswap_uint16 __builtin_bswap16
+#endif
 
-// TODO: Add a call to generate a Fixed Hard Disk VHD footer, This would allow the saving of an existing USB to VHD. See VHD specs at:
-// http://download.microsoft.com/download/f/f/e/ffef50a5-07dd-4cf8-aaa3-442c0673a029/Virtual%20Hard%20Disk%20Format%20Spec_10_18_06.doc
+#define VHD_FOOTER_COOKIE					{ 'c', 'o', 'n', 'e', 'c', 't', 'i', 'x' }
+
+#define VHD_FOOTER_FILE_FORMAT_V1_0			0x00010000
+
+#define VHD_FOOTER_TYPE_FIXED_HARD_DISK		0x00000002
+#define VHD_FOOTER_TYPE_DYNAMIC_HARD_DISK	0x00000003
+#define VHD_FOOTER_TYPE_DIFFER_HARD_DISK	0x00000004
+
+/*
+ * VHD Fixed HD footer (Big Endian)
+ * http://download.microsoft.com/download/f/f/e/ffef50a5-07dd-4cf8-aaa3-442c0673a029/Virtual%20Hard%20Disk%20Format%20Spec_10_18_06.doc
+ */
+#pragma pack(push, 1)
+typedef struct vhd_footer {
+	char		cookie[8];
+	uint32_t	features;
+	uint32_t	file_format_version;
+	uint64_t	data_offset;
+	uint32_t	timestamp;
+	uint32_t	creator_app;
+	uint32_t	creator_version;
+	uint32_t	creator_host_os;
+	uint64_t	original_size;
+	uint64_t	current_size;
+	uint32_t	disk_geometry;
+	uint32_t	disk_type;
+	uint32_t	checksum;
+	uuid_t		unique_id;
+	uint8_t		saved_state;
+	uint8_t		reserved[427];
+} vhd_footer;
+#pragma pack(pop)
 
 // WIM API Prototypes
 #define WIM_GENERIC_READ	GENERIC_READ
@@ -39,6 +78,9 @@ PF_TYPE_DECL(WINAPI, HANDLE, WIMLoadImage, (HANDLE, DWORD));
 PF_TYPE_DECL(WINAPI, BOOL, WIMExtractImagePath, (HANDLE, PWSTR, PWSTR, DWORD));
 PF_TYPE_DECL(WINAPI, BOOL, WIMCloseHandle, (HANDLE));
 
+static BOOL has_wimgapi = FALSE, has_7z = FALSE;
+static char sevenzip_path[MAX_PATH];
+
 static BOOL Get7ZipPath(void)
 {
 	if ( (GetRegistryKeyStr(REGKEY_HKCU, "7-Zip\\Path", sevenzip_path, sizeof(sevenzip_path)))
@@ -47,6 +89,57 @@ static BOOL Get7ZipPath(void)
 		return (_access(sevenzip_path, 0) != -1);
 	}
 	return FALSE;
+}
+
+BOOL IsHDImage(const char* path)
+{
+	const char conectix_str[] = VHD_FOOTER_COOKIE;
+	HANDLE handle = INVALID_HANDLE_VALUE;
+	LARGE_INTEGER liImageSize;
+	vhd_footer* footer = NULL;
+	DWORD size;
+	LARGE_INTEGER ptr;
+
+	handle = CreateFileU(path, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
+	if (handle == INVALID_HANDLE_VALUE) {
+		uprintf("Could not open image '%s'", path);
+		goto out;
+	}
+	iso_report.is_bootable_img = AnalyzeMBR(handle, "Image");
+
+	if (!GetFileSizeEx(handle, &liImageSize)) {
+		uprintf("Could not get image size: %s", WindowsErrorString());
+		goto out;
+	}
+	iso_report.projected_size = (uint64_t)liImageSize.QuadPart;
+
+	size = sizeof(vhd_footer);
+	if (iso_report.projected_size >= (512 + size)) {
+		footer = (vhd_footer*)malloc(size);
+		ptr.QuadPart = iso_report.projected_size - size;
+		if ( (footer == NULL) || (!SetFilePointerEx(handle, ptr, NULL, FILE_BEGIN)) ||
+			 (!ReadFile(handle, footer, size, &size, NULL)) || (size != sizeof(vhd_footer)) ) {
+			uprintf("Could not read VHD footer");
+			goto out;
+		}
+		if (memcmp(footer->cookie, conectix_str, sizeof(footer->cookie)) == 0) {
+			iso_report.projected_size -= sizeof(vhd_footer);
+			if ( (bswap_uint32(footer->file_format_version) != VHD_FOOTER_FILE_FORMAT_V1_0)
+			  || (bswap_uint32(footer->disk_type) != VHD_FOOTER_TYPE_FIXED_HARD_DISK)) {
+				uprintf("Unsupported type of VHD image");
+				iso_report.is_bootable_img = FALSE;
+				goto out;
+			}
+			// Need to remove the footer from our payload
+			uprintf("Image is a Fixed Hard Disk VHD file");
+			iso_report.is_vhd = TRUE;
+		}
+	}
+
+out:
+	safe_free(footer);
+	safe_closehandle(handle);
+	return iso_report.is_bootable_img;
 }
 
 // Find out if we have any way to extract WIM files on this platform

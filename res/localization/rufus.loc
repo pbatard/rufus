@@ -264,7 +264,7 @@ t MSG_096 "Only FAT/FAT32 is supported for this type of ISO. Please select FAT/F
 t MSG_097 "Only 'bootmgr' or 'WinPE' based ISO images can currently be used with NTFS."
 t MSG_098 "FAT/FAT32 can only be used for isolinux based ISO images or when the Target Type is UEFI."
 t MSG_099 "Filesystem limitation"
-t MSG_100 "This ISO image contains a file larger than 4GB file, which is more than the "
+t MSG_100 "This ISO image contains a file larger than 4GB, which is more than the "
 	"maximum size allowed for a FAT or FAT32 file system."
 t MSG_101 "Missing WIM support"
 t MSG_102 "Your platform cannot extract files from WIM archives. WIM extraction "
