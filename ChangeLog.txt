@@ -1,3 +1,14 @@
+o Version 1.4.8 (2014.06.??)
+    Add KolibriOS ISO support
+    Add VHD support (as *uncompressed* image source)
+    Add Arabic translation, courtesy of عمر الصمد
+    Add Croatian translation, courtesy of Dario Komar
+    Add Danish translation, courtesy of Jens Hansen
+    Add Latvian translation, courtesy of Aldis Tutins
+    Report the detected USB speed in the log
+    Fix support for pure UEFI bootable disk images
+    Various other fixes and improvements
+
 o Version 1.4.7 (2014.04.22)
     Add VHD support as a target, courtesy of Scott
     Add ReFS support (only for Windows 8.1 or later and only for fixed drives)

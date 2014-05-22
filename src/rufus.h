@@ -263,6 +263,29 @@ typedef struct {
 	char* release_notes;
 } RUFUS_UPDATE;
 
+/*
+ * Structure and macros used for the extensions specification of FileDialog()
+ * You can use:
+ *   EXT_DECL(my_extensions, "default.std", __VA_GROUP__("*.std", "*.other"), __VA_GROUP__("Standard type", "Other Type"));
+ * to define an 'ext_t my_extensions' variable initialized with the relevant attributes.
+ */
+typedef struct ext_t {
+	const size_t count;
+	const char* filename;
+	const char** extension;
+	const char** description;
+} ext_t;
+
+#ifndef __VA_GROUP__
+#define __VA_GROUP__(...)  __VA_ARGS__ 
+#endif
+#define EXT_X(prefix, ...) const char* _##prefix##_x[] = { __VA_ARGS__ }
+#define EXT_D(prefix, ...) const char* _##prefix##_d[] = { __VA_ARGS__ }
+#define EXT_DECL(var, filename, extensions, descriptions)                   \
+	EXT_X(var, extensions);                                                 \
+	EXT_D(var, descriptions);                                               \
+	ext_t var = { ARRAYSIZE(_##var##_x), filename, _##var##_x, _##var##_d }
+
 /* Duplication of the TBPFLAG enum for Windows 7 taskbar progress */
 typedef enum TASKBAR_PROGRESS_FLAGS
 {
@@ -285,14 +308,6 @@ enum WindowsVersion {
 	WINDOWS_8_1_OR_LATER = 0x63,
 	WINDOWS_MAX
 };
-
-/* Extensions structure used by FileDialog() */
-typedef struct ext_t {
-	const size_t count;
-	const char* filename;
-	const char** extension;
-	const char** description;
-} ext_t;
 
 
 /*
@@ -375,14 +390,12 @@ extern BOOL WimExtractFile(const char* wim_image, int index, const char* src, co
 extern BOOL IsHDImage(const char* path);
 extern int IsHDD(DWORD DriveIndex, uint16_t vid, uint16_t pid, const char* strid);
 
-static __inline BOOL UnlockDrive(HANDLE hDrive)
-{
+static __inline BOOL UnlockDrive(HANDLE hDrive) {
 	DWORD size;
 	return DeviceIoControl(hDrive, FSCTL_UNLOCK_VOLUME, NULL, 0, NULL, 0, &size, NULL);
 }
 
-static __inline void *_reallocf(void *ptr, size_t size)
-{
+static __inline void *_reallocf(void *ptr, size_t size) {
 	void *ret = realloc(ptr, size);
 	if (!ret)
 		free(ptr);

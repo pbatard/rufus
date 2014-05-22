@@ -1187,9 +1187,7 @@ INT_PTR CALLBACK NewVersionCallback(HWND hDlg, UINT message, WPARAM wParam, LPAR
 	STARTUPINFOA si;
 	PROCESS_INFORMATION pi;
 	HFONT hyperlink_font = NULL;
-	const char* dl_x[] = { "*.exe" };
-	const char* dl_d[] = { lmprintf(MSG_037) };
-	ext_t dl_ext = { ARRAYSIZE(dl_x), "rufus.log", dl_x, dl_d };
+	EXT_DECL(dl_ext, NULL, __VA_GROUP__("*.exe"), __VA_GROUP__(lmprintf(MSG_037)));
 
 	switch (message) {
 	case WM_INITDIALOG:

@@ -766,10 +766,7 @@ BOOL CALLBACK LogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 	long lfHeight;
 	DWORD log_size;
 	char *log_buffer = NULL, *filepath;
-	const char* log_x[] = { "*.log" };
-	const char* log_d[] = { lmprintf(MSG_108) };
-	ext_t log_ext = {ARRAYSIZE(log_x), "rufus.log", log_x, log_d };
-
+	EXT_DECL(log_ext, "rufus.log", __VA_GROUP__("*.log"), __VA_GROUP__("Rufus log"));
 	switch (message) {
 	case WM_INITDIALOG:
 		apply_localization(IDD_LOG, hDlg);
@@ -1509,12 +1506,8 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	static MY_SHChangeNotifyEntry NotifyEntry;
 	loc_cmd* lcmd = NULL;
 	// TODO: Add "*.img;*.vhd" / "All Supported Images" to the list below and use a generic "%s Image" in the .loc
-	const char* img_x[] = { "*.img", "*.vhd" };
-	const char* img_d[] = { lmprintf(MSG_095), "VHD Image" };
-	ext_t img_ext = {ARRAYSIZE(img_x), NULL, img_x, img_d};
-	const char* iso_x[] = { "*.iso" };
-	const char* iso_d[] = { lmprintf(MSG_036) };
-	ext_t iso_ext = {ARRAYSIZE(iso_x), NULL, iso_x, iso_d };
+	EXT_DECL(img_ext, NULL, __VA_GROUP__("*.img", "*.vhd"), __VA_GROUP__(lmprintf(MSG_095), "VHD Image"));
+	EXT_DECL(iso_ext, NULL, __VA_GROUP__("*.iso"), __VA_GROUP__(lmprintf(MSG_036)));
 
 	switch (message) {
 
