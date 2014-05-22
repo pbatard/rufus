@@ -7550,7 +7550,7 @@ t MSG_261 "Menulis imej: %0.1f%% selesai"
 
 ################################################################################
 l "pl-PL" "Polish (Polski)" 0x0415
-v 1.0.11
+v 1.0.12
 b "en-US"
 # my info: 15.02.2014,16:14
 
@@ -7757,7 +7757,7 @@ t MSG_075 ""Nie można ponownie zamontować woluminu."
 t MSG_076 ""Nie można załatać/skonfigurować plików do bootowania."
 t MSG_077 "Nie można przypisać litery dysku."
 t MSG_078 "Nie można zamontować woluminu GUID."
-
+t MSG_079 "Urządzenie nie jest gotowe."
 t MSG_080 "Rufus wykrył że Windows ciągle opróźnia swoje is bufory na urządzenie USB .\n\n"
 	"Zależnie od prędkości twojego urządzenia USB, ta operacja może zająć dużo czasu, "
 	"zwłaszcza dla dużych plików.\n\nZalecamy abyś pozwolił Windowsowui skończyć aby uniknąć uszkodzeń. "
@@ -7854,7 +7854,7 @@ t MSG_161 "Sprawdź urządzenie pod kątem błędnych sektorów używając wzoru
 t MSG_162 "Odznacz to pole aby użyć \"wolnej\" metody formatowania"
 t MSG_163 "Zaznacz to pole aby stworzyć dysk bootowalny"
 t MSG_164 "Metoda która zostanie użyta aby uczynić dysk bootowalnym"
-t MSG_165 "Kliknij aby wybrać ISO..."
+t MSG_165 "Kliknij aby wybrać obraz..."
 t MSG_166 "Zaznacz to pole aby zezwolić na wyświetlanie etykiet międzynarodowych "
 	"i ustawić ikonę urządzenia (tworzy plik autorun.inf)"
 t MSG_167 "Instaluje MBR, który pozwala wybrać uruchamianie i może zmienić ID dysku USB w BIOSie"
@@ -7885,6 +7885,7 @@ t MSG_186 "Rufus nie instaluje lub uruchamia procesów w tle, dlatego aktualizac
 	"Dostęp do internetu jest oczywiście wymagany podczas sprawdzania aktualizacji."
 t MSG_187 "Obraz nieprawidłowy dla wybranej opcji bootowania"
 t MSG_188 "Obecny obraz nie pasuje do wybranej opcji bootowania. Proszę uzyć innego obrazu lub wybrać inną opcję bootowania"
+t MSG_189 "Ten obraz ISO jest niekompatybilny z wybranym systemem plików"
 
 # Status messages - these messages will appear on the status bar
 t MSG_201 "Anulowanie - Proszę czekać..."
@@ -7965,6 +7966,8 @@ t MSG_258 "Wsparcie Rock Ridge"
 t MSG_259 "Siłowa aktualizacja"
 t MSG_260 "Kompresja NTFS"
 t MSG_261 "Zapisywanie obrazu: ukończono %0.1f%%"
+t MSG_262 "Wsparcie ISO"
+t MSG_263 "Użyj WŁAŚCIWEGO rozmiaru jednostek"
 
 ################################################################################
 l "pt-PT" "Portuguese Standard (Português)" 0x0816
