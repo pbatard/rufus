@@ -20,6 +20,8 @@
 #include <windows.h>
 #include <stdlib.h>
 #include <io.h>
+#include <rpc.h>
+#include <time.h>
 
 #include "rufus.h"
 #include "msapi_utf8.h"
@@ -38,15 +40,28 @@
 
 #define VHD_FOOTER_COOKIE					{ 'c', 'o', 'n', 'e', 'c', 't', 'i', 'x' }
 
+#define VHD_FOOTER_FEATURES_NONE			0x00000000
+#define VHD_FOOTER_FEATURES_TEMPORARY		0x00000001
+#define VHD_FOOTER_FEATURES_RESERVED		0x00000002
+
 #define VHD_FOOTER_FILE_FORMAT_V1_0			0x00010000
+
+#define VHD_FOOTER_DATA_OFFSET_FIXED_DISK	0xFFFFFFFFFFFFFFFFULL
+
+#define VHD_FOOTER_CREATOR_HOST_OS_WINDOWS	{ 'W', 'i', '2', 'k' }
+#define VHD_FOOTER_CREATOR_HOST_OS_MAC		{ 'M', 'a', 'c', ' ' }
 
 #define VHD_FOOTER_TYPE_FIXED_HARD_DISK		0x00000002
 #define VHD_FOOTER_TYPE_DYNAMIC_HARD_DISK	0x00000003
 #define VHD_FOOTER_TYPE_DIFFER_HARD_DISK	0x00000004
 
+#define SECONDS_SINCE_JAN_1ST_2000			946684800
+
 /*
  * VHD Fixed HD footer (Big Endian)
  * http://download.microsoft.com/download/f/f/e/ffef50a5-07dd-4cf8-aaa3-442c0673a029/Virtual%20Hard%20Disk%20Format%20Spec_10_18_06.doc
+ * NB: If a dymamic implementation is needed, check the GPL v3 compatible C++ implementation from:
+ * https://sourceforge.net/p/urbackup/backend/ci/master/tree/fsimageplugin/
  */
 #pragma pack(push, 1)
 typedef struct vhd_footer {
@@ -55,12 +70,19 @@ typedef struct vhd_footer {
 	uint32_t	file_format_version;
 	uint64_t	data_offset;
 	uint32_t	timestamp;
-	uint32_t	creator_app;
+	char		creator_app[4];
 	uint32_t	creator_version;
-	uint32_t	creator_host_os;
+	char		creator_host_os[4];
 	uint64_t	original_size;
 	uint64_t	current_size;
-	uint32_t	disk_geometry;
+	union {
+		uint32_t	geometry;
+		struct {
+			uint16_t	cylinders;
+			uint8_t		heads;
+			uint8_t		sectors;
+		} chs;
+	} disk_geometry;
 	uint32_t	disk_type;
 	uint32_t	checksum;
 	uuid_t		unique_id;
@@ -77,9 +99,11 @@ PF_TYPE_DECL(WINAPI, BOOL, WIMSetTemporaryPath, (HANDLE, PWSTR));
 PF_TYPE_DECL(WINAPI, HANDLE, WIMLoadImage, (HANDLE, DWORD));
 PF_TYPE_DECL(WINAPI, BOOL, WIMExtractImagePath, (HANDLE, PWSTR, PWSTR, DWORD));
 PF_TYPE_DECL(WINAPI, BOOL, WIMCloseHandle, (HANDLE));
+PF_TYPE_DECL(RPC_ENTRY, RPC_STATUS, UuidCreate, (UUID __RPC_FAR*));
 
 static BOOL has_wimgapi = FALSE, has_7z = FALSE;
 static char sevenzip_path[MAX_PATH];
+static const char conectix_str[] = VHD_FOOTER_COOKIE;
 
 static BOOL Get7ZipPath(void)
 {
@@ -91,13 +115,109 @@ static BOOL Get7ZipPath(void)
 	return FALSE;
 }
 
+BOOL AppendVHDFooter(const char* image_path)
+{
+	const char creator_os[4] = VHD_FOOTER_CREATOR_HOST_OS_WINDOWS;
+	const char creator_app[4] = { 'r', 'u', 'f', 'u' };
+	BOOL r = FALSE;
+	DWORD size;
+	LARGE_INTEGER li;
+	HANDLE handle = INVALID_HANDLE_VALUE;
+	vhd_footer* footer;
+	uint64_t totalSectors;
+	uint16_t cylinders = 0;
+	uint8_t heads, sectorsPerTrack;
+	uint32_t cylinderTimesHeads;
+	uint32_t checksum;
+	size_t i;
+
+	PF_INIT(UuidCreate, Rpcrt4);
+	handle = CreateFileU(image_path, GENERIC_WRITE, FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL);
+	li.QuadPart = 0;
+	if ((handle == INVALID_HANDLE_VALUE) || (!SetFilePointerEx(handle, li, &li, FILE_END))) {
+		uprintf("Could not open image '%s': %s", image_path, WindowsErrorString());
+		goto out;
+	}
+	footer = (vhd_footer*)calloc(1, sizeof(vhd_footer));
+	if (footer == NULL) {
+		uprintf("Could not allocate VHD footer");
+		goto out;
+	}
+
+	memcpy(footer->cookie, conectix_str, sizeof(footer->cookie));
+	footer->features = bswap_uint32(VHD_FOOTER_FEATURES_RESERVED);
+	footer->file_format_version = bswap_uint32(VHD_FOOTER_FILE_FORMAT_V1_0);
+	footer->data_offset = bswap_uint64(VHD_FOOTER_DATA_OFFSET_FIXED_DISK);
+	footer->timestamp = bswap_uint32(_time32(NULL) - SECONDS_SINCE_JAN_1ST_2000);
+	memcpy(footer->creator_app, creator_app, sizeof(creator_app));
+	footer->creator_version = bswap_uint32((rufus_version[0]<<16)|rufus_version[1]);
+	memcpy(footer->creator_host_os, creator_os, sizeof(creator_os));
+	footer->original_size = bswap_uint64(li.QuadPart);
+	footer->current_size = footer->original_size;
+	footer->disk_type = bswap_uint32(VHD_FOOTER_TYPE_FIXED_HARD_DISK);
+	if ((pfUuidCreate == NULL) || (pfUuidCreate(&footer->unique_id) != RPC_S_OK))
+		uprintf("Warning: could not set VHD UUID");
+
+	// Compute CHS, as per the VHD specs
+	totalSectors = li.QuadPart / 512;
+	if (totalSectors > 65535 * 16 * 255) {
+		totalSectors = 65535 * 16 * 255;
+	}
+
+	if (totalSectors >= 65535 * 16 * 63) {
+		sectorsPerTrack = 255;
+		heads = 16;
+		cylinderTimesHeads = (uint32_t)(totalSectors / sectorsPerTrack);
+	} else {
+		sectorsPerTrack = 17; 
+		cylinderTimesHeads = (uint32_t)(totalSectors / sectorsPerTrack);
+
+		heads = (cylinderTimesHeads + 1023) / 1024;
+
+		if (heads < 4) {
+			heads = 4;
+		}
+		if (cylinderTimesHeads >= ((uint32_t)heads * 1024) || heads > 16) {
+			sectorsPerTrack = 31;
+			heads = 16;
+			cylinderTimesHeads = (uint32_t)(totalSectors / sectorsPerTrack);
+		}
+		if (cylinderTimesHeads >= ((uint32_t)heads * 1024)) {
+			sectorsPerTrack = 63;
+			heads = 16;
+			cylinderTimesHeads = (uint32_t)(totalSectors / sectorsPerTrack);
+		}
+	}
+	cylinders = cylinderTimesHeads / heads;
+	footer->disk_geometry.chs.cylinders = bswap_uint16(cylinders);
+	footer->disk_geometry.chs.heads = heads;
+	footer->disk_geometry.chs.sectors = sectorsPerTrack;
+
+	// Compute the VHD footer checksum
+	for (checksum=0, i=0; i<sizeof(vhd_footer); i++)
+		checksum += ((uint8_t*)footer)[i];
+	footer->checksum = bswap_uint32(~checksum);
+
+	if (!WriteFile(handle, footer, sizeof(vhd_footer), &size, NULL) || (size != sizeof(vhd_footer))) {
+		uprintf("Could not write VHD footer: %s", WindowsErrorString());
+		goto out;
+	}
+	r = TRUE;
+	
+out:
+	safe_free(footer);
+	safe_closehandle(handle);
+	return r;
+}
+
 BOOL IsHDImage(const char* path)
 {
-	const char conectix_str[] = VHD_FOOTER_COOKIE;
 	HANDLE handle = INVALID_HANDLE_VALUE;
 	LARGE_INTEGER liImageSize;
 	vhd_footer* footer = NULL;
 	DWORD size;
+	size_t i;
+	uint32_t checksum, old_checksum;
 	LARGE_INTEGER ptr;
 
 	handle = CreateFileU(path, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
@@ -130,6 +250,14 @@ BOOL IsHDImage(const char* path)
 				iso_report.is_bootable_img = FALSE;
 				goto out;
 			}
+			// Might as well validate the checksum while we're at it
+			old_checksum = bswap_uint32(footer->checksum);
+			footer->checksum = 0;
+			for (checksum=0, i=0; i<sizeof(vhd_footer); i++)
+				checksum += ((uint8_t*)footer)[i];
+			checksum = ~checksum;
+			if (checksum != old_checksum)
+				uprintf("Warning: VHD footer seems corrupted (checksum: %04X, expected: %04X)", old_checksum, checksum);
 			// Need to remove the footer from our payload
 			uprintf("Image is a Fixed Hard Disk VHD file");
 			iso_report.is_vhd = TRUE;

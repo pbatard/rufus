@@ -364,7 +364,6 @@ extern BOOL ExtractDOS(const char* path);
 extern BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan);
 extern int64_t ExtractISOFile(const char* iso, const char* iso_file, const char* dest_file, DWORD attributes);
 extern BOOL InstallSyslinux(DWORD drive_index, char drive_letter);
-DWORD WINAPI FormatThread(void* param);
 extern BOOL CreateProgress(void);
 extern BOOL SetAutorun(const char* path);
 extern char* FileDialog(BOOL save, char* path, const ext_t* ext, DWORD options);
@@ -388,7 +387,11 @@ extern void parse_update(char* buf, size_t len);
 extern BOOL WimExtractCheck(void);
 extern BOOL WimExtractFile(const char* wim_image, int index, const char* src, const char* dst);
 extern BOOL IsHDImage(const char* path);
+extern BOOL AppendVHDFooter(const char* image_path);
 extern int IsHDD(DWORD DriveIndex, uint16_t vid, uint16_t pid, const char* strid);
+
+DWORD WINAPI FormatThread(void* param);
+DWORD WINAPI SaveImageThread(void* param);
 
 static __inline BOOL UnlockDrive(HANDLE hDrive) {
 	DWORD size;

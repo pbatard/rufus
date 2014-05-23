@@ -610,57 +610,58 @@ static BOOL PopulateProperties(int ComboIndex)
 /*
  * Set up progress bar real estate allocation
  */
-static void InitProgress(void)
+static void InitProgress(BOOL bOnlyFormat)
 {
 	int i, fs;
 	float last_end = 0.0f, slots_discrete = 0.0f, slots_analog = 0.0f;
 
 	fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
-	memset(&nb_slots, 0, sizeof(nb_slots));
-	memset(&slot_end, 0, sizeof(slot_end));
-	previous_end = 0.0f;
 
 	memset(nb_slots, 0, sizeof(nb_slots));
 	memset(slot_end, 0, sizeof(slot_end));
 	previous_end = 0.0f;
 
-	nb_slots[OP_ANALYZE_MBR] = 1;
-	if (IsChecked(IDC_BADBLOCKS)) {
-		nb_slots[OP_BADBLOCKS] = -1;
-	}
-	if (IsChecked(IDC_BOOT)) {
-		// 1 extra slot for PBR writing
-		switch (selection_default) {
-		case DT_WINME:
-			nb_slots[OP_DOS] = 3+1;
-			break;
-		case DT_FREEDOS:
-			nb_slots[OP_DOS] = 5+1;
-			break;
-		case DT_IMG:
-			nb_slots[OP_DOS] = 0;
-			break;
-		case DT_ISO:
-			nb_slots[OP_DOS] = -1;
-			break;
-		default:
-			nb_slots[OP_DOS] = 2+1;
-			break;
-		}
-	}
-	if (selection_default == DT_IMG) {
+	if (bOnlyFormat) {
 		nb_slots[OP_FORMAT] = -1;
 	} else {
-		nb_slots[OP_ZERO_MBR] = 1;
-		nb_slots[OP_PARTITION] = 1;
-		nb_slots[OP_FIX_MBR] = 1;
-		nb_slots[OP_CREATE_FS] =
-			nb_steps[ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem))];
-		if ( (!IsChecked(IDC_QUICKFORMAT))
-		  || ((fs == FS_FAT32) && ((SelectedDrive.DiskSize >= LARGE_FAT32_SIZE) || (force_large_fat32))) ) {
-			nb_slots[OP_FORMAT] = -1;
+		nb_slots[OP_ANALYZE_MBR] = 1;
+		if (IsChecked(IDC_BADBLOCKS)) {
+			nb_slots[OP_BADBLOCKS] = -1;
 		}
-		nb_slots[OP_FINALIZE] = ((selection_default == DT_ISO) && (fs == FS_NTFS))?3:2;
+		if (IsChecked(IDC_BOOT)) {
+			// 1 extra slot for PBR writing
+			switch (selection_default) {
+			case DT_WINME:
+				nb_slots[OP_DOS] = 3+1;
+				break;
+			case DT_FREEDOS:
+				nb_slots[OP_DOS] = 5+1;
+				break;
+			case DT_IMG:
+				nb_slots[OP_DOS] = 0;
+				break;
+			case DT_ISO:
+				nb_slots[OP_DOS] = -1;
+				break;
+			default:
+				nb_slots[OP_DOS] = 2+1;
+				break;
+			}
+		}
+		if (selection_default == DT_IMG) {
+			nb_slots[OP_FORMAT] = -1;
+		} else {
+			nb_slots[OP_ZERO_MBR] = 1;
+			nb_slots[OP_PARTITION] = 1;
+			nb_slots[OP_FIX_MBR] = 1;
+			nb_slots[OP_CREATE_FS] =
+				nb_steps[ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem))];
+			if ( (!IsChecked(IDC_QUICKFORMAT))
+			  || ((fs == FS_FAT32) && ((SelectedDrive.DiskSize >= LARGE_FAT32_SIZE) || (force_large_fat32))) ) {
+				nb_slots[OP_FORMAT] = -1;
+			}
+			nb_slots[OP_FINALIZE] = ((selection_default == DT_ISO) && (fs == FS_NTFS))?3:2;
+		}
 	}
 
 	for (i=0; i<OP_MAX; i++) {
@@ -1687,6 +1688,53 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			break;
 #ifdef RUFUS_TEST
 		case IDC_TEST:
+			if (format_thid != NULL) {
+				return (INT_PTR)TRUE;
+			}
+			FormatStatus = 0;
+			format_op_in_progress = TRUE;
+			// Reset all progress bars
+			SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_NORMAL, 0);
+			SetTaskbarProgressState(TASKBAR_NORMAL);
+			SetTaskbarProgressValue(0, MAX_PROGRESS);
+			SendMessage(hProgress, PBM_SETPOS, 0, 0);
+			nDeviceIndex = ComboBox_GetCurSel(hDeviceList);
+			if (nDeviceIndex != CB_ERR) {
+				if ((IsChecked(IDC_BOOT)) && (!BootCheck())) {
+					format_op_in_progress = FALSE;
+					break;
+				}
+
+				GetWindowTextU(hDeviceList, tmp, ARRAYSIZE(tmp));
+				if (MessageBoxU(hMainDialog, lmprintf(MSG_003, tmp),
+					APPLICATION_NAME, MB_OKCANCEL|MB_ICONWARNING|MB_IS_RTL) == IDCANCEL) {
+					format_op_in_progress = FALSE;
+					break;
+				}
+				safe_free(image_path);
+				image_path = strdup("C:\\Downloads\\my.vhd");
+
+				// Disable all controls except cancel
+				EnableControls(FALSE);
+				DeviceNum = (DWORD)ComboBox_GetItemData(hDeviceList, nDeviceIndex);
+				FormatStatus = 0;
+				InitProgress(TRUE);
+				format_thid = CreateThread(NULL, 0, SaveImageThread, (LPVOID)(uintptr_t)DeviceNum, 0, NULL);
+				if (format_thid == NULL) {
+					uprintf("Unable to start saving thread");
+					FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_START_THREAD);
+					PostMessage(hMainDialog, UM_FORMAT_COMPLETED, 0, 0);
+				}
+				uprintf("\r\nSave to image operation started");
+				PrintStatus(0, FALSE, -1);
+				timer = 0;
+				safe_sprintf(szTimer, sizeof(szTimer), "00:00:00");
+				SendMessageA(GetDlgItem(hMainDialog, IDC_STATUS), SB_SETTEXTA,
+					SBT_OWNERDRAW | 1, (LPARAM)szTimer);
+				SetTimer(hMainDialog, TID_APP_TIMER, 1000, ClockTimer);
+			}
+			if (format_thid == NULL)
+				format_op_in_progress = FALSE;
 			break;
 #endif
 		case IDC_LANG:
@@ -1889,7 +1937,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				EnableControls(FALSE);
 				DeviceNum = (DWORD)ComboBox_GetItemData(hDeviceList, nDeviceIndex);
 				FormatStatus = 0;
-				InitProgress();
+				InitProgress(FALSE);
 				format_thid = CreateThread(NULL, 0, FormatThread, (LPVOID)(uintptr_t)DeviceNum, 0, NULL);
 				if (format_thid == NULL) {
 					uprintf("Unable to start formatting thread");
