@@ -3163,7 +3163,7 @@ t MSG_261 "Bezig met schrijven van image: %0.1f%% voltooid"
 
 ################################################################################
 l "fi-FI" "Finnish (Suomi)" 0x040B
-v 1.0.11
+v 1.0.12
 b "en-US"
 
 # Main dialog
@@ -3351,6 +3351,7 @@ t MSG_075 "Asemaa ei voitu ottaa uudelleen käyttöön."
 t MSG_076 "Tiedostoja ei voitu päivittää/asentaa käynnistystä varten."
 t MSG_077 "Levykirjainta ei voitu asettaa."
 t MSG_078 "GUID-asemaa ei voitu ottaa käyttöön."
+t MSG_079 "Laite ei ole valmis."
 
 t MSG_080 "Rufus havaitsi, että Windows tyhjentää sisäistä puskuria USB-laitteelle.\n\n"
 	"USB-laitteesi nopeudesta riippuen toiminnon suorittamisessa voi kestää kauan, "
@@ -3372,13 +3373,13 @@ t MSG_085 "Ladataan %s"
 t MSG_086 "ISO-levykuvaa ei valittu"
 # The content between the quotes below (\"Create a bootable disk\") should match
 # the beginning of the IDC_BOOT text
-t MSG_087 "Paina levykuvakkeesta valitaksesi bootattavan ISO-levykuvan "
+t MSG_087 "Paina levykuvakkeesta valitaksesi boottaavan ISO-levykuvan "
 	"tai poista valinta \"Luo käynnistyslevy...\" -valintaruudusta."
 t MSG_088 "Levykuva on liian suuri"
 t MSG_089 "Levykuva on liian suuri valittuun kohteeseen."
 t MSG_090 "ISO-levykuvaa ei tueta"
-t MSG_091 "UEFI-kohdetyyppiä käytettäessä vain EFI-bootattavat ISO-levykuvat ovat tuettuna. "
-	"Valitse EFI-bootattava ISO-levykuva tai valitse kohdetyypiksi BIOS."
+t MSG_091 "UEFI-kohdetyyppiä käytettäessä vain EFI-boottaavat ISO-levykuvat ovat tuettuna. "
+	"Valitse EFI-boottaava ISO-levykuva tai valitse kohdetyypiksi BIOS."
 t MSG_092 "Tiedostojärjestelmää ei tueta"
 t MSG_093 "TÄRKEÄÄ: TÄMÄ LEVYASEMA SISÄLTÄÄ USEITA OSIOITA!!\n\n"
 	"Siihen saattaa kuulua osioita/asemia, joita ei ole listattuna tai edes näkyvissä Windowsissa. "
@@ -3445,13 +3446,13 @@ t MSG_159 "Käytä tätä kenttää valitaksesi aseman nimen\nVoit käyttää ka
 t MSG_160 "Näytä tai piilota lisäasetukset"
 t MSG_161 "Tarkista laite testikuviolla vioittuneiden lohkojen varalta"
 t MSG_162 "Poista valintaruudun valinta käyttääksesi \"hidasta\" alustustapaa"
-t MSG_163 "Valitse valintaruutu tehdäksesi USB-asemasta bootattavan"
-t MSG_164 "Tapa, jolla asemasta tehdään bootattava"
-t MSG_165 "Paina valitaksesi ISO-levykuva..."
+t MSG_163 "Valitse valintaruutu tehdäksesi USB-asemasta boottaavan"
+t MSG_164 "Tapa, jolla asemasta tehdään boottaava"
+t MSG_165 "Paina valitaksesi levykuva..."
 t MSG_166 "Valitse valintaruutu salliaksesi kansainvälisten merkkien näyttämisen "
 	"ja asettaaksesi laitekuvakkeen (luo autorun.inf-tiedoston)"
 t MSG_167 "Asenna MBR, joka sallii käynnistysvalinnan ja voi naamioida USB-aseman BIOS ID:n"
-t MSG_168 "Yritä naamioida ensimmäinen bootattava USB-asema (yleensä 0x80) eri asemaksi.\n"
+t MSG_168 "Yritä naamioida ensimmäinen boottaava USB-asema (yleensä 0x80) eri asemaksi.\n"
 	"Tämän tulisi olla tarpeellista vain asennettaessa Windows XP:tä, kun levyjä on useampia."
 t MSG_169 "Luo ylimääräinen, piilotettu osio ja yritä kohdistaa osioiden rajoja.\n"
 	"Tämä voi parantaa USB-laitteiden havaitsemista käynnistyksessä vanhemmissa BIOSeissa"
@@ -3478,6 +3479,7 @@ t MSG_186 "Rufus ei asenna tai aja taustapalveluja, siksi päivitystarkistukset 
 	"Internetyhteys toki vaaditaan päivityksiä tarkistettaessa."
 t MSG_187 "Levykuva ei ole sopiva valitulle käynnistysvalinnalle"
 t MSG_188 "Nykyinen levykuva ei vastaa valittua käynnistysvalintaa. Käytä toista levykuvaa tai valitse eri käynnistysvalinta."
+t MSG_189 "Tämä ISO-levykuva ei ole yhteensopiva valitun tiedostojärjestelmän kanssa"
 
 # Status messages - these messages will appear on the status bar
 t MSG_201 "Peruutetaan - Odota..."
@@ -3558,6 +3560,8 @@ t MSG_258 "Rock Ridge -tuki"
 t MSG_259 "Päivityksen pakotus"
 t MSG_260 "NTFS-pakkaaminen"
 t MSG_261 "Kirjoitetaan levykuvaa: %0.1f%% valmiina"
+t MSG_262 "ISO-tuki"
+t MSG_263 "Käytä OIKEITA tilayksikön kerrannaisia"
 
 ################################################################################
 l "fr-FR" "French (Français)" 0x040c, 0x080c, 0x0c0c, 0x100c, 0x140c, 0x180c, 0x1c0c, 0x200c, 0x240c, 0x280c, 0x2c0c, 0x300c, 0x340c, 0x380c, 0xe40c
