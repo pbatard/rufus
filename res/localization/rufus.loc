@@ -1991,7 +1991,7 @@ t MSG_263 "正規位元單位"
 
 ################################################################################
 l "hr-HR" "Croatian (Hrvatski)" 0x041a, 0x081a, 0x101a
-v 1.0.11
+v 1.0.12
 b "en-US"
 
 # Main dialog
@@ -2173,6 +2173,7 @@ t MSG_075 "Nemogu remontirati uređaj."
 t MSG_076 "Nemogu zakrpati/postaviti datoteke za bootanje."
 t MSG_077 "Nemogu dodijeliti slovo jedinici."
 t MSG_078 "Nemogu montirati GUID jedinicu."
+t MSG_079 "Uređaj nije spreman"
 
 t MSG_080 "Rufus je otkrio da Windows još uvijek ispire unutarnje buffer-e na USB uređaj.\n\n"
 	"Ovisno o brzini USB uređaja, ova operacija bi mogla potrajati, "
@@ -2269,9 +2270,9 @@ t MSG_161 "Provjeri prisutnost loših blokova sa uzorkom"
 t MSG_162 "Ostavite prazno za \"sporu\" metodu formatiranja"
 t MSG_163 "Odaberite ovo da USB bude 'bootable'"
 t MSG_164 "Metoda sa kojom će se USB postati 'bootable'"
-t MSG_165 "Kliknite za odabir"
-t MSG_166 "Check this box to allow the display of international labels "
-	"and set a device icon (creates an autorun.inf)"
+t MSG_165 "Kliknite za odabir slike"
+t MSG_166 "Potvrdite ovo da dozvolite prikaz internacijonalnih oznaka "
+	"i napravite ikonu (stvara autorun.inf)"
 t MSG_167 "Instaliraj MBR koji omogučuje boot odabir i može pretvoriti BIOS USB drive ID"
 t MSG_168 "Try to masquerade first bootable USB drive (usually 0x80) as a different disk.\n"
 	"This should only be necessary if you install Windows XP and have more than one disk"
@@ -2300,6 +2301,7 @@ t MSG_186 "Rufus nema pozadinskih programčića, tako da se ažur. provjeravaju 
 	"Naravno, prilikom provjere i preuzimanja ažuriranja, potrebna je veza sa internetom."
 t MSG_187 "Kriva slika za odabrano bootanje"
 t MSG_188 "Trenutna slika se ne podudara sa odabranim boot opcijama. Odaberite drugu sliku ili boot opciju."
+t MSG_189 "Ova ISO slika nije kompatibilna sa odabranim sustavom dat."
 
 # Status messages - these messages will appear on the status bar
 t MSG_201 "Otkazujem - Pričekajte..."
@@ -2345,7 +2347,7 @@ t MSG_227 "Zatvaram postojeću jedinicu..."
 t MSG_228 "Zapisujem master boot record..."
 t MSG_229 "Zapisujem partition boot record..."
 t MSG_230 "Kopiram DOS datoteke..."
-t MSG_231 "Kopiram ISO datoteke..."
+t MSG_231 "Kopiram ISO datoteku..."
 t MSG_232 "Win7 EFI boot setup..."
 t MSG_233 "Završavam..."
 # Takes a Syslinux version as parameter, eg. "Installing Syslinux v5.10..."
@@ -2380,6 +2382,8 @@ t MSG_258 "Rock Ridge podrška"
 t MSG_259 "Forsiraj ažuriranje"
 t MSG_260 "NTFS kompresija"
 t MSG_261 "Zapisujem: %0.1f%% završeno"
+t MSG_262 "ISO podrška"
+t MSG_263 "Koristi PRAVE vel. jedinica"
 
 ################################################################################
 l "da-DK" "Danish (Dansk)" 0x0406
