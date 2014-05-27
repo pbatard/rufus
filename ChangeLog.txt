@@ -1,11 +1,12 @@
 o Version 1.4.8 (2014.06.??)
     Add KolibriOS ISO support
-    Add VHD support (as *uncompressed* image source)
     Add Arabic translation, courtesy of عمر الصمد
     Add Croatian translation, courtesy of Dario Komar
     Add Danish translation, courtesy of Jens Hansen
     Add Latvian translation, courtesy of Aldis Tutins
+    Allow the use of VHDs as DD image source (fixed disk/uncompressed only)
     Report the detected USB speed in the log
+    Fix a long standing issue when launching Rufus from Far Manager
     Fix support for pure UEFI bootable disk images
     Various other fixes and improvements
 

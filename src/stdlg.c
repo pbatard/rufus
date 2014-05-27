@@ -283,7 +283,7 @@ char* FileDialog(BOOL save, char* path, const ext_t* ext, DWORD options)
 		}
 
 		// Set the file extension filters
-		pfd->lpVtbl->SetFileTypes(pfd, ext->count+1, filter_spec);
+		pfd->lpVtbl->SetFileTypes(pfd, (UINT)ext->count+1, filter_spec);
 
 		// Set the default directory
 		wpath = utf8_to_wchar(path);

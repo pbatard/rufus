@@ -1571,6 +1571,10 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				SHCNE_MEDIAINSERTED|SHCNE_MEDIAREMOVED, UM_MEDIA_CHANGE, 1, &NotifyEntry);
 		}
 		PostMessage(hMainDialog, UM_PROGRESS_CREATE, 0, 0);
+		// Bring our Window on top. We have to go through all *THREE* of these, or Far Manager hides our window :(
+		SetWindowPos(hMainDialog, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE|SWP_NOMOVE);
+		SetWindowPos(hMainDialog, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOSIZE|SWP_NOMOVE);
+		SetWindowPos(hMainDialog, HWND_TOP, 0, 0, 0, 0, SWP_NOSIZE|SWP_NOMOVE);
 		return (INT_PTR)TRUE;
 
 	// The things one must do to get an ellipsis on the status bar...
@@ -2031,28 +2035,6 @@ static void PrintUsage(char* appname)
 	printf("     This usage guide.\n");
 }
 
-/* There's a massive annoyance when taking over the console in a win32 app
- * in that it doesn't return the prompt on app exit. So we must handle that
- * manually, but the *ONLY* frigging way to achieve it is by simulating a
- * keypress... which means we first need to bring our console back on top.
- * And people wonder why developing elegant Win32 apps takes forever...
- */
-static void DetachConsole(void)
-{
-	INPUT input;
-	HWND hWnd;
-
-	hWnd = GetConsoleWindow();
-	SetWindowPos(hWnd, HWND_TOP, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
-	FreeConsole();
-	memset(&input, 0, sizeof(input));
-	input.type = INPUT_KEYBOARD;
-	input.ki.wVk = VK_RETURN;
-	SendInput(1, &input, sizeof(input));
-	input.ki.dwFlags = KEYEVENTF_KEYUP;
-	SendInput(1, &input, sizeof(input));
-}
-
 /*
  * Application Entrypoint
  */
@@ -2064,15 +2046,16 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 {
 	const char* old_wait_option = "/W";
 	const char* rufus_loc = "rufus.loc";
+	const char* cmdline_hogger = "rufus.com";
 	int i, opt, option_index = 0, argc = 0, si = 0, lcid = GetUserDefaultUILanguage();
 	BOOL attached_console = FALSE, external_loc_file = FALSE, lgp_set = FALSE;
-	BYTE* loc_data;
-	DWORD loc_size, Size;
+	BYTE *loc_data, *hog_data;
+	DWORD loc_size, hog_size, Size;
 	char tmp_path[MAX_PATH] = "", loc_file[MAX_PATH] = "", *tmp, *locale_name = NULL;
 	char** argv = NULL;
 	wchar_t **wenv, **wargv;
 	PF_TYPE_DECL(CDECL, int,  __wgetmainargs, (int*, wchar_t***, wchar_t***, int, int*));
-	HANDLE mutex = NULL, hFile = NULL;
+	HANDLE mutex = NULL, hogmutex = NULL, hFile = NULL;
 	HWND hDlg = NULL;
 	MSG msg;
 	int wait_for_mutex = 0;
@@ -2087,12 +2070,41 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	// Reattach the console, if we were started from commandline
 	if (AttachConsole(ATTACH_PARENT_PROCESS) != 0) {
+		INPUT* input;
 		attached_console = TRUE;
+
 		IGNORE_RETVAL(freopen("CONIN$", "r", stdin));
 		IGNORE_RETVAL(freopen("CONOUT$", "w", stdout));
 		IGNORE_RETVAL(freopen("CONOUT$", "w", stderr));
 		_flushall();
-		printf("\n");
+
+		hog_data = GetResource(hMainInstance, MAKEINTRESOURCEA(IDR_XT_HOGGER),
+			_RT_RCDATA, cmdline_hogger, &hog_size, FALSE);
+		if (hog_data != NULL) {
+			// Create our synchronisation mutex
+			hogmutex = CreateMutexA(NULL, TRUE, "Global/Rufus_CmdLine");
+
+			// Extract the hogger resource
+			hFile = CreateFileA(cmdline_hogger, GENERIC_READ | GENERIC_WRITE,
+				FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+			if (hFile != INVALID_HANDLE_VALUE) {
+				WriteFile(hFile, hog_data, hog_size, &Size, NULL);
+			}
+			safe_closehandle(hFile);
+
+			// Now launch the file from the commandline, by simulating keypresses
+			input = (INPUT*)calloc(strlen(cmdline_hogger)+1, sizeof(INPUT));
+			for (i=0; i<(int)strlen(cmdline_hogger); i++) {
+				input[i].type = INPUT_KEYBOARD;
+				input[i].ki.dwFlags = KEYEVENTF_UNICODE;
+				input[i].ki.wScan = (wchar_t)cmdline_hogger[i];
+			}
+			input[i].type = INPUT_KEYBOARD;
+			input[i].ki.wVk = VK_RETURN;
+//			SetWindowPos(GetConsoleWindow(), HWND_TOP, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
+			SendInput(i+1, input, sizeof(INPUT));
+			safe_free(input);
+		}
 	}
 
 	// Use the Locale specified in the registry, if any
@@ -2183,7 +2195,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	if ( (!get_supported_locales(loc_file))
 	  || ((selected_locale = ((locale_name == NULL)?get_locale_from_lcid(lcid, TRUE):get_locale_from_name(locale_name, TRUE))) == NULL) ) {
 		uprintf("FATAL: Could not access locale!\n");
-		MessageBoxU(NULL, "The locale data is missing or invalid. This application will now exit.", "Fatal error", MB_ICONSTOP|MB_IS_RTL);
+		MessageBoxU(NULL, "The locale data is missing or invalid. This application will now exit.",
+			"Fatal error", MB_ICONSTOP|MB_IS_RTL|MB_SYSTEMMODAL);
 		goto out;
 	}
 
@@ -2200,7 +2213,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	if ((mutex == NULL) || (GetLastError() == ERROR_ALREADY_EXISTS)) {
 		// Load the translation before we print the error
 		get_loc_data_file(loc_file, selected_locale);
-		MessageBoxU(NULL, lmprintf(MSG_002), lmprintf(MSG_001), MB_ICONSTOP|MB_IS_RTL);
+		// Set MB_SYSTEMMODAL to prevent Far Manager from stealing focus...
+		MessageBoxU(NULL, lmprintf(MSG_002), lmprintf(MSG_001), MB_ICONSTOP|MB_IS_RTL|MB_SYSTEMMODAL);
 		goto out;
 	}
 
@@ -2254,7 +2268,7 @@ relaunch:
 	 */
 	hDlg = CreateDialogW(hInstance, MAKEINTRESOURCEW(IDD_DIALOG + IDD_IS_RTL), NULL, MainCallback);
 	if (hDlg == NULL) {
-		MessageBoxU(NULL, "Could not create Window", "DialogBox failure", MB_ICONSTOP|MB_IS_RTL);
+		MessageBoxU(NULL, "Could not create Window", "DialogBox failure", MB_ICONSTOP|MB_IS_RTL|MB_SYSTEMMODAL);
 		goto out;
 	}
 	if ((relaunch_rc.left > -65536) && (relaunch_rc.top > -65536))
@@ -2376,6 +2390,9 @@ relaunch:
 	}
 
 out:
+	// Destroy our commandline hogger first, so that we can delete the app
+	ReleaseMutex(hogmutex);
+	safe_closehandle(hogmutex);
 	if ((!external_loc_file) && (loc_file[0] != 0))
 		DeleteFileU(loc_file);
 	DestroyAllTooltips();
@@ -2390,8 +2407,11 @@ out:
 	}
 	if (lgp_set)
 		SetLGP(TRUE, &existing_key, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer", "NoDriveTypeAutorun", 0);
-	if (attached_console)
-		DetachConsole();
+	if (attached_console) {
+		SetWindowPos(GetConsoleWindow(), HWND_TOP, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
+		FreeConsole();
+	}
+	DeleteFileA(cmdline_hogger);
 	CloseHandle(mutex);
 	CLOSE_OPENED_LIBRARIES;
 	uprintf("*** " APPLICATION_NAME " exit ***\n");

@@ -387,7 +387,7 @@ extern void parse_update(char* buf, size_t len);
 extern BOOL WimExtractCheck(void);
 extern BOOL WimExtractFile(const char* wim_image, int index, const char* src, const char* dst);
 extern BOOL IsHDImage(const char* path);
-extern BOOL AppendVHDFooter(const char* image_path);
+extern BOOL AppendVHDFooter(const char* vhd_path);
 extern int IsHDD(DWORD DriveIndex, uint16_t vid, uint16_t pid, const char* strid);
 
 DWORD WINAPI FormatThread(void* param);

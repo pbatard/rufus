@@ -115,7 +115,7 @@ static BOOL Get7ZipPath(void)
 	return FALSE;
 }
 
-BOOL AppendVHDFooter(const char* image_path)
+BOOL AppendVHDFooter(const char* vhd_path)
 {
 	const char creator_os[4] = VHD_FOOTER_CREATOR_HOST_OS_WINDOWS;
 	const char creator_app[4] = { 'r', 'u', 'f', 'u' };
@@ -123,7 +123,7 @@ BOOL AppendVHDFooter(const char* image_path)
 	DWORD size;
 	LARGE_INTEGER li;
 	HANDLE handle = INVALID_HANDLE_VALUE;
-	vhd_footer* footer;
+	vhd_footer* footer = NULL;
 	uint64_t totalSectors;
 	uint16_t cylinders = 0;
 	uint8_t heads, sectorsPerTrack;
@@ -132,10 +132,10 @@ BOOL AppendVHDFooter(const char* image_path)
 	size_t i;
 
 	PF_INIT(UuidCreate, Rpcrt4);
-	handle = CreateFileU(image_path, GENERIC_WRITE, FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL);
+	handle = CreateFileU(vhd_path, GENERIC_WRITE, FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL);
 	li.QuadPart = 0;
 	if ((handle == INVALID_HANDLE_VALUE) || (!SetFilePointerEx(handle, li, &li, FILE_END))) {
-		uprintf("Could not open image '%s': %s", image_path, WindowsErrorString());
+		uprintf("Could not open image '%s': %s", vhd_path, WindowsErrorString());
 		goto out;
 	}
 	footer = (vhd_footer*)calloc(1, sizeof(vhd_footer));
