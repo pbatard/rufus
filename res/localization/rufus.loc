@@ -7108,7 +7108,7 @@ t MSG_263 "Izvēlieties atbilstošas vienības"
 
 ################################################################################
 l "lt-LT" "Lithuanian (Lietuvių)" 0x0427
-v 1.0.11
+v 1.0.12
 b "en-US"
 
 # Main dialog
@@ -7313,6 +7313,7 @@ t MSG_075 "Negalima prijungti tomo."
 t MSG_076 "Negalima papildyti/paruošti failų įkelčiai."
 t MSG_077 "Negalima priskirti disko raidės."
 t MSG_078 "Negalima prijungti GUID tomo."
+t MSG_079 "Įrenginys nepasiruošęs."
 
 t MSG_080 "Rufus aptiko, kad Windows vis dar išvalo savo vidinius buferius į USB įrenginį.\n\n"
 	"Priklausomai nuo jūsų USB įrenginio spartos, šis veiksmas gali užtrukti ilgai, "
@@ -7410,7 +7411,7 @@ t MSG_161 "Tikrinti įrenginį dėl blogų blokų naudojant testo šabloną"
 t MSG_162 "Nuimkite šio langelio žymę norėdami naudoti \"lėtą\" formatavimo būdą"
 t MSG_163 "Pažymėkite šį langelį norėdami padaryti USB diską įkeliamą"
 t MSG_164 "Būdas, kuris bus naudojamas padaryti diską įkeliamą"
-t MSG_165 "Spauskite, kad pasirinktumėte ISO..."
+t MSG_165 "Spauskite, kad pasirinktumėte atvaizdą..."
 t MSG_166 "Pažymėkite šį langelį, norėdami įgalinti tarptautinių žymių rodymą "
 	"ir įrenginio piktogramos nustatymą (sukuria autorun.inf)"
 t MSG_167 "Įdiegia MBR, kuris įgalina įkelties pasirinkimą ir gali maskuoti BIOS USB disko ID"
@@ -7441,6 +7442,7 @@ t MSG_186 "Rufus neįdiegia ir nevykdo foninių tarnybų, todėl naujinių tikri
 	"Interneto prieiga, be abejo, yra reikalinga naujinių tikrinimui."
 t MSG_187 "Negaliojantis atvaizdas pasirinktai įkelties parinkčiai"
 t MSG_188 "Dabartinis atvaizdas neatitinka pasirinktos įkelties parinkties. Prašau naudoti kitą atvaizdą arba rinktis kitą įkelties parinktį."
+t MSG_189 "Šis ISO atvaizdas nesuderinamas su pasirinkta failų sistema"
 
 # Status messages - these messages will appear on the status bar
 t MSG_201 "Atšaukiama - prašome palaukti..."
@@ -7521,6 +7523,8 @@ t MSG_258 "Rock Ridge palaikymas"
 t MSG_259 "Priversti naujintis"
 t MSG_260 "NTFS glaudinimas"
 t MSG_261 "Rašomas atvaizdas: %0.1f%% baigta"
+t MSG_262 "ISO palaikymas"
+t MSG_263 "Naudoti TIKRUOSIUS dydžio vienetus"
 
 ################################################################################
 l "ms-MY" "Malay (Bahasa Malaysia)" 0x043e, 0x083e
