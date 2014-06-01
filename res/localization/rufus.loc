@@ -2767,7 +2767,7 @@ t MSG_263 "MiB notation"
 
 ################################################################################
 l "nl-NL" "Dutch (Nederlands)" 0x0413, 0x0813
-v 1.0.11
+v 1.0.12
 b "en-US"
 
 # Main dialog
@@ -2966,6 +2966,7 @@ t MSG_075 "Herkoppelen van volume niet mogelijk."
 t MSG_076 "Patchen/klaarmaken van bestanden voor opstarten niet mogelijk."
 t MSG_077 "Niet mogelijk om een driveletter toe te wijzen."
 t MSG_078 "Kan GUID volume niet koppelen."
+t MSG_079 "Het apparaat is niet klaar."
 
 t MSG_080 " Rufus heeft gedetecteerd dat Windows nog steeds bezig is om zijn interne buffers te legen naar het USB apparaat.\n\n"
 	"Afhankelijk van de snelheid van uw USB apparaat, kan deze operatie een lange tijd duren voordat het voltooid is.\n"
@@ -3054,7 +3055,7 @@ t MSG_161 "Controleer het apparaat op slechte blokken tijdens een testpatroon"
 t MSG_162 "Uitvinken om een \"langzamere\" formatteer methode te gebruiken"
 t MSG_163 "Aanvinken om de USB drive opstartbaar te maken"
 t MSG_164 "Gebruikte methode om de drive opstartbaar te maken"
-t MSG_165 "Klik om een ISO te selecteren..."
+t MSG_165 "Klik om een image te selecteren..."
 t MSG_166 "Vink aan om internationale labels te zien en een apparaat\n"
          "pictogram in te stellen (creëert een autorun.inf bestand)"
 t MSG_167 "Installeert een MBR die een opstartselectie toestaat en de BIOS USB drive ID kan verbergen"
@@ -3085,6 +3086,7 @@ t MSG_186 "Rufus voert geen installatie van of achtergrond services uit, Daarom 
 	"Internet toegang is natuurlijk vereist wanneer er op updates gecontroleerd wordt."
 t MSG_187 "Ongeldige image voor geselecteerde opstart optie"
 t MSG_188 "De huidige image komt niet overeen met de opstart optie die geselecteerd is. Gebruik a.u.b. een andere image of kies een andere opstart optie."
+t MSG_189 "Dit ISO beeldbestand is niet compatibel met het geselecteerde bestandssysteem."
 
 # Status messages - these messages will appear on the status bar
 t MSG_201 "Bezig met annuleren - Een moment geduld a.u.b. ..."
@@ -3160,6 +3162,8 @@ t MSG_258 "Rock Ridge ondersteuning"
 t MSG_259 "Update forceren"
 t MSG_260 "NTFS compressie"
 t MSG_261 "Bezig met schrijven van image: %0.1f%% voltooid"
+t MSG_262 "ISO ondersteuning"
+t MSG_263 "Gebruik de juiste grootte-eenheden"
 
 ################################################################################
 l "fi-FI" "Finnish (Suomi)" 0x040B
