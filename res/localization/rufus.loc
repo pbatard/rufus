@@ -10752,7 +10752,7 @@ t MSG_259 "Forzar actualización"
 
 ################################################################################
 l "sv-SE" "Swedish (Svenska)" 0x041d, 0x081d
-v 1.0.11
+v 1.0.12
 b "en-US"
 
 # Main dialog
@@ -10850,7 +10850,7 @@ t IDS_NEW_VERSION_AVAIL_TXT "En nyare version finns tillgänglig. Ladda gärna n
 t IDC_WEBSITE "Tryck här för att komma till hemsidan"
 t IDS_NEW_VERSION_NOTES_GRP "Programinformation"
 t IDS_NEW_VERSION_DOWNLOAD_GRP "Nedladdning"
-t IDC_DOWNLOAD "Nedladdning"
+t IDC_DOWNLOAD "Ladda ned"
 t IDCANCEL "Stäng"
 
 # Dialog that appears when scanning/extracting ISO files
@@ -10953,6 +10953,7 @@ t MSG_075 "Kunde inte återmontera volumen."
 t MSG_076 "Kunde inte installera filer för uppstarten (boot)."
 t MSG_077 "Kunde inte tilldela enhetsbokstav."
 t MSG_078 "Kan inte montera GUID-volymen."
+t MSG_079 "Enheten är inte klar."
 t MSG_080 "Rufus har upptäckt att Windows fortfarande tömmer den interna bufferten till USB-enheten.\n\n"
 	"Beroende på hastigheten på din USB-enhet, kan detta ta en lång stund innan det är klart, "
 	"speciellt för stora filer.\n\nVi rekommenderar att du låter Windows få slutföra, för att undvika problem. "
@@ -11079,6 +11080,7 @@ t MSG_186 "Rufus installerar inga bakgrundsprogram, därför sker endast uppdate
 	"För att kontrollera efter uppdateringar krävs naturligtvis internettillgång."
 t MSG_187 "Ogiltig avbild för vald startinställning"
 t MSG_188 "Nuvarande avbild matchar inte det startbara valet. Välj en annan avbild eller ändra de startbara valet."
+t MSG_189 "Denna ISO-avbild är inte kompatibel med valt filsystem"
 
 # Status messages - these messages will appear on the status bar
 t MSG_201 "Avbryter - Vänta..."
@@ -11159,6 +11161,8 @@ t MSG_258 "Rock Ridge-stöd"
 t MSG_259 "Tvinga uppdatering"
 t MSG_260 "NTFS-kompression"
 t MSG_261 "Skriver avbild: %0.1f%% klart"
+t MSG_262 "ISO-stöd"
+t MSG_263 "Använd "RÄTT" storleksenhet"
 
 ################################################################################
 l "tr-TR" "Turkish (Türkçe)" 0x041F
