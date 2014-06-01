@@ -474,8 +474,6 @@ int IsHDD(DWORD DriveIndex, uint16_t vid, uint16_t pid, const char* strid)
 
 	// Check against known VIDs
 	for (i=0; i<ARRAYSIZE(vid_score); i++) {
-		if (vid < vid_score[i].vid)
-			break;
 		if (vid == vid_score[i].vid) {
 			score += vid_score[i].score;
 			break;
@@ -484,8 +482,6 @@ int IsHDD(DWORD DriveIndex, uint16_t vid, uint16_t pid, const char* strid)
 
 	// Check against known VID:PIDs
 	for (i=0; i<ARRAYSIZE(vidpid_score); i++) {
-		if (vid < vidpid_score[i].vid)
-			break;
 		if ((vid == vidpid_score[i].vid) && (pid == vidpid_score[i].pid)) {
 			score += vidpid_score[i].score;
 			break;
@@ -493,5 +489,8 @@ int IsHDD(DWORD DriveIndex, uint16_t vid, uint16_t pid, const char* strid)
 	}
 
 	// TODO: try to perform inquiry if below a specific threshold (Verbatim, etc)?
+#if defined(_DEBUG)
+	uprintf("  Score: %d\n", score);
+#endif
 	return score;
 }

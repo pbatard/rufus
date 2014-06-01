@@ -6,8 +6,9 @@ o Version 1.4.8 (2014.06.??)
     Add Latvian translation, courtesy of Aldis Tutins
     Allow the use of VHDs as DD image source (fixed disk/uncompressed only)
     Report the detected USB speed in the log
-    Fix a long standing issue when launching Rufus from Far Manager
+    Fix a long standing issue when launching Rufus using Far Manager
     Fix support for pure UEFI bootable disk images
+    Fix detection for some Buffalo, Lacie, Samsung, Toshiba and Verbatim drives
     Various other fixes and improvements
 
 o Version 1.4.7 (2014.04.22)
