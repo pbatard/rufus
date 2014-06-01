@@ -2101,7 +2101,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			}
 			input[i].type = INPUT_KEYBOARD;
 			input[i].ki.wVk = VK_RETURN;
-//			SetWindowPos(GetConsoleWindow(), HWND_TOP, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
 			SendInput(i+1, input, sizeof(INPUT));
 			safe_free(input);
 		}
@@ -2390,9 +2389,11 @@ relaunch:
 	}
 
 out:
-	// Destroy our commandline hogger first, so that we can delete the app
-	ReleaseMutex(hogmutex);
-	safe_closehandle(hogmutex);
+	// Destroy the hogger mutex first, so that the cmdline app can exit and we can delete it
+	if (attached_console) {
+		ReleaseMutex(hogmutex);
+		safe_closehandle(hogmutex);
+	}
 	if ((!external_loc_file) && (loc_file[0] != 0))
 		DeleteFileU(loc_file);
 	DestroyAllTooltips();

@@ -68,7 +68,7 @@ static void GetUSBProperties(char* parent_path, char* device_id, usb_device_prop
 
 	handle = CreateFileA(parent_path, GENERIC_WRITE, FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_FLAG_OVERLAPPED, NULL);
 	if (handle == INVALID_HANDLE_VALUE) {
-		uprintf("could not open hub %s: %s", parent_path, WindowsErrorString());
+		uprintf("Could not open hub %s: %s", parent_path, WindowsErrorString());
 		goto out;
 	}
 	memset(&conn_info, 0, sizeof(conn_info));
@@ -76,7 +76,7 @@ static void GetUSBProperties(char* parent_path, char* device_id, usb_device_prop
 	conn_info.ConnectionIndex = (ULONG)props->port;
 	// coverity[tainted_data_argument]
 	if (!DeviceIoControl(handle, IOCTL_USB_GET_NODE_CONNECTION_INFORMATION_EX, &conn_info, size, &conn_info, size, &size, NULL)) {
-		uprintf("could not get node connection information for device '%s': %s", device_id, WindowsErrorString());
+		uprintf("Could not get node connection information for '%s': %s", device_id, WindowsErrorString());
 		goto out;
 	}
 
@@ -92,7 +92,7 @@ static void GetUSBProperties(char* parent_path, char* device_id, usb_device_prop
 		conn_info_v2.Length = size;
 		conn_info_v2.SupportedUsbProtocols.Usb300 = 1;
 		if (!DeviceIoControl(handle, IOCTL_USB_GET_NODE_CONNECTION_INFORMATION_EX_V2, &conn_info_v2, size, &conn_info_v2, size, &size, NULL)) {
-			uprintf("could not get node connection information (V2) for device '%s': %s", device_id, WindowsErrorString());
+			uprintf("Could not get node connection information (V2) for device '%s': %s", device_id, WindowsErrorString());
 		} else if (conn_info_v2.Flags.DeviceIsOperatingAtSuperSpeedOrHigher) {
 			props->speed = USB_SPEED_SUPER_OR_LATER;
 		} else if (conn_info_v2.Flags.DeviceIsSuperSpeedCapableOrHigher) {
@@ -262,6 +262,25 @@ BOOL GetUSBDevices(DWORD devnum)
 					if (j > 0) {
 						GetUSBProperties(dev_if_path.String[(uint32_t)htab_devid.table[j].data], device_id, &props);
 					}
+
+					// If the previous calls didn't succeed in getting the VID:PID, try from the device_id
+					// (This is for the case for USB media player devices, for instance)
+					if ((props.vid == 0) && (props.pid == 0)) {
+						BOOL post_backslash = FALSE;
+						for (j=0, k=0; (j<strlen(device_id))&&(k<2); j++) {
+							// The ID is in the form USB_VENDOR_BUSID\VID_xxxx&PID_xxxx\...
+							if (device_id[j] == '\\')
+								post_backslash = TRUE;
+							if (!post_backslash)
+								continue;
+							if (device_id[j] == '_') {
+								props.pid = (uint16_t)strtoul(&device_id[j+1], NULL, 16);
+								if (k++==0)
+									props.vid = props.pid;
+							}
+						}
+					}
+
 				}
 			}
 		}
