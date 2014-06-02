@@ -7535,7 +7535,7 @@ t MSG_263 "Naudoti TIKRUOSIUS dydžio vienetus"
 
 ################################################################################
 l "ms-MY" "Malay (Bahasa Malaysia)" 0x043e, 0x083e
-v 1.0.11
+v 1.0.12
 b "en-US"
 
 # Main dialog
@@ -7744,6 +7744,7 @@ t MSG_075 "Tidak dapat mount semula jilid."
 t MSG_076 "Tidak dapat mengepatch/menyediakan fail untuk boot."
 t MSG_077 "Tidak dapat menguntukkan huruf untuk drive."
 t MSG_078 "Tidak boleh mount jilid GUID."
+t MSG_079 "Peranti ini tidak sedia untuk digunakan"
 
 t MSG_080 "Rufus mengesan bahawa Windows masih lagi mengeflush buffer ke dalam peranti USB.\n\n"
 	"Bergantung kepada kelajuan peranti USB anda, operasi ini mungkin mengambil masa yang amat lama."
@@ -7841,7 +7842,7 @@ t MSG_161 "Semak peranti untuk blok rosak menggunakan corak ujian"
 t MSG_162 "Jangan tanda kotak ini untuk menggunakan kaedah pemformatan \"perlahan\""
 t MSG_163 "Tanda kotak ini jika anda mahu membuat cakera USB yang boleh-but"
 t MSG_164 "Kaedah yang digunakan untuk membuat cakera boleh-but"
-t MSG_165 "Klik untuk memilih ISO..."
+t MSG_165 "Klik untuk memilih imej..."
 t MSG_166 "Klik kotak ini untuk membenarkan paparan label antarabangsa "
 	"dan menetapkan ikon cakera (akan membuat fail autorun.inf)"
 t MSG_167 "Memasang MBR yang membenarkan pilihan boot dan mampu menyamar ID BIOS USB"
@@ -7872,6 +7873,7 @@ t MSG_186 "Rufus tidak memasang atau menjalankan servis di latar belakang. Oleh 
 	"Akses internet diperlukan untuk menymeak untuk versi baru."
 t MSG_187 "Imej tidak sah untuk pilihan boot yang dipilih"
 t MSG_188 "Imej	tidak serasi dengan pilihan boot yang dipilih. Tolong gunakan imej lain atau pilih pilihan boot lain."
+t MSG_189 "Imej ISO ini tidak serasi dengan sistem fail yang dipilih"
 
 # Status messages - these messages will appear on the status bar
 t MSG_201 "Sedang membatalkan - Sila tunggu..."
@@ -7952,6 +7954,8 @@ t MSG_258 "Sokongan Rock Ridge"
 t MSG_259 "Paksa kemas kini"
 t MSG_260 "Mampatan NTFS"
 t MSG_261 "Menulis imej: %0.1f%% selesai"
+t MSG_262 "Sokongan ISO"
+t MSG_263 "Guna saiz seunit yang BETUL"
 
 ################################################################################
 l "pl-PL" "Polish (Polski)" 0x0415
