@@ -417,7 +417,7 @@ BOOL SmartGetVersion(HANDLE hdevice)
  * from HDDs. But short of a crystal ball, this remains just a guess, which may be
  * way off mark. Still, you are also reminded that Rufus does produce PROMINENT
  * warnings before you format a drive, and also provides extensive info about the
- * drive (from the toolips and the log) => PAY ATTENTION TO THESE OR PAY THE PRICE!
+ * drive (from the tooltips and the log) => PAY ATTENTION TO THESE OR PAY THE PRICE!
  *
  * But let me just elaborate further on why differentiating UFDs from HDDs is not as
  * 'simple' as it seems:
@@ -489,8 +489,6 @@ int IsHDD(DWORD DriveIndex, uint16_t vid, uint16_t pid, const char* strid)
 	}
 
 	// TODO: try to perform inquiry if below a specific threshold (Verbatim, etc)?
-#if defined(_DEBUG)
-	uprintf("  Score: %d\n", score);
-#endif
+	duprintf("  Score: %d\n", score);
 	return score;
 }

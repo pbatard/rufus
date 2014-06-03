@@ -104,8 +104,7 @@ extern void _uprintf(const char *format, ...);
 #define uprintf(...) _uprintf(__VA_ARGS__)
 #define vuprintf(...) if (verbose) _uprintf(__VA_ARGS__)
 #define vvuprintf(...) if (verbose > 1) _uprintf(__VA_ARGS__)
-#ifdef _CRTDBG_MAP_ALLOC
-// Use the _CRTDBG as our general debug flag
+#ifdef _DEBUG
 #define duprintf(...) _uprintf(__VA_ARGS__)
 #else
 #define duprintf(...)

@@ -2412,6 +2412,7 @@ out:
 		SetWindowPos(GetConsoleWindow(), HWND_TOP, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
 		FreeConsole();
 	}
+	// Unconditional delete, just in case...
 	DeleteFileA(cmdline_hogger);
 	CloseHandle(mutex);
 	CLOSE_OPENED_LIBRARIES;
