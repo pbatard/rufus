@@ -2088,6 +2088,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			hFile = CreateFileA(cmdline_hogger, GENERIC_READ | GENERIC_WRITE,
 				FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 			if (hFile != INVALID_HANDLE_VALUE) {
+				// coverity[check_return]
 				WriteFile(hFile, hog_data, hog_size, &Size, NULL);
 			}
 			safe_closehandle(hFile);

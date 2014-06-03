@@ -4,6 +4,7 @@ o Version 1.4.8 (2014.06.??)
     Add Croatian translation, courtesy of Dario Komar
     Add Danish translation, courtesy of Jens Hansen
     Add Latvian translation, courtesy of Aldis Tutins
+    Add Portuguese Brazilian translation, courtesy of Chateaubriand Vieira Moura
     Allow the use of VHDs as DD image source (fixed disk/uncompressed only)
     Report the detected USB speed in the log
     Fix a long standing issue when launching Rufus using Far Manager

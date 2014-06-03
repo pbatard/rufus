@@ -357,9 +357,9 @@ fallback:
 	}
 	ext_strlen += safe_strlen(all_files) + sizeof(" (*.*)\r*.*\r");
 	ext_string = (char*)malloc(ext_strlen+1);
-	ext_string[0] = 0;
 	if (ext_string == NULL)
 		return NULL;
+	ext_string[0] = 0;
 	for (i=0, j=0; i<ext->count; i++) {
 		j += _snprintf(&ext_string[j], ext_strlen-j, "%s (%s)\r%s\r", ext->description[i], ext->extension[i], ext->extension[i]);
 	}
