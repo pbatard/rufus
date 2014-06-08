@@ -1,4 +1,7 @@
-o Version 1.4.8 (2014.06.??)
+o Version 1.4.9 (2014.06.08) [BUGFIX RELEASE]
+    Fix listing of drives for Windows XP and Windows Vista (reported by Alex Andrews)
+
+o Version 1.4.8 (2014.06.03)
     Add KolibriOS ISO support
     Add Arabic translation, courtesy of عمر الصمد
     Add Croatian translation, courtesy of Dario Komar

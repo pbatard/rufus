@@ -49,6 +49,7 @@ typedef CHAR *DEVINSTID_A;
 #define CR_SUCCESS                              0x00000000
 #define CR_NO_SUCH_DEVNODE                      0x0000000D
 #define CM_GETIDLIST_FILTER_SERVICE             0x00000002
+// /!\ The following flag is only available on Windows 7 or later!
 #define CM_GETIDLIST_FILTER_PRESENT             0x00000100
 #define CM_DRP_ADDRESS                          0x0000001D
 

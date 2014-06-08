@@ -126,7 +126,7 @@ BOOL GetUSBDevices(DWORD devnum)
 	PSP_DEVICE_INTERFACE_DETAIL_DATA_A devint_detail_data;
 	DEVINST parent_inst, device_inst;
 	DWORD size, i, j, k, datatype, drive_index;
-	ULONG list_size[ARRAYSIZE(storage_name)], full_list_size;
+	ULONG list_size[ARRAYSIZE(storage_name)] = { 0 }, full_list_size, ulFlags;
 	HANDLE hDrive;
 	LONG maxwidth = 0;
 	int s, score, drive_number;
@@ -191,11 +191,14 @@ BOOL GetUSBDevices(DWORD devnum)
 
 	// Build a single list of Device IDs from all the storage enumerators we know of
 	full_list_size = 0;
+	ulFlags = CM_GETIDLIST_FILTER_SERVICE;
+	if (nWindowsVersion >= WINDOWS_7)
+		ulFlags |= CM_GETIDLIST_FILTER_PRESENT;
 	for (s=0; s<ARRAYSIZE(storage_name); s++) {
 		// Get a list of device IDs for all USB storage devices
 		// This will be used to find if a device is UASP
-		CM_Get_Device_ID_List_SizeA(&list_size[s], storage_name[s],
-			CM_GETIDLIST_FILTER_SERVICE|CM_GETIDLIST_FILTER_PRESENT);
+		if (CM_Get_Device_ID_List_SizeA(&list_size[s], storage_name[s], ulFlags) != CR_SUCCESS)
+			list_size[s] = 0;
 		if (list_size[s] != 0)
 			full_list_size += list_size[s]-1;	// remove extra NUL terminator
 	}
@@ -209,8 +212,8 @@ BOOL GetUSBDevices(DWORD devnum)
 		}
 		for (s=0, i=0; s<ARRAYSIZE(storage_name); s++) {
 			if (list_size[s] > 1) {
-				CM_Get_Device_ID_ListA(storage_name[s], &devid_list[i], list_size[s],
-					CM_GETIDLIST_FILTER_SERVICE|CM_GETIDLIST_FILTER_PRESENT);	// 
+				if (CM_Get_Device_ID_ListA(storage_name[s], &devid_list[i], list_size[s], ulFlags) != CR_SUCCESS)
+					continue;
 				// The list_size is sometimes larger than required thus we need to find the real end
 				for (i += list_size[s]; i > 2; i--) {
 					if ((devid_list[i-2] != '\0') && (devid_list[i-1] == '\0') && (devid_list[i] == '\0'))
