@@ -217,6 +217,10 @@ static vidpid_score_t vidpid_score[] = {
 	// Smartmontools are uncertain about that one, and so am I
 	{ 0x6795, 0x2756, 2 },		// Sharkoon 2-Bay RAID Box
 
+	// OCZ exceptions
+	{ 0x0324, 0xbc06, -20 },	// OCZ ATV USB 2.0 Flash Drive
+	{ 0x0324, 0xbc08, -20 },	// OCZ Rally2 / ATV USB 2.0 Flash Drive
+	{ 0x0325, 0xac02, -20 },	// OCZ ATV Turbo / Rally2 Dual Channel USB 2.0 Flash Drive
 	// Buffalo exceptions
 	{ 0x0411, 0x01e8, -20 },	// Buffalo HD-PNTU2
 	// Samsung exceptions
