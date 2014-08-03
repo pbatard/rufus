@@ -431,6 +431,8 @@ static BOOL FormatFAT32(DWORD DriveIndex)
 		}
 		memcpy(&dgDrive, &xdgDrive->Geometry, sizeof(dgDrive));
 	}
+	if (dgDrive.BytesPerSector < 512)
+		dgDrive.BytesPerSector = 512;
 	if (IS_ERROR(FormatStatus)) goto out;
 	if (!DeviceIoControl (hLogicalVolume, IOCTL_DISK_GET_PARTITION_INFO, NULL, 0, &piDrive,
 		sizeof(piDrive), &cbRet, NULL)) {

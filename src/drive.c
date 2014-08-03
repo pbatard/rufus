@@ -602,7 +602,7 @@ int GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSyst
 	FileSystemName[0] = 0;
 	volume_name = GetLogicalName(DriveIndex, TRUE, FALSE);
 	if ((volume_name == NULL) || (!GetVolumeInformationA(volume_name, NULL, 0, NULL, NULL, NULL, FileSystemName, FileSystemNameSize))) {
-		uprintf("No volume information for disk 0x%02x\n", DriveIndex);
+		uprintf("No volume information for drive 0x%02x\n", DriveIndex);
 	}
 	safe_free(volume_name);
 
@@ -616,6 +616,11 @@ int GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSyst
 		uprintf("Could not get geometry for drive 0x%02x: %s\n", DriveIndex, WindowsErrorString());
 		safe_closehandle(hPhysical);
 		return 0;
+	}
+	if (DiskGeometry->Geometry.BytesPerSector < 512) {
+		uprintf("WARNING: Drive 0x%02x reports a sector size of %d - Correcting to 512 bytes.\n",
+			DriveIndex, DiskGeometry->Geometry.BytesPerSector);
+		DiskGeometry->Geometry.BytesPerSector = 512;
 	}
 	SelectedDrive.DiskSize = DiskGeometry->DiskSize.QuadPart;
 	memcpy(&SelectedDrive.Geometry, &DiskGeometry->Geometry, sizeof(DISK_GEOMETRY));
