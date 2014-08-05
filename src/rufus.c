@@ -125,6 +125,7 @@ BOOL enable_HDDs = FALSE, advanced_mode = TRUE, force_update = FALSE, use_fake_u
 int dialog_showing = 0;
 uint16_t rufus_version[4], embedded_sl_version[2];
 char embedded_sl_version_str[2][12] = { "?.??", "?.??" };
+char embedded_sl_version_ext[2][32];
 RUFUS_UPDATE update = { {0,0,0,0}, {0,0}, NULL, NULL};
 StrArray DriveID, DriveLabel;
 extern char szStatusMessage[256];
@@ -1065,13 +1066,13 @@ void ToggleImage(BOOL enable)
 static BOOL BootCheck(void)
 {
 	int i, fs, bt, dt, r;
-	FILE* fd;
+	FILE *fd;
 	DWORD len;
 	BOOL in_files_dir = FALSE;
 	const char* ldlinux = "ldlinux";
 	const char* syslinux = "syslinux";
 	const char* ldlinux_ext[3] = { "sys", "bss", "c32" };
-	char tmp[MAX_PATH];
+	char tmp[MAX_PATH], tmp2[MAX_PATH];
 
 	syslinux_ldlinux_len[0] = 0; syslinux_ldlinux_len[1] = 0;
 	dt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
@@ -1174,7 +1175,8 @@ static BOOL BootCheck(void)
 				IGNORE_RETVAL(_chdir(FILES_DIR));
 				for (i=0; i<2; i++) {
 					// Check if we already have the relevant ldlinux_v#.##.sys & ldlinux_v#.##.bss files
-					static_sprintf(tmp, "%s-%s/%s.%s", syslinux, iso_report.sl_version_str, ldlinux, ldlinux_ext[i]);
+					static_sprintf(tmp, "%s-%s%s/%s.%s", syslinux, iso_report.sl_version_str,
+						iso_report.sl_version_ext, ldlinux, ldlinux_ext[i]);
 					fd = fopen(tmp, "rb");
 					if (fd != NULL) {
 						fseek(fd, 0, SEEK_END);
@@ -1183,21 +1185,46 @@ static BOOL BootCheck(void)
 					}
 				}
 				if ((syslinux_ldlinux_len[0] != 0) && (syslinux_ldlinux_len[1] != 0)) {
-					uprintf("Will reuse '%s.%s' and '%s.%s' from './" FILES_DIR "/%s/%s-%s/' for Syslinux installation\n",
-						ldlinux, ldlinux_ext[0], ldlinux, ldlinux_ext[1], FILES_DIR, syslinux, iso_report.sl_version_str);
+					uprintf("Will reuse '%s.%s' and '%s.%s' from './" FILES_DIR "/%s/%s-%s%s/' for Syslinux installation\n",
+						ldlinux, ldlinux_ext[0], ldlinux, ldlinux_ext[1], FILES_DIR, syslinux,
+						iso_report.sl_version_str, iso_report.sl_version_ext);
 				} else {
-					r = MessageBoxU(hMainDialog, lmprintf(MSG_114, iso_report.sl_version_str, embedded_sl_version_str[1]),
+					r = MessageBoxU(hMainDialog, lmprintf(MSG_114, iso_report.sl_version_str, iso_report.sl_version_ext,
+						embedded_sl_version_str[1]),
 						lmprintf(MSG_115), MB_YESNO|MB_ICONWARNING|MB_IS_RTL);
 					if (r != IDYES)
 						return FALSE;
 					for (i=0; i<2; i++) {
 						static_sprintf(tmp, "%s-%s", syslinux, iso_report.sl_version_str);
 						IGNORE_RETVAL(_mkdir(tmp));
+						if (*iso_report.sl_version_ext != 0) {
+							IGNORE_RETVAL(_chdir(tmp));
+							IGNORE_RETVAL(_mkdir(&iso_report.sl_version_ext[1]));
+							IGNORE_RETVAL(_chdir(".."));
+						}
 						static_sprintf(tmp, "%s.%s %s", ldlinux, ldlinux_ext[i], iso_report.sl_version_str);
 						SetWindowTextU(hISOProgressDlg, lmprintf(MSG_085, tmp));
-						static_sprintf(tmp, "%s/%s-%s/%s.%s", FILES_URL, syslinux, iso_report.sl_version_str, ldlinux, ldlinux_ext[i]);
+						static_sprintf(tmp, "%s/%s-%s%s/%s.%s", FILES_URL, syslinux, iso_report.sl_version_str,
+							iso_report.sl_version_ext, ldlinux, ldlinux_ext[i]);
 						SetWindowTextU(hISOFileName, tmp);
+						PromptOnError = (*iso_report.sl_version_ext == 0);
 						syslinux_ldlinux_len[i] = DownloadFile(tmp, &tmp[sizeof(FILES_URL)], hISOProgressDlg);
+						PromptOnError = TRUE;
+						if ((syslinux_ldlinux_len[i] == 0) && (DownloadStatus == 404) && (*iso_report.sl_version_ext != 0)) {
+							// Couldn't locate the file on the server => try to download without the version extra
+							uprintf("Extended version was not found, trying main version\n");
+							static_sprintf(tmp, "%s/%s-%s/%s.%s", FILES_URL, syslinux, iso_report.sl_version_str,
+								ldlinux, ldlinux_ext[i]);
+							SetWindowTextU(hISOFileName, tmp);
+							syslinux_ldlinux_len[i] = DownloadFile(tmp, &tmp[sizeof(FILES_URL)], hISOProgressDlg);
+							if (syslinux_ldlinux_len[i] != 0) {
+								// Duplicate the file so that the user won't be prompted to download again
+								static_sprintf(tmp, "%s-%s\\%s.%s", syslinux, iso_report.sl_version_str, ldlinux, ldlinux_ext[i]);
+								static_sprintf(tmp2, "%s-%s\\%s\\%s.%s", syslinux, iso_report.sl_version_str, 
+									&iso_report.sl_version_ext[1], ldlinux, ldlinux_ext[i]);
+								CopyFileA(tmp, tmp2, FALSE);
+							}
+						}
 						if (syslinux_ldlinux_len[i] == 0) {
 							uprintf("Couldn't download the files - cancelling\n");
 							return FALSE;
@@ -1249,7 +1276,7 @@ void InitDialog(HWND hDlg)
 	DWORD len;
 	HDC hDC;
 	int i, i16, s16;
-	char tmp[128], *token, *buf;
+	char tmp[128], *token, *buf, *ext;
 	static char* resource[2] = { MAKEINTRESOURCEA(IDR_SL_LDLINUX_V4_SYS), MAKEINTRESOURCEA(IDR_SL_LDLINUX_V5_SYS) };
 
 #ifdef RUFUS_TEST
@@ -1301,14 +1328,16 @@ void InitDialog(HWND hDlg)
 	uprintf(APPLICATION_NAME " version: %d.%d.%d.%d\n", rufus_version[0], rufus_version[1], rufus_version[2], rufus_version[3]);
 	for (i=0; i<ARRAYSIZE(resource); i++) {
 		buf = (char*)GetResource(hMainInstance, resource[i], _RT_RCDATA, "ldlinux_sys", &len, FALSE);
-		if ((buf == NULL) || (len < 16)) {
+		if (buf == NULL) {
 			uprintf("Warning: could not read embedded Syslinux v%d version", i+4);
 		} else {
-			embedded_sl_version[i] = (((uint8_t)strtoul(&buf[0xb], &token, 10))<<8) + (uint8_t)strtoul(&token[1], NULL, 10);
+			embedded_sl_version[i] = GetSyslinuxVersion(buf, len, &ext);
 			static_sprintf(embedded_sl_version_str[i], "%d.%02d", SL_MAJOR(embedded_sl_version[i]), SL_MINOR(embedded_sl_version[i]));
+			safe_strcpy(embedded_sl_version_ext[i], sizeof(embedded_sl_version_ext[i]), ext);
 		}
 	}
-	uprintf("Syslinux versions: %s, %s", embedded_sl_version_str[0], embedded_sl_version_str[1]);
+	uprintf("Syslinux versions: %s%s, %s%s", embedded_sl_version_str[0], embedded_sl_version_ext[0],
+		embedded_sl_version_str[1], embedded_sl_version_ext[1]);
 	uprintf("Windows version: %s\n", WindowsVersionStr);
 	uprintf("Locale ID: 0x%04X\n", GetUserDefaultUILanguage());
 

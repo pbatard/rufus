@@ -249,6 +249,7 @@ typedef struct {
 	BOOL is_vhd;
 	uint16_t sl_version;	// Syslinux/Isolinux version
 	char sl_version_str[12];
+	char sl_version_ext[32];
 } RUFUS_ISO_REPORT;
 
 /* Isolate the Syslinux version numbers */
@@ -319,7 +320,8 @@ extern HWND hISOProgressDlg, hISOProgressBar, hISOFileName, hDiskID;
 extern float fScale;
 extern char szFolderPath[MAX_PATH], app_dir[MAX_PATH];
 extern char* image_path;
-extern DWORD FormatStatus;
+extern DWORD FormatStatus, DownloadStatus;
+extern BOOL PromptOnError;
 extern DWORD syslinux_ldlinux_len[2];
 extern RUFUS_DRIVE_INFO SelectedDrive;
 extern const int nb_steps[FS_MAX];
@@ -363,6 +365,7 @@ extern BOOL ExtractDOS(const char* path);
 extern BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan);
 extern int64_t ExtractISOFile(const char* iso, const char* iso_file, const char* dest_file, DWORD attributes);
 extern BOOL InstallSyslinux(DWORD drive_index, char drive_letter);
+extern uint16_t GetSyslinuxVersion(char* buf, size_t buf_size, char** ext);
 extern BOOL CreateProgress(void);
 extern BOOL SetAutorun(const char* path);
 extern char* FileDialog(BOOL save, char* path, const ext_t* ext, DWORD options);

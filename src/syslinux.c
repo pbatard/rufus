@@ -109,7 +109,8 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter)
 			syslinux_ldlinux[i] = (unsigned char*) malloc(syslinux_ldlinux_len[i]);
 			if (syslinux_ldlinux[i] == NULL)
 				goto out;
-			static_sprintf(path, "%s/%s-%s/%s.%s", FILES_DIR, syslinux, iso_report.sl_version_str, ldlinux, i==0?"sys":"bss");
+			static_sprintf(path, "%s/%s-%s%s/%s.%s", FILES_DIR, syslinux, iso_report.sl_version_str,
+				iso_report.sl_version_ext, ldlinux, i==0?"sys":"bss");
 			fd = fopen(path, "rb");
 			if (fd == NULL) {
 				uprintf("Could not open %s\n", path);
@@ -299,4 +300,58 @@ out:
 	safe_closehandle(d_handle);
 	safe_closehandle(f_handle);
 	return r;
+}
+
+uint16_t GetSyslinuxVersion(char* buf, size_t buf_size, char** ext)
+{
+	size_t i, j;
+	char *p;
+	uint16_t version;
+	const char LINUX[] = { 'L', 'I', 'N', 'U', 'X', ' ' };
+	static char* nullstr = "";
+
+	*ext = nullstr;
+	if (buf_size < 256)
+		return 0;
+
+	// Start at 64 to avoid the short incomplete version at the beginning of ldlinux.sys
+	for (i=64; i<buf_size-64; i++) {
+		if (memcmp(&buf[i], LINUX, sizeof(LINUX)) == 0) {
+			// Check for ISO or SYS prefix
+			if (!( ((buf[i-3] == 'I') && (buf[i-2] == 'S') && (buf[i-1] == 'O'))
+			    || ((buf[i-3] == 'S') && (buf[i-2] == 'Y') && (buf[i-1] == 'S')) ))
+			  continue;
+			i += sizeof(LINUX);
+			version = (((uint8_t)strtoul(&buf[i], &p, 10))<<8) + (uint8_t)strtoul(&p[1], &p, 10);
+			if (version == 0)
+				continue;
+			p[safe_strlen(p)] = 0;
+			// Ensure that our extra version string starts with a slash
+			*p = '/';
+			// Remove the x.yz- duplicate if present
+			for (j=0; (buf[i+j] == p[1+j]) && (buf[i+j] != ' '); j++);
+			if (p[j+1] == '-')
+				j++;
+			if (j >= 4) {
+				p[j] = '/';
+				p = &p[j];
+			}
+			for (j=safe_strlen(p)-1; j>0; j--) {
+				// Arch Linux affixes a star for their version - who knows what else is out there...
+				if ((p[j] == ' ') || (p[j] == '*'))
+					p[j] = 0;
+				else
+					break;
+			}
+			// Sanitize the string
+			for (j=1; j<safe_strlen(p); j++)
+				// Some people are bound to have slashes in their date strings
+				if ((p[j] == '/') || (p[j] == '\\') || (p[j] == '*'))
+					p[j] = '_';
+			// If all we have is a slash, return the empty string for the extra version
+			*ext = (p[1] == 0)?nullstr:p;
+			return version;
+		}
+	}
+	return 0;
 }

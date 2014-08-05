@@ -471,7 +471,7 @@ out:
 
 BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan)
 {
-	size_t i, k, size;
+	size_t i, size;
 	int j;
 	uint16_t sl_version;
 	FILE* fd;
@@ -480,11 +480,10 @@ BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan)
 	udf_t* p_udf = NULL; 
 	udf_dirent_t* p_udf_root;
 	LONG progress_style;
-	char *tmp, *buf;
+	char *tmp, *buf, *ext;
 	char path[MAX_PATH];
 	const char* basedir[] = { "i386", "minint" };
 	const char* tmp_sif = ".\\txtsetup.sif~";
-	const char ISOLINUX[] = { 'I', 'S', 'O', 'L', 'I', 'N', 'U', 'X', ' ' };
 	iso_extension_mask_t iso_extension_mask = ISO_EXTENSION_ALL;
 
 	if ((!enable_iso) || (src_iso == NULL) || (dest_dir == NULL))
@@ -589,7 +588,12 @@ out:
 		if (!IsStrArrayEmpty(config_path)) {
 			safe_strcpy(iso_report.cfg_path, sizeof(iso_report.cfg_path), config_path.String[0]);
 			for (i=1; i<config_path.Index; i++) {
-				if (safe_strlen(iso_report.cfg_path) > safe_strlen(config_path.String[i]))
+				// Tails uses an '/EFI/BOOT/isolinux.cfg' along with a '/isolinux/isolinux.cfg'
+				// which are the exact same length. However, only the /isolinux one will work,
+				// so for now, at equal length, always pick the latest.
+				// We may have to revisit this and prefer a path that contains '/isolinux' if
+				// this hack is not enough for other images.
+				if (safe_strlen(iso_report.cfg_path) >= safe_strlen(config_path.String[i]))
 					safe_strcpy(iso_report.cfg_path, sizeof(iso_report.cfg_path), config_path.String[i]);
 			}
 			uprintf("Will use %s for Syslinux\n", iso_report.cfg_path);
@@ -608,20 +612,15 @@ out:
 					}
 					fread(buf, 1, size, fd);
 					fclose(fd);
-					for (k=0; k<size-16; k++) {
-						if (memcmp(&buf[k], ISOLINUX, sizeof(ISOLINUX)) == 0) {
-							k += sizeof(ISOLINUX);
-							sl_version = (((uint8_t)strtoul(&buf[k], &tmp, 10))<<8) + (uint8_t)strtoul(&tmp[1], NULL, 10);
-							if (iso_report.sl_version == 0) {
-								iso_report.sl_version = sl_version;
-								j = (int)i;
-							} else if (iso_report.sl_version != sl_version) {
-								uprintf("Found conflicting %s versions:\n  '%s' (%d.%02d) vs '%s' (%d.%02d)\n", isolinux_bin,
-									isolinux_path.String[j], SL_MAJOR(iso_report.sl_version), SL_MINOR(iso_report.sl_version),
-									isolinux_path.String[i], SL_MAJOR(sl_version), SL_MINOR(sl_version));
-							}
-							break;
-						}
+					sl_version = GetSyslinuxVersion(buf, size, &ext);
+					if (iso_report.sl_version == 0) {
+						safe_strcpy(iso_report.sl_version_ext, sizeof(iso_report.sl_version_ext), ext);
+						iso_report.sl_version = sl_version;
+						j = (int)i;
+					} else if ((iso_report.sl_version != sl_version) || (safe_strcmp(iso_report.sl_version_ext, ext) != 0)) {
+						uprintf("Found conflicting %s versions:\n  '%s' (%d.%02d%s) vs '%s' (%d.%02d%s)\n", isolinux_bin,
+							isolinux_path.String[j], SL_MAJOR(iso_report.sl_version), SL_MINOR(iso_report.sl_version),
+							iso_report.sl_version_ext, isolinux_path.String[i], SL_MAJOR(sl_version), SL_MINOR(sl_version), ext);
 					}
 					free(buf);
 					_unlink(dot_isolinux_bin);
@@ -630,8 +629,8 @@ out:
 			if (iso_report.sl_version != 0) {
 				static_sprintf(iso_report.sl_version_str, "%d.%02d",
 					SL_MAJOR(iso_report.sl_version), SL_MINOR(iso_report.sl_version));
-				uprintf("Detected Isolinux version: %s (from '%s')",
-					iso_report.sl_version_str, isolinux_path.String[j]);
+				uprintf("Detected Isolinux version: %s%s (from '%s')",
+					iso_report.sl_version_str, iso_report.sl_version_ext, isolinux_path.String[j]);
 				if ( (has_ldlinux_c32 && (SL_MAJOR(iso_report.sl_version) < 5))
 				  || (!has_ldlinux_c32 && (SL_MAJOR(iso_report.sl_version) >= 5)) )
 					uprintf("Warning: Conflict between Isolinux version and the presence of ldlinux.c32...\n");

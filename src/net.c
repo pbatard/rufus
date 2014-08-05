@@ -41,6 +41,9 @@
 /* Default delay between update checks (1 day) */
 #define DEFAULT_UPDATE_INTERVAL (24*3600)
 
+DWORD DownloadStatus;
+BOOL PromptOnError = TRUE;
+
 extern BOOL force_update;
 static DWORD error_code;
 static BOOL update_check_in_progress = FALSE;
@@ -243,7 +246,7 @@ DWORD DownloadFile(const char* url, const char* file, HWND hProgressDialog)
 {
 	HWND hProgressBar = NULL;
 	BOOL r = FALSE;
-	DWORD dwFlags, dwSize, dwDownloaded, dwTotalSize, dwStatus;
+	DWORD dwFlags, dwSize, dwDownloaded, dwTotalSize;
 	FILE* fd = NULL; 
 	LONG progress_style;
 	const char* accept_types[] = {"*/*\0", NULL};
@@ -255,6 +258,7 @@ DWORD DownloadFile(const char* url, const char* file, HWND hProgressDialog)
 	size_t last_slash;
 	int i;
 
+	DownloadStatus = 0;
 	if (hProgressDialog != NULL) {
 		// Use the progress control provided, if any
 		hProgressBar = GetDlgItem(hProgressDialog, IDC_PROGRESS);
@@ -320,12 +324,12 @@ DWORD DownloadFile(const char* url, const char* file, HWND hProgressDialog)
 	}
 
 	// Get the file size
-	dwSize = sizeof(dwStatus);
-	dwStatus = 404;
-	HttpQueryInfoA(hRequest, HTTP_QUERY_STATUS_CODE|HTTP_QUERY_FLAG_NUMBER, (LPVOID)&dwStatus, &dwSize, NULL);
-	if (dwStatus != 200) {
+	dwSize = sizeof(DownloadStatus);
+	DownloadStatus = 404;
+	HttpQueryInfoA(hRequest, HTTP_QUERY_STATUS_CODE|HTTP_QUERY_FLAG_NUMBER, (LPVOID)&DownloadStatus, &dwSize, NULL);
+	if (DownloadStatus != 200) {
 		error_code = ERROR_INTERNET_ITEM_NOT_FOUND;
-		uprintf("Unable to access file: Server status %d\n", dwStatus);
+		uprintf("Unable to access file: Server status %d\n", DownloadStatus);
 		goto out;
 	}
 	dwSize = sizeof(dwTotalSize);
@@ -373,10 +377,12 @@ out:
 	if (fd != NULL) fclose(fd);
 	if (!r) {
 		_unlink(file);
-		PrintStatus(0, FALSE, MSG_242);
-		SetLastError(error_code);
-		MessageBoxU(hMainDialog, IS_ERROR(FormatStatus)?StrError(FormatStatus, FALSE):WinInetErrorString(),
-		lmprintf(MSG_044), MB_OK|MB_ICONERROR|MB_IS_RTL);
+		if (PromptOnError) {
+			PrintStatus(0, FALSE, MSG_242);
+			SetLastError(error_code);
+			MessageBoxU(hMainDialog, IS_ERROR(FormatStatus)?StrError(FormatStatus, FALSE):WinInetErrorString(),
+			lmprintf(MSG_044), MB_OK|MB_ICONERROR|MB_IS_RTL);
+		}
 	}
 	if (hRequest) InternetCloseHandle(hRequest);
 	if (hConnection) InternetCloseHandle(hConnection);
