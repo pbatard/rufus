@@ -527,7 +527,7 @@ BOOL AnalyzeMBR(HANDLE hPhysicalDrive, const char* TargetName)
 	int i;
 
 	fake_fd._ptr = (char*)hPhysicalDrive;
-	fake_fd._bufsiz = SelectedDrive.Geometry.BytesPerSector;
+	fake_fd._bufsiz = 512;
 
 	if (!is_br(&fake_fd)) {
 		uprintf("%s does not have an x86 %s\n", TargetName, mbr_name);
@@ -562,7 +562,7 @@ BOOL AnalyzePBR(HANDLE hLogicalVolume)
 	int i;
 
 	fake_fd._ptr = (char*)hLogicalVolume;
-	fake_fd._bufsiz = SelectedDrive.Geometry.BytesPerSector;
+	fake_fd._bufsiz = 512;
 
 	if (!is_br(&fake_fd)) {
 		uprintf("Volume does not have an x86 %s\n", pbr_name);

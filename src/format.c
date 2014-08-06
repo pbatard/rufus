@@ -848,8 +848,6 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 	DWORD size;
 	int dt, fs, bt;
 	unsigned char* buf = NULL;
-	size_t SecSize = SelectedDrive.Geometry.BytesPerSector;
-	size_t nSecs = (0x200 + SecSize -1) / SecSize;
 	FILE fake_fd = { 0 };
 	const char* using_msg = "Using %s MBR\n";
 
@@ -857,14 +855,14 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 
 	// FormatEx rewrites the MBR and removes the LBA attribute of FAT16
 	// and FAT32 partitions - we need to correct this in the MBR
-	buf = (unsigned char*)malloc(SecSize * nSecs);
+	buf = (unsigned char*)malloc(512);
 	if (buf == NULL) {
 		uprintf("Could not allocate memory for MBR");
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_NOT_ENOUGH_MEMORY;
 		goto out;
 	}
 
-	if (!read_sectors(hPhysicalDrive, SelectedDrive.Geometry.BytesPerSector, 0, nSecs, buf)) {
+	if (!read_sectors(hPhysicalDrive, 512, 0, 1, buf)) {
 		uprintf("Could not read MBR\n");
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_READ_FAULT;
 		goto out;
@@ -894,14 +892,14 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 		uprintf("Set bootable USB partition as 0x%02X\n", buf[0x1be]);
 	}
 
-	if (!write_sectors(hPhysicalDrive, SecSize, 0, nSecs, buf)) {
+	if (!write_sectors(hPhysicalDrive, 512, 0, 1, buf)) {
 		uprintf("Could not write MBR\n");
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_WRITE_FAULT;
 		goto out;
 	}
 
 	fake_fd._ptr = (char*)hPhysicalDrive;
-	fake_fd._bufsiz = SelectedDrive.Geometry.BytesPerSector;
+	fake_fd._bufsiz = 512;
 	fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
 	dt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
 	bt = GETBIOSTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
@@ -955,7 +953,7 @@ static BOOL WritePBR(HANDLE hLogicalVolume)
 	const char* using_msg = "Using %s %s partition boot record\n";
 
 	fake_fd._ptr = (char*)hLogicalVolume;
-	fake_fd._bufsiz = SelectedDrive.Geometry.BytesPerSector;
+	fake_fd._bufsiz = 512;
 
 	switch (ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem))) {
 	case FS_FAT16:
@@ -999,7 +997,7 @@ static BOOL WritePBR(HANDLE hLogicalVolume)
 			// Disk Drive ID needs to be corrected on XP
 			if (!write_partition_physical_disk_drive_id_fat32(&fake_fd))
 				break;
-			fake_fd._cnt += 6 * (int)SelectedDrive.Geometry.BytesPerSector;
+			fake_fd._cnt += 6 * 512;
 		}
 		return TRUE;
 	case FS_NTFS:
@@ -1329,7 +1327,7 @@ DWORD WINAPI FormatThread(void* param)
 				uprintf("Bad blocks: Check failed.\n");
 				if (!IS_ERROR(FormatStatus))
 					FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_BADBLOCKS_FAILURE);
-				ClearMBRGPT(hPhysicalDrive, SelectedDrive.DiskSize, SelectedDrive.Geometry.BytesPerSector, FALSE);
+				ClearMBRGPT(hPhysicalDrive, SelectedDrive.DiskSize, 512, FALSE);
 				fclose(log_fd);
 				_unlink(logfile);
 				goto out;
@@ -1440,7 +1438,7 @@ DWORD WINAPI FormatThread(void* param)
 
 	// Especially after destructive badblocks test, you must zero the MBR/GPT completely
 	// before repartitioning. Else, all kind of bad things happen.
-	if (!ClearMBRGPT(hPhysicalDrive, SelectedDrive.DiskSize, SelectedDrive.Geometry.BytesPerSector, use_large_fat32)) {
+	if (!ClearMBRGPT(hPhysicalDrive, SelectedDrive.DiskSize, 512, use_large_fat32)) {
 		uprintf("unable to zero MBR/GPT\n");
 		if (!IS_ERROR(FormatStatus))
 			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_WRITE_FAULT;
