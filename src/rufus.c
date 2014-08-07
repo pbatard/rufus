@@ -380,7 +380,7 @@ static BOOL SetDriveInfo(int ComboIndex)
 	memset(&SelectedDrive, 0, sizeof(SelectedDrive));
 	SelectedDrive.DeviceNumber = (DWORD)ComboBox_GetItemData(hDeviceList, ComboIndex);
 
-	SelectedDrive.nPartitions = GetDrivePartitionData(SelectedDrive.DeviceNumber, fs_type, sizeof(fs_type));
+	GetDrivePartitionData(SelectedDrive.DeviceNumber, fs_type, sizeof(fs_type), FALSE);
 
 	if (!DefineClusterSizes()) {
 		uprintf("No file system is selectable for this drive\n");

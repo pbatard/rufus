@@ -1358,8 +1358,18 @@ DWORD WINAPI FormatThread(void* param)
 		}
 	}
 
+	// Especially after destructive badblocks test, you must zero the MBR/GPT completely
+	// before repartitioning. Else, all kind of bad things happen.
+	if (!ClearMBRGPT(hPhysicalDrive, SelectedDrive.DiskSize, 512, use_large_fat32)) {
+		uprintf("unable to zero MBR/GPT\n");
+		if (!IS_ERROR(FormatStatus))
+			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_WRITE_FAULT;
+		goto out;
+	}
+
 	// Write an image file
 	if (dt == DT_IMG) {
+		char fs_type[32];
 		// We poked the MBR and other stuff, so we need to rewind
 		li.QuadPart = 0;
 		if (!SetFilePointerEx(hPhysicalDrive, li, NULL, FILE_BEGIN))
@@ -1421,9 +1431,31 @@ DWORD WINAPI FormatThread(void* param)
 			}
 			if (i >= WRITE_RETRIES) goto out;
 		}
+
+		// If the image contains a partition we might be able to access, try to re-mount it
+		RefreshDriveLayout(hPhysicalDrive);
+		safe_unlockclose(hPhysicalDrive);
+		safe_unlockclose(hLogicalVolume);
+		Sleep(200);
+		WaitForLogical(DriveIndex);
+		if (GetDrivePartitionData(SelectedDrive.DeviceNumber, fs_type, sizeof(fs_type), TRUE)) {
+			guid_volume = GetLogicalName(DriveIndex, TRUE, TRUE);
+			if ((guid_volume != NULL) && (MountVolume(drive_name, guid_volume)))
+				uprintf("Remounted %s on %s\n", guid_volume, drive_name);
+		}
+
 		uprintf("Done");
 		goto out;
 	}
+
+	UpdateProgress(OP_ZERO_MBR, -1.0f);
+	CHECK_FOR_USER_CANCEL;
+
+	if (!CreatePartition(hPhysicalDrive, pt, fs, (pt==PARTITION_STYLE_MBR)&&(bt==BT_UEFI))) {
+		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_PARTITION_FAILURE;
+		goto out;
+	}
+	UpdateProgress(OP_PARTITION, -1.0f);
 
 	// Close the (unmounted) volume before formatting
 	if ((hLogicalVolume != NULL) && (hLogicalVolume != INVALID_HANDLE_VALUE)) {
@@ -1435,23 +1467,6 @@ DWORD WINAPI FormatThread(void* param)
 		}
 	}
 	hLogicalVolume = INVALID_HANDLE_VALUE;
-
-	// Especially after destructive badblocks test, you must zero the MBR/GPT completely
-	// before repartitioning. Else, all kind of bad things happen.
-	if (!ClearMBRGPT(hPhysicalDrive, SelectedDrive.DiskSize, 512, use_large_fat32)) {
-		uprintf("unable to zero MBR/GPT\n");
-		if (!IS_ERROR(FormatStatus))
-			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_WRITE_FAULT;
-		goto out;
-	}
-	UpdateProgress(OP_ZERO_MBR, -1.0f);
-	CHECK_FOR_USER_CANCEL;
-
-	if (!CreatePartition(hPhysicalDrive, pt, fs, (pt==PARTITION_STYLE_MBR)&&(bt==BT_UEFI))) {
-		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_PARTITION_FAILURE;
-		goto out;
-	}
-	UpdateProgress(OP_PARTITION, -1.0f);
 
 	// Wait for the logical drive we just created to appear
 	uprintf("Waiting for logical drive to reappear...\n");

@@ -37,13 +37,15 @@
 #include "ntfs.h"
 #include "localization.h"
 
+#if !defined(PARTITION_BASIC_DATA_GUID)
+const GUID PARTITION_BASIC_DATA_GUID = 
+	{ 0xebd0a0a2, 0xb9e5, 0x4433, {0x87, 0xc0, 0x68, 0xb6, 0xb7, 0x26, 0x99, 0xc7} };
+#endif
+
 /*
  * Globals
  */
 RUFUS_DRIVE_INFO SelectedDrive;
-
-// TODO: add a DetectSectorSize()?
-// http://msdn.microsoft.com/en-us/library/ff800831.aspx
 
 /*
  * Working with drive indexes quite risky (left unchecked,inadvertently passing 0 as
@@ -78,7 +80,7 @@ static HANDLE GetHandle(char* Path, BOOL bWriteAccess, BOOL bLockDrive)
 	}
 
 	if (bWriteAccess) {
-		uprintf("Caution: Opened drive %s for write access\n", Path);
+		uprintf("Opened drive %s for write access\n", Path);
 	}
 
 	if (bLockDrive) {
@@ -136,7 +138,6 @@ HANDLE GetPhysicalHandle(DWORD DriveIndex, BOOL bWriteAccess, BOOL bLockDrive)
  * The returned string is allocated and must be freed
  * TODO: a drive may have multiple volumes - should we handle those?
  */
-#define suprintf(...) if (!bSilent) uprintf(__VA_ARGS__)
 char* GetLogicalName(DWORD DriveIndex, BOOL bKeepTrailingBackslash, BOOL bSilent)
 {
 	BOOL success = FALSE;
@@ -585,10 +586,13 @@ BOOL AnalyzePBR(HANDLE hLogicalVolume)
 
 /*
  * Fill the drive properties (size, FS, etc)
+ * Returns TRUE if the drive has a partition that can be mounted in Windows, FALSE otherwise
  */
-int GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSystemNameSize)
+BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSystemNameSize, BOOL bSilent)
 {
-	BOOL r, hasRufusExtra = FALSE;
+	// MBR partition types that can be mounted in Windows
+	const uint8_t mbr_mountable[] = { 0x01, 0x04, 0x06, 0x07, 0x0b, 0x0c, 0x0e, 0xef };
+	BOOL r, hasRufusExtra = FALSE, ret = FALSE;
 	HANDLE hPhysical;
 	DWORD size;
 	BYTE geometry[256], layout[4096], part_type;
@@ -596,13 +600,14 @@ int GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSyst
 	PDRIVE_LAYOUT_INFORMATION_EX DriveLayout = (PDRIVE_LAYOUT_INFORMATION_EX)(void*)layout;
 	char* volume_name;
 	char tmp[256];
-	DWORD i, nb_partitions = 0;
+	DWORD i, j;
 
+	SelectedDrive.nPartitions = 0;
 	// Populate the filesystem data
 	FileSystemName[0] = 0;
 	volume_name = GetLogicalName(DriveIndex, TRUE, FALSE);
 	if ((volume_name == NULL) || (!GetVolumeInformationA(volume_name, NULL, 0, NULL, NULL, NULL, FileSystemName, FileSystemNameSize))) {
-		uprintf("No volume information for drive 0x%02x\n", DriveIndex);
+		suprintf("No volume information for drive 0x%02x\n", DriveIndex);
 	}
 	safe_free(volume_name);
 
@@ -613,26 +618,26 @@ int GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSyst
 	r = DeviceIoControl(hPhysical, IOCTL_DISK_GET_DRIVE_GEOMETRY_EX,
 			NULL, 0, geometry, sizeof(geometry), &size, NULL);
 	if (!r || size <= 0) {
-		uprintf("Could not get geometry for drive 0x%02x: %s\n", DriveIndex, WindowsErrorString());
+		suprintf("Could not get geometry for drive 0x%02x: %s\n", DriveIndex, WindowsErrorString());
 		safe_closehandle(hPhysical);
 		return 0;
 	}
 	if (DiskGeometry->Geometry.BytesPerSector < 512) {
-		uprintf("WARNING: Drive 0x%02x reports a sector size of %d - Correcting to 512 bytes.\n",
+		suprintf("WARNING: Drive 0x%02x reports a sector size of %d - Correcting to 512 bytes.\n",
 			DriveIndex, DiskGeometry->Geometry.BytesPerSector);
 		DiskGeometry->Geometry.BytesPerSector = 512;
 	}
 	SelectedDrive.DiskSize = DiskGeometry->DiskSize.QuadPart;
 	memcpy(&SelectedDrive.Geometry, &DiskGeometry->Geometry, sizeof(DISK_GEOMETRY));
-	uprintf("Disk type: %s, Sector Size: %d bytes\n", (DiskGeometry->Geometry.MediaType == FixedMedia)?"Fixed":"Removable",
+	suprintf("Disk type: %s, Sector Size: %d bytes\n", (DiskGeometry->Geometry.MediaType == FixedMedia)?"Fixed":"Removable",
 		DiskGeometry->Geometry.BytesPerSector);
-	uprintf("Cylinders: %lld, TracksPerCylinder: %d, SectorsPerTrack: %d\n",
+	suprintf("Cylinders: %lld, TracksPerCylinder: %d, SectorsPerTrack: %d\n",
 		DiskGeometry->Geometry.Cylinders, DiskGeometry->Geometry.TracksPerCylinder, DiskGeometry->Geometry.SectorsPerTrack);
 
 	r = DeviceIoControl(hPhysical, IOCTL_DISK_GET_DRIVE_LAYOUT_EX, 
 			NULL, 0, layout, sizeof(layout), &size, NULL );
 	if (!r || size <= 0) {
-		uprintf("Could not get layout for drive 0x%02x: %s\n", DriveIndex, WindowsErrorString());
+		suprintf("Could not get layout for drive 0x%02x: %s\n", DriveIndex, WindowsErrorString());
 		safe_closehandle(hPhysical);
 		return 0;
 	}
@@ -642,18 +647,24 @@ int GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSyst
 		SelectedDrive.PartitionType = PARTITION_STYLE_MBR;
 		for (i=0; i<DriveLayout->PartitionCount; i++) {
 			if (DriveLayout->PartitionEntry[i].Mbr.PartitionType != PARTITION_ENTRY_UNUSED) {
-				nb_partitions++;
+				SelectedDrive.nPartitions++;
 			}
 		}
-		uprintf("Partition type: MBR, NB Partitions: %d\n", nb_partitions);
+		suprintf("Partition type: MBR, NB Partitions: %d\n", SelectedDrive.nPartitions);
 		SelectedDrive.has_mbr_uefi_marker = (DriveLayout->Mbr.Signature == MBR_UEFI_MARKER);
-		uprintf("Disk ID: 0x%08X %s\n", DriveLayout->Mbr.Signature, SelectedDrive.has_mbr_uefi_marker?"(UEFI target)":"");
+		suprintf("Disk ID: 0x%08X %s\n", DriveLayout->Mbr.Signature, SelectedDrive.has_mbr_uefi_marker?"(UEFI target)":"");
 		AnalyzeMBR(hPhysical, "Drive");
 		for (i=0; i<DriveLayout->PartitionCount; i++) {
 			if (DriveLayout->PartitionEntry[i].Mbr.PartitionType != PARTITION_ENTRY_UNUSED) {
-				uprintf("Partition %d:\n", i+1);
+				suprintf("Partition %d:\n", i+1);
 				part_type = DriveLayout->PartitionEntry[i].Mbr.PartitionType;
-				uprintf("  Type: %s (0x%02x)\r\n  Size: %s (%lld bytes)\r\n  Start Sector: %d, Boot: %s, Recognized: %s\n",
+				for (j=0; j<ARRAYSIZE(mbr_mountable); j++) {
+					if (part_type == mbr_mountable[j]) {
+						ret = TRUE;
+						break;
+					}
+				}
+				suprintf("  Type: %s (0x%02x)\r\n  Size: %s (%lld bytes)\r\n  Start Sector: %d, Boot: %s, Recognized: %s\n",
 					((part_type==0x07)&&(FileSystemName[0]!=0))?FileSystemName:GetPartitionType(part_type), part_type,
 					SizeToHumanReadable(DriveLayout->PartitionEntry[i].PartitionLength.QuadPart, TRUE, FALSE),
 					DriveLayout->PartitionEntry[i].PartitionLength, DriveLayout->PartitionEntry[i].Mbr.HiddenSectors,
@@ -668,32 +679,35 @@ int GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSyst
 		break;
 	case PARTITION_STYLE_GPT:
 		SelectedDrive.PartitionType = PARTITION_STYLE_GPT;
-		uprintf("Partition type: GPT, NB Partitions: %d\n", DriveLayout->PartitionCount);
-		uprintf("Disk GUID: %s\n", GuidToString(&DriveLayout->Gpt.DiskId));
-		uprintf("Max parts: %d, Start Offset: %lld, Usable = %lld bytes\n",
+		suprintf("Partition type: GPT, NB Partitions: %d\n", DriveLayout->PartitionCount);
+		suprintf("Disk GUID: %s\n", GuidToString(&DriveLayout->Gpt.DiskId));
+		suprintf("Max parts: %d, Start Offset: %lld, Usable = %lld bytes\n",
 			DriveLayout->Gpt.MaxPartitionCount, DriveLayout->Gpt.StartingUsableOffset.QuadPart, DriveLayout->Gpt.UsableLength.QuadPart);
 		for (i=0; i<DriveLayout->PartitionCount; i++) {
-			nb_partitions++;
+			SelectedDrive.nPartitions++;
 			tmp[0] = 0;
 			wchar_to_utf8_no_alloc(DriveLayout->PartitionEntry[i].Gpt.Name, tmp, sizeof(tmp));
-			uprintf("Partition %d:\r\n  Type: %s\r\n  Name: '%s'\n", DriveLayout->PartitionEntry[i].PartitionNumber,
+			suprintf("Partition %d:\r\n  Type: %s\r\n  Name: '%s'\n", DriveLayout->PartitionEntry[i].PartitionNumber,
 				GuidToString(&DriveLayout->PartitionEntry[i].Gpt.PartitionType), tmp);
-			uprintf("  ID: %s\r\n  Size: %s (%lld bytes)\r\n  Start Sector: %lld, Attributes: 0x%016llX\n",
+			suprintf("  ID: %s\r\n  Size: %s (%lld bytes)\r\n  Start Sector: %lld, Attributes: 0x%016llX\n",
 				GuidToString(&DriveLayout->PartitionEntry[i].Gpt.PartitionId), SizeToHumanReadable(DriveLayout->PartitionEntry[i].PartitionLength.QuadPart, TRUE, FALSE),
 				DriveLayout->PartitionEntry[i].PartitionLength, DriveLayout->PartitionEntry[i].StartingOffset.QuadPart / DiskGeometry->Geometry.BytesPerSector,
 				DriveLayout->PartitionEntry[i].Gpt.Attributes);
+			if ( (memcmp(&PARTITION_BASIC_DATA_GUID, &DriveLayout->PartitionEntry[i].Gpt.PartitionType, sizeof(GUID)) == 0) &&
+				 (nWindowsVersion >= WINDOWS_VISTA) )
+				ret = TRUE;
 		}
 		break;
 	default:
 		SelectedDrive.PartitionType = PARTITION_STYLE_MBR;
-		uprintf("Partition type: RAW\n");
+		suprintf("Partition type: RAW\n");
 		break;
 	}
 	safe_closehandle(hPhysical);
 
 	if (hasRufusExtra)
-		nb_partitions--;
-	return (int)nb_partitions;
+		SelectedDrive.nPartitions--;
+	return ret;
 }
 
 /*
@@ -822,9 +836,6 @@ typedef struct _DRIVE_LAYOUT_INFORMATION_EX4 {
  * copy it got from the last IOCTL, and ignores your changes until you replug the drive
  * or issue an IOCTL_DISK_UPDATE_PROPERTIES.
  */
-#if !defined(PARTITION_BASIC_DATA_GUID)
-const GUID PARTITION_BASIC_DATA_GUID = { 0xebd0a0a2, 0xb9e5, 0x4433, {0x87, 0xc0, 0x68, 0xb6, 0xb7, 0x26, 0x99, 0xc7} };
-#endif
 BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL mbr_uefi_marker)
 {
 	const char* PartitionTypeName[2] = { "MBR", "GPT" };
@@ -963,15 +974,25 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 		safe_closehandle(hDrive);
 		return FALSE;
 	}
-	// Diskpart does call the following IOCTL this after updating the partition table, so we do too
-	r = DeviceIoControl(hDrive, IOCTL_DISK_UPDATE_PROPERTIES, NULL, 0, NULL, 0, &size, NULL );
-	if (!r) {
-		uprintf("Could not refresh drive layout: %s\n", WindowsErrorString());
+
+	if (!RefreshDriveLayout(hDrive)) {
 		safe_closehandle(hDrive);
 		return FALSE;
 	}
 
 	return TRUE;
+}
+
+BOOL RefreshDriveLayout(HANDLE hDrive)
+{
+	BOOL r;
+	DWORD size;
+
+	// Diskpart does call the following IOCTL this after updating the partition table, so we do too
+	r = DeviceIoControl(hDrive, IOCTL_DISK_UPDATE_PROPERTIES, NULL, 0, NULL, 0, &size, NULL );
+	if (!r)
+		uprintf("Could not refresh drive layout: %s\n", WindowsErrorString());
+	return r;
 }
 
 /* Delete the disk partition table */
