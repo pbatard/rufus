@@ -1264,6 +1264,14 @@ DWORD WINAPI FormatThread(void* param)
 		// Do it in reverse so that we always end on the first volume letter
 		for (i=(int)safe_strlen(drive_letters); i>0; i--) {
 			drive_name[0] = drive_letters[i-1];
+			if (IsChecked(IDC_BOOT) && ((dt == DT_ISO) || (dt == DT_IMG))) {
+				// If we are using an image, check that it isn't located on the drive we are trying to format
+				if ((PathGetDriveNumberU(image_path) + 'A') == drive_letters[i-1]) {
+					uprintf("ABORTED: Cannot use an image that is located on the target drive!\n");
+					FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_ACCESS_DENIED;
+					goto out;
+				}
+			}
 			if (!DeleteVolumeMountPointA(drive_name)) {
 				uprintf("Failed to delete mountpoint %s: %s\n", drive_name, WindowsErrorString());
 				// Try to continue. We will bail out if this causes an issue.
@@ -1368,7 +1376,7 @@ DWORD WINAPI FormatThread(void* param)
 	}
 
 	// Write an image file
-	if (dt == DT_IMG) {
+	if (IsChecked(IDC_BOOT) && (dt == DT_IMG)) {
 		char fs_type[32];
 		// We poked the MBR and other stuff, so we need to rewind
 		li.QuadPart = 0;

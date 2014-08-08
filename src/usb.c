@@ -389,10 +389,10 @@ BOOL GetUSBDevices(DWORD devnum)
 						if (right_to_left_mode)
 							safe_strcat(entry_msg, sizeof(entry_msg), RIGHT_TO_LEFT_MARK);
 						safe_strcat(entry_msg, sizeof(entry_msg), letter_name);
-						if (drive_letters[k] == app_dir[0]) break;
+						if (drive_letters[k] == (PathGetDriveNumberU(app_dir) + 'A')) break;
 					}
 					// Repeat as we need to break the outside loop
-					if (drive_letters[k] == app_dir[0]) {
+					if (drive_letters[k] == (PathGetDriveNumberU(app_dir) + 'A')) {
 						uprintf("Removing %c: from the list: This is the disk from which " APPLICATION_NAME " is running!\n", app_dir[0]);
 						safe_closehandle(hDrive);
 						safe_free(devint_detail_data);

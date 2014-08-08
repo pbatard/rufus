@@ -25,6 +25,7 @@
 #include <ctype.h>
 #include <commdlg.h>
 #include <shellapi.h>
+#include <shlwapi.h>
 #include <setupapi.h>
 #include <direct.h>
 
@@ -346,6 +347,18 @@ static __inline BOOL DeleteFileU(const char* lpFileName)
 	ret = DeleteFileW(wlpFileName);
 	err = GetLastError();
 	wfree(lpFileName);
+	SetLastError(err);
+	return ret;
+}
+
+static __inline int PathGetDriveNumberU(char* lpPath)
+{
+	int ret = 0;
+	DWORD err = ERROR_INVALID_DATA;
+	wconvert(lpPath);
+	ret = PathGetDriveNumberW(wlpPath);
+	err = GetLastError();
+	wfree(lpPath);
 	SetLastError(err);
 	return ret;
 }
