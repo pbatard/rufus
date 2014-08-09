@@ -113,7 +113,8 @@ BOOL GetUSBDevices(DWORD devnum)
 	// The rest are the vendor UASP drivers I know of so far - list may be incomplete!
 	const char* storage_name[] = { "USBSTOR", "UASPSTOR", "VUSBSTOR", "ETRONSTOR" };
 	const char* scsi_name = "SCSI";
-	const char* vhd_name = "Virtual Disk";
+	const char* win8_vhd_name = "Microsoft Virtual Disk";
+	const char* win7_vhd_name = "Msft Virtual Disk";
 	const char* usb_speed_name[USB_SPEED_MAX] = { "USB", "USB 1.0", "USB 1.1", "USB 2.0", "USB 3.0" };
 	// Hash table and String Array used to match a Device ID with the parent hub's Device Interface Path
 	htab_table htab_devid = HTAB_EMPTY;
@@ -248,7 +249,7 @@ BOOL GetUSBDevices(DWORD devnum)
 			uprintf("SetupDiGetDeviceRegistryProperty (Friendly Name) failed: %s\n", WindowsErrorString());
 			// We can afford a failure on this call - just replace the name with "USB Storage Device (Generic)"
 			safe_strcpy(buffer, sizeof(buffer), lmprintf(MSG_045));
-		} else if (safe_strstr(buffer, vhd_name) != NULL) {
+		} else if ((safe_strstr(buffer, win7_vhd_name) != NULL) || (safe_strstr(buffer, win8_vhd_name) != NULL)) {
 			props.is_VHD = TRUE;
 		} else if (devid_list != NULL) {
 			// Get the properties of the device. We could avoid doing this lookup every time by keeping
