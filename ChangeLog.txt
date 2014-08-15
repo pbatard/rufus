@@ -1,3 +1,10 @@
+o Version 1.4.10 (2014.08.15)
+    Fix a crash when scanning disk images with no USB drive plugged
+    Fix default detection of some OCZ flash drives
+    Improve Syslinux 6.x support (for Tails 1.x and other ISOs)
+    Improve disk image handling (refresh partitions, remount drive, etc.)
+    Other fixes and improvements
+
 o Version 1.4.9 (2014.06.08) [BUGFIX RELEASE]
     Fix listing of drives for Windows XP and Windows Vista (reported by Alex Andrews)
 
