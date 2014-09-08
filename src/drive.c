@@ -308,7 +308,7 @@ static BOOL _GetDriveLettersAndType(DWORD DriveIndex, char* drive_letters, UINT*
 	HANDLE hDrive = INVALID_HANDLE_VALUE;
 	UINT _drive_type;
 	int i = 0, drive_number;
-	char *drive, drives[26*4];	/* "D:\", "E:\", etc. */
+	char *drive, drives[26*4 + 1];	/* "D:\", "E:\", etc., plus one NUL */
 	char logical_drive[] = "\\\\.\\#:";
 
 	if (drive_letters != NULL)
@@ -317,13 +317,20 @@ static BOOL _GetDriveLettersAndType(DWORD DriveIndex, char* drive_letters, UINT*
 		*drive_type = DRIVE_UNKNOWN;
 	CheckDriveIndex(DriveIndex);
 
+	// This call is weird... The buffer needs to have an extra NUL, but you're
+	// supposed to provide the size without the extra NUL. And the returned size
+	// does not include the NUL either *EXCEPT* if your buffer is too small...
+	// But then again, this doesn't hold true if you have a 105 byte buffer and
+	// pass a 4*26=104 size, as the the call will return 105 (i.e. *FAILURE*)
+	// instead of 104 as it should => screw Microsoft: We'll include the NUL
+	// always, as each drive string is at least 4 chars long anyway.
 	size = GetLogicalDriveStringsA(sizeof(drives), drives);
 	if (size == 0) {
 		uprintf("GetLogicalDriveStrings failed: %s\n", WindowsErrorString());
 		goto out;
 	}
 	if (size > sizeof(drives)) {
-		uprintf("GetLogicalDriveStrings: buffer too small (required %d vs %d)\n", size, sizeof(drives));
+		uprintf("GetLogicalDriveStrings: Buffer too small (required %d vs. %d)\n", size, sizeof(drives));
 		goto out;
 	}
 
@@ -390,7 +397,7 @@ UINT GetDriveTypeFromIndex(DWORD DriveIndex)
 char GetUnusedDriveLetter(void)
 {
 	DWORD size;
-	char drive_letter = 'Z'+1, *drive, drives[26*4];	/* "D:\", "E:\", etc. */
+	char drive_letter = 'Z'+1, *drive, drives[26*4 + 1];	/* "D:\", "E:\", etc., plus one NUL */
 
 	size = GetLogicalDriveStringsA(sizeof(drives), drives);
 	if (size == 0) {
@@ -398,7 +405,7 @@ char GetUnusedDriveLetter(void)
 		goto out;
 	}
 	if (size > sizeof(drives)) {
-		uprintf("GetLogicalDriveStrings: buffer too small (required %d vs %d)\n", size, sizeof(drives));
+		uprintf("GetLogicalDriveStrings: Buffer too small (required %d vs. %d)\n", size, sizeof(drives));
 		goto out;
 	}
 
