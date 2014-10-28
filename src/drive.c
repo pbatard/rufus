@@ -136,7 +136,6 @@ HANDLE GetPhysicalHandle(DWORD DriveIndex, BOOL bWriteAccess, BOOL bLockDrive)
  * Return the first GUID volume name for the associated drive or NULL if not found
  * See http://msdn.microsoft.com/en-us/library/cc542456.aspx
  * The returned string is allocated and must be freed
- * TODO: a drive may have multiple volumes - should we handle those?
  */
 char* GetLogicalName(DWORD DriveIndex, BOOL bKeepTrailingBackslash, BOOL bSilent)
 {
@@ -535,7 +534,7 @@ BOOL AnalyzeMBR(HANDLE hPhysicalDrive, const char* TargetName)
 	int i;
 
 	fake_fd._ptr = (char*)hPhysicalDrive;
-	fake_fd._bufsiz = 512;
+	fake_fd._bufsiz = SelectedDrive.Geometry.BytesPerSector;
 
 	if (!is_br(&fake_fd)) {
 		uprintf("%s does not have an x86 %s\n", TargetName, mbr_name);
@@ -570,7 +569,7 @@ BOOL AnalyzePBR(HANDLE hLogicalVolume)
 	int i;
 
 	fake_fd._ptr = (char*)hLogicalVolume;
-	fake_fd._bufsiz = 512;
+	fake_fd._bufsiz = SelectedDrive.Geometry.BytesPerSector;
 
 	if (!is_br(&fake_fd)) {
 		uprintf("Volume does not have an x86 %s\n", pbr_name);
@@ -900,9 +899,9 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 
 		DriveLayoutEx.PartitionStyle = PARTITION_STYLE_GPT;
 		DriveLayoutEx.PartitionCount = 1;
-		// At the very least, a GPT disk has 34 reserved blocks (512 bytes) at the beginning and 33 at the end.
-		DriveLayoutEx.Type.Gpt.StartingUsableOffset.QuadPart = 34*512;
-		DriveLayoutEx.Type.Gpt.UsableLength.QuadPart = SelectedDrive.DiskSize - (34+33)*512;
+		// At the very least, a GPT disk has 34 reserved sectors at the beginning and 33 at the end.
+		DriveLayoutEx.Type.Gpt.StartingUsableOffset.QuadPart = 34 * SelectedDrive.Geometry.BytesPerSector;
+		DriveLayoutEx.Type.Gpt.UsableLength.QuadPart = SelectedDrive.DiskSize - (34+33) * SelectedDrive.Geometry.BytesPerSector;
 		DriveLayoutEx.Type.Gpt.MaxPartitionCount = MAX_GPT_PARTITIONS;
 		DriveLayoutEx.Type.Gpt.DiskId = CreateDisk.Gpt.DiskId;
 		DriveLayoutEx.PartitionEntry[0].PartitionStyle = PARTITION_STYLE_GPT;

@@ -289,14 +289,14 @@ static BOOL DefineClusterSizes(void)
 
 		// UDF (only supported for Vista and later)
 		if (nWindowsVersion >= WINDOWS_VISTA) {
-			SelectedDrive.ClusterSize[FS_UDF].Allowed = 0x00000100;
+			SelectedDrive.ClusterSize[FS_UDF].Allowed = SINGLE_CLUSTERSIZE_DEFAULT;
 			SelectedDrive.ClusterSize[FS_UDF].Default = 1;
 		}
 
 		// ReFS (only supported for Windows 8.1 and later and for fixed disks)
 		if (SelectedDrive.DiskSize >= 512*MB) {
 			if ((nWindowsVersion >= WINDOWS_8_1_OR_LATER) && (SelectedDrive.Geometry.MediaType == FixedMedia)) {
-				SelectedDrive.ClusterSize[FS_REFS].Allowed = 0x00000100;
+				SelectedDrive.ClusterSize[FS_REFS].Allowed = SINGLE_CLUSTERSIZE_DEFAULT;
 				SelectedDrive.ClusterSize[FS_REFS].Default = 1;
 			}
 		}
@@ -305,6 +305,15 @@ static BOOL DefineClusterSizes(void)
 out:
 	// Only add the filesystems we can service
 	for (fs=0; fs<FS_MAX; fs++) {
+		// Remove all cluster sizes that are below the sector size
+		if (SelectedDrive.ClusterSize[fs].Allowed != SINGLE_CLUSTERSIZE_DEFAULT) {
+			SelectedDrive.ClusterSize[fs].Allowed &= ~(SelectedDrive.Geometry.BytesPerSector - 1);
+			if ((SelectedDrive.ClusterSize[fs].Default & SelectedDrive.ClusterSize[fs].Allowed) == 0)
+				// We lost our default => Use rightmost bit to select the new one
+				SelectedDrive.ClusterSize[fs].Default =
+					SelectedDrive.ClusterSize[fs].Allowed & (-(LONG)SelectedDrive.ClusterSize[fs].Allowed);
+		}
+
 		if (SelectedDrive.ClusterSize[fs].Allowed != 0) {
 			tmp[0] = 0;
 			// Tell the user if we're going to use Large FAT32 or regular

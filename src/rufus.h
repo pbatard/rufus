@@ -53,6 +53,7 @@
 #define MBR_UEFI_MARKER             0x49464555	// 'U', 'E', 'F', 'I', as a 32 bit little endian longword
 #define WRITE_RETRIES               3
 #define FS_DEFAULT                  FS_FAT32
+#define SINGLE_CLUSTERSIZE_DEFAULT  0x00000100
 #define BADBLOCK_PATTERNS           {0xaa, 0x55, 0xff, 0x00}
 #define LARGE_FAT32_SIZE            (32*1073741824LL)	// Size at which we need to use fat32format
 #define UDF_FORMAT_SPEED            3.1f		// Speed estimate at which we expect UDF drives to be formatted (GB/s)

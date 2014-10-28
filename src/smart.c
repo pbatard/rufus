@@ -179,7 +179,7 @@ static int SatAtaPassthrough(HANDLE hPhysical, ATA_PASSTHROUGH_CMD* Command, voi
 	int t_length = 0;   /* 0 -> no data transferred */
 	uint8_t Direction;
 
-	if (BufLen % 512 != 0) {
+	if (BufLen % SelectedDrive.Geometry.BytesPerSector != 0) {
 		uprintf("SatAtaPassthrough: BufLen must be a multiple of <block size>\n");
 		return SPT_ERROR_BUFFER;
 	}
