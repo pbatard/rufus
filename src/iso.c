@@ -121,8 +121,11 @@ static BOOL check_iso_props(const char* psz_dirname, BOOL* is_syslinux_cfg, BOOL
 	// Check for an isolinux/syslinux config file anywhere
 	*is_syslinux_cfg = FALSE;
 	for (i=0; i<ARRAYSIZE(syslinux_cfg); i++) {
-		if (safe_stricmp(psz_basename, syslinux_cfg[i]) == 0)
+		if (safe_stricmp(psz_basename, syslinux_cfg[i]) == 0) {
 			*is_syslinux_cfg = TRUE;
+			if ((scan_only) && (i == 1) && (safe_stricmp(psz_dirname, efi_dirname) == 0))
+				iso_report.has_efi_syslinux = TRUE;
+		}
 	}
 
 	// Check for a syslinux v5.0+ file anywhere
@@ -204,7 +207,7 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 	BOOL r, is_syslinux_cfg, is_old_c32[NB_OLD_C32];
 	int i_length;
 	size_t i, nul_pos;
-	char tmp[128], *psz_fullpath = NULL;
+	char tmp[128], *psz_fullpath = NULL, *dst;
 	const char* psz_basename;
 	udf_dirent_t *p_udf_dirent2;
 	uint8_t buf[UDF_BLOCKSIZE];
@@ -311,6 +314,14 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 				// append that may be different from our USB label.
 				if (replace_in_token_data(psz_fullpath, "append", iso_report.label, iso_report.usb_label, TRUE) != NULL)
 					uprintf("Patched %s: '%s' -> '%s'\n", psz_fullpath, iso_report.label, iso_report.usb_label);
+				// Fix dual BIOS + EFI support for tails and other ISOs
+				if ( (safe_stricmp(psz_path, efi_dirname) == 0) && (safe_stricmp(psz_basename, syslinux_cfg[0]) == 0) &&
+					 (!iso_report.has_efi_syslinux) && (dst = safe_strdup(psz_fullpath)) ) {
+					dst[nul_pos-12] = 's'; dst[nul_pos-11] = 'y'; dst[nul_pos-10] = 's';
+					CopyFileA(psz_fullpath, dst, TRUE);
+					uprintf("Duplicated %s to %s\n", psz_fullpath, dst);
+					free(dst);
+				}
 			}
 		}
 		safe_free(psz_fullpath);
@@ -332,7 +343,7 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 	DWORD buf_size, wr_size, err;
 	BOOL s, is_syslinux_cfg, is_old_c32[NB_OLD_C32], is_symlink;
 	int i_length, r = 1;
-	char tmp[128], psz_fullpath[1024], *psz_basename;
+	char tmp[128], psz_fullpath[MAX_PATH], *psz_basename, *dst;
 	const char *psz_iso_name = &psz_fullpath[strlen(psz_extract_dir)];
 	unsigned char buf[ISO_BLOCKSIZE];
 	CdioListNode_t* p_entnode;
@@ -397,7 +408,8 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 			safe_sprintf(&psz_fullpath[nul_pos], 24, " (%s)", SizeToHumanReadable(i_file_length, FALSE, FALSE));
 			SetWindowTextU(hISOFileName, psz_fullpath);
 			// ISO9660 cannot handle backslashes
-			for (i=0; i<nul_pos; i++) if (psz_fullpath[i] == '\\') psz_fullpath[i] = '/';
+			for (i=0; i<nul_pos; i++)
+				if (psz_fullpath[i] == '\\') psz_fullpath[i] = '/';
 			psz_fullpath[nul_pos] = 0;
 			for (i=0; i<NB_OLD_C32; i++) {
 				if (is_old_c32[i] && use_own_c32[i]) {
@@ -456,8 +468,19 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 			}
 			ISO_BLOCKING(safe_closehandle(file_handle));
 			if (is_syslinux_cfg) {
+				nul_pos = safe_strlen(psz_fullpath);
+				for (i=0; i<nul_pos; i++)
+					if (psz_fullpath[i] == '/') psz_fullpath[i] = '\\';
 				if (replace_in_token_data(psz_fullpath, "append", iso_report.label, iso_report.usb_label, TRUE) != NULL)
 					uprintf("Patched %s: '%s' -> '%s'\n", psz_fullpath, iso_report.label, iso_report.usb_label);
+				// Fix dual BIOS + EFI support for tails and other ISOs
+				if ( (safe_stricmp(psz_path, efi_dirname) == 0) && (safe_stricmp(psz_basename, syslinux_cfg[0]) == 0) &&
+					 (!iso_report.has_efi_syslinux) && (dst = safe_strdup(psz_fullpath)) ) {
+					dst[nul_pos-12] = 's'; dst[nul_pos-11] = 'y'; dst[nul_pos-10] = 's';
+					CopyFileA(psz_fullpath, dst, TRUE);
+					uprintf("Duplicated %s to %s\n", psz_fullpath, dst);
+					free(dst);
+				}
 			}
 		}
 	}

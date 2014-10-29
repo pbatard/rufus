@@ -246,6 +246,7 @@ typedef struct {
 	BOOL has_autorun;
 	BOOL has_old_c32[NB_OLD_C32];
 	BOOL has_old_vesamenu;
+	BOOL has_efi_syslinux;
 	BOOL has_kolibrios;
 	BOOL uses_minint;
 	BOOL is_bootable_img;
