@@ -1,3 +1,10 @@
+o Version 1.4.11 (2014.11.??)
+    Add Ukrainian translation, courtesy of VKS
+    Fix formatting of drives with a large sector size (2K, 4K)
+    Fix UEFI boot for tails and other Syslinux/EFI based ISOs
+    Fix listing of devices when all 26 drive letters are in use
+    Add a minimize button as well as other minor UI changes
+
 o Version 1.4.10 (2014.08.15)
     Fix a crash when scanning disk images with no USB drive plugged
     Fix default detection of some OCZ flash drives

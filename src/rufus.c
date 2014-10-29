@@ -1336,13 +1336,14 @@ void InitDialog(HWND hDlg)
 	}
 	uprintf(APPLICATION_NAME " version: %d.%d.%d.%d\n", rufus_version[0], rufus_version[1], rufus_version[2], rufus_version[3]);
 	for (i=0; i<ARRAYSIZE(resource); i++) {
-		buf = (char*)GetResource(hMainInstance, resource[i], _RT_RCDATA, "ldlinux_sys", &len, FALSE);
+		buf = (char*)GetResource(hMainInstance, resource[i], _RT_RCDATA, "ldlinux_sys", &len, TRUE);
 		if (buf == NULL) {
 			uprintf("Warning: could not read embedded Syslinux v%d version", i+4);
 		} else {
 			embedded_sl_version[i] = GetSyslinuxVersion(buf, len, &ext);
 			static_sprintf(embedded_sl_version_str[i], "%d.%02d", SL_MAJOR(embedded_sl_version[i]), SL_MINOR(embedded_sl_version[i]));
 			safe_strcpy(embedded_sl_version_ext[i], sizeof(embedded_sl_version_ext[i]), ext);
+			free(buf);
 		}
 	}
 	uprintf("Syslinux versions: %s%s, %s%s", embedded_sl_version_str[0], embedded_sl_version_ext[0],
@@ -2319,6 +2320,12 @@ relaunch:
 	while(GetMessage(&msg, NULL, 0, 0)) {
 		// The following ensures the processing of the ISO progress window messages
 		if (!IsWindow(hISOProgressDlg) || !IsDialogMessage(hISOProgressDlg, &msg)) {
+			// Ctrl-A => Select the log data
+			if ( (IsWindowVisible(hLogDlg)) && (GetKeyState(VK_CONTROL) & 0x8000) && 
+				(msg.message == WM_KEYDOWN) && (msg.wParam == 'A') ) {
+				// Might also need ES_NOHIDESEL property if you want to select when not active
+				SendMessage(hLog, EM_SETSEL, 0, -1);
+			}
 			// Alt-B => Toggle fake drive detection during bad blocks check
 			// By default, Rufus will check for fake USB flash drives that mistakenly present
 			// more capacity than they already have by looping over the flash. This check which

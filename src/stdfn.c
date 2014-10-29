@@ -632,7 +632,7 @@ BOOL SetLGP(BOOL bRestore, BOOL* bExistingKey, const char* szPath, const char* s
 
 	// Apply policy
 	hr = pLGPO->lpVtbl->Save(pLGPO, TRUE, (bRestore)?FALSE:TRUE, &ext_guid, &snap_guid);
-	if (r != S_OK) {
+	if (hr != S_OK) {
 		uprintf("SetLGP: Unable to apply %s policy - error %x\n", szPolicy, hr);
 		goto error;
 	} else {
