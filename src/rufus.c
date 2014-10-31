@@ -749,7 +749,7 @@ void UpdateProgress(int op, float percent)
 static void EnableControls(BOOL bEnable)
 {
 	EnableWindow(GetDlgItem(hMainDialog, IDC_DEVICE), bEnable);
-	EnableWindow(GetDlgItem(hMainDialog, IDC_START), bEnable);
+	EnableWindow(GetDlgItem(hMainDialog, IDC_START), (ComboBox_GetCurSel(hDeviceList)<0)?FALSE:bEnable);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_ABOUT), bEnable);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_BADBLOCKS), bEnable);
 	EnableBootOptions(bEnable, FALSE);
@@ -962,6 +962,7 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 		MessageBoxU(hMainDialog, lmprintf(MSG_082), lmprintf(MSG_081), MB_OK|MB_ICONINFORMATION|MB_IS_RTL);
 		safe_free(image_path);
 		SetMBRProps();
+		PrintStatus(0, FALSE, -1);
 	} else {
 		// Enable bootable and set Target System and FS accordingly
 		CheckDlgButton(hMainDialog, IDC_BOOT, BST_CHECKED);

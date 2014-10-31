@@ -417,7 +417,8 @@ void PrintStatus(unsigned int duration, BOOL debug, int msg_id, ...)
 
 	if (msg_id < 0) {
 		//A negative msg_id clears the status
-		SendMessageLU(GetDlgItem(hMainDialog, IDC_STATUS), SB_SETTEXTW, SBT_OWNERDRAW, "");
+		szStatusMessage[0] = 0;
+		SendMessageLU(GetDlgItem(hMainDialog, IDC_STATUS), SB_SETTEXTW, SBT_OWNERDRAW, szStatusMessage);
 		return;
 	}
 
