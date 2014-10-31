@@ -22,6 +22,7 @@
     <ClCompile Include="..\disc.c" />
     <ClCompile Include="..\ds.c" />
     <ClCompile Include="..\logging.c" />
+    <ClCompile Include="..\memory.c" />
     <ClCompile Include="..\read.c" />
     <ClCompile Include="..\sector.c" />
     <ClCompile Include="..\track.c" />
@@ -34,6 +35,7 @@
     <ClInclude Include="..\..\cdio\cdio.h" />
     <ClInclude Include="..\..\cdio\ds.h" />
     <ClInclude Include="..\..\cdio\logging.h" />
+    <ClInclude Include="..\..\cdio\memory.h" />
     <ClInclude Include="..\..\cdio\sector.h" />
     <ClInclude Include="..\..\cdio\types.h" />
     <ClInclude Include="..\..\cdio\util.h" />

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2003-2008, 2011-2013 Rocky Bernstein <rocky@gnu.org>
+  Copyright (C) 2003-2008, 2011-2014 Rocky Bernstein <rocky@gnu.org>
   Copyright (C) 2001 Herbert Valerio Riedel <hvr@gnu.org>
 
   This program is free software: you can redistribute it and/or modify
@@ -754,6 +754,7 @@ _iso9660_dir_to_statbuf (iso9660_dir_t *p_iso9660_dir, bool_3way_t b_xa,
         if (!p_stat_new)
           {
           cdio_warn("Couldn't calloc(1, %d)", (int)(sizeof(iso9660_stat_t)+i_rr_fname+2));
+	  free(p_stat);
           return NULL;
           }
 	memcpy(p_stat_new, p_stat, stat_len);
@@ -1270,12 +1271,15 @@ iso9660_fs_readdir (CdIo_t *p_cdio, const char psz_path[], bool b_mode2)
     if (!_dirbuf)
       {
       cdio_warn("Couldn't calloc(1, %d)", p_stat->secsize * ISO_BLOCKSIZE);
+      _cdio_list_free (retval, true);
       return NULL;
       }
 
     if (cdio_read_data_sectors (p_cdio, _dirbuf, p_stat->lsn,
-				ISO_BLOCKSIZE, p_stat->secsize))
-	return NULL;
+				ISO_BLOCKSIZE, p_stat->secsize)) {
+      _cdio_list_free (retval, true);
+      return NULL;
+    }
 
     while (offset < (p_stat->secsize * ISO_BLOCKSIZE))
       {
@@ -1334,12 +1338,14 @@ iso9660_ifs_readdir (iso9660_t *p_iso, const char psz_path[])
     if (!_dirbuf)
       {
         cdio_warn("Couldn't calloc(1, %d)", p_stat->secsize * ISO_BLOCKSIZE);
+      _cdio_list_free (retval, true);
         return NULL;
       }
 
     ret = iso9660_iso_seek_read (p_iso, _dirbuf, p_stat->lsn, p_stat->secsize);
     if (ret != ISO_BLOCKSIZE*p_stat->secsize)
 	  {
+	    _cdio_list_free (retval, true);
 	    free (_dirbuf);
 	    return NULL;
 	  }
@@ -1415,8 +1421,9 @@ find_lsn_recurse (void *p_image, iso9660_readdir_t iso9660_readdir,
 	iso9660_stat_t *ret_stat = calloc(1, len2);
 	if (!ret_stat)
 	  {
-          cdio_warn("Couldn't calloc(1, %d)", len2);
-          return NULL;
+	    _cdio_list_free (dirlist, true);
+	    cdio_warn("Couldn't calloc(1, %d)", len2);
+	    return NULL;
 	  }
 	memcpy(ret_stat, statbuf, len2);
         _cdio_list_free (entlist, true);
@@ -1511,6 +1518,16 @@ iso9660_ifs_find_lsn_with_path(iso9660_t *p_iso, lsn_t i_lsn,
 }
 
 /*!
+  Free the passed iso9660_stat_t structure.
+ */
+void
+iso9660_stat_free(iso9660_stat_t *p_stat)
+{
+  if (p_stat != NULL)
+    free(p_stat);
+}
+
+/*!
   Return true if ISO 9660 image has extended attrributes (XA).
 */
 bool
@@ -1563,11 +1580,11 @@ iso_have_rr_traverse (iso9660_t *p_iso, const iso9660_stat_t *_root,
       if ( have_rr != yep) {
 	have_rr = iso_have_rr_traverse (p_iso, p_stat, &splitpath[1], pu_file_limit);
       }
+      free(p_stat);
       if (have_rr != nope) {
 	free (_dirbuf);
 	return have_rr;
       }
-      free(p_stat);
 
       offset += iso9660_get_dir_len(p_iso9660_dir);
       *pu_file_limit = (*pu_file_limit)-1;

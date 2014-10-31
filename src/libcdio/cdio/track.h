@@ -211,8 +211,8 @@ extern "C" {
     @return the International Standard Recording Code (ISRC) or NULL
     if there is none or we don't have the ability to get it.
 
-    Note: string is malloc'd so caller has to free() the returned
-    string when done with it.
+    Note: The caller must free the returned string with cdio_free()
+    when done with it.
 
   */
   char * cdio_get_track_isrc (const CdIo_t *p_cdio, track_t i_track);

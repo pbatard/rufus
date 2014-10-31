@@ -146,13 +146,21 @@ iso9660_get_xa_attr_str (uint16_t xa_attr);
   
 /*! 
   Allocates and initalizes a new iso9600_xa_t variable and returns
-  it. The caller should free the returned result.
+  it. The caller must free the returned result using iso9660_xa_free().
 
   @see iso9660_xa
 */
 iso9660_xa_t *
 iso9660_xa_init (iso9660_xa_t *_xa, uint16_t uid, uint16_t gid, uint16_t attr, 
                  uint8_t filenum);
+
+/*! 
+  Frees the passed iso9600_xa_t structure.
+
+  @see iso9660_xa
+*/
+void
+iso9660_xa_free (iso9660_xa_t *_xa);
 
 #ifdef __cplusplus
 }

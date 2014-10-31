@@ -1,5 +1,6 @@
 /*
-  Copyright (C) 2005-2006, 2008, 2011, 2013 Rocky Bernstein <rocky@gnu.org>
+  Copyright (C) 2005-2006, 2008, 2011, 2013-2014
+  Rocky Bernstein <rocky@gnu.org>
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -205,10 +206,9 @@ udf_get_lba(const udf_file_entry_t *p_udf_fe,
 
 #define udf_PATH_DELIMITERS "/\\"
 
-/* Searches p_udf_dirent a directory entry called psz_token.
-   Note p_udf_dirent is continuously updated. If the entry is
-   not found p_udf_dirent is useless and thus the caller should
-   not use it afterwards.
+/* Searches p_udf_dirent for a directory entry called psz_token.
+   Note that p_udf_dirent may be replaced or freed during this call
+   and only the returned udf_dirent_t must be used afterwards.
 */
 static
 udf_dirent_t *
@@ -221,20 +221,21 @@ udf_ff_traverse(udf_dirent_t *p_udf_dirent, char *psz_token)
       if (!next_tok)
 	return p_udf_dirent; /* found */
       else if (p_udf_dirent->b_dir) {
-	udf_dirent_t * p_udf_dirent2 = udf_opendir(p_udf_dirent);
+	udf_dirent_t * p_udf_dirent_next = udf_opendir(p_udf_dirent);
 
-	if (p_udf_dirent2) {
-	  udf_dirent_t * p_udf_dirent3 =
-	    udf_ff_traverse(p_udf_dirent2, next_tok);
+	if (p_udf_dirent_next) {
+	  /* free p_udf_dirent to avoid leaking memory. */
+	  udf_dirent_free(p_udf_dirent);
 
-	  /* if p_udf_dirent3 is null p_udf_dirent2 is free'd. */
-	  return p_udf_dirent3;
+	  /* previous p_udf_dirent_next is freed by udf_ff_traverse. */
+	  p_udf_dirent_next = udf_ff_traverse(p_udf_dirent_next, next_tok);
+
+	  return p_udf_dirent_next;
 	}
       }
     }
   }
-  if (p_udf_dirent)
-    free(p_udf_dirent->psz_name);
+
   return NULL;
 }
 
@@ -253,20 +254,15 @@ udf_fopen(udf_dirent_t *p_udf_root, const char *psz_name)
     /* file position must be reset when accessing a new file */
     p_udf_root->p_udf->i_position = 0;
 
-    strncpy(tokenline, psz_name, udf_MAX_PATHLEN);
+    tokenline[udf_MAX_PATHLEN-1] = '\0';
+    strncpy(tokenline, psz_name, udf_MAX_PATHLEN-1);
     psz_token = strtok(tokenline, udf_PATH_DELIMITERS);
     if (psz_token) {
-      /*** FIXME??? udf_dirent can be variable size due to the
-	   extended attributes and descriptors. Given that, is this
-	   correct?
-       */
       udf_dirent_t *p_udf_dirent =
 	udf_new_dirent(&p_udf_root->fe, p_udf_root->p_udf,
 		       p_udf_root->psz_name, p_udf_root->b_dir,
 		       p_udf_root->b_parent);
       p_udf_file = udf_ff_traverse(p_udf_dirent, psz_token);
-      if (p_udf_file != p_udf_dirent)
-        udf_dirent_free(p_udf_dirent);
     }
     else if ( 0 == strncmp("/", psz_name, sizeof("/")) ) {
       return udf_new_dirent(&p_udf_root->fe, p_udf_root->p_udf,
@@ -299,7 +295,7 @@ unicode16_decode(const uint8_t *data, int i_len)
     cdio_charset_to_utf8((char*)&data[1], i_len-1, &r, "UCS-2BE");
     return r;
   default:
-    /* Empty string, for calls that can't take a NULL pointer */ 
+    /* Empty string, as some existing sections can't take a NULL pointer */
     r = (char*)calloc(1, 1);
     return r;
   }
@@ -449,7 +445,7 @@ udf_open (const char *psz_path)
  * returns the size of buffer needed for all data
  * Note: this call accepts a NULL psz_volid, to retrieve the length required.
  */
-int 
+int
 udf_get_volume_id(udf_t *p_udf, /*out*/ char *psz_volid, unsigned int i_volid)
 {
   uint8_t data[UDF_BLOCKSIZE];
@@ -475,10 +471,10 @@ udf_get_volume_id(udf_t *p_udf, /*out*/ char *psz_volid, unsigned int i_volid)
   if (r == NULL)
     return 0;
 
-  volid_len = strlen(r)+1;	/* +1 for NUL terminator */
+  volid_len = strlen(r)+1;     /* +1 for NUL terminator */
   if (psz_volid != NULL) {
     strncpy(psz_volid, r, MIN(volid_len, i_volid));
-    psz_volid[i_volid-1] = 0;	/* strncpy does not always terminate the dest */
+    psz_volid[i_volid-1] = 0;  /* strncpy does not always terminate the dest */
   }
   free(r);
 
@@ -534,17 +530,17 @@ udf_get_logical_volume_id(udf_t *p_udf, /*out*/ char *psz_logvolid, unsigned int
   if (psz_logvolid != NULL)
     psz_logvolid[0] = 0;
 
-  if (DRIVER_OP_SUCCESS != udf_read_sectors (p_udf, p_logvol, p_udf->lvd_lba, 1) ) 
+  if (DRIVER_OP_SUCCESS != udf_read_sectors (p_udf, p_logvol, p_udf->lvd_lba, 1) )
     return 0;
 
   r = unicode16_decode((uint8_t *) p_logvol->logvol_id, p_logvol->logvol_id[127]);
   if (r == NULL)
     return 0;
 
-  logvolid_len = strlen(r)+1;	/* +1 for NUL terminator */
+  logvolid_len = strlen(r)+1;  /* +1 for NUL terminator */
   if (psz_logvolid != NULL) {
     strncpy(psz_logvolid, r, MIN(logvolid_len, i_logvolid));
-    psz_logvolid[i_logvolid-1] = 0;	/* strncpy does not always terminate the dest */
+    psz_logvolid[i_logvolid-1] = 0;    /* strncpy does not always terminate the dest */
   }
   free(r);
 
@@ -748,9 +744,9 @@ udf_readdir(udf_dirent_t *p_udf_dirent)
 		return NULL;
 	}
 
-	free_and_null(p_udf_dirent->psz_name);
-	p = (uint8_t*)p_udf_dirent->fid->u.imp_use.data + p_udf_dirent->fid->u.i_imp_use;
-	p_udf_dirent->psz_name = unicode16_decode(p, i_len);
+       free_and_null(p_udf_dirent->psz_name);
+       p = (uint8_t*)p_udf_dirent->fid->u.imp_use.data + p_udf_dirent->fid->u.i_imp_use;
+       p_udf_dirent->psz_name = unicode16_decode(p, i_len);
       }
       return p_udf_dirent;
     }

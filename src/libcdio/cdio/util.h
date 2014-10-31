@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2004, 2005, 2006, 2008, 2010, 2012
+    Copyright (C) 2004, 2005, 2006, 2008, 2010, 2012, 2014
     Rocky Bernstein <rocky@gnu.org>
     Copyright (C) 2000 Herbert Valerio Riedel <hvr@gnu.org>
 
@@ -101,7 +101,8 @@ _cdio_strdup_upper (const char str[]);
 
 /* Duplicate path and make it platform compliant. Typically needed for
    MinGW/MSYS where a "/c/..." path must be translated to "c:/..." for
-   use with fopen(), etc. Returned string must be freed by the caller. */
+   use with fopen(), etc. Returned string must be freed by the caller
+   using cdio_free(). */
 char * 
 _cdio_strdup_fixpath (const char path[]);
 

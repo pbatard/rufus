@@ -294,8 +294,8 @@ cdio_get_track_lsn(const CdIo_t *p_cdio, track_t u_track)
   Return the International Standard Recording Code (ISRC) for track number
   u_track in p_cdio.  Track numbers start at 1.
 
-  Note: string is malloc'd so caller has to free() the returned
-  string when done with it.
+  Note: The caller must free the returned string with cdio_free()
+  when done with it.
 */
 char *
 cdio_get_track_isrc (const CdIo_t *p_cdio, track_t u_track)

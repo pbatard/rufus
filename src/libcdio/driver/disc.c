@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2003, 2004, 2005, 2008, 2011, 2012
+  Copyright (C) 2003, 2004, 2005, 2008, 2011, 2012, 2014
    Rocky Bernstein <rocky@gnu.org>
   Copyright (C) 2001 Herbert Valerio Riedel <hvr@gnu.org>
 
@@ -77,8 +77,8 @@ cdio_get_cdtext (CdIo *obj)
   
   @param obj the CD object that may contain CD-TEXT information.
   @return pointer to allocated memory area holding the raw CD-TEXT
-  or NULL if obj is NULL or CD-TEXT does not exist.
-  free() when done.
+  or NULL if obj is NULL or CD-TEXT does not exist. Return value
+  must be freed with cdio_free() when done with it and not NULL.
 */
 uint8_t *
 cdio_get_cdtext_raw (CdIo *obj)

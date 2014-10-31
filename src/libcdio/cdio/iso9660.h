@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2012
+    Copyright (C) 2003-2008, 2012-2013
                   Rocky Bernstein <rocky@gnu.org>
     Copyright (C) 2000 Herbert Valerio Riedel <hvr@gnu.org>
 
@@ -859,7 +859,7 @@ iso9660_dir_calc_record_size (unsigned int namelen, unsigned int su_len);
    lsn and return information about it.
 
    @return stat_t of entry if we found lsn, or NULL otherwise.
-   Caller must free return value.
+   Caller must free return value using iso9660_stat_free().
  */
 #define iso9660_fs_find_lsn  iso9660_find_fs_lsn
 iso9660_stat_t *iso9660_fs_find_lsn(CdIo_t *p_cdio, lsn_t i_lsn);
@@ -870,7 +870,7 @@ iso9660_stat_t *iso9660_fs_find_lsn(CdIo_t *p_cdio, lsn_t i_lsn);
    lsn and return information about it.
 
    @return stat_t of entry if we found lsn, or NULL otherwise.
-   Caller must free return value.
+   Caller must free return value using iso9660_stat_free().
  */
 iso9660_stat_t *iso9660_fs_find_lsn_with_path(CdIo_t *p_cdio, lsn_t i_lsn,
                                               /*out*/ char **ppsz_path);
@@ -880,7 +880,7 @@ iso9660_stat_t *iso9660_fs_find_lsn_with_path(CdIo_t *p_cdio, lsn_t i_lsn,
    lsn and return information about it.
 
    @return stat_t of entry if we found lsn, or NULL otherwise.
-   Caller must free return value.
+   Caller must free return value using iso9660_stat_free().
  */
 iso9660_stat_t *iso9660_ifs_find_lsn(iso9660_t *p_iso, lsn_t i_lsn);
 
@@ -897,12 +897,16 @@ iso9660_stat_t *iso9660_ifs_find_lsn(iso9660_t *p_iso, lsn_t i_lsn);
    *ppsz_path when you are done using it.
 
    @return stat_t of entry if we found lsn, or NULL otherwise.
-   Caller must free return value.
+   Caller must free return value using iso9660_stat_free().
  */
 iso9660_stat_t *iso9660_ifs_find_lsn_with_path(iso9660_t *p_iso,
                                                lsn_t i_lsn,
                                                /*out*/ char **ppsz_path);
 
+/*!
+  Free the passed iso9660_stat_t structure.
+ */
+void iso9660_stat_free(iso9660_stat_t *p_stat);
 
 /*!
   Return file status for psz_path. NULL is returned on error.
@@ -951,7 +955,7 @@ iso9660_stat_t *iso9660_ifs_stat_translate (iso9660_t *p_iso,
 
 /*!  Read psz_path (a directory) and return a list of iso9660_stat_t
   pointers for the files inside that directory. The caller must free the
-  returned result.
+  returned result using _cdio_list_free().
 
   b_mode2 is historical. It is not used.
 */
@@ -960,7 +964,7 @@ CdioList_t * iso9660_fs_readdir (CdIo_t *p_cdio, const char psz_path[],
 
 /*!  Read psz_path (a directory) and return a list of iso9660_stat_t
   pointers for the files inside that directory. The caller must free
-  the returned result.
+  the returned result using _cdio_list_free().
 */
 CdioList_t * iso9660_ifs_readdir (iso9660_t *p_iso, const char psz_path[]);
 

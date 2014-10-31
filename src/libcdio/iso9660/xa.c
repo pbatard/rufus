@@ -151,6 +151,13 @@ iso9660_xa_init (iso9660_xa_t *_xa, uint16_t uid, uint16_t gid, uint16_t attr,
   return _xa;
 }
 
+void
+iso9660_xa_free (iso9660_xa_t *_xa)
+{
+  if (_xa != NULL)
+    free(_xa);
+}
+
 /*!
   Returns POSIX mode bitstring for a given file.
 */

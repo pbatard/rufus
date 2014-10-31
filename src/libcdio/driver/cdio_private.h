@@ -35,8 +35,19 @@
 extern "C" {
 #endif /* __cplusplus */
 
-  extern const char * cdio_dirname(const char *fname);
-  extern const char *cdio_abspath(const char *cwd, const char *fname);
+  /*!
+    Get directory name from file name.
+
+    Callers must free return value after use.
+   */
+  extern char *cdio_dirname(const char *fname);
+
+  /*!
+    Construct an absolute file name from path and file name.
+
+    Callers must free return value after use.
+   */
+  extern char *cdio_abspath(const char *cwd, const char *fname);
 
   /* Opaque type */
   typedef struct _CdioDataSource CdioDataSource_t;

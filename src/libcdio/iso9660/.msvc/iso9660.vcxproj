@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClInclude Include="..\..\cdio\bytesex.h" />
     <ClInclude Include="..\..\cdio\cdio.h" />
+    <ClInclude Include="..\..\cdio\cdtext.h" />
     <ClInclude Include="..\..\cdio\iso9660.h" />
     <ClInclude Include="..\..\cdio\logging.h" />
     <ClInclude Include="..\..\cdio\utf8.h" />

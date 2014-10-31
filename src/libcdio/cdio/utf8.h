@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2008, 2012 Rocky Bernstein <rocky@gnu.org>
+    Copyright (C) 2008, 2012, 2014 Rocky Bernstein <rocky@gnu.org>
     Copyright (C) 2006 Burkhard Plaum <plaum@ipf.uni-stuttgart.de>
 
     This program is free software: you can redistribute it and/or modify
@@ -52,7 +52,7 @@ void cdio_charset_converter_destroy(cdio_charset_coverter_t*cnv);
  *  \param dst_len If non NULL, returns the length of the destination string
  *  \returns true if conversion was sucessful, false else.
  *
- *  The destination string must be freed by the caller with free().
+ *  The destination string must be freed by the caller with cdio_free().
  *  If you pass -1 for src_len, strlen() will be used.
  */
 
@@ -69,6 +69,8 @@ bool cdio_charset_convert(cdio_charset_coverter_t*cnv,
  *
  *  This is a convenience function, which creates a charset converter,
  *  converts one string and destroys the charset converter.
+ *
+ *  The destination string must be freed by the caller with cdio_free().
  */
 
 
@@ -83,8 +85,10 @@ bool cdio_charset_from_utf8(cdio_utf8_t * src, char ** dst,
  *  \returns true if conversion was sucessful, false else.
  *
  *  This is a convenience function, which creates a charset converter,
- *  converts one string and destroys the charset converter. If you pass -1
- *  for src_len, strlen() will be used.
+ *  converts one string and destroys the charset converter.
+ *
+ *  The destination string must be freed by the caller with cdio_free().
+ *  If you pass -1 for src_len, strlen() will be used.
  */
 
 
@@ -95,7 +99,7 @@ bool cdio_charset_to_utf8(const char *src, size_t src_len, cdio_utf8_t **dst,
 /** \brief Convert an UTF8 string to UTF-16 (allocate returned string)
  *  \param str Source string
  *  \returns NULL if the conversion was unsuccesful. Caller must free the
- *  returned string.
+ *  returned string with cdio_free().
  *  This is a convenience function available on Windows platforms only.
  */
 wchar_t* cdio_utf8_to_wchar(const char* str);

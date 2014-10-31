@@ -1,6 +1,6 @@
 /*
   Copyright (C) 2006, 2008 Burkhard Plaum <plaum@ipf.uni-stuttgart.de>
-  Copyright (C) 2011 Rocky Bernstein <rocky@gnu.org>
+  Copyright (C) 2011, 2014 Rocky Bernstein <rocky@gnu.org>
   Copyright (C) 2012 Pete Batard <pete@akeo.ie>
 
   This program is free software: you can redistribute it and/or modify
@@ -41,6 +41,7 @@
 
 #include <cdio/utf8.h>
 #include <cdio/logging.h>
+#include <cdio/memory.h>
 
 /* Windows requires some basic UTF-8 support outside of Joliet */
 #if defined(_WIN32)
@@ -107,8 +108,8 @@ FILE* fopen_utf8(const char* filename, const char* mode)
   wchar_t* wfilename = cdio_utf8_to_wchar(filename);
   wchar_t* wmode =  cdio_utf8_to_wchar(mode);
   ret = _wfopen(wfilename, wmode);
-  free(wfilename);
-  free(wmode);
+  cdio_free(wfilename);
+  cdio_free(wmode);
   return ret;
 }
 #endif
@@ -136,7 +137,7 @@ static void bgav_hexdump(uint8_t * data, int len, int linebreak)
   int i;
   int bytes_written = 0;
   int imax;
-  
+
   while(bytes_written < len)
     {
     imax = (bytes_written + linebreak > len) ? len - bytes_written : linebreak;
@@ -183,11 +184,11 @@ do_convert(iconv_t cd, const char * src, int src_len,
 #if 0
   fprintf(stderr, "Converting:\n");
   bgav_hexdump(src, src_len, 16);
-#endif    
+#endif
   alloc_size = src_len + BYTES_INCREMENT;
 
   inbytesleft  = src_len;
-  
+
   /* We reserve space here to add a final '\0' */
   outbytesleft = alloc_size-1;
 
@@ -195,10 +196,10 @@ do_convert(iconv_t cd, const char * src, int src_len,
 
   inbuf  = (char *)src;
   outbuf = ret;
-  
+
   while(1)
     {
-    
+
     if(iconv(cd, (ICONV_CONST char **)&inbuf, &inbytesleft,
              &outbuf, &outbytesleft) == (size_t)-1)
       {
@@ -241,7 +242,7 @@ do_convert(iconv_t cd, const char * src, int src_len,
   bgav_hexdump(src, src_len, 16);
   fprintf(stderr, "dst:\n");
   bgav_hexdump((uint8_t*)(ret), (int)(outbuf - ret), 16);
-#endif  
+#endif
   return true;
   }
 
@@ -292,7 +293,7 @@ bool cdio_charset_from_utf8(cdio_utf8_t * src, char ** dst,
   /* Eliminate empty strings */
   le_dst = cdio_utf8_to_wchar(src);
   if ((le_dst == NULL) || (le_dst[0] == 0)) {
-    free(le_dst);
+    cdio_free(le_dst);
     return false;
   }
 

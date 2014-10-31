@@ -97,11 +97,7 @@ cdio_log_handler_t cdio_log_set_handler (cdio_log_handler_t new_handler);
  */
 void cdio_log (cdio_log_level_t level,
                const char format[], ...) GNUC_PRINTF(2, 3);
-#if defined(__GNUC__)
-/* See http://clang-analyzer.llvm.org/annotations.html#custom_assertions */
-void cdio_assert_log (const char format[], ...)
-               GNUC_PRINTF(1, 2) __attribute__((__noreturn__));
-#endif
+
 /**
  * Handle a debugging message.
  *

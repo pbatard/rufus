@@ -1,7 +1,7 @@
 /*
-  Copyright (C) 2005, 2008, 2010, 2011 Rocky Bernstein <rocky@gnu.org>
+  Copyright (C) 2005, 2008, 2010-2011, 2014 Rocky Bernstein <rocky@gnu.org>
   Adapted from GNU/Linux fs/isofs/rock.c (C) 1992, 1993 Eric Youngdale
- 
+
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation, either version 3 of the License, or
@@ -51,7 +51,7 @@ iso_rock_tf_flag_t iso_rock_tf_flag;
    valgrind complaint.
 */
 static bool
-realloc_symlink(/*in/out*/ iso9660_stat_t *p_stat, uint8_t i_grow) 
+realloc_symlink(/*in/out*/ iso9660_stat_t *p_stat, uint8_t i_grow)
 {
   if (!p_stat->rr.i_symlink) {
     const uint16_t i_max = 2*i_grow+1;
@@ -138,15 +138,15 @@ realloc_symlink(/*in/out*/ iso9660_stat_t *p_stat, uint8_t i_grow)
 	     sizeof(iso9660_dtime_t)); 				  \
       cnt += sizeof(iso9660_dtime_t);				  \
     }								  \
-  }								  
+  }
 
-/*! 
+/*!
   Get
-  @return length of name field; 0: not found, -1: to be ignored 
+  @return length of name field; 0: not found, -1: to be ignored
 */
-int 
-get_rock_ridge_filename(iso9660_dir_t * p_iso9660_dir, 
-			/*out*/ char * psz_name, 
+int
+get_rock_ridge_filename(iso9660_dir_t * p_iso9660_dir,
+			/*out*/ char * psz_name,
 			/*in/out*/ iso9660_stat_t *p_stat)
 {
   int len;
@@ -165,19 +165,19 @@ get_rock_ridge_filename(iso9660_dir_t * p_iso9660_dir,
     iso_extension_record_t * rr;
     int sig;
     int rootflag;
-    
+
     while (len > 1){ /* There may be one byte for padding somewhere */
       rr = (iso_extension_record_t *) chr;
       if (rr->len == 0) goto out; /* Something got screwed up here */
       sig = *chr+(*(chr+1) << 8);
-      chr += rr->len; 
+      chr += rr->len;
       len -= rr->len;
 
       switch(sig){
       case SIG('S','P'):
 	CHECK_SP(goto out);
 	break;
-      case SIG('C','E'): 
+      case SIG('C','E'):
 	{
 	  iso711_t i_fname = from_711(p_iso9660_dir->filename.len);
 	  if ('\0' == p_iso9660_dir->filename.str[1] && 1 == i_fname)
@@ -190,7 +190,7 @@ get_rock_ridge_filename(iso9660_dir_t * p_iso9660_dir,
       case SIG('E','R'):
 	p_stat->rr.b3_rock = yep;
 	cdio_debug("ISO 9660 Extensions: ");
-	{ 
+	{
 	  int p;
 	  for(p=0;p<rr->u.ER.len_id;p++) cdio_debug("%c",rr->u.ER.data[p]);
 	}
@@ -265,13 +265,13 @@ get_rock_ridge_filename(iso9660_dir_t * p_iso9660_dir,
 	    slen -= p_sl->len + 2;
 	    p_oldsl = p_sl;
 	    p_sl = (iso_rock_sl_part_t *) (((char *) p_sl) + p_sl->len + 2);
-	    
+
 	    if (slen < 2) {
-	      if (((rr->u.SL.flags & 1) != 0) && ((p_oldsl->flags & 1) == 0)) 
+	      if (((rr->u.SL.flags & 1) != 0) && ((p_oldsl->flags & 1) == 0))
 		p_stat->rr.i_symlink += 1;
 	      break;
 	    }
-	    
+
 	    /*
 	     * If this component record isn't continued, then append a '/'.
 	     */
@@ -288,7 +288,7 @@ get_rock_ridge_filename(iso9660_dir_t * p_iso9660_dir,
       case SIG('R','E'):
 	free(buffer);
 	return -1;
-      case SIG('T','F'): 
+      case SIG('T','F'):
 	/* Time stamp(s) for a file */
 	{
 	  int cnt = 0;
@@ -332,20 +332,20 @@ parse_rock_ridge_stat_internal(iso9660_dir_t *p_iso9660_dir,
       len-=14;
       if (len<0) len=0;
     }
-  
+
   /* repeat:*/
   {
     int sig;
     iso_extension_record_t * rr;
     int rootflag;
-    
+
     while (len > 1){ /* There may be one byte for padding somewhere */
       rr = (iso_extension_record_t *) chr;
       if (rr->len == 0) goto out; /* Something got screwed up here */
       sig = from_721(*chr);
-      chr += rr->len; 
+      chr += rr->len;
       len -= rr->len;
-      
+
       switch(sig){
       case SIG('S','P'):
 	CHECK_SP(goto out);
@@ -385,7 +385,7 @@ parse_rock_ridge_stat_internal(iso9660_dir_t *p_iso9660_dir,
 	  }
 	}
 	break;
-      case SIG('T','F'): 
+      case SIG('T','F'):
 	/* Time stamp(s) for a file */
 	{
 	  int cnt = 0;
@@ -437,13 +437,13 @@ parse_rock_ridge_stat_internal(iso9660_dir_t *p_iso9660_dir,
 	    slen -= p_sl->len + 2;
 	    p_oldsl = p_sl;
 	    p_sl = (iso_rock_sl_part_t *) (((char *) p_sl) + p_sl->len + 2);
-	    
+
 	    if (slen < 2) {
-	      if (((rr->u.SL.flags & 1) != 0) && ((p_oldsl->flags & 1) == 0)) 
+	      if (((rr->u.SL.flags & 1) != 0) && ((p_oldsl->flags & 1) == 0))
 		p_stat->rr.i_symlink += 1;
 	      break;
 	    }
-	    
+
 	    /*
 	     * If this component record isn't continued, then append a '/'.
 	     */
@@ -461,7 +461,7 @@ parse_rock_ridge_stat_internal(iso9660_dir_t *p_iso9660_dir,
 	cdio_warn("Attempt to read p_stat for relocated directory");
 	goto out;
 #ifdef FINISHED
-      case SIG('C','L'): 
+      case SIG('C','L'):
 	{
 	  iso9660_stat_t * reloc;
 	  ISOFS_I(p_stat)->i_first_extent = from_733(rr->u.CL.location);
@@ -492,14 +492,14 @@ parse_rock_ridge_stat_internal(iso9660_dir_t *p_iso9660_dir,
   return 0;
 }
 
-int 
-parse_rock_ridge_stat(iso9660_dir_t *p_iso9660_dir, 
+int
+parse_rock_ridge_stat(iso9660_dir_t *p_iso9660_dir,
 		      /*out*/ iso9660_stat_t *p_stat)
 {
   int result;
 
   if (!p_stat) return 0;
-  
+
   result = parse_rock_ridge_stat_internal(p_iso9660_dir, p_stat, 0);
   /* if Rock-Ridge flag was reset and we didn't look for attributes
    * behind eventual XA attributes, have a look there */
@@ -518,7 +518,7 @@ _getbuf (void)
 {
   static char _buf[BUF_COUNT][BUF_SIZE];
   static int _i = -1;
-  
+
   _i++;
   _i %= BUF_COUNT;
 
@@ -528,24 +528,24 @@ _getbuf (void)
 }
 
 /*!
-  Returns a string which interpreting the POSIX mode st_mode. 
+  Returns a string which interpreting the POSIX mode st_mode.
   For example:
   \verbatim
   drwxrws---
   -rw-rw-r--
   lrwxrwxrwx
   \endverbatim
-  
+
   A description of the characters in the string follows
-  The 1st character is either "b" for a block device, 
+  The 1st character is either "b" for a block device,
   "c" for a character device, "d" if the entry is a directory, "l" for
-  a symbolic link, "p" for a pipe or FIFO, "s" for a "socket", 
+  a symbolic link, "p" for a pipe or FIFO, "s" for a "socket",
   or "-" if none of the these.
-  
+
   The 2nd to 4th characters refer to permissions for a user while the
-  the 5th to 7th characters refer to permissions for a group while, and 
-  the 8th to 10h characters refer to permissions for everyone. 
-  
+  the 5th to 7th characters refer to permissions for a group while, and
+  the 8th to 10h characters refer to permissions for everyone.
+
   In each of these triplets the first character (2, 5, 8) is "r" if
   the entry is allowed to be read.
 
@@ -569,7 +569,7 @@ iso9660_get_rock_attr_str(posix_mode_t st_mode)
 
   if (S_ISBLK(st_mode))
     result[ 0] = 'b';
-  else if (S_ISDIR(st_mode)) 
+  else if (S_ISDIR(st_mode))
     result[ 0] = 'd';
   else if (S_ISCHR(st_mode))
     result[ 0] = 'c';
@@ -577,16 +577,16 @@ iso9660_get_rock_attr_str(posix_mode_t st_mode)
     result[ 0] = 'l';
   else if (S_ISFIFO(st_mode))
     result[ 0] = 'p';
-  else if (S_ISSOCK(st_mode)) 
+  else if (S_ISSOCK(st_mode))
     result[ 0] = 's';
   /* May eventually fill in others.. */
-  else 
+  else
     result[ 0] = '-';
 
   result[ 1] = (st_mode & ISO_ROCK_IRUSR) ? 'r' : '-';
   result[ 2] = (st_mode & ISO_ROCK_IWUSR) ? 'w' : '-';
 
-  if (st_mode & ISO_ROCK_ISUID) 
+  if (st_mode & ISO_ROCK_ISUID)
     result[ 3] = (st_mode & ISO_ROCK_IXUSR) ? 's' : 'S';
   else
     result[ 3] = (st_mode & ISO_ROCK_IXUSR) ? 'x' : '-';
@@ -594,9 +594,9 @@ iso9660_get_rock_attr_str(posix_mode_t st_mode)
   result[ 4] = (st_mode & ISO_ROCK_IRGRP) ? 'r' : '-';
   result[ 5] = (st_mode & ISO_ROCK_IWGRP) ? 'w' : '-';
 
-  if (st_mode & ISO_ROCK_ISGID) 
+  if (st_mode & ISO_ROCK_ISGID)
     result[ 6] = (st_mode & ISO_ROCK_IXGRP) ? 's' : 'S';
-  else 
+  else
     result[ 6] = (st_mode & ISO_ROCK_IXGRP) ? 'x' : '-';
 
   result[ 7] = (st_mode & ISO_ROCK_IROTH) ? 'r' : '-';
@@ -611,10 +611,8 @@ iso9660_get_rock_attr_str(posix_mode_t st_mode)
 /*!
   Returns POSIX mode bitstring for a given file.
 */
-mode_t 
-iso9660_get_posix_filemode_from_rock(const iso_rock_statbuf_t *rr) 
+mode_t
+iso9660_get_posix_filemode_from_rock(const iso_rock_statbuf_t *rr)
 {
   return (mode_t) rr->st_mode;
 }
-
-

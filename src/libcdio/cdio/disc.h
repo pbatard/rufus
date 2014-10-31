@@ -1,7 +1,7 @@
 /* -*- c -*-
 
-    Copyright (C) 2004, 2005, 2006, 2008, 2010, 2012 Rocky Bernstein
-    <rocky@gnu.org>
+    Copyright (C) 2004, 2005, 2006, 2008, 2010, 2012, 2014
+    Rocky Bernstein <rocky@gnu.org>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -61,9 +61,9 @@ extern "C" {
     Get binary CD-Text information for a CdIo_t object.
 
     @param p_cdio the CD object that may contain CD-Text information.
-    @return malloc'd pointer to raw CD-Text data as stored on the disc 
-    or NULL if p_cdio is NULL or CD-Text information does not exist.
-    Return value should be freed when done with it and not NULL.
+    @return malloc'd pointer to raw CD-Text data as stored on the disc or
+    NULL if p_cdio is NULL or CD-Text information does not exist. Return
+    value must be freed with cdio_free() when done with it and not NULL.
   */
   uint8_t * cdio_get_cdtext_raw (CdIo_t *p_cdio);
 
@@ -101,8 +101,8 @@ extern "C" {
     @return the media catalog number or NULL if there is none or we
     don't have the ability to get it.
 
-    Note: string is malloc'd so caller has to free() the returned
-    string when done with it.
+    Note: The caller must free the returned string with cdio_free()
+    when done with it.
 
   */
   char * cdio_get_mcn (const CdIo_t *p_cdio);

@@ -139,7 +139,8 @@ _cdio_strdup_upper (const char str[])
 }
 
 /* Convert MinGW/MSYS paths that start in "/c/..." to "c:/..."
-   so that they can be used with fopen(), stat(), etc. */
+   so that they can be used with fopen(), stat(), etc.
+   Returned string must be freed by the caller using cdio_free().*/
 char * 
 _cdio_strdup_fixpath (const char path[])
 {

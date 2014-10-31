@@ -73,7 +73,7 @@ static inline int _stati64_utf8(const char *path, struct _stati64 *buffer) {
   int ret;
   wchar_t* wpath = cdio_utf8_to_wchar(path);
   ret = _wstati64(wpath, buffer);
-  free(wpath);
+  cdio_free(wpath);
   return ret;
 }
 #define CDIO_STAT_CALL _stati64_utf8
@@ -262,7 +262,7 @@ cdio_stdio_new(const char pathname[])
     {
       cdio_warn ("could not retrieve file info for `%s': %s", 
                  pathdup, strerror (errno));
-      free(pathdup);
+      cdio_free(pathdup);
       return NULL;
     }
 
