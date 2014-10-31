@@ -108,9 +108,11 @@ static BOOLEAN __stdcall FormatExCallback(FILE_SYSTEM_CALLBACK_COMMAND Command, 
 		UpdateProgress(OP_FORMAT, 1.0f * (*percent));
 		break;
 	case FCC_STRUCTURE_PROGRESS:	// No progress on quick format
-		PrintStatus(0, TRUE, MSG_218, ++task_number, nb_steps[fs_index]);
-		format_percent += 100.0f / (1.0f * nb_steps[fs_index]);
-		UpdateProgress(OP_CREATE_FS, format_percent);
+		if (task_number < nb_steps[fs_index] - 1) {
+			PrintStatus(0, TRUE, MSG_218, ++task_number, nb_steps[fs_index]);
+			format_percent += 100.0f / (1.0f * nb_steps[fs_index]);
+			UpdateProgress(OP_CREATE_FS, format_percent);
+		}
 		break;
 	case FCC_DONE:
 		PrintStatus(0, TRUE, MSG_218, nb_steps[fs_index], nb_steps[fs_index]);
