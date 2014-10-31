@@ -54,9 +54,9 @@ libdriver_a_AR = $(AR) $(ARFLAGS)
 libdriver_a_LIBADD =
 am_libdriver_a_OBJECTS = libdriver_a-disc.$(OBJEXT) \
 	libdriver_a-ds.$(OBJEXT) libdriver_a-logging.$(OBJEXT) \
-	libdriver_a-read.$(OBJEXT) libdriver_a-sector.$(OBJEXT) \
-	libdriver_a-track.$(OBJEXT) libdriver_a-util.$(OBJEXT) \
-	libdriver_a-_cdio_stdio.$(OBJEXT) \
+	libdriver_a-memory.$(OBJEXT) libdriver_a-read.$(OBJEXT) \
+	libdriver_a-sector.$(OBJEXT) libdriver_a-track.$(OBJEXT) \
+	libdriver_a-util.$(OBJEXT) libdriver_a-_cdio_stdio.$(OBJEXT) \
 	libdriver_a-_cdio_stream.$(OBJEXT) libdriver_a-utf8.$(OBJEXT)
 libdriver_a_OBJECTS = $(am_libdriver_a_OBJECTS)
 DEFAULT_INCLUDES = -I.@am__isrc@
@@ -169,7 +169,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 noinst_LIBRARIES = libdriver.a
-libdriver_a_SOURCES = disc.c ds.c logging.c read.c sector.c track.c util.c _cdio_stdio.c _cdio_stream.c utf8.c
+libdriver_a_SOURCES = disc.c ds.c logging.c memory.c read.c sector.c track.c util.c _cdio_stdio.c _cdio_stream.c utf8.c
 # Boy do you NOT want to have HAVE_CONFIG_H set before $(AM_CFLAGS) with Clang!
 libdriver_a_CFLAGS = $(AM_CFLAGS) -DHAVE_CONFIG_H -I. -I..
 all: all-am
@@ -251,6 +251,14 @@ libdriver_a-logging.o: logging.c
 libdriver_a-logging.obj: logging.c
 	$(AM_V_CC) @AM_BACKSLASH@
 	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libdriver_a_CFLAGS) $(CFLAGS) -c -o libdriver_a-logging.obj `if test -f 'logging.c'; then $(CYGPATH_W) 'logging.c'; else $(CYGPATH_W) '$(srcdir)/logging.c'; fi`
+
+libdriver_a-memory.o: memory.c
+	$(AM_V_CC) @AM_BACKSLASH@
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libdriver_a_CFLAGS) $(CFLAGS) -c -o libdriver_a-memory.o `test -f 'memory.c' || echo '$(srcdir)/'`memory.c
+
+libdriver_a-memory.obj: memory.c
+	$(AM_V_CC) @AM_BACKSLASH@
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libdriver_a_CFLAGS) $(CFLAGS) -c -o libdriver_a-memory.obj `if test -f 'memory.c'; then $(CYGPATH_W) 'memory.c'; else $(CYGPATH_W) '$(srcdir)/memory.c'; fi`
 
 libdriver_a-read.o: read.c
 	$(AM_V_CC) @AM_BACKSLASH@

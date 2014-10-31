@@ -16,6 +16,7 @@ TARGETLIBS=$(SDK_LIB_PATH)\kernel32.lib \
 SOURCES=disc.c     \
 	ds.c             \
 	logging.c        \
+	memory.c         \
 	read.c           \
 	sector.c         \
 	track.c          \
