@@ -1223,9 +1223,11 @@ INT_PTR CALLBACK NewVersionCallback(HWND hDlg, UINT message, WPARAM wParam, LPAR
 		switch (LOWORD(wParam)) {
 		case IDCLOSE:
 		case IDCANCEL:
-			reset_localization(IDD_NEW_VERSION);
-			safe_free(filepath);
-			EndDialog(hDlg, LOWORD(wParam));
+			if (download_status != 1) {
+				reset_localization(IDD_NEW_VERSION);
+				safe_free(filepath);
+				EndDialog(hDlg, LOWORD(wParam));
+			}
 			return (INT_PTR)TRUE;
 		case IDC_WEBSITE:
 			ShellExecuteA(hDlg, "open", RUFUS_URL, NULL, NULL, SW_SHOWNORMAL);
@@ -1234,8 +1236,10 @@ INT_PTR CALLBACK NewVersionCallback(HWND hDlg, UINT message, WPARAM wParam, LPAR
 			switch(download_status) {
 			case 1:		// Abort
 				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANCELLED;
+				download_status = 0;
 				break;
 			case 2:		// Launch newer version and close this one
+				Sleep(1000);	// Add a delay on account of antivirus scanners
 				memset(&si, 0, sizeof(si));
 				memset(&pi, 0, sizeof(pi));
 				si.cb = sizeof(si);
@@ -1268,11 +1272,13 @@ INT_PTR CALLBACK NewVersionCallback(HWND hDlg, UINT message, WPARAM wParam, LPAR
 		}
 		break;
 	case UM_PROGRESS_INIT:
+		EnableWindow(GetDlgItem(hDlg, IDCANCEL), FALSE);
+		SetWindowTextU(GetDlgItem(hDlg, IDC_DOWNLOAD), lmprintf(MSG_038));
 		FormatStatus = 0;
 		download_status = 1;
-		SetWindowTextU(GetDlgItem(hDlg, IDC_DOWNLOAD), lmprintf(MSG_038));
 		return (INT_PTR)TRUE;
 	case UM_PROGRESS_EXIT:
+		EnableWindow(GetDlgItem(hDlg, IDCANCEL), TRUE);
 		if (wParam) {
 			SetWindowTextU(GetDlgItem(hDlg, IDC_DOWNLOAD), lmprintf(MSG_039));
 			download_status = 2;

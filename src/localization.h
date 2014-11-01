@@ -24,7 +24,7 @@
 
 // Number of concurrent localization messages (i.e. messages we can concurrently
 // reference at the same time). Must be a power of 2.
-#define LOC_MESSAGE_NB          16
+#define LOC_MESSAGE_NB          32
 #define LOC_MESSAGE_SIZE        2048
 #define LOC_HTAB_SIZE           1031	// Using a prime speeds up the hash table init
 
