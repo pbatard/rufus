@@ -560,8 +560,20 @@ DECLARE_INTERFACE_(IGroupPolicyObject, IUnknown) {
 };
 typedef IGroupPolicyObject *LPGROUPPOLICYOBJECT;
 
-BOOL SetLGP(BOOL bRestore, BOOL* bExistingKey, const char* szPath, const char* szPolicy, DWORD dwValue)
+// I've seen rare cases where pLGPO->lpVtbl->Save(...) gets stuck, which prevents the
+// application from launching altogether. To alleviate this, use a thread that we can
+// terminate if needed...
+typedef struct {
+	BOOL bRestore;
+	BOOL* bExistingKey;
+	const char* szPath;
+	const char* szPolicy;
+	DWORD dwValue;
+} SetLGP_Params;
+
+DWORD WINAPI SetLGPThread(LPVOID param)
 {
+	SetLGP_Params* p = (SetLGP_Params*)param;
 	LONG r;
 	DWORD disp, regtype, val=0, val_size=sizeof(DWORD);
 	HRESULT hr;
@@ -577,6 +589,9 @@ BOOL SetLGP(BOOL bRestore, BOOL* bExistingKey, const char* szPath, const char* s
 	GUID ext_guid = REGISTRY_EXTENSION_GUID;
 	// Can be anything really
 	GUID snap_guid = { 0x3D271CFC, 0x2BC6, 0x4AC2, {0xB6, 0x33, 0x3B, 0xDF, 0xF5, 0xBD, 0xAB, 0x2A} };
+
+	// Reinitialize COM since it's not shared between threads
+	IGNORE_RETVAL(CoInitializeEx(NULL, COINIT_APARTMENTTHREADED));
 
 	// We need an IGroupPolicyObject instance to set a Local Group Policy
 	hr = CoCreateInstance(&my_CLSID_GroupPolicyObject, NULL, CLSCTX_INPROC_SERVER, &my_IID_IGroupPolicyObject, (LPVOID*)&pLGPO);
@@ -598,31 +613,31 @@ BOOL SetLGP(BOOL bRestore, BOOL* bExistingKey, const char* szPath, const char* s
 	}
 
 	// The DisableSystemRestore is set in Software\Policies\Microsoft\Windows\DeviceInstall\Settings
-	r = RegCreateKeyExA(path_key, szPath, 0, NULL, 0, KEY_SET_VALUE | KEY_QUERY_VALUE,
+	r = RegCreateKeyExA(path_key, p->szPath, 0, NULL, 0, KEY_SET_VALUE | KEY_QUERY_VALUE,
 		NULL, &policy_key, &disp);
 	if (r != ERROR_SUCCESS) {
-		uprintf("SetLGP: Failed to open LGPO path %s - error %x\n", szPath, hr);
+		uprintf("SetLGP: Failed to open LGPO path %s - error %x\n", p->szPath, hr);
 		goto error;
 	}
 
-	if ((disp == REG_OPENED_EXISTING_KEY) && (!bRestore) && (!(*bExistingKey))) {
+	if ((disp == REG_OPENED_EXISTING_KEY) && (!p->bRestore) && (!(*(p->bExistingKey)))) {
 		// backup existing value for restore
-		*bExistingKey = TRUE;
+		*(p->bExistingKey) = TRUE;
 		regtype = REG_DWORD;
-		r = RegQueryValueExA(policy_key, szPolicy, NULL, &regtype, (LPBYTE)&original_val, &val_size);
+		r = RegQueryValueExA(policy_key, p->szPolicy, NULL, &regtype, (LPBYTE)&original_val, &val_size);
 		if (r == ERROR_FILE_NOT_FOUND) {
 			// The Key exists but not its value, which is OK
-			*bExistingKey = FALSE;
+			*(p->bExistingKey) = FALSE;
 		} else if (r != ERROR_SUCCESS) {
-			uprintf("SetLGP: Failed to read original %s policy value - error %x\n", szPolicy, r);
+			uprintf("SetLGP: Failed to read original %s policy value - error %x\n", p->szPolicy, r);
 		}
 	}
 
-	if ((!bRestore) || (*bExistingKey)) {
-		val = (bRestore)?original_val:dwValue;
-		r = RegSetValueExA(policy_key, szPolicy, 0, REG_DWORD, (BYTE*)&val, sizeof(val));
+	if ((!p->bRestore) || (*(p->bExistingKey))) {
+		val = (p->bRestore)?original_val:p->dwValue;
+		r = RegSetValueExA(policy_key, p->szPolicy, 0, REG_DWORD, (BYTE*)&val, sizeof(val));
 	} else {
-		r = RegDeleteValueA(policy_key, szPolicy);
+		r = RegDeleteValueA(policy_key, p->szPolicy);
 	}
 	if (r != ERROR_SUCCESS) {
 		uprintf("SetLGP: RegSetValueEx / RegDeleteValue failed - error %x\n", r);
@@ -631,15 +646,15 @@ BOOL SetLGP(BOOL bRestore, BOOL* bExistingKey, const char* szPath, const char* s
 	policy_key = NULL;
 
 	// Apply policy
-	hr = pLGPO->lpVtbl->Save(pLGPO, TRUE, (bRestore)?FALSE:TRUE, &ext_guid, &snap_guid);
+	hr = pLGPO->lpVtbl->Save(pLGPO, TRUE, (p->bRestore)?FALSE:TRUE, &ext_guid, &snap_guid);
 	if (hr != S_OK) {
-		uprintf("SetLGP: Unable to apply %s policy - error %x\n", szPolicy, hr);
+		uprintf("SetLGP: Unable to apply %s policy - error %x\n", p->szPolicy, hr);
 		goto error;
 	} else {
-		if ((!bRestore) || (*bExistingKey)) {
-			uprintf("SetLGP: Successfully %s %s policy to 0x%08X\n", (bRestore)?"restored":"set", szPolicy, val);
+		if ((!p->bRestore) || (*(p->bExistingKey))) {
+			uprintf("SetLGP: Successfully %s %s policy to 0x%08X\n", (p->bRestore)?"restored":"set", p->szPolicy, val);
 		} else {
-			uprintf("SetLGP: Successfully removed %s policy key\n", szPolicy);
+			uprintf("SetLGP: Successfully removed %s policy key\n", p->szPolicy);
 		}
 	}
 
@@ -654,3 +669,22 @@ error:
 	return FALSE;
 }
 #pragma pop_macro("INTERFACE")
+
+BOOL SetLGP(BOOL bRestore, BOOL* bExistingKey, const char* szPath, const char* szPolicy, DWORD dwValue)
+{
+	SetLGP_Params params = {bRestore, bExistingKey, szPath, szPolicy, dwValue};
+	HANDLE thread_id = CreateThread(NULL, 0, SetLGPThread, (LPVOID)&params, 0, NULL);
+	DWORD r = FALSE;
+	if (thread_id == NULL) {
+		uprintf("SetLGP: Unable to start thread");
+		return FALSE;
+	}
+	if (WaitForSingleObject(thread_id, 2500) != WAIT_OBJECT_0) {
+		uprintf("SetLGP: Killing stuck thread!");
+		TerminateThread(thread_id, 0);
+		CloseHandle(thread_id);
+		return FALSE;
+	}
+	GetExitCodeThread(thread_id, &r);
+	return (BOOL) r;
+}
