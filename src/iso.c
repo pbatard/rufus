@@ -199,6 +199,37 @@ static BOOL check_iso_props(const char* psz_dirname, BOOL* is_syslinux_cfg, BOOL
 	return FALSE;
 }
 
+static void fix_syslinux(const char* psz_fullpath, const char* psz_path, const char* psz_basename)
+{
+	size_t i, nul_pos;
+	char *iso_label, *usb_label, *src, *dst;
+
+	nul_pos = safe_strlen(psz_fullpath);
+	src = safe_strdup(psz_fullpath);
+	if (src == NULL)
+		return;
+	for (i=0; i<nul_pos; i++)
+		if (src[i] == '/') src[i] = '\\';
+
+	// Workaround for isolinux config files requiring an ISO label for kernel
+	// append that may be different from our USB label. Oh, and these labels
+	// must have spaces converted to \x20.
+	iso_label = replace_char(iso_report.label, ' ', "\\x20");
+	usb_label = replace_char(iso_report.usb_label, ' ', "\\x20");
+	if (replace_in_token_data(src, "append", iso_label, usb_label, TRUE) != NULL)
+		uprintf("  Patched %s: '%s' -> '%s'\n", src, iso_label, usb_label);
+	free(iso_label);
+	free(usb_label);
+	// Fix dual BIOS + EFI support for tails and other ISOs
+	if ( (safe_stricmp(psz_path, efi_dirname) == 0) && (safe_stricmp(psz_basename, syslinux_cfg[0]) == 0) &&
+			(!iso_report.has_efi_syslinux) && (dst = safe_strdup(src)) ) {
+		dst[nul_pos-12] = 's'; dst[nul_pos-11] = 'y'; dst[nul_pos-10] = 's';
+		CopyFileA(src, dst, TRUE);
+		uprintf("Duplicated %s to %s\n", src, dst);
+		free(dst);
+	}
+}
+
 // Returns 0 on success, nonzero on error
 static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const char *psz_path)
 {
@@ -207,7 +238,7 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 	BOOL r, is_syslinux_cfg, is_old_c32[NB_OLD_C32];
 	int i_length;
 	size_t i, nul_pos;
-	char tmp[128], *psz_fullpath = NULL, *dst;
+	char tmp[128], *psz_fullpath = NULL;
 	const char* psz_basename;
 	udf_dirent_t *p_udf_dirent2;
 	uint8_t buf[UDF_BLOCKSIZE];
@@ -309,20 +340,8 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 			// The drawback however is with cancellation. With a large file, CloseHandle()
 			// may take forever to complete and is not interruptible. We try to detect this.
 			ISO_BLOCKING(safe_closehandle(file_handle));
-			if (is_syslinux_cfg) {
-				// Workaround for isolinux config files requiring an ISO label for kernel
-				// append that may be different from our USB label.
-				if (replace_in_token_data(psz_fullpath, "append", iso_report.label, iso_report.usb_label, TRUE) != NULL)
-					uprintf("Patched %s: '%s' -> '%s'\n", psz_fullpath, iso_report.label, iso_report.usb_label);
-				// Fix dual BIOS + EFI support for tails and other ISOs
-				if ( (safe_stricmp(psz_path, efi_dirname) == 0) && (safe_stricmp(psz_basename, syslinux_cfg[0]) == 0) &&
-					 (!iso_report.has_efi_syslinux) && (dst = safe_strdup(psz_fullpath)) ) {
-					dst[nul_pos-12] = 's'; dst[nul_pos-11] = 'y'; dst[nul_pos-10] = 's';
-					CopyFileA(psz_fullpath, dst, TRUE);
-					uprintf("Duplicated %s to %s\n", psz_fullpath, dst);
-					free(dst);
-				}
-			}
+			if (is_syslinux_cfg)
+				fix_syslinux(psz_fullpath, psz_path, psz_basename);
 		}
 		safe_free(psz_fullpath);
 	}
@@ -343,7 +362,7 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 	DWORD buf_size, wr_size, err;
 	BOOL s, is_syslinux_cfg, is_old_c32[NB_OLD_C32], is_symlink;
 	int i_length, r = 1;
-	char tmp[128], psz_fullpath[MAX_PATH], *psz_basename, *dst;
+	char tmp[128], psz_fullpath[MAX_PATH], *psz_basename;
 	const char *psz_iso_name = &psz_fullpath[strlen(psz_extract_dir)];
 	unsigned char buf[ISO_BLOCKSIZE];
 	CdioListNode_t* p_entnode;
@@ -467,21 +486,8 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 				}
 			}
 			ISO_BLOCKING(safe_closehandle(file_handle));
-			if (is_syslinux_cfg) {
-				nul_pos = safe_strlen(psz_fullpath);
-				for (i=0; i<nul_pos; i++)
-					if (psz_fullpath[i] == '/') psz_fullpath[i] = '\\';
-				if (replace_in_token_data(psz_fullpath, "append", iso_report.label, iso_report.usb_label, TRUE) != NULL)
-					uprintf("Patched %s: '%s' -> '%s'\n", psz_fullpath, iso_report.label, iso_report.usb_label);
-				// Fix dual BIOS + EFI support for tails and other ISOs
-				if ( (safe_stricmp(psz_path, efi_dirname) == 0) && (safe_stricmp(psz_basename, syslinux_cfg[0]) == 0) &&
-					 (!iso_report.has_efi_syslinux) && (dst = safe_strdup(psz_fullpath)) ) {
-					dst[nul_pos-12] = 's'; dst[nul_pos-11] = 'y'; dst[nul_pos-10] = 's';
-					CopyFileA(psz_fullpath, dst, TRUE);
-					uprintf("Duplicated %s to %s\n", psz_fullpath, dst);
-					free(dst);
-				}
-			}
+			if (is_syslinux_cfg)
+				fix_syslinux(psz_fullpath, psz_path, psz_basename);
 		}
 	}
 	r = 0;

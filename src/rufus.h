@@ -389,6 +389,7 @@ extern char* get_token_data_file(const char* token, const char* filename);
 extern char* get_token_data_buffer(const char* token, unsigned int n, const char* buffer, size_t buffer_size);
 extern char* insert_section_data(const char* filename, const char* section, const char* data, BOOL dos2unix);
 extern char* replace_in_token_data(const char* filename, const char* token, const char* src, const char* rep, BOOL dos2unix);
+extern char* replace_char(const char* src, const char c, const char* rep);
 extern void parse_update(char* buf, size_t len);
 extern BOOL WimExtractCheck(void);
 extern BOOL WimExtractFile(const char* wim_image, int index, const char* src, const char* dst);
