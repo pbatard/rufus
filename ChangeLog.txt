@@ -1,3 +1,10 @@
+o Version 1.4.12 (2014.11.??) [BUGFIX RELEASE]
+    Fix support for Red Hat 7 and CentOS 7
+    Fix support for Debian 7.x
+    Fix default listing of Mushkin Ventura Ultra USB 3.0 drives
+    Fix Czech translation, courtesy of doktotnotor
+    Update Windows version listing for Windows 10
+
 o Version 1.4.11 (2014.11.04)
     Add Czech translation, courtesy of Richard Kahl
     Add Ukrainian translation, courtesy of VKS

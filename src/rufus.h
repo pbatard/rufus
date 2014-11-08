@@ -309,7 +309,8 @@ enum WindowsVersion {
 	WINDOWS_VISTA = 0x60,
 	WINDOWS_7 = 0x61,
 	WINDOWS_8 = 0x62,
-	WINDOWS_8_1_OR_LATER = 0x63,
+	WINDOWS_8_1 = 0x63,
+	WINDOWS_10 = 0x64,
 	WINDOWS_MAX
 };
 
@@ -344,7 +345,7 @@ extern int dialog_showing;
  */
 extern void GetWindowsVersion(void);
 extern BOOL is_x64(void);
-extern const char* PrintWindowsVersion(enum WindowsVersion version);
+//extern const char* PrintWindowsVersion(enum WindowsVersion version);
 extern const char *WindowsErrorString(void);
 extern void DumpBufferHex(void *buf, size_t size);
 extern void PrintStatus(unsigned int duration, BOOL debug, int msg_id, ...);

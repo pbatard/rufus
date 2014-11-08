@@ -297,7 +297,9 @@ DWORD DownloadFile(const char* url, const char* file, HWND hProgressDialog)
 		uprintf("Network is unavailable: %s\n", WinInetErrorString());
 		goto out;
 	}
-	_snprintf(agent, ARRAYSIZE(agent), APPLICATION_NAME "/%d.%d.%d.%d", rufus_version[0], rufus_version[1], rufus_version[2], rufus_version[3]);
+	_snprintf(agent, ARRAYSIZE(agent), APPLICATION_NAME "/%d.%d.%d.%d (WinNT %d.%d%s)",
+		rufus_version[0], rufus_version[1], rufus_version[2], rufus_version[3],
+		nWindowsVersion>>4, nWindowsVersion&0x0F, is_x64()?"; WOW64":"");
 	hSession = InternetOpenA(agent, INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
 	if (hSession == NULL) {
 		uprintf("Could not open Internet session: %s\n", WinInetErrorString());

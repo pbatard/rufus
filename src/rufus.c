@@ -295,7 +295,7 @@ static BOOL DefineClusterSizes(void)
 
 		// ReFS (only supported for Windows 8.1 and later and for fixed disks)
 		if (SelectedDrive.DiskSize >= 512*MB) {
-			if ((nWindowsVersion >= WINDOWS_8_1_OR_LATER) && (SelectedDrive.Geometry.MediaType == FixedMedia)) {
+			if ((nWindowsVersion >= WINDOWS_8_1) && (SelectedDrive.Geometry.MediaType == FixedMedia)) {
 				SelectedDrive.ClusterSize[FS_REFS].Allowed = SINGLE_CLUSTERSIZE_DEFAULT;
 				SelectedDrive.ClusterSize[FS_REFS].Default = 1;
 			}
