@@ -228,6 +228,7 @@ static void fix_syslinux(const char* psz_fullpath, const char* psz_path, const c
 		uprintf("Duplicated %s to %s\n", src, dst);
 		free(dst);
 	}
+	free(src);
 }
 
 // Returns 0 on success, nonzero on error

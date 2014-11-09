@@ -1,4 +1,4 @@
-o Version 1.4.12 (2014.11.??) [BUGFIX RELEASE]
+o Version 1.4.12 (2014.11.09) [BUGFIX RELEASE]
     Fix support for Red Hat 7 and CentOS 7
     Fix support for Debian 7.x
     Fix default listing of Mushkin Ventura Ultra USB 3.0 drives
