@@ -13,5 +13,6 @@ TARGETLIBS=$(SDK_LIB_PATH)\kernel32.lib \
            $(SDK_LIB_PATH)\user32.lib
 
 SOURCES=fs.c          \
+        ntfssect.c    \
         setadv.c      \
         syslxmod.c

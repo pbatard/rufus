@@ -50,8 +50,8 @@
 #define IDR_FD_EGA18_CPX                326
 #define IDR_SL_LDLINUX_V4_BSS           400
 #define IDR_SL_LDLINUX_V4_SYS           401
-#define IDR_SL_LDLINUX_V5_BSS           402
-#define IDR_SL_LDLINUX_V5_SYS           403
+#define IDR_SL_LDLINUX_V6_BSS           402
+#define IDR_SL_LDLINUX_V6_SYS           403
 #define IDR_SL_MBOOT_C32                404
 #define IDR_LC_RUFUS_LOC                500
 #define IDR_XT_HOGGER                   501

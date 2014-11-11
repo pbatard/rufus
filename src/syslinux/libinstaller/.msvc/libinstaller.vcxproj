@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\advconst.h" />
+    <ClInclude Include="..\ntfssect.h" />
     <ClInclude Include="..\syslinux.h" />
     <ClInclude Include="..\syslxcom.h" />
     <ClInclude Include="..\syslxfs.h" />
@@ -27,6 +28,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\fs.c" />
+    <ClCompile Include="..\ntfssect.c" />
     <ClCompile Include="..\setadv.c" />
     <ClCompile Include="..\syslxmod.c" />
   </ItemGroup>

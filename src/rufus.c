@@ -1178,7 +1178,8 @@ static BOOL BootCheck(void)
 						}
 					}
 				}
-			} else if (iso_report.sl_version != embedded_sl_version[1]) {
+			} else if ((iso_report.sl_version != embedded_sl_version[1]) ||
+				(safe_strcmp(iso_report.sl_version_ext, embedded_sl_version_ext[1]) != 0)) {
 				// Unlike what was the case for v4 and earlier, Syslinux v5+ versions are INCOMPATIBLE with one another!
 				IGNORE_RETVAL(_chdirU(app_dir));
 				IGNORE_RETVAL(_mkdir(FILES_DIR));
@@ -1200,7 +1201,7 @@ static BOOL BootCheck(void)
 						iso_report.sl_version_str, iso_report.sl_version_ext);
 				} else {
 					r = MessageBoxU(hMainDialog, lmprintf(MSG_114, iso_report.sl_version_str, iso_report.sl_version_ext,
-						embedded_sl_version_str[1]),
+						embedded_sl_version_str[1], embedded_sl_version_ext[1]),
 						lmprintf(MSG_115), MB_YESNO|MB_ICONWARNING|MB_IS_RTL);
 					if (r != IDYES)
 						return FALSE;
@@ -1287,7 +1288,7 @@ void InitDialog(HWND hDlg)
 	HDC hDC;
 	int i, i16, s16;
 	char tmp[128], *token, *buf, *ext;
-	static char* resource[2] = { MAKEINTRESOURCEA(IDR_SL_LDLINUX_V4_SYS), MAKEINTRESOURCEA(IDR_SL_LDLINUX_V5_SYS) };
+	static char* resource[2] = { MAKEINTRESOURCEA(IDR_SL_LDLINUX_V4_SYS), MAKEINTRESOURCEA(IDR_SL_LDLINUX_V6_SYS) };
 
 #ifdef RUFUS_TEST
 	ShowWindow(GetDlgItem(hDlg, IDC_TEST), SW_SHOW);
@@ -1505,9 +1506,9 @@ void SetBoot(int fs, int bt)
 	IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, lmprintf(MSG_036)), DT_ISO));
 	IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, lmprintf(MSG_095)), DT_IMG));
 	// If needed (advanced mode) also append a Syslinux option
-	if ( (bt == BT_BIOS) && (((fs == FS_FAT16) || (fs == FS_FAT32)) && (advanced_mode)) ) {
+	if ( (bt == BT_BIOS) && (((fs == FS_FAT16) || (fs == FS_FAT32) || (fs == FS_NTFS)) && (advanced_mode)) ) {
 		IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, "Syslinux 4"), DT_SYSLINUX_V4));
-		IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, "Syslinux 5"), DT_SYSLINUX_V5));
+		IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, "Syslinux 6"), DT_SYSLINUX_V5));
 		IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, "ReactOS"), DT_REACTOS));
 	}
 	if ((!advanced_mode) && (selection_default >= DT_SYSLINUX_V4)) {

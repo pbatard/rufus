@@ -1,5 +1,5 @@
 /*
- *   Copyright 2011 Paulo Alcantara <pcacjr@gmail.com>
+ *   Copyright 2011-2012 Paulo Alcantara <pcacjr@zytor.com>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -12,13 +12,16 @@
 #ifndef _SYSLXFS_H_
 #define _SYSLXFS_H_
 
-/* Global fs_type for handling fat, ntfs, ext2/3/4 and btrfs */
+/* Global fs_type for handling fat, ntfs, ext2/3/4, btrfs, xfs and ufs1/2 */
 enum filesystem {
     NONE,
     EXT2,
     BTRFS,
     VFAT,
     NTFS,
+    XFS,
+    UFS1,
+    UFS2,
 };
 
 //extern int fs_type;

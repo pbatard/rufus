@@ -369,7 +369,7 @@ extern BOOL Question(char* title, char* format, ...);
 extern BOOL ExtractDOS(const char* path);
 extern BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan);
 extern int64_t ExtractISOFile(const char* iso, const char* iso_file, const char* dest_file, DWORD attributes);
-extern BOOL InstallSyslinux(DWORD drive_index, char drive_letter);
+extern BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int fs);
 extern uint16_t GetSyslinuxVersion(char* buf, size_t buf_size, char** ext);
 extern BOOL CreateProgress(void);
 extern BOOL SetAutorun(const char* path);

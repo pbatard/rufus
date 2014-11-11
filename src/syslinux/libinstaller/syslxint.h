@@ -1,7 +1,7 @@
 /* ----------------------------------------------------------------------- *
  *
  *   Copyright 2007-2008 H. Peter Anvin - All Rights Reserved
- *   Copyright 2009-2011 Intel Corporation; author: H. Peter Anvin
+ *   Copyright 2009-2014 Intel Corporation; author: H. Peter Anvin
  *   Copyright 2011 Paulo Alcantara <pcacjr@gmail.com>
  *
  *   This program is free software; you can redistribute it and/or modify
@@ -26,16 +26,15 @@
 #ifdef __GNUC__
 # ifdef __MINGW32__
    /* gcc 4.7 miscompiles packed structures in MS-bitfield mode */
-#  define GNUC_PACKED __attribute__((packed,gcc_struct))
+#  define PACKME
+#  define PACKED __attribute__((packed,gcc_struct))
 # else
-#  define GNUC_PACKED __attribute__((packed))
+#  define PACKME
+#  define PACKED __attribute__((packed))
 # endif
-# define PRAGMA_BEGIN_PACKED
-# define PRAGMA_END_PACKED
 #elif defined(_MSC_VER)
-# define GNUC_PACKED
-# define PRAGMA_BEGIN_PACKED __pragma(pack(push, 1))
-# define PRAGMA_END_PACKED   __pragma(pack(pop))
+# define PACKME __pragma(pack(push, 1))
+# define PACKED __pragma(pack(pop))
 #else
 # error "Need to define PACKED for this compiler"
 #endif
@@ -66,7 +65,7 @@ static inline uint32_t get_32(const uint32_t * p)
     return *p;
 #else
     const uint16_t *pp = (const uint16_t *)p;
-    return get_16(pp[0]) + (uint32_t)get_16(pp[1]);
+    return get_16(&pp[0]) + ((uint32_t)get_16(&pp[1]) << 16);
 #endif
 }
 
@@ -77,7 +76,7 @@ static inline uint64_t get_64(const uint64_t * p)
     return *p;
 #else
     const uint32_t *pp = (const uint32_t *)p;
-    return get_32(pp[0]) + (uint64_t)get_32(pp[1]);
+    return get_32(&pp[0]) + ((uint64_t)get_32(&pp[1]) << 32);
 #endif
 }
 
@@ -104,11 +103,9 @@ static inline void set_32(uint32_t *p, uint32_t v)
     /* Littleendian and unaligned-capable */
     *p = v;
 #else
-    uint8_t *pp = (uint8_t *) p;
-    pp[0] = (v & 0xff);
-    pp[1] = ((v >> 8) & 0xff);
-    pp[2] = ((v >> 16) & 0xff);
-    pp[3] = ((v >> 24) & 0xff);
+    uint16_t *pp = (uint16_t *) p;
+    set_16(&pp[0], v);
+    set_16(&pp[1], v >> 16);
 #endif
 }
 
@@ -119,8 +116,8 @@ static inline void set_64(uint64_t *p, uint64_t v)
     *p = v;
 #else
     uint32_t *pp = (uint32_t *) p;
-    set_32(pp[0], v);
-    set_32(pp[1], v >> 32);
+    set_32(&pp[0], v);
+    set_32(&pp[1], v >> 32);
 #endif
 }
 
@@ -130,47 +127,65 @@ static inline void set_64(uint64_t *p, uint64_t v)
  */
 #ifdef __MSDOS__
 
-static inline __attribute__ ((const))
-uint16_t ds(void)
-{
-    uint16_t v;
-    asm("movw %%ds,%0":"=rm"(v));
-    return v;
-}
-
-static inline void *set_fs(const void *p)
-{
-    uint16_t seg;
-
-    seg = ds() + ((size_t) p >> 4);
-    asm volatile ("movw %0,%%fs"::"rm" (seg));
-    return (void *)((size_t) p & 0xf);
-}
-
-uint8_t get_8_sl(const uint8_t * p);
-uint16_t get_16_sl(const uint16_t * p);
-uint32_t get_32_sl(const uint32_t * p);
-uint64_t get_64_sl(const uint64_t * p);
-void set_8_sl(uint8_t * p, uint8_t v);
-void set_16_sl(uint16_t * p, uint16_t v);
-void set_32_sl(uint32_t * p, uint32_t v);
-void set_64_sl(uint64_t * p, uint64_t v);
-void memcpy_to_sl(void *dst, const void *src, size_t len);
-void memcpy_from_sl(void *dst, const void *src, size_t len);
+uint8_t get_8_sl(const uint8_t _slimg * p);
+uint16_t get_16_sl(const uint16_t _slimg * p);
+uint32_t get_32_sl(const uint32_t _slimg * p);
+uint64_t get_64_sl(const uint64_t _slimg * p);
+void set_8_sl(uint8_t _slimg * p, uint8_t v);
+void set_16_sl(uint16_t _slimg * p, uint16_t v);
+void set_32_sl(uint32_t _slimg * p, uint32_t v);
+void set_64_sl(uint64_t _slimg * p, uint64_t v);
+void memcpy_to_sl(void _slimg *dst, const void *src, size_t len);
+void memcpy_from_sl(void *dst, const void _slimg *src, size_t len);
+void memset_sl(void _slimg *dst, int c, size_t len);
 
 #else
 
 /* Sane system ... */
-#define get_8_sl(x)    		get_8(x)
-#define get_16_sl(x)   		get_16(x)
-#define get_32_sl(x)   		get_32(x)
-#define get_64_sl(x)   		get_64(x)
-#define set_8_sl(x,y)  		set_8(x,y)
-#define set_16_sl(x,y) 		set_16(x,y)
-#define set_32_sl(x,y) 		set_32(x,y)
-#define set_64_sl(x,y) 		set_64(x,y)
-#define memcpy_to_sl(d,s,l)	memcpy(d,s,l)
-#define memcpy_from_sl(d,s,l)	memcpy(d,s,l)
+static inline uint8_t get_8_sl(const uint8_t _slimg * p)
+{
+    return get_8((const uint8_t _force *)p);
+}
+static inline uint16_t get_16_sl(const uint16_t _slimg * p)
+{
+    return get_16((const uint16_t _force *)p);
+}
+static inline uint32_t get_32_sl(const uint32_t _slimg * p)
+{
+    return get_32((const uint32_t _force *)p);
+}
+static inline uint64_t get_64_sl(const uint64_t _slimg * p)
+{
+    return get_64((const uint64_t _force *)p);
+}
+static inline void set_8_sl(uint8_t _slimg * p, uint8_t v)
+{
+    set_8((uint8_t _force *)p, v);
+}
+static inline void set_16_sl(uint16_t _slimg * p, uint16_t v)
+{
+    set_16((uint16_t _force *)p, v);
+}
+static inline void set_32_sl(uint32_t _slimg * p, uint32_t v)
+{
+    set_32((uint32_t _force *)p, v);
+}
+static inline void set_64_sl(uint64_t _slimg * p, uint64_t v)
+{
+    set_64((uint64_t _force *)p, v);
+}
+static inline void memcpy_to_sl(void _slimg *dst, const void *src, size_t len)
+{
+    memcpy((void _force *)dst, src, len);
+}
+static inline void memcpy_from_sl(void *dst, const void _slimg *src, size_t len)
+{
+    memcpy(dst, (const void _force *)src, len);
+}
+static inline void memset_sl(void _slimg *dst, int c, size_t len)
+{
+    memset((void _force *)dst, c, len);
+}
 
 #endif
 
@@ -204,13 +219,14 @@ struct ext_patch_area {
 };
 
 /* Sector extent */
-PRAGMA_BEGIN_PACKED
+PACKME
 struct syslinux_extent {
     uint64_t lba;
     uint16_t len;
-} GNUC_PACKED;
+} PACKED;
 
 /* FAT bootsector format, also used by other disk-based derivatives */
+PACKME
 struct fat_boot_sector {
     uint8_t bsJump[3];
     char bsOemName[8];
@@ -227,7 +243,9 @@ struct fat_boot_sector {
     uint32_t bsHiddenSecs;
     uint32_t bsHugeSectors;
 
+    PACKME
     union {
+	PACKME
 	struct {
 	    uint8_t DriveNumber;
 	    uint8_t Reserved1;
@@ -236,7 +254,8 @@ struct fat_boot_sector {
 	    char VolumeLabel[11];
 	    char FileSysType[8];
 	    uint8_t Code[442];
-	} GNUC_PACKED bs16;
+	} PACKED bs16;
+	PACKME
 	struct {
 	    uint32_t FATSz32;
 	    uint16_t ExtFlags;
@@ -252,15 +271,16 @@ struct fat_boot_sector {
 	    char VolumeLabel[11];
 	    char FileSysType[8];
 	    uint8_t Code[414];
-	} GNUC_PACKED bs32;
-    } GNUC_PACKED;
+	} PACKED bs32;
+    } PACKED;
 
     uint32_t bsMagic;
     uint16_t bsForwardPtr;
     uint16_t bsSignature;
-} GNUC_PACKED;
+} PACKED;
 
 /* NTFS bootsector format */
+PACKME
 struct ntfs_boot_sector {
     uint8_t bsJump[3];
     char bsOemName[8];
@@ -291,8 +311,7 @@ struct ntfs_boot_sector {
     uint32_t bsMagic;
     uint16_t bsForwardPtr;
     uint16_t bsSignature;
-} GNUC_PACKED;
-PRAGMA_END_PACKED
+} PACKED;
 
 #define FAT_bsHead      bsJump
 #define FAT_bsHeadLen   offsetof(struct fat_boot_sector, bsBytesPerSec)

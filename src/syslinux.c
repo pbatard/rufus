@@ -36,6 +36,7 @@
 #include "syslxfs.h"
 #include "libfat.h"
 #include "setadv.h"
+#include "ntfssect.h"
 
 unsigned char* syslinux_ldlinux[2] = { NULL, NULL };
 DWORD syslinux_ldlinux_len[2];
@@ -69,7 +70,7 @@ int libfat_readfile(intptr_t pp, void *buf, size_t secsize,
  * Extract the ldlinux.sys and ldlinux.bss from resources,
  * then patch and install them
  */
-BOOL InstallSyslinux(DWORD drive_index, char drive_letter)
+BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int fs_type)
 {
 	HANDLE f_handle = INVALID_HANDLE_VALUE;
 	HANDLE d_handle = INVALID_HANDLE_VALUE;
@@ -77,12 +78,12 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter)
 	DWORD bytes_written;
 	BOOL r = FALSE;
 	FILE* fd;
-	size_t len;
+	size_t length;
 
 	static unsigned char sectbuf[SECTOR_SIZE];
 	static char* resource[2][2] = {
 		{ MAKEINTRESOURCEA(IDR_SL_LDLINUX_V4_SYS), MAKEINTRESOURCEA(IDR_SL_LDLINUX_V4_BSS) },
-		{ MAKEINTRESOURCEA(IDR_SL_LDLINUX_V5_SYS), MAKEINTRESOURCEA(IDR_SL_LDLINUX_V5_BSS) } };
+		{ MAKEINTRESOURCEA(IDR_SL_LDLINUX_V6_SYS), MAKEINTRESOURCEA(IDR_SL_LDLINUX_V6_BSS) } };
 	const char* ldlinux = "ldlinux";
 	const char* syslinux = "syslinux";
 	const char* ldlinux_ext[3] = { "sys", "bss", "c32" };
@@ -116,9 +117,9 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter)
 				uprintf("Could not open %s\n", path);
 				goto out;
 			}
-			len = fread(syslinux_ldlinux[i], 1, (size_t)syslinux_ldlinux_len[i], fd);
+			length = fread(syslinux_ldlinux[i], 1, (size_t)syslinux_ldlinux_len[i], fd);
 			fclose(fd);
-			if (len != (size_t)syslinux_ldlinux_len[i]) {
+			if (length != (size_t)syslinux_ldlinux_len[i]) {
 				uprintf("Could not read %s\n", path);
 				goto out;
 			}
@@ -148,8 +149,8 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter)
 	}
 
 	/* Write ldlinux.sys file */
-	if (!WriteFile(f_handle, syslinux_ldlinux[0], syslinux_ldlinux_len[0],
-		   &bytes_written, NULL) ||
+	if (!WriteFile(f_handle, (const char _force *)syslinux_ldlinux[0],
+		   syslinux_ldlinux_len[0], &bytes_written, NULL) ||
 		bytes_written != syslinux_ldlinux_len[0]) {
 		uprintf("Could not write '%s'\n", &path[3]);
 		goto out;
@@ -183,6 +184,39 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter)
 	sectors = (libfat_sector_t*) calloc(ldlinux_sectors, sizeof *sectors);
 	if (sectors == NULL)
 		goto out;
+	if (fs_type == FS_NTFS) {
+		DWORD err;
+		S_NTFSSECT_VOLINFO vol_info;
+		LARGE_INTEGER vcn, lba, len;
+		S_NTFSSECT_EXTENT extent;
+
+		static_sprintf(tmp, "%C:\\", drive_letter);
+		err = NtfsSectGetVolumeInfo(tmp, &vol_info);
+		if (err != ERROR_SUCCESS) {
+			uprintf("Could not fetch NTFS volume info");
+			goto out;
+		}
+		secp = sectors;
+		nsectors = 0;
+		for (vcn.QuadPart = 0;
+			NtfsSectGetFileVcnExtent(f_handle, &vcn, &extent) == ERROR_SUCCESS;
+			vcn = extent.NextVcn) {
+				err = NtfsSectLcnToLba(&vol_info, &extent.FirstLcn, &lba);
+				if (err != ERROR_SUCCESS) {
+					uprintf("Could not translate LDLINUX.SYS LCN to disk LBA");
+					goto out;
+				}
+				lba.QuadPart -= vol_info.PartitionLba.QuadPart;
+				len.QuadPart = ((extent.NextVcn.QuadPart -
+					extent.FirstVcn.QuadPart) *
+					vol_info.SectorsPerCluster);
+				while (len.QuadPart-- && nsectors < ldlinux_sectors) {
+					*secp++ = lba.QuadPart++;
+					nsectors++;
+				}
+		}
+		goto map_done;
+	}
 	fs = libfat_open(libfat_readfile, (intptr_t) d_handle);
 	if (fs == NULL) {
 		uprintf("Syslinux FAT access error\n");
@@ -198,6 +232,7 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter)
 		s = libfat_nextsector(fs, s);
 	}
 	libfat_close(fs);
+map_done:
 
 	/* Patch ldlinux.sys and the boot sector */
 	syslinux_patch(sectors, nsectors, 0, 0, NULL, NULL);
@@ -224,7 +259,7 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter)
 	}
 
 	/* Make the syslinux boot sector */
-	syslinux_make_bootsect(sectbuf, VFAT);
+	syslinux_make_bootsect(sectbuf, (fs_type == FS_NTFS)?NTFS:VFAT);
 
 	/* Write boot sector back */
 	if (SetFilePointer(d_handle, 0, NULL, FILE_BEGIN) != 0 ||

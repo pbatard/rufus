@@ -1554,7 +1554,7 @@ DWORD WINAPI FormatThread(void* param)
 			// We must close and unlock the volume to write files to it
 			safe_unlockclose(hLogicalVolume);
 		} else if ( (dt == DT_SYSLINUX_V4) || (dt == DT_SYSLINUX_V5) || ((dt == DT_ISO) && ((fs == FS_FAT16) || (fs == FS_FAT32))) ) {
-			if (!InstallSyslinux(DriveIndex, drive_name[0])) {
+			if (!InstallSyslinux(DriveIndex, drive_name[0], fs)) {
 				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_INSTALL_FAILURE;
 			}
 		}

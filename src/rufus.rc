@@ -32,7 +32,7 @@ LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
 
 IDD_DIALOG DIALOGEX 12, 12, 206, 329
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_MINIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Rufus 1.5.0.537"
+CAPTION "Rufus 1.5.0.538"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     DEFPUSHBUTTON   "Start",IDC_START,94,291,50,14
@@ -165,7 +165,7 @@ END
 RTL_IDD_DIALOG DIALOGEX 12, 12, 206, 329
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_MINIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_RTLREADING | WS_EX_APPWINDOW | WS_EX_LAYOUTRTL
-CAPTION "Rufus 1.5.0.537"
+CAPTION "Rufus 1.5.0.538"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     DEFPUSHBUTTON   "Start",IDC_START,94,291,50,14
@@ -336,8 +336,8 @@ BEGIN
     "#endif\r\n"
     "IDR_SL_LDLINUX_V4_BSS   RCDATA                  ""../res/syslinux/ldlinux_v4.bss""\r\n"
     "IDR_SL_LDLINUX_V4_SYS   RCDATA                  ""../res/syslinux/ldlinux_v4.sys""\r\n"
-    "IDR_SL_LDLINUX_V5_BSS   RCDATA                  ""../res/syslinux/ldlinux_v5.bss""\r\n"
-    "IDR_SL_LDLINUX_V5_SYS   RCDATA                  ""../res/syslinux/ldlinux_v5.sys""\r\n"
+    "IDR_SL_LDLINUX_V6_BSS   RCDATA                  ""../res/syslinux/ldlinux_v6.bss""\r\n"
+    "IDR_SL_LDLINUX_V6_SYS   RCDATA                  ""../res/syslinux/ldlinux_v6.sys""\r\n"
     "IDR_SL_MBOOT_C32        RCDATA                  ""../res/syslinux/mboot.c32""\r\n"
     "IDR_FD_COMMAND_COM      RCDATA                  ""../res/freedos/COMMAND.COM""\r\n"
     "IDR_FD_KERNEL_SYS       RCDATA                  ""../res/freedos/KERNEL.SYS""\r\n"
@@ -428,8 +428,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,5,0,537
- PRODUCTVERSION 1,5,0,537
+ FILEVERSION 1,5,0,538
+ PRODUCTVERSION 1,5,0,538
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -446,13 +446,13 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Akeo Consulting (http://akeo.ie)"
             VALUE "FileDescription", "Rufus"
-            VALUE "FileVersion", "1.5.0.537"
+            VALUE "FileVersion", "1.5.0.538"
             VALUE "InternalName", "Rufus"
             VALUE "LegalCopyright", "© 2011-2014 Pete Batard (GPL v3)"
             VALUE "LegalTrademarks", "http://www.gnu.org/copyleft/gpl.html"
             VALUE "OriginalFilename", "rufus.exe"
             VALUE "ProductName", "Rufus"
-            VALUE "ProductVersion", "1.5.0.537"
+            VALUE "ProductVersion", "1.5.0.538"
         END
     END
     BLOCK "VarFileInfo"
@@ -490,8 +490,8 @@ IDR_LC_RUFUS_LOC        RCDATA                  "../res/localization/embedded.lo
 #endif
 IDR_SL_LDLINUX_V4_BSS   RCDATA                  "../res/syslinux/ldlinux_v4.bss"
 IDR_SL_LDLINUX_V4_SYS   RCDATA                  "../res/syslinux/ldlinux_v4.sys"
-IDR_SL_LDLINUX_V5_BSS   RCDATA                  "../res/syslinux/ldlinux_v5.bss"
-IDR_SL_LDLINUX_V5_SYS   RCDATA                  "../res/syslinux/ldlinux_v5.sys"
+IDR_SL_LDLINUX_V6_BSS   RCDATA                  "../res/syslinux/ldlinux_v6.bss"
+IDR_SL_LDLINUX_V6_SYS   RCDATA                  "../res/syslinux/ldlinux_v6.sys"
 IDR_SL_MBOOT_C32        RCDATA                  "../res/syslinux/mboot.c32"
 IDR_FD_COMMAND_COM      RCDATA                  "../res/freedos/COMMAND.COM"
 IDR_FD_KERNEL_SYS       RCDATA                  "../res/freedos/KERNEL.SYS"

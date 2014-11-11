@@ -1,7 +1,7 @@
 /* ----------------------------------------------------------------------- *
  *
  *   Copyright 1998-2008 H. Peter Anvin - All Rights Reserved
- *   Copyright 2009-2010 Intel Corporation; author H. Peter Anvin
+ *   Copyright 2009-2014 Intel Corporation; author H. Peter Anvin
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -17,6 +17,8 @@
 
 #define _XOPEN_SOURCE 500	/* Required on glibc 2.x */
 #define _BSD_SOURCE
+/* glibc 2.20 deprecates _BSD_SOURCE in favour of _DEFAULT_SOURCE */
+#define _DEFAULT_SOURCE 1
 #include <stdio.h>
 #include <inttypes.h>
 #include <string.h>
@@ -30,7 +32,7 @@
 /*
  * Generate sector extents
  */
-static void generate_extents(struct syslinux_extent *ex, int nptrs,
+static void generate_extents(struct syslinux_extent _slimg *ex, int nptrs,
 			     const sector_t *sectp, int nsect)
 {
     uint32_t addr = 0x8000;	/* ldlinux.sys starts loading here */
@@ -42,7 +44,7 @@ static void generate_extents(struct syslinux_extent *ex, int nptrs,
     len = 0;
     lba = 0;
 
-    memset(ex, 0, nptrs * sizeof *ex);
+    memset_sl(ex, 0, nptrs * sizeof *ex);
 
     while (nsect) {
 	sect = *sectp++;
@@ -81,9 +83,14 @@ static void generate_extents(struct syslinux_extent *ex, int nptrs,
 /*
  * Form a pointer based on a 16-bit patcharea/epa field
  */
-static inline void *ptr(void *img, uint16_t *offset_p)
+static inline void *ptr(void *img, const uint16_t _slimg *offset_p)
 {
     return (char *)img + get_16_sl(offset_p);
+}
+static inline void _slimg *slptr(void _slimg *img,
+				 const uint16_t _slimg *offset_p)
+{
+    return (char _slimg *)img + get_16_sl(offset_p);
 }
 
 /*
@@ -101,25 +108,26 @@ int syslinux_patch(const sector_t *sectp, int nsectors,
 		   int stupid, int raid_mode,
 		   const char *subdir, const char *subvol)
 {
-    struct patch_area *patcharea;
-    struct ext_patch_area *epa;
-    struct syslinux_extent *ex;
-    uint32_t *wp;
+    struct patch_area _slimg *patcharea;
+    struct ext_patch_area _slimg *epa;
+    struct syslinux_extent _slimg *ex;
+    const uint32_t _slimg *wp;
     int nsect = ((boot_image_len + SECTOR_SIZE - 1) >> SECTOR_SHIFT) + 2;
     uint32_t csum;
     int i, dw, nptrs;
     struct fat_boot_sector *sbs = (struct fat_boot_sector *)boot_sector;
-    uint64_t *advptrs;
+    uint64_t _slimg *advptrs;
 
     if (nsectors < nsect)
 	return -1;		/* The actual file is too small for content */
 
     /* Search for LDLINUX_MAGIC to find the patch area */
-    for (wp = (uint32_t *)boot_image; get_32_sl(wp) != LDLINUX_MAGIC;
+    for (wp = (const uint32_t _slimg *)boot_image;
+	 get_32_sl(wp) != LDLINUX_MAGIC;
 	 wp++)
 	;
-    patcharea = (struct patch_area *)wp;
-    epa = ptr(boot_image, &patcharea->epaoffset);
+    patcharea = (struct patch_area _slimg *)wp;
+    epa = slptr(boot_image, &patcharea->epaoffset);
 
     /* First sector need pointer in boot sector */
     set_32(ptr(sbs, &epa->sect1ptr0), (uint32_t) sectp[0]);
@@ -145,20 +153,22 @@ int syslinux_patch(const sector_t *sectp, int nsectors,
     }
 
     /* Set the sector extents */
-    ex = ptr(boot_image, &epa->secptroffset);
+    ex = slptr(boot_image, &epa->secptroffset);
     nptrs = get_16_sl(&epa->secptrcnt);
 
+#if 0
     if (nsect > nptrs) {
 	/* Not necessarily an error in this case, but a general problem */
 	fprintf(stderr, "Insufficient extent space, build error!\n");
 	exit(1);
     }
+#endif
 
     /* -1 for the pointer in the boot sector, -2 for the two ADVs */
     generate_extents(ex, nptrs, sectp, nsect-1-2);
 
     /* ADV pointers */
-    advptrs = ptr(boot_image, &epa->advptroffset);
+    advptrs = slptr(boot_image, &epa->advptroffset);
     set_64_sl(&advptrs[0], sectp[nsect-1-2]);
     set_64_sl(&advptrs[1], sectp[nsect-1-1]);
 
@@ -169,7 +179,7 @@ int syslinux_patch(const sector_t *sectp, int nsectors,
 	    fprintf(stderr, "Subdirectory path too long... aborting install!\n");
 	    exit(1);
 	}
-	memcpy_to_sl(ptr(boot_image, &epa->diroffset), subdir, sublen);
+	memcpy_to_sl(slptr(boot_image, &epa->diroffset), subdir, sublen);
     }
 
     /* Poke in the subvolume information */
@@ -179,14 +189,14 @@ int syslinux_patch(const sector_t *sectp, int nsectors,
 	    fprintf(stderr, "Subvol name too long... aborting install!\n");
 	    exit(1);
 	}
-	memcpy_to_sl(ptr(boot_image, &epa->subvoloffset), subvol, sublen);
+	memcpy_to_sl(slptr(boot_image, &epa->subvoloffset), subvol, sublen);
     }
 
     /* Now produce a checksum */
     set_32_sl(&patcharea->checksum, 0);
 
     csum = LDLINUX_MAGIC;
-    for (i = 0, wp = (uint32_t *)boot_image; i < dw; i++, wp++)
+    for (i = 0, wp = (const uint32_t _slimg *)boot_image; i < dw; i++, wp++)
 	csum -= get_32_sl(wp);	/* Negative checksum */
 
     set_32_sl(&patcharea->checksum, csum);

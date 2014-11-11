@@ -18,6 +18,8 @@
 
 #define _XOPEN_SOURCE 500	/* Required on glibc 2.x */
 #define _BSD_SOURCE
+/* glibc 2.20 deprecates _BSD_SOURCE in favour of _DEFAULT_SOURCE */
+#define _DEFAULT_SOURCE 1
 #include <stdio.h>
 #include <inttypes.h>
 #include <string.h>

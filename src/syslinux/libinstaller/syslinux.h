@@ -18,6 +18,14 @@
 #include "advconst.h"
 #include "setadv.h"
 
+#ifdef __CHECKER__
+# define _slimg __attribute__((noderef,address_space(1)))
+# define _force __attribute__((force))
+#else
+# define _slimg
+# define _force
+#endif
+
 /* The standard boot sector and ldlinux image */
 extern unsigned char* syslinux_ldlinux[2];
 extern DWORD syslinux_ldlinux_len[2];
