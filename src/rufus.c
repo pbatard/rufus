@@ -2089,7 +2089,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	const char* rufus_loc = "rufus.loc";
 	const char* cmdline_hogger = "rufus.com";
 	int i, opt, option_index = 0, argc = 0, si = 0, lcid = GetUserDefaultUILanguage();
-	BOOL attached_console = FALSE, external_loc_file = FALSE, lgp_set = FALSE;
+	BOOL attached_console = FALSE, external_loc_file = FALSE, lgp_set = FALSE, automount;
 	BYTE *loc_data, *hog_data;
 	DWORD loc_size, hog_size, Size;
 	char tmp_path[MAX_PATH] = "", loc_file[MAX_PATH] = "", *tmp, *locale_name = NULL;
@@ -2126,8 +2126,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			hogmutex = CreateMutexA(NULL, TRUE, "Global/Rufus_CmdLine");
 
 			// Extract the hogger resource
-			hFile = CreateFileA(cmdline_hogger, GENERIC_READ | GENERIC_WRITE,
-				FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+			hFile = CreateFileA(cmdline_hogger, GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ|FILE_SHARE_WRITE,
+				NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 			if (hFile != INVALID_HANDLE_VALUE) {
 				// coverity[check_return]
 				WriteFile(hFile, hog_data, hog_size, &Size, NULL);
@@ -2219,7 +2219,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		}
 
 		hFile = CreateFileU(loc_file, GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ|FILE_SHARE_WRITE,
-			NULL, CREATE_ALWAYS, 0, 0);
+			NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 		if ((hFile == INVALID_HANDLE_VALUE) || (!WriteFile(hFile, loc_data, loc_size, &Size, 0)) || (loc_size != Size)) {
 			uprintf("localization: unable to extract '%s': %s.\n", loc_file, WindowsErrorString());
 			safe_closehandle(hFile);
@@ -2276,6 +2276,18 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	// We use local group policies rather than direct registry manipulation
 	// 0x9e disables removable and fixed drive notifications
 	lgp_set = SetLGP(FALSE, &existing_key, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer", "NoDriveTypeAutorun", 0x9e);
+
+	if (nWindowsVersion > WINDOWS_XP) {
+		// Re-enable AutoMount if needed
+		if (!GetAutoMount(&automount)) {
+			uprintf("Could not get AutoMount status");
+			automount = TRUE;	// So that we don't try to change its status on exit
+		} else if (!automount) {
+			uprintf("AutoMount was detected as disabled - temporary re-enabling it");
+			if (!SetAutoMount(TRUE))
+				uprintf("Failed to enable AutoMount");
+		}
+	}
 
 relaunch:
 	uprintf("localization: using locale '%s'\n", selected_locale->txt[0]);
@@ -2456,6 +2468,8 @@ out:
 	}
 	if (lgp_set)
 		SetLGP(TRUE, &existing_key, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer", "NoDriveTypeAutorun", 0);
+	if ((nWindowsVersion > WINDOWS_XP) && (!automount) && (!SetAutoMount(FALSE)))
+		uprintf("Failed to restore AutoMount to disabled");
 	if (attached_console) {
 		SetWindowPos(GetConsoleWindow(), HWND_TOP, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
 		FreeConsole();

@@ -48,6 +48,48 @@ const GUID PARTITION_BASIC_DATA_GUID =
 RUFUS_DRIVE_INFO SelectedDrive;
 
 /*
+ * The following methods get or set the AutoMount setting (which is different from AutoRun)
+ * Rufus needs AutoMount to be set as the format process may fail for fixed drives otherwise.
+ * See https://github.com/pbatard/rufus/issues/386.
+ *
+ * Reverse engineering diskpart and mountvol indicates that the former uses the IVdsService
+ * ClearFlags()/SetFlags() to set VDS_SVF_AUTO_MOUNT_OFF whereas mountvol on uses 
+ * IOCTL_MOUNTMGR_SET_AUTO_MOUNT on "\\\\.\\MountPointManager".
+ * As the latter is MUCH simpler this is what we'll use too
+ */
+BOOL SetAutoMount(BOOL enable)
+{
+	HANDLE hMountMgr;
+	DWORD size;
+	BOOL ret = FALSE;
+
+	hMountMgr = CreateFileA(MOUNTMGR_DOS_DEVICE_NAME, GENERIC_READ|GENERIC_WRITE,
+		FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	if (hMountMgr == NULL)
+		return FALSE;
+	ret = DeviceIoControl(hMountMgr, IOCTL_MOUNTMGR_SET_AUTO_MOUNT, &enable, sizeof(enable), NULL, 0, &size, NULL);
+	CloseHandle(hMountMgr);
+	return ret;
+}
+
+BOOL GetAutoMount(BOOL* enabled)
+{
+	HANDLE hMountMgr;
+	DWORD size;
+	BOOL ret = FALSE;
+
+	if (enabled == NULL)
+		return FALSE;
+	hMountMgr = CreateFileA(MOUNTMGR_DOS_DEVICE_NAME, GENERIC_READ|GENERIC_WRITE,
+		FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	if (hMountMgr == NULL)
+		return FALSE;
+	ret = DeviceIoControl(hMountMgr, IOCTL_MOUNTMGR_QUERY_AUTO_MOUNT, NULL, 0, enabled, sizeof(*enabled), &size, NULL);
+	CloseHandle(hMountMgr);
+	return ret;
+}
+
+/*
  * Working with drive indexes quite risky (left unchecked,inadvertently passing 0 as
  * index would return a handle to C:, which we might then proceed to unknowingly
  * clear the MBR of!), so we mitigate the risk by forcing our indexes to belong to
@@ -73,7 +115,7 @@ static HANDLE GetHandle(char* Path, BOOL bWriteAccess, BOOL bLockDrive)
 	if (Path == NULL)
 		goto out;
 	hDrive = CreateFileA(Path, GENERIC_READ|(bWriteAccess?GENERIC_WRITE:0),
-		FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL);
+		FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (hDrive == INVALID_HANDLE_VALUE) {
 		uprintf("Could not open drive %s: %s\n", Path, WindowsErrorString());
 		goto out;
@@ -195,7 +237,8 @@ char* GetLogicalName(DWORD DriveIndex, BOOL bKeepTrailingBackslash, BOOL bSilent
 		}
 
 		// If we can't have FILE_SHARE_WRITE, forget it
-		hDrive = CreateFileA(volume_name, GENERIC_READ, FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL);
+		hDrive = CreateFileA(volume_name, GENERIC_READ, FILE_SHARE_READ|FILE_SHARE_WRITE,
+			NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 		if (hDrive == INVALID_HANDLE_VALUE) {
 			suprintf("Could not open GUID volume '%s': %s\n", volume_name, WindowsErrorString());
 			continue;
@@ -352,7 +395,8 @@ static BOOL _GetDriveLettersAndType(DWORD DriveIndex, char* drive_letters, UINT*
 			continue;
 
 		safe_sprintf(logical_drive, sizeof(logical_drive), "\\\\.\\%c:", drive[0]);
-		hDrive = CreateFileA(logical_drive, GENERIC_READ, FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL);
+		hDrive = CreateFileA(logical_drive, GENERIC_READ, FILE_SHARE_READ|FILE_SHARE_WRITE,
+			NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 		if (hDrive == INVALID_HANDLE_VALUE) {
 			uprintf("Warning: could not open drive %c: %s\n", drive[0], WindowsErrorString());
 			continue;
@@ -727,7 +771,7 @@ static BOOL FlushDrive(char drive_letter)
 
 	logical_drive[4] = drive_letter;
 	hDrive = CreateFileA(logical_drive, GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ|FILE_SHARE_WRITE,
-		NULL, OPEN_EXISTING, 0, NULL);
+		NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (hDrive == INVALID_HANDLE_VALUE) {
 		uprintf("Failed to open %c: for flushing: %s\n", drive_letter, WindowsErrorString());
 		goto out;

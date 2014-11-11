@@ -132,7 +132,8 @@ BOOL AppendVHDFooter(const char* vhd_path)
 	size_t i;
 
 	PF_INIT(UuidCreate, Rpcrt4);
-	handle = CreateFileU(vhd_path, GENERIC_WRITE, FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL);
+	handle = CreateFileU(vhd_path, GENERIC_WRITE, FILE_SHARE_WRITE, NULL,
+		OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	li.QuadPart = 0;
 	if ((handle == INVALID_HANDLE_VALUE) || (!SetFilePointerEx(handle, li, &li, FILE_END))) {
 		uprintf("Could not open image '%s': %s", vhd_path, WindowsErrorString());
@@ -220,7 +221,8 @@ BOOL IsHDImage(const char* path)
 	uint32_t checksum, old_checksum;
 	LARGE_INTEGER ptr;
 
-	handle = CreateFileU(path, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
+	handle = CreateFileU(path, GENERIC_READ, FILE_SHARE_READ, NULL,
+		OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (handle == INVALID_HANDLE_VALUE) {
 		uprintf("Could not open image '%s'", path);
 		goto out;

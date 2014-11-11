@@ -251,7 +251,7 @@ static BOOL ExtractFAT(int entry, const char* path)
 
 	/* Create a file, using the same attributes as found in the FAT */
 	hFile = CreateFileA(filename, GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ|FILE_SHARE_WRITE,
-		NULL, CREATE_ALWAYS, dir_entry->Attributes, 0);
+		NULL, CREATE_ALWAYS, dir_entry->Attributes, NULL);
 	if (hFile == INVALID_HANDLE_VALUE) {
 		uprintf("Unable to create file '%s': %s.\n", filename, WindowsErrorString());
 		return FALSE;
@@ -379,8 +379,8 @@ BOOL ExtractFreeDOS(const char* path)
 		safe_strcpy(filename, sizeof(filename), ((i<2)?path:locale_path));
 		safe_strcat(filename, sizeof(filename), res_name[i]);
 
-		hFile = CreateFileA(filename, GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ|FILE_SHARE_WRITE,
-			NULL, CREATE_ALWAYS, (i<2)?(FILE_ATTRIBUTE_HIDDEN|FILE_ATTRIBUTE_SYSTEM):0, 0);
+		hFile = CreateFileA(filename, GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ|FILE_SHARE_WRITE, NULL,
+			CREATE_ALWAYS, (i<2)?(FILE_ATTRIBUTE_HIDDEN|FILE_ATTRIBUTE_SYSTEM):FILE_ATTRIBUTE_NORMAL, NULL);
 		if (hFile == INVALID_HANDLE_VALUE) {
 			uprintf("Unable to create file '%s': %s.\n", filename, WindowsErrorString());
 			return FALSE;

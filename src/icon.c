@@ -101,7 +101,7 @@ static BOOL SaveIcon(const char* filename)
 	icondir = (GRPICONDIR*)GetResource(hMainInstance, MAKEINTRESOURCEA(IDI_ICON), _RT_GROUP_ICON, "icon", &res_size, FALSE);
 
 	hFile = CreateFileA(filename, GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ|FILE_SHARE_WRITE,
-			NULL, CREATE_NEW, 0, 0);
+			NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (hFile == INVALID_HANDLE_VALUE) {
 		uprintf("Unable to create icon '%s': %s.\n", filename, WindowsErrorString());
 		goto out;

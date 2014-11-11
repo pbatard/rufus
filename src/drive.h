@@ -22,7 +22,13 @@
 
 #pragma once
 
-#define RUFUS_EXTRA_PARTITION_TYPE	0xea
+#define RUFUS_EXTRA_PARTITION_TYPE          0xea
+#define MOUNTMGRCONTROLTYPE                 ((ULONG)'m')
+#define MOUNTMGR_DOS_DEVICE_NAME            "\\\\.\\MountPointManager"
+#define IOCTL_MOUNTMGR_QUERY_AUTO_MOUNT     \
+	CTL_CODE(MOUNTMGRCONTROLTYPE, 15, METHOD_BUFFERED, FILE_ANY_ACCESS) 
+#define IOCTL_MOUNTMGR_SET_AUTO_MOUNT       \
+	CTL_CODE(MOUNTMGRCONTROLTYPE, 16, METHOD_BUFFERED, FILE_READ_ACCESS | FILE_WRITE_ACCESS)
 
 /* We need a redef of these MS structure */
 typedef struct {
@@ -37,6 +43,8 @@ typedef struct {
 	DISK_EXTENT Extents[8];
 } VOLUME_DISK_EXTENTS_REDEF;
 
+BOOL SetAutoMount(BOOL enable);
+BOOL GetAutoMount(BOOL* enabled);
 char* GetPhysicalName(DWORD DriveIndex);
 HANDLE GetPhysicalHandle(DWORD DriveIndex, BOOL bWriteAccess, BOOL bLockDrive);
 char* GetLogicalName(DWORD DriveIndex, BOOL bKeepTrailingBackslash, BOOL bSilent);

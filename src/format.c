@@ -1080,7 +1080,8 @@ static BOOL SetupWinPE(char drive_letter)
 	}
 
 	// At this stage we only handle \i386
-	handle = CreateFileA(dst, GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	handle = CreateFileA(dst, GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ|FILE_SHARE_WRITE,
+		NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (handle == INVALID_HANDLE_VALUE) {
 		uprintf("Could not open %s for patching: %s\n", dst, WindowsErrorString());
 		goto out;
@@ -1384,7 +1385,8 @@ DWORD WINAPI FormatThread(void* param)
 		li.QuadPart = 0;
 		if (!SetFilePointerEx(hPhysicalDrive, li, NULL, FILE_BEGIN))
 			uprintf("Warning: Unable to rewind image position - wrong data might be copied!");
-		hSourceImage = CreateFileU(image_path, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, NULL);
+		hSourceImage = CreateFileU(image_path, GENERIC_READ, FILE_SHARE_READ, NULL,
+			OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, NULL);
 		if (hSourceImage == INVALID_HANDLE_VALUE) {
 			uprintf("Could not open image '%s': %s", image_path, WindowsErrorString());
 			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_OPEN_FAILED;
@@ -1680,7 +1682,8 @@ DWORD WINAPI SaveImageThread(void* param)
 	li.QuadPart = 0;
 	if (!SetFilePointerEx(hPhysicalDrive, li, NULL, FILE_BEGIN))
 		uprintf("Warning: Unable to rewind device position - wrong data might be copied!");
-	hDestImage = CreateFileU(image_path, GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, 0, NULL);
+	hDestImage = CreateFileU(image_path, GENERIC_WRITE, FILE_SHARE_WRITE, NULL,
+		CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (hDestImage == INVALID_HANDLE_VALUE) {
 		uprintf("Could not open image '%s': %s", image_path, WindowsErrorString());
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_OPEN_FAILED;

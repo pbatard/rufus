@@ -450,7 +450,7 @@ BOOL FileIO(BOOL save, char* path, char** buffer, DWORD* size)
 		*buffer = NULL;
 	}
 	handle = CreateFileU(path, save?GENERIC_WRITE:GENERIC_READ, FILE_SHARE_READ,
-		ps, save?CREATE_ALWAYS:OPEN_EXISTING, 0, NULL);
+		ps, save?CREATE_ALWAYS:OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 
 	if (handle == INVALID_HANDLE_VALUE) {
 		uprintf("Could not %s file '%s'\n", save?"create":"open", path);
