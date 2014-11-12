@@ -4,12 +4,13 @@ BUILT_SOURCES = embedded.loc
 noinst_PROGRAMS =
 noinst_EXES =
 
-pkg_v_sed = $(pkg_v_sed_$(V))
-pkg_v_sed_ = $(pkg_v_sed_$(AM_DEFAULT_VERBOSITY))
-pkg_v_sed_0 = @echo "  SED    $<";
+AM_V_SED_0 = @echo "  SED    $<";$(SED)
+AM_V_SED_1 = $(SED)
+AM_V_SED_  = $(AM_V_SED_$(AM_DEFAULT_VERBOSITY))
+AM_V_SED   = $(AM_V_SED_$(V))
 
 embedded.loc: rufus.loc
-	$(pkg_v_sed)$(SED) -f embedded.sed $< > $@
+	$(AM_V_SED) -f embedded.sed $< > $@
 
 clean-local:
 	-rm -rf embedded.loc

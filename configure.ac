@@ -2,10 +2,7 @@ AC_INIT([rufus], [1.5.0], [https://github.com/pbatard/rufus/issues], [rufus], [h
 AM_INIT_AUTOMAKE([-Wno-portability foreign no-dist no-dependencies])
 AC_CONFIG_SRCDIR([src/rufus.c])
 AC_CONFIG_MACRO_DIR([m4])
-# Enable silent build rules by default (Automake v1.11 or later).
-# Disable by either passing --disable-silent-rules to configure or passing V=1 to make
-m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])],
-         [AC_SUBST([AM_DEFAULT_VERBOSITY], [1])])
+AM_SILENT_RULES([yes])
 
 AC_PREREQ([2.50])
 AC_PROG_CC

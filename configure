@@ -2269,8 +2269,6 @@ am__tar='${AMTAR} chof - "$$tardir"'; am__untar='${AMTAR} xf -'
 
 
 
-# Enable silent build rules by default (Automake v1.11 or later).
-# Disable by either passing --disable-silent-rules to configure or passing V=1 to make
 # Check whether --enable-silent-rules was given.
 if test "${enable_silent_rules+set}" = set; then :
   enableval=$enable_silent_rules;
