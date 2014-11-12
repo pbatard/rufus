@@ -96,7 +96,7 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int fs_type)
 	uint32_t ldlinux_cluster;
 	int i, nsectors;
 	int dt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
-	BOOL use_v5 = (dt == DT_SYSLINUX_V5) || ((dt == DT_ISO) && (SL_MAJOR(iso_report.sl_version) >= 5));
+	BOOL use_v5 = (dt == DT_SYSLINUX_V6) || ((dt == DT_ISO) && (SL_MAJOR(iso_report.sl_version) >= 5));
 
 	PrintStatus(0, TRUE, MSG_234, (dt == DT_ISO)?iso_report.sl_version_str:embedded_sl_version_str[use_v5?1:0]);
 
@@ -272,7 +272,7 @@ map_done:
 
 	uprintf("Successfully wrote Syslinux boot record\n");
 
-	if (dt == DT_SYSLINUX_V5) {
+	if (dt == DT_SYSLINUX_V6) {
 		IGNORE_RETVAL(_chdirU(app_dir));
 		static_sprintf(path, "%s/%s-%s", FILES_DIR, syslinux, embedded_sl_version_str[1]);
 		IGNORE_RETVAL(_chdir(path));

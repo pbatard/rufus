@@ -1244,7 +1244,7 @@ static BOOL BootCheck(void)
 				}
 			}
 		}
-	} else if (dt == DT_SYSLINUX_V5) {
+	} else if (dt == DT_SYSLINUX_V6) {
 		IGNORE_RETVAL(_chdirU(app_dir));
 		IGNORE_RETVAL(_mkdir(FILES_DIR));
 		IGNORE_RETVAL(_chdir(FILES_DIR));
@@ -1497,6 +1497,7 @@ void ShowLanguageMenu(HWND hDlg)
 void SetBoot(int fs, int bt)
 {
 	int i;
+	char tmp[32];
 
 	IGNORE_RETVAL(ComboBox_ResetContent(hBootType));
 	if ((bt == BT_BIOS) && ((fs == FS_FAT16) || (fs == FS_FAT32))) {
@@ -1507,8 +1508,10 @@ void SetBoot(int fs, int bt)
 	IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, lmprintf(MSG_095)), DT_IMG));
 	// If needed (advanced mode) also append a Syslinux option
 	if ( (bt == BT_BIOS) && (((fs == FS_FAT16) || (fs == FS_FAT32) || (fs == FS_NTFS)) && (advanced_mode)) ) {
-		IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, "Syslinux 4"), DT_SYSLINUX_V4));
-		IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, "Syslinux 6"), DT_SYSLINUX_V5));
+		static_sprintf(tmp, "Syslinux %s", embedded_sl_version_str[0]);
+		IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, tmp), DT_SYSLINUX_V4));
+		static_sprintf(tmp, "Syslinux %s", embedded_sl_version_str[1]);
+		IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, tmp), DT_SYSLINUX_V6));
 		IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, "ReactOS"), DT_REACTOS));
 	}
 	if ((!advanced_mode) && (selection_default >= DT_SYSLINUX_V4)) {
@@ -1599,7 +1602,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		// Create the log window (hidden)
 		first_log_display = TRUE;
 		log_displayed = FALSE;
-		hLogDlg = CreateDialogW(hMainInstance, MAKEINTRESOURCEW(IDD_LOG + IDD_IS_RTL), hDlg, (DLGPROC)LogProc);
+		hLogDlg = CreateDialogW(hMainInstance, MAKEINTRESOURCEW(IDD_LOG + IDD_OFFSET), hDlg, (DLGPROC)LogProc);
 		InitDialog(hDlg);
 		GetUSBDevices(0);
 		CheckForUpdates(FALSE);
@@ -2017,7 +2020,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		// You'd think that Windows would let you instantiate a modeless dialog wherever
 		// but you'd be wrong. It must be done in the main callback, hence the custom message.
 		if (!IsWindow(hISOProgressDlg)) { 
-			hISOProgressDlg = CreateDialogW(hMainInstance, MAKEINTRESOURCEW(IDD_ISO_EXTRACT + IDD_IS_RTL),
+			hISOProgressDlg = CreateDialogW(hMainInstance, MAKEINTRESOURCEW(IDD_ISO_EXTRACT + IDD_OFFSET),
 				hDlg, (DLGPROC)ISOProc);
 
 			// The window is not visible by default but takes focus => restore it
@@ -2316,11 +2319,11 @@ relaunch:
 	 * WS_EX_RTLREADING, WS_EX_RIGHT, WS_EX_LAYOUTRTL, WS_EX_LEFTSCROLLBAR and ES_RIGHT will
 	 * work... and there's no way to toggle ES_RIGHT at runtime anyway.
 	 * So, just like Microsoft advocates, we go through a massive duplication of all our RC
-	 * dialogs (our RTL dialogs having their IDD's offset by +100 - see IDD_IS_RTL), just to
+	 * dialogs (our RTL dialogs having their IDD's offset by +100 - see IDD_OFFSET), just to
 	 * add a handful of stupid flags. And of course, we also have to go through a whole other
 	 * exercise just so that our RTL and non RTL duplicated dialogs are kept in sync...
 	 */
-	hDlg = CreateDialogW(hInstance, MAKEINTRESOURCEW(IDD_DIALOG + IDD_IS_RTL), NULL, MainCallback);
+	hDlg = CreateDialogW(hInstance, MAKEINTRESOURCEW(IDD_DIALOG + IDD_OFFSET), NULL, MainCallback);
 	if (hDlg == NULL) {
 		MessageBoxU(NULL, "Could not create Window", "DialogBox failure", MB_ICONSTOP|MB_IS_RTL|MB_SYSTEMMODAL);
 		goto out;

@@ -911,7 +911,7 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 	} else if ( (dt == DT_ISO) && (iso_report.has_kolibrios) && (fs == FS_FAT32)) {
 		uprintf(using_msg, "KolibriOS");
 		r = write_kolibri_mbr(&fake_fd);
-	} else if ( (dt == DT_SYSLINUX_V4) || (dt == DT_SYSLINUX_V5) || ((dt == DT_ISO) && ((fs == FS_FAT16) || (fs == FS_FAT32))) ) {
+	} else if ( (dt == DT_SYSLINUX_V4) || (dt == DT_SYSLINUX_V6) || ((dt == DT_ISO) && ((fs == FS_FAT16) || (fs == FS_FAT32))) ) {
 		uprintf(using_msg, "Syslinux");
 		r = write_syslinux_mbr(&fake_fd);
 	} else if (dt == DT_REACTOS) {
@@ -1553,7 +1553,7 @@ DWORD WINAPI FormatThread(void* param)
 			}
 			// We must close and unlock the volume to write files to it
 			safe_unlockclose(hLogicalVolume);
-		} else if ( (dt == DT_SYSLINUX_V4) || (dt == DT_SYSLINUX_V5) || ((dt == DT_ISO) && ((fs == FS_FAT16) || (fs == FS_FAT32))) ) {
+		} else if ( (dt == DT_SYSLINUX_V4) || (dt == DT_SYSLINUX_V6) || ((dt == DT_ISO) && ((fs == FS_FAT16) || (fs == FS_FAT32))) ) {
 			if (!InstallSyslinux(DriveIndex, drive_name[0], fs)) {
 				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_INSTALL_FAILURE;
 			}

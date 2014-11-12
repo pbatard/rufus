@@ -74,7 +74,7 @@
 #endif
 #define IsChecked(CheckBox_ID)      (IsDlgButtonChecked(hMainDialog, CheckBox_ID) == BST_CHECKED)
 #define MB_IS_RTL                   (right_to_left_mode?MB_RTLREADING:0)
-#define IDD_IS_RTL                  (right_to_left_mode?100:0)
+#define IDD_OFFSET                  ((right_to_left_mode?100:0) + ((nWindowsVersion <= WINDOWS_XP)?50:0))
 
 #define safe_free(p) do {free((void*)p); p = NULL;} while(0)
 #define safe_min(a, b) min((size_t)(a), (size_t)(b))
@@ -184,7 +184,7 @@ enum dos_type {
 	DT_ISO,
 	DT_IMG,
 	DT_SYSLINUX_V4,		// Start of indexes that only display in advanced mode
-	DT_SYSLINUX_V5,
+	DT_SYSLINUX_V6,
 	DT_REACTOS,
 	DT_MAX
 };
