@@ -50,6 +50,8 @@
     <ClInclude Include="..\inc\mbr_95b.h" />
     <ClInclude Include="..\inc\mbr_dos.h" />
     <ClInclude Include="..\inc\mbr_dos_f2.h" />
+    <ClInclude Include="..\inc\mbr_grub.h" />
+    <ClInclude Include="..\inc\mbr_grub2.h" />
     <ClInclude Include="..\inc\mbr_kolibri.h" />
     <ClInclude Include="..\inc\mbr_reactos.h" />
     <ClInclude Include="..\inc\mbr_rufus.h" />

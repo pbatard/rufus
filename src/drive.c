@@ -567,6 +567,8 @@ const struct {int (*fn)(FILE *fp); char* str;} known_mbr[] = {
 	{ is_syslinux_mbr, "Syslinux" },
 	{ is_reactos_mbr, "ReactOS" },
 	{ is_kolibri_mbr, "KolibriOS" },
+	{ is_grub_mbr, "Grub4DOS" },
+	{ is_grub2_mbr, "Grub 2.0" },
 	{ is_zero_mbr, "Zeroed" },
 };
 

@@ -120,6 +120,27 @@ int is_reactos_mbr(FILE *fp)
       contains_data(fp, 0x1FE, aucRef, sizeof(aucRef));
 } /* is_reactos_mbr */
 
+int is_grub_mbr(FILE *fp)
+{
+   #include "mbr_grub.h"
+   unsigned char aucRef[] = {0x55, 0xAA};
+   (void)mbr_grub_0x200; /* silence unused variable warning */
+
+   return
+      contains_data(fp, 0x0, mbr_grub_0x0, sizeof(mbr_grub_0x0)) &&
+      contains_data(fp, 0x1FE, aucRef, sizeof(aucRef));
+} /* is_grub_mbr */
+
+int is_grub2_mbr(FILE *fp)
+{
+   #include "mbr_grub2.h"
+   unsigned char aucRef[] = {0x55, 0xAA};
+
+   return
+      contains_data(fp, 0x0, mbr_grub2_0x0, sizeof(mbr_grub2_0x0)) &&
+      contains_data(fp, 0x1FE, aucRef, sizeof(aucRef));
+} /* is_grub2_mbr */
+
 int is_kolibri_mbr(FILE *fp)
 {
    #include "mbr_kolibri.h"
@@ -239,6 +260,27 @@ int write_syslinux_mbr(FILE *fp)
       write_data(fp, 0x0, mbr_syslinux_0x0, sizeof(mbr_syslinux_0x0)) &&
       write_data(fp, 0x1FE, aucRef, sizeof(aucRef));
 } /* write_syslinux_mbr */
+
+int write_grub_mbr(FILE *fp)
+{
+   #include "mbr_grub.h"
+   unsigned char aucRef[] = {0x55, 0xAA};
+
+   return
+      write_data(fp, 0x0, mbr_grub_0x0, sizeof(mbr_grub_0x0)) &&
+      write_data(fp, 0x1FE, aucRef, sizeof(aucRef)) &&
+      write_data(fp, 0x200, mbr_grub_0x200, sizeof(mbr_grub_0x200));
+}
+
+int write_grub2_mbr(FILE *fp)
+{
+   #include "mbr_grub2.h"
+   unsigned char aucRef[] = {0x55, 0xAA};
+
+   return
+      write_data(fp, 0x0, mbr_grub2_0x0, sizeof(mbr_grub2_0x0)) &&
+      write_data(fp, 0x1FE, aucRef, sizeof(aucRef));
+}
 
 int write_zero_mbr(FILE *fp)
 {

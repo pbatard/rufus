@@ -58,6 +58,7 @@ BOOL enable_iso = TRUE, enable_joliet = TRUE, enable_rockridge = TRUE, has_ldlin
 #define ISO_BLOCKING(x) do {x; iso_blocking_status++; } while(0)
 static const char* psz_extract_dir;
 static const char* bootmgr_efi_name = "bootmgr.efi";
+static const char* grldr_name = "grldr";
 static const char* ldlinux_name = "ldlinux.sys";
 static const char* ldlinux_c32 = "ldlinux.c32";
 static const char* efi_dirname = "/efi/boot";
@@ -146,11 +147,14 @@ static BOOL check_iso_props(const char* psz_dirname, BOOL* is_syslinux_cfg, BOOL
 			if (safe_strnicmp(psz_basename, bootmgr_efi_name, safe_strlen(bootmgr_efi_name)-5) == 0) {
 				iso_report.has_bootmgr = TRUE;
 			}
-			if (safe_stricmp(psz_basename, bootmgr_efi_name) == 0) {
-				iso_report.has_win7_efi = TRUE;
+			if (safe_stricmp(psz_basename, grldr_name) == 0) {
+				iso_report.has_grub4dos = TRUE;
 			}
 			if (safe_stricmp(psz_basename, kolibri_name) == 0) {
 				iso_report.has_kolibrios = TRUE;
+			}
+			if (safe_stricmp(psz_basename, bootmgr_efi_name) == 0) {
+				iso_report.has_win7_efi = TRUE;
 			}
 		}
 

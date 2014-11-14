@@ -339,6 +339,20 @@ static __inline HANDLE CreateFileU(const char* lpFileName, DWORD dwDesiredAccess
 	return ret;
 }
 
+static __inline BOOL CopyFileU(const char* lpExistingFileName, const char* lpNewFileName, BOOL bFailIfExists)
+{
+	BOOL ret = FALSE;
+	DWORD err = ERROR_INVALID_DATA;
+	wconvert(lpExistingFileName);
+	wconvert(lpNewFileName);
+	ret = CopyFileW(wlpExistingFileName, wlpNewFileName, bFailIfExists);
+	err = GetLastError();
+	wfree(lpExistingFileName);
+	wfree(lpNewFileName);
+	SetLastError(err);
+	return ret;
+}
+
 static __inline BOOL DeleteFileU(const char* lpFileName)
 {
 	BOOL ret = FALSE;

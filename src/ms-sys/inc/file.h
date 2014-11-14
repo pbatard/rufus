@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 /* Max valid value of uiLen for contains_data */
-#define MAX_DATA_LEN 8192
+#define MAX_DATA_LEN 16384
 
 /* Checks if a file contains a data pattern of length Len at position
    Position. The file pointer will change when calling this function! */

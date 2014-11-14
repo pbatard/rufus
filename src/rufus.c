@@ -916,12 +916,44 @@ BOOL CALLBACK ISOProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 	return FALSE;
 }
 
+// Report the features of the selected ISO images
+static const char* YesNo(BOOL b) {
+	return (b) ? "Yes" : "No";
+}
+static void DisplayISOProps(void)
+{
+	int i;
+	char isolinux_str[16] = "No";
+
+	if (HAS_SYSLINUX(iso_report)) {
+		safe_sprintf(isolinux_str, sizeof(isolinux_str), "Yes (%s)", iso_report.sl_version_str);
+	}
+
+	// TODO: Only report features that are present
+	uprintf("ISO label: %s", iso_report.label);
+	uprintf("  Size: %lld bytes", iso_report.projected_size);
+	uprintf("  Has a >64 chars filename: %s", YesNo(iso_report.has_long_filename));
+	uprintf("  Has Symlinks: %s", YesNo(iso_report.has_symlinks));
+	uprintf("  Has a >4GB file: %s", YesNo(iso_report.has_4GB_file));
+	uprintf("  Uses Bootmgr: %s", YesNo(iso_report.has_bootmgr));
+	uprintf("  Uses EFI: %s%s", YesNo(iso_report.has_efi || iso_report.has_win7_efi), (iso_report.has_win7_efi && (!iso_report.has_efi)) ? " (win7_x64)" : "");
+	uprintf("  Uses Grub4DOS: %s", YesNo(iso_report.has_grub4dos));
+	uprintf("  Uses isolinux: %s", isolinux_str);
+	if (HAS_SYSLINUX(iso_report) && (SL_MAJOR(iso_report.sl_version) < 5)) {
+		for (i = 0; i<NB_OLD_C32; i++) {
+			uprintf("    With an old %s: %s\n", old_c32_name[i], iso_report.has_old_c32[i] ? "Yes" : "No");
+		}
+	}
+	uprintf("  Uses KolibriOS: %s", YesNo(iso_report.has_kolibrios));
+	uprintf("  Uses ReactOS: %s", YesNo(IS_REACTOS(iso_report)));
+	uprintf("  Uses WinPE: %s%s", YesNo(IS_WINPE(iso_report.winpe)), (iso_report.uses_minint) ? " (with /minint)" : "");
+}
+
 // The scanning process can be blocking for message processing => use a thread
 DWORD WINAPI ISOScanThread(LPVOID param)
 {
 	int i;
 	BOOL r;
-	char isolinux_str[16] = "No";
 
 	if (image_path == NULL)
 		goto out;
@@ -941,24 +973,10 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 		uprintf("Using bootable %s image: '%s'", iso_report.is_vhd?"VHD":"disk", image_path);
 		selection_default = DT_IMG;
 	} else {
-		if (HAS_SYSLINUX(iso_report)) {
-			safe_sprintf(isolinux_str, sizeof(isolinux_str), "Yes (%s)", iso_report.sl_version_str);
-		}
-		// TODO: This should become a DisplayISOProps() call or something
-		uprintf("ISO label: '%s'\r\n  Size: %lld bytes\r\n  Has a >64 chars filename: %s\r\n  Has Symlinks: %s\r\n  Has a >4GB file: %s\r\n"
-			"  Uses ReactOS: %s\r\n  Uses KolibriOS: %s\r\n  Uses EFI: %s%s\r\n  Uses Bootmgr: %s\r\n  Uses WinPE: %s%s\r\n  Uses isolinux: %s\r\n",
-			iso_report.label, iso_report.projected_size, iso_report.has_long_filename?"Yes":"No", iso_report.has_symlinks?"Yes":"No",
-			iso_report.has_4GB_file?"Yes":"No", IS_REACTOS(iso_report)?"Yes":"No", iso_report.has_kolibrios?"Yes":"No", (iso_report.has_efi || iso_report.has_win7_efi)?"Yes":"No",
-			(iso_report.has_win7_efi && (!iso_report.has_efi))?" (win7_x64)":"", iso_report.has_bootmgr?"Yes":"No",
-			IS_WINPE(iso_report.winpe)?"Yes":"No", (iso_report.uses_minint)?" (with /minint)":"", isolinux_str);
-		if (HAS_SYSLINUX(iso_report) && (SL_MAJOR(iso_report.sl_version) < 5)) {
-			for (i=0; i<NB_OLD_C32; i++) {
-				uprintf("    With an old %s: %s\n", old_c32_name[i], iso_report.has_old_c32[i]?"Yes":"No");
-			}
-		}
+		DisplayISOProps();
 	}
-	if ( (!iso_report.has_bootmgr) && (!HAS_SYSLINUX(iso_report)) && (!IS_WINPE(iso_report.winpe)) 
-		&& (!iso_report.has_efi) && (!IS_REACTOS(iso_report) && (!iso_report.has_kolibrios) && (!iso_report.is_bootable_img)) ) {
+	if ( (!iso_report.has_bootmgr) && (!HAS_SYSLINUX(iso_report)) && (!IS_WINPE(iso_report.winpe)) && (!iso_report.has_grub4dos)
+	  && (!iso_report.has_efi) && (!IS_REACTOS(iso_report) && (!iso_report.has_kolibrios) && (!iso_report.is_bootable_img)) ) {
 		MessageBoxU(hMainDialog, lmprintf(MSG_082), lmprintf(MSG_081), MB_OK|MB_ICONINFORMATION|MB_IS_RTL);
 		safe_free(image_path);
 		SetMBRProps();
@@ -1117,7 +1135,7 @@ static BOOL BootCheck(void)
 					ShellExecuteA(hMainDialog, "open", SEVENZIP_URL, NULL, NULL, SW_SHOWNORMAL);
 				return FALSE;
 			}
-		} else if ((fs == FS_NTFS) && (!iso_report.has_bootmgr) && (!IS_WINPE(iso_report.winpe))) {
+		} else if ((fs == FS_NTFS) && (!iso_report.has_bootmgr) && (!IS_WINPE(iso_report.winpe)) && (!iso_report.has_grub4dos)) {
 			if (HAS_SYSLINUX(iso_report)) {
 				// Only FAT/FAT32 is supported for this type of ISO
 				MessageBoxU(hMainDialog, lmprintf(MSG_096), lmprintf(MSG_092), MB_OK|MB_ICONERROR|MB_IS_RTL);
@@ -1131,7 +1149,7 @@ static BOOL BootCheck(void)
 			MessageBoxU(hMainDialog, lmprintf(MSG_189), lmprintf(MSG_099), MB_OK|MB_ICONERROR|MB_IS_RTL);
 			return FALSE;
 		} else if (((fs == FS_FAT16)||(fs == FS_FAT32)) && (!HAS_SYSLINUX(iso_report)) &&
-			(!IS_REACTOS(iso_report)) && (!iso_report.has_kolibrios)) {
+			(!IS_REACTOS(iso_report)) && (!iso_report.has_kolibrios) && (!iso_report.has_grub4dos)) {
 			// FAT/FAT32 can only be used for isolinux based ISO images or when the Target Type is UEFI
 			MessageBoxU(hMainDialog, lmprintf(MSG_098), lmprintf(MSG_090), MB_OK|MB_ICONERROR|MB_IS_RTL);
 			return FALSE;
@@ -1257,7 +1275,7 @@ static BOOL BootCheck(void)
 			static_sprintf(tmp, "%s.%s", ldlinux, ldlinux_ext[2]);
 			PrintStatus(0, FALSE, MSG_206, tmp);
 			// MSG_104: "Syslinux v5.0 or later requires a '%s' file to be installed"
-			r = MessageBoxU(hMainDialog, lmprintf(MSG_104, tmp, tmp),
+			r = MessageBoxU(hMainDialog, lmprintf(MSG_104, "Syslinux v5.0", tmp, "Syslinux v5+", tmp),
 				lmprintf(MSG_103, tmp), MB_YESNOCANCEL|MB_ICONWARNING|MB_IS_RTL);
 			if (r == IDCANCEL)
 				return FALSE;
@@ -1275,6 +1293,30 @@ static BOOL BootCheck(void)
 			// MS-DOS cannot boot from a drive using a 64 kilobytes Cluster size
 			MessageBoxU(hMainDialog, lmprintf(MSG_110), lmprintf(MSG_111), MB_OK|MB_ICONERROR|MB_IS_RTL);
 			return FALSE;
+		}
+	} else if (dt == DT_GRUB4DOS) {
+		IGNORE_RETVAL(_chdirU(app_dir));
+		IGNORE_RETVAL(_mkdir(FILES_DIR));
+		IGNORE_RETVAL(_chdir(FILES_DIR));
+		static_sprintf(tmp, "grub4dos/grldr");
+		fd = fopenU(tmp, "rb");
+		if (fd != NULL) {
+			uprintf("Will reuse './%s/%s' for Grub4DOS installation\n", FILES_DIR, tmp);
+			fclose(fd);
+		} else {
+			static_sprintf(tmp, "grldr");
+			PrintStatus(0, FALSE, MSG_206, tmp);
+			r = MessageBoxU(hMainDialog, lmprintf(MSG_104, "Grub4DOS 0.4", tmp, "Grub4DOS", tmp),
+				lmprintf(MSG_103, tmp), MB_YESNOCANCEL|MB_ICONWARNING|MB_IS_RTL);
+			if (r == IDCANCEL)
+				return FALSE;
+			if (r == IDYES) {
+				IGNORE_RETVAL(_mkdir("grub4dos"));
+				static_sprintf(tmp, "%s/grub4dos/grldr", FILES_URL);
+				SetWindowTextU(hISOProgressDlg, lmprintf(MSG_085, tmp));
+				SetWindowTextU(hISOFileName, tmp);
+				DownloadFile(tmp, &tmp[sizeof(FILES_URL)], hISOProgressDlg);
+			}
 		}
 	}
 	return TRUE;
@@ -1506,13 +1548,15 @@ void SetBoot(int fs, int bt)
 	}
 	IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, lmprintf(MSG_036)), DT_ISO));
 	IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, lmprintf(MSG_095)), DT_IMG));
-	// If needed (advanced mode) also append a Syslinux option
+	// If needed (advanced mode) also append "bare" Syslinux and other options
 	if ( (bt == BT_BIOS) && (((fs == FS_FAT16) || (fs == FS_FAT32) || (fs == FS_NTFS)) && (advanced_mode)) ) {
 		static_sprintf(tmp, "Syslinux %s", embedded_sl_version_str[0]);
 		IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, tmp), DT_SYSLINUX_V4));
 		static_sprintf(tmp, "Syslinux %s", embedded_sl_version_str[1]);
 		IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, tmp), DT_SYSLINUX_V6));
 		IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, "ReactOS"), DT_REACTOS));
+//		IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, "Grub 2.0"), DT_GRUB2));
+		IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, "Grub4DOS"), DT_GRUB4DOS));
 	}
 	if ((!advanced_mode) && (selection_default >= DT_SYSLINUX_V4)) {
 		selection_default = DT_FREEDOS;

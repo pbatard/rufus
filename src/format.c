@@ -911,12 +911,18 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 	} else if ( (dt == DT_ISO) && (iso_report.has_kolibrios) && (fs == FS_FAT32)) {
 		uprintf(using_msg, "KolibriOS");
 		r = write_kolibri_mbr(&fake_fd);
-	} else if ( (dt == DT_SYSLINUX_V4) || (dt == DT_SYSLINUX_V6) || ((dt == DT_ISO) && ((fs == FS_FAT16) || (fs == FS_FAT32))) ) {
-		uprintf(using_msg, "Syslinux");
-		r = write_syslinux_mbr(&fake_fd);
+	} else if (((dt == DT_ISO) && (iso_report.has_grub4dos)) || (dt == DT_GRUB4DOS)) {
+		uprintf(using_msg, "Grub4DOS");
+		r = write_grub_mbr(&fake_fd);
+	} else if (dt == DT_GRUB2) {
+		uprintf(using_msg, "Grub 2.0");
+		r = write_grub2_mbr(&fake_fd);
 	} else if (dt == DT_REACTOS) {
 		uprintf(using_msg, "ReactOS");
 		r = write_reactos_mbr(&fake_fd);
+	} else if ( (dt == DT_SYSLINUX_V4) || (dt == DT_SYSLINUX_V6) || ((dt == DT_ISO) && ((fs == FS_FAT16) || (fs == FS_FAT32))) ) {
+		uprintf(using_msg, "Syslinux");
+		r = write_syslinux_mbr(&fake_fd);
 	} else {
 		if ((IS_WINPE(iso_report.winpe) && !iso_report.uses_minint) || (IsChecked(IDC_RUFUS_MBR))) {
 			uprintf(using_msg, APPLICATION_NAME);
@@ -1229,6 +1235,7 @@ DWORD WINAPI FormatThread(void* param)
 	char wim_image[] = "?:\\sources\\install.wim";
 	char efi_dst[] = "?:\\efi\\boot\\bootx64.efi";
 	char kolibri_dst[] = "?:\\MTLD_F32";
+	char grub4dos_dst[] = "?:\\grldr";
 	
 	PF_TYPE_DECL(WINAPI, LANGID, GetThreadUILanguage, (void));
 	PF_TYPE_DECL(WINAPI, LANGID, SetThreadUILanguage, (LANGID));
@@ -1533,8 +1540,8 @@ DWORD WINAPI FormatThread(void* param)
 				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_INSTALL_FAILURE;
 				goto out;
 			}
-		} else if ((((dt == DT_WINME) || (dt == DT_FREEDOS) || (dt == DT_REACTOS)) &&
-			(!use_large_fat32)) || ((dt == DT_ISO) && ((fs == FS_NTFS)||(iso_report.has_kolibrios)))) {
+		} else if ((((dt == DT_WINME) || (dt == DT_FREEDOS) || (dt == DT_GRUB4DOS) || (dt == DT_REACTOS)) &&
+			(!use_large_fat32)) || ((dt == DT_ISO) && ((fs == FS_NTFS)||(iso_report.has_kolibrios||iso_report.has_grub4dos)))) {
 			// We still have a lock, which we need to modify the volume boot record 
 			// => no need to reacquire the lock...
 			hLogicalVolume = GetLogicalHandle(DriveIndex, TRUE, FALSE);
@@ -1580,6 +1587,12 @@ DWORD WINAPI FormatThread(void* param)
 					FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANNOT_COPY;
 				goto out;
 			}
+		} else if (dt == DT_GRUB4DOS) {
+			grub4dos_dst[0] = drive_name[0];
+			uprintf("Installing: %s (Grub4DOS loader)\n", grub4dos_dst);
+			IGNORE_RETVAL(_chdirU(app_dir));
+			if (!CopyFileU(FILES_DIR "\\grub4dos\\grldr", grub4dos_dst, FALSE))
+				uprintf("Failed to copy file: %s", WindowsErrorString());
 		} else if (dt == DT_ISO) {
 			if (image_path != NULL) {
 				UpdateProgress(OP_DOS, 0.0f);

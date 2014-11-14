@@ -15,6 +15,13 @@ content. PLEASE, do not just look at this Changelog when updating your
 translation, but always use the English section of rufus.loc as your base.
 For instance, MSG_114, that was introduced in v1.0.8 is MORE than one line!
 
+o Version 1.0.13 (2014.11.14)
+  - Changed MSG_104 "Syslinux v5.0 or later requires a '%s' file to be installed.\n"
+    "Because this file is more than 100 KB in size, and always present on Syslinux v5+ ISO images (...)"
+    -> "%s or later requires a '%s' file to be installed.\n"
+	  "Because this file is more than 100 KB in size, and always present on %s ISO images (...)"
+  Note: since this doesn't require translator involvement, I have applied the change to existing translations. 
+
 o Version 1.0.12 (2014.05.19)
   - *NEW* MSG_079 "The device is not ready."
   - *NEW* MSG_189 "This ISO image is not compatible with the selected filesystem"
