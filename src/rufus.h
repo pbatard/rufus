@@ -231,6 +231,7 @@ typedef struct {
 #define IS_WINPE(r)     (((r&WINPE_MININT) == WINPE_MININT)||((r&WINPE_I386) == WINPE_I386))
 #define IS_EFI(r)       ((r.has_efi) || (r.has_win7_efi))
 #define IS_REACTOS(r)   (r.reactos_path[0] != 0)
+#define IS_GRUB(r)      ((r.has_grub2) || (r.has_grub4dos))
 
 typedef struct {
 	char label[192];		/* 3*64 to account for UTF-8 */
@@ -251,6 +252,7 @@ typedef struct {
 	BOOL has_old_vesamenu;
 	BOOL has_efi_syslinux;
 	BOOL has_grub4dos;
+	BOOL has_grub2;
 	BOOL has_kolibrios;
 	BOOL uses_minint;
 	BOOL is_bootable_img;

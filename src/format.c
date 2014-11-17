@@ -914,7 +914,7 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 	} else if (((dt == DT_ISO) && (iso_report.has_grub4dos)) || (dt == DT_GRUB4DOS)) {
 		uprintf(using_msg, "Grub4DOS");
 		r = write_grub_mbr(&fake_fd);
-	} else if (dt == DT_GRUB2) {
+	} else if (((dt == DT_ISO) && (iso_report.has_grub2)) || (dt == DT_GRUB2)) {
 		uprintf(using_msg, "Grub 2.0");
 		r = write_grub2_mbr(&fake_fd);
 	} else if (dt == DT_REACTOS) {
@@ -939,6 +939,41 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 
 out:
 	safe_free(buf);
+	return r;
+}
+
+/*
+ * Write Secondary Boot Record (usually right after the MBR)
+ */
+static BOOL WriteSBR(HANDLE hPhysicalDrive)
+{
+	BOOL r = FALSE;
+	DWORD size;
+	int dt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
+	unsigned char* buf = NULL;
+	FILE fake_fd = { 0 };
+	const char* using_msg = "Using %s SBR\n";
+
+	fake_fd._ptr = (char*)hPhysicalDrive;
+	fake_fd._bufsiz = SelectedDrive.Geometry.BytesPerSector;
+	if ((dt == DT_GRUB4DOS) || ((dt == DT_ISO) && (iso_report.has_grub4dos))) {
+		buf = GetResource(hMainInstance, MAKEINTRESOURCEA(IDR_GR_GRUB_GRLDR_MBR), _RT_RCDATA, "grldr.mbr", &size, FALSE);
+		if ((buf != NULL) && (size > 0x200)) {
+			uprintf(using_msg, "Grub4DOS");
+			// -0x200 to remove the MBR part
+			r = (write_data(&fake_fd, 512, &buf[0x200], (uint64_t)(size - 0x200)) != 0);
+		}
+	} else if ((dt == DT_GRUB2) || ((dt == DT_ISO) && (iso_report.has_grub2))) {
+		buf = GetResource(hMainInstance, MAKEINTRESOURCEA(IDR_GR_GRUB2_CORE_IMG), _RT_RCDATA, "core.img", &size, FALSE);
+		if (buf != NULL) {
+			uprintf(using_msg, "Grub 2.0");
+			// TODO: test what happens for 4096 bytes sectors
+			r = (write_data(&fake_fd, 512, buf, (uint64_t)size) != 0);
+		}
+	} else {
+		// No need to write secondary block
+		r = TRUE;
+	}
 	return r;
 }
 
@@ -1505,7 +1540,7 @@ DWORD WINAPI FormatThread(void* param)
 	// Thanks to Microsoft, we must fix the MBR AFTER the drive has been formatted
 	if (pt == PARTITION_STYLE_MBR) {
 		PrintStatus(0, TRUE, MSG_228);	// "Writing master boot record..."
-		if (!WriteMBR(hPhysicalDrive)) {
+		if ((!WriteMBR(hPhysicalDrive)) || (!WriteSBR(hPhysicalDrive))) {
 			if (!IS_ERROR(FormatStatus))
 				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_WRITE_FAULT;
 			goto out;
@@ -1540,8 +1575,8 @@ DWORD WINAPI FormatThread(void* param)
 				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_INSTALL_FAILURE;
 				goto out;
 			}
-		} else if ((((dt == DT_WINME) || (dt == DT_FREEDOS) || (dt == DT_GRUB4DOS) || (dt == DT_REACTOS)) &&
-			(!use_large_fat32)) || ((dt == DT_ISO) && ((fs == FS_NTFS)||(iso_report.has_kolibrios||iso_report.has_grub4dos)))) {
+		} else if ((((dt == DT_WINME) || (dt == DT_FREEDOS) || (dt == DT_GRUB4DOS) || (dt == DT_GRUB2) || (dt == DT_REACTOS)) &&
+			(!use_large_fat32)) || ((dt == DT_ISO) && ((fs == FS_NTFS)||(iso_report.has_kolibrios||IS_GRUB(iso_report))))) {
 			// We still have a lock, which we need to modify the volume boot record 
 			// => no need to reacquire the lock...
 			hLogicalVolume = GetLogicalHandle(DriveIndex, TRUE, FALSE);

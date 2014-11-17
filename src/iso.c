@@ -62,6 +62,7 @@ static const char* grldr_name = "grldr";
 static const char* ldlinux_name = "ldlinux.sys";
 static const char* ldlinux_c32 = "ldlinux.c32";
 static const char* efi_dirname = "/efi/boot";
+static const char* grub_dirname = "/boot/grub";   // NB: We don't support nonstandard config dir such as AROS' "/boot/pc/grub/"
 static const char* syslinux_cfg[] = { "isolinux.cfg", "syslinux.cfg", "extlinux.conf"};
 static const char dot_isolinux_bin[] = ".\\isolinux.bin";
 static const char* isolinux_bin = &dot_isolinux_bin[2];
@@ -165,6 +166,13 @@ static BOOL check_iso_props(const char* psz_dirname, BOOL* is_syslinux_cfg, BOOL
 		// Check for the EFI boot directory
 		if (safe_stricmp(psz_dirname, efi_dirname) == 0)
 			iso_report.has_efi = TRUE;
+
+		// Check for the Grub boot directory
+		// TODO: If there is a need to point to a different config file, as we do with Syslinux,
+		// see http://www.gnu.org/software/grub/manual/grub.html#Embedded-configuration
+		// However, this allegedly requires normal.mod (105 KB!) to be in core.img...
+		if (safe_stricmp(psz_dirname, grub_dirname) == 0)
+			iso_report.has_grub2 = TRUE;
 
 		// Check for PE (XP) specific files in "/i386" or "/minint"
 		for (i=0; i<ARRAYSIZE(pe_dirname); i++)

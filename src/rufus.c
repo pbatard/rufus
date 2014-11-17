@@ -937,6 +937,7 @@ static void DisplayISOProps(void)
 	uprintf("  Has a >4GB file: %s", YesNo(iso_report.has_4GB_file));
 	uprintf("  Uses Bootmgr: %s", YesNo(iso_report.has_bootmgr));
 	uprintf("  Uses EFI: %s%s", YesNo(iso_report.has_efi || iso_report.has_win7_efi), (iso_report.has_win7_efi && (!iso_report.has_efi)) ? " (win7_x64)" : "");
+	uprintf("  Uses Grub 2: %s", YesNo(iso_report.has_grub2));
 	uprintf("  Uses Grub4DOS: %s", YesNo(iso_report.has_grub4dos));
 	uprintf("  Uses isolinux: %s", isolinux_str);
 	if (HAS_SYSLINUX(iso_report) && (SL_MAJOR(iso_report.sl_version) < 5)) {
@@ -975,7 +976,7 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 	} else {
 		DisplayISOProps();
 	}
-	if ( (!iso_report.has_bootmgr) && (!HAS_SYSLINUX(iso_report)) && (!IS_WINPE(iso_report.winpe)) && (!iso_report.has_grub4dos)
+	if ( (!iso_report.has_bootmgr) && (!HAS_SYSLINUX(iso_report)) && (!IS_WINPE(iso_report.winpe)) && (!IS_GRUB(iso_report))
 	  && (!iso_report.has_efi) && (!IS_REACTOS(iso_report) && (!iso_report.has_kolibrios) && (!iso_report.is_bootable_img)) ) {
 		MessageBoxU(hMainDialog, lmprintf(MSG_082), lmprintf(MSG_081), MB_OK|MB_ICONINFORMATION|MB_IS_RTL);
 		safe_free(image_path);
@@ -1135,7 +1136,7 @@ static BOOL BootCheck(void)
 					ShellExecuteA(hMainDialog, "open", SEVENZIP_URL, NULL, NULL, SW_SHOWNORMAL);
 				return FALSE;
 			}
-		} else if ((fs == FS_NTFS) && (!iso_report.has_bootmgr) && (!IS_WINPE(iso_report.winpe)) && (!iso_report.has_grub4dos)) {
+		} else if ((fs == FS_NTFS) && (!iso_report.has_bootmgr) && (!IS_WINPE(iso_report.winpe)) && (!IS_GRUB(iso_report))) {
 			if (HAS_SYSLINUX(iso_report)) {
 				// Only FAT/FAT32 is supported for this type of ISO
 				MessageBoxU(hMainDialog, lmprintf(MSG_096), lmprintf(MSG_092), MB_OK|MB_ICONERROR|MB_IS_RTL);
@@ -1149,7 +1150,7 @@ static BOOL BootCheck(void)
 			MessageBoxU(hMainDialog, lmprintf(MSG_189), lmprintf(MSG_099), MB_OK|MB_ICONERROR|MB_IS_RTL);
 			return FALSE;
 		} else if (((fs == FS_FAT16)||(fs == FS_FAT32)) && (!HAS_SYSLINUX(iso_report)) &&
-			(!IS_REACTOS(iso_report)) && (!iso_report.has_kolibrios) && (!iso_report.has_grub4dos)) {
+			(!IS_REACTOS(iso_report)) && (!iso_report.has_kolibrios) && (!IS_GRUB(iso_report))) {
 			// FAT/FAT32 can only be used for isolinux based ISO images or when the Target Type is UEFI
 			MessageBoxU(hMainDialog, lmprintf(MSG_098), lmprintf(MSG_090), MB_OK|MB_ICONERROR|MB_IS_RTL);
 			return FALSE;
@@ -1555,7 +1556,7 @@ void SetBoot(int fs, int bt)
 		static_sprintf(tmp, "Syslinux %s", embedded_sl_version_str[1]);
 		IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, tmp), DT_SYSLINUX_V6));
 		IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, "ReactOS"), DT_REACTOS));
-//		IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, "Grub 2.0"), DT_GRUB2));
+		IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, "Grub 2.0"), DT_GRUB2));
 		IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, "Grub4DOS"), DT_GRUB4DOS));
 	}
 	if ((!advanced_mode) && (selection_default >= DT_SYSLINUX_V4)) {

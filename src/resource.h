@@ -69,6 +69,8 @@
 #define IDR_SL_LDLINUX_V6_BSS           402
 #define IDR_SL_LDLINUX_V6_SYS           403
 #define IDR_SL_MBOOT_C32                404
+#define IDR_GR_GRUB_GRLDR_MBR           450
+#define IDR_GR_GRUB2_CORE_IMG           451
 #define IDR_LC_RUFUS_LOC                500
 #define IDR_XT_HOGGER                   501
 #define IDC_DEVICE                      1001

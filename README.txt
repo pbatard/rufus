@@ -15,7 +15,7 @@ Compilation:
   Use either Visual Studio 2013, WDK 7.1 (Windows Driver Kit) or MinGW and then
   invoke the .sln, wdk_build.cmd or configure/make respectively.
 
-  Note that, since Rufus is a OSI compliant Open Source project, you are entitled to
+  Note that, since Rufus is an OSI compliant Open Source project, you are entitled to
   download and use the *freely available* Visual Studio 2013 Community Edition to
   build, run or develop for Rufus. As per the Visual Studio Community Edition license
   this applies regardless of whether you are an individual or a corporate user.
