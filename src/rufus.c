@@ -43,6 +43,7 @@
 #include "localization.h"
 
 /* Redefinitions for WDK and MinGW */
+// TODO: these would be better in a 'missing.h' file
 #ifndef PBM_SETSTATE
 #define PBM_SETSTATE (WM_USER+16)
 #endif
@@ -487,7 +488,7 @@ static void SetMBRProps(void)
 	int dt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
 	BOOL needs_masquerading = (IS_WINPE(iso_report.winpe) && (!iso_report.uses_minint));
 
-	if ((!mbr_selected_by_user) && ((image_path == NULL) || (dt != DT_ISO) || (fs != FS_NTFS))) {
+	if ((!mbr_selected_by_user) && ((image_path == NULL) || (dt != DT_ISO) || (fs != FS_NTFS) || IS_GRUB(iso_report))) {
 		CheckDlgButton(hMainDialog, IDC_RUFUS_MBR, BST_UNCHECKED);
 		IGNORE_RETVAL(ComboBox_SetCurSel(hDiskID, 0));
 		return;
@@ -502,25 +503,30 @@ static void SetMBRProps(void)
 static void EnableAdvancedBootOptions(BOOL enable, BOOL remove_checkboxes)
 {
 	int bt = GETBIOSTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
-	BOOL actual_enable = ((bt==BT_UEFI)||(selection_default>=DT_IMG)||!IsChecked(IDC_BOOT))?FALSE:enable;
+	BOOL actual_enable_mbr = ((bt==BT_UEFI)||(selection_default>=DT_IMG)||!IsChecked(IDC_BOOT))?FALSE:enable;
+	BOOL actual_enable_fix = ((bt==BT_UEFI)||(selection_default==DT_IMG)||!IsChecked(IDC_BOOT))?FALSE:enable;
 	static UINT uXPartChecked = BST_UNCHECKED;
 
+	if ((selection_default == DT_ISO) && (iso_report.has_kolibrios || IS_GRUB(iso_report) || IS_REACTOS(iso_report) || HAS_SYSLINUX(iso_report))) {
+		actual_enable_mbr = FALSE;
+		mbr_selected_by_user = FALSE;
+	}
 	if (remove_checkboxes) {
 		// Store/Restore the checkbox states
-		if (IsWindowEnabled(GetDlgItem(hMainDialog, IDC_RUFUS_MBR)) && !actual_enable) {
+		if (IsWindowEnabled(GetDlgItem(hMainDialog, IDC_RUFUS_MBR)) && !actual_enable_mbr) {
 			uMBRChecked = IsChecked(IDC_RUFUS_MBR);
 			CheckDlgButton(hMainDialog, IDC_RUFUS_MBR, BST_UNCHECKED);
 			uXPartChecked = IsChecked(IDC_EXTRA_PARTITION);
 			CheckDlgButton(hMainDialog, IDC_EXTRA_PARTITION, BST_UNCHECKED);
-		} else if (!IsWindowEnabled(GetDlgItem(hMainDialog, IDC_RUFUS_MBR)) && actual_enable) {
+		} else if (!IsWindowEnabled(GetDlgItem(hMainDialog, IDC_RUFUS_MBR)) && actual_enable_mbr) {
 			CheckDlgButton(hMainDialog, IDC_RUFUS_MBR, uMBRChecked);
 			CheckDlgButton(hMainDialog, IDC_EXTRA_PARTITION, uXPartChecked);
 		}
 	}
 
-	EnableWindow(GetDlgItem(hMainDialog, IDC_EXTRA_PARTITION), actual_enable);
-	EnableWindow(GetDlgItem(hMainDialog, IDC_RUFUS_MBR), actual_enable);
-	EnableWindow(hDiskID, actual_enable);
+	EnableWindow(GetDlgItem(hMainDialog, IDC_EXTRA_PARTITION), actual_enable_fix);
+	EnableWindow(GetDlgItem(hMainDialog, IDC_RUFUS_MBR), actual_enable_mbr);
+	EnableWindow(hDiskID, actual_enable_mbr);
 }
 
 static void EnableBootOptions(BOOL enable, BOOL remove_checkboxes)
@@ -556,7 +562,8 @@ static void SetTargetSystem(void)
 	if (SelectedDrive.PartitionType == PARTITION_STYLE_GPT) {
 		ts = 2;	// GPT/UEFI
 	} else if (SelectedDrive.has_protective_mbr || SelectedDrive.has_mbr_uefi_marker || (IS_EFI(iso_report) &&
-		(!HAS_SYSLINUX(iso_report)) && (!iso_report.has_bootmgr) && (!IS_WINPE(iso_report.winpe))) ) {
+		(!HAS_SYSLINUX(iso_report)) && (!iso_report.has_bootmgr) && (!IS_REACTOS(iso_report)) && 
+		(!iso_report.has_kolibrios) && (!IS_GRUB(iso_report)) && (!IS_WINPE(iso_report.winpe))) ) {
 		ts = 1;	// MBR/UEFI
 	} else {
 		ts = 0;	// MBR/BIOS|UEFI
@@ -714,7 +721,7 @@ void UpdateProgress(int op, float percent)
 		return;
 	}
 	if (percent > 100.1f) {
-		duprintf("UpdateProgress(%d): invalid percentage %0.2f\n", op, percent);
+//		duprintf("UpdateProgress(%d): invalid percentage %0.2f\n", op, percent);
 		return;
 	}
 	if ((percent < 0.0f) && (nb_slots[op] <= 0)) {
@@ -1556,7 +1563,7 @@ void SetBoot(int fs, int bt)
 		static_sprintf(tmp, "Syslinux %s", embedded_sl_version_str[1]);
 		IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, tmp), DT_SYSLINUX_V6));
 		IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, "ReactOS"), DT_REACTOS));
-		IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, "Grub 2.0"), DT_GRUB2));
+		IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, "Grub 2.00-22"), DT_GRUB2));
 		IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, "Grub4DOS"), DT_GRUB4DOS));
 	}
 	if ((!advanced_mode) && (selection_default >= DT_SYSLINUX_V4)) {

@@ -890,7 +890,8 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 	}
 	if (IsChecked(IDC_BOOT)) {
 		// Set first partition bootable - masquerade as per the DiskID selected
-		buf[0x1be] = (IsChecked(IDC_RUFUS_MBR))?(BYTE)ComboBox_GetItemData(hDiskID, ComboBox_GetCurSel(hDiskID)):0x80;
+		buf[0x1be] = (IsWindowEnabled(GetDlgItem(hMainDialog, IDC_RUFUS_MBR)) && IsChecked(IDC_RUFUS_MBR)) ? 
+			(BYTE)ComboBox_GetItemData(hDiskID, ComboBox_GetCurSel(hDiskID)):0x80;
 		uprintf("Set bootable USB partition as 0x%02X\n", buf[0x1be]);
 	}
 
@@ -947,34 +948,51 @@ out:
  */
 static BOOL WriteSBR(HANDLE hPhysicalDrive)
 {
-	BOOL r = FALSE;
-	DWORD size;
+	// TODO: Do we need anything special for 4K sectors?
+	DWORD size, max_size, mbr_size = 0x200;
 	int dt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
 	unsigned char* buf = NULL;
 	FILE fake_fd = { 0 };
-	const char* using_msg = "Using %s SBR\n";
 
 	fake_fd._ptr = (char*)hPhysicalDrive;
 	fake_fd._bufsiz = SelectedDrive.Geometry.BytesPerSector;
-	if ((dt == DT_GRUB4DOS) || ((dt == DT_ISO) && (iso_report.has_grub4dos))) {
+	// Ensure that we have sufficient space for the SBR
+	max_size = IsChecked(IDC_EXTRA_PARTITION) ?
+		(DWORD)(SelectedDrive.Geometry.BytesPerSector * SelectedDrive.Geometry.SectorsPerTrack) : 1024 * 1024;
+	max_size -= mbr_size;
+	if ((dt == DT_ISO) && (iso_report.has_grub4dos))
+		dt = DT_GRUB4DOS;
+	if ((dt == DT_ISO) && (iso_report.has_grub2))
+		dt = DT_GRUB2;
+
+	switch (dt) {
+	case DT_GRUB4DOS:
 		buf = GetResource(hMainInstance, MAKEINTRESOURCEA(IDR_GR_GRUB_GRLDR_MBR), _RT_RCDATA, "grldr.mbr", &size, FALSE);
-		if ((buf != NULL) && (size > 0x200)) {
-			uprintf(using_msg, "Grub4DOS");
-			// -0x200 to remove the MBR part
-			r = (write_data(&fake_fd, 512, &buf[0x200], (uint64_t)(size - 0x200)) != 0);
+		if ((buf == NULL) || (size <= mbr_size)) {
+			uprintf("grldr.mbr is either not present or too small");
+			return FALSE;
 		}
-	} else if ((dt == DT_GRUB2) || ((dt == DT_ISO) && (iso_report.has_grub2))) {
+		buf = &buf[mbr_size];
+		size -= mbr_size;
+		break;
+	case DT_GRUB2:
 		buf = GetResource(hMainInstance, MAKEINTRESOURCEA(IDR_GR_GRUB2_CORE_IMG), _RT_RCDATA, "core.img", &size, FALSE);
-		if (buf != NULL) {
-			uprintf(using_msg, "Grub 2.0");
-			// TODO: test what happens for 4096 bytes sectors
-			r = (write_data(&fake_fd, 512, buf, (uint64_t)size) != 0);
+		if (buf == NULL) {
+			uprintf("Could not access core.img");
+			return FALSE;
 		}
-	} else {
+		break;
+	default:
 		// No need to write secondary block
-		r = TRUE;
+		return TRUE;
 	}
-	return r;
+
+	uprintf("Writing SBR (Secondary Boot record)");
+	if (size > max_size) {
+		uprintf("  SBR size is too large - You may need to uncheck 'Add fixes for old BIOSes'.");
+		return FALSE;
+	}
+	return (write_data(&fake_fd, mbr_size, buf, (uint64_t)size) != 0);
 }
 
 /*
@@ -984,7 +1002,7 @@ static __inline const char* dt_to_name(int dt) {
 	switch (dt) {
 	case DT_FREEDOS: return "FreeDOS";
 	case DT_REACTOS: return "ReactOS";
-	default: 
+	default:
 		return ((dt==DT_ISO)&&(iso_report.has_kolibrios))?"KolibriOS":"Standard";
 	}
 }
