@@ -1564,7 +1564,7 @@ void SetBoot(int fs, int bt)
 		IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, tmp), DT_SYSLINUX_V6));
 		IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, "ReactOS"), DT_REACTOS));
 		IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, "Grub 2.00-22"), DT_GRUB2));
-		IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, "Grub4DOS"), DT_GRUB4DOS));
+		IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, "Grub4DOS 0.4.5"), DT_GRUB4DOS));
 	}
 	if ((!advanced_mode) && (selection_default >= DT_SYSLINUX_V4)) {
 		selection_default = DT_FREEDOS;
