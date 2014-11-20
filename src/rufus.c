@@ -42,6 +42,10 @@
 #include "registry.h"
 #include "localization.h"
 
+// These should be commented out for release
+//#define IS_ALPHA
+#define IS_BETA
+
 /* Redefinitions for WDK and MinGW */
 // TODO: these would be better in a 'missing.h' file
 #ifndef PBM_SETSTATE
@@ -1330,6 +1334,16 @@ static BOOL BootCheck(void)
 	return TRUE;
 }
 
+static __inline const char* IsAlphaOrBeta(void)
+{
+#if defined(IS_ALPHA)
+	return " (Alpha) ";
+#elif defined(IS_BETA)
+	return " (Beta) ";
+#else
+	return " ";
+#endif
+}
 
 void InitDialog(HWND hDlg)
 {
@@ -1382,11 +1396,15 @@ void InitDialog(HWND hDlg)
 	token = strtok(tmp, " ");
 	for (i=0; (i<4) && ((token = strtok(NULL, ".")) != NULL); i++)
 		rufus_version[i] = (uint16_t)atoi(token);
-	if (right_to_left_mode) {
-		static_sprintf(tmp, "%d.%d.%d.%d " APPLICATION_NAME, rufus_version[0], rufus_version[1], rufus_version[2], rufus_version[3]);
-		SetWindowTextU(hDlg, tmp);
+
+	// Redefine the title to be able to add "Alpha" or "Beta" and get the version in the right order for RTL
+	if (!right_to_left_mode) {
+		static_sprintf(tmp, APPLICATION_NAME " %d.%d.%d.%d%s", rufus_version[0], rufus_version[1], rufus_version[2], rufus_version[3], IsAlphaOrBeta());
+	} else {
+		static_sprintf(tmp, "%s%d.%d.%d.%d " APPLICATION_NAME, IsAlphaOrBeta(), rufus_version[0], rufus_version[1], rufus_version[2], rufus_version[3]);
 	}
-	uprintf(APPLICATION_NAME " version: %d.%d.%d.%d\n", rufus_version[0], rufus_version[1], rufus_version[2], rufus_version[3]);
+	SetWindowTextU(hDlg, tmp);
+	uprintf(APPLICATION_NAME " version: %d.%d.%d.%d%s\n", rufus_version[0], rufus_version[1], rufus_version[2], rufus_version[3], IsAlphaOrBeta());
 	for (i=0; i<ARRAYSIZE(resource); i++) {
 		buf = (char*)GetResource(hMainInstance, resource[i], _RT_RCDATA, "ldlinux_sys", &len, TRUE);
 		if (buf == NULL) {
@@ -1672,6 +1690,12 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		SetWindowPos(hMainDialog, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE|SWP_NOMOVE);
 		SetWindowPos(hMainDialog, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOSIZE|SWP_NOMOVE);
 		SetWindowPos(hMainDialog, HWND_TOP, 0, 0, 0, 0, SWP_NOSIZE|SWP_NOMOVE);
+
+#if defined(IS_ALPHA)
+		// Add a VERY ANNOYING popup for Alpha releases, so that people don't start redistributing them
+		Notification(MSG_INFO, NULL, "ALPHA VERSION", "This is an Alpha version of " APPLICATION_NAME
+			" - It is meant to be used for testing ONLY and should NOT be distributed as a release.");
+#endif
 		return (INT_PTR)TRUE;
 
 	// The things one must do to get an ellipsis on the status bar...
