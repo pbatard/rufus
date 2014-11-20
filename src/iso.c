@@ -82,18 +82,25 @@ static BOOL scan_only = FALSE;
 static StrArray config_path, isolinux_path;
 
 // Ensure filenames do not contain invalid FAT32 or NTFS characters
-static __inline BOOL sanitize_filename(char* filename)
+static __inline char* sanitize_filename(char* filename, BOOL* is_identical)
 {
 	size_t i, j;
-	BOOL ret = FALSE;
+	char* ret = NULL;
 	char unauthorized[] = {'<', '>', ':', '|', '*', '?'};
 
+	*is_identical = TRUE;
+	ret = safe_strdup(filename);
+	if (ret == NULL) {
+		uprintf("Couldn't allocate string for sanitized path");
+		return NULL;
+	}
+
 	// Must start after the drive part (D:\...) so that we don't eliminate the first column
-	for (i=2; i<safe_strlen(filename); i++) {
+	for (i=2; i<safe_strlen(ret); i++) {
 		for (j=0; j<sizeof(unauthorized); j++) {
-			if (filename[i] == unauthorized[j]) {
-				filename[i] = '_';
-				ret = TRUE;
+			if (ret[i] == unauthorized[j]) {
+				ret[i] = '_';
+				*is_identical = FALSE;
 			}
 		}
 	}
@@ -243,15 +250,34 @@ static void fix_syslinux(const char* psz_fullpath, const char* psz_path, const c
 	free(src);
 }
 
+static void print_extracted_file(char* psz_fullpath, int64_t i_file_length)
+{
+	size_t i, nul_pos;
+
+	// Replace slashes with backslashes and append the size to the path for UI display
+	nul_pos = safe_strlen(psz_fullpath);
+	for (i=0; i<nul_pos; i++)
+		if (psz_fullpath[i] == '/') psz_fullpath[i] = '\\';
+	safe_sprintf(&psz_fullpath[nul_pos], 24, " (%s)", SizeToHumanReadable(i_file_length, TRUE, FALSE));
+	uprintf("Extracting: %s\n", psz_fullpath);
+	safe_sprintf(&psz_fullpath[nul_pos], 24, " (%s)", SizeToHumanReadable(i_file_length, FALSE, FALSE));
+	SetWindowTextU(hISOFileName, psz_fullpath);
+	// ISO9660 cannot handle backslashes
+	for (i=0; i<nul_pos; i++)
+		if (psz_fullpath[i] == '\\') psz_fullpath[i] = '/';
+	// Remove the appended size for extraction
+	psz_fullpath[nul_pos] = 0;
+}
+
 // Returns 0 on success, nonzero on error
 static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const char *psz_path)
 {
 	HANDLE file_handle = NULL;
 	DWORD buf_size, wr_size, err;
-	BOOL r, is_syslinux_cfg, is_old_c32[NB_OLD_C32];
+	BOOL r, is_syslinux_cfg, is_old_c32[NB_OLD_C32], is_identical;
 	int i_length;
-	size_t i, nul_pos;
-	char tmp[128], *psz_fullpath = NULL;
+	size_t i;
+	char tmp[128], *psz_fullpath = NULL, *psz_sanpath = NULL;
 	const char* psz_basename;
 	udf_dirent_t *p_udf_dirent2;
 	uint8_t buf[UDF_BLOCKSIZE];
@@ -276,7 +302,11 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 			goto out;
 		}
 		if (udf_is_dir(p_udf_dirent)) {
-			if (!scan_only) IGNORE_RETVAL(_mkdirU(psz_fullpath));
+			if (!scan_only) {
+				psz_sanpath = sanitize_filename(psz_fullpath, &is_identical);
+				IGNORE_RETVAL(_mkdirU(psz_sanpath));
+				safe_free(psz_sanpath);
+			}
 			p_udf_dirent2 = udf_opendir(p_udf_dirent);
 			if (p_udf_dirent2 != NULL) {
 				if (udf_extract_files(p_udf, p_udf_dirent2, &psz_fullpath[strlen(psz_extract_dir)]))
@@ -288,16 +318,7 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 				safe_free(psz_fullpath);
 				continue;
 			}
-			// Replace slashes with backslashes and append the size to the path for UI display
-			nul_pos = safe_strlen(psz_fullpath);
-			for (i=0; i<nul_pos; i++)
-				if (psz_fullpath[i] == '/') psz_fullpath[i] = '\\';
-			safe_sprintf(&psz_fullpath[nul_pos], 24, " (%s)", SizeToHumanReadable(i_file_length, TRUE, FALSE));
-			uprintf("Extracting: %s\n", psz_fullpath);
-			safe_sprintf(&psz_fullpath[nul_pos], 24, " (%s)", SizeToHumanReadable(i_file_length, FALSE, FALSE));
-			SetWindowTextU(hISOFileName, psz_fullpath);
-			// Remove the appended size for extraction
-			psz_fullpath[nul_pos] = 0;
+			print_extracted_file(psz_fullpath, i_file_length);
 			for (i=0; i<NB_OLD_C32; i++) {
 				if (is_old_c32[i] && use_own_c32[i]) {
 					static_sprintf(tmp, "%s/syslinux-%s/%s", FILES_DIR, embedded_sl_version_str[0], old_c32_name[i]);
@@ -310,14 +331,15 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 			}
 			if (i < NB_OLD_C32)
 				continue;
-			if (sanitize_filename(psz_fullpath))
-				uprintf("  File name sanitized to '%s'\n", psz_fullpath);
-			file_handle = CreateFileU(psz_fullpath, GENERIC_READ | GENERIC_WRITE,
+			psz_sanpath = sanitize_filename(psz_fullpath, &is_identical);
+			if (!is_identical)
+				uprintf("  File name sanitized to '%s'\n", psz_sanpath);
+			file_handle = CreateFileU(psz_sanpath, GENERIC_READ | GENERIC_WRITE,
 				FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 			if (file_handle == INVALID_HANDLE_VALUE) {
 				err = GetLastError();
 				uprintf("  Unable to create file: %s\n", WindowsErrorString());
-				if ((err == ERROR_ACCESS_DENIED) && (safe_strcmp(&psz_fullpath[3], autorun_name) == 0))
+				if ((err == ERROR_ACCESS_DENIED) && (safe_strcmp(&psz_sanpath[3], autorun_name) == 0))
 					uprintf(stupid_antivirus);
 				else
 					goto out;
@@ -354,7 +376,8 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 			// may take forever to complete and is not interruptible. We try to detect this.
 			ISO_BLOCKING(safe_closehandle(file_handle));
 			if (is_syslinux_cfg)
-				fix_syslinux(psz_fullpath, psz_path, psz_basename);
+				fix_syslinux(psz_sanpath, psz_path, psz_basename);
+			safe_free(psz_sanpath);
 		}
 		safe_free(psz_fullpath);
 	}
@@ -373,15 +396,15 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 {
 	HANDLE file_handle = NULL;
 	DWORD buf_size, wr_size, err;
-	BOOL s, is_syslinux_cfg, is_old_c32[NB_OLD_C32], is_symlink;
+	BOOL s, is_syslinux_cfg, is_old_c32[NB_OLD_C32], is_symlink, is_identical;
 	int i_length, r = 1;
-	char tmp[128], psz_fullpath[MAX_PATH], *psz_basename;
+	char tmp[128], psz_fullpath[MAX_PATH], *psz_basename, *psz_sanpath;
 	const char *psz_iso_name = &psz_fullpath[strlen(psz_extract_dir)];
 	unsigned char buf[ISO_BLOCKSIZE];
 	CdioListNode_t* p_entnode;
 	iso9660_stat_t *p_statbuf;
 	CdioList_t* p_entlist;
-	size_t i, j, nul_pos;
+	size_t i, j;
 	lsn_t lsn;
 	int64_t i_file_length;
 
@@ -423,7 +446,11 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 			iso9660_name_translate_ext(p_statbuf->filename, psz_basename, i_joliet_level);
 		}
 		if (p_statbuf->type == _STAT_DIR) {
-			if (!scan_only) IGNORE_RETVAL(_mkdirU(psz_fullpath));
+			if (!scan_only) {
+				psz_sanpath = sanitize_filename(psz_fullpath, &is_identical);
+				IGNORE_RETVAL(_mkdirU(psz_sanpath));
+				safe_free(psz_sanpath);
+			}
 			if (iso_extract_files(p_iso, psz_iso_name))
 				goto out;
 		} else {
@@ -431,18 +458,7 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 			if (check_iso_props(psz_path, &is_syslinux_cfg, is_old_c32, i_file_length, psz_basename, psz_fullpath)) {
 				continue;
 			}
-			// Replace slashes with backslashes and append the size to the path for UI display
-			nul_pos = safe_strlen(psz_fullpath);
-			for (i=0; i<nul_pos; i++)
-				if (psz_fullpath[i] == '/') psz_fullpath[i] = '\\';
-			safe_sprintf(&psz_fullpath[nul_pos], 24, " (%s)", SizeToHumanReadable(i_file_length, TRUE, FALSE));
-			uprintf("Extracting: %s\n", psz_fullpath);
-			safe_sprintf(&psz_fullpath[nul_pos], 24, " (%s)", SizeToHumanReadable(i_file_length, FALSE, FALSE));
-			SetWindowTextU(hISOFileName, psz_fullpath);
-			// ISO9660 cannot handle backslashes
-			for (i=0; i<nul_pos; i++)
-				if (psz_fullpath[i] == '\\') psz_fullpath[i] = '/';
-			psz_fullpath[nul_pos] = 0;
+			print_extracted_file(psz_fullpath, i_file_length);
 			for (i=0; i<NB_OLD_C32; i++) {
 				if (is_old_c32[i] && use_own_c32[i]) {
 					static_sprintf(tmp, "%s/syslinux-%s/%s", FILES_DIR, embedded_sl_version_str[0], old_c32_name[i]);
@@ -455,19 +471,20 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 			}
 			if (i < NB_OLD_C32)
 				continue;
-			if (sanitize_filename(psz_fullpath))
-				uprintf("  File name sanitized to '%s'\n", psz_fullpath);
+			psz_sanpath = sanitize_filename(psz_fullpath, &is_identical);
+			if (!is_identical)
+				uprintf("  File name sanitized to '%s'\n", psz_sanpath);
 			if (is_symlink) {
 				if (i_file_length == 0)
 					uprintf("  Ignoring Rock Ridge symbolic link to '%s'\n", p_statbuf->rr.psz_symlink);
 				safe_free(p_statbuf->rr.psz_symlink);
 			}
-			file_handle = CreateFileU(psz_fullpath, GENERIC_READ | GENERIC_WRITE,
+			file_handle = CreateFileU(psz_sanpath, GENERIC_READ | GENERIC_WRITE,
 				FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 			if (file_handle == INVALID_HANDLE_VALUE) {
 				err = GetLastError();
 				uprintf("  Unable to create file: %s\n", WindowsErrorString());
-				if ((err == ERROR_ACCESS_DENIED) && (safe_strcmp(&psz_fullpath[3], autorun_name) == 0))
+				if ((err == ERROR_ACCESS_DENIED) && (safe_strcmp(&psz_sanpath[3], autorun_name) == 0))
 					uprintf(stupid_antivirus);
 				else
 					goto out;
@@ -500,7 +517,8 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 			}
 			ISO_BLOCKING(safe_closehandle(file_handle));
 			if (is_syslinux_cfg)
-				fix_syslinux(psz_fullpath, psz_path, psz_basename);
+				fix_syslinux(psz_sanpath, psz_path, psz_basename);
+			safe_free(psz_sanpath);
 		}
 	}
 	r = 0;

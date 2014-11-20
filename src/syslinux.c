@@ -339,11 +339,12 @@ out:
 
 uint16_t GetSyslinuxVersion(char* buf, size_t buf_size, char** ext)
 {
-	size_t i, j;
+	size_t i, j, k;
 	char *p;
 	uint16_t version;
 	const char LINUX[] = { 'L', 'I', 'N', 'U', 'X', ' ' };
 	static char* nullstr = "";
+	char unauthorized[] = {'<', '>', ':', '|', '*', '?', '\\', '/'};
 
 	*ext = nullstr;
 	if (buf_size < 256)
@@ -379,10 +380,13 @@ uint16_t GetSyslinuxVersion(char* buf, size_t buf_size, char** ext)
 					break;
 			}
 			// Sanitize the string
-			for (j=1; j<safe_strlen(p); j++)
-				// Some people are bound to have slashes in their date strings
-				if ((p[j] == '/') || (p[j] == '\\') || (p[j] == '*'))
-					p[j] = '_';
+			for (j=1; j<safe_strlen(p); j++) {
+				// Some people are bound to have invalid chars in their date strings
+				for (k=0; k<sizeof(unauthorized); k++) {
+					if (p[j] == unauthorized[k])
+						p[j] = '_';
+				}
+			}
 			// If all we have is a slash, return the empty string for the extra version
 			*ext = (p[1] == 0)?nullstr:p;
 			return version;
