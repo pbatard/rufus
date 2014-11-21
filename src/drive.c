@@ -580,7 +580,8 @@ BOOL AnalyzeMBR(HANDLE hPhysicalDrive, const char* TargetName)
 	int i;
 
 	fake_fd._ptr = (char*)hPhysicalDrive;
-	fake_fd._bufsiz = SelectedDrive.Geometry.BytesPerSector;
+	// Must be set to 512, as we also use this method for images and we may not have a target UFD yet
+	fake_fd._bufsiz = 512;
 
 	if (!is_br(&fake_fd)) {
 		uprintf("%s does not have an x86 %s\n", TargetName, mbr_name);
