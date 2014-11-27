@@ -53,7 +53,7 @@
 # http://download.microsoft.com/download/9/5/E/95EF66AF-9026-4BB0-A41D-A4F81802D92C/%5BMS-LCID%5D.pdf
 # for the LCID (0x####) codes you should use
 l "en-US" "English (English)" 0x0409, 0x0809, 0x0c09, 0x1009, 0x1409, 0x1809, 0x1c09, 0x2009, 0x2409, 0x2809, 0x2c09, 0x3009, 0x3409, 0x3809, 0x3c09, 0x4009, 0x4409, 0x4809
-v 1.0.12
+v 1.0.14
 
 # Main dialog
 g IDD_DIALOG
@@ -455,7 +455,8 @@ t IDS_PARTITION_TYPE_TXT "مخطط التقسيم ونوع النظام المس
 t IDS_FILESYSTEM_TXT "نظام الملفات"
 t IDS_CLUSTERSIZE_TXT "حجم الكلستر"
 t IDS_LABEL_TXT "تسمية وحدة التخزين"
-t IDS_FORMAT_OPTIONS_GRP "خيارات الفورمات       "
+t IDS_FORMAT_OPTIONS_GRP "خيارات الفورمات        "
+m IDC_ADVANCED -6,0
 t IDC_BADBLOCKS "فحص الجهاز من الأجزاء التالفة"
 t IDC_QUICKFORMAT "فورمات سريع"
 t IDC_BOOT "إنشاء قرص إقلاع بإستخدام"
@@ -467,12 +468,7 @@ t IDCANCEL "إغلاق"
 t IDC_START "إبدأ"
 t IDS_ADVANCED_OPTIONS_GRP "خيارات متقدّمة"
 t IDC_ENABLE_FIXED_DISKS "قائمة بالمحركات الصلبة المحمولة USB"
-# Note: it is acceptable to drop the parenthesis () below if you are running out of space
-# as there is a tooltip (MSG_169) providing these details
 t IDC_EXTRA_PARTITION "إضافة إصلاح BIOSes قديمة (تقسم إضافي, معاينة..)"
-# 'MBR': See http://en.wikipedia.org/wiki/Master_boot_record
-# Rufus can install it's own custom MBR (the Rufus MBR), which also allows users
-# to specify a custom disk ID for the BIOS. Note: the tooltip for this control is MSG_167.
 t IDC_RUFUS_MBR "إستخدام MBR مع BIOS ID"
 
 # About dialog
@@ -504,8 +500,8 @@ t IDCANCEL "إغلاق السجلّ"
 g IDD_UPDATE_POLICY
 t IDD_UPDATE_POLICY "سياسة التحديث وإعدادات"
 t IDS_UPDATE_SETTINGS_GRP "إعدادات"
-t IDS_UPDATE_FREQUENCY_TXT "تحقق من تحديثات:"
-t IDS_INCLUDE_BETAS_TXT "شمل النسخ التجريبية:"
+t IDS_UPDATE_FREQUENCY_TXT "تحقق من تحديثات"
+t IDS_INCLUDE_BETAS_TXT "شمل النسخ التجريبية"
 t IDC_CHECK_NOW "تحقق الآن"
 t IDCANCEL "إغلاق"
 
@@ -834,7 +830,7 @@ t MSG_261 "كتابة صورة: تم %0.1f%%"
 
 ######################################################################
 l "bg-BG" "Bulgarian (Български)" 0x0402
-v 1.0.12
+v 1.0.14
 b "en-US"
 
 # Main dialog
@@ -849,21 +845,18 @@ s IDC_CLUSTERSIZE +15,0
 s IDC_LABEL +15,0
 s IDC_PROGRESS +15,0
 s IDS_ADVANCED_OPTIONS_GRP +15,0
-m IDC_NBPASSES +3,0
-s IDC_NBPASSES +15,0
-m IDC_BOOTTYPE +3,0
-s IDC_BOOTTYPE +15,0
-m IDC_SELECT_ISO +18,0
+m IDC_NBPASSES +15,0
+m IDC_BOOTTYPE +15,0
+m IDC_SELECT_ISO +15,0
 m IDC_ADVANCED +72,0
 s IDC_ABOUT -3,0
 s IDC_LOG +38,0
-m IDC_LOG -8,0
-m IDC_DISK_ID +3,0
-s IDC_DISK_ID +15,0
-m IDC_START +20,0
+m IDC_LOG -5,0
+s IDC_RUFUS_MBR +15,0
+m IDC_DISK_ID +15,0
+m IDC_START +18,0
 m IDCANCEL +15,0
 
-#
 t IDS_DEVICE_TXT "Устройство"
 t IDS_PARTITION_TYPE_TXT "Схема на дяла и тип на интерфейса"
 t IDS_FILESYSTEM_TXT "Файлова система"
@@ -880,12 +873,7 @@ t IDCANCEL "Затвори"
 t IDC_START "Старт"
 t IDS_ADVANCED_OPTIONS_GRP "Разширени свойства"
 t IDC_ENABLE_FIXED_DISKS "Списък с USB твърди дискове"
-# Note: it is acceptable to drop the parenthesis () below if you are running out of space
-# as there is a tooltip (MSG_169) providing these details
 t IDC_EXTRA_PARTITION "Добави поправки за стария BIOS"
-# 'MBR': See http://en.wikipedia.org/wiki/Master_boot_record
-# Rufus can install it's own custom MBR (the Rufus MBR), which also allows users
-# to specify a custom disk ID for the BIOS. Note: the tooltip for this control is MSG_167.
 t IDC_RUFUS_MBR "Използвай Rufus MBR с BIOS ID"
 
 # About dialog
@@ -904,17 +892,18 @@ t IDCANCEL "Затвори"
 # Notifications. You can trigger one of these by using Alt-R and re-launching Rufus
 g IDD_NOTIFICATION
 t IDC_MORE_INFO "Повече Информация"
+s IDC_MORE_INFO +16,0
 t IDYES "Да"
 t IDNO "Не"
 
 # Log dialog
 g IDD_LOG
-s IDC_LOG_CLEAR +28,0
-m IDC_LOG_CLEAR -84,0
-m IDC_LOG_SAVE -56,0
-s IDC_LOG_SAVE +28,0
-m IDCANCEL -28,0
-s IDCANCEL +28,0
+s IDC_LOG_CLEAR +35,0
+m IDC_LOG_CLEAR -98,0
+m IDC_LOG_SAVE -65,0
+s IDC_LOG_SAVE +31,0
+m IDCANCEL -35,0
+s IDCANCEL +35,0
 
 t IDD_LOG "Регистър"
 t IDC_LOG_CLEAR "Изчисти регистър"
@@ -923,21 +912,26 @@ t IDCANCEL "Затвори регистър"
 
 # About -> Updates
 g IDD_UPDATE_POLICY
-s IDS_UPDATE_SETTINGS_GRP +55,0
-m IDS_UPDATE_SETTINGS_GRP -55,0
-m IDC_UPDATE_FREQUENCY -45,0
-s IDC_UPDATE_FREQUENCY +50,0
-m IDC_INCLUDE_BETAS -45,0
-s IDS_UPDATE_FREQUENCY_TXT +17,0
-m IDS_UPDATE_FREQUENCY_TXT -60,0
-m IDS_INCLUDE_BETAS_TXT -60,0
-s IDS_INCLUDE_BETAS_TXT +17,0
+s IDS_UPDATE_SETTINGS_GRP +70,0
+m IDS_UPDATE_SETTINGS_GRP -61,0
+m IDC_UPDATE_FREQUENCY -41,0
+s IDC_UPDATE_FREQUENCY +57,0
+m IDC_INCLUDE_BETAS -41,0
+m IDS_UPDATE_FREQUENCY_TXT -61,0
+s IDS_UPDATE_FREQUENCY_TXT +27,0
+m IDS_INCLUDE_BETAS_TXT -61,0
+s IDS_INCLUDE_BETAS_TXT +27,0
+m IDS_CHECK_NOW_GRP +9,0
+s IDS_CHECK_NOW_GRP -9,0
 s IDC_CHECK_NOW +5,0
+m IDC_CHECK_NOW +2,0
+s IDCANCEL +5,0
+m IDCANCEL +2,0
 
 t IDD_UPDATE_POLICY "Политика на актуализация и настройки"
 t IDS_UPDATE_SETTINGS_GRP "Настройки"
-t IDS_UPDATE_FREQUENCY_TXT "Провери за Актуализация:"
-t IDS_INCLUDE_BETAS_TXT "Обхвани и бета версиите:"
+t IDS_UPDATE_FREQUENCY_TXT "Провери за Актуализация"
+t IDS_INCLUDE_BETAS_TXT "Обхвани и бета версиите"
 t IDC_CHECK_NOW "Провери сега"
 t IDCANCEL "Затвори"
 
@@ -1265,7 +1259,7 @@ t MSG_263 "Използвайте ПОДХОДЯЩ размер единици"
 
 ################################################################################
 l "zh-CN" "Chinese Simplified (简体中文)" 0x0804, 0x1004
-v 1.0.12
+v 1.0.14
 b "en-US"
 
 # Main dialog
@@ -1275,12 +1269,12 @@ t IDS_PARTITION_TYPE_TXT "分区方案和目标系统类型"
 t IDS_FILESYSTEM_TXT "文件系统"
 t IDS_CLUSTERSIZE_TXT "簇大小"
 t IDS_LABEL_TXT "新卷标"
-t IDS_FORMAT_OPTIONS_GRP "格式化选项        "
-t IDC_BADBLOCKS "检查设备坏块："
+t IDS_FORMAT_OPTIONS_GRP "格式化选项         "
+t IDC_BADBLOCKS "检查设备坏块"
 t IDC_QUICKFORMAT "快速格式化"
-t IDC_BOOT "创建一个启动盘使用："
+t IDC_BOOT "创建一个启动盘使用"
 t IDC_SET_ICON "创建扩展标签和图标文件"
-m IDC_ADVANCED -12,0
+m IDC_ADVANCED -15,0
 t IDC_ABOUT "关于..."
 t IDC_LOG "日志"
 s IDC_LOG +16,0
@@ -1289,7 +1283,7 @@ t IDC_START "开始"
 t IDS_ADVANCED_OPTIONS_GRP "高级选项"
 t IDC_ENABLE_FIXED_DISKS "显示 USB 外置硬盘"
 t IDC_EXTRA_PARTITION "旧 BIOS 修正（额外的分区，校准等等）"
-t IDC_RUFUS_MBR "使用 Rufus MBR BIOS ID："
+t IDC_RUFUS_MBR "使用 Rufus MBR BIOS ID"
 
 # About dialog
 g IDD_ABOUTBOX
@@ -1320,8 +1314,12 @@ t IDCANCEL "关闭日志"
 g IDD_UPDATE_POLICY
 t IDD_UPDATE_POLICY "更新方案和设置"
 t IDS_UPDATE_SETTINGS_GRP "设置"
-t IDS_UPDATE_FREQUENCY_TXT "检查更新："
-t IDS_INCLUDE_BETAS_TXT "包括测试版本："
+t IDS_UPDATE_FREQUENCY_TXT "检查更新"
+t IDS_INCLUDE_BETAS_TXT "包括测试版本"
+s IDS_UPDATE_FREQUENCY_TXT -30,0
+s IDS_INCLUDE_BETAS_TXT -30,0
+m IDC_UPDATE_FREQUENCY -30,0
+m IDC_INCLUDE_BETAS -30,0
 t IDC_CHECK_NOW "立即检查"
 t IDCANCEL "关闭"
 
@@ -1625,7 +1623,7 @@ t MSG_263 "准确存储单位转换"
 
 ################################################################################
 l "zh-TW" "Chinese Traditional (正體中文)" 0x0404, 0x0c04, 0x1404, 0x7c04
-v 1.0.12
+v 1.0.14
 b "en-US"
 
 # Main dialog
@@ -1635,14 +1633,14 @@ t IDS_PARTITION_TYPE_TXT "資料分割配置及系統類型"
 t IDS_FILESYSTEM_TXT "檔案系統"
 t IDS_CLUSTERSIZE_TXT "配置單元大小"
 t IDS_LABEL_TXT "磁碟區標籤"
-t IDS_FORMAT_OPTIONS_GRP "選項       "
-m IDC_ADVANCED -50,0
-t IDC_BADBLOCKS "檢查損毀磁區，測試次數:"
+t IDS_FORMAT_OPTIONS_GRP "選項         "
+m IDC_ADVANCED -54,0
+t IDC_BADBLOCKS "檢查損毀磁區，測試次數"
 s IDC_BADBLOCKS -5,0
 m IDC_NBPASSES -5,0
 s IDC_NBPASSES +5,0
 t IDC_QUICKFORMAT "快速格式化"
-t IDC_BOOT "使用映像檔建立開機片:"
+t IDC_BOOT "使用映像檔建立開機片"
 s IDC_BOOT -5,0
 m IDC_BOOTTYPE -5,0
 s IDC_BOOTTYPE +5,0
@@ -1661,7 +1659,7 @@ m IDC_START +10,0
 t IDS_ADVANCED_OPTIONS_GRP "進階選項"
 t IDC_ENABLE_FIXED_DISKS "顯示 USB 外接硬碟"
 t IDC_EXTRA_PARTITION "相容性模式"
-t IDC_RUFUS_MBR "客製 MBR 並設 ID 為:"
+t IDC_RUFUS_MBR "客製 MBR 並設 ID 為"
 s IDC_RUFUS_MBR -5,0
 m IDC_DISK_ID -5,0
 s IDC_DISK_ID +5,0
@@ -1694,8 +1692,12 @@ t IDCANCEL "關閉"
 g IDD_UPDATE_POLICY
 t IDD_UPDATE_POLICY "版本更新"
 t IDS_UPDATE_SETTINGS_GRP "設定"
-t IDS_UPDATE_FREQUENCY_TXT "自動檢查更新:"
-t IDS_INCLUDE_BETAS_TXT "包含測試版本:"
+t IDS_UPDATE_FREQUENCY_TXT "自動檢查更新"
+t IDS_INCLUDE_BETAS_TXT "包含測試版本"
+s IDS_UPDATE_FREQUENCY_TXT -30,0
+s IDS_INCLUDE_BETAS_TXT -30,0
+m IDC_UPDATE_FREQUENCY -30,0
+m IDC_INCLUDE_BETAS -30,0
 t IDC_CHECK_NOW "立即檢查"
 t IDCANCEL "關閉"
 
@@ -1996,7 +1998,7 @@ t MSG_263 "正規位元單位"
 
 ################################################################################
 l "hr-HR" "Croatian (Hrvatski)" 0x041a, 0x081a, 0x101a
-v 1.0.12
+v 1.0.14
 b "en-US"
 
 # Main dialog
@@ -2005,13 +2007,13 @@ s IDC_LOG +14,0
 s IDC_ABOUT -2,0
 m IDC_LOG -4,0
 m IDC_START +2,0
-m IDC_ADVANCED -33,0
+m IDC_ADVANCED -35,0
 t IDS_DEVICE_TXT "Uređaj"
 t IDS_PARTITION_TYPE_TXT "Shema particije i ciljani datotečni sustav"
 t IDS_FILESYSTEM_TXT "Sustav datoteka"
 t IDS_CLUSTERSIZE_TXT "Veličina grupiranja"
 t IDS_LABEL_TXT "Naziv nove particije"
-t IDS_FORMAT_OPTIONS_GRP "Dodatno       "
+t IDS_FORMAT_OPTIONS_GRP "Dodatno        "
 t IDC_BADBLOCKS "Provjeri blokove"
 t IDC_QUICKFORMAT "Brzo formatiranje"
 t IDC_BOOT "Stvori pokretačku jedinicu sa"
@@ -2059,12 +2061,12 @@ t IDCANCEL "Zatvori zapis"
 g IDD_UPDATE_POLICY
 s IDS_UPDATE_FREQUENCY_TXT -10,0
 m IDC_UPDATE_FREQUENCY -10,0
-s IDC_UPDATE_FREQUENCY +10,0
+s IDC_UPDATE_FREQUENCY +13,0
 m IDC_INCLUDE_BETAS -10,0
 t IDD_UPDATE_POLICY "Ažuriraj postavke"
 t IDS_UPDATE_SETTINGS_GRP "Postavke"
-t IDS_UPDATE_FREQUENCY_TXT "Provjeri ažuriranja:"
-t IDS_INCLUDE_BETAS_TXT "Obuhvati beta verzije:"
+t IDS_UPDATE_FREQUENCY_TXT "Provjeri ažuriranja"
+t IDS_INCLUDE_BETAS_TXT "Obuhvati beta verzije"
 t IDC_CHECK_NOW "Provjeri"
 t IDCANCEL "Zatvori"
 
@@ -2392,26 +2394,23 @@ t MSG_263 "Koristi PRAVE vel. jedinica"
 
 ################################################################################
 l "cs-CZ" "Czech (Čeština)"  0x0405
-v 1.0.12
+v 1.0.14
 b "en-US"
 
 # Main dialog
 g IDD_DIALOG
 
-m IDC_ADVANCED +38,0
+m IDC_ADVANCED +35,0
+s IDC_ABOUT +5,0
 s IDC_LOG +35,0
-m IDC_LOG -2,0
-m IDC_START +22,0
-s IDC_START -15,0
-s IDCANCEL -5,0
-m IDCANCEL +5,0
+m IDC_LOG +5,0
 
 t IDS_DEVICE_TXT "Zařízení"
 t IDS_PARTITION_TYPE_TXT "Schéma oddílu a typ cílového systému"
 t IDS_FILESYSTEM_TXT "Souborový systém"
 t IDS_CLUSTERSIZE_TXT "Velikost alokační jednotky"
 t IDS_LABEL_TXT "Nový název svazku"
-t IDS_FORMAT_OPTIONS_GRP "Nastavení formátování        "
+t IDS_FORMAT_OPTIONS_GRP "Nastavení formátování         "
 t IDC_BADBLOCKS "Zkontrolovat chybné bloky"
 t IDC_QUICKFORMAT "Rychlé formátování"
 t IDC_BOOT "Vytvořit spouštěcí disk"
@@ -2422,12 +2421,7 @@ t IDCANCEL "Zavřít"
 t IDC_START "Spustit"
 t IDS_ADVANCED_OPTIONS_GRP "Pokročilé možnosti formátování "
 t IDC_ENABLE_FIXED_DISKS "Zobrazit seznam USB pevných disků"
-# Note: it is acceptable to drop the parenthesis () below if you are running out of space
-# as there is a tooltip (MSG_169) providing these details
 t IDC_EXTRA_PARTITION "Přidat opravy pro staré BIOSy"
-# 'MBR': See http://en.wikipedia.org/wiki/Master_boot_record
-# Rufus can install it's own custom MBR (the Rufus MBR), which also allows users
-# to specify a custom disk ID for the BIOS. Note: the tooltip for this control is MSG_167.
 t IDC_RUFUS_MBR "Použít Rufus MBR s BIOS ID"
 
 # About dialog
@@ -2459,11 +2453,11 @@ t IDCANCEL "Zavřít"
 g IDD_UPDATE_POLICY
 t IDD_UPDATE_POLICY "Zásady aktualizací a nastavení"
 t IDS_UPDATE_SETTINGS_GRP "Nastavení automatických aktualizací"
-t IDS_UPDATE_FREQUENCY_TXT "Kontrolovat:"
+t IDS_UPDATE_FREQUENCY_TXT "Kontrolovat"
 s IDS_UPDATE_FREQUENCY_TXT -10,0
 m IDC_UPDATE_FREQUENCY -10,0
 s IDC_UPDATE_FREQUENCY +10,0
-t IDS_INCLUDE_BETAS_TXT "Zahrnout beta verze:"
+t IDS_INCLUDE_BETAS_TXT "Zahrnout beta verze"
 s IDS_INCLUDE_BETAS_TXT -10,0
 m IDC_INCLUDE_BETAS -10,0
 s IDC_INCLUDE_BETAS +10,0
@@ -2792,7 +2786,7 @@ t MSG_263 "Použit BINÁRNÍ předpony jednotek"
 
 ################################################################################
 l "da-DK" "Danish (Dansk)" 0x0406
-v 1.0.12
+v 1.0.14
 b "en-US"
 # Main dialog
 g IDD_DIALOG
@@ -2801,12 +2795,10 @@ t IDS_PARTITION_TYPE_TXT "Partition ordning og type af mål-system"
 t IDS_FILESYSTEM_TXT "Filsystem"
 t IDS_CLUSTERSIZE_TXT "Klyngestørrelse"
 t IDS_LABEL_TXT "Ny Volume-etiket"
-t IDS_FORMAT_OPTIONS_GRP "Formateringsindstillinger       "
+t IDS_FORMAT_OPTIONS_GRP "Formateringsindstillinger        "
 t IDC_BADBLOCKS "Søg efter fejlbehæftede blokke"
 t IDC_QUICKFORMAT "Ekspresformatering"
 t IDC_BOOT "Opret en boot-disk med"
-m IDC_SELECT_ISO 2,0
-s IDC_SELECT_ISO -2,0
 t IDC_SET_ICON "Brug udvidet etiket og ikon-filer"
 t IDC_ABOUT "Om..."
 t IDC_LOG "Log"
@@ -2814,24 +2806,19 @@ t IDCANCEL "Afslut"
 t IDC_START "Start"
 t IDS_ADVANCED_OPTIONS_GRP "Avancerede indstillinger"
 t IDC_ENABLE_FIXED_DISKS "List USB-harddiske"
-# Note: it is acceptable to drop the parenthesis () below if you are running out of space
-# as there is a tooltip (MSG_169) providing these details
 t IDC_EXTRA_PARTITION "Tilføj rettelser for ældre BIOS'er"
-# 'MBR': See http://en.wikipedia.org/wiki/Master_boot_record
-# Rufus can install it's own custom MBR (the Rufus MBR), which also allows users
-# to specify a custom disk ID for the BIOS. Note: the tooltip for this control is MSG_167.
 t IDC_RUFUS_MBR "Brug Rufus MBR med BIOS ID"
-m IDC_ADVANCED 42,0
+m IDC_ADVANCED +48,0
 s IDC_BADBLOCKS +20,0
-s IDC_NBPASSES +10,0
-m IDC_NBPASSES +26,0
-s IDC_BOOTTYPE +4,0
+s IDC_NBPASSES -25,0
+m IDC_NBPASSES +25,0
 
 # About dialog
 g IDD_ABOUTBOX
 t IDD_ABOUTBOX "Om Rufus"
 t IDC_ABOUT_LICENSE "Licens"
 t IDC_ABOUT_UPDATES "Opdateringer"
+s IDC_ABOUT_UPDATES +16,0
 t IDOK "OK"
 
 # About -> License dialog
@@ -2856,15 +2843,22 @@ t IDCANCEL "Luk Log"
 g IDD_UPDATE_POLICY
 t IDD_UPDATE_POLICY "Opdateringspolitik og indstillinger"
 t IDS_UPDATE_SETTINGS_GRP "Indstillinger"
-t IDS_UPDATE_FREQUENCY_TXT "Søg efter opdateringer:"
-s IDS_UPDATE_FREQUENCY_TXT -10,0
-m IDC_UPDATE_FREQUENCY -10,0
-t IDS_INCLUDE_BETAS_TXT "Inkluder betaversioner:"
-s IDS_INCLUDE_BETAS_TXT -10,0
-m IDC_INCLUDE_BETAS -10,0
+s IDS_UPDATE_SETTINGS_GRP +10,0
+s IDS_CHECK_NOW_GRP -10,0
+m IDS_CHECK_NOW_GRP +10,0
+t IDS_UPDATE_FREQUENCY_TXT "Søg efter opdateringer"
+s IDS_UPDATE_FREQUENCY_TXT +6,0
+m IDS_UPDATE_FREQUENCY_TXT -2,0
+m IDC_UPDATE_FREQUENCY -3,0
+s IDC_UPDATE_FREQUENCY +18,0
+t IDS_INCLUDE_BETAS_TXT "Inkluder betaversioner"
+s IDS_INCLUDE_BETAS_TXT +6,0
+m IDS_INCLUDE_BETAS_TXT -2,0
+m IDC_INCLUDE_BETAS -3,0
 t IDC_CHECK_NOW "Søg nu"
+m IDC_CHECK_NOW +5,0
 t IDCANCEL "Luk"
-s IDC_UPDATE_FREQUENCY 9,0
+m IDCANCEL +5,0
 
 # Dialog that appears when a new version is available
 g IDD_NEW_VERSION
@@ -3169,28 +3163,28 @@ t MSG_263 "MiB notation"
 
 ################################################################################
 l "nl-NL" "Dutch (Nederlands)" 0x0413, 0x0813
-v 1.0.12
+v 1.0.14
 b "en-US"
 
 # Main dialog
 g IDD_DIALOG
-s IDD_DIALOG 40,0
-m IDC_LANG 40,0
+s IDD_DIALOG 20,0
+m IDC_LANG 20,0
 t IDS_DEVICE_TXT "Apparaat"
-s IDC_DEVICE 40,0
+s IDC_DEVICE 20,0
 t IDS_PARTITION_TYPE_TXT "Partitie-indeling en type computer"
-s IDC_PARTITION_TYPE 40,0
+s IDC_PARTITION_TYPE 20,0
 t IDS_FILESYSTEM_TXT "Bestandssysteem"
-s IDC_FILESYSTEM 40,0
+s IDC_FILESYSTEM 20,0
 t IDS_CLUSTERSIZE_TXT "Clustergrootte"
-s IDC_CLUSTERSIZE 40,0
+s IDC_CLUSTERSIZE 20,0
 t IDS_LABEL_TXT "Nieuw volume naam"
-s IDC_LABEL 40,0
-t IDS_FORMAT_OPTIONS_GRP "Formatteer Opties       "
-t IDC_BADBLOCKS "Controleer op slechte blokken:"
+s IDC_LABEL 20,0
+t IDS_FORMAT_OPTIONS_GRP "Formatteer Opties         "
+t IDC_BADBLOCKS "Controleer op slechte blokken"
 s IDC_BADBLOCKS 10,0
 t IDC_QUICKFORMAT "Snelformatteren"
-t IDC_BOOT "Creëer een opstartbare disk met:"
+t IDC_BOOT "Creëer een opstartbare disk met"
 s IDC_BOOT 19,0
 m IDC_BOOTTYPE 20,0
 m IDC_SELECT_ISO 20,0
@@ -3202,17 +3196,17 @@ t IDC_START "Start"
 t IDS_ADVANCED_OPTIONS_GRP "Geavanceerde Opties"
 t IDC_ENABLE_FIXED_DISKS "Laat USB HD's zien"
 t IDC_EXTRA_PARTITION "Oplossingen voor oude BIOS'en (extra partitie, uitlijnen, etc.)"
-s IDC_EXTRA_PARTITION 40,0
-t IDC_RUFUS_MBR "Gebruik Rufus MBR met BIOS ID:"
+s IDC_EXTRA_PARTITION 20,0
+t IDC_RUFUS_MBR "Gebruik Rufus MBR met BIOS ID"
 s IDC_RUFUS_MBR 13,0
 m IDC_DISK_ID 20,0
-m IDC_ADVANCED 14,0
+m IDC_ADVANCED 13,0
 m IDC_NBPASSES 20,0
-s IDS_FORMAT_OPTIONS_GRP 40,0
-s IDS_ADVANCED_OPTIONS_GRP 40,0
-s IDC_PROGRESS 45,0
-m IDC_START 45,0
-m IDCANCEL 45,0
+s IDS_FORMAT_OPTIONS_GRP 20,0
+s IDS_ADVANCED_OPTIONS_GRP 20,0
+s IDC_PROGRESS 20,0
+m IDC_START 20,0
+m IDCANCEL 20,0
 
 # About dialog
 g IDD_ABOUTBOX
@@ -3235,6 +3229,8 @@ t IDNO "Nee"
 g IDD_LOG
 t IDD_LOG "Log scherm"
 t IDC_LOG_CLEAR "Verwijder Log"
+s IDC_LOG_CLEAR +10,0
+m IDC_LOG_CLEAR -10,0
 t IDC_LOG_SAVE "Bewaar Log"
 t IDCANCEL "Sluit Log"
 
@@ -3243,21 +3239,27 @@ g IDD_UPDATE_POLICY
 s IDD_UPDATE_POLICY +30,0
 t IDD_UPDATE_POLICY "Update beleid en instellingen"
 t IDS_UPDATE_SETTINGS_GRP "Instellingen"
-t IDS_UPDATE_FREQUENCY_TXT "Controleer op updates:"
-s IDS_UPDATE_FREQUENCY_TXT -5,0
-t IDS_INCLUDE_BETAS_TXT "Inclusief bèta versies:"
-s IDS_INCLUDE_BETAS_TXT -5,0
+m IDS_UPDATE_SETTINGS_GRP -15,0
+s IDS_UPDATE_SETTINGS_GRP +38,0
+t IDS_UPDATE_FREQUENCY_TXT "Controleer op updates"
+m IDS_UPDATE_FREQUENCY_TXT -15,0
+s IDS_UPDATE_FREQUENCY_TXT +5,0
+t IDS_INCLUDE_BETAS_TXT "Inclusief bèta versies"
+m IDS_INCLUDE_BETAS_TXT -15,0
 t IDC_CHECK_NOW "Controleer nu"
-m IDC_CHECK_NOW +25,0
+m IDC_CHECK_NOW +22,0
+s IDC_CHECK_NOW +8,0
 t IDCANCEL "Sluiten"
-s IDC_UPDATE_FREQUENCY +28,0
-m IDC_UPDATE_FREQUENCY -5,0
-m IDC_INCLUDE_BETAS -5,0
-m IDS_CHECK_NOW_GRP +25,0
+s IDC_UPDATE_FREQUENCY +34,0
+m IDC_UPDATE_FREQUENCY -10,0
+m IDC_INCLUDE_BETAS -10,0
+m IDS_CHECK_NOW_GRP +23,0
+s IDS_CHECK_NOW_GRP +6,0
 s IDC_POLICY +45,0
 m IDC_POLICY -15,0
-m IDCANCEL +25,0
-s IDS_UPDATE_SETTINGS_GRP 25,0
+m IDCANCEL +23,0
+s IDCANCEL +6,0
+m IDC_ABOUT_ICON -5,0
 t IDOK "OK"
 
 # Dialog that appears when a new version is available
@@ -3569,24 +3571,24 @@ t MSG_263 "Gebruik de juiste grootte-eenheden"
 
 ################################################################################
 l "fi-FI" "Finnish (Suomi)" 0x040B
-v 1.0.12
+v 1.0.14
 b "en-US"
 
 # Main dialog
 g IDD_DIALOG
-m IDC_ADVANCED +9,0
+m IDC_ADVANCED +6,0
 t IDS_DEVICE_TXT "Laite"
 t IDS_PARTITION_TYPE_TXT "Osion ja kohdejärjestelmän tyyppi"
 t IDS_FILESYSTEM_TXT "Tiedostojärjestelmä"
 t IDS_CLUSTERSIZE_TXT "Tilanvarausyksikkö"
 t IDS_LABEL_TXT "Uuden aseman nimi"
-t IDS_FORMAT_OPTIONS_GRP "Alustusasetukset       "
-t IDC_BADBLOCKS "Vioittuneiden lohkojen tarkistus:"
+t IDS_FORMAT_OPTIONS_GRP "Alustusasetukset        "
+t IDC_BADBLOCKS "Vioittuneiden lohkojen tarkistus"
 s IDC_BADBLOCKS +16,0
 m IDC_NBPASSES +12,0
-s IDC_NBPASSES -6,0
+s IDC_NBPASSES -9,0
 t IDC_QUICKFORMAT "Pika-alustus"
-t IDC_BOOT "Luo käynnistyslevy käyttäen:"
+t IDC_BOOT "Luo käynnistyslevy käyttäen"
 m IDC_BOOTTYPE +12,0
 s IDC_BOOTTYPE -6,0
 m IDC_SELECT_ISO +3,0
@@ -3598,13 +3600,8 @@ t IDCANCEL "Sulje"
 t IDC_START "Aloita"
 t IDS_ADVANCED_OPTIONS_GRP "Lisäasetukset"
 t IDC_ENABLE_FIXED_DISKS "Näytä USB-kiintolevyt"
-# Note: it is acceptable to drop the parenthesis () below if you are running out of space
-# as there is a tooltip (MSG_169) providing these details
 t IDC_EXTRA_PARTITION "Lisää korjauksia vanhoja BIOS-versioita varten"
-# 'MBR': See http://en.wikipedia.org/wiki/Master_boot_record
-# Rufus can install it's own custom MBR (the Rufus MBR), which also allows users
-# to specify a custom disk ID for the BIOS. Note: the tooltip for this control is MSG_167.
-t IDC_RUFUS_MBR "Käytä Rufus-MBR:ää, BIOS ID:"
+t IDC_RUFUS_MBR "Käytä Rufus-MBR:ää, BIOS ID"
 s IDC_RUFUS_MBR +10,0
 m IDC_DISK_ID +12,0
 s IDC_DISK_ID -9,0
@@ -3631,6 +3628,8 @@ t IDNO "Ei"
 g IDD_LOG
 t IDD_LOG "Loki"
 t IDC_LOG_CLEAR "Tyhjennä loki"
+s IDC_LOG_CLEAR +6,0
+m IDC_LOG_CLEAR -6,0
 t IDC_LOG_SAVE "Tallenna loki"
 t IDCANCEL "Sulje loki"
 
@@ -3638,12 +3637,11 @@ t IDCANCEL "Sulje loki"
 g IDD_UPDATE_POLICY
 t IDD_UPDATE_POLICY "Päivityskäytäntö ja -asetukset"
 t IDS_UPDATE_SETTINGS_GRP "Asetukset"
-s IDS_UPDATE_SETTINGS_GRP 0,0
-t IDS_UPDATE_FREQUENCY_TXT "Tarkista päivitykset:"
-t IDS_INCLUDE_BETAS_TXT "Sisällytä beta-versiot:"
-m IDC_UPDATE_FREQUENCY -2,0
-s IDC_UPDATE_FREQUENCY +8,0
-m IDC_INCLUDE_BETAS -2,0
+t IDS_UPDATE_FREQUENCY_TXT "Tarkista päivitykset"
+t IDS_INCLUDE_BETAS_TXT "Sisällytä beta-versiot"
+m IDC_UPDATE_FREQUENCY -10,0
+s IDC_UPDATE_FREQUENCY +16,0
+m IDC_INCLUDE_BETAS -10,0
 t IDC_CHECK_NOW "Tarkista nyt"
 t IDCANCEL "Sulje"
 
@@ -3971,7 +3969,7 @@ t MSG_263 "Käytä OIKEITA tilayksikön kerrannaisia"
 
 ################################################################################
 l "fr-FR" "French (Français)" 0x040c, 0x080c, 0x0c0c, 0x100c, 0x140c, 0x180c, 0x1c0c, 0x200c, 0x240c, 0x280c, 0x2c0c, 0x300c, 0x340c, 0x380c, 0xe40c
-v 1.0.12
+v 1.0.14
 b "en-US"
 
 g IDD_DIALOG
@@ -3980,17 +3978,17 @@ t IDS_PARTITION_TYPE_TXT "Type de partition et système de destination"
 t IDS_FILESYSTEM_TXT "Système de fichiers"
 t IDS_CLUSTERSIZE_TXT "Taille d'unité d'allocation"
 t IDS_LABEL_TXT "Nom de volume"
-t IDS_FORMAT_OPTIONS_GRP "Options de Formatage      "
+t IDS_FORMAT_OPTIONS_GRP "Options de Formatage        "
 t IDC_BADBLOCKS "Vérification de mauvais blocs"
-s IDC_BADBLOCKS +10,0
 m IDC_NBPASSES +5,0
+s IDC_NBPASSES -2,0
 t IDC_QUICKFORMAT "Formatage rapide"
 t IDC_BOOT "Créer un disque de démarrage"
 s IDC_BOOT +5,0
 m IDC_BOOTTYPE +5,0
 m IDC_SELECT_ISO +3,0
 t IDC_SET_ICON "Ajouter un label étendu et une icône"
-m IDC_ADVANCED +32,0
+m IDC_ADVANCED +34,0
 t IDC_ABOUT "A propos..."
 t IDCANCEL "Fermer"
 t IDC_START "Démarrer"
@@ -4021,24 +4019,22 @@ t IDC_LOG_SAVE "Enregistrer"
 t IDCANCEL "Fermer"
 
 g IDD_UPDATE_POLICY
-s IDD_UPDATE_POLICY +30,0
+s IDD_UPDATE_POLICY +45,0
 t IDD_UPDATE_POLICY "Paramètres de mises à jour"
-s IDC_POLICY +30,0
+s IDC_POLICY +45,0
 t IDS_UPDATE_SETTINGS_GRP "Options"
-s IDS_UPDATE_SETTINGS_GRP +20,0
+s IDS_UPDATE_SETTINGS_GRP +25,0
 t IDS_UPDATE_FREQUENCY_TXT "Recherche mises à jour"
-s IDS_UPDATE_FREQUENCY_TXT -3,0
+s IDS_UPDATE_FREQUENCY_TXT +5,0
 t IDS_INCLUDE_BETAS_TXT "Inclure les bétas"
-m IDC_UPDATE_FREQUENCY -3,0
-m IDC_INCLUDE_BETAS -3,0
-s IDC_UPDATE_FREQUENCY +25,0
-m IDS_CHECK_NOW_GRP 14,0
-s IDS_CHECK_NOW_GRP +16,0
+s IDC_UPDATE_FREQUENCY +35,0
+m IDS_CHECK_NOW_GRP +25,0
+s IDS_CHECK_NOW_GRP +20,0
 t IDC_CHECK_NOW "Chercher maintenant"
-m IDC_CHECK_NOW 5,0
-s IDC_CHECK_NOW +34,0
+m IDC_CHECK_NOW +14,0
+s IDC_CHECK_NOW +40,0
 t IDCANCEL "Fermer"
-m IDCANCEL 5,0
+m IDCANCEL +34,0
 
 g IDD_NEW_VERSION
 t IDD_NEW_VERSION "Mise à jour de Rufus"
@@ -4334,7 +4330,7 @@ t MSG_263 "Affich. tailles avec de VRAIES unités"
 
 ################################################################################
 l "de-DE" "German (Deutsch)" 0x0407, 0x0807, 0x0c07, 0x1007, 0x1407
-v 1.0.12
+v 1.0.14
 b "en-US"
 
 g IDD_DIALOG
@@ -4346,12 +4342,11 @@ s IDC_PARTITION_TYPE +28,0
 s IDC_FILESYSTEM +28,0
 s IDC_CLUSTERSIZE +28,0
 s IDC_LABEL +28,0
-m IDC_ADVANCED +58,0
+m IDC_ADVANCED +64,0
 s IDS_ADVANCED_OPTIONS_GRP +29,0
 s IDC_ENABLE_FIXED_DISKS +30,0
 s IDC_EXTRA_PARTITION +30,0
 s IDC_RUFUS_MBR +25,0
-s IDC_NBPASSES +36,0
 m IDC_NBPASSES +30,0
 s IDC_BOOT +32,0
 m IDC_BOOTTYPE +30,0
@@ -4366,10 +4361,10 @@ t IDS_PARTITION_TYPE_TXT "Partitionsschema und Typ des Zielsystems"
 t IDS_FILESYSTEM_TXT "Dateisystem"
 t IDS_CLUSTERSIZE_TXT "Größe der Zuordnungseinheit"
 t IDS_LABEL_TXT "Neue Laufwerksbezeichnung"
-t IDS_FORMAT_OPTIONS_GRP "Formatierungseinstellungen       "
-t IDC_BADBLOCKS "Auf defekte Blöcke prüfen:"
+t IDS_FORMAT_OPTIONS_GRP "Formatierungseinstellungen        "
+t IDC_BADBLOCKS "Auf defekte Blöcke prüfen"
 t IDC_QUICKFORMAT "Schnellformatierung"
-t IDC_BOOT "Startfähiges Laufwerk erstellen mit:"
+t IDC_BOOT "Startfähiges Laufwerk erstellen mit"
 t IDC_SET_ICON "Erweiterte Bezeichnung und Symbole erstellen"
 t IDC_ABOUT "Über..."
 t IDC_LOG "Log"
@@ -4378,7 +4373,7 @@ t IDC_START "Start"
 t IDS_ADVANCED_OPTIONS_GRP "Erweiterte Einstellungen"
 t IDC_ENABLE_FIXED_DISKS "USB-Festplatten anzeigen"
 t IDC_EXTRA_PARTITION "Fix für ältere BIOSe verwenden (zus. Partition, usw.)"
-t IDC_RUFUS_MBR "Rufus MBR benutzen mit BIOS ID:"
+t IDC_RUFUS_MBR "Rufus MBR benutzen mit BIOS ID"
 
 g IDD_ABOUTBOX
 t IDD_ABOUTBOX "Über Rufus"
@@ -4399,22 +4394,31 @@ t IDNO "Nein"
 
 g IDD_LOG
 t IDD_LOG "Log"
-t IDC_LOG_CLEAR "Log löschen"
 t IDC_LOG_SAVE "Log speichern"
+s IDC_LOG_SAVE +12,0
+m IDC_LOG_SAVE -12,0
+t IDC_LOG_CLEAR "Log löschen"
+m IDC_LOG_CLEAR -12,0
 t IDCANCEL "Schließen"
 
 g IDD_UPDATE_POLICY
-s IDS_UPDATE_SETTINGS_GRP +14,0
-m IDS_CHECK_NOW_GRP +8,0
-s IDS_CHECK_NOW_GRP -8,0
-s IDC_UPDATE_FREQUENCY +12,0
-m IDC_CHECK_NOW +3,0
-m IDCANCEL +3,0
+s IDS_UPDATE_SETTINGS_GRP +16,0
+s IDS_UPDATE_FREQUENCY_TXT +14,0
+m IDS_UPDATE_FREQUENCY_TXT -2,0
+s IDC_UPDATE_FREQUENCY +18,0
+m IDC_UPDATE_FREQUENCY +6,0
+s IDS_INCLUDE_BETAS_TXT +14,0
+m IDS_INCLUDE_BETAS_TXT -2,0
+m IDC_INCLUDE_BETAS +6,0
+m IDS_CHECK_NOW_GRP +16,0
+s IDS_CHECK_NOW_GRP -15,0
+m IDC_CHECK_NOW +8,0
+m IDCANCEL +8,0
 
 t IDD_UPDATE_POLICY "Aktualisierungseinstellungen"
 t IDS_UPDATE_SETTINGS_GRP "Einstellungen"
-t IDS_UPDATE_FREQUENCY_TXT "Auf neue Version prüfen:"
-t IDS_INCLUDE_BETAS_TXT "Beta-Version verwenden:"
+t IDS_UPDATE_FREQUENCY_TXT "Auf neue Version prüfen"
+t IDS_INCLUDE_BETAS_TXT "Beta-Version verwenden"
 t IDC_CHECK_NOW "Jetzt prüfen"
 t IDCANCEL "Schließen"
 
@@ -4724,7 +4728,7 @@ t MSG_263 "Verwenden Sie korrekten Größeneinheiten"
 
 ################################################################################
 l "el-GR" "Greek (Ελληνικά)" 0x0408
-v 1.0.12
+v 1.0.14
 b "en-US"
 
 # Main dialog
@@ -4741,22 +4745,22 @@ t IDS_CLUSTERSIZE_TXT "Μέγεθος μονάδας εκχώρησης"
 s IDC_CLUSTERSIZE +158,0
 t IDS_LABEL_TXT "Ετικέτα τόμου"
 s IDC_LABEL +158,0
-t IDS_FORMAT_OPTIONS_GRP "Επιλογές διαμόρφωσης       "
+t IDS_FORMAT_OPTIONS_GRP "Επιλογές διαμόρφωσης         "
 s IDS_FORMAT_OPTIONS_GRP +157,0
-t IDC_BADBLOCKS "Ελέγξτε τη συσκευή για κατεστραμμένους τομείς:"
+t IDC_BADBLOCKS "Ελέγξτε τη συσκευή για κατεστραμμένους τομείς"
 s IDC_BADBLOCKS +134,0
 m IDC_NBPASSES +149,0
-s IDC_NBPASSES +45,0
+s IDC_NBPASSES +7,0
 t IDC_QUICKFORMAT "Γρήγορη διαμόρφωση"
-t IDC_BOOT "Δημιουργία USB με δυνατότητα εκκίνησης χρησιμοποιώντας:"
+t IDC_BOOT "Δημιουργία USB με δυνατότητα εκκίνησης χρησιμοποιώντας"
 s IDC_BOOT +148,0
 m IDC_BOOTTYPE +149,0
 s IDC_BOOTTYPE +4,0
-m IDC_SELECT_ISO +158,0
+m IDC_SELECT_ISO +156,0
 t IDC_SET_ICON "Δημιουργία εκτεταμένης ετικέτας και εικονιδίων"
 t IDC_ABOUT "Σχετικά..."
 t IDC_LOG "Αρχείο καταγραφής"
-s IDC_LOG 80,0
+s IDC_LOG 86,0
 m IDC_TEST 80,0
 t IDCANCEL "Κλείσιμο"
 m IDCANCEL 158,0
@@ -4764,15 +4768,15 @@ t IDC_START "Εκκίνηση"
 m IDC_START 158,0
 t IDS_ADVANCED_OPTIONS_GRP "Επιλογές για προχωρημένους"
 s IDS_ADVANCED_OPTIONS_GRP +157,0
-m IDC_ADVANCED +36,0
+m IDC_ADVANCED +42,0
 t IDC_ENABLE_FIXED_DISKS "Εμφάνιση σκληρών δίσκων USB"
 s IDC_ENABLE_FIXED_DISKS +40,0
 t IDC_EXTRA_PARTITION "Προσθήκη διορθώσεων για παλαιότερα BIOS(επιπλέον διαμέριση, ευθυγράμμιση, κλπ.)"
 s IDC_EXTRA_PARTITION +156,0
-t IDC_RUFUS_MBR "Χρησιμοποίηση του Rufus MBR με BIOS ID:"
+t IDC_RUFUS_MBR "Χρησιμοποίηση του Rufus MBR με BIOS ID"
 s IDC_RUFUS_MBR +60,0
 m IDC_DISK_ID +149,0
-s IDC_DISK_ID +9,0
+s IDC_DISK_ID +8,0
 s IDC_PROGRESS +158,0
 
 # About dialog
@@ -4782,11 +4786,11 @@ m IDC_ABOUT_COPYRIGHTS 0,30
 s IDC_ABOUT_BLURB +0,30
 t IDD_ABOUTBOX "Σχετικά με το Rufus"
 t IDC_ABOUT_LICENSE "Άδεια χρήσης"
-s IDC_ABOUT_LICENSE +5,0
+s IDC_ABOUT_LICENSE +14,0
 m IDC_ABOUT_LICENSE +0,30
 t IDC_ABOUT_UPDATES "Αναβαθμίσεις"
-m IDC_ABOUT_UPDATES +4,30
-s IDC_ABOUT_UPDATES +5,0
+m IDC_ABOUT_UPDATES +18,30
+s IDC_ABOUT_UPDATES +14,0
 t IDOK "OK"
 m IDOK +0,30
 
@@ -4797,7 +4801,7 @@ t IDCANCEL "Κλείσιμο"
 
 # Notifications. You can trigger one of these by using Alt-R and re-launching Rufus
 g IDD_NOTIFICATION
-s IDC_MORE_INFO +40,0
+s IDC_MORE_INFO +48,0
 t IDC_MORE_INFO "Περισσότερες πληροφορίες"
 t IDYES "Ναι"
 t IDNO "Όχι"
@@ -4805,15 +4809,9 @@ t IDNO "Όχι"
 # Log dialog
 g IDD_LOG
 t IDD_LOG "Αρχείο καταγραφής"
-t IDC_LOG_CLEAR "Καθαρισμός αρχείου καταγραφής"
-m IDC_LOG_CLEAR -293,0
-s IDC_LOG_CLEAR +100,0
-t IDC_LOG_SAVE "Αποθήκευση αρχείου καταγραφής"
-m IDC_LOG_SAVE -193,0
-s IDC_LOG_SAVE +100,0
-t IDCANCEL "Κλείσιμο αρχείου καταγραφής"
-m IDCANCEL -93,0
-s IDCANCEL +100,0
+t IDC_LOG_CLEAR "Καθαρισμός"
+t IDC_LOG_SAVE "Αποθήκευση"
+t IDCANCEL "Κλείσιμο"
 
 # About -> Updates
 g IDD_UPDATE_POLICY
@@ -4822,21 +4820,21 @@ s IDC_POLICY +62,0
 t IDD_UPDATE_POLICY "Πολιτική ενημέρωσης και ρυθμίσεων"
 t IDS_UPDATE_SETTINGS_GRP "Ρυθμίσεις"
 s IDS_UPDATE_SETTINGS_GRP +68,0
-t IDS_UPDATE_FREQUENCY_TXT "Έλεγχος για ενημερώσεις:"
-s IDS_UPDATE_FREQUENCY_TXT +16,0
-s IDC_UPDATE_FREQUENCY +50,0
-m IDC_UPDATE_FREQUENCY +16,0
-t IDS_INCLUDE_BETAS_TXT "Συμπεριλάβετε τις εκδόσεις beta:"
-s IDS_INCLUDE_BETAS_TXT +60,0
-m IDC_INCLUDE_BETAS +111,0
+t IDS_UPDATE_FREQUENCY_TXT "Έλεγχος για ενημερώσεις"
+s IDS_UPDATE_FREQUENCY_TXT +22,0
+s IDC_UPDATE_FREQUENCY +59,0
+m IDC_UPDATE_FREQUENCY +14,0
+t IDS_INCLUDE_BETAS_TXT "Συμπεριλάβετε τις εκδόσεις beta"
+s IDS_INCLUDE_BETAS_TXT +68,0
+m IDC_INCLUDE_BETAS +118,0
 t IDC_CHECK_NOW "Έλεγχος τώρα"
-m IDC_CHECK_NOW +58,0
+m IDC_CHECK_NOW +62,0
 s IDC_CHECK_NOW +4,0
 t IDCANCEL "Κλείσιμο"
-m IDCANCEL +58,0
+m IDCANCEL +62,0
 s IDCANCEL +4,0
-m IDS_CHECK_NOW_GRP +62,0
-s IDS_CHECK_NOW_GRP -1,0
+m IDS_CHECK_NOW_GRP +68,0
+s IDS_CHECK_NOW_GRP -6,0
 
 # Dialog that appears when a new version is available
 g IDD_NEW_VERSION
@@ -5164,9 +5162,9 @@ t IDS_FILESYSTEM_TXT "Fájlrendszer"
 t IDS_CLUSTERSIZE_TXT "Klaszter mérete"
 t IDS_LABEL_TXT "Új kötetcímke"
 t IDS_FORMAT_OPTIONS_GRP "Formázási beállítások        "
-t IDC_BADBLOCKS "Hibás blokkok keresése:"
+t IDC_BADBLOCKS "Hibás blokkok keresése"
 t IDC_QUICKFORMAT "Gyorsformázás"
-t IDC_BOOT "Bootolható lemez készítése:"
+t IDC_BOOT "Bootolható lemez készítése"
 t IDC_SET_ICON "Saját címke és ikon használata"
 t IDC_ABOUT "Névjegy"
 t IDC_LOG "Log"
@@ -5175,8 +5173,10 @@ t IDC_START "Indítás"
 t IDS_ADVANCED_OPTIONS_GRP "Haladó beállítások"
 t IDC_ENABLE_FIXED_DISKS "USB-s merevlemezek mutatása"
 t IDC_EXTRA_PARTITION "Régi BIOS-ok javítása (extra partíció, sor, stb.)"
-t IDC_RUFUS_MBR "MBR-es Rufus BIOS azonosítóval:"
-s IDC_NBPASSES +36,0
+t IDC_RUFUS_MBR "MBR-es Rufus BIOS azonosítóval"
+s IDC_RUFUS_MBR +14,0
+m IDC_DISK_ID +25,0
+s IDC_DISK_ID -25,0
 m IDC_ADVANCED +28,0
 
 # About dialog
@@ -5205,8 +5205,12 @@ t IDCANCEL "Bezárás"
 g IDD_UPDATE_POLICY
 t IDD_UPDATE_POLICY "Beállítások frissítése"
 t IDS_UPDATE_SETTINGS_GRP "Beállítások"
-t IDS_UPDATE_FREQUENCY_TXT "Frissítések keresése:"
-t IDS_INCLUDE_BETAS_TXT "Beta verziókat is:"
+t IDS_UPDATE_FREQUENCY_TXT "Frissítések keresése"
+m IDC_UPDATE_FREQUENCY -8,0
+s IDC_UPDATE_FREQUENCY +8,0
+t IDS_INCLUDE_BETAS_TXT "Beta verziókat is"
+m IDC_INCLUDE_BETAS -8,0
+s IDC_INCLUDE_BETAS +8,0
 t IDC_CHECK_NOW "Ellenőrzés"
 t IDCANCEL "Bezárás"
 
@@ -5520,8 +5524,8 @@ g IDD_DIALOG
 s IDD_DIALOG +62,0
 s IDC_ABOUT +10,0
 s IDS_ADVANCED_OPTIONS_GRP +62,0
-s IDC_BADBLOCKS +63,0
-s IDC_BOOT +62,0
+s IDC_BADBLOCKS +64,0
+s IDC_BOOT +66,0
 s IDC_CLUSTERSIZE +62,0
 s IDC_DEVICE +62,0
 s IDC_ENABLE_FIXED_DISKS +10,0
@@ -5533,13 +5537,16 @@ s IDC_LABEL +62,0
 s IDC_NBPASSES +0,0
 s IDC_PARTITION_TYPE +62,0
 s IDC_PROGRESS +62,0
-s IDC_RUFUS_MBR +38,0
+s IDC_RUFUS_MBR +44,0
 
-m IDC_BOOTTYPE +62,0
-m IDC_DISK_ID +62,0
+m IDC_BOOTTYPE +66,0
+s IDC_BOOTTYPE -4,0
+m IDC_DISK_ID +66,0
+s IDC_DISK_ID -4,0
 m IDC_LANG +62,0
 m IDC_LOG +10,0
-m IDC_NBPASSES +62,0
+m IDC_NBPASSES +66,0
+s IDC_NBPASSES -4,0
 m IDC_START +62,0
 m IDC_SELECT_ISO +62,0
 m IDCANCEL +62,0
@@ -5550,10 +5557,10 @@ t IDS_PARTITION_TYPE_TXT "Skema partisi dan tipe target sistem"
 t IDS_FILESYSTEM_TXT "Sistem file"
 t IDS_CLUSTERSIZE_TXT "Ukuran Cluster"
 t IDS_LABEL_TXT "Label baru volume"
-t IDS_FORMAT_OPTIONS_GRP "Pilihan Format        "
-t IDC_BADBLOCKS "Periksa perangkat untuk blok yang buruk:"
+t IDS_FORMAT_OPTIONS_GRP "Pilihan Format         "
+t IDC_BADBLOCKS "Periksa perangkat untuk blok yang buruk"
 t IDC_QUICKFORMAT "Format Cepat"
-t IDC_BOOT "Buat bootable disk dengan menggunakan:"
+t IDC_BOOT "Buat bootable disk dengan menggunakan"
 t IDC_SET_ICON "Membuat icon dan memperpanjang label"
 t IDC_ABOUT "Tentang..."
 t IDC_LOG "Log"
@@ -5561,13 +5568,8 @@ t IDCANCEL "Tutup"
 t IDC_START "Mulai"
 t IDS_ADVANCED_OPTIONS_GRP "Pilihan Lanjutan"
 t IDC_ENABLE_FIXED_DISKS "Daftar Hard Drives USB"
-# Note: it is acceptable to drop the parenthesis () below if you are running out of space
-# as there is a tooltip (MSG_169) providing these details
 t IDC_EXTRA_PARTITION "Tambah perbaikan untuk BIOS lama"
-# 'MBR': See http://en.wikipedia.org/wiki/Master_boot_record
-# Rufus can install it's own custom MBR (the Rufus MBR), which also allows users
-# to specify a custom disk ID for the BIOS. Note: the tooltip for this control is MSG_167.
-t IDC_RUFUS_MBR "Gunakan MBR Rufus dengan ID BIOS:"
+t IDC_RUFUS_MBR "Gunakan MBR Rufus dengan ID BIOS"
 
 # About dialog
 g IDD_ABOUTBOX
@@ -5591,6 +5593,8 @@ t IDNO "Tidak"
 g IDD_LOG
 t IDD_LOG "Log"
 t IDC_LOG_CLEAR "Bersihkan Log"
+s IDC_LOG_CLEAR +10,0
+m IDC_LOG_CLEAR -10,0
 t IDC_LOG_SAVE "Simpan Log"
 t IDCANCEL "Tutup Log"
 
@@ -5598,9 +5602,9 @@ t IDCANCEL "Tutup Log"
 g IDD_UPDATE_POLICY
 t IDD_UPDATE_POLICY "Kebijakan pembaruan dan pengaturan"
 t IDS_UPDATE_SETTINGS_GRP "Pengaturan"
-t IDS_UPDATE_FREQUENCY_TXT "Periksa pembaruan:"
-s IDC_UPDATE_FREQUENCY +2,0
-t IDS_INCLUDE_BETAS_TXT "Sertakan versi beta:"
+t IDS_UPDATE_FREQUENCY_TXT "Periksa pembaruan"
+s IDC_UPDATE_FREQUENCY +8,0
+t IDS_INCLUDE_BETAS_TXT "Sertakan versi beta"
 t IDC_CHECK_NOW "Periksa Sekarang"
 s IDC_CHECK_NOW +20,0
 m IDC_CHECK_NOW -10,0
@@ -5908,7 +5912,7 @@ t MSG_259 "Pembaruan Paksa"
 
 ################################################################################
 l "it-IT" "Italian (Italiano)" 0x0410, 0x0810
-v 1.0.12
+v 1.0.14
 b "en-US"
 
 g IDD_DIALOG
@@ -5917,17 +5921,13 @@ t IDS_PARTITION_TYPE_TXT "Schema partizione e tipo sistema destinazione"
 t IDS_FILESYSTEM_TXT "File system"
 t IDS_CLUSTERSIZE_TXT "Dimensione cluster"
 t IDS_LABEL_TXT "Nuova etichetta volume"
-t IDS_FORMAT_OPTIONS_GRP "Opzioni formattazione       "
-t IDC_BADBLOCKS "Test controllo blocchi errati unità:"
-s IDC_BADBLOCKS +30,0
-m IDC_NBPASSES +29,0
-s IDC_NBPASSES +10,0
+t IDS_FORMAT_OPTIONS_GRP "Opzioni formattazione         "
+t IDC_BADBLOCKS "Test controllo blocchi errati unità"
+s IDC_BADBLOCKS +25,0
+m IDC_NBPASSES +25,0
+s IDC_NBPASSES -25,0
 t IDC_QUICKFORMAT "Formattazione rapida"
-t IDC_BOOT "Crea disco avviabile con:"
-s IDC_BOOT -10,0
-m IDC_BOOTTYPE -13,0
-s IDC_BOOTTYPE +18,0
-m IDC_SELECT_ISO +3,0
+t IDC_BOOT "Crea disco avviabile con"
 t IDC_SET_ICON "Crea etichetta estesa e file icone"
 t IDC_ABOUT "Info su..."
 s IDC_ABOUT -18,0
@@ -5939,18 +5939,17 @@ t IDCANCEL "Chiudi"
 s IDCANCEL 0,0
 t IDC_START "Avvia"
 t IDS_ADVANCED_OPTIONS_GRP "Opzioni avanzate"
-m IDC_ADVANCED +31,0
+m IDC_ADVANCED +36,0
 t IDC_ENABLE_FIXED_DISKS "Elenca dischi fissi USB"
 t IDC_EXTRA_PARTITION "Aggiungi correzioni per vecchi BIOS"
-t IDC_RUFUS_MBR "Usa MBR Rufus con ID BIOS:"
-m IDC_DISK_ID 3,0
+t IDC_RUFUS_MBR "Usa MBR Rufus con ID BIOS"
 
 g IDD_ABOUTBOX
 t IDD_ABOUTBOX "Info su Rufus"
 t IDC_ABOUT_LICENSE "Licenza"
 m IDC_ABOUT_LICENSE +95,0
 t IDC_ABOUT_UPDATES "Aggiornamenti"
-s IDC_ABOUT_UPDATES +10,0
+s IDC_ABOUT_UPDATES +18,0
 m IDC_ABOUT_UPDATES +100,0
 
 g IDD_LICENSE
@@ -5973,23 +5972,23 @@ m IDC_LOG_SAVE -20,0
 t IDCANCEL "Chiudi"
 
 g IDD_UPDATE_POLICY
-s IDD_UPDATE_POLICY +16,0
-s IDC_POLICY +18,0
+s IDD_UPDATE_POLICY +30,0
+s IDC_POLICY +30,0
 t IDD_UPDATE_POLICY "Impostazioni e policy aggiornamenti"
 t IDS_UPDATE_SETTINGS_GRP "Impostazioni"
-s IDS_UPDATE_SETTINGS_GRP +32,0
-t IDS_UPDATE_FREQUENCY_TXT "Controllo aggiornamenti:"
-s IDS_UPDATE_FREQUENCY_TXT -3,0
-m IDC_UPDATE_FREQUENCY -3,0
-s IDC_UPDATE_FREQUENCY +35,0
-t IDS_INCLUDE_BETAS_TXT "Includi versioni beta:"
-m IDC_INCLUDE_BETAS -3,0
-m IDS_CHECK_NOW_GRP +26,0
-s IDS_CHECK_NOW_GRP -9,0
+s IDS_UPDATE_SETTINGS_GRP +49,0
+t IDS_UPDATE_FREQUENCY_TXT "Controllo aggiornamenti"
+s IDS_UPDATE_FREQUENCY_TXT +16,0
+s IDC_UPDATE_FREQUENCY +50,0
+m IDC_UPDATE_FREQUENCY +8,0
+t IDS_INCLUDE_BETAS_TXT "Includi versioni beta"
+m IDC_INCLUDE_BETAS +8,0
+m IDS_CHECK_NOW_GRP +49,0
+s IDS_CHECK_NOW_GRP -18,0
 t IDC_CHECK_NOW "Controlla ora"
-m IDC_CHECK_NOW +20,0
+m IDC_CHECK_NOW +39,0
 t IDCANCEL "Chiudi"
-m IDCANCEL +20,0
+m IDCANCEL +39,0
 
 g IDD_NEW_VERSION
 t IDD_NEW_VERSION "Rufus - Controllo aggiornamenti"
@@ -6288,47 +6287,48 @@ t MSG_263 "Usa unità dimensione CORRETTA"
 
 ######################################################################
 l "ja-JP" "Japanese (日本語)" 0x0411
-v 1.0.12
+v 1.0.14
 b "en-US"
 
 # Main dialog
 g IDD_DIALOG
 
-s IDD_DIALOG +35,0
-m IDC_LANG +35,0
-s IDC_PROGRESS +35,0
-s IDC_DEVICE +35,0
-s IDC_PARTITION_TYPE +35,0
-s IDC_FILESYSTEM +35,0
-s IDC_CLUSTERSIZE +35,0
-s IDC_LABEL +35,0
-s IDS_FORMAT_OPTIONS_GRP +34,0
-s IDS_ADVANCED_OPTIONS_GRP +34,0
-s IDC_ENABLE_FIXED_DISKS +35,0
-s IDC_EXTRA_PARTITION +35,0
-m IDC_NBPASSES +10,0
-s IDC_NBPASSES +21,0
-m IDC_BOOTTYPE +10,0
-s IDC_BOOTTYPE +21,0
-m IDC_SELECT_ISO +33,0
-s IDC_RUFUS_MBR +16,0
-s IDC_RUFUS_MBR +10,0
-m IDC_DISK_ID +10,0
-s IDC_DISK_ID +22,0
-s IDC_ABOUT +5,0
-m IDC_LOG +5,0
-s IDC_LOG +10,0
-s IDC_START +5,0
-m IDC_START +24,0
-s IDCANCEL +5,0
-m IDCANCEL +29,0
+s IDD_DIALOG +60,0
+m IDC_LANG +60,0
+s IDC_PROGRESS +60,0
+s IDC_DEVICE +60,0
+s IDC_PARTITION_TYPE +60,0
+s IDC_FILESYSTEM +60,0
+s IDC_CLUSTERSIZE +60,0
+s IDC_LABEL +60,0
+s IDS_FORMAT_OPTIONS_GRP +60,0
+s IDS_ADVANCED_OPTIONS_GRP +60,0
+s IDC_BADBLOCKS +30,0
+s IDC_ENABLE_FIXED_DISKS +60,0
+s IDC_EXTRA_PARTITION +60,0
+m IDC_NBPASSES +30,0
+s IDC_NBPASSES +30,0
+m IDC_BOOTTYPE +30,0
+s IDC_BOOTTYPE +30,0
+m IDC_SELECT_ISO +60,0
+s IDC_RUFUS_MBR +30,0
+m IDC_DISK_ID +30,0
+s IDC_DISK_ID +30,0
+s IDC_ABOUT +15,0
+m IDC_LOG +15,0
+s IDC_LOG +15,0
+m IDC_START +30,0
+s IDC_START +15,0
+m IDCANCEL +45,0
+s IDCANCEL +15,0
+m IDC_ADVANCED +15,0
 
 t IDS_DEVICE_TXT "デバイス"
 t IDS_PARTITION_TYPE_TXT "パーティション構成とターゲットシステムの種類"
 t IDS_FILESYSTEM_TXT "ファイルシステム"
 t IDS_CLUSTERSIZE_TXT "クラスタサイズ"
 t IDS_LABEL_TXT "ボリュームの新ラベル"
-t IDS_FORMAT_OPTIONS_GRP "フォーマット設定       "
+t IDS_FORMAT_OPTIONS_GRP "フォーマット設定        "
 t IDC_BADBLOCKS "破損したブロックを検索する"
 t IDC_QUICKFORMAT "クイックフォーマット"
 t IDC_BOOT "ブートディスクを作る"
@@ -6346,13 +6346,20 @@ t IDC_RUFUS_MBR "バイオスIDでRufusのMBRを作る"
 g IDD_ABOUTBOX
 t IDD_ABOUTBOX "Rufusについて"
 t IDC_ABOUT_LICENSE "ライセンス"
+s IDC_ABOUT_LICENSE +15,0
 t IDC_ABOUT_UPDATES "アップデート"
+m IDC_ABOUT_UPDATES +15,0
+s IDC_ABOUT_UPDATES +15,0
 t IDOK "閉じる"
+s IDOK +15,0
+m IDOK -15,0
 
 # About -> License dialog
 g IDD_LICENSE
 t IDD_LICENSE "Rufusライセンス"
 t IDCANCEL "閉じる"
+s IDCANCEL +15,0
+m IDCANCEL -15,0
 
 # Notifications. You can trigger one of these by using Alt-R and re-launching Rufus
 g IDD_NOTIFICATION
@@ -6364,24 +6371,36 @@ t IDNO "いいえ"
 g IDD_LOG
 t IDD_LOG "Log"
 t IDC_LOG_CLEAR "ログを消去する"
-m IDC_LOG_CLEAR -10,0
-s IDC_LOG_CLEAR +5,0
+m IDC_LOG_CLEAR -45,0
+s IDC_LOG_CLEAR +15,0
 t IDC_LOG_SAVE "ログを保存する"
-m IDC_LOG_SAVE -5,0
-s IDC_LOG_SAVE +5,0
+m IDC_LOG_SAVE -30,0
+s IDC_LOG_SAVE +15,0
 t IDCANCEL "ログを閉じる"
-s IDCANCEL +5,0
+s IDCANCEL +15,0
+m IDCANCEL -15,0
 
 # About -> Updates
 g IDD_UPDATE_POLICY
+s IDD_UPDATE_POLICY +45,0
+s IDC_POLICY +45,0
 t IDD_UPDATE_POLICY "アップデートポリシーと設定"
 t IDS_UPDATE_SETTINGS_GRP "設定"
-t IDS_UPDATE_FREQUENCY_TXT "アップデートを探す:"
-t IDS_INCLUDE_BETAS_TXT "ベータバージョンを含める:"
+s IDS_UPDATE_SETTINGS_GRP +45,0
+t IDS_UPDATE_FREQUENCY_TXT "アップデートを探す"
+s IDS_UPDATE_FREQUENCY_TXT +30,0
+t IDS_INCLUDE_BETAS_TXT "ベータバージョンを含める"
+s IDS_INCLUDE_BETAS_TXT +30,0
 t IDC_CHECK_NOW "今すぐに探す"
+m IDC_CHECK_NOW +40,0
+s IDC_CHECK_NOW +10,0
 t IDCANCEL "閉じる"
-s IDC_UPDATE_FREQUENCY +2,0
-s IDS_UPDATE_SETTINGS_GRP +5,0
+m IDCANCEL +40,0
+s IDCANCEL +10,0
+m IDC_UPDATE_FREQUENCY +30,0
+s IDC_UPDATE_FREQUENCY +20,0
+m IDC_INCLUDE_BETAS +30,0
+m IDS_CHECK_NOW_GRP +45,0
 
 # Dialog that appears when a new version is available
 g IDD_NEW_VERSION
@@ -6707,7 +6726,7 @@ t MSG_263 "適切なサイズユニットを使って下さい。"
 
 ################################################################################
 l "ko-KR" "Korean (한국어)" 0x0412
-v 1.0.12
+v 1.0.14
 b "en-US"
 
 # Main dialog
@@ -6717,34 +6736,20 @@ t IDS_PARTITION_TYPE_TXT "디스크 형식과 부팅 시스템 유형"
 t IDS_FILESYSTEM_TXT "파일 시스템"
 t IDS_CLUSTERSIZE_TXT "할당 단위 크기"
 t IDS_LABEL_TXT "새 볼륨 레이블"
-t IDS_FORMAT_OPTIONS_GRP "포맷 옵션       "
-m IDC_ADVANCED -23,0
-t IDC_BADBLOCKS "배드 섹터 검사:"
-m IDC_NBPASSES +3,0
-s IDC_NBPASSES +35,0
+t IDS_FORMAT_OPTIONS_GRP "포맷 옵션        "
+m IDC_ADVANCED -33,0
+t IDC_BADBLOCKS "배드 섹터 검사"
 t IDC_QUICKFORMAT "빠른 포맷"
-t IDC_BOOT "부팅 가능 디스크 만들기:"
-s IDC_BOOT +3,0
-m IDC_BOOTTYPE +3,0
-m IDC_SELECT_ISO +2,0
+t IDC_BOOT "부팅 가능 디스크 만들기"
 t IDC_SET_ICON "확장 레이블 및 아이콘 파일 만들기"
 t IDC_ABOUT "정보..."
 t IDC_LOG "로그"
-s IDC_LOG +5,0
-m IDC_LOG -2,0
 t IDCANCEL "닫기"
 t IDC_START "시작"
-m IDC_START +2,0
 t IDS_ADVANCED_OPTIONS_GRP "고급 옵션"
 t IDC_ENABLE_FIXED_DISKS "기타 USB 장치를 목록에 추가"
-# Note: it is acceptable to drop the parenthesis () below if you are running out of space
-# as there is a tooltip (MSG_169) providing these details
 t IDC_EXTRA_PARTITION "구형BIOS를 위한 수정"
-# 'MBR': See http://en.wikipedia.org/wiki/Master_boot_record
-# Rufus can install it's own custom MBR (the Rufus MBR), which also allows users
-# to specify a custom disk ID for the BIOS. Note: the tooltip for this control is MSG_167.
-t IDC_RUFUS_MBR "USB용 MBR 사용(ID):"
-m IDC_DISK_ID +3,0
+t IDC_RUFUS_MBR "USB용 MBR 사용(ID)"
 
 # About dialog
 g IDD_ABOUTBOX
@@ -6775,9 +6780,13 @@ t IDCANCEL "로그 닫기"
 g IDD_UPDATE_POLICY
 t IDD_UPDATE_POLICY "업데이트 정책과 설정"
 t IDS_UPDATE_SETTINGS_GRP "설정"
-t IDS_UPDATE_FREQUENCY_TXT "업데이트 확인:"
-t IDS_INCLUDE_BETAS_TXT "테스트 버전 포함:"
+t IDS_UPDATE_FREQUENCY_TXT "업데이트 확인"
+s IDS_UPDATE_FREQUENCY_TXT -20,0
+m IDC_UPDATE_FREQUENCY -20,0
+t IDS_INCLUDE_BETAS_TXT "테스트 버전 포함"
+s IDS_INCLUDE_BETAS_TXT -20,0
 s IDC_INCLUDE_BETAS +5,0
+m IDC_INCLUDE_BETAS -20,0
 t IDC_CHECK_NOW "지금 확인"
 t IDCANCEL "닫기"
 
@@ -7102,7 +7111,7 @@ t MSG_263 "적당한 크기의 단위를 사용"
 
 ################################################################################
 l "lv-LV" "Latvian (Latviešu)" 0x0426
-v 1.0.12
+v 1.0.14
 
 # Main dialog
 g IDD_DIALOG
@@ -7119,19 +7128,18 @@ t IDS_PARTITION_TYPE_TXT "Partīcijas veids un sistēmas tips"
 t IDS_FILESYSTEM_TXT "Failu sistēma"
 t IDS_CLUSTERSIZE_TXT "Bloka izmērs"
 t IDS_LABEL_TXT "Datu nesēja nosaukums"
-t IDS_FORMAT_OPTIONS_GRP "Formatēšanas opcijas       "
+t IDS_FORMAT_OPTIONS_GRP "Formatēšanas opcijas         "
 s IDS_FORMAT_OPTIONS_GRP 20,0
 m IDC_ADVANCED +30,0
 s IDC_BADBLOCKS 45,0
 t IDC_BADBLOCKS "Pārbaudīt ierīci uz bojātiem sektoriem"
-m IDC_NBPASSES 40,0
-s IDC_NBPASSES 15,0
+m IDC_NBPASSES 45,0
+s IDC_NBPASSES -25,0
 t IDC_QUICKFORMAT "Ātrā formatēšana"
 t IDC_BOOT "Izveidot boot disku izmantojot"
 s IDC_BOOT 10,0
-m IDC_BOOTTYPE 10,0
-m IDC_SELECT_ISO 15,0
-s IDC_SELECT_ISO 5,0
+m IDC_BOOTTYPE 20,0
+m IDC_SELECT_ISO 20,0
 t IDC_SET_ICON "Izveidot papildus nosaukumu un failu ikonas"
 s IDC_ABOUT -10,0
 t IDC_ABOUT "Par..."
@@ -7141,20 +7149,15 @@ t IDC_LOG "Logs"
 t IDCANCEL "Aizvērt"
 m IDCANCEL 20,0
 t IDC_START "Sākt"
-m IDC_START 15,0
-s IDC_START 10,0
-m IDC_START 10,0
+m IDC_START 20,0
 t IDS_ADVANCED_OPTIONS_GRP "Papildopcijas"
 s IDS_ADVANCED_OPTIONS_GRP 20,0
 t IDC_ENABLE_FIXED_DISKS "USB ierīču saraksts"
-
 t IDC_EXTRA_PARTITION "Pievienot vecāku BIOSu labojumus (partīcijām, dalījumam, u.c.)"
 s IDC_EXTRA_PARTITION 25,0
-
-s IDC_RUFUS_MBR +10,0
-m IDC_DISK_ID 13,0
-s IDC_DISK_ID 10,0
 t IDC_RUFUS_MBR "Izmantot Rufus MBR ar BIOS ID"
+s IDC_RUFUS_MBR +10,0
+m IDC_DISK_ID 20,0
 
 g IDD_ABOUTBOX
 t IDD_ABOUTBOX "Par Rufus"
@@ -7181,24 +7184,24 @@ t IDCANCEL "Aizvērt logu"
 
 # About -> Updates
 g IDD_UPDATE_POLICY
+s IDD_UPDATE_POLICY +20,0
+s IDC_POLICY +20,0
 t IDD_UPDATE_POLICY "Jaunināšanas noteikumi un uzstādījumi"
 t IDS_UPDATE_SETTINGS_GRP "Uzstādījumi"
-s IDS_UPDATE_SETTINGS_GRP +25,0
-t IDS_UPDATE_FREQUENCY_TXT "Pārbaudīt jauninājumus:"
-s IDS_UPDATE_FREQUENCY_TXT -5,0
-m IDC_UPDATE_FREQUENCY -5,0
-s IDC_UPDATE_FREQUENCY +32,0
-t IDS_INCLUDE_BETAS_TXT "Ieskaitot Beta versijas:"
-s IDS_INCLUDE_BETAS_TXT -5,0
-m IDC_INCLUDE_BETAS -5,0
-m IDS_CHECK_NOW_GRP +19,0
-s IDS_CHECK_NOW_GRP -19,0
+s IDS_UPDATE_SETTINGS_GRP +40,0
+t IDS_UPDATE_FREQUENCY_TXT "Pārbaudīt jauninājumus"
+s IDS_UPDATE_FREQUENCY_TXT +10,0
+s IDC_UPDATE_FREQUENCY +44,0
+m IDC_UPDATE_FREQUENCY +5,0
+t IDS_INCLUDE_BETAS_TXT "Ieskaitot Beta versijas"
+s IDS_INCLUDE_BETAS_TXT +10,0
+m IDC_INCLUDE_BETAS +5,0
+m IDS_CHECK_NOW_GRP +40,0
+s IDS_CHECK_NOW_GRP -20,0
 t IDC_CHECK_NOW "Pārbaudīt"
-m IDC_CHECK_NOW +10,0
-s IDC_CHECK_NOW -3,0
+m IDC_CHECK_NOW +29,0
 t IDCANCEL "Aizvērt"
-m IDCANCEL +10,0
-s IDCANCEL -3,0
+m IDCANCEL +29,0
 
 # Dialog that appears when a new version is available
 g IDD_NEW_VERSION
@@ -7521,35 +7524,24 @@ t MSG_263 "Izvēlieties atbilstošas vienības"
 
 ################################################################################
 l "lt-LT" "Lithuanian (Lietuvių)" 0x0427
-v 1.0.12
+v 1.0.14
 b "en-US"
 
 # Main dialog
 g IDD_DIALOG
-s IDD_DIALOG +12,0
-m IDC_LANG +12,0
-s IDC_DEVICE +12,0
-s IDC_PARTITION_TYPE +12,0
-s IDC_FILESYSTEM +12.0
-s IDC_CLUSTERSIZE +12,0
-s IDC_LABEL +12,0
-s IDC_PROGRESS +12,0
 t IDS_DEVICE_TXT "Įrenginys"
 t IDS_PARTITION_TYPE_TXT "Skaidinių schema ir paskirties sistemos tipas"
 t IDS_FILESYSTEM_TXT "Failų sistema"
 t IDS_CLUSTERSIZE_TXT "Klasterio dydis"
 t IDS_LABEL_TXT "Nauja tomo žymė"
-t IDS_FORMAT_OPTIONS_GRP "Formatavimo parinktys       "
-s IDS_FORMAT_OPTIONS_GRP +10,0
-m IDC_ADVANCED +35,0
-s IDC_BADBLOCKS +10,0
-t IDC_BADBLOCKS "Tikrinti įrenginį dėl blogų blokų:"
-m IDC_NBPASSES +6,0
-s IDC_NBPASSES +11,0
+t IDS_FORMAT_OPTIONS_GRP "Formatavimo parinktys         "
+m IDC_ADVANCED +36,0
+s IDC_BADBLOCKS +25,0
+t IDC_BADBLOCKS "Tikrinti įrenginį dėl blogų blokų"
+m IDC_NBPASSES +25,0
+s IDC_NBPASSES -25,0
 t IDC_QUICKFORMAT "Greitas formatavimas"
-t IDC_BOOT "Kurti įkelties diską naudojant:"
-s IDC_BOOTTYPE +17,0
-m IDC_SELECT_ISO +15,0
+t IDC_BOOT "Kurti įkelties diską naudojant"
 t IDC_SET_ICON "Kurti išplėstinės žymės ir piktogramos failus"
 s IDC_ABOUT -15,0
 t IDC_ABOUT "Apie..."
@@ -7557,20 +7549,14 @@ m IDC_LOG -15,0
 s IDC_LOG 30,0
 t IDC_LOG "Dienynas"
 t IDCANCEL "Uždaryti"
-m IDCANCEL +12,0
 t IDC_START "Pradėti"
-m IDC_START +12,0
-s IDS_ADVANCED_OPTIONS_GRP +10,0
 t IDS_ADVANCED_OPTIONS_GRP "Išsamios parinktys"
 t IDC_ENABLE_FIXED_DISKS "Rodyti USB kietuosius diskus"
 t IDC_EXTRA_PARTITION "Pataisos seniems BIOS (papildomas skaidinys, ir kt.)"
-# 'MBR': See bhttp://en.wikipedia.org/wiki/Master_boot_record
-# Rufus can install it's own custom MBR (the Rufus MBR), which also allows users
-# to specify a custom disk ID for the BIOS. Note: the tooltip for this control is MSG_167.
-s IDC_RUFUS_MBR +10,0
-m IDC_DISK_ID +10,0
-s IDC_DISK_ID -10,0
-t IDC_RUFUS_MBR "Naudoti Rufus MBR su BIOS ID:"
+m IDC_DISK_ID +25,0
+s IDC_DISK_ID -25,0
+t IDC_RUFUS_MBR "Naudoti Rufus MBR su BIOS ID"
+s IDC_RUFUS_MBR +25,0
 
 # About dialog
 g IDD_ABOUTBOX
@@ -7602,20 +7588,19 @@ t IDCANCEL "Uždaryti"
 g IDD_UPDATE_POLICY
 t IDD_UPDATE_POLICY "Naujinių politika ir nuostatos"
 t IDS_UPDATE_SETTINGS_GRP "Nuostatos"
-s IDS_UPDATE_SETTINGS_GRP +11,0
-m IDS_CHECK_NOW_GRP +5,0
-s IDS_CHECK_NOW_GRP -5,0
-s IDS_UPDATE_FREQUENCY_TXT -12,0
-t IDS_UPDATE_FREQUENCY_TXT "Tikrinti, ar yra naujinių:"
-m IDC_UPDATE_FREQUENCY -12,0
-s IDC_UPDATE_FREQUENCY +20,0
-s IDS_INCLUDE_BETAS_TXT -12,0
-t IDS_INCLUDE_BETAS_TXT "Įtraukti beta versijas:"
-m IDC_INCLUDE_BETAS -12,0
+s IDS_UPDATE_SETTINGS_GRP +17,0
+m IDS_CHECK_NOW_GRP +17,0
+s IDS_CHECK_NOW_GRP -12,0
+s IDS_UPDATE_FREQUENCY_TXT +6,0
+t IDS_UPDATE_FREQUENCY_TXT "Tikrinti, ar yra naujinių"
+m IDC_UPDATE_FREQUENCY -4,0
+s IDC_UPDATE_FREQUENCY +28,0
+t IDS_INCLUDE_BETAS_TXT "Įtraukti beta versijas"
+m IDC_INCLUDE_BETAS -4,0
 t IDC_CHECK_NOW "Tikrinti dabar"
-m IDC_CHECK_NOW +2,0
+m IDC_CHECK_NOW +10,0
 t IDCANCEL "Uždaryti"
-m IDCANCEL +2,0
+m IDCANCEL +10,0
 
 # Dialog that appears when a new version is available
 g IDD_NEW_VERSION
@@ -7941,59 +7926,50 @@ t MSG_263 "Naudoti TIKRUOSIUS dydžio vienetus"
 
 ################################################################################
 l "ms-MY" "Malay (Bahasa Malaysia)" 0x043e, 0x083e
-v 1.0.12
+v 1.0.14
 b "en-US"
 
 # Main dialog
 g IDD_DIALOG
-s IDD_DIALOG +20,0
-m IDC_LANG +18,0
-s IDC_PROGRESS +20,0
-s IDC_DEVICE +18,0
-s IDC_PARTITION_TYPE +18,0
-s IDC_FILESYSTEM +18,0
-s IDC_CLUSTERSIZE +18,0
-s IDC_LABEL +18,0
-m IDC_ADVANCED -9,0
+s IDD_DIALOG +30,0
+m IDC_LANG +30,0
+s IDC_PROGRESS +30,0
+s IDC_DEVICE +30,0
+s IDC_PARTITION_TYPE +30,0
+s IDC_FILESYSTEM +30,0
+s IDC_CLUSTERSIZE +30,0
+s IDC_LABEL +30,0
+m IDC_ADVANCED -8,0
 t IDS_DEVICE_TXT "Peranti"
 t IDS_PARTITION_TYPE_TXT "Skema partition dan jenis sistem sasaran"
 t IDS_FILESYSTEM_TXT "Sistem fail"
 t IDS_CLUSTERSIZE_TXT "Saiz gugusan"
 t IDS_LABEL_TXT "Label jilid baharu"
-t IDS_FORMAT_OPTIONS_GRP "Pilihan format       "
-s IDS_FORMAT_OPTIONS_GRP +19,0
-s IDC_BADBLOCKS +17,0
-t IDC_BADBLOCKS "Semak peranti untuk blok rosak:"
-m IDC_NBPASSES +27,0
+t IDS_FORMAT_OPTIONS_GRP "Pilihan format         "
+s IDS_FORMAT_OPTIONS_GRP +30,0
+s IDC_BADBLOCKS +30,0
+t IDC_BADBLOCKS "Semak peranti untuk blok rosak"
+m IDC_NBPASSES +30,0
 t IDC_QUICKFORMAT "Format pantas"
-m IDC_SELECT_ISO +26,0
-s IDC_SELECT_ISO -3,0
-m IDC_BOOTTYPE +27,0
-s IDC_BOOT +29,0
-t IDC_BOOT "Cipta disk boleh-but menggunakan:"
+m IDC_SELECT_ISO +30,0
+m IDC_BOOTTYPE +30,0
+s IDC_BOOT +32,0
+t IDC_BOOT "Cipta disk boleh-but menggunakan"
 t IDC_SET_ICON "Cipta label lanjut dan fail icon"
 t IDC_ABOUT "Tentang..."
 t IDC_LOG "Log"
 t IDCANCEL "Tutup"
-m IDCANCEL +18,0
+m IDCANCEL +30,0
 t IDC_START "Mula"
-m IDC_START +18,0
+m IDC_START +30,0
 t IDS_ADVANCED_OPTIONS_GRP "Pilihan Lanjutan"
-s IDS_ADVANCED_OPTIONS_GRP +19,0
+s IDS_ADVANCED_OPTIONS_GRP +30,0
 t IDC_ENABLE_FIXED_DISKS "Senaraikan cakera keras USB"
-s IDC_ENABLE_FIXED_DISKS +20,0
-# Note: it is acceptable to drop the parenthesis () below if you are running out of space
-# as there is a tooltip (MSG_169) providing these details
+s IDC_ENABLE_FIXED_DISKS +30,0
 t IDC_EXTRA_PARTITION "Pembaikan tambahan untuk BIOS lama"
-s IDC_EXTRA_PARTITION +20,0
-# 'MBR': See http://en.wikipedia.org/wiki/Master_boot_record
-# Rufus can install it's own custom MBR (the Rufus MBR), which also allows users
-# to specify a custom disk ID for the BIOS. Note: the tooltip for this control is MSG_167.
-m IDC_DISK_ID +27,0
-s IDC_DISK_ID -10,0
-t IDC_RUFUS_MBR "Guna MBR Rufus dengan BIOS ID:"
-s IDC_RUFUS_MBR +16,0
-s IDC_RUFUS_MBR +25,0
+s IDC_EXTRA_PARTITION +30,0
+m IDC_DISK_ID +30,0
+t IDC_RUFUS_MBR "Guna MBR Rufus dengan BIOS ID"
 
 # About dialog
 g IDD_ABOUTBOX
@@ -8016,28 +7992,32 @@ t IDNO "Tidak"
 g IDD_LOG
 t IDD_LOG "Log"
 t IDC_LOG_CLEAR "Bersihkan Log"
+s IDC_LOG_CLEAR +10,0
+m IDC_LOG_CLEAR -10,0
 t IDC_LOG_SAVE "Simpan Log"
 t IDCANCEL "Tutup Log"
 
 # About -> Updates
 g IDD_UPDATE_POLICY
+s IDD_UPDATE_POLICY +20,0
 t IDD_UPDATE_POLICY "Dasar dan tetapan mengemas kini"
+s IDC_POLICY +20,0
 t IDS_UPDATE_SETTINGS_GRP "Tetapan"
-s IDS_UPDATE_SETTINGS_GRP +7,0
-s IDS_CHECK_NOW_GRP -1,0
-m IDS_CHECK_NOW_GRP 1,0
-s IDC_UPDATE_FREQUENCY +5,0
-m IDC_UPDATE_FREQUENCY +7,0
-t IDS_UPDATE_FREQUENCY_TXT "Semak untuk versi baharu:"
-s IDS_UPDATE_FREQUENCY_TXT +8,0
-t IDS_INCLUDE_BETAS_TXT "Gunakan juga versi Beta:"
-s IDS_INCLUDE_BETAS_TXT +2,0
-m IDC_INCLUDE_BETAS +7,0
+s IDS_UPDATE_SETTINGS_GRP +17,0
+m IDS_CHECK_NOW_GRP +17,0
+s IDS_CHECK_NOW_GRP +3,0
+t IDS_UPDATE_FREQUENCY_TXT "Semak untuk versi baharu"
+s IDS_UPDATE_FREQUENCY_TXT +20,0
+s IDC_UPDATE_FREQUENCY +10,0
+m IDC_UPDATE_FREQUENCY +15,0
+t IDS_INCLUDE_BETAS_TXT "Gunakan juga versi Beta"
+s IDS_INCLUDE_BETAS_TXT +14,0
+m IDC_INCLUDE_BETAS +15,0
 s IDC_CHECK_NOW +20,0
-m IDC_CHECK_NOW -10,0
+m IDC_CHECK_NOW +7,0
 t IDC_CHECK_NOW "Semak sekarang"
 s IDCANCEL +20,0
-m IDCANCEL -10,0
+m IDCANCEL +7,0
 t IDCANCEL "Tutup"
 
 # Dialog that appears when a new version is available
@@ -8365,48 +8345,48 @@ t MSG_263 "Guna saiz seunit yang BETUL"
 
 ################################################################################
 l "pl-PL" "Polish (Polski)" 0x0415
-v 1.0.12
+v 1.0.14
 b "en-US"
 # my info: 15.02.2014,16:14
 
 # Main dialog
 g IDD_DIALOG
-s IDD_DIALOG +50,0
-m IDC_LANG +48,0
-s IDS_FORMAT_OPTIONS_GRP +49,0
-s IDC_PROGRESS +50,0
-s IDC_DEVICE +48,0
-s IDC_PARTITION_TYPE +48,0
-s IDC_FILESYSTEM +48,0
-s IDC_CLUSTERSIZE +48,0
-s IDC_LABEL +48,0
-m IDC_ADVANCED +25,0
-s IDS_ADVANCED_OPTIONS_GRP +49,0
+s IDD_DIALOG +40,0
+m IDC_LANG +40,0
+s IDS_FORMAT_OPTIONS_GRP +40,0
+s IDC_PROGRESS +40,0
+s IDC_DEVICE +40,0
+s IDC_PARTITION_TYPE +40,0
+s IDC_FILESYSTEM +40,0
+s IDC_CLUSTERSIZE +40,0
+s IDC_LABEL +40,0
+m IDC_ADVANCED +27,0
+s IDS_ADVANCED_OPTIONS_GRP +40,0
 s IDC_ENABLE_FIXED_DISKS +40,0
 s IDC_EXTRA_PARTITION +40,0
-s IDC_RUFUS_MBR +26,0
-s IDC_NBPASSES +16,0
-m IDC_NBPASSES +70,0
-s IDC_BOOT +42,0
-m IDC_BOOTTYPE +50,0
-m IDC_SELECT_ISO +50,0
-s IDC_RUFUS_MBR +35,0
-m IDC_DISK_ID +50,0
+s IDC_RUFUS_MBR +40,0
+s IDC_NBPASSES -25,0
+m IDC_NBPASSES +65,0
+s IDC_BOOT +40,0
+m IDC_BOOTTYPE +40,0
+m IDC_SELECT_ISO +40,0
+s IDC_RUFUS_MBR +40,0
+m IDC_DISK_ID +40,0
 s IDC_ABOUT +10,0
 m IDC_LOG +10,0
-m IDC_START +48,0
-m IDCANCEL +48,0
+m IDC_START +40,0
+m IDCANCEL +40,0
 
 t IDS_DEVICE_TXT "Urządzenie"
 t IDS_PARTITION_TYPE_TXT "Schemat partycjonowania i typ systemu docelowego"
 t IDS_FILESYSTEM_TXT "System plików"
 t IDS_CLUSTERSIZE_TXT "Rozmiar jednostki alokacji"
 t IDS_LABEL_TXT "Nowa nazwa woluminu"
-t IDS_FORMAT_OPTIONS_GRP "Opcje Formatowania       "
-t IDC_BADBLOCKS "Szukaj błędnych sektorów na urządzeniu:"
+t IDS_FORMAT_OPTIONS_GRP "Opcje Formatowania         "
+t IDC_BADBLOCKS "Szukaj błędnych sektorów na urządzeniu"
 s IDC_BADBLOCKS +65,0
 t IDC_QUICKFORMAT "Szybkie formatowanie"
-t IDC_BOOT "Utwórz bootowalny dysk używając:"
+t IDC_BOOT "Utwórz bootowalny dysk używając"
 t IDC_SET_ICON "Utwórz rozszerzoną nazwę i pliki ikon"
 t IDC_ABOUT "O programie..."
 t IDC_LOG "Log"
@@ -8415,10 +8395,7 @@ t IDC_START "Start"
 t IDS_ADVANCED_OPTIONS_GRP "Zaawansowane Opcje"
 t IDC_ENABLE_FIXED_DISKS "Pokaż Dyski Twarde USB"
 t IDC_EXTRA_PARTITION "Dodaj łatkę dla starych BIOSów (dodatkowa partycja, itp.)"
-# 'MBR': See bhttp://en.wikipedia.org/wiki/Master_boot_record
-# Rufus can install it's own custom MBR (the Rufus MBR), which also allows users
-# to specify a custom disk ID for the BIOS. Note: the tooltip for this control is MSG_167.
-t IDC_RUFUS_MBR "Użyj MBR Rufusa z ID BIOSu:"
+t IDC_RUFUS_MBR "Użyj MBR Rufusa z ID BIOSu"
 
 # About dialog
 g IDD_ABOUTBOX
@@ -8446,21 +8423,24 @@ t IDCANCEL "Zamknij Log"
 
 # About -> Updates
 g IDD_UPDATE_POLICY
+s IDD_UPDATE_POLICY +10,0
 t IDD_UPDATE_POLICY "Polityka aktualizacji i ustawienia"
+s IDC_POLICY +10,0
 t IDS_UPDATE_SETTINGS_GRP "Ustawienia"
-t IDS_UPDATE_FREQUENCY_TXT "Szukaj aktualizacji:"
-s IDS_UPDATE_FREQUENCY_TXT -22,0
-m IDC_UPDATE_FREQUENCY -22,0
-s IDC_UPDATE_FREQUENCY +22,0
-t IDS_INCLUDE_BETAS_TXT "Dołącz wersje beta:"
-m IDC_INCLUDE_BETAS -22,0
-m IDS_CHECK_NOW_GRP -6,0
-s IDS_CHECK_NOW_GRP +6,0
+s IDS_UPDATE_SETTINGS_GRP +9,0
+t IDS_UPDATE_FREQUENCY_TXT "Szukaj aktualizacji"
+s IDS_UPDATE_FREQUENCY_TXT -10,0
+m IDC_UPDATE_FREQUENCY -20,0
+s IDC_UPDATE_FREQUENCY +30,0
+t IDS_INCLUDE_BETAS_TXT "Dołącz wersje beta"
+m IDC_INCLUDE_BETAS -20,0
+m IDS_CHECK_NOW_GRP +9,0
+s IDS_CHECK_NOW_GRP +1,0
 t IDC_CHECK_NOW "Sprawdź Teraz"
-m IDC_CHECK_NOW -6,0
+m IDC_CHECK_NOW +6,0
 s IDC_CHECK_NOW +6,0
 t IDCANCEL "Zamknij"
-m IDCANCEL -6,0
+m IDCANCEL +6,0
 s IDCANCEL +6,0
 
 # Dialog that appears when a new version is available
@@ -8786,7 +8766,7 @@ t MSG_263 "Użyj WŁAŚCIWEGO rozmiaru jednostek"
 
 ################################################################################
 l "pt-BR" "Portuguese Brazilian (Português do Brasil)" 0x0416
-v 1.0.12
+v 1.0.14
 b "pt-PT"
 
 g IDD_DIALOG
@@ -8958,28 +8938,17 @@ b "en-US"
 
 # Main dialog
 g IDD_DIALOG
-s IDD_DIALOG +5,0
-s IDC_DEVICE +5,0
-m IDC_LANG +5,0
-s IDC_PARTITION_TYPE +5,0
-s IDC_FILESYSTEM +5,0
-s IDC_CLUSTERSIZE +5,0
-s IDC_LABEL +5,0
-s IDC_PROGRESS +7,0
 t IDS_DEVICE_TXT "Dispositivo"
 t IDS_PARTITION_TYPE_TXT "Tipo de partição e do sistema de destino"
 t IDS_FILESYSTEM_TXT "Sistema de arquivos"
 t IDS_CLUSTERSIZE_TXT "Tamanho de cluster"
 t IDS_LABEL_TXT "Novo nome"
-t IDS_FORMAT_OPTIONS_GRP "Opções de formatação       "
-s IDS_FORMAT_OPTIONS_GRP +5, 0
+t IDS_FORMAT_OPTIONS_GRP "Opções de formatação        "
 m IDC_ADVANCED +35,0
 t IDC_BADBLOCKS "Procurar erros no disco USB"
-s IDC_BADBLOCKS +7,0
+s IDC_BADBLOCKS +4,0
 t IDC_QUICKFORMAT "Formação rápida"
 t IDC_BOOT "Criar disco de arranque com"
-s IDC_BOOTTYPE +7,0
-m IDC_SELECT_ISO +7,0
 t IDC_SET_ICON "Criar nomes estendidos e ícones"
 t IDC_ABOUT "Sobre..."
 s IDC_ABOUT -5,0
@@ -8987,24 +8956,14 @@ t IDC_LOG "Histórico..."
 s IDC_LOG +40,0
 m IDC_LOG -5,0
 t IDCANCEL "Fechar"
-s IDCANCEL -20,0
-m IDCANCEL +25,0
 t IDC_START "Iniciar"
-s IDC_START -10,0
-m IDC_START +35,0
 t IDS_ADVANCED_OPTIONS_GRP "Opções avançadas"
-s IDS_ADVANCED_OPTIONS_GRP +5,0
 t IDC_ENABLE_FIXED_DISKS "Mostrar drives USB"
 t IDC_EXTRA_PARTITION "Opções de compatibilidade para BIOS antigas"
-# 'MBR': See http://en.wikipedia.org/wiki/Master_boot_record
-# Rufus can install it's own custom MBR (the Rufus MBR), which also allows users
-# to specify a custom disk ID for the BIOS. Note: the tooltip for this control is MSG_167.
 t IDC_RUFUS_MBR "Usar MBR do Rufus, ID de BIOS"
 s IDC_RUFUS_MBR +25,0
-s IDC_NBPASSES +7,0
-s IDC_RUFUS_MBR +18,0
-s IDC_DISK_ID -12,0
-m IDC_DISK_ID +18,0
+s IDC_DISK_ID -25,0
+m IDC_DISK_ID +25,0
 
 # About dialog
 g IDD_ABOUTBOX
@@ -9028,30 +8987,29 @@ t IDNO "Não"
 g IDD_LOG
 t IDD_LOG "Histórico de eventos"
 t IDC_LOG_CLEAR "Limpar o histórico"
-s IDC_LOG_CLEAR +20,0
-m IDC_LOG_CLEAR -40,0
+s IDC_LOG_CLEAR +30,0
+m IDC_LOG_CLEAR -70,0
 t IDC_LOG_SAVE "Guardar o histórico"
-s IDC_LOG_SAVE +27,0
-m IDC_LOG_SAVE -24,0
+s IDC_LOG_SAVE +40,0
+m IDC_LOG_SAVE -40,0
 t IDCANCEL "Fechar"
 
 # About -> Updates
 g IDD_UPDATE_POLICY
-s IDD_UPDATE_POLICY +6,0
-s IDC_POLICY +4,0
-s IDS_UPDATE_SETTINGS_GRP +16,0
-s IDS_UPDATE_FREQUENCY_TXT -10,0
-m IDC_UPDATE_FREQUENCY -10,0
-m IDC_INCLUDE_BETAS -10,0
-s IDC_UPDATE_FREQUENCY +25,0
-m IDS_CHECK_NOW_GRP 10,0
-s IDS_CHECK_NOW_GRP -7,0
-m IDC_CHECK_NOW 5,0
-m IDCANCEL 5,0
+s IDD_UPDATE_POLICY +20,0
+s IDC_POLICY +20,0
+s IDS_UPDATE_SETTINGS_GRP +25,0
+m IDC_UPDATE_FREQUENCY -6,0
+s IDC_UPDATE_FREQUENCY +34,0
+m IDC_INCLUDE_BETAS -6,0
+m IDS_CHECK_NOW_GRP +25,0
+s IDS_CHECK_NOW_GRP -5,0
+m IDC_CHECK_NOW +22,0
+m IDCANCEL +22,0
 t IDD_UPDATE_POLICY "Configuração da auto atualização"
 t IDS_UPDATE_SETTINGS_GRP "Configurações"
-t IDS_UPDATE_FREQUENCY_TXT "Procurar atualizações:"
-t IDS_INCLUDE_BETAS_TXT "Incluir versões beta:"
+t IDS_UPDATE_FREQUENCY_TXT "Procurar atualizações"
+t IDS_INCLUDE_BETAS_TXT "Incluir versões beta"
 t IDC_CHECK_NOW "Procurar"
 t IDCANCEL "Fechar"
 
@@ -9363,7 +9321,7 @@ t MSG_259 "Forçar atualização"
 
 ################################################################################
 l "ro-RO" "Romanian (Română)" 0x0418, 0x0818
-v 1.0.12
+v 1.0.14
 b "en-US"
 
 g IDD_DIALOG
@@ -9372,37 +9330,26 @@ t IDS_PARTITION_TYPE_TXT "Sistemul de partiţie şi tipul de sistem ţintă"
 t IDS_FILESYSTEM_TXT "Sistemul de fişiere"
 t IDS_CLUSTERSIZE_TXT "Mărime unitate de alocare"
 t IDS_LABEL_TXT "Eticheta de volum nou"
-t IDS_FORMAT_OPTIONS_GRP "Opţiuni de formatare       "
-t IDC_BADBLOCKS "Testarea blocurilor defecte:"
-s IDC_BADBLOCKS +30,0
-m IDC_NBPASSES +29,0
-s IDC_NBPASSES +10,0
+t IDS_FORMAT_OPTIONS_GRP "Opţiuni de formatare         "
+t IDC_BADBLOCKS "Testarea blocurilor defecte"
 t IDC_QUICKFORMAT "Formatare rapidă"
-t IDC_BOOT "Creaţi disc USB bootabil cu:"
-s IDC_BOOT -10,0
-m IDC_BOOTTYPE -8,0
-s IDC_BOOTTYPE +12,0
-m IDC_SELECT_ISO +3,0
+t IDC_BOOT "Creaţi disc USB bootabil cu"
 t IDC_SET_ICON "Creaţi etichete extinse şi pictograme"
 t IDC_ABOUT "Despre..."
 s IDC_ABOUT -16,0
 t IDC_LOG "Registru"
 s IDC_LOG +26,0
-m IDC_LOG -18,0
+m IDC_LOG -14,0
 t IDCANCEL "Închide"
-s IDCANCEL -2,0
-m IDCANCEL +2,0
 t IDC_START "Începe"
-s IDC_START -2,0
-m IDC_START +6,0
 t IDS_ADVANCED_OPTIONS_GRP "Opţiuni avansate"
-m IDC_ADVANCED +26,0
+m IDC_ADVANCED +29,0
 t IDC_ENABLE_FIXED_DISKS "Lista Hard-uri USB"
 t IDC_EXTRA_PARTITION "Adaugă remedieri pentru BIOS-ul vechi"
-t IDC_RUFUS_MBR "Utilizaţi MBR Rufus cu BIOS-ul:"
-s IDC_RUFUS_MBR +4,0
+t IDC_RUFUS_MBR "Utilizaţi MBR Rufus cu BIOS-ul"
+s IDC_RUFUS_MBR +5,0
 m IDC_DISK_ID +5,0
-s IDC_DISK_ID -2,0
+s IDC_DISK_ID -5,0
 
 g IDD_ABOUTBOX
 t IDD_ABOUTBOX "Despre Rufus"
@@ -9417,6 +9364,7 @@ t IDD_LICENSE "Licenţa Rufus"
 
 g IDD_NOTIFICATION
 t IDC_MORE_INFO "Mai multe informaţii"
+s IDC_MORE_INFO +10,0
 t IDYES "Da"
 t IDNO "Nu"
 
@@ -9436,17 +9384,19 @@ s IDC_POLICY +30,0
 t IDD_UPDATE_POLICY "Setări şi actualizări de politică"
 t IDS_UPDATE_SETTINGS_GRP "Setări"
 s IDS_UPDATE_SETTINGS_GRP +28,0
-t IDS_UPDATE_FREQUENCY_TXT "Verificare actualizări:"
+t IDS_UPDATE_FREQUENCY_TXT "Verificare actualizări"
 s IDS_UPDATE_FREQUENCY_TXT -3,0
-t IDS_INCLUDE_BETAS_TXT "Include versiuni beta:"
+t IDS_INCLUDE_BETAS_TXT "Include versiuni beta"
 m IDC_UPDATE_FREQUENCY -3,0
 m IDC_INCLUDE_BETAS -3,0
 s IDC_UPDATE_FREQUENCY +20,0
 m IDS_CHECK_NOW_GRP +28,0
 t IDC_CHECK_NOW "Verifică acum"
-m IDC_CHECK_NOW +28,0
+m IDC_CHECK_NOW +25,0
+s IDC_CHECK_NOW +4,0
 t IDCANCEL "Închide"
-m IDCANCEL +28,0
+m IDCANCEL +25,0
+s IDCANCEL +4,0
 
 g IDD_NEW_VERSION
 t IDD_NEW_VERSION "Rufus - Verificare actualizări"
@@ -9735,68 +9685,40 @@ t MSG_263 "Utilizarea dimensiunii corecte pentru unități"
 
 ################################################################################
 l "ru-RU" "Russian (Русский)" 0x0419, 0x0819
-v 1.0.12
+v 1.0.14
 b "en-US"
 
 # Main dialog
 g IDD_DIALOG
-s IDD_DIALOG +22,0
-
-m IDC_LANG +22,0
-s IDS_FORMAT_OPTIONS_GRP +20,0
-s IDS_ADVANCED_OPTIONS_GRP +20,0
-s IDC_NBPASSES +30,0
-m IDC_ABOUT -2,0
-s IDC_ABOUT +15,0
-m IDC_LOG +9,0
+m IDC_ADVANCED +79,0
+s IDC_ABOUT +18,0
+m IDC_LOG +18,0
 s IDC_LOG +30,0
-m IDC_START +47,0
-s IDC_START -10,0
-m IDCANCEL +33,0
-s IDCANCEL -10,0
-m IDC_PROGRESS -1,0
-s IDC_PROGRESS +24,0
-
-m IDC_NBPASSES +12,0
-s IDC_NBPASSES +44,0
-m IDC_BOOTTYPE +12,0
-s IDC_BOOTTYPE +9,0
-m IDC_SELECT_ISO +20,0
-s IDC_BADBLOCKS +10,0
-m IDC_DISK_ID +12,0
-s IDC_DISK_ID +8,0
-
 t IDS_DEVICE_TXT "Устройство"
-s IDC_DEVICE +22,0
 t IDS_PARTITION_TYPE_TXT "Схема раздела и тип системного интерфейса"
-s IDC_PARTITION_TYPE +22,0
 t IDS_FILESYSTEM_TXT "Файловая система"
-s IDC_FILESYSTEM +22,0
 t IDS_CLUSTERSIZE_TXT "Размер кластера"
-s IDC_CLUSTERSIZE +22,0
 t IDS_LABEL_TXT "Новая метка тома"
-s IDC_LABEL +22,0
-t IDS_FORMAT_OPTIONS_GRP "Параметры форматирования       "
-t IDC_BADBLOCKS "Проверить на плохие блоки:"
+t IDS_FORMAT_OPTIONS_GRP "Параметры форматирования         "
+t IDC_BADBLOCKS "Проверить на плохие блоки"
 t IDC_QUICKFORMAT "Быстрое форматирование"
-t IDC_BOOT "Создать загрузочный диск:"
+t IDC_BOOT "Создать загрузочный диск"
 t IDC_SET_ICON "Создать расширенную метку и значок устройства"
 t IDC_ABOUT "О программе..."
 t IDC_LOG "Журнал"
 t IDCANCEL "Закрыть"
 t IDC_START "Старт"
-m IDC_ADVANCED +72,0
 t IDS_ADVANCED_OPTIONS_GRP "Дополнительные параметры"
 t IDC_ENABLE_FIXED_DISKS "Показывать внешние USB накопители"
 t IDC_EXTRA_PARTITION "Добавить исправления для старых BIOS"
-t IDC_RUFUS_MBR "Использовать MBR с BIOS ID:"
-s IDC_RUFUS_MBR +10,0
+t IDC_RUFUS_MBR "Использовать MBR с BIOS ID"
 
 # About dialog
 g IDD_ABOUTBOX
 t IDD_ABOUTBOX "О программе Rufus"
 t IDC_ABOUT_LICENSE "Лицензия"
 t IDC_ABOUT_UPDATES "Обновления"
+s IDC_ABOUT_UPDATES +10,0
 
 # About -> License dialog
 g IDD_LICENSE
@@ -9806,6 +9728,7 @@ t IDCANCEL "Закрыть"
 # Notifications. You can trigger one of these by using Alt-R and re-launching Rufus
 g IDD_NOTIFICATION
 t IDC_MORE_INFO "Больше информации"
+s IDC_MORE_INFO +20,0
 t IDYES "Да"
 t IDNO "Нет"
 
@@ -9813,34 +9736,35 @@ t IDNO "Нет"
 g IDD_LOG
 t IDD_LOG "Журнал"
 t IDC_LOG_CLEAR "Очистить журнал"
-m IDC_LOG_CLEAR -78,0
-s IDC_LOG_CLEAR +30,0
+m IDC_LOG_CLEAR -101,0
+s IDC_LOG_CLEAR +32,0
 t IDC_LOG_SAVE "Сохранить журнал"
-m IDC_LOG_SAVE -54,0
-s IDC_LOG_SAVE +30,0
+m IDC_LOG_SAVE -70,0
+s IDC_LOG_SAVE +38,0
 t IDCANCEL "Закрыть журнал"
-m IDCANCEL -29,0
-s IDCANCEL +30,0
+m IDCANCEL -32,0
+s IDCANCEL +32,0
 
 # About -> Updates
 g IDD_UPDATE_POLICY
-s IDD_UPDATE_POLICY +80,0
-s IDC_POLICY +80,0
-m IDS_CHECK_NOW_GRP +94,0
-s IDS_CHECK_NOW_GRP -16,0
-m IDC_UPDATE_FREQUENCY +40,0
-s IDC_UPDATE_FREQUENCY +62,0
-m IDC_INCLUDE_BETAS +40,0
+s IDD_UPDATE_POLICY +100,0
+s IDC_POLICY +100,0
+m IDS_CHECK_NOW_GRP +119,0
+s IDS_CHECK_NOW_GRP -18,0
+m IDC_UPDATE_FREQUENCY +54,0
+s IDC_UPDATE_FREQUENCY +74,0
+m IDC_INCLUDE_BETAS +54,0
 t IDD_UPDATE_POLICY "Политика обновления и параметры"
 t IDS_UPDATE_SETTINGS_GRP "Параметры"
-s IDS_UPDATE_SETTINGS_GRP +100,0
-t IDS_UPDATE_FREQUENCY_TXT "Проверка наличия обновлений:"
-s IDS_UPDATE_FREQUENCY_TXT +40,0
-t IDS_INCLUDE_BETAS_TXT "Включая бета-версии:"
+s IDS_UPDATE_SETTINGS_GRP +119,0
+t IDS_UPDATE_FREQUENCY_TXT "Проверка наличия обновлений"
+s IDS_UPDATE_FREQUENCY_TXT +60,0
+t IDS_INCLUDE_BETAS_TXT "Включая бета-версии"
+s IDS_INCLUDE_BETAS_TXT +60,0
 t IDC_CHECK_NOW "Проверить"
-m IDC_CHECK_NOW +85,0
+m IDC_CHECK_NOW +109,0
 t IDCANCEL "Закрыть"
-m IDCANCEL +85,0
+m IDCANCEL +109,0
 
 # Dialog that appears when a new version is available
 g IDD_NEW_VERSION
@@ -10144,19 +10068,14 @@ t MSG_263 "Использование правильного размера"
 
 ################################################################################
 l "sk-SK" "Slovak (Slovensky)" 0x041B
-v 1.0.12
+v 1.0.14
 b "en-US"
 
 # Main dialog
 g IDD_DIALOG
 
-m IDC_ADVANCED +50,0
-s IDC_LOG +35,0
-m IDC_LOG -2,0
-m IDC_START +22,0
-s IDC_START -15,0
-s IDCANCEL -5,0
-m IDCANCEL +5,0
+m IDC_ADVANCED +47,0
+s IDC_LOG +24,0
 
 t IDS_DEVICE_TXT "Zariadenie"
 t IDS_PARTITION_TYPE_TXT "Schéma oddielu a typ cieľového systému"
@@ -10211,16 +10130,20 @@ t IDCANCEL "Zatvoriť"
 g IDD_UPDATE_POLICY
 t IDD_UPDATE_POLICY "Zásady aktualizácií a nastavenia"
 t IDS_UPDATE_SETTINGS_GRP "Nastavenia automatických aktualizácií"
-t IDS_UPDATE_FREQUENCY_TXT "Aktualizácia:"
-s IDS_UPDATE_FREQUENCY_TXT -10,0
-m IDC_UPDATE_FREQUENCY -10,0
-s IDC_UPDATE_FREQUENCY +10,0
-t IDS_INCLUDE_BETAS_TXT "Zahrnúť beta verzie:"
-s IDS_INCLUDE_BETAS_TXT -10,0
-m IDC_INCLUDE_BETAS -10,0
+t IDS_UPDATE_FREQUENCY_TXT "Aktualizácia"
+s IDS_UPDATE_FREQUENCY_TXT -14,0
+m IDC_UPDATE_FREQUENCY -14,0
+s IDC_UPDATE_FREQUENCY +18,0
+t IDS_INCLUDE_BETAS_TXT "Zahrnúť beta verzie"
+s IDS_INCLUDE_BETAS_TXT -14,0
+m IDC_INCLUDE_BETAS -14,0
 s IDC_INCLUDE_BETAS +10,0
 t IDC_CHECK_NOW "Skontrolovať"
+s IDC_CHECK_NOW +6,0
+m IDC_CHECK_NOW -3,0
 t IDCANCEL "Zavrieť"
+s IDCANCEL +6,0
+m IDCANCEL -3,0
 
 # Dialog that appears when a new version is available
 g IDD_NEW_VERSION
@@ -10544,7 +10467,7 @@ t MSG_263 "Použiť PROPER veľkosť jednotiek"
 
 ################################################################################
 l "sl-SI" "Slovene (Slovenščina)" 0x0424
-v 1.0.12
+v 1.0.14
 b "en-US"
 
 # Main dialog
@@ -10554,46 +10477,37 @@ t IDS_PARTITION_TYPE_TXT "Particijska shema in vrsta ciljnega sistema"
 t IDS_FILESYSTEM_TXT "Datotečni sistem"
 t IDS_CLUSTERSIZE_TXT "Velikost gruče"
 t IDS_LABEL_TXT "Oznaka novega nosilca"
-t IDS_FORMAT_OPTIONS_GRP "Možnosti formatiranja       "
+t IDS_FORMAT_OPTIONS_GRP "Možnosti formatiranja         "
 t IDC_BADBLOCKS "Odkrij slabe bloke"
-s IDC_BADBLOCKS -10,0
-m IDC_NBPASSES -10,0
-s IDC_NBPASSES +10,0
+s IDC_BADBLOCKS -25,0
+m IDC_NBPASSES -25,0
+s IDC_NBPASSES +25,0
 t IDC_QUICKFORMAT "Hitro formatiranje"
 t IDC_BOOT "Ustvari zagonski disk z"
-s IDC_BOOT -10,0
-m IDC_BOOTTYPE -10,0
-s IDC_BOOTTYPE +10,0
+s IDC_BOOT -25,0
+m IDC_BOOTTYPE -25,0
+s IDC_BOOTTYPE +25,0
 t IDC_SET_ICON "Ustvari datoteki za ikono in podaljšano oznako"
 t IDC_ABOUT "O programu"
 t IDC_LOG "Zapisnik"
-s IDC_LOG +28,0
-m IDC_LOG -4,0
+s IDC_LOG +30,0
 t IDCANCEL "Zapri"
-m IDCANCEL +6,0
-s IDCANCEL -7,0
 t IDC_START "Začni"
-m IDC_START +15,0
-s IDC_START -7,0
 t IDS_ADVANCED_OPTIONS_GRP "Dodatne možnosti"
-m IDC_ADVANCED +30,0
+m IDC_ADVANCED +34,0
 t IDC_ENABLE_FIXED_DISKS "Naštej USB trde diske"
-# Note: it is acceptable to drop the parenthesis () below if you are running out of space
-# as there is a tooltip (MSG_169) providing these details
 t IDC_EXTRA_PARTITION "Dodaj popravke za stare BIOSe"
-# 'MBR': See http://en.wikipedia.org/wiki/Master_boot_record
-# Rufus can install it's own custom MBR (the Rufus MBR), which also allows users
-# to specify a custom disk ID for the BIOS. Note: the tooltip for this control is MSG_167.
 t IDC_RUFUS_MBR "Rufusov MBR z BIOS ID"
-s IDC_RUFUS_MBR -10,0
-m IDC_DISK_ID -10,0
-s IDC_DISK_ID +10,0
+s IDC_RUFUS_MBR -25,0
+m IDC_DISK_ID -25,0
+s IDC_DISK_ID +25,0
 
 # About dialog
 g IDD_ABOUTBOX
 t IDD_ABOUTBOX "O Rufusu"
 t IDC_ABOUT_LICENSE "Licenca"
 t IDC_ABOUT_UPDATES "Posodobitve"
+s IDC_ABOUT_UPDATES +10,0
 t IDOK "V redu"
 
 # About -> License dialog
@@ -10616,18 +10530,23 @@ t IDCANCEL "Zapri"
 
 # About -> Updates
 g IDD_UPDATE_POLICY
+s IDD_UPDATE_POLICY +20,0
+s IDC_POLICY +20,0
 t IDD_UPDATE_POLICY "Posodobitvena politika in nastavitve"
 t IDS_UPDATE_SETTINGS_GRP "Nastavitve"
-s IDS_UPDATE_SETTINGS_GRP +6,0
+s IDS_UPDATE_SETTINGS_GRP +20,0
+m IDS_CHECK_NOW_GRP +20,0
 t IDS_UPDATE_FREQUENCY_TXT "Preveri za posodobitve"
-s IDS_UPDATE_FREQUENCY_TXT -5,0
-m IDC_UPDATE_FREQUENCY -5,0
-s IDC_UPDATE_FREQUENCY +10,0
-t IDS_INCLUDE_BETAS_TXT "Upoštevaj beta verzije:"
-s IDS_INCLUDE_BETAS_TXT -5,0
-m IDC_INCLUDE_BETAS -5,0
+s IDS_UPDATE_FREQUENCY_TXT +5,0
+m IDC_UPDATE_FREQUENCY +3,0
+s IDC_UPDATE_FREQUENCY +15,0
+t IDS_INCLUDE_BETAS_TXT "Upoštevaj beta verzije"
+s IDS_INCLUDE_BETAS_TXT +5,0
+m IDC_INCLUDE_BETAS +3,0
 t IDC_CHECK_NOW "Preveri zdaj"
+m IDC_CHECK_NOW +20,0
 t IDCANCEL "Zapri"
+m IDCANCEL +20,0
 
 # Dialog that appears when a new version is available
 g IDD_NEW_VERSION
@@ -10956,12 +10875,10 @@ t IDS_LABEL_TXT "Etiqueta nueva"
 t IDS_FORMAT_OPTIONS_GRP "Opciones de formateo        "
 s IDS_FORMAT_OPTIONS_GRP +5, 0
 m IDC_ADVANCED +34,0
-t IDC_BADBLOCKS "Buscar bloques dañados en la USB:"
-s IDC_BADBLOCKS +35, 0
+t IDC_BADBLOCKS "Buscar bloques dañados en la USB"
+s IDC_BADBLOCKS +30,0
 t IDC_QUICKFORMAT "Formateo rápido"
-t IDC_BOOT "Crear disco de arranque con:"
-s IDC_BOOTTYPE +7,0
-m IDC_BOOTTYPE -2,0
+t IDC_BOOT "Crear disco de arranque con"
 t IDC_SET_ICON "Añadir etiquetas extendidas e iconos"
 t IDC_ABOUT "Acerca de..."
 s IDC_ABOUT -5,0
@@ -10969,27 +10886,21 @@ t IDC_LOG "Historial..."
 s IDC_LOG +40,0
 m IDC_LOG -5,0
 t IDCANCEL "Cerrar"
-s IDCANCEL -20,0
-m IDCANCEL +25,0
+m IDCANCEL +5,0
 t IDC_START "Empezar"
-s IDC_START -10,0
-m IDC_START +35,0
+m IDC_START +5,0
 t IDS_ADVANCED_OPTIONS_GRP "Opciones avanzadas"
 s IDS_ADVANCED_OPTIONS_GRP +5, 0
 t IDC_ENABLE_FIXED_DISKS "Enlistar los discos duros USB"
 t IDC_EXTRA_PARTITION "Opciones de compatibilidad para BIOS viejos"
-# 'MBR': See http://en.wikipedia.org/wiki/Master_boot_record
-# Rufus can install it's own custom MBR (the Rufus MBR), which also allows users
-# to specify a custom disk ID for the BIOS. Note: the tooltip for this control is MSG_167.
-t IDC_RUFUS_MBR "Usar el MBR de Rufus, ID de BIOS:"
+t IDC_RUFUS_MBR "Usar el MBR de Rufus, ID de BIOS"
 s IDC_RUFUS_MBR +25,0
-
 m IDC_NBPASSES +30,0
-s IDC_NBPASSES +14,0
-s IDC_DISK_ID -17,0
-m IDC_DISK_ID +25,0
-m IDC_SELECT_ISO +8,0
-m IDC_BOOTTYPE +2,0
+s IDC_NBPASSES -25,0
+s IDC_DISK_ID -25,0
+m IDC_DISK_ID +30,0
+m IDC_SELECT_ISO +5,0
+m IDC_BOOTTYPE +5,0
 
 # About dialog
 g IDD_ABOUTBOX
@@ -11012,22 +10923,24 @@ t IDNO "No"
 # Log dialog
 g IDD_LOG
 t IDD_LOG "Historial de eventos"
-t IDC_LOG_CLEAR "Borrar el historial"
-s IDC_LOG_CLEAR +15, 0
-m IDC_LOG_CLEAR -35, 0
-t IDC_LOG_SAVE "Guardar el historial"
-s IDC_LOG_SAVE +23, 0
-m IDC_LOG_SAVE -23 , 0
+t IDC_LOG_CLEAR "Borrar"
+t IDC_LOG_SAVE "Guardar"
 t IDCANCEL "Cerrar"
 
 # About -> Updates
 g IDD_UPDATE_POLICY
 t IDD_UPDATE_POLICY "Configuración de auto-actualización"
 t IDS_UPDATE_SETTINGS_GRP "Configuraciones"
-t IDS_UPDATE_FREQUENCY_TXT "Buscar actualizaciones:"
-t IDS_INCLUDE_BETAS_TXT "Incluir versiones beta:"
+t IDS_UPDATE_FREQUENCY_TXT "Buscar actualizaciones"
+s IDS_UPDATE_FREQUENCY_TXT +5,0
+s IDC_UPDATE_FREQUENCY +5,0
+t IDS_INCLUDE_BETAS_TXT "Incluir versiones beta"
 t IDC_CHECK_NOW "Buscar ahora"
+s IDC_CHECK_NOW +10,0
+m IDC_CHECK_NOW -5,0
 t IDCANCEL "Cerrar"
+s IDCANCEL +10,0
+m IDCANCEL -5,0
 
 # Dialog that appears when a new version is available
 g IDD_NEW_VERSION
@@ -11337,7 +11250,7 @@ t MSG_259 "Forzar actualización"
 
 ################################################################################
 l "sv-SE" "Swedish (Svenska)" 0x041d, 0x081d
-v 1.0.12
+v 1.0.14
 b "en-US"
 
 # Main dialog
@@ -11348,7 +11261,7 @@ t IDS_PARTITION_TYPE_TXT "Partitionsschema och måltypssystem"
 t IDS_FILESYSTEM_TXT "Filsystem"
 t IDS_CLUSTERSIZE_TXT "Klusterstorlek"
 t IDS_LABEL_TXT "Ny volumetikett"
-t IDS_FORMAT_OPTIONS_GRP "Formateringsinställningar       "
+t IDS_FORMAT_OPTIONS_GRP "Formateringsinställningar         "
 t IDC_BADBLOCKS "Kontrollera enheten efter trasiga block"
 t IDC_QUICKFORMAT "Snabbformatering"
 t IDC_BOOT "Skapa startbar disk med"
@@ -11359,12 +11272,7 @@ t IDCANCEL "Stäng"
 t IDC_START "Starta"
 t IDS_ADVANCED_OPTIONS_GRP "Avancerade inställningar"
 t IDC_ENABLE_FIXED_DISKS "Lista USB-hårddiskar"
-# Note: it is acceptable to drop the parenthesis () below if you are running out of space
-# as there is a tooltip (MSG_169) providing these details
 t IDC_EXTRA_PARTITION "Lägg till korrigeringar för äldre BIOS:ar"
-# 'MBR': See http://en.wikipedia.org/wiki/Master_boot_record
-# Rufus can install it's own custom MBR (the Rufus MBR), which also allows users
-# to specify a custom disk ID for the BIOS. Note: the tooltip for this control is MSG_167.
 t IDC_RUFUS_MBR "Använd Rufus MBR med BIOS-ID"
 s IDC_RUFUS_MBR 20,0
 m IDC_LANG 60,0
@@ -11380,7 +11288,7 @@ m IDC_START 60,0
 s IDS_FORMAT_OPTIONS_GRP 60,0
 s IDS_ADVANCED_OPTIONS_GRP 60,0
 m IDC_NBPASSES 60,0
-m IDC_ADVANCED 46,0
+m IDC_ADVANCED 53,0
 m IDC_DISK_ID 60,0
 s IDC_BADBLOCKS 60,0
 s IDC_LOG 42,0
@@ -11417,16 +11325,21 @@ t IDCANCEL "Stäng logg"
 g IDD_UPDATE_POLICY
 t IDD_UPDATE_POLICY "Uppdateringspolicy och inställningar"
 t IDS_UPDATE_SETTINGS_GRP "Inställningar"
-t IDS_UPDATE_FREQUENCY_TXT "Kontrollera:"
-t IDS_INCLUDE_BETAS_TXT "Även beta-versioner:"
+s IDS_UPDATE_SETTINGS_GRP 8,0
+s IDS_CHECK_NOW_GRP -8,0
+m IDS_CHECK_NOW_GRP 8,0
+t IDS_UPDATE_FREQUENCY_TXT "Kontrollera"
+t IDS_INCLUDE_BETAS_TXT "Även beta-versioner"
 t IDC_CHECK_NOW "Uppdatera nu"
 t IDCANCEL "Stäng"
-s IDC_UPDATE_FREQUENCY 20,0
-m IDC_UPDATE_FREQUENCY -15,0
-s IDS_UPDATE_FREQUENCY_TXT -15,0
-m IDC_INCLUDE_BETAS -15,0
+s IDC_UPDATE_FREQUENCY 30,0
+m IDC_UPDATE_FREQUENCY -14,0
+s IDS_UPDATE_FREQUENCY_TXT -14,0
+m IDC_INCLUDE_BETAS -14,0
 s IDC_CHECK_NOW 10,0
+m IDC_CHECK_NOW -2,0
 s IDCANCEL 10,0
+m IDCANCEL -2,0
 
 # Dialog that appears when a new version is available
 g IDD_NEW_VERSION
@@ -11751,54 +11664,61 @@ t MSG_263 "Använd "RÄTT" storleksenhet"
 
 ################################################################################
 l "tr-TR" "Turkish (Türkçe)" 0x041F
-v 1.0.12
+v 1.0.14
 b "en-US"
 
 # Main dialog
 g IDD_DIALOG
+s IDD_DIALOG +5,0
+m IDC_LANG +5,0
 t IDS_DEVICE_TXT "Aygıt"
+s IDC_DEVICE +5,0
 t IDS_PARTITION_TYPE_TXT "Disk Bölüm Düzeni ve Hedef Sistem Türü"
+s IDC_PARTITION_TYPE +5,0
 t IDS_FILESYSTEM_TXT "Dosya Sistemi"
+s IDC_FILESYSTEM +5,0
 t IDS_CLUSTERSIZE_TXT "Ayırma Birimi Boyutu"
+s IDC_CLUSTERSIZE +5,0
 t IDS_LABEL_TXT "Yeni Birim Etiketi"
-t IDS_FORMAT_OPTIONS_GRP "Biçimlendirme Seçenekleri       "
-m IDC_ADVANCED +46,0
-t IDC_BADBLOCKS "Hatalı Bloklar için Aygıtı Denetle:"
-s IDC_BADBLOCKS +15,0
+s IDC_LABEL +5,0
+s IDC_PROGRESS +5,0
+t IDS_FORMAT_OPTIONS_GRP "Biçimlendirme Seçenekleri         "
+s IDS_FORMAT_OPTIONS_GRP +5,0
+m IDC_ADVANCED +53,0
+t IDC_BADBLOCKS "Hatalı Bloklar için Aygıtı Denetle"
+s IDC_BADBLOCKS +25,0
 m IDC_NBPASSES +30,0
-s IDC_NBPASSES +12,0
+s IDC_NBPASSES -25,0
 t IDC_QUICKFORMAT "Hızlı Biçimlendir"
-t IDC_BOOT "Açılış Diski Oluşturma Yöntemi:"
-s IDC_BOOT +2,0
-m IDC_BOOTTYPE +3,0
-s IDC_BOOTTYPE +7,0
-m IDC_SELECT_ISO +7,0
-s IDC_SELECT_ISO -1,0
+t IDC_BOOT "Açılış Diski Oluşturma Yöntemi"
+s IDC_BOOT +5,0
+m IDC_BOOTTYPE +5,0
+m IDC_SELECT_ISO +5,0
 t IDC_SET_ICON "Genişletilmiş Etiket ve Simge Dosyaları Oluştur"
 t IDC_ABOUT "Hakkında..."
 s IDC_ABOUT -5,0
 t IDC_LOG "Günlük"
-m IDC_LOG -10,0
-s IDC_LOG +15,0
+m IDC_LOG -5,0
+s IDC_LOG +20,0
 t IDCANCEL "Kapat"
-m IDCANCEL +10,0
-s IDCANCEL -10,0
+m IDCANCEL +5,0
 t IDC_START "Başlat"
-m IDC_START +20,0
-s IDC_START -10,0
+m IDC_START +5,0
 t IDS_ADVANCED_OPTIONS_GRP "Gelişmiş Seçenekler"
+s IDS_ADVANCED_OPTIONS_GRP +5,0
 t IDC_ENABLE_FIXED_DISKS "USB sabit sürücüleri listele"
 t IDC_EXTRA_PARTITION "Eski BIOSlar için düzeltme ekle(ekstra bölüm, hiza vs.)"
-t IDC_RUFUS_MBR "Rufus MBR kullan. BIOS Kimliği:"
-s IDC_RUFUS_MBR +5,0
-m IDC_DISK_ID +6,0
+t IDC_RUFUS_MBR "Rufus MBR kullan. BIOS Kimliği"
+s IDC_RUFUS_MBR +10,0
+m IDC_DISK_ID +30,0
+s IDC_DISK_ID -25,0
 
 # About dialog
 g IDD_ABOUTBOX
 t IDD_ABOUTBOX "Rufus Hakkında"
 t IDC_ABOUT_LICENSE "Lisans"
 t IDC_ABOUT_UPDATES "Güncellemeler"
-s IDC_ABOUT_UPDATES +10,0
+s IDC_ABOUT_UPDATES +18,0
 t IDOK "Tamam"
 
 # About -> License dialog
@@ -11816,33 +11736,36 @@ t IDNO "Hayır"
 g IDD_LOG
 t IDD_LOG "Günlük"
 t IDC_LOG_CLEAR "Günlüğü Temizle"
-s IDC_LOG_CLEAR +15,0
-m IDC_LOG_CLEAR -30,0
+s IDC_LOG_CLEAR +24,0
+m IDC_LOG_CLEAR -72,0
 t IDC_LOG_SAVE "Günlüğü Kaydet"
-s IDC_LOG_SAVE +15,0
-m IDC_LOG_SAVE -20,0
+s IDC_LOG_SAVE +24,0
+m IDC_LOG_SAVE -48,0
 t IDCANCEL "Günlüğü Kapat"
-s IDCANCEL +15,0
-m IDCANCEL -10,0
+s IDCANCEL +24,0
+m IDCANCEL -24,0
 
 # About -> Updates
 g IDD_UPDATE_POLICY
+s IDD_UPDATE_POLICY +20,0
+s IDC_POLICY +20,0
 t IDD_UPDATE_POLICY "Güncelleme İlkesi ve Ayarlar"
 t IDS_UPDATE_SETTINGS_GRP "Ayarlar"
-s IDS_UPDATE_SETTINGS_GRP +6,0
-t IDS_UPDATE_FREQUENCY_TXT "Güncellemeleri Denetle:"
-m IDS_UPDATE_FREQUENCY_TXT -4,0
-m IDC_UPDATE_FREQUENCY -6,0
-s IDC_UPDATE_FREQUENCY +16,0
-t IDS_INCLUDE_BETAS_TXT "Beta sürümlerini içersin:"
-m IDS_INCLUDE_BETAS_TXT -4,0
-m IDC_INCLUDE_BETAS -6,0
+s IDS_UPDATE_SETTINGS_GRP +20,0
+t IDS_UPDATE_FREQUENCY_TXT "Güncellemeleri Denetle"
+s IDS_UPDATE_FREQUENCY_TXT +10,0
+m IDC_UPDATE_FREQUENCY +2,0
+s IDC_UPDATE_FREQUENCY +24,0
+t IDS_INCLUDE_BETAS_TXT "Beta sürümlerini içersin"
+s IDS_INCLUDE_BETAS_TXT +10,0
+m IDC_INCLUDE_BETAS +2,0
 t IDC_CHECK_NOW "Şimdi Denetle"
-m IDC_CHECK_NOW +3,0
-m IDS_CHECK_NOW_GRP +6,0
-s IDS_CHECK_NOW_GRP -6,0
+m IDC_CHECK_NOW +15,0
+s IDC_CHECK_NOW +10,0
+m IDS_CHECK_NOW_GRP +20,0
 t IDCANCEL "Kapat"
-m IDCANCEL +3,0
+m IDCANCEL +15,0
+s IDCANCEL +10,0
 
 # Dialog that appears when a new version is available
 g IDD_NEW_VERSION
@@ -12168,48 +12091,38 @@ t MSG_263 "UYGUN boyutta birimleri kullanın"
 
 ################################################################################
 l "uk-UA" "Ukrainian (Українська)" 0x0422
-v 1.0.12
+v 1.0.14
 b "en-US"
 
 # Main dialog
 g IDD_DIALOG
-s IDD_DIALOG +22,0
-
-m IDC_LANG +22,0
+s IDD_DIALOG +20,0
+m IDC_LANG +20,0
 s IDS_FORMAT_OPTIONS_GRP +20,0
 s IDS_ADVANCED_OPTIONS_GRP +20,0
-s IDC_NBPASSES +30,0
-m IDC_ABOUT -2,0
-s IDC_ABOUT +15,0
-m IDC_LOG +9,0
-s IDC_LOG +30,0
-m IDC_START +47,0
-s IDC_START -10,0
-m IDCANCEL +33,0
-s IDCANCEL -10,0
-m IDC_PROGRESS -1,0
-s IDC_PROGRESS +24,0
-
-m IDC_NBPASSES +18,0
-s IDC_NBPASSES +41,0
-m IDC_BOOTTYPE +18,0
-s IDC_BOOTTYPE +5,0
-m IDC_SELECT_ISO +23,0
-s IDC_BADBLOCKS +10,0
-m IDC_DISK_ID +21,0
-s IDC_DISK_ID +2,0
+s IDC_ABOUT +26,0
+m IDC_LOG +26,0
+s IDC_LOG +28,0
+m IDC_START +20,0
+m IDCANCEL +20,0
+s IDC_PROGRESS +20,0
+m IDC_NBPASSES +20,0
+m IDC_BOOTTYPE +20,0
+m IDC_SELECT_ISO +20,0
+s IDC_BADBLOCKS +20,0
+m IDC_DISK_ID +20,0
 
 t IDS_DEVICE_TXT "Пристрій"
-s IDC_DEVICE +22,0
+s IDC_DEVICE +20,0
 t IDS_PARTITION_TYPE_TXT "Схема розділу та тип системного інтерфейсу"
-s IDC_PARTITION_TYPE +22,0
+s IDC_PARTITION_TYPE +20,0
 t IDS_FILESYSTEM_TXT "Файлова система"
-s IDC_FILESYSTEM +22,0
+s IDC_FILESYSTEM +20,0
 t IDS_CLUSTERSIZE_TXT "Розмір кластеру"
-s IDC_CLUSTERSIZE +22,0
+s IDC_CLUSTERSIZE +20,0
 t IDS_LABEL_TXT "Нова мітка тому"
-s IDC_LABEL +22,0
-t IDS_FORMAT_OPTIONS_GRP "Параметри форматування        "
+s IDC_LABEL +20,0
+t IDS_FORMAT_OPTIONS_GRP "Параметри форматування         "
 t IDC_BADBLOCKS "Перевірити на погані блоки"
 t IDC_QUICKFORMAT "Швидке форматування"
 t IDC_BOOT "Створити завантажувал. диск"
@@ -12219,7 +12132,7 @@ t IDC_ABOUT "Про програму..."
 t IDC_LOG "Журнал"
 t IDCANCEL "Закрити"
 t IDC_START "Почати"
-m IDC_ADVANCED +60,0
+m IDC_ADVANCED +62,0
 t IDS_ADVANCED_OPTIONS_GRP "Додаткові параметри"
 t IDC_ENABLE_FIXED_DISKS "Показувати зовнішні USB накопичувачі"
 t IDC_EXTRA_PARTITION "Додати виправлення для старих BIOS"
@@ -12240,6 +12153,7 @@ t IDCANCEL "Закрити"
 # Notifications. You can trigger one of these by using Alt-R and re-launching Rufus
 g IDD_NOTIFICATION
 t IDC_MORE_INFO "Більше інформації"
+s IDC_MORE_INFO +12,0
 t IDYES "Так"
 t IDNO "Ні"
 
@@ -12260,21 +12174,21 @@ s IDCANCEL +30,0
 g IDD_UPDATE_POLICY
 s IDD_UPDATE_POLICY +80,0
 s IDC_POLICY +80,0
-m IDS_CHECK_NOW_GRP +94,0
-s IDS_CHECK_NOW_GRP -16,0
-m IDC_UPDATE_FREQUENCY +40,0
-s IDC_UPDATE_FREQUENCY +62,0
-m IDC_INCLUDE_BETAS +40,0
+m IDS_CHECK_NOW_GRP +80,0
+m IDC_UPDATE_FREQUENCY +50,0
+s IDC_UPDATE_FREQUENCY +30,0
+m IDC_INCLUDE_BETAS +50,0
 t IDD_UPDATE_POLICY "Політика оновлення та параметри"
 t IDS_UPDATE_SETTINGS_GRP "Параметри"
-s IDS_UPDATE_SETTINGS_GRP +100,0
-t IDS_UPDATE_FREQUENCY_TXT "Перевірка наявності оновлень:"
-s IDS_UPDATE_FREQUENCY_TXT +40,0
-t IDS_INCLUDE_BETAS_TXT "Включаючи бета-версії:"
+s IDS_UPDATE_SETTINGS_GRP +80,0
+t IDS_UPDATE_FREQUENCY_TXT "Перевірка наявності оновлень"
+s IDS_UPDATE_FREQUENCY_TXT +70,0
+t IDS_INCLUDE_BETAS_TXT "Включаючи бета-версії"
+s IDS_INCLUDE_BETAS_TXT +20,0
 t IDC_CHECK_NOW "Перевірити"
-m IDC_CHECK_NOW +85,0
+m IDC_CHECK_NOW +80,0
 t IDCANCEL "Закрити"
-m IDCANCEL +85,0
+m IDCANCEL +80,0
 
 # Dialog that appears when a new version is available
 g IDD_NEW_VERSION

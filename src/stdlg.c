@@ -1113,12 +1113,16 @@ BOOL SetUpdateCheck(void)
 		GetModuleFileNameU(NULL, filename, sizeof(filename));
 		fn_len = safe_strlen(filename);
 		exe_len = safe_strlen(exename);
+#if !defined(_DEBUG)	// Don't allow disabling update prompt, unless it's a release
 		if ((fn_len > exe_len) && (safe_stricmp(&filename[fn_len-exe_len], exename) == 0)) {
 			uprintf("Short name used - Disabling initial update policy prompt\n");
 			enable_updates = TRUE;
 		} else {
+#endif
 			enable_updates = Notification(MSG_QUESTION, &more_info, lmprintf(MSG_004), lmprintf(MSG_005));
+#if !defined(_DEBUG)
 		}
+#endif
 		if (!enable_updates) {
 			WriteRegistryKey32(REGKEY_HKCU, REGKEY_UPDATE_INTERVAL, -1);
 			return FALSE;

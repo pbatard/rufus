@@ -1358,6 +1358,12 @@ void InitDialog(HWND hDlg)
 	ShowWindow(GetDlgItem(hDlg, IDC_TEST), SW_SHOW);
 #endif
 
+	// Position of the advanced button needs to be adjusted for XP
+	// (and we don't want to have to remember to keep in sync in the RC)
+	// TODO: Ideally, we'd get the metrics of the font and compute our position and addon spaces accordingly
+	if (nWindowsVersion <= WINDOWS_XP)
+		ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDC_ADVANCED), -5, 0, 0, 0);
+
 	// Quite a burden to carry around as parameters
 	hMainDialog = hDlg;
 	hDeviceList = GetDlgItem(hDlg, IDC_DEVICE);
