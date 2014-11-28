@@ -372,6 +372,7 @@ extern void DestroyTooltip(HWND hWnd);
 extern void DestroyAllTooltips(void);
 extern BOOL Notification(int type, const notification_info* more_info, char* title, char* format, ...);
 extern BOOL Question(char* title, char* format, ...);
+extern SIZE GetTextSize(HWND hCtrl);
 extern BOOL ExtractDOS(const char* path);
 extern BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan);
 extern int64_t ExtractISOFile(const char* iso, const char* iso_file, const char* dest_file, DWORD attributes);

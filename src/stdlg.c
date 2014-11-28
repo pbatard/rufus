@@ -1337,3 +1337,35 @@ void SetTitleBarIcon(HWND hDlg)
 	hBigIcon = (HICON)LoadImage(hMainInstance, MAKEINTRESOURCE(IDI_ICON), IMAGE_ICON, s32, s32, 0);
 	SendMessage (hDlg, WM_SETICON, ICON_BIG, (LPARAM)hBigIcon);
 }
+
+// Return the onscreen size of the text displayed by a control
+SIZE GetTextSize(HWND hCtrl)
+{
+	SIZE sz = {0, 0};
+	HDC hDC;
+	wchar_t *wstr;
+	int len;
+	HFONT hFont;
+
+	// Compute the size of the text of the format group
+	hDC = GetDC(hCtrl);
+	if (hDC == NULL)
+		goto out;
+	hFont = (HFONT)SendMessageA(hCtrl, WM_GETFONT, 0, 0);
+	if (hFont == NULL)
+		goto out;
+	SelectObject(hDC, hFont);
+	len = GetWindowTextLengthW(hCtrl);
+	if (len <= 0)
+		goto out;
+	wstr = calloc(len + 1, sizeof(wchar_t));
+	if (wstr == NULL)
+		goto out;
+	if (GetWindowTextW(hCtrl, wstr, len + 1) > 0)
+		GetTextExtentPoint32W(hDC, wstr, len, &sz);
+out:
+	safe_free(wstr);
+	if (hDC != NULL)
+		ReleaseDC(hCtrl, hDC);
+	return sz;
+}

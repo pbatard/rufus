@@ -1345,20 +1345,17 @@ void InitDialog(HWND hDlg)
 {
 	HINSTANCE hDllInst;
 	DWORD len;
+	SIZE sz;
+	HWND hCtrl;
 	HDC hDC;
 	int i, i16, s16;
 	char tmp[128], *token, *buf, *ext;
+	wchar_t wtmp[128] = {0};
 	static char* resource[2] = { MAKEINTRESOURCEA(IDR_SL_LDLINUX_V4_SYS), MAKEINTRESOURCEA(IDR_SL_LDLINUX_V6_SYS) };
 
 #ifdef RUFUS_TEST
 	ShowWindow(GetDlgItem(hDlg, IDC_TEST), SW_SHOW);
 #endif
-
-	// Position of the advanced button needs to be adjusted for XP
-	// (and we don't want to have to remember to keep in sync in the RC)
-	// TODO: Ideally, we'd get the metrics of the font and compute our position and addon spaces accordingly
-	if (nWindowsVersion <= WINDOWS_XP)
-		ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDC_ADVANCED), -5, 0, 0, 0);
 
 	// Quite a burden to carry around as parameters
 	hMainDialog = hDlg;
@@ -1471,6 +1468,20 @@ void InitDialog(HWND hDlg)
 	} else {
 		hIconDown = (HICON)LoadImage(hMainInstance, MAKEINTRESOURCE(IDI_DOWN), IMAGE_ICON, 16, 16, 0);
 		hIconUp = (HICON)LoadImage(hMainInstance, MAKEINTRESOURCE(IDI_UP), IMAGE_ICON, 16, 16, 0);
+	}
+
+	// Reposition the Advanced button
+	hCtrl = GetDlgItem(hDlg, IDS_FORMAT_OPTIONS_GRP);
+	sz = GetTextSize(hCtrl);
+	ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDC_ADVANCED), sz.cx, 0, 0, 0);
+	// Add a space to the "Format Options" text
+	GetWindowTextW(hCtrl, wtmp, ARRAYSIZE(wtmp));
+	wtmp[wcslen(wtmp)] = ' ';
+	SetWindowTextW(hCtrl, wtmp);
+	// The things one needs to do to keep things looking good...
+	if (nWindowsVersion == WINDOWS_7) {
+		ResizeMoveCtrl(hDlg, GetDlgItem(hMainDialog, IDS_ADVANCED_OPTIONS_GRP), 0, -1, 0, 2);
+		ResizeMoveCtrl(hDlg, hProgress, 0, 1, 0, 0);
 	}
 
 	// Set the icons on the the buttons
