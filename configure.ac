@@ -32,6 +32,18 @@ else
   LDFLAGS="-s"
 fi
 
+# Alpha/Beta
+AC_ARG_ENABLE([alpha],[AS_HELP_STRING([--enable-alpha], [build an ALPHA release (default=no)])], [alpha_enabled=$enableval], [alpha_enabled='no'])
+if test "x$alpha_enabled" != "xno" ; then
+  CFLAGS+=" -DALPHA"
+  SUFFIX=_ALPHA
+fi
+AC_ARG_ENABLE([beta],[AS_HELP_STRING([--enable-beta], [build a BETA release (default=no)])],	[beta_enabled=$enableval],	[beta_enabled='no'])
+if test "x$beta_enabled" != "xno" ; then
+  CFLAGS+=" -DBETA"
+  SUFFIX=_BETA
+fi
+
 AC_MSG_RESULT([enabling Large File Support (ISO support)])
 AM_CFLAGS="$AM_CFLAGS -D_FILE_OFFSET_BITS=64 -D_OFF_T_ -D_off_t=off64_t -Doff_t=off64_t -Doff32_t=long"
 
@@ -47,6 +59,7 @@ AM_CFLAGS="$AM_CFLAGS -std=gnu99 -Wshadow -Wall -Wundef -Wunused -Wstrict-protot
 AC_SUBST([VISIBILITY_CFLAGS])
 AC_SUBST([AM_CFLAGS])
 AC_SUBST([AM_LDFLAGS])
+AC_SUBST([SUFFIX])
 
 AC_CONFIG_FILES([Makefile])
 AC_CONFIG_FILES([src/Makefile])

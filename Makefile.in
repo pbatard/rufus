@@ -110,6 +110,7 @@ SED = @SED@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
+SUFFIX = @SUFFIX@
 VERSION = @VERSION@
 VISIBILITY_CFLAGS = @VISIBILITY_CFLAGS@
 WINDRES = @WINDRES@
@@ -449,8 +450,8 @@ release: all
 	@mv src/$(TARGET)$(EXEEXT) .
 	@$(STRIP) $(TARGET)$(EXEEXT)
 	@upx --lzma $(TARGET)$(EXEEXT)
-	@mv $(TARGET)$(EXEEXT) $(TARGET)-$(VERSION)$(EXEEXT)
-	@cmd.exe /k _sign.cmd $(TARGET)-$(VERSION)$(EXEEXT)
+	@mv $(TARGET)$(EXEEXT) $(TARGET)-$(VERSION)$(SUFFIX)$(EXEEXT)
+	@cmd.exe /k _sign.cmd $(TARGET)-$(VERSION)$(SUFFIX)$(EXEEXT)
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

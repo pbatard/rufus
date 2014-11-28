@@ -42,10 +42,6 @@
 #include "registry.h"
 #include "localization.h"
 
-// These should be commented out for release
-//#define IS_ALPHA
-#define IS_BETA
-
 /* Redefinitions for WDK and MinGW */
 // TODO: these would be better in a 'missing.h' file
 #ifndef PBM_SETSTATE
@@ -1336,9 +1332,9 @@ static BOOL BootCheck(void)
 
 static __inline const char* IsAlphaOrBeta(void)
 {
-#if defined(IS_ALPHA)
+#if defined(ALPHA)
 	return " (Alpha) ";
-#elif defined(IS_BETA)
+#elif defined(BETA)
 	return " (Beta) ";
 #else
 	return " ";
@@ -1697,7 +1693,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		SetWindowPos(hMainDialog, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOSIZE|SWP_NOMOVE);
 		SetWindowPos(hMainDialog, HWND_TOP, 0, 0, 0, 0, SWP_NOSIZE|SWP_NOMOVE);
 
-#if defined(IS_ALPHA)
+#if defined(ALPHA)
 		// Add a VERY ANNOYING popup for Alpha releases, so that people don't start redistributing them
 		Notification(MSG_INFO, NULL, "ALPHA VERSION", "This is an Alpha version of " APPLICATION_NAME
 			" - It is meant to be used for testing ONLY and should NOT be distributed as a release.");

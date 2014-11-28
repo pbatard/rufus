@@ -570,6 +570,7 @@ ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
 LIBOBJS
+SUFFIX
 AM_LDFLAGS
 AM_CFLAGS
 VISIBILITY_CFLAGS
@@ -652,6 +653,8 @@ ac_user_opts='
 enable_option_checking
 enable_silent_rules
 enable_debug
+enable_alpha
+enable_beta
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1280,6 +1283,8 @@ Optional Features:
   --enable-silent-rules          less verbose build output (undo: `make V=1')
   --disable-silent-rules         verbose build output (undo: `make V=0')
   --enable-debug          keep debug symbols for gdb (default=yes)
+  --enable-alpha          build an ALPHA release (default=no)
+  --enable-beta           build a BETA release (default=no)
 
 Some influential environment variables:
   CC          C compiler command
@@ -3526,6 +3531,30 @@ else
   LDFLAGS="-s"
 fi
 
+# Alpha/Beta
+# Check whether --enable-alpha was given.
+if test "${enable_alpha+set}" = set; then :
+  enableval=$enable_alpha; alpha_enabled=$enableval
+else
+  alpha_enabled='no'
+fi
+
+if test "x$alpha_enabled" != "xno" ; then
+  CFLAGS+=" -DALPHA"
+  SUFFIX=_ALPHA
+fi
+# Check whether --enable-beta was given.
+if test "${enable_beta+set}" = set; then :
+  enableval=$enable_beta; beta_enabled=$enableval
+else
+  beta_enabled='no'
+fi
+
+if test "x$beta_enabled" != "xno" ; then
+  CFLAGS+=" -DBETA"
+  SUFFIX=_BETA
+fi
+
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: enabling Large File Support (ISO support)" >&5
 $as_echo "enabling Large File Support (ISO support)" >&6; }
 AM_CFLAGS="$AM_CFLAGS -D_FILE_OFFSET_BITS=64 -D_OFF_T_ -D_off_t=off64_t -Doff_t=off64_t -Doff32_t=long"
@@ -3553,6 +3582,7 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 CFLAGS="${saved_CFLAGS}"
 
 AM_CFLAGS="$AM_CFLAGS -std=gnu99 -Wshadow -Wall -Wundef -Wunused -Wstrict-prototypes -Werror-implicit-function-declaration $nopointersign_cflags"
+
 
 
 
