@@ -109,15 +109,16 @@ static __inline BOOL IsVHD(const char* buffer)
 	int i;
 	// List of the Friendly Names of the VHD devices we know
 	const char* vhd_name[] = {
-		"Arsenal Virtual SCSI Disk Device",
-		"Kernsafe Virtual SCSI Disk Device",
-		"Microsoft Virtual Disk",
-		"MS Virtual Server SCSI Disk Device",
-		"Msft Virtual Disk"
+		"Arsenal Virtual",
+		"Kernsafe Virtual",
+		"Microsoft Virtual",
+		"MS Virtual",
+		"Msft Virtual",
+//		"VMware Virtual"	// Would list primary disks on VMWare instances, so we avoid it
 	};
 
 	for (i = 0; i < ARRAYSIZE(vhd_name); i++)
-		if (safe_stricmp(buffer, vhd_name[i]) == 0)
+		if (safe_strstr(buffer, vhd_name[i]) != NULL)
 			return TRUE;
 	return FALSE;
 }

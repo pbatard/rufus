@@ -383,7 +383,9 @@ static __inline BOOL GetTextExtentPointU(HDC hdc, const char* lpString, LPSIZE l
 	BOOL ret = FALSE;
 	DWORD err = ERROR_INVALID_DATA;
 	wconvert(lpString);
-	ret = GetTextExtentPointW(hdc, wlpString, (int)wcslen(wlpString)+1, lpSize);
+	if (wlpString == NULL)
+		return FALSE;
+	ret = GetTextExtentPoint32W(hdc, wlpString, (int)wcslen(wlpString), lpSize);
 	err = GetLastError();
 	wfree(lpString);
 	SetLastError(err);
