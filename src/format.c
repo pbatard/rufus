@@ -1272,7 +1272,8 @@ DWORD WINAPI FormatThread(void* param)
 {
 	int i, r, pt, bt, fs, dt;
 	BOOL s, ret, use_large_fat32;
-	DWORD rSize, wSize, LastRefresh = 0, DriveIndex = (DWORD)(uintptr_t)param;
+	const DWORD SectorSize = SelectedDrive.Geometry.BytesPerSector;
+	DWORD rSize, wSize, BufSize, LastRefresh = 0, DriveIndex = (DWORD)(uintptr_t)param;
 	HANDLE hPhysicalDrive = INVALID_HANDLE_VALUE;
 	HANDLE hLogicalVolume = INVALID_HANDLE_VALUE;
 	HANDLE hSourceImage = INVALID_HANDLE_VALUE;
@@ -1280,7 +1281,7 @@ DWORD WINAPI FormatThread(void* param)
 	FILE* log_fd;
 	LARGE_INTEGER li;
 	uint64_t wb;
-	uint8_t *buffer = NULL;
+	uint8_t *buffer = NULL, *aligned_buffer;
 	char *bb_msg, *guid_volume = NULL;
 	char drive_name[] = "?:\\";
 	char drive_letters[27];
@@ -1393,12 +1394,12 @@ DWORD WINAPI FormatThread(void* param)
 				fflush(log_fd);
 			}
 
-			if (!BadBlocks(hPhysicalDrive, SelectedDrive.DiskSize,
-				SelectedDrive.Geometry.BytesPerSector, ComboBox_GetCurSel(hNBPasses)+1, &report, log_fd)) {
+			if (!BadBlocks(hPhysicalDrive, SelectedDrive.DiskSize, SectorSize,
+				ComboBox_GetCurSel(hNBPasses)+1, &report, log_fd)) {
 				uprintf("Bad blocks: Check failed.\n");
 				if (!IS_ERROR(FormatStatus))
 					FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_BADBLOCKS_FAILURE);
-				ClearMBRGPT(hPhysicalDrive, SelectedDrive.DiskSize, SelectedDrive.Geometry.BytesPerSector, FALSE);
+				ClearMBRGPT(hPhysicalDrive, SelectedDrive.DiskSize, SectorSize, FALSE);
 				fclose(log_fd);
 				_unlink(logfile);
 				goto out;
@@ -1431,7 +1432,7 @@ DWORD WINAPI FormatThread(void* param)
 
 	// Especially after destructive badblocks test, you must zero the MBR/GPT completely
 	// before repartitioning. Else, all kind of bad things happen.
-	if (!ClearMBRGPT(hPhysicalDrive, SelectedDrive.DiskSize, SelectedDrive.Geometry.BytesPerSector, use_large_fat32)) {
+	if (!ClearMBRGPT(hPhysicalDrive, SelectedDrive.DiskSize, SectorSize, use_large_fat32)) {
 		uprintf("unable to zero MBR/GPT\n");
 		if (!IS_ERROR(FormatStatus))
 			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_WRITE_FAULT;
@@ -1454,18 +1455,22 @@ DWORD WINAPI FormatThread(void* param)
 		}
 
 		uprintf("Writing Image...");
-		buffer = (uint8_t*)malloc(DD_BUFFER_SIZE);
+		// Our buffer size must be a multiple of the sector size
+		BufSize = ((DD_BUFFER_SIZE + SectorSize - 1) / SectorSize) * SectorSize;
+		buffer = (uint8_t*)malloc(BufSize + SectorSize);	// +1 sector for align
 		if (buffer == NULL) {
 			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_NOT_ENOUGH_MEMORY;
 			uprintf("could not allocate DD buffer");
 			goto out;
 		}
+		// http://msdn.microsoft.com/en-us/library/windows/desktop/aa365747.aspx does buffer sector alignment
+		aligned_buffer = ((void *) ((((uintptr_t)(buffer)) + (SectorSize) - 1) & (~(((uintptr_t)(SectorSize)) - 1))));
 
 		// Don't bother trying for something clever, using double buffering overlapped and whatnot:
 		// With Windows' default optimizations, sync read + sync write for sequential operations
 		// will be as fast, if not faster, than whatever async scheme you can come up with.
-		for (wb = 0; ; wb += wSize) {
-			s = ReadFile(hSourceImage, buffer, DD_BUFFER_SIZE, &rSize, NULL);
+		for (wb = 0, wSize = 0; ; wb += wSize) {
+			s = ReadFile(hSourceImage, aligned_buffer, BufSize, &rSize, NULL);
 			if (!s) {
 				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_READ_FAULT;
 				uprintf("read error: %s", WindowsErrorString());
@@ -1483,9 +1488,12 @@ DWORD WINAPI FormatThread(void* param)
 			if (wb + rSize > iso_report.projected_size) {
 				rSize = (DWORD)(iso_report.projected_size - wb);
 			}
+			// WriteFile fails unless the size is a multiple of sector size
+			if (rSize % SectorSize != 0)
+				rSize = ((rSize + SectorSize -1) / SectorSize) * SectorSize;
 			for (i=0; i<WRITE_RETRIES; i++) {
 				CHECK_FOR_USER_CANCEL;
-				s = WriteFile(hPhysicalDrive, buffer, rSize, &wSize, NULL);
+				s = WriteFile(hPhysicalDrive, aligned_buffer, rSize, &wSize, NULL);
 				if ((s) && (wSize == rSize))
 					break;
 				if (s)
