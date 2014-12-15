@@ -24,7 +24,6 @@
 x86_32
 x86_64
 autom4te.cache
-compile
 config.guess
 ./config.h
 config.log

@@ -8,4 +8,4 @@ release: all
 	@$(STRIP) $(TARGET)$(EXEEXT)
 	@upx --lzma $(TARGET)$(EXEEXT)
 	@mv $(TARGET)$(EXEEXT) $(TARGET)-$(VERSION)$(SUFFIX)$(EXEEXT)
-	@cmd.exe /k _sign.cmd $(TARGET)-$(VERSION)$(SUFFIX)$(EXEEXT)
+	@cmd.exe //c _sign.cmd $(TARGET)-$(VERSION)$(SUFFIX)$(EXEEXT)

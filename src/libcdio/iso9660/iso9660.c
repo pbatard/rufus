@@ -91,7 +91,7 @@ timegm(struct tm *tm)
 #endif
 
 #ifndef HAVE_GMTIME_R
-static struct tm *
+struct tm *
 gmtime_r(const time_t *timer, struct tm *result)
 {
     struct tm *tmp = gmtime(timer);
@@ -105,7 +105,7 @@ gmtime_r(const time_t *timer, struct tm *result)
 #endif
 
 #ifndef HAVE_LOCALTIME_R
-static struct tm *
+struct tm *
 localtime_r(const time_t *timer, struct tm *result)
 {
     struct tm *tmp = localtime(timer);

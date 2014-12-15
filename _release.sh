@@ -1,5 +1,5 @@
 #!/bin/sh
 rm -f rufus*.exe
 ./configure --disable-debug "$@"
-make clean
-make release
+make -j4 clean
+make -j4 release

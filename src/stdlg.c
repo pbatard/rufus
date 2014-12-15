@@ -1339,7 +1339,7 @@ SIZE GetTextSize(HWND hCtrl)
 {
 	SIZE sz = {0, 0};
 	HDC hDC;
-	wchar_t *wstr;
+	wchar_t *wstr = NULL;
 	int len;
 	HFONT hFont;
 
