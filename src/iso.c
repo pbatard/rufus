@@ -52,6 +52,12 @@
 CdIo_t* cdio_open (const char* psz_source, driver_id_t driver_id) {return NULL;}
 void cdio_destroy (CdIo_t* p_cdio) {}
 
+typedef struct {
+	BOOL is_syslinux_cfg;
+	BOOL is_grub_cfg;
+	BOOL is_old_c32[NB_OLD_C32];
+} EXTRACT_PROPS;
+
 RUFUS_ISO_REPORT iso_report;
 int64_t iso_blocking_status = -1;
 BOOL enable_iso = TRUE, enable_joliet = TRUE, enable_rockridge = TRUE, has_ldlinux_c32;
@@ -63,6 +69,7 @@ static const char* ldlinux_name = "ldlinux.sys";
 static const char* ldlinux_c32 = "ldlinux.c32";
 static const char* efi_dirname = "/efi/boot";
 static const char* grub_dirname = "/boot/grub";   // NB: We don't support nonstandard config dir such as AROS' "/boot/pc/grub/"
+static const char* grub_cfg = "grub.cfg";
 static const char* syslinux_cfg[] = { "isolinux.cfg", "syslinux.cfg", "extlinux.conf"};
 static const char dot_isolinux_bin[] = ".\\isolinux.bin";
 static const char* isolinux_bin = &dot_isolinux_bin[2];
@@ -122,34 +129,41 @@ static void log_handler (cdio_log_level_t level, const char *message)
  * Scan and set ISO properties
  * Returns true if the the current file does not need to be processed further
  */
-static BOOL check_iso_props(const char* psz_dirname, BOOL* is_syslinux_cfg, BOOL* is_old_c32, 
-	int64_t i_file_length, const char* psz_basename, const char* psz_fullpath)
+static BOOL check_iso_props(const char* psz_dirname, int64_t i_file_length, const char* psz_basename,
+	const char* psz_fullpath, EXTRACT_PROPS *props)
 {
 	size_t i, j;
-
 	// Check for an isolinux/syslinux config file anywhere
-	*is_syslinux_cfg = FALSE;
+	memset(props, 0, sizeof(EXTRACT_PROPS));
 	for (i=0; i<ARRAYSIZE(syslinux_cfg); i++) {
 		if (safe_stricmp(psz_basename, syslinux_cfg[i]) == 0) {
-			*is_syslinux_cfg = TRUE;
+			props->is_syslinux_cfg = TRUE;
 			if ((scan_only) && (i == 1) && (safe_stricmp(psz_dirname, efi_dirname) == 0))
 				iso_report.has_efi_syslinux = TRUE;
 		}
 	}
 
-	// Check for a syslinux v5.0+ file anywhere
-	if (safe_stricmp(psz_basename, ldlinux_c32) == 0) {
-		has_ldlinux_c32 = TRUE;
-	}
-
 	// Check for an old incompatible c32 file anywhere
 	for (i=0; i<NB_OLD_C32; i++) {
-		is_old_c32[i] = FALSE;
 		if ((safe_stricmp(psz_basename, old_c32_name[i]) == 0) && (i_file_length <= old_c32_threshold[i]))
-			is_old_c32[i] = TRUE;
+			props->is_old_c32[i] = TRUE;
 	}
 
+	// Check for the Grub config file
+	if ((safe_stricmp(psz_dirname, grub_dirname) == 0) && (safe_stricmp(psz_basename, grub_cfg) == 0)) {
+		if (scan_only)
+			iso_report.has_grub2 = TRUE;
+		else
+			props->is_grub_cfg = TRUE;
+	}
+
+
 	if (scan_only) {
+		// Check for a syslinux v5.0+ file anywhere
+		if (safe_stricmp(psz_basename, ldlinux_c32) == 0) {
+			has_ldlinux_c32 = TRUE;
+		}
+
 		// Check for various files in root (psz_dirname = "")
 		if (*psz_dirname == 0) {
 			if (safe_strnicmp(psz_basename, bootmgr_efi_name, safe_strlen(bootmgr_efi_name)-5) == 0) {
@@ -174,13 +188,6 @@ static BOOL check_iso_props(const char* psz_dirname, BOOL* is_syslinux_cfg, BOOL
 		if (safe_stricmp(psz_dirname, efi_dirname) == 0)
 			iso_report.has_efi = TRUE;
 
-		// Check for the Grub boot directory
-		// TODO: If there is a need to point to a different config file, as we do with Syslinux,
-		// see http://www.gnu.org/software/grub/manual/grub.html#Embedded-configuration
-		// However, this allegedly requires normal.mod (105 KB!) to be in core.img...
-		if (safe_stricmp(psz_dirname, grub_dirname) == 0)
-			iso_report.has_grub2 = TRUE;
-
 		// Check for PE (XP) specific files in "/i386" or "/minint"
 		for (i=0; i<ARRAYSIZE(pe_dirname); i++)
 			if (safe_stricmp(psz_dirname, pe_dirname[i]) == 0)
@@ -188,7 +195,7 @@ static BOOL check_iso_props(const char* psz_dirname, BOOL* is_syslinux_cfg, BOOL
 					if (safe_stricmp(psz_basename, pe_file[j]) == 0)
 						iso_report.winpe |= (1<<i)<<(ARRAYSIZE(pe_dirname)*j);
 
-		if (*is_syslinux_cfg) {
+		if (props->is_syslinux_cfg) {
 			// Maintain a list of all the isolinux/syslinux configs identified so far
 			StrArrayAdd(&config_path, psz_fullpath);
 		}
@@ -198,7 +205,7 @@ static BOOL check_iso_props(const char* psz_dirname, BOOL* is_syslinux_cfg, BOOL
 		}
 
 		for (i=0; i<NB_OLD_C32; i++) {
-			if (is_old_c32[i])
+			if (props->is_old_c32[i])
 				iso_report.has_old_c32[i] = TRUE;
 		}
 		if (i_file_length >= FOUR_GIGABYTES)
@@ -218,10 +225,10 @@ static BOOL check_iso_props(const char* psz_dirname, BOOL* is_syslinux_cfg, BOOL
 	return FALSE;
 }
 
-static void fix_syslinux(const char* psz_fullpath, const char* psz_path, const char* psz_basename)
+static void fix_config(const char* psz_fullpath, const char* psz_path, const char* psz_basename, EXTRACT_PROPS* props)
 {
 	size_t i, nul_pos;
-	char *iso_label, *usb_label, *src, *dst;
+	char *iso_label = NULL, *usb_label = NULL, *src, *dst;
 
 	nul_pos = safe_strlen(psz_fullpath);
 	src = safe_strdup(psz_fullpath);
@@ -230,23 +237,37 @@ static void fix_syslinux(const char* psz_fullpath, const char* psz_path, const c
 	for (i=0; i<nul_pos; i++)
 		if (src[i] == '/') src[i] = '\\';
 
-	// Workaround for isolinux config files requiring an ISO label for kernel
-	// append that may be different from our USB label. Oh, and these labels
-	// must have spaces converted to \x20.
-	iso_label = replace_char(iso_report.label, ' ', "\\x20");
-	usb_label = replace_char(iso_report.usb_label, ' ', "\\x20");
-	if (replace_in_token_data(src, "append", iso_label, usb_label, TRUE) != NULL)
-		uprintf("  Patched %s: '%s' -> '%s'\n", src, iso_label, usb_label);
-	free(iso_label);
-	free(usb_label);
-	// Fix dual BIOS + EFI support for tails and other ISOs
-	if ( (safe_stricmp(psz_path, efi_dirname) == 0) && (safe_stricmp(psz_basename, syslinux_cfg[0]) == 0) &&
-			(!iso_report.has_efi_syslinux) && (dst = safe_strdup(src)) ) {
-		dst[nul_pos-12] = 's'; dst[nul_pos-11] = 'y'; dst[nul_pos-10] = 's';
-		CopyFileA(src, dst, TRUE);
-		uprintf("Duplicated %s to %s\n", src, dst);
-		free(dst);
+	if (props->is_syslinux_cfg) {
+		// Workaround for isolinux config files requiring an ISO label for kernel
+		// append that may be different from our USB label. Oh, and these labels
+		// must have spaces converted to \x20.
+		iso_label = replace_char(iso_report.label, ' ', "\\x20");
+		usb_label = replace_char(iso_report.usb_label, ' ', "\\x20");
+		if ((iso_label != NULL) && (usb_label != NULL)) {
+			if (replace_in_token_data(src, "append", iso_label, usb_label, TRUE) != NULL)
+				uprintf("  Patched %s: '%s' ⇨ '%s'\n", src, iso_label, usb_label);
+			// Fix dual BIOS + EFI support for tails and other ISOs
+			if ( (safe_stricmp(psz_path, efi_dirname) == 0) && (safe_stricmp(psz_basename, syslinux_cfg[0]) == 0) &&
+					(!iso_report.has_efi_syslinux) && (dst = safe_strdup(src)) ) {
+				dst[nul_pos-12] = 's'; dst[nul_pos-11] = 'y'; dst[nul_pos-10] = 's';
+				CopyFileA(src, dst, TRUE);
+				uprintf("Duplicated %s to %s\n", src, dst);
+				free(dst);
+			}
+		}
+	} else if (props->is_grub_cfg) {
+		// Workaround for FreeNAS
+		iso_label = malloc(MAX_PATH);
+		usb_label = malloc(MAX_PATH);
+		if ((iso_label != NULL) && (usb_label != NULL)) {
+			safe_sprintf(iso_label, MAX_PATH, "cd9660:/dev/iso9660/%s", iso_report.label);
+			safe_sprintf(usb_label, MAX_PATH, "msdosfs:/dev/msdosfs/%s", iso_report.usb_label);
+			if (replace_in_token_data(src, "set", iso_label, usb_label, TRUE) != NULL)
+				uprintf("  Patched %s: '%s' ⇨ '%s'\n", src, iso_label, usb_label);
+		}
 	}
+	safe_free(iso_label);
+	safe_free(usb_label);
 	free(src);
 }
 
@@ -274,7 +295,8 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 {
 	HANDLE file_handle = NULL;
 	DWORD buf_size, wr_size, err;
-	BOOL r, is_syslinux_cfg, is_old_c32[NB_OLD_C32], is_identical;
+	EXTRACT_PROPS props;
+	BOOL r, is_identical;
 	int i_length;
 	size_t i;
 	char tmp[128], *psz_fullpath = NULL, *psz_sanpath = NULL;
@@ -314,13 +336,13 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 			}
 		} else {
 			i_file_length = udf_get_file_length(p_udf_dirent);
-			if (check_iso_props(psz_path, &is_syslinux_cfg, is_old_c32, i_file_length, psz_basename, psz_fullpath)) {
+			if (check_iso_props(psz_path, i_file_length, psz_basename, psz_fullpath, &props)) {
 				safe_free(psz_fullpath);
 				continue;
 			}
 			print_extracted_file(psz_fullpath, i_file_length);
 			for (i=0; i<NB_OLD_C32; i++) {
-				if (is_old_c32[i] && use_own_c32[i]) {
+				if (props.is_old_c32[i] && use_own_c32[i]) {
 					static_sprintf(tmp, "%s/syslinux-%s/%s", FILES_DIR, embedded_sl_version_str[0], old_c32_name[i]);
 					if (CopyFileA(tmp, psz_fullpath, FALSE)) {
 						uprintf("  Replaced with local version\n");
@@ -375,8 +397,8 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 			// The drawback however is with cancellation. With a large file, CloseHandle()
 			// may take forever to complete and is not interruptible. We try to detect this.
 			ISO_BLOCKING(safe_closehandle(file_handle));
-			if (is_syslinux_cfg)
-				fix_syslinux(psz_sanpath, psz_path, psz_basename);
+			if (props.is_syslinux_cfg || props.is_grub_cfg)
+				fix_config(psz_sanpath, psz_path, psz_basename, &props);
 			safe_free(psz_sanpath);
 		}
 		safe_free(psz_fullpath);
@@ -396,7 +418,8 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 {
 	HANDLE file_handle = NULL;
 	DWORD buf_size, wr_size, err;
-	BOOL s, is_syslinux_cfg, is_old_c32[NB_OLD_C32], is_symlink, is_identical;
+	EXTRACT_PROPS props;
+	BOOL s, is_symlink, is_identical;
 	int i_length, r = 1;
 	char tmp[128], psz_fullpath[MAX_PATH], *psz_basename, *psz_sanpath;
 	const char *psz_iso_name = &psz_fullpath[strlen(psz_extract_dir)];
@@ -455,12 +478,12 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 				goto out;
 		} else {
 			i_file_length = p_statbuf->size;
-			if (check_iso_props(psz_path, &is_syslinux_cfg, is_old_c32, i_file_length, psz_basename, psz_fullpath)) {
+			if (check_iso_props(psz_path, i_file_length, psz_basename, psz_fullpath, &props)) {
 				continue;
 			}
 			print_extracted_file(psz_fullpath, i_file_length);
 			for (i=0; i<NB_OLD_C32; i++) {
-				if (is_old_c32[i] && use_own_c32[i]) {
+				if (props.is_old_c32[i] && use_own_c32[i]) {
 					static_sprintf(tmp, "%s/syslinux-%s/%s", FILES_DIR, embedded_sl_version_str[0], old_c32_name[i]);
 					if (CopyFileA(tmp, psz_fullpath, FALSE)) {
 						uprintf("  Replaced with local version\n");
@@ -516,8 +539,8 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 				}
 			}
 			ISO_BLOCKING(safe_closehandle(file_handle));
-			if (is_syslinux_cfg)
-				fix_syslinux(psz_sanpath, psz_path, psz_basename);
+			if (props.is_syslinux_cfg || props.is_grub_cfg)
+				fix_config(psz_sanpath, psz_path, psz_basename, &props);
 			safe_free(psz_sanpath);
 		}
 	}
