@@ -906,7 +906,7 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 	fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
 	dt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
 	bt = GETBIOSTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
-	if (bt == BT_UEFI) {
+	if ((bt == BT_UEFI) && (!allow_dual_uefi_bios)) {
 		uprintf(using_msg, "zeroed");
 		r = write_zero_mbr(&fake_fd);	// Force UEFI boot only by zeroing the MBR
 	} else if ( (dt == DT_ISO) && (iso_report.has_kolibrios) && (fs == FS_FAT32)) {
@@ -921,7 +921,7 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 	} else if (dt == DT_REACTOS) {
 		uprintf(using_msg, "ReactOS");
 		r = write_reactos_mbr(&fake_fd);
-	} else if ( (dt == DT_SYSLINUX_V4) || (dt == DT_SYSLINUX_V6) || ((dt == DT_ISO) && ((fs == FS_FAT16) || (fs == FS_FAT32))) ) {
+	} else if ( (dt == DT_SYSLINUX_V4) || (dt == DT_SYSLINUX_V6) || ((dt == DT_ISO) && (!allow_dual_uefi_bios) && ((fs == FS_FAT16) || (fs == FS_FAT32))) ) {
 		uprintf(using_msg, "Syslinux");
 		r = write_syslinux_mbr(&fake_fd);
 	} else {
@@ -1621,7 +1621,8 @@ DWORD WINAPI FormatThread(void* param)
 			}
 			// We must close and unlock the volume to write files to it
 			safe_unlockclose(hLogicalVolume);
-		} else if ( (dt == DT_SYSLINUX_V4) || (dt == DT_SYSLINUX_V6) || ((dt == DT_ISO) && ((fs == FS_FAT16) || (fs == FS_FAT32))) ) {
+		} else if ( (dt == DT_SYSLINUX_V4) || (dt == DT_SYSLINUX_V6) || ((dt == DT_ISO) && (!allow_dual_uefi_bios) &&
+			((fs == FS_FAT16) || (fs == FS_FAT32))) ) {
 			if (!InstallSyslinux(DriveIndex, drive_name[0], fs)) {
 				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_INSTALL_FAILURE;
 			}

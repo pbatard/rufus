@@ -123,6 +123,7 @@ HWND hISOProgressDlg = NULL, hLogDlg = NULL, hISOProgressBar, hISOFileName, hDis
 BOOL use_own_c32[NB_OLD_C32] = {FALSE, FALSE}, detect_fakes = TRUE, mbr_selected_by_user = FALSE;
 BOOL iso_op_in_progress = FALSE, format_op_in_progress = FALSE, right_to_left_mode = FALSE;
 BOOL enable_HDDs = FALSE, advanced_mode = TRUE, force_update = FALSE, use_fake_units = TRUE;
+BOOL allow_dual_uefi_bios = FALSE;
 int dialog_showing = 0;
 uint16_t rufus_version[4], embedded_sl_version[2];
 char embedded_sl_version_str[2][12] = { "?.??", "?.??" };
@@ -1170,7 +1171,7 @@ static BOOL BootCheck(void)
 			// KolibriOS doesn't support FAT16
 			MessageBoxU(hMainDialog, lmprintf(MSG_189), lmprintf(MSG_099), MB_OK|MB_ICONERROR|MB_IS_RTL);
 			return FALSE;
-		} else if (((fs == FS_FAT16)||(fs == FS_FAT32)) && (!HAS_SYSLINUX(iso_report)) &&
+		} else if (((fs == FS_FAT16)||(fs == FS_FAT32)) && (!HAS_SYSLINUX(iso_report)) && (!allow_dual_uefi_bios) &&
 			(!IS_REACTOS(iso_report)) && (!iso_report.has_kolibrios) && (!IS_GRUB(iso_report))) {
 			// FAT/FAT32 can only be used for isolinux based ISO images or when the Target Type is UEFI
 			MessageBoxU(hMainDialog, lmprintf(MSG_098), lmprintf(MSG_090), MB_OK|MB_ICONERROR|MB_IS_RTL);
@@ -2469,6 +2470,13 @@ relaunch:
 			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'D')) {
 				PrintStatus(2000, FALSE, MSG_255);
 				existing_key = FALSE;
+				continue;
+			}
+			// Alt-E => Enhanced installation mode (allow dual UEFI/BIOS mode and FAT32 for Windows)
+			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'E')) {
+				allow_dual_uefi_bios = !allow_dual_uefi_bios;
+				// TODO: add a localized message
+				PrintStatus2000("Allow dual UEFI/BIOS mode", allow_dual_uefi_bios);
 				continue;
 			}
 			// Alt-F => Toggle detection of USB HDDs
