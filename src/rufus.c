@@ -882,6 +882,14 @@ static void CALLBACK BlockingTimer(HWND hWnd, UINT uMsg, UINT_PTR idEvent, DWORD
 BOOL CALLBACK ISOProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	switch (message) {
+	case WM_SHOWWINDOW:
+		// If we don't do this, the ISO progress dialog will remain visible
+		// if it was active while the app was minimized
+		if (wParam && (lParam == SW_PARENTOPENING) && (!iso_op_in_progress)) {
+			ShowWindow(hDlg, SW_HIDE);
+			return TRUE;
+		}
+		return FALSE;
 	case WM_INITDIALOG:
 		apply_localization(IDD_ISO_EXTRACT, hDlg);
 		hISOProgressBar = GetDlgItem(hDlg, IDC_PROGRESS);
@@ -893,7 +901,13 @@ BOOL CALLBACK ISOProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 		iso_op_in_progress = TRUE;
 		EnableWindow(GetDlgItem(hISOProgressDlg, IDC_ISO_ABORT), TRUE);
 		CenterDialog(hDlg);
-		ShowWindow(hDlg, SW_SHOW);
+		// If we try to show the progress dialog while the app is minimized, users won't
+		// be able to restore the app, so we only show it if it isn't. But this workaround
+		// means that the progress dialog will never display for users who had the app
+		// minimized when ISO extraction started, which we don't really care about, since
+		// we're planning to remove the whole separate progress dialog soon anyway.
+		if (!IsIconic(hMainDialog))
+			ShowWindow(hDlg, SW_SHOW);
 		UpdateWindow(hDlg);
 		return TRUE;
 	case UM_PROGRESS_EXIT:
