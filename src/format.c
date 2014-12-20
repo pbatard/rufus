@@ -1271,7 +1271,7 @@ DWORD WINAPI CloseFormatPromptThread(LPVOID param) {
 DWORD WINAPI FormatThread(void* param)
 {
 	int i, r, pt, bt, fs, dt;
-	BOOL s, ret, use_large_fat32;
+	BOOL s, ret, use_large_fat32, add_uefi_togo;
 	const DWORD SectorSize = SelectedDrive.Geometry.BytesPerSector;
 	DWORD rSize, wSize, BufSize, LastRefresh = 0, DriveIndex = (DWORD)(uintptr_t)param;
 	HANDLE hPhysicalDrive = INVALID_HANDLE_VALUE;
@@ -1301,6 +1301,7 @@ DWORD WINAPI FormatThread(void* param)
 	pt = GETPARTTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
 	bt = GETBIOSTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
 	use_large_fat32 = (fs == FS_FAT32) && ((SelectedDrive.DiskSize > LARGE_FAT32_SIZE) || (force_large_fat32));
+	add_uefi_togo = (fs == FS_NTFS) && (dt == DT_ISO) && (IS_EFI(iso_report)) && (bt == BT_UEFI);
 
 	PrintStatus(0, TRUE, MSG_225);
 	hPhysicalDrive = GetPhysicalHandle(DriveIndex, TRUE, TRUE);
@@ -1531,7 +1532,7 @@ DWORD WINAPI FormatThread(void* param)
 	UpdateProgress(OP_ZERO_MBR, -1.0f);
 	CHECK_FOR_USER_CANCEL;
 
-	if (!CreatePartition(hPhysicalDrive, pt, fs, (pt==PARTITION_STYLE_MBR)&&(bt==BT_UEFI))) {
+	if (!CreatePartition(hPhysicalDrive, pt, fs, (pt==PARTITION_STYLE_MBR) && (bt==BT_UEFI), add_uefi_togo)) {
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_PARTITION_FAILURE;
 		goto out;
 	}

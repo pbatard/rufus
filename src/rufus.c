@@ -460,7 +460,8 @@ static void SetFSFromISO(void)
 	}
 
 	// Syslinux and EFI have precedence over bootmgr (unless the user selected BIOS as target type)
-	if ((HAS_SYSLINUX(iso_report)) || (IS_REACTOS(iso_report)) || (iso_report.has_kolibrios) || ( (IS_EFI(iso_report)) && (bt == BT_UEFI))) {
+	if ((HAS_SYSLINUX(iso_report)) || (IS_REACTOS(iso_report)) || (iso_report.has_kolibrios) ||
+		((IS_EFI(iso_report)) && (bt == BT_UEFI) && (!iso_report.has_4GB_file))) {
 		if (fs_mask & (1<<FS_FAT32)) {
 			selected_fs = FS_FAT32;
 		} else if ((fs_mask & (1<<FS_FAT16)) && (!iso_report.has_kolibrios)) {

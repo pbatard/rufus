@@ -645,7 +645,7 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 {
 	// MBR partition types that can be mounted in Windows
 	const uint8_t mbr_mountable[] = { 0x01, 0x04, 0x06, 0x07, 0x0b, 0x0c, 0x0e, 0xef };
-	BOOL r, hasRufusExtra = FALSE, ret = FALSE;
+	BOOL r, hasRufusExtra = FALSE, ret = FALSE, isUefiTogo;
 	HANDLE hPhysical;
 	DWORD size;
 	BYTE geometry[256], layout[4096], part_type;
@@ -695,6 +695,10 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 		return 0;
 	}
 
+#if defined(__GNUC__)
+// GCC 4.9 bug us about the fact that MS defined an expandable array as array[1]
+#pragma GCC diagnostic ignored "-Warray-bounds"
+#endif
 	switch (DriveLayout->PartitionStyle) {
 	case PARTITION_STYLE_MBR:
 		SelectedDrive.PartitionType = PARTITION_STYLE_MBR;
@@ -709,8 +713,10 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 		AnalyzeMBR(hPhysical, "Drive");
 		for (i=0; i<DriveLayout->PartitionCount; i++) {
 			if (DriveLayout->PartitionEntry[i].Mbr.PartitionType != PARTITION_ENTRY_UNUSED) {
-				suprintf("Partition %d:\n", i+1);
 				part_type = DriveLayout->PartitionEntry[i].Mbr.PartitionType;
+				isUefiTogo = (i == 1) && (part_type == 0x01) &&
+					(DriveLayout->PartitionEntry[i].PartitionLength.QuadPart == 131072);
+				suprintf("Partition %d%s:\n", i+1, isUefiTogo?" (UEFI:TOGO)":"");
 				for (j=0; j<ARRAYSIZE(mbr_mountable); j++) {
 					if (part_type == mbr_mountable[j]) {
 						ret = TRUE;
@@ -723,7 +729,8 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 					DriveLayout->PartitionEntry[i].PartitionLength, DriveLayout->PartitionEntry[i].Mbr.HiddenSectors,
 					DriveLayout->PartitionEntry[i].Mbr.BootIndicator?"Yes":"No",
 					DriveLayout->PartitionEntry[i].Mbr.RecognizedPartition?"Yes":"No");
-				if (part_type == RUFUS_EXTRA_PARTITION_TYPE)	// This is a partition Rufus created => we can safely ignore it
+				if ((part_type == RUFUS_EXTRA_PARTITION_TYPE) || (isUefiTogo))
+					// This is a partition Rufus created => we can safely ignore it
 					hasRufusExtra = TRUE;
 				if (part_type == 0xee)	// Flag a protective MBR for non GPT platforms (XP)
 					SelectedDrive.has_protective_mbr = TRUE;
@@ -746,6 +753,8 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 				GuidToString(&DriveLayout->PartitionEntry[i].Gpt.PartitionId), SizeToHumanReadable(DriveLayout->PartitionEntry[i].PartitionLength.QuadPart, TRUE, FALSE),
 				DriveLayout->PartitionEntry[i].PartitionLength, DriveLayout->PartitionEntry[i].StartingOffset.QuadPart / DiskGeometry->Geometry.BytesPerSector,
 				DriveLayout->PartitionEntry[i].Gpt.Attributes);
+			if (safe_strcmp(tmp, "UEFI:TOGO") == 0)
+				hasRufusExtra = TRUE;
 			if ( (memcmp(&PARTITION_BASIC_DATA_GUID, &DriveLayout->PartitionEntry[i].Gpt.PartitionType, sizeof(GUID)) == 0) &&
 				 (nWindowsVersion >= WINDOWS_VISTA) )
 				ret = TRUE;
@@ -756,6 +765,9 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 		suprintf("Partition type: RAW\n");
 		break;
 	}
+#if defined(__GNUC__)
+#pragma GCC diagnostic warning "-Warray-bounds"
+#endif
 	safe_closehandle(hPhysical);
 
 	if (hasRufusExtra)
@@ -889,14 +901,15 @@ typedef struct _DRIVE_LAYOUT_INFORMATION_EX4 {
  * copy it got from the last IOCTL, and ignores your changes until you replug the drive
  * or issue an IOCTL_DISK_UPDATE_PROPERTIES.
  */
-BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL mbr_uefi_marker)
+BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL mbr_uefi_marker, BOOL add_uefi_togo)
 {
 	const char* PartitionTypeName[2] = { "MBR", "GPT" };
+	unsigned char* buffer;
 	CREATE_DISK CreateDisk = {PARTITION_STYLE_RAW, {{0}}};
 	DRIVE_LAYOUT_INFORMATION_EX4 DriveLayoutEx = {0};
 	BOOL r;
-	DWORD size;
-	LONGLONG size_in_sectors;
+	DWORD size, bufsize;
+	LONGLONG size_in_sectors, extra_size_in_tracks = 1;
 
 	PrintStatus(0, TRUE, MSG_238, PartitionTypeName[partition_style]);
 
@@ -908,8 +921,18 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 		DriveLayoutEx.PartitionEntry[0].StartingOffset.QuadPart = 
 			SelectedDrive.Geometry.BytesPerSector * SelectedDrive.Geometry.SectorsPerTrack;
 	}
-	// TODO: should we try to align the following to the cluster size as well?
 	size_in_sectors = (SelectedDrive.DiskSize - DriveLayoutEx.PartitionEntry[0].StartingOffset.QuadPart) / SelectedDrive.Geometry.BytesPerSector;
+	// Align on track boundary if the extra part option is checked
+	if ((partition_style == PARTITION_STYLE_MBR) && ((IsChecked(IDC_EXTRA_PARTITION)) || (add_uefi_togo))) {
+		if (add_uefi_togo)	// Already set to 1 track in non To_Go mode
+			extra_size_in_tracks = (MIN_EXTRA_PART_SIZE + SelectedDrive.Geometry.SectorsPerTrack - 1) /
+				SelectedDrive.Geometry.SectorsPerTrack;
+		uprintf("Reserving %d tracks for extra partition", extra_size_in_tracks);
+		size_in_sectors = ((size_in_sectors / SelectedDrive.Geometry.SectorsPerTrack) - extra_size_in_tracks) *
+			SelectedDrive.Geometry.SectorsPerTrack;
+		if (size_in_sectors <= 0)
+			return FALSE;
+	}
 
 	switch (partition_style) {
 	case PARTITION_STYLE_MBR:
@@ -927,13 +950,6 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 		// TODO: CHS fixup (32 sectors/track) through a cheat mode, if requested
 		// NB: disk geometry is computed by BIOS & co. by finding a match between LBA and CHS value of first partition
 		//     ms-sys's write_partition_number_of_heads() and write_partition_start_sector_number() can be used if needed
-
-		// Align on sector boundary if the extra part option is checked
-		if (IsChecked(IDC_EXTRA_PARTITION)) {
-			size_in_sectors = ((size_in_sectors / SelectedDrive.Geometry.SectorsPerTrack)-1) * SelectedDrive.Geometry.SectorsPerTrack;
-			if (size_in_sectors <= 0)
-				return FALSE;
-		}
 		break;
 	case PARTITION_STYLE_GPT:
 		// TODO: (?) As per MSDN: "When specifying a GUID partition table (GPT) as the PARTITION_STYLE of the CREATE_DISK
@@ -945,7 +961,7 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 		CreateDisk.Gpt.MaxPartitionCount = MAX_GPT_PARTITIONS;
 
 		DriveLayoutEx.PartitionStyle = PARTITION_STYLE_GPT;
-		DriveLayoutEx.PartitionCount = 1;
+		DriveLayoutEx.PartitionCount = (add_uefi_togo)?2:1;
 		// At the very least, a GPT disk has 34 reserved sectors at the beginning and 33 at the end.
 		DriveLayoutEx.Type.Gpt.StartingUsableOffset.QuadPart = 34 * SelectedDrive.Geometry.BytesPerSector;
 		DriveLayoutEx.Type.Gpt.UsableLength.QuadPart = SelectedDrive.DiskSize - (34+33) * SelectedDrive.Geometry.BytesPerSector;
@@ -984,18 +1000,24 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 			uprintf("Unsupported file system\n");
 			return FALSE;
 		}
-		// Create an extra partition on request - can improve BIOS detection as HDD for older BIOSes
-		if (IsChecked(IDC_EXTRA_PARTITION)) {
+		// Create an extra partition on request
+		if (IsChecked(IDC_EXTRA_PARTITION) || (add_uefi_togo)) {
 			DriveLayoutEx.PartitionEntry[1].PartitionStyle = PARTITION_STYLE_MBR;
-			// Should end on a sector boundary
+			// Should end on a track boundary
 			DriveLayoutEx.PartitionEntry[1].StartingOffset.QuadPart = DriveLayoutEx.PartitionEntry[0].StartingOffset.QuadPart +
 				DriveLayoutEx.PartitionEntry[0].PartitionLength.QuadPart;
-			DriveLayoutEx.PartitionEntry[1].PartitionLength.QuadPart = SelectedDrive.Geometry.SectorsPerTrack*SelectedDrive.Geometry.BytesPerSector;
+			if (add_uefi_togo) {
+				DriveLayoutEx.PartitionEntry[1].PartitionLength.QuadPart =
+					GetResourceSize(hMainInstance, MAKEINTRESOURCEA(IDR_UEFI_TOGO), _RT_RCDATA, "uefi-togo.img");
+			} else {
+				DriveLayoutEx.PartitionEntry[1].PartitionLength.QuadPart = extra_size_in_tracks *
+					SelectedDrive.Geometry.SectorsPerTrack * SelectedDrive.Geometry.BytesPerSector;
+			}
 			DriveLayoutEx.PartitionEntry[1].PartitionNumber = 2;
 			DriveLayoutEx.PartitionEntry[1].RewritePartition = TRUE;
 			DriveLayoutEx.PartitionEntry[1].Mbr.BootIndicator = FALSE;
 			DriveLayoutEx.PartitionEntry[1].Mbr.HiddenSectors = SelectedDrive.Geometry.SectorsPerTrack*SelectedDrive.Geometry.BytesPerSector;
-			DriveLayoutEx.PartitionEntry[1].Mbr.PartitionType = RUFUS_EXTRA_PARTITION_TYPE;
+			DriveLayoutEx.PartitionEntry[1].Mbr.PartitionType = (add_uefi_togo)?0x01:RUFUS_EXTRA_PARTITION_TYPE;
 		}
 		// For the remaining partitions, PartitionStyle & PartitionType have already
 		// been zeroed => already set to MBR/unused
@@ -1003,10 +1025,46 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 	case PARTITION_STYLE_GPT:
 		DriveLayoutEx.PartitionEntry[0].Gpt.PartitionType = PARTITION_BASIC_DATA_GUID;
 		wcscpy(DriveLayoutEx.PartitionEntry[0].Gpt.Name, L"Microsoft Basic Data");
+		if (add_uefi_togo) {
+			DriveLayoutEx.PartitionEntry[1].Gpt.PartitionType = PARTITION_BASIC_DATA_GUID;
+			wcscpy(DriveLayoutEx.PartitionEntry[1].Gpt.Name, L"UEFI:TOGO");
+			DriveLayoutEx.PartitionEntry[1].PartitionNumber = 2;
+			DriveLayoutEx.PartitionEntry[1].RewritePartition = TRUE;
+			DriveLayoutEx.PartitionEntry[1].StartingOffset.QuadPart = DriveLayoutEx.PartitionEntry[0].StartingOffset.QuadPart +
+				DriveLayoutEx.PartitionEntry[0].PartitionLength.QuadPart;
+			DriveLayoutEx.PartitionEntry[1].PartitionLength.QuadPart =
+				GetResourceSize(hMainInstance, MAKEINTRESOURCEA(IDR_UEFI_TOGO), _RT_RCDATA, "uefi-togo.img");
+		}
 		IGNORE_RETVAL(CoCreateGuid(&DriveLayoutEx.PartitionEntry[0].Gpt.PartitionId));
+		IGNORE_RETVAL(CoCreateGuid(&DriveLayoutEx.PartitionEntry[1].Gpt.PartitionId));
 		break;
 	default:
 		break;
+	}
+
+	// We need to write the extra partition before we refresh the disk
+	if (add_uefi_togo) {
+		uprintf("Writing UEFI:TOGO partition...");
+		if (!SetFilePointerEx(hDrive, DriveLayoutEx.PartitionEntry[1].StartingOffset, NULL, FILE_BEGIN)) {
+			uprintf("Unable to set position");
+			safe_closehandle(hDrive);
+			return FALSE;
+		}
+		buffer = GetResource(hMainInstance, MAKEINTRESOURCEA(IDR_UEFI_TOGO), _RT_RCDATA, "uefi-togo.img", &bufsize, FALSE);
+		if (buffer == NULL) {
+			uprintf("Could not access uefi-togo.img");
+			safe_closehandle(hDrive);
+			return FALSE;
+		}
+		r = WriteFile(hDrive, buffer, bufsize, &size, NULL);
+		if ((!r) || (size != bufsize)) {
+			if (!r)
+				uprintf("Write error: %s", WindowsErrorString());
+			else
+				uprintf("Write error: Wrote %d bytes, expected %d bytes\n", size, bufsize);
+			safe_closehandle(hDrive);
+			return FALSE;
+		}
 	}
 
 	// If you don't call IOCTL_DISK_CREATE_DISK, the next call will fail
@@ -1019,7 +1077,7 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 		return FALSE;
 	}
 
-	size = sizeof(DriveLayoutEx) - ((partition_style == PARTITION_STYLE_GPT)?(3*sizeof(PARTITION_INFORMATION_EX)):0);
+	size = sizeof(DriveLayoutEx) - ((partition_style == PARTITION_STYLE_GPT)?((add_uefi_togo?2:3)*sizeof(PARTITION_INFORMATION_EX)):0);
 	r = DeviceIoControl(hDrive, IOCTL_DISK_SET_DRIVE_LAYOUT_EX,
 			(BYTE*)&DriveLayoutEx, size, NULL, 0, &size, NULL );
 	if (!r) {

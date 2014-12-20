@@ -73,6 +73,7 @@
 #define IDR_GR_GRUB2_CORE_IMG           451
 #define IDR_LC_RUFUS_LOC                500
 #define IDR_XT_HOGGER                   501
+#define IDR_UEFI_TOGO                   502
 #define IDC_DEVICE                      1001
 #define IDC_FILESYSTEM                  1002
 #define IDC_START                       1003

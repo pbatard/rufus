@@ -522,6 +522,11 @@ out:
 	return p;
 }
 
+DWORD GetResourceSize(HMODULE module, char* name, char* type, const char* desc)
+{
+	DWORD len = 0;
+	return (GetResource(module, name, type, desc, &len, FALSE) == NULL)?0:len;
+}
 
 /*
  * Set or restore a Local Group Policy DWORD key indexed by szPath/SzPolicy

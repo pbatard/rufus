@@ -4,7 +4,6 @@ This directory contains the Grub 2.0 boot records that are used by Rufus
   commit 72ec399ad8d6348b6c74ea63d80c79784c8b84ae, on a Debian 7.7.0 x64 system.
   This was done following the guide from:
   http://pete.akeo.ie/2014/05/compiling-and-installing-grub2-for.html.
-  Note that exFAT was not included in core.img in order to keep it under 31.5 KB.
 
 * boot.img has been modified to nop the jump @ 0x66 as per grub2's setup.c comments:
   /* If DEST_DRIVE is a hard disk, enable the workaround, which is
