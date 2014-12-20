@@ -109,12 +109,10 @@ static __inline BOOL IsVHD(const char* buffer)
 	int i;
 	// List of the Friendly Names of the VHD devices we know
 	const char* vhd_name[] = {
-		"Arsenal Virtual",
-		"Kernsafe Virtual",
-		"Microsoft Virtual",
-		"MS Virtual",
-		"Msft Virtual",
-//		"VMware Virtual"	// Would list primary disks on VMWare instances, so we avoid it
+		"Arsenal_________Virtual_",
+		"KernSafeVirtual_________",
+		"Msft____Virtual_Disk____",
+//		"VMware__VMware_Virtual_S"	// Would list primary disks on VMWare instances, so we avoid it
 	};
 
 	for (i = 0; i < ARRAYSIZE(vhd_name); i++)
@@ -259,16 +257,21 @@ BOOL GetUSBDevices(DWORD devnum)
 		is_SCSI = (safe_stricmp(buffer, scsi_name) == 0);
 		if ((safe_stricmp(buffer, storage_name[0]) != 0) && (!is_SCSI))
 			continue;
-		memset(buffer, 0, sizeof(buffer));
+
+		// We can't use the friendly name to find if a drive is a VHD, as friendly name string gets translated
+		// according to your locale, so we poke the Hardware ID
 		memset(&props, 0, sizeof(props));
+		memset(buffer, 0, sizeof(buffer));
+		props.is_VHD = SetupDiGetDeviceRegistryPropertyA(dev_info, &dev_info_data, SPDRP_HARDWAREID,
+			&datatype, (LPBYTE)buffer, sizeof(buffer), &size) && IsVHD(buffer);
+
+		memset(buffer, 0, sizeof(buffer));
 		if (!SetupDiGetDeviceRegistryPropertyA(dev_info, &dev_info_data, SPDRP_FRIENDLYNAME,
 				&datatype, (LPBYTE)buffer, sizeof(buffer), &size)) {
 			uprintf("SetupDiGetDeviceRegistryProperty (Friendly Name) failed: %s\n", WindowsErrorString());
 			// We can afford a failure on this call - just replace the name with "USB Storage Device (Generic)"
 			safe_strcpy(buffer, sizeof(buffer), lmprintf(MSG_045));
-		} else if (IsVHD(buffer)) {
-			props.is_VHD = TRUE;
-		} else if (devid_list != NULL) {
+		} else if ((!props.is_VHD) && (devid_list != NULL)) {
 			// Get the properties of the device. We could avoid doing this lookup every time by keeping
 			// a lookup table, but there shouldn't be that many USB storage devices connected...
 			// NB: Each of these Device IDs have an _only_ child, from which we get the Device Instance match.
