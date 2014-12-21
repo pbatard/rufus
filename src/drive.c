@@ -46,6 +46,7 @@ const GUID PARTITION_BASIC_DATA_GUID =
  * Globals
  */
 RUFUS_DRIVE_INFO SelectedDrive;
+size_t uefi_togo_size = 0;
 
 /*
  * The following methods get or set the AutoMount setting (which is different from AutoRun)
@@ -668,6 +669,9 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 	if (hPhysical == INVALID_HANDLE_VALUE)
 		return 0;
 
+	if (uefi_togo_size == 0)
+		uefi_togo_size = GetResourceSize(hMainInstance, MAKEINTRESOURCEA(IDR_UEFI_TOGO), _RT_RCDATA, "uefi-togo.img");
+
 	r = DeviceIoControl(hPhysical, IOCTL_DISK_GET_DRIVE_GEOMETRY_EX,
 			NULL, 0, geometry, sizeof(geometry), &size, NULL);
 	if (!r || size <= 0) {
@@ -715,7 +719,7 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 			if (DriveLayout->PartitionEntry[i].Mbr.PartitionType != PARTITION_ENTRY_UNUSED) {
 				part_type = DriveLayout->PartitionEntry[i].Mbr.PartitionType;
 				isUefiTogo = (i == 1) && (part_type == 0x01) &&
-					(DriveLayout->PartitionEntry[i].PartitionLength.QuadPart == 131072);
+					(DriveLayout->PartitionEntry[i].PartitionLength.QuadPart == uefi_togo_size);
 				suprintf("Partition %d%s:\n", i+1, isUefiTogo?" (UEFI:TOGO)":"");
 				for (j=0; j<ARRAYSIZE(mbr_mountable); j++) {
 					if (part_type == mbr_mountable[j]) {
@@ -753,7 +757,7 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 				GuidToString(&DriveLayout->PartitionEntry[i].Gpt.PartitionId), SizeToHumanReadable(DriveLayout->PartitionEntry[i].PartitionLength.QuadPart, TRUE, FALSE),
 				DriveLayout->PartitionEntry[i].PartitionLength, DriveLayout->PartitionEntry[i].StartingOffset.QuadPart / DiskGeometry->Geometry.BytesPerSector,
 				DriveLayout->PartitionEntry[i].Gpt.Attributes);
-			if (safe_strcmp(tmp, "UEFI:TOGO") == 0)
+			if (strcmp(tmp, "UEFI:TOGO") == 0)
 				hasRufusExtra = TRUE;
 			if ( (memcmp(&PARTITION_BASIC_DATA_GUID, &DriveLayout->PartitionEntry[i].Gpt.PartitionType, sizeof(GUID)) == 0) &&
 				 (nWindowsVersion >= WINDOWS_VISTA) )
@@ -912,6 +916,8 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 	LONGLONG size_in_sectors, extra_size_in_tracks = 1;
 
 	PrintStatus(0, TRUE, MSG_238, PartitionTypeName[partition_style]);
+	if (uefi_togo_size == 0)
+		uefi_togo_size = GetResourceSize(hMainInstance, MAKEINTRESOURCEA(IDR_UEFI_TOGO), _RT_RCDATA, "uefi-togo.img");
 
 	if ((partition_style == PARTITION_STYLE_GPT) || (!IsChecked(IDC_EXTRA_PARTITION))) {
 		// Go with the MS 1 MB wastage at the beginning...
@@ -923,7 +929,7 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 	}
 	size_in_sectors = (SelectedDrive.DiskSize - DriveLayoutEx.PartitionEntry[0].StartingOffset.QuadPart) / SelectedDrive.Geometry.BytesPerSector;
 	// Align on track boundary if the extra part option is checked
-	if ((partition_style == PARTITION_STYLE_MBR) && ((IsChecked(IDC_EXTRA_PARTITION)) || (add_uefi_togo))) {
+	if ((add_uefi_togo) || ((partition_style == PARTITION_STYLE_MBR) && (IsChecked(IDC_EXTRA_PARTITION)))) {
 		if (add_uefi_togo)	// Already set to 1 track in non To_Go mode
 			extra_size_in_tracks = (MIN_EXTRA_PART_SIZE + SelectedDrive.Geometry.SectorsPerTrack - 1) /
 				SelectedDrive.Geometry.SectorsPerTrack;
@@ -1007,8 +1013,7 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 			DriveLayoutEx.PartitionEntry[1].StartingOffset.QuadPart = DriveLayoutEx.PartitionEntry[0].StartingOffset.QuadPart +
 				DriveLayoutEx.PartitionEntry[0].PartitionLength.QuadPart;
 			if (add_uefi_togo) {
-				DriveLayoutEx.PartitionEntry[1].PartitionLength.QuadPart =
-					GetResourceSize(hMainInstance, MAKEINTRESOURCEA(IDR_UEFI_TOGO), _RT_RCDATA, "uefi-togo.img");
+				DriveLayoutEx.PartitionEntry[1].PartitionLength.QuadPart = uefi_togo_size;
 			} else {
 				DriveLayoutEx.PartitionEntry[1].PartitionLength.QuadPart = extra_size_in_tracks *
 					SelectedDrive.Geometry.SectorsPerTrack * SelectedDrive.Geometry.BytesPerSector;
@@ -1024,19 +1029,18 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 		break;
 	case PARTITION_STYLE_GPT:
 		DriveLayoutEx.PartitionEntry[0].Gpt.PartitionType = PARTITION_BASIC_DATA_GUID;
+		IGNORE_RETVAL(CoCreateGuid(&DriveLayoutEx.PartitionEntry[0].Gpt.PartitionId));
 		wcscpy(DriveLayoutEx.PartitionEntry[0].Gpt.Name, L"Microsoft Basic Data");
 		if (add_uefi_togo) {
 			DriveLayoutEx.PartitionEntry[1].Gpt.PartitionType = PARTITION_BASIC_DATA_GUID;
+			IGNORE_RETVAL(CoCreateGuid(&DriveLayoutEx.PartitionEntry[1].Gpt.PartitionId));
 			wcscpy(DriveLayoutEx.PartitionEntry[1].Gpt.Name, L"UEFI:TOGO");
 			DriveLayoutEx.PartitionEntry[1].PartitionNumber = 2;
 			DriveLayoutEx.PartitionEntry[1].RewritePartition = TRUE;
 			DriveLayoutEx.PartitionEntry[1].StartingOffset.QuadPart = DriveLayoutEx.PartitionEntry[0].StartingOffset.QuadPart +
 				DriveLayoutEx.PartitionEntry[0].PartitionLength.QuadPart;
-			DriveLayoutEx.PartitionEntry[1].PartitionLength.QuadPart =
-				GetResourceSize(hMainInstance, MAKEINTRESOURCEA(IDR_UEFI_TOGO), _RT_RCDATA, "uefi-togo.img");
+			DriveLayoutEx.PartitionEntry[1].PartitionLength.QuadPart = uefi_togo_size;
 		}
-		IGNORE_RETVAL(CoCreateGuid(&DriveLayoutEx.PartitionEntry[0].Gpt.PartitionId));
-		IGNORE_RETVAL(CoCreateGuid(&DriveLayoutEx.PartitionEntry[1].Gpt.PartitionId));
 		break;
 	default:
 		break;

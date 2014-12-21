@@ -1552,7 +1552,8 @@ DWORD WINAPI FormatThread(void* param)
 	// Wait for the logical drive we just created to appear
 	uprintf("Waiting for logical drive to reappear...\n");
 	Sleep(200);
-	WaitForLogical(DriveIndex);	// We try to continue even if this fails, just in case
+	if (!WaitForLogical(DriveIndex))
+		uprintf("Logical drive was not found!");	// We try to continue even if this fails, just in case
 	CHECK_FOR_USER_CANCEL;
 
 	// If FAT32 is requested and we have a large drive (>32 GB) use 
