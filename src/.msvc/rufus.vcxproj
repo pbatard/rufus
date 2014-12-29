@@ -199,12 +199,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\badblocks.h" />
+    <ClInclude Include="..\bled\bled.h" />
     <ClInclude Include="..\drive.h" />
     <ClInclude Include="..\format.h" />
     <ClInclude Include="..\hdd_vs_ufd.h" />
     <ClInclude Include="..\libcdio\cdio\cdio.h" />
     <ClInclude Include="..\libcdio\cdio\iso9660.h" />
-    <ClInclude Include="..\libcdio\cdio\logging.h" />
     <ClInclude Include="..\libcdio\cdio\udf.h" />
     <ClInclude Include="..\localization.h" />
     <ClInclude Include="..\localization_data.h" />
@@ -231,6 +231,9 @@
     <ResourceCompile Include="..\rufus.rc" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\bled\.msvc\bled.vcxproj">
+      <Project>{fb6d52d4-a2f8-c358-db85-bbcaecfddd7d}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\getopt\.msvc\getopt.vcxproj">
       <Project>{ae83e1b4-ce06-47ee-b7a3-c3a1d7c2d71e}</Project>
     </ProjectReference>

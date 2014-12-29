@@ -240,6 +240,7 @@ typedef struct {
 	char cfg_path[128];		/* path to the ISO's isolinux.cfg */
 	char reactos_path[128];	/* path to the ISO's freeldr.sys or setupldr.sys */
 	uint64_t projected_size;
+	uint64_t src_size;
 	// TODO: use a bitmask and #define tests for the following
 	uint8_t winpe;
 	BOOL has_4GB_file;
@@ -257,6 +258,7 @@ typedef struct {
 	BOOL has_kolibrios;
 	BOOL uses_minint;
 	BOOL is_bootable_img;
+	BOOL compression_type;
 	BOOL is_vhd;
 	uint16_t sl_version;	// Syslinux/Isolinux version
 	char sl_version_str[12];

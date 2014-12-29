@@ -3797,11 +3797,7 @@ ac_config_files="$ac_config_files Makefile"
 
 ac_config_files="$ac_config_files src/Makefile"
 
-ac_config_files="$ac_config_files src/ms-sys/Makefile"
-
-ac_config_files="$ac_config_files src/syslinux/libfat/Makefile"
-
-ac_config_files="$ac_config_files src/syslinux/libinstaller/Makefile"
+ac_config_files="$ac_config_files src/bled/Makefile"
 
 ac_config_files="$ac_config_files src/libcdio/iso9660/Makefile"
 
@@ -3810,6 +3806,12 @@ ac_config_files="$ac_config_files src/libcdio/udf/Makefile"
 ac_config_files="$ac_config_files src/libcdio/driver/Makefile"
 
 ac_config_files="$ac_config_files res/localization/Makefile"
+
+ac_config_files="$ac_config_files src/ms-sys/Makefile"
+
+ac_config_files="$ac_config_files src/syslinux/libfat/Makefile"
+
+ac_config_files="$ac_config_files src/syslinux/libinstaller/Makefile"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -4538,13 +4540,14 @@ do
   case $ac_config_target in
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
     "src/Makefile") CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;
-    "src/ms-sys/Makefile") CONFIG_FILES="$CONFIG_FILES src/ms-sys/Makefile" ;;
-    "src/syslinux/libfat/Makefile") CONFIG_FILES="$CONFIG_FILES src/syslinux/libfat/Makefile" ;;
-    "src/syslinux/libinstaller/Makefile") CONFIG_FILES="$CONFIG_FILES src/syslinux/libinstaller/Makefile" ;;
+    "src/bled/Makefile") CONFIG_FILES="$CONFIG_FILES src/bled/Makefile" ;;
     "src/libcdio/iso9660/Makefile") CONFIG_FILES="$CONFIG_FILES src/libcdio/iso9660/Makefile" ;;
     "src/libcdio/udf/Makefile") CONFIG_FILES="$CONFIG_FILES src/libcdio/udf/Makefile" ;;
     "src/libcdio/driver/Makefile") CONFIG_FILES="$CONFIG_FILES src/libcdio/driver/Makefile" ;;
     "res/localization/Makefile") CONFIG_FILES="$CONFIG_FILES res/localization/Makefile" ;;
+    "src/ms-sys/Makefile") CONFIG_FILES="$CONFIG_FILES src/ms-sys/Makefile" ;;
+    "src/syslinux/libfat/Makefile") CONFIG_FILES="$CONFIG_FILES src/syslinux/libfat/Makefile" ;;
+    "src/syslinux/libinstaller/Makefile") CONFIG_FILES="$CONFIG_FILES src/syslinux/libinstaller/Makefile" ;;
 
   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5;;
   esac

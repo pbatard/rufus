@@ -3,7 +3,7 @@
  * Compensating for what Microsoft should have done a long long time ago.
  * Also see http://utf8everywhere.org/
  *
- * Copyright © 2010-2013 Pete Batard <pete@akeo.ie>
+ * Copyright © 2010-2014 Pete Batard <pete@akeo.ie>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -28,6 +28,7 @@
 #include <shlwapi.h>
 #include <setupapi.h>
 #include <direct.h>
+#include <io.h>
 
 #pragma once
 #if defined(_MSC_VER)
@@ -718,6 +719,15 @@ static __inline FILE* fopenU(const char* filename, const char* mode)
 	ret = _wfopen(wfilename, wmode);
 	wfree(filename);
 	wfree(mode);
+	return ret;
+}
+
+static __inline int _openU(const char *filename, int oflag , int pmode)
+{
+	int ret = -1;
+	wconvert(filename);
+	ret = _wopen(wfilename, oflag, pmode);
+	wfree(filename);
 	return ret;
 }
 

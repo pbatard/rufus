@@ -98,9 +98,6 @@
     <ClInclude Include="..\libcdio\cdio\cdio.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\libcdio\cdio\logging.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\libcdio\cdio\iso9660.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -126,6 +123,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\usb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\bled\bled.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

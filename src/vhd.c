@@ -27,6 +27,7 @@
 #include "msapi_utf8.h"
 #include "drive.h"
 #include "registry.h"
+#include "bled/bled.h"
 
 #if defined(_MSC_VER)
 #define bswap_uint64 _byteswap_uint64
@@ -211,6 +212,43 @@ out:
 	return r;
 }
 
+typedef struct {
+	const char* ext;
+	bled_compression_type type;
+} comp_assoc;
+
+static comp_assoc blah[] = {
+	{ ".xz", BLED_COMPRESSION_XZ },
+	{ ".gz", BLED_COMPRESSION_GZIP },
+	{ ".lzma", BLED_COMPRESSION_LZMA },
+	{ ".bz2", BLED_COMPRESSION_BZIP2 },
+	{ ".Z", BLED_COMPRESSION_LZW },
+};
+
+// For now we consider that an image that matches a known extension is bootable
+// TODO: uncompress header and check for bootable flag
+BOOL IsCompressedBootableImage(const char* path)
+{
+	char* p;
+	int i;
+
+	iso_report.compression_type = BLED_COMPRESSION_NONE;
+	for (p = (char*)&path[strlen(path)-1]; (*p != '.') && (p != path); p--);
+
+	if (p == path)
+		return FALSE;
+
+	for (i = 0; i<ARRAYSIZE(blah); i++) {
+		if (strcmp(p, blah[i].ext) == 0) {
+			iso_report.compression_type = blah[i].type;
+			return TRUE;
+		}
+	}
+
+	return FALSE;
+}
+
+
 BOOL IsHDImage(const char* path)
 {
 	HANDLE handle = INVALID_HANDLE_VALUE;
@@ -227,7 +265,10 @@ BOOL IsHDImage(const char* path)
 		uprintf("Could not open image '%s'", path);
 		goto out;
 	}
-	iso_report.is_bootable_img = AnalyzeMBR(handle, "Image");
+
+	iso_report.is_bootable_img = IsCompressedBootableImage(path);
+	if (iso_report.compression_type == BLED_COMPRESSION_NONE)
+		iso_report.is_bootable_img = AnalyzeMBR(handle, "Image");
 
 	if (!GetFileSizeEx(handle, &liImageSize)) {
 		uprintf("Could not get image size: %s", WindowsErrorString());
@@ -236,7 +277,7 @@ BOOL IsHDImage(const char* path)
 	iso_report.projected_size = (uint64_t)liImageSize.QuadPart;
 
 	size = sizeof(vhd_footer);
-	if (iso_report.projected_size >= (512 + size)) {
+	if ((iso_report.compression_type == BLED_COMPRESSION_NONE) && (iso_report.projected_size >= (512 + size))) {
 		footer = (vhd_footer*)malloc(size);
 		ptr.QuadPart = iso_report.projected_size - size;
 		if ( (footer == NULL) || (!SetFilePointerEx(handle, ptr, NULL, FILE_BEGIN)) ||

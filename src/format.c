@@ -45,11 +45,12 @@
 #include "format.h"
 #include "badblocks.h"
 #include "localization.h"
+#include "bled/bled.h"
 
 /*
  * Globals
  */
-DWORD FormatStatus;
+DWORD FormatStatus, LastRefresh;
 badblocks_report report;
 static float format_percent = 0.0f;
 static int task_number = 0;
@@ -374,7 +375,7 @@ static DWORD GetFATSizeSectors(DWORD DskSize, DWORD ReservedSecCnt, DWORD SecPer
 static BOOL FormatFAT32(DWORD DriveIndex)
 {
 	BOOL r = FALSE;
-	DWORD i, LastRefresh = 0;
+	DWORD i;
 	HANDLE hLogicalVolume;
 	DWORD cbRet;
 	DISK_GEOMETRY dgDrive;
@@ -412,6 +413,7 @@ static BOOL FormatFAT32(DWORD DriveIndex)
 	ULONGLONG FatNeeded, ClusterCount;
 
 	PrintStatus(0, TRUE, MSG_222, "Large FAT32");
+	LastRefresh = 0;
 	VolumeId = GetVolumeID();
 
 	// Open the drive and lock it
@@ -1256,6 +1258,16 @@ DWORD WINAPI CloseFormatPromptThread(LPVOID param) {
 	ExitThread(0);
 }
 
+void update_progress(const uint64_t processed_bytes)
+{
+	if (GetTickCount() > LastRefresh + 25) {
+		LastRefresh = GetTickCount();
+		format_percent = (100.0f*processed_bytes)/(1.0f*iso_report.projected_size);
+		PrintStatus(0, FALSE, MSG_261, format_percent);
+		UpdateProgress(OP_FORMAT, format_percent);
+	}
+}
+
 /*
  * Standalone thread for the formatting operation
  * According to http://msdn.microsoft.com/en-us/library/windows/desktop/aa364562.aspx
@@ -1273,7 +1285,7 @@ DWORD WINAPI FormatThread(void* param)
 	int i, r, pt, bt, fs, dt;
 	BOOL s, ret, use_large_fat32, add_uefi_togo;
 	const DWORD SectorSize = SelectedDrive.Geometry.BytesPerSector;
-	DWORD rSize, wSize, BufSize, LastRefresh = 0, DriveIndex = (DWORD)(uintptr_t)param;
+	DWORD rSize, wSize, BufSize, DriveIndex = (DWORD)(uintptr_t)param;
 	HANDLE hPhysicalDrive = INVALID_HANDLE_VALUE;
 	HANDLE hLogicalVolume = INVALID_HANDLE_VALUE;
 	HANDLE hSourceImage = INVALID_HANDLE_VALUE;
@@ -1454,63 +1466,71 @@ DWORD WINAPI FormatThread(void* param)
 			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_OPEN_FAILED;
 			goto out;
 		}
+		LastRefresh = 0;
 
-		uprintf("Writing Image...");
-		// Our buffer size must be a multiple of the sector size
-		BufSize = ((DD_BUFFER_SIZE + SectorSize - 1) / SectorSize) * SectorSize;
-		buffer = (uint8_t*)malloc(BufSize + SectorSize);	// +1 sector for align
-		if (buffer == NULL) {
-			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_NOT_ENOUGH_MEMORY;
-			uprintf("could not allocate DD buffer");
-			goto out;
-		}
-		// http://msdn.microsoft.com/en-us/library/windows/desktop/aa365747.aspx does buffer sector alignment
-		aligned_buffer = ((void *) ((((uintptr_t)(buffer)) + (SectorSize) - 1) & (~(((uintptr_t)(SectorSize)) - 1))));
-
-		// Don't bother trying for something clever, using double buffering overlapped and whatnot:
-		// With Windows' default optimizations, sync read + sync write for sequential operations
-		// will be as fast, if not faster, than whatever async scheme you can come up with.
-		for (wb = 0, wSize = 0; ; wb += wSize) {
-			s = ReadFile(hSourceImage, aligned_buffer, BufSize, &rSize, NULL);
-			if (!s) {
-				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_READ_FAULT;
-				uprintf("read error: %s", WindowsErrorString());
+		if (iso_report.compression_type != BLED_COMPRESSION_NONE) {
+			uprintf("Writing Compressed Image...");
+			bled_init(_uprintf, update_progress);
+			bled_uncompress_with_handles(hSourceImage, hPhysicalDrive, iso_report.compression_type);
+			bled_exit();
+		} else {
+			uprintf("Writing Image...");
+			// Our buffer size must be a multiple of the sector size
+			BufSize = ((DD_BUFFER_SIZE + SectorSize - 1) / SectorSize) * SectorSize;
+			buffer = (uint8_t*)malloc(BufSize + SectorSize);	// +1 sector for align
+			if (buffer == NULL) {
+				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_NOT_ENOUGH_MEMORY;
+				uprintf("could not allocate DD buffer");
 				goto out;
 			}
-			if (rSize == 0)
-				break;
-			if (GetTickCount() > LastRefresh + 25) {
-				LastRefresh = GetTickCount();
-				format_percent = (100.0f*wb)/(1.0f*iso_report.projected_size);
-				PrintStatus(0, FALSE, MSG_261, format_percent);
-				UpdateProgress(OP_FORMAT, format_percent);
-			}
-			// Don't overflow our projected size (mostly for VHDs)
-			if (wb + rSize > iso_report.projected_size) {
-				rSize = (DWORD)(iso_report.projected_size - wb);
-			}
-			// WriteFile fails unless the size is a multiple of sector size
-			if (rSize % SectorSize != 0)
-				rSize = ((rSize + SectorSize -1) / SectorSize) * SectorSize;
-			for (i=0; i<WRITE_RETRIES; i++) {
-				CHECK_FOR_USER_CANCEL;
-				s = WriteFile(hPhysicalDrive, aligned_buffer, rSize, &wSize, NULL);
-				if ((s) && (wSize == rSize))
-					break;
-				if (s)
-					uprintf("write error: Wrote %d bytes, expected %d bytes\n", wSize, rSize);
-				else
-					uprintf("write error: %s", WindowsErrorString());
-				if (i < WRITE_RETRIES-1) {
-					li.QuadPart = wb;
-					SetFilePointerEx(hPhysicalDrive, li, NULL, FILE_BEGIN);
-					uprintf("  RETRYING...\n");
-				} else {
-					FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_WRITE_FAULT;
+			// http://msdn.microsoft.com/en-us/library/windows/desktop/aa365747.aspx does buffer sector alignment
+			aligned_buffer = ((void *) ((((uintptr_t)(buffer)) + (SectorSize) - 1) & (~(((uintptr_t)(SectorSize)) - 1))));
+
+			// Don't bother trying for something clever, using double buffering overlapped and whatnot:
+			// With Windows' default optimizations, sync read + sync write for sequential operations
+			// will be as fast, if not faster, than whatever async scheme you can come up with.
+			for (wb = 0, wSize = 0; ; wb += wSize) {
+				s = ReadFile(hSourceImage, aligned_buffer, BufSize, &rSize, NULL);
+				if (!s) {
+					FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_READ_FAULT;
+					uprintf("read error: %s", WindowsErrorString());
 					goto out;
 				}
+				if (rSize == 0)
+					break;
+				if (GetTickCount() > LastRefresh + 25) {
+					LastRefresh = GetTickCount();
+					format_percent = (100.0f*wb)/(1.0f*iso_report.projected_size);
+					PrintStatus(0, FALSE, MSG_261, format_percent);
+					UpdateProgress(OP_FORMAT, format_percent);
+				}
+				// Don't overflow our projected size (mostly for VHDs)
+				if (wb + rSize > iso_report.projected_size) {
+					rSize = (DWORD)(iso_report.projected_size - wb);
+				}
+				// WriteFile fails unless the size is a multiple of sector size
+				if (rSize % SectorSize != 0)
+					rSize = ((rSize + SectorSize -1) / SectorSize) * SectorSize;
+				for (i=0; i<WRITE_RETRIES; i++) {
+					CHECK_FOR_USER_CANCEL;
+					s = WriteFile(hPhysicalDrive, aligned_buffer, rSize, &wSize, NULL);
+					if ((s) && (wSize == rSize))
+						break;
+					if (s)
+						uprintf("write error: Wrote %d bytes, expected %d bytes\n", wSize, rSize);
+					else
+						uprintf("write error: %s", WindowsErrorString());
+					if (i < WRITE_RETRIES-1) {
+						li.QuadPart = wb;
+						SetFilePointerEx(hPhysicalDrive, li, NULL, FILE_BEGIN);
+						uprintf("  RETRYING...\n");
+					} else {
+						FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_WRITE_FAULT;
+						goto out;
+					}
+				}
+				if (i >= WRITE_RETRIES) goto out;
 			}
-			if (i >= WRITE_RETRIES) goto out;
 		}
 
 		// If the image contains a partition we might be able to access, try to re-mount it
@@ -1739,7 +1759,7 @@ out:
 DWORD WINAPI SaveImageThread(void* param)
 {
 	BOOL s;
-	DWORD rSize, wSize, LastRefresh = 0, DriveIndex = (DWORD)(uintptr_t)param;
+	DWORD rSize, wSize, DriveIndex = (DWORD)(uintptr_t)param;
 	HANDLE hPhysicalDrive = INVALID_HANDLE_VALUE;
 	HANDLE hDestImage = INVALID_HANDLE_VALUE;
 	LARGE_INTEGER li;
@@ -1748,6 +1768,7 @@ DWORD WINAPI SaveImageThread(void* param)
 	int i;
 
 	PrintStatus(0, TRUE, MSG_225);
+	LastRefresh = 0;
 	hPhysicalDrive = GetPhysicalHandle(DriveIndex, FALSE, TRUE);
 	if (hPhysicalDrive == INVALID_HANDLE_VALUE) {
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_OPEN_FAILED;

@@ -1,3 +1,4 @@
+*.a
 *.aps
 *.dep
 *.exe
@@ -16,11 +17,16 @@
 *.pdb
 *.plg
 *.res
+*.sdf
 *.suo
 *.swp
+*.tlog
 *.user
+*.opensdf
+*.o_manifest
 .deps
 .libs
+Makefile
 x86_32
 x86_64
 autom4te.cache

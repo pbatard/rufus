@@ -41,6 +41,7 @@
 #include "drive.h"
 #include "registry.h"
 #include "localization.h"
+#include "bled/bled.h"
 
 /* Redefinitions for WDK and MinGW */
 // TODO: these would be better in a 'missing.h' file
@@ -1637,6 +1638,7 @@ void SetBoot(int fs, int bt)
 /*
  * Main dialog callback
  */
+extern int uncompress(const char* src, const char* dst, int type);
 static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	DRAWITEMSTRUCT* pDI;
