@@ -427,7 +427,7 @@ static __inline DWORD GetTempFileNameU(char* lpPathName, char* lpPrefixString, U
 	wconvert(lpPathName);
 	wconvert(lpPrefixString);
 	walloc(lpTempFileName, MAX_PATH);
-	ret =GetTempFileNameW(wlpPathName, wlpPrefixString, uUnique, wlpTempFileName);
+	ret = GetTempFileNameW(wlpPathName, wlpPrefixString, uUnique, wlpTempFileName);
 	err = GetLastError();
 	if ((ret != 0) && ((ret = wchar_to_utf8_no_alloc(wlpTempFileName, lpTempFileName, MAX_PATH)) == 0)) {
 		err = GetLastError();

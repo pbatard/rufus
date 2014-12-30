@@ -110,6 +110,7 @@ typedef unsigned int uid_t;
 
 extern smallint bb_got_signal;
 extern uint32_t *global_crc32_table;
+extern jmp_buf bb_error_jmp;
 
 uint32_t* crc32_filltable(uint32_t *crc_table, int endian);
 uint32_t crc32_le(uint32_t crc, unsigned char const *p, size_t len, uint32_t *crc32table_le);
@@ -135,10 +136,11 @@ typedef struct _llist_t {
 extern void (*bled_printf) (const char* format, ...);
 extern void (*bled_progress) (const uint64_t processed_bytes);
 
+#define xfunc_die() longjmp(bb_error_jmp, 1)
 #define bb_printf(...) do { if (bled_printf != NULL) bled_printf(__VA_ARGS__); \
 	else { printf(__VA_ARGS__); putchar('\n'); } } while(0)
 #define bb_error_msg bb_printf
-#define bb_error_msg_and_die(...) do {bb_printf(__VA_ARGS__); return;} while(0)
+#define bb_error_msg_and_die(...) do {bb_printf(__VA_ARGS__); xfunc_die();} while(0)
 #define bb_error_msg_and_err(...) do {bb_printf(__VA_ARGS__); goto err;} while(0)
 #define bb_perror_msg bb_error_msg
 #define bb_perror_msg_and_die bb_error_msg_and_die
@@ -185,7 +187,6 @@ static inline ssize_t full_read(int fd, void *buf, size_t count) {
 #define xzalloc(x) calloc(x, 1)
 #define malloc_or_warn malloc
 #define xopen3 open
-#define xfunc_die() do { bb_printf("not implemented"); return -1; } while(0)
 #define mkdir(x, y) _mkdirU(x)
 
 #if defined(_MSC_VER)

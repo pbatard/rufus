@@ -23,6 +23,7 @@ uint64_t bb_total_rb;
 printf_t bled_printf = NULL;
 progress_t bled_progress = NULL;
 static bool bled_initialized = 0;
+jmp_buf bb_error_jmp;
 
 static long long int unpack_none(transformer_state_t *xstate)
 {
@@ -72,6 +73,8 @@ int64_t bled_uncompress(const char* src, const char* dst, int type)
 		goto err;
 	}
 
+	if (setjmp(bb_error_jmp))
+		goto err;
 	ret = unpacker[type](&xstate);
 	_close(xstate.src_fd);
 	_close(xstate.dst_fd);
@@ -116,6 +119,8 @@ int64_t bled_uncompress_with_handles(HANDLE hSrc, HANDLE hDst, int type)
 		return -1;
 	}
 
+	if (setjmp(bb_error_jmp))
+		return -1;
 	return unpacker[type](&xstate);
 }
 

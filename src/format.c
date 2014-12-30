@@ -58,6 +58,8 @@ extern const int nb_steps[FS_MAX];
 extern uint32_t dur_mins, dur_secs;
 static int fs_index = 0;
 BOOL force_large_fat32 = FALSE, enable_ntfs_compression = FALSE;
+uint8_t *grub2_buf = NULL;
+long grub2_len;
 static BOOL WritePBR(HANDLE hLogicalDrive);
 
 /* 
@@ -952,7 +954,7 @@ static BOOL WriteSBR(HANDLE hPhysicalDrive)
 {
 	// TODO: Do we need anything special for 4K sectors?
 	DWORD size, max_size, mbr_size = 0x200;
-	int dt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
+	int r, dt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
 	unsigned char* buf = NULL;
 	FILE fake_fd = { 0 };
 
@@ -969,6 +971,7 @@ static BOOL WriteSBR(HANDLE hPhysicalDrive)
 
 	switch (dt) {
 	case DT_GRUB4DOS:
+		uprintf("Writing Grub4Dos SBR...");
 		buf = GetResource(hMainInstance, MAKEINTRESOURCEA(IDR_GR_GRUB_GRLDR_MBR), _RT_RCDATA, "grldr.mbr", &size, FALSE);
 		if ((buf == NULL) || (size <= mbr_size)) {
 			uprintf("grldr.mbr is either not present or too small");
@@ -978,10 +981,17 @@ static BOOL WriteSBR(HANDLE hPhysicalDrive)
 		size -= mbr_size;
 		break;
 	case DT_GRUB2:
-		buf = GetResource(hMainInstance, MAKEINTRESOURCEA(IDR_GR_GRUB2_CORE_IMG), _RT_RCDATA, "core.img", &size, FALSE);
-		if (buf == NULL) {
-			uprintf("Could not access core.img");
-			return FALSE;
+		if (grub2_buf != NULL) {
+			uprintf("Writing Grub 2.0 SBR (from download)...");
+			buf = grub2_buf;
+			size = (DWORD)grub2_len;
+		} else {
+			uprintf("Writing Grub 2.0 SBR (from embedded)...");
+			buf = GetResource(hMainInstance, MAKEINTRESOURCEA(IDR_GR_GRUB2_CORE_IMG), _RT_RCDATA, "core.img", &size, FALSE);
+			if (buf == NULL) {
+				uprintf("Could not access core.img");
+				return FALSE;
+			}
 		}
 		break;
 	default:
@@ -989,12 +999,13 @@ static BOOL WriteSBR(HANDLE hPhysicalDrive)
 		return TRUE;
 	}
 
-	uprintf("Writing SBR (Secondary Boot record)");
 	if (size > max_size) {
 		uprintf("  SBR size is too large - You may need to uncheck 'Add fixes for old BIOSes'.");
 		return FALSE;
 	}
-	return (write_data(&fake_fd, mbr_size, buf, (uint64_t)size) != 0);
+	r = write_data(&fake_fd, mbr_size, buf, (uint64_t)size);
+	safe_free(grub2_buf);
+	return (r != 0);
 }
 
 /*

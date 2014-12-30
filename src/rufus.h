@@ -263,6 +263,7 @@ typedef struct {
 	uint16_t sl_version;	// Syslinux/Isolinux version
 	char sl_version_str[12];
 	char sl_version_ext[32];
+	char grub2_version[32];
 } RUFUS_ISO_REPORT;
 
 /* Isolate the Syslinux version numbers */

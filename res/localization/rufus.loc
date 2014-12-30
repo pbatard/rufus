@@ -305,6 +305,15 @@ t MSG_114 "This image uses Syslinux %s%s but this application only includes the 
 	"Note: The files will be downloaded in the current application directory and will be reused "
 	"automatically if present.\n"
 t MSG_115 "Download required"
+t MSG_116 "This image uses Grub %s but the application only includes the installation files for "
+	"Grub %s.\n\nAs different versions of Grub may not be compatible with one another, and it is "
+	"not possible to include them all, Rufus will attempt to locate a version of the Grub "
+	"installation file ('core.img') that matches the one from your image:\n"
+	"- Select 'Yes' to connect to the Internet and attempt to download it\n"
+	"- Select 'No' to use the embedded version regardless\n"
+	"- Select 'Cancel' to abort the operation\n\n"
+	"Note: The file will be downloaded in the current application directory and will be reused "
+	"automatically if present. If no match can be found, then the embedded version will be used.\n"
 # Tootips
 # Partition Scheme and Target Type
 t MSG_150 "Usually the safest choice. If you have an UEFI computer and want to install "

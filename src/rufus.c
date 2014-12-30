@@ -42,6 +42,8 @@
 #include "registry.h"
 #include "localization.h"
 #include "bled/bled.h"
+#include "../res/grub/grub_version.h"
+#include "../res/grub2/grub2_version.h"
 
 /* Redefinitions for WDK and MinGW */
 // TODO: these would be better in a 'missing.h' file
@@ -99,6 +101,8 @@ static BOOL iso_provided = FALSE;
 static BOOL user_notified = FALSE;
 static BOOL relaunch = FALSE;
 extern BOOL force_large_fat32, enable_iso, enable_joliet, enable_rockridge, enable_ntfs_compression;
+extern uint8_t* grub2_buf;
+extern long grub2_len;
 extern const char* old_c32_name[NB_OLD_C32];
 static int selection_default;
 static loc_cmd* selected_locale = NULL;
@@ -129,6 +133,8 @@ int dialog_showing = 0;
 uint16_t rufus_version[4], embedded_sl_version[2];
 char embedded_sl_version_str[2][12] = { "?.??", "?.??" };
 char embedded_sl_version_ext[2][32];
+char embedded_grub_version[] = GRUB4DOS_VERSION;
+char embedded_grub2_version[] = GRUB2_PACKAGE_VERSION;
 RUFUS_UPDATE update = { {0,0,0,0}, {0,0}, NULL, NULL};
 StrArray DriveID, DriveLabel;
 extern char szStatusMessage[256];
@@ -1122,12 +1128,15 @@ static BOOL BootCheck(void)
 	FILE *fd;
 	DWORD len;
 	BOOL in_files_dir = FALSE;
+	const char* grub = "grub";
+	const char* core_img = "core.img";
 	const char* ldlinux = "ldlinux";
 	const char* syslinux = "syslinux";
 	const char* ldlinux_ext[3] = { "sys", "bss", "c32" };
 	char tmp[MAX_PATH], tmp2[MAX_PATH];
 
 	syslinux_ldlinux_len[0] = 0; syslinux_ldlinux_len[1] = 0;
+	safe_free(grub2_buf);
 	dt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
 	if ((dt == DT_ISO) || (dt == DT_IMG)) {
 		if (image_path == NULL) {
@@ -1183,6 +1192,59 @@ static BOOL BootCheck(void)
 			// This ISO image contains a file larger than 4GB file (FAT32)
 			MessageBoxU(hMainDialog, lmprintf(MSG_100), lmprintf(MSG_099), MB_OK|MB_ICONERROR|MB_IS_RTL);
 			return FALSE;
+		}
+
+		if ((iso_report.has_grub2) && (safe_strcmp(iso_report.grub2_version, embedded_grub2_version) != 0)) {
+			// We may have to download a different Grub2 version if we can find one
+			IGNORE_RETVAL(_chdirU(app_dir));
+			IGNORE_RETVAL(_mkdir(FILES_DIR));
+			IGNORE_RETVAL(_chdir(FILES_DIR));
+			static_sprintf(tmp, "%s-%s/%s", grub, iso_report.grub2_version, core_img);
+			fd = fopen(tmp, "rb");
+			if (fd != NULL) {
+				// If a file already exists in the current directory, use that one
+				uprintf("Will reuse '%s' from './" FILES_DIR "/%s-%s/' for Grub 2.x installation\n",
+					core_img, grub, iso_report.grub2_version);
+				fseek(fd, 0, SEEK_END);
+				grub2_len = ftell(fd);
+				fseek(fd, 0, SEEK_SET);
+				if (grub2_len > 0)
+					grub2_buf = malloc(grub2_len);
+
+				// grub2_buf was set to NULL at the beginning of this call
+				if ((grub2_buf == NULL) || (fread(grub2_buf, 1, (size_t)grub2_len, fd) != (size_t)grub2_len)) {
+					uprintf("Failed to read existing '%s' data - will use embedded version", core_img);
+					safe_free(grub2_buf);
+				}
+				fclose(fd);
+			} else {
+				r = MessageBoxU(hMainDialog, lmprintf(MSG_116, iso_report.grub2_version, embedded_grub2_version),
+					lmprintf(MSG_115), MB_YESNOCANCEL|MB_ICONWARNING|MB_IS_RTL);
+				if (r == IDCANCEL)
+					return FALSE;
+				else if (r == IDYES) {
+					static_sprintf(tmp, "%s-%s", grub, iso_report.grub2_version);
+					IGNORE_RETVAL(_mkdir(tmp));
+					static_sprintf(tmp, "%s/%s-%s/%s", FILES_URL, grub, iso_report.grub2_version, core_img);
+					SetWindowTextU(hISOProgressDlg, lmprintf(MSG_085, tmp));
+					SetWindowTextU(hISOFileName, tmp);
+					PromptOnError = FALSE;
+					grub2_len = (long)DownloadFile(tmp, &tmp[sizeof(FILES_URL)], hISOProgressDlg);
+					PromptOnError = TRUE;
+					if (grub2_len <= 0)
+						uprintf("%s was not found - will use embedded version\n", tmp);
+					else {
+						fd = fopen(&tmp[sizeof(FILES_URL)], "rb");
+						grub2_buf = malloc(grub2_len);
+						if ((fd == NULL) || (grub2_buf == NULL) || (fread(grub2_buf, 1, (size_t)grub2_len, fd) != (size_t)grub2_len)) {
+							uprintf("Failed to read '%s' data - will use embedded version", core_img);
+							safe_free(grub2_buf);
+						}
+						if (fd != NULL)
+							fclose(fd);
+					}
+				}
+			}
 		}
 
 		if (HAS_SYSLINUX(iso_report)) {
@@ -1434,6 +1496,7 @@ void InitDialog(HWND hDlg)
 	}
 	uprintf("Syslinux versions: %s%s, %s%s", embedded_sl_version_str[0], embedded_sl_version_ext[0],
 		embedded_sl_version_str[1], embedded_sl_version_ext[1]);
+	uprintf("Grub versions: %s, %s", embedded_grub_version, embedded_grub2_version);
 	uprintf("Windows version: %s\n", WindowsVersionStr);
 	uprintf("Locale ID: 0x%04X\n", GetUserDefaultUILanguage());
 

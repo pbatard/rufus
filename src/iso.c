@@ -552,6 +552,27 @@ out:
 	return r;
 }
 
+void GetGrubVersion(char* buf, size_t buf_size)
+{
+	char *p, unauthorized[] = {'<', '>', ':', '|', '*', '?', '\\', '/'};
+	size_t i;
+	const char grub_version_str[] = "GRUB  version %s";
+
+	for (i=0; i<buf_size; i++) {
+		if (memcmp(&buf[i], grub_version_str, sizeof(grub_version_str)) == 0) {
+			safe_strcpy(iso_report.grub2_version, sizeof(iso_report.grub2_version), &buf[i + sizeof(grub_version_str)]);
+			break;
+		}
+	}
+	// Sanitize the string
+	for (p = &iso_report.grub2_version[0]; *p; p++) {
+		for (i=0; i<sizeof(unauthorized); i++) {
+			if (*p == unauthorized[i])
+				*p = '_';
+		}
+	}
+}
+
 BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan)
 {
 	size_t i, size;
@@ -742,6 +763,25 @@ out:
 			}
 			_unlink(tmp_sif);
 			safe_free(tmp);
+		}
+		if (iso_report.has_grub2) {
+			// In case we have a GRUB2 based iso, we extract boot/grub/i386-pc/normal.mod to parse its version
+			strcpy(iso_report.grub2_version, "unknown");
+			if ((GetTempPathU(sizeof(path), path) != 0) && (GetTempFileNameU(path, APPLICATION_NAME, 0, path) != 0)) {
+				size = (size_t)ExtractISOFile(src_iso, "boot/grub/i386-pc/normal.mod", path, FILE_ATTRIBUTE_NORMAL);
+				buf = (char*)calloc(size, 1);
+				fd = fopen(path, "rb");
+				if ((size == 0) || (buf == NULL) || (fd == NULL)) {
+					uprintf("Could not read Grub version from 'boot/grub/i386-pc/normal.mod'");
+				} else {
+					fread(buf, 1, size, fd);
+					fclose(fd);
+					GetGrubVersion(buf, size);
+				}
+				free(buf);
+				_unlink(path);
+			}
+			uprintf("Detected Grub version: %s", iso_report.grub2_version);
 		}
 		StrArrayDestroy(&config_path);
 		StrArrayDestroy(&isolinux_path);
