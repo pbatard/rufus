@@ -39,4 +39,4 @@ sed -i -e "s/@@MAJOR@@/$MAJOR/g" -e "s/@@MINOR@@/$MINOR/g" -e "s/@@MICRO@@/$MICR
 sed -i -f cmd.sed src/rufus.rc
 sed -i 's/$/\r/' src/rufus.rc
 rm cmd.sed
-source bootstrap.sh
+source ./bootstrap.sh
