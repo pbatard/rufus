@@ -1,9 +1,9 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * ISO file extraction
- * Copyright © 2011-2014 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2015 Pete Batard <pete@akeo.ie>
  * Based on libcdio's iso & udf samples:
- * Copyright © 2003-2012 Rocky Bernstein <rocky@gnu.org>
+ * Copyright © 2003-2014 Rocky Bernstein <rocky@gnu.org>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -98,7 +98,7 @@ static __inline char* sanitize_filename(char* filename, BOOL* is_identical)
 	*is_identical = TRUE;
 	ret = safe_strdup(filename);
 	if (ret == NULL) {
-		uprintf("Couldn't allocate string for sanitized path");
+		uprintf("Could not allocate string for sanitized path");
 		return NULL;
 	}
 
@@ -282,7 +282,8 @@ static void print_extracted_file(char* psz_fullpath, int64_t i_file_length)
 	safe_sprintf(&psz_fullpath[nul_pos], 24, " (%s)", SizeToHumanReadable(i_file_length, TRUE, FALSE));
 	uprintf("Extracting: %s\n", psz_fullpath);
 	safe_sprintf(&psz_fullpath[nul_pos], 24, " (%s)", SizeToHumanReadable(i_file_length, FALSE, FALSE));
-	SetWindowTextU(hISOFileName, psz_fullpath);
+	SendMessageLU(GetDlgItem(hMainDialog, IDC_STATUS), SB_SETTEXTW, SBT_OWNERDRAW, psz_fullpath);
+	PrintStatus(0, MSG_000, psz_fullpath);	// MSG_000 is "%s"
 	// ISO9660 cannot handle backslashes
 	for (i=0; i<nul_pos; i++)
 		if (psz_fullpath[i] == '\\') psz_fullpath[i] = '/';
@@ -386,10 +387,8 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 				}
 				if (i >= WRITE_RETRIES) goto out;
 				i_file_length -= i_read;
-				if (nb_blocks++ % PROGRESS_THRESHOLD == 0) {
-					SendMessage(hISOProgressBar, PBM_SETPOS, (WPARAM)((MAX_PROGRESS*nb_blocks)/total_blocks), 0);
+				if (nb_blocks++ % PROGRESS_THRESHOLD == 0)
 					UpdateProgress(OP_DOS, 100.0f*nb_blocks/total_blocks);
-				}
 			}
 			// If you have a fast USB 3.0 device, the default Windows buffering does an
 			// excellent job at compensating for our small blocks read/writes to max out the
@@ -533,10 +532,8 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 				}
 				if (j >= WRITE_RETRIES) goto out;
 				i_file_length -= ISO_BLOCKSIZE;
-				if (nb_blocks++ % PROGRESS_THRESHOLD == 0) {
-					SendMessage(hISOProgressBar, PBM_SETPOS, (WPARAM)((MAX_PROGRESS*nb_blocks)/total_blocks), 0);
+				if (nb_blocks++ % PROGRESS_THRESHOLD == 0)
 					UpdateProgress(OP_DOS, 100.0f*nb_blocks/total_blocks);
-				}
 			}
 			ISO_BLOCKING(safe_closehandle(file_handle));
 			if (props.is_syslinux_cfg || props.is_grub_cfg)
@@ -583,7 +580,6 @@ BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan)
 	iso9660_t* p_iso = NULL;
 	udf_t* p_udf = NULL; 
 	udf_dirent_t* p_udf_root;
-	LONG progress_style;
 	char *tmp, *buf, *ext;
 	char path[MAX_PATH];
 	const char* basedir[] = { "i386", "minint" };
@@ -596,24 +592,20 @@ BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan)
 	scan_only = scan;
 	cdio_log_set_handler(log_handler);
 	psz_extract_dir = dest_dir;
-	progress_style = GetWindowLong(hISOProgressBar, GWL_STYLE);
+	// Change progress style to marquee for scanning
 	if (scan_only) {
+		SendMessage(hMainDialog, UM_PROGRESS_INIT, PBS_MARQUEE, 0);
 		total_blocks = 0;
 		memset(&iso_report, 0, sizeof(iso_report));
 		has_ldlinux_c32 = FALSE;
 		// String array of all isolinux/syslinux locations
 		StrArrayCreate(&config_path, 8);
 		StrArrayCreate(&isolinux_path, 8);
-		// Change the Window title and static text
-		SetWindowTextU(hISOProgressDlg, lmprintf(MSG_202));
-		SetWindowTextU(hISOFileName, lmprintf(MSG_202));
-		// Change progress style to marquee for scanning
-		SetWindowLong(hISOProgressBar, GWL_STYLE, progress_style | PBS_MARQUEE);
-		SendMessage(hISOProgressBar, PBM_SETMARQUEE, TRUE, 0);
+		PrintInfo(0, MSG_202);
 	} else {
 		uprintf("Extracting files...\n");
 		IGNORE_RETVAL(_chdirU(app_dir));
-		SetWindowTextU(hISOProgressDlg, lmprintf(MSG_231));
+		PrintInfo(0, MSG_231);
 		if (total_blocks == 0) {
 			uprintf("Error: ISO has not been properly scanned.\n");
 			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_ISO_SCAN);
@@ -621,10 +613,7 @@ BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan)
 		}
 		nb_blocks = 0;
 		iso_blocking_status = 0;
-		SetWindowLong(hISOProgressBar, GWL_STYLE, progress_style & (~PBS_MARQUEE));
-		SendMessage(hISOProgressBar, PBM_SETPOS, 0, 0);
 	}
-	SendMessage(hISOProgressDlg, UM_PROGRESS_INIT, 0, 0);
 
 	/* First try to open as UDF - fallback to ISO if it failed */
 	p_udf = udf_open(src_iso);
@@ -634,7 +623,7 @@ BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan)
 
 	p_udf_root = udf_get_root(p_udf, true, 0);
 	if (p_udf_root == NULL) {
-		uprintf("Couldn't locate UDF root directory\n");
+		uprintf("Could not locate UDF root directory\n");
 		goto out;
 	}
 	if (scan_only) {
@@ -785,6 +774,7 @@ out:
 		}
 		StrArrayDestroy(&config_path);
 		StrArrayDestroy(&isolinux_path);
+		SendMessage(hMainDialog, UM_PROGRESS_EXIT, 0, 0);
 	} else if (HAS_SYSLINUX(iso_report)) {
 		safe_sprintf(path, sizeof(path), "%s\\syslinux.cfg", dest_dir);
 		// Create a /syslinux.cfg (if none exists) that points to the existing isolinux cfg
@@ -808,7 +798,6 @@ out:
 		if (fd != NULL)
 			fclose(fd);
 	}
-	SendMessage(hISOProgressDlg, UM_PROGRESS_EXIT, 0, 0);
 	if (p_iso != NULL)
 		iso9660_close(p_iso);
 	if (p_udf != NULL)
@@ -847,12 +836,12 @@ int64_t ExtractISOFile(const char* iso, const char* iso_file, const char* dest_f
 
 	p_udf_root = udf_get_root(p_udf, true, 0);
 	if (p_udf_root == NULL) {
-		uprintf("Couldn't locate UDF root directory\n");
+		uprintf("Could not locate UDF root directory\n");
 		goto out;
 	}
 	p_udf_file = udf_fopen(p_udf_root, iso_file);
 	if (!p_udf_file) {
-		uprintf("Couldn't locate file %s in ISO image\n", iso_file);
+		uprintf("Could not locate file %s in ISO image\n", iso_file);
 		goto out;
 	}
 	file_length = udf_get_file_length(p_udf_file);

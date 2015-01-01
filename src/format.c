@@ -2,7 +2,7 @@
  * Rufus: The Reliable USB Formatting Utility
  * Formatting function calls
  * Copyright © 2007-2009 Tom Thornhill/Ridgecrop
- * Copyright © 2011-2014 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2015 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -107,18 +107,18 @@ static BOOLEAN __stdcall FormatExCallback(FILE_SYSTEM_CALLBACK_COMMAND Command, 
 	switch(Command) {
 	case FCC_PROGRESS:
 		percent = (DWORD*)pData;
-		PrintStatus(0, FALSE, MSG_217, 1.0f * (*percent));
+		PrintInfo(0, MSG_217, 1.0f * (*percent));
 		UpdateProgress(OP_FORMAT, 1.0f * (*percent));
 		break;
 	case FCC_STRUCTURE_PROGRESS:	// No progress on quick format
 		if (task_number < nb_steps[fs_index] - 1) {
-			PrintStatus(0, TRUE, MSG_218, ++task_number, nb_steps[fs_index]);
+			PrintInfoDebug(0, MSG_218, ++task_number, nb_steps[fs_index]);
 			format_percent += 100.0f / (1.0f * nb_steps[fs_index]);
 			UpdateProgress(OP_CREATE_FS, format_percent);
 		}
 		break;
 	case FCC_DONE:
-		PrintStatus(0, TRUE, MSG_218, nb_steps[fs_index], nb_steps[fs_index]);
+		PrintInfoDebug(0, MSG_218, nb_steps[fs_index], nb_steps[fs_index]);
 		UpdateProgress(OP_CREATE_FS, 100.0f);
 		if(*(BOOLEAN*)pData == FALSE) {
 			uprintf("Error while formatting");
@@ -198,7 +198,7 @@ static BOOLEAN __stdcall ChkdskCallback(FILE_SYSTEM_CALLBACK_COMMAND Command, DW
 	case FCC_PROGRESS:
 	case FCC_CHECKDISK_PROGRESS:
 		percent = (DWORD*)pData;
-		PrintStatus(0, FALSE, MSG_219, *percent);
+		PrintInfo(0, MSG_219, *percent);
 		break;
 	case FCC_DONE:
 		if(*(BOOLEAN*)pData == FALSE) {
@@ -414,7 +414,7 @@ static BOOL FormatFAT32(DWORD DriveIndex)
 	// Debug temp vars
 	ULONGLONG FatNeeded, ClusterCount;
 
-	PrintStatus(0, TRUE, MSG_222, "Large FAT32");
+	PrintInfoDebug(0, MSG_222, "Large FAT32");
 	LastRefresh = 0;
 	VolumeId = GetVolumeID();
 
@@ -620,7 +620,7 @@ static BOOL FormatFAT32(DWORD DriveIndex)
 		if (GetTickCount() > LastRefresh + 25) {
 			LastRefresh = GetTickCount();
 			format_percent = (100.0f*i)/(1.0f*(SystemAreaSize+BurstSize));
-			PrintStatus(0, FALSE, MSG_217, format_percent);
+			PrintInfo(0, MSG_217, format_percent);
 			UpdateProgress(OP_FORMAT, format_percent);
 		}
 		if (IS_ERROR(FormatStatus)) goto out;	// For cancellation
@@ -645,7 +645,7 @@ static BOOL FormatFAT32(DWORD DriveIndex)
 	}
 
 	// Must do it here, as have issues when trying to write the PBR after a remount
-	PrintStatus(0, TRUE, MSG_229);
+	PrintInfoDebug(0, MSG_229);
 	if (!WritePBR(hLogicalVolume)) {
 		// Non fatal error, but the drive probably won't boot
 		uprintf("Could not write partition boot record - drive may not boot...\n");
@@ -654,7 +654,7 @@ static BOOL FormatFAT32(DWORD DriveIndex)
 	// Set the FAT32 volume label
 	GetWindowTextW(hLabel, wLabel, ARRAYSIZE(wLabel));
 	ToValidLabel(wLabel, TRUE);
-	PrintStatus(0, TRUE, MSG_221);
+	PrintInfoDebug(0, MSG_221);
 	// Handle must be closed for SetVolumeLabel to work
 	safe_closehandle(hLogicalVolume);
 	VolumeName = GetLogicalName(DriveIndex, TRUE, TRUE);
@@ -705,9 +705,9 @@ static BOOL FormatDrive(DWORD DriveIndex)
 	}
 	fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
 	if ((fs == FS_UDF) && !((dur_mins == 0) && (dur_secs == 0))) {
-		PrintStatus(0, TRUE, MSG_220, FSType, dur_mins, dur_secs);
+		PrintInfoDebug(0, MSG_220, FSType, dur_mins, dur_secs);
 	} else {
-		PrintStatus(0, TRUE, MSG_222, FSType);
+		PrintInfoDebug(0, MSG_222, FSType);
 	}
 	VolumeName = GetLogicalName(DriveIndex, TRUE, TRUE);
 	wVolumeName = utf8_to_wchar(VolumeName);
@@ -787,7 +787,7 @@ static BOOL CheckDisk(char DriveLetter)
 	size_t i;
 
 	wDriveRoot[0] = (WCHAR)DriveLetter;
-	PrintStatus(0, TRUE, MSG_223);
+	PrintInfoDebug(0, MSG_223);
 
 	PF_INIT_OR_OUT(Chkdsk, Fmifs);
 
@@ -816,7 +816,7 @@ static BOOL ClearMBRGPT(HANDLE hPhysicalDrive, LONGLONG DiskSize, DWORD SectorSi
 	uint64_t i, last_sector = DiskSize/SectorSize;
 	unsigned char* pBuf = (unsigned char*) calloc(SectorSize, 1);
 
-	PrintStatus(0, TRUE, MSG_224);
+	PrintInfoDebug(0, MSG_224);
 	if (pBuf == NULL) {
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_NOT_ENOUGH_MEMORY;
 		goto out;
@@ -1274,7 +1274,7 @@ void update_progress(const uint64_t processed_bytes)
 	if (GetTickCount() > LastRefresh + 25) {
 		LastRefresh = GetTickCount();
 		format_percent = (100.0f*processed_bytes)/(1.0f*iso_report.projected_size);
-		PrintStatus(0, FALSE, MSG_261, format_percent);
+		PrintInfo(0, MSG_261, format_percent);
 		UpdateProgress(OP_FORMAT, format_percent);
 	}
 }
@@ -1326,7 +1326,7 @@ DWORD WINAPI FormatThread(void* param)
 	use_large_fat32 = (fs == FS_FAT32) && ((SelectedDrive.DiskSize > LARGE_FAT32_SIZE) || (force_large_fat32));
 	add_uefi_togo = (fs == FS_NTFS) && (dt == DT_ISO) && (IS_EFI(iso_report)) && (bt == BT_UEFI);
 
-	PrintStatus(0, TRUE, MSG_225);
+	PrintInfoDebug(0, MSG_225);
 	hPhysicalDrive = GetPhysicalHandle(DriveIndex, TRUE, TRUE);
 	if (hPhysicalDrive == INVALID_HANDLE_VALUE) {
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_OPEN_FAILED;
@@ -1382,7 +1382,7 @@ DWORD WINAPI FormatThread(void* param)
 	}
 	CHECK_FOR_USER_CANCEL;
 
-	PrintStatus(0, TRUE, MSG_226);
+	PrintInfoDebug(0, MSG_226);
 	AnalyzeMBR(hPhysicalDrive, "Drive");
 	if ((hLogicalVolume != NULL) && (hLogicalVolume != INVALID_HANDLE_VALUE)) {
 		AnalyzePBR(hLogicalVolume);
@@ -1481,7 +1481,7 @@ DWORD WINAPI FormatThread(void* param)
 
 		if (iso_report.compression_type != BLED_COMPRESSION_NONE) {
 			uprintf("Writing Compressed Image...");
-			bled_init(_uprintf, update_progress);
+			bled_init(_uprintf, update_progress, &FormatStatus);
 			bled_uncompress_with_handles(hSourceImage, hPhysicalDrive, iso_report.compression_type);
 			bled_exit();
 		} else {
@@ -1512,7 +1512,7 @@ DWORD WINAPI FormatThread(void* param)
 				if (GetTickCount() > LastRefresh + 25) {
 					LastRefresh = GetTickCount();
 					format_percent = (100.0f*wb)/(1.0f*iso_report.projected_size);
-					PrintStatus(0, FALSE, MSG_261, format_percent);
+					PrintInfo(0, MSG_261, format_percent);
 					UpdateProgress(OP_FORMAT, format_percent);
 				}
 				// Don't overflow our projected size (mostly for VHDs)
@@ -1571,7 +1571,7 @@ DWORD WINAPI FormatThread(void* param)
 
 	// Close the (unmounted) volume before formatting
 	if ((hLogicalVolume != NULL) && (hLogicalVolume != INVALID_HANDLE_VALUE)) {
-		PrintStatus(0, TRUE, MSG_227);
+		PrintInfoDebug(0, MSG_227);
 		if (!CloseHandle(hLogicalVolume)) {
 			uprintf("Could not close volume: %s\n", WindowsErrorString());
 			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_ACCESS_DENIED;
@@ -1598,7 +1598,7 @@ DWORD WINAPI FormatThread(void* param)
 
 	// Thanks to Microsoft, we must fix the MBR AFTER the drive has been formatted
 	if (pt == PARTITION_STYLE_MBR) {
-		PrintStatus(0, TRUE, MSG_228);	// "Writing master boot record..."
+		PrintInfoDebug(0, MSG_228);	// "Writing master boot record..."
 		if ((!WriteMBR(hPhysicalDrive)) || (!WriteSBR(hPhysicalDrive))) {
 			if (!IS_ERROR(FormatStatus))
 				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_WRITE_FAULT;
@@ -1646,7 +1646,7 @@ DWORD WINAPI FormatThread(void* param)
 			}
 			// NB: if you unmount the logical volume here, XP will report error:
 			// [0x00000456] The media in the drive may have changed
-			PrintStatus(0, TRUE, MSG_229);
+			PrintInfoDebug(0, MSG_229);
 			if (!WritePBR(hLogicalVolume)) {
 				if (!IS_ERROR(FormatStatus))
 					FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_WRITE_FAULT;
@@ -1676,7 +1676,7 @@ DWORD WINAPI FormatThread(void* param)
 	if (IsChecked(IDC_BOOT)) {
 		if ((dt == DT_WINME) || (dt == DT_FREEDOS)) {
 			UpdateProgress(OP_DOS, -1.0f);
-			PrintStatus(0, TRUE, MSG_230);
+			PrintInfoDebug(0, MSG_230);
 			if (!ExtractDOS(drive_name)) {
 				if (!IS_ERROR(FormatStatus))
 					FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANNOT_COPY;
@@ -1691,7 +1691,7 @@ DWORD WINAPI FormatThread(void* param)
 		} else if (dt == DT_ISO) {
 			if (image_path != NULL) {
 				UpdateProgress(OP_DOS, 0.0f);
-				PrintStatus(0, TRUE, MSG_231);
+				PrintInfoDebug(0, MSG_231);
 				drive_name[2] = 0;
 				if (!ExtractISO(image_path, drive_name, FALSE)) {
 					if (!IS_ERROR(FormatStatus))
@@ -1707,7 +1707,7 @@ DWORD WINAPI FormatThread(void* param)
 					}
 				}
 				if ((bt == BT_UEFI) && (!iso_report.has_efi) && (iso_report.has_win7_efi)) {
-					PrintStatus(0, TRUE, MSG_232);
+					PrintInfoDebug(0, MSG_232);
 					wim_image[0] = drive_name[0];
 					efi_dst[0] = drive_name[0];
 					efi_dst[sizeof(efi_dst) - sizeof("\\bootx64.efi")] = 0;
@@ -1730,7 +1730,7 @@ DWORD WINAPI FormatThread(void* param)
 			}
 		}
 		UpdateProgress(OP_FINALIZE, -1.0f);
-		PrintStatus(0, TRUE, MSG_233);
+		PrintInfoDebug(0, MSG_233);
 		if (IsChecked(IDC_SET_ICON))
 			SetAutorun(drive_name);
 		// Issue another complete remount before we exit, to ensure we're clean
@@ -1751,7 +1751,6 @@ DWORD WINAPI FormatThread(void* param)
 out:
 	safe_free(guid_volume);
 	safe_free(buffer);
-	SendMessage(hISOProgressDlg, UM_PROGRESS_EXIT, 0, 0);
 	safe_closehandle(hSourceImage);
 	safe_unlockclose(hLogicalVolume);
 	safe_unlockclose(hPhysicalDrive);	// This can take a while
@@ -1778,7 +1777,7 @@ DWORD WINAPI SaveImageThread(void* param)
 	uint64_t wb;
 	int i;
 
-	PrintStatus(0, TRUE, MSG_225);
+	PrintInfoDebug(0, MSG_225);
 	LastRefresh = 0;
 	hPhysicalDrive = GetPhysicalHandle(DriveIndex, FALSE, TRUE);
 	if (hPhysicalDrive == INVALID_HANDLE_VALUE) {
@@ -1823,7 +1822,7 @@ DWORD WINAPI SaveImageThread(void* param)
 		if (GetTickCount() > LastRefresh + 25) {
 			LastRefresh = GetTickCount();
 			format_percent = (100.0f*wb)/(1.0f*SelectedDrive.DiskSize);
-			PrintStatus(0, FALSE, MSG_261, format_percent);
+			PrintInfo(0, MSG_261, format_percent);
 			UpdateProgress(OP_FORMAT, format_percent);
 		}
 		for (i=0; i<WRITE_RETRIES; i++) {
@@ -1861,7 +1860,6 @@ DWORD WINAPI SaveImageThread(void* param)
 
 out:
 	safe_free(buffer);
-	SendMessage(hISOProgressDlg, UM_PROGRESS_EXIT, 0, 0);
 	safe_closehandle(hDestImage);
 	safe_unlockclose(hPhysicalDrive);
 	PostMessage(hMainDialog, UM_FORMAT_COMPLETED, 0, 0);

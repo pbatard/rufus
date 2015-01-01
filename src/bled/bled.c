@@ -1,7 +1,7 @@
 /*
  * Bled (Busybox Library for Easy Decompression)
  *
- * Copyright © 2014 Pete Batard <pete@akeo.ie>
+ * Copyright © 2014-2015 Pete Batard <pete@akeo.ie>
  *
  * Licensed under GPLv2 or later, see file LICENSE in this source tree.
  */
@@ -22,6 +22,7 @@ smallint bb_got_signal;
 uint64_t bb_total_rb;
 printf_t bled_printf = NULL;
 progress_t bled_progress = NULL;
+unsigned long* bled_cancel_request;
 static bool bled_initialized = 0;
 jmp_buf bb_error_jmp;
 
@@ -124,20 +125,31 @@ int64_t bled_uncompress_with_handles(HANDLE hSrc, HANDLE hDst, int type)
 	return unpacker[type](&xstate);
 }
 
-int bled_init(printf_t print_function, progress_t progress_function)
+/* Initialize the library.
+ * When the parameters are not NULL you can:
+ * - specify the printf-like function you want to use to output message
+ *   void print_function(const char* format, ...);
+ * - specify the function you want to use to display progress, based on number of source archive bytes read
+ *   void progress_function(const uint64_t read_bytes);
+ * - point to an unsigned long variable, to be used to cancel operations when set to non zero
+ */
+int bled_init(printf_t print_function, progress_t progress_function, unsigned long* cancel_request)
 {
 	if (bled_initialized)
 		return -1;
 	bled_initialized = true;
 	bled_printf = print_function;
 	bled_progress = progress_function;
+	bled_cancel_request = cancel_request;
 	return 0;
 }
 
+/* This call frees any resource used by the library */
 void bled_exit(void)
 {
 	bled_printf = NULL;
 	bled_progress = NULL;
+	bled_cancel_request = NULL;
 	if (global_crc32_table)
 		free(global_crc32_table);
 	bled_initialized = false;

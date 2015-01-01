@@ -2,7 +2,7 @@
  * Library header for busybox
  *
  * Rewritten for Bled (Busybox Library for Easy Decompression)
- * Copyright © 2014 Pete Batard <pete@akeo.ie>
+ * Copyright © 2014-2015 Pete Batard <pete@akeo.ie>
  *
  * Licensed under GPLv2 or later, see file LICENSE in this source tree.
  */
@@ -135,6 +135,7 @@ typedef struct _llist_t {
 
 extern void (*bled_printf) (const char* format, ...);
 extern void (*bled_progress) (const uint64_t processed_bytes);
+extern unsigned long* bled_cancel_request;
 
 #define xfunc_die() longjmp(bb_error_jmp, 1)
 #define bb_printf(...) do { if (bled_printf != NULL) bled_printf(__VA_ARGS__); \
@@ -171,7 +172,13 @@ static inline pid_t wait(int* status) { *status = 4; return -1; }
 /* This override enables the display of a progress based on the number of bytes read */
 extern uint64_t bb_total_rb;
 static inline ssize_t full_read(int fd, void *buf, size_t count) {
-	ssize_t rb = _read(fd, buf, count);
+	ssize_t rb;
+	if ((bled_cancel_request != NULL) && (*bled_cancel_request != 0)) {
+		errno = EINTR;
+		return -1;
+	}
+
+	rb = _read(fd, buf, count);
 	if (rb > 0) {
 		bb_total_rb += rb;
 		if (bled_progress != NULL)

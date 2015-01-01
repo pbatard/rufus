@@ -1,6 +1,6 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
- * Copyright © 2011-2014 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2015 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -125,7 +125,6 @@ extern void _uprintf(const char *format, ...);
 enum user_message_type {
 	UM_FORMAT_COMPLETED = WM_APP,
 	UM_MEDIA_CHANGE,
-	UM_PROGRESS_CREATE,
 	UM_PROGRESS_INIT,
 	UM_PROGRESS_EXIT,
 	// Start of the WM IDs for the language menu items
@@ -331,7 +330,7 @@ enum WindowsVersion {
 extern HINSTANCE hMainInstance;
 extern HWND hMainDialog, hLogDlg, hStatus, hDeviceList, hCapacity;
 extern HWND hPartitionScheme, hFileSystem, hClusterSize, hLabel, hBootType, hNBPasses, hLog;
-extern HWND hISOProgressDlg, hISOProgressBar, hISOFileName, hDiskID;
+extern HWND hInfo, hProgress, hDiskID;
 extern float fScale;
 extern char szFolderPath[MAX_PATH], app_dir[MAX_PATH];
 extern char* image_path;
@@ -359,7 +358,11 @@ extern BOOL is_x64(void);
 //extern const char* PrintWindowsVersion(enum WindowsVersion version);
 extern const char *WindowsErrorString(void);
 extern void DumpBufferHex(void *buf, size_t size);
-extern void PrintStatus(unsigned int duration, BOOL debug, int msg_id, ...);
+extern void PrintStatusInfo(BOOL info, BOOL debug, unsigned int duration, int msg_id, ...);
+#define PrintStatus(...) PrintStatusInfo(FALSE, FALSE, __VA_ARGS__)
+#define PrintStatusDebug(...) PrintStatusInfo(FALSE, TRUE, __VA_ARGS__)
+#define PrintInfo(...) PrintStatusInfo(TRUE, FALSE, __VA_ARGS__)
+#define PrintInfoDebug(...) PrintStatusInfo(TRUE, TRUE, __VA_ARGS__)
 extern void UpdateProgress(int op, float percent);
 extern const char* StrError(DWORD error_code, BOOL use_default_locale);
 extern char* GuidToString(const GUID* guid);

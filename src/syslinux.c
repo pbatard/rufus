@@ -2,7 +2,7 @@
  *
  *   Copyright 2003 Lars Munch Christensen - All Rights Reserved
  *   Copyright 1998-2008 H. Peter Anvin - All Rights Reserved
- *   Copyright 2012-2014 Pete Batard
+ *   Copyright 2012-2015 Pete Batard
  *
  *   Based on the Linux installer program for SYSLINUX by H. Peter Anvin
  *
@@ -98,7 +98,7 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int fs_type)
 	int dt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
 	BOOL use_v5 = (dt == DT_SYSLINUX_V6) || ((dt == DT_ISO) && (SL_MAJOR(iso_report.sl_version) >= 5));
 
-	PrintStatus(0, TRUE, MSG_234, (dt == DT_ISO)?iso_report.sl_version_str:embedded_sl_version_str[use_v5?1:0]);
+	PrintInfoDebug(0, MSG_234, (dt == DT_ISO)?iso_report.sl_version_str:embedded_sl_version_str[use_v5?1:0]);
 
 	/* Initialize the ADV -- this should be smarter */
 	syslinux_reset_adv(syslinux_adv);

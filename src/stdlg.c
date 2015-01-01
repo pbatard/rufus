@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Standard Dialog Routines (Browse for folder, About, etc)
- * Copyright © 2011-2014 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2015 Pete Batard <pete@akeo.ie>
  *
  * Based on zadig_stdlg.c, part of libwdi: http://libwdi.akeo.ie
  *
@@ -1244,11 +1244,11 @@ INT_PTR CALLBACK NewVersionCallback(HWND hDlg, UINT message, WPARAM wParam, LPAR
 				memset(&pi, 0, sizeof(pi));
 				si.cb = sizeof(si);
 				if (!CreateProcessU(filepath, cmdline, NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi)) {
-					PrintStatus(0, FALSE, MSG_214);
+					PrintInfo(0, MSG_214);
 					// TODO: produce a message box and add a retry, as the file may be scanned by the Antivirus
 					uprintf("Failed to launch new application: %s\n", WindowsErrorString());
 				} else {
-					PrintStatus(0, FALSE, MSG_213);
+					PrintInfo(0, MSG_213);
 					PostMessage(hDlg, WM_COMMAND, (WPARAM)IDCLOSE, 0);
 					PostMessage(hMainDialog, WM_CLOSE, 0, 0);
 				}

@@ -1,7 +1,8 @@
 /*
  * unxz implementation for busybox
  *
- * Based on xz-embedded (C) Lasse Collin <lasse.collin@tukaani.org> - Public Domain
+ * Copyright © 2014-2015 Pete Batard <pete@akeo.ie>
+ * Based on xz-embedded © Lasse Collin <lasse.collin@tukaani.org> - Public Domain
  *
  * Licensed under GPLv2 or later, see file LICENSE in this source tree.
  */
@@ -46,9 +47,8 @@ IF_DESKTOP(long long) int FAST_FUNC unpack_xz_stream(transformer_state_t *xstate
 	 */
 	s = xz_dec_init(XZ_DYNALLOC, 1 << 26);
 	if (!s)
-		bb_error_msg_and_err("memory allocation failed");
+		bb_error_msg_and_err("memory allocation error");
 
-	// TODO: this is set very low on Windows...
 	in = xmalloc(BUFSIZ);
 	out = xmalloc(BUFSIZ);
 
@@ -63,7 +63,7 @@ IF_DESKTOP(long long) int FAST_FUNC unpack_xz_stream(transformer_state_t *xstate
 		if (b.in_pos == b.in_size) {
 			b.in_size = safe_read(xstate->src_fd, in, BUFSIZ);
 			if ((int)b.in_size < 0)
-				bb_error_msg_and_err(bb_msg_read_error);
+				bb_error_msg_and_err("read error (errno: %d)", errno);
 			b.in_pos = 0;
 		}
 		ret = xz_dec_run(s, &b);
@@ -72,7 +72,7 @@ IF_DESKTOP(long long) int FAST_FUNC unpack_xz_stream(transformer_state_t *xstate
 			nwrote = transformer_write(xstate, b.out, b.out_pos);
 			if (nwrote == (ssize_t)-1) {
 				ret = XZ_DATA_ERROR;
-				bb_error_msg_and_err("write error");
+				bb_error_msg_and_err("write error (errno: %d)", errno);
 			}
 			IF_DESKTOP(n += nwrote;)
 			b.out_pos = 0;
@@ -91,7 +91,7 @@ IF_DESKTOP(long long) int FAST_FUNC unpack_xz_stream(transformer_state_t *xstate
 		nwrote = transformer_write(xstate, b.out, b.out_pos);
 		if (nwrote == (ssize_t)-1) {
 			ret = XZ_DATA_ERROR;
-			bb_error_msg_and_err("write error");
+			bb_error_msg_and_err("write error (errno: %d)", errno);
 		}
 		IF_DESKTOP(n += nwrote;)
 
@@ -101,24 +101,24 @@ IF_DESKTOP(long long) int FAST_FUNC unpack_xz_stream(transformer_state_t *xstate
 			goto out;
 
 		case XZ_MEM_ERROR:
-			bb_error_msg_and_err("memory allocation failed");
+			bb_error_msg_and_err("memory allocation error");
 
 		case XZ_MEMLIMIT_ERROR:
-			bb_error_msg_and_err("memory usage limit reached");
+			bb_error_msg_and_err("memory usage limit error");
 
 		case XZ_FORMAT_ERROR:
 			bb_error_msg_and_err("not a .xz file");
 
 		case XZ_OPTIONS_ERROR:
-			bb_error_msg_and_err("unsupported options in the .xz headers");
+			bb_error_msg_and_err("unsupported XZ header option");
 
 		case XZ_DATA_ERROR:
-			bb_error_msg_and_err("file is corrupt");
+			bb_error_msg_and_err("corrupted archive");
 		case XZ_BUF_ERROR:
-			bb_error_msg_and_err("buf is corrupt");
+			bb_error_msg_and_err("corrupted buffer");
 
 		default:
-			bb_error_msg_and_err("bug!");
+			bb_error_msg_and_err("XZ decompression bug!");
 		}
 	}
 

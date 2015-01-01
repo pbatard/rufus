@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Drive access function calls
- * Copyright © 2011-2014 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2015 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -915,7 +915,7 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 	DWORD size, bufsize;
 	LONGLONG size_in_sectors, extra_size_in_tracks = 1;
 
-	PrintStatus(0, TRUE, MSG_238, PartitionTypeName[partition_style]);
+	PrintInfoDebug(0, MSG_238, PartitionTypeName[partition_style]);
 	if (uefi_togo_size == 0)
 		uefi_togo_size = GetResourceSize(hMainInstance, MAKEINTRESOURCEA(IDR_UEFI_TOGO), _RT_RCDATA, "uefi-togo.img");
 
@@ -1117,7 +1117,7 @@ BOOL DeletePartitions(HANDLE hDrive)
 	DWORD size;
 	CREATE_DISK CreateDisk = {PARTITION_STYLE_RAW, {{0}}};
 
-	PrintStatus(0, TRUE, MSG_239);
+	PrintInfoDebug(0, MSG_239);
 
 	size = sizeof(CreateDisk);
 	r = DeviceIoControl(hDrive, IOCTL_DISK_CREATE_DISK,

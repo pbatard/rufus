@@ -7,7 +7,7 @@
  *
  * Copyright 1995, 1996, 1997, 1998, 1999 by Theodore Ts'o
  * Copyright 1999 by David Beattie
- * Copyright 2011-2013 by Pete Batard
+ * Copyright 2011-2015 by Pete Batard
  *
  * This file is based on the minix file system programs fsck and mkfs
  * written and copyrighted by Linus Torvalds <Linus.Torvalds@cs.helsinki.fi>
@@ -327,13 +327,13 @@ static void print_status(void)
 
 	percent = calc_percent((unsigned long) currently_testing,
 					(unsigned long) num_blocks);
-	percent = (percent/2.0f) + ((cur_op==OP_READ)? 50.0f : 0.0f);
-	PrintStatus(0, FALSE, MSG_235,
+	PrintInfo(0, MSG_235, lmprintf(MSG_191 + ((cur_op==OP_WRITE)?0:1)),
 				cur_pattern, nr_pattern,
 				percent,
 				num_read_errors,
 				num_write_errors,
 				num_corruption_errors);
+	percent = (percent/2.0f) + ((cur_op==OP_READ)? 50.0f : 0.0f);
 	UpdateProgress(OP_BADBLOCKS, (((cur_pattern-1)*100.0f) + percent) / nr_pattern);
 }
 
@@ -359,7 +359,7 @@ static void pattern_fill(unsigned char *buffer, unsigned int pattern,
 		for (ptr = buffer; ptr < buffer + n; ptr++) {
 			(*ptr) = rand() % (1 << (8 * sizeof(char)));
 		}
-		PrintStatus(3500, FALSE, MSG_236);
+		PrintInfo(3500, MSG_236);
 	} else {
 		bpattern[0] = 0;
 		for (i = 0; i < sizeof(bpattern); i++) {
@@ -376,7 +376,7 @@ static void pattern_fill(unsigned char *buffer, unsigned int pattern,
 			else
 				i--;
 		}
-		PrintStatus(3500, FALSE, MSG_237, bpattern[i]);
+		PrintInfo(3500, MSG_237, bpattern[i]);
 		cur_pattern++;
 	}
 }

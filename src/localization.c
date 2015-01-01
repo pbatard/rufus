@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Localization functions, a.k.a. "Everybody is doing it wrong but me!"
- * Copyright © 2013-2014 Pete Batard <pete@akeo.ie>
+ * Copyright © 2013-2015 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -74,14 +74,14 @@ struct list_head locale_list = {NULL, NULL};
 char   *loc_filename = NULL, *embedded_loc_filename = "embedded.loc";
 
 /* Message table */
-char* default_msg_table[MSG_MAX-MSG_000] = {0};
-char* current_msg_table[MSG_MAX-MSG_000] = {0};
+char* default_msg_table[MSG_MAX-MSG_000] = {"%s", 0};
+char* current_msg_table[MSG_MAX-MSG_000] = {"%s", 0};
 char** msg_table = NULL;
 
 static void mtab_destroy(BOOL reinit)
 {
 	size_t j;
-	for (j=0; j<MSG_MAX-MSG_000; j++) {
+	for (j=1; j<MSG_MAX-MSG_000; j++) {
 		safe_free(current_msg_table[j]);
 		if (!reinit)
 			safe_free(default_msg_table[j]);
@@ -402,7 +402,7 @@ char* lmprintf(int msg_id, ...)
  */
 static BOOL bStatusTimerArmed = FALSE;
 char szStatusMessage[256] = { 0 };
-static void CALLBACK PrintStatusTimeout(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
+static void CALLBACK PrintStatusTimeout(HWND hWnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
 {
 	bStatusTimerArmed = FALSE;
 	// potentially display lower priority message that was overridden
@@ -410,20 +410,30 @@ static void CALLBACK PrintStatusTimeout(HWND hwnd, UINT uMsg, UINT_PTR idEvent, 
 	KillTimer(hMainDialog, TID_MESSAGE);
 }
 
-void PrintStatus(unsigned int duration, BOOL debug, int msg_id, ...)
+static void CALLBACK PrintInfoTimeout(HWND hWnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
+{
+	bStatusTimerArmed = FALSE;
+	SetWindowTextU(hInfo, szStatusMessage);
+	KillTimer(hMainDialog, TID_MESSAGE);
+}
+
+void PrintStatusInfo(BOOL info, BOOL debug, unsigned int duration, int msg_id, ...)
 {
 	char *format = NULL, buf[sizeof(szStatusMessage)];
 	va_list args;
 
 	if (msg_id < 0) {
-		//A negative msg_id clears the status
+		// A negative msg_id clears the text area
 		szStatusMessage[0] = 0;
-		SendMessageLU(GetDlgItem(hMainDialog, IDC_STATUS), SB_SETTEXTW, SBT_OWNERDRAW, szStatusMessage);
+		if (info)
+			SetWindowTextU(hInfo, szStatusMessage);
+		else
+			SendMessageLU(GetDlgItem(hMainDialog, IDC_STATUS), SB_SETTEXTW, SBT_OWNERDRAW, szStatusMessage);
 		return;
 	}
 
-	if ((msg_id <= MSG_000) || (msg_id >= MSG_MAX)) {
-		uprintf("PrintStatus: invalid MSG_ID\n");
+	if ((msg_id < MSG_000) || (msg_id >= MSG_MAX)) {
+		uprintf("PrintStatusInfo: invalid MSG_ID\n");
 		return;
 	}
 
@@ -438,12 +448,15 @@ void PrintStatus(unsigned int duration, BOOL debug, int msg_id, ...)
 	va_end(args);
 	szStatusMessage[sizeof(szStatusMessage)-1] = '\0';
 
-	if ((duration) || (!bStatusTimerArmed)) {
-		SendMessageLU(GetDlgItem(hMainDialog, IDC_STATUS), SB_SETTEXTW, SBT_OWNERDRAW, szStatusMessage);
+	if ((duration != 0) || (!bStatusTimerArmed)) {
+		if (info)
+			SetWindowTextU(hInfo, szStatusMessage);
+		else
+			SendMessageLU(GetDlgItem(hMainDialog, IDC_STATUS), SB_SETTEXTW, SBT_OWNERDRAW, szStatusMessage);
 	}
 
-	if (duration) {
-		SetTimer(hMainDialog, TID_MESSAGE, duration, PrintStatusTimeout);
+	if (duration != 0) {
+		SetTimer(hMainDialog, TID_MESSAGE, duration, (info)?PrintInfoTimeout:PrintStatusTimeout);
 		bStatusTimerArmed = TRUE;
 	}
 

@@ -126,12 +126,6 @@ t IDS_NEW_VERSION_DOWNLOAD_GRP "Download"
 t IDC_DOWNLOAD "Download"
 t IDCANCEL "Close"
 
-# Dialog that appears when scanning/extracting ISO files
-g IDD_ISO_EXTRACT
-t IDD_ISO_EXTRACT "Copying ISO files..."
-t IDC_ISO_FILENAME "Opening ISO image - please wait..."
-t IDC_ISO_ABORT "Cancel"
-
 # Messages used throughout the application
 t MSG_001 "Other instance detected"
 t MSG_002 "Another Rufus application is running.\n"
@@ -366,6 +360,9 @@ t MSG_186 "Rufus does not install or run background services, therefore update c
 t MSG_187 "Invalid image for selected boot option"
 t MSG_188 "The current image doesn't match the boot option selected. Please use a different image or choose a different boot option."
 t MSG_189 "This ISO image is not compatible with the selected filesystem"
+t MSG_190 "No image selected"
+t MSG_191 "Write pass"
+t MSG_192 "Read pass"
 
 # Status messages - these messages will appear on the status bar
 t MSG_201 "Cancelling - Please wait..."
@@ -373,8 +370,8 @@ t MSG_202 "Scanning image..."
 t MSG_203 "Failed to scan image"
 # Parameter: the name of an obsolete Syslinux .c32 module. eg: "Obsolete vesamenu.c32 detected"
 t MSG_204 "Obsolete %s detected"
-# Display the name of the ISO selected. eg: "Using ISO: en_win7_x64_sp1.iso"
-t MSG_205 "Using ISO: %s"
+# Display the name of the image selected. eg: "Using image: en_win7_x64_sp1.iso"
+t MSG_205 "Using image: %s"
 # Typically "Missing ldlinux.c32 file"
 t MSG_206 "Missing %s file"
 # The name proposed by Windows' Computer Management -> Disk Management when you try to format a drive
@@ -383,9 +380,9 @@ t MSG_207 "New Volume"
 # Same message, once for singular and plural ("1 device found", "2 devices found")
 t MSG_208 "%d device found"
 t MSG_209 "%d devices found"
-t MSG_210 "DONE"
+t MSG_210 "READY"
 t MSG_211 "Cancelled"
-t MSG_212 "FAILED"
+t MSG_212 "Failed"
 # Used when a new update has been downloaded and launched
 t MSG_213 "Launching new application..."
 t MSG_214 "Failed to launch new application"
@@ -416,8 +413,9 @@ t MSG_232 "Win7 EFI boot setup (this may take a while)..."
 t MSG_233 "Finalizing, please wait..."
 # Takes a Syslinux version as parameter, eg. "Installing Syslinux v5.10..."
 t MSG_234 "Installing Syslinux %s..."
-# Bad blocks status. eg: "Bad Blocks: PASS 1/2 - 12.34% (0/0/1 errors)"
-t MSG_235 "Bad Blocks: PASS %d/%d - %0.2f%% (%d/%d/%d errors)"
+# Bad blocks status. eg: "Bad Blocks: Write pass 1/2 - 12.34% (0/0/1 errors)"
+# See MSG_191/192 for "Write pass"/"Read pass" translation
+t MSG_235 "Bad Blocks: %s %d/%d - %0.2f%% (%d/%d/%d errors)"
 t MSG_236 "Bad Blocks: Testing with random pattern"
 t MSG_237 "Bad Blocks: Testing with pattern 0x%02X"
 # eg. "Partitioning (MBR)..."

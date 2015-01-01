@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Networking functionality (web file download, check for update, etc.)
- * Copyright © 2012-2014 Pete Batard <pete@akeo.ie>
+ * Copyright © 2012-2015 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -277,7 +277,7 @@ DWORD DownloadFile(const char* url, const char* file, HWND hProgressDialog)
 		}
 	}
 
-	PrintStatus(0, FALSE, MSG_240, &file[last_slash]);
+	PrintInfo(0, MSG_240, &file[last_slash]);
 	uprintf("Downloading '%s' from %s\n", &file[last_slash], url);
 
 	if ( (!InternetCrackUrlA(url, (DWORD)safe_strlen(url), 0, &UrlParts))
@@ -357,7 +357,7 @@ DWORD DownloadFile(const char* url, const char* file, HWND hProgressDialog)
 			break;
 		dwSize += dwDownloaded;
 		SendMessage(hProgressBar, PBM_SETPOS, (WPARAM)(MAX_PROGRESS*((1.0f*dwSize)/(1.0f*dwTotalSize))), 0);
-		PrintStatus(0, FALSE, MSG_241, (100.0f*dwSize)/(1.0f*dwTotalSize));
+		PrintInfo(0, MSG_241, (100.0f*dwSize)/(1.0f*dwTotalSize));
 		if (fwrite(buf, 1, dwDownloaded, fd) != dwDownloaded) {
 			uprintf("Error writing file '%s': %s\n", &file[last_slash], WinInetErrorString());
 			goto out;
@@ -380,7 +380,7 @@ out:
 	if (!r) {
 		_unlink(file);
 		if (PromptOnError) {
-			PrintStatus(0, FALSE, MSG_242);
+			PrintInfo(0, MSG_242);
 			SetLastError(error_code);
 			MessageBoxU(hMainDialog, IS_ERROR(FormatStatus)?StrError(FormatStatus, FALSE):WinInetErrorString(),
 			lmprintf(MSG_044), MB_OK|MB_ICONERROR|MB_IS_RTL);
@@ -475,7 +475,7 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 		}
 	}
 
-	PrintStatus(3000, TRUE, MSG_243);
+	PrintInfoDebug(3000, MSG_243);
 	status++;	// 1
 
 	if (!GetVersionExA(&os_version)) {
@@ -607,14 +607,14 @@ out:
 	if (hSession) InternetCloseHandle(hSession);
 	switch(status) {
 	case 1:
-		PrintStatus(3000, TRUE, MSG_244);
+		PrintInfoDebug(3000, MSG_244);
 		break;
 	case 2:
-		PrintStatus(3000, TRUE, MSG_245);
+		PrintInfoDebug(3000, MSG_245);
 		break;
 	case 3:
 	case 4:
-		PrintStatus(3000, FALSE, found_new_version?MSG_246:MSG_247);
+		PrintInfo(3000, found_new_version?MSG_246:MSG_247);
 	default:
 		break;
 	}

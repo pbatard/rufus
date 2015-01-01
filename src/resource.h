@@ -6,7 +6,6 @@
 #define IDD_ABOUTBOX                    102
 #define IDD_NOTIFICATION                103
 #define IDD_LICENSE                     104
-#define IDD_ISO_EXTRACT                 105
 #define IDD_LOG                         106
 #define IDD_UPDATE_POLICY               107
 #define IDD_NEW_VERSION                 108
@@ -17,7 +16,6 @@
 #define IDD_ABOUTBOX_XP                 152
 #define IDD_NOTIFICATION_XP             153
 #define IDD_LICENSE_XP                  154
-#define IDD_ISO_EXTRACT_XP              155
 #define IDD_LOG_XP                      156
 #define IDD_UPDATE_POLICY_XP            157
 #define IDD_NEW_VERSION_XP              158
@@ -25,7 +23,6 @@
 #define IDD_ABOUTBOX_RTL                202
 #define IDD_NOTIFICATION_RTL            203
 #define IDD_LICENSE_RTL                 204
-#define IDD_ISO_EXTRACT_RTL             205
 #define IDD_LOG_RTL                     206
 #define IDD_UPDATE_POLICY_RTL           207
 #define IDD_NEW_VERSION_RTL             208
@@ -33,7 +30,6 @@
 #define IDD_ABOUTBOX_RTL_XP             252
 #define IDD_NOTIFICATION_RTL_XP         253
 #define IDD_LICENSE_RTL_XP              254
-#define IDD_ISO_EXTRACT_RTL_XP          255
 #define IDD_LOG_RTL_XP                  256
 #define IDD_UPDATE_POLICY_RTL_XP        257
 #define IDD_NEW_VERSION_RTL_XP          258
@@ -92,8 +88,7 @@
 #define IDC_SELECT_ISO                  1016
 #define IDC_SET_ICON                    1017
 #define IDC_RUFUS_MBR                   1018
-#define IDC_ISO_FILENAME                1020
-#define IDC_ISO_ABORT                   1021
+#define IDC_INFO                        1020
 #define IDC_DISK_ID                     1022
 #define IDC_EXTRA_PARTITION             1023
 #define IDC_ENABLE_FIXED_DISKS          1024

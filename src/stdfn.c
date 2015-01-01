@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Standard Windows function calls
- * Copyright © 2013-2014 Pete Batard <pete@akeo.ie>
+ * Copyright © 2013-2015 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -474,7 +474,7 @@ BOOL FileIO(BOOL save, char* path, char** buffer, DWORD* size)
 		goto out;
 	}
 
-	PrintStatus(0, TRUE, save?MSG_216:MSG_215, path);
+	PrintInfoDebug(0, save?MSG_216:MSG_215, path);
 	ret = TRUE;
 
 out:

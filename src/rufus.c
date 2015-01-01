@@ -1,6 +1,6 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
- * Copyright © 2011-2014 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2015 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -124,7 +124,7 @@ float fScale = 1.0f;
 int default_fs;
 uint32_t dur_mins, dur_secs;
 HWND hDeviceList, hPartitionScheme, hFileSystem, hClusterSize, hLabel, hBootType, hNBPasses, hLog = NULL;
-HWND hISOProgressDlg = NULL, hLogDlg = NULL, hISOProgressBar, hISOFileName, hDiskID;
+HWND hLogDlg = NULL, hProgress = NULL, hInfo, hDiskID;
 BOOL use_own_c32[NB_OLD_C32] = {FALSE, FALSE}, detect_fakes = TRUE, mbr_selected_by_user = FALSE;
 BOOL iso_op_in_progress = FALSE, format_op_in_progress = FALSE, right_to_left_mode = FALSE;
 BOOL enable_HDDs = FALSE, advanced_mode = TRUE, force_update = FALSE, use_fake_units = TRUE;
@@ -140,7 +140,7 @@ StrArray DriveID, DriveLabel;
 extern char szStatusMessage[256];
 
 static HANDLE format_thid = NULL;
-static HWND hProgress = NULL, hBoot = NULL, hSelectISO = NULL;
+static HWND hBoot = NULL, hSelectISO = NULL;
 static HICON hIconDisc, hIconDown, hIconUp, hIconLang;
 static char szTimer[12] = "00:00:00";
 static unsigned int timer;
@@ -887,65 +887,6 @@ static void CALLBACK BlockingTimer(HWND hWnd, UINT uMsg, UINT_PTR idEvent, DWORD
 	}
 }
 
-/* Callback for the modeless ISO extraction progress, and other progress dialogs */
-BOOL CALLBACK ISOProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
-{
-	switch (message) {
-	case WM_SHOWWINDOW:
-		// If we don't do this, the ISO progress dialog will remain visible
-		// if it was active while the app was minimized
-		if (wParam && (lParam == SW_PARENTOPENING) && (!iso_op_in_progress)) {
-			ShowWindow(hDlg, SW_HIDE);
-			return TRUE;
-		}
-		return FALSE;
-	case WM_INITDIALOG:
-		apply_localization(IDD_ISO_EXTRACT, hDlg);
-		hISOProgressBar = GetDlgItem(hDlg, IDC_PROGRESS);
-		hISOFileName = GetDlgItem(hDlg, IDC_ISO_FILENAME);
-		// Use maximum granularity for the progress bar
-		SendMessage(hISOProgressBar, PBM_SETRANGE, 0, (MAX_PROGRESS<<16) & 0xFFFF0000);
-		return TRUE;
-	case UM_PROGRESS_INIT:
-		iso_op_in_progress = TRUE;
-		EnableWindow(GetDlgItem(hISOProgressDlg, IDC_ISO_ABORT), TRUE);
-		CenterDialog(hDlg);
-		// If we try to show the progress dialog while the app is minimized, users won't
-		// be able to restore the app, so we only show it if it isn't. But this workaround
-		// means that the progress dialog will never display for users who had the app
-		// minimized when ISO extraction started, which we don't really care about, since
-		// we're planning to remove the whole separate progress dialog soon anyway.
-		if (!IsIconic(hMainDialog))
-			ShowWindow(hDlg, SW_SHOW);
-		UpdateWindow(hDlg);
-		return TRUE;
-	case UM_PROGRESS_EXIT:
-		// Just hide and recenter the dialog
-		ShowWindow(hDlg, SW_HIDE);
-		iso_op_in_progress = FALSE;
-		return TRUE;
-	case WM_COMMAND:
-		switch (LOWORD(wParam)) {
-		case IDC_ISO_ABORT:
-			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANCELLED;
-			PrintStatus(0, FALSE, MSG_201);
-			uprintf("Cancelling (from ISO proc.)\n");
-			EnableWindow(GetDlgItem(hISOProgressDlg, IDC_ISO_ABORT), FALSE);
-			if (format_thid != NULL)
-				EnableWindow(GetDlgItem(hMainDialog, IDCANCEL), FALSE);
-			//  Start a timer to detect blocking operations during ISO file extraction
-			if (iso_blocking_status >= 0) {
-				last_iso_blocking_status = iso_blocking_status;
-				SetTimer(hMainDialog, TID_BLOCKING_TIMER, 5000, BlockingTimer);
-			}
-			return TRUE;
-		}
-	case WM_CLOSE:		// prevent closure using Alt-F4
-		return TRUE;
-	}
-	return FALSE;
-}
-
 // Report the features of the selected ISO images
 static const char* YesNo(BOOL b) {
 	return (b) ? "Yes" : "No";
@@ -988,14 +929,15 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 
 	if (image_path == NULL)
 		goto out;
-	PrintStatus(0, TRUE, MSG_202);
+	PrintInfoDebug(0, MSG_202);
 	user_notified = FALSE;
 	EnableControls(FALSE);
 	r = ExtractISO(image_path, "", TRUE) || IsHDImage(image_path);
 	EnableControls(TRUE);
 	if (!r) {
-		SendMessage(hISOProgressDlg, UM_PROGRESS_EXIT, 0, 0);
-		PrintStatus(0, TRUE, MSG_203);
+		// TODO: is that needed?
+		SendMessage(hMainDialog, UM_PROGRESS_EXIT, 0, 0);
+		PrintInfoDebug(0, MSG_203);
 		safe_free(image_path);
 		goto out;
 	}
@@ -1008,10 +950,10 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 	}
 	if ( (!iso_report.has_bootmgr) && (!HAS_SYSLINUX(iso_report)) && (!IS_WINPE(iso_report.winpe)) && (!IS_GRUB(iso_report))
 	  && (!iso_report.has_efi) && (!IS_REACTOS(iso_report) && (!iso_report.has_kolibrios) && (!iso_report.is_bootable_img)) ) {
+		PrintInfo(0, MSG_081);
 		MessageBoxU(hMainDialog, lmprintf(MSG_082), lmprintf(MSG_081), MB_OK|MB_ICONINFORMATION|MB_IS_RTL);
 		safe_free(image_path);
 		SetMBRProps();
-		PrintStatus(0, FALSE, -1);
 	} else {
 		// Enable bootable and set Target System and FS accordingly
 		CheckDlgButton(hMainDialog, IDC_BOOT, BST_CHECKED);
@@ -1029,7 +971,7 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 				ComboBox_GetCurSel(hFileSystem));
 		}
 		for (i=(int)safe_strlen(image_path); (i>0)&&(image_path[i]!='\\'); i--);
-		PrintStatus(0, TRUE, MSG_205, &image_path[i+1]);
+		PrintStatusDebug(0, MSG_205, &image_path[i+1]);
 		// Lose the focus on the select ISO (but place it on Close)
 		SendMessage(hMainDialog, WM_NEXTDLGCTL,  (WPARAM)FALSE, 0);
 		// Lose the focus from Close and set it back to Start
@@ -1037,7 +979,7 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 	}
 
 out:
-	SendMessage(hISOProgressDlg, UM_PROGRESS_EXIT, 0, 0);
+	PrintInfo(0, MSG_210);
 	ExitThread(0);
 }
 
@@ -1074,6 +1016,7 @@ void ToggleAdvanced(void)
 	// Move the status bar up or down
 	MoveCtrlY(hMainDialog, IDC_STATUS, dialog_shift);
 	MoveCtrlY(hMainDialog, IDC_START, dialog_shift);
+	MoveCtrlY(hMainDialog, IDC_INFO, dialog_shift);
 	MoveCtrlY(hMainDialog, IDC_PROGRESS, dialog_shift);
 	MoveCtrlY(hMainDialog, IDC_ABOUT, dialog_shift);
 	MoveCtrlY(hMainDialog, IDC_LOG, dialog_shift);
@@ -1226,10 +1169,9 @@ static BOOL BootCheck(void)
 					static_sprintf(tmp, "%s-%s", grub, iso_report.grub2_version);
 					IGNORE_RETVAL(_mkdir(tmp));
 					static_sprintf(tmp, "%s/%s-%s/%s", FILES_URL, grub, iso_report.grub2_version, core_img);
-					SetWindowTextU(hISOProgressDlg, lmprintf(MSG_085, tmp));
-					SetWindowTextU(hISOFileName, tmp);
+					PrintInfoDebug(0, MSG_085, tmp);
 					PromptOnError = FALSE;
-					grub2_len = (long)DownloadFile(tmp, &tmp[sizeof(FILES_URL)], hISOProgressDlg);
+					grub2_len = (long)DownloadFile(tmp, &tmp[sizeof(FILES_URL)], hMainDialog);
 					PromptOnError = TRUE;
 					if (grub2_len <= 0)
 						uprintf("%s was not found - will use embedded version\n", tmp);
@@ -1265,17 +1207,16 @@ static BOOL BootCheck(void)
 							fclose(fd);
 							use_own_c32[i] = TRUE;
 						} else {
-							PrintStatus(0, FALSE, MSG_204, old_c32_name[i]);
+							PrintInfo(0, MSG_204, old_c32_name[i]);
 							if (MessageBoxU(hMainDialog, lmprintf(MSG_084, old_c32_name[i], old_c32_name[i]),
 									lmprintf(MSG_083, old_c32_name[i]), MB_YESNO|MB_ICONWARNING|MB_IS_RTL) == IDYES) {
 								static_sprintf(tmp, "%s-%s", syslinux, embedded_sl_version_str[0]);
 								IGNORE_RETVAL(_mkdir(tmp));
-								SetWindowTextU(hISOProgressDlg, lmprintf(MSG_085, old_c32_name[i]));
 								static_sprintf(tmp, "%s/%s-%s/%s", FILES_URL, syslinux, embedded_sl_version_str[0], old_c32_name[i]);
-								SetWindowTextU(hISOFileName, tmp);
-								len = DownloadFile(tmp, &tmp[sizeof(FILES_URL)], hISOProgressDlg);
+								PrintInfo(0, MSG_085, old_c32_name[i]);
+								len = DownloadFile(tmp, &tmp[sizeof(FILES_URL)], hMainDialog);
 								if (len == 0) {
-									uprintf("Couldn't download the files - cancelling\n");
+									uprintf("Could not download file - cancelling\n");
 									return FALSE;
 								}
 								use_own_c32[i] = TRUE;
@@ -1318,21 +1259,19 @@ static BOOL BootCheck(void)
 							IGNORE_RETVAL(_mkdir(&iso_report.sl_version_ext[1]));
 							IGNORE_RETVAL(_chdir(".."));
 						}
-						static_sprintf(tmp, "%s.%s %s", ldlinux, ldlinux_ext[i], iso_report.sl_version_str);
-						SetWindowTextU(hISOProgressDlg, lmprintf(MSG_085, tmp));
 						static_sprintf(tmp, "%s/%s-%s%s/%s.%s", FILES_URL, syslinux, iso_report.sl_version_str,
 							iso_report.sl_version_ext, ldlinux, ldlinux_ext[i]);
-						SetWindowTextU(hISOFileName, tmp);
+						PrintInfo(0, MSG_085, tmp);
 						PromptOnError = (*iso_report.sl_version_ext == 0);
-						syslinux_ldlinux_len[i] = DownloadFile(tmp, &tmp[sizeof(FILES_URL)], hISOProgressDlg);
+						syslinux_ldlinux_len[i] = DownloadFile(tmp, &tmp[sizeof(FILES_URL)], hMainDialog);
 						PromptOnError = TRUE;
 						if ((syslinux_ldlinux_len[i] == 0) && (DownloadStatus == 404) && (*iso_report.sl_version_ext != 0)) {
 							// Couldn't locate the file on the server => try to download without the version extra
 							uprintf("Extended version was not found, trying main version\n");
 							static_sprintf(tmp, "%s/%s-%s/%s.%s", FILES_URL, syslinux, iso_report.sl_version_str,
 								ldlinux, ldlinux_ext[i]);
-							SetWindowTextU(hISOFileName, tmp);
-							syslinux_ldlinux_len[i] = DownloadFile(tmp, &tmp[sizeof(FILES_URL)], hISOProgressDlg);
+							PrintInfo(0, MSG_085, tmp);
+							syslinux_ldlinux_len[i] = DownloadFile(tmp, &tmp[sizeof(FILES_URL)], hMainDialog);
 							if (syslinux_ldlinux_len[i] != 0) {
 								// Duplicate the file so that the user won't be prompted to download again
 								static_sprintf(tmp, "%s-%s\\%s.%s", syslinux, iso_report.sl_version_str, ldlinux, ldlinux_ext[i]);
@@ -1342,7 +1281,7 @@ static BOOL BootCheck(void)
 							}
 						}
 						if (syslinux_ldlinux_len[i] == 0) {
-							uprintf("Couldn't download the files - cancelling\n");
+							uprintf("Could not download the file - cancelling\n");
 							return FALSE;
 						}
 					}
@@ -1360,7 +1299,7 @@ static BOOL BootCheck(void)
 			fclose(fd);
 		} else {
 			static_sprintf(tmp, "%s.%s", ldlinux, ldlinux_ext[2]);
-			PrintStatus(0, FALSE, MSG_206, tmp);
+			PrintInfo(0, MSG_206, tmp);
 			// MSG_104: "Syslinux v5.0 or later requires a '%s' file to be installed"
 			r = MessageBoxU(hMainDialog, lmprintf(MSG_104, "Syslinux v5.0", tmp, "Syslinux v5+", tmp),
 				lmprintf(MSG_103, tmp), MB_YESNOCANCEL|MB_ICONWARNING|MB_IS_RTL);
@@ -1370,9 +1309,8 @@ static BOOL BootCheck(void)
 				static_sprintf(tmp, "%s-%s", syslinux, embedded_sl_version_str[1]);
 				IGNORE_RETVAL(_mkdir(tmp));
 				static_sprintf(tmp, "%s/%s-%s/%s.%s", FILES_URL, syslinux, embedded_sl_version_str[1], ldlinux, ldlinux_ext[2]);
-				SetWindowTextU(hISOProgressDlg, lmprintf(MSG_085, tmp));
-				SetWindowTextU(hISOFileName, tmp);
-				DownloadFile(tmp, &tmp[sizeof(FILES_URL)], hISOProgressDlg);
+				PrintInfo(0, MSG_085, tmp);
+				DownloadFile(tmp, &tmp[sizeof(FILES_URL)], hMainDialog);
 			}
 		}
 	} else if (dt == DT_WINME) {
@@ -1392,7 +1330,7 @@ static BOOL BootCheck(void)
 			fclose(fd);
 		} else {
 			static_sprintf(tmp, "grldr");
-			PrintStatus(0, FALSE, MSG_206, tmp);
+			PrintInfo(0, MSG_206, tmp);
 			r = MessageBoxU(hMainDialog, lmprintf(MSG_104, "Grub4DOS 0.4", tmp, "Grub4DOS", tmp),
 				lmprintf(MSG_103, tmp), MB_YESNOCANCEL|MB_ICONWARNING|MB_IS_RTL);
 			if (r == IDCANCEL)
@@ -1400,9 +1338,8 @@ static BOOL BootCheck(void)
 			if (r == IDYES) {
 				IGNORE_RETVAL(_mkdir("grub4dos"));
 				static_sprintf(tmp, "%s/grub4dos/grldr", FILES_URL);
-				SetWindowTextU(hISOProgressDlg, lmprintf(MSG_085, tmp));
-				SetWindowTextU(hISOFileName, tmp);
-				DownloadFile(tmp, &tmp[sizeof(FILES_URL)], hISOProgressDlg);
+				PrintInfo(0, MSG_085, tmp);
+				DownloadFile(tmp, &tmp[sizeof(FILES_URL)], hMainDialog);
 			}
 		}
 	}
@@ -1423,11 +1360,12 @@ static __inline const char* IsAlphaOrBeta(void)
 void InitDialog(HWND hDlg)
 {
 	HINSTANCE hDllInst;
+	HFONT hf;
 	DWORD len;
 	SIZE sz;
 	HWND hCtrl;
 	HDC hDC;
-	int i, i16, s16;
+	int i, i16, s16, lfHeight;
 	char tmp[128], *token, *buf, *ext;
 	wchar_t wtmp[128] = {0};
 	static char* resource[2] = { MAKEINTRESOURCEA(IDR_SL_LDLINUX_V4_SYS), MAKEINTRESOURCEA(IDR_SL_LDLINUX_V6_SYS) };
@@ -1444,6 +1382,7 @@ void InitDialog(HWND hDlg)
 	hClusterSize = GetDlgItem(hDlg, IDC_CLUSTERSIZE);
 	hLabel = GetDlgItem(hDlg, IDC_LABEL);
 	hProgress = GetDlgItem(hDlg, IDC_PROGRESS);
+	hInfo = GetDlgItem(hDlg, IDC_INFO);
 	hBoot = GetDlgItem(hDlg, IDC_BOOT);
 	hBootType = GetDlgItem(hDlg, IDC_BOOTTYPE);
 	hSelectISO = GetDlgItem(hDlg, IDC_SELECT_ISO);
@@ -1454,6 +1393,7 @@ void InitDialog(HWND hDlg)
 	i16 = GetSystemMetrics(SM_CXSMICON);
 	hDC = GetDC(hDlg);
 	fScale = GetDeviceCaps(hDC, LOGPIXELSX) / 96.0f;
+	lfHeight = -MulDiv(8, GetDeviceCaps(hDC, LOGPIXELSY), 72);
 	ReleaseDC(hDlg, hDC);
 	// Adjust icon size lookup
 	s16 = i16;
@@ -1465,6 +1405,15 @@ void InitDialog(HWND hDlg)
 		s16 = 32;
 	else if (s16 >= 20)
 		s16 = 24;
+
+	// Change the font of the Info edit box
+#if defined(COLOURED_INFO)
+	hf = CreateFontA(lfHeight, 0, 0, 0, FW_BOLD, FALSE, FALSE, FALSE,
+#else
+	hf = CreateFontA(lfHeight, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE,
+#endif
+		DEFAULT_CHARSET, 0, 0, PROOF_QUALITY, 0, "Arial Unicode MS");
+	SendDlgItemMessageA(hDlg, IDC_INFO, WM_SETFONT, (WPARAM)hf, TRUE);
 
 	// Create the title bar icon
 	SetTitleBarIcon(hDlg);
@@ -1617,11 +1566,13 @@ void InitDialog(HWND hDlg)
 		// Simulate a button click for ISO selection
 		PostMessage(hDlg, WM_COMMAND, IDC_SELECT_ISO, 0);
 	}
+
+	PrintInfo(0, MSG_210);
 }
 
 static void PrintStatus2000(const char* str, BOOL val)
 {
-	PrintStatus(2000, FALSE, (val)?MSG_250:MSG_251, str);
+	PrintStatus(2000, (val)?MSG_250:MSG_251, str);
 }
 
 void ShowLanguageMenu(HWND hDlg)
@@ -1701,19 +1652,19 @@ void SetBoot(int fs, int bt)
 /*
  * Main dialog callback
  */
-extern int uncompress(const char* src, const char* dst, int type);
 static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	DRAWITEMSTRUCT* pDI;
-	POINT Point;
-	RECT DialogRect, DesktopRect;
-	int nDeviceIndex, fs, bt, i, nWidth, nHeight, nb_devices, selected_language;
 	static DWORD DeviceNum = 0, LastRefresh = 0;
-	char tmp[128];
 	static BOOL first_log_display = TRUE, user_changed_label = FALSE;
 	static ULONG ulRegister = 0;
 	static LPITEMIDLIST pidlDesktop = NULL;
 	static MY_SHChangeNotifyEntry NotifyEntry;
+	DRAWITEMSTRUCT* pDI;
+	POINT Point;
+	RECT DialogRect, DesktopRect;
+	LONG progress_style;
+	int nDeviceIndex, fs, bt, i, nWidth, nHeight, nb_devices, selected_language;
+	char tmp[128];
 	loc_cmd* lcmd = NULL;
 	// TODO: Add "*.img;*.vhd" / "All Supported Images" to the list below and use a generic "%s Image" in the .loc
 	EXT_DECL(img_ext, NULL, __VA_GROUP__("*.img", "*.vhd"), __VA_GROUP__(lmprintf(MSG_095), "VHD Image"));
@@ -1779,7 +1730,6 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			ulRegister = pfSHChangeNotifyRegister(hDlg, 0x0001|0x0002|0x8000,
 				SHCNE_MEDIAINSERTED|SHCNE_MEDIAREMOVED, UM_MEDIA_CHANGE, 1, &NotifyEntry);
 		}
-		PostMessage(hMainDialog, UM_PROGRESS_CREATE, 0, 0);
 		// Bring our Window on top. We have to go through all *THREE* of these, or Far Manager hides our window :(
 		SetWindowPos(hMainDialog, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE|SWP_NOMOVE);
 		SetWindowPos(hMainDialog, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOSIZE|SWP_NOMOVE);
@@ -1812,6 +1762,20 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		}
 		break;
 
+#if defined(COLOURED_INFO)
+	case WM_CTLCOLORSTATIC:
+		// Must be transparent for XP and non Aero Vista/7
+		SetBkMode((HDC)wParam, TRANSPARENT);
+		if ((HWND)lParam == hInfo) {
+			SetTextColor((HDC)wParam, RGB(0,192,255));
+			return (INT_PTR)CreateSolidBrush(RGB(0,0,0));
+		}
+		// Restore transparency if we don't change the background
+		SetBkMode((HDC)wParam, OPAQUE);
+		return (INT_PTR)FALSE;
+		break;
+#endif
+
 	case WM_COMMAND:
 		if ((LOWORD(wParam) >= UM_LANGUAGE_MENU) && (LOWORD(wParam) < UM_LANGUAGE_MENU_MAX)) {
 			selected_language = LOWORD(wParam) - UM_LANGUAGE_MENU;
@@ -1831,7 +1795,6 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		case IDOK:			// close application
 		case IDCANCEL:
 			PF_INIT(SHChangeNotifyDeregister, Shell32);
-			EnableWindow(GetDlgItem(hISOProgressDlg, IDC_ISO_ABORT), FALSE);
 			EnableWindow(GetDlgItem(hDlg, IDCANCEL), FALSE);
 			if (format_thid != NULL) {
 				if (MessageBoxU(hMainDialog, lmprintf(MSG_105), lmprintf(MSG_049),
@@ -1839,8 +1802,8 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 					// Operation may have completed in the meantime
 					if (format_thid != NULL) {
 						FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANCELLED;
-						PrintStatus(0, FALSE, MSG_201);
-						uprintf("Cancelling (from main app)\n");
+						PrintInfo(0, MSG_201);
+						uprintf("Cancelling");
 						//  Start a timer to detect blocking operations during ISO file extraction
 						if (iso_blocking_status >= 0) {
 							last_iso_blocking_status = iso_blocking_status;
@@ -1848,7 +1811,6 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 						}
 					}
 				} else {
-					EnableWindow(GetDlgItem(hISOProgressDlg, IDC_ISO_ABORT), TRUE);
 					EnableWindow(GetDlgItem(hDlg, IDCANCEL), TRUE);
 				}
 				return (INT_PTR)TRUE;
@@ -1897,8 +1859,6 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			}
 			// Display the log Window
 			log_displayed = !log_displayed;
-			if (IsShown(hISOProgressDlg))
-				SetFocus(hISOProgressDlg);
 			// Set focus on the start button
 			SendMessage(hMainDialog, WM_NEXTDLGCTL, (WPARAM)FALSE, 0);
 			SendMessage(hMainDialog, WM_NEXTDLGCTL, (WPARAM)GetDlgItem(hMainDialog, IDC_START), TRUE);
@@ -1945,7 +1905,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 					PostMessage(hMainDialog, UM_FORMAT_COMPLETED, 0, 0);
 				}
 				uprintf("\r\nSave to image operation started");
-				PrintStatus(0, FALSE, -1);
+				PrintInfo(0, -1);
 				timer = 0;
 				safe_sprintf(szTimer, sizeof(szTimer), "00:00:00");
 				SendMessageA(GetDlgItem(hMainDialog, IDC_STATUS), SB_SETTEXTA,
@@ -1972,7 +1932,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			if (HIWORD(wParam) != CBN_SELCHANGE)
 				break;
 			nb_devices = ComboBox_GetCount(hDeviceList);
-			PrintStatus(0, TRUE, (nb_devices==1)?MSG_208:MSG_209, nb_devices);
+			PrintStatusDebug(0, (nb_devices==1)?MSG_208:MSG_209, nb_devices);
 			PopulateProperties(ComboBox_GetCurSel(hDeviceList));
 			SendMessage(hMainDialog, WM_COMMAND, (CBN_SELCHANGE<<16) | IDC_FILESYSTEM,
 				ComboBox_GetCurSel(hFileSystem));
@@ -2085,6 +2045,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 					image_path = FileDialog(FALSE, NULL, &iso_ext, 0);
 				if (image_path == NULL) {
 					CreateTooltip(hSelectISO, lmprintf(MSG_173), -1);
+					PrintStatus(0, MSG_190);
 					break;
 				}
 			}
@@ -2164,7 +2125,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 					PostMessage(hMainDialog, UM_FORMAT_COMPLETED, 0, 0);
 				}
 				uprintf("\r\nFormat operation started");
-				PrintStatus(0, FALSE, -1);
+				PrintInfo(0, -1);
 				timer = 0;
 				safe_sprintf(szTimer, sizeof(szTimer), "00:00:00");
 				SendMessageA(GetDlgItem(hMainDialog, IDC_STATUS), SB_SETTEXTA,
@@ -2186,17 +2147,28 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		PostQuitMessage(0);
 		break;
 
-	case UM_PROGRESS_CREATE:
-		// You'd think that Windows would let you instantiate a modeless dialog wherever
-		// but you'd be wrong. It must be done in the main callback, hence the custom message.
-		if (!IsWindow(hISOProgressDlg)) { 
-			hISOProgressDlg = CreateDialogW(hMainInstance, MAKEINTRESOURCEW(IDD_ISO_EXTRACT + IDD_OFFSET),
-				hDlg, (DLGPROC)ISOProc);
-
-			// The window is not visible by default but takes focus => restore it
-			SetFocus(hDlg);
+	case UM_PROGRESS_INIT:
+		if (wParam == PBS_MARQUEE) {
+			progress_style = GetWindowLong(hProgress, GWL_STYLE);
+			SetWindowLong(hProgress, GWL_STYLE, progress_style | PBS_MARQUEE);
+			SendMessage(hProgress, PBM_SETMARQUEE, TRUE, 0);
+		} else {
+			SendMessage(hProgress, PBM_SETPOS, 0, 0);
 		}
-		return (INT_PTR)TRUE;
+		SetTaskbarProgressState(TASKBAR_NORMAL);
+		SetTaskbarProgressValue(0, MAX_PROGRESS);
+		
+		break;
+
+	case UM_PROGRESS_EXIT:
+		// Remove marquee style if previously set
+		progress_style = GetWindowLong(hProgress, GWL_STYLE);
+		SetWindowLong(hProgress, GWL_STYLE, progress_style & (~PBS_MARQUEE));
+		SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_NORMAL, 0);
+		SetTaskbarProgressState(TASKBAR_NORMAL);
+		SetTaskbarProgressValue(0, MAX_PROGRESS);
+		SendMessage(hProgress, PBM_SETPOS, 0, 0);
+		break;
 
 	case UM_FORMAT_COMPLETED:
 		format_thid = NULL;
@@ -2205,7 +2177,6 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		// Close the cancel MessageBox and Blocking notification if active
 		SendMessage(FindWindowA(MAKEINTRESOURCEA(32770), lmprintf(MSG_049)), WM_COMMAND, IDNO, 0);
 		SendMessage(FindWindowA(MAKEINTRESOURCEA(32770), lmprintf(MSG_049)), WM_COMMAND, IDYES, 0);
-		EnableWindow(GetDlgItem(hISOProgressDlg, IDC_ISO_ABORT), TRUE);
 		EnableWindow(GetDlgItem(hMainDialog, IDCANCEL), TRUE);
 		EnableControls(TRUE);
 		uprintf("\r\n");
@@ -2216,16 +2187,16 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			SendMessage(hProgress, PBM_SETPOS, (MAX_PROGRESS+1), 0);
 			SendMessage(hProgress, PBM_SETRANGE, 0, (MAX_PROGRESS<<16) & 0xFFFF0000);
 			SetTaskbarProgressState(TASKBAR_NOPROGRESS);
-			PrintStatus(0, FALSE, MSG_210);
+			PrintInfo(0, MSG_210);
 		} else if (SCODE_CODE(FormatStatus) == ERROR_CANCELLED) {
 			SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_PAUSED, 0);
 			SetTaskbarProgressState(TASKBAR_PAUSED);
-			PrintStatus(0, FALSE, MSG_211);
+			PrintInfo(0, MSG_211);
 			Notification(MSG_INFO, NULL, lmprintf(MSG_211), lmprintf(MSG_041));
 		} else {
 			SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_ERROR, 0);
 			SetTaskbarProgressState(TASKBAR_ERROR);
-			PrintStatus(0, FALSE, MSG_212);
+			PrintInfo(0, MSG_212);
 			Notification(MSG_ERROR, NULL, lmprintf(MSG_042), lmprintf(MSG_043, StrError(FormatStatus, FALSE)));
 		}
 		FormatStatus = 0;
@@ -2470,12 +2441,6 @@ relaunch:
 	if (get_loc_data_file(loc_file, selected_locale))
 		WriteRegistryKeyStr(REGKEY_HKCU, REGKEY_LOCALE, selected_locale->txt[0]);
 
-	// Destroy the ISO progress window, if it exists
-	if (hISOProgressDlg != NULL) {
-		DestroyWindow(hISOProgressDlg);
-		hISOProgressDlg = NULL;
-	}
-
 	/*
 	 * Create the main Window
 	 *
@@ -2505,123 +2470,121 @@ relaunch:
 
 	// Do our own event processing and process "magic" commands
 	while(GetMessage(&msg, NULL, 0, 0)) {
-		// The following ensures the processing of the ISO progress window messages
-		if (!IsWindow(hISOProgressDlg) || !IsDialogMessage(hISOProgressDlg, &msg)) {
-			// Ctrl-A => Select the log data
-			if ( (IsWindowVisible(hLogDlg)) && (GetKeyState(VK_CONTROL) & 0x8000) && 
-				(msg.message == WM_KEYDOWN) && (msg.wParam == 'A') ) {
-				// Might also need ES_NOHIDESEL property if you want to select when not active
-				SendMessage(hLog, EM_SETSEL, 0, -1);
-			}
-			// Alt-B => Toggle fake drive detection during bad blocks check
-			// By default, Rufus will check for fake USB flash drives that mistakenly present
-			// more capacity than they already have by looping over the flash. This check which
-			// is enabled by default is performed by writing the block number sequence and reading
-			// it back during the bad block check.
-			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'B')) {
-				detect_fakes = !detect_fakes;
-				PrintStatus2000(lmprintf(MSG_256), detect_fakes);
-				continue;
-			}
-			// Alt C => Force the update check to be successful
-			// This will set the reported current version of Rufus to 0.0.0.0 when performing an update
-			// check, so that it always succeeds. This is useful for translators.
-			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'C')) {
-				force_update = !force_update;
-				PrintStatus2000(lmprintf(MSG_259), force_update);
-				continue;
-			}
-			// Alt-D => Delete the NoDriveTypeAutorun key on exit (useful if the app crashed)
-			// This key is used to disable Windows popup messages when an USB drive is plugged in.
-			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'D')) {
-				PrintStatus(2000, FALSE, MSG_255);
-				existing_key = FALSE;
-				continue;
-			}
-			// Alt-E => Enhanced installation mode (allow dual UEFI/BIOS mode and FAT32 for Windows)
-			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'E')) {
-				allow_dual_uefi_bios = !allow_dual_uefi_bios;
-				// TODO: add a localized message
-				PrintStatus2000("Allow dual UEFI/BIOS mode", allow_dual_uefi_bios);
-				continue;
-			}
-			// Alt-F => Toggle detection of USB HDDs
-			// By default Rufus does not list USB HDDs. This is a safety feature aimed at avoiding
-			// unintentional formatting of backup drives instead of USB keys.
-			// When enabled, Rufus will list and allow the formatting of USB HDDs.
-			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'F')) {
-				enable_HDDs = !enable_HDDs;
-				PrintStatus2000(lmprintf(MSG_253), enable_HDDs);
-				GetUSBDevices(0);
-				CheckDlgButton(hMainDialog, IDC_ENABLE_FIXED_DISKS, enable_HDDs?BST_CHECKED:BST_UNCHECKED);
-				continue;
-			}
-			// Alt-I => Toggle ISO support
-			// This is useful if you have a dual ISO/DD image and you want to force Rufus to use
-			// DD-mode when writing the data.
-			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'I')) {
-				enable_iso = !enable_iso;
-				PrintStatus2000(lmprintf(MSG_262), enable_iso);
-				if (image_path != NULL) {
-					iso_provided = TRUE;
-					PostMessage(hDlg, WM_COMMAND, IDC_SELECT_ISO, 0);
-				}
-				continue;
-			}
-			// Alt J => Toggle Joliet support for ISO9660 images
-			// Some ISOs (Ubuntu) have Joliet extensions but expect applications not to use them,
-			// due to their reliance on filenames that are > 64 chars (the Joliet max length for
-			// a file name). This option allows users to ignore Joliet when using such images.
-			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'J')) {
-				enable_joliet = !enable_joliet;
-				PrintStatus2000(lmprintf(MSG_257), enable_joliet);
-				continue;
-			}
-			// Alt K => Toggle Rock Ridge support for ISO9660 images
-			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'K')) {
-				enable_rockridge = !enable_rockridge;
-				PrintStatus2000(lmprintf(MSG_258), enable_rockridge);
-				continue;
-			}
-			// Alt-L => Force Large FAT32 format to be used on < 32 GB drives
-			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'L')) {
-				force_large_fat32 = !force_large_fat32;
-				PrintStatus2000(lmprintf(MSG_254), force_large_fat32);
-				GetUSBDevices(0);
-				continue;
-			}
-			// Alt N => Enable NTFS compression
-			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'N')) {
-				enable_ntfs_compression = !enable_ntfs_compression;
-				PrintStatus2000(lmprintf(MSG_260), enable_ntfs_compression);
-				continue;
-			}
-			// Alt-R => Remove all the registry keys created by Rufus
-			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'R')) {
-				PrintStatus(2000, FALSE, DeleteRegistryKey(REGKEY_HKCU, COMPANY_NAME "\\" APPLICATION_NAME)?MSG_248:MSG_249);
-				// Also try to delete the upper key (company name) if it's empty (don't care about the result)
-				DeleteRegistryKey(REGKEY_HKCU, COMPANY_NAME);
-				continue;
-			}
-			// Alt-S => Disable size limit for ISOs
-			// By default, Rufus will not copy ISOs that are larger than in size than
-			// the target USB drive. If this is enabled, the size check is disabled.
-			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'S')) {
-				size_check = !size_check;
-				PrintStatus2000(lmprintf(MSG_252), size_check);
-				GetUSBDevices(0);
-				continue;
-			}
-			// Alt-U => Use PROPER size units, instead of this whole Kibi/Gibi nonsense
-			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'U')) {
-				use_fake_units = !use_fake_units;
-				PrintStatus2000(lmprintf(MSG_263), !use_fake_units);
-				GetUSBDevices(0);
-				continue;
-			}
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
+
+		// Ctrl-A => Select the log data
+		if ( (IsWindowVisible(hLogDlg)) && (GetKeyState(VK_CONTROL) & 0x8000) && 
+			(msg.message == WM_KEYDOWN) && (msg.wParam == 'A') ) {
+			// Might also need ES_NOHIDESEL property if you want to select when not active
+			SendMessage(hLog, EM_SETSEL, 0, -1);
 		}
+		// Alt-B => Toggle fake drive detection during bad blocks check
+		// By default, Rufus will check for fake USB flash drives that mistakenly present
+		// more capacity than they already have by looping over the flash. This check which
+		// is enabled by default is performed by writing the block number sequence and reading
+		// it back during the bad block check.
+		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'B')) {
+			detect_fakes = !detect_fakes;
+			PrintStatus2000(lmprintf(MSG_256), detect_fakes);
+			continue;
+		}
+		// Alt C => Force the update check to be successful
+		// This will set the reported current version of Rufus to 0.0.0.0 when performing an update
+		// check, so that it always succeeds. This is useful for translators.
+		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'C')) {
+			force_update = !force_update;
+			PrintStatus2000(lmprintf(MSG_259), force_update);
+			continue;
+		}
+		// Alt-D => Delete the NoDriveTypeAutorun key on exit (useful if the app crashed)
+		// This key is used to disable Windows popup messages when an USB drive is plugged in.
+		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'D')) {
+			PrintStatus(2000, MSG_255);
+			existing_key = FALSE;
+			continue;
+		}
+		// Alt-E => Enhanced installation mode (allow dual UEFI/BIOS mode and FAT32 for Windows)
+		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'E')) {
+			allow_dual_uefi_bios = !allow_dual_uefi_bios;
+			// TODO: add a localized message
+			PrintStatus2000("Allow dual UEFI/BIOS mode", allow_dual_uefi_bios);
+			continue;
+		}
+		// Alt-F => Toggle detection of USB HDDs
+		// By default Rufus does not list USB HDDs. This is a safety feature aimed at avoiding
+		// unintentional formatting of backup drives instead of USB keys.
+		// When enabled, Rufus will list and allow the formatting of USB HDDs.
+		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'F')) {
+			enable_HDDs = !enable_HDDs;
+			PrintStatus2000(lmprintf(MSG_253), enable_HDDs);
+			GetUSBDevices(0);
+			CheckDlgButton(hMainDialog, IDC_ENABLE_FIXED_DISKS, enable_HDDs?BST_CHECKED:BST_UNCHECKED);
+			continue;
+		}
+		// Alt-I => Toggle ISO support
+		// This is useful if you have a dual ISO/DD image and you want to force Rufus to use
+		// DD-mode when writing the data.
+		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'I')) {
+			enable_iso = !enable_iso;
+			PrintStatus2000(lmprintf(MSG_262), enable_iso);
+			if (image_path != NULL) {
+				iso_provided = TRUE;
+				PostMessage(hDlg, WM_COMMAND, IDC_SELECT_ISO, 0);
+			}
+			continue;
+		}
+		// Alt J => Toggle Joliet support for ISO9660 images
+		// Some ISOs (Ubuntu) have Joliet extensions but expect applications not to use them,
+		// due to their reliance on filenames that are > 64 chars (the Joliet max length for
+		// a file name). This option allows users to ignore Joliet when using such images.
+		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'J')) {
+			enable_joliet = !enable_joliet;
+			PrintStatus2000(lmprintf(MSG_257), enable_joliet);
+			continue;
+		}
+		// Alt K => Toggle Rock Ridge support for ISO9660 images
+		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'K')) {
+			enable_rockridge = !enable_rockridge;
+			PrintStatus2000(lmprintf(MSG_258), enable_rockridge);
+			continue;
+		}
+		// Alt-L => Force Large FAT32 format to be used on < 32 GB drives
+		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'L')) {
+			force_large_fat32 = !force_large_fat32;
+			PrintStatus2000(lmprintf(MSG_254), force_large_fat32);
+			GetUSBDevices(0);
+			continue;
+		}
+		// Alt N => Enable NTFS compression
+		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'N')) {
+			enable_ntfs_compression = !enable_ntfs_compression;
+			PrintStatus2000(lmprintf(MSG_260), enable_ntfs_compression);
+			continue;
+		}
+		// Alt-R => Remove all the registry keys created by Rufus
+		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'R')) {
+			PrintStatus(2000, DeleteRegistryKey(REGKEY_HKCU, COMPANY_NAME "\\" APPLICATION_NAME)?MSG_248:MSG_249);
+			// Also try to delete the upper key (company name) if it's empty (don't care about the result)
+			DeleteRegistryKey(REGKEY_HKCU, COMPANY_NAME);
+			continue;
+		}
+		// Alt-S => Disable size limit for ISOs
+		// By default, Rufus will not copy ISOs that are larger than in size than
+		// the target USB drive. If this is enabled, the size check is disabled.
+		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'S')) {
+			size_check = !size_check;
+			PrintStatus2000(lmprintf(MSG_252), size_check);
+			GetUSBDevices(0);
+			continue;
+		}
+		// Alt-U => Use PROPER size units, instead of this whole Kibi/Gibi nonsense
+		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'U')) {
+			use_fake_units = !use_fake_units;
+			PrintStatus2000(lmprintf(MSG_263), !use_fake_units);
+			GetUSBDevices(0);
+			continue;
+		}
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
 	}
 	if (relaunch) {
 		relaunch = FALSE;
