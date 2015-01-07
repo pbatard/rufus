@@ -1758,7 +1758,7 @@ t MSG_028 "megabytes"
 t MSG_029 "預設"
 # The following gets appended to the file system, cluster size, etc.
 t MSG_030 "%s (預設)"
-t MSG_031 "%s 可容 BIOS 和 UEFI 之資料分割配置"
+t MSG_031 "%s 可相容 BIOS 和 UEFI 之資料分割配置"
 t MSG_032 "%s BIOS 資料分割配置"
 t MSG_033 "%s UEFI 資料分割配置"
 # Number of bad block check passes (singular for 1 pass, plural for 2 or more passes)
