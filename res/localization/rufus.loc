@@ -308,7 +308,7 @@ t MSG_116 "This image uses Grub %s but the application only includes the install
 	"- Select 'Cancel' to abort the operation\n\n"
 	"Note: The file will be downloaded in the current application directory and will be reused "
 	"automatically if present. If no match can be found, then the embedded version will be used.\n"
-# Tootips
+# Tooltips
 # Partition Scheme and Target Type
 t MSG_150 "Usually the safest choice. If you have an UEFI computer and want to install "
 	"an OS in EFI mode however, you should select one of the other options"
@@ -366,6 +366,11 @@ t MSG_193 "Downloaded %s"
 t MSG_194 "Could not download %s"
 # eg. "Using embedded version of Grub2 file(s)"
 t MSG_195 "Using embedded version of %s file(s)"
+t MSG_196 "IMPORTANT: THIS DRIVE USES A NONSTANDARD SECTOR SIZE!!\n\n"
+	"Conventional drives use a 512-byte sector size but this drive uses a %d-byte one. "
+	"In many cases, this means that you will NOT be able to boot from this drive.\n"
+	"Rufus can still try to create a bootable drive, but there is NO WARRANTY that it will work."
+t MSG_197 "Nonstandard sector size detected"
 
 # Status messages - these messages will appear on the status bar
 t MSG_201 "Cancelling - Please wait..."
@@ -704,7 +709,7 @@ t MSG_114 "هذه الصورة (الإيميج) تستخدم Syslinux %s%s ول�
 	"ملاحظة: سيتم تحميل الملفات في الدليل الحالي وسوف يتم إعادة إستخدامه "
 	"تلقائياً عند العثور عليها.\n"
 t MSG_115 "مطلوب التحميل"
-# Tootips
+# Tooltips
 # Partition Scheme and Target Type
 t MSG_150 "عادةً الخيار الأكثر أماناً. إذا كان لديك جهاز كمبيوتر UEFI وتريد تثبيت "
 	"نظام تشغيل في وضع EFI مع ذلك, عليك إختيار إحدى الخيارات الأخرى"
@@ -1131,7 +1136,7 @@ t MSG_114 "Този образ използва Syslinux %s%s но тази пр
 	"Бележка: Тези файлове ще бъдат изтеглени  в настоящата директория на програмата и ще бъдат използвани "
 	"автоматично щом бъдат налични.\n"
 t MSG_115 "Необходимо е изтегляне"
-# Tootips
+# Tooltips
 # Partition Scheme and Target Type
 t MSG_150 "Обикновено най сигурният избор. Ако имате UEFI компютър и искате да инсталирате "
 	" операционна система в EFI режим ,въпреки това по добре е да изберете някоя от другите опции"
@@ -1504,7 +1509,7 @@ t MSG_114 "此镜像使用的更新版本的 Syslinux %s%s，此程序内置的 
 	"注意：文件将会被下载到当前目录，自动选用。\n"
 t MSG_115 "文件下载"
 
-# Tootips
+# Tooltips
 # Partition Scheme and Target Type
 t MSG_150 "一般最保险的选项。 若想在支持 UEFI 的计算机上使用 EFI 模式安装系统，请选择其他选项。"
 t MSG_151 "若想使用 EFI 模式安装系统却须使用 Windows XP 访问磁盘内容。"
@@ -1876,7 +1881,7 @@ t MSG_114 "此映像檔使用到 Syslinux %s%s，但本軟體僅支援 Syslinux 
 	"如欲下載這份檔案，請選擇「是」，Rufus 將會自動上網下載。若要終止作業，請選擇「否」\n\n"
 	"(僅需下載一次，以後可直接沿用不須再次下載)"
 t MSG_115 "需額外下載擴充檔案"
-# Tootips
+# Tooltips
 # Partition Scheme and Target Type
 t MSG_150 "一般而言最安全、最保險的選項。如果確定系統支援 UEFI 且欲在 EFI 模式下安裝 OS，則建議選擇下列其他選項"
 t MSG_151 "欲在 EFI 模式下安裝 OS 卻須使用 Windows XP 存取 USB 內容"
@@ -2255,7 +2260,7 @@ t MSG_114 "Ova slika koristi Syslinux %s%s ali ova aplikacija samo uključuje da
 	"Note: The files will be downloaded in the current application directory and will be reused "
 	"automatically if present.\n"
 t MSG_115 "Potrebno preuzimanje"
-# Tootips
+# Tooltips
 # Partition Scheme and Target Type
 t MSG_150 "Najčešče najsigurnija opcija. Ako imate UEFI računale a želite instalirati "
 	"OS u EFI načinu, odaberite drugu opciju"
@@ -2647,7 +2652,7 @@ t MSG_114 "Tento obraz používá Syslinux %s%s, tato aplikace však obsahuje po
 	"Poznámka: Soubory budou staženy do aktuální složky programu "
 	"pro opětovné automatické použití.\n"
 t MSG_115 "Nutné stažení souborů"
-# Tootips
+# Tooltips
 # Partition Scheme and Target Type
 t MSG_150 "Obvykle nejbezpečnější volba. Pokud však máte UEFI počítač a chcete instalovat"
 	"OS v EFI režimu, měli byste zvolte některou z ostatních možností"
@@ -3042,7 +3047,7 @@ t MSG_114 "Dette image benytter Syslinux %s%s men denne applikation indeholder k
 	"Bemærk: Disse filer bliver gemt i den nuværende mappe og "
 	"bliver afterfølgende automatisk genanvendt, hvis fundet der.\n"
 t MSG_115 "Download nødvendig"
-# Tootips
+# Tooltips
 # Partition Scheme and Target Type
 t MSG_150 "Normalt det sikreste valg. Hvis du har en UEFI computer og vil installere "
 	"et OS i EFI-tilstand dog bør du vælge en af ​​de andre muligheder"
@@ -3826,7 +3831,7 @@ t MSG_114 "Tämä kuva käyttää Syslinuxia %s%s, mutta tämä sovellus sisält
 	"Huomio: Tiedostot ladataan nykyiseen sovelluskansioon ja niitä käytetään"
 	"automaattisesti uudelleen niiden löytyessä.\n"
 t MSG_115 "Lataus vaaditaan"
-# Tootips
+# Tooltips
 # Partition Scheme and Target Type
 t MSG_150 "Yleensä turvallisin vaihtoehto. Jos sinulla kuitenkin on UEFI-tietokone ja haluat asentaa "
 	"käyttöjärjestelmän EFI-tilassa, tulisi sinun valita muista vaihtoehdoista"
@@ -4206,7 +4211,7 @@ t MSG_114 "Cette image utilise Syslinux %s%s mais l'application inclus seulement
 	"Note : Ces fichier seront téléchargés dans le répertoire courant et réutilisés automatiquement une fois présents."
 t MSG_115 "Téléchargement nécessaire"
 
-# Tootips
+# Tooltips
 t MSG_150 "Le choix le plus sûr. Mais si vous possédez un ordinateur à base de UEFI et voulez installer "
 	"un Système d’exploitation en mode EFI, sélectionnez plutôt l’une des autres options"
 t MSG_151 "Choisissez cette option si vous voulez installer un Système d’exploitation en mode EFI, "
@@ -5015,7 +5020,7 @@ t MSG_114 "Αυτό το είδωλο χρησιμοποιεί το Syslinux %s%
 	"Σημείωση: Η λήψη των νέων αρχείων θα γίνει στον τρέχοντα κατάλογο και εφόσον τα "
 	"αρχεία υπάρχουν εκεί, θα επαναχρησιμοποιηθούν αυτόματα.\n"
 t MSG_115 "Απαιτείται λήψη..."
-# Tootips
+# Tooltips
 # Partition Scheme and Target Type
 t MSG_150 "Συνήθως η ασφαλέστερη επιλογή. Παρόλα αυτά εάν έχετε έναν υπολογιστή με UEFI και "
 	"θέλετε να εγκαταστήσετε ένα λειτουργικό σύστημα(OS) σε λειτουργία EFI, θα πρέπει "
@@ -5381,7 +5386,7 @@ t MSG_112 "Nagy UDF kötetek formázása sok időt igénybe vehet. USB 2.0 sebes
 	"ennyi addig fog tartani ( %d:%02d ), amíg a folyamat jelző meg nem fagy. KÉrlek, légy türelemmel!"
 t MSG_113 "Nagy UDF kötet"
 
-# Tootips
+# Tooltips
 # Partition Scheme and Target Type
 t MSG_150 "Általában a leggyorsabb választás. Ha UEFI-s géped van, és azt szeretnéd telepíteni "
 	"egy oprendszerre EFI módban, akkor az alább lévő oprciók közül kell egyet választanod."
@@ -5777,7 +5782,7 @@ t MSG_112 "Memformat volume UDF yang besar dapat mengambil banyak waktu. Pada ke
 	"Durasi adalah %d:%02d, progress bar yang akan muncul mungkin beku, Harap bersabar!"
 t MSG_113 "Volume UDF besar"
 
-# Tootips
+# Tooltips
 # Partition Scheme and Target Type
 t MSG_150 "Biasanya pilihan paling aman . Jika Anda memiliki komputer UEFI dan ingin memasangnya "
 	"OS dalam mode EFI Namun, Anda harus memilih salah satu dari pilihan lain"
@@ -6158,7 +6163,7 @@ t MSG_114 "Questa immagine usa Syslinux %s%s ma questa applicazione include solo
 	"Nota: questi file verranno scaricati nella cartella corrente dell'applicazione e se presenti "
 	"verranno riusati automaticamente.\n"
 t MSG_115 "Richiede download"
-# Tootips
+# Tooltips
 # Partition Scheme and Target Type
 t MSG_150 "Questa impostazione è la scelta più sicura. Se hai un computer UEFI e vuoi installare "
 	"un sistema operativo in modo EFI, puoi selezionare una delle opzioni sottostanti"
@@ -6582,7 +6587,7 @@ t MSG_114 "このイメージは Syslinux %s%s を使うが、このアプリケ
 	"注意： 新しいファイルは現在ディレクトリにある場合、 "
 	"ダウンロードし再利用します。\n"
 t MSG_115 "ダウンロード必須"
-# Tootips
+# Tooltips
 # Partition Scheme and Target Type
 t MSG_150 "たいていもっとも安全選択です。でも、UEFIコンピューターにEFIモードOS "
 	"をインストール食べたければ、他のオプションを選択するはずです。"
@@ -6967,7 +6972,7 @@ t MSG_114 "이 이미지는 Syslinux를 하지만 %s%s 이 프로그램에는 Sy
 	"알림: 이 파일들은 프로그램이 위치한 폴더에 저장되며, 같은 파일들이 있으면 자동으로 재 사용되어집니다. \n"
 t MSG_115 "다운로드가 필요합니다."
 
-# Tootips
+# Tooltips
 # Partition Scheme and Target Type
 t MSG_150 "일반적으로 가장 안전한 방법입니다. 하지만 UEFI 컴퓨터의 EFI모드에서 운영체제를 설치하는 경우에는 "
 	"다른 옵션 중에서 하나를 선택해야 합니다."
@@ -7379,7 +7384,7 @@ t MSG_114 "Šis imidžs izmanto Syslinux %s%s, bet aplikācija satur instalācij
 	"Piezīme: Faili tiks lejuplādēti tekošajā mapē, un ja tādi eksistē, automātiski "
 	"tiks pārrakstīti.\n"
 t MSG_115 "Nepieciešams lejuplādēt"
-# Tootips
+# Tooltips
 # Partition Scheme and Target Type
 t MSG_150 "Parasti izmantojamā izvēle. Ja jums ir  UEFI dators un vēlaties OS instalēt "
 	"EFI režīmā, izvēlieties šo opciju"
@@ -7779,7 +7784,7 @@ t MSG_114 "Šis atvaizdas naudoja Syslinux %s%s, bet ši programa turi tik diegi
 	"automatiškai, juos ten radus.\n"
 t MSG_115 "Reikalingas atsisiuntimas"
 
-# Tootips
+# Tooltips
 # Partition Scheme and Target Type
 t MSG_150 "Paprastai saugiausias pasirinkimas. Bet jei turite UEFI kompiuterį ir norite įdiegti "
 	"operacinę sistemą EFI režimu, turėtumėte pasirinkit vieną iš kitų parinkčių"
@@ -8197,7 +8202,7 @@ t MSG_114 "Imej ini menggunakan Syslinux %s%s tetapi aplikasi ini hanya mempunya
 	"secara automatik sekiranya sedia ada.\n"
 t MSG_115 "Muat turun diperlukan"
 	
-# Tootips
+# Tooltips
 # Partition Scheme and Target Type
 t MSG_150 "Selalunya pilihan ini paling selamat. Namun, jika anda ada komputer UEFI dan mahu "
 	"install OS dalam mod EFI, anda patut pilih pilihan yang lain"
@@ -8617,7 +8622,7 @@ t MSG_114 "Ten obraz używa Syslinux %s%s lecz ta aplikacja dołącza pliki inst
 	"automatycznie jeśli istneją.\n"
 t MSG_115 "Wymagane pobieranie"
 
-# Tootips
+# Tooltips
 # Partition Scheme and Target Type
 t MSG_150 "Zazwyczaj najbezpieczniejszy wybór. Jeśli jednak masz komputer UEFI i chcesz zainstalować "
 	"OS w trybie EFI , powinieneś wybrać jedną z innych opcji"
@@ -9174,7 +9179,7 @@ t MSG_112 "Formatar um volume UDF de tamanho grande pode demorar muito tempo. À
 	"Por favor, seja paciente!"
 t MSG_113 "Volume UDF de tamanho grande"
 
-# Tootips
+# Tooltips
 # Partition Scheme and Target Type
 t MSG_150 "Geralmente a opção mais rápida. Embora, se tem um computador baseada em UEFI e quer instalar "
 	"um sistema operativo no modo EFI, deve selecionar uma das outras opções"
@@ -9928,7 +9933,7 @@ t MSG_115 "Необходимо скачать"
 t MSG_220 "Форматирование (%s) - Окончание через %d:%02d..."
 t MSG_207 "Новый том"
 
-# Tootips
+# Tooltips
 # Partition Scheme and Target Type
 t MSG_150 "Вариант для большинства компьютеров с интерфейсом BIOS или UEFI"
 t MSG_151 "Вариант для компьютеров с интерфейсом UEFI\n(При установке Windows XP с доступом к USB)"
@@ -10308,7 +10313,7 @@ t MSG_114 "Tento obraz používa Syslinux %s%s ale tento program obsahuje inšta
 	"Poznámka: Súbory budú stiahnuté do aktuálneho priečinku programu a budú použité "
 	"automaticky po stiahnutí.\n"
 t MSG_115 "Sťahovanie požadované"
-# Tootips
+# Tooltips
 # Partition Scheme and Target Type
 t MSG_150 "Zvyčajne najbezpečnejšia voľba. Ak máte UEFI počítač a predsa len chcete inštalovať "
 	"OS v EFI móde, mali by ste si vybrať niektorú z ostatných nastavení"
@@ -10709,7 +10714,7 @@ t MSG_114 "Ta slika uporablja Syslinux %s%s, toda ta aplikacija vsebuje le names
 	"Opomba: datoteki bosta prenešeni v mapo, kjer je nameščen Rufus, in bosta v prihodnje ponovno uporabljeni."
 t MSG_115 "Prenos potreben"
 
-# Tootips
+# Tooltips
 # Partition Scheme and Target Type
 t MSG_150 "To je navadno najvarnejša izbira, če pa imate računalnik UEFI in želite namestiti "
 	"operacijski sistem v načinu EFI, izberite eno od ostalih možnosti."
@@ -11091,7 +11096,7 @@ t MSG_112 "Formatear un volumen UDF de gran tamaño puede tomar mucho tiempo. A 
 	"¡Por favor, sea paciente!"
 t MSG_113 "Volumen UDF de gran tamaño"
 
-# Tootips
+# Tooltips
 # Partition Scheme and Target Type
 t MSG_150 "Usualmente la opción más segura. Empero, si tiene una computadora basada en UEFI y quiere instalar "
 	"un sistema operativo en modo EFI, debe seleccionar una de las otras opciones"
@@ -11501,7 +11506,7 @@ t MSG_114 "Denna avbild använder Syslinux %s%s men detta programmet innehåller
 	"Obs: Filerna kommer att laddas ned i programmets katalog och kommer att användas igen "
 	"automatiskt om de finns där.\n"
 t MSG_115 "Nedladdning krävs"
-# Tootips
+# Tooltips
 # Partition Scheme and Target Type
 t MSG_150 "Oftast det säkraste valet. Har du en UEFI-dator och vill installera "
 	"ett OS i EFI-läge ska du dock välja något av de andra valen"
@@ -11927,7 +11932,7 @@ t MSG_114 "Bu yansıma Syslinux %s%s kullanıyor fakat bu uygulama yalnız Sysli
 	"hazır olduğunda otomatik olarak kullanılacak.\n"
 t MSG_115 "İndirme gerekli"
 
-# Tootips
+# Tooltips
 # Partition Scheme and Target Type
 t MSG_150 "Genellikle en güvenli seçenektir. UEFI destekli bir bilgisayara sahipseniz ve bir işletim sistemini "
 	"EFI modunda yüklemek istiyorsanız ancak diğer seçeneklerden birini seçmelisiniz"
@@ -12339,7 +12344,7 @@ t MSG_115 "Необхідно завантажити"
 t MSG_220 "Форматування (%s) - Завершення через %d:%02d..."
 t MSG_207 "Новий том"
 
-# Tootips
+# Tooltips
 # Partition Scheme and Target Type
 t MSG_150 "Варіант для більшості комп'ютерів з інтерфейсом BIOS чи UEFI"
 t MSG_151 "Варіант для комп'ютерів з інтерфейсом UEFI\n(При встановленні Windows XP з доступом до USB)"

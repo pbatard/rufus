@@ -2116,6 +2116,12 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 					format_op_in_progress = FALSE;
 					break;
 				}
+				if ((IsChecked(IDC_BOOT)) && (SelectedDrive.Geometry.BytesPerSector != 512) && 
+					(MessageBoxU(hMainDialog, lmprintf(MSG_196, SelectedDrive.Geometry.BytesPerSector),
+						lmprintf(MSG_197), MB_OKCANCEL|MB_ICONWARNING|MB_IS_RTL) == IDCANCEL)) {
+					format_op_in_progress = FALSE;
+					break;
+				}
 
 				// Disable all controls except cancel
 				EnableControls(FALSE);
