@@ -755,7 +755,7 @@ out:
 		}
 		if (iso_report.has_grub2) {
 			// In case we have a GRUB2 based iso, we extract boot/grub/i386-pc/normal.mod to parse its version
-			strcpy(iso_report.grub2_version, "unknown");
+			iso_report.grub2_version[0] = 0;
 			if ((GetTempPathU(sizeof(path), path) != 0) && (GetTempFileNameU(path, APPLICATION_NAME, 0, path) != 0)) {
 				size = (size_t)ExtractISOFile(src_iso, "boot/grub/i386-pc/normal.mod", path, FILE_ATTRIBUTE_NORMAL);
 				buf = (char*)calloc(size, 1);
@@ -770,7 +770,10 @@ out:
 				free(buf);
 				_unlink(path);
 			}
-			uprintf("Detected Grub version: %s", iso_report.grub2_version);
+			if (iso_report.grub2_version[0] != 0)
+				uprintf("Detected Grub version: %s", iso_report.grub2_version);
+			else
+				uprintf("Could not detect Grub2 version");
 		}
 		StrArrayDestroy(&config_path);
 		StrArrayDestroy(&isolinux_path);

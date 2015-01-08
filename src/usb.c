@@ -41,7 +41,7 @@
 #include "usb.h"
 
 extern StrArray DriveID, DriveLabel;
-extern BOOL enable_HDDs, use_fake_units;
+extern BOOL enable_HDDs, use_fake_units, enable_vmdk;
 
 /*
  * Get the VID, PID and current device speed
@@ -112,10 +112,10 @@ static __inline BOOL IsVHD(const char* buffer)
 		"Arsenal_________Virtual_",
 		"KernSafeVirtual_________",
 		"Msft____Virtual_Disk____",
-//		"VMware__VMware_Virtual_S"	// Would list primary disks on VMWare instances, so we avoid it
+		"VMware__VMware_Virtual_S"	// Enabled through a cheat mode, as this lists primary disks on VMWare instances
 	};
 
-	for (i = 0; i < ARRAYSIZE(vhd_name); i++)
+	for (i = 0; i < (int)(ARRAYSIZE(vhd_name)-(enable_vmdk?0:1)); i++)
 		if (safe_strstr(buffer, vhd_name[i]) != NULL)
 			return TRUE;
 	return FALSE;

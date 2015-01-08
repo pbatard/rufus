@@ -128,7 +128,7 @@ HWND hLogDlg = NULL, hProgress = NULL, hInfo, hDiskID;
 BOOL use_own_c32[NB_OLD_C32] = {FALSE, FALSE}, detect_fakes = TRUE, mbr_selected_by_user = FALSE;
 BOOL iso_op_in_progress = FALSE, format_op_in_progress = FALSE, right_to_left_mode = FALSE;
 BOOL enable_HDDs = FALSE, advanced_mode = TRUE, force_update = FALSE, use_fake_units = TRUE;
-BOOL allow_dual_uefi_bios = FALSE;
+BOOL allow_dual_uefi_bios = FALSE, enable_vmdk = FALSE;
 int dialog_showing = 0;
 uint16_t rufus_version[4], embedded_sl_version[2];
 char embedded_sl_version_str[2][12] = { "?.??", "?.??" };
@@ -137,7 +137,7 @@ char embedded_grub_version[] = GRUB4DOS_VERSION;
 char embedded_grub2_version[] = GRUB2_PACKAGE_VERSION;
 RUFUS_UPDATE update = { {0,0,0,0}, {0,0}, NULL, NULL};
 StrArray DriveID, DriveLabel;
-extern char szStatusMessage[256];
+extern char* szStatusMessage;
 
 static HANDLE format_thid = NULL;
 static HWND hBoot = NULL, hSelectISO = NULL;
@@ -953,6 +953,7 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 		PrintInfo(0, MSG_081);
 		MessageBoxU(hMainDialog, lmprintf(MSG_082), lmprintf(MSG_081), MB_OK|MB_ICONINFORMATION|MB_IS_RTL);
 		safe_free(image_path);
+		PrintStatus(0, MSG_086);
 		SetMBRProps();
 	} else {
 		// Enable bootable and set Target System and FS accordingly
@@ -1137,7 +1138,8 @@ static BOOL BootCheck(void)
 			return FALSE;
 		}
 
-		if ((iso_report.has_grub2) && (safe_strcmp(iso_report.grub2_version, embedded_grub2_version) != 0)) {
+		if ((iso_report.has_grub2) && (iso_report.grub2_version[0] != 0) &&
+			(strcmp(iso_report.grub2_version, embedded_grub2_version) != 0)) {
 			// We may have to download a different Grub2 version if we can find one
 			IGNORE_RETVAL(_chdirU(app_dir));
 			IGNORE_RETVAL(_mkdir(FILES_DIR));
@@ -1173,9 +1175,11 @@ static BOOL BootCheck(void)
 					PromptOnError = FALSE;
 					grub2_len = (long)DownloadFile(tmp, &tmp[sizeof(FILES_URL)], hMainDialog);
 					PromptOnError = TRUE;
-					if (grub2_len <= 0)
+					if (grub2_len <= 0) {
+						PrintInfo(0, MSG_195, "Grub2");
 						uprintf("%s was not found - will use embedded version\n", tmp);
-					else {
+					} else {
+						PrintInfo(0, MSG_193, tmp);
 						fd = fopen(&tmp[sizeof(FILES_URL)], "rb");
 						grub2_buf = malloc(grub2_len);
 						if ((fd == NULL) || (grub2_buf == NULL) || (fread(grub2_buf, 1, (size_t)grub2_len, fd) != (size_t)grub2_len)) {
@@ -2045,7 +2049,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 					image_path = FileDialog(FALSE, NULL, &iso_ext, 0);
 				if (image_path == NULL) {
 					CreateTooltip(hSelectISO, lmprintf(MSG_173), -1);
-					PrintStatus(0, MSG_190);
+					PrintStatus(0, MSG_086);
 					break;
 				}
 			}
@@ -2581,6 +2585,20 @@ relaunch:
 			use_fake_units = !use_fake_units;
 			PrintStatus2000(lmprintf(MSG_263), !use_fake_units);
 			GetUSBDevices(0);
+			continue;
+		}
+		// Alt-W => Enable VMWare disk detection
+		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'W')) {
+			enable_vmdk = !enable_vmdk;
+			PrintStatus2000(lmprintf(MSG_265), !enable_vmdk);
+			GetUSBDevices(0);
+			continue;
+		}
+		// Alt-X => Delete the 'rufus_files' subdirectory
+		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'X')) {
+			static_sprintf(tmp_path, "%s\\%s", app_dir, FILES_DIR);
+			PrintStatus(2000, MSG_264, tmp_path);
+			SHDeleteDirectoryExU(NULL, tmp_path, FOF_SILENT | FOF_NOERRORUI | FOF_NOCONFIRMATION);
 			continue;
 		}
 		TranslateMessage(&msg);

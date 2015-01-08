@@ -39,7 +39,9 @@ cat > cmd.sed <<\_EOF
 const loc_control_id control_id[] = {\
 	// The dialog IDs must come first
 
-# Add the control entries - must be in IDD_, IDC_, IDS_ or MSG_
+# Add the control entries - must be in IDD_, IDC_, IDS_ or MSG_ (and not contain _XP or _RTL suffix)
+s/^.* IDD_.*_RTL .*//
+s/^.* IDD_.*_XP .*//
 s/^#define \([I|M][D|S][D|C|S|G]_[^ ]*\) .*/\	LOC_CTRL(\1),/
 
 # Add standard IDs from windows.h and close table
@@ -71,6 +73,8 @@ cat > cmd.sed <<\_EOF
 loc_dlg_list loc_dlg[] = {
 
 # Add the dialog entries - must start with IDD_
+s/^.* IDD_.*_RTL .*//
+s/^.* IDD_.*_XP .*//
 s/^#define \(IDD_[^ ]*\) .*/\	LOC_DLG(\1),/
 
 # Close the table

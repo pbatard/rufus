@@ -146,7 +146,8 @@ typedef struct {
 
 /* Timers used throughout the program */
 enum timer_type {
-	TID_MESSAGE = 0x1000,
+	TID_MESSAGE_INFO = 0x1000,
+	TID_MESSAGE_STATUS,
 	TID_BADBLOCKS_UPDATE,
 	TID_APP_TIMER,
 	TID_BLOCKING_TIMER,

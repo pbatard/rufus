@@ -360,9 +360,12 @@ t MSG_186 "Rufus does not install or run background services, therefore update c
 t MSG_187 "Invalid image for selected boot option"
 t MSG_188 "The current image doesn't match the boot option selected. Please use a different image or choose a different boot option."
 t MSG_189 "This ISO image is not compatible with the selected filesystem"
-t MSG_190 "No image selected"
 t MSG_191 "Write pass"
 t MSG_192 "Read pass"
+t MSG_193 "Downloaded %s"
+t MSG_194 "Could not download %s"
+# eg. "Using embedded version of Grub2 file(s)"
+t MSG_195 "Using embedded version of %s file(s)"
 
 # Status messages - these messages will appear on the status bar
 t MSG_201 "Cancelling - Please wait..."
@@ -435,7 +438,7 @@ t MSG_249 "Failed to delete application registry keys"
 t MSG_250 "%s enabled"
 t MSG_251 "%s disabled"
 t MSG_252 "Size checks"
-t MSG_253 "Fixed disks detection"
+t MSG_253 "Hard disk detection"
 t MSG_254 "Force large FAT32 formatting"
 t MSG_255 "NoDriveTypeAutorun will be deleted on exit"
 t MSG_256 "Fake drive detection"
@@ -448,6 +451,8 @@ t MSG_261 "Writing image: %0.1f%% completed"
 t MSG_262 "ISO Support"
 # Cheat mode to force legacy size units, where 1 KB is 1024 bytes and NOT that fake 1000 bytes abomination!
 t MSG_263 "Use PROPER size units"
+t MSG_264 "Deleting directory '%s'"
+t MSG_265 "VMWare disk detection"
 ################################################################################
 ############################# TRANSLATOR END COPY ##############################
 ################################################################################

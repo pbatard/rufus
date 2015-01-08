@@ -396,39 +396,51 @@ char* lmprintf(int msg_id, ...)
 }
 
 /*
- * Display a localized message on the status bar as well as its English counterpart in the
- * log (if debug is set). If duration is non zero, ensures that message is displayed for at
- * least duration ms, regardless of any other incoming message
+ * The following calls help display a localized message on the info field or status bar as well as its
+ * _English_ counterpart in the log (if debug is set).
+ * If duration is non zero, that message is displayed for at least duration ms, regardless of
+ * any other incoming message. After that time, the display reverts to the last non-timeout message.
  */
+// TODO: handle a timeout message overriding a timeout message
+#define MSG_LEN      256
+#define MSG_STATUS   0
+#define MSG_INFO     1
+#define MSG_LOW_PRI  0
+#define MSG_HIGH_PRI 1
+char szMessage[2][2][MSG_LEN] = { 0 };
+char* szStatusMessage = szMessage[MSG_STATUS][MSG_HIGH_PRI];
 static BOOL bStatusTimerArmed = FALSE;
-char szStatusMessage[256] = { 0 };
-static void CALLBACK PrintStatusTimeout(HWND hWnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
+
+static __inline OutputMessage(BOOL info, char* msg)
 {
-	bStatusTimerArmed = FALSE;
-	// potentially display lower priority message that was overridden
-	SendMessageLU(GetDlgItem(hMainDialog, IDC_STATUS), SB_SETTEXTW, SBT_OWNERDRAW, szStatusMessage);
-	KillTimer(hMainDialog, TID_MESSAGE);
+	if (info)
+		SetWindowTextU(hInfo, msg);
+	else
+		SendMessageLU(GetDlgItem(hMainDialog, IDC_STATUS), SB_SETTEXTW, SBT_OWNERDRAW, msg);
 }
 
-static void CALLBACK PrintInfoTimeout(HWND hWnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
+static void CALLBACK PrintMessageTimeout(HWND hWnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
 {
 	bStatusTimerArmed = FALSE;
-	SetWindowTextU(hInfo, szStatusMessage);
-	KillTimer(hMainDialog, TID_MESSAGE);
+	// We're going to print high priority message, so restore our pointer
+	if (idEvent != TID_MESSAGE_INFO)
+		szStatusMessage = szMessage[MSG_STATUS][MSG_HIGH_PRI];
+	OutputMessage((idEvent == TID_MESSAGE_INFO), szMessage[(idEvent == TID_MESSAGE_INFO)?MSG_INFO:MSG_STATUS][MSG_HIGH_PRI]);
+	KillTimer(hMainDialog, idEvent);
 }
 
 void PrintStatusInfo(BOOL info, BOOL debug, unsigned int duration, int msg_id, ...)
 {
-	char *format = NULL, buf[sizeof(szStatusMessage)];
+	char *format = NULL, buf[MSG_LEN];
+	char *msg_hi = szMessage[info?MSG_INFO:MSG_STATUS][MSG_HIGH_PRI];
+	char *msg_lo = szMessage[info?MSG_INFO:MSG_STATUS][MSG_LOW_PRI];
+	char *msg_cur = (duration > 0)?msg_lo:msg_hi;
 	va_list args;
 
 	if (msg_id < 0) {
-		// A negative msg_id clears the text area
-		szStatusMessage[0] = 0;
-		if (info)
-			SetWindowTextU(hInfo, szStatusMessage);
-		else
-			SendMessageLU(GetDlgItem(hMainDialog, IDC_STATUS), SB_SETTEXTW, SBT_OWNERDRAW, szStatusMessage);
+		// A negative msg_id clears the message
+		msg_hi[0] = 0;
+		OutputMessage(info, msg_hi);
 		return;
 	}
 
@@ -437,29 +449,32 @@ void PrintStatusInfo(BOOL info, BOOL debug, unsigned int duration, int msg_id, .
 		return;
 	}
 
+	// We need to keep track of where szStatusMessage should point to so that ellipses work
+	if (!info)
+		szStatusMessage = szMessage[MSG_STATUS][(duration > 0)?MSG_LOW_PRI:MSG_HIGH_PRI];
+
 	format = msg_table[msg_id - MSG_000];
 	if (format == NULL) {
-		safe_sprintf(szStatusMessage, sizeof(szStatusMessage), "MSG_%03d UNTRANSLATED", msg_id - MSG_000);
+		safe_sprintf(msg_hi, MSG_LEN, "MSG_%03d UNTRANSLATED", msg_id - MSG_000);
+		uprintf(msg_hi);
+		OutputMessage(info, msg_hi);
 		return;
 	}
 
 	va_start(args, msg_id);
-	safe_vsnprintf(szStatusMessage, sizeof(szStatusMessage), format, args);
+	safe_vsnprintf(msg_cur, MSG_LEN, format, args);
 	va_end(args);
-	szStatusMessage[sizeof(szStatusMessage)-1] = '\0';
+	msg_cur[MSG_LEN-1] = '\0';
 
-	if ((duration != 0) || (!bStatusTimerArmed)) {
-		if (info)
-			SetWindowTextU(hInfo, szStatusMessage);
-		else
-			SendMessageLU(GetDlgItem(hMainDialog, IDC_STATUS), SB_SETTEXTW, SBT_OWNERDRAW, szStatusMessage);
-	}
+	if ((duration != 0) || (!bStatusTimerArmed))
+		OutputMessage(info, msg_cur);
 
 	if (duration != 0) {
-		SetTimer(hMainDialog, TID_MESSAGE, duration, (info)?PrintInfoTimeout:PrintStatusTimeout);
+		SetTimer(hMainDialog, (info)?TID_MESSAGE_INFO:TID_MESSAGE_STATUS, duration, PrintMessageTimeout);
 		bStatusTimerArmed = TRUE;
 	}
 
+	// Because we want the log messages in English, we go through the VA business once more, but this time with default_msg_table
 	if (debug) {
 		format = default_msg_table[msg_id - MSG_000];
 		if (format == NULL) {
@@ -467,8 +482,9 @@ void PrintStatusInfo(BOOL info, BOOL debug, unsigned int duration, int msg_id, .
 			return;
 		}
 		va_start(args, msg_id);
-		safe_vsnprintf(buf, sizeof(szStatusMessage)-1, format, args);
+		safe_vsnprintf(buf, MSG_LEN, format, args);
 		va_end(args);
+		buf[MSG_LEN-1] = '\0';
 		uprintf(buf);
 	}
 }

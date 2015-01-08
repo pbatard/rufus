@@ -499,6 +499,21 @@ static __inline int SHCreateDirectoryExU(HWND hwnd, const char* pszPath, SECURIT
 	return ret;
 }
 
+static __inline int SHDeleteDirectoryExU(HWND hwnd, const char* pszPath, FILEOP_FLAGS fFlags)
+{
+	int ret;
+	// String needs to be double NULL terminated, so we just use the length of the UTF-8 string
+	// which is always expected to be larger than our UTF-16 one, and add 2 chars for good measure.
+	size_t wpszPath_len = strlen(pszPath) + 2;
+	wchar_t* wpszPath = (wchar_t*)calloc(wpszPath_len, sizeof(wchar_t));
+	utf8_to_wchar_no_alloc(pszPath, wpszPath, wpszPath_len);
+	// FOF_SILENT | FOF_NOERRORUI | FOF_NOCONFIRMATION,
+	SHFILEOPSTRUCTW shfo = { hwnd, FO_DELETE, wpszPath, NULL, fFlags, FALSE, NULL, NULL };
+	ret = SHFileOperationW(&shfo);
+	wfree(pszPath);
+	return ret;
+}
+
 static __inline BOOL ShellExecuteExU(SHELLEXECUTEINFOA* lpExecInfo)
 {
 	BOOL ret = FALSE;
