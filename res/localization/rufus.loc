@@ -1785,7 +1785,7 @@ t MSG_043 "錯誤: %s"
 t MSG_044 "檔案下載"
 t MSG_045 "USB 裝置"
 t MSG_046 "%s (磁碟 %d) [%s]"
-# t MSG_047 "Multiple Partitions"
+t MSG_047 "多個磁碟分割區"
 t MSG_048 "Rufus - 清理緩衝區"
 t MSG_049 "Rufus - 取消"
 
