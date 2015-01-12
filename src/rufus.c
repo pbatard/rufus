@@ -128,7 +128,7 @@ HWND hLogDlg = NULL, hProgress = NULL, hInfo, hDiskID;
 BOOL use_own_c32[NB_OLD_C32] = {FALSE, FALSE}, detect_fakes = TRUE, mbr_selected_by_user = FALSE;
 BOOL iso_op_in_progress = FALSE, format_op_in_progress = FALSE, right_to_left_mode = FALSE;
 BOOL enable_HDDs = FALSE, advanced_mode = TRUE, force_update = FALSE, use_fake_units = TRUE;
-BOOL allow_dual_uefi_bios = FALSE, enable_vmdk = FALSE;
+BOOL allow_dual_uefi_bios = FALSE, enable_vmdk = FALSE, togo_mode = TRUE;
 int dialog_showing = 0;
 uint16_t rufus_version[4], embedded_sl_version[2];
 char embedded_sl_version_str[2][12] = { "?.??", "?.??" };
@@ -985,12 +985,11 @@ out:
 }
 
 // Move a control along the Y axis according to the advanced mode setting
-void MoveCtrlY(HWND hDlg, int nID, float vertical_shift) {
-	ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, nID), 0,
-		(int)(advanced_mode?vertical_shift:-vertical_shift), 0, 0);
+static __inline void MoveCtrlY(HWND hDlg, int nID, float vertical_shift) {
+	ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, nID), 0, (int)vertical_shift, 0, 0);
 }
 
-void SetPassesTooltip(void)
+static void SetPassesTooltip(void)
 {
 	const unsigned char pattern[] = BADBLOCK_PATTERNS;
 	CreateTooltip(hNBPasses, lmprintf(MSG_153 + ComboBox_GetCurSel(hNBPasses),
@@ -998,21 +997,23 @@ void SetPassesTooltip(void)
 }
 
 // Toggle "advanced" mode
-void ToggleAdvanced(void)
+static void ToggleAdvanced(void)
 {
-	float dialog_shift = 80.0f;
+	float dialog_shift = 82.0f;
 	RECT rect;
 	POINT point;
 	int toggle;
 
 	advanced_mode = !advanced_mode;
+	if (!advanced_mode)
+		dialog_shift = -dialog_shift;
 
 	// Increase or decrease the Window size
 	GetWindowRect(hMainDialog, &rect);
 	point.x = (rect.right - rect.left);
 	point.y = (rect.bottom - rect.top);
 	MoveWindow(hMainDialog, rect.left, rect.top, point.x,
-		point.y + (int)(fScale*(advanced_mode?dialog_shift:-dialog_shift)), TRUE);
+		point.y + (int)(fScale*dialog_shift), TRUE);
 
 	// Move the status bar up or down
 	MoveCtrlY(hMainDialog, IDC_STATUS, dialog_shift);
@@ -1031,13 +1032,13 @@ void ToggleAdvanced(void)
 	point.x = (rect.right - rect.left);
 	point.y = (rect.bottom - rect.top);
 	MoveWindow(hLogDlg, rect.left, rect.top, point.x,
-		point.y + (int)(fScale*(advanced_mode?dialog_shift:-dialog_shift)), TRUE);
+		point.y + (int)(fScale*dialog_shift), TRUE);
 	MoveCtrlY(hLogDlg, IDC_LOG_CLEAR, dialog_shift);
 	MoveCtrlY(hLogDlg, IDC_LOG_SAVE, dialog_shift);
 	MoveCtrlY(hLogDlg, IDCANCEL, dialog_shift);
 	GetWindowRect(hLog, &rect);
 	point.x = (rect.right - rect.left);
-	point.y = (rect.bottom - rect.top) + (int)(fScale*(advanced_mode?dialog_shift:-dialog_shift));
+	point.y = (rect.bottom - rect.top) + (int)(fScale*dialog_shift);
 	SetWindowPos(hLog, 0, 0, 0, point.x, point.y, 0);
 	// Don't forget to scroll the edit to the bottom after resize
 	SendMessage(hLog, EM_LINESCROLL, 0, SendMessage(hLog, EM_GETLINECOUNT, 0, 0));
@@ -1052,10 +1053,12 @@ void ToggleAdvanced(void)
 
 	// Toggle the up/down icon
 	SendMessage(GetDlgItem(hMainDialog, IDC_ADVANCED), BCM_SETIMAGELIST, 0, (LPARAM)(advanced_mode?&bi_up:&bi_down));
+
+	InvalidateRect(hMainDialog, NULL, TRUE);
 }
 
 // Toggle DD Image mode
-void ToggleImage(BOOL enable)
+static void ToggleImage(BOOL enable)
 {
 	EnableWindow(GetDlgItem(hMainDialog, IDC_QUICKFORMAT), enable);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_PARTITION_TYPE), enable);
@@ -1064,6 +1067,74 @@ void ToggleImage(BOOL enable)
 	EnableWindow(GetDlgItem(hMainDialog, IDC_LABEL), enable);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_QUICKFORMAT), enable);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_SET_ICON), enable);
+}
+
+// Toggle the Windows To Go radio choice
+static void ToggleToGo(void)
+{
+	float dialog_shift = 38.0f;
+	RECT rect;
+	POINT point;
+	int toggle;
+
+	togo_mode = !togo_mode;
+	if (!togo_mode)
+		dialog_shift = -dialog_shift;
+
+	// Increase or decrease the Window size
+	GetWindowRect(hMainDialog, &rect);
+	point.x = (rect.right - rect.left);
+	point.y = (rect.bottom - rect.top);
+	MoveWindow(hMainDialog, rect.left, rect.top, point.x,
+		point.y + (int)(fScale*dialog_shift), TRUE);
+
+	// Move the controls up or down
+	MoveCtrlY(hMainDialog, IDC_STATUS, dialog_shift);
+	MoveCtrlY(hMainDialog, IDC_START, dialog_shift);
+	MoveCtrlY(hMainDialog, IDC_INFO, dialog_shift);
+	MoveCtrlY(hMainDialog, IDC_PROGRESS, dialog_shift);
+	MoveCtrlY(hMainDialog, IDC_ABOUT, dialog_shift);
+	MoveCtrlY(hMainDialog, IDC_LOG, dialog_shift);
+	MoveCtrlY(hMainDialog, IDCANCEL, dialog_shift);
+	MoveCtrlY(hMainDialog, IDC_SET_ICON, dialog_shift);
+	MoveCtrlY(hMainDialog, IDS_ADVANCED_OPTIONS_GRP, dialog_shift);
+	MoveCtrlY(hMainDialog, IDC_ENABLE_FIXED_DISKS, dialog_shift);
+	MoveCtrlY(hMainDialog, IDC_EXTRA_PARTITION, dialog_shift);
+	MoveCtrlY(hMainDialog, IDC_RUFUS_MBR, dialog_shift);
+	MoveCtrlY(hMainDialog, IDC_DISK_ID, dialog_shift);
+	ResizeMoveCtrl(hMainDialog, GetDlgItem(hMainDialog, IDS_FORMAT_OPTIONS_GRP), 0, 0, 0, (int)dialog_shift);
+	
+#ifdef RUFUS_TEST
+	MoveCtrlY(hMainDialog, IDC_TEST, dialog_shift);
+#endif
+
+	// And do the same for the log dialog while we're at it
+	GetWindowRect(hLogDlg, &rect);
+	point.x = (rect.right - rect.left);
+	point.y = (rect.bottom - rect.top);
+	MoveWindow(hLogDlg, rect.left, rect.top, point.x,
+		point.y + (int)(fScale*dialog_shift), TRUE);
+	MoveCtrlY(hLogDlg, IDC_LOG_CLEAR, dialog_shift);
+	MoveCtrlY(hLogDlg, IDC_LOG_SAVE, dialog_shift);
+	MoveCtrlY(hLogDlg, IDCANCEL, dialog_shift);
+	GetWindowRect(hLog, &rect);
+	point.x = (rect.right - rect.left);
+	point.y = (rect.bottom - rect.top) + (int)(fScale*dialog_shift);
+	SetWindowPos(hLog, 0, 0, 0, point.x, point.y, 0);
+	// Don't forget to scroll the edit to the bottom after resize
+	SendMessage(hLog, EM_LINESCROLL, 0, SendMessage(hLog, EM_GETLINECOUNT, 0, 0));
+
+	// Hide or show the various advanced options
+	toggle = togo_mode?SW_SHOW:SW_HIDE;
+	ShowWindow(GetDlgItem(hMainDialog, IDC_WINDOWS_INSTALL), toggle);
+	ShowWindow(GetDlgItem(hMainDialog, IDC_WINDOWS_TO_GO), toggle);
+
+	// Reset the radio button choice
+	Button_SetCheck(GetDlgItem(hMainDialog, IDC_WINDOWS_INSTALL), BST_CHECKED);
+	Button_SetCheck(GetDlgItem(hMainDialog, IDC_WINDOWS_TO_GO), BST_UNCHECKED);
+
+	// Need to invalidate, else we may get artifacts
+	InvalidateRect(hMainDialog, NULL, TRUE);
 }
 
 static BOOL BootCheck(void)
@@ -1564,6 +1635,7 @@ void InitDialog(HWND hDlg)
 	// TODO: add new tooltips
 
 	ToggleAdvanced();	// We start in advanced mode => go to basic mode
+	ToggleToGo();
 
 	// Process commandline parameters
 	if (iso_provided) {
@@ -1718,6 +1790,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		apply_localization(IDD_DIALOG, hDlg);
 		SetUpdateCheck();
 		advanced_mode = TRUE;
+		togo_mode = TRUE;
 		// Create the log window (hidden)
 		first_log_display = TRUE;
 		log_displayed = FALSE;
@@ -1871,6 +1944,8 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			break;
 #ifdef RUFUS_TEST
 		case IDC_TEST:
+			ToggleToGo();
+#if 0
 			if (format_thid != NULL) {
 				return (INT_PTR)TRUE;
 			}
@@ -1918,6 +1993,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			}
 			if (format_thid == NULL)
 				format_op_in_progress = FALSE;
+#endif
 			break;
 #endif
 		case IDC_LANG:

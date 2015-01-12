@@ -67,6 +67,10 @@ t IDS_FORMAT_OPTIONS_GRP "Format Options"
 t IDC_BADBLOCKS "Check device for bad blocks"
 t IDC_QUICKFORMAT "Quick format"
 t IDC_BOOT "Create a bootable disk using"
+t IDC_WINDOWS_INSTALL "Standard Windows installation"
+# Only translate if Microsoft has a specific name for http://en.wikipedia.org/wiki/Windows_To_Go in your language
+# Otherwise, you can add a parenthesis eg. "Windows To Go (hint at what it does)" and/or use the tooltip (MSG_???)
+t IDC_WINDOWS_TO_GO "Windows To Go"
 t IDC_SET_ICON "Create extended label and icon files"
 t IDC_ABOUT "About..."
 t IDC_LOG "Log"

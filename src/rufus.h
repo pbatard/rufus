@@ -37,7 +37,7 @@
 #define COMPANY_NAME                "Akeo Consulting"
 #define STR_NO_LABEL                "NO_LABEL"
 #define LEFT_TO_RIGHT_MARK          "‎"			// Yes, there is a character between the quotes!
-#define RIGHT_TO_LEFT_MARK          "‏"
+#define RIGHT_TO_LEFT_MARK          "‏"			// Yes, there is a character between the quotes!
 #define DRIVE_ACCESS_TIMEOUT        15000		// How long we should retry drive access (in ms)
 #define DRIVE_ACCESS_RETRIES        60			// How many times we should retry
 #define DRIVE_INDEX_MIN             0x00000080
