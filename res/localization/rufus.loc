@@ -462,6 +462,7 @@ t MSG_262 "ISO Support"
 t MSG_263 "Use PROPER size units"
 t MSG_264 "Deleting directory '%s'"
 t MSG_265 "VMWare disk detection"
+t MSG_266 "Dual UEFI/BIOS mode"
 ################################################################################
 ############################# TRANSLATOR END COPY ##############################
 ################################################################################

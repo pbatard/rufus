@@ -522,7 +522,7 @@ INT_PTR CALLBACK AboutCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 			ShowWindow(GetDlgItem(hDlg, IDC_ABOUT_UPDATES), SW_SHOW);
 		safe_sprintf(about_blurb, sizeof(about_blurb), about_blurb_format, lmprintf(MSG_174),
 			lmprintf(MSG_175, rufus_version[0], rufus_version[1], rufus_version[2], rufus_version[3]),
-			right_to_left_mode?"Akeo \\\\ Pete Batard 2011-2014 © Copyright":"Copyright © 2011-2014 Pete Batard / Akeo",
+			right_to_left_mode?"Akeo \\\\ Pete Batard 2011-2015 © Copyright":"Copyright © 2011-2015 Pete Batard / Akeo",
 			lmprintf(MSG_176), lmprintf(MSG_177), lmprintf(MSG_178));
 		for (i=0; i<ARRAYSIZE(hEdit); i++) {
 			hEdit[i] = GetDlgItem(hDlg, edit_id[i]);

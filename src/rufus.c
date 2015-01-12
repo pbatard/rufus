@@ -158,8 +158,8 @@ static int nb_slots[OP_MAX];
 static float slot_end[OP_MAX+1];	// shifted +1 so that we can subtract 1 to OP indexes
 static float previous_end;
 
-// TODO: Remember to update copyright year in both license.h and the RC when the year changes!
-// Also localization_data.sh
+// TODO: Remember to update copyright year in stdlg's AboutCallback() WM_INITDIALOG,
+// localization_data.sh and the .rc when the year changes!
 
 #define KB          1024LL
 #define MB       1048576LL
@@ -2591,8 +2591,7 @@ relaunch:
 		// Alt-E => Enhanced installation mode (allow dual UEFI/BIOS mode and FAT32 for Windows)
 		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'E')) {
 			allow_dual_uefi_bios = !allow_dual_uefi_bios;
-			// TODO: add a localized message
-			PrintStatus2000("Allow dual UEFI/BIOS mode", allow_dual_uefi_bios);
+			PrintStatus2000(lmprintf(MSG_266), allow_dual_uefi_bios);
 			continue;
 		}
 		// Alt-F => Toggle detection of USB HDDs

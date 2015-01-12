@@ -400,7 +400,11 @@
 #define MSG_263                         3263
 #define MSG_264                         3264
 #define MSG_265                         3265
-#define MSG_MAX                         3266
+#define MSG_266                         3266
+#define MSG_267                         3267
+#define MSG_268                         3268
+#define MSG_269                         3269
+#define MSG_MAX                         3270
 
 // Next default values for new objects
 // 
