@@ -68,6 +68,8 @@ static const char* grldr_name = "grldr";
 static const char* ldlinux_name = "ldlinux.sys";
 static const char* ldlinux_c32 = "ldlinux.c32";
 static const char* efi_dirname = "/efi/boot";
+static const char* efi_bootname[] = { "bootia32.efi", "bootx64.efi", "bootia64.efi", "bootarm.efi" };
+static const char* install_wim_path = "/sources/install.wim";
 static const char* grub_dirname = "/boot/grub";   // NB: We don't support nonstandard config dir such as AROS' "/boot/pc/grub/"
 static const char* grub_cfg = "grub.cfg";
 static const char* syslinux_cfg[] = { "isolinux.cfg", "syslinux.cfg", "extlinux.conf"};
@@ -157,7 +159,6 @@ static BOOL check_iso_props(const char* psz_dirname, int64_t i_file_length, cons
 			props->is_grub_cfg = TRUE;
 	}
 
-
 	if (scan_only) {
 		// Check for a syslinux v5.0+ file anywhere
 		if (safe_stricmp(psz_basename, ldlinux_c32) == 0) {
@@ -176,7 +177,7 @@ static BOOL check_iso_props(const char* psz_dirname, int64_t i_file_length, cons
 				iso_report.has_kolibrios = TRUE;
 			}
 			if (safe_stricmp(psz_basename, bootmgr_efi_name) == 0) {
-				iso_report.has_win7_efi = TRUE;
+				iso_report.has_efi |= 1;
 			}
 		}
 
@@ -184,9 +185,16 @@ static BOOL check_iso_props(const char* psz_dirname, int64_t i_file_length, cons
 		if ((iso_report.reactos_path[0] == 0) && (safe_stricmp(psz_basename, reactos_name) == 0))
 			safe_strcpy(iso_report.reactos_path, sizeof(iso_report.reactos_path), psz_fullpath);
 
-		// Check for the EFI boot directory
-		if (safe_stricmp(psz_dirname, efi_dirname) == 0)
-			iso_report.has_efi = TRUE;
+		// Check for the EFI boot entries
+		if (safe_stricmp(psz_dirname, efi_dirname) == 0) {
+			for (i=0; i<ARRAYSIZE(efi_bootname); i++)
+				if (safe_stricmp(psz_basename, efi_bootname[i]) == 0)
+					iso_report.has_efi |= (2<<i);
+		}
+
+		// Check for 'install.wim"
+		if (safe_stricmp(psz_fullpath, install_wim_path) == 0)
+			iso_report.has_install_wim = TRUE;
 
 		// Check for PE (XP) specific files in "/i386" or "/minint"
 		for (i=0; i<ARRAYSIZE(pe_dirname); i++)

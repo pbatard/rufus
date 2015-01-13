@@ -1324,7 +1324,7 @@ DWORD WINAPI FormatThread(void* param)
 	pt = GETPARTTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
 	bt = GETBIOSTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
 	use_large_fat32 = (fs == FS_FAT32) && ((SelectedDrive.DiskSize > LARGE_FAT32_SIZE) || (force_large_fat32));
-	add_uefi_togo = (fs == FS_NTFS) && (dt == DT_ISO) && (IS_EFI(iso_report)) && (bt == BT_UEFI);
+	add_uefi_togo = (fs == FS_NTFS) && (dt == DT_ISO) && (iso_report.has_efi) && (bt == BT_UEFI);
 
 	PrintInfoDebug(0, MSG_225);
 	hPhysicalDrive = GetPhysicalHandle(DriveIndex, TRUE, TRUE);
@@ -1629,7 +1629,7 @@ DWORD WINAPI FormatThread(void* param)
 	if (IsChecked(IDC_BOOT)) {
 		if (bt == BT_UEFI) {
 			// For once, no need to do anything - just check our sanity
-			if ( (dt != DT_ISO) || (!IS_EFI(iso_report)) || (fs > FS_NTFS) ) {
+			if ( (dt != DT_ISO) || (!iso_report.has_efi) || (fs > FS_NTFS) ) {
 				uprintf("Spock gone crazy error!\n");
 				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_INSTALL_FAILURE;
 				goto out;
@@ -1706,7 +1706,7 @@ DWORD WINAPI FormatThread(void* param)
 						uprintf("Warning: loader installation failed - KolibriOS will not boot!\n");
 					}
 				}
-				if ((bt == BT_UEFI) && (!iso_report.has_efi) && (iso_report.has_win7_efi)) {
+				if ((bt == BT_UEFI) && (!iso_report.has_efi)) {
 					PrintInfoDebug(0, MSG_232);
 					wim_image[0] = drive_name[0];
 					efi_dst[0] = drive_name[0];

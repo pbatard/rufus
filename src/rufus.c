@@ -145,6 +145,7 @@ static HICON hIconDisc, hIconDown, hIconUp, hIconLang;
 static char szTimer[12] = "00:00:00";
 static unsigned int timer;
 static int64_t last_iso_blocking_status;
+static void ToggleToGo(void);
 
 /*
  * The following is used to allocate slots within the progress bar
@@ -468,7 +469,7 @@ static void SetFSFromISO(void)
 
 	// Syslinux and EFI have precedence over bootmgr (unless the user selected BIOS as target type)
 	if ((HAS_SYSLINUX(iso_report)) || (IS_REACTOS(iso_report)) || (iso_report.has_kolibrios) ||
-		((IS_EFI(iso_report)) && (bt == BT_UEFI) && (!iso_report.has_4GB_file))) {
+		((iso_report.has_efi) && (bt == BT_UEFI) && (!iso_report.has_4GB_file))) {
 		if (fs_mask & (1<<FS_FAT32)) {
 			selected_fs = FS_FAT32;
 		} else if ((fs_mask & (1<<FS_FAT16)) && (!iso_report.has_kolibrios)) {
@@ -509,6 +510,13 @@ static void SetMBRProps(void)
 	IGNORE_RETVAL(ComboBox_SetCurSel(hDiskID, needs_masquerading?1:0));
 }
 
+static void SetToGo(void)
+{
+	int dt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
+	if ( ((dt != DT_ISO) && (togo_mode)) || ((dt == DT_ISO) && (HAS_TOGO(iso_report)) && (!togo_mode)) )
+		ToggleToGo();
+}
+
 static void EnableAdvancedBootOptions(BOOL enable, BOOL remove_checkboxes)
 {
 	int bt = GETBIOSTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
@@ -546,6 +554,8 @@ static void EnableBootOptions(BOOL enable, BOOL remove_checkboxes)
 	EnableWindow(hBoot, actual_enable);
 	EnableWindow(hBootType, actual_enable);
 	EnableWindow(hSelectISO, actual_enable);
+	EnableWindow(GetDlgItem(hMainDialog, IDC_WINDOWS_INSTALL), actual_enable);
+	EnableWindow(GetDlgItem(hMainDialog, IDC_WINDOWS_TO_GO), actual_enable);
 	EnableAdvancedBootOptions(actual_enable, remove_checkboxes);
 }
 
@@ -570,7 +580,7 @@ static void SetTargetSystem(void)
 
 	if (SelectedDrive.PartitionType == PARTITION_STYLE_GPT) {
 		ts = 2;	// GPT/UEFI
-	} else if (SelectedDrive.has_protective_mbr || SelectedDrive.has_mbr_uefi_marker || (IS_EFI(iso_report) &&
+	} else if (SelectedDrive.has_protective_mbr || SelectedDrive.has_mbr_uefi_marker || ((iso_report.has_efi) &&
 		(!HAS_SYSLINUX(iso_report)) && (!iso_report.has_bootmgr) && (!IS_REACTOS(iso_report)) && 
 		(!iso_report.has_kolibrios) && (!IS_GRUB(iso_report)) && (!IS_WINPE(iso_report.winpe))) ) {
 		ts = 1;	// MBR/UEFI
@@ -783,6 +793,8 @@ static void EnableControls(BOOL bEnable)
 	EnableWindow(GetDlgItem(hMainDialog, IDC_LABEL), bEnable);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_QUICKFORMAT), bEnable);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_SET_ICON), bEnable);
+	EnableWindow(GetDlgItem(hMainDialog, IDC_WINDOWS_INSTALL), bEnable);
+	EnableWindow(GetDlgItem(hMainDialog, IDC_WINDOWS_TO_GO), bEnable);
 }
 
 /* Callback for the log window */
@@ -907,7 +919,8 @@ static void DisplayISOProps(void)
 	uprintf("  Has Symlinks: %s", YesNo(iso_report.has_symlinks));
 	uprintf("  Has a >4GB file: %s", YesNo(iso_report.has_4GB_file));
 	uprintf("  Uses Bootmgr: %s", YesNo(iso_report.has_bootmgr));
-	uprintf("  Uses EFI: %s%s", YesNo(iso_report.has_efi || iso_report.has_win7_efi), (iso_report.has_win7_efi && (!iso_report.has_efi)) ? " (win7_x64)" : "");
+	// TODO: report x86, x64, Arm, Itanic?
+	uprintf("  Uses EFI: %s%s", YesNo(iso_report.has_efi), IS_WIN7_EFI(iso_report) ? " (win7_x64)" : "");
 	uprintf("  Uses Grub 2: %s", YesNo(iso_report.has_grub2));
 	uprintf("  Uses Grub4DOS: %s", YesNo(iso_report.has_grub4dos));
 	uprintf("  Uses isolinux: %s", isolinux_str);
@@ -919,6 +932,9 @@ static void DisplayISOProps(void)
 	uprintf("  Uses KolibriOS: %s", YesNo(iso_report.has_kolibrios));
 	uprintf("  Uses ReactOS: %s", YesNo(IS_REACTOS(iso_report)));
 	uprintf("  Uses WinPE: %s%s", YesNo(IS_WINPE(iso_report.winpe)), (iso_report.uses_minint) ? " (with /minint)" : "");
+
+	if ( ((!togo_mode) && (HAS_TOGO(iso_report))) || ((togo_mode) && (!HAS_TOGO(iso_report))) )
+		ToggleToGo();
 }
 
 // The scanning process can be blocking for message processing => use a thread
@@ -978,6 +994,9 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 		// Lose the focus from Close and set it back to Start
 		SendMessage(hMainDialog, WM_NEXTDLGCTL, (WPARAM)GetDlgItem(hMainDialog, IDC_START), TRUE);
 	}
+	
+	// Need to invalidate as we may have changed the UI and may get artifacts if we don't
+	InvalidateRect(hMainDialog, NULL, TRUE);
 
 out:
 	PrintInfo(0, MSG_210);
@@ -1053,8 +1072,6 @@ static void ToggleAdvanced(void)
 
 	// Toggle the up/down icon
 	SendMessage(GetDlgItem(hMainDialog, IDC_ADVANCED), BCM_SETIMAGELIST, 0, (LPARAM)(advanced_mode?&bi_up:&bi_down));
-
-	InvalidateRect(hMainDialog, NULL, TRUE);
 }
 
 // Toggle DD Image mode
@@ -1132,9 +1149,6 @@ static void ToggleToGo(void)
 	// Reset the radio button choice
 	Button_SetCheck(GetDlgItem(hMainDialog, IDC_WINDOWS_INSTALL), BST_CHECKED);
 	Button_SetCheck(GetDlgItem(hMainDialog, IDC_WINDOWS_TO_GO), BST_UNCHECKED);
-
-	// Need to invalidate, else we may get artifacts
-	InvalidateRect(hMainDialog, NULL, TRUE);
 }
 
 static BOOL BootCheck(void)
@@ -1173,12 +1187,12 @@ static BOOL BootCheck(void)
 		fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
 		bt = GETBIOSTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
 		if (bt == BT_UEFI) {
-			if (!IS_EFI(iso_report)) {
+			if (!iso_report.has_efi) {
 				// Unsupported ISO
 				MessageBoxU(hMainDialog, lmprintf(MSG_091), lmprintf(MSG_090), MB_OK|MB_ICONERROR|MB_IS_RTL);
 				return FALSE;
 			}
-			if ((iso_report.has_win7_efi) && (!WimExtractCheck())) {
+			if (IS_WIN7_EFI(iso_report) && (!WimExtractCheck())) {
 				// Your platform cannot extract files from WIM archives => download 7-zip?
 				if (MessageBoxU(hMainDialog, lmprintf(MSG_102), lmprintf(MSG_101), MB_YESNO|MB_ICONERROR|MB_IS_RTL) == IDYES)
 					ShellExecuteA(hMainDialog, "open", SEVENZIP_URL, NULL, NULL, SW_SHOWNORMAL);
@@ -1721,6 +1735,8 @@ void SetBoot(int fs, int bt)
 		EnableWindow(hBoot, TRUE);
 		EnableWindow(hBootType, TRUE);
 		EnableWindow(hSelectISO, TRUE);
+		EnableWindow(GetDlgItem(hMainDialog, IDC_WINDOWS_INSTALL), TRUE);
+		EnableWindow(GetDlgItem(hMainDialog, IDC_WINDOWS_TO_GO), TRUE);
 		CheckDlgButton(hMainDialog, IDC_BOOT, uBootChecked);
 	}
 }
@@ -1943,9 +1959,6 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			ShowWindow(hLogDlg, log_displayed?SW_SHOW:SW_HIDE);
 			break;
 #ifdef RUFUS_TEST
-		case IDC_TEST:
-			ToggleToGo();
-#if 0
 			if (format_thid != NULL) {
 				return (INT_PTR)TRUE;
 			}
@@ -1993,7 +2006,6 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			}
 			if (format_thid == NULL)
 				format_op_in_progress = FALSE;
-#endif
 			break;
 #endif
 		case IDC_LANG:
@@ -2037,6 +2049,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				ToggleImage(FALSE);
 				EnableAdvancedBootOptions(FALSE, TRUE);
 				SetBoot(fs, bt);
+				SetToGo();
 				break;
 			}
 			SetClusterSizes(fs);
@@ -2081,6 +2094,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			EnableAdvancedBootOptions(TRUE, TRUE);
 			SetBoot(fs, bt);
 			SetMBRProps();
+			SetToGo();
 			break;
 		case IDC_BOOT:
 			EnableAdvancedBootOptions(TRUE, TRUE);
@@ -2093,6 +2107,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			selection_default = (int) ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
 			EnableAdvancedBootOptions(TRUE, TRUE);
 			ToggleImage(!IsChecked(IDC_BOOT) || (selection_default != DT_IMG));
+			SetToGo();
 			if ((selection_default == DT_ISO) || (selection_default == DT_IMG)) {
 				if ((image_path == NULL) || (iso_report.label[0] == 0)) {
 					// Set focus to the Select ISO button

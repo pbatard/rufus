@@ -229,8 +229,9 @@ typedef struct {
 #define WINPE_MININT    0x2A
 #define WINPE_I386      0x15
 #define HAS_SYSLINUX(r) (r.sl_version != 0)
-#define IS_WINPE(r)     (((r&WINPE_MININT) == WINPE_MININT)||((r&WINPE_I386) == WINPE_I386))
-#define IS_EFI(r)       ((r.has_efi) || (r.has_win7_efi))
+#define HAS_TOGO(r)     (r.has_bootmgr && r.has_efi && r.has_install_wim)
+#define IS_WINPE(r)     (((r & WINPE_MININT) == WINPE_MININT)||(( r & WINPE_I386) == WINPE_I386))
+#define IS_WIN7_EFI(r)  (r.has_efi & 1)
 #define IS_REACTOS(r)   (r.reactos_path[0] != 0)
 #define IS_GRUB(r)      ((r.has_grub2) || (r.has_grub4dos))
 
@@ -241,14 +242,13 @@ typedef struct {
 	char reactos_path[128];	/* path to the ISO's freeldr.sys or setupldr.sys */
 	uint64_t projected_size;
 	uint64_t src_size;
-	// TODO: use a bitmask and #define tests for the following
 	uint8_t winpe;
+	uint8_t has_efi;
 	BOOL has_4GB_file;
 	BOOL has_long_filename;
 	BOOL has_symlinks;
 	BOOL has_bootmgr;
-	BOOL has_efi;
-	BOOL has_win7_efi;
+	BOOL has_install_wim;
 	BOOL has_autorun;
 	BOOL has_old_c32[NB_OLD_C32];
 	BOOL has_old_vesamenu;
