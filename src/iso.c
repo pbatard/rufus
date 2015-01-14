@@ -920,3 +920,155 @@ out:
 		udf_close(p_udf);
 	return r;
 }
+
+/*
+ * The following is used for native ISO mounting in Windows 8 or later
+ */
+const GUID VIRTUAL_STORAGE_TYPE_VENDOR_MICROSOFT =
+	{ 0xEC984AECL, 0xA0F9, 0x47e9, { 0x90, 0x1F, 0x71, 0x41, 0x5A, 0x66, 0x34, 0x5B } };
+
+typedef enum _VIRTUAL_DISK_ACCESS_MASK {
+	VIRTUAL_DISK_ACCESS_NONE = 0x00000000,
+	VIRTUAL_DISK_ACCESS_ATTACH_RO = 0x00010000,
+	VIRTUAL_DISK_ACCESS_ATTACH_RW = 0x00020000,
+	VIRTUAL_DISK_ACCESS_DETACH = 0x00040000,
+	VIRTUAL_DISK_ACCESS_GET_INFO = 0x00080000,
+	VIRTUAL_DISK_ACCESS_CREATE = 0x00100000,
+	VIRTUAL_DISK_ACCESS_METAOPS = 0x00200000,
+	VIRTUAL_DISK_ACCESS_READ = 0x000d0000,
+	VIRTUAL_DISK_ACCESS_ALL = 0x003f0000,
+	VIRTUAL_DISK_ACCESS_WRITABLE = 0x00320000
+} VIRTUAL_DISK_ACCESS_MASK;
+
+typedef enum _OPEN_VIRTUAL_DISK_FLAG {
+	OPEN_VIRTUAL_DISK_FLAG_NONE = 0x00000000,
+	OPEN_VIRTUAL_DISK_FLAG_NO_PARENTS = 0x00000001,
+	OPEN_VIRTUAL_DISK_FLAG_BLANK_FILE = 0x00000002,
+	OPEN_VIRTUAL_DISK_FLAG_BOOT_DRIVE = 0x00000004,
+	OPEN_VIRTUAL_DISK_FLAG_CACHED_IO = 0x00000008,
+	OPEN_VIRTUAL_DISK_FLAG_CUSTOM_DIFF_CHAIN = 0x00000010
+} OPEN_VIRTUAL_DISK_FLAG;
+
+typedef enum _OPEN_VIRTUAL_DISK_VERSION {
+	OPEN_VIRTUAL_DISK_VERSION_UNSPECIFIED = 0,
+	OPEN_VIRTUAL_DISK_VERSION_1 = 1,
+	OPEN_VIRTUAL_DISK_VERSION_2 = 2
+} OPEN_VIRTUAL_DISK_VERSION;
+
+typedef enum _ATTACH_VIRTUAL_DISK_FLAG {
+	ATTACH_VIRTUAL_DISK_FLAG_NONE = 0x00000000,
+	ATTACH_VIRTUAL_DISK_FLAG_READ_ONLY = 0x00000001,
+	ATTACH_VIRTUAL_DISK_FLAG_NO_DRIVE_LETTER = 0x00000002,
+	ATTACH_VIRTUAL_DISK_FLAG_PERMANENT_LIFETIME = 0x00000004,
+	ATTACH_VIRTUAL_DISK_FLAG_NO_LOCAL_HOST = 0x00000008
+} ATTACH_VIRTUAL_DISK_FLAG;
+
+typedef enum _ATTACH_VIRTUAL_DISK_VERSION {
+	ATTACH_VIRTUAL_DISK_VERSION_UNSPECIFIED = 0,
+	ATTACH_VIRTUAL_DISK_VERSION_1 = 1
+} ATTACH_VIRTUAL_DISK_VERSION;
+
+typedef enum _DETACH_VIRTUAL_DISK_FLAG {
+	DETACH_VIRTUAL_DISK_FLAG_NONE = 0x00000000
+} DETACH_VIRTUAL_DISK_FLAG;
+
+typedef struct _VIRTUAL_STORAGE_TYPE {
+	ULONG DeviceId;
+	GUID  VendorId;
+} VIRTUAL_STORAGE_TYPE, *PVIRTUAL_STORAGE_TYPE;
+
+typedef struct _OPEN_VIRTUAL_DISK_PARAMETERS {
+	OPEN_VIRTUAL_DISK_VERSION Version;
+	union {
+		struct {
+			ULONG RWDepth;
+		} Version1;
+		struct {
+			BOOL GetInfoOnly;
+			BOOL ReadOnly;
+			GUID ResiliencyGuid;
+		} Version2;
+	};
+} OPEN_VIRTUAL_DISK_PARAMETERS, *POPEN_VIRTUAL_DISK_PARAMETERS;
+
+typedef struct _ATTACH_VIRTUAL_DISK_PARAMETERS {
+	ATTACH_VIRTUAL_DISK_VERSION Version;
+	union {
+		struct {
+			ULONG Reserved;
+		} Version1;
+	};
+} ATTACH_VIRTUAL_DISK_PARAMETERS, *PATTACH_VIRTUAL_DISK_PARAMETERS;
+
+// VirtDisk API Prototypes - Only available for Windows 8 or later
+PF_TYPE_DECL(WINAPI, DWORD, OpenVirtualDisk, (PVIRTUAL_STORAGE_TYPE, PCWSTR,
+	VIRTUAL_DISK_ACCESS_MASK, OPEN_VIRTUAL_DISK_FLAG, POPEN_VIRTUAL_DISK_PARAMETERS, PHANDLE));
+PF_TYPE_DECL(WINAPI, DWORD, AttachVirtualDisk, (HANDLE, PSECURITY_DESCRIPTOR,
+	ATTACH_VIRTUAL_DISK_FLAG, ULONG, PATTACH_VIRTUAL_DISK_PARAMETERS, LPOVERLAPPED));
+PF_TYPE_DECL(WINAPI, DWORD, DetachVirtualDisk, (HANDLE, DETACH_VIRTUAL_DISK_FLAG, ULONG));
+PF_TYPE_DECL(WINAPI, DWORD, GetVirtualDiskPhysicalPath, (HANDLE, PULONG, PWSTR));
+
+static char physical_path[128] = "";
+static HANDLE mounted_handle = INVALID_HANDLE_VALUE;
+
+char* MountISO(const char* path)
+{
+	VIRTUAL_STORAGE_TYPE vtype = { 1, VIRTUAL_STORAGE_TYPE_VENDOR_MICROSOFT };
+	ATTACH_VIRTUAL_DISK_PARAMETERS vparams = { ATTACH_VIRTUAL_DISK_VERSION_1, 0 };
+	DWORD r;
+	wchar_t wtmp[128];
+	ULONG size = ARRAYSIZE(wtmp);
+	wconvert(path);
+	char* ret = NULL;
+
+	PF_INIT_OR_OUT(OpenVirtualDisk, VirtDisk);
+	PF_INIT_OR_OUT(AttachVirtualDisk, VirtDisk);
+	PF_INIT_OR_OUT(GetVirtualDiskPhysicalPath, VirtDisk);
+
+	if ((mounted_handle != NULL) && (mounted_handle != INVALID_HANDLE_VALUE))
+		UnMountISO();
+
+	r = pfOpenVirtualDisk(&vtype, wpath, VIRTUAL_DISK_ACCESS_READ | VIRTUAL_DISK_ACCESS_GET_INFO,
+		OPEN_VIRTUAL_DISK_FLAG_NONE, NULL, &mounted_handle);
+	if (r != ERROR_SUCCESS) {
+		SetLastError(r);
+		uprintf("Could not open ISO '%s': %s", path, WindowsErrorString());
+		goto out;
+	}
+
+	r = pfAttachVirtualDisk(mounted_handle, NULL, ATTACH_VIRTUAL_DISK_FLAG_READ_ONLY |
+		ATTACH_VIRTUAL_DISK_FLAG_NO_DRIVE_LETTER, 0, &vparams, NULL);
+	if (r != ERROR_SUCCESS) {
+		SetLastError(r);
+		uprintf("Could not mount ISO '%s': %s", path, WindowsErrorString());
+		goto out;
+	}
+
+	r = pfGetVirtualDiskPhysicalPath(mounted_handle, &size, wtmp);
+	if (r != ERROR_SUCCESS) {
+		SetLastError(r);
+		uprintf("Could not obtain physical path for mounted ISO '%s': %s", path, WindowsErrorString());
+		goto out;
+	}
+	wchar_to_utf8_no_alloc(wtmp, physical_path, sizeof(physical_path));
+	ret = physical_path;
+
+out:
+	if (ret == NULL)
+		UnMountISO();
+	wfree(path);
+	return ret;
+}
+
+void UnMountISO(void)
+{
+	PF_INIT_OR_OUT(DetachVirtualDisk, VirtDisk);
+
+	if ((mounted_handle == NULL) || (mounted_handle == INVALID_HANDLE_VALUE))
+		goto out;
+
+	pfDetachVirtualDisk(mounted_handle, DETACH_VIRTUAL_DISK_FLAG_NONE, 0);
+	safe_closehandle(mounted_handle);
+out:
+	physical_path[0] = 0;
+}
