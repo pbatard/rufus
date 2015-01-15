@@ -1305,10 +1305,10 @@ DWORD WINAPI FormatThread(void* param)
 	LARGE_INTEGER li;
 	uint64_t wb;
 	uint8_t *buffer = NULL, *aligned_buffer;
-	char *bb_msg, *guid_volume = NULL;
+	char *bb_msg, *guid_volume = NULL, *mounted_iso;
 	char drive_name[] = "?:\\";
 	char drive_letters[27];
-	char logfile[MAX_PATH], *userdir;
+	char logfile[MAX_PATH], image[128], *userdir;
 	char wim_image[] = "?:\\sources\\install.wim";
 	char efi_dst[] = "?:\\efi\\boot\\bootx64.efi";
 	char kolibri_dst[] = "?:\\MTLD_F32";
@@ -1693,7 +1693,26 @@ DWORD WINAPI FormatThread(void* param)
 				UpdateProgress(OP_DOS, 0.0f);
 				PrintInfoDebug(0, MSG_231);
 				drive_name[2] = 0;
-				if (!ExtractISO(image_path, drive_name, FALSE)) {
+				// TODO: Check that we have apply-wim support
+				if (HAS_TOGO(iso_report) && (Button_GetCheck(GetDlgItem(hMainDialog, IDC_WINDOWS_TO_GO)) == BST_CHECKED)) {
+					uprintf("Windows To Go mode selected");
+					mounted_iso = MountISO(image_path);
+					if (mounted_iso == NULL) {
+						uprintf("Could not mount ISO for Windows To Go installation");
+						FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_ISO_EXTRACT);
+					} else {
+						uprintf("Mounted ISO as '%s'", mounted_iso);
+						static_sprintf(image, "%s\\sources\\install.wim", mounted_iso);
+						if (!WimApplyImage(image, 1, drive_name)) {
+							uprintf("Failed to setup Windows To Go");
+							if (!IS_ERROR(FormatStatus))
+								FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_ISO_EXTRACT);
+						}
+						UnMountISO();
+					}
+					if (IS_ERROR(FormatStatus))
+						goto out;
+				} else if (!ExtractISO(image_path, drive_name, FALSE)) {
 					if (!IS_ERROR(FormatStatus))
 						FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANNOT_COPY;
 					goto out;
@@ -1706,7 +1725,8 @@ DWORD WINAPI FormatThread(void* param)
 						uprintf("Warning: loader installation failed - KolibriOS will not boot!\n");
 					}
 				}
-				if ((bt == BT_UEFI) && (!iso_report.has_efi)) {
+				// EFI mode selected, with no 'bootx64.efi' (bit #2) but Windows 7 x64's 'bootmgr.efi' (bit #0)
+				if ((bt == BT_UEFI) && (!(iso_report.has_efi & 4)) && (iso_report.has_efi & 1)) {
 					PrintInfoDebug(0, MSG_232);
 					wim_image[0] = drive_name[0];
 					efi_dst[0] = drive_name[0];

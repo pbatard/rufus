@@ -1960,8 +1960,6 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			break;
 #ifdef RUFUS_TEST
 		case IDC_TEST:
-			uprintf("Mounted ISO: '%s'", MountISO("D:\\ISOs\\archlinux-2012.08.04-dual.iso"));
-#if 0
 			if (format_thid != NULL) {
 				return (INT_PTR)TRUE;
 			}
@@ -2009,7 +2007,6 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			}
 			if (format_thid == NULL)
 				format_op_in_progress = FALSE;
-#endif
 			break;
 #endif
 		case IDC_LANG:

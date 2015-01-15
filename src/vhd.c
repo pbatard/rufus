@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Virtual Disk Handling functions
- * Copyright © 2013-2014 Pete Batard <pete@akeo.ie>
+ * Copyright © 2013-2015 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@
 #include <time.h>
 
 #include "rufus.h"
+#include "resource.h"
 #include "msapi_utf8.h"
 #include "drive.h"
 #include "registry.h"
@@ -98,11 +99,14 @@ typedef struct vhd_footer {
 PF_TYPE_DECL(WINAPI, HANDLE, WIMCreateFile, (PWSTR, DWORD, DWORD, DWORD, DWORD, PDWORD));
 PF_TYPE_DECL(WINAPI, BOOL, WIMSetTemporaryPath, (HANDLE, PWSTR));
 PF_TYPE_DECL(WINAPI, HANDLE, WIMLoadImage, (HANDLE, DWORD));
+PF_TYPE_DECL(WINAPI, BOOL, WIMApplyImage, (HANDLE, PCWSTR, DWORD));
 PF_TYPE_DECL(WINAPI, BOOL, WIMExtractImagePath, (HANDLE, PWSTR, PWSTR, DWORD));
 PF_TYPE_DECL(WINAPI, BOOL, WIMCloseHandle, (HANDLE));
+PF_TYPE_DECL(WINAPI, DWORD, WIMRegisterMessageCallback, (HANDLE, FARPROC, PVOID));
+PF_TYPE_DECL(WINAPI, DWORD, WIMUnregisterMessageCallback, (HANDLE, FARPROC));
 PF_TYPE_DECL(RPC_ENTRY, RPC_STATUS, UuidCreate, (UUID __RPC_FAR*));
 
-static BOOL has_wimgapi = FALSE, has_7z = FALSE;
+static uint8_t wim_flags = 0;
 static char sevenzip_path[MAX_PATH];
 static const char conectix_str[] = VHD_FOOTER_COOKIE;
 
@@ -313,21 +317,36 @@ out:
 	return iso_report.is_bootable_img;
 }
 
-// Find out if we have any way to extract WIM files on this platform
-BOOL WimExtractCheck(void)
+#define WIM_HAS_API_EXTRACT 1
+#define WIM_HAS_7Z_EXTRACT  2
+#define WIM_HAS_API_APPLY   4
+#define WIM_HAS_EXTRACT(r) (r & (WIM_HAS_API_EXTRACT|WIM_HAS_7Z_EXTRACT))
+
+// Find out if we have any way to extract/apply WIM files on this platform
+// Returns a bitfield of the methods we can use (1 = Extract using wimgapi, 2 = Extract using 7-Zip, 4 = Apply using wimgapi)
+uint8_t WimExtractCheck(void)
 {
 	PF_INIT(WIMCreateFile, Wimgapi);
 	PF_INIT(WIMSetTemporaryPath, Wimgapi);
 	PF_INIT(WIMLoadImage, Wimgapi);
+	PF_INIT(WIMApplyImage, Wimgapi);
 	PF_INIT(WIMExtractImagePath, Wimgapi);
+	PF_INIT(WIMRegisterMessageCallback, Wimgapi);
+	PF_INIT(WIMUnregisterMessageCallback, Wimgapi);
 	PF_INIT(WIMCloseHandle, Wimgapi);
 
-	has_wimgapi = (pfWIMCreateFile && pfWIMSetTemporaryPath && pfWIMLoadImage && pfWIMExtractImagePath && pfWIMCloseHandle);
-	has_7z = Get7ZipPath();
+	if (pfWIMCreateFile && pfWIMSetTemporaryPath && pfWIMLoadImage && pfWIMExtractImagePath && pfWIMCloseHandle)
+		wim_flags |= WIM_HAS_API_EXTRACT;
+	if (Get7ZipPath())
+		wim_flags |= WIM_HAS_7Z_EXTRACT;
+	if ((wim_flags & WIM_HAS_API_EXTRACT) && pfWIMApplyImage && pfWIMRegisterMessageCallback && pfWIMUnregisterMessageCallback)
+		wim_flags |= WIM_HAS_API_APPLY;
 
-	uprintf("WIM extraction method(s) supported: %s%s%s\n", has_7z?"7z":(has_wimgapi?"":"NONE"),
-		(has_wimgapi && has_7z)?", ":"", has_wimgapi?"wimgapi.dll":"");
-	return (has_wimgapi || has_7z);
+	uprintf("WIM extraction method(s) supported: %s%s%s", (wim_flags & WIM_HAS_7Z_EXTRACT)?"7-Zip":
+		((wim_flags & WIM_HAS_API_EXTRACT)?"":"NONE"),
+		(WIM_HAS_EXTRACT(wim_flags))?", ":"", (wim_flags & WIM_HAS_API_EXTRACT)?"wimgapi.dll":"");
+	uprintf("WIM apply method supported: %s", (wim_flags & WIM_HAS_API_APPLY)?"wimgapi.dll":"NONE");
+	return wim_flags;
 }
 
 
@@ -351,32 +370,32 @@ static BOOL WimExtractFile_API(const char* image, int index, const char* src, co
 	PF_INIT_OR_OUT(WIMExtractImagePath, Wimgapi);
 	PF_INIT_OR_OUT(WIMCloseHandle, Wimgapi);
 
-	uprintf("Opening: %s:[%d] (API)\n", image, index);
+	uprintf("Opening: %s:[%d] (API)", image, index);
 	if (GetTempPathW(ARRAYSIZE(wtemp), wtemp) == 0) {
-		uprintf("  Could not fetch temp path: %s\n", WindowsErrorString());
+		uprintf("  Could not fetch temp path: %s", WindowsErrorString());
 		goto out;
 	}
 
 	hWim = pfWIMCreateFile(wimage, WIM_GENERIC_READ, WIM_OPEN_EXISTING, 0, 0, &dw);
 	if (hWim == NULL) {
-		uprintf("  Could not access image: %s\n", WindowsErrorString());
+		uprintf("  Could not access image: %s", WindowsErrorString());
 		goto out;
 	}
 
 	if (!pfWIMSetTemporaryPath(hWim, wtemp)) {
-		uprintf("  Could not set temp path: %s\n", WindowsErrorString());
+		uprintf("  Could not set temp path: %s", WindowsErrorString());
 		goto out;
 	}
 
 	hImage = pfWIMLoadImage(hWim, (DWORD)index);
 	if (hImage == NULL) {
-		uprintf("  Could not set index: %s\n", WindowsErrorString());
+		uprintf("  Could not set index: %s", WindowsErrorString());
 		goto out;
 	}
 
-	uprintf("Extracting: %s (From %s)\n", dst, src);
+	uprintf("Extracting: %s (From %s)", dst, src);
 	if (!pfWIMExtractImagePath(hImage, wsrc, wdst, 0)) {
-		uprintf("  Could not extract file: %s\n", WindowsErrorString());
+		uprintf("  Could not extract file: %s", WindowsErrorString());
 		goto out;
 	}
 	r = TRUE;
@@ -384,10 +403,10 @@ static BOOL WimExtractFile_API(const char* image, int index, const char* src, co
 
 out:
 	if ((hImage != NULL) || (hWim != NULL)) {
-		uprintf("Closing: %s\n", image);
+		uprintf("Closing: %s", image);
+		if (hImage != NULL) pfWIMCloseHandle(hImage);
+		if (hWim != NULL) pfWIMCloseHandle(hWim);
 	}
-	if (hImage != NULL) pfWIMCloseHandle(hImage);
-	if (hWim != NULL) pfWIMCloseHandle(hWim);
 	safe_free(wimage);
 	safe_free(wsrc);
 	safe_free(wdst);
@@ -403,7 +422,7 @@ static BOOL WimExtractFile_7z(const char* image, int index, const char* src, con
 	char cmdline[MAX_PATH];
 	char tmpdst[MAX_PATH];
 
-	uprintf("Opening: %s:[%d] (7-Zip)\n", image, index);
+	uprintf("Opening: %s:[%d] (7-Zip)", image, index);
 	safe_strcpy(tmpdst, sizeof(tmpdst), dst);
 	for (i=safe_strlen(tmpdst); i>0; i--) {
 		if (tmpdst[i] == '\\')
@@ -413,9 +432,9 @@ static BOOL WimExtractFile_7z(const char* image, int index, const char* src, con
 
 	si.cb = sizeof(si);
 	safe_sprintf(cmdline, sizeof(cmdline), "7z -y e \"%s\" %d\\%s", image, index, src);
-	uprintf("Extracting: %s (From %s)\n", dst, src);
+	uprintf("Extracting: %s (From %s)", dst, src);
 	if (!CreateProcessU(sevenzip_path, cmdline, NULL, NULL, FALSE, CREATE_NO_WINDOW, NULL, tmpdst, &si, &pi)) {
-		uprintf("  Could not launch 7z.exe: %s\n", WindowsErrorString());
+		uprintf("  Could not launch 7z.exe: %s", WindowsErrorString());
 		return FALSE;
 	}
 	WaitForSingleObject(pi.hProcess, INFINITE);
@@ -425,12 +444,12 @@ static BOOL WimExtractFile_7z(const char* image, int index, const char* src, con
 
 	safe_strcat(tmpdst, sizeof(tmpdst), "\\bootmgfw.efi");
 	if (_access(tmpdst, 0) == -1) {
-		uprintf("  7z.exe did not extract %s\n", tmpdst);
+		uprintf("  7z.exe did not extract %s", tmpdst);
 		return FALSE;
 	}
 	// coverity[toctou]
 	if (rename(tmpdst, dst) != 0) {
-		uprintf("  Could not rename %s to %s\n", tmpdst, dst);
+		uprintf("  Could not rename %s to %s", tmpdst, dst);
 		return FALSE;
 	}
 
@@ -440,13 +459,177 @@ static BOOL WimExtractFile_7z(const char* image, int index, const char* src, con
 // Extract a file from a WIM image
 BOOL WimExtractFile(const char* image, int index, const char* src, const char* dst)
 {
-	if ((!has_wimgapi) && (!has_7z) && (!WimExtractCheck()))
+	if ((wim_flags == 0) && (!WIM_HAS_EXTRACT(WimExtractCheck())))
 		return FALSE;
 	if ((image == NULL) || (src == NULL) || (dst == NULL))
 		return FALSE;
 
 	// Prefer 7-Zip as, unsurprisingly, it's faster than the Microsoft way,
 	// but allow fallback if 7-Zip doesn't succeed
-	return ( (has_7z && WimExtractFile_7z(image, index, src, dst))
-		  || (has_wimgapi && WimExtractFile_API(image, index, src, dst)) );
+	return ( ((wim_flags & WIM_HAS_7Z_EXTRACT) && WimExtractFile_7z(image, index, src, dst))
+		  || ((wim_flags & WIM_HAS_API_EXTRACT) && WimExtractFile_API(image, index, src, dst)) );
+}
+
+// Apply image functionality
+static const char *_image, *_dst;
+static int _index;
+
+// From http://msdn.microsoft.com/en-us/library/windows/desktop/dd834960.aspx
+// as well as http://www.msfn.org/board/topic/150700-wimgapi-wimmountimage-progressbar/
+enum WIMMessage {
+	WIM_MSG = WM_APP + 0x1476,
+	WIM_MSG_TEXT,
+	WIM_MSG_PROGRESS,	// Indicates an update in the progress of an image application.
+	WIM_MSG_PROCESS,	// Enables the caller to prevent a file or a directory from being captured or applied.
+	WIM_MSG_SCANNING,	// Indicates that volume information is being gathered during an image capture.
+	WIM_MSG_SETRANGE,	// Indicates the number of files that will be captured or applied.
+	WIM_MSG_SETPOS,		// Indicates the number of files that have been captured or applied.
+	WIM_MSG_STEPIT,		// Indicates that a file has been either captured or applied.
+	WIM_MSG_COMPRESS,	// Enables the caller to prevent a file resource from being compressed during a capture.
+	WIM_MSG_ERROR,		// Alerts the caller that an error has occurred while capturing or applying an image.
+	WIM_MSG_ALIGNMENT,	// Enables the caller to align a file resource on a particular alignment boundary.
+	WIM_MSG_RETRY,		// Sent when the file is being reapplied because of a network timeout.
+	WIM_MSG_SPLIT,		// Enables the caller to align a file resource on a particular alignment boundary.
+	WIM_MSG_INFO,		// Sent when an info message is available.
+	WIM_MSG_WARNING,	// Sent when a warning message is available.
+	WIM_MSG_CHK_PROCESS,
+	WIM_MSG_SUCCESS = 0x00000000,
+	WIM_MSG_ABORT_IMAGE = 0xFFFFFFFF
+};
+
+#define INVALID_CALLBACK_VALUE 0xFFFFFFFF
+
+// Progress callback
+DWORD WINAPI WimProgressCallback(DWORD dwMsgId, WPARAM wParam, LPARAM lParam, PVOID pvIgnored)
+{
+	PBOOL pbCancel = NULL;
+	char* str = NULL;
+	const char* level = NULL;
+
+	switch (dwMsgId) {
+	case WIM_MSG_PROGRESS:
+		uprintf("  %d%% completed", (DWORD)wParam);
+		UpdateProgress(OP_DOS, 1.0f*(DWORD)wParam);
+		break;
+	case WIM_MSG_PROCESS:
+		// The amount of files processed is a bit overwhelming, and displaying it all slows us down
+//#define WIM_DISPLAY_INDIVIDUAL_FILES
+#if WIM_DISPLAY_INDIVIDUAL_FILES
+		str = wchar_to_utf8((PWSTR)wParam);
+		uprintf("Applying: '%s'", str);
+		PrintStatus(0, MSG_000, str);	// MSG_000 is "%s"
+#endif
+		if (IS_ERROR(FormatStatus)) {
+			pbCancel = (PBOOL)lParam;
+			*pbCancel = TRUE;
+		}
+		break;
+	case WIM_MSG_RETRY:
+		level = "retry";
+		// fall through
+	case WIM_MSG_INFO:
+		if (level == NULL) level = "info";
+		// fall through
+	case WIM_MSG_WARNING:
+		if (level == NULL) level = "warning";
+		// fall through
+	case WIM_MSG_ERROR:
+		if (level == NULL) level = "error";
+		str = wchar_to_utf8((PWSTR)wParam);
+		SetLastError((DWORD)lParam);
+		uprintf("Apply %s: %s [err = %d]\n", level, str, WindowsErrorString());
+		break;
+	}
+	safe_free(str);
+
+	return IS_ERROR(FormatStatus)?WIM_MSG_ABORT_IMAGE:WIM_MSG_SUCCESS;
+}
+
+// Apply a WIM image using wimgapi.dll (Windows 7 or later)
+// http://msdn.microsoft.com/en-us/library/windows/desktop/dd851944.aspx
+// To get progress, we must run this call within its own thread
+static DWORD WINAPI WimApplyImageThread(LPVOID param)
+{
+	BOOL r = FALSE;
+	DWORD dw = 0;
+	HANDLE hWim = NULL;
+	HANDLE hImage = NULL;
+	wchar_t wtemp[MAX_PATH] = {0};
+	wchar_t* wimage = utf8_to_wchar(_image);
+	wchar_t* wdst = utf8_to_wchar(_dst);
+
+	PF_INIT_OR_OUT(WIMRegisterMessageCallback, Wimgapi);
+	PF_INIT_OR_OUT(WIMCreateFile, Wimgapi);
+	PF_INIT_OR_OUT(WIMSetTemporaryPath, Wimgapi);
+	PF_INIT_OR_OUT(WIMLoadImage, Wimgapi);
+	PF_INIT_OR_OUT(WIMApplyImage, Wimgapi);
+	PF_INIT_OR_OUT(WIMCloseHandle, Wimgapi);
+	PF_INIT_OR_OUT(WIMUnregisterMessageCallback, Wimgapi);
+
+	uprintf("Opening: %s:[%d]", _image, _index);
+
+	if (pfWIMRegisterMessageCallback(NULL, (FARPROC)WimProgressCallback, NULL) == INVALID_CALLBACK_VALUE) {
+		uprintf("  Could not set progress callback: %s", WindowsErrorString());
+		goto out;
+	}
+
+	if (GetTempPathW(ARRAYSIZE(wtemp), wtemp) == 0) {
+		uprintf("  Could not fetch temp path: %s", WindowsErrorString());
+		goto out;
+	}
+
+	hWim = pfWIMCreateFile(wimage, WIM_GENERIC_READ, WIM_OPEN_EXISTING, 0, 0, &dw);
+	if (hWim == NULL) {
+		uprintf("  Could not access image: %s", WindowsErrorString());
+		goto out;
+	}
+
+	if (!pfWIMSetTemporaryPath(hWim, wtemp)) {
+		uprintf("  Could not set temp path: %s", WindowsErrorString());
+		goto out;
+	}
+
+	hImage = pfWIMLoadImage(hWim, (DWORD)_index);
+	if (hImage == NULL) {
+		uprintf("  Could not set index: %s", WindowsErrorString());
+		goto out;
+	}
+
+	uprintf("Applying image...");
+	if (!pfWIMApplyImage(hImage, wdst, 0)) {
+		uprintf("  Could not apply image: %s", WindowsErrorString());
+		goto out;
+	}
+
+	r = TRUE;
+	UpdateProgress(OP_FINALIZE, -1.0f);
+
+out:
+	if ((hImage != NULL) || (hWim != NULL)) {
+		uprintf("Closing: %s", _image);
+		if (hImage != NULL) pfWIMCloseHandle(hImage);
+		if (hWim != NULL) pfWIMCloseHandle(hWim);
+	}
+	pfWIMUnregisterMessageCallback(NULL, (FARPROC)WimProgressCallback);
+	safe_free(wimage);
+	safe_free(wdst);
+	ExitThread((DWORD)r);
+}
+
+BOOL WimApplyImage(const char* image, int index, const char* dst)
+{
+	_image = image;
+	_index = index;
+	_dst = dst;
+	HANDLE handle;
+	DWORD dw = 0;
+
+	handle = CreateThread(NULL, 0, WimApplyImageThread, NULL, 0, NULL);
+	if (handle == NULL) {
+		uprintf("Unable to start apply-image thread");
+		return FALSE;
+	}
+	WaitForSingleObject(handle, INFINITE);
+	GetExitCodeThread(handle, &dw);
+	return (BOOL)dw;
 }
