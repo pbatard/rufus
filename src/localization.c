@@ -407,11 +407,11 @@ char* lmprintf(int msg_id, ...)
 #define MSG_INFO     1
 #define MSG_LOW_PRI  0
 #define MSG_HIGH_PRI 1
-char szMessage[2][2][MSG_LEN] = { 0 };
+char szMessage[2][2][MSG_LEN] = { {"", ""}, {"", ""} };
 char* szStatusMessage = szMessage[MSG_STATUS][MSG_HIGH_PRI];
 static BOOL bStatusTimerArmed = FALSE;
 
-static __inline OutputMessage(BOOL info, char* msg)
+static void __inline OutputMessage(BOOL info, char* msg)
 {
 	if (info)
 		SetWindowTextU(hInfo, msg);

@@ -751,7 +751,7 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 			SelectedDrive.nPartitions++;
 			tmp[0] = 0;
 			wchar_to_utf8_no_alloc(DriveLayout->PartitionEntry[i].Gpt.Name, tmp, sizeof(tmp));
-			suprintf("Partition %d:\r\n  Type: %s\r\n  Name: '%s'\n", DriveLayout->PartitionEntry[i].PartitionNumber,
+			suprintf("Partition %d:\r\n  Type: %s\r\n  Name: '%s'\n", i+1,
 				GuidToString(&DriveLayout->PartitionEntry[i].Gpt.PartitionType), tmp);
 			suprintf("  ID: %s\r\n  Size: %s (%lld bytes)\r\n  Start Sector: %lld, Attributes: 0x%016llX\n",
 				GuidToString(&DriveLayout->PartitionEntry[i].Gpt.PartitionId), SizeToHumanReadable(DriveLayout->PartitionEntry[i].PartitionLength.QuadPart, TRUE, FALSE),

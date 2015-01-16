@@ -933,8 +933,11 @@ static void DisplayISOProps(void)
 	uprintf("  Uses ReactOS: %s", YesNo(IS_REACTOS(iso_report)));
 	uprintf("  Uses WinPE: %s%s", YesNo(IS_WINPE(iso_report.winpe)), (iso_report.uses_minint) ? " (with /minint)" : "");
 
-	if ( ((!togo_mode) && (HAS_TOGO(iso_report))) || ((togo_mode) && (!HAS_TOGO(iso_report))) )
-		ToggleToGo();
+	// We don't support ToGo on Windows 7 or earlier, for lack of ISO mount capabilities
+	// TODO: add install.wim extraction workaround for Windows 7
+	if (nWindowsVersion >= WINDOWS_8)
+		if ( ((!togo_mode) && (HAS_TOGO(iso_report))) || ((togo_mode) && (!HAS_TOGO(iso_report))) )
+			ToggleToGo();
 }
 
 // The scanning process can be blocking for message processing => use a thread
@@ -1186,7 +1189,18 @@ static BOOL BootCheck(void)
 		}
 		fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
 		bt = GETBIOSTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
-		if (bt == BT_UEFI) {
+		if ((togo_mode) && (Button_GetCheck(GetDlgItem(hMainDialog, IDC_WINDOWS_TO_GO)) == BST_CHECKED)) {
+			if (fs != FS_NTFS) {
+				// Windows To Go only works for NTFS
+				MessageBoxU(hMainDialog, lmprintf(MSG_097), lmprintf(MSG_092), MB_OK|MB_ICONERROR|MB_IS_RTL);
+				return FALSE;
+			} else if (SelectedDrive.Geometry.MediaType != FixedMedia) {
+				// I never had any success with drives that have the REMOVABLE attribute set, no matter the
+				// method or tool I tried. If you manage to get this working, I'd like to hear from you!
+				if (MessageBoxU(hMainDialog, lmprintf(MSG_098), lmprintf(MSG_190), MB_YESNO|MB_ICONWARNING|MB_IS_RTL) != IDYES)
+					return FALSE;
+			}
+		} else if (bt == BT_UEFI) {
 			if (!iso_report.has_efi) {
 				// Unsupported ISO
 				MessageBoxU(hMainDialog, lmprintf(MSG_091), lmprintf(MSG_090), MB_OK|MB_ICONERROR|MB_IS_RTL);
@@ -1198,23 +1212,15 @@ static BOOL BootCheck(void)
 					ShellExecuteA(hMainDialog, "open", SEVENZIP_URL, NULL, NULL, SW_SHOWNORMAL);
 				return FALSE;
 			}
-		} else if ((fs == FS_NTFS) && (!iso_report.has_bootmgr) && (!IS_WINPE(iso_report.winpe)) && (!IS_GRUB(iso_report))) {
-			if (HAS_SYSLINUX(iso_report)) {
-				// Only FAT/FAT32 is supported for this type of ISO
-				MessageBoxU(hMainDialog, lmprintf(MSG_096), lmprintf(MSG_092), MB_OK|MB_ICONERROR|MB_IS_RTL);
-			} else {
-				// Only 'bootmgr' or 'WinPE' based ISO images can currently be used with NTFS
-				MessageBoxU(hMainDialog, lmprintf(MSG_097), lmprintf(MSG_090), MB_OK|MB_ICONERROR|MB_IS_RTL);
-			}
+		} else if ( ((fs == FS_NTFS) && (!iso_report.has_bootmgr) && (!IS_WINPE(iso_report.winpe)) && (!IS_GRUB(iso_report)))
+				 || (((fs == FS_FAT16)||(fs == FS_FAT32)) && (!HAS_SYSLINUX(iso_report)) && (!allow_dual_uefi_bios) &&
+					 (!IS_REACTOS(iso_report)) && (!iso_report.has_kolibrios) && (!IS_GRUB(iso_report))) ) {
+			// Incompatible FS and ISO
+			MessageBoxU(hMainDialog, lmprintf(MSG_096), lmprintf(MSG_092), MB_OK|MB_ICONERROR|MB_IS_RTL);
 			return FALSE;
 		} else if ((fs == FS_FAT16) && (iso_report.has_kolibrios)) {
 			// KolibriOS doesn't support FAT16
 			MessageBoxU(hMainDialog, lmprintf(MSG_189), lmprintf(MSG_099), MB_OK|MB_ICONERROR|MB_IS_RTL);
-			return FALSE;
-		} else if (((fs == FS_FAT16)||(fs == FS_FAT32)) && (!HAS_SYSLINUX(iso_report)) && (!allow_dual_uefi_bios) &&
-			(!IS_REACTOS(iso_report)) && (!iso_report.has_kolibrios) && (!IS_GRUB(iso_report))) {
-			// FAT/FAT32 can only be used for isolinux based ISO images or when the Target Type is UEFI
-			MessageBoxU(hMainDialog, lmprintf(MSG_098), lmprintf(MSG_090), MB_OK|MB_ICONERROR|MB_IS_RTL);
 			return FALSE;
 		}
 		if (((fs == FS_FAT16)||(fs == FS_FAT32)) && (iso_report.has_4GB_file)) {
@@ -2151,6 +2157,16 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			if (CreateThread(NULL, 0, ISOScanThread, NULL, 0, NULL) == NULL) {
 				uprintf("Unable to start ISO scanning thread");
 				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_START_THREAD);
+			}
+			break;
+		case IDC_WINDOWS_TO_GO:
+			if (Button_GetCheck(GetDlgItem(hMainDialog, IDC_WINDOWS_TO_GO)) == BST_CHECKED) {
+				for (i=0; i<ComboBox_GetCount(hFileSystem); i++) {
+					if (ComboBox_GetItemData(hFileSystem, i) == FS_NTFS) {
+						IGNORE_RETVAL(ComboBox_SetCurSel(hFileSystem, i));
+						break;
+					}
+				}
 			}
 			break;
 		case IDC_RUFUS_MBR:

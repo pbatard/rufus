@@ -430,6 +430,7 @@ static BOOL WimExtractFile_7z(const char* image, int index, const char* src, con
 	}
 	tmpdst[i] = 0;
 
+	// TODO: use RunCommand
 	si.cb = sizeof(si);
 	safe_sprintf(cmdline, sizeof(cmdline), "7z -y e \"%s\" %d\\%s", image, index, src);
 	uprintf("Extracting: %s (From %s)", dst, src);
@@ -509,12 +510,11 @@ DWORD WINAPI WimProgressCallback(DWORD dwMsgId, WPARAM wParam, LPARAM lParam, PV
 	switch (dwMsgId) {
 	case WIM_MSG_PROGRESS:
 		uprintf("  %d%% completed", (DWORD)wParam);
-		UpdateProgress(OP_DOS, 1.0f*(DWORD)wParam);
+		UpdateProgress(OP_DOS, 0.98f*(DWORD)wParam);
 		break;
 	case WIM_MSG_PROCESS:
 		// The amount of files processed is a bit overwhelming, and displaying it all slows us down
-//#define WIM_DISPLAY_INDIVIDUAL_FILES
-#if WIM_DISPLAY_INDIVIDUAL_FILES
+#if 0
 		str = wchar_to_utf8((PWSTR)wParam);
 		uprintf("Applying: '%s'", str);
 		PrintStatus(0, MSG_000, str);	// MSG_000 is "%s"
@@ -595,7 +595,7 @@ static DWORD WINAPI WimApplyImageThread(LPVOID param)
 		goto out;
 	}
 
-	uprintf("Applying image...");
+	uprintf("Applying Windows image...");
 	if (!pfWIMApplyImage(hImage, wdst, 0)) {
 		uprintf("  Could not apply image: %s", WindowsErrorString());
 		goto out;
@@ -618,11 +618,11 @@ out:
 
 BOOL WimApplyImage(const char* image, int index, const char* dst)
 {
+	HANDLE handle;
+	DWORD dw = 0;
 	_image = image;
 	_index = index;
 	_dst = dst;
-	HANDLE handle;
-	DWORD dw = 0;
 
 	handle = CreateThread(NULL, 0, WimApplyImageThread, NULL, 0, NULL);
 	if (handle == NULL) {

@@ -925,8 +925,8 @@ out:
 /*
  * The following is used for native ISO mounting in Windows 8 or later
  */
-const GUID VIRTUAL_STORAGE_TYPE_VENDOR_MICROSOFT =
-	{ 0xEC984AECL, 0xA0F9, 0x47e9, { 0x90, 0x1F, 0x71, 0x41, 0x5A, 0x66, 0x34, 0x5B } };
+#define VIRTUAL_STORAGE_TYPE_VENDOR_MICROSOFT \
+	{ 0xEC984AECL, 0xA0F9, 0x47e9, { 0x90, 0x1F, 0x71, 0x41, 0x5A, 0x66, 0x34, 0x5B } }
 
 typedef enum _VIRTUAL_DISK_ACCESS_MASK {
 	VIRTUAL_DISK_ACCESS_NONE = 0x00000000,
@@ -1015,7 +1015,7 @@ static HANDLE mounted_handle = INVALID_HANDLE_VALUE;
 char* MountISO(const char* path)
 {
 	VIRTUAL_STORAGE_TYPE vtype = { 1, VIRTUAL_STORAGE_TYPE_VENDOR_MICROSOFT };
-	ATTACH_VIRTUAL_DISK_PARAMETERS vparams = { ATTACH_VIRTUAL_DISK_VERSION_1, 0 };
+	ATTACH_VIRTUAL_DISK_PARAMETERS vparams = {0};
 	DWORD r;
 	wchar_t wtmp[128];
 	ULONG size = ARRAYSIZE(wtmp);
@@ -1037,6 +1037,7 @@ char* MountISO(const char* path)
 		goto out;
 	}
 
+	vparams.Version = ATTACH_VIRTUAL_DISK_VERSION_1;
 	r = pfAttachVirtualDisk(mounted_handle, NULL, ATTACH_VIRTUAL_DISK_FLAG_READ_ONLY |
 		ATTACH_VIRTUAL_DISK_FLAG_NO_DRIVE_LETTER, 0, &vparams, NULL);
 	if (r != ERROR_SUCCESS) {

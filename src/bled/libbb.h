@@ -187,6 +187,11 @@ static inline ssize_t full_read(int fd, void *buf, size_t count) {
 	return rb;
 }
 
+static inline struct tm *localtime_r(const time_t *timep, struct tm *result) {
+	result = localtime(timep);
+	return result;
+}
+
 #define full_write _write
 #define safe_read full_read
 #define lstat stat
@@ -197,11 +202,6 @@ static inline ssize_t full_read(int fd, void *buf, size_t count) {
 #define mkdir(x, y) _mkdirU(x)
 
 #if defined(_MSC_VER)
-static inline struct tm *localtime_r(const time_t *timep, struct tm *result) {
-	result = localtime(timep);
-	return result;
-}
-
 #define _S_IFBLK 0x3000
 
 #define S_IFMT   _S_IFMT

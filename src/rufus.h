@@ -395,6 +395,7 @@ extern char* FileDialog(BOOL save, char* path, const ext_t* ext, DWORD options);
 extern BOOL FileIO(BOOL save, char* path, char** buffer, DWORD* size);
 extern unsigned char* GetResource(HMODULE module, char* name, char* type, const char* desc, DWORD* len, BOOL duplicate);
 extern DWORD GetResourceSize(HMODULE module, char* name, char* type, const char* desc);
+extern DWORD RunCommand(const char* cmdline, const char* dir, BOOL log);
 extern BOOL GetUSBDevices(DWORD devnum);
 extern BOOL SetLGP(BOOL bRestore, BOOL* bExistingKey, const char* szPath, const char* szPolicy, DWORD dwValue);
 extern LONG GetEntryWidth(HWND hDropDown, const char* entry);

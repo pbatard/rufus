@@ -1225,6 +1225,79 @@ out:
 	return r;
 }
 
+// http://technet.microsoft.com/en-ie/library/jj721578.aspx
+static BOOL SetupWinToGo(const char* drive_name)
+{
+	char san_policy_path[] = "?:\\san_policy.xml", unattend_path[] = "?:\\Windows\\System32\\sysprep\\unattend.xml";
+	char *mounted_iso, image[128], cmd[128];
+	unsigned char *buffer;
+	DWORD bufsize;
+	FILE* fd;
+
+	uprintf("Windows To Go mode selected");
+
+	// First, we need to access the install.wim image, that resides on the ISO
+	mounted_iso = MountISO(image_path);
+	if (mounted_iso == NULL) {
+		uprintf("Could not mount ISO for Windows To Go installation");
+		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_ISO_EXTRACT);
+		return FALSE;
+	}
+	uprintf("Mounted ISO as '%s'", mounted_iso);
+
+	// Now we use the WIM API to apply that image
+	static_sprintf(image, "%s\\sources\\install.wim", mounted_iso);
+	if (!WimApplyImage(image, 1, drive_name)) {
+		uprintf("Failed to apply Windows To Go image");
+		if (!IS_ERROR(FormatStatus))
+			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_ISO_EXTRACT);
+		UnMountISO();
+		return FALSE;
+	}
+	UnMountISO();
+
+	uprintf("Setting up boot for Windows To Go...");
+	static_sprintf(cmd, "%C:\\Windows\\System32\\bcdboot.exe %C:\\Windows /f ALL /s %C:",
+		drive_name[0], drive_name[0], drive_name[0]);
+	if (RunCommand(cmd, NULL, TRUE) != 0) {
+		// Fatal, as the UFD is unlikely to boot then
+		uprintf("Command '%s' failed to run", cmd);
+		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_ISO_EXTRACT);
+		return FALSE;
+	}
+	UpdateProgress(OP_DOS, 99.0f);
+
+	// The following are non fatal if they fail
+	buffer = GetResource(hMainInstance, MAKEINTRESOURCEA(IDR_TOGO_SAN_POLICY_XML),
+		_RT_RCDATA, "san_policy.xml", &bufsize, FALSE);
+	san_policy_path[0] = drive_name[0];
+	uprintf("Applying san_policy.xml...");
+	fd = fopenU(san_policy_path, "wb");
+	if ((fd == NULL) || (fwrite(buffer, 1, bufsize, fd) != bufsize)) {
+		uprintf("Could not write '%s'\n", san_policy_path);
+		if (fd)
+			fclose(fd);
+	} else {
+		fclose(fd);
+		static_sprintf(cmd, "dism /Image:%C:\\ /Apply-Unattend:%s", drive_name[0], san_policy_path);
+		if (RunCommand(cmd, NULL, TRUE) != 0)
+			uprintf("Command '%s' failed to run");
+	}
+
+	uprintf("Copying 'unattend.xml'");
+	buffer = GetResource(hMainInstance, MAKEINTRESOURCEA(IDR_TOGO_UNATTEND_XML),
+		_RT_RCDATA, "unattend.xml", &bufsize, FALSE);
+	unattend_path[0] = drive_name[0];
+	fd = fopenU(unattend_path, "wb");
+	if ((fd == NULL) || (fwrite(buffer, 1, bufsize, fd) != bufsize)) {
+		uprintf("Could not write '%s'\n", unattend_path);
+	}
+	fclose(fd);
+	UpdateProgress(OP_DOS, 100.0f);
+
+	return TRUE;
+}
+
 /*
  * Detect if a Windows Format prompt is active, by enumerating the
  * whole Windows tree and looking for the relevant popup
@@ -1305,10 +1378,10 @@ DWORD WINAPI FormatThread(void* param)
 	LARGE_INTEGER li;
 	uint64_t wb;
 	uint8_t *buffer = NULL, *aligned_buffer;
-	char *bb_msg, *guid_volume = NULL, *mounted_iso;
+	char *bb_msg, *guid_volume = NULL;
 	char drive_name[] = "?:\\";
 	char drive_letters[27];
-	char logfile[MAX_PATH], image[128], *userdir;
+	char logfile[MAX_PATH], *userdir;
 	char wim_image[] = "?:\\sources\\install.wim";
 	char efi_dst[] = "?:\\efi\\boot\\bootx64.efi";
 	char kolibri_dst[] = "?:\\MTLD_F32";
@@ -1693,28 +1766,24 @@ DWORD WINAPI FormatThread(void* param)
 				UpdateProgress(OP_DOS, 0.0f);
 				PrintInfoDebug(0, MSG_231);
 				drive_name[2] = 0;
-				// TODO: Check that we have apply-wim support
 				if (HAS_TOGO(iso_report) && (Button_GetCheck(GetDlgItem(hMainDialog, IDC_WINDOWS_TO_GO)) == BST_CHECKED)) {
-					uprintf("Windows To Go mode selected");
-					mounted_iso = MountISO(image_path);
-					if (mounted_iso == NULL) {
-						uprintf("Could not mount ISO for Windows To Go installation");
-						FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_ISO_EXTRACT);
-					} else {
-						uprintf("Mounted ISO as '%s'", mounted_iso);
-						static_sprintf(image, "%s\\sources\\install.wim", mounted_iso);
-						if (!WimApplyImage(image, 1, drive_name)) {
-							uprintf("Failed to setup Windows To Go");
-							if (!IS_ERROR(FormatStatus))
-								FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_ISO_EXTRACT);
-						}
-						UnMountISO();
-					}
-					if (IS_ERROR(FormatStatus))
+					// Sanity checks
+					if (fs != FS_NTFS) {
+						FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_INCOMPATIBLE_FS);
 						goto out;
+					}
+					if ((nWindowsVersion < WINDOWS_8) || ((WimExtractCheck() & 4) == 0)) {
+						FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_NOT_SUPPORTED;
+						goto out;
+					}
+					if (!SetupWinToGo(drive_name)) {
+						if (!IS_ERROR(FormatStatus))
+							FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_ISO_EXTRACT;
+						goto out;
+					}
 				} else if (!ExtractISO(image_path, drive_name, FALSE)) {
 					if (!IS_ERROR(FormatStatus))
-						FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANNOT_COPY;
+						FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_ISO_EXTRACT;
 					goto out;
 				}
 				if (iso_report.has_kolibrios) {

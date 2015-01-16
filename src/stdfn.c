@@ -528,6 +528,68 @@ DWORD GetResourceSize(HMODULE module, char* name, char* type, const char* desc)
 	return (GetResource(module, name, type, desc, &len, FALSE) == NULL)?0:len;
 }
 
+// Run a console command, with optional redirection of stdout and stderr to our log
+DWORD RunCommand(const char* cmd, const char* dir, BOOL log)
+{
+	DWORD ret, dwRead, dwAvail, dwMsg;
+	STARTUPINFOA si = {0};
+	PROCESS_INFORMATION pi = {0};
+	HANDLE hOutputRead = INVALID_HANDLE_VALUE, hOutputWrite = INVALID_HANDLE_VALUE;
+	HANDLE hDupOutputWrite = INVALID_HANDLE_VALUE;
+	char output[1024];
+
+	si.cb = sizeof(si);
+	if (log) {
+		if (!CreatePipe(&hOutputRead, &hOutputWrite, NULL, sizeof(output)-1)) {
+			ret = GetLastError();
+			uprintf("Could not set commandline pipe: %s", WindowsErrorString());
+			goto out;
+		}
+		// We need an inheritable pipe endpoint handle
+		DuplicateHandle(GetCurrentProcess(), hOutputWrite, GetCurrentProcess(), &hDupOutputWrite, 
+			0L, TRUE, DUPLICATE_CLOSE_SOURCE | DUPLICATE_SAME_ACCESS);
+		si.dwFlags = STARTF_USESHOWWINDOW | STARTF_USESTDHANDLES;
+		si.wShowWindow = SW_HIDE;
+		si.hStdOutput = hDupOutputWrite;
+		si.hStdError = hDupOutputWrite;
+	}
+
+	if (!CreateProcessU(NULL, cmd, NULL, NULL, TRUE,
+		NORMAL_PRIORITY_CLASS | CREATE_NO_WINDOW, NULL, dir, &si, &pi)) {
+		ret = GetLastError();
+		uprintf("Unable to launch command '%s': %s", WindowsErrorString());
+		goto out;
+	}
+
+	if (log) {
+		while (1) {
+			if (PeekNamedPipe(hOutputRead, output, sizeof(output)-1, &dwRead, &dwAvail, &dwMsg)) {
+				// Don't care about possible multiple reads being needed
+				if ((dwAvail != 0) && (ReadFile(hOutputRead, output, dwAvail, &dwRead, NULL)) && (dwRead != 0)) {
+					// This seems to be needed. Won't overflow since we set our max sizes to sizeof(output)-1
+					output[dwAvail] = 0;
+					uprintf(output);
+				}
+			}
+			if (WaitForSingleObject(pi.hProcess, 0) == WAIT_OBJECT_0)
+				break;
+			Sleep(100);
+		};
+	} else {
+		WaitForSingleObject(pi.hProcess, INFINITE);
+	}
+
+	if (!GetExitCodeProcess(pi.hProcess, &ret))
+		ret = GetLastError();
+	CloseHandle(pi.hProcess);
+	CloseHandle(pi.hThread);
+
+out:
+	safe_closehandle(hDupOutputWrite);
+	safe_closehandle(hOutputRead);
+	return ret;
+}
+
 /*
  * Set or restore a Local Group Policy DWORD key indexed by szPath/SzPolicy
  */

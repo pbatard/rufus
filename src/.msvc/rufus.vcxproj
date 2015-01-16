@@ -223,7 +223,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\res\down.ico" />
-    <None Include="..\..\res\localization\rufus.loc" />
     <None Include="..\..\res\rufus.ico" />
     <None Include="..\..\res\up.ico" />
   </ItemGroup>
