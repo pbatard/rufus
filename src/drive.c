@@ -39,7 +39,11 @@
 
 #if !defined(PARTITION_BASIC_DATA_GUID)
 const GUID PARTITION_BASIC_DATA_GUID = 
-	{ 0xebd0a0a2, 0xb9e5, 0x4433, {0x87, 0xc0, 0x68, 0xb6, 0xb7, 0x26, 0x99, 0xc7} };
+	{ 0xebd0a0a2L, 0xb9e5, 0x4433, {0x87, 0xc0, 0x68, 0xb6, 0xb7, 0x26, 0x99, 0xc7} };
+#endif
+#if !defined(PARTITION_MSFT_RESERVED_GUID)
+const GUID PARTITION_MSFT_RESERVED_GUID =
+	{ 0xe3c9e316L, 0x0b5c, 0x4db8, {0x81, 0x7d, 0xf9, 0x2d, 0xf0, 0x02, 0x15, 0xae} };
 #endif
 
 /*
@@ -912,32 +916,132 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 	CREATE_DISK CreateDisk = {PARTITION_STYLE_RAW, {{0}}};
 	DRIVE_LAYOUT_INFORMATION_EX4 DriveLayoutEx = {0};
 	BOOL r;
-	DWORD size, bufsize;
-	LONGLONG size_in_sectors, extra_size_in_tracks = 1;
+	DWORD i, size, bufsize, pn = 0;
+	LONGLONG size_in_sectors, extra_part_size_in_tracks = 0;
+	BOOL add_msr = FALSE; //TRUE;
 
 	PrintInfoDebug(0, MSG_238, PartitionTypeName[partition_style]);
+
 	if (uefi_togo_size == 0)
 		uefi_togo_size = GetResourceSize(hMainInstance, MAKEINTRESOURCEA(IDR_UEFI_TOGO), _RT_RCDATA, "uefi-togo.img");
 
+	// Compute the start offset of our first partition
 	if ((partition_style == PARTITION_STYLE_GPT) || (!IsChecked(IDC_EXTRA_PARTITION))) {
 		// Go with the MS 1 MB wastage at the beginning...
-		DriveLayoutEx.PartitionEntry[0].StartingOffset.QuadPart = 1024*1024;
+		DriveLayoutEx.PartitionEntry[pn].StartingOffset.QuadPart = 1024*1024;
 	} else {
 		// Align on Cylinder
-		DriveLayoutEx.PartitionEntry[0].StartingOffset.QuadPart = 
+		DriveLayoutEx.PartitionEntry[pn].StartingOffset.QuadPart = 
 			SelectedDrive.Geometry.BytesPerSector * SelectedDrive.Geometry.SectorsPerTrack;
 	}
-	size_in_sectors = (SelectedDrive.DiskSize - DriveLayoutEx.PartitionEntry[0].StartingOffset.QuadPart) / SelectedDrive.Geometry.BytesPerSector;
-	// Align on track boundary if the extra part option is checked
+
+	// If required, set the MSR partition (GPT only - must be created before the data part)
+	if ((partition_style == PARTITION_STYLE_GPT) && (add_msr)) {
+		uprintf("Adding MSR partition");
+		DriveLayoutEx.PartitionEntry[pn].PartitionLength.QuadPart = 128*1024*1024;
+		DriveLayoutEx.PartitionEntry[pn].Gpt.PartitionType = PARTITION_MSFT_RESERVED_GUID;
+		IGNORE_RETVAL(CoCreateGuid(&DriveLayoutEx.PartitionEntry[pn].Gpt.PartitionId));
+		wcscpy(DriveLayoutEx.PartitionEntry[pn].Gpt.Name, L"Microsoft reserved partition");
+		pn++;
+		DriveLayoutEx.PartitionEntry[pn].StartingOffset.QuadPart = DriveLayoutEx.PartitionEntry[pn-1].StartingOffset.QuadPart +
+				DriveLayoutEx.PartitionEntry[pn-1].PartitionLength.QuadPart;
+	}
+
+	// Set our main data partition
+	size_in_sectors = (SelectedDrive.DiskSize - DriveLayoutEx.PartitionEntry[pn].StartingOffset.QuadPart) /
+		// Need 33 sectors at the end for secondary GPT
+		SelectedDrive.Geometry.BytesPerSector - ((partition_style == PARTITION_STYLE_GPT)?33:0);
+	// Adjust the size according to extra partitions
 	if ((add_uefi_togo) || ((partition_style == PARTITION_STYLE_MBR) && (IsChecked(IDC_EXTRA_PARTITION)))) {
-		if (add_uefi_togo)	// Already set to 1 track in non To_Go mode
-			extra_size_in_tracks = (MIN_EXTRA_PART_SIZE + SelectedDrive.Geometry.SectorsPerTrack - 1) /
+		if (add_uefi_togo)	{
+			extra_part_size_in_tracks = (MIN_EXTRA_PART_SIZE + SelectedDrive.Geometry.SectorsPerTrack - 1) /
 				SelectedDrive.Geometry.SectorsPerTrack;
-		uprintf("Reserving %d tracks for extra partition", extra_size_in_tracks);
-		size_in_sectors = ((size_in_sectors / SelectedDrive.Geometry.SectorsPerTrack) - extra_size_in_tracks) *
+		} else {
+			extra_part_size_in_tracks = 1;	// One track for the extra part in non togo mode
+		}
+		uprintf("Reserving %d tracks for extra partition", extra_part_size_in_tracks);
+		size_in_sectors = ((size_in_sectors / SelectedDrive.Geometry.SectorsPerTrack) - extra_part_size_in_tracks) *
 			SelectedDrive.Geometry.SectorsPerTrack;
 		if (size_in_sectors <= 0)
 			return FALSE;
+	}
+	DriveLayoutEx.PartitionEntry[pn].PartitionLength.QuadPart = size_in_sectors * SelectedDrive.Geometry.BytesPerSector;
+	if (partition_style == PARTITION_STYLE_MBR) {
+		DriveLayoutEx.PartitionEntry[pn].Mbr.BootIndicator = IsChecked(IDC_BOOT);
+		DriveLayoutEx.PartitionEntry[pn].Mbr.HiddenSectors = SelectedDrive.Geometry.SectorsPerTrack;
+		switch (file_system) {
+		case FS_FAT16:
+			DriveLayoutEx.PartitionEntry[pn].Mbr.PartitionType = 0x0e;	// FAT16 LBA
+			break;
+		case FS_NTFS:
+		case FS_EXFAT:
+		case FS_UDF:
+		case FS_REFS:
+			DriveLayoutEx.PartitionEntry[pn].Mbr.PartitionType = 0x07;
+			break;
+		case FS_FAT32:
+			DriveLayoutEx.PartitionEntry[pn].Mbr.PartitionType = 0x0c;	// FAT32 LBA
+			break;
+		default:
+			uprintf("Unsupported file system\n");
+			return FALSE;
+		}
+	} else {
+		DriveLayoutEx.PartitionEntry[pn].Gpt.PartitionType = PARTITION_BASIC_DATA_GUID;
+		IGNORE_RETVAL(CoCreateGuid(&DriveLayoutEx.PartitionEntry[pn].Gpt.PartitionId));
+		wcscpy(DriveLayoutEx.PartitionEntry[pn].Gpt.Name, L"Microsoft Basic Data");
+	}
+	pn++;
+
+	// Set the optional extra partition
+	if (IsChecked(IDC_EXTRA_PARTITION) || (add_uefi_togo)) {
+		// Should end on a track boundary
+		DriveLayoutEx.PartitionEntry[pn].StartingOffset.QuadPart = DriveLayoutEx.PartitionEntry[pn-1].StartingOffset.QuadPart +
+				DriveLayoutEx.PartitionEntry[pn-1].PartitionLength.QuadPart;
+		DriveLayoutEx.PartitionEntry[pn].PartitionLength.QuadPart = (add_uefi_togo)?uefi_togo_size:
+			extra_part_size_in_tracks * SelectedDrive.Geometry.SectorsPerTrack * SelectedDrive.Geometry.BytesPerSector;
+		if (partition_style == PARTITION_STYLE_GPT) {
+			if (add_uefi_togo)	// already set to UNUSED GUID (000...000) otherwise
+				DriveLayoutEx.PartitionEntry[pn].Gpt.PartitionType = PARTITION_BASIC_DATA_GUID;
+			IGNORE_RETVAL(CoCreateGuid(&DriveLayoutEx.PartitionEntry[pn].Gpt.PartitionId));
+			wcscpy(DriveLayoutEx.PartitionEntry[pn].Gpt.Name, (add_uefi_togo)?L"UEFI:TOGO":L"Rufus Extra Partition");
+		} else {
+			DriveLayoutEx.PartitionEntry[pn].Mbr.PartitionType = (add_uefi_togo)?0x01:RUFUS_EXTRA_PARTITION_TYPE;
+			DriveLayoutEx.PartitionEntry[pn].Mbr.HiddenSectors = SelectedDrive.Geometry.SectorsPerTrack;
+		}
+
+		// We need to write the TOGO partition before we refresh the disk
+		if (add_uefi_togo) {
+			uprintf("Writing UEFI:TOGO partition...");
+			if (!SetFilePointerEx(hDrive, DriveLayoutEx.PartitionEntry[pn].StartingOffset, NULL, FILE_BEGIN)) {
+				uprintf("Unable to set position");
+				safe_closehandle(hDrive);
+				return FALSE;
+			}
+			buffer = GetResource(hMainInstance, MAKEINTRESOURCEA(IDR_UEFI_TOGO), _RT_RCDATA, "uefi-togo.img", &bufsize, FALSE);
+			if (buffer == NULL) {
+				uprintf("Could not access uefi-togo.img");
+				safe_closehandle(hDrive);
+				return FALSE;
+			}
+			r = WriteFile(hDrive, buffer, bufsize, &size, NULL);
+			if ((!r) || (size != bufsize)) {
+				if (!r)
+					uprintf("Write error: %s", WindowsErrorString());
+				else
+					uprintf("Write error: Wrote %d bytes, expected %d bytes\n", size, bufsize);
+				safe_closehandle(hDrive);
+				return FALSE;
+			}
+		}
+		pn++;
+	}
+
+	// Initialize the remaining partition data
+	for (i = 0; i < pn; i++) {
+		DriveLayoutEx.PartitionEntry[i].PartitionNumber = i+1;
+		DriveLayoutEx.PartitionEntry[i].PartitionStyle = partition_style;
+		DriveLayoutEx.PartitionEntry[i].RewritePartition = TRUE;
 	}
 
 	switch (partition_style) {
@@ -952,7 +1056,6 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 		DriveLayoutEx.PartitionStyle = PARTITION_STYLE_MBR;
 		DriveLayoutEx.PartitionCount = 4;	// Must be multiple of 4 for MBR
 		DriveLayoutEx.Type.Mbr.Signature = CreateDisk.Mbr.Signature;
-		DriveLayoutEx.PartitionEntry[0].PartitionStyle = PARTITION_STYLE_MBR;
 		// TODO: CHS fixup (32 sectors/track) through a cheat mode, if requested
 		// NB: disk geometry is computed by BIOS & co. by finding a match between LBA and CHS value of first partition
 		//     ms-sys's write_partition_number_of_heads() and write_partition_start_sector_number() can be used if needed
@@ -967,123 +1070,26 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 		CreateDisk.Gpt.MaxPartitionCount = MAX_GPT_PARTITIONS;
 
 		DriveLayoutEx.PartitionStyle = PARTITION_STYLE_GPT;
-		DriveLayoutEx.PartitionCount = (add_uefi_togo)?2:1;
+		DriveLayoutEx.PartitionCount = pn;
 		// At the very least, a GPT disk has 34 reserved sectors at the beginning and 33 at the end.
 		DriveLayoutEx.Type.Gpt.StartingUsableOffset.QuadPart = 34 * SelectedDrive.Geometry.BytesPerSector;
 		DriveLayoutEx.Type.Gpt.UsableLength.QuadPart = SelectedDrive.DiskSize - (34+33) * SelectedDrive.Geometry.BytesPerSector;
 		DriveLayoutEx.Type.Gpt.MaxPartitionCount = MAX_GPT_PARTITIONS;
 		DriveLayoutEx.Type.Gpt.DiskId = CreateDisk.Gpt.DiskId;
-		DriveLayoutEx.PartitionEntry[0].PartitionStyle = PARTITION_STYLE_GPT;
-
-		size_in_sectors -= 33;	// Need 33 sectors at the end for secondary GPT
 		break;
-	default:
-		break;
-	}
-
-	DriveLayoutEx.PartitionEntry[0].PartitionLength.QuadPart = size_in_sectors * SelectedDrive.Geometry.BytesPerSector;
-	DriveLayoutEx.PartitionEntry[0].PartitionNumber = 1;
-	DriveLayoutEx.PartitionEntry[0].RewritePartition = TRUE;
-
-	switch (partition_style) {
-	case PARTITION_STYLE_MBR:
-		DriveLayoutEx.PartitionEntry[0].Mbr.BootIndicator = IsChecked(IDC_BOOT);
-		DriveLayoutEx.PartitionEntry[0].Mbr.HiddenSectors = SelectedDrive.Geometry.SectorsPerTrack;
-		switch (file_system) {
-		case FS_FAT16:
-			DriveLayoutEx.PartitionEntry[0].Mbr.PartitionType = 0x0e;	// FAT16 LBA
-			break;
-		case FS_NTFS:
-		case FS_EXFAT:
-		case FS_UDF:
-		case FS_REFS:
-			DriveLayoutEx.PartitionEntry[0].Mbr.PartitionType = 0x07;
-			break;
-		case FS_FAT32:
-			DriveLayoutEx.PartitionEntry[0].Mbr.PartitionType = 0x0c;	// FAT32 LBA
-			break;
-		default:
-			uprintf("Unsupported file system\n");
-			return FALSE;
-		}
-		// Create an extra partition on request
-		if (IsChecked(IDC_EXTRA_PARTITION) || (add_uefi_togo)) {
-			DriveLayoutEx.PartitionEntry[1].PartitionStyle = PARTITION_STYLE_MBR;
-			// Should end on a track boundary
-			DriveLayoutEx.PartitionEntry[1].StartingOffset.QuadPart = DriveLayoutEx.PartitionEntry[0].StartingOffset.QuadPart +
-				DriveLayoutEx.PartitionEntry[0].PartitionLength.QuadPart;
-			if (add_uefi_togo) {
-				DriveLayoutEx.PartitionEntry[1].PartitionLength.QuadPart = uefi_togo_size;
-			} else {
-				DriveLayoutEx.PartitionEntry[1].PartitionLength.QuadPart = extra_size_in_tracks *
-					SelectedDrive.Geometry.SectorsPerTrack * SelectedDrive.Geometry.BytesPerSector;
-			}
-			DriveLayoutEx.PartitionEntry[1].PartitionNumber = 2;
-			DriveLayoutEx.PartitionEntry[1].RewritePartition = TRUE;
-			DriveLayoutEx.PartitionEntry[1].Mbr.BootIndicator = FALSE;
-			DriveLayoutEx.PartitionEntry[1].Mbr.HiddenSectors = SelectedDrive.Geometry.SectorsPerTrack*SelectedDrive.Geometry.BytesPerSector;
-			DriveLayoutEx.PartitionEntry[1].Mbr.PartitionType = (add_uefi_togo)?0x01:RUFUS_EXTRA_PARTITION_TYPE;
-		}
-		// For the remaining partitions, PartitionStyle & PartitionType have already
-		// been zeroed => already set to MBR/unused
-		break;
-	case PARTITION_STYLE_GPT:
-		DriveLayoutEx.PartitionEntry[0].Gpt.PartitionType = PARTITION_BASIC_DATA_GUID;
-		IGNORE_RETVAL(CoCreateGuid(&DriveLayoutEx.PartitionEntry[0].Gpt.PartitionId));
-		wcscpy(DriveLayoutEx.PartitionEntry[0].Gpt.Name, L"Microsoft Basic Data");
-		if (add_uefi_togo) {
-			DriveLayoutEx.PartitionEntry[1].Gpt.PartitionType = PARTITION_BASIC_DATA_GUID;
-			IGNORE_RETVAL(CoCreateGuid(&DriveLayoutEx.PartitionEntry[1].Gpt.PartitionId));
-			wcscpy(DriveLayoutEx.PartitionEntry[1].Gpt.Name, L"UEFI:TOGO");
-			DriveLayoutEx.PartitionEntry[1].PartitionNumber = 2;
-			DriveLayoutEx.PartitionEntry[1].RewritePartition = TRUE;
-			DriveLayoutEx.PartitionEntry[1].StartingOffset.QuadPart = DriveLayoutEx.PartitionEntry[0].StartingOffset.QuadPart +
-				DriveLayoutEx.PartitionEntry[0].PartitionLength.QuadPart;
-			DriveLayoutEx.PartitionEntry[1].PartitionLength.QuadPart = uefi_togo_size;
-		}
-		break;
-	default:
-		break;
-	}
-
-	// We need to write the extra partition before we refresh the disk
-	if (add_uefi_togo) {
-		uprintf("Writing UEFI:TOGO partition...");
-		if (!SetFilePointerEx(hDrive, DriveLayoutEx.PartitionEntry[1].StartingOffset, NULL, FILE_BEGIN)) {
-			uprintf("Unable to set position");
-			safe_closehandle(hDrive);
-			return FALSE;
-		}
-		buffer = GetResource(hMainInstance, MAKEINTRESOURCEA(IDR_UEFI_TOGO), _RT_RCDATA, "uefi-togo.img", &bufsize, FALSE);
-		if (buffer == NULL) {
-			uprintf("Could not access uefi-togo.img");
-			safe_closehandle(hDrive);
-			return FALSE;
-		}
-		r = WriteFile(hDrive, buffer, bufsize, &size, NULL);
-		if ((!r) || (size != bufsize)) {
-			if (!r)
-				uprintf("Write error: %s", WindowsErrorString());
-			else
-				uprintf("Write error: Wrote %d bytes, expected %d bytes\n", size, bufsize);
-			safe_closehandle(hDrive);
-			return FALSE;
-		}
 	}
 
 	// If you don't call IOCTL_DISK_CREATE_DISK, the next call will fail
 	size = sizeof(CreateDisk);
-	r = DeviceIoControl(hDrive, IOCTL_DISK_CREATE_DISK,
-			(BYTE*)&CreateDisk, size, NULL, 0, &size, NULL );
+	r = DeviceIoControl(hDrive, IOCTL_DISK_CREATE_DISK, (BYTE*)&CreateDisk, size, NULL, 0, &size, NULL );
 	if (!r) {
 		uprintf("Could not reset disk: %s\n", WindowsErrorString());
 		safe_closehandle(hDrive);
 		return FALSE;
 	}
 
-	size = sizeof(DriveLayoutEx) - ((partition_style == PARTITION_STYLE_GPT)?((add_uefi_togo?2:3)*sizeof(PARTITION_INFORMATION_EX)):0);
-	r = DeviceIoControl(hDrive, IOCTL_DISK_SET_DRIVE_LAYOUT_EX,
-			(BYTE*)&DriveLayoutEx, size, NULL, 0, &size, NULL );
+	size = sizeof(DriveLayoutEx) - ((partition_style == PARTITION_STYLE_GPT)?((4-pn)*sizeof(PARTITION_INFORMATION_EX)):0);
+	r = DeviceIoControl(hDrive, IOCTL_DISK_SET_DRIVE_LAYOUT_EX, (BYTE*)&DriveLayoutEx, size, NULL, 0, &size, NULL );
 	if (!r) {
 		uprintf("Could not set drive layout: %s\n", WindowsErrorString());
 		safe_closehandle(hDrive);

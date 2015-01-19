@@ -1778,12 +1778,12 @@ DWORD WINAPI FormatThread(void* param)
 					}
 					if (!SetupWinToGo(drive_name)) {
 						if (!IS_ERROR(FormatStatus))
-							FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_ISO_EXTRACT;
+							FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_ISO_EXTRACT);
 						goto out;
 					}
 				} else if (!ExtractISO(image_path, drive_name, FALSE)) {
 					if (!IS_ERROR(FormatStatus))
-						FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_ISO_EXTRACT;
+						FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_ISO_EXTRACT);
 					goto out;
 				}
 				if (iso_report.has_kolibrios) {
