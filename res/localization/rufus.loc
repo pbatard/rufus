@@ -45,6 +45,40 @@
 #   with a double quote ("). Also be careful to keep the special symbols such as %d, %s, \\b, \",  \n.
 # - Don't forget to check the translation guide from https://github.com/pbatard/rufus/wiki/Localization
 
+# List of all languages included in this file (with base LCID)
+# l "en-US" "English (English)" 0x0409
+# l "ar-SA" "Arabic (العربية)" 0x0401
+# l "bg-BG" "Bulgarian (Български)" 0x0402
+# l "zh-CN" "Chinese Simplified (简体中文)" 0x0804
+# l "zh-TW" "Chinese Traditional (正體中文)" 0x0404
+# l "hr-HR" "Croatian (Hrvatski)" 0x041a
+# l "cs-CZ" "Czech (Čeština)" 0x0405
+# l "da-DK" "Danish (Dansk)" 0x0406
+# l "nl-NL" "Dutch (Nederlands)" 0x0413
+# l "fi-FI" "Finnish (Suomi)" 0x040B
+# l "fr-FR" "French (Français)" 0x040c
+# l "de-DE" "German (Deutsch)" 0x0407
+# l "el-GR" "Greek (Ελληνικά)" 0x0408
+# l "hu-HU" "Hungarian (Magyar)" 0x040e
+# l "id-ID" "Indonesian (Bahasa Indonesia)" 0x0421
+# l "it-IT" "Italian (Italiano)" 0x0410
+# l "ja-JP" "Japanese (日本語)" 0x0411
+# l "ko-KR" "Korean (한국어)" 0x0412
+# l "lv-LV" "Latvian (Latviešu)" 0x0426
+# l "lt-LT" "Lithuanian (Lietuvių)" 0x0427
+# l "ms-MY" "Malay (Bahasa Malaysia)" 0x043e
+# l "nb-NO" "Norwegian (Norsk)" 0x0414
+# l "pl-PL" "Polish (Polski)" 0x0415
+# l "pt-BR" "Portuguese Brazilian (Português do Brasil)" 0x0416
+# l "pt-PT" "Portuguese Standard (Português)" 0x0816
+# l "ro-RO" "Romanian (Română)" 0x0418
+# l "ru-RU" "Russian (Русский)" 0x0419
+# l "sk-SK" "Slovak (Slovensky)" 0x041B
+# l "sl-SI" "Slovene (Slovenščina)" 0x0424
+# l "es-ES" "Spanish (Español)" 0x040a
+# l "sv-SE" "Swedish (Svenska)" 0x041d
+# l "tr-TR" "Turkish (Türkçe)" 0x041F
+# l "uk-UA" "Ukrainian (Українська)" 0x0422
 
 ################################################################################
 ############################ TRANSLATOR START COPY #############################
@@ -2409,7 +2443,7 @@ t MSG_262 "ISO podrška"
 t MSG_263 "Koristi PRAVE vel. jedinica"
 
 ################################################################################
-l "cs-CZ" "Czech (Čeština)"  0x0405
+l "cs-CZ" "Czech (Čeština)" 0x0405
 v 1.0.14
 b "en-US"
 
@@ -8349,6 +8383,441 @@ t MSG_260 "Mampatan NTFS"
 t MSG_261 "Menulis imej: %0.1f%% selesai"
 t MSG_262 "Sokongan ISO"
 t MSG_263 "Guna saiz seunit yang BETUL"
+
+################################################################################
+l "nb-NO" "Norwegian (Norsk)" 0x0414
+v 1.0.14
+b "en-US"
+
+# Main dialog
+g IDD_DIALOG
+s IDD_DIALOG 10,0
+t IDS_DEVICE_TXT "Enhet"
+t IDS_PARTITION_TYPE_TXT "Partisjon skjema og mål system type"
+t IDS_FILESYSTEM_TXT "Fil system"
+t IDS_CLUSTERSIZE_TXT "Cluster størrelse"
+t IDS_LABEL_TXT "Nytt volum navn"
+t IDS_FORMAT_OPTIONS_GRP "Format Valg"
+t IDC_BADBLOCKS "Sjekk enhet for dårlige blokker"
+t IDC_QUICKFORMAT "Hurtig formatering"
+t IDC_BOOT "Lager oppstartbar disk. Bruker:"
+t IDC_SET_ICON "Lager utvidet merke og ikon filer"
+t IDC_ABOUT "Om..."
+t IDC_LOG "Logg"
+t IDCANCEL "Lukk"
+t IDC_START "Start"
+t IDS_ADVANCED_OPTIONS_GRP "Avanserte Valg"
+t IDC_ENABLE_FIXED_DISKS "Før opp USB Hard Disker"
+t IDC_EXTRA_PARTITION "Legger til fiks for gamle BIOSer (ekstra partisjon, etc.)"
+t IDC_RUFUS_MBR "Bruk Rufus MBR med BIOS ID"
+s IDC_RUFUS_MBR 10,0
+m IDC_LANG 10,0
+s IDC_DEVICE 10,0
+s IDC_PARTITION_TYPE 10,0
+s IDC_FILESYSTEM 10,0
+s IDC_CLUSTERSIZE 10,0
+s IDC_LABEL 10,0
+s IDC_BOOT 10,0
+s IDC_PROGRESS 10,0
+s IDC_INFO 10,0
+m IDCANCEL 10,0
+m IDC_START 10,0
+s IDS_FORMAT_OPTIONS_GRP 10,0
+s IDS_ADVANCED_OPTIONS_GRP 10,0
+m IDC_NBPASSES 10,0
+m IDC_DISK_ID 10,0
+s IDC_BADBLOCKS 10,0
+s IDC_LOG 42,0
+m IDC_SELECT_ISO 10,0
+m IDC_BOOTTYPE 10,0
+
+# About dialog
+g IDD_ABOUTBOX
+t IDD_ABOUTBOX "Om Rufus"
+t IDC_ABOUT_LICENSE "Lisens"
+t IDC_ABOUT_UPDATES "Oppdatering"
+t IDOK "OK"
+s IDC_ABOUT_UPDATES 30,0
+
+# About -> License dialog
+g IDD_LICENSE
+t IDD_LICENSE "Rufus Lisens"
+t IDCANCEL "Lukk"
+
+# Notifications. You can trigger one of these by using Alt-R and re-launching Rufus
+g IDD_NOTIFICATION
+t IDC_MORE_INFO "Mer informasjon"
+t IDYES "Ja"
+t IDNO "Nei"
+
+# Log dialog
+g IDD_LOG
+t IDD_LOG "Logg"
+t IDC_LOG_CLEAR "Slett Logg"
+t IDC_LOG_SAVE "Lagre Logg"
+t IDCANCEL "Lukk Logg"
+
+# About -> Updates
+g IDD_UPDATE_POLICY
+t IDD_UPDATE_POLICY "Oppdatere politikk og innstillinger"
+t IDS_UPDATE_SETTINGS_GRP "Innstillinger"
+t IDS_UPDATE_FREQUENCY_TXT "Ser etter oppdateringer"
+t IDS_INCLUDE_BETAS_TXT "Inkluder beta versjoner"
+t IDC_CHECK_NOW "Sjekk Nå"
+t IDCANCEL "Lukk"
+s IDS_UPDATE_FREQUENCY_TXT 10,0
+s IDS_INCLUDE_BETAS_TXT 10,0
+m IDC_UPDATE_FREQUENCY 3,0
+s IDC_UPDATE_FREQUENCY 16,0
+m IDC_INCLUDE_BETAS 3,0
+s IDS_UPDATE_SETTINGS_GRP 12,0
+m IDS_CHECK_NOW_GRP 12,0
+s IDS_CHECK_NOW_GRP -12,0
+m IDC_CHECK_NOW 5,0
+m IDCANCEL 5,0
+
+# Dialog that appears when a new version is available
+g IDD_NEW_VERSION
+t IDD_NEW_VERSION "Sjekker for oppdateringer - Rufus"
+t IDS_NEW_VERSION_AVAIL_TXT "En ny versjon er tilgjengelig. Vennligst last ned den nyeste versjonen!"
+t IDC_WEBSITE "Klikk her for å gå til nettsiden"
+t IDS_NEW_VERSION_NOTES_GRP "Utgivelses notater"
+t IDS_NEW_VERSION_DOWNLOAD_GRP "Last ned"
+t IDC_DOWNLOAD "Last ned"
+t IDCANCEL "Lukk"
+
+# Messages used throughout the application
+t MSG_001 "Annen forekomst oppdaget"
+t MSG_002 "Annen Rufus utgave kjører.\n"
+	"Vennligst lukk den første utgaven, før åpne en ny."
+t MSG_003 "WARNING: ALL DATA ON DEVICE '%s' WILL BE DESTROYED.\n"
+	"For å fortsette denne operasjonen, klikk OK. For å avslutte klikk Avbryt."
+t MSG_004 "Rufus oppdaterings politikk"
+t MSG_005 "Vil du tillate at Rufus sjekker oppdaterings oppgaven online?"
+# Must be the same as IDD_DIALOG:IDCANCEL (i.e. "Close" - I know it's confusing)
+t MSG_006 "Lukk"
+t MSG_007 "Avbryt"
+t MSG_008 "Ja"
+t MSG_009 "Nei"
+t MSG_010 "Dårlige blokker funnet"
+t MSG_011 "Sjekk fullført: %d dårlig(e) blokke(r) funnet"
+	"  %d Lese feil\n  %d Skrive feil\n  %d Korrupte feil\n"
+# The following will contain the formatted message above as well as the name of the bad blocks logfile
+t MSG_012 "%s\nA Mer detaljert rapport kan bli funnet her:\n%s"
+t MSG_013 "Deaktivert"
+t MSG_014 "Daglig"
+t MSG_015 "Ukentlig"
+t MSG_016 "Månedlig"
+t MSG_017 "Bruker"
+t MSG_018 "Din versjon: %d.%d.%d (Utgave %d)"
+t MSG_019 "Siste versjon: %d.%d.%d (Utgave %d)"
+# *Short* size names. These can be used as suffixes
+t MSG_020 "bytes"
+t MSG_021 "KB"
+t MSG_022 "MB"
+t MSG_023 "GB"
+t MSG_024 "TB"
+t MSG_025 "PB"
+# *Long* size names, as they are displayed for the cluster size in the MS format dialog.
+t MSG_026 "bytes"	# Yes, this is a repeat from MSG_020
+t MSG_027 "kilobytes"
+t MSG_028 "megabytes"
+t MSG_029 "Standard"
+# The following gets appended to the file system, cluster size, etc.
+t MSG_030 "%s (Standard)"
+t MSG_031 "%s partisjon skjema for BIOS eller UEFI datamaskiner"
+t MSG_032 "%s partisjon skjema for BIOS datamaskiner"
+t MSG_033 "%s partisjon skjema for UEFI datamaskiner"
+# Number of bad block check passes (singular for 1 pass, plural for 2 or more passes)
+t MSG_034 "%d Passert"
+t MSG_035 "%d Passeringer"
+t MSG_036 "ISO Bilde"
+t MSG_037 "Applikasjon"
+t MSG_038 "Avbryt"
+t MSG_039 "Kjør"
+t MSG_040 "Last ned"
+t MSG_041 "Operasjon avbrutt av bruker"
+t MSG_042 "Feil"
+t MSG_043 "Feil: %s"
+t MSG_044 "Fil ned lasting"
+t MSG_045 "USB Lagrings enhet (Generisk)"
+t MSG_046 "%s (Disk %d) [%s]"
+# Used when a drive is detected that contains more than one partition
+t MSG_047 "Multippel Partisjoner"
+t MSG_048 "Rufus - Tømmer buffere"
+t MSG_049 "Rufus - Avbryter"
+
+# Error messages
+t MSG_050 "Suksess."
+t MSG_051 "Ubestemmelig feil under formateringen."
+t MSG_052 "Kan ikke bruke det valgte filsystem for dette mediet."
+t MSG_053 "Ikke tilgang til denne enheten."
+t MSG_054 "Mediet er skrive beskyttet."
+t MSG_055 "Enheten brukes av en annen prosess. "
+	"Vennligst lukk den andre prosessen som muligens bruker denne enheten."
+t MSG_056 "Hurtigformatering er ikke tilgjengelig for denne enheten."
+t MSG_057 "Volum navnet er ugyldig."
+t MSG_058 "Enhets håndteringen er ugyldig."
+t MSG_059 "Den valgte cluster størrelsen er ikke gyldig for denne enheten."
+t MSG_060 "Volumstørrelsen er ugyldig."
+t MSG_061 "Vennligst sett inn et media i stasjonen."
+t MSG_062 "Ustøttet kommando mottatt."
+t MSG_063 "Minne tildelingsfeil."
+t MSG_064 "Lesefeil."
+t MSG_065 "Skrivefeil."
+t MSG_066 "Installasjonsfeil"
+t MSG_067 "Kunne ikke åpne media. Er muligens i bruk av en annen prosess. "
+	"Vennligst koble fra, og prøv å koble til på nytt."
+t MSG_068 "Feil under stasjons partisjonering."
+t MSG_069 "Kunne ikke kopiere filer til målstasjonen."
+t MSG_070 "Brukeravbrutt."
+# See http://en.wikipedia.org/wiki/Thread_%28computing%29
+t MSG_071 "Ikke mulig å starte tråd."
+t MSG_072 "Dårlig blokk-kontroll ikke fullført."
+t MSG_073 "ISO bilde skann feil."
+t MSG_074 "ISO bilde utpakkings feil."
+t MSG_075 "Ikke mulig å igjen-innkoble volum."
+t MSG_076 "Ute av stand til å reparere filer for boot."
+t MSG_077 "Ikke mulig å tildele en stasjons bokstav."
+t MSG_078 "Kan ikke montere GUID stasjon."
+t MSG_079 "Denne enheten er ikke klar."
+
+t MSG_080 "Rufus oppdaget at Windows fortsatt skriver til denne USB enhetens interne buffer.\n\n"
+	"Avhengig av hastigheten på din USB enhet, vil muligens denne operasjonen ta lang til å fullføre, "
+	"spesielt for store filer.\n\nVi anbefaler at du lar Windows fullføre, slik at feil unngås. "
+	"Men blir du lei av og vente..., kan du bare koble fra enheten..."
+t MSG_081 "Ustøttet ISO"
+t MSG_082 "Denne versjonen av Rufus støtter bare oppstartbare ISOs basert på bootmgr/WinPE, isolinux eller EFI.\n"
+	"Denne ISO ser ikke ut til å støtte noen av delene..."
+t MSG_083 "Bytte ut %s?"
+t MSG_084 "Dette ISO bildet ser ut til å inneholde en foreldet versjon av '%s'.\n"
+	"Boot menyene vil muligens bli vist feil p.g.a. dette.\n\n"
+	"En nyere versjon kan lastes ned fra Rufus for å fikse dette problemet:\n"
+	"- Velg 'Ja' for å koble til internett og laste ned filen\n"
+	"- Velg 'Nei' for å bruke den eksisterende ISO filen\n"
+	"Hvis du ikke vet hva du skal gjøre, bør du velge 'Ja'.\n\n"
+	"OBS: Den nye filen vil bli lastet ned i den gjeldende mappen, og når"
+	"'%s' er der, vil den bli brukt automatisk."
+t MSG_085 "Laster ned %s"
+t MSG_086 "Intet bilde valgt"
+# The content between the quotes below (\"Create a bootable disk\") should match
+# the beginning of the IDC_BOOT text
+t MSG_087 "Vennligst klikk på disk knappen for å velge et bootbart bilde, "
+	"eller fjern merket i \"Velg et bootbart bilde\" kontroll boks."
+t MSG_088 "Bildet er for stort"
+t MSG_089 "Bildet er for stort for det valgte målet."
+t MSG_090 "Ikke støttet ISO"
+t MSG_091 "Når UEFI måltype blir brukt, er kun EFI bootbart ISO bilde støttet. "
+	"Vennligst velg en EFI bootbart ISO eller sett måltype i BIOS."
+t MSG_092 "Ikke støttet fil system"
+t MSG_093 "VIKTIGT: DENNE STASJONEN INNEHOLDER FLERE PARTISJONER!!\n\n"
+	"Denne inneholder kanskje partisjoner/volumer som ikke er listet og muligens ikke synlig i Windows. "
+	"Hvis du ønsker å fortsette, er du selv ansvarlig for evt. tapte data på disse partisjonene."
+t MSG_094 "Flere partisjoner oppdaget"
+t MSG_095 "DD Bilde"
+t MSG_096 "Kun FAT/FAT32 er støttet for denne type ISO. Vennligst velg FAT/FAT32 som Fil system."
+t MSG_097 "Kun 'bootmgr' eller 'WinPE' basert ISO kan bli brukt med NTFS."
+t MSG_098 "FAT/FAT32 kan kun bli brukt for isolinux baserte ISO bilder eller når måltypen er UEFI."
+t MSG_099 "Fil system begrensning"
+t MSG_100 "Dette ISO bildet inneholder filer større en 4GB, som er mer enn det"
+	"maksimalt tillate størrelsen for FAT eller FAT32 fil systemet."
+t MSG_101 "Mangler WIM støtte"
+t MSG_102 "Din plattform kan ikke pakke ut filer fra WIM arkiver. WIM utpakking "
+	"er is påkrevd for å lage EFI bootbart Windows 7 og Windows Vista USB stasjoner. Du kan fikse det "
+	"ved å installere siste versjon av 7-Zip.\nVil du besøke 7-zip nedlastings siden?"
+t MSG_103 "Lastet ned %s?"
+# Eg. "Grub4DOS v0.4 or later requires a 'grldr' file to be installed. Because this file
+#      is more than 100 KB in size, and always present on Grub4DOS ISO images, etc."
+t MSG_104 "%s eller senere er påkrevd for at '%s' filen kan bli innstallert.\n"
+	"P.g.a. filen er mer enn 100 KB i størrelse, og er alltid tilstede i %s ISO bilder, "
+	"og den ikke er innebygd i Rufus.\n\nRufus kan laste den den manglende filen for deg:\n"
+	"- Velg 'Ja' for å koble til internett og laste ned filen\n"
+	"- Velg 'Nei' hvis du vil kopiere denne filen manuelt til stasjonen senere\n\n"
+	"OBS: Denne filen vil bli lastet ned i den aktuelle mappen og straks den "
+	"'%s' er der, vil den bli brukt automatisk.\n"
+t MSG_105 "Å avbryte, vil enheten være i en USTABIL tilstand.\n"
+	"Hvis du er sikker på at du vil avbryte, klikk JA. Ellers klikk NEI."
+t MSG_106 "Vennligst velg en mappe"
+t MSG_107 "Alle filer"
+t MSG_108 "Rufus logg"
+t MSG_109 "0x%02X (Disk %d)"
+# "Cluster size" below should be the same as the label for IDS_CLUSTERSIZE_TXT
+# "kilobytes" should be the same as in MSG_027
+t MSG_110 "MS-DOS kan ikke boote fra en stasjon  som brukeren  64 kilobytes Cluster størrelse.\n"
+	"Vennligst bytt Cluster størrelse eller bruk FreeDOS."
+t MSG_111 "Inkompatibelt Cluster størrelse"
+# "%d:%02d" below is a duration (mins:secs)
+t MSG_112 "Formatere en stor UDF volum kan ta mye tid. Ved å bruke  USB 2.0 hastighet, den estimerte formaterings "
+	"tiden er %d:%02d, under denne tiden vil framgangslinjen virke frossen. Vennligst vær tålmodig!"
+t MSG_113 "Stort UDF volum"
+t MSG_114 "Dette bildet bruker Syslinux %s%s men dette programmet inkluderer kun installsjons filer for "
+	"Syslinux %s%s.\n\nNye versjoner av Syslinux er ikke kompatible med hverandre, og dermed "
+	"ikke mulig for Rufus og inkludere alle, 2 ekstra filer må lastes ned fra "
+	"Internett ('ldlinux.sys' og 'ldlinux.bss'):\n"
+	"- Velg 'Ja' For å koble til internett og laste ned disse filene\n"
+	"- Velg 'Nei' for å avbryte\n\n"
+	"OBS: Filene vil bli lastet ned i den aktuelle programmets mappe og vil bli brukt "
+	"automatisk hvis de er tilstede.\n"
+t MSG_115 "Nedlasting påkrevd"
+t MSG_116 "Dette bildet bruker Grub %s men programmet inkluderer kun installasjonsfiler for "
+	"Grub %s.\n\nForskjellige versjoner av Grub er muligens ikke kompatible med hverandre, og er ikke "
+	"ikke mulig å inkludere dem alle, Rufus vil prøve å finne en versjon av Grub "
+	"installasjon filen ('core.img') som passer til ditt bilde:\n"
+	"- Velg 'Ja' for å koble til internett og forsøke å laste den ned\n"
+	"- Velg 'Nei' for å bruke det innebygde versjonen uansett\n"
+	"- Velg 'Avbryt' for å avbryte\n\n"
+	"OBS: Filen vil bli lastet ned i det aktuelle program mappen og vil bli brukt "
+	"automatisk hvis tilgjengelig. Hvis ingen treff kan bli funnet, den innebygde versjonen vil bli brukt.\n"
+# Tooltips
+# Partition Scheme and Target Type
+t MSG_150 "Som oftest det tryggeste valget. Hvis du har en UEFI datamaskin og ønsker å installere "
+	"et operativsystem i EFI mode uansett, skal du velge en av de andre valgene"
+t MSG_151 "Bruk dette hvis du vil installere et operativsystem i EFI mode, men trenger å ha tilgang "
+	"til USB innholdet fra Windows XP"
+t MSG_152 "Det foretrukne valget for å installere operativsystemet i EFI mode og når "
+	"USB tilgang ikke er påkrevd av Windows XP"
+t MSG_153 "Test mønster: 0x%02X"
+t MSG_154 "Test mønster: 0x%02X, 0x%02X"
+t MSG_155 "Test mønster: 0x%02X, 0x%02X, 0x%02X"
+t MSG_156 "Test mønster: 0x%02X, 0x%02X, 0x%02X, 0x%02X"
+t MSG_157 "Setter mål fil systemet"
+t MSG_158 "Minimum størrelse en datablokk vil okkupere i filsystemet"
+t MSG_159 "Bruk dette feltet for å lage stasjonsnavn \nInternasjonale bokstaver er tillatt"
+t MSG_160 "Avanserte valg"
+t MSG_161 "Velg denne enheten for å teste for bad blocks bruke dette test mønsteret"
+t MSG_162 "Fjern merket i boksen for å bruke \"langsom\" format metode"
+t MSG_163 "Merk denne boksen for å gjøre USB stasjonen bootbar"
+t MSG_164 "metoden som vil bli brukt for å gjøre stasjonen bootbar"
+t MSG_165 "Klikk for å velge et bilde..."
+t MSG_166 "Merk denne boksen for å tillate visning av internasjonal merkelapp "
+	"og lage et stasjons ikon (lager en autorun.inf)"
+t MSG_167 "Installerer en MBR som tillater oppstarts valg og kan maskere BIOS USB stasjons ID"
+t MSG_168 "Forsøker å maskere første bootbare USB stasjon (vanligvis 0x80) som en annen stasjon.\n"
+	"Dette er kun nødvendig hvis du installerer Windows XP og har mer enn en stasjon"
+t MSG_169 "Lager en ekstra skjult partisjon og forsøker å justere partisjons grenser.\n"
+	"Dette kan gjøre det lettere å oppdage eldre BIOSer"
+t MSG_170 "Aktivere listen av USB Hard Disk kabinetter. BRUKES PÅ EGEN RISIKO!!!"
+t MSG_171 "Starter formaterings operasjonen.\nDette vil SLETTE data på målstasjonen!"
+t MSG_172 "Lisens in formasjon og krediteringer"
+t MSG_173 "Klikk for å velge..."
+# The following will appear in the about dialog
+t MSG_174 "Rufus - Det pålitelig USB Formaterings Programmet"
+t MSG_175 "Versjon %d.%d.%d (Utgave %d)"
+t MSG_176 "Norsk oversettelse: JED <mailto:volvo744gl@yahoo.com>"
+t MSG_177 "Rapporter feil og forespør forbedringer på:"
+t MSG_178 "Tilleggs Copyright:"
+t MSG_179 "Oppdaterings politikk:"
+t MSG_180 "Hvis du ønsker å tillate at programmet skal sjekke for oppdateringer, "
+	"du tillater da følgende informasjon å bli samlet inn til vår server(e):"
+t MSG_181 "Ditt operativsystems arkitektur og versjon"
+t MSG_182 "Versjon programmet du bruker"
+t MSG_183 "Din IP adresse"
+t MSG_184 "For muligheten å lage privat bruksstatestikk, vi vil lagre informasjonen for senere bruk, "
+	"\\b for det meste opp mot et år\\b0 . Men vi vil ikke frivillig avsløre noen av denne personens data til tredjepart."
+t MSG_185 "Oppdaterings prosess:"
+t MSG_186 "Rufus vil ikke installere eller kjøre bakgrunns programmer, derfor vil oppdateringskontrollen kun bli utført når hovedprogrammet kjører.\\line\n"
+	"Internett tilgang er selvfølgelig påkrevd for å se etter oppdateringer."
+t MSG_187 "Ugyldig bilde for valgt oppstart løsning"
+t MSG_188 "Det nåværende bilde passer ikke den valgte oppstarts valget. Vennligst velg ett annet bilde, eller velg et annet oppstarts valg."
+t MSG_189 "Dette ISO bildet er ikke kompatibelt med det valgte filsystemet"
+t MSG_191 "Skriving"
+t MSG_192 "Lesing"
+t MSG_193 "Lastet ned %s"
+t MSG_194 "Kunne ikke laste ned %s"
+# eg. "Bruker innebygget versjon av Grub2 fil(er)"
+t MSG_195 "Bruker innebygget versjon av %s fil(er)"
+t MSG_196 "VIKTIGT: DENNE STASJONEN BRUKER IKKE STANDARD SEKTOR STØRRELSE!!\n\n"
+	"Konvensjonelle stasjoner bruker en 512-byte sektor størrelse, mens denne stasjonen bruker en %d-byte. "
+	"I mangen tilfeller betyr dette at du IKKE vil kunne starte fra denne stasjonen.\n"
+	"Rufus kan fortsatt prøve å lage en oppstartbar stasjon, men det er INGEN GARANTI for at det vil fungere."
+t MSG_197 "Ikke standard sektor størrelse oppdaget."
+
+# Status messages - these messages will appear on the status bar
+t MSG_201 "Avbryter - Vennligst vent..."
+t MSG_202 "Skanner bilde..."
+t MSG_203 "Feilet i bilde søk"
+# Parameter: the name of an obsolete Syslinux .c32 module. eg: "Obsolete vesamenu.c32 detected"
+t MSG_204 "Foreldet %s oppdaget"
+# Display the name of the image selected. eg: "Using image: en_win7_x64_sp1.iso"
+t MSG_205 "Bruker bilde: %s"
+# Typically "Missing ldlinux.c32 file"
+t MSG_206 "Mangler %s fil"
+# The name proposed by Windows' Computer Management -> Disk Management when you try to format a drive
+# with an empty label. See http://rufus.akeo.ie/pics/default_name.png
+t MSG_207 "Nytt Volum"
+# Same message, once for singular and plural ("1 device found", "2 devices found")
+t MSG_208 "%d enhet funnet"
+t MSG_209 "%d enhet funnet"
+t MSG_210 "KLAR"
+t MSG_211 "Avbrutt"
+t MSG_212 "Feilet"
+# Used when a new update has been downloaded and launched
+t MSG_213 "Starter ett nytt program..."
+t MSG_214 "Oppstart feilet"
+# Open/Save file
+t MSG_215 "Åpnet %s"
+t MSG_216 "Lagret %s"
+# Formatting status (make sure you use a double % to print the percent sign)
+t MSG_217 "Formatert: %0.1f%% fullført"
+t MSG_218 "Lager filsystem: Oppgave %d/%d fullført"
+t MSG_219 "NTFS opprettet: %d%% fullført"
+# Parameter: the file system and an estimated duration in mins and secs.
+# eg. "Formatting (UDF) - Estimated duration 3:21..."
+# NB: if "estimated duration" is too long, just use "estimated" or an abbreviation
+t MSG_220 "Formaterer (%s) - estimeret varighet %d:%02d..."
+t MSG_221 "Lager merkelapp (Dette kan ta en stund)..."
+# Parameter: the file system. eg. "Formatting (NTFS)..."
+t MSG_222 "Formaterer (%s)..."
+t MSG_223 "NTFS retting (Checkdisk)..."
+t MSG_224 "Fjerner MBR/PBR/GPT strukturer..."
+t MSG_225 "Ber om stasjons tilgang..."
+t MSG_226 "Analyserer oppstarts arkiver..."
+t MSG_227 "Lukker eksisterende volum..."
+t MSG_228 "Skriver hoved oppstarts arkiv..."
+t MSG_229 "Skriver partisjon oppstarts arkiv..."
+t MSG_230 "Kopierer DOS filer..."
+t MSG_231 "Kopierer ISO filer..."
+t MSG_232 "Win7 EFI oppstarts oppsett (Dette kan ta litt tid)..."
+t MSG_233 "Ferdiggjør, vennligst vent..."
+# Takes a Syslinux version as parameter, eg. "Installing Syslinux v5.10..."
+t MSG_234 "Installerer Syslinux %s..."
+# Bad blocks status. eg: "Bad Blocks: Write pass 1/2 - 12.34% (0/0/1 errors)"
+# See MSG_191/192 for "Write pass"/"Read pass" translation
+t MSG_235 "Dårlige blokker: %s %d/%d - %0.2f%% (%d/%d/%d feil)"
+t MSG_236 "Dårlige blokker: Tester tilfeldig mønster"
+t MSG_237 "Dårlige blokker: Tester med mønster 0x%02X"
+# eg. "Partisjonerer (MBR)..."
+t MSG_238 "Partisjonerer (%s)..."
+t MSG_239 "Sletter partisjoner..."
+t MSG_240 "Laster ned %s: Kobler til..."
+t MSG_241 "Laster ned: %0.1f%%"
+t MSG_242 "Nedlasting av fil feilet."
+t MSG_243 "Sjekker for Rufus oppdateringer..."
+t MSG_244 "Oppdateringer: Ikke mulig å koble til internett"
+t MSG_245 "Oppdateringer: Ikke mulig å sjekke versjons data"
+t MSG_246 "En ny versjon av Rufus er tilgjengelig!"
+t MSG_247 "Ingen ny versjon av Rufus er funnet"
+t MSG_248 "Programmets register nøkler er slettet"
+t MSG_249 "Sletting av register nøkler feilet"
+# eg. "Fixed disk detection enabled" "ISO size check disabled"
+t MSG_250 "%s aktivert"
+t MSG_251 "%s deaktivert"
+t MSG_252 "Størrelse kontrollert"
+t MSG_253 "Harddisk oppdagelse"
+t MSG_254 "Tvinger stor FAT32 formatering"
+t MSG_255 "NoDriveTypeAutorun vil bli oppdaget ved avsluttning"
+t MSG_256 "Falsk stasjon oppdaget"
+t MSG_257 "Joliet støtte"
+t MSG_258 "Rock Ridge støtte"
+t MSG_259 "Tvungen oppdatering"
+t MSG_260 "NTFS pakking"
+t MSG_261 "Skriver bilde: %0.1f%% ferdig"
+# Cheat mode message to disable ISO Support so that only DD images can be opened
+t MSG_262 "ISO Støtte"
+# Cheat mode to force legacy size units, where 1 KB is 1024 bytes and NOT that fake 1000 bytes abomination!
+t MSG_263 "Bruk SKIKKELIG størrelse enhet"
+t MSG_264 "Sletter mappe '%s'"
+t MSG_265 "VMWare disk oppdagelse"
 
 ################################################################################
 l "pl-PL" "Polish (Polski)" 0x0415
