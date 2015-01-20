@@ -45,6 +45,10 @@ const GUID PARTITION_BASIC_DATA_GUID =
 const GUID PARTITION_MSFT_RESERVED_GUID =
 	{ 0xe3c9e316L, 0x0b5c, 0x4db8, {0x81, 0x7d, 0xf9, 0x2d, 0xf0, 0x02, 0x15, 0xae} };
 #endif
+#if !defined(PARTITION_SYSTEM_GUID)
+const GUID PARTITION_SYSTEM_GUID =
+	{ 0xc12a7328L, 0xf81f, 0x11d2, {0xba, 0x4b, 0x00, 0xa0, 0xc9, 0x3e, 0xc9, 0x3b} };
+#endif
 
 /*
  * Globals
@@ -102,7 +106,7 @@ BOOL GetAutoMount(BOOL* enabled)
  */
 #define CheckDriveIndex(DriveIndex) do { \
 	if ((DriveIndex < DRIVE_INDEX_MIN) || (DriveIndex > DRIVE_INDEX_MAX)) { \
-		uprintf("WARNING: Bad index value. Please check the code!\n"); \
+		uprintf("ERROR: Bad index value. Please check the code!\n"); \
 		goto out; \
 	} \
 	DriveIndex -= DRIVE_INDEX_MIN; } while (0)
@@ -403,7 +407,7 @@ static BOOL _GetDriveLettersAndType(DWORD DriveIndex, char* drive_letters, UINT*
 		hDrive = CreateFileA(logical_drive, GENERIC_READ, FILE_SHARE_READ|FILE_SHARE_WRITE,
 			NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 		if (hDrive == INVALID_HANDLE_VALUE) {
-			uprintf("Warning: could not open drive %c: %s\n", drive[0], WindowsErrorString());
+//			uprintf("Warning: could not open drive %c: %s\n", drive[0], WindowsErrorString());
 			continue;
 		}
 
@@ -684,7 +688,7 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 		return 0;
 	}
 	if (DiskGeometry->Geometry.BytesPerSector < 512) {
-		suprintf("WARNING: Drive 0x%02x reports a sector size of %d - Correcting to 512 bytes.\n",
+		suprintf("Warning: Drive 0x%02x reports a sector size of %d - Correcting to 512 bytes.\n",
 			DriveIndex, DiskGeometry->Geometry.BytesPerSector);
 		DiskGeometry->Geometry.BytesPerSector = 512;
 	}
@@ -864,6 +868,102 @@ BOOL MountVolume(char* drive_name, char *drive_guid)
 }
 
 /*
+ * Mount partition #part_nr, residing on the same disk as drive_name to an available
+ * drive letter. Returns the newly allocated drive string.
+ * We need to do this because, for instance, EFI System partitions are not assigned
+ * Volume GUIDs by the OS, and we need to have a letter assigned, for when we invoke
+ * bcdtool for Windows To Go. All in all, the process looks like this:
+ * 1. F: = \Device\HarddiskVolume9 (SINGLE LOOKUP)
+ * 2. Harddisk5Partition1 = \Device\HarddiskVolume9 (FULL LOOKUP)
+ * 3. Harddisk5Partition2 = \Device\HarddiskVolume10 (SINGLE LOOKUP)
+ * 4. DefineDosDevice(letter, \Device\HarddiskVolume10)
+ */
+char* AltMountVolume(const char* drive_name, uint8_t part_nr)
+{
+	static char mounted_drive[] = "?:";
+	const size_t bufsize = 65536;
+	char *buffer = NULL, *p, target[2][MAX_PATH], *ret = NULL;
+	int i;
+
+	mounted_drive[0] = GetUnusedDriveLetter();
+	if (mounted_drive[0] == 0) {
+		uprintf("Could not find an unused drive letter");
+		goto out;
+	}
+
+	target[0][0] = 0;
+	// Convert our drive letter to something like "\Device\HarddiskVolume9"
+	if (!QueryDosDeviceA(drive_name, target[0], MAX_PATH) && (strlen(target[0]) == 0)) {
+		uprintf("Could not get the DOS device name for '%s': %s", drive_name, WindowsErrorString());
+		goto out;
+	}
+
+	// Now parse the whole DOS device list to find the 'Harddisk#Partition#' that matches the above
+	// TODO: realloc if someone ever manages to burst through 64K of DOS devices
+	buffer = malloc(bufsize);
+	if (buffer == NULL)
+		goto out;
+
+	buffer[0] = 0;
+	if (!QueryDosDeviceA(NULL, buffer, bufsize)) {
+		uprintf("Could not get the DOS device list: %s", WindowsErrorString());
+		goto out;
+	}
+
+	p = buffer;
+	while (strlen(p) != 0) {
+		if ((strncmp("Harddisk", p, 8) == 0) && (strstr(&p[9], "Partition") != NULL)) {
+			target[1][0] = 0;
+			if (QueryDosDeviceA(p, target[1], MAX_PATH) && (strlen(target[1]) != 0))
+				if ((strcmp(target[1], target[0]) == 0) && (p[1] != ':'))
+					break;
+		}
+		p += strlen(p) + 1;
+	}
+
+	i = strlen(p);
+	if (i == 0) {
+		uprintf("Could not find partition mapping for %s", target[0]);
+		goto out;
+	}
+	
+	while ((--i > 0) && (isdigit(p[i])));
+	p[++i] = '0' + part_nr;
+	p[++i] = 0;
+
+	target[0][0] = 0;
+	if (!QueryDosDeviceA(p, target[0], MAX_PATH) && (strlen(target[0]) == 0)) {
+		uprintf("Could not get DOS device name for partition '%s': %s", drive_name, WindowsErrorString());
+		goto out;
+	}
+
+	if (!DefineDosDeviceA(DDD_RAW_TARGET_PATH | DDD_NO_BROADCAST_SYSTEM, mounted_drive, target[0])) {
+		uprintf("Could not mount '%s' to '%s': %s", target[0], mounted_drive, WindowsErrorString());
+		goto out;
+	}
+
+	uprintf("Successfully mounted '%s' (USB partition %d) as '%s'", target[0], part_nr, mounted_drive);
+	ret = mounted_drive;
+
+out:
+	safe_free(buffer);
+	return ret;
+}
+
+/*
+ * Unmount a volume that was mounted by AltmountVolume()
+ */
+BOOL AltUnmountVolume(const char* drive_name)
+{
+	if (!DefineDosDeviceA(DDD_REMOVE_DEFINITION | DDD_NO_BROADCAST_SYSTEM, drive_name, NULL)) {
+		uprintf("Could not unmount '%s': %s", drive_name, WindowsErrorString());
+		return FALSE;
+	}
+	uprintf("Successfully unmounted '%s'", drive_name);
+	return TRUE;
+}
+
+/*
  * Issue a complete remount of the volume
  */
 BOOL RemountVolume(char* drive_name)
@@ -909,7 +1009,7 @@ typedef struct _DRIVE_LAYOUT_INFORMATION_EX4 {
  * copy it got from the last IOCTL, and ignores your changes until you replug the drive
  * or issue an IOCTL_DISK_UPDATE_PROPERTIES.
  */
-BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL mbr_uefi_marker, BOOL add_uefi_togo)
+BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL mbr_uefi_marker, uint8_t extra_partitions)
 {
 	const char* PartitionTypeName[2] = { "MBR", "GPT" };
 	unsigned char* buffer;
@@ -917,12 +1017,11 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 	DRIVE_LAYOUT_INFORMATION_EX4 DriveLayoutEx = {0};
 	BOOL r;
 	DWORD i, size, bufsize, pn = 0;
-	LONGLONG size_in_sectors, extra_part_size_in_tracks = 0;
-	BOOL add_msr = FALSE; //TRUE;
+	LONGLONG main_part_size_in_sectors, extra_part_size_in_tracks = 0;
 
 	PrintInfoDebug(0, MSG_238, PartitionTypeName[partition_style]);
 
-	if (uefi_togo_size == 0)
+	if ((extra_partitions & XP_UEFI_TOGO) && (uefi_togo_size == 0))
 		uefi_togo_size = GetResourceSize(hMainInstance, MAKEINTRESOURCEA(IDR_UEFI_TOGO), _RT_RCDATA, "uefi-togo.img");
 
 	// Compute the start offset of our first partition
@@ -936,7 +1035,7 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 	}
 
 	// If required, set the MSR partition (GPT only - must be created before the data part)
-	if ((partition_style == PARTITION_STYLE_GPT) && (add_msr)) {
+	if ((partition_style == PARTITION_STYLE_GPT) && (extra_partitions & XP_MSR)) {
 		uprintf("Adding MSR partition");
 		DriveLayoutEx.PartitionEntry[pn].PartitionLength.QuadPart = 128*1024*1024;
 		DriveLayoutEx.PartitionEntry[pn].Gpt.PartitionType = PARTITION_MSFT_RESERVED_GUID;
@@ -948,24 +1047,27 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 	}
 
 	// Set our main data partition
-	size_in_sectors = (SelectedDrive.DiskSize - DriveLayoutEx.PartitionEntry[pn].StartingOffset.QuadPart) /
+	main_part_size_in_sectors = (SelectedDrive.DiskSize - DriveLayoutEx.PartitionEntry[pn].StartingOffset.QuadPart) /
 		// Need 33 sectors at the end for secondary GPT
 		SelectedDrive.Geometry.BytesPerSector - ((partition_style == PARTITION_STYLE_GPT)?33:0);
 	// Adjust the size according to extra partitions
-	if ((add_uefi_togo) || ((partition_style == PARTITION_STYLE_MBR) && (IsChecked(IDC_EXTRA_PARTITION)))) {
-		if (add_uefi_togo)	{
-			extra_part_size_in_tracks = (MIN_EXTRA_PART_SIZE + SelectedDrive.Geometry.SectorsPerTrack - 1) /
-				SelectedDrive.Geometry.SectorsPerTrack;
+	if (extra_partitions) {
+		if (extra_partitions & (XP_UEFI_TOGO | XP_EFI)) {
+			// TODO: this will explode to 800MB instead of 100MB on 4K sectors...
+			extra_part_size_in_tracks = ((MIN_EXTRA_PART_SIZE*((extra_partitions & XP_EFI)?100:1))
+				+ SelectedDrive.Geometry.SectorsPerTrack - 1) / SelectedDrive.Geometry.SectorsPerTrack;
 		} else {
-			extra_part_size_in_tracks = 1;	// One track for the extra part in non togo mode
+			extra_part_size_in_tracks = 1;	// One track for the extra partition
 		}
-		uprintf("Reserving %d tracks for extra partition", extra_part_size_in_tracks);
-		size_in_sectors = ((size_in_sectors / SelectedDrive.Geometry.SectorsPerTrack) - extra_part_size_in_tracks) *
-			SelectedDrive.Geometry.SectorsPerTrack;
-		if (size_in_sectors <= 0)
+		uprintf("Reserving %lld tracks (%s) for extra partition", extra_part_size_in_tracks,
+			SizeToHumanReadable(extra_part_size_in_tracks * SelectedDrive.Geometry.SectorsPerTrack *
+			SelectedDrive.Geometry.BytesPerSector, TRUE, FALSE));
+		main_part_size_in_sectors = ((main_part_size_in_sectors / SelectedDrive.Geometry.SectorsPerTrack) -
+			extra_part_size_in_tracks) * SelectedDrive.Geometry.SectorsPerTrack;
+		if (main_part_size_in_sectors <= 0)
 			return FALSE;
 	}
-	DriveLayoutEx.PartitionEntry[pn].PartitionLength.QuadPart = size_in_sectors * SelectedDrive.Geometry.BytesPerSector;
+	DriveLayoutEx.PartitionEntry[pn].PartitionLength.QuadPart = main_part_size_in_sectors * SelectedDrive.Geometry.BytesPerSector;
 	if (partition_style == PARTITION_STYLE_MBR) {
 		DriveLayoutEx.PartitionEntry[pn].Mbr.BootIndicator = IsChecked(IDC_BOOT);
 		DriveLayoutEx.PartitionEntry[pn].Mbr.HiddenSectors = SelectedDrive.Geometry.SectorsPerTrack;
@@ -994,24 +1096,23 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 	pn++;
 
 	// Set the optional extra partition
-	if (IsChecked(IDC_EXTRA_PARTITION) || (add_uefi_togo)) {
+	if (extra_partitions) {
 		// Should end on a track boundary
 		DriveLayoutEx.PartitionEntry[pn].StartingOffset.QuadPart = DriveLayoutEx.PartitionEntry[pn-1].StartingOffset.QuadPart +
-				DriveLayoutEx.PartitionEntry[pn-1].PartitionLength.QuadPart;
-		DriveLayoutEx.PartitionEntry[pn].PartitionLength.QuadPart = (add_uefi_togo)?uefi_togo_size:
+			DriveLayoutEx.PartitionEntry[pn-1].PartitionLength.QuadPart;
+		DriveLayoutEx.PartitionEntry[pn].PartitionLength.QuadPart = (extra_partitions & XP_UEFI_TOGO)?uefi_togo_size:
 			extra_part_size_in_tracks * SelectedDrive.Geometry.SectorsPerTrack * SelectedDrive.Geometry.BytesPerSector;
 		if (partition_style == PARTITION_STYLE_GPT) {
-			if (add_uefi_togo)	// already set to UNUSED GUID (000...000) otherwise
-				DriveLayoutEx.PartitionEntry[pn].Gpt.PartitionType = PARTITION_BASIC_DATA_GUID;
+			DriveLayoutEx.PartitionEntry[pn].Gpt.PartitionType = PARTITION_SYSTEM_GUID;
 			IGNORE_RETVAL(CoCreateGuid(&DriveLayoutEx.PartitionEntry[pn].Gpt.PartitionId));
-			wcscpy(DriveLayoutEx.PartitionEntry[pn].Gpt.Name, (add_uefi_togo)?L"UEFI:TOGO":L"Rufus Extra Partition");
+			wcscpy(DriveLayoutEx.PartitionEntry[pn].Gpt.Name, (extra_partitions & XP_UEFI_TOGO)?L"UEFI:TOGO":L"EFI system partition");
 		} else {
-			DriveLayoutEx.PartitionEntry[pn].Mbr.PartitionType = (add_uefi_togo)?0x01:RUFUS_EXTRA_PARTITION_TYPE;
+			DriveLayoutEx.PartitionEntry[pn].Mbr.PartitionType = (extra_partitions & XP_UEFI_TOGO)?0x01:RUFUS_EXTRA_PARTITION_TYPE;
 			DriveLayoutEx.PartitionEntry[pn].Mbr.HiddenSectors = SelectedDrive.Geometry.SectorsPerTrack;
 		}
 
 		// We need to write the TOGO partition before we refresh the disk
-		if (add_uefi_togo) {
+		if (extra_partitions & XP_UEFI_TOGO) {
 			uprintf("Writing UEFI:TOGO partition...");
 			if (!SetFilePointerEx(hDrive, DriveLayoutEx.PartitionEntry[pn].StartingOffset, NULL, FILE_BEGIN)) {
 				uprintf("Unable to set position");

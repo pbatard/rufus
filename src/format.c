@@ -1226,15 +1226,24 @@ out:
 }
 
 // http://technet.microsoft.com/en-ie/library/jj721578.aspx
-static BOOL SetupWinToGo(const char* drive_name)
+BOOL SetupWinToGo(const char* drive_name, BOOL use_ms_efi)
 {
 	char san_policy_path[] = "?:\\san_policy.xml", unattend_path[] = "?:\\Windows\\System32\\sysprep\\unattend.xml";
-	char *mounted_iso, image[128], cmd[128];
+	char *mounted_iso, *ms_efi, image[128], cmd[128];
+	wchar_t wVolumeName[] = L"?:";
 	unsigned char *buffer;
 	DWORD bufsize;
 	FILE* fd;
+	PF_DECL(FormatEx);
+	PF_INIT(FormatEx, Fmifs);
 
 	uprintf("Windows To Go mode selected");
+	if ((use_ms_efi) && (SelectedDrive.Geometry.MediaType != FixedMedia)) {
+		// Arthur's Theme: "♫ I know it's stupid... but it's true. ♫"
+		uprintf("Cannot set 'Windows To Go' for a GPT target unless it is a fixed drive");
+		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_NOT_SUPPORTED;
+		return FALSE;
+	}
 
 	// First, we need to access the install.wim image, that resides on the ISO
 	mounted_iso = MountISO(image_path);
@@ -1256,14 +1265,45 @@ static BOOL SetupWinToGo(const char* drive_name)
 	}
 	UnMountISO();
 
-	uprintf("Setting up boot for Windows To Go...");
-	static_sprintf(cmd, "%C:\\Windows\\System32\\bcdboot.exe %C:\\Windows /f ALL /s %C:",
-		drive_name[0], drive_name[0], drive_name[0]);
+	if (use_ms_efi) {
+		uprintf("Setting up MS EFI system partition");
+		if (pfFormatEx == NULL)
+			return FALSE;
+		ms_efi = AltMountVolume(drive_name, 3);	// MSR, main, EFI
+		if (ms_efi == NULL) {
+			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_ASSIGN_LETTER);
+			return FALSE;
+		}
+		fs_index = 0;
+		task_number = 0;
+		wVolumeName[0] = ms_efi[0];
+		// Boy do you *NOT* want to specify a label here, and spend
+		// HOURS figuring out why your EFI partition cannot boot...
+		pfFormatEx(wVolumeName, SelectedDrive.Geometry.MediaType, L"FAT32", L"",
+			TRUE, 1024, FormatExCallback);
+		if (IS_ERROR(FormatStatus)) {
+			uprintf("Failed to format EFI partition");
+			AltUnmountVolume(ms_efi);
+			return FALSE;
+		}
+	}
+
+	// TODO: Don't use ALL but adjust to what we effectively support
+	static_sprintf(cmd, "%s\\Windows\\System32\\bcdboot.exe %s\\Windows /f ALL /s %s",
+		drive_name, drive_name, (use_ms_efi)?ms_efi:drive_name);
+	uprintf("Enabling boot: '%s'", cmd);
 	if (RunCommand(cmd, NULL, TRUE) != 0) {
 		// Fatal, as the UFD is unlikely to boot then
 		uprintf("Command '%s' failed to run", cmd);
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_ISO_EXTRACT);
+		if (use_ms_efi) 
+			AltUnmountVolume(ms_efi);
 		return FALSE;
+	}
+
+	if (use_ms_efi) {
+		Sleep(200);
+		AltUnmountVolume(ms_efi);
 	}
 	UpdateProgress(OP_DOS, 99.0f);
 
@@ -1279,7 +1319,7 @@ static BOOL SetupWinToGo(const char* drive_name)
 			fclose(fd);
 	} else {
 		fclose(fd);
-		static_sprintf(cmd, "dism /Image:%C:\\ /Apply-Unattend:%s", drive_name[0], san_policy_path);
+		static_sprintf(cmd, "dism /Image:%s\\ /Apply-Unattend:%s", drive_name, san_policy_path);
 		if (RunCommand(cmd, NULL, TRUE) != 0)
 			uprintf("Command '%s' failed to run");
 	}
@@ -1367,7 +1407,7 @@ void update_progress(const uint64_t processed_bytes)
 DWORD WINAPI FormatThread(void* param)
 {
 	int i, r, pt, bt, fs, dt;
-	BOOL s, ret, use_large_fat32, add_uefi_togo;
+	BOOL s, ret, use_large_fat32, windows_to_go;
 	const DWORD SectorSize = SelectedDrive.Geometry.BytesPerSector;
 	DWORD rSize, wSize, BufSize, DriveIndex = (DWORD)(uintptr_t)param;
 	HANDLE hPhysicalDrive = INVALID_HANDLE_VALUE;
@@ -1377,7 +1417,7 @@ DWORD WINAPI FormatThread(void* param)
 	FILE* log_fd;
 	LARGE_INTEGER li;
 	uint64_t wb;
-	uint8_t *buffer = NULL, *aligned_buffer;
+	uint8_t *buffer = NULL, *aligned_buffer, extra_partitions = 0;
 	char *bb_msg, *guid_volume = NULL;
 	char drive_name[] = "?:\\";
 	char drive_letters[27];
@@ -1397,7 +1437,14 @@ DWORD WINAPI FormatThread(void* param)
 	pt = GETPARTTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
 	bt = GETBIOSTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
 	use_large_fat32 = (fs == FS_FAT32) && ((SelectedDrive.DiskSize > LARGE_FAT32_SIZE) || (force_large_fat32));
-	add_uefi_togo = (fs == FS_NTFS) && (dt == DT_ISO) && (iso_report.has_efi) && (bt == BT_UEFI);
+	windows_to_go = HAS_TOGO(iso_report) && (Button_GetCheck(GetDlgItem(hMainDialog, IDC_WINDOWS_TO_GO)) == BST_CHECKED);
+	// Find out if we need to add any extra partitions
+	if ((windows_to_go) && (bt == BT_UEFI) && (pt == PARTITION_STYLE_GPT))
+		// According to Microsoft, every GPT disk (we RUN Windows from) must have an MSR due to not having hidden sectors
+		// http://msdn.microsoft.com/en-us/library/windows/hardware/dn640535.aspx#gpt_faq_what_disk_require_msr
+		extra_partitions = XP_MSR | XP_EFI;
+	else if ((fs == FS_NTFS) && (dt == DT_ISO) && (iso_report.has_efi) && ((bt == BT_UEFI) || (windows_to_go)))
+		extra_partitions = XP_UEFI_TOGO;
 
 	PrintInfoDebug(0, MSG_225);
 	hPhysicalDrive = GetPhysicalHandle(DriveIndex, TRUE, TRUE);
@@ -1636,7 +1683,7 @@ DWORD WINAPI FormatThread(void* param)
 	UpdateProgress(OP_ZERO_MBR, -1.0f);
 	CHECK_FOR_USER_CANCEL;
 
-	if (!CreatePartition(hPhysicalDrive, pt, fs, (pt==PARTITION_STYLE_MBR) && (bt==BT_UEFI), add_uefi_togo)) {
+	if (!CreatePartition(hPhysicalDrive, pt, fs, (pt==PARTITION_STYLE_MBR) && (bt==BT_UEFI), extra_partitions)) {
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_PARTITION_FAILURE;
 		goto out;
 	}
@@ -1765,8 +1812,8 @@ DWORD WINAPI FormatThread(void* param)
 			if (image_path != NULL) {
 				UpdateProgress(OP_DOS, 0.0f);
 				PrintInfoDebug(0, MSG_231);
-				drive_name[2] = 0;
-				if (HAS_TOGO(iso_report) && (Button_GetCheck(GetDlgItem(hMainDialog, IDC_WINDOWS_TO_GO)) == BST_CHECKED)) {
+				drive_name[2] = 0;	// Ensure our drive is something like 'D:'
+				if (windows_to_go) {
 					// Sanity checks
 					if (fs != FS_NTFS) {
 						FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_INCOMPATIBLE_FS);
@@ -1776,7 +1823,7 @@ DWORD WINAPI FormatThread(void* param)
 						FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_NOT_SUPPORTED;
 						goto out;
 					}
-					if (!SetupWinToGo(drive_name)) {
+					if (!SetupWinToGo(drive_name, (extra_partitions & XP_EFI))) {
 						if (!IS_ERROR(FormatStatus))
 							FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_ISO_EXTRACT);
 						goto out;

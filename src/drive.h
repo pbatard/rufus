@@ -30,6 +30,10 @@
 #define IOCTL_MOUNTMGR_SET_AUTO_MOUNT       \
 	CTL_CODE(MOUNTMGRCONTROLTYPE, 16, METHOD_BUFFERED, FILE_READ_ACCESS | FILE_WRITE_ACCESS)
 
+#define XP_MSR       0x01
+#define XP_EFI       0x02
+#define XP_UEFI_TOGO 0x04
+
 /* We need a redef of these MS structure */
 typedef struct {
 	DWORD DeviceType;
@@ -62,8 +66,10 @@ BOOL AnalyzePBR(HANDLE hLogicalVolume);
 BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSystemNameSize, BOOL bSilent);
 BOOL UnmountVolume(HANDLE hDrive);
 BOOL MountVolume(char* drive_name, char *drive_guid);
+BOOL AltUnmountVolume(const char* drive_name);
+char* AltMountVolume(const char* drive_name, uint8_t part_nr);
 BOOL RemountVolume(char* drive_name);
-BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL mbr_uefi_marker, BOOL add_uefi_togo);
+BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL mbr_uefi_marker, uint8_t extra_partitions);
 BOOL DeletePartitions(HANDLE hDrive);
 BOOL RefreshDriveLayout(HANDLE hDrive);
 const char* GetPartitionType(BYTE Type);

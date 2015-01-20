@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Standard User I/O Routines (logging, status, etc.)
- * Copyright © 2011-2013 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2015 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -181,7 +181,7 @@ char* SizeToHumanReadable(uint64_t size, BOOL log, BOOL fake_units)
 	} else if (fake_units) {
 		if (hr_size < 8) {
 			static_sprintf(str_size, (fabs((hr_size*10.0)-(floor(hr_size + 0.5)*10.0)) < 0.5)?"%0.0f%s":"%0.1f%s",
-			hr_size, _msg_table[MSG_020+suffix-MSG_000]);
+				hr_size, _msg_table[MSG_020+suffix-MSG_000]);
 		} else {
 			t = (double)upo2((uint16_t)hr_size);
 			i_size = (uint16_t)((fabs(1.0f-(hr_size / t)) < 0.05f)?t:hr_size);
