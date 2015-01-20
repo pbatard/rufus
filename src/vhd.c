@@ -509,7 +509,7 @@ DWORD WINAPI WimProgressCallback(DWORD dwMsgId, WPARAM wParam, LPARAM lParam, PV
 
 	switch (dwMsgId) {
 	case WIM_MSG_PROGRESS:
-		uprintf("  %d%% completed", (DWORD)wParam);
+		PrintInfo(0, MSG_267, (DWORD)wParam);
 		UpdateProgress(OP_DOS, 0.98f*(DWORD)wParam);
 		break;
 	case WIM_MSG_PROCESS:

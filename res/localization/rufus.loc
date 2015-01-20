@@ -415,8 +415,10 @@ t MSG_195 "Using embedded version of %s file(s)"
 t MSG_196 "IMPORTANT: THIS DRIVE USES A NONSTANDARD SECTOR SIZE!!\n\n"
 	"Conventional drives use a 512-byte sector size but this drive uses a %d-byte one. "
 	"In many cases, this means that you will NOT be able to boot from this drive.\n"
-	"Rufus can still try to create a bootable drive, but there is NO WARRANTY that it will work."
+	"Rufus can try to create a bootable drive, but there is NO WARRANTY that it will work."
 t MSG_197 "Nonstandard sector size detected"
+t MSG_198 "Windows To Go can only be installed on a GPT partitioned drive if it has "
+	"the FIXED attribute set. The current drive was not detected as FIXED."
 
 # Status messages - these messages will appear on the status bar
 t MSG_201 "Cancelling - Please wait..."
@@ -505,6 +507,9 @@ t MSG_263 "Use PROPER size units"
 t MSG_264 "Deleting directory '%s'"
 t MSG_265 "VMWare disk detection"
 t MSG_266 "Dual UEFI/BIOS mode"
+t MSG_267 "Applying Windows image: %d%% completed"
+t MSG_268 "Applying Windows image..."
+
 ################################################################################
 ############################# TRANSLATOR END COPY ##############################
 ################################################################################

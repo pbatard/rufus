@@ -33,6 +33,7 @@
 #define XP_MSR       0x01
 #define XP_EFI       0x02
 #define XP_UEFI_TOGO 0x04
+#define XP_COMPAT    0x08
 
 /* We need a redef of these MS structure */
 typedef struct {

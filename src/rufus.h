@@ -42,7 +42,7 @@
 #define DRIVE_ACCESS_RETRIES        60			// How many times we should retry
 #define DRIVE_INDEX_MIN             0x00000080
 #define DRIVE_INDEX_MAX             0x000000C0
-#define MIN_EXTRA_PART_SIZE         2048		// Minimum size of the extra partition, in sectors
+#define MIN_EXTRA_PART_SIZE         (1024*1024)		// Minimum size of the extra partition, in bytes
 #define MAX_DRIVES                  (DRIVE_INDEX_MAX - DRIVE_INDEX_MIN)
 #define MAX_TOOLTIPS                128
 #define MAX_SIZE_SUFFIXES           6			// bytes, KB, MB, GB, TB, PB
@@ -210,7 +210,7 @@ typedef struct {
 	DWORD FirstSector;
 	char proposed_label[16];
 	int PartitionType;
-	int nPartitions;
+	int nPartitions;	// number of partitions we actually care about
 	int FSType;
 	BOOL has_protective_mbr;
 	BOOL has_mbr_uefi_marker;
@@ -396,6 +396,7 @@ extern BOOL FileIO(BOOL save, char* path, char** buffer, DWORD* size);
 extern unsigned char* GetResource(HMODULE module, char* name, char* type, const char* desc, DWORD* len, BOOL duplicate);
 extern DWORD GetResourceSize(HMODULE module, char* name, char* type, const char* desc);
 extern DWORD RunCommand(const char* cmdline, const char* dir, BOOL log);
+extern BOOL CompareGUID(const GUID *guid1, const GUID *guid2);
 extern BOOL GetUSBDevices(DWORD devnum);
 extern BOOL SetLGP(BOOL bRestore, BOOL* bExistingKey, const char* szPath, const char* szPolicy, DWORD dwValue);
 extern LONG GetEntryWidth(HWND hDropDown, const char* entry);

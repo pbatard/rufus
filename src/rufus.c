@@ -919,7 +919,6 @@ static void DisplayISOProps(void)
 	uprintf("  Has Symlinks: %s", YesNo(iso_report.has_symlinks));
 	uprintf("  Has a >4GB file: %s", YesNo(iso_report.has_4GB_file));
 	uprintf("  Uses Bootmgr: %s", YesNo(iso_report.has_bootmgr));
-	// TODO: report x86, x64, Arm, Itanic?
 	uprintf("  Uses EFI: %s%s", YesNo(iso_report.has_efi), IS_WIN7_EFI(iso_report) ? " (win7_x64)" : "");
 	uprintf("  Uses Grub 2: %s", YesNo(iso_report.has_grub2));
 	uprintf("  Uses Grub4DOS: %s", YesNo(iso_report.has_grub4dos));
@@ -1156,7 +1155,7 @@ static void ToggleToGo(void)
 
 static BOOL BootCheck(void)
 {
-	int i, fs, bt, dt, r;
+	int i, fs, bt, dt, pt, r;
 	FILE *fd;
 	DWORD len;
 	BOOL in_files_dir = FALSE;
@@ -1170,6 +1169,7 @@ static BOOL BootCheck(void)
 	syslinux_ldlinux_len[0] = 0; syslinux_ldlinux_len[1] = 0;
 	safe_free(grub2_buf);
 	dt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
+	pt = GETPARTTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
 	if ((dt == DT_ISO) || (dt == DT_IMG)) {
 		if (image_path == NULL) {
 			// Please click on the disc button to select a bootable ISO
@@ -1195,6 +1195,12 @@ static BOOL BootCheck(void)
 				MessageBoxU(hMainDialog, lmprintf(MSG_097), lmprintf(MSG_092), MB_OK|MB_ICONERROR|MB_IS_RTL);
 				return FALSE;
 			} else if (SelectedDrive.Geometry.MediaType != FixedMedia) {
+				if ((bt == BT_UEFI) && (pt == PARTITION_STYLE_GPT)) {
+					// We're screwed since we need access to 2 partitions at the same time to set this, which
+					// Windows can't do. Cue in Arthur's Theme: "♫ I know it's stupid... but it's true. ♫"
+					MessageBoxU(hMainDialog, lmprintf(MSG_198), lmprintf(MSG_190), MB_OK|MB_ICONERROR|MB_IS_RTL);
+					return FALSE;
+				}
 				// I never had any success with drives that have the REMOVABLE attribute set, no matter the
 				// method or tool I tried. If you manage to get this working, I'd like to hear from you!
 				if (MessageBoxU(hMainDialog, lmprintf(MSG_098), lmprintf(MSG_190), MB_YESNO|MB_ICONWARNING|MB_IS_RTL) != IDYES)
