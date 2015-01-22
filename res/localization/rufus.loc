@@ -4046,9 +4046,8 @@ t IDCANCEL "Fermer"
 t IDC_START "Démarrer"
 m IDC_START +5,0
 s IDC_START -2,0
-m ICANCEL +2,0
-s ICANCEL -2,0
-m IDC_LOG -2,0
+m IDCANCEL +2,0
+s IDCANCEL -2,0
 t IDS_ADVANCED_OPTIONS_GRP "Options avancées"
 t IDC_ENABLE_FIXED_DISKS "Lister les disques durs USB"
 t IDC_EXTRA_PARTITION "Ajouter les options de compatibilité pour vieux BIOS"
