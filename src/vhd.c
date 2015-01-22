@@ -109,6 +109,9 @@ PF_TYPE_DECL(RPC_ENTRY, RPC_STATUS, UuidCreate, (UUID __RPC_FAR*));
 static uint8_t wim_flags = 0;
 static char sevenzip_path[MAX_PATH];
 static const char conectix_str[] = VHD_FOOTER_COOKIE;
+static uint32_t wim_nb_files, wim_proc_files;
+static BOOL count_files;
+static DWORD LastRefresh;
 
 static BOOL Get7ZipPath(void)
 {
@@ -491,6 +494,7 @@ enum WIMMessage {
 	WIM_MSG_ALIGNMENT,	// Enables the caller to align a file resource on a particular alignment boundary.
 	WIM_MSG_RETRY,		// Sent when the file is being reapplied because of a network timeout.
 	WIM_MSG_SPLIT,		// Enables the caller to align a file resource on a particular alignment boundary.
+	WIM_MSG_FILEINFO,	// Used in conjunction with WimApplyImages()'s WIM_FLAG_FILEINFO flag to provide detailed file info.
 	WIM_MSG_INFO,		// Sent when an info message is available.
 	WIM_MSG_WARNING,	// Sent when a warning message is available.
 	WIM_MSG_CHK_PROCESS,
@@ -500,29 +504,73 @@ enum WIMMessage {
 
 #define INVALID_CALLBACK_VALUE 0xFFFFFFFF
 
+#define WIM_FLAG_RESERVED      0x00000001
+#define WIM_FLAG_VERIFY        0x00000002
+#define WIM_FLAG_INDEX         0x00000004
+#define WIM_FLAG_NO_APPLY      0x00000008
+#define WIM_FLAG_NO_DIRACL     0x00000010
+#define WIM_FLAG_NO_FILEACL    0x00000020
+#define WIM_FLAG_SHARE_WRITE   0x00000040
+#define WIM_FLAG_FILEINFO      0x00000080
+#define WIM_FLAG_NO_RP_FIX     0x00000100
+
 // Progress callback
 DWORD WINAPI WimProgressCallback(DWORD dwMsgId, WPARAM wParam, LPARAM lParam, PVOID pvIgnored)
 {
 	PBOOL pbCancel = NULL;
+	PWIN32_FIND_DATA pFileData;
 	char* str = NULL;
 	const char* level = NULL;
+	uint64_t size;
+	float apply_percent;
 
 	switch (dwMsgId) {
 	case WIM_MSG_PROGRESS:
+		// The default WIM progress is useless (freezes at 95%, which is usually when only half
+		// the files have been processed), so we don't use it
+#if 0
 		PrintInfo(0, MSG_267, (DWORD)wParam);
 		UpdateProgress(OP_DOS, 0.98f*(DWORD)wParam);
+#endif
 		break;
 	case WIM_MSG_PROCESS:
-		// The amount of files processed is a bit overwhelming, and displaying it all slows us down
+		// The amount of files processed is overwhelming (16k+ for a typical image),
+		// and trying to display it *WILL* slow us down, so we don't.
 #if 0
 		str = wchar_to_utf8((PWSTR)wParam);
-		uprintf("Applying: '%s'", str);
+		uprintf("%s", str);
 		PrintStatus(0, MSG_000, str);	// MSG_000 is "%s"
 #endif
+		if (count_files) {
+			wim_nb_files++;
+		} else {
+			wim_proc_files++;
+			if (GetTickCount() > LastRefresh + 100) {
+				// At the end of an actual apply, the WIM API re-lists a bunch of directories it
+				// already processed, so we end up with more entries than counted - ignore those.
+				if (wim_proc_files > wim_nb_files)
+					wim_proc_files = wim_nb_files;
+				LastRefresh = GetTickCount();
+				// x^3 progress, so as not to give a better idea right from the onset
+				// as to the dismal speed with which the WIM API can actually apply files...
+				apply_percent = 4.636942595f * ((float)wim_proc_files) / ((float)wim_nb_files);
+				apply_percent = apply_percent * apply_percent * apply_percent;
+				PrintInfo(0, MSG_267, apply_percent);
+				UpdateProgress(OP_DOS, apply_percent);
+			}
+		}
+		// Halt on error
 		if (IS_ERROR(FormatStatus)) {
 			pbCancel = (PBOOL)lParam;
 			*pbCancel = TRUE;
+			break;
 		}
+		break;
+	case WIM_MSG_FILEINFO:
+		str = wchar_to_utf8((PWSTR)wParam);
+		pFileData = (PWIN32_FIND_DATA)lParam;
+		size = (((uint64_t)pFileData->nFileSizeHigh) << 32) + pFileData->nFileSizeLow;
+		uprintf("'%s' (%s)", str, SizeToHumanReadable(size, FALSE, FALSE));
 		break;
 	case WIM_MSG_RETRY:
 		level = "retry";
@@ -596,13 +644,24 @@ static DWORD WINAPI WimApplyImageThread(LPVOID param)
 	}
 
 	uprintf("Applying Windows image...");
+	// Run a first pass using WIM_FLAG_NO_APPLY to count the files
+	wim_nb_files = 0;
+	wim_proc_files = 0;
+	LastRefresh = 0;
+	count_files = TRUE;
+	if (!pfWIMApplyImage(hImage, wdst, WIM_FLAG_NO_APPLY)) {
+		uprintf("  Could not count the files to apply: %s", WindowsErrorString());
+		goto out;
+	}
+	count_files = FALSE;
+	// Actual apply
 	if (!pfWIMApplyImage(hImage, wdst, 0)) {
 		uprintf("  Could not apply image: %s", WindowsErrorString());
 		goto out;
 	}
-
+	PrintInfo(0, MSG_267, 99.8f);
+	UpdateProgress(OP_DOS, 99.8f);
 	r = TRUE;
-	UpdateProgress(OP_FINALIZE, -1.0f);
 
 out:
 	if ((hImage != NULL) || (hWim != NULL)) {

@@ -341,7 +341,7 @@ extern DWORD syslinux_ldlinux_len[2];
 extern RUFUS_DRIVE_INFO SelectedDrive;
 extern const int nb_steps[FS_MAX];
 extern BOOL use_own_c32[NB_OLD_C32], detect_fakes, iso_op_in_progress, format_op_in_progress, right_to_left_mode;
-extern BOOL allow_dual_uefi_bios;
+extern BOOL allow_dual_uefi_bios, togo_mode;
 extern RUFUS_ISO_REPORT iso_report;
 extern int64_t iso_blocking_status;
 extern uint16_t rufus_version[4], embedded_sl_version[2];

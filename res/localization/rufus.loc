@@ -419,6 +419,8 @@ t MSG_196 "IMPORTANT: THIS DRIVE USES A NONSTANDARD SECTOR SIZE!!\n\n"
 t MSG_197 "Nonstandard sector size detected"
 t MSG_198 "Windows To Go can only be installed on a GPT partitioned drive if it has "
 	"the FIXED attribute set. The current drive was not detected as FIXED."
+t MSG_199 "Choose this if you want to INSTALL Windows, on a different disk."
+t MSG_200 "Choose this if you want to RUN Windows, from the USB."
 
 # Status messages - these messages will appear on the status bar
 t MSG_201 "Cancelling - Please wait..."
@@ -507,7 +509,7 @@ t MSG_263 "Use PROPER size units"
 t MSG_264 "Deleting directory '%s'"
 t MSG_265 "VMWare disk detection"
 t MSG_266 "Dual UEFI/BIOS mode"
-t MSG_267 "Applying Windows image: %d%% completed"
+t MSG_267 "Applying Windows image: %0.1f%% completed"
 t MSG_268 "Applying Windows image..."
 
 ################################################################################

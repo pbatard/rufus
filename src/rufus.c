@@ -498,7 +498,8 @@ static void SetMBRProps(void)
 	int dt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
 	BOOL needs_masquerading = (IS_WINPE(iso_report.winpe) && (!iso_report.uses_minint));
 
-	if ((!mbr_selected_by_user) && ((image_path == NULL) || (dt != DT_ISO) || (fs != FS_NTFS) || IS_GRUB(iso_report))) {
+	if ((!mbr_selected_by_user) && ((image_path == NULL) || (dt != DT_ISO) || (fs != FS_NTFS) || IS_GRUB(iso_report) ||
+		((togo_mode) && (Button_GetCheck(GetDlgItem(hMainDialog, IDC_WINDOWS_TO_GO)) == BST_CHECKED)) )) {
 		CheckDlgButton(hMainDialog, IDC_RUFUS_MBR, BST_UNCHECKED);
 		IGNORE_RETVAL(ComboBox_SetCurSel(hDiskID, 0));
 		return;
@@ -1658,6 +1659,8 @@ void InitDialog(HWND hDlg)
 	CreateTooltip(GetDlgItem(hDlg, IDC_ENABLE_FIXED_DISKS), lmprintf(MSG_170), -1);
 	CreateTooltip(GetDlgItem(hDlg, IDC_START), lmprintf(MSG_171), -1);
 	CreateTooltip(GetDlgItem(hDlg, IDC_ABOUT), lmprintf(MSG_172), -1);
+	CreateTooltip(GetDlgItem(hDlg, IDC_WINDOWS_INSTALL), lmprintf(MSG_199), -1);
+	CreateTooltip(GetDlgItem(hDlg, IDC_WINDOWS_TO_GO), lmprintf(MSG_200), -1);
 	// TODO: add new tooltips
 
 	ToggleAdvanced();	// We start in advanced mode => go to basic mode
@@ -2165,6 +2168,10 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_START_THREAD);
 			}
 			break;
+		case IDC_WINDOWS_INSTALL:
+			if (Button_GetCheck(GetDlgItem(hMainDialog, IDC_WINDOWS_INSTALL)) == BST_CHECKED)
+				SetMBRProps();
+			break;
 		case IDC_WINDOWS_TO_GO:
 			if (Button_GetCheck(GetDlgItem(hMainDialog, IDC_WINDOWS_TO_GO)) == BST_CHECKED) {
 				for (i=0; i<ComboBox_GetCount(hFileSystem); i++) {
@@ -2173,6 +2180,8 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 						break;
 					}
 				}
+				SetMBRProps();
+				CheckDlgButton(hMainDialog, IDC_RUFUS_MBR, BST_UNCHECKED);
 			}
 			break;
 		case IDC_RUFUS_MBR:

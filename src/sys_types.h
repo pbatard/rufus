@@ -32,6 +32,7 @@ typedef struct {
 /*
  * File system types for MBR partition tables
  * See http://en.wikipedia.org/wiki/Partition_type
+ * Also http://www.win.tue.nl/~aeb/partitions/partition_types-1.html
  * Note: If googling APTI (Alternative Partition Table Identification)
  * doesn't return squat, then IT ISN'T A REAL THING!!
  */

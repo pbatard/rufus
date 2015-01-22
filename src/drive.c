@@ -589,8 +589,10 @@ BOOL AnalyzeMBR(HANDLE hPhysicalDrive, const char* TargetName)
 	int i;
 
 	fake_fd._ptr = (char*)hPhysicalDrive;
-	// Must be set to 512, as we also use this method for images and we may not have a target UFD yet
-	fake_fd._bufsiz = 512;
+	fake_fd._bufsiz = SelectedDrive.Geometry.BytesPerSector;
+	// Might need correction, as we use this method for images and we may not have a target UFD yet
+	if (fake_fd._bufsiz < 512)
+		fake_fd._bufsiz = 512;
 
 	if (!is_br(&fake_fd)) {
 		uprintf("%s does not have an x86 %s\n", TargetName, mbr_name);
@@ -726,7 +728,7 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 		for (i=0; i<DriveLayout->PartitionCount; i++) {
 			if (DriveLayout->PartitionEntry[i].Mbr.PartitionType != PARTITION_ENTRY_UNUSED) {
 				part_type = DriveLayout->PartitionEntry[i].Mbr.PartitionType;
-				isUefiTogo = (i == 1) && (part_type == 0x01) &&
+				isUefiTogo = (i == 1) && (part_type == 0xef) &&
 					(DriveLayout->PartitionEntry[i].PartitionLength.QuadPart == uefi_togo_size);
 				suprintf("Partition %d%s:\n", i+1, isUefiTogo?" (UEFI:TOGO)":"");
 				for (j=0; j<ARRAYSIZE(mbr_mountable); j++) {
@@ -1025,8 +1027,11 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 
 	PrintInfoDebug(0, MSG_238, PartitionTypeName[partition_style]);
 
-	if ((extra_partitions & XP_UEFI_TOGO) && (uefi_togo_size == 0))
+	if ((extra_partitions & XP_UEFI_TOGO) && (uefi_togo_size == 0)) {
 		uefi_togo_size = GetResourceSize(hMainInstance, MAKEINTRESOURCEA(IDR_UEFI_TOGO), _RT_RCDATA, "uefi-togo.img");
+		if (uefi_togo_size == 0)
+			return FALSE;
+	}
 
 	// Compute the start offset of our first partition
 	if ((partition_style == PARTITION_STYLE_GPT) || (!IsChecked(IDC_EXTRA_PARTITION))) {
@@ -1064,6 +1069,9 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 	main_part_size_in_sectors = (SelectedDrive.DiskSize - DriveLayoutEx.PartitionEntry[pn].StartingOffset.QuadPart) /
 		// Need 33 sectors at the end for secondary GPT
 		SelectedDrive.Geometry.BytesPerSector - ((partition_style == PARTITION_STYLE_GPT)?33:0);
+	if (main_part_size_in_sectors <= 0)
+		return FALSE;
+
 	// Adjust the size according to extra partitions (which we always align to a track)
 	if (extra_partitions) {
 		uprintf("Adding extra partition");
@@ -1127,7 +1135,7 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 			IGNORE_RETVAL(CoCreateGuid(&DriveLayoutEx.PartitionEntry[pn].Gpt.PartitionId));
 			wcscpy(DriveLayoutEx.PartitionEntry[pn].Gpt.Name, (extra_partitions & XP_UEFI_TOGO)?L"UEFI:TOGO":L"EFI system partition");
 		} else {
-			DriveLayoutEx.PartitionEntry[pn].Mbr.PartitionType = (extra_partitions & XP_UEFI_TOGO)?0x01:RUFUS_EXTRA_PARTITION_TYPE;
+			DriveLayoutEx.PartitionEntry[pn].Mbr.PartitionType = (extra_partitions & XP_UEFI_TOGO)?0xef:RUFUS_EXTRA_PARTITION_TYPE;
 			if (extra_partitions & XP_COMPAT)
 				// Set the one track compatibility partition to be all hidden sectors
 				DriveLayoutEx.PartitionEntry[pn].Mbr.HiddenSectors = SelectedDrive.Geometry.SectorsPerTrack;

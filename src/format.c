@@ -50,8 +50,9 @@
 /*
  * Globals
  */
-DWORD FormatStatus, LastRefresh;
+DWORD FormatStatus;
 badblocks_report report;
+static DWORD LastRefresh;
 static float format_percent = 0.0f;
 static int task_number = 0;
 extern const int nb_steps[FS_MAX];
@@ -1320,7 +1321,8 @@ BOOL SetupWinToGo(const char* drive_name, BOOL use_ms_efi)
 		Sleep(200);
 		AltUnmountVolume(ms_efi);
 	}
-	UpdateProgress(OP_DOS, 99.0f);
+	PrintInfo(0, MSG_267, 99.9f);
+	UpdateProgress(OP_DOS, 99.9f);
 
 	// The following are non fatal if they fail
 	buffer = GetResource(hMainInstance, MAKEINTRESOURCEA(IDR_TOGO_SAN_POLICY_XML),
@@ -1348,6 +1350,7 @@ BOOL SetupWinToGo(const char* drive_name, BOOL use_ms_efi)
 		uprintf("Could not write '%s'\n", unattend_path);
 	}
 	fclose(fd);
+	PrintInfo(0, MSG_267, 100.0f);
 	UpdateProgress(OP_DOS, 100.0f);
 
 	return TRUE;
@@ -1452,7 +1455,7 @@ DWORD WINAPI FormatThread(void* param)
 	pt = GETPARTTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
 	bt = GETBIOSTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
 	use_large_fat32 = (fs == FS_FAT32) && ((SelectedDrive.DiskSize > LARGE_FAT32_SIZE) || (force_large_fat32));
-	windows_to_go = HAS_TOGO(iso_report) && (Button_GetCheck(GetDlgItem(hMainDialog, IDC_WINDOWS_TO_GO)) == BST_CHECKED);
+	windows_to_go = (togo_mode) && HAS_TOGO(iso_report) && (Button_GetCheck(GetDlgItem(hMainDialog, IDC_WINDOWS_TO_GO)) == BST_CHECKED);
 	// Find out if we need to add any extra partitions
 	if ((windows_to_go) && (bt == BT_UEFI) && (pt == PARTITION_STYLE_GPT))
 		// According to Microsoft, every GPT disk (we RUN Windows from) must have an MSR due to not having hidden sectors
