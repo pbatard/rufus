@@ -261,7 +261,7 @@ unpack_Z_stream(transformer_state_t *xstate)
 			{
 				int i;
 
-				i = de_stack - stackp;
+				i = (int)(de_stack - stackp);
 				if (outpos + i >= OBUFSIZ) {
 					do {
 						if (i > OBUFSIZ - outpos) {
@@ -279,7 +279,7 @@ unpack_Z_stream(transformer_state_t *xstate)
 							outpos = 0;
 						}
 						stackp += i;
-						i = de_stack - stackp;
+						i = (int)(de_stack - stackp);
 					} while (i > 0);
 				} else {
 					memcpy(outbuf + outpos, stackp, i);

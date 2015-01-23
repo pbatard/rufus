@@ -48,7 +48,7 @@ ssize_t FAST_FUNC transformer_write(transformer_state_t *xstate, const void *buf
 		xstate->mem_output_buf[size] = '\0';
 		nwrote = bufsize;
 	} else {
-		nwrote = full_write(xstate->dst_fd, buf, bufsize);
+		nwrote = full_write(xstate->dst_fd, buf, (unsigned)bufsize);
 		if (nwrote != (ssize_t)bufsize) {
 			bb_perror_msg("write");
 			nwrote = -1;

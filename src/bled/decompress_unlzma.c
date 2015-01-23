@@ -247,7 +247,7 @@ unpack_lzma_stream(transformer_state_t *xstate)
 	if (header.dict_size == 0)
 		header.dict_size++;
 
-	buffer = xmalloc(MIN(header.dst_size, header.dict_size));
+	buffer = xmalloc((size_t)MIN(header.dst_size, header.dict_size));
 
 	{
 		int num_probs;
@@ -279,7 +279,7 @@ unpack_lzma_stream(transformer_state_t *xstate)
 
 			if (state >= LZMA_NUM_LIT_STATES) {
 				int match_byte;
-				uint32_t pos = buffer_pos - rep0;
+				uint32_t pos = (uint32_t)(buffer_pos - rep0);
 
 				while (pos >= header.dict_size)
 					pos += header.dict_size;
@@ -432,7 +432,7 @@ unpack_lzma_stream(transformer_state_t *xstate)
 			len += LZMA_MATCH_MIN_LEN;
  IF_NOT_FEATURE_LZMA_FAST(string:)
 			do {
-				uint32_t pos = buffer_pos - rep0;
+				uint32_t pos = (uint32_t)(buffer_pos - rep0);
 				while (pos >= header.dict_size)
 					pos += header.dict_size;
 				previous_byte = buffer[pos];

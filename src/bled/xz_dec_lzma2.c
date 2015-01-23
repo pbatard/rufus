@@ -353,7 +353,7 @@ static bool XZ_FUNC dict_repeat(
 	if (dist >= dict->full || dist >= dict->size)
 		return false;
 
-	left = min_t(size_t, dict->limit - dict->pos, *len);
+	left = (uint32_t)min_t(size_t, dict->limit - dict->pos, *len);
 	*len -= left;
 
 	back = dict->pos - dist - 1;
@@ -387,7 +387,7 @@ static void XZ_FUNC dict_uncompressed(
 		if (copy_size > *left)
 			copy_size = *left;
 
-		*left -= copy_size;
+		*left -= (uint32_t)copy_size;
 
 		memcpy(dict->buf + dict->pos, b->in + b->in_pos, copy_size);
 		dict->pos += copy_size;
@@ -429,7 +429,7 @@ static uint32_t XZ_FUNC dict_flush(struct dictionary *dict, struct xz_buf *b)
 
 	dict->start = dict->pos;
 	b->out_pos += copy_size;
-	return copy_size;
+	return (uint32_t)copy_size;
 }
 
 /*****************
@@ -856,7 +856,7 @@ static bool XZ_FUNC lzma2_lzma(struct xz_dec_lzma2 *s, struct xz_buf *b)
 		if (tmp > s->lzma2.compressed - s->temp.size)
 			tmp = s->lzma2.compressed - s->temp.size;
 		if (tmp > in_avail)
-			tmp = in_avail;
+			tmp = (uint32_t)in_avail;
 
 		memcpy(s->temp.buf + s->temp.size, b->in + b->in_pos, tmp);
 
@@ -879,10 +879,10 @@ static bool XZ_FUNC lzma2_lzma(struct xz_dec_lzma2 *s, struct xz_buf *b)
 		if (!lzma_main(s) || s->rc.in_pos > s->temp.size + tmp)
 			return false;
 
-		s->lzma2.compressed -= s->rc.in_pos;
+		s->lzma2.compressed -= (uint32_t)s->rc.in_pos;
 
 		if (s->rc.in_pos < s->temp.size) {
-			s->temp.size -= s->rc.in_pos;
+			s->temp.size -= (uint32_t)s->rc.in_pos;
 			memmove(s->temp.buf, s->temp.buf + s->rc.in_pos,
 					s->temp.size);
 			return true;
@@ -909,7 +909,7 @@ static bool XZ_FUNC lzma2_lzma(struct xz_dec_lzma2 *s, struct xz_buf *b)
 		if (in_avail > s->lzma2.compressed)
 			return false;
 
-		s->lzma2.compressed -= in_avail;
+		s->lzma2.compressed -= (uint32_t)in_avail;
 		b->in_pos = s->rc.in_pos;
 	}
 
@@ -919,7 +919,7 @@ static bool XZ_FUNC lzma2_lzma(struct xz_dec_lzma2 *s, struct xz_buf *b)
 			in_avail = s->lzma2.compressed;
 
 		memcpy(s->temp.buf, b->in + b->in_pos, in_avail);
-		s->temp.size = in_avail;
+		s->temp.size = (uint32_t)in_avail;
 		b->in_pos += in_avail;
 	}
 

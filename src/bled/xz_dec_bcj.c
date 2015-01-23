@@ -394,7 +394,7 @@ static void XZ_FUNC bcj_apply(struct xz_dec_bcj *s,
 	}
 
 	*pos += filtered;
-	s->pos += filtered;
+	s->pos += (uint32_t)filtered;
 }
 
 /*

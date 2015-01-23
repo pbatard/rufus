@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Registry access
- * Copyright © 2012-2013 Pete Batard <pete@akeo.ie>
+ * Copyright © 2012-2015 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -82,13 +82,20 @@ static __inline BOOL _GetRegistryKey(HKEY key_root, const char* key_name, DWORD 
 		safe_strcat(long_key_name, sizeof(long_key_name), key_name);
 		long_key_name[sizeof("SOFTWARE\\") + i-1] = 0;
 		i++;
-		if (RegOpenKeyExA(key_root, long_key_name, 0, KEY_READ, &hApp) != ERROR_SUCCESS)
+		if (RegOpenKeyExA(key_root, long_key_name, 0, KEY_READ, &hApp) != ERROR_SUCCESS) {
+			hApp = NULL;
 			goto out;
+		}
 	} else {
-		if ( (RegOpenKeyExA(key_root, "SOFTWARE", 0, KEY_READ|KEY_CREATE_SUB_KEY, &hSoftware) != ERROR_SUCCESS)
-			 || (RegCreateKeyExA(hSoftware, COMPANY_NAME "\\" APPLICATION_NAME, 0, NULL, 0,
-				KEY_SET_VALUE|KEY_QUERY_VALUE|KEY_CREATE_SUB_KEY, NULL, &hApp, &dwDisp) != ERROR_SUCCESS) )
-		goto out;
+		if (RegOpenKeyExA(key_root, "SOFTWARE", 0, KEY_READ|KEY_CREATE_SUB_KEY, &hSoftware) != ERROR_SUCCESS) {
+			hSoftware = NULL;
+			goto out;
+		}
+		if (RegCreateKeyExA(hSoftware, COMPANY_NAME "\\" APPLICATION_NAME, 0, NULL, 0,
+			KEY_SET_VALUE | KEY_QUERY_VALUE | KEY_CREATE_SUB_KEY, NULL, &hApp, &dwDisp) != ERROR_SUCCESS) {
+			hApp = NULL;
+			goto out;
+		}
 	}
 
 	s = RegQueryValueExA(hApp, &key_name[i], NULL, &dwType, (LPBYTE)dest, &dwSize);
@@ -97,8 +104,10 @@ static __inline BOOL _GetRegistryKey(HKEY key_root, const char* key_name, DWORD 
 		r = TRUE;
 	}
 out:
-	RegCloseKey(hSoftware);
-	RegCloseKey(hApp);
+	if (hSoftware != NULL)
+		RegCloseKey(hSoftware);
+	if (hApp != NULL)
+		RegCloseKey(hApp);
 	return r;
 }
 
@@ -109,17 +118,23 @@ static __inline BOOL _SetRegistryKey(HKEY key_root, const char* key_name, DWORD 
 	HKEY hSoftware = NULL, hApp = NULL;
 	DWORD dwDisp, dwType = reg_type;
 
-	if ( (RegOpenKeyExA(key_root, "SOFTWARE", 0, KEY_READ|KEY_CREATE_SUB_KEY, &hSoftware) != ERROR_SUCCESS)
-	  || (RegCreateKeyExA(hSoftware, COMPANY_NAME "\\" APPLICATION_NAME, 0, NULL, 0,
-		KEY_SET_VALUE|KEY_QUERY_VALUE|KEY_CREATE_SUB_KEY, NULL, &hApp, &dwDisp) != ERROR_SUCCESS) ) {
+	if (RegOpenKeyExA(key_root, "SOFTWARE", 0, KEY_READ|KEY_CREATE_SUB_KEY, &hSoftware) != ERROR_SUCCESS) {
+		hSoftware = NULL;
+		goto out;
+	}
+	if (RegCreateKeyExA(hSoftware, COMPANY_NAME "\\" APPLICATION_NAME, 0, NULL, 0,
+		KEY_SET_VALUE|KEY_QUERY_VALUE|KEY_CREATE_SUB_KEY, NULL, &hApp, &dwDisp) != ERROR_SUCCESS) {
+		hApp = NULL;
 		goto out;
 	}
 
 	r = (RegSetValueExA(hApp, key_name, 0, dwType, src, src_size) == ERROR_SUCCESS);
 
 out:
-	RegCloseKey(hSoftware);
-	RegCloseKey(hApp);
+	if (hSoftware != NULL)
+		RegCloseKey(hSoftware);
+	if (hApp != NULL)
+		RegCloseKey(hApp);
 	return r;
 }
 

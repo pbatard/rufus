@@ -192,12 +192,12 @@ void FAST_FUNC data_extract_all(archive_handle_t *archive_handle)
 		 * it has lchmod which seems to do nothing!
 		 * so we use chmod... */
 		if (!(archive_handle->ah_flags & ARCHIVE_DONT_RESTORE_PERM)) {
-			chmod(file_header->name, file_header->mode);
+			(void)chmod(file_header->name, file_header->mode);
 		}
 		if (archive_handle->ah_flags & ARCHIVE_RESTORE_DATE) {
 			struct timeval t[2];
 
-			t[1].tv_sec = t[0].tv_sec = file_header->mtime;
+			t[1].tv_sec = t[0].tv_sec = (long)file_header->mtime;
 			t[1].tv_usec = t[0].tv_usec = 0;
 			utimes(file_header->name, t);
 		}

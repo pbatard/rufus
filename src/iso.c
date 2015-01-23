@@ -283,8 +283,10 @@ static void print_extracted_file(char* psz_fullpath, int64_t i_file_length)
 {
 	size_t i, nul_pos;
 
+	if (psz_fullpath == NULL)
+		return;
 	// Replace slashes with backslashes and append the size to the path for UI display
-	nul_pos = safe_strlen(psz_fullpath);
+	nul_pos = strlen(psz_fullpath);
 	for (i=0; i<nul_pos; i++)
 		if (psz_fullpath[i] == '/') psz_fullpath[i] = '\\';
 	safe_sprintf(&psz_fullpath[nul_pos], 24, " (%s)", SizeToHumanReadable(i_file_length, TRUE, FALSE));
@@ -973,10 +975,13 @@ typedef enum _DETACH_VIRTUAL_DISK_FLAG {
 	DETACH_VIRTUAL_DISK_FLAG_NONE = 0x00000000
 } DETACH_VIRTUAL_DISK_FLAG;
 
+#ifndef _VIRTUAL_STORAGE_TYPE_DEFINED
+#define _VIRTUAL_STORAGE_TYPE_DEFINED
 typedef struct _VIRTUAL_STORAGE_TYPE {
 	ULONG DeviceId;
 	GUID  VendorId;
 } VIRTUAL_STORAGE_TYPE, *PVIRTUAL_STORAGE_TYPE;
+#endif
 
 typedef struct _OPEN_VIRTUAL_DISK_PARAMETERS {
 	OPEN_VIRTUAL_DISK_VERSION Version;

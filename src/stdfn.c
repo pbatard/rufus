@@ -691,6 +691,7 @@ DWORD WINAPI SetLGPThread(LPVOID param)
 		NULL, &policy_key, &disp);
 	if (r != ERROR_SUCCESS) {
 		uprintf("SetLGP: Failed to open LGPO path %s - error %x\n", p->szPath, hr);
+		policy_key = NULL;
 		goto error;
 	}
 
@@ -759,6 +760,7 @@ BOOL SetLGP(BOOL bRestore, BOOL* bExistingKey, const char* szPath, const char* s
 		CloseHandle(thread_id);
 		return FALSE;
 	}
-	GetExitCodeThread(thread_id, &r);
+	if (!GetExitCodeThread(thread_id, &r))
+		return FALSE;
 	return (BOOL) r;
 }

@@ -669,7 +669,8 @@ out:
 		if (hImage != NULL) pfWIMCloseHandle(hImage);
 		if (hWim != NULL) pfWIMCloseHandle(hWim);
 	}
-	pfWIMUnregisterMessageCallback(NULL, (FARPROC)WimProgressCallback);
+	if (pfWIMUnregisterMessageCallback != NULL)
+		pfWIMUnregisterMessageCallback(NULL, (FARPROC)WimProgressCallback);
 	safe_free(wimage);
 	safe_free(wdst);
 	ExitThread((DWORD)r);
@@ -689,6 +690,7 @@ BOOL WimApplyImage(const char* image, int index, const char* dst)
 		return FALSE;
 	}
 	WaitForSingleObject(handle, INFINITE);
-	GetExitCodeThread(handle, &dw);
+	if (!GetExitCodeThread(handle, &dw))
+		return FALSE;
 	return (BOOL)dw;
 }

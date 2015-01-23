@@ -3,7 +3,7 @@
  * Compensating for what Microsoft should have done a long long time ago.
  * Also see http://utf8everywhere.org/
  *
- * Copyright © 2010-2014 Pete Batard <pete@akeo.ie>
+ * Copyright © 2010-2015 Pete Batard <pete@akeo.ie>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -507,7 +507,7 @@ static __inline int SHDeleteDirectoryExU(HWND hwnd, const char* pszPath, FILEOP_
 	size_t wpszPath_len = strlen(pszPath) + 2;
 	wchar_t* wpszPath = (wchar_t*)calloc(wpszPath_len, sizeof(wchar_t));
 	SHFILEOPSTRUCTW shfo = { hwnd, FO_DELETE, wpszPath, NULL, fFlags, FALSE, NULL, NULL };
-	utf8_to_wchar_no_alloc(pszPath, wpszPath, wpszPath_len);
+	utf8_to_wchar_no_alloc(pszPath, wpszPath, (int)wpszPath_len);
 	// FOF_SILENT | FOF_NOERRORUI | FOF_NOCONFIRMATION,
 	ret = SHFileOperationW(&shfo);
 	wfree(pszPath);

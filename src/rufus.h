@@ -24,6 +24,7 @@
 // Disable some VS2012 Code Analysis warnings
 #pragma warning(disable: 4996)		// Ignore deprecated (eg. GetVersionEx()), as we have to contend with XP
 #pragma warning(disable: 28159)		// VS2012 wants us to use GetTickCount64(), but it's not available on XP
+#pragma warning(disable: 6258)		// I know what I'm using TerminateThread for
 #endif
 
 #pragma once

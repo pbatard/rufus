@@ -884,9 +884,9 @@ BOOL MountVolume(char* drive_name, char *drive_guid)
 char* AltMountVolume(const char* drive_name, uint8_t part_nr)
 {
 	static char mounted_drive[] = "?:";
-	const size_t bufsize = 65536;
+	const DWORD bufsize = 65536;
 	char *buffer = NULL, *p, target[2][MAX_PATH], *ret = NULL;
-	int i;
+	size_t i;
 
 	mounted_drive[0] = GetUnusedDriveLetter();
 	if (mounted_drive[0] == 0) {
