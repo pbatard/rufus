@@ -15,6 +15,10 @@ content. PLEASE, do not just look at this Changelog when updating your
 translation, but always use the English section of rufus.loc as your base.
 For instance, MSG_114, that was introduced in v1.0.8 is MORE than one line!
 
+o Version 1.0.15 (2015.01.23)
+  - IDD_ISO_EXTRACT dialog and associated translations have been removed
+  Note: since this doesn't require translator involvement, I have applied the changes to existing translations.
+
 o Version 1.0.14 (2014.11.27)
   - Updated translations for the new 1.5.0 UI font and layout.
   Note: since this doesn't require translator involvement, I have applied the changes to existing translations.

@@ -87,7 +87,7 @@
 # http://download.microsoft.com/download/9/5/E/95EF66AF-9026-4BB0-A41D-A4F81802D92C/%5BMS-LCID%5D.pdf
 # for the LCID (0x####) codes you should use
 l "en-US" "English (English)" 0x0409, 0x0809, 0x0c09, 0x1009, 0x1409, 0x1809, 0x1c09, 0x2009, 0x2409, 0x2809, 0x2c09, 0x3009, 0x3409, 0x3809, 0x3c09, 0x4009, 0x4409, 0x4809
-v 1.0.14
+v 1.0.15
 
 # Main dialog
 g IDD_DIALOG
@@ -586,12 +586,6 @@ t IDS_NEW_VERSION_DOWNLOAD_GRP "تحميل"
 t IDC_DOWNLOAD "تحميل"
 t IDCANCEL "إغلاق"
 
-# Dialog that appears when scanning/extracting ISO files
-g IDD_ISO_EXTRACT
-t IDD_ISO_EXTRACT "نسخ ملفات ISO..."
-t IDC_ISO_FILENAME "فتح صورة الـ ISO - الرجاء الإنتظار..."
-t IDC_ISO_ABORT "إلغاء"
-
 # Messages used throughout the application
 t MSG_001 "إكتشاف نموذج آخر"
 t MSG_002 "هناك تطبيق آخر من روفوس يعمل.\n"
@@ -901,7 +895,7 @@ t MSG_261 "كتابة صورة: تم %0.1f%%"
 
 ######################################################################
 l "bg-BG" "Bulgarian (Български)" 0x0402
-v 1.0.14
+v 1.0.15
 b "en-US"
 
 # Main dialog
@@ -1012,12 +1006,6 @@ t IDS_NEW_VERSION_NOTES_GRP "Бележки по дистрибуцията"
 t IDS_NEW_VERSION_DOWNLOAD_GRP "Изтегли"
 t IDC_DOWNLOAD "Изтегли"
 t IDCANCEL "Затвори"
-
-# Dialog that appears when scanning/extracting ISO files
-g IDD_ISO_EXTRACT
-t IDD_ISO_EXTRACT "Копиране на ISO файловете..."
-t IDC_ISO_FILENAME "Отваряне на ISO образа - моля изчакайте..."
-t IDC_ISO_ABORT "Прекрати"
 
 # Messages used throughout the application
 t MSG_001 "Отворено е друго приложение"
@@ -1327,7 +1315,7 @@ t MSG_263 "Използвайте ПОДХОДЯЩ размер единици"
 
 ################################################################################
 l "zh-CN" "Chinese Simplified (简体中文)" 0x0804, 0x1004
-v 1.0.14
+v 1.0.15
 b "en-US"
 
 # Main dialog
@@ -1399,12 +1387,6 @@ t IDS_NEW_VERSION_NOTES_GRP "发行说明"
 t IDS_NEW_VERSION_DOWNLOAD_GRP "下载"
 t IDC_DOWNLOAD "下载"
 t IDCANCEL "关闭"
-
-# Dialog that appears when scanning/extracting ISO files
-g IDD_ISO_EXTRACT
-t IDD_ISO_EXTRACT "复制 ISO 文件..."
-t IDC_ISO_FILENAME "打开 ISO 映像，请稍候..."
-t IDC_ISO_ABORT "取消"
 
 # Messages used throughout the application
 t MSG_001 "重复进程"
@@ -1690,7 +1672,7 @@ t MSG_263 "准确存储单位转换"
 
 ################################################################################
 l "zh-TW" "Chinese Traditional (正體中文)" 0x0404, 0x0c04, 0x1404, 0x7c04
-v 1.0.14
+v 1.0.15
 b "en-US"
 
 # Main dialog
@@ -1776,12 +1758,6 @@ t IDS_NEW_VERSION_NOTES_GRP "版本說明"
 t IDS_NEW_VERSION_DOWNLOAD_GRP "下載"
 t IDC_DOWNLOAD "下載"
 t IDCANCEL "關閉"
-
-# Dialog that appears when scanning/extracting ISO files
-g IDD_ISO_EXTRACT
-t IDD_ISO_EXTRACT "正在複製映像檔..."
-t IDC_ISO_FILENAME "讀取映像檔中，請稍候..."
-t IDC_ISO_ABORT "取消"
 
 # Messages used throughout the application
 t MSG_001 "錯誤"
@@ -2064,7 +2040,7 @@ t MSG_263 "正規位元單位"
 
 ################################################################################
 l "hr-HR" "Croatian (Hrvatski)" 0x041a, 0x081a, 0x101a
-v 1.0.14
+v 1.0.15
 b "en-US"
 
 # Main dialog
@@ -2136,12 +2112,6 @@ t IDS_NEW_VERSION_NOTES_GRP "Bilješke distribucije"
 t IDS_NEW_VERSION_DOWNLOAD_GRP "Preuzmi"
 t IDC_DOWNLOAD "Preuzmi"
 t IDCANCEL "Zatvori"
-
-# Dialog that appears when scanning/extracting ISO files
-g IDD_ISO_EXTRACT
-t IDD_ISO_EXTRACT "Kopiram ISO datoteku..."
-t IDC_ISO_FILENAME "Otvaram ISO sliku - pričekajte..."
-t IDC_ISO_ABORT "Odustani"
 
 # Messages used throughout the application
 t MSG_001 "Drugi primjerak otkriven"
@@ -2451,7 +2421,7 @@ t MSG_263 "Koristi PRAVE vel. jedinica"
 
 ################################################################################
 l "cs-CZ" "Czech (Čeština)" 0x0405
-v 1.0.14
+v 1.0.15
 b "en-US"
 
 # Main dialog
@@ -2529,12 +2499,6 @@ t IDS_NEW_VERSION_NOTES_GRP "Poznámky k vydání"
 t IDS_NEW_VERSION_DOWNLOAD_GRP "Stažení"
 t IDC_DOWNLOAD "Stáhnout"
 t IDCANCEL "Zavřít"
-
-# Dialog that appears when scanning/extracting ISO files
-g IDD_ISO_EXTRACT
-t IDD_ISO_EXTRACT "Kopírování souborů z ISO obrazu..."
-t IDC_ISO_FILENAME "Otvírání ISO obrazu, čekejte prosím..."
-t IDC_ISO_ABORT "Zrušit"
 
 # Messages used throughout the application
 t MSG_001 "Zjištěna běžící instance aplikace"
@@ -2842,7 +2806,7 @@ t MSG_263 "Použit BINÁRNÍ předpony jednotek"
 
 ################################################################################
 l "da-DK" "Danish (Dansk)" 0x0406
-v 1.0.14
+v 1.0.15
 b "en-US"
 # Main dialog
 g IDD_DIALOG
@@ -2924,12 +2888,6 @@ t IDS_NEW_VERSION_NOTES_GRP "Programinformation"
 t IDS_NEW_VERSION_DOWNLOAD_GRP "Hent"
 t IDC_DOWNLOAD "Hent"
 t IDCANCEL "Luk"
-
-# Dialog that appears when scanning/extracting ISO files
-g IDD_ISO_EXTRACT
-t IDD_ISO_EXTRACT "Kopierer ISO-filer..."
-t IDC_ISO_FILENAME "Åbner ISO-image - vent venligst..."
-t IDC_ISO_ABORT "Annuller"
 
 # Messages used throughout the application
 t MSG_001 "Anden instans opdaget"
@@ -3218,7 +3176,7 @@ t MSG_263 "MiB notation"
 
 ################################################################################
 l "nl-NL" "Dutch (Nederlands)" 0x0413, 0x0813
-v 1.0.14
+v 1.0.15
 b "en-US"
 
 # Main dialog
@@ -3325,12 +3283,6 @@ t IDS_NEW_VERSION_NOTES_GRP "Uitgave opmerkingen"
 t IDS_NEW_VERSION_DOWNLOAD_GRP "Download"
 t IDC_DOWNLOAD "Download"
 t IDCANCEL "Sluiten"
-
-# Dialog that appears when scanning/extracting ISO files
-g IDD_ISO_EXTRACT
-t IDD_ISO_EXTRACT "Bezig met kopiëren van ISO bestanden..."
-t IDC_ISO_FILENAME "Bezig met openen ISO image - Een moment geduld a.u.b. ..."
-t IDC_ISO_ABORT "Annuleer"
 
 # Messages used throughout the application
 t MSG_001 "Ander programma gedetecteerd"
@@ -3625,7 +3577,7 @@ t MSG_263 "Gebruik de juiste grootte-eenheden"
 
 ################################################################################
 l "fi-FI" "Finnish (Suomi)" 0x040B
-v 1.0.14
+v 1.0.15
 b "en-US"
 
 # Main dialog
@@ -3707,12 +3659,6 @@ t IDS_NEW_VERSION_NOTES_GRP "Julkaisutiedotteet"
 t IDS_NEW_VERSION_DOWNLOAD_GRP "Lataa"
 t IDC_DOWNLOAD "Lataa"
 t IDCANCEL "Sulje"
-
-# Dialog that appears when scanning/extracting ISO files
-g IDD_ISO_EXTRACT
-t IDD_ISO_EXTRACT "Kopioidaan ISO-tiedostoja..."
-t IDC_ISO_FILENAME "Avataan ISO-tiedostokuvaa - ole hyvä ja odota..."
-t IDC_ISO_ABORT "Peruuta"
 
 # Messages used throughout the application
 t MSG_001 "Toinen prosessi käynnissä"
@@ -4022,7 +3968,7 @@ t MSG_263 "Käytä OIKEITA tilayksikön kerrannaisia"
 
 ################################################################################
 l "fr-FR" "French (Français)" 0x040c, 0x080c, 0x0c0c, 0x100c, 0x140c, 0x180c, 0x1c0c, 0x200c, 0x240c, 0x280c, 0x2c0c, 0x300c, 0x340c, 0x380c, 0xe40c
-v 1.0.14
+v 1.0.15
 b "en-US"
 
 g IDD_DIALOG
@@ -4100,11 +4046,6 @@ t IDS_NEW_VERSION_NOTES_GRP "Notes relatives à cette version"
 t IDS_NEW_VERSION_DOWNLOAD_GRP "Téléchargement"
 t IDC_DOWNLOAD "Télécharger"
 t IDCANCEL "Fermer"
-
-g IDD_ISO_EXTRACT
-t IDD_ISO_EXTRACT "Copie des fichier ISO..."
-t IDC_ISO_FILENAME "Ouverture de l'image - veuillez patienter..."
-t IDC_ISO_ABORT "Annuler"
 
 # Messages used throughout the application
 t MSG_001 "Autre instance détectée"
@@ -4386,7 +4327,7 @@ t MSG_263 "Affich. tailles avec de VRAIES unités"
 
 ################################################################################
 l "de-DE" "German (Deutsch)" 0x0407, 0x0807, 0x0c07, 0x1007, 0x1407
-v 1.0.14
+v 1.0.15
 b "en-US"
 
 g IDD_DIALOG
@@ -4485,11 +4426,6 @@ t IDS_NEW_VERSION_NOTES_GRP "Versionshinweise"
 t IDS_NEW_VERSION_DOWNLOAD_GRP "Download"
 t IDC_DOWNLOAD "Download"
 t IDCANCEL "Schließen"
-
-g IDD_ISO_EXTRACT
-t IDD_ISO_EXTRACT "Kopiere ISO-Dateien..."
-t IDC_ISO_FILENAME "Öffne ISO-Abbild-Datei - bitte warten..."
-t IDC_ISO_ABORT "Abbruch"
 
 # Messages used throughout the application
 t MSG_001 "Rufus ist bereits gestartet"
@@ -4783,7 +4719,7 @@ t MSG_263 "Verwenden Sie korrekten Größeneinheiten"
 
 ################################################################################
 l "el-GR" "Greek (Ελληνικά)" 0x0408
-v 1.0.14
+v 1.0.15
 b "en-US"
 
 # Main dialog
@@ -4900,12 +4836,6 @@ t IDS_NEW_VERSION_NOTES_GRP "Σημειώσεις έκδοσης"
 t IDS_NEW_VERSION_DOWNLOAD_GRP "Λήψη"
 t IDC_DOWNLOAD "Λήψη"
 t IDCANCEL "Κλείσιμο"
-
-# Dialog that appears when scanning/extracting ISO files
-g IDD_ISO_EXTRACT
-t IDD_ISO_EXTRACT "Αντιγραφή αρχείων ISO..."
-t IDC_ISO_FILENAME "Άνοιγμα αρχείου ISO - παρακαλώ περιμένετε..."
-t IDC_ISO_ABORT "Ακύρωση"
 
 # Messages used throughout the application
 t MSG_001 "Ανιχνεύθηκε άλλη εφαρμογή Rufus"
@@ -5277,12 +5207,6 @@ t IDS_NEW_VERSION_NOTES_GRP "Kiadási jegyzék"
 t IDS_NEW_VERSION_DOWNLOAD_GRP "Letöltés"
 t IDC_DOWNLOAD "Letöltés"
 t IDCANCEL "Bezárás"
-
-# Dialog that appears when scanning/extracting ISO files
-g IDD_ISO_EXTRACT
-t IDD_ISO_EXTRACT "ISO fájlok másolása..."
-t IDC_ISO_FILENAME "ISO fájl megnyitása - kérlek, várj..."
-t IDC_ISO_ABORT "Mégse"
 
 # Messages used throughout the application
 t MSG_001 "Másik folyamat"
@@ -5673,12 +5597,6 @@ t IDS_NEW_VERSION_DOWNLOAD_GRP "Download"
 t IDC_DOWNLOAD "Download"
 t IDCANCEL "Tutup"
 
-# Dialog that appears when scanning/extracting ISO files
-g IDD_ISO_EXTRACT
-t IDD_ISO_EXTRACT "Menyalin file ISO..."
-t IDC_ISO_FILENAME "Membuka image ISO - mohon tunggu..."
-t IDC_ISO_ABORT "Batal"
-
 # Messages used throughout the application
 t MSG_001 "Aplikasi lain terdeteksi"
 t MSG_002 "Aplikasi Rufus lain sedang berjalan.\n"
@@ -5965,7 +5883,7 @@ t MSG_259 "Pembaruan Paksa"
 
 ################################################################################
 l "it-IT" "Italian (Italiano)" 0x0410, 0x0810
-v 1.0.14
+v 1.0.15
 b "en-US"
 
 g IDD_DIALOG
@@ -6050,11 +5968,6 @@ t IDS_NEW_VERSION_NOTES_GRP "Informazioni versione"
 t IDS_NEW_VERSION_DOWNLOAD_GRP "Download"
 t IDC_DOWNLOAD "Download"
 t IDCANCEL "Chiudi"
-
-g IDD_ISO_EXTRACT
-t IDD_ISO_EXTRACT "Copia file ISO..."
-t IDC_ISO_FILENAME "Apertura file immagine ISO..."
-t IDC_ISO_ABORT "Annulla"
 
 # Messages used throughout the application
 t MSG_001 "Rilevata altra istanza Rufus"
@@ -6339,7 +6252,7 @@ t MSG_263 "Usa unità dimensione CORRETTA"
 
 ######################################################################
 l "ja-JP" "Japanese (日本語)" 0x0411
-v 1.0.14
+v 1.0.15
 b "en-US"
 
 # Main dialog
@@ -6462,12 +6375,6 @@ t IDS_NEW_VERSION_NOTES_GRP "リリースノート"
 t IDS_NEW_VERSION_DOWNLOAD_GRP "ダウンロード"
 t IDC_DOWNLOAD "ダウンロード"
 t IDCANCEL "閉じる"
-
-# Dialog that appears when scanning/extracting ISO files
-g IDD_ISO_EXTRACT
-t IDD_ISO_EXTRACT "ISOファイルをコピー中．．．．．．"
-t IDC_ISO_FILENAME "ISOを開く中・そろそろお待ち下さい．．．．．．"
-t IDC_ISO_ABORT "取消"
 
 # Messages used throughout the application
 t MSG_001 "他のインスタンスは検出した"
@@ -6777,7 +6684,7 @@ t MSG_263 "適切なサイズユニットを使って下さい。"
 
 ################################################################################
 l "ko-KR" "Korean (한국어)" 0x0412
-v 1.0.14
+v 1.0.15
 b "en-US"
 
 # Main dialog
@@ -6849,12 +6756,6 @@ t IDS_NEW_VERSION_NOTES_GRP "업데이트 목록"
 t IDS_NEW_VERSION_DOWNLOAD_GRP "다운로드"
 t IDC_DOWNLOAD "다운로드"
 t IDCANCEL "닫기"
-
-# Dialog that appears when scanning/extracting ISO files
-g IDD_ISO_EXTRACT
-t IDD_ISO_EXTRACT "ISO 파일을 복사하는 중..."
-t IDC_ISO_FILENAME "ISO 이미지 파일을 여는 중입니다. - 잠시만..."
-t IDC_ISO_ABORT "취소"
 
 # Messages used throughout the application
 t MSG_001 "다른 인스턴스가 감지 됨."
@@ -7161,7 +7062,7 @@ t MSG_263 "적당한 크기의 단위를 사용"
 
 ################################################################################
 l "lv-LV" "Latvian (Latviešu)" 0x0426
-v 1.0.14
+v 1.0.15
 
 # Main dialog
 g IDD_DIALOG
@@ -7261,12 +7162,6 @@ t IDS_NEW_VERSION_NOTES_GRP "Piezīmes"
 t IDS_NEW_VERSION_DOWNLOAD_GRP "Lejuplādēt"
 t IDC_DOWNLOAD "Lejuplādēt"
 t IDCANCEL "Aizvērt"
-
-# Dialog that appears when scanning/extracting ISO files
-g IDD_ISO_EXTRACT
-t IDD_ISO_EXTRACT "Tiek kopēti ISO faili..."
-t IDC_ISO_FILENAME "Atveras ISO imidžs, lūdzu uzgaidiet..."
-t IDC_ISO_ABORT "Atcelt"
 
 # Messages used throughout the application
 t MSG_001 "Noteikta cita procesa esamība"
@@ -7573,7 +7468,7 @@ t MSG_263 "Izvēlieties atbilstošas vienības"
 
 ################################################################################
 l "lt-LT" "Lithuanian (Lietuvių)" 0x0427
-v 1.0.14
+v 1.0.15
 b "en-US"
 
 # Main dialog
@@ -7659,12 +7554,6 @@ t IDS_NEW_VERSION_NOTES_GRP "Leidimo pastabos"
 t IDS_NEW_VERSION_DOWNLOAD_GRP "Siųstis"
 t IDC_DOWNLOAD "Siųstis"
 t IDCANCEL "Uždaryti"
-
-# Dialog that appears when scanning/extracting ISO files
-g IDD_ISO_EXTRACT
-t IDD_ISO_EXTRACT "Kopijuojami ISO failai..."
-t IDC_ISO_FILENAME "Atidaromas ISO atvaizdas - palaukite..."
-t IDC_ISO_ABORT "Atšaukti"
 
 # Messages used throughout the application
 t MSG_001 "Aptiktas kitas programos atvejis"
@@ -7974,7 +7863,7 @@ t MSG_263 "Naudoti TIKRUOSIUS dydžio vienetus"
 
 ################################################################################
 l "ms-MY" "Malay (Bahasa Malaysia)" 0x043e, 0x083e
-v 1.0.14
+v 1.0.15
 b "en-US"
 
 # Main dialog
@@ -8076,12 +7965,6 @@ t IDS_NEW_VERSION_NOTES_GRP "Informasi versi terbaharu"
 t IDS_NEW_VERSION_DOWNLOAD_GRP "Muat turun"
 t IDC_DOWNLOAD "Muat turun"
 t IDCANCEL "Tutup"
-
-# Dialog that appears when scanning/extracting ISO files
-g IDD_ISO_EXTRACT
-t IDD_ISO_EXTRACT "Menyalin fail ISO..."
-t IDC_ISO_FILENAME "Membuka imej ISO - tunggu sebentar..."
-t IDC_ISO_ABORT "Batal"
 
 # Messages used throughout the application
 t MSG_001 "Proses Rufus lain dikesan"
@@ -8827,7 +8710,7 @@ t MSG_265 "VMWare disk oppdagelse"
 
 ################################################################################
 l "pl-PL" "Polish (Polski)" 0x0415
-v 1.0.14
+v 1.0.15
 b "en-US"
 # my info: 15.02.2014,16:14
 
@@ -8933,12 +8816,6 @@ t IDS_NEW_VERSION_NOTES_GRP "Informacje o Wydaniu"
 t IDS_NEW_VERSION_DOWNLOAD_GRP "Pobierz"
 t IDC_DOWNLOAD "Pobierz"
 t IDCANCEL "Zamknij"
-
-# Dialog that appears when scanning/extracting ISO files
-g IDD_ISO_EXTRACT
-t IDD_ISO_EXTRACT "Kopiowanie plików ISO..."
-t IDC_ISO_FILENAME "Otwieranie obrazu ISO - proszę czekać..."
-t IDC_ISO_ABORT "Anuluj"
 
 # Messages used throughout the application
 t MSG_001 "Wykryto inną instancję"
@@ -9247,7 +9124,7 @@ t MSG_263 "Użyj WŁAŚCIWEGO rozmiaru jednostek"
 
 ################################################################################
 l "pt-BR" "Portuguese Brazilian (Português do Brasil)" 0x0416
-v 1.0.14
+v 1.0.15
 b "pt-PT"
 
 g IDD_DIALOG
@@ -9267,10 +9144,6 @@ t IDD_UPDATE_POLICY "Configurar atualização automática"
 g IDD_NEW_VERSION
 t IDS_NEW_VERSION_AVAIL_TXT "Nova versão disponível. Por favor, faça Download da última versão!"
 t IDS_NEW_VERSION_NOTES_GRP "Sobre esta versão"
-
-g IDD_ISO_EXTRACT
-t IDD_ISO_EXTRACT "Copiando os arquivos ISO..."
-t IDC_ISO_FILENAME "Abrindo a imagem ISO - por favor, aguarde..."
 
 t MSG_001 "Foi detectada outra aplicação"
 t MSG_003 "AVISO: TODOS OS DADOS EM %s SERÃO ELIMINADOS.\n"
@@ -9502,12 +9375,6 @@ t IDS_NEW_VERSION_NOTES_GRP "Notas relativas a esta versão"
 t IDS_NEW_VERSION_DOWNLOAD_GRP "Download"
 t IDC_DOWNLOAD "Download"
 t IDCANCEL "Fechar"
-
-# Dialog that appears when scanning/extracting ISO files
-g IDD_ISO_EXTRACT
-t IDD_ISO_EXTRACT "A copiar os arquivos ISO..."
-t IDC_ISO_FILENAME "A abrir a imagem ISO - por favor, aguarde..."
-t IDC_ISO_ABORT "Cancelar"
 
 # Messages used throughout the application
 t MSG_001 "Foi detetada outra aplicação"
@@ -9801,7 +9668,7 @@ t MSG_259 "Forçar atualização"
 
 ################################################################################
 l "ro-RO" "Romanian (Română)" 0x0418, 0x0818
-v 1.0.14
+v 1.0.15
 b "en-US"
 
 g IDD_DIALOG
@@ -9885,11 +9752,6 @@ t IDS_NEW_VERSION_NOTES_GRP "Informaţii versiune"
 t IDS_NEW_VERSION_DOWNLOAD_GRP "Descărcare"
 t IDC_DOWNLOAD "Descărcare"
 t IDCANCEL "Închide"
-
-g IDD_ISO_EXTRACT
-t IDD_ISO_EXTRACT "Copiere fişiere ISO..."
-t IDC_ISO_FILENAME "Deschiderea fişier imagine ISO..."
-t IDC_ISO_ABORT "Anulează"
 
 # Messages used throughout the application
 t MSG_001 "Un alt exemplu detectat Rufus"
@@ -10164,7 +10026,7 @@ t MSG_263 "Utilizarea dimensiunii corecte pentru unități"
 
 ################################################################################
 l "ru-RU" "Russian (Русский)" 0x0419, 0x0819
-v 1.0.14
+v 1.0.15
 b "en-US"
 
 # Main dialog
@@ -10253,12 +10115,6 @@ t IDS_NEW_VERSION_NOTES_GRP "Заметки о выпуске"
 t IDS_NEW_VERSION_DOWNLOAD_GRP "Скачать"
 t IDC_DOWNLOAD "Скачать"
 t IDCANCEL "Закрыть"
-
-# Dialog that appears when scanning/extracting ISO files
-g IDD_ISO_EXTRACT
-t IDD_ISO_EXTRACT "Копирование ISO-файлов..."
-t IDC_ISO_FILENAME "Открытие ISO-образа - пожалуйста, ждите..."
-t IDC_ISO_ABORT "Отмена"
 
 # Messages used throughout the application
 t MSG_001 "Запущено другое приложение Rufus"
@@ -10546,7 +10402,7 @@ t MSG_263 "Использование правильного размера"
 
 ################################################################################
 l "sk-SK" "Slovak (Slovensky)" 0x041B
-v 1.0.14
+v 1.0.15
 b "en-US"
 
 # Main dialog
@@ -10624,12 +10480,6 @@ t IDS_NEW_VERSION_NOTES_GRP "Poznámky k vydaniu"
 t IDS_NEW_VERSION_DOWNLOAD_GRP "Sťahovanie"
 t IDC_DOWNLOAD "Stiahnuť"
 t IDCANCEL "Zatvoriť"
-
-# Dialog that appears when scanning/extracting ISO files
-g IDD_ISO_EXTRACT
-t IDD_ISO_EXTRACT "Kopírovanie súborov z ISO obrazu..."
-t IDC_ISO_FILENAME "Otváranie ISO obrazu, čakajte prosím..."
-t IDC_ISO_ABORT "Zrušiť"
 
 # Messages used throughout the application
 t MSG_001 "Zistený spustený program"
@@ -10937,7 +10787,7 @@ t MSG_263 "Použiť PROPER veľkosť jednotiek"
 
 ################################################################################
 l "sl-SI" "Slovene (Slovenščina)" 0x0424
-v 1.0.14
+v 1.0.15
 b "en-US"
 
 # Main dialog
@@ -11026,12 +10876,6 @@ t IDS_NEW_VERSION_NOTES_GRP "Opombe ob izdaji"
 t IDS_NEW_VERSION_DOWNLOAD_GRP "Prenesi"
 t IDC_DOWNLOAD "Prenesi"
 t IDCANCEL "Zapri"
-
-# Dialog that appears when scanning/extracting ISO files
-g IDD_ISO_EXTRACT
-t IDD_ISO_EXTRACT "Kopiram ISO datoteke…"
-t IDC_ISO_FILENAME "Odpiram ISO sliko - prosim, počakajte…"
-t IDC_ISO_ABORT "Prekliči"
 
 # Messages used throughout the application
 t MSG_001 "Drug primerek zaznan"
@@ -11420,12 +11264,6 @@ t IDS_NEW_VERSION_DOWNLOAD_GRP "Descarga"
 t IDC_DOWNLOAD "Descargar"
 t IDCANCEL "Cerrar"
 
-# Dialog that appears when scanning/extracting ISO files
-g IDD_ISO_EXTRACT
-t IDD_ISO_EXTRACT "Copiando los archivos ISO..."
-t IDC_ISO_FILENAME "Abriendo la imagen ISO - por favor, espere..."
-t IDC_ISO_ABORT "Cancelar"
-
 # Messages used throughout the application
 t MSG_001 "Se detectó otra instancia"
 t MSG_002 "Ya hay una intancia de Rufus ejecutándose.\n"
@@ -11718,7 +11556,7 @@ t MSG_259 "Forzar actualización"
 
 ################################################################################
 l "sv-SE" "Swedish (Svenska)" 0x041d, 0x081d
-v 1.0.14
+v 1.0.15
 b "en-US"
 
 # Main dialog
@@ -11817,12 +11655,6 @@ t IDS_NEW_VERSION_NOTES_GRP "Programinformation"
 t IDS_NEW_VERSION_DOWNLOAD_GRP "Nedladdning"
 t IDC_DOWNLOAD "Ladda ned"
 t IDCANCEL "Stäng"
-
-# Dialog that appears when scanning/extracting ISO files
-g IDD_ISO_EXTRACT
-t IDD_ISO_EXTRACT "Kopierar ISO-filer..."
-t IDC_ISO_FILENAME "Öppnar ISO-avbilden - vänta..."
-t IDC_ISO_ABORT "Avbryt"
 
 # Messages used throughout the application
 t MSG_001 "Program redan i gång"
@@ -12131,7 +11963,7 @@ t MSG_263 "Använd "RÄTT" storleksenhet"
 
 ################################################################################
 l "tr-TR" "Turkish (Türkçe)" 0x041F
-v 1.0.14
+v 1.0.15
 b "en-US"
 
 # Main dialog
@@ -12242,12 +12074,6 @@ t IDS_NEW_VERSION_NOTES_GRP "Sürüm Notları"
 t IDS_NEW_VERSION_DOWNLOAD_GRP "İndir"
 t IDC_DOWNLOAD "İndir"
 t IDCANCEL "Kapat"
-
-# Dialog that appears when scanning/extracting ISO files
-g IDD_ISO_EXTRACT
-t IDD_ISO_EXTRACT "ISO Dosyaları Kopyalanıyor ..."
-t IDC_ISO_FILENAME "ISO Yansıması Açılıyor - Lütfen Bekleyin..."
-t IDC_ISO_ABORT "Vazgeç"
 
 # Messages used throughout the application
 t MSG_001 "Rufus'un zaten çalıştığı algılandı"
@@ -12557,7 +12383,7 @@ t MSG_263 "UYGUN boyutta birimleri kullanın"
 
 ################################################################################
 l "uk-UA" "Ukrainian (Українська)" 0x0422
-v 1.0.14
+v 1.0.15
 b "en-US"
 
 # Main dialog
@@ -12664,12 +12490,6 @@ t IDS_NEW_VERSION_NOTES_GRP "Нотатки про випуск"
 t IDS_NEW_VERSION_DOWNLOAD_GRP "Завантажити"
 t IDC_DOWNLOAD "Завантажити"
 t IDCANCEL "Закрити"
-
-# Dialog that appears when scanning/extracting ISO files
-g IDD_ISO_EXTRACT
-t IDD_ISO_EXTRACT "Копіювання ISO-файлів..."
-t IDC_ISO_FILENAME "Відкриття ISO-образу - будь ласка, чекайте..."
-t IDC_ISO_ABORT "Відмінити"
 
 # Messages used throughout the application
 t MSG_001 "Запущений інший додаток Rufus"

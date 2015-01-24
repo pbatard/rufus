@@ -325,7 +325,7 @@ void apply_localization(int dlg_id, HWND hDlg)
 				} else {
 					hCtrl = GetDlgItem(hDlg, lcmd->ctrl_id);
 				}
-				if (hCtrl == NULL) {
+				if ((hCtrl == NULL) && (hDlg != NULL)) {
 					loc_line_nr = lcmd->line_nr;
 					luprintf("control '%s' is not part of dialog '%s'\n",
 						lcmd->txt[0], control_id[dlg_id-IDD_DIALOG].name);
