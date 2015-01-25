@@ -128,6 +128,9 @@
     <ClInclude Include="..\bled\bled.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\settings.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\res\rufus.ico">

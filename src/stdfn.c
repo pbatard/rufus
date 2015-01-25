@@ -27,6 +27,7 @@
 #include "msapi_utf8.h"
 #include "rufus.h"
 #include "resource.h"
+#include "settings.h"
 #include "localization.h"
 
 int  nWindowsVersion = WINDOWS_UNDEFINED;

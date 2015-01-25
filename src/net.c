@@ -32,7 +32,7 @@
 
 #include "msapi_utf8.h"
 #include "rufus.h"
-#include "registry.h"
+#include "settings.h"
 #include "resource.h"
 #include "localization.h"
 
@@ -441,7 +441,7 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 	int64_t local_time = 0, reg_time, server_time, update_interval;
 
 	update_check_in_progress = TRUE;
-	verbose = ReadRegistryKey32(REGKEY_HKCU, REGKEY_VERBOSE_UPDATES);
+	verbose = ReadSetting32(SETTING_VERBOSE_UPDATES);
 	// Without this the FileDialog will produce error 0x8001010E when compiled for Vista or later
 	IGNORE_RETVAL(CoInitializeEx(NULL, COINIT_APARTMENTTHREADED));
 	// Unless the update was forced, wait a while before performing the update check
@@ -453,14 +453,14 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 				Sleep(500);
 		} while ((!force_update_check) && ((iso_op_in_progress || format_op_in_progress || (dialog_showing>0))));
 		if (!force_update_check) {
-			if ((ReadRegistryKey32(REGKEY_HKCU, REGKEY_UPDATE_INTERVAL) == -1)) {
-				vuprintf("Check for updates disabled, as per registry settings.\n");
+			if ((ReadSetting32(SETTING_UPDATE_INTERVAL) == -1)) {
+				vuprintf("Check for updates disabled, as per settings.\n");
 				goto out;
 			}
-			reg_time = ReadRegistryKey64(REGKEY_HKCU, REGKEY_LAST_UPDATE);
-			update_interval = (int64_t)ReadRegistryKey32(REGKEY_HKCU, REGKEY_UPDATE_INTERVAL);
+			reg_time = ReadSetting64(SETTING_LAST_UPDATE);
+			update_interval = (int64_t)ReadSetting32(SETTING_UPDATE_INTERVAL);
 			if (update_interval == 0) {
-				WriteRegistryKey32(REGKEY_HKCU, REGKEY_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL);
+				WriteSetting32(SETTING_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL);
 				update_interval = DEFAULT_UPDATE_INTERVAL;
 			}
 			GetSystemTime(&LocalTime);
@@ -496,7 +496,7 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 		goto out;
 
 	status++;	// 2
-	releases_only = !GetRegistryKeyBool(REGKEY_HKCU, REGKEY_INCLUDE_BETAS);
+	releases_only = !ReadSettingBool(SETTING_INCLUDE_BETAS);
 
 	for (k=0; (k<(releases_only?1:(int)ARRAYSIZE(channel))) && (!found_new_version); k++) {
 		uprintf("Checking %s channel...\n", channel[k]);
@@ -562,7 +562,7 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 		server_time = ((((int64_t)FileTime.dwHighDateTime)<<32) + FileTime.dwLowDateTime) / 10000000;
 		vvuprintf("Server time: %" PRId64 "\n", server_time);
 		// Always store the server response time - the only clock we trust!
-		WriteRegistryKey64(REGKEY_HKCU, REGKEY_LAST_UPDATE, server_time);
+		WriteSetting64(SETTING_LAST_UPDATE, server_time);
 		// Might as well let the user know
 		if (!force_update_check) {
 			if ((local_time > server_time + 600) || (local_time < server_time - 600)) {

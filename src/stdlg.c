@@ -37,6 +37,7 @@
 #include "rufus.h"
 #include "msapi_utf8.h"
 #include "registry.h"
+#include "settings.h"
 #include "resource.h"
 #include "license.h"
 #include "localization.h"
@@ -58,7 +59,7 @@ static WNDPROC pOrgBrowseWndproc;
 static const SETTEXTEX friggin_microsoft_unicode_amateurs = {ST_DEFAULT, CP_UTF8};
 static BOOL notification_is_question;
 static const notification_info* notification_more_info;
-static BOOL reg_commcheck = FALSE;
+static BOOL settings_commcheck = FALSE;
 static WNDPROC original_wndproc = NULL;
 
 /*
@@ -518,7 +519,7 @@ INT_PTR CALLBACK AboutCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 		apply_localization(IDD_ABOUTBOX, hDlg);
 		SetTitleBarIcon(hDlg);
 		CenterDialog(hDlg);
-		if (reg_commcheck)
+		if (settings_commcheck)
 			ShowWindow(GetDlgItem(hDlg, IDC_ABOUT_UPDATES), SW_SHOW);
 		safe_sprintf(about_blurb, sizeof(about_blurb), about_blurb_format, lmprintf(MSG_174),
 			lmprintf(MSG_175, rufus_version[0], rufus_version[1], rufus_version[2], rufus_version[3]),
@@ -1021,7 +1022,7 @@ INT_PTR CALLBACK UpdateCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 		IGNORE_RETVAL(ComboBox_SetItemData(hFrequency, ComboBox_AddStringU(hFrequency, lmprintf(MSG_030, lmprintf(MSG_014))), 86400));
 		IGNORE_RETVAL(ComboBox_SetItemData(hFrequency, ComboBox_AddStringU(hFrequency, lmprintf(MSG_015)), 604800));
 		IGNORE_RETVAL(ComboBox_SetItemData(hFrequency, ComboBox_AddStringU(hFrequency, lmprintf(MSG_016)), 2629800));
-		freq = ReadRegistryKey32(REGKEY_HKCU, REGKEY_UPDATE_INTERVAL);
+		freq = ReadSetting32(SETTING_UPDATE_INTERVAL);
 		EnableWindow(GetDlgItem(hDlg, IDC_CHECK_NOW), (freq != 0));
 		EnableWindow(hBeta, (freq >= 0));
 		switch(freq) {
@@ -1045,7 +1046,7 @@ INT_PTR CALLBACK UpdateCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 		}
 		IGNORE_RETVAL(ComboBox_AddStringU(hBeta, lmprintf(MSG_008)));
 		IGNORE_RETVAL(ComboBox_AddStringU(hBeta, lmprintf(MSG_009)));
-		IGNORE_RETVAL(ComboBox_SetCurSel(hBeta, GetRegistryKeyBool(REGKEY_HKCU, REGKEY_INCLUDE_BETAS)?0:1));
+		IGNORE_RETVAL(ComboBox_SetCurSel(hBeta, ReadSettingBool(SETTING_INCLUDE_BETAS)?0:1));
 		hPolicy = GetDlgItem(hDlg, IDC_POLICY);
 		SendMessage(hPolicy, EM_AUTOURLDETECT, 1, 0);
 		safe_sprintf(update_policy_text, sizeof(update_policy_text), update_policy, lmprintf(MSG_179),
@@ -1070,13 +1071,13 @@ INT_PTR CALLBACK UpdateCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 			if (HIWORD(wParam) != CBN_SELCHANGE)
 				break;
 			freq = (int32_t)ComboBox_GetItemData(hFrequency, ComboBox_GetCurSel(hFrequency));
-			WriteRegistryKey32(REGKEY_HKCU, REGKEY_UPDATE_INTERVAL, (DWORD)freq);
+			WriteSetting32(SETTING_UPDATE_INTERVAL, (DWORD)freq);
 			EnableWindow(hBeta, (freq >= 0));
 			return (INT_PTR)TRUE;
 		case IDC_INCLUDE_BETAS:
 			if (HIWORD(wParam) != CBN_SELCHANGE)
 				break;
-			SetRegistryKeyBool(REGKEY_HKCU, REGKEY_INCLUDE_BETAS, ComboBox_GetCurSel(hBeta) == 0);
+			WriteSettingBool(SETTING_INCLUDE_BETAS, ComboBox_GetCurSel(hBeta) == 0);
 			return (INT_PTR)TRUE;
 		}
 		break;
@@ -1095,14 +1096,14 @@ BOOL SetUpdateCheck(void)
 	char filename[MAX_PATH] = "", exename[] = APPLICATION_NAME ".exe";
 	size_t fn_len, exe_len;
 
-	// Test if we have access to the registry. If not, forget it.
-	WriteRegistryKey32(REGKEY_HKCU, REGKEY_COMM_CHECK, commcheck);
-	if (ReadRegistryKey32(REGKEY_HKCU, REGKEY_COMM_CHECK) != commcheck)
+	// Test if we can read and write settings. If not, forget it.
+	WriteSetting32(SETTING_COMM_CHECK, commcheck);
+	if (ReadSetting32(SETTING_COMM_CHECK) != commcheck)
 		return FALSE;
-	reg_commcheck = TRUE;
+	settings_commcheck = TRUE;
 
 	// If the update interval is not set, this is the first time we run so prompt the user
-	if (ReadRegistryKey32(REGKEY_HKCU, REGKEY_UPDATE_INTERVAL) == 0) {
+	if (ReadSetting32(SETTING_UPDATE_INTERVAL) == 0) {
 
 		// Add a hack for people who'd prefer the app not to prompt about update settings on first run.
 		// If the executable is called "rufus.exe", without version, we disable the prompt
@@ -1120,13 +1121,13 @@ BOOL SetUpdateCheck(void)
 		}
 #endif
 		if (!enable_updates) {
-			WriteRegistryKey32(REGKEY_HKCU, REGKEY_UPDATE_INTERVAL, -1);
+			WriteSetting32(SETTING_UPDATE_INTERVAL, -1);
 			return FALSE;
 		}
 		// If the user hasn't set the interval in the dialog, set to default
-		if ( (ReadRegistryKey32(REGKEY_HKCU, REGKEY_UPDATE_INTERVAL) == 0) ||
-			 ((ReadRegistryKey32(REGKEY_HKCU, REGKEY_UPDATE_INTERVAL) == -1) && enable_updates) )
-			WriteRegistryKey32(REGKEY_HKCU, REGKEY_UPDATE_INTERVAL, 86400);
+		if ( (ReadSetting32(SETTING_UPDATE_INTERVAL) == 0) ||
+			 ((ReadSetting32(SETTING_UPDATE_INTERVAL) == -1) && enable_updates) )
+			WriteSetting32(SETTING_UPDATE_INTERVAL, 86400);
 	}
 	return TRUE;
 }

@@ -107,7 +107,7 @@ out:
 static __inline BOOL IsVHD(const char* buffer)
 {
 	int i;
-	// List of the Friendly Names of the VHD devices we know
+	// List of the Hardware IDs of the VHD devices we know
 	const char* vhd_name[] = {
 		"Arsenal_________Virtual_",
 		"KernSafeVirtual_________",

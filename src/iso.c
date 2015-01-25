@@ -120,7 +120,7 @@ static void log_handler (cdio_log_level_t level, const char *message)
 {
 	switch(level) {
 	case CDIO_LOG_DEBUG:
-		// TODO: use a registry key to enable libcdio debug?
+		// TODO: use a setting to enable libcdio debug?
 		return;
 	default:
 		uprintf("libcdio: %s\n", message);

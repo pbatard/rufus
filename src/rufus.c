@@ -39,7 +39,7 @@
 #include "resource.h"
 #include "rufus.h"
 #include "drive.h"
-#include "registry.h"
+#include "settings.h"
 #include "localization.h"
 #include "bled/bled.h"
 #include "../res/grub/grub_version.h"
@@ -110,7 +110,7 @@ static UINT_PTR UM_LANGUAGE_MENU_MAX = UM_LANGUAGE_MENU;
 static RECT relaunch_rc = { -65536, -65536, 0, 0};
 static UINT uBootChecked = BST_CHECKED, uQFChecked = BST_CHECKED, uMBRChecked = BST_UNCHECKED;
 char ClusterSizeLabel[MAX_CLUSTER_SIZES][64];
-char msgbox[1024], msgbox_title[32];
+char msgbox[1024], msgbox_title[32], *ini_file = NULL;
 
 /*
  * Globals
@@ -1533,7 +1533,7 @@ void InitDialog(HWND hDlg)
 		static_sprintf(tmp, "%s%d.%d.%d.%d " APPLICATION_NAME, IsAlphaOrBeta(), rufus_version[0], rufus_version[1], rufus_version[2], rufus_version[3]);
 	}
 	SetWindowTextU(hDlg, tmp);
-	uprintf(APPLICATION_NAME " version: %d.%d.%d.%d%s\n", rufus_version[0], rufus_version[1], rufus_version[2], rufus_version[3], IsAlphaOrBeta());
+	uprintf(APPLICATION_NAME " version: %d.%d.%d.%d%s", rufus_version[0], rufus_version[1], rufus_version[2], rufus_version[3], IsAlphaOrBeta());
 	for (i=0; i<ARRAYSIZE(resource); i++) {
 		buf = (char*)GetResource(hMainInstance, resource[i], _RT_RCDATA, "ldlinux_sys", &len, TRUE);
 		if (buf == NULL) {
@@ -1545,11 +1545,11 @@ void InitDialog(HWND hDlg)
 			free(buf);
 		}
 	}
+	uprintf("Windows version: %s", WindowsVersionStr);
 	uprintf("Syslinux versions: %s%s, %s%s", embedded_sl_version_str[0], embedded_sl_version_ext[0],
 		embedded_sl_version_str[1], embedded_sl_version_ext[1]);
 	uprintf("Grub versions: %s, %s", embedded_grub_version, embedded_grub2_version);
-	uprintf("Windows version: %s\n", WindowsVersionStr);
-	uprintf("Locale ID: 0x%04X\n", GetUserDefaultUILanguage());
+	uprintf("Locale ID: 0x%04X", GetUserDefaultUILanguage());
 
 	SetClusterSizeLabels();
 
@@ -1661,7 +1661,6 @@ void InitDialog(HWND hDlg)
 	CreateTooltip(GetDlgItem(hDlg, IDC_ABOUT), lmprintf(MSG_172), -1);
 	CreateTooltip(GetDlgItem(hDlg, IDC_WINDOWS_INSTALL), lmprintf(MSG_199), -1);
 	CreateTooltip(GetDlgItem(hDlg, IDC_WINDOWS_TO_GO), lmprintf(MSG_200), -1);
-	// TODO: add new tooltips
 
 	ToggleAdvanced();	// We start in advanced mode => go to basic mode
 	ToggleToGo();
@@ -2367,11 +2366,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	const char* rufus_loc = "rufus.loc";
 	const char* cmdline_hogger = "rufus.com";
 	int i, opt, option_index = 0, argc = 0, si = 0, lcid = GetUserDefaultUILanguage();
+	FILE* fd;
 	BOOL attached_console = FALSE, external_loc_file = FALSE, lgp_set = FALSE, automount;
 	BYTE *loc_data, *hog_data;
 	DWORD loc_size, hog_size, Size;
-	char tmp_path[MAX_PATH] = "", loc_file[MAX_PATH] = "", *tmp, *locale_name = NULL;
-	char** argv = NULL;
+	char tmp_path[MAX_PATH] = "", loc_file[MAX_PATH] = "", ini_path[MAX_PATH], ini_flags[] = "rb";
+	char *tmp, *locale_name = NULL, **argv = NULL;
 	wchar_t **wenv, **wargv;
 	PF_TYPE_DECL(CDECL, int,  __wgetmainargs, (int*, wchar_t***, wchar_t***, int, int*));
 	HANDLE mutex = NULL, hogmutex = NULL, hFile = NULL;
@@ -2426,13 +2426,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		}
 	}
 
-	// Use the Locale specified in the registry, if any
-	tmp = ReadRegistryKeyStr(REGKEY_HKCU, REGKEY_LOCALE);
-	if (tmp[0] != 0) {
-		locale_name = safe_strdup(tmp);
-		uprintf("found registry locale '%s'", locale_name);
-	}
-
 	// We have to process the arguments before we acquire the lock and process the locale
 	PF_INIT(__wgetmainargs, Msvcrt);
 	if (pf__wgetmainargs != NULL) {
@@ -2444,6 +2437,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			if (safe_strcmp(argv[i], old_wait_option) == 0)
 				wait_for_mutex = 150;	// Try to acquire the mutex for 15 seconds
 		}
+
+		// If our application name contains a 'p' (for "portable") create a 'rufus.ini'
+		tmp = &argv[0][strlen(argv[0]) -1];
+		while ((((uintptr_t)tmp)>((uintptr_t)argv[0])) && (*tmp != '\\'))
+			tmp--;
+		if (strchr(tmp, 'p') != NULL)
+			ini_flags[0] = 'a';
 
 		while ((opt = getopt_long(argc, argv, "?fhi:w:l:", long_options, &option_index)) != EOF)
 			switch (opt) {
@@ -2481,6 +2481,22 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	// Retrieve the current application directory
 	GetCurrentDirectoryU(MAX_PATH, app_dir);
+
+	// Look for a .ini file in the current app directory
+	static_sprintf(ini_path, "%s\\rufus.ini", app_dir);
+	fd = fopenU(ini_path, ini_flags);	// Will create the file if portable mode is requested
+	if (fd != NULL) {
+		ini_file = ini_path;
+		fclose(fd);
+	}
+	uprintf("Will use settings from %s", (ini_file != NULL)?"INI file":"registry");
+
+	// Use the locale specified by the settings, if any
+	tmp = ReadSettingStr(SETTING_LOCALE);
+	if (tmp[0] != 0) {
+		locale_name = safe_strdup(tmp);
+		uprintf("found locale '%s'", locale_name);
+	}
 
 	// Init localization
 	init_localization();
@@ -2572,7 +2588,7 @@ relaunch:
 	right_to_left_mode = ((selected_locale->ctrl_id) & LOC_RIGHT_TO_LEFT);
 	SetProcessDefaultLayout(right_to_left_mode?LAYOUT_RTL:0);
 	if (get_loc_data_file(loc_file, selected_locale))
-		WriteRegistryKeyStr(REGKEY_HKCU, REGKEY_LOCALE, selected_locale->txt[0]);
+		WriteSettingStr(SETTING_LOCALE, selected_locale->txt[0]);
 
 	/*
 	 * Create the main Window
@@ -2692,7 +2708,7 @@ relaunch:
 			PrintStatus2000(lmprintf(MSG_260), enable_ntfs_compression);
 			continue;
 		}
-		// Alt-R => Remove all the registry keys created by Rufus
+		// Alt-R => Remove all the registry keys that may have been created by Rufus
 		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'R')) {
 			PrintStatus(2000, DeleteRegistryKey(REGKEY_HKCU, COMPANY_NAME "\\" APPLICATION_NAME)?MSG_248:MSG_249);
 			// Also try to delete the upper key (company name) if it's empty (don't care about the result)

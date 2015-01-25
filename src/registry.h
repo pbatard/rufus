@@ -29,17 +29,6 @@ extern "C" {
 #define REGKEY_HKCU                 HKEY_CURRENT_USER
 #define REGKEY_HKLM                 HKEY_LOCAL_MACHINE
 
-/*
- * List of registry keys used by this application
- * These keys go into HKCU\Software\COMPANY_NAME\APPLICATION_NAME\
- */
-#define REGKEY_VERBOSE_UPDATES      "VerboseUpdateCheck"
-#define REGKEY_LAST_UPDATE          "LastUpdateCheck"
-#define REGKEY_UPDATE_INTERVAL      "UpdateCheckInterval"
-#define REGKEY_INCLUDE_BETAS        "CheckForBetas"
-#define REGKEY_COMM_CHECK           "CommCheck"
-#define REGKEY_LOCALE               "Locale"
-
 /* Delete a registry key from <key_root>\Software and all its values
    If the key has subkeys, this call will fail. */
 static __inline BOOL DeleteRegistryKey(HKEY key_root, const char* key_name)
@@ -144,7 +133,7 @@ out:
 // Check that a key is accessible for R/W (will create a key if not already existing)
 static __inline BOOL CheckRegistryKey64(HKEY root, const char* key) {
 	LONGLONG val;
-	return GetRegistryKey64(root, key, &val); // && SetRegistryKey64(key, val));
+	return GetRegistryKey64(root, key, &val);
 }
 static __inline int64_t ReadRegistryKey64(HKEY root, const char* key) {
 	LONGLONG val;
@@ -174,8 +163,8 @@ static __inline BOOL WriteRegistryKey32(HKEY root, const char* key, int32_t val)
 }
 
 /* Helpers for boolean registry operations */
-#define GetRegistryKeyBool(root, key) (ReadRegistryKey32(root, key) != 0)
-#define SetRegistryKeyBool(root, key, b) WriteRegistryKey32(root, key, (b)?1:0)
+#define ReadRegistryKeyBool(root, key) (ReadRegistryKey32(root, key) != 0)
+#define WriteRegistryKeyBool(root, key, b) WriteRegistryKey32(root, key, (b)?1:0)
 #define CheckRegistryKeyBool CheckRegistryKey32
 
 /* Helpers for String registry operations */
