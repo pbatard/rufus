@@ -1336,9 +1336,13 @@ BOOL SetupWinToGo(const char* drive_name, BOOL use_ms_efi)
 			fclose(fd);
 	} else {
 		fclose(fd);
+		// Can't use the one from the USB (at least for Windows 10 preview), as you'll get
+		// "Error: 0x800401f0  An error occurred while initializing COM security".
+		// On the other hand, using Windows 8.1 dism against Windows 10 doesn't work either
+		// (you get a message about needing to upgrade to latest AIK)...
 		static_sprintf(cmd, "dism /Image:%s\\ /Apply-Unattend:%s", drive_name, san_policy_path);
 		if (RunCommand(cmd, NULL, TRUE) != 0)
-			uprintf("Command '%s' failed to run");
+			uprintf("Command '%s' failed to run", cmd);
 	}
 
 	uprintf("Copying 'unattend.xml'");

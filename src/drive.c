@@ -1049,9 +1049,6 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 		DriveLayoutEx.PartitionEntry[pn].Gpt.PartitionType = PARTITION_MSFT_RESERVED_GUID;
 		IGNORE_RETVAL(CoCreateGuid(&DriveLayoutEx.PartitionEntry[pn].Gpt.PartitionId));
 		wcscpy(DriveLayoutEx.PartitionEntry[pn].Gpt.Name, L"Microsoft reserved partition");
-		pn++;
-		DriveLayoutEx.PartitionEntry[pn].StartingOffset.QuadPart = DriveLayoutEx.PartitionEntry[pn-1].StartingOffset.QuadPart +
-				DriveLayoutEx.PartitionEntry[pn-1].PartitionLength.QuadPart;
 
 		// We must zero the beginning of this partition, else we get FAT leftovers and stuff
 		if (SetFilePointerEx(hDrive, DriveLayoutEx.PartitionEntry[pn].StartingOffset, NULL, FILE_BEGIN)) {
@@ -1063,6 +1060,10 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 				free(buffer);
 			}
 		}
+
+		pn++;
+		DriveLayoutEx.PartitionEntry[pn].StartingOffset.QuadPart = DriveLayoutEx.PartitionEntry[pn-1].StartingOffset.QuadPart +
+				DriveLayoutEx.PartitionEntry[pn-1].PartitionLength.QuadPart;
 	}
 
 	// Set our main data partition

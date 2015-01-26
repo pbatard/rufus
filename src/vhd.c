@@ -347,7 +347,8 @@ uint8_t WimExtractCheck(void)
 
 	uprintf("WIM extraction method(s) supported: %s%s%s", (wim_flags & WIM_HAS_7Z_EXTRACT)?"7-Zip":
 		((wim_flags & WIM_HAS_API_EXTRACT)?"":"NONE"),
-		(WIM_HAS_EXTRACT(wim_flags))?", ":"", (wim_flags & WIM_HAS_API_EXTRACT)?"wimgapi.dll":"");
+		(WIM_HAS_EXTRACT(wim_flags) == (WIM_HAS_API_EXTRACT|WIM_HAS_7Z_EXTRACT))?", ":
+		"", (wim_flags & WIM_HAS_API_EXTRACT)?"wimgapi.dll":"");
 	uprintf("WIM apply method supported: %s", (wim_flags & WIM_HAS_API_APPLY)?"wimgapi.dll":"NONE");
 	return wim_flags;
 }
