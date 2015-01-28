@@ -246,6 +246,8 @@ void GetWindowsVersion(void)
 		if (vi.dwMajorVersion > 6 || (vi.dwMajorVersion == 6 && vi.dwMinorVersion >= 2)) {
 			// Starting with Windows 8.1 Preview, GetVersionEx() does no longer report the actual OS version
 			// See: http://msdn.microsoft.com/en-us/library/windows/desktop/dn302074.aspx
+			// And starting with Windows 10 Preview 2, Windows enforces the use of the application/supportedOS
+			// manifest in order for VerSetConditionMask() to report the ACTUAL OS major and minor...
 
 			major_equal = VerSetConditionMask(0, VER_MAJORVERSION, VER_EQUAL);
 			for (major = vi.dwMajorVersion; major <= 9; major++) {
@@ -289,7 +291,10 @@ void GetWindowsVersion(void)
 				break;
 			case 0x63: w = (ws?"8.1":"2012_R2");
 				break;
-			case 0x64: w = (ws?"10":"2015");
+			case 0x64: w = (ws?"10 (Preview 1)":"Server 10 (Preview 1)");
+				break;
+			// Starting with Windows 10 Preview 2, the major is the same as the public-facing version
+			case 0xA0: w = (ws?"10":"Server 10");
 				break;
 			default:
 				if (nWindowsVersion < 0x50)
