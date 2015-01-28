@@ -342,7 +342,7 @@ static void CALLBACK alarm_intr(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dw
 	if (!num_blocks)
 		return;
 	if (FormatStatus) {
-		uprintf("%sInterrupting at block %llu\n", bb_prefix,
+		uprintf("%sInterrupting at block %" PRIu64 "\n", bb_prefix,
 			(unsigned long long) currently_testing);
 		cancel_ops = -1;
 	}

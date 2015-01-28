@@ -915,7 +915,7 @@ static void DisplayISOProps(void)
 
 	// TODO: Only report features that are present
 	uprintf("ISO label: %s", iso_report.label);
-	uprintf("  Size: %lld bytes", iso_report.projected_size);
+	uprintf("  Size: %" PRIu64 " bytes", iso_report.projected_size);
 	uprintf("  Has a >64 chars filename: %s", YesNo(iso_report.has_long_filename));
 	uprintf("  Has Symlinks: %s", YesNo(iso_report.has_symlinks));
 	uprintf("  Has a >4GB file: %s", YesNo(iso_report.has_4GB_file));
@@ -1686,18 +1686,18 @@ void ShowLanguageMenu(HWND hDlg)
 	loc_cmd* lcmd = NULL;
 	char lang[256];
 	char *search = "()";
-	char *l, *r, *dup;
+	char *l, *r, *str;
 
 	UM_LANGUAGE_MENU_MAX = UM_LANGUAGE_MENU;
 	menu = CreatePopupMenu();
 	list_for_each_entry(lcmd, &locale_list, loc_cmd, list) {
 		// The appearance of LTR languages must be fixed for RTL menus
 		if ((right_to_left_mode) && (!(lcmd->ctrl_id & LOC_RIGHT_TO_LEFT)))  {
-			dup = safe_strdup(lcmd->txt[1]);
-			l = strtok(dup, search);
+			str = safe_strdup(lcmd->txt[1]);
+			l = strtok(str, search);
 			r = strtok(NULL, search);
 			static_sprintf(lang, LEFT_TO_RIGHT_MARK "(%s) " LEFT_TO_RIGHT_MARK "%s", r, l);
-			safe_free(dup);
+			safe_free(str);
 		} else {
 			safe_strcpy(lang, sizeof(lang), lcmd->txt[1]);
 		}

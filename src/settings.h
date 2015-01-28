@@ -57,7 +57,7 @@ static __inline int64_t ReadIniKey64(const char* key) {
 }
 static __inline BOOL WriteIniKey64(const char* key, int64_t val) {
 	char str[24];
-	static_sprintf(str, "%lld", val);
+	static_sprintf(str, "%" PRIi64, val);
 	return (set_token_data_file(key, str, ini_file) != NULL);
 }
 

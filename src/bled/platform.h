@@ -220,7 +220,7 @@ static __inline uint64_t bswap_64(uint64_t x)
 #elif defined(BYTE_ORDER) && BYTE_ORDER == LITTLE_ENDIAN
 # define BB_BIG_ENDIAN 0
 # define BB_LITTLE_ENDIAN 1
-#elif defined(__386__) || defined(_M_IX86) || defined(_M_AMD64)
+#elif defined(__386__) || defined(__i386__) || defined(__x86_64__) || defined(_M_IX86) || defined(_M_X64)
 # define BB_BIG_ENDIAN 0
 # define BB_LITTLE_ENDIAN 1
 #else
@@ -292,7 +292,7 @@ typedef uint64_t bb__aliased_uint64_t FIX_ALIASING;
 
 /* ---- Size-saving "small" ints (arch-dependent) ----------- */
 
-#if defined(i386) || defined(__x86_64__) || defined(__mips__) || defined(__cris__)
+#if defined(__386__) || defined(__i386__) || defined(__x86_64__) || defined(_M_IX86) || defined(_M_X64) || defined(__mips__) || defined(__cris__)
 /* add other arches which benefit from this... */
 typedef signed char smallint;
 typedef unsigned char smalluint;

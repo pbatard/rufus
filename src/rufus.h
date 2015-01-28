@@ -18,7 +18,7 @@
 #include <windows.h>
 #include <winioctl.h>               // for DISK_GEOMETRY
 #include <malloc.h>
-#include <stdint.h>
+#include <inttypes.h>
 
 #if defined(_MSC_VER)
 // Disable some VS2012 Code Analysis warnings
@@ -368,7 +368,7 @@ extern void PrintStatusInfo(BOOL info, BOOL debug, unsigned int duration, int ms
 extern void UpdateProgress(int op, float percent);
 extern const char* StrError(DWORD error_code, BOOL use_default_locale);
 extern char* GuidToString(const GUID* guid);
-extern char* SizeToHumanReadable(uint64_t size, BOOL log, BOOL fake_units);
+extern char* SizeToHumanReadable(uint64_t size, BOOL copy_to_log, BOOL fake_units);
 extern void CenterDialog(HWND hDlg);
 extern void ResizeMoveCtrl(HWND hDlg, HWND hCtrl, int dx, int dy, int dw, int dh);
 extern void CreateStatusBar(void);

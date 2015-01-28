@@ -160,15 +160,15 @@ static __inline uint16_t upo2(uint16_t v)
 }
 
 // Convert a size to human readable
-char* SizeToHumanReadable(uint64_t size, BOOL log, BOOL fake_units)
+char* SizeToHumanReadable(uint64_t size, BOOL copy_to_log, BOOL fake_units)
 {
 	int suffix;
 	static char str_size[32];
-	const char* dir = ((right_to_left_mode)&&(!log))?RIGHT_TO_LEFT_MARK:"";
+	const char* dir = ((right_to_left_mode)&&(!copy_to_log))?RIGHT_TO_LEFT_MARK:"";
 	double hr_size = (double)size;
 	double t;
 	uint16_t i_size;
-	char **_msg_table = log?default_msg_table:msg_table;
+	char **_msg_table = copy_to_log?default_msg_table:msg_table;
 	const double divider = fake_units?1000.0:1024.0;
 
 	for (suffix=0; suffix<MAX_SIZE_SUFFIXES-1; suffix++) {

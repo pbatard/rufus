@@ -853,10 +853,12 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 {
 	BOOL r = FALSE;
 	DWORD size;
-	int dt, fs, bt;
 	unsigned char* buf = NULL;
 	FILE fake_fd = { 0 };
 	const char* using_msg = "Using %s MBR\n";
+	int fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
+	int dt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
+	int bt = GETBIOSTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
 
 	AnalyzeMBR(hPhysicalDrive, "Drive");
 
@@ -893,9 +895,9 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 		buf[0x1c2] = 0x0c;
 		break;
 	}
-	if (IsChecked(IDC_BOOT)) {
+	if ((IsChecked(IDC_BOOT)) && (bt == BT_BIOS)) {
 		// Set first partition bootable - masquerade as per the DiskID selected
-		buf[0x1be] = (IsWindowEnabled(GetDlgItem(hMainDialog, IDC_RUFUS_MBR)) && IsChecked(IDC_RUFUS_MBR)) ? 
+		buf[0x1be] = IsChecked(IDC_RUFUS_MBR) ? 
 			(BYTE)ComboBox_GetItemData(hDiskID, ComboBox_GetCurSel(hDiskID)):0x80;
 		uprintf("Set bootable USB partition as 0x%02X\n", buf[0x1be]);
 	}
@@ -908,9 +910,6 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 
 	fake_fd._ptr = (char*)hPhysicalDrive;
 	fake_fd._bufsiz = SelectedDrive.Geometry.BytesPerSector;
-	fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
-	dt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
-	bt = GETBIOSTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
 	if ((bt == BT_UEFI) && (!allow_dual_uefi_bios)) {
 		uprintf(using_msg, "zeroed");
 		r = write_zero_mbr(&fake_fd);	// Force UEFI boot only by zeroing the MBR
@@ -1998,11 +1997,11 @@ DWORD WINAPI SaveImageThread(void* param)
 		if (i >= WRITE_RETRIES) goto out;
 	}
 	if (wb != SelectedDrive.DiskSize) {
-		uprintf("Error: wrote %llu bytes, expected %llu", wb, SelectedDrive.DiskSize);
+		uprintf("Error: wrote %" PRIu64 " bytes, expected %" PRIu64, wb, SelectedDrive.DiskSize);
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_WRITE_FAULT;
 		goto out;
 	}
-	uprintf("%llu bytes written", wb);
+	uprintf("%" PRIu64 " bytes written", wb);
 	uprintf("Appending VHD footer...");
 	if (!AppendVHDFooter(image_path)) {
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_WRITE_FAULT;

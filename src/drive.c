@@ -656,15 +656,18 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 {
 	// MBR partition types that can be mounted in Windows
 	const uint8_t mbr_mountable[] = { 0x01, 0x04, 0x06, 0x07, 0x0b, 0x0c, 0x0e, 0xef };
-	BOOL r, ret = FALSE, isUefiTogo;
+	BOOL r, ret = FALSE, isUefiTogo = FALSE;
 	HANDLE hPhysical;
 	DWORD size;
-	BYTE geometry[256], layout[4096], part_type;
+	BYTE geometry[256] = {0}, layout[4096] = {0}, part_type;
 	PDISK_GEOMETRY_EX DiskGeometry = (PDISK_GEOMETRY_EX)(void*)geometry;
 	PDRIVE_LAYOUT_INFORMATION_EX DriveLayout = (PDRIVE_LAYOUT_INFORMATION_EX)(void*)layout;
 	char* volume_name;
 	char tmp[256];
 	DWORD i, j;
+
+	if (FileSystemName == NULL)
+		return FALSE;
 
 	SelectedDrive.nPartitions = 0;
 	// Populate the filesystem data
@@ -698,7 +701,7 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 	memcpy(&SelectedDrive.Geometry, &DiskGeometry->Geometry, sizeof(DISK_GEOMETRY));
 	suprintf("Disk type: %s, Sector Size: %d bytes\n", (DiskGeometry->Geometry.MediaType == FixedMedia)?"Fixed":"Removable",
 		DiskGeometry->Geometry.BytesPerSector);
-	suprintf("Cylinders: %lld, TracksPerCylinder: %d, SectorsPerTrack: %d\n",
+	suprintf("Cylinders: %" PRIi64 ", TracksPerCylinder: %d, SectorsPerTrack: %d\n",
 		DiskGeometry->Geometry.Cylinders, DiskGeometry->Geometry.TracksPerCylinder, DiskGeometry->Geometry.SectorsPerTrack);
 
 	r = DeviceIoControl(hPhysical, IOCTL_DISK_GET_DRIVE_LAYOUT_EX, 
@@ -737,10 +740,11 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 						break;
 					}
 				}
-				suprintf("  Type: %s (0x%02x)\r\n  Size: %s (%lld bytes)\r\n  Start Sector: %d, Boot: %s, Recognized: %s\n",
+				// NB: MinGW's gcc 4.9.2 broke "%lld" printout on XP so we use the inttypes.h "PRI##" qualifiers
+				suprintf("  Type: %s (0x%02x)\r\n  Size: %s (%" PRIi64 " bytes)\r\n  Start Sector: %d, Boot: %s, Recognized: %s\n",
 					((part_type==0x07)&&(FileSystemName[0]!=0))?FileSystemName:GetPartitionType(part_type), part_type,
 					SizeToHumanReadable(DriveLayout->PartitionEntry[i].PartitionLength.QuadPart, TRUE, FALSE),
-					DriveLayout->PartitionEntry[i].PartitionLength, DriveLayout->PartitionEntry[i].Mbr.HiddenSectors,
+					DriveLayout->PartitionEntry[i].PartitionLength.QuadPart, DriveLayout->PartitionEntry[i].Mbr.HiddenSectors,
 					DriveLayout->PartitionEntry[i].Mbr.BootIndicator?"Yes":"No",
 					DriveLayout->PartitionEntry[i].Mbr.RecognizedPartition?"Yes":"No");
 				if ((part_type == RUFUS_EXTRA_PARTITION_TYPE) || (isUefiTogo))
@@ -755,7 +759,7 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 		SelectedDrive.PartitionType = PARTITION_STYLE_GPT;
 		suprintf("Partition type: GPT, NB Partitions: %d\n", DriveLayout->PartitionCount);
 		suprintf("Disk GUID: %s\n", GuidToString(&DriveLayout->Gpt.DiskId));
-		suprintf("Max parts: %d, Start Offset: %lld, Usable = %lld bytes\n",
+		suprintf("Max parts: %d, Start Offset: %" PRIi64 ", Usable = %" PRIi64 " bytes\n",
 			DriveLayout->Gpt.MaxPartitionCount, DriveLayout->Gpt.StartingUsableOffset.QuadPart, DriveLayout->Gpt.UsableLength.QuadPart);
 		for (i=0; i<DriveLayout->PartitionCount; i++) {
 			SelectedDrive.nPartitions++;
@@ -763,7 +767,7 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 			wchar_to_utf8_no_alloc(DriveLayout->PartitionEntry[i].Gpt.Name, tmp, sizeof(tmp));
 			suprintf("Partition %d:\r\n  Type: %s\r\n  Name: '%s'\n", i+1,
 				GuidToString(&DriveLayout->PartitionEntry[i].Gpt.PartitionType), tmp);
-			suprintf("  ID: %s\r\n  Size: %s (%lld bytes)\r\n  Start Sector: %lld, Attributes: 0x%016llX\n",
+			suprintf("  ID: %s\r\n  Size: %s (%" PRIi64 " bytes)\r\n  Start Sector: %" PRIi64 ", Attributes: 0x%016" PRIX64 "\n",
 				GuidToString(&DriveLayout->PartitionEntry[i].Gpt.PartitionId), SizeToHumanReadable(DriveLayout->PartitionEntry[i].PartitionLength.QuadPart, TRUE, FALSE),
 				DriveLayout->PartitionEntry[i].PartitionLength, DriveLayout->PartitionEntry[i].StartingOffset.QuadPart / DiskGeometry->Geometry.BytesPerSector,
 				DriveLayout->PartitionEntry[i].Gpt.Attributes);
@@ -1090,7 +1094,7 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 			extra_part_size_in_tracks = (MIN_EXTRA_PART_SIZE + bytes_per_track - 1) / bytes_per_track;
 		else if (extra_partitions & XP_COMPAT)
 			extra_part_size_in_tracks = 1;	// One track for the extra partition
-		uprintf("Reserved %lld tracks (%s) for extra partition", extra_part_size_in_tracks,
+		uprintf("Reserved %" PRIi64" tracks (%s) for extra partition", extra_part_size_in_tracks,
 			SizeToHumanReadable(extra_part_size_in_tracks * bytes_per_track, TRUE, FALSE));
 		main_part_size_in_sectors = ((main_part_size_in_sectors / SelectedDrive.Geometry.SectorsPerTrack) -
 			extra_part_size_in_tracks) * SelectedDrive.Geometry.SectorsPerTrack;

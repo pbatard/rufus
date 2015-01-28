@@ -1,6 +1,6 @@
 /******************************************************************
     Copyright (C) 2009  Henrik Carlqvist
-    Modified for Rufus/Windows (C) 2011-2012  Pete Batard
+    Modified for Rufus/Windows (C) 2011-2015  Pete Batard
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -41,15 +41,15 @@ int64_t write_sectors(HANDLE hDrive, uint64_t SectorSize,
    ptr.QuadPart = StartSector*SectorSize;
    if(!SetFilePointerEx(hDrive, ptr, NULL, FILE_BEGIN))
    {
-      uprintf("write_sectors: Could not access sector 0x%08llx - %s\n", StartSector, WindowsErrorString());
+      uprintf("write_sectors: Could not access sector 0x%08" PRIx64 " - %s\n", StartSector, WindowsErrorString());
       return -1;
    }
 
    if((!WriteFile(hDrive, pBuf, Size, &Size, NULL)) || (Size != nSectors*SectorSize))
    {
       uprintf("write_sectors: Write error %s\n", (GetLastError()!=ERROR_SUCCESS)?WindowsErrorString():"");
-      uprintf("  Wrote: %d, Expected: %lld\n",  Size, nSectors*SectorSize);
-      uprintf("  StartSector: 0x%08llx, nSectors: 0x%llx, SectorSize: 0x%llx\n", StartSector, nSectors, SectorSize);
+      uprintf("  Wrote: %d, Expected: %" PRIu64 "\n",  Size, nSectors*SectorSize);
+      uprintf("  StartSector: 0x%08" PRIx64 ", nSectors: 0x%" PRIx64 ", SectorSize: 0x%" PRIx64 "\n", StartSector, nSectors, SectorSize);
       return Size;
    }
 
@@ -74,15 +74,15 @@ int64_t read_sectors(HANDLE hDrive, uint64_t SectorSize,
    ptr.QuadPart = StartSector*SectorSize;
    if(!SetFilePointerEx(hDrive, ptr, NULL, FILE_BEGIN))
    {
-      uprintf("read_sectors: Could not access sector 0x%08llx - %s\n", StartSector, WindowsErrorString());
+      uprintf("read_sectors: Could not access sector 0x%08" PRIx64 " - %s\n", StartSector, WindowsErrorString());
       return -1;
    }
 
    if((!ReadFile(hDrive, pBuf, Size, &Size, NULL)) || (Size != nSectors*SectorSize))
    {
       uprintf("read_sectors: Read error %s\n", (GetLastError()!=ERROR_SUCCESS)?WindowsErrorString():"");
-      uprintf("  Read: %d, Expected: %lld\n",  Size, nSectors*SectorSize);
-      uprintf("  StartSector: 0x%08llx, nSectors: 0x%llx, SectorSize: 0x%llx\n", StartSector, nSectors, SectorSize);
+      uprintf("  Read: %d, Expected: %" PRIu64 "\n",  Size, nSectors*SectorSize);
+      uprintf("  StartSector: 0x%08" PRIx64 ", nSectors: 0x%" PRIx64 ", SectorSize: 0x%" PRIx64 "\n", StartSector, nSectors, SectorSize);
    }
 
    return (int64_t)Size;
