@@ -1761,7 +1761,7 @@ void SetBoot(int fs, int bt)
 static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	static DWORD DeviceNum = 0, LastRefresh = 0;
-	static BOOL first_log_display = TRUE, user_changed_label = FALSE;
+	static BOOL first_log_display = TRUE, user_changed_label = FALSE, isMarquee = FALSE;
 	static ULONG ulRegister = 0;
 	static LPITEMIDLIST pidlDesktop = NULL;
 	static MY_SHChangeNotifyEntry NotifyEntry;
@@ -2280,7 +2280,8 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		break;
 
 	case UM_PROGRESS_INIT:
-		if (wParam == PBS_MARQUEE) {
+		isMarquee = (wParam == PBS_MARQUEE);
+		if (isMarquee) {
 			progress_style = GetWindowLong(hProgress, GWL_STYLE);
 			SetWindowLong(hProgress, GWL_STYLE, progress_style | PBS_MARQUEE);
 			SendMessage(hProgress, PBM_SETMARQUEE, TRUE, 0);
@@ -2293,13 +2294,21 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		break;
 
 	case UM_PROGRESS_EXIT:
-		// Remove marquee style if previously set
-		progress_style = GetWindowLong(hProgress, GWL_STYLE);
-		SetWindowLong(hProgress, GWL_STYLE, progress_style & (~PBS_MARQUEE));
+		if (isMarquee) {
+			// Remove marquee style if previously set
+			progress_style = GetWindowLong(hProgress, GWL_STYLE);
+			SetWindowLong(hProgress, GWL_STYLE, progress_style & (~PBS_MARQUEE));
+			SetTaskbarProgressValue(0, MAX_PROGRESS);
+			SendMessage(hProgress, PBM_SETPOS, 0, 0);
+		} else if (!IS_ERROR(FormatStatus)) {
+			SetTaskbarProgressValue(MAX_PROGRESS, MAX_PROGRESS);
+			// This is the only way to achieve instantaneous progress transition to 100%
+			SendMessage(hProgress, PBM_SETRANGE, 0, ((MAX_PROGRESS+1)<<16) & 0xFFFF0000);
+			SendMessage(hProgress, PBM_SETPOS, (MAX_PROGRESS+1), 0);
+			SendMessage(hProgress, PBM_SETRANGE, 0, (MAX_PROGRESS<<16) & 0xFFFF0000);
+		}
 		SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_NORMAL, 0);
 		SetTaskbarProgressState(TASKBAR_NORMAL);
-		SetTaskbarProgressValue(0, MAX_PROGRESS);
-		SendMessage(hProgress, PBM_SETPOS, 0, 0);
 		break;
 
 	case UM_FORMAT_COMPLETED:
@@ -2768,6 +2777,7 @@ out:
 	safe_free(locale_name);
 	safe_free(update.download_url);
 	safe_free(update.release_notes);
+	safe_free(grub2_buf);
 	if (argv != NULL) {
 		for (i=0; i<argc; i++) safe_free(argv[i]);
 		safe_free(argv);
