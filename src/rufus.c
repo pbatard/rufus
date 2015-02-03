@@ -457,6 +457,8 @@ static void SetFSFromISO(void)
 	int i, fs, selected_fs = FS_UNKNOWN;
 	uint32_t fs_mask = 0;
 	int bt = GETBIOSTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
+	BOOL windows_to_go = (togo_mode) && HAS_TOGO(iso_report) &&
+		(Button_GetCheck(GetDlgItem(hMainDialog, IDC_WINDOWS_TO_GO)) == BST_CHECKED);
 
 	if (image_path == NULL)
 		return;
@@ -469,13 +471,13 @@ static void SetFSFromISO(void)
 
 	// Syslinux and EFI have precedence over bootmgr (unless the user selected BIOS as target type)
 	if ((HAS_SYSLINUX(iso_report)) || (IS_REACTOS(iso_report)) || (iso_report.has_kolibrios) ||
-		((iso_report.has_efi) && (bt == BT_UEFI) && (!iso_report.has_4GB_file))) {
+		((iso_report.has_efi) && (bt == BT_UEFI) && (!iso_report.has_4GB_file) && (!windows_to_go))) {
 		if (fs_mask & (1<<FS_FAT32)) {
 			selected_fs = FS_FAT32;
 		} else if ((fs_mask & (1<<FS_FAT16)) && (!iso_report.has_kolibrios)) {
 			selected_fs = FS_FAT16;
 		}
-	} else if ((iso_report.has_bootmgr) || (IS_WINPE(iso_report.winpe))) {
+	} else if ((windows_to_go) || (iso_report.has_bootmgr) || (IS_WINPE(iso_report.winpe))) {
 		if (fs_mask & (1<<FS_NTFS)) {
 			selected_fs = FS_NTFS;
 		}
@@ -2168,19 +2170,11 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			}
 			break;
 		case IDC_WINDOWS_INSTALL:
-			if (Button_GetCheck(GetDlgItem(hMainDialog, IDC_WINDOWS_INSTALL)) == BST_CHECKED)
-				SetMBRProps();
-			break;
 		case IDC_WINDOWS_TO_GO:
-			if (Button_GetCheck(GetDlgItem(hMainDialog, IDC_WINDOWS_TO_GO)) == BST_CHECKED) {
-				for (i=0; i<ComboBox_GetCount(hFileSystem); i++) {
-					if (ComboBox_GetItemData(hFileSystem, i) == FS_NTFS) {
-						IGNORE_RETVAL(ComboBox_SetCurSel(hFileSystem, i));
-						break;
-					}
-				}
+			if ( (Button_GetCheck(GetDlgItem(hMainDialog, IDC_WINDOWS_INSTALL)) == BST_CHECKED) ||
+				 (Button_GetCheck(GetDlgItem(hMainDialog, IDC_WINDOWS_TO_GO)) == BST_CHECKED) ) {
+				SetFSFromISO();
 				SetMBRProps();
-				CheckDlgButton(hMainDialog, IDC_RUFUS_MBR, BST_UNCHECKED);
 			}
 			break;
 		case IDC_RUFUS_MBR:
