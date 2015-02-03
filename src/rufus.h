@@ -33,6 +33,10 @@
 #define RUFUS_DEBUG                 // print debug info to Debug facility
 /* Features not ready for prime time and that may *DESTROY* your data - USE AT YOUR OWN RISKS! */
 // #define RUFUS_TEST
+/* Languages for which translators are M.I.A. and we could use help with */
+#define LOST_TRANSLATORS            { "ar-SA", "hu-HU", "id-ID", "pt-PT", "es-ES" }	// NB: locales MUST be <= 5 chars
+/* Probability of getting the M.I.A. translator message. For more on this, see LostTranslatorCheck() */
+#define LOST_TRANSLATOR_PROBABILITY 1000
 
 #define APPLICATION_NAME            "Rufus"
 #define COMPANY_NAME                "Akeo Consulting"
@@ -421,6 +425,7 @@ extern BOOL WimApplyImage(const char* image, int index, const char* dst);
 extern BOOL IsHDImage(const char* path);
 extern BOOL AppendVHDFooter(const char* vhd_path);
 extern int IsHDD(DWORD DriveIndex, uint16_t vid, uint16_t pid, const char* strid);
+extern void LostTranslatorCheck(void);
 
 DWORD WINAPI FormatThread(void* param);
 DWORD WINAPI SaveImageThread(void* param);

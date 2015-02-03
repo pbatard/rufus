@@ -111,6 +111,7 @@ static RECT relaunch_rc = { -65536, -65536, 0, 0};
 static UINT uBootChecked = BST_CHECKED, uQFChecked = BST_CHECKED, uMBRChecked = BST_UNCHECKED;
 char ClusterSizeLabel[MAX_CLUSTER_SIZES][64];
 char msgbox[1024], msgbox_title[32], *ini_file = NULL;
+char lost_translators[][6] = LOST_TRANSLATORS;
 
 /*
  * Globals
@@ -900,6 +901,25 @@ static void CALLBACK BlockingTimer(HWND hWnd, UINT uMsg, UINT_PTR idEvent, DWORD
 			last_iso_blocking_status = iso_blocking_status;
 		}
 	}
+}
+
+// Randomly nag users about translations that have been left behind
+void LostTranslatorCheck(void)
+{
+	char *p;
+	char* lang = safe_strdup(selected_locale->txt[1]);
+	int i, r = rand() * LOST_TRANSLATOR_PROBABILITY / RAND_MAX;
+	for (i=0; i<ARRAYSIZE(lost_translators); i++)
+		if (strcmp(selected_locale->txt[0], lost_translators[i]) == 0)
+			break;
+	if ((r == 0) && (i != ARRAYSIZE(lost_translators)) && (lang != NULL) && ((p = strchr(lang, '(')) != NULL)) {
+		p[-1] = 0;
+		safe_sprintf(msgbox, sizeof(msgbox), "Note: The %s translation requires an update, but the original "
+			"translator is no longer contributing to it...\nIf you can read English and want to help complete "
+			"this translation, please visit: http://rufus.akeo.ie/translate.", lang);
+		MessageBoxU(hMainDialog, msgbox, "Translation help needed", MB_OK|MB_ICONINFORMATION);
+	}
+	safe_free(lang);
 }
 
 // Report the features of the selected ISO images
@@ -2585,6 +2605,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 				uprintf("Failed to enable AutoMount");
 		}
 	}
+	srand((unsigned int)GetTickCount());
 
 relaunch:
 	uprintf("localization: using locale '%s'\n", selected_locale->txt[0]);

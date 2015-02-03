@@ -457,8 +457,7 @@ static unsigned int test_rw(HANDLE hDrive, blk_t last_block, size_t block_size, 
 
 	for (pat_idx = 0; pat_idx < nb_passes; pat_idx++) {
 		if (cancel_ops) goto out;
-		srand((unsigned int)GetTickCount());
-		id_offset = rand()* (block_size-sizeof(blk_t)) / RAND_MAX;
+		id_offset = rand() * (block_size-sizeof(blk_t)) / RAND_MAX;
 		pattern_fill(buffer, pattern[pat_idx], blocks_at_once * block_size);
 		uprintf("%sUsing offset %d for fake device check\n", bb_prefix, id_offset);
 		num_blocks = last_block - 1;

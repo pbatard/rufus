@@ -233,11 +233,13 @@ out:
  * Parse a localization file, to construct the list of available locales.
  * The locale file must be UTF-8 with NO BOM.
  */
+extern char lost_translators[][6];
 BOOL get_supported_locales(const char* filename)
 {
 	FILE* fd = NULL;
 	BOOL r = FALSE;
 	char line[1024];
+	char* LT[] = LOST_TRANSLATORS;	//just to get the arraysize...
 	size_t i, j, k;
 	loc_cmd *lcmd = NULL, *last_lcmd = NULL;
 	long end_of_block;
@@ -346,6 +348,14 @@ BOOL get_supported_locales(const char* filename)
 						"If you are the translator, please update your translation with the changes that intervened between v%d.%d.%d and v%d.%d.%d.\n"
 						"See https://github.com/pbatard/rufus/blob/master/res/localization/ChangeLog.txt", 
 						LOC_FRAMEWORK_VERSION, loc_base_minor, lcmd->unum[2], LOC_FRAMEWORK_VERSION, loc_base_minor, loc_base_micro);
+				} else if (lcmd->unum[2] >= loc_base_micro) {
+					// Don't bug users about a locale that may already have been upgraded
+					for (i=0; i<ARRAYSIZE(LT); i++) {
+						if (safe_strcmp(last_lcmd->txt[0], lost_translators[i]) == 0) {
+							uprintf("NOTE: This translation appears up to date - Removing it from LOST_TRANSLATORS");
+							lost_translators[i][0] = 0;
+						}
+					}
 				}
 				version_line_nr = loc_line_nr;
 			}
@@ -1220,7 +1230,6 @@ out:
 
 	return ret;
 }
-
 
 /*
  * Replace all 'c' characters in string 'src' with the subtsring 'rep'

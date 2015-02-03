@@ -50,7 +50,7 @@ static __inline int64_t ReadIniKey64(const char* key) {
 	int64_t val = 0;
 	char* str = get_token_data_file(key, ini_file);
 	if (str != NULL) {
-		val = strtoll(str, NULL, 0);
+		val = _strtoi64(str, NULL, 0);
 		free(str);
 	}
 	return val;
