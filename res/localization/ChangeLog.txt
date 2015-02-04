@@ -15,6 +15,42 @@ content. PLEASE, do not just look at this Changelog when updating your
 translation, but always use the English section of rufus.loc as your base.
 For instance, MSG_114, that was introduced in v1.0.8 is MORE than one line!
 
+o Version 1.0.17 (2015.02.04)
+  - *NEW CONTROL* IDC_WINDOWS_INSTALL "Standard Windows installation" (Main dialog)
+  - *NEW CONTROL* IDC_WINDOWS_TO_GO "Windows To Go" (Main dialog)
+  Note: to see the 2 controls above displayed, you will need to load the "Windows To Go.iso" image from
+  https://github.com/pbatard/rufus/raw/master/res/localization/Windows%20To%20Go.iso (356 KB)
+  Also see the comment for IDC_WINDOWS_TO_GO in the English translation.
+  - *NEW* MSG_096 "The file system currently selected can not be used with this type of ISO (...)"
+  - *NEW* MSG_097 "'Windows To Go' can only be applied if the file system is NTFS."
+  - *NEW* MSG_098 "IMPORTANT: You are trying to install 'Windows To Go', but your target drive doesn't (...)"
+  - *NEW* MSG_116 "This image uses Grub %s but the application only includes the installation files for (...)"
+    Similar to MSG_114. Please see the comment from the English translation if you want to test this message.
+  - *NEW* MSG_190 "Incompatible drive detected"
+  - *NEW* MSG_191 "Write pass"
+  - *NEW* MSG_192 "Read pass"
+    See MSG_235 for where the 2 messages above are being used.
+  - *NEW* MSG_193 "Downloaded %s"
+  - *NEW* MSG_194 "Could not download %s"
+  - *NEW* MSG_195 "Using embedded version of %s file(s)"
+  - *NEW* MSG_196 "IMPORTANT: THIS DRIVE USES A NONSTANDARD SECTOR SIZE!! (...)"
+  - *NEW* MSG_197 "Nonstandard sector size detected"
+  - *NEW* MSG_198 "'Windows To Go' can only be installed on a GPT partitioned drive if it has (...)"
+  - *NEW* MSG_199 "Choose this if you plan to install Windows, to another disk, using (...)"
+  - *NEW* MSG_200 "Choose this if you want to run Windows directly from the selected device."
+  - Changed MSG_205 "Using ISO: %s" -> "Using image: %s"
+  - Changed MSG_210 "DONE" -> "READY".
+    This message appears in the new Info field that was added to Rufus 2.0 and reflects
+    when the application is ready to take an action from the user.
+  - Changed MSG_235 "Bad Blocks: PASS %d/%d - %0.2f%% (%d/%d/%d errors)" -> "Bad Blocks: %s %d/%d - %0.2f%% (%d/%d/%d errors)"
+    Basically "PASS" will be replaced by "Write pass" or "Read pass" from MSG_191/192 (printed in place of the '%s')
+  - Changed MSG_253 "Fixed disks detection" -> "Hard disk detection"
+  - *NEW* MSG_264 "Deleting directory '%s'"
+  - *NEW* MSG_265 "VMWare disk detection"
+  - *NEW* MSG_266 "Dual UEFI/BIOS mode"
+  - *NEW* MSG_267 "Applying Windows image: %0.1f%% completed"
+  - *NEW* MSG_268 "Applying Windows image..."
+
 o Version 1.0.16 (2015.02.03)
   - Removed MSG_096 - MSG_098
   Note: since this doesn't require translator involvement, I have applied the changes to existing translations.
