@@ -87,7 +87,7 @@
 # http://download.microsoft.com/download/9/5/E/95EF66AF-9026-4BB0-A41D-A4F81802D92C/%5BMS-LCID%5D.pdf
 # for the LCID (0x####) codes you should use
 l "en-US" "English (English)" 0x0409, 0x0809, 0x0c09, 0x1009, 0x1409, 0x1809, 0x1c09, 0x2009, 0x2409, 0x2809, 0x2c09, 0x3009, 0x3409, 0x3809, 0x3c09, 0x4009, 0x4409, 0x4809
-v 1.0.15
+v 1.0.16
 
 # Main dialog
 g IDD_DIALOG
@@ -103,7 +103,7 @@ t IDC_QUICKFORMAT "Quick format"
 t IDC_BOOT "Create a bootable disk using"
 t IDC_WINDOWS_INSTALL "Standard Windows installation"
 # Only translate if Microsoft has a specific name for http://en.wikipedia.org/wiki/Windows_To_Go in your language
-# Otherwise, you can add a parenthesis eg. "Windows To Go (hint at what it does)" and/or use the tooltip (MSG_???)
+# Otherwise, you can add a parenthesis eg. "Windows To Go (hint at what it does)" and/or use the tooltip (MSG_200)
 t IDC_WINDOWS_TO_GO "Windows To Go"
 t IDC_SET_ICON "Create extended label and icon files"
 t IDC_ABOUT "About..."
@@ -714,9 +714,6 @@ t MSG_093 "هام: هذا القرص يحتوي على أقسام متعددة!!
 	"إذا كنت ترغب في إكمال العملية، أنت المسؤول عن أي فقدان لبيانات على هذه الأقسام."
 t MSG_094 "إكتشاف أقسام متعددة"
 t MSG_095 "DD صورة"
-t MSG_096 "إعتماد FAT/FAT32 فقط لهذا النوع من ISO. الرجاء تحديد FAT/FAT32 كنظام الملفات."
-t MSG_097 "يمكن إستخدام ملفات ISO 'bootmgr' أو 'WinPE' مع NTFS فقط حالياً."
-t MSG_098 "يمكن إستخدام FAT/FAT32 لملفات ISO isolinux عندما يكون نوع الهدف UEFI."
 t MSG_099 "قيود نظام الملفات"
 t MSG_100 "صورة الـISO تحتوي على ملف أكبر من 4GB, وهي أكبر من "
 	"الحد الأقصى للحجم المسموح لنظام الملفات FAT أو FAT32."
@@ -895,7 +892,7 @@ t MSG_261 "كتابة صورة: تم %0.1f%%"
 
 ######################################################################
 l "bg-BG" "Bulgarian (Български)" 0x0402
-v 1.0.15
+v 1.0.16
 b "en-US"
 
 # Main dialog
@@ -1136,9 +1133,6 @@ t MSG_093 "ВАЖНО: ТОВА УСТРОЙСТВО СЪДЪРЖА МНОЖЕС
 	"Ако желаете да продължите, вие носите отговорност за загубата на информация на тези дялове/томове ."
 t MSG_094 "Засечени са множество дялове"
 t MSG_095 "DD Образ"
-t MSG_096 "Само FAT/FAT32 е поддържан за този вид ISO. Моля изберете FAT/FAT32 за тип файлова система."
-t MSG_097 "Само 'bootmgr' или 'WinPE' базирани ISO образи могат да се използват с NTFS за момента."
-t MSG_098 "FAT/FAT32 могат да бъдат използвани с isolinux базирани ISO образи или когато целевия тип е UEFI."
 t MSG_099 "Ограничение на файловата система"
 t MSG_100 "Този ISO образ съдържа файл по голям от 4GB, което е повече "
 	"допустимият размер за FAT или FAT32 файлова система."
@@ -1315,7 +1309,7 @@ t MSG_263 "Използвайте ПОДХОДЯЩ размер единици"
 
 ################################################################################
 l "zh-CN" "Chinese Simplified (简体中文)" 0x0804, 0x1004
-v 1.0.15
+v 1.0.16
 b "en-US"
 
 # Main dialog
@@ -1509,9 +1503,6 @@ t MSG_093 "警告：此磁盘包含多分区！\n\n"
 	"继续操作可能造成数据丢失，后果自负。"
 t MSG_094 "检测到多分区磁盘"
 t MSG_095 "DD 镜像"
-t MSG_096 "此 ISO 镜像仅支持 FAT/FAT32 文件系统，\n请选择 FAT/FAT32 文件系统。"
-t MSG_097 "目前只有基于 bootmgr/WinPE 的 ISO 镜像支持 NTFS 文件系统。"
-t MSG_098 "选择 FAT/FAT32 文件系统时，只支持基于 isolinux 的 ISO 镜像，\n或 UEFI 系统类型。"
 t MSG_099 "文件系统限制"
 t MSG_100 "此 ISO 镜像包含大于 4 GB 的单一文件，\n超出 FAT/FAT32 文件系统限制。"
 t MSG_101 "缺少 WIM 支持"
@@ -1672,7 +1663,7 @@ t MSG_263 "准确存储单位转换"
 
 ################################################################################
 l "zh-TW" "Chinese Traditional (正體中文)" 0x0404, 0x0c04, 0x1404, 0x7c04
-v 1.0.15
+v 1.0.16
 b "en-US"
 
 # Main dialog
@@ -1879,9 +1870,6 @@ t MSG_093 "注意! 此裝置具有多重磁碟分割配置，可能包含 Window
 	"請確認是否繼續執行，所造成任何磁碟分割資料遺失請自行負責"
 t MSG_094 "偵測到多重磁碟分割"
 t MSG_095 "DD 映像檔"
-t MSG_096 "此 ISO 映像檔僅可使用 FAT/FAT32，請指定 FAT/FAT32 為檔案系統"
-t MSG_097 "NTFS 僅可使用 bootmgr 或 WinPE 作為開機載入之 ISO 映像檔"
-t MSG_098 "FAT/FAT32 僅支援 isolinux 作為開機載入之 ISO 映像檔；或指定 UEFI 為目標型別時可支援"
 t MSG_099 "檔案系統限制"
 t MSG_100 "此映像檔內含大於 4GB 的單一檔案大小，超出 FAT/FAT32 檔案系統可支援的上限"
 t MSG_101 "缺少 WIM 支援"
@@ -2040,7 +2028,7 @@ t MSG_263 "正規位元單位"
 
 ################################################################################
 l "hr-HR" "Croatian (Hrvatski)" 0x041a, 0x081a, 0x101a
-v 1.0.15
+v 1.0.16
 b "en-US"
 
 # Main dialog
@@ -2242,9 +2230,6 @@ t MSG_093 "VAŽNO: OVA JEDINICA IMA VIŠE PARTICIJA!!!\n\n"
 	"Ako nastavite, odgovorni ste za sve izgubljene podatke na particiji."
 t MSG_094 "Otkrivene višestruke particije"
 t MSG_095 "DD slike"
-t MSG_096 "Samo FAT/FAT32 su podržani za ovaj ISO. Molimo odaberite FAT/FAT32."
-t MSG_097 "Samo 'bootmgr' ili 'WinPE' bazirane ISO slike se mogu koristiti sa NTFS."
-t MSG_098 "FAT/FAT32 se samo može koristiti za isolinux baziranu ISO sliku ili dok je Target Type UEFI."
 t MSG_099 "Ograničenje sustava datoteka"
 t MSG_100 "Ova ISO slika sadrži datoteku od 4GB ili više, što je "
 	"više nego dozvoljeno za FAT ili FAT32."
@@ -2421,7 +2406,7 @@ t MSG_263 "Koristi PRAVE vel. jedinica"
 
 ################################################################################
 l "cs-CZ" "Czech (Čeština)" 0x0405
-v 1.0.15
+v 1.0.16
 b "en-US"
 
 # Main dialog
@@ -2628,9 +2613,6 @@ t MSG_093 "DŮLEŽITÉ: TOTO ZAŘÍZENÍ OBSAHUJE NĚKOLIK ODDÍLŮ!!\n\n"
 	"Pokud přesto chcete pokračovat, nesete odpovědnost za ztrátu veškerých dat na těchto oddílech."
 t MSG_094 "Bylo zjištěno více oddílů"
 t MSG_095 "Obraz DD"
-t MSG_096 "Pro tento typ ISO obrazu jsou podporované jen FAT/FAT32. Vyberte FAT/FAT32 jako souborový systém."
-t MSG_097 "Se souborovým systémem NTFS lze použít jen ISO obrazy založené na bootmgr nebo WinPE."
-t MSG_098 "FAT/FAT32 může být použit pouze pro ISO obrazy založené na isolinux, nebo pokud je cílový typ systému UEFI."
 t MSG_099 "Omezení souborového systému"
 t MSG_100 "Tento ISO obraz obsahuje soubor větší než 4GB, přesahující maximální "
 	"přípustnou velikost souboru souborového systému FAT nebo FAT32."
@@ -2806,7 +2788,7 @@ t MSG_263 "Použit BINÁRNÍ předpony jednotek"
 
 ################################################################################
 l "da-DK" "Danish (Dansk)" 0x0406
-v 1.0.15
+v 1.0.16
 b "en-US"
 # Main dialog
 g IDD_DIALOG
@@ -3017,9 +2999,6 @@ t MSG_093 "VIGTIGT: DETTE DREV INDEHOLDER FLERE PARTITIONER!!\n\n"
 	"Hvis du ønsker at fortsætte, er du ansvarlig for eventuelle tab af data på disse partitioner."
 t MSG_094 "Flere partitioner blev opdaget"
 t MSG_095 "DD-image"
-t MSG_096 "Kun FAT/FAT32 er understøttet for denne type af ISO. Vælg venligst FAT/FAT32 som filsystem."
-t MSG_097 "Kun 'bootmgr' eller 'WinPE' baseret ISO-image kan for nuværende anvende NTFS."
-t MSG_098 "FAT/FAT32 kan kun anvendes med et isolinux baseret ISO-image eller når type af mål-system er UEFI."
 t MSG_099 "Filsystem begrænsning"
 t MSG_100 "Dette ISO-image indeholder en fil der er større end 4GB, hvilket er mere end "
 	"den maksimale størrelse FAT eller FAT32 filsystemet tillader"
@@ -3176,7 +3155,7 @@ t MSG_263 "MiB notation"
 
 ################################################################################
 l "nl-NL" "Dutch (Nederlands)" 0x0413, 0x0813
-v 1.0.15
+v 1.0.16
 b "en-US"
 
 # Main dialog
@@ -3411,9 +3390,6 @@ t MSG_093 "BELANGRIJK: DEZE DRIVE BEVAT MEERDERE PARTITIES!!\n\n"
 	"Als je verder wilt gaan, ben je zelf verantwoordelijk voor gegevensverlies op deze partities."
 t MSG_094 "Meerdere partities gedetecteerd"
 t MSG_095 "DD Image"
-t MSG_096 "Alleen FAT/FAT32 wordt ondersteund voor dit type ISO. Selecteer FAT/FAT32 als bestandssysteem a.u.b."
-t MSG_097 "Alleen 'bootmgr' of 'WinPE' gebaseerde ISO images kunnen momenteel worden gebruikt met NTFS."
-t MSG_098 "FAT/FAT32 kan alleen gebruikt worden voor op isolinux gebaseerde ISO images of wanneer het doel type computer UEFI is."
 t MSG_099 "Beperking van bestandssysteem"
 t MSG_100 "Deze ISO image bevat een bestand dat groter is dan 4 GB wat groter is dan de"
          "maximum toegestane grootte voor een FAT of FAT32 bestandssysteem."
@@ -3577,7 +3553,7 @@ t MSG_263 "Gebruik de juiste grootte-eenheden"
 
 ################################################################################
 l "fi-FI" "Finnish (Suomi)" 0x040B
-v 1.0.15
+v 1.0.16
 b "en-US"
 
 # Main dialog
@@ -3789,9 +3765,6 @@ t MSG_093 "TÄRKEÄÄ: TÄMÄ LEVYASEMA SISÄLTÄÄ USEITA OSIOITA!!\n\n"
 	"Jos haluat jatkaa, olet vastuussa mahdollisesta tietojen häviämisestä näillä osioilla."
 t MSG_094 "Useita osioita havaittu"
 t MSG_095 "DD-kuva"
-t MSG_096 "Vain FAT/FAT32 on tuettuna tämän tyyppiselle ISO-levykuvalle. Valitse FAT/FAT32 tiedostojärjestelmäksi."
-t MSG_097 "Vain 'bootmgr' tai 'WinPE' -pohjaisia ISO-levykuvia voidaan tällä hetkellä käyttää NTFS-muodon kanssa."
-t MSG_098 "FAT/FAT32 -muotoa voidaan käyttää vain isolinux-pohjaisille ISO-levykuville tai kohdetyypin ollessa UEFI."
 t MSG_099 "Tiedostojärjestelmärajoitus"
 t MSG_100 "Tämä ISO-levykuva sisältää yli 4GB-kokoisen tiedoston, joka ylittää "
 	"FAT ja FAT32 -tiedostojärjestelmien maksimikoon."
@@ -3968,7 +3941,7 @@ t MSG_263 "Käytä OIKEITA tilayksikön kerrannaisia"
 
 ################################################################################
 l "fr-FR" "French (Français)" 0x040c, 0x080c, 0x0c0c, 0x100c, 0x140c, 0x180c, 0x1c0c, 0x200c, 0x240c, 0x280c, 0x2c0c, 0x300c, 0x340c, 0x380c, 0xe40c
-v 1.0.15
+v 1.0.16
 b "en-US"
 
 g IDD_DIALOG
@@ -4167,9 +4140,6 @@ t MSG_093 "IMPORTANT : CE PÉRIPHÉRIQUE CONTIENT PLUSIEURS PARTITIONS !!\n\n"
 	"de continuer, vous êtes responsable de toute perte de données intervenant sur ces partitions."
 t MSG_094 "Partitions multiples détectées"
 t MSG_095 "Image DD"
-t MSG_096 "Seul FAT/FAT32 est supporté avec ce type d'image ISO. Veuillez sélectionner FAT/FAT32 pour le système de fichiers."
-t MSG_097 "Seules les images ISO utilisant 'bootmgr' ou 'WinPE' peuvent être utilisées avec NTFS."
-t MSG_098 "FAT/FAT32 peut seulement être utilisé pour les images ISO utilisant 'isolinux' ou lorsque que le système de destination est UEFI."
 t MSG_099 "Limitation du système de fichiers"
 t MSG_100 "Cette image ISO contient un fichier de plus de 4 Go, ce qui est plus que la taille maximum "
 	"supportée par le système de fichiers FAT ou FAT32."
@@ -4327,7 +4297,7 @@ t MSG_263 "Affich. tailles avec de VRAIES unités"
 
 ################################################################################
 l "de-DE" "German (Deutsch)" 0x0407, 0x0807, 0x0c07, 0x1007, 0x1407
-v 1.0.15
+v 1.0.16
 b "en-US"
 
 g IDD_DIALOG
@@ -4551,9 +4521,6 @@ t MSG_093 "ACHTUNG! DIESES LAUFWERK VERFÜGT ÜBER MEHRERE PARTITIONEN ODER VOLU
 	"Wenn Sie fortfahren, sind Sie selbst für den Datenverlust auf diesen Partitionen verantwortlich."
 t MSG_094 "Mehrere Partitionen erkannt"	
 t MSG_095 "DD Abbild"
-t MSG_096 "Nur FAT/FAT32 sind unterstützt für diesen Typ des ISO-Abbilds. Bitte wählen Sie FAT/FAT32 als Dateisystem."
-t MSG_097 "Nur 'bootmgr' oder 'WinPE' basierende ISO-Abbilder können derzeit mit NTFS verwendet werden."
-t MSG_098 "FAT/FAT32 kann nur für isolinux basierte ISO-Abbilder oder den Zieltyp UEFI verwendet werden."
 t MSG_099 "Dateisystembeschränkung"
 t MSG_100 "Diese ISO-Abbild-Datei enthält eine Datei größer 4GB. Diese Dateigröße ist für "
 	"FAT oder FAT32 Dateisysteme nicht zulässig."
@@ -4719,7 +4686,7 @@ t MSG_263 "Verwenden Sie korrekten Größeneinheiten"
 
 ################################################################################
 l "el-GR" "Greek (Ελληνικά)" 0x0408
-v 1.0.15
+v 1.0.16
 b "en-US"
 
 # Main dialog
@@ -4964,9 +4931,6 @@ t MSG_093 "ΠΡΟΣΟΧΗ: Η ΕΠΙΛΕΓΜΕΝΗ ΣΥΣΚΕΥΗ ΠΕΡΙΕΧΕ
 	"Εάν επιθυμείτε να συνεχίσετε, είστε υπεύθυνοι για τυχόν απώλειες δεδομένων σε αυτούς τους διαμερισμούς."
 t MSG_094 "Εντοπίστηκαν πολλαπλοί διαμερισμοί"
 t MSG_095 "Είδωλο DD"
-t MSG_096 "Μόνο το FAT/FAT32 υποστηρίζεται για αυτόν τον τύπο ειδώλου ISO. Παρακαλώ επιλέξτε FAT/FAT32 ως σύστημα αρχείων."
-t MSG_097 "Μόνο τα είδωλα που βασίζονται στον τύπο 'bootmgr' ή 'WinPE' μπορούν να χρησιμοποιηθούν με το NTFS."
-t MSG_098 "Ο τύπος FAT/FAT32 μπορεί να χρησιμοποιηθεί μόνο με είδωλα που βασίζονται στον τύπο isolinux ή όταν ο επιθυμητός τύπος είναι το UEFI."
 t MSG_099 "Περιορισμός του συστήματος αρχείων"
 t MSG_100 "Αυτό το είδωλο ISO περιέχει ένα αρχείο μεγαλύτερο από 4 GB, το οποίο είναι μεγαλύτερο "
 	"από το μέγιστο επιτρεπόμενο μέγεθος για το σύστημα αρχείων FAT ή FAT32. "
@@ -5329,9 +5293,6 @@ t MSG_090 "Nem támogatott ISO"
 t MSG_091 "Amikor UEFI-t használsz céltípusnak, akkor csak az EFI-s ISO képek vannak támogatva. "
 	"Kérlek, válassz egy EFI-s bootolható ISO-t, vagy rakd a Céltípust BIOS-ra."
 t MSG_092 "Nem támogatott fájlrendszer"
-t MSG_096 "Csak a FAT/FAT32 támogatott ehhez az ISO-hoz. KÉrlek, válaszd ki a FAT/FAT32 Fájlrendszernek."
-t MSG_097 "Csak 'bootmgr' vagy 'WinPE' alapú ISO képek használhatóak NTFS-el."
-t MSG_098 "FAT/FAT32 csak isolinux alapú ISO lpekhez ahsználhatóak, vagy akkor, mikor a Céltípus UEFI."
 t MSG_099 "Fájlrendszeri korlátozás"
 t MSG_100 "Ez az ISO nagyobb, mint 4GB, ami nagyobb, "
 	"mint a maximális megengedett méret FAT vagy FAT32 fájlrendszer esetén."
@@ -5719,9 +5680,6 @@ t MSG_090 "ISO tidak didukung"
 t MSG_091 "Bila menggunakan tipe UEFI, hanya EFI bootable ISO yang didukung. "
 	"Silakan pilih bootable ISO EFI atau atur Target Tipe ke BIOS."
 t MSG_092 "File sistem tidak didukung"
-t MSG_096 "Hanya FAT/FAT32 yang didukung jenis ISO ini. Silakan pilih FAT/FAT32 sebagai sistem file."
-t MSG_097 "Hanya 'bootmgr' atau 'WinPE' berbasis ISO yang saat ini dapat digunakan dengan NTFS."
-t MSG_098 "FAT/FAT32 hanya dapat digunakan untuk isolinux berbasis ISO atau target tipe UEFI."
 t MSG_099 "Pembatasan file sistem"
 t MSG_100 "ISO ini berisi file yang lebih besar dari file yang 4GB , yang lebih dari "
 	"ukuran maksimum yang diizinkan untuk FAT atau sistem file FAT32."
@@ -5883,7 +5841,7 @@ t MSG_259 "Pembaruan Paksa"
 
 ################################################################################
 l "it-IT" "Italian (Italiano)" 0x0410, 0x0810
-v 1.0.15
+v 1.0.16
 b "en-US"
 
 g IDD_DIALOG
@@ -6087,9 +6045,6 @@ t MSG_093 "IMPORTANTE: QUESTA UNITA' CONTIENE PARTIZIONI MULTIPLE!!\n\n"
 	"Se vuoi procedere, sei responsabile per qualsiasi perdita di dati in queste partizioni."
 t MSG_094 "Rilevate partizioni multiple"
 t MSG_095 "Immagine DD"
-t MSG_096 "Per questo tipo di ISO, sono supportate solo FAT/FAT32. Seleziona FAT/FAT32 come filesystem."
-t MSG_097 "Con NTFS attualmente possono essere usate solo immagini ISO basate su 'bootmgr' o 'WinPE'."
-t MSG_098 "FAT/FAT32 può essere usata solo per immagini ISO basate su isolinux o quando il tipo destinazione è UEFI."
 t MSG_099 "Limitazione filesystem"
 t MSG_100 "Questa immagine ISO contiene un file più grande di 4 GB, che è maggiore della "
 	"dimensione massima permessa per il filesystem FAT o FAT32."
@@ -6252,7 +6207,7 @@ t MSG_263 "Usa unità dimensione CORRETTA"
 
 ######################################################################
 l "ja-JP" "Japanese (日本語)" 0x0411
-v 1.0.15
+v 1.0.16
 b "en-US"
 
 # Main dialog
@@ -6505,9 +6460,6 @@ t MSG_093 "重要：このドライブは複数のパーティションを含ん
 	"進みたければ、このパーティションのオーナーはデータ損失を責任があります。"
 t MSG_094 "複数のパーティションを検出しました。"
 t MSG_095 "DD イメージ"
-t MSG_096 "こんなISOでFAT・FAT32だけサポートします。FAT・FAT32はファイルシステムのために選択して下さい。"
-t MSG_097 "現在、NTSFで「bootmgr」または「WinPE」に基づいたISOだけは使えます。"
-t MSG_098 "FAT・FAT32はターゲット·タイプがUEFI時isolinuxに基づいたISOのために使えます。"
 t MSG_099 "ファイルシステム制限"
 t MSG_100 "ISOイメージに４GBより大きいファイルがあります。 "
 	"FAT・FAT32ファイルシステムの可能な最大のサイズより大きいです。"
@@ -6684,7 +6636,7 @@ t MSG_263 "適切なサイズユニットを使って下さい。"
 
 ################################################################################
 l "ko-KR" "Korean (한국어)" 0x0412
-v 1.0.15
+v 1.0.16
 b "en-US"
 
 # Main dialog
@@ -6884,9 +6836,6 @@ t MSG_093 "중요: 이 드라이브는 여러 개의 파티션을 포함하고 �
 	"계속 진행하고자 하는 경우, 이 파티션의 데이터가 손실될 수 있습니다."
 t MSG_094 "다중 파티션이 감지 됨."
 t MSG_095 "DD Image"
-t MSG_096 "이 ISO 유형은 FAT/FAT32만 지원합니다. 파일 시스템으로 FAT/FAT32를 선택하십시오."
-t MSG_097 "현재 'bootmgr' 또는 'WinPE' 기반의 ISO 이미지만 NTFS와 함께 사용할 수 있습니다."
-t MSG_098 "FAT/FAT32는 isolinux 기반의 ISO 이미지 또는 대상 유형이 UEFI일 때만 사용할 수 있습니다."
 t MSG_099 "파일 시스템 제한"
 t MSG_100 "이 ISO 이미지는 FAT 또는 FAT32 파일 시스템에 허용되는 최대 크기 4GB보다 "
 	"더 큰 파일이 포함되어 있습니다."
@@ -7062,7 +7011,7 @@ t MSG_263 "적당한 크기의 단위를 사용"
 
 ################################################################################
 l "lv-LV" "Latvian (Latviešu)" 0x0426
-v 1.0.15
+v 1.0.16
 
 # Main dialog
 g IDD_DIALOG
@@ -7291,9 +7240,6 @@ t MSG_093 "SVARĪGI: ŠIS NESĒJS SATUR VAIRĀKAS PARTĪCIJAS!!\n\n"
 	"Ja vēlaties turpināt, paši atbildat par datu zaudēšanu uz šādām partīcijām."
 t MSG_094 "Konstatētas vairākas partīcijas"
 t MSG_095 "DD imidžs"
-t MSG_096 "Šis ISO tips atbalsta tikai FAT/FAT32 failu sistēmas."
-t MSG_097 "Tikai 'bootmgr' vai 'WinPE' bāzēti ISO imidži var tikt izmantoti ar NTFS failu sistēmu."
-t MSG_098 "Tikai 'isolinux' bāzēti ISO imidži var tikt izmantoti ar FAT/FAT32 vai sistēmas interfeiss UEFI."
 t MSG_099 "Failu sistēmas ierobežojums"
 t MSG_100 "Šis ISO imidžs satur failu lielāku kā 4GB, kas ir vairāk nekā "
 	"maksimāli pieļaujamais apjoms izmantojotFAT vai FAT32 failu sistēmu."
@@ -7468,7 +7414,7 @@ t MSG_263 "Izvēlieties atbilstošas vienības"
 
 ################################################################################
 l "lt-LT" "Lithuanian (Lietuvių)" 0x0427
-v 1.0.15
+v 1.0.16
 b "en-US"
 
 # Main dialog
@@ -7683,9 +7629,6 @@ t MSG_093 "SVARBU: ŠIS DISKAS TURI KELETĄ SKAIDINIŲ!!\n\n"
 	"Jei norėsite tęsti, būsite atsakingi dėl galimo duomenų praradimo šiuose skaidiniuose."
 t MSG_094 "Aptikta keletas skaidinių"
 t MSG_095 "DD atvaizdas"
-t MSG_096 "Tik FAT/FAT32 yra palaikoma šiam ISO tipui. Prašau pasirinkti FAT/FAT32 failų sistemą."
-t MSG_097 "Tik 'bootmgr' ar 'WinPE' pagrindo ISO atvaizdai šiuo metu gali būti naudojami su NTFS."
-t MSG_098 "FAT/FAT32 gali būti naudojama tik isolinux pagrindo ISO atvaizdams arba kai paskirties tipas yra UEFI."
 t MSG_099 "Failų sistemos apribojimas"
 t MSG_100 "Šiame ISO atvaizde yra failas, didesnis negu 4 GB, tai daugiau negu "
 	"maksimalus leistinas dydis FAT arba FAT32 failų sistemai."
@@ -7863,7 +7806,7 @@ t MSG_263 "Naudoti TIKRUOSIUS dydžio vienetus"
 
 ################################################################################
 l "ms-MY" "Malay (Bahasa Malaysia)" 0x043e, 0x083e
-v 1.0.15
+v 1.0.16
 b "en-US"
 
 # Main dialog
@@ -8095,9 +8038,6 @@ t MSG_093 "PENTING: PERANTI INI MEMPUNYAI BEBERAPA PARTITION!!\n\n"
 	"Jika anda mahu meneruskannya, anda bertanggungjawab ke atas kehilangan data dalam partition tersebut."
 t MSG_094 "Beberapa partition dikesan"
 t MSG_095 "DD Imej"
-t MSG_096 "Hanya FAT/FAT32 diskong untuk ISO ini. Tolong pilih FAT/FAT32 sebagai fail sistem."
-t MSG_097 "Hanya imej ISO yang berdasarkan 'bootmgr' atau 'WinPE' boleh digunakan dengan NTFS."
-t MSG_098 "FAT/FAT32 hanya boleh digunakan untuk imej ISO yang berdasarkan isolinux atau apabila jenis sasaran adalah UEFI."
 t MSG_099 "Had sistem fail"
 t MSG_100 "Imej ISO ini mengandungi fail yang lebih besar daripada 4GB "
 	"iaitu saiz maksima yang dibenarakan untuk sistem fail FAT/FAT32."
@@ -8504,9 +8444,6 @@ t MSG_093 "VIKTIGT: DENNE STASJONEN INNEHOLDER FLERE PARTISJONER!!\n\n"
 	"Hvis du ønsker å fortsette, er du selv ansvarlig for evt. tapte data på disse partisjonene."
 t MSG_094 "Flere partisjoner oppdaget"
 t MSG_095 "DD Bilde"
-t MSG_096 "Kun FAT/FAT32 er støttet for denne type ISO. Vennligst velg FAT/FAT32 som Fil system."
-t MSG_097 "Kun 'bootmgr' eller 'WinPE' basert ISO kan bli brukt med NTFS."
-t MSG_098 "FAT/FAT32 kan kun bli brukt for isolinux baserte ISO bilder eller når måltypen er UEFI."
 t MSG_099 "Fil system begrensning"
 t MSG_100 "Dette ISO bildet inneholder filer større en 4GB, som er mer enn det"
 	"maksimalt tillate størrelsen for FAT eller FAT32 fil systemet."
@@ -8710,7 +8647,7 @@ t MSG_265 "VMWare disk oppdagelse"
 
 ################################################################################
 l "pl-PL" "Polish (Polski)" 0x0415
-v 1.0.15
+v 1.0.16
 b "en-US"
 # my info: 15.02.2014,16:14
 
@@ -8944,9 +8881,6 @@ t MSG_093 "WAŻNE: TEN NAPĘD ZAWIERA WIELE PARTYCJI!!\n\n"
 	"Jeżeli chcesz kontunuować, jesteś odpowiedzialny za utratę danych na tych partycjach."
 t MSG_094 "Wykryto wiele partycji"
 t MSG_095 "Obraz DD"
-t MSG_096 "Tylko FAT/FAT32 jest wpierane dla tego typu ISO. Proszę wybrać FAT/FAT32 jako System plików."
-t MSG_097 "Obecnie tylko obrazy ISO oparte na 'bootmgr' lub 'WinPE' mogą być użyte z NTFS."
-t MSG_098 "FAT/FAT32 może zostać użyte tylko dla obrazów ISO opartych na isolinux lub gdy System Docelowy to UEFI."
 t MSG_099 "Ograniczenia systemu plików"
 t MSG_100 "Ten obraz ISO zawiera plik większy niż 4GB, który jest większy niż "
 	"maksymalny dozwolony rozmiar dla systemu plików FAT lub FAT32."
@@ -9124,7 +9058,7 @@ t MSG_263 "Użyj WŁAŚCIWEGO rozmiaru jednostek"
 
 ################################################################################
 l "pt-BR" "Portuguese Brazilian (Português do Brasil)" 0x0416
-v 1.0.15
+v 1.0.16
 b "pt-PT"
 
 g IDD_DIALOG
@@ -9498,9 +9432,6 @@ t MSG_090 "ISO não suportado"
 t MSG_091 "Quando se usa UEFI como tipo de destino, só são suportadas imagens ISO bootables tipo EFI. "
 	"Selecione uma imagem ISO bootable do tipo EFI ou altere o tipo de destino para BIOS."
 t MSG_092 "Sistema de arquivos não suportado"
-t MSG_096 "Só é suportado FAT/FAT32 para este tipo de ISO. Por favor selecione FAT/FAT32 como sistema de arquivos."
-t MSG_097 "Com NTFS só se podem usar imagens ISO baseadas em 'bootmgr' ou 'WinPE'."
-t MSG_098 "FAT/FAT32 somente se pode usar quando o tipo de dispositivo destino é UEFI ou se usam imagens baseadas em isolinux."
 t MSG_099 "Limitação de sistema de arquivos"
 t MSG_100 "Esta imagem ISO contém um arquivo com mais de 4GB, ultrapassando o tamanho máximo"
 	"permitido para um sistema de arquivos FAT ou FAT32."
@@ -9668,7 +9599,7 @@ t MSG_259 "Forçar atualização"
 
 ################################################################################
 l "ro-RO" "Romanian (Română)" 0x0418, 0x0818
-v 1.0.15
+v 1.0.16
 b "en-US"
 
 g IDD_DIALOG
@@ -9870,9 +9801,6 @@ t MSG_093 "IMPORTANT: Această unitate conţine mai multe partiții sau volume!!
 	"Dacă doriți să continuați, sunteți responsabil pentru orice pierderi de date de pe aceste partiții. "
 t MSG_094 "Mai multe partiții detectate "
 t MSG_095 "Imagine DD"
-t MSG_096 "Pentru acest tip de ISO, sunt acceptate numai FAT/FAT32. Selectaţi FAT/FAT32 ca sistem de fişiere."
-t MSG_097 "Cu NTFS prezent, poate fi utilizat numai imagini ISO pe bază de "Bootmgr" sau "WinPE"."
-t MSG_098 "FAT/FAT32 pot fi utilizate numai pentru imaginile ISO pe baza isolinux sau cînd tipul ţintă este UEFI."
 t MSG_099 "Limitarea sistemului de fişiere"
 t MSG_100 "Această imagine ISO conţine un fişier mai mare de 4 GB, care este mai mare decît "
 	"dimensiunea maximă permisă pentru sistemul de fişiere FAT sau FAT32."
@@ -10026,7 +9954,7 @@ t MSG_263 "Utilizarea dimensiunii corecte pentru unități"
 
 ################################################################################
 l "ru-RU" "Russian (Русский)" 0x0419, 0x0819
-v 1.0.15
+v 1.0.16
 b "en-US"
 
 # Main dialog
@@ -10240,9 +10168,6 @@ t MSG_093 "ВАЖНО: ДАННЫЙ ДИСК СОДЕРЖИТ НЕСКОЛЬКО
 	"Если вы хотите продолжить, то вы несете ответственность за потерю данных на этих разделах."
 t MSG_094 "Обнаружено несколько разделов"
 t MSG_095 "DD-образ"
-t MSG_096 "Для данного ISO-образа необходима файловая система FAT/FAT32. Пожалуйста, выберите FAT/FAT32 в качестве файловой системы."
-t MSG_097 "Только ISO-образы на основе 'bootmgr' или 'WinPE' могут использоваться с NTFS."
-t MSG_098 "Только ISO-образы на основе 'isolinux' могут использоваться с FAT/FAT32 или если тип целевой системы UEFI."
 t MSG_099 "Ограничения файловой системы"
 t MSG_100 "Этот ISO-образ содержит файл размером более 4 Гб, что недопустимо при использовании файловой системы FAT или FAT32"
 t MSG_101 "Отсутствует поддержка WIM"
@@ -10402,7 +10327,7 @@ t MSG_263 "Использование правильного размера"
 
 ################################################################################
 l "sk-SK" "Slovak (Slovensky)" 0x041B
-v 1.0.15
+v 1.0.16
 b "en-US"
 
 # Main dialog
@@ -10609,9 +10534,6 @@ t MSG_093 "DÔLEŽITÉ: TOTO ZARIADENIE OBSAHUJE NIEKOĽKO ODDIELOV!!\n\n"
 	"Ak budete pokračovať, môžete stratiť všetky údaje na týchto oddieloch."
 t MSG_094 "Boli zistené viaceré oddiely"
 t MSG_095 "Obraz DD"
-t MSG_096 "Pre tento typ ISO obrazu sú podporované iba FAT/FAT32. Vyberte FAT/FAT32 ako súborový systém."
-t MSG_097 "Iba ISO obrazy založené na bootmgr alebo WinPE môžu byť práve použité s NTFS."
-t MSG_098 "FAT/FAT32 môžu byť použité pre ISO obrazy založené na isolinux alebo keď je cieľový typ UEFI."
 t MSG_099 "Obmedzenie súborového systému"
 t MSG_100 "Tento ISO obraz obsahuje súbor s veľkosťou viac ako 4GB, "
 	"čo je viac ako podporuje súborový systém FAT alebo FAT32."
@@ -10787,7 +10709,7 @@ t MSG_263 "Použiť PROPER veľkosť jednotiek"
 
 ################################################################################
 l "sl-SI" "Slovene (Slovenščina)" 0x0424
-v 1.0.15
+v 1.0.16
 b "en-US"
 
 # Main dialog
@@ -11005,9 +10927,6 @@ t MSG_093 "TA POGON IMA VEČ PARTICIJ!\n\n"
 	"Če nadaljujete, ste odgovorni za morebitno izgubo podatkov na teh particijah."
 t MSG_094 "Zaznanih več particij"
 t MSG_095 "DD slika"
-t MSG_096 "Za to vrsto slike ISO sta podprta samo FAT in FAT32. Prosim, izberite FAT ali FAT32 za datotečni sistem."
-t MSG_097 "Z NTFS se trenutno lahko uporabljajo samo slike, ki temeljijo na bootmgr ali WinPE."
-t MSG_098 "FAT in FAT32 se lahko uporabljata samo za ISO slike, ki temeljijo na isolinux-u, ali za cilj UEFI."
 t MSG_099 "Omejitev datotečnega sistema"
 t MSG_100 "Ta slika vsebuje datoteko, večjo od 4 GB, kar je več od največje velikosti, "
 	"ki jo dopuščata datotečna sistema FAT in FAT32."
@@ -11386,9 +11305,6 @@ t MSG_090 "ISO no soportado"
 t MSG_091 "Cuando se usa UEFI como tipo de destino, sólo se soportan imágenes ISO booteables tipo EFI. "
 	"Seleccione una imagen booteable ISO de tipo EFI o cambie el tipo de destino a BIOS."
 t MSG_092 "Sistema de archivos no soportado"
-t MSG_096 "Sólo se soporta FAT/FAT32 para este tipo de ISO. Por favor seleccione FAT/FAT32 como sistema de archivos."
-t MSG_097 Con NTFS sólo se pueden usar imágenes ISO basadas en 'bootmgr' o 'WinPE'."
-t MSG_098 "FAT/FAT32 se puede usar sólo cuando el tipo de dispositivo destino es UEFI o se usan imágenes basadas en isolinux."
 t MSG_099 "Limitación del sistema de archivos"
 t MSG_100 "Esta imagen ISO contiene un archivo de más de 4GB, sobrepasando el tamaño máximo"
 	"permitido para un sistema de archivos FAT o FAT32."
@@ -11556,7 +11472,7 @@ t MSG_259 "Forzar actualización"
 
 ################################################################################
 l "sv-SE" "Swedish (Svenska)" 0x041d, 0x081d
-v 1.0.15
+v 1.0.16
 b "en-US"
 
 # Main dialog
@@ -11784,9 +11700,6 @@ t MSG_093 "VIKTIGT: DENNA ENHETEN INNEHÅLLER FLERA PARTITIONER!!\n\n"
 	"Fortsätter du, är du själv ansvarig för all data som kan försvinna på dessa partitioner."
 t MSG_094 "Flera partitioner upptäcktes"
 t MSG_095 "DD-avbild"
-t MSG_096 "Endast FAT/FAT32 stöds för denna ISO-typen. Välj FAT/FAT32 som filsystem."
-t MSG_097 "Endast 'bootmgr' eller 'WinPE' baserade ISO-avbilder kan för närvarande använda NTFS."
-t MSG_098 "FAT/FAT32 kan endast användas för isolinux baserade ISO-avbilder eller när måltypen är UEFI."
 t MSG_099 "Begränsningar i filsystem"
 t MSG_100 "Denna ISO-avbild innehåller en fil som är större än 4GB, vilket är mer än "
 	"maximal storlek tillåtet för FAT- och FAT32-filsystemen."
@@ -11963,7 +11876,7 @@ t MSG_263 "Använd "RÄTT" storleksenhet"
 
 ################################################################################
 l "tr-TR" "Turkish (Türkçe)" 0x041F
-v 1.0.15
+v 1.0.16
 b "en-US"
 
 # Main dialog
@@ -12203,9 +12116,6 @@ t MSG_093 "ÖNEMLİ: BU SÜRÜCÜ ÇOKLU DİSK BÖLÜMÜ İÇERİYOR!!\n\n"
 	"İşlem yapmayı tercih ederseniz, bu disk bölümlerindeki herhangi bir veri kaybında sorumluluğu kabul etmiş olursunuz."
 t MSG_094 "Çoklu disk bölümü algılandı"
 t MSG_095 "DD Yansıma"
-t MSG_096 "Bu tür ISOlar için sadece FAT/FAT32 desteklenir. Lütfen Dosya Sistemi olarak FAT/FAT32 seçin."
-t MSG_097 "Şuanda sadece 'bootmgr' yada 'WinPE' tabanlı ISO yansımaları, NTFS ile kullanılabilir."
-t MSG_098 "FAT/FAT32 sadece isolinux tabanlı ISO yansımaları için ya da Hedef türü, UEFI ise kullanılabilir."
 t MSG_099 "Dosya Sistemi Sınırlandırması"
 t MSG_100 "Bu ISO yansıması, FAT yada FAT32 dosya sisteminin desteklediği en fazla boyut olan 4GB'tan "
 	"daha büyük bir dosya içeriyor."
@@ -12383,7 +12293,7 @@ t MSG_263 "UYGUN boyutta birimleri kullanın"
 
 ################################################################################
 l "uk-UA" "Ukrainian (Українська)" 0x0422
-v 1.0.15
+v 1.0.16
 b "en-US"
 
 # Main dialog
@@ -12615,9 +12525,6 @@ t MSG_093 "ВАЖЛИВО: ДАНИЙ ДИСК МІСТИТЬ КІЛЬКА РО�
 	"Якщо ви продовжите, то будете нести відповідальність за втрату даних на цих розділах."
 t MSG_094 "Виявлено декілька розділів"
 t MSG_095 "DD-образ"
-t MSG_096 "Для даного ISO-образу необхідна файлова система FAT/FAT32. Будь ласка, оберіть FAT/FAT32 в якості файлової системи."
-t MSG_097 "Тільки ISO-образи на основі 'bootmgr' чи 'WinPE' можуть використовуватися з NTFS."
-t MSG_098 "Тільки ISO-образи на основі 'isolinux' можуть використовуватися з FAT/FAT32 або якщо цільовий тип системи UEFI."
 t MSG_099 "Обмеження файлової системи"
 t MSG_100 "Цей ISO-образ містить файл розміром більш ніж 4 Гб, що неприпустимо при використанні файлової системи FAT чи FAT32"
 t MSG_101 "Відсутня підтримка WIM"
