@@ -12066,7 +12066,7 @@ t MSG_263 "Använd "RÄTT" storleksenhet"
 
 ################################################################################
 l "tr-TR" "Turkish (Türkçe)" 0x041F
-v 1.0.16
+v 1.0.17
 b "en-US"
 
 # Main dialog
@@ -12095,6 +12095,7 @@ t IDC_BOOT "Açılış Diski Oluşturma Yöntemi"
 s IDC_BOOT +5,0
 m IDC_BOOTTYPE +5,0
 m IDC_SELECT_ISO +5,0
+t IDC_WINDOWS_INSTALL "Standart Windows Yüklemesi"
 t IDC_SET_ICON "Genişletilmiş Etiket ve Simge Dosyaları Oluştur"
 t IDC_ABOUT "Hakkında..."
 s IDC_ABOUT -5,0
@@ -12108,11 +12109,11 @@ m IDC_START +5,0
 t IDS_ADVANCED_OPTIONS_GRP "Gelişmiş Seçenekler"
 s IDS_ADVANCED_OPTIONS_GRP +5,0
 t IDC_ENABLE_FIXED_DISKS "USB sabit sürücüleri listele"
-t IDC_EXTRA_PARTITION "Eski BIOSlar için düzeltme ekle(ekstra bölüm, hiza vs.)"
-t IDC_RUFUS_MBR "Rufus MBR kullan. BIOS Kimliği"
-s IDC_RUFUS_MBR +10,0
-m IDC_DISK_ID +30,0
-s IDC_DISK_ID -25,0
+t IDC_EXTRA_PARTITION "Eski BIOSlar için düzeltme ekle(ekstra bölüm, hizalama vs.)"
+t IDC_RUFUS_MBR "Rufus MBR kullan. BIOS Kimliği Seçin"
+s IDC_RUFUS_MBR +47,0
+m IDC_DISK_ID +45,0
+s IDC_DISK_ID -40,0
 
 # About dialog
 g IDD_ABOUTBOX
@@ -12306,6 +12307,16 @@ t MSG_093 "ÖNEMLİ: BU SÜRÜCÜ ÇOKLU DİSK BÖLÜMÜ İÇERİYOR!!\n\n"
 	"İşlem yapmayı tercih ederseniz, bu disk bölümlerindeki herhangi bir veri kaybında sorumluluğu kabul etmiş olursunuz."
 t MSG_094 "Çoklu disk bölümü algılandı"
 t MSG_095 "DD Yansıma"
+t MSG_096 "Mevcut seçili dosya sistemi bu ISO türüyle kullanılamaz. "
+	"Lütfen farklı bir dosya sistemi seçin yada farklı bir ISO kullanın."
+t MSG_097 "'Windows To Go' sadece dosya sistemi NTFS ise uygulanabilir."
+t MSG_098 "ÖNEMLİ: 'Windows To Go' yüklemeye çalışıyorsunuz, fakat hedef sürücünüz 'SABİT' niteliğinde"
+	" bir disk değil. Bundan dolayı Windows, ön yükleme sırasında büyük olasılıkla donacaktır."
+	" Microsoft, bunu 'KALDIRILABİLİR' nitelikteki sürücüler ile çalışmak üzere tasarlamamıştır."
+	"\n\nYine de devam etmek istiyor musunuz?\n\n"
+	"Not: 'SABİT/KALDIRILABİLİR' niteliği, disk üreticileri tarafından özel araçlar kullanılarak "
+	"değiştirilebilen bir donanım özelliğidir. Fakat bu araçlar genellikle herkese açık olarak "
+	"paylaşılmaz..."
 t MSG_099 "Dosya Sistemi Sınırlandırması"
 t MSG_100 "Bu ISO yansıması, FAT yada FAT32 dosya sisteminin desteklediği en fazla boyut olan 4GB'tan "
 	"daha büyük bir dosya içeriyor."
@@ -12345,7 +12356,15 @@ t MSG_114 "Bu yansıma Syslinux %s%s kullanıyor fakat bu uygulama yalnız Sysli
 	"Not: Dosyalar mevcut uygulama dizinine indirilecek ve "
 	"hazır olduğunda otomatik olarak kullanılacak.\n"
 t MSG_115 "İndirme gerekli"
-
+t MSG_116 "Bu yansıma Grub %s kullanıyor fakat bu uygulama yalnız Grub %s için yükleme dosyalarını "
+	"içeriyor.\n\nGrub 'un yeni sürümleri bir başkasıyla uyumlu olmadığından ve Rufus'un bunların "
+	"tamamını içermesi mümkün olmadığından, Rufus yansımanızla eşleşen Grub'un bir yükleme dosyasını"
+	"('core.img') edinmeyi çalışacak:\n"
+	"- İnternete bağlanıp bu dosyaları indirmek için 'Evet'i seçin\n"
+	"- Rufustan varsayılan sürümü kullanmak için 'Hayır''ı seçin\n"
+	"- İşlemden vazgeçmek için 'Vazgeç'i seçin\n\n"
+	"Not: Dosyalar mevcut uygulama dizinine indirilecek ve "
+	"hazır olduğunda otomatik olarak kullanılacak. Çevrimiçi bulunanlar eşleşmiyorsa varsayılan sürüm kullanılacak."
 # Tooltips
 # Partition Scheme and Target Type
 t MSG_150 "Genellikle en güvenli seçenektir. UEFI destekli bir bilgisayara sahipseniz ve bir işletim sistemini "
@@ -12398,15 +12417,32 @@ t MSG_186 "Güncelleme denetiminin sadece ana uygulama çalışırken gerçekle�
 t MSG_187 "Seçilen açılış seçeneği için geçersiz yansıma"
 t MSG_188 "Mevcut yansıma, seçilen açılış seçeneği ile eşleşmiyor. Lütfen farklı bir yansıma kullanın ya da farklı bir açılış seçeneği seçin."
 t MSG_189 "Bu ISO yansıması, seçilen dosya sistemi ile uyumlu değil"
-	
+t MSG_190 "Uyumsuz sürücü algılandı"
+# See MSG_235 for where the 2 messages below are being used:
+t MSG_191 "Yazma geçişi"
+t MSG_192 "Okuma geçişi"
+t MSG_193 "%s indirildi"
+t MSG_194 "%s indirilemedi"
+# eg. "Using embedded version of Grub2 file(s)"
+t MSG_195 "%s dosyalarının gömülü sürümü kullanılıyor"
+t MSG_196 "ÖNEMLİ: BU SÜRÜCÜ STANDART OLMAYAN BİR SEKTÖR BOYUTU KULLANIYOR!\n\n"
+	"Geleneksel sürücüler 512-byte sektör boyutu kullanır fakat bu sürücü %d-byte kullanıyor. "
+	"Birçok durumda, bu demek oluyor ki bu sürücüden önyükleme yapılamayacak.\n"
+	"Rufus önyüklemeli bir sürücü oluşturmayı deneyecektir fakat bunun olacağının GARANTİSİ verilemez."
+t MSG_197 "Standart olmayan sektör boyutu algılandı"
+t MSG_198 "'Windows To Go', SABİT disk niteliği ayarlanmışsa GPT olarak bölümlendiğinde "
+	"yüklenebilir . Mevcut sürücü SABİT disk olarak algılanamadı."
+t MSG_199 "Windows'u başka bir diske yüklemek için yükleme medyası olarak seçilen aygıtı kullanmayı planlıyorsanız bunu seçin."
+t MSG_200 "Windows'u doğrudan seçilen sürücüden çalıştırmak istiyorsanız bunu seçin."
+
 # Status messages - these messages will appear on the status bar
 t MSG_201 "Vazgeçiliyor - Lütfen Bekleyin..."
-t MSG_202 "ISO yansıması taranıyor..."
-t MSG_203 "ISO yansıması taranamadı"
+t MSG_202 "Yansıma taranıyor..."
+t MSG_203 "Yansıma taranamadı"
 # Parameter: the name of an obsolete Syslinux .c32 module. eg: "Obsolete vesamenu.c32 detected"
 t MSG_204 "Eski %s algılandı"
 # Display the name of the ISO selected. eg: "Using ISO: en_win7_x64_sp1.iso"
-t MSG_205 "Kullanılan ISO: %s"
+t MSG_205 "Kullanılan Yansıma: %s"
 # Typically "Missing ldlinux.c32 file"
 t MSG_206 "Eksik %s dosyası"
 # The name proposed by Windows' Computer Management -> Disk Management when you try to format a drive
@@ -12415,7 +12451,7 @@ t MSG_207 "Yeni Birim"
 # Same message, once for singular and plural ("1 device found", "2 devices found")
 t MSG_208 "%d aygıt bulundu"
 t MSG_209 "%d aygıt bulundu"
-t MSG_210 "TAMAM."
+t MSG_210 "HAZIR."
 t MSG_211 "Vazgeçildi."
 t MSG_212 "BAŞARISIZ."
 # Used when a new update has been downloaded and launched
@@ -12449,7 +12485,7 @@ t MSG_233 "Bitiriliyor, Lütfen Bekleyin..."
 # Takes the Syslinux version as parameter, eg. "Installing Syslinux v5..."
 t MSG_234 "Syslinux %s Yükleniyor..."
 # Bad blocks status. eg: "Bad Blocks: PASS 1/2 - 12.34% (0/0/1 errors)"
-t MSG_235 "Hatalı Bloklar: Geçiş %d/%d - %0.2f%% (%d/%d/%d hata)"
+t MSG_235 "Hatalı Bloklar: %s %d/%d - %0.2f%% (%d/%d/%d hata)"
 t MSG_236 "Hatalı Bloklar: Rasgele kalıpla deneniyor"
 t MSG_237 "Hatalı Bloklar: 0x%02X kalıbıyla deneniyor"
 # eg. "Formatting (MBR)..."
@@ -12480,6 +12516,11 @@ t MSG_260 "NTFS sıkıştırma"
 t MSG_261 "Yansıma yazılıyor: %0.1f%% tamamlandı"
 t MSG_262 "ISO Desteği"
 t MSG_263 "UYGUN boyutta birimleri kullanın"
+t MSG_264 "'%s' dizini siliniyor"
+t MSG_265 "VMWare disk algılama"
+t MSG_266 "Çift UEFI/BIOS modu"
+t MSG_267 "Windows yansıması uygulanıyor: %0.1f%% tamamlandı"
+t MSG_268 "Windows yansıması uygulanıyor..."
 
 ################################################################################
 l "uk-UA" "Ukrainian (Українська)" 0x0422
