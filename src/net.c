@@ -297,8 +297,8 @@ DWORD DownloadFile(const char* url, const char* file, HWND hProgressDialog)
 		uprintf("Network is unavailable: %s\n", WinInetErrorString());
 		goto out;
 	}
-	_snprintf(agent, ARRAYSIZE(agent), APPLICATION_NAME "/%d.%d.%d.%d (WinNT %d.%d%s)",
-		rufus_version[0], rufus_version[1], rufus_version[2], rufus_version[3],
+	_snprintf(agent, ARRAYSIZE(agent), APPLICATION_NAME "/%d.%d.%d (WinNT %d.%d%s)",
+		rufus_version[0], rufus_version[1], rufus_version[2],
 		nWindowsVersion>>4, nWindowsVersion&0x0F, is_x64()?"; WOW64":"");
 	hSession = InternetOpenA(agent, INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
 	if (hSession == NULL) {
@@ -412,7 +412,7 @@ HANDLE DownloadFileThreaded(const char* url, const char* file, HWND hProgressDia
 static __inline uint64_t to_uint64_t(uint16_t x[4]) {
 	int i;
 	uint64_t ret = 0;
-	for (i=0; i<4; i++)
+	for (i=0; i<3; i++)
 		ret = (ret<<16) + x[i];
 	return ret;
 }
@@ -489,7 +489,7 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 		goto out;
 	hostname[sizeof(hostname)-1] = 0;
 
-	safe_sprintf(agent, ARRAYSIZE(agent), APPLICATION_NAME "/%d.%d.%d.%d", rufus_version[0], rufus_version[1], rufus_version[2], rufus_version[3]);
+	safe_sprintf(agent, ARRAYSIZE(agent), APPLICATION_NAME "/%d.%d.%d", rufus_version[0], rufus_version[1], rufus_version[2]);
 	hSession = InternetOpenA(agent, INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
 	if (hSession == NULL)
 		goto out;
@@ -591,8 +591,7 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 		parse_update(buf, dwTotalSize+1);
 
 		vuprintf("UPDATE DATA:\n");
-		vuprintf("  version: %d.%d.%d.%d (%s)\n", update.version[0], update.version[1], 
-			update.version[2], update.version[3], channel[k]);
+		vuprintf("  version: %d.%d.%d (%s)\n", update.version[0], update.version[1], update.version[2], channel[k]);
 		vuprintf("  platform_min: %d.%d\n", update.platform_min[0], update.platform_min[1]);
 		vuprintf("  url: %s\n", update.download_url);
 

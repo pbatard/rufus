@@ -522,7 +522,7 @@ INT_PTR CALLBACK AboutCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 		if (settings_commcheck)
 			ShowWindow(GetDlgItem(hDlg, IDC_ABOUT_UPDATES), SW_SHOW);
 		safe_sprintf(about_blurb, sizeof(about_blurb), about_blurb_format, lmprintf(MSG_174),
-			lmprintf(MSG_175, rufus_version[0], rufus_version[1], rufus_version[2], rufus_version[3]),
+			lmprintf(MSG_175, rufus_version[0], rufus_version[1], rufus_version[2]),
 			right_to_left_mode?"Akeo \\\\ Pete Batard 2011-2015 © Copyright":"Copyright © 2011-2015 Pete Batard / Akeo",
 			lmprintf(MSG_176), lmprintf(MSG_177), lmprintf(MSG_178));
 		for (i=0; i<ARRAYSIZE(hEdit); i++) {
@@ -1203,9 +1203,9 @@ INT_PTR CALLBACK NewVersionCallback(HWND hDlg, UINT message, WPARAM wParam, LPAR
 		SendMessage(hNotes, EM_SETSEL, -1, -1);
 		SendMessage(hNotes, EM_SETEVENTMASK, 0, ENM_LINK);
 		SetWindowTextU(GetDlgItem(hDlg, IDC_YOUR_VERSION), lmprintf(MSG_018, 
-			rufus_version[0], rufus_version[1], rufus_version[2], rufus_version[3]));
+			rufus_version[0], rufus_version[1], rufus_version[2]));
 		SetWindowTextU(GetDlgItem(hDlg, IDC_LATEST_VERSION), lmprintf(MSG_019,
-			update.version[0], update.version[1], update.version[2], update.version[3]));
+			update.version[0], update.version[1], update.version[2]));
 		SetWindowTextU(GetDlgItem(hDlg, IDC_DOWNLOAD_URL), update.download_url);
 		SendMessage(GetDlgItem(hDlg, IDC_PROGRESS), PBM_SETRANGE, 0, (MAX_PROGRESS<<16) & 0xFFFF0000);
 		if (update.download_url == NULL)

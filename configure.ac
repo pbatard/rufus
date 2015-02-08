@@ -1,4 +1,4 @@
-AC_INIT([rufus], [2.0.0], [https://github.com/pbatard/rufus/issues], [rufus], [http://rufus.akeo.ie])
+AC_INIT([rufus], [2.0], [https://github.com/pbatard/rufus/issues], [rufus], [http://rufus.akeo.ie])
 AM_INIT_AUTOMAKE([-Wno-portability foreign no-dist no-dependencies])
 AC_CONFIG_SRCDIR([src/rufus.c])
 AC_CONFIG_MACRO_DIR([m4])
@@ -38,7 +38,7 @@ if test "x$alpha_enabled" != "xno" ; then
   CFLAGS+=" -DALPHA"
   SUFFIX=_ALPHA
 fi
-AC_ARG_ENABLE([beta],[AS_HELP_STRING([--enable-beta], [build a BETA release (default=no)])],	[beta_enabled=$enableval],	[beta_enabled='no'])
+AC_ARG_ENABLE([beta],[AS_HELP_STRING([--enable-beta], [build a BETA release (default=no)])], [beta_enabled=$enableval], [beta_enabled='no'])
 if test "x$beta_enabled" != "xno" ; then
   CFLAGS+=" -DBETA"
   SUFFIX=_BETA

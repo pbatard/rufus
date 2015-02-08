@@ -276,7 +276,7 @@ typedef struct {
 #define SL_MINOR(x) ((uint8_t)(x))
 
 typedef struct {
-	uint16_t version[4];
+	uint16_t version[3];
 	uint32_t platform_min[2];		// minimum platform version required
 	char* download_url;
 	char* release_notes;
@@ -350,7 +350,7 @@ extern BOOL use_own_c32[NB_OLD_C32], detect_fakes, iso_op_in_progress, format_op
 extern BOOL allow_dual_uefi_bios, togo_mode;
 extern RUFUS_ISO_REPORT iso_report;
 extern int64_t iso_blocking_status;
-extern uint16_t rufus_version[4], embedded_sl_version[2];
+extern uint16_t rufus_version[3], embedded_sl_version[2];
 extern int nWindowsVersion;
 extern char WindowsVersionStr[128];
 extern char embedded_sl_version_str[2][12];

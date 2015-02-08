@@ -133,12 +133,12 @@ BOOL iso_op_in_progress = FALSE, format_op_in_progress = FALSE, right_to_left_mo
 BOOL enable_HDDs = FALSE, advanced_mode = TRUE, force_update = FALSE, use_fake_units = TRUE;
 BOOL allow_dual_uefi_bios = FALSE, enable_vmdk = FALSE, togo_mode = TRUE;
 int dialog_showing = 0;
-uint16_t rufus_version[4], embedded_sl_version[2];
+uint16_t rufus_version[3], embedded_sl_version[2];
 char embedded_sl_version_str[2][12] = { "?.??", "?.??" };
 char embedded_sl_version_ext[2][32];
 char embedded_grub_version[] = GRUB4DOS_VERSION;
 char embedded_grub2_version[] = GRUB2_PACKAGE_VERSION;
-RUFUS_UPDATE update = { {0,0,0,0}, {0,0}, NULL, NULL};
+RUFUS_UPDATE update = { {0,0,0}, {0,0}, NULL, NULL};
 StrArray DriveID, DriveLabel;
 extern char* szStatusMessage;
 
@@ -978,7 +978,6 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 	r = ExtractISO(image_path, "", TRUE) || IsHDImage(image_path);
 	EnableControls(TRUE);
 	if (!r) {
-		// TODO: is that needed?
 		SendMessage(hMainDialog, UM_PROGRESS_EXIT, 0, 0);
 		PrintInfoDebug(0, MSG_203);
 		safe_free(image_path);
@@ -1489,7 +1488,7 @@ static __inline const char* IsAlphaOrBeta(void)
 #endif
 }
 
-INT_PTR CALLBACK InfoCallback(HWND hCtrl, UINT message, WPARAM wParam, LPARAM lParam)
+static INT_PTR CALLBACK InfoCallback(HWND hCtrl, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	HDC hdc;
 	RECT rect;
@@ -1515,7 +1514,7 @@ INT_PTR CALLBACK InfoCallback(HWND hCtrl, UINT message, WPARAM wParam, LPARAM lP
 		SetBkColor(hdc, GetSysColor(COLOR_BTNFACE));
 		SetTextAlign(hdc , TA_CENTER | TA_BASELINE);
 		GetClientRect(hCtrl , &rect);
-		TextOutW(hdc, rect.right/2, rect.bottom/2 + (int)(5.0f * fScale), winfo, wcslen(winfo));
+		TextOutW(hdc, rect.right/2, rect.bottom/2 + (int)(5.0f * fScale), winfo, (int)wcslen(winfo));
 		EndPaint(hCtrl, &ps);
 		return (INT_PTR)TRUE;
 	}
@@ -1581,17 +1580,17 @@ void InitDialog(HWND hDlg)
 	// Count of Microsoft for making it more attractive to read a
 	// version using strtok() than using GetFileVersionInfo()
 	token = strtok(tmp, " ");
-	for (i=0; (i<4) && ((token = strtok(NULL, ".")) != NULL); i++)
+	for (i=0; (i<3) && ((token = strtok(NULL, ".")) != NULL); i++)
 		rufus_version[i] = (uint16_t)atoi(token);
 
 	// Redefine the title to be able to add "Alpha" or "Beta" and get the version in the right order for RTL
 	if (!right_to_left_mode) {
-		static_sprintf(tmp, APPLICATION_NAME " %d.%d.%d.%d%s", rufus_version[0], rufus_version[1], rufus_version[2], rufus_version[3], IsAlphaOrBeta());
+		static_sprintf(tmp, APPLICATION_NAME " %d.%d.%d%s", rufus_version[0], rufus_version[1], rufus_version[2], IsAlphaOrBeta());
 	} else {
-		static_sprintf(tmp, "%s%d.%d.%d.%d " APPLICATION_NAME, IsAlphaOrBeta(), rufus_version[0], rufus_version[1], rufus_version[2], rufus_version[3]);
+		static_sprintf(tmp, "%s%d.%d.%d " APPLICATION_NAME, IsAlphaOrBeta(), rufus_version[0], rufus_version[1], rufus_version[2]);
 	}
 	SetWindowTextU(hDlg, tmp);
-	uprintf(APPLICATION_NAME " version: %d.%d.%d.%d%s", rufus_version[0], rufus_version[1], rufus_version[2], rufus_version[3], IsAlphaOrBeta());
+	uprintf(APPLICATION_NAME " version: %d.%d.%d%s", rufus_version[0], rufus_version[1], rufus_version[2], IsAlphaOrBeta());
 	for (i=0; i<ARRAYSIZE(resource); i++) {
 		buf = (char*)GetResource(hMainInstance, resource[i], _RT_RCDATA, "ldlinux_sys", &len, TRUE);
 		if (buf == NULL) {

@@ -927,14 +927,14 @@ void parse_update(char* buf, size_t len)
 		}
 	}
 
-	for (i=0; i<4; i++)
+	for (i=0; i<3; i++)
 		update.version[i] = 0;
 	update.platform_min[0] = 5;
 	update.platform_min[1] = 2;	// XP or later
 	safe_free(update.download_url);
 	safe_free(update.release_notes);
 	if ((data = get_sanitized_token_data_buffer("version", 1, buf, len)) != NULL) {
-		for (i=0; (i<4) && ((token = strtok((i==0)?data:NULL, ".")) != NULL); i++) {
+		for (i=0; (i<3) && ((token = strtok((i==0)?data:NULL, ".")) != NULL); i++) {
 			update.version[i] = (uint16_t)atoi(token);
 		}
 		safe_free(data);

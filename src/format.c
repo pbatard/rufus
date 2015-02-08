@@ -1294,7 +1294,6 @@ BOOL SetupWinToGo(const char* drive_name, BOOL use_ms_efi)
 		wVolumeName[0] = ms_efi[0];
 
 		// Boy do you *NOT* want to specify a label here, and spend HOURS figuring out why your EFI partition cannot boot...
-		// TODO: Can we avoid resetting the progress bar here?
 		pfFormatEx(wVolumeName, SelectedDrive.Geometry.MediaType, L"FAT32", L"", TRUE, cluster_size, FormatExCallback);
 		if (IS_ERROR(FormatStatus)) {
 			uprintf("Failed to format EFI partition");
@@ -1303,7 +1302,6 @@ BOOL SetupWinToGo(const char* drive_name, BOOL use_ms_efi)
 		}
 	}
 
-	// TODO: Don't use ALL but adjust to what we effectively support
 	static_sprintf(cmd, "%s\\Windows\\System32\\bcdboot.exe %s\\Windows /f ALL /s %s",
 		drive_name, drive_name, (use_ms_efi)?ms_efi:drive_name);
 	uprintf("Enabling boot: '%s'", cmd);

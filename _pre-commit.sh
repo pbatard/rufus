@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Bumps the nano version according to the number of commits on this branch
+# Bumps the micro version according to the number of commits on this branch
 #
 # To have git run this script on commit, create a "pre-commit" text file in
 # .git/hooks/ with the following content:
@@ -15,22 +15,22 @@ type -P git &>/dev/null || { echo "git command not found. Aborting." >&2; exit 1
 VER=`git log --oneline | wc -l`
 # adjust so that we match the github commit count
 TAGVER=`expr $VER + 1`
-# there may be a better way to prevent improper nano on amend. For now the detection
+# there may be a better way to prevent improper micro on amend. For now the detection
 # of a .amend file in the current directory will do
 if [ -f ./.amend ]; then
 	TAGVER=`expr $TAGVER - 1`
 	git tag -d "b$TAGVER"
 	rm ./.amend;
 fi
-echo "setting nano to $TAGVER"
+echo "setting micro to $TAGVER"
 echo $TAGVER > .tag
 
 cat > cmd.sed <<\_EOF
-s/^[ \t]*FILEVERSION[ \t]*\(.*\),\(.*\),\(.*\),.*/ FILEVERSION \1,\2,\3,@@TAGVER@@/
-s/^[ \t]*PRODUCTVERSION[ \t]*\(.*\),\(.*\),\(.*\),.*/ PRODUCTVERSION \1,\2,\3,@@TAGVER@@/
+s/^[ \t]*FILEVERSION[ \t]*\(.*\),\(.*\),.*,\(.*\)/ FILEVERSION \1,\2,@@TAGVER@@,\3/
+s/^[ \t]*PRODUCTVERSION[ \t]*\(.*\),\(.*\),.*,\(.*\)/ PRODUCTVERSION \1,\2,@@TAGVER@@,\3/
 s/^\([ \t]*\)VALUE[ \t]*"FileVersion",[ \t]*"\(.*\)\..*"/\1VALUE "FileVersion", "\2.@@TAGVER@@"/
 s/^\([ \t]*\)VALUE[ \t]*"ProductVersion",[ \t]*"\(.*\)\..*"/\1VALUE "ProductVersion", "\2.@@TAGVER@@"/
-s/^\(.*\)"Rufus \(.*\)\.\(.*\)"\(.*\)/\1"Rufus \2.@@TAGVER@@"\4/
+s/^\(.*\)"Rufus \(.*\)\..*"\(.*\)/\1"Rufus \2.@@TAGVER@@"\3/
 _EOF
 
 # First run sed to substitute our variable in the sed command file
