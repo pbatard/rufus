@@ -8884,9 +8884,9 @@ t MSG_268 "Legger til Windows bilde..."
 
 ################################################################################
 l "pl-PL" "Polish (Polski)" 0x0415
-v 1.0.16
+v 1.0.17
 b "en-US"
-# my info: 15.02.2014,16:14
+# my info: 8.02.2015,17:06
 
 # Main dialog
 g IDD_DIALOG
@@ -8908,6 +8908,7 @@ m IDC_NBPASSES +65,0
 s IDC_BOOT +40,0
 m IDC_BOOTTYPE +40,0
 m IDC_SELECT_ISO +40,0
+s IDC_INFO +40,0
 s IDC_RUFUS_MBR +40,0
 m IDC_DISK_ID +40,0
 s IDC_ABOUT +10,0
@@ -8925,6 +8926,7 @@ t IDC_BADBLOCKS "Szukaj błędnych sektorów na urządzeniu"
 s IDC_BADBLOCKS +65,0
 t IDC_QUICKFORMAT "Szybkie formatowanie"
 t IDC_BOOT "Utwórz bootowalny dysk używając"
+t IDC_WINDOWS_INSTALL "Standardowa instalacja Windowsa"
 t IDC_SET_ICON "Utwórz rozszerzoną nazwę i pliki ikon"
 t IDC_ABOUT "O programie..."
 t IDC_LOG "Log"
@@ -9118,6 +9120,16 @@ t MSG_093 "WAŻNE: TEN NAPĘD ZAWIERA WIELE PARTYCJI!!\n\n"
 	"Jeżeli chcesz kontunuować, jesteś odpowiedzialny za utratę danych na tych partycjach."
 t MSG_094 "Wykryto wiele partycji"
 t MSG_095 "Obraz DD"
+t MSG_096 "Aktualnie zaznaczony system plikównie może zostać użyty z tym typem ISO. "
+	"Proszę wybrać inny system plików lub użyć innego ISO."
+t MSG_097 "'Windows To Go' może zostać użyte wyłącznie, jeżeli system plików to NTFS."
+t MSG_098 "WAŻNE: Próbujesz zainstalować 'Windows To Go', lecz dysk docelowy nie ma "
+	"atrybytu 'LOKALNY'. Z tego powodu Windows prawdopodobnie zawiesi się podczas startu, "
+	"ponieważ Microsoft nie zaprojektował go do działaniaz dyskami, które zamiast tego mają atrybut "
+	"'WYMIENNY'.\n\nCzy nadal chcesz kontynuować?\n\n"
+	"Informacja: Atrybut 'LOKANY/WYMIENNY' to właściwość sprzętowa, która może jedynie zostać zmieniona "
+	"używając narzędzi dostarczanych przez producenta dysku. Jednak te narzędzia PRAWIE NIGDY "
+	"nie są udostępnione publicznie..."
 t MSG_099 "Ograniczenia systemu plików"
 t MSG_100 "Ten obraz ISO zawiera plik większy niż 4GB, który jest większy niż "
 	"maksymalny dozwolony rozmiar dla systemu plików FAT lub FAT32."
@@ -9148,7 +9160,7 @@ t MSG_111 "Niekompatybilny Rozmiar jednostki alokacji"
 t MSG_112 "Formatowanie dużych woluminów UDF może zająć dużo czasu. Przy prędkości USB 2.0 , szacunkowy czas "
 	"formatowania wynosi %d:%02d, podczas którego pasek postępu będzie wysawał się być zamrożony. Proszę być cierpliwym!"
 t MSG_113 "Duży wolumin UDF"
-t MSG_114 "Ten obraz używa Syslinux %s%s lecz ta aplikacja dołącza pliki instalacyjne tylko dla "
+t MSG_114 "Ten obraz używa Syslinux %s%s, lecz ta aplikacja dołącza pliki instalacyjne tylko dla "
 	"Syslinux %s%s.\n\nPonieważ nowa wersja Syslinux nie jest kompatybilna z inną i nie jest "
 	"możliwe dla Rufusa aby załączyć je wszystkie, dwa dodatkowe pliki muszą być pobrane "
 	"z Internetu ('ldlinux.sys' oraz 'ldlinux.bss'):\n"
@@ -9157,6 +9169,15 @@ t MSG_114 "Ten obraz używa Syslinux %s%s lecz ta aplikacja dołącza pliki inst
 	"Informacja: Pliki zostaną pobrane do aktualnego folderu aplikacji i zostaną użyte ponownie "
 	"automatycznie jeśli istneją.\n"
 t MSG_115 "Wymagane pobieranie"
+t MSG_116 "Ten obraz używa Grub %s, lecz ta aplikacja dołącza pliki instalacyjne tylko dla "
+	"Grub %s.\n\nPonieważ inna wersja Grub może nie być kompatybilna, oraz nie jest możliwe "
+	"dołączenie wszystkich, Rufus spróbuje zlokalizować wersję pliku instalacyjnego Grub "
+	"('core.img') która jest zgodna z użytą w twoim obrazie:\n"
+	"- Wybierz 'Tak' aby połączyć z Internetem i spróbować ją pobrać\n"
+	"- Wybierz 'Nie' aby użyć domyślnej wersji z Rufusa\n"
+	"- Wybierz 'Anuluj' aby przerwać operację\n\n"
+	"Informacja: Pliki zostaną pobrane do aktualnego folderu aplikacji i zostaną użyte ponownie"
+	"automatycznie jeśli istneją. Jeśli nie można znależć odpowiednich plików online, zostanie użyta domyślna wersja plików."
 
 # Tooltips
 # Partition Scheme and Target Type
@@ -9210,6 +9231,23 @@ t MSG_186 "Rufus nie instaluje lub uruchamia procesów w tle, dlatego aktualizac
 t MSG_187 "Obraz nieprawidłowy dla wybranej opcji bootowania"
 t MSG_188 "Obecny obraz nie pasuje do wybranej opcji bootowania. Proszę uzyć innego obrazu lub wybrać inną opcję bootowania"
 t MSG_189 "Ten obraz ISO jest niekompatybilny z wybranym systemem plików"
+t MSG_190 "Wykryto niekompatybilny dysk"
+# See MSG_235 for where the 2 messages below are being used:
+t MSG_191 "Postęp zapisu"
+t MSG_192 "Postęp odczytu"
+t MSG_193 "Pobrano %s"
+t MSG_194 "Nie można pobrać %s"
+# eg. "Using embedded version of Grub2 file(s)"
+t MSG_195 "Używanie wbudowanej wersji pliku(ów) %s"
+t MSG_196 "WAŻNE: TEN DYSK UŻYWA NIESTANDARDOWEGO ROZMIARU SEKTORA!\n\n"
+	"Standardowe dyski używają 512-bajtowego rozmiaru sektora, lecz ten dysk używa %d-bajtowego. "
+	"W wielu przypadkach oznacza to, że NIE będziesz mógł bootować z tego dysku.\n"
+	"Rufus moze spróbować utworzyć dysk bootowalny, ale NIE MA GWARANCJI, że to zadziała."
+t MSG_197 "Wysryto niestandardowy rozmiar sektora"
+t MSG_198 "'Windows To Go' może zostać zainstalowany jedynie na dysku ze strukturą GPT jeżeli ma on "
+	"ustawiony atrybut LOKALNY. Obecny dysk nie został wybryty jako LOKALNY."
+t MSG_199 "Wybierz to, jeżeli planujesz zainstalować Windows na innym dysku, używając wybranego dysku jako dysku instalacyjnego."
+t MSG_200 Wybierz to, jeżeli chcesz uruchomić Windows bezpośrednio z wybranego urządzenia."
 
 # Status messages - these messages will appear on the status bar
 t MSG_201 "Anulowanie - Proszę czekać..."
@@ -9218,7 +9256,7 @@ t MSG_203 "Niepowodzenie skanowania obrazu"
 # Parameter: the name of an obsolete Syslinux .c32 module. eg: "Obsolete vesamenu.c32 detected"
 t MSG_204 "wykryto przestarzałe %s"
 # Display the name of the ISO selected. eg: "Using ISO: en_win7_x64_sp1.iso"
-t MSG_205 "Używane ISO: %s"
+t MSG_205 "Używany obraz: %s"
 # Typically "Missing ldlinux.c32 file"
 t MSG_206 "Brak pliku %s"
 # The name proposed by Windows' Computer Management -> Disk Management when you try to format a drive
@@ -9227,9 +9265,9 @@ t MSG_207 "Nowy"
 # Same message, once for singular and plural ("1 device found", "2 devices found")
 t MSG_208 "znaleziono %d urządzenie"
 t MSG_209 "znaleziono %d urządzenia"
-t MSG_210 "Gotowe."
-t MSG_211 "Anulowano."
-t MSG_212 "NIEPOWODZENIE."
+t MSG_210 "Gotowy"
+t MSG_211 "Anulowano"
+t MSG_212 "NIEPOWODZENIE"
 # Used when a new update has been downloaded and lauched
 t MSG_213 "Uruchamianie nowej aplikacji..."
 t MSG_214 "Niepowodzenie uruchomienia nowej aplikacji"
@@ -9261,7 +9299,7 @@ t MSG_233 "Finalizacja, proszę czekać..."
 # Takes the Syslinux version as paramete. eg. "Installing Syslinux v5..."
 t MSG_234 "Instalowanie Syslinux %s..."
 # Bad blocks status. eg: "Bad Blocks: PASS 1/2 - 12.34% (0/0/1 errors)"
-t MSG_235 "Błędne Sektory: UKOŃCZONO %d/%d - %0.2f%% (%d/%d/%d błędów)"
+t MSG_235 "Błędne Sektory: %s %d/%d - %0.2f%% (%d/%d/%d błędów)"
 t MSG_236 "Błędne Sektory: Testowanie z losowym wzorem"
 t MSG_237 "Błędne Sektory: Testowanie z wzorem 0x%02X"
 # eg. "Partitioning (MBR)..."
@@ -9281,7 +9319,7 @@ t MSG_249 "Niepowodzenie usuwania kluczy rejestru aplikacji"
 t MSG_250 "włączono %s"
 t MSG_251 "wyłączono %s "
 t MSG_252 "Sprawdzanie rozmiaru"
-t MSG_253 "Naprawioną detekcję dysków"
+t MSG_253 "Wykrywanie dysków twardych"
 t MSG_254 "Siłowe formatowanie dużych FAT32"
 t MSG_255 "NoDriveTypeAutorun zostanie usunięte przy wyjściu"
 t MSG_256 "Fałszywe wykrywanie dysku"
@@ -9292,6 +9330,11 @@ t MSG_260 "Kompresja NTFS"
 t MSG_261 "Zapisywanie obrazu: ukończono %0.1f%%"
 t MSG_262 "Wsparcie ISO"
 t MSG_263 "Użyj WŁAŚCIWEGO rozmiaru jednostek"
+t MSG_264 "Usuwanie folderu '%s'"
+t MSG_265 "Wykrywanie dysków VMWare"
+t MSG_266 "Tryb dual UEFI/BIOS"
+t MSG_267 "Zastosowywanie obrazu Windows: ukończono %0.1f%%"
+t MSG_268 "Zastosowywanie obrazu Windows..."
 
 ################################################################################
 l "pt-BR" "Portuguese Brazilian (Português do Brasil)" 0x0416
