@@ -109,6 +109,8 @@ static loc_cmd* selected_locale = NULL;
 static UINT_PTR UM_LANGUAGE_MENU_MAX = UM_LANGUAGE_MENU;
 static RECT relaunch_rc = { -65536, -65536, 0, 0};
 static UINT uBootChecked = BST_CHECKED, uQFChecked = BST_CHECKED, uMBRChecked = BST_UNCHECKED;
+static HFONT hFont;
+static WNDPROC info_original_proc = NULL;
 char ClusterSizeLabel[MAX_CLUSTER_SIZES][64];
 char msgbox[1024], msgbox_title[32], *ini_file = NULL;
 char lost_translators[][6] = LOST_TRANSLATORS;
@@ -1119,6 +1121,12 @@ static void ToggleToGo(void)
 	POINT point;
 	int toggle;
 
+	// Windows To Go mode is only available for Windows 8 or later due to the lack
+	// of an ISO mounting API on previous versions.
+	// But we still need to be able to hide the Windows To Go option on startup.
+	if ((nWindowsVersion < WINDOWS_8) && (!togo_mode))
+		return;
+
 	togo_mode = !togo_mode;
 	if (!togo_mode)
 		dialog_shift = -dialog_shift;
@@ -1481,10 +1489,43 @@ static __inline const char* IsAlphaOrBeta(void)
 #endif
 }
 
+INT_PTR CALLBACK InfoCallback(HWND hCtrl, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	HDC hdc;
+	RECT rect;
+	PAINTSTRUCT ps;
+	wchar_t winfo[128];
+
+	switch (message) {
+
+	// Prevent select (which screws up our display as it redraws the font using different settings)
+	case WM_LBUTTONDOWN:
+		return (INT_PTR)FALSE;
+
+	// Prevent the select cursor from appearing
+	case WM_SETCURSOR:
+		SetCursor(LoadCursor(NULL, IDC_ARROW));
+		return (INT_PTR)TRUE;
+
+	// The things one needs to do to vertically center text in an edit control...
+	case WM_PAINT:
+		GetWindowTextW(hInfo, winfo, ARRAYSIZE(winfo));
+		hdc = BeginPaint(hCtrl , &ps);
+		SelectObject(hdc, hFont);
+		SetBkColor(hdc, GetSysColor(COLOR_BTNFACE));
+		SetTextAlign(hdc , TA_CENTER | TA_BASELINE);
+		GetClientRect(hCtrl , &rect);
+		TextOutW(hdc, rect.right/2, rect.bottom/2 + (int)(5.0f * fScale), winfo, wcslen(winfo));
+		EndPaint(hCtrl, &ps);
+		return (INT_PTR)TRUE;
+	}
+
+	return CallWindowProc(info_original_proc, hCtrl, message, wParam, lParam);
+}
+
 void InitDialog(HWND hDlg)
 {
 	HINSTANCE hDllInst;
-	HFONT hf;
 	DWORD len;
 	SIZE sz;
 	HWND hCtrl;
@@ -1517,7 +1558,7 @@ void InitDialog(HWND hDlg)
 	i16 = GetSystemMetrics(SM_CXSMICON);
 	hDC = GetDC(hDlg);
 	fScale = GetDeviceCaps(hDC, LOGPIXELSX) / 96.0f;
-	lfHeight = -MulDiv(8, GetDeviceCaps(hDC, LOGPIXELSY), 72);
+	lfHeight = -MulDiv(9, GetDeviceCaps(hDC, LOGPIXELSY), 72);
 	ReleaseDC(hDlg, hDC);
 	// Adjust icon size lookup
 	s16 = i16;
@@ -1530,14 +1571,9 @@ void InitDialog(HWND hDlg)
 	else if (s16 >= 20)
 		s16 = 24;
 
-	// Change the font of the Info edit box
-#if defined(COLOURED_INFO)
-	hf = CreateFontA(lfHeight, 0, 0, 0, FW_BOLD, FALSE, FALSE, FALSE,
-#else
-	hf = CreateFontA(lfHeight, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE,
-#endif
-		DEFAULT_CHARSET, 0, 0, PROOF_QUALITY, 0, "Arial Unicode MS");
-	SendDlgItemMessageA(hDlg, IDC_INFO, WM_SETFONT, (WPARAM)hf, TRUE);
+	// Create the font for the Info edit box
+	hFont = CreateFontA(lfHeight, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE, DEFAULT_CHARSET,
+		0, 0, PROOF_QUALITY, 0, (nWindowsVersion >= WINDOWS_VISTA)?"Segoe UI":"Arial Unicode MS");
 
 	// Create the title bar icon
 	SetTitleBarIcon(hDlg);
@@ -1626,7 +1662,7 @@ void InitDialog(HWND hDlg)
 	// Reposition the Advanced button
 	hCtrl = GetDlgItem(hDlg, IDS_FORMAT_OPTIONS_GRP);
 	sz = GetTextSize(hCtrl);
-	ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDC_ADVANCED), sz.cx, 0, 0, 0);
+	ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDC_ADVANCED), (int)((1.0f * sz.cx) / fScale), 0, 0, 0);
 	// Add a space to the "Format Options" text
 	GetWindowTextW(hCtrl, wtmp, ARRAYSIZE(wtmp));
 	wtmp[wcslen(wtmp)] = ' ';
@@ -1635,7 +1671,11 @@ void InitDialog(HWND hDlg)
 	if (nWindowsVersion == WINDOWS_7) {
 		ResizeMoveCtrl(hDlg, GetDlgItem(hMainDialog, IDS_ADVANCED_OPTIONS_GRP), 0, -1, 0, 2);
 		ResizeMoveCtrl(hDlg, hProgress, 0, 1, 0, 0);
+		ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDC_ADVANCED), -2, 0, 0, 0);
 	}
+
+	// Subclass the Info box so that we can align its text vertically
+	info_original_proc = (WNDPROC)SetWindowLongPtr(hInfo, GWLP_WNDPROC, (LONG_PTR)InfoCallback);
 
 	// Set the icons on the the buttons
 	PF_INIT(ImageList_Create, Comctl32);
@@ -1791,7 +1831,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	POINT Point;
 	RECT DialogRect, DesktopRect;
 	LONG progress_style;
-	int nDeviceIndex, fs, bt, i, nWidth, nHeight, nb_devices, selected_language;
+	int nDeviceIndex, fs, bt, i, nWidth, nHeight, nb_devices, selected_language, offset;
 	char tmp[128];
 	loc_cmd* lcmd = NULL;
 	// TODO: Add "*.img;*.vhd" / "All Supported Images" to the list below and use a generic "%s Image" in the .loc
@@ -1891,20 +1931,6 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		}
 		break;
 
-#if defined(COLOURED_INFO)
-	case WM_CTLCOLORSTATIC:
-		// Must be transparent for XP and non Aero Vista/7
-		SetBkMode((HDC)wParam, TRANSPARENT);
-		if ((HWND)lParam == hInfo) {
-			SetTextColor((HDC)wParam, RGB(0,192,255));
-			return (INT_PTR)CreateSolidBrush(RGB(0,0,0));
-		}
-		// Restore transparency if we don't change the background
-		SetBkMode((HDC)wParam, OPAQUE);
-		return (INT_PTR)FALSE;
-		break;
-#endif
-
 	case WM_COMMAND:
 		if ((LOWORD(wParam) >= UM_LANGUAGE_MENU) && (LOWORD(wParam) < UM_LANGUAGE_MENU_MAX)) {
 			selected_language = LOWORD(wParam) - UM_LANGUAGE_MENU;
@@ -1965,10 +1991,13 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				nWidth = DialogRect.right - DialogRect.left;
 				nHeight = DialogRect.bottom - DialogRect.top;
 				GetWindowRect(hDlg, &DialogRect);
+				offset = GetSystemMetrics(SM_CXSIZEFRAME) + (int)(2.0f * fScale);
+				if (nWindowsVersion >= WINDOWS_10)
+					offset += (int)(-14.0f * fScale);
 				if (right_to_left_mode)
-					Point.x = max(DialogRect.left - GetSystemMetrics(SM_CXSIZEFRAME)-(int)(2.0f * fScale) - nWidth, 0);
+					Point.x = max(DialogRect.left - offset - nWidth, 0);
 				else
-					Point.x = min(DialogRect.right + GetSystemMetrics(SM_CXSIZEFRAME)+(int)(2.0f * fScale), DesktopRect.right - nWidth);
+					Point.x = min(DialogRect.right + offset, DesktopRect.right - nWidth);
 				
 				Point.y = max(DialogRect.top, DesktopRect.top - nHeight);
 				MoveWindow(hLogDlg, Point.x, Point.y, nWidth, nHeight, FALSE);
@@ -1978,10 +2007,9 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				if (right_to_left_mode) {
 					Point.x = DialogRect.left;
 					GetWindowRect(hLogDlg, &DialogRect);
-					Point.x = max(Point.x, DialogRect.right - DialogRect.left + GetSystemMetrics(SM_CXSIZEFRAME) + (int)(2.0f * fScale));
+					Point.x = max(Point.x, DialogRect.right - DialogRect.left + offset);
 				} else {
-					Point.x = max((DialogRect.left<0)?DialogRect.left:0,
-						Point.x - nWidth - GetSystemMetrics(SM_CXSIZEFRAME) - (int)(2.0f * fScale));
+					Point.x = max((DialogRect.left<0)?DialogRect.left:0, Point.x - offset - nWidth);
 				}
 				MoveWindow(hDlg, Point.x, Point.y, nWidth, nHeight, TRUE);
 				first_log_display = FALSE;
