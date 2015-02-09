@@ -69,8 +69,9 @@ static const char* ldlinux_name = "ldlinux.sys";
 static const char* ldlinux_c32 = "ldlinux.c32";
 static const char* efi_dirname = "/efi/boot";
 static const char* efi_bootname[] = { "bootia32.efi", "bootx64.efi", "bootia64.efi", "bootarm.efi" };
-static const char* install_wim_path = "/sources/install.wim";
-static const char* grub_dirname = "/boot/grub";   // NB: We don't support nonstandard config dir such as AROS' "/boot/pc/grub/"
+static const char* install_wim_path = "/sources";
+static const char* install_wim_name[] = { "install.wim", "install.swm" };
+static const char* grub_dirname = "/boot/grub"; // NB: We don't support nonstandard config dir such as AROS' "/boot/pc/grub/"
 static const char* grub_cfg = "grub.cfg";
 static const char* syslinux_cfg[] = { "isolinux.cfg", "syslinux.cfg", "extlinux.conf"};
 static const char dot_isolinux_bin[] = ".\\isolinux.bin";
@@ -189,12 +190,15 @@ static BOOL check_iso_props(const char* psz_dirname, int64_t i_file_length, cons
 		if (safe_stricmp(psz_dirname, efi_dirname) == 0) {
 			for (i=0; i<ARRAYSIZE(efi_bootname); i++)
 				if (safe_stricmp(psz_basename, efi_bootname[i]) == 0)
-					iso_report.has_efi |= (2<<i);
+					iso_report.has_efi |= (2<<i);	// start at 2 since "bootmgr.efi" is bit 0
 		}
 
-		// Check for 'install.wim"
-		if (safe_stricmp(psz_fullpath, install_wim_path) == 0)
-			iso_report.has_install_wim = TRUE;
+		// Check for "install.wim" or "install.swm" in "/sources"
+		if (safe_stricmp(psz_dirname, install_wim_path) == 0) {
+			for (i=0; i<ARRAYSIZE(install_wim_name); i++)
+				if (safe_stricmp(psz_basename, install_wim_name[i]) == 0)
+					iso_report.has_install_wim |= (1<<i);
+		}
 
 		// Check for PE (XP) specific files in "/i386" or "/minint"
 		for (i=0; i<ARRAYSIZE(pe_dirname); i++)

@@ -249,11 +249,11 @@ typedef struct {
 	uint64_t src_size;
 	uint8_t winpe;
 	uint8_t has_efi;
+	uint8_t has_install_wim;
 	BOOL has_4GB_file;
 	BOOL has_long_filename;
 	BOOL has_symlinks;
 	BOOL has_bootmgr;
-	BOOL has_install_wim;
 	BOOL has_autorun;
 	BOOL has_old_c32[NB_OLD_C32];
 	BOOL has_old_vesamenu;

@@ -1855,9 +1855,14 @@ DWORD WINAPI FormatThread(void* param)
 					}
 				}
 				// EFI mode selected, with no 'bootx64.efi' (bit #2) but Windows 7 x64's 'bootmgr.efi' (bit #0)
-				if ((bt == BT_UEFI) && (!(iso_report.has_efi & 4)) && (iso_report.has_efi & 1)) {
+				if ((bt == BT_UEFI) && (!(iso_report.has_efi & 4)) && (iso_report.has_efi & 1) && (iso_report.has_install_wim)) {
 					PrintInfoDebug(0, MSG_232);
 					wim_image[0] = drive_name[0];
+					// Handle multipart .swm images
+					if (iso_report.has_install_wim == 2) {
+						wim_image[19] = 's';
+						wim_image[20] = 'w';
+					}
 					efi_dst[0] = drive_name[0];
 					efi_dst[sizeof(efi_dst) - sizeof("\\bootx64.efi")] = 0;
 					if (!CreateDirectoryA(efi_dst, 0)) {
