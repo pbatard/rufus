@@ -1514,6 +1514,8 @@ static INT_PTR CALLBACK InfoCallback(HWND hCtrl, UINT message, WPARAM wParam, LP
 		SetBkColor(hdc, GetSysColor(COLOR_BTNFACE));
 		SetTextAlign(hdc , TA_CENTER | TA_BASELINE);
 		GetClientRect(hCtrl , &rect);
+		// If you don't fill the client area, you get leftover text artifacts
+		FillRect(hdc, &rect, CreateSolidBrush(GetSysColor(COLOR_BTNFACE)));
 		TextOutW(hdc, rect.right/2, rect.bottom/2 + (int)(5.0f * fScale), winfo, (int)wcslen(winfo));
 		EndPaint(hCtrl, &ps);
 		return (INT_PTR)TRUE;
