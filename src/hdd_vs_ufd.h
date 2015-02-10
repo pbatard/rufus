@@ -81,6 +81,9 @@ static str_score_t str_score[] = {
 	{ "MUSHKIN", -15 },
 };
 
+static str_score_t str_adjust[] = {
+	{ "Gadget", -10 },
+};
 
 /* The lists belows set a score according to VID & VID:PID
  * These were constructed as follows:

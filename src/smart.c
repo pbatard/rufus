@@ -472,6 +472,13 @@ int IsHDD(DWORD DriveIndex, uint16_t vid, uint16_t pid, const char* strid)
 		}
 	}
 
+	// Adjust for oddball devices
+	if (strid != NULL) {
+		for (i=0; i<ARRAYSIZE(str_adjust); i++)
+			if (strstr(strid, str_adjust[i].name) != NULL)
+				score += str_adjust[i].score;
+	}
+
 	// Check against known VIDs
 	for (i=0; i<ARRAYSIZE(vid_score); i++) {
 		if (vid == vid_score[i].vid) {
