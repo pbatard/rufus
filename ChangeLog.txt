@@ -1,3 +1,20 @@
+o Version 2.0 (2015.03.??)
+    Major UI improvements (improved font, new info field, no separate progress dialog, etc.)
+    Add support for Windows To Go (when Rufus is running on Windows 8 or later)
+    Add support for Grub4DOS and GRUB 2 based images (e.g. FreeNAS) 
+    Add portable application support, through a 'rufus.ini' file
+    Add native decompression support for DD images (.Z, .gz, .lzma, .bz2 and .xz)
+    Add seamless UEFI boot of NTFS partitions, for Windows ISOs with large files (>4GB)
+    Add support for Windows multipart install.swm
+    Add support for non Microsoft VHD drivers
+    Add Norwegian translation, courtesy of JED
+    Fix a crash on image selection when no device is present
+    Fix broken VHD support for non-English version of Windows
+    Fix write error for DD images that are not a multiple of the sector size
+    Fix broken Unicode support
+    Update Syslinux to 6.0.3
+    Other improvements and fixes
+
 o Version 1.4.12 (2014.11.09) [BUGFIX RELEASE]
     Fix support for Red Hat 7 and CentOS 7
     Fix support for Debian 7.x

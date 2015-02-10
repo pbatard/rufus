@@ -1022,6 +1022,9 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 	}
 	
 	// Need to invalidate as we may have changed the UI and may get artifacts if we don't
+	// Oh and we need to invoke BOTH RedrawWindow() and InvalidateRect() because UI refresh
+	// in the Microsoft worlds SUCKS!!!! (we may lose the disabled "Start" button otherwise)
+	RedrawWindow(hMainDialog, NULL, NULL, RDW_ALLCHILDREN | RDW_UPDATENOW);
 	InvalidateRect(hMainDialog, NULL, TRUE);
 
 out:
@@ -1672,7 +1675,7 @@ void InitDialog(HWND hDlg)
 	if (nWindowsVersion == WINDOWS_7) {
 		ResizeMoveCtrl(hDlg, GetDlgItem(hMainDialog, IDS_ADVANCED_OPTIONS_GRP), 0, -1, 0, 2);
 		ResizeMoveCtrl(hDlg, hProgress, 0, 1, 0, 0);
-		ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDC_ADVANCED), -2, 0, 0, 0);
+		ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDC_ADVANCED), -1, 0, 0, 0);
 	}
 
 	// Subclass the Info box so that we can align its text vertically
