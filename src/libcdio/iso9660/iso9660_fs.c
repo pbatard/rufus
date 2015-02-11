@@ -263,7 +263,7 @@ static bool
 check_pvd (const iso9660_pvd_t *p_pvd, cdio_log_level_t log_level)
 {
   if ( ISO_VD_PRIMARY != from_711(p_pvd->type) ) {
-    cdio_log (log_level, "unexpected PVD type %d", p_pvd->type);
+//    cdio_log (log_level, "unexpected PVD type %d", p_pvd->type);
     return false;
   }
 
@@ -442,7 +442,7 @@ iso9660_ifs_read_pvd_loglevel (const iso9660_t *p_iso,
 			       cdio_log_level_t log_level)
 {
   if (0 == iso9660_iso_seek_read (p_iso, p_pvd, ISO_PVD_SECTOR, 1)) {
-    cdio_log ( log_level, "error reading PVD sector (%d)", ISO_PVD_SECTOR );
+//    cdio_log ( log_level, "error reading PVD sector (%d)", ISO_PVD_SECTOR );
     return false;
   }
   return check_pvd(p_pvd, log_level);

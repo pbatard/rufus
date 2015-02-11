@@ -224,7 +224,7 @@ typedef struct {
 	bled_compression_type type;
 } comp_assoc;
 
-static comp_assoc blah[] = {
+static comp_assoc file_assoc[] = {
 	{ ".xz", BLED_COMPRESSION_XZ },
 	{ ".gz", BLED_COMPRESSION_GZIP },
 	{ ".lzma", BLED_COMPRESSION_LZMA },
@@ -233,11 +233,14 @@ static comp_assoc blah[] = {
 };
 
 // For now we consider that an image that matches a known extension is bootable
-// TODO: uncompress header and check for bootable flag
+#define MBR_SIZE 512	// Might need to review this once we see bootable 4k systems
 BOOL IsCompressedBootableImage(const char* path)
 {
-	char* p;
+	char *p;
+	unsigned char *buf = NULL;
 	int i;
+	BOOL r = FALSE;
+	int64_t dc;
 
 	iso_report.compression_type = BLED_COMPRESSION_NONE;
 	for (p = (char*)&path[strlen(path)-1]; (*p != '.') && (p != path); p--);
@@ -245,10 +248,23 @@ BOOL IsCompressedBootableImage(const char* path)
 	if (p == path)
 		return FALSE;
 
-	for (i = 0; i<ARRAYSIZE(blah); i++) {
-		if (strcmp(p, blah[i].ext) == 0) {
-			iso_report.compression_type = blah[i].type;
-			return TRUE;
+	for (i = 0; i<ARRAYSIZE(file_assoc); i++) {
+		if (strcmp(p, file_assoc[i].ext) == 0) {
+			iso_report.compression_type = file_assoc[i].type;
+			buf = malloc(MBR_SIZE);
+			if (buf == NULL)
+				return FALSE;
+			FormatStatus = 0;
+			bled_init(_uprintf, NULL, &FormatStatus);
+			dc = bled_uncompress_to_buffer(path, (char*)buf, MBR_SIZE, file_assoc[i].type);
+			bled_exit();
+			if (dc != MBR_SIZE) {
+				free(buf);
+				return FALSE;
+			}
+			r = (buf[0x1FE] == 0x55) && (buf[0x1FF] == 0xAA);
+			free(buf);
+			return r;
 		}
 	}
 

@@ -225,7 +225,6 @@ typedef struct transformer_state_t {
 
 void init_transformer_state(transformer_state_t *xstate) FAST_FUNC;
 ssize_t transformer_write(transformer_state_t *xstate, const void *buf, size_t bufsize) FAST_FUNC;
-ssize_t xtransformer_write(transformer_state_t *xstate, const void *buf, size_t bufsize) FAST_FUNC;
 int check_signature16(transformer_state_t *xstate, unsigned magic16) FAST_FUNC;
 
 IF_DESKTOP(long long) int inflate_unzip(transformer_state_t *xstate) FAST_FUNC;

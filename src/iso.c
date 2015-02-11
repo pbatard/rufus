@@ -661,7 +661,7 @@ try_iso:
 
 	p_iso = iso9660_open_ext(src_iso, iso_extension_mask);
 	if (p_iso == NULL) {
-		uprintf("Unable to open '%s' as an ISO image.\n", src_iso);
+		uprintf("'%s' doesn't look like an ISO image\n", src_iso);
 		r = 1;
 		goto out;
 	}

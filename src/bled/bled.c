@@ -28,18 +28,19 @@ jmp_buf bb_error_jmp;
 
 static long long int unpack_none(transformer_state_t *xstate)
 {
-	bb_printf("BLED_COMPRESSION_NONE is not supported");
+	bb_printf("This compression type is not supported");
 	return -1;
 }
 
 unpacker_t unpacker[BLED_COMPRESSION_MAX] = {
 	unpack_none,
-	inflate_unzip,
+	unpack_none,
 	unpack_Z_stream,
 	unpack_gz_stream,
 	unpack_lzma_stream,
 	unpack_bz2_stream,
-	unpack_xz_stream
+	unpack_xz_stream,
+	unpack_none
 };
 
 /* Uncompress file 'src', compressed using 'type', to file 'dst' */
@@ -125,6 +126,48 @@ int64_t bled_uncompress_with_handles(HANDLE hSrc, HANDLE hDst, int type)
 	return unpacker[type](&xstate);
 }
 
+/* Uncompress file 'src', compressed using 'type', to buffer 'buf' of size 'size' */
+int64_t bled_uncompress_to_buffer(const char* src, char* buf, size_t size, int type)
+{
+	transformer_state_t xstate;
+	int64_t ret;
+
+	if (!bled_initialized)
+		return -1;
+
+	bb_total_rb = 0;
+	init_transformer_state(&xstate);
+	xstate.src_fd = -1;
+	xstate.dst_fd = -1;
+	xstate.check_signature = 1;
+
+	xstate.src_fd = _openU(src, _O_RDONLY | _O_BINARY, 0);
+	if (xstate.src_fd < 0) {
+		bb_printf("Could not open '%s' (errno: %d)", src, errno);
+		goto err;
+	}
+
+	xstate.mem_output_buf = buf;
+	xstate.mem_output_size = 0;
+	xstate.mem_output_size_max = size;
+
+	if ((type < 0) || (type >= BLED_COMPRESSION_MAX)) {
+		bb_printf("unsupported compression format");
+		goto err;
+	}
+
+	if (setjmp(bb_error_jmp))
+		goto err;
+	ret = unpacker[type](&xstate);
+	_close(xstate.src_fd);
+	return ret;
+
+err:
+	if (xstate.src_fd > 0)
+		_close(xstate.src_fd);
+	return -1;
+}
+
 /* Initialize the library.
  * When the parameters are not NULL you can:
  * - specify the printf-like function you want to use to output message
@@ -150,7 +193,9 @@ void bled_exit(void)
 	bled_printf = NULL;
 	bled_progress = NULL;
 	bled_cancel_request = NULL;
-	if (global_crc32_table)
+	if (global_crc32_table) {
 		free(global_crc32_table);
+		global_crc32_table = NULL;
+	}
 	bled_initialized = false;
 }

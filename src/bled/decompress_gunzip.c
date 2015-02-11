@@ -1003,8 +1003,9 @@ inflate_unzip_internal(STATE_PARAM transformer_state_t *xstate)
 	while (1) {
 		int r = inflate_get_next_window(PASS_STATE_ONLY);
 		nwrote = transformer_write(xstate, gunzip_window, gunzip_outbuf_count);
-		if (nwrote == (ssize_t)-1) {
-			n = -1;
+		if (nwrote != (ssize_t)gunzip_outbuf_count) {
+			huft_free_all(PASS_STATE_ONLY);
+			n = (nwrote <0)?nwrote:-1;
 			goto ret;
 		}
 		IF_DESKTOP(n += nwrote;)
@@ -1226,7 +1227,7 @@ unpack_gz_stream(transformer_state_t *xstate)
 
 	n = inflate_unzip_internal(PASS_STATE xstate);
 	if (n < 0) {
-		total = -1;
+		total = (n == -ENOSPC)?xstate->mem_output_size_max:n;
 		goto ret;
 	}
 	total += n;

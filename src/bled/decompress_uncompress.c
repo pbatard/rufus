@@ -274,7 +274,11 @@ unpack_Z_stream(transformer_state_t *xstate)
 						}
 
 						if (outpos >= OBUFSIZ) {
-							xtransformer_write(xstate, outbuf, outpos);
+							retval = transformer_write(xstate, outbuf, outpos);
+							if (retval != (ssize_t)outpos) {
+								retval = (retval == -ENOSPC)?xstate->mem_output_size_max:-1;
+								goto err;
+							}
 							IF_DESKTOP(total_written += outpos;)
 							outpos = 0;
 						}
@@ -301,7 +305,9 @@ unpack_Z_stream(transformer_state_t *xstate)
 	} while (rsize > 0);
 
 	if (outpos > 0) {
-		xtransformer_write(xstate, outbuf, outpos);
+		retval = transformer_write(xstate, outbuf, outpos);
+		if (retval != (ssize_t)outpos)
+			retval = (retval == -ENOSPC)?xstate->mem_output_size_max:-1;
 		IF_DESKTOP(total_written += outpos;)
 	}
 

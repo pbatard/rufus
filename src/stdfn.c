@@ -754,8 +754,15 @@ error:
 BOOL SetLGP(BOOL bRestore, BOOL* bExistingKey, const char* szPath, const char* szPolicy, DWORD dwValue)
 {
 	SetLGP_Params params = {bRestore, bExistingKey, szPath, szPolicy, dwValue};
-	HANDLE thread_id = CreateThread(NULL, 0, SetLGPThread, (LPVOID)&params, 0, NULL);
 	DWORD r = FALSE;
+	HANDLE thread_id;
+
+	if (ReadSettingBool(SETTING_DISABLE_LGP)) {
+		uprintf("LPG handling disabled, per settings");
+		return FALSE;
+	}
+
+	thread_id = CreateThread(NULL, 0, SetLGPThread, (LPVOID)&params, 0, NULL);
 	if (thread_id == NULL) {
 		uprintf("SetLGP: Unable to start thread");
 		return FALSE;

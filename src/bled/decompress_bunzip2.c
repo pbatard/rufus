@@ -736,7 +736,7 @@ unpack_bz2_stream(transformer_state_t *xstate)
 	IF_DESKTOP(long long total_written = 0;)
 	bunzip_data *bd;
 	char *outbuf;
-	int i;
+	int i, nwrote;
 	unsigned len;
 
 	if (check_signature16(xstate, BZIP2_MAGIC))
@@ -756,8 +756,9 @@ unpack_bz2_stream(transformer_state_t *xstate)
 				i = IOBUF_SIZE - i; /* number of bytes produced */
 				if (i == 0) /* EOF? */
 					break;
-				if (i != transformer_write(xstate, outbuf, i)) {
-					i = RETVAL_SHORT_WRITE;
+				nwrote = (int)transformer_write(xstate, outbuf, i);
+				if (nwrote != i) {
+					i = (nwrote == -ENOSPC)?(int)xstate->mem_output_size_max:RETVAL_SHORT_WRITE;
 					goto release_mem;
 				}
 				IF_DESKTOP(total_written += i;)

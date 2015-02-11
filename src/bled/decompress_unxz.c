@@ -70,7 +70,11 @@ IF_DESKTOP(long long) int FAST_FUNC unpack_xz_stream(transformer_state_t *xstate
 
 		if (b.out_pos == BUFSIZ) {
 			nwrote = transformer_write(xstate, b.out, b.out_pos);
-			if (nwrote == (ssize_t)-1) {
+			if (nwrote == -ENOSPC) {
+				ret = XZ_BUF_FULL;
+				goto out;
+			}
+			if (nwrote < 0) {
 				ret = XZ_DATA_ERROR;
 				bb_error_msg_and_err("write error (errno: %d)", errno);
 			}
@@ -89,7 +93,11 @@ IF_DESKTOP(long long) int FAST_FUNC unpack_xz_stream(transformer_state_t *xstate
 #endif
 
 		nwrote = transformer_write(xstate, b.out, b.out_pos);
-		if (nwrote == (ssize_t)-1) {
+		if (nwrote == -ENOSPC) {
+			ret = XZ_BUF_FULL;
+			goto out;
+		}
+		if (nwrote < 0) {
 			ret = XZ_DATA_ERROR;
 			bb_error_msg_and_err("write error (errno: %d)", errno);
 		}
@@ -99,24 +107,20 @@ IF_DESKTOP(long long) int FAST_FUNC unpack_xz_stream(transformer_state_t *xstate
 		case XZ_STREAM_END:
 			ret = XZ_OK;
 			goto out;
-
 		case XZ_MEM_ERROR:
 			bb_error_msg_and_err("memory allocation error");
-
 		case XZ_MEMLIMIT_ERROR:
 			bb_error_msg_and_err("memory usage limit error");
-
 		case XZ_FORMAT_ERROR:
 			bb_error_msg_and_err("not a .xz file");
-
 		case XZ_OPTIONS_ERROR:
 			bb_error_msg_and_err("unsupported XZ header option");
-
 		case XZ_DATA_ERROR:
 			bb_error_msg_and_err("corrupted archive");
 		case XZ_BUF_ERROR:
 			bb_error_msg_and_err("corrupted buffer");
-
+		case XZ_BUF_FULL:
+			break;
 		default:
 			bb_error_msg_and_err("XZ decompression bug!");
 		}
@@ -127,5 +131,10 @@ err:
 	xz_dec_end(s);
 	free(in);
 	free(out);
-	return (ret == XZ_OK)?n:-ret;
+	if (ret == XZ_OK)
+		return n;
+	else if (ret == XZ_BUF_FULL)
+		return xstate->mem_output_size_max;
+	else
+		return -ret;
 }

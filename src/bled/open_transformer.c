@@ -33,20 +33,14 @@ ssize_t FAST_FUNC transformer_write(transformer_state_t *xstate, const void *buf
 
 	if (xstate->mem_output_size_max != 0) {
 		size_t pos = xstate->mem_output_size;
-		size_t size;
-
-		size = (xstate->mem_output_size += bufsize);
-		if (size > xstate->mem_output_size_max) {
-			free(xstate->mem_output_buf);
-			xstate->mem_output_buf = NULL;
-			bb_perror_msg("buffer %u too small", (unsigned)xstate->mem_output_size_max);
-			nwrote = -1;
-			goto ret;
-		}
-		xstate->mem_output_buf = xrealloc(xstate->mem_output_buf, size + 1);
-		memcpy(xstate->mem_output_buf + pos, buf, bufsize);
-		xstate->mem_output_buf[size] = '\0';
 		nwrote = bufsize;
+		if ((pos + bufsize) > xstate->mem_output_size_max) {
+			bufsize = xstate->mem_output_size_max - pos;
+			// Use ENOSPC as an indicator that our buffer is full
+			nwrote = -ENOSPC;
+		}
+		memcpy(xstate->mem_output_buf + pos, buf, bufsize);
+		xstate->mem_output_size += bufsize;
 	} else {
 		nwrote = full_write(xstate->dst_fd, buf, (unsigned)bufsize);
 		if (nwrote != (ssize_t)bufsize) {
@@ -56,15 +50,6 @@ ssize_t FAST_FUNC transformer_write(transformer_state_t *xstate, const void *buf
 		}
 	}
  ret:
-	return nwrote;
-}
-
-ssize_t FAST_FUNC xtransformer_write(transformer_state_t *xstate, const void *buf, size_t bufsize)
-{
-	ssize_t nwrote = transformer_write(xstate, buf, bufsize);
-	if (nwrote != (ssize_t)bufsize) {
-		xfunc_die();
-	}
 	return nwrote;
 }
 

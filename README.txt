@@ -5,6 +5,8 @@ Features:
 - Creates DOS bootable USB drives, using FreeDOS or MS-DOS with no external files required
 - Creates MBR or GPT/UEFI bootable drives
 - Creates bootable drives from bootable ISOs (Windows, Linux, etc.)
+- Creates bootbale drives from disk images, including compressed ones
+- Creates Windows To Go drives
 - Twice as fast as Microsoft's USB/DVD tool or UNetbootin, on ISO->USB (1)
 - Can perform bad blocks check, with fake drive detection
 - Modern and familiar UI, with more than 30 languages natively supported (2)

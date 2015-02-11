@@ -981,11 +981,14 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 		SendMessage(hMainDialog, UM_PROGRESS_EXIT, 0, 0);
 		PrintInfoDebug(0, MSG_203);
 		safe_free(image_path);
+		PrintStatus(0, MSG_086);
+		SetMBRProps();
 		goto out;
 	}
 
 	if (iso_report.is_bootable_img) {
-		uprintf("Using bootable %s image: '%s'", iso_report.is_vhd?"VHD":"disk", image_path);
+		uprintf("'%s' is a %sbootable %s image", image_path,
+			(iso_report.compression_type != BLED_COMPRESSION_NONE)?"compressed ":"", iso_report.is_vhd?"VHD":"disk");
 		selection_default = DT_IMG;
 	} else {
 		DisplayISOProps();

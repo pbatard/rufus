@@ -220,6 +220,7 @@ unpack_lzma_stream(transformer_state_t *xstate)
 	uint8_t *buffer;
 	uint8_t previous_byte = 0;
 	size_t buffer_pos = 0, global_pos = 0;
+	ssize_t nwrote;
 	int len = 0;
 	int state = 0;
 	uint32_t rep0 = 1, rep1 = 1, rep2 = 1, rep3 = 1;
@@ -307,7 +308,8 @@ unpack_lzma_stream(transformer_state_t *xstate)
 			if (buffer_pos == header.dict_size) {
 				buffer_pos = 0;
 				global_pos += header.dict_size;
-				if (transformer_write(xstate, buffer, header.dict_size) != (ssize_t)header.dict_size)
+				nwrote = transformer_write(xstate, buffer, header.dict_size);
+				if (nwrote != (ssize_t)header.dict_size)
 					goto bad;
 				IF_DESKTOP(total_written += header.dict_size;)
 			}
@@ -441,7 +443,8 @@ unpack_lzma_stream(transformer_state_t *xstate)
 				if (buffer_pos == header.dict_size) {
 					buffer_pos = 0;
 					global_pos += header.dict_size;
-					if (transformer_write(xstate, buffer, header.dict_size) != (ssize_t)header.dict_size)
+					nwrote = transformer_write(xstate, buffer, header.dict_size);
+					if (nwrote != (ssize_t)header.dict_size)
 						goto bad;
 					IF_DESKTOP(total_written += header.dict_size;)
 				}
@@ -456,9 +459,10 @@ unpack_lzma_stream(transformer_state_t *xstate)
 	{
 		IF_NOT_DESKTOP(int total_written = 0; /* success */)
 		IF_DESKTOP(total_written += buffer_pos;)
-		if (transformer_write(xstate, buffer, buffer_pos) != (ssize_t)buffer_pos) {
+		nwrote = transformer_write(xstate, buffer, buffer_pos);
+		if (nwrote != (ssize_t)buffer_pos) {
  bad:
-			total_written = -1; /* failure */
+			total_written = (nwrote == -ENOSPC)?xstate->mem_output_size_max:-1;
 		}
 		rc_free(rc);
 		free(p);

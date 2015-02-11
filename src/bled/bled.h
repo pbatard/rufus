@@ -26,7 +26,7 @@ typedef enum {
 	BLED_COMPRESSION_LZMA,		// .lzma
 	BLED_COMPRESSION_BZIP2,		// .bz2
 	BLED_COMPRESSION_XZ,		// .xz
-//	BLED_COMPRESSION_7ZIP		// .7z
+	BLED_COMPRESSION_7ZIP,		// .7z
 	BLED_COMPRESSION_MAX
 } bled_compression_type;
 
@@ -35,6 +35,9 @@ int64_t bled_uncompress(const char* src, const char* dst, int type);
 
 /* Uncompress using Windows handles */
 int64_t bled_uncompress_with_handles(HANDLE hSrc, HANDLE hDst, int type);
+
+/* Uncompress file 'src', compressed using 'type', to buffer 'buf' of size 'size' */
+int64_t bled_uncompress_to_buffer(const char* src, char* buf, size_t size, int type);
 
 /* Initialize the library.
  * When the parameters are not NULL you can:
