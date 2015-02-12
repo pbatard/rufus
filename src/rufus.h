@@ -34,7 +34,7 @@
 /* Features not ready for prime time and that may *DESTROY* your data - USE AT YOUR OWN RISKS! */
 // #define RUFUS_TEST
 /* Languages for which translators are M.I.A. and that we could use help with */
-#define LOST_TRANSLATORS            { "ar-SA", "da-DK", "hu-HU", "id-ID", "pt-PT" }	// NB: locales MUST be <= 5 chars
+#define LOST_TRANSLATORS            { "ar-SA", "da-DK", "id-ID", "pt-PT" }	// NB: locales MUST be <= 5 chars
 /* Probability of getting the M.I.A. translator message. For more on this, see LostTranslatorCheck() */
 #define LOST_TRANSLATOR_PROBABILITY 1000
 
