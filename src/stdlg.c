@@ -42,7 +42,7 @@
 #include "license.h"
 #include "localization.h"
 
-#if (_WIN32_WINNT >= 0x0600)
+#if (_WIN32_WINNT >= _WIN32_WINNT_VISTA)
 PF_TYPE_DECL(WINAPI, HRESULT, SHCreateItemFromParsingName, (PCWSTR, IBindCtx*, REFIID, void **));
 #endif
 PF_TYPE_DECL(WINAPI, LPITEMIDLIST, SHSimpleIDListFromPath, (PCWSTR pszPath));
@@ -130,7 +130,7 @@ void BrowseForFolder(void) {
 	BROWSEINFOW bi;
 	LPITEMIDLIST pidl;
 
-#if (_WIN32_WINNT >= 0x0600)	// Vista and later
+#if (_WIN32_WINNT >= _WIN32_WINNT_VISTA)
 	WCHAR *wpath;
 	size_t i;
 	HRESULT hr;
@@ -248,7 +248,7 @@ char* FileDialog(BOOL save, char* path, const ext_t* ext, DWORD options)
 	BOOL r;
 	char* filepath = NULL;
 
-#if (_WIN32_WINNT >= 0x0600)	// Vista and later
+#if (_WIN32_WINNT >= _WIN32_WINNT_VISTA)
 	HRESULT hr = FALSE;
 	IFileDialog *pfd = NULL;
 	IShellItem *psiResult;
@@ -261,7 +261,7 @@ char* FileDialog(BOOL save, char* path, const ext_t* ext, DWORD options)
 		return NULL;
 	dialog_showing++;
 
-#if (_WIN32_WINNT >= 0x0600)	// Vista and later
+#if (_WIN32_WINNT >= _WIN32_WINNT_VISTA)
 	INIT_VISTA_SHELL32;
 	filter_spec = (COMDLG_FILTERSPEC*)calloc(ext->count + 1, sizeof(COMDLG_FILTERSPEC));
 	if ((IS_VISTA_SHELL32_AVAILABLE) && (filter_spec != NULL)) {
@@ -295,7 +295,7 @@ char* FileDialog(BOOL save, char* path, const ext_t* ext, DWORD options)
 		safe_free(wpath);
 
 		// Set the default filename
-		wfilename = utf8_to_wchar((ext->filename == NULL)?ext->extension[0]:ext->filename);
+		wfilename = utf8_to_wchar((ext->filename == NULL)?"":ext->filename);
 		if (wfilename != NULL) {
 			pfd->lpVtbl->SetFileName(pfd, wfilename);
 		}
@@ -347,7 +347,7 @@ fallback:
 	ofn.lStructSize = sizeof(ofn);
 	ofn.hwndOwner = hMainDialog;
 	// Selected File name
-	static_sprintf(selected_name, "%s", (ext->filename == NULL)?ext->extension[0]:ext->filename);
+	static_sprintf(selected_name, "%s", (ext->filename == NULL)?"":ext->filename);
 	ofn.lpstrFile = selected_name;
 	ofn.nMaxFile = MAX_PATH;
 	// Set the file extension filters
@@ -602,7 +602,7 @@ INT_PTR CALLBACK NotificationCallback(HWND hDlg, UINT message, WPARAM wParam, LP
 		ncm.cbSize = sizeof(ncm);
 		// If we're compiling with the Vista SDK or later, the NONCLIENTMETRICS struct
 		// will be the wrong size for previous versions, so we need to adjust it.
-		#if defined(_MSC_VER) && (_MSC_VER >= 1500) && (WINVER >= 0x0600)
+		#if defined(_MSC_VER) && (_MSC_VER >= 1500) && (_WIN32_WINNT >= _WIN32_WINNT_VISTA)
 		if (nWindowsVersion >= WINDOWS_VISTA) {
 			// In versions of Windows prior to Vista, the iPaddedBorderWidth member
 			// is not present, so we need to subtract its size from cbSize.

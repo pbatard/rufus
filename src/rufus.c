@@ -1841,8 +1841,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	int nDeviceIndex, fs, bt, i, nWidth, nHeight, nb_devices, selected_language, offset;
 	char tmp[128];
 	loc_cmd* lcmd = NULL;
-	// TODO: Add "*.img;*.vhd" / "All Supported Images" to the list below and use a generic "%s Image" in the .loc
-	EXT_DECL(img_ext, NULL, __VA_GROUP__("*.img", "*.vhd"), __VA_GROUP__(lmprintf(MSG_095), "VHD Image"));
+	EXT_DECL(img_ext, NULL, __VA_GROUP__("*.img;*.vhd;*.gz;*.bzip2;*.xz;*.lzma;*.Z"), __VA_GROUP__(lmprintf(MSG_095)));
 	EXT_DECL(iso_ext, NULL, __VA_GROUP__("*.iso"), __VA_GROUP__(lmprintf(MSG_036)));
 
 	switch (message) {
@@ -2206,10 +2205,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				iso_provided = FALSE;	// One off thing...
 			} else {
 				safe_free(image_path);
-				if (selection_default == DT_IMG)
-					image_path = FileDialog(FALSE, NULL, &img_ext, 0);
-				else
-					image_path = FileDialog(FALSE, NULL, &iso_ext, 0);
+				image_path = FileDialog(FALSE, NULL, (selection_default == DT_IMG)?&img_ext:&iso_ext, 0);
 				if (image_path == NULL) {
 					CreateTooltip(hSelectISO, lmprintf(MSG_173), -1);
 					PrintStatus(0, MSG_086);
