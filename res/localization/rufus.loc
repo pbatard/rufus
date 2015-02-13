@@ -7453,7 +7453,7 @@ t MSG_046 "%s (Disks %d) [%s]"
 # Used when a drive is detected that contains more than one partition
 t MSG_047 "Multi partīcijas"
 t MSG_048 "Ātrapmaiņas buferis"
-t MSG_049 "Atcelšana"
+t MSG_049 "Darbības atcelšana"
 
 # Error messages
 t MSG_050 "Veiksmīgi."
@@ -7533,7 +7533,7 @@ t MSG_098 "SVARĪGI: Jūs mēģinat instalēt 'Windows To Go', bet izvēlētajam
 	"izmantojot rīkus no iekārtas ražotāja. Šādi rīki parasti brīvā piekļuvē NETIEK IZLIKTI..."
 t MSG_099 "Failu sistēmas ierobežojums"
 t MSG_100 "Šis ISO imidžs satur failu lielāku kā 4GB, kas ir vairāk nekā "
-	"maksimāli pieļaujamais apjoms izmantojotFAT vai FAT32 failu sistēmu."
+	"maksimāli pieļaujamais apjoms izmantojot FAT vai FAT32 failu sistēmu."
 t MSG_101 "Kļūdains WIM atbalsts"
 t MSG_102 "Jūsu OS nevar atpakot failus no WIM arhīviem. Savukārt tas "
 	"nepieciešams EFI ielādes diska izveidei OS Windows 7 vai Windows Vista USB diskiem. To var izlabot "
@@ -7632,7 +7632,7 @@ t MSG_188 "Izvēlētais imidžs neatbalsta izvēlēto ielādes variantu. Lūdzu 
 t MSG_189 "Šis ISO imidžs neatbalstās ar izvēlēto failu sistēmu"
 t MSG_190 "Noteikts neatbalstāms nesējs"
 # See MSG_235 for where the 2 messages below are being used:
-t MSG_191 "Ierakstīts"
+t MSG_191 "Mēģinājums"
 t MSG_192 "Nolasīts"
 t MSG_193 "Ielādēts %s"
 t MSG_194 "Nevar ielādēt %s"
@@ -7665,7 +7665,7 @@ t MSG_207 "Jauns Disks"
 t MSG_208 "Atrasta %d ierīce"
 t MSG_209 "Atrastas %d ierīces"
 t MSG_210 "Gatavs darbam"
-t MSG_211 "Atcelts"
+t MSG_211 "Darbība atcelta"
 t MSG_212 "Kļūda"
 # Used when a new update has been downloaded and launched
 t MSG_213 "Tiek startēta jaunā versija..."
