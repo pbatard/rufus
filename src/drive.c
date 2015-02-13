@@ -1027,7 +1027,7 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 	BOOL r;
 	DWORD i, size, bufsize, pn = 0;
 	LONGLONG main_part_size_in_sectors, extra_part_size_in_tracks = 0, ms_efi_size;
-	const LONGLONG bytes_per_track = SelectedDrive.Geometry.SectorsPerTrack * SelectedDrive.Geometry.BytesPerSector;
+	const LONGLONG bytes_per_track = ((LONGLONG)SelectedDrive.Geometry.SectorsPerTrack) * SelectedDrive.Geometry.BytesPerSector;
 
 	PrintInfoDebug(0, MSG_238, PartitionTypeName[partition_style]);
 
@@ -1052,6 +1052,7 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 		DriveLayoutEx.PartitionEntry[pn].PartitionLength.QuadPart = 128*1024*1024;
 		DriveLayoutEx.PartitionEntry[pn].Gpt.PartitionType = PARTITION_MSFT_RESERVED_GUID;
 		IGNORE_RETVAL(CoCreateGuid(&DriveLayoutEx.PartitionEntry[pn].Gpt.PartitionId));
+		// coverity[strcpy_overrun]
 		wcscpy(DriveLayoutEx.PartitionEntry[pn].Gpt.Name, L"Microsoft reserved partition");
 
 		// We must zero the beginning of this partition, else we get FAT leftovers and stuff

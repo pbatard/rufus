@@ -116,10 +116,10 @@ void FAST_FUNC data_extract_all(archive_handle_t *archive_handle)
 			/* rpm-style temp file name */
 			dst_name = xasprintf("%s;%x", dst_name, (int)getpid());
 #endif
-		dst_fd = xopen3(dst_name,
-			flags,
-			file_header->mode
-			);
+		dst_fd = open(dst_name, flags, file_header->mode);
+		if (dst_fd < 0) {
+			bb_perror_msg_and_die("can't open file %s", dst_name);
+		}
 		bb_copyfd_exact_size(archive_handle->src_fd, dst_fd, file_header->size);
 		close(dst_fd);
 #ifdef ARCHIVE_REPLACE_VIA_RENAME

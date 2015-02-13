@@ -569,11 +569,13 @@ DWORD RunCommand(const char* cmd, const char* dir, BOOL log)
 
 	if (log) {
 		while (1) {
+			// coverity[string_null]
 			if (PeekNamedPipe(hOutputRead, output, sizeof(output)-1, &dwRead, &dwAvail, &dwMsg)) {
 				// Don't care about possible multiple reads being needed
 				if ((dwAvail != 0) && (ReadFile(hOutputRead, output, dwAvail, &dwRead, NULL)) && (dwRead != 0)) {
 					// This seems to be needed. Won't overflow since we set our max sizes to sizeof(output)-1
 					output[dwAvail] = 0;
+					// coverity[tainted_string]
 					uprintf(output);
 				}
 			}
@@ -745,7 +747,6 @@ DWORD WINAPI SetLGPThread(LPVOID param)
 
 error:
 	if (path_key != NULL) RegCloseKey(path_key);
-	if (policy_key != NULL) RegCloseKey(policy_key);
 	if (pLGPO != NULL) pLGPO->lpVtbl->Release(pLGPO);
 	return FALSE;
 }

@@ -173,6 +173,15 @@ static inline pid_t wait(int* status) { *status = 4; return -1; }
 extern uint64_t bb_total_rb;
 static inline int full_read(int fd, void *buf, size_t count) {
 	int rb;
+
+	if (fd < 0) {
+		errno = EBADF;
+		return -1;
+	}
+	if (buf == NULL) {
+		errno = EFAULT;
+		return -1;
+	}
 	if ((bled_cancel_request != NULL) && (*bled_cancel_request != 0)) {
 		errno = EINTR;
 		return -1;
@@ -198,7 +207,6 @@ static inline struct tm *localtime_r(const time_t *timep, struct tm *result) {
 #define xmalloc malloc
 #define xzalloc(x) calloc(x, 1)
 #define malloc_or_warn malloc
-#define xopen3 open
 #define mkdir(x, y) _mkdirU(x)
 
 #if defined(_MSC_VER)
