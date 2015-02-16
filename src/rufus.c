@@ -136,8 +136,6 @@ int dialog_showing = 0;
 uint16_t rufus_version[3], embedded_sl_version[2];
 char embedded_sl_version_str[2][12] = { "?.??", "?.??" };
 char embedded_sl_version_ext[2][32];
-char embedded_grub_version[] = GRUB4DOS_VERSION;
-char embedded_grub2_version[] = GRUB2_PACKAGE_VERSION;
 RUFUS_UPDATE update = { {0,0,0}, {0,0}, NULL, NULL};
 StrArray DriveID, DriveLabel;
 extern char* szStatusMessage;
@@ -1272,7 +1270,7 @@ static BOOL BootCheck(void)
 		}
 
 		if ((iso_report.has_grub2) && (iso_report.grub2_version[0] != 0) &&
-			(strcmp(iso_report.grub2_version, embedded_grub2_version) != 0)) {
+			(strcmp(iso_report.grub2_version, GRUB2_PACKAGE_VERSION) != 0)) {
 			// We may have to download a different Grub2 version if we can find one
 			IGNORE_RETVAL(_chdirU(app_dir));
 			IGNORE_RETVAL(_mkdir(FILES_DIR));
@@ -1296,7 +1294,7 @@ static BOOL BootCheck(void)
 				}
 				fclose(fd);
 			} else {
-				r = MessageBoxU(hMainDialog, lmprintf(MSG_116, iso_report.grub2_version, embedded_grub2_version),
+				r = MessageBoxU(hMainDialog, lmprintf(MSG_116, iso_report.grub2_version, GRUB2_PACKAGE_VERSION),
 					lmprintf(MSG_115), MB_YESNOCANCEL|MB_ICONWARNING|MB_IS_RTL);
 				if (r == IDCANCEL)
 					return FALSE;
@@ -1447,7 +1445,8 @@ static BOOL BootCheck(void)
 				IGNORE_RETVAL(_mkdir(tmp));
 				static_sprintf(tmp, "%s/%s-%s/%s.%s", FILES_URL, syslinux, embedded_sl_version_str[1], ldlinux, ldlinux_ext[2]);
 				PrintInfo(0, MSG_085, tmp);
-				DownloadFile(tmp, &tmp[sizeof(FILES_URL)], hMainDialog);
+				if (DownloadFile(tmp, &tmp[sizeof(FILES_URL)], hMainDialog))
+					return FALSE;
 			}
 		}
 	} else if (dt == DT_WINME) {
@@ -1460,7 +1459,7 @@ static BOOL BootCheck(void)
 		IGNORE_RETVAL(_chdirU(app_dir));
 		IGNORE_RETVAL(_mkdir(FILES_DIR));
 		IGNORE_RETVAL(_chdir(FILES_DIR));
-		static_sprintf(tmp, "grub4dos/grldr");
+		static_sprintf(tmp, "grub4dos-%s/grldr", GRUB4DOS_VERSION);
 		fd = fopenU(tmp, "rb");
 		if (fd != NULL) {
 			uprintf("Will reuse './%s/%s' for Grub4DOS installation\n", FILES_DIR, tmp);
@@ -1473,10 +1472,13 @@ static BOOL BootCheck(void)
 			if (r == IDCANCEL)
 				return FALSE;
 			if (r == IDYES) {
-				IGNORE_RETVAL(_mkdir("grub4dos"));
-				static_sprintf(tmp, "%s/grub4dos/grldr", FILES_URL);
+				static_sprintf(tmp, "grub4dos-%s", GRUB4DOS_VERSION);
+				IGNORE_RETVAL(_mkdir(tmp));
+				static_sprintf(tmp, "%s/grub4dos-%s/grldr", FILES_URL, GRUB4DOS_VERSION);
 				PrintInfo(0, MSG_085, tmp);
-				DownloadFile(tmp, &tmp[sizeof(FILES_URL)], hMainDialog);
+				uprintf("URL = %s", tmp);
+				if (DownloadFile(tmp, &tmp[sizeof(FILES_URL)], hMainDialog) == 0)
+					return FALSE;
 			}
 		}
 	}
@@ -1613,7 +1615,7 @@ void InitDialog(HWND hDlg)
 	uprintf("Windows version: %s", WindowsVersionStr);
 	uprintf("Syslinux versions: %s%s, %s%s", embedded_sl_version_str[0], embedded_sl_version_ext[0],
 		embedded_sl_version_str[1], embedded_sl_version_ext[1]);
-	uprintf("Grub versions: %s, %s", embedded_grub_version, embedded_grub2_version);
+	uprintf("Grub versions: %s, %s", GRUB4DOS_VERSION, GRUB2_PACKAGE_VERSION);
 	uprintf("Locale ID: 0x%04X", GetUserDefaultUILanguage());
 
 	SetClusterSizeLabels();
@@ -1798,8 +1800,10 @@ void SetBoot(int fs, int bt)
 		static_sprintf(tmp, "Syslinux %s", embedded_sl_version_str[1]);
 		IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, tmp), DT_SYSLINUX_V6));
 		IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, "ReactOS"), DT_REACTOS));
-		IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, "Grub 2.00-22"), DT_GRUB2));
-		IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, "Grub4DOS 0.4.5"), DT_GRUB4DOS));
+		IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType,
+			"Grub " GRUB2_PACKAGE_VERSION), DT_GRUB2));
+		IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType,
+			"Grub4DOS " GRUB4DOS_VERSION), DT_GRUB4DOS));
 	}
 	if ((!advanced_mode) && (selection_default >= DT_SYSLINUX_V4)) {
 		selection_default = DT_FREEDOS;
@@ -2789,7 +2793,7 @@ relaunch:
 		// Alt-W => Enable VMWare disk detection
 		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'W')) {
 			enable_vmdk = !enable_vmdk;
-			PrintStatus2000(lmprintf(MSG_265), !enable_vmdk);
+			PrintStatus2000(lmprintf(MSG_265), enable_vmdk);
 			GetUSBDevices(0);
 			continue;
 		}

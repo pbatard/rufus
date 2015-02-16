@@ -46,6 +46,7 @@
 #include "badblocks.h"
 #include "localization.h"
 #include "bled/bled.h"
+#include "../res/grub/grub_version.h"
 
 /*
  * Globals
@@ -1827,7 +1828,7 @@ DWORD WINAPI FormatThread(void* param)
 			grub4dos_dst[0] = drive_name[0];
 			uprintf("Installing: %s (Grub4DOS loader)\n", grub4dos_dst);
 			IGNORE_RETVAL(_chdirU(app_dir));
-			if (!CopyFileU(FILES_DIR "\\grub4dos\\grldr", grub4dos_dst, FALSE))
+			if (!CopyFileU(FILES_DIR "\\grub4dos-" GRUB4DOS_VERSION "\\grldr", grub4dos_dst, FALSE))
 				uprintf("Failed to copy file: %s", WindowsErrorString());
 		} else if ((dt == DT_ISO) && (image_path != NULL)) {
 			UpdateProgress(OP_DOS, 0.0f);
