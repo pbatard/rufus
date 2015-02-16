@@ -1102,6 +1102,9 @@ static void ToggleAdvanced(void)
 
 	// Toggle the up/down icon
 	SendMessage(GetDlgItem(hMainDialog, IDC_ADVANCED), BCM_SETIMAGELIST, 0, (LPARAM)(advanced_mode?&bi_up:&bi_down));
+
+	// Never hurts to force Windows' hand
+	InvalidateRect(hMainDialog, NULL, TRUE);
 }
 
 // Toggle DD Image mode
@@ -1185,6 +1188,9 @@ static void ToggleToGo(void)
 	// Reset the radio button choice
 	Button_SetCheck(GetDlgItem(hMainDialog, IDC_WINDOWS_INSTALL), BST_CHECKED);
 	Button_SetCheck(GetDlgItem(hMainDialog, IDC_WINDOWS_TO_GO), BST_UNCHECKED);
+
+	// If you don't force a redraw here, all kind of bad UI artifacts happen...
+	InvalidateRect(hMainDialog, NULL, TRUE);
 }
 
 static BOOL BootCheck(void)
