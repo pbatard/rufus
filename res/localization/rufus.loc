@@ -3686,7 +3686,7 @@ t MSG_263 "Gebruik de juiste grootte-eenheden"
 
 ################################################################################
 l "fi-FI" "Finnish (Suomi)" 0x040B
-v 1.0.16
+v 1.0.17
 b "en-US"
 
 # Main dialog
@@ -3703,6 +3703,7 @@ m IDC_NBPASSES +12,0
 s IDC_NBPASSES -9,0
 t IDC_QUICKFORMAT "Pika-alustus"
 t IDC_BOOT "Luo käynnistyslevy käyttäen"
+t IDC_WINDOWS_INSTALL "Tavanomainen Windowsin asennus"
 m IDC_BOOTTYPE +12,0
 s IDC_BOOTTYPE -6,0
 m IDC_SELECT_ISO +3,0
@@ -3761,7 +3762,7 @@ t IDCANCEL "Sulje"
 
 # Dialog that appears when a new version is available
 g IDD_NEW_VERSION
-t IDD_NEW_VERSION "Tarkista päivitysten varalta - Rufus"
+t IDD_NEW_VERSION "Tarkista päivitysten saatavuus - Rufus"
 t IDS_NEW_VERSION_AVAIL_TXT "Saatavilla on uudempi versio. Ole hyvä ja lataa ohjelman uusin versio!"
 t IDC_WEBSITE "Klikkaa tästä päästäksesi verkkosivulle"
 t IDS_NEW_VERSION_NOTES_GRP "Julkaisutiedotteet"
@@ -3898,6 +3899,16 @@ t MSG_093 "TÄRKEÄÄ: TÄMÄ LEVYASEMA SISÄLTÄÄ USEITA OSIOITA!!\n\n"
 	"Jos haluat jatkaa, olet vastuussa mahdollisesta tietojen häviämisestä näillä osioilla."
 t MSG_094 "Useita osioita havaittu"
 t MSG_095 "DD-kuva"
+t MSG_096 "Valittua tiedostojärjestelmää ei voida käyttää tämäntyyppisen ISO-levykuvan kanssa. "
+	"Valitse toinen tiedostojärjestelmä tai käytä toista ISO-levykuvaa."
+t MSG_097 "'Windows To Go' on käytettävissä vain NTFS-tiedostojärjestelmän kanssa."
+t MSG_098 "TÄRKEÄÄ: Olet asentamassa 'Windows To Go' -järjestelmää, mutta kohdeasemaa ei ole "
+	"määritelty kiinteäksi. Tästä johtuen Windows todennäköisesti pysähtyy käynnistyksessä, "
+	"sillä Microsoft ei ole suunnitellut sitä toimivaksi asemilla, jotka ovat merkitty "
+	"irroitettaviksi.\n\nHaluatko kuitenkin jatkaa?\n\n"
+	"Huomio: 'Kiinteä/irroitettava' -määritys on laitteiston ominaisuus, joka voidaan vaihtaa "
+	"vain aseman valmistajan erityisohjelmistolla. Näitä työkaluja ei kuitenkaan lähes milloinkaan "
+	"levitetä julkiseen käyttöön..."
 t MSG_099 "Tiedostojärjestelmärajoitus"
 t MSG_100 "Tämä ISO-levykuva sisältää yli 4GB-kokoisen tiedoston, joka ylittää "
 	"FAT ja FAT32 -tiedostojärjestelmien maksimikoon."
@@ -3934,9 +3945,18 @@ t MSG_114 "Tämä kuva käyttää Syslinuxia %s%s, mutta tämä sovellus sisält
 	"('ldlinux.sys' ja 'ldlinux.bss'):\n"
 	"- Valitse 'Kyllä' yhdistääksesi internetiin ja ladataksesi nämä tiedostot\n"
 	"- Valitse 'Ei' peruaksesi toiminnon\n\n"
-	"Huomio: Tiedostot ladataan nykyiseen sovelluskansioon ja niitä käytetään"
+	"Huomio: Tiedosto ladataan nykyiseen sovelluskansioon ja niitä käytetään"
 	"automaattisesti uudelleen niiden löytyessä.\n"
 t MSG_115 "Lataus vaaditaan"
+t MSG_116 "Tämä kuva käyttää Grubia %s, mutta tämä sovellus sisältää asennustiedostot vain "
+	"Grubille %s.\n\nKoska Grubin eri versiot eivät välttämättä ole yhteensopivia eikä jokaista "
+	"versiota voida sisällyttää, Rufus yrittää etsiä versiota Grub-asennustiedostosta "
+	"('core.img'), joka täsmäisi levykuvaasi:\n"
+	"- Valitse 'Kyllä' yhdistääksesi internetiin ja yrittääksesi ladata tämän\n"
+	"- Valitse 'Ei' käyttääksesi Rufuksen sisältämää vakioversiota\n"
+	"- Valitse 'Peruuta' peruaksesi toiminnon\n\n"
+	"Huomio: Tiedosto ladataan nykyiseen sovelluskansioon ja sitä käytetään "
+	"automaattisesti sen löytyessä. Jos vastaavaa ei löydy verkosta, käytetään vakioversiota."
 # Tooltips
 # Partition Scheme and Target Type
 t MSG_150 "Yleensä turvallisin vaihtoehto. Jos sinulla kuitenkin on UEFI-tietokone ja haluat asentaa "
@@ -3989,6 +4009,21 @@ t MSG_186 "Rufus ei asenna tai aja taustapalveluja, siksi päivitystarkistukset 
 t MSG_187 "Levykuva ei ole sopiva valitulle käynnistysvalinnalle"
 t MSG_188 "Nykyinen levykuva ei vastaa valittua käynnistysvalintaa. Käytä toista levykuvaa tai valitse eri käynnistysvalinta."
 t MSG_189 "Tämä ISO-levykuva ei ole yhteensopiva valitun tiedostojärjestelmän kanssa"
+t MSG_190 "Epäsopiva asema havaittu"
+t MSG_191 "Kirjoitustesti"
+t MSG_192 "Lukutesti"
+t MSG_193 "Ladattu %s"
+t MSG_194 "Ei voitu ladata %s"
+t MSG_195 "Käytetään sisällytettyä versiota %s -tiedostoista"
+t MSG_196 "TÄRKEÄÄ: TÄMÄ ASEMA KÄYTTÄÄ EPÄSTANDARDIA SEKTORIKOKOA!\n\n"
+	"Perinteiset asemat käyttävät 512-tavuista sektorikokoa, mutta tämä asema käyttää %d-tavuista. "
+	"Monesti tämä tarkoittaa sitä, että tältä asemalta boottaminen EI ONNISTU.\n"
+	"Rufus voi yrittää luoda boottaavan aseman, mutta sen toiminnasta EI OLE TAKUITA."
+t MSG_197 "Epästandardi sektorikoko havaittu"
+t MSG_198 "'Windows To Go' voidaan asentaa GPT-osioidulle asemalla vain, jos asema "
+	"on merkitty kiinteäksi. Valittua asemaa ei havaittu asetetuksi kiinteäksi."
+t MSG_199 "Valitse tämä, jos aiot asentaa Windowsin eri asemalle käyttäen valittua laitetta asennusmediana."
+t MSG_200 "Valitse tämä, jos haluat käyttää Windowsia siirreltävänä suoraan valitusta laitteesta."
 
 # Status messages - these messages will appear on the status bar
 t MSG_201 "Peruutetaan - Odota..."
@@ -3997,7 +4032,7 @@ t MSG_203 "ISO-levykuvan skannaus epäonnistui"
 # Parameter: the name of an obsolete Syslinux .c32 module. eg: "Obsolete vesamenu.c32 detected"
 t MSG_204 "Vanhentunut %s havaittu"
 # Display the name of the ISO selected. eg: "Using ISO: en_win7_x64_sp1.iso"
-t MSG_205 "Käytössä oleva ISO: %s"
+t MSG_205 "Käytössä oleva levykuva: %s"
 # Typically "Missing ldlinux.c32 file"
 t MSG_206 "Tiedosto %s puuttuu"
 # The name proposed by Windows' Computer Management -> Disk Management when you try to format a drive
@@ -4006,7 +4041,7 @@ t MSG_207 "Uusi asema"
 # Same message, once for singular and plural ("1 device found", "2 devices found")
 t MSG_208 "%d laite havaittu"
 t MSG_209 "%d laitetta havaittu"
-t MSG_210 "VALMIS"
+t MSG_210 "VALMIINA"
 t MSG_211 "Peruutettu"
 t MSG_212 "EPÄONNISTUI"
 # Used when a new update has been downloaded and launched
@@ -4040,7 +4075,7 @@ t MSG_233 "Viimeistellään, odota..."
 # Takes a Syslinux version as parameter, eg. "Installing Syslinux v5.10..."
 t MSG_234 "Asennetaan Syslinux %s..."
 # Bad blocks status. eg: "Bad Blocks: PASS 1/2 - 12.34% (0/0/1 errors)"
-t MSG_235 "Lohkot: Testi %d/%d - %0.2f%% (%d/%d/%d virhettä)"
+t MSG_235 "Lohkot: %s %d/%d - %0.2f%% (%d/%d/%d virhettä)"
 t MSG_236 "Lohkot: Testataan satunnaisella kuviolla"
 t MSG_237 "Lohkot: Testataan kuviolla 0x%02X"
 # eg. "Partitioning (MBR)..."
@@ -4070,7 +4105,12 @@ t MSG_259 "Päivityksen pakotus"
 t MSG_260 "NTFS-pakkaaminen"
 t MSG_261 "Kirjoitetaan levykuvaa: %0.1f%% valmiina"
 t MSG_262 "ISO-tuki"
-t MSG_263 "Käytä OIKEITA tilayksikön kerrannaisia"
+t MSG_263 "OIKEIDEN tilayksiköiden kerrannaisten käyttö"
+t MSG_264 "Poistetaan kansiota '%s'"
+t MSG_265 "VMWare-levyn havaitseminen"
+t MSG_266 "Kaksois-UEFI/BIOS -tila"
+t MSG_267 "Asetetaan Windows-levykuvaa: %0.1f%% suoritettu"
+t MSG_268 "Asetetaan Windows-levykuvaa..."
 
 ################################################################################
 l "fr-FR" "French (Français)" 0x040c, 0x080c, 0x0c0c, 0x100c, 0x140c, 0x180c, 0x1c0c, 0x200c, 0x240c, 0x280c, 0x2c0c, 0x300c, 0x340c, 0x380c, 0xe40c
