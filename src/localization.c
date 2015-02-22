@@ -72,6 +72,7 @@ static htab_table htab_loc = HTAB_EMPTY;
 int    loc_line_nr;
 struct list_head locale_list = {NULL, NULL};
 char   *loc_filename = NULL, *embedded_loc_filename = "embedded.loc";
+static BOOL localization_initialized = FALSE;
 
 /* Message table */
 char* default_msg_table[MSG_MAX-MSG_000] = {"%s", 0};
@@ -188,9 +189,12 @@ void _init_localization(BOOL reinit) {
 	if (!reinit)
 		list_init(&locale_list);
 	htab_create(LOC_HTAB_SIZE, &htab_loc);
+	localization_initialized = TRUE;
 }
 
 void _exit_localization(BOOL reinit) {
+	if (!localization_initialized)
+		return;
 	if (!reinit) {
 		free_locale_list();
 		if (loc_filename != embedded_loc_filename)

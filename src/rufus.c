@@ -90,6 +90,7 @@ PF_DECL(ImageList_ReplaceIcon);
 PF_TYPE_DECL(WINAPI, BOOL, SHChangeNotifyDeregister, (ULONG));
 PF_TYPE_DECL(WINAPI, ULONG, SHChangeNotifyRegister, (HWND, int, LONG, UINT, int, const MY_SHChangeNotifyEntry*));
 
+const char* cmdline_hogger = "rufus.com";
 const char* FileSystemLabel[FS_MAX] = { "FAT", "FAT32", "NTFS", "UDF", "exFAT", "ReFS" };
 // Number of steps for each FS for FCC_STRUCTURE_PROGRESS
 const int nb_steps[FS_MAX] = { 5, 5, 12, 1, 10 };
@@ -2407,14 +2408,63 @@ static void PrintUsage(char* appname)
 	char fname[_MAX_FNAME];
 
 	_splitpath(appname, NULL, NULL, fname, NULL);
-	printf("\nUsage: %s [-h] [-i PATH] [-w TIMEOUT]\n", fname);
+	printf("\nUsage: %s [-f] [-g] [-h] [-i PATH] [-l LOCALE] [-w TIMEOUT]\n", fname);
+	printf("  -f, --fixed\n");
+	printf("     Enable the listing of fixed/HDD USB drives\n");
+	printf("  -g, --gui\n");
+	printf("     Start in GUI mode (disable the 'rufus.com' commandline hogger)\n");
 	printf("  -i PATH, --iso=PATH\n");
 	printf("     Select the ISO image pointed by PATH to be used on startup\n");
+	printf("  -l LOCALE, --locale=LOCALE\n");
+	printf("     Select the locale to be used on startup\n");
 	printf("  -w TIMEOUT, --wait=TIMEOUT\n");
-	printf("     Wait TIMEOUT tens of a second for the global application mutex to be released.\n");
+	printf("     Wait TIMEOUT tens of seconds for the global application mutex to be released.\n");
 	printf("     Used when launching a newer version of " APPLICATION_NAME " from a running application.\n");
 	printf("  -h, --help\n");
 	printf("     This usage guide.\n");
+}
+
+static HANDLE SetHogger(BOOL attached_console, BOOL disable_hogger)
+{
+	INPUT* input;
+	BYTE* hog_data;
+	DWORD hog_size, Size;
+	HANDLE hogmutex = NULL, hFile = NULL;
+	int i;
+
+	if (!attached_console)
+		return NULL;
+
+	hog_data = GetResource(hMainInstance, MAKEINTRESOURCEA(IDR_XT_HOGGER),
+		_RT_RCDATA, cmdline_hogger, &hog_size, FALSE);
+	if ((hog_data != NULL) && (!disable_hogger)) {
+		// Create our synchronisation mutex
+		hogmutex = CreateMutexA(NULL, TRUE, "Global/Rufus_CmdLine");
+
+		// Extract the hogger resource
+		hFile = CreateFileA(cmdline_hogger, GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ|FILE_SHARE_WRITE,
+			NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+		if (hFile != INVALID_HANDLE_VALUE) {
+			// coverity[check_return]
+			WriteFile(hFile, hog_data, hog_size, &Size, NULL);
+		}
+		safe_closehandle(hFile);
+
+		// Now launch the file from the commandline, by simulating keypresses
+		input = (INPUT*)calloc(strlen(cmdline_hogger)+1, sizeof(INPUT));
+		for (i=0; i<(int)strlen(cmdline_hogger); i++) {
+			input[i].type = INPUT_KEYBOARD;
+			input[i].ki.dwFlags = KEYEVENTF_UNICODE;
+			input[i].ki.wScan = (wchar_t)cmdline_hogger[i];
+		}
+		input[i].type = INPUT_KEYBOARD;
+		input[i].ki.wVk = VK_RETURN;
+		SendInput(i+1, input, sizeof(INPUT));
+		safe_free(input);
+	}
+	if (hogmutex != NULL)
+		Sleep(200);	// Need to add a delay, otherwise we may get some printout before the hogger
+	return hogmutex;
 }
 
 /*
@@ -2426,14 +2476,12 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 #endif
 {
-	const char* old_wait_option = "/W";
 	const char* rufus_loc = "rufus.loc";
-	const char* cmdline_hogger = "rufus.com";
 	int i, opt, option_index = 0, argc = 0, si = 0, lcid = GetUserDefaultUILanguage();
 	FILE* fd;
-	BOOL attached_console = FALSE, external_loc_file = FALSE, lgp_set = FALSE, automount;
-	BYTE *loc_data, *hog_data;
-	DWORD loc_size, hog_size, Size;
+	BOOL attached_console = FALSE, external_loc_file = FALSE, lgp_set = FALSE, automount, disable_hogger = FALSE;
+	BYTE *loc_data;
+	DWORD loc_size, Size;
 	char tmp_path[MAX_PATH] = "", loc_file[MAX_PATH] = "", ini_path[MAX_PATH], ini_flags[] = "rb";
 	char *tmp, *locale_name = NULL, **argv = NULL;
 	wchar_t **wenv, **wargv;
@@ -2443,8 +2491,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	MSG msg;
 	int wait_for_mutex = 0;
 	struct option long_options[] = {
+		{"fixed",   no_argument,       NULL, 'f'},
+		{"gui",     no_argument,       NULL, 'g'},
 		{"help",    no_argument,       NULL, 'h'},
 		{"iso",     required_argument, NULL, 'i'},
+		{"locale",  required_argument, NULL, 'l'},
 		{"wait",    required_argument, NULL, 'w'},
 		{0, 0, NULL, 0}
 	};
@@ -2453,41 +2504,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	// Reattach the console, if we were started from commandline
 	if (AttachConsole(ATTACH_PARENT_PROCESS) != 0) {
-		INPUT* input;
 		attached_console = TRUE;
-
 		IGNORE_RETVAL(freopen("CONIN$", "r", stdin));
 		IGNORE_RETVAL(freopen("CONOUT$", "w", stdout));
 		IGNORE_RETVAL(freopen("CONOUT$", "w", stderr));
 		_flushall();
-
-		hog_data = GetResource(hMainInstance, MAKEINTRESOURCEA(IDR_XT_HOGGER),
-			_RT_RCDATA, cmdline_hogger, &hog_size, FALSE);
-		if (hog_data != NULL) {
-			// Create our synchronisation mutex
-			hogmutex = CreateMutexA(NULL, TRUE, "Global/Rufus_CmdLine");
-
-			// Extract the hogger resource
-			hFile = CreateFileA(cmdline_hogger, GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ|FILE_SHARE_WRITE,
-				NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-			if (hFile != INVALID_HANDLE_VALUE) {
-				// coverity[check_return]
-				WriteFile(hFile, hog_data, hog_size, &Size, NULL);
-			}
-			safe_closehandle(hFile);
-
-			// Now launch the file from the commandline, by simulating keypresses
-			input = (INPUT*)calloc(strlen(cmdline_hogger)+1, sizeof(INPUT));
-			for (i=0; i<(int)strlen(cmdline_hogger); i++) {
-				input[i].type = INPUT_KEYBOARD;
-				input[i].ki.dwFlags = KEYEVENTF_UNICODE;
-				input[i].ki.wScan = (wchar_t)cmdline_hogger[i];
-			}
-			input[i].type = INPUT_KEYBOARD;
-			input[i].ki.wVk = VK_RETURN;
-			SendInput(i+1, input, sizeof(INPUT));
-			safe_free(input);
-		}
 	}
 
 	// We have to process the arguments before we acquire the lock and process the locale
@@ -2495,24 +2516,38 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	if (pf__wgetmainargs != NULL) {
 		pf__wgetmainargs(&argc, &wargv, &wenv, 1, &si);
 		argv = (char**)calloc(argc, sizeof(char*));
+
+		// Non getopt parameter check
 		for (i=0; i<argc; i++) {
 			argv[i] = wchar_to_utf8(wargv[i]);
-			// Check for "/W" (wait for mutex release for pre 1.3.3 versions)
-			if (safe_strcmp(argv[i], old_wait_option) == 0)
+			// Check for " /W" (wait for mutex release for pre 1.3.3 versions)
+			if (strcmp(argv[i], "/W") == 0)
 				wait_for_mutex = 150;	// Try to acquire the mutex for 15 seconds
+			// We need to find if we need to disable the hogger BEFORE we start
+			// processing arguments with getopt, as we may want to print messages
+			// on the commandline then, which the hogger makes more intuitive.
+			if ((strcmp(argv[i], "-g") == 0) || (strcmp(argv[i], "--gui") == 0))
+				disable_hogger = TRUE;
 		}
 
 		// If our application name contains a 'p' (for "portable") create a 'rufus.ini'
+		// NB: argv[0] is populated in the previous loop
 		tmp = &argv[0][strlen(argv[0]) -1];
 		while ((((uintptr_t)tmp)>((uintptr_t)argv[0])) && (*tmp != '\\'))
 			tmp--;
 		if (strchr(tmp, 'p') != NULL)
 			ini_flags[0] = 'a';
 
-		while ((opt = getopt_long(argc, argv, "?fhi:w:l:", long_options, &option_index)) != EOF)
+		// Now enable the hogger before processing the rest of the arguments
+		hogmutex = SetHogger(attached_console, disable_hogger);
+
+		while ((opt = getopt_long(argc, argv, "?fghi:w:l:", long_options, &option_index)) != EOF)
 			switch (opt) {
 			case 'f':
 				enable_HDDs = TRUE;
+				break;
+			case 'g':
+				// No need to reprocess that option
 				break;
 			case 'i':
 				if (_access(optarg, 0) != -1) {
@@ -2821,7 +2856,7 @@ relaunch:
 
 out:
 	// Destroy the hogger mutex first, so that the cmdline app can exit and we can delete it
-	if (attached_console) {
+	if (attached_console && !disable_hogger) {
 		ReleaseMutex(hogmutex);
 		safe_closehandle(hogmutex);
 	}
