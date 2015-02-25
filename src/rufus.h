@@ -239,6 +239,7 @@ typedef struct {
 #define IS_WIN7_EFI(r)  (r.has_efi & 1)
 #define IS_REACTOS(r)   (r.reactos_path[0] != 0)
 #define IS_GRUB(r)      ((r.has_grub2) || (r.has_grub4dos))
+#define IS_FAT(fs)      ((fs == FS_FAT16) || (fs == FS_FAT32))
 
 typedef struct {
 	char label[192];		/* 3*64 to account for UTF-8 */

@@ -911,34 +911,66 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 
 	fake_fd._ptr = (char*)hPhysicalDrive;
 	fake_fd._bufsiz = SelectedDrive.Geometry.BytesPerSector;
-	if ((bt == BT_UEFI) && (!allow_dual_uefi_bios)) {
+
+	// What follows is really a case statement with complex conditions listed
+	// by order of preference
+	if (allow_dual_uefi_bios)
+		goto windows_mbr;
+
+	// Forced UEFI (by zeroing the MBR)
+	if (bt == BT_UEFI) {
 		uprintf(using_msg, "zeroed");
-		r = write_zero_mbr(&fake_fd);	// Force UEFI boot only by zeroing the MBR
-	} else if ( (dt == DT_ISO) && (iso_report.has_kolibrios) && (fs == FS_FAT32)) {
-		uprintf(using_msg, "KolibriOS");
-		r = write_kolibri_mbr(&fake_fd);
-	} else if (((dt == DT_ISO) && (iso_report.has_grub4dos)) || (dt == DT_GRUB4DOS)) {
-		uprintf(using_msg, "Grub4DOS");
-		r = write_grub_mbr(&fake_fd);
-	} else if (((dt == DT_ISO) && (iso_report.has_grub2)) || (dt == DT_GRUB2)) {
-		uprintf(using_msg, "Grub 2.0");
-		r = write_grub2_mbr(&fake_fd);
-	} else if (dt == DT_REACTOS) {
-		uprintf(using_msg, "ReactOS");
-		r = write_reactos_mbr(&fake_fd);
-	} else if ( (dt == DT_SYSLINUX_V4) || (dt == DT_SYSLINUX_V6) || ((dt == DT_ISO) && (!allow_dual_uefi_bios) && ((fs == FS_FAT16) || (fs == FS_FAT32))) ) {
+		r = write_zero_mbr(&fake_fd);
+		goto notify;
+	}
+	
+	// Syslinux
+	if ( (dt == DT_SYSLINUX_V4) || (dt == DT_SYSLINUX_V6) ||
+		 ((dt == DT_ISO) && (HAS_SYSLINUX(iso_report)) && (IS_FAT(fs))) ) {
 		uprintf(using_msg, "Syslinux");
 		r = write_syslinux_mbr(&fake_fd);
-	} else {
-		if ((IS_WINPE(iso_report.winpe) && !iso_report.uses_minint) || (IsChecked(IDC_RUFUS_MBR))) {
-			uprintf(using_msg, APPLICATION_NAME);
-			r = write_rufus_mbr(&fake_fd);
-		} else {
-			uprintf(using_msg, "Windows 7");
-			r = write_win7_mbr(&fake_fd);
-		}
+		goto notify;
 	}
 
+	// Grub 2.0
+	if ( ((dt == DT_ISO) && (iso_report.has_grub2)) || (dt == DT_GRUB2) ) {
+		uprintf(using_msg, "Grub 2.0");
+		r = write_grub2_mbr(&fake_fd);
+		goto notify;
+	}
+
+	// Grub4DOS
+	if ( ((dt == DT_ISO) && (iso_report.has_grub4dos)) || (dt == DT_GRUB4DOS) ) {
+		uprintf(using_msg, "Grub4DOS");
+		r = write_grub_mbr(&fake_fd);
+		goto notify;
+	}
+
+	// ReactOS
+	if (dt == DT_REACTOS) {
+		uprintf(using_msg, "ReactOS");
+		r = write_reactos_mbr(&fake_fd);
+		goto notify;
+	} 
+
+	// KolibriOS
+	if ( (dt == DT_ISO) && (iso_report.has_kolibrios) && (IS_FAT(fs))) {
+		uprintf(using_msg, "KolibriOS");
+		r = write_kolibri_mbr(&fake_fd);
+		goto notify;
+	}
+
+	// If everything else failed, fall back to a conventional Windows/Rufus MBR
+windows_mbr:
+	if ((IS_WINPE(iso_report.winpe) && !iso_report.uses_minint) || (IsChecked(IDC_RUFUS_MBR))) {
+		uprintf(using_msg, APPLICATION_NAME);
+		r = write_rufus_mbr(&fake_fd);
+	} else {
+		uprintf(using_msg, "Windows 7");
+		r = write_win7_mbr(&fake_fd);
+	}
+
+notify:
 	// Tell the system we've updated the disk properties
 	if (!DeviceIoControl(hPhysicalDrive, IOCTL_DISK_UPDATE_PROPERTIES, NULL, 0, NULL, 0, &size, NULL))
 		uprintf("Failed to notify system about disk properties update: %s\n", WindowsErrorString());
@@ -965,10 +997,13 @@ static BOOL WriteSBR(HANDLE hPhysicalDrive)
 	max_size = IsChecked(IDC_EXTRA_PARTITION) ?
 		(DWORD)(SelectedDrive.Geometry.BytesPerSector * SelectedDrive.Geometry.SectorsPerTrack) : 1024 * 1024;
 	max_size -= mbr_size;
-	if ((dt == DT_ISO) && (iso_report.has_grub4dos))
-		dt = DT_GRUB4DOS;
-	if ((dt == DT_ISO) && (iso_report.has_grub2))
-		dt = DT_GRUB2;
+	// Syslinux has precedence over Grub
+	if ((dt == DT_ISO) && (!HAS_SYSLINUX(iso_report))) {
+		if (iso_report.has_grub4dos)
+			dt = DT_GRUB4DOS;
+		if (iso_report.has_grub2)
+			dt = DT_GRUB2;
+	}
 
 	switch (dt) {
 	case DT_GRUB4DOS:
@@ -1776,8 +1811,12 @@ DWORD WINAPI FormatThread(void* param)
 				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_INSTALL_FAILURE;
 				goto out;
 			}
-		} else if ((((dt == DT_WINME) || (dt == DT_FREEDOS) || (dt == DT_GRUB4DOS) || (dt == DT_GRUB2) || (dt == DT_REACTOS)) &&
-			(!use_large_fat32)) || ((dt == DT_ISO) && ((fs == FS_NTFS)||(iso_report.has_kolibrios||IS_GRUB(iso_report))))) {
+		} else if ( (dt == DT_SYSLINUX_V4) || (dt == DT_SYSLINUX_V6) ||
+			((dt == DT_ISO) && (HAS_SYSLINUX(iso_report)) && (!allow_dual_uefi_bios) && (IS_FAT(fs))) ) {
+			if (!InstallSyslinux(DriveIndex, drive_name[0], fs)) {
+				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_INSTALL_FAILURE;
+			}
+		} else {
 			// We still have a lock, which we need to modify the volume boot record 
 			// => no need to reacquire the lock...
 			hLogicalVolume = GetLogicalHandle(DriveIndex, TRUE, FALSE);
@@ -1796,11 +1835,6 @@ DWORD WINAPI FormatThread(void* param)
 			}
 			// We must close and unlock the volume to write files to it
 			safe_unlockclose(hLogicalVolume);
-		} else if ( (dt == DT_SYSLINUX_V4) || (dt == DT_SYSLINUX_V6) || ((dt == DT_ISO) && (!allow_dual_uefi_bios) &&
-			((fs == FS_FAT16) || (fs == FS_FAT32))) ) {
-			if (!InstallSyslinux(DriveIndex, drive_name[0], fs)) {
-				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_INSTALL_FAILURE;
-			}
 		}
 	} else {
 		if (IsChecked(IDC_SET_ICON))

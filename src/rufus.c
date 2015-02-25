@@ -554,7 +554,7 @@ static void EnableAdvancedBootOptions(BOOL enable, BOOL remove_checkboxes)
 static void EnableBootOptions(BOOL enable, BOOL remove_checkboxes)
 {
 	int fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
-	BOOL actual_enable = ((fs != FS_FAT16) && (fs != FS_FAT32) && (fs != FS_NTFS) && (selection_default == DT_IMG))?FALSE:enable;
+	BOOL actual_enable = ((!IS_FAT(fs)) && (fs != FS_NTFS) && (selection_default == DT_IMG))?FALSE:enable;
 
 	EnableWindow(hBoot, actual_enable);
 	EnableWindow(hBootType, actual_enable);
@@ -1260,7 +1260,7 @@ static BOOL BootCheck(void)
 				return FALSE;
 			}
 		} else if ( ((fs == FS_NTFS) && (!iso_report.has_bootmgr) && (!IS_WINPE(iso_report.winpe)) && (!IS_GRUB(iso_report)))
-				 || (((fs == FS_FAT16)||(fs == FS_FAT32)) && (!HAS_SYSLINUX(iso_report)) && (!allow_dual_uefi_bios) &&
+				 || ((IS_FAT(fs)) && (!HAS_SYSLINUX(iso_report)) && (!allow_dual_uefi_bios) &&
 					 (!IS_REACTOS(iso_report)) && (!iso_report.has_kolibrios) && (!IS_GRUB(iso_report))) ) {
 			// Incompatible FS and ISO
 			MessageBoxU(hMainDialog, lmprintf(MSG_096), lmprintf(MSG_092), MB_OK|MB_ICONERROR|MB_IS_RTL);
@@ -1270,7 +1270,7 @@ static BOOL BootCheck(void)
 			MessageBoxU(hMainDialog, lmprintf(MSG_189), lmprintf(MSG_099), MB_OK|MB_ICONERROR|MB_IS_RTL);
 			return FALSE;
 		}
-		if (((fs == FS_FAT16)||(fs == FS_FAT32)) && (iso_report.has_4GB_file)) {
+		if ((IS_FAT(fs)) && (iso_report.has_4GB_file)) {
 			// This ISO image contains a file larger than 4GB file (FAT32)
 			MessageBoxU(hMainDialog, lmprintf(MSG_100), lmprintf(MSG_099), MB_OK|MB_ICONERROR|MB_IS_RTL);
 			return FALSE;
@@ -1794,14 +1794,14 @@ void SetBoot(int fs, int bt)
 	char tmp[32];
 
 	IGNORE_RETVAL(ComboBox_ResetContent(hBootType));
-	if ((bt == BT_BIOS) && ((fs == FS_FAT16) || (fs == FS_FAT32))) {
+	if ((bt == BT_BIOS) && (IS_FAT(fs))) {
 		IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, "MS-DOS"), DT_WINME));
 		IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, "FreeDOS"), DT_FREEDOS));
 	}
 	IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, lmprintf(MSG_036)), DT_ISO));
 	IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, lmprintf(MSG_095)), DT_IMG));
 	// If needed (advanced mode) also append "bare" Syslinux and other options
-	if ( (bt == BT_BIOS) && (((fs == FS_FAT16) || (fs == FS_FAT32) || (fs == FS_NTFS)) && (advanced_mode)) ) {
+	if ( (bt == BT_BIOS) && ((IS_FAT(fs) || (fs == FS_NTFS)) && (advanced_mode)) ) {
 		static_sprintf(tmp, "Syslinux %s", embedded_sl_version_str[0]);
 		IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, tmp), DT_SYSLINUX_V4));
 		static_sprintf(tmp, "Syslinux %s", embedded_sl_version_str[1]);
