@@ -74,8 +74,10 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int fs_type)
 {
 	HANDLE f_handle = INVALID_HANDLE_VALUE;
 	HANDLE d_handle = INVALID_HANDLE_VALUE;
-	DWORD bytes_read;
-	DWORD bytes_written;
+	DWORD bytes_read, bytes_written, err;
+	S_NTFSSECT_VOLINFO vol_info;
+	LARGE_INTEGER vcn, lba, len;
+	S_NTFSSECT_EXTENT extent;
 	BOOL r = FALSE;
 	FILE* fd;
 	size_t length;
@@ -184,13 +186,11 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int fs_type)
 	sectors = (libfat_sector_t*) calloc(ldlinux_sectors, sizeof *sectors);
 	if (sectors == NULL)
 		goto out;
-	if (fs_type == FS_NTFS) {
-		DWORD err;
-		S_NTFSSECT_VOLINFO vol_info;
-		LARGE_INTEGER vcn, lba, len;
-		S_NTFSSECT_EXTENT extent;
 
+	switch (fs_type) {
+	case FS_NTFS:
 		static_sprintf(tmp, "%C:\\", drive_letter);
+		vol_info.Handle = d_handle;
 		err = NtfsSectGetVolumeInfo(tmp, &vol_info);
 		if (err != ERROR_SUCCESS) {
 			uprintf("Could not fetch NTFS volume info");
@@ -215,24 +215,30 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int fs_type)
 					nsectors++;
 				}
 		}
-		goto map_done;
-	}
-	fs = libfat_open(libfat_readfile, (intptr_t) d_handle);
-	if (fs == NULL) {
-		uprintf("Syslinux FAT access error\n");
+		break;
+	case FS_FAT16:
+	case FS_FAT32:
+	case FS_EXFAT:
+		fs = libfat_open(libfat_readfile, (intptr_t) d_handle);
+		if (fs == NULL) {
+			uprintf("Syslinux FAT access error\n");
+			goto out;
+		}
+		ldlinux_cluster = libfat_searchdir(fs, 0, "LDLINUX SYS", NULL);
+		secp = sectors;
+		nsectors = 0;
+		s = libfat_clustertosector(fs, ldlinux_cluster);
+		while (s && nsectors < ldlinux_sectors) {
+			*secp++ = s;
+			nsectors++;
+			s = libfat_nextsector(fs, s);
+		}
+		libfat_close(fs);
+		break;
+	default:
+		uprintf("Unsupported Syslinux filesystem\n");
 		goto out;
 	}
-	ldlinux_cluster = libfat_searchdir(fs, 0, "LDLINUX SYS", NULL);
-	secp = sectors;
-	nsectors = 0;
-	s = libfat_clustertosector(fs, ldlinux_cluster);
-	while (s && nsectors < ldlinux_sectors) {
-		*secp++ = s;
-		nsectors++;
-		s = libfat_nextsector(fs, s);
-	}
-	libfat_close(fs);
-map_done:
 
 	/* Patch ldlinux.sys and the boot sector */
 	syslinux_patch(sectors, nsectors, 0, 0, NULL, NULL);

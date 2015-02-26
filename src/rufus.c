@@ -1452,7 +1452,7 @@ static BOOL BootCheck(void)
 				IGNORE_RETVAL(_mkdir(tmp));
 				static_sprintf(tmp, "%s/%s-%s/%s.%s", FILES_URL, syslinux, embedded_sl_version_str[1], ldlinux, ldlinux_ext[2]);
 				PrintInfo(0, MSG_085, tmp);
-				if (DownloadFile(tmp, &tmp[sizeof(FILES_URL)], hMainDialog))
+				if (DownloadFile(tmp, &tmp[sizeof(FILES_URL)], hMainDialog) == 0)
 					return FALSE;
 			}
 		}

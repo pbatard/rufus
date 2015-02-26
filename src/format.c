@@ -1812,7 +1812,8 @@ DWORD WINAPI FormatThread(void* param)
 				goto out;
 			}
 		} else if ( (dt == DT_SYSLINUX_V4) || (dt == DT_SYSLINUX_V6) ||
-			((dt == DT_ISO) && (HAS_SYSLINUX(iso_report)) && (!allow_dual_uefi_bios) && (IS_FAT(fs))) ) {
+			((dt == DT_ISO) && (HAS_SYSLINUX(iso_report) || IS_REACTOS(iso_report)) &&
+				(!allow_dual_uefi_bios) && (IS_FAT(fs))) ) {
 			if (!InstallSyslinux(DriveIndex, drive_name[0], fs)) {
 				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_INSTALL_FAILURE;
 			}
