@@ -231,26 +231,27 @@ typedef struct {
 #define OLD_C32_THRESHOLD   { 53500, 148000 }
 
 /* ISO details that the application may want */
-#define WINPE_MININT    0x2A
-#define WINPE_I386      0x15
-#define HAS_SYSLINUX(r) (r.sl_version != 0)
-#define HAS_TOGO(r)     (r.has_bootmgr && r.has_efi && r.has_install_wim)
-#define IS_WINPE(r)     (((r & WINPE_MININT) == WINPE_MININT)||(( r & WINPE_I386) == WINPE_I386))
-#define IS_WIN7_EFI(r)  (r.has_efi & 1)
-#define IS_REACTOS(r)   (r.reactos_path[0] != 0)
-#define IS_GRUB(r)      ((r.has_grub2) || (r.has_grub4dos))
-#define IS_FAT(fs)      ((fs == FS_FAT16) || (fs == FS_FAT32))
+#define WINPE_MININT        0x2A
+#define WINPE_I386          0x15
+#define HAS_SYSLINUX(r)     (r.sl_version != 0)
+#define HAS_INSTALL_WIM(r)  (r.install_wim_path[0] != 0)
+#define HAS_TOGO(r)         (r.has_bootmgr && r.has_efi && HAS_INSTALL_WIM(r))
+#define IS_WINPE(r)         (((r & WINPE_MININT) == WINPE_MININT)||(( r & WINPE_I386) == WINPE_I386))
+#define IS_WIN7_EFI(r)      (r.has_efi & 1)
+#define IS_REACTOS(r)       (r.reactos_path[0] != 0)
+#define IS_GRUB(r)          ((r.has_grub2) || (r.has_grub4dos))
+#define IS_FAT(fs)          ((fs == FS_FAT16) || (fs == FS_FAT32))
 
 typedef struct {
-	char label[192];		/* 3*64 to account for UTF-8 */
-	char usb_label[192];	/* converted USB label for workaround */
-	char cfg_path[128];		/* path to the ISO's isolinux.cfg */
-	char reactos_path[128];	/* path to the ISO's freeldr.sys or setupldr.sys */
+	char label[192];			/* 3*64 to account for UTF-8 */
+	char usb_label[192];		/* converted USB label for workaround */
+	char cfg_path[128];			/* path to the ISO's isolinux.cfg */
+	char reactos_path[128];		/* path to the ISO's freeldr.sys or setupldr.sys */
+	char install_wim_path[64];	/* path to install.wim or install.swm */
 	uint64_t projected_size;
 	uint64_t src_size;
 	uint8_t winpe;
 	uint8_t has_efi;
-	uint8_t has_install_wim;
 	BOOL has_4GB_file;
 	BOOL has_long_filename;
 	BOOL has_symlinks;

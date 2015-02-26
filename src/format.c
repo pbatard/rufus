@@ -1296,7 +1296,7 @@ BOOL SetupWinToGo(const char* drive_name, BOOL use_ms_efi)
 	uprintf("Mounted ISO as '%s'", mounted_iso);
 
 	// Now we use the WIM API to apply that image
-	static_sprintf(image, "%s\\sources\\install.wim", mounted_iso);
+	static_sprintf(image, "%s%s", mounted_iso, &iso_report.install_wim_path[2]);
 	if (!WimApplyImage(image, 1, drive_name)) {
 		uprintf("Failed to apply Windows To Go image");
 		if (!IS_ERROR(FormatStatus))
@@ -1477,7 +1477,6 @@ DWORD WINAPI FormatThread(void* param)
 	char drive_name[] = "?:\\";
 	char drive_letters[27];
 	char logfile[MAX_PATH], *userdir;
-	char wim_image[] = "?:\\sources\\install.wim";
 	char efi_dst[] = "?:\\efi\\boot\\bootx64.efi";
 	char kolibri_dst[] = "?:\\MTLD_F32";
 	char grub4dos_dst[] = "?:\\grldr";
@@ -1891,14 +1890,9 @@ DWORD WINAPI FormatThread(void* param)
 					}
 				}
 				// EFI mode selected, with no 'bootx64.efi' (bit #2) but Windows 7 x64's 'bootmgr.efi' (bit #0)
-				if ((bt == BT_UEFI) && (!(iso_report.has_efi & 4)) && (iso_report.has_efi & 1) && (iso_report.has_install_wim)) {
+				if ((bt == BT_UEFI) && (!(iso_report.has_efi & 4)) && (iso_report.has_efi & 1) && (HAS_INSTALL_WIM(iso_report))) {
 					PrintInfoDebug(0, MSG_232);
-					wim_image[0] = drive_name[0];
-					// Handle multipart .swm images
-					if (iso_report.has_install_wim == 2) {
-						wim_image[19] = 's';
-						wim_image[20] = 'w';
-					}
+					iso_report.install_wim_path[0] = drive_name[0];
 					efi_dst[0] = drive_name[0];
 					efi_dst[sizeof(efi_dst) - sizeof("\\bootx64.efi")] = 0;
 					if (!CreateDirectoryA(efi_dst, 0)) {
@@ -1906,7 +1900,7 @@ DWORD WINAPI FormatThread(void* param)
 						FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_PATCH);
 					} else {
 						efi_dst[sizeof(efi_dst) - sizeof("\\bootx64.efi")] = '\\';
-						if (!WimExtractFile(wim_image, 1, "Windows\\Boot\\EFI\\bootmgfw.efi", efi_dst)) {
+						if (!WimExtractFile(iso_report.install_wim_path, 1, "Windows\\Boot\\EFI\\bootmgfw.efi", efi_dst)) {
 							uprintf("Failed to setup Win7 EFI boot\n");
 							FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_PATCH);
 						}
