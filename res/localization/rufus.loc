@@ -1709,7 +1709,7 @@ t MSG_263 "准确存储单位转换"
 
 ################################################################################
 l "zh-TW" "Chinese Traditional (正體中文)" 0x0404, 0x0c04, 0x1404, 0x7c04
-v 1.0.16
+v 1.0.17
 b "en-US"
 
 # Main dialog
@@ -1727,6 +1727,7 @@ s IDC_NBPASSES +5,0
 t IDC_QUICKFORMAT "快速格式化"
 t IDC_BOOT "使用映像檔建立開機片"
 s IDC_BOOT -5,0
+t IDC_WINDOWS_INSTALL "標準 Windows 安裝"
 m IDC_BOOTTYPE -5,0
 s IDC_BOOTTYPE +5,0
 t IDC_SET_ICON "建立延伸標籤及圖示"
@@ -1916,6 +1917,10 @@ t MSG_093 "注意! 此裝置具有多重磁碟分割配置，可能包含 Window
 	"請確認是否繼續執行，所造成任何磁碟分割資料遺失請自行負責"
 t MSG_094 "偵測到多重磁碟分割"
 t MSG_095 "DD 映像檔"
+t MSG_096 "目前選取之檔案系統不適用此 ISO 映像檔，請選取其他檔案系統或更換其他 ISO 映像檔"
+t MSG_097 "'Windows To Go' 僅適用 NTFS 檔案系統"
+t MSG_098 "注意! 'Windows To Go' 根據微軟定義僅能安裝於指定行動硬體裝置，而目前偵測到裝置屬性為'卸除式'不符規定，"
+"因此極有可能造成開機過程中無法正常開機。請確認是否仍繼續執行\n\n"
 t MSG_099 "檔案系統限制"
 t MSG_100 "此映像檔內含大於 4GB 的單一檔案大小，超出 FAT/FAT32 檔案系統可支援的上限"
 t MSG_101 "缺少 WIM 支援"
@@ -1945,6 +1950,11 @@ t MSG_114 "此映像檔使用到 Syslinux %s%s，但本軟體僅支援 Syslinux 
 	"如欲下載這份檔案，請選擇「是」，Rufus 將會自動上網下載。若要終止作業，請選擇「否」\n\n"
 	"(僅需下載一次，以後可直接沿用不須再次下載)"
 t MSG_115 "需額外下載擴充檔案"
+t MSG_116 "此映像檔使用到 Grub %s，但本軟體僅支援 Grub %s 安裝檔案。\n\n"
+	"由於不同版本的 Grub 互不相容，因此需額外下載以下符合映像檔 Grub 版本的擴充檔案: \n"
+	"'core.img'\n"
+	"如欲下載這份檔案，請選擇「是」，Rufus 將會自動上網下載，或選擇「否」使用 Rufus 內建版本。若要終止作業，請選擇「取消」\n\n"
+	"(僅需下載一次，以後可直接沿用不須再次下載；若無法下載到相同版本的檔案，則會自動使用內建版本)"
 # Tooltips
 # Partition Scheme and Target Type
 t MSG_150 "一般而言最安全、最保險的選項。如果確定系統支援 UEFI 且欲在 EFI 模式下安裝 OS，則建議選擇下列其他選項"
@@ -1990,7 +2000,18 @@ t MSG_186 "Rufus 沒有常駐或背景程式，因此當主程式執行時才會
 t MSG_187 "選取的開機方法不支援此映像檔"
 t MSG_188 "此映像檔與選取的開機方法不匹配，請更換映像檔或開機方法"
 t MSG_189 "此映像檔與選取的檔案系統不相容"
-
+t MSG_190 "偵測到不相容的磁碟"
+t MSG_191 "寫入測試"
+t MSG_192 "讀取測試"
+t MSG_193 "已下載 %s"
+t MSG_194 "無法下載 %s"
+t MSG_195 "使用內建 %s 檔案"
+t MSG_196 "注意! 此裝置的磁區大小為 %d-byte，而非常見的標準 512-byte。\n\n"
+	"通常這表示此裝置無法作為開機碟，Rufus 可嘗試繼續執行作業，但不保證能正常開機"
+t MSG_197 "偵測到非標準磁區大小"
+t MSG_198 "'Windows To Go' 需安裝於 'FIXED' 屬性之裝置，目前裝置屬性非 'FIXED'"
+t MSG_199 "如欲將裝置設定為 Windows 安裝片，勾選此項"
+t MSG_200 "如欲直接從裝置執行 Windows，勾選此項"
 # Status messages - these messages will appear on the status bar
 t MSG_201 "取消中，請稍候..."
 t MSG_202 "掃描映像檔中..."
@@ -2007,7 +2028,7 @@ t MSG_207 "新增磁碟區"
 # Same message, once for singular and plural ("1 device found", "2 devices found")
 t MSG_208 "偵測到 %d 個可用裝置"
 t MSG_209 "偵測到 %d 個可用裝置"
-t MSG_210 "已完成"
+t MSG_210 "已就緒"
 t MSG_211 "已取消"
 t MSG_212 "作業失敗"
 # Used when a new update has been downloaded and lauched
@@ -2041,7 +2062,7 @@ t MSG_233 "收尾中，請稍候..."
 # Takes the Syslinux version as paramete. eg. "Installing Syslinux v5..."
 t MSG_234 "Syslinux %s 安裝中..."
 # Bad blocks status. eg: "Bad Blocks: PASS 1/2 - 12.34% (0/0/1 errors)"
-t MSG_235 "損毀磁區: 第 %d/%d 回 - %0.2f%% (%d/%d/%d 錯誤)"
+t MSG_235 "損毀磁區: %s %d/%d - %0.2f%% (%d/%d/%d 錯誤)"
 t MSG_236 "損毀磁區: 掃描中 (隨機模式)"
 t MSG_237 "損毀磁區: 掃描中 (0x%02X 模式)"
 # eg. "Partitioning (MBR)..."
@@ -2060,7 +2081,7 @@ t MSG_249 "Rufus 登錄檔清除失敗"
 t MSG_250 "%s 已啟用"
 t MSG_251 "%s 已停用"
 t MSG_252 "大小偵測"
-t MSG_253 "固定式磁碟偵測"
+t MSG_253 "硬碟偵測"
 t MSG_254 "強制大容量 FAT32 格式化模式"
 t MSG_255 "離開時清除 NoDriveTypeAutorun"
 t MSG_256 "假磁碟偵測"
@@ -2071,6 +2092,11 @@ t MSG_260 "NTFS 壓縮"
 t MSG_261 "映像檔寫入中，已完成: %0.1f%%"
 t MSG_262 "ISO 支援"
 t MSG_263 "正規位元單位"
+t MSG_264 "刪除目錄 '%s'"
+t MSG_265 "VMWare 磁碟偵測"
+t MSG_266 "Dual UEFI/BIOS 模式"
+t MSG_267 "建置 Windows 映像檔: 已完成 %0.1f%%"
+t MSG_268 "建置 Windows 映像檔中..."
 
 ################################################################################
 l "hr-HR" "Croatian (Hrvatski)" 0x041a, 0x081a, 0x101a
@@ -12626,7 +12652,7 @@ t MSG_207 "Ny volym"
 # Same message, once for singular and plural ("1 device found", "2 devices found")
 t MSG_208 "Hittade %d enhet"
 t MSG_209 "Hittade %d enheter"
-t MSG_210 "KLAR"
+t MSG_210 "REDO"
 t MSG_211 "Avbruten"
 t MSG_212 "MISSLYCKADES"
 # Used when a new update has been downloaded and launched
