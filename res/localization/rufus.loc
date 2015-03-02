@@ -7967,7 +7967,7 @@ t MSG_268 "Pielietots Windows imidžs..."
 
 ################################################################################
 l "lt-LT" "Lithuanian (Lietuvių)" 0x0427
-v 1.0.16
+v 1.0.17
 b "en-US"
 
 # Main dialog
@@ -7984,6 +7984,7 @@ m IDC_NBPASSES +25,0
 s IDC_NBPASSES -25,0
 t IDC_QUICKFORMAT "Greitas formatavimas"
 t IDC_BOOT "Kurti įkelties diską naudojant"
+t IDC_WINDOWS_INSTALL "Standartinė Windows įdiegtis"
 t IDC_SET_ICON "Kurti išplėstinės žymės ir piktogramos failus"
 s IDC_ABOUT -15,0
 t IDC_ABOUT "Apie..."
@@ -8182,6 +8183,16 @@ t MSG_093 "SVARBU: ŠIS DISKAS TURI KELETĄ SKAIDINIŲ!!\n\n"
 	"Jei norėsite tęsti, būsite atsakingi dėl galimo duomenų praradimo šiuose skaidiniuose."
 t MSG_094 "Aptikta keletas skaidinių"
 t MSG_095 "DD atvaizdas"
+t MSG_096 "Pasirinkta failų sistema negali būti naudojama su šiuo ISO tipu."
+	"Pasirinkite kitą failų sistemą arba naudokite kitokį ISO."
+t MSG_097 "'Windows To Go' gali būti taikomas tik jei failų sistema yra NTFS."
+t MSG_098 "SVARBU: Jūs bandote įdiegti 'Windows To Go', bet jūsų paskirties diskas neturi "
+	"atributo 'FIKSUOTAS'. Dėl to sistema 'Windows' greičiausiai pakibs įkelties metu, "
+	"kadangi Microsoft nepritaikė jos veikti su diskais, turinčiais 'KEIČIAMAS' "
+	"atributą.\n\nAr vis tiek norite tęsti?\n\n"
+	"Pastaba: Atributas 'FIKSUOTAS/KEIČIAMAS' yra techninės įrangos savybė, kurią galima pakeisti tik "
+	"naudojant specialias priemones iš disko gamintojo. Tačiau šios priemonės BEVEIK NIEKADA "
+	"viešai nepateikiamos..."
 t MSG_099 "Failų sistemos apribojimas"
 t MSG_100 "Šiame ISO atvaizde yra failas, didesnis negu 4 GB, tai daugiau negu "
 	"maksimalus leistinas dydis FAT arba FAT32 failų sistemai."
@@ -8192,7 +8203,7 @@ t MSG_102 "Jūsų platforma negali išskleisti failų iš WIM archyvų. WIM išs
 t MSG_103 "Atsiųsti %s?"
 t MSG_104 "%s ar vėlesniam reikia, kad '%s' failas būtų įdiegtas.\n"
 	"Kadangi šis failas didesnis nei 100 KB ir yra visada įtrauktas į %s ISO atvaizdus, "
-	"jis nėra įjungtas į Rufus.\n\nRufus gali jums atsiųsti trūkstamą failą:\n"
+	"jis nėra įterptas į Rufus.\n\nRufus gali jums atsiųsti trūkstamą failą:\n"
 	"- Pasirinkite 'Taip' norėdami prisijungti prie interneto ir atsisiųsti failą\n"
 	"- Pasirinkite 'Ne' norėdami rankiniu būdu nukopijuoti šį failą į diską vėliau\n\n"
 	"Pastaba: Failas bus atsiųstas į dabartinį katalogą ir kai "
@@ -8221,6 +8232,15 @@ t MSG_114 "Šis atvaizdas naudoja Syslinux %s%s, bet ši programa turi tik diegi
 	"Pastaba: Failai bus atsiųsti į dabartinį programos katalogą ir bus naudojami vėl "
 	"automatiškai, juos ten radus.\n"
 t MSG_115 "Reikalingas atsisiuntimas"
+t MSG_116 "Šis atvaizdas naudoja Grub %s bet ši programa turi tik diegimo failus, skirtus "
+	"Grub %s.\n\nKadangi skirtingos Grub versijos gali būti nesuderinamos tarpusavyje, o jų visų "
+	"įtraukti nėra galimybės, Rufus bandys surasti Grub įdiegimo failo "
+	"('core.img') versiją, atitinkančią esančią jūsų atvaizde:\n"
+	"- Pasirinkite 'Taip' norėdami prisijungti prie interneto ir atsisiųsti ją\n"
+	"- Pasirinkite 'Ne' norėdami naudoti numatytąją versiją iš Rufus\n"
+	"- Pasirinkite 'Atšaukti' norėdami nutraukti veiksmą\n\n"
+	"Pastaba: Failas bus atsiųstas į dabartinį programos aplanką ir vėliau jam ten esant bus "
+	"naudojamas automatiškai. Jei atitinkančio nebus rasta internete, bus naudojama numatytoji versija."
 
 # Tooltips
 # Partition Scheme and Target Type
@@ -8274,6 +8294,21 @@ t MSG_186 "Rufus neįdiegia ir nevykdo foninių tarnybų, todėl naujinių tikri
 t MSG_187 "Negaliojantis atvaizdas pasirinktai įkelties parinkčiai"
 t MSG_188 "Dabartinis atvaizdas neatitinka pasirinktos įkelties parinkties. Prašau naudoti kitą atvaizdą arba rinktis kitą įkelties parinktį."
 t MSG_189 "Šis ISO atvaizdas nesuderinamas su pasirinkta failų sistema"
+t MSG_190 "Aptiktas nesuderinamas diskas"
+t MSG_191 "Rašymo bandymas"
+t MSG_192 "Skaitymo bandymas"
+t MSG_193 "Atsiųsta %s"
+t MSG_194 "Nepavyko atsiųsti %s"
+t MSG_195 "Naudojama įterpta failo(ų) %s versija"
+t MSG_196 "SVARBU: ŠIS DISKAS NAUDOJA NESTANDARTINĮ SEKTORIAUS DYDĮ!\n\n"
+	"Įprastiniai diskai naudoja 512 baitų sektoriaus dydį, bet šis diskas naudoja %d baitų. "
+	"Daugeliu atveju tai reiškia, kad jūs NEGALĖSITE įkelti sistemos iš šio disko.\n"
+	"Rufus gali mėginti sukurti įkelties diską, bet NĖRA GARANTIJŲ, kad jis veiks."
+t MSG_197 "Aptiktas nestandartinis sektoriaus dydis"
+t MSG_198 "'Windows To Go' gali būti įdiegta tik į GPT skaidinių diską, jei jis turi įjungtą "
+	"atributą 'FIKSUOTAS'. Pasirinktas diskas nebuvo aptiktas kaip FIKSUOTAS."
+t MSG_199 "Rinkitės šį, jei planuojate įdiegti Windows į kitą diską, naudodami pasirinktą įrenginį kaip įdiegimo laikmeną"
+t MSG_200 "Rinkitės šį, jei norite leisti Windows tiesiai iš pasirinkto įrenginio."
 
 # Status messages - these messages will appear on the status bar
 t MSG_201 "Atšaukiama - prašome palaukti..."
@@ -8281,8 +8316,8 @@ t MSG_202 "Peržiūrimas atvaizdas..."
 t MSG_203 "Nepavyko peržiūrėti atvaizdo"
 # Parameter: the name of an obsolete Syslinux .c32 module. eg: "Obsolete vesamenu.c32 detected"
 t MSG_204 "Aptiktas pasenęs %s"
-# Display the name of the ISO selected. eg: "Using ISO: en_win7_x64_sp1.iso"
-t MSG_205 "Naudojamas ISO: %s"
+# Display the name of the image selected. eg: "Using image: en_win7_x64_sp1.iso"
+t MSG_205 "Naudojamas atvaizdas: %s"
 # Typically "Missing ldlinux.c32 file"
 t MSG_206 "Trūksta %s failo"
 # The name proposed by Windows' Computer Management -> Disk Management when you try to format a drive
@@ -8291,7 +8326,7 @@ t MSG_207 "Naujas tomas"
 # Same message, once for singular and plural ("1 device found", "2 devices found")
 t MSG_208 "%d įrenginys rastas"
 t MSG_209 "%d įrenginiai rasti"
-t MSG_210 "ATLIKTA"
+t MSG_210 "PASIRUOŠĘS"
 t MSG_211 "Atšaukta"
 t MSG_212 "NEPAVYKO"
 # Used when a new update has been downloaded and launched
@@ -8324,8 +8359,9 @@ t MSG_232 "Win7 EFI įkelties sąranka (gali užtrukti)..."
 t MSG_233 "Baigiama, prašome palaukti..."
 # Takes the Syslinux version as parameter, eg. "Installing Syslinux v5..."
 t MSG_234 "Įdiegiama Syslinux %s..."
-# Bad blocks status. eg: "Bad Blocks: PASS 1/2 - 12.34% (0/0/1 errors)"
-t MSG_235 "Blogi blokai: BANDYMAS %d/%d - %0.2f%% (%d/%d/%d klaidos)"
+# Bad blocks status. eg: "Bad Blocks: Write pass 1/2 - 12.34% (0/0/1 errors)"
+# See MSG_191/192 for "Write pass"/"Read pass" translation
+t MSG_235 "Blogi blokai: %s %d/%d - %0.2f%% (%d/%d/%d klaidos)"
 t MSG_236 "Blogi blokai: tikrinama su atsitiktiniu šablonu"
 t MSG_237 "Blogi blokai: tikrinama su šablonu 0x%02X"
 # eg. "Skaidoma (MBR)..."
@@ -8345,7 +8381,7 @@ t MSG_249 "Nepavyko ištrinti programos registro raktų"
 t MSG_250 "%s įjungtas"
 t MSG_251 "%s išjungtas"
 t MSG_252 "Dydžio tikrinimas"
-t MSG_253 "Fiksuotųjų diskų aptikimas"
+t MSG_253 "Kietųjų diskų aptikimas"
 t MSG_254 "Priversti didelį FAT32 formatavimą"
 t MSG_255 "NoDriveTypeAutorun bus ištrintas išeinant"
 t MSG_256 "Netikrų diskų aptikimas"
@@ -8356,6 +8392,11 @@ t MSG_260 "NTFS glaudinimas"
 t MSG_261 "Rašomas atvaizdas: %0.1f%% baigta"
 t MSG_262 "ISO palaikymas"
 t MSG_263 "Naudoti TIKRUOSIUS dydžio vienetus"
+t MSG_264 "Trinamas aplankas '%s'"
+t MSG_265 "VMWare disko aptikimas"
+t MSG_266 "Dvigubas UEFI/BIOS režimas"
+t MSG_267 "Taikomas Windows atvaizdas: %0.1f%% baigta"
+t MSG_268 "Taikomas Windows atvaizdas..."
 
 ################################################################################
 l "ms-MY" "Malay (Bahasa Malaysia)" 0x043e, 0x083e
@@ -9124,10 +9165,10 @@ t MSG_196 "VIKTIGT: DENNE STASJONEN BRUKER IKKE STANDARD SEKTOR STØRRELSE!!\n\n
 	"I mangen tilfeller betyr dette at du IKKE vil kunne starte fra denne stasjonen.\n"
 	"Rufus kan fortsatt prøve å lage en oppstartbar stasjon, men det er INGEN GARANTI for at det vil fungere."
 t MSG_197 "Ikke standard sektor størrelse oppdaget."
-t MSG_198 "'Windows To Go' kan kun installeres på en GPT partisjonert stasjon hvis den er"
+t MSG_198 "'Windows To Go' kan kun installeres på en GPT partisjonert stasjon hvis den er "
 	"FAST stasjons type. Den aktuelle stasjonen ble ikke oppdaget som FAST."
-t MSG_199 "Velg dette hvis du planlegger å installere Windows, til en annen stasjon,
-ved å bruke den valgte stasjonen som instaslasjons media."
+t MSG_199 "Velg dette hvis du planlegger å installere Windows, til en annen stasjon, "
+	"ved å bruke den valgte stasjonen som instaslasjons media."
 t MSG_200 "Velg dette hvis du vil kjøre Windows direkte fra valgte stasjon."
 
 # Status messages - these messages will appear on the status bar
