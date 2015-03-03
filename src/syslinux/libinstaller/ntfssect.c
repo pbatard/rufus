@@ -33,10 +33,6 @@
 #define M_ERR(msg) (NtfsSectLastErrorMessage = (msg))
 
 /*** Function declarations */
-static DWORD NtfsSectGetVolumeHandle(
-    CHAR * VolumeName,
-    S_NTFSSECT_VOLINFO * VolumeInfo
-  );
 static DWORD NtfsSectGetVolumePartitionLba(S_NTFSSECT_VOLINFO * VolumeInfo);
 
 /*** Objects */

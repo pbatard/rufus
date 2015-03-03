@@ -1,4 +1,4 @@
-o Version 2.0 (2015.03.??)
+o Version 2.0 (2015.03.03)
     Major UI improvements (improved font, new info field, no separate progress dialog, etc.)
     Add support for Windows To Go (if Rufus is running on Windows 8 or later)
     Add support for Grub4DOS and GRUB 2 based images (e.g. FreeNAS) 
