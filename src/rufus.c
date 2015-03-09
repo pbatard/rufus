@@ -2367,6 +2367,10 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		SetTaskbarProgressState(TASKBAR_NORMAL);
 		break;
 
+	case UM_NO_UPDATE:
+		Notification(MSG_INFO, NULL, lmprintf(MSG_243), lmprintf(MSG_247));
+		break;
+
 	case UM_FORMAT_COMPLETED:
 		format_thid = NULL;
 		// Stop the timer

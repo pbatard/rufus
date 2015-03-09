@@ -626,6 +626,8 @@ out:
 			Sleep(15000);
 		}
 		DownloadNewVersion();
+	} else if (force_update_check) {
+		PostMessage(hMainDialog, UM_NO_UPDATE, 0, 0);
 	}
 	force_update_check = FALSE;
 	update_check_in_progress = FALSE;

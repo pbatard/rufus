@@ -132,6 +132,7 @@ enum user_message_type {
 	UM_MEDIA_CHANGE,
 	UM_PROGRESS_INIT,
 	UM_PROGRESS_EXIT,
+	UM_NO_UPDATE,
 	// Start of the WM IDs for the language menu items
 	UM_LANGUAGE_MENU = WM_APP + 0x100
 };
