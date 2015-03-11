@@ -1137,7 +1137,8 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 		DriveLayoutEx.PartitionEntry[pn].PartitionLength.QuadPart = (extra_partitions & XP_UEFI_TOGO)?uefi_togo_size:
 			extra_part_size_in_tracks * SelectedDrive.Geometry.SectorsPerTrack * SelectedDrive.Geometry.BytesPerSector;
 		if (partition_style == PARTITION_STYLE_GPT) {
-			DriveLayoutEx.PartitionEntry[pn].Gpt.PartitionType = PARTITION_SYSTEM_GUID;
+			DriveLayoutEx.PartitionEntry[pn].Gpt.PartitionType = (extra_partitions & XP_UEFI_TOGO)?
+				PARTITION_BASIC_DATA_GUID:PARTITION_SYSTEM_GUID;
 			IGNORE_RETVAL(CoCreateGuid(&DriveLayoutEx.PartitionEntry[pn].Gpt.PartitionId));
 			wcscpy(DriveLayoutEx.PartitionEntry[pn].Gpt.Name, (extra_partitions & XP_UEFI_TOGO)?L"UEFI:TOGO":L"EFI system partition");
 		} else {
