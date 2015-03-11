@@ -238,7 +238,7 @@ typedef struct {
 #define HAS_INSTALL_WIM(r)  (r.install_wim_path[0] != 0)
 #define HAS_TOGO(r)         (r.has_bootmgr && r.has_efi && HAS_INSTALL_WIM(r))
 #define IS_WINPE(r)         (((r & WINPE_MININT) == WINPE_MININT)||(( r & WINPE_I386) == WINPE_I386))
-#define IS_WIN7_EFI(r)      (r.has_efi & 1)
+#define IS_WIN7_EFI(r)      ((r.has_efi == 1) && HAS_INSTALL_WIM(r))
 #define IS_REACTOS(r)       (r.reactos_path[0] != 0)
 #define IS_GRUB(r)          ((r.has_grub2) || (r.has_grub4dos))
 #define IS_FAT(fs)          ((fs == FS_FAT16) || (fs == FS_FAT32))

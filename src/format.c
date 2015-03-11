@@ -1889,8 +1889,8 @@ DWORD WINAPI FormatThread(void* param)
 						uprintf("Warning: loader installation failed - KolibriOS will not boot!\n");
 					}
 				}
-				// EFI mode selected, with no 'bootx64.efi' (bit #2) but Windows 7 x64's 'bootmgr.efi' (bit #0)
-				if ((bt == BT_UEFI) && (!(iso_report.has_efi & 4)) && (iso_report.has_efi & 1) && (HAS_INSTALL_WIM(iso_report))) {
+				// EFI mode selected, with no 'boot###.efi' but Windows 7 x64's 'bootmgr.efi' (bit #0)
+				if ((bt == BT_UEFI) && IS_WIN7_EFI(iso_report)) {
 					PrintInfoDebug(0, MSG_232);
 					iso_report.install_wim_path[0] = drive_name[0];
 					efi_dst[0] = drive_name[0];
