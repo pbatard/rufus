@@ -32,7 +32,7 @@ LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
 
 IDD_DIALOG DIALOGEX 12, 12, 242, 376
 STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_MINIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Rufus 2.0.644"
+CAPTION "Rufus 2.0.645"
 FONT 8, "Segoe UI", 400, 0, 0x1
 BEGIN
     DEFPUSHBUTTON   "Start",IDC_START,127,339,50,14
@@ -157,7 +157,7 @@ END
 
 IDD_DIALOG_XP DIALOGEX 12, 12, 242, 376
 STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_MINIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Rufus 2.0.644"
+CAPTION "Rufus 2.0.645"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     DEFPUSHBUTTON   "Start",IDC_START,127,339,50,14
@@ -283,7 +283,7 @@ END
 IDD_DIALOG_RTL DIALOGEX 12, 12, 242, 376
 STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_MINIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_RTLREADING | WS_EX_APPWINDOW | WS_EX_LAYOUTRTL
-CAPTION "Rufus 2.0.644"
+CAPTION "Rufus 2.0.645"
 FONT 8, "Segoe UI", 400, 0, 0x1
 BEGIN
     DEFPUSHBUTTON   "Start",IDC_START,127,339,50,14
@@ -415,7 +415,7 @@ END
 IDD_DIALOG_RTL_XP DIALOGEX 12, 12, 242, 376
 STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_MINIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_RTLREADING | WS_EX_APPWINDOW | WS_EX_LAYOUTRTL
-CAPTION "Rufus 2.0.644"
+CAPTION "Rufus 2.0.645"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     DEFPUSHBUTTON   "Start",IDC_START,127,339,50,14
@@ -611,7 +611,7 @@ BEGIN
     "IDR_FD_EGA17_CPX        RCDATA                  ""../res/freedos/ega17.cpx""\r\n"
     "IDR_FD_EGA18_CPX        RCDATA                  ""../res/freedos/ega18.cpx""\r\n"
     "IDR_XT_HOGGER           RCDATA                  ""../res/hogger/hogger.exe""\r\n"
-    "IDR_UEFI_TOGO           RCDATA                  ""../res/uefi/uefi-togo.img""\r\n"
+    "IDR_UEFI_NTFS           RCDATA                  ""../res/uefi/uefi-ntfs.img""\r\n"
     "IDR_TOGO_SAN_POLICY_XML RCDATA                  ""../res/togo/san_policy.xml""\r\n"
     "IDR_TOGO_UNATTEND_XML   RCDATA                  ""../res/togo/unattend.xml""\r\n"
     "\r\n"
@@ -671,8 +671,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 2,0,644,0
- PRODUCTVERSION 2,0,644,0
+ FILEVERSION 2,1,645,0
+ PRODUCTVERSION 2,1,645,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -689,13 +689,13 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Akeo Consulting (http://akeo.ie)"
             VALUE "FileDescription", "Rufus"
-            VALUE "FileVersion", "2.0.644"
+            VALUE "FileVersion", "2.1.645"
             VALUE "InternalName", "Rufus"
             VALUE "LegalCopyright", "© 2011-2015 Pete Batard (GPL v3)"
             VALUE "LegalTrademarks", "http://www.gnu.org/copyleft/gpl.html"
             VALUE "OriginalFilename", "rufus.exe"
             VALUE "ProductName", "Rufus"
-            VALUE "ProductVersion", "2.0.644"
+            VALUE "ProductVersion", "2.1.645"
         END
     END
     BLOCK "VarFileInfo"
@@ -766,7 +766,7 @@ IDR_FD_EGA16_CPX        RCDATA                  "../res/freedos/ega16.cpx"
 IDR_FD_EGA17_CPX        RCDATA                  "../res/freedos/ega17.cpx"
 IDR_FD_EGA18_CPX        RCDATA                  "../res/freedos/ega18.cpx"
 IDR_XT_HOGGER           RCDATA                  "../res/hogger/hogger.exe"
-IDR_UEFI_TOGO           RCDATA                  "../res/uefi/uefi-togo.img"
+IDR_UEFI_NTFS           RCDATA                  "../res/uefi/uefi-ntfs.img"
 IDR_TOGO_SAN_POLICY_XML RCDATA                  "../res/togo/san_policy.xml"
 IDR_TOGO_UNATTEND_XML   RCDATA                  "../res/togo/unattend.xml"
 

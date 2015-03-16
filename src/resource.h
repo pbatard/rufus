@@ -69,7 +69,7 @@
 #define IDR_GR_GRUB2_CORE_IMG           451
 #define IDR_LC_RUFUS_LOC                500
 #define IDR_XT_HOGGER                   501
-#define IDR_UEFI_TOGO                   502
+#define IDR_UEFI_NTFS                   502
 #define IDR_TOGO_SAN_POLICY_XML         503
 #define IDR_TOGO_UNATTEND_XML           504
 #define IDC_DEVICE                      1001

@@ -54,7 +54,7 @@ const GUID PARTITION_SYSTEM_GUID =
  * Globals
  */
 RUFUS_DRIVE_INFO SelectedDrive;
-size_t uefi_togo_size = 0;
+size_t uefi_ntfs_size = 0;
 
 /*
  * The following methods get or set the AutoMount setting (which is different from AutoRun)
@@ -656,7 +656,7 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 {
 	// MBR partition types that can be mounted in Windows
 	const uint8_t mbr_mountable[] = { 0x01, 0x04, 0x06, 0x07, 0x0b, 0x0c, 0x0e, 0xef };
-	BOOL r, ret = FALSE, isUefiTogo = FALSE;
+	BOOL r, ret = FALSE, isUefiNtfs = FALSE;
 	HANDLE hPhysical;
 	DWORD size;
 	BYTE geometry[256] = {0}, layout[4096] = {0}, part_type;
@@ -682,8 +682,8 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 	if (hPhysical == INVALID_HANDLE_VALUE)
 		return 0;
 
-	if (uefi_togo_size == 0)
-		uefi_togo_size = GetResourceSize(hMainInstance, MAKEINTRESOURCEA(IDR_UEFI_TOGO), _RT_RCDATA, "uefi-togo.img");
+	if (uefi_ntfs_size == 0)
+		uefi_ntfs_size = GetResourceSize(hMainInstance, MAKEINTRESOURCEA(IDR_UEFI_NTFS), _RT_RCDATA, "uefi-ntfs.img");
 
 	r = DeviceIoControl(hPhysical, IOCTL_DISK_GET_DRIVE_GEOMETRY_EX,
 			NULL, 0, geometry, sizeof(geometry), &size, NULL);
@@ -731,9 +731,9 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 		for (i=0; i<DriveLayout->PartitionCount; i++) {
 			if (DriveLayout->PartitionEntry[i].Mbr.PartitionType != PARTITION_ENTRY_UNUSED) {
 				part_type = DriveLayout->PartitionEntry[i].Mbr.PartitionType;
-				isUefiTogo = (i == 1) && (part_type == 0xef) &&
-					(DriveLayout->PartitionEntry[i].PartitionLength.QuadPart == uefi_togo_size);
-				suprintf("Partition %d%s:\n", i+1, isUefiTogo?" (UEFI:TOGO)":"");
+				isUefiNtfs = (i == 1) && (part_type == 0xef) &&
+					(DriveLayout->PartitionEntry[i].PartitionLength.QuadPart == uefi_ntfs_size);
+				suprintf("Partition %d%s:\n", i+1, isUefiNtfs?" (UEFI:NTFS)":"");
 				for (j=0; j<ARRAYSIZE(mbr_mountable); j++) {
 					if (part_type == mbr_mountable[j]) {
 						ret = TRUE;
@@ -747,7 +747,7 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 					DriveLayout->PartitionEntry[i].PartitionLength.QuadPart, DriveLayout->PartitionEntry[i].Mbr.HiddenSectors,
 					DriveLayout->PartitionEntry[i].Mbr.BootIndicator?"Yes":"No",
 					DriveLayout->PartitionEntry[i].Mbr.RecognizedPartition?"Yes":"No");
-				if ((part_type == RUFUS_EXTRA_PARTITION_TYPE) || (isUefiTogo))
+				if ((part_type == RUFUS_EXTRA_PARTITION_TYPE) || (isUefiNtfs))
 					// This is a partition Rufus created => we can safely ignore it
 					--SelectedDrive.nPartitions;
 				if (part_type == 0xee)	// Flag a protective MBR for non GPT platforms (XP)
@@ -772,7 +772,7 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 				DriveLayout->PartitionEntry[i].PartitionLength, DriveLayout->PartitionEntry[i].StartingOffset.QuadPart / DiskGeometry->Geometry.BytesPerSector,
 				DriveLayout->PartitionEntry[i].Gpt.Attributes);
 			// Don't register the partitions that we don't care about destroying
-			if ( (strcmp(tmp, "UEFI:TOGO") == 0) ||
+			if ( (strcmp(tmp, "UEFI:NTFS") == 0) ||
 				 (CompareGUID(&DriveLayout->PartitionEntry[i].Gpt.PartitionType, &PARTITION_MSFT_RESERVED_GUID)) ||
 				 (CompareGUID(&DriveLayout->PartitionEntry[i].Gpt.PartitionType, &PARTITION_SYSTEM_GUID)) )
 				--SelectedDrive.nPartitions;
@@ -1031,9 +1031,9 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 
 	PrintInfoDebug(0, MSG_238, PartitionTypeName[partition_style]);
 
-	if ((extra_partitions & XP_UEFI_TOGO) && (uefi_togo_size == 0)) {
-		uefi_togo_size = GetResourceSize(hMainInstance, MAKEINTRESOURCEA(IDR_UEFI_TOGO), _RT_RCDATA, "uefi-togo.img");
-		if (uefi_togo_size == 0)
+	if ((extra_partitions & XP_UEFI_NTFS) && (uefi_ntfs_size == 0)) {
+		uefi_ntfs_size = GetResourceSize(hMainInstance, MAKEINTRESOURCEA(IDR_UEFI_NTFS), _RT_RCDATA, "uefi-ntfs.img");
+		if (uefi_ntfs_size == 0)
 			return FALSE;
 	}
 
@@ -1091,7 +1091,7 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 			else
 				ms_efi_size = 1200*1024*1024;	// That'll teach you to have a nonstandard disk!
 			extra_part_size_in_tracks = (ms_efi_size + bytes_per_track - 1) / bytes_per_track;
-		} else if (extra_partitions & XP_UEFI_TOGO)
+		} else if (extra_partitions & XP_UEFI_NTFS)
 			extra_part_size_in_tracks = (MIN_EXTRA_PART_SIZE + bytes_per_track - 1) / bytes_per_track;
 		else if (extra_partitions & XP_COMPAT)
 			extra_part_size_in_tracks = 1;	// One track for the extra partition
@@ -1134,30 +1134,30 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 		// Should end on a track boundary
 		DriveLayoutEx.PartitionEntry[pn].StartingOffset.QuadPart = DriveLayoutEx.PartitionEntry[pn-1].StartingOffset.QuadPart +
 			DriveLayoutEx.PartitionEntry[pn-1].PartitionLength.QuadPart;
-		DriveLayoutEx.PartitionEntry[pn].PartitionLength.QuadPart = (extra_partitions & XP_UEFI_TOGO)?uefi_togo_size:
+		DriveLayoutEx.PartitionEntry[pn].PartitionLength.QuadPart = (extra_partitions & XP_UEFI_NTFS)?uefi_ntfs_size:
 			extra_part_size_in_tracks * SelectedDrive.Geometry.SectorsPerTrack * SelectedDrive.Geometry.BytesPerSector;
 		if (partition_style == PARTITION_STYLE_GPT) {
-			DriveLayoutEx.PartitionEntry[pn].Gpt.PartitionType = (extra_partitions & XP_UEFI_TOGO)?
+			DriveLayoutEx.PartitionEntry[pn].Gpt.PartitionType = (extra_partitions & XP_UEFI_NTFS)?
 				PARTITION_BASIC_DATA_GUID:PARTITION_SYSTEM_GUID;
 			IGNORE_RETVAL(CoCreateGuid(&DriveLayoutEx.PartitionEntry[pn].Gpt.PartitionId));
-			wcscpy(DriveLayoutEx.PartitionEntry[pn].Gpt.Name, (extra_partitions & XP_UEFI_TOGO)?L"UEFI:TOGO":L"EFI system partition");
+			wcscpy(DriveLayoutEx.PartitionEntry[pn].Gpt.Name, (extra_partitions & XP_UEFI_NTFS)?L"UEFI:NTFS":L"EFI system partition");
 		} else {
-			DriveLayoutEx.PartitionEntry[pn].Mbr.PartitionType = (extra_partitions & XP_UEFI_TOGO)?0xef:RUFUS_EXTRA_PARTITION_TYPE;
+			DriveLayoutEx.PartitionEntry[pn].Mbr.PartitionType = (extra_partitions & XP_UEFI_NTFS)?0xef:RUFUS_EXTRA_PARTITION_TYPE;
 			if (extra_partitions & XP_COMPAT)
 				// Set the one track compatibility partition to be all hidden sectors
 				DriveLayoutEx.PartitionEntry[pn].Mbr.HiddenSectors = SelectedDrive.Geometry.SectorsPerTrack;
 		}
 
-		// We need to write the TOGO partition before we refresh the disk
-		if (extra_partitions & XP_UEFI_TOGO) {
-			uprintf("Writing UEFI:TOGO partition...");
+		// We need to write the UEFI:NTFS partition before we refresh the disk
+		if (extra_partitions & XP_UEFI_NTFS) {
+			uprintf("Writing UEFI:NTFS partition...");
 			if (!SetFilePointerEx(hDrive, DriveLayoutEx.PartitionEntry[pn].StartingOffset, NULL, FILE_BEGIN)) {
 				uprintf("Unable to set position");
 				return FALSE;
 			}
-			buffer = GetResource(hMainInstance, MAKEINTRESOURCEA(IDR_UEFI_TOGO), _RT_RCDATA, "uefi-togo.img", &bufsize, FALSE);
+			buffer = GetResource(hMainInstance, MAKEINTRESOURCEA(IDR_UEFI_NTFS), _RT_RCDATA, "uefi-ntfs.img", &bufsize, FALSE);
 			if (buffer == NULL) {
-				uprintf("Could not access uefi-togo.img");
+				uprintf("Could not access uefi-ntfs.img");
 				return FALSE;
 			}
 			r = WriteFile(hDrive, buffer, bufsize, &size, NULL);

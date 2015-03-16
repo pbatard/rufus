@@ -1498,7 +1498,7 @@ DWORD WINAPI FormatThread(void* param)
 		// http://msdn.microsoft.com/en-us/library/windows/hardware/dn640535.aspx#gpt_faq_what_disk_require_msr
 		extra_partitions = XP_MSR | XP_EFI;
 	else if ((fs == FS_NTFS) && (dt == DT_ISO) && (iso_report.has_efi) && ((bt == BT_UEFI) || (windows_to_go)))
-		extra_partitions = XP_UEFI_TOGO;
+		extra_partitions = XP_UEFI_NTFS;
 	else if (IsChecked(IDC_EXTRA_PARTITION))
 		extra_partitions = XP_COMPAT;
 
