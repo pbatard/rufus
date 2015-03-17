@@ -583,6 +583,10 @@ void GetGrubVersion(char* buf, size_t buf_size)
 				*p = '_';
 		}
 	}
+	// <Shakes fist angrily> "KASPERSKYYYYYY!!!..." (https://github.com/pbatard/rufus/issues/467)
+	// But seriously, these guys should know better than "security" through obscurity...
+	if (iso_report.grub2_version[0] == '0')
+		iso_report.grub2_version[0] = 0;
 }
 
 BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan)
@@ -787,8 +791,10 @@ out:
 			}
 			if (iso_report.grub2_version[0] != 0)
 				uprintf("Detected Grub version: %s", iso_report.grub2_version);
-			else
-				uprintf("Could not detect Grub2 version");
+			else {
+				uprintf("Could not detect Grub version");
+				iso_report.has_grub2 = FALSE;
+			}
 		}
 		StrArrayDestroy(&config_path);
 		StrArrayDestroy(&isolinux_path);

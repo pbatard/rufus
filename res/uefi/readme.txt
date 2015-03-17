@@ -11,6 +11,6 @@ o The UEFI:NTFS binaries (https://github.com/pbatard/uefi-ntfs), which were also
   These are the \EFI\Boot\boot[ia32|x64].efi files.
 
 The FAT partition was created on Debian GNU/Linux using the following commands
-  dd if=/dev/zero of=uefi-togo.img bs=512 count=512
+  dd if=/dev/zero of=uefi-ntfs.img bs=512 count=512
   mkfs.vfat uefi-ntfs.img
 and then mounting the `uefi-ntfs.img` and copying the relevant files.
