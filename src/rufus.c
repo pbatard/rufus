@@ -1233,7 +1233,7 @@ static BOOL BootCheck(void)
 		if ((togo_mode) && (Button_GetCheck(GetDlgItem(hMainDialog, IDC_WINDOWS_TO_GO)) == BST_CHECKED)) {
 			if (fs != FS_NTFS) {
 				// Windows To Go only works for NTFS
-				MessageBoxU(hMainDialog, lmprintf(MSG_097), lmprintf(MSG_092), MB_OK|MB_ICONERROR|MB_IS_RTL);
+				MessageBoxU(hMainDialog, lmprintf(MSG_097, "Windows To Go"), lmprintf(MSG_092), MB_OK|MB_ICONERROR|MB_IS_RTL);
 				return FALSE;
 			} else if (SelectedDrive.Geometry.MediaType != FixedMedia) {
 				if ((bt == BT_UEFI) && (pt == PARTITION_STYLE_GPT)) {
@@ -1487,6 +1487,12 @@ static BOOL BootCheck(void)
 				if (DownloadFile(tmp, &tmp[sizeof(FILES_URL)], hMainDialog) == 0)
 					return FALSE;
 			}
+		}
+	} else if (dt == DT_UEFI_NTFS) {
+		fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
+		if (fs != FS_NTFS) {
+			MessageBoxU(hMainDialog, lmprintf(MSG_097, "UEFI:NTFS"), lmprintf(MSG_092), MB_OK|MB_ICONERROR|MB_IS_RTL);
+			return FALSE;
 		}
 	}
 	return TRUE;
@@ -1812,6 +1818,8 @@ void SetBoot(int fs, int bt)
 		IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType,
 			"Grub4DOS " GRUB4DOS_VERSION), DT_GRUB4DOS));
 	}
+	if (advanced_mode)
+		IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, "UEFI:NTFS"), DT_UEFI_NTFS));
 	if ((!advanced_mode) && (selection_default >= DT_SYSLINUX_V4)) {
 		selection_default = DT_FREEDOS;
 		CheckDlgButton(hMainDialog, IDC_DISK_ID, BST_UNCHECKED);
@@ -2200,6 +2208,16 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 					SetWindowTextU(hLabel, iso_report.label);
 				}
 			} else {
+				if (selection_default == DT_UEFI_NTFS) {
+					// Try to select NTFS as default
+					for (i=0; i<ComboBox_GetCount(hFileSystem); i++) {
+						fs = (int)ComboBox_GetItemData(hFileSystem, i);
+						if (fs == FS_NTFS)
+							IGNORE_RETVAL(ComboBox_SetCurSel(hFileSystem, i));
+					}
+					SendMessage(hMainDialog, WM_COMMAND, (CBN_SELCHANGE<<16) | IDC_FILESYSTEM,
+						ComboBox_GetCurSel(hFileSystem));
+				}
 				// Set focus on the start button
 				SendMessage(hMainDialog, WM_NEXTDLGCTL, (WPARAM)FALSE, 0);
 				SendMessage(hMainDialog, WM_NEXTDLGCTL, (WPARAM)GetDlgItem(hMainDialog, IDC_START), TRUE);

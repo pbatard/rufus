@@ -196,6 +196,7 @@ enum dos_type {
 	DT_REACTOS,
 	DT_GRUB4DOS,
 	DT_GRUB2,
+	DT_UEFI_NTFS,
 	DT_MAX
 };
 

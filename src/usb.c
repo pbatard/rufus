@@ -135,13 +135,14 @@ BOOL GetUSBDevices(DWORD devnum)
 	htab_table htab_devid = HTAB_EMPTY;
 	StrArray dev_if_path;
 	char letter_name[] = " (?:)";
+	char uefi_togo_check[] = "?:\\EFI\\Rufus\\ntfs_x64.efi";
 	BOOL r = FALSE, found = FALSE, is_SCSI;
 	HDEVINFO dev_info = NULL;
 	SP_DEVINFO_DATA dev_info_data;
 	SP_DEVICE_INTERFACE_DATA devint_data;
 	PSP_DEVICE_INTERFACE_DETAIL_DATA_A devint_detail_data;
 	DEVINST parent_inst, device_inst;
-	DWORD size, i, j, k, datatype, drive_index;
+	DWORD size, i, j, k, l, datatype, drive_index;
 	ULONG list_size[ARRAYSIZE(storage_name)] = { 0 }, full_list_size, ulFlags;
 	HANDLE hDrive;
 	LONG maxwidth = 0;
@@ -401,6 +402,15 @@ BOOL GetUSBDevices(DWORD devnum)
 					entry = lmprintf(MSG_046, label, drive_number,
 						SizeToHumanReadable(GetDriveSize(drive_index), FALSE, use_fake_units));
 				} else {
+					// Find the UEFI:TOGO partition(s) (and eliminate them form our listing)
+					for (k=0; drive_letters[k]; k++) {
+						uefi_togo_check[0] = drive_letters[k];
+						if (PathFileExistsA(uefi_togo_check)) {
+							for (l=k; drive_letters[l]; l++)
+								drive_letters[l] = drive_letters[l+1];
+							k--;
+						}
+					}
 					// We have multiple volumes assigned to the same device (multiple partitions)
 					// If that is the case, use "Multiple Volumes" instead of the label
 					safe_strcpy(entry_msg, sizeof(entry_msg), ((drive_letters[0] != 0) && (drive_letters[1] != 0))?

@@ -1,3 +1,12 @@
+o Version 2.1 (2015.03.??)
+    Add 32 bit support to UEFI:NTFS boot
+    Add standalone UEFI:NTFS boot installation, in advanced mode
+    Add Vietnamese translation, courtesy of thanhtai2009
+    Disable support for ISOs that don't report their GRUB version (looking at you Kaspersky!)
+    Fix broken Windows UEFI installation when using GPT/NTFS
+    Fix creation of 32 bit UEFI Windows 10 installation flash drives
+    Other improvements
+
 o Version 2.0 (2015.03.03)
     Major UI improvements (improved font, new info field, no separate progress dialog, etc.)
     Add support for Windows To Go (if Rufus is running on Windows 8 or later)

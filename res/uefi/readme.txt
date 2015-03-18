@@ -12,5 +12,5 @@ o The UEFI:NTFS binaries (https://github.com/pbatard/uefi-ntfs), which were also
 
 The FAT partition was created on Debian GNU/Linux using the following commands
   dd if=/dev/zero of=uefi-ntfs.img bs=512 count=512
-  mkfs.vfat uefi-ntfs.img
-and then mounting the `uefi-ntfs.img` and copying the relevant files.
+  mkfs.vfat -n UEFI_NTFS uefi-ntfs.img
+and then mounting the uefi-ntfs.img image and copying the relevant files.

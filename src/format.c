@@ -1497,7 +1497,8 @@ DWORD WINAPI FormatThread(void* param)
 		// According to Microsoft, every GPT disk (we RUN Windows from) must have an MSR due to not having hidden sectors
 		// http://msdn.microsoft.com/en-us/library/windows/hardware/dn640535.aspx#gpt_faq_what_disk_require_msr
 		extra_partitions = XP_MSR | XP_EFI;
-	else if ((fs == FS_NTFS) && (dt == DT_ISO) && (iso_report.has_efi) && ((bt == BT_UEFI) || (windows_to_go)))
+	else if ( (fs == FS_NTFS) && ((dt == DT_UEFI_NTFS) ||
+			  ((dt == DT_ISO) && (iso_report.has_efi) && ((bt == BT_UEFI) || (windows_to_go) || (allow_dual_uefi_bios)))) )
 		extra_partitions = XP_UEFI_NTFS;
 	else if (IsChecked(IDC_EXTRA_PARTITION))
 		extra_partitions = XP_COMPAT;
@@ -1803,7 +1804,9 @@ DWORD WINAPI FormatThread(void* param)
 	CHECK_FOR_USER_CANCEL;
 
 	if (IsChecked(IDC_BOOT)) {
-		if (bt == BT_UEFI) {
+		if (dt == DT_UEFI_NTFS) {
+			// All good
+		} else if (bt == BT_UEFI) {
 			// For once, no need to do anything - just check our sanity
 			if ( (dt != DT_ISO) || (!iso_report.has_efi) || (fs > FS_NTFS) ) {
 				uprintf("Spock gone crazy error!\n");
