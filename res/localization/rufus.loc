@@ -3365,7 +3365,7 @@ t MSG_268 "Anvender Windows image..."
 
 ################################################################################
 l "nl-NL" "Dutch (Nederlands)" 0x0413, 0x0813
-v 1.0.16
+v 1.0.17
 b "en-US"
 
 # Main dialog
@@ -3409,6 +3409,7 @@ s IDS_ADVANCED_OPTIONS_GRP 20,0
 s IDC_PROGRESS 20,0
 m IDC_START 20,0
 m IDCANCEL 20,0
+t IDC_WINDOWS_INSTALL "Standaard Windows installatie"
 
 # About dialog
 g IDD_ABOUTBOX
@@ -3601,6 +3602,15 @@ t MSG_093 "BELANGRIJK: DEZE DRIVE BEVAT MEERDERE PARTITIES!!\n\n"
 	"Als je verder wilt gaan, ben je zelf verantwoordelijk voor gegevensverlies op deze partities."
 t MSG_094 "Meerdere partities gedetecteerd"
 t MSG_095 "DD Image"
+t MSG_096 "Het geselecteerde bestandssysteem kan niet worden gebruikt met dit type ISO. Selecteer een ander bestandssysteem of gebruik een andere ISO."
+t MSG_097 "'%s' kan alleen worden toegepast als het bestandssysteem NTFS is."
+t MSG_098 "BELANGRIJK: U probeert 'Windows To Go' te installeren, maar uw doelschijf heeft "
+	"het "FIXED" attribuut niet. Hierdoor zal Windows hoogst waarschijnlijk vastlopen tijdens "
+	"het opstarten omdat Microsoft het niet zo heeft ontworpen dat het werkt met drives die "
+	"het 'REMOVABLE' attribuut hebben.\n\nWilt u nog steeds doorgaan?\n\n"
+	"Aantekening: Het 'FIXED/REMOVABLE' attribuut is een hardware eigenschap dat alleen "
+	"veranderd kan worden door gebruik te maken van tools van de drive fabrikant. "
+	"Maar deze tools worden BIJNA NOOIT aan het publiek aangeboden..."
 t MSG_099 "Beperking van bestandssysteem"
 t MSG_100 "Deze ISO image bevat een bestand dat groter is dan 4 GB wat groter is dan de"
          "maximum toegestane grootte voor een FAT of FAT32 bestandssysteem."
@@ -3632,6 +3642,15 @@ t MSG_114 "Deze image maakt gebruik van Syslinux %s%s maar de applicatie bevat a
 	"- Klik op 'Nee' om de opdracht te annuleren\n\n"
 	"Let op: De bestanden worden in de huidige applicatiemap opgeslagen en zullen automatisch vervangen worden als het bestand al bestaat.\n"
 t MSG_115 "Download is vereist"
+t MSG_116 "Deze image maakt gebruik van Grub %s maar de applicatie bevat alleen de installatiebestanden voor Grub %s.\n\n"
+	"Als verschillende versies van Grub mogelijk niet compatibel met elkaar zijn, en het is "
+	"niet mogelijk om ze allemaal toe te voegen, dan zal Rufus proberen om een versie van het "
+	"Grub installatie bestand ('core.img') te zoeken dat overeenkomst met uw image:\n"
+	"- Selecteer 'Ja' om te proberen het te downloaden\n"
+	"- Selecteer 'Nee' om de standaard versie van Rufus te gebruiken\n"
+	"- Selecteer 'Annuleren' om de bewerking te stoppen\n\n"
+	"Aantekening: Het bestand zal in de huidige programma map gedownload en automatisch vervangen worden als het bestand al bestaat. "
+	"Als er geen bestand online wordt gevonden, dan zal de standaard versie worden gebruikt."
 
 # Tooltips
 # Partition Scheme and Target Type
@@ -3684,6 +3703,21 @@ t MSG_186 "Rufus voert geen installatie van of achtergrond services uit, Daarom 
 t MSG_187 "Ongeldige image voor geselecteerde opstart optie"
 t MSG_188 "De huidige image komt niet overeen met de opstart optie die geselecteerd is. Gebruik a.u.b. een andere image of kies een andere opstart optie."
 t MSG_189 "Dit ISO beeldbestand is niet compatibel met het geselecteerde bestandssysteem."
+t MSG_190 "niet compatibel drive gedetecteerd"
+t MSG_191 "Schrijfactie"
+t MSG_192 "Leesactie"
+t MSG_193 "Gedownload %s"
+t MSG_194 "Kan niet downloaden %s"
+t MSG_195 "Gebruikt geïntegreerde versie van %s bestand(en)"
+t MSG_196 "BELANGRIJK: DEZE DRIVE GEBRUIKT EEN NIET-STANDAARD SECTORGROOTTE!!\n\n"
+	"Conventionele drives gebruiken een 512-byte sector grootte maar deze drive gebruikt een %d-byte one. "
+	"In veel gevallen betekent dit dat u NIET van deze drive kan opstarten.\n"
+	"Rufus kan proberen om een opstartbare drive te maken, maar er is GEEN GARANTIE dat het gaat werken."
+t MSG_197 "Niet-standaard sectorgrootte gedetecteerd"
+t MSG_198 "'Windows To Go' kan alleen worden geïnstalleerd op een GPT gepartitioneerde schijf als het "
+	"FIXED attribuut is ingesteld. De huidige drive wordt niet herkend als FIXED."
+t MSG_199 "Kies dit als u van plan bent om Windows op een andere schijf te installeren, waarvan het geselecteerde apparaat als installatie media wordt gebruikt."
+t MSG_200 "Kies dit als u Windows rechtstreeks vanaf het geselecteerde apparaat wilt starten."
 
 # Status messages - these messages will appear on the status bar
 t MSG_201 "Bezig met annuleren - Een moment geduld a.u.b. ..."
@@ -3692,14 +3726,14 @@ t MSG_203 "Onderzoeken van image mislukt"
 # Parameter: de naam van een verouderd Syslinux .c32 module. b.v.: "Verouderde vesamenu.c32 gedetecteerd"
 t MSG_204 "Verouderde %s gedetecteerd"
 # Display the name of the ISO selected. eg: "Using ISO: en_win7_x64_sp1.iso"
-t MSG_205 "ISO in gebruik: %s"
+t MSG_205 "Gebruikte image: %s"
 # Typically "Missing ldlinux.c32 file"
 t MSG_206 "Ontbrekend %s bestand"
 t MSG_207 "Nieuw Volume"
 # Same message, once for singular and plural ("1 device found", "2 devices found")
 t MSG_208 "%d apparaat gevonden"
 t MSG_209 "%d apparaten gevonden"
-t MSG_210 "KLAAR"
+t MSG_210 "GEREED"
 t MSG_211 "Geannuleerd"
 t MSG_212 "MISLUKT"
 # Used when a new update has been downloaded and lauched
@@ -3722,7 +3756,7 @@ t MSG_225 "Verzoek tot disk toegang..."
 t MSG_226 "Bezig met analyse bestaande opstart records..."
 t MSG_227 "Bezig bestaande volume afsluiten..."
 t MSG_228 "Master boot record aan het schrijven..."
-t MSG_229 "Partitie opstart record aan het schrijven..."
+t MSG_229 "Partitie opstartrecord aan het schrijven..."
 t MSG_230 "DOS files aan het kopiëren..."
 t MSG_231 "ISO bestanden aan het kopiëren..."
 t MSG_232 "Win7 EFI opstart setup (Dit kan een tijdje duren)..."
@@ -3730,7 +3764,7 @@ t MSG_233 "Finaliseren, een moment geduld a.u.b. ..."
 # Takes the Syslinux version as paramete. eg. "Installing Syslinux v5..."
 t MSG_234 "Bezig met installeren Syslinux %s..."
 # Bad blocks status. eg: "Bad Blocks: PASS 1/2 - 12.34% (0/0/1 errors)"
-t MSG_235 "Slechte Blokken: Ronde %d/%d - %0.2f%% (%d/%d/%d fouten)"
+t MSG_235 "Slechte Blokken: Ronde %s %d/%d - %0.2f%% (%d/%d/%d fouten)"
 t MSG_236 "Slechte Blokken: Testen met willekeurig patroon"
 t MSG_237 "Slechte Blokken: Testen met patroon 0x%02X"
 # eg. "Partitioning (MBR)..."
@@ -3750,7 +3784,7 @@ t MSG_249 "Registersleutels van applicatie verwijderen mislukt"
 t MSG_250 "%s ingeschakeld"
 t MSG_251 "%s uitgeschakeld"
 t MSG_252 "Controles op image grootte"
-t MSG_253 "Detectie vaste schijven"
+t MSG_253 "Detectie harde schijven"
 t MSG_254 "Forceer uitgebreide FAT32 formattering"
 t MSG_255 "NoDriveTypeAutorun zal worden verwijderd tijdens afsluiten"
 t MSG_256 "Valse drive detectie"
@@ -3761,6 +3795,11 @@ t MSG_260 "NTFS compressie"
 t MSG_261 "Bezig met schrijven van image: %0.1f%% voltooid"
 t MSG_262 "ISO ondersteuning"
 t MSG_263 "Gebruik de juiste grootte-eenheden"
+t MSG_264 "De map '%s' wordt verwijderd"
+t MSG_265 "VMWare disk gedetecteerd"
+t MSG_266 "Dubbel UEFI/BIOS modus"
+t MSG_267 "Windows image wordt toegepast: %0.1f%% gereed"
+t MSG_268 "Windows image wordt toegepast..."
 
 ################################################################################
 l "fi-FI" "Finnish (Suomi)" 0x040B
