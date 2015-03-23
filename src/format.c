@@ -114,13 +114,15 @@ static BOOLEAN __stdcall FormatExCallback(FILE_SYSTEM_CALLBACK_COMMAND Command, 
 		break;
 	case FCC_STRUCTURE_PROGRESS:	// No progress on quick format
 		if (task_number < nb_steps[fs_index] - 1) {
-			PrintInfoDebug(0, MSG_218, ++task_number, nb_steps[fs_index]);
+			if (task_number == 0)
+				uprintf("Creating file system...");
+			PrintInfo(0, MSG_218, ++task_number, nb_steps[fs_index]);
 			format_percent += 100.0f / (1.0f * nb_steps[fs_index]);
 			UpdateProgress(OP_CREATE_FS, format_percent);
 		}
 		break;
 	case FCC_DONE:
-		PrintInfoDebug(0, MSG_218, nb_steps[fs_index], nb_steps[fs_index]);
+		PrintInfo(0, MSG_218, nb_steps[fs_index], nb_steps[fs_index]);
 		UpdateProgress(OP_CREATE_FS, 100.0f);
 		if(*(BOOLEAN*)pData == FALSE) {
 			uprintf("Error while formatting");

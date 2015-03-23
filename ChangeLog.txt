@@ -1,4 +1,4 @@
-o Version 2.1 (2015.03.??)
+o Version 2.1 (2015.03.23)
     Add 32 bit support to UEFI:NTFS boot
     Add standalone UEFI:NTFS boot installation, in advanced mode
     Add Vietnamese translation, courtesy of thanhtai2009
