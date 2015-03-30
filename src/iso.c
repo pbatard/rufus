@@ -600,7 +600,7 @@ BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan)
 	udf_t* p_udf = NULL; 
 	udf_dirent_t* p_udf_root;
 	char *tmp, *buf, *ext;
-	char path[MAX_PATH];
+	char path[MAX_PATH], path2[16];
 	const char* basedir[] = { "i386", "minint" };
 	const char* tmp_sif = ".\\txtsetup.sif~";
 	iso_extension_mask_t iso_extension_mask = ISO_EXTENSION_ALL;
@@ -698,8 +698,22 @@ out:
 		// If multiple config files exist, choose the one with the shortest path
 		// (so that a '/syslinux.cfg' is preferred over a '/isolinux/isolinux.cfg')
 		if (!IsStrArrayEmpty(config_path)) {
-			safe_strcpy(iso_report.cfg_path, sizeof(iso_report.cfg_path), config_path.String[0]);
-			for (i=1; i<config_path.Index; i++) {
+			// Set the iso_report.cfg_path string to maximum length, so that we don't have to
+			// do a special case for StrArray entry 0.
+			memset(iso_report.cfg_path, '_', sizeof(iso_report.cfg_path)-1);
+			iso_report.cfg_path[sizeof(iso_report.cfg_path)-1] = 0;
+			for (i=0; i<config_path.Index; i++) {
+				// OpenSuse based Live image have a /syslinux.cfg that doesn't work, so we enforce
+				// the use of the one in '/boot/[i386|x86_64]/loader/isolinux.cfg' if present.
+				// Note that, because the openSuse live script are not designed to handle anything but
+				// an ISO9660 filesystem for the live device, this still won't allow for proper boot.
+				// See https://github.com/openSUSE/kiwi/issues/354
+				if ( (_stricmp(config_path.String[i], "/boot/i386/loader/isolinux.cfg") == 0) ||
+					 (_stricmp(config_path.String[i], "/boot/x86_64/loader/isolinux.cfg") == 0)) {
+					safe_strcpy(iso_report.cfg_path, sizeof(iso_report.cfg_path), config_path.String[i]);
+					iso_report.needs_syslinux_overwrite = TRUE;
+					break;
+				}
 				// Tails uses an '/EFI/BOOT/isolinux.cfg' along with a '/isolinux/isolinux.cfg'
 				// which are the exact same length. However, only the /isolinux one will work,
 				// so for now, at equal length, always pick the latest.
@@ -708,7 +722,7 @@ out:
 				if (safe_strlen(iso_report.cfg_path) >= safe_strlen(config_path.String[i]))
 					safe_strcpy(iso_report.cfg_path, sizeof(iso_report.cfg_path), config_path.String[i]);
 			}
-			uprintf("Will use %s for Syslinux\n", iso_report.cfg_path);
+			uprintf("Will use '%s' for Syslinux\n", iso_report.cfg_path);
 			// Extract all of the isolinux.bin files we found to identify their versions
 			for (i=0; i<isolinux_path.Index; i++) {
 				size = (size_t)ExtractISOFile(src_iso, isolinux_path.String[i], dot_isolinux_bin, FILE_ATTRIBUTE_NORMAL);
@@ -803,6 +817,13 @@ out:
 		safe_sprintf(path, sizeof(path), "%s\\syslinux.cfg", dest_dir);
 		// Create a /syslinux.cfg (if none exists) that points to the existing isolinux cfg
 		fd = fopen(path, "r");
+		if (fd != NULL && iso_report.needs_syslinux_overwrite) {
+			fclose(fd);
+			fd = NULL;
+			safe_sprintf(path2, sizeof(path2), "%s\\syslinux.org", dest_dir);
+			uprintf("Renaming: %s ⇨ %s", path, path2);
+			rename(path, path2);
+		}
 		if (fd == NULL) {
 			fd = fopen(path, "w");	// No "/syslinux.cfg" => create a new one
 			if (fd == NULL) {

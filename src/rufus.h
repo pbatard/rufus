@@ -262,6 +262,7 @@ typedef struct {
 	BOOL has_old_c32[NB_OLD_C32];
 	BOOL has_old_vesamenu;
 	BOOL has_efi_syslinux;
+	BOOL needs_syslinux_overwrite;
 	BOOL has_grub4dos;
 	BOOL has_grub2;
 	BOOL has_kolibrios;
