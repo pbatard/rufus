@@ -1554,7 +1554,7 @@ void InitDialog(HWND hDlg)
 	HINSTANCE hINetCplDllInst;
 	HIMAGELIST hLangToolbarImageList;
 	TBBUTTON tbLangToolbarButtons[1];
-	RECT rcClient;
+	RECT rcDeviceList;
 	RECT rcToolbarButton;
 	DWORD len;
 	SIZE sz;
@@ -1700,7 +1700,7 @@ void InitDialog(HWND hDlg)
 		hIconUp = (HICON)LoadImage(hMainInstance, MAKEINTRESOURCE(IDI_UP), IMAGE_ICON, 16, 16, 0);
 	}
 
-	hLangToolbar = CreateWindowEx(0, TOOLBARCLASSNAME, NULL, WS_CHILD | WS_TABSTOP | TBSTYLE_TRANSPARENT | CCS_NOPARENTALIGN | CCS_NORESIZE | CCS_NODIVIDER, 0, 0, 0, 0, hMainDialog, NULL, hMainInstance, NULL);
+	hLangToolbar = CreateWindowEx(0, TOOLBARCLASSNAME, NULL, WS_CHILD | TBSTYLE_TRANSPARENT | CCS_NOPARENTALIGN | CCS_NORESIZE | CCS_NODIVIDER, 0, 0, 0, 0, hMainDialog, NULL, hMainInstance, NULL);
 
 	hLangToolbarImageList = ImageList_Create(i16, i16, ILC_COLOR32, 1, 0);
 
@@ -1718,16 +1718,16 @@ void InitDialog(HWND hDlg)
 
 	SendMessage(hLangToolbar, TB_GETRECT, idLangButton, (LPARAM)&rcToolbarButton);
 	
-	// get the dimensions of the dialog
-	GetClientRect(hDlg, &rcClient);
+	// get the position of the device list combobox so that the button can be aligned to its right edge
+	GetWindowRect(hDeviceList, &rcDeviceList);
+	MapWindowPoints(NULL, hDlg, (POINT*)&rcDeviceList, 2);
 
 	// make the toolbar window just big enough to hold the button
-	// set the top margin to 4 DIPs and the right margin to 12 DIPs
 	SetWindowPos(
 		hLangToolbar,
 		NULL,
-		rcClient.right - rcToolbarButton.right - (int)(12.0f * fScale),
-		(int)(4.0f * fScale),
+		rcDeviceList.right - rcToolbarButton.right, // right margin: same as the device list combobox
+		(int)(4.0f * fScale), // top margin: 4 DIPs
 		rcToolbarButton.right,
 		rcToolbarButton.bottom,
 		0);
