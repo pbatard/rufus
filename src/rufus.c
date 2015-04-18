@@ -1646,7 +1646,7 @@ void InitDialog(HWND hDlg)
 	for (i=0; i<4; i++) {
 		IGNORE_RETVAL(ComboBox_AddStringU(hNBPasses, lmprintf((i==0)?MSG_034:MSG_035, i+1)));
 	}
-	IGNORE_RETVAL(ComboBox_SetCurSel(hNBPasses, 1));
+	IGNORE_RETVAL(ComboBox_SetCurSel(hNBPasses, 0));
 	SetPassesTooltip();
 	// Fill up the boot type dropdown
 	IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, "MS-DOS"), DT_WINME));
