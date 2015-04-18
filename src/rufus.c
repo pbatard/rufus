@@ -73,7 +73,7 @@ struct {
 	HIMAGELIST himl;
 	RECT margin;
 	UINT uAlign;
-} bi_iso = {0}, bi_up = {0}, bi_down = {0}, bi_lang = {0};	// BUTTON_IMAGELIST
+} bi_iso = {0}, bi_up = {0}, bi_down = {0};	// BUTTON_IMAGELIST
 
 typedef struct
 {
@@ -127,6 +127,8 @@ char* image_path = NULL;
 float fScale = 1.0f;
 int default_fs;
 uint32_t dur_mins, dur_secs;
+HWND hLangToolbar = NULL;
+int idLangButton = 0;
 HWND hDeviceList, hPartitionScheme, hFileSystem, hClusterSize, hLabel, hBootType, hNBPasses, hLog = NULL;
 HWND hLogDlg = NULL, hProgress = NULL, hInfo, hDiskID;
 BOOL use_own_c32[NB_OLD_C32] = {FALSE, FALSE}, detect_fakes = TRUE, mbr_selected_by_user = FALSE;
@@ -787,7 +789,7 @@ static void EnableControls(BOOL bEnable)
 	EnableWindow(hSelectISO, bEnable);
 	EnableWindow(hNBPasses, bEnable);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_ADVANCED), bEnable);
-	EnableWindow(GetDlgItem(hMainDialog, IDC_LANG), bEnable);
+	EnableWindow(hLangToolbar, bEnable);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_ENABLE_FIXED_DISKS), bEnable);
 	SetDlgItemTextU(hMainDialog, IDCANCEL, lmprintf(bEnable?MSG_006:MSG_007));
 	if (selection_default == DT_IMG)
@@ -1547,7 +1549,13 @@ static INT_PTR CALLBACK InfoCallback(HWND hCtrl, UINT message, WPARAM wParam, LP
 
 void InitDialog(HWND hDlg)
 {
-	HINSTANCE hDllInst;
+	HINSTANCE hShell32DllInst;
+	HINSTANCE hUserLanguagesCplDllInst;
+	HINSTANCE hINetCplDllInst;
+	HIMAGELIST hLangToolbarImageList;
+	TBBUTTON tbLangToolbarButtons[1];
+	RECT rcClient;
+	RECT rcToolbarButton;
 	DWORD len;
 	SIZE sz;
 	HWND hCtrl;
@@ -1670,16 +1678,61 @@ void InitDialog(HWND hDlg)
 	CheckDlgButton(hDlg, IDC_SET_ICON, BST_CHECKED);
 
 	// Load system icons (NB: Use the excellent http://www.nirsoft.net/utils/iconsext.html to find icon IDs)
-	hDllInst = GetLibraryHandle("Shell32");
-	hIconDisc = (HICON)LoadImage(hDllInst, MAKEINTRESOURCE(12), IMAGE_ICON, s16, s16, LR_DEFAULTCOLOR|LR_SHARED);
-	hIconLang = (HICON)LoadImage(hDllInst, MAKEINTRESOURCE(244), IMAGE_ICON, s16, s16, LR_DEFAULTCOLOR|LR_SHARED);
+	if (nWindowsVersion >= WINDOWS_8) {
+		// use the icon from the Windows 8+ 'Language' Control Panel if we can
+		hUserLanguagesCplDllInst = GetLibraryHandle("UserLanguagesCpl");
+		hIconLang = (HICON)LoadImage(hUserLanguagesCplDllInst, MAKEINTRESOURCE(1), IMAGE_ICON, s16, s16, LR_DEFAULTCOLOR | LR_SHARED);
+	} else {
+		// otherwise use the globe icon from the Internet Options Control Panel
+		hINetCplDllInst = GetLibraryHandle("inetcpl.cpl");
+		hIconLang = (HICON)LoadImage(hINetCplDllInst, MAKEINTRESOURCE(1313), IMAGE_ICON, s16, s16, LR_DEFAULTCOLOR | LR_SHARED);
+	}
+
+	hShell32DllInst = GetLibraryHandle("Shell32");
+
+	hIconDisc = (HICON)LoadImage(hShell32DllInst, MAKEINTRESOURCE(12), IMAGE_ICON, s16, s16, LR_DEFAULTCOLOR | LR_SHARED);
+
 	if (nWindowsVersion >= WINDOWS_VISTA) {
-		hIconDown = (HICON)LoadImage(hDllInst, MAKEINTRESOURCE(16750), IMAGE_ICON, s16, s16, LR_DEFAULTCOLOR|LR_SHARED);
-		hIconUp = (HICON)LoadImage(hDllInst, MAKEINTRESOURCE(16749), IMAGE_ICON, s16, s16, LR_DEFAULTCOLOR|LR_SHARED);
+		hIconDown = (HICON)LoadImage(hShell32DllInst, MAKEINTRESOURCE(16750), IMAGE_ICON, s16, s16, LR_DEFAULTCOLOR | LR_SHARED);
+		hIconUp = (HICON)LoadImage(hShell32DllInst, MAKEINTRESOURCE(16749), IMAGE_ICON, s16, s16, LR_DEFAULTCOLOR | LR_SHARED);
 	} else {
 		hIconDown = (HICON)LoadImage(hMainInstance, MAKEINTRESOURCE(IDI_DOWN), IMAGE_ICON, 16, 16, 0);
 		hIconUp = (HICON)LoadImage(hMainInstance, MAKEINTRESOURCE(IDI_UP), IMAGE_ICON, 16, 16, 0);
 	}
+
+	hLangToolbar = CreateWindowEx(0, TOOLBARCLASSNAME, NULL, WS_CHILD | TBSTYLE_TRANSPARENT | CCS_NOPARENTALIGN | CCS_NORESIZE | CCS_NODIVIDER, 0, 0, 0, 0, hMainDialog, NULL, hMainInstance, NULL);
+
+	hLangToolbarImageList = ImageList_Create(i16, i16, ILC_COLOR32, 1, 0);
+
+	ImageList_AddIcon(hLangToolbarImageList, hIconLang);
+
+	SendMessage(hLangToolbar, TB_SETIMAGELIST,
+		(WPARAM)0,
+		(LPARAM)hLangToolbarImageList);
+
+	// TODO: give this button a tooltip
+	tbLangToolbarButtons[0] = (TBBUTTON) { 0, idLangButton, TBSTATE_ENABLED, BTNS_WHOLEDROPDOWN, { 0 }, 0, 0 };
+
+	SendMessage(hLangToolbar, TB_BUTTONSTRUCTSIZE, (WPARAM)sizeof(TBBUTTON), 0);
+	SendMessage(hLangToolbar, TB_ADDBUTTONS, (WPARAM)1, (LPARAM)&tbLangToolbarButtons); // add just the 1 button
+
+	SendMessage(hLangToolbar, TB_GETRECT, idLangButton, (LPARAM)&rcToolbarButton);
+	
+	// get the dimensions of the dialog
+	GetClientRect(hDlg, &rcClient);
+
+	// make the toolbar window just big enough to hold the button
+	// set the top margin to 4 DIPs and the right margin to 12 DIPs
+	SetWindowPos(
+		hLangToolbar,
+		NULL,
+		rcClient.right - rcToolbarButton.right - (int)(12.0f * fScale),
+		(int)(4.0f * fScale),
+		rcToolbarButton.right,
+		rcToolbarButton.bottom,
+		0);
+
+	ShowWindow(hLangToolbar, SW_SHOWNORMAL);
 
 	// Reposition the Advanced button
 	hCtrl = GetDlgItem(hDlg, IDS_FORMAT_OPTIONS_GRP);
@@ -1708,10 +1761,6 @@ void InitDialog(HWND hDlg)
 		pfImageList_ReplaceIcon(bi_iso.himl, -1, hIconDisc);
 		SetRect(&bi_iso.margin, 0, 1, 0, 0);
 		bi_iso.uAlign = BUTTON_IMAGELIST_ALIGN_CENTER;
-		bi_lang.himl = pfImageList_Create(i16, i16, ILC_COLOR32 | ILC_MASK, 1, 0);
-		pfImageList_ReplaceIcon(bi_lang.himl, -1, hIconLang);
-		SetRect(&bi_lang.margin, 0, 1, 0, 0);
-		bi_lang.uAlign = BUTTON_IMAGELIST_ALIGN_CENTER;
 		bi_down.himl = pfImageList_Create(i16, i16, ILC_COLOR32 | ILC_MASK, 1, 0);
 		pfImageList_ReplaceIcon(bi_down.himl, -1, hIconDown);
 		SetRect(&bi_down.margin, 0, 0, 0, 0);
@@ -1722,7 +1771,6 @@ void InitDialog(HWND hDlg)
 		bi_up.uAlign = BUTTON_IMAGELIST_ALIGN_CENTER;
 
 		SendMessage(hSelectISO, BCM_SETIMAGELIST, 0, (LPARAM)&bi_iso);
-		SendMessage(GetDlgItem(hDlg, IDC_LANG), BCM_SETIMAGELIST, 0, (LPARAM)&bi_lang);
 		SendMessage(GetDlgItem(hDlg, IDC_ADVANCED), BCM_SETIMAGELIST, 0, (LPARAM)&bi_down);
 	}
 
@@ -1763,14 +1811,14 @@ static void PrintStatus2000(const char* str, BOOL val)
 	PrintStatus(2000, (val)?MSG_250:MSG_251, str);
 }
 
-void ShowLanguageMenu(HWND hDlg)
+void ShowLanguageMenu(RECT rcExclude)
 {
-	POINT pt;
 	HMENU menu;
 	loc_cmd* lcmd = NULL;
 	char lang[256];
 	char *search = "()";
 	char *l, *r, *str;
+	TPMPARAMS tpm;
 
 	UM_LANGUAGE_MENU_MAX = UM_LANGUAGE_MENU;
 	menu = CreatePopupMenu();
@@ -1788,9 +1836,17 @@ void ShowLanguageMenu(HWND hDlg)
 		InsertMenuU(menu, -1, MF_BYPOSITION|((selected_locale == lcmd)?MF_CHECKED:0), UM_LANGUAGE_MENU_MAX++, lang);
 	}
 
-	SetForegroundWindow(hDlg);
-	GetCursorPos(&pt);
-	TrackPopupMenu(menu, TPM_TOPALIGN|TPM_RIGHTALIGN, pt.x, pt.y, 0, hMainDialog, NULL);
+	// open the menu such that it doesn't overlap the specified rect
+	tpm.cbSize = sizeof(TPMPARAMS);
+	tpm.rcExclude = rcExclude;
+	TrackPopupMenuEx(
+		menu,
+		0,
+		right_to_left_mode ? rcExclude.right : rcExclude.left, // in RTL languages, the menu should be placed at the bottom-right of the rect
+		rcExclude.bottom,
+		hMainDialog,
+		&tpm);
+
 	DestroyMenu(menu);
 }
 
@@ -1862,6 +1918,8 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	loc_cmd* lcmd = NULL;
 	EXT_DECL(img_ext, NULL, __VA_GROUP__("*.img;*.vhd;*.gz;*.bzip2;*.xz;*.lzma;*.Z"), __VA_GROUP__(lmprintf(MSG_095)));
 	EXT_DECL(iso_ext, NULL, __VA_GROUP__("*.iso"), __VA_GROUP__(lmprintf(MSG_036)));
+	LPNMTOOLBAR lpnmtb;
+	RECT rcLangToolbarButton;
 
 	switch (message) {
 
@@ -2098,9 +2156,6 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				format_op_in_progress = FALSE;
 			break;
 #endif
-		case IDC_LANG:
-			ShowLanguageMenu(GetDlgItem(hDlg, IDC_LANG));
-			break;
 		case IDC_ADVANCED:
 			ToggleAdvanced();
 			SendMessage(hMainDialog, WM_COMMAND, (CBN_SELCHANGE<<16) | IDC_FILESYSTEM,
@@ -2345,6 +2400,27 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			return (INT_PTR)FALSE;
 		}
 		return (INT_PTR)TRUE;
+
+	case WM_NOTIFY:
+		switch (((LPNMHDR)lParam)->code) {
+		case TBN_DROPDOWN:
+			lpnmtb = (LPNMTOOLBAR)lParam;
+			
+			// we only care about the language button on the language toolbar
+			if (lpnmtb->hdr.hwndFrom == hLangToolbar
+				&& lpnmtb->iItem == idLangButton) {
+				// get toolbar button rect and map it to actual screen pixels
+				SendMessage(lpnmtb->hdr.hwndFrom, TB_GETRECT, (WPARAM)lpnmtb->iItem, (LPARAM)&rcLangToolbarButton);
+				MapWindowPoints(lpnmtb->hdr.hwndFrom, NULL, (POINT*)&rcLangToolbarButton, 2);
+
+				// show the language menu such that it doesn't overlap the button
+				ShowLanguageMenu(rcLangToolbarButton);
+				return (INT_PTR)TBDDRET_DEFAULT;
+			}
+			break;
+		}
+
+		break;
 
 	case WM_CLOSE:
 		if (format_thid != NULL) {
