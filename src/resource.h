@@ -106,7 +106,6 @@
 #define IDC_ADVANCED                    1043
 #define IDS_ADVANCED_OPTIONS_GRP        1044
 #define IDC_LOG                         1045
-#define IDC_LANG                        1046
 #define IDC_WINDOWS_INSTALL             1047
 #define IDC_WINDOWS_TO_GO               1048
 #define IDC_LOG_EDIT                    1050
