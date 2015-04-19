@@ -1702,7 +1702,7 @@ void InitDialog(HWND hDlg)
 
 	hLangToolbar = CreateWindowEx(0, TOOLBARCLASSNAME, NULL, WS_CHILD | TBSTYLE_TRANSPARENT | CCS_NOPARENTALIGN | CCS_NORESIZE | CCS_NODIVIDER, 0, 0, 0, 0, hMainDialog, NULL, hMainInstance, NULL);
 
-	hLangToolbarImageList = ImageList_Create(i16, i16, ILC_COLOR32, 1, 0);
+	hLangToolbarImageList = ImageList_Create(i16, i16, ILC_MASK | ILC_COLOR32, 1, 0);
 
 	ImageList_AddIcon(hLangToolbarImageList, hIconLang);
 
