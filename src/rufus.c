@@ -826,7 +826,9 @@ BOOL CALLBACK LogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 		hf = CreateFontA(lfHeight, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE,
 			DEFAULT_CHARSET, 0, 0, PROOF_QUALITY, 0, "Arial Unicode MS");
 		SendDlgItemMessageA(hDlg, IDC_LOG_EDIT, WM_SETFONT, (WPARAM)hf, TRUE);
-		return TRUE;
+		// Set 'Close Log' as the selected button
+		SendMessage(hDlg, WM_NEXTDLGCTL, (WPARAM)GetDlgItem(hDlg, IDCANCEL), TRUE);
+		break;
 	case WM_COMMAND:
 		switch (LOWORD(wParam)) {
 		case IDCANCEL:
@@ -1020,7 +1022,7 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 		for (i=(int)safe_strlen(image_path); (i>0)&&(image_path[i]!='\\'); i--);
 		PrintStatusDebug(0, MSG_205, &image_path[i+1]);
 		// Lose the focus on the select ISO (but place it on Close)
-		SendMessage(hMainDialog, WM_NEXTDLGCTL,  (WPARAM)FALSE, 0);
+		SendMessage(hMainDialog, WM_NEXTDLGCTL, (WPARAM)FALSE, 0);
 		// Lose the focus from Close and set it back to Start
 		SendMessage(hMainDialog, WM_NEXTDLGCTL, (WPARAM)GetDlgItem(hMainDialog, IDC_START), TRUE);
 	}
@@ -1702,7 +1704,7 @@ void InitDialog(HWND hDlg)
 
 	// Create the language toolbar
 	// NB: We don't make it a tabstop as it would become the default selected button otherwise
-	hLangToolbar = CreateWindowEx(0, TOOLBARCLASSNAME, NULL, WS_CHILD | TBSTYLE_TRANSPARENT | CCS_NOPARENTALIGN |
+	hLangToolbar = CreateWindowEx(0, TOOLBARCLASSNAME, NULL, WS_CHILD | WS_TABSTOP | TBSTYLE_TRANSPARENT | CCS_NOPARENTALIGN |
 		CCS_NORESIZE | CCS_NODIVIDER, 0, 0, 0, 0, hMainDialog, NULL, hMainInstance, NULL);
 	if ((pfImageList_Create != NULL) && (pfImageList_AddIcon != NULL)) {
 		hLangToolbarImageList = pfImageList_Create(i16, i16, ILC_COLOR32, 1, 0);
@@ -1971,12 +1973,16 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		SetWindowPos(hMainDialog, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOSIZE|SWP_NOMOVE);
 		SetWindowPos(hMainDialog, HWND_TOP, 0, 0, 0, 0, SWP_NOSIZE|SWP_NOMOVE);
 
+		// Set 'Start' as the selected button if it's enabled, otherwise use 'Close', instead
+		SendMessage(hDlg, WM_NEXTDLGCTL, (WPARAM)(IsWindowEnabled(GetDlgItem(hDlg, IDC_START)) ? GetDlgItem(hDlg, IDC_START) : GetDlgItem(hDlg, IDCANCEL)), TRUE);
+
+
 #if defined(ALPHA)
 		// Add a VERY ANNOYING popup for Alpha releases, so that people don't start redistributing them
 		Notification(MSG_INFO, NULL, "ALPHA VERSION", "This is an Alpha version of " APPLICATION_NAME
 			" - It is meant to be used for testing ONLY and should NOT be distributed as a release.");
 #endif
-		return (INT_PTR)TRUE;
+		return (INT_PTR)FALSE;
 
 	// The things one must do to get an ellipsis on the status bar...
 	case WM_DRAWITEM:
@@ -2927,8 +2933,13 @@ relaunch:
 			SHDeleteDirectoryExU(NULL, tmp_path, FOF_SILENT | FOF_NOERRORUI | FOF_NOCONFIRMATION);
 			continue;
 		}
-		TranslateMessage(&msg);
-		DispatchMessage(&msg);
+
+		// Let the system handle dialog messages (e.g. those from the tab key)
+		if (!IsDialogMessage(hDlg, &msg) && !IsDialogMessage(hLogDlg, &msg))
+		{
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}
 	}
 	if (relaunch) {
 		relaunch = FALSE;
