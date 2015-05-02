@@ -29,7 +29,7 @@ TARGETLIBS=$(SDK_LIB_PATH)\kernel32.lib \
            .\getopt\getopt.lib
 
 # http://jpassing.com/2008/02/01/how-to-use-manifests-with-buildexe/
-SXS_APPLICATION_MANIFEST=..\common_controls_and_elevation.manifest
+SXS_APPLICATION_MANIFEST=..\rufus.manifest
 
 SOURCES=rufus.c          \
         format.c         \

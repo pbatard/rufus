@@ -144,7 +144,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Manifest Include="..\common_controls_and_elevation.manifest">
+    <Manifest Include="..\rufus.manifest">
       <Filter>Resource Files</Filter>
     </Manifest>
   </ItemGroup>

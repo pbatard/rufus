@@ -277,8 +277,6 @@ void GetWindowsVersion(void)
 			ws = (vi.wProductType <= VER_NT_WORKSTATION);
 			nWindowsVersion = vi.dwMajorVersion << 4 | vi.dwMinorVersion;
 			switch (nWindowsVersion) {
-			case 0x50: w = "2000";
-				break;
 			case 0x51: w = "XP";
 				break;
 			case 0x52: w = (!GetSystemMetrics(89)?"2003":"2003_R2");
@@ -297,7 +295,7 @@ void GetWindowsVersion(void)
 			case 0xA0: w = (ws?"10":"Server 10");
 				break;
 			default:
-				if (nWindowsVersion < 0x50)
+				if (nWindowsVersion < 0x51)
 					nWindowsVersion = WINDOWS_UNSUPPORTED;
 				else
 					w = "11 or later";

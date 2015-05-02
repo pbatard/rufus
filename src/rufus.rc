@@ -32,7 +32,7 @@ LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
 
 IDD_DIALOG DIALOGEX 12, 12, 242, 376
 STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_MINIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Rufus 2.2.655"
+CAPTION "Rufus 2.2.656"
 FONT 8, "Segoe UI", 400, 0, 0x1
 BEGIN
     LTEXT           "Device",IDS_DEVICE_TXT,9,6,200,8
@@ -156,7 +156,7 @@ END
 
 IDD_DIALOG_XP DIALOGEX 12, 12, 242, 376
 STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_MINIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Rufus 2.2.655"
+CAPTION "Rufus 2.2.656"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     LTEXT           "Device",IDS_DEVICE_TXT,9,6,200,8
@@ -281,7 +281,7 @@ END
 IDD_DIALOG_RTL DIALOGEX 12, 12, 242, 376
 STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_MINIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_RTLREADING | WS_EX_APPWINDOW | WS_EX_LAYOUTRTL
-CAPTION "Rufus 2.2.655"
+CAPTION "Rufus 2.2.656"
 FONT 8, "Segoe UI", 400, 0, 0x1
 BEGIN
     LTEXT           "Device",IDS_DEVICE_TXT,9,6,200,8
@@ -412,7 +412,7 @@ END
 IDD_DIALOG_RTL_XP DIALOGEX 12, 12, 242, 376
 STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_MINIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_RTLREADING | WS_EX_APPWINDOW | WS_EX_LAYOUTRTL
-CAPTION "Rufus 2.2.655"
+CAPTION "Rufus 2.2.656"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     LTEXT           "Device",IDS_DEVICE_TXT,9,6,200,8
@@ -614,7 +614,7 @@ BEGIN
     "// Must reference a manifest for visual styles and elevation\r\n"
     "// Oh, and it must happen at the end, or MinGW will ignore it!\r\n"
     "#if defined(__GNUC__)\r\n"
-    "CREATEPROCESS_MANIFEST_RESOURCE_ID RT_MANIFEST ""common_controls_and_elevation.manifest""\r\n"
+    "CREATEPROCESS_MANIFEST_RESOURCE_ID RT_MANIFEST ""rufus.manifest""\r\n"
     "#endif\r\n"
     "\0"
 END
@@ -667,8 +667,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 2,2,655,0
- PRODUCTVERSION 2,2,655,0
+ FILEVERSION 2,2,656,0
+ PRODUCTVERSION 2,2,656,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -685,13 +685,13 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Akeo Consulting (http://akeo.ie)"
             VALUE "FileDescription", "Rufus"
-            VALUE "FileVersion", "2.2.655"
+            VALUE "FileVersion", "2.2.656"
             VALUE "InternalName", "Rufus"
             VALUE "LegalCopyright", "© 2011-2015 Pete Batard (GPL v3)"
             VALUE "LegalTrademarks", "http://www.gnu.org/copyleft/gpl.html"
             VALUE "OriginalFilename", "rufus.exe"
             VALUE "ProductName", "Rufus"
-            VALUE "ProductVersion", "2.2.655"
+            VALUE "ProductVersion", "2.2.656"
         END
     END
     BLOCK "VarFileInfo"
@@ -769,7 +769,7 @@ IDR_TOGO_UNATTEND_XML   RCDATA                  "../res/togo/unattend.xml"
 // Must reference a manifest for visual styles and elevation
 // Oh, and it must happen at the end, or MinGW will ignore it!
 #if defined(__GNUC__)
-CREATEPROCESS_MANIFEST_RESOURCE_ID RT_MANIFEST "common_controls_and_elevation.manifest"
+CREATEPROCESS_MANIFEST_RESOURCE_ID RT_MANIFEST "rufus.manifest"
 #endif
 
 /////////////////////////////////////////////////////////////////////////////

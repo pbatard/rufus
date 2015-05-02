@@ -220,7 +220,7 @@
     <ClInclude Include="..\usb.h" />
   </ItemGroup>
   <ItemGroup>
-    <Manifest Include="..\common_controls_and_elevation.manifest" />
+    <Manifest Include="..\rufus.manifest" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\res\down.ico" />
