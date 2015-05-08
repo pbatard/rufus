@@ -123,7 +123,7 @@ char lost_translators[][6] = LOST_TRANSLATORS;
  */
 OPENED_LIBRARIES_VARS;
 HINSTANCE hMainInstance;
-HWND hMainDialog, hLangToolbar = NULL;
+HWND hMainDialog, hLangToolbar = NULL, hUpdatesDlg = NULL;
 char szFolderPath[MAX_PATH], app_dir[MAX_PATH];
 char* image_path = NULL;
 float fScale = 1.0f;
@@ -1704,7 +1704,6 @@ void InitDialog(HWND hDlg)
 	}
 
 	// Create the language toolbar
-	// NB: We don't make it a tabstop as it would become the default selected button otherwise
 	hLangToolbar = CreateWindowEx(0, TOOLBARCLASSNAME, NULL, WS_CHILD | WS_TABSTOP | TBSTYLE_TRANSPARENT | CCS_NOPARENTALIGN |
 		CCS_NORESIZE | CCS_NODIVIDER, 0, 0, 0, 0, hMainDialog, NULL, hMainInstance, NULL);
 	if ((pfImageList_Create != NULL) && (pfImageList_AddIcon != NULL)) {
@@ -1785,6 +1784,10 @@ void InitDialog(HWND hDlg)
 	CreateTooltip(GetDlgItem(hDlg, IDC_ABOUT), lmprintf(MSG_172), -1);
 	CreateTooltip(GetDlgItem(hDlg, IDC_WINDOWS_INSTALL), lmprintf(MSG_199), -1);
 	CreateTooltip(GetDlgItem(hDlg, IDC_WINDOWS_TO_GO), lmprintf(MSG_200), -1);
+
+	// Set a label for the Advanced Mode and Select Image button for screen readers
+	SetWindowTextU(GetDlgItem(hDlg, IDC_ADVANCED), lmprintf(MSG_160));
+	SetWindowTextU(hSelectISO, lmprintf(MSG_165));
 
 	ToggleAdvanced();	// We start in advanced mode => go to basic mode
 	ToggleToGo();
@@ -2244,11 +2247,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			ToggleImage(!IsChecked(IDC_BOOT) || (selection_default != DT_IMG));
 			SetToGo();
 			if ((selection_default == DT_ISO) || (selection_default == DT_IMG)) {
-				if ((image_path == NULL) || (iso_report.label[0] == 0)) {
-					// Set focus to the Select ISO button
-					SendMessage(hMainDialog, WM_NEXTDLGCTL, (WPARAM)FALSE, 0);
-					SendMessage(hMainDialog, WM_NEXTDLGCTL, (WPARAM)hSelectISO, TRUE);
-				} else {
+				if ((image_path != NULL) && (iso_report.label[0] != 0)) {
 					// Some distros (eg. Arch Linux) want to see a specific label => ignore user one
 					SetWindowTextU(hLabel, iso_report.label);
 				}
@@ -2263,9 +2262,6 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 					SendMessage(hMainDialog, WM_COMMAND, (CBN_SELCHANGE<<16) | IDC_FILESYSTEM,
 						ComboBox_GetCurSel(hFileSystem));
 				}
-				// Set focus on the start button
-				SendMessage(hMainDialog, WM_NEXTDLGCTL, (WPARAM)FALSE, 0);
-				SendMessage(hMainDialog, WM_NEXTDLGCTL, (WPARAM)hStart, TRUE);
 				// For non ISO, if the user manually set a label, try to preserve it
 				if (!user_changed_label)
 					SetWindowTextU(hLabel, SelectedDrive.proposed_label);
@@ -2453,6 +2449,8 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 
 	case UM_NO_UPDATE:
 		Notification(MSG_INFO, NULL, lmprintf(MSG_243), lmprintf(MSG_247));
+		// Need to manually set focus back to "Check Now" for tabbing to work
+		SendMessage(hUpdatesDlg, WM_NEXTDLGCTL, (WPARAM)GetDlgItem(hUpdatesDlg, IDC_CHECK_NOW), TRUE);
 		break;
 
 	case UM_FORMAT_COMPLETED:

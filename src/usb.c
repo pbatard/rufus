@@ -469,6 +469,8 @@ BOOL GetUSBDevices(DWORD devnum)
 	r = TRUE;
 
 out:
+	// Set 'Start' as the selected button, so that tab selection works
+	SendMessage(hMainDialog, WM_NEXTDLGCTL, (WPARAM)GetDlgItem(hMainDialog, IDC_START), TRUE);
 	safe_free(devid_list);
 	StrArrayDestroy(&dev_if_path);
 	htab_destroy(&htab_devid);

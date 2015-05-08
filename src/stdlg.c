@@ -55,6 +55,7 @@ static HICON hMessageIcon = (HICON)INVALID_HANDLE_VALUE;
 static char* szMessageText = NULL;
 static char* szMessageTitle = NULL;
 static HWND hBrowseEdit;
+extern HWND hUpdatesDlg;
 static WNDPROC pOrgBrowseWndproc;
 static const SETTEXTEX friggin_microsoft_unicode_amateurs = {ST_DEFAULT, CP_UTF8};
 static BOOL notification_is_question;
@@ -537,6 +538,8 @@ INT_PTR CALLBACK AboutCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 			SendMessage(hEdit[i], EM_SETEVENTMASK, 0, ENM_LINK);
 			SendMessage(hEdit[i], EM_SETBKGNDCOLOR, 0, (LPARAM)GetSysColor(COLOR_BTNFACE));
 		}
+		// Need to send an explicit SetSel to avoid being positioned at the end of richedit control when tabstop is used
+		SendMessage(hEdit[1], EM_SETSEL, 0, 0);
 		break;
 	case WM_NOTIFY:
 		switch (((LPNMHDR)lParam)->code) {
@@ -1013,6 +1016,7 @@ INT_PTR CALLBACK UpdateCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 
 	switch (message) {
 	case WM_INITDIALOG:
+		hUpdatesDlg = hDlg;
 		apply_localization(IDD_UPDATE_POLICY, hDlg);
 		SetTitleBarIcon(hDlg);
 		CenterDialog(hDlg);
@@ -1063,6 +1067,7 @@ INT_PTR CALLBACK UpdateCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 		case IDCANCEL:
 			reset_localization(IDD_UPDATE_POLICY);
 			EndDialog(hDlg, LOWORD(wParam));
+			hUpdatesDlg = NULL;
 			return (INT_PTR)TRUE;
 		case IDC_CHECK_NOW:
 			CheckForUpdates(TRUE);
@@ -1266,6 +1271,8 @@ INT_PTR CALLBACK NewVersionCallback(HWND hDlg, UINT message, WPARAM wParam, LPAR
 					uprintf("Could not get save path\n");
 					break;
 				}
+				// Opening the File Dialog will make us lose tabbing focus - set it back
+				SendMessage(hDlg, WM_NEXTDLGCTL, (WPARAM)GetDlgItem(hDlg, IDC_DOWNLOAD), TRUE);
 				DownloadFileThreaded(update.download_url, filepath, hDlg);
 				break;
 			}
