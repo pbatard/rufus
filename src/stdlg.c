@@ -61,7 +61,7 @@ static const SETTEXTEX friggin_microsoft_unicode_amateurs = {ST_DEFAULT, CP_UTF8
 static BOOL notification_is_question;
 static const notification_info* notification_more_info;
 static BOOL settings_commcheck = FALSE;
-static WNDPROC original_wndproc = NULL;
+static WNDPROC update_original_proc = NULL;
 
 /*
  * We need a sub-callback to read the content of the edit box on exit and update
@@ -405,7 +405,7 @@ void CreateStatusBar(void)
 
 	// Create the status bar.
 	hStatus = CreateWindowEx(0, STATUSCLASSNAME, NULL, WS_CHILD | WS_VISIBLE,
-		0, 0, 0, 0, hMainDialog, (HMENU)IDC_STATUS,  hMainInstance, NULL);
+		0, 0, 0, 0, hMainDialog, (HMENU)IDC_STATUS, hMainInstance, NULL);
 
 	// Create 2 status areas
 	GetClientRect(hMainDialog, &rect);
@@ -1165,7 +1165,7 @@ static void CreateStaticFont(HDC dc, HFONT* hyperlink_font) {
  * Work around the limitations of edit control, to display a hand cursor for hyperlinks
  * NB: The LTEXT control must have SS_NOTIFY attribute for this to work
  */
-INT_PTR CALLBACK subclass_callback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+INT_PTR CALLBACK update_subclass_callback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	switch (message)
 	{
@@ -1176,7 +1176,7 @@ INT_PTR CALLBACK subclass_callback(HWND hDlg, UINT message, WPARAM wParam, LPARA
 		}
 		break;
 	}
-	return CallWindowProc(original_wndproc, hDlg, message, wParam, lParam);
+	return CallWindowProc(update_original_proc, hDlg, message, wParam, lParam);
 }
 
 /*
@@ -1201,7 +1201,7 @@ INT_PTR CALLBACK NewVersionCallback(HWND hDlg, UINT message, WPARAM wParam, LPAR
 		SetTitleBarIcon(hDlg);
 		CenterDialog(hDlg);
 		// Subclass the callback so that we can change the cursor
-		original_wndproc = (WNDPROC)SetWindowLongPtr(hDlg, GWLP_WNDPROC, (LONG_PTR)subclass_callback);
+		update_original_proc = (WNDPROC)SetWindowLongPtr(hDlg, GWLP_WNDPROC, (LONG_PTR)update_subclass_callback);
 		hNotes = GetDlgItem(hDlg, IDC_RELEASE_NOTES);
 		SendMessage(hNotes, EM_AUTOURLDETECT, 1, 0);
 		SendMessageA(hNotes, EM_SETTEXTEX, (WPARAM)&friggin_microsoft_unicode_amateurs, (LPARAM)update.release_notes);
@@ -1351,7 +1351,7 @@ SIZE GetTextSize(HWND hCtrl)
 	int len;
 	HFONT hFont;
 
-	// Compute the size of the text of the format group
+	// Compute the size of the text
 	hDC = GetDC(hCtrl);
 	if (hDC == NULL)
 		goto out;

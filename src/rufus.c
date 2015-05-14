@@ -1053,7 +1053,10 @@ static void SetPassesTooltip(void)
 // Toggle "advanced" mode
 static void ToggleAdvanced(void)
 {
-	float dialog_shift = 82.0f;
+	// Compute the shift according to the weird values we measured at different scales:
+	// {1.0, 82}, {1.25, 88}, {1.5, 90}, {2.0, 96}, {2.5, 94} (Seriously, WTF is wrong with your scaling Microsoft?!?!)
+	// https://www.wolframalpha.com/input/?i=cubic+fit+{1%2C82}%2C{1.25%2C88}%2C{1.5%2C90}%2C{2%2C96}%2C{2.5%2C94}
+	float dialog_shift = -3.22807f*fScale*fScale*fScale + 6.69173f*fScale*fScale + 15.8822f*fScale + 62.9737f;
 	RECT rect;
 	POINT point;
 	int toggle;
@@ -1127,7 +1130,8 @@ static void ToggleImage(BOOL enable)
 // Toggle the Windows To Go radio choice
 static void ToggleToGo(void)
 {
-	float dialog_shift = 38.0f;
+	// {1.0, 38}, {1.25, 40}, {1.5, 40}, {2.0, 44}, {2.5, 44}
+	float dialog_shift = (fScale >= 1.9f)?44.0f:((fScale >= 1.2f)?40.0f:38.0f);
 	RECT rect;
 	POINT point;
 	int toggle;
@@ -1554,7 +1558,7 @@ void InitDialog(HWND hDlg)
 	HINSTANCE hShell32DllInst, hUserLanguagesCplDllInst, hINetCplDllInst;
 	HIMAGELIST hLangToolbarImageList;
 	TBBUTTON tbLangToolbarButtons[1];
-	RECT rcDeviceList, rcToolbarButton;
+	RECT rcDeviceList, rcToolbarButton, rcFormatGroup, rcAdvancedOptions, rcBootType, rcSelectImage;
 	DWORD len;
 	SIZE sz;
 	HWND hCtrl;
@@ -1727,19 +1731,33 @@ void InitDialog(HWND hDlg)
 		(int)(4.0f * fScale), rcToolbarButton.right, rcToolbarButton.bottom, 0);
 	ShowWindow(hLangToolbar, SW_SHOWNORMAL);
 
-	// Reposition the Advanced button
+	// Add trailing space to the "Format Options" text
 	hCtrl = GetDlgItem(hDlg, IDS_FORMAT_OPTIONS_GRP);
-	sz = GetTextSize(hCtrl);
-	ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDC_ADVANCED), (int)((1.0f * sz.cx) / fScale), 0, 0, 0);
-	// Add a space to the "Format Options" text
 	GetWindowTextW(hCtrl, wtmp, ARRAYSIZE(wtmp));
 	wtmp[wcslen(wtmp)] = ' ';
 	SetWindowTextW(hCtrl, wtmp);
+
+	// Reposition and resize the Advanced button
+	GetWindowRect(hCtrl, &rcFormatGroup);
+	MapWindowPoints(NULL, hDlg, (POINT*)&rcFormatGroup, 2);
+	sz = GetTextSize(hCtrl);
+	GetWindowRect(GetDlgItem(hDlg, IDC_ADVANCED), &rcAdvancedOptions);
+	// The label of a group box is always 8 pixels to the right, *regardless* of the zoom level
+	SetWindowPos(GetDlgItem(hDlg, IDC_ADVANCED), hCtrl, rcFormatGroup.left + 8 + sz.cx,
+		rcFormatGroup.top, i16 + (int)(4.0f * fScale), i16/2 + (int)(8.0f * fScale), 0);
+
+	// Reposition and resize the Select Image button
+	GetWindowRect(hBootType, &rcBootType);
+	MapWindowPoints(NULL, hDlg, (POINT*)&rcBootType, 2);
+	GetWindowRect(hSelectISO, &rcSelectImage);
+	MapWindowPoints(NULL, hDlg, (POINT*)&rcSelectImage, 2);
+	SetWindowPos(hSelectISO, NULL, rcSelectImage.left, rcBootType.top - 1,
+		rcSelectImage.right - rcSelectImage.left, rcBootType.bottom - rcBootType.top + 2, 0);
+
 	// The things one needs to do to keep things looking good...
 	if (nWindowsVersion == WINDOWS_7) {
 		ResizeMoveCtrl(hDlg, GetDlgItem(hMainDialog, IDS_ADVANCED_OPTIONS_GRP), 0, -1, 0, 2);
 		ResizeMoveCtrl(hDlg, hProgress, 0, 1, 0, 0);
-		ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDC_ADVANCED), -1, 0, 0, 0);
 	}
 
 	// Subclass the Info box so that we can align its text vertically
@@ -1987,11 +2005,11 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 #endif
 		return (INT_PTR)FALSE;
 
-	// The things one must do to get an ellipsis on the status bar...
+	// The things one must do to get an ellipsis text alignment on the status bar...
 	case WM_DRAWITEM:
 		if (wParam == IDC_STATUS) {
 			pDI = (DRAWITEMSTRUCT*)lParam;
-			pDI->rcItem.top += (int)(2.0f * fScale);
+			pDI->rcItem.top -= (int)((4.0f * fScale) - 6.0f);
 			pDI->rcItem.left += (int)(4.0f * fScale);
 			SetBkMode(pDI->hDC, TRANSPARENT);
 			switch(pDI->itemID) {

@@ -331,7 +331,7 @@ DWORD DownloadFile(const char* url, const char* file, HWND hProgressDialog)
 	HttpQueryInfoA(hRequest, HTTP_QUERY_STATUS_CODE|HTTP_QUERY_FLAG_NUMBER, (LPVOID)&DownloadStatus, &dwSize, NULL);
 	if (DownloadStatus != 200) {
 		error_code = ERROR_INTERNET_ITEM_NOT_FOUND;
-		uprintf("Unable to access file: Server status %d\n", DownloadStatus);
+		uprintf("Unable to access file: %d\n", DownloadStatus);
 		goto out;
 	}
 	dwSize = sizeof(dwTotalSize);
