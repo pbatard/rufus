@@ -2430,6 +2430,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		break;
 
 	case WM_CLOSE:
+	case WM_ENDSESSION:
 		if (format_thid != NULL) {
 			return (INT_PTR)TRUE;
 		}
