@@ -112,7 +112,8 @@ static loc_cmd* selected_locale = NULL;
 static UINT_PTR UM_LANGUAGE_MENU_MAX = UM_LANGUAGE_MENU;
 static RECT relaunch_rc = { -65536, -65536, 0, 0};
 static UINT uBootChecked = BST_CHECKED, uQFChecked = BST_CHECKED, uMBRChecked = BST_UNCHECKED;
-static HFONT hFont;
+static HFONT hInfoFont;
+static HBRUSH hInfoBrush;
 static WNDPROC info_original_proc = NULL;
 char ClusterSizeLabel[MAX_CLUSTER_SIZES][64];
 char msgbox[1024], msgbox_title[32], *ini_file = NULL;
@@ -1539,13 +1540,13 @@ static INT_PTR CALLBACK InfoCallback(HWND hCtrl, UINT message, WPARAM wParam, LP
 	case WM_PAINT:
 		GetWindowTextW(hInfo, winfo, ARRAYSIZE(winfo));
 		hdc = BeginPaint(hCtrl , &ps);
-		SelectObject(hdc, hFont);
+		SelectObject(hdc, hInfoFont);
 		SetBkColor(hdc, GetSysColor(COLOR_BTNFACE));
 		SetTextAlign(hdc , TA_CENTER | TA_BASELINE);
 		GetClientRect(hCtrl , &rect);
 		// If you don't fill the client area, you get leftover text artifacts
-		FillRect(hdc, &rect, CreateSolidBrush(GetSysColor(COLOR_BTNFACE)));
-		TextOutW(hdc, rect.right/2, rect.bottom/2 + (int)(5.0f * fScale), winfo, (int)wcslen(winfo));
+		FillRect(hdc, &rect, hInfoBrush);
+		ExtTextOutW(hdc, rect.right/2, rect.bottom/2 + (int)(5.0f * fScale), ETO_CLIPPED, &rect, winfo, (int)wcslen(winfo), NULL);
 		EndPaint(hCtrl, &ps);
 		return (INT_PTR)TRUE;
 	}
@@ -1609,9 +1610,11 @@ void InitDialog(HWND hDlg)
 	else if (s16 >= 20)
 		s16 = 24;
 
-	// Create the font for the Info edit box
-	hFont = CreateFontA(lfHeight, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE, DEFAULT_CHARSET,
+	// Create the font and brush for the Info edit box
+	hInfoFont = CreateFontA(lfHeight, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE, DEFAULT_CHARSET,
 		0, 0, PROOF_QUALITY, 0, (nWindowsVersion >= WINDOWS_VISTA)?"Segoe UI":"Arial Unicode MS");
+	SendDlgItemMessageA(hDlg, IDC_INFO, WM_SETFONT, (WPARAM)hInfoFont, TRUE);
+	hInfoBrush = CreateSolidBrush(GetSysColor(COLOR_BTNFACE));
 
 	// Create the title bar icon
 	SetTitleBarIcon(hDlg);
