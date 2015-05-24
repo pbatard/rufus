@@ -1,3 +1,11 @@
+o Version 2.2 (2015.05.??)
+    Modernize the language selection button, courtesy of David Warner
+    Add keyboard accessibility, courtesy of David Warner
+    Add a clear indication of UEFI-CSM usage
+    Fix Rufus preventing Windows shutdown when idle
+    Improve UI on high DPI monitors
+    Other UI improvements and fixes
+
 o Version 2.1 (2015.03.23)
     Add 32 bit support to UEFI:NTFS boot
     Add standalone UEFI:NTFS boot installation, in advanced mode

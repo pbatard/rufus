@@ -53,9 +53,9 @@ CdIo_t* cdio_open (const char* psz_source, driver_id_t driver_id) {return NULL;}
 void cdio_destroy (CdIo_t* p_cdio) {}
 
 typedef struct {
-	BOOL is_syslinux_cfg;
-	BOOL is_grub_cfg;
-	BOOL is_old_c32[NB_OLD_C32];
+	BOOLEAN is_syslinux_cfg;
+	BOOLEAN is_grub_cfg;
+	BOOLEAN is_old_c32[NB_OLD_C32];
 } EXTRACT_PROPS;
 
 RUFUS_ISO_REPORT iso_report;
