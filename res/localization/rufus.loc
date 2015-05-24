@@ -204,7 +204,7 @@ t MSG_028 "megabytes"
 t MSG_029 "Default"
 # The following gets appended to the file system, cluster size, etc.
 t MSG_030 "%s (Default)"
-t MSG_031 "%s partition scheme for BIOS or UEFI/CSM"
+t MSG_031 "%s partition scheme for BIOS or %s"
 t MSG_032 "%s partition scheme for BIOS"
 t MSG_033 "%s partition scheme for UEFI"
 # Number of bad block check passes (singular for 1 pass, plural for 2 or more passes)
@@ -629,7 +629,7 @@ t MSG_028 "ميجا بايت"
 t MSG_029 "الإفتراضي"
 # The following gets appended to the file system, cluster size, etc.
 t MSG_030 "%s (الإفتراضي)"
-t MSG_031 "%s مخطط تقسيم لل BIOS أو أجهزة UEFI/CSM"
+t MSG_031 "%s مخطط تقسيم لل BIOS أو أجهزة %s"
 t MSG_032 "%s مخطط تقسيم BIOS"
 t MSG_033 "%s مخطط تقسيم UEFI"
 # Number of bad block check passes (singular for 1 pass, plural for 2 or more passes)
@@ -1049,7 +1049,7 @@ t MSG_028 "megabytes"
 t MSG_029 "Стандартно"
 # The following gets appended to the file system, cluster size, etc.
 t MSG_030 "%s (Стандартно)"
-t MSG_031 "%s дялова схема за BIOS или UEFI/CSM"
+t MSG_031 "%s дялова схема за BIOS или %s"
 t MSG_032 "%s дялова схема за BIOS"
 t MSG_033 "%s дялова схема за UEFI"
 # Number of bad block check passes (singular for 1 pass, plural for 2 or more passes)
@@ -1467,7 +1467,7 @@ t MSG_028 "M 字节"
 t MSG_029 "默认"
 # The following gets appended to the file system, cluster size, etc.
 t MSG_030 "%s (默认)"
-t MSG_031 "用于 BIOS 或 UEFI/CSM 计算机的 %s 分区方案，"
+t MSG_031 "用于 BIOS 或 %s 计算机的 %s 分区方案，"
 t MSG_032 "用于 BIOS 计算机的 %s 分区方案"
 t MSG_033 "用于 UEFI 计算机的 %s 分区方案"
 # Number of bad block check passes (singular for 1 pass, plural for 2 or more passes)
@@ -1879,7 +1879,7 @@ t MSG_028 "megabytes"
 t MSG_029 "預設"
 # The following gets appended to the file system, cluster size, etc.
 t MSG_030 "%s (預設)"
-t MSG_031 "%s 可相容 BIOS 和 UEFI/CSM 之資料分割配置"
+t MSG_031 "%s 可相容 BIOS 和 %s 之資料分割配置"
 t MSG_032 "%s BIOS 資料分割配置"
 t MSG_033 "%s UEFI 資料分割配置"
 # Number of bad block check passes (singular for 1 pass, plural for 2 or more passes)
@@ -2255,7 +2255,7 @@ t MSG_028 "megabajta"
 t MSG_029 "Zadano"
 # The following gets appended to the file system, cluster size, etc.
 t MSG_030 "%s (Zadano)"
-t MSG_031 "%s shema particije za BIOS ili UEFI/CSM"
+t MSG_031 "%s shema particije za BIOS ili %s"
 t MSG_032 "%s shema particije za BIOS"
 t MSG_033 "%s shema particije za UEFI"
 # Number of bad block check passes (singular for 1 pass, plural for 2 or more passes)
@@ -2681,7 +2681,7 @@ t MSG_028 "megabajtů"
 t MSG_029 "Výchozí"
 # The following gets appended to the file system, cluster size, etc.
 t MSG_030 "%s (Výchozí)"
-t MSG_031 "%s schéma oddílu pro BIOS nebo UEFI/CSM"
+t MSG_031 "%s schéma oddílu pro BIOS nebo %s"
 t MSG_032 "%s schéma oddílu pro BIOS"
 t MSG_033 "%s schéma oddílu pro UEFI"
 # Number of bad block check passes (singular for 1 pass, plural for 2 or more passes)
@@ -3116,7 +3116,7 @@ t MSG_028 "megabytes"
 t MSG_029 "standard"
 # The following gets appended to the file system, cluster size, etc.
 t MSG_030 "%s (standard)"
-t MSG_031 "%s partition for BIOS eller UEFI/CSM"
+t MSG_031 "%s partition for BIOS eller %s"
 t MSG_032 "%s partition for BIOS"
 t MSG_033 "%s partition for UEFI"
 # Number of bad block check passes (singular for 1 pass, plural for 2 or more passes)
@@ -3555,7 +3555,7 @@ t MSG_028 "megabytes"
 t MSG_029 "Standaard"
 # The following gets appended to the file system, cluster size, etc.
 t MSG_030 "%s (Standaard)"
-t MSG_031 "%s partitie-indeling voor BIOS of UEFI/CSM"
+t MSG_031 "%s partitie-indeling voor BIOS of %s"
 t MSG_032 "%s partitie-indeling voor BIOS"
 t MSG_033 "%s partitie-indeling voor UEFI"
 # Number of bad block check passes (singular for 1 pass, plural for 2 or more passes)
@@ -3967,7 +3967,7 @@ t MSG_028 "megatavua"
 t MSG_029 "Oletus"
 # The following gets appended to the file system, cluster size, etc.
 t MSG_030 "%s (Oletus)"
-t MSG_031 "%s-osiotyyppi BIOS- tai UEFI/CSM"
+t MSG_031 "%s-osiotyyppi BIOS- tai %s"
 t MSG_032 "%s-osiotyyppi BIOS"
 t MSG_033 "%s-osiotyyppi UEFI"
 # Number of bad block check passes (singular for 1 pass, plural for 2 or more passes)
@@ -4386,7 +4386,7 @@ t MSG_027 "kilo-octets"
 t MSG_028 "méga-octets"
 t MSG_029 "Défaut"
 t MSG_030 "%s (Défaut)"
-t MSG_031 "Type de partition %s pour BIOS ou UEFI/CSM"
+t MSG_031 "Type de partition %s pour BIOS ou %s"
 t MSG_032 "Type de partition %s pour BIOS"
 t MSG_033 "Type de partition %s pour UEFI"
 t MSG_034 "%d passe"
@@ -4807,7 +4807,7 @@ t MSG_028 "Megabyte"
 t MSG_029 "Standard"
 # The following gets appended to the file system, cluster size, etc.
 t MSG_030 "%s (Standard)"
-t MSG_031 "%s Partitionierungsschema für BIOS oder UEFI/CSM"
+t MSG_031 "%s Partitionierungsschema für BIOS oder %s"
 t MSG_032 "%s Partitionierungsschema für BIOS"
 t MSG_033 "%s Partitionierungsschema für UEFI"
 # Number of bad block check passes (singular for 1 pass, plural for 2 or more passes)
@@ -5253,7 +5253,7 @@ t MSG_028 "megabytes"
 t MSG_029 "Προεπιλογή"
 # The following gets appended to the file system, cluster size, etc.
 t MSG_030 "%s (Προεπιλογή)"
-t MSG_031 "%s Σύστημα διαμερισμού για BIOS ή UEFI/CSM"
+t MSG_031 "%s Σύστημα διαμερισμού για BIOS ή %s"
 t MSG_032 "%s Σύστημα διαμερισμού για BIOS"
 t MSG_033 "%s Σύστημα διαμερισμού για UEFI"
 # Number of bad block check passes (singular for 1 pass, plural for 2 or more passes)
@@ -5668,7 +5668,7 @@ t MSG_028 "megabájt"
 t MSG_029 "Alapértelmezett"
 # The following gets appended to the file system, cluster size, etc.
 t MSG_030 "%s (Alap)"
-t MSG_031 "%s partíciós séma BIOS-os vagy UEFI/CSM-s gép(ek)hez"
+t MSG_031 "%s partíciós séma BIOS-os vagy %s-s gép(ek)hez"
 t MSG_032 "%s partíciós séma BIOS-os gép(ek)hez"
 t MSG_033 "%s partíciós séma UEFI-s gép(ek)hez"
 # Number of bad block check passes (singular for 1 pass, plural for 2 or more passes)
@@ -6113,7 +6113,7 @@ t MSG_028 "megabit"
 t MSG_029 "Standar"
 # The following gets appended to the file system, cluster size, etc.
 t MSG_030 "%s (Standar)"
-t MSG_031 "%s skema partisi untuk BIOS atau UEFI/CSM"
+t MSG_031 "%s skema partisi untuk BIOS atau %s"
 t MSG_032 "%s skema partisi untuk BIOS"
 t MSG_033 "%s skema partisi untuk UEFI"
 # Number of bad block check passes (singular for 1 pass, plural for 2 or more passes)
@@ -6478,7 +6478,7 @@ t MSG_027 "kilobyte"
 t MSG_028 "megabyte"
 t MSG_029 "Predefinito"
 t MSG_030 "%s (predefinito)"
-t MSG_031 "Schema partizione %s per BIOS o UEFI/CSM"
+t MSG_031 "Schema partizione %s per BIOS o %s"
 t MSG_032 "Schema partizione %s per BIOS"
 t MSG_033 "Schema partizione %s per UEFI"
 t MSG_034 "%d test"
@@ -6773,33 +6773,33 @@ b "en-US"
 # Main dialog
 g IDD_DIALOG
 
-s IDD_DIALOG +60,0
-s IDC_PROGRESS +60,0
-s IDC_DEVICE +60,0
-s IDC_PARTITION_TYPE +60,0
-s IDC_FILESYSTEM +60,0
-s IDC_CLUSTERSIZE +60,0
-s IDC_LABEL +60,0
-s IDS_FORMAT_OPTIONS_GRP +60,0
-s IDS_ADVANCED_OPTIONS_GRP +60,0
+s IDD_DIALOG +90,0
+s IDC_PROGRESS +90,0
+s IDC_DEVICE +90,0
+s IDC_PARTITION_TYPE +90,0
+s IDC_FILESYSTEM +90,0
+s IDC_CLUSTERSIZE +90,0
+s IDC_LABEL +90,0
+s IDS_FORMAT_OPTIONS_GRP +90,0
+s IDS_ADVANCED_OPTIONS_GRP +90,0
 s IDC_BADBLOCKS +30,0
-s IDC_ENABLE_FIXED_DISKS +60,0
-s IDC_EXTRA_PARTITION +60,0
+s IDC_ENABLE_FIXED_DISKS +90,0
+s IDC_EXTRA_PARTITION +90,0
 m IDC_NBPASSES +30,0
-s IDC_NBPASSES +30,0
+s IDC_NBPASSES +60,0
 m IDC_BOOTTYPE +30,0
-s IDC_BOOTTYPE +30,0
-m IDC_SELECT_ISO +60,0
-s IDC_INFO +60,0
+s IDC_BOOTTYPE +60,0
+m IDC_SELECT_ISO +90,0
+s IDC_INFO +90,0
 s IDC_RUFUS_MBR +30,0
 m IDC_DISK_ID +30,0
-s IDC_DISK_ID +30,0
+s IDC_DISK_ID +60,0
 s IDC_ABOUT +15,0
 m IDC_LOG +15,0
 s IDC_LOG +15,0
-m IDC_START +30,0
+m IDC_START +60,0
 s IDC_START +15,0
-m IDCANCEL +45,0
+m IDCANCEL +75,0
 s IDCANCEL +15,0
 
 t IDS_DEVICE_TXT "デバイス"
@@ -6931,7 +6931,7 @@ t MSG_028 "メガバイト"
 t MSG_029 "デフォルト"
 # The following gets appended to the file system, cluster size, etc.
 t MSG_030 "%s (デフォルト)"
-t MSG_031 "%s バイオスまたはUEFIコンピューターのためにパーティション構成"
+t MSG_031 "%s バイオスまたは%sコンピューターのためにパーティション構成"
 t MSG_032 "%s バイオスコンピューターのためにパーティション構成"
 t MSG_033 "%s UEFIコンピューターのためにパーティション構成"
 # Number of bad block check passes (singular for 1 pass, plural for 2 or more passes)
@@ -7349,7 +7349,7 @@ t MSG_028 "MB"
 t MSG_029 "기본"
 # The following gets appended to the file system, cluster size, etc.
 t MSG_030 "%s (기본)"
-t MSG_031 "%s 파티션 형식의 BIOS 또는 UEFI/CSM (BIOS 호환)"
+t MSG_031 "%s 파티션 형식의 BIOS 또는 %s (BIOS 호환)"
 t MSG_032 "%s 파티션 형식의 BIOS"
 t MSG_033 "%s 파티션 형식의 UEFI"
 # Number of bad block check passes (singular for 1 pass, plural for 2 or more passes)
@@ -7790,7 +7790,7 @@ t MSG_028 "megabaiti"
 t MSG_029 "Noklusējums"
 # The following gets appended to the file system, cluster size, etc.
 t MSG_030 "%s (Noklusējums)"
-t MSG_031 "%s formāts datoriem ar BIOS vai UEFI/CSM"
+t MSG_031 "%s formāts datoriem ar BIOS vai %s"
 t MSG_032 "%s formāts datoriem ar BIOS"
 t MSG_033 "%s formāts datoriem ar UEFI"
 # Number of bad block check passes (singular for 1 pass, plural for 2 or more passes)
@@ -8221,7 +8221,7 @@ t MSG_028 "megabaitai"
 t MSG_029 "Numatytas"
 # The following gets appended to the file system, cluster size, etc.
 t MSG_030 "%s (numatytas)"
-t MSG_031 "%s skaidinių schema BIOS ar UEFI/CSM"
+t MSG_031 "%s skaidinių schema BIOS ar %s"
 t MSG_032 "%s skaidinių schema BIOS"
 t MSG_033 "%s skaidinių schema UEFI"
 # Number of bad block check passes (singular for 1 pass, plural for 2 or more passes)
@@ -8669,7 +8669,7 @@ t MSG_028 "megabait"
 t MSG_029 "lalai"
 # The following gets appended to the file system, cluster size, etc.
 t MSG_030 "%s (Lalai)"
-t MSG_031 "%s skema partition untuk BIOS dan UEFI/CSM"
+t MSG_031 "%s skema partition untuk BIOS dan %s"
 t MSG_032 "%s skema partition untuk BIOS"
 t MSG_033 "%s skema partition untuk UEFI"
 
@@ -9076,7 +9076,7 @@ t MSG_028 "megabytes"
 t MSG_029 "Standard"
 # The following gets appended to the file system, cluster size, etc.
 t MSG_030 "%s (Standard)"
-t MSG_031 "%s partisjon skjema for BIOS eller UEFI/CSM"
+t MSG_031 "%s partisjon skjema for BIOS eller %s"
 t MSG_032 "%s partisjon skjema for BIOS"
 t MSG_033 "%s partisjon skjema for UEFI"
 # Number of bad block check passes (singular for 1 pass, plural for 2 or more passes)
@@ -9535,7 +9535,7 @@ t MSG_028 "megabajtów"
 t MSG_029 "Domyślne"
 # The following gets appended to the file system, cluster size, etc.
 t MSG_030 "%s (Domyślne)"
-t MSG_031 "Schemat partycjonowania %s dla BIOS lub UEFI/CSM"
+t MSG_031 "Schemat partycjonowania %s dla BIOS lub %s"
 t MSG_032 "Schemat partycjonowania %s dla BIOS"
 t MSG_033 "Schemat partycjonowania %s dla UEFI"
 # Number of bad block check passes (singular for 1 pass, plural for 2 or more passes)
@@ -9971,7 +9971,7 @@ t MSG_028 "megabytes"
 t MSG_029 "Default"
 # The following gets appended to the file system, cluster size, etc.
 t MSG_030 "%s (Default)"
-t MSG_031 "Partição %s para BIOS ou UEFI/CSM"
+t MSG_031 "Partição %s para BIOS ou %s"
 t MSG_032 "Partição %s para BIOS"
 t MSG_033 "Partição %s para UEFI"
 # Number of bad block check passes (singular for 1 pass, plural for 2 or more passes)
@@ -10383,7 +10383,7 @@ t MSG_028 "megabytes"
 t MSG_029 "Default"
 # The following gets appended to the file system, cluster size, etc.
 t MSG_030 "%s (Default)"
-t MSG_031 "Partição %s para BIOS ou UEFI/CSM"
+t MSG_031 "Partição %s para BIOS ou %s"
 t MSG_032 "Partição %s para BIOS"
 t MSG_033 "Partição %s para UEFI"
 # Number of bad block check passes (singular for 1 pass, plural for 2 or more passes)
@@ -10814,7 +10814,7 @@ t MSG_027 "kilo-octeţi"
 t MSG_028 "megaocteţi"
 t MSG_029 "Standart"
 t MSG_030 "%s (Standart)"
-t MSG_031 "Schema de partiţie %s cu BIOS sau UEFI/CSM"
+t MSG_031 "Schema de partiţie %s cu BIOS sau %s"
 t MSG_032 "Schema de partiţie %s cu BIOS"
 t MSG_033 "Schema de partiţie %s cu UEFI"
 t MSG_034 "%d trecere"
@@ -11219,7 +11219,7 @@ t MSG_028 "МБ"
 t MSG_029 "По умолчанию"
 # The following gets appended to the file system, cluster size, etc.
 t MSG_030 "%s (по умолчанию)"
-t MSG_031 "%s для компьютеров с BIOS или UEFI/CSM"
+t MSG_031 "%s для компьютеров с BIOS или %s"
 t MSG_032 "%s для компьютеров с BIOS"
 t MSG_033 "%s для компьютеров с UEFI"
 # Number of bad block check passes (singular for 1 pass, plural for 2 or more passes)
@@ -11624,7 +11624,7 @@ t MSG_028 "megabitov"
 t MSG_029 "Predvolené"
 # The following gets appended to the file system, cluster size, etc.
 t MSG_030 "%s (Predvolené)"
-t MSG_031 "%s schéma oddielu pre BIOS alebo UEFI/CSM"
+t MSG_031 "%s schéma oddielu pre BIOS alebo %s"
 t MSG_032 "%s schéma oddielu pre BIOS"
 t MSG_033 "%s schéma oddielu pre UEFI"
 # Number of bad block check passes (singular for 1 pass, plural for 2 or more passes)
@@ -12058,7 +12058,7 @@ t MSG_028 "megabajtov"
 t MSG_029 "Privzeto"
 # The following gets appended to the file system, cluster size, etc.
 t MSG_030 "%s (privzeto)"
-t MSG_031 "%s particijska shema za BIOS ali UEFI/CSM"
+t MSG_031 "%s particijska shema za BIOS ali %s"
 t MSG_032 "%s particijska shema za BIOS"
 t MSG_033 "%s particijska shema za UEFI"
 # Number of bad block check passes (singular for 1 pass, plural for 2 or more passes)
@@ -12486,7 +12486,7 @@ t MSG_028 "megabytes"
 t MSG_029 "Por defecto"
 # The following gets appended to the file system, cluster size, etc.
 t MSG_030 "%s (Por defecto)"
-t MSG_031 "Tipo de partición %s para BIOS o UEFI/CSM"
+t MSG_031 "Tipo de partición %s para BIOS o %s"
 t MSG_032 "Tipo de partición %s para BIOS"
 t MSG_033 "Tipo de partición %s para UEFI"
 # Number of bad block check passes (singular for 1 pass, plural for 2 or more passes)
@@ -12935,7 +12935,7 @@ t MSG_028 "megabytes"
 t MSG_029 "Standard"
 # The following gets appended to the file system, cluster size, etc.
 t MSG_030 "%s (Standard)"
-t MSG_031 "%s partitionsschema för BIOS eller UEFI/CSM"
+t MSG_031 "%s partitionsschema för BIOS eller %s"
 t MSG_032 "%s partitionsschema för BIOS"
 t MSG_033 "%s partitionsschema för UEFI"
 # Number of bad block check passes (singular for 1 pass, plural for 2 or more passes)
@@ -13391,7 +13391,7 @@ t MSG_028 "megabyte"
 t MSG_029 "Varsayılan"
 # The following gets appended to the file system, cluster size, etc.
 t MSG_030 "%s (Varsayılan)"
-t MSG_031 "BIOS yada UEFI/CSM için %s Bölüm Düzeni"
+t MSG_031 "BIOS yada %s için %s Bölüm Düzeni"
 t MSG_032 "BIOS için %s Bölüm Düzeni"
 t MSG_033 "UEFI için %s Bölüm Düzeni"
 # Number of bad block check passes (singular for 1 pass, plural for 2 or more passes)
@@ -13843,7 +13843,7 @@ t MSG_028 "мегабайтів"
 t MSG_029 "За замовчуванням"
 # The following gets appended to the file system, cluster size, etc.
 t MSG_030 "%s (за замовч.)"
-t MSG_031 "%s для комп'ютерів з BIOS чи UEFI/CSM"
+t MSG_031 "%s для комп'ютерів з BIOS чи %s"
 t MSG_032 "%s для комп'ютерів з BIOS"
 t MSG_033 "%s для комп'ютерів з UEFI"
 # Number of bad block check passes (singular for 1 pass, plural for 2 or more passes)
@@ -14255,7 +14255,7 @@ t MSG_028 "megabyte"
 t MSG_029 "Mặc định"
 # The following gets appended to the file system, cluster size, etc.
 t MSG_030 "%s (Mặc định)"
-t MSG_031 "Sắp xếp phân vùng %s cho BIOS hoặc UEFI/CSM"
+t MSG_031 "Sắp xếp phân vùng %s cho BIOS hoặc %s"
 t MSG_032 "Sắp xếp phân vùng %s cho BIOS"
 t MSG_033 "Sắp xếp phân vùng %s cho UEFI"
 # Number of bad block check passes (singular for 1 pass, plural for 2 or more passes)

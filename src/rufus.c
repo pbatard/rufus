@@ -392,13 +392,33 @@ static BOOL SetClusterSizes(int FSType)
 	return TRUE;
 }
 
+// This call sets the first option for the "partition type and target system" field
+// according to whether we will be running in UEFI/CSM mode or standard UEFI
+static void SetMBRForUEFI(BOOL replace)
+{
+	BOOL useCSM = FALSE;
+
+	if (image_path != NULL) {
+		if ( (!iso_report.has_efi) || ((iso_report.has_bootmgr) && (!allow_dual_uefi_bios) &&
+			 (Button_GetCheck(GetDlgItem(hMainDialog, IDC_WINDOWS_TO_GO)) != BST_CHECKED)) )
+			useCSM = TRUE;
+	}
+
+	if (replace)
+		ComboBox_DeleteString(hPartitionScheme, 0);
+	IGNORE_RETVAL(ComboBox_SetItemData(hPartitionScheme, ComboBox_InsertStringU(hPartitionScheme, 0,
+		lmprintf(MSG_031, PartitionTypeLabel[PARTITION_STYLE_MBR], useCSM?"UEFI-CSM":"UEFI")), (BT_BIOS<<16)|PARTITION_STYLE_MBR));
+	if (replace)
+		IGNORE_RETVAL(ComboBox_SetCurSel(hPartitionScheme, max(ComboBox_GetCurSel(hPartitionScheme), 0)));
+}
+
 /*
  * Fill the drive properties (size, FS, etc)
  */
 static BOOL SetDriveInfo(int ComboIndex)
 {
 	DWORD i;
-	int pt, bt;
+	int pt;
 	char fs_type[32];
 
 	memset(&SelectedDrive, 0, sizeof(SelectedDrive));
@@ -445,10 +465,13 @@ static BOOL SetDriveInfo(int ComboIndex)
 		// for XP, as it doesn't support GPT at all
 		if ((i == 2) && (nWindowsVersion <= WINDOWS_XP))
 			continue;
-		bt = (i==0)?BT_BIOS:BT_UEFI;
 		pt = (i==2)?PARTITION_STYLE_GPT:PARTITION_STYLE_MBR;
-		IGNORE_RETVAL(ComboBox_SetItemData(hPartitionScheme, ComboBox_AddStringU(hPartitionScheme,
-			lmprintf((i==0)?MSG_031:MSG_033, PartitionTypeLabel[pt])), (bt<<16)|pt));
+		if (i==0) {
+			SetMBRForUEFI(FALSE);
+		} else {
+			IGNORE_RETVAL(ComboBox_SetItemData(hPartitionScheme, ComboBox_AddStringU(hPartitionScheme,
+				lmprintf(MSG_033, PartitionTypeLabel[pt])), (BT_UEFI<<16)|pt));
+		}
 	}
 
 	// At least one filesystem is go => enable formatting
@@ -586,6 +609,7 @@ static void SetTargetSystem(void)
 {
 	int ts;
 
+	SetMBRForUEFI(TRUE);
 	if (SelectedDrive.PartitionType == PARTITION_STYLE_GPT) {
 		ts = 2;	// GPT/UEFI
 	} else if (SelectedDrive.has_protective_mbr || SelectedDrive.has_mbr_uefi_marker || ((iso_report.has_efi) &&
@@ -2317,6 +2341,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				 (Button_GetCheck(GetDlgItem(hMainDialog, IDC_WINDOWS_TO_GO)) == BST_CHECKED) ) {
 				SetFSFromISO();
 				SetMBRProps();
+				SetMBRForUEFI(TRUE);
 			}
 			break;
 		case IDC_RUFUS_MBR:
@@ -2863,6 +2888,7 @@ relaunch:
 		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'E')) {
 			allow_dual_uefi_bios = !allow_dual_uefi_bios;
 			PrintStatus2000(lmprintf(MSG_266), allow_dual_uefi_bios);
+			SetMBRForUEFI(TRUE);
 			continue;
 		}
 		// Alt-F => Toggle detection of USB HDDs
