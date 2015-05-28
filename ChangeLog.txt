@@ -5,6 +5,7 @@ o Version 2.2 (2015.05.??)
     Fix an USB detection issue and add support for ASUS UASP Turbo Mode
     Fix prevention of Windows shutdown when Rufus is idle
     Improve UI on high DPI monitors
+    Update Grub4DOS to 0.4.6a [2015.05.18]
     Other UI improvements and fixes
 
 o Version 2.1 (2015.03.23)
