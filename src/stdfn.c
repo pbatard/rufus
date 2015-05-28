@@ -153,7 +153,7 @@ uint32_t htab_hash(char* str, htab_table* htab)
 			// existing hash
 			return idx;
 		}
-		// uprintf("hash collision ('%s' vs '%s')\n", str, htab_table[idx].str);
+		// uprintf("hash collision ('%s' vs '%s')\n", str, htab->table[idx].str);
 
 		// Second hash function, as suggested in [Knuth]
 		hval2 = 1 + hval % (htab->size - 2);

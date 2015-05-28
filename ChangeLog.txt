@@ -1,8 +1,9 @@
 o Version 2.2 (2015.05.??)
     Modernize the language selection button, courtesy of David Warner
     Add keyboard accessibility, courtesy of David Warner
-    Add a clear indication of UEFI-CSM usage
-    Fix Rufus preventing Windows shutdown when idle
+    Add a clear indication of when UEFI-CSM is to be used
+    Fix an USB detection issue and add support for ASUS UASP Turbo Mode
+    Fix prevention of Windows shutdown when Rufus is idle
     Improve UI on high DPI monitors
     Other UI improvements and fixes
 

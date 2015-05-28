@@ -128,7 +128,7 @@ BOOL GetUSBDevices(DWORD devnum)
 {
 	// The first two are standard Microsoft drivers (including the Windows 8 UASP one).
 	// The rest are the vendor UASP drivers I know of so far - list may be incomplete!
-	const char* storage_name[] = { "USBSTOR", "UASPSTOR", "VUSBSTOR", "ETRONSTOR" };
+	const char* storage_name[] = { "USBSTOR", "UASPSTOR", "VUSBSTOR", "ETRONSTOR", "ASUSSTPT" };
 	const char* scsi_name = "SCSI";
 	const char* usb_speed_name[USB_SPEED_MAX] = { "USB", "USB 1.0", "USB 1.1", "USB 2.0", "USB 3.0" };
 	// Hash table and String Array used to match a Device ID with the parent hub's Device Interface Path
@@ -141,20 +141,22 @@ BOOL GetUSBDevices(DWORD devnum)
 	SP_DEVINFO_DATA dev_info_data;
 	SP_DEVICE_INTERFACE_DATA devint_data;
 	PSP_DEVICE_INTERFACE_DETAIL_DATA_A devint_detail_data;
-	DEVINST parent_inst, device_inst;
+	DEVINST parent_inst, grandparent_inst, device_inst;
 	DWORD size, i, j, k, l, datatype, drive_index;
-	ULONG list_size[ARRAYSIZE(storage_name)] = { 0 }, full_list_size, ulFlags;
+	ULONG list_size[ARRAYSIZE(storage_name)] = { 0 }, list_start[ARRAYSIZE(storage_name)] = { 0 }, full_list_size, ulFlags;
 	HANDLE hDrive;
 	LONG maxwidth = 0;
 	int s, score, drive_number;
 	char drive_letters[27], *device_id, *devid_list = NULL, entry_msg[128];
-	char *label, *entry, buffer[MAX_PATH], str[128];
+	char *label, *entry, buffer[MAX_PATH], str[MAX_PATH], *method_str;
 	usb_device_props props;
 
 	IGNORE_RETVAL(ComboBox_ResetContent(hDeviceList));
 	StrArrayClear(&DriveID);
 	StrArrayClear(&DriveLabel);
 	StrArrayCreate(&dev_if_path, 128);
+	// Add a dummy for string index zero, as this is what non matching hashes will point to
+	StrArrayAdd(&dev_if_path, "");
 
 	device_id = (char*)malloc(MAX_PATH);
 	if (device_id == NULL)
@@ -196,7 +198,6 @@ BOOL GetUSBDevices(DWORD devnum)
 								}
 							}
 						}
-
 					}
 					free(devint_detail_data);
 				}
@@ -228,6 +229,7 @@ BOOL GetUSBDevices(DWORD devnum)
 			return FALSE;
 		}
 		for (s=0, i=0; s<ARRAYSIZE(storage_name); s++) {
+			list_start[s] = i;
 			if (list_size[s] > 1) {
 				if (CM_Get_Device_ID_ListA(storage_name[s], &devid_list[i], list_size[s], ulFlags) != CR_SUCCESS)
 					continue;
@@ -249,6 +251,7 @@ BOOL GetUSBDevices(DWORD devnum)
 	dev_info_data.cbSize = sizeof(dev_info_data);
 	for (i=0; SetupDiEnumDeviceInfo(dev_info, i, &dev_info_data); i++) {
 		memset(buffer, 0, sizeof(buffer));
+		method_str = "";
 		if (!SetupDiGetDeviceRegistryPropertyA(dev_info, &dev_info_data, SPDRP_ENUMERATOR_NAME,
 				&datatype, (LPBYTE)buffer, sizeof(buffer), &size)) {
 			uprintf("SetupDiGetDeviceRegistryProperty (Enumerator Name) failed: %s\n", WindowsErrorString());
@@ -281,17 +284,27 @@ BOOL GetUSBDevices(DWORD devnum)
 				  && (CM_Get_Child(&device_inst, parent_inst, 0) == CR_SUCCESS)
 				  && (device_inst == dev_info_data.DevInst) ) {
 					// If we're not dealing with the USBSTOR part of our list, then this is an UASP device
-					props.is_UASP = ((((uintptr_t)device_id)+2) >= ((uintptr_t)devid_list)+list_size[0]);
+					props.is_UASP = ((((uintptr_t)device_id)+2) >= ((uintptr_t)devid_list)+list_start[1]);
 					// Now get the properties of the device, and its Device ID, which we need to populate the properties
 					j = htab_hash(device_id, &htab_devid);
-					if (j > 0) {
-						GetUSBProperties(dev_if_path.String[(uint32_t)htab_devid.table[j].data], device_id, &props);
+					// If the hash didn't match a populated string in dev_if_path[] (htab_devid.table[j].data > 0),
+					// we might have an extra vendor driver in between (e.g. "ASUS USB 3.0 Boost Storage Driver"
+					// for UASP devices in ASUS "Turbo Mode" or "Apple Mobile Device USB Driver" for iPods)
+					// so try to see if we can match the grandparent.
+					if ( ((uint32_t)htab_devid.table[j].data == 0)
+					  && (CM_Get_Parent(&grandparent_inst, parent_inst, 0) == CR_SUCCESS)
+					  && (CM_Get_Device_IDA(grandparent_inst, str, MAX_PATH, 0) == CR_SUCCESS) ) {
+						device_id = str;
+						method_str = "[GP]";
+						j = htab_hash(device_id, &htab_devid);
 					}
+					if ((uint32_t)htab_devid.table[j].data > 0)
+						GetUSBProperties(dev_if_path.String[(uint32_t)htab_devid.table[j].data], device_id, &props);
 
-					// If the previous calls didn't succeed in getting the VID:PID, try from the device_id
-					// (This is for the case for USB media player devices, for instance)
+					// If previous calls still didn't succeed, try reading the VID:PID from the device_id
 					if ((props.vid == 0) && (props.pid == 0)) {
 						BOOL post_backslash = FALSE;
+						method_str = "[ID]";
 						for (j=0, k=0; (j<strlen(device_id))&&(k<2); j++) {
 							// The ID is in the form USB_VENDOR_BUSID\VID_xxxx&PID_xxxx\...
 							if (device_id[j] == '\\')
@@ -305,12 +318,11 @@ BOOL GetUSBDevices(DWORD devnum)
 							}
 						}
 					}
-
 				}
 			}
 		}
 		if (props.is_VHD) {
-			uprintf("Found VHD device '%s'\n", buffer);
+			uprintf("Found VHD device '%s'", buffer);
 		} else {
 			if ((props.vid == 0) && (props.pid == 0)) {
 				if (is_SCSI) {
@@ -324,8 +336,8 @@ BOOL GetUSBDevices(DWORD devnum)
 			}
 			if (props.speed >= USB_SPEED_MAX)
 				props.speed = 0;
-			uprintf("Found %s%s%s device '%s' (%s)\n", props.is_UASP?"UAS (":"", 
-				usb_speed_name[props.speed], props.is_UASP?")":"", buffer, str);
+			uprintf("Found %s%s%s device '%s' (%s) %s\n", props.is_UASP?"UAS (":"", 
+				usb_speed_name[props.speed], props.is_UASP?")":"", buffer, str, method_str);
 			if (props.is_LowerSpeed)
 				uprintf("NOTE: This device is an USB 3.0 device operating at lower speed...");
 		}

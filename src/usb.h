@@ -32,9 +32,9 @@ typedef struct usb_device_props {
 	uint32_t  pid;
 	uint32_t  speed;
 	uint32_t  port;
-	BOOL      is_UASP;
-	BOOL      is_VHD;
-	BOOL      is_LowerSpeed;
+	BOOLEAN   is_UASP;
+	BOOLEAN   is_VHD;
+	BOOLEAN   is_LowerSpeed;
 } usb_device_props;
 
 /*
@@ -94,6 +94,7 @@ DECLSPEC_IMPORT CONFIGRET WINAPI CM_Get_Device_ID_List_SizeA(PULONG pulLen, PCST
 DECLSPEC_IMPORT CONFIGRET WINAPI CM_Get_Device_ID_ListA(PCSTR pszFilter, PCHAR Buffer, ULONG  BufferLen, ULONG ulFlags);
 DECLSPEC_IMPORT CONFIGRET WINAPI CM_Locate_DevNodeA(PDEVINST pdnDevInst, DEVINSTID_A pDeviceID, ULONG ulFlags);
 DECLSPEC_IMPORT CONFIGRET WINAPI CM_Get_Child(PDEVINST pdnDevInst, DEVINST dnDevInst, ULONG ulFlags);
+DECLSPEC_IMPORT CONFIGRET WINAPI CM_Get_Parent(PDEVINST pdnDevInst, DEVINST dnDevInst, ULONG ulFlags);
 DECLSPEC_IMPORT CONFIGRET WINAPI CM_Get_Sibling(PDEVINST pdnDevInst, DEVINST dnDevInst, ULONG ulFlags);
 // This last one is unknown from MinGW32 and needs to be fetched from the DLL
 PF_TYPE_DECL(WINAPI, CONFIGRET, CM_Get_DevNode_Registry_PropertyA, (DEVINST, ULONG, PULONG, PVOID, PULONG, ULONG));
