@@ -1831,8 +1831,10 @@ void InitDialog(HWND hDlg)
 	CreateTooltip(GetDlgItem(hDlg, IDC_WINDOWS_TO_GO), lmprintf(MSG_200), -1);
 
 	// Set a label for the Advanced Mode and Select Image button for screen readers
-	SetWindowTextU(GetDlgItem(hDlg, IDC_ADVANCED), lmprintf(MSG_160));
-	SetWindowTextU(hSelectISO, lmprintf(MSG_165));
+	if (nWindowsVersion > WINDOWS_XP) {
+		SetWindowTextU(GetDlgItem(hDlg, IDC_ADVANCED), lmprintf(MSG_160));
+		SetWindowTextU(hSelectISO, lmprintf(MSG_165));
+	}
 
 	ToggleAdvanced();	// We start in advanced mode => go to basic mode
 	ToggleToGo();
