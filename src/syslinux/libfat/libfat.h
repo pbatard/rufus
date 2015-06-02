@@ -22,9 +22,14 @@
 #include <stddef.h>
 #include <inttypes.h>
 
-#define LIBFAT_SECTOR_SHIFT	9
-#define LIBFAT_SECTOR_SIZE	512
-#define LIBFAT_SECTOR_MASK	511
+// Workaround for 4K support
+extern uint32_t LIBFAT_SECTOR_SHIFT;
+extern uint32_t LIBFAT_SECTOR_SIZE;
+extern uint32_t LIBFAT_SECTOR_MASK;
+#define MAX_LIBFAT_SECTOR_SIZE	4096
+//#define LIBFAT_SECTOR_SHIFT	9
+//#define LIBFAT_SECTOR_SIZE	512
+//#define LIBFAT_SECTOR_MASK	511
 
 typedef uint64_t libfat_sector_t;
 struct libfat_filesystem;

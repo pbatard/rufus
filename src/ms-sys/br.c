@@ -169,123 +169,126 @@ int is_zero_mbr(FILE *fp)
 	/* Don't bother to check 55AA signature */
 } /* is_zero_mbr */
 
+/* Handle nonstandard sector sizes (such as 4K) by writing
+   the boot marker at every 512-2 bytes location */
+static int write_bootmark(FILE *fp)
+{
+	unsigned char aucRef[] = {0x55, 0xAA};
+	int pos = 0x1FE;
+
+	/* We use fp->_bufsiz as our sector size indicator */
+	for (pos = 0x1FE; pos < fp->_bufsiz; pos += 0x200) {
+		if (!write_data(fp, pos, aucRef, sizeof(aucRef)))
+			return 0;
+	}
+	return 1;
+}
+
 int write_dos_mbr(FILE *fp)
 {
    #include "mbr_dos.h"
-   unsigned char aucRef[] = {0x55, 0xAA};
 
    return
       write_data(fp, 0x0, mbr_dos_0x0, sizeof(mbr_dos_0x0)) &&
-      write_data(fp, 0x1FE, aucRef, sizeof(aucRef));
+      write_bootmark(fp);
 } /* write_dos_mbr */
 
 int write_95b_mbr(FILE *fp)
 {
    #include "mbr_95b.h"
-   unsigned char aucRef[] = {0x55, 0xAA};
 
    return
       write_data(fp, 0x0,   mbr_95b_0x0, sizeof(mbr_95b_0x0)) &&
       write_data(fp, 0x0e0, mbr_95b_0x0e0, sizeof(mbr_95b_0x0e0)) &&
-      write_data(fp, 0x1FE, aucRef, sizeof(aucRef));
+      write_bootmark(fp);
 } /* write_95b_mbr */
 
 int write_2000_mbr(FILE *fp)
 {
    #include "mbr_2000.h"
-   unsigned char aucRef[] = {0x55, 0xAA};
 
    return
       write_data(fp, 0x0, mbr_2000_0x0, sizeof(mbr_2000_0x0)) &&
-      write_data(fp, 0x1FE, aucRef, sizeof(aucRef));
+      write_bootmark(fp);
 } /* write_2000_mbr */
 
 int write_vista_mbr(FILE *fp)
 {
    #include "mbr_vista.h"
-   unsigned char aucRef[] = {0x55, 0xAA};
 
    return
       write_data(fp, 0x0, mbr_vista_0x0, sizeof(mbr_vista_0x0)) &&
-      write_data(fp, 0x1FE, aucRef, sizeof(aucRef));
+      write_bootmark(fp);
 } /* write_vista_mbr */
 
 int write_win7_mbr(FILE *fp)
 {
    #include "mbr_win7.h"
-   unsigned char aucRef[] = {0x55, 0xAA};
 
    return
       write_data(fp, 0x0, mbr_win7_0x0, sizeof(mbr_win7_0x0)) &&
-      write_data(fp, 0x1FE, aucRef, sizeof(aucRef));
+      write_bootmark(fp);
 } /* write_win7_mbr */
 
 int write_rufus_mbr(FILE *fp)
 {
    #include "mbr_rufus.h"
-   unsigned char aucRef[] = {0x55, 0xAA};
 
    return
       write_data(fp, 0x0, mbr_rufus_0x0, sizeof(mbr_rufus_0x0)) &&
-      write_data(fp, 0x1FE, aucRef, sizeof(aucRef));
+      write_bootmark(fp);
 } /* write_rufus_mbr */
 
 int write_reactos_mbr(FILE *fp)
 {
    #include "mbr_reactos.h"
-   unsigned char aucRef[] = {0x55, 0xAA};
 
    return
       write_data(fp, 0x0, mbr_reactos_0x0, sizeof(mbr_reactos_0x0)) &&
-      write_data(fp, 0x1FE, aucRef, sizeof(aucRef));
+      write_bootmark(fp);
 } /* write_reactos_mbr */
 
 int write_kolibri_mbr(FILE *fp)
 {
    #include "mbr_kolibri.h"
-   unsigned char aucRef[] = {0x55, 0xAA};
 
    return
       write_data(fp, 0x0, mbr_kolibri_0x0, sizeof(mbr_kolibri_0x0)) &&
-      write_data(fp, 0x1FE, aucRef, sizeof(aucRef));
+      write_bootmark(fp);
 } /* write_kolibri_mbr */
 
 int write_syslinux_mbr(FILE *fp)
 {
    #include "mbr_syslinux.h"
-   unsigned char aucRef[] = {0x55, 0xAA};
 
    return
       write_data(fp, 0x0, mbr_syslinux_0x0, sizeof(mbr_syslinux_0x0)) &&
-      write_data(fp, 0x1FE, aucRef, sizeof(aucRef));
+      write_bootmark(fp);
 } /* write_syslinux_mbr */
 
 int write_grub_mbr(FILE *fp)
 {
    #include "mbr_grub.h"
-   unsigned char aucRef[] = {0x55, 0xAA};
 
    return
       write_data(fp, 0x0, mbr_grub_0x0, sizeof(mbr_grub_0x0)) &&
-      write_data(fp, 0x1FE, aucRef, sizeof(aucRef));
+      write_bootmark(fp);
 }
 
 int write_grub2_mbr(FILE *fp)
 {
    #include "mbr_grub2.h"
-   unsigned char aucRef[] = {0x55, 0xAA};
 
    return
       write_data(fp, 0x0, mbr_grub2_0x0, sizeof(mbr_grub2_0x0)) &&
-      write_data(fp, 0x1FE, aucRef, sizeof(aucRef));
+      write_bootmark(fp);
 }
 
 int write_zero_mbr(FILE *fp)
 {
    #include "mbr_zero.h"
-   unsigned char aucRef[] = {0x55, 0xAA};
 
    return
       write_data(fp, 0x0,   mbr_zero_0x0, sizeof(mbr_zero_0x0)) &&
-      write_data(fp, 0x1FE, aucRef, sizeof(aucRef));
+      write_bootmark(fp);
 } /* write_zero_mbr */

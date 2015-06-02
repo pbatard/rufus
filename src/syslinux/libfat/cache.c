@@ -29,10 +29,10 @@ void *libfat_get_sector(struct libfat_filesystem *fs, libfat_sector_t n)
     }
 
     /* Not found in cache */
-    ls = malloc(sizeof(struct libfat_sector));
+    ls = malloc(sizeof(struct libfat_sector) + LIBFAT_SECTOR_SIZE);
     if (!ls) {
 	libfat_flush(fs);
-	ls = malloc(sizeof(struct libfat_sector));
+	ls = malloc(sizeof(struct libfat_sector) + LIBFAT_SECTOR_SIZE);
 
 	if (!ls)
 	    return NULL;	/* Can't allocate memory */

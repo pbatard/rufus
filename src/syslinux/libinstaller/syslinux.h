@@ -41,8 +41,11 @@ extern const unsigned int syslinux_mbr_len;
 extern const int syslinux_mbr_mtime;
 
 /* Sector size assumptions... */
-#define SECTOR_SHIFT	9
-#define SECTOR_SIZE	(1 << SECTOR_SHIFT)
+// Workaround for 4K support
+extern uint32_t SECTOR_SHIFT;
+extern uint32_t SECTOR_SIZE;
+//#define SECTOR_SHIFT	9
+//#define SECTOR_SIZE	(1 << SECTOR_SHIFT)
 
 /* This takes a boot sector and merges in the syslinux fields */
 void syslinux_make_bootsect(void *bs, int fs_type);

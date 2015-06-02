@@ -25,7 +25,7 @@
 struct libfat_sector {
     libfat_sector_t n;		/* Sector number */
     struct libfat_sector *next;	/* Next in list */
-    char data[LIBFAT_SECTOR_SIZE];
+    char data[0];
 };
 
 enum fat_type {

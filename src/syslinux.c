@@ -43,6 +43,13 @@ DWORD syslinux_ldlinux_len[2];
 unsigned char* syslinux_mboot = NULL;
 DWORD syslinux_mboot_len;
 
+// Workaround for 4K support
+uint32_t SECTOR_SHIFT = 9;
+uint32_t SECTOR_SIZE = 512;
+uint32_t LIBFAT_SECTOR_SHIFT = 9;
+uint32_t LIBFAT_SECTOR_SIZE = 512;
+uint32_t LIBFAT_SECTOR_MASK = 511;
+
 /*
  * Wrapper for ReadFile suitable for libfat
  */
@@ -82,7 +89,7 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int fs_type)
 	FILE* fd;
 	size_t length;
 
-	static unsigned char sectbuf[SECTOR_SIZE];
+	static unsigned char* sectbuf = NULL;
 	static char* resource[2][2] = {
 		{ MAKEINTRESOURCEA(IDR_SL_LDLINUX_V4_SYS), MAKEINTRESOURCEA(IDR_SL_LDLINUX_V4_BSS) },
 		{ MAKEINTRESOURCEA(IDR_SL_LDLINUX_V6_SYS), MAKEINTRESOURCEA(IDR_SL_LDLINUX_V6_BSS) } };
@@ -102,6 +109,20 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int fs_type)
 
 	PrintInfoDebug(0, MSG_234, (dt == DT_ISO)?iso_report.sl_version_str:embedded_sl_version_str[use_v5?1:0]);
 
+	// 4K sector size workaround
+	SECTOR_SHIFT = 0;
+	SECTOR_SIZE = SelectedDrive.Geometry.BytesPerSector;
+	while (SECTOR_SIZE>>=1)
+		SECTOR_SHIFT++;
+	SECTOR_SIZE = SelectedDrive.Geometry.BytesPerSector;
+	LIBFAT_SECTOR_SHIFT = SECTOR_SHIFT;
+	LIBFAT_SECTOR_SIZE = SECTOR_SIZE;
+	LIBFAT_SECTOR_MASK = SECTOR_SIZE - 1;
+
+	sectbuf = malloc(SECTOR_SIZE);
+	if (sectbuf == NULL)
+		goto out;
+	
 	/* Initialize the ADV -- this should be smarter */
 	syslinux_reset_adv(syslinux_adv);
 
@@ -335,6 +356,7 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int fs_type)
 	r = TRUE;
 
 out:
+	safe_free(sectbuf);
 	safe_free(syslinux_ldlinux[0]);
 	safe_free(syslinux_ldlinux[1]);
 	safe_free(sectors);
