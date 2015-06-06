@@ -398,6 +398,9 @@ static void SetMBRForUEFI(BOOL replace)
 {
 	BOOL useCSM = FALSE;
 
+	if (ComboBox_GetCurSel(hDeviceList) < 0)
+		return;
+
 	if (image_path != NULL) {
 		if ( (!iso_report.has_efi) || ((iso_report.has_bootmgr) && (!allow_dual_uefi_bios) &&
 			 (Button_GetCheck(GetDlgItem(hMainDialog, IDC_WINDOWS_TO_GO)) != BST_CHECKED)) )
