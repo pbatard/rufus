@@ -2150,53 +2150,6 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			break;
 #ifdef RUFUS_TEST
 		case IDC_TEST:
-			if (format_thid != NULL) {
-				return (INT_PTR)TRUE;
-			}
-			FormatStatus = 0;
-			format_op_in_progress = TRUE;
-			// Reset all progress bars
-			SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_NORMAL, 0);
-			SetTaskbarProgressState(TASKBAR_NORMAL);
-			SetTaskbarProgressValue(0, MAX_PROGRESS);
-			SendMessage(hProgress, PBM_SETPOS, 0, 0);
-			nDeviceIndex = ComboBox_GetCurSel(hDeviceList);
-			if (nDeviceIndex != CB_ERR) {
-				if ((IsChecked(IDC_BOOT)) && (!BootCheck())) {
-					format_op_in_progress = FALSE;
-					break;
-				}
-
-				GetWindowTextU(hDeviceList, tmp, ARRAYSIZE(tmp));
-				if (MessageBoxU(hMainDialog, lmprintf(MSG_003, tmp),
-					APPLICATION_NAME, MB_OKCANCEL|MB_ICONWARNING|MB_IS_RTL) == IDCANCEL) {
-					format_op_in_progress = FALSE;
-					break;
-				}
-				safe_free(image_path);
-				image_path = strdup("C:\\Downloads\\my.vhd");
-
-				// Disable all controls except cancel
-				EnableControls(FALSE);
-				DeviceNum = (DWORD)ComboBox_GetItemData(hDeviceList, nDeviceIndex);
-				FormatStatus = 0;
-				InitProgress(TRUE);
-				format_thid = CreateThread(NULL, 0, SaveImageThread, (LPVOID)(uintptr_t)DeviceNum, 0, NULL);
-				if (format_thid == NULL) {
-					uprintf("Unable to start saving thread");
-					FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_START_THREAD);
-					PostMessage(hMainDialog, UM_FORMAT_COMPLETED, 0, 0);
-				}
-				uprintf("\r\nSave to image operation started");
-				PrintInfo(0, -1);
-				timer = 0;
-				safe_sprintf(szTimer, sizeof(szTimer), "00:00:00");
-				SendMessageA(GetDlgItem(hMainDialog, IDC_STATUS), SB_SETTEXTA,
-					SBT_OWNERDRAW | 1, (LPARAM)szTimer);
-				SetTimer(hMainDialog, TID_APP_TIMER, 1000, ClockTimer);
-			}
-			if (format_thid == NULL)
-				format_op_in_progress = FALSE;
 			break;
 #endif
 		case IDC_ADVANCED:
@@ -2969,6 +2922,59 @@ relaunch:
 			PrintStatus2000(lmprintf(MSG_263), !use_fake_units);
 			GetUSBDevices(0);
 			continue;
+		}
+		// Alt-V => Save selected device to *UNCOMPRESSED* VHD
+		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'V')) {
+			int DriveIndex = ComboBox_GetCurSel(hDeviceList);
+			if ((DriveIndex != CB_ERR) && (!format_op_in_progress) && (format_thid == NULL)) {
+				EXT_DECL(vhd_ext, DriveLabel.String[DriveIndex], __VA_GROUP__("*.vhd"), __VA_GROUP__("VHD File"));
+				ULARGE_INTEGER free_space;
+				VHD_SAVE vhd_save = { (DWORD)ComboBox_GetItemData(hDeviceList, DriveIndex), FileDialog(TRUE, NULL, &vhd_ext, 0) };
+				if (vhd_save.path != NULL) {
+					// Reset all progress bars
+					SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_NORMAL, 0);
+					SetTaskbarProgressState(TASKBAR_NORMAL);
+					SetTaskbarProgressValue(0, MAX_PROGRESS);
+					SendMessage(hProgress, PBM_SETPOS, 0, 0);
+					FormatStatus = 0;
+					format_op_in_progress = TRUE;
+					free_space.QuadPart = 0;
+					if ( (GetVolumePathNameA(vhd_save.path, tmp_path, sizeof(tmp_path)))
+					  && (GetDiskFreeSpaceExA(tmp_path, &free_space, NULL, NULL)) 
+					  && ((LONGLONG)free_space.QuadPart > (SelectedDrive.DiskSize + 512)) ) {
+						// Disable all controls except cancel
+						EnableControls(FALSE);
+						FormatStatus = 0;
+						InitProgress(TRUE);
+						format_thid = CreateThread(NULL, 0, SaveImageThread, &vhd_save, 0, NULL);
+						if (format_thid != NULL) {
+							uprintf("\r\nSave to VHD operation started");
+							PrintInfo(0, -1);
+							timer = 0;
+							safe_sprintf(szTimer, sizeof(szTimer), "00:00:00");
+							SendMessageA(GetDlgItem(hMainDialog, IDC_STATUS), SB_SETTEXTA, SBT_OWNERDRAW | 1, (LPARAM)szTimer);
+							SetTimer(hMainDialog, TID_APP_TIMER, 1000, ClockTimer);
+						} else {
+							uprintf("Unable to start VHD save thread");
+							FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_START_THREAD);
+							safe_free(vhd_save.path);
+							PostMessage(hMainDialog, UM_FORMAT_COMPLETED, 0, 0);
+							format_op_in_progress = FALSE;
+						}
+					} else {
+						if (free_space.QuadPart == 0) {
+							uprintf("Unable to isolate drive name for VHD save");
+							FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_PATH_NOT_FOUND;
+						} else {
+							uprintf("The VHD size is too large for the target drive");
+							FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_FILE_TOO_LARGE;
+						}
+						safe_free(vhd_save.path);
+						PostMessage(hMainDialog, UM_FORMAT_COMPLETED, 0, 0);
+						format_op_in_progress = FALSE;
+					}
+				}
+			}
 		}
 		// Alt-W => Enable VMWare disk detection
 		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'W')) {

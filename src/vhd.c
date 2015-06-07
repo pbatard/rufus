@@ -126,7 +126,7 @@ static BOOL Get7ZipPath(void)
 BOOL AppendVHDFooter(const char* vhd_path)
 {
 	const char creator_os[4] = VHD_FOOTER_CREATOR_HOST_OS_WINDOWS;
-	const char creator_app[4] = { 'r', 'u', 'f', 'u' };
+	const char creator_app[4] = { 'r', 'u', 'f', 's' };
 	BOOL r = FALSE;
 	DWORD size;
 	LARGE_INTEGER li;

@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <windows.h>
-#include <winioctl.h>               // for DISK_GEOMETRY
+#include <winioctl.h>				// for DISK_GEOMETRY
 #include <malloc.h>
 #include <inttypes.h>
 
@@ -286,6 +286,11 @@ typedef struct {
 	char* download_url;
 	char* release_notes;
 } RUFUS_UPDATE;
+
+typedef struct {
+	DWORD DeviceNum;
+	char* path;
+} VHD_SAVE;
 
 /*
  * Structure and macros used for the extensions specification of FileDialog()

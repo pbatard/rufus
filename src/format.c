@@ -1958,7 +1958,8 @@ out:
 DWORD WINAPI SaveImageThread(void* param)
 {
 	BOOL s;
-	DWORD rSize, wSize, DriveIndex = (DWORD)(uintptr_t)param;
+	DWORD rSize, wSize;
+	VHD_SAVE *vhd_save = param;
 	HANDLE hPhysicalDrive = INVALID_HANDLE_VALUE;
 	HANDLE hDestImage = INVALID_HANDLE_VALUE;
 	LARGE_INTEGER li;
@@ -1968,7 +1969,7 @@ DWORD WINAPI SaveImageThread(void* param)
 
 	PrintInfoDebug(0, MSG_225);
 	LastRefresh = 0;
-	hPhysicalDrive = GetPhysicalHandle(DriveIndex, FALSE, TRUE);
+	hPhysicalDrive = GetPhysicalHandle(vhd_save->DeviceNum, FALSE, TRUE);
 	if (hPhysicalDrive == INVALID_HANDLE_VALUE) {
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_OPEN_FAILED;
 		goto out;
@@ -1979,15 +1980,15 @@ DWORD WINAPI SaveImageThread(void* param)
 	li.QuadPart = 0;
 	if (!SetFilePointerEx(hPhysicalDrive, li, NULL, FILE_BEGIN))
 		uprintf("Warning: Unable to rewind device position - wrong data might be copied!");
-	hDestImage = CreateFileU(image_path, GENERIC_WRITE, FILE_SHARE_WRITE, NULL,
+	hDestImage = CreateFileU(vhd_save->path, GENERIC_WRITE, FILE_SHARE_WRITE, NULL,
 		CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (hDestImage == INVALID_HANDLE_VALUE) {
-		uprintf("Could not open image '%s': %s", image_path, WindowsErrorString());
+		uprintf("Could not open image '%s': %s", vhd_save->path, WindowsErrorString());
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_OPEN_FAILED;
 		goto out;
 	}
 
-	uprintf("Saving to image '%s'...", image_path);
+	uprintf("Saving to image '%s'...", vhd_save->path);
 	buffer = (uint8_t*)malloc(DD_BUFFER_SIZE);
 	if (buffer == NULL) {
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_NOT_ENOUGH_MEMORY;
@@ -2041,13 +2042,14 @@ DWORD WINAPI SaveImageThread(void* param)
 	}
 	uprintf("%" PRIu64 " bytes written", wb);
 	uprintf("Appending VHD footer...");
-	if (!AppendVHDFooter(image_path)) {
+	if (!AppendVHDFooter(vhd_save->path)) {
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_WRITE_FAULT;
 		goto out;
 	}
 	uprintf("Done");
 
 out:
+	safe_free(vhd_save->path);
 	safe_free(buffer);
 	safe_closehandle(hDestImage);
 	safe_unlockclose(hPhysicalDrive);
