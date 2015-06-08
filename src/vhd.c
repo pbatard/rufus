@@ -289,9 +289,9 @@ BOOL IsHDImage(const char* path)
 		goto out;
 	}
 
-	iso_report.is_bootable_img = IsCompressedBootableImage(path);
+	iso_report.is_bootable_img = (BOOLEAN)IsCompressedBootableImage(path);
 	if (iso_report.compression_type == BLED_COMPRESSION_NONE)
-		iso_report.is_bootable_img = AnalyzeMBR(handle, "Image");
+		iso_report.is_bootable_img = (BOOLEAN)AnalyzeMBR(handle, "Image");
 
 	if (!GetFileSizeEx(handle, &liImageSize)) {
 		uprintf("Could not get image size: %s", WindowsErrorString());

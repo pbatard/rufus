@@ -2925,9 +2925,12 @@ relaunch:
 		}
 		// Alt-V => Save selected device to *UNCOMPRESSED* VHD
 		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'V')) {
+			char vhd_name[128];
 			int DriveIndex = ComboBox_GetCurSel(hDeviceList);
+			if (DriveIndex >= 0)
+				safe_sprintf(vhd_name, sizeof(vhd_name), "%s.vhd", DriveLabel.String[DriveIndex]);
 			if ((DriveIndex != CB_ERR) && (!format_op_in_progress) && (format_thid == NULL)) {
-				EXT_DECL(vhd_ext, DriveLabel.String[DriveIndex], __VA_GROUP__("*.vhd"), __VA_GROUP__("VHD File"));
+				EXT_DECL(vhd_ext, vhd_name, __VA_GROUP__("*.vhd"), __VA_GROUP__("VHD File"));
 				ULARGE_INTEGER free_space;
 				VHD_SAVE vhd_save = { (DWORD)ComboBox_GetItemData(hDeviceList, DriveIndex), FileDialog(TRUE, NULL, &vhd_ext, 0) };
 				if (vhd_save.path != NULL) {
