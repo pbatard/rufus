@@ -9977,7 +9977,7 @@ t IDS_LABEL_TXT "Novo nome do volume"
 t IDS_FORMAT_OPTIONS_GRP "Opções de formatação"
 t IDC_BADBLOCKS "Procurar blocos defeituosos"
 s IDC_BADBLOCKS +4,0
-t IDC_QUICKFORMAT "Formação rápida"
+t IDC_QUICKFORMAT "Formatação rápida"
 t IDC_BOOT "Criar disco bootável com"
 t IDC_WINDOWS_INSTALL "Instalação Padrão do Windows"
 t IDC_SET_ICON "Criar nomes estendidos e ícones"
