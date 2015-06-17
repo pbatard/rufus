@@ -1552,13 +1552,16 @@ static INT_PTR CALLBACK InfoCallback(HWND hCtrl, UINT message, WPARAM wParam, LP
 	PAINTSTRUCT ps;
 	wchar_t winfo[128];
 
+	// Prevent the cursor (caret) from appearing within the edit control
+	HideCaret(hCtrl);
+
 	switch (message) {
 
 	// Prevent select (which screws up our display as it redraws the font using different settings)
 	case WM_LBUTTONDOWN:
 		return (INT_PTR)FALSE;
 
-	// Prevent the select cursor from appearing
+	// Prevent the text selection pointer from appearing on hover
 	case WM_SETCURSOR:
 		SetCursor(LoadCursor(NULL, IDC_ARROW));
 		return (INT_PTR)TRUE;

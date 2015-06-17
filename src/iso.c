@@ -822,7 +822,7 @@ out:
 			fd = NULL;
 			safe_sprintf(path2, sizeof(path2), "%s\\syslinux.org", dest_dir);
 			uprintf("Renaming: %s ⇨ %s", path, path2);
-			rename(path, path2);
+			IGNORE_RETVAL(rename(path, path2));
 		}
 		if (fd == NULL) {
 			fd = fopen(path, "w");	// No "/syslinux.cfg" => create a new one
