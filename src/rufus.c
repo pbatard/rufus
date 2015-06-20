@@ -1022,6 +1022,7 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 			(iso_report.compression_type != BLED_COMPRESSION_NONE)?"compressed ":"", iso_report.is_vhd?"VHD":"disk");
 		selection_default = DT_IMG;
 	} else {
+		selection_default = DT_ISO;
 		DisplayISOProps();
 	}
 	if ( (!iso_report.has_bootmgr) && (!HAS_SYSLINUX(iso_report)) && (!IS_WINPE(iso_report.winpe)) && (!IS_GRUB(iso_report))
@@ -1960,7 +1961,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	int nDeviceIndex, fs, bt, i, nWidth, nHeight, nb_devices, selected_language, offset;
 	char tmp[128];
 	loc_cmd* lcmd = NULL;
-	EXT_DECL(img_ext, NULL, __VA_GROUP__("*.img;*.vhd;*.gz;*.bzip2;*.xz;*.lzma;*.Z"), __VA_GROUP__(lmprintf(MSG_095)));
+	EXT_DECL(img_ext, NULL, __VA_GROUP__("*.img;*.vhd;*.gz;*.bzip2;*.xz;*.lzma;*.Z;*.zip"), __VA_GROUP__(lmprintf(MSG_095)));
 	EXT_DECL(iso_ext, NULL, __VA_GROUP__("*.iso"), __VA_GROUP__(lmprintf(MSG_036)));
 	LPNMTOOLBAR lpnmtb;
 
@@ -2288,8 +2289,6 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 					break;
 				}
 			}
-			selection_default = DT_ISO;
-			CreateTooltip(hSelectISO, image_path, -1);
 			FormatStatus = 0;
 			if (CreateThread(NULL, 0, ISOScanThread, NULL, 0, NULL) == NULL) {
 				uprintf("Unable to start ISO scanning thread");

@@ -29,6 +29,7 @@
     <ClCompile Include="..\decompress_uncompress.c" />
     <ClCompile Include="..\decompress_unlzma.c" />
     <ClCompile Include="..\decompress_unxz.c" />
+    <ClCompile Include="..\decompress_unzip.c" />
     <ClCompile Include="..\filter_accept_all.c" />
     <ClCompile Include="..\filter_accept_list.c" />
     <ClCompile Include="..\filter_accept_reject_list.c" />

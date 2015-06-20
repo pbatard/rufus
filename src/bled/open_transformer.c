@@ -53,6 +53,15 @@ ssize_t FAST_FUNC transformer_write(transformer_state_t *xstate, const void *buf
 	return nwrote;
 }
 
+ssize_t FAST_FUNC xtransformer_write(transformer_state_t *xstate, const void *buf, size_t bufsize)
+{
+	ssize_t nwrote = transformer_write(xstate, buf, bufsize);
+	if (nwrote != (ssize_t)bufsize) {
+		xfunc_die();
+	}
+	return nwrote;
+}
+
 void check_errors_in_children(int signo)
 {
 	int status;
@@ -167,6 +176,13 @@ static transformer_state_t *setup_transformer_on_fd(int fd, int fail_if_not_comp
 	) {
 		xstate->xformer = unpack_gz_stream;
 		USE_FOR_NOMMU(xstate->xformer_prog = "gunzip";)
+		goto found_magic;
+	}
+	if (ENABLE_FEATURE_SEAMLESS_Z
+	 && magic.b16[0] == COMPRESS_MAGIC
+	) {
+		xstate->xformer = unpack_Z_stream;
+		USE_FOR_NOMMU(xstate->xformer_prog = "uncompress";)
 		goto found_magic;
 	}
 	if (ENABLE_FEATURE_SEAMLESS_BZ2

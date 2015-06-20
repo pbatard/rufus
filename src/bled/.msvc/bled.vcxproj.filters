@@ -81,6 +81,9 @@
     <ClCompile Include="..\xz_dec_stream.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\decompress_unzip.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\bb_archive.h">

@@ -225,11 +225,12 @@ typedef struct {
 } comp_assoc;
 
 static comp_assoc file_assoc[] = {
-	{ ".xz", BLED_COMPRESSION_XZ },
+	{ ".zip", BLED_COMPRESSION_ZIP },
+	{ ".Z", BLED_COMPRESSION_LZW },
 	{ ".gz", BLED_COMPRESSION_GZIP },
 	{ ".lzma", BLED_COMPRESSION_LZMA },
 	{ ".bz2", BLED_COMPRESSION_BZIP2 },
-	{ ".Z", BLED_COMPRESSION_LZW },
+	{ ".xz", BLED_COMPRESSION_XZ },
 };
 
 // For now we consider that an image that matches a known extension is bootable

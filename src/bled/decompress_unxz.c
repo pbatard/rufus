@@ -1,5 +1,5 @@
 /*
- * unxz implementation for busybox
+ * unxz implementation for Bled/busybox
  *
  * Copyright © 2014-2015 Pete Batard <pete@akeo.ie>
  * Based on xz-embedded © Lasse Collin <lasse.collin@tukaani.org> - Public Domain
