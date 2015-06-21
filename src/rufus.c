@@ -1572,6 +1572,7 @@ static INT_PTR CALLBACK InfoCallback(HWND hCtrl, UINT message, WPARAM wParam, LP
 		GetWindowTextW(hInfo, winfo, ARRAYSIZE(winfo));
 		hdc = BeginPaint(hCtrl , &ps);
 		SelectObject(hdc, hInfoFont);
+		SetTextColor(hdc, GetSysColor(COLOR_BTNTEXT));
 		SetBkColor(hdc, GetSysColor(COLOR_BTNFACE));
 		SetTextAlign(hdc , TA_CENTER | TA_BASELINE);
 		GetClientRect(hCtrl , &rect);
@@ -2050,6 +2051,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			SetBkMode(pDI->hDC, TRANSPARENT);
 			switch(pDI->itemID) {
 			case 0:	// left part
+				SetTextColor(pDI->hDC, GetSysColor(COLOR_BTNTEXT));
 				DrawTextExU(pDI->hDC, szStatusMessage, -1, &pDI->rcItem,
 					DT_LEFT|DT_END_ELLIPSIS|DT_PATH_ELLIPSIS, NULL);
 				return (INT_PTR)TRUE;

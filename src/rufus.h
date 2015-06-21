@@ -68,8 +68,6 @@
 #define MAX_FAT32_SIZE              2.0f		// Threshold above which we disable FAT32 formatting (in TB)
 #define FAT32_CLUSTER_THRESHOLD     1.011f		// For FAT32, cluster size changes don't occur at power of 2 boundaries but sligthly above
 #define DD_BUFFER_SIZE              65536		// Minimum size of the buffer we use for DD operations
-#define WHITE                       RGB(255,255,255)
-#define SEPARATOR_GREY              RGB(223,223,223)
 #define RUFUS_URL                   "http://rufus.akeo.ie"
 #define DOWNLOAD_URL                RUFUS_URL "/downloads"
 #define FILES_URL                   RUFUS_URL "/files"

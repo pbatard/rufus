@@ -594,7 +594,7 @@ INT_PTR CALLBACK NotificationCallback(HWND hDlg, UINT message, WPARAM wParam, LP
 	// Prevent resizing
 	static LRESULT disabled[9] = { HTLEFT, HTRIGHT, HTTOP, HTBOTTOM, HTSIZE,
 		HTTOPLEFT, HTTOPRIGHT, HTBOTTOMLEFT, HTBOTTOMRIGHT };
-	static HBRUSH white_brush, separator_brush;
+	static HBRUSH background_brush, separator_brush;
 	// To use the system message font
 	NONCLIENTMETRICS ncm;
 	HFONT hDlgFont;
@@ -622,8 +622,8 @@ INT_PTR CALLBACK NotificationCallback(HWND hDlg, UINT message, WPARAM wParam, LP
 		SendMessage(GetDlgItem(hDlg, IDNO), WM_SETFONT, (WPARAM)hDlgFont, MAKELPARAM(TRUE, 0));
 
 		apply_localization(IDD_NOTIFICATION, hDlg);
-		white_brush = CreateSolidBrush(WHITE);
-		separator_brush = CreateSolidBrush(SEPARATOR_GREY);
+		background_brush = CreateSolidBrush(GetSysColor(COLOR_3DHILIGHT));
+		separator_brush = CreateSolidBrush(GetSysColor(COLOR_3DLIGHT));
 		SetTitleBarIcon(hDlg);
 		CenterDialog(hDlg);
 		// Change the default icon
@@ -654,7 +654,7 @@ INT_PTR CALLBACK NotificationCallback(HWND hDlg, UINT message, WPARAM wParam, LP
 		if ((HWND)lParam == GetDlgItem(hDlg, IDC_NOTIFICATION_LINE)) {
 			return (INT_PTR)separator_brush;
 		}
-		return (INT_PTR)white_brush;
+		return (INT_PTR)background_brush;
 	case WM_NCHITTEST:
 		// Check coordinates to prevent resize actions
 		loc = DefWindowProc(hDlg, message, wParam, lParam);
