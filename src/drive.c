@@ -842,6 +842,9 @@ BOOL MountVolume(char* drive_name, char *drive_guid)
 	char mounted_letter[16] = {0};
 	DWORD size;
 
+	if (drive_name[0] == '?')
+		return FALSE;
+
 	// For fixed disks, Windows may already have remounted the volume, but with a different letter
 	// than the one we want. If that's the case, we need to unmount first.
 	if ( (GetVolumePathNamesForVolumeNameA(drive_guid, mounted_letter, sizeof(mounted_letter), &size))

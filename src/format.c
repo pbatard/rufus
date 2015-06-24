@@ -1264,12 +1264,22 @@ out:
 }
 
 // http://technet.microsoft.com/en-ie/library/jj721578.aspx
+
+// As opposed to the technet guide above, we no longer set internal drives offline,
+// due to people wondering why they can't see them by default, and also due to dism
+// incompatibilities from one version of Windows to the next.
+// Maybe when we use wimlib we'll review this, but for now just turn it off.
+//#define SET_INTERNAL_DRIVES_OFFLINE
 BOOL SetupWinToGo(const char* drive_name, BOOL use_ms_efi)
 {
-	char san_policy_path[] = "?:\\san_policy.xml", unattend_path[] = "?:\\Windows\\System32\\sysprep\\unattend.xml";
-	char *mounted_iso, *ms_efi = NULL, image[128], cmd[128];
-	wchar_t wVolumeName[] = L"?:";
+#ifdef SET_INTERNAL_DRIVES_OFFLINE
+	static char san_policy_path[] = "?:\\san_policy.xml";
+#endif
+	static char unattend_path[] = "?:\\Windows\\System32\\sysprep\\unattend.xml";
+	char *mounted_iso, *ms_efi = NULL, image[128], cmd[MAX_PATH], system_root[128];
 	unsigned char *buffer;
+	int i;
+	wchar_t wVolumeName[] = L"?:";
 	DWORD bufsize;
 	ULONG cluster_size;
 	FILE* fd;
@@ -1340,17 +1350,27 @@ BOOL SetupWinToGo(const char* drive_name, BOOL use_ms_efi)
 		}
 	}
 
-	static_sprintf(cmd, "%s\\Windows\\System32\\bcdboot.exe %s\\Windows /f ALL /s %s",
-		drive_name, drive_name, (use_ms_efi)?ms_efi:drive_name);
-	uprintf("Enabling boot: '%s'", cmd);
-	if (RunCommand(cmd, NULL, TRUE) != 0) {
+	// Try the 'bcdboot' command, first using the one from the target drive and, if that doesn't work, the system's
+	uprintf("Enabling boot...");
+	for (i = 0; i < 2; i++) {
+		if (i == 0)
+			static_sprintf(system_root, "%s\\Windows\\System32", drive_name);
+		else
+			GetSystemDirectoryA(system_root, sizeof(system_root));
+		static_sprintf(cmd, "%s\\bcdboot.exe %s\\Windows /f ALL /s %s",
+			system_root, drive_name, (use_ms_efi)?ms_efi:drive_name);
+		if (RunCommand(cmd, NULL, TRUE) == 0)
+			break;
+	}
+	if (i >= 2)	{
 		// Fatal, as the UFD is unlikely to boot then
-		uprintf("Command '%s' failed to run", cmd);
+		uprintf("Failed to enable boot - aborting", cmd);
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_ISO_EXTRACT);
 		if (use_ms_efi) 
 			AltUnmountVolume(ms_efi);
 		return FALSE;
 	}
+	uprintf("Boot was successfully enabled using command '%s'", cmd);
 
 	if (use_ms_efi) {
 		Sleep(200);
@@ -1360,10 +1380,12 @@ BOOL SetupWinToGo(const char* drive_name, BOOL use_ms_efi)
 	UpdateProgress(OP_DOS, 99.9f);
 
 	// The following are non fatal if they fail
+
+#ifdef SET_INTERNAL_DRIVES_OFFLINE
+	uprintf("Applying 'san_policy.xml', to set the target's internal drives offline...");
 	buffer = GetResource(hMainInstance, MAKEINTRESOURCEA(IDR_TOGO_SAN_POLICY_XML),
 		_RT_RCDATA, "san_policy.xml", &bufsize, FALSE);
 	san_policy_path[0] = drive_name[0];
-	uprintf("Applying san_policy.xml...");
 	fd = fopenU(san_policy_path, "wb");
 	if ((fd == NULL) || (fwrite(buffer, 1, bufsize, fd) != bufsize)) {
 		uprintf("Could not write '%s'\n", san_policy_path);
@@ -1379,8 +1401,9 @@ BOOL SetupWinToGo(const char* drive_name, BOOL use_ms_efi)
 		if (RunCommand(cmd, NULL, TRUE) != 0)
 			uprintf("Command '%s' failed to run", cmd);
 	}
+#endif
 
-	uprintf("Copying 'unattend.xml'");
+	uprintf("Copying 'unattend.xml', to disable the use of the Windows Recovery Environment...");
 	buffer = GetResource(hMainInstance, MAKEINTRESOURCEA(IDR_TOGO_UNATTEND_XML),
 		_RT_RCDATA, "unattend.xml", &bufsize, FALSE);
 	unattend_path[0] = drive_name[0];

@@ -561,7 +561,7 @@ DWORD RunCommand(const char* cmd, const char* dir, BOOL log)
 	if (!CreateProcessU(NULL, cmd, NULL, NULL, TRUE,
 		NORMAL_PRIORITY_CLASS | CREATE_NO_WINDOW, NULL, dir, &si, &pi)) {
 		ret = GetLastError();
-		uprintf("Unable to launch command '%s': %s", WindowsErrorString());
+		uprintf("Unable to launch command '%s': %s", cmd, WindowsErrorString());
 		goto out;
 	}
 
