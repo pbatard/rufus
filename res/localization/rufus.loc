@@ -515,6 +515,7 @@ t MSG_265 "VMWare disk detection"
 t MSG_266 "Dual UEFI/BIOS mode"
 t MSG_267 "Applying Windows image: %0.1f%% completed"
 t MSG_268 "Applying Windows image..."
+t MSG_269 "Preserve timestamps"
 
 ################################################################################
 ############################# TRANSLATOR END COPY ##############################

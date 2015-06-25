@@ -60,7 +60,7 @@ typedef struct {
 
 RUFUS_ISO_REPORT iso_report;
 int64_t iso_blocking_status = -1;
-BOOL enable_iso = TRUE, enable_joliet = TRUE, enable_rockridge = TRUE, has_ldlinux_c32;
+BOOL enable_iso = TRUE, enable_joliet = TRUE, enable_rockridge = TRUE, preserve_timestamps = FALSE, has_ldlinux_c32;
 #define ISO_BLOCKING(x) do {x; iso_blocking_status++; } while(0)
 static const char* psz_extract_dir;
 static const char* bootmgr_efi_name = "bootmgr.efi";
@@ -306,6 +306,31 @@ static void print_extracted_file(char* psz_fullpath, int64_t i_file_length)
 	psz_fullpath[nul_pos] = 0;
 }
 
+// Convert from time_t to FILETIME
+// Uses 3 static entries so that we can convert 3 concurrent values at the same time
+static LPFILETIME __inline to_filetime(time_t t)
+{
+	static int i = 0;
+	static FILETIME ft[3], *r;
+	LONGLONG ll = Int32x32To64(t, 10000000) + 116444736000000000;
+
+	r = &ft[i];
+	r->dwLowDateTime = (DWORD)ll;
+	r->dwHighDateTime = (DWORD)(ll >> 32);
+	i = (i + 1) % ARRAYSIZE(ft);
+	return r;
+}
+
+// Helper function to restore the timestamp on a directory
+static void __inline set_directory_timestamp(char* path, LPFILETIME creation, LPFILETIME last_access, LPFILETIME modify)
+{
+	HANDLE dir_handle = CreateFileU(path, GENERIC_READ | GENERIC_WRITE,
+		FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
+	if ((dir_handle == INVALID_HANDLE_VALUE) || (!SetFileTime(dir_handle, creation, last_access, modify)))
+		uprintf("  Could not set timestamp for directory '%s': %s", path, WindowsErrorString());
+	safe_closehandle(dir_handle);
+}
+
 // Returns 0 on success, nonzero on error
 static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const char *psz_path)
 {
@@ -343,6 +368,10 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 			if (!scan_only) {
 				psz_sanpath = sanitize_filename(psz_fullpath, &is_identical);
 				IGNORE_RETVAL(_mkdirU(psz_sanpath));
+				if (preserve_timestamps) {
+					set_directory_timestamp(psz_sanpath, to_filetime(udf_get_attribute_time(p_udf_dirent)),
+						to_filetime(udf_get_access_time(p_udf_dirent)), to_filetime(udf_get_modification_time(p_udf_dirent)));
+				}
 				safe_free(psz_sanpath);
 			}
 			p_udf_dirent2 = udf_opendir(p_udf_dirent);
@@ -405,6 +434,10 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 				if (nb_blocks++ % PROGRESS_THRESHOLD == 0)
 					UpdateProgress(OP_DOS, 100.0f*nb_blocks/total_blocks);
 			}
+			if ((preserve_timestamps) && (!SetFileTime(file_handle, to_filetime(udf_get_attribute_time(p_udf_dirent)),
+				to_filetime(udf_get_access_time(p_udf_dirent)), to_filetime(udf_get_modification_time(p_udf_dirent)))))
+				uprintf("  Could not set timestamp: %s", WindowsErrorString());
+
 			// If you have a fast USB 3.0 device, the default Windows buffering does an
 			// excellent job at compensating for our small blocks read/writes to max out the
 			// device's bandwidth.
@@ -486,6 +519,10 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 			if (!scan_only) {
 				psz_sanpath = sanitize_filename(psz_fullpath, &is_identical);
 				IGNORE_RETVAL(_mkdirU(psz_sanpath));
+				if (preserve_timestamps) {
+					LPFILETIME ft = to_filetime(mktime(&p_statbuf->tm));
+					set_directory_timestamp(psz_sanpath, ft, ft, ft);
+				}
 				safe_free(psz_sanpath);
 			}
 			if (iso_extract_files(p_iso, psz_iso_name))
@@ -549,6 +586,11 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 				i_file_length -= ISO_BLOCKSIZE;
 				if (nb_blocks++ % PROGRESS_THRESHOLD == 0)
 					UpdateProgress(OP_DOS, 100.0f*nb_blocks/total_blocks);
+			}
+			if (preserve_timestamps) {
+				LPFILETIME ft = to_filetime(mktime(&p_statbuf->tm));
+				if (!SetFileTime(file_handle, ft, ft, ft))
+					uprintf("  Could not set timestamp: %s", WindowsErrorString());
 			}
 			ISO_BLOCKING(safe_closehandle(file_handle));
 			if (props.is_syslinux_cfg || props.is_grub_cfg)

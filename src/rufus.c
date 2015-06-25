@@ -103,7 +103,7 @@ static BOOL log_displayed = FALSE;
 static BOOL iso_provided = FALSE;
 static BOOL user_notified = FALSE;
 static BOOL relaunch = FALSE;
-extern BOOL force_large_fat32, enable_iso, enable_joliet, enable_rockridge, enable_ntfs_compression;
+extern BOOL force_large_fat32, enable_iso, enable_joliet, enable_rockridge, enable_ntfs_compression, preserve_timestamps;
 extern uint8_t* grub2_buf;
 extern long grub2_len;
 extern const char* old_c32_name[NB_OLD_C32];
@@ -2918,6 +2918,12 @@ relaunch:
 			size_check = !size_check;
 			PrintStatus2000(lmprintf(MSG_252), size_check);
 			GetUSBDevices(0);
+			continue;
+		}
+		// Alt-T => Preserve timestamps when extracting ISO files
+		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'T')) {
+			preserve_timestamps = !preserve_timestamps;
+			PrintStatus2000(lmprintf(MSG_269), preserve_timestamps);
 			continue;
 		}
 		// Alt-U => Use PROPER size units, instead of this whole Kibi/Gibi nonsense
