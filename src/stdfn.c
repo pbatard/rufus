@@ -535,16 +535,18 @@ DWORD GetResourceSize(HMODULE module, char* name, char* type, const char* desc)
 // Run a console command, with optional redirection of stdout and stderr to our log
 DWORD RunCommand(const char* cmd, const char* dir, BOOL log)
 {
-	DWORD ret, dwRead, dwAvail, dwMsg;
+	DWORD ret, dwRead, dwAvail, dwPipeSize = 4096;
 	STARTUPINFOA si = {0};
 	PROCESS_INFORMATION pi = {0};
 	HANDLE hOutputRead = INVALID_HANDLE_VALUE, hOutputWrite = INVALID_HANDLE_VALUE;
 	HANDLE hDupOutputWrite = INVALID_HANDLE_VALUE;
-	char output[1024];
+	static char* output;
 
 	si.cb = sizeof(si);
 	if (log) {
-		if (!CreatePipe(&hOutputRead, &hOutputWrite, NULL, sizeof(output)-1)) {
+		// NB: The size of a pipe is a suggestion, NOT an absolute gaurantee
+		// This means that you may get a pipe of 4K even if you requested 1K
+		if (!CreatePipe(&hOutputRead, &hOutputWrite, NULL, dwPipeSize)) {
 			ret = GetLastError();
 			uprintf("Could not set commandline pipe: %s", WindowsErrorString());
 			goto out;
@@ -568,13 +570,15 @@ DWORD RunCommand(const char* cmd, const char* dir, BOOL log)
 	if (log) {
 		while (1) {
 			// coverity[string_null]
-			if (PeekNamedPipe(hOutputRead, output, sizeof(output)-1, &dwRead, &dwAvail, &dwMsg)) {
-				// Don't care about possible multiple reads being needed
-				if ((dwAvail != 0) && (ReadFile(hOutputRead, output, dwAvail, &dwRead, NULL)) && (dwRead != 0)) {
-					// This seems to be needed. Won't overflow since we set our max sizes to sizeof(output)-1
-					output[dwAvail] = 0;
-					// coverity[tainted_string]
-					uprintf(output);
+			if (PeekNamedPipe(hOutputRead, NULL, dwPipeSize, NULL, &dwAvail, NULL)) {
+				if (dwAvail != 0) {
+					output = malloc(dwAvail + 1);
+					if ((output != NULL) && (ReadFile(hOutputRead, output, dwAvail, &dwRead, NULL)) && (dwRead != 0)) {
+						output[dwAvail] = 0;
+						// coverity[tainted_string]
+						uprintf(output);
+					}
+					free(output);
 				}
 			}
 			if (WaitForSingleObject(pi.hProcess, 0) == WAIT_OBJECT_0)
