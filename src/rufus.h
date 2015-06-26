@@ -77,6 +77,9 @@
 #ifndef ARRAYSIZE
 #define ARRAYSIZE(A)                (sizeof(A)/sizeof((A)[0]))
 #endif
+#ifndef STRINGIFY
+#define STRINGIFY(x)                #x
+#endif
 #define IsChecked(CheckBox_ID)      (IsDlgButtonChecked(hMainDialog, CheckBox_ID) == BST_CHECKED)
 #define MB_IS_RTL                   (right_to_left_mode?MB_RTLREADING:0)
 #define IDD_OFFSET                  ((right_to_left_mode?100:0) + ((nWindowsVersion <= WINDOWS_XP)?50:0))

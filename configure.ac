@@ -35,7 +35,7 @@ else
   LDFLAGS="-s"
 fi
 
-# Alpha/Beta
+# Alpha/Beta/Test
 AC_ARG_ENABLE([alpha],[AS_HELP_STRING([--enable-alpha], [build an ALPHA release (default=no)])], [alpha_enabled=$enableval], [alpha_enabled='no'])
 if test "x$alpha_enabled" != "xno" ; then
   CFLAGS+=" -DALPHA"
@@ -45,6 +45,12 @@ AC_ARG_ENABLE([beta],[AS_HELP_STRING([--enable-beta], [build a BETA release (def
 if test "x$beta_enabled" != "xno" ; then
   CFLAGS+=" -DBETA"
   SUFFIX=_BETA
+fi
+AC_ARG_ENABLE([test],[AS_HELP_STRING([--enable-test=#], [build a TEST release (default=no)])], [test_enabled=$enableval], [test_enabled='no'])
+if test "x$test_enabled" != "xno" ; then
+  if test "x$test_enabled" == "xyes" ; then $enableval="" ; fi
+  CFLAGS+=" -DTEST=$enableval"
+  SUFFIX=_TEST$enableval
 fi
 
 AC_MSG_RESULT([enabling Large File Support (ISO support)])

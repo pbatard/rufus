@@ -103,7 +103,7 @@ static BOOL log_displayed = FALSE;
 static BOOL iso_provided = FALSE;
 static BOOL user_notified = FALSE;
 static BOOL relaunch = FALSE;
-extern BOOL force_large_fat32, enable_iso, enable_joliet, enable_rockridge, enable_ntfs_compression, preserve_timestamps;
+extern BOOL force_large_fat32, enable_iso, enable_joliet, enable_rockridge, enable_ntfs_compression, preserve_timestamps, usb_debug;
 extern uint8_t* grub2_buf;
 extern long grub2_len;
 extern const char* old_c32_name[NB_OLD_C32];
@@ -1541,6 +1541,9 @@ static __inline const char* IsAlphaOrBeta(void)
 	return " (Alpha) ";
 #elif defined(BETA)
 	return " (Beta) ";
+#elif defined(TEST)
+#	define TEST_STR(x) " (Test" STRINGIFY(x) ")"
+	return TEST_STR(TEST);
 #else
 	return " ";
 #endif
@@ -2038,6 +2041,10 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 #if defined(ALPHA)
 		// Add a VERY ANNOYING popup for Alpha releases, so that people don't start redistributing them
 		Notification(MSG_INFO, NULL, "ALPHA VERSION", "This is an Alpha version of " APPLICATION_NAME
+			" - It is meant to be used for testing ONLY and should NOT be distributed as a release.");
+#elif defined(TEST)
+		// Same thing for Test releases
+		Notification(MSG_INFO, NULL, "TEST VERSION", "This is a Test version of " APPLICATION_NAME
 			" - It is meant to be used for testing ONLY and should NOT be distributed as a release.");
 #endif
 		return (INT_PTR)FALSE;
@@ -2820,6 +2827,13 @@ relaunch:
 			(msg.message == WM_KEYDOWN) && (msg.wParam == 'A') ) {
 			// Might also need ES_NOHIDESEL property if you want to select when not active
 			SendMessage(hLog, EM_SETSEL, 0, -1);
+		}
+		// Alt-. => Enable USB enumeration debug
+		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == VK_OEM_PERIOD)) {
+			usb_debug = !usb_debug;
+			PrintStatus2000(lmprintf(MSG_270), usb_debug);
+			GetUSBDevices(0);
+			continue;
 		}
 		// Alt-B => Toggle fake drive detection during bad blocks check
 		// By default, Rufus will check for fake USB flash drives that mistakenly present

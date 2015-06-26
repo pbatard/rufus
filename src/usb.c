@@ -42,6 +42,7 @@
 
 extern StrArray DriveID, DriveLabel;
 extern BOOL enable_HDDs, use_fake_units, enable_vmdk;
+BOOL usb_debug = FALSE;
 
 /*
  * Get the VID, PID and current device speed
@@ -169,7 +170,8 @@ BOOL GetUSBDevices(DWORD devnum)
 		if (htab_create(DEVID_HTAB_SIZE, &htab_devid)) {
 			dev_info_data.cbSize = sizeof(dev_info_data);
 			for (i=0; SetupDiEnumDeviceInfo(dev_info, i, &dev_info_data); i++) {
-
+				if (usb_debug)
+					uprintf("Processing Hub %d:", i + 1);
 				devint_detail_data = NULL;
 				devint_data.cbSize = sizeof(devint_data);
 				// Only care about the first interface (MemberIndex 0)
@@ -188,12 +190,16 @@ BOOL GetUSBDevices(DWORD devnum)
 								if ((k = htab_hash(device_id, &htab_devid)) != 0) {
 									htab_devid.table[k].data = (void*)(uintptr_t)s;
 								}
+								if (usb_debug)
+									uprintf("  Found ID[%03d]: %s", k, device_id);
 								while (CM_Get_Sibling(&device_inst, device_inst, 0) == CR_SUCCESS) {
 									device_id[0] = 0;
 									if (CM_Get_Device_IDA(device_inst, device_id, MAX_PATH, 0) == CR_SUCCESS) {
 										if ((k = htab_hash(device_id, &htab_devid)) != 0) {
 											htab_devid.table[k].data = (void*)(uintptr_t)s;
 										}
+										if (usb_debug)
+											uprintf("  Found ID[%03d]: %s", k, device_id);
 									}
 								}
 							}
@@ -233,6 +239,11 @@ BOOL GetUSBDevices(DWORD devnum)
 			if (list_size[s] > 1) {
 				if (CM_Get_Device_ID_ListA(storage_name[s], &devid_list[i], list_size[s], ulFlags) != CR_SUCCESS)
 					continue;
+				if (usb_debug) {
+					uprintf("Processing IDs belonging to %s:", storage_name[s]);
+					for (device_id = &devid_list[i]; *device_id != 0; device_id += strlen(device_id) + 1)
+						uprintf("  %s", device_id);
+				}
 				// The list_size is sometimes larger than required thus we need to find the real end
 				for (i += list_size[s]; i > 2; i--) {
 					if ((devid_list[i-2] != '\0') && (devid_list[i-1] == '\0') && (devid_list[i] == '\0'))
@@ -268,6 +279,8 @@ BOOL GetUSBDevices(DWORD devnum)
 		memset(buffer, 0, sizeof(buffer));
 		props.is_VHD = SetupDiGetDeviceRegistryPropertyA(dev_info, &dev_info_data, SPDRP_HARDWAREID,
 			&datatype, (LPBYTE)buffer, sizeof(buffer), &size) && IsVHD(buffer);
+		if (usb_debug)
+			uprintf("Processing Device: '%s'", buffer);
 
 		memset(buffer, 0, sizeof(buffer));
 		if (!SetupDiGetDeviceRegistryPropertyA(dev_info, &dev_info_data, SPDRP_FRIENDLYNAME,
@@ -287,6 +300,8 @@ BOOL GetUSBDevices(DWORD devnum)
 					props.is_UASP = ((((uintptr_t)device_id)+2) >= ((uintptr_t)devid_list)+list_start[1]);
 					// Now get the properties of the device, and its Device ID, which we need to populate the properties
 					j = htab_hash(device_id, &htab_devid);
+					if (usb_debug)
+						uprintf("  Matched with ID[%03d]: %s", j, device_id);
 					// If the hash didn't match a populated string in dev_if_path[] (htab_devid.table[j].data > 0),
 					// we might have an extra vendor driver in between (e.g. "ASUS USB 3.0 Boost Storage Driver"
 					// for UASP devices in ASUS "Turbo Mode" or "Apple Mobile Device USB Driver" for iPods)
@@ -297,9 +312,13 @@ BOOL GetUSBDevices(DWORD devnum)
 						device_id = str;
 						method_str = "[GP]";
 						j = htab_hash(device_id, &htab_devid);
+						if (usb_debug)
+							uprintf("  Matched with (GP) ID[%03d]: %s", j, device_id);
 					}
 					if ((uint32_t)htab_devid.table[j].data > 0)
 						GetUSBProperties(dev_if_path.String[(uint32_t)htab_devid.table[j].data], device_id, &props);
+					if (usb_debug)
+						uprintf("  Props VID:PID = %04X:%04X", props.vid, props.pid);
 
 					// If previous calls still didn't succeed, try reading the VID:PID from the device_id
 					if ((props.vid == 0) && (props.pid == 0)) {
@@ -328,6 +347,8 @@ BOOL GetUSBDevices(DWORD devnum)
 				if (is_SCSI) {
 					// If we have an SCSI drive and couldn't get a VID:PID, we are most likely
 					// dealing with a system drive => eliminate it!
+					if (usb_debug)
+						uprintf("  Non USB => Eliminated");
 					continue;
 				}
 				safe_strcpy(str, sizeof(str), "????:????");	// Couldn't figure VID:PID

@@ -678,6 +678,7 @@ enable_silent_rules
 enable_debug
 enable_alpha
 enable_beta
+enable_test
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1306,6 +1307,7 @@ Optional Features:
   --enable-debug          keep debug symbols for gdb (default=yes)
   --enable-alpha          build an ALPHA release (default=no)
   --enable-beta           build a BETA release (default=no)
+  --enable-test=#         build a TEST release (default=no)
 
 Some influential environment variables:
   CC          C compiler command
@@ -3831,7 +3833,7 @@ else
   LDFLAGS="-s"
 fi
 
-# Alpha/Beta
+# Alpha/Beta/Test
 # Check whether --enable-alpha was given.
 if test "${enable_alpha+set}" = set; then :
   enableval=$enable_alpha; alpha_enabled=$enableval
@@ -3853,6 +3855,18 @@ fi
 if test "x$beta_enabled" != "xno" ; then
   CFLAGS+=" -DBETA"
   SUFFIX=_BETA
+fi
+# Check whether --enable-test was given.
+if test "${enable_test+set}" = set; then :
+  enableval=$enable_test; test_enabled=$enableval
+else
+  test_enabled='no'
+fi
+
+if test "x$test_enabled" != "xno" ; then
+  if test "x$test_enabled" == "xyes" ; then $enableval="" ; fi
+  CFLAGS+=" -DTEST=$enableval"
+  SUFFIX=_TEST$enableval
 fi
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: enabling Large File Support (ISO support)" >&5
