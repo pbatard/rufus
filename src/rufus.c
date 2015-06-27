@@ -125,7 +125,7 @@ char lost_translators[][6] = LOST_TRANSLATORS;
 OPENED_LIBRARIES_VARS;
 HINSTANCE hMainInstance;
 HWND hMainDialog, hLangToolbar = NULL, hUpdatesDlg = NULL;
-char szFolderPath[MAX_PATH], app_dir[MAX_PATH];
+char szFolderPath[MAX_PATH], app_dir[MAX_PATH], system_dir[MAX_PATH];
 char* image_path = NULL;
 float fScale = 1.0f;
 int default_fs;
@@ -2677,11 +2677,18 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 				goto out;
 		}
 	} else {
-		uprintf("unable to access UTF-16 args");
+		uprintf("Could not access UTF-16 args");
 	}
 
-	// Retrieve the current application directory
-	GetCurrentDirectoryU(MAX_PATH, app_dir);
+	// Retrieve the current application directory as well as the system dir
+	if (GetCurrentDirectoryU(sizeof(app_dir), app_dir) == 0) {
+		uprintf("Could not get current directory: %s", WindowsErrorString());
+		app_dir[0] = 0;
+	}
+	if (GetSystemDirectoryU(system_dir, sizeof(system_dir)) == 0) {
+		uprintf("Could not get system directory: %s", WindowsErrorString());
+		safe_strcpy(system_dir, sizeof(system_dir), "C:\\Windows\\System32");
+	}
 
 	// Look for a .ini file in the current app directory
 	static_sprintf(ini_path, "%s\\rufus.ini", app_dir);

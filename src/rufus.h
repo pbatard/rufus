@@ -350,7 +350,7 @@ extern HWND hMainDialog, hLogDlg, hStatus, hDeviceList, hCapacity;
 extern HWND hPartitionScheme, hFileSystem, hClusterSize, hLabel, hBootType, hNBPasses, hLog;
 extern HWND hInfo, hProgress, hDiskID;
 extern float fScale;
-extern char szFolderPath[MAX_PATH], app_dir[MAX_PATH];
+extern char szFolderPath[MAX_PATH], app_dir[MAX_PATH], system_dir[MAX_PATH];
 extern char* image_path;
 extern DWORD FormatStatus, DownloadStatus;
 extern BOOL PromptOnError;

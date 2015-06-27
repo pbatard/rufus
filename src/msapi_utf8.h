@@ -407,6 +407,20 @@ static __inline DWORD GetCurrentDirectoryU(DWORD nBufferLength, char* lpBuffer)
 	return ret;
 }
 
+static __inline UINT GetSystemDirectoryU(char* lpBuffer, UINT uSize)
+{
+	UINT ret = 0, err = ERROR_INVALID_DATA;
+	walloc(lpBuffer, uSize);
+	ret = GetSystemDirectoryW(wlpBuffer, uSize);
+	err = GetLastError();
+	if ((ret != 0) && ((ret = wchar_to_utf8_no_alloc(wlpBuffer, lpBuffer, uSize)) == 0)) {
+		err = GetLastError();
+	}
+	wfree(lpBuffer);
+	SetLastError(err);
+	return ret;
+}
+
 static __inline DWORD GetTempPathU(DWORD nBufferLength, char* lpBuffer)
 {
 	DWORD ret = 0, err = ERROR_INVALID_DATA;

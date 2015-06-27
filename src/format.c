@@ -1276,7 +1276,8 @@ BOOL SetupWinToGo(const char* drive_name, BOOL use_ms_efi)
 	static char san_policy_path[] = "?:\\san_policy.xml";
 #endif
 	static char unattend_path[] = "?:\\Windows\\System32\\sysprep\\unattend.xml";
-	char *mounted_iso, *ms_efi = NULL, image[128], cmd[MAX_PATH], system_root[128];
+	char *mounted_iso, *ms_efi = NULL, image[128], cmd[MAX_PATH];
+	char usb_system_dir[] = "?:\\Windows\\System32";
 	unsigned char *buffer;
 	int i;
 	wchar_t wVolumeName[] = L"?:";
@@ -1287,6 +1288,7 @@ BOOL SetupWinToGo(const char* drive_name, BOOL use_ms_efi)
 	PF_INIT(FormatEx, Fmifs);
 
 	uprintf("Windows To Go mode selected");
+	usb_system_dir[0] = drive_name[0];
 	// Additional sanity checks
 	if ( ((use_ms_efi) && (SelectedDrive.Geometry.MediaType != FixedMedia)) ||
 		 ((nWindowsVersion < WINDOWS_8) || ((WimExtractCheck() & 4) == 0)) ) {
@@ -1353,16 +1355,12 @@ BOOL SetupWinToGo(const char* drive_name, BOOL use_ms_efi)
 	// Try the 'bcdboot' command, first using the one from the target drive and, if that doesn't work, the system's
 	uprintf("Enabling boot...");
 	for (i = 0; i < 2; i++) {
-		if (i == 0)
-			static_sprintf(system_root, "%s\\Windows\\System32", drive_name);
-		else
-			GetSystemDirectoryA(system_root, sizeof(system_root));
 		static_sprintf(cmd, "%s\\bcdboot.exe %s\\Windows /f ALL /s %s",
-			system_root, drive_name, (use_ms_efi)?ms_efi:drive_name);
+			(i==0)?usb_system_dir:system_dir, drive_name, (use_ms_efi)?ms_efi:drive_name);
 		if (RunCommand(cmd, NULL, TRUE) == 0)
 			break;
 	}
-	if (i >= 2)	{
+	if (i >= 2) {
 		// Fatal, as the UFD is unlikely to boot then
 		uprintf("Failed to enable boot - aborting", cmd);
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_ISO_EXTRACT);

@@ -147,7 +147,7 @@ BOOL GetUSBDevices(DWORD devnum)
 	ULONG list_size[ARRAYSIZE(storage_name)] = { 0 }, list_start[ARRAYSIZE(storage_name)] = { 0 }, full_list_size, ulFlags;
 	HANDLE hDrive;
 	LONG maxwidth = 0;
-	int s, score, drive_number;
+	int s, score, drive_number, remove_drive;
 	char drive_letters[27], *device_id, *devid_list = NULL, entry_msg[128];
 	char *label, *entry, buffer[MAX_PATH], str[MAX_PATH], *method_str;
 	usb_device_props props;
@@ -448,17 +448,21 @@ BOOL GetUSBDevices(DWORD devnum)
 					// If that is the case, use "Multiple Volumes" instead of the label
 					safe_strcpy(entry_msg, sizeof(entry_msg), ((drive_letters[0] != 0) && (drive_letters[1] != 0))?
 						lmprintf(MSG_047):label);
-					for (k=0; drive_letters[k]; k++) {
+					for (k=0, remove_drive=0; drive_letters[k] && (!remove_drive); k++) {
 						// Append all the drive letters we detected
 						letter_name[2] = drive_letters[k];
 						if (right_to_left_mode)
 							safe_strcat(entry_msg, sizeof(entry_msg), RIGHT_TO_LEFT_MARK);
 						safe_strcat(entry_msg, sizeof(entry_msg), letter_name);
-						if (drive_letters[k] == (PathGetDriveNumberU(app_dir) + 'A')) break;
+						if (drive_letters[k] == (PathGetDriveNumberU(app_dir) + 'A'))
+							remove_drive = 1;
+						if (drive_letters[k] == (PathGetDriveNumberU(system_dir) + 'A'))
+							remove_drive = 2;
 					}
-					// Repeat as we need to break the outside loop
-					if (drive_letters[k] == (PathGetDriveNumberU(app_dir) + 'A')) {
-						uprintf("Removing %c: from the list: This is the disk from which " APPLICATION_NAME " is running!\n", app_dir[0]);
+					// Make sure that we don't list any drive that should not be listed
+					if (remove_drive) {
+						uprintf("Removing %C: from the list: This is the %s!", drive_letters[--k],
+							(remove_drive==1)?"disk from which " APPLICATION_NAME " is running":"system disk");
 						safe_closehandle(hDrive);
 						safe_free(devint_detail_data);
 						break;
