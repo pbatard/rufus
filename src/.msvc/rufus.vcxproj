@@ -189,6 +189,7 @@
     <ClCompile Include="..\net.c" />
     <ClCompile Include="..\parser.c" />
     <ClCompile Include="..\rufus.c" />
+    <ClCompile Include="..\checksum.c" />
     <ClCompile Include="..\smart.c" />
     <ClCompile Include="..\stdfn.c" />
     <ClCompile Include="..\stdio.c" />

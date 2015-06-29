@@ -83,6 +83,7 @@
 #define IsChecked(CheckBox_ID)      (IsDlgButtonChecked(hMainDialog, CheckBox_ID) == BST_CHECKED)
 #define MB_IS_RTL                   (right_to_left_mode?MB_RTLREADING:0)
 #define IDD_OFFSET                  ((right_to_left_mode?100:0) + ((nWindowsVersion <= WINDOWS_XP)?50:0))
+#define CHECK_FOR_USER_CANCEL       if (IS_ERROR(FormatStatus)) goto out
 
 #define safe_free(p) do {free((void*)p); p = NULL;} while(0)
 #define safe_min(a, b) min((size_t)(a), (size_t)(b))
@@ -252,7 +253,6 @@ typedef struct {
 	char reactos_path[128];		/* path to the ISO's freeldr.sys or setupldr.sys */
 	char install_wim_path[64];	/* path to install.wim or install.swm */
 	uint64_t projected_size;
-	uint64_t src_size;
 	uint8_t winpe;
 	uint8_t has_efi;
 	BOOLEAN has_4GB_file;
@@ -441,6 +441,7 @@ extern void LostTranslatorCheck(void);
 
 DWORD WINAPI FormatThread(void* param);
 DWORD WINAPI SaveImageThread(void* param);
+DWORD WINAPI SumThread(void* param);
 
 static __inline BOOL UnlockDrive(HANDLE hDrive) {
 	DWORD size;

@@ -1481,7 +1481,6 @@ void update_progress(const uint64_t processed_bytes)
  *   Unlock the volume.
  *   Close the volume handle.
  */
-#define CHECK_FOR_USER_CANCEL 	if (IS_ERROR(FormatStatus)) goto out
 DWORD WINAPI FormatThread(void* param)
 {
 	int i, r, pt, bt, fs, dt;
@@ -1972,7 +1971,7 @@ out:
 			free(guid_volume);
 		}
 	}
-	PostMessage(hMainDialog, UM_FORMAT_COMPLETED, 0, 0);
+	PostMessage(hMainDialog, UM_FORMAT_COMPLETED, (WPARAM)TRUE, 0);
 	ExitThread(0);
 }
 
@@ -2074,6 +2073,6 @@ out:
 	safe_free(buffer);
 	safe_closehandle(hDestImage);
 	safe_unlockclose(hPhysicalDrive);
-	PostMessage(hMainDialog, UM_FORMAT_COMPLETED, 0, 0);
+	PostMessage(hMainDialog, UM_FORMAT_COMPLETED, (WPARAM)TRUE, 0);
 	ExitThread(0);
 }

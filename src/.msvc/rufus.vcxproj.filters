@@ -69,6 +69,9 @@
     <ClCompile Include="..\usb.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\checksum.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\rufus.h">

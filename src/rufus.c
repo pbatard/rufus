@@ -135,7 +135,7 @@ HWND hLogDlg = NULL, hProgress = NULL, hInfo, hDiskID;
 BOOL use_own_c32[NB_OLD_C32] = {FALSE, FALSE}, detect_fakes = TRUE, mbr_selected_by_user = FALSE;
 BOOL iso_op_in_progress = FALSE, format_op_in_progress = FALSE, right_to_left_mode = FALSE;
 BOOL enable_HDDs = FALSE, advanced_mode = TRUE, force_update = FALSE, use_fake_units = TRUE;
-BOOL allow_dual_uefi_bios = FALSE, enable_vmdk = FALSE, togo_mode = TRUE;
+BOOL allow_dual_uefi_bios = FALSE, enable_vmdk = FALSE, togo_mode = TRUE, no_confirmation_on_cancel = FALSE;
 int dialog_showing = 0, lang_button_id = 0;
 uint16_t rufus_version[3], embedded_sl_version[2];
 char embedded_sl_version_str[2][12] = { "?.??", "?.??" };
@@ -2091,8 +2091,8 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			PF_INIT(SHChangeNotifyDeregister, Shell32);
 			EnableWindow(GetDlgItem(hDlg, IDCANCEL), FALSE);
 			if (format_thid != NULL) {
-				if (MessageBoxU(hMainDialog, lmprintf(MSG_105), lmprintf(MSG_049),
-					MB_YESNO|MB_ICONWARNING|MB_IS_RTL) == IDYES) {
+				if ((no_confirmation_on_cancel) || (MessageBoxU(hMainDialog, lmprintf(MSG_105), lmprintf(MSG_049),
+					MB_YESNO|MB_ICONWARNING|MB_IS_RTL) == IDYES)) {
 					// Operation may have completed in the meantime
 					if (format_thid != NULL) {
 						FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANCELLED;
@@ -2107,6 +2107,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				} else {
 					EnableWindow(GetDlgItem(hDlg, IDCANCEL), TRUE);
 				}
+				no_confirmation_on_cancel = FALSE;
 				return (INT_PTR)TRUE;
 			}
 			if ((pfSHChangeNotifyDeregister != NULL) && (ulRegister != 0))
@@ -2330,6 +2331,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			}
 			FormatStatus = 0;
 			format_op_in_progress = TRUE;
+			no_confirmation_on_cancel = FALSE;
 			// Reset all progress bars
 			SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_NORMAL, 0);
 			SetTaskbarProgressState(TASKBAR_NORMAL);
@@ -2378,13 +2380,12 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				// Disable all controls except cancel
 				EnableControls(FALSE);
 				DeviceNum = (DWORD)ComboBox_GetItemData(hDeviceList, nDeviceIndex);
-				FormatStatus = 0;
 				InitProgress(FALSE);
 				format_thid = CreateThread(NULL, 0, FormatThread, (LPVOID)(uintptr_t)DeviceNum, 0, NULL);
 				if (format_thid == NULL) {
 					uprintf("Unable to start formatting thread");
 					FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_START_THREAD);
-					PostMessage(hMainDialog, UM_FORMAT_COMPLETED, 0, 0);
+					PostMessage(hMainDialog, UM_FORMAT_COMPLETED, (WPARAM)FALSE, 0);
 				}
 				uprintf("\r\nFormat operation started");
 				PrintInfo(0, -1);
@@ -2478,8 +2479,10 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		SendMessage(FindWindowA(MAKEINTRESOURCEA(32770), lmprintf(MSG_049)), WM_COMMAND, IDYES, 0);
 		EnableWindow(GetDlgItem(hMainDialog, IDCANCEL), TRUE);
 		EnableControls(TRUE);
-		uprintf("\r\n");
-		GetUSBDevices(DeviceNum);
+		if (wParam) {
+			uprintf("\r\n");
+			GetUSBDevices(DeviceNum);
+		}
 		if (!IS_ERROR(FormatStatus)) {
 			// This is the only way to achieve instantaneous progress transition to 100%
 			SendMessage(hProgress, PBM_SETRANGE, 0, ((MAX_PROGRESS+1)<<16) & 0xFFFF0000);
@@ -2919,6 +2922,37 @@ relaunch:
 			GetUSBDevices(0);
 			continue;
 		}
+		// Alt-M => Compute Message Digests (MD5, SHA-1) on the current image
+		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'M')) {
+			if ((format_thid != NULL) || (image_path == NULL))
+				continue;
+			FormatStatus = 0;
+			format_op_in_progress = TRUE;
+			no_confirmation_on_cancel = TRUE;
+			// Reset all progress bars
+			SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_NORMAL, 0);
+			SetTaskbarProgressState(TASKBAR_NORMAL);
+			SetTaskbarProgressValue(0, MAX_PROGRESS);
+			SendMessage(hProgress, PBM_SETPOS, 0, 0);
+			// Disable all controls except cancel
+			EnableControls(FALSE);
+			InitProgress(FALSE);
+			format_thid = CreateThread(NULL, 0, SumThread, NULL, 0, NULL);
+			if (format_thid != NULL) {
+				PrintInfo(0, -1);
+				timer = 0;
+				safe_sprintf(szTimer, sizeof(szTimer), "00:00:00");
+				SendMessageA(GetDlgItem(hMainDialog, IDC_STATUS), SB_SETTEXTA,
+					SBT_OWNERDRAW | 1, (LPARAM)szTimer);
+				SetTimer(hMainDialog, TID_APP_TIMER, 1000, ClockTimer);
+			} else {
+				uprintf("Unable to start checksum thread");
+				FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_CANT_START_THREAD);
+				PostMessage(hMainDialog, UM_FORMAT_COMPLETED, (WPARAM)FALSE, 0);
+				format_op_in_progress = FALSE;
+			}
+			continue;
+		}
 		// Alt N => Enable NTFS compression
 		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'N')) {
 			enable_ntfs_compression = !enable_ntfs_compression;
@@ -2992,7 +3026,7 @@ relaunch:
 							uprintf("Unable to start VHD save thread");
 							FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_START_THREAD);
 							safe_free(vhd_save.path);
-							PostMessage(hMainDialog, UM_FORMAT_COMPLETED, 0, 0);
+							PostMessage(hMainDialog, UM_FORMAT_COMPLETED, (WPARAM)FALSE, 0);
 							format_op_in_progress = FALSE;
 						}
 					} else {
@@ -3004,7 +3038,7 @@ relaunch:
 							FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_FILE_TOO_LARGE;
 						}
 						safe_free(vhd_save.path);
-						PostMessage(hMainDialog, UM_FORMAT_COMPLETED, 0, 0);
+						PostMessage(hMainDialog, UM_FORMAT_COMPLETED, (WPARAM)FALSE, 0);
 						format_op_in_progress = FALSE;
 					}
 				}

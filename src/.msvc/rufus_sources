@@ -31,20 +31,21 @@ TARGETLIBS=$(SDK_LIB_PATH)\kernel32.lib \
 # http://jpassing.com/2008/02/01/how-to-use-manifests-with-buildexe/
 SXS_APPLICATION_MANIFEST=..\rufus.manifest
 
-SOURCES=rufus.c          \
-        format.c         \
-        stdio.c          \
-        stdfn.c          \
-        stdlg.c          \
-        icon.c           \
-        parser.c         \
-        localization.c   \
-        net.c            \
-        iso.c            \
+SOURCES=badblocks.c      \
+        checksum.c       \
         dos.c            \
         dos_locale.c     \
-        badblocks.c      \
         drive.c          \
+        format.c         \
+        icon.c           \
+        iso.c            \
+        stdfn.c          \
+        stdio.c          \
+        stdlg.c          \
+        localization.c   \
+        net.c            \
+        parser.c         \
+        rufus.c          \
         smart.c          \
         syslinux.c       \
         usb.c            \
