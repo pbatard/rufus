@@ -32,46 +32,46 @@
 
 #undef BIG_ENDIAN_HOST
 
+#if defined(__GNUC__)
+#define ALIGNED(m) __attribute__ ((__aligned__(m)))
+#elif defined(_MSC_VER)
+#define ALIGNED(m) __declspec(align(m))
+#endif
+
 /* Rotate a 32 bit integer by n bytes */
 #if defined(__GNUC__) && defined(__i386__)
-static inline uint32_t
-rol(uint32_t x, int n)
+static inline uint32_t rol(uint32_t x, int n)
 {
 	__asm__("roll %%cl,%0"
 		:"=r" (x)
 		:"0" (x),"c" (n));
 	return x;
 }
+#elif defined(_MSC_VER) && (_M_IX86 >= 300)
+static __inline uint32_t rol(uint32_t x, int n)
+{
+	__asm {
+		mov eax, x
+		mov ecx, n
+		rol eax, cl
+	}
+	/* returns with result in EAX */
+}
 #else
 #define rol(x,n) ( ((x) << (n)) | ((x) >> (32-(n))) )
 #endif
 
-#ifndef BIG_ENDIAN_HOST
-#define byte_reverse(buf, nlongs) /* nothing */
-#else
-static void byte_reverse(unsigned char *buf, unsigned nlongs)
-{
-	uint32_t t;
-	do {
-		t = (uint32_t)((unsigned)buf[3] << 8 | buf[2]) << 16 |
-			((unsigned)buf[1] << 8 | buf[0]);
-		*(uint32_t *)buf = t;
-		buf += 4;
-	} while (--nlongs);
-}
-#endif
-
-typedef struct {
-	uint32_t h0, h1, h2, h3, h4;
-	uint32_t nblocks;
+typedef struct ALIGNED(8) {
 	unsigned char buf[64];
-	int count;
+	uint32_t h0, h1, h2, h3, h4;
+	uint32_t count;
+	uint64_t nblocks;
 } SHA1_CONTEXT;
 
-typedef struct {
-	uint32_t h0, h1, h2, h3;
-	uint32_t bits[2];
+typedef struct ALIGNED(8) {
 	unsigned char buf[64];
+	uint32_t h0, h1, h2, h3;
+	uint64_t bitcount;
 } MD5_CONTEXT;
 
 void sha1_init(SHA1_CONTEXT *ctx)
@@ -82,8 +82,6 @@ void sha1_init(SHA1_CONTEXT *ctx)
 	ctx->h2 = 0x98badcfe;
 	ctx->h3 = 0x10325476;
 	ctx->h4 = 0xc3d2e1f0;
-	ctx->nblocks = 0;
-	ctx->count = 0;
 }
 
 void md5_init(MD5_CONTEXT *ctx)
@@ -93,8 +91,6 @@ void md5_init(MD5_CONTEXT *ctx)
 	ctx->h1 = 0xefcdab89;
 	ctx->h2 = 0x98badcfe;
 	ctx->h3 = 0x10325476;
-	ctx->bits[0] = 0;
-	ctx->bits[1] = 0;
 }
 
 /* Transform the message X which consists of 16 32-bit-words (SHA-1) */
@@ -136,8 +132,8 @@ static void sha1_transform(SHA1_CONTEXT *ctx, const unsigned char *data)
 
 #define M(i) ( tm = x[i&0x0f] ^ x[(i-14)&0x0f] ^ x[(i-8)&0x0f] ^ x[(i-3)&0x0f], (x[i&0x0f] = rol(tm,1)) )
 
-#define SHA1STEP(a,b,c,d,e,f,k,m) do { e += rol( a, 5 ) + f( b, c, d ) + k + m; \
-                                       b = rol( b, 30 ); } while(0)
+#define SHA1STEP(a,b,c,d,e,f,k,m) do { e += rol(a, 5) + f(b, c, d) + k + m; \
+                                       b = rol(b, 30); } while(0)
 	SHA1STEP(a, b, c, d, e, F1, K1, x[0]);
 	SHA1STEP(e, a, b, c, d, F1, K1, x[1]);
 	SHA1STEP(d, e, a, b, c, F1, K1, x[2]);
@@ -381,12 +377,9 @@ void md5_write(MD5_CONTEXT *ctx, const unsigned char *buf, size_t len)
 	uint32_t t;
 
 	/* Update bitcount */
-	t = ctx->bits[0];
-	if ((ctx->bits[0] = t + ((uint32_t)len << 3)) < t)
-		ctx->bits[1]++; /* carry from low to high */
-	ctx->bits[1] += len >> 29;
+	ctx->bitcount += (len << 3);
 
-	t = (t >> 3) & 0x3f; /* bytes already in shsInfo->data */
+	t = (ctx->bitcount >> 3) & 0x3f;
 
 	/* Handle any leading odd-sized chunks */
 	if (t) {
@@ -398,7 +391,6 @@ void md5_write(MD5_CONTEXT *ctx, const unsigned char *buf, size_t len)
 			return;
 		}
 		memcpy(p, buf, t);
-		byte_reverse(ctx->buf, 16);
 		md5_transform(ctx, ctx->buf);
 		buf += t;
 		len -= t;
@@ -407,7 +399,6 @@ void md5_write(MD5_CONTEXT *ctx, const unsigned char *buf, size_t len)
 	/* Process data in 64-byte chunks */
 	while (len >= 64) {
 		memcpy(ctx->buf, buf, 64);
-		byte_reverse(ctx->buf, 16);
 		md5_transform(ctx, ctx->buf);
 		buf += 64;
 		len -= 64;
@@ -420,24 +411,12 @@ void md5_write(MD5_CONTEXT *ctx, const unsigned char *buf, size_t len)
 /* The routine final terminates the computation and returns the digest (SHA-1) */
 static void sha1_final(SHA1_CONTEXT *ctx)
 {
-	uint32_t t, msb, lsb;
+	uint64_t bitcount;
 	unsigned char *p;
 
 	sha1_write(ctx, NULL, 0); /* flush */;
 
-	t = ctx->nblocks;
-	/* multiply by 64 to make a byte count */
-	lsb = t << 6;
-	msb = t >> 26;
-	/* add the count */
-	t = lsb;
-	if ((lsb += ctx->count) < t)
-		msb++;
-	/* multiply by 8 to make a bit count */
-	t = lsb;
-	lsb <<= 3;
-	msb <<= 3;
-	msb |= t >> 29;
+	bitcount = ctx->nblocks * 64 * 8;
 
 	if (ctx->count < 56) { /* enough room */
 		ctx->buf[ctx->count++] = 0x80; /* pad */
@@ -450,23 +429,25 @@ static void sha1_final(SHA1_CONTEXT *ctx)
 		sha1_write(ctx, NULL, 0); /* flush */;
 		memset(ctx->buf, 0, 56); /* fill next block with zeroes */
 	}
-	/* append the 64 bit count */
-	ctx->buf[56] = msb >> 24;
-	ctx->buf[57] = msb >> 16;
-	ctx->buf[58] = msb >> 8;
-	ctx->buf[59] = msb;
-	ctx->buf[60] = lsb >> 24;
-	ctx->buf[61] = lsb >> 16;
-	ctx->buf[62] = lsb >> 8;
-	ctx->buf[63] = lsb;
+
+	/* append the 64 bit count (big-endian) */
+	ctx->buf[56] = (unsigned char) (bitcount >> 56);
+	ctx->buf[57] = (unsigned char) (bitcount >> 48);
+	ctx->buf[58] = (unsigned char) (bitcount >> 40);
+	ctx->buf[59] = (unsigned char) (bitcount >> 32);
+	ctx->buf[60] = (unsigned char) (bitcount >> 24);
+	ctx->buf[61] = (unsigned char) (bitcount >> 16);
+	ctx->buf[62] = (unsigned char) (bitcount >> 8);
+	ctx->buf[63] = (unsigned char) bitcount;
+
 	sha1_transform(ctx, ctx->buf);
 
 	p = ctx->buf;
 #ifdef BIG_ENDIAN_HOST
 #define X(a) do { *(uint32_t*)p = ctx->h##a ; p += 4; } while(0)
 #else /* little endian */
-#define X(a) do { *p++ = ctx->h##a >> 24; *p++ = ctx->h##a >> 16; \
-                  *p++ = ctx->h##a >> 8; *p++ = ctx->h##a; } while(0)
+#define X(a) do { *p++ = (unsigned char) (ctx->h##a >> 24); *p++ = (unsigned char) (ctx->h##a >> 16); \
+                  *p++ = (unsigned char) (ctx->h##a >> 8); *p++ = (unsigned char) ctx->h##a; } while(0)
 #endif
 	X(0);
 	X(1);
@@ -479,11 +460,11 @@ static void sha1_final(SHA1_CONTEXT *ctx)
 /* The routine final terminates the computation and returns the digest (MD5) */
 static void md5_final(MD5_CONTEXT *ctx)
 {
-	unsigned count;
+	uint32_t count;
 	unsigned char *p;
 
 	/* Compute number of bytes mod 64 */
-	count = (ctx->bits[0] >> 3) & 0x3F;
+	count = (ctx->bitcount >> 3) & 0x3F;
 
 	/* Set the first char of padding to 0x80.
 	 * This is safe since there is always at least one byte free
@@ -498,7 +479,6 @@ static void md5_final(MD5_CONTEXT *ctx)
 	if (count < 8) {
 		/* Two lots of padding: Pad the first block to 64 bytes */
 		memset(p, 0, count);
-		byte_reverse(ctx->buf, 16);
 		md5_transform(ctx, ctx->buf);
 
 		/* Now fill the next block with 56 bytes */
@@ -507,26 +487,25 @@ static void md5_final(MD5_CONTEXT *ctx)
 		/* Pad block to 56 bytes */
 		memset(p, 0, count - 8);
 	}
-	byte_reverse(ctx->buf, 14);
 
-	/* append the 64 bit count */
-	ctx->buf[56] = ctx->bits[0];
-	ctx->buf[57] = ctx->bits[0] >> 8;
-	ctx->buf[58] = ctx->bits[0] >> 16;
-	ctx->buf[59] = ctx->bits[0] >> 24;
-	ctx->buf[60] = ctx->bits[1];
-	ctx->buf[61] = ctx->bits[1] >> 8;
-	ctx->buf[62] = ctx->bits[1] >> 16;
-	ctx->buf[63] = ctx->bits[1] >> 24;
+	/* append the 64 bit count (little endian) */
+	ctx->buf[56] = (unsigned char) ctx->bitcount;
+	ctx->buf[57] = (unsigned char) (ctx->bitcount >> 8);
+	ctx->buf[58] = (unsigned char) (ctx->bitcount >> 16);
+	ctx->buf[59] = (unsigned char) (ctx->bitcount >> 24);
+	ctx->buf[60] = (unsigned char) (ctx->bitcount >> 32);
+	ctx->buf[61] = (unsigned char) (ctx->bitcount >> 40);
+	ctx->buf[62] = (unsigned char) (ctx->bitcount >> 48);
+	ctx->buf[63] = (unsigned char) (ctx->bitcount >> 56);
 
 	md5_transform(ctx, ctx->buf);
 
 	p = ctx->buf;
-#ifndef BIG_ENDIAN_HOST
+#ifdef BIG_ENDIAN_HOST
+#define X(a) do { *p++ = (unsigned char) (ctx->h##a >> 24); *p++ = (unsigned char) (ctx->h##a >> 16); \
+                  *p++ = (unsigned char) (ctx->h##a >> 8); *p++ = (unsigned char) ctx->h##a; } while(0)
+#else /* little endian */
 #define X(a) do { *(uint32_t*)p = ctx->h##a ; p += 4; } while(0)
-#else /* big endian */
-#define X(a) do { *p++ = ctx->h##a >> 24; *p++ = ctx->h##a >> 16; \
-                  *p++ = ctx->h##a >> 8; *p++ = ctx->h##a; } while(0)
 #endif
 	X(0);
 	X(1);
