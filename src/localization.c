@@ -420,7 +420,7 @@ static void __inline OutputMessage(BOOL info, char* msg)
 	if (info)
 		SetWindowTextU(hInfo, msg);
 	else
-		SendMessageLU(GetDlgItem(hMainDialog, IDC_STATUS), SB_SETTEXTW, SBT_OWNERDRAW, msg);
+		SendMessageLU(hStatus, SB_SETTEXTW, SBT_OWNERDRAW | SB_SECTION_LEFT, msg);
 }
 
 static void CALLBACK PrintMessageTimeout(HWND hWnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)

@@ -401,17 +401,22 @@ fallback:
 void CreateStatusBar(void)
 {
 	RECT rect;
-	int edge[2];
+	int edge[3];
 
 	// Create the status bar.
 	hStatus = CreateWindowEx(0, STATUSCLASSNAME, NULL, WS_CHILD | WS_VISIBLE,
 		0, 0, 0, 0, hMainDialog, (HMENU)IDC_STATUS, hMainInstance, NULL);
 
-	// Create 2 status areas
+	// Create 3 status areas
 	GetClientRect(hMainDialog, &rect);
-	edge[0] = rect.right - (int)(58.0f*fScale);
-	edge[1] = rect.right;
-	SendMessage(hStatus, SB_SETPARTS, (WPARAM) 2, (LPARAM)&edge);
+	edge[0] = rect.right - (int)(SB_EDGE_1 * fScale);
+	edge[1] = rect.right - (int)(SB_EDGE_2 * fScale);
+	edge[2] = rect.right;
+	SendMessage(hStatus, SB_SETPARTS, (WPARAM) ARRAYSIZE(edge), (LPARAM)&edge);
+
+	// NB: To add an icon on the status bar, you can use something like this:
+//	SendMessage(hStatus, SB_SETICON, (WPARAM) 1, (LPARAM)LoadImage(GetLibraryHandle("rasdlg"),
+//		MAKEINTRESOURCE(50), IMAGE_ICON, GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON), LR_DEFAULTCOLOR | LR_SHARED));
 }
 
 /*

@@ -903,7 +903,7 @@ static void CALLBACK ClockTimer(HWND hWnd, UINT uMsg, UINT_PTR idEvent, DWORD dw
 	timer++;
 	safe_sprintf(szTimer, sizeof(szTimer), "%02d:%02d:%02d",
 		timer/3600, (timer%3600)/60, timer%60);
-	SendMessageA(GetDlgItem(hWnd, IDC_STATUS), SB_SETTEXTA, SBT_OWNERDRAW | 1, (LPARAM)szTimer);
+	SendMessageA(hStatus, SB_SETTEXTA, SBT_OWNERDRAW | SB_SECTION_RIGHT, (LPARAM)szTimer);
 }
 
 /*
@@ -1063,6 +1063,7 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 	InvalidateRect(hMainDialog, NULL, TRUE);
 
 out:
+	SendMessageLU(hStatus, SB_SETTEXTW, SBT_OWNERDRAW | SB_SECTION_MIDDLE, "");
 	PrintInfo(0, MSG_210);
 	ExitThread(0);
 }
@@ -1850,6 +1851,9 @@ void InitDialog(HWND hDlg)
 	ToggleAdvanced();	// We start in advanced mode => go to basic mode
 	ToggleToGo();
 
+	// Create the hash sign on the status bar
+	SendMessageLU(hStatus, SB_SETTEXTW, SBT_OWNERDRAW | SB_SECTION_MIDDLE, "");
+
 	// Process commandline parameters
 	if (iso_provided) {
 		// Simulate a button click for ISO selection
@@ -1953,7 +1957,7 @@ void SetBoot(int fs, int bt)
  */
 static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	static DWORD DeviceNum = 0, LastRefresh = 0;
+	static DWORD DeviceNum = 0, LastRefresh = 0, MessagePos;
 	static BOOL first_log_display = TRUE, user_changed_label = FALSE, isMarquee = FALSE;
 	static ULONG ulRegister = 0;
 	static LPITEMIDLIST pidlDesktop = NULL;
@@ -2057,15 +2061,58 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			pDI->rcItem.left += (int)(4.0f * fScale);
 			SetBkMode(pDI->hDC, TRANSPARENT);
 			switch(pDI->itemID) {
-			case 0:	// left part
+			case SB_SECTION_LEFT:
 				SetTextColor(pDI->hDC, GetSysColor(COLOR_BTNTEXT));
 				DrawTextExU(pDI->hDC, szStatusMessage, -1, &pDI->rcItem,
 					DT_LEFT|DT_END_ELLIPSIS|DT_PATH_ELLIPSIS, NULL);
 				return (INT_PTR)TRUE;
-			case 1:	// right part
+			case SB_SECTION_MIDDLE:
+				SetTextColor(pDI->hDC, (image_path==NULL)?GetSysColor(COLOR_3DSHADOW):GetSysColor(COLOR_BTNTEXT));
+				DrawTextExA(pDI->hDC, "#", -1, &pDI->rcItem, DT_LEFT, NULL);
+				return (INT_PTR)TRUE;
+			case SB_SECTION_RIGHT:
 				SetTextColor(pDI->hDC, GetSysColor(COLOR_3DSHADOW));
 				DrawTextExA(pDI->hDC, szTimer, -1, &pDI->rcItem, DT_LEFT, NULL);
 				return (INT_PTR)TRUE;
+			}
+		}
+		break;
+
+	// Detect a click on the "hash" sign in the status bar
+	case WM_PARENTNOTIFY:
+		if (wParam == WM_LBUTTONDOWN) {
+			GetClientRect(hMainDialog, &DialogRect);
+			MessagePos = GetMessagePos();
+			Point.x = GET_X_LPARAM(MessagePos);
+			Point.y = GET_Y_LPARAM(MessagePos);
+			ScreenToClient(hDlg, &Point);
+			if ( (Point.x >= DialogRect.right - (int)(SB_EDGE_1*fScale)) &&
+				 (Point.x <= DialogRect.right - (int)(SB_EDGE_2*fScale)) &&
+				 ((format_thid == NULL) && (image_path != NULL)) ) {
+				FormatStatus = 0;
+				format_op_in_progress = TRUE;
+				no_confirmation_on_cancel = TRUE;
+				// Reset all progress bars
+				SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_NORMAL, 0);
+				SetTaskbarProgressState(TASKBAR_NORMAL);
+				SetTaskbarProgressValue(0, MAX_PROGRESS);
+				SendMessage(hProgress, PBM_SETPOS, 0, 0);
+				// Disable all controls except cancel
+				EnableControls(FALSE);
+				InitProgress(FALSE);
+				format_thid = CreateThread(NULL, 0, SumThread, NULL, 0, NULL);
+				if (format_thid != NULL) {
+					PrintInfo(0, -1);
+					timer = 0;
+					safe_sprintf(szTimer, sizeof(szTimer), "00:00:00");
+					SendMessageA(hStatus, SB_SETTEXTA, SBT_OWNERDRAW | SB_SECTION_RIGHT, (LPARAM)szTimer);
+					SetTimer(hMainDialog, TID_APP_TIMER, 1000, ClockTimer);
+				} else {
+					uprintf("Unable to start checksum thread");
+					FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_CANT_START_THREAD);
+					PostMessage(hMainDialog, UM_FORMAT_COMPLETED, (WPARAM)FALSE, 0);
+					format_op_in_progress = FALSE;
+				}
 			}
 		}
 		break;
@@ -2391,8 +2438,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				PrintInfo(0, -1);
 				timer = 0;
 				safe_sprintf(szTimer, sizeof(szTimer), "00:00:00");
-				SendMessageA(GetDlgItem(hMainDialog, IDC_STATUS), SB_SETTEXTA,
-					SBT_OWNERDRAW | 1, (LPARAM)szTimer);
+				SendMessageA(hStatus, SB_SETTEXTA, SBT_OWNERDRAW | SB_SECTION_RIGHT, (LPARAM)szTimer);
 				SetTimer(hMainDialog, TID_APP_TIMER, 1000, ClockTimer);
 			}
 			if (format_thid == NULL)
@@ -2922,37 +2968,6 @@ relaunch:
 			GetUSBDevices(0);
 			continue;
 		}
-		// Alt-M => Compute Message Digests (MD5, SHA-1) on the current image
-		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'M')) {
-			if ((format_thid != NULL) || (image_path == NULL))
-				continue;
-			FormatStatus = 0;
-			format_op_in_progress = TRUE;
-			no_confirmation_on_cancel = TRUE;
-			// Reset all progress bars
-			SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_NORMAL, 0);
-			SetTaskbarProgressState(TASKBAR_NORMAL);
-			SetTaskbarProgressValue(0, MAX_PROGRESS);
-			SendMessage(hProgress, PBM_SETPOS, 0, 0);
-			// Disable all controls except cancel
-			EnableControls(FALSE);
-			InitProgress(FALSE);
-			format_thid = CreateThread(NULL, 0, SumThread, NULL, 0, NULL);
-			if (format_thid != NULL) {
-				PrintInfo(0, -1);
-				timer = 0;
-				safe_sprintf(szTimer, sizeof(szTimer), "00:00:00");
-				SendMessageA(GetDlgItem(hMainDialog, IDC_STATUS), SB_SETTEXTA,
-					SBT_OWNERDRAW | 1, (LPARAM)szTimer);
-				SetTimer(hMainDialog, TID_APP_TIMER, 1000, ClockTimer);
-			} else {
-				uprintf("Unable to start checksum thread");
-				FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_CANT_START_THREAD);
-				PostMessage(hMainDialog, UM_FORMAT_COMPLETED, (WPARAM)FALSE, 0);
-				format_op_in_progress = FALSE;
-			}
-			continue;
-		}
 		// Alt N => Enable NTFS compression
 		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'N')) {
 			enable_ntfs_compression = !enable_ntfs_compression;
@@ -3020,7 +3035,7 @@ relaunch:
 							PrintInfo(0, -1);
 							timer = 0;
 							safe_sprintf(szTimer, sizeof(szTimer), "00:00:00");
-							SendMessageA(GetDlgItem(hMainDialog, IDC_STATUS), SB_SETTEXTA, SBT_OWNERDRAW | 1, (LPARAM)szTimer);
+							SendMessageA(hStatus, SB_SETTEXTA, SBT_OWNERDRAW | SB_SECTION_RIGHT, (LPARAM)szTimer);
 							SetTimer(hMainDialog, TID_APP_TIMER, 1000, ClockTimer);
 						} else {
 							uprintf("Unable to start VHD save thread");
