@@ -104,10 +104,10 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int fs_type)
 	int ldlinux_sectors;
 	uint32_t ldlinux_cluster;
 	int i, nsectors;
-	int dt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
-	BOOL use_v5 = (dt == DT_SYSLINUX_V6) || ((dt == DT_ISO) && (SL_MAJOR(iso_report.sl_version) >= 5));
+	int bt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
+	BOOL use_v5 = (bt == BT_SYSLINUX_V6) || ((bt == BT_ISO) && (SL_MAJOR(iso_report.sl_version) >= 5));
 
-	PrintInfoDebug(0, MSG_234, (dt == DT_ISO)?iso_report.sl_version_str:embedded_sl_version_str[use_v5?1:0]);
+	PrintInfoDebug(0, MSG_234, (bt == BT_ISO)?iso_report.sl_version_str:embedded_sl_version_str[use_v5?1:0]);
 
 	// 4K sector size workaround
 	SECTOR_SHIFT = 0;
@@ -186,7 +186,7 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int fs_type)
 	}
 
 	uprintf("Successfully wrote '%s'\n", &path[3]);
-	if (dt != DT_ISO)
+	if (bt != BT_ISO)
 		UpdateProgress(OP_DOS, -1.0f);
 
 	/* Now flush the media */
@@ -299,7 +299,7 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int fs_type)
 
 	uprintf("Successfully wrote Syslinux boot record\n");
 
-	if (dt == DT_SYSLINUX_V6) {
+	if (bt == BT_SYSLINUX_V6) {
 		IGNORE_RETVAL(_chdirU(app_dir));
 		static_sprintf(path, "%s/%s-%s", FILES_DIR, syslinux, embedded_sl_version_str[1]);
 		IGNORE_RETVAL(_chdir(path));
@@ -350,7 +350,7 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int fs_type)
 		fclose(fd);
 	}
 
-	if (dt != DT_ISO)
+	if (bt != BT_ISO)
 		UpdateProgress(OP_DOS, -1.0f);
 
 	r = TRUE;

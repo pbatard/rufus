@@ -197,28 +197,28 @@ enum {
 	FS_MAX
 };
 
-enum dos_type {
-	DT_WINME = 0,
-	DT_FREEDOS,
-	DT_ISO,
-	DT_IMG,
-	DT_SYSLINUX_V4,		// Start of indexes that only display in advanced mode
-	DT_SYSLINUX_V6,
-	DT_REACTOS,
-	DT_GRUB4DOS,
-	DT_GRUB2,
-	DT_UEFI_NTFS,
-	DT_MAX
-};
-
-enum bios_type {
-	BT_BIOS = 0,
-	BT_UEFI,
+enum boot_type {
+	BT_MSDOS = 0,
+	BT_FREEDOS,
+	BT_ISO,
+	BT_IMG,
+	BT_SYSLINUX_V4,		// Start of indexes that only display in advanced mode
+	BT_SYSLINUX_V6,
+	BT_REACTOS,
+	BT_GRUB4DOS,
+	BT_GRUB2,
+	BT_UEFI_NTFS,
 	BT_MAX
 };
+
+enum target_type {
+	TT_BIOS = 0,
+	TT_UEFI,
+	TT_MAX
+};
 // For the partition types we'll use Microsoft's PARTITION_STYLE_### constants
-#define GETBIOSTYPE(x) (((x)>0)?(((x) >> 16) & 0xFFFF):0)
-#define GETPARTTYPE(x) (((x)>0)?((x) & 0xFFFF):0);
+#define GETTARGETTYPE(x) (((x)>0)?(((x) >> 16) & 0xFFFF):0)
+#define GETPARTTYPE(x)   (((x)>0)?((x) & 0xFFFF):0);
 
 /* Current drive info */
 typedef struct {

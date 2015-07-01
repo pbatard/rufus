@@ -860,8 +860,8 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 	FILE fake_fd = { 0 };
 	const char* using_msg = "Using %s MBR\n";
 	int fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
-	int dt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
-	int bt = GETBIOSTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
+	int bt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
+	int tt = GETTARGETTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
 
 	AnalyzeMBR(hPhysicalDrive, "Drive");
 
@@ -898,7 +898,7 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 		buf[0x1c2] = 0x0c;
 		break;
 	}
-	if ((IsChecked(IDC_BOOT)) && (bt == BT_BIOS)) {
+	if ((IsChecked(IDC_BOOT)) && (tt == TT_BIOS)) {
 		// Set first partition bootable - masquerade as per the DiskID selected
 		buf[0x1be] = IsChecked(IDC_RUFUS_MBR) ? 
 			(BYTE)ComboBox_GetItemData(hDiskID, ComboBox_GetCurSel(hDiskID)):0x80;
@@ -920,43 +920,43 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 		goto windows_mbr;
 
 	// Forced UEFI (by zeroing the MBR)
-	if (bt == BT_UEFI) {
+	if (tt == TT_UEFI) {
 		uprintf(using_msg, "zeroed");
 		r = write_zero_mbr(&fake_fd);
 		goto notify;
 	}
 	
 	// Syslinux
-	if ( (dt == DT_SYSLINUX_V4) || (dt == DT_SYSLINUX_V6) ||
-		 ((dt == DT_ISO) && (HAS_SYSLINUX(iso_report)) && (IS_FAT(fs))) ) {
+	if ( (bt == BT_SYSLINUX_V4) || (bt == BT_SYSLINUX_V6) ||
+		 ((bt == BT_ISO) && (HAS_SYSLINUX(iso_report)) && (IS_FAT(fs))) ) {
 		uprintf(using_msg, "Syslinux");
 		r = write_syslinux_mbr(&fake_fd);
 		goto notify;
 	}
 
 	// Grub 2.0
-	if ( ((dt == DT_ISO) && (iso_report.has_grub2)) || (dt == DT_GRUB2) ) {
+	if ( ((bt == BT_ISO) && (iso_report.has_grub2)) || (bt == BT_GRUB2) ) {
 		uprintf(using_msg, "Grub 2.0");
 		r = write_grub2_mbr(&fake_fd);
 		goto notify;
 	}
 
 	// Grub4DOS
-	if ( ((dt == DT_ISO) && (iso_report.has_grub4dos)) || (dt == DT_GRUB4DOS) ) {
+	if ( ((bt == BT_ISO) && (iso_report.has_grub4dos)) || (bt == BT_GRUB4DOS) ) {
 		uprintf(using_msg, "Grub4DOS");
 		r = write_grub_mbr(&fake_fd);
 		goto notify;
 	}
 
 	// ReactOS
-	if (dt == DT_REACTOS) {
+	if (bt == BT_REACTOS) {
 		uprintf(using_msg, "ReactOS");
 		r = write_reactos_mbr(&fake_fd);
 		goto notify;
 	} 
 
 	// KolibriOS
-	if ( (dt == DT_ISO) && (iso_report.has_kolibrios) && (IS_FAT(fs))) {
+	if ( (bt == BT_ISO) && (iso_report.has_kolibrios) && (IS_FAT(fs))) {
 		uprintf(using_msg, "KolibriOS");
 		r = write_kolibri_mbr(&fake_fd);
 		goto notify;
@@ -989,7 +989,7 @@ static BOOL WriteSBR(HANDLE hPhysicalDrive)
 {
 	// TODO: Do we need anything special for 4K sectors?
 	DWORD size, max_size, mbr_size = 0x200;
-	int r, dt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
+	int r, bt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
 	unsigned char* buf = NULL;
 	FILE fake_fd = { 0 };
 
@@ -1000,15 +1000,15 @@ static BOOL WriteSBR(HANDLE hPhysicalDrive)
 		(DWORD)(SelectedDrive.Geometry.BytesPerSector * SelectedDrive.Geometry.SectorsPerTrack) : 1024 * 1024;
 	max_size -= mbr_size;
 	// Syslinux has precedence over Grub
-	if ((dt == DT_ISO) && (!HAS_SYSLINUX(iso_report))) {
+	if ((bt == BT_ISO) && (!HAS_SYSLINUX(iso_report))) {
 		if (iso_report.has_grub4dos)
-			dt = DT_GRUB4DOS;
+			bt = BT_GRUB4DOS;
 		if (iso_report.has_grub2)
-			dt = DT_GRUB2;
+			bt = BT_GRUB2;
 	}
 
-	switch (dt) {
-	case DT_GRUB4DOS:
+	switch (bt) {
+	case BT_GRUB4DOS:
 		uprintf("Writing Grub4Dos SBR...");
 		buf = GetResource(hMainInstance, MAKEINTRESOURCEA(IDR_GR_GRUB_GRLDR_MBR), _RT_RCDATA, "grldr.mbr", &size, FALSE);
 		if ((buf == NULL) || (size <= mbr_size)) {
@@ -1018,7 +1018,7 @@ static BOOL WriteSBR(HANDLE hPhysicalDrive)
 		buf = &buf[mbr_size];
 		size -= mbr_size;
 		break;
-	case DT_GRUB2:
+	case BT_GRUB2:
 		if (grub2_buf != NULL) {
 			uprintf("Writing Grub 2.0 SBR (from download)...");
 			buf = grub2_buf;
@@ -1049,19 +1049,19 @@ static BOOL WriteSBR(HANDLE hPhysicalDrive)
 /*
  * Process the Partition Boot Record
  */
-static __inline const char* dt_to_name(int dt) {
-	switch (dt) {
-	case DT_FREEDOS: return "FreeDOS";
-	case DT_REACTOS: return "ReactOS";
+static __inline const char* bt_to_name(int bt) {
+	switch (bt) {
+	case BT_FREEDOS: return "FreeDOS";
+	case BT_REACTOS: return "ReactOS";
 	default:
-		return ((dt==DT_ISO)&&(iso_report.has_kolibrios))?"KolibriOS":"Standard";
+		return ((bt==BT_ISO)&&(iso_report.has_kolibrios))?"KolibriOS":"Standard";
 	}
 }
 static BOOL WritePBR(HANDLE hLogicalVolume)
 {
 	int i;
 	FILE fake_fd = { 0 };
-	int dt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
+	int bt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
 	const char* using_msg = "Using %s %s partition boot record\n";
 
 	fake_fd._ptr = (char*)hLogicalVolume;
@@ -1069,17 +1069,17 @@ static BOOL WritePBR(HANDLE hLogicalVolume)
 
 	switch (ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem))) {
 	case FS_FAT16:
-		uprintf(using_msg, dt_to_name(dt), "FAT16");
+		uprintf(using_msg, bt_to_name(bt), "FAT16");
 		if (!is_fat_16_fs(&fake_fd)) {
 			uprintf("New volume does not have a FAT16 boot sector - aborting\n");
 			break;
 		}
 		uprintf("Confirmed new volume has a FAT16 boot sector\n");
-		if (dt == DT_FREEDOS) {
+		if (bt == BT_FREEDOS) {
 			if (!write_fat_16_fd_br(&fake_fd, 0)) break;
-		} else if (dt == DT_REACTOS) {
+		} else if (bt == BT_REACTOS) {
 			if (!write_fat_16_ros_br(&fake_fd, 0)) break;
-		} else if ((dt == DT_ISO) && (iso_report.has_kolibrios)) {
+		} else if ((bt == BT_ISO) && (iso_report.has_kolibrios)) {
 			uprintf("FAT16 is not supported for KolibriOS\n"); break;
 		} else {
 			if (!write_fat_16_br(&fake_fd, 0)) break;
@@ -1089,7 +1089,7 @@ static BOOL WritePBR(HANDLE hLogicalVolume)
 			break;
 		return TRUE;
 	case FS_FAT32:
-		uprintf(using_msg, dt_to_name(dt), "FAT32");
+		uprintf(using_msg, bt_to_name(bt), "FAT32");
 		for (i=0; i<2; i++) {
 			if (!is_fat_32_fs(&fake_fd)) {
 				uprintf("New volume does not have a %s FAT32 boot sector - aborting\n", i?"secondary":"primary");
@@ -1097,11 +1097,11 @@ static BOOL WritePBR(HANDLE hLogicalVolume)
 			}
 			uprintf("Confirmed new volume has a %s FAT32 boot sector\n", i?"secondary":"primary");
 			uprintf("Setting %s FAT32 boot sector for boot...\n", i?"secondary":"primary");
-			if (dt == DT_FREEDOS) {
+			if (bt == BT_FREEDOS) {
 				if (!write_fat_32_fd_br(&fake_fd, 0)) break;
-			} else if (dt == DT_REACTOS) {
+			} else if (bt == BT_REACTOS) {
 				if (!write_fat_32_ros_br(&fake_fd, 0)) break;
-			} else if ((dt == DT_ISO) && (iso_report.has_kolibrios)) {
+			} else if ((bt == BT_ISO) && (iso_report.has_kolibrios)) {
 				if (!write_fat_32_kos_br(&fake_fd, 0)) break;
 			} else {
 				if (!write_fat_32_br(&fake_fd, 0)) break;
@@ -1113,7 +1113,7 @@ static BOOL WritePBR(HANDLE hLogicalVolume)
 		}
 		return TRUE;
 	case FS_NTFS:
-		uprintf(using_msg, dt_to_name(dt), "NTFS");
+		uprintf(using_msg, bt_to_name(bt), "NTFS");
 		if (!is_ntfs_fs(&fake_fd)) {
 			uprintf("New volume does not have an NTFS boot sector - aborting\n");
 			break;
@@ -1483,7 +1483,7 @@ void update_progress(const uint64_t processed_bytes)
  */
 DWORD WINAPI FormatThread(void* param)
 {
-	int i, r, pt, bt, fs, dt;
+	int i, r, pt, tt, fs, bt;
 	BOOL s, ret, use_large_fat32, windows_to_go;
 	const DWORD SectorSize = SelectedDrive.Geometry.BytesPerSector;
 	DWORD rSize, wSize, BufSize, DriveIndex = (DWORD)(uintptr_t)param;
@@ -1509,18 +1509,18 @@ DWORD WINAPI FormatThread(void* param)
 	PF_INIT(SetThreadUILanguage, Kernel32);
 
 	fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
-	dt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
+	bt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
 	pt = GETPARTTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
-	bt = GETBIOSTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
+	tt = GETTARGETTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
 	use_large_fat32 = (fs == FS_FAT32) && ((SelectedDrive.DiskSize > LARGE_FAT32_SIZE) || (force_large_fat32));
 	windows_to_go = (togo_mode) && HAS_TOGO(iso_report) && (Button_GetCheck(GetDlgItem(hMainDialog, IDC_WINDOWS_TO_GO)) == BST_CHECKED);
 	// Find out if we need to add any extra partitions
-	if ((windows_to_go) && (bt == BT_UEFI) && (pt == PARTITION_STYLE_GPT))
+	if ((windows_to_go) && (tt == TT_UEFI) && (pt == PARTITION_STYLE_GPT))
 		// According to Microsoft, every GPT disk (we RUN Windows from) must have an MSR due to not having hidden sectors
 		// http://msdn.microsoft.com/en-us/library/windows/hardware/dn640535.aspx#gpt_faq_what_disk_require_msr
 		extra_partitions = XP_MSR | XP_EFI;
-	else if ( (fs == FS_NTFS) && ((dt == DT_UEFI_NTFS) ||
-			  ((dt == DT_ISO) && (iso_report.has_efi) && ((bt == BT_UEFI) || (windows_to_go) || (allow_dual_uefi_bios)))) )
+	else if ( (fs == FS_NTFS) && ((bt == BT_UEFI_NTFS) ||
+			  ((bt == BT_ISO) && (iso_report.has_efi) && ((tt == TT_UEFI) || (windows_to_go) || (allow_dual_uefi_bios)))) )
 		extra_partitions = XP_UEFI_NTFS;
 	else if (IsChecked(IDC_EXTRA_PARTITION))
 		extra_partitions = XP_COMPAT;
@@ -1551,7 +1551,7 @@ DWORD WINAPI FormatThread(void* param)
 		// Do it in reverse so that we always end on the first volume letter
 		for (i=(int)safe_strlen(drive_letters); i>0; i--) {
 			drive_name[0] = drive_letters[i-1];
-			if (IsChecked(IDC_BOOT) && ((dt == DT_ISO) || (dt == DT_IMG))) {
+			if (IsChecked(IDC_BOOT) && ((bt == BT_ISO) || (bt == BT_IMG))) {
 				// If we are using an image, check that it isn't located on the drive we are trying to format
 				if ((PathGetDriveNumberU(image_path) + 'A') == drive_letters[i-1]) {
 					uprintf("ABORTED: Cannot use an image that is located on the target drive!\n");
@@ -1663,7 +1663,7 @@ DWORD WINAPI FormatThread(void* param)
 	}
 
 	// Write an image file
-	if (IsChecked(IDC_BOOT) && (dt == DT_IMG)) {
+	if (IsChecked(IDC_BOOT) && (bt == BT_IMG)) {
 		char fs_type[32];
 		// We poked the MBR and other stuff, so we need to rewind
 		li.QuadPart = 0;
@@ -1762,7 +1762,7 @@ DWORD WINAPI FormatThread(void* param)
 	UpdateProgress(OP_ZERO_MBR, -1.0f);
 	CHECK_FOR_USER_CANCEL;
 
-	if (!CreatePartition(hPhysicalDrive, pt, fs, (pt==PARTITION_STYLE_MBR) && (bt==BT_UEFI), extra_partitions)) {
+	if (!CreatePartition(hPhysicalDrive, pt, fs, (pt==PARTITION_STYLE_MBR) && (tt==TT_UEFI), extra_partitions)) {
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_PARTITION_FAILURE;
 		goto out;
 	}
@@ -1826,17 +1826,17 @@ DWORD WINAPI FormatThread(void* param)
 	CHECK_FOR_USER_CANCEL;
 
 	if (IsChecked(IDC_BOOT)) {
-		if (dt == DT_UEFI_NTFS) {
+		if (bt == BT_UEFI_NTFS) {
 			// All good
-		} else if (bt == BT_UEFI) {
+		} else if (tt == TT_UEFI) {
 			// For once, no need to do anything - just check our sanity
-			if ( (dt != DT_ISO) || (!iso_report.has_efi) || (fs > FS_NTFS) ) {
+			if ( (bt != BT_ISO) || (!iso_report.has_efi) || (fs > FS_NTFS) ) {
 				uprintf("Spock gone crazy error!\n");
 				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_INSTALL_FAILURE;
 				goto out;
 			}
-		} else if ( (dt == DT_SYSLINUX_V4) || (dt == DT_SYSLINUX_V6) ||
-			((dt == DT_ISO) && (HAS_SYSLINUX(iso_report) || IS_REACTOS(iso_report)) &&
+		} else if ( (bt == BT_SYSLINUX_V4) || (bt == BT_SYSLINUX_V6) ||
+			((bt == BT_ISO) && (HAS_SYSLINUX(iso_report) || IS_REACTOS(iso_report)) &&
 				(!allow_dual_uefi_bios) && (IS_FAT(fs))) ) {
 			if (!InstallSyslinux(DriveIndex, drive_name[0], fs)) {
 				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_INSTALL_FAILURE;
@@ -1875,7 +1875,7 @@ DWORD WINAPI FormatThread(void* param)
 	CHECK_FOR_USER_CANCEL;
 
 	if (IsChecked(IDC_BOOT)) {
-		if ((dt == DT_WINME) || (dt == DT_FREEDOS)) {
+		if ((bt == BT_MSDOS) || (bt == BT_FREEDOS)) {
 			UpdateProgress(OP_DOS, -1.0f);
 			PrintInfoDebug(0, MSG_230);
 			if (!ExtractDOS(drive_name)) {
@@ -1883,13 +1883,13 @@ DWORD WINAPI FormatThread(void* param)
 					FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANNOT_COPY;
 				goto out;
 			}
-		} else if (dt == DT_GRUB4DOS) {
+		} else if (bt == BT_GRUB4DOS) {
 			grub4dos_dst[0] = drive_name[0];
 			uprintf("Installing: %s (Grub4DOS loader)\n", grub4dos_dst);
 			IGNORE_RETVAL(_chdirU(app_dir));
 			if (!CopyFileU(FILES_DIR "\\grub4dos-" GRUB4DOS_VERSION "\\grldr", grub4dos_dst, FALSE))
 				uprintf("Failed to copy file: %s", WindowsErrorString());
-		} else if ((dt == DT_ISO) && (image_path != NULL)) {
+		} else if ((bt == BT_ISO) && (image_path != NULL)) {
 			UpdateProgress(OP_DOS, 0.0f);
 			drive_name[2] = 0;	// Ensure our drive is something like 'D:'
 			if (windows_to_go) {
@@ -1915,7 +1915,7 @@ DWORD WINAPI FormatThread(void* param)
 					}
 				}
 				// EFI mode selected, with no 'boot###.efi' but Windows 7 x64's 'bootmgr.efi' (bit #0)
-				if ((bt == BT_UEFI) && IS_WIN7_EFI(iso_report)) {
+				if ((tt == TT_UEFI) && IS_WIN7_EFI(iso_report)) {
 					PrintInfoDebug(0, MSG_232);
 					iso_report.install_wim_path[0] = drive_name[0];
 					efi_dst[0] = drive_name[0];
@@ -1931,7 +1931,7 @@ DWORD WINAPI FormatThread(void* param)
 						}
 					}
 				}
-				if ( (bt == BT_BIOS) && (IS_WINPE(iso_report.winpe)) ) {
+				if ( (tt == TT_BIOS) && (IS_WINPE(iso_report.winpe)) ) {
 					// Apply WinPe fixup
 					if (!SetupWinPE(drive_name[0]))
 						FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_PATCH);
@@ -1945,7 +1945,7 @@ DWORD WINAPI FormatThread(void* param)
 		// Issue another complete remount before we exit, to ensure we're clean
 		RemountVolume(drive_name);
 		// NTFS fixup (WinPE/AIK images don't seem to boot without an extra checkdisk)
-		if ((dt == DT_ISO) && (fs == FS_NTFS)) {
+		if ((bt == BT_ISO) && (fs == FS_NTFS)) {
 			// Try to ensure that all messages from Checkdisk will be in English
 			if ((pfGetThreadUILanguage != NULL) && (PRIMARYLANGID(pfGetThreadUILanguage()) != LANG_ENGLISH)) {
 				pfSetThreadUILanguage(MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US));

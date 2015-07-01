@@ -410,7 +410,7 @@ static void SetMBRForUEFI(BOOL replace)
 	if (replace)
 		ComboBox_DeleteString(hPartitionScheme, 0);
 	IGNORE_RETVAL(ComboBox_SetItemData(hPartitionScheme, ComboBox_InsertStringU(hPartitionScheme, 0,
-		lmprintf(MSG_031, PartitionTypeLabel[PARTITION_STYLE_MBR], useCSM?"UEFI-CSM":"UEFI")), (BT_BIOS<<16)|PARTITION_STYLE_MBR));
+		lmprintf(MSG_031, PartitionTypeLabel[PARTITION_STYLE_MBR], useCSM?"UEFI-CSM":"UEFI")), (TT_BIOS<<16)|PARTITION_STYLE_MBR));
 	if (replace)
 		IGNORE_RETVAL(ComboBox_SetCurSel(hPartitionScheme, max(ComboBox_GetCurSel(hPartitionScheme), 0)));
 }
@@ -473,7 +473,7 @@ static BOOL SetDriveInfo(int ComboIndex)
 			SetMBRForUEFI(FALSE);
 		} else {
 			IGNORE_RETVAL(ComboBox_SetItemData(hPartitionScheme, ComboBox_AddStringU(hPartitionScheme,
-				lmprintf(MSG_033, PartitionTypeLabel[pt])), (BT_UEFI<<16)|pt));
+				lmprintf(MSG_033, PartitionTypeLabel[pt])), (TT_UEFI<<16)|pt));
 		}
 	}
 
@@ -487,7 +487,7 @@ static void SetFSFromISO(void)
 {
 	int i, fs, selected_fs = FS_UNKNOWN;
 	uint32_t fs_mask = 0;
-	int bt = GETBIOSTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
+	int tt = GETTARGETTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
 	BOOL windows_to_go = (togo_mode) && HAS_TOGO(iso_report) &&
 		(Button_GetCheck(GetDlgItem(hMainDialog, IDC_WINDOWS_TO_GO)) == BST_CHECKED);
 
@@ -502,7 +502,7 @@ static void SetFSFromISO(void)
 
 	// Syslinux and EFI have precedence over bootmgr (unless the user selected BIOS as target type)
 	if ((HAS_SYSLINUX(iso_report)) || (IS_REACTOS(iso_report)) || (iso_report.has_kolibrios) ||
-		((iso_report.has_efi) && (bt == BT_UEFI) && (!iso_report.has_4GB_file) && (!windows_to_go))) {
+		((iso_report.has_efi) && (tt == TT_UEFI) && (!iso_report.has_4GB_file) && (!windows_to_go))) {
 		if (fs_mask & (1<<FS_FAT32)) {
 			selected_fs = FS_FAT32;
 		} else if ((fs_mask & (1<<FS_FAT16)) && (!iso_report.has_kolibrios)) {
@@ -528,10 +528,10 @@ static void SetFSFromISO(void)
 static void SetMBRProps(void)
 {
 	int fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
-	int dt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
+	int bt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
 	BOOL needs_masquerading = (IS_WINPE(iso_report.winpe) && (!iso_report.uses_minint));
 
-	if ((!mbr_selected_by_user) && ((image_path == NULL) || (dt != DT_ISO) || (fs != FS_NTFS) || IS_GRUB(iso_report) ||
+	if ((!mbr_selected_by_user) && ((image_path == NULL) || (bt != BT_ISO) || (fs != FS_NTFS) || IS_GRUB(iso_report) ||
 		((togo_mode) && (Button_GetCheck(GetDlgItem(hMainDialog, IDC_WINDOWS_TO_GO)) == BST_CHECKED)) )) {
 		CheckDlgButton(hMainDialog, IDC_RUFUS_MBR, BST_UNCHECKED);
 		IGNORE_RETVAL(ComboBox_SetCurSel(hDiskID, 0));
@@ -546,19 +546,19 @@ static void SetMBRProps(void)
 
 static void SetToGo(void)
 {
-	int dt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
-	if ( ((dt != DT_ISO) && (togo_mode)) || ((dt == DT_ISO) && (HAS_TOGO(iso_report)) && (!togo_mode)) )
+	int bt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
+	if ( ((bt != BT_ISO) && (togo_mode)) || ((bt == BT_ISO) && (HAS_TOGO(iso_report)) && (!togo_mode)) )
 		ToggleToGo();
 }
 
 static void EnableAdvancedBootOptions(BOOL enable, BOOL remove_checkboxes)
 {
-	int bt = GETBIOSTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
-	BOOL actual_enable_mbr = ((bt==BT_UEFI)||(selection_default>=DT_IMG)||!IsChecked(IDC_BOOT))?FALSE:enable;
-	BOOL actual_enable_fix = ((bt==BT_UEFI)||(selection_default==DT_IMG)||!IsChecked(IDC_BOOT))?FALSE:enable;
+	int tt = GETTARGETTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
+	BOOL actual_enable_mbr = ((tt==TT_UEFI)||(selection_default>=BT_IMG)||!IsChecked(IDC_BOOT))?FALSE:enable;
+	BOOL actual_enable_fix = ((tt==TT_UEFI)||(selection_default==BT_IMG)||!IsChecked(IDC_BOOT))?FALSE:enable;
 	static UINT uXPartChecked = BST_UNCHECKED;
 
-	if ((selection_default == DT_ISO) && (iso_report.has_kolibrios || IS_GRUB(iso_report) || IS_REACTOS(iso_report) || HAS_SYSLINUX(iso_report))) {
+	if ((selection_default == BT_ISO) && (iso_report.has_kolibrios || IS_GRUB(iso_report) || IS_REACTOS(iso_report) || HAS_SYSLINUX(iso_report))) {
 		actual_enable_mbr = FALSE;
 		mbr_selected_by_user = FALSE;
 	}
@@ -583,7 +583,7 @@ static void EnableAdvancedBootOptions(BOOL enable, BOOL remove_checkboxes)
 static void EnableBootOptions(BOOL enable, BOOL remove_checkboxes)
 {
 	int fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
-	BOOL actual_enable = ((!IS_FAT(fs)) && (fs != FS_NTFS) && (selection_default == DT_IMG))?FALSE:enable;
+	BOOL actual_enable = ((!IS_FAT(fs)) && (fs != FS_NTFS) && (selection_default == BT_IMG))?FALSE:enable;
 
 	EnableWindow(hBoot, actual_enable);
 	EnableWindow(hBootType, actual_enable);
@@ -595,9 +595,9 @@ static void EnableBootOptions(BOOL enable, BOOL remove_checkboxes)
 
 static void SetPartitionSchemeTooltip(void)
 {
-	int bt = GETBIOSTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
+	int tt = GETTARGETTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
 	int pt = GETPARTTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
-	if (bt == BT_BIOS) {
+	if (tt == TT_BIOS) {
 		CreateTooltip(hPartitionScheme, lmprintf(MSG_150), 15000);
 	} else {
 		if (pt == PARTITION_STYLE_MBR) {
@@ -702,16 +702,16 @@ static void InitProgress(BOOL bOnlyFormat)
 		if (IsChecked(IDC_BOOT)) {
 			// 1 extra slot for PBR writing
 			switch (selection_default) {
-			case DT_WINME:
+			case BT_MSDOS:
 				nb_slots[OP_DOS] = 3+1;
 				break;
-			case DT_FREEDOS:
+			case BT_FREEDOS:
 				nb_slots[OP_DOS] = 5+1;
 				break;
-			case DT_IMG:
+			case BT_IMG:
 				nb_slots[OP_DOS] = 0;
 				break;
-			case DT_ISO:
+			case BT_ISO:
 				nb_slots[OP_DOS] = -1;
 				break;
 			default:
@@ -719,7 +719,7 @@ static void InitProgress(BOOL bOnlyFormat)
 				break;
 			}
 		}
-		if (selection_default == DT_IMG) {
+		if (selection_default == BT_IMG) {
 			nb_slots[OP_FORMAT] = -1;
 		} else {
 			nb_slots[OP_ZERO_MBR] = 1;
@@ -731,7 +731,7 @@ static void InitProgress(BOOL bOnlyFormat)
 			  || ((fs == FS_FAT32) && ((SelectedDrive.DiskSize >= LARGE_FAT32_SIZE) || (force_large_fat32))) ) {
 				nb_slots[OP_FORMAT] = -1;
 			}
-			nb_slots[OP_FINALIZE] = ((selection_default == DT_ISO) && (fs == FS_NTFS))?3:2;
+			nb_slots[OP_FINALIZE] = ((selection_default == BT_ISO) && (fs == FS_NTFS))?3:2;
 		}
 	}
 
@@ -820,7 +820,7 @@ static void EnableControls(BOOL bEnable)
 	EnableWindow(hLangToolbar, bEnable);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_ENABLE_FIXED_DISKS), bEnable);
 	SetDlgItemTextU(hMainDialog, IDCANCEL, lmprintf(bEnable?MSG_006:MSG_007));
-	if (selection_default == DT_IMG)
+	if (selection_default == BT_IMG)
 		return;
 	EnableWindow(GetDlgItem(hMainDialog, IDC_PARTITION_TYPE), bEnable);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_FILESYSTEM), bEnable);
@@ -1020,9 +1020,9 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 	if (iso_report.is_bootable_img) {
 		uprintf("'%s' is a %sbootable %s image", image_path,
 			(iso_report.compression_type != BLED_COMPRESSION_NONE)?"compressed ":"", iso_report.is_vhd?"VHD":"disk");
-		selection_default = DT_IMG;
+		selection_default = BT_IMG;
 	} else {
-		selection_default = DT_ISO;
+		selection_default = BT_ISO;
 		DisplayISOProps();
 	}
 	if ( (!iso_report.has_bootmgr) && (!HAS_SYSLINUX(iso_report)) && (!IS_WINPE(iso_report.winpe)) && (!IS_GRUB(iso_report))
@@ -1234,7 +1234,7 @@ static void ToggleToGo(void)
 
 static BOOL BootCheck(void)
 {
-	int i, fs, bt, dt, pt, r;
+	int i, fs, tt, bt, pt, r;
 	FILE *fd;
 	DWORD len;
 	BOOL in_files_dir = FALSE;
@@ -1247,9 +1247,9 @@ static BOOL BootCheck(void)
 
 	syslinux_ldlinux_len[0] = 0; syslinux_ldlinux_len[1] = 0;
 	safe_free(grub2_buf);
-	dt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
+	bt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
 	pt = GETPARTTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
-	if ((dt == DT_ISO) || (dt == DT_IMG)) {
+	if ((bt == BT_ISO) || (bt == BT_IMG)) {
 		if (image_path == NULL) {
 			// Please click on the disc button to select a bootable ISO
 			MessageBoxU(hMainDialog, lmprintf(MSG_087), lmprintf(MSG_086), MB_OK|MB_ICONERROR|MB_IS_RTL);
@@ -1260,21 +1260,21 @@ static BOOL BootCheck(void)
 			MessageBoxU(hMainDialog, lmprintf(MSG_089), lmprintf(MSG_088), MB_OK|MB_ICONERROR|MB_IS_RTL);
 			return FALSE;
 		}
-		if (dt == DT_IMG) {
+		if (bt == BT_IMG) {
 			if (!iso_report.is_bootable_img)
 			// The selected image doesn't match the boot option selected.
 				MessageBoxU(hMainDialog, lmprintf(MSG_188), lmprintf(MSG_187), MB_OK|MB_ICONERROR|MB_IS_RTL);
 			return (iso_report.is_bootable_img);
 		}
 		fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
-		bt = GETBIOSTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
+		tt = GETTARGETTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
 		if ((togo_mode) && (Button_GetCheck(GetDlgItem(hMainDialog, IDC_WINDOWS_TO_GO)) == BST_CHECKED)) {
 			if (fs != FS_NTFS) {
 				// Windows To Go only works for NTFS
 				MessageBoxU(hMainDialog, lmprintf(MSG_097, "Windows To Go"), lmprintf(MSG_092), MB_OK|MB_ICONERROR|MB_IS_RTL);
 				return FALSE;
 			} else if (SelectedDrive.Geometry.MediaType != FixedMedia) {
-				if ((bt == BT_UEFI) && (pt == PARTITION_STYLE_GPT)) {
+				if ((tt == TT_UEFI) && (pt == PARTITION_STYLE_GPT)) {
 					// We're screwed since we need access to 2 partitions at the same time to set this, which
 					// Windows can't do. Cue in Arthur's Theme: "♫ I know it's stupid... but it's true. ♫"
 					MessageBoxU(hMainDialog, lmprintf(MSG_198), lmprintf(MSG_190), MB_OK|MB_ICONERROR|MB_IS_RTL);
@@ -1285,7 +1285,7 @@ static BOOL BootCheck(void)
 				if (MessageBoxU(hMainDialog, lmprintf(MSG_098), lmprintf(MSG_190), MB_YESNO|MB_ICONWARNING|MB_IS_RTL) != IDYES)
 					return FALSE;
 			}
-		} else if (bt == BT_UEFI) {
+		} else if (tt == TT_UEFI) {
 			if (!iso_report.has_efi) {
 				// Unsupported ISO
 				MessageBoxU(hMainDialog, lmprintf(MSG_091), lmprintf(MSG_090), MB_OK|MB_ICONERROR|MB_IS_RTL);
@@ -1468,7 +1468,7 @@ static BOOL BootCheck(void)
 				}
 			}
 		}
-	} else if (dt == DT_SYSLINUX_V6) {
+	} else if (bt == BT_SYSLINUX_V6) {
 		IGNORE_RETVAL(_chdirU(app_dir));
 		IGNORE_RETVAL(_mkdir(FILES_DIR));
 		IGNORE_RETVAL(_chdir(FILES_DIR));
@@ -1494,13 +1494,13 @@ static BOOL BootCheck(void)
 					return FALSE;
 			}
 		}
-	} else if (dt == DT_WINME) {
+	} else if (bt == BT_MSDOS) {
 		if ((size_check) && (ComboBox_GetItemData(hClusterSize, ComboBox_GetCurSel(hClusterSize)) >= 65536)) {
 			// MS-DOS cannot boot from a drive using a 64 kilobytes Cluster size
 			MessageBoxU(hMainDialog, lmprintf(MSG_110), lmprintf(MSG_111), MB_OK|MB_ICONERROR|MB_IS_RTL);
 			return FALSE;
 		}
-	} else if (dt == DT_GRUB4DOS) {
+	} else if (bt == BT_GRUB4DOS) {
 		IGNORE_RETVAL(_chdirU(app_dir));
 		IGNORE_RETVAL(_mkdir(FILES_DIR));
 		IGNORE_RETVAL(_chdir(FILES_DIR));
@@ -1526,7 +1526,7 @@ static BOOL BootCheck(void)
 					return FALSE;
 			}
 		}
-	} else if (dt == DT_UEFI_NTFS) {
+	} else if (bt == BT_UEFI_NTFS) {
 		fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
 		if (fs != FS_NTFS) {
 			MessageBoxU(hMainDialog, lmprintf(MSG_097, "UEFI:NTFS"), lmprintf(MSG_092), MB_OK|MB_ICONERROR|MB_IS_RTL);
@@ -1689,7 +1689,7 @@ void InitDialog(HWND hDlg)
 	SetClusterSizeLabels();
 
 	// Prefer FreeDOS to MS-DOS
-	selection_default = DT_FREEDOS;
+	selection_default = BT_FREEDOS;
 	// Create the status line and initialize the taskbar icon for progress overlay
 	CreateStatusBar();
 	CreateTaskbarList();
@@ -1704,10 +1704,11 @@ void InitDialog(HWND hDlg)
 	IGNORE_RETVAL(ComboBox_SetCurSel(hNBPasses, 0));
 	SetPassesTooltip();
 	// Fill up the boot type dropdown
-	IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, "MS-DOS"), DT_WINME));
-	IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, "FreeDOS"), DT_FREEDOS));
-	IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, lmprintf(MSG_036)), DT_ISO));
-	IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, lmprintf(MSG_095)), DT_IMG));
+	if (nWindowsVersion < WINDOWS_10)	// The diskcopy.dll with the MS-DOS floppy image was removed in Windows 10
+		IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, "MS-DOS"), BT_MSDOS));
+	IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, "FreeDOS"), BT_FREEDOS));
+	IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, lmprintf(MSG_036)), BT_ISO));
+	IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, lmprintf(MSG_095)), BT_IMG));
 	IGNORE_RETVAL(ComboBox_SetCurSel(hBootType, selection_default));
 	// Fill up the MBR masqueraded disk IDs ("8 disks should be enough for anybody")
 	IGNORE_RETVAL(ComboBox_SetItemData(hDiskID, ComboBox_AddStringU(hDiskID, lmprintf(MSG_030, LEFT_TO_RIGHT_MARK "0x80")), 0x80));
@@ -1903,34 +1904,35 @@ void ShowLanguageMenu(RECT rcExclude)
 	DestroyMenu(menu);
 }
 
-void SetBoot(int fs, int bt)
+void SetBoot(int fs, int tt)
 {
 	int i;
 	char tmp[32];
 
 	IGNORE_RETVAL(ComboBox_ResetContent(hBootType));
-	if ((bt == BT_BIOS) && (IS_FAT(fs))) {
-		IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, "MS-DOS"), DT_WINME));
-		IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, "FreeDOS"), DT_FREEDOS));
+	if ((tt == TT_BIOS) && (IS_FAT(fs))) {
+		if (nWindowsVersion < WINDOWS_10)	// The diskcopy.dll with the MS-DOS floppy image was removed in Windows 10
+			IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, "MS-DOS"), BT_MSDOS));
+		IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, "FreeDOS"), BT_FREEDOS));
 	}
-	IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, lmprintf(MSG_036)), DT_ISO));
-	IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, lmprintf(MSG_095)), DT_IMG));
+	IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, lmprintf(MSG_036)), BT_ISO));
+	IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, lmprintf(MSG_095)), BT_IMG));
 	// If needed (advanced mode) also append "bare" Syslinux and other options
-	if ( (bt == BT_BIOS) && ((IS_FAT(fs) || (fs == FS_NTFS)) && (advanced_mode)) ) {
+	if ( (tt == TT_BIOS) && ((IS_FAT(fs) || (fs == FS_NTFS)) && (advanced_mode)) ) {
 		static_sprintf(tmp, "Syslinux %s", embedded_sl_version_str[0]);
-		IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, tmp), DT_SYSLINUX_V4));
+		IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, tmp), BT_SYSLINUX_V4));
 		static_sprintf(tmp, "Syslinux %s", embedded_sl_version_str[1]);
-		IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, tmp), DT_SYSLINUX_V6));
-		IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, "ReactOS"), DT_REACTOS));
+		IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, tmp), BT_SYSLINUX_V6));
+		IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, "ReactOS"), BT_REACTOS));
 		IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType,
-			"Grub " GRUB2_PACKAGE_VERSION), DT_GRUB2));
+			"Grub " GRUB2_PACKAGE_VERSION), BT_GRUB2));
 		IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType,
-			"Grub4DOS " GRUB4DOS_VERSION), DT_GRUB4DOS));
+			"Grub4DOS " GRUB4DOS_VERSION), BT_GRUB4DOS));
 	}
 	if (advanced_mode)
-		IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, "UEFI:NTFS"), DT_UEFI_NTFS));
-	if ((!advanced_mode) && (selection_default >= DT_SYSLINUX_V4)) {
-		selection_default = DT_FREEDOS;
+		IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, "UEFI:NTFS"), BT_UEFI_NTFS));
+	if ((!advanced_mode) && (selection_default >= BT_SYSLINUX_V4)) {
+		selection_default = BT_FREEDOS;
 		CheckDlgButton(hMainDialog, IDC_DISK_ID, BST_UNCHECKED);
 	}
 	for (i=0; i<ComboBox_GetCount(hBootType); i++) {
@@ -1966,7 +1968,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	POINT Point;
 	RECT DialogRect, DesktopRect, LangToolbarRect;
 	LONG progress_style;
-	int nDeviceIndex, fs, bt, i, nWidth, nHeight, nb_devices, selected_language, offset;
+	int nDeviceIndex, fs, tt, i, nWidth, nHeight, nb_devices, selected_language, offset;
 	char tmp[128];
 	loc_cmd* lcmd = NULL;
 	EXT_DECL(img_ext, NULL, __VA_GROUP__("*.img;*.vhd;*.gz;*.bzip2;*.xz;*.lzma;*.Z;*.zip"), __VA_GROUP__(lmprintf(MSG_095)));
@@ -2246,11 +2248,11 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			if (HIWORD(wParam) != CBN_SELCHANGE)
 				break;
 			fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
-			bt = GETBIOSTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
-			if ((selection_default == DT_IMG) && IsChecked(IDC_BOOT)) {
+			tt = GETTARGETTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
+			if ((selection_default == BT_IMG) && IsChecked(IDC_BOOT)) {
 				ToggleImage(FALSE);
 				EnableAdvancedBootOptions(FALSE, TRUE);
-				SetBoot(fs, bt);
+				SetBoot(fs, tt);
 				SetToGo();
 				break;
 			}
@@ -2272,8 +2274,8 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				EnableBootOptions(TRUE, TRUE);
 				SetMBRProps();
 				// Remove the SysLinux and ReactOS options if they exists
-				if (ComboBox_GetItemData(hBootType, ComboBox_GetCount(hBootType)-1) == (DT_MAX-1)) {
-					for (i=DT_SYSLINUX_V4; i<DT_MAX; i++)
+				if (ComboBox_GetItemData(hBootType, ComboBox_GetCount(hBootType)-1) == (BT_MAX-1)) {
+					for (i=BT_SYSLINUX_V4; i<BT_MAX; i++)
 						IGNORE_RETVAL(ComboBox_DeleteString(hBootType,  ComboBox_GetCount(hBootType)-1));
 					IGNORE_RETVAL(ComboBox_SetCurSel(hBootType, 1));
 				}
@@ -2294,13 +2296,13 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				break;
 			}
 			EnableAdvancedBootOptions(TRUE, TRUE);
-			SetBoot(fs, bt);
+			SetBoot(fs, tt);
 			SetMBRProps();
 			SetToGo();
 			break;
 		case IDC_BOOT:
 			EnableAdvancedBootOptions(TRUE, TRUE);
-			if (selection_default == DT_IMG)
+			if (selection_default == BT_IMG)
 				ToggleImage(!IsChecked(IDC_BOOT));
 			break;
 		case IDC_BOOTTYPE:
@@ -2308,15 +2310,15 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				break;
 			selection_default = (int) ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
 			EnableAdvancedBootOptions(TRUE, TRUE);
-			ToggleImage(!IsChecked(IDC_BOOT) || (selection_default != DT_IMG));
+			ToggleImage(!IsChecked(IDC_BOOT) || (selection_default != BT_IMG));
 			SetToGo();
-			if ((selection_default == DT_ISO) || (selection_default == DT_IMG)) {
+			if ((selection_default == BT_ISO) || (selection_default == BT_IMG)) {
 				if ((image_path != NULL) && (iso_report.label[0] != 0)) {
 					// Some distros (eg. Arch Linux) want to see a specific label => ignore user one
 					SetWindowTextU(hLabel, iso_report.label);
 				}
 			} else {
-				if (selection_default == DT_UEFI_NTFS) {
+				if (selection_default == BT_UEFI_NTFS) {
 					// Try to select NTFS as default
 					for (i=0; i<ComboBox_GetCount(hFileSystem); i++) {
 						fs = (int)ComboBox_GetItemData(hFileSystem, i);
@@ -2339,7 +2341,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				iso_provided = FALSE;	// One off thing...
 			} else {
 				safe_free(image_path);
-				image_path = FileDialog(FALSE, NULL, (selection_default == DT_IMG)?&img_ext:&iso_ext, 0);
+				image_path = FileDialog(FALSE, NULL, (selection_default == BT_IMG)?&img_ext:&iso_ext, 0);
 				if (image_path == NULL) {
 					CreateTooltip(hSelectISO, lmprintf(MSG_173), -1);
 					PrintStatus(0, MSG_086);

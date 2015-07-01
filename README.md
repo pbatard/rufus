@@ -1,19 +1,27 @@
-# Rufus: The Reliable USB Formatting Utility
+Rufus: The Reliable USB Formatting Utility
+==========================================
 
-## Features
+![Rufus logo](https://raw.githubusercontent.com/pbatard/rufus/master/res/icon-set/rufus-256.png)
+
+Features
+--------
+
 * Formats USB and Virtual HD drives to FAT/FAT32/NTFS/UDF/exFAT/ReFS
 * Creates DOS bootable USB drives, using [FreeDOS](http://www.freedos.org/) or MS-DOS
 * Creates BIOS or UEFI bootable drives, including UEFI bootable NTFS
 * Creates bootable drives from bootable ISOs (Windows, Linux, etc.)
 * Creates bootbale drives from bootable disk images, including compressed ones
 * Creates [Windows To Go](https://en.wikipedia.org/wiki/Windows_To_Go) drives
-* Twice as fast as Microsoft's USB/DVD tool or UNetbootin, on ISO -> USB (1)
-* Performs bad blocks checks, including fake drives detection
+* Twice as fast as Microsoft's USB/DVD tool or UNetbootin, on ISO -> USB creation (1)
+* Performs bad blocks checks, including detection of "fake" flash drives
 * Modern and familiar UI, with more than [30 languages natively supported](http://rufus.akeo.ie/translations)
-* Small footprint with no installation required
-* 100% Free Software (GPL v3)
+* Small footprint. No installation required.
+* Portable
+* 100% [Free Software](http://www.gnu.org/philosophy/free-sw.en.html) (GPL v3)
 
-## Compilation
+Compilation
+-----------
+
 Use either Visual Studio 2013, WDK 7.1 (Windows Driver Kit) or MinGW and then
 invoke the `.sln`, `wdk_build.cmd` or `configure`/`make` respectively.
 
@@ -25,15 +33,18 @@ build, run or develop for Rufus. As per the Visual Studio Community Edition lice
 this applies regardless of whether you are an individual or a corporate user.
 For details, see [this](http://pete.akeo.ie/2014/11/visual-studio-2013-has-now-become.html).
 
-## Additional information
+Additional information
+----------------------
+
 Rufus provides extensive information about what it is doing, either through
 its easily accessible log, or through the Windows debug facility.
 
-For more info, please consult:
-* The Official Website - http://rufus.akeo.ie
-* The Official FAQ - http://rufus.akeo.ie/FAQ
+* Website: http://rufus.akeo.ie
+* FAQ: http://rufus.akeo.ie/FAQ
 
-## Enhancements/Bugs
+Enhancements/Bugs
+-----------------
+
 Please use the [GitHub issue tracker](https://github.com/pbatard/rufus/issues)
 for reporting problems or suggesting new features.
 
