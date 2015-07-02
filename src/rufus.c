@@ -103,6 +103,7 @@ static BOOL log_displayed = FALSE;
 static BOOL iso_provided = FALSE;
 static BOOL user_notified = FALSE;
 static BOOL relaunch = FALSE;
+static BOOL hash_enabled = FALSE;
 extern BOOL force_large_fat32, enable_iso, enable_joliet, enable_rockridge, enable_ntfs_compression, preserve_timestamps, usb_debug;
 extern uint8_t* grub2_buf;
 extern long grub2_len;
@@ -131,7 +132,7 @@ float fScale = 1.0f;
 int default_fs;
 uint32_t dur_mins, dur_secs;
 HWND hDeviceList, hPartitionScheme, hFileSystem, hClusterSize, hLabel, hBootType, hNBPasses, hLog = NULL;
-HWND hLogDlg = NULL, hProgress = NULL, hInfo, hDiskID;
+HWND hLogDlg = NULL, hProgress = NULL, hInfo, hDiskID, hHash;
 BOOL use_own_c32[NB_OLD_C32] = {FALSE, FALSE}, detect_fakes = TRUE, mbr_selected_by_user = FALSE;
 BOOL iso_op_in_progress = FALSE, format_op_in_progress = FALSE, right_to_left_mode = FALSE;
 BOOL enable_HDDs = FALSE, advanced_mode = TRUE, force_update = FALSE, use_fake_units = TRUE;
@@ -804,6 +805,14 @@ void UpdateProgress(int op, float percent)
 	SetTaskbarProgressValue(pos, MAX_PROGRESS);
 }
 
+static void EnableHash(BOOL bEnable)
+{
+	// Can't use EnableWindow() for hHash as it overrides our WM_PAINT suppression
+	// and we'd end up with an out of place disabled button
+	hash_enabled = bEnable;
+	SendMessage(hStatus, SB_SETTEXTW, SBT_OWNERDRAW | SB_SECTION_MIDDLE, 0);
+}
+
 /*
  * Toggle controls according to operation
  */
@@ -818,6 +827,7 @@ static void EnableControls(BOOL bEnable)
 	EnableWindow(hNBPasses, bEnable);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_ADVANCED), bEnable);
 	EnableWindow(hLangToolbar, bEnable);
+	EnableHash(bEnable);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_ENABLE_FIXED_DISKS), bEnable);
 	SetDlgItemTextU(hMainDialog, IDCANCEL, lmprintf(bEnable?MSG_006:MSG_007));
 	if (selection_default == BT_IMG)
@@ -1063,7 +1073,6 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 	InvalidateRect(hMainDialog, NULL, TRUE);
 
 out:
-	SendMessageLU(hStatus, SB_SETTEXTW, SBT_OWNERDRAW | SB_SECTION_MIDDLE, "");
 	PrintInfo(0, MSG_210);
 	ExitThread(0);
 }
@@ -1102,8 +1111,9 @@ static void ToggleAdvanced(void)
 	MoveWindow(hMainDialog, rect.left, rect.top, point.x,
 		point.y + (int)(fScale*dialog_shift), TRUE);
 
-	// Move the status bar up or down
+	// Move the controls up or down
 	MoveCtrlY(hMainDialog, IDC_STATUS, dialog_shift);
+	MoveCtrlY(hMainDialog, IDC_HASH, dialog_shift);
 	MoveCtrlY(hMainDialog, IDC_START, dialog_shift);
 	MoveCtrlY(hMainDialog, IDC_INFO, dialog_shift);
 	MoveCtrlY(hMainDialog, IDC_PROGRESS, dialog_shift);
@@ -1185,6 +1195,7 @@ static void ToggleToGo(void)
 
 	// Move the controls up or down
 	MoveCtrlY(hMainDialog, IDC_STATUS, dialog_shift);
+	MoveCtrlY(hMainDialog, IDC_HASH, dialog_shift);
 	MoveCtrlY(hMainDialog, IDC_START, dialog_shift);
 	MoveCtrlY(hMainDialog, IDC_INFO, dialog_shift);
 	MoveCtrlY(hMainDialog, IDC_PROGRESS, dialog_shift);
@@ -1692,6 +1703,8 @@ void InitDialog(HWND hDlg)
 	selection_default = BT_FREEDOS;
 	// Create the status line and initialize the taskbar icon for progress overlay
 	CreateStatusBar();
+	// Create the hash sign on the status bar
+	EnableHash(FALSE);
 	CreateTaskbarList();
 	SetTaskbarProgressState(TASKBAR_NORMAL);
 
@@ -1842,6 +1855,8 @@ void InitDialog(HWND hDlg)
 	CreateTooltip(GetDlgItem(hDlg, IDC_ABOUT), lmprintf(MSG_172), -1);
 	CreateTooltip(GetDlgItem(hDlg, IDC_WINDOWS_INSTALL), lmprintf(MSG_199), -1);
 	CreateTooltip(GetDlgItem(hDlg, IDC_WINDOWS_TO_GO), lmprintf(MSG_200), -1);
+	CreateTooltip(hHash, lmprintf(MSG_272), -1);
+	CreateTooltip(hLangToolbar, lmprintf(MSG_273), -1);
 
 	// Set a label for the Advanced Mode and Select Image button for screen readers
 	if (nWindowsVersion > WINDOWS_XP) {
@@ -1851,9 +1866,6 @@ void InitDialog(HWND hDlg)
 
 	ToggleAdvanced();	// We start in advanced mode => go to basic mode
 	ToggleToGo();
-
-	// Create the hash sign on the status bar
-	SendMessageLU(hStatus, SB_SETTEXTW, SBT_OWNERDRAW | SB_SECTION_MIDDLE, "");
 
 	// Process commandline parameters
 	if (iso_provided) {
@@ -2055,12 +2067,12 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 #endif
 		return (INT_PTR)FALSE;
 
-	// The things one must do to get an ellipsis text alignment on the status bar...
+	// The things one must do to get an ellipsis and text alignment on the status bar...
 	case WM_DRAWITEM:
 		if (wParam == IDC_STATUS) {
 			pDI = (DRAWITEMSTRUCT*)lParam;
 			pDI->rcItem.top -= (int)((4.0f * fScale) - 6.0f);
-			pDI->rcItem.left += (int)(4.0f * fScale);
+			pDI->rcItem.left += (int)(((pDI->itemID == SB_SECTION_MIDDLE)?-2.0f:4.0f) * fScale);
 			SetBkMode(pDI->hDC, TRANSPARENT);
 			switch(pDI->itemID) {
 			case SB_SECTION_LEFT:
@@ -2069,52 +2081,13 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 					DT_LEFT|DT_END_ELLIPSIS|DT_PATH_ELLIPSIS, NULL);
 				return (INT_PTR)TRUE;
 			case SB_SECTION_MIDDLE:
-				SetTextColor(pDI->hDC, (image_path==NULL)?GetSysColor(COLOR_3DSHADOW):GetSysColor(COLOR_BTNTEXT));
-				DrawTextExA(pDI->hDC, "#", -1, &pDI->rcItem, DT_LEFT, NULL);
+				SetTextColor(pDI->hDC, ((image_path==NULL)||(!hash_enabled))?GetSysColor(COLOR_3DSHADOW):GetSysColor(COLOR_BTNTEXT));
+				DrawTextExA(pDI->hDC, "#", -1, &pDI->rcItem, DT_CENTER, NULL);
 				return (INT_PTR)TRUE;
 			case SB_SECTION_RIGHT:
 				SetTextColor(pDI->hDC, GetSysColor(COLOR_3DSHADOW));
 				DrawTextExA(pDI->hDC, szTimer, -1, &pDI->rcItem, DT_LEFT, NULL);
 				return (INT_PTR)TRUE;
-			}
-		}
-		break;
-
-	// Detect a click on the "hash" sign in the status bar
-	case WM_PARENTNOTIFY:
-		if (wParam == WM_LBUTTONDOWN) {
-			GetClientRect(hMainDialog, &DialogRect);
-			MessagePos = GetMessagePos();
-			Point.x = GET_X_LPARAM(MessagePos);
-			Point.y = GET_Y_LPARAM(MessagePos);
-			ScreenToClient(hDlg, &Point);
-			if ( (Point.x >= DialogRect.right - (int)(SB_EDGE_1*fScale)) &&
-				 (Point.x <= DialogRect.right - (int)(SB_EDGE_2*fScale)) &&
-				 ((format_thid == NULL) && (image_path != NULL)) ) {
-				FormatStatus = 0;
-				format_op_in_progress = TRUE;
-				no_confirmation_on_cancel = TRUE;
-				// Reset all progress bars
-				SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_NORMAL, 0);
-				SetTaskbarProgressState(TASKBAR_NORMAL);
-				SetTaskbarProgressValue(0, MAX_PROGRESS);
-				SendMessage(hProgress, PBM_SETPOS, 0, 0);
-				// Disable all controls except cancel
-				EnableControls(FALSE);
-				InitProgress(FALSE);
-				format_thid = CreateThread(NULL, 0, SumThread, NULL, 0, NULL);
-				if (format_thid != NULL) {
-					PrintInfo(0, -1);
-					timer = 0;
-					safe_sprintf(szTimer, sizeof(szTimer), "00:00:00");
-					SendMessageA(hStatus, SB_SETTEXTA, SBT_OWNERDRAW | SB_SECTION_RIGHT, (LPARAM)szTimer);
-					SetTimer(hMainDialog, TID_APP_TIMER, 1000, ClockTimer);
-				} else {
-					uprintf("Unable to start checksum thread");
-					FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_CANT_START_THREAD);
-					PostMessage(hMainDialog, UM_FORMAT_COMPLETED, (WPARAM)FALSE, 0);
-					format_op_in_progress = FALSE;
-				}
 			}
 		}
 		break;
@@ -2341,6 +2314,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				iso_provided = FALSE;	// One off thing...
 			} else {
 				safe_free(image_path);
+				EnableHash(FALSE);
 				image_path = FileDialog(FALSE, NULL, (selection_default == BT_IMG)?&img_ext:&iso_ext, 0);
 				if (image_path == NULL) {
 					CreateTooltip(hSelectISO, lmprintf(MSG_173), -1);
@@ -2445,6 +2419,34 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			}
 			if (format_thid == NULL)
 				format_op_in_progress = FALSE;
+			break;
+		case IDC_HASH:
+			if ((format_thid == NULL) && (image_path != NULL) && (hash_enabled)) {
+				FormatStatus = 0;
+				format_op_in_progress = TRUE;
+				no_confirmation_on_cancel = TRUE;
+				// Reset all progress bars
+				SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_NORMAL, 0);
+				SetTaskbarProgressState(TASKBAR_NORMAL);
+				SetTaskbarProgressValue(0, MAX_PROGRESS);
+				SendMessage(hProgress, PBM_SETPOS, 0, 0);
+				// Disable all controls except cancel
+				EnableControls(FALSE);
+				InitProgress(FALSE);
+				format_thid = CreateThread(NULL, 0, SumThread, NULL, 0, NULL);
+				if (format_thid != NULL) {
+					PrintInfo(0, -1);
+					timer = 0;
+					safe_sprintf(szTimer, sizeof(szTimer), "00:00:00");
+					SendMessageA(hStatus, SB_SETTEXTA, SBT_OWNERDRAW | SB_SECTION_RIGHT, (LPARAM)szTimer);
+					SetTimer(hMainDialog, TID_APP_TIMER, 1000, ClockTimer);
+				} else {
+					uprintf("Unable to start checksum thread");
+					FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_CANT_START_THREAD);
+					PostMessage(hMainDialog, UM_FORMAT_COMPLETED, (WPARAM)FALSE, 0);
+					format_op_in_progress = FALSE;
+				}
+			}
 			break;
 		default:
 			return (INT_PTR)FALSE;

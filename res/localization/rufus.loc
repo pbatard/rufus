@@ -518,6 +518,8 @@ t MSG_268 "Applying Windows image..."
 t MSG_269 "Preserve timestamps"
 t MSG_270 "USB debug"
 t MSG_271 "Computing image checksum: %0.1f%% completed"
+t MSG_272 "Click here to compute the SHA-1 and MD5 checksums for the selected image"
+t MSG_273 "Change the application language"
 
 ################################################################################
 ############################# TRANSLATOR END COPY ##############################

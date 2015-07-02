@@ -1,7 +1,7 @@
 Rufus: The Reliable USB Formatting Utility
 ==========================================
 
-![Rufus logo](https://raw.githubusercontent.com/pbatard/rufus/master/res/icon-set/rufus-256.png)
+![Rufus logo](https://raw.githubusercontent.com/pbatard/rufus/master/res/icon-set/rufus-128.png)
 
 Features
 --------

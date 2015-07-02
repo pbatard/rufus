@@ -56,7 +56,7 @@ static char* szMessageText = NULL;
 static char* szMessageTitle = NULL;
 static HWND hBrowseEdit;
 extern HWND hUpdatesDlg;
-static WNDPROC pOrgBrowseWndproc;
+static WNDPROC pOrgBrowseWndproc, pOrgHashWdnProc;
 static const SETTEXTEX friggin_microsoft_unicode_amateurs = {ST_DEFAULT, CP_UTF8};
 static BOOL notification_is_question;
 static const notification_info* notification_more_info;
@@ -395,28 +395,68 @@ fallback:
 	return filepath;
 }
 
+// Subclass the Hash button, so that it will be active but not display in the UI
+static INT_PTR CALLBACK HashCallback(HWND hCtrl, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	PAINTSTRUCT ps;
+	if (message == WM_PAINT) {
+		// Even though we really don't want to paint anything, we *MUST* call Begin/EndPaint
+		BeginPaint(hCtrl , &ps);
+		EndPaint(hCtrl, &ps);
+		return TRUE;
+	}
+	return CallWindowProc(pOrgHashWdnProc, hCtrl, message, wParam, lParam);
+}
+
 /*
  * Create the application status bar
  */
 void CreateStatusBar(void)
 {
 	RECT rect;
+	LONG height;
 	int edge[3];
+	HFONT hFont;
 
-	// Create the status bar.
-	hStatus = CreateWindowEx(0, STATUSCLASSNAME, NULL, WS_CHILD | WS_VISIBLE,
-		0, 0, 0, 0, hMainDialog, (HMENU)IDC_STATUS, hMainInstance, NULL);
+	// Create the status bar (WS_CLIPSIBLINGS since we have an overlapping button)
+	hStatus = CreateWindowEx(0, STATUSCLASSNAME, NULL, WS_CHILD | WS_VISIBLE | SBARS_TOOLTIPS | WS_CLIPSIBLINGS,
+		CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, hMainDialog,
+		(HMENU)IDC_STATUS, hMainInstance, NULL);
+
+	// Keep track of the status bar height
+	GetClientRect(hStatus, &rect);
+	height = rect.bottom;
 
 	// Create 3 status areas
 	GetClientRect(hMainDialog, &rect);
 	edge[0] = rect.right - (int)(SB_EDGE_1 * fScale);
 	edge[1] = rect.right - (int)(SB_EDGE_2 * fScale);
 	edge[2] = rect.right;
-	SendMessage(hStatus, SB_SETPARTS, (WPARAM) ARRAYSIZE(edge), (LPARAM)&edge);
+	SendMessage(hStatus, SB_SETPARTS, (WPARAM)ARRAYSIZE(edge), (LPARAM)&edge);
 
 	// NB: To add an icon on the status bar, you can use something like this:
-//	SendMessage(hStatus, SB_SETICON, (WPARAM) 1, (LPARAM)LoadImage(GetLibraryHandle("rasdlg"),
-//		MAKEINTRESOURCE(50), IMAGE_ICON, GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON), LR_DEFAULTCOLOR | LR_SHARED));
+	//	SendMessage(hStatus, SB_SETICON, (WPARAM) 1, (LPARAM)LoadImage(GetLibraryHandle("rasdlg"),
+	//		MAKEINTRESOURCE(50), IMAGE_ICON, GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON), LR_DEFAULTCOLOR | LR_SHARED));
+
+	// This is supposed to create a toolips for a statusbar section (when SBARS_TOOLTIPS is in use)... but doesn't :(
+	//	SendMessageLU(hStatus, SB_SETTIPTEXT, (WPARAM)2, (LPARAM)"HELLO");
+
+	// Manually create the Hash button on the status bar
+	hHash = CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, TEXT("#"), WS_CHILD | WS_VISIBLE | WS_TABSTOP,
+		edge[0], rect.bottom - height +1, edge[1] - edge[0] - 1, height - 1, hMainDialog,
+		(HMENU)IDC_HASH, hMainInstance, NULL);
+
+	// Subclass our button so that we can hide it from the UI
+	pOrgHashWdnProc = (WNDPROC)SetWindowLongPtr(hHash, GWLP_WNDPROC, (LONG_PTR)HashCallback);
+
+	// Set the font we'll use to display the '#' sign
+	hFont = CreateFontA(-MulDiv(10, GetDeviceCaps(GetDC(hMainDialog), LOGPIXELSY), 72),
+		0, 0, 0, FW_MEDIUM, FALSE, FALSE, FALSE, DEFAULT_CHARSET,
+		0, 0, PROOF_QUALITY, 0, (nWindowsVersion >= WINDOWS_VISTA)?"Segoe UI":"Arial Unicode MS");
+	SendDlgItemMessageA(hMainDialog, IDC_HASH, WM_SETFONT, (WPARAM)hFont, TRUE);
+
+	// Update our Z-order, just to be on the safe side
+	SetWindowPos(hStatus, hHash, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
 }
 
 /*
@@ -813,6 +853,10 @@ BOOL CreateTooltip(HWND hControl, const char* message, int duration)
 	toolInfo.cbSize = sizeof(toolInfo);
 	toolInfo.hwnd = ttlist[i].hTip;	// Set to the tooltip itself to ease up subclassing
 	toolInfo.uFlags = TTF_IDISHWND | TTF_SUBCLASS | ((right_to_left_mode)?TTF_RTLREADING:0);
+	// set TTF_NOTBUTTON and TTF_CENTERTIP if it isn't a button
+	if (!(SendMessage(hControl, WM_GETDLGCODE, 0, 0) & DLGC_BUTTON))
+		toolInfo.uFlags |= 0x80000000L | TTF_CENTERTIP;
+
 	toolInfo.uId = (UINT_PTR)hControl;
 	toolInfo.lpszText = LPSTR_TEXTCALLBACKW;
 	SendMessageW(ttlist[i].hTip, TTM_ADDTOOLW, 0, (LPARAM)&toolInfo);
