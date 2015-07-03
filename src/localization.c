@@ -563,3 +563,13 @@ void toggle_default_locale(void)
 		old_msg_table = NULL;
 	}
 }
+
+const char* get_name_from_id(int id)
+{
+	int i;
+	for (i=0; i<ARRAYSIZE(control_id); i++) {
+		if (control_id[i].id == id)
+			return control_id[i].name;
+	}
+	return "UNKNOWN ID";
+}

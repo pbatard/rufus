@@ -609,10 +609,10 @@ INT_PTR CALLBACK AboutCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 			EndDialog(hDlg, LOWORD(wParam));
 			return (INT_PTR)TRUE;
 		case IDC_ABOUT_LICENSE:
-			DialogBoxW(hMainInstance, MAKEINTRESOURCEW(IDD_LICENSE + IDD_OFFSET), hDlg, LicenseCallback);
+			MyDialogBox(hMainInstance, IDD_LICENSE, hDlg, LicenseCallback);
 			break;
 		case IDC_ABOUT_UPDATES:
-			DialogBoxW(hMainInstance, MAKEINTRESOURCEW(IDD_UPDATE_POLICY + IDD_OFFSET), hDlg, UpdateCallback);
+			MyDialogBox(hMainInstance, IDD_UPDATE_POLICY, hDlg, UpdateCallback);
 			break;
 		}
 		break;
@@ -624,7 +624,7 @@ INT_PTR CreateAboutBox(void)
 {
 	INT_PTR r;
 	dialog_showing++;
-	r = DialogBoxW(hMainInstance, MAKEINTRESOURCEW(IDD_ABOUTBOX + IDD_OFFSET), hMainDialog, AboutCallback);
+	r = MyDialogBox(hMainInstance, IDD_ABOUTBOX, hMainDialog, AboutCallback);
 	dialog_showing--;
 	return r;
 }
@@ -719,8 +719,7 @@ INT_PTR CALLBACK NotificationCallback(HWND hDlg, UINT message, WPARAM wParam, LP
 			return (INT_PTR)TRUE;
 		case IDC_MORE_INFO:
 			if (notification_more_info != NULL)
-				DialogBoxW(hMainInstance, MAKEINTRESOURCEW(notification_more_info->id),
-					hDlg, notification_more_info->callback);
+				MyDialogBox(hMainInstance, notification_more_info->id, hDlg, notification_more_info->callback);
 			break;
 		}
 		break;
@@ -763,7 +762,7 @@ BOOL Notification(int type, const notification_info* more_info, char* title, cha
 		hMessageIcon = LoadIcon(NULL, IDI_INFORMATION);
 		break;
 	}
-	ret = (DialogBoxW(hMainInstance, MAKEINTRESOURCEW(IDD_NOTIFICATION + IDD_OFFSET), hMainDialog, NotificationCallback) == IDYES);
+	ret = (MyDialogBox(hMainInstance, IDD_NOTIFICATION, hMainDialog, NotificationCallback) == IDYES);
 	safe_free(szMessageText);
 	dialog_showing--;
 	return ret;
@@ -1350,7 +1349,7 @@ INT_PTR CALLBACK NewVersionCallback(HWND hDlg, UINT message, WPARAM wParam, LPAR
 
 void DownloadNewVersion(void)
 {
-	DialogBoxW(hMainInstance, MAKEINTRESOURCEW(IDD_NEW_VERSION + IDD_OFFSET), hMainDialog, NewVersionCallback);
+	MyDialogBox(hMainInstance, IDD_NEW_VERSION, hMainDialog, NewVersionCallback);
 }
 
 void SetTitleBarIcon(HWND hDlg)
@@ -1421,4 +1420,83 @@ out:
 	if (hDC != NULL)
 		ReleaseDC(hCtrl, hDC);
 	return sz;
+}
+
+/*
+ * The following is used to work around dialog template limitations when switching from LTR to RTL
+ * or switching the font. This avoids having to multiply similar templates in the RC.
+ * TODO: Can we use http://stackoverflow.com/questions/6057239/which-font-is-the-default-for-mfc-dialog-controls?
+ * TODO: We are supposed to use Segoe with font size 9 in Vista or later
+  */
+
+// Produce a dialog template from our RC, and update its RTL and Font settings dynamically
+// See http://blogs.msdn.com/b/oldnewthing/archive/2004/06/21/163596.aspx as well as
+// https://msdn.microsoft.com/en-us/library/windows/desktop/ms645389.aspx for a description
+// of the Dialog structure
+LPCDLGTEMPLATE GetDialogTemplate(int Dialog_ID)
+{
+	int i;
+	size_t len;
+	DWORD size;
+	DWORD* dwBuf;
+	WCHAR* wBuf;
+	LPCDLGTEMPLATE rcTemplate = (LPCDLGTEMPLATE) GetResource(hMainInstance, MAKEINTRESOURCEA(Dialog_ID),
+		_RT_DIALOG, get_name_from_id(Dialog_ID), &size, TRUE);
+	if ((size == 0) || (rcTemplate == NULL))
+		return NULL;
+	if (right_to_left_mode) {
+		// Add the RTL styles into our RC copy, so that we don't have to multiply dialog definitions in the RC
+		dwBuf = (DWORD*)rcTemplate;
+		dwBuf[2] = WS_EX_RTLREADING | WS_EX_APPWINDOW | WS_EX_LAYOUTRTL;
+	}
+	wBuf = (WCHAR*)rcTemplate;
+	wBuf = &wBuf[14];	// Move to class name
+	// Skip class name and title
+	for (i = 0; i<2; i++) {
+		if (*wBuf == 0xFFFF)
+			wBuf = &wBuf[2];	// Ordinal
+		else
+			wBuf = &wBuf[wcslen(wBuf) + 1]; // String
+	}
+	// NB: to change the font size to 9, you can use
+	// wBuf[0] = 0x0009;
+	wBuf = &wBuf[3];
+	// Make sure we are where we want to be and adjust the font
+	if (wcscmp(L"Segoe UI Symbol", wBuf) == 0) {
+		uintptr_t src, dst, start = (uintptr_t)rcTemplate;
+		// We can't simply zero the characters we don't want, as the size of the font
+		// string determines the next item lookup. So we must memmove the remaining of
+		// our buffer. Oh, and those items are DWORD aligned.
+		if (nWindowsVersion <= WINDOWS_XP) {
+			wcscpy(wBuf, L"MS Shell Dlg");
+		} else {
+			wBuf[8] = 0;
+		}
+		len = wcslen(wBuf);
+		wBuf[len + 1] = 0;
+		dst = (uintptr_t)&wBuf[len + 2];
+		dst &= ~3;
+		src = (uintptr_t)&wBuf[17];
+		src &= ~3;
+		memmove((void*)dst, (void*)src, size - (src - start));
+	} else {
+		uprintf("Could not locate font for %s!", get_name_from_id(Dialog_ID));
+	}
+	return rcTemplate;
+}
+
+HWND MyCreateDialog(HINSTANCE hInstance, int Dialog_ID, HWND hWndParent, DLGPROC lpDialogFunc)
+{
+	LPCDLGTEMPLATE rcTemplate = GetDialogTemplate(Dialog_ID);
+	HWND hDlg = CreateDialogIndirect(hInstance, rcTemplate, hWndParent, lpDialogFunc);
+	safe_free(rcTemplate);
+	return hDlg;
+}
+
+INT_PTR MyDialogBox(HINSTANCE hInstance, int Dialog_ID, HWND hWndParent, DLGPROC lpDialogFunc)
+{
+	LPCDLGTEMPLATE rcTemplate = GetDialogTemplate(Dialog_ID);
+	INT_PTR ret = DialogBoxIndirect(hMainInstance, rcTemplate, hMainDialog, lpDialogFunc);
+	safe_free(rcTemplate);
+	return ret;
 }

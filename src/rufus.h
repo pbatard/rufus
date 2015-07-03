@@ -82,7 +82,6 @@
 #endif
 #define IsChecked(CheckBox_ID)      (IsDlgButtonChecked(hMainDialog, CheckBox_ID) == BST_CHECKED)
 #define MB_IS_RTL                   (right_to_left_mode?MB_RTLREADING:0)
-#define IDD_OFFSET                  ((right_to_left_mode?100:0) + ((nWindowsVersion <= WINDOWS_XP)?50:0))
 #define CHECK_FOR_USER_CANCEL       if (IS_ERROR(FormatStatus)) goto out
 
 #define safe_free(p) do {free((void*)p); p = NULL;} while(0)
@@ -382,7 +381,6 @@ extern int dialog_showing;
  */
 extern void GetWindowsVersion(void);
 extern BOOL is_x64(void);
-//extern const char* PrintWindowsVersion(enum WindowsVersion version);
 extern const char *WindowsErrorString(void);
 extern void DumpBufferHex(void *buf, size_t size);
 extern void PrintStatusInfo(BOOL info, BOOL debug, unsigned int duration, int msg_id, ...);
@@ -394,6 +392,8 @@ extern void UpdateProgress(int op, float percent);
 extern const char* StrError(DWORD error_code, BOOL use_default_locale);
 extern char* GuidToString(const GUID* guid);
 extern char* SizeToHumanReadable(uint64_t size, BOOL copy_to_log, BOOL fake_units);
+extern HWND MyCreateDialog(HINSTANCE hInstance, int Dialog_ID, HWND hWndParent, DLGPROC lpDialogFunc);
+extern INT_PTR MyDialogBox(HINSTANCE hInstance, int Dialog_ID, HWND hWndParent, DLGPROC lpDialogFunc);
 extern void CenterDialog(HWND hDlg);
 extern void ResizeMoveCtrl(HWND hDlg, HWND hCtrl, int dx, int dy, int dw, int dh);
 extern void CreateStatusBar(void);
@@ -569,5 +569,6 @@ static __inline HMODULE GetLibraryHandle(char* szLibraryName) {
 
 /* Why oh why does Microsoft have to make everybody suffer with their braindead use of Unicode? */
 #define _RT_ICON			MAKEINTRESOURCEA(3)
+#define _RT_DIALOG			MAKEINTRESOURCEA(5)
 #define _RT_RCDATA			MAKEINTRESOURCEA(10)
 #define _RT_GROUP_ICON		MAKEINTRESOURCEA((ULONG_PTR)(MAKEINTRESOURCEA(3) + 11))

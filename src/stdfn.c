@@ -501,12 +501,12 @@ unsigned char* GetResource(HMODULE module, char* name, char* type, const char* d
 
 	res = FindResourceA(module, name, type);
 	if (res == NULL) {
-		uprintf("Unable to locate resource '%s': %s\n", desc, WindowsErrorString());
+		uprintf("Could not locate resource '%s': %s\n", desc, WindowsErrorString());
 		goto out;
 	}
 	res_handle = LoadResource(module, res);
 	if (res_handle == NULL) {
-		uprintf("Unable to load resource '%s': %s\n", desc, WindowsErrorString());
+		uprintf("Could not load resource '%s': %s\n", desc, WindowsErrorString());
 		goto out;
 	}
 	*len = SizeofResource(module, res);
@@ -514,7 +514,7 @@ unsigned char* GetResource(HMODULE module, char* name, char* type, const char* d
 	if (duplicate) {
 		p = (unsigned char*)malloc(*len);
 		if (p == NULL) {
-			uprintf("Unable to allocate resource '%s'\n", desc);
+			uprintf("Coult not allocate resource '%s'\n", desc);
 			goto out;
 		}
 		memcpy(p, LockResource(res_handle), *len);

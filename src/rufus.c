@@ -1971,7 +1971,7 @@ void SetBoot(int fs, int tt)
  */
 static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	static DWORD DeviceNum = 0, LastRefresh = 0, MessagePos;
+	static DWORD DeviceNum = 0, LastRefresh = 0;
 	static BOOL first_log_display = TRUE, user_changed_label = FALSE, isMarquee = FALSE;
 	static ULONG ulRegister = 0;
 	static LPITEMIDLIST pidlDesktop = NULL;
@@ -2035,7 +2035,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		// Create the log window (hidden)
 		first_log_display = TRUE;
 		log_displayed = FALSE;
-		hLogDlg = CreateDialogW(hMainInstance, MAKEINTRESOURCEW(IDD_LOG + IDD_OFFSET), hDlg, (DLGPROC)LogProc);
+		hLogDlg = MyCreateDialog(hMainInstance, IDD_LOG, hDlg, (DLGPROC)LogProc);
 		InitDialog(hDlg);
 		GetUSBDevices(0);
 		CheckForUpdates(FALSE);
@@ -2622,6 +2622,7 @@ static HANDLE SetHogger(BOOL attached_console, BOOL disable_hogger)
 	return hogmutex;
 }
 
+
 /*
  * Application Entrypoint
  */
@@ -2633,18 +2634,18 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 {
 	const char* rufus_loc = "rufus.loc";
 	int i, opt, option_index = 0, argc = 0, si = 0, lcid = GetUserDefaultUILanguage();
+	int wait_for_mutex = 0;
 	FILE* fd;
 	BOOL attached_console = FALSE, external_loc_file = FALSE, lgp_set = FALSE, automount, disable_hogger = FALSE;
 	BYTE *loc_data;
-	DWORD loc_size, Size;
+	DWORD loc_size, size;
 	char tmp_path[MAX_PATH] = "", loc_file[MAX_PATH] = "", ini_path[MAX_PATH], ini_flags[] = "rb";
 	char *tmp, *locale_name = NULL, **argv = NULL;
 	wchar_t **wenv, **wargv;
-	PF_TYPE_DECL(CDECL, int,  __wgetmainargs, (int*, wchar_t***, wchar_t***, int, int*));
+	PF_TYPE_DECL(CDECL, int, __wgetmainargs, (int*, wchar_t***, wchar_t***, int, int*));
 	HANDLE mutex = NULL, hogmutex = NULL, hFile = NULL;
 	HWND hDlg = NULL;
 	MSG msg;
-	int wait_for_mutex = 0;
 	struct option long_options[] = {
 		{"fixed",   no_argument,       NULL, 'f'},
 		{"gui",     no_argument,       NULL, 'g'},
@@ -2775,7 +2776,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 		hFile = CreateFileU(loc_file, GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ|FILE_SHARE_WRITE,
 			NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-		if ((hFile == INVALID_HANDLE_VALUE) || (!WriteFile(hFile, loc_data, loc_size, &Size, 0)) || (loc_size != Size)) {
+		if ((hFile == INVALID_HANDLE_VALUE) || (!WriteFile(hFile, loc_data, loc_size, &size, 0)) || (loc_size != size)) {
 			uprintf("localization: unable to extract '%s': %s.\n", loc_file, WindowsErrorString());
 			safe_closehandle(hFile);
 			goto out;
@@ -2854,22 +2855,8 @@ relaunch:
 
 	/*
 	 * Create the main Window
-	 *
-	 * Oh yeah, thanks to Microsoft limitations for dialog boxes this is SUPER SUCKY:
-	 * As per the MSDN [http://msdn.microsoft.com/en-ie/goglobal/bb688119.aspx], "The only way
-	 *   to switch between mirrored and nonmirrored dialog resources at run time is to have two
-	 *   sets of dialog resources: one mirrored and one nonmirrored."
-	 * Unfortunately, this limitation is VERY REAL, so that's what we have to go through, and
-	 * furthermore, trying to switch part of the dialogs back to LTR is also a major exercise
-	 * in frustration, because it's next to impossible to figure out which combination of
-	 * WS_EX_RTLREADING, WS_EX_RIGHT, WS_EX_LAYOUTRTL, WS_EX_LEFTSCROLLBAR and ES_RIGHT will
-	 * work... and there's no way to toggle ES_RIGHT at runtime anyway.
-	 * So, just like Microsoft advocates, we go through a massive duplication of all our RC
-	 * dialogs (our RTL dialogs having their IDD's offset by +100 - see IDD_OFFSET), just to
-	 * add a handful of stupid flags. And of course, we also have to go through a whole other
-	 * exercise just so that our RTL and non RTL duplicated dialogs are kept in sync...
 	 */
-	hDlg = CreateDialogW(hInstance, MAKEINTRESOURCEW(IDD_DIALOG + IDD_OFFSET), NULL, MainCallback);
+	hDlg = MyCreateDialog(hInstance, IDD_DIALOG, NULL, MainCallback);
 	if (hDlg == NULL) {
 		MessageBoxU(NULL, "Could not create Window", "DialogBox failure", MB_ICONSTOP|MB_IS_RTL|MB_SYSTEMMODAL);
 		goto out;
