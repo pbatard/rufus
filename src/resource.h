@@ -9,6 +9,7 @@
 #define IDD_LOG                         105
 #define IDD_UPDATE_POLICY               106
 #define IDD_NEW_VERSION                 107
+#define IDD_CHECKSUM                    108
 #define IDI_ICON                        110
 #define IDI_UP                          111
 #define IDI_DOWN                        112
@@ -123,6 +124,8 @@
 #define IDC_YOUR_VERSION                1068
 #define IDC_LATEST_VERSION              1069
 #define IDC_DOWNLOAD_URL                1070
+#define IDC_MD5                         1071
+#define IDC_SHA1                        1072
 #define IDS_DEVICE_TXT                  2000
 #define IDS_PARTITION_TYPE_TXT          2001
 #define IDS_FILESYSTEM_TXT              2002
@@ -425,7 +428,7 @@
 #define _APS_NO_MFC                     1
 #define _APS_NEXT_RESOURCE_VALUE        505
 #define _APS_NEXT_COMMAND_VALUE         40001
-#define _APS_NEXT_CONTROL_VALUE         1071
+#define _APS_NEXT_CONTROL_VALUE         1073
 #define _APS_NEXT_SYMED_VALUE           4000
 #endif
 #endif

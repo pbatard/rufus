@@ -29,8 +29,12 @@
 #include "msapi_utf8.h"
 #include "rufus.h"
 #include "resource.h"
+#include "localization.h"
 
 #undef BIG_ENDIAN_HOST
+
+/* Globals */
+char sha1str[41], md5str[33];
 
 #if defined(__GNUC__)
 #define ALIGNED(m) __attribute__ ((__aligned__(m)))
@@ -514,13 +518,44 @@ static void md5_final(MD5_CONTEXT *ctx)
 #undef X
 }
 
+/*
+ * Checksum dialog callback
+ */
+INT_PTR CALLBACK ChecksumCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	HFONT hFont;
+	switch (message) {
+	case WM_INITDIALOG:
+		apply_localization(IDD_CHECKSUM, hDlg);
+		// Create the font and brush for the Info edit box
+		hFont = CreateFontA(-MulDiv(9, GetDeviceCaps(GetDC(hDlg), LOGPIXELSY), 72),
+			0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE, DEFAULT_CHARSET,
+			0, 0, PROOF_QUALITY, 0, "Courier New");
+		SendDlgItemMessageA(hDlg, IDC_MD5, WM_SETFONT, (WPARAM)hFont, TRUE);
+		SendDlgItemMessageA(hDlg, IDC_SHA1, WM_SETFONT, (WPARAM)hFont, TRUE);
+		SetWindowTextA(GetDlgItem(hDlg, IDC_MD5), md5str);
+		SetWindowTextA(GetDlgItem(hDlg, IDC_SHA1), sha1str);
+		CenterDialog(hDlg);
+		break;
+	case WM_COMMAND:
+		switch (LOWORD(wParam)) {
+		case IDOK:
+		case IDCANCEL:
+			reset_localization(IDD_CHECKSUM);
+			EndDialog(hDlg, LOWORD(wParam));
+			return (INT_PTR)TRUE;
+		}
+	}
+	return (INT_PTR)FALSE;
+}
+
+
 DWORD WINAPI SumThread(void* param)
 {
 	HANDLE h = INVALID_HANDLE_VALUE;
 	DWORD rSize = 0, LastRefresh = 0;
 	uint64_t rb;
 	char buffer[4096];
-	char str[41];
 	SHA1_CONTEXT sha1_ctx;
 	MD5_CONTEXT md5_ctx;
 	int i, r = -1;
@@ -565,15 +600,17 @@ DWORD WINAPI SumThread(void* param)
 	md5_final(&md5_ctx);
 
 	for (i = 0; i < 16; i++)
-		safe_sprintf(&str[2 * i], sizeof(str) - 2 * i, "%02x", md5_ctx.buf[i]);
-	uprintf("  MD5:\t%s", str);
+		safe_sprintf(&md5str[2 * i], sizeof(md5str) - 2 * i, "%02x", md5_ctx.buf[i]);
+	uprintf("  MD5:\t%s", md5str);
 	for (i = 0; i < 20; i++)
-		safe_sprintf(&str[2*i], sizeof(str) - 2*i, "%02x", sha1_ctx.buf[i]);
-	uprintf("  SHA1:\t%s", str);
+		safe_sprintf(&sha1str[2*i], sizeof(sha1str) - 2*i, "%02x", sha1_ctx.buf[i]);
+	uprintf("  SHA1:\t%s", sha1str);
 	r = 0;
 
 out:
 	safe_closehandle(h);
 	PostMessage(hMainDialog, UM_FORMAT_COMPLETED, (WPARAM)FALSE, 0);
+	if (r == 0)
+		MyDialogBox(hMainInstance, IDD_CHECKSUM, hMainDialog, ChecksumCallback);
 	ExitThread(r);
 }
