@@ -152,13 +152,10 @@ typedef struct {
 } notification_info;	// To provide a "More info..." on notifications
 
 /* Status Bar sections */
-#define SB_SECTION_LEFT     0
-#define SB_SECTION_MIDDLE   1
-#define SB_SECTION_RIGHT    2
-
-/* Distance, from the right border, of the Status Bar separators */
-#define SB_EDGE_1           77.0f
-#define SB_EDGE_2           58.0f
+#define SB_SECTION_LEFT         0
+#define SB_SECTION_MIDDLE       1
+#define SB_SECTION_RIGHT        2
+#define SB_TIMER_SECTION_SIZE   58.0f
 
 /* Timers used throughout the program */
 enum timer_type {
@@ -356,7 +353,7 @@ enum WindowsVersion {
 extern HINSTANCE hMainInstance;
 extern HWND hMainDialog, hLogDlg, hStatus, hDeviceList, hCapacity;
 extern HWND hPartitionScheme, hFileSystem, hClusterSize, hLabel, hBootType, hNBPasses, hLog;
-extern HWND hInfo, hProgress, hDiskID, hHash;
+extern HWND hInfo, hProgress, hDiskID, hStatusToolbar;
 extern float fScale;
 extern char szFolderPath[MAX_PATH], app_dir[MAX_PATH], system_dir[MAX_PATH];
 extern char* image_path;

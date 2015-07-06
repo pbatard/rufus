@@ -56,7 +56,7 @@ static char* szMessageText = NULL;
 static char* szMessageTitle = NULL;
 static HWND hBrowseEdit;
 extern HWND hUpdatesDlg;
-static WNDPROC pOrgBrowseWndproc, pOrgHashWdnProc;
+static WNDPROC pOrgBrowseWndproc;
 static const SETTEXTEX friggin_microsoft_unicode_amateurs = {ST_DEFAULT, CP_UTF8};
 static BOOL notification_is_question;
 static const notification_info* notification_more_info;
@@ -395,28 +395,19 @@ fallback:
 	return filepath;
 }
 
-// Subclass the Hash button, so that it will be active but not display in the UI
-static INT_PTR CALLBACK HashCallback(HWND hCtrl, UINT message, WPARAM wParam, LPARAM lParam)
-{
-	PAINTSTRUCT ps;
-	if (message == WM_PAINT) {
-		// Even though we really don't want to paint anything, we *MUST* call Begin/EndPaint
-		BeginPaint(hCtrl , &ps);
-		EndPaint(hCtrl, &ps);
-		return TRUE;
-	}
-	return CallWindowProc(pOrgHashWdnProc, hCtrl, message, wParam, lParam);
-}
-
 /*
  * Create the application status bar
  */
 void CreateStatusBar(void)
 {
+	SIZE sz = {0, 0};
 	RECT rect;
-	LONG height;
+	LONG x, y, width, height;
 	int edge[3];
+	TBBUTTON tbbStatusToolbarButtons[1];
+	TBBUTTONINFO tbi;
 	HFONT hFont;
+	HDC hDC;
 
 	// Create the status bar (WS_CLIPSIBLINGS since we have an overlapping button)
 	hStatus = CreateWindowEx(0, STATUSCLASSNAME, NULL, WS_CHILD | WS_VISIBLE | SBARS_TOOLTIPS | WS_CLIPSIBLINGS,
@@ -427,10 +418,22 @@ void CreateStatusBar(void)
 	GetClientRect(hStatus, &rect);
 	height = rect.bottom;
 
+	// Set the font we'll use to display the '#' sign in the toolbar button
+	hFont = CreateFontA(-MulDiv(10, GetDeviceCaps(GetDC(hMainDialog), LOGPIXELSY), 72),
+		0, 0, 0, FW_MEDIUM, FALSE, FALSE, FALSE, DEFAULT_CHARSET,
+		0, 0, PROOF_QUALITY, 0, (nWindowsVersion >= WINDOWS_VISTA)?"Segoe UI":"Arial Unicode MS");
+
+	// Find the width of our hash sign
+	hDC = GetDC(hMainDialog);
+	SelectObject(hDC, hFont);
+	GetTextExtentPoint32W(hDC, L"#", 1, &sz);
+	if (hDC != NULL)
+		ReleaseDC(hMainDialog, hDC);
+
 	// Create 3 status areas
 	GetClientRect(hMainDialog, &rect);
-	edge[0] = rect.right - (int)(SB_EDGE_1 * fScale);
-	edge[1] = rect.right - (int)(SB_EDGE_2 * fScale);
+	edge[1] = rect.right - (int)(SB_TIMER_SECTION_SIZE * fScale);
+	edge[0] = edge[1] - (8 + sz.cx + 8 + 1); // There's 8 absolute pixels on right and left of the text
 	edge[2] = rect.right;
 	SendMessage(hStatus, SB_SETPARTS, (WPARAM)ARRAYSIZE(edge), (LPARAM)&edge);
 
@@ -441,22 +444,51 @@ void CreateStatusBar(void)
 	// This is supposed to create a toolips for a statusbar section (when SBARS_TOOLTIPS is in use)... but doesn't :(
 	//	SendMessageLU(hStatus, SB_SETTIPTEXT, (WPARAM)2, (LPARAM)"HELLO");
 
-	// Manually create the Hash button on the status bar
-	hHash = CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, TEXT("#"), WS_CHILD | WS_VISIBLE | WS_TABSTOP,
-		edge[0], rect.bottom - height +1, edge[1] - edge[0] - 1, height - 1, hMainDialog,
-		(HMENU)IDC_HASH, hMainInstance, NULL);
+	// Compute the dimensions for the hash button
+	x = edge[0];
+	y = rect.bottom - height + 1;
+	width = edge[1] - edge[0] - 1;
+	// How I wish there was a way to figure out how to make Windows controls look good
+	// at all scales, without adding all these crappy empirical adjustments...
+	if ((fScale > 1.20f) && (fScale <2.40f))
+		height -= 1;
+	if (nWindowsVersion <= WINDOWS_7)
+		height += 1;
 
-	// Subclass our button so that we can hide it from the UI
-	pOrgHashWdnProc = (WNDPROC)SetWindowLongPtr(hHash, GWLP_WNDPROC, (LONG_PTR)HashCallback);
+	// Create the status toolbar
+	hStatusToolbar = CreateWindowEx(WS_EX_TRANSPARENT, TOOLBARCLASSNAME, NULL, WS_CHILD | WS_TABSTOP | WS_DISABLED |
+		TBSTYLE_LIST | CCS_NOPARENTALIGN | CCS_NODIVIDER | CCS_NORESIZE,
+		x, y, width, height, hMainDialog, (HMENU)IDC_STATUS_TOOLBAR, hMainInstance, NULL);
 
-	// Set the font we'll use to display the '#' sign
-	hFont = CreateFontA(-MulDiv(10, GetDeviceCaps(GetDC(hMainDialog), LOGPIXELSY), 72),
-		0, 0, 0, FW_MEDIUM, FALSE, FALSE, FALSE, DEFAULT_CHARSET,
-		0, 0, PROOF_QUALITY, 0, (nWindowsVersion >= WINDOWS_VISTA)?"Segoe UI":"Arial Unicode MS");
-	SendDlgItemMessageA(hMainDialog, IDC_HASH, WM_SETFONT, (WPARAM)hFont, TRUE);
+	// Set the button properties
+	SendMessage(hStatusToolbar, WM_SETFONT, (WPARAM)hFont, TRUE);
+	SendMessage(hStatusToolbar, TB_SETEXTENDEDSTYLE, 0, (LPARAM)TBSTYLE_EX_MIXEDBUTTONS);
+	SendMessage(hStatusToolbar, TB_SETIMAGELIST, 0, (LPARAM)NULL);
+	SendMessage(hStatusToolbar, TB_SETDISABLEDIMAGELIST, 0, (LPARAM)NULL);	
+	SendMessage(hStatusToolbar, TB_SETBITMAPSIZE, 0, MAKELONG(0,0));	
 
-	// Update our Z-order, just to be on the safe side
-	SetWindowPos(hStatus, hHash, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
+	// Set our text
+	memset(tbbStatusToolbarButtons, 0, sizeof(TBBUTTON));
+	tbbStatusToolbarButtons[0].idCommand = IDC_HASH;
+	tbbStatusToolbarButtons[0].fsStyle = BTNS_SHOWTEXT;
+	tbbStatusToolbarButtons[0].fsState = TBSTATE_ENABLED;
+	tbbStatusToolbarButtons[0].iString = (INT_PTR)L"#";
+	SendMessage(hStatusToolbar, TB_BUTTONSTRUCTSIZE, (WPARAM)sizeof(TBBUTTON), 0);
+	SendMessage(hStatusToolbar, TB_ADDBUTTONS, (WPARAM)1, (LPARAM)&tbbStatusToolbarButtons);
+
+	SendMessage(hStatusToolbar, TB_SETBUTTONSIZE, 0, MAKELPARAM(width, height - 1));
+	// Yeah, you'd think that TB_SETBUTTONSIZE would work for the width... but you'd be wrong.
+	// The only working method that actually enforces the requested width is TB_SETBUTTONINFO
+	tbi.cbSize = sizeof(tbi);
+	tbi.dwMask = TBIF_SIZE | TBIF_COMMAND;
+	tbi.cx = (WORD)width;
+	tbi.idCommand = IDC_HASH;
+	SendMessage(hStatusToolbar, TB_SETBUTTONINFO, (WPARAM)IDC_HASH, (LPARAM)&tbi);
+
+	// Need to resend the positioning for the toolbar to become active... One of Windows' mysteries
+	// Also use this opportunity to set our Z-order for tab stop
+	SetWindowPos(hStatusToolbar, GetDlgItem(hMainDialog, IDCANCEL), x, y, width, height, 0);
+	ShowWindow(hStatusToolbar, SW_SHOWNORMAL);
 }
 
 /*
@@ -931,7 +963,8 @@ LONG GetEntryWidth(HWND hDropDown, const char *entry)
 	if (hFont != NULL)
 		SelectObject(hDC, hDefFont);
 
-	ReleaseDC(hDropDown, hDC);
+	if (hDC != NULL)
+		ReleaseDC(hDropDown, hDC);
 	return size.cx;
 }
 
@@ -1362,7 +1395,8 @@ void SetTitleBarIcon(HWND hDlg)
 	i16 = GetSystemMetrics(SM_CXSMICON);
 	hDC = GetDC(hDlg);
 	fScale = GetDeviceCaps(hDC, LOGPIXELSX) / 96.0f;
-	ReleaseDC(hDlg, hDC);
+	if (hDC != NULL)
+		ReleaseDC(hDlg, hDC);
 	// Adjust icon size lookup
 	s16 = i16;
 	s32 = (int)(32.0f*fScale);

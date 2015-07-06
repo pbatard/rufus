@@ -103,7 +103,6 @@ static BOOL log_displayed = FALSE;
 static BOOL iso_provided = FALSE;
 static BOOL user_notified = FALSE;
 static BOOL relaunch = FALSE;
-static BOOL hash_enabled = FALSE;
 extern BOOL force_large_fat32, enable_iso, enable_joliet, enable_rockridge, enable_ntfs_compression, preserve_timestamps, usb_debug;
 extern uint8_t* grub2_buf;
 extern long grub2_len;
@@ -132,7 +131,7 @@ float fScale = 1.0f;
 int default_fs;
 uint32_t dur_mins, dur_secs;
 HWND hDeviceList, hPartitionScheme, hFileSystem, hClusterSize, hLabel, hBootType, hNBPasses, hLog = NULL;
-HWND hLogDlg = NULL, hProgress = NULL, hInfo, hDiskID, hHash;
+HWND hLogDlg = NULL, hProgress = NULL, hInfo, hDiskID, hStatusToolbar;
 BOOL use_own_c32[NB_OLD_C32] = {FALSE, FALSE}, detect_fakes = TRUE, mbr_selected_by_user = FALSE;
 BOOL iso_op_in_progress = FALSE, format_op_in_progress = FALSE, right_to_left_mode = FALSE;
 BOOL enable_HDDs = FALSE, advanced_mode = TRUE, force_update = FALSE, use_fake_units = TRUE;
@@ -805,14 +804,6 @@ void UpdateProgress(int op, float percent)
 	SetTaskbarProgressValue(pos, MAX_PROGRESS);
 }
 
-static void EnableHash(BOOL bEnable)
-{
-	// Can't use EnableWindow() for hHash as it overrides our WM_PAINT suppression
-	// and we'd end up with an out of place disabled button
-	hash_enabled = bEnable;
-	SendMessage(hStatus, SB_SETTEXTW, SBT_OWNERDRAW | SB_SECTION_MIDDLE, 0);
-}
-
 /*
  * Toggle controls according to operation
  */
@@ -827,7 +818,7 @@ static void EnableControls(BOOL bEnable)
 	EnableWindow(hNBPasses, bEnable);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_ADVANCED), bEnable);
 	EnableWindow(hLangToolbar, bEnable);
-	EnableHash(bEnable);
+	EnableWindow(hStatusToolbar, bEnable);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_ENABLE_FIXED_DISKS), bEnable);
 	SetDlgItemTextU(hMainDialog, IDCANCEL, lmprintf(bEnable?MSG_006:MSG_007));
 	if (selection_default == BT_IMG)
@@ -860,7 +851,8 @@ BOOL CALLBACK LogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 		// Set the font to Unicode so that we can display anything
 		hdc = GetDC(NULL);
 		lfHeight = -MulDiv(8, GetDeviceCaps(hdc, LOGPIXELSY), 72);
-		ReleaseDC(NULL, hdc);
+		if (hdc != NULL)
+			ReleaseDC(NULL, hdc);
 		hf = CreateFontA(lfHeight, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE,
 			DEFAULT_CHARSET, 0, 0, PROOF_QUALITY, 0, "Arial Unicode MS");
 		SendDlgItemMessageA(hDlg, IDC_LOG_EDIT, WM_SETFONT, (WPARAM)hf, TRUE);
@@ -1022,6 +1014,7 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 		SendMessage(hMainDialog, UM_PROGRESS_EXIT, 0, 0);
 		PrintInfoDebug(0, MSG_203);
 		safe_free(image_path);
+		EnableWindow(hStatusToolbar, FALSE);
 		PrintStatus(0, MSG_086);
 		SetMBRProps();
 		goto out;
@@ -1038,8 +1031,9 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 	if ( (!iso_report.has_bootmgr) && (!HAS_SYSLINUX(iso_report)) && (!IS_WINPE(iso_report.winpe)) && (!IS_GRUB(iso_report))
 	  && (!iso_report.has_efi) && (!IS_REACTOS(iso_report) && (!iso_report.has_kolibrios) && (!iso_report.is_bootable_img)) ) {
 		PrintInfo(0, MSG_081);
-		MessageBoxU(hMainDialog, lmprintf(MSG_082), lmprintf(MSG_081), MB_OK|MB_ICONINFORMATION|MB_IS_RTL);
 		safe_free(image_path);
+		EnableWindow(hStatusToolbar, FALSE);
+		MessageBoxU(hMainDialog, lmprintf(MSG_082), lmprintf(MSG_081), MB_OK|MB_ICONINFORMATION|MB_IS_RTL);
 		PrintStatus(0, MSG_086);
 		SetMBRProps();
 	} else {
@@ -1113,7 +1107,7 @@ static void ToggleAdvanced(void)
 
 	// Move the controls up or down
 	MoveCtrlY(hMainDialog, IDC_STATUS, dialog_shift);
-	MoveCtrlY(hMainDialog, IDC_HASH, dialog_shift);
+	MoveCtrlY(hMainDialog, IDC_STATUS_TOOLBAR, dialog_shift);
 	MoveCtrlY(hMainDialog, IDC_START, dialog_shift);
 	MoveCtrlY(hMainDialog, IDC_INFO, dialog_shift);
 	MoveCtrlY(hMainDialog, IDC_PROGRESS, dialog_shift);
@@ -1136,7 +1130,7 @@ static void ToggleAdvanced(void)
 	GetWindowRect(hLog, &rect);
 	point.x = (rect.right - rect.left);
 	point.y = (rect.bottom - rect.top) + (int)(fScale*dialog_shift);
-	SetWindowPos(hLog, 0, 0, 0, point.x, point.y, 0);
+	SetWindowPos(hLog, NULL, 0, 0, point.x, point.y, SWP_NOZORDER);
 	// Don't forget to scroll the edit to the bottom after resize
 	SendMessage(hLog, EM_LINESCROLL, 0, SendMessage(hLog, EM_GETLINECOUNT, 0, 0));
 
@@ -1195,7 +1189,7 @@ static void ToggleToGo(void)
 
 	// Move the controls up or down
 	MoveCtrlY(hMainDialog, IDC_STATUS, dialog_shift);
-	MoveCtrlY(hMainDialog, IDC_HASH, dialog_shift);
+	MoveCtrlY(hMainDialog, IDC_STATUS_TOOLBAR, dialog_shift);
 	MoveCtrlY(hMainDialog, IDC_START, dialog_shift);
 	MoveCtrlY(hMainDialog, IDC_INFO, dialog_shift);
 	MoveCtrlY(hMainDialog, IDC_PROGRESS, dialog_shift);
@@ -1226,7 +1220,7 @@ static void ToggleToGo(void)
 	GetWindowRect(hLog, &rect);
 	point.x = (rect.right - rect.left);
 	point.y = (rect.bottom - rect.top) + (int)(fScale*dialog_shift);
-	SetWindowPos(hLog, 0, 0, 0, point.x, point.y, 0);
+	SetWindowPos(hLog, NULL, 0, 0, point.x, point.y, SWP_NOZORDER);
 	// Don't forget to scroll the edit to the bottom after resize
 	SendMessage(hLog, EM_LINESCROLL, 0, SendMessage(hLog, EM_GETLINECOUNT, 0, 0));
 
@@ -1645,7 +1639,8 @@ void InitDialog(HWND hDlg)
 	hDC = GetDC(hDlg);
 	fScale = GetDeviceCaps(hDC, LOGPIXELSX) / 96.0f;
 	lfHeight = -MulDiv(9, GetDeviceCaps(hDC, LOGPIXELSY), 72);
-	ReleaseDC(hDlg, hDC);
+	if (hDC != NULL)
+		ReleaseDC(hDlg, hDC);
 	// Adjust icon size lookup
 	s16 = i16;
 	if (s16 >= 54)
@@ -1703,8 +1698,6 @@ void InitDialog(HWND hDlg)
 	selection_default = BT_FREEDOS;
 	// Create the status line and initialize the taskbar icon for progress overlay
 	CreateStatusBar();
-	// Create the hash sign on the status bar
-	EnableHash(FALSE);
 	CreateTaskbarList();
 	SetTaskbarProgressState(TASKBAR_NORMAL);
 
@@ -1780,7 +1773,7 @@ void InitDialog(HWND hDlg)
 	// Set the top margin to 4 DIPs and the right margin so that it's aligned with the Device List Combobox
 	GetWindowRect(hDeviceList, &rcDeviceList);
 	MapWindowPoints(NULL, hDlg, (POINT*)&rcDeviceList, 2);
-	SetWindowPos(hLangToolbar, NULL, rcDeviceList.right - rcToolbarButton.right,
+	SetWindowPos(hLangToolbar, HWND_TOP, rcDeviceList.right - rcToolbarButton.right,
 		(int)(4.0f * fScale), rcToolbarButton.right, rcToolbarButton.bottom, 0);
 	ShowWindow(hLangToolbar, SW_SHOWNORMAL);
 
@@ -1805,7 +1798,7 @@ void InitDialog(HWND hDlg)
 	GetWindowRect(hSelectISO, &rcSelectImage);
 	MapWindowPoints(NULL, hDlg, (POINT*)&rcSelectImage, 2);
 	SetWindowPos(hSelectISO, NULL, rcSelectImage.left, rcBootType.top - 1,
-		rcSelectImage.right - rcSelectImage.left, rcBootType.bottom - rcBootType.top + 2, 0);
+		rcSelectImage.right - rcSelectImage.left, rcBootType.bottom - rcBootType.top + 2, SWP_NOZORDER);
 
 	// The things one needs to do to keep things looking good...
 	if (nWindowsVersion == WINDOWS_7) {
@@ -1855,7 +1848,7 @@ void InitDialog(HWND hDlg)
 	CreateTooltip(GetDlgItem(hDlg, IDC_ABOUT), lmprintf(MSG_172), -1);
 	CreateTooltip(GetDlgItem(hDlg, IDC_WINDOWS_INSTALL), lmprintf(MSG_199), -1);
 	CreateTooltip(GetDlgItem(hDlg, IDC_WINDOWS_TO_GO), lmprintf(MSG_200), -1);
-	CreateTooltip(hHash, lmprintf(MSG_272), -1);
+	CreateTooltip(hStatusToolbar, lmprintf(MSG_272), -1);
 	CreateTooltip(hLangToolbar, lmprintf(MSG_273), -1);
 
 	// Set a label for the Advanced Mode and Select Image button for screen readers
@@ -2079,10 +2072,6 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				SetTextColor(pDI->hDC, GetSysColor(COLOR_BTNTEXT));
 				DrawTextExU(pDI->hDC, szStatusMessage, -1, &pDI->rcItem,
 					DT_LEFT|DT_END_ELLIPSIS|DT_PATH_ELLIPSIS, NULL);
-				return (INT_PTR)TRUE;
-			case SB_SECTION_MIDDLE:
-				SetTextColor(pDI->hDC, ((image_path==NULL)||(!hash_enabled))?GetSysColor(COLOR_3DSHADOW):GetSysColor(COLOR_BTNTEXT));
-				DrawTextExA(pDI->hDC, "#", -1, &pDI->rcItem, DT_CENTER, NULL);
 				return (INT_PTR)TRUE;
 			case SB_SECTION_RIGHT:
 				SetTextColor(pDI->hDC, GetSysColor(COLOR_3DSHADOW));
@@ -2314,7 +2303,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				iso_provided = FALSE;	// One off thing...
 			} else {
 				safe_free(image_path);
-				EnableHash(FALSE);
+				EnableWindow(hStatusToolbar, FALSE);
 				image_path = FileDialog(FALSE, NULL, (selection_default == BT_IMG)?&img_ext:&iso_ext, 0);
 				if (image_path == NULL) {
 					CreateTooltip(hSelectISO, lmprintf(MSG_173), -1);
@@ -2421,7 +2410,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				format_op_in_progress = FALSE;
 			break;
 		case IDC_HASH:
-			if ((format_thid == NULL) && (image_path != NULL) && (hash_enabled)) {
+			if ((format_thid == NULL) && (image_path != NULL)) {
 				FormatStatus = 0;
 				format_op_in_progress = TRUE;
 				no_confirmation_on_cancel = TRUE;

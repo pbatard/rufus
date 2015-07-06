@@ -523,18 +523,27 @@ static void md5_final(MD5_CONTEXT *ctx)
  */
 INT_PTR CALLBACK ChecksumCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
+	int i;
 	HFONT hFont;
+	HDC hDC;
+
 	switch (message) {
 	case WM_INITDIALOG:
 		apply_localization(IDD_CHECKSUM, hDlg);
-		// Create the font and brush for the Info edit box
-		hFont = CreateFontA(-MulDiv(9, GetDeviceCaps(GetDC(hDlg), LOGPIXELSY), 72),
+		hDC = GetDC(hDlg);
+		hFont = CreateFontA(-MulDiv(9, GetDeviceCaps(hDC, LOGPIXELSY), 72),
 			0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE, DEFAULT_CHARSET,
 			0, 0, PROOF_QUALITY, 0, "Courier New");
+		if (hDC != NULL)
+			ReleaseDC(hDlg, hDC);
 		SendDlgItemMessageA(hDlg, IDC_MD5, WM_SETFONT, (WPARAM)hFont, TRUE);
 		SendDlgItemMessageA(hDlg, IDC_SHA1, WM_SETFONT, (WPARAM)hFont, TRUE);
 		SetWindowTextA(GetDlgItem(hDlg, IDC_MD5), md5str);
 		SetWindowTextA(GetDlgItem(hDlg, IDC_SHA1), sha1str);
+		for (i=(int)safe_strlen(image_path); (i>0)&&(image_path[i]!='\\'); i--);
+		SetWindowTextU(hDlg, &image_path[i+1]);
+		// Set focus on the OK button
+		SendMessage(hDlg, WM_NEXTDLGCTL, (WPARAM)GetDlgItem(hDlg, IDOK), TRUE);
 		CenterDialog(hDlg);
 		break;
 	case WM_COMMAND:
@@ -543,6 +552,8 @@ INT_PTR CALLBACK ChecksumCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 		case IDCANCEL:
 			reset_localization(IDD_CHECKSUM);
 			EndDialog(hDlg, LOWORD(wParam));
+			// Reset focus to our toolbar
+			PostMessage(hMainDialog, WM_NEXTDLGCTL, (WPARAM)hStatusToolbar, TRUE);
 			return (INT_PTR)TRUE;
 		}
 	}
