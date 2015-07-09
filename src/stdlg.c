@@ -446,6 +446,10 @@ void CreateStatusBar(void)
 
 	// Compute the dimensions for the hash button
 	x = edge[0];
+	if (nWindowsVersion <= WINDOWS_XP) {
+		x -= 1;
+		height -= 2;
+	}
 	y = rect.bottom - height + 1;
 	width = edge[1] - edge[0] - 1;
 	// How I wish there was a way to figure out how to make Windows controls look good
