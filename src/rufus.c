@@ -68,6 +68,9 @@
 #ifndef DBT_CUSTOMEVENT
 #define DBT_CUSTOMEVENT 0x8006
 #endif
+#ifndef ERROR_FILE_TOO_LARGE
+#define ERROR_FILE_TOO_LARGE 223
+#endif
 
 struct {
 	HIMAGELIST himl;

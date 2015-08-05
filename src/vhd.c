@@ -157,7 +157,7 @@ BOOL AppendVHDFooter(const char* vhd_path)
 	footer->features = bswap_uint32(VHD_FOOTER_FEATURES_RESERVED);
 	footer->file_format_version = bswap_uint32(VHD_FOOTER_FILE_FORMAT_V1_0);
 	footer->data_offset = bswap_uint64(VHD_FOOTER_DATA_OFFSET_FIXED_DISK);
-	footer->timestamp = bswap_uint32(_time32(NULL) - SECONDS_SINCE_JAN_1ST_2000);
+	footer->timestamp = bswap_uint32((uint32_t)(_time64(NULL) - SECONDS_SINCE_JAN_1ST_2000));
 	memcpy(footer->creator_app, creator_app, sizeof(creator_app));
 	footer->creator_version = bswap_uint32((rufus_version[0]<<16)|rufus_version[1]);
 	memcpy(footer->creator_host_os, creator_os, sizeof(creator_os));

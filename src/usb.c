@@ -306,7 +306,7 @@ BOOL GetUSBDevices(DWORD devnum)
 					// we might have an extra vendor driver in between (e.g. "ASUS USB 3.0 Boost Storage Driver"
 					// for UASP devices in ASUS "Turbo Mode" or "Apple Mobile Device USB Driver" for iPods)
 					// so try to see if we can match the grandparent.
-					if ( ((uint32_t)htab_devid.table[j].data == 0)
+					if ( ((uintptr_t)htab_devid.table[j].data == 0)
 					  && (CM_Get_Parent(&grandparent_inst, parent_inst, 0) == CR_SUCCESS)
 					  && (CM_Get_Device_IDA(grandparent_inst, str, MAX_PATH, 0) == CR_SUCCESS) ) {
 						device_id = str;
@@ -315,8 +315,8 @@ BOOL GetUSBDevices(DWORD devnum)
 						if (usb_debug)
 							uprintf("  Matched with (GP) ID[%03d]: %s", j, device_id);
 					}
-					if ((uint32_t)htab_devid.table[j].data > 0)
-						GetUSBProperties(dev_if_path.String[(uint32_t)htab_devid.table[j].data], device_id, &props);
+					if ((uintptr_t)htab_devid.table[j].data > 0)
+						GetUSBProperties(dev_if_path.String[(uintptr_t)htab_devid.table[j].data], device_id, &props);
 					if (usb_debug)
 						uprintf("  Props VID:PID = %04X:%04X", props.vid, props.pid);
 
@@ -446,8 +446,8 @@ BOOL GetUSBDevices(DWORD devnum)
 					}
 					// We have multiple volumes assigned to the same device (multiple partitions)
 					// If that is the case, use "Multiple Volumes" instead of the label
-					safe_strcpy(entry_msg, sizeof(entry_msg), ((drive_letters[0] != 0) && (drive_letters[1] != 0))?
-						lmprintf(MSG_047):label);
+					safe_strcpy(entry_msg, sizeof(entry_msg), (((drive_letters[0] != 0) && (drive_letters[1] != 0))?
+						lmprintf(MSG_047):label));
 					for (k=0, remove_drive=0; drive_letters[k] && (!remove_drive); k++) {
 						// Append all the drive letters we detected
 						letter_name[2] = drive_letters[k];
