@@ -174,10 +174,10 @@ int is_zero_mbr(FILE *fp)
 static int write_bootmark(FILE *fp)
 {
 	unsigned char aucRef[] = {0x55, 0xAA};
-	int pos = 0x1FE;
+	uint32_t pos = 0x1FE;
+	FAKE_FD* fd = (FAKE_FD*)fp;
 
-	/* We use fp->_bufsiz as our sector size indicator */
-	for (pos = 0x1FE; pos < fp->_bufsiz; pos += 0x200) {
+	for (pos = 0x1FE; pos < fd->_sector_size; pos += 0x200) {
 		if (!write_data(fp, pos, aucRef, sizeof(aucRef)))
 			return 0;
 	}

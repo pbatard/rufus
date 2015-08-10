@@ -270,6 +270,9 @@ DWORD DownloadFile(const char* url, const char* file, HWND hProgressDialog)
 		SendMessage(hProgressDialog, UM_PROGRESS_INIT, 0, 0);
 	}
 
+	if (file == NULL)
+		goto out;
+
 	for (last_slash = safe_strlen(file); last_slash != 0; last_slash--) {
 		if ((file[last_slash] == '/') || (file[last_slash] == '\\')) {
 			last_slash++;

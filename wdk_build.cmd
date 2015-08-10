@@ -3,7 +3,7 @@
 if Test%BUILD_ALT_DIR%==Test goto usage
 
 ::# /M 2 for multiple cores
-set BUILD_CMD=build -bcwgZ -M2
+set BUILD_CMD=build -bcwgZ -M12
 set PWD=%~dp0
 
 ::# Set target platform type

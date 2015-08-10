@@ -6,6 +6,13 @@
 /* Max valid value of uiLen for contains_data */
 #define MAX_DATA_LEN 32768
 
+/* We hijack the FILE structure for our own needs */
+typedef struct {
+	void *_handle;
+	uint64_t _offset;
+	uint32_t _sector_size;
+} FAKE_FD;
+
 /* Checks if a file contains a data pattern of length Len at position
    Position. The file pointer will change when calling this function! */
 int contains_data(FILE *fp, uint64_t Position,

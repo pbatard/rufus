@@ -5,6 +5,7 @@ TARGET  = rufus
 # NB: UPX v3.09 or later is needed for LZMA compression (http://upx.sourceforge.net/)
 release: all
 	@mv src/$(TARGET)$(EXEEXT) .
+	@sleep 1
 	@$(STRIP) $(TARGET)$(EXEEXT)
 	@upx --lzma $(TARGET)$(EXEEXT)
 	@mv $(TARGET)$(EXEEXT) $(TARGET)-$(VERSION)$(SUFFIX)$(EXEEXT)

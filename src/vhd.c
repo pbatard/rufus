@@ -444,8 +444,12 @@ static BOOL WimExtractFile_7z(const char* image, int index, const char* src, con
 	char tmpdst[MAX_PATH];
 
 	uprintf("Opening: %s:[%d] (7-Zip)", image, index);
+
+	if ((image == NULL) || (src == NULL) || (dst == NULL))
+		return FALSE;
+
 	safe_strcpy(tmpdst, sizeof(tmpdst), dst);
-	for (i=safe_strlen(tmpdst); i>0; i--) {
+	for (i=strlen(tmpdst)-1; i>0; i--) {
 		if (tmpdst[i] == '\\')
 			break;
 	}

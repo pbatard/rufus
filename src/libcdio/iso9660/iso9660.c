@@ -31,6 +31,7 @@ const char ISO_STANDARD_ID[] = {'C', 'D', '0', '0', '1'};
 #include <cdio/bytesex.h>
 #include <cdio/iso9660.h>
 #include <cdio/util.h>
+#include <cdio/portable.h>
 
 #include <time.h>
 #include <ctype.h>

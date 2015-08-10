@@ -299,6 +299,9 @@ static BOOL ExtractMSDOS(const char* path)
 		"KEYB    COM", "KEYBOARDSYS", "KEYBRD2 SYS", "KEYBRD3 SYS", "KEYBRD4 SYS",
 		"DISPLAY SYS", "EGA     CPI", "EGA2    CPI", "EGA3    CPI" };
 
+	if (path == NULL)
+		return FALSE;
+
 	// Reduce the visible mess by placing all the locale files into a subdir
 	safe_strcpy(locale_path, sizeof(locale_path), path);
 	safe_strcat(locale_path, sizeof(locale_path), "LOCALE\\");
@@ -386,7 +389,7 @@ BOOL ExtractFreeDOS(const char* path)
 
 		hFile = CreateFileA(filename, GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ|FILE_SHARE_WRITE, NULL,
 			CREATE_ALWAYS, (i<2)?(FILE_ATTRIBUTE_HIDDEN|FILE_ATTRIBUTE_SYSTEM):FILE_ATTRIBUTE_NORMAL, NULL);
-		if (hFile == INVALID_HANDLE_VALUE) {
+		if ((hFile == NULL) || (hFile == INVALID_HANDLE_VALUE)) {
 			uprintf("Unable to create file '%s': %s.\n", filename, WindowsErrorString());
 			return FALSE;
 		}

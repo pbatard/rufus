@@ -28,6 +28,7 @@
 
 #include "msapi_utf8.h"
 #include "rufus.h"
+#include "file.h"
 #include "drive.h"
 #include "resource.h"
 #include "sys_types.h"
@@ -585,21 +586,22 @@ const struct {int (*fn)(FILE *fp); char* str;} known_mbr[] = {
 BOOL AnalyzeMBR(HANDLE hPhysicalDrive, const char* TargetName)
 {
 	const char* mbr_name = "Master Boot Record";
-	FILE fake_fd = { 0 };
+	FAKE_FD fake_fd = { 0 };
+	FILE* fp = (FILE*)&fake_fd;
 	int i;
 
-	fake_fd._ptr = (char*)hPhysicalDrive;
-	fake_fd._bufsiz = SelectedDrive.Geometry.BytesPerSector;
+	fake_fd._handle = (char*)hPhysicalDrive;
+	fake_fd._sector_size = SelectedDrive.Geometry.BytesPerSector;
 	// Might need correction, as we use this method for images and we may not have a target UFD yet
-	if (fake_fd._bufsiz < 512)
-		fake_fd._bufsiz = 512;
+	if (fake_fd._sector_size < 512)
+		fake_fd._sector_size = 512;
 
-	if (!is_br(&fake_fd)) {
+	if (!is_br(fp)) {
 		uprintf("%s does not have an x86 %s\n", TargetName, mbr_name);
 		return FALSE;
 	}
 	for (i=0; i<ARRAYSIZE(known_mbr); i++) {
-		if (known_mbr[i].fn(&fake_fd)) {
+		if (known_mbr[i].fn(fp)) {
 			uprintf("%s has a %s %s\n", TargetName, known_mbr[i].str, mbr_name);
 			return TRUE;
 		}
@@ -623,20 +625,21 @@ const struct {int (*fn)(FILE *fp); char* str;} known_pbr[] = {
 BOOL AnalyzePBR(HANDLE hLogicalVolume)
 {
 	const char* pbr_name = "Partition Boot Record";
-	FILE fake_fd = { 0 };
+	FAKE_FD fake_fd = { 0 };
+	FILE* fp = (FILE*)&fake_fd;
 	int i;
 
-	fake_fd._ptr = (char*)hLogicalVolume;
-	fake_fd._bufsiz = SelectedDrive.Geometry.BytesPerSector;
+	fake_fd._handle = (char*)hLogicalVolume;
+	fake_fd._sector_size = SelectedDrive.Geometry.BytesPerSector;
 
-	if (!is_br(&fake_fd)) {
+	if (!is_br(fp)) {
 		uprintf("Volume does not have an x86 %s\n", pbr_name);
 		return FALSE;
 	}
 
-	if (is_fat_16_br(&fake_fd) || is_fat_32_br(&fake_fd)) {
+	if (is_fat_16_br(fp) || is_fat_32_br(fp)) {
 		for (i=0; i<ARRAYSIZE(known_pbr); i++) {
-			if (known_pbr[i].fn(&fake_fd)) {
+			if (known_pbr[i].fn(fp)) {
 				uprintf("Drive has a %s %s\n", known_pbr[i].str, pbr_name);
 				return TRUE;
 			}

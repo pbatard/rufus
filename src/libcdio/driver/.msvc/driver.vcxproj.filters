@@ -79,9 +79,6 @@
     <ClInclude Include="..\..\config.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\portable.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\cdio\sector.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -89,6 +86,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\cdio\memory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cdio\portable.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

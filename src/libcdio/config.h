@@ -111,9 +111,14 @@ static __inline int fseeko64(FILE *stream, __int64 offset, int origin) {
 /* #undef HAVE_SLEEP */
 
 /* Define to 1 if you have the `snprintf' function. */
+#if defined(_MSC_VER) && (_MSC_VER >= 1900)
 #define HAVE_SNPRINTF 1
-/* The equivalent of snprintf on MSVC is _snprintf */
-#define snprintf _snprintf
+#endif
+
+/* Define to 1 if you have the `vsnprintf' function. */
+#if defined(_MSC_VER) && (_MSC_VER >= 1900)
+#define HAVE_VSNPRINTF
+#endif
 
 /* Define to 1 if you have the <stdarg.h> header file. */
 #define HAVE_STDARG_H 1

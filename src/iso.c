@@ -194,7 +194,7 @@ static BOOL check_iso_props(const char* psz_dirname, int64_t i_file_length, cons
 		}
 
 		// Check for "install.wim" or "install.swm" in "/sources"
-		if (safe_stricmp(psz_dirname, install_wim_path) == 0) {
+		if ((install_wim_path != NULL) && (safe_stricmp(psz_dirname, install_wim_path) == 0)) {
 			for (i=0; i<ARRAYSIZE(install_wim_name); i++)
 				if (safe_stricmp(psz_basename, install_wim_name[i]) == 0)
 					static_sprintf(iso_report.install_wim_path, "?:\\%s\\%s", &install_wim_path[1], install_wim_name[i]);

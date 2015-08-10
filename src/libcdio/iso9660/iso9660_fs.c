@@ -47,6 +47,7 @@
 #include <cdio/iso9660.h>
 #include <cdio/util.h>
 #include <cdio/utf8.h>
+#include <cdio/portable.h>
 
 /* Private headers */
 #include "cdio_assert.h"

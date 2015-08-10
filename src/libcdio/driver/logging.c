@@ -33,8 +33,8 @@
 #endif
 
 #include <cdio/logging.h>
+#include <cdio/portable.h>
 #include "cdio_assert.h"
-#include "portable.h"
 
 cdio_log_level_t cdio_loglevel_default = CDIO_LOG_WARN;
 

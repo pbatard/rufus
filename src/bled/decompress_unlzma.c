@@ -264,14 +264,15 @@ unpack_lzma_stream(transformer_state_t *xstate)
 
 	while (global_pos + buffer_pos < header.dst_size) {
 		int pos_state = (buffer_pos + global_pos) & pos_state_mask;
-		uint16_t *prob = p + LZMA_IS_MATCH + (state << LZMA_NUM_POS_BITS_MAX) + pos_state;
+		uintptr_t off1 = LZMA_IS_MATCH + (state << LZMA_NUM_POS_BITS_MAX) + pos_state;
+		uint16_t *prob1 = p + off1;
 
-		if (!rc_is_bit_1(rc, prob)) {
+		if (!rc_is_bit_1(rc, prob1)) {
 			static const char next_state[LZMA_NUM_STATES] =
 				{ 0, 0, 0, 0, 1, 2, 3, 4, 5, 6, 4, 5 };
 			int mi = 1;
 
-			prob = (p + LZMA_LITERAL
+			prob1 = (p + LZMA_LITERAL
 			        + (LZMA_LIT_SIZE * ((((buffer_pos + global_pos) & literal_pos_mask) << lc)
 			                            + (previous_byte >> (8 - lc))
 			                           )
@@ -290,13 +291,13 @@ unpack_lzma_stream(transformer_state_t *xstate)
 
 					match_byte <<= 1;
 					bit = match_byte & 0x100;
-					bit ^= (rc_get_bit(rc, prob + 0x100 + bit + mi, &mi) << 8); /* 0x100 or 0 */
+					bit ^= (rc_get_bit(rc, prob1 + 0x100 + bit + mi, &mi) << 8); /* 0x100 or 0 */
 					if (bit)
 						break;
 				} while (mi < 0x100);
 			}
 			while (mi < 0x100) {
-				rc_get_bit(rc, prob + mi, &mi);
+				rc_get_bit(rc, prob1 + mi, &mi);
 			}
 
 			state = next_state[state];
@@ -333,10 +334,8 @@ unpack_lzma_stream(transformer_state_t *xstate)
 			} else {
 				prob2 += LZMA_IS_REP_G0 - LZMA_IS_REP;
 				if (!rc_is_bit_1(rc, prob2)) {
-					prob2 = (p + LZMA_IS_REP_0_LONG
-					        + (state << LZMA_NUM_POS_BITS_MAX)
-					        + pos_state
-					);
+					uintptr_t off2 = LZMA_IS_REP_0_LONG + (state << LZMA_NUM_POS_BITS_MAX) + pos_state;
+					prob2 = p + off2;
 					if (!rc_is_bit_1(rc, prob2)) {
 #if ENABLE_FEATURE_LZMA_FAST
 						uint32_t pos = buffer_pos - rep0;
@@ -397,13 +396,13 @@ unpack_lzma_stream(transformer_state_t *xstate)
 
 			if (state < 4) {
 				int pos_slot;
+				uintptr_t off3 = LZMA_POS_SLOT +
+					((len < LZMA_NUM_LEN_TO_POS_STATES ? len :	LZMA_NUM_LEN_TO_POS_STATES - 1)
+						<< LZMA_NUM_POS_SLOT_BITS);
 				uint16_t *prob3;
 
 				state += LZMA_NUM_LIT_STATES;
-				prob3 = p + LZMA_POS_SLOT +
-				       ((len < LZMA_NUM_LEN_TO_POS_STATES ? len :
-				         LZMA_NUM_LEN_TO_POS_STATES - 1)
-				         << LZMA_NUM_POS_SLOT_BITS);
+				prob3 = p + off3;
 				rc_bit_tree_decode(rc, prob3,
 					LZMA_NUM_POS_SLOT_BITS, &pos_slot);
 				rep0 = pos_slot;

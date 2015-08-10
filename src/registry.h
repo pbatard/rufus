@@ -59,8 +59,12 @@ static __inline BOOL _GetRegistryKey(HKEY key_root, const char* key_name, DWORD 
 	LONG s;
 	HKEY hSoftware = NULL, hApp = NULL;
 	DWORD dwDisp, dwType = -1, dwSize = dest_size;
-	char long_key_name[256] = "SOFTWARE\\";
+	// VS Code Analysis complains if we don't break our initialization into chars
+	char long_key_name[256] = { 0 };
 	memset(dest, 0, dest_size);
+
+	if (key_name == NULL)
+		return FALSE;
 
 	for (i=safe_strlen(key_name); i>0; i--) {
 		if (key_name[i] == '\\')
@@ -68,6 +72,7 @@ static __inline BOOL _GetRegistryKey(HKEY key_root, const char* key_name, DWORD 
 	}
 
 	if (i != 0) {
+		strcpy(long_key_name, "SOFTWARE\\");
 		safe_strcat(long_key_name, sizeof(long_key_name), key_name);
 		long_key_name[sizeof("SOFTWARE\\") + i-1] = 0;
 		i++;

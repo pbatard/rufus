@@ -2918,14 +2918,14 @@ relaunch:
 			continue;
 		}
 		// Alt-I => Toggle ISO support
-		// This is useful if you have a dual ISO/DD image and you want to force Rufus to use
+		// This is useful if you have an ISOHybrid image and you want to force Rufus to use
 		// DD-mode when writing the data.
 		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'I')) {
 			enable_iso = !enable_iso;
 			PrintStatus2000(lmprintf(MSG_262), enable_iso);
 			if (image_path != NULL) {
 				iso_provided = TRUE;
-				PostMessage(hDlg, WM_COMMAND, IDC_SELECT_ISO, 0);
+				SendMessage(hDlg, WM_COMMAND, IDC_SELECT_ISO, 0);
 			}
 			continue;
 		}

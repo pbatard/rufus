@@ -89,19 +89,20 @@ int64_t read_sectors(HANDLE hDrive, uint64_t SectorSize,
 }
 
 /*
- * The following calls use a bastardized fp on Windows that contains:
- * fp->_ptr: a Windows handle
- * fp->_bufsiz: the sector size
- * fp->_cnt: a file offset
+ * The following calls use a hijacked fp on Windows that contains:
+ * fp->_handle: a Windows handle
+ * fp->_sector_size: the sector size
+ * fp->_offset: a file offset
  */
 int contains_data(FILE *fp, uint64_t Position,
                   const void *pData, uint64_t Len)
 {
    unsigned char aucBuf[MAX_DATA_LEN];
-   HANDLE hDrive = (HANDLE)fp->_ptr;
-   uint64_t SectorSize = (uint64_t)fp->_bufsiz;
+   FAKE_FD* fd = (FAKE_FD*)fp;
+   HANDLE hDrive = (HANDLE)fd->_handle;
+   uint64_t SectorSize = (uint64_t)fd->_sector_size;
    uint64_t StartSector, EndSector, NumSectors;
-   Position += (uint64_t)fp->_cnt;
+   Position += fd->_offset;
 
    StartSector = Position/SectorSize;
    EndSector   = (Position+Len+SectorSize-1)/SectorSize;
@@ -133,10 +134,11 @@ int write_data(FILE *fp, uint64_t Position,
                const void *pData, uint64_t Len)
 {
    unsigned char aucBuf[MAX_DATA_LEN];
-   HANDLE hDrive = (HANDLE)fp->_ptr;
-   uint64_t SectorSize = (uint64_t)fp->_bufsiz;
+   FAKE_FD* fd = (FAKE_FD*)fp;
+   HANDLE hDrive = (HANDLE)fd->_handle;
+   uint64_t SectorSize = (uint64_t)fd->_sector_size;
    uint64_t StartSector, EndSector, NumSectors;
-   Position += (uint64_t)fp->_cnt;
+   Position += fd->_offset;
 
    StartSector = Position/SectorSize;
    EndSector   = (Position+Len+SectorSize-1)/SectorSize;

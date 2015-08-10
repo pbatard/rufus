@@ -50,6 +50,9 @@
     <ClInclude Include="..\..\cdio\cdtext.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\cdio\portable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\iso9660_fs.c">

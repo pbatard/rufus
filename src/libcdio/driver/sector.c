@@ -24,8 +24,8 @@
 #include <cdio/sector.h>
 #include <cdio/util.h>
 #include <cdio/logging.h>
+#include <cdio/portable.h>
 #include "cdio_assert.h"
-#include "portable.h"
 
 #ifdef HAVE_STDIO_H
 #include <stdio.h>

@@ -857,7 +857,8 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 	BOOL r = FALSE;
 	DWORD size;
 	unsigned char* buf = NULL;
-	FILE fake_fd = { 0 };
+	FAKE_FD fake_fd = { 0 };
+	FILE* fp = (FILE*)&fake_fd;
 	const char* using_msg = "Using %s MBR\n";
 	int fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
 	int bt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
@@ -911,8 +912,8 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 		goto out;
 	}
 
-	fake_fd._ptr = (char*)hPhysicalDrive;
-	fake_fd._bufsiz = SelectedDrive.Geometry.BytesPerSector;
+	fake_fd._handle = (char*)hPhysicalDrive;
+	fake_fd._sector_size = SelectedDrive.Geometry.BytesPerSector;
 
 	// What follows is really a case statement with complex conditions listed
 	// by order of preference
@@ -922,7 +923,7 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 	// Forced UEFI (by zeroing the MBR)
 	if (tt == TT_UEFI) {
 		uprintf(using_msg, "zeroed");
-		r = write_zero_mbr(&fake_fd);
+		r = write_zero_mbr(fp);
 		goto notify;
 	}
 	
@@ -930,35 +931,35 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 	if ( (bt == BT_SYSLINUX_V4) || (bt == BT_SYSLINUX_V6) ||
 		 ((bt == BT_ISO) && (HAS_SYSLINUX(iso_report)) && (IS_FAT(fs))) ) {
 		uprintf(using_msg, "Syslinux");
-		r = write_syslinux_mbr(&fake_fd);
+		r = write_syslinux_mbr(fp);
 		goto notify;
 	}
 
 	// Grub 2.0
 	if ( ((bt == BT_ISO) && (iso_report.has_grub2)) || (bt == BT_GRUB2) ) {
 		uprintf(using_msg, "Grub 2.0");
-		r = write_grub2_mbr(&fake_fd);
+		r = write_grub2_mbr(fp);
 		goto notify;
 	}
 
 	// Grub4DOS
 	if ( ((bt == BT_ISO) && (iso_report.has_grub4dos)) || (bt == BT_GRUB4DOS) ) {
 		uprintf(using_msg, "Grub4DOS");
-		r = write_grub_mbr(&fake_fd);
+		r = write_grub_mbr(fp);
 		goto notify;
 	}
 
 	// ReactOS
 	if (bt == BT_REACTOS) {
 		uprintf(using_msg, "ReactOS");
-		r = write_reactos_mbr(&fake_fd);
+		r = write_reactos_mbr(fp);
 		goto notify;
 	} 
 
 	// KolibriOS
 	if ( (bt == BT_ISO) && (iso_report.has_kolibrios) && (IS_FAT(fs))) {
 		uprintf(using_msg, "KolibriOS");
-		r = write_kolibri_mbr(&fake_fd);
+		r = write_kolibri_mbr(fp);
 		goto notify;
 	}
 
@@ -966,10 +967,10 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 windows_mbr:
 	if ((IS_WINPE(iso_report.winpe) && !iso_report.uses_minint) || (IsChecked(IDC_RUFUS_MBR))) {
 		uprintf(using_msg, APPLICATION_NAME);
-		r = write_rufus_mbr(&fake_fd);
+		r = write_rufus_mbr(fp);
 	} else {
 		uprintf(using_msg, "Windows 7");
-		r = write_win7_mbr(&fake_fd);
+		r = write_win7_mbr(fp);
 	}
 
 notify:
@@ -991,10 +992,11 @@ static BOOL WriteSBR(HANDLE hPhysicalDrive)
 	DWORD size, max_size, mbr_size = 0x200;
 	int r, bt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
 	unsigned char* buf = NULL;
-	FILE fake_fd = { 0 };
+	FAKE_FD fake_fd = { 0 };
+	FILE* fp = (FILE*)&fake_fd;
 
-	fake_fd._ptr = (char*)hPhysicalDrive;
-	fake_fd._bufsiz = SelectedDrive.Geometry.BytesPerSector;
+	fake_fd._handle = (char*)hPhysicalDrive;
+	fake_fd._sector_size = SelectedDrive.Geometry.BytesPerSector;
 	// Ensure that we have sufficient space for the SBR
 	max_size = IsChecked(IDC_EXTRA_PARTITION) ?
 		(DWORD)(SelectedDrive.Geometry.BytesPerSector * SelectedDrive.Geometry.SectorsPerTrack) : 1024 * 1024;
@@ -1041,7 +1043,7 @@ static BOOL WriteSBR(HANDLE hPhysicalDrive)
 		uprintf("  SBR size is too large - You may need to uncheck 'Add fixes for old BIOSes'.");
 		return FALSE;
 	}
-	r = write_data(&fake_fd, mbr_size, buf, (uint64_t)size);
+	r = write_data(fp, mbr_size, buf, (uint64_t)size);
 	safe_free(grub2_buf);
 	return (r != 0);
 }
@@ -1060,66 +1062,67 @@ static __inline const char* bt_to_name(int bt) {
 static BOOL WritePBR(HANDLE hLogicalVolume)
 {
 	int i;
-	FILE fake_fd = { 0 };
+	FAKE_FD fake_fd = { 0 };
+	FILE* fp = (FILE*)&fake_fd;
 	int bt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
 	const char* using_msg = "Using %s %s partition boot record\n";
 
-	fake_fd._ptr = (char*)hLogicalVolume;
-	fake_fd._bufsiz = SelectedDrive.Geometry.BytesPerSector;
+	fake_fd._handle = (char*)hLogicalVolume;
+	fake_fd._sector_size = SelectedDrive.Geometry.BytesPerSector;
 
 	switch (ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem))) {
 	case FS_FAT16:
 		uprintf(using_msg, bt_to_name(bt), "FAT16");
-		if (!is_fat_16_fs(&fake_fd)) {
+		if (!is_fat_16_fs(fp)) {
 			uprintf("New volume does not have a FAT16 boot sector - aborting\n");
 			break;
 		}
 		uprintf("Confirmed new volume has a FAT16 boot sector\n");
 		if (bt == BT_FREEDOS) {
-			if (!write_fat_16_fd_br(&fake_fd, 0)) break;
+			if (!write_fat_16_fd_br(fp, 0)) break;
 		} else if (bt == BT_REACTOS) {
-			if (!write_fat_16_ros_br(&fake_fd, 0)) break;
+			if (!write_fat_16_ros_br(fp, 0)) break;
 		} else if ((bt == BT_ISO) && (iso_report.has_kolibrios)) {
 			uprintf("FAT16 is not supported for KolibriOS\n"); break;
 		} else {
-			if (!write_fat_16_br(&fake_fd, 0)) break;
+			if (!write_fat_16_br(fp, 0)) break;
 		}
 		// Disk Drive ID needs to be corrected on XP
-		if (!write_partition_physical_disk_drive_id_fat16(&fake_fd))
+		if (!write_partition_physical_disk_drive_id_fat16(fp))
 			break;
 		return TRUE;
 	case FS_FAT32:
 		uprintf(using_msg, bt_to_name(bt), "FAT32");
 		for (i=0; i<2; i++) {
-			if (!is_fat_32_fs(&fake_fd)) {
+			if (!is_fat_32_fs(fp)) {
 				uprintf("New volume does not have a %s FAT32 boot sector - aborting\n", i?"secondary":"primary");
 				break;
 			}
 			uprintf("Confirmed new volume has a %s FAT32 boot sector\n", i?"secondary":"primary");
 			uprintf("Setting %s FAT32 boot sector for boot...\n", i?"secondary":"primary");
 			if (bt == BT_FREEDOS) {
-				if (!write_fat_32_fd_br(&fake_fd, 0)) break;
+				if (!write_fat_32_fd_br(fp, 0)) break;
 			} else if (bt == BT_REACTOS) {
-				if (!write_fat_32_ros_br(&fake_fd, 0)) break;
+				if (!write_fat_32_ros_br(fp, 0)) break;
 			} else if ((bt == BT_ISO) && (iso_report.has_kolibrios)) {
-				if (!write_fat_32_kos_br(&fake_fd, 0)) break;
+				if (!write_fat_32_kos_br(fp, 0)) break;
 			} else {
-				if (!write_fat_32_br(&fake_fd, 0)) break;
+				if (!write_fat_32_br(fp, 0)) break;
 			}
 			// Disk Drive ID needs to be corrected on XP
-			if (!write_partition_physical_disk_drive_id_fat32(&fake_fd))
+			if (!write_partition_physical_disk_drive_id_fat32(fp))
 				break;
-			fake_fd._cnt += 6 * SelectedDrive.Geometry.BytesPerSector;
+			fake_fd._offset += 6 * SelectedDrive.Geometry.BytesPerSector;
 		}
 		return TRUE;
 	case FS_NTFS:
 		uprintf(using_msg, bt_to_name(bt), "NTFS");
-		if (!is_ntfs_fs(&fake_fd)) {
+		if (!is_ntfs_fs(fp)) {
 			uprintf("New volume does not have an NTFS boot sector - aborting\n");
 			break;
 		}
 		uprintf("Confirmed new volume has an NTFS boot sector\n");
-		if (!write_ntfs_br(&fake_fd)) break;
+		if (!write_ntfs_br(fp)) break;
 		// Note: NTFS requires a full remount after writing the PBR. We dismount when we lock
 		// and also go through a forced remount, so that shouldn't be an issue.
 		// But with NTFS, if you don't remount, you don't boot!
