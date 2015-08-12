@@ -49,6 +49,7 @@ BOOL usb_debug = FALSE;
  */
 static void GetUSBProperties(char* parent_path, char* device_id, usb_device_props* props)
 {
+	CONFIGRET r;
 	HANDLE handle = INVALID_HANDLE_VALUE;
 	DWORD size;
 	DEVINST device_inst;
@@ -56,15 +57,23 @@ static void GetUSBProperties(char* parent_path, char* device_id, usb_device_prop
 	USB_NODE_CONNECTION_INFORMATION_EX_V2 conn_info_v2;
 	PF_INIT(CM_Get_DevNode_Registry_PropertyA, Cfgmgr32);
 
-	if ((parent_path == NULL) || (device_id == NULL) || (props == NULL)) {
-		return;
+	if ((parent_path == NULL) || (device_id == NULL) || (props == NULL) ||
+		(pfCM_Get_DevNode_Registry_PropertyA == NULL)) {
+		goto out;
+	}
+
+	r = CM_Locate_DevNodeA(&device_inst, device_id, 0);
+	if (r != CR_SUCCESS) {
+		uprintf("Could not get device instance handle for '%s': CR error %d", device_id, r);
+		goto out;
 	}
 
 	props->port = 0;
 	size = sizeof(props->port);
-	if ( (pfCM_Get_DevNode_Registry_PropertyA != NULL) && 
-		 (CM_Locate_DevNodeA(&device_inst, device_id, 0) == CR_SUCCESS) ) {
-		pfCM_Get_DevNode_Registry_PropertyA(device_inst, CM_DRP_ADDRESS, NULL, (PVOID)&props->port, &size, 0);
+	r = pfCM_Get_DevNode_Registry_PropertyA(device_inst, CM_DRP_ADDRESS, NULL, (PVOID)&props->port, &size, 0);
+	if (r != CR_SUCCESS) {
+		uprintf("Could not get port for '%s': CR error %d", device_id, r);
+		goto out;
 	}
 
 	handle = CreateFileA(parent_path, GENERIC_WRITE, FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_FLAG_OVERLAPPED, NULL);
@@ -186,6 +195,8 @@ BOOL GetUSBDevices(DWORD devnum)
 						if (CM_Get_Child(&device_inst, dev_info_data.DevInst, 0) == CR_SUCCESS) {
 							device_id[0] = 0;
 							s = StrArrayAdd(&dev_if_path, devint_detail_data->DevicePath);
+							if (usb_debug)
+								uprintf("  Hub[%d] = '%s'", s, devint_detail_data->DevicePath);
 							if ((s>= 0) && (CM_Get_Device_IDA(device_inst, device_id, MAX_PATH, 0) == CR_SUCCESS)) {
 								if ((k = htab_hash(device_id, &htab_devid)) != 0) {
 									htab_devid.table[k].data = (void*)(uintptr_t)s;
@@ -315,8 +326,12 @@ BOOL GetUSBDevices(DWORD devnum)
 						if (usb_debug)
 							uprintf("  Matched with (GP) ID[%03d]: %s", j, device_id);
 					}
-					if ((uintptr_t)htab_devid.table[j].data > 0)
+					if ((uintptr_t)htab_devid.table[j].data > 0) {
+						if (usb_debug)
+							uprintf("  Matched with Hub[%d]: '%s'", (uintptr_t)htab_devid.table[j].data,
+								dev_if_path.String[(uintptr_t)htab_devid.table[j].data]);
 						GetUSBProperties(dev_if_path.String[(uintptr_t)htab_devid.table[j].data], device_id, &props);
+					}
 					if (usb_debug)
 						uprintf("  Props VID:PID = %04X:%04X", props.vid, props.pid);
 
@@ -337,6 +352,7 @@ BOOL GetUSBDevices(DWORD devnum)
 							}
 						}
 					}
+					break;
 				}
 			}
 		}
