@@ -1145,8 +1145,8 @@ char* replace_in_token_data(const char* filename, const char* token, const char*
 		break;
 	}
 	fseek(fd_in, 0, SEEK_SET);
-	duprintf("'%s' was detected as %s\n", filename, 
-		(mode==0)?"ANSI/UTF8 (no BOM)":((mode==1)?"UTF8 (with BOM)":"UTF16 (with BOM"));
+//	duprintf("'%s' was detected as %s\n", filename, 
+//		(mode==0)?"ANSI/UTF8 (no BOM)":((mode==1)?"UTF8 (with BOM)":"UTF16 (with BOM"));
 
 
 	wtmpname = (wchar_t*)calloc(wcslen(wfilename)+2, sizeof(wchar_t));
