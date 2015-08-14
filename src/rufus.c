@@ -106,6 +106,7 @@ static BOOL log_displayed = FALSE;
 static BOOL iso_provided = FALSE;
 static BOOL user_notified = FALSE;
 static BOOL relaunch = FALSE;
+static BOOL dont_display_image_name = FALSE;
 extern BOOL force_large_fat32, enable_iso, enable_joliet, enable_rockridge, enable_ntfs_compression, preserve_timestamps, usb_debug;
 extern uint8_t* grub2_buf;
 extern long grub2_len;
@@ -1012,11 +1013,11 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 	user_notified = FALSE;
 	EnableControls(FALSE);
 	r = ExtractISO(image_path, "", TRUE) || IsHDImage(image_path);
-	EnableControls(TRUE);
 	if (!r) {
 		SendMessage(hMainDialog, UM_PROGRESS_EXIT, 0, 0);
 		PrintInfoDebug(0, MSG_203);
 		safe_free(image_path);
+		EnableControls(TRUE);
 		EnableWindow(hStatusToolbar, FALSE);
 		PrintStatus(0, MSG_086);
 		SetMBRProps();
@@ -1031,6 +1032,8 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 		selection_default = BT_ISO;
 		DisplayISOProps();
 	}
+	// Only enable AFTER we have determined the image type
+	EnableControls(TRUE);
 	if ( (!iso_report.has_bootmgr) && (!HAS_SYSLINUX(iso_report)) && (!IS_WINPE(iso_report.winpe)) && (!IS_GRUB(iso_report))
 	  && (!iso_report.has_efi) && (!IS_REACTOS(iso_report) && (!iso_report.has_kolibrios) && (!iso_report.is_bootable_img)) ) {
 		PrintInfo(0, MSG_081);
@@ -1055,8 +1058,10 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 			SendMessage(hMainDialog, WM_COMMAND, (CBN_SELCHANGE<<16) | IDC_FILESYSTEM,
 				ComboBox_GetCurSel(hFileSystem));
 		}
-		for (i=(int)safe_strlen(image_path); (i>0)&&(image_path[i]!='\\'); i--);
-		PrintStatusDebug(0, MSG_205, &image_path[i+1]);
+		if (!dont_display_image_name) {
+			for (i = (int)safe_strlen(image_path); (i > 0) && (image_path[i] != '\\'); i--);
+			PrintStatusDebug(0, MSG_205, &image_path[i + 1]);
+		}
 		// Lose the focus on the select ISO (but place it on Close)
 		SendMessage(hMainDialog, WM_NEXTDLGCTL, (WPARAM)FALSE, 0);
 		// Lose the focus from Close and set it back to Start
@@ -1070,6 +1075,7 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 	InvalidateRect(hMainDialog, NULL, TRUE);
 
 out:
+	dont_display_image_name = FALSE;
 	PrintInfo(0, MSG_210);
 	ExitThread(0);
 }
@@ -1959,6 +1965,67 @@ void SetBoot(int fs, int tt)
 		EnableWindow(GetDlgItem(hMainDialog, IDC_WINDOWS_INSTALL), TRUE);
 		EnableWindow(GetDlgItem(hMainDialog, IDC_WINDOWS_TO_GO), TRUE);
 		CheckDlgButton(hMainDialog, IDC_BOOT, uBootChecked);
+	}
+}
+
+void SaveVHD(void)
+{
+	char filename[128];
+	char path[MAX_PATH];
+	int DriveIndex = ComboBox_GetCurSel(hDeviceList);
+	if (DriveIndex >= 0)
+		safe_sprintf(filename, sizeof(filename), "%s.vhd", DriveLabel.String[DriveIndex]);
+	if ((DriveIndex != CB_ERR) && (!format_op_in_progress) && (format_thid == NULL)) {
+		EXT_DECL(vhd_ext, filename, __VA_GROUP__("*.vhd"), __VA_GROUP__("VHD File"));
+		ULARGE_INTEGER free_space;
+		VHD_SAVE vhd_save = { (DWORD)ComboBox_GetItemData(hDeviceList, DriveIndex), FileDialog(TRUE, NULL, &vhd_ext, 0) };
+		if (vhd_save.path != NULL) {
+			// Reset all progress bars
+			SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_NORMAL, 0);
+			SetTaskbarProgressState(TASKBAR_NORMAL);
+			SetTaskbarProgressValue(0, MAX_PROGRESS);
+			SendMessage(hProgress, PBM_SETPOS, 0, 0);
+			FormatStatus = 0;
+			format_op_in_progress = TRUE;
+			free_space.QuadPart = 0;
+			if ((GetVolumePathNameA(vhd_save.path, path, sizeof(path)))
+				&& (GetDiskFreeSpaceExA(path, &free_space, NULL, NULL))
+				&& ((LONGLONG)free_space.QuadPart > (SelectedDrive.DiskSize + 512))) {
+				// Disable all controls except cancel
+				EnableControls(FALSE);
+				FormatStatus = 0;
+				InitProgress(TRUE);
+				format_thid = CreateThread(NULL, 0, SaveImageThread, &vhd_save, 0, NULL);
+				if (format_thid != NULL) {
+					uprintf("\r\nSave to VHD operation started");
+					PrintInfo(0, -1);
+					timer = 0;
+					safe_sprintf(szTimer, sizeof(szTimer), "00:00:00");
+					SendMessageA(hStatus, SB_SETTEXTA, SBT_OWNERDRAW | SB_SECTION_RIGHT, (LPARAM)szTimer);
+					SetTimer(hMainDialog, TID_APP_TIMER, 1000, ClockTimer);
+				}
+				else {
+					uprintf("Unable to start VHD save thread");
+					FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_CANT_START_THREAD);
+					safe_free(vhd_save.path);
+					PostMessage(hMainDialog, UM_FORMAT_COMPLETED, (WPARAM)FALSE, 0);
+					format_op_in_progress = FALSE;
+				}
+			}
+			else {
+				if (free_space.QuadPart == 0) {
+					uprintf("Unable to isolate drive name for VHD save");
+					FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_PATH_NOT_FOUND;
+				}
+				else {
+					uprintf("The VHD size is too large for the target drive");
+					FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_FILE_TOO_LARGE;
+				}
+				safe_free(vhd_save.path);
+				PostMessage(hMainDialog, UM_FORMAT_COMPLETED, (WPARAM)FALSE, 0);
+				format_op_in_progress = FALSE;
+			}
+		}
 	}
 }
 
@@ -2925,6 +2992,7 @@ relaunch:
 			PrintStatus2000(lmprintf(MSG_262), enable_iso);
 			if (image_path != NULL) {
 				iso_provided = TRUE;
+				dont_display_image_name = TRUE;
 				SendMessage(hDlg, WM_COMMAND, IDC_SELECT_ISO, 0);
 			}
 			continue;
@@ -2988,59 +3056,8 @@ relaunch:
 		}
 		// Alt-V => Save selected device to *UNCOMPRESSED* VHD
 		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'V')) {
-			char vhd_name[128];
-			int DriveIndex = ComboBox_GetCurSel(hDeviceList);
-			if (DriveIndex >= 0)
-				safe_sprintf(vhd_name, sizeof(vhd_name), "%s.vhd", DriveLabel.String[DriveIndex]);
-			if ((DriveIndex != CB_ERR) && (!format_op_in_progress) && (format_thid == NULL)) {
-				EXT_DECL(vhd_ext, vhd_name, __VA_GROUP__("*.vhd"), __VA_GROUP__("VHD File"));
-				ULARGE_INTEGER free_space;
-				VHD_SAVE vhd_save = { (DWORD)ComboBox_GetItemData(hDeviceList, DriveIndex), FileDialog(TRUE, NULL, &vhd_ext, 0) };
-				if (vhd_save.path != NULL) {
-					// Reset all progress bars
-					SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_NORMAL, 0);
-					SetTaskbarProgressState(TASKBAR_NORMAL);
-					SetTaskbarProgressValue(0, MAX_PROGRESS);
-					SendMessage(hProgress, PBM_SETPOS, 0, 0);
-					FormatStatus = 0;
-					format_op_in_progress = TRUE;
-					free_space.QuadPart = 0;
-					if ( (GetVolumePathNameA(vhd_save.path, tmp_path, sizeof(tmp_path)))
-					  && (GetDiskFreeSpaceExA(tmp_path, &free_space, NULL, NULL)) 
-					  && ((LONGLONG)free_space.QuadPart > (SelectedDrive.DiskSize + 512)) ) {
-						// Disable all controls except cancel
-						EnableControls(FALSE);
-						FormatStatus = 0;
-						InitProgress(TRUE);
-						format_thid = CreateThread(NULL, 0, SaveImageThread, &vhd_save, 0, NULL);
-						if (format_thid != NULL) {
-							uprintf("\r\nSave to VHD operation started");
-							PrintInfo(0, -1);
-							timer = 0;
-							safe_sprintf(szTimer, sizeof(szTimer), "00:00:00");
-							SendMessageA(hStatus, SB_SETTEXTA, SBT_OWNERDRAW | SB_SECTION_RIGHT, (LPARAM)szTimer);
-							SetTimer(hMainDialog, TID_APP_TIMER, 1000, ClockTimer);
-						} else {
-							uprintf("Unable to start VHD save thread");
-							FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_START_THREAD);
-							safe_free(vhd_save.path);
-							PostMessage(hMainDialog, UM_FORMAT_COMPLETED, (WPARAM)FALSE, 0);
-							format_op_in_progress = FALSE;
-						}
-					} else {
-						if (free_space.QuadPart == 0) {
-							uprintf("Unable to isolate drive name for VHD save");
-							FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_PATH_NOT_FOUND;
-						} else {
-							uprintf("The VHD size is too large for the target drive");
-							FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_FILE_TOO_LARGE;
-						}
-						safe_free(vhd_save.path);
-						PostMessage(hMainDialog, UM_FORMAT_COMPLETED, (WPARAM)FALSE, 0);
-						format_op_in_progress = FALSE;
-					}
-				}
-			}
+			SaveVHD();
+			continue;
 		}
 		// Alt-W => Enable VMWare disk detection
 		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'W')) {
