@@ -19,13 +19,34 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* SHA-1 code taken from GnuPG */
-/* MD5 code taken from Asterisk */
+/*
+ * SHA-1 code taken from GnuPG, as per copyrights above.
+ *
+ * MD5 code from various public domain sources sharing the following
+ * copyright declaration:
+ * 
+ * This code implements the MD5 message-digest algorithm.
+ * The algorithm is due to Ron Rivest.  This code was
+ * written by Colin Plumb in 1993, no copyright is claimed.
+ * This code is in the public domain; do with it what you wish.
+ *
+ * Equivalent code is available from RSA Data Security, Inc.
+ * This code has been tested against that, and is equivalent,
+ * except that you don't need to include two pages of legalese
+ * with every copy.
+ *
+ * To compute the message digest of a chunk of bytes, declare an
+ * MD5Context structure, pass it to MD5Init, call MD5Update as
+ * needed on buffers full of bytes, and then call MD5Final, which
+ * will fill a supplied 16-byte array with the digest.
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <inttypes.h>
 #include <errno.h>
+#include <windowsx.h>
 #include "msapi_utf8.h"
 #include "rufus.h"
 #include "resource.h"
@@ -523,7 +544,8 @@ static void md5_final(MD5_CONTEXT *ctx)
  */
 INT_PTR CALLBACK ChecksumCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	int i;
+	int i, dw;
+	RECT rect;
 	HFONT hFont;
 	HDC hDC;
 
@@ -540,6 +562,19 @@ INT_PTR CALLBACK ChecksumCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 		SendDlgItemMessageA(hDlg, IDC_SHA1, WM_SETFONT, (WPARAM)hFont, TRUE);
 		SetWindowTextA(GetDlgItem(hDlg, IDC_MD5), md5str);
 		SetWindowTextA(GetDlgItem(hDlg, IDC_SHA1), sha1str);
+
+		// Move/Resize the controls as needed to fit our text
+		hDC = GetDC(GetDlgItem(hDlg, IDC_SHA1));
+		SelectFont(hDC, hFont);	// Yes, you *MUST* reapply the font to the DC, even after SetWindowText!
+		GetWindowRect(GetDlgItem(hDlg, IDC_SHA1), &rect);
+		dw = rect.right - rect.left;
+		DrawTextU(hDC, sha1str, -1, &rect, DT_CALCRECT);
+		if (hDC != NULL)
+			ReleaseDC(GetDlgItem(hDlg, IDC_SHA1), hDC);
+		dw = rect.right - rect.left - dw + 12;	// Ideally we'd compute the field borders from the system, but hey...
+		ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDC_MD5), 0, 0, dw, 0, 1.0f);
+		ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDC_SHA1), 0, 0, dw, 0, 1.0f);
+
 		for (i=(int)safe_strlen(image_path); (i>0)&&(image_path[i]!='\\'); i--);
 		if (image_path != NULL)	// VS code analysis has a false positive on this one
 			SetWindowTextU(hDlg, &image_path[i+1]);

@@ -821,7 +821,7 @@ INT_PTR CALLBACK SelectionCallback(HWND hDlg, UINT message, WPARAM wParam, LPARA
 	RECT rect;
 	HFONT hDlgFont;
 	HWND hCtrl;
-	HDC dc;
+	HDC hDC;
 
 	switch (message) {
 	case WM_INITDIALOG:
@@ -861,13 +861,14 @@ INT_PTR CALLBACK SelectionCallback(HWND hDlg, UINT message, WPARAM wParam, LPARA
 
 		// Move/Resize the controls as needed to fit our text
 		hCtrl = GetDlgItem(hDlg, IDC_SELECTION_TEXT);
-		dc = GetDC(hCtrl);
-		SelectFont(dc, hDlgFont);	// Yes, you *MUST* reapply the font to the DC, even after SetWindowText!
+		hDC = GetDC(hCtrl);
+		SelectFont(hDC, hDlgFont);	// Yes, you *MUST* reapply the font to the DC, even after SetWindowText!
 		GetWindowRect(hCtrl, &rect);
 		dh = rect.bottom - rect.top;
-		DrawTextU(dc, szMessageText, -1, &rect, DT_CALCRECT | DT_WORDBREAK);
+		DrawTextU(hDC, szMessageText, -1, &rect, DT_CALCRECT | DT_WORDBREAK);
 		dh = rect.bottom - rect.top - dh;
-		ReleaseDC(hCtrl, dc);
+		if (hDC != NULL)
+			ReleaseDC(hCtrl, hDC);
 
 		ResizeMoveCtrl(hDlg, hCtrl, 0, 0, 0, dh, 1.0f);
 		ResizeMoveCtrl(hDlg, hDlg, 0, 0, 0, dh, 1.0f);
