@@ -47,9 +47,10 @@ BOOL usb_debug = FALSE;
 /*
  * Get the VID, PID and current device speed
  */
-static void GetUSBProperties(char* parent_path, char* device_id, usb_device_props* props)
+static BOOL GetUSBProperties(char* parent_path, char* device_id, usb_device_props* props)
 {
-	CONFIGRET r;
+	BOOL r = FALSE;
+	CONFIGRET cr;
 	HANDLE handle = INVALID_HANDLE_VALUE;
 	DWORD size;
 	DEVINST device_inst;
@@ -62,17 +63,17 @@ static void GetUSBProperties(char* parent_path, char* device_id, usb_device_prop
 		goto out;
 	}
 
-	r = CM_Locate_DevNodeA(&device_inst, device_id, 0);
-	if (r != CR_SUCCESS) {
-		uprintf("Could not get device instance handle for '%s': CR error %d", device_id, r);
+	cr = CM_Locate_DevNodeA(&device_inst, device_id, 0);
+	if (cr != CR_SUCCESS) {
+		uprintf("Could not get device instance handle for '%s': CR error %d", device_id, cr);
 		goto out;
 	}
 
 	props->port = 0;
 	size = sizeof(props->port);
-	r = pfCM_Get_DevNode_Registry_PropertyA(device_inst, CM_DRP_ADDRESS, NULL, (PVOID)&props->port, &size, 0);
-	if (r != CR_SUCCESS) {
-		uprintf("Could not get port for '%s': CR error %d", device_id, r);
+	cr = pfCM_Get_DevNode_Registry_PropertyA(device_inst, CM_DRP_ADDRESS, NULL, (PVOID)&props->port, &size, 0);
+	if (cr != CR_SUCCESS) {
+		uprintf("Could not get port for '%s': CR error %d", device_id, cr);
 		goto out;
 	}
 
@@ -109,9 +110,11 @@ static void GetUSBProperties(char* parent_path, char* device_id, usb_device_prop
 			props->is_LowerSpeed = TRUE;
 		}
 	}
+	r = TRUE;
 
 out:
 	safe_closehandle(handle);
+	return r;
 }
 
 static __inline BOOL IsVHD(const char* buffer)
@@ -146,7 +149,7 @@ BOOL GetUSBDevices(DWORD devnum)
 	StrArray dev_if_path;
 	char letter_name[] = " (?:)";
 	char uefi_togo_check[] = "?:\\EFI\\Rufus\\ntfs_x64.efi";
-	BOOL r = FALSE, found = FALSE, is_SCSI;
+	BOOL r = FALSE, found = FALSE, is_SCSI, post_backslash;
 	HDEVINFO dev_info = NULL;
 	SP_DEVINFO_DATA dev_info_data;
 	SP_DEVICE_INTERFACE_DATA devint_data;
@@ -307,12 +310,33 @@ BOOL GetUSBDevices(DWORD devnum)
 				if ( (CM_Locate_DevNodeA(&parent_inst, device_id, 0) == CR_SUCCESS)
 				  && (CM_Get_Child(&device_inst, parent_inst, 0) == CR_SUCCESS)
 				  && (device_inst == dev_info_data.DevInst) ) {
+					post_backslash = FALSE;
+					method_str = "";
+
 					// If we're not dealing with the USBSTOR part of our list, then this is an UASP device
 					props.is_UASP = ((((uintptr_t)device_id)+2) >= ((uintptr_t)devid_list)+list_start[1]);
 					// Now get the properties of the device, and its Device ID, which we need to populate the properties
 					j = htab_hash(device_id, &htab_devid);
 					if (usb_debug)
 						uprintf("  Matched with ID[%03d]: %s", j, device_id);
+
+					// Try to parse the current device_id string for VID:PID
+					// We'll use that if we can't get anything better
+					for (j = 0, k = 0; (j<strlen(device_id)) && (k<2); j++) {
+						// The ID is in the form USB_VENDOR_BUSID\VID_xxxx&PID_xxxx\...
+						if (device_id[j] == '\\')
+							post_backslash = TRUE;
+						if (!post_backslash)
+							continue;
+						if (device_id[j] == '_') {
+							props.pid = (uint16_t)strtoul(&device_id[j + 1], NULL, 16);
+							if (k++ == 0)
+								props.vid = props.pid;
+						}
+					}
+					if (props.vid != 0)
+						method_str = "[ID]";
+
 					// If the hash didn't match a populated string in dev_if_path[] (htab_devid.table[j].data > 0),
 					// we might have an extra vendor driver in between (e.g. "ASUS USB 3.0 Boost Storage Driver"
 					// for UASP devices in ASUS "Turbo Mode" or "Apple Mobile Device USB Driver" for iPods)
@@ -330,27 +354,8 @@ BOOL GetUSBDevices(DWORD devnum)
 						if (usb_debug)
 							uprintf("  Matched with Hub[%d]: '%s'", (uintptr_t)htab_devid.table[j].data,
 								dev_if_path.String[(uintptr_t)htab_devid.table[j].data]);
-						GetUSBProperties(dev_if_path.String[(uintptr_t)htab_devid.table[j].data], device_id, &props);
-					}
-					if (usb_debug)
-						uprintf("  Props VID:PID = %04X:%04X", props.vid, props.pid);
-
-					// If previous calls still didn't succeed, try reading the VID:PID from the device_id
-					if ((props.vid == 0) && (props.pid == 0)) {
-						BOOL post_backslash = FALSE;
-						method_str = "[ID]";
-						for (j=0, k=0; (j<strlen(device_id))&&(k<2); j++) {
-							// The ID is in the form USB_VENDOR_BUSID\VID_xxxx&PID_xxxx\...
-							if (device_id[j] == '\\')
-								post_backslash = TRUE;
-							if (!post_backslash)
-								continue;
-							if (device_id[j] == '_') {
-								props.pid = (uint16_t)strtoul(&device_id[j+1], NULL, 16);
-								if (k++==0)
-									props.vid = props.pid;
-							}
-						}
+						if (GetUSBProperties(dev_if_path.String[(uintptr_t)htab_devid.table[j].data], device_id, &props))
+							method_str = "";
 					}
 					break;
 				}
