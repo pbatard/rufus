@@ -32,7 +32,7 @@ LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
 
 IDD_DIALOG DIALOGEX 12, 12, 242, 376
 STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_MINIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Rufus 2.3.699"
+CAPTION "Rufus 2.3.700"
 FONT 8, "Segoe UI Symbol", 400, 0, 0x0
 BEGIN
     LTEXT           "Device",IDS_DEVICE_TXT,9,6,200,8
@@ -130,6 +130,21 @@ BEGIN
     DEFPUSHBUTTON   "No",IDNO,206,44,50,14
     PUSHBUTTON      "More information",IDC_MORE_INFO,8,44,76,14,NOT WS_VISIBLE
     PUSHBUTTON      "Yes",IDYES,154,44,50,14,NOT WS_VISIBLE
+END
+
+IDD_SELECTION DIALOGEX 0, 0, 312, 71
+STYLE DS_SETFONT | DS_NOFAILCREATE | DS_CENTER | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_THICKFRAME
+CAPTION "Rufus"
+FONT 8, "Segoe UI Symbol", 400, 0, 0x0
+BEGIN
+    LTEXT           "",IDC_SELECTION_LINE,0,0,312,47
+    CONTROL         "",IDC_STATIC,"Static",SS_WHITERECT,0,0,312,46
+    LTEXT           "Message",IDC_SELECTION_TEXT,35,5,269,8
+    ICON            IDI_ICON,IDC_SELECTION_ICON,6,6,20,20,0,WS_EX_TRANSPARENT
+    DEFPUSHBUTTON   "Cancel",IDCANCEL,254,52,50,14
+    PUSHBUTTON      "OK",IDOK,196,52,50,14
+    CONTROL         "Choice 1",IDC_SELECTION_CHOICE1,"Button",BS_AUTORADIOBUTTON,35,18,269,10,WS_EX_TRANSPARENT
+    CONTROL         "Choice 2",IDC_SELECTION_CHOICE2,"Button",BS_AUTORADIOBUTTON,35,31,269,10,WS_EX_TRANSPARENT
 END
 
 IDD_UPDATE_POLICY DIALOGEX 0, 0, 287, 198
@@ -281,6 +296,10 @@ BEGIN
     BEGIN
     END
 
+    IDD_SELECTION, DIALOG
+    BEGIN
+    END
+
     IDD_UPDATE_POLICY, DIALOG
     BEGIN
     END
@@ -298,8 +317,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 2,3,699,0
- PRODUCTVERSION 2,3,699,0
+ FILEVERSION 2,3,700,0
+ PRODUCTVERSION 2,3,700,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -316,13 +335,13 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Akeo Consulting (http://akeo.ie)"
             VALUE "FileDescription", "Rufus"
-            VALUE "FileVersion", "2.3.699"
+            VALUE "FileVersion", "2.3.700"
             VALUE "InternalName", "Rufus"
             VALUE "LegalCopyright", "© 2011-2015 Pete Batard (GPL v3)"
             VALUE "LegalTrademarks", "http://www.gnu.org/copyleft/gpl.html"
             VALUE "OriginalFilename", "rufus.exe"
             VALUE "ProductName", "Rufus"
-            VALUE "ProductVersion", "2.3.699"
+            VALUE "ProductVersion", "2.3.700"
         END
     END
     BLOCK "VarFileInfo"

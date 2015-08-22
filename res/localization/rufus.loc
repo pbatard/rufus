@@ -265,9 +265,8 @@ t MSG_080 "Rufus detected that Windows is still flushing its internal buffers on
 	"Depending on the speed of your USB device, this operation may take a long time to complete, "
 	"especially for large files.\n\nWe recommend that you let Windows finish, to avoid corruption. "
 	"But if you grow tired of waiting, you can just unplug the device..."
-t MSG_081 "Unsupported ISO"
-t MSG_082 "This version of Rufus only supports bootable ISOs based on bootmgr, EFI, Grub4DOS, GRUB 2, "
-	"isolinux, or WinPE.\nThis ISO doesn't appear to use either..."
+t MSG_081 "Unsupported image"
+t MSG_082 "This image is either non-bootable, or uses a boot/compression method that is unsupported by Rufus..."
 t MSG_083 "Replace %s?"
 t MSG_084 "This ISO image seems to use an obsolete version of '%s'.\n"
 	"Boot menus may not display properly because of this.\n\n"
@@ -520,6 +519,18 @@ t MSG_270 "USB debug"
 t MSG_271 "Computing image checksums: %0.1f%% completed"
 t MSG_272 "Compute the SHA1 and MD5 checksums for the selected image"
 t MSG_273 "Change the application language"
+t MSG_274 "ISOHybrid image detected"
+# '%s' below will be replaced with your translations for MSG_036 ("ISO Image") and MSG_095 ("DD Image")
+t MSG_275 "The image you have selected is an 'ISOHybrid' image. This means it can be written either in "
+	"%s (file copy) mode or %s (disk image) mode .\n"
+	"Rufus recommends using %s mode, so that you always have full access to the drive after writing it.\n"
+	"However, if you encounter issues during boot, you can try writing this image again in %s mode.\n\n"
+	"Please select the mode Rufus should use to write this image:"
+# '%s' below will be replaced with your translation for MSG_036 ("ISO Image")
+t MSG_276 "Write in %s mode (Recommended)"
+# '%s' below will be replaced with your translation for MSG_095 ("DD Image")
+t MSG_277 "Write in %s mode"
+
 
 ################################################################################
 ############################# TRANSLATOR END COPY ##############################

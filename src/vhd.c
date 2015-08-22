@@ -283,19 +283,20 @@ BOOL IsHDImage(const char* path)
 	uint32_t checksum, old_checksum;
 	LARGE_INTEGER ptr;
 
+	uprintf("Disk image analysis:");
 	handle = CreateFileU(path, GENERIC_READ, FILE_SHARE_READ, NULL,
 		OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (handle == INVALID_HANDLE_VALUE) {
-		uprintf("Could not open image '%s'", path);
+		uprintf("  Could not open image '%s'", path);
 		goto out;
 	}
 
 	iso_report.is_bootable_img = (BOOLEAN)IsCompressedBootableImage(path);
 	if (iso_report.compression_type == BLED_COMPRESSION_NONE)
-		iso_report.is_bootable_img = (BOOLEAN)AnalyzeMBR(handle, "Image");
+		iso_report.is_bootable_img = (BOOLEAN)AnalyzeMBR(handle, "  Image");
 
 	if (!GetFileSizeEx(handle, &liImageSize)) {
-		uprintf("Could not get image size: %s", WindowsErrorString());
+		uprintf("  Could not get image size: %s", WindowsErrorString());
 		goto out;
 	}
 	iso_report.projected_size = (uint64_t)liImageSize.QuadPart;
@@ -306,14 +307,14 @@ BOOL IsHDImage(const char* path)
 		ptr.QuadPart = iso_report.projected_size - size;
 		if ( (footer == NULL) || (!SetFilePointerEx(handle, ptr, NULL, FILE_BEGIN)) ||
 			 (!ReadFile(handle, footer, size, &size, NULL)) || (size != sizeof(vhd_footer)) ) {
-			uprintf("Could not read VHD footer");
+			uprintf("  Could not read VHD footer");
 			goto out;
 		}
 		if (memcmp(footer->cookie, conectix_str, sizeof(footer->cookie)) == 0) {
 			iso_report.projected_size -= sizeof(vhd_footer);
 			if ( (bswap_uint32(footer->file_format_version) != VHD_FOOTER_FILE_FORMAT_V1_0)
 			  || (bswap_uint32(footer->disk_type) != VHD_FOOTER_TYPE_FIXED_HARD_DISK)) {
-				uprintf("Unsupported type of VHD image");
+				uprintf("  Unsupported type of VHD image");
 				iso_report.is_bootable_img = FALSE;
 				goto out;
 			}
@@ -324,9 +325,9 @@ BOOL IsHDImage(const char* path)
 				checksum += ((uint8_t*)footer)[i];
 			checksum = ~checksum;
 			if (checksum != old_checksum)
-				uprintf("Warning: VHD footer seems corrupted (checksum: %04X, expected: %04X)", old_checksum, checksum);
+				uprintf("  Warning: VHD footer seems corrupted (checksum: %04X, expected: %04X)", old_checksum, checksum);
 			// Need to remove the footer from our payload
-			uprintf("Image is a Fixed Hard Disk VHD file");
+			uprintf("  Image is a Fixed Hard Disk VHD file");
 			iso_report.is_vhd = TRUE;
 		}
 	}

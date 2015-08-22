@@ -345,12 +345,12 @@ void apply_localization(int dlg_id, HWND hDlg)
 				break;
 			case LC_MOVE:
 				if (hCtrl != NULL) {
-					ResizeMoveCtrl(hDlg, hCtrl, lcmd->num[0], lcmd->num[1], 0, 0);
+					ResizeMoveCtrl(hDlg, hCtrl, lcmd->num[0], lcmd->num[1], 0, 0, fScale);
 				}
 				break;
 			case LC_SIZE:
 				if (hCtrl != NULL) {
-					ResizeMoveCtrl(hDlg, hCtrl, 0, 0, lcmd->num[0], lcmd->num[1]);
+					ResizeMoveCtrl(hDlg, hCtrl, 0, 0, lcmd->num[0], lcmd->num[1], fScale);
 				}
 				break;
 			}

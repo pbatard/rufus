@@ -54,6 +54,7 @@ PF_TYPE_DECL(WINAPI, LPITEMIDLIST, SHSimpleIDListFromPath, (PCWSTR pszPath));
 static HICON hMessageIcon = (HICON)INVALID_HANDLE_VALUE;
 static char* szMessageText = NULL;
 static char* szMessageTitle = NULL;
+static char *szChoice1, *szChoice2;
 static HWND hBrowseEdit;
 extern HWND hUpdatesDlg;
 static WNDPROC pOrgBrowseWndproc;
@@ -538,7 +539,7 @@ SIZE GetBorderSize(HWND hDlg)
 	return size;
 }
 
-void ResizeMoveCtrl(HWND hDlg, HWND hCtrl, int dx, int dy, int dw, int dh)
+void ResizeMoveCtrl(HWND hDlg, HWND hCtrl, int dx, int dy, int dw, int dh, float scale)
 {
 	RECT rect;
 	POINT point;
@@ -552,9 +553,9 @@ void ResizeMoveCtrl(HWND hDlg, HWND hCtrl, int dx, int dy, int dw, int dh)
 
 	// If the control has any borders (dialog, edit box), take them into account
 	border = GetBorderSize(hCtrl);
-	MoveWindow(hCtrl, point.x + (int)(fScale*(float)dx), point.y + (int)(fScale*(float)dy),
-		(rect.right - rect.left) + (int)(fScale*(float)dw + border.cx),
-		(rect.bottom - rect.top) + (int)(fScale*(float)dh + border.cy), TRUE);
+	MoveWindow(hCtrl, point.x + (int)(scale*(float)dx), point.y + (int)(scale*(float)dy),
+		(rect.right - rect.left) + (int)(scale*(float)dw + border.cx),
+		(rect.bottom - rect.top) + (int)(scale*(float)dh + border.cy), TRUE);
 	InvalidateRect(hCtrl, NULL, TRUE);
 }
 
@@ -801,6 +802,136 @@ BOOL Notification(int type, const notification_info* more_info, char* title, cha
 	ret = (MyDialogBox(hMainInstance, IDD_NOTIFICATION, hMainDialog, NotificationCallback) == IDYES);
 	safe_free(szMessageText);
 	dialog_showing--;
+	return ret;
+}
+
+/*
+* Custom dialog for radio button selection dialog
+*/
+INT_PTR CALLBACK SelectionCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	LRESULT loc;
+	int i, dh, r  = -1;
+	// Prevent resizing
+	static LRESULT disabled[9] = { HTLEFT, HTRIGHT, HTTOP, HTBOTTOM, HTSIZE,
+		HTTOPLEFT, HTTOPRIGHT, HTBOTTOMLEFT, HTBOTTOMRIGHT };
+	static HBRUSH background_brush, separator_brush;
+	// To use the system message font
+	NONCLIENTMETRICS ncm;
+	RECT rect;
+	HFONT hDlgFont;
+	HWND hCtrl;
+	HDC dc;
+
+	switch (message) {
+	case WM_INITDIALOG:
+		// Get the system message box font. See http://stackoverflow.com/a/6057761
+		ncm.cbSize = sizeof(ncm);
+		// If we're compiling with the Vista SDK or later, the NONCLIENTMETRICS struct
+		// will be the wrong size for previous versions, so we need to adjust it.
+#if defined(_MSC_VER) && (_MSC_VER >= 1500) && (_WIN32_WINNT >= _WIN32_WINNT_VISTA)
+		if (nWindowsVersion >= WINDOWS_VISTA) {
+			// In versions of Windows prior to Vista, the iPaddedBorderWidth member
+			// is not present, so we need to subtract its size from cbSize.
+			ncm.cbSize -= sizeof(ncm.iPaddedBorderWidth);
+		}
+#endif
+		SystemParametersInfo(SPI_GETNONCLIENTMETRICS, ncm.cbSize, &ncm, 0);
+		hDlgFont = CreateFontIndirect(&(ncm.lfMessageFont));
+		// Set the dialog to use the system message box font
+		SendMessage(hDlg, WM_SETFONT, (WPARAM)hDlgFont, MAKELPARAM(TRUE, 0));
+		SendMessage(GetDlgItem(hDlg, IDC_SELECTION_TEXT), WM_SETFONT, (WPARAM)hDlgFont, MAKELPARAM(TRUE, 0));
+		SendMessage(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1), WM_SETFONT, (WPARAM)hDlgFont, MAKELPARAM(TRUE, 0));
+		SendMessage(GetDlgItem(hDlg, IDC_SELECTION_CHOICE2), WM_SETFONT, (WPARAM)hDlgFont, MAKELPARAM(TRUE, 0));
+		SendMessage(GetDlgItem(hDlg, IDYES), WM_SETFONT, (WPARAM)hDlgFont, MAKELPARAM(TRUE, 0));
+		SendMessage(GetDlgItem(hDlg, IDNO), WM_SETFONT, (WPARAM)hDlgFont, MAKELPARAM(TRUE, 0));
+
+		apply_localization(IDD_SELECTION, hDlg);
+		background_brush = CreateSolidBrush(GetSysColor(COLOR_3DHILIGHT));
+		separator_brush = CreateSolidBrush(GetSysColor(COLOR_3DLIGHT));
+		SetTitleBarIcon(hDlg);
+		CenterDialog(hDlg);
+		// Change the default icon and set the text
+		Static_SetIcon(GetDlgItem(hDlg, IDC_SELECTION_ICON), LoadIcon(NULL, IDI_QUESTION));
+		SetWindowTextU(hDlg, szMessageTitle);
+		SetWindowTextU(GetDlgItem(hDlg, IDCANCEL), lmprintf(MSG_007));
+		SetWindowTextU(GetDlgItem(hDlg, IDC_SELECTION_TEXT), szMessageText);
+		SetWindowTextU(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1), szChoice1);
+		SetWindowTextU(GetDlgItem(hDlg, IDC_SELECTION_CHOICE2), szChoice2);
+
+		// Move/Resize the controls as needed to fit our text
+		hCtrl = GetDlgItem(hDlg, IDC_SELECTION_TEXT);
+		dc = GetDC(hCtrl);
+		SelectFont(dc, hDlgFont);	// Yes, you *MUST* reapply the font to the DC, even after SetWindowText!
+		GetWindowRect(hCtrl, &rect);
+		dh = rect.bottom - rect.top;
+		DrawTextU(dc, szMessageText, -1, &rect, DT_CALCRECT | DT_WORDBREAK);
+		dh = rect.bottom - rect.top - dh;
+		ReleaseDC(hCtrl, dc);
+
+		ResizeMoveCtrl(hDlg, hCtrl, 0, 0, 0, dh, 1.0f);
+		ResizeMoveCtrl(hDlg, hDlg, 0, 0, 0, dh, 1.0f);
+		ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, -1), 0, 0, 0, dh, 1.0f);	// IDC_STATIC = -1
+		ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDC_SELECTION_LINE), 0, dh, 0, 0, 1.0f);
+		ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDC_SELECTION_CHOICE1), 0, dh, 0, 0, 1.0f);
+		ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDC_SELECTION_CHOICE2), 0, dh, 0, 0, 1.0f);
+		ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDOK), 0, dh, 0, 0, 1.0f);
+		ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDCANCEL), 0, dh, 0, 0, 1.0f);
+		CenterDialog(hDlg);
+
+		// Set the radio selection
+		Button_SetCheck(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1), BST_CHECKED);
+		Button_SetCheck(GetDlgItem(hDlg, IDC_SELECTION_CHOICE2), BST_UNCHECKED);
+		return (INT_PTR)TRUE;
+	case WM_CTLCOLORSTATIC:
+		// Change the background colour for static text and icon
+		SetBkMode((HDC)wParam, TRANSPARENT);
+		if ((HWND)lParam == GetDlgItem(hDlg, IDC_NOTIFICATION_LINE)) {
+			return (INT_PTR)separator_brush;
+		}
+		return (INT_PTR)background_brush;
+	case WM_NCHITTEST:
+		// Check coordinates to prevent resize actions
+		loc = DefWindowProc(hDlg, message, wParam, lParam);
+		for (i = 0; i < 9; i++) {
+			if (loc == disabled[i]) {
+				return (INT_PTR)TRUE;
+			}
+		}
+		return (INT_PTR)FALSE;
+	case WM_COMMAND:
+		switch (LOWORD(wParam)) {
+		case IDOK:
+			if (Button_GetCheck(GetDlgItem(hDlg, IDC_SELECTION_CHOICE2)) == BST_CHECKED)
+				r = 2;
+			else
+				r = 1;
+			// Fall through
+		case IDNO:
+		case IDCANCEL:
+			EndDialog(hDlg, r);
+			return (INT_PTR)TRUE;
+		}
+		break;
+	}
+	return (INT_PTR)FALSE;
+}
+
+/*
+* Display a selection question
+*/
+int Selection(char* title, char* message, char* choice1, char* choice2)
+{
+	int ret;
+
+	dialog_showing++;
+	szMessageTitle = title;
+	szMessageText = message;
+	szChoice1 = choice1;
+	szChoice2 = choice2;
+	ret = (int)MyDialogBox(hMainInstance, IDD_SELECTION, hMainDialog, SelectionCallback);
+	dialog_showing--;
+
 	return ret;
 }
 

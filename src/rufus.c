@@ -171,6 +171,15 @@ static float previous_end;
 // TODO: Remember to update copyright year in stdlg's AboutCallback() WM_INITDIALOG,
 // localization_data.sh and the .rc when the year changes!
 
+// Set the combo selection according to the data
+static __inline void SetComboEntry(HWND hDlg, int data) {
+	int i;
+	for (i = 0; i < ComboBox_GetCount(hDlg); i++) {
+		if (ComboBox_GetItemData(hDlg, i) == data)
+			IGNORE_RETVAL(ComboBox_SetCurSel(hDlg, i));
+	}
+}
+
 #define KB          1024LL
 #define MB       1048576LL
 #define GB    1073741824LL
@@ -975,7 +984,7 @@ static void DisplayISOProps(void)
 	}
 
 	// TODO: Only report features that are present
-	uprintf("ISO label: %s", iso_report.label);
+	uprintf("ISO label: '%s'", iso_report.label);
 	uprintf("  Size: %" PRIu64 " bytes", iso_report.projected_size);
 	uprintf("  Has a >64 chars filename: %s", YesNo(iso_report.has_long_filename));
 	uprintf("  Has Symlinks: %s", YesNo(iso_report.has_symlinks));
@@ -1005,15 +1014,16 @@ static void DisplayISOProps(void)
 DWORD WINAPI ISOScanThread(LPVOID param)
 {
 	int i;
-	BOOL r;
+	BOOL is_iso, is_img;
 
 	if (image_path == NULL)
 		goto out;
 	PrintInfoDebug(0, MSG_202);
 	user_notified = FALSE;
 	EnableControls(FALSE);
-	r = ExtractISO(image_path, "", TRUE) || IsHDImage(image_path);
-	if (!r) {
+	is_iso = ExtractISO(image_path, "", TRUE);
+	is_img = IsHDImage(image_path);
+	if (!is_iso && !is_img) {
 		SendMessage(hMainDialog, UM_PROGRESS_EXIT, 0, 0);
 		PrintInfoDebug(0, MSG_203);
 		safe_free(image_path);
@@ -1024,11 +1034,13 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 		goto out;
 	}
 
-	if (iso_report.is_bootable_img) {
-		uprintf("'%s' is a %sbootable %s image", image_path,
-			(iso_report.compression_type != BLED_COMPRESSION_NONE)?"compressed ":"", iso_report.is_vhd?"VHD":"disk");
+	if (is_img) {
+		uprintf("  Image is a %sbootable %s image",
+			(iso_report.compression_type != BLED_COMPRESSION_NONE) ? "compressed " : "", iso_report.is_vhd ? "VHD" : "disk");
 		selection_default = BT_IMG;
-	} else {
+	}
+	if (is_iso) {
+		// Will override BT_IMG above for ISOHybrid
 		selection_default = BT_ISO;
 		DisplayISOProps();
 	}
@@ -1082,7 +1094,7 @@ out:
 
 // Move a control along the Y axis according to the advanced mode setting
 static __inline void MoveCtrlY(HWND hDlg, int nID, float vertical_shift) {
-	ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, nID), 0, (int)vertical_shift, 0, 0);
+	ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, nID), 0, (int)vertical_shift, 0, 0, fScale);
 }
 
 static void SetPassesTooltip(void)
@@ -1211,7 +1223,7 @@ static void ToggleToGo(void)
 	MoveCtrlY(hMainDialog, IDC_EXTRA_PARTITION, dialog_shift);
 	MoveCtrlY(hMainDialog, IDC_RUFUS_MBR, dialog_shift);
 	MoveCtrlY(hMainDialog, IDC_DISK_ID, dialog_shift);
-	ResizeMoveCtrl(hMainDialog, GetDlgItem(hMainDialog, IDS_FORMAT_OPTIONS_GRP), 0, 0, 0, (int)dialog_shift);
+	ResizeMoveCtrl(hMainDialog, GetDlgItem(hMainDialog, IDS_FORMAT_OPTIONS_GRP), 0, 0, 0, (int)dialog_shift, fScale);
 	
 #ifdef RUFUS_TEST
 	MoveCtrlY(hMainDialog, IDC_TEST, dialog_shift);
@@ -1724,7 +1736,7 @@ void InitDialog(HWND hDlg)
 	IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, "FreeDOS"), BT_FREEDOS));
 	IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, lmprintf(MSG_036)), BT_ISO));
 	IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, lmprintf(MSG_095)), BT_IMG));
-	IGNORE_RETVAL(ComboBox_SetCurSel(hBootType, selection_default));
+	SetComboEntry(hBootType, selection_default);
 	// Fill up the MBR masqueraded disk IDs ("8 disks should be enough for anybody")
 	IGNORE_RETVAL(ComboBox_SetItemData(hDiskID, ComboBox_AddStringU(hDiskID, lmprintf(MSG_030, LEFT_TO_RIGHT_MARK "0x80")), 0x80));
 	for (i=1; i<=7; i++) {
@@ -1811,8 +1823,8 @@ void InitDialog(HWND hDlg)
 
 	// The things one needs to do to keep things looking good...
 	if (nWindowsVersion == WINDOWS_7) {
-		ResizeMoveCtrl(hDlg, GetDlgItem(hMainDialog, IDS_ADVANCED_OPTIONS_GRP), 0, -1, 0, 2);
-		ResizeMoveCtrl(hDlg, hProgress, 0, 1, 0, 0);
+		ResizeMoveCtrl(hDlg, GetDlgItem(hMainDialog, IDS_ADVANCED_OPTIONS_GRP), 0, -1, 0, 2, fScale);
+		ResizeMoveCtrl(hDlg, hProgress, 0, 1, 0, 0, fScale);
 	}
 
 	// Subclass the Info box so that we can align its text vertically
@@ -2438,6 +2450,24 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 					} else {
 						dur_secs = 0;
 						dur_mins = 0;
+					}
+				}
+
+				// Ask users how they want to write ISOHybrid images
+				if ((IsChecked(IDC_BOOT)) && (iso_report.is_bootable_img) &&
+					(ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType)) == BT_ISO)) {
+					char* iso_image = lmprintf(MSG_036);
+					char* dd_image = lmprintf(MSG_095);
+					i = Selection(lmprintf(MSG_274), lmprintf(MSG_275, iso_image, dd_image, iso_image, dd_image),
+						lmprintf(MSG_276, iso_image), lmprintf(MSG_277, dd_image));
+					if (i < 0) {	// Cancel
+						format_op_in_progress = FALSE;
+						break;
+					} else if (i == 2) {
+						selection_default = BT_IMG;
+						uprintf("CURSEL = %d", ComboBox_GetCurSel(hBootType));
+						SetComboEntry(hBootType, selection_default);
+						uprintf("CURSEL = %d", ComboBox_GetCurSel(hBootType));
 					}
 				}
 

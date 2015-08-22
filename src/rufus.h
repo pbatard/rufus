@@ -182,7 +182,7 @@ enum action_type {
 };
 
 /* File system indexes in our FS combobox */
-enum {
+enum fs_type {
 	FS_UNKNOWN = -1,
 	FS_FAT16 = 0,
 	FS_FAT32,
@@ -392,7 +392,7 @@ extern char* SizeToHumanReadable(uint64_t size, BOOL copy_to_log, BOOL fake_unit
 extern HWND MyCreateDialog(HINSTANCE hInstance, int Dialog_ID, HWND hWndParent, DLGPROC lpDialogFunc);
 extern INT_PTR MyDialogBox(HINSTANCE hInstance, int Dialog_ID, HWND hWndParent, DLGPROC lpDialogFunc);
 extern void CenterDialog(HWND hDlg);
-extern void ResizeMoveCtrl(HWND hDlg, HWND hCtrl, int dx, int dy, int dw, int dh);
+extern void ResizeMoveCtrl(HWND hDlg, HWND hCtrl, int dx, int dy, int dw, int dh, float scale);
 extern void CreateStatusBar(void);
 extern void SetTitleBarIcon(HWND hDlg);
 extern BOOL CreateTaskbarList(void);
@@ -403,7 +403,7 @@ extern BOOL CreateTooltip(HWND hControl, const char* message, int duration);
 extern void DestroyTooltip(HWND hWnd);
 extern void DestroyAllTooltips(void);
 extern BOOL Notification(int type, const notification_info* more_info, char* title, char* format, ...);
-extern BOOL Question(char* title, char* format, ...);
+extern int Selection(char* title, char* message, char* selection1, char* selection2);
 extern SIZE GetTextSize(HWND hCtrl);
 extern BOOL ExtractDOS(const char* path);
 extern BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan);

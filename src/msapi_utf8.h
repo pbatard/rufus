@@ -207,6 +207,18 @@ static __inline int MessageBoxU(HWND hWnd, LPCSTR lpText, LPCSTR lpCaption, UINT
 	return ret;
 }
 
+static __inline int DrawTextU(HDC hDC, LPCSTR lpText, int nCount, LPRECT lpRect, UINT uFormat)
+{
+	int ret;
+	DWORD err = ERROR_INVALID_DATA;
+	wconvert(lpText);
+	ret = DrawTextW(hDC, wlpText, nCount, lpRect, uFormat);
+	err = GetLastError();
+	wfree(lpText);
+	SetLastError(err);
+	return ret;
+}
+
 static __inline int GetWindowTextU(HWND hWnd, char* lpString, int nMaxCount)
 {
 	int ret = 0;

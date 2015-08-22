@@ -5,14 +5,15 @@
 #define IDD_DIALOG                      101
 #define IDD_ABOUTBOX                    102
 #define IDD_NOTIFICATION                103
-#define IDD_LICENSE                     104
-#define IDD_LOG                         105
-#define IDD_UPDATE_POLICY               106
-#define IDD_NEW_VERSION                 107
-#define IDD_CHECKSUM                    108
-#define IDI_ICON                        110
-#define IDI_UP                          111
-#define IDI_DOWN                        112
+#define IDD_SELECTION                   104
+#define IDD_LICENSE                     105
+#define IDD_LOG                         106
+#define IDD_UPDATE_POLICY               107
+#define IDD_NEW_VERSION                 108
+#define IDD_CHECKSUM                    109
+#define IDI_ICON                        120
+#define IDI_UP                          121
+#define IDI_DOWN                        122
 #define IDD_DIALOG_XP                   151
 #define IDD_ABOUTBOX_XP                 152
 #define IDD_NOTIFICATION_XP             153
@@ -127,6 +128,11 @@
 #define IDC_DOWNLOAD_URL                1070
 #define IDC_MD5                         1071
 #define IDC_SHA1                        1072
+#define IDC_SELECTION_ICON              1073
+#define IDC_SELECTION_TEXT              1074
+#define IDC_SELECTION_LINE              1075
+#define IDC_SELECTION_CHOICE1           1076
+#define IDC_SELECTION_CHOICE2           1077
 #define IDS_DEVICE_TXT                  2000
 #define IDS_PARTITION_TYPE_TXT          2001
 #define IDS_FILESYSTEM_TXT              2002
@@ -429,7 +435,7 @@
 #define _APS_NO_MFC                     1
 #define _APS_NEXT_RESOURCE_VALUE        505
 #define _APS_NEXT_COMMAND_VALUE         40001
-#define _APS_NEXT_CONTROL_VALUE         1073
+#define _APS_NEXT_CONTROL_VALUE         1078
 #define _APS_NEXT_SYMED_VALUE           4000
 #endif
 #endif

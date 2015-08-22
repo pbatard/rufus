@@ -653,15 +653,19 @@ BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan)
 	const char* basedir[] = { "i386", "minint" };
 	const char* tmp_sif = ".\\txtsetup.sif~";
 	iso_extension_mask_t iso_extension_mask = ISO_EXTENSION_ALL;
+	char* spacing = "  ";
 
 	if ((!enable_iso) || (src_iso == NULL) || (dest_dir == NULL))
 		return FALSE;
 
 	scan_only = scan;
+	if (!scan_only)
+		spacing = "";
 	cdio_log_set_handler(log_handler);
 	psz_extract_dir = dest_dir;
 	// Change progress style to marquee for scanning
 	if (scan_only) {
+		uprintf("ISO analysis:");
 		SendMessage(hMainDialog, UM_PROGRESS_INIT, PBS_MARQUEE, 0);
 		total_blocks = 0;
 		memset(&iso_report, 0, sizeof(iso_report));
@@ -687,11 +691,11 @@ BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan)
 	p_udf = udf_open(src_iso);
 	if (p_udf == NULL)
 		goto try_iso;
-	uprintf("Disc image is an UDF image\n");
+	uprintf("%sImage is an UDF image", spacing);
 
 	p_udf_root = udf_get_root(p_udf, true, 0);
 	if (p_udf_root == NULL) {
-		uprintf("Could not locate UDF root directory\n");
+		uprintf("%sCould not locate UDF root directory", spacing);
 		goto out;
 	}
 	if (scan_only) {
@@ -714,11 +718,11 @@ try_iso:
 
 	p_iso = iso9660_open_ext(src_iso, iso_extension_mask);
 	if (p_iso == NULL) {
-		uprintf("'%s' doesn't look like an ISO image\n", src_iso);
+		uprintf("%s'%s' doesn't look like an ISO image", spacing, src_iso);
 		r = 1;
 		goto out;
 	}
-	uprintf("Disc image is an ISO9660 image\n");
+	uprintf("%sImage is an ISO9660 image", spacing);
 	i_joliet_level = iso9660_ifs_get_joliet_level(p_iso);
 	if (scan_only) {
 		if (iso9660_ifs_get_volume_id(p_iso, &tmp)) {
@@ -728,10 +732,10 @@ try_iso:
 			iso_report.label[0] = 0;
 	} else {
 		if (iso_extension_mask & (ISO_EXTENSION_JOLIET|ISO_EXTENSION_ROCK_RIDGE))
-			uprintf("This image will be extracted using %s extensions (if present)", 
+			uprintf("%sThis image will be extracted using %s extensions (if present)", spacing,
 				(iso_extension_mask & ISO_EXTENSION_JOLIET)?"Joliet":"Rock Ridge");
 		else
-			uprintf("This image will not be extracted using any ISO extensions");
+			uprintf("%sThis image will not be extracted using any ISO extensions", spacing);
 	}
 	r = iso_extract_files(p_iso, "");
 
@@ -771,12 +775,12 @@ out:
 				if (safe_strlen(iso_report.cfg_path) >= safe_strlen(config_path.String[i]))
 					safe_strcpy(iso_report.cfg_path, sizeof(iso_report.cfg_path), config_path.String[i]);
 			}
-			uprintf("Will use '%s' for Syslinux\n", iso_report.cfg_path);
+			uprintf("  Will use '%s' for Syslinux", iso_report.cfg_path);
 			// Extract all of the isolinux.bin files we found to identify their versions
 			for (i=0; i<isolinux_path.Index; i++) {
 				size = (size_t)ExtractISOFile(src_iso, isolinux_path.String[i], dot_isolinux_bin, FILE_ATTRIBUTE_NORMAL);
 				if (size == 0) {
-					uprintf("Could not access %s\n", isolinux_path.String[i]);
+					uprintf("  Could not access %s", isolinux_path.String[i]);
 				} else {
 					buf = (char*)calloc(size, 1);
 					if (buf == NULL) break;
@@ -793,7 +797,7 @@ out:
 						iso_report.sl_version = sl_version;
 						j = (int)i;
 					} else if ((iso_report.sl_version != sl_version) || (safe_strcmp(iso_report.sl_version_ext, ext) != 0)) {
-						uprintf("Found conflicting %s versions:\n  '%s' (%d.%02d%s) vs '%s' (%d.%02d%s)\n", isolinux_bin,
+						uprintf("  Found conflicting %s versions:\n  '%s' (%d.%02d%s) vs '%s' (%d.%02d%s)", isolinux_bin,
 							isolinux_path.String[j], SL_MAJOR(iso_report.sl_version), SL_MINOR(iso_report.sl_version),
 							iso_report.sl_version_ext, isolinux_path.String[i], SL_MAJOR(sl_version), SL_MINOR(sl_version), ext);
 					}
@@ -804,17 +808,17 @@ out:
 			if (iso_report.sl_version != 0) {
 				static_sprintf(iso_report.sl_version_str, "%d.%02d",
 					SL_MAJOR(iso_report.sl_version), SL_MINOR(iso_report.sl_version));
-				uprintf("Detected Isolinux version: %s%s (from '%s')",
+				uprintf("  Detected Syslinux version: %s%s (from '%s')",
 					iso_report.sl_version_str, iso_report.sl_version_ext, isolinux_path.String[j]);
 				if ( (has_ldlinux_c32 && (SL_MAJOR(iso_report.sl_version) < 5))
 				  || (!has_ldlinux_c32 && (SL_MAJOR(iso_report.sl_version) >= 5)) )
-					uprintf("Warning: Conflict between Isolinux version and the presence of ldlinux.c32...\n");
+					uprintf("  Warning: Conflict between Isolinux version and the presence of ldlinux.c32...");
 			} else {
 				// Couldn't find a version from isolinux.bin. Force set to the versions we embed
 				iso_report.sl_version = embedded_sl_version[has_ldlinux_c32?1:0];
 				static_sprintf(iso_report.sl_version_str, "%d.%02d",
 					SL_MAJOR(iso_report.sl_version), SL_MINOR(iso_report.sl_version));
-				uprintf("Warning: Could not detect Isolinux version - Forcing to %s (embedded)",
+				uprintf("  Warning: Could not detect Isolinux version - Forcing to %s (embedded)",
 					iso_report.sl_version_str);
 			}
 		}
@@ -829,7 +833,7 @@ out:
 			if (tmp != NULL) {
 				for (i=0; i<strlen(tmp); i++)
 					tmp[i] = (char)tolower(tmp[i]);
-				uprintf("Checking txtsetup.sif:\n  OsLoadOptions = %s\n", tmp);
+				uprintf("  Checking txtsetup.sif:\n  OsLoadOptions = %s", tmp);
 				iso_report.uses_minint = (strstr(tmp, "/minint") != NULL);
 			}
 			_unlink(tmp_sif);
@@ -843,7 +847,7 @@ out:
 				buf = (char*)calloc(size, 1);
 				fd = fopen(path, "rb");
 				if ((size == 0) || (buf == NULL) || (fd == NULL)) {
-					uprintf("Could not read Grub version from 'boot/grub/i386-pc/normal.mod'");
+					uprintf("  Could not read Grub version from 'boot/grub/i386-pc/normal.mod'");
 				} else {
 					fread(buf, 1, size, fd);
 					fclose(fd);
@@ -853,9 +857,9 @@ out:
 				_unlink(path);
 			}
 			if (iso_report.grub2_version[0] != 0)
-				uprintf("Detected Grub version: %s", iso_report.grub2_version);
+				uprintf("  Detected Grub version: %s", iso_report.grub2_version);
 			else {
-				uprintf("Could not detect Grub version");
+				uprintf("  Could not detect Grub version");
 				iso_report.has_grub2 = FALSE;
 			}
 		}
@@ -876,7 +880,7 @@ out:
 		if (fd == NULL) {
 			fd = fopen(path, "w");	// No "/syslinux.cfg" => create a new one
 			if (fd == NULL) {
-				uprintf("Unable to create %s - booting from USB will not work\n", path);
+				uprintf("Unable to create %s - booting from USB will not work", path);
 				r = 1;
 			} else {
 				fprintf(fd, "DEFAULT loadconfig\n\nLABEL loadconfig\n  CONFIG %s\n", iso_report.cfg_path);
@@ -886,7 +890,7 @@ out:
 					fprintf(fd, "  APPEND %s/\n", iso_report.cfg_path);
 					iso_report.cfg_path[i] = '/';
 				}
-				uprintf("Created: %s\n", path);
+				uprintf("Created: %s", path);
 			}
 		}
 		if (fd != NULL)

@@ -15,6 +15,19 @@ content. PLEASE, do not just look at this Changelog when updating your
 translation, but always use the English section of rufus.loc as your base.
 For instance, MSG_114, that was introduced in v1.0.8 is MORE than one line!
 
+o Upcoming changes for Rufus 2.4 (TRANSLATORS, PLEASE DO NOT START WORKING ON THOSE UNTIL ADVISED TO DO SO!!!)
+  - Changed MSG_081 "Unsupported ISO" -> "Unsupported image"
+  - Changed MSG_082 -> "This image is either non-bootable, or uses a boot/compression method that is unsupported by Rufus..."
+  - *NEW* MSG_269 "Preserve timestamps" (use the Alt-T cheat mode to see this message)
+  - *NEW* MSG_270 "USB debug" (use the Alt-. cheat mode to see this message)
+  - *NEW* MSG_271 "Computing image checksums: %0.1f%% completed"
+  - *NEW* MSG_272 "Compute the SHA1 and MD5 checksums for the selected image"
+  - *NEW* MSG_273 "Change the application language"
+  - *NEW* MSG_274 "ISOHybrid image detected"
+	- *NEW* MSG_275 "The image you have selected is..." [TRANSLATORS: See 'rufus.loc' for the FULL message]
+  - *NEW* MSG_276 "Write in %s mode (Recommended)"
+  - *NEW* MSG_277 "Write in %s mode"
+
 o Version 1.0.17 (2015.02.04)
   - *NEW CONTROL* IDC_WINDOWS_INSTALL "Standard Windows installation" (Main dialog)
   - *NEW CONTROL* IDC_WINDOWS_TO_GO "Windows To Go" (Main dialog)
