@@ -544,7 +544,7 @@ DWORD RunCommand(const char* cmd, const char* dir, BOOL log)
 
 	si.cb = sizeof(si);
 	if (log) {
-		// NB: The size of a pipe is a suggestion, NOT an absolute gaurantee
+		// NB: The size of a pipe is a suggestion, NOT an absolute guarantee
 		// This means that you may get a pipe of 4K even if you requested 1K
 		if (!CreatePipe(&hOutputRead, &hOutputWrite, NULL, dwPipeSize)) {
 			ret = GetLastError();

@@ -129,7 +129,7 @@ char lost_translators[][6] = LOST_TRANSLATORS;
 OPENED_LIBRARIES_VARS;
 HINSTANCE hMainInstance;
 HWND hMainDialog, hLangToolbar = NULL, hUpdatesDlg = NULL;
-char szFolderPath[MAX_PATH], app_dir[MAX_PATH], system_dir[MAX_PATH];
+char szFolderPath[MAX_PATH], app_dir[MAX_PATH], system_dir[MAX_PATH], sysnative_dir[MAX_PATH];
 char* image_path = NULL;
 float fScale = 1.0f;
 int default_fs;
@@ -2823,7 +2823,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		uprintf("Could not access UTF-16 args");
 	}
 
-	// Retrieve the current application directory as well as the system dir
+	// Retrieve the current application directory as well as the system & sysnative dirs
 	if (GetCurrentDirectoryU(sizeof(app_dir), app_dir) == 0) {
 		uprintf("Could not get current directory: %s", WindowsErrorString());
 		app_dir[0] = 0;
@@ -2832,6 +2832,20 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		uprintf("Could not get system directory: %s", WindowsErrorString());
 		safe_strcpy(system_dir, sizeof(system_dir), "C:\\Windows\\System32");
 	}
+	// Construct Sysnative ourselves as there is no GetSysnativeDirectory() call
+	// By default (64bit app running on 64 bit OS or 32 bit app running on 32 bit OS)
+	// Sysnative and System32 are the same
+	safe_strcpy(sysnative_dir, sizeof(sysnative_dir), system_dir);
+	// But if the app is 32 bit and the OS is 64 bit, Sysnative must differ from System32
+#if (!defined(_WIN64) && !defined(BUILD64)) 
+	if (is_x64()) {
+		if (GetSystemWindowsDirectoryU(sysnative_dir, sizeof(sysnative_dir)) == 0) {
+			uprintf("Could not get Windows directory: %s", WindowsErrorString());
+			safe_strcpy(sysnative_dir, sizeof(sysnative_dir), "C:\\Windows");
+		}
+		safe_strcat(sysnative_dir, sizeof(sysnative_dir), "\\Sysnative");
+	}
+#endif
 
 	// Look for a .ini file in the current app directory
 	static_sprintf(ini_path, "%s\\rufus.ini", app_dir);

@@ -1280,9 +1280,7 @@ BOOL SetupWinToGo(const char* drive_name, BOOL use_ms_efi)
 #endif
 	static char unattend_path[] = "?:\\Windows\\System32\\sysprep\\unattend.xml";
 	char *mounted_iso, *ms_efi = NULL, image[128], cmd[MAX_PATH];
-	char usb_system_dir[] = "?:\\Windows\\System32";
 	unsigned char *buffer;
-	int i;
 	wchar_t wVolumeName[] = L"?:";
 	DWORD bufsize;
 	ULONG cluster_size;
@@ -1291,7 +1289,6 @@ BOOL SetupWinToGo(const char* drive_name, BOOL use_ms_efi)
 	PF_INIT(FormatEx, Fmifs);
 
 	uprintf("Windows To Go mode selected");
-	usb_system_dir[0] = drive_name[0];
 	// Additional sanity checks
 	if ( ((use_ms_efi) && (SelectedDrive.Geometry.MediaType != FixedMedia)) ||
 		 ((nWindowsVersion < WINDOWS_8) || ((WimExtractCheck() & 4) == 0)) ) {
@@ -1353,25 +1350,21 @@ BOOL SetupWinToGo(const char* drive_name, BOOL use_ms_efi)
 			AltUnmountVolume(ms_efi);
 			return FALSE;
 		}
+		Sleep(200);
 	}
 
-	// Try the 'bcdboot' command, first using the one from the target drive and, if that doesn't work, the system's
+	// We invoke the 'bcdboot' command from the host, as the one from the drive produces problems (#558)
+	// Also, since Rufus should (usually) be running as a 32 bit app, on 64 bit systems, we need to use
+	// 'C:\Windows\Sysnative' and not 'C:\Windows\System32' to invoke bcdboot, as 'C:\Windows\System32'
+	// will get converted to 'C:\Windows\SysWOW64' behind the scenes, and ther is no bcdboot.exe there.
 	uprintf("Enabling boot...");
-	for (i = 0; i < 2; i++) {
-		static_sprintf(cmd, "%s\\bcdboot.exe %s\\Windows /f ALL /s %s",
-			(i==0)?usb_system_dir:system_dir, drive_name, (use_ms_efi)?ms_efi:drive_name);
-		if (RunCommand(cmd, NULL, TRUE) == 0)
-			break;
+	static_sprintf(cmd, "%s\\bcdboot.exe %s\\Windows /v /f ALL /s %s", sysnative_dir,
+		drive_name, (use_ms_efi)?ms_efi:drive_name);
+	if (RunCommand(cmd, sysnative_dir, TRUE) != 0) {
+		// Try to continue... but report a failure
+		uprintf("Failed to enable boot using command '%s'", cmd);
+		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_ISO_EXTRACT);
 	}
-	if (i >= 2) {
-		// Fatal, as the UFD is unlikely to boot then
-		uprintf("Failed to enable boot - aborting", cmd);
-		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_ISO_EXTRACT);
-		if (use_ms_efi) 
-			AltUnmountVolume(ms_efi);
-		return FALSE;
-	}
-	uprintf("Boot was successfully enabled using command '%s'", cmd);
 
 	if (use_ms_efi) {
 		Sleep(200);
