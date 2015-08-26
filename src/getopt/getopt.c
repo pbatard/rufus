@@ -391,6 +391,8 @@ _getopt_initialize (argc, argv, optstring)
      char *const *argv;
      const char *optstring;
 {
+  size_t posixly_correct_size = 0;
+  char posixly_correct_buffer[16];
   /* Start processing options with ARGV-element 1 (since ARGV-element 0
      is the program name); the sequence of previously skipped
      non-option ARGV-elements is empty.  */
@@ -399,7 +401,9 @@ _getopt_initialize (argc, argv, optstring)
 
   nextchar = NULL;
 
-  posixly_correct = getenv ("POSIXLY_CORRECT");
+  if ((getenv_s(&posixly_correct_size, posixly_correct_buffer, sizeof(posixly_correct_buffer),
+      "POSIXLY_CORRECT") == 0) && (posixly_correct_size != 0))
+    posixly_correct = _strdup(posixly_correct_buffer);
 
   /* Determine how to handle the ordering of options and nonoptions.  */
 

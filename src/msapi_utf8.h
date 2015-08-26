@@ -28,6 +28,8 @@
 #include <shlwapi.h>
 #include <setupapi.h>
 #include <direct.h>
+#include <share.h>
+#include <fcntl.h>
 #include <io.h>
 
 #pragma once
@@ -771,7 +773,7 @@ static __inline FILE* fopenU(const char* filename, const char* mode)
 	FILE* ret = NULL;
 	wconvert(filename);
 	wconvert(mode);
-	ret = _wfopen(wfilename, wmode);
+	_wfopen_s(&ret, wfilename, wmode);
 	wfree(filename);
 	wfree(mode);
 	return ret;
@@ -780,8 +782,14 @@ static __inline FILE* fopenU(const char* filename, const char* mode)
 static __inline int _openU(const char *filename, int oflag , int pmode)
 {
 	int ret = -1;
+	int shflag = _SH_DENYNO;
 	wconvert(filename);
-	ret = _wopen(wfilename, oflag, pmode);
+	// Try to match the share flag to the oflag
+	if (oflag & _O_RDONLY)
+		shflag = _SH_DENYWR;
+	else if (oflag & _O_WRONLY)
+		shflag = _SH_DENYRD;
+	_wsopen_s(&ret, wfilename, oflag, shflag, pmode);
 	wfree(filename);
 	return ret;
 }
@@ -790,8 +798,12 @@ static __inline int _openU(const char *filename, int oflag , int pmode)
 static __inline char* getenvU(const char* varname)
 {
 	wconvert(varname);
-	char* ret;
-	ret = wchar_to_utf8(_wgetenv(wvarname));
+	char *ret;
+	wchar_t value[256];
+	size_t value_size;
+	// MinGW and WDK don't know wdupenv_s, so we use wgetenv_s
+	_wgetenv_s(&value_size, value, sizeof(value), wvarname);
+	ret = wchar_to_utf8(value);
 	wfree(varname);
 	return ret;
 }
