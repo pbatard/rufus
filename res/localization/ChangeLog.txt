@@ -17,14 +17,19 @@ For instance, MSG_114, that was introduced in v1.0.8 is MORE than one line!
 
 o Upcoming changes for Rufus 2.4 (TRANSLATORS, PLEASE DO NOT START WORKING ON THOSE UNTIL ADVISED TO DO SO!!!)
   - Changed MSG_081 "Unsupported ISO" -> "Unsupported image"
-  - Changed MSG_082 -> "This image is either non-bootable, or uses a boot/compression method that is unsupported by Rufus..."
-  - *NEW* MSG_269 "Preserve timestamps" (use the Alt-T cheat mode to see this message)
-  - *NEW* MSG_270 "USB debug" (use the Alt-. cheat mode to see this message)
+  - Changed MSG_082 -> "This image is either non-bootable, or it uses a boot or compression method that is not supported by Rufus..."
+  - *NEW* MSG_269 "Preserve timestamps"
+    Note: You can use the Alt-T cheat mode to see this message. Also, if 'timestamp' doesn't really translate in your language,
+    "file dates preservation" is a good approximation of what this is about.
+  - *NEW* MSG_270 "USB debug"
+    Note: You can use the Alt-. cheat mode to see this message
+  See https://en.wikipedia.org/wiki/Md5sum for an idea of what the 'checksums' in the 2 messages below are used for:
   - *NEW* MSG_271 "Computing image checksums: %0.1f%% completed"
   - *NEW* MSG_272 "Compute the SHA1 and MD5 checksums for the selected image"
   - *NEW* MSG_273 "Change the application language"
+    Note: You can see this message by hovering on the language button
   - *NEW* MSG_274 "ISOHybrid image detected"
-	- *NEW* MSG_275 "The image you have selected is..." [TRANSLATORS: See 'rufus.loc' for the FULL message]
+	- *NEW* MSG_275 "The image you have selected is..." [TRANSLATORS: Please see the English section of 'rufus.loc' for the FULL message]
   - *NEW* MSG_276 "Write in %s mode (Recommended)"
   - *NEW* MSG_277 "Write in %s mode"
 
