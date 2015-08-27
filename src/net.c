@@ -381,7 +381,8 @@ out:
 		SendMessage(hProgressDialog, UM_PROGRESS_EXIT, (WPARAM)r, 0);
 	if (fd != NULL) fclose(fd);
 	if (!r) {
-		_unlink(file);
+		if (file != NULL)
+			_unlink(file);
 		if (PromptOnError) {
 			PrintInfo(0, MSG_242);
 			SetLastError(error_code);

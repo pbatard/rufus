@@ -1612,8 +1612,11 @@ LPCDLGTEMPLATE GetDialogTemplate(int Dialog_ID)
 	WCHAR* wBuf;
 	LPCDLGTEMPLATE rcTemplate = (LPCDLGTEMPLATE) GetResource(hMainInstance, MAKEINTRESOURCEA(Dialog_ID),
 		_RT_DIALOG, get_name_from_id(Dialog_ID), &size, TRUE);
-	if ((size == 0) || (rcTemplate == NULL))
+
+	if ((size == 0) || (rcTemplate == NULL)) {
+		safe_free(rcTemplate);
 		return NULL;
+	}
 	if (right_to_left_mode) {
 		// Add the RTL styles into our RC copy, so that we don't have to multiply dialog definitions in the RC
 		dwBuf = (DWORD*)rcTemplate;
