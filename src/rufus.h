@@ -242,9 +242,10 @@ typedef struct {
 /* ISO details that the application may want */
 #define WINPE_MININT        0x2A
 #define WINPE_I386          0x15
+#define MAX_WIM_VERSION     0x000E0000
 #define HAS_SYSLINUX(r)     (r.sl_version != 0)
 #define HAS_INSTALL_WIM(r)  (r.install_wim_path[0] != 0)
-#define HAS_TOGO(r)         (r.has_bootmgr && r.has_efi && HAS_INSTALL_WIM(r))
+#define HAS_TOGO(r)         (r.has_bootmgr && r.has_efi && HAS_INSTALL_WIM(r) && (r.install_wim_version < MAX_WIM_VERSION))
 #define IS_WINPE(r)         (((r & WINPE_MININT) == WINPE_MININT)||(( r & WINPE_I386) == WINPE_I386))
 #define IS_WIN7_EFI(r)      ((r.has_efi == 1) && HAS_INSTALL_WIM(r))
 #define IS_REACTOS(r)       (r.reactos_path[0] != 0)
@@ -258,6 +259,7 @@ typedef struct {
 	char reactos_path[128];		/* path to the ISO's freeldr.sys or setupldr.sys */
 	char install_wim_path[64];	/* path to install.wim or install.swm */
 	uint64_t projected_size;
+	uint32_t install_wim_version;
 	uint8_t winpe;
 	uint8_t has_efi;
 	BOOLEAN has_4GB_file;
@@ -459,6 +461,18 @@ static __inline void *_reallocf(void *ptr, size_t size) {
 	if (!ret)
 		free(ptr);
 	return ret;
+}
+
+static __inline uint16_t bswap_16(uint16_t x) {
+	return (x >> 8) | (x << 8);
+}
+
+static __inline uint32_t bswap_32(uint32_t x) {
+	return (bswap_16(x & 0xffff) << 16) | (bswap_16(x >> 16));
+}
+
+static __inline uint64_t bswap_64(uint64_t x) {
+	return (((uint64_t) bswap_32(x & 0xffffffffull)) << 32) | (bswap_32(x >> 32));
 }
 
 /* Hash tables */

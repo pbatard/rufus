@@ -52,6 +52,8 @@
 CdIo_t* cdio_open (const char* psz_source, driver_id_t driver_id) {return NULL;}
 void cdio_destroy (CdIo_t* p_cdio) {}
 
+uint32_t GetInstallWimVersion(const char* iso);
+
 typedef struct {
 	BOOLEAN is_syslinux_cfg;
 	BOOLEAN is_grub_cfg;
@@ -839,6 +841,9 @@ out:
 			_unlink(tmp_sif);
 			safe_free(tmp);
 		}
+		if (HAS_INSTALL_WIM(iso_report)) {
+			iso_report.install_wim_version = GetInstallWimVersion(src_iso);
+		}
 		if (iso_report.has_grub2) {
 			// In case we have a GRUB2 based iso, we extract boot/grub/i386-pc/normal.mod to parse its version
 			iso_report.grub2_version[0] = 0;
@@ -1006,6 +1011,74 @@ out:
 	if (p_udf != NULL)
 		udf_close(p_udf);
 	return r;
+}
+
+uint32_t GetInstallWimVersion(const char* iso)
+{
+	char *wim_path = NULL, *p, buf[UDF_BLOCKSIZE] = { 0 };
+	uint32_t* wim_header = (uint32_t*)buf, r = 0xffffffff;
+	iso9660_t* p_iso = NULL;
+	udf_t* p_udf = NULL;
+	udf_dirent_t *p_udf_root = NULL, *p_udf_file = NULL;
+	iso9660_stat_t *p_statbuf = NULL;
+
+	wim_path = safe_strdup(&iso_report.install_wim_path[2]);
+	for (p = wim_path; p != 0; p++)
+		if (*p == '\\') *p = '/';
+
+	/* First try to open as UDF - fallback to ISO if it failed */
+	p_udf = udf_open(iso);
+	if (p_udf == NULL)
+		goto try_iso;
+
+	p_udf_root = udf_get_root(p_udf, true, 0);
+	if (p_udf_root == NULL) {
+		uprintf("Could not locate UDF root directory\n");
+		goto out;
+	}
+	p_udf_file = udf_fopen(p_udf_root, wim_path);
+	if (!p_udf_file) {
+		uprintf("Could not locate file %s in ISO image\n", wim_path);
+		goto out;
+	}
+	if (udf_read_block(p_udf_file, buf, 1) != UDF_BLOCKSIZE) {
+		uprintf("Error reading UDF file %s\n", wim_path);
+		goto out;
+	}
+	r = wim_header[3];
+	goto out;
+
+try_iso:
+	p_iso = iso9660_open(iso);
+	if (p_iso == NULL) {
+		uprintf("Unable to open image '%s'.\n", iso);
+		goto out;
+	}
+	p_statbuf = iso9660_ifs_stat_translate(p_iso, wim_path);
+	if (p_statbuf == NULL) {
+		uprintf("Could not get ISO-9660 file information for file %s\n", wim_path);
+		goto out;
+	}
+	if (iso9660_iso_seek_read(p_iso, buf, p_statbuf->lsn, 1) != ISO_BLOCKSIZE) {
+		uprintf("Error reading ISO9660 file %s at LSN %lu\n", wim_path, (long unsigned int)p_statbuf->lsn);
+		goto out;
+	}
+	r = wim_header[3];
+	
+out:
+	if (p_statbuf != NULL)
+		safe_free(p_statbuf->rr.psz_symlink);
+	safe_free(p_statbuf);
+	if (p_udf_root != NULL)
+		udf_dirent_free(p_udf_root);
+	if (p_udf_file != NULL)
+		udf_dirent_free(p_udf_file);
+	if (p_iso != NULL)
+		iso9660_close(p_iso);
+	if (p_udf != NULL)
+		udf_close(p_udf);
+	safe_free(wim_path);
+	return bswap_32(r);
 }
 
 /*

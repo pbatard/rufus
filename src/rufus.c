@@ -1002,6 +1002,14 @@ static void DisplayISOProps(void)
 	uprintf("  Uses KolibriOS: %s", YesNo(iso_report.has_kolibrios));
 	uprintf("  Uses ReactOS: %s", YesNo(IS_REACTOS(iso_report)));
 	uprintf("  Uses WinPE: %s%s", YesNo(IS_WINPE(iso_report.winpe)), (iso_report.uses_minint) ? " (with /minint)" : "");
+	if (HAS_INSTALL_WIM(iso_report)) {
+		uprintf("  Uses Install.wim: Yes (version %d.%d.%d)", (iso_report.install_wim_version >> 24) & 0xff,
+			(iso_report.install_wim_version >> 16) & 0xff, (iso_report.install_wim_version >> 8) & 0xff);
+		// Microsoft somehow managed to make their ESD WIMs incompatible with their own APIs
+		// (yes, EVEN the Windows 10 APIs), so we must filter them out...
+		if (iso_report.install_wim_version >= MAX_WIM_VERSION)
+			uprintf("  Note: This WIM version is NOT compatible with Windows To Go");
+	}
 
 	// We don't support ToGo on Windows 7 or earlier, for lack of ISO mount capabilities
 	// TODO: add install.wim extraction workaround for Windows 7
