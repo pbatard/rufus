@@ -855,6 +855,8 @@ BOOL MountVolume(char* drive_name, char *drive_guid)
 		uprintf("Volume is already mounted, but as %c: instead of %c: - Unmounting...\n", mounted_letter[0], drive_name[0]);
 		if (!DeleteVolumeMountPointA(mounted_letter))
 			uprintf("Failed to unmount volume: %s", WindowsErrorString());
+		// Also delete the destination mountpoint if needed (Don't care about errors)
+		DeleteVolumeMountPointA(drive_name);
 		Sleep(200);
 	}
 
