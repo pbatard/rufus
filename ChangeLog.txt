@@ -1,8 +1,8 @@
 o Version 2.3 (2015.08.28)
-    Detect ISOHybrid images and prompt users on how they should be written
+    Detect ISOHybrid images and ask users how they should be written
     Add MD5/SHA1 checksum verification ('#' button on the status bar)
     Add Zip decompression support for DD Images
-    Add a cheat mode to save the current USB to VHD (Alt-V)
+    Add a cheat mode to save the current USB to *uncompressed* VHD (Alt-V)
     Add a cheat mode for ISO timestamp preservation (Alt-T)
     Add a cheat mode for USB enumeration debugging (Alt-.)
     Disable MS-DOS creation for Windows 10 or later (FreeDOS is still available)

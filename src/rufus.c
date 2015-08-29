@@ -2473,9 +2473,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 						break;
 					} else if (i == 2) {
 						selection_default = BT_IMG;
-						uprintf("CURSEL = %d", ComboBox_GetCurSel(hBootType));
 						SetComboEntry(hBootType, selection_default);
-						uprintf("CURSEL = %d", ComboBox_GetCurSel(hBootType));
 					}
 				}
 
