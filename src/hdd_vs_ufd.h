@@ -78,6 +78,7 @@ static str_score_t str_score[] = {
 	{ "TOSHIBA", 5 },
 	{ "QUANTUM", 10 },
 	{ "EXCELSTOR", 10 },
+	{ "CORSAIR", -15 },
 	{ "MUSHKIN", -15 },
 };
 
