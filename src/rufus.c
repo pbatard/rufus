@@ -1022,6 +1022,7 @@ static void DisplayISOProps(void)
 DWORD WINAPI ISOScanThread(LPVOID param)
 {
 	int i;
+//	BOOL is_iso, is_img;
 
 	if (image_path == NULL)
 		goto out;
@@ -1064,7 +1065,7 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 	} else {
 		// Enable bootable and set Target System and FS accordingly
 		CheckDlgButton(hMainDialog, IDC_BOOT, BST_CHECKED);
-		if (!img_report.is_bootable_img) {
+		if (img_report.is_iso) {
 			SetTargetSystem();
 			SetFSFromISO();
 			SetMBRProps();
@@ -1331,7 +1332,7 @@ static BOOL BootCheck(void)
 				return FALSE;
 			}
 		} else if ( ((fs == FS_NTFS) && (!img_report.has_bootmgr) && (!IS_WINPE(img_report.winpe)) && (!IS_GRUB(img_report)))
-				 || ((IS_FAT(fs)) && (!HAS_SYSLINUX(img_report)) && (!allow_dual_uefi_bios) &&
+				 || ((IS_FAT(fs)) && (!HAS_SYSLINUX(img_report)) && (!allow_dual_uefi_bios) && (!img_report.has_efi) &&
 					 (!IS_REACTOS(img_report)) && (!img_report.has_kolibrios) && (!IS_GRUB(img_report))) ) {
 			// Incompatible FS and ISO
 			MessageBoxU(hMainDialog, lmprintf(MSG_096), lmprintf(MSG_092), MB_OK|MB_ICONERROR|MB_IS_RTL);
