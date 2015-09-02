@@ -260,6 +260,8 @@ typedef struct {
 	char install_wim_path[64];	/* path to install.wim or install.swm */
 	uint64_t projected_size;
 	uint32_t install_wim_version;
+	BOOLEAN is_iso;
+	BOOLEAN is_bootable_img;
 	uint8_t winpe;
 	uint8_t has_efi;
 	BOOLEAN has_4GB_file;
@@ -275,14 +277,13 @@ typedef struct {
 	BOOLEAN has_grub2;
 	BOOLEAN has_kolibrios;
 	BOOLEAN uses_minint;
-	BOOLEAN is_bootable_img;
 	BOOLEAN compression_type;
 	BOOLEAN is_vhd;
 	uint16_t sl_version;	// Syslinux/Isolinux version
 	char sl_version_str[12];
 	char sl_version_ext[32];
 	char grub2_version[32];
-} RUFUS_ISO_REPORT;
+} RUFUS_IMG_REPORT;
 
 /* Isolate the Syslinux version numbers */
 #define SL_MAJOR(x) ((uint8_t)((x)>>8))
@@ -366,7 +367,7 @@ extern RUFUS_DRIVE_INFO SelectedDrive;
 extern const int nb_steps[FS_MAX];
 extern BOOL use_own_c32[NB_OLD_C32], detect_fakes, iso_op_in_progress, format_op_in_progress, right_to_left_mode;
 extern BOOL allow_dual_uefi_bios, togo_mode;
-extern RUFUS_ISO_REPORT iso_report;
+extern RUFUS_IMG_REPORT img_report;
 extern int64_t iso_blocking_status;
 extern uint16_t rufus_version[3], embedded_sl_version[2];
 extern int nWindowsVersion;
@@ -442,7 +443,7 @@ extern void parse_update(char* buf, size_t len);
 extern uint8_t WimExtractCheck(void);
 extern BOOL WimExtractFile(const char* wim_image, int index, const char* src, const char* dst);
 extern BOOL WimApplyImage(const char* image, int index, const char* dst);
-extern BOOL IsHDImage(const char* path);
+extern BOOL IsBootableImage(const char* path);
 extern BOOL AppendVHDFooter(const char* vhd_path);
 extern int IsHDD(DWORD DriveIndex, uint16_t vid, uint16_t pid, const char* strid);
 extern void LostTranslatorCheck(void);

@@ -415,7 +415,7 @@ static void SetMBRForUEFI(BOOL replace)
 		return;
 
 	if (image_path != NULL) {
-		if ( (!iso_report.has_efi) || ((iso_report.has_bootmgr) && (!allow_dual_uefi_bios) &&
+		if ( (!img_report.has_efi) || ((img_report.has_bootmgr) && (!allow_dual_uefi_bios) &&
 			 (Button_GetCheck(GetDlgItem(hMainDialog, IDC_WINDOWS_TO_GO)) != BST_CHECKED)) )
 			useCSM = TRUE;
 	}
@@ -501,7 +501,7 @@ static void SetFSFromISO(void)
 	int i, fs, selected_fs = FS_UNKNOWN;
 	uint32_t fs_mask = 0;
 	int tt = GETTARGETTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
-	BOOL windows_to_go = (togo_mode) && HAS_TOGO(iso_report) &&
+	BOOL windows_to_go = (togo_mode) && HAS_TOGO(img_report) &&
 		(Button_GetCheck(GetDlgItem(hMainDialog, IDC_WINDOWS_TO_GO)) == BST_CHECKED);
 
 	if (image_path == NULL)
@@ -514,14 +514,14 @@ static void SetFSFromISO(void)
 	}
 
 	// Syslinux and EFI have precedence over bootmgr (unless the user selected BIOS as target type)
-	if ((HAS_SYSLINUX(iso_report)) || (IS_REACTOS(iso_report)) || (iso_report.has_kolibrios) ||
-		((iso_report.has_efi) && (tt == TT_UEFI) && (!iso_report.has_4GB_file) && (!windows_to_go))) {
+	if ((HAS_SYSLINUX(img_report)) || (IS_REACTOS(img_report)) || (img_report.has_kolibrios) ||
+		((img_report.has_efi) && (tt == TT_UEFI) && (!img_report.has_4GB_file) && (!windows_to_go))) {
 		if (fs_mask & (1<<FS_FAT32)) {
 			selected_fs = FS_FAT32;
-		} else if ((fs_mask & (1<<FS_FAT16)) && (!iso_report.has_kolibrios)) {
+		} else if ((fs_mask & (1<<FS_FAT16)) && (!img_report.has_kolibrios)) {
 			selected_fs = FS_FAT16;
 		}
-	} else if ((windows_to_go) || (iso_report.has_bootmgr) || (IS_WINPE(iso_report.winpe))) {
+	} else if ((windows_to_go) || (img_report.has_bootmgr) || (IS_WINPE(img_report.winpe))) {
 		if (fs_mask & (1<<FS_NTFS)) {
 			selected_fs = FS_NTFS;
 		}
@@ -542,16 +542,16 @@ static void SetMBRProps(void)
 {
 	int fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
 	int bt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
-	BOOL needs_masquerading = (IS_WINPE(iso_report.winpe) && (!iso_report.uses_minint));
+	BOOL needs_masquerading = (IS_WINPE(img_report.winpe) && (!img_report.uses_minint));
 
-	if ((!mbr_selected_by_user) && ((image_path == NULL) || (bt != BT_ISO) || (fs != FS_NTFS) || IS_GRUB(iso_report) ||
+	if ((!mbr_selected_by_user) && ((image_path == NULL) || (bt != BT_ISO) || (fs != FS_NTFS) || IS_GRUB(img_report) ||
 		((togo_mode) && (Button_GetCheck(GetDlgItem(hMainDialog, IDC_WINDOWS_TO_GO)) == BST_CHECKED)) )) {
 		CheckDlgButton(hMainDialog, IDC_RUFUS_MBR, BST_UNCHECKED);
 		IGNORE_RETVAL(ComboBox_SetCurSel(hDiskID, 0));
 		return;
 	}
 
-	uMBRChecked = (needs_masquerading || iso_report.has_bootmgr || mbr_selected_by_user)?BST_CHECKED:BST_UNCHECKED;
+	uMBRChecked = (needs_masquerading || img_report.has_bootmgr || mbr_selected_by_user)?BST_CHECKED:BST_UNCHECKED;
 	if (IsWindowEnabled(GetDlgItem(hMainDialog, IDC_RUFUS_MBR)))
 		CheckDlgButton(hMainDialog, IDC_RUFUS_MBR, uMBRChecked);
 	IGNORE_RETVAL(ComboBox_SetCurSel(hDiskID, needs_masquerading?1:0));
@@ -560,7 +560,7 @@ static void SetMBRProps(void)
 static void SetToGo(void)
 {
 	int bt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
-	if ( ((bt != BT_ISO) && (togo_mode)) || ((bt == BT_ISO) && (HAS_TOGO(iso_report)) && (!togo_mode)) )
+	if ( ((bt != BT_ISO) && (togo_mode)) || ((bt == BT_ISO) && (HAS_TOGO(img_report)) && (!togo_mode)) )
 		ToggleToGo();
 }
 
@@ -571,7 +571,7 @@ static void EnableAdvancedBootOptions(BOOL enable, BOOL remove_checkboxes)
 	BOOL actual_enable_fix = ((tt==TT_UEFI)||(selection_default==BT_IMG)||!IsChecked(IDC_BOOT))?FALSE:enable;
 	static UINT uXPartChecked = BST_UNCHECKED;
 
-	if ((selection_default == BT_ISO) && (iso_report.has_kolibrios || IS_GRUB(iso_report) || IS_REACTOS(iso_report) || HAS_SYSLINUX(iso_report))) {
+	if ((selection_default == BT_ISO) && (img_report.has_kolibrios || IS_GRUB(img_report) || IS_REACTOS(img_report) || HAS_SYSLINUX(img_report))) {
 		actual_enable_mbr = FALSE;
 		mbr_selected_by_user = FALSE;
 	}
@@ -628,9 +628,9 @@ static void SetTargetSystem(void)
 	SetMBRForUEFI(TRUE);
 	if (SelectedDrive.PartitionType == PARTITION_STYLE_GPT) {
 		ts = 2;	// GPT/UEFI
-	} else if (SelectedDrive.has_protective_mbr || SelectedDrive.has_mbr_uefi_marker || ((iso_report.has_efi) &&
-		(!HAS_SYSLINUX(iso_report)) && (!iso_report.has_bootmgr) && (!IS_REACTOS(iso_report)) && 
-		(!iso_report.has_kolibrios) && (!IS_GRUB(iso_report)) && (!IS_WINPE(iso_report.winpe))) ) {
+	} else if (SelectedDrive.has_protective_mbr || SelectedDrive.has_mbr_uefi_marker || ((img_report.has_efi) &&
+		(!HAS_SYSLINUX(img_report)) && (!img_report.has_bootmgr) && (!IS_REACTOS(img_report)) && 
+		(!img_report.has_kolibrios) && (!IS_GRUB(img_report)) && (!IS_WINPE(img_report.winpe))) ) {
 		ts = 1;	// MBR/UEFI
 	} else {
 		ts = 0;	// MBR/BIOS|UEFI
@@ -677,7 +677,7 @@ static BOOL PopulateProperties(int ComboIndex)
 	}
 
 	// If no existing label is available and no ISO is selected, propose one according to the size (eg: "256MB", "8GB")
-	if ((image_path == NULL) || (iso_report.label[0] == 0)) {
+	if ((image_path == NULL) || (img_report.label[0] == 0)) {
 		if ( (safe_stricmp(no_label, DriveLabel.String[ComboIndex]) == 0)
 		  || (safe_stricmp(lmprintf(MSG_207), DriveLabel.String[ComboIndex]) == 0) ) {
 			SetWindowTextU(hLabel, SelectedDrive.proposed_label);
@@ -685,7 +685,7 @@ static BOOL PopulateProperties(int ComboIndex)
 			SetWindowTextU(hLabel, DriveLabel.String[ComboIndex]);
 		}
 	} else {
-		SetWindowTextU(hLabel, iso_report.label);
+		SetWindowTextU(hLabel, img_report.label);
 	}
 
 	return TRUE;
@@ -979,42 +979,42 @@ static void DisplayISOProps(void)
 	int i;
 	char isolinux_str[16] = "No";
 
-	if (HAS_SYSLINUX(iso_report)) {
-		safe_sprintf(isolinux_str, sizeof(isolinux_str), "Yes (%s)", iso_report.sl_version_str);
+	if (HAS_SYSLINUX(img_report)) {
+		safe_sprintf(isolinux_str, sizeof(isolinux_str), "Yes (%s)", img_report.sl_version_str);
 	}
 
 	// TODO: Only report features that are present
-	uprintf("ISO label: '%s'", iso_report.label);
-	uprintf("  Size: %" PRIu64 " bytes", iso_report.projected_size);
-	uprintf("  Has a >64 chars filename: %s", YesNo(iso_report.has_long_filename));
-	uprintf("  Has Symlinks: %s", YesNo(iso_report.has_symlinks));
-	uprintf("  Has a >4GB file: %s", YesNo(iso_report.has_4GB_file));
-	uprintf("  Uses Bootmgr: %s", YesNo(iso_report.has_bootmgr));
-	uprintf("  Uses EFI: %s%s", YesNo(iso_report.has_efi), IS_WIN7_EFI(iso_report) ? " (win7_x64)" : "");
-	uprintf("  Uses Grub 2: %s", YesNo(iso_report.has_grub2));
-	uprintf("  Uses Grub4DOS: %s", YesNo(iso_report.has_grub4dos));
+	uprintf("ISO label: '%s'", img_report.label);
+	uprintf("  Size: %" PRIu64 " bytes", img_report.projected_size);
+	uprintf("  Has a >64 chars filename: %s", YesNo(img_report.has_long_filename));
+	uprintf("  Has Symlinks: %s", YesNo(img_report.has_symlinks));
+	uprintf("  Has a >4GB file: %s", YesNo(img_report.has_4GB_file));
+	uprintf("  Uses Bootmgr: %s", YesNo(img_report.has_bootmgr));
+	uprintf("  Uses EFI: %s%s", YesNo(img_report.has_efi), IS_WIN7_EFI(img_report) ? " (win7_x64)" : "");
+	uprintf("  Uses Grub 2: %s", YesNo(img_report.has_grub2));
+	uprintf("  Uses Grub4DOS: %s", YesNo(img_report.has_grub4dos));
 	uprintf("  Uses isolinux: %s", isolinux_str);
-	if (HAS_SYSLINUX(iso_report) && (SL_MAJOR(iso_report.sl_version) < 5)) {
+	if (HAS_SYSLINUX(img_report) && (SL_MAJOR(img_report.sl_version) < 5)) {
 		for (i = 0; i<NB_OLD_C32; i++) {
-			uprintf("    With an old %s: %s\n", old_c32_name[i], iso_report.has_old_c32[i] ? "Yes" : "No");
+			uprintf("    With an old %s: %s\n", old_c32_name[i], img_report.has_old_c32[i] ? "Yes" : "No");
 		}
 	}
-	uprintf("  Uses KolibriOS: %s", YesNo(iso_report.has_kolibrios));
-	uprintf("  Uses ReactOS: %s", YesNo(IS_REACTOS(iso_report)));
-	uprintf("  Uses WinPE: %s%s", YesNo(IS_WINPE(iso_report.winpe)), (iso_report.uses_minint) ? " (with /minint)" : "");
-	if (HAS_INSTALL_WIM(iso_report)) {
-		uprintf("  Uses Install.wim: Yes (version %d.%d.%d)", (iso_report.install_wim_version >> 24) & 0xff,
-			(iso_report.install_wim_version >> 16) & 0xff, (iso_report.install_wim_version >> 8) & 0xff);
+	uprintf("  Uses KolibriOS: %s", YesNo(img_report.has_kolibrios));
+	uprintf("  Uses ReactOS: %s", YesNo(IS_REACTOS(img_report)));
+	uprintf("  Uses WinPE: %s%s", YesNo(IS_WINPE(img_report.winpe)), (img_report.uses_minint) ? " (with /minint)" : "");
+	if (HAS_INSTALL_WIM(img_report)) {
+		uprintf("  Uses Install.wim: Yes (version %d.%d.%d)", (img_report.install_wim_version >> 24) & 0xff,
+			(img_report.install_wim_version >> 16) & 0xff, (img_report.install_wim_version >> 8) & 0xff);
 		// Microsoft somehow managed to make their ESD WIMs incompatible with their own APIs
 		// (yes, EVEN the Windows 10 APIs), so we must filter them out...
-		if (iso_report.install_wim_version >= MAX_WIM_VERSION)
+		if (img_report.install_wim_version >= MAX_WIM_VERSION)
 			uprintf("  Note: This WIM version is NOT compatible with Windows To Go");
 	}
 
 	// We don't support ToGo on Windows 7 or earlier, for lack of ISO mount capabilities
 	// TODO: add install.wim extraction workaround for Windows 7
 	if (nWindowsVersion >= WINDOWS_8)
-		if ( ((!togo_mode) && (HAS_TOGO(iso_report))) || ((togo_mode) && (!HAS_TOGO(iso_report))) )
+		if ( ((!togo_mode) && (HAS_TOGO(img_report))) || ((togo_mode) && (!HAS_TOGO(img_report))) )
 			ToggleToGo();
 }
 
@@ -1022,16 +1022,15 @@ static void DisplayISOProps(void)
 DWORD WINAPI ISOScanThread(LPVOID param)
 {
 	int i;
-	BOOL is_iso, is_img;
 
 	if (image_path == NULL)
 		goto out;
 	PrintInfoDebug(0, MSG_202);
 	user_notified = FALSE;
 	EnableControls(FALSE);
-	is_iso = ExtractISO(image_path, "", TRUE);
-	is_img = IsHDImage(image_path);
-	if (!is_iso && !is_img) {
+	img_report.is_iso = ExtractISO(image_path, "", TRUE);
+	img_report.is_bootable_img = IsBootableImage(image_path);
+	if (!img_report.is_iso && !img_report.is_bootable_img) {
 		SendMessage(hMainDialog, UM_PROGRESS_EXIT, 0, 0);
 		PrintInfoDebug(0, MSG_203);
 		safe_free(image_path);
@@ -1042,20 +1041,20 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 		goto out;
 	}
 
-	if (is_img) {
+	if (img_report.is_bootable_img) {
 		uprintf("  Image is a %sbootable %s image",
-			(iso_report.compression_type != BLED_COMPRESSION_NONE) ? "compressed " : "", iso_report.is_vhd ? "VHD" : "disk");
+			(img_report.compression_type != BLED_COMPRESSION_NONE) ? "compressed " : "", img_report.is_vhd ? "VHD" : "disk");
 		selection_default = BT_IMG;
 	}
-	if (is_iso) {
+	if (img_report.is_iso) {
 		// Will override BT_IMG above for ISOHybrid
 		selection_default = BT_ISO;
 		DisplayISOProps();
 	}
 	// Only enable AFTER we have determined the image type
 	EnableControls(TRUE);
-	if ( (!iso_report.has_bootmgr) && (!HAS_SYSLINUX(iso_report)) && (!IS_WINPE(iso_report.winpe)) && (!IS_GRUB(iso_report))
-	  && (!iso_report.has_efi) && (!IS_REACTOS(iso_report) && (!iso_report.has_kolibrios) && (!iso_report.is_bootable_img)) ) {
+	if ( (!img_report.has_bootmgr) && (!HAS_SYSLINUX(img_report)) && (!IS_WINPE(img_report.winpe)) && (!IS_GRUB(img_report))
+	  && (!img_report.has_efi) && (!IS_REACTOS(img_report) && (!img_report.has_kolibrios) && (!img_report.is_bootable_img)) ) {
 		PrintInfo(0, MSG_081);
 		safe_free(image_path);
 		EnableWindow(hStatusToolbar, FALSE);
@@ -1065,14 +1064,14 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 	} else {
 		// Enable bootable and set Target System and FS accordingly
 		CheckDlgButton(hMainDialog, IDC_BOOT, BST_CHECKED);
-		if (!iso_report.is_bootable_img) {
+		if (!img_report.is_bootable_img) {
 			SetTargetSystem();
 			SetFSFromISO();
 			SetMBRProps();
 			// Some Linux distros, such as Arch Linux, require the USB drive to have
 			// a specific label => copy the one we got from the ISO image
-			if (iso_report.label[0] != 0) {
-				SetWindowTextU(hLabel, iso_report.label);
+			if (img_report.label[0] != 0) {
+				SetWindowTextU(hLabel, img_report.label);
 			}
 		} else {
 			SendMessage(hMainDialog, WM_COMMAND, (CBN_SELCHANGE<<16) | IDC_FILESYSTEM,
@@ -1289,16 +1288,16 @@ static BOOL BootCheck(void)
 			MessageBoxU(hMainDialog, lmprintf(MSG_087), lmprintf(MSG_086), MB_OK|MB_ICONERROR|MB_IS_RTL);
 			return FALSE;
 		}
-		if ((size_check) && (iso_report.projected_size > (uint64_t)SelectedDrive.DiskSize)) {
+		if ((size_check) && (img_report.projected_size > (uint64_t)SelectedDrive.DiskSize)) {
 			// This ISO image is too big for the selected target
 			MessageBoxU(hMainDialog, lmprintf(MSG_089), lmprintf(MSG_088), MB_OK|MB_ICONERROR|MB_IS_RTL);
 			return FALSE;
 		}
 		if (bt == BT_IMG) {
-			if (!iso_report.is_bootable_img)
+			if (!img_report.is_bootable_img)
 			// The selected image doesn't match the boot option selected.
 				MessageBoxU(hMainDialog, lmprintf(MSG_188), lmprintf(MSG_187), MB_OK|MB_ICONERROR|MB_IS_RTL);
-			return (iso_report.is_bootable_img);
+			return (img_report.is_bootable_img);
 		}
 		fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
 		tt = GETTARGETTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
@@ -1320,46 +1319,46 @@ static BOOL BootCheck(void)
 					return FALSE;
 			}
 		} else if (tt == TT_UEFI) {
-			if (!iso_report.has_efi) {
+			if (!img_report.has_efi) {
 				// Unsupported ISO
 				MessageBoxU(hMainDialog, lmprintf(MSG_091), lmprintf(MSG_090), MB_OK|MB_ICONERROR|MB_IS_RTL);
 				return FALSE;
 			}
-			if (IS_WIN7_EFI(iso_report) && (!WimExtractCheck())) {
+			if (IS_WIN7_EFI(img_report) && (!WimExtractCheck())) {
 				// Your platform cannot extract files from WIM archives => download 7-zip?
 				if (MessageBoxU(hMainDialog, lmprintf(MSG_102), lmprintf(MSG_101), MB_YESNO|MB_ICONERROR|MB_IS_RTL) == IDYES)
 					ShellExecuteA(hMainDialog, "open", SEVENZIP_URL, NULL, NULL, SW_SHOWNORMAL);
 				return FALSE;
 			}
-		} else if ( ((fs == FS_NTFS) && (!iso_report.has_bootmgr) && (!IS_WINPE(iso_report.winpe)) && (!IS_GRUB(iso_report)))
-				 || ((IS_FAT(fs)) && (!HAS_SYSLINUX(iso_report)) && (!allow_dual_uefi_bios) &&
-					 (!IS_REACTOS(iso_report)) && (!iso_report.has_kolibrios) && (!IS_GRUB(iso_report))) ) {
+		} else if ( ((fs == FS_NTFS) && (!img_report.has_bootmgr) && (!IS_WINPE(img_report.winpe)) && (!IS_GRUB(img_report)))
+				 || ((IS_FAT(fs)) && (!HAS_SYSLINUX(img_report)) && (!allow_dual_uefi_bios) &&
+					 (!IS_REACTOS(img_report)) && (!img_report.has_kolibrios) && (!IS_GRUB(img_report))) ) {
 			// Incompatible FS and ISO
 			MessageBoxU(hMainDialog, lmprintf(MSG_096), lmprintf(MSG_092), MB_OK|MB_ICONERROR|MB_IS_RTL);
 			return FALSE;
-		} else if ((fs == FS_FAT16) && (iso_report.has_kolibrios)) {
+		} else if ((fs == FS_FAT16) && (img_report.has_kolibrios)) {
 			// KolibriOS doesn't support FAT16
 			MessageBoxU(hMainDialog, lmprintf(MSG_189), lmprintf(MSG_099), MB_OK|MB_ICONERROR|MB_IS_RTL);
 			return FALSE;
 		}
-		if ((IS_FAT(fs)) && (iso_report.has_4GB_file)) {
+		if ((IS_FAT(fs)) && (img_report.has_4GB_file)) {
 			// This ISO image contains a file larger than 4GB file (FAT32)
 			MessageBoxU(hMainDialog, lmprintf(MSG_100), lmprintf(MSG_099), MB_OK|MB_ICONERROR|MB_IS_RTL);
 			return FALSE;
 		}
 
-		if ((iso_report.has_grub2) && (iso_report.grub2_version[0] != 0) &&
-			(strcmp(iso_report.grub2_version, GRUB2_PACKAGE_VERSION) != 0)) {
+		if ((img_report.has_grub2) && (img_report.grub2_version[0] != 0) &&
+			(strcmp(img_report.grub2_version, GRUB2_PACKAGE_VERSION) != 0)) {
 			// We may have to download a different Grub2 version if we can find one
 			IGNORE_RETVAL(_chdirU(app_dir));
 			IGNORE_RETVAL(_mkdir(FILES_DIR));
 			IGNORE_RETVAL(_chdir(FILES_DIR));
-			static_sprintf(tmp, "%s-%s/%s", grub, iso_report.grub2_version, core_img);
+			static_sprintf(tmp, "%s-%s/%s", grub, img_report.grub2_version, core_img);
 			fd = fopen(tmp, "rb");
 			if (fd != NULL) {
 				// If a file already exists in the current directory, use that one
 				uprintf("Will reuse '%s' from './" FILES_DIR "/%s-%s/' for Grub 2.x installation\n",
-					core_img, grub, iso_report.grub2_version);
+					core_img, grub, img_report.grub2_version);
 				fseek(fd, 0, SEEK_END);
 				grub2_len = ftell(fd);
 				fseek(fd, 0, SEEK_SET);
@@ -1373,14 +1372,14 @@ static BOOL BootCheck(void)
 				}
 				fclose(fd);
 			} else {
-				r = MessageBoxU(hMainDialog, lmprintf(MSG_116, iso_report.grub2_version, GRUB2_PACKAGE_VERSION),
+				r = MessageBoxU(hMainDialog, lmprintf(MSG_116, img_report.grub2_version, GRUB2_PACKAGE_VERSION),
 					lmprintf(MSG_115), MB_YESNOCANCEL|MB_ICONWARNING|MB_IS_RTL);
 				if (r == IDCANCEL)
 					return FALSE;
 				else if (r == IDYES) {
-					static_sprintf(tmp, "%s-%s", grub, iso_report.grub2_version);
+					static_sprintf(tmp, "%s-%s", grub, img_report.grub2_version);
 					IGNORE_RETVAL(_mkdir(tmp));
-					static_sprintf(tmp, "%s/%s-%s/%s", FILES_URL, grub, iso_report.grub2_version, core_img);
+					static_sprintf(tmp, "%s/%s-%s/%s", FILES_URL, grub, img_report.grub2_version, core_img);
 					PrintInfoDebug(0, MSG_085, tmp);
 					PromptOnError = FALSE;
 					grub2_len = (long)DownloadFile(tmp, &tmp[sizeof(FILES_URL)], hMainDialog);
@@ -1403,11 +1402,11 @@ static BOOL BootCheck(void)
 			}
 		}
 
-		if (HAS_SYSLINUX(iso_report)) {
-			if (SL_MAJOR(iso_report.sl_version) < 5) {
+		if (HAS_SYSLINUX(img_report)) {
+			if (SL_MAJOR(img_report.sl_version) < 5) {
 				IGNORE_RETVAL(_chdirU(app_dir));
 				for (i=0; i<NB_OLD_C32; i++) {
-					if (iso_report.has_old_c32[i]) {
+					if (img_report.has_old_c32[i]) {
 						if (!in_files_dir) {
 							IGNORE_RETVAL(_mkdir(FILES_DIR));
 							IGNORE_RETVAL(_chdir(FILES_DIR));
@@ -1438,16 +1437,16 @@ static BOOL BootCheck(void)
 						}
 					}
 				}
-			} else if ((iso_report.sl_version != embedded_sl_version[1]) ||
-				(safe_strcmp(iso_report.sl_version_ext, embedded_sl_version_ext[1]) != 0)) {
+			} else if ((img_report.sl_version != embedded_sl_version[1]) ||
+				(safe_strcmp(img_report.sl_version_ext, embedded_sl_version_ext[1]) != 0)) {
 				// Unlike what was the case for v4 and earlier, Syslinux v5+ versions are INCOMPATIBLE with one another!
 				IGNORE_RETVAL(_chdirU(app_dir));
 				IGNORE_RETVAL(_mkdir(FILES_DIR));
 				IGNORE_RETVAL(_chdir(FILES_DIR));
 				for (i=0; i<2; i++) {
 					// Check if we already have the relevant ldlinux_v#.##.sys & ldlinux_v#.##.bss files
-					static_sprintf(tmp, "%s-%s%s/%s.%s", syslinux, iso_report.sl_version_str,
-						iso_report.sl_version_ext, ldlinux, ldlinux_ext[i]);
+					static_sprintf(tmp, "%s-%s%s/%s.%s", syslinux, img_report.sl_version_str,
+						img_report.sl_version_ext, ldlinux, ldlinux_ext[i]);
 					fd = fopen(tmp, "rb");
 					if (fd != NULL) {
 						fseek(fd, 0, SEEK_END);
@@ -1458,39 +1457,39 @@ static BOOL BootCheck(void)
 				if ((syslinux_ldlinux_len[0] != 0) && (syslinux_ldlinux_len[1] != 0)) {
 					uprintf("Will reuse '%s.%s' and '%s.%s' from './" FILES_DIR "/%s/%s-%s%s/' for Syslinux installation\n",
 						ldlinux, ldlinux_ext[0], ldlinux, ldlinux_ext[1], FILES_DIR, syslinux,
-						iso_report.sl_version_str, iso_report.sl_version_ext);
+						img_report.sl_version_str, img_report.sl_version_ext);
 				} else {
-					r = MessageBoxU(hMainDialog, lmprintf(MSG_114, iso_report.sl_version_str, iso_report.sl_version_ext,
+					r = MessageBoxU(hMainDialog, lmprintf(MSG_114, img_report.sl_version_str, img_report.sl_version_ext,
 						embedded_sl_version_str[1], embedded_sl_version_ext[1]),
 						lmprintf(MSG_115), MB_YESNO|MB_ICONWARNING|MB_IS_RTL);
 					if (r != IDYES)
 						return FALSE;
 					for (i=0; i<2; i++) {
-						static_sprintf(tmp, "%s-%s", syslinux, iso_report.sl_version_str);
+						static_sprintf(tmp, "%s-%s", syslinux, img_report.sl_version_str);
 						IGNORE_RETVAL(_mkdir(tmp));
-						if (*iso_report.sl_version_ext != 0) {
+						if (*img_report.sl_version_ext != 0) {
 							IGNORE_RETVAL(_chdir(tmp));
-							IGNORE_RETVAL(_mkdir(&iso_report.sl_version_ext[1]));
+							IGNORE_RETVAL(_mkdir(&img_report.sl_version_ext[1]));
 							IGNORE_RETVAL(_chdir(".."));
 						}
-						static_sprintf(tmp, "%s/%s-%s%s/%s.%s", FILES_URL, syslinux, iso_report.sl_version_str,
-							iso_report.sl_version_ext, ldlinux, ldlinux_ext[i]);
+						static_sprintf(tmp, "%s/%s-%s%s/%s.%s", FILES_URL, syslinux, img_report.sl_version_str,
+							img_report.sl_version_ext, ldlinux, ldlinux_ext[i]);
 						PrintInfo(0, MSG_085, tmp);
-						PromptOnError = (*iso_report.sl_version_ext == 0);
+						PromptOnError = (*img_report.sl_version_ext == 0);
 						syslinux_ldlinux_len[i] = DownloadFile(tmp, &tmp[sizeof(FILES_URL)], hMainDialog);
 						PromptOnError = TRUE;
-						if ((syslinux_ldlinux_len[i] == 0) && (DownloadStatus == 404) && (*iso_report.sl_version_ext != 0)) {
+						if ((syslinux_ldlinux_len[i] == 0) && (DownloadStatus == 404) && (*img_report.sl_version_ext != 0)) {
 							// Couldn't locate the file on the server => try to download without the version extra
 							uprintf("Extended version was not found, trying main version\n");
-							static_sprintf(tmp, "%s/%s-%s/%s.%s", FILES_URL, syslinux, iso_report.sl_version_str,
+							static_sprintf(tmp, "%s/%s-%s/%s.%s", FILES_URL, syslinux, img_report.sl_version_str,
 								ldlinux, ldlinux_ext[i]);
 							PrintInfo(0, MSG_085, tmp);
 							syslinux_ldlinux_len[i] = DownloadFile(tmp, &tmp[sizeof(FILES_URL)], hMainDialog);
 							if (syslinux_ldlinux_len[i] != 0) {
 								// Duplicate the file so that the user won't be prompted to download again
-								static_sprintf(tmp, "%s-%s\\%s.%s", syslinux, iso_report.sl_version_str, ldlinux, ldlinux_ext[i]);
-								static_sprintf(tmp2, "%s-%s\\%s\\%s.%s", syslinux, iso_report.sl_version_str, 
-									&iso_report.sl_version_ext[1], ldlinux, ldlinux_ext[i]);
+								static_sprintf(tmp, "%s-%s\\%s.%s", syslinux, img_report.sl_version_str, ldlinux, ldlinux_ext[i]);
+								static_sprintf(tmp2, "%s-%s\\%s\\%s.%s", syslinux, img_report.sl_version_str, 
+									&img_report.sl_version_ext[1], ldlinux, ldlinux_ext[i]);
 								CopyFileA(tmp, tmp2, FALSE);
 							}
 						}
@@ -2365,9 +2364,9 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			ToggleImage(!IsChecked(IDC_BOOT) || (selection_default != BT_IMG));
 			SetToGo();
 			if ((selection_default == BT_ISO) || (selection_default == BT_IMG)) {
-				if ((image_path != NULL) && (iso_report.label[0] != 0)) {
+				if ((image_path != NULL) && (img_report.label[0] != 0)) {
 					// Some distros (eg. Arch Linux) want to see a specific label => ignore user one
-					SetWindowTextU(hLabel, iso_report.label);
+					SetWindowTextU(hLabel, img_report.label);
 				}
 			} else {
 				if (selection_default == BT_UEFI_NTFS) {
@@ -2462,7 +2461,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				}
 
 				// Ask users how they want to write ISOHybrid images
-				if ((IsChecked(IDC_BOOT)) && (iso_report.is_bootable_img) &&
+				if ((IsChecked(IDC_BOOT)) && (img_report.is_bootable_img) &&
 					(ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType)) == BT_ISO)) {
 					char* iso_image = lmprintf(MSG_036);
 					char* dd_image = lmprintf(MSG_095);

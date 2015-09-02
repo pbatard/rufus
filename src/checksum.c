@@ -626,10 +626,10 @@ DWORD WINAPI SumThread(void* param)
 	for (rb = 0; ; rb += rSize) {
 		if (GetTickCount() > LastRefresh + 25) {
 			LastRefresh = GetTickCount();
-			format_percent = (100.0f*rb) / (1.0f*iso_report.projected_size);
+			format_percent = (100.0f*rb) / (1.0f*img_report.projected_size);
 			PrintInfo(0, MSG_271, format_percent);
 			SendMessage(hProgress, PBM_SETPOS, (WPARAM)((format_percent/100.0f)*MAX_PROGRESS), 0);
-			SetTaskbarProgressValue(rb, iso_report.projected_size);
+			SetTaskbarProgressValue(rb, img_report.projected_size);
 		}
 		CHECK_FOR_USER_CANCEL;
 		if (!ReadFile(h, buffer, sizeof(buffer), &rSize, NULL)) {

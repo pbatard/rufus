@@ -303,7 +303,7 @@ static void ToValidLabel(WCHAR* name, BOOL bFAT)
 	}
 
 	// Needed for disk by label isolinux.cfg workaround
-	wchar_to_utf8_no_alloc(name, iso_report.usb_label, sizeof(iso_report.usb_label));
+	wchar_to_utf8_no_alloc(name, img_report.usb_label, sizeof(img_report.usb_label));
 }
 
 /*
@@ -929,21 +929,21 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 	
 	// Syslinux
 	if ( (bt == BT_SYSLINUX_V4) || (bt == BT_SYSLINUX_V6) ||
-		 ((bt == BT_ISO) && (HAS_SYSLINUX(iso_report)) && (IS_FAT(fs))) ) {
+		 ((bt == BT_ISO) && (HAS_SYSLINUX(img_report)) && (IS_FAT(fs))) ) {
 		uprintf(using_msg, "Syslinux");
 		r = write_syslinux_mbr(fp);
 		goto notify;
 	}
 
 	// Grub 2.0
-	if ( ((bt == BT_ISO) && (iso_report.has_grub2)) || (bt == BT_GRUB2) ) {
+	if ( ((bt == BT_ISO) && (img_report.has_grub2)) || (bt == BT_GRUB2) ) {
 		uprintf(using_msg, "Grub 2.0");
 		r = write_grub2_mbr(fp);
 		goto notify;
 	}
 
 	// Grub4DOS
-	if ( ((bt == BT_ISO) && (iso_report.has_grub4dos)) || (bt == BT_GRUB4DOS) ) {
+	if ( ((bt == BT_ISO) && (img_report.has_grub4dos)) || (bt == BT_GRUB4DOS) ) {
 		uprintf(using_msg, "Grub4DOS");
 		r = write_grub_mbr(fp);
 		goto notify;
@@ -957,7 +957,7 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 	} 
 
 	// KolibriOS
-	if ( (bt == BT_ISO) && (iso_report.has_kolibrios) && (IS_FAT(fs))) {
+	if ( (bt == BT_ISO) && (img_report.has_kolibrios) && (IS_FAT(fs))) {
 		uprintf(using_msg, "KolibriOS");
 		r = write_kolibri_mbr(fp);
 		goto notify;
@@ -965,7 +965,7 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 
 	// If everything else failed, fall back to a conventional Windows/Rufus MBR
 windows_mbr:
-	if ((IS_WINPE(iso_report.winpe) && !iso_report.uses_minint) || (IsChecked(IDC_RUFUS_MBR))) {
+	if ((IS_WINPE(img_report.winpe) && !img_report.uses_minint) || (IsChecked(IDC_RUFUS_MBR))) {
 		uprintf(using_msg, APPLICATION_NAME);
 		r = write_rufus_mbr(fp);
 	} else {
@@ -1002,10 +1002,10 @@ static BOOL WriteSBR(HANDLE hPhysicalDrive)
 		(DWORD)(SelectedDrive.Geometry.BytesPerSector * SelectedDrive.Geometry.SectorsPerTrack) : 1024 * 1024;
 	max_size -= mbr_size;
 	// Syslinux has precedence over Grub
-	if ((bt == BT_ISO) && (!HAS_SYSLINUX(iso_report))) {
-		if (iso_report.has_grub4dos)
+	if ((bt == BT_ISO) && (!HAS_SYSLINUX(img_report))) {
+		if (img_report.has_grub4dos)
 			bt = BT_GRUB4DOS;
-		if (iso_report.has_grub2)
+		if (img_report.has_grub2)
 			bt = BT_GRUB2;
 	}
 
@@ -1056,7 +1056,7 @@ static __inline const char* bt_to_name(int bt) {
 	case BT_FREEDOS: return "FreeDOS";
 	case BT_REACTOS: return "ReactOS";
 	default:
-		return ((bt==BT_ISO)&&(iso_report.has_kolibrios))?"KolibriOS":"Standard";
+		return ((bt==BT_ISO)&&(img_report.has_kolibrios))?"KolibriOS":"Standard";
 	}
 }
 static BOOL WritePBR(HANDLE hLogicalVolume)
@@ -1082,7 +1082,7 @@ static BOOL WritePBR(HANDLE hLogicalVolume)
 			if (!write_fat_16_fd_br(fp, 0)) break;
 		} else if (bt == BT_REACTOS) {
 			if (!write_fat_16_ros_br(fp, 0)) break;
-		} else if ((bt == BT_ISO) && (iso_report.has_kolibrios)) {
+		} else if ((bt == BT_ISO) && (img_report.has_kolibrios)) {
 			uprintf("FAT16 is not supported for KolibriOS\n"); break;
 		} else {
 			if (!write_fat_16_br(fp, 0)) break;
@@ -1104,7 +1104,7 @@ static BOOL WritePBR(HANDLE hLogicalVolume)
 				if (!write_fat_32_fd_br(fp, 0)) break;
 			} else if (bt == BT_REACTOS) {
 				if (!write_fat_32_ros_br(fp, 0)) break;
-			} else if ((bt == BT_ISO) && (iso_report.has_kolibrios)) {
+			} else if ((bt == BT_ISO) && (img_report.has_kolibrios)) {
 				if (!write_fat_32_kos_br(fp, 0)) break;
 			} else {
 				if (!write_fat_32_br(fp, 0)) break;
@@ -1152,7 +1152,7 @@ static BOOL SetupWinPE(char drive_letter)
 	BOOL r = FALSE;
 	char* buf = NULL;
 
-	index = ((iso_report.winpe&WINPE_I386) == WINPE_I386)?0:1;
+	index = ((img_report.winpe&WINPE_I386) == WINPE_I386)?0:1;
 	// Allow other values than harddisk 1, as per user choice for disk ID
 	safe_sprintf(setupsrcdev, sizeof(setupsrcdev),
 		"SetupSourceDevice = \"\\device\\harddisk%d\\partition1\"", ComboBox_GetCurSel(hDiskID));
@@ -1160,7 +1160,7 @@ static BOOL SetupWinPE(char drive_letter)
 	safe_sprintf(src, sizeof(src), "%c:\\%s\\ntdetect.com", drive_letter, basedir[index]);
 	safe_sprintf(dst, sizeof(dst), "%c:\\ntdetect.com", drive_letter);
 	CopyFileA(src, dst, TRUE);
-	if (!iso_report.uses_minint) {
+	if (!img_report.uses_minint) {
 		// Create a copy of txtsetup.sif, as we want to keep the i386 files unmodified
 		safe_sprintf(src, sizeof(src), "%c:\\%s\\txtsetup.sif", drive_letter, basedir[index]);
 		safe_sprintf(dst, sizeof(dst), "%c:\\txtsetup.sif", drive_letter);
@@ -1182,11 +1182,11 @@ static BOOL SetupWinPE(char drive_letter)
 
 	// \minint with /minint option doesn't require further processing => return true
 	// \minint and no \i386 without /minint is unclear => return error
-	if (iso_report.winpe&WINPE_MININT) {
-		if (iso_report.uses_minint) {
+	if (img_report.winpe&WINPE_MININT) {
+		if (img_report.uses_minint) {
 			uprintf("Detected \\minint directory with /minint option: nothing to patch\n");
 			r = TRUE;
-		} else if (!(iso_report.winpe&WINPE_I386)) {
+		} else if (!(img_report.winpe&WINPE_I386)) {
 			uprintf("Detected \\minint directory only but no /minint option: not sure what to do\n");
 		}
 		goto out;
@@ -1231,7 +1231,7 @@ static BOOL SetupWinPE(char drive_letter)
 		}
 	}
 
-	if (!iso_report.uses_minint) {
+	if (!img_report.uses_minint) {
 		// Additional setupldr.bin/bootmgr patching
 		for (i=0; i<size-32; i++) {
 			// rdisk(0) -> rdisk(#) disk masquerading
@@ -1310,7 +1310,7 @@ BOOL SetupWinToGo(const char* drive_name, BOOL use_ms_efi)
 	uprintf("Mounted ISO as '%s'", mounted_iso);
 
 	// Now we use the WIM API to apply that image
-	static_sprintf(image, "%s%s", mounted_iso, &iso_report.install_wim_path[2]);
+	static_sprintf(image, "%s%s", mounted_iso, &img_report.install_wim_path[2]);
 	if (!WimApplyImage(image, 1, drive_name)) {
 		uprintf("Failed to apply Windows To Go image");
 		if (!IS_ERROR(FormatStatus))
@@ -1460,7 +1460,7 @@ void update_progress(const uint64_t processed_bytes)
 {
 	if (GetTickCount() > LastRefresh + 25) {
 		LastRefresh = GetTickCount();
-		format_percent = (100.0f*processed_bytes)/(1.0f*iso_report.projected_size);
+		format_percent = (100.0f*processed_bytes)/(1.0f*img_report.projected_size);
 		PrintInfo(0, MSG_261, format_percent);
 		UpdateProgress(OP_FORMAT, format_percent);
 	}
@@ -1509,14 +1509,14 @@ DWORD WINAPI FormatThread(void* param)
 	pt = GETPARTTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
 	tt = GETTARGETTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
 	use_large_fat32 = (fs == FS_FAT32) && ((SelectedDrive.DiskSize > LARGE_FAT32_SIZE) || (force_large_fat32));
-	windows_to_go = (togo_mode) && HAS_TOGO(iso_report) && (Button_GetCheck(GetDlgItem(hMainDialog, IDC_WINDOWS_TO_GO)) == BST_CHECKED);
+	windows_to_go = (togo_mode) && HAS_TOGO(img_report) && (Button_GetCheck(GetDlgItem(hMainDialog, IDC_WINDOWS_TO_GO)) == BST_CHECKED);
 	// Find out if we need to add any extra partitions
 	if ((windows_to_go) && (tt == TT_UEFI) && (pt == PARTITION_STYLE_GPT))
 		// According to Microsoft, every GPT disk (we RUN Windows from) must have an MSR due to not having hidden sectors
 		// http://msdn.microsoft.com/en-us/library/windows/hardware/dn640535.aspx#gpt_faq_what_disk_require_msr
 		extra_partitions = XP_MSR | XP_EFI;
 	else if ( (fs == FS_NTFS) && ((bt == BT_UEFI_NTFS) ||
-			  ((bt == BT_ISO) && (iso_report.has_efi) && ((tt == TT_UEFI) || (windows_to_go) || (allow_dual_uefi_bios)))) )
+			  ((bt == BT_ISO) && (img_report.has_efi) && ((tt == TT_UEFI) || (windows_to_go) || (allow_dual_uefi_bios)))) )
 		extra_partitions = XP_UEFI_NTFS;
 	else if (IsChecked(IDC_EXTRA_PARTITION))
 		extra_partitions = XP_COMPAT;
@@ -1674,10 +1674,10 @@ DWORD WINAPI FormatThread(void* param)
 		}
 		LastRefresh = 0;
 
-		if (iso_report.compression_type != BLED_COMPRESSION_NONE) {
+		if (img_report.compression_type != BLED_COMPRESSION_NONE) {
 			uprintf("Writing Compressed Image...");
 			bled_init(_uprintf, update_progress, &FormatStatus);
-			bled_uncompress_with_handles(hSourceImage, hPhysicalDrive, iso_report.compression_type);
+			bled_uncompress_with_handles(hSourceImage, hPhysicalDrive, img_report.compression_type);
 			bled_exit();
 		} else {
 			uprintf("Writing Image...");
@@ -1706,13 +1706,13 @@ DWORD WINAPI FormatThread(void* param)
 					break;
 				if (GetTickCount() > LastRefresh + 25) {
 					LastRefresh = GetTickCount();
-					format_percent = (100.0f*wb)/(1.0f*iso_report.projected_size);
+					format_percent = (100.0f*wb)/(1.0f*img_report.projected_size);
 					PrintInfo(0, MSG_261, format_percent);
 					UpdateProgress(OP_FORMAT, format_percent);
 				}
 				// Don't overflow our projected size (mostly for VHDs)
-				if (wb + rSize > iso_report.projected_size) {
-					rSize = (DWORD)(iso_report.projected_size - wb);
+				if (wb + rSize > img_report.projected_size) {
+					rSize = (DWORD)(img_report.projected_size - wb);
 				}
 				// WriteFile fails unless the size is a multiple of sector size
 				if (rSize % SectorSize != 0)
@@ -1826,13 +1826,13 @@ DWORD WINAPI FormatThread(void* param)
 			// All good
 		} else if (tt == TT_UEFI) {
 			// For once, no need to do anything - just check our sanity
-			if ( (bt != BT_ISO) || (!iso_report.has_efi) || (fs > FS_NTFS) ) {
+			if ( (bt != BT_ISO) || (!img_report.has_efi) || (fs > FS_NTFS) ) {
 				uprintf("Spock gone crazy error!\n");
 				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_INSTALL_FAILURE;
 				goto out;
 			}
 		} else if ( (bt == BT_SYSLINUX_V4) || (bt == BT_SYSLINUX_V6) ||
-			((bt == BT_ISO) && (HAS_SYSLINUX(iso_report) || IS_REACTOS(iso_report)) &&
+			((bt == BT_ISO) && (HAS_SYSLINUX(img_report) || IS_REACTOS(img_report)) &&
 				(!allow_dual_uefi_bios) && (IS_FAT(fs))) ) {
 			if (!InstallSyslinux(DriveIndex, drive_name[0], fs)) {
 				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_INSTALL_FAILURE;
@@ -1902,7 +1902,7 @@ DWORD WINAPI FormatThread(void* param)
 						FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_ISO_EXTRACT);
 					goto out;
 				}
-				if (iso_report.has_kolibrios) {
+				if (img_report.has_kolibrios) {
 					kolibri_dst[0] = drive_name[0];
 					uprintf("Installing: %s (KolibriOS loader)\n", kolibri_dst);
 					if (ExtractISOFile(image_path, "HD_Load/USB_Boot/MTLD_F32", kolibri_dst,
@@ -1911,9 +1911,9 @@ DWORD WINAPI FormatThread(void* param)
 					}
 				}
 				// EFI mode selected, with no 'boot###.efi' but Windows 7 x64's 'bootmgr.efi' (bit #0)
-				if ((tt == TT_UEFI) && IS_WIN7_EFI(iso_report)) {
+				if ((tt == TT_UEFI) && IS_WIN7_EFI(img_report)) {
 					PrintInfoDebug(0, MSG_232);
-					iso_report.install_wim_path[0] = drive_name[0];
+					img_report.install_wim_path[0] = drive_name[0];
 					efi_dst[0] = drive_name[0];
 					efi_dst[sizeof(efi_dst) - sizeof("\\bootx64.efi")] = 0;
 					if (!CreateDirectoryA(efi_dst, 0)) {
@@ -1921,13 +1921,13 @@ DWORD WINAPI FormatThread(void* param)
 						FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_PATCH);
 					} else {
 						efi_dst[sizeof(efi_dst) - sizeof("\\bootx64.efi")] = '\\';
-						if (!WimExtractFile(iso_report.install_wim_path, 1, "Windows\\Boot\\EFI\\bootmgfw.efi", efi_dst)) {
+						if (!WimExtractFile(img_report.install_wim_path, 1, "Windows\\Boot\\EFI\\bootmgfw.efi", efi_dst)) {
 							uprintf("Failed to setup Win7 EFI boot\n");
 							FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_PATCH);
 						}
 					}
 				}
-				if ( (tt == TT_BIOS) && (IS_WINPE(iso_report.winpe)) ) {
+				if ( (tt == TT_BIOS) && (IS_WINPE(img_report.winpe)) ) {
 					// Apply WinPe fixup
 					if (!SetupWinPE(drive_name[0]))
 						FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_PATCH);

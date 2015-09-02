@@ -105,9 +105,9 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int fs_type)
 	uint32_t ldlinux_cluster;
 	int i, nsectors;
 	int bt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
-	BOOL use_v5 = (bt == BT_SYSLINUX_V6) || ((bt == BT_ISO) && (SL_MAJOR(iso_report.sl_version) >= 5));
+	BOOL use_v5 = (bt == BT_SYSLINUX_V6) || ((bt == BT_ISO) && (SL_MAJOR(img_report.sl_version) >= 5));
 
-	PrintInfoDebug(0, MSG_234, (bt == BT_ISO)?iso_report.sl_version_str:embedded_sl_version_str[use_v5?1:0]);
+	PrintInfoDebug(0, MSG_234, (bt == BT_ISO)?img_report.sl_version_str:embedded_sl_version_str[use_v5?1:0]);
 
 	// 4K sector size workaround
 	SECTOR_SHIFT = 0;
@@ -133,8 +133,8 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int fs_type)
 			syslinux_ldlinux[i] = (unsigned char*) malloc(syslinux_ldlinux_len[i]);
 			if (syslinux_ldlinux[i] == NULL)
 				goto out;
-			static_sprintf(path, "%s/%s-%s%s/%s.%s", FILES_DIR, syslinux, iso_report.sl_version_str,
-				iso_report.sl_version_ext, ldlinux, i==0?"sys":"bss");
+			static_sprintf(path, "%s/%s-%s%s/%s.%s", FILES_DIR, syslinux, img_report.sl_version_str,
+				img_report.sl_version_ext, ldlinux, i==0?"sys":"bss");
 			fd = fopen(path, "rb");
 			if (fd == NULL) {
 				uprintf("Could not open %s\n", path);
@@ -315,7 +315,7 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int fs_type)
 				uprintf("Failed to create '%s': %s\n", path, WindowsErrorString());
 			}
 		}
-	} else if (IS_REACTOS(iso_report)) {
+	} else if (IS_REACTOS(img_report)) {
 		uprintf("Setting up ReactOS...\n");
 		syslinux_mboot = GetResource(hMainInstance, MAKEINTRESOURCEA(IDR_SL_MBOOT_C32),
 			_RT_RCDATA, "mboot.c32", &syslinux_mboot_len, FALSE);
@@ -346,7 +346,7 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int fs_type)
 		}
 		/* Write the syslinux.cfg for ReactOS */
 		fprintf(fd, "DEFAULT ReactOS\nLABEL ReactOS\n  KERNEL %s\n  APPEND %s\n",
-			mboot_c32, iso_report.reactos_path);
+			mboot_c32, img_report.reactos_path);
 		fclose(fd);
 	}
 

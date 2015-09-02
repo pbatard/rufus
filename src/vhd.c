@@ -243,7 +243,7 @@ BOOL IsCompressedBootableImage(const char* path)
 	BOOL r = FALSE;
 	int64_t dc;
 
-	iso_report.compression_type = BLED_COMPRESSION_NONE;
+	img_report.compression_type = BLED_COMPRESSION_NONE;
 	for (p = (char*)&path[strlen(path)-1]; (*p != '.') && (p != path); p--);
 
 	if (p == path)
@@ -251,7 +251,7 @@ BOOL IsCompressedBootableImage(const char* path)
 
 	for (i = 0; i<ARRAYSIZE(file_assoc); i++) {
 		if (strcmp(p, file_assoc[i].ext) == 0) {
-			iso_report.compression_type = file_assoc[i].type;
+			img_report.compression_type = file_assoc[i].type;
 			buf = malloc(MBR_SIZE);
 			if (buf == NULL)
 				return FALSE;
@@ -273,7 +273,7 @@ BOOL IsCompressedBootableImage(const char* path)
 }
 
 
-BOOL IsHDImage(const char* path)
+BOOL IsBootableImage(const char* path)
 {
 	HANDLE handle = INVALID_HANDLE_VALUE;
 	LARGE_INTEGER liImageSize;
@@ -282,6 +282,7 @@ BOOL IsHDImage(const char* path)
 	size_t i;
 	uint32_t checksum, old_checksum;
 	LARGE_INTEGER ptr;
+	BOOL is_bootable_img = FALSE;
 
 	uprintf("Disk image analysis:");
 	handle = CreateFileU(path, GENERIC_READ, FILE_SHARE_READ, NULL,
@@ -291,31 +292,31 @@ BOOL IsHDImage(const char* path)
 		goto out;
 	}
 
-	iso_report.is_bootable_img = (BOOLEAN)IsCompressedBootableImage(path);
-	if (iso_report.compression_type == BLED_COMPRESSION_NONE)
-		iso_report.is_bootable_img = (BOOLEAN)AnalyzeMBR(handle, "  Image");
+	is_bootable_img = (BOOLEAN)IsCompressedBootableImage(path);
+	if (img_report.compression_type == BLED_COMPRESSION_NONE)
+		is_bootable_img = (BOOLEAN)AnalyzeMBR(handle, "  Image");
 
 	if (!GetFileSizeEx(handle, &liImageSize)) {
 		uprintf("  Could not get image size: %s", WindowsErrorString());
 		goto out;
 	}
-	iso_report.projected_size = (uint64_t)liImageSize.QuadPart;
+	img_report.projected_size = (uint64_t)liImageSize.QuadPart;
 
 	size = sizeof(vhd_footer);
-	if ((iso_report.compression_type == BLED_COMPRESSION_NONE) && (iso_report.projected_size >= (512 + size))) {
+	if ((img_report.compression_type == BLED_COMPRESSION_NONE) && (img_report.projected_size >= (512 + size))) {
 		footer = (vhd_footer*)malloc(size);
-		ptr.QuadPart = iso_report.projected_size - size;
+		ptr.QuadPart = img_report.projected_size - size;
 		if ( (footer == NULL) || (!SetFilePointerEx(handle, ptr, NULL, FILE_BEGIN)) ||
 			 (!ReadFile(handle, footer, size, &size, NULL)) || (size != sizeof(vhd_footer)) ) {
 			uprintf("  Could not read VHD footer");
 			goto out;
 		}
 		if (memcmp(footer->cookie, conectix_str, sizeof(footer->cookie)) == 0) {
-			iso_report.projected_size -= sizeof(vhd_footer);
+			img_report.projected_size -= sizeof(vhd_footer);
 			if ( (bswap_uint32(footer->file_format_version) != VHD_FOOTER_FILE_FORMAT_V1_0)
 			  || (bswap_uint32(footer->disk_type) != VHD_FOOTER_TYPE_FIXED_HARD_DISK)) {
 				uprintf("  Unsupported type of VHD image");
-				iso_report.is_bootable_img = FALSE;
+				is_bootable_img = FALSE;
 				goto out;
 			}
 			// Might as well validate the checksum while we're at it
@@ -328,14 +329,14 @@ BOOL IsHDImage(const char* path)
 				uprintf("  Warning: VHD footer seems corrupted (checksum: %04X, expected: %04X)", old_checksum, checksum);
 			// Need to remove the footer from our payload
 			uprintf("  Image is a Fixed Hard Disk VHD file");
-			iso_report.is_vhd = TRUE;
+			img_report.is_vhd = TRUE;
 		}
 	}
 
 out:
 	safe_free(footer);
 	safe_closehandle(handle);
-	return iso_report.is_bootable_img;
+	return is_bootable_img;
 }
 
 #define WIM_HAS_API_EXTRACT 1
