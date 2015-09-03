@@ -9100,7 +9100,7 @@ t MSG_263 "Guna saiz seunit yang BETUL"
 
 ################################################################################
 l "nb-NO" "Norwegian (Norsk)" 0x0414
-v 1.0.17
+v 1.0.18
 b "en-US"
 
 # Main dialog
@@ -9301,9 +9301,8 @@ t MSG_080 "Rufus oppdaget at Windows fortsatt skriver til denne USB enhetens int
 	"Avhengig av hastigheten på din USB enhet, vil muligens denne operasjonen ta lang til å fullføre, "
 	"spesielt for store filer.\n\nVi anbefaler at du lar Windows fullføre, slik at feil unngås. "
 	"Men blir du lei av og vente..., kan du bare koble fra enheten..."
-t MSG_081 "Ustøttet ISO"
-t MSG_082 "Denne versjonen av Rufus støtter bare oppstartbare ISOs basert på bootmgr, EFI, Grub4DOS, GRUB 2, isolinux eller WinPE.\n"
-	"Denne ISO ser ikke ut til å støtte noen av delene..."
+t MSG_081 "Ikke støttet bildefil"
+t MSG_082 "Dette ISO-bildet er enten ikke oppstartbar, eller så bruker den en oppstart eller pakkemetode som ikke er støttet av Rufus...\n"
 t MSG_083 "Bytte ut %s?"
 t MSG_084 "Dette ISO bildet ser ut til å inneholde en foreldet versjon av '%s'.\n"
 	"Boot menyene vil muligens bli vist feil p.g.a. dette.\n\n"
@@ -9549,6 +9548,23 @@ t MSG_265 "VMWare disk oppdagelse"
 t MSG_266 "Dobbel UEFI/BIOS instilling"
 t MSG_267 "Legger til Windows bilde: %0.1f%% ferdig"
 t MSG_268 "Legger til Windows bilde..."
+t MSG_269 "Bevarer tidskode"
+t MSG_270 "USB avkoding"
+t MSG_271 "Regner ut bilde sjekksummer: %0.1f%% fullført"
+t MSG_272 "Regner ut SHA1 og MD5 sjekksummer for det valgte bilde"
+t MSG_273 "Bytt program språk"
+t MSG_274 "ISOHybrid bilde oppdaget"
+t MSG_275 "Bildet du har valgt er en 'ISOHybrid' bilde. Dette betyr det enten kan bli skrevet i "
+	"%s (fil kopi) modus eller %s (bildefil) modus.\n"
+	"Rufus anbefaler å bruke %s modus, slik at du har full tilgang til stasjonen etter at du har skrevet til den.\n"
+	"Hvis du skulle få problemer under oppstart, kan du prøve å skrive bildet igjen i %s modus.\n\n"
+	"Vennligst velg modus som du ønsker å skrive dette bildet i:"
+t MSG_276 "Skriv i %s modus (Anbefalt)"
+t MSG_277 "Skriv i %s modus"
+t MSG_278 "Oppstart type"
+t MSG_279 "Ikke oppstartbar"
+t MSG_280 "Bilde valg"
+t MSG_281 "(Vennligst velg et bilde)"
 
 ################################################################################
 l "pl-PL" "Polish (Polski)" 0x0415
