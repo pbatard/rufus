@@ -9,29 +9,36 @@ https://github.com/pbatard/rufus/wiki/Localization#Editing_a_translation
 Remember to also update the version number for your translation ('v x.y.z')
 once you have matched all the changes that occurred for the en-US translation.
 
-!!IMPORTANT!! The changes below do NOT contain the full message and only tell
+!!IMPORTANT!! The changes below may NOT contain the full message and only tell
 you WHERE, in the English translation, you should look to find the full message
 content. PLEASE, do not just look at this Changelog when updating your
 translation, but always use the English section of rufus.loc as your base.
 For instance, MSG_114, that was introduced in v1.0.8 is MORE than one line!
 
-o Upcoming changes for Rufus 2.4 (TRANSLATORS, PLEASE DO NOT START WORKING ON THOSE UNTIL ADVISED TO DO SO!!!)
+o Version 1.0.18 (2015.09.03)
   - Changed MSG_081 "Unsupported ISO" -> "Unsupported image"
   - Changed MSG_082 -> "This image is either non-bootable, or it uses a boot or compression method that is not supported by Rufus..."
   - *NEW* MSG_269 "Preserve timestamps"
     Note: You can use the Alt-T cheat mode to see this message. Also, if 'timestamp' doesn't really translate in your language,
     "file dates preservation" is a good approximation of what this is about.
   - *NEW* MSG_270 "USB debug"
-    Note: You can use the Alt-. cheat mode to see this message
-  See https://en.wikipedia.org/wiki/Md5sum for an idea of what the 'checksums' in the 2 messages below are used for:
+    Note: You can use the Alt-. cheat mode to see the message above
+  For an idea of what the 'checksums' in the 2 messages below are used for, see https://en.wikipedia.org/wiki/Md5sum:
   - *NEW* MSG_271 "Computing image checksums: %0.1f%% completed"
   - *NEW* MSG_272 "Compute the SHA1 and MD5 checksums for the selected image"
   - *NEW* MSG_273 "Change the application language"
-    Note: You can see this message by hovering on the language button
+    Note: You can see the message above by hovering on the language button
   - *NEW* MSG_274 "ISOHybrid image detected"
-	- *NEW* MSG_275 "The image you have selected is..." [TRANSLATORS: Please see the English section of 'rufus.loc' for the FULL message]
+    Note: You can test this message and the one below by downloading and trying to write the latest menu_c32_test.iso (120 KB) from:
+    https://github.com/pbatard/rufus/raw/master/res/localization/menu_c32_test.iso
+	- *NEW* MSG_275 "The image you have selected is..." [TRANSLATORS: Please refer to the English section of 'rufus.loc' for the FULL message]
+	  For more info on the messages below, also see the comments in the English section of rufus.loc
   - *NEW* MSG_276 "Write in %s mode (Recommended)"
   - *NEW* MSG_277 "Write in %s mode"
+  - *NEW* MSG_278 "Boot type"
+  - *NEW* MSG_279 "Non bootable"
+  - *NEW* MSG_280 "Image selection"
+  - *NEW* MSG_281 "(Please select an image)"
 
 o Version 1.0.17 (2015.02.04)
   - *NEW CONTROL* IDC_WINDOWS_INSTALL "Standard Windows installation" (Main dialog)

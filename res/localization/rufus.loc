@@ -88,7 +88,7 @@
 # http://download.microsoft.com/download/9/5/E/95EF66AF-9026-4BB0-A41D-A4F81802D92C/%5BMS-LCID%5D.pdf
 # for the LCID (0x####) codes you should use
 l "en-US" "English (English)" 0x0409, 0x0809, 0x0c09, 0x1009, 0x1409, 0x1809, 0x1c09, 0x2009, 0x2409, 0x2809, 0x2c09, 0x3009, 0x3409, 0x3809, 0x3c09, 0x4009, 0x4409, 0x4809
-v 1.0.17
+v 1.0.18
 
 # Main dialog
 g IDD_DIALOG
@@ -530,7 +530,14 @@ t MSG_275 "The image you have selected is an 'ISOHybrid' image. This means it ca
 t MSG_276 "Write in %s mode (Recommended)"
 # '%s' below will be replaced with your translation for MSG_095 ("DD Image")
 t MSG_277 "Write in %s mode"
-
+# The following will be used for new controls of the Rufus 3.0 interface
+# They are added as messages, so that I will have them available when needed.
+# 278 & 280 will be dropdown titles, similar to how IDS_DEVICE_TXT or IDS_PARTITION_TYPE_TXT are used
+# 279 & 281 will be items that can appear in the dropdowns
+t MSG_278 "Boot type"
+t MSG_279 "Non bootable"
+t MSG_280 "Image selection"
+t MSG_281 "(Please select an image)"
 
 ################################################################################
 ############################# TRANSLATOR END COPY ##############################
@@ -4332,7 +4339,7 @@ t MSG_268 "Asetetaan Windows-levykuvaa..."
 
 ################################################################################
 l "fr-FR" "French (Français)" 0x040c, 0x080c, 0x0c0c, 0x100c, 0x140c, 0x180c, 0x1c0c, 0x200c, 0x240c, 0x280c, 0x2c0c, 0x300c, 0x340c, 0x380c, 0xe40c
-v 1.0.17
+v 1.0.18
 b "en-US"
 
 g IDD_DIALOG
@@ -4739,6 +4746,10 @@ t MSG_275 "L'image que vous avez sélectionnée est une image 'ISOHybrid'. Cela 
 	"Veuillez sélectionner le mode que vous souhaitez utiliser pour écrire cette image :"
 t MSG_276 "Ecrire en mode %s (Recommandé)"
 t MSG_277 "Ecrire en mode %s"
+t MSG_278 "Type de démarrage"
+t MSG_279 "Non démarrable"
+t MSG_280 "Sélection d'image"
+t MSG_281 "(Veuillez sélectioner une image)"
 
 ################################################################################
 l "de-DE" "German (Deutsch)" 0x0407, 0x0807, 0x0c07, 0x1007, 0x1407
