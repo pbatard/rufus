@@ -522,7 +522,7 @@ t MSG_273 "Change the application language"
 t MSG_274 "ISOHybrid image detected"
 # '%s' below will be replaced with your translations for MSG_036 ("ISO Image") and MSG_095 ("DD Image")
 t MSG_275 "The image you have selected is an 'ISOHybrid' image. This means it can be written either in "
-	"%s (file copy) mode or %s (disk image) mode .\n"
+	"%s (file copy) mode or %s (disk image) mode.\n"
 	"Rufus recommends using %s mode, so that you always have full access to the drive after writing it.\n"
 	"However, if you encounter issues during boot, you can try writing this image again in %s mode.\n\n"
 	"Please select the mode that you want to use to write this image:"
