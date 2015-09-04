@@ -6521,7 +6521,7 @@ t MSG_268 "Menerapkan image Windows..."
 
 ################################################################################
 l "it-IT" "Italian (Italiano)" 0x0410, 0x0810
-v 1.0.17
+v 1.0.18
 b "en-US"
 
 g IDD_DIALOG
@@ -6699,9 +6699,8 @@ t MSG_080 "Rufus ha rilevato che Windows sta ancora svuotando i buffer interni r
 	"A seconda della velocità dell'unità USB, questa operazione potrebbe richiedere un certo tempo per essere completata, "
 	"specialmente per file molto grandi.\n\nTi suggeriamo di attendere che Windows completi le operazioni per evitare la corruzione dei dati. "
 	"Se sei stanco di aspettare, puoi semplicemente scollegare l'unità..."
-t MSG_081 "Formato ISO non supportato"
-t MSG_082 "Questa versione di Rufus supporta solo immagini ISO avviabili basate su bootmgr, EFI, Grub4DOS, GRUB 2, isolinux o WinPE.\n"
-	"Questa immagine ISO non sembra usare uno dei metodi supportati..."
+t MSG_081 "Formato immagine non supportato"
+t MSG_082 "Questa immagine non è bootabile, o usa un metodo di boot o di compressione non supportato da Rufus..."
 t MSG_083 "Sostituire %s?"
 t MSG_084 "Questa immagine sembra che usi una versione obsoleta di '%s'.\n"
 	"A causa di ciò il menu di avvio potrebbe non essere visualizzato correttamente.\n\n"
@@ -6928,6 +6927,23 @@ t MSG_265 "Rilevamento disco VMWare"
 t MSG_266 "Modo duale UEFI/BIOS"
 t MSG_267 "Applicazione immagine Windows: %0.1f%% completata"
 t MSG_268 "Applicazione immagine Windows..."
+t MSG_269 "Preserva data/ora"
+t MSG_270 "Debug USB"
+t MSG_271 "Calcolo checksum immagine: %0.1f%% completato"
+t MSG_272 "Calcola le checksum SHA1 e MD5 per l'immagine selezionata"
+t MSG_273 "Cambia la lingua dell'interfaccia"
+t MSG_274 "Rilevata immagine ISO ibrida"
+t MSG_275 "L'immagine selezionata è un'immagine ISO ibrida. Questo significa che può essere registrata in modo "
+	"'%s' (copia file) o in modo '%s' (immagine disco).\n"
+	"Rufus suggerisce di usare il modo '%s', in modo da avere sempre pieno accesso all'unità dopo la scrittura.\n"
+	"Se incontri problemi al boot, puoi provare a scrivere questa immagine in modo %s.\n\n"
+	"Seleziona il modo che vuoi usare per scrivere questa immagine:"
+t MSG_276 "Scrivi in modo %s (suggerito)"
+t MSG_277 "Scrivi in modo %s"
+t MSG_278 "Tipo boot"
+t MSG_279 "Non avviabile"
+t MSG_280 "Selezione immagine"
+t MSG_281 "(seleziona un'immagine)"
 
 ######################################################################
 l "ja-JP" "Japanese (日本語)" 0x0411
