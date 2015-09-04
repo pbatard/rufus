@@ -1989,15 +1989,18 @@ void SetBoot(int fs, int tt)
 
 void SaveVHD(void)
 {
+	static VHD_SAVE vhd_save;
 	char filename[128];
 	char path[MAX_PATH];
 	int DriveIndex = ComboBox_GetCurSel(hDeviceList);
+	EXT_DECL(vhd_ext, filename, __VA_GROUP__("*.vhd"), __VA_GROUP__("VHD File"));
+	ULARGE_INTEGER free_space;
+
 	if (DriveIndex >= 0)
 		safe_sprintf(filename, sizeof(filename), "%s.vhd", DriveLabel.String[DriveIndex]);
 	if ((DriveIndex != CB_ERR) && (!format_op_in_progress) && (format_thid == NULL)) {
-		EXT_DECL(vhd_ext, filename, __VA_GROUP__("*.vhd"), __VA_GROUP__("VHD File"));
-		ULARGE_INTEGER free_space;
-		VHD_SAVE vhd_save = { (DWORD)ComboBox_GetItemData(hDeviceList, DriveIndex), FileDialog(TRUE, NULL, &vhd_ext, 0) };
+		vhd_save.DeviceNum = (DWORD)ComboBox_GetItemData(hDeviceList, DriveIndex);
+		vhd_save.path = FileDialog(TRUE, NULL, &vhd_ext, 0);
 		if (vhd_save.path != NULL) {
 			// Reset all progress bars
 			SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_NORMAL, 0);

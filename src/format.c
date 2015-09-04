@@ -1975,7 +1975,7 @@ DWORD WINAPI SaveImageThread(void* param)
 {
 	BOOL s;
 	DWORD rSize, wSize;
-	VHD_SAVE *vhd_save = param;
+	VHD_SAVE *vhd_save = (VHD_SAVE*)param;
 	HANDLE hPhysicalDrive = INVALID_HANDLE_VALUE;
 	HANDLE hDestImage = INVALID_HANDLE_VALUE;
 	LARGE_INTEGER li;
