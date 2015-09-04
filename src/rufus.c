@@ -1022,15 +1022,14 @@ static void DisplayISOProps(void)
 DWORD WINAPI ISOScanThread(LPVOID param)
 {
 	int i;
-//	BOOL is_iso, is_img;
 
 	if (image_path == NULL)
 		goto out;
 	PrintInfoDebug(0, MSG_202);
 	user_notified = FALSE;
 	EnableControls(FALSE);
-	img_report.is_iso = ExtractISO(image_path, "", TRUE);
-	img_report.is_bootable_img = IsBootableImage(image_path);
+	img_report.is_iso = (BOOLEAN)ExtractISO(image_path, "", TRUE);
+	img_report.is_bootable_img = (BOOLEAN)IsBootableImage(image_path);
 	if (!img_report.is_iso && !img_report.is_bootable_img) {
 		SendMessage(hMainDialog, UM_PROGRESS_EXIT, 0, 0);
 		PrintInfoDebug(0, MSG_203);
