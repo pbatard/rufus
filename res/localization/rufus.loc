@@ -14326,7 +14326,7 @@ t MSG_268 "Застосування Windows-образа..."
 
 ################################################################################
 l "vi-VN" "Vietnamese (Tiếng Việt)" 0x042A
-v 1.0.17
+v 1.0.18
 b "en-US"
 
 # Main dialog
@@ -14512,9 +14512,8 @@ t MSG_080 "Rufus đã phát hiện Windows vẫn đang làm sạch bộ đệm b
 	"Tuỳ thuộc vào tốc độ của thiết bị USB, hoạt động này có thể mất một thời gian dài để hoàn tất, "
 	"đặc biệt với những tập tin lớn.\n\nChúng tôi khuyên bạn nên để Windows kết thúc để phòng hỏng dữ liệu. "
 	"Nhưng nếu bạn mệt mỏi vì chờ đợi, hãy cứ rút thiết bị ra..."
-t MSG_081 "ISO không được hỗ trợ"
-t MSG_082 "Phiên bản Rufus này chỉ hỗ trợ ISO khởi động dựa trên bootmgr, EFI, Grub4DOS, GRUB 2, isolinux hoặc WinPE.\n"
-	"ISO này không phải chúng..."
+t MSG_081 "Ảnh không được hỗ trợ"
+t MSG_082 "Ảnh này không có khả năng khởi động hoặc sử dụng một phương thức khởi động hoặc nén không được Rufus hỗ trợ..."
 t MSG_083 "Thay thế %s?"
 t MSG_084 "Ảnh ISO này là phiên bản cũ của '%s'.\n"
 	"Menu khởi động có thể không hiện chính xác vì điều này.\n\n"
@@ -14758,3 +14757,20 @@ t MSG_265 "Phát hiện đĩa VMWare"
 t MSG_266 "Chế độ Dual UEFI/BIOS"
 t MSG_267 "Đang áp dụng ảnh Windows: đã hoàn tất %0.1f%%"
 t MSG_268 "Đang áp dụng ảnh Windows..."
+t MSG_269 "Giữ dấu thời gian"
+t MSG_270 "Gỡ rối USB"
+t MSG_271 "Đang tính toán kiểm tổng ảnh: đã hoàn thành %0.1f%%"
+t MSG_272 "Tính toán giá trị tổng kiểm tra SHA1 và MD5 với ảnh đã chọn"
+t MSG_273 "Thay đổi ngôn ngữ ứng dụng"
+t MSG_274 "Đã phát hiện ảnh ISOHybrid"
+t MSG_275 "Ảnh bạn đã chọn là một ảnh 'ISOHybrid'. Điều này có nghĩa nó có thể được ghi trong "
+	"chế độ %s (chép tập tin) hoặc %s (ảnh đĩa).\n"
+	"Rufus khuyến cáo sử dụng chế độ %s, vì bạn luôn có toàn quyền truy nhập ổ đĩa sau khi ghi nó.\n"
+	"Tuy nhiên, nếu bạn gặp vấn đề trong lúc khởi động, bạn có thể thử ghi lại ảnh này trong chế độ %s.\n\n"
+	"Hãy chọn chế độ mà bạn muốn dùng để ghi ảnh này:"
+t MSG_276 "Ghi trong chế độ %s (Khuyến cáo)"
+t MSG_277 "Ghi trong chế độ %s"
+t MSG_278 "Phương thức khởi động"
+t MSG_279 "Không có khả năng khởi động"
+t MSG_280 "Chọn ảnh"
+t MSG_281 "(Hãy chọn một ảnh)"
