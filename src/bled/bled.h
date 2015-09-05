@@ -1,5 +1,5 @@
 /*
- * Bled (Busybox Library for Easy Decompression)
+ * Bled (Base Library for Easy Decompression)
  *
  * Copyright © 2014-2015 Pete Batard <pete@akeo.ie>
  *

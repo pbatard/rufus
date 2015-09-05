@@ -919,6 +919,7 @@ static int inflate_block(STATE_PARAM smallint *e)
 	}
 	default:
 		abort_unzip(PASS_STATE_ONLY);
+		return 0;
 	}
 }
 

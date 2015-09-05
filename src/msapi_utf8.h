@@ -802,7 +802,7 @@ static __inline char* getenvU(const char* varname)
 	wchar_t value[256];
 	size_t value_size;
 	// MinGW and WDK don't know wdupenv_s, so we use wgetenv_s
-	_wgetenv_s(&value_size, value, sizeof(value), wvarname);
+	_wgetenv_s(&value_size, value, ARRAYSIZE(value), wvarname);
 	ret = wchar_to_utf8(value);
 	wfree(varname);
 	return ret;

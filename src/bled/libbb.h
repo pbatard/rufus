@@ -1,7 +1,7 @@
 /*
- * Library header for busybox
+ * Library header for busybox/Bled
  *
- * Rewritten for Bled (Busybox Library for Easy Decompression)
+ * Rewritten for Bled (Base Library for Easy Decompression)
  * Copyright © 2014-2015 Pete Batard <pete@akeo.ie>
  *
  * Licensed under GPLv2 or later, see file LICENSE in this source tree.
@@ -20,9 +20,6 @@
 #error Only Windows platforms are supported
 #endif
 
-#if defined(_MSC_VER)
-#pragma warning(disable: 4715)		// not all control paths return a value
-#pragma warning(disable: 4996)		// Ignore deprecated
 #if defined(DDKBUILD)
 #pragma warning(disable: 4242)		// "Conversion from x to y, possible loss of data"
 #pragma warning(disable: 4244)
@@ -30,7 +27,6 @@ struct timeval {
 	long tv_sec;
 	long tv_usec;
 };
-#endif
 #endif
 
 #include "platform.h"
@@ -197,7 +193,12 @@ static inline int full_read(int fd, void *buf, size_t count) {
 }
 
 static inline struct tm *localtime_r(const time_t *timep, struct tm *result) {
+#if defined(DDKBUILD)
 	result = localtime(timep);
+#else
+	if (localtime_s(result, timep) != 0)
+		result = NULL;
+#endif
 	return result;
 }
 
