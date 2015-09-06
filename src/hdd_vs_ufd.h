@@ -78,8 +78,15 @@ static str_score_t str_score[] = {
 	{ "TOSHIBA", 5 },
 	{ "QUANTUM", 10 },
 	{ "EXCELSTOR", 10 },
+	{ "ADATA", -15 },
 	{ "CORSAIR", -15 },
+	{ "KINGMAX", -15 },
+	{ "KINGSTON", -15 },
+	{ "LEXAR", -15 },
 	{ "MUSHKIN", -15 },
+	{ "PNY", -15 },
+	{ "SANDISK", -15 },
+	{ "TRANSCEND", -15 },
 };
 
 static str_score_t str_adjust[] = {
@@ -147,7 +154,7 @@ static vid_score_t vid_score[] = {
 	{ 0x1516, -5 },		// CompUSA
 	{ 0x152d, 10 },		// JMicron
 	{ 0x1687, -5 },		// Kingmax
-	{ 0x174c, 8 },		// ASMedia
+	{ 0x174c, 3 },		// ASMedia (also used by SanDisk)
 	{ 0x1759, 8 },		// LucidPort
 	{ 0x18a5, -2 },		// Verbatim
 	{ 0x18ec, -5 },		// Arkmicro

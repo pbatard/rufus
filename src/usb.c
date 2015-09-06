@@ -134,6 +134,14 @@ static __inline BOOL IsVHD(const char* buffer)
 	return FALSE;
 }
 
+/* For debugging user reports of HDDs vs UFDs */
+//#define FORCED_DEVICE
+#ifdef FORCED_DEVICE
+#define FORCED_VID 0x174C
+#define FORCED_PID 0x3074
+#define FORCED_NAME "SanDisk Extreme USB Device"
+#endif
+
 /*
  * Refresh the list of USB devices
  */
@@ -356,6 +364,11 @@ BOOL GetUSBDevices(DWORD devnum)
 								dev_if_path.String[(uintptr_t)htab_devid.table[j].data]);
 						if (GetUSBProperties(dev_if_path.String[(uintptr_t)htab_devid.table[j].data], device_id, &props))
 							method_str = "";
+#ifdef FORCED_DEVICE
+						props.vid = FORCED_VID;
+						props.pid = FORCED_PID;
+						safe_strcpy(buffer, sizeof(buffer), FORCED_NAME);
+#endif
 					}
 					break;
 				}
