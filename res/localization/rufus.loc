@@ -9600,9 +9600,9 @@ t MSG_281 "(Vennligst velg et bilde)"
 
 ################################################################################
 l "pl-PL" "Polish (Polski)" 0x0415
-v 1.0.17
+v 1.0.18
 b "en-US"
-# my info: 8.02.2015,17:06
+# my info: 6.9.2015,22:39
 
 # Main dialog
 g IDD_DIALOG
@@ -9618,8 +9618,9 @@ s IDS_ADVANCED_OPTIONS_GRP +40,0
 s IDC_ENABLE_FIXED_DISKS +40,0
 s IDC_EXTRA_PARTITION +40,0
 s IDC_RUFUS_MBR +40,0
-s IDC_NBPASSES -25,0
-m IDC_NBPASSES +65,0
+s IDC_BADBLOCKS +100,0
+s IDC_NBPASSES -60,0
+m IDC_NBPASSES +100,0
 s IDC_BOOT +40,0
 m IDC_BOOTTYPE +40,0
 m IDC_SELECT_ISO +40,0
@@ -9638,7 +9639,6 @@ t IDS_CLUSTERSIZE_TXT "Rozmiar jednostki alokacji"
 t IDS_LABEL_TXT "Nowa nazwa woluminu"
 t IDS_FORMAT_OPTIONS_GRP "Opcje Formatowania"
 t IDC_BADBLOCKS "Szukaj błędnych sektorów na urządzeniu"
-s IDC_BADBLOCKS +65,0
 t IDC_QUICKFORMAT "Szybkie formatowanie"
 t IDC_BOOT "Utwórz bootowalny dysk używając"
 t IDC_WINDOWS_INSTALL "Standardowa instalacja Windowsa"
@@ -9691,7 +9691,7 @@ t IDS_INCLUDE_BETAS_TXT "Dołącz wersje beta"
 m IDC_INCLUDE_BETAS -20,0
 m IDS_CHECK_NOW_GRP +9,0
 s IDS_CHECK_NOW_GRP +1,0
-t IDC_CHECK_NOW "Sprawdź Teraz"
+t IDC_CHECK_NOW "Sprawdź teraz"
 m IDC_CHECK_NOW +6,0
 s IDC_CHECK_NOW +6,0
 t IDCANCEL "Zamknij"
@@ -9806,9 +9806,8 @@ t MSG_080 "Rufus wykrył że Windows ciągle opróźnia swoje is bufory na urzą
 	"Zależnie od prędkości twojego urządzenia USB, ta operacja może zająć dużo czasu, "
 	"zwłaszcza dla dużych plików.\n\nZalecamy abyś pozwolił Windowsowui skończyć aby uniknąć uszkodzeń. "
 	"Ale jeśli jesteś już zmęczony czekaniem możesz po prostu odłączyć urządzenie..."
-t MSG_081 "Niewspierane ISO"
-t MSG_082 "Ta wersja Rufusa wspera tylko bootowalne ISO oparte na bootmgr, EFI, Grub4DOS, GRUB 2, isolinux lub WinPE.\n"
-	"To ISO nie wydaje się używać któregoś z nich..."
+t MSG_081 "Niewspierany obraz"
+t MSG_082 "Ten obraz nie jest bootowalny lub używa kompresji sektora rozruchowego niewspieranej przez Rufusa..."
 t MSG_083 "Zastąpić %s?"
 t MSG_084 "Ten plik ISO wydaje się być przestarzałą wersją '%s'.\n"
 	"Z tego powodu menu bootowania może nie wyświetlać się poprawnie.\n\n"
@@ -9929,18 +9928,18 @@ t MSG_173 "Kliknij aby wybrać..."
 # The following will appear in the about dialog
 t MSG_174 "Rufus - The Reliable USB Formatting Utility"
 t MSG_175 "Wersja %d.%d (Build %d)"
-t MSG_176 "Polski tłumacz: Piotr Halama <mailto:halamix2@o2.pl>"
+t MSG_176 "Polskie tłumaczenie: Piotr Halama <mailto:halamix2@o2.pl>"
 t MSG_177 "Zgłaszaj błędy lub ulepszenia na:"
-t MSG_178 "Dodatkowe Prawa Autorskie:"
-t MSG_179 "Polityka Aktualizacji:"
+t MSG_178 "Dodatkowe prawa autorskie:"
+t MSG_179 "Polityka aktualizacji:"
 t MSG_180 "Jeśli pozwolisz temu programowi szukać aktualizacji aplikacji, "
-	"Zgadzasz się na to, że następujące informacje mogą być zbierane na naszy, serwerze (serwerach):"
+	"Zgadzasz się na to, że następujące informacje mogą być zbierane na naszym serwerze (serwerach):"
 t MSG_181 "Architektura i wersja twojego systemu operacyjnego"
 t MSG_182 "Wersja aplikacji z której korzystasz"
 t MSG_183 "Twój adres IP"
-t MSG_184 "W celu generowania poufnych statystyk używania , możemy trzymać zebrane informacje, "
-	"\\b Przez najwyżej rok\\b0 . Jednak nie będziemy udostępniać żadnych z indywidualnych danych do osób trzecich."
-t MSG_185 "Proces Aktualizacji:"
+t MSG_184 "W celu generowania poufnych statystyk użytkowania tego programu możemy przechowywać zebrane informacje "
+	"\\b co najwyżej rok\\b0, jednak nie będziemy udostępniać żadnych z indywidualnych danych osobom trzecim."
+t MSG_185 "Proces aktualizacji:"
 t MSG_186 "Rufus nie instaluje lub uruchamia procesów w tle, dlatego aktualizacje są sprawdzane tylko kiedy jest uruchomione główne okno aplikacji.\\line\n"
 	"Dostęp do internetu jest oczywiście wymagany podczas sprawdzania aktualizacji."
 t MSG_187 "Obraz nieprawidłowy dla wybranej opcji bootowania"
@@ -10050,6 +10049,23 @@ t MSG_265 "Wykrywanie dysków VMWare"
 t MSG_266 "Tryb dual UEFI/BIOS"
 t MSG_267 "Zastosowywanie obrazu Windows: ukończono %0.1f%%"
 t MSG_268 "Zastosowywanie obrazu Windows..."
+t MSG_269 "Zachowaj znacziki czasu"
+t MSG_270 "Debugowanie USB"
+t MSG_271 "Obliczanie sum kontrolnych obrazu: ukończono %0.1f%%"
+t MSG_272 "Oblicz sumy kontrolne SHA1 oraz MD5 dla wybranego obrazu"
+t MSG_273 "Zmień język aplikacji"
+t MSG_274 "Wykryto obraz ISOHybrid"
+t MSG_275 "Obraz który wybrałeś to obraz 'ISOHybrid'. To znacza iż może zostać zapisany w trybie "
+	"%s (kopia plików) lub trybie %s (obraz dysku).\n"
+	"Rufus zaleca użycie trybu %s abyś zawsze miał pełny dostęp do dysku po jego zapisaniu.\n"
+	"Jednak jeśli napotkasz problemy podczas bootowania możesz spróbować zapisać ten obraz ponownie w trybie %s.\n\n"
+	"Proszę wybrać tryb którego chcesz użyć do zapisania tego obrazu:"
+t MSG_276 "Zapisz w trybie %s (zalecane)"
+t MSG_277 "Zapisz w trybie %s"
+t MSG_278 "Typ bootowania"
+t MSG_279 "Niebootowalne"
+t MSG_280 "Wybór obrazu"
+t MSG_281 "(Proszę wybrać obraz)"
 
 ################################################################################
 l "pt-BR" "Portuguese Brazilian (Português do Brasil)" 0x0416
