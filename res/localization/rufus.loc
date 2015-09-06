@@ -10483,7 +10483,7 @@ t MSG_281 "(Por favor selecione uma imagem)"
 
 ################################################################################
 l "pt-PT" "Portuguese Standard (Português)" 0x0816
-v 1.0.17
+v 1.0.18
 b "en-US"
 
 # Main dialog
@@ -10567,7 +10567,7 @@ t IDCANCEL "Fechar"
 g IDD_NEW_VERSION
 t IDD_NEW_VERSION "Procurar atualizações de Rufus"
 t IDS_NEW_VERSION_AVAIL_TXT "Nova versão disponível. Por favor, faça a transferência da última versão!"
-t IDC_WEBSITE "Clique aqui para ir ao Site de Rufus"
+t IDC_WEBSITE "Clique aqui para aceder ao Site de Rufus"
 t IDS_NEW_VERSION_NOTES_GRP "Notas relativas a esta versão"
 t IDS_NEW_VERSION_DOWNLOAD_GRP "Transferência"
 t IDC_DOWNLOAD "Transferir"
@@ -10671,9 +10671,8 @@ t MSG_080 "Rufus detetou que o Windows ainda está a limpar o buffer interno no 
 	"Dependendo da velocidade do dispositivo USB, esta operação pode demorar muito tempo a terminar, "
 	"especialmente para ficheiros grandes.\n\nRecomendamos que deixe o Windows terminar para evitar corrompimentos; "
 	"No entanto, se não quiser esperar, pode simplesmente desligar o dispositivo..."
-t MSG_081 "Tipo de imagem ISO não suportada"
-t MSG_082 "Esta versão de Rufus só suporta ISO's inicializáveis baseados em bootmgr, EFI, Grub4DOS, GRUB 2, isolinux ou WinPE.\n"
-	"Esta ISO parece não usar nenhuma destas opções..."
+t MSG_081 "Tipo de imagem não suportada"
+t MSG_082 "Esta imagem não é inicializável ou então usa um método de arranque ou compressão não suportado."
 t MSG_083 "Substituir %s?"
 t MSG_084 "Esta imagem ISO usa uma versão obsoleta do ficheiro '%s'.\n"
 	"Isto pode fazer com que o menu de arranque não seja exibido corretamente.\n\n"
@@ -10919,6 +10918,23 @@ t MSG_265 "A detetar disco VMWare"
 t MSG_266 "Dual modo UEFI/BIOS"
 t MSG_267 "A aplicar imagem Windows: %0.1f%% completo"
 t MSG_268 "Aplicar imagem Windows..."
+t MSG_269 "Manter data dos ficheiros"
+t MSG_270 "Depuração USB"
+t MSG_271 "Cálculo do checksums da imagem: %0.1f%% completo"
+t MSG_272 "Calcular SHA1 e MD5 para a imagem selecionada"
+t MSG_273 "Alterar o idioma da aplicação"
+t MSG_274 "Imagem ISOHybrid detetada"
+t MSG_275 "A imagem selecionada é uma 'ISOHybrid'. Isto significa que pode ser escrita no modo "
+	"%s (cópia de ficheiros) ou no modo %s (cópia de imagem).\n"
+	"Rufus recomenda o modo %s, para que tenha sempre acesso total ao disco após a escrita.\n"
+	"No entanto, se existirem erros durante o arranque, pode tentar escrever no modo %s.\n\n"
+	"Selecione o modo que realmente pretende para escrever esta imagem:"
+t MSG_276 "Escrever no modo %s (Recomendado)"
+t MSG_277 "Escrever no modo %s
+t MSG_278 "Tipo de arranque"
+t MSG_279 "Não inicializável"
+t MSG_280 "Seleção da Imagem"
+t MSG_281 "(Selecione a imagem)"
 
 ################################################################################
 l "ro-RO" "Romanian (Română)" 0x0418, 0x0818
