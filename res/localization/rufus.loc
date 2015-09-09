@@ -13532,7 +13532,7 @@ t MSG_281 "(Välj en avbild)"
 
 ################################################################################
 l "tr-TR" "Turkish (Türkçe)" 0x041F
-v 1.0.17
+v 1.0.18
 b "en-US"
 
 # Main dialog
@@ -13684,9 +13684,9 @@ t MSG_028 "megabyte"
 t MSG_029 "Varsayılan"
 # The following gets appended to the file system, cluster size, etc.
 t MSG_030 "%s (Varsayılan)"
-t MSG_031 "BIOS yada %s için %s Bölüm Düzeni"
-t MSG_032 "BIOS için %s Bölüm Düzeni"
-t MSG_033 "UEFI için %s Bölüm Düzeni"
+t MSG_031 "%s Bölüm Düzeni ve BIOS ya da %s"
+t MSG_032 "%s Bölüm Düzeni ve BIOS"
+t MSG_033 "%s Bölüm Düzeni ve UEFI"
 # Number of bad block check passes (singular for 1 pass, plural for 2 or more passes)
 t MSG_034 "%d Geçiş"
 t MSG_035 "%d Geçiş"
@@ -13744,9 +13744,8 @@ t MSG_080 "Rufus Windows'un USB aygıtını kendi işlemlerinde hala kullandığ
 	"USB aygıtınızın hızına bağlı olarak, bu işlemin tamamlanması özellikle büyük dosyalar için, "
 	"uzun bir süre alabilir.\n\nBozulmayı önlemek için Windows'un işini bitirmesine izin vermenizi öneriyoruz. "
 	"Fakat beklemekten yorulduysanız, yalnız aygıtı çıkarabilirsiniz..."
-t MSG_081 "Desteklenmeyen ISO"
-t MSG_082 "Rufus'un bu sürümü sadece açılabilir bootmgr, EFI, Grub4DOS, GRUB 2, isolinux yada WinPE tabanlı ISOları destekler.\n"
-	"Bu ISO öyle görünmüyor..."
+t MSG_081 "Desteklenmeyen Yansıma"
+t MSG_082 "Bu yansıma ya önyüklenebilir değil ya da Rufus tarafından desteklenmeyen bir önyükleme veya bir sıkıştırma yöntemi kullanıyor..."
 t MSG_083 "%s yerdeğiştirilsin mi?"
 t MSG_084 "Bu ISO yansıması '%s'in eski bir sürümünü kullanıyor gibi görünüyor.\n"
 	"Açılış menüsü bundan dolayı düzgün görüntülenmeyebilir.\n\n"
@@ -13987,6 +13986,23 @@ t MSG_265 "VMWare disk algılama"
 t MSG_266 "Çift UEFI/BIOS modu"
 t MSG_267 "Windows yansıması uygulanıyor: %0.1f%% tamamlandı"
 t MSG_268 "Windows yansıması uygulanıyor..."
+t MSG_269 "Zaman damgalarını koruma"
+t MSG_270 "USB Hata Ayıklama"
+t MSG_271 "Yansıma sağlaması hesaplanıyor: %0.1f%% tamamlandı"
+t MSG_272 "Seçilen yansıma için SHA1 ve MD5 sağlamasını hesapla"
+t MSG_273 "Uygulama dilini değiştir"
+t MSG_274 "ISOHybrid yansıma algılandı"
+t MSG_275 "Seçtiğiniz yansıma bir 'ISOHybrid' yansımasıdır. Bu da yansımanın ya %s (dosya kopyalama) modunda "
+	"ya da %s (disk yansıması) modunda yazılabileceği anlamına geliyor.\n"
+	"Rufus %s modunun kullanılmasını önerir, Böylece yazdırmadan sonra, sürücüye her zaman tam erişim sağlanabilir.\n"
+	"Ancak, Önyükleme sırasında sorunlarla karşılaşırsanız, Yansımayı %s modunda yeniden yazmayı deneyebilirsiniz.\n\n"
+	"Lütfen bu yansımanın yazdırılmasında kullanmak istediğiniz modu seçin:"
+t MSG_276 "%s modunda yazdır (Önerilen)"
+t MSG_277 "%s modunda yazdır"
+t MSG_278 "Önyükleme türü"
+t MSG_279 "Önyüklenebilir değil"
+t MSG_280 "Yansıma seçimi"
+t MSG_281 "(Lütfen bir yansıma seçin)"
 
 ################################################################################
 l "uk-UA" "Ukrainian (Українська)" 0x0422
