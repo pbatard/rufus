@@ -73,7 +73,7 @@ static str_score_t str_score[] = {
 	{ "MAXTOR", 10 },
 	{ "HITACHI", 10 },
 	{ "SEAGATE", 10 },
-	{ "SAMSUNG", 10 },
+	{ "SAMSUNG", 5 },
 	{ "FUJITSU", 10 },
 	{ "TOSHIBA", 5 },
 	{ "QUANTUM", 10 },
@@ -91,6 +91,7 @@ static str_score_t str_score[] = {
 
 static str_score_t str_adjust[] = {
 	{ "Gadget", -10 },
+	{ "Flash", -10 }
 };
 
 /* The lists belows set a score according to VID & VID:PID
@@ -127,7 +128,7 @@ static vid_score_t vid_score[] = {
 	{ 0x0718, -2 },		// Imation
 	{ 0x0781, -5 },		// SanDisk
 	{ 0x07ab, 8 },		// Freecom
-	{ 0x090c, -5 },		// Silicon Motion
+	{ 0x090c, -5 },		// Silicon Motion (also used by Samsung)
 	{ 0x0928, 10 },		// PLX Technology
 	{ 0x0930, -8 },		// Toshiba
 	{ 0x093a, -5 },		// Pixart
@@ -258,6 +259,8 @@ static vidpid_score_t vidpid_score[] = {
 	{ 0x067b, 0x3500, -10 },	// Hi-Speed Flash Disk with TruePrint AES3500
 	// Freecom exceptions
 	{ 0x07ab, 0xfcab, -20 },	// 4 GB UFD
+	// Samsung exceptions
+	{ 0x090c, 0x1000, -20 },	// Samsung Flash drive
 	// Toshiba exceptions
 	{ 0x0930, 0x1400, -20 },
 	{ 0x0930, 0x6533, -20 },

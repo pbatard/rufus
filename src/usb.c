@@ -137,9 +137,9 @@ static __inline BOOL IsVHD(const char* buffer)
 /* For debugging user reports of HDDs vs UFDs */
 //#define FORCED_DEVICE
 #ifdef FORCED_DEVICE
-#define FORCED_VID 0x174C
-#define FORCED_PID 0x3074
-#define FORCED_NAME "SanDisk Extreme USB Device"
+#define FORCED_VID 0x090c
+#define FORCED_PID 0x1000
+#define FORCED_NAME "Samsung Flash Drive USB Device"
 #endif
 
 /*
