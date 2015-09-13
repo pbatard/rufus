@@ -7861,7 +7861,8 @@ t MSG_268 "Windows 이미지 적용..."
 
 ################################################################################
 l "lv-LV" "Latvian (Latviešu)" 0x0426
-v 1.0.17
+v 1.0.18
+b "en-US"
 
 # Main dialog
 g IDD_DIALOG
@@ -8062,9 +8063,8 @@ t MSG_080 "Rufus noteica ka Windows nav beidzis darbu ar USB ierīces ātrpikļu
 	"Atkarībā no USB ierīces ātruma šīs operācijas pabeigšana var aizņemt ilgāku laiku, "
 	"īpaši lielākiem failiem.\n\nIeteikums sagaidīt Windows darbības beigas, lai nesabojāt ierīci. "
 	"Ja jums nav iespējas gaidīt, varat vienkārši atvienot ierīci..."
-t MSG_081 "Neatbalstāms ISO formāts"
-t MSG_082 "Šī Rufus versija atbalsta tikai ISO imidžus izveidotus kā bootmgr, EFI, Grub4DOS, "
-	"GRUB 2, isolinux vai WinPE.\nŠis ISO neatbilst minētajām prasībām..."
+t MSG_081 "Neatbalstāms imidža formāts"
+t MSG_082 "Izvēlētais imidžs nav ielādes, jeb izmanto Rufus nezināmu ielādes metodi vai saspiešanas formātu."
 t MSG_083 "Aizvietot %s?"
 t MSG_084 "Šis ISO imidžs izmanto novecojušas versijas '%s'.\n"
 	"Ielādes komandkarte var attēloties nekorekti.\n\n"
@@ -8303,6 +8303,23 @@ t MSG_265 "Noteikts VMWare disks"
 t MSG_266 "Apvienotais UEFI/BIOS režīms"
 t MSG_267 "Pielietots Windows imidžs: %0.1f%% pabeigts"
 t MSG_268 "Pielietots Windows imidžs..."
+t MSG_269 "Atļauja laika zīmogam"
+t MSG_270 "USB-atkļūdošana"
+t MSG_271 "Kontrolsummu skaitļošana: pabeigts %0.1f%%"
+t MSG_272 "Izskaitļot SHA1 un MD5 kontrolsummas izvēlētajam imidžam"
+t MSG_273 "Mainīt aplikācijas valodu"
+t MSG_274 "Pamanīts ISOHybrid-imidžs"
+t MSG_275 "Izvēlētajam imidžam ir 'ISOHybrid' formāts. Tas nozīmē ka imidžu var ierakstīt "
+	"vai %s kopēšanas režīmā, vai %s diska imidža režīmā.\n"
+	"Ieteicams izmantot %s režīmu pilnīgai piekļuvei diska saturam pēc ieraksta.\n"
+	"Ja ielādes laikā rodas problēmas, Jūs varat atkārtoti mēģināt ierakstīt imidžu %s režīmā.\n\n"
+	"Lūdzu, izvēlieties režīmu, kurš tiks izmantots izvēlētā imidža ierakstam:"
+t MSG_276 "Ierakstīt %s režīmā (Ieteicams)"
+t MSG_277 "Ierakstīt %s režīmā"
+t MSG_278 "Ielādes veids"
+t MSG_279 "Neielādējams imidžs"
+t MSG_280 "Imidža izvēle"
+t MSG_281 "(Lūdzu, izvēlieties imidžu)"
 
 ################################################################################
 l "lt-LT" "Lithuanian (Lietuvių)" 0x0427
