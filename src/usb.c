@@ -137,9 +137,9 @@ static __inline BOOL IsVHD(const char* buffer)
 /* For debugging user reports of HDDs vs UFDs */
 //#define FORCED_DEVICE
 #ifdef FORCED_DEVICE
-#define FORCED_VID 0x090c
-#define FORCED_PID 0x1000
-#define FORCED_NAME "Samsung Flash Drive USB Device"
+#define FORCED_VID 0x0930
+#define FORCED_PID 0x6544
+#define FORCED_NAME "TOSHIBA TransMemory USB Device"
 #endif
 
 /*
@@ -330,15 +330,15 @@ BOOL GetUSBDevices(DWORD devnum)
 
 					// Try to parse the current device_id string for VID:PID
 					// We'll use that if we can't get anything better
-					for (j = 0, k = 0; (j<strlen(device_id)) && (k<2); j++) {
+					for (k = 0, l = 0; (k<strlen(device_id)) && (l<2); k++) {
 						// The ID is in the form USB_VENDOR_BUSID\VID_xxxx&PID_xxxx\...
-						if (device_id[j] == '\\')
+						if (device_id[k] == '\\')
 							post_backslash = TRUE;
 						if (!post_backslash)
 							continue;
-						if (device_id[j] == '_') {
-							props.pid = (uint16_t)strtoul(&device_id[j + 1], NULL, 16);
-							if (k++ == 0)
+						if (device_id[k] == '_') {
+							props.pid = (uint16_t)strtoul(&device_id[k + 1], NULL, 16);
+							if (l++ == 0)
 								props.vid = props.pid;
 						}
 					}

@@ -60,7 +60,6 @@ static str_score_t str_score[] = {
 	{ "MX#", 10 },
 	{ "WDC", 10 },
 	{ "IBM", 10 },
-	{ "OCZ", 5 },
 	{ "STM#", 10 },
 	{ "HDS#", 10 },		// These Hitachi drives are a PITA
 	{ "HDP#", 10 },
