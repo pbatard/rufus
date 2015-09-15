@@ -13750,9 +13750,9 @@ t MSG_028 "megabyte"
 t MSG_029 "Varsayılan"
 # The following gets appended to the file system, cluster size, etc.
 t MSG_030 "%s (Varsayılan)"
-t MSG_031 "%s Bölüm Düzeni ve BIOS ya da %s"
-t MSG_032 "%s Bölüm Düzeni ve BIOS"
-t MSG_033 "%s Bölüm Düzeni ve UEFI"
+t MSG_031 "%s Bölüm Düzeni: BIOS ya da %s için"
+t MSG_032 "BIOS için %s Bölüm Düzeni"
+t MSG_033 "UEFI için %s Bölüm Düzeni"
 # Number of bad block check passes (singular for 1 pass, plural for 2 or more passes)
 t MSG_034 "%d Geçiş"
 t MSG_035 "%d Geçiş"
