@@ -41,8 +41,7 @@
 #include "usb.h"
 
 extern StrArray DriveID, DriveLabel;
-extern BOOL enable_HDDs, use_fake_units, enable_vmdk;
-BOOL usb_debug = FALSE;
+extern BOOL enable_HDDs, use_fake_units, enable_vmdk, usb_debug;
 
 /*
  * Get the VID, PID and current device speed

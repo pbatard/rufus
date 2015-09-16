@@ -62,7 +62,8 @@ typedef struct {
 
 RUFUS_IMG_REPORT img_report;
 int64_t iso_blocking_status = -1;
-BOOL enable_iso = TRUE, enable_joliet = TRUE, enable_rockridge = TRUE, preserve_timestamps = FALSE, has_ldlinux_c32;
+extern BOOL preserve_timestamps;
+BOOL enable_iso = TRUE, enable_joliet = TRUE, enable_rockridge = TRUE, has_ldlinux_c32;
 #define ISO_BLOCKING(x) do {x; iso_blocking_status++; } while(0)
 static const char* psz_extract_dir;
 static const char* bootmgr_efi_name = "bootmgr.efi";

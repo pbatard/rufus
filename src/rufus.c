@@ -107,7 +107,7 @@ static BOOL iso_provided = FALSE;
 static BOOL user_notified = FALSE;
 static BOOL relaunch = FALSE;
 static BOOL dont_display_image_name = FALSE;
-extern BOOL force_large_fat32, enable_iso, enable_joliet, enable_rockridge, enable_ntfs_compression, preserve_timestamps, usb_debug;
+extern BOOL enable_iso, enable_joliet, enable_rockridge, enable_ntfs_compression;
 extern uint8_t* grub2_buf;
 extern long grub2_len;
 extern const char* old_c32_name[NB_OLD_C32];
@@ -136,10 +136,10 @@ int default_fs;
 uint32_t dur_mins, dur_secs;
 HWND hDeviceList, hPartitionScheme, hFileSystem, hClusterSize, hLabel, hBootType, hNBPasses, hLog = NULL;
 HWND hLogDlg = NULL, hProgress = NULL, hInfo, hDiskID, hStatusToolbar;
-BOOL use_own_c32[NB_OLD_C32] = {FALSE, FALSE}, detect_fakes = TRUE, mbr_selected_by_user = FALSE;
+BOOL use_own_c32[NB_OLD_C32] = {FALSE, FALSE}, mbr_selected_by_user = FALSE, togo_mode;
 BOOL iso_op_in_progress = FALSE, format_op_in_progress = FALSE, right_to_left_mode = FALSE;
-BOOL enable_HDDs = FALSE, advanced_mode = TRUE, force_update = FALSE, use_fake_units = TRUE;
-BOOL allow_dual_uefi_bios = FALSE, enable_vmdk = FALSE, togo_mode = TRUE, no_confirmation_on_cancel = FALSE;
+BOOL enable_HDDs = FALSE, force_update = FALSE, enable_ntfs_compression = FALSE, no_confirmation_on_cancel = FALSE;
+BOOL advanced_mode, allow_dual_uefi_bios, detect_fakes, enable_vmdk, force_large_fat32, usb_debug, use_fake_units, preserve_timestamps;
 int dialog_showing = 0, lang_button_id = 0;
 uint16_t rufus_version[3], embedded_sl_version[2];
 char embedded_sl_version_str[2][12] = { "?.??", "?.??" };
@@ -1112,7 +1112,7 @@ static void SetPassesTooltip(void)
 }
 
 // Toggle "advanced" mode
-static void ToggleAdvanced(void)
+static void ToggleAdvanced(BOOL enable)
 {
 	// Compute the shift according to the weird values we measured at different scales:
 	// {1.0, 82}, {1.25, 88}, {1.5, 90}, {2.0, 96}, {2.5, 94} (Seriously, WTF is wrong with your scaling Microsoft?!?!)
@@ -1122,8 +1122,7 @@ static void ToggleAdvanced(void)
 	POINT point;
 	int toggle;
 
-	advanced_mode = !advanced_mode;
-	if (!advanced_mode)
+	if (!enable)
 		dialog_shift = -dialog_shift;
 
 	// Increase or decrease the Window size
@@ -1163,7 +1162,7 @@ static void ToggleAdvanced(void)
 	SendMessage(hLog, EM_LINESCROLL, 0, SendMessage(hLog, EM_GETLINECOUNT, 0, 0));
 
 	// Hide or show the various advanced options
-	toggle = advanced_mode?SW_SHOW:SW_HIDE;
+	toggle = enable?SW_SHOW:SW_HIDE;
 	ShowWindow(GetDlgItem(hMainDialog, IDC_ENABLE_FIXED_DISKS), toggle);
 	ShowWindow(GetDlgItem(hMainDialog, IDC_EXTRA_PARTITION), toggle);
 	ShowWindow(GetDlgItem(hMainDialog, IDC_RUFUS_MBR), toggle);
@@ -1171,7 +1170,7 @@ static void ToggleAdvanced(void)
 	ShowWindow(GetDlgItem(hMainDialog, IDS_ADVANCED_OPTIONS_GRP), toggle);
 
 	// Toggle the up/down icon
-	SendMessage(GetDlgItem(hMainDialog, IDC_ADVANCED), BCM_SETIMAGELIST, 0, (LPARAM)(advanced_mode?&bi_up:&bi_down));
+	SendMessage(GetDlgItem(hMainDialog, IDC_ADVANCED), BCM_SETIMAGELIST, 0, (LPARAM)(enable?&bi_up:&bi_down));
 
 	// Never hurts to force Windows' hand
 	InvalidateRect(hMainDialog, NULL, TRUE);
@@ -1854,7 +1853,8 @@ void InitDialog(HWND hDlg)
 		bi_up.uAlign = BUTTON_IMAGELIST_ALIGN_CENTER;
 
 		SendMessage(hSelectISO, BCM_SETIMAGELIST, 0, (LPARAM)&bi_iso);
-		SendMessage(GetDlgItem(hDlg, IDC_ADVANCED), BCM_SETIMAGELIST, 0, (LPARAM)&bi_down);
+		SendMessage(GetDlgItem(hDlg, IDC_ADVANCED), BCM_SETIMAGELIST, 0,
+			(LPARAM)(advanced_mode?&bi_up:&bi_down));
 	}
 
 	// Set the various tooltips
@@ -1885,7 +1885,8 @@ void InitDialog(HWND hDlg)
 		SetWindowTextU(hSelectISO, lmprintf(MSG_165));
 	}
 
-	ToggleAdvanced();	// We start in advanced mode => go to basic mode
+	if (!advanced_mode)	// Hide as needed, since we display the advanced controls by default
+		ToggleAdvanced(FALSE);
 	ToggleToGo();
 
 	// Process commandline parameters
@@ -2115,8 +2116,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		PF_INIT(SHChangeNotifyRegister, shell32);
 		apply_localization(IDD_DIALOG, hDlg);
 		SetUpdateCheck();
-		advanced_mode = TRUE;
-		togo_mode = TRUE;
+		togo_mode = TRUE;	// We display the ToGo controls by default and need to hide them
 		// Create the log window (hidden)
 		first_log_display = TRUE;
 		log_displayed = FALSE;
@@ -2270,7 +2270,9 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			break;
 #endif
 		case IDC_ADVANCED:
-			ToggleAdvanced();
+			advanced_mode = !advanced_mode;
+			WriteSettingBool(SETTING_ADVANCED_MODE, advanced_mode);
+			ToggleAdvanced(advanced_mode);
 			SendMessage(hMainDialog, WM_COMMAND, (CBN_SELCHANGE<<16) | IDC_FILESYSTEM,
 				ComboBox_GetCurSel(hFileSystem));
 			break;
@@ -2871,6 +2873,16 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		uprintf("found locale '%s'", locale_name);
 	}
 
+	// Restore user-saved settings
+	advanced_mode = ReadSettingBool(SETTING_ADVANCED_MODE);
+	preserve_timestamps = ReadSettingBool(SETTING_PRESERVE_TIMESTAMPS);
+	use_fake_units = !ReadSettingBool(SETTING_USE_PROPER_SIZE_UNITS);
+	usb_debug = ReadSettingBool(SETTING_ENABLE_USB_DEBUG);
+	detect_fakes = !ReadSettingBool(SETTING_DISABLE_FAKE_DRIVES_CHECK);
+	allow_dual_uefi_bios = ReadSettingBool(SETTING_ENABLE_WIN_DUAL_EFI_BIOS);
+	force_large_fat32 = ReadSettingBool(SETTING_FORCE_LARGE_FAT32_FORMAT);
+	enable_vmdk = ReadSettingBool(SETTING_ENABLE_VMDK_DETECTION);
+
 	// Init localization
 	init_localization();
 	// Seek for a loc file in the current directory
@@ -2989,6 +3001,7 @@ relaunch:
 		// Alt-. => Enable USB enumeration debug
 		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == VK_OEM_PERIOD)) {
 			usb_debug = !usb_debug;
+			WriteSettingBool(SETTING_ENABLE_USB_DEBUG, usb_debug);
 			PrintStatus2000(lmprintf(MSG_270), usb_debug);
 			GetUSBDevices(0);
 			continue;
@@ -3000,6 +3013,7 @@ relaunch:
 		// it back during the bad block check.
 		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'B')) {
 			detect_fakes = !detect_fakes;
+			WriteSettingBool(SETTING_DISABLE_FAKE_DRIVES_CHECK, !detect_fakes);
 			PrintStatus2000(lmprintf(MSG_256), detect_fakes);
 			continue;
 		}
@@ -3021,6 +3035,7 @@ relaunch:
 		// Alt-E => Enhanced installation mode (allow dual UEFI/BIOS mode and FAT32 for Windows)
 		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'E')) {
 			allow_dual_uefi_bios = !allow_dual_uefi_bios;
+			WriteSettingBool(SETTING_ENABLE_WIN_DUAL_EFI_BIOS, !allow_dual_uefi_bios);
 			PrintStatus2000(lmprintf(MSG_266), allow_dual_uefi_bios);
 			SetMBRForUEFI(TRUE);
 			continue;
@@ -3067,6 +3082,7 @@ relaunch:
 		// Alt-L => Force Large FAT32 format to be used on < 32 GB drives
 		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'L')) {
 			force_large_fat32 = !force_large_fat32;
+			WriteSettingBool(SETTING_FORCE_LARGE_FAT32_FORMAT, force_large_fat32);
 			PrintStatus2000(lmprintf(MSG_254), force_large_fat32);
 			GetUSBDevices(0);
 			continue;
@@ -3096,12 +3112,14 @@ relaunch:
 		// Alt-T => Preserve timestamps when extracting ISO files
 		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'T')) {
 			preserve_timestamps = !preserve_timestamps;
+			WriteSettingBool(SETTING_PRESERVE_TIMESTAMPS, preserve_timestamps);
 			PrintStatus2000(lmprintf(MSG_269), preserve_timestamps);
 			continue;
 		}
 		// Alt-U => Use PROPER size units, instead of this whole Kibi/Gibi nonsense
 		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'U')) {
 			use_fake_units = !use_fake_units;
+			WriteSettingBool(SETTING_USE_PROPER_SIZE_UNITS, !use_fake_units);
 			PrintStatus2000(lmprintf(MSG_263), !use_fake_units);
 			GetUSBDevices(0);
 			continue;
@@ -3114,6 +3132,7 @@ relaunch:
 		// Alt-W => Enable VMWare disk detection
 		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'W')) {
 			enable_vmdk = !enable_vmdk;
+			WriteSettingBool(SETTING_ENABLE_VMDK_DETECTION, enable_vmdk);
 			PrintStatus2000(lmprintf(MSG_265), enable_vmdk);
 			GetUSBDevices(0);
 			continue;

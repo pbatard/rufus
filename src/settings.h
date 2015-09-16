@@ -27,13 +27,24 @@ extern char* ini_file;
 /*
  * List of setting names used by this application
  */
-#define SETTING_VERBOSE_UPDATES      "VerboseUpdateCheck"
-#define SETTING_LAST_UPDATE          "LastUpdateCheck"
-#define SETTING_UPDATE_INTERVAL      "UpdateCheckInterval"
-#define SETTING_INCLUDE_BETAS        "CheckForBetas"
-#define SETTING_COMM_CHECK           "CommCheck"
-#define SETTING_LOCALE               "Locale"
-#define SETTING_DISABLE_LGP          "DisableLGP"
+#define SETTING_VERBOSE_UPDATES			    "VerboseUpdateCheck"
+#define SETTING_LAST_UPDATE                 "LastUpdateCheck"
+#define SETTING_UPDATE_INTERVAL             "UpdateCheckInterval"
+#define SETTING_INCLUDE_BETAS               "CheckForBetas"
+#define SETTING_COMM_CHECK                  "CommCheck"
+#define SETTING_LOCALE                      "Locale"
+#define SETTING_DISABLE_LGP                 "DisableLGP"
+
+#define SETTING_ADVANCED_MODE               "AdvancedMode"
+#define SETTING_PRESERVE_TIMESTAMPS         "PreserveTimestamps"
+#define SETTING_USE_PROPER_SIZE_UNITS       "UseProperSizeUnits"
+#define SETTING_ENABLE_USB_DEBUG            "EnableUsbDebug"
+#define SETTING_DISABLE_FAKE_DRIVES_CHECK   "DisableFakeDrivesCheck"
+#define SETTING_ENABLE_WIN_DUAL_EFI_BIOS    "EnableWindowsDualUefiBiosMode"
+#define SETTING_FORCE_LARGE_FAT32_FORMAT    "ForceLargeFat32Formatting"
+#define SETTING_ENABLE_VMDK_DETECTION       "EnableVmdkDetection"
+
+
 
 static __inline BOOL CheckIniKey(const char* key) {
 	char* str = get_token_data_file(key, ini_file);
