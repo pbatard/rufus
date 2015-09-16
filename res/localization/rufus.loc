@@ -4785,7 +4785,7 @@ t MSG_281 "(Veuillez sélectioner une image)"
 
 ################################################################################
 l "de-DE" "German (Deutsch)" 0x0407, 0x0807, 0x0c07, 0x1007, 0x1407
-v 1.0.17
+v 1.0.18
 b "en-US"
 
 g IDD_DIALOG
@@ -4980,9 +4980,8 @@ t MSG_079 "Das Laufwerk ist nicht bereit."
 t MSG_080 "Rufus hat erkannt, dass Inhalte des Datenpuffer auf das USB-Laufwerk geschrieben werden.\n\n"
 	"Abhängig von der Geschwindigkeit des USB-Laufwerks, kann dieser Vorgang lange dauern; speziell für große Dateien.\n\nWir empfehlen, dass Sie Windows den Vorgang beenden lassen, um eine Problem zu vermeiden. "
 	"Wenn Ihnen der Vorgang zu lange dauert, können Sie das Gerät einfach entfernen..."
-t MSG_081 "Nicht unterstützte ISO-Abbild-Datei"
-t MSG_082 "Diese Version von Rufus unterstützt nur startfähige ISO-Abbilder auf Basis von bootmgr, EFI, Grub4DOS, GRUB 2, isolinux oder WinPE.\n"
-	"Dieses ISO-Abbild verwendet ein anderes Verfahren."
+t MSG_081 "Nicht unterstützte Abbild-Datei"
+t MSG_082 "Dieses Abbild ist nicht startfähig oder benutzt eine nicht unterstützte Startart und/oder Kompression."
 t MSG_083 "Ersetze %s?"
 t MSG_084 "Diese ISO-Abbild-Datei verwendet eine veraltete Version von '%s'.\n"
 	"Bootmenüs werden deswegen möglicherweise fehlerhaft dargestellt.\n\n"
@@ -5023,7 +5022,7 @@ t MSG_100 "Diese ISO-Abbild-Datei enthält eine Datei größer 4GB. Diese Dateig
 	"FAT oder FAT32 Dateisysteme nicht zulässig."
 t MSG_101 "Fehlende WIM-Unterstützung"
 t MSG_102 "Ihre Plattform kann keine Dateien aus WIM-Containern extrahieren. WIM-Extraktion "
-	"ist erforderlich, um EFI-startbare Windows 7 und Windows Vista USB-Laufwerke zu erzeugen. Sie können "
+	"ist erforderlich, um EFI-startfähige Windows 7 und Windows Vista USB-Laufwerke zu erzeugen. Sie können "
 	"das durch die Installation der aktuellen 7-ZIP Version beheben.\nMöchten Sie die 7-ZIP Download-Seite aufrufen?"
 t MSG_103 "Download %s?"
 t MSG_104 "%s oder neuer erfordert, dass eine '%s' installiert ist.\n"
@@ -5121,7 +5120,7 @@ t MSG_196 "WICHTIG: DIESES LAUFWERK HAT EINE NICHT STANDARDKONFORME SEKTORGRÖSS
 	"Herkömmliche Laufwerke nutzen eine 512-Byte Sektorgröße, aber dieses Laufwerk nutzt %d-Byte. "
 	"Höchstwahrscheinlich können Sie von diesem Laufwerk NICHT booten.\n"
 	"Rufus kann versuchen, ein bootfähiges Laufwerk zu erstellen, aber es gibt KEINE GARANTIE, dass es funktionieren wird."
-t MSG_197 "Nichtstandardkonforme Sektorgröße erkannt"
+t MSG_197 "Nicht standardkonforme Sektorgröße erkannt"
 t MSG_198 "'Windows To Go' kann nur auf ein GPT-partitioniertes Laufwerk installiert werden, wenn das FIXED-Attribut gesetzt ist. Das aktuelle Laufwerk hat diese nicht."
 t MSG_199 "Wählen Sie dies, wenn Sie planen Windows auf eines anderes Laufwerk zu installieren."
 t MSG_200 "Wählen Sie dies, wenn Sie Windows direkt vom gewählten Laufwerk starten wollen."
@@ -5152,9 +5151,7 @@ t MSG_216 "Gespeichert %s"
 t MSG_217 "Formatieren: %0.1f%% erledigt"
 t MSG_218 "Dateisystem erzeugen: Aufgabe %d/%d abgeschlossen"
 t MSG_219 "NTFS Fixup: %d%% erledigt"
-
 t MSG_220 "Formatiere (%s) - geschätzte Dauer %d:%02d..."
-
 t MSG_221 "Setzte Bezeichnung (kann etwas dauern)..."
 # Parameter: the file system. eg. "Formatting (NTFS)..."
 t MSG_222 "Formatiere (%s)..."
@@ -5208,6 +5205,23 @@ t MSG_265 "VMWare-Laufwerks-Erkennung"
 t MSG_266 "Dual UEFI/BIOS-Modus"
 t MSG_267 "Spiele Windows-Abbild auf: %0.1f%% fertiggestellt"
 t MSG_268 "Windows-Abbild aufspielen..."
+t MSG_269 "Zeitstempel bewahren"
+t MSG_270 "USB Testmodus"
+t MSG_271 "Berechne Abbild-Prüfsumme: %0.1f%% fertiggestellt"
+t MSG_272 "Berechne SHA1- und MD5-Prüfsumme für das gewählte Abbild"
+t MSG_273 "Sprache der Anwendung ändern"
+t MSG_274 "Hybrides ISO-Abbild erkannt"
+t MSG_275 "Das gewählte Abbild ist eine hybrides ISO-Abbild. Es kann entweder im "
+	"%s (Dateikopier-) oder %s (Abbild-) Modus kopiert werden.\n"
+	"Rufus empfiehlt den %s Modus, denn dann haben Sie nach dem Schreiben vollen Zugriff auf das Laufwerk.\n"
+	"Wenn Sie beim Starten Probleme haben, können Sie den %s Modus versuchen.\n\n"
+	"Bitte wählen Sie den Modus, mit dem Sie das Abbild schreiben wollen:"
+t MSG_276 "Im %s Modus schreiben (empfohlen)"
+t MSG_277 "Im %s Modus schreiben"
+t MSG_278 "Startart"
+t MSG_279 "Nicht startfähig"
+t MSG_280 "Abbildauswahl"
+t MSG_281 "(Bitte wählen Sie ein Abbild)"
 
 ################################################################################
 l "el-GR" "Greek (Ελληνικά)" 0x0408
