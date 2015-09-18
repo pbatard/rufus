@@ -3959,7 +3959,7 @@ t MSG_268 "Windows image wordt toegepast..."
 
 ################################################################################
 l "fi-FI" "Finnish (Suomi)" 0x040B
-v 1.0.17
+v 1.0.18
 b "en-US"
 
 # Main dialog
@@ -4143,9 +4143,8 @@ t MSG_080 "Rufus havaitsi, että Windows tyhjentää sisäistä puskuria USB-lai
 	"USB-laitteesi nopeudesta riippuen toiminnon suorittamisessa voi kestää kauan, "
 	"varsinkin suurilla tiedostoilla.\n\nSuosittelemme, että annat Windowsin suorittaa toiminnon loppuun välttyäksesi virheiltä. "
 	"Jos et kuitenkaan jaksa enää odottaa, voit ottaa laitteen irti..."
-t MSG_081 "ISO-levykuvaa ei tueta"
-t MSG_082 "Tämä Rufuksen versio tukee vain bootmgr, EFI, Grub4DOS, GRUB 2, isolinux tai WinPE- pohjaisia bootattavia ISO-levykuvia.\n"
-	"Tämä ISO ei vaikuta olevan tuettu..."
+t MSG_081 "Levykuvaa ei tueta"
+t MSG_082 "Valittu levykuva ei ole boottava tai se käyttää käynnistys- tai pakkausmenetelmää jota Rufus ei tue..."
 t MSG_083 "Korvataanko %s?"
 t MSG_084 "Tämä ISO-levykuva vaikuttaisi käyttävän vanhentunutta '%s'-versiota.\n"
 	"Tämän vuoksi käynnistysvalikot saattavat näkyä väärin.\n\n"
@@ -4384,6 +4383,23 @@ t MSG_265 "VMWare-levyn havaitseminen"
 t MSG_266 "Kaksois-UEFI/BIOS -tila"
 t MSG_267 "Asetetaan Windows-levykuvaa: %0.1f%% suoritettu"
 t MSG_268 "Asetetaan Windows-levykuvaa..."
+t MSG_269 "Aikaleimojen käyttö"
+t MSG_270 "USB-virheenkorjaus"
+t MSG_271 "Lasketaan levykuvan tarkistussummia: %0.1f%% suoritettu"
+t MSG_272 "Laske valitun levykuvan SHA1- ja MD5-tarkistussummat."
+t MSG_273 "Vaihda sovelluksen kieltä"
+t MSG_274 "ISOHybrid-levykuva havaittu"
+t MSG_275 "Valitsemasi levykuva on muotoa 'ISOHybrid'. Tämä tarkoittaa, että se voidaan "
+	"kirjoittaa joko %sna (tiedostojen kopiointi) tai %sna (levykuva).\n"
+	"Rufus suosittelee käyttämään '%s' -tilaa, jotta sinulla pysyy täysi pääsy asemaan kirjoittamisen jälkeen.\n"
+	"Jos törmäät ongelmiin käynnistyksessä, voit yrittää kirjoittaa levykuvaa uudelleen '%s' -tilassa.\n\n"
+	"Valitse tila, jota haluat käyttää levykuvan kirjoittamiseen:"
+t MSG_276 "Kirjoita %sna (Suositellaan)"
+t MSG_277 "Kirjoita %sna"
+t MSG_278 "Käynnistystyyppi"
+t MSG_279 "Ei-boottaava"
+t MSG_280 "Levykuvan valinta"
+t MSG_281 "(Valitse levykuva)"
 
 ################################################################################
 l "fr-FR" "French (Français)" 0x040c, 0x080c, 0x0c0c, 0x100c, 0x140c, 0x180c, 0x1c0c, 0x200c, 0x240c, 0x280c, 0x2c0c, 0x300c, 0x340c, 0x380c, 0xe40c
