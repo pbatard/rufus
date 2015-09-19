@@ -561,7 +561,7 @@ BOOL IsMediaPresent(DWORD DriveIndex)
 
 	hPhysical = GetPhysicalHandle(DriveIndex, FALSE, FALSE);
 	r = DeviceIoControl(hPhysical, IOCTL_DISK_GET_DRIVE_GEOMETRY_EX,
-			NULL, 0, geometry, sizeof(geometry), &size, NULL) || (size <= 0);
+			NULL, 0, geometry, sizeof(geometry), &size, NULL) && (size > 0);
 	safe_closehandle(hPhysical);
 	return r;
 }
@@ -716,7 +716,7 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 	}
 
 #if defined(__GNUC__)
-// GCC 4.9 bug us about the fact that MS defined an expandable array as array[1]
+// GCC 4.9 bugs us about the fact that MS defined an expandable array as array[1]
 #pragma GCC diagnostic ignored "-Warray-bounds"
 #endif
 	switch (DriveLayout->PartitionStyle) {
