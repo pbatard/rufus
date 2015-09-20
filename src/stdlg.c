@@ -704,7 +704,7 @@ INT_PTR CALLBACK NotificationCallback(HWND hDlg, UINT message, WPARAM wParam, LP
 		SendMessage(GetDlgItem(hDlg, IDNO), WM_SETFONT, (WPARAM)hDlgFont, MAKELPARAM(TRUE, 0));
 
 		apply_localization(IDD_NOTIFICATION, hDlg);
-		background_brush = CreateSolidBrush(GetSysColor(COLOR_3DHILIGHT));
+		background_brush = CreateSolidBrush(GetSysColor(COLOR_WINDOW));
 		separator_brush = CreateSolidBrush(GetSysColor(COLOR_3DLIGHT));
 		SetTitleBarIcon(hDlg);
 		CenterDialog(hDlg);
@@ -847,7 +847,7 @@ INT_PTR CALLBACK SelectionCallback(HWND hDlg, UINT message, WPARAM wParam, LPARA
 		SendMessage(GetDlgItem(hDlg, IDNO), WM_SETFONT, (WPARAM)hDlgFont, MAKELPARAM(TRUE, 0));
 
 		apply_localization(IDD_SELECTION, hDlg);
-		background_brush = CreateSolidBrush(GetSysColor(COLOR_3DHILIGHT));
+		background_brush = CreateSolidBrush(GetSysColor(COLOR_WINDOW));
 		separator_brush = CreateSolidBrush(GetSysColor(COLOR_3DLIGHT));
 		SetTitleBarIcon(hDlg);
 		CenterDialog(hDlg);
