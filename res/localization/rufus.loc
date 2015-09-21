@@ -3522,7 +3522,7 @@ t MSG_268 "Anvender Windows image..."
 
 ################################################################################
 l "nl-NL" "Dutch (Nederlands)" 0x0413, 0x0813
-v 1.0.17
+v 1.0.18
 b "en-US"
 
 # Main dialog
@@ -3729,9 +3729,8 @@ t MSG_080 " Rufus heeft gedetecteerd dat Windows nog steeds bezig is om zijn int
 	"Afhankelijk van de snelheid van uw USB apparaat, kan deze operatie een lange tijd duren voordat het voltooid is.\n"
 	"Zeker voor grote bestanden.\n\nHet is aanbevolen om Windows de taak volledig te laten voltooien om data corruptie te voorkomen.\n"
 	"Als het erg lang duurt dan kunt u het apparaat ontkoppelen..."
-t MSG_081 "Niet-ondersteunde ISO"
-t MSG_082 "Deze versie van Rufus ondersteund alleen opstartbare ISO's gebaseerd op bootmgr, EFI, Grub4DOS, GRUB 2, isolinux of WinPE.\n"
-	"Deze ISO lijkt dit geen van allen te zijn..."
+t MSG_081 "Niet-ondersteunde image"
+t MSG_082 "Deze image is ofwel niet opstartbaar, of het gebruikt een opstart- of compressiemethode dat niet ondersteund wordt door Rufus..."
 t MSG_083 "Vervang %s?"
 t MSG_084 "Deze ISO image lijkt een verouderde versie te gebruiken van'%s'.\n"
 	"Opstart menu's worden mogelijk niet goed getoond.\n\n"
@@ -3956,6 +3955,23 @@ t MSG_265 "VMWare disk gedetecteerd"
 t MSG_266 "Dubbel UEFI/BIOS modus"
 t MSG_267 "Windows image wordt toegepast: %0.1f%% gereed"
 t MSG_268 "Windows image wordt toegepast..."
+t MSG_269 "Behoud bestandsdata"
+t MSG_270 "USB debug"
+t MSG_271 "Image checksums berekenen: %0.1f%% voltooid"
+t MSG_272 "Bereken de SHA1 en MD5 checksums voor de geselecteerde image"
+t MSG_273 "Verander de taal van het programma"
+t MSG_274 "ISOHybride image gedetecteerd"
+t MSG_275 "De geselecteerde image is een 'ISOHybride' image. Dit betekent dat het in "
+	"%s (bestands copy) modus of %s (disk image) modus weggeschreven kan worden.\n"
+	"Rufus beveelt de %s modus aan zodat er altijd volledige toegang is tot de schijf nadat het beschreven is.\n"
+	"Echter, als er problemen zijn tijdens het opstarten kunt u proberen om deze image opnieuw te schrijven in %s modus.\n\n"
+	"Selecteer a.u.b. de modus die u wilt gebruiken om deze image te schrijven:"
+t MSG_276 "Schrijf in %s modus (Aanbevolen)"
+t MSG_277 "Schrijf in %s modus"
+t MSG_278 "Opstart type"
+t MSG_279 "Niet bootable"
+t MSG_280 "Image selectie"
+t MSG_281 "(Selecteer a.u.b. een image)"
 
 ################################################################################
 l "fi-FI" "Finnish (Suomi)" 0x040B
