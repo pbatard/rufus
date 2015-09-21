@@ -1,3 +1,10 @@
+o Version 2.4 (2015.09.??)
+    Allow some settings and cheat modes to be persisted
+    Fix multiple issues with flash drive detection
+    Fix removal of drives that contain no media
+    Fix cheat mode to save the current USB to *uncompressed* VHD (Alt-V)
+    Update most of the translations
+
 o Version 2.3 (2015.08.28)
     Detect ISOHybrid images and ask users how they should be written
     Add MD5/SHA1 checksum verification ('#' button on the status bar)
