@@ -1664,7 +1664,6 @@ void InitDialog(HWND hDlg)
 	// High DPI scaling
 	i16 = GetSystemMetrics(SM_CXSMICON);
 	hDC = GetDC(hDlg);
-	fScale = GetDeviceCaps(hDC, LOGPIXELSX) / 96.0f;
 	lfHeight = -MulDiv(9, GetDeviceCaps(hDC, LOGPIXELSY), 72);
 	if (hDC != NULL)
 		ReleaseDC(hDlg, hDC);
@@ -2066,6 +2065,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	POINT Point;
 	RECT DialogRect, DesktopRect, LangToolbarRect;
 	LONG progress_style;
+	HDC hDC;
 	int nDeviceIndex, fs, tt, i, nWidth, nHeight, nb_devices, selected_language, offset;
 	char tmp[128];
 	loc_cmd* lcmd = NULL;
@@ -2114,6 +2114,11 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 
 	case WM_INITDIALOG:
 		PF_INIT(SHChangeNotifyRegister, shell32);
+		// Make sure fScale is set before the first call to apply localization, so that move/resize scale appropriately
+		hDC = GetDC(hDlg);
+		fScale = GetDeviceCaps(hDC, LOGPIXELSX) / 96.0f;
+		if (hDC != NULL)
+			ReleaseDC(hDlg, hDC);
 		apply_localization(IDD_DIALOG, hDlg);
 		SetUpdateCheck();
 		togo_mode = TRUE;	// We display the ToGo controls by default and need to hide them
