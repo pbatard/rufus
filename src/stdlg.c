@@ -548,7 +548,8 @@ void ResizeMoveCtrl(HWND hDlg, HWND hCtrl, int dx, int dy, int dw, int dh, float
 	GetWindowRect(hCtrl, &rect);
 	point.x = right_to_left_mode?rect.right:rect.left;
 	point.y = rect.top;
-	ScreenToClient(hDlg, &point);
+	if (hDlg != hCtrl)
+		ScreenToClient(hDlg, &point);
 	GetClientRect(hCtrl, &rect);
 
 	// If the control has any borders (dialog, edit box), take them into account
@@ -587,13 +588,15 @@ INT_PTR CALLBACK LicenseCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM 
  */
 INT_PTR CALLBACK AboutCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	int i;
+	int i, dy;
 	const int edit_id[2] = {IDC_ABOUT_BLURB, IDC_ABOUT_COPYRIGHTS};
 	char about_blurb[2048];
 	const char* edit_text[2] = {about_blurb, additional_copyrights};
 	HWND hEdit[2];
 	TEXTRANGEW tr;
 	ENLINK* enl;
+	RECT rect;
+	REQRESIZE* rsz;
 	wchar_t wUrl[256];
 
 	switch (message) {
@@ -617,14 +620,23 @@ INT_PTR CALLBACK AboutCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 			 * http://blog.kowalczyk.info/article/eny/Setting-unicode-rtf-text-in-rich-edit-control.html */
 			SendMessageA(hEdit[i], EM_SETTEXTEX, (WPARAM)&friggin_microsoft_unicode_amateurs, (LPARAM)edit_text[i]);
 			SendMessage(hEdit[i], EM_SETSEL, -1, -1);
-			SendMessage(hEdit[i], EM_SETEVENTMASK, 0, ENM_LINK);
+			SendMessage(hEdit[i], EM_SETEVENTMASK, 0, ENM_LINK|((i==0)?ENM_REQUESTRESIZE:0));
 			SendMessage(hEdit[i], EM_SETBKGNDCOLOR, 0, (LPARAM)GetSysColor(COLOR_BTNFACE));
 		}
 		// Need to send an explicit SetSel to avoid being positioned at the end of richedit control when tabstop is used
 		SendMessage(hEdit[1], EM_SETSEL, 0, 0);
+		SendMessage(hEdit[0], EM_REQUESTRESIZE, 0, 0);
 		break;
 	case WM_NOTIFY:
 		switch (((LPNMHDR)lParam)->code) {
+		case EN_REQUESTRESIZE:
+			GetWindowRect(GetDlgItem(hDlg, edit_id[0]), &rect);
+			dy = rect.bottom - rect.top;
+			rsz = (REQRESIZE *)lParam;
+			dy -= rsz->rc.bottom - rsz->rc.top;
+			ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, edit_id[0]), 0, 0, 0, -dy, 1.0f);
+			ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, edit_id[1]), 0, -dy, 0, dy, 1.0f);
+			break;
 		case EN_LINK:
 			enl = (ENLINK*) lParam;
 			if (enl->msg == WM_LBUTTONUP) {
@@ -878,7 +890,6 @@ INT_PTR CALLBACK SelectionCallback(HWND hDlg, UINT message, WPARAM wParam, LPARA
 		ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDC_SELECTION_CHOICE2), 0, dh, 0, 0, 1.0f);
 		ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDOK), 0, dh, 0, 0, 1.0f);
 		ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDCANCEL), 0, dh, 0, 0, 1.0f);
-		CenterDialog(hDlg);
 
 		// Set the radio selection
 		Button_SetCheck(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1), BST_CHECKED);
@@ -1226,6 +1237,9 @@ BOOL SetTaskbarProgressValue(ULONGLONG ullCompleted, ULONGLONG ullTotal)
  */
 INT_PTR CALLBACK UpdateCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
+	int dy;
+	RECT rect;
+	REQRESIZE* rsz;
 	HWND hPolicy;
 	static HWND hFrequency, hBeta;
 	int32_t freq;
@@ -1275,8 +1289,28 @@ INT_PTR CALLBACK UpdateCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 			lmprintf(MSG_185), lmprintf(MSG_186));
 		SendMessageA(hPolicy, EM_SETTEXTEX, (WPARAM)&friggin_microsoft_unicode_amateurs, (LPARAM)update_policy_text);
 		SendMessage(hPolicy, EM_SETSEL, -1, -1);
-		SendMessage(hPolicy, EM_SETEVENTMASK, 0, ENM_LINK);
+		SendMessage(hPolicy, EM_SETEVENTMASK, 0, ENM_LINK|ENM_REQUESTRESIZE);
 		SendMessageA(hPolicy, EM_SETBKGNDCOLOR, 0, (LPARAM)GetSysColor(COLOR_BTNFACE));
+		SendMessage(hPolicy, EM_REQUESTRESIZE, 0, 0);
+		break;
+	case WM_NOTIFY:
+		if (((LPNMHDR)lParam)->code == EN_REQUESTRESIZE) {
+			hPolicy = GetDlgItem(hDlg, IDC_POLICY);
+			GetWindowRect(hPolicy, &rect);
+			dy = rect.bottom - rect.top;
+			rsz = (REQRESIZE *)lParam;
+			dy -= rsz->rc.bottom - rsz->rc.top + 6;	// add the border	
+			ResizeMoveCtrl(hDlg, hDlg, 0, 0, 0, -dy, 1.0f);
+			ResizeMoveCtrl(hDlg, hPolicy, 0, 0, 0, -dy, 1.0f);
+			ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDS_UPDATE_SETTINGS_GRP), 0, -dy, 0, 0, 1.0f);
+			ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDS_UPDATE_FREQUENCY_TXT), 0, -dy, 0, 0, 1.0f);
+			ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDC_UPDATE_FREQUENCY), 0, -dy, 0, 0, 1.0f);
+			ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDS_INCLUDE_BETAS_TXT), 0, -dy, 0, 0, 1.0f);
+			ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDC_INCLUDE_BETAS), 0, -dy, 0, 0, 1.0f);
+			ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDS_CHECK_NOW_GRP), 0, -dy, 0, 0, 1.0f);
+			ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDC_CHECK_NOW), 0, -dy, 0, 0, 1.0f);
+			ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDCANCEL), 0, -dy, 0, 0, 1.0f);
+		}
 		break;
 	case WM_COMMAND:
 		switch (LOWORD(wParam)) {
