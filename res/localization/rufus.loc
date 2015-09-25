@@ -11098,7 +11098,7 @@ t MSG_281 "(Selecione a imagem)"
 
 ################################################################################
 l "ro-RO" "Romanian (Română)" 0x0418, 0x0818
-v 1.0.17
+v 1.0.18
 b "en-US"
 
 g IDD_DIALOG
@@ -11275,9 +11275,8 @@ t MSG_080 "Rufus detected that Windows is still flushing its internal buffers on
 	"În funcţie de viteza dispozitivului USB, această operaţie poate dura o lungă perioadă de timp pentru a finaliza, "
 	"în special pentru fişiere mari.\n\nVă recomandăm să lăsaţi Windows să finiseze, pentru a evita corupţia. "
 	"Dar, dacă aţi obosit să aşteptaţi, aveţi posibilitatea să deconectaţi doar dispozitivul..."
-t MSG_081 "Formatul ISO nu este acceptat"
-t MSG_082 "Această versiune a Rufus acceptă numai imagini ISO boot-abil, se bazează pebootmgr, EFI, Grub4DOS, GRUB 2, isolinux sau WinPE.\n"
-	"Acest ISO nu pare să utilizeze una dintre metodele acceptate..."
+t MSG_081 "Imaginea nu este acceptată"
+t MSG_082 "Această imagine este fie neboot-abilă, sau folosește o metodă de boot sau de compresie nesusținută de Rufus ..."
 t MSG_083 "Înlocuire %s?"
 t MSG_084 "Acest lucru arată ca utilizaţi o versiune învechită a '%s'.\n"
 	"Din acest motiv, meniul de boot nu este vizualizat corect.\n\n"
@@ -11491,6 +11490,23 @@ t MSG_265 "Detectare disc VMWare"
 t MSG_266 "Mod dual UEFI/BIOS"
 t MSG_267 "Aplicarea imaginei Windows: %0.1f%% finalizat"
 t MSG_268 "Aplicarea imaginei Windows..."
+t MSG_269 "Păstrare mărci temporale"
+t MSG_270 "Depanare USB"
+t MSG_271 "Calcularea sumelor de control: %0.1f%% complet"
+t MSG_272 "Calcularea sumelor de control SHA1 și MD5 pentru imaginea selectată"
+t MSG_273 "Schimbare limba aplicației"
+t MSG_274 "Imagine detectată ISOHybrid"
+t MSG_275 "Imaginea selectată este 'ISOHybrid'. Înseamnă că poate fi scris fie în "
+	"modul (copiere dosar) %s sau in modul (imagine de disc) %s.\n"
+	"Rufus recomandă modul %s, astfel încât să aveți acces deplin la unitatea utilizată.\n"
+	"Dacă vă confruntați cu probleme în timpul de boot-are, puteți încerca să scrieți imaginea din nou în modul %s.\n\n"
+	"Selectați modul care doriți să-l utilizați pentru a scrie această imagine:"
+t MSG_276 "Scriere in modul %s (Recomandat)"
+t MSG_277 "Scriere in modul %s"
+t MSG_278 "Tipul de boot-are"
+t MSG_279 "Imagine nebootabilă"
+t MSG_280 "Selectare Imagine"
+t MSG_281 "(Vă rugăm, selectați o imagine)"
 
 ################################################################################
 l "ru-RU" "Russian (Русский)" 0x0419, 0x0819
