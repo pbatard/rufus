@@ -1557,16 +1557,11 @@ void DownloadNewVersion(void)
 
 void SetTitleBarIcon(HWND hDlg)
 {
-	HDC hDC;
 	int i16, s16, s32;
 	HICON hSmallIcon, hBigIcon;
 
 	// High DPI scaling
 	i16 = GetSystemMetrics(SM_CXSMICON);
-	hDC = GetDC(hDlg);
-	fScale = GetDeviceCaps(hDC, LOGPIXELSX) / 96.0f;
-	if (hDC != NULL)
-		ReleaseDC(hDlg, hDC);
 	// Adjust icon size lookup
 	s16 = i16;
 	s32 = (int)(32.0f*fScale);

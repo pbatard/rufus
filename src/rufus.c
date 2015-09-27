@@ -2749,6 +2749,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	PF_TYPE_DECL(CDECL, int, __wgetmainargs, (int*, wchar_t***, wchar_t***, int, int*));
 	HANDLE mutex = NULL, hogmutex = NULL, hFile = NULL;
 	HWND hDlg = NULL;
+	HDC hDC;
 	MSG msg;
 	struct option long_options[] = {
 		{"fixed",   no_argument,       NULL, 'f'},
@@ -2887,6 +2888,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	allow_dual_uefi_bios = ReadSettingBool(SETTING_ENABLE_WIN_DUAL_EFI_BIOS);
 	force_large_fat32 = ReadSettingBool(SETTING_FORCE_LARGE_FAT32_FORMAT);
 	enable_vmdk = ReadSettingBool(SETTING_ENABLE_VMDK_DETECTION);
+
+	// Initialize the global scaling, in case we need it before we initialize the dialog
+	hDC = GetDC(NULL);
+	fScale = GetDeviceCaps(hDC, LOGPIXELSX) / 96.0f;
+	if (hDC != NULL)
+		ReleaseDC(NULL, hDC);
 
 	// Init localization
 	init_localization();
