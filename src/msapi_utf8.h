@@ -785,9 +785,9 @@ static __inline int _openU(const char *filename, int oflag , int pmode)
 	int shflag = _SH_DENYNO;
 	wconvert(filename);
 	// Try to match the share flag to the oflag
-	if (oflag & _O_RDONLY)
+	if ((oflag & 0x03) == _O_RDONLY)
 		shflag = _SH_DENYWR;
-	else if (oflag & _O_WRONLY)
+	else if ((oflag & 0x03) == _O_WRONLY)
 		shflag = _SH_DENYRD;
 	_wsopen_s(&ret, wfilename, oflag, shflag, pmode);
 	wfree(filename);
