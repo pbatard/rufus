@@ -768,6 +768,37 @@ static __inline int _chdirU(const char *dirname)
 	return ret;
 }
 
+#if defined(_WIN32_WINNT) && (_WIN32_WINNT <= 0x501)
+static __inline FILE* fopenU(const char* filename, const char* mode)
+{
+	FILE* ret = NULL;
+	wconvert(filename);
+	wconvert(mode);
+	ret = _wfopen(wfilename, wmode);
+	wfree(filename);
+	wfree(mode);
+	return ret;
+}
+
+static __inline int _openU(const char *filename, int oflag, int pmode)
+{
+	int ret = -1;
+	wconvert(filename);
+	ret = _wopen(wfilename, oflag, pmode);
+	wfree(filename);
+	return ret;
+}
+
+// returned UTF-8 string must be freed
+static __inline char* getenvU(const char* varname)
+{
+	wconvert(varname);
+	char* ret;
+	ret = wchar_to_utf8(_wgetenv(wvarname));
+	wfree(varname);
+	return ret;
+}
+#else
 static __inline FILE* fopenU(const char* filename, const char* mode)
 {
 	FILE* ret = NULL;
@@ -807,6 +838,7 @@ static __inline char* getenvU(const char* varname)
 	wfree(varname);
 	return ret;
 }
+#endif
 
 static __inline int _mkdirU(const char* dirname)
 {
