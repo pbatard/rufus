@@ -3532,6 +3532,10 @@ t MSG_275 "Det diskbillede du har valgt er et 'ISOHybrid'-diskbillede. Det betyd
 	"Vælg den metode som du ønsker at bruge til at skrive diskbilledet:"
 t MSG_276 "Skriv som %s (Anbefalet)"
 t MSG_277 "Skriv som %s"
+t MSG_278 "Opstartstype"
+t MSG_279 "Ikke startbar"
+t MSG_280 "Diskbillede"
+t MSG_281 "(Vælg et diskbillede)"
 
 ################################################################################
 l "nl-NL" "Dutch (Nederlands)" 0x0413, 0x0813
@@ -12847,7 +12851,7 @@ t MSG_281 "(Izberite sliko)"
 
 ################################################################################
 l "es-ES" "Spanish (Español)" 0x040a, 0x080a, 0x0c0a, 0x100a, 0x140a, 0x180a, 0x1c0a, 0x200a, 0x240a, 0x280a, 0x2c0a, 0x300a, 0x340a, 0x380a, 0x3c0a, 0x400a, 0x440a, 0x480a, 0x4c0a, 0x500a, 0x540a, 0x580a
-v 1.0.17
+v 1.0.18
 b "en-US"
 
 # Main dialog
@@ -13046,9 +13050,8 @@ t MSG_080 "Rufus detectó que Windows aún está purgando sus buffers internos e
 	"Dependiendo de la velocidad de su dispositivo USB, esta operación puede tomar mucho tiempo para acabar, "
 	"especialmente para archivos grandes.\n\nRecomendamos que se deje a Windows terminar para que se corrompa la integridad del USB; "
 	"Pero si se cansa de esperar, puede simplemente desconectar el dispositivo..."
-t MSG_081 "Tipo de imagen ISO no soportada"
-t MSG_082 "Esta versión de Rufus soporta sólo ISOs arrancables basados en bootmgr, EFI, Grub4DOS, GRUB 2, isolinux o WinPE.\n"
-	"Esta imagen ISO parece no usar ninguna de estas opciones..."
+t MSG_081 "Tipo de imagen no soportada"
+t MSG_082 "Esta imagen ISO, o no es autoarrancable, o usa un método de arranque o compresión que no es soportado por Rufus..."
 t MSG_083 "¿Reemplazar %s?"
 t MSG_084 "Esta imagen ISO parece que usa una versión obsoleta del archivo '%s'.\n"
 	"Esto puede hacer que los menús de arranque no se muestren correctamente.\n\n"
@@ -13292,6 +13295,23 @@ t MSG_265 "Detección de discos VMWare"
 t MSG_266 "Modo dual EFI/BIOS"
 t MSG_267 "Aplicando imagen Windows: %0.1f%% completedo"
 t MSG_268 "Aplicando imagen Windows..."
+t MSG_269 "Mantener la información de tiempo"
+t MSG_270 "Depuración USB"
+t MSG_271 "Calculando checksums de la imagen: %0.1f%% completado"
+t MSG_272 "Calcular los checksums SHA1 y MD5 para la imagen seleccionada"
+t MSG_273 "Cambiar idioma"
+t MSG_274 "Imagen ISOHybrid detectada"
+t MSG_275 "La imágen que ha seleccionado es una imagen de tipo 'ISOHybrid', esto significa que puede ser escrita tanto en modo "
+	"%s (copia de fichero) o modo %s (imagen de disco).\n"
+	"Rufus recomienda usar el modo %s , así siempre podrás tener acceso completo a la unidad tras escribir en ella.\n"
+	"Sin embargo, si encuentra problemas durante el arranque, puede intentar escribir de nuevo esta imagen en modo %s.\n\n"
+	"Por favor, selecciona el modo en el que quiere escribir esta imagen:"
+t MSG_276 "Escribir en modo %s (Recomendado)"
+t MSG_277 "Escribir en modo %s"
+t MSG_278 "Tipo de arranque"
+t MSG_279 "No autoarrancable"
+t MSG_280 "Selección de imagen"
+t MSG_281 "(Por favor seleccione una imagen)"
 
 ################################################################################
 l "sv-SE" "Swedish (Svenska)" 0x041d, 0x081d
