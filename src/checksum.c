@@ -3,6 +3,7 @@
  * Message-Digest algorithms (sha1sum, md5sum)
  * Copyright © 1998-2001 Free Software Foundation, Inc.
  * Copyright © 2004 g10 Code GmbH
+ * Copyright © 2006-2012 Brad Conte <brad@bradconte.com>
  * Copyright © 2015 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -21,6 +22,9 @@
 
 /*
  * SHA-1 code taken from GnuPG, as per copyrights above.
+ *
+ * SHA-256 code modified from crypto-algorithms by Brad Conte:
+ * https://github.com/B-Con/crypto-algorithms - Public Domain
  *
  * MD5 code from various public domain sources sharing the following
  * copyright declaration:
@@ -55,7 +59,7 @@
 #undef BIG_ENDIAN_HOST
 
 /* Globals */
-char sha1str[41], md5str[33];
+char sha1str[41], sha256str[65], md5str[33];
 
 #if defined(__GNUC__)
 #define ALIGNED(m) __attribute__ ((__aligned__(m)))
@@ -86,36 +90,68 @@ static __inline uint32_t rol(uint32_t x, int n)
 #define rol(x,n) ( ((x) << (n)) | ((x) >> (32-(n))) )
 #endif
 
+// For SHA-256
+static const uint32_t k[64] = {
+	0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,
+	0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,
+	0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,
+	0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,
+	0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,
+	0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,
+	0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,
+	0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2
+};
+
 typedef struct ALIGNED(8) {
 	unsigned char buf[64];
-	uint32_t h0, h1, h2, h3, h4;
+	uint32_t state[5];
 	uint32_t count;
 	uint64_t nblocks;
 } SHA1_CONTEXT;
 
 typedef struct ALIGNED(8) {
 	unsigned char buf[64];
-	uint32_t h0, h1, h2, h3;
+	uint32_t state[8];
+	uint32_t datalen;
+	uint64_t bitlen;
+} SHA256_CONTEXT;
+
+typedef struct ALIGNED(8) {
+	unsigned char buf[64];
+	uint32_t state[4];
 	uint64_t bitcount;
 } MD5_CONTEXT;
 
-void sha1_init(SHA1_CONTEXT *ctx)
+static void sha1_init(SHA1_CONTEXT *ctx)
 {
 	memset(ctx, 0, sizeof(*ctx));
-	ctx->h0 = 0x67452301;
-	ctx->h1 = 0xefcdab89;
-	ctx->h2 = 0x98badcfe;
-	ctx->h3 = 0x10325476;
-	ctx->h4 = 0xc3d2e1f0;
+	ctx->state[0] = 0x67452301;
+	ctx->state[1] = 0xefcdab89;
+	ctx->state[2] = 0x98badcfe;
+	ctx->state[3] = 0x10325476;
+	ctx->state[4] = 0xc3d2e1f0;
 }
 
-void md5_init(MD5_CONTEXT *ctx)
+static void sha256_init(SHA256_CONTEXT *ctx)
 {
 	memset(ctx, 0, sizeof(*ctx));
-	ctx->h0 = 0x67452301;
-	ctx->h1 = 0xefcdab89;
-	ctx->h2 = 0x98badcfe;
-	ctx->h3 = 0x10325476;
+	ctx->state[0] = 0x6a09e667;
+	ctx->state[1] = 0xbb67ae85;
+	ctx->state[2] = 0x3c6ef372;
+	ctx->state[3] = 0xa54ff53a;
+	ctx->state[4] = 0x510e527f;
+	ctx->state[5] = 0x9b05688c;
+	ctx->state[6] = 0x1f83d9ab;
+	ctx->state[7] = 0x5be0cd19;
+}
+
+static void md5_init(MD5_CONTEXT *ctx)
+{
+	memset(ctx, 0, sizeof(*ctx));
+	ctx->state[0] = 0x67452301;
+	ctx->state[1] = 0xefcdab89;
+	ctx->state[2] = 0x98badcfe;
+	ctx->state[3] = 0x10325476;
 }
 
 /* Transform the message X which consists of 16 32-bit-words (SHA-1) */
@@ -125,11 +161,11 @@ static void sha1_transform(SHA1_CONTEXT *ctx, const unsigned char *data)
 	uint32_t x[16];
 
 	/* get values from the chaining vars */
-	a = ctx->h0;
-	b = ctx->h1;
-	c = ctx->h2;
-	d = ctx->h3;
-	e = ctx->h4;
+	a = ctx->state[0];
+	b = ctx->state[1];
+	c = ctx->state[2];
+	d = ctx->state[3];
+	e = ctx->state[4];
 
 #ifdef BIG_ENDIAN_HOST
 	memcpy(x, data, sizeof(x));
@@ -246,11 +282,75 @@ static void sha1_transform(SHA1_CONTEXT *ctx, const unsigned char *data)
 #undef F4
 
 	/* Update chaining vars */
-	ctx->h0 += a;
-	ctx->h1 += b;
-	ctx->h2 += c;
-	ctx->h3 += d;
-	ctx->h4 += e;
+	ctx->state[0] += a;
+	ctx->state[1] += b;
+	ctx->state[2] += c;
+	ctx->state[3] += d;
+	ctx->state[4] += e;
+}
+
+static void sha256_transform(SHA256_CONTEXT *ctx, const unsigned char *data)
+{
+	uint32_t a, b, c, d, e, f, g, h, i, t1, t2, m[64];
+
+	a = ctx->state[0];
+	b = ctx->state[1];
+	c = ctx->state[2];
+	d = ctx->state[3];
+	e = ctx->state[4];
+	f = ctx->state[5];
+	g = ctx->state[6];
+	h = ctx->state[7];
+
+#define ROTLEFT(a,b) (((a) << (b)) | ((a) >> (32-(b))))
+#define ROTRIGHT(a,b) (((a) >> (b)) | ((a) << (32-(b))))
+
+#define CH(x,y,z) (((x) & (y)) ^ (~(x) & (z)))
+#define MAJ(x,y,z) (((x) & (y)) ^ ((x) & (z)) ^ ((y) & (z)))
+#define EP0(x) (ROTRIGHT(x,2) ^ ROTRIGHT(x,13) ^ ROTRIGHT(x,22))
+#define EP1(x) (ROTRIGHT(x,6) ^ ROTRIGHT(x,11) ^ ROTRIGHT(x,25))
+#define SIG0(x) (ROTRIGHT(x,7) ^ ROTRIGHT(x,18) ^ ((x) >> 3))
+#define SIG1(x) (ROTRIGHT(x,17) ^ ROTRIGHT(x,19) ^ ((x) >> 10))
+
+
+#ifdef BIG_ENDIAN_HOST
+	memcpy(m, data, sizeof(m));
+#else
+	{
+		unsigned char *p2;
+		for (i = 0, p2 = (unsigned char*)m; i < 16; i++, p2 += 4) {
+			p2[3] = *data++;
+			p2[2] = *data++;
+			p2[1] = *data++;
+			p2[0] = *data++;
+		}
+	}
+#endif
+
+	for (i = 16; i < 64; ++i)
+		m[i] = SIG1(m[i - 2]) + m[i - 7] + SIG0(m[i - 15]) + m[i - 16];
+
+	for (i = 0; i < 64; ++i) {
+		t1 = h + EP1(e) + CH(e, f, g) + k[i] + m[i];
+		t2 = EP0(a) + MAJ(a, b, c);
+		h = g;
+		g = f;
+		f = e;
+		e = d + t1;
+		d = c;
+		c = b;
+		b = a;
+		a = t1 + t2;
+	}
+
+	ctx->state[0] += a;
+	ctx->state[1] += b;
+	ctx->state[2] += c;
+	ctx->state[3] += d;
+	ctx->state[4] += e;
+	ctx->state[5] += f;
+	ctx->state[6] += g;
+	ctx->state[7] += h;
 }
 
 /* Transform the message X which consists of 16 32-bit-words (MD5) */
@@ -259,10 +359,10 @@ static void md5_transform(MD5_CONTEXT *ctx, const unsigned char *data)
 	uint32_t a, b, c, d;
 	uint32_t x[16];
 
-	a = ctx->h0;
-	b = ctx->h1;
-	c = ctx->h2;
-	d = ctx->h3;
+	a = ctx->state[0];
+	b = ctx->state[1];
+	c = ctx->state[2];
+	d = ctx->state[3];
 
 #ifndef BIG_ENDIAN_HOST
 	memcpy(x, data, sizeof(x));
@@ -361,10 +461,10 @@ static void md5_transform(MD5_CONTEXT *ctx, const unsigned char *data)
 #undef F4
 
 	/* Update chaining vars */
-	ctx->h0 += a;
-	ctx->h1 += b;
-	ctx->h2 += c;
-	ctx->h3 += d;
+	ctx->state[0] += a;
+	ctx->state[1] += b;
+	ctx->state[2] += c;
+	ctx->state[3] += d;
 }
 
 /* Update the message digest with the contents of the buffer (SHA-1) */
@@ -396,8 +496,23 @@ static void sha1_write(SHA1_CONTEXT *ctx, const unsigned char *buf, size_t len)
 		ctx->buf[ctx->count++] = *buf++;
 }
 
+static void sha256_write(SHA256_CONTEXT *ctx, const unsigned char *buf, size_t len)
+{
+	uint32_t i;
+
+	for (i = 0; i < len; ++i) {
+		ctx->buf[ctx->datalen] = buf[i];
+		ctx->datalen++;
+		if (ctx->datalen == 64) {
+			sha256_transform(ctx, ctx->buf);
+			ctx->bitlen += 512;
+			ctx->datalen = 0;
+		}
+	}
+}
+
 /* Update the message digest with the contents of the buffer (MD5) */
-void md5_write(MD5_CONTEXT *ctx, const unsigned char *buf, size_t len)
+static void md5_write(MD5_CONTEXT *ctx, const unsigned char *buf, size_t len)
 {
 	uint32_t t;
 
@@ -469,16 +584,68 @@ static void sha1_final(SHA1_CONTEXT *ctx)
 
 	p = ctx->buf;
 #ifdef BIG_ENDIAN_HOST
-#define X(a) do { *(uint32_t*)p = ctx->h##a ; p += 4; } while(0)
+#define X(a) do { *(uint32_t*)p = ctx->state[a]; p += 4; } while(0)
 #else /* little endian */
-#define X(a) do { *p++ = (unsigned char) (ctx->h##a >> 24); *p++ = (unsigned char) (ctx->h##a >> 16); \
-                  *p++ = (unsigned char) (ctx->h##a >> 8); *p++ = (unsigned char) ctx->h##a; } while(0)
+#define X(a) do { *p++ = (unsigned char) (ctx->state[a] >> 24); *p++ = (unsigned char) (ctx->state[a] >> 16); \
+                  *p++ = (unsigned char) (ctx->state[a] >> 8); *p++ = (unsigned char) ctx->state[a]; } while(0)
 #endif
 	X(0);
 	X(1);
 	X(2);
 	X(3);
 	X(4);
+#undef X
+}
+
+static void sha256_final(SHA256_CONTEXT *ctx)
+{
+	uint32_t i;
+	unsigned char *p;
+
+	i = ctx->datalen;
+
+	// Pad whatever data is left in the buffer.
+	if (ctx->datalen < 56) {
+		ctx->buf[i++] = 0x80;
+		while (i < 56)
+			ctx->buf[i++] = 0x00;
+	}
+	else {
+		ctx->buf[i++] = 0x80;
+		while (i < 64)
+			ctx->buf[i++] = 0x00;
+		sha256_transform(ctx, ctx->buf);
+		memset(ctx->buf, 0, 56);
+	}
+
+	// Append to the padding the total message's length in bits and transform.
+	ctx->bitlen += ctx->datalen * 8;
+	ctx->buf[63] = (unsigned char) (ctx->bitlen);
+	ctx->buf[62] = (unsigned char) (ctx->bitlen >> 8);
+	ctx->buf[61] = (unsigned char) (ctx->bitlen >> 16);
+	ctx->buf[60] = (unsigned char) (ctx->bitlen >> 24);
+	ctx->buf[59] = (unsigned char) (ctx->bitlen >> 32);
+	ctx->buf[58] = (unsigned char) (ctx->bitlen >> 40);
+	ctx->buf[57] = (unsigned char) (ctx->bitlen >> 48);
+	ctx->buf[56] = (unsigned char) (ctx->bitlen >> 56);
+
+	sha256_transform(ctx, ctx->buf);
+
+	p = ctx->buf;
+#ifdef BIG_ENDIAN_HOST
+#define X(a) do { *(uint32_t*)p = ctx->state[a]; p += 4; } while(0)
+#else /* little endian */
+#define X(a) do { *p++ = (unsigned char) (ctx->state[a] >> 24); *p++ = (unsigned char) (ctx->state[a] >> 16); \
+                  *p++ = (unsigned char) (ctx->state[a] >> 8); *p++ = (unsigned char) ctx->state[a]; } while(0)
+#endif
+	X(0);
+	X(1);
+	X(2);
+	X(3);
+	X(4);
+	X(5);
+	X(6);
+	X(7);
 #undef X
 }
 
@@ -527,10 +694,10 @@ static void md5_final(MD5_CONTEXT *ctx)
 
 	p = ctx->buf;
 #ifdef BIG_ENDIAN_HOST
-#define X(a) do { *p++ = (unsigned char) (ctx->h##a >> 24); *p++ = (unsigned char) (ctx->h##a >> 16); \
-                  *p++ = (unsigned char) (ctx->h##a >> 8); *p++ = (unsigned char) ctx->h##a; } while(0)
+#define X(a) do { *p++ = (unsigned char) (ctx->state[a] >> 24); *p++ = (unsigned char) (ctx->state[a] >> 16); \
+                  *p++ = (unsigned char) (ctx->state[a] >> 8); *p++ = (unsigned char) ctx->state[a]; } while(0)
 #else /* little endian */
-#define X(a) do { *(uint32_t*)p = ctx->h##a ; p += 4; } while(0)
+#define X(a) do { *(uint32_t*)p = ctx->state[a]; p += 4; } while(0)
 #endif
 	X(0);
 	X(1);
@@ -556,24 +723,32 @@ INT_PTR CALLBACK ChecksumCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 		hFont = CreateFontA(-MulDiv(9, GetDeviceCaps(hDC, LOGPIXELSY), 72),
 			0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE, DEFAULT_CHARSET,
 			0, 0, PROOF_QUALITY, 0, "Courier New");
-		if (hDC != NULL)
-			ReleaseDC(hDlg, hDC);
+		safe_release_dc(hDlg, hDC);
 		SendDlgItemMessageA(hDlg, IDC_MD5, WM_SETFONT, (WPARAM)hFont, TRUE);
 		SendDlgItemMessageA(hDlg, IDC_SHA1, WM_SETFONT, (WPARAM)hFont, TRUE);
+		SendDlgItemMessageA(hDlg, IDC_SHA256, WM_SETFONT, (WPARAM)hFont, TRUE);
 		SetWindowTextA(GetDlgItem(hDlg, IDC_MD5), md5str);
 		SetWindowTextA(GetDlgItem(hDlg, IDC_SHA1), sha1str);
+		SetWindowTextA(GetDlgItem(hDlg, IDC_SHA256), sha256str);
 
 		// Move/Resize the controls as needed to fit our text
-		hDC = GetDC(GetDlgItem(hDlg, IDC_SHA1));
+		hDC = GetDC(GetDlgItem(hDlg, IDC_MD5));
 		SelectFont(hDC, hFont);	// Yes, you *MUST* reapply the font to the DC, even after SetWindowText!
+
+		GetWindowRect(GetDlgItem(hDlg, IDC_MD5), &rect);
+		dw = rect.right - rect.left;
+		DrawTextU(hDC, md5str, -1, &rect, DT_CALCRECT);
+		dw = rect.right - rect.left - dw + 12;	// Ideally we'd compute the field borders from the system, but hey...
+		ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDC_SHA256), 0, 0, dw, 0, 1.0f);
+
 		GetWindowRect(GetDlgItem(hDlg, IDC_SHA1), &rect);
 		dw = rect.right - rect.left;
 		DrawTextU(hDC, sha1str, -1, &rect, DT_CALCRECT);
-		if (hDC != NULL)
-			ReleaseDC(GetDlgItem(hDlg, IDC_SHA1), hDC);
-		dw = rect.right - rect.left - dw + 12;	// Ideally we'd compute the field borders from the system, but hey...
+		dw = rect.right - rect.left - dw + 12;
 		ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDC_MD5), 0, 0, dw, 0, 1.0f);
 		ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDC_SHA1), 0, 0, dw, 0, 1.0f);
+
+		safe_release_dc(GetDlgItem(hDlg, IDC_MD5), hDC);
 
 		for (i=(int)safe_strlen(image_path); (i>0)&&(image_path[i]!='\\'); i--);
 		if (image_path != NULL)	// VS code analysis has a false positive on this one
@@ -604,6 +779,7 @@ DWORD WINAPI SumThread(void* param)
 	uint64_t rb;
 	char buffer[4096];
 	SHA1_CONTEXT sha1_ctx;
+	SHA256_CONTEXT sha256_ctx;
 	MD5_CONTEXT md5_ctx;
 	int i, r = -1;
 	float format_percent = 0.0f;
@@ -621,6 +797,7 @@ DWORD WINAPI SumThread(void* param)
 	}
 
 	sha1_init(&sha1_ctx);
+	sha256_init(&sha256_ctx);
 	md5_init(&md5_ctx);
 
 	for (rb = 0; ; rb += rSize) {
@@ -640,18 +817,23 @@ DWORD WINAPI SumThread(void* param)
 		if (rSize == 0)
 			break;
 		sha1_write(&sha1_ctx, buffer, (size_t)rSize);
+		sha256_write(&sha256_ctx, buffer, (size_t)rSize);
 		md5_write(&md5_ctx, buffer, (size_t)rSize);
 	}
 
 	sha1_final(&sha1_ctx);
+	sha256_final(&sha256_ctx);
 	md5_final(&md5_ctx);
 
 	for (i = 0; i < 16; i++)
-		safe_sprintf(&md5str[2 * i], sizeof(md5str) - 2 * i, "%02x", md5_ctx.buf[i]);
-	uprintf("  MD5:\t%s", md5str);
+		safe_sprintf(&md5str[2*i], sizeof(md5str) - 2*i, "%02x", md5_ctx.buf[i]);
+	uprintf("  MD5:\t %s", md5str);
 	for (i = 0; i < 20; i++)
 		safe_sprintf(&sha1str[2*i], sizeof(sha1str) - 2*i, "%02x", sha1_ctx.buf[i]);
-	uprintf("  SHA1:\t%s", sha1str);
+	uprintf("  SHA1:\t %s", sha1str);
+	for (i = 0; i < 32; i++)
+		safe_sprintf(&sha256str[2*i], sizeof(sha256str) - 2*i, "%02x", sha256_ctx.buf[i]);
+	uprintf("  SHA256: %s", sha256str);
 	r = 0;
 
 out:
