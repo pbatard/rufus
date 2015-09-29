@@ -1851,7 +1851,7 @@ t MSG_268 "正在应用 Windows 镜像..."
 
 ################################################################################
 l "zh-TW" "Chinese Traditional (正體中文)" 0x0404, 0x0c04, 0x1404, 0x7c04
-v 1.0.17
+v 1.0.18
 b "en-US"
 
 # Main dialog
@@ -1897,6 +1897,7 @@ g IDD_ABOUTBOX
 t IDD_ABOUTBOX "關於 Rufus"
 t IDC_ABOUT_LICENSE "授權合約"
 t IDC_ABOUT_UPDATES "版本更新"
+t IDOK "關閉"
 
 # About -> License dialog
 g IDD_LICENSE
@@ -1984,7 +1985,7 @@ t MSG_033 "%s UEFI 資料分割配置"
 # Number of bad block check passes (singular for 1 pass, plural for 2 or more passes)
 t MSG_034 "%d 回"
 t MSG_035 "%d 回"
-t MSG_036 "ISO"
+t MSG_036 "ISO 映像"
 t MSG_037 "程式"
 t MSG_038 "終止"
 t MSG_039 "執行"
@@ -2058,7 +2059,7 @@ t MSG_092 "不支援的檔案系統"
 t MSG_093 "注意! 此裝置具有多重磁碟分割配置，可能包含 Windows 無法辨識或顯示的磁碟分割\n\n"
 	"請確認是否繼續執行，所造成任何磁碟分割資料遺失請自行負責"
 t MSG_094 "偵測到多重磁碟分割"
-t MSG_095 "DD 映像檔"
+t MSG_095 "DD 映像"
 t MSG_096 "目前選取之檔案系統不適用此 ISO 映像檔，請選取其他檔案系統或更換其他 ISO 映像檔"
 t MSG_097 "'%s' 僅適用 NTFS 檔案系統"
 t MSG_098 "注意! 'Windows To Go' 根據微軟定義僅能安裝於指定行動硬體裝置，而目前偵測到裝置屬性為'卸除式'不符規定，"
@@ -2127,7 +2128,7 @@ t MSG_173 "選取內容..."
 # The following will appear in the about dialog
 t MSG_174 "Rufus - 快速可靠的 USB 格式化工具"
 t MSG_175 "版本 %d.%d (Build %d)"
-t MSG_176 "正體中文譯者: 佚 <mailto:mmmeow@gmail.com>"
+t MSG_176 "正體中文譯者: 佚 <mailto:mmmeow@gmail.com>\\line Chocobo1 <https://github.com/Chocobo1>"
 t MSG_177 "Bug 回報或請求新功能請至: (英文網頁)"
 t MSG_178 "其他著作權資訊:"
 t MSG_179 "線上更新規則:"
@@ -2239,6 +2240,23 @@ t MSG_265 "VMWare 磁碟偵測"
 t MSG_266 "Dual UEFI/BIOS 模式"
 t MSG_267 "建置 Windows 映像檔: 已完成 %0.1f%%"
 t MSG_268 "建置 Windows 映像檔中..."
+t MSG_269 "保留時間戳記"
+t MSG_270 "USB 除錯"
+t MSG_271 "計算映像檔總和檢查碼: 已完成 %0.1f%%"
+t MSG_272 "計算已選擇映像檔的 MD5, SHA1 和 SHA256 總和檢查碼"
+t MSG_273 "更改應用程式語言"
+t MSG_274 "偵測到 ISOHybrid 映像檔"
+t MSG_275 "你選擇的映像檔為 'ISOHybrid' 格式。該檔案格式可以使用以下模式寫入"
+	"%s (檔案複製) 模式 或 %s (磁碟映像) 模式。\n"
+	"Rufus 建議使用 %s 模式，你將擁有磁碟的完整存取權限。\n"
+	"如果你在開機時遭遇問題，你可以嘗試使用 %s 模式寫入。\n\n"
+	"請選擇寫入模式: "
+t MSG_276 "以 %s 模式寫入 (建議)"
+t MSG_277 "以 %s 模式寫入"
+t MSG_278 "開機模式"
+t MSG_279 "不可開機"
+t MSG_280 "選擇映像檔"
+t MSG_281 "(請選擇一個映像檔)"
 
 ################################################################################
 l "hr-HR" "Croatian (Hrvatski)" 0x041a, 0x081a, 0x101a
