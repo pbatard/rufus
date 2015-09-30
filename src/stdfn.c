@@ -223,7 +223,7 @@ void GetWindowsVersion(void)
 	OSVERSIONINFOEXA vi, vi2;
 	const char* w = 0;
 	const char* w64 = "32 bit";
-	char* vptr;
+	char *vptr, build_number[10] = "";
 	size_t vlen;
 	unsigned major, minor;
 	ULONGLONG major_equal, minor_equal;
@@ -318,6 +318,17 @@ void GetWindowsVersion(void)
 		safe_sprintf(vptr, vlen, "%s SP%u %s", w, vi.wServicePackMajor, w64);
 	else
 		safe_sprintf(vptr, vlen, "%s %s", w, w64);
+
+	// Add the build number for Windows 8.0 and later
+	if (nWindowsVersion >= 0x62) {
+		GetRegistryKeyStr(REGKEY_HKLM, "Microsoft\\Windows NT\\CurrentVersion\\CurrentBuildNumber", build_number, sizeof(build_number));
+		if (build_number[0] != 0) {
+			safe_strcat(WindowsVersionStr, sizeof(WindowsVersionStr), " (Build ");
+			safe_strcat(WindowsVersionStr, sizeof(WindowsVersionStr), build_number);
+			safe_strcat(WindowsVersionStr, sizeof(WindowsVersionStr), ")");
+		}
+	}
+
 }
 
 /*
