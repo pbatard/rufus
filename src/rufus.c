@@ -138,7 +138,7 @@ HWND hDeviceList, hPartitionScheme, hFileSystem, hClusterSize, hLabel, hBootType
 HWND hLogDlg = NULL, hProgress = NULL, hInfo, hDiskID, hStatusToolbar;
 BOOL use_own_c32[NB_OLD_C32] = {FALSE, FALSE}, mbr_selected_by_user = FALSE, togo_mode;
 BOOL iso_op_in_progress = FALSE, format_op_in_progress = FALSE, right_to_left_mode = FALSE;
-BOOL enable_HDDs = FALSE, force_update = FALSE, enable_ntfs_compression = FALSE, no_confirmation_on_cancel = FALSE;
+BOOL enable_HDDs = FALSE, force_update = FALSE, enable_ntfs_compression = FALSE, no_confirmation_on_cancel = FALSE, lock_drive = TRUE;
 BOOL advanced_mode, allow_dual_uefi_bios, detect_fakes, enable_vmdk, force_large_fat32, usb_debug, use_fake_units, preserve_timestamps;
 int dialog_showing = 0, lang_button_id = 0;
 uint16_t rufus_version[3], embedded_sl_version[2];
@@ -3016,6 +3016,12 @@ relaunch:
 			WriteSettingBool(SETTING_ENABLE_USB_DEBUG, usb_debug);
 			PrintStatus2000(lmprintf(MSG_270), usb_debug);
 			GetUSBDevices(0);
+			continue;
+		}
+		// Alt-, => Disable physical drive locking
+		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == VK_OEM_COMMA)) {
+			lock_drive = !lock_drive;
+			PrintStatus2000(lmprintf(MSG_282), lock_drive);
 			continue;
 		}
 		// Alt-B => Toggle fake drive detection during bad blocks check

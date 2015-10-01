@@ -538,6 +538,7 @@ t MSG_278 "Boot type"
 t MSG_279 "Non bootable"
 t MSG_280 "Image selection"
 t MSG_281 "(Please select an image)"
+t MSG_282 "Drive locking"
 
 ################################################################################
 ############################# TRANSLATOR END COPY ##############################
