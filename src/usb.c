@@ -136,9 +136,9 @@ static __inline BOOL IsVHD(const char* buffer)
 /* For debugging user reports of HDDs vs UFDs */
 //#define FORCED_DEVICE
 #ifdef FORCED_DEVICE
-#define FORCED_VID 0x0930
-#define FORCED_PID 0x6544
-#define FORCED_NAME "TOSHIBA TransMemory USB Device"
+#define FORCED_VID 0x125F
+#define FORCED_PID 0xA11A
+#define FORCED_NAME "ABATA CH11 USB Device"
 #endif
 
 /*
@@ -189,8 +189,7 @@ BOOL GetUSBDevices(DWORD devnum)
 		if (htab_create(DEVID_HTAB_SIZE, &htab_devid)) {
 			dev_info_data.cbSize = sizeof(dev_info_data);
 			for (i=0; SetupDiEnumDeviceInfo(dev_info, i, &dev_info_data); i++) {
-				if (usb_debug)
-					uprintf("Processing Hub %d:", i + 1);
+				uuprintf("Processing Hub %d:", i + 1);
 				devint_detail_data = NULL;
 				devint_data.cbSize = sizeof(devint_data);
 				// Only care about the first interface (MemberIndex 0)
@@ -205,22 +204,19 @@ BOOL GetUSBDevices(DWORD devnum)
 						if (CM_Get_Child(&device_inst, dev_info_data.DevInst, 0) == CR_SUCCESS) {
 							device_id[0] = 0;
 							s = StrArrayAdd(&dev_if_path, devint_detail_data->DevicePath);
-							if (usb_debug)
-								uprintf("  Hub[%d] = '%s'", s, devint_detail_data->DevicePath);
+							uuprintf("  Hub[%d] = '%s'", s, devint_detail_data->DevicePath);
 							if ((s>= 0) && (CM_Get_Device_IDA(device_inst, device_id, MAX_PATH, 0) == CR_SUCCESS)) {
 								if ((k = htab_hash(device_id, &htab_devid)) != 0) {
 									htab_devid.table[k].data = (void*)(uintptr_t)s;
 								}
-								if (usb_debug)
-									uprintf("  Found ID[%03d]: %s", k, device_id);
+								uuprintf("  Found ID[%03d]: %s", k, device_id);
 								while (CM_Get_Sibling(&device_inst, device_inst, 0) == CR_SUCCESS) {
 									device_id[0] = 0;
 									if (CM_Get_Device_IDA(device_inst, device_id, MAX_PATH, 0) == CR_SUCCESS) {
 										if ((k = htab_hash(device_id, &htab_devid)) != 0) {
 											htab_devid.table[k].data = (void*)(uintptr_t)s;
 										}
-										if (usb_debug)
-											uprintf("  Found ID[%03d]: %s", k, device_id);
+										uuprintf("  Found ID[%03d]: %s", k, device_id);
 									}
 								}
 							}
@@ -300,8 +296,7 @@ BOOL GetUSBDevices(DWORD devnum)
 		memset(buffer, 0, sizeof(buffer));
 		props.is_VHD = SetupDiGetDeviceRegistryPropertyA(dev_info, &dev_info_data, SPDRP_HARDWAREID,
 			&datatype, (LPBYTE)buffer, sizeof(buffer), &size) && IsVHD(buffer);
-		if (usb_debug)
-			uprintf("Processing Device: '%s'", buffer);
+		uuprintf("Processing Device: '%s'", buffer);
 
 		memset(buffer, 0, sizeof(buffer));
 		if (!SetupDiGetDeviceRegistryPropertyA(dev_info, &dev_info_data, SPDRP_FRIENDLYNAME,
@@ -324,8 +319,7 @@ BOOL GetUSBDevices(DWORD devnum)
 					props.is_UASP = ((((uintptr_t)device_id)+2) >= ((uintptr_t)devid_list)+list_start[1]);
 					// Now get the properties of the device, and its Device ID, which we need to populate the properties
 					j = htab_hash(device_id, &htab_devid);
-					if (usb_debug)
-						uprintf("  Matched with ID[%03d]: %s", j, device_id);
+					uuprintf("  Matched with ID[%03d]: %s", j, device_id);
 
 					// Try to parse the current device_id string for VID:PID
 					// We'll use that if we can't get anything better
@@ -354,12 +348,10 @@ BOOL GetUSBDevices(DWORD devnum)
 						device_id = str;
 						method_str = "[GP]";
 						j = htab_hash(device_id, &htab_devid);
-						if (usb_debug)
-							uprintf("  Matched with (GP) ID[%03d]: %s", j, device_id);
+						uuprintf("  Matched with (GP) ID[%03d]: %s", j, device_id);
 					}
 					if ((uintptr_t)htab_devid.table[j].data > 0) {
-						if (usb_debug)
-							uprintf("  Matched with Hub[%d]: '%s'", (uintptr_t)htab_devid.table[j].data,
+						uuprintf("  Matched with Hub[%d]: '%s'", (uintptr_t)htab_devid.table[j].data,
 								dev_if_path.String[(uintptr_t)htab_devid.table[j].data]);
 						if (GetUSBProperties(dev_if_path.String[(uintptr_t)htab_devid.table[j].data], device_id, &props))
 							method_str = "";
@@ -380,8 +372,7 @@ BOOL GetUSBDevices(DWORD devnum)
 				if (is_SCSI) {
 					// If we have an SCSI drive and couldn't get a VID:PID, we are most likely
 					// dealing with a system drive => eliminate it!
-					if (usb_debug)
-						uprintf("  Non USB => Eliminated");
+					uuprintf("  Non USB => Eliminated");
 					continue;
 				}
 				safe_strcpy(str, sizeof(str), "????:????");	// Couldn't figure VID:PID

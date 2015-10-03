@@ -115,6 +115,7 @@ extern void _uprintf(const char *format, ...);
 #define vuprintf(...) if (verbose) _uprintf(__VA_ARGS__)
 #define vvuprintf(...) if (verbose > 1) _uprintf(__VA_ARGS__)
 #define suprintf(...) if (!bSilent) _uprintf(__VA_ARGS__)
+#define uuprintf(...) if (usb_debug) _uprintf(__VA_ARGS__)
 #ifdef _DEBUG
 #define duprintf(...) _uprintf(__VA_ARGS__)
 #else
