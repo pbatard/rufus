@@ -2054,6 +2054,8 @@ void SaveVHD(void)
 /*
  * Main dialog callback
  */
+extern BOOL CheckSignatureAttributes(const char* path);
+extern LONG ValidateSignature(HWND hDlg, const char* path);
 static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	static DWORD DeviceNum = 0, LastRefresh = 0;
@@ -2272,6 +2274,9 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			break;
 #ifdef RUFUS_TEST
 		case IDC_TEST:
+			uprintf("CHK: %d", CheckSignatureAttributes("C:\\Downloads\\rufus-2.4.exe"));
+			SetLastError(ValidateSignature(hDlg, "C:\\Downloads\\rufus-2.4.exe"));
+			uprintf("VAL: %s", WindowsErrorString());
 			break;
 #endif
 		case IDC_ADVANCED:

@@ -10,9 +10,9 @@ AM_V_WINDRES   = $(AM_V_WINDRES_$(V))
 %_rc.o: %.rc ../res/localization/embedded.loc
 	$(AM_V_WINDRES) $(AM_RCFLAGS) -i $< -o $@
 
-rufus_SOURCES = badblocks.c checksum.c dos.c dos_locale.c drive.c format.c icon.c iso.c localization.c net.c smart.c \
-  stdfn.c stdio.c stdlg.c rufus.c parser.c syslinux.c usb.c vhd.c
+rufus_SOURCES = badblocks.c checksum.c dos.c dos_locale.c drive.c format.c icon.c iso.c localization.c net.c parser.c \
+	pki.c rufus.c smart.c stdfn.c stdio.c stdlg.c syslinux.c usb.c vhd.c
 rufus_CFLAGS = -I./ms-sys/inc -I./syslinux/libfat -I./syslinux/libinstaller -I./libcdio $(AM_CFLAGS)
 rufus_LDFLAGS = $(AM_LDFLAGS) -mwindows
 rufus_LDADD = rufus_rc.o bled/libbled.a ms-sys/libmssys.a syslinux/libfat/libfat.a syslinux/libinstaller/libinstaller.a \
-	libcdio/iso9660/libiso9660.a libcdio/udf/libudf.a libcdio/driver/libdriver.a -lsetupapi -lole32 -lgdi32 -lwininet -lshlwapi
+	libcdio/iso9660/libiso9660.a libcdio/udf/libudf.a libcdio/driver/libdriver.a -lsetupapi -lole32 -lgdi32 -lwininet -lshlwapi -lcrypt32 -lwintrust

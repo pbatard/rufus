@@ -32,7 +32,7 @@
 /* Program options */
 #define RUFUS_DEBUG                 // print debug info to Debug facility
 /* Features not ready for prime time and that may *DESTROY* your data - USE AT YOUR OWN RISKS! */
-// #define RUFUS_TEST
+#define RUFUS_TEST
 /* Languages for which translators are M.I.A. and that we could use help with */
 #define LOST_TRANSLATORS            { "ms-MY" }	// NB: locales MUST be <= 5 chars
 /* Probability of getting the M.I.A. translator message. For more on this, see LostTranslatorCheck() */

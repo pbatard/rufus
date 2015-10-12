@@ -1,0 +1,164 @@
+/*
+ * Rufus: The Reliable USB Formatting Utility
+ * PKI functions (code signing, etc.)
+ * Copyright © 2015 Pete Batard <pete@akeo.ie>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/* Memory leaks detection - define _CRTDBG_MAP_ALLOC as preprocessor macro */
+#ifdef _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
+#endif
+
+#include <windows.h>
+#include <stdio.h>
+#include <wincrypt.h>
+#include <wintrust.h>
+
+#include "rufus.h"
+#include "msapi_utf8.h"
+
+#define ENCODING (X509_ASN_ENCODING | PKCS_7_ASN_ENCODING)
+
+// Signatures names we accept (may be suffixed, but signature must start with one of those)
+const char* valid_cert_names[] = { "Akeo Consulting", "Akeo Systems", "Pete Batard" };
+
+typedef struct {
+	LPWSTR lpszProgramName;
+	LPWSTR lpszPublisherLink;
+	LPWSTR lpszMoreInfoLink;
+} SPROG_PUBLISHERINFO, *PSPROG_PUBLISHERINFO;
+
+// Mostly from https://support.microsoft.com/en-us/kb/323809
+BOOL CheckSignatureAttributes(const char* path)
+{
+	BOOL r = FALSE;
+	HCERTSTORE hStore = NULL;
+	HCRYPTMSG hMsg = NULL;
+	PCCERT_CONTEXT pCertContext = NULL;
+	DWORD dwEncoding, dwContentType, dwFormatType, dwSubjectSize;
+	PCMSG_SIGNER_INFO pSignerInfo = NULL;
+	PCMSG_SIGNER_INFO pCounterSignerInfo = NULL;
+	DWORD dwSignerInfo = 0;
+	CERT_INFO CertInfo = { 0 };
+	SPROG_PUBLISHERINFO ProgPubInfo = { 0 };
+	wchar_t *szFileName = utf8_to_wchar(path);
+	char szSubjectName[128];
+	int i;
+
+	// Get message handle and store handle from the signed file.
+	r = CryptQueryObject(CERT_QUERY_OBJECT_FILE, szFileName,
+		CERT_QUERY_CONTENT_FLAG_PKCS7_SIGNED_EMBED, CERT_QUERY_FORMAT_FLAG_BINARY,
+		0, &dwEncoding, &dwContentType, &dwFormatType, &hStore, &hMsg, NULL);
+	if (!r) {
+		uprintf("PKI: Failed to get store handle for '%s': %s", path, WindowsErrorString());
+		goto out;
+	}
+
+	// Get signer information size.
+	r = CryptMsgGetParam(hMsg, CMSG_SIGNER_INFO_PARAM, 0, NULL, &dwSignerInfo);
+	if (!r) {
+		uprintf("PKI: Failed to get signer size: %s", WindowsErrorString);
+		goto out;
+	}
+
+	// Allocate memory for signer information.
+	pSignerInfo = (PCMSG_SIGNER_INFO)calloc(dwSignerInfo, 1);
+	if (!pSignerInfo) {
+		uprintf("PKI: Could not allocate memory for signer information");
+		r = FALSE;
+		goto out;
+	}
+
+	// Get Signer Information.
+	r = CryptMsgGetParam(hMsg, CMSG_SIGNER_INFO_PARAM, 0, (PVOID)pSignerInfo, &dwSignerInfo);
+	if (!r) {
+		uprintf("PKI: Failed to get signer information: %s", WindowsErrorString());
+		goto out;
+	}
+
+	// Search for the signer certificate in the temporary certificate store.
+	CertInfo.Issuer = pSignerInfo->Issuer;
+	CertInfo.SerialNumber = pSignerInfo->SerialNumber;
+
+	pCertContext = CertFindCertificateInStore(hStore, ENCODING, 0, CERT_FIND_SUBJECT_CERT, (PVOID)&CertInfo, NULL);
+	if (!pCertContext) {
+		uprintf("PKI: Failed to locate signer certificate in temporary store: %s", WindowsErrorString());
+		r = FALSE;
+		goto out;
+	}
+
+	// Isolate the signing certificate subject name
+	dwSubjectSize = CertGetNameStringA(pCertContext, CERT_NAME_SIMPLE_DISPLAY_TYPE, 0, NULL,
+		szSubjectName, sizeof(szSubjectName));
+	if (dwSubjectSize <= 1) {
+		uprintf("PKI: Failed to get Subject Name");
+		r = FALSE;
+		goto out;
+	}
+
+	uprintf("Executable is signed by '%s'", szSubjectName);
+
+	// Now check the signature name. Make it specific enough (i.e. don't simply check for "Akeo")
+	// so that, besides hacking our server, it'll place an extra hurdle on any malicious entity
+	// into also fooling a C.A. to issue a certificate that passes our test. 
+	for (i = 0; i < ARRAYSIZE(valid_cert_names); i++) {
+		r = (strncmp(szSubjectName, valid_cert_names[i], strlen(valid_cert_names[i])) == 0);
+		if (r)
+			break;
+	}
+
+out:
+	safe_free(szFileName);
+	safe_free(ProgPubInfo.lpszProgramName);
+	safe_free(ProgPubInfo.lpszPublisherLink);
+	safe_free(ProgPubInfo.lpszMoreInfoLink);
+	safe_free(pSignerInfo);
+	safe_free(pCounterSignerInfo);
+	if (pCertContext != NULL)
+		CertFreeCertificateContext(pCertContext);
+	if (hStore != NULL)
+		CertCloseStore(hStore, 0);
+	if (hMsg != NULL)
+		CryptMsgClose(hMsg);
+	return r;
+}
+
+// From https://msdn.microsoft.com/en-us/library/windows/desktop/aa382384.aspx
+LONG ValidateSignature(HWND hDlg, const char* path)
+{
+	LONG r;
+	WINTRUST_DATA trust_data = { 0 };
+	WINTRUST_FILE_INFO trust_file = { 0 };
+	GUID guid_generic_verify =	// WINTRUST_ACTION_GENERIC_VERIFY_V2
+		{ 0xaac56b, 0xcd44, 0x11d0,{ 0x8c, 0xc2, 0x0, 0xc0, 0x4f, 0xc2, 0x95, 0xee } };
+	wchar_t *szFileName = utf8_to_wchar(path);
+
+	trust_file.cbStruct = sizeof(trust_file);
+	trust_file.pcwszFilePath = szFileName;
+
+	trust_data.cbStruct = sizeof(trust_data);
+	trust_data.dwUIChoice = WTD_UI_ALL;
+	trust_data.fdwRevocationChecks = WTD_REVOKE_WHOLECHAIN;
+	trust_data.dwUnionChoice = WTD_CHOICE_FILE;
+	trust_data.pFile = &trust_file;
+	// 0x400 = WTD_MOTW  for Windows 8.1 or later
+	trust_data.dwProvFlags = WTD_REVOCATION_CHECK_CHAIN | 0x400;
+
+	r = WinVerifyTrust(NULL, &guid_generic_verify, &trust_data);
+	safe_free(szFileName);
+	return r;
+}

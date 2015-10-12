@@ -19,6 +19,8 @@ TARGETLIBS=$(SDK_LIB_PATH)\kernel32.lib \
            $(SDK_LIB_PATH)\shell32.lib \
            $(SDK_LIB_PATH)\wininet.lib \
            $(SDK_LIB_PATH)\shlwapi.lib \
+           $(SDK_LIB_PATH)\crypt32.lib \
+           $(SDK_LIB_PATH)\wintrust.lib \
            .\bled\bled.lib \
            .\ms-sys\ms-sys.lib \
            .\syslinux\libfat\libfat.lib \
@@ -39,14 +41,15 @@ SOURCES=badblocks.c      \
         format.c         \
         icon.c           \
         iso.c            \
-        stdfn.c          \
-        stdio.c          \
-        stdlg.c          \
         localization.c   \
         net.c            \
         parser.c         \
+        pki.c            \
         rufus.c          \
         smart.c          \
+        stdfn.c          \
+        stdio.c          \
+        stdlg.c          \
         syslinux.c       \
         usb.c            \
         vhd.c            \
