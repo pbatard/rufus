@@ -539,6 +539,9 @@ t MSG_279 "Non bootable"
 t MSG_280 "Image selection"
 t MSG_281 "(Please select an image)"
 t MSG_282 "Drive locking"
+t MSG_283 "Invalid signature"
+t MSG_284 "The downloaded executable is missing a digital signature."
+t MSG_285 "The downloaded executable was signed by '%s'.\nThis doesn't look right... Are you sure you want to run it?"
 
 ################################################################################
 ############################# TRANSLATOR END COPY ##############################

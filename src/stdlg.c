@@ -1435,11 +1435,11 @@ INT_PTR CALLBACK update_subclass_callback(HWND hDlg, UINT message, WPARAM wParam
  */
 INT_PTR CALLBACK NewVersionCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	int i;
-	HWND hNotes;
 	char cmdline[] = APPLICATION_NAME " -w 150";
 	static char* filepath = NULL;
 	static int download_status = 0;
+	LONG i;
+	HWND hNotes;
 	STARTUPINFOA si;
 	PROCESS_INFORMATION pi;
 	HFONT hyperlink_font = NULL;
@@ -1497,12 +1497,15 @@ INT_PTR CALLBACK NewVersionCallback(HWND hDlg, UINT message, WPARAM wParam, LPAR
 				break;
 			case 2:		// Launch newer version and close this one
 				Sleep(1000);	// Add a delay on account of antivirus scanners
+
+				if (ValidateSignature(hDlg, filepath) != NO_ERROR)
+					break;
+
 				memset(&si, 0, sizeof(si));
 				memset(&pi, 0, sizeof(pi));
 				si.cb = sizeof(si);
 				if (!CreateProcessU(filepath, cmdline, NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi)) {
 					PrintInfo(0, MSG_214);
-					// TODO: produce a message box and add a retry, as the file may be scanned by the Antivirus
 					uprintf("Failed to launch new application: %s\n", WindowsErrorString());
 				} else {
 					PrintInfo(0, MSG_213);

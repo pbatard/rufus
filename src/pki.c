@@ -30,10 +30,12 @@
 
 #include "rufus.h"
 #include "msapi_utf8.h"
+#include "resource.h"
+#include "localization.h"
 
 #define ENCODING (X509_ASN_ENCODING | PKCS_7_ASN_ENCODING)
 
-// Signatures names we accept (may be suffixed, but signature must start with one of those)
+// Signatures names we accept (may be suffixed, but the signature should start with one of those)
 const char* valid_cert_names[] = { "Akeo Consulting", "Akeo Systems", "Pete Batard" };
 
 typedef struct {
@@ -43,9 +45,11 @@ typedef struct {
 } SPROG_PUBLISHERINFO, *PSPROG_PUBLISHERINFO;
 
 // Mostly from https://support.microsoft.com/en-us/kb/323809
-BOOL CheckSignatureAttributes(const char* path)
+static char* GetSignatureName(const char* path)
 {
-	BOOL r = FALSE;
+	static char szSubjectName[128];
+	char* p = NULL;
+	BOOL r;
 	HCERTSTORE hStore = NULL;
 	HCRYPTMSG hMsg = NULL;
 	PCCERT_CONTEXT pCertContext = NULL;
@@ -56,8 +60,6 @@ BOOL CheckSignatureAttributes(const char* path)
 	CERT_INFO CertInfo = { 0 };
 	SPROG_PUBLISHERINFO ProgPubInfo = { 0 };
 	wchar_t *szFileName = utf8_to_wchar(path);
-	char szSubjectName[128];
-	int i;
 
 	// Get message handle and store handle from the signed file.
 	r = CryptQueryObject(CERT_QUERY_OBJECT_FILE, szFileName,
@@ -79,7 +81,6 @@ BOOL CheckSignatureAttributes(const char* path)
 	pSignerInfo = (PCMSG_SIGNER_INFO)calloc(dwSignerInfo, 1);
 	if (!pSignerInfo) {
 		uprintf("PKI: Could not allocate memory for signer information");
-		r = FALSE;
 		goto out;
 	}
 
@@ -97,7 +98,6 @@ BOOL CheckSignatureAttributes(const char* path)
 	pCertContext = CertFindCertificateInStore(hStore, ENCODING, 0, CERT_FIND_SUBJECT_CERT, (PVOID)&CertInfo, NULL);
 	if (!pCertContext) {
 		uprintf("PKI: Failed to locate signer certificate in temporary store: %s", WindowsErrorString());
-		r = FALSE;
 		goto out;
 	}
 
@@ -106,20 +106,11 @@ BOOL CheckSignatureAttributes(const char* path)
 		szSubjectName, sizeof(szSubjectName));
 	if (dwSubjectSize <= 1) {
 		uprintf("PKI: Failed to get Subject Name");
-		r = FALSE;
 		goto out;
 	}
 
-	uprintf("Executable is signed by '%s'", szSubjectName);
-
-	// Now check the signature name. Make it specific enough (i.e. don't simply check for "Akeo")
-	// so that, besides hacking our server, it'll place an extra hurdle on any malicious entity
-	// into also fooling a C.A. to issue a certificate that passes our test. 
-	for (i = 0; i < ARRAYSIZE(valid_cert_names); i++) {
-		r = (strncmp(szSubjectName, valid_cert_names[i], strlen(valid_cert_names[i])) == 0);
-		if (r)
-			break;
-	}
+	uprintf("Downloaded executable is signed by '%s'", szSubjectName);
+	p = szSubjectName;
 
 out:
 	safe_free(szFileName);
@@ -134,7 +125,7 @@ out:
 		CertCloseStore(hStore, 0);
 	if (hMsg != NULL)
 		CryptMsgClose(hMsg);
-	return r;
+	return p;
 }
 
 // From https://msdn.microsoft.com/en-us/library/windows/desktop/aa382384.aspx
@@ -145,20 +136,47 @@ LONG ValidateSignature(HWND hDlg, const char* path)
 	WINTRUST_FILE_INFO trust_file = { 0 };
 	GUID guid_generic_verify =	// WINTRUST_ACTION_GENERIC_VERIFY_V2
 		{ 0xaac56b, 0xcd44, 0x11d0,{ 0x8c, 0xc2, 0x0, 0xc0, 0x4f, 0xc2, 0x95, 0xee } };
-	wchar_t *szFileName = utf8_to_wchar(path);
+	char *signature_name;
+	int i;
+
+	// Check the signature name. Make it specific enough (i.e. don't simply check for "Akeo")
+	// so that, besides hacking our server, it'll place an extra hurdle on any malicious entity
+	// into also fooling a C.A. to issue a certificate that passes our test. 
+	signature_name = GetSignatureName(path);
+	if (signature_name == NULL) {
+		uprintf("PKI: Could not get signature name");
+		MessageBoxU(hDlg, lmprintf(MSG_284), lmprintf(MSG_283), MB_OK | MB_ICONERROR | MB_IS_RTL);
+		return TRUST_E_NOSIGNATURE;
+	}
+	for (i = 0; i < ARRAYSIZE(valid_cert_names); i++) {
+		if (strncmp(signature_name, valid_cert_names[i], strlen(valid_cert_names[i])) == 0)
+			break;
+	}
+	if (i >= ARRAYSIZE(valid_cert_names)) {
+		uprintf("PKI: Signature '%s' doesn't look right...", signature_name);
+		if (MessageBoxU(hDlg, lmprintf(MSG_285, signature_name), lmprintf(MSG_283),
+			MB_YESNO | MB_ICONWARNING | MB_IS_RTL) != IDYES)
+			return TRUST_E_EXPLICIT_DISTRUST;
+	}
 
 	trust_file.cbStruct = sizeof(trust_file);
-	trust_file.pcwszFilePath = szFileName;
+	trust_file.pcwszFilePath = utf8_to_wchar(path);
+	if (trust_file.pcwszFilePath == NULL) {
+		uprintf("PKI: Unable to convert '%s' to UTF16", path);
+		return ERROR_SEVERITY_ERROR | FAC(FACILITY_CERT) | ERROR_NOT_ENOUGH_MEMORY;
+	}
 
 	trust_data.cbStruct = sizeof(trust_data);
 	trust_data.dwUIChoice = WTD_UI_ALL;
+	// We just downloaded from the Internet, so we should be able to check revocation
 	trust_data.fdwRevocationChecks = WTD_REVOKE_WHOLECHAIN;
-	trust_data.dwUnionChoice = WTD_CHOICE_FILE;
-	trust_data.pFile = &trust_file;
 	// 0x400 = WTD_MOTW  for Windows 8.1 or later
 	trust_data.dwProvFlags = WTD_REVOCATION_CHECK_CHAIN | 0x400;
+	trust_data.dwUnionChoice = WTD_CHOICE_FILE;
+	trust_data.pFile = &trust_file;
 
 	r = WinVerifyTrust(NULL, &guid_generic_verify, &trust_data);
-	safe_free(szFileName);
+	safe_free(trust_file.pcwszFilePath);
+
 	return r;
 }
