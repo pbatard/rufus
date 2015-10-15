@@ -137,7 +137,7 @@ LONG ValidateSignature(HWND hDlg, const char* path)
 	GUID guid_generic_verify =	// WINTRUST_ACTION_GENERIC_VERIFY_V2
 		{ 0xaac56b, 0xcd44, 0x11d0,{ 0x8c, 0xc2, 0x0, 0xc0, 0x4f, 0xc2, 0x95, 0xee } };
 	char *signature_name;
-	int i;
+	size_t i, len;
 
 	// Check the signature name. Make it specific enough (i.e. don't simply check for "Akeo")
 	// so that, besides hacking our server, it'll place an extra hurdle on any malicious entity
@@ -149,11 +149,15 @@ LONG ValidateSignature(HWND hDlg, const char* path)
 		return TRUST_E_NOSIGNATURE;
 	}
 	for (i = 0; i < ARRAYSIZE(valid_cert_names); i++) {
-		if (strncmp(signature_name, valid_cert_names[i], strlen(valid_cert_names[i])) == 0)
-			break;
+		len = strlen(valid_cert_names[i]);
+		if (strncmp(signature_name, valid_cert_names[i], len) == 0) {
+			// Test for whitespace after the part we match, for added safety
+			if ((len >= strlen(signature_name)) || isspace(signature_name[len]))
+				break;
+		}
 	}
 	if (i >= ARRAYSIZE(valid_cert_names)) {
-		uprintf("PKI: Signature '%s' doesn't look right...", signature_name);
+		uprintf("PKI: Signature '%s' is unexpected...", signature_name);
 		if (MessageBoxU(hDlg, lmprintf(MSG_285, signature_name), lmprintf(MSG_283),
 			MB_YESNO | MB_ICONWARNING | MB_IS_RTL) != IDYES)
 			return TRUST_E_EXPLICIT_DISTRUST;

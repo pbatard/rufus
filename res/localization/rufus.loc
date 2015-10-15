@@ -88,7 +88,7 @@
 # http://download.microsoft.com/download/9/5/E/95EF66AF-9026-4BB0-A41D-A4F81802D92C/%5BMS-LCID%5D.pdf
 # for the LCID (0x####) codes you should use
 l "en-US" "English (English)" 0x0409, 0x0809, 0x0c09, 0x1009, 0x1409, 0x1809, 0x1c09, 0x2009, 0x2409, 0x2809, 0x2c09, 0x3009, 0x3409, 0x3809, 0x3c09, 0x4009, 0x4409, 0x4809
-v 1.0.18
+v 1.0.19
 
 # Main dialog
 g IDD_DIALOG
@@ -538,10 +538,11 @@ t MSG_278 "Boot type"
 t MSG_279 "Non bootable"
 t MSG_280 "Image selection"
 t MSG_281 "(Please select an image)"
-t MSG_282 "Drive locking"
+t MSG_282 "Exclusive USB drive locking"
 t MSG_283 "Invalid signature"
 t MSG_284 "The downloaded executable is missing a digital signature."
-t MSG_285 "The downloaded executable was signed by '%s'.\nThis doesn't look right... Are you sure you want to run it?"
+t MSG_285 "The downloaded executable is signed by '%s'.\nThis is not a signature we recognize and could "
+	"indicate some form of malicious activity...\nAre you sure you want to run this file?"
 
 ################################################################################
 ############################# TRANSLATOR END COPY ##############################
@@ -4511,7 +4512,7 @@ t MSG_281 "(Valitse levykuva)"
 
 ################################################################################
 l "fr-FR" "French (Français)" 0x040c, 0x080c, 0x0c0c, 0x100c, 0x140c, 0x180c, 0x1c0c, 0x200c, 0x240c, 0x280c, 0x2c0c, 0x300c, 0x340c, 0x380c, 0xe40c
-v 1.0.18
+v 1.0.19
 b "en-US"
 
 g IDD_DIALOG
@@ -4922,6 +4923,11 @@ t MSG_278 "Type de démarrage"
 t MSG_279 "Non démarrable"
 t MSG_280 "Sélection d'image"
 t MSG_281 "(Veuillez sélectioner une image)"
+t MSG_282 "Verrouillage exclusif de périphérique USB"
+t MSG_283 "Signature invalide"
+t MSG_284 "L'exécutable téléchargé ne possède pas de signature digitale."
+t MSG_285 "L'exécutable téléchargé est signé par '%s'.\nCe n’est pas une signature que nous reconnaissons et "
+	"pourrait indiquer une activité malicieuse...\nÊtes-vous certain de vouloir lancer ce fichier?"
 
 ################################################################################
 l "de-DE" "German (Deutsch)" 0x0407, 0x0807, 0x0c07, 0x1007, 0x1407
