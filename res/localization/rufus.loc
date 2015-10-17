@@ -3180,7 +3180,7 @@ t MSG_281 "(Prosím, vyberte obraz)"
 
 ################################################################################
 l "da-DK" "Danish (Dansk)" 0x0406
-v 1.0.18
+v 1.0.19
 b "en-US"
 # Main dialog
 g IDD_DIALOG
@@ -3612,6 +3612,11 @@ t MSG_278 "Opstartstype"
 t MSG_279 "Ikke startbar"
 t MSG_280 "Diskbillede"
 t MSG_281 "(Vælg et diskbillede)"
+t MSG_282 "Isoleret USB-lukning"
+t MSG_283 "Ugyldig signatur"
+t MSG_284 "Den hentede fil mangler en digital signatur."
+t MSG_285 "Den hentede fil er signeret af '%s'.\nDet er ikke en signatur vi genkender og det kan tyde "
+	"på at der er en form for ondsindet aktivitet...\nEr du sikker på at du vil køre denne fil?"
 
 ################################################################################
 l "nl-NL" "Dutch (Nederlands)" 0x0413, 0x0813
