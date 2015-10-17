@@ -23,7 +23,7 @@ o Version 1.0.19 (2015.10.15)
           Internet in case something is very wrong with its digital signature...
   - *NEW* MSG_283 "Invalid signature"
   - *NEW* MSG_284 "The downloaded executable is missing a digital signature."
-	- *NEW* MSG_285 "The downloaded executable is signed by '%s'.\nThis is not a signature we recognize and could "
+  - *NEW* MSG_285 "The downloaded executable is signed by '%s'.\nThis is not a signature we recognize and could "
                   "indicate some form of malicious activity...\nAre you sure you want to run this file?"
 
 o Version 1.0.18 (2015.09.03)

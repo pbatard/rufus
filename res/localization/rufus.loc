@@ -13876,7 +13876,7 @@ t MSG_281 "(Välj en avbild)"
 
 ################################################################################
 l "tr-TR" "Turkish (Türkçe)" 0x041F
-v 1.0.18
+v 1.0.19
 b "en-US"
 
 # Main dialog
@@ -14347,6 +14347,11 @@ t MSG_278 "Önyükleme türü"
 t MSG_279 "Önyüklenebilir değil"
 t MSG_280 "Yansıma seçimi"
 t MSG_281 "(Lütfen bir yansıma seçin)"
+t MSG_282 "Özel USB sürücü kilitleme"
+t MSG_283 "Geçersiz imza"
+t MSG_284 "İndirilen yürütülebilir dosyanın dijital imzası eksik."
+t MSG_285 "İndirilen yürütülebilir dosya '%s' tarafından imzalanmış.\nBu tanımlayabildiğimiz ve kötü niyetli "
+	"etkinliğini belirtebileceğimiz bir imza değil...\nBu dosyayı çalıştırmak istediğinize emin misiniz?"
 
 ################################################################################
 l "uk-UA" "Ukrainian (Українська)" 0x0422
