@@ -12511,7 +12511,7 @@ t MSG_281 "(Vyberte obraz)"
 
 ################################################################################
 l "sl-SI" "Slovene (Slovenščina)" 0x0424
-v 1.0.18
+v 1.0.19
 b "en-US"
 
 # Main dialog
@@ -12944,6 +12944,11 @@ t MSG_278 "Način zagona"
 t MSG_279 "Nezagonska"
 t MSG_280 "Izbira slike"
 t MSG_281 "(Izberite sliko)"
+t MSG_282 "Ekskluzivno zaklepanje nosilca USB"
+t MSG_283 "Neveljaven podpis"
+t MSG_284 "Prenesena datoteka nima digitalnega podpisa."
+t MSG_285 "Oseba, ki je podpisala preneseno datoteko, je '%s'.\nTa podpis se ne ujema s pričakovanim, kar lahko pomeni, "
+	"da je to zlonamerna datoteka, ki jo vam je nekdo podtaknil.\nAli ste prepričani, da jo želite zagnati?" 
 
 ################################################################################
 l "es-ES" "Spanish (Español)" 0x040a, 0x080a, 0x0c0a, 0x100a, 0x140a, 0x180a, 0x1c0a, 0x200a, 0x240a, 0x280a, 0x2c0a, 0x300a, 0x340a, 0x380a, 0x3c0a, 0x400a, 0x440a, 0x480a, 0x4c0a, 0x500a, 0x540a, 0x580a
