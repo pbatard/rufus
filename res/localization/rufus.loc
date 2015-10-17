@@ -9390,7 +9390,7 @@ t MSG_263 "Guna saiz seunit yang BETUL"
 
 ################################################################################
 l "nb-NO" "Norwegian (Norsk)" 0x0414
-v 1.0.18
+v 1.0.19
 b "en-US"
 
 # Main dialog
@@ -9468,7 +9468,7 @@ t IDD_UPDATE_POLICY "Oppdaterings politikk og innstillinger"
 t IDS_UPDATE_SETTINGS_GRP "Innstillinger"
 t IDS_UPDATE_FREQUENCY_TXT "Ser etter oppdateringer"
 t IDS_INCLUDE_BETAS_TXT "Inkluder beta versjoner"
-t IDC_CHECK_NOW "Sjekk Nå"
+t IDC_CHECK_NOW "Sjekk nå"
 t IDCANCEL "Lukk"
 s IDS_UPDATE_FREQUENCY_TXT 10,0
 s IDS_INCLUDE_BETAS_TXT 10,0
@@ -9855,6 +9855,11 @@ t MSG_278 "Oppstart type"
 t MSG_279 "Ikke oppstartbar"
 t MSG_280 "Bilde valg"
 t MSG_281 "(Vennligst velg et bilde)"
+t MSG_282 "Utelat USB stasjonslås"
+t MSG_283 "Ugyldig signatur"
+t MSG_284 "Den nedlastede programfil mangler en digital signatur."
+t MSG_285 "Den nedlastede programfil er signert av '%s'.\nDette er en signatur vi ikke gjenkjenner, og kan "
+	"indikere en form for skadelig aktivitet...\nEr du sikker på at du vil kjøre denne filen?"
 
 ################################################################################
 l "pl-PL" "Polish (Polski)" 0x0415
