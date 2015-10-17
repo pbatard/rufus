@@ -12937,7 +12937,7 @@ t MSG_281 "(Izberite sliko)"
 
 ################################################################################
 l "es-ES" "Spanish (Español)" 0x040a, 0x080a, 0x0c0a, 0x100a, 0x140a, 0x180a, 0x1c0a, 0x200a, 0x240a, 0x280a, 0x2c0a, 0x300a, 0x340a, 0x380a, 0x3c0a, 0x400a, 0x440a, 0x480a, 0x4c0a, 0x500a, 0x540a, 0x580a
-v 1.0.18
+v 1.0.19
 b "en-US"
 
 # Main dialog
@@ -13398,6 +13398,11 @@ t MSG_278 "Tipo de arranque"
 t MSG_279 "No autoarrancable"
 t MSG_280 "Selección de imagen"
 t MSG_281 "(Por favor seleccione una imagen)"
+t MSG_282 "Dispositivo USB bloqueado de forma exclusiva"
+t MSG_283 "Firma no válida"
+t MSG_284 "El ejecutable descargado carece de firma digital."
+t MSG_285 "El ejecutable descargado está firmado por '%s'.\nNo reconocemos este tipo de firma y podría "
+	"indicar alguna forma de actividad maliciosa...\n¿Está seguro de que quieres ejecutar este fichero?"
 
 ################################################################################
 l "sv-SE" "Swedish (Svenska)" 0x041d, 0x081d
