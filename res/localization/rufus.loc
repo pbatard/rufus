@@ -11218,7 +11218,7 @@ t MSG_281 "(Selecione a imagem)"
 
 ################################################################################
 l "ro-RO" "Romanian (Română)" 0x0418, 0x0818
-v 1.0.18
+v 1.0.19
 b "en-US"
 
 g IDD_DIALOG
@@ -11627,6 +11627,11 @@ t MSG_278 "Tipul de boot-are"
 t MSG_279 "Imagine nebootabilă"
 t MSG_280 "Selectare Imagine"
 t MSG_281 "(Vă rugăm, selectați o imagine)"
+t MSG_282 "Exclusiv blocare USB"
+t MSG_283 "Semnătură invalidă"
+t MSG_284 "Din executabilul descărcat lipseste o semnătură digitală."
+t MSG_285 "Executabilul descărcat este semnat de către '%s'.\nAceasta nu este o semnătură să recunoaștem și ar putea "
+	"indica o anumită formă de activitate dăunătoare...\nSigur doriți să executați acest fișier?"
 
 ################################################################################
 l "ru-RU" "Russian (Русский)" 0x0419, 0x0819
