@@ -10,7 +10,7 @@ Features
 * Creates DOS bootable USB drives, using [FreeDOS](http://www.freedos.org/) or MS-DOS
 * Creates BIOS or UEFI bootable drives, including UEFI bootable NTFS
 * Creates bootable drives from bootable ISOs (Windows, Linux, etc.)
-* Creates bootbale drives from bootable disk images, including compressed ones
+* Creates bootable drives from bootable disk images, including compressed ones
 * Creates [Windows To Go](https://en.wikipedia.org/wiki/Windows_To_Go) drives
 * Twice as fast as Microsoft's USB/DVD tool or UNetbootin, on ISO -> USB creation (1)
 * Performs bad blocks checks, including detection of "fake" flash drives
