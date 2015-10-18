@@ -2736,7 +2736,7 @@ t MSG_281 "(Molim odaberite datoteku)"
 
 ################################################################################
 l "cs-CZ" "Czech (Čeština)" 0x0405
-v 1.0.18
+v 1.0.19
 b "en-US"
 
 # Main dialog
@@ -3177,6 +3177,11 @@ t MSG_278 "Typ boot"
 t MSG_279 "Není boot"
 t MSG_280 "Volba obrazu"
 t MSG_281 "(Prosím, vyberte obraz)"
+t MSG_282 "Uzamčení USB disku"
+t MSG_283 "Neplatný podpis"
+t MSG_284 "Schází digitální podpis u staženého programu."
+t MSG_285 "Stažený program je podepsán '%s'.\nTento není jsme si vědomi že muže být "
+	"indikovaná jako škodlivý program aktivita...\nOpravdu chcete spustit tento program?"
 
 ################################################################################
 l "da-DK" "Danish (Dansk)" 0x0406
