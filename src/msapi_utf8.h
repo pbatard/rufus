@@ -66,7 +66,7 @@ extern "C" {
 #define isdigitU(c) isdigit((unsigned char)(c))
 #define isspaceU(c) isspace((unsigned char)(c))
 #define isxdigitU(c) isxdigit((unsigned char)(c))
-// NB: other issomething() calls are not implemented as they may require multibyte UTF-8 sequences to be converted 
+// NB: other issomething() calls are not implemented as they may require multibyte UTF-8 sequences to be converted
 
 #define sfree(p) do {if (p != NULL) {free((void*)(p)); p = NULL;}} while(0)
 #define wconvert(p)     wchar_t* w ## p = utf8_to_wchar(p)
@@ -202,6 +202,20 @@ static __inline int MessageBoxU(HWND hWnd, LPCSTR lpText, LPCSTR lpCaption, UINT
 	wconvert(lpText);
 	wconvert(lpCaption);
 	ret = MessageBoxW(hWnd, wlpText, wlpCaption, uType);
+	err = GetLastError();
+	wfree(lpText);
+	wfree(lpCaption);
+	SetLastError(err);
+	return ret;
+}
+
+static __inline int MessageBoxExU(HWND hWnd, LPCSTR lpText, LPCSTR lpCaption, UINT uType, WORD wLanguageId)
+{
+	int ret;
+	DWORD err = ERROR_INVALID_DATA;
+	wconvert(lpText);
+	wconvert(lpCaption);
+	ret = MessageBoxExW(hWnd, wlpText, wlpCaption, uType, wLanguageId);
 	err = GetLastError();
 	wfree(lpText);
 	wfree(lpCaption);

@@ -64,7 +64,7 @@ uint8_t *grub2_buf = NULL;
 long grub2_len;
 static BOOL WritePBR(HANDLE hLogicalDrive);
 
-/* 
+/*
  * Convert the fmifs outputs messages (that use an OEM code page) to UTF-8
  */
 static void OutputUTF8Message(const char* src)
@@ -312,13 +312,13 @@ static void ToValidLabel(WCHAR* name, BOOL bFAT)
  * For example, say a disk was formatted on 26 Dec 95 at 9:55 PM and 41.94
  * seconds.  DOS takes the date and time just before it writes it to the
  * disk.
- * 
+ *
  * Low order word is calculated:               Volume Serial Number is:
  * Month & Day         12/26   0c1ah
  * Sec & Hundredths    41:94   295eh               3578:1d02
  * -----
  * 3578h
- * 
+ *
  * High order word is calculated:
  * Hours & Minutes     21:55   1537h
  * Year                1995    07cbh
@@ -346,7 +346,7 @@ static DWORD GetVolumeID(void)
 
 /*
  * This is the Microsoft calculation from FATGEN
- * 
+ *
  * DWORD RootDirSectors = 0;
  * DWORD TmpVal1, TmpVal2, FATSz;
  *
@@ -363,7 +363,7 @@ static DWORD GetFATSizeSectors(DWORD DskSize, DWORD ReservedSecCnt, DWORD SecPer
 	ULONGLONG FatElementSize = 4;
 	ULONGLONG FatSz;
 
-	// This is based on 
+	// This is based on
 	// http://hjem.get2net.dk/rune_moeller_barnkob/filesystems/fat.html
 	Numerator = FatElementSize * (DskSize - ReservedSecCnt);
 	Denominator = (SecPerClus * BytesPerSect) + (FatElementSize * NumFATs);
@@ -399,7 +399,7 @@ static BOOL FormatFAT32(DWORD DriveIndex)
 	DWORD BurstSize = 128; // Zero in blocks of 64K typically
 
 	// Calculated later
-	DWORD FatSize = 0; 
+	DWORD FatSize = 0;
 	DWORD BytesPerSect = 0;
 	DWORD ClusterSize = 0;
 	DWORD SectorsPerCluster = 0;
@@ -510,7 +510,7 @@ static BOOL FormatFAT32(DWORD DriveIndex)
 	TotalSectors = (DWORD)  (piDrive.PartitionLength.QuadPart/dgDrive.BytesPerSector);
 	pFAT32BootSect->dTotSec32 = TotalSectors;
 
-	FatSize = GetFATSizeSectors(pFAT32BootSect->dTotSec32, pFAT32BootSect->wRsvdSecCnt, 
+	FatSize = GetFATSizeSectors(pFAT32BootSect->dTotSec32, pFAT32BootSect->wRsvdSecCnt,
 		pFAT32BootSect->bSecPerClus, pFAT32BootSect->bNumFATs, BytesPerSect);
 
 	pFAT32BootSect->dFATSz32 = FatSize;
@@ -529,11 +529,11 @@ static BOOL FormatFAT32(DWORD DriveIndex)
 	((BYTE*)pFAT32BootSect)[510] = 0x55;
 	((BYTE*)pFAT32BootSect)[511] = 0xaa;
 
-	// FATGEN103.DOC says "NOTE: Many FAT documents mistakenly say that this 0xAA55 signature occupies the "last 2 bytes of 
-	// the boot sector". This statement is correct if - and only if - BPB_BytsPerSec is 512. If BPB_BytsPerSec is greater than 
-	// 512, the offsets of these signature bytes do not change (although it is perfectly OK for the last two bytes at the end 
-	// of the boot sector to also contain this signature)." 
-	// 
+	// FATGEN103.DOC says "NOTE: Many FAT documents mistakenly say that this 0xAA55 signature occupies the "last 2 bytes of
+	// the boot sector". This statement is correct if - and only if - BPB_BytsPerSec is 512. If BPB_BytsPerSec is greater than
+	// 512, the offsets of these signature bytes do not change (although it is perfectly OK for the last two bytes at the end
+	// of the boot sector to also contain this signature)."
+	//
 	// Windows seems to only check the bytes at offsets 510 and 511. Other OSs might check the ones at the end of the sector,
 	// so we'll put them there too.
 	if (BytesPerSect != 512) {
@@ -555,7 +555,7 @@ static BOOL FormatFAT32(DWORD DriveIndex)
 
 	// Write boot sector, fats
 	// Sector 0 Boot Sector
-	// Sector 1 FSInfo 
+	// Sector 1 FSInfo
 	// Sector 2 More boot code - we write zeros here
 	// Sector 3 unused
 	// Sector 4 unused
@@ -572,7 +572,7 @@ static BOOL FormatFAT32(DWORD DriveIndex)
 	UserAreaSize = TotalSectors - ReservedSectCount - (NumFATs*FatSize);
 	ClusterCount = UserAreaSize / SectorsPerCluster;
 
-	// Sanity check for a cluster count of >2^28, since the upper 4 bits of the cluster values in 
+	// Sanity check for a cluster count of >2^28, since the upper 4 bits of the cluster values in
 	// the FAT are reserved.
 	if (ClusterCount > 0x0FFFFFFF) {
 		die("This drive has more than 2^28 clusters, try to specify a larger cluster size or use the default\n",
@@ -586,7 +586,7 @@ static BOOL FormatFAT32(DWORD DriveIndex)
 	}
 
 	// Sanity check, make sure the fat is big enough
-	// Convert the cluster count into a Fat sector count, and check the fat size value we calculated 
+	// Convert the cluster count into a Fat sector count, and check the fat size value we calculated
 	// earlier is OK.
 	FatNeeded = ClusterCount * 4;
 	FatNeeded += (BytesPerSect-1);
@@ -901,7 +901,7 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 	}
 	if ((IsChecked(IDC_BOOT)) && (tt == TT_BIOS)) {
 		// Set first partition bootable - masquerade as per the DiskID selected
-		buf[0x1be] = IsChecked(IDC_RUFUS_MBR) ? 
+		buf[0x1be] = IsChecked(IDC_RUFUS_MBR) ?
 			(BYTE)ComboBox_GetItemData(hDiskID, ComboBox_GetCurSel(hDiskID)):0x80;
 		uprintf("Set bootable USB partition as 0x%02X\n", buf[0x1be]);
 	}
@@ -926,7 +926,7 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 		r = write_zero_mbr(fp);
 		goto notify;
 	}
-	
+
 	// Syslinux
 	if ( (bt == BT_SYSLINUX_V4) || (bt == BT_SYSLINUX_V6) ||
 		 ((bt == BT_ISO) && (HAS_SYSLINUX(img_report)) && (IS_FAT(fs))) ) {
@@ -954,7 +954,7 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 		uprintf(using_msg, "ReactOS");
 		r = write_reactos_mbr(fp);
 		goto notify;
-	} 
+	}
 
 	// KolibriOS
 	if ( (bt == BT_ISO) && (img_report.has_kolibrios) && (IS_FAT(fs))) {
@@ -1498,7 +1498,7 @@ DWORD WINAPI FormatThread(void* param)
 	char efi_dst[] = "?:\\efi\\boot\\bootx64.efi";
 	char kolibri_dst[] = "?:\\MTLD_F32";
 	char grub4dos_dst[] = "?:\\grldr";
-	
+
 	PF_TYPE_DECL(WINAPI, LANGID, GetThreadUILanguage, (void));
 	PF_TYPE_DECL(WINAPI, LANGID, SetThreadUILanguage, (LANGID));
 	PF_INIT(GetThreadUILanguage, Kernel32);
@@ -1635,8 +1635,8 @@ DWORD WINAPI FormatThread(void* param)
 				fprintf(log_fd, APPLICATION_NAME " bad blocks check ended on: %04d.%02d.%02d %02d:%02d:%02d\n",
 				lt.wYear, lt.wMonth, lt.wDay, lt.wHour, lt.wMinute, lt.wSecond);
 				fclose(log_fd);
-				r = MessageBoxU(hMainDialog, lmprintf(MSG_012, bb_msg, logfile),
-					lmprintf(MSG_010), MB_ABORTRETRYIGNORE|MB_ICONWARNING|MB_IS_RTL);
+				r = MessageBoxExU(hMainDialog, lmprintf(MSG_012, bb_msg, logfile),
+					lmprintf(MSG_010), MB_ABORTRETRYIGNORE|MB_ICONWARNING|MB_IS_RTL, selected_langid);
 			} else {
 				// We didn't get any errors => delete the log file
 				fclose(log_fd);
@@ -1782,7 +1782,7 @@ DWORD WINAPI FormatThread(void* param)
 		uprintf("Logical drive was not found!");	// We try to continue even if this fails, just in case
 	CHECK_FOR_USER_CANCEL;
 
-	// If FAT32 is requested and we have a large drive (>32 GB) use 
+	// If FAT32 is requested and we have a large drive (>32 GB) use
 	// large FAT32 format, else use MS's FormatEx.
 	ret = use_large_fat32?FormatFAT32(DriveIndex):FormatDrive(DriveIndex);
 	if (!ret) {
@@ -1838,7 +1838,7 @@ DWORD WINAPI FormatThread(void* param)
 				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_INSTALL_FAILURE;
 			}
 		} else {
-			// We still have a lock, which we need to modify the volume boot record 
+			// We still have a lock, which we need to modify the volume boot record
 			// => no need to reacquire the lock...
 			hLogicalVolume = GetLogicalHandle(DriveIndex, TRUE, FALSE);
 			if ((hLogicalVolume == INVALID_HANDLE_VALUE) || (hLogicalVolume == NULL)) {
@@ -2016,7 +2016,7 @@ DWORD WINAPI SaveImageThread(void* param)
 	// With Windows' default optimizations, sync read + sync write for sequential operations
 	// will be as fast, if not faster, than whatever async scheme you can come up with.
 	for (wb = 0; ; wb += wSize) {
-		s = ReadFile(hPhysicalDrive, buffer, 
+		s = ReadFile(hPhysicalDrive, buffer,
 			(DWORD)MIN(DD_BUFFER_SIZE, SelectedDrive.DiskSize - wb), &rSize, NULL);
 		if (!s) {
 			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_READ_FAULT;

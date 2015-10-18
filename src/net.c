@@ -235,7 +235,7 @@ const char* WinInetErrorString(void)
 	}
 }
 
-/* 
+/*
  * Download a file from an URL
  * Mostly taken from http://support.microsoft.com/kb/234913
  * If hProgressDialog is not NULL, this function will send INIT and EXIT messages
@@ -247,7 +247,7 @@ DWORD DownloadFile(const char* url, const char* file, HWND hProgressDialog)
 	HWND hProgressBar = NULL;
 	BOOL r = FALSE;
 	DWORD dwFlags, dwSize, dwDownloaded, dwTotalSize;
-	FILE* fd = NULL; 
+	FILE* fd = NULL;
 	LONG progress_style;
 	const char* accept_types[] = {"*/*\0", NULL};
 	unsigned char buf[DOWNLOAD_BUFFER_SIZE];
@@ -386,8 +386,8 @@ out:
 		if (PromptOnError) {
 			PrintInfo(0, MSG_242);
 			SetLastError(error_code);
-			MessageBoxU(hMainDialog, IS_ERROR(FormatStatus)?StrError(FormatStatus, FALSE):WinInetErrorString(),
-			lmprintf(MSG_044), MB_OK|MB_ICONERROR|MB_IS_RTL);
+			MessageBoxExU(hMainDialog, IS_ERROR(FormatStatus)?StrError(FormatStatus, FALSE):WinInetErrorString(),
+			lmprintf(MSG_044), MB_OK|MB_ICONERROR|MB_IS_RTL, selected_langid);
 		}
 	}
 	if (hRequest) InternetCloseHandle(hRequest);
@@ -538,7 +538,7 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 			dwSize = sizeof(dwStatus);
 			dwStatus = 404;
 			HttpQueryInfoA(hRequest, HTTP_QUERY_STATUS_CODE|HTTP_QUERY_FLAG_NUMBER, (LPVOID)&dwStatus, &dwSize, NULL);
-			if (dwStatus == 200) 
+			if (dwStatus == 200)
 				break;
 			InternetCloseHandle(hRequest);
 			hRequest = NULL;
@@ -572,7 +572,7 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 		// Might as well let the user know
 		if (!force_update_check) {
 			if ((local_time > server_time + 600) || (local_time < server_time - 600)) {
-				uprintf("IMPORTANT: Your local clock is more than 10 minutes in the %s. Unless you fix this, " APPLICATION_NAME " may not be able to check for updates...", 
+				uprintf("IMPORTANT: Your local clock is more than 10 minutes in the %s. Unless you fix this, " APPLICATION_NAME " may not be able to check for updates...",
 					(local_time > server_time + 600)?"future":"past");
 			}
 		}

@@ -35,7 +35,7 @@
 #include "localization.h"
 #include "localization_data.h"
 
-/* 
+/*
  * List of supported locale commands, with their parameter syntax:
  *   c control ID (no space, no quotes)
  *   s: quoted string
@@ -137,7 +137,7 @@ void add_message_command(loc_cmd* lcmd)
 		uprintf("localization: invalid MSG_ index\n");
 		return;
 	}
-	
+
 	safe_free(msg_table[lcmd->ctrl_id-MSG_000]);
 	msg_table[lcmd->ctrl_id-MSG_000] = lcmd->txt[1];
 	lcmd->txt[1] = NULL;	// String would be freed after this call otherwise
@@ -547,7 +547,7 @@ loc_cmd* get_locale_from_name(char* locale_name, BOOL fallback)
 	return lcmd;
 }
 
-/* 
+/*
  * This call is used to toggle the issuing of messages with the default locale
  * (usually en-US) instead of the current (usually non en) one.
  */
@@ -572,4 +572,54 @@ const char* get_name_from_id(int id)
 			return control_id[i].name;
 	}
 	return "UNKNOWN ID";
+}
+
+/*
+ * This call is used to get a supported Windows Language identifier we
+ * should pass to MessageBoxEx to try to get the buttons displayed in
+ * the currently selected language. This relies on the relevant language
+ * pack having been installed.
+ */
+static BOOL found_lang;
+static BOOL CALLBACK EnumUILanguagesProc(LPTSTR lpUILanguageString, LONG_PTR lParam)
+{
+	wchar_t* wlang = (wchar_t*)lParam;
+	if (wcscmp(wlang, lpUILanguageString) == 0)
+		found_lang = TRUE;
+	return TRUE;
+}
+
+WORD get_language_id(loc_cmd* lcmd)
+{
+	int i;
+	wchar_t wlang[5];
+	LANGID lang_id = GetUserDefaultUILanguage();
+
+	if (lcmd == NULL)
+		return MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT);
+
+	// Find if the selected language is the user default
+	for (i = 0; i<lcmd->unum_size; i++) {
+		if (lcmd->unum[i] == lang_id) {
+			uprintf("localization: will use default UI language 0x%04X", lang_id);
+			return MAKELANGID(lang_id, SUBLANG_DEFAULT);
+		}
+	}
+
+	// Selected language is not user default - find if a language pack is installed for it
+	found_lang = FALSE;
+	for (i = 0; (i<lcmd->unum_size); i++) {
+		// Always uppercase
+		swprintf_s(wlang, ARRAYSIZE(wlang), L"%04X", lcmd->unum[i]);
+		// This callback enumeration from Microsoft is retarded. Now we need a global
+		// boolean to tell us that we found what we were after.
+		EnumUILanguages(EnumUILanguagesProc, 0x4, (LONG_PTR)wlang);	// 0x04 = MUI_LANGUAGE_ID
+		if (found_lang) {
+			uprintf("localization: will use installed language pack for 0x%04X", lcmd->unum[i]);
+			return MAKELANGID(lcmd->unum[i], SUBLANG_DEFAULT);
+		}
+	}
+
+	uprintf("localization: no matching language pack - some messages will be displayed using default locale");
+	return MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT);
 }

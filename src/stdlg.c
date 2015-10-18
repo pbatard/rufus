@@ -469,8 +469,8 @@ void CreateStatusBar(void)
 	SendMessage(hStatusToolbar, WM_SETFONT, (WPARAM)hFont, TRUE);
 	SendMessage(hStatusToolbar, TB_SETEXTENDEDSTYLE, 0, (LPARAM)TBSTYLE_EX_MIXEDBUTTONS);
 	SendMessage(hStatusToolbar, TB_SETIMAGELIST, 0, (LPARAM)NULL);
-	SendMessage(hStatusToolbar, TB_SETDISABLEDIMAGELIST, 0, (LPARAM)NULL);	
-	SendMessage(hStatusToolbar, TB_SETBITMAPSIZE, 0, MAKELONG(0,0));	
+	SendMessage(hStatusToolbar, TB_SETDISABLEDIMAGELIST, 0, (LPARAM)NULL);
+	SendMessage(hStatusToolbar, TB_SETBITMAPSIZE, 0, MAKELONG(0,0));
 
 	// Set our text
 	memset(tbbStatusToolbarButtons, 0, sizeof(TBBUTTON));
@@ -1094,7 +1094,7 @@ BOOL IsShown(HWND hDlg)
 
 /* Compute the width of a dropdown list entry */
 LONG GetEntryWidth(HWND hDropDown, const char *entry)
-{ 
+{
 	HDC hDC;
 	HFONT hFont, hDefFont = NULL;
 	SIZE size;
@@ -1103,7 +1103,7 @@ LONG GetEntryWidth(HWND hDropDown, const char *entry)
 	hFont = (HFONT)SendMessage(hDropDown, WM_GETFONT, 0, 0);
 	if (hFont != NULL)
 		hDefFont = (HFONT)SelectObject(hDC, hFont);
-	
+
 	if (!GetTextExtentPointU(hDC, entry, &size))
 		size.cx = 0;
 
@@ -1193,9 +1193,9 @@ DECLARE_INTERFACE_(my_ITaskbarList3, IUnknown) {
 	STDMETHOD (SetThumbnailTooltip) (THIS_ HWND hwnd, LPCWSTR pszTip) PURE;
 	STDMETHOD (SetThumbnailClip) (THIS_ HWND hwnd, RECT *prcClip) PURE;
 };
-const IID my_IID_ITaskbarList3 = 
+const IID my_IID_ITaskbarList3 =
 	{ 0xea1afb91, 0x9e28, 0x4b86, { 0x90, 0xe9, 0x9e, 0x9f, 0x8a, 0x5e, 0xef, 0xaf } };
-const IID my_CLSID_TaskbarList = 
+const IID my_CLSID_TaskbarList =
 	{ 0x56fdf344, 0xfd6d, 0x11d0, { 0x95, 0x8a ,0x0, 0x60, 0x97, 0xc9, 0xa0 ,0x90 } };
 
 static my_ITaskbarList3* ptbl = NULL;
@@ -1299,7 +1299,7 @@ INT_PTR CALLBACK UpdateCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 			GetWindowRect(hPolicy, &rect);
 			dy = rect.bottom - rect.top;
 			rsz = (REQRESIZE *)lParam;
-			dy -= rsz->rc.bottom - rsz->rc.top + 6;	// add the border	
+			dy -= rsz->rc.bottom - rsz->rc.top + 6;	// add the border
 			ResizeMoveCtrl(hDlg, hDlg, 0, 0, 0, -dy, 1.0f);
 			ResizeMoveCtrl(hDlg, hPolicy, 0, 0, 0, -dy, 1.0f);
 			ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDS_UPDATE_SETTINGS_GRP), 0, -dy, 0, 0, 1.0f);
@@ -1458,7 +1458,7 @@ INT_PTR CALLBACK NewVersionCallback(HWND hDlg, UINT message, WPARAM wParam, LPAR
 		SendMessageA(hNotes, EM_SETTEXTEX, (WPARAM)&friggin_microsoft_unicode_amateurs, (LPARAM)update.release_notes);
 		SendMessage(hNotes, EM_SETSEL, -1, -1);
 		SendMessage(hNotes, EM_SETEVENTMASK, 0, ENM_LINK);
-		SetWindowTextU(GetDlgItem(hDlg, IDC_YOUR_VERSION), lmprintf(MSG_018, 
+		SetWindowTextU(GetDlgItem(hDlg, IDC_YOUR_VERSION), lmprintf(MSG_018,
 			rufus_version[0], rufus_version[1], rufus_version[2]));
 		SetWindowTextU(GetDlgItem(hDlg, IDC_LATEST_VERSION), lmprintf(MSG_019,
 			update.version[0], update.version[1], update.version[2]));

@@ -141,11 +141,11 @@ LONG ValidateSignature(HWND hDlg, const char* path)
 
 	// Check the signature name. Make it specific enough (i.e. don't simply check for "Akeo")
 	// so that, besides hacking our server, it'll place an extra hurdle on any malicious entity
-	// into also fooling a C.A. to issue a certificate that passes our test. 
+	// into also fooling a C.A. to issue a certificate that passes our test.
 	signature_name = GetSignatureName(path);
 	if (signature_name == NULL) {
 		uprintf("PKI: Could not get signature name");
-		MessageBoxU(hDlg, lmprintf(MSG_284), lmprintf(MSG_283), MB_OK | MB_ICONERROR | MB_IS_RTL);
+		MessageBoxExU(hDlg, lmprintf(MSG_284), lmprintf(MSG_283), MB_OK | MB_ICONERROR | MB_IS_RTL, selected_langid);
 		return TRUST_E_NOSIGNATURE;
 	}
 	for (i = 0; i < ARRAYSIZE(valid_cert_names); i++) {
@@ -158,8 +158,8 @@ LONG ValidateSignature(HWND hDlg, const char* path)
 	}
 	if (i >= ARRAYSIZE(valid_cert_names)) {
 		uprintf("PKI: Signature '%s' is unexpected...", signature_name);
-		if (MessageBoxU(hDlg, lmprintf(MSG_285, signature_name), lmprintf(MSG_283),
-			MB_YESNO | MB_ICONWARNING | MB_IS_RTL) != IDYES)
+		if (MessageBoxExU(hDlg, lmprintf(MSG_285, signature_name), lmprintf(MSG_283),
+			MB_YESNO | MB_ICONWARNING | MB_IS_RTL, selected_langid) != IDYES)
 			return TRUST_E_EXPLICIT_DISTRUST;
 	}
 

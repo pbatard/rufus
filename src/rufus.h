@@ -41,8 +41,12 @@
 #define APPLICATION_NAME            "Rufus"
 #define COMPANY_NAME                "Akeo Consulting"
 #define STR_NO_LABEL                "NO_LABEL"
-#define LEFT_TO_RIGHT_MARK          "‎"			// Yes, there is a character between the quotes!
-#define RIGHT_TO_LEFT_MARK          "‏"			// Yes, there is a character between the quotes!
+// Yes, there is a character between these seemingly empty quotes!
+#define LEFT_TO_RIGHT_MARK          "‎"
+#define RIGHT_TO_LEFT_MARK          "‏"
+#define LEFT_TO_RIGHT_EMBEDDING     "‪"
+#define RIGHT_TO_LEFT_EMBEDDING     "‫"
+#define POP_DIRECTIONAL_FORMATTING  "‬"
 #define DRIVE_ACCESS_TIMEOUT        15000		// How long we should retry drive access (in ms)
 #define DRIVE_ACCESS_RETRIES        60			// How many times we should retry
 #define DRIVE_INDEX_MIN             0x00000080
@@ -81,7 +85,7 @@
 #define STRINGIFY(x)                #x
 #endif
 #define IsChecked(CheckBox_ID)      (IsDlgButtonChecked(hMainDialog, CheckBox_ID) == BST_CHECKED)
-#define MB_IS_RTL                   (right_to_left_mode?MB_RTLREADING:0)
+#define MB_IS_RTL                   (right_to_left_mode?MB_RTLREADING|MB_RIGHT:0)
 #define CHECK_FOR_USER_CANCEL       if (IS_ERROR(FormatStatus)) goto out
 
 #define safe_free(p) do {free((void*)p); p = NULL;} while(0)
@@ -317,7 +321,7 @@ typedef struct ext_t {
 } ext_t;
 
 #ifndef __VA_GROUP__
-#define __VA_GROUP__(...)  __VA_ARGS__ 
+#define __VA_GROUP__(...)  __VA_ARGS__
 #endif
 #define EXT_X(prefix, ...) const char* _##prefix##_x[] = { __VA_ARGS__ }
 #define EXT_D(prefix, ...) const char* _##prefix##_d[] = { __VA_ARGS__ }
@@ -377,6 +381,7 @@ extern char WindowsVersionStr[128];
 extern char embedded_sl_version_str[2][12];
 extern RUFUS_UPDATE update;
 extern int dialog_showing;
+extern WORD selected_langid;
 
 /*
  * Shared prototypes

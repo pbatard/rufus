@@ -124,12 +124,12 @@ const char* additional_copyrights =
 "All other references can be found in the source.\\line\n}";
 
 const char* update_policy =
-"{\\rtf1\\ansi{\\fonttbl{\\f0\\fnil\\fcharset0 Microsoft Sans Serif;}{\\f1\\fnil\\fcharset2 Symbol;}}\n"
+"{\\rtf1\\ansi{\\fonttbl{\\f0\\fnil\\fcharset0 Microsoft Sans Serif;}}\n"
 "\\fs16\\b %s\\b0\\line\n"
 "%s\\par\n"
-"\\pard{\\pntext\\f1\\'B7\\tab}{\\*\\pn\\pnlvlblt\\pnf2\\pnindent0{\\pntxtb\\'B7}}\\fi-150\\li220 %s\\par\n"
-"{\\pntext\\f1\\'B7\\tab}%s\\par\n"
-"{\\pntext\\f1\\'B7\\tab}%s\\line\\pard\n"
+"\\fs20•\\fs16  %s\\par\n"
+"\\fs20•\\fs16  %s\\par\n"
+"\\fs20•\\fs16  %s\\line\n"
 "\\line\n"
 "%s\\line\n\\line\n"
 "\\b %s\\b0\\line\n"
