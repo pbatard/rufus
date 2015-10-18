@@ -4078,7 +4078,7 @@ t MSG_281 "(Selecteer a.u.b. een image)"
 
 ################################################################################
 l "fi-FI" "Finnish (Suomi)" 0x040B
-v 1.0.18
+v 1.0.19
 b "en-US"
 
 # Main dialog
@@ -4519,6 +4519,11 @@ t MSG_278 "Käynnistystyyppi"
 t MSG_279 "Ei-boottaava"
 t MSG_280 "Levykuvan valinta"
 t MSG_281 "(Valitse levykuva)"
+t MSG_282 "USB-aseman eksklusiivinen käyttö"
+t MSG_283 "Epäkelpo allekirjoitus"
+t MSG_284 "Ladatusta tiedostosta puuttuu digitaalinen allekirjoitus."
+t MSG_285 "Ladatun tiedoston on allekirjoittanut '%s'.\nEmme tunnista kyseistä allekirjoitusta, mikä "
+	"saattaa viitata haitalliseen toimintaan...\nHaluatko varmasti suorittaa tämän tiedoston?"
 
 ################################################################################
 l "fr-FR" "French (Français)" 0x040c, 0x080c, 0x0c0c, 0x100c, 0x140c, 0x180c, 0x1c0c, 0x200c, 0x240c, 0x280c, 0x2c0c, 0x300c, 0x340c, 0x380c, 0xe40c
