@@ -13441,7 +13441,7 @@ t MSG_285 "El ejecutable descargado está firmado por '%s'.\nNo reconocemos este
 
 ################################################################################
 l "sv-SE" "Swedish (Svenska)" 0x041d, 0x081d
-v 1.0.18
+v 1.0.19
 b "en-US"
 
 # Main dialog
@@ -13759,7 +13759,7 @@ t MSG_171 "Starta formateringen.\nDetta kommer att RADERA all data på målenhet
 t MSG_172 "Licensinformation och beröm"
 t MSG_173 "Tryck för att välja..."
 # The following will appear in the about dialog
-t MSG_174 "Rufus - Det pålitliga USB-formateringsverktyget"
+t MSG_174 "Rufus - Det pålitliga verktyget för USB-formatering"
 t MSG_175 "Version %d.%d (Build %d)"
 t MSG_176 "Svensk översättning: Sopor <mailto:sopor@hotmail.com>"
 t MSG_177 "Rapportera fel eller om du har några idéer:"
@@ -13898,6 +13898,11 @@ t MSG_278 "Starttyp"
 t MSG_279 "Icke startbar"
 t MSG_280 "Avbildsväljare"
 t MSG_281 "(Välj en avbild)"
+t MSG_282 "Exklusiv låsning av USB-enheten"
+t MSG_283 "Ogiltig signatur"
+t MSG_284 "Den nedladdade körbara filen saknar digital signatur."
+t MSG_285 "Den nedladdade körbara filen är signerad av '%s'.\nDetta är inte en signatur vi känner igen och "
+	"detta kan tyda på någon form av skadlig aktivitet...\nÄr du säker på att du vill köra filen?"
 
 ################################################################################
 l "tr-TR" "Turkish (Türkçe)" 0x041F
