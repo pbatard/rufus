@@ -10783,7 +10783,7 @@ t MSG_285 "O executável baixado é assinado por '%s'.\nEsta assinatura não é 
 
 ################################################################################
 l "pt-PT" "Portuguese Standard (Português)" 0x0816
-v 1.0.18
+v 1.0.19
 b "en-US"
 
 # Main dialog
@@ -11235,6 +11235,11 @@ t MSG_278 "Tipo de arranque"
 t MSG_279 "Não inicializável"
 t MSG_280 "Seleção da Imagem"
 t MSG_281 "(Selecione a imagem)"
+t MSG_282 "Bloqueio exclusivo do dispositivo USB"
+t MSG_283 "Assinatura inválida"
+t MSG_284 "No executável transferido está a faltar uma assinatura digital."
+t MSG_285 "O executável transferido está assinado por '%s'.\nNão é uma assinatura reconhecida e "
+	"poderá indicar algum tipo de actividade mal intencionada...\nTem certeza de que deseja executar este ficheiro?"
 
 ################################################################################
 l "ro-RO" "Romanian (Română)" 0x0418, 0x0818
