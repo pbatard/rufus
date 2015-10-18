@@ -8101,7 +8101,7 @@ t MSG_281 "(이미지를 선택하세요)"
 
 ################################################################################
 l "lv-LV" "Latvian (Latviešu)" 0x0426
-v 1.0.18
+v 1.0.19
 b "en-US"
 
 # Main dialog
@@ -8560,6 +8560,11 @@ t MSG_278 "Ielādes veids"
 t MSG_279 "Neielādējams imidžs"
 t MSG_280 "Imidža izvēle"
 t MSG_281 "(Lūdzu, izvēlieties imidžu)"
+t MSG_282 "Ekskluzīva USB nesēja slēgšana"
+t MSG_283 "Nederīgs paraksts"
+t MSG_284 "Ielādētajam izpildfailam ir kļūdains ciparu paraksts."
+t MSG_285 "Ielādētais izpildfails parakstīts kā '%s'.\nTas ir neatpazīts paraksts un iespējams, "
+	"var radīt aizdomīgas aktivitātes...\nVai tiešām vēlaties izpildīt šo failu?"
 
 ################################################################################
 l "lt-LT" "Lithuanian (Lietuvių)" 0x0427
