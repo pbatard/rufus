@@ -2,6 +2,7 @@ o Version 2.5 (2015.10.??)
     Add SHA-256 checksum verification
     Add a cheat mode to disable exclusive USB drive locking (Alt-,)
     Add digital signature check on update downloads
+    Fix an issue with improper display of the update settings under some conditions
     Report Windows build number in the log (Windows 8 or later)
     Localization improvements
     Additional translation updates

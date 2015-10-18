@@ -598,9 +598,11 @@ INT_PTR CALLBACK AboutCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 	RECT rect;
 	REQRESIZE* rsz;
 	wchar_t wUrl[256];
+	static BOOL resized_already = TRUE;
 
 	switch (message) {
 	case WM_INITDIALOG:
+		resized_already = FALSE;
 		// Execute dialog localization
 		apply_localization(IDD_ABOUTBOX, hDlg);
 		SetTitleBarIcon(hDlg);
@@ -630,12 +632,15 @@ INT_PTR CALLBACK AboutCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 	case WM_NOTIFY:
 		switch (((LPNMHDR)lParam)->code) {
 		case EN_REQUESTRESIZE:
-			GetWindowRect(GetDlgItem(hDlg, edit_id[0]), &rect);
-			dy = rect.bottom - rect.top;
-			rsz = (REQRESIZE *)lParam;
-			dy -= rsz->rc.bottom - rsz->rc.top;
-			ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, edit_id[0]), 0, 0, 0, -dy, 1.0f);
-			ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, edit_id[1]), 0, -dy, 0, dy, 1.0f);
+			if (!resized_already) {
+				resized_already = TRUE;
+				GetWindowRect(GetDlgItem(hDlg, edit_id[0]), &rect);
+				dy = rect.bottom - rect.top;
+				rsz = (REQRESIZE *)lParam;
+				dy -= rsz->rc.bottom - rsz->rc.top;
+				ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, edit_id[0]), 0, 0, 0, -dy, 1.0f);
+				ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, edit_id[1]), 0, -dy, 0, dy, 1.0f);
+			}
 			break;
 		case EN_LINK:
 			enl = (ENLINK*) lParam;
@@ -1244,9 +1249,11 @@ INT_PTR CALLBACK UpdateCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 	static HWND hFrequency, hBeta;
 	int32_t freq;
 	char update_policy_text[4096];
+	static BOOL resized_already = TRUE;
 
 	switch (message) {
 	case WM_INITDIALOG:
+		resized_already = FALSE;
 		hUpdatesDlg = hDlg;
 		apply_localization(IDD_UPDATE_POLICY, hDlg);
 		SetTitleBarIcon(hDlg);
@@ -1294,7 +1301,8 @@ INT_PTR CALLBACK UpdateCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 		SendMessage(hPolicy, EM_REQUESTRESIZE, 0, 0);
 		break;
 	case WM_NOTIFY:
-		if (((LPNMHDR)lParam)->code == EN_REQUESTRESIZE) {
+		if ((((LPNMHDR)lParam)->code == EN_REQUESTRESIZE) && (!resized_already)) {
+			resized_already = TRUE;
 			hPolicy = GetDlgItem(hDlg, IDC_POLICY);
 			GetWindowRect(hPolicy, &rect);
 			dy = rect.bottom - rect.top;
