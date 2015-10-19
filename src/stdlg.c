@@ -546,7 +546,7 @@ void ResizeMoveCtrl(HWND hDlg, HWND hCtrl, int dx, int dy, int dw, int dh, float
 	SIZE border;
 
 	GetWindowRect(hCtrl, &rect);
-	point.x = right_to_left_mode?rect.right:rect.left;
+	point.x = (right_to_left_mode && (hDlg != hCtrl))?rect.right:rect.left;
 	point.y = rect.top;
 	if (hDlg != hCtrl)
 		ScreenToClient(hDlg, &point);
