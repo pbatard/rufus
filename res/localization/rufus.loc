@@ -6777,7 +6777,7 @@ t MSG_281 "(Silakan pilih sebuah image)"
 
 ################################################################################
 l "it-IT" "Italian (Italiano)" 0x0410, 0x0810
-v 1.0.18
+v 1.0.19
 b "en-US"
 
 g IDD_DIALOG
@@ -7200,6 +7200,11 @@ t MSG_278 "Tipo boot"
 t MSG_279 "Non avviabile"
 t MSG_280 "Selezione immagine"
 t MSG_281 "(seleziona un'immagine)"
+t MSG_282 "Blocco esclusivo unità USB"
+t MSG_283 "Firma non valida"
+t MSG_284 "L'eseguibile scaricato non ha una firma digitale."
+t MSG_285 "L'eseguibile scaricato è firmato da '%s'.\nQuesta non è una firma riconosciuta e potrebbe "
+	"indicare qualche forma di attività malevola.\nSei sicuro di voler eseguire questo file?"
 
 ######################################################################
 l "ja-JP" "Japanese (日本語)" 0x0411
