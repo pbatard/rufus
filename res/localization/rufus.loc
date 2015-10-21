@@ -840,12 +840,11 @@ t MSG_171 "بدء عملية الفرمتة. \nستم تدمير أية بيان
 t MSG_172 "معلومات الترخيص و اعتراف بالفضل"
 t MSG_173 "إضغط لاختيار..."
 # The following will appear in the about dialog
-# NOTE: In the line below, there are (potentially) invisible Right-To-Left marks
-#       (UTF-8: 0xE2 0x80 0x8f) After "USB" and after "Rufus".
-t MSG_174 "Rufus‏ - أداة فرمتة الـ USB‏ جديرة بالثقة"
-# This one's a massive empirical fest of RTL marks and nonsensical parenthesis, to
-# make the output look about right... If you edit this, all I can say is: GOOD LUCK!!!
-t MSG_175 "إصدار ‏ %d.%d‏)بناء‏ ‏%d‏("
+# NOTE: Because it starts with English text, the line below requires an invisible
+#       RIGHT-TO-LEFT EMBEDDING (UTF-8: 0xE2 0x80 0xAB) at the beginning and a
+#       POP DIRECTIONAL FORMATTING (UTF-8: 0xE2 0x80 0xAC) at the end.
+t MSG_174 "‫Rufus - أداة فرمتة الـ USB جديرة بالثقة‬"
+t MSG_175 "إصدار %d.%d (بناء %d)"
 t MSG_176 "الترجمة العربية: عمر الصمد، تحديث: جلال شفرور (mailto:ch_djalel@yahoo.com)"
 t MSG_177 "إخبار عن مشكلة أو طلب تعديلات على:"
 t MSG_178 "حقوق الطبع والنشر الإضافية:"
@@ -856,7 +855,7 @@ t MSG_181 "نظامك التشغيلي والإصدار"
 t MSG_182 "إصدار البرنامج الذي تستخدمه"
 t MSG_183 "عنوان الـIP الخاص بك"
 t MSG_184 "لغرض إنشاء إحصاءات الإستخدام الخاص, قد نقوم بالحفاظ علي المعلومات التي تم جمعها, "
-	"\\b لسنة واحدة كحدّ أقصى \\b0 . لكننا لن نقوم بالكشف عن أي من هذه البيانات الفردية إلى أطراف ثالثة."
+	"\\b لسنة واحدة كحدّ أقصى\\b0 . لكننا لن نقوم بالكشف عن أي من هذه البيانات الفردية إلى أطراف ثالثة."
 t MSG_185 "إجراء التحديث:"
 t MSG_186 "روفوس لا يقوم بتثبيت أو تشغيل خدمات خلفية, وبالتالي يتم التحقّق من تحديثات فقط عند تشغيل التطبيق الرئيسي. \\line\n"
 	"الإتصال بالإنترنت بالطبع مطلوب عند التحقّق من وجود تحديثات."

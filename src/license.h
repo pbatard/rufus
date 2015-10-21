@@ -19,7 +19,7 @@
 
 const char* about_blurb_format =
 "{\\rtf1\\ansi\n"
-"{\\b\\fs20%s}\\line\n"
+"\\b\\fs20%s\\b0\\line\n"
 "\\fs18%s\\line\n"
 "\\line\n"
 "%s\\line\n"
@@ -30,7 +30,7 @@ RUFUS_URL "\\line\n"
 "%s\\line\n"
 "https://github.com/pbatard/rufus/issues\\line\n"
 "\\line\n"
-"{\\b\\fs19 %s}}";
+"\\b\\fs19 %s\\b0}";
 
 const char* additional_copyrights =
 "{\\rtf1\\ansi\n"

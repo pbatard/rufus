@@ -1577,7 +1577,7 @@ static __inline const char* IsAlphaOrBeta(void)
 #elif defined(BETA)
 	return " (Beta) ";
 #elif defined(TEST)
-#	define TEST_STR(x) " (Test" STRINGIFY(x) ")"
+#	define TEST_STR(x) " (Test" STRINGIFY(x) ") "
 	return TEST_STR(TEST);
 #else
 	return " ";
@@ -2151,12 +2151,12 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 
 #if defined(ALPHA)
 		// Add a VERY ANNOYING popup for Alpha releases, so that people don't start redistributing them
-		Notification(MSG_INFO, NULL, "ALPHA VERSION", "This is an Alpha version of " APPLICATION_NAME
-			" - It is meant to be used for testing ONLY and should NOT be distributed as a release.");
+		MessageBoxA(NULL, "This is an Alpha version of " APPLICATION_NAME " - It is meant to be used for "
+			"testing ONLY and should NOT be distributed as a release.", "ALPHA VERSION", MSG_INFO);
 #elif defined(TEST)
 		// Same thing for Test releases
-		Notification(MSG_INFO, NULL, "TEST VERSION", "This is a Test version of " APPLICATION_NAME
-			" - It is meant to be used for testing ONLY and should NOT be distributed as a release.");
+		MessageBoxA(NULL, "This is a Test version of " APPLICATION_NAME " - It is meant to be used for "
+			"testing ONLY and should NOT be distributed as a release.", "TEST VERSION", MSG_INFO);
 #endif
 		return (INT_PTR)FALSE;
 

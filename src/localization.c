@@ -375,7 +375,7 @@ void reset_localization(int dlg_id)
  * Uses a rolling list of buffers to allow concurrency
  * TODO: use dynamic realloc'd buffer in case LOC_MESSAGE_SIZE is not enough
  */
-char* lmprintf(int msg_id, ...)
+char* lmprintf(uint32_t msg_id, ...)
 {
 	static int buf_id = 0;
 	static char buf[LOC_MESSAGE_NB][LOC_MESSAGE_SIZE];
@@ -383,7 +383,9 @@ char* lmprintf(int msg_id, ...)
 	va_list args;
 	buf_id %= LOC_MESSAGE_NB;
 	buf[buf_id][0] = 0;
+	BOOL needs_rtf_rtl_marks = (msg_id & MSG_RTF) && right_to_left_mode;
 
+	msg_id &= MSG_MASK;
 	if ((msg_id > MSG_000) && (msg_id < MSG_MAX)) {
 		format = msg_table[msg_id - MSG_000];
 	}
@@ -391,9 +393,13 @@ char* lmprintf(int msg_id, ...)
 	if (format == NULL) {
 		safe_sprintf(buf[buf_id], LOC_MESSAGE_SIZE-1, "MSG_%03d UNTRANSLATED", msg_id - MSG_000);
 	} else {
+		if (needs_rtf_rtl_marks)
+			safe_strcpy(buf[buf_id], LOC_MESSAGE_SIZE-1, "\\rtlch");
 		va_start(args, msg_id);
-		safe_vsnprintf(buf[buf_id], LOC_MESSAGE_SIZE-1, format, args);
+		safe_vsnprintf(&buf[buf_id][needs_rtf_rtl_marks?6:0], LOC_MESSAGE_SIZE-1, format, args);
 		va_end(args);
+		if (needs_rtf_rtl_marks)
+			safe_strcat(buf[buf_id], LOC_MESSAGE_SIZE-1, "\\ltrch");
 		buf[buf_id][LOC_MESSAGE_SIZE-1] = '\0';
 	}
 	return buf[buf_id++];

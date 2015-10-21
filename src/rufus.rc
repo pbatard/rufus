@@ -32,7 +32,7 @@ LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
 
 IDD_DIALOG DIALOGEX 12, 12, 242, 376
 STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_MINIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Rufus 2.5.785"
+CAPTION "Rufus 2.5.786"
 FONT 8, "Segoe UI Symbol", 400, 0, 0x0
 BEGIN
     LTEXT           "Device",IDS_DEVICE_TXT,9,6,200,8
@@ -156,7 +156,7 @@ FONT 8, "Segoe UI Symbol", 400, 0, 0x0
 BEGIN
     ICON            IDI_ICON,IDC_ABOUT_ICON,11,8,20,20
     DEFPUSHBUTTON   "Close",IDCANCEL,221,172,50,14,WS_GROUP
-    CONTROL         "",IDC_POLICY,"RichEdit20W",WS_VSCROLL | WS_TABSTOP | 0x804,46,8,235,132,WS_EX_STATICEDGE
+    CONTROL         "",IDC_POLICY,"RichEdit20W",ES_MULTILINE | ES_READONLY | WS_VSCROLL | WS_TABSTOP,46,8,235,132,WS_EX_STATICEDGE
     GROUPBOX        "Settings",IDS_UPDATE_SETTINGS_GRP,45,145,165,46
     LTEXT           "Check for updates",IDS_UPDATE_FREQUENCY_TXT,51,159,76,11
     COMBOBOX        IDC_UPDATE_FREQUENCY,133,155,66,12,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
@@ -319,8 +319,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 2,5,785,0
- PRODUCTVERSION 2,5,785,0
+ FILEVERSION 2,5,786,0
+ PRODUCTVERSION 2,5,786,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -337,13 +337,13 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Akeo Consulting (http://akeo.ie)"
             VALUE "FileDescription", "Rufus"
-            VALUE "FileVersion", "2.5.785"
+            VALUE "FileVersion", "2.5.786"
             VALUE "InternalName", "Rufus"
             VALUE "LegalCopyright", "© 2011-2015 Pete Batard (GPL v3)"
             VALUE "LegalTrademarks", "http://www.gnu.org/copyleft/gpl.html"
             VALUE "OriginalFilename", "rufus.exe"
             VALUE "ProductName", "Rufus"
-            VALUE "ProductVersion", "2.5.785"
+            VALUE "ProductVersion", "2.5.786"
         END
     END
     BLOCK "VarFileInfo"
