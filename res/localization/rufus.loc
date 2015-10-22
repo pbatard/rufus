@@ -1895,7 +1895,7 @@ t MSG_282 "驱动器锁定"
 
 ################################################################################
 l "zh-TW" "Chinese Traditional (正體中文)" 0x0404, 0x0c04, 0x1404, 0x7c04
-v 1.0.18
+v 1.0.19
 b "en-US"
 
 # Main dialog
@@ -2301,6 +2301,11 @@ t MSG_278 "開機模式"
 t MSG_279 "不可開機"
 t MSG_280 "選擇映像檔"
 t MSG_281 "(請選擇一個映像檔)"
+t MSG_282 "鎖定 USB 磁碟"
+t MSG_283 "無效簽章"
+t MSG_284 "下載的檔案缺少數位簽章。"
+t MSG_285 "下載的檔案簽章者為: '%s'.\n本軟體未使用此簽章，"
+	"代表檔案可能已遭受病毒感染...\n是否要執行檔案?"
 
 ################################################################################
 l "hr-HR" "Croatian (Hrvatski)" 0x041a, 0x081a, 0x101a
@@ -5646,7 +5651,7 @@ t MSG_098 "ΣΗΜΑΝΤΙΚΟ: Προσπαθείτε να εγκαταστήσ�
 	"\n\nΕίστε σίγουροι ότι θέλετε να συνεχίσετε?\n\n"
 	"Σημείωση: Το χαρακτηριστικό 'ΣΤΑΘΕΡΟΣ / ΑΦΑΙΡΟΥΜΕΝΟΣ' ενός δίσκου είναι μια ιδιότητα που "
 	"μπορεί να αλλάξει μόνο χρησιμοποιώντας προσαρμοσμένα εργαλεία από τον κατασκευαστή της μονάδας. "
-	"Ωστόσο, τα εργαλεία αυτά δεν διατίθενται στο κοινό."	
+	"Ωστόσο, τα εργαλεία αυτά δεν διατίθενται στο κοινό."
 t MSG_099 "Περιορισμός του συστήματος αρχείων"
 t MSG_100 "Αυτό το είδωλο ISO περιέχει ένα αρχείο μεγαλύτερο από 4 GB, το οποίο είναι μεγαλύτερο "
 	"από το μέγιστο επιτρεπόμενο μέγεθος για το σύστημα αρχείων FAT ή FAT32. "
@@ -12987,7 +12992,7 @@ t MSG_282 "Ekskluzivno zaklepanje nosilca USB"
 t MSG_283 "Neveljaven podpis"
 t MSG_284 "Prenesena datoteka nima digitalnega podpisa."
 t MSG_285 "Oseba, ki je podpisala preneseno datoteko, je '%s'.\nTa podpis se ne ujema s pričakovanim, kar lahko pomeni, "
-	"da je to zlonamerna datoteka, ki jo vam je nekdo podtaknil.\nAli ste prepričani, da jo želite zagnati?" 
+	"da je to zlonamerna datoteka, ki jo vam je nekdo podtaknil.\nAli ste prepričani, da jo želite zagnati?"
 
 ################################################################################
 l "es-ES" "Spanish (Español)" 0x040a, 0x080a, 0x0c0a, 0x100a, 0x140a, 0x180a, 0x1c0a, 0x200a, 0x240a, 0x280a, 0x2c0a, 0x300a, 0x340a, 0x380a, 0x3c0a, 0x400a, 0x440a, 0x480a, 0x4c0a, 0x500a, 0x540a, 0x580a
