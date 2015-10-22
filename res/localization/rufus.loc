@@ -69,6 +69,7 @@
 # l "lt-LT" "Lithuanian (Lietuvių)" 0x0427
 # l "ms-MY" "Malay (Bahasa Malaysia)" 0x043e
 # l "nb-NO" "Norwegian (Norsk)" 0x0414
+# l "fa-IR" "Persian (فارسی)" 0x0429
 # l "pl-PL" "Polish (Polski)" 0x0415
 # l "pt-BR" "Portuguese Brazilian (Português do Brasil)" 0x0416
 # l "pt-PT" "Portuguese Standard (Português)" 0x0816
@@ -10373,6 +10374,553 @@ t MSG_283 "Ugyldig signatur"
 t MSG_284 "Den nedlastede programfil mangler en digital signatur."
 t MSG_285 "Den nedlastede programfil er signert av '%s'.\nDette er en signatur vi ikke gjenkjenner, og kan "
 	"indikere en form for skadelig aktivitet...\nEr du sikker på at du vil kjøre denne filen?"
+
+################################################################################
+l "fa-IR" "Persian (فارسی)" 0x0429
+a "r"
+v 1.0.19
+b "en-US"
+
+# Main dialog
+g IDD_DIALOG
+s IDD_DIALOG +40,0
+s IDS_FORMAT_OPTIONS_GRP +40,0
+s IDC_PROGRESS +40,0
+s IDC_DEVICE +40,0
+s IDC_PARTITION_TYPE +40,0
+s IDC_FILESYSTEM +40,0
+s IDC_CLUSTERSIZE +40,0
+s IDC_LABEL +40,0
+s IDS_ADVANCED_OPTIONS_GRP +40,0
+s IDC_ENABLE_FIXED_DISKS +40,0
+s IDC_EXTRA_PARTITION +40,0
+s IDC_BADBLOCKS +50,0
+s IDC_NBPASSES -15,0
+m IDC_NBPASSES +55,0
+s IDC_BOOT +55,0
+m IDC_BOOTTYPE +55,0
+s IDC_BOOTTYPE -10,0
+m IDC_SELECT_ISO +40,0
+s IDC_INFO +40,0
+s IDC_RUFUS_MBR +40,0
+m IDC_DISK_ID +53,0
+s IDC_DISK_ID -13,0
+s IDC_ABOUT -10,0
+m IDC_LOG -15,0
+s IDC_LOG +40,0
+m IDC_START +40,0
+m IDCANCEL +40,0
+t IDS_DEVICE_TXT "درایو USB (حافظه فلش یا سایر ابزارهای ذخیره‌سازی قابل‌حمل)"
+t IDS_PARTITION_TYPE_TXT "روش پارتیشن‌بندی و نوع ثابت‌افزار (Firmware) رایانه موردنظر"
+t IDS_FILESYSTEM_TXT "سیستم فایل"
+t IDS_CLUSTERSIZE_TXT "اندازه کلاستر"
+t IDS_LABEL_TXT "نام دلخواه برای درایو USB موردنظر"
+t IDS_FORMAT_OPTIONS_GRP "گزینه‌ها و تنظیمات"
+# Note: The button (IDC_ADVANCED) that appears next to "Format Options" is repositioned automatically.
+t IDC_BADBLOCKS "بررسی وجود بدسکتور در درایو به روشِ"
+t IDC_QUICKFORMAT "فرمت کردن سریع (Quick format)"
+t IDC_BOOT "ساخت درایو راه‌انداز (Bootable) با استفاده از"
+t IDC_WINDOWS_INSTALL "نصب ویندوز به روش استاندارد و رایج"
+# Only translate if Microsoft has a specific name for http://en.wikipedia.org/wiki/Windows_To_Go in your language
+# Otherwise, you can add a parenthesis eg. "Windows To Go (hint at what it does)" and/or use the tooltip (MSG_200)
+t IDC_WINDOWS_TO_GO "استفاده از ویژگی «Windows To Go»"
+t IDC_SET_ICON "ایجاد آیکون و نام‌گذاری درایو USB با استفاده از فایل autorun.inf"
+t IDC_ABOUT "درباره"
+t IDC_LOG "گزارش (Log)"
+t IDCANCEL "خروج"
+t IDC_START "شروع"
+t IDS_ADVANCED_OPTIONS_GRP "تنظیمات پیشرفته"
+t IDC_ENABLE_FIXED_DISKS "نمایش هارد دیسک‌های اکسترنال در فهرست درایوهای USB موجود"
+# Note: It is acceptable to drop the parenthesis () below if you are running out of space
+# as there is a tooltip (MSG_169) providing these details.
+t IDC_EXTRA_PARTITION "بهسازی و اصلاح تنظیمات برای شناسایی بهتر درایو در BIOSهای قدیمی"
+# 'MBR': See http://en.wikipedia.org/wiki/Master_boot_record
+# Rufus can install it's own custom MBR (the Rufus MBR), which also allows users
+# to specify a custom disk ID for the BIOS. Note: the tooltip for this control is MSG_167.
+t IDC_RUFUS_MBR "استفاده از Rufus MBR با BIOS ID برابر با"
+
+# About dialog
+g IDD_ABOUTBOX
+s IDC_ABOUT_LICENSE +45,0
+m IDC_ABOUT_UPDATES +45,0
+s IDC_ABOUT_UPDATES +45,0
+m IDOK +20,0
+# TRANSLATOR NOTE: To make the output looks correctly, there are two invisible Unicode directional formatting characters in the line below.
+#       RLE (right-to-left embedding, UTF-8: 0xE2 0x80 0xAB) at the beginning of the string
+#       PDF (pop directional formatting, UTF-8: 0xE2 0x80 0xAC) at the end of the string
+t IDD_ABOUTBOX "‫درباره Rufus‬"
+t IDC_ABOUT_LICENSE "پروانه نرم‌افزار (License)"
+t IDC_ABOUT_UPDATES "به‌روزرسانی نرم‌افزار"
+t IDOK "بستن"
+
+# About -> License dialog
+g IDD_LICENSE
+# NOTE: To make the output looks correctly, there are two invisible Unicode directional formatting characters in the line below.
+#       RLE (right-to-left embedding, UTF-8: 0xE2 0x80 0xAB) at the beginning of the string
+#       PDF (pop directional formatting, UTF-8: 0xE2 0x80 0xAC) at the end of the string
+t IDD_LICENSE "‫پروانه نرم‌افزار Rufus‬"
+t IDCANCEL "بستن"
+
+# Notifications. You can trigger one of these by using Alt-R and re-launching Rufus
+g IDD_NOTIFICATION
+t IDC_MORE_INFO "اطلاعات بیشتر"
+t IDYES "بله"
+t IDNO "خیر"
+
+# Log dialog
+g IDD_LOG
+m IDC_LOG_CLEAR -290,0
+s IDC_LOG_CLEAR +10,0
+m IDC_LOG_SAVE -280,0
+s IDC_LOG_SAVE +10,0
+# TRANSLATOR NOTE: In the line below 'RLE' & 'PDF' are used
+t IDD_LOG "‫گزارش ثبت‌شده (Log)‬"
+t IDC_LOG_CLEAR "پاک کردن گزارش"
+t IDC_LOG_SAVE "ذخیره گزارش"
+t IDCANCEL "بستن"
+
+# About -> Updates
+g IDD_UPDATE_POLICY
+s IDC_POLICY +15,0
+s IDS_UPDATE_SETTINGS_GRP +45,0
+m IDS_UPDATE_SETTINGS_GRP -60,0
+s IDS_UPDATE_FREQUENCY_TXT +20,0
+m IDS_UPDATE_FREQUENCY_TXT -55,0
+s IDC_UPDATE_FREQUENCY +20,0
+m IDC_UPDATE_FREQUENCY -25,0
+s IDS_INCLUDE_BETAS_TXT +40,0
+m IDS_INCLUDE_BETAS_TXT -55,0
+s IDC_INCLUDE_BETAS +30,0
+m IDC_INCLUDE_BETAS -25,0
+s IDS_CHECK_NOW_GRP +10,0
+m IDS_CHECK_NOW_GRP -10,0
+s IDC_CHECK_NOW +25,0
+m IDC_CHECK_NOW -20,0
+s IDCANCEL +25,0
+m IDCANCEL -20,0
+t IDD_UPDATE_POLICY "سیاست و تنظیمات به‌روزرسانی نرم‌افزار"
+t IDS_UPDATE_SETTINGS_GRP "تنظیمات"
+t IDS_UPDATE_FREQUENCY_TXT "بررسی و به‌روزرسانی خودکار:"
+t IDS_INCLUDE_BETAS_TXT "شامل نسخه‌های آزمایشی (Beta):"
+t IDC_CHECK_NOW "همین الآن بررسی کن!"
+t IDCANCEL "بستن"
+
+# Dialog that appears when a new version is available
+g IDD_NEW_VERSION
+t IDD_NEW_VERSION "Rufus بررسی آپدیت‌های جدید و به‌روزرسانی نرم‌افزار"
+t IDS_NEW_VERSION_AVAIL_TXT "نسخه جدیدی از نرم‌افزار موجود است. لطفاً آخرین نسخه نرم‌افزار را دانلود کنید!"
+t IDC_WEBSITE "برای رفتن به سایت نرم‌افزار، کلیک کنید."
+t IDS_NEW_VERSION_NOTES_GRP "یادداشت‌های انتشار نسخه جدید (Release Notes)"
+t IDS_NEW_VERSION_DOWNLOAD_GRP "دانلود"
+t IDC_DOWNLOAD "دانلود"
+t IDCANCEL "بستن"
+
+# Messages used throughout the application
+t MSG_001 "شناسایی نمونه دیگری از نرم‌افزار"
+# NOTE: To make the output look correctly, in the line below there are RLE & PDF invisible Unicode directional formatting characters.
+#		Position: (RLE) At the beginning and (PDF) at the end of each line.
+t MSG_002 "‫نمونه دیگری از نرم‌افزار Rufus در حال اجراست.‬\n"
+	"‫امکان اجرای همزمان دو نمونه از نرم‌افزار وجود ندارد. لطفاً قبل از باز کردن نرم‌افزار جدید، نمونه قبلی در حال اجرا را ببندید.‬"
+# NOTE: To make the output look correctly, in the line below there are LRE & PDF invisible Unicode directional formatting characters.
+#		Position: (LRE) At the beginning and (PDF) at the end of %s.
+t MSG_003 "هشدار!\n"
+	"تمام داده‌ها و اطلاعات موجود در درایو '‪%s‬' پاک خواهد شد.\n"
+	"آیا برای ادامه این عملیات مطمئن هستید؟"
+t MSG_004 "سیاست به‌روزرسانی نرم‌افزار"
+t MSG_005 "آیا برای بررسی آپدیت جدید و به‌روزرسانی نرم‌افزار، به Rufus اجازه اتصال به اینترنت را می‌دهید؟"
+# Must be the same as IDD_DIALOG:IDCANCEL (i.e. "Close" - I know it's confusing)
+t MSG_006 "خروج"
+t MSG_007 "لغو"
+t MSG_008 "بله"
+t MSG_009 "خیر"
+t MSG_010 "تعدادی بدسکتور پیدا شده است"
+t MSG_011 "بررسی انجام شد. تعداد بدسکتور(های) پیدا شده: %d\n"
+	"  خطا(های) خواندن: %d\n  خطا(های) نوشتن: %d\n  خطا(های) خرابی (corruption) داده‌ها: %d\n"
+# The following will contain the formatted message above as well as the name of the bad blocks logfile
+t MSG_012 "%s\n گزارش با جزئیات بیشتر را می‌توانید در فایل زیر مشاهده کنید.\n%s"
+t MSG_013 "غیرفعال"
+t MSG_014 "روزانه"
+t MSG_015 "هفتگی"
+t MSG_016 "ماهانه"
+t MSG_017 "سفارشی"
+# TRANSLATOR NOTE: In the both lines below 'LRE' & 'PDF' are used
+t MSG_018 "نسخه کنونی نرم‌افزار شما: ‪%d.%d (Build %d)‬"
+t MSG_019 "آخرین نسخه موجود: ‪%d.%d (Build %d)‬"
+# *Short* size names. These can be used as suffixes
+t MSG_020 "bytes"
+t MSG_021 "KB"
+t MSG_022 "MB"
+t MSG_023 "GB"
+t MSG_024 "TB"
+t MSG_025 "PB"
+# *Long* size names, as they are displayed for the cluster size in the MS format dialog.
+t MSG_026 "بایت"	# Yes, this is a repeat from MSG_020
+t MSG_027 "کیلوبایت"
+t MSG_028 "مگابایت"
+t MSG_029 "پیش‌فرض"
+# The following gets appended to the file system, cluster size, etc.
+t MSG_030 "%s (پیش‌فرض)"
+t MSG_031 "الگوی پارتیشن‌بندی %s برای رایانه‌های دارای BIOS یا %s"
+t MSG_032 "الگوی پارتیشن‌بندی %s برای رایانه‌های دارای BIOS"
+t MSG_033 "الگوی پارتیشن‌بندی %s برای رایانه‌های دارای UEFI"
+# Number of bad block check passes (singular for 1 pass, plural for 2 or more passes)
+t MSG_034 "%d گذره"
+t MSG_035 "%d گذره"
+t MSG_036 "ایمیج ISO"
+t MSG_037 "برنامه"
+t MSG_038 "لغو"
+t MSG_039 "اجرا"
+t MSG_040 "دانلود"
+t MSG_041 "کاربر ادامه فرآیند را لغو کرد."
+t MSG_042 "خطا"
+t MSG_043 "خطا: %s"
+t MSG_044 "دانلود فایل"
+t MSG_045 "USB Storage Device (Generic)"
+t MSG_046 "%s (Disk %d) [%s]"
+# Used when a drive is detected that contains more than one partition
+t MSG_047 "درایو بیش از یک پارتیشن دارد."
+t MSG_048 "Rufus - در حال تخلیه میان‌گیر (بافر)"
+t MSG_049 "Rufus - در حال لغو کردن"
+
+# Error messages
+t MSG_050 "موفق بود."
+t MSG_051 "برخورد با خطای نامشخص، هنگام فرمت کردن"
+t MSG_052 "برای این ابزار ذخیره‌سازی نمی‌توان از سیستم فایل انتخاب‌شده استفاده کرد."
+t MSG_053 "اجازه دسترسی به درایو انتخاب‌شده وجود ندارد."
+t MSG_054 "درایو انتخاب‌شده نسبت به «نوشتن» محافظت شده است (Write Protected)."
+t MSG_055 "برنامه یا فرآیند (Process) دیگری در حال استفاده از درایو انتخاب‌شده است."
+	"لطفاً سایر برنامه‌هایی را که در حال استفاده کردن از درایو موردنظر هستند؛ ببندید."
+t MSG_056 "برای درایو انتخاب‌شده، امکان «فرمت کردن سریع» وجود ندارد."
+t MSG_057 "نام انتخاب‌شده برای درایو، نامعتبر است. لطفاً نام دیگری را انتخاب کنید."
+t MSG_058 "دستگیره (handle) نرم‌افزاری درایو موردنظر نامعتبر است."
+t MSG_059 "برای درایو موردنظر اندازه کلاستری که انتخاب کرده‌اید نامعتبر است. لطفاً اندازه دیگری را انتخاب کنید."
+t MSG_060 "اندازه فضای ذخیره‌سازی درایو موردنظر نامعتبر است."
+t MSG_061 "لطفاً در درایو USB، یک ابزار ذخیره‌سازی قابل‌حمل وارد کنید."
+t MSG_062 "فرمان غیرقابل پشتیبانی و نامشخصی دریافت شد."
+t MSG_063 "خطا در تخصیص حافظه (Memory Allocation)"
+t MSG_064 "خطا در خواندن"
+t MSG_065 "خطا در نوشتن"
+t MSG_066 "فرآیند نصب ناموفق بود."
+t MSG_067 "نرم‌افزار نتوانست درایو موردنظر را باز کند. ممکن است برنامه یا فرآیند دیگری در حال استفاده از این درایو باشد.\n"
+	"لطفاً وسیله موردنظر را از درگاه USB بیرون بیاورید و سپس دوباره آن را متصل و امتحان کنید."
+t MSG_068 "خطا در هنگام پارتیشن‌بندی درایو"
+t MSG_069 "نمی‌توان فایل‌ها را در درایو موردنظر کپی کرد."
+t MSG_070 "کاربر ادامه فرآیند را لغو کرد."
+# See http://en.wikipedia.org/wiki/Thread_%28computing%29
+t MSG_071 "نرم‌افزار نتوانست ریسه (Thread) را اجرا کند."
+t MSG_072 "بررسی بدسکتورها کامل انجام نشد."
+t MSG_073 "بررسی اطلاعات موجود در فایل ISO ناموفق بود."
+t MSG_074 "استخراج (Extraction) اطلاعات موجود در فایل ISO ناموفق بود."
+t MSG_075 "اتصال دوباره و سوار کردن (Mount) درایو ناموفق بود."
+t MSG_076 "نصب فایل‌های موردنیاز برای راه‌اندازی (Boot) سیستم‌عامل ناموفق بود."
+t MSG_077 "اختصاص حروف الفبا به درایو موردنظر ناموفق بود."
+t MSG_078 "امکان وصل و سوار کردن (Mount) فضای ذخیره‌سازی GUID وجود ندارد."
+t MSG_079 "درایو موردنظر هنوز آماده استفاده کردن نیست."
+
+t MSG_080 "ویندوز در حال تخلیه اطلاعات و میان‌گیر (بافر) خود در درایو USB موردنظر است.\n\n"
+	"با توجه به سرعت درایو USB، این فرآیند ممکن است کمی زمان‌بر باشد (به‌ویژه برای فایل‌های بزرگ).\n\n"
+	"برای جلوگیری از خرابی فایل‌ها، بهتر است اجازه دهید ویندوز کار خود را کامل کند."
+	"اما اگر از صبر کردن خسته شده‌اید؛ می‌توانید وسیله موردنظر را از درگاه USB بیرون بیاورید."
+t MSG_081 "فایل ایمیج انتخاب‌شده پشتیبانی نمی‌شود"
+t MSG_082 "فایل ایمیج (Image) انتخاب‌شده، قابلیت راه‌اندازی سیستم‌عامل را ندارد (none-bootable) یا ساختاری دارد که Rufus آن را پشتیبانی نمی‌کند."
+t MSG_083 "%s جایگزین شود؟"
+t MSG_084 "انگار این فایل ISO از نسخه قدیمی «%s» استفاده می‌کند.\n"
+	"به همین دلیل، ممکن است منوی راه‌اندازی (Boot Menu) به‌درستی نمایش داده نشود.\n\n"
+	"برای از بین بردن این مشکل، Rufus می‌تواند نسخه جدید آن را دانلود کند.\n"
+	"-برای اتصال به اینترنت و دانلود این فایل «بله» را انتخاب کنید\n"
+	"-اگر نمی‌خواهید این فایل را دانلود کنید، «خیر» را انتخاب کنید.\n\n"
+	"نکته: این فایل در پوشه نرم‌افزار دانلود می‌شود و در دفعات بعد به‌صورت خودکار از آن استفاده خواهد شد."
+t MSG_085 "در حال دانلود کردن %s"
+t MSG_086 "فایل ایمیج انتخاب نشده است"
+# The content between the quotes below (\"Create a bootable disk\") should match
+# the beginning of the IDC_BOOT text
+t MSG_087 "لطفاً  با کلیک بر روی آیکون CD یک فایل ایمیج (Image) انتخاب کنید؛ "
+	"یا گزینه «ساخت درایو راه‌انداز (Bootable) با استفاده از» را غیرفعال کنید."
+t MSG_088 "فایل ایمیج بیش از اندازه بزرگ است"
+t MSG_089 "اندازه فایل ایمیج (Image) از ظرفیت درایو انتخاب‌شده بیشتر است."
+t MSG_090 "خطا در انتخاب فایل ISO"
+# NOTE: To make the output look correctly, in the line below there are RLE & PDF invisible Unicode directional formatting characters.
+#		Position: (RLE) At the beginning and (PDF) at the end of string.
+t MSG_091 "‫هنگامی‌که نوع UEFI را انتخاب می‌کنید؛ فقط می‌توانید از فایل‌های ISO با قابلیت راه‌اندازی EFI (EFI Bootable) استفاده کنید. ‬"
+	"لطفاً از یک فایل ISO با قابلیت راه‌اندازی EFI استفاده کنید یا در گزینه‌ها نوع BIOS را انتخاب کنید."
+t MSG_092 "سیستم فایل پشتیبانی نمی‌شود"
+t MSG_093 "هشدار مهم! درایو انتخاب‌شده چندین پارتیشن دارد.\n\n"
+	"ممکن است این پارتیشن‌ها پنهان باشند و شما آن‌ها را در فهرست ویندوز نبینید. "
+	"اگر می‌خواهید ادامه دهید، مسئولیت هرگونه پاک شدن اطلاعات در این پارتیشن‌ها به عهده خود شما است!"
+t MSG_094 "چندین پارتیشن شناسایی شده است"
+t MSG_095 "ایمیج DD"
+t MSG_096 "سیستم فایلی را که انتخاب کرده‌اید  با این نوع از فایل ISO نمی‌توان استفاده کرد. "
+	"لطفاً سیستم فایل یا فایل ISO دیگری را انتخاب کنید."
+t MSG_097 "«%s» فقط زمانی قابل استفاده است که سیستم فایل انتخاب‌شده NTFS باشد."
+t MSG_098 "هشدار مهم! شما گزینه «Windows To Go» را انتخاب کرده‌اید اما درایو موردنظر شما فاقد ویژگی «FIXED» است. "
+	"به همین دلیل هنگام راه‌اندازی سیستم‌عامل (Boot) با استفاده از این درایو به احتمال زیاد اجرای ویندوز متوقف می‌شود. "
+	"چون‌که مایکروسافت این امکان را برای درایوهایی که ویژگی «REMOVABLE» دارند، طراحی نکرده است.\n\n"
+	"آیا می‌خواهید این کار را ادامه دهید؟\n\n"
+	"نکته: ویژگی‌های «FIXED» و «REMOVABLE» خاصیت سخت‌افزاری هستند "
+	"و فقط شرکت‌های سازنده درایو با ابزارهای مخصوصی می‌توانند آن‌ها را تغییر دهند. "
+	"این ابزارها تقریباً هیچ‌وقت در اختیار عموم مردم قرار نمی‌گیرد."
+t MSG_099 "محدودیت در سیستم فایل"
+t MSG_100 "ایمیج (Image) انتخاب‌شده فایلی بزرگ‌تر از ۴ گیگابایت دارد. "
+	"این مقدار از حداکثر اندازه مجاز برای سیستم فایل FAT و FAT32 بیشتر است."
+t MSG_101 "استخراج اطلاعات فایل WIM پشتیبانی نمی‌شود"
+t MSG_102 "سیستم‌عامل شما نمی‌تواند اطلاعات فایل‌های WIM را از حالت فشرده خارج کند. "
+	"استخراج اطلاعات موجود در این نوع از فایل‌ها، برای ساختن درایو USB «ویندوز ویستا» و «ویندوز ۷» با قابلیت راه‌اندازی EFI لازم است. "
+	"شما می‌توانید با نصب کردن نرم‌افزار 7-Zip این مشکل را حل کنید.\n"
+	"آیا می‌خواهید وارد سایت دانلود نرم‌افزار 7-Zip شوید؟"
+t MSG_103 "%s دانلود شود؟"
+# Eg. "Grub4DOS v0.4 or later requires a 'grldr' file to be installed. Because this file
+#      is more than 100 KB in size, and always present on Grub4DOS ISO images, etc."
+t MSG_104 "%s یا نسخه‌های بعدی آن، نیازمند فایل %s است.\n"
+	"چون اندازه این فایل از ۱۰۰ کیلوبایت بیشتر است و معمولاً در ایمیج‌های %s موجود است؛ "
+	"این فایل به همراه نرم‌افزار Rufus عرضه نشده است.\n\nRufus می‌تواند این فایل را از اینترنت دانلود کند.\n"
+	"-برای اتصال به اینترنت و دانلود این فایل «بله» را انتخاب کنید\n"
+	"-اگر می‌خواهید بعداً خودتان این فایل را در درایو موردنظر کپی کنید؛ «خیر» را انتخاب کنید\n\n"
+	"نکته: این فایل در پوشه نرم‌افزار دانلود می‌شود و در دفعات بعد به‌صورت خودکار از آن استفاده خواهد شد."
+t MSG_105 "لغو این فرآیند ممکن است درایو موردنظر را در وضعیت غیرقابل استفاده (UNUSABLE) قرار دهد.\n"
+	"آیا مطمئن هستید که می‌خواهید این فرآیند را لغو کنید؟"
+t MSG_106 "لطفاً یک پوشه انتخاب کنید"
+t MSG_107 "همه فایل‌ها"
+t MSG_108 "گزارش Rufus"
+t MSG_109 "0x%02X (دیسک %d)"
+# "Cluster size" below should be the same as the label for IDS_CLUSTERSIZE_TXT
+# "kilobytes" should be the same as in MSG_027
+t MSG_110 "MS-DOS با استفاده از درایوی که اندازه کلاستر آن ۶۴ کیلوبایت است؛ راه‌اندازی (Boot) نمی‌شود.\n"
+	"لطفاً اندازه کلاستر را تغییر دهید یا از FreeDOS استفاده کنید."
+t MSG_111 "اندازه کلاستر ناسازگار و نامناسب است"
+# "%d:%02d" below is a duration (mins:secs)
+t MSG_112 "معمولاً فرمت کردن درایو UDF حجیم و بزرگ زمان‌بر است. زمان تخمینی با استفاده از درگاه USB 2.0 «%d:%02d» است. "
+	"ممکن است هنگام فرمت کردن، نوار لغزنده‌ای که پیشرفت فرآیند را نشان می‌دهد بی‌حرکت و ثابت شود.\n"
+	"پس لطفاً صبور باشید!"
+t MSG_113 "درایو UDF حجیم"
+t MSG_114 "این ایمیج (Image) از «Syslinux %s%s» استفاده می‌کند؛ اما نرم‌افزار Rufus فقط تنظیمات و فایل‌های نصب «Syslinux %s%s» را به همراه دارد. "
+	"از آنجا که نسخه‌های مختلف Syslinux با یکدیگر سازگار نیستند و امکان قرار دادن همه آن‌ها در نرم‌افزار Rufus وجود ندارد؛ "
+	"Rufus باید دو فایل «ldlinux.sys» و «ldlinux.bss» را از اینترنت دانلود کند.\n"
+	"-برای اتصال به اینترنت و دانلود این فایل‌ها «بله» را انتخاب کنید\n"
+	"-اگر از ادامه این فرآیند منصرف شده‌اید، «خیر» را انتخاب کنید.\n\n"
+	"نکته: این فایل‌ها در پوشه نرم‌افزار دانلود می‌شود و در دفعات بعد به‌صورت خودکار از آن‌ها استفاده خواهد شد."
+t MSG_115 "دانلود چند فایل لازم است"
+# Note: You should be able to test this message with Super Grub2 Disk ISO:
+# http://forja.cenatic.es/frs/download.php/file/1757/super_grub2_disk_hybrid_2.00s2.iso (11 MB)
+t MSG_116 "این ایمیج (Image) از «Grub %s» استفاده می‌کند؛ اما نرم‌افزار Rufus فقط تنظیمات و فایل‌های نصب «Grub %s» را به همراه دارد. "
+	"از آنجا که نسخه‌های مختلف Grub ممکن است با یکدیگر سازگار نباشند و امکان قرار دادن همه آن‌ها در نرم‌افزار Rufus وجود ندارد؛ "
+	"Rufus تلاش می‌کند فایل نصب «core.img» مناسب ایمیج شما را در اینترنت پیدا کند.\n\n"
+	"installation file ('core.img') that matches the one from your image:\n"
+	"-برای اتصال به اینترنت و تلاش برای دانلود این فایل «بله» را انتخاب کنید\n"
+	"-اگر می‌خواهید از فایل کنونی و پیش‌فرض Rufus استفاده کنید «خیر» را انتخاب کنید\n"
+	"-اگر از ادامه این فرآیند منصرف شده‌اید، «لغو» را انتخاب کنید.\n\n"
+	"نکته: این فایل در پوشه نرم‌افزار دانلود می‌شود و در دفعات بعد به‌صورت خودکار از آن استفاده خواهد شد. "
+	"اگر فایل مناسبی در اینترنت پیدا نشود، نرم‌افزار از نسخه پیش‌فرض استفاده خواهد کرد."
+# Tooltips
+# Partition Scheme and Target Type
+t MSG_150 "معمولاً مطمئن‌ترین انتخاب همین گزینه است؛ اما اگر رایانه شما UEFI دارد و شما می‌خواهید "
+	"در حالت native EFI اقدام به نصب سیستم‌عامل کنید؛ بهتر است گزینه دیگری را انتخاب کنید."
+t MSG_151 "اگر می‌خواهید در حالت native EFI اقدام به نصب سیستم‌عامل کنید و "
+	"نیاز دارید که در ویندوز XP به محتویات درایو USB دسترسی داشته باشید؛ از این گزینه استفاده کنید."
+t MSG_152 "اگر می‌خواهید در حالت native EFI اقدام به نصب سیستم‌عامل کنید و "
+	"نیازی به دسترسی به درایو USB در ویندوز XP ندارید؛ بهتر است این گزینه را انتخاب کنید."
+t MSG_153 "الگوی آزمایش: 0x%02X"
+t MSG_154 "الگوی آزمایش: 0x%02X, 0x%02X"
+t MSG_155 "الگوی آزمایش: 0x%02X, 0x%02X, 0x%02X"
+t MSG_156 "الگوی آزمایش: 0x%02X, 0x%02X, 0x%02X, 0x%02X"
+t MSG_157 "سیستم فایل موردنظر را انتخاب کنید.\n"
+	"اگر نمی‌دانید کدام گزینه مناسب است؛ مقدار پیش‌فرض را انتخاب کنید."
+t MSG_158 "کمترین مقداری که یک بلاک داده (Data block) در سیستم فایل اشغال می‌کند.\n"
+	"اگر نمی‌دانید کدام گزینه مناسب است؛ مقدار پیش‌فرض را انتخاب کنید."
+t MSG_159 "شما می‌توانید برای درایو USB موردنظر؛ نام دلخواهی را انتخاب کنید."
+t MSG_160 "نمایش دادن/پنهان کردن تنظیمات پیشرفته"
+t MSG_161 "بررسی وجود بدسکتور (Bad sector) در حافظه و درایو موردنظر با استفاده از یک الگوی آزمایش (Test pattern)"
+t MSG_162 "برای فرمت کردن به روش آهسته یا کامل (Full format) این گزینه را غیرفعال کنید."
+t MSG_163 "اگر می‌خواهید یک درایو USB با قابلیت راه‌اندازی (Bootable) بسازید؛ این گزینه را انتخاب کنید."
+t MSG_164 "انتخاب روش و نوع فایلی که می‌خواهید با استفاده از آن یک درایو USB با قابلیت راه‌اندازی بسازید"
+t MSG_165 "برای انتخاب فایل ایمیج (Image) کلیک کنید."
+t MSG_166 "اگر نامی که برای درایو موردنظر انتخاب کرده‌اید طولانی و یا دارای حروف غیر انگلیسی است "
+	"و یا اگر می‌خواهید درایو موردنظر آیکون داشته باشد؛ این گزینه را انتخاب کنید."
+t MSG_167 "نصبِ MBR سفارشیِ نرم‌افزارِ Rufus که با استفاده از آن می‌توان نحوه راه‌اندازی را"
+	" انتخاب و شناسه (ID) درایو USB بایوس را جعل کرد."
+t MSG_168 "با انتخاب یکی از این گزینه‌ها می‌توانید به‌صورت ساختگی و جعلی، اولین درایو USB با قابلیت "
+	"راه‌اندازی (معمولاً 0x80) را به‌عنوان هارددیسک جداگانه معرفی کنید\n"
+	"انتخاب این گزینه فقط زمانی ضروری است که بیش از یک هارددیسک دارید و می‌خواهید ویندوز XP نصب کنید."
+t MSG_169 "افزودن تنظیماتی مثل ساختن یک پارتیشن اضافی و مخفی (Extra hidden partition) در درایو "
+	"و یا تراز کردن (Align) حدود و مرزهای پارتیشن‌ها که باعث شناسایی بهتر درایو در "
+	"بایوس‌های قدیمی می‌شود."
+t MSG_170 "لطفاً با آگاهی کامل این گزینه را انتخاب کنید و در صورت نیاز حتماً "
+	"از اطلاعات موجود در هارد اکسترنال یک نسخه پشتیبان (بکاپ) تهیه کنید."
+t MSG_171 "شروع فرآیند فرمت کردن\n با این کار، همه اطلاعات موجود در درایوی که انتخاب کرده‌اید «پاک» می‌شود"
+t MSG_172 "اطلاعات مربوط به پروانه (Licence)، به‌روزرسانی (آپدیت)، سازنده و مترجم نرم‌افزار"
+t MSG_173 "برای انتخاب کلیک کنید"
+# The following will appear in the about dialog
+# Translator Note: In the line below invisible RLE (at the beginning) and PDF (at the end) are used
+t MSG_174 "‫Rufus، ابزاری کاربردی و قابل‌اطمینان برای فرمت کردن درایوهای USB‬"
+t MSG_175 "نسخه %d.%d (Build %d)"
+t MSG_176 "ترجمه فارسی: سید ضیاءالدین عظیمی «mailto:s.zia.azimi@gmail.com»"
+t MSG_177 "گزارش اشکال (Bug) یا درخواست قابلیت جدید و بهبود نرم‌افزار در:"
+t MSG_178 "حقوق نشر دیگران:"
+t MSG_179 "سیاست به‌روزرسانی:"
+t MSG_180 "اگر به این نرم‌افزار اجازه بررسی به‌روزرسانی‌های جدید را بدهید؛ "
+	"شما موافقت خود را با احتمال جمع‌آوری اطلاعات زیر در سرور یا سرورهای ما اعلام کرده‌اید:"
+t MSG_181 "معماری و نسخه سیستم‌عامل شما"
+t MSG_182 "نسخه این نرم‌افزار که در حال استفاده از آن هستید"
+t MSG_183 "‫آدرس IP شما‬"
+t MSG_184 "به جهت تولید آمار استفاده شخصی، ممکن است ما این اطلاعات جمع‌آوری‌شده را "
+	"\\b برای حداکثر یک سال \\b0نگه‌داری کنیم. با وجود این، ما از روی میل این داده‌های فردی را در اختیار شخص ثالث قرار نخواهیم داد."
+t MSG_185 "فرآیند به‌روزرسانی:"
+# Translator Note: In the line below invisible RLE (at the beginning) and PDF (at the end) are used
+t MSG_186 "‫Rufus هیچ سرویس پس‌زمینه‌ای را اجرا یا نصب نمی‌کند؛ بنابراین فقط زمانی که نرم‌افزار در حال اجرا است فرآیند بررسی به‌روزرسانی‌های جدید انجام می‌شود.‬\\line\n"
+	"واضح است هنگام بررسی به‌روزرسانی‌ها، دسترسی به اینترنت لازم است."
+t MSG_187 "ناهماهنگی بین ایمیج و گزینه راه‌اندازی انتخاب‌شده"
+t MSG_188 "این فایل ایمیج (Image)، با تنظیمات راه‌اندازی (Boot) انتخاب‌شده؛ سازگار نیست. لطفاً فایل یا تنظیمات دیگری انتخاب کنید."
+t MSG_189 "این فایل ایمیج (Image) با سیستم فایل انتخاب‌شده سازگار نیست."
+t MSG_190 "درایو ناسازگار و ناهماهنگ شناسایی شده است"
+# See MSG_235 for where the 2 messages below are being used:
+t MSG_191 "مرحله نوشتن"
+t MSG_192 "مرحله خواندن"
+t MSG_193 "%s دانلود شد"
+t MSG_194 "دانلود %s امکان‌پذیر نیست"
+# eg. "Using embedded version of Grub2 file(s)"
+t MSG_195 "در حال استفاده از نسخه جاسازی‌شده و داخلی فایل %s"
+t MSG_196 "مهم!\n"
+	"این درایو اندازه سکتور غیراستانداردی دارد.\n\n"
+	"درایوهای شناخته‌شده، اندازه سکتور ۵۱۲ بایت دارند اما این درایو از %d بایت استفاده می‌کند. "
+	"این به این معنی است که (در بیشتر موارد) شما قادر به راه‌اندازی سیستم با استفاده از این درایو نخواهید بود.\n"
+	"نرم‌افزار Rufus تلاش می‌کند یک درایو قابل راه‌اندازی را بسازد؛ اما در مورد درست کار کردن آن تضمینی نخواهد داد!"
+t MSG_197 "شناسایی اندازه سکتور غیراستاندارد"
+t MSG_198 "استفاده از قابلیت «Windows To Go» فقط در درایوهای پارتیشن‌بندی‌شده به روش "
+	"GPT که دارای ویژگی «FIXED» هستند؛ امکان‌پذیر است. درایوی که شما انتخاب کرده‌اید ویژگی «FIXED» را ندارد."
+t MSG_199 "اگر می‌خواهید با استفاده از درایو انتخاب‌شده اقدام به «نصب ویندوز» کنید؛ این گزینه را انتخاب کنید."
+t MSG_200 "اگر می‌خواهید مستقیماً از روی درایو انتخاب‌شده اقدام به «اجرای ویندوز» کنید؛ این گزینه را انتخاب کنید."
+
+# Status messages - these messages will appear on the status bar
+# Translator Note: In the 2 lines below there are invisible Unicode directional formatting characters.
+#	RLE (RIGHT-TO-LEFT EMBEDDING) at the beginning of the string
+#	PDF (POP DIRECTIONAL FORMATTING) at the end of the string
+t MSG_201 "‫در حال لغو کردن؛ لطفاً صبور باشید...‬"
+t MSG_202 "‫در حال پویش و بررسی ایمیج...‬"
+t MSG_203 "بررسی ایمیج ناموفق بود"
+# Parameter: the name of an obsolete Syslinux .c32 module. eg: "Obsolete vesamenu.c32 detected"
+# Translator Note: In the line below invisible RLE (at the beginning) and PDF (at the end) are used
+t MSG_204 "‫فایل قدیمی و منسوخ %s شناسایی شد‬"
+# Display the name of the image selected. eg: "Using image: en_win7_x64_sp1.iso"
+t MSG_205 "در حال استفاده از ایمیج: %s"
+# Typically "Missing ldlinux.c32 file"
+# Translator Note: In the line below invisible RLE (at the beginning) and PDF (at the end) are used
+t MSG_206 "‫فایل %s موجود نیست‬"
+# The name proposed by Windows' Computer Management -> Disk Management when you try to format a drive
+# with an empty label. See http://rufus.akeo.ie/pics/default_name.png
+t MSG_207 "New Volume"
+# Same message, once for singular and plural ("1 device found", "2 devices found")
+t MSG_208 "%d درایو شناسایی شد"
+t MSG_209 "%d درایو شناسایی شد"
+t MSG_210 "آماده"
+t MSG_211 "لغو شد"
+t MSG_212 "ناموفق بود"
+# Used when a new update has been downloaded and launched
+# Translator Note: In the line below invisible RLE (at the beginning) and PDF (at the end) are used
+t MSG_213 "‫در حال راه‌اندازی نسخه جدید نرم‌افزار...‬"
+t MSG_214 "راه‌اندازی نسخه جدید نرم‌افزار ناموفق بود"
+# Open/Save file
+# Translator Note: From MSG_215 to MSG_235, invisible RLE (at the beginning) and PDF (at the end) are used
+t MSG_215 "‫%s باز شد‬"
+t MSG_216 "‫%s ذخیره شد‬"
+# Formatting status (make sure you use a double % to print the percent sign)
+t MSG_217 "‫در حال فرمت کردن؛ درصد پیشرفت: %0.1f%%‬"
+t MSG_218 "‫در حال ساختن سیستم فایل؛ تعداد وظایف انجام شده: %d/%d‬"
+t MSG_219 "‫ایجاد ساختار NTFS Fixup؛ درصد پیشرفت: %d%%‬"
+# Parameter: the file system and an estimated duration in mins and secs.
+# eg. "Formatting (UDF) - Estimated duration 3:21..."
+# NB: if "estimated duration" is too long, just use "estimated" or an abbreviation
+t MSG_220 "‫در حال فرمت کردن (%s)؛ زمان تخمینی: %d:%02d‬"
+t MSG_221 "‫در حال نام‌گذاری درایو (ممکن است کمی زمان‌بر باشد)...‬"
+# Parameter: the file system. eg. "Formatting (NTFS)..."
+t MSG_222 "‫در حال فرمت کردن (%s)...‬"
+t MSG_223 "‫در حال ایجاد ساختار NTFS Fixup (Checkdisk)...‬"
+t MSG_224 "‫در حال پاک‌کردن ساختارهای MBR/PBR/GPT...‬"
+t MSG_225 "‫در حال درخواست دسترسی به دیسک...‬"
+t MSG_226 "‫در حال بررسی رکوردهای راه‌انداز موجود...‬"
+t MSG_227 "‫در حال بستن درایوهای موجود...‬"
+t MSG_228 "‫در حال نوشتن رکورد راه‌انداز اصلی (MBR)...‬"
+t MSG_229 "‫در حال نوشتن رکورد راه‌انداز پارتیشن (PBR)...‬"
+t MSG_230 "‫در حال کپی کردن فایل‌های DOS...‬"
+t MSG_231 "‫در حال کپی کردن محتویات فایل ISO...‬"
+t MSG_232 "‫در حال نصب راه‌انداز EFI ویندوز ۷ (ممکن است کمی زمان‌بر باشد)...‬"
+t MSG_233 "‫در حال انجام مرحله نهایی، لطفاً صبور باشید...‬"
+# Takes a Syslinux version as parameter, eg. "Installing Syslinux v5.10..."
+t MSG_234 "‫در حال نصب Syslinux %s...‬"
+# Bad blocks status. eg: "Bad Blocks: Write pass 1/2 - 12.34% (0/0/1 errors)"
+# See MSG_191/192 for "Write pass"/"Read pass" translation
+t MSG_235 "‫بررسی بدسکتور: %s %d/%d - %0.2f%% (%d/%d/%d خطاها)‬"
+t MSG_236 "بررسی بدسکتور: آزمایش با استفاده از الگوی تصادفی"
+# Translator Note: From MSG_237 to MSG_241, invisible RLE (at the beginning) and PDF (at the end) are used
+t MSG_237 "‫بررسی بدسکتور: آزمایش با استفاده از الگوی 0x%02X‬"
+# eg. "Partitioning (MBR)..."
+t MSG_238 "‫در حال پارتیشن‌بندی (%s)...‬"
+t MSG_239 "‫در حال حذف پارتیشن‌ها...‬"
+t MSG_240 "‫دانلود %s: در حال اتصال...‬"
+t MSG_241 "‫در حال دانلود: %0.1f%%‬"
+t MSG_242 "دانلود فایل ناموفق بود"
+# Translator Note: In the line below invisible RLE (at the beginning) and PDF (at the end) are used
+t MSG_243 "‫در حال بررسی به‌روزرسانی‌های Rufus...‬"
+t MSG_244 "به‌روزرسانی: نرم‌افزار نتوانست به اینترنت وصل شود"
+t MSG_245 "به‌روزرسانی: نرم‌افزار نتوانست به اطلاعات نسخه برنامه دسترسی پیدا کند"
+# Translator Note: In the 2 lines below invisible RLE (at the beginning) and PDF (at the end) are used
+t MSG_246 "‫نسخه جدیدی از Rufus موجود است!‬"
+t MSG_247 "‫نسخه جدیدی برای Rufus پیدا نشد‬"
+t MSG_248 "کلیدهای رجیستری برنامه با موفقیت حذف شدند"
+t MSG_249 "حذف کلیدهای رجیستری برنامه ناموفق بود"
+# eg. "Fixed disk detection enabled" "ISO size check disabled"
+t MSG_250 "%s فعال شد."
+t MSG_251 "%s غیرفعال شد."
+t MSG_252 "بررسی اندازه ایمیج"
+t MSG_253 "تشخیص دیسک سخت (هارد دیسک) USB"
+t MSG_254 "وادار کردن استفاده از فرمت Large FAT32"
+t MSG_255 "هنگام خروج، NoDriveTypeAutorun حذف خواهد شد."
+t MSG_256 "تشخیص درایو ساختگی و تقلبی"
+t MSG_257 "پشتیبانی از سیستم فایل Joliet"
+t MSG_258 "پشتیبانی از سیستم فایل Rock Ridge"
+t MSG_259 "وادار کردن به‌روزرسانی"
+t MSG_260 "فشرده‌سازی NTFS"
+t MSG_261 "‫در حال نوشتن اطلاعات ایمیج؛ درصد پیشرفت: %0.1f%%‬"
+# Cheat mode message to disable ISO Support so that only DD images can be opened
+t MSG_262 "پشتیبانی از فایل ISO"
+# Cheat mode to force legacy size units, where 1 KB is 1024 bytes and NOT that fake 1000 bytes abomination!
+# TRANSLATOR NOTE: In the line below 'RLE','LRE' & 'PDF' are used
+t MSG_263 "‫نمایش دودویی واحدهای حافظه (‪1 KB = 1024 bytes‬)‬"
+t MSG_264 "در حال حذف کردن پوشه '%s'"
+t MSG_265 "شناسایی دیسک VMWare"
+t MSG_266 "روش دوگانه UEFI/BIOS"
+# Translator Note: In the 2 lines below invisible RLE (at the beginning) and PDF (at the end) are used
+t MSG_267 "در حال استفاده از ایمیج ویندوز؛ درصد پیشرفت: %0.1f%%"
+t MSG_268 "‫در حال استفاده از ایمیج ویندوز...‬"
+t MSG_269 "نگه‌داری برچسب زمان (timestamp)"
+t MSG_270 "اشکال‌زدایی (debug) USB"
+# Translator Note: In the line below invisible RLE (at the beginning) and PDF (at the end) are used
+t MSG_271 "‫محاسبه جمع کنترلی (Checksum) ایمیج؛ درصد پیشرفت: %0.1f%%‬"
+t MSG_272 "محاسبه جمع کنترلی (Checksum) SHA1 و MD5 برای ایمیج انتخاب‌شده"
+t MSG_273 "تغییر زبان برنامه"
+# TRANSLATOR NOTE: In the line below 'RLE' & 'PDF' are used
+t MSG_274 "‫ایمیج ISOHybrid شناسایی شد‬"
+# '%s' below will be replaced with your translations for MSG_036 ("ISO Image") and MSG_095 ("DD Image")
+t MSG_275 "ایمیجی که شما انتخاب کرده‌اید از نوع «ISOHybrid» است. به این معنی که این فایل می‌تواند "
+	"‫‫به روش «%s (کپی کردن فایل)» یا «%s (ایمیج دیسک)» نوشته شود.‬ \n"
+	"Rufus استفاده از روش «%s» را پیشنهاد می‌کند. در این روش پس از نوشتن اطلاعات در درایو، شما همیشه دسترسی کاملی به درایو خواهید داشت. \n"
+	"با این حال، اگر هنگام راه‌اندازی (boot) سیستم‌عامل با مشکلی برخورد کردید؛ شما می‌توانید دوباره نوشتن اطلاعات به روش «%s» را امتحان کنید.\n\n"
+	"لطفاً شیوه‌ای را که می‌خواهید با استفاده از آن اطلاعات ایمیج نوشته شود؛ انتخاب کنید."
+# '%s' below will be replaced with your translation for MSG_036 ("ISO Image")
+t MSG_276 "نوشتن به روش «%s» (پیشنهاد برنامه)"
+# '%s' below will be replaced with your translation for MSG_095 ("DD Image")
+t MSG_277 "نوشتن به روش «%s»"
+# The following will be used for new controls of the Rufus 3.0 interface
+# They are added as messages, so that I will have them available when needed.
+# 278 & 280 will be dropdown titles, similar to how IDS_DEVICE_TXT or IDS_PARTITION_TYPE_TXT are used
+# 279 & 281 will be items that can appear in the dropdowns
+t MSG_278 "نوع راه‌اندازی (Boot)"
+t MSG_279 "غیرقابل راه‌اندازی (Non bootable)"
+t MSG_280 "انتخاب ایمیج (Image)"
+t MSG_281 "(لطفاً یک ایمیج انتخاب کنید)"
+t MSG_282 "قفل کردن اختصاصی درایو USB"
+t MSG_283 "امضای نامعتبر"
+t MSG_284 "فایل اجرایی دانلود شده امضای دیجیتال ندارد."
+t MSG_285 "این فایل اجرایی دانلود شده، توسط '%s' امضا شده است.\n ما این امضا را نمی‌شناسیم و "
+	"ناشناس بودن آن ممکن است نشانه نوعی فعالیت خرابکارانه باشد...\nآیا مطمئن هستید می‌خواهید این فایل را اجرا کنید؟"
 
 ################################################################################
 l "pl-PL" "Polish (Polski)" 0x0415
