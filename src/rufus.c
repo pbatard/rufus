@@ -1616,7 +1616,9 @@ static INT_PTR CALLBACK InfoCallback(HWND hCtrl, UINT message, WPARAM wParam, LP
 		GetClientRect(hCtrl , &rect);
 		// If you don't fill the client area, you get leftover text artifacts
 		FillRect(hdc, &rect, hInfoBrush);
-		ExtTextOutW(hdc, rect.right/2, rect.bottom/2 + (int)(5.0f * fScale), ETO_CLIPPED, &rect, winfo, (int)wcslen(winfo), NULL);
+		ExtTextOutW(hdc, rect.right/2, rect.bottom/2 + (int)(5.0f * fScale),
+			ETO_CLIPPED | ETO_NUMERICSLOCAL | (right_to_left_mode?ETO_RTLREADING:0),
+			&rect, winfo, (int)wcslen(winfo), NULL);
 		EndPaint(hCtrl, &ps);
 		return (INT_PTR)TRUE;
 	}
