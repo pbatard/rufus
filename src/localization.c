@@ -381,9 +381,10 @@ char* lmprintf(uint32_t msg_id, ...)
 	static char buf[LOC_MESSAGE_NB][LOC_MESSAGE_SIZE];
 	char *format = NULL;
 	va_list args;
+	BOOL needs_rtf_rtl_marks = (msg_id & MSG_RTF) && right_to_left_mode;
+
 	buf_id %= LOC_MESSAGE_NB;
 	buf[buf_id][0] = 0;
-	BOOL needs_rtf_rtl_marks = (msg_id & MSG_RTF) && right_to_left_mode;
 
 	msg_id &= MSG_MASK;
 	if ((msg_id > MSG_000) && (msg_id < MSG_MAX)) {

@@ -76,7 +76,7 @@ static const char* install_wim_path = "/sources";
 static const char* install_wim_name[] = { "install.wim", "install.swm" };
 static const char* grub_dirname = "/boot/grub"; // NB: We don't support nonstandard config dir such as AROS' "/boot/pc/grub/"
 static const char* grub_cfg = "grub.cfg";
-static const char* syslinux_cfg[] = { "isolinux.cfg", "syslinux.cfg", "extlinux.conf"};
+static const char* syslinux_cfg[] = { "isolinux.cfg", "syslinux.cfg", "extlinux.conf" };
 static const char dot_isolinux_bin[] = ".\\isolinux.bin";
 static const char* isolinux_bin = &dot_isolinux_bin[2];
 static const char* pe_dirname[] = { "/i386", "/minint" };
@@ -228,7 +228,7 @@ static BOOL check_iso_props(const char* psz_dirname, int64_t i_file_length, cons
 		// Compute projected size needed
 		total_blocks += i_file_length/UDF_BLOCKSIZE;
 		// NB: ISO_BLOCKSIZE = UDF_BLOCKSIZE
-		if ((i_file_length != 0) && (i_file_length%ISO_BLOCKSIZE == 0))	// 
+		if ((i_file_length != 0) && (i_file_length%ISO_BLOCKSIZE == 0))
 			total_blocks++;
 		return TRUE;
 	}
@@ -649,7 +649,7 @@ BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan)
 	FILE* fd;
 	int r = 1;
 	iso9660_t* p_iso = NULL;
-	udf_t* p_udf = NULL; 
+	udf_t* p_udf = NULL;
 	udf_dirent_t* p_udf_root;
 	char *tmp, *buf, *ext;
 	char path[MAX_PATH], path2[16];
@@ -829,7 +829,7 @@ out:
 			// In case we have a WinPE 1.x based iso, we extract and parse txtsetup.sif
 			// during scan, to see if /minint was provided for OsLoadOptions, as it decides
 			// whether we should use 0x80 or 0x81 as the disk ID in the MBR
-			safe_sprintf(path, sizeof(path), "/%s/txtsetup.sif", 
+			safe_sprintf(path, sizeof(path), "/%s/txtsetup.sif",
 				basedir[((img_report.winpe&WINPE_I386) == WINPE_I386)?0:1]);
 			ExtractISOFile(src_iso, path, tmp_sif, FILE_ATTRIBUTE_NORMAL);
 			tmp = get_token_data_file("OsLoadOptions", tmp_sif);
@@ -920,7 +920,7 @@ int64_t ExtractISOFile(const char* iso, const char* iso_file, const char* dest_f
 	DWORD buf_size, wr_size;
 	BOOL s;
 	iso9660_t* p_iso = NULL;
-	udf_t* p_udf = NULL; 
+	udf_t* p_udf = NULL;
 	udf_dirent_t *p_udf_root = NULL, *p_udf_file = NULL;
 	iso9660_stat_t *p_statbuf = NULL;
 	lsn_t lsn;
@@ -1065,7 +1065,7 @@ try_iso:
 		goto out;
 	}
 	r = wim_header[3];
-	
+
 out:
 	if (p_statbuf != NULL)
 		safe_free(p_statbuf->rr.psz_symlink);
