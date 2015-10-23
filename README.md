@@ -6,15 +6,15 @@ Rufus: The Reliable USB Formatting Utility
 Features
 --------
 
-* Formats USB and Virtual HD drives to FAT/FAT32/NTFS/UDF/exFAT/ReFS
-* Creates DOS bootable USB drives, using [FreeDOS](http://www.freedos.org/) or MS-DOS
-* Creates BIOS or UEFI bootable drives, including UEFI bootable NTFS
-* Creates bootable drives from bootable ISOs (Windows, Linux, etc.)
-* Creates bootable drives from bootable disk images, including compressed ones
-* Creates [Windows To Go](https://en.wikipedia.org/wiki/Windows_To_Go) drives
+* Format USB and Virtual HD drives to FAT/FAT32/NTFS/UDF/exFAT/ReFS
+* Create DOS bootable USB drives, using [FreeDOS](http://www.freedos.org/) or MS-DOS
+* Create BIOS or UEFI bootable drives, including [UEFI bootable NTFS](https://github.com/pbatard/uefi-ntfs)
+* Create bootable drives from bootable ISOs (Windows, Linux, etc.)
+* Create bootable drives from bootable disk images, including compressed ones
+* Create [Windows To Go](https://en.wikipedia.org/wiki/Windows_To_Go) drives
 * Twice as fast as Microsoft's USB/DVD tool or UNetbootin, on ISO -> USB creation (1)
-* Performs bad blocks checks, including detection of "fake" flash drives
-* Modern and familiar UI, with more than [30 languages natively supported](http://rufus.akeo.ie/translations)
+* Perform bad blocks checks, including detection of "fake" flash drives
+* Modern and familiar UI, with more than [35 languages natively supported](https://rufus.akeo.ie/translations)
 * Small footprint. No installation required.
 * Portable
 * 100% [Free Software](http://www.gnu.org/philosophy/free-sw.en.html) (GPL v3)
@@ -39,8 +39,8 @@ Additional information
 Rufus provides extensive information about what it is doing, either through
 its easily accessible log, or through the Windows debug facility.
 
-* Website: http://rufus.akeo.ie
-* FAQ: http://rufus.akeo.ie/FAQ
+* Website: https://rufus.akeo.ie
+* FAQ: https://rufus.akeo.ie/FAQ
 
 Enhancements/Bugs
 -----------------

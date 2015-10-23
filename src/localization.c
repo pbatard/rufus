@@ -617,12 +617,12 @@ WORD get_language_id(loc_cmd* lcmd)
 	found_lang = FALSE;
 	for (i = 0; (i<lcmd->unum_size); i++) {
 		// Always uppercase
-		swprintf_s(wlang, ARRAYSIZE(wlang), L"%04X", lcmd->unum[i]);
+		_snwprintf(wlang, ARRAYSIZE(wlang), L"%04X", lcmd->unum[i]);
 		// This callback enumeration from Microsoft is retarded. Now we need a global
 		// boolean to tell us that we found what we were after.
 		EnumUILanguages(EnumUILanguagesProc, 0x4, (LONG_PTR)wlang);	// 0x04 = MUI_LANGUAGE_ID
 		if (found_lang) {
-			uprintf("localization: will use installed language pack for 0x%04X", lcmd->unum[i]);
+			uprintf("localization: detected installed language pack for 0x%04X", lcmd->unum[i]);
 			return MAKELANGID(lcmd->unum[i], SUBLANG_DEFAULT);
 		}
 	}

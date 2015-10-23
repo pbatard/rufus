@@ -32,7 +32,7 @@ LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
 
 IDD_DIALOG DIALOGEX 12, 12, 242, 376
 STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_MINIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Rufus 2.5.794"
+CAPTION "Rufus 2.5.795"
 FONT 8, "Segoe UI Symbol", 400, 0, 0x0
 BEGIN
     LTEXT           "Device",IDS_DEVICE_TXT,9,6,200,8
@@ -79,8 +79,8 @@ CAPTION "About Rufus"
 FONT 8, "Segoe UI Symbol", 400, 0, 0x0
 BEGIN
     ICON            IDI_ICON,IDC_ABOUT_ICON,11,8,20,20
-    CONTROL         "",IDC_ABOUT_BLURB,"RichEdit20W",0x884,45,7,268,107
-    CONTROL         "",IDC_ABOUT_COPYRIGHTS,"RichEdit20W",WS_VSCROLL | WS_TABSTOP | 0x804,46,115,267,91,WS_EX_STATICEDGE
+    CONTROL         "",IDC_ABOUT_BLURB,"RichEdit20W",ES_MULTILINE | ES_AUTOHSCROLL | ES_READONLY,45,7,268,107
+    CONTROL         "",IDC_ABOUT_COPYRIGHTS,"RichEdit20W",ES_MULTILINE | ES_READONLY | WS_VSCROLL | WS_TABSTOP,46,115,267,91,WS_EX_STATICEDGE
     PUSHBUTTON      "License",IDC_ABOUT_LICENSE,46,215,50,14,WS_GROUP
     PUSHBUTTON      "Updates",IDC_ABOUT_UPDATES,100,215,50,14,NOT WS_VISIBLE | WS_GROUP
     DEFPUSHBUTTON   "OK",IDOK,251,215,50,14,WS_GROUP
@@ -110,7 +110,7 @@ BEGIN
 END
 
 IDD_LOG DIALOGEX 0, 0, 366, 376
-STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Log"
 FONT 8, "Segoe UI Symbol", 400, 0, 0x0
 BEGIN
@@ -319,8 +319,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 2,5,794,0
- PRODUCTVERSION 2,5,794,0
+ FILEVERSION 2,5,795,0
+ PRODUCTVERSION 2,5,795,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -337,13 +337,13 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Akeo Consulting (http://akeo.ie)"
             VALUE "FileDescription", "Rufus"
-            VALUE "FileVersion", "2.5.794"
+            VALUE "FileVersion", "2.5.795"
             VALUE "InternalName", "Rufus"
             VALUE "LegalCopyright", "© 2011-2015 Pete Batard (GPL v3)"
             VALUE "LegalTrademarks", "http://www.gnu.org/copyleft/gpl.html"
             VALUE "OriginalFilename", "rufus.exe"
             VALUE "ProductName", "Rufus"
-            VALUE "ProductVersion", "2.5.794"
+            VALUE "ProductVersion", "2.5.795"
         END
     END
     BLOCK "VarFileInfo"
