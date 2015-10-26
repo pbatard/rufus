@@ -1,9 +1,9 @@
-o Version 2.5 (2015.10.??)
+o Version 2.5 (2015.10.26)
     Add SHA-256 checksum verification
     Add a cheat mode to disable exclusive USB drive locking (Alt-,)
     Add digital signature check on update downloads
     Add Azerbaijani translation, courtesy of Elvin Məlikov
-    Add Persian translation, courtesy of سید ضیاءالدین عظیمی (ziaa)
+    Add Persian translation, courtesy of Seyed Zia Azimi (ziaa)
     Fix an issue where the update settings dialog may not display properly
     Report Windows build number in the log (Windows 8 or later)
     Many localization improvements and fixes, especially for right-to-left languages
