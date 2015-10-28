@@ -122,7 +122,7 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int fs_type)
 	sectbuf = malloc(SECTOR_SIZE);
 	if (sectbuf == NULL)
 		goto out;
-	
+
 	/* Initialize the ADV -- this should be smarter */
 	syslinux_reset_adv(syslinux_adv);
 
@@ -262,7 +262,10 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int fs_type)
 	}
 
 	/* Patch ldlinux.sys and the boot sector */
-	syslinux_patch(sectors, nsectors, 0, 0, NULL, NULL);
+	if (syslinux_patch(sectors, nsectors, 0, 0, NULL, NULL) < 0) {
+		uprintf("Could not patch Syslinux files");
+		goto out;
+	}
 
 	/* Rewrite the file */
 	if (SetFilePointer(f_handle, 0, NULL, FILE_BEGIN) != 0 ||
