@@ -59,7 +59,7 @@ static int task_number = 0;
 extern const int nb_steps[FS_MAX];
 extern uint32_t dur_mins, dur_secs;
 static int fs_index = 0;
-extern BOOL force_large_fat32, enable_ntfs_compression, lock_drive;
+extern BOOL force_large_fat32, enable_ntfs_compression, lock_drive, zero_drive;
 uint8_t *grub2_buf = NULL;
 long grub2_len;
 static BOOL WritePBR(HANDLE hLogicalDrive);
@@ -1577,12 +1577,14 @@ DWORD WINAPI FormatThread(void* param)
 	}
 	CHECK_FOR_USER_CANCEL;
 
-	PrintInfoDebug(0, MSG_226);
-	AnalyzeMBR(hPhysicalDrive, "Drive");
-	if ((hLogicalVolume != NULL) && (hLogicalVolume != INVALID_HANDLE_VALUE)) {
-		AnalyzePBR(hLogicalVolume);
+	if (!zero_drive) {
+		PrintInfoDebug(0, MSG_226);
+		AnalyzeMBR(hPhysicalDrive, "Drive");
+		if ((hLogicalVolume != NULL) && (hLogicalVolume != INVALID_HANDLE_VALUE)) {
+			AnalyzePBR(hLogicalVolume);
+		}
+		UpdateProgress(OP_ANALYZE_MBR, -1.0f);
 	}
-	UpdateProgress(OP_ANALYZE_MBR, -1.0f);
 
 	// Zap any existing partitions. This helps prevent access errors.
 	// As this creates issues with FAT16 formatted MS drives, only do this for other filesystems
@@ -1591,9 +1593,61 @@ DWORD WINAPI FormatThread(void* param)
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_PARTITION_FAILURE;
 		goto out;
 	}
-
 	CreateThread(NULL, 0, CloseFormatPromptThread, NULL, 0, NULL);
-	if (IsChecked(IDC_BADBLOCKS)) {
+
+	// TODO: factorize this with DD write?
+	if (zero_drive) {
+		li.QuadPart = 0;
+		SetFilePointerEx(hPhysicalDrive, li, NULL, FILE_BEGIN);
+		uprintf("Zeroing drive...");
+		// Our buffer size must be a multiple of the sector size
+		BufSize = ((DD_BUFFER_SIZE + SectorSize - 1) / SectorSize) * SectorSize;
+		buffer = (uint8_t*)calloc(BufSize + SectorSize, 1);	// +1 sector for align
+		if (buffer == NULL) {
+			FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_NOT_ENOUGH_MEMORY;
+			uprintf("could not allocate zeroing buffer");
+			goto out;
+		}
+		// http://msdn.microsoft.com/en-us/library/windows/desktop/aa365747.aspx does buffer sector alignment
+		aligned_buffer = ((void *)((((uintptr_t)(buffer)) + (SectorSize)-1) & (~(((uintptr_t)(SectorSize)) - 1))));
+		for (wb = 0, wSize = 0; wb < (uint64_t)SelectedDrive.DiskSize; wb += wSize) {
+			if (GetTickCount() > LastRefresh + 25) {
+				LastRefresh = GetTickCount();
+				format_percent = (100.0f*wb) / (1.0f*SelectedDrive.DiskSize);
+				PrintInfo(0, MSG_286, format_percent);
+				UpdateProgress(OP_FORMAT, format_percent);
+			}
+			// Don't overflow our projected size
+			if (wb + BufSize > (uint64_t)SelectedDrive.DiskSize) {
+				BufSize = (DWORD)(SelectedDrive.DiskSize - wb);
+			}
+			// WriteFile fails unless the size is a multiple of sector size
+			if (BufSize % SectorSize != 0)
+				BufSize = ((BufSize + SectorSize - 1) / SectorSize) * SectorSize;
+			for (i = 0; i < WRITE_RETRIES; i++) {
+				CHECK_FOR_USER_CANCEL;
+				s = WriteFile(hPhysicalDrive, aligned_buffer, BufSize, &wSize, NULL);
+				if ((s) && (wSize == BufSize))
+					break;
+				if (s)
+					uprintf("write error: Wrote %d bytes, expected %d bytes\n", wSize, BufSize);
+				else
+					uprintf("write error: %s", WindowsErrorString());
+				if (i < WRITE_RETRIES - 1) {
+					li.QuadPart = wb;
+					SetFilePointerEx(hPhysicalDrive, li, NULL, FILE_BEGIN);
+					uprintf("  RETRYING...\n");
+				}
+				else {
+					FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_WRITE_FAULT;
+					goto out;
+				}
+			}
+			if (i >= WRITE_RETRIES) goto out;
+		}
+		RefreshDriveLayout(hPhysicalDrive);
+		goto out;
+	} else if (IsChecked(IDC_BADBLOCKS)) {
 		do {
 			// create a log file for bad blocks report. Since %USERPROFILE% may
 			// have localized characters, we use the UTF-8 API.
@@ -1717,7 +1771,7 @@ DWORD WINAPI FormatThread(void* param)
 				// WriteFile fails unless the size is a multiple of sector size
 				if (rSize % SectorSize != 0)
 					rSize = ((rSize + SectorSize -1) / SectorSize) * SectorSize;
-				for (i=0; i<WRITE_RETRIES; i++) {
+				for (i=0; i < WRITE_RETRIES; i++) {
 					CHECK_FOR_USER_CANCEL;
 					s = WriteFile(hPhysicalDrive, aligned_buffer, rSize, &wSize, NULL);
 					if ((s) && (wSize == rSize))
@@ -1954,6 +2008,7 @@ DWORD WINAPI FormatThread(void* param)
 	}
 
 out:
+	zero_drive = FALSE;
 	safe_free(guid_volume);
 	safe_free(buffer);
 	safe_closehandle(hSourceImage);

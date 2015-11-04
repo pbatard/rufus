@@ -545,6 +545,7 @@ t MSG_283 "Invalid signature"
 t MSG_284 "The downloaded executable is missing a digital signature."
 t MSG_285 "The downloaded executable is signed by '%s'.\nThis is not a signature we recognize and could "
 	"indicate some form of malicious activity...\nAre you sure you want to run this file?"
+t MSG_286 "Zeroing drive: %0.1f%% completed"
 
 ################################################################################
 ############################# TRANSLATOR END COPY ##############################

@@ -141,6 +141,7 @@ BOOL use_own_c32[NB_OLD_C32] = {FALSE, FALSE}, mbr_selected_by_user = FALSE, tog
 BOOL iso_op_in_progress = FALSE, format_op_in_progress = FALSE, right_to_left_mode = FALSE;
 BOOL enable_HDDs = FALSE, force_update = FALSE, enable_ntfs_compression = FALSE, no_confirmation_on_cancel = FALSE, lock_drive = TRUE;
 BOOL advanced_mode, allow_dual_uefi_bios, detect_fakes, enable_vmdk, force_large_fat32, usb_debug, use_fake_units, preserve_timestamps;
+BOOL zero_drive = FALSE;
 int dialog_showing = 0, lang_button_id = 0;
 uint16_t rufus_version[3], embedded_sl_version[2];
 char embedded_sl_version_str[2][12] = { "?.??", "?.??" };
@@ -2514,7 +2515,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				// Disable all controls except cancel
 				EnableControls(FALSE);
 				DeviceNum = (DWORD)ComboBox_GetItemData(hDeviceList, nDeviceIndex);
-				InitProgress(FALSE);
+				InitProgress(zero_drive);
 				format_thid = CreateThread(NULL, 0, FormatThread, (LPVOID)(uintptr_t)DeviceNum, 0, NULL);
 				if (format_thid == NULL) {
 					uprintf("Unable to start formatting thread");
@@ -3172,6 +3173,12 @@ relaunch:
 			PrintStatus(2000, MSG_264, tmp_path);
 			SHDeleteDirectoryExU(NULL, tmp_path, FOF_SILENT | FOF_NOERRORUI | FOF_NOCONFIRMATION);
 			continue;
+		}
+		// Alt-Z => Zero the drive
+		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'Z')) {
+			zero_drive = TRUE;
+			// Simulate a button click for Start
+			PostMessage(hDlg, WM_COMMAND, (WPARAM)IDC_START, 0);
 		}
 
 		// Let the system handle dialog messages (e.g. those from the tab key)
