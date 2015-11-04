@@ -9070,7 +9070,7 @@ t MSG_285 "Ielādētais izpildfails parakstīts kā '%s'.\nTas ir neatpazīts pa
 
 ################################################################################
 l "lt-LT" "Lithuanian (Lietuvių)" 0x0427
-v 1.0.17
+v 1.0.19
 b "en-US"
 
 # Main dialog
@@ -9257,9 +9257,8 @@ t MSG_080 "Rufus aptiko, kad Windows vis dar išvalo savo vidinius buferius į U
 	"Priklausomai nuo jūsų USB įrenginio spartos, šis veiksmas gali užtrukti ilgai, "
 	"ypač su dideliais failais.\n\nMes patariame jums leisti Windows pabaigti, kad išvengtumėte iškraipymų. "
 	"Bet jei jums nusibos laukti, galite tiesiog ištraukti įrenginį..."
-t MSG_081 "Nepalaikomas ISO"
-t MSG_082 "Ši Rufus versija palaiko tik įkelties ISO, naudojančius bootmgr, EFI, Grub4DOS, GRUB 2, isolinux ar WinPE.\n"
-	"Šis ISO, atrodo, nenaudoja nė vieno..."
+t MSG_081 "Nepalaikomas atvaizdas"
+t MSG_082 "Arba šis atvaizdas yra ne įkelties, arba jis naudoja įkelties ar glaudinimo metodą, kurio nepalaiko Rufus..."
 t MSG_083 "Pakeisti %s?"
 t MSG_084 "Atrodo, šis ISO atvaizdas naudoja pasenusią '%s' versiją.\n"
 	"Įkelties meniu dėl to gali būti vaizduojamas blogai.\n\n"
@@ -9305,8 +9304,8 @@ t MSG_102 "Jūsų platforma negali išskleisti failų iš WIM archyvų. WIM išs
 	"įdiegdami dabartinę 7-Zip versiją.\nAr norite apsilankyti 7-zip atsisiuntimo puslapyje?"
 t MSG_103 "Atsiųsti %s?"
 t MSG_104 "%s ar vėlesniam reikia, kad '%s' failas būtų įdiegtas.\n"
-	"Kadangi šis failas didesnis nei 100 KB ir yra visada įtrauktas į %s ISO atvaizdus, "
-	"jis nėra įterptas į Rufus.\n\nRufus gali jums atsiųsti trūkstamą failą:\n"
+	"Kadangi šis failas didesnis nei 100 KB ir visada yra %s ISO atvaizduose, "
+	"jis nėra įtrauktas į Rufus.\n\nRufus gali jums atsiųsti trūkstamą failą:\n"
 	"- Pasirinkite 'Taip' norėdami prisijungti prie interneto ir atsisiųsti failą\n"
 	"- Pasirinkite 'Ne' norėdami rankiniu būdu nukopijuoti šį failą į diską vėliau\n\n"
 	"Pastaba: Failas bus atsiųstas į dabartinį katalogą ir kai "
@@ -9441,7 +9440,7 @@ t MSG_216 "Išsaugotas %s"
 # Formatting status (make sure you use a double % to print the percent sign)
 t MSG_217 "Formatuojama: %0.1f%% baigta"
 t MSG_218 "Kuriama failų sistema: Užduotis %d/%d atlikta"
-t MSG_219 "NTFS tvarkymas: %d%% baigta"
+t MSG_219 "NTFS taisymas: %d%% baigta"
 # Parameter: the file system and an estimated duration in mins and secs.
 # eg. "Formatting (UDF) - Estimated duration 3:21..."
 # NB: if "estimated duration" is too long, just use "estimated" or an abbreviation
@@ -9449,7 +9448,7 @@ t MSG_220 "Formatuojama (%s) - numatoma trukmė %d:%02d..."
 t MSG_221 "Rašoma žymė (gali užtrukti)..."
 # Parameter: the file system. eg. "Formatting (NTFS)..."
 t MSG_222 "Formatuojama (%s)..."
-t MSG_223 "NTFS tvarkymas (disko tikrinimas)..."
+t MSG_223 "NTFS taisymas (disko tikrinimas)..."
 t MSG_224 "Išvalomos MBR/PBR/GPT struktūros..."
 t MSG_225 "Užsakoma disko prieiga..."
 t MSG_226 "Tiriami esami įkelties įrašai..."
@@ -9500,6 +9499,35 @@ t MSG_265 "VMWare disko aptikimas"
 t MSG_266 "Dvigubas UEFI/BIOS režimas"
 t MSG_267 "Taikomas Windows atvaizdas: %0.1f%% baigta"
 t MSG_268 "Taikomas Windows atvaizdas..."
+t MSG_269 "Išsaugoti laiko žymas"
+t MSG_270 "USB derinimas"
+t MSG_271 "Skaičiuojamos atvaizdo kontrolinės sumos: %0.1f%% baigta"
+t MSG_272 "Skaičiuoti MD5, SHA1 ir SHA256 kontrolines sumas pasirinktam atvaizdui"
+t MSG_273 "Keisti programos kalbą"
+t MSG_274 "Aptiktas ISOHybrid atvaizdas"
+# '%s' below will be replaced with your translations for MSG_036 ("ISO Image") and MSG_095 ("DD Image")
+t MSG_275 "Jūsų pasirinktas atvaizdas yra 'ISOHybrid' atvaizdas. Tai reiškia, kad jis gali būti įrašytas "
+	"%s (failų kopijavimo) režimu arba %s (disko atvaizdo) režimu.\n"
+	"Rufus rekomenduoja naudoti režimą %s, tam, kad jūs visada turėtumėte visišką prieigą prie disko po įrašymo.\n"
+	"Tačiau, jei susiduriate su problemomis įkelties metu, galite pabandyti įrašyti šį atvaizdą iš naujo režimu %s.\n\n"
+	"Prašome pasirinkti režimą, kuriuo norite įrašyti šį atvaizdą:"
+# '%s' below will be replaced with your translation for MSG_036 ("ISO Image")
+t MSG_276 "Įrašyti režimu %s (rekomenduojama)"
+# '%s' below will be replaced with your translation for MSG_095 ("DD Image")
+t MSG_277 "Įrašyti režimu %s"
+# The following will be used for new controls of the Rufus 3.0 interface
+# They are added as messages, so that I will have them available when needed.
+# 278 & 280 will be dropdown titles, similar to how IDS_DEVICE_TXT or IDS_PARTITION_TYPE_TXT are used
+# 279 & 281 will be items that can appear in the dropdowns
+t MSG_278 "Įkelties tipas"
+t MSG_279 "Neįkeliamas"
+t MSG_280 "Atvaizdo parinktis"
+t MSG_281 "(Prašau pasirinkti atvaizdą)"
+t MSG_282 "Išimtinis USB disko užrakinimas"
+t MSG_283 "Negaliojantis parašas"
+t MSG_284 "Atsiųstas vykdomasis failas neturi skaitmeninio parašo."
+t MSG_285 "Atsiųstą vykdomąjį failą pasirašė '%s'.\nŠio parašo mes neatpažįstame ir tai gali "
+	"būti tam tikros kenkėjiškos veiklos požymis...\nAr jūs tikrai norite vykdyti šį failą?"
 
 ################################################################################
 l "ms-MY" "Malay (Bahasa Malaysia)" 0x043e, 0x083e
