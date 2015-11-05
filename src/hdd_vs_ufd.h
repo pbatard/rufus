@@ -3,12 +3,12 @@
  * SMART HDD vs Flash detection - isHDD() tables
  * Copyright © 2013-2014 Pete Batard <pete@akeo.ie>
  *
- * Based in part on drivedb.h from Smartmontools: 
+ * Based in part on drivedb.h from Smartmontools:
  * http://svn.code.sf.net/p/smartmontools/code/trunk/smartmontools/drivedb.h
  * Copyright © 2003-11 Philip Williams, Bruce Allen
  * Copyright © 2008-13 Christian Franke <smartmontools-support@lists.sourceforge.net>
  *
- * Also based on entries listed in the identification flash database 
+ * Also based on entries listed in the identification flash database
  * (http://flashboot.ru/iflash/saved/) as well as the Linux USB IDs
  * (http://www.linux-usb.org/usb.ids)
  *
@@ -215,7 +215,7 @@ static vidpid_score_t vidpid_score[] = {
 	{ 0x18a5, 0x0237, 10 },		// Verbatim Portable Hard Drive (500 GB)
 	// SunPlus seem to have a bunch of UFDs
 	{ 0x1bcf, 0x0c31, 10 },		// SunplusIT
-	// Plenty of Innostor UFDs 
+	// Plenty of Innostor UFDs
 	{ 0x1f75, 0x0888, 10 },		// Innostor IS888
 	// NOT in VID list as plenty of UFDs
 	{ 0x3538, 0x0902, 10 },		// PQI H560
@@ -265,6 +265,8 @@ static vidpid_score_t vidpid_score[] = {
 	{ 0x0930, 0x653e, -20 },
 	{ 0x0930, 0x6544, -20 },
 	{ 0x0930, 0x6545, -20 },
+	// Innostor exceptions
+	{ 0x0BC2, 0x03312, -20 },
 	// Verbatim exceptions
 	{ 0x18a5, 0x0243, -20 },
 	{ 0x18a5, 0x0245, -20 },

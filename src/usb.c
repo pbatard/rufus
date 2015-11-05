@@ -136,9 +136,9 @@ static __inline BOOL IsVHD(const char* buffer)
 /* For debugging user reports of HDDs vs UFDs */
 //#define FORCED_DEVICE
 #ifdef FORCED_DEVICE
-#define FORCED_VID 0x125F
-#define FORCED_PID 0xA11A
-#define FORCED_NAME "ABATA CH11 USB Device"
+#define FORCED_VID 0x0BC2
+#define FORCED_PID 0x3312
+#define FORCED_NAME "Innostor Innostor USB Device"
 #endif
 
 /*
@@ -194,8 +194,8 @@ BOOL GetUSBDevices(DWORD devnum)
 				devint_data.cbSize = sizeof(devint_data);
 				// Only care about the first interface (MemberIndex 0)
 				if ( (SetupDiEnumDeviceInterfaces(dev_info, &dev_info_data, &_GUID_DEVINTERFACE_USB_HUB, 0, &devint_data))
-				  && (!SetupDiGetDeviceInterfaceDetailA(dev_info, &devint_data, NULL, 0, &size, NULL)) 
-				  && (GetLastError() == ERROR_INSUFFICIENT_BUFFER) 
+				  && (!SetupDiGetDeviceInterfaceDetailA(dev_info, &devint_data, NULL, 0, &size, NULL))
+				  && (GetLastError() == ERROR_INSUFFICIENT_BUFFER)
 				  && ((devint_detail_data = (PSP_DEVICE_INTERFACE_DETAIL_DATA_A)calloc(1, size)) != NULL) ) {
 					devint_detail_data->cbSize = sizeof(SP_DEVICE_INTERFACE_DETAIL_DATA_A);
 					if (SetupDiGetDeviceInterfaceDetailA(dev_info, &devint_data, devint_detail_data, size, &size, NULL)) {
@@ -381,7 +381,7 @@ BOOL GetUSBDevices(DWORD devnum)
 			}
 			if (props.speed >= USB_SPEED_MAX)
 				props.speed = 0;
-			uprintf("Found %s%s%s device '%s' (%s) %s\n", props.is_UASP?"UAS (":"", 
+			uprintf("Found %s%s%s device '%s' (%s) %s\n", props.is_UASP?"UAS (":"",
 				usb_speed_name[props.speed], props.is_UASP?")":"", buffer, str, method_str);
 			if (props.is_LowerSpeed)
 				uprintf("NOTE: This device is an USB 3.0 device operating at lower speed...");
