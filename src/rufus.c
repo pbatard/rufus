@@ -3065,7 +3065,7 @@ relaunch:
 		// Alt-E => Enhanced installation mode (allow dual UEFI/BIOS mode and FAT32 for Windows)
 		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'E')) {
 			allow_dual_uefi_bios = !allow_dual_uefi_bios;
-			WriteSettingBool(SETTING_ENABLE_WIN_DUAL_EFI_BIOS, !allow_dual_uefi_bios);
+			WriteSettingBool(SETTING_ENABLE_WIN_DUAL_EFI_BIOS, allow_dual_uefi_bios);
 			PrintStatus2000(lmprintf(MSG_266), allow_dual_uefi_bios);
 			SetMBRForUEFI(TRUE);
 			continue;

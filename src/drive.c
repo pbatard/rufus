@@ -39,7 +39,7 @@
 #include "localization.h"
 
 #if !defined(PARTITION_BASIC_DATA_GUID)
-const GUID PARTITION_BASIC_DATA_GUID = 
+const GUID PARTITION_BASIC_DATA_GUID =
 	{ 0xebd0a0a2L, 0xb9e5, 0x4433, {0x87, 0xc0, 0x68, 0xb6, 0xb7, 0x26, 0x99, 0xc7} };
 #endif
 #if !defined(PARTITION_MSFT_RESERVED_GUID)
@@ -63,7 +63,7 @@ size_t uefi_ntfs_size = 0;
  * See https://github.com/pbatard/rufus/issues/386.
  *
  * Reverse engineering diskpart and mountvol indicates that the former uses the IVdsService
- * ClearFlags()/SetFlags() to set VDS_SVF_AUTO_MOUNT_OFF whereas mountvol on uses 
+ * ClearFlags()/SetFlags() to set VDS_SVF_AUTO_MOUNT_OFF whereas mountvol on uses
  * IOCTL_MOUNTMGR_SET_AUTO_MOUNT on "\\\\.\\MountPointManager".
  * As the latter is MUCH simpler this is what we'll use too
  */
@@ -156,7 +156,7 @@ out:
 	return hDrive;
 }
 
-/* 
+/*
  * Return the path to access the physical drive, or NULL on error.
  * The string is allocated and must be freed (to ensure concurrent access)
  */
@@ -172,7 +172,7 @@ out:
 	return (success)?safe_strdup(physical_name):NULL;
 }
 
-/* 
+/*
  * Return a handle to the physical drive identified by DriveIndex
  */
 HANDLE GetPhysicalHandle(DWORD DriveIndex, BOOL bWriteAccess, BOOL bLockDrive)
@@ -295,7 +295,7 @@ BOOL WaitForLogical(DWORD DriveIndex)
 	return FALSE;
 }
 
-/* 
+/*
  * Obtain a handle to the first logical volume on the disk identified by DriveIndex
  * Returns INVALID_HANDLE_VALUE on error or NULL if no logical path exists (typical
  * of unpartitioned drives)
@@ -707,7 +707,7 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 	suprintf("Cylinders: %" PRIi64 ", TracksPerCylinder: %d, SectorsPerTrack: %d\n",
 		DiskGeometry->Geometry.Cylinders, DiskGeometry->Geometry.TracksPerCylinder, DiskGeometry->Geometry.SectorsPerTrack);
 
-	r = DeviceIoControl(hPhysical, IOCTL_DISK_GET_DRIVE_LAYOUT_EX, 
+	r = DeviceIoControl(hPhysical, IOCTL_DISK_GET_DRIVE_LAYOUT_EX,
 			NULL, 0, layout, sizeof(layout), &size, NULL );
 	if (!r || size <= 0) {
 		suprintf("Could not get layout for drive 0x%02x: %s\n", DriveIndex, WindowsErrorString());
@@ -941,7 +941,7 @@ char* AltMountVolume(const char* drive_name, uint8_t part_nr)
 		uprintf("Could not find partition mapping for %s", target[0]);
 		goto out;
 	}
-	
+
 	while ((--i > 0) && (isdigit(p[i])));
 	p[++i] = '0' + part_nr;
 	p[++i] = 0;

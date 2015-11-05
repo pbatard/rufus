@@ -1647,7 +1647,9 @@ DWORD WINAPI FormatThread(void* param)
 		}
 		RefreshDriveLayout(hPhysicalDrive);
 		goto out;
-	} else if (IsChecked(IDC_BADBLOCKS)) {
+	}
+
+	if (IsChecked(IDC_BADBLOCKS)) {
 		do {
 			// create a log file for bad blocks report. Since %USERPROFILE% may
 			// have localized characters, we use the UTF-8 API.
