@@ -15344,7 +15344,7 @@ t MSG_180 "Om du väljer att tillåta detta program att leta efter uppdateringar
 t MSG_181 "Information om ditt operativsystem och version"
 t MSG_182 "Version på programmet du använder"
 t MSG_183 "Din IP-adress"
-t MSG_184 "För att kunna skapa användarstatestik, kommer vi att spara informationen, "
+t MSG_184 "För att kunna skapa användningsstatistik, kommer vi att spara informationen, "
 	"\\b i högst ett år\\b0 . Vi kommer dock behålla informationen för oss själva."
 t MSG_185 "Uppdateringsprocess:"
 t MSG_186 "Rufus installerar inga bakgrundsprogram, därför sker endast uppdateringskontrollen när det körs.\\line\n"
