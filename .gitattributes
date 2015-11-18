@@ -3,6 +3,7 @@
 *.am            eol=lf
 *.in            eol=lf
 *.m4            eol=lf
+missing         eol=lf
 configure       eol=lf
 install-sh      eol=lf
 *.sln           eol=crlf
