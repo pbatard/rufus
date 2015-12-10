@@ -2459,39 +2459,41 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			selection_default = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
 			nDeviceIndex = ComboBox_GetCurSel(hDeviceList);
 			if (nDeviceIndex != CB_ERR) {
-				if ((IsChecked(IDC_BOOT)) && (!BootCheck())) {
-					format_op_in_progress = FALSE;
-					break;
-				}
-
-				// Display a warning about UDF formatting times
-				fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
-				if (fs == FS_UDF) {
-					dur_secs = (uint32_t)(((double)SelectedDrive.DiskSize)/1073741824.0f/UDF_FORMAT_SPEED);
-					if (dur_secs > UDF_FORMAT_WARN) {
-						dur_mins = dur_secs/60;
-						dur_secs -= dur_mins*60;
-						MessageBoxExU(hMainDialog, lmprintf(MSG_112, dur_mins, dur_secs), lmprintf(MSG_113),
-							MB_OK|MB_ICONASTERISK|MB_IS_RTL, selected_langid);
-					} else {
-						dur_secs = 0;
-						dur_mins = 0;
-					}
-				}
-
-				// Ask users how they want to write ISOHybrid images
-				if ((IsChecked(IDC_BOOT)) && (img_report.is_bootable_img) &&
-					(ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType)) == BT_ISO)) {
-					char* iso_image = lmprintf(MSG_036);
-					char* dd_image = lmprintf(MSG_095);
-					i = Selection(lmprintf(MSG_274), lmprintf(MSG_275, iso_image, dd_image, iso_image, dd_image),
-						lmprintf(MSG_276, iso_image), lmprintf(MSG_277, dd_image));
-					if (i < 0) {	// Cancel
+				if (!zero_drive) {
+					if ((IsChecked(IDC_BOOT)) && (!BootCheck())) {
 						format_op_in_progress = FALSE;
 						break;
-					} else if (i == 2) {
-						selection_default = BT_IMG;
-						SetComboEntry(hBootType, selection_default);
+					}
+
+					// Display a warning about UDF formatting times
+					fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
+					if (fs == FS_UDF) {
+						dur_secs = (uint32_t)(((double)SelectedDrive.DiskSize) / 1073741824.0f / UDF_FORMAT_SPEED);
+						if (dur_secs > UDF_FORMAT_WARN) {
+							dur_mins = dur_secs / 60;
+							dur_secs -= dur_mins * 60;
+							MessageBoxExU(hMainDialog, lmprintf(MSG_112, dur_mins, dur_secs), lmprintf(MSG_113),
+								MB_OK | MB_ICONASTERISK | MB_IS_RTL, selected_langid);
+						} else {
+							dur_secs = 0;
+							dur_mins = 0;
+						}
+					}
+
+					// Ask users how they want to write ISOHybrid images
+					if ((IsChecked(IDC_BOOT)) && (img_report.is_bootable_img) &&
+						(ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType)) == BT_ISO)) {
+						char* iso_image = lmprintf(MSG_036);
+						char* dd_image = lmprintf(MSG_095);
+						i = Selection(lmprintf(MSG_274), lmprintf(MSG_275, iso_image, dd_image, iso_image, dd_image),
+							lmprintf(MSG_276, iso_image), lmprintf(MSG_277, dd_image));
+						if (i < 0) {	// Cancel
+							format_op_in_progress = FALSE;
+							break;
+						} else if (i == 2) {
+							selection_default = BT_IMG;
+							SetComboEntry(hBootType, selection_default);
+						}
 					}
 				}
 
@@ -2506,7 +2508,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 					format_op_in_progress = FALSE;
 					break;
 				}
-				if ((IsChecked(IDC_BOOT)) && (SelectedDrive.Geometry.BytesPerSector != 512) &&
+				if ((!zero_drive) && (IsChecked(IDC_BOOT)) && (SelectedDrive.Geometry.BytesPerSector != 512) &&
 					(MessageBoxExU(hMainDialog, lmprintf(MSG_196, SelectedDrive.Geometry.BytesPerSector),
 						lmprintf(MSG_197), MB_OKCANCEL|MB_ICONWARNING|MB_IS_RTL, selected_langid) == IDCANCEL)) {
 					format_op_in_progress = FALSE;
