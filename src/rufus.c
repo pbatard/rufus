@@ -2501,11 +2501,13 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				if (MessageBoxExU(hMainDialog, lmprintf(MSG_003, tmp),
 					APPLICATION_NAME, MB_OKCANCEL|MB_ICONWARNING|MB_IS_RTL, selected_langid) == IDCANCEL) {
 					format_op_in_progress = FALSE;
+					zero_drive = FALSE;
 					break;
 				}
 				if ((SelectedDrive.nPartitions > 1) && (MessageBoxExU(hMainDialog, lmprintf(MSG_093),
 					lmprintf(MSG_094), MB_OKCANCEL|MB_ICONWARNING|MB_IS_RTL, selected_langid) == IDCANCEL)) {
 					format_op_in_progress = FALSE;
+					zero_drive = FALSE;
 					break;
 				}
 				if ((!zero_drive) && (IsChecked(IDC_BOOT)) && (SelectedDrive.Geometry.BytesPerSector != 512) &&
@@ -2532,8 +2534,10 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				SendMessageA(hStatus, SB_SETTEXTA, SBT_OWNERDRAW | SB_SECTION_RIGHT, (LPARAM)szTimer);
 				SetTimer(hMainDialog, TID_APP_TIMER, 1000, ClockTimer);
 			}
-			if (format_thid == NULL)
+			if (format_thid == NULL) {
 				format_op_in_progress = FALSE;
+				zero_drive = FALSE;
+			}
 			break;
 		case IDC_HASH:
 			if ((format_thid == NULL) && (image_path != NULL)) {
