@@ -1,4 +1,4 @@
-o Version 2.6 (2015.12.??)
+o Version 2.6 (2015.12.22)
     Add Serbian (Latin) translation, courtesy of Ivan Strugar
     Add a cheat mode to zero a device (Alt-Z)
     Fix dual BIOS/UEFI mode not being disabled once enabled (Alt-E)
