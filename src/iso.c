@@ -690,7 +690,7 @@ BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan)
 		iso_blocking_status = 0;
 	}
 
-	/* First try to open as UDF - fallback to ISO if it failed */
+	// First try to open as UDF - fallback to ISO if it failed
 	p_udf = udf_open(src_iso);
 	if (p_udf == NULL)
 		goto try_iso;
@@ -933,7 +933,7 @@ int64_t ExtractISOFile(const char* iso, const char* iso_file, const char* dest_f
 		goto out;
 	}
 
-	/* First try to open as UDF - fallback to ISO if it failed */
+	// First try to open as UDF - fallback to ISO if it failed
 	p_udf = udf_open(iso);
 	if (p_udf == NULL)
 		goto try_iso;
@@ -1024,10 +1024,14 @@ uint32_t GetInstallWimVersion(const char* iso)
 	iso9660_stat_t *p_statbuf = NULL;
 
 	wim_path = safe_strdup(&img_report.install_wim_path[2]);
-	for (p = wim_path; p != 0; p++)
+	if (wim_path == NULL)
+		goto out;
+	// UDF indiscriminately accepts slash or backslash delimiters,
+	// but ISO-9660 requires slash
+	for (p = wim_path; *p != 0; p++)
 		if (*p == '\\') *p = '/';
 
-	/* First try to open as UDF - fallback to ISO if it failed */
+	// First try to open as UDF - fallback to ISO if it failed
 	p_udf = udf_open(iso);
 	if (p_udf == NULL)
 		goto try_iso;
