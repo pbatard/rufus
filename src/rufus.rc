@@ -32,7 +32,7 @@ LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
 
 IDD_DIALOG DIALOGEX 12, 12, 242, 376
 STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_MINIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Rufus 2.6.819"
+CAPTION "Rufus 2.7.820"
 FONT 8, "Segoe UI Symbol", 400, 0, 0x0
 BEGIN
     LTEXT           "Device",IDS_DEVICE_TXT,9,6,200,8
@@ -86,7 +86,7 @@ BEGIN
     DEFPUSHBUTTON   "OK",IDOK,251,215,50,14,WS_GROUP
 END
 
-IDD_CHECKSUM DIALOGEX 0, 0, 301, 67
+IDD_CHECKSUM DIALOGEX 0, 0, 301, 70
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Checksums"
 FONT 8, "Segoe UI Symbol", 400, 0, 0x0
@@ -96,8 +96,8 @@ BEGIN
     LTEXT           "SHA1:",IDC_STATIC,9,26,20,8
     EDITTEXT        IDC_SHA1,40,25,197,12,ES_LOWERCASE | ES_AUTOHSCROLL | ES_READONLY
     LTEXT           "SHA256:",IDC_STATIC,9,42,27,8
-    EDITTEXT        IDC_SHA256,40,41,197,19,ES_MULTILINE | ES_LOWERCASE | ES_READONLY
-    DEFPUSHBUTTON   "OK",IDOK,243,46,50,14,WS_GROUP
+    EDITTEXT        IDC_SHA256,40,41,197,22,ES_MULTILINE | ES_LOWERCASE | ES_READONLY
+    DEFPUSHBUTTON   "OK",IDOK,243,49,50,14,WS_GROUP
 END
 
 IDD_LICENSE DIALOGEX 0, 0, 335, 205
@@ -319,8 +319,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 2,6,819,0
- PRODUCTVERSION 2,6,819,0
+ FILEVERSION 2,7,820,0
+ PRODUCTVERSION 2,7,820,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -337,13 +337,13 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Akeo Consulting (http://akeo.ie)"
             VALUE "FileDescription", "Rufus"
-            VALUE "FileVersion", "2.6.819"
+            VALUE "FileVersion", "2.7.820"
             VALUE "InternalName", "Rufus"
             VALUE "LegalCopyright", "© 2011-2015 Pete Batard (GPL v3)"
             VALUE "LegalTrademarks", "http://www.gnu.org/copyleft/gpl.html"
             VALUE "OriginalFilename", "rufus.exe"
             VALUE "ProductName", "Rufus"
-            VALUE "ProductVersion", "2.6.819"
+            VALUE "ProductVersion", "2.7.820"
         END
     END
     BLOCK "VarFileInfo"
