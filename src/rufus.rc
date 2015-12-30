@@ -32,7 +32,7 @@ LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
 
 IDD_DIALOG DIALOGEX 12, 12, 242, 376
 STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_MINIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Rufus 2.7.820"
+CAPTION "Rufus 2.7.821"
 FONT 8, "Segoe UI Symbol", 400, 0, 0x0
 BEGIN
     LTEXT           "Device",IDS_DEVICE_TXT,9,6,200,8
@@ -58,12 +58,12 @@ BEGIN
     CONTROL         "Windows To Go",IDC_WINDOWS_TO_GO,"Button",BS_AUTORADIOBUTTON,23,210,205,8
     CONTROL         "Create extended label and icon files",IDC_SET_ICON,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,221,216,10
-    GROUPBOX        "Advanced Options",IDS_ADVANCED_OPTIONS_GRP,7,234,227,55
-    CONTROL         "List USB Hard Drives",IDC_ENABLE_FIXED_DISKS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,247,216,10
+    GROUPBOX        "Advanced Options",IDS_ADVANCED_OPTIONS_GRP,7,233,227,55
+    CONTROL         "List USB Hard Drives",IDC_ENABLE_FIXED_DISKS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,246,216,10
     CONTROL         "Add fixes for old BIOSes (extra partition, align, etc.)",IDC_EXTRA_PARTITION,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,259,216,10
-    CONTROL         "Use Rufus MBR with BIOS ID",IDC_RUFUS_MBR,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,272,112,10
-    COMBOBOX        IDC_DISK_ID,128,270,100,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,258,216,10
+    CONTROL         "Use Rufus MBR with BIOS ID",IDC_RUFUS_MBR,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,271,112,10
+    COMBOBOX        IDC_DISK_ID,128,269,100,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     CONTROL         "",IDC_PROGRESS,"msctls_progress32",PBS_SMOOTH | WS_BORDER,8,298,225,9
     EDITTEXT        IDC_INFO,8,316,225,12,ES_CENTER | ES_READONLY | NOT WS_BORDER,WS_EX_STATICEDGE
     PUSHBUTTON      "About...",IDC_ABOUT,8,339,50,14
@@ -319,8 +319,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 2,7,820,0
- PRODUCTVERSION 2,7,820,0
+ FILEVERSION 2,7,821,0
+ PRODUCTVERSION 2,7,821,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -337,13 +337,13 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Akeo Consulting (http://akeo.ie)"
             VALUE "FileDescription", "Rufus"
-            VALUE "FileVersion", "2.7.820"
+            VALUE "FileVersion", "2.7.821"
             VALUE "InternalName", "Rufus"
             VALUE "LegalCopyright", "© 2011-2015 Pete Batard (GPL v3)"
             VALUE "LegalTrademarks", "http://www.gnu.org/copyleft/gpl.html"
             VALUE "OriginalFilename", "rufus.exe"
             VALUE "ProductName", "Rufus"
-            VALUE "ProductVersion", "2.7.820"
+            VALUE "ProductVersion", "2.7.821"
         END
     END
     BLOCK "VarFileInfo"
@@ -361,8 +361,11 @@ END
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
 IDI_ICON                ICON                    "../res/rufus.ico"
+
 IDI_UP                  ICON                    "../res/up.ico"
+
 IDI_DOWN                ICON                    "../res/down.ico"
+
 #endif    // Neutral resources
 /////////////////////////////////////////////////////////////////////////////
 

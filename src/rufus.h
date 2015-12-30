@@ -456,6 +456,7 @@ extern BOOL AppendVHDFooter(const char* vhd_path);
 extern int IsHDD(DWORD DriveIndex, uint16_t vid, uint16_t pid, const char* strid);
 extern void LostTranslatorCheck(void);
 extern LONG ValidateSignature(HWND hDlg, const char* path);
+extern BOOL IsFontAvailable(const char* font_name);
 
 DWORD WINAPI FormatThread(void* param);
 DWORD WINAPI SaveImageThread(void* param);

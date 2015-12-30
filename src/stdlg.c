@@ -1662,6 +1662,16 @@ LPCDLGTEMPLATE GetDialogTemplate(int Dialog_ID)
 		dwBuf = (DWORD*)rcTemplate;
 		dwBuf[2] = WS_EX_RTLREADING | WS_EX_APPWINDOW | WS_EX_LAYOUTRTL;
 	}
+
+	// All our dialogs are set to use 'Segoe UI Symbol':
+	// 1. So that we can replace the font name with 'MS Shell Dlg' if needed (XP)
+	// 2. So that Thai displays properly on RTF controls (don't work with regular 'Segoe UI')
+
+	// If 'Segoe UI Symbol' is available, we're done here
+	if (IsFontAvailable("Segoe UI Symbol"))
+		return rcTemplate;
+
+	// 'Segoe UI Symbol' is not available => Fall back to the best we have
 	wBuf = (WCHAR*)rcTemplate;
 	wBuf = &wBuf[14];	// Move to class name
 	// Skip class name and title
@@ -1680,10 +1690,11 @@ LPCDLGTEMPLATE GetDialogTemplate(int Dialog_ID)
 		// We can't simply zero the characters we don't want, as the size of the font
 		// string determines the next item lookup. So we must memmove the remaining of
 		// our buffer. Oh, and those items are DWORD aligned.
-		if (nWindowsVersion <= WINDOWS_XP) {
-			wcscpy(wBuf, L"MS Shell Dlg");
-		} else {
+		if (IsFontAvailable("Segoe UI")) {
+			// 'Segoe UI Symbol' -> 'Segoe UI'
 			wBuf[8] = 0;
+		} else {
+			wcscpy(wBuf, L"MS Shell Dlg");
 		}
 		len = wcslen(wBuf);
 		wBuf[len + 1] = 0;
