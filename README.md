@@ -22,12 +22,12 @@ Features
 Compilation
 -----------
 
-Use either Visual Studio 2013, WDK 7.1 (Windows Driver Kit) or MinGW and then
+Use either Visual Studio 2015, WDK 7.1 (Windows Driver Kit) or MinGW and then
 invoke the `.sln`, `wdk_build.cmd` or `configure`/`make` respectively.
 
 #### Visual Studio
 Note that, since Rufus is an OSI compliant Open Source project, you are entitled to
-download and use the *freely available* [Visual Studio 2013 Community Edition]
+download and use the *freely available* [Visual Studio 2015 Community Edition]
 (http://www.visualstudio.com/products/visual-studio-community-vs) to
 build, run or develop for Rufus. As per the Visual Studio Community Edition license
 this applies regardless of whether you are an individual or a corporate user.
@@ -39,8 +39,8 @@ Additional information
 Rufus provides extensive information about what it is doing, either through
 its easily accessible log, or through the Windows debug facility.
 
-* Website: https://rufus.akeo.ie
-* FAQ: https://rufus.akeo.ie/FAQ
+* [Official Website](https://rufus.akeo.ie)
+* [FAQ](https://rufus.akeo.ie/FAQ)
 
 Enhancements/Bugs
 -----------------
