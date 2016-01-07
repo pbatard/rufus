@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Drive access function calls
- * Copyright © 2011-2015 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2016 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -576,10 +576,10 @@ const struct {int (*fn)(FILE *fp); char* str;} known_mbr[] = {
 	{ is_rufus_mbr, "Rufus" },
 	{ is_syslinux_mbr, "Syslinux" },
 	{ is_reactos_mbr, "ReactOS" },
-	{ is_kolibri_mbr, "KolibriOS" },
-	{ is_grub_mbr, "Grub4DOS" },
+	{ is_kolibrios_mbr, "KolibriOS" },
+	{ is_grub4dos_mbr, "Grub4DOS" },
 	{ is_grub2_mbr, "Grub 2.0" },
-	{ is_zero_mbr, "Zeroed" },
+	{ is_zero_mbr_not_including_disk_signature_or_copy_protect, "Zeroed" },
 };
 
 // Returns TRUE if the drive seems bootable, FALSE otherwise
@@ -591,10 +591,7 @@ BOOL AnalyzeMBR(HANDLE hPhysicalDrive, const char* TargetName)
 	int i;
 
 	fake_fd._handle = (char*)hPhysicalDrive;
-	fake_fd._sector_size = SelectedDrive.Geometry.BytesPerSector;
-	// Might need correction, as we use this method for images and we may not have a target UFD yet
-	if (fake_fd._sector_size < 512)
-		fake_fd._sector_size = 512;
+	set_bytes_per_sector(SelectedDrive.Geometry.BytesPerSector);
 
 	if (!is_br(fp)) {
 		uprintf("%s does not have an x86 %s\n", TargetName, mbr_name);
@@ -630,7 +627,7 @@ BOOL AnalyzePBR(HANDLE hLogicalVolume)
 	int i;
 
 	fake_fd._handle = (char*)hLogicalVolume;
-	fake_fd._sector_size = SelectedDrive.Geometry.BytesPerSector;
+	set_bytes_per_sector(SelectedDrive.Geometry.BytesPerSector);
 
 	if (!is_br(fp)) {
 		uprintf("Volume does not have an x86 %s\n", pbr_name);

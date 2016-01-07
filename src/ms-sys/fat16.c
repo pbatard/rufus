@@ -129,5 +129,5 @@ int write_fat_16_ros_br(FILE *fp, int bKeepLabel)
 	 ( write_data(fp, 0x0, br_fat16_0x0, sizeof(br_fat16_0x0)) &&
 	   /* BIOS Parameter Block should not be overwritten */
 	   write_data(fp, 0x2b, label_11_char, sizeof(label_11_char)) &&
-	   write_data(fp, 0x3e, br_fat16_0x3e, sizeof(br_fat16_0x3e)) );      
+	   write_data(fp, 0x3e, br_fat16_0x3e, sizeof(br_fat16_0x3e)) );
 } /* write_fat_16_ros_br */

@@ -2,7 +2,7 @@
  * Rufus: The Reliable USB Formatting Utility
  * Formatting function calls
  * Copyright © 2007-2009 Tom Thornhill/Ridgecrop
- * Copyright © 2011-2015 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2016 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -913,7 +913,7 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 	}
 
 	fake_fd._handle = (char*)hPhysicalDrive;
-	fake_fd._sector_size = SelectedDrive.Geometry.BytesPerSector;
+	set_bytes_per_sector(SelectedDrive.Geometry.BytesPerSector);
 
 	// What follows is really a case statement with complex conditions listed
 	// by order of preference
@@ -945,7 +945,7 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 	// Grub4DOS
 	if ( ((bt == BT_ISO) && (img_report.has_grub4dos)) || (bt == BT_GRUB4DOS) ) {
 		uprintf(using_msg, "Grub4DOS");
-		r = write_grub_mbr(fp);
+		r = write_grub4dos_mbr(fp);
 		goto notify;
 	}
 
@@ -959,7 +959,7 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 	// KolibriOS
 	if ( (bt == BT_ISO) && (img_report.has_kolibrios) && (IS_FAT(fs))) {
 		uprintf(using_msg, "KolibriOS");
-		r = write_kolibri_mbr(fp);
+		r = write_kolibrios_mbr(fp);
 		goto notify;
 	}
 
@@ -996,7 +996,7 @@ static BOOL WriteSBR(HANDLE hPhysicalDrive)
 	FILE* fp = (FILE*)&fake_fd;
 
 	fake_fd._handle = (char*)hPhysicalDrive;
-	fake_fd._sector_size = SelectedDrive.Geometry.BytesPerSector;
+	set_bytes_per_sector(SelectedDrive.Geometry.BytesPerSector);
 	// Ensure that we have sufficient space for the SBR
 	max_size = IsChecked(IDC_EXTRA_PARTITION) ?
 		(DWORD)(SelectedDrive.Geometry.BytesPerSector * SelectedDrive.Geometry.SectorsPerTrack) : 1024 * 1024;
@@ -1068,7 +1068,7 @@ static BOOL WritePBR(HANDLE hLogicalVolume)
 	const char* using_msg = "Using %s %s partition boot record\n";
 
 	fake_fd._handle = (char*)hLogicalVolume;
-	fake_fd._sector_size = SelectedDrive.Geometry.BytesPerSector;
+	set_bytes_per_sector(SelectedDrive.Geometry.BytesPerSector);
 
 	switch (ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem))) {
 	case FS_FAT16:

@@ -1,6 +1,6 @@
 /******************************************************************
     Copyright (C) 2009  Henrik Carlqvist
-    Modified for Rufus/Windows (C) 2011-2015  Pete Batard
+    Modified for Rufus/Windows (C) 2011-2016  Pete Batard
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -22,6 +22,8 @@
 
 #include "../rufus.h"
 #include "file.h"
+
+extern unsigned long ulBytesPerSector;
 
 /* Returns the number of bytes written or -1 on error */
 int64_t write_sectors(HANDLE hDrive, uint64_t SectorSize,
@@ -89,26 +91,37 @@ int64_t read_sectors(HANDLE hDrive, uint64_t SectorSize,
 }
 
 /*
- * The following calls use a hijacked fp on Windows that contains:
- * fp->_handle: a Windows handle
- * fp->_sector_size: the sector size
- * fp->_offset: a file offset
- */
+* The following calls use a hijacked fp on Windows that contains:
+* fp->_handle: a Windows handle
+* fp->_offset: a file offset
+*/
+
 int contains_data(FILE *fp, uint64_t Position,
-                  const void *pData, uint64_t Len)
+	const void *pData, uint64_t Len)
+{
+	unsigned char aucBuf[MAX_DATA_LEN];
+
+	if (!read_data(fp, Position, aucBuf, Len))
+		return 0;
+	if (memcmp(pData, aucBuf, (size_t)Len))
+		return 0;
+	return 1;
+} /* contains_data */
+
+int read_data(FILE *fp, uint64_t Position,
+              void *pData, uint64_t Len)
 {
    unsigned char aucBuf[MAX_DATA_LEN];
    FAKE_FD* fd = (FAKE_FD*)fp;
    HANDLE hDrive = (HANDLE)fd->_handle;
-   uint64_t SectorSize = (uint64_t)fd->_sector_size;
    uint64_t StartSector, EndSector, NumSectors;
    Position += fd->_offset;
 
-   StartSector = Position/SectorSize;
-   EndSector   = (Position+Len+SectorSize-1)/SectorSize;
+   StartSector = Position/ulBytesPerSector;
+   EndSector   = (Position+Len+ulBytesPerSector -1)/ulBytesPerSector;
    NumSectors  = (size_t)(EndSector - StartSector);
 
-   if((NumSectors*SectorSize) > MAX_DATA_LEN)
+   if((NumSectors*ulBytesPerSector) > MAX_DATA_LEN)
    {
       uprintf("contains_data: please increase MAX_DATA_LEN in file.h\n");
       return 0;
@@ -120,14 +133,13 @@ int contains_data(FILE *fp, uint64_t Position,
       return 0;
    }
 
-   if(read_sectors(hDrive, SectorSize, StartSector,
+   if(read_sectors(hDrive, ulBytesPerSector, StartSector,
                      NumSectors, aucBuf) <= 0)
       return 0;
 
-   if(memcmp(pData, &aucBuf[Position - StartSector*SectorSize], (size_t)Len))
-      return 0;
+   memcpy(pData, &aucBuf[Position - StartSector*ulBytesPerSector], (size_t)Len);
    return 1;
-} /* contains_data */
+}  /* read_data */
 
 /* May read/write the same sector many times, but compatible with existing ms-sys */
 int write_data(FILE *fp, uint64_t Position,
@@ -136,15 +148,14 @@ int write_data(FILE *fp, uint64_t Position,
    unsigned char aucBuf[MAX_DATA_LEN];
    FAKE_FD* fd = (FAKE_FD*)fp;
    HANDLE hDrive = (HANDLE)fd->_handle;
-   uint64_t SectorSize = (uint64_t)fd->_sector_size;
    uint64_t StartSector, EndSector, NumSectors;
    Position += fd->_offset;
 
-   StartSector = Position/SectorSize;
-   EndSector   = (Position+Len+SectorSize-1)/SectorSize;
+   StartSector = Position/ulBytesPerSector;
+   EndSector   = (Position+Len+ulBytesPerSector-1)/ulBytesPerSector;
    NumSectors  = EndSector - StartSector;
 
-   if((NumSectors*SectorSize) > MAX_DATA_LEN)
+   if((NumSectors*ulBytesPerSector) > MAX_DATA_LEN)
    {
       uprintf("Please increase MAX_DATA_LEN in file.h\n");
       return 0;
@@ -157,14 +168,14 @@ int write_data(FILE *fp, uint64_t Position,
    }
 
    /* Data to write may not be aligned on a sector boundary => read into a sector buffer first */
-   if(read_sectors(hDrive, SectorSize, StartSector,
+   if(read_sectors(hDrive, ulBytesPerSector, StartSector,
                      NumSectors, aucBuf) <= 0)
       return 0;
 
-   if(!memcpy(&aucBuf[Position - StartSector*SectorSize], pData, (size_t)Len))
+   if(!memcpy(&aucBuf[Position - StartSector*ulBytesPerSector], pData, (size_t)Len))
       return 0;
 
-   if(write_sectors(hDrive, SectorSize, StartSector,
+   if(write_sectors(hDrive, ulBytesPerSector, StartSector,
                      NumSectors, aucBuf) <= 0)
       return 0;
    return 1;

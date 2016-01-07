@@ -10,13 +10,17 @@
 typedef struct {
 	void *_handle;
 	uint64_t _offset;
-	uint32_t _sector_size;
 } FAKE_FD;
 
 /* Checks if a file contains a data pattern of length Len at position
    Position. The file pointer will change when calling this function! */
 int contains_data(FILE *fp, uint64_t Position,
                   const void *pData, uint64_t Len);
+
+/* Reads data of length Len at position Position.
+The file pointer will change when calling this function! */
+int read_data(FILE *fp, uint64_t Position,
+              void *pData, uint64_t uiLen);
 
 /* Writes a data pattern of length Len at position Position.
    The file pointer will change when calling this function! */

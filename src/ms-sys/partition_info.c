@@ -55,13 +55,13 @@ int write_partition_start_sector_number(FILE *fp, int iStartSector)
 int write_partition_physical_disk_drive_id_fat32(FILE *fp)
 {
    unsigned char ucId = 0x80; /* C: */
-   
+
    return write_data(fp, 0x40, &ucId, 1);
 } /* write_partition_physical_disk_drive_id_fat32 */
 
 int write_partition_physical_disk_drive_id_fat16(FILE *fp)
 {
    unsigned char ucId = 0x80; /* C: */
-   
+
    return write_data(fp, 0x24, &ucId, 1);
 } /* write_partition_physical_disk_drive_id_fat16 */
