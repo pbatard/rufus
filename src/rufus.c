@@ -687,7 +687,11 @@ static BOOL PopulateProperties(int ComboIndex)
 			SetWindowTextU(hLabel, DriveLabel.String[ComboIndex]);
 		}
 	} else {
-		SetWindowTextU(hLabel, img_report.label);
+		if (IsChecked(IDC_BOOT)) {
+			SetWindowTextU(hLabel, img_report.label);
+		} else {
+			SetWindowTextU(hLabel, DriveLabel.String[ComboIndex]);
+		}
 	}
 
 	return TRUE;
