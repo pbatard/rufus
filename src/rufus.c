@@ -107,6 +107,8 @@ static BOOL iso_provided = FALSE;
 static BOOL user_notified = FALSE;
 static BOOL relaunch = FALSE;
 static BOOL dont_display_image_name = FALSE;
+static BOOL user_changed_label = FALSE;
+static BOOL app_changed_label = FALSE;
 extern BOOL enable_iso, enable_joliet, enable_rockridge, enable_ntfs_compression;
 extern uint8_t* grub2_buf;
 extern long grub2_len;
@@ -641,19 +643,53 @@ static void SetTargetSystem(void)
 	SetPartitionSchemeTooltip();
 }
 
+static void SetProposedLabel(int ComboIndex)
+{
+	const char no_label[] = STR_NO_LABEL;
+	int bt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
+
+	app_changed_label = TRUE;
+	// If bootable ISO creation is selected, and we have an ISO selected with a valid name, use that
+	// Also some distros (eg. Arch) require the USB to have the same label as the ISO
+	if (IsChecked(IDC_BOOT) && (bt == BT_ISO) && (image_path != NULL) && (img_report.label[0] != 0)) {
+		SetWindowTextU(hLabel, img_report.label);
+		// If we force the ISO label, we need to reset the user_changed_label flag
+		user_changed_label = FALSE;
+		return;
+	}
+
+	// If the user manually changed the label, try to preserve it
+	if (user_changed_label) {
+		app_changed_label = FALSE;
+		return;
+	}
+
+	// Empty the label if no device is currently selected
+	if (ComboIndex < 0) {
+		SetWindowTextU(hLabel, "");
+		return;
+	}
+
+	// Else if no existing label is available, propose one according to the size (eg: "256MB", "8GB")
+	if ((safe_stricmp(no_label, DriveLabel.String[ComboIndex]) == 0) || (safe_stricmp(no_label, "") == 0)
+		|| (safe_stricmp(lmprintf(MSG_207), DriveLabel.String[ComboIndex]) == 0)) {
+		SetWindowTextU(hLabel, SelectedDrive.proposed_label);
+	} else {
+		SetWindowTextU(hLabel, DriveLabel.String[ComboIndex]);
+	}
+}
+
 /*
  * Populate the UI properties
  */
 static BOOL PopulateProperties(int ComboIndex)
 {
-	const char no_label[] = STR_NO_LABEL;
 	char* device_tooltip;
 
 	IGNORE_RETVAL(ComboBox_ResetContent(hPartitionScheme));
 	IGNORE_RETVAL(ComboBox_ResetContent(hFileSystem));
 	IGNORE_RETVAL(ComboBox_ResetContent(hClusterSize));
 	EnableWindow(hStart, FALSE);
-	SetWindowTextA(hLabel, "");
 	memset(&SelectedDrive, 0, sizeof(SelectedDrive));
 
 	if (ComboIndex < 0)
@@ -678,17 +714,7 @@ static BOOL PopulateProperties(int ComboIndex)
 		free(device_tooltip);
 	}
 
-	// If no existing label is available and no ISO is selected, propose one according to the size (eg: "256MB", "8GB")
-	if ((image_path == NULL) || (img_report.label[0] == 0)) {
-		if ( (safe_stricmp(no_label, DriveLabel.String[ComboIndex]) == 0)
-		  || (safe_stricmp(lmprintf(MSG_207), DriveLabel.String[ComboIndex]) == 0) ) {
-			SetWindowTextU(hLabel, SelectedDrive.proposed_label);
-		} else {
-			SetWindowTextU(hLabel, DriveLabel.String[ComboIndex]);
-		}
-	} else {
-		SetWindowTextU(hLabel, img_report.label);
-	}
+	SetProposedLabel(ComboIndex);
 
 	return TRUE;
 }
@@ -1071,11 +1097,7 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 			SetTargetSystem();
 			SetFSFromISO();
 			SetMBRProps();
-			// Some Linux distros, such as Arch Linux, require the USB drive to have
-			// a specific label => copy the one we got from the ISO image
-			if (img_report.label[0] != 0) {
-				SetWindowTextU(hLabel, img_report.label);
-			}
+			SetProposedLabel(ComboBox_GetCurSel(hDeviceList));
 		} else {
 			SendMessage(hMainDialog, WM_COMMAND, (CBN_SELCHANGE<<16) | IDC_FILESYSTEM,
 				ComboBox_GetCurSel(hFileSystem));
@@ -2064,7 +2086,7 @@ void SaveVHD(void)
 static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	static DWORD DeviceNum = 0, LastRefresh = 0;
-	static BOOL first_log_display = TRUE, user_changed_label = FALSE, isMarquee = FALSE;
+	static BOOL first_log_display = TRUE, isMarquee = FALSE;
 	static ULONG ulRegister = 0;
 	static LPITEMIDLIST pidlDesktop = NULL;
 	static MY_SHChangeNotifyEntry NotifyEntry;
@@ -2290,8 +2312,12 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				ComboBox_GetCurSel(hFileSystem));
 			break;
 		case IDC_LABEL:
-			if (HIWORD(wParam) == EN_CHANGE)
-				user_changed_label = TRUE;
+			if (HIWORD(wParam) == EN_CHANGE) {
+				// We will get EN_CHANGE when we change the label automatically, so we need to detect that
+				if (!app_changed_label)
+					user_changed_label = TRUE;
+				app_changed_label = FALSE;
+			}
 			break;
 		case IDC_DEVICE:
 			if (HIWORD(wParam) != CBN_SELCHANGE)
@@ -2373,6 +2399,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			EnableAdvancedBootOptions(TRUE, TRUE);
 			if (selection_default == BT_IMG)
 				ToggleImage(!IsChecked(IDC_BOOT));
+			SetProposedLabel(ComboBox_GetCurSel(hDeviceList));
 			break;
 		case IDC_BOOTTYPE:
 			if (HIWORD(wParam) != CBN_SELCHANGE)
@@ -2381,26 +2408,19 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			EnableAdvancedBootOptions(TRUE, TRUE);
 			ToggleImage(!IsChecked(IDC_BOOT) || (selection_default != BT_IMG));
 			SetToGo();
-			if ((selection_default == BT_ISO) || (selection_default == BT_IMG)) {
-				if ((image_path != NULL) && (img_report.label[0] != 0)) {
-					// Some distros (eg. Arch Linux) want to see a specific label => ignore user one
-					SetWindowTextU(hLabel, img_report.label);
+			SetProposedLabel(ComboBox_GetCurSel(hDeviceList));
+			if (selection_default == BT_UEFI_NTFS) {
+				// Try to select NTFS as default
+				for (i=0; i<ComboBox_GetCount(hFileSystem); i++) {
+					fs = (int)ComboBox_GetItemData(hFileSystem, i);
+					if (fs == FS_NTFS)
+						IGNORE_RETVAL(ComboBox_SetCurSel(hFileSystem, i));
 				}
-			} else {
-				if (selection_default == BT_UEFI_NTFS) {
-					// Try to select NTFS as default
-					for (i=0; i<ComboBox_GetCount(hFileSystem); i++) {
-						fs = (int)ComboBox_GetItemData(hFileSystem, i);
-						if (fs == FS_NTFS)
-							IGNORE_RETVAL(ComboBox_SetCurSel(hFileSystem, i));
-					}
-					SendMessage(hMainDialog, WM_COMMAND, (CBN_SELCHANGE<<16) | IDC_FILESYSTEM,
-						ComboBox_GetCurSel(hFileSystem));
-				}
-				// For non ISO, if the user manually set a label, try to preserve it
-				if (!user_changed_label)
-					SetWindowTextU(hLabel, SelectedDrive.proposed_label);
-				// Reset disk ID to 0x80 if Rufus MBR is used
+				SendMessage(hMainDialog, WM_COMMAND, (CBN_SELCHANGE<<16) | IDC_FILESYSTEM,
+					ComboBox_GetCurSel(hFileSystem));
+			}
+			// Reset disk ID to 0x80 if Rufus MBR is used
+			if ((selection_default != BT_ISO) && (selection_default != BT_IMG)) {
 				IGNORE_RETVAL(ComboBox_SetCurSel(hDiskID, 0));
 			}
 			return (INT_PTR)TRUE;
