@@ -687,7 +687,11 @@ static BOOL PopulateProperties(int ComboIndex)
 			SetWindowTextU(hLabel, DriveLabel.String[ComboIndex]);
 		}
 	} else {
-		SetWindowTextU(hLabel, img_report.label);
+		if (IsChecked(IDC_BOOT)) {
+			SetWindowTextU(hLabel, img_report.label);
+		} else {
+			SetWindowTextU(hLabel, DriveLabel.String[ComboIndex]);
+		}
 	}
 
 	return TRUE;
@@ -2079,526 +2083,555 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	EXT_DECL(img_ext, NULL, __VA_GROUP__("*.img;*.vhd;*.gz;*.bzip2;*.xz;*.lzma;*.Z;*.zip"), __VA_GROUP__(lmprintf(MSG_095)));
 	EXT_DECL(iso_ext, NULL, __VA_GROUP__("*.iso"), __VA_GROUP__(lmprintf(MSG_036)));
 	LPNMTOOLBAR lpnmtb;
+	HDROP droppedFileInfo;
 
-	switch (message) {
+	switch(message) {
 
-	case UM_MEDIA_CHANGE:
-		wParam = DBT_CUSTOMEVENT;
-		// Fall through
-	case WM_DEVICECHANGE:
-		// The Windows hotplug subsystem sucks. Among other things, if you insert a GPT partitioned
-		// USB drive with zero partitions, the only device messages you will get are a stream of
-		// DBT_DEVNODES_CHANGED and that's it. But those messages are also issued when you get a
-		// DBT_DEVICEARRIVAL and DBT_DEVICEREMOVECOMPLETE, and there's a whole slew of them so we
-		// can't really issue a refresh for each one we receive
-		// What we do then is arm a timer on DBT_DEVNODES_CHANGED, if it's been more than 1 second
-		// since last refresh/arm timer, and have that timer send DBT_CUSTOMEVENT when it expires.
-		// DO *NOT* USE WM_DEVICECHANGE AS THE MESSAGE FROM THE TIMER PROC, as it may be filtered!
-		// For instance filtering will occur when (un)plugging in a FreeBSD UFD on Windows 8.
-		// Instead, use a custom user message, such as UM_MEDIA_CHANGE, to set DBT_CUSTOMEVENT.
-		if (format_thid == NULL) {
-			switch (wParam) {
-			case DBT_DEVICEARRIVAL:
-			case DBT_DEVICEREMOVECOMPLETE:
-			case DBT_CUSTOMEVENT:	// Sent by our timer refresh function or for card reader media change
-				LastRefresh = GetTickCount();	// Don't care about 49.7 days rollback of GetTickCount()
-				KillTimer(hMainDialog, TID_REFRESH_TIMER);
-				GetUSBDevices((DWORD)ComboBox_GetItemData(hDeviceList, ComboBox_GetCurSel(hDeviceList)));
-				user_changed_label = FALSE;
-				return (INT_PTR)TRUE;
-			case DBT_DEVNODES_CHANGED:
-				// If it's been more than a second since last device refresh, arm a refresh timer
-				if (GetTickCount() > LastRefresh + 1000) {
-					LastRefresh = GetTickCount();
-					SetTimer(hMainDialog, TID_REFRESH_TIMER, 1000, RefreshTimer);
+		case UM_MEDIA_CHANGE:
+			wParam = DBT_CUSTOMEVENT;
+			// Fall through
+		case WM_DEVICECHANGE:
+			// The Windows hotplug subsystem sucks. Among other things, if you insert a GPT partitioned
+			// USB drive with zero partitions, the only device messages you will get are a stream of
+			// DBT_DEVNODES_CHANGED and that's it. But those messages are also issued when you get a
+			// DBT_DEVICEARRIVAL and DBT_DEVICEREMOVECOMPLETE, and there's a whole slew of them so we
+			// can't really issue a refresh for each one we receive
+			// What we do then is arm a timer on DBT_DEVNODES_CHANGED, if it's been more than 1 second
+			// since last refresh/arm timer, and have that timer send DBT_CUSTOMEVENT when it expires.
+			// DO *NOT* USE WM_DEVICECHANGE AS THE MESSAGE FROM THE TIMER PROC, as it may be filtered!
+			// For instance filtering will occur when (un)plugging in a FreeBSD UFD on Windows 8.
+			// Instead, use a custom user message, such as UM_MEDIA_CHANGE, to set DBT_CUSTOMEVENT.
+			if(format_thid == NULL) {
+				switch(wParam) {
+					case DBT_DEVICEARRIVAL:
+					case DBT_DEVICEREMOVECOMPLETE:
+					case DBT_CUSTOMEVENT:	// Sent by our timer refresh function or for card reader media change
+						LastRefresh = GetTickCount();	// Don't care about 49.7 days rollback of GetTickCount()
+						KillTimer(hMainDialog, TID_REFRESH_TIMER);
+						GetUSBDevices((DWORD)ComboBox_GetItemData(hDeviceList, ComboBox_GetCurSel(hDeviceList)));
+						user_changed_label = FALSE;
+						return (INT_PTR)TRUE;
+					case DBT_DEVNODES_CHANGED:
+						// If it's been more than a second since last device refresh, arm a refresh timer
+						if(GetTickCount() > LastRefresh + 1000) {
+							LastRefresh = GetTickCount();
+							SetTimer(hMainDialog, TID_REFRESH_TIMER, 1000, RefreshTimer);
+						}
+						break;
+					default:
+						break;
 				}
-				break;
-			default:
-				break;
 			}
-		}
-		break;
+			break;
 
-	case WM_INITDIALOG:
-		PF_INIT(SHChangeNotifyRegister, shell32);
-		// Make sure fScale is set before the first call to apply localization, so that move/resize scale appropriately
-		hDC = GetDC(hDlg);
-		fScale = GetDeviceCaps(hDC, LOGPIXELSX) / 96.0f;
-		if (hDC != NULL)
-			ReleaseDC(hDlg, hDC);
-		apply_localization(IDD_DIALOG, hDlg);
-		SetUpdateCheck();
-		togo_mode = TRUE;	// We display the ToGo controls by default and need to hide them
-		// Create the log window (hidden)
-		first_log_display = TRUE;
-		log_displayed = FALSE;
-		hLogDlg = MyCreateDialog(hMainInstance, IDD_LOG, hDlg, (DLGPROC)LogProc);
-		InitDialog(hDlg);
-		GetUSBDevices(0);
-		CheckForUpdates(FALSE);
-		// Register MEDIA_INSERTED/MEDIA_REMOVED notifications for card readers
-		if ((pfSHChangeNotifyRegister != NULL) && (SUCCEEDED(SHGetSpecialFolderLocation(0, CSIDL_DESKTOP, &pidlDesktop)))) {
-			NotifyEntry.pidl = pidlDesktop;
-			NotifyEntry.fRecursive = TRUE;
-			// NB: The following only works if the media is already formatted.
-			// If you insert a blank card, notifications will not be sent... :(
-			ulRegister = pfSHChangeNotifyRegister(hDlg, 0x0001|0x0002|0x8000,
-				SHCNE_MEDIAINSERTED|SHCNE_MEDIAREMOVED, UM_MEDIA_CHANGE, 1, &NotifyEntry);
-		}
-		// Bring our Window on top. We have to go through all *THREE* of these, or Far Manager hides our window :(
-		SetWindowPos(hMainDialog, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE|SWP_NOMOVE);
-		SetWindowPos(hMainDialog, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOSIZE|SWP_NOMOVE);
-		SetWindowPos(hMainDialog, HWND_TOP, 0, 0, 0, 0, SWP_NOSIZE|SWP_NOMOVE);
+		case WM_INITDIALOG:
+			PF_INIT(SHChangeNotifyRegister, shell32);
+			// Make sure fScale is set before the first call to apply localization, so that move/resize scale appropriately
+			hDC = GetDC(hDlg);
+			fScale = GetDeviceCaps(hDC, LOGPIXELSX) / 96.0f;
+			if(hDC != NULL)
+				ReleaseDC(hDlg, hDC);
+			apply_localization(IDD_DIALOG, hDlg);
+			SetUpdateCheck();
+			togo_mode = TRUE;	// We display the ToGo controls by default and need to hide them
+			// Create the log window (hidden)
+			first_log_display = TRUE;
+			log_displayed = FALSE;
+			hLogDlg = MyCreateDialog(hMainInstance, IDD_LOG, hDlg, (DLGPROC)LogProc);
+			InitDialog(hDlg);
+			GetUSBDevices(0);
+			CheckForUpdates(FALSE);
+			// Register MEDIA_INSERTED/MEDIA_REMOVED notifications for card readers
+			if((pfSHChangeNotifyRegister != NULL) && (SUCCEEDED(SHGetSpecialFolderLocation(0, CSIDL_DESKTOP, &pidlDesktop)))) {
+				NotifyEntry.pidl = pidlDesktop;
+				NotifyEntry.fRecursive = TRUE;
+				// NB: The following only works if the media is already formatted.
+				// If you insert a blank card, notifications will not be sent... :(
+				ulRegister = pfSHChangeNotifyRegister(hDlg, 0x0001 | 0x0002 | 0x8000,
+													  SHCNE_MEDIAINSERTED | SHCNE_MEDIAREMOVED, UM_MEDIA_CHANGE, 1, &NotifyEntry);
+			}
+			// Bring our Window on top. We have to go through all *THREE* of these, or Far Manager hides our window :(
+			SetWindowPos(hMainDialog, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
+			SetWindowPos(hMainDialog, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
+			SetWindowPos(hMainDialog, HWND_TOP, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
 
-		// Set 'Start' as the selected button if it's enabled, otherwise use 'Select ISO', instead
-		SendMessage(hDlg, WM_NEXTDLGCTL, (WPARAM)(IsWindowEnabled(hStart) ? hStart : hSelectISO), TRUE);
+			// Set 'Start' as the selected button if it's enabled, otherwise use 'Select ISO', instead
+			SendMessage(hDlg, WM_NEXTDLGCTL, (WPARAM)(IsWindowEnabled(hStart) ? hStart : hSelectISO), TRUE);
 
 #if defined(ALPHA)
-		// Add a VERY ANNOYING popup for Alpha releases, so that people don't start redistributing them
-		MessageBoxA(NULL, "This is an Alpha version of " APPLICATION_NAME " - It is meant to be used for "
-			"testing ONLY and should NOT be distributed as a release.", "ALPHA VERSION", MSG_INFO);
+			// Add a VERY ANNOYING popup for Alpha releases, so that people don't start redistributing them
+			MessageBoxA(NULL, "This is an Alpha version of " APPLICATION_NAME " - It is meant to be used for "
+						"testing ONLY and should NOT be distributed as a release.", "ALPHA VERSION", MSG_INFO);
 #elif defined(TEST)
-		// Same thing for Test releases
-		MessageBoxA(NULL, "This is a Test version of " APPLICATION_NAME " - It is meant to be used for "
-			"testing ONLY and should NOT be distributed as a release.", "TEST VERSION", MSG_INFO);
+			// Same thing for Test releases
+			MessageBoxA(NULL, "This is a Test version of " APPLICATION_NAME " - It is meant to be used for "
+						"testing ONLY and should NOT be distributed as a release.", "TEST VERSION", MSG_INFO);
 #endif
-		return (INT_PTR)FALSE;
+			return (INT_PTR)FALSE;
 
-	// The things one must do to get an ellipsis and text alignment on the status bar...
-	case WM_DRAWITEM:
-		if (wParam == IDC_STATUS) {
-			pDI = (DRAWITEMSTRUCT*)lParam;
-			pDI->rcItem.top -= (int)((4.0f * fScale) - 6.0f);
-			pDI->rcItem.left += (int)(((pDI->itemID == SB_SECTION_MIDDLE)?-2.0f:4.0f) * fScale);
-			SetBkMode(pDI->hDC, TRANSPARENT);
-			switch(pDI->itemID) {
-			case SB_SECTION_LEFT:
-				SetTextColor(pDI->hDC, GetSysColor(COLOR_BTNTEXT));
-				DrawTextExU(pDI->hDC, szStatusMessage, -1, &pDI->rcItem,
-					DT_LEFT|DT_END_ELLIPSIS|DT_PATH_ELLIPSIS, NULL);
-				return (INT_PTR)TRUE;
-			case SB_SECTION_RIGHT:
-				SetTextColor(pDI->hDC, GetSysColor(COLOR_3DSHADOW));
-				DrawTextExA(pDI->hDC, szTimer, -1, &pDI->rcItem, DT_LEFT, NULL);
-				return (INT_PTR)TRUE;
-			}
-		}
-		break;
-
-	case WM_COMMAND:
-		if ((LOWORD(wParam) >= UM_LANGUAGE_MENU) && (LOWORD(wParam) < UM_LANGUAGE_MENU_MAX)) {
-			selected_language = LOWORD(wParam) - UM_LANGUAGE_MENU;
-			i = 0;
-			list_for_each_entry(lcmd, &locale_list, loc_cmd, list) {
-				if (i++ == selected_language) {
-					if (selected_locale != lcmd) {
-						selected_locale = lcmd;
-						selected_langid = get_language_id(lcmd);
-						relaunch = TRUE;
-						PostMessage(hDlg, WM_COMMAND, IDCANCEL, 0);
-					}
-					break;
+			// The things one must do to get an ellipsis and text alignment on the status bar...
+		case WM_DRAWITEM:
+			if(wParam == IDC_STATUS) {
+				pDI = (DRAWITEMSTRUCT*)lParam;
+				pDI->rcItem.top -= (int)((4.0f * fScale) - 6.0f);
+				pDI->rcItem.left += (int)(((pDI->itemID == SB_SECTION_MIDDLE) ? -2.0f : 4.0f) * fScale);
+				SetBkMode(pDI->hDC, TRANSPARENT);
+				switch(pDI->itemID) {
+					case SB_SECTION_LEFT:
+						SetTextColor(pDI->hDC, GetSysColor(COLOR_BTNTEXT));
+						DrawTextExU(pDI->hDC, szStatusMessage, -1, &pDI->rcItem,
+									DT_LEFT | DT_END_ELLIPSIS | DT_PATH_ELLIPSIS, NULL);
+						return (INT_PTR)TRUE;
+					case SB_SECTION_RIGHT:
+						SetTextColor(pDI->hDC, GetSysColor(COLOR_3DSHADOW));
+						DrawTextExA(pDI->hDC, szTimer, -1, &pDI->rcItem, DT_LEFT, NULL);
+						return (INT_PTR)TRUE;
 				}
 			}
-		}
-		switch(LOWORD(wParam)) {
-		case IDOK:			// close application
-		case IDCANCEL:
-			PF_INIT(SHChangeNotifyDeregister, Shell32);
-			EnableWindow(GetDlgItem(hDlg, IDCANCEL), FALSE);
-			if (format_thid != NULL) {
-				if ((no_confirmation_on_cancel) || (MessageBoxExU(hMainDialog, lmprintf(MSG_105), lmprintf(MSG_049),
-					MB_YESNO|MB_ICONWARNING|MB_IS_RTL, selected_langid) == IDYES)) {
-					// Operation may have completed in the meantime
-					if (format_thid != NULL) {
-						FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANCELLED;
-						PrintInfo(0, MSG_201);
-						uprintf("Cancelling");
-						//  Start a timer to detect blocking operations during ISO file extraction
-						if (iso_blocking_status >= 0) {
-							last_iso_blocking_status = iso_blocking_status;
-							SetTimer(hMainDialog, TID_BLOCKING_TIMER, 3000, BlockingTimer);
+			break;
+
+		case WM_COMMAND:
+			if((LOWORD(wParam) >= UM_LANGUAGE_MENU) && (LOWORD(wParam) < UM_LANGUAGE_MENU_MAX)) {
+				selected_language = LOWORD(wParam) - UM_LANGUAGE_MENU;
+				i = 0;
+				list_for_each_entry(lcmd, &locale_list, loc_cmd, list) {
+					if(i++ == selected_language) {
+						if(selected_locale != lcmd) {
+							selected_locale = lcmd;
+							selected_langid = get_language_id(lcmd);
+							relaunch = TRUE;
+							PostMessage(hDlg, WM_COMMAND, IDCANCEL, 0);
 						}
-					}
-				} else {
-					EnableWindow(GetDlgItem(hDlg, IDCANCEL), TRUE);
-				}
-				no_confirmation_on_cancel = FALSE;
-				return (INT_PTR)TRUE;
-			}
-			if ((pfSHChangeNotifyDeregister != NULL) && (ulRegister != 0))
-				pfSHChangeNotifyDeregister(ulRegister);
-			PostQuitMessage(0);
-			StrArrayDestroy(&DriveID);
-			StrArrayDestroy(&DriveLabel);
-			DestroyAllTooltips();
-			DestroyWindow(hLogDlg);
-			GetWindowRect(hDlg, &relaunch_rc);
-			EndDialog(hDlg, 0);
-			break;
-		case IDC_ABOUT:
-			CreateAboutBox();
-			break;
-		case IDC_LOG:
-			// Place the log Window to the right (or left for RTL) of our dialog on first display
-			if (first_log_display) {
-				GetClientRect(GetDesktopWindow(), &DesktopRect);
-				GetWindowRect(hLogDlg, &DialogRect);
-				nWidth = DialogRect.right - DialogRect.left;
-				nHeight = DialogRect.bottom - DialogRect.top;
-				GetWindowRect(hDlg, &DialogRect);
-				offset = GetSystemMetrics(SM_CXSIZEFRAME) + (int)(2.0f * fScale);
-				if (nWindowsVersion >= WINDOWS_10)
-					offset += (int)(-14.0f * fScale);
-				if (right_to_left_mode)
-					Point.x = max(DialogRect.left - offset - nWidth, 0);
-				else
-					Point.x = min(DialogRect.right + offset, DesktopRect.right - nWidth);
-
-				Point.y = max(DialogRect.top, DesktopRect.top - nHeight);
-				MoveWindow(hLogDlg, Point.x, Point.y, nWidth, nHeight, FALSE);
-				// The log may have been recentered to fit the screen, in which case, try to shift our main dialog left (or right for RTL)
-				nWidth = DialogRect.right - DialogRect.left;
-				nHeight = DialogRect.bottom - DialogRect.top;
-				if (right_to_left_mode) {
-					Point.x = DialogRect.left;
-					GetWindowRect(hLogDlg, &DialogRect);
-					Point.x = max(Point.x, DialogRect.right - DialogRect.left + offset);
-				} else {
-					Point.x = max((DialogRect.left<0)?DialogRect.left:0, Point.x - offset - nWidth);
-				}
-				MoveWindow(hDlg, Point.x, Point.y, nWidth, nHeight, TRUE);
-				first_log_display = FALSE;
-			}
-			// Display the log Window
-			log_displayed = !log_displayed;
-			// Set focus on the start button
-			SendMessage(hMainDialog, WM_NEXTDLGCTL, (WPARAM)FALSE, 0);
-			SendMessage(hMainDialog, WM_NEXTDLGCTL, (WPARAM)hStart, TRUE);
-			// Must come last for the log window to get focus
-			ShowWindow(hLogDlg, log_displayed?SW_SHOW:SW_HIDE);
-			break;
-#ifdef RUFUS_TEST
-		case IDC_TEST:
-			break;
-#endif
-		case IDC_ADVANCED:
-			advanced_mode = !advanced_mode;
-			WriteSettingBool(SETTING_ADVANCED_MODE, advanced_mode);
-			ToggleAdvanced(advanced_mode);
-			SendMessage(hMainDialog, WM_COMMAND, (CBN_SELCHANGE<<16) | IDC_FILESYSTEM,
-				ComboBox_GetCurSel(hFileSystem));
-			break;
-		case IDC_LABEL:
-			if (HIWORD(wParam) == EN_CHANGE)
-				user_changed_label = TRUE;
-			break;
-		case IDC_DEVICE:
-			if (HIWORD(wParam) != CBN_SELCHANGE)
-				break;
-			nb_devices = ComboBox_GetCount(hDeviceList);
-			PrintStatusDebug(0, (nb_devices==1)?MSG_208:MSG_209, nb_devices);
-			PopulateProperties(ComboBox_GetCurSel(hDeviceList));
-			SendMessage(hMainDialog, WM_COMMAND, (CBN_SELCHANGE<<16) | IDC_FILESYSTEM,
-				ComboBox_GetCurSel(hFileSystem));
-			break;
-		case IDC_NBPASSES:
-			if (HIWORD(wParam) != CBN_SELCHANGE)
-				break;
-			SetPassesTooltip();
-			break;
-		case IDC_PARTITION_TYPE:
-			if (HIWORD(wParam) != CBN_SELCHANGE)
-				break;
-			SetPartitionSchemeTooltip();
-			SetFSFromISO();
-			// fall-through
-		case IDC_FILESYSTEM:
-			if (HIWORD(wParam) != CBN_SELCHANGE)
-				break;
-			fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
-			tt = GETTARGETTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
-			if ((selection_default == BT_IMG) && IsChecked(IDC_BOOT)) {
-				ToggleImage(FALSE);
-				EnableAdvancedBootOptions(FALSE, TRUE);
-				SetBoot(fs, tt);
-				SetToGo();
-				break;
-			}
-			SetClusterSizes(fs);
-			// Disable/restore the quick format control depending on large FAT32 or ReFS
-			if ( ((fs == FS_FAT32) && ((SelectedDrive.DiskSize > LARGE_FAT32_SIZE) || (force_large_fat32))) || (fs == FS_REFS) ) {
-				if (IsWindowEnabled(GetDlgItem(hMainDialog, IDC_QUICKFORMAT))) {
-					uQFChecked = IsChecked(IDC_QUICKFORMAT);
-					CheckDlgButton(hMainDialog, IDC_QUICKFORMAT, BST_CHECKED);
-					EnableWindow(GetDlgItem(hMainDialog, IDC_QUICKFORMAT), FALSE);
-				}
-			} else {
-				if (!IsWindowEnabled(GetDlgItem(hMainDialog, IDC_QUICKFORMAT))) {
-					CheckDlgButton(hMainDialog, IDC_QUICKFORMAT, uQFChecked);
-					EnableWindow(GetDlgItem(hMainDialog, IDC_QUICKFORMAT), TRUE);
-				}
-			}
-			if (fs < 0) {
-				EnableBootOptions(TRUE, TRUE);
-				SetMBRProps();
-				// Remove the SysLinux and ReactOS options if they exists
-				if (ComboBox_GetItemData(hBootType, ComboBox_GetCount(hBootType)-1) == (BT_MAX-1)) {
-					for (i=BT_SYSLINUX_V4; i<BT_MAX; i++)
-						IGNORE_RETVAL(ComboBox_DeleteString(hBootType,  ComboBox_GetCount(hBootType)-1));
-					IGNORE_RETVAL(ComboBox_SetCurSel(hBootType, 1));
-				}
-				break;
-			}
-			if ((fs == FS_EXFAT) || (fs == FS_UDF) || (fs == FS_REFS)) {
-				if (IsWindowEnabled(hBoot)) {
-					// unlikely to be supported by BIOSes => don't bother
-					IGNORE_RETVAL(ComboBox_SetCurSel(hBootType, 0));
-					uBootChecked = IsChecked(IDC_BOOT);
-					CheckDlgButton(hDlg, IDC_BOOT, BST_UNCHECKED);
-					EnableBootOptions(FALSE, TRUE);
-				} else if (IsChecked(IDC_BOOT)) {
-					uBootChecked = TRUE;
-					CheckDlgButton(hDlg, IDC_BOOT, BST_UNCHECKED);
-				}
-				SetMBRProps();
-				break;
-			}
-			EnableAdvancedBootOptions(TRUE, TRUE);
-			SetBoot(fs, tt);
-			SetMBRProps();
-			SetToGo();
-			break;
-		case IDC_BOOT:
-			EnableAdvancedBootOptions(TRUE, TRUE);
-			if (selection_default == BT_IMG)
-				ToggleImage(!IsChecked(IDC_BOOT));
-			break;
-		case IDC_BOOTTYPE:
-			if (HIWORD(wParam) != CBN_SELCHANGE)
-				break;
-			selection_default = (int) ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
-			EnableAdvancedBootOptions(TRUE, TRUE);
-			ToggleImage(!IsChecked(IDC_BOOT) || (selection_default != BT_IMG));
-			SetToGo();
-			if ((selection_default == BT_ISO) || (selection_default == BT_IMG)) {
-				if ((image_path != NULL) && (img_report.label[0] != 0)) {
-					// Some distros (eg. Arch Linux) want to see a specific label => ignore user one
-					SetWindowTextU(hLabel, img_report.label);
-				}
-			} else {
-				if (selection_default == BT_UEFI_NTFS) {
-					// Try to select NTFS as default
-					for (i=0; i<ComboBox_GetCount(hFileSystem); i++) {
-						fs = (int)ComboBox_GetItemData(hFileSystem, i);
-						if (fs == FS_NTFS)
-							IGNORE_RETVAL(ComboBox_SetCurSel(hFileSystem, i));
-					}
-					SendMessage(hMainDialog, WM_COMMAND, (CBN_SELCHANGE<<16) | IDC_FILESYSTEM,
-						ComboBox_GetCurSel(hFileSystem));
-				}
-				// For non ISO, if the user manually set a label, try to preserve it
-				if (!user_changed_label)
-					SetWindowTextU(hLabel, SelectedDrive.proposed_label);
-				// Reset disk ID to 0x80 if Rufus MBR is used
-				IGNORE_RETVAL(ComboBox_SetCurSel(hDiskID, 0));
-			}
-			return (INT_PTR)TRUE;
-		case IDC_SELECT_ISO:
-			if (iso_provided) {
-				uprintf("Image provided: '%s'\n", image_path);
-				iso_provided = FALSE;	// One off thing...
-			} else {
-				safe_free(image_path);
-				EnableWindow(hStatusToolbar, FALSE);
-				image_path = FileDialog(FALSE, NULL, (selection_default == BT_IMG)?&img_ext:&iso_ext, 0);
-				if (image_path == NULL) {
-					CreateTooltip(hSelectISO, lmprintf(MSG_173), -1);
-					PrintStatus(0, MSG_086);
-					break;
-				}
-			}
-			FormatStatus = 0;
-			if (CreateThread(NULL, 0, ISOScanThread, NULL, 0, NULL) == NULL) {
-				uprintf("Unable to start ISO scanning thread");
-				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_START_THREAD);
-			}
-			break;
-		case IDC_WINDOWS_INSTALL:
-		case IDC_WINDOWS_TO_GO:
-			if ( (Button_GetCheck(GetDlgItem(hMainDialog, IDC_WINDOWS_INSTALL)) == BST_CHECKED) ||
-				 (Button_GetCheck(GetDlgItem(hMainDialog, IDC_WINDOWS_TO_GO)) == BST_CHECKED) ) {
-				SetFSFromISO();
-				SetMBRProps();
-				SetMBRForUEFI(TRUE);
-			}
-			break;
-		case IDC_RUFUS_MBR:
-			if ((HIWORD(wParam)) == BN_CLICKED)
-				mbr_selected_by_user = IsChecked(IDC_RUFUS_MBR);
-			break;
-		case IDC_ENABLE_FIXED_DISKS:
-			if ((HIWORD(wParam)) == BN_CLICKED) {
-				enable_HDDs = !enable_HDDs;
-				PrintStatus2000(lmprintf(MSG_253), enable_HDDs);
-				GetUSBDevices(0);
-			}
-			break;
-		case IDC_START:
-			if (format_thid != NULL) {
-				return (INT_PTR)TRUE;
-			}
-			FormatStatus = 0;
-			format_op_in_progress = TRUE;
-			no_confirmation_on_cancel = FALSE;
-			// Reset all progress bars
-			SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_NORMAL, 0);
-			SetTaskbarProgressState(TASKBAR_NORMAL);
-			SetTaskbarProgressValue(0, MAX_PROGRESS);
-			SendMessage(hProgress, PBM_SETPOS, 0, 0);
-			selection_default = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
-			nDeviceIndex = ComboBox_GetCurSel(hDeviceList);
-			if (nDeviceIndex != CB_ERR) {
-				if (!zero_drive) {
-					if ((IsChecked(IDC_BOOT)) && (!BootCheck())) {
-						format_op_in_progress = FALSE;
 						break;
 					}
-
-					// Display a warning about UDF formatting times
-					fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
-					if (fs == FS_UDF) {
-						dur_secs = (uint32_t)(((double)SelectedDrive.DiskSize) / 1073741824.0f / UDF_FORMAT_SPEED);
-						if (dur_secs > UDF_FORMAT_WARN) {
-							dur_mins = dur_secs / 60;
-							dur_secs -= dur_mins * 60;
-							MessageBoxExU(hMainDialog, lmprintf(MSG_112, dur_mins, dur_secs), lmprintf(MSG_113),
-								MB_OK | MB_ICONASTERISK | MB_IS_RTL, selected_langid);
+				}
+			}
+			switch(LOWORD(wParam)) {
+				case IDOK:			// close application
+				case IDCANCEL:
+					PF_INIT(SHChangeNotifyDeregister, Shell32);
+					EnableWindow(GetDlgItem(hDlg, IDCANCEL), FALSE);
+					if(format_thid != NULL) {
+						if((no_confirmation_on_cancel) || (MessageBoxExU(hMainDialog, lmprintf(MSG_105), lmprintf(MSG_049),
+																		 MB_YESNO | MB_ICONWARNING | MB_IS_RTL, selected_langid) == IDYES)) {
+							// Operation may have completed in the meantime
+							if(format_thid != NULL) {
+								FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_CANCELLED;
+								PrintInfo(0, MSG_201);
+								uprintf("Cancelling");
+								//  Start a timer to detect blocking operations during ISO file extraction
+								if(iso_blocking_status >= 0) {
+									last_iso_blocking_status = iso_blocking_status;
+									SetTimer(hMainDialog, TID_BLOCKING_TIMER, 3000, BlockingTimer);
+								}
+							}
 						} else {
-							dur_secs = 0;
-							dur_mins = 0;
+							EnableWindow(GetDlgItem(hDlg, IDCANCEL), TRUE);
+						}
+						no_confirmation_on_cancel = FALSE;
+						return (INT_PTR)TRUE;
+					}
+					if((pfSHChangeNotifyDeregister != NULL) && (ulRegister != 0))
+						pfSHChangeNotifyDeregister(ulRegister);
+					PostQuitMessage(0);
+					StrArrayDestroy(&DriveID);
+					StrArrayDestroy(&DriveLabel);
+					DestroyAllTooltips();
+					DestroyWindow(hLogDlg);
+					GetWindowRect(hDlg, &relaunch_rc);
+					EndDialog(hDlg, 0);
+					break;
+				case IDC_ABOUT:
+					CreateAboutBox();
+					break;
+				case IDC_LOG:
+					// Place the log Window to the right (or left for RTL) of our dialog on first display
+					if(first_log_display) {
+						GetClientRect(GetDesktopWindow(), &DesktopRect);
+						GetWindowRect(hLogDlg, &DialogRect);
+						nWidth = DialogRect.right - DialogRect.left;
+						nHeight = DialogRect.bottom - DialogRect.top;
+						GetWindowRect(hDlg, &DialogRect);
+						offset = GetSystemMetrics(SM_CXSIZEFRAME) + (int)(2.0f * fScale);
+						if(nWindowsVersion >= WINDOWS_10)
+							offset += (int)(-14.0f * fScale);
+						if(right_to_left_mode)
+							Point.x = max(DialogRect.left - offset - nWidth, 0);
+						else
+							Point.x = min(DialogRect.right + offset, DesktopRect.right - nWidth);
+
+						Point.y = max(DialogRect.top, DesktopRect.top - nHeight);
+						MoveWindow(hLogDlg, Point.x, Point.y, nWidth, nHeight, FALSE);
+						// The log may have been recentered to fit the screen, in which case, try to shift our main dialog left (or right for RTL)
+						nWidth = DialogRect.right - DialogRect.left;
+						nHeight = DialogRect.bottom - DialogRect.top;
+						if(right_to_left_mode) {
+							Point.x = DialogRect.left;
+							GetWindowRect(hLogDlg, &DialogRect);
+							Point.x = max(Point.x, DialogRect.right - DialogRect.left + offset);
+						} else {
+							Point.x = max((DialogRect.left < 0) ? DialogRect.left : 0, Point.x - offset - nWidth);
+						}
+						MoveWindow(hDlg, Point.x, Point.y, nWidth, nHeight, TRUE);
+						first_log_display = FALSE;
+					}
+					// Display the log Window
+					log_displayed = !log_displayed;
+					// Set focus on the start button
+					SendMessage(hMainDialog, WM_NEXTDLGCTL, (WPARAM)FALSE, 0);
+					SendMessage(hMainDialog, WM_NEXTDLGCTL, (WPARAM)hStart, TRUE);
+					// Must come last for the log window to get focus
+					ShowWindow(hLogDlg, log_displayed ? SW_SHOW : SW_HIDE);
+					break;
+#ifdef RUFUS_TEST
+				case IDC_TEST:
+					break;
+#endif
+				case IDC_ADVANCED:
+					advanced_mode = !advanced_mode;
+					WriteSettingBool(SETTING_ADVANCED_MODE, advanced_mode);
+					ToggleAdvanced(advanced_mode);
+					SendMessage(hMainDialog, WM_COMMAND, (CBN_SELCHANGE << 16) | IDC_FILESYSTEM,
+								ComboBox_GetCurSel(hFileSystem));
+					break;
+				case IDC_LABEL:
+					if(HIWORD(wParam) == EN_CHANGE)
+						user_changed_label = TRUE;
+					break;
+				case IDC_DEVICE:
+					if(HIWORD(wParam) != CBN_SELCHANGE)
+						break;
+					nb_devices = ComboBox_GetCount(hDeviceList);
+					PrintStatusDebug(0, (nb_devices == 1) ? MSG_208 : MSG_209, nb_devices);
+					PopulateProperties(ComboBox_GetCurSel(hDeviceList));
+					SendMessage(hMainDialog, WM_COMMAND, (CBN_SELCHANGE << 16) | IDC_FILESYSTEM,
+								ComboBox_GetCurSel(hFileSystem));
+					break;
+				case IDC_NBPASSES:
+					if(HIWORD(wParam) != CBN_SELCHANGE)
+						break;
+					SetPassesTooltip();
+					break;
+				case IDC_PARTITION_TYPE:
+					if(HIWORD(wParam) != CBN_SELCHANGE)
+						break;
+					SetPartitionSchemeTooltip();
+					SetFSFromISO();
+					// fall-through
+				case IDC_FILESYSTEM:
+					if(HIWORD(wParam) != CBN_SELCHANGE)
+						break;
+					fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
+					tt = GETTARGETTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
+					if((selection_default == BT_IMG) && IsChecked(IDC_BOOT)) {
+						ToggleImage(FALSE);
+						EnableAdvancedBootOptions(FALSE, TRUE);
+						SetBoot(fs, tt);
+						SetToGo();
+						break;
+					}
+					SetClusterSizes(fs);
+					// Disable/restore the quick format control depending on large FAT32 or ReFS
+					if(((fs == FS_FAT32) && ((SelectedDrive.DiskSize > LARGE_FAT32_SIZE) || (force_large_fat32))) || (fs == FS_REFS)) {
+						if(IsWindowEnabled(GetDlgItem(hMainDialog, IDC_QUICKFORMAT))) {
+							uQFChecked = IsChecked(IDC_QUICKFORMAT);
+							CheckDlgButton(hMainDialog, IDC_QUICKFORMAT, BST_CHECKED);
+							EnableWindow(GetDlgItem(hMainDialog, IDC_QUICKFORMAT), FALSE);
+						}
+					} else {
+						if(!IsWindowEnabled(GetDlgItem(hMainDialog, IDC_QUICKFORMAT))) {
+							CheckDlgButton(hMainDialog, IDC_QUICKFORMAT, uQFChecked);
+							EnableWindow(GetDlgItem(hMainDialog, IDC_QUICKFORMAT), TRUE);
 						}
 					}
+					if(fs < 0) {
+						EnableBootOptions(TRUE, TRUE);
+						SetMBRProps();
+						// Remove the SysLinux and ReactOS options if they exists
+						if(ComboBox_GetItemData(hBootType, ComboBox_GetCount(hBootType) - 1) == (BT_MAX - 1)) {
+							for(i = BT_SYSLINUX_V4; i < BT_MAX; i++)
+								IGNORE_RETVAL(ComboBox_DeleteString(hBootType, ComboBox_GetCount(hBootType) - 1));
+							IGNORE_RETVAL(ComboBox_SetCurSel(hBootType, 1));
+						}
+						break;
+					}
+					if((fs == FS_EXFAT) || (fs == FS_UDF) || (fs == FS_REFS)) {
+						if(IsWindowEnabled(hBoot)) {
+							// unlikely to be supported by BIOSes => don't bother
+							IGNORE_RETVAL(ComboBox_SetCurSel(hBootType, 0));
+							uBootChecked = IsChecked(IDC_BOOT);
+							CheckDlgButton(hDlg, IDC_BOOT, BST_UNCHECKED);
+							EnableBootOptions(FALSE, TRUE);
+						} else if(IsChecked(IDC_BOOT)) {
+							uBootChecked = TRUE;
+							CheckDlgButton(hDlg, IDC_BOOT, BST_UNCHECKED);
+						}
+						SetMBRProps();
+						break;
+					}
+					EnableAdvancedBootOptions(TRUE, TRUE);
+					SetBoot(fs, tt);
+					SetMBRProps();
+					SetToGo();
+					break;
+				case IDC_BOOT:
+					EnableAdvancedBootOptions(TRUE, TRUE);
+					if(selection_default == BT_IMG)
+						ToggleImage(!IsChecked(IDC_BOOT));
 
-					// Ask users how they want to write ISOHybrid images
-					if ((IsChecked(IDC_BOOT)) && (img_report.is_bootable_img) &&
-						(ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType)) == BT_ISO)) {
-						char* iso_image = lmprintf(MSG_036);
-						char* dd_image = lmprintf(MSG_095);
-						i = Selection(lmprintf(MSG_274), lmprintf(MSG_275, iso_image, dd_image, iso_image, dd_image),
-							lmprintf(MSG_276, iso_image), lmprintf(MSG_277, dd_image));
-						if (i < 0) {	// Cancel
+					if(IsChecked(IDC_BOOT)) {
+						SetWindowTextU(hLabel, img_report.label);
+					} else {
+						SetWindowTextU(hLabel, DriveLabel.String[ComboBox_GetCurSel(hDeviceList)]);
+					}
+					break;
+				case IDC_BOOTTYPE:
+					if(HIWORD(wParam) != CBN_SELCHANGE)
+						break;
+					selection_default = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
+					EnableAdvancedBootOptions(TRUE, TRUE);
+					ToggleImage(!IsChecked(IDC_BOOT) || (selection_default != BT_IMG));
+					SetToGo();
+					if((selection_default == BT_ISO) || (selection_default == BT_IMG)) {
+						if((image_path != NULL) && (img_report.label[0] != 0)) {
+							// Some distros (eg. Arch Linux) want to see a specific label => ignore user one
+							SetWindowTextU(hLabel, img_report.label);
+						}
+					} else {
+						if(selection_default == BT_UEFI_NTFS) {
+							// Try to select NTFS as default
+							for(i = 0; i < ComboBox_GetCount(hFileSystem); i++) {
+								fs = (int)ComboBox_GetItemData(hFileSystem, i);
+								if(fs == FS_NTFS)
+									IGNORE_RETVAL(ComboBox_SetCurSel(hFileSystem, i));
+							}
+							SendMessage(hMainDialog, WM_COMMAND, (CBN_SELCHANGE << 16) | IDC_FILESYSTEM,
+										ComboBox_GetCurSel(hFileSystem));
+						}
+						// For non ISO, if the user manually set a label, try to preserve it
+						if(!user_changed_label)
+							SetWindowTextU(hLabel, SelectedDrive.proposed_label);
+						// Reset disk ID to 0x80 if Rufus MBR is used
+						IGNORE_RETVAL(ComboBox_SetCurSel(hDiskID, 0));
+					}
+					return (INT_PTR)TRUE;
+				case IDC_SELECT_ISO:
+					if(iso_provided) {
+						uprintf("Image provided: '%s'\n", image_path);
+						iso_provided = FALSE;	// One off thing...
+					} else {
+						safe_free(image_path);
+						EnableWindow(hStatusToolbar, FALSE);
+						image_path = FileDialog(FALSE, NULL, (selection_default == BT_IMG) ? &img_ext : &iso_ext, 0);
+						if(image_path == NULL) {
+							CreateTooltip(hSelectISO, lmprintf(MSG_173), -1);
+							PrintStatus(0, MSG_086);
+							break;
+						}
+					}
+					FormatStatus = 0;
+					if(CreateThread(NULL, 0, ISOScanThread, NULL, 0, NULL) == NULL) {
+						uprintf("Unable to start ISO scanning thread");
+						FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_CANT_START_THREAD);
+					}
+					break;
+				case IDC_WINDOWS_INSTALL:
+				case IDC_WINDOWS_TO_GO:
+					if((Button_GetCheck(GetDlgItem(hMainDialog, IDC_WINDOWS_INSTALL)) == BST_CHECKED) ||
+					   (Button_GetCheck(GetDlgItem(hMainDialog, IDC_WINDOWS_TO_GO)) == BST_CHECKED)) {
+						SetFSFromISO();
+						SetMBRProps();
+						SetMBRForUEFI(TRUE);
+					}
+					break;
+				case IDC_RUFUS_MBR:
+					if((HIWORD(wParam)) == BN_CLICKED)
+						mbr_selected_by_user = IsChecked(IDC_RUFUS_MBR);
+					break;
+				case IDC_ENABLE_FIXED_DISKS:
+					if((HIWORD(wParam)) == BN_CLICKED) {
+						enable_HDDs = !enable_HDDs;
+						PrintStatus2000(lmprintf(MSG_253), enable_HDDs);
+						GetUSBDevices(0);
+					}
+					break;
+				case IDC_START:
+					if(format_thid != NULL) {
+						return (INT_PTR)TRUE;
+					}
+					FormatStatus = 0;
+					format_op_in_progress = TRUE;
+					no_confirmation_on_cancel = FALSE;
+					// Reset all progress bars
+					SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_NORMAL, 0);
+					SetTaskbarProgressState(TASKBAR_NORMAL);
+					SetTaskbarProgressValue(0, MAX_PROGRESS);
+					SendMessage(hProgress, PBM_SETPOS, 0, 0);
+					selection_default = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
+					nDeviceIndex = ComboBox_GetCurSel(hDeviceList);
+					if(nDeviceIndex != CB_ERR) {
+						if(!zero_drive) {
+							if((IsChecked(IDC_BOOT)) && (!BootCheck())) {
+								format_op_in_progress = FALSE;
+								break;
+							}
+
+							// Display a warning about UDF formatting times
+							fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
+							if(fs == FS_UDF) {
+								dur_secs = (uint32_t)(((double)SelectedDrive.DiskSize) / 1073741824.0f / UDF_FORMAT_SPEED);
+								if(dur_secs > UDF_FORMAT_WARN) {
+									dur_mins = dur_secs / 60;
+									dur_secs -= dur_mins * 60;
+									MessageBoxExU(hMainDialog, lmprintf(MSG_112, dur_mins, dur_secs), lmprintf(MSG_113),
+												  MB_OK | MB_ICONASTERISK | MB_IS_RTL, selected_langid);
+								} else {
+									dur_secs = 0;
+									dur_mins = 0;
+								}
+							}
+
+							// Ask users how they want to write ISOHybrid images
+							if((IsChecked(IDC_BOOT)) && (img_report.is_bootable_img) &&
+							   (ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType)) == BT_ISO)) {
+								char* iso_image = lmprintf(MSG_036);
+								char* dd_image = lmprintf(MSG_095);
+								i = Selection(lmprintf(MSG_274), lmprintf(MSG_275, iso_image, dd_image, iso_image, dd_image),
+											  lmprintf(MSG_276, iso_image), lmprintf(MSG_277, dd_image));
+								if(i < 0) {	// Cancel
+									format_op_in_progress = FALSE;
+									break;
+								} else if(i == 2) {
+									selection_default = BT_IMG;
+									SetComboEntry(hBootType, selection_default);
+								}
+							}
+						}
+
+						GetWindowTextU(hDeviceList, tmp, ARRAYSIZE(tmp));
+						if(MessageBoxExU(hMainDialog, lmprintf(MSG_003, tmp),
+										 APPLICATION_NAME, MB_OKCANCEL | MB_ICONWARNING | MB_IS_RTL, selected_langid) == IDCANCEL) {
+							format_op_in_progress = FALSE;
+							zero_drive = FALSE;
+							break;
+						}
+						if((SelectedDrive.nPartitions > 1) && (MessageBoxExU(hMainDialog, lmprintf(MSG_093),
+																			 lmprintf(MSG_094), MB_OKCANCEL | MB_ICONWARNING | MB_IS_RTL, selected_langid) == IDCANCEL)) {
+							format_op_in_progress = FALSE;
+							zero_drive = FALSE;
+							break;
+						}
+						if((!zero_drive) && (IsChecked(IDC_BOOT)) && (SelectedDrive.Geometry.BytesPerSector != 512) &&
+						   (MessageBoxExU(hMainDialog, lmprintf(MSG_196, SelectedDrive.Geometry.BytesPerSector),
+										  lmprintf(MSG_197), MB_OKCANCEL | MB_ICONWARNING | MB_IS_RTL, selected_langid) == IDCANCEL)) {
 							format_op_in_progress = FALSE;
 							break;
-						} else if (i == 2) {
-							selection_default = BT_IMG;
-							SetComboEntry(hBootType, selection_default);
+						}
+
+						// Disable all controls except cancel
+						EnableControls(FALSE);
+						DeviceNum = (DWORD)ComboBox_GetItemData(hDeviceList, nDeviceIndex);
+						InitProgress(zero_drive);
+						format_thid = CreateThread(NULL, 0, FormatThread, (LPVOID)(uintptr_t)DeviceNum, 0, NULL);
+						if(format_thid == NULL) {
+							uprintf("Unable to start formatting thread");
+							FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_CANT_START_THREAD);
+							PostMessage(hMainDialog, UM_FORMAT_COMPLETED, (WPARAM)FALSE, 0);
+						}
+						uprintf("\r\nFormat operation started");
+						PrintInfo(0, -1);
+						timer = 0;
+						safe_sprintf(szTimer, sizeof(szTimer), "00:00:00");
+						SendMessageA(hStatus, SB_SETTEXTA, SBT_OWNERDRAW | SB_SECTION_RIGHT, (LPARAM)szTimer);
+						SetTimer(hMainDialog, TID_APP_TIMER, 1000, ClockTimer);
+					}
+					if(format_thid == NULL) {
+						format_op_in_progress = FALSE;
+						zero_drive = FALSE;
+					}
+					break;
+				case IDC_HASH:
+					if((format_thid == NULL) && (image_path != NULL)) {
+						FormatStatus = 0;
+						format_op_in_progress = TRUE;
+						no_confirmation_on_cancel = TRUE;
+						// Reset all progress bars
+						SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_NORMAL, 0);
+						SetTaskbarProgressState(TASKBAR_NORMAL);
+						SetTaskbarProgressValue(0, MAX_PROGRESS);
+						SendMessage(hProgress, PBM_SETPOS, 0, 0);
+						// Disable all controls except cancel
+						EnableControls(FALSE);
+						InitProgress(FALSE);
+						format_thid = CreateThread(NULL, 0, SumThread, NULL, 0, NULL);
+						if(format_thid != NULL) {
+							PrintInfo(0, -1);
+							timer = 0;
+							safe_sprintf(szTimer, sizeof(szTimer), "00:00:00");
+							SendMessageA(hStatus, SB_SETTEXTA, SBT_OWNERDRAW | SB_SECTION_RIGHT, (LPARAM)szTimer);
+							SetTimer(hMainDialog, TID_APP_TIMER, 1000, ClockTimer);
+						} else {
+							uprintf("Unable to start checksum thread");
+							FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_CANT_START_THREAD);
+							PostMessage(hMainDialog, UM_FORMAT_COMPLETED, (WPARAM)FALSE, 0);
+							format_op_in_progress = FALSE;
 						}
 					}
-				}
-
-				GetWindowTextU(hDeviceList, tmp, ARRAYSIZE(tmp));
-				if (MessageBoxExU(hMainDialog, lmprintf(MSG_003, tmp),
-					APPLICATION_NAME, MB_OKCANCEL|MB_ICONWARNING|MB_IS_RTL, selected_langid) == IDCANCEL) {
-					format_op_in_progress = FALSE;
-					zero_drive = FALSE;
 					break;
-				}
-				if ((SelectedDrive.nPartitions > 1) && (MessageBoxExU(hMainDialog, lmprintf(MSG_093),
-					lmprintf(MSG_094), MB_OKCANCEL|MB_ICONWARNING|MB_IS_RTL, selected_langid) == IDCANCEL)) {
-					format_op_in_progress = FALSE;
-					zero_drive = FALSE;
-					break;
-				}
-				if ((!zero_drive) && (IsChecked(IDC_BOOT)) && (SelectedDrive.Geometry.BytesPerSector != 512) &&
-					(MessageBoxExU(hMainDialog, lmprintf(MSG_196, SelectedDrive.Geometry.BytesPerSector),
-						lmprintf(MSG_197), MB_OKCANCEL|MB_ICONWARNING|MB_IS_RTL, selected_langid) == IDCANCEL)) {
-					format_op_in_progress = FALSE;
-					break;
-				}
-
-				// Disable all controls except cancel
-				EnableControls(FALSE);
-				DeviceNum = (DWORD)ComboBox_GetItemData(hDeviceList, nDeviceIndex);
-				InitProgress(zero_drive);
-				format_thid = CreateThread(NULL, 0, FormatThread, (LPVOID)(uintptr_t)DeviceNum, 0, NULL);
-				if (format_thid == NULL) {
-					uprintf("Unable to start formatting thread");
-					FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_START_THREAD);
-					PostMessage(hMainDialog, UM_FORMAT_COMPLETED, (WPARAM)FALSE, 0);
-				}
-				uprintf("\r\nFormat operation started");
-				PrintInfo(0, -1);
-				timer = 0;
-				safe_sprintf(szTimer, sizeof(szTimer), "00:00:00");
-				SendMessageA(hStatus, SB_SETTEXTA, SBT_OWNERDRAW | SB_SECTION_RIGHT, (LPARAM)szTimer);
-				SetTimer(hMainDialog, TID_APP_TIMER, 1000, ClockTimer);
+				default:
+					return (INT_PTR)FALSE;
 			}
-			if (format_thid == NULL) {
-				format_op_in_progress = FALSE;
-				zero_drive = FALSE;
-			}
-			break;
-		case IDC_HASH:
-			if ((format_thid == NULL) && (image_path != NULL)) {
-				FormatStatus = 0;
-				format_op_in_progress = TRUE;
-				no_confirmation_on_cancel = TRUE;
-				// Reset all progress bars
-				SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_NORMAL, 0);
-				SetTaskbarProgressState(TASKBAR_NORMAL);
-				SetTaskbarProgressValue(0, MAX_PROGRESS);
-				SendMessage(hProgress, PBM_SETPOS, 0, 0);
-				// Disable all controls except cancel
-				EnableControls(FALSE);
-				InitProgress(FALSE);
-				format_thid = CreateThread(NULL, 0, SumThread, NULL, 0, NULL);
-				if (format_thid != NULL) {
-					PrintInfo(0, -1);
-					timer = 0;
-					safe_sprintf(szTimer, sizeof(szTimer), "00:00:00");
-					SendMessageA(hStatus, SB_SETTEXTA, SBT_OWNERDRAW | SB_SECTION_RIGHT, (LPARAM)szTimer);
-					SetTimer(hMainDialog, TID_APP_TIMER, 1000, ClockTimer);
-				} else {
-					uprintf("Unable to start checksum thread");
-					FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_CANT_START_THREAD);
-					PostMessage(hMainDialog, UM_FORMAT_COMPLETED, (WPARAM)FALSE, 0);
-					format_op_in_progress = FALSE;
-				}
-			}
-			break;
-		default:
-			return (INT_PTR)FALSE;
-		}
-		return (INT_PTR)TRUE;
-
-	case WM_NOTIFY:
-		switch (((LPNMHDR)lParam)->code) {
-		case TBN_DROPDOWN:
-			lpnmtb = (LPNMTOOLBAR)lParam;
-
-			// We only care about the language button on the language toolbar
-			if (lpnmtb->hdr.hwndFrom == hLangToolbar
-				&& lpnmtb->iItem == lang_button_id) {
-				// Get toolbar button rect and map it to actual screen pixels
-				SendMessage(lpnmtb->hdr.hwndFrom, TB_GETRECT, (WPARAM)lpnmtb->iItem, (LPARAM)&LangToolbarRect);
-				MapWindowPoints(lpnmtb->hdr.hwndFrom, NULL, (POINT*)&LangToolbarRect, 2);
-
-				// Show the language menu such that it doesn't overlap the button
-				ShowLanguageMenu(LangToolbarRect);
-				return (INT_PTR)TBDDRET_DEFAULT;
-			}
-			break;
-		}
-
-		break;
-
-	case WM_CLOSE:
-	case WM_ENDSESSION:
-		if (format_thid != NULL) {
 			return (INT_PTR)TRUE;
-		}
-		PostQuitMessage(0);
+
+		case WM_NOTIFY:
+			switch(((LPNMHDR)lParam)->code) {
+				case TBN_DROPDOWN:
+					lpnmtb = (LPNMTOOLBAR)lParam;
+
+					// We only care about the language button on the language toolbar
+					if(lpnmtb->hdr.hwndFrom == hLangToolbar
+					   && lpnmtb->iItem == lang_button_id) {
+						// Get toolbar button rect and map it to actual screen pixels
+						SendMessage(lpnmtb->hdr.hwndFrom, TB_GETRECT, (WPARAM)lpnmtb->iItem, (LPARAM)&LangToolbarRect);
+						MapWindowPoints(lpnmtb->hdr.hwndFrom, NULL, (POINT*)&LangToolbarRect, 2);
+
+						// Show the language menu such that it doesn't overlap the button
+						ShowLanguageMenu(LangToolbarRect);
+						return (INT_PTR)TBDDRET_DEFAULT;
+					}
+					break;
+			}
+
+			break;
+
+		case WM_CLOSE:
+		case WM_ENDSESSION:
+			if(format_thid != NULL) {
+				return (INT_PTR)TRUE;
+			}
+			PostQuitMessage(0);
+			break;
+
+		case WM_DROPFILES:
+			droppedFileInfo = (HDROP)wParam;
+			char buffer[MAX_PATH];
+			
+			DragQueryFileA(droppedFileInfo, 0, buffer, MAX_PATH);
+
+			safe_free(image_path);
+			image_path = safe_strdup(buffer);
+			
+			if(image_path == NULL) {
+				CreateTooltip(hSelectISO, lmprintf(MSG_173), -1);
+				PrintStatus(0, MSG_086);
+				break;
+			} else {
+				FormatStatus = 0;
+				if(CreateThread(NULL, 0, ISOScanThread, NULL, 0, NULL) == NULL) {
+					uprintf("Unable to start ISO scanning thread");
+					FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_CANT_START_THREAD);
+				}
+			}
 		break;
 
 	case UM_PROGRESS_INIT:
@@ -3019,6 +3052,11 @@ relaunch:
 		SetWindowPos(hDlg, HWND_TOP, relaunch_rc.left, relaunch_rc.top, 0, 0, SWP_NOSIZE);
 	ShowWindow(hDlg, SW_SHOWNORMAL);
 	UpdateWindow(hDlg);
+
+	// Have to call these to let the drag-n-drop through the message filter
+	ChangeWindowMessageFilterEx(hDlg, WM_DROPFILES, MSGFLT_ALLOW, NULL);
+	ChangeWindowMessageFilterEx(hDlg, WM_COPYDATA, MSGFLT_ALLOW, NULL);
+	ChangeWindowMessageFilterEx(hDlg, 0x49, MSGFLT_ALLOW, NULL);
 
 	// Do our own event processing and process "magic" commands
 	while(GetMessage(&msg, NULL, 0, 0)) {

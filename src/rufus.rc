@@ -32,6 +32,7 @@ LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
 
 IDD_DIALOG DIALOGEX 12, 12, 242, 376
 STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_MINIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_ACCEPTFILES
 CAPTION "Rufus 2.7.825"
 FONT 8, "Segoe UI Symbol", 400, 0, 0x0
 BEGIN
@@ -79,8 +80,8 @@ CAPTION "About Rufus"
 FONT 8, "Segoe UI Symbol", 400, 0, 0x0
 BEGIN
     ICON            IDI_ICON,IDC_ABOUT_ICON,11,8,20,20
-    CONTROL         "",IDC_ABOUT_BLURB,"RichEdit20W",ES_MULTILINE | ES_AUTOHSCROLL | ES_READONLY,45,7,268,107
-    CONTROL         "",IDC_ABOUT_COPYRIGHTS,"RichEdit20W",ES_MULTILINE | ES_READONLY | WS_VSCROLL | WS_TABSTOP,46,115,267,91,WS_EX_STATICEDGE
+    CONTROL         "",IDC_ABOUT_BLURB,"RichEdit20W",0x884,45,7,268,107
+    CONTROL         "",IDC_ABOUT_COPYRIGHTS,"RichEdit20W",WS_VSCROLL | WS_TABSTOP | 0x804,46,115,267,91,WS_EX_STATICEDGE
     PUSHBUTTON      "License",IDC_ABOUT_LICENSE,46,215,50,14,WS_GROUP
     PUSHBUTTON      "Updates",IDC_ABOUT_UPDATES,100,215,50,14,NOT WS_VISIBLE | WS_GROUP
     DEFPUSHBUTTON   "OK",IDOK,251,215,50,14,WS_GROUP
@@ -156,7 +157,7 @@ FONT 8, "Segoe UI Symbol", 400, 0, 0x0
 BEGIN
     ICON            IDI_ICON,IDC_ABOUT_ICON,11,8,20,20
     DEFPUSHBUTTON   "Close",IDCANCEL,221,172,50,14,WS_GROUP
-    CONTROL         "",IDC_POLICY,"RichEdit20W",ES_MULTILINE | ES_READONLY | WS_VSCROLL | WS_TABSTOP,46,8,235,132,WS_EX_STATICEDGE
+    CONTROL         "",IDC_POLICY,"RichEdit20W",WS_VSCROLL | WS_TABSTOP | 0x804,46,8,235,132,WS_EX_STATICEDGE
     GROUPBOX        "Settings",IDS_UPDATE_SETTINGS_GRP,45,145,165,46
     LTEXT           "Check for updates",IDS_UPDATE_FREQUENCY_TXT,51,159,76,11
     COMBOBOX        IDC_UPDATE_FREQUENCY,133,155,66,12,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
@@ -191,12 +192,12 @@ END
 // TEXTINCLUDE
 //
 
-1 TEXTINCLUDE
+1 TEXTINCLUDE 
 BEGIN
     "resource.h\0"
 END
 
-2 TEXTINCLUDE
+2 TEXTINCLUDE 
 BEGIN
     "#ifndef _USING_V110_SDK71_\r\n"
     "#define _USING_V110_SDK71_\r\n"
@@ -208,7 +209,7 @@ BEGIN
     "\0"
 END
 
-3 TEXTINCLUDE
+3 TEXTINCLUDE 
 BEGIN
     "\r\n"
     "#ifdef RUFUS_LOC\r\n"
@@ -361,11 +362,8 @@ END
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
 IDI_ICON                ICON                    "../res/rufus.ico"
-
 IDI_UP                  ICON                    "../res/up.ico"
-
 IDI_DOWN                ICON                    "../res/down.ico"
-
 #endif    // Neutral resources
 /////////////////////////////////////////////////////////////////////////////
 
