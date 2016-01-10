@@ -2379,7 +2379,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 					if(selection_default == BT_IMG)
 						ToggleImage(!IsChecked(IDC_BOOT));
 
-					if(IsChecked(IDC_BOOT)) {
+					if(IsChecked(IDC_BOOT) && (img_report.label != NULL && img_report.label[0] != '\0')) {
 						SetWindowTextU(hLabel, img_report.label);
 					} else {
 						SetWindowTextU(hLabel, DriveLabel.String[ComboBox_GetCurSel(hDeviceList)]);
