@@ -2377,6 +2377,12 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			EnableAdvancedBootOptions(TRUE, TRUE);
 			if (selection_default == BT_IMG)
 				ToggleImage(!IsChecked(IDC_BOOT));
+
+			if(IsChecked(IDC_BOOT)) {
+				SetWindowTextU(hLabel, img_report.label);
+			} else {
+				SetWindowTextU(hLabel, DriveLabel.String[ComboBox_GetCurSel(hDeviceList)]);
+			}
 			break;
 		case IDC_BOOTTYPE:
 			if (HIWORD(wParam) != CBN_SELCHANGE)
