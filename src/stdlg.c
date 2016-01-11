@@ -64,6 +64,8 @@ static const notification_info* notification_more_info;
 static BOOL settings_commcheck = FALSE;
 static WNDPROC update_original_proc = NULL;
 
+extern loc_cmd* selected_locale;
+
 /*
  * We need a sub-callback to read the content of the edit box on exit and update
  * our path, else if what the user typed does match the selection, it is discarded.
@@ -1663,15 +1665,17 @@ LPCDLGTEMPLATE GetDialogTemplate(int Dialog_ID)
 		dwBuf[2] = WS_EX_RTLREADING | WS_EX_APPWINDOW | WS_EX_LAYOUTRTL;
 	}
 
-	// All our dialogs are set to use 'Segoe UI Symbol':
-	// 1. So that we can replace the font name with 'MS Shell Dlg' if needed (XP)
-	// 2. So that Thai displays properly on RTF controls (don't work with regular 'Segoe UI')
+	// All our dialogs are set to use 'Segoe UI Symbol' by default:
+	// 1. So that we can replace the font name with 'MS Shell Dlg' (XP) or 'Segoe UI'
+	// 2. So that Thai displays properly on RTF controls as it won't work with regular
+	// 'Segoe UI'... but Cyrillic won't work with 'Segoe UI Symbol'
 
-	// If 'Segoe UI Symbol' is available, we're done here
-	if (IsFontAvailable("Segoe UI Symbol"))
+	// If 'Segoe UI Symbol' is available, and we are using Thai, we're done here
+	if (IsFontAvailable("Segoe UI Symbol") && (selected_locale != 0)
+		&& (safe_strcmp(selected_locale->txt[0], "th-TH") == 0))
 		return rcTemplate;
 
-	// 'Segoe UI Symbol' is not available => Fall back to the best we have
+	// 'Segoe UI Symbol' cannot be used => Fall back to the best we have
 	wBuf = (WCHAR*)rcTemplate;
 	wBuf = &wBuf[14];	// Move to class name
 	// Skip class name and title
