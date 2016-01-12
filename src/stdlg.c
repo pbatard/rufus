@@ -1671,7 +1671,7 @@ LPCDLGTEMPLATE GetDialogTemplate(int Dialog_ID)
 	// 'Segoe UI'... but Cyrillic won't work with 'Segoe UI Symbol'
 
 	// If 'Segoe UI Symbol' is available, and we are using Thai, we're done here
-	if (IsFontAvailable("Segoe UI Symbol") && (selected_locale != 0)
+	if (IsFontAvailable("Segoe UI Symbol") && (selected_locale != NULL)
 		&& (safe_strcmp(selected_locale->txt[0], "th-TH") == 0))
 		return rcTemplate;
 
