@@ -1065,7 +1065,7 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 			bufsize = 65536;	// 64K should be enough for everyone
 			buffer = calloc(bufsize, 1);
 			if (buffer != NULL) {
-				if ((!WriteFile(hDrive, buffer, bufsize, &size, NULL)) || (size != bufsize))
+				if (!WriteFileWithRetry(hDrive, buffer, bufsize, &size, WRITE_RETRIES))
 					uprintf("  Could not zero MSR: %s", WindowsErrorString());
 				free(buffer);
 			}
@@ -1165,12 +1165,8 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 				uprintf("Could not access uefi-ntfs.img");
 				return FALSE;
 			}
-			r = WriteFile(hDrive, buffer, bufsize, &size, NULL);
-			if ((!r) || (size != bufsize)) {
-				if (!r)
-					uprintf("Write error: %s", WindowsErrorString());
-				else
-					uprintf("Write error: Wrote %d bytes, expected %d bytes\n", size, bufsize);
+			if(!WriteFileWithRetry(hDrive, buffer, bufsize, &size, WRITE_RETRIES)) {
+				uprintf("Write error: %s", WindowsErrorString());
 				return FALSE;
 			}
 		}

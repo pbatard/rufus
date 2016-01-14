@@ -1251,7 +1251,7 @@ static BOOL SetupWinPE(char drive_letter)
 		}
 	}
 
-	if ((!WriteFile(handle, buf, size, &rw_size, NULL)) || (size != rw_size)) {
+	if (!WriteFileWithRetry(handle, buf, size, &rw_size, WRITE_RETRIES)) {
 		uprintf("Could not write patched file: %s\n", WindowsErrorString());
 		goto out;
 	}

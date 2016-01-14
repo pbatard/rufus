@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Virtual Disk Handling functions
- * Copyright © 2013-2015 Pete Batard <pete@akeo.ie>
+ * Copyright © 2013-2016 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -178,7 +178,7 @@ BOOL AppendVHDFooter(const char* vhd_path)
 		heads = 16;
 		cylinderTimesHeads = (uint32_t)(totalSectors / sectorsPerTrack);
 	} else {
-		sectorsPerTrack = 17; 
+		sectorsPerTrack = 17;
 		cylinderTimesHeads = (uint32_t)(totalSectors / sectorsPerTrack);
 
 		heads = (cylinderTimesHeads + 1023) / 1024;
@@ -207,12 +207,12 @@ BOOL AppendVHDFooter(const char* vhd_path)
 		checksum += ((uint8_t*)footer)[i];
 	footer->checksum = bswap_uint32(~checksum);
 
-	if (!WriteFile(handle, footer, sizeof(vhd_footer), &size, NULL) || (size != sizeof(vhd_footer))) {
+	if (!WriteFileWithRetry(handle, footer, sizeof(vhd_footer), &size, WRITE_RETRIES)) {
 		uprintf("Could not write VHD footer: %s", WindowsErrorString());
 		goto out;
 	}
 	r = TRUE;
-	
+
 out:
 	safe_free(footer);
 	safe_closehandle(handle);

@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Standard Windows function calls
- * Copyright © 2013-2015 Pete Batard <pete@akeo.ie>
+ * Copyright © 2013-2016 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -809,4 +809,39 @@ BOOL SetLGP(BOOL bRestore, BOOL* bExistingKey, const char* szPath, const char* s
 	if (!GetExitCodeThread(thread_id, &r))
 		return FALSE;
 	return (BOOL) r;
+}
+
+BOOL WriteFileWithRetry(HANDLE hFile, LPCVOID lpBuffer, DWORD nNumberOfBytesToWrite,
+	LPDWORD lpNumberOfBytesWritten, DWORD nNumRetries)
+{
+	DWORD nTry = 1;
+	BOOL readFilePointer;
+	LARGE_INTEGER liFilePointer, liZero = { {0,0} };
+	static char* retry_msg = " - retrying...";
+
+	// Need to get the current file pointer in case we need to retry
+	readFilePointer = SetFilePointerEx(hFile, liZero, &liFilePointer, FILE_CURRENT);
+	if (!readFilePointer)
+		uprintf("  Warning  - could not read file pointer: %s", WindowsErrorString());
+
+	do {
+		// Need to rewind our file position on retry
+		if ((nTry > 1) && (!SetFilePointerEx(hFile, liFilePointer, NULL, FILE_BEGIN))) {
+			uprintf("  Could not set file pointer%s", retry_msg);
+			goto next_try;
+		}
+		if (WriteFile(hFile, lpBuffer, nNumberOfBytesToWrite, lpNumberOfBytesWritten, NULL)) {
+			if (nNumberOfBytesToWrite == *lpNumberOfBytesWritten)
+				return TRUE;
+			uprintf("  Wrote %d bytes but requested %d%s", *lpNumberOfBytesWritten,
+				nNumberOfBytesToWrite, nTry < nNumRetries ? retry_msg : "");
+			SetLastError(ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_INCORRECT_SIZE);
+		} else {
+			uprintf("  Write error%s", nTry < nNumRetries ? retry_msg : "");
+		}
+next_try:
+		Sleep(200);
+		nTry++;
+	} while((readFilePointer) && (nTry < nNumRetries));
+	return FALSE;
 }

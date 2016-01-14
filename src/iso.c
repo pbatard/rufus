@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * ISO file extraction
- * Copyright © 2011-2015 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2016 Pete Batard <pete@akeo.ie>
  * Based on libcdio's iso & udf samples:
  * Copyright © 2003-2014 Rocky Bernstein <rocky@gnu.org>
  *
@@ -429,17 +429,11 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 					goto out;
 				}
 				buf_size = (DWORD)MIN(i_file_length, i_read);
-				for (i=0; i<WRITE_RETRIES; i++) {
-					ISO_BLOCKING(r = WriteFile(file_handle, buf, buf_size, &wr_size, NULL));
-					if ((!r) || (buf_size != wr_size)) {
-						uprintf("  Error writing file: %s", WindowsErrorString());
-						if (i < WRITE_RETRIES-1)
-							uprintf("  RETRYING...\n");
-					} else {
-						break;
-					}
+				ISO_BLOCKING(r = WriteFileWithRetry(file_handle, buf, buf_size, &wr_size, WRITE_RETRIES));
+				if (!r) {
+					uprintf("  Error writing file: %s", WindowsErrorString());
+					goto out;
 				}
-				if (i >= WRITE_RETRIES) goto out;
 				i_file_length -= i_read;
 				if (nb_blocks++ % PROGRESS_THRESHOLD == 0)
 					UpdateProgress(OP_DOS, 100.0f*nb_blocks/total_blocks);
@@ -476,7 +470,7 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 	HANDLE file_handle = NULL;
 	DWORD buf_size, wr_size, err;
 	EXTRACT_PROPS props;
-	BOOL s, is_symlink, is_identical;
+	BOOL is_symlink, is_identical;
 	int i_length, r = 1;
 	char tmp[128], psz_fullpath[MAX_PATH], *psz_basename, *psz_sanpath;
 	const char *psz_iso_name = &psz_fullpath[strlen(psz_extract_dir)];
@@ -484,7 +478,7 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 	CdioListNode_t* p_entnode;
 	iso9660_stat_t *p_statbuf;
 	CdioList_t* p_entlist;
-	size_t i, j;
+	size_t i;
 	lsn_t lsn;
 	int64_t i_file_length;
 
@@ -582,17 +576,11 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 					goto out;
 				}
 				buf_size = (DWORD)MIN(i_file_length, ISO_BLOCKSIZE);
-				for (j=0; j<WRITE_RETRIES; j++) {
-					ISO_BLOCKING(s = WriteFile(file_handle, buf, buf_size, &wr_size, NULL));
-					if ((!s) || (buf_size != wr_size)) {
-						uprintf("  Error writing file: %s", WindowsErrorString());
-						if (j < WRITE_RETRIES-1)
-							uprintf("  RETRYING...\n");
-					} else {
-						break;
-					}
+				ISO_BLOCKING(r = WriteFileWithRetry(file_handle, buf, buf_size, &wr_size, WRITE_RETRIES));
+				if (!r) {
+					uprintf("  Error writing file: %s", WindowsErrorString());
+					goto out;
 				}
-				if (j >= WRITE_RETRIES) goto out;
 				i_file_length -= ISO_BLOCKSIZE;
 				if (nb_blocks++ % PROGRESS_THRESHOLD == 0)
 					UpdateProgress(OP_DOS, 100.0f*nb_blocks/total_blocks);
@@ -918,7 +906,6 @@ int64_t ExtractISOFile(const char* iso, const char* iso_file, const char* dest_f
 	int64_t file_length, r = 0;
 	char buf[UDF_BLOCKSIZE];
 	DWORD buf_size, wr_size;
-	BOOL s;
 	iso9660_t* p_iso = NULL;
 	udf_t* p_udf = NULL;
 	udf_dirent_t *p_udf_root = NULL, *p_udf_file = NULL;
@@ -957,8 +944,7 @@ int64_t ExtractISOFile(const char* iso, const char* iso_file, const char* dest_f
 			goto out;
 		}
 		buf_size = (DWORD)MIN(file_length, read_size);
-		s = WriteFile(file_handle, buf, buf_size, &wr_size, NULL);
-		if ((!s) || (buf_size != wr_size)) {
+		if (!WriteFileWithRetry(file_handle, buf, buf_size, &wr_size, WRITE_RETRIES)) {
 			uprintf("  Error writing file %s: %s\n", dest_file, WindowsErrorString());
 			goto out;
 		}
@@ -989,8 +975,7 @@ try_iso:
 			goto out;
 		}
 		buf_size = (DWORD)MIN(file_length, ISO_BLOCKSIZE);
-		s = WriteFile(file_handle, buf, buf_size, &wr_size, NULL);
-		if ((!s) || (buf_size != wr_size)) {
+		if (!WriteFileWithRetry(file_handle, buf, buf_size, &wr_size, WRITE_RETRIES)) {
 			uprintf("  Error writing file %s: %s\n", dest_file, WindowsErrorString());
 			goto out;
 		}
