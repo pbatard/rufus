@@ -16907,7 +16907,7 @@ t MSG_285 "Завантажений файл підписаний '%s'.\nЦе н
 
 ################################################################################
 l "vi-VN" "Vietnamese (Tiếng Việt)" 0x042A
-v 1.0.18
+v 1.0.19
 b "en-US"
 
 # Main dialog
@@ -17355,3 +17355,8 @@ t MSG_278 "Phương thức khởi động"
 t MSG_279 "Không có khả năng khởi động"
 t MSG_280 "Chọn ảnh"
 t MSG_281 "(Hãy chọn một ảnh)"
+t MSG_282 "Khoá ổ USB đặc biệt"
+t MSG_283 "Chữ ký không hợp lệ"
+t MSG_284 "Tập tin thực thi đã tải xuống thiếu chữ ký số."
+t MSG_285 "Tập tin thực thi đã tải xuống được ký bởi '%s'.\nĐây không phải chữ ký số chúng tôi công nhận và có thể "
+	"xác định là một dạng hoạt động nguy hiểm...\nBạn chắc muốn chạy tập tin này?"
