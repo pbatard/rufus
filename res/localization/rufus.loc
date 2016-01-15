@@ -7711,7 +7711,7 @@ t MSG_285 "L'eseguibile scaricato è firmato da '%s'.\nQuesta non è una firma r
 
 ######################################################################
 l "ja-JP" "Japanese (日本語)" 0x0411
-v 1.0.20
+v 1.0.19
 b "en-US"
 
 # Main dialog
