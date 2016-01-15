@@ -13699,7 +13699,7 @@ t MSG_286 "Anuliranje uređaja: %0.1f%% završeno"
 
 ################################################################################
 l "sk-SK" "Slovak (Slovensky)" 0x041B
-v 1.0.18
+v 1.0.19
 b "en-US"
 
 # Main dialog
@@ -14136,6 +14136,11 @@ t MSG_278 "Typ bootovania"
 t MSG_279 "Nie je možné bootovať"
 t MSG_280 "Výber obrazu"
 t MSG_281 "(Vyberte obraz)"
+t MSG_282 "Uzamknutie USB zariadenia
+t MSG_283 "Neplatný podpis
+t MSG_284 "Stiahnutému inštalátoru chýba digitálny podpis."
+t MSG_285 "Stiahnutý inštalátor podpísal '%s'.\nTento podpis nebol rozoznaný a môže znamenať "
+	"nejakú formu škodlivej aktivity...\nSte si istý, že chcete spustiť tento súbor?"
 
 ################################################################################
 l "sl-SI" "Slovene (Slovenščina)" 0x0424
