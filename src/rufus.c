@@ -72,6 +72,13 @@
 #define ERROR_FILE_TOO_LARGE 223
 #endif
 
+#ifndef MSGFLT_ADD
+#define MSGFLT_ADD 1
+#endif
+#ifndef WM_COPYGLOBALDATA
+#define WM_COPYGLOBALDATA 0x49
+#endif
+
 struct {
 	HIMAGELIST himl;
 	RECT margin;
@@ -2091,12 +2098,14 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	static LPITEMIDLIST pidlDesktop = NULL;
 	static MY_SHChangeNotifyEntry NotifyEntry;
 	DRAWITEMSTRUCT* pDI;
+	HDROP droppedFileInfo;
 	POINT Point;
 	RECT DialogRect, DesktopRect, LangToolbarRect;
 	LONG progress_style;
 	HDC hDC;
 	int nDeviceIndex, fs, tt, i, nWidth, nHeight, nb_devices, selected_language, offset;
 	char tmp[128];
+	wchar_t* wbuffer = NULL;
 	loc_cmd* lcmd = NULL;
 	EXT_DECL(img_ext, NULL, __VA_GROUP__("*.img;*.vhd;*.gz;*.bzip2;*.xz;*.lzma;*.Z;*.zip"), __VA_GROUP__(lmprintf(MSG_095)));
 	EXT_DECL(iso_ext, NULL, __VA_GROUP__("*.iso"), __VA_GROUP__(lmprintf(MSG_036)));
@@ -2426,7 +2435,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			return (INT_PTR)TRUE;
 		case IDC_SELECT_ISO:
 			if (iso_provided) {
-				uprintf("Image provided: '%s'\n", image_path);
+				uprintf("\r\nImage provided: '%s'", image_path);
 				iso_provided = FALSE;	// One off thing...
 			} else {
 				safe_free(image_path);
@@ -2613,6 +2622,25 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 
 		break;
 
+	case WM_DROPFILES:
+		droppedFileInfo = (HDROP)wParam;
+		wbuffer = calloc(MAX_PATH, sizeof(wchar_t));
+		if (wbuffer == NULL) {
+			uprintf("Failed to alloc buffer for drag-n-drop");
+			break;
+		}
+		DragQueryFileW(droppedFileInfo, 0, wbuffer, MAX_PATH);
+		safe_free(image_path);
+		image_path = wchar_to_utf8(wbuffer);
+		safe_free(wbuffer);
+
+		if (image_path != NULL) {
+			iso_provided = TRUE;
+			// Simulate ISO selection click
+			SendMessage(hDlg, WM_COMMAND, IDC_SELECT_ISO, 0);
+		}
+		break;
+
 	case WM_CLOSE:
 	case WM_ENDSESSION:
 		if (format_thid != NULL) {
@@ -2782,6 +2810,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	char *tmp, *locale_name = NULL, **argv = NULL;
 	wchar_t **wenv, **wargv;
 	PF_TYPE_DECL(CDECL, int, __wgetmainargs, (int*, wchar_t***, wchar_t***, int, int*));
+	PF_TYPE_DECL(WINAPI, BOOL, ChangeWindowMessageFilter, (UINT message, DWORD dwFlag));
 	HANDLE mutex = NULL, hogmutex = NULL, hFile = NULL;
 	HWND hDlg = NULL;
 	HDC hDC;
@@ -3037,6 +3066,20 @@ relaunch:
 	}
 	if ((relaunch_rc.left > -65536) && (relaunch_rc.top > -65536))
 		SetWindowPos(hDlg, HWND_TOP, relaunch_rc.left, relaunch_rc.top, 0, 0, SWP_NOSIZE);
+
+	// Enable drag-n-drop through the message filter (for Vista or later)
+	if (nWindowsVersion >= WINDOWS_VISTA) {
+		PF_INIT(ChangeWindowMessageFilter, user32);
+		if (pfChangeWindowMessageFilter != NULL) {
+			// NB: We use ChangeWindowMessageFilter() here because
+			// ChangeWindowMessageFilterEx() is not available on Vista
+			pfChangeWindowMessageFilter(WM_DROPFILES, MSGFLT_ADD);
+			pfChangeWindowMessageFilter(WM_COPYDATA, MSGFLT_ADD);
+			// CopyGlobalData is needed sine we are running elevated
+			pfChangeWindowMessageFilter(WM_COPYGLOBALDATA, MSGFLT_ADD);
+		}
+	}
+
 	ShowWindow(hDlg, SW_SHOWNORMAL);
 	UpdateWindow(hDlg);
 

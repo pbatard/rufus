@@ -283,7 +283,6 @@ const char* StrError(DWORD error_code, BOOL use_default_locale)
 	return ret;
 }
 
-
 BOOL WriteFileWithRetry(HANDLE hFile, LPCVOID lpBuffer, DWORD nNumberOfBytesToWrite,
 	LPDWORD lpNumberOfBytesWritten, DWORD nNumRetries)
 {
