@@ -62,12 +62,14 @@ void _uprintf(const char *format, ...)
 
 	// Send output to Windows debug facility
 	OutputDebugStringA(buf);
-	// Send output to our log Window
-	Edit_SetSel(hLog, MAX_LOG_SIZE, MAX_LOG_SIZE);
-	Edit_ReplaceSelU(hLog, buf);
-	// Make sure the message scrolls into view
-	// (Or see code commented in LogProc:WM_SHOWWINDOW for a less forceful scroll)
-	SendMessage(hLog, EM_LINESCROLL, 0, SendMessage(hLog, EM_GETLINECOUNT, 0, 0));
+	if ((hLog != NULL) && (hLog != INVALID_HANDLE_VALUE)) {
+		// Send output to our log Window
+		Edit_SetSel(hLog, MAX_LOG_SIZE, MAX_LOG_SIZE);
+		Edit_ReplaceSelU(hLog, buf);
+		// Make sure the message scrolls into view
+		// (Or see code commented in LogProc:WM_SHOWWINDOW for a less forceful scroll)
+		SendMessage(hLog, EM_LINESCROLL, 0, SendMessage(hLog, EM_GETLINECOUNT, 0, 0));
+	}
 }
 #endif
 
@@ -279,4 +281,45 @@ const char* StrError(DWORD error_code, BOOL use_default_locale)
 	if (use_default_locale)
 		toggle_default_locale();
 	return ret;
+}
+
+
+BOOL WriteFileWithRetry(HANDLE hFile, LPCVOID lpBuffer, DWORD nNumberOfBytesToWrite,
+	LPDWORD lpNumberOfBytesWritten, DWORD nNumRetries)
+{
+	DWORD nTry;
+	BOOL readFilePointer;
+	LARGE_INTEGER liFilePointer, liZero = { { 0,0 } };
+	static char* retry_msg = " - retrying...";
+
+	// Need to get the current file pointer in case we need to retry
+	readFilePointer = SetFilePointerEx(hFile, liZero, &liFilePointer, FILE_CURRENT);
+	if (!readFilePointer)
+		uprintf("  Warning - Could not read file pointer: %s", WindowsErrorString());
+
+	if (nNumRetries == 0)
+		nNumRetries = 1;
+	for (nTry = 1; nTry <= nNumRetries; nTry++) {
+		// Need to rewind our file position on retry - if we can't even do that, just give up
+		if ((nTry > 1) && (!SetFilePointerEx(hFile, liFilePointer, NULL, FILE_BEGIN))) {
+			uprintf("  Could not set file pointer - aborting");
+			break;
+		}
+		if (WriteFile(hFile, lpBuffer, nNumberOfBytesToWrite, lpNumberOfBytesWritten, NULL)) {
+			if (nNumberOfBytesToWrite == *lpNumberOfBytesWritten)
+				return TRUE;
+			uprintf("  Wrote %d bytes but requested %d%s", *lpNumberOfBytesWritten,
+				nNumberOfBytesToWrite, nTry < nNumRetries ? retry_msg : "");
+		}
+		else {
+			uprintf("  Write error [0x%8X]%s", GetLastError(), nTry < nNumRetries ? retry_msg : "");
+		}
+		// If we can't reposition for the next run, just abort
+		if (!readFilePointer)
+			break;
+		Sleep(200);
+	}
+	if (SCODE_CODE(GetLastError()) == ERROR_SUCCESS)
+		SetLastError(ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_WRITE_FAULT);
+	return FALSE;
 }

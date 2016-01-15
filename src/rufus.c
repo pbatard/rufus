@@ -2948,11 +2948,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		hFile = CreateFileU(loc_file, GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ|FILE_SHARE_WRITE,
 			NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 		if ((hFile == INVALID_HANDLE_VALUE) || (!WriteFileWithRetry(hFile, loc_data, loc_size, &size, WRITE_RETRIES))) {
-			uprintf("localization: unable to extract '%s': %s.\n", loc_file, WindowsErrorString());
+			uprintf("localization: unable to extract '%s': %s", loc_file, WindowsErrorString());
 			safe_closehandle(hFile);
 			goto out;
 		}
-		uprintf("localization: extracted data to '%s'\n", loc_file);
+		uprintf("localization: extracted data to '%s'", loc_file);
 		safe_closehandle(hFile);
 	} else {
 		safe_sprintf(loc_file, sizeof(loc_file), "%s\\%s", app_dir, rufus_loc);
@@ -2962,7 +2962,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	if ( (!get_supported_locales(loc_file))
 	  || ((selected_locale = ((locale_name == NULL)?get_locale_from_lcid(lcid, TRUE):get_locale_from_name(locale_name, TRUE))) == NULL) ) {
-		uprintf("FATAL: Could not access locale!\n");
+		uprintf("FATAL: Could not access locale!");
 		MessageBoxU(NULL, "The locale data is missing or invalid. This application will now exit.",
 			"Fatal error", MB_ICONSTOP|MB_SYSTEMMODAL);
 		goto out;
