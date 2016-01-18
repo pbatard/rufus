@@ -18,6 +18,7 @@
 #include <stdio.h>
 
 #include "file.h"
+#include "nls.h"
 #include "br.h"
 
 unsigned long ulBytesPerSector = 512;
@@ -41,6 +42,28 @@ int write_windows_disk_signature(FILE *fp, uint32_t tWDS)
 {
    return write_data(fp, 0x1b8, &tWDS, 4);
 } /* write_windows_disk_signature */
+
+uint16_t read_mbr_copy_protect_bytes(FILE *fp)
+{
+   uint16_t tOut;
+   if(!read_data(fp, 0x1bc, &tOut, 2))
+      return 0xffff;
+   return tOut;
+} /* read_mbr_copy_protect_bytes */
+
+const char *read_mbr_copy_protect_bytes_explained(FILE *fp)
+{
+   uint16_t t = read_mbr_copy_protect_bytes(fp);
+   switch(t)
+   {
+      case 0:
+	 return _("not copy protected");
+      case 0x5a5a:
+	 return _("copy protected");
+      default:
+	 return _("unknown value");
+   }
+} /* read_mbr_copy_protect_bytes_explained */
 
 int is_br(FILE *fp)
 {
@@ -188,17 +211,6 @@ int is_zero_mbr(FILE *fp)
       contains_data(fp, 0x0, mbr_zero_0x0, sizeof(mbr_zero_0x0));
 	/* Don't bother to check 55AA signature */
 } /* is_zero_mbr */
-
-int is_zero_mbr_with_other_windows_disk_signature(FILE *fp)
-{
-   #include "mbr_zero.h"
-
-   return
-      (!contains_data(fp, 0x0, mbr_zero_0x0, sizeof(mbr_zero_0x0))) &&
-      contains_data(fp, 0x0, mbr_zero_0x0, 0x1b8);
-      contains_data(fp, 0x1bc, mbr_zero_0x0, 2);
-	/* Don't bother to check 55AA signature */
-} /* is_zero_mbr_with_other_windows_disk_signature */
 
 int is_zero_mbr_not_including_disk_signature_or_copy_protect(FILE *fp)
 {

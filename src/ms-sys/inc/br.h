@@ -13,6 +13,10 @@ uint32_t read_windows_disk_signature(FILE *fp);
 /* Sets a new Windows Disk Signature to MBR */
 int write_windows_disk_signature(FILE *fp, uint32_t tWDS);
 
+/* Reads copy protect bytes after Windows Disk Signature from MBR */
+uint16_t read_mbr_copy_protect_bytes(FILE *fp);
+const char *read_mbr_copy_protect_bytes_explained(FILE *fp);
+
 /* returns TRUE if the file has a boot record, otherwise FALSE.
    The file position will change when this function is called! */
 int is_br(FILE *fp);
@@ -77,7 +81,6 @@ int is_syslinux_gpt_mbr(FILE *fp);
 /* returns TRUE if the file has a zeroed master boot record, otherwise
    FALSE.The file position will change when this function is called! */
 int is_zero_mbr(FILE *fp);
-int is_zero_mbr_with_other_windows_disk_signature(FILE *fp);
 int is_zero_mbr_not_including_disk_signature_or_copy_protect(FILE *fp);
 
 /* Writes a dos master boot record to a file, returns TRUE on success, otherwise
