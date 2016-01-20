@@ -2800,7 +2800,7 @@ t MSG_285 "下載的檔案簽章者為: '%s'.\n本軟體未使用此簽章，代
 
 ################################################################################
 l "hr-HR" "Croatian (Hrvatski)" 0x041a, 0x081a, 0x101a
-v 1.0.18
+v 1.0.19
 b "en-US"
 
 # Main dialog
@@ -3228,6 +3228,11 @@ t MSG_278 "Boot tip"
 t MSG_279 "Non bootable"
 t MSG_280 "Odabir datoteke"
 t MSG_281 "(Molim odaberite datoteku)"
+t MSG_282 "Ekskluzivno zaključavanje USB medija"
+t MSG_283 "Nevažeći potpis"
+t MSG_284 "Preuzeta aplikacija ne sadrži digitalni potpis."
+t MSG_285 "Preuzeta aplikacija je potpisana od strane ‘%s’.\nOvo nije prepoznatljiv izvor "
+	"i može biti zlonamjeran...\nŽelite li svejedno pokrenuti program?"
 
 ################################################################################
 l "cs-CZ" "Czech (Čeština)" 0x0405
