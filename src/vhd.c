@@ -439,42 +439,54 @@ out:
 // Extract a file from a WIM image using 7-Zip
 static BOOL WimExtractFile_7z(const char* image, int index, const char* src, const char* dst)
 {
+	int n;
 	size_t i;
-	STARTUPINFOA si = {0};
-	PROCESS_INFORMATION pi = {0};
 	char cmdline[MAX_PATH];
 	char tmpdst[MAX_PATH];
+	char index_prefix[] = "#\\";
 
 	uprintf("Opening: %s:[%d] (7-Zip)", image, index);
 
 	if ((image == NULL) || (src == NULL) || (dst == NULL))
 		return FALSE;
 
-	safe_strcpy(tmpdst, sizeof(tmpdst), dst);
-	for (i=strlen(tmpdst)-1; i>0; i--) {
-		if (tmpdst[i] == '\\')
+	// If you shove more than 9 images in a WIM, don't come complaining
+	// that this breaks!
+	index_prefix[0] = '0' + index;
+
+	uprintf("Extracting: %s (From %s)", dst, src);
+
+	// 7z has a quirk where the image index MUST be specified if a
+	// WIM has multiple indexes, but it MUST be removed if there is
+	// only one image. Because of this (and because 7z will not
+	// return an error code if it can't extract the file), we need
+	// to issue 2 passes. See github issue #680.
+	for (n = 0; n < 2; n++) {
+		safe_strcpy(tmpdst, sizeof(tmpdst), dst);
+		for (i = strlen(tmpdst) - 1; i > 0; i--) {
+			if (tmpdst[i] == '\\')
+				break;
+		}
+		tmpdst[i] = 0;
+
+		safe_sprintf(cmdline, sizeof(cmdline), "\"%s\" -y e \"%s\" %s%s", sevenzip_path,
+			image, (n == 0) ? index_prefix : "", src);
+		if (RunCommand(cmdline, tmpdst, FALSE) != 0) {
+			uprintf("  Could not launch 7z.exe: %s", WindowsErrorString());
+			return FALSE;
+		}
+
+		safe_strcat(tmpdst, sizeof(tmpdst), "\\bootmgfw.efi");
+		if (_access(tmpdst, 0) == 0)
+			// File was extracted => move on
 			break;
 	}
-	tmpdst[i] = 0;
 
-	// TODO: use RunCommand
-	si.cb = sizeof(si);
-	safe_sprintf(cmdline, sizeof(cmdline), "7z -y e \"%s\" %d\\%s", image, index, src);
-	uprintf("Extracting: %s (From %s)", dst, src);
-	if (!CreateProcessU(sevenzip_path, cmdline, NULL, NULL, FALSE, CREATE_NO_WINDOW, NULL, tmpdst, &si, &pi)) {
-		uprintf("  Could not launch 7z.exe: %s", WindowsErrorString());
-		return FALSE;
-	}
-	WaitForSingleObject(pi.hProcess, INFINITE);
-	UpdateProgress(OP_FINALIZE, -1.0f);
-	CloseHandle(pi.hProcess);
-	CloseHandle(pi.hThread);
-
-	safe_strcat(tmpdst, sizeof(tmpdst), "\\bootmgfw.efi");
-	if (_access(tmpdst, 0) == -1) {
+	if (n >= 2) {
 		uprintf("  7z.exe did not extract %s", tmpdst);
 		return FALSE;
 	}
+
 	// coverity[toctou]
 	if (rename(tmpdst, dst) != 0) {
 		uprintf("  Could not rename %s to %s", tmpdst, dst);

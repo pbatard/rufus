@@ -94,7 +94,7 @@ static __inline BOOL _GetRegistryKey(HKEY key_root, const char* key_name, DWORD 
 
 	s = RegQueryValueExA(hApp, &key_name[i], NULL, &dwType, (LPBYTE)dest, &dwSize);
 	// No key means default value of 0 or empty string
-	if ((s == ERROR_FILE_NOT_FOUND) || ((s == ERROR_SUCCESS) && (dwType = reg_type) && (dwSize > 0))) {
+	if ((s == ERROR_FILE_NOT_FOUND) || ((s == ERROR_SUCCESS) && (dwType == reg_type) && (dwSize > 0))) {
 		r = TRUE;
 	}
 out:
