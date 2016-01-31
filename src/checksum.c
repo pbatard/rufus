@@ -4,7 +4,7 @@
  * Copyright © 1998-2001 Free Software Foundation, Inc.
  * Copyright © 2004 g10 Code GmbH
  * Copyright © 2006-2012 Brad Conte <brad@bradconte.com>
- * Copyright © 2015 Pete Batard <pete@akeo.ie>
+ * Copyright © 2015-2016 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -711,7 +711,7 @@ static void md5_final(MD5_CONTEXT *ctx)
  */
 INT_PTR CALLBACK ChecksumCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	int i, dw;
+	int i, dw, dh;
 	RECT rect;
 	HFONT hFont;
 	HDC hDC;
@@ -737,9 +737,11 @@ INT_PTR CALLBACK ChecksumCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 
 		GetWindowRect(GetDlgItem(hDlg, IDC_MD5), &rect);
 		dw = rect.right - rect.left;
+		dh = rect.bottom - rect.top;
 		DrawTextU(hDC, md5str, -1, &rect, DT_CALCRECT);
 		dw = rect.right - rect.left - dw + 12;	// Ideally we'd compute the field borders from the system, but hey...
-		ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDC_SHA256), 0, 0, dw, 0, 1.0f);
+		dh = rect.bottom - rect.top - dh + 6;
+		ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDC_SHA256), 0, 0, dw, dh, 1.0f);
 
 		GetWindowRect(GetDlgItem(hDlg, IDC_SHA1), &rect);
 		dw = rect.right - rect.left;
