@@ -75,6 +75,9 @@
 #ifndef MSGFLT_ADD
 #define MSGFLT_ADD 1
 #endif
+#ifndef WM_CLIENTSHUTDOWN
+#define WM_CLIENTSHUTDOWN 0x3B
+#endif
 #ifndef WM_COPYGLOBALDATA
 #define WM_COPYGLOBALDATA 0x49
 #endif
@@ -1862,9 +1865,8 @@ void InitDialog(HWND hDlg)
 		rcSelectImage.right - rcSelectImage.left, rcBootType.bottom - rcBootType.top + 2, SWP_NOZORDER);
 
 	// The things one needs to do to keep things looking good...
-	if (nWindowsVersion == WINDOWS_7) {
-		ResizeMoveCtrl(hDlg, GetDlgItem(hMainDialog, IDS_ADVANCED_OPTIONS_GRP), 0, -1, 0, 2, fScale);
-		ResizeMoveCtrl(hDlg, hProgress, 0, 1, 0, 0, fScale);
+	if (fScale > 1.4f) {
+		ResizeMoveCtrl(hDlg, GetDlgItem(hMainDialog, IDS_ADVANCED_OPTIONS_GRP), 0, +1, 0, 0, fScale);
 	}
 
 	// Subclass the Info box so that we can align its text vertically
@@ -2641,12 +2643,23 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		}
 		break;
 
+	// This is >>>SUPER WEIRD<<<. After a successful ISO or DD write (e.g. Arch 2016.01)
+	// we no longer receive WM_QUERYENDSESSION messages, only WM_ENDSESSION.
+	// But if we do a FreeDOS format, WM_QUERYENDSESSION is still sent to us alright.
+	// What the heck is going on here?!?
+	// Also, even as we try to work around this, WM_ENDSESSION comes too late in the game
+	// to prevent shutdown block. So we need to handle the _undocumented_ WM_CLIENTSHUTDOWN.
 	case WM_CLOSE:
+	case WM_CLIENTSHUTDOWN:
+	case WM_QUERYENDSESSION:
 	case WM_ENDSESSION:
-		if (format_thid != NULL) {
+		// TODO: Do we want to use ShutdownBlockReasonCreate() in Vista and later to stop
+		// forced shutdown? See https://msdn.microsoft.com/en-us/library/ms700677.aspx
+		if (format_op_in_progress) {
+			// WM_QUERYENDSESSION uses this value to prevent shutdown
 			return (INT_PTR)TRUE;
 		}
-		PostQuitMessage(0);
+		SendMessage(hDlg, WM_COMMAND, (WPARAM)IDCANCEL, (LPARAM)0);
 		break;
 
 	case UM_PROGRESS_INIT:
