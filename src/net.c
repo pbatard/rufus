@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Networking functionality (web file download, check for update, etc.)
- * Copyright © 2012-2015 Pete Batard <pete@akeo.ie>
+ * Copyright © 2012-2016 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -80,7 +80,7 @@ static BOOL force_update_check = FALSE;
 
 /*
  * FormatMessage does not handle internet errors
- * http://support.microsoft.com/kb/193625
+ * https://msdn.microsoft.com/en-us/library/windows/desktop/aa385465.aspx
  */
 const char* WinInetErrorString(void)
 {
@@ -429,9 +429,9 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 	BOOL releases_only, found_new_version = FALSE;
 	int status = 0;
 	const char* server_url = RUFUS_URL "/";
-	int i, j, k, verbose = 0, verpos[4];
+	int i, j, k, max_channel, verbose = 0, verpos[4];
 	static const char* archname[] = {"win_x86", "win_x64"};
-	static const char* channel[] = {"release", "beta"};		// release channel
+	static const char* channel[] = {"release", "beta", "test"};		// release channel
 	const char* accept_types[] = {"*/*\0", NULL};
 	DWORD dwFlags, dwSize, dwDownloaded, dwTotalSize, dwStatus;
 	char* buf = NULL;
@@ -504,7 +504,13 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 	status++;	// 2
 	releases_only = !ReadSettingBool(SETTING_INCLUDE_BETAS);
 
-	for (k=0; (k<(releases_only?1:(int)ARRAYSIZE(channel))) && (!found_new_version); k++) {
+	// Test releases get their own distribution channel (and also force beta checks)
+#if defined(TEST)
+	max_channel = (int)ARRAYSIZE(channel);
+#else
+	max_channel = releases_only ? 1 : (int)ARRAYSIZE(channel) - 1;
+#endif
+	for (k=0; (k<max_channel) && (!found_new_version); k++) {
 		uprintf("Checking %s channel...\n", channel[k]);
 		// At this stage we can query the server for various update version files.
 		// We first try to lookup for "<appname>_<os_arch>_<os_version_major>_<os_version_minor>.ver"
