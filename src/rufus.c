@@ -654,7 +654,7 @@ static void SetTargetSystem(void)
 
 static void SetProposedLabel(int ComboIndex)
 {
-	const char no_label[] = STR_NO_LABEL;
+	const char no_label[] = STR_NO_LABEL, empty[] = "";
 	int bt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
 
 	app_changed_label = TRUE;
@@ -680,7 +680,7 @@ static void SetProposedLabel(int ComboIndex)
 	}
 
 	// Else if no existing label is available, propose one according to the size (eg: "256MB", "8GB")
-	if ((safe_stricmp(no_label, DriveLabel.String[ComboIndex]) == 0) || (safe_stricmp(no_label, "") == 0)
+	if ((safe_stricmp(no_label, DriveLabel.String[ComboIndex]) == 0) || (safe_stricmp(no_label, empty) == 0)
 		|| (safe_stricmp(lmprintf(MSG_207), DriveLabel.String[ComboIndex]) == 0)) {
 		SetWindowTextU(hLabel, SelectedDrive.proposed_label);
 	} else {

@@ -1648,6 +1648,7 @@ out:
 LPCDLGTEMPLATE GetDialogTemplate(int Dialog_ID)
 {
 	int i;
+	const char thai_id[] = "th-TH";
 	size_t len;
 	DWORD size;
 	DWORD* dwBuf;
@@ -1672,7 +1673,7 @@ LPCDLGTEMPLATE GetDialogTemplate(int Dialog_ID)
 
 	// If 'Segoe UI Symbol' is available, and we are using Thai, we're done here
 	if (IsFontAvailable("Segoe UI Symbol") && (selected_locale != NULL)
-		&& (safe_strcmp(selected_locale->txt[0], "th-TH") == 0))
+		&& (safe_strcmp(selected_locale->txt[0], thai_id) == 0))
 		return rcTemplate;
 
 	// 'Segoe UI Symbol' cannot be used => Fall back to the best we have

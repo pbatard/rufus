@@ -1,3 +1,13 @@
+o Version 2.7 (2016.02.??)
+    Add Thai translation, courtesy of Sippapas Wangsri
+    Add Drag and Drop support, courtesy of SeymourApps
+    Add a retry for most write operations
+    Update UEFI:NTFS, ms-sys and Grub4DOS to latest
+    Dual sign Rufus with both SHA-1 and SHA-256
+    Fix 2nd line of SHA-256 being hidden on some platforms
+    Fix shutdown prevention issues
+    Additional small fixes
+
 o Version 2.6 (2015.12.22)
     Add Serbian (Latin) translation, courtesy of Ivan Strugar
     Add a cheat mode to zero a device (Alt-Z)
