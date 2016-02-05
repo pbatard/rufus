@@ -474,8 +474,6 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 			vvuprintf("Local time: %" PRId64 "\n", local_time);
 			if (local_time < reg_time + update_interval) {
 				vuprintf("Next update check in %" PRId64 " seconds.\n", reg_time + update_interval - local_time);
-				// This is as good a place as any to ask for translation help
-				LostTranslatorCheck();
 				goto out;
 			}
 		}
