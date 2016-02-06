@@ -6818,7 +6818,7 @@ t MSG_286 "Meghajtó kinullázása: %0.1f%% kész"
 
 ################################################################################
 l "id-ID" "Indonesian (Bahasa Indonesia)" 0x0421
-v 1.0.18
+v 1.0.19
 b "en-US"
 
 # Main dialog
@@ -7138,7 +7138,7 @@ t MSG_158 "Ukuran minimal blok data yang akan menempati sistem berkas"
 t MSG_159 "Gunakan bidang ini untuk menyetel karakter Internasional yang diperbolehkan\npada label perangkat"
 t MSG_160 "Tombol untuk opsi lanjutan"
 t MSG_161 "Periksa blok buruk pada perangkat menggunakan tes pola"
-t MSG_162 "Hapus centang pada kotak ini untuk \"tampilkan\" metode format"
+t MSG_162 "Hapus centang kotak ini untuk menggunakan metode format \"lambat\""
 t MSG_163 "Centang kotak ini untuk membuat perangkat USB bootable"
 t MSG_164 "Metode yang akan digunakan untuk membuat perangkat bootable"
 t MSG_165 "Klik untuk memilih sebuah image..."
@@ -7294,6 +7294,12 @@ t MSG_278 "Tipe Boot"
 t MSG_279 "Non bootable"
 t MSG_280 "Pemilihan image"
 t MSG_281 "(Silakan pilih sebuah image)"
+t MSG_282 "Penguncian perangkat USB khusus"
+t MSG_283 "Tanda tangan digital tidak valid"
+t MSG_284 "Berkas exe yang diunduh memiliki tanda tangan digital yang salah."
+t MSG_285 "Berkas exe yang diunduh ditandatangani oleh '%s'.\nTanda tangan ini "
+	"tidak kami kenali dan bisa menjadi pertanda dari aktivitas berbahaya...\n"
+	"Apakah Anda yakin ingin menjalankan berkas ini?"
 
 ################################################################################
 l "it-IT" "Italian (Italiano)" 0x0410, 0x0810
