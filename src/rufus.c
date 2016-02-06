@@ -1050,6 +1050,7 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 	img_report.is_iso = (BOOLEAN)ExtractISO(image_path, "", TRUE);
 	img_report.is_bootable_img = (BOOLEAN)IsBootableImage(image_path);
 	if (!img_report.is_iso && !img_report.is_bootable_img) {
+		// Failed to scan image
 		SendMessage(hMainDialog, UM_PROGRESS_EXIT, 0, 0);
 		PrintInfoDebug(0, MSG_203);
 		safe_free(image_path);
@@ -1065,15 +1066,24 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 			(img_report.compression_type != BLED_COMPRESSION_NONE) ? "compressed " : "", img_report.is_vhd ? "VHD" : "disk");
 		selection_default = BT_IMG;
 	}
+
 	if (img_report.is_iso) {
-		// Will override BT_IMG above for ISOHybrid
-		selection_default = BT_ISO;
 		DisplayISOProps();
+		// If we have an ISOHybrid, but without an ISO method we support, disable ISO support altogether
+		if ((img_report.is_bootable_img) && (!img_report.has_bootmgr) && (!HAS_SYSLINUX(img_report)) && (!IS_WINPE(img_report.winpe))
+			&& (!IS_GRUB(img_report)) && (!img_report.has_efi) && (!IS_REACTOS(img_report)) && (!img_report.has_kolibrios)) {
+			uprintf("This ISOHybrid is not compatible with any of the ISO boot methods we support");
+			img_report.is_iso = FALSE;
+		} else {
+			// Will override BT_IMG above for ISOHybrid
+			selection_default = BT_ISO;
+		}
 	}
 	// Only enable AFTER we have determined the image type
 	EnableControls(TRUE);
 	if ( (!img_report.has_bootmgr) && (!HAS_SYSLINUX(img_report)) && (!IS_WINPE(img_report.winpe)) && (!IS_GRUB(img_report))
-	  && (!img_report.has_efi) && (!IS_REACTOS(img_report) && (!img_report.has_kolibrios) && (!img_report.is_bootable_img)) ) {
+	  && (!img_report.has_efi) && (!IS_REACTOS(img_report)) && (!img_report.has_kolibrios) && (!img_report.is_bootable_img) ) {
+		// No boot method that we support
 		PrintInfo(0, MSG_081);
 		safe_free(image_path);
 		EnableWindow(hStatusToolbar, FALSE);
