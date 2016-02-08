@@ -300,7 +300,7 @@ DWORD DownloadFile(const char* url, const char* file, HWND hProgressDialog)
 		uprintf("Network is unavailable: %s\n", WinInetErrorString());
 		goto out;
 	}
-	_snprintf(agent, ARRAYSIZE(agent), APPLICATION_NAME "/%d.%d.%d (WinNT %d.%d%s)",
+	safe_sprintf(agent, ARRAYSIZE(agent), APPLICATION_NAME "/%d.%d.%d (Windows NT %d.%d%s)",
 		rufus_version[0], rufus_version[1], rufus_version[2],
 		nWindowsVersion>>4, nWindowsVersion&0x0F, is_x64()?"; WOW64":"");
 	hSession = InternetOpenA(agent, INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
@@ -491,7 +491,9 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 		goto out;
 	hostname[sizeof(hostname)-1] = 0;
 
-	safe_sprintf(agent, ARRAYSIZE(agent), APPLICATION_NAME "/%d.%d.%d", rufus_version[0], rufus_version[1], rufus_version[2]);
+	safe_sprintf(agent, ARRAYSIZE(agent), APPLICATION_NAME "/%d.%d.%d (Windows NT %d.%d%s)",
+		rufus_version[0], rufus_version[1], rufus_version[2],
+		nWindowsVersion >> 4, nWindowsVersion & 0x0F, is_x64() ? "; WOW64" : "");
 	hSession = InternetOpenA(agent, INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
 	if (hSession == NULL)
 		goto out;
