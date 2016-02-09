@@ -2828,6 +2828,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		{0, 0, NULL, 0}
 	};
 
+	// Disable loading system DLLs from the current directory (sideloading mitigation)
+	SetDllDirectoryA("");
+
 	uprintf("*** " APPLICATION_NAME " init ***\n");
 
 	// Reattach the console, if we were started from commandline
