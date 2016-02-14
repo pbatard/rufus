@@ -1,4 +1,4 @@
-o Version 2.7 (2016.02.??)
+o Version 2.7 (2016.02.14)
     Add Thai translation, courtesy of Sippapas Wangsri
     Add Drag and Drop support, courtesy of SeymourApps
     Add a retry for most write operations
@@ -6,7 +6,7 @@ o Version 2.7 (2016.02.??)
     Dual sign Rufus with both SHA-1 and SHA-256
     Fix 2nd line of SHA-256 being hidden on some platforms
     Fix shutdown prevention issues
-    Additional small fixes
+    Additional fixes & translation updates
 
 o Version 2.6 (2015.12.22)
     Add Serbian (Latin) translation, courtesy of Ivan Strugar
