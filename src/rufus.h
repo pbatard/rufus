@@ -113,6 +113,9 @@
 #ifdef RUFUS_DEBUG
 extern void _uprintf(const char *format, ...);
 #define uprintf(...) _uprintf(__VA_ARGS__)
+#define ubclear() do { ubuffer[0] = 0; } while (0);
+#define ubpushf(...) static_sprintf(ubuffer, __VA_ARGS__)
+#define ubpop() uprintf("%s", ubuffer)
 #define vuprintf(...) if (verbose) _uprintf(__VA_ARGS__)
 #define vvuprintf(...) if (verbose > 1) _uprintf(__VA_ARGS__)
 #define suprintf(...) if (!bSilent) _uprintf(__VA_ARGS__)
@@ -375,6 +378,7 @@ extern int64_t iso_blocking_status;
 extern uint16_t rufus_version[3], embedded_sl_version[2];
 extern int nWindowsVersion;
 extern char WindowsVersionStr[128];
+extern char ubuffer[256];
 extern char embedded_sl_version_str[2][12];
 extern RUFUS_UPDATE update;
 extern int dialog_showing;

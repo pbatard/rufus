@@ -38,6 +38,7 @@
  * Globals
  */
 HWND hStatus;
+char ubuffer[256];	// Buffer for ubpushf() messages we don't log right away
 
 #ifdef RUFUS_DEBUG
 void _uprintf(const char *format, ...)

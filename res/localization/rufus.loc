@@ -9795,7 +9795,7 @@ t MSG_080 "Rufus mengesan bahawa Windows masih lagi menarik penimbal ke dalam pe
 	"Terutamanya untuk fail besar .\n\nKami cadangkan anda biarkan Windows tamat dahulu untuk mengelakkan korupsi."
 	"Namun, jika anda kesuntukan masa, anda boleh cabutkan peranti anda..."
 t MSG_081 "ISO tidak disokong" -> "Imej tidak disokong"
-t MSG_082 -> "Imej ini sama ada tidak boleh boot, atau ia menggunakan kaedah boot atau mampatan yang tidak disokong oleh Rufus..."
+t MSG_082 "Imej ini sama ada tidak boleh boot, atau ia menggunakan kaedah boot atau mampatan yang tidak disokong oleh Rufus..."
 t MSG_083 "Gantikan %s?"
 t MSG_084 "Imej ISO ini menggunakan versi '%s' yang telah lapuk.\n"
 	"Oleh sebab ini, menu boot mungkin tidak dipaparkan dengan betul.\n\n"

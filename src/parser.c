@@ -41,8 +41,6 @@ static const char* conversion_error = "Could not convert '%s' to UTF-16";
 
 const struct {char c; int flag;} attr_parse[] = {
 	{ 'r', LOC_RIGHT_TO_LEFT },
-	{ 'a', LOC_ARABIC_NUMERALS },	// NOT IMPLEMENTED
-	{ 'j', LOC_JAPANESE_NUMERALS },	// NOT IMPLEMENTED
 };
 
 /*
@@ -343,6 +341,7 @@ BOOL get_supported_locales(const char* filename)
 					LOC_FRAMEWORK_VERSION, loc_base_minor);
 			} else {
 				if (lcmd->unum[2] < loc_base_micro) {
+					last_lcmd->ctrl_id |= LOC_NEEDS_UPDATE;
 					luprintf("the version of this translation is older than the base one and may result in some messages not being properly translated.\n"
 						"If you are the translator, please update your translation with the changes that intervened between v%d.%d.%d and v%d.%d.%d.\n"
 						"See https://github.com/pbatard/rufus/blob/master/res/localization/ChangeLog.txt",
