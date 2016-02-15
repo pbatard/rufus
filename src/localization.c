@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Localization functions, a.k.a. "Everybody is doing it wrong but me!"
- * Copyright © 2013-2015 Pete Batard <pete@akeo.ie>
+ * Copyright © 2013-2016 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -630,6 +630,6 @@ WORD get_language_id(loc_cmd* lcmd)
 	}
 
 	ubpushf("NOTE: No Windows Language Pack is installed for %s on this system.\r\n"
-		"This means that some controls will still be displayed using the system locale.", lcmd->txt[1]);
+		"This means that some controls may still be displayed using the system locale.", lcmd->txt[1]);
 	return MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT);
 }

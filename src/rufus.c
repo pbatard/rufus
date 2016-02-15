@@ -888,7 +888,7 @@ BOOL CALLBACK LogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	HDC hdc;
 	HFONT hf;
-	long lfHeight;
+	long lfHeight, style;
 	DWORD log_size;
 	char *log_buffer = NULL, *filepath;
 	EXT_DECL(log_ext, "rufus.log", __VA_GROUP__("*.log"), __VA_GROUP__("Rufus log"));
@@ -896,6 +896,7 @@ BOOL CALLBACK LogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 	case WM_INITDIALOG:
 		apply_localization(IDD_LOG, hDlg);
 		hLog = GetDlgItem(hDlg, IDC_LOG_EDIT);
+
 		// Increase the size of our log textbox to MAX_LOG_SIZE (unsigned word)
 		PostMessage(hLog, EM_LIMITTEXT, MAX_LOG_SIZE , 0);
 		// Set the font to Unicode so that we can display anything
@@ -908,6 +909,18 @@ BOOL CALLBACK LogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 		SendDlgItemMessageA(hDlg, IDC_LOG_EDIT, WM_SETFONT, (WPARAM)hf, TRUE);
 		// Set 'Close Log' as the selected button
 		SendMessage(hDlg, WM_NEXTDLGCTL, (WPARAM)GetDlgItem(hDlg, IDCANCEL), TRUE);
+
+		// Suppress any inherited RTL flags from our edit control's style. Otherwise
+		// the displayed text becomes a mess due to Windows trying to interpret
+		// dots, parenthesis, columns and so on in an RTL context...
+		// We also take this opportunity to fix the scroll bar and text alignment.
+		style = GetWindowLong(hLog, GWL_EXSTYLE);
+		style &= ~(WS_EX_RTLREADING | WS_EX_RIGHT | WS_EX_LEFTSCROLLBAR);
+		SetWindowLong(hLog, GWL_EXSTYLE, style);
+		style = GetWindowLong(hLog, GWL_STYLE);
+		style &= ~(ES_RIGHT);
+		SetWindowLong(hLog, GWL_STYLE, style);
+
 		break;
 	case WM_COMMAND:
 		switch (LOWORD(wParam)) {
@@ -2835,7 +2848,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	};
 
 	// Disable loading system DLLs from the current directory (sideloading mitigation)
+#ifndef DDKBUILD	// WDK doesn't know about that one
 	SetDllDirectoryA("");
+#endif
 
 	uprintf("*** " APPLICATION_NAME " init ***\n");
 
