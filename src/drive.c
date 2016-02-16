@@ -395,10 +395,10 @@ static BOOL _GetDriveLettersAndType(DWORD DriveIndex, char* drive_letters, UINT*
 			continue;
 		}
 
-		/* IOCTL_STORAGE_GET_DEVICE_NUMBER's STORAGE_DEVICE_NUMBER.DeviceNumber is
-			not unique! An HDD, a DVD and probably other drives can have the same
-			value there => Use GetDriveType() to filter out unwanted devices.
-			See https://github.com/pbatard/rufus/issues/32 for details. */
+		// IOCTL_STORAGE_GET_DEVICE_NUMBER's STORAGE_DEVICE_NUMBER.DeviceNumber is
+		// not unique! An HDD, a DVD and probably other drives can have the same
+		// value there => Use GetDriveType() to filter out unwanted devices.
+		// See https://github.com/pbatard/rufus/issues/32#issuecomment-3785956
 		_drive_type = GetDriveTypeA(drive);
 
 		if ((_drive_type != DRIVE_REMOVABLE) && (_drive_type != DRIVE_FIXED))

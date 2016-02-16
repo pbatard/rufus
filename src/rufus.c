@@ -152,7 +152,7 @@ BOOL use_own_c32[NB_OLD_C32] = {FALSE, FALSE}, mbr_selected_by_user = FALSE, tog
 BOOL iso_op_in_progress = FALSE, format_op_in_progress = FALSE, right_to_left_mode = FALSE;
 BOOL enable_HDDs = FALSE, force_update = FALSE, enable_ntfs_compression = FALSE, no_confirmation_on_cancel = FALSE, lock_drive = TRUE;
 BOOL advanced_mode, allow_dual_uefi_bios, detect_fakes, enable_vmdk, force_large_fat32, usb_debug, use_fake_units, preserve_timestamps;
-BOOL zero_drive = FALSE;
+BOOL zero_drive = FALSE, list_non_usb_removable_drives = FALSE;
 int dialog_showing = 0, lang_button_id = 0;
 uint16_t rufus_version[3], embedded_sl_version[2];
 char embedded_sl_version_str[2][12] = { "?.??", "?.??" };
@@ -1762,7 +1762,7 @@ void InitDialog(HWND hDlg)
 	if (selected_locale->ctrl_id & LOC_NEEDS_UPDATE) {
 		uprintf("NOTE: The %s translation requires an update, but the current translator hasn't submitted "
 			"one. Because of this, some messages will only be displayed in English.", selected_locale->txt[1]);
-		uprintf("If you think you can help update this translation, please e-mail <pete@akeo.ie>.");
+		uprintf("If you think you can help update this translation, please e-mail the author of this application");
 	}
 
 	SetClusterSizeLabels();
@@ -2826,6 +2826,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	int wait_for_mutex = 0;
 	FILE* fd;
 	BOOL attached_console = FALSE, external_loc_file = FALSE, lgp_set = FALSE, automount, disable_hogger = FALSE;
+	BOOL previous_enable_HDDs = FALSE;
 	BYTE *loc_data;
 	DWORD loc_size, size;
 	char tmp_path[MAX_PATH] = "", loc_file[MAX_PATH] = "", ini_path[MAX_PATH], ini_flags[] = "rb";
@@ -3276,6 +3277,26 @@ relaunch:
 			zero_drive = TRUE;
 			// Simulate a button click for Start
 			PostMessage(hDlg, WM_COMMAND, (WPARAM)IDC_START, 0);
+		}
+
+		// Hazardous cheat modes require Ctrl + Alt
+		// Ctrl-Alt-F => List non USB removable drives such as eSATA, etc - CAUTION!!!
+		if ((msg.message == WM_KEYDOWN) && (msg.wParam == 'F') &&
+			(GetKeyState(VK_CONTROL) & 0x8000) && (GetKeyState(VK_MENU) & 0x8000)) {
+			list_non_usb_removable_drives = !list_non_usb_removable_drives;
+			if (list_non_usb_removable_drives) {
+				previous_enable_HDDs = enable_HDDs;
+				enable_HDDs = TRUE;
+			} else {
+				enable_HDDs = previous_enable_HDDs;
+			}
+			CheckDlgButton(hMainDialog, IDC_ENABLE_FIXED_DISKS, enable_HDDs ? BST_CHECKED : BST_UNCHECKED);
+			PrintStatus2000("Listing of non-USB removable drives", list_non_usb_removable_drives);
+			uprintf("NOTE: Listing of non-USB removable drives has been %s.", (list_non_usb_removable_drives)?"enabled (CAUTION!)":"disabled");
+			if (list_non_usb_removable_drives)
+				uprintf("By using this unofficial cheat mode you forfeit ANY RIGHT to complain if you lose valuable data!");
+			GetUSBDevices(0);
+			continue;
 		}
 
 		// Let the system handle dialog messages (e.g. those from the tab key)

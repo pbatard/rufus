@@ -1883,7 +1883,7 @@ DWORD WINAPI FormatThread(void* param)
 		} else if (tt == TT_UEFI) {
 			// For once, no need to do anything - just check our sanity
 			if ( (bt != BT_ISO) || (!img_report.has_efi) || (fs > FS_NTFS) ) {
-				uprintf("Spock gone crazy error!\n");
+				uprintf("Spock gone crazy error in %s:%d", __FILE__, __LINE__);
 				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_INSTALL_FAILURE;
 				goto out;
 			}
