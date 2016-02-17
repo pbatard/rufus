@@ -702,10 +702,12 @@ static BOOL PopulateProperties(int ComboIndex)
 	memset(&SelectedDrive, 0, sizeof(SelectedDrive));
 
 	if (ComboIndex < 0)
-		return TRUE;
+		goto out;
 
-	if (!SetDriveInfo(ComboIndex))	// This also populates FS
+	if (!SetDriveInfo(ComboIndex)) {	// This also populates FS
+		SetProposedLabel(-1);
 		return FALSE;
+	}
 	SetTargetSystem();
 	SetFSFromISO();
 	EnableBootOptions(TRUE, TRUE);
@@ -723,8 +725,8 @@ static BOOL PopulateProperties(int ComboIndex)
 		free(device_tooltip);
 	}
 
+out:
 	SetProposedLabel(ComboIndex);
-
 	return TRUE;
 }
 
