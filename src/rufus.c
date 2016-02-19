@@ -227,10 +227,6 @@ static BOOL DefineClusterSizes(void)
 
 	default_fs = FS_UNKNOWN;
 	memset(&SelectedDrive.ClusterSize, 0, sizeof(SelectedDrive.ClusterSize));
-	if (SelectedDrive.DiskSize < 8*MB) {
-		uprintf("Device was eliminated because it is smaller than 8 MB\n");
-		goto out;
-	}
 
 /*
  * The following are MS's allowed cluster sizes for FAT16 and FAT32:
@@ -343,7 +339,6 @@ static BOOL DefineClusterSizes(void)
 		}
 	}
 
-out:
 	// Only add the filesystems we can service
 	for (fs=0; fs<FS_MAX; fs++) {
 		// Remove all cluster sizes that are below the sector size

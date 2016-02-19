@@ -537,6 +537,12 @@ BOOL GetUSBDevices(DWORD devnum)
 				safe_free(devint_detail_data);
 				break;
 			}
+			if (GetDriveSize(drive_index) < (MIN_DRIVE_SIZE*1024*1024)) {
+				uprintf("Device eliminated because it is smaller than %d MB\n", MIN_DRIVE_SIZE);
+				safe_closehandle(hDrive);
+				safe_free(devint_detail_data);
+				break;
+			}
 
 			if (GetDriveLabel(drive_index, drive_letters, &label)) {
 				if ((props.is_SCSI) && (!props.is_UASP) && (!props.is_VHD)) {
