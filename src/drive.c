@@ -26,17 +26,19 @@
 #include <string.h>
 #include <ctype.h>
 
-#include "msapi_utf8.h"
 #include "rufus.h"
+#include "missing.h"
+#include "resource.h"
+#include "msapi_utf8.h"
+#include "localization.h"
+
 #include "file.h"
 #include "drive.h"
-#include "resource.h"
 #include "sys_types.h"
 #include "br.h"
 #include "fat16.h"
 #include "fat32.h"
 #include "ntfs.h"
-#include "localization.h"
 
 #if !defined(PARTITION_BASIC_DATA_GUID)
 const GUID PARTITION_BASIC_DATA_GUID =
@@ -1045,7 +1047,7 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 	// Compute the start offset of our first partition
 	if ((partition_style == PARTITION_STYLE_GPT) || (!IsChecked(IDC_EXTRA_PARTITION))) {
 		// Go with the MS 1 MB wastage at the beginning...
-		DriveLayoutEx.PartitionEntry[pn].StartingOffset.QuadPart = 1024*1024;
+		DriveLayoutEx.PartitionEntry[pn].StartingOffset.QuadPart = MB;
 	} else {
 		// Align on Cylinder
 		DriveLayoutEx.PartitionEntry[pn].StartingOffset.QuadPart = bytes_per_track;
@@ -1054,7 +1056,7 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 	// If required, set the MSR partition (GPT only - must be created before the data part)
 	if ((partition_style == PARTITION_STYLE_GPT) && (extra_partitions & XP_MSR)) {
 		uprintf("Adding MSR partition");
-		DriveLayoutEx.PartitionEntry[pn].PartitionLength.QuadPart = 128*1024*1024;
+		DriveLayoutEx.PartitionEntry[pn].PartitionLength.QuadPart = 128*MB;
 		DriveLayoutEx.PartitionEntry[pn].Gpt.PartitionType = PARTITION_MSFT_RESERVED_GUID;
 		IGNORE_RETVAL(CoCreateGuid(&DriveLayoutEx.PartitionEntry[pn].Gpt.PartitionId));
 		// coverity[strcpy_overrun]
@@ -1090,11 +1092,11 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 			// The size of the EFI partition depends on the minimum size we're able to format in FAT32,
 			// which in turn depends on the cluster size used, which in turn depends on the disk sector size.
 			if (SelectedDrive.Geometry.BytesPerSector <= 1024)
-				ms_efi_size = 100*1024*1024;
+				ms_efi_size = 100*MB;
 			else if (SelectedDrive.Geometry.BytesPerSector <= 4096)
-				ms_efi_size = 300*1024*1024;
+				ms_efi_size = 300*MB;
 			else
-				ms_efi_size = 1200*1024*1024;	// That'll teach you to have a nonstandard disk!
+				ms_efi_size = 1200*MB;	// That'll teach you to have a nonstandard disk!
 			extra_part_size_in_tracks = (ms_efi_size + bytes_per_track - 1) / bytes_per_track;
 		} else if (extra_partitions & XP_UEFI_NTFS)
 			extra_part_size_in_tracks = (MIN_EXTRA_PART_SIZE + bytes_per_track - 1) / bytes_per_track;

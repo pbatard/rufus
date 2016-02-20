@@ -29,9 +29,9 @@
 #include <ctype.h>
 #include <math.h>
 
-#include "msapi_utf8.h"
 #include "rufus.h"
 #include "resource.h"
+#include "msapi_utf8.h"
 #include "localization.h"
 
 /*

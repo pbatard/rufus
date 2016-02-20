@@ -51,9 +51,10 @@
 #include <inttypes.h>
 #include <errno.h>
 #include <windowsx.h>
-#include "msapi_utf8.h"
+
 #include "rufus.h"
 #include "resource.h"
+#include "msapi_utf8.h"
 #include "localization.h"
 
 #undef BIG_ENDIAN_HOST

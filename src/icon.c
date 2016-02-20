@@ -27,9 +27,9 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "msapi_utf8.h"
 #include "rufus.h"
 #include "resource.h"
+#include "msapi_utf8.h"
 
 #pragma pack(push)
 #pragma pack(2)

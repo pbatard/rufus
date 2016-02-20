@@ -30,11 +30,12 @@
 #include <string.h>
 #include <inttypes.h>
 
-#include "msapi_utf8.h"
 #include "rufus.h"
-#include "settings.h"
 #include "resource.h"
+#include "msapi_utf8.h"
 #include "localization.h"
+
+#include "settings.h"
 
 /* Maximum download chunk size, in bytes */
 #define DOWNLOAD_BUFFER_SIZE    10240
@@ -48,35 +49,6 @@ extern BOOL force_update;
 static DWORD error_code;
 static BOOL update_check_in_progress = FALSE;
 static BOOL force_update_check = FALSE;
-
-/* MinGW is missing some of those */
-#if !defined(ERROR_INTERNET_DISCONNECTED)
-#define ERROR_INTERNET_DISCONNECTED (INTERNET_ERROR_BASE + 163)
-#endif
-#if !defined(ERROR_INTERNET_SERVER_UNREACHABLE)
-#define ERROR_INTERNET_SERVER_UNREACHABLE (INTERNET_ERROR_BASE + 164)
-#endif
-#if !defined(ERROR_INTERNET_PROXY_SERVER_UNREACHABLE)
-#define ERROR_INTERNET_PROXY_SERVER_UNREACHABLE (INTERNET_ERROR_BASE + 165)
-#endif
-#if !defined(ERROR_INTERNET_BAD_AUTO_PROXY_SCRIPT)
-#define ERROR_INTERNET_BAD_AUTO_PROXY_SCRIPT (INTERNET_ERROR_BASE + 166)
-#endif
-#if !defined(ERROR_INTERNET_UNABLE_TO_DOWNLOAD_SCRIPT)
-#define ERROR_INTERNET_UNABLE_TO_DOWNLOAD_SCRIPT (INTERNET_ERROR_BASE + 167)
-#endif
-#if !defined(ERROR_INTERNET_FAILED_DUETOSECURITYCHECK)
-#define ERROR_INTERNET_FAILED_DUETOSECURITYCHECK (INTERNET_ERROR_BASE + 171)
-#endif
-#if !defined(ERROR_INTERNET_NOT_INITIALIZED)
-#define ERROR_INTERNET_NOT_INITIALIZED (INTERNET_ERROR_BASE + 172)
-#endif
-#if !defined(ERROR_INTERNET_NEED_MSN_SSPI_PKG)
-#define ERROR_INTERNET_NEED_MSN_SSPI_PKG (INTERNET_ERROR_BASE + 173)
-#endif
-#if !defined(ERROR_INTERNET_LOGIN_FAILURE_DISPLAY_ENTITY_BODY)
-#define ERROR_INTERNET_LOGIN_FAILURE_DISPLAY_ENTITY_BODY (INTERNET_ERROR_BASE + 174)
-#endif
 
 /*
  * FormatMessage does not handle internet errors

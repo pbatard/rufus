@@ -33,11 +33,13 @@
 #include <commctrl.h>
 #include <setupapi.h>
 
-#include "msapi_utf8.h"
 #include "rufus.h"
-#include "drive.h"
+#include "missing.h"
 #include "resource.h"
+#include "msapi_utf8.h"
 #include "localization.h"
+
+#include "drive.h"
 #include "usb.h"
 
 extern StrArray DriveID, DriveLabel;
@@ -537,7 +539,7 @@ BOOL GetUSBDevices(DWORD devnum)
 				safe_free(devint_detail_data);
 				break;
 			}
-			if (GetDriveSize(drive_index) < (MIN_DRIVE_SIZE*1024*1024)) {
+			if (GetDriveSize(drive_index) < (MIN_DRIVE_SIZE*MB)) {
 				uprintf("Device eliminated because it is smaller than %d MB\n", MIN_DRIVE_SIZE);
 				safe_closehandle(hDrive);
 				safe_free(devint_detail_data);

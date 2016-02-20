@@ -24,11 +24,12 @@
 #include <windows.h>
 #include <sddl.h>
 
-#include "msapi_utf8.h"
 #include "rufus.h"
 #include "resource.h"
-#include "settings.h"
+#include "msapi_utf8.h"
 #include "localization.h"
+
+#include "settings.h"
 
 int  nWindowsVersion = WINDOWS_UNDEFINED;
 char WindowsVersionStr[128] = "Windows ";

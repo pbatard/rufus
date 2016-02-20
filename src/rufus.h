@@ -469,25 +469,6 @@ static __inline BOOL UnlockDrive(HANDLE hDrive) {
 	return DeviceIoControl(hDrive, FSCTL_UNLOCK_VOLUME, NULL, 0, NULL, 0, &size, NULL);
 }
 
-static __inline void *_reallocf(void *ptr, size_t size) {
-	void *ret = realloc(ptr, size);
-	if (!ret)
-		free(ptr);
-	return ret;
-}
-
-static __inline uint16_t bswap_16(uint16_t x) {
-	return (x >> 8) | (x << 8);
-}
-
-static __inline uint32_t bswap_32(uint32_t x) {
-	return (bswap_16(x & 0xffff) << 16) | (bswap_16(x >> 16));
-}
-
-static __inline uint64_t bswap_64(uint64_t x) {
-	return (((uint64_t) bswap_32(x & 0xffffffffull)) << 32) | (bswap_32(x >> 32));
-}
-
 /* Hash tables */
 typedef struct htab_entry {
 	uint32_t used;
@@ -579,17 +560,6 @@ static __inline HMODULE GetLibraryHandle(char* szLibraryName) {
 #define ERROR_CANT_PATCH               0x120A
 #define ERROR_CANT_ASSIGN_LETTER       0x120B
 #define ERROR_CANT_MOUNT_VOLUME        0x120C
-
-/* More niceties */
-#ifndef MIN
-#define MIN(a,b) (((a) < (b)) ? (a) : (b))
-#endif
-#ifndef PBS_MARQUEE
-#define PBS_MARQUEE 0x08
-#endif
-#ifndef PBM_SETMARQUEE
-#define PBM_SETMARQUEE (WM_USER+10)
-#endif
 
 /* Why oh why does Microsoft have to make everybody suffer with their braindead use of Unicode? */
 #define _RT_ICON			MAKEINTRESOURCEA(3)

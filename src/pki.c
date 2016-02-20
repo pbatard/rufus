@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * PKI functions (code signing, etc.)
- * Copyright © 2015 Pete Batard <pete@akeo.ie>
+ * Copyright © 2015-2016 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,8 +29,8 @@
 #include <wintrust.h>
 
 #include "rufus.h"
-#include "msapi_utf8.h"
 #include "resource.h"
+#include "msapi_utf8.h"
 #include "localization.h"
 
 #define ENCODING (X509_ASN_ENCODING | PKCS_7_ASN_ENCODING)

@@ -24,21 +24,13 @@
 #include <time.h>
 
 #include "rufus.h"
+#include "missing.h"
 #include "resource.h"
 #include "msapi_utf8.h"
+
 #include "drive.h"
 #include "registry.h"
 #include "bled/bled.h"
-
-#if defined(_MSC_VER)
-#define bswap_uint64 _byteswap_uint64
-#define bswap_uint32 _byteswap_ulong
-#define bswap_uint16 _byteswap_ushort
-#else
-#define bswap_uint64 __builtin_bswap64
-#define bswap_uint32 __builtin_bswap32
-#define bswap_uint16 __builtin_bswap16
-#endif
 
 #define VHD_FOOTER_COOKIE					{ 'c', 'o', 'n', 'e', 'c', 't', 'i', 'x' }
 

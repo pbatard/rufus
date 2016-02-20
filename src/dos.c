@@ -31,8 +31,9 @@
 #include <string.h>
 
 #include "rufus.h"
-#include "dos.h"
 #include "resource.h"
+
+#include "dos.h"
 
 static BYTE* DiskImage = NULL;
 static DWORD DiskImageSize;

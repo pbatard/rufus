@@ -35,69 +35,23 @@
 #include <io.h>
 #include <getopt.h>
 
-#include "msapi_utf8.h"
-#include "resource.h"
 #include "rufus.h"
+#include "missing.h"
+#include "resource.h"
+#include "msapi_utf8.h"
+#include "localization.h"
+
 #include "drive.h"
 #include "settings.h"
-#include "localization.h"
 #include "bled/bled.h"
 #include "../res/grub/grub_version.h"
 #include "../res/grub2/grub2_version.h"
-
-/* Redefinitions for WDK and MinGW */
-// TODO: these would be better in a 'missing.h' file
-#ifndef PBM_SETSTATE
-#define PBM_SETSTATE (WM_USER+16)
-#endif
-#ifndef PBST_NORMAL
-#define PBST_NORMAL 1
-#endif
-#ifndef PBST_ERROR
-#define PBST_ERROR 2
-#endif
-#ifndef PBST_PAUSED
-#define PBST_PAUSED 3
-#endif
-#ifndef BUTTON_IMAGELIST_ALIGN_CENTER
-#define BUTTON_IMAGELIST_ALIGN_CENTER 4
-#endif
-#ifndef BCM_SETIMAGELIST
-#define BCM_SETIMAGELIST 0x1602
-#endif
-#ifndef DBT_CUSTOMEVENT
-#define DBT_CUSTOMEVENT 0x8006
-#endif
-#ifndef ERROR_FILE_TOO_LARGE
-#define ERROR_FILE_TOO_LARGE 223
-#endif
-
-#ifndef MSGFLT_ADD
-#define MSGFLT_ADD 1
-#endif
-#ifndef WM_CLIENTSHUTDOWN
-#define WM_CLIENTSHUTDOWN 0x3B
-#endif
-#ifndef WM_COPYGLOBALDATA
-#define WM_COPYGLOBALDATA 0x49
-#endif
-
-struct {
-	HIMAGELIST himl;
-	RECT margin;
-	UINT uAlign;
-} bi_iso = {0}, bi_up = {0}, bi_down = {0};	// BUTTON_IMAGELIST
-
-typedef struct
-{
-	LPCITEMIDLIST pidl;
-	BOOL fRecursive;
-} MY_SHChangeNotifyEntry;
 
 // MinGW doesn't know these
 PF_TYPE(WINAPI, HIMAGELIST, ImageList_Create, (int, int, UINT, int, int));
 PF_TYPE(WINAPI, int, ImageList_AddIcon, (HIMAGELIST, HICON));
 PF_TYPE(WINAPI, int, ImageList_ReplaceIcon, (HIMAGELIST, int, HICON));
+
 // WDK blows up when trying to using PF_TYPE_DECL() for the ImageList calls... so we don't.
 PF_DECL(ImageList_Create);
 PF_DECL(ImageList_AddIcon);
@@ -139,6 +93,7 @@ char msgbox[1024], msgbox_title[32], *ini_file = NULL;
 OPENED_LIBRARIES_VARS;
 HINSTANCE hMainInstance;
 HWND hMainDialog, hLangToolbar = NULL, hUpdatesDlg = NULL;
+MY_BUTTON_IMAGELIST bi_iso = { 0 }, bi_up = { 0 }, bi_down = { 0 };
 char szFolderPath[MAX_PATH], app_dir[MAX_PATH], system_dir[MAX_PATH], sysnative_dir[MAX_PATH];
 char* image_path = NULL;
 float fScale = 1.0f;
@@ -192,11 +147,6 @@ static __inline void SetComboEntry(HWND hDlg, int data) {
 			IGNORE_RETVAL(ComboBox_SetCurSel(hDlg, i));
 	}
 }
-
-#define KB          1024LL
-#define MB       1048576LL
-#define GB    1073741824LL
-#define TB 1099511627776LL
 
 /*
  * Fill in the cluster size names
@@ -370,10 +320,6 @@ static BOOL DefineClusterSizes(void)
 
 	return r;
 }
-#undef KB
-#undef MB
-#undef GB
-#undef TB
 
 /*
  * Populate the Allocation unit size field

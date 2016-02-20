@@ -35,12 +35,13 @@
 #include <richedit.h>
 
 #include "rufus.h"
+#include "resource.h"
 #include "msapi_utf8.h"
+#include "localization.h"
+
 #include "registry.h"
 #include "settings.h"
-#include "resource.h"
 #include "license.h"
-#include "localization.h"
 
 #if (_WIN32_WINNT >= _WIN32_WINNT_VISTA)
 PF_TYPE_DECL(WINAPI, HRESULT, SHCreateItemFromParsingName, (PCWSTR, IBindCtx*, REFIID, void **));

@@ -32,9 +32,12 @@
 #include <ctype.h>
 #include <locale.h>
 
-#include "msapi_utf8.h"
 #include "rufus.h"
+#include "missing.h"
 #include "resource.h"
+#include "msapi_utf8.h"
+#include "localization.h"
+
 #include "br.h"
 #include "fat16.h"
 #include "fat32.h"
@@ -44,7 +47,6 @@
 #include "drive.h"
 #include "format.h"
 #include "badblocks.h"
-#include "localization.h"
 #include "bled/bled.h"
 #include "../res/grub/grub_version.h"
 
@@ -999,7 +1001,7 @@ static BOOL WriteSBR(HANDLE hPhysicalDrive)
 	set_bytes_per_sector(SelectedDrive.Geometry.BytesPerSector);
 	// Ensure that we have sufficient space for the SBR
 	max_size = IsChecked(IDC_EXTRA_PARTITION) ?
-		(DWORD)(SelectedDrive.Geometry.BytesPerSector * SelectedDrive.Geometry.SectorsPerTrack) : 1024 * 1024;
+		(DWORD)(SelectedDrive.Geometry.BytesPerSector * SelectedDrive.Geometry.SectorsPerTrack) : 1*MB;
 	max_size -= mbr_size;
 	// Syslinux has precedence over Grub
 	if ((bt == BT_ISO) && (!HAS_SYSLINUX(img_report))) {

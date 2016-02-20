@@ -27,10 +27,11 @@
 #include <ctype.h>
 
 #include "rufus.h"
-#include "drive.h"
 #include "resource.h"
-#include "localization.h"
 #include "msapi_utf8.h"
+#include "localization.h"
+
+#include "drive.h"
 
 #include "syslinux.h"
 #include "syslxfs.h"
