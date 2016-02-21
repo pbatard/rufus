@@ -194,7 +194,7 @@ BOOL GetUSBDevices(DWORD devnum)
 	SP_DEVINFO_DATA dev_info_data;
 	SP_DEVICE_INTERFACE_DATA devint_data;
 	PSP_DEVICE_INTERFACE_DETAIL_DATA_A devint_detail_data;
-	DEVINST parent_inst, grandparent_inst, sibling_inst, device_inst;
+	DEVINST parent_inst, grandparent_inst, device_inst;
 	DWORD size, i, j, k, l, datatype, drive_index;
 	DWORD uasp_start = ARRAYSIZE(usbstor_name), card_start = ARRAYSIZE(genstor_name);
 	ULONG list_size[ARRAYSIZE(usbstor_name)] = { 0 }, list_start[ARRAYSIZE(usbstor_name)] = { 0 }, full_list_size, ulFlags;
@@ -396,10 +396,9 @@ BOOL GetUSBDevices(DWORD devnum)
 				}
 				if (device_inst != dev_info_data.DevInst) {
 					// Try the siblings
-					while (CM_Get_Sibling(&sibling_inst, device_inst, 0) == CR_SUCCESS) {
-						if (sibling_inst == dev_info_data.DevInst) {
+					while (CM_Get_Sibling(&device_inst, device_inst, 0) == CR_SUCCESS) {
+						if (device_inst == dev_info_data.DevInst) {
 							uuprintf("NOTE: Matched instance from sibling for '%s'", device_id);
-							device_inst = sibling_inst;
 							break;
 						}
 					}
