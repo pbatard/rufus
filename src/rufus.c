@@ -946,48 +946,40 @@ static void CALLBACK BlockingTimer(HWND hWnd, UINT uMsg, UINT_PTR idEvent, DWORD
 }
 
 // Report the features of the selected ISO images
-static const char* YesNo(BOOL b) {
-	return (b) ? "Yes" : "No";
-}
+#define PRINT_ISO_PROP(b, ...) do {if (b) uprintf(__VA_ARGS__);} while(0)
 static void DisplayISOProps(void)
 {
 	int i;
-	char isolinux_str[16] = "No";
 
-	if (HAS_SYSLINUX(img_report)) {
-		safe_sprintf(isolinux_str, sizeof(isolinux_str), "Yes (%s)", img_report.sl_version_str);
-	}
-
-	// TODO: Only report features that are present
 	uprintf("ISO label: '%s'", img_report.label);
 	uprintf("  Size: %" PRIu64 " bytes", img_report.projected_size);
-	uprintf("  Has a >64 chars filename: %s", YesNo(img_report.has_long_filename));
-	uprintf("  Has Symlinks: %s", YesNo(img_report.has_symlinks));
-	uprintf("  Has a >4GB file: %s", YesNo(img_report.has_4GB_file));
-	uprintf("  Uses Bootmgr: %s", YesNo(img_report.has_bootmgr));
-	uprintf("  Uses EFI: %s%s", YesNo(img_report.has_efi), IS_WIN7_EFI(img_report) ? " (win7_x64)" : "");
-	uprintf("  Uses Grub 2: %s", YesNo(img_report.has_grub2));
-	uprintf("  Uses Grub4DOS: %s", YesNo(img_report.has_grub4dos));
-	uprintf("  Uses isolinux: %s", isolinux_str);
+	PRINT_ISO_PROP(img_report.has_4GB_file, "  Has a >4GB file");
+	PRINT_ISO_PROP(img_report.has_long_filename, "  Has a >64 chars filename");
+	PRINT_ISO_PROP(HAS_SYSLINUX(img_report), "  Uses: Syslinux/Isolinux v%s", img_report.sl_version_str);
 	if (HAS_SYSLINUX(img_report) && (SL_MAJOR(img_report.sl_version) < 5)) {
 		for (i = 0; i<NB_OLD_C32; i++) {
-			uprintf("    With an old %s: %s\n", old_c32_name[i], img_report.has_old_c32[i] ? "Yes" : "No");
+			PRINT_ISO_PROP(img_report.has_old_c32[i], "    With an old %s", old_c32_name[i]);
 		}
 	}
-	uprintf("  Uses KolibriOS: %s", YesNo(img_report.has_kolibrios));
-	uprintf("  Uses ReactOS: %s", YesNo(IS_REACTOS(img_report)));
-	uprintf("  Uses WinPE: %s%s", YesNo(IS_WINPE(img_report.winpe)), (img_report.uses_minint) ? " (with /minint)" : "");
+	PRINT_ISO_PROP(img_report.has_kolibrios, "  Uses: KolibriOS");
+	PRINT_ISO_PROP(IS_REACTOS(img_report), "  Uses: ReactOS");
+	PRINT_ISO_PROP(img_report.has_grub4dos, "  Uses: Grub4DOS");
+	PRINT_ISO_PROP(img_report.has_grub2, "  Uses: GRUB2");
+	PRINT_ISO_PROP(img_report.has_efi, "  Uses: EFI %s", IS_WIN7_EFI(img_report) ? "(win7_x64)" : "");
+	PRINT_ISO_PROP(img_report.has_bootmgr, "  Uses: Bootmgr");
+	PRINT_ISO_PROP(IS_WINPE(img_report.winpe), "  Uses: WinPE %s", (img_report.uses_minint) ? "(with /minint)" : "");
 	if (HAS_INSTALL_WIM(img_report)) {
-		uprintf("  Uses Install.wim: Yes (version %d.%d.%d)", (img_report.install_wim_version >> 24) & 0xff,
+		uprintf("  Uses: Install.wim (version %d.%d.%d)", (img_report.install_wim_version >> 24) & 0xff,
 			(img_report.install_wim_version >> 16) & 0xff, (img_report.install_wim_version >> 8) & 0xff);
 		// Microsoft somehow managed to make their ESD WIMs incompatible with their own APIs
 		// (yes, EVEN the Windows 10 APIs), so we must filter them out...
 		if (img_report.install_wim_version >= MAX_WIM_VERSION)
 			uprintf("  Note: This WIM version is NOT compatible with Windows To Go");
 	}
+	PRINT_ISO_PROP(img_report.has_symlinks, "  Note: This ISO uses symbolic links, which will not be replicated due to file system limitations.");
+	PRINT_ISO_PROP(img_report.has_symlinks, "  Because of this, some features from this image may not work...");
 
-	// We don't support ToGo on Windows 7 or earlier, for lack of ISO mount capabilities
-	// TODO: add install.wim extraction workaround for Windows 7
+	// We don't support ToGo on Windows 7 or earlier, for lack of native ISO mounting capabilities
 	if (nWindowsVersion >= WINDOWS_8)
 		if ( ((!togo_mode) && (HAS_TOGO(img_report))) || ((togo_mode) && (!HAS_TOGO(img_report))) )
 			ToggleToGo();
