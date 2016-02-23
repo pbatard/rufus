@@ -94,7 +94,6 @@ am__v_AR_1 =
 libinstaller_a_AR = $(AR) $(ARFLAGS)
 libinstaller_a_LIBADD =
 am_libinstaller_a_OBJECTS = libinstaller_a-fs.$(OBJEXT) \
-	libinstaller_a-ntfssect.$(OBJEXT) \
 	libinstaller_a-setadv.$(OBJEXT) \
 	libinstaller_a-syslxmod.$(OBJEXT)
 libinstaller_a_OBJECTS = $(am_libinstaller_a_OBJECTS)
@@ -244,7 +243,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 noinst_LIBRARIES = libinstaller.a
-libinstaller_a_SOURCES = fs.c ntfssect.c setadv.c syslxmod.c
+libinstaller_a_SOURCES = fs.c setadv.c syslxmod.c
 libinstaller_a_CFLAGS = $(AM_CFLAGS)
 all: all-am
 
@@ -306,12 +305,6 @@ libinstaller_a-fs.o: fs.c
 
 libinstaller_a-fs.obj: fs.c
 	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libinstaller_a_CFLAGS) $(CFLAGS) -c -o libinstaller_a-fs.obj `if test -f 'fs.c'; then $(CYGPATH_W) 'fs.c'; else $(CYGPATH_W) '$(srcdir)/fs.c'; fi`
-
-libinstaller_a-ntfssect.o: ntfssect.c
-	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libinstaller_a_CFLAGS) $(CFLAGS) -c -o libinstaller_a-ntfssect.o `test -f 'ntfssect.c' || echo '$(srcdir)/'`ntfssect.c
-
-libinstaller_a-ntfssect.obj: ntfssect.c
-	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libinstaller_a_CFLAGS) $(CFLAGS) -c -o libinstaller_a-ntfssect.obj `if test -f 'ntfssect.c'; then $(CYGPATH_W) 'ntfssect.c'; else $(CYGPATH_W) '$(srcdir)/ntfssect.c'; fi`
 
 libinstaller_a-setadv.o: setadv.c
 	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libinstaller_a_CFLAGS) $(CFLAGS) -c -o libinstaller_a-setadv.o `test -f 'setadv.c' || echo '$(srcdir)/'`setadv.c

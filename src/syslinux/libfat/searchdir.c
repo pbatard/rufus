@@ -25,7 +25,7 @@ int32_t libfat_searchdir(struct libfat_filesystem *fs, int32_t dirclust,
 			 const void *name, struct libfat_direntry *direntry)
 {
     struct fat_dirent *dep;
-    unsigned int nent;
+    int nent;
     libfat_sector_t s = libfat_clustertosector(fs, dirclust);
 
     while (1) {

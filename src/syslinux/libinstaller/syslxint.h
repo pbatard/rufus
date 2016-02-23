@@ -92,8 +92,8 @@ static inline void set_16(uint16_t *p, uint16_t v)
     *p = v;
 #else
     uint8_t *pp = (uint8_t *) p;
-    pp[0] = (v & 0xff);
-    pp[1] = ((v >> 8) & 0xff);
+    pp[0] = v;
+    pp[1] = v >> 8;
 #endif
 }
 

@@ -40,9 +40,9 @@
 #include "ntfssect.h"
 
 unsigned char* syslinux_ldlinux[2] = { NULL, NULL };
-DWORD syslinux_ldlinux_len[2];
+unsigned long syslinux_ldlinux_len[2];
 unsigned char* syslinux_mboot = NULL;
-DWORD syslinux_mboot_len;
+unsigned long syslinux_mboot_len;
 
 // Workaround for 4K support
 uint32_t SECTOR_SHIFT = 9;

@@ -13,7 +13,6 @@
 #ifndef SYSLINUX_H
 #define SYSLINUX_H
 
-#include <windows.h>
 #include <inttypes.h>
 #include "advconst.h"
 #include "setadv.h"
@@ -28,7 +27,7 @@
 
 /* The standard boot sector and ldlinux image */
 extern unsigned char* syslinux_ldlinux[2];
-extern DWORD syslinux_ldlinux_len[2];
+extern unsigned long syslinux_ldlinux_len[2];
 extern const int syslinux_ldlinux_mtime[2];
 
 #define boot_sector	syslinux_ldlinux[1]
@@ -40,12 +39,9 @@ extern unsigned char syslinux_mbr[];
 extern const unsigned int syslinux_mbr_len;
 extern const int syslinux_mbr_mtime;
 
-/* Sector size assumptions... */
-// Workaround for 4K support
+/* Sector size variables are defined externally for 4K support */
 extern uint32_t SECTOR_SHIFT;
 extern uint32_t SECTOR_SIZE;
-//#define SECTOR_SHIFT	9
-//#define SECTOR_SIZE	(1 << SECTOR_SHIFT)
 
 /* This takes a boot sector and merges in the syslinux fields */
 void syslinux_make_bootsect(void *bs, int fs_type);

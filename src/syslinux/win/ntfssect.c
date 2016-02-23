@@ -18,9 +18,6 @@
  * With special thanks to Mark Roddy for his article:
  *   http://www.wd-3.com/archive/luserland.htm
  */
-#if defined(_MSC_VER)
-#pragma warning(disable:4996)
-#endif
 
 #include <windows.h>
 #include <winioctl.h>
@@ -33,6 +30,10 @@
 #define M_ERR(msg) (NtfsSectLastErrorMessage = (msg))
 
 /*** Function declarations */
+static DWORD NtfsSectGetVolumeHandle(
+    CHAR * VolumeName,
+    S_NTFSSECT_VOLINFO * VolumeInfo
+  );
 static DWORD NtfsSectGetVolumePartitionLba(S_NTFSSECT_VOLINFO * VolumeInfo);
 
 /*** Objects */
@@ -44,7 +45,7 @@ DWORD M_NTFSSECT_API NtfsSectGetFileVcnExtent(
     LARGE_INTEGER * Vcn,
     S_NTFSSECT_EXTENT * Extent
   ) {
-    BOOL bad, ok;
+    BOOL bad;
     DWORD output_size, rc;
     STARTING_VCN_INPUT_BUFFER input;
     RETRIEVAL_POINTERS_BUFFER output;
@@ -59,7 +60,7 @@ DWORD M_NTFSSECT_API NtfsSectGetFileVcnExtent(
       return ERROR_INVALID_PARAMETER;
 
     input.StartingVcn = *Vcn;
-    ok = DeviceIoControl(
+    DeviceIoControl(
         File,
         FSCTL_GET_RETRIEVAL_POINTERS,
         &input,
@@ -69,7 +70,6 @@ DWORD M_NTFSSECT_API NtfsSectGetFileVcnExtent(
         &output_size,
         NULL
       );
-    ok = ok;
     rc = GetLastError();
     switch (rc) {
         case NO_ERROR:
@@ -89,6 +89,52 @@ DWORD M_NTFSSECT_API NtfsSectGetFileVcnExtent(
     return rc;
   }
 
+/* Internal use only */
+static DWORD NtfsSectGetVolumeHandle(
+    CHAR * VolumeName,
+    S_NTFSSECT_VOLINFO * VolumeInfo
+  ) {
+    #define M_VOL_PREFIX "\\\\.\\"
+    CHAR volname[sizeof M_VOL_PREFIX - 1 + MAX_PATH + 1] = M_VOL_PREFIX;
+    CHAR * const volname_short = volname + sizeof M_VOL_PREFIX - 1;
+    CHAR * c;
+    DWORD rc;
+
+    /* Prefix "\\.\" onto the passed volume name */
+    strcpy(volname + sizeof M_VOL_PREFIX - 1, VolumeName);
+
+    /* Find the last non-null character */
+    for (c = volname_short; *c; ++c)
+      ;
+
+    /* Remove trailing back-slash */
+    if (c[-1] == '\\')
+      c[-1] = 0;
+
+    /* Open the volume */
+    VolumeInfo->Handle = CreateFileA(
+        volname,
+        GENERIC_READ,
+        FILE_SHARE_READ | FILE_SHARE_WRITE,
+        NULL,
+        OPEN_EXISTING,
+        0,
+        NULL
+      );
+    rc = GetLastError();
+    if (VolumeInfo->Handle == INVALID_HANDLE_VALUE) {
+        M_ERR("Unable to open volume handle!");
+        goto err_handle;
+      }
+
+    return ERROR_SUCCESS;
+
+    CloseHandle(VolumeInfo->Handle);
+    err_handle:
+
+    return rc;
+  }
+
 DWORD M_NTFSSECT_API NtfsSectGetVolumeInfo(
     CHAR * VolumeName,
     S_NTFSSECT_VOLINFO * VolumeInfo
@@ -99,6 +145,10 @@ DWORD M_NTFSSECT_API NtfsSectGetVolumeInfo(
 
     if (!VolumeName || !VolumeInfo)
       return ERROR_INVALID_PARAMETER;
+
+    rc = NtfsSectGetVolumeHandle(VolumeName, VolumeInfo);
+    if (rc != ERROR_SUCCESS)
+      goto err_handle;
 
     rc = NtfsSectLoadXpFuncs(&xp_funcs);
     if (rc != ERROR_SUCCESS)
@@ -135,6 +185,7 @@ DWORD M_NTFSSECT_API NtfsSectGetVolumeInfo(
         CloseHandle(VolumeInfo->Handle);
         VolumeInfo->Handle = INVALID_HANDLE_VALUE;
       }
+    err_handle:
 
     return rc;
   }

@@ -66,7 +66,7 @@ libfat_sector_t libfat_nextsector(struct libfat_filesystem * fs,
     if (~rs & clustmask)
 	return s + 1;		/* Next sector in cluster */
 
-    cluster = (int32_t) (2 + (rs >> fs->clustshift));
+    cluster = 2 + (rs >> fs->clustshift);
 
     if (cluster >= fs->endcluster)
 	return -1;

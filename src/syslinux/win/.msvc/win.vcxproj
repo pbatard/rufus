@@ -19,22 +19,16 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\fat.h" />
-    <ClInclude Include="..\libfat.h" />
-    <ClInclude Include="..\libfatint.h" />
-    <ClInclude Include="..\ulint.h" />
+    <ClInclude Include="..\ntfssect.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\cache.c" />
-    <ClCompile Include="..\fatchain.c" />
-    <ClCompile Include="..\open.c" />
-    <ClCompile Include="..\searchdir.c" />
+    <ClCompile Include="..\ntfssect.c" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{8390DCE0-859D-4F57-AD9C-AAEAC4D77EEF}</ProjectGuid>
+    <ProjectGuid>{7D2E9784-DDF7-4988-A887-CF099BC3B340}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>libfat</RootNamespace>
-    <ProjectName>syslinux-libfat</ProjectName>
+    <RootNamespace>win</RootNamespace>
+    <ProjectName>syslinux-win</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -104,7 +98,7 @@
       <AdditionalIncludeDirectories>..;..\..\..\msvc-missing;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <DisableSpecificWarnings>4018;4244</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4244;4267;4996</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -125,7 +119,7 @@
       <AdditionalIncludeDirectories>..;..\..\..\msvc-missing;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <DisableSpecificWarnings>4018;4244</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4244;4267;4996</DisableSpecificWarnings>
     </ClCompile>
     <Lib>
       <TargetMachine>MachineX86</TargetMachine>
@@ -141,7 +135,7 @@
       <AdditionalIncludeDirectories>..;..\..\..\msvc-missing;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <DisableSpecificWarnings>4018;4244</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4244;4267;4996</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -162,7 +156,7 @@
       <AdditionalIncludeDirectories>..;..\..\..\msvc-missing;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <DisableSpecificWarnings>4018;4244</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4244;4267;4996</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

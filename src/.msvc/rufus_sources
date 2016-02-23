@@ -3,7 +3,7 @@ TARGETTYPE=PROGRAM
 UMTYPE=windows
 UMENTRY=winmain
 
-INCLUDES=$(DDK_INC_PATH);.\ms-sys\inc;.\syslinux\libfat;.\syslinux\libinstaller;.\msvc-missing;.\libcdio;.\getopt;.\bled
+INCLUDES=$(DDK_INC_PATH);.\ms-sys\inc;.\syslinux\libfat;.\syslinux\libinstaller;.\syslinux\win;.\msvc-missing;.\libcdio;.\getopt;.\bled
 C_DEFINES = $(C_DEFINES) /DDDKBUILD /DUNICODE /D_UNICODE /DRUFUS_LOC /DISOLATION_AWARE_ENABLED
 
 !IFNDEF MSC_WARNING_LEVEL
@@ -25,6 +25,7 @@ TARGETLIBS=$(SDK_LIB_PATH)\kernel32.lib \
            .\ms-sys\ms-sys.lib \
            .\syslinux\libfat\libfat.lib \
            .\syslinux\libinstaller\libinstaller.lib \
+           .\syslinux\win\win.lib \
            .\libcdio\iso9660\iso9660.lib \
            .\libcdio\udf\udf.lib \
            .\libcdio\driver\driver.lib \

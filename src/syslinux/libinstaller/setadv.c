@@ -20,7 +20,6 @@
  * Return 0 on success, -1 on error, and set errno.
  *
  */
-//#define  _GNU_SOURCE
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -110,8 +109,8 @@ int syslinux_setadv(int tag, size_t size, const void *data)
 	    return -1;
 	}
 
-	*p++ = (uint8_t) tag;
-	*p++ = (uint8_t) size;
+	*p++ = tag;
+	*p++ = size;
 	memcpy(p, data, size);
 	p += size;
 	left -= size + 2;

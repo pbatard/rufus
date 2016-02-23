@@ -371,7 +371,7 @@ extern char szFolderPath[MAX_PATH], app_dir[MAX_PATH], system_dir[MAX_PATH], sys
 extern char* image_path;
 extern DWORD FormatStatus, DownloadStatus;
 extern BOOL PromptOnError;
-extern DWORD syslinux_ldlinux_len[2];
+extern unsigned long syslinux_ldlinux_len[2];
 extern RUFUS_DRIVE_INFO SelectedDrive;
 extern const int nb_steps[FS_MAX];
 extern BOOL use_own_c32[NB_OLD_C32], detect_fakes, iso_op_in_progress, format_op_in_progress, right_to_left_mode;
