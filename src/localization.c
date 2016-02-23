@@ -418,16 +418,58 @@ char* lmprintf(uint32_t msg_id, ...)
 #define MSG_INFO     1
 #define MSG_LOW_PRI  0
 #define MSG_HIGH_PRI 1
+// Minimum delay between Info and Status message refreshes, in ms
+#define MSG_DELAY    50
 char szMessage[2][2][MSG_LEN] = { {"", ""}, {"", ""} };
 char* szStatusMessage = szMessage[MSG_STATUS][MSG_HIGH_PRI];
-static BOOL bStatusTimerArmed = FALSE;
+static BOOL bStatusTimerArmed = FALSE, bOutputTimerArmed[2] = { FALSE, FALSE };
+static char *output_msg[2];
+static uint64_t last_msg_time[2] = { 0, 0 };
 
-static void __inline OutputMessage(BOOL info, char* msg)
+static void PrintInfoMessage(char* msg) {
+	SetWindowTextU(hInfo, msg);
+}
+static void PrintStatusMessage(char* msg) {
+	SendMessageLU(hStatus, SB_SETTEXTW, SBT_OWNERDRAW | SB_SECTION_LEFT, msg);
+}
+typedef void PRINT_FUNCTION(char*);
+PRINT_FUNCTION *PrintMessage[2] = { PrintInfoMessage, PrintStatusMessage };
+
+/*
+ * The following timer call is used, along with MSG_DELAY, to prevent obnoxious flicker
+ * on the Info and Status fields due to messages being updated too quickly.
+ */
+static void CALLBACK OutputMessageTimeout(HWND hWnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
 {
-	if (info)
-		SetWindowTextU(hInfo, msg);
-	else
-		SendMessageLU(hStatus, SB_SETTEXTW, SBT_OWNERDRAW | SB_SECTION_LEFT, msg);
+	int i = (idEvent == TID_OUTPUT_INFO)? 0 : 1;
+
+	KillTimer(hMainDialog, idEvent);
+	bOutputTimerArmed[i] = FALSE;
+	PrintMessage[i](output_msg[i]);
+	last_msg_time[i] = GetTickCount64();
+}
+
+static void OutputMessage(BOOL info, char* msg)
+{
+	uint64_t delta;
+	int i = info ? 0 : 1;
+
+	if (bOutputTimerArmed[i]) {
+		// Already have a delayed message going - just change that message to latest
+		output_msg[i] = msg;
+	} else {
+		// Find if we need to arm a timer
+		delta = GetTickCount64() - last_msg_time[i];
+		if (delta < MSG_DELAY) {
+			// Not enough time has elapsed since our last output => arm a timer
+			output_msg[i] = msg;
+			SetTimer(hMainDialog, TID_OUTPUT_INFO + i, (UINT)(MSG_DELAY - delta), OutputMessageTimeout);
+			bOutputTimerArmed[i] = TRUE;
+		} else {
+			PrintMessage[i](msg);
+			last_msg_time[i] = GetTickCount64();
+		}
+	}
 }
 
 static void CALLBACK PrintMessageTimeout(HWND hWnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)

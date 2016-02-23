@@ -307,8 +307,6 @@ static void print_extracted_file(char* psz_fullpath, int64_t i_file_length)
 	safe_sprintf(&psz_fullpath[nul_pos], 24, " (%s)", SizeToHumanReadable(i_file_length, TRUE, FALSE));
 	uprintf("Extracting: %s\n", psz_fullpath);
 	safe_sprintf(&psz_fullpath[nul_pos], 24, " (%s)", SizeToHumanReadable(i_file_length, FALSE, FALSE));
-	// TODO: I don't think we need both of these...
-	SendMessageLU(hStatus, SB_SETTEXTW, SBT_OWNERDRAW | SB_SECTION_LEFT, psz_fullpath);
 	PrintStatus(0, MSG_000, psz_fullpath);	// MSG_000 is "%s"
 	// ISO9660 cannot handle backslashes
 	for (i=0; i<nul_pos; i++)

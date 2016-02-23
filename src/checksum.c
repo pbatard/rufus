@@ -1,6 +1,6 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
- * Message-Digest algorithms (sha1sum, md5sum)
+ * Message-Digest algorithms (md5sum, sha1sum, sha256sum)
  * Copyright © 1998-2001 Free Software Foundation, Inc.
  * Copyright © 2004 g10 Code GmbH
  * Copyright © 2006-2012 Brad Conte <brad@bradconte.com>
