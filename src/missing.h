@@ -51,6 +51,12 @@ static __inline void *_reallocf(void *ptr, size_t size) {
 	return ret;
 }
 
+/* Why oh why does Microsoft have to make everybody suffer with their braindead use of Unicode? */
+#define _RT_ICON			MAKEINTRESOURCEA(3)
+#define _RT_DIALOG			MAKEINTRESOURCEA(5)
+#define _RT_RCDATA			MAKEINTRESOURCEA(10)
+#define _RT_GROUP_ICON		MAKEINTRESOURCEA((ULONG_PTR)(MAKEINTRESOURCEA(3) + 11))
+
 /* UI redefinitions for WDK and MinGW */
 #ifndef PBM_SETSTATE
 #define PBM_SETSTATE (WM_USER+16)
@@ -211,4 +217,14 @@ typedef struct _ATTACH_VIRTUAL_DISK_PARAMETERS {
 #endif
 #if !defined(ERROR_INTERNET_LOGIN_FAILURE_DISPLAY_ENTITY_BODY)
 #define ERROR_INTERNET_LOGIN_FAILURE_DISPLAY_ENTITY_BODY (INTERNET_ERROR_BASE + 174)
+#endif
+
+/* Clang/MinGW32 has an issue with intptr_t */
+#ifndef _UINTPTR_T_DEFINED
+#define _UINTPTR_T_DEFINED
+#ifdef _WIN64
+typedef unsigned __int64 uintptr_t;
+#else
+typedef unsigned int uintptr_t;
+#endif
 #endif

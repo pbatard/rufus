@@ -35,6 +35,7 @@
 #include <richedit.h>
 
 #include "rufus.h"
+#include "missing.h"
 #include "resource.h"
 #include "msapi_utf8.h"
 #include "localization.h"
@@ -1358,14 +1359,14 @@ INT_PTR CALLBACK UpdateCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 BOOL SetUpdateCheck(void)
 {
 	BOOL enable_updates;
-	DWORD commcheck = GetTickCount();
+	uint64_t commcheck = _GetTickCount64();
 	notification_info more_info = { IDD_UPDATE_POLICY, UpdateCallback };
 	char filename[MAX_PATH] = "", exename[] = APPLICATION_NAME ".exe";
 	size_t fn_len, exe_len;
 
 	// Test if we can read and write settings. If not, forget it.
-	WriteSetting32(SETTING_COMM_CHECK, commcheck);
-	if (ReadSetting32(SETTING_COMM_CHECK) != commcheck)
+	WriteSetting64(SETTING_COMM_CHECK, commcheck);
+	if (ReadSetting64(SETTING_COMM_CHECK) != commcheck)
 		return FALSE;
 	settings_commcheck = TRUE;
 

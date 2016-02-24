@@ -55,7 +55,7 @@
  */
 DWORD FormatStatus;
 badblocks_report report;
-static DWORD LastRefresh;
+static uint64_t LastRefresh;
 static float format_percent = 0.0f;
 static int task_number = 0;
 extern const int nb_steps[FS_MAX];
@@ -623,8 +623,8 @@ static BOOL FormatFAT32(DWORD DriveIndex)
 
 	format_percent = 0.0f;
 	for (i=0; i<(SystemAreaSize+BurstSize-1); i+=BurstSize) {
-		if (GetTickCount() > LastRefresh + 25) {
-			LastRefresh = GetTickCount();
+		if (_GetTickCount64() > LastRefresh + 25) {
+			LastRefresh = _GetTickCount64();
 			format_percent = (100.0f*i)/(1.0f*(SystemAreaSize+BurstSize));
 			PrintInfo(0, MSG_217, format_percent);
 			UpdateProgress(OP_FORMAT, format_percent);
@@ -1460,8 +1460,8 @@ DWORD WINAPI CloseFormatPromptThread(LPVOID param) {
 
 void update_progress(const uint64_t processed_bytes)
 {
-	if (GetTickCount() > LastRefresh + 25) {
-		LastRefresh = GetTickCount();
+	if (_GetTickCount64() > LastRefresh + 25) {
+		LastRefresh = _GetTickCount64();
 		format_percent = (100.0f*processed_bytes)/(1.0f*img_report.projected_size);
 		PrintInfo(0, MSG_261, format_percent);
 		UpdateProgress(OP_FORMAT, format_percent);
@@ -1613,8 +1613,8 @@ DWORD WINAPI FormatThread(void* param)
 		// http://msdn.microsoft.com/en-us/library/windows/desktop/aa365747.aspx does buffer sector alignment
 		aligned_buffer = ((void *)((((uintptr_t)(buffer)) + (SectorSize)-1) & (~(((uintptr_t)(SectorSize)) - 1))));
 		for (wb = 0, wSize = 0; wb < (uint64_t)SelectedDrive.DiskSize; wb += wSize) {
-			if (GetTickCount() > LastRefresh + 25) {
-				LastRefresh = GetTickCount();
+			if (_GetTickCount64() > LastRefresh + 25) {
+				LastRefresh = _GetTickCount64();
 				format_percent = (100.0f*wb) / (1.0f*SelectedDrive.DiskSize);
 				PrintInfo(0, MSG_286, format_percent);
 				UpdateProgress(OP_FORMAT, format_percent);
@@ -1762,8 +1762,8 @@ DWORD WINAPI FormatThread(void* param)
 				}
 				if (rSize == 0)
 					break;
-				if (GetTickCount() > LastRefresh + 25) {
-					LastRefresh = GetTickCount();
+				if (_GetTickCount64() > LastRefresh + 25) {
+					LastRefresh = _GetTickCount64();
 					format_percent = (100.0f*wb)/(1.0f*img_report.projected_size);
 					PrintInfo(0, MSG_261, format_percent);
 					UpdateProgress(OP_FORMAT, format_percent);
@@ -2084,8 +2084,8 @@ DWORD WINAPI SaveImageThread(void* param)
 		}
 		if (rSize == 0)
 			break;
-		if (GetTickCount() > LastRefresh + 25) {
-			LastRefresh = GetTickCount();
+		if (_GetTickCount64() > LastRefresh + 25) {
+			LastRefresh = _GetTickCount64();
 			format_percent = (100.0f*wb)/(1.0f*SelectedDrive.DiskSize);
 			PrintInfo(0, MSG_261, format_percent);
 			UpdateProgress(OP_FORMAT, format_percent);

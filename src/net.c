@@ -31,6 +31,7 @@
 #include <inttypes.h>
 
 #include "rufus.h"
+#include "missing.h"
 #include "resource.h"
 #include "msapi_utf8.h"
 #include "localization.h"
@@ -38,7 +39,7 @@
 #include "settings.h"
 
 /* Maximum download chunk size, in bytes */
-#define DOWNLOAD_BUFFER_SIZE    10240
+#define DOWNLOAD_BUFFER_SIZE    10*KB
 /* Default delay between update checks (1 day) */
 #define DEFAULT_UPDATE_INTERVAL (24*3600)
 

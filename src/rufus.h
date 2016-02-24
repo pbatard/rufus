@@ -23,7 +23,7 @@
 #if defined(_MSC_VER)
 // Disable some VS2012 Code Analysis warnings
 #pragma warning(disable: 4996)		// Ignore deprecated (eg. GetVersionEx()), as we have to contend with XP
-#pragma warning(disable: 28159)		// VS2012 wants us to use GetTickCount64(), but it's not available on XP
+#pragma warning(disable: 28159)		// We use GetTickCount64() where possible, but it's not available on XP
 #pragma warning(disable: 6258)		// I know what I'm using TerminateThread for
 #endif
 
@@ -537,16 +537,6 @@ static __inline HMODULE GetLibraryHandle(char* szLibraryName) {
 	if (pf##proc == NULL) {uprintf("Unable to locate %s() in %s.dll: %s\n",  \
 	#proc, #name, WindowsErrorString()); goto out;} } while(0)
 
-/* Clang/MinGW32 has an issue with intptr_t */
-#ifndef _UINTPTR_T_DEFINED
-#define _UINTPTR_T_DEFINED
-#ifdef _WIN64
-  typedef unsigned __int64 uintptr_t;
-#else
-  typedef unsigned int uintptr_t;
-#endif
-#endif
-
 /* Custom application errors */
 #define FAC(f)                         (f<<16)
 #define APPERR(err)                    (APPLICATION_ERROR_MASK|err)
@@ -563,8 +553,7 @@ static __inline HMODULE GetLibraryHandle(char* szLibraryName) {
 #define ERROR_CANT_ASSIGN_LETTER       0x120B
 #define ERROR_CANT_MOUNT_VOLUME        0x120C
 
-/* Why oh why does Microsoft have to make everybody suffer with their braindead use of Unicode? */
-#define _RT_ICON			MAKEINTRESOURCEA(3)
-#define _RT_DIALOG			MAKEINTRESOURCEA(5)
-#define _RT_RCDATA			MAKEINTRESOURCEA(10)
-#define _RT_GROUP_ICON		MAKEINTRESOURCEA((ULONG_PTR)(MAKEINTRESOURCEA(3) + 11))
+/* GetTickCount64 not being available on XP is a massive bother */
+PF_TYPE(WINAPI, ULONGLONG, GetTickCount64, (void));
+extern GetTickCount64_t pfGetTickCount64;
+#define _GetTickCount64() ((pfGetTickCount64 != NULL)?(uint64_t)pfGetTickCount64():(uint64_t)GetTickCount())

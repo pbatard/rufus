@@ -28,6 +28,7 @@
 #include <string.h>
 
 #include "rufus.h"
+#include "missing.h"
 #include "resource.h"
 #include "msapi_utf8.h"
 

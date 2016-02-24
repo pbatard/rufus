@@ -31,7 +31,7 @@ extern char* ini_file;
 #define SETTING_LAST_UPDATE                 "LastUpdateCheck"
 #define SETTING_UPDATE_INTERVAL             "UpdateCheckInterval"
 #define SETTING_INCLUDE_BETAS               "CheckForBetas"
-#define SETTING_COMM_CHECK                  "CommCheck"
+#define SETTING_COMM_CHECK                  "CommCheck64"
 #define SETTING_LOCALE                      "Locale"
 #define SETTING_DISABLE_LGP                 "DisableLGP"
 

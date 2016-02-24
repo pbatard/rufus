@@ -1189,7 +1189,7 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 		// This helps us reselect the partition scheme option that was used when creating the
 		// drive in Rufus. As far as I can tell, Windows doesn't care much if this signature
 		// isn't unique for USB drives.
-		CreateDisk.Mbr.Signature = mbr_uefi_marker?MBR_UEFI_MARKER:GetTickCount();
+		CreateDisk.Mbr.Signature = mbr_uefi_marker?MBR_UEFI_MARKER:(DWORD)_GetTickCount64();
 
 		DriveLayoutEx.PartitionStyle = PARTITION_STYLE_MBR;
 		DriveLayoutEx.PartitionCount = 4;	// Must be multiple of 4 for MBR

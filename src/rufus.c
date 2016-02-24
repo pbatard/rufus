@@ -94,6 +94,7 @@ OPENED_LIBRARIES_VARS;
 HINSTANCE hMainInstance;
 HWND hMainDialog, hLangToolbar = NULL, hUpdatesDlg = NULL;
 MY_BUTTON_IMAGELIST bi_iso = { 0 }, bi_up = { 0 }, bi_down = { 0 };
+GetTickCount64_t pfGetTickCount64 = NULL;
 char szFolderPath[MAX_PATH], app_dir[MAX_PATH], system_dir[MAX_PATH], sysnative_dir[MAX_PATH];
 char* image_path = NULL;
 float fScale = 1.0f;
@@ -2038,7 +2039,8 @@ void SaveVHD(void)
  */
 static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	static DWORD DeviceNum = 0, LastRefresh = 0;
+	static DWORD DeviceNum = 0;
+	static uint64_t LastRefresh = 0;
 	static BOOL first_log_display = TRUE, isMarquee = FALSE;
 	static ULONG ulRegister = 0;
 	static LPITEMIDLIST pidlDesktop = NULL;
@@ -2078,15 +2080,15 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			case DBT_DEVICEARRIVAL:
 			case DBT_DEVICEREMOVECOMPLETE:
 			case DBT_CUSTOMEVENT:	// Sent by our timer refresh function or for card reader media change
-				LastRefresh = GetTickCount();	// Don't care about 49.7 days rollback of GetTickCount()
+				LastRefresh = _GetTickCount64();
 				KillTimer(hMainDialog, TID_REFRESH_TIMER);
 				GetUSBDevices((DWORD)ComboBox_GetItemData(hDeviceList, ComboBox_GetCurSel(hDeviceList)));
 				user_changed_label = FALSE;
 				return (INT_PTR)TRUE;
 			case DBT_DEVNODES_CHANGED:
 				// If it's been more than a second since last device refresh, arm a refresh timer
-				if (GetTickCount() > LastRefresh + 1000) {
-					LastRefresh = GetTickCount();
+				if (_GetTickCount64() > LastRefresh + 1000) {
+					LastRefresh = _GetTickCount64();
 					SetTimer(hMainDialog, TID_REFRESH_TIMER, 1000, RefreshTimer);
 				}
 				break;
@@ -2789,6 +2791,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 #endif
 
 	uprintf("*** " APPLICATION_NAME " init ***\n");
+	PF_INIT(GetTickCount64, kernel32);
 
 	// Reattach the console, if we were started from commandline
 	if (AttachConsole(ATTACH_PARENT_PROCESS) != 0) {
@@ -3009,7 +3012,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 				uprintf("Failed to enable AutoMount");
 		}
 	}
-	srand((unsigned int)GetTickCount());
+	srand((unsigned int)_GetTickCount64());
 
 relaunch:
 	uprintf("localization: using locale '%s'\n", selected_locale->txt[0]);

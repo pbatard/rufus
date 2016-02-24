@@ -31,6 +31,7 @@
 #include <string.h>
 
 #include "rufus.h"
+#include "missing.h"
 #include "resource.h"
 
 #include "dos.h"
@@ -325,7 +326,7 @@ static BOOL ExtractMSDOS(const char* path)
 		goto out;
 
 	// Sanity check
-	if (DiskImageSize < 700*1024) {
+	if (DiskImageSize < 700*KB) {
 		uprintf("MS-DOS disk image is too small (%d bytes)\n", dllname, DiskImageSize);
 		goto out;
 	}

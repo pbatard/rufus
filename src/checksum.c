@@ -778,8 +778,8 @@ INT_PTR CALLBACK ChecksumCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 DWORD WINAPI SumThread(void* param)
 {
 	HANDLE h = INVALID_HANDLE_VALUE;
-	DWORD rSize = 0, LastRefresh = 0;
-	uint64_t rb;
+	DWORD rSize = 0;
+	uint64_t rb, LastRefresh = 0;
 	char buffer[4096];
 	SHA1_CONTEXT sha1_ctx;
 	SHA256_CONTEXT sha256_ctx;
@@ -804,8 +804,8 @@ DWORD WINAPI SumThread(void* param)
 	md5_init(&md5_ctx);
 
 	for (rb = 0; ; rb += rSize) {
-		if (GetTickCount() > LastRefresh + 25) {
-			LastRefresh = GetTickCount();
+		if (_GetTickCount64() > LastRefresh + 25) {
+			LastRefresh = _GetTickCount64();
 			format_percent = (100.0f*rb) / (1.0f*img_report.projected_size);
 			PrintInfo(0, MSG_271, format_percent);
 			SendMessage(hProgress, PBM_SETPOS, (WPARAM)((format_percent/100.0f)*MAX_PROGRESS), 0);
