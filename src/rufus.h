@@ -16,7 +16,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <windows.h>
-#include <winioctl.h>				// for DISK_GEOMETRY
 #include <malloc.h>
 #include <inttypes.h>
 
@@ -99,7 +98,6 @@
 #define safe_strncmp(str1, str2, count) strncmp(((str1==NULL)?"<NULL>":str1), ((str2==NULL)?"<NULL>":str2), count)
 #define safe_strnicmp(str1, str2, count) _strnicmp(((str1==NULL)?"<NULL>":str1), ((str2==NULL)?"<NULL>":str2), count)
 #define safe_closehandle(h) do {if ((h != INVALID_HANDLE_VALUE) && (h != NULL)) {CloseHandle(h); h = INVALID_HANDLE_VALUE;}} while(0)
-#define safe_unlockclose(h) do {if ((h != INVALID_HANDLE_VALUE) && (h != NULL)) {UnlockDrive(h); CloseHandle(h); h = INVALID_HANDLE_VALUE;}} while(0)
 #define safe_release_dc(hDlg, hDC) do {if ((hDC != INVALID_HANDLE_VALUE) && (hDC != NULL)) {ReleaseDC(hDlg, hDC); hDC = NULL;}} while(0)
 #define safe_sprintf(dst, count, ...) do {_snprintf(dst, count, __VA_ARGS__); (dst)[(count)-1] = 0; } while(0)
 #define static_sprintf(dst, ...) safe_sprintf(dst, sizeof(dst), __VA_ARGS__)
@@ -224,24 +222,6 @@ enum target_type {
 // For the partition types we'll use Microsoft's PARTITION_STYLE_### constants
 #define GETTARGETTYPE(x) (((x)>0)?(((x) >> 16) & 0xFFFF):0)
 #define GETPARTTYPE(x)   (((x)>0)?((x) & 0xFFFF):0);
-
-/* Current drive info */
-typedef struct {
-	DWORD DeviceNumber;
-	LONGLONG DiskSize;
-	DISK_GEOMETRY Geometry;
-	DWORD FirstSector;
-	char proposed_label[16];
-	int PartitionType;
-	int nPartitions;	// number of partitions we actually care about
-	int FSType;
-	BOOL has_protective_mbr;
-	BOOL has_mbr_uefi_marker;
-	struct {
-		ULONG Allowed;
-		ULONG Default;
-	} ClusterSize[FS_MAX];
-} RUFUS_DRIVE_INFO;
 
 /* Special handling for old .c32 files we need to replace */
 #define NB_OLD_C32          2
@@ -372,7 +352,6 @@ extern char* image_path;
 extern DWORD FormatStatus, DownloadStatus;
 extern BOOL PromptOnError;
 extern unsigned long syslinux_ldlinux_len[2];
-extern RUFUS_DRIVE_INFO SelectedDrive;
 extern const int nb_steps[FS_MAX];
 extern BOOL use_own_c32[NB_OLD_C32], detect_fakes, iso_op_in_progress, format_op_in_progress, right_to_left_mode;
 extern BOOL allow_dual_uefi_bios, togo_mode;
@@ -465,11 +444,6 @@ extern BOOL WriteFileWithRetry(HANDLE hFile, LPCVOID lpBuffer, DWORD nNumberOfBy
 DWORD WINAPI FormatThread(void* param);
 DWORD WINAPI SaveImageThread(void* param);
 DWORD WINAPI SumThread(void* param);
-
-static __inline BOOL UnlockDrive(HANDLE hDrive) {
-	DWORD size;
-	return DeviceIoControl(hDrive, FSCTL_UNLOCK_VOLUME, NULL, 0, NULL, 0, &size, NULL);
-}
 
 /* Hash tables */
 typedef struct htab_entry {
