@@ -347,31 +347,20 @@ static DWORD GetVolumeID(void)
 }
 
 /*
- * This is the Microsoft calculation from FATGEN
- *
- * DWORD RootDirSectors = 0;
- * DWORD TmpVal1, TmpVal2, FATSz;
- *
- * TmpVal1 = DskSize - (ReservedSecCnt + RootDirSectors);
- * TmpVal2 = (256 * SecPerClus) + NumFATs;
- * TmpVal2 = TmpVal2 / 2;
- * FATSz = (TmpVal1 + (TmpVal2 - 1)) / TmpVal2;
- *
- * return( FatSz );
+ * Proper computation of FAT size
+ * See: http://www.syslinux.org/archives/2016-February/024850.html
+ * and subsequent replies.
  */
 static DWORD GetFATSizeSectors(DWORD DskSize, DWORD ReservedSecCnt, DWORD SecPerClus, DWORD NumFATs, DWORD BytesPerSect)
 {
 	ULONGLONG Numerator, Denominator;
 	ULONGLONG FatElementSize = 4;
+	ULONGLONG ReservedClusCnt = 2;
 	ULONGLONG FatSz;
 
-	// This is based on
-	// http://hjem.get2net.dk/rune_moeller_barnkob/filesystems/fat.html
-	Numerator = FatElementSize * (DskSize - ReservedSecCnt);
-	Denominator = (SecPerClus * BytesPerSect) + (FatElementSize * NumFATs);
-	FatSz = Numerator / Denominator;
-	// round up
-	FatSz += 1;
+	Numerator = DskSize - ReservedSecCnt + ReservedClusCnt * SecPerClus;
+	Denominator = SecPerClus * BytesPerSect / FatElementSize + NumFATs;
+	FatSz = Numerator / Denominator + 1;	// +1 to ensure we are rounded up
 
 	return (DWORD)FatSz;
 }
