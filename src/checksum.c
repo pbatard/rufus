@@ -60,7 +60,7 @@
 #undef BIG_ENDIAN_HOST
 
 /* Globals */
-char sha1str[41], sha256str[65], md5str[33];
+char sum_str[3][65];
 
 #if defined(__GNUC__)
 #define ALIGNED(m) __attribute__ ((__aligned__(m)))
@@ -103,27 +103,27 @@ static const uint32_t k[64] = {
 	0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2
 };
 
-typedef struct ALIGNED(8) {
-	unsigned char buf[64];
-	uint32_t state[5];
-	uint32_t count;
-	uint64_t nblocks;
-} SHA1_CONTEXT;
-
+/*
+ * For convenience, we use a common context for all the checksums algorithms,
+ * which means some elements may be unused...
+ */
 typedef struct ALIGNED(8) {
 	unsigned char buf[64];
 	uint32_t state[8];
-	uint32_t datalen;
-	uint64_t bitlen;
-} SHA256_CONTEXT;
-
-typedef struct ALIGNED(8) {
-	unsigned char buf[64];
-	uint32_t state[4];
 	uint64_t bitcount;
-} MD5_CONTEXT;
+	uint32_t bytecount;
+} SUM_CONTEXT;
 
-static void sha1_init(SHA1_CONTEXT *ctx)
+static void md5_init(SUM_CONTEXT *ctx)
+{
+	memset(ctx, 0, sizeof(*ctx));
+	ctx->state[0] = 0x67452301;
+	ctx->state[1] = 0xefcdab89;
+	ctx->state[2] = 0x98badcfe;
+	ctx->state[3] = 0x10325476;
+}
+
+static void sha1_init(SUM_CONTEXT *ctx)
 {
 	memset(ctx, 0, sizeof(*ctx));
 	ctx->state[0] = 0x67452301;
@@ -133,7 +133,7 @@ static void sha1_init(SHA1_CONTEXT *ctx)
 	ctx->state[4] = 0xc3d2e1f0;
 }
 
-static void sha256_init(SHA256_CONTEXT *ctx)
+static void sha256_init(SUM_CONTEXT *ctx)
 {
 	memset(ctx, 0, sizeof(*ctx));
 	ctx->state[0] = 0x6a09e667;
@@ -146,17 +146,9 @@ static void sha256_init(SHA256_CONTEXT *ctx)
 	ctx->state[7] = 0x5be0cd19;
 }
 
-static void md5_init(MD5_CONTEXT *ctx)
-{
-	memset(ctx, 0, sizeof(*ctx));
-	ctx->state[0] = 0x67452301;
-	ctx->state[1] = 0xefcdab89;
-	ctx->state[2] = 0x98badcfe;
-	ctx->state[3] = 0x10325476;
-}
 
 /* Transform the message X which consists of 16 32-bit-words (SHA-1) */
-static void sha1_transform(SHA1_CONTEXT *ctx, const unsigned char *data)
+static void sha1_transform(SUM_CONTEXT *ctx, const unsigned char *data)
 {
 	uint32_t a, b, c, d, e, tm;
 	uint32_t x[16];
@@ -290,7 +282,7 @@ static void sha1_transform(SHA1_CONTEXT *ctx, const unsigned char *data)
 	ctx->state[4] += e;
 }
 
-static void sha256_transform(SHA256_CONTEXT *ctx, const unsigned char *data)
+static void sha256_transform(SUM_CONTEXT *ctx, const unsigned char *data)
 {
 	uint32_t a, b, c, d, e, f, g, h, i, t1, t2, m[64];
 
@@ -355,7 +347,7 @@ static void sha256_transform(SHA256_CONTEXT *ctx, const unsigned char *data)
 }
 
 /* Transform the message X which consists of 16 32-bit-words (MD5) */
-static void md5_transform(MD5_CONTEXT *ctx, const unsigned char *data)
+static void md5_transform(SUM_CONTEXT *ctx, const unsigned char *data)
 {
 	uint32_t a, b, c, d;
 	uint32_t x[16];
@@ -469,18 +461,18 @@ static void md5_transform(MD5_CONTEXT *ctx, const unsigned char *data)
 }
 
 /* Update the message digest with the contents of the buffer (SHA-1) */
-static void sha1_write(SHA1_CONTEXT *ctx, const unsigned char *buf, size_t len)
+static void sha1_write(SUM_CONTEXT *ctx, const unsigned char *buf, size_t len)
 {
-	if (ctx->count == 64) { /* flush the buffer */
+	if (ctx->bytecount == 64) { /* flush the buffer */
 		sha1_transform(ctx, ctx->buf);
-		ctx->count = 0;
-		ctx->nblocks++;
+		ctx->bytecount = 0;
+		ctx->bitcount += 64 * 8;
 	}
 	if (!buf)
 		return;
-	if (ctx->count) {
-		for (; len && ctx->count < 64; len--)
-			ctx->buf[ctx->count++] = *buf++;
+	if (ctx->bytecount) {
+		for (; len && ctx->bytecount < 64; len--)
+			ctx->buf[ctx->bytecount++] = *buf++;
 		sha1_write(ctx, NULL, 0);
 		if (!len)
 			return;
@@ -488,32 +480,32 @@ static void sha1_write(SHA1_CONTEXT *ctx, const unsigned char *buf, size_t len)
 
 	while (len >= 64) {
 		sha1_transform(ctx, buf);
-		ctx->count = 0;
-		ctx->nblocks++;
+		ctx->bytecount = 0;
+		ctx->bitcount += 64 * 8;
 		len -= 64;
 		buf += 64;
 	}
-	for (; len && ctx->count < 64; len--)
-		ctx->buf[ctx->count++] = *buf++;
+	for (; len && ctx->bytecount < 64; len--)
+		ctx->buf[ctx->bytecount++] = *buf++;
 }
 
-static void sha256_write(SHA256_CONTEXT *ctx, const unsigned char *buf, size_t len)
+static void sha256_write(SUM_CONTEXT *ctx, const unsigned char *buf, size_t len)
 {
 	uint32_t i;
 
 	for (i = 0; i < len; ++i) {
-		ctx->buf[ctx->datalen] = buf[i];
-		ctx->datalen++;
-		if (ctx->datalen == 64) {
+		ctx->buf[ctx->bytecount] = buf[i];
+		ctx->bytecount++;
+		if (ctx->bytecount == 64) {
 			sha256_transform(ctx, ctx->buf);
-			ctx->bitlen += 512;
-			ctx->datalen = 0;
+			ctx->bitcount += 64 * 8;
+			ctx->bytecount = 0;
 		}
 	}
 }
 
 /* Update the message digest with the contents of the buffer (MD5) */
-static void md5_write(MD5_CONTEXT *ctx, const unsigned char *buf, size_t len)
+static void md5_write(SUM_CONTEXT *ctx, const unsigned char *buf, size_t len)
 {
 	uint32_t t;
 
@@ -550,36 +542,33 @@ static void md5_write(MD5_CONTEXT *ctx, const unsigned char *buf, size_t len)
 }
 
 /* The routine final terminates the computation and returns the digest (SHA-1) */
-static void sha1_final(SHA1_CONTEXT *ctx)
+static void sha1_final(SUM_CONTEXT *ctx)
 {
-	uint64_t bitcount;
 	unsigned char *p;
 
 	sha1_write(ctx, NULL, 0); /* flush */;
 
-	bitcount = ctx->nblocks * 64 * 8;
-
-	if (ctx->count < 56) { /* enough room */
-		ctx->buf[ctx->count++] = 0x80; /* pad */
-		while (ctx->count < 56)
-			ctx->buf[ctx->count++] = 0; /* pad */
+	if (ctx->bytecount < 56) { /* enough room */
+		ctx->buf[ctx->bytecount++] = 0x80; /* pad */
+		while (ctx->bytecount < 56)
+			ctx->buf[ctx->bytecount++] = 0; /* pad */
 	} else { /* need one extra block */
-		ctx->buf[ctx->count++] = 0x80; /* pad character */
-		while (ctx->count < 64)
-			ctx->buf[ctx->count++] = 0;
+		ctx->buf[ctx->bytecount++] = 0x80; /* pad character */
+		while (ctx->bytecount < 64)
+			ctx->buf[ctx->bytecount++] = 0;
 		sha1_write(ctx, NULL, 0); /* flush */;
 		memset(ctx->buf, 0, 56); /* fill next block with zeroes */
 	}
 
 	/* append the 64 bit count (big-endian) */
-	ctx->buf[56] = (unsigned char) (bitcount >> 56);
-	ctx->buf[57] = (unsigned char) (bitcount >> 48);
-	ctx->buf[58] = (unsigned char) (bitcount >> 40);
-	ctx->buf[59] = (unsigned char) (bitcount >> 32);
-	ctx->buf[60] = (unsigned char) (bitcount >> 24);
-	ctx->buf[61] = (unsigned char) (bitcount >> 16);
-	ctx->buf[62] = (unsigned char) (bitcount >> 8);
-	ctx->buf[63] = (unsigned char) bitcount;
+	ctx->buf[56] = (unsigned char) (ctx->bitcount >> 56);
+	ctx->buf[57] = (unsigned char) (ctx->bitcount >> 48);
+	ctx->buf[58] = (unsigned char) (ctx->bitcount >> 40);
+	ctx->buf[59] = (unsigned char) (ctx->bitcount >> 32);
+	ctx->buf[60] = (unsigned char) (ctx->bitcount >> 24);
+	ctx->buf[61] = (unsigned char) (ctx->bitcount >> 16);
+	ctx->buf[62] = (unsigned char) (ctx->bitcount >> 8);
+	ctx->buf[63] = (unsigned char) ctx->bitcount;
 
 	sha1_transform(ctx, ctx->buf);
 
@@ -598,15 +587,15 @@ static void sha1_final(SHA1_CONTEXT *ctx)
 #undef X
 }
 
-static void sha256_final(SHA256_CONTEXT *ctx)
+static void sha256_final(SUM_CONTEXT *ctx)
 {
 	uint32_t i;
 	unsigned char *p;
 
-	i = ctx->datalen;
+	i = ctx->bytecount;
 
 	// Pad whatever data is left in the buffer.
-	if (ctx->datalen < 56) {
+	if (ctx->bytecount < 56) {
 		ctx->buf[i++] = 0x80;
 		while (i < 56)
 			ctx->buf[i++] = 0x00;
@@ -620,15 +609,15 @@ static void sha256_final(SHA256_CONTEXT *ctx)
 	}
 
 	// Append to the padding the total message's length in bits and transform.
-	ctx->bitlen += ctx->datalen * 8;
-	ctx->buf[63] = (unsigned char) (ctx->bitlen);
-	ctx->buf[62] = (unsigned char) (ctx->bitlen >> 8);
-	ctx->buf[61] = (unsigned char) (ctx->bitlen >> 16);
-	ctx->buf[60] = (unsigned char) (ctx->bitlen >> 24);
-	ctx->buf[59] = (unsigned char) (ctx->bitlen >> 32);
-	ctx->buf[58] = (unsigned char) (ctx->bitlen >> 40);
-	ctx->buf[57] = (unsigned char) (ctx->bitlen >> 48);
-	ctx->buf[56] = (unsigned char) (ctx->bitlen >> 56);
+	ctx->bitcount += ctx->bytecount * 8;
+	ctx->buf[63] = (unsigned char) (ctx->bitcount);
+	ctx->buf[62] = (unsigned char) (ctx->bitcount >> 8);
+	ctx->buf[61] = (unsigned char) (ctx->bitcount >> 16);
+	ctx->buf[60] = (unsigned char) (ctx->bitcount >> 24);
+	ctx->buf[59] = (unsigned char) (ctx->bitcount >> 32);
+	ctx->buf[58] = (unsigned char) (ctx->bitcount >> 40);
+	ctx->buf[57] = (unsigned char) (ctx->bitcount >> 48);
+	ctx->buf[56] = (unsigned char) (ctx->bitcount >> 56);
 
 	sha256_transform(ctx, ctx->buf);
 
@@ -651,7 +640,7 @@ static void sha256_final(SHA256_CONTEXT *ctx)
 }
 
 /* The routine final terminates the computation and returns the digest (MD5) */
-static void md5_final(MD5_CONTEXT *ctx)
+static void md5_final(SUM_CONTEXT *ctx)
 {
 	uint32_t count;
 	unsigned char *p;
@@ -728,9 +717,9 @@ INT_PTR CALLBACK ChecksumCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 		SendDlgItemMessageA(hDlg, IDC_MD5, WM_SETFONT, (WPARAM)hFont, TRUE);
 		SendDlgItemMessageA(hDlg, IDC_SHA1, WM_SETFONT, (WPARAM)hFont, TRUE);
 		SendDlgItemMessageA(hDlg, IDC_SHA256, WM_SETFONT, (WPARAM)hFont, TRUE);
-		SetWindowTextA(GetDlgItem(hDlg, IDC_MD5), md5str);
-		SetWindowTextA(GetDlgItem(hDlg, IDC_SHA1), sha1str);
-		SetWindowTextA(GetDlgItem(hDlg, IDC_SHA256), sha256str);
+		SetWindowTextA(GetDlgItem(hDlg, IDC_MD5), sum_str[0]);
+		SetWindowTextA(GetDlgItem(hDlg, IDC_SHA1), sum_str[1]);
+		SetWindowTextA(GetDlgItem(hDlg, IDC_SHA256), sum_str[2]);
 
 		// Move/Resize the controls as needed to fit our text
 		hDC = GetDC(GetDlgItem(hDlg, IDC_MD5));
@@ -739,14 +728,14 @@ INT_PTR CALLBACK ChecksumCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 		GetWindowRect(GetDlgItem(hDlg, IDC_MD5), &rect);
 		dw = rect.right - rect.left;
 		dh = rect.bottom - rect.top;
-		DrawTextU(hDC, md5str, -1, &rect, DT_CALCRECT);
+		DrawTextU(hDC, sum_str[0], -1, &rect, DT_CALCRECT);
 		dw = rect.right - rect.left - dw + 12;	// Ideally we'd compute the field borders from the system, but hey...
 		dh = rect.bottom - rect.top - dh + 6;
 		ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDC_SHA256), 0, 0, dw, dh, 1.0f);
 
 		GetWindowRect(GetDlgItem(hDlg, IDC_SHA1), &rect);
 		dw = rect.right - rect.left;
-		DrawTextU(hDC, sha1str, -1, &rect, DT_CALCRECT);
+		DrawTextU(hDC, sum_str[1], -1, &rect, DT_CALCRECT);
 		dw = rect.right - rect.left - dw + 12;
 		ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDC_MD5), 0, 0, dw, 0, 1.0f);
 		ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDC_SHA1), 0, 0, dw, 0, 1.0f);
@@ -774,6 +763,13 @@ INT_PTR CALLBACK ChecksumCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 	return (INT_PTR)FALSE;
 }
 
+typedef void sum_init_t(SUM_CONTEXT *ctx);
+typedef void sum_write_t(SUM_CONTEXT *ctx, const unsigned char *buf, size_t len);
+typedef void sum_final_t(SUM_CONTEXT *ctx);
+sum_init_t *sum_init[3] = { md5_init, sha1_init , sha256_init };
+sum_write_t *sum_write[3] = { md5_write, sha1_write , sha256_write };
+sum_final_t *sum_final[3] = { md5_final, sha1_final , sha256_final };
+int sum_count[3] = { 16, 20, 32 };
 
 DWORD WINAPI SumThread(void* param)
 {
@@ -781,10 +777,8 @@ DWORD WINAPI SumThread(void* param)
 	DWORD rSize = 0;
 	uint64_t rb, LastRefresh = 0;
 	char buffer[4096];
-	SHA1_CONTEXT sha1_ctx;
-	SHA256_CONTEXT sha256_ctx;
-	MD5_CONTEXT md5_ctx;
-	int i, r = -1;
+	SUM_CONTEXT sum_ctx[3];
+	int i, j, r = -1;
 	float format_percent = 0.0f;
 
 	if (image_path == NULL)
@@ -799,9 +793,8 @@ DWORD WINAPI SumThread(void* param)
 		goto out;
 	}
 
-	sha1_init(&sha1_ctx);
-	sha256_init(&sha256_ctx);
-	md5_init(&md5_ctx);
+	for (i = 0; i < ARRAYSIZE(sum_init); i++)
+		sum_init[i](&sum_ctx[i]);
 
 	for (rb = 0; ; rb += rSize) {
 		if (_GetTickCount64() > LastRefresh + 25) {
@@ -819,24 +812,20 @@ DWORD WINAPI SumThread(void* param)
 		}
 		if (rSize == 0)
 			break;
-		sha1_write(&sha1_ctx, buffer, (size_t)rSize);
-		sha256_write(&sha256_ctx, buffer, (size_t)rSize);
-		md5_write(&md5_ctx, buffer, (size_t)rSize);
+		for (i = 0; i < ARRAYSIZE(sum_init); i++)
+			sum_write[i](&sum_ctx[i], buffer, (size_t)rSize);
 	}
 
-	sha1_final(&sha1_ctx);
-	sha256_final(&sha256_ctx);
-	md5_final(&md5_ctx);
+	for (i = 0; i < ARRAYSIZE(sum_init); i++) {
+		memset(&sum_str[i], 0, ARRAYSIZE(sum_str[i]));
+		sum_final[i](&sum_ctx[i]);
+		for (j = 0; j < sum_count[i]; j++)
+			safe_sprintf(&sum_str[i][2 * j], ARRAYSIZE(sum_str[i]) - 2 * j, "%02x", sum_ctx[i].buf[j]);
+	}
+	uprintf("  MD5:\t %s", sum_str[0]);
+	uprintf("  SHA1:\t %s", sum_str[1]);
+	uprintf("  SHA256: %s", sum_str[2]);
 
-	for (i = 0; i < 16; i++)
-		safe_sprintf(&md5str[2*i], sizeof(md5str) - 2*i, "%02x", md5_ctx.buf[i]);
-	uprintf("  MD5:\t %s", md5str);
-	for (i = 0; i < 20; i++)
-		safe_sprintf(&sha1str[2*i], sizeof(sha1str) - 2*i, "%02x", sha1_ctx.buf[i]);
-	uprintf("  SHA1:\t %s", sha1str);
-	for (i = 0; i < 32; i++)
-		safe_sprintf(&sha256str[2*i], sizeof(sha256str) - 2*i, "%02x", sha256_ctx.buf[i]);
-	uprintf("  SHA256: %s", sha256str);
 	r = 0;
 
 out:
