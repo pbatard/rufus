@@ -60,6 +60,7 @@
 #define MAX_SECTORS_TO_CLEAR        128			// nb sectors to zap when clearing the MBR/GPT (must be >34)
 #define MBR_UEFI_MARKER             0x49464555	// 'U', 'E', 'F', 'I', as a 32 bit little endian longword
 #define WRITE_RETRIES               3
+#define NUM_CHECKSUMS               3			// Number of checksum algorithms we support (MD5, SHA1, SHA256)
 #define FS_DEFAULT                  FS_FAT32
 #define SINGLE_CLUSTERSIZE_DEFAULT  0x00000100
 #define BADBLOCK_PATTERNS           {0xaa, 0x55, 0xff, 0x00}
@@ -290,6 +291,11 @@ typedef struct {
 	char* path;
 } VHD_SAVE;
 
+typedef struct {
+	DWORD_PTR read_thread;
+	DWORD_PTR sum_thread[NUM_CHECKSUMS];
+} CHECKSUM_AFFINITY;
+
 /*
  * Structure and macros used for the extensions specification of FileDialog()
  * You can use:
@@ -440,6 +446,7 @@ extern LONG ValidateSignature(HWND hDlg, const char* path);
 extern BOOL IsFontAvailable(const char* font_name);
 extern BOOL WriteFileWithRetry(HANDLE hFile, LPCVOID lpBuffer, DWORD nNumberOfBytesToWrite,
 	LPDWORD lpNumberOfBytesWritten, DWORD nNumRetries);
+extern BOOL SetChecksumAffinity(CHECKSUM_AFFINITY* checksum_affinity);
 
 DWORD WINAPI FormatThread(void* param);
 DWORD WINAPI SaveImageThread(void* param);

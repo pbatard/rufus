@@ -53,14 +53,22 @@
 #include <windowsx.h>
 
 #include "rufus.h"
+#include "missing.h"
 #include "resource.h"
 #include "msapi_utf8.h"
 #include "localization.h"
 
 #undef BIG_ENDIAN_HOST
 
+#define BUFFER_SIZE     4096
+#define WAIT_TIME       5000
+
 /* Globals */
-char sum_str[3][65];
+char sum_str[NUM_CHECKSUMS][65];
+int bufnum, sum_count[NUM_CHECKSUMS] = { 16, 20, 32 };
+HANDLE data_ready[NUM_CHECKSUMS], thread_ready[NUM_CHECKSUMS];
+DWORD rSize[2];
+char buffer[2][BUFFER_SIZE];
 
 #if defined(__GNUC__)
 #define ALIGNED(m) __attribute__ ((__aligned__(m)))
@@ -766,25 +774,116 @@ INT_PTR CALLBACK ChecksumCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 typedef void sum_init_t(SUM_CONTEXT *ctx);
 typedef void sum_write_t(SUM_CONTEXT *ctx, const unsigned char *buf, size_t len);
 typedef void sum_final_t(SUM_CONTEXT *ctx);
-sum_init_t *sum_init[3] = { md5_init, sha1_init , sha256_init };
-sum_write_t *sum_write[3] = { md5_write, sha1_write , sha256_write };
-sum_final_t *sum_final[3] = { md5_final, sha1_final , sha256_final };
-int sum_count[3] = { 16, 20, 32 };
+sum_init_t *sum_init[NUM_CHECKSUMS] = { md5_init, sha1_init , sha256_init };
+sum_write_t *sum_write[NUM_CHECKSUMS] = { md5_write, sha1_write , sha256_write };
+sum_final_t *sum_final[NUM_CHECKSUMS] = { md5_final, sha1_final , sha256_final };
+
+/*
+ * We want the maximum speed we can get out of the checksum computation,
+ * so, if we have a multiprocessor/multithreaded machine, we'll assign of
+ * each of the individual checksum threads to a specific virtual core, and
+ * assign the read thread to one of the remainder virtual cores.
+ * To do just that, we need the following function call.
+ * Oh, and BOY is this thing sensitive to whether the first sum affinity
+ * is on an even or odd virtual core!
+ */
+BOOL SetChecksumAffinity(CHECKSUM_AFFINITY* checksum_affinity)
+{
+	int i, pc;
+	DWORD_PTR affinity, dummy;
+
+	memset(checksum_affinity, 0, sizeof(CHECKSUM_AFFINITY));
+	if (!GetProcessAffinityMask(GetCurrentProcess(), &affinity, &dummy))
+		return FALSE;
+
+	// If we don't have enough virtual cores to evenly spread our load forget it
+	pc = popcnt64(affinity);
+	if (pc < NUM_CHECKSUMS + 1)
+		return FALSE;
+
+	// We'll use the NUM_CHECKSUMS least significant set bits in our mask for
+	// the individual checksum threads, and the remainder for the read thread.
+	// From an empirical perspective, this looks like the best "one-size-fits-all"
+	// to spread the load.
+	checksum_affinity->read_thread = affinity;
+	for (i = 0; i < NUM_CHECKSUMS; i++) {
+		checksum_affinity->sum_thread[i] = affinity & (-1LL * affinity);
+		affinity ^= checksum_affinity->sum_thread[i];
+		checksum_affinity->read_thread ^= checksum_affinity->sum_thread[i];
+	}
+	return TRUE;
+}
+
+// Individual thread that computes one of MD5, SHA1 or SHA256 in parallel
+DWORD WINAPI IndividualSumThread(void* param)
+{
+	SUM_CONTEXT sum_ctx;
+	int i = (int)(uintptr_t)param, j;
+
+	sum_init[i](&sum_ctx);
+	// Signal that we're ready to service requests
+	if (!SetEvent(thread_ready[i]))
+		goto error;
+
+	// Wait for requests
+	while (1) {
+		if (WaitForSingleObject(data_ready[i], WAIT_TIME) != WAIT_OBJECT_0) {
+			uprintf("Failed to wait for event for checksum thread #%d: %s", i, WindowsErrorString());
+			return 1;
+		}
+		if (rSize[bufnum] != 0) {
+			sum_write[i](&sum_ctx, buffer[bufnum], (size_t)rSize[bufnum]);
+			if (!SetEvent(thread_ready[i]))
+				goto error;
+		} else {
+			sum_final[i](&sum_ctx);
+			memset(&sum_str[i], 0, ARRAYSIZE(sum_str[i]));
+			for (j = 0; j < sum_count[i]; j++)
+				safe_sprintf(&sum_str[i][2 * j], ARRAYSIZE(sum_str[i]) - 2 * j, "%02x", sum_ctx.buf[j]);
+			return 0;
+		}
+	}
+error:
+	uprintf("Failed to set event for checksum thread #%d: %s", i, WindowsErrorString());
+	return 1;
+}
 
 DWORD WINAPI SumThread(void* param)
 {
+	CHECKSUM_AFFINITY* checksum_affinity = (CHECKSUM_AFFINITY*)param;
+	HANDLE sum_thread[NUM_CHECKSUMS] = { NULL, NULL, NULL };
 	HANDLE h = INVALID_HANDLE_VALUE;
-	DWORD rSize = 0;
 	uint64_t rb, LastRefresh = 0;
-	char buffer[4096];
-	SUM_CONTEXT sum_ctx[3];
-	int i, j, r = -1;
+	int i, _bufnum, r = -1;
 	float format_percent = 0.0f;
 
-	if (image_path == NULL)
+	if ((image_path == NULL) || (checksum_affinity == NULL))
 		goto out;
 
 	uprintf("\r\nComputing checksum for '%s'...", image_path);
+
+	if (checksum_affinity->read_thread != 0)
+		SetThreadAffinityMask(GetCurrentThread(), checksum_affinity->read_thread);
+
+	for (i = 0; i < NUM_CHECKSUMS; i++) {
+		// NB: Can't use a single manual-reset event for data_ready as we
+		// wouldn't be able to ensure the event is reset before the threa
+		// gets into its next wait loop
+		data_ready[i] = CreateEvent(NULL, FALSE, FALSE, NULL);
+		thread_ready[i] = CreateEvent(NULL, FALSE, FALSE, NULL);
+		if ((data_ready == NULL) || (thread_ready[i] == NULL)) {
+			uprintf("Unable to create checksum thread event: %s", WindowsErrorString());
+			goto out;
+		}
+		sum_thread[i] = CreateThread(NULL, 0, IndividualSumThread, (LPVOID)(uintptr_t)i, 0, NULL);
+		if (sum_thread[i] == NULL) {
+			uprintf("Unable to start checksum thread #%d", i);
+			goto out;
+		}
+		if (checksum_affinity->sum_thread[i] != 0)
+			SetThreadAffinityMask(sum_thread[i], checksum_affinity->sum_thread[i]);
+	}
+
 	h = CreateFileU(image_path, GENERIC_READ, FILE_SHARE_READ, NULL,
 		OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, NULL);
 	if (h == INVALID_HANDLE_VALUE) {
@@ -793,42 +892,70 @@ DWORD WINAPI SumThread(void* param)
 		goto out;
 	}
 
-	for (i = 0; i < ARRAYSIZE(sum_init); i++)
-		sum_init[i](&sum_ctx[i]);
-
-	for (rb = 0; ; rb += rSize) {
+	bufnum = 0;
+	_bufnum = 0;
+	rSize[0] = 1;	// Don't trigger the first loop break
+	for (rb = 0; ;rb += rSize[_bufnum]) {
+		// Update the progress and check for cancel
 		if (_GetTickCount64() > LastRefresh + 25) {
 			LastRefresh = _GetTickCount64();
 			format_percent = (100.0f*rb) / (1.0f*img_report.projected_size);
 			PrintInfo(0, MSG_271, format_percent);
-			SendMessage(hProgress, PBM_SETPOS, (WPARAM)((format_percent/100.0f)*MAX_PROGRESS), 0);
+			SendMessage(hProgress, PBM_SETPOS, (WPARAM)((format_percent / 100.0f)*MAX_PROGRESS), 0);
 			SetTaskbarProgressValue(rb, img_report.projected_size);
 		}
 		CHECK_FOR_USER_CANCEL;
-		if (!ReadFile(h, buffer, sizeof(buffer), &rSize, NULL)) {
+
+		// Signal the threads that we have data to process
+		if (rb != 0) {
+			bufnum = _bufnum;
+			// Toggle the read buffer
+			_bufnum = (bufnum + 1) % 2;
+			// Signal the waiting threads
+			for (i = 0; i < NUM_CHECKSUMS; i++) {
+				if (!SetEvent(data_ready[i])) {
+					uprintf("Could not signal checksum thread %d: %s", i, WindowsErrorString());
+					goto out;
+				}
+			}
+		}
+
+		// Break the loop when data has been exhausted
+		if (rSize[bufnum] == 0)
+			break;
+
+		// Read data (double buffered)
+		if (!ReadFile(h, buffer[_bufnum], BUFFER_SIZE, &rSize[_bufnum], NULL)) {
 			FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_READ_FAULT;
-			uprintf("  Read error: %s", WindowsErrorString());
+			uprintf("Read error: %s", WindowsErrorString());
 			goto out;
 		}
-		if (rSize == 0)
-			break;
-		for (i = 0; i < ARRAYSIZE(sum_init); i++)
-			sum_write[i](&sum_ctx[i], buffer, (size_t)rSize);
+
+		// Wait for the thread to signal they are ready to process data
+		if (WaitForMultipleObjects(NUM_CHECKSUMS, thread_ready, TRUE, WAIT_TIME) != WAIT_OBJECT_0) {
+			uprintf("Checksum threads failed to signal: %s", WindowsErrorString());
+			goto out;
+		}
 	}
 
-	for (i = 0; i < ARRAYSIZE(sum_init); i++) {
-		memset(&sum_str[i], 0, ARRAYSIZE(sum_str[i]));
-		sum_final[i](&sum_ctx[i]);
-		for (j = 0; j < sum_count[i]; j++)
-			safe_sprintf(&sum_str[i][2 * j], ARRAYSIZE(sum_str[i]) - 2 * j, "%02x", sum_ctx[i].buf[j]);
+	// Our last event with rSize=0 signaled the threads to exit - wait for that to happen
+	if (WaitForMultipleObjects(NUM_CHECKSUMS, sum_thread, TRUE, WAIT_TIME) != WAIT_OBJECT_0) {
+		uprintf("Checksum threads did not finalize: %s", WindowsErrorString());
+		goto out;
 	}
+
 	uprintf("  MD5:\t %s", sum_str[0]);
 	uprintf("  SHA1:\t %s", sum_str[1]);
 	uprintf("  SHA256: %s", sum_str[2]);
-
 	r = 0;
 
 out:
+	for (i = 0; i < NUM_CHECKSUMS; i++) {
+		if (sum_thread[i] != NULL)
+			TerminateThread(sum_thread[i], 1);
+		CloseHandle(data_ready[i]);
+		CloseHandle(thread_ready[i]);
+	}
 	safe_closehandle(h);
 	PostMessage(hMainDialog, UM_FORMAT_COMPLETED, (WPARAM)FALSE, 0);
 	if (r == 0)

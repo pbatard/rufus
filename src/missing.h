@@ -21,6 +21,7 @@
 #include <commctrl.h>
 #include <shlobj.h>
 #include <wininet.h>
+#include <stdint.h>
 
 #pragma once
 
@@ -43,6 +44,21 @@
 #define bswap_uint32 __builtin_bswap32
 #define bswap_uint16 __builtin_bswap16
 #endif
+
+/*
+ * Nibbled from https://github.com/hanji/popcnt/blob/master/populationcount.cpp
+ * Since MSVC x86_32 does not have intrinsic popcount64 and I don't have all day
+ */
+static inline int popcnt64(register uint64_t u)
+{
+	u = (u & 0x5555555555555555) + ((u >> 1) & 0x5555555555555555);
+	u = (u & 0x3333333333333333) + ((u >> 2) & 0x3333333333333333);
+	u = (u & 0x0f0f0f0f0f0f0f0f) + ((u >> 4) & 0x0f0f0f0f0f0f0f0f);
+	u = (u & 0x00ff00ff00ff00ff) + ((u >> 8) & 0x00ff00ff00ff00ff);
+	u = (u & 0x0000ffff0000ffff) + ((u >> 16) & 0x0000ffff0000ffff);
+	u = (u & 0x00000000ffffffff) + ((u >> 32) & 0x00000000ffffffff);
+	return (int)u;
+}
 
 static __inline void *_reallocf(void *ptr, size_t size) {
 	void *ret = realloc(ptr, size);
