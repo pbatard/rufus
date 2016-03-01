@@ -60,7 +60,7 @@
 
 #undef BIG_ENDIAN_HOST
 
-#define BUFFER_SIZE     4096
+#define BUFFER_SIZE     (64*KB)
 #define WAIT_TIME       5000
 
 /* Globals */
@@ -704,6 +704,13 @@ static void md5_final(SUM_CONTEXT *ctx)
 #undef X
 }
 
+typedef void sum_init_t(SUM_CONTEXT *ctx);
+typedef void sum_write_t(SUM_CONTEXT *ctx, const unsigned char *buf, size_t len);
+typedef void sum_final_t(SUM_CONTEXT *ctx);
+sum_init_t *sum_init[NUM_CHECKSUMS] = { md5_init, sha1_init , sha256_init };
+sum_write_t *sum_write[NUM_CHECKSUMS] = { md5_write, sha1_write , sha256_write };
+sum_final_t *sum_final[NUM_CHECKSUMS] = { md5_final, sha1_final , sha256_final };
+
 /*
  * Checksum dialog callback
  */
@@ -771,53 +778,47 @@ INT_PTR CALLBACK ChecksumCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 	return (INT_PTR)FALSE;
 }
 
-typedef void sum_init_t(SUM_CONTEXT *ctx);
-typedef void sum_write_t(SUM_CONTEXT *ctx, const unsigned char *buf, size_t len);
-typedef void sum_final_t(SUM_CONTEXT *ctx);
-sum_init_t *sum_init[NUM_CHECKSUMS] = { md5_init, sha1_init , sha256_init };
-sum_write_t *sum_write[NUM_CHECKSUMS] = { md5_write, sha1_write , sha256_write };
-sum_final_t *sum_final[NUM_CHECKSUMS] = { md5_final, sha1_final , sha256_final };
-
 /*
  * We want the maximum speed we can get out of the checksum computation,
- * so, if we have a multiprocessor/multithreaded machine, we'll assign of
- * each of the individual checksum threads to a specific virtual core, and
- * assign the read thread to one of the remainder virtual cores.
+ * so, if we have a multiprocessor/multithreaded machine, we try to assign
+ * each of the individual checksum threads to a different core.
  * To do just that, we need the following function call.
- * Oh, and BOY is this thing sensitive to whether the first sum affinity
- * is on an even or odd virtual core!
  */
-BOOL SetChecksumAffinity(CHECKSUM_AFFINITY* checksum_affinity)
+extern BOOL usb_debug;	// For uuprintf
+BOOL SetChecksumAffinity(DWORD_PTR* thread_affinity)
 {
-	int i, pc;
+	int i, j, pc;
 	DWORD_PTR affinity, dummy;
 
-	memset(checksum_affinity, 0, sizeof(CHECKSUM_AFFINITY));
+	memset(thread_affinity, 0, 4 * sizeof(DWORD_PTR));
 	if (!GetProcessAffinityMask(GetCurrentProcess(), &affinity, &dummy))
 		return FALSE;
+	uuprintf("\r\nChecksum affinities:");
+	uuprintf("global:\t%s", printbitslz(affinity));
 
 	// If we don't have enough virtual cores to evenly spread our load forget it
 	pc = popcnt64(affinity);
 	if (pc < NUM_CHECKSUMS + 1)
 		return FALSE;
 
-	// We'll use the NUM_CHECKSUMS least significant set bits in our mask for
-	// the individual checksum threads, and the remainder for the read thread.
-	// From an empirical perspective, this looks like the best "one-size-fits-all"
-	// to spread the load.
-	checksum_affinity->read_thread = affinity;
+	// Spread the affinity as evenly as we can
+	thread_affinity[NUM_CHECKSUMS] = affinity;
 	for (i = 0; i < NUM_CHECKSUMS; i++) {
-		checksum_affinity->sum_thread[i] = affinity & (-1LL * affinity);
-		affinity ^= checksum_affinity->sum_thread[i];
-		checksum_affinity->read_thread ^= checksum_affinity->sum_thread[i];
+		for (j = 0; j < pc / (NUM_CHECKSUMS + 1); j++) {
+			thread_affinity[i] |= affinity & (-1LL * affinity);
+			affinity ^= affinity & (-1LL * affinity);
+		}
+		uuprintf("sum%d:\t%s", i, printbitslz(thread_affinity[i]));
+		thread_affinity[NUM_CHECKSUMS] ^= thread_affinity[i];
 	}
+	uuprintf("sum%d:\t%s", i, printbitslz(thread_affinity[i]));
 	return TRUE;
 }
 
 // Individual thread that computes one of MD5, SHA1 or SHA256 in parallel
 DWORD WINAPI IndividualSumThread(void* param)
 {
-	SUM_CONTEXT sum_ctx;
+	SUM_CONTEXT sum_ctx = { 0 }; // There's a memset in sum_init, but static analyzers still bug us
 	int i = (int)(uintptr_t)param, j;
 
 	sum_init[i](&sum_ctx);
@@ -850,24 +851,28 @@ error:
 
 DWORD WINAPI SumThread(void* param)
 {
-	CHECKSUM_AFFINITY* checksum_affinity = (CHECKSUM_AFFINITY*)param;
+	DWORD_PTR* thread_affinity = (DWORD_PTR*)param;
 	HANDLE sum_thread[NUM_CHECKSUMS] = { NULL, NULL, NULL };
 	HANDLE h = INVALID_HANDLE_VALUE;
 	uint64_t rb, LastRefresh = 0;
 	int i, _bufnum, r = -1;
 	float format_percent = 0.0f;
 
-	if ((image_path == NULL) || (checksum_affinity == NULL))
+	if ((image_path == NULL) || (thread_affinity == NULL))
 		goto out;
 
 	uprintf("\r\nComputing checksum for '%s'...", image_path);
 
-	if (checksum_affinity->read_thread != 0)
-		SetThreadAffinityMask(GetCurrentThread(), checksum_affinity->read_thread);
+	if (thread_affinity[0] != 0)
+		// Use the first affinity mask, as our read thread is the least
+		// CPU intensive (mostly waits on disk I/O or on the other threads)
+		// whereas the OS is likely to requisition the first Core, which
+		// is usually in this first mask, for other tasks.
+		SetThreadAffinityMask(GetCurrentThread(), thread_affinity[0]);
 
 	for (i = 0; i < NUM_CHECKSUMS; i++) {
 		// NB: Can't use a single manual-reset event for data_ready as we
-		// wouldn't be able to ensure the event is reset before the threa
+		// wouldn't be able to ensure the event is reset before the thread
 		// gets into its next wait loop
 		data_ready[i] = CreateEvent(NULL, FALSE, FALSE, NULL);
 		thread_ready[i] = CreateEvent(NULL, FALSE, FALSE, NULL);
@@ -880,8 +885,8 @@ DWORD WINAPI SumThread(void* param)
 			uprintf("Unable to start checksum thread #%d", i);
 			goto out;
 		}
-		if (checksum_affinity->sum_thread[i] != 0)
-			SetThreadAffinityMask(sum_thread[i], checksum_affinity->sum_thread[i]);
+		if (thread_affinity[i+1] != 0)
+			SetThreadAffinityMask(sum_thread[i], thread_affinity[i+1]);
 	}
 
 	h = CreateFileU(image_path, GENERIC_READ, FILE_SHARE_READ, NULL,

@@ -291,11 +291,6 @@ typedef struct {
 	char* path;
 } VHD_SAVE;
 
-typedef struct {
-	DWORD_PTR read_thread;
-	DWORD_PTR sum_thread[NUM_CHECKSUMS];
-} CHECKSUM_AFFINITY;
-
 /*
  * Structure and macros used for the extensions specification of FileDialog()
  * You can use:
@@ -446,7 +441,10 @@ extern LONG ValidateSignature(HWND hDlg, const char* path);
 extern BOOL IsFontAvailable(const char* font_name);
 extern BOOL WriteFileWithRetry(HANDLE hFile, LPCVOID lpBuffer, DWORD nNumberOfBytesToWrite,
 	LPDWORD lpNumberOfBytesWritten, DWORD nNumRetries);
-extern BOOL SetChecksumAffinity(CHECKSUM_AFFINITY* checksum_affinity);
+extern BOOL SetChecksumAffinity(DWORD_PTR* thread_affinity);
+#define printbits(x) _printbits(sizeof(x), &x, 0)
+#define printbitslz(x) _printbits(sizeof(x), &x, 1)
+extern char* _printbits(size_t const size, void const * const ptr, int leading_zeroes);
 
 DWORD WINAPI FormatThread(void* param);
 DWORD WINAPI SaveImageThread(void* param);
