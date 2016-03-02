@@ -68,36 +68,15 @@ char sum_str[NUM_CHECKSUMS][65];
 int bufnum, sum_count[NUM_CHECKSUMS] = { 16, 20, 32 };
 HANDLE data_ready[NUM_CHECKSUMS], thread_ready[NUM_CHECKSUMS];
 DWORD rSize[2];
-char buffer[2][BUFFER_SIZE];
+char ALIGNED(64) buffer[2][BUFFER_SIZE];
 
-#if defined(__GNUC__)
-#define ALIGNED(m) __attribute__ ((__aligned__(m)))
-#elif defined(_MSC_VER)
-#define ALIGNED(m) __declspec(align(m))
-#endif
-
-/* Rotate a 32 bit integer by n bytes */
-#if defined(__GNUC__) && defined(__i386__)
-static inline uint32_t rol(uint32_t x, int n)
-{
-	__asm__("roll %%cl,%0"
-		:"=r" (x)
-		:"0" (x),"c" (n));
-	return x;
-}
-#elif defined(_MSC_VER) && (_M_IX86 >= 300)
-static __inline uint32_t rol(uint32_t x, int n)
-{
-	__asm {
-		mov eax, x
-		mov ecx, n
-		rol eax, cl
-	}
-	/* returns with result in EAX */
-}
-#else
-#define rol(x,n) ( ((x) << (n)) | ((x) >> (32-(n))) )
-#endif
+/*
+ * Rotate 32 bit integers by n bytes.
+ * Don't bother trying to hand-optimize those, as the
+ * compiler usually does a pretty good job at that.
+ */
+#define ROL(a,b) (((a) << (b)) | ((a) >> (32-(b))))
+#define ROR(a,b) (((a) >> (b)) | ((a) << (32-(b))))
 
 // For SHA-256
 static const uint32_t k[64] = {
@@ -154,7 +133,6 @@ static void sha256_init(SUM_CONTEXT *ctx)
 	ctx->state[7] = 0x5be0cd19;
 }
 
-
 /* Transform the message X which consists of 16 32-bit-words (SHA-1) */
 static void sha1_transform(SUM_CONTEXT *ctx, const unsigned char *data)
 {
@@ -192,10 +170,10 @@ static void sha1_transform(SUM_CONTEXT *ctx, const unsigned char *data)
 #define F3(x,y,z)   ( ( x & y ) | ( z & ( x | y ) ) )
 #define F4(x,y,z)   ( x ^ y ^ z )
 
-#define M(i) ( tm = x[i&0x0f] ^ x[(i-14)&0x0f] ^ x[(i-8)&0x0f] ^ x[(i-3)&0x0f], (x[i&0x0f] = rol(tm,1)) )
+#define M(i) ( tm = x[i&0x0f] ^ x[(i-14)&0x0f] ^ x[(i-8)&0x0f] ^ x[(i-3)&0x0f], (x[i&0x0f] = ROL(tm,1)) )
 
-#define SHA1STEP(a,b,c,d,e,f,k,m) do { e += rol(a, 5) + f(b, c, d) + k + m; \
-                                       b = rol(b, 30); } while(0)
+#define SHA1STEP(a,b,c,d,e,f,k,m) do { e += ROL(a, 5) + f(b, c, d) + k + m; \
+                                       b = ROL(b, 30); } while(0)
 	SHA1STEP(a, b, c, d, e, F1, K1, x[0]);
 	SHA1STEP(e, a, b, c, d, F1, K1, x[1]);
 	SHA1STEP(d, e, a, b, c, F1, K1, x[2]);
@@ -303,15 +281,12 @@ static void sha256_transform(SUM_CONTEXT *ctx, const unsigned char *data)
 	g = ctx->state[6];
 	h = ctx->state[7];
 
-#define ROTLEFT(a,b) (((a) << (b)) | ((a) >> (32-(b))))
-#define ROTRIGHT(a,b) (((a) >> (b)) | ((a) << (32-(b))))
-
 #define CH(x,y,z) (((x) & (y)) ^ (~(x) & (z)))
 #define MAJ(x,y,z) (((x) & (y)) ^ ((x) & (z)) ^ ((y) & (z)))
-#define EP0(x) (ROTRIGHT(x,2) ^ ROTRIGHT(x,13) ^ ROTRIGHT(x,22))
-#define EP1(x) (ROTRIGHT(x,6) ^ ROTRIGHT(x,11) ^ ROTRIGHT(x,25))
-#define SIG0(x) (ROTRIGHT(x,7) ^ ROTRIGHT(x,18) ^ ((x) >> 3))
-#define SIG1(x) (ROTRIGHT(x,17) ^ ROTRIGHT(x,19) ^ ((x) >> 10))
+#define EP0(x) (ROR(x,2) ^ ROR(x,13) ^ ROR(x,22))
+#define EP1(x) (ROR(x,6) ^ ROR(x,11) ^ ROR(x,25))
+#define SIG0(x) (ROR(x,7) ^ ROR(x,18) ^ ((x) >> 3))
+#define SIG1(x) (ROR(x,17) ^ ROR(x,19) ^ ((x) >> 10))
 
 
 #ifdef BIG_ENDIAN_HOST
@@ -487,6 +462,7 @@ static void sha1_write(SUM_CONTEXT *ctx, const unsigned char *buf, size_t len)
 	}
 
 	while (len >= 64) {
+		PREFETCH64(&buf[64]);
 		sha1_transform(ctx, buf);
 		ctx->bytecount = 0;
 		ctx->bitcount += 64 * 8;
@@ -505,6 +481,7 @@ static void sha256_write(SUM_CONTEXT *ctx, const unsigned char *buf, size_t len)
 		ctx->buf[ctx->bytecount] = buf[i];
 		ctx->bytecount++;
 		if (ctx->bytecount == 64) {
+			PREFETCH64(&buf[i + 64]);
 			sha256_transform(ctx, ctx->buf);
 			ctx->bitcount += 64 * 8;
 			ctx->bytecount = 0;
@@ -539,6 +516,7 @@ static void md5_write(SUM_CONTEXT *ctx, const unsigned char *buf, size_t len)
 
 	/* Process data in 64-byte chunks */
 	while (len >= 64) {
+		PREFETCH64(&buf[64]);
 		memcpy(ctx->buf, buf, 64);
 		md5_transform(ctx, ctx->buf);
 		buf += 64;
@@ -703,6 +681,11 @@ static void md5_final(SUM_CONTEXT *ctx)
 	X(3);
 #undef X
 }
+
+// These 'null' calls are useful for testing load balancing and individual algorithm speed
+static void null_init(SUM_CONTEXT *ctx) { memset(ctx, 0, sizeof(*ctx)); }
+static void null_write(SUM_CONTEXT *ctx, const unsigned char *buf, size_t len) { }
+static void null_final(SUM_CONTEXT *ctx) { }
 
 typedef void sum_init_t(SUM_CONTEXT *ctx);
 typedef void sum_write_t(SUM_CONTEXT *ctx, const unsigned char *buf, size_t len);

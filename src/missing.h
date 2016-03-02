@@ -35,6 +35,23 @@
 #define MIN(a,b) (((a) < (b)) ? (a) : (b))
 #endif
 
+#if defined(__GNUC__)
+#define ALIGNED(m) __attribute__ ((__aligned__(m)))
+#elif defined(_MSC_VER)
+#define ALIGNED(m) __declspec(align(m))
+#endif
+
+/*
+ * Prefetch 64 bytes at address m, for read-only operation
+ * We account for these built-in calls doing nothing if the
+ * line has already been fetched, or if the address is invalid.
+ */
+#if defined(__GNUC__)
+#define PREFETCH64(m) do { __builtin_prefetch(m, 0, 0); __builtin_prefetch(m+32, 0, 0); } while(0)
+#elif defined(_MSC_VER)
+#define PREFETCH64(m) do { _m_prefetch(m); _m_prefetch(m+32); } while(0)
+#endif
+
 #if defined(_MSC_VER)
 #define bswap_uint64 _byteswap_uint64
 #define bswap_uint32 _byteswap_ulong
