@@ -3,7 +3,7 @@
  * Message-Digest algorithms (md5sum, sha1sum, sha256sum)
  * Copyright © 1998-2001 Free Software Foundation, Inc.
  * Copyright © 2004 g10 Code GmbH
- * Copyright © 2006-2012 Brad Conte <brad@bradconte.com>
+ * Copyright © 2002-2015 Wei Dai & Igor Pavlov
  * Copyright © 2015-2016 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -23,8 +23,7 @@
 /*
  * SHA-1 code taken from GnuPG, as per copyrights above.
  *
- * SHA-256 code modified from crypto-algorithms by Brad Conte:
- * https://github.com/B-Con/crypto-algorithms - Public Domain
+ * SHA-256 taken from 7-zip's Sha256.c, itself based on Crypto++ - Public Domain
  *
  * MD5 code from various public domain sources sharing the following
  * copyright declaration:
@@ -79,7 +78,7 @@ char ALIGNED(64) buffer[2][BUFFER_SIZE];
 #define ROR(a,b) (((a) >> (b)) | ((a) << (32-(b))))
 
 // For SHA-256
-static const uint32_t k[64] = {
+static const uint32_t K[64] = {
 	0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,
 	0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,
 	0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,
@@ -97,8 +96,8 @@ static const uint32_t k[64] = {
 typedef struct ALIGNED(8) {
 	unsigned char buf[64];
 	uint32_t state[8];
+	uint64_t bytecount;
 	uint64_t bitcount;
-	uint32_t bytecount;
 } SUM_CONTEXT;
 
 static void md5_init(SUM_CONTEXT *ctx)
@@ -150,13 +149,13 @@ static void sha1_transform(SUM_CONTEXT *ctx, const unsigned char *data)
 	memcpy(x, data, sizeof(x));
 #else
 	{
-		int i;
-		unsigned char *p2;
-		for (i = 0, p2 = (unsigned char*)x; i < 16; i++, p2 += 4) {
-			p2[3] = *data++;
-			p2[2] = *data++;
-			p2[1] = *data++;
-			p2[0] = *data++;
+		unsigned k;
+		for (k = 0; k < 16; k += 4) {
+			const unsigned char *p2 = data + k * 4;
+			x[k] = get_be32(p2);
+			x[k + 1] = get_be32(p2 + 4);
+			x[k + 2] = get_be32(p2 + 8);
+			x[k + 3] = get_be32(p2 + 12);
 		}
 	}
 #endif
@@ -270,7 +269,7 @@ static void sha1_transform(SUM_CONTEXT *ctx, const unsigned char *data)
 
 static void sha256_transform(SUM_CONTEXT *ctx, const unsigned char *data)
 {
-	uint32_t a, b, c, d, e, f, g, h, i, t1, t2, m[64];
+	uint32_t a, b, c, d, e, f, g, h, j, x[16];
 
 	a = ctx->state[0];
 	b = ctx->state[1];
@@ -281,43 +280,52 @@ static void sha256_transform(SUM_CONTEXT *ctx, const unsigned char *data)
 	g = ctx->state[6];
 	h = ctx->state[7];
 
-#define CH(x,y,z) (((x) & (y)) ^ (~(x) & (z)))
-#define MAJ(x,y,z) (((x) & (y)) ^ ((x) & (z)) ^ ((y) & (z)))
+#define CH(x,y,z) ((z) ^ ((x) & ((y) ^ (z))))
+#define MAJ(x,y,z) (((x) & (y)) | ((z) & ((x) | (y))))
 #define EP0(x) (ROR(x,2) ^ ROR(x,13) ^ ROR(x,22))
 #define EP1(x) (ROR(x,6) ^ ROR(x,11) ^ ROR(x,25))
 #define SIG0(x) (ROR(x,7) ^ ROR(x,18) ^ ((x) >> 3))
 #define SIG1(x) (ROR(x,17) ^ ROR(x,19) ^ ((x) >> 10))
-
+#define BLK0(i) (x[i])
+#define BLK2(i) (x[i] += SIG1(x[((i)-2)&15]) + x[((i)-7)&15] + SIG0(x[((i)-15)&15]))
+#define R(a,b,c,d,e,f,g,h, i) \
+	h += EP1(e) + CH(e,f,g) + K[(i)+(j)] + (j ? BLK2(i) : BLK0(i)); \
+	d += h; \
+	h += EP0(a) + MAJ(a, b, c)
+#define RX_8(i) \
+	R(a,b,c,d,e,f,g,h, i); \
+	R(h,a,b,c,d,e,f,g, i+1); \
+	R(g,h,a,b,c,d,e,f, i+2); \
+	R(f,g,h,a,b,c,d,e, i+3); \
+	R(e,f,g,h,a,b,c,d, i+4); \
+	R(d,e,f,g,h,a,b,c, i+5); \
+	R(c,d,e,f,g,h,a,b, i+6); \
+	R(b,c,d,e,f,g,h,a, i+7)
 
 #ifdef BIG_ENDIAN_HOST
-	memcpy(m, data, sizeof(m));
+	memcpy(x, data, sizeof(x));
 #else
 	{
-		unsigned char *p2;
-		for (i = 0, p2 = (unsigned char*)m; i < 16; i++, p2 += 4) {
-			p2[3] = *data++;
-			p2[2] = *data++;
-			p2[1] = *data++;
-			p2[0] = *data++;
+		unsigned k;
+		for (k = 0; k < 16; k += 4) {
+			const unsigned char *p2 = data + k * 4;
+			x[k] = get_be32(p2);
+			x[k + 1] = get_be32(p2 + 4);
+			x[k + 2] = get_be32(p2 + 8);
+			x[k + 3] = get_be32(p2 + 12);
 		}
 	}
 #endif
 
-	for (i = 16; i < 64; ++i)
-		m[i] = SIG1(m[i - 2]) + m[i - 7] + SIG0(m[i - 15]) + m[i - 16];
-
-	for (i = 0; i < 64; ++i) {
-		t1 = h + EP1(e) + CH(e, f, g) + k[i] + m[i];
-		t2 = EP0(a) + MAJ(a, b, c);
-		h = g;
-		g = f;
-		f = e;
-		e = d + t1;
-		d = c;
-		c = b;
-		b = a;
-		a = t1 + t2;
+	for (j = 0; j < 64; j += 16) {
+		RX_8(0);
+		RX_8(8);
 	}
+
+#undef EP0
+#undef EP1
+#undef SIG0
+#undef SIG1
 
 	ctx->state[0] += a;
 	ctx->state[1] += b;
@@ -344,13 +352,13 @@ static void md5_transform(SUM_CONTEXT *ctx, const unsigned char *data)
 	memcpy(x, data, sizeof(x));
 #else
 	{
-		int i;
-		unsigned char *p;
-		for (i = 0, p = (unsigned char*)x; i < 16; i++, p += 4) {
-			p[3] = *data++;
-			p[2] = *data++;
-			p[1] = *data++;
-			p[0] = *data++;
+		unsigned k;
+		for (k = 0; k < 16; k += 4) {
+			const unsigned char *p2 = data + k * 4;
+			x[k] = get_be32(p2);
+			x[k + 1] = get_be32(p2 + 4);
+			x[k + 2] = get_be32(p2 + 8);
+			x[k + 3] = get_be32(p2 + 12);
 		}
 	}
 #endif
@@ -475,18 +483,32 @@ static void sha1_write(SUM_CONTEXT *ctx, const unsigned char *buf, size_t len)
 
 static void sha256_write(SUM_CONTEXT *ctx, const unsigned char *buf, size_t len)
 {
-	uint32_t i;
+	uint64_t pos = ctx->bytecount & 0x3F;
+	uint64_t num;
 
-	for (i = 0; i < len; ++i) {
-		ctx->buf[ctx->bytecount] = buf[i];
-		ctx->bytecount++;
-		if (ctx->bytecount == 64) {
-			PREFETCH64(&buf[i + 64]);
-			sha256_transform(ctx, ctx->buf);
-			ctx->bitcount += 64 * 8;
-			ctx->bytecount = 0;
-		}
+	ctx->bytecount += len;
+
+	num = 64 - pos;
+	if (num > len) {
+		memcpy(ctx->buf + pos, buf, len);
+		return;
 	}
+	len -= num;
+	memcpy(ctx->buf + pos, buf, num);
+	buf += num;
+
+	for (;;) {
+		PREFETCH64(buf + 64);
+		sha256_transform(ctx, ctx->buf);
+		if (len < 64)
+			break;
+		len -= 64;
+		memcpy(ctx->buf, buf, 64);
+		buf += 64;
+	}
+
+	if (len != 0)
+		memcpy(ctx->buf, buf, len);
 }
 
 /* Update the message digest with the contents of the buffer (MD5) */
@@ -575,27 +597,21 @@ static void sha1_final(SUM_CONTEXT *ctx)
 
 static void sha256_final(SUM_CONTEXT *ctx)
 {
-	uint32_t i;
+	uint64_t pos = ctx->bytecount & 0x3F;
 	unsigned char *p;
 
-	i = ctx->bytecount;
+	ctx->buf[pos++] = 0x80;
 
 	// Pad whatever data is left in the buffer.
-	if (ctx->bytecount < 56) {
-		ctx->buf[i++] = 0x80;
-		while (i < 56)
-			ctx->buf[i++] = 0x00;
-	}
-	else {
-		ctx->buf[i++] = 0x80;
-		while (i < 64)
-			ctx->buf[i++] = 0x00;
-		sha256_transform(ctx, ctx->buf);
-		memset(ctx->buf, 0, 56);
+	while (pos != (64 - 8)) {
+		pos &= 0x3F;
+		if (pos == 0)
+			sha256_transform(ctx, ctx->buf);
+		ctx->buf[pos++] = 0;
 	}
 
 	// Append to the padding the total message's length in bits and transform.
-	ctx->bitcount += ctx->bytecount * 8;
+	ctx->bitcount = ctx->bytecount << 3;
 	ctx->buf[63] = (unsigned char) (ctx->bitcount);
 	ctx->buf[62] = (unsigned char) (ctx->bitcount >> 8);
 	ctx->buf[61] = (unsigned char) (ctx->bitcount >> 16);
@@ -682,10 +698,13 @@ static void md5_final(SUM_CONTEXT *ctx)
 #undef X
 }
 
+//#define NULL_TEST
+#ifdef NULL_TEST
 // These 'null' calls are useful for testing load balancing and individual algorithm speed
 static void null_init(SUM_CONTEXT *ctx) { memset(ctx, 0, sizeof(*ctx)); }
 static void null_write(SUM_CONTEXT *ctx, const unsigned char *buf, size_t len) { }
 static void null_final(SUM_CONTEXT *ctx) { }
+#endif
 
 typedef void sum_init_t(SUM_CONTEXT *ctx);
 typedef void sum_write_t(SUM_CONTEXT *ctx, const unsigned char *buf, size_t len);
