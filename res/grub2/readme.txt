@@ -1,7 +1,7 @@
 This directory contains the Grub 2.0 boot records that are used by Rufus
 
-* boot.img and core.img were compiled from git://git.savannah.gnu.org/grub.git,
-  commit 72ec399ad8d6348b6c74ea63d80c79784c8b84ae, on a Debian 7.7.0 x64 system.
+* boot.img and core.img were compiled from
+  http://alpha.gnu.org/gnu/grub/grub-2.02~beta3.tar.xz, on a Debian 8.3 x64 system.
   This was done following the guide from:
   http://pete.akeo.ie/2014/05/compiling-and-installing-grub2-for.html.
 
