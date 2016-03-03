@@ -52,6 +52,7 @@
 #define PREFETCH64(m) do { _m_prefetch(m); _m_prefetch(m+32); } while(0)
 #endif
 
+/* Read/write with endianness swap */
 #if defined (_MSC_VER) && (_MSC_VER >= 1300)
 #include <stdlib.h>
 #pragma intrinsic(_byteswap_ushort)
@@ -60,15 +61,17 @@
 #define bswap_uint64 _byteswap_uint64
 #define bswap_uint32 _byteswap_ulong
 #define bswap_uint16 _byteswap_ushort
-#define get_be32(p) bswap_uint32(*(const uint32_t *)(const uint8_t *)(p))
-#define get_be64(p) bswap_uint64(*(const uint64_t *)(const uint8_t *)(p))
 #elif defined (__GNUC__) && ((__GNUC__ > 4) || ((__GNUC__ == 4) && (__GNUC_MINOR__ >= 3)))
 #define bswap_uint64 __builtin_bswap64
 #define bswap_uint32 __builtin_bswap32
 #define bswap_uint16 __builtin_bswap16
-#define get_be32(p) bswap_uint32(*(const uint32_t *)(const uint8_t *)(p))
-#define get_be64(p) bswap_uint64(*(const uint32_t *)(const uint8_t *)(p))
 #endif
+#define read_swap16(p) bswap_uint16(*(const uint16_t*)(const uint8_t*)(p))
+#define read_swap32(p) bswap_uint32(*(const uint32_t*)(const uint8_t*)(p))
+#define read_swap64(p) bswap_uint64(*(const uint64_t*)(const uint8_t*)(p))
+#define write_swap16(p,v) (*(uint16_t*)(void*)(p)) = bswap_uint16(v)
+#define write_swap32(p,v) (*(uint32_t*)(void*)(p)) = bswap_uint32(v)
+#define write_swap64(p,v) (*(uint32_t*)(void*)(p)) = bswap_uint64(v)
 
 /*
  * Nibbled from https://github.com/hanji/popcnt/blob/master/populationcount.cpp

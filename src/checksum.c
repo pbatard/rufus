@@ -64,9 +64,9 @@
 
 /* Globals */
 char sum_str[NUM_CHECKSUMS][65];
-int bufnum, sum_count[NUM_CHECKSUMS] = { 16, 20, 32 };
+uint32_t bufnum, sum_count[NUM_CHECKSUMS] = { 16, 20, 32 };
 HANDLE data_ready[NUM_CHECKSUMS], thread_ready[NUM_CHECKSUMS];
-DWORD rSize[2];
+DWORD read_size[2];
 char ALIGNED(64) buffer[2][BUFFER_SIZE];
 
 /*
@@ -77,7 +77,7 @@ char ALIGNED(64) buffer[2][BUFFER_SIZE];
 #define ROL(a,b) (((a) << (b)) | ((a) >> (32-(b))))
 #define ROR(a,b) (((a) >> (b)) | ((a) << (32-(b))))
 
-// For SHA-256
+/* SHA-256 constants */
 static const uint32_t K[64] = {
 	0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,
 	0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,
@@ -135,8 +135,7 @@ static void sha256_init(SUM_CONTEXT *ctx)
 /* Transform the message X which consists of 16 32-bit-words (SHA-1) */
 static void sha1_transform(SUM_CONTEXT *ctx, const unsigned char *data)
 {
-	uint32_t a, b, c, d, e, tm;
-	uint32_t x[16];
+	uint32_t a, b, c, d, e, tm, x[16];
 
 	/* get values from the chaining vars */
 	a = ctx->state[0];
@@ -152,10 +151,10 @@ static void sha1_transform(SUM_CONTEXT *ctx, const unsigned char *data)
 		unsigned k;
 		for (k = 0; k < 16; k += 4) {
 			const unsigned char *p2 = data + k * 4;
-			x[k] = get_be32(p2);
-			x[k + 1] = get_be32(p2 + 4);
-			x[k + 2] = get_be32(p2 + 8);
-			x[k + 3] = get_be32(p2 + 12);
+			x[k] = read_swap32(p2);
+			x[k + 1] = read_swap32(p2 + 4);
+			x[k + 2] = read_swap32(p2 + 8);
+			x[k + 3] = read_swap32(p2 + 12);
 		}
 	}
 #endif
@@ -267,6 +266,7 @@ static void sha1_transform(SUM_CONTEXT *ctx, const unsigned char *data)
 	ctx->state[4] += e;
 }
 
+/* Transform the message X which consists of 16 32-bit-words (SHA-256) */
 static void sha256_transform(SUM_CONTEXT *ctx, const unsigned char *data)
 {
 	uint32_t a, b, c, d, e, f, g, h, j, x[16];
@@ -309,10 +309,10 @@ static void sha256_transform(SUM_CONTEXT *ctx, const unsigned char *data)
 		unsigned k;
 		for (k = 0; k < 16; k += 4) {
 			const unsigned char *p2 = data + k * 4;
-			x[k] = get_be32(p2);
-			x[k + 1] = get_be32(p2 + 4);
-			x[k + 2] = get_be32(p2 + 8);
-			x[k + 3] = get_be32(p2 + 12);
+			x[k] = read_swap32(p2);
+			x[k + 1] = read_swap32(p2 + 4);
+			x[k + 2] = read_swap32(p2 + 8);
+			x[k + 3] = read_swap32(p2 + 12);
 		}
 	}
 #endif
@@ -340,27 +340,26 @@ static void sha256_transform(SUM_CONTEXT *ctx, const unsigned char *data)
 /* Transform the message X which consists of 16 32-bit-words (MD5) */
 static void md5_transform(SUM_CONTEXT *ctx, const unsigned char *data)
 {
-	uint32_t a, b, c, d;
-	uint32_t x[16];
+	uint32_t a, b, c, d, x[16];
 
 	a = ctx->state[0];
 	b = ctx->state[1];
 	c = ctx->state[2];
 	d = ctx->state[3];
 
-#ifndef BIG_ENDIAN_HOST
-	memcpy(x, data, sizeof(x));
-#else
+#ifdef BIG_ENDIAN_HOST
 	{
 		unsigned k;
 		for (k = 0; k < 16; k += 4) {
 			const unsigned char *p2 = data + k * 4;
-			x[k] = get_be32(p2);
-			x[k + 1] = get_be32(p2 + 4);
-			x[k + 2] = get_be32(p2 + 8);
-			x[k + 3] = get_be32(p2 + 12);
+			x[k] = read_swap32(p2);
+			x[k + 1] = read_swap32(p2 + 4);
+			x[k + 2] = read_swap32(p2 + 8);
+			x[k + 3] = read_swap32(p2 + 12);
 		}
 	}
+#else
+	memcpy(x, data, sizeof(x));
 #endif
 
 #define F1(x, y, z) (z ^ (x & (y ^ z)))
@@ -470,7 +469,7 @@ static void sha1_write(SUM_CONTEXT *ctx, const unsigned char *buf, size_t len)
 	}
 
 	while (len >= 64) {
-		PREFETCH64(&buf[64]);
+		PREFETCH64(buf + 64);
 		sha1_transform(ctx, buf);
 		ctx->bytecount = 0;
 		ctx->bitcount += 64 * 8;
@@ -481,10 +480,10 @@ static void sha1_write(SUM_CONTEXT *ctx, const unsigned char *buf, size_t len)
 		ctx->buf[ctx->bytecount++] = *buf++;
 }
 
+/* Update the message digest with the contents of the buffer (SHA-256) */
 static void sha256_write(SUM_CONTEXT *ctx, const unsigned char *buf, size_t len)
 {
-	uint64_t pos = ctx->bytecount & 0x3F;
-	uint64_t num;
+	size_t num, pos = ctx->bytecount & 0x3F;
 
 	ctx->bytecount += len;
 
@@ -514,7 +513,7 @@ static void sha256_write(SUM_CONTEXT *ctx, const unsigned char *buf, size_t len)
 /* Update the message digest with the contents of the buffer (MD5) */
 static void md5_write(SUM_CONTEXT *ctx, const unsigned char *buf, size_t len)
 {
-	uint32_t t;
+	size_t t;
 
 	/* Update bitcount */
 	ctx->bitcount += (len << 3);
@@ -538,7 +537,7 @@ static void md5_write(SUM_CONTEXT *ctx, const unsigned char *buf, size_t len)
 
 	/* Process data in 64-byte chunks */
 	while (len >= 64) {
-		PREFETCH64(&buf[64]);
+		PREFETCH64(buf + 64);
 		memcpy(ctx->buf, buf, 64);
 		md5_transform(ctx, ctx->buf);
 		buf += 64;
@@ -549,7 +548,7 @@ static void md5_write(SUM_CONTEXT *ctx, const unsigned char *buf, size_t len)
 	memcpy(ctx->buf, buf, len);
 }
 
-/* The routine final terminates the computation and returns the digest (SHA-1) */
+/* Finalize the computation and write the digest in ctx->state[] (SHA-1) */
 static void sha1_final(SUM_CONTEXT *ctx)
 {
 	unsigned char *p;
@@ -583,9 +582,8 @@ static void sha1_final(SUM_CONTEXT *ctx)
 	p = ctx->buf;
 #ifdef BIG_ENDIAN_HOST
 #define X(a) do { *(uint32_t*)p = ctx->state[a]; p += 4; } while(0)
-#else /* little endian */
-#define X(a) do { *p++ = (unsigned char) (ctx->state[a] >> 24); *p++ = (unsigned char) (ctx->state[a] >> 16); \
-                  *p++ = (unsigned char) (ctx->state[a] >> 8); *p++ = (unsigned char) ctx->state[a]; } while(0)
+#else
+#define X(a) do { write_swap32(p, ctx->state[a]); p += 4; } while(0);
 #endif
 	X(0);
 	X(1);
@@ -595,14 +593,15 @@ static void sha1_final(SUM_CONTEXT *ctx)
 #undef X
 }
 
+/* Finalize the computation and write the digest in ctx->state[] (SHA-256) */
 static void sha256_final(SUM_CONTEXT *ctx)
 {
-	uint64_t pos = ctx->bytecount & 0x3F;
+	size_t pos = ctx->bytecount & 0x3F;
 	unsigned char *p;
 
 	ctx->buf[pos++] = 0x80;
 
-	// Pad whatever data is left in the buffer.
+	/* Pad whatever data is left in the buffer */
 	while (pos != (64 - 8)) {
 		pos &= 0x3F;
 		if (pos == 0)
@@ -610,7 +609,7 @@ static void sha256_final(SUM_CONTEXT *ctx)
 		ctx->buf[pos++] = 0;
 	}
 
-	// Append to the padding the total message's length in bits and transform.
+	/* Append to the padding the total message's length in bits and transform */
 	ctx->bitcount = ctx->bytecount << 3;
 	ctx->buf[63] = (unsigned char) (ctx->bitcount);
 	ctx->buf[62] = (unsigned char) (ctx->bitcount >> 8);
@@ -626,9 +625,8 @@ static void sha256_final(SUM_CONTEXT *ctx)
 	p = ctx->buf;
 #ifdef BIG_ENDIAN_HOST
 #define X(a) do { *(uint32_t*)p = ctx->state[a]; p += 4; } while(0)
-#else /* little endian */
-#define X(a) do { *p++ = (unsigned char) (ctx->state[a] >> 24); *p++ = (unsigned char) (ctx->state[a] >> 16); \
-                  *p++ = (unsigned char) (ctx->state[a] >> 8); *p++ = (unsigned char) ctx->state[a]; } while(0)
+#else
+#define X(a) do { write_swap32(p, ctx->state[a]); p += 4; } while(0);
 #endif
 	X(0);
 	X(1);
@@ -641,10 +639,10 @@ static void sha256_final(SUM_CONTEXT *ctx)
 #undef X
 }
 
-/* The routine final terminates the computation and returns the digest (MD5) */
+/* Finalize the computation and write the digest in ctx->state[] (MD5) */
 static void md5_final(SUM_CONTEXT *ctx)
 {
-	uint32_t count;
+	size_t count;
 	unsigned char *p;
 
 	/* Compute number of bytes mod 64 */
@@ -686,9 +684,8 @@ static void md5_final(SUM_CONTEXT *ctx)
 
 	p = ctx->buf;
 #ifdef BIG_ENDIAN_HOST
-#define X(a) do { *p++ = (unsigned char) (ctx->state[a] >> 24); *p++ = (unsigned char) (ctx->state[a] >> 16); \
-                  *p++ = (unsigned char) (ctx->state[a] >> 8); *p++ = (unsigned char) ctx->state[a]; } while(0)
-#else /* little endian */
+#define X(a) do { write_swap32(p, ctx->state[a]); p += 4; } while(0);
+#else
 #define X(a) do { *(uint32_t*)p = ctx->state[a]; p += 4; } while(0)
 #endif
 	X(0);
@@ -697,6 +694,7 @@ static void md5_final(SUM_CONTEXT *ctx)
 	X(3);
 #undef X
 }
+
 
 //#define NULL_TEST
 #ifdef NULL_TEST
@@ -821,7 +819,7 @@ BOOL SetChecksumAffinity(DWORD_PTR* thread_affinity)
 DWORD WINAPI IndividualSumThread(void* param)
 {
 	SUM_CONTEXT sum_ctx = { 0 }; // There's a memset in sum_init, but static analyzers still bug us
-	int i = (int)(uintptr_t)param, j;
+	uint32_t i = (uint32_t)(uintptr_t)param, j;
 
 	sum_init[i](&sum_ctx);
 	// Signal that we're ready to service requests
@@ -834,8 +832,8 @@ DWORD WINAPI IndividualSumThread(void* param)
 			uprintf("Failed to wait for event for checksum thread #%d: %s", i, WindowsErrorString());
 			return 1;
 		}
-		if (rSize[bufnum] != 0) {
-			sum_write[i](&sum_ctx, buffer[bufnum], (size_t)rSize[bufnum]);
+		if (read_size[bufnum] != 0) {
+			sum_write[i](&sum_ctx, buffer[bufnum], (size_t)read_size[bufnum]);
 			if (!SetEvent(thread_ready[i]))
 				goto error;
 		} else {
@@ -901,8 +899,8 @@ DWORD WINAPI SumThread(void* param)
 
 	bufnum = 0;
 	_bufnum = 0;
-	rSize[0] = 1;	// Don't trigger the first loop break
-	for (rb = 0; ;rb += rSize[_bufnum]) {
+	read_size[0] = 1;	// Don't trigger the first loop break
+	for (rb = 0; ;rb += read_size[_bufnum]) {
 		// Update the progress and check for cancel
 		if (_GetTickCount64() > LastRefresh + 25) {
 			LastRefresh = _GetTickCount64();
@@ -928,11 +926,11 @@ DWORD WINAPI SumThread(void* param)
 		}
 
 		// Break the loop when data has been exhausted
-		if (rSize[bufnum] == 0)
+		if (read_size[bufnum] == 0)
 			break;
 
 		// Read data (double buffered)
-		if (!ReadFile(h, buffer[_bufnum], BUFFER_SIZE, &rSize[_bufnum], NULL)) {
+		if (!ReadFile(h, buffer[_bufnum], BUFFER_SIZE, &read_size[_bufnum], NULL)) {
 			FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_READ_FAULT;
 			uprintf("Read error: %s", WindowsErrorString());
 			goto out;
@@ -945,7 +943,7 @@ DWORD WINAPI SumThread(void* param)
 		}
 	}
 
-	// Our last event with rSize=0 signaled the threads to exit - wait for that to happen
+	// Our last event with read_size=0 signaled the threads to exit - wait for that to happen
 	if (WaitForMultipleObjects(NUM_CHECKSUMS, sum_thread, TRUE, WAIT_TIME) != WAIT_OBJECT_0) {
 		uprintf("Checksum threads did not finalize: %s", WindowsErrorString());
 		goto out;
