@@ -2045,7 +2045,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	static ULONG ulRegister = 0;
 	static LPITEMIDLIST pidlDesktop = NULL;
 	static MY_SHChangeNotifyEntry NotifyEntry;
-	static DWORD_PTR sumthread_affinity[4];
+	static DWORD_PTR thread_affinity[4];
 	DRAWITEMSTRUCT* pDI;
 	HDROP droppedFileInfo;
 	POINT Point;
@@ -2530,8 +2530,8 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				// Disable all controls except cancel
 				EnableControls(FALSE);
 				InitProgress(FALSE);
-				SetChecksumAffinity(sumthread_affinity);
-				format_thid = CreateThread(NULL, 0, SumThread, (LPVOID)sumthread_affinity, 0, NULL);
+				SetThreadAffinity(thread_affinity, NUM_CHECKSUMS + 1);
+				format_thid = CreateThread(NULL, 0, SumThread, (LPVOID)thread_affinity, 0, NULL);
 				if (format_thid != NULL) {
 					PrintInfo(0, -1);
 					timer = 0;

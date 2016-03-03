@@ -93,7 +93,7 @@ static const uint32_t K[64] = {
  * For convenience, we use a common context for all the checksums algorithms,
  * which means some elements may be unused...
  */
-typedef struct ALIGNED(8) {
+typedef struct ALIGNED(64) {
 	unsigned char buf[64];
 	uint32_t state[8];
 	uint64_t bytecount;
@@ -776,43 +776,6 @@ INT_PTR CALLBACK ChecksumCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 		}
 	}
 	return (INT_PTR)FALSE;
-}
-
-/*
- * We want the maximum speed we can get out of the checksum computation,
- * so, if we have a multiprocessor/multithreaded machine, we try to assign
- * each of the individual checksum threads to a different core.
- * To do just that, we need the following function call.
- */
-extern BOOL usb_debug;	// For uuprintf
-BOOL SetChecksumAffinity(DWORD_PTR* thread_affinity)
-{
-	int i, j, pc;
-	DWORD_PTR affinity, dummy;
-
-	memset(thread_affinity, 0, 4 * sizeof(DWORD_PTR));
-	if (!GetProcessAffinityMask(GetCurrentProcess(), &affinity, &dummy))
-		return FALSE;
-	uuprintf("\r\nChecksum affinities:");
-	uuprintf("global:\t%s", printbitslz(affinity));
-
-	// If we don't have enough virtual cores to evenly spread our load forget it
-	pc = popcnt64(affinity);
-	if (pc < NUM_CHECKSUMS + 1)
-		return FALSE;
-
-	// Spread the affinity as evenly as we can
-	thread_affinity[NUM_CHECKSUMS] = affinity;
-	for (i = 0; i < NUM_CHECKSUMS; i++) {
-		for (j = 0; j < pc / (NUM_CHECKSUMS + 1); j++) {
-			thread_affinity[i] |= affinity & (-1LL * affinity);
-			affinity ^= affinity & (-1LL * affinity);
-		}
-		uuprintf("sum%d:\t%s", i, printbitslz(thread_affinity[i]));
-		thread_affinity[NUM_CHECKSUMS] ^= thread_affinity[i];
-	}
-	uuprintf("sum%d:\t%s", i, printbitslz(thread_affinity[i]));
-	return TRUE;
 }
 
 // Individual thread that computes one of MD5, SHA1 or SHA256 in parallel
