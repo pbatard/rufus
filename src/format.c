@@ -1264,7 +1264,7 @@ out:
 // incompatibilities from one version of Windows to the next.
 // Maybe when we use wimlib we'll review this, but for now just turn it off.
 //#define SET_INTERNAL_DRIVES_OFFLINE
-BOOL SetupWinToGo(const char* drive_name, BOOL use_ms_efi)
+static BOOL SetupWinToGo(const char* drive_name, BOOL use_ms_efi)
 {
 #ifdef SET_INTERNAL_DRIVES_OFFLINE
 	static char san_policy_path[] = "?:\\san_policy.xml";
@@ -1432,7 +1432,7 @@ static BOOL CALLBACK FormatPromptCallback(HWND hWnd, LPARAM lParam)
  * disk in drive X: before you can use it'. You will also get that popup if you start a
  * bad blocks check and cancel it before it completes. We have to close that popup manually.
  */
-DWORD WINAPI CloseFormatPromptThread(LPVOID param) {
+static DWORD WINAPI CloseFormatPromptThread(LPVOID param) {
 	HWND hFormatPrompt;
 
 	while(format_op_in_progress) {
@@ -1447,7 +1447,7 @@ DWORD WINAPI CloseFormatPromptThread(LPVOID param) {
 	ExitThread(0);
 }
 
-void update_progress(const uint64_t processed_bytes)
+static void update_progress(const uint64_t processed_bytes)
 {
 	if (_GetTickCount64() > LastRefresh + 25) {
 		LastRefresh = _GetTickCount64();
@@ -1455,6 +1455,99 @@ void update_progress(const uint64_t processed_bytes)
 		PrintInfo(0, MSG_261, format_percent);
 		UpdateProgress(OP_FORMAT, format_percent);
 	}
+}
+
+/* Write an image file or zero a drive */
+static BOOL WriteDrive(HANDLE hPhysicalDrive, HANDLE hSourceImage)
+{
+	const DWORD SectorSize = SelectedDrive.Geometry.BytesPerSector;
+	BOOL s, ret = FALSE;
+	LARGE_INTEGER li;
+	DWORD rSize, wSize, BufSize;
+	uint64_t wb, target_size = hSourceImage?img_report.projected_size:SelectedDrive.DiskSize;
+	uint8_t *buffer = NULL, *aligned_buffer;
+	int i;
+
+	// We poked the MBR and other stuff, so we need to rewind
+	li.QuadPart = 0;
+	if (!SetFilePointerEx(hPhysicalDrive, li, NULL, FILE_BEGIN))
+		uprintf("Warning: Unable to rewind image position - wrong data might be copied!");
+	LastRefresh = 0;
+
+	if (img_report.compression_type != BLED_COMPRESSION_NONE) {
+		uprintf("Writing Compressed Image...");
+		bled_init(_uprintf, update_progress, &FormatStatus);
+		bled_uncompress_with_handles(hSourceImage, hPhysicalDrive, img_report.compression_type);
+		bled_exit();
+	} else {
+		uprintf(hSourceImage?"Writing Image...":"Zeroing drive...");
+		// Our buffer size must be a multiple of the sector size
+		BufSize = ((DD_BUFFER_SIZE + SectorSize - 1) / SectorSize) * SectorSize;
+		buffer = (uint8_t*)calloc(BufSize + SectorSize, 1);	// +1 sector for align
+		if (buffer == NULL) {
+			FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_NOT_ENOUGH_MEMORY;
+			uprintf("could not allocate disk write buffer");
+			goto out;
+		}
+		// http://msdn.microsoft.com/en-us/library/windows/desktop/aa365747.aspx does buffer sector alignment
+		aligned_buffer = ((void *)((((uintptr_t)(buffer)) + (SectorSize)-1) & (~(((uintptr_t)(SectorSize)) - 1))));
+
+		// Don't bother trying for something clever, using double buffering overlapped and whatnot:
+		// With Windows' default optimizations, sync read + sync write for sequential operations
+		// will be as fast, if not faster, than whatever async scheme you can come up with.
+		rSize = BufSize;
+		for (wb = 0, wSize = 0; wb < (uint64_t)SelectedDrive.DiskSize; wb += wSize) {
+			if (_GetTickCount64() > LastRefresh + 25) {
+				LastRefresh = _GetTickCount64();
+				format_percent = (100.0f*wb) / (1.0f*target_size);
+				PrintInfo(0, hSourceImage?MSG_261:MSG_286, format_percent);
+				UpdateProgress(OP_FORMAT, format_percent);
+			}
+
+			if (hSourceImage != NULL) {
+				s = ReadFile(hSourceImage, aligned_buffer, BufSize, &rSize, NULL);
+				if (!s) {
+					FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_READ_FAULT;
+					uprintf("read error: %s", WindowsErrorString());
+					goto out;
+				}
+				if (rSize == 0)
+					break;
+			}
+			// Don't overflow our projected size (mostly for VHDs)
+			if (wb + rSize > target_size) {
+				rSize = (DWORD)(target_size - wb);
+			}
+
+			// WriteFile fails unless the size is a multiple of sector size
+			if (rSize % SectorSize != 0)
+				rSize = ((rSize + SectorSize - 1) / SectorSize) * SectorSize;
+			for (i = 0; i < WRITE_RETRIES; i++) {
+				CHECK_FOR_USER_CANCEL;
+				s = WriteFile(hPhysicalDrive, aligned_buffer, rSize, &wSize, NULL);
+				if ((s) && (wSize == rSize))
+					break;
+				if (s)
+					uprintf("write error: Wrote %d bytes, expected %d bytes\n", wSize, rSize);
+				else
+					uprintf("write error: %s", WindowsErrorString());
+				if (i < WRITE_RETRIES - 1) {
+					li.QuadPart = wb;
+					SetFilePointerEx(hPhysicalDrive, li, NULL, FILE_BEGIN);
+					uprintf("  RETRYING...\n");
+				} else {
+					FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_WRITE_FAULT;
+					goto out;
+				}
+			}
+			if (i >= WRITE_RETRIES) goto out;
+		}
+	}
+	RefreshDriveLayout(hPhysicalDrive);
+	ret = TRUE;
+out:
+	safe_free(buffer);
+	return ret;
 }
 
 /*
@@ -1471,20 +1564,18 @@ void update_progress(const uint64_t processed_bytes)
 DWORD WINAPI FormatThread(void* param)
 {
 	int i, r, pt, tt, fs, bt;
-	BOOL s, ret, use_large_fat32, windows_to_go;
+	BOOL ret, use_large_fat32, windows_to_go;
 	const DWORD SectorSize = SelectedDrive.Geometry.BytesPerSector;
-	DWORD rSize, wSize, BufSize, DriveIndex = (DWORD)(uintptr_t)param;
+	DWORD DriveIndex = (DWORD)(uintptr_t)param;
 	HANDLE hPhysicalDrive = INVALID_HANDLE_VALUE;
 	HANDLE hLogicalVolume = INVALID_HANDLE_VALUE;
 	HANDLE hSourceImage = INVALID_HANDLE_VALUE;
 	SYSTEMTIME lt;
 	FILE* log_fd;
-	LARGE_INTEGER li;
-	uint64_t wb;
-	uint8_t *buffer = NULL, *aligned_buffer, extra_partitions = 0;
+	uint8_t *buffer = NULL, extra_partitions = 0;
 	char *bb_msg, *guid_volume = NULL;
 	char drive_name[] = "?:\\";
-	char drive_letters[27];
+	char drive_letters[27], fs_type[32];
 	char logfile[MAX_PATH], *userdir;
 	char efi_dst[] = "?:\\efi\\boot\\bootx64.efi";
 	char kolibri_dst[] = "?:\\MTLD_F32";
@@ -1586,57 +1677,8 @@ DWORD WINAPI FormatThread(void* param)
 	}
 	CreateThread(NULL, 0, CloseFormatPromptThread, NULL, 0, NULL);
 
-	// TODO: factorize this with DD write?
 	if (zero_drive) {
-		li.QuadPart = 0;
-		SetFilePointerEx(hPhysicalDrive, li, NULL, FILE_BEGIN);
-		uprintf("Zeroing drive...");
-		// Our buffer size must be a multiple of the sector size
-		BufSize = ((DD_BUFFER_SIZE + SectorSize - 1) / SectorSize) * SectorSize;
-		buffer = (uint8_t*)calloc(BufSize + SectorSize, 1);	// +1 sector for align
-		if (buffer == NULL) {
-			FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_NOT_ENOUGH_MEMORY;
-			uprintf("could not allocate zeroing buffer");
-			goto out;
-		}
-		// http://msdn.microsoft.com/en-us/library/windows/desktop/aa365747.aspx does buffer sector alignment
-		aligned_buffer = ((void *)((((uintptr_t)(buffer)) + (SectorSize)-1) & (~(((uintptr_t)(SectorSize)) - 1))));
-		for (wb = 0, wSize = 0; wb < (uint64_t)SelectedDrive.DiskSize; wb += wSize) {
-			if (_GetTickCount64() > LastRefresh + 25) {
-				LastRefresh = _GetTickCount64();
-				format_percent = (100.0f*wb) / (1.0f*SelectedDrive.DiskSize);
-				PrintInfo(0, MSG_286, format_percent);
-				UpdateProgress(OP_FORMAT, format_percent);
-			}
-			// Don't overflow our projected size
-			if (wb + BufSize > (uint64_t)SelectedDrive.DiskSize) {
-				BufSize = (DWORD)(SelectedDrive.DiskSize - wb);
-			}
-			// WriteFile fails unless the size is a multiple of sector size
-			if (BufSize % SectorSize != 0)
-				BufSize = ((BufSize + SectorSize - 1) / SectorSize) * SectorSize;
-			for (i = 0; i < WRITE_RETRIES; i++) {
-				CHECK_FOR_USER_CANCEL;
-				s = WriteFile(hPhysicalDrive, aligned_buffer, BufSize, &wSize, NULL);
-				if ((s) && (wSize == BufSize))
-					break;
-				if (s)
-					uprintf("write error: Wrote %d bytes, expected %d bytes\n", wSize, BufSize);
-				else
-					uprintf("write error: %s", WindowsErrorString());
-				if (i < WRITE_RETRIES - 1) {
-					li.QuadPart = wb;
-					SetFilePointerEx(hPhysicalDrive, li, NULL, FILE_BEGIN);
-					uprintf("  RETRYING...\n");
-				}
-				else {
-					FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_WRITE_FAULT;
-					goto out;
-				}
-			}
-			if (i >= WRITE_RETRIES) goto out;
-		}
-		RefreshDriveLayout(hPhysicalDrive);
+		WriteDrive(hPhysicalDrive, NULL);
 		goto out;
 	}
 
@@ -1707,11 +1749,6 @@ DWORD WINAPI FormatThread(void* param)
 
 	// Write an image file
 	if (IsChecked(IDC_BOOT) && (bt == BT_IMG)) {
-		char fs_type[32];
-		// We poked the MBR and other stuff, so we need to rewind
-		li.QuadPart = 0;
-		if (!SetFilePointerEx(hPhysicalDrive, li, NULL, FILE_BEGIN))
-			uprintf("Warning: Unable to rewind image position - wrong data might be copied!");
 		hSourceImage = CreateFileU(image_path, GENERIC_READ, FILE_SHARE_READ, NULL,
 			OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, NULL);
 		if (hSourceImage == INVALID_HANDLE_VALUE) {
@@ -1719,75 +1756,10 @@ DWORD WINAPI FormatThread(void* param)
 			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_OPEN_FAILED;
 			goto out;
 		}
-		LastRefresh = 0;
 
-		if (img_report.compression_type != BLED_COMPRESSION_NONE) {
-			uprintf("Writing Compressed Image...");
-			bled_init(_uprintf, update_progress, &FormatStatus);
-			bled_uncompress_with_handles(hSourceImage, hPhysicalDrive, img_report.compression_type);
-			bled_exit();
-		} else {
-			uprintf("Writing Image...");
-			// Our buffer size must be a multiple of the sector size
-			BufSize = ((DD_BUFFER_SIZE + SectorSize - 1) / SectorSize) * SectorSize;
-			buffer = (uint8_t*)malloc(BufSize + SectorSize);	// +1 sector for align
-			if (buffer == NULL) {
-				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_NOT_ENOUGH_MEMORY;
-				uprintf("could not allocate DD buffer");
-				goto out;
-			}
-			// http://msdn.microsoft.com/en-us/library/windows/desktop/aa365747.aspx does buffer sector alignment
-			aligned_buffer = ((void *) ((((uintptr_t)(buffer)) + (SectorSize) - 1) & (~(((uintptr_t)(SectorSize)) - 1))));
-
-			// Don't bother trying for something clever, using double buffering overlapped and whatnot:
-			// With Windows' default optimizations, sync read + sync write for sequential operations
-			// will be as fast, if not faster, than whatever async scheme you can come up with.
-			for (wb = 0, wSize = 0; ; wb += wSize) {
-				s = ReadFile(hSourceImage, aligned_buffer, BufSize, &rSize, NULL);
-				if (!s) {
-					FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_READ_FAULT;
-					uprintf("read error: %s", WindowsErrorString());
-					goto out;
-				}
-				if (rSize == 0)
-					break;
-				if (_GetTickCount64() > LastRefresh + 25) {
-					LastRefresh = _GetTickCount64();
-					format_percent = (100.0f*wb)/(1.0f*img_report.projected_size);
-					PrintInfo(0, MSG_261, format_percent);
-					UpdateProgress(OP_FORMAT, format_percent);
-				}
-				// Don't overflow our projected size (mostly for VHDs)
-				if (wb + rSize > img_report.projected_size) {
-					rSize = (DWORD)(img_report.projected_size - wb);
-				}
-				// WriteFile fails unless the size is a multiple of sector size
-				if (rSize % SectorSize != 0)
-					rSize = ((rSize + SectorSize -1) / SectorSize) * SectorSize;
-				for (i=0; i < WRITE_RETRIES; i++) {
-					CHECK_FOR_USER_CANCEL;
-					s = WriteFile(hPhysicalDrive, aligned_buffer, rSize, &wSize, NULL);
-					if ((s) && (wSize == rSize))
-						break;
-					if (s)
-						uprintf("write error: Wrote %d bytes, expected %d bytes\n", wSize, rSize);
-					else
-						uprintf("write error: %s", WindowsErrorString());
-					if (i < WRITE_RETRIES-1) {
-						li.QuadPart = wb;
-						SetFilePointerEx(hPhysicalDrive, li, NULL, FILE_BEGIN);
-						uprintf("  RETRYING...\n");
-					} else {
-						FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_WRITE_FAULT;
-						goto out;
-					}
-				}
-				if (i >= WRITE_RETRIES) goto out;
-			}
-		}
+		WriteDrive(hPhysicalDrive, hSourceImage);
 
 		// If the image contains a partition we might be able to access, try to re-mount it
-		RefreshDriveLayout(hPhysicalDrive);
 		safe_unlockclose(hPhysicalDrive);
 		safe_unlockclose(hLogicalVolume);
 		Sleep(200);
@@ -1797,8 +1769,6 @@ DWORD WINAPI FormatThread(void* param)
 			if ((guid_volume != NULL) && (MountVolume(drive_name, guid_volume)))
 				uprintf("Remounted %s on %s\n", guid_volume, drive_name);
 		}
-
-		uprintf("Done");
 		goto out;
 	}
 

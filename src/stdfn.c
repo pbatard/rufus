@@ -820,7 +820,8 @@ BOOL SetLGP(BOOL bRestore, BOOL* bExistingKey, const char* szPath, const char* s
  */
 BOOL SetThreadAffinity(DWORD_PTR* thread_affinity, size_t num_threads)
 {
-	int i, j, pc;
+
+	size_t i, j, pc;
 	DWORD_PTR affinity, dummy;
 
 	memset(thread_affinity, 0, num_threads * sizeof(DWORD_PTR));
