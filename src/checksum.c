@@ -97,7 +97,6 @@ typedef struct ALIGNED(64) {
 	unsigned char buf[64];
 	uint32_t state[8];
 	uint64_t bytecount;
-	uint64_t bitcount;
 } SUM_CONTEXT;
 
 static void md5_init(SUM_CONTEXT *ctx)
@@ -267,7 +266,7 @@ static void sha1_transform(SUM_CONTEXT *ctx, const unsigned char *data)
 }
 
 /* Transform the message X which consists of 16 32-bit-words (SHA-256) */
-static void sha256_transform(SUM_CONTEXT *ctx, const unsigned char *data)
+static __inline void sha256_transform(SUM_CONTEXT *ctx, const unsigned char *data)
 {
 	uint32_t a, b, c, d, e, f, g, h, j, x[16];
 
@@ -282,16 +281,17 @@ static void sha256_transform(SUM_CONTEXT *ctx, const unsigned char *data)
 
 #define CH(x,y,z) ((z) ^ ((x) & ((y) ^ (z))))
 #define MAJ(x,y,z) (((x) & (y)) | ((z) & ((x) | (y))))
-#define EP0(x) (ROR(x,2) ^ ROR(x,13) ^ ROR(x,22))
-#define EP1(x) (ROR(x,6) ^ ROR(x,11) ^ ROR(x,25))
-#define SIG0(x) (ROR(x,7) ^ ROR(x,18) ^ ((x) >> 3))
-#define SIG1(x) (ROR(x,17) ^ ROR(x,19) ^ ((x) >> 10))
+// Nesting the ROR allows for single register compiler optimizations
+#define S0(x) (ROR(ROR(ROR(x,9)^(x),11)^(x),2))
+#define S1(x) (ROR(ROR(ROR(x,14)^(x),5)^(x),6))
+#define s0(x) (ROR(ROR(x,11)^(x),7)^((x)>>3))
+#define s1(x) (ROR(ROR(x,2)^(x),17)^((x)>>10))
 #define BLK0(i) (x[i])
-#define BLK2(i) (x[i] += SIG1(x[((i)-2)&15]) + x[((i)-7)&15] + SIG0(x[((i)-15)&15]))
-#define R(a,b,c,d,e,f,g,h, i) \
-	h += EP1(e) + CH(e,f,g) + K[(i)+(j)] + (j ? BLK2(i) : BLK0(i)); \
+#define BLK2(i) (x[i] += s1(x[((i)-2)&15]) + x[((i)-7)&15] + s0(x[((i)-15)&15]))
+#define R(a,b,c,d,e,f,g,h,i) \
+	h += S1(e) + CH(e,f,g) + K[(i)+(j)] + (j ? BLK2(i) : BLK0(i)); \
 	d += h; \
-	h += EP0(a) + MAJ(a, b, c)
+	h += S0(a) + MAJ(a, b, c)
 #define RX_8(i) \
 	R(a,b,c,d,e,f,g,h, i); \
 	R(h,a,b,c,d,e,f,g, i+1); \
@@ -322,10 +322,10 @@ static void sha256_transform(SUM_CONTEXT *ctx, const unsigned char *data)
 		RX_8(8);
 	}
 
-#undef EP0
-#undef EP1
-#undef SIG0
-#undef SIG1
+#undef S0
+#undef S1
+#undef s0
+#undef s1
 
 	ctx->state[0] += a;
 	ctx->state[1] += b;
@@ -453,61 +453,75 @@ static void md5_transform(SUM_CONTEXT *ctx, const unsigned char *data)
 /* Update the message digest with the contents of the buffer (SHA-1) */
 static void sha1_write(SUM_CONTEXT *ctx, const unsigned char *buf, size_t len)
 {
-	if (ctx->bytecount == 64) { /* flush the buffer */
-		sha1_transform(ctx, ctx->buf);
-		ctx->bytecount = 0;
-		ctx->bitcount += 64 * 8;
-	}
-	if (!buf)
-		return;
-	if (ctx->bytecount) {
-		for (; len && ctx->bytecount < 64; len--)
-			ctx->buf[ctx->bytecount++] = *buf++;
-		sha1_write(ctx, NULL, 0);
-		if (!len)
+	size_t t;
+
+	/* Update bytecount */
+	ctx->bytecount += len;
+
+	t = ctx->bytecount & 0x3f;
+
+	/* Handle any leading odd-sized chunks */
+	if (t) {
+		unsigned char *p = ctx->buf + t;
+
+		t = 64 - t;
+		if (len < t) {
+			memcpy(p, buf, len);
 			return;
+		}
+		memcpy(p, buf, t);
+		sha1_transform(ctx, ctx->buf);
+		buf += t;
+		len -= t;
 	}
 
+	/* Process data in 64-byte chunks */
 	while (len >= 64) {
 		PREFETCH64(buf + 64);
 		sha1_transform(ctx, buf);
-		ctx->bytecount = 0;
-		ctx->bitcount += 64 * 8;
-		len -= 64;
 		buf += 64;
+		len -= 64;
 	}
-	for (; len && ctx->bytecount < 64; len--)
-		ctx->buf[ctx->bytecount++] = *buf++;
+
+	/* Handle any remaining bytes of data. */
+	memcpy(ctx->buf, buf, len);
 }
 
 /* Update the message digest with the contents of the buffer (SHA-256) */
 static void sha256_write(SUM_CONTEXT *ctx, const unsigned char *buf, size_t len)
 {
-	size_t num, pos = ctx->bytecount & 0x3F;
+	size_t t;
 
+	/* Update bytecount */
 	ctx->bytecount += len;
 
-	num = 64 - pos;
-	if (num > len) {
-		memcpy(ctx->buf + pos, buf, len);
-		return;
-	}
-	len -= num;
-	memcpy(ctx->buf + pos, buf, num);
-	buf += num;
+	t = ctx->bytecount & 0x3f;
 
-	for (;;) {
-		PREFETCH64(buf + 64);
+	/* Handle any leading odd-sized chunks */
+	if (t) {
+		unsigned char *p = ctx->buf + t;
+
+		t = 64 - t;
+		if (len < t) {
+			memcpy(p, buf, len);
+			return;
+		}
+		memcpy(p, buf, t);
 		sha256_transform(ctx, ctx->buf);
-		if (len < 64)
-			break;
-		len -= 64;
-		memcpy(ctx->buf, buf, 64);
-		buf += 64;
+		buf += t;
+		len -= t;
 	}
 
-	if (len != 0)
-		memcpy(ctx->buf, buf, len);
+	/* Process data in 64-byte chunks */
+	while (len >= 64) {
+		PREFETCH64(buf + 64);
+		sha256_transform(ctx, buf);
+		buf += 64;
+		len -= 64;
+	}
+
+	/* Handle any remaining bytes of data. */
+	memcpy(ctx->buf, buf, len);
 }
 
 /* Update the message digest with the contents of the buffer (MD5) */
@@ -515,10 +529,10 @@ static void md5_write(SUM_CONTEXT *ctx, const unsigned char *buf, size_t len)
 {
 	size_t t;
 
-	/* Update bitcount */
-	ctx->bitcount += (len << 3);
+	/* Update bytecount */
+	ctx->bytecount += len;
 
-	t = (ctx->bitcount >> 3) & 0x3f;
+	t = ctx->bytecount & 0x3f;
 
 	/* Handle any leading odd-sized chunks */
 	if (t) {
@@ -538,8 +552,7 @@ static void md5_write(SUM_CONTEXT *ctx, const unsigned char *buf, size_t len)
 	/* Process data in 64-byte chunks */
 	while (len >= 64) {
 		PREFETCH64(buf + 64);
-		memcpy(ctx->buf, buf, 64);
-		md5_transform(ctx, ctx->buf);
+		md5_transform(ctx, buf);
 		buf += 64;
 		len -= 64;
 	}
@@ -551,31 +564,29 @@ static void md5_write(SUM_CONTEXT *ctx, const unsigned char *buf, size_t len)
 /* Finalize the computation and write the digest in ctx->state[] (SHA-1) */
 static void sha1_final(SUM_CONTEXT *ctx)
 {
+	uint64_t bitcount = ctx->bytecount << 3;
+	size_t pos = ((size_t)ctx->bytecount) & 0x3F;
 	unsigned char *p;
 
-	sha1_write(ctx, NULL, 0); /* flush */;
+	ctx->buf[pos++] = 0x80;
 
-	if (ctx->bytecount < 56) { /* enough room */
-		ctx->buf[ctx->bytecount++] = 0x80; /* pad */
-		while (ctx->bytecount < 56)
-			ctx->buf[ctx->bytecount++] = 0; /* pad */
-	} else { /* need one extra block */
-		ctx->buf[ctx->bytecount++] = 0x80; /* pad character */
-		while (ctx->bytecount < 64)
-			ctx->buf[ctx->bytecount++] = 0;
-		sha1_write(ctx, NULL, 0); /* flush */;
-		memset(ctx->buf, 0, 56); /* fill next block with zeroes */
+	/* Pad whatever data is left in the buffer */
+	while (pos != (64 - 8)) {
+		pos &= 0x3F;
+		if (pos == 0)
+			sha1_transform(ctx, ctx->buf);
+		ctx->buf[pos++] = 0;
 	}
 
-	/* append the 64 bit count (big-endian) */
-	ctx->buf[56] = (unsigned char) (ctx->bitcount >> 56);
-	ctx->buf[57] = (unsigned char) (ctx->bitcount >> 48);
-	ctx->buf[58] = (unsigned char) (ctx->bitcount >> 40);
-	ctx->buf[59] = (unsigned char) (ctx->bitcount >> 32);
-	ctx->buf[60] = (unsigned char) (ctx->bitcount >> 24);
-	ctx->buf[61] = (unsigned char) (ctx->bitcount >> 16);
-	ctx->buf[62] = (unsigned char) (ctx->bitcount >> 8);
-	ctx->buf[63] = (unsigned char) ctx->bitcount;
+	/* Append to the padding the total message's length in bits and transform */
+	ctx->buf[63] = (unsigned char) bitcount;
+	ctx->buf[62] = (unsigned char) (bitcount >> 8);
+	ctx->buf[61] = (unsigned char) (bitcount >> 16);
+	ctx->buf[60] = (unsigned char) (bitcount >> 24);
+	ctx->buf[59] = (unsigned char) (bitcount >> 32);
+	ctx->buf[58] = (unsigned char) (bitcount >> 40);
+	ctx->buf[57] = (unsigned char) (bitcount >> 48);
+	ctx->buf[56] = (unsigned char) (bitcount >> 56);
 
 	sha1_transform(ctx, ctx->buf);
 
@@ -596,7 +607,8 @@ static void sha1_final(SUM_CONTEXT *ctx)
 /* Finalize the computation and write the digest in ctx->state[] (SHA-256) */
 static void sha256_final(SUM_CONTEXT *ctx)
 {
-	size_t pos = ctx->bytecount & 0x3F;
+	uint64_t bitcount = ctx->bytecount << 3;
+	size_t pos = ((size_t)ctx->bytecount) & 0x3F;
 	unsigned char *p;
 
 	ctx->buf[pos++] = 0x80;
@@ -610,15 +622,14 @@ static void sha256_final(SUM_CONTEXT *ctx)
 	}
 
 	/* Append to the padding the total message's length in bits and transform */
-	ctx->bitcount = ctx->bytecount << 3;
-	ctx->buf[63] = (unsigned char) (ctx->bitcount);
-	ctx->buf[62] = (unsigned char) (ctx->bitcount >> 8);
-	ctx->buf[61] = (unsigned char) (ctx->bitcount >> 16);
-	ctx->buf[60] = (unsigned char) (ctx->bitcount >> 24);
-	ctx->buf[59] = (unsigned char) (ctx->bitcount >> 32);
-	ctx->buf[58] = (unsigned char) (ctx->bitcount >> 40);
-	ctx->buf[57] = (unsigned char) (ctx->bitcount >> 48);
-	ctx->buf[56] = (unsigned char) (ctx->bitcount >> 56);
+	ctx->buf[63] = (unsigned char) bitcount;
+	ctx->buf[62] = (unsigned char) (bitcount >> 8);
+	ctx->buf[61] = (unsigned char) (bitcount >> 16);
+	ctx->buf[60] = (unsigned char) (bitcount >> 24);
+	ctx->buf[59] = (unsigned char) (bitcount >> 32);
+	ctx->buf[58] = (unsigned char) (bitcount >> 40);
+	ctx->buf[57] = (unsigned char) (bitcount >> 48);
+	ctx->buf[56] = (unsigned char) (bitcount >> 56);
 
 	sha256_transform(ctx, ctx->buf);
 
@@ -642,11 +653,9 @@ static void sha256_final(SUM_CONTEXT *ctx)
 /* Finalize the computation and write the digest in ctx->state[] (MD5) */
 static void md5_final(SUM_CONTEXT *ctx)
 {
-	size_t count;
+	size_t count = ((size_t)ctx->bytecount) & 0x3F;
+	uint64_t bitcount = ctx->bytecount << 3;
 	unsigned char *p;
-
-	/* Compute number of bytes mod 64 */
-	count = (ctx->bitcount >> 3) & 0x3F;
 
 	/* Set the first char of padding to 0x80.
 	 * This is safe since there is always at least one byte free
@@ -671,14 +680,14 @@ static void md5_final(SUM_CONTEXT *ctx)
 	}
 
 	/* append the 64 bit count (little endian) */
-	ctx->buf[56] = (unsigned char) ctx->bitcount;
-	ctx->buf[57] = (unsigned char) (ctx->bitcount >> 8);
-	ctx->buf[58] = (unsigned char) (ctx->bitcount >> 16);
-	ctx->buf[59] = (unsigned char) (ctx->bitcount >> 24);
-	ctx->buf[60] = (unsigned char) (ctx->bitcount >> 32);
-	ctx->buf[61] = (unsigned char) (ctx->bitcount >> 40);
-	ctx->buf[62] = (unsigned char) (ctx->bitcount >> 48);
-	ctx->buf[63] = (unsigned char) (ctx->bitcount >> 56);
+	ctx->buf[56] = (unsigned char) bitcount;
+	ctx->buf[57] = (unsigned char) (bitcount >> 8);
+	ctx->buf[58] = (unsigned char) (bitcount >> 16);
+	ctx->buf[59] = (unsigned char) (bitcount >> 24);
+	ctx->buf[60] = (unsigned char) (bitcount >> 32);
+	ctx->buf[61] = (unsigned char) (bitcount >> 40);
+	ctx->buf[62] = (unsigned char) (bitcount >> 48);
+	ctx->buf[63] = (unsigned char) (bitcount >> 56);
 
 	md5_transform(ctx, ctx->buf);
 
@@ -694,7 +703,6 @@ static void md5_final(SUM_CONTEXT *ctx)
 	X(3);
 #undef X
 }
-
 
 //#define NULL_TEST
 #ifdef NULL_TEST
