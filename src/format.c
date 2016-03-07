@@ -908,7 +908,7 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 
 	// What follows is really a case statement with complex conditions listed
 	// by order of preference
-	if (allow_dual_uefi_bios)
+	if ((allow_dual_uefi_bios) && (tt == TT_BIOS))
 		goto windows_mbr;
 
 	// Forced UEFI (by zeroing the MBR)
