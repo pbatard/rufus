@@ -122,11 +122,11 @@ int syslinux_patch(const sector_t *sectp, int nsectors,
 	return -1;		/* The actual file is too small for content */
 
     /* Search for LDLINUX_MAGIC to find the patch area */
-    for (wp = (const uint32_t _slimg *)boot_image;
-	 (get_32_sl(wp) != LDLINUX_MAGIC) && (((uintptr_t)wp) < ((uintptr_t)boot_image + boot_image_len));
-	 wp++)
-	;
-    if (((uintptr_t)wp) >= ((uintptr_t)boot_image + boot_image_len))
+    dw = (boot_image_len - sizeof(struct patch_area)) >> 2;
+    for (i = 0, wp = (const uint32_t _slimg *)boot_image;
+	 (i <= dw) && ((get_32_sl(wp) != LDLINUX_MAGIC));
+	 i++, wp++)
+    if (i > dw)	/* Not found */
 	return -1;
     patcharea = (struct patch_area _slimg *)wp;
     epa = slptr(boot_image, &patcharea->epaoffset);

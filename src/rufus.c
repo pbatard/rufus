@@ -1468,8 +1468,13 @@ static BOOL BootCheck(void)
 							}
 						}
 						if (syslinux_ldlinux_len[i] == 0) {
-							uprintf("Could not download the file - cancelling\n");
-							return FALSE;
+							// If the version matches our embedded one, try to use that as a last ditch effort
+							if (img_report.sl_version == embedded_sl_version[1]) {
+								uprintf("Could not download the file - will try to use embedded %s version instead", img_report.sl_version_str);
+							} else {
+								uprintf("Could not download the file - cancelling\n");
+								return FALSE;
+							}
 						}
 					}
 				}
