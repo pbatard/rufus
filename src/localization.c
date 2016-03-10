@@ -418,8 +418,6 @@ char* lmprintf(uint32_t msg_id, ...)
 #define MSG_INFO     1
 #define MSG_LOW_PRI  0
 #define MSG_HIGH_PRI 1
-// Minimum delay between Info and Status message refreshes, in ms
-#define MSG_DELAY    50
 char szMessage[2][2][MSG_LEN] = { {"", ""}, {"", ""} };
 char* szStatusMessage = szMessage[MSG_STATUS][MSG_HIGH_PRI];
 static BOOL bStatusTimerArmed = FALSE, bOutputTimerArmed[2] = { FALSE, FALSE };
@@ -436,7 +434,7 @@ typedef void PRINT_FUNCTION(char*);
 PRINT_FUNCTION *PrintMessage[2] = { PrintInfoMessage, PrintStatusMessage };
 
 /*
- * The following timer call is used, along with MSG_DELAY, to prevent obnoxious flicker
+ * The following timer call is used, along with MAX_REFRESH, to prevent obnoxious flicker
  * on the Info and Status fields due to messages being updated too quickly.
  */
 static void CALLBACK OutputMessageTimeout(HWND hWnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
@@ -460,10 +458,10 @@ static void OutputMessage(BOOL info, char* msg)
 	} else {
 		// Find if we need to arm a timer
 		delta = _GetTickCount64() - last_msg_time[i];
-		if (delta < MSG_DELAY) {
+		if (delta < (2 * MAX_REFRESH)) {
 			// Not enough time has elapsed since our last output => arm a timer
 			output_msg[i] = msg;
-			SetTimer(hMainDialog, TID_OUTPUT_INFO + i, (UINT)(MSG_DELAY - delta), OutputMessageTimeout);
+			SetTimer(hMainDialog, TID_OUTPUT_INFO + i, (UINT)((2 * MAX_REFRESH) - delta), OutputMessageTimeout);
 			bOutputTimerArmed[i] = TRUE;
 		} else {
 			PrintMessage[i](msg);

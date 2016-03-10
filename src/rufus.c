@@ -763,6 +763,7 @@ static void InitProgress(BOOL bOnlyFormat)
 void UpdateProgress(int op, float percent)
 {
 	int pos;
+	static uint64_t LastRefresh = 0;
 
 	if ((op < 0) || (op >= OP_MAX)) {
 		duprintf("UpdateProgress: invalid op %d\n", op);
@@ -794,8 +795,12 @@ void UpdateProgress(int op, float percent)
 		pos = MAX_PROGRESS;
 	}
 
-	SendMessage(hProgress, PBM_SETPOS, (WPARAM)pos, 0);
-	SetTaskbarProgressValue(pos, MAX_PROGRESS);
+	// Reduce the refresh rate, to avoid weird effects on the sliding part of progress bar
+	if (_GetTickCount64() > LastRefresh + (2 * MAX_REFRESH)) {
+		LastRefresh = _GetTickCount64();
+		SendMessage(hProgress, PBM_SETPOS, (WPARAM)pos, 0);
+		SetTaskbarProgressValue(pos, MAX_PROGRESS);
+	}
 }
 
 /*
