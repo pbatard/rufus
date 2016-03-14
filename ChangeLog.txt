@@ -1,3 +1,12 @@
+o Version 2.8 (2016.03.??)
+    Enable listing of non-USB card readers (EXPERIMENTAL)
+    Major speed improvements for checksum computation
+    Fix UI flicker during progress report
+    Fix computation of FAT size for Large FAT32 (with thanks to Ady)
+    Syslinux improvements
+    Update GRUB to 2.02~beta3
+    Switch to https when downloading updates
+
 o Version 2.7 (2016.02.14)
     Add Thai translation, courtesy of Sippapas Wangsri
     Add Drag and Drop support, courtesy of SeymourApps
