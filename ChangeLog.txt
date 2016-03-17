@@ -5,7 +5,6 @@ o Version 2.8 (2016.03.??)
     Fix computation of FAT size for Large FAT32 (with thanks to Ady)
     Syslinux improvements
     Update GRUB to 2.02~beta3
-    Switch to https when downloading updates
 
 o Version 2.7 (2016.02.14)
     Add Thai translation, courtesy of Sippapas Wangsri
