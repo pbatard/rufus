@@ -272,3 +272,307 @@ typedef unsigned __int64 uintptr_t;
 typedef unsigned int uintptr_t;
 #endif
 #endif
+
+/*
+ * IFile[Open]Dialog interface for Vista and later (from MinGW headers)
+ */
+#ifdef DDKBUILD
+typedef struct _COMDLG_FILTERSPEC {
+	LPCWSTR pszName;
+	LPCWSTR pszSpec;
+} COMDLG_FILTERSPEC;
+#endif
+
+#ifndef __IFileDialog_INTERFACE_DEFINED__
+#define __IFileDialog_INTERFACE_DEFINED__
+
+enum _FILEOPENDIALOGOPTIONS {
+	FOS_OVERWRITEPROMPT = 0x2,
+	FOS_STRICTFILETYPES = 0x4,
+	FOS_NOCHANGEDIR = 0x8,
+	FOS_PICKFOLDERS = 0x20,
+	FOS_FORCEFILESYSTEM = 0x40,
+	FOS_ALLNONSTORAGEITEMS = 0x80,
+	FOS_NOVALIDATE = 0x100,
+	FOS_ALLOWMULTISELECT = 0x200,
+	FOS_PATHMUSTEXIST = 0x800,
+	FOS_FILEMUSTEXIST = 0x1000,
+	FOS_CREATEPROMPT = 0x2000,
+	FOS_SHAREAWARE = 0x4000,
+	FOS_NOREADONLYRETURN = 0x8000,
+	FOS_NOTESTFILECREATE = 0x10000,
+	FOS_HIDEMRUPLACES = 0x20000,
+	FOS_HIDEPINNEDPLACES = 0x40000,
+	FOS_NODEREFERENCELINKS = 0x100000,
+	FOS_DONTADDTORECENT = 0x2000000,
+	FOS_FORCESHOWHIDDEN = 0x10000000,
+	FOS_DEFAULTNOMINIMODE = 0x20000000,
+	FOS_FORCEPREVIEWPANEON = 0x40000000
+};
+
+typedef enum FDAP {
+	FDAP_BOTTOM = 0,
+	FDAP_TOP = 1
+} FDAP;
+
+typedef DWORD FILEOPENDIALOGOPTIONS;
+
+DEFINE_GUID(IID_IFileDialog, 0x42f85136, 0xdb7e, 0x439c, 0x85, 0xf1, 0xe4, 0x07, 0x5d, 0x13, 0x5f, 0xc8);
+
+typedef struct IFileDialogVtbl {
+	BEGIN_INTERFACE
+
+		/*** IUnknown methods ***/
+		HRESULT(STDMETHODCALLTYPE *QueryInterface)(
+			IFileDialog* This,
+			REFIID riid,
+			void **ppvObject);
+
+	ULONG(STDMETHODCALLTYPE *AddRef)(
+		IFileDialog* This);
+
+	ULONG(STDMETHODCALLTYPE *Release)(
+		IFileDialog* This);
+
+	/*** IModalWindow methods ***/
+	HRESULT(STDMETHODCALLTYPE *Show)(
+		IFileDialog* This,
+		HWND hwndOwner);
+
+	/*** IFileDialog methods ***/
+	HRESULT(STDMETHODCALLTYPE *SetFileTypes)(
+		IFileDialog* This,
+		UINT cFileTypes,
+		const COMDLG_FILTERSPEC *rgFilterSpec);
+
+	HRESULT(STDMETHODCALLTYPE *SetFileTypeIndex)(
+		IFileDialog* This,
+		UINT iFileType);
+
+	HRESULT(STDMETHODCALLTYPE *GetFileTypeIndex)(
+		IFileDialog* This,
+		UINT *piFileType);
+
+	HRESULT(STDMETHODCALLTYPE *Advise)(
+		IFileDialog* This,
+		IFileDialogEvents *pfde,
+		DWORD *pdwCookie);
+
+	HRESULT(STDMETHODCALLTYPE *Unadvise)(
+		IFileDialog* This,
+		DWORD dwCookie);
+
+	HRESULT(STDMETHODCALLTYPE *SetOptions)(
+		IFileDialog* This,
+		FILEOPENDIALOGOPTIONS fos);
+
+	HRESULT(STDMETHODCALLTYPE *GetOptions)(
+		IFileDialog* This,
+		FILEOPENDIALOGOPTIONS *pfos);
+
+	HRESULT(STDMETHODCALLTYPE *SetDefaultFolder)(
+		IFileDialog* This,
+		IShellItem *psi);
+
+	HRESULT(STDMETHODCALLTYPE *SetFolder)(
+		IFileDialog* This,
+		IShellItem *psi);
+
+	HRESULT(STDMETHODCALLTYPE *GetFolder)(
+		IFileDialog* This,
+		IShellItem **ppsi);
+
+	HRESULT(STDMETHODCALLTYPE *GetCurrentSelection)(
+		IFileDialog* This,
+		IShellItem **ppsi);
+
+	HRESULT(STDMETHODCALLTYPE *SetFileName)(
+		IFileDialog* This,
+		LPCWSTR pszName);
+
+	HRESULT(STDMETHODCALLTYPE *GetFileName)(
+		IFileDialog* This,
+		LPWSTR *pszName);
+
+	HRESULT(STDMETHODCALLTYPE *SetTitle)(
+		IFileDialog* This,
+		LPCWSTR pszTitle);
+
+	HRESULT(STDMETHODCALLTYPE *SetOkButtonLabel)(
+		IFileDialog* This,
+		LPCWSTR pszText);
+
+	HRESULT(STDMETHODCALLTYPE *SetFileNameLabel)(
+		IFileDialog* This,
+		LPCWSTR pszLabel);
+
+	HRESULT(STDMETHODCALLTYPE *GetResult)(
+		IFileDialog* This,
+		IShellItem **ppsi);
+
+	HRESULT(STDMETHODCALLTYPE *AddPlace)(
+		IFileDialog* This,
+		IShellItem *psi,
+		FDAP fdap);
+
+	HRESULT(STDMETHODCALLTYPE *SetDefaultExtension)(
+		IFileDialog* This,
+		LPCWSTR pszDefaultExtension);
+
+	HRESULT(STDMETHODCALLTYPE *Close)(
+		IFileDialog* This,
+		HRESULT hr);
+
+	HRESULT(STDMETHODCALLTYPE *SetClientGuid)(
+		IFileDialog* This,
+		REFGUID guid);
+
+	HRESULT(STDMETHODCALLTYPE *ClearClientData)(
+		IFileDialog* This);
+
+	HRESULT(STDMETHODCALLTYPE *SetFilter)(
+		IFileDialog* This,
+		IShellItemFilter *pFilter);
+
+	END_INTERFACE
+} IFileDialogVtbl;
+interface IFileDialog {
+	CONST_VTBL IFileDialogVtbl* lpVtbl;
+};
+#endif
+
+#ifndef __IFileOpenDialog_INTERFACE_DEFINED__
+#define __IFileOpenDialog_INTERFACE_DEFINED__
+
+DEFINE_GUID(IID_IFileOpenDialog, 0xd57c7288, 0xd4ad, 0x4768, 0xbe, 0x02, 0x9d, 0x96, 0x95, 0x32, 0xd9, 0x60);
+
+typedef struct IFileOpenDialogVtbl {
+	BEGIN_INTERFACE
+
+		/*** IUnknown methods ***/
+		HRESULT(STDMETHODCALLTYPE *QueryInterface)(
+			IFileOpenDialog* This,
+			REFIID riid,
+			void **ppvObject);
+
+	ULONG(STDMETHODCALLTYPE *AddRef)(
+		IFileOpenDialog* This);
+
+	ULONG(STDMETHODCALLTYPE *Release)(
+		IFileOpenDialog* This);
+
+	/*** IModalWindow methods ***/
+	HRESULT(STDMETHODCALLTYPE *Show)(
+		IFileOpenDialog* This,
+		HWND hwndOwner);
+
+	/*** IFileDialog methods ***/
+	HRESULT(STDMETHODCALLTYPE *SetFileTypes)(
+		IFileOpenDialog* This,
+		UINT cFileTypes,
+		const COMDLG_FILTERSPEC *rgFilterSpec);
+
+	HRESULT(STDMETHODCALLTYPE *SetFileTypeIndex)(
+		IFileOpenDialog* This,
+		UINT iFileType);
+
+	HRESULT(STDMETHODCALLTYPE *GetFileTypeIndex)(
+		IFileOpenDialog* This,
+		UINT *piFileType);
+
+	HRESULT(STDMETHODCALLTYPE *Advise)(
+		IFileOpenDialog* This,
+		IFileDialogEvents *pfde,
+		DWORD *pdwCookie);
+
+	HRESULT(STDMETHODCALLTYPE *Unadvise)(
+		IFileOpenDialog* This,
+		DWORD dwCookie);
+
+	HRESULT(STDMETHODCALLTYPE *SetOptions)(
+		IFileOpenDialog* This,
+		FILEOPENDIALOGOPTIONS fos);
+
+	HRESULT(STDMETHODCALLTYPE *GetOptions)(
+		IFileOpenDialog* This,
+		FILEOPENDIALOGOPTIONS *pfos);
+
+	HRESULT(STDMETHODCALLTYPE *SetDefaultFolder)(
+		IFileOpenDialog* This,
+		IShellItem *psi);
+
+	HRESULT(STDMETHODCALLTYPE *SetFolder)(
+		IFileOpenDialog* This,
+		IShellItem *psi);
+
+	HRESULT(STDMETHODCALLTYPE *GetFolder)(
+		IFileOpenDialog* This,
+		IShellItem **ppsi);
+
+	HRESULT(STDMETHODCALLTYPE *GetCurrentSelection)(
+		IFileOpenDialog* This,
+		IShellItem **ppsi);
+
+	HRESULT(STDMETHODCALLTYPE *SetFileName)(
+		IFileOpenDialog* This,
+		LPCWSTR pszName);
+
+	HRESULT(STDMETHODCALLTYPE *GetFileName)(
+		IFileOpenDialog* This,
+		LPWSTR *pszName);
+
+	HRESULT(STDMETHODCALLTYPE *SetTitle)(
+		IFileOpenDialog* This,
+		LPCWSTR pszTitle);
+
+	HRESULT(STDMETHODCALLTYPE *SetOkButtonLabel)(
+		IFileOpenDialog* This,
+		LPCWSTR pszText);
+
+	HRESULT(STDMETHODCALLTYPE *SetFileNameLabel)(
+		IFileOpenDialog* This,
+		LPCWSTR pszLabel);
+
+	HRESULT(STDMETHODCALLTYPE *GetResult)(
+		IFileOpenDialog* This,
+		IShellItem **ppsi);
+
+	HRESULT(STDMETHODCALLTYPE *AddPlace)(
+		IFileOpenDialog* This,
+		IShellItem *psi,
+		FDAP fdap);
+
+	HRESULT(STDMETHODCALLTYPE *SetDefaultExtension)(
+		IFileOpenDialog* This,
+		LPCWSTR pszDefaultExtension);
+
+	HRESULT(STDMETHODCALLTYPE *Close)(
+		IFileOpenDialog* This,
+		HRESULT hr);
+
+	HRESULT(STDMETHODCALLTYPE *SetClientGuid)(
+		IFileOpenDialog* This,
+		REFGUID guid);
+
+	HRESULT(STDMETHODCALLTYPE *ClearClientData)(
+		IFileOpenDialog* This);
+
+	HRESULT(STDMETHODCALLTYPE *SetFilter)(
+		IFileOpenDialog* This,
+		IShellItemFilter *pFilter);
+
+	/*** IFileOpenDialog methods ***/
+	HRESULT(STDMETHODCALLTYPE *GetResults)(
+		IFileOpenDialog* This,
+		IShellItemArray **ppenum);
+
+	HRESULT(STDMETHODCALLTYPE *GetSelectedItems)(
+		IFileOpenDialog* This,
+		IShellItemArray **ppsai);
+
+	END_INTERFACE
+} IFileOpenDialogVtbl;
+interface IFileOpenDialog {
+	CONST_VTBL IFileOpenDialogVtbl* lpVtbl;
+};
+#endif
