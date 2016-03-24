@@ -2798,9 +2798,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	};
 
 	// Disable loading system DLLs from the current directory (sideloading mitigation)
-#ifndef DDKBUILD	// WDK doesn't know about that one
 	SetDllDirectoryA("");
-#endif
 
 	uprintf("*** " APPLICATION_NAME " init ***\n");
 	PF_INIT(GetTickCount64, kernel32);

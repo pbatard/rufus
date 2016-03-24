@@ -143,7 +143,6 @@ void BrowseForFolder(void) {
 	char* tmp_path = NULL;
 
 	dialog_showing++;
-#ifndef DDKBUILD	// WDK being uncooperative yet again...
 	if (nWindowsVersion >= WINDOWS_VISTA) {
 		INIT_VISTA_SHELL32;
 		if (IS_VISTA_SHELL32_AVAILABLE) {
@@ -214,7 +213,6 @@ fallback:
 			pfod->lpVtbl->Release(pfod);
 		}
 	}
-#endif
 
 	INIT_XP_SHELL32;
 	memset(&bi, 0, sizeof(BROWSEINFOW));
@@ -260,7 +258,6 @@ char* FileDialog(BOOL save, char* path, const ext_t* ext, DWORD options)
 		return NULL;
 	dialog_showing++;
 
-#ifndef DDKBUILD
 	if (nWindowsVersion >= WINDOWS_VISTA) {
 		INIT_VISTA_SHELL32;
 		filter_spec = (COMDLG_FILTERSPEC*)calloc(ext->count + 1, sizeof(COMDLG_FILTERSPEC));
@@ -341,7 +338,6 @@ fallback:
 			pfd->lpVtbl->Release(pfd);
 		}
 	}
-#endif
 
 	memset(&ofn, 0, sizeof(ofn));
 	ofn.lStructSize = sizeof(ofn);

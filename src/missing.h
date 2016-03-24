@@ -276,13 +276,6 @@ typedef unsigned int uintptr_t;
 /*
  * IFile[Open]Dialog interface for Vista and later (from MinGW headers)
  */
-#ifdef DDKBUILD
-typedef struct _COMDLG_FILTERSPEC {
-	LPCWSTR pszName;
-	LPCWSTR pszSpec;
-} COMDLG_FILTERSPEC;
-#endif
-
 #ifndef __IFileDialog_INTERFACE_DEFINED__
 #define __IFileDialog_INTERFACE_DEFINED__
 

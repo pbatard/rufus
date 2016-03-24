@@ -847,7 +847,7 @@ DWORD WINAPI SumThread(void* param)
 		// gets into its next wait loop
 		data_ready[i] = CreateEvent(NULL, FALSE, FALSE, NULL);
 		thread_ready[i] = CreateEvent(NULL, FALSE, FALSE, NULL);
-		if ((data_ready == NULL) || (thread_ready[i] == NULL)) {
+		if ((data_ready[i] == NULL) || (thread_ready[i] == NULL)) {
 			uprintf("Unable to create checksum thread event: %s", WindowsErrorString());
 			goto out;
 		}
