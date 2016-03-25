@@ -122,6 +122,9 @@ static __inline BOOL _SetRegistryKey(HKEY key_root, const char* key_name, DWORD 
 	HKEY hRoot = NULL, hApp = NULL;
 	DWORD dwDisp, dwType = reg_type;
 
+	if (key_name == NULL)
+		return FALSE;
+
 	if (RegOpenKeyExA(key_root, NULL, 0, KEY_READ|KEY_CREATE_SUB_KEY, &hRoot) != ERROR_SUCCESS) {
 		hRoot = NULL;
 		goto out;

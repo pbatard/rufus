@@ -175,10 +175,10 @@ void BrowseForFolder(void) {
 			hr = (*pfSHCreateItemFromParsingName)(wpath, NULL, &IID_IShellItem, (LPVOID)&si_path);
 			if (SUCCEEDED(hr)) {
 				if (wpath != NULL) {
-					hr = pfod->lpVtbl->SetFolder(pfod, si_path);
+					pfod->lpVtbl->SetFolder(pfod, si_path);
 				}
 				if (fname != NULL) {
-					hr = pfod->lpVtbl->SetFileName(pfod, fname);
+					pfod->lpVtbl->SetFileName(pfod, fname);
 				}
 			}
 			safe_free(wpath);
@@ -250,7 +250,7 @@ char* FileDialog(BOOL save, char* path, const ext_t* ext, DWORD options)
 	HRESULT hr = FALSE;
 	IFileDialog *pfd = NULL;
 	IShellItem *psiResult;
-	COMDLG_FILTERSPEC* filter_spec;
+	COMDLG_FILTERSPEC* filter_spec = NULL;
 	wchar_t *wpath = NULL, *wfilename = NULL;
 	IShellItem *si_path = NULL;	// Automatically freed
 
@@ -333,7 +333,8 @@ char* FileDialog(BOOL save, char* path, const ext_t* ext, DWORD options)
 			dialog_showing--;
 			return filepath;
 		}
-fallback:
+	fallback:
+		safe_free(filter_spec);
 		if (pfd != NULL) {
 			pfd->lpVtbl->Release(pfd);
 		}
