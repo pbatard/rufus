@@ -1,7 +1,7 @@
 /*
 * Rufus: The Reliable USB Formatting Utility
 * Constants and defines missing from various toolchains
-* Copyright © 2016 Pete Batard <pete@akeo.ie>
+* Copyright © 2016-2017 Pete Batard <pete@akeo.ie>
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -49,7 +49,12 @@
 #if defined(__GNUC__) || defined(__clang__)
 #define PREFETCH64(m) do { __builtin_prefetch(m, 0, 0); __builtin_prefetch(m+32, 0, 0); } while(0)
 #elif defined(_MSC_VER)
+#if defined(_M_IX86) || defined (_M_X64)
 #define PREFETCH64(m) do { _m_prefetch(m); _m_prefetch(m+32); } while(0)
+#else
+// _m_prefetch() doesn't seem to exist for MSVC/ARM
+#define PREFETCH64(m)
+#endif
 #endif
 
 /* Read/write with endianness swap */

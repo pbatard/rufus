@@ -10,7 +10,6 @@
 *.idb
 *.ipch
 *.la
-*.lib
 *.lo
 *.log
 *.mac
