@@ -9596,7 +9596,7 @@ t MSG_285 "Atsiųstą vykdomąjį failą pasirašė '%s'.\nŠio parašo mes neat
 
 ################################################################################
 l "ms-MY" "Malay (Bahasa Malaysia)" 0x043e, 0x083e
-v 1.0.18
+v 1.0.19
 b "en-US"
 
 # Main dialog
@@ -9827,9 +9827,17 @@ t MSG_093 "PENTING: PERANTI INI MEMPUNYAI BEBERAPA PARTISYEN!!\n\n"
 	"Jika anda mahu meneruskannya, anda bertanggungjawab ke atas kehilangan data dalam partisyen tersebut."
 t MSG_094 "Beberapa partisyen dikesan"
 t MSG_095 "DD Imej"
-#t MSG_096 "Sistem fail yang dipilih tidak boleh digunakan dengan jenis ISO ini (...)"
+t MSG_096 "Sistem fail yang sedang dipilih tidak boleh digunakan dengan jenis ISO ini. "
+	"Sila pilih sistem fail berlainan atau gunakan ISO berlainan."
 t MSG_097 "'Windows To Go' hanya boleh digunakan jika sistem fail adalah NTFS."
-#t MSG_098 "PENTING: Anda cuba memasang 'Windows To Go', tetapi pemacu sasaran anda tidak (...)"
+t MSG_098 "PENTING: Anda cuba memasang 'Windows To Go', tetapi "
+	"pemacu sasaran anda tidak mempunyai atribut 'FIXED'. Disebabkan "
+	"ini Windows akan berkemungkinan besar sangkut sepanjang but, kerana Microsoft "
+	"tidak merekanya untuk berfungsi dengan pemacu yang sebaliknya mempunyai "
+	"atribut 'REMOVABLE'.\n\nAdakah anda masih mahu teruskan?\n\n"
+	"Nota: Atribut 'FIXED/REMOVABLE'adalah sifat perkakasan yang "
+	"hanya boleh ditukar menggunakan alatan tersuai daripada pengilang pemacu. "
+	"Bagaimanapun alatan tersebut adalah HAMPIR TIDAK AKAN diberikan kepada umum..."
 t MSG_099 "Had sistem fail"
 t MSG_100 "Imej ISO ini mengandungi fail yang lebih besar daripada 4GB "
 	"iaitu saiz maksima yang dibenarkan untuk sistem fail FAT/FAT32."
@@ -9869,7 +9877,15 @@ t MSG_114 "Imej ini menggunakan Syslinux %s%s tetapi aplikasi ini hanya mempunya
 	"NOTA:Fail akan dimuat turun ke dalam direktori aplikasi ini dan akan digunakan semula"
 	"secara automatik sekiranya sedia ada.\n"
 t MSG_115 "Muat turun diperlukan"
-#t MSG_116 "Imej ini menggunakan Grub %s tetapi penggunaan hanya termasuk fail pemasangan untuk (...)"
+t MSG_116 "Imej ini menggunakan Grub %s tetapi aplikasi hanya termasuk fail pemasangan untuk Grub %s.\n\n"
+	"Sepertimana versi Grub berlainan mungkin tidak sesuai antara satu sama lain, dan ianya tidak "
+	"mungkin untuk memasukkan mereka semua, Rufus akan cuba mengesan versi fail pemasangan Grub "
+	"('core.img') yang sepadan dengan salah satu daripada imej anda:\n"
+	"- Pilih 'Ya' untuk bersambung ke Internet dan cuba memuat turunnya\n"
+	"- Pilih 'Tidak' untuk menggunakan versi lalai dari Rufus\n"
+	"- Pilih 'Batal' untuk membatalkan operasi\n\n"
+	"Nota: Fail akan dimuat turun dalam direktori aplikasi semasa dan akan digunakan semula secara automatik "
+	"jika ada. Jika tiada padanan boleh dijumpai dalam talian, versi lalai akan digunakan."
 
 # Tooltips
 # Partition Scheme and Target Type
@@ -9931,10 +9947,15 @@ t MSG_192 "Melepasi bacaan"
 t MSG_193 "Muat turun %s"
 t MSG_194 "Tidak boleh muat turun %s"
 t MSG_195 "Menggunakan %s fail versi dibenam"
-#t MSG_196 "PENTING: PEMACU INI MENGGUNAKAN SAIZ SEKTOR BUKAN STANDARD!! (...)"
+t MSG_196 "PENTING: PEMACU INI MENGGUNAKAN SAIZ SEKTOR BUKAN PIAWAIAN!\n\n"
+	"Pemacu konvensional mengunakan saiz sektor 512 bait tetapi pemacu ini menggunakan "
+	"%d bait. Dalam banyak kes, ini bermaksud anda TIDAK akan mampu untuk but dari pemacu ini.\n"
+	"Rufus boleh cuba untuk mencipta pemacu boleh but, tetapi TIDAK ADA JAMINAN ianya akan berfungsi."
 t MSG_197 "Saiz sektor bukan standard dikesan"
-#t MSG_198 "'Windows To Go' hanya boleh dipasang di pemacu dibahagi GPT jika ia ada (...)"
-#t MSG_199 "Pilih ini jika anda merancang untuk memasang Windows, ke cakera lain, menggunakan (...)"
+t MSG_198 "'Windows To Go' hanya boleh dipasang dalam pemacu berpartisyen GPT jika ia mempunyai "
+	"set atribut 'FIXED'. Pemacu semasa tidak dikesan sebagai 'FIXED'."
+t MSG_199 "Pilih ini jika anda merancang untuk memasang Windows, ke cakera lain, "
+	"menggunakan peranti dipilih sebagai media pemasangan."
 t MSG_200 "Pilih ini jika anda mahu untuk menjalankan Windows secara langsung dari peranti dipilih."
 
 # Status messages - these messages will appear on the status bar
