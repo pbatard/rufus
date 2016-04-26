@@ -200,7 +200,7 @@
     <ClCompile Include="..\stdio.c" />
     <ClCompile Include="..\stdlg.c" />
     <ClCompile Include="..\syslinux.c" />
-    <ClCompile Include="..\usb.c" />
+    <ClCompile Include="..\dev.c" />
     <ClCompile Include="..\vhd.c" />
   </ItemGroup>
   <ItemGroup>
@@ -224,7 +224,7 @@
     <ClInclude Include="..\license.h" />
     <ClInclude Include="..\smart.h" />
     <ClInclude Include="..\sys_types.h" />
-    <ClInclude Include="..\usb.h" />
+    <ClInclude Include="..\dev.h" />
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="..\rufus.manifest" />

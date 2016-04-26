@@ -36,6 +36,7 @@ SXS_APPLICATION_MANIFEST=..\rufus.manifest
 
 SOURCES=badblocks.c      \
         checksum.c       \
+        dev.c            \
         dos.c            \
         dos_locale.c     \
         drive.c          \
@@ -52,6 +53,5 @@ SOURCES=badblocks.c      \
         stdio.c          \
         stdlg.c          \
         syslinux.c       \
-        usb.c            \
         vhd.c            \
         rufus.rc

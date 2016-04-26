@@ -2093,7 +2093,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			case DBT_CUSTOMEVENT:	// Sent by our timer refresh function or for card reader media change
 				LastRefresh = _GetTickCount64();
 				KillTimer(hMainDialog, TID_REFRESH_TIMER);
-				GetUSBDevices((DWORD)ComboBox_GetItemData(hDeviceList, ComboBox_GetCurSel(hDeviceList)));
+				GetDevices((DWORD)ComboBox_GetItemData(hDeviceList, ComboBox_GetCurSel(hDeviceList)));
 				user_changed_label = FALSE;
 				return (INT_PTR)TRUE;
 			case DBT_DEVNODES_CHANGED:
@@ -2124,7 +2124,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		log_displayed = FALSE;
 		hLogDlg = MyCreateDialog(hMainInstance, IDD_LOG, hDlg, (DLGPROC)LogProc);
 		InitDialog(hDlg);
-		GetUSBDevices(0);
+		GetDevices(0);
 		CheckForUpdates(FALSE);
 		// Register MEDIA_INSERTED/MEDIA_REMOVED notifications for card readers
 		if ((pfSHChangeNotifyRegister != NULL) && (SUCCEEDED(SHGetSpecialFolderLocation(0, CSIDL_DESKTOP, &pidlDesktop)))) {
@@ -2429,7 +2429,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			if ((HIWORD(wParam)) == BN_CLICKED) {
 				enable_HDDs = !enable_HDDs;
 				PrintStatus2000(lmprintf(MSG_253), enable_HDDs);
-				GetUSBDevices(0);
+				GetDevices(0);
 			}
 			break;
 		case IDC_START:
@@ -2669,7 +2669,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		EnableControls(TRUE);
 		if (wParam) {
 			uprintf("\r\n");
-			GetUSBDevices(DeviceNum);
+			GetDevices(DeviceNum);
 		}
 		if (!IS_ERROR(FormatStatus)) {
 			// This is the only way to achieve instantaneous progress transition to 100%
@@ -3073,7 +3073,7 @@ relaunch:
 			usb_debug = !usb_debug;
 			WriteSettingBool(SETTING_ENABLE_USB_DEBUG, usb_debug);
 			PrintStatus2000(lmprintf(MSG_270), usb_debug);
-			GetUSBDevices(0);
+			GetDevices(0);
 			continue;
 		}
 		// Alt-, => Disable physical drive locking
@@ -3123,7 +3123,7 @@ relaunch:
 		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'F')) {
 			enable_HDDs = !enable_HDDs;
 			PrintStatus2000(lmprintf(MSG_253), enable_HDDs);
-			GetUSBDevices(0);
+			GetDevices(0);
 			CheckDlgButton(hMainDialog, IDC_ENABLE_FIXED_DISKS, enable_HDDs?BST_CHECKED:BST_UNCHECKED);
 			continue;
 		}
@@ -3160,7 +3160,7 @@ relaunch:
 			force_large_fat32 = !force_large_fat32;
 			WriteSettingBool(SETTING_FORCE_LARGE_FAT32_FORMAT, force_large_fat32);
 			PrintStatus2000(lmprintf(MSG_254), force_large_fat32);
-			GetUSBDevices(0);
+			GetDevices(0);
 			continue;
 		}
 		// Alt N => Enable NTFS compression
@@ -3182,7 +3182,7 @@ relaunch:
 		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'S')) {
 			size_check = !size_check;
 			PrintStatus2000(lmprintf(MSG_252), size_check);
-			GetUSBDevices(0);
+			GetDevices(0);
 			continue;
 		}
 		// Alt-T => Preserve timestamps when extracting ISO files
@@ -3197,7 +3197,7 @@ relaunch:
 			use_fake_units = !use_fake_units;
 			WriteSettingBool(SETTING_USE_PROPER_SIZE_UNITS, !use_fake_units);
 			PrintStatus2000(lmprintf(MSG_263), !use_fake_units);
-			GetUSBDevices(0);
+			GetDevices(0);
 			continue;
 		}
 		// Alt-V => Save selected device to *UNCOMPRESSED* VHD
@@ -3210,7 +3210,7 @@ relaunch:
 			enable_vmdk = !enable_vmdk;
 			WriteSettingBool(SETTING_ENABLE_VMDK_DETECTION, enable_vmdk);
 			PrintStatus2000(lmprintf(MSG_265), enable_vmdk);
-			GetUSBDevices(0);
+			GetDevices(0);
 			continue;
 		}
 		// Alt-X => Delete the 'rufus_files' subdirectory
@@ -3243,7 +3243,7 @@ relaunch:
 			uprintf("NOTE: Listing of non-USB removable drives has been %s.", (list_non_usb_removable_drives)?"enabled (CAUTION!)":"disabled");
 			if (list_non_usb_removable_drives)
 				uprintf("By using this unofficial cheat mode you forfeit ANY RIGHT to complain if you lose valuable data!");
-			GetUSBDevices(0);
+			GetDevices(0);
 			continue;
 		}
 

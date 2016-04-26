@@ -1,6 +1,6 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
- * USB device listing
+ * Device detection and enumeration
  * Copyright © 2014-2016 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -40,7 +40,7 @@
 #include "localization.h"
 
 #include "drive.h"
-#include "usb.h"
+#include "dev.h"
 
 extern StrArray DriveID, DriveLabel;
 extern BOOL enable_HDDs, use_fake_units, enable_vmdk, usb_debug, list_non_usb_removable_drives;
@@ -157,7 +157,7 @@ static __inline BOOL IsRemovable(const char* buffer)
 /*
  * Refresh the list of USB devices
  */
-BOOL GetUSBDevices(DWORD devnum)
+BOOL GetDevices(DWORD devnum)
 {
 	// List of USB storage drivers we know - list may be incomplete!
 	const char* usbstor_name[] = {
@@ -461,14 +461,18 @@ BOOL GetUSBDevices(DWORD devnum)
 			uprintf("Found VHD device '%s'", buffer);
 		} else if ((props.is_CARD) && ((!props.is_USB) || ((props.vid == 0) && (props.pid == 0)))) {
 			uprintf("Found card reader device '%s'", buffer);
-		} else if ((!props.is_USB) && (props.is_Removable) && (!props.is_UASP)) {
-			uprintf("Found non-USB removable device '%s'", buffer);
+		} else if ((!props.is_USB) && (!props.is_UASP) && (props.is_Removable)) {
+			uprintf("Found non-USB removable device '%s' => Eliminated", buffer);
+			if (!list_non_usb_removable_drives) {
+				uuprintf("If you *REALLY* need, you can enable listing of this device with <Ctrl><Alt><F>");
+				continue;
+			}
 		} else {
 			if ((props.vid == 0) && (props.pid == 0)) {
 				if (!props.is_USB) {
 					// If we have a non removable SCSI drive and couldn't get a VID:PID,
 					// we are most likely dealing with a system drive => eliminate it!
-					uuprintf("  Non-USB or non-removable => Eliminated");
+					uuprintf("Found non-USB non-removable device '%s' => Eliminated", buffer);
 					continue;
 				}
 				safe_strcpy(str, sizeof(str), "????:????");	// Couldn't figure VID:PID
