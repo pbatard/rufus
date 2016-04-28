@@ -57,7 +57,6 @@ const GUID PARTITION_SYSTEM_GUID =
  * Globals
  */
 RUFUS_DRIVE_INFO SelectedDrive;
-size_t uefi_ntfs_size = 0;
 
 /*
  * The following methods get or set the AutoMount setting (which is different from AutoRun)
@@ -684,9 +683,6 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 	if (hPhysical == INVALID_HANDLE_VALUE)
 		return 0;
 
-	if (uefi_ntfs_size == 0)
-		uefi_ntfs_size = GetResourceSize(hMainInstance, MAKEINTRESOURCEA(IDR_UEFI_NTFS), _RT_RCDATA, "uefi-ntfs.img");
-
 	r = DeviceIoControl(hPhysical, IOCTL_DISK_GET_DRIVE_GEOMETRY_EX,
 			NULL, 0, geometry, sizeof(geometry), &size, NULL);
 	if (!r || size <= 0) {
@@ -734,7 +730,7 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 			if (DriveLayout->PartitionEntry[i].Mbr.PartitionType != PARTITION_ENTRY_UNUSED) {
 				part_type = DriveLayout->PartitionEntry[i].Mbr.PartitionType;
 				isUefiNtfs = (i == 1) && (part_type == 0xef) &&
-					(DriveLayout->PartitionEntry[i].PartitionLength.QuadPart == uefi_ntfs_size);
+					(DriveLayout->PartitionEntry[i].PartitionLength.QuadPart <= 1*MB);
 				suprintf("Partition %d%s:\n", i+1, isUefiNtfs?" (UEFI:NTFS)":"");
 				for (j=0; j<ARRAYSIZE(mbr_mountable); j++) {
 					if (part_type == mbr_mountable[j]) {
@@ -1029,6 +1025,7 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 {
 	const char* PartitionTypeName[2] = { "MBR", "GPT" };
 	unsigned char* buffer;
+	size_t uefi_ntfs_size = 0;
 	CREATE_DISK CreateDisk = {PARTITION_STYLE_RAW, {{0}}};
 	DRIVE_LAYOUT_INFORMATION_EX4 DriveLayoutEx = {0};
 	BOOL r;
@@ -1038,7 +1035,7 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 
 	PrintInfoDebug(0, MSG_238, PartitionTypeName[partition_style]);
 
-	if ((extra_partitions & XP_UEFI_NTFS) && (uefi_ntfs_size == 0)) {
+	if (extra_partitions & XP_UEFI_NTFS) {
 		uefi_ntfs_size = GetResourceSize(hMainInstance, MAKEINTRESOURCEA(IDR_UEFI_NTFS), _RT_RCDATA, "uefi-ntfs.img");
 		if (uefi_ntfs_size == 0)
 			return FALSE;

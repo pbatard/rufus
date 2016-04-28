@@ -2778,7 +2778,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	BOOL previous_enable_HDDs = FALSE;
 	BYTE *loc_data;
 	DWORD loc_size, size;
-	char tmp_path[MAX_PATH] = "", loc_file[MAX_PATH] = "", ini_path[MAX_PATH], ini_flags[] = "rb";
+	char tmp_path[MAX_PATH] = "", loc_file[MAX_PATH] = "", ini_path[MAX_PATH] = "", ini_flags[] = "rb";
 	char *tmp, *locale_name = NULL, **argv = NULL;
 	wchar_t **wenv, **wargv;
 	PF_TYPE_DECL(CDECL, int, __wgetmainargs, (int*, wchar_t***, wchar_t***, int, int*));
