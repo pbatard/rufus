@@ -268,11 +268,11 @@ static BOOL DefineClusterSizes(void)
 		if (nWindowsVersion > WINDOWS_XP) {
 			SelectedDrive.ClusterSize[FS_EXFAT].Allowed = 0x03FFFE00;
 			if (SelectedDrive.DiskSize < 256*MB)	// < 256 MB
-				SelectedDrive.ClusterSize[FS_EXFAT].Default = 4*1024;
+				SelectedDrive.ClusterSize[FS_EXFAT].Default = 4*KB;
 			else if (SelectedDrive.DiskSize < 32*GB)	// < 32 GB
-				SelectedDrive.ClusterSize[FS_EXFAT].Default = 32*1024;
+				SelectedDrive.ClusterSize[FS_EXFAT].Default = 32*KB;
 			else
-				SelectedDrive.ClusterSize[FS_EXFAT].Default = 28*1024;
+				SelectedDrive.ClusterSize[FS_EXFAT].Default = 128*KB;
 		}
 
 		// UDF (only supported for Vista and later)
