@@ -242,7 +242,7 @@ static BOOL DefineClusterSizes(void)
 		if ((SelectedDrive.DiskSize >= 256*MB) && (SelectedDrive.DiskSize < 32*GB)) {
 			for (i=8; i<=32; i<<=1) {				// 256 MB -> 32 GB
 				if (SelectedDrive.DiskSize*1.0f < i*GB*FAT32_CLUSTER_THRESHOLD) {
-					SelectedDrive.ClusterSize[FS_FAT32].Default = ((ULONG)i/2)*1024;
+					SelectedDrive.ClusterSize[FS_FAT32].Default = ((ULONG)i/2)*KB;
 					break;
 				}
 			}
@@ -259,7 +259,7 @@ static BOOL DefineClusterSizes(void)
 		SelectedDrive.ClusterSize[FS_NTFS].Allowed = 0x0001FE00;
 		for (i=16; i<=256; i<<=1) {				// 7 MB -> 256 TB
 			if (SelectedDrive.DiskSize < i*TB) {
-				SelectedDrive.ClusterSize[FS_NTFS].Default = ((ULONG)i/4)*1024;
+				SelectedDrive.ClusterSize[FS_NTFS].Default = ((ULONG)i/4)*KB;
 				break;
 			}
 		}
@@ -3282,14 +3282,15 @@ out:
 		SetLGP(TRUE, &existing_key, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer", "NoDriveTypeAutorun", 0);
 	if ((nWindowsVersion > WINDOWS_XP) && (!automount) && (!SetAutoMount(FALSE)))
 		uprintf("Failed to restore AutoMount to disabled");
+	// Unconditional delete with retry, just in case...
+	for (i = 0; (!DeleteFileA(cmdline_hogger)) && (i <= 10); i++)
+		Sleep(200);
+	CloseHandle(mutex);
+	CLOSE_OPENED_LIBRARIES;
 	if (attached_console) {
 		SetWindowPos(GetConsoleWindow(), HWND_TOP, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
 		FreeConsole();
 	}
-	// Unconditional delete, just in case...
-	DeleteFileA(cmdline_hogger);
-	CloseHandle(mutex);
-	CLOSE_OPENED_LIBRARIES;
 	uprintf("*** " APPLICATION_NAME " exit ***\n");
 #ifdef _CRTDBG_MAP_ALLOC
 	_CrtDumpMemoryLeaks();
