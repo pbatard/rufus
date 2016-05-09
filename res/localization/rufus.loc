@@ -16081,7 +16081,7 @@ t MSG_286 "Zeroing drive: %0.1f%%"
 
 ################################################################################
 l "tr-TR" "Turkish (Türkçe)" 0x041F
-v 1.0.19
+v 1.0.20
 b "en-US"
 
 # Main dialog
@@ -16557,6 +16557,8 @@ t MSG_283 "Geçersiz imza"
 t MSG_284 "İndirilen yürütülebilir dosyanın dijital imzası eksik."
 t MSG_285 "İndirilen yürütülebilir dosya '%s' tarafından imzalanmış.\nBu tanımlayabildiğimiz ve kötü niyetli "
 	"etkinliğini belirtebileceğimiz bir imza değil...\nBu dosyayı çalıştırmak istediğinize emin misiniz?"
+t MSG_286 "Sürücü sıfırlanıyor: %0.1f%% tamamlandı"
+t MSG_287 "USB olmayan çıkarılabilir aygıtlar taranıyor"
 
 ################################################################################
 l "uk-UA" "Ukrainian (Українська)" 0x0422
