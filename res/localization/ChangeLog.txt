@@ -16,6 +16,9 @@ translation, but always use the English section of rufus.loc as your base.
 For instance, MSG_114, that was introduced in v1.0.8 is MORE than one line!
 
 o Version 1.0.20 (2016.05.09)
+  - *NEW* MSG_286 "Zeroing drive: %0.1f%% completed"
+    Used when filling a whole drive with zero bytes, to display progress in percent (e.g. "Zeroing drive: 12.3% completed")
+    Can be tested with Alt-Z (CAUTION: THIS WILL COMPLETELY ERASE THE SELECTED DRIVE!!)
   - *NEW* MSG_287 "Detection of non-USB removable drives"
     Note, this message is followed by either "enabled"/"disabled" (see MSG_250/251) and is similar to MSG_253
     The message appears on the status bar and can be tested with Ctrl-Alt-F.
