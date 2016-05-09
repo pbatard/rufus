@@ -66,6 +66,7 @@
 #define MAX_GPT_PARTITIONS          128
 #define MAX_SECTORS_TO_CLEAR        128			// nb sectors to zap when clearing the MBR/GPT (must be >34)
 #define MBR_UEFI_MARKER             0x49464555	// 'U', 'E', 'F', 'I', as a 32 bit little endian longword
+#define STATUS_MSG_TIMEOUT          3500		// How long should cheat mode messages appear for on the status bar
 #define WRITE_RETRIES               3
 #define NUM_CHECKSUMS               3			// Number of checksum algorithms we support (MD5, SHA1, SHA256)
 #define FS_DEFAULT                  FS_FAT32

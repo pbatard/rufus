@@ -1889,9 +1889,9 @@ void InitDialog(HWND hDlg)
 	PrintInfo(0, MSG_210);
 }
 
-static void PrintStatus2000(const char* str, BOOL val)
+static void PrintStatusTimeout(const char* str, BOOL val)
 {
-	PrintStatus(2000, (val)?MSG_250:MSG_251, str);
+	PrintStatus(STATUS_MSG_TIMEOUT, (val)?MSG_250:MSG_251, str);
 }
 
 void ShowLanguageMenu(RECT rcExclude)
@@ -2428,7 +2428,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		case IDC_ENABLE_FIXED_DISKS:
 			if ((HIWORD(wParam)) == BN_CLICKED) {
 				enable_HDDs = !enable_HDDs;
-				PrintStatus2000(lmprintf(MSG_253), enable_HDDs);
+				PrintStatusTimeout(lmprintf(MSG_253), enable_HDDs);
 				GetDevices(0);
 			}
 			break;
@@ -3072,14 +3072,14 @@ relaunch:
 		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == VK_OEM_PERIOD)) {
 			usb_debug = !usb_debug;
 			WriteSettingBool(SETTING_ENABLE_USB_DEBUG, usb_debug);
-			PrintStatus2000(lmprintf(MSG_270), usb_debug);
+			PrintStatusTimeout(lmprintf(MSG_270), usb_debug);
 			GetDevices(0);
 			continue;
 		}
 		// Alt-, => Disable physical drive locking
 		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == VK_OEM_COMMA)) {
 			lock_drive = !lock_drive;
-			PrintStatus2000(lmprintf(MSG_282), lock_drive);
+			PrintStatusTimeout(lmprintf(MSG_282), lock_drive);
 			continue;
 		}
 		// Alt-B => Toggle fake drive detection during bad blocks check
@@ -3090,7 +3090,7 @@ relaunch:
 		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'B')) {
 			detect_fakes = !detect_fakes;
 			WriteSettingBool(SETTING_DISABLE_FAKE_DRIVES_CHECK, !detect_fakes);
-			PrintStatus2000(lmprintf(MSG_256), detect_fakes);
+			PrintStatusTimeout(lmprintf(MSG_256), detect_fakes);
 			continue;
 		}
 		// Alt C => Force the update check to be successful
@@ -3098,7 +3098,7 @@ relaunch:
 		// check, so that it always succeeds. This is useful for translators.
 		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'C')) {
 			force_update = !force_update;
-			PrintStatus2000(lmprintf(MSG_259), force_update);
+			PrintStatusTimeout(lmprintf(MSG_259), force_update);
 			continue;
 		}
 		// Alt-D => Delete the NoDriveTypeAutorun key on exit (useful if the app crashed)
@@ -3112,7 +3112,7 @@ relaunch:
 		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'E')) {
 			allow_dual_uefi_bios = !allow_dual_uefi_bios;
 			WriteSettingBool(SETTING_ENABLE_WIN_DUAL_EFI_BIOS, allow_dual_uefi_bios);
-			PrintStatus2000(lmprintf(MSG_266), allow_dual_uefi_bios);
+			PrintStatusTimeout(lmprintf(MSG_266), allow_dual_uefi_bios);
 			SetMBRForUEFI(TRUE);
 			continue;
 		}
@@ -3122,7 +3122,7 @@ relaunch:
 		// When enabled, Rufus will list and allow the formatting of USB HDDs.
 		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'F')) {
 			enable_HDDs = !enable_HDDs;
-			PrintStatus2000(lmprintf(MSG_253), enable_HDDs);
+			PrintStatusTimeout(lmprintf(MSG_253), enable_HDDs);
 			GetDevices(0);
 			CheckDlgButton(hMainDialog, IDC_ENABLE_FIXED_DISKS, enable_HDDs?BST_CHECKED:BST_UNCHECKED);
 			continue;
@@ -3132,7 +3132,7 @@ relaunch:
 		// DD-mode when writing the data.
 		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'I')) {
 			enable_iso = !enable_iso;
-			PrintStatus2000(lmprintf(MSG_262), enable_iso);
+			PrintStatusTimeout(lmprintf(MSG_262), enable_iso);
 			if (image_path != NULL) {
 				iso_provided = TRUE;
 				dont_display_image_name = TRUE;
@@ -3146,27 +3146,27 @@ relaunch:
 		// a file name). This option allows users to ignore Joliet when using such images.
 		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'J')) {
 			enable_joliet = !enable_joliet;
-			PrintStatus2000(lmprintf(MSG_257), enable_joliet);
+			PrintStatusTimeout(lmprintf(MSG_257), enable_joliet);
 			continue;
 		}
 		// Alt K => Toggle Rock Ridge support for ISO9660 images
 		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'K')) {
 			enable_rockridge = !enable_rockridge;
-			PrintStatus2000(lmprintf(MSG_258), enable_rockridge);
+			PrintStatusTimeout(lmprintf(MSG_258), enable_rockridge);
 			continue;
 		}
 		// Alt-L => Force Large FAT32 format to be used on < 32 GB drives
 		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'L')) {
 			force_large_fat32 = !force_large_fat32;
 			WriteSettingBool(SETTING_FORCE_LARGE_FAT32_FORMAT, force_large_fat32);
-			PrintStatus2000(lmprintf(MSG_254), force_large_fat32);
+			PrintStatusTimeout(lmprintf(MSG_254), force_large_fat32);
 			GetDevices(0);
 			continue;
 		}
 		// Alt N => Enable NTFS compression
 		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'N')) {
 			enable_ntfs_compression = !enable_ntfs_compression;
-			PrintStatus2000(lmprintf(MSG_260), enable_ntfs_compression);
+			PrintStatusTimeout(lmprintf(MSG_260), enable_ntfs_compression);
 			continue;
 		}
 		// Alt-R => Remove all the registry keys that may have been created by Rufus
@@ -3181,7 +3181,7 @@ relaunch:
 		// the target USB drive. If this is enabled, the size check is disabled.
 		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'S')) {
 			size_check = !size_check;
-			PrintStatus2000(lmprintf(MSG_252), size_check);
+			PrintStatusTimeout(lmprintf(MSG_252), size_check);
 			GetDevices(0);
 			continue;
 		}
@@ -3189,14 +3189,14 @@ relaunch:
 		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'T')) {
 			preserve_timestamps = !preserve_timestamps;
 			WriteSettingBool(SETTING_PRESERVE_TIMESTAMPS, preserve_timestamps);
-			PrintStatus2000(lmprintf(MSG_269), preserve_timestamps);
+			PrintStatusTimeout(lmprintf(MSG_269), preserve_timestamps);
 			continue;
 		}
 		// Alt-U => Use PROPER size units, instead of this whole Kibi/Gibi nonsense
 		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'U')) {
 			use_fake_units = !use_fake_units;
 			WriteSettingBool(SETTING_USE_PROPER_SIZE_UNITS, !use_fake_units);
-			PrintStatus2000(lmprintf(MSG_263), !use_fake_units);
+			PrintStatusTimeout(lmprintf(MSG_263), !use_fake_units);
 			GetDevices(0);
 			continue;
 		}
@@ -3209,7 +3209,7 @@ relaunch:
 		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'W')) {
 			enable_vmdk = !enable_vmdk;
 			WriteSettingBool(SETTING_ENABLE_VMDK_DETECTION, enable_vmdk);
-			PrintStatus2000(lmprintf(MSG_265), enable_vmdk);
+			PrintStatusTimeout(lmprintf(MSG_265), enable_vmdk);
 			GetDevices(0);
 			continue;
 		}
@@ -3239,8 +3239,9 @@ relaunch:
 				enable_HDDs = previous_enable_HDDs;
 			}
 			CheckDlgButton(hMainDialog, IDC_ENABLE_FIXED_DISKS, enable_HDDs ? BST_CHECKED : BST_UNCHECKED);
-			PrintStatus2000("Listing of non-USB removable drives", list_non_usb_removable_drives);
-			uprintf("NOTE: Listing of non-USB removable drives has been %s.", (list_non_usb_removable_drives)?"enabled (CAUTION!)":"disabled");
+			PrintStatusTimeout(lmprintf(MSG_287), list_non_usb_removable_drives);
+			uprintf("%sListing of non-USB removable drives %s",
+				(list_non_usb_removable_drives)?"CAUTION: ":"", (list_non_usb_removable_drives)?"enabled":"disabled");
 			if (list_non_usb_removable_drives)
 				uprintf("By using this unofficial cheat mode you forfeit ANY RIGHT to complain if you lose valuable data!");
 			GetDevices(0);

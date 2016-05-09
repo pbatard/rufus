@@ -15,6 +15,11 @@ content. PLEASE, do not just look at this Changelog when updating your
 translation, but always use the English section of rufus.loc as your base.
 For instance, MSG_114, that was introduced in v1.0.8 is MORE than one line!
 
+o Version 1.0.20 (2016.05.09)
+  - *NEW* MSG_287 "Detection of non-USB removable drives"
+    Note, this message is followed by either "enabled"/"disabled" (see MSG_250/251) and is similar to MSG_253
+    The message appears on the status bar and can be tested with Ctrl-Alt-F.
+
 o Version 1.0.19 (2015.10.15)
     Note: The following message can be tested by pressing Alt-, (That's the 'Alt' and 'comma' keys on your keyboard)
           In case the message below is not clear, you can consider that it says "Exclusive locking of the USB drive"
