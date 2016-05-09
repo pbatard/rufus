@@ -12469,7 +12469,7 @@ t MSG_285 "O executável transferido está assinado por '%s'.\nNão é uma assin
 
 ################################################################################
 l "ro-RO" "Romanian (Română)" 0x0418, 0x0818
-v 1.0.19
+v 1.0.20
 b "en-US"
 
 g IDD_DIALOG
@@ -12881,6 +12881,8 @@ t MSG_283 "Semnătură invalidă"
 t MSG_284 "Executabilul descărcat nu este semnat."
 t MSG_285 "Executabilul descărcat este semnat de către '%s'.\nAceasta nu este o semnătură recunoscută și ar putea "
 	"indica o anumită formă de activitate dăunătoare...\nSunteți sigur că doriți să executați acest fișier?"
+t MSG_286 "Unitatea zero: %0.1f%% finisat"	
+t MSG_287 "Detectarea unităților mobile de bază non-USB"
 
 ################################################################################
 l "ru-RU" "Russian (Русский)" 0x0419, 0x0819
