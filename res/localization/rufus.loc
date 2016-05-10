@@ -11575,7 +11575,7 @@ t MSG_285 "Pobrany plik wykonywalny jest podpisany przez '%s'.\nTo nie jest rozp
 
 ################################################################################
 l "pt-BR" "Portuguese Brazilian (Português do Brasil)" 0x0416
-v 1.0.19
+v 1.0.20
 b "en-US"
 
 # Main dialog
@@ -12007,6 +12007,8 @@ t MSG_283 "Assinatura digital inválida"
 t MSG_284 "O executável baixado não contém uma assinatura digital."
 t MSG_285 "O executável baixado é assinado por '%s'.\nEsta assinatura não é reconhecida e pode "
 	"indicar alguma forma de atividade maliciosa...\nVocê tem certeza que deseja executar este arquivo?"
+t MSG_286 "Zerando HD: %0.1f%% concluído"
+t MSG_287 "Detecção de drives não USB removíveis"
 
 ################################################################################
 l "pt-PT" "Portuguese Standard (Português)" 0x0816
