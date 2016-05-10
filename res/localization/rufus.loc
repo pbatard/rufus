@@ -15172,7 +15172,7 @@ t MSG_287 "Detección de unidades extraibles no USB"
 
 ################################################################################
 l "sv-SE" "Swedish (Svenska)" 0x041d, 0x081d
-v 1.0.19
+v 1.0.20
 b "en-US"
 
 # Main dialog
@@ -15634,6 +15634,8 @@ t MSG_283 "Ogiltig signatur"
 t MSG_284 "Den nedladdade körbara filen saknar digital signatur."
 t MSG_285 "Den nedladdade körbara filen är signerad av '%s'.\nDetta är inte en signatur vi känner igen och "
 	"detta kan tyda på någon form av skadlig aktivitet...\nÄr du säker på att du vill köra filen?"
+t MSG_286 "Nollställer enheten: %0.1f%% klart"
+t MSG_287 "Visar även icke flyttbara USB-enheter" 
 
 ################################################################################
 l "th-TH" "Thai (ไทย)" 0x041e
