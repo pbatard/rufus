@@ -12018,7 +12018,7 @@ t MSG_287 "Detecção de drives não USB removíveis"
 
 ################################################################################
 l "pt-PT" "Portuguese Standard (Português)" 0x0816
-v 1.0.19
+v 1.0.20
 b "en-US"
 
 # Main dialog
@@ -12475,6 +12475,8 @@ t MSG_283 "Assinatura inválida"
 t MSG_284 "No executável transferido está a faltar uma assinatura digital."
 t MSG_285 "O executável transferido está assinado por '%s'.\nNão é uma assinatura reconhecida e "
 	"poderá indicar algum tipo de actividade mal intencionada...\nTem certeza de que deseja executar este ficheiro?"
+t MSG_286 "A limpar disco: %0.1f%% concluído"
+t MSG_287 "Detecção de unidades removíveis não-USB"
 
 ################################################################################
 l "ro-RO" "Romanian (Română)" 0x0418, 0x0818
