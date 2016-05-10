@@ -14693,7 +14693,7 @@ t MSG_285 "Oseba, ki je podpisala preneseno datoteko, je '%s'.\nTa podpis se ne 
 
 ################################################################################
 l "es-ES" "Spanish (Español)" 0x040a, 0x080a, 0x0c0a, 0x100a, 0x140a, 0x180a, 0x1c0a, 0x200a, 0x240a, 0x280a, 0x2c0a, 0x300a, 0x340a, 0x380a, 0x3c0a, 0x400a, 0x440a, 0x480a, 0x4c0a, 0x500a, 0x540a, 0x580a
-v 1.0.19
+v 1.0.20
 b "en-US"
 
 # Main dialog
@@ -15159,6 +15159,8 @@ t MSG_283 "Firma no válida"
 t MSG_284 "El ejecutable descargado carece de firma digital."
 t MSG_285 "El ejecutable descargado está firmado por '%s'.\nNo reconocemos este tipo de firma y podría "
 	"indicar alguna forma de actividad maliciosa...\n¿Está seguro de que quieres ejecutar este fichero?"
+t MSG_286 "Borrando a ceros la unidad: %0.1f%% completado"
+t MSG_287 "Detección de unidades extraibles no USB"
 
 ################################################################################
 l "sv-SE" "Swedish (Svenska)" 0x041d, 0x081d
