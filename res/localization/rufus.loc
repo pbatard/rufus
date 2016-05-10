@@ -7312,7 +7312,7 @@ t MSG_285 "Berkas exe yang diunduh ditandatangani oleh '%s'.\nTanda tangan ini "
 
 ################################################################################
 l "it-IT" "Italian (Italiano)" 0x0410, 0x0810
-v 1.0.19
+v 1.0.20
 b "en-US"
 
 g IDD_DIALOG
@@ -7740,6 +7740,8 @@ t MSG_283 "Firma non valida"
 t MSG_284 "L'eseguibile scaricato non ha una firma digitale."
 t MSG_285 "L'eseguibile scaricato è firmato da '%s'.\nQuesta non è una firma riconosciuta e potrebbe "
 	"indicare qualche forma di attività malevola.\nSei sicuro di voler eseguire questo file?"
+t MSG_286 "Azzeramento disco: %0.1f%% completato"
+t MSG_287 "Rilevamento di unità rimuovibili non USB"
 
 ######################################################################
 l "ja-JP" "Japanese (日本語)" 0x0411
