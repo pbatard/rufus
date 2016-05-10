@@ -989,7 +989,7 @@ t MSG_281 "(فضلا اختر صورة)"
 
 ################################################################################
 l "az-AZ" "Azerbaijani (Azərbaycanca)" 0x042c, 0x782c
-v 1.0.19
+v 1.0.20
 b "en-US"
 
 # Main dialog
@@ -1465,6 +1465,8 @@ t MSG_283 "Keçərsiz imza"
 t MSG_284 "Yüklənən aparıla faylın rəqəmsal imzası çatmır."
 t MSG_285 "Yüklənən aparıla bilən fayl '%s' tərəfindən imzalanmışdır.\nBu tərifə və pis niyyətli "
 	"səmərəliliyini qeyd edəcəyimiz bir imza deyil...\nBu faylı işlətmək istədiyinizə əminsiniz?"
+t MSG_286 "Sürücü sıfırlama: %0.1f%% tamamlandı"
+t MSG_287 "Olmayan çıxarılabilən USB sürücülər"
 
 ######################################################################
 l "bg-BG" "Bulgarian (Български)" 0x0402
