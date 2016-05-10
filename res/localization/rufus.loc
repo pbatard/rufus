@@ -8671,7 +8671,7 @@ t MSG_285 "다운로드 한 실행 파일은 '%s'에 의해 서명됩니다..\n�
 
 ################################################################################
 l "lv-LV" "Latvian (Latviešu)" 0x0426
-v 1.0.19
+v 1.0.20
 b "en-US"
 
 # Main dialog
@@ -9135,6 +9135,8 @@ t MSG_283 "Nederīgs paraksts"
 t MSG_284 "Ielādētajam izpildfailam ir kļūdains ciparu paraksts."
 t MSG_285 "Ielādētais izpildfails parakstīts kā '%s'.\nTas ir neatpazīts paraksts un iespējams, "
 	"var radīt aizdomīgas aktivitātes...\nVai tiešām vēlaties izpildīt šo failu?"
+t MSG_286 "Nulles disks: %0.1f%% paveikts"
+t MSG_287 "neUSB disku noteikšana"
 
 ################################################################################
 l "lt-LT" "Lithuanian (Lietuvių)" 0x0427
