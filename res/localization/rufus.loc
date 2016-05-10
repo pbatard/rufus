@@ -5457,7 +5457,7 @@ t MSG_287 "Détection disques non-USB détachables"
 
 ################################################################################
 l "de-DE" "German (Deutsch)" 0x0407, 0x0807, 0x0c07, 0x1007, 0x1407
-v 1.0.19
+v 1.0.20
 b "en-US"
 
 g IDD_DIALOG
@@ -5899,6 +5899,8 @@ t MSG_283 "Ungültige Signatur"
 t MSG_284 "Die heruntergeladene ausführbare Datei verfügt über keine Signatur."
 t MSG_285 "Die heruntergeladene ausführbare Datei ist von '%s' signiert.\nDiese Signatur ist nicht akzeptiert und könnte "
 	"auf eine böswillige Aktivität hindeuten...\nSind Sie sicher, dass Sie diese Datei ausführen wollen?"
+t MSG_286 "Überschreiben mit Nullen: %0.1f%% fertiggestellt"
+t MSG_287 "Erkennung nicht wechselbarer USB-Laufwerke"
 
 ################################################################################
 l "el-GR" "Greek (Ελληνικά)" 0x0408
