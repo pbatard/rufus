@@ -6829,7 +6829,7 @@ t MSG_286 "Meghajtó kinullázása: %0.1f%% kész"
 
 ################################################################################
 l "id-ID" "Indonesian (Bahasa Indonesia)" 0x0421
-v 1.0.19
+v 1.0.20
 b "en-US"
 
 # Main dialog
@@ -7311,6 +7311,8 @@ t MSG_284 "Berkas exe yang diunduh memiliki tanda tangan digital yang salah."
 t MSG_285 "Berkas exe yang diunduh ditandatangani oleh '%s'.\nTanda tangan ini "
 	"tidak kami kenali dan bisa menjadi pertanda dari aktivitas berbahaya...\n"
 	"Apakah Anda yakin ingin menjalankan berkas ini?"
+t MSG_286 "Mengosongkan perangkat: %0.1f%% selesai"
+t MSG_287 "Deteksi selain perangkat USB yang dapat dilepas"
 
 ################################################################################
 l "it-IT" "Italian (Italiano)" 0x0410, 0x0810
