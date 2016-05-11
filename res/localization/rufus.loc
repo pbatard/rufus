@@ -10094,7 +10094,7 @@ t MSG_286 "Mensifarkan pemacu: %0.1f%% selesai"
 
 ################################################################################
 l "nb-NO" "Norwegian (Norsk)" 0x0414
-v 1.0.19
+v 1.0.20
 b "en-US"
 
 # Main dialog
@@ -10564,6 +10564,8 @@ t MSG_283 "Ugyldig signatur"
 t MSG_284 "Den nedlastede programfil mangler en digital signatur."
 t MSG_285 "Den nedlastede programfil er signert av '%s'.\nDette er en signatur vi ikke gjenkjenner, og kan "
 	"indikere en form for skadelig aktivitet...\nEr du sikker på at du vil kjøre denne filen?"
+t MSG_286 "Skriver 0-er til stasjon: %0.1f%% ferdig"
+t MSG_287 "Oppdagelse av ikke-USB flyttbare stasjoner"
 
 ################################################################################
 l "fa-IR" "Persian (فارسی)" 0x0429
