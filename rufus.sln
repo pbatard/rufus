@@ -1,7 +1,6 @@
-
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.23107.0
+VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rufus", "src\.msvc\rufus.vcxproj", "{731858A7-0303-4988-877B-9C0DD6471864}"
 EndProject
@@ -10,6 +9,8 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "syslinux-libfat", "src\syslinux\libfat\.msvc\libfat.vcxproj", "{8390DCE0-859D-4F57-AD9C-AAEAC4D77EEF}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "syslinux-libinstaller", "src\syslinux\libinstaller\.msvc\libinstaller.vcxproj", "{266502AC-CD74-4581-B707-938A7D05AD7A}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "syslinux-win", "src\syslinux\win\.msvc\win.vcxproj", "{7D2E9784-DDF7-4988-A887-CF099BC3B340}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libcdio-iso9660", "src\libcdio\iso9660\.msvc\iso9660.vcxproj", "{D4E80F35-2604-40AC-B436-97B052ECB572}"
 EndProject
@@ -61,6 +62,14 @@ Global
 		{266502AC-CD74-4581-B707-938A7D05AD7A}.Release|x86_32.Build.0 = Release|Win32
 		{266502AC-CD74-4581-B707-938A7D05AD7A}.Release|x86_64.ActiveCfg = Release|x64
 		{266502AC-CD74-4581-B707-938A7D05AD7A}.Release|x86_64.Build.0 = Release|x64
+		{7D2E9784-DDF7-4988-A887-CF099BC3B340}.Debug|x86_32.ActiveCfg = Debug|Win32
+		{7D2E9784-DDF7-4988-A887-CF099BC3B340}.Debug|x86_32.Build.0 = Debug|Win32
+		{7D2E9784-DDF7-4988-A887-CF099BC3B340}.Debug|x86_64.ActiveCfg = Debug|x64
+		{7D2E9784-DDF7-4988-A887-CF099BC3B340}.Debug|x86_64.Build.0 = Debug|x64
+		{7D2E9784-DDF7-4988-A887-CF099BC3B340}.Release|x86_32.ActiveCfg = Release|Win32
+		{7D2E9784-DDF7-4988-A887-CF099BC3B340}.Release|x86_32.Build.0 = Release|Win32
+		{7D2E9784-DDF7-4988-A887-CF099BC3B340}.Release|x86_64.ActiveCfg = Release|x64
+		{7D2E9784-DDF7-4988-A887-CF099BC3B340}.Release|x86_64.Build.0 = Release|x64
 		{D4E80F35-2604-40AC-B436-97B052ECB572}.Debug|x86_32.ActiveCfg = Debug|Win32
 		{D4E80F35-2604-40AC-B436-97B052ECB572}.Debug|x86_32.Build.0 = Debug|Win32
 		{D4E80F35-2604-40AC-B436-97B052ECB572}.Debug|x86_64.ActiveCfg = Debug|x64

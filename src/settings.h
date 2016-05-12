@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Settings access, through either registry or INI file
- * Copyright © 2015 Pete Batard <pete@akeo.ie>
+ * Copyright © 2015-2016 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,11 +27,11 @@ extern char* ini_file;
 /*
  * List of setting names used by this application
  */
-#define SETTING_VERBOSE_UPDATES			    "VerboseUpdateCheck"
+#define SETTING_VERBOSE_UPDATES             "VerboseUpdateCheck"
 #define SETTING_LAST_UPDATE                 "LastUpdateCheck"
 #define SETTING_UPDATE_INTERVAL             "UpdateCheckInterval"
 #define SETTING_INCLUDE_BETAS               "CheckForBetas"
-#define SETTING_COMM_CHECK                  "CommCheck"
+#define SETTING_COMM_CHECK                  "CommCheck64"
 #define SETTING_LOCALE                      "Locale"
 #define SETTING_DISABLE_LGP                 "DisableLGP"
 

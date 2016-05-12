@@ -60,7 +60,7 @@ static void generate_extents(struct syslinux_extent _slimg *ex, int nptrs,
 	    }
 
 	    set_64_sl(&ex->lba, lba);
-	    set_16_sl(&ex->len, (uint16_t) len);
+	    set_16_sl(&ex->len, len);
 	    ex++;
 	}
 
@@ -75,7 +75,7 @@ static void generate_extents(struct syslinux_extent _slimg *ex, int nptrs,
 
     if (len) {
 	set_64_sl(&ex->lba, lba);
-	set_16_sl(&ex->len, (uint16_t) len);
+	set_16_sl(&ex->len, len);
 	ex++;
     }
 }
@@ -122,18 +122,18 @@ int syslinux_patch(const sector_t *sectp, int nsectors,
 	return -1;		/* The actual file is too small for content */
 
     /* Search for LDLINUX_MAGIC to find the patch area */
-    for (wp = (const uint32_t _slimg *)boot_image;
-	 (get_32_sl(wp) != LDLINUX_MAGIC) && (((uintptr_t)wp) < ((uintptr_t)boot_image + boot_image_len));
-	 wp++)
-	;
-    if (((uintptr_t)wp) >= ((uintptr_t)boot_image + boot_image_len))
+    dw = (boot_image_len - sizeof(struct patch_area)) >> 2;
+    for (i = 0, wp = (const uint32_t _slimg *)boot_image;
+	 (i <= dw) && ((get_32_sl(wp) != LDLINUX_MAGIC));
+	 i++, wp++)
+    if (i > dw)	/* Not found */
 	return -1;
     patcharea = (struct patch_area _slimg *)wp;
     epa = slptr(boot_image, &patcharea->epaoffset);
 
     /* First sector need pointer in boot sector */
-    set_32(ptr(sbs, &epa->sect1ptr0), (uint32_t) sectp[0]);
-    set_32(ptr(sbs, &epa->sect1ptr1), (uint32_t) (sectp[0] >> 32));
+    set_32(ptr(sbs, &epa->sect1ptr0), sectp[0]);
+    set_32(ptr(sbs, &epa->sect1ptr1), sectp[0] >> 32);
     sectp++;
 
     /* Handle RAID mode */
@@ -176,7 +176,7 @@ int syslinux_patch(const sector_t *sectp, int nsectors,
 
     /* Poke in the base directory path */
     if (subdir) {
-	int sublen = (int) (strlen(subdir) + 1);
+	int sublen = strlen(subdir) + 1;
 	if (get_16_sl(&epa->dirlen) < sublen) {
 	    fprintf(stderr, "Subdirectory path too long... aborting install!\n");
 	    exit(1);
@@ -186,7 +186,7 @@ int syslinux_patch(const sector_t *sectp, int nsectors,
 
     /* Poke in the subvolume information */
     if (subvol) {
-	int sublen = (int) (strlen(subvol) + 1);
+	int sublen = strlen(subvol) + 1;
 	if (get_16_sl(&epa->subvollen) < sublen) {
 	    fprintf(stderr, "Subvol name too long... aborting install!\n");
 	    exit(1);

@@ -66,13 +66,13 @@
     <ClCompile Include="..\smart.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\usb.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\checksum.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\pki.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\dev.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -128,13 +128,16 @@
     <ClInclude Include="..\drive.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\usb.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\bled\bled.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\settings.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\missing.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\dev.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

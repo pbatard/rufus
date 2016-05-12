@@ -1,5 +1,5 @@
 @echo off
-set COV_DIR=E:\cov-analysis-win32-7.7.0
+set COV_DIR=E:\cov-analysis-win32-7.7.0.4
 set PATH=%PATH%;%COV_DIR%\bin
 set PWD=%~dp0
 rmdir cov-int /s /q >NUL 2>NUL

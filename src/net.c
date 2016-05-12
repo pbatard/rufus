@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Networking functionality (web file download, check for update, etc.)
- * Copyright © 2012-2015 Pete Batard <pete@akeo.ie>
+ * Copyright © 2012-2016 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,14 +30,16 @@
 #include <string.h>
 #include <inttypes.h>
 
-#include "msapi_utf8.h"
 #include "rufus.h"
-#include "settings.h"
+#include "missing.h"
 #include "resource.h"
+#include "msapi_utf8.h"
 #include "localization.h"
 
+#include "settings.h"
+
 /* Maximum download chunk size, in bytes */
-#define DOWNLOAD_BUFFER_SIZE    10240
+#define DOWNLOAD_BUFFER_SIZE    10*KB
 /* Default delay between update checks (1 day) */
 #define DEFAULT_UPDATE_INTERVAL (24*3600)
 
@@ -49,38 +51,9 @@ static DWORD error_code;
 static BOOL update_check_in_progress = FALSE;
 static BOOL force_update_check = FALSE;
 
-/* MinGW is missing some of those */
-#if !defined(ERROR_INTERNET_DISCONNECTED)
-#define ERROR_INTERNET_DISCONNECTED (INTERNET_ERROR_BASE + 163)
-#endif
-#if !defined(ERROR_INTERNET_SERVER_UNREACHABLE)
-#define ERROR_INTERNET_SERVER_UNREACHABLE (INTERNET_ERROR_BASE + 164)
-#endif
-#if !defined(ERROR_INTERNET_PROXY_SERVER_UNREACHABLE)
-#define ERROR_INTERNET_PROXY_SERVER_UNREACHABLE (INTERNET_ERROR_BASE + 165)
-#endif
-#if !defined(ERROR_INTERNET_BAD_AUTO_PROXY_SCRIPT)
-#define ERROR_INTERNET_BAD_AUTO_PROXY_SCRIPT (INTERNET_ERROR_BASE + 166)
-#endif
-#if !defined(ERROR_INTERNET_UNABLE_TO_DOWNLOAD_SCRIPT)
-#define ERROR_INTERNET_UNABLE_TO_DOWNLOAD_SCRIPT (INTERNET_ERROR_BASE + 167)
-#endif
-#if !defined(ERROR_INTERNET_FAILED_DUETOSECURITYCHECK)
-#define ERROR_INTERNET_FAILED_DUETOSECURITYCHECK (INTERNET_ERROR_BASE + 171)
-#endif
-#if !defined(ERROR_INTERNET_NOT_INITIALIZED)
-#define ERROR_INTERNET_NOT_INITIALIZED (INTERNET_ERROR_BASE + 172)
-#endif
-#if !defined(ERROR_INTERNET_NEED_MSN_SSPI_PKG)
-#define ERROR_INTERNET_NEED_MSN_SSPI_PKG (INTERNET_ERROR_BASE + 173)
-#endif
-#if !defined(ERROR_INTERNET_LOGIN_FAILURE_DISPLAY_ENTITY_BODY)
-#define ERROR_INTERNET_LOGIN_FAILURE_DISPLAY_ENTITY_BODY (INTERNET_ERROR_BASE + 174)
-#endif
-
 /*
  * FormatMessage does not handle internet errors
- * http://support.microsoft.com/kb/193625
+ * https://msdn.microsoft.com/en-us/library/windows/desktop/aa385465.aspx
  */
 const char* WinInetErrorString(void)
 {
@@ -300,7 +273,7 @@ DWORD DownloadFile(const char* url, const char* file, HWND hProgressDialog)
 		uprintf("Network is unavailable: %s\n", WinInetErrorString());
 		goto out;
 	}
-	_snprintf(agent, ARRAYSIZE(agent), APPLICATION_NAME "/%d.%d.%d (WinNT %d.%d%s)",
+	safe_sprintf(agent, ARRAYSIZE(agent), APPLICATION_NAME "/%d.%d.%d (Windows NT %d.%d%s)",
 		rufus_version[0], rufus_version[1], rufus_version[2],
 		nWindowsVersion>>4, nWindowsVersion&0x0F, is_x64()?"; WOW64":"");
 	hSession = InternetOpenA(agent, INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
@@ -429,9 +402,9 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 	BOOL releases_only, found_new_version = FALSE;
 	int status = 0;
 	const char* server_url = RUFUS_URL "/";
-	int i, j, k, verbose = 0, verpos[4];
+	int i, j, k, max_channel, verbose = 0, verpos[4];
 	static const char* archname[] = {"win_x86", "win_x64"};
-	static const char* channel[] = {"release", "beta"};		// release channel
+	static const char* channel[] = {"release", "beta", "test"};		// release channel
 	const char* accept_types[] = {"*/*\0", NULL};
 	DWORD dwFlags, dwSize, dwDownloaded, dwTotalSize, dwStatus;
 	char* buf = NULL;
@@ -474,8 +447,6 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 			vvuprintf("Local time: %" PRId64 "\n", local_time);
 			if (local_time < reg_time + update_interval) {
 				vuprintf("Next update check in %" PRId64 " seconds.\n", reg_time + update_interval - local_time);
-				// This is as good a place as any to ask for translation help
-				LostTranslatorCheck();
 				goto out;
 			}
 		}
@@ -493,7 +464,9 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 		goto out;
 	hostname[sizeof(hostname)-1] = 0;
 
-	safe_sprintf(agent, ARRAYSIZE(agent), APPLICATION_NAME "/%d.%d.%d", rufus_version[0], rufus_version[1], rufus_version[2]);
+	safe_sprintf(agent, ARRAYSIZE(agent), APPLICATION_NAME "/%d.%d.%d (Windows NT %d.%d%s)",
+		rufus_version[0], rufus_version[1], rufus_version[2],
+		nWindowsVersion >> 4, nWindowsVersion & 0x0F, is_x64() ? "; WOW64" : "");
 	hSession = InternetOpenA(agent, INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
 	if (hSession == NULL)
 		goto out;
@@ -504,7 +477,13 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 	status++;	// 2
 	releases_only = !ReadSettingBool(SETTING_INCLUDE_BETAS);
 
-	for (k=0; (k<(releases_only?1:(int)ARRAYSIZE(channel))) && (!found_new_version); k++) {
+	// Test releases get their own distribution channel (and also force beta checks)
+#if defined(TEST)
+	max_channel = (int)ARRAYSIZE(channel);
+#else
+	max_channel = releases_only ? 1 : (int)ARRAYSIZE(channel) - 1;
+#endif
+	for (k=0; (k<max_channel) && (!found_new_version); k++) {
 		uprintf("Checking %s channel...\n", channel[k]);
 		// At this stage we can query the server for various update version files.
 		// We first try to lookup for "<appname>_<os_arch>_<os_version_major>_<os_version_minor>.ver"

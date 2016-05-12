@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Virtual Disk Handling functions
- * Copyright © 2013-2015 Pete Batard <pete@akeo.ie>
+ * Copyright © 2013-2016 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,21 +24,13 @@
 #include <time.h>
 
 #include "rufus.h"
+#include "missing.h"
 #include "resource.h"
 #include "msapi_utf8.h"
+
 #include "drive.h"
 #include "registry.h"
 #include "bled/bled.h"
-
-#if defined(_MSC_VER)
-#define bswap_uint64 _byteswap_uint64
-#define bswap_uint32 _byteswap_ulong
-#define bswap_uint16 _byteswap_ushort
-#else
-#define bswap_uint64 __builtin_bswap64
-#define bswap_uint32 __builtin_bswap32
-#define bswap_uint16 __builtin_bswap16
-#endif
 
 #define VHD_FOOTER_COOKIE					{ 'c', 'o', 'n', 'e', 'c', 't', 'i', 'x' }
 
@@ -111,7 +103,7 @@ static char sevenzip_path[MAX_PATH];
 static const char conectix_str[] = VHD_FOOTER_COOKIE;
 static uint32_t wim_nb_files, wim_proc_files;
 static BOOL count_files;
-static DWORD LastRefresh;
+static uint64_t LastRefresh;
 
 static BOOL Get7ZipPath(void)
 {
@@ -178,7 +170,7 @@ BOOL AppendVHDFooter(const char* vhd_path)
 		heads = 16;
 		cylinderTimesHeads = (uint32_t)(totalSectors / sectorsPerTrack);
 	} else {
-		sectorsPerTrack = 17; 
+		sectorsPerTrack = 17;
 		cylinderTimesHeads = (uint32_t)(totalSectors / sectorsPerTrack);
 
 		heads = (cylinderTimesHeads + 1023) / 1024;
@@ -207,12 +199,12 @@ BOOL AppendVHDFooter(const char* vhd_path)
 		checksum += ((uint8_t*)footer)[i];
 	footer->checksum = bswap_uint32(~checksum);
 
-	if (!WriteFile(handle, footer, sizeof(vhd_footer), &size, NULL) || (size != sizeof(vhd_footer))) {
+	if (!WriteFileWithRetry(handle, footer, sizeof(vhd_footer), &size, WRITE_RETRIES)) {
 		uprintf("Could not write VHD footer: %s", WindowsErrorString());
 		goto out;
 	}
 	r = TRUE;
-	
+
 out:
 	safe_free(footer);
 	safe_closehandle(handle);
@@ -439,42 +431,54 @@ out:
 // Extract a file from a WIM image using 7-Zip
 static BOOL WimExtractFile_7z(const char* image, int index, const char* src, const char* dst)
 {
+	int n;
 	size_t i;
-	STARTUPINFOA si = {0};
-	PROCESS_INFORMATION pi = {0};
 	char cmdline[MAX_PATH];
 	char tmpdst[MAX_PATH];
+	char index_prefix[] = "#\\";
 
 	uprintf("Opening: %s:[%d] (7-Zip)", image, index);
 
 	if ((image == NULL) || (src == NULL) || (dst == NULL))
 		return FALSE;
 
-	safe_strcpy(tmpdst, sizeof(tmpdst), dst);
-	for (i=strlen(tmpdst)-1; i>0; i--) {
-		if (tmpdst[i] == '\\')
+	// If you shove more than 9 images in a WIM, don't come complaining
+	// that this breaks!
+	index_prefix[0] = '0' + index;
+
+	uprintf("Extracting: %s (From %s)", dst, src);
+
+	// 7z has a quirk where the image index MUST be specified if a
+	// WIM has multiple indexes, but it MUST be removed if there is
+	// only one image. Because of this (and because 7z will not
+	// return an error code if it can't extract the file), we need
+	// to issue 2 passes. See github issue #680.
+	for (n = 0; n < 2; n++) {
+		safe_strcpy(tmpdst, sizeof(tmpdst), dst);
+		for (i = strlen(tmpdst) - 1; i > 0; i--) {
+			if (tmpdst[i] == '\\')
+				break;
+		}
+		tmpdst[i] = 0;
+
+		safe_sprintf(cmdline, sizeof(cmdline), "\"%s\" -y e \"%s\" %s%s", sevenzip_path,
+			image, (n == 0) ? index_prefix : "", src);
+		if (RunCommand(cmdline, tmpdst, FALSE) != 0) {
+			uprintf("  Could not launch 7z.exe: %s", WindowsErrorString());
+			return FALSE;
+		}
+
+		safe_strcat(tmpdst, sizeof(tmpdst), "\\bootmgfw.efi");
+		if (_access(tmpdst, 0) == 0)
+			// File was extracted => move on
 			break;
 	}
-	tmpdst[i] = 0;
 
-	// TODO: use RunCommand
-	si.cb = sizeof(si);
-	safe_sprintf(cmdline, sizeof(cmdline), "7z -y e \"%s\" %d\\%s", image, index, src);
-	uprintf("Extracting: %s (From %s)", dst, src);
-	if (!CreateProcessU(sevenzip_path, cmdline, NULL, NULL, FALSE, CREATE_NO_WINDOW, NULL, tmpdst, &si, &pi)) {
-		uprintf("  Could not launch 7z.exe: %s", WindowsErrorString());
-		return FALSE;
-	}
-	WaitForSingleObject(pi.hProcess, INFINITE);
-	UpdateProgress(OP_FINALIZE, -1.0f);
-	CloseHandle(pi.hProcess);
-	CloseHandle(pi.hThread);
-
-	safe_strcat(tmpdst, sizeof(tmpdst), "\\bootmgfw.efi");
-	if (_access(tmpdst, 0) == -1) {
+	if (n >= 2) {
 		uprintf("  7z.exe did not extract %s", tmpdst);
 		return FALSE;
 	}
+
 	// coverity[toctou]
 	if (rename(tmpdst, dst) != 0) {
 		uprintf("  Could not rename %s to %s", tmpdst, dst);
@@ -569,12 +573,12 @@ DWORD WINAPI WimProgressCallback(DWORD dwMsgId, WPARAM wParam, LPARAM lParam, PV
 			wim_nb_files++;
 		} else {
 			wim_proc_files++;
-			if (GetTickCount() > LastRefresh + 100) {
+			if (_GetTickCount64() > LastRefresh + 100) {
 				// At the end of an actual apply, the WIM API re-lists a bunch of directories it
 				// already processed, so we end up with more entries than counted - ignore those.
 				if (wim_proc_files > wim_nb_files)
 					wim_proc_files = wim_nb_files;
-				LastRefresh = GetTickCount();
+				LastRefresh = _GetTickCount64();
 				// x^3 progress, so as not to give a better idea right from the onset
 				// as to the dismal speed with which the WIM API can actually apply files...
 				apply_percent = 4.636942595f * ((float)wim_proc_files) / ((float)wim_nb_files);

@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Standard Windows function calls
- * Copyright © 2013-2015 Pete Batard <pete@akeo.ie>
+ * Copyright © 2013-2016 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,12 +24,15 @@
 #include <windows.h>
 #include <sddl.h>
 
-#include "msapi_utf8.h"
 #include "rufus.h"
+#include "missing.h"
 #include "resource.h"
-#include "settings.h"
+#include "msapi_utf8.h"
 #include "localization.h"
 
+#include "settings.h"
+
+extern BOOL usb_debug;	// For uuprintf
 int  nWindowsVersion = WINDOWS_UNDEFINED;
 char WindowsVersionStr[128] = "Windows ";
 
@@ -800,7 +803,7 @@ BOOL SetLGP(BOOL bRestore, BOOL* bExistingKey, const char* szPath, const char* s
 		uprintf("SetLGP: Unable to start thread");
 		return FALSE;
 	}
-	if (WaitForSingleObject(thread_id, 2500) != WAIT_OBJECT_0) {
+	if (WaitForSingleObject(thread_id, 5000) != WAIT_OBJECT_0) {
 		uprintf("SetLGP: Killing stuck thread!");
 		TerminateThread(thread_id, 0);
 		CloseHandle(thread_id);
@@ -809,4 +812,38 @@ BOOL SetLGP(BOOL bRestore, BOOL* bExistingKey, const char* szPath, const char* s
 	if (!GetExitCodeThread(thread_id, &r))
 		return FALSE;
 	return (BOOL) r;
+}
+
+/*
+ * This call tries to evenly balance the affinities for an array of
+ * num_threads, according to the number of cores at our disposal...
+ */
+BOOL SetThreadAffinity(DWORD_PTR* thread_affinity, size_t num_threads)
+{
+	size_t i, j, pc;
+	DWORD_PTR affinity, dummy;
+
+	memset(thread_affinity, 0, num_threads * sizeof(DWORD_PTR));
+	if (!GetProcessAffinityMask(GetCurrentProcess(), &affinity, &dummy))
+		return FALSE;
+	uuprintf("\r\nThread affinities:");
+	uuprintf("  avail:\t%s", printbitslz(affinity));
+
+	// If we don't have enough virtual cores to evenly spread our load forget it
+	pc = popcnt64(affinity);
+	if (pc < num_threads)
+		return FALSE;
+
+	// Spread the affinity as evenly as we can
+	thread_affinity[num_threads - 1] = affinity;
+	for (i = 0; i < num_threads - 1; i++) {
+		for (j = 0; j < pc / num_threads; j++) {
+			thread_affinity[i] |= affinity & (-1LL * affinity);
+			affinity ^= affinity & (-1LL * affinity);
+		}
+		uuprintf("  thr_%d:\t%s", i, printbitslz(thread_affinity[i]));
+		thread_affinity[num_threads - 1] ^= thread_affinity[i];
+	}
+	uuprintf("  thr_%d:\t%s", i, printbitslz(thread_affinity[i]));
+	return TRUE;
 }

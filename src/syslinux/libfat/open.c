@@ -77,7 +77,7 @@ libfat_open(int (*readfunc) (intptr_t, void *, size_t, libfat_sector_t),
 	goto barf;
 
     /* Figure out how many clusters */
-    nclusters = (uint32_t) ((fs->end - fs->data) >> fs->clustshift);
+    nclusters = (fs->end - fs->data) >> fs->clustshift;
     fs->endcluster = nclusters + 2;
 
     if (nclusters <= 0xff4) {
@@ -92,15 +92,10 @@ libfat_open(int (*readfunc) (intptr_t, void *, size_t, libfat_sector_t),
     } else
 	goto barf;		/* Impossibly many clusters */
 
-    /* This check doesn't hold for Large FAT32 => remove it */
-#if 0
-    minfatsize = (minfatsize + LIBFAT_SECTOR_SIZE - 1) >> LIBFAT_SECTOR_SHIFT;
+	minfatsize = (minfatsize + LIBFAT_SECTOR_SIZE - 1) >> LIBFAT_SECTOR_SHIFT;
 
     if (minfatsize > fatsize)
 	goto barf;		/* The FATs don't fit */
-#else
-    (void)(minfatsize);		/* silence an unused warning in MinGW */
-#endif
 
     if (fs->fat_type == FAT28)
 	fs->rootcluster = read32(&bs->u.fat32.bpb_rootclus);

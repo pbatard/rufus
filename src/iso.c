@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * ISO file extraction
- * Copyright © 2011-2015 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2016 Pete Batard <pete@akeo.ie>
  * Based on libcdio's iso & udf samples:
  * Copyright © 2003-2014 Rocky Bernstein <rocky@gnu.org>
  *
@@ -39,8 +39,9 @@
 #include <cdio/udf.h>
 
 #include "rufus.h"
-#include "msapi_utf8.h"
+#include "missing.h"
 #include "resource.h"
+#include "msapi_utf8.h"
 #include "localization.h"
 
 // How often should we update the progress bar (in 2K blocks) as updating
@@ -71,7 +72,7 @@ static const char* grldr_name = "grldr";
 static const char* ldlinux_name = "ldlinux.sys";
 static const char* ldlinux_c32 = "ldlinux.c32";
 static const char* efi_dirname = "/efi/boot";
-static const char* efi_bootname[] = { "bootia32.efi", "bootx64.efi", "bootia64.efi", "bootarm.efi" };
+static const char* efi_bootname[] = { "bootia32.efi", "bootia64.efi", "bootx64.efi", "bootarm.efi", "bootaa64.efi" };
 static const char* install_wim_path = "/sources";
 static const char* install_wim_name[] = { "install.wim", "install.swm" };
 static const char* grub_dirname = "/boot/grub"; // NB: We don't support nonstandard config dir such as AROS' "/boot/pc/grub/"
@@ -306,8 +307,6 @@ static void print_extracted_file(char* psz_fullpath, int64_t i_file_length)
 	safe_sprintf(&psz_fullpath[nul_pos], 24, " (%s)", SizeToHumanReadable(i_file_length, TRUE, FALSE));
 	uprintf("Extracting: %s\n", psz_fullpath);
 	safe_sprintf(&psz_fullpath[nul_pos], 24, " (%s)", SizeToHumanReadable(i_file_length, FALSE, FALSE));
-	// TODO: I don't think we need both of these...
-	SendMessageLU(hStatus, SB_SETTEXTW, SBT_OWNERDRAW | SB_SECTION_LEFT, psz_fullpath);
 	PrintStatus(0, MSG_000, psz_fullpath);	// MSG_000 is "%s"
 	// ISO9660 cannot handle backslashes
 	for (i=0; i<nul_pos; i++)
@@ -429,17 +428,11 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 					goto out;
 				}
 				buf_size = (DWORD)MIN(i_file_length, i_read);
-				for (i=0; i<WRITE_RETRIES; i++) {
-					ISO_BLOCKING(r = WriteFile(file_handle, buf, buf_size, &wr_size, NULL));
-					if ((!r) || (buf_size != wr_size)) {
-						uprintf("  Error writing file: %s", WindowsErrorString());
-						if (i < WRITE_RETRIES-1)
-							uprintf("  RETRYING...\n");
-					} else {
-						break;
-					}
+				ISO_BLOCKING(r = WriteFileWithRetry(file_handle, buf, buf_size, &wr_size, WRITE_RETRIES));
+				if (!r) {
+					uprintf("  Error writing file: %s", WindowsErrorString());
+					goto out;
 				}
-				if (i >= WRITE_RETRIES) goto out;
 				i_file_length -= i_read;
 				if (nb_blocks++ % PROGRESS_THRESHOLD == 0)
 					UpdateProgress(OP_DOS, 100.0f*nb_blocks/total_blocks);
@@ -476,7 +469,7 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 	HANDLE file_handle = NULL;
 	DWORD buf_size, wr_size, err;
 	EXTRACT_PROPS props;
-	BOOL s, is_symlink, is_identical;
+	BOOL is_symlink, is_identical;
 	int i_length, r = 1;
 	char tmp[128], psz_fullpath[MAX_PATH], *psz_basename, *psz_sanpath;
 	const char *psz_iso_name = &psz_fullpath[strlen(psz_extract_dir)];
@@ -484,7 +477,7 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 	CdioListNode_t* p_entnode;
 	iso9660_stat_t *p_statbuf;
 	CdioList_t* p_entlist;
-	size_t i, j;
+	size_t i;
 	lsn_t lsn;
 	int64_t i_file_length;
 
@@ -582,17 +575,11 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 					goto out;
 				}
 				buf_size = (DWORD)MIN(i_file_length, ISO_BLOCKSIZE);
-				for (j=0; j<WRITE_RETRIES; j++) {
-					ISO_BLOCKING(s = WriteFile(file_handle, buf, buf_size, &wr_size, NULL));
-					if ((!s) || (buf_size != wr_size)) {
-						uprintf("  Error writing file: %s", WindowsErrorString());
-						if (j < WRITE_RETRIES-1)
-							uprintf("  RETRYING...\n");
-					} else {
-						break;
-					}
+				ISO_BLOCKING(r = WriteFileWithRetry(file_handle, buf, buf_size, &wr_size, WRITE_RETRIES));
+				if (!r) {
+					uprintf("  Error writing file: %s", WindowsErrorString());
+					goto out;
 				}
-				if (j >= WRITE_RETRIES) goto out;
 				i_file_length -= ISO_BLOCKSIZE;
 				if (nb_blocks++ % PROGRESS_THRESHOLD == 0)
 					UpdateProgress(OP_DOS, 100.0f*nb_blocks/total_blocks);
@@ -918,7 +905,6 @@ int64_t ExtractISOFile(const char* iso, const char* iso_file, const char* dest_f
 	int64_t file_length, r = 0;
 	char buf[UDF_BLOCKSIZE];
 	DWORD buf_size, wr_size;
-	BOOL s;
 	iso9660_t* p_iso = NULL;
 	udf_t* p_udf = NULL;
 	udf_dirent_t *p_udf_root = NULL, *p_udf_file = NULL;
@@ -957,8 +943,7 @@ int64_t ExtractISOFile(const char* iso, const char* iso_file, const char* dest_f
 			goto out;
 		}
 		buf_size = (DWORD)MIN(file_length, read_size);
-		s = WriteFile(file_handle, buf, buf_size, &wr_size, NULL);
-		if ((!s) || (buf_size != wr_size)) {
+		if (!WriteFileWithRetry(file_handle, buf, buf_size, &wr_size, WRITE_RETRIES)) {
 			uprintf("  Error writing file %s: %s\n", dest_file, WindowsErrorString());
 			goto out;
 		}
@@ -989,8 +974,7 @@ try_iso:
 			goto out;
 		}
 		buf_size = (DWORD)MIN(file_length, ISO_BLOCKSIZE);
-		s = WriteFile(file_handle, buf, buf_size, &wr_size, NULL);
-		if ((!s) || (buf_size != wr_size)) {
+		if (!WriteFileWithRetry(file_handle, buf, buf_size, &wr_size, WRITE_RETRIES)) {
 			uprintf("  Error writing file %s: %s\n", dest_file, WindowsErrorString());
 			goto out;
 		}
@@ -1083,90 +1067,8 @@ out:
 	if (p_udf != NULL)
 		udf_close(p_udf);
 	safe_free(wim_path);
-	return bswap_32(r);
+	return bswap_uint32(r);
 }
-
-/*
- * The following is used for native ISO mounting in Windows 8 or later
- */
-#define VIRTUAL_STORAGE_TYPE_VENDOR_MICROSOFT \
-	{ 0xEC984AECL, 0xA0F9, 0x47e9, { 0x90, 0x1F, 0x71, 0x41, 0x5A, 0x66, 0x34, 0x5B } }
-
-typedef enum _VIRTUAL_DISK_ACCESS_MASK {
-	VIRTUAL_DISK_ACCESS_NONE = 0x00000000,
-	VIRTUAL_DISK_ACCESS_ATTACH_RO = 0x00010000,
-	VIRTUAL_DISK_ACCESS_ATTACH_RW = 0x00020000,
-	VIRTUAL_DISK_ACCESS_DETACH = 0x00040000,
-	VIRTUAL_DISK_ACCESS_GET_INFO = 0x00080000,
-	VIRTUAL_DISK_ACCESS_CREATE = 0x00100000,
-	VIRTUAL_DISK_ACCESS_METAOPS = 0x00200000,
-	VIRTUAL_DISK_ACCESS_READ = 0x000d0000,
-	VIRTUAL_DISK_ACCESS_ALL = 0x003f0000,
-	VIRTUAL_DISK_ACCESS_WRITABLE = 0x00320000
-} VIRTUAL_DISK_ACCESS_MASK;
-
-typedef enum _OPEN_VIRTUAL_DISK_FLAG {
-	OPEN_VIRTUAL_DISK_FLAG_NONE = 0x00000000,
-	OPEN_VIRTUAL_DISK_FLAG_NO_PARENTS = 0x00000001,
-	OPEN_VIRTUAL_DISK_FLAG_BLANK_FILE = 0x00000002,
-	OPEN_VIRTUAL_DISK_FLAG_BOOT_DRIVE = 0x00000004,
-	OPEN_VIRTUAL_DISK_FLAG_CACHED_IO = 0x00000008,
-	OPEN_VIRTUAL_DISK_FLAG_CUSTOM_DIFF_CHAIN = 0x00000010
-} OPEN_VIRTUAL_DISK_FLAG;
-
-typedef enum _OPEN_VIRTUAL_DISK_VERSION {
-	OPEN_VIRTUAL_DISK_VERSION_UNSPECIFIED = 0,
-	OPEN_VIRTUAL_DISK_VERSION_1 = 1,
-	OPEN_VIRTUAL_DISK_VERSION_2 = 2
-} OPEN_VIRTUAL_DISK_VERSION;
-
-typedef enum _ATTACH_VIRTUAL_DISK_FLAG {
-	ATTACH_VIRTUAL_DISK_FLAG_NONE = 0x00000000,
-	ATTACH_VIRTUAL_DISK_FLAG_READ_ONLY = 0x00000001,
-	ATTACH_VIRTUAL_DISK_FLAG_NO_DRIVE_LETTER = 0x00000002,
-	ATTACH_VIRTUAL_DISK_FLAG_PERMANENT_LIFETIME = 0x00000004,
-	ATTACH_VIRTUAL_DISK_FLAG_NO_LOCAL_HOST = 0x00000008
-} ATTACH_VIRTUAL_DISK_FLAG;
-
-typedef enum _ATTACH_VIRTUAL_DISK_VERSION {
-	ATTACH_VIRTUAL_DISK_VERSION_UNSPECIFIED = 0,
-	ATTACH_VIRTUAL_DISK_VERSION_1 = 1
-} ATTACH_VIRTUAL_DISK_VERSION;
-
-typedef enum _DETACH_VIRTUAL_DISK_FLAG {
-	DETACH_VIRTUAL_DISK_FLAG_NONE = 0x00000000
-} DETACH_VIRTUAL_DISK_FLAG;
-
-#ifndef _VIRTUAL_STORAGE_TYPE_DEFINED
-#define _VIRTUAL_STORAGE_TYPE_DEFINED
-typedef struct _VIRTUAL_STORAGE_TYPE {
-	ULONG DeviceId;
-	GUID  VendorId;
-} VIRTUAL_STORAGE_TYPE, *PVIRTUAL_STORAGE_TYPE;
-#endif
-
-typedef struct _OPEN_VIRTUAL_DISK_PARAMETERS {
-	OPEN_VIRTUAL_DISK_VERSION Version;
-	union {
-		struct {
-			ULONG RWDepth;
-		} Version1;
-		struct {
-			BOOL GetInfoOnly;
-			BOOL ReadOnly;
-			GUID ResiliencyGuid;
-		} Version2;
-	};
-} OPEN_VIRTUAL_DISK_PARAMETERS, *POPEN_VIRTUAL_DISK_PARAMETERS;
-
-typedef struct _ATTACH_VIRTUAL_DISK_PARAMETERS {
-	ATTACH_VIRTUAL_DISK_VERSION Version;
-	union {
-		struct {
-			ULONG Reserved;
-		} Version1;
-	};
-} ATTACH_VIRTUAL_DISK_PARAMETERS, *PATTACH_VIRTUAL_DISK_PARAMETERS;
 
 // VirtDisk API Prototypes - Only available for Windows 8 or later
 PF_TYPE_DECL(WINAPI, DWORD, OpenVirtualDisk, (PVIRTUAL_STORAGE_TYPE, PCWSTR,

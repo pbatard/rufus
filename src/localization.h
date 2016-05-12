@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Localization functions, a.k.a. "Everybody is doing it wrong but me!"
- * Copyright © 2013-2014 Pete Batard <pete@akeo.ie>
+ * Copyright © 2013-2016 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,8 +30,7 @@
 
 // Attributes that can be set by a translation
 #define LOC_RIGHT_TO_LEFT       0x00000001
-#define LOC_ARABIC_NUMERALS     0x00000002
-#define LOC_JAPANESE_NUMERALS   0x00000004
+#define LOC_NEEDS_UPDATE        0x00000002
 
 // The [v]ersion major from a translation must match this number or
 // the translation will be ignored

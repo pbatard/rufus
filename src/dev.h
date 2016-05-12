@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
- * USB device listing
- * Copyright © 2014 Pete Batard <pete@akeo.ie>
+ * Device listing
+ * Copyright © 2014-2016 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,8 +32,12 @@ typedef struct usb_device_props {
 	uint32_t  pid;
 	uint32_t  speed;
 	uint32_t  port;
+	BOOLEAN   is_USB;
+	BOOLEAN   is_SCSI;
+	BOOLEAN   is_CARD;
 	BOOLEAN   is_UASP;
 	BOOLEAN   is_VHD;
+	BOOLEAN   is_Removable;
 	BOOLEAN   is_LowerSpeed;
 } usb_device_props;
 
@@ -46,12 +50,15 @@ typedef DWORD RETURN_TYPE;
 typedef RETURN_TYPE CONFIGRET;
 typedef CHAR *DEVINSTID_A;
 
-#define CR_SUCCESS                              0x00000000
-#define CR_NO_SUCH_DEVNODE                      0x0000000D
-#define CM_GETIDLIST_FILTER_SERVICE             0x00000002
+#define CR_SUCCESS                                  0x00000000
+#define CR_NO_SUCH_DEVNODE                          0x0000000D
+#define CM_GETIDLIST_FILTER_SERVICE                 0x00000002
+#define CM_REMOVAL_POLICY_EXPECT_NO_REMOVAL         0x00000001
+#define CM_REMOVAL_POLICY_EXPECT_ORDERLY_REMOVAL    0x00000002
+#define CM_REMOVAL_POLICY_EXPECT_SURPRISE_REMOVAL   0x00000003
 // /!\ The following flag is only available on Windows 7 or later!
-#define CM_GETIDLIST_FILTER_PRESENT             0x00000100
-#define CM_DRP_ADDRESS                          0x0000001D
+#define CM_GETIDLIST_FILTER_PRESENT                 0x00000100
+#define CM_DRP_ADDRESS                              0x0000001D
 
 #ifndef METHOD_BUFFERED
 #define METHOD_BUFFERED                         0

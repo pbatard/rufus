@@ -7,7 +7,7 @@
  *
  * Copyright 1995, 1996, 1997, 1998, 1999 by Theodore Ts'o
  * Copyright 1999 by David Beattie
- * Copyright 2011-2015 by Pete Batard
+ * Copyright 2011-2016 by Pete Batard
  *
  * This file is based on the minix file system programs fsck and mkfs
  * written and copyrighted by Linus Torvalds <Linus.Torvalds@cs.helsinki.fi>
@@ -42,11 +42,12 @@
 #include <stdint.h>
 
 #include "rufus.h"
+#include "resource.h"
+#include "msapi_utf8.h"
+#include "localization.h"
+
 #include "badblocks.h"
 #include "file.h"
-#include "msapi_utf8.h"
-#include "resource.h"
-#include "localization.h"
 
 FILE* log_fd = NULL;
 static const char* abort_msg = "Too many bad blocks, aborting test\n";
@@ -257,7 +258,7 @@ static bb_badblocks_iterate bb_iter = NULL;
 static __inline void *allocate_buffer(size_t size) {
 #ifdef __MINGW32__
 	return __mingw_aligned_malloc(size, BB_SYS_PAGE_SIZE);
-#else 
+#else
 	return _aligned_malloc(size, BB_SYS_PAGE_SIZE);
 #endif
 }

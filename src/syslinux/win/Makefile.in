@@ -76,7 +76,7 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
-subdir = src/syslinux/libinstaller
+subdir = src/syslinux/win
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
@@ -91,12 +91,10 @@ AM_V_AR = $(am__v_AR_@AM_V@)
 am__v_AR_ = $(am__v_AR_@AM_DEFAULT_V@)
 am__v_AR_0 = @echo "  AR      " $@;
 am__v_AR_1 = 
-libinstaller_a_AR = $(AR) $(ARFLAGS)
-libinstaller_a_LIBADD =
-am_libinstaller_a_OBJECTS = libinstaller_a-fs.$(OBJEXT) \
-	libinstaller_a-setadv.$(OBJEXT) \
-	libinstaller_a-syslxmod.$(OBJEXT)
-libinstaller_a_OBJECTS = $(am_libinstaller_a_OBJECTS)
+libwin_a_AR = $(AR) $(ARFLAGS)
+libwin_a_LIBADD =
+am_libwin_a_OBJECTS = libwin_a-ntfssect.$(OBJEXT)
+libwin_a_OBJECTS = $(am_libwin_a_OBJECTS)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -128,7 +126,7 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(libinstaller_a_SOURCES)
+SOURCES = $(libwin_a_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -242,9 +240,9 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-noinst_LIBRARIES = libinstaller.a
-libinstaller_a_SOURCES = fs.c setadv.c syslxmod.c
-libinstaller_a_CFLAGS = $(AM_CFLAGS)
+noinst_LIBRARIES = libwin.a
+libwin_a_SOURCES = ntfssect.c
+libwin_a_CFLAGS = $(AM_CFLAGS)
 all: all-am
 
 .SUFFIXES:
@@ -258,9 +256,9 @@ $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign --ignore-deps src/syslinux/libinstaller/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign --ignore-deps src/syslinux/win/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign --ignore-deps src/syslinux/libinstaller/Makefile
+	  $(AUTOMAKE) --foreign --ignore-deps src/syslinux/win/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -283,10 +281,10 @@ $(am__aclocal_m4_deps):
 clean-noinstLIBRARIES:
 	-test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)
 
-libinstaller.a: $(libinstaller_a_OBJECTS) $(libinstaller_a_DEPENDENCIES) $(EXTRA_libinstaller_a_DEPENDENCIES) 
-	$(AM_V_at)-rm -f libinstaller.a
-	$(AM_V_AR)$(libinstaller_a_AR) libinstaller.a $(libinstaller_a_OBJECTS) $(libinstaller_a_LIBADD)
-	$(AM_V_at)$(RANLIB) libinstaller.a
+libwin.a: $(libwin_a_OBJECTS) $(libwin_a_DEPENDENCIES) $(EXTRA_libwin_a_DEPENDENCIES) 
+	$(AM_V_at)-rm -f libwin.a
+	$(AM_V_AR)$(libwin_a_AR) libwin.a $(libwin_a_OBJECTS) $(libwin_a_LIBADD)
+	$(AM_V_at)$(RANLIB) libwin.a
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -300,23 +298,11 @@ distclean-compile:
 .c.obj:
 	$(AM_V_CC)$(COMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
 
-libinstaller_a-fs.o: fs.c
-	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libinstaller_a_CFLAGS) $(CFLAGS) -c -o libinstaller_a-fs.o `test -f 'fs.c' || echo '$(srcdir)/'`fs.c
+libwin_a-ntfssect.o: ntfssect.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libwin_a_CFLAGS) $(CFLAGS) -c -o libwin_a-ntfssect.o `test -f 'ntfssect.c' || echo '$(srcdir)/'`ntfssect.c
 
-libinstaller_a-fs.obj: fs.c
-	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libinstaller_a_CFLAGS) $(CFLAGS) -c -o libinstaller_a-fs.obj `if test -f 'fs.c'; then $(CYGPATH_W) 'fs.c'; else $(CYGPATH_W) '$(srcdir)/fs.c'; fi`
-
-libinstaller_a-setadv.o: setadv.c
-	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libinstaller_a_CFLAGS) $(CFLAGS) -c -o libinstaller_a-setadv.o `test -f 'setadv.c' || echo '$(srcdir)/'`setadv.c
-
-libinstaller_a-setadv.obj: setadv.c
-	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libinstaller_a_CFLAGS) $(CFLAGS) -c -o libinstaller_a-setadv.obj `if test -f 'setadv.c'; then $(CYGPATH_W) 'setadv.c'; else $(CYGPATH_W) '$(srcdir)/setadv.c'; fi`
-
-libinstaller_a-syslxmod.o: syslxmod.c
-	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libinstaller_a_CFLAGS) $(CFLAGS) -c -o libinstaller_a-syslxmod.o `test -f 'syslxmod.c' || echo '$(srcdir)/'`syslxmod.c
-
-libinstaller_a-syslxmod.obj: syslxmod.c
-	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libinstaller_a_CFLAGS) $(CFLAGS) -c -o libinstaller_a-syslxmod.obj `if test -f 'syslxmod.c'; then $(CYGPATH_W) 'syslxmod.c'; else $(CYGPATH_W) '$(srcdir)/syslxmod.c'; fi`
+libwin_a-ntfssect.obj: ntfssect.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libwin_a_CFLAGS) $(CFLAGS) -c -o libwin_a-ntfssect.obj `if test -f 'ntfssect.c'; then $(CYGPATH_W) 'ntfssect.c'; else $(CYGPATH_W) '$(srcdir)/ntfssect.c'; fi`
 
 ID: $(am__tagged_files)
 	$(am__define_uniq_tagged_files); mkid -fID $$unique

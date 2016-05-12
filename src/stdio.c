@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Standard User I/O Routines (logging, status, etc.)
- * Copyright © 2011-2015 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2016 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,15 +29,16 @@
 #include <ctype.h>
 #include <math.h>
 
-#include "msapi_utf8.h"
 #include "rufus.h"
 #include "resource.h"
+#include "msapi_utf8.h"
 #include "localization.h"
 
 /*
  * Globals
  */
 HWND hStatus;
+char ubuffer[256];	// Buffer for ubpushf() messages we don't log right away
 
 #ifdef RUFUS_DEBUG
 void _uprintf(const char *format, ...)
@@ -62,14 +63,44 @@ void _uprintf(const char *format, ...)
 
 	// Send output to Windows debug facility
 	OutputDebugStringA(buf);
-	// Send output to our log Window
-	Edit_SetSel(hLog, MAX_LOG_SIZE, MAX_LOG_SIZE);
-	Edit_ReplaceSelU(hLog, buf);
-	// Make sure the message scrolls into view
-	// (Or see code commented in LogProc:WM_SHOWWINDOW for a less forceful scroll)
-	SendMessage(hLog, EM_LINESCROLL, 0, SendMessage(hLog, EM_GETLINECOUNT, 0, 0));
+	if ((hLog != NULL) && (hLog != INVALID_HANDLE_VALUE)) {
+		// Send output to our log Window
+		Edit_SetSel(hLog, MAX_LOG_SIZE, MAX_LOG_SIZE);
+		Edit_ReplaceSelU(hLog, buf);
+		// Make sure the message scrolls into view
+		// (Or see code commented in LogProc:WM_SHOWWINDOW for a less forceful scroll)
+		SendMessage(hLog, EM_LINESCROLL, 0, SendMessage(hLog, EM_GETLINECOUNT, 0, 0));
+	}
 }
 #endif
+
+// Prints a bitstring of a number of any size, with or without leading zeroes.
+// See also the printbits() and printbitslz() helper macros in rufus.h
+char *_printbits(size_t const size, void const * const ptr, int leading_zeroes)
+{
+	// sizeof(uintmax_t) so that we have enough space to store whatever is thrown at us
+	static char str[sizeof(uintmax_t) * 8 + 3];
+	size_t i;
+	uint8_t* b = (uint8_t*)ptr;
+	uintmax_t mask, lzmask = 0, val = 0;
+
+	// Little endian, the SCOURGE of any rational computing
+	for (i = 0; i < size; i++)
+		val |= ((uintmax_t)b[i]) << (8 * i);
+
+	str[0] = '0';
+	str[1] = 'b';
+	if (leading_zeroes)
+		lzmask = 1ULL << (size * 8 - 1);
+	for (i = 2, mask = 1ULL << (sizeof(uintmax_t) * 8 - 1); mask != 0; mask >>= 1) {
+		if ((i > 2) || (lzmask & mask))
+			str[i++] = (val & mask) ? '1' : '0';
+		else if (val & mask)
+			str[i++] = '1';
+	}
+	str[i] = '\0';
+	return str;
+}
 
 void DumpBufferHex(void *buf, size_t size)
 {
@@ -279,4 +310,44 @@ const char* StrError(DWORD error_code, BOOL use_default_locale)
 	if (use_default_locale)
 		toggle_default_locale();
 	return ret;
+}
+
+BOOL WriteFileWithRetry(HANDLE hFile, LPCVOID lpBuffer, DWORD nNumberOfBytesToWrite,
+	LPDWORD lpNumberOfBytesWritten, DWORD nNumRetries)
+{
+	DWORD nTry;
+	BOOL readFilePointer;
+	LARGE_INTEGER liFilePointer, liZero = { { 0,0 } };
+	static char* retry_msg = " - retrying...";
+
+	// Need to get the current file pointer in case we need to retry
+	readFilePointer = SetFilePointerEx(hFile, liZero, &liFilePointer, FILE_CURRENT);
+	if (!readFilePointer)
+		uprintf("  Warning - Could not read file pointer: %s", WindowsErrorString());
+
+	if (nNumRetries == 0)
+		nNumRetries = 1;
+	for (nTry = 1; nTry <= nNumRetries; nTry++) {
+		// Need to rewind our file position on retry - if we can't even do that, just give up
+		if ((nTry > 1) && (!SetFilePointerEx(hFile, liFilePointer, NULL, FILE_BEGIN))) {
+			uprintf("  Could not set file pointer - aborting");
+			break;
+		}
+		if (WriteFile(hFile, lpBuffer, nNumberOfBytesToWrite, lpNumberOfBytesWritten, NULL)) {
+			if (nNumberOfBytesToWrite == *lpNumberOfBytesWritten)
+				return TRUE;
+			uprintf("  Wrote %d bytes but requested %d%s", *lpNumberOfBytesWritten,
+				nNumberOfBytesToWrite, nTry < nNumRetries ? retry_msg : "");
+		}
+		else {
+			uprintf("  Write error [0x%8X]%s", GetLastError(), nTry < nNumRetries ? retry_msg : "");
+		}
+		// If we can't reposition for the next run, just abort
+		if (!readFilePointer)
+			break;
+		Sleep(200);
+	}
+	if (SCODE_CODE(GetLastError()) == ERROR_SUCCESS)
+		SetLastError(ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_WRITE_FAULT);
+	return FALSE;
 }

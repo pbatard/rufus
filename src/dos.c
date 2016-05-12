@@ -2,8 +2,8 @@
  * Rufus: The Reliable USB Formatting Utility
  * DOS boot file extraction, from the FAT12 floppy image in diskcopy.dll
  * (MS WinME DOS) or from the embedded FreeDOS resource files
- * Copyright © 2011-2015 Pete Batard <pete@akeo.ie>
- * 
+ * Copyright © 2011-2016 Pete Batard <pete@akeo.ie>
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -31,8 +31,10 @@
 #include <string.h>
 
 #include "rufus.h"
-#include "dos.h"
+#include "missing.h"
 #include "resource.h"
+
+#include "dos.h"
 
 static BYTE* DiskImage = NULL;
 static DWORD DiskImageSize;
@@ -257,8 +259,8 @@ static BOOL ExtractFAT(int entry, const char* path)
 		return FALSE;
 	}
 
-	if ((!WriteFile(hFile, &DiskImage[filestart], (DWORD)filesize, &Size, 0)) || (filesize != Size)) {
-		uprintf("Couldn't write file '%s': %s.\n", filename, WindowsErrorString());
+	if (!WriteFileWithRetry(hFile, &DiskImage[filestart], (DWORD)filesize, &Size, WRITE_RETRIES)) {
+		uprintf("Could not write file '%s': %s.\n", filename, WindowsErrorString());
 		safe_closehandle(hFile);
 		return FALSE;
 	}
@@ -324,7 +326,7 @@ static BOOL ExtractMSDOS(const char* path)
 		goto out;
 
 	// Sanity check
-	if (DiskImageSize < 700*1024) {
+	if (DiskImageSize < 700*KB) {
 		uprintf("MS-DOS disk image is too small (%d bytes)\n", dllname, DiskImageSize);
 		goto out;
 	}
@@ -394,8 +396,8 @@ BOOL ExtractFreeDOS(const char* path)
 			return FALSE;
 		}
 
-		if ((!WriteFile(hFile, res_data, res_size, &Size, 0)) || (res_size != Size)) {
-			uprintf("Couldn't write file '%s': %s.\n", filename, WindowsErrorString());
+		if (!WriteFileWithRetry(hFile, res_data, res_size, &Size, WRITE_RETRIES)) {
+			uprintf("Could not write file '%s': %s.\n", filename, WindowsErrorString());
 			safe_closehandle(hFile);
 			return FALSE;
 		}

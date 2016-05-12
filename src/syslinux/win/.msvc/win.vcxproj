@@ -19,64 +19,16 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\inc\br.h" />
-    <ClInclude Include="..\inc\br_fat12_0x0.h" />
-    <ClInclude Include="..\inc\br_fat12_0x3e.h" />
-    <ClInclude Include="..\inc\br_fat16fd_0x3e.h" />
-    <ClInclude Include="..\inc\br_fat16ros_0x0.h" />
-    <ClInclude Include="..\inc\br_fat16ros_0x3e.h" />
-    <ClInclude Include="..\inc\br_fat16_0x0.h" />
-    <ClInclude Include="..\inc\br_fat16_0x3e.h" />
-    <ClInclude Include="..\inc\br_fat32fd_0x3f0.h" />
-    <ClInclude Include="..\inc\br_fat32fd_0x52.h" />
-    <ClInclude Include="..\inc\br_fat32kos_0x52.h" />
-    <ClInclude Include="..\inc\br_fat32nt_0x1800.h" />
-    <ClInclude Include="..\inc\br_fat32nt_0x3f0.h" />
-    <ClInclude Include="..\inc\br_fat32nt_0x52.h" />
-    <ClInclude Include="..\inc\br_fat32ros_0x1c00.h" />
-    <ClInclude Include="..\inc\br_fat32ros_0x3f0.h" />
-    <ClInclude Include="..\inc\br_fat32ros_0x52.h" />
-    <ClInclude Include="..\inc\br_fat32_0x0.h" />
-    <ClInclude Include="..\inc\br_fat32_0x3f0.h" />
-    <ClInclude Include="..\inc\br_fat32_0x52.h" />
-    <ClInclude Include="..\inc\br_ntfs_0x0.h" />
-    <ClInclude Include="..\inc\br_ntfs_0x54.h" />
-    <ClInclude Include="..\inc\fat12.h" />
-    <ClInclude Include="..\inc\fat16.h" />
-    <ClInclude Include="..\inc\fat32.h" />
-    <ClInclude Include="..\inc\file.h" />
-    <ClInclude Include="..\inc\label_11_char.h" />
-    <ClInclude Include="..\inc\libintl.h" />
-    <ClInclude Include="..\inc\mbr_2000.h" />
-    <ClInclude Include="..\inc\mbr_95b.h" />
-    <ClInclude Include="..\inc\mbr_dos.h" />
-    <ClInclude Include="..\inc\mbr_dos_f2.h" />
-    <ClInclude Include="..\inc\mbr_grub.h" />
-    <ClInclude Include="..\inc\mbr_grub2.h" />
-    <ClInclude Include="..\inc\mbr_kolibri.h" />
-    <ClInclude Include="..\inc\mbr_reactos.h" />
-    <ClInclude Include="..\inc\mbr_rufus.h" />
-    <ClInclude Include="..\inc\mbr_syslinux.h" />
-    <ClInclude Include="..\inc\mbr_vista.h" />
-    <ClInclude Include="..\inc\mbr_win7.h" />
-    <ClInclude Include="..\inc\mbr_zero.h" />
-    <ClInclude Include="..\inc\nls.h" />
-    <ClInclude Include="..\inc\ntfs.h" />
-    <ClInclude Include="..\inc\partition_info.h" />
+    <ClInclude Include="..\ntfssect.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\br.c" />
-    <ClCompile Include="..\fat12.c" />
-    <ClCompile Include="..\fat16.c" />
-    <ClCompile Include="..\fat32.c" />
-    <ClCompile Include="..\file.c" />
-    <ClCompile Include="..\ntfs.c" />
-    <ClCompile Include="..\partition_info.c" />
+    <ClCompile Include="..\ntfssect.c" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{2B1D078D-8EB4-4398-9CA4-23457265A7F6}</ProjectGuid>
+    <ProjectGuid>{7D2E9784-DDF7-4988-A887-CF099BC3B340}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>mssys</RootNamespace>
+    <RootNamespace>win</RootNamespace>
+    <ProjectName>syslinux-win</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -142,12 +94,11 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>_CRTDBG_MAP_ALLOC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>../inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>inline=__inline;_CRTDBG_MAP_ALLOC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..;..\..\..\msvc-missing;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <AdditionalOptions>/analyze:stacksize32850 %(AdditionalOptions)</AdditionalOptions>
-      <DisableSpecificWarnings>28252;28253</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4244;4267;4996</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -164,12 +115,11 @@
       </PrecompiledHeader>
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>../inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>inline=__inline;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..;..\..\..\msvc-missing;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <AdditionalOptions>/analyze:stacksize32850 %(AdditionalOptions)</AdditionalOptions>
-      <DisableSpecificWarnings>28252;28253</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4244;4267;4996</DisableSpecificWarnings>
     </ClCompile>
     <Lib>
       <TargetMachine>MachineX86</TargetMachine>
@@ -181,12 +131,11 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>_CRTDBG_MAP_ALLOC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>../inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>inline=__inline;_CRTDBG_MAP_ALLOC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..;..\..\..\msvc-missing;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <AdditionalOptions>/analyze:stacksize32850 %(AdditionalOptions)</AdditionalOptions>
-      <DisableSpecificWarnings>28252;28253</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4244;4267;4996</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -203,12 +152,11 @@
       </PrecompiledHeader>
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>../inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>inline=__inline;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..;..\..\..\msvc-missing;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <AdditionalOptions>/analyze:stacksize32850 %(AdditionalOptions)</AdditionalOptions>
-      <DisableSpecificWarnings>28252;28253</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4244;4267;4996</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

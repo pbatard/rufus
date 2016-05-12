@@ -54,13 +54,14 @@ static __inline BOOL DeleteRegistryKey(HKEY key_root, const char* key_name)
    the application and create the app subkey if required */
 static __inline BOOL _GetRegistryKey(HKEY key_root, const char* key_name, DWORD reg_type, LPBYTE dest, DWORD dest_size)
 {
+	const char software_prefix[] = "SOFTWARE\\";
+	char long_key_name[MAX_PATH] = { 0 };
 	BOOL r = FALSE;
-	size_t i = 0;
+	size_t i;
 	LONG s;
 	HKEY hSoftware = NULL, hApp = NULL;
 	DWORD dwDisp, dwType = -1, dwSize = dest_size;
-	// VS Code Analysis complains if we don't break our initialization into chars
-	char long_key_name[256] = { 0 };
+
 	memset(dest, 0, dest_size);
 
 	if (key_name == NULL)
@@ -72,9 +73,15 @@ static __inline BOOL _GetRegistryKey(HKEY key_root, const char* key_name, DWORD 
 	}
 
 	if (i != 0) {
-		strcpy(long_key_name, "SOFTWARE\\");
-		safe_strcat(long_key_name, sizeof(long_key_name), key_name);
-		long_key_name[sizeof("SOFTWARE\\") + i-1] = 0;
+		// Prefix with "SOFTWARE" if needed
+		if (_strnicmp(key_name, software_prefix, sizeof(software_prefix) - 1) != 0) {
+			strcpy(long_key_name, software_prefix);
+			safe_strcat(long_key_name, sizeof(long_key_name), key_name);
+			long_key_name[sizeof(software_prefix) + i - 1] = 0;
+		} else {
+			safe_strcpy(long_key_name, sizeof(long_key_name), key_name);
+			long_key_name[i] = 0;
+		}
 		i++;
 		if (RegOpenKeyExA(key_root, long_key_name, 0, KEY_READ, &hApp) != ERROR_SUCCESS) {
 			hApp = NULL;
@@ -94,7 +101,7 @@ static __inline BOOL _GetRegistryKey(HKEY key_root, const char* key_name, DWORD 
 
 	s = RegQueryValueExA(hApp, &key_name[i], NULL, &dwType, (LPBYTE)dest, &dwSize);
 	// No key means default value of 0 or empty string
-	if ((s == ERROR_FILE_NOT_FOUND) || ((s == ERROR_SUCCESS) && (dwType = reg_type) && (dwSize > 0))) {
+	if ((s == ERROR_FILE_NOT_FOUND) || ((s == ERROR_SUCCESS) && (dwType == reg_type) && (dwSize > 0))) {
 		r = TRUE;
 	}
 out:
@@ -108,25 +115,57 @@ out:
 /* Write a generic registry key value (create the key if it doesn't exist) */
 static __inline BOOL _SetRegistryKey(HKEY key_root, const char* key_name, DWORD reg_type, LPBYTE src, DWORD src_size)
 {
+	const char software_prefix[] = "SOFTWARE\\";
+	char long_key_name[MAX_PATH] = { 0 };
 	BOOL r = FALSE;
-	HKEY hSoftware = NULL, hApp = NULL;
+	size_t i;
+	HKEY hRoot = NULL, hApp = NULL;
 	DWORD dwDisp, dwType = reg_type;
 
-	if (RegOpenKeyExA(key_root, "SOFTWARE", 0, KEY_READ|KEY_CREATE_SUB_KEY, &hSoftware) != ERROR_SUCCESS) {
-		hSoftware = NULL;
-		goto out;
-	}
-	if (RegCreateKeyExA(hSoftware, COMPANY_NAME "\\" APPLICATION_NAME, 0, NULL, 0,
-		KEY_SET_VALUE|KEY_QUERY_VALUE|KEY_CREATE_SUB_KEY, NULL, &hApp, &dwDisp) != ERROR_SUCCESS) {
-		hApp = NULL;
+	if (key_name == NULL)
+		return FALSE;
+
+	if (RegOpenKeyExA(key_root, NULL, 0, KEY_READ|KEY_CREATE_SUB_KEY, &hRoot) != ERROR_SUCCESS) {
+		hRoot = NULL;
 		goto out;
 	}
 
-	r = (RegSetValueExA(hApp, key_name, 0, dwType, src, src_size) == ERROR_SUCCESS);
+	// Find if we're dealing with a short key
+	for (i = safe_strlen(key_name); i>0; i--) {
+		if (key_name[i] == '\\')
+			break;
+	}
+
+	if (i == 0) {
+		// If this is a short key name, store the value under our app sub-hive
+		if (RegCreateKeyExA(hRoot, "SOFTWARE\\" COMPANY_NAME "\\" APPLICATION_NAME, 0, NULL, 0,
+			KEY_SET_VALUE | KEY_QUERY_VALUE | KEY_CREATE_SUB_KEY, NULL, &hApp, &dwDisp) != ERROR_SUCCESS) {
+			hApp = NULL;
+			goto out;
+		}
+	} else {
+		// Prefix with "SOFTWARE" if needed
+		if (_strnicmp(key_name, software_prefix, sizeof(software_prefix) - 1) != 0) {
+			strcpy(long_key_name, software_prefix);
+			safe_strcat(long_key_name, sizeof(long_key_name), key_name);
+			long_key_name[sizeof(software_prefix) + i - 1] = 0;
+		} else {
+			safe_strcpy(long_key_name, sizeof(long_key_name), key_name);
+			long_key_name[i] = 0;
+		}
+		i++;
+		if (RegCreateKeyExA(hRoot, long_key_name, 0, NULL, 0,
+			KEY_SET_VALUE | KEY_QUERY_VALUE | KEY_CREATE_SUB_KEY, NULL, &hApp, &dwDisp) != ERROR_SUCCESS) {
+			hApp = NULL;
+			goto out;
+		}
+	}
+
+	r = (RegSetValueExA(hApp, &key_name[i], 0, dwType, src, src_size) == ERROR_SUCCESS);
 
 out:
-	if (hSoftware != NULL)
-		RegCloseKey(hSoftware);
+	if (hRoot != NULL)
+		RegCloseKey(hRoot);
 	if (hApp != NULL)
 		RegCloseKey(hApp);
 	return r;

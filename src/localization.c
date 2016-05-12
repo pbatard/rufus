@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Localization functions, a.k.a. "Everybody is doing it wrong but me!"
- * Copyright © 2013-2015 Pete Batard <pete@akeo.ie>
+ * Copyright © 2013-2016 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -420,14 +420,54 @@ char* lmprintf(uint32_t msg_id, ...)
 #define MSG_HIGH_PRI 1
 char szMessage[2][2][MSG_LEN] = { {"", ""}, {"", ""} };
 char* szStatusMessage = szMessage[MSG_STATUS][MSG_HIGH_PRI];
-static BOOL bStatusTimerArmed = FALSE;
+static BOOL bStatusTimerArmed = FALSE, bOutputTimerArmed[2] = { FALSE, FALSE };
+static char *output_msg[2];
+static uint64_t last_msg_time[2] = { 0, 0 };
 
-static void __inline OutputMessage(BOOL info, char* msg)
+static void PrintInfoMessage(char* msg) {
+	SetWindowTextU(hInfo, msg);
+}
+static void PrintStatusMessage(char* msg) {
+	SendMessageLU(hStatus, SB_SETTEXTW, SBT_OWNERDRAW | SB_SECTION_LEFT, msg);
+}
+typedef void PRINT_FUNCTION(char*);
+PRINT_FUNCTION *PrintMessage[2] = { PrintInfoMessage, PrintStatusMessage };
+
+/*
+ * The following timer call is used, along with MAX_REFRESH, to prevent obnoxious flicker
+ * on the Info and Status fields due to messages being updated too quickly.
+ */
+static void CALLBACK OutputMessageTimeout(HWND hWnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
 {
-	if (info)
-		SetWindowTextU(hInfo, msg);
-	else
-		SendMessageLU(hStatus, SB_SETTEXTW, SBT_OWNERDRAW | SB_SECTION_LEFT, msg);
+	int i = (idEvent == TID_OUTPUT_INFO)? 0 : 1;
+
+	KillTimer(hMainDialog, idEvent);
+	bOutputTimerArmed[i] = FALSE;
+	PrintMessage[i](output_msg[i]);
+	last_msg_time[i] = _GetTickCount64();
+}
+
+static void OutputMessage(BOOL info, char* msg)
+{
+	uint64_t delta;
+	int i = info ? 0 : 1;
+
+	if (bOutputTimerArmed[i]) {
+		// Already have a delayed message going - just change that message to latest
+		output_msg[i] = msg;
+	} else {
+		// Find if we need to arm a timer
+		delta = _GetTickCount64() - last_msg_time[i];
+		if (delta < (2 * MAX_REFRESH)) {
+			// Not enough time has elapsed since our last output => arm a timer
+			output_msg[i] = msg;
+			SetTimer(hMainDialog, TID_OUTPUT_INFO + i, (UINT)((2 * MAX_REFRESH) - delta), OutputMessageTimeout);
+			bOutputTimerArmed[i] = TRUE;
+		} else {
+			PrintMessage[i](msg);
+			last_msg_time[i] = _GetTickCount64();
+		}
+	}
 }
 
 static void CALLBACK PrintMessageTimeout(HWND hWnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
@@ -602,13 +642,15 @@ WORD get_language_id(loc_cmd* lcmd)
 	wchar_t wlang[5];
 	LANGID lang_id = GetUserDefaultUILanguage();
 
+	// Log will be reset, so we need to use the buffered uprintf() to get our messages to the user
+	ubclear();
 	if (lcmd == NULL)
 		return MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT);
 
 	// Find if the selected language is the user default
 	for (i = 0; i<lcmd->unum_size; i++) {
 		if (lcmd->unum[i] == lang_id) {
-			uprintf("localization: will use default UI language 0x%04X", lang_id);
+			ubpushf("Will use default UI locale 0x%04X", lang_id);
 			return MAKELANGID(lang_id, SUBLANG_DEFAULT);
 		}
 	}
@@ -622,11 +664,12 @@ WORD get_language_id(loc_cmd* lcmd)
 		// boolean to tell us that we found what we were after.
 		EnumUILanguages(EnumUILanguagesProc, 0x4, (LONG_PTR)wlang);	// 0x04 = MUI_LANGUAGE_ID
 		if (found_lang) {
-			uprintf("localization: detected installed language pack for 0x%04X", lcmd->unum[i]);
+			ubpushf("Detected installed Windows Language Pack for 0x%04X (%s)", lcmd->unum[i], lcmd->txt[1]);
 			return MAKELANGID(lcmd->unum[i], SUBLANG_DEFAULT);
 		}
 	}
 
-	uprintf("localization: no matching language pack - some messages will be displayed using default locale");
+	ubpushf("NOTE: No Windows Language Pack is installed for %s on this system.\r\n"
+		"This means that some controls may still be displayed using the system locale.", lcmd->txt[1]);
 	return MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT);
 }

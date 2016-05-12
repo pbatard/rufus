@@ -70,6 +70,21 @@ copy obj%BUILD_ALT_DIR%\%ARCH_DIR%\libinstaller.lib . >NUL 2>&1
 if EXIST Makefile.hide ren Makefile.hide Makefile
 if EXIST sources del sources >NUL 2>&1
 
+::# SysLinux win Library
+cd ..\win
+if EXIST Makefile ren Makefile Makefile.hide
+
+copy .msvc\win_sources sources >NUL 2>&1
+
+@echo on
+%BUILD_CMD%
+@echo off
+if errorlevel 1 goto builderror
+copy obj%BUILD_ALT_DIR%\%ARCH_DIR%\win.lib . >NUL 2>&1
+
+if EXIST Makefile.hide ren Makefile.hide Makefile
+if EXIST sources del sources >NUL 2>&1
+
 ::# libcdio iso9660 Library
 cd ..\..\libcdio\iso9660
 if EXIST Makefile ren Makefile Makefile.hide

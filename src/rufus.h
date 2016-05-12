@@ -1,6 +1,6 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
- * Copyright © 2011-2015 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2016 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,15 +16,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <windows.h>
-#include <winioctl.h>				// for DISK_GEOMETRY
 #include <malloc.h>
 #include <inttypes.h>
 
 #if defined(_MSC_VER)
 // Disable some VS2012 Code Analysis warnings
 #pragma warning(disable: 4996)		// Ignore deprecated (eg. GetVersionEx()), as we have to contend with XP
-#pragma warning(disable: 28159)		// VS2012 wants us to use GetTickCount64(), but it's not available on XP
+#pragma warning(disable: 28159)		// We use GetTickCount64() where possible, but it's not available on XP
 #pragma warning(disable: 6258)		// I know what I'm using TerminateThread for
+// Burn in HELL Windows XP!!!
+#ifdef DDKBUILD
+#if (_WIN32_WINNT < _WIN32_WINNT_VISTA)
+#error The Windows XP target is no longer supported for WDK compilation.
+#endif
+#endif
 #endif
 
 #pragma once
@@ -33,10 +38,6 @@
 #define RUFUS_DEBUG                 // print debug info to Debug facility
 /* Features not ready for prime time and that may *DESTROY* your data - USE AT YOUR OWN RISKS! */
 // #define RUFUS_TEST
-/* Languages for which translators are M.I.A. and that we could use help with */
-#define LOST_TRANSLATORS            { "ms-MY" }	// NB: locales MUST be <= 5 chars
-/* Probability of getting the M.I.A. translator message. For more on this, see LostTranslatorCheck() */
-#define LOST_TRANSLATOR_PROBABILITY 1000
 
 #define APPLICATION_NAME            "Rufus"
 #define COMPANY_NAME                "Akeo Consulting"
@@ -52,6 +53,7 @@
 #define DRIVE_ACCESS_RETRIES        60			// How many times we should retry
 #define DRIVE_INDEX_MIN             0x00000080
 #define DRIVE_INDEX_MAX             0x000000C0
+#define MIN_DRIVE_SIZE              8			// Minimum size a drive must have, to be formattable (in MB)
 #define MIN_EXTRA_PART_SIZE         (1024*1024)		// Minimum size of the extra partition, in bytes
 #define MAX_DRIVES                  (DRIVE_INDEX_MAX - DRIVE_INDEX_MIN)
 #define MAX_TOOLTIPS                128
@@ -59,11 +61,14 @@
 #define MAX_CLUSTER_SIZES           18
 #define MAX_PROGRESS                (0xFFFF-1)	// leave room for 1 more for insta-progress workaround
 #define MAX_LOG_SIZE                0x7FFFFFFE
+#define MAX_REFRESH                 25			// How long we should wait to refresh UI elements (in ms)
 #define MAX_GUID_STRING_LENGTH      40
 #define MAX_GPT_PARTITIONS          128
 #define MAX_SECTORS_TO_CLEAR        128			// nb sectors to zap when clearing the MBR/GPT (must be >34)
 #define MBR_UEFI_MARKER             0x49464555	// 'U', 'E', 'F', 'I', as a 32 bit little endian longword
+#define STATUS_MSG_TIMEOUT          3500		// How long should cheat mode messages appear for on the status bar
 #define WRITE_RETRIES               3
+#define NUM_CHECKSUMS               3			// Number of checksum algorithms we support (MD5, SHA1, SHA256)
 #define FS_DEFAULT                  FS_FAT32
 #define SINGLE_CLUSTERSIZE_DEFAULT  0x00000100
 #define BADBLOCK_PATTERNS           {0xaa, 0x55, 0xff, 0x00}
@@ -102,7 +107,6 @@
 #define safe_strncmp(str1, str2, count) strncmp(((str1==NULL)?"<NULL>":str1), ((str2==NULL)?"<NULL>":str2), count)
 #define safe_strnicmp(str1, str2, count) _strnicmp(((str1==NULL)?"<NULL>":str1), ((str2==NULL)?"<NULL>":str2), count)
 #define safe_closehandle(h) do {if ((h != INVALID_HANDLE_VALUE) && (h != NULL)) {CloseHandle(h); h = INVALID_HANDLE_VALUE;}} while(0)
-#define safe_unlockclose(h) do {if ((h != INVALID_HANDLE_VALUE) && (h != NULL)) {UnlockDrive(h); CloseHandle(h); h = INVALID_HANDLE_VALUE;}} while(0)
 #define safe_release_dc(hDlg, hDC) do {if ((hDC != INVALID_HANDLE_VALUE) && (hDC != NULL)) {ReleaseDC(hDlg, hDC); hDC = NULL;}} while(0)
 #define safe_sprintf(dst, count, ...) do {_snprintf(dst, count, __VA_ARGS__); (dst)[(count)-1] = 0; } while(0)
 #define static_sprintf(dst, ...) safe_sprintf(dst, sizeof(dst), __VA_ARGS__)
@@ -117,6 +121,9 @@
 #ifdef RUFUS_DEBUG
 extern void _uprintf(const char *format, ...);
 #define uprintf(...) _uprintf(__VA_ARGS__)
+#define ubclear() do { ubuffer[0] = 0; } while (0);
+#define ubpushf(...) static_sprintf(ubuffer, __VA_ARGS__)
+#define ubpop() uprintf("%s", ubuffer)
 #define vuprintf(...) if (verbose) _uprintf(__VA_ARGS__)
 #define vvuprintf(...) if (verbose > 1) _uprintf(__VA_ARGS__)
 #define suprintf(...) if (!bSilent) _uprintf(__VA_ARGS__)
@@ -168,6 +175,8 @@ typedef struct {
 enum timer_type {
 	TID_MESSAGE_INFO = 0x1000,
 	TID_MESSAGE_STATUS,
+	TID_OUTPUT_INFO,
+	TID_OUTPUT_STATUS,
 	TID_BADBLOCKS_UPDATE,
 	TID_APP_TIMER,
 	TID_BLOCKING_TIMER,
@@ -222,24 +231,6 @@ enum target_type {
 // For the partition types we'll use Microsoft's PARTITION_STYLE_### constants
 #define GETTARGETTYPE(x) (((x)>0)?(((x) >> 16) & 0xFFFF):0)
 #define GETPARTTYPE(x)   (((x)>0)?((x) & 0xFFFF):0);
-
-/* Current drive info */
-typedef struct {
-	DWORD DeviceNumber;
-	LONGLONG DiskSize;
-	DISK_GEOMETRY Geometry;
-	DWORD FirstSector;
-	char proposed_label[16];
-	int PartitionType;
-	int nPartitions;	// number of partitions we actually care about
-	int FSType;
-	BOOL has_protective_mbr;
-	BOOL has_mbr_uefi_marker;
-	struct {
-		ULONG Allowed;
-		ULONG Default;
-	} ClusterSize[FS_MAX];
-} RUFUS_DRIVE_INFO;
 
 /* Special handling for old .c32 files we need to replace */
 #define NB_OLD_C32          2
@@ -369,8 +360,7 @@ extern char szFolderPath[MAX_PATH], app_dir[MAX_PATH], system_dir[MAX_PATH], sys
 extern char* image_path;
 extern DWORD FormatStatus, DownloadStatus;
 extern BOOL PromptOnError;
-extern DWORD syslinux_ldlinux_len[2];
-extern RUFUS_DRIVE_INFO SelectedDrive;
+extern unsigned long syslinux_ldlinux_len[2];
 extern const int nb_steps[FS_MAX];
 extern BOOL use_own_c32[NB_OLD_C32], detect_fakes, iso_op_in_progress, format_op_in_progress, right_to_left_mode;
 extern BOOL allow_dual_uefi_bios, togo_mode;
@@ -379,6 +369,7 @@ extern int64_t iso_blocking_status;
 extern uint16_t rufus_version[3], embedded_sl_version[2];
 extern int nWindowsVersion;
 extern char WindowsVersionStr[128];
+extern char ubuffer[256];
 extern char embedded_sl_version_str[2][12];
 extern RUFUS_UPDATE update;
 extern int dialog_showing;
@@ -431,7 +422,7 @@ extern unsigned char* GetResource(HMODULE module, char* name, char* type, const 
 extern DWORD GetResourceSize(HMODULE module, char* name, char* type, const char* desc);
 extern DWORD RunCommand(const char* cmdline, const char* dir, BOOL log);
 extern BOOL CompareGUID(const GUID *guid1, const GUID *guid2);
-extern BOOL GetUSBDevices(DWORD devnum);
+extern BOOL GetDevices(DWORD devnum);
 extern BOOL SetLGP(BOOL bRestore, BOOL* bExistingKey, const char* szPath, const char* szPolicy, DWORD dwValue);
 extern LONG GetEntryWidth(HWND hDropDown, const char* entry);
 extern DWORD DownloadFile(const char* url, const char* file, HWND hProgressDialog);
@@ -454,37 +445,18 @@ extern BOOL WimApplyImage(const char* image, int index, const char* dst);
 extern BOOL IsBootableImage(const char* path);
 extern BOOL AppendVHDFooter(const char* vhd_path);
 extern int IsHDD(DWORD DriveIndex, uint16_t vid, uint16_t pid, const char* strid);
-extern void LostTranslatorCheck(void);
 extern LONG ValidateSignature(HWND hDlg, const char* path);
 extern BOOL IsFontAvailable(const char* font_name);
+extern BOOL WriteFileWithRetry(HANDLE hFile, LPCVOID lpBuffer, DWORD nNumberOfBytesToWrite,
+	LPDWORD lpNumberOfBytesWritten, DWORD nNumRetries);
+extern BOOL SetThreadAffinity(DWORD_PTR* thread_affinity, size_t num_threads);
+#define printbits(x) _printbits(sizeof(x), &x, 0)
+#define printbitslz(x) _printbits(sizeof(x), &x, 1)
+extern char* _printbits(size_t const size, void const * const ptr, int leading_zeroes);
 
 DWORD WINAPI FormatThread(void* param);
 DWORD WINAPI SaveImageThread(void* param);
 DWORD WINAPI SumThread(void* param);
-
-static __inline BOOL UnlockDrive(HANDLE hDrive) {
-	DWORD size;
-	return DeviceIoControl(hDrive, FSCTL_UNLOCK_VOLUME, NULL, 0, NULL, 0, &size, NULL);
-}
-
-static __inline void *_reallocf(void *ptr, size_t size) {
-	void *ret = realloc(ptr, size);
-	if (!ret)
-		free(ptr);
-	return ret;
-}
-
-static __inline uint16_t bswap_16(uint16_t x) {
-	return (x >> 8) | (x << 8);
-}
-
-static __inline uint32_t bswap_32(uint32_t x) {
-	return (bswap_16(x & 0xffff) << 16) | (bswap_16(x >> 16));
-}
-
-static __inline uint64_t bswap_64(uint64_t x) {
-	return (((uint64_t) bswap_32(x & 0xffffffffull)) << 32) | (bswap_32(x >> 32));
-}
 
 /* Hash tables */
 typedef struct htab_entry {
@@ -552,16 +524,6 @@ static __inline HMODULE GetLibraryHandle(char* szLibraryName) {
 	if (pf##proc == NULL) {uprintf("Unable to locate %s() in %s.dll: %s\n",  \
 	#proc, #name, WindowsErrorString()); goto out;} } while(0)
 
-/* Clang/MinGW32 has an issue with intptr_t */
-#ifndef _UINTPTR_T_DEFINED
-#define _UINTPTR_T_DEFINED
-#ifdef _WIN64
-  typedef unsigned __int64 uintptr_t;
-#else
-  typedef unsigned int uintptr_t;
-#endif
-#endif
-
 /* Custom application errors */
 #define FAC(f)                         (f<<16)
 #define APPERR(err)                    (APPLICATION_ERROR_MASK|err)
@@ -578,19 +540,7 @@ static __inline HMODULE GetLibraryHandle(char* szLibraryName) {
 #define ERROR_CANT_ASSIGN_LETTER       0x120B
 #define ERROR_CANT_MOUNT_VOLUME        0x120C
 
-/* More niceties */
-#ifndef MIN
-#define MIN(a,b) (((a) < (b)) ? (a) : (b))
-#endif
-#ifndef PBS_MARQUEE
-#define PBS_MARQUEE 0x08
-#endif
-#ifndef PBM_SETMARQUEE
-#define PBM_SETMARQUEE (WM_USER+10)
-#endif
-
-/* Why oh why does Microsoft have to make everybody suffer with their braindead use of Unicode? */
-#define _RT_ICON			MAKEINTRESOURCEA(3)
-#define _RT_DIALOG			MAKEINTRESOURCEA(5)
-#define _RT_RCDATA			MAKEINTRESOURCEA(10)
-#define _RT_GROUP_ICON		MAKEINTRESOURCEA((ULONG_PTR)(MAKEINTRESOURCEA(3) + 11))
+/* GetTickCount64 not being available on XP is a massive bother */
+PF_TYPE(WINAPI, ULONGLONG, GetTickCount64, (void));
+extern GetTickCount64_t pfGetTickCount64;
+#define _GetTickCount64() ((pfGetTickCount64 != NULL)?(uint64_t)pfGetTickCount64():(uint64_t)GetTickCount())

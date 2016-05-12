@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Extract icon from executable and set autorun.inf
- * Copyright © 2012-2013 Pete Batard <pete@akeo.ie>
+ * Copyright © 2012-2016 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,9 +27,10 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "msapi_utf8.h"
 #include "rufus.h"
+#include "missing.h"
 #include "resource.h"
+#include "msapi_utf8.h"
 
 #pragma pack(push)
 #pragma pack(2)
@@ -74,7 +75,7 @@ typedef struct
 	WORD	nID;			// the ID
 } GRPICONDIRENTRY, *LPGRPICONDIRENTRY;
 
-typedef struct 
+typedef struct
 {
 	WORD			idReserved;		// Reserved (must be 0)
 	WORD			idType;			// Resource type (1 for icons)
@@ -103,13 +104,13 @@ static BOOL SaveIcon(const char* filename)
 	hFile = CreateFileA(filename, GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ|FILE_SHARE_WRITE,
 			NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (hFile == INVALID_HANDLE_VALUE) {
-		uprintf("Unable to create icon '%s': %s.\n", filename, WindowsErrorString());
+		uprintf("Unable to create icon '%s': %s.", filename, WindowsErrorString());
 		goto out;
 	}
 
 	// Write .ico header
-	if ((!WriteFile(hFile, icondir, 3*sizeof(WORD), &Size, NULL)) || (Size != 3*sizeof(WORD))) {
-		uprintf("Couldn't write icon header: %s.\n", WindowsErrorString());
+	if (!WriteFileWithRetry(hFile, icondir, 3*sizeof(WORD), &Size, WRITE_RETRIES)) {
+		uprintf("Could not write icon header: %s.", WindowsErrorString());
 		goto out;
 	}
 
@@ -117,15 +118,14 @@ static BOOL SaveIcon(const char* filename)
 	offset = 3*sizeof(WORD) + icondir->idCount*sizeof(ICONDIRENTRY);
 	for (i=0; i<icondir->idCount; i++) {
 		// Write the common part of ICONDIRENTRY
-		if ( (!WriteFile(hFile, &icondir->idEntries[i], sizeof(GRPICONDIRENTRY)-sizeof(WORD), &Size, NULL))
-		   || (Size != sizeof(GRPICONDIRENTRY)-sizeof(WORD)) ) {
-			uprintf("Couldn't write ICONDIRENTRY[%d]: %s.\n", i, WindowsErrorString());
+		if (!WriteFileWithRetry(hFile, &icondir->idEntries[i], sizeof(GRPICONDIRENTRY)-sizeof(WORD), &Size, WRITE_RETRIES)) {
+			uprintf("Could not write ICONDIRENTRY[%d]: %s.", i, WindowsErrorString());
 			goto out;
 		}
 		res = FindResourceA(hMainInstance, MAKEINTRESOURCEA(icondir->idEntries[i].nID), _RT_ICON);
 		// Write the DWORD offset
-		if ( (!WriteFile(hFile, &offset, sizeof(offset), &Size, NULL)) || (Size != sizeof(offset)) ) {
-			uprintf("Couldn't write ICONDIRENTRY[%d] offset: %s.\n", i, WindowsErrorString());
+		if (!WriteFileWithRetry(hFile, &offset, sizeof(offset), &Size, WRITE_RETRIES)) {
+			uprintf("Could not write ICONDIRENTRY[%d] offset: %s.", i, WindowsErrorString());
 			goto out;
 		}
 		offset += SizeofResource(NULL, res);
@@ -136,12 +136,12 @@ static BOOL SaveIcon(const char* filename)
 		res_handle = LoadResource(NULL, res);
 		res_data = (BYTE*)LockResource(res_handle);
 		res_size = SizeofResource(NULL, res);
-		if ( (!WriteFile(hFile, res_data, res_size, &Size, NULL)) || (Size != res_size) ) {
-			uprintf("Couldn't write icon data #%d: %s.\n", i, WindowsErrorString());
+		if (!WriteFileWithRetry(hFile, res_data, res_size, &Size, WRITE_RETRIES)) {
+			uprintf("Could not write icon data #%d: %s.", i, WindowsErrorString());
 			goto out;
 		}
 	}
-	uprintf("Created: %s\n", filename);
+	uprintf("Created: %s", filename);
 	r = TRUE;
 
 out:
@@ -163,14 +163,14 @@ BOOL SetAutorun(const char* path)
 	safe_sprintf(filename, sizeof(filename), "%sautorun.inf", path);
 	fd = fopen(filename, "r");	// If there's an existing autorun, don't overwrite
 	if (fd != NULL) {
-		uprintf("%s already exists - keeping it\n", filename);
+		uprintf("%s already exists - keeping it", filename);
 		fclose(fd);
 		return FALSE;
 	}
 	// No "/autorun.inf" => create a new one in UTF-16 LE mode
 	fd = fopen(filename, "w, ccs=UTF-16LE");
 	if (fd == NULL) {
-		uprintf("Unable to create %s\n", filename);
+		uprintf("Unable to create %s", filename);
 		uprintf("NOTE: This may be caused by a poorly designed security solution. "
 			"See http://rufus.akeo.ie/compatibility.");
 		return FALSE;
@@ -181,7 +181,7 @@ BOOL SetAutorun(const char* path)
 	fwprintf(fd, L"; Created by %s\n; " LTEXT(RUFUS_URL) L"\n", wRufusVersion);
 	fwprintf(fd, L"[autorun]\nicon  = autorun.ico\nlabel = %s\n", wlabel);
 	fclose(fd);
-	uprintf("Created: %s\n", filename);
+	uprintf("Created: %s", filename);
 
 	// .inf -> .ico
 	filename[strlen(filename)-1] = 'o';
