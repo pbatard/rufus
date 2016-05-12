@@ -11120,7 +11120,7 @@ t MSG_287 "شناسايي درايوهاي غير USB"
 
 ################################################################################
 l "pl-PL" "Polish (Polski)" 0x0415
-v 1.0.19
+v 1.0.20
 b "en-US"
 # my info: 6.9.2015,22:39
 
@@ -11592,6 +11592,8 @@ t MSG_283 "Nieprawidłowa sygnatura"
 t MSG_284 "Pobrany plik wykonywalny nie posiada cyfrowej sygnatury."
 t MSG_285 "Pobrany plik wykonywalny jest podpisany przez '%s'.\nTo nie jest rozpoznawana przez nas sygnatura i może "
 	"wskazywać na pewne formy złośliwych zachowań...\nCzy na pewno chcesz uruchomić ten plik?"
+t MSG_286 "Zerowanie dysku: ukończono %0.1f%%"
+t MSG_287 "Wykrywanie dysków wymiennych nie-USB"
 
 ################################################################################
 l "pt-BR" "Portuguese Brazilian (Português do Brasil)" 0x0416
