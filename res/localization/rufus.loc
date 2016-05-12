@@ -8021,11 +8021,6 @@ t MSG_102 "ご使用の環境ではWIMファイルからファイルを抽出で
 	"EFIでのブートを必要とするWindows 7とWindows Vista用のUSBドライブを作るためには、WIMファイルを展開できる必要があります。"
 	"7-Zipの最近のバージョンでは展開することができます。\n7-Zipのダウンロードページへ行きますか?"
 t MSG_103 "ダウンロード %s?"
-<<<<<<< HEAD
-# Eg. "Grub4DOS v0.4 or later requires a 'grldr' file to be installed. Because this file
-#      is more than 100 KB in size, and always present on Grub4DOS ISO images, etc."
-=======
->>>>>>> upstream/master
 t MSG_104 "%s 以降の物が内包されており '%s' ファイルが必要になります。\n"
 	"このファイルは100KBより大きいのでRufusに内蔵していません。%s にISO イメージが常時あるためです。"
 	"\n\nRufus で不足しているファイルをダウンロードすることができます:\n"
@@ -8057,11 +8052,6 @@ t MSG_114 "このイメージは Syslinux %s%s を使用しますが、このア
 	"注意: ファイルは現在のディレクトリへダウンロードされます。新しいファイルが既に現在のディレクトリにある場合、"
 	"ダウンロードせず自動的に再使用します。\n"
 t MSG_115 "ダウンロードが必要"
-<<<<<<< HEAD
-# Note: You should be able to test this message with Super Grub2 Disk ISO:
-# http://forja.cenatic.es/frs/download.php/file/1757/super_grub2_disk_hybrid_2.00s2.iso (11 MB)
-=======
->>>>>>> upstream/master
 t MSG_116 "このイメージはGrub %s を使いますが、このアプリケーションには Grub %sのインストールファイルのみ"
 	"内蔵しています。\n\n各々のGrubのバージョンは互いに互換性はなく、使用できません。"
 	"しかし、Rufusはイメージと一致したバージョンのGrubインストールファイル('core.img')"
@@ -8198,10 +8188,6 @@ t MSG_234 "Syslinux %s をインストール中..."
 t MSG_235 "不良ブロック:%s %d/%d - %0.2f%% (%d/%d/%d エラー)"
 t MSG_236 "不良ブロック:ランダムパターンでテスト"
 t MSG_237 "不良ブロック:パターン 0x%02X でテスト"
-<<<<<<< HEAD
-# eg. "Partitioning (MBR)..."
-=======
->>>>>>> upstream/master
 t MSG_238 "パーティション分割中 (%s)..."
 t MSG_239 "パーティション削除中..."
 t MSG_240 "ダウンロード中 %s: 接続中..."
@@ -8242,19 +8228,11 @@ t MSG_271 "イメージのチェックサムを計算中 : %0.1f%% 完了"
 t MSG_272 "選択したイメージのMD5、SHA1、SHA256チェックサムを計算します。"
 t MSG_273 "アプリケーションの使用言語を変更"
 t MSG_274 "「ISOHybrid｣イメージを検出しました"
-<<<<<<< HEAD
-# '%s' below will be replaced with your translations for MSG_036 ("ISO Image") and MSG_095 ("DD Image")
-=======
->>>>>>> upstream/master
 t MSG_275 "選択されたイメージは「ISOHybrid｣です。下記のいずれかの方法で書き込むことができます: "
 	"%s (ファイルコピー)モード又は %s (ディスクイメージ)モード。\n"
 	"書き込み後、ドライブへフルアクセスできる様、Rufusは %s を推奨します。\n"
 	"ブート中エラーが発生する場合には、%s モードで再度試してみてください。\n\n"
 	"このイメージを書き込む際に使用するモードを選択してください:"
-<<<<<<< HEAD
-# '%s' below will be replaced with your translation for MSG_036 ("ISO Image")
-=======
->>>>>>> upstream/master
 t MSG_276 "%sモードで書き込む(推奨)"
 # '%s' below will be replaced with your translation for MSG_095 ("DD Image")
 t MSG_277 "%sモードで書き込む"
