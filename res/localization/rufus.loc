@@ -8200,7 +8200,6 @@ t MSG_246 "Rufusの新しいバージョンを利用できます!"
 t MSG_247 "Rufusの新しいバージョンはありませんでした"
 t MSG_248 "アプリケーションのレジストリキーは正常に削除できました"
 t MSG_249 "アプリケーションのレジストリキーの削除に失敗しました"
-# eg. "Fixed disk detection enabled" "ISO size check disabled"
 t MSG_250 "%s 有効"
 t MSG_251 "%s 無効"
 t MSG_252 "サイズの確認"
@@ -8213,9 +8212,7 @@ t MSG_258 "Rock Ridgeのサポート"
 t MSG_259 "強制的にアップデート"
 t MSG_260 "NTFS圧縮"
 t MSG_261 "イメージを書き込み中: %0.1f%% 完了"
-# Cheat mode message to disable ISO Support so that only DD images can be opened
 t MSG_262 "ISOのサポート"
-# Cheat mode to force legacy size units, where 1 KB is 1024 bytes and NOT that fake 1000 bytes abomination!
 t MSG_263 "適切なサイズの値を使用してください"
 t MSG_264 "ディレクトリを削除しています '%s'"
 t MSG_265 "VMWareディスクを検出"
@@ -8234,12 +8231,7 @@ t MSG_275 "選択されたイメージは「ISOHybrid｣です。下記のいず
 	"ブート中エラーが発生する場合には、%s モードで再度試してみてください。\n\n"
 	"このイメージを書き込む際に使用するモードを選択してください:"
 t MSG_276 "%sモードで書き込む(推奨)"
-# '%s' below will be replaced with your translation for MSG_095 ("DD Image")
 t MSG_277 "%sモードで書き込む"
-# The following will be used for new controls of the Rufus 3.0 interface
-# They are added as messages, so that I will have them available when needed.
-# 278 & 280 will be dropdown titles, similar to how IDS_DEVICE_TXT or IDS_PARTITION_TYPE_TXT are used
-# 279 & 281 will be items that can appear in the dropdowns
 t MSG_278 "ブートの種類"
 t MSG_279 "非ブート"
 t MSG_280 "イメージ選択"
