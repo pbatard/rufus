@@ -9152,7 +9152,7 @@ t MSG_287 "neUSB disku noteikšana"
 
 ################################################################################
 l "lt-LT" "Lithuanian (Lietuvių)" 0x0427
-v 1.0.19
+v 1.0.20
 b "en-US"
 
 # Main dialog
@@ -9610,6 +9610,8 @@ t MSG_283 "Negaliojantis parašas"
 t MSG_284 "Atsiųstas vykdomasis failas neturi skaitmeninio parašo."
 t MSG_285 "Atsiųstą vykdomąjį failą pasirašė '%s'.\nŠio parašo mes neatpažįstame ir tai gali "
 	"būti tam tikros kenkėjiškos veiklos požymis...\nAr jūs tikrai norite vykdyti šį failą?"
+t MSG_286 "Nulinamas diskas: %0.1f%% baigta"
+t MSG_287 "Ne USB keičiamų diskų aptikimas"	
 
 ################################################################################
 l "ms-MY" "Malay (Bahasa Malaysia)" 0x043e, 0x083e
