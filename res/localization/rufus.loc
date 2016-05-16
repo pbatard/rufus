@@ -2807,7 +2807,7 @@ t MSG_287 "偵測非USB可移除磁碟"
 
 ################################################################################
 l "hr-HR" "Croatian (Hrvatski)" 0x041a, 0x081a, 0x101a
-v 1.0.19
+v 1.0.20
 b "en-US"
 
 # Main dialog
@@ -3240,6 +3240,8 @@ t MSG_283 "Nevažeći potpis"
 t MSG_284 "Preuzeta aplikacija ne sadrži digitalni potpis."
 t MSG_285 "Preuzeta aplikacija je potpisana od strane ‘%s’.\nOvo nije prepoznatljiv izvor "
 	"i može biti zlonamjeran...\nŽelite li svejedno pokrenuti program?"
+t MSG_286 "Čišćenje uređaja: %0.1f%% završeno"
+t MSG_287 "Prikazivanje ostalih uklonjivih medija"	
 
 ################################################################################
 l "cs-CZ" "Czech (Čeština)" 0x0405
