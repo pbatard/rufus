@@ -3243,7 +3243,7 @@ t MSG_285 "Preuzeta aplikacija je potpisana od strane ‘%s’.\nOvo nije prepoz
 
 ################################################################################
 l "cs-CZ" "Czech (Čeština)" 0x0405
-v 1.0.19
+v 1.0.20
 b "en-US"
 
 # Main dialog
@@ -3689,6 +3689,8 @@ t MSG_283 "Neplatný podpis"
 t MSG_284 "Schází digitální podpis u staženého programu."
 t MSG_285 "Stažený program je podepsán '%s'.\nTento není jsme si vědomi že muže být "
 	"indikovaná jako škodlivý program aktivita...\nOpravdu chcete spustit tento program?"
+t MSG_286 "Nulování jednotky: %0.1f%% komplet"
+t MSG_287 "Detekce Není vložen-USB disk"
 
 ################################################################################
 l "da-DK" "Danish (Dansk)" 0x0406
