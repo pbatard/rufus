@@ -6395,7 +6395,7 @@ t MSG_284 "Το εκτελέσιμο αρχείο που κατεβάσατε δ
 
 ################################################################################
 l "hu-HU" "Hungarian (Magyar)" 0x040e
-v 1.0.19
+v 1.0.20
 b "en-US"
 
 # Main dialog
@@ -6832,6 +6832,7 @@ t MSG_284 "A letöltött futtatható fájl nem rendelkezik digitális aláírás
 t MSG_285 "A letöltött futtatható fájlt '%s' írta alá.\nEz egy általunk nem felismert aláírás, és "
 	"rosszindulatú tevékenységre utalhat...\nBiztosan futtatni akarod ezt a fájlt?"
 t MSG_286 "Meghajtó kinullázása: %0.1f%% kész"
+t MSG_287 "Nem-USB eltávolítható eszközök észlelése"
 
 ################################################################################
 l "id-ID" "Indonesian (Bahasa Indonesia)" 0x0421
