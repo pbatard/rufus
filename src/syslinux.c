@@ -263,7 +263,8 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int fs_type)
 
 	/* Patch ldlinux.sys and the boot sector */
 	if (syslinux_patch(sectors, nsectors, 0, 0, NULL, NULL) < 0) {
-		uprintf("Could not patch Syslinux files");
+		uprintf("Could not patch Syslinux files.");
+		uprintf("WARNING: This could be caused by your firewall having modifed downloaded content, such as 'ldlinux.sys'...");
 		goto out;
 	}
 

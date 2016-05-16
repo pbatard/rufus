@@ -125,7 +125,7 @@ int syslinux_patch(const sector_t *sectp, int nsectors,
     dw = (boot_image_len - sizeof(struct patch_area)) >> 2;
     for (i = 0, wp = (const uint32_t _slimg *)boot_image;
 	 (i <= dw) && ((get_32_sl(wp) != LDLINUX_MAGIC));
-	 i++, wp++)
+	 i++, wp++);
     if (i > dw)	/* Not found */
 	return -1;
     patcharea = (struct patch_area _slimg *)wp;

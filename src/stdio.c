@@ -340,7 +340,7 @@ BOOL WriteFileWithRetry(HANDLE hFile, LPCVOID lpBuffer, DWORD nNumberOfBytesToWr
 				nNumberOfBytesToWrite, nTry < nNumRetries ? retry_msg : "");
 		}
 		else {
-			uprintf("  Write error [0x%8X]%s", GetLastError(), nTry < nNumRetries ? retry_msg : "");
+			uprintf("  Write error [0x%08X]%s", GetLastError(), nTry < nNumRetries ? retry_msg : "");
 		}
 		// If we can't reposition for the next run, just abort
 		if (!readFilePointer)
