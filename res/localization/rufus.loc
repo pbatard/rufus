@@ -5238,7 +5238,7 @@ t MSG_087 "Veuillez cliquer sur le bouton avec un disque pour sélectionner une 
 	"ou décochez l'option \"Créer un disque de démarrage\"."
 t MSG_088 "Image trop large"
 t MSG_089 "L'image est trop large pour être copiée sur le périphérique sélectionné."
-t MSG_090 "Image ISO on supportée"
+t MSG_090 "Image ISO non supportée"
 t MSG_091 "Quand UEFI est sélectionné, seules les images ISO basées sur EFI sont supportées. "
 	"Veuillez sélectionner une image ISO démarrable avec EFI ou sélectionner BIOS pour le système de destination."
 t MSG_092 "Système de fichiers non supporté"
