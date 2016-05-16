@@ -13841,7 +13841,7 @@ t MSG_286 "Anuliranje uređaja: %0.1f%% završeno"
 
 ################################################################################
 l "sk-SK" "Slovak (Slovensky)" 0x041B
-v 1.0.19
+v 1.0.20
 b "en-US"
 
 # Main dialog
@@ -14283,6 +14283,8 @@ t MSG_283 "Neplatný podpis
 t MSG_284 "Stiahnutému inštalátoru chýba digitálny podpis."
 t MSG_285 "Stiahnutý inštalátor podpísal '%s'.\nTento podpis nebol rozoznaný a môže znamenať "
 	"nejakú formu škodlivej aktivity...\nSte si istý, že chcete spustiť tento súbor?"
+t MSG_286 "Vymazávanie zariadenia: %0.1f%% dokončených"
+t MSG_287 "Zisťovanie nie-USB vymeniteľných zariadení" 	
 
 ################################################################################
 l "sl-SI" "Slovenian (Slovenščina)" 0x0424
