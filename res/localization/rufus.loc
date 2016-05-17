@@ -13360,7 +13360,7 @@ t MSG_287 "Выявление не-USB съемных дисков"
 
 ################################################################################
 l "sr-SP" "Serbian (Srpski)" 0x241a, 0x081a, 0x181a, 0x2c1a, 0x701a, 0x7c1a
-v 1.0.19
+v 1.0.20
 b "en-US"
 
 # Main dialog
@@ -13839,6 +13839,7 @@ t MSG_284 "Nedostaje digitalni potpis u izvršnoj datoteci."
 t MSG_285 "Preuzeta izvršna datoteka je potpisana od strane '%s'.\nOvo nije potpis koji prepozanajemo i može "
 	"ukazivati na neki oblik zlonamjerne aktivnosti...\nDa li ste sigurni da želite pokrenuti ovaj program?"
 t MSG_286 "Anuliranje uređaja: %0.1f%% završeno"
+t MSG_287 "Detekcija ne-USB diskova"
 
 ################################################################################
 l "sk-SK" "Slovak (Slovensky)" 0x041B
