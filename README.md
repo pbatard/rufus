@@ -12,12 +12,12 @@ Features
 * Create bootable drives from bootable ISOs (Windows, Linux, etc.)
 * Create bootable drives from bootable disk images, including compressed ones
 * Create [Windows To Go](https://en.wikipedia.org/wiki/Windows_To_Go) drives
-* Twice as fast as Microsoft's USB/DVD tool or UNetbootin, on ISO -> USB creation (1)
+* Twice as fast as Microsoft's USB/DVD tool or UNetbootin, on ISO -> USB creation <sup>(1)</sup>
 * Perform bad blocks checks, including detection of "fake" flash drives
 * Modern and familiar UI, with more than [35 languages natively supported](https://rufus.akeo.ie/translations)
 * Small footprint. No installation required.
 * Portable
-* 100% [Free Software](http://www.gnu.org/philosophy/free-sw.en.html) (GPL v3)
+* 100% [Free Software](http://www.gnu.org/philosophy/free-sw.en.html) ([GPL v3](http://www.gnu.org/licenses/gpl-3.0.en.html))
 
 Compilation
 -----------
@@ -49,7 +49,7 @@ Please use the [GitHub issue tracker](https://github.com/pbatard/rufus/issues)
 for reporting problems or suggesting new features.
 
 
-(1) Tests carried out with a 16 GB USB 3.0 ADATA pen drive on a Core 2 duo/4 GB RAM platform running Windows 7 x64.
+<sup>(1)</sup> Tests carried out with a 16 GB USB 3.0 ADATA pen drive on a Core 2 duo/4 GB RAM platform running Windows 7 x64.
 ISO: `en_windows_7_ultimate_with_sp1_x64_dvd_618240.iso`
 
 | Name of tool | Version | Time |

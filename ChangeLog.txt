@@ -1,10 +1,10 @@
-o Version 2.9 (2016.05.??)
+o Version 2.9 (2016.05.17)
     Add ARM support for UEFI:NTFS
     Fix UEFI:NTFS support for HP and Gigabyte firmwares (with thanks to Rod Smith and linnaea)
     Fix unwanted listing of some internal removable drives
+    Fix the resurgence of a possible Syslinux installation crash
     Fix missing default cluster size default on exFAT for >32GB drives
     Fix the non-removal of the commandline hogger in some corner cases
-    Fix a potential Syslinux crash... again
     Use "modern" file selection dialog on Vista or later (if you can spot the difference, good for you...)
 
 o Version 2.8 (2016.03.22)
