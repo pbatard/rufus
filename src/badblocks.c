@@ -358,6 +358,7 @@ static void pattern_fill(unsigned char *buffer, unsigned int pattern,
 
 	if (pattern == (unsigned int) ~0) {
 		for (ptr = buffer; ptr < buffer + n; ptr++) {
+			// coverity[dont_call]
 			(*ptr) = rand() % (1 << (8 * sizeof(char)));
 		}
 		PrintInfo(3500, MSG_236);
@@ -458,6 +459,7 @@ static unsigned int test_rw(HANDLE hDrive, blk_t last_block, size_t block_size, 
 
 	for (pat_idx = 0; pat_idx < nb_passes; pat_idx++) {
 		if (cancel_ops) goto out;
+		// coverity[dont_call]
 		id_offset = rand() * (block_size-sizeof(blk_t)) / RAND_MAX;
 		pattern_fill(buffer, pattern[pat_idx], blocks_at_once * block_size);
 		uprintf("%sUsing offset %d for fake device check\n", bb_prefix, id_offset);
