@@ -97,6 +97,6 @@ BOOL AltUnmountVolume(const char* drive_name);
 char* AltMountVolume(const char* drive_name, uint8_t part_nr);
 BOOL RemountVolume(char* drive_name);
 BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL mbr_uefi_marker, uint8_t extra_partitions);
-BOOL DeletePartitions(HANDLE hDrive);
+BOOL InitializeDisk(HANDLE hDrive);
 BOOL RefreshDriveLayout(HANDLE hDrive);
 const char* GetPartitionType(BYTE Type);

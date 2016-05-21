@@ -1668,19 +1668,21 @@ DWORD WINAPI FormatThread(void* param)
 		UpdateProgress(OP_ANALYZE_MBR, -1.0f);
 	}
 
+	if (zero_drive) {
+		WriteDrive(hPhysicalDrive, NULL);
+		goto out;
+	}
+
 	// Zap any existing partitions. This helps prevent access errors.
-	// As this creates issues with FAT16 formatted MS drives, only do this for other filesystems
-	if ( (fs != FS_FAT16) && (!DeletePartitions(hPhysicalDrive)) ) {
+	// Note, Microsoft's way of cleaning partitions (IOCTL_DISK_CREATE_DISK, which is what we apply
+	// in InitializeDisk) is *NOT ENOUGH* to reset a disk and can render it inoperable for partitioning
+	// or formatting under Windows. See https://github.com/pbatard/rufus/issues/759 for details.
+	if ((!ClearMBRGPT(hPhysicalDrive, SelectedDrive.DiskSize, SectorSize, FALSE)) || (!InitializeDisk(hPhysicalDrive)) ) {
 		uprintf("Could not reset partitions\n");
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_PARTITION_FAILURE;
 		goto out;
 	}
 	CreateThread(NULL, 0, CloseFormatPromptThread, NULL, 0, NULL);
-
-	if (zero_drive) {
-		WriteDrive(hPhysicalDrive, NULL);
-		goto out;
-	}
 
 	if (IsChecked(IDC_BADBLOCKS)) {
 		do {
@@ -1736,15 +1738,15 @@ DWORD WINAPI FormatThread(void* param)
 			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANCELLED;
 			goto out;
 		}
-	}
 
-	// Especially after destructive badblocks test, you must zero the MBR/GPT completely
-	// before repartitioning. Else, all kind of bad things happen.
-	if (!ClearMBRGPT(hPhysicalDrive, SelectedDrive.DiskSize, SectorSize, use_large_fat32)) {
-		uprintf("unable to zero MBR/GPT\n");
-		if (!IS_ERROR(FormatStatus))
-			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_WRITE_FAULT;
-		goto out;
+		// Especially after destructive badblocks test, you must zero the MBR/GPT completely
+		// before repartitioning. Else, all kind of bad things happen.
+		if (!ClearMBRGPT(hPhysicalDrive, SelectedDrive.DiskSize, SectorSize, use_large_fat32)) {
+			uprintf("unable to zero MBR/GPT\n");
+			if (!IS_ERROR(FormatStatus))
+				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_WRITE_FAULT;
+			goto out;
+		}
 	}
 
 	// Write an image file

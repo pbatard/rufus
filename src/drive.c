@@ -1247,8 +1247,8 @@ BOOL RefreshDriveLayout(HANDLE hDrive)
 	return r;
 }
 
-/* Delete the disk partition table */
-BOOL DeletePartitions(HANDLE hDrive)
+/* Initialize disk for partitioning */
+BOOL InitializeDisk(HANDLE hDrive)
 {
 	BOOL r;
 	DWORD size;
