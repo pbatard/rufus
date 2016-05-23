@@ -113,10 +113,10 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int fs_type)
 
 	// 4K sector size workaround
 	SECTOR_SHIFT = 0;
-	SECTOR_SIZE = SelectedDrive.Geometry.BytesPerSector;
+	SECTOR_SIZE = SelectedDrive.SectorSize;
 	while (SECTOR_SIZE>>=1)
 		SECTOR_SHIFT++;
-	SECTOR_SIZE = SelectedDrive.Geometry.BytesPerSector;
+	SECTOR_SIZE = SelectedDrive.SectorSize;
 	LIBFAT_SECTOR_SHIFT = SECTOR_SHIFT;
 	LIBFAT_SECTOR_SIZE = SECTOR_SIZE;
 	LIBFAT_SECTOR_MASK = SECTOR_SIZE - 1;

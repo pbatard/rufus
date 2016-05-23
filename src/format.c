@@ -747,7 +747,7 @@ static BOOL FormatDrive(DWORD DriveIndex)
 	fs_index = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
 
 	uprintf("%s format was selected\n", IsChecked(IDC_QUICKFORMAT)?"Quick":"Slow");
-	pfFormatEx(wVolumeName, SelectedDrive.Geometry.MediaType, wFSType, wLabel,
+	pfFormatEx(wVolumeName, SelectedDrive.MediaType, wFSType, wLabel,
 		IsChecked(IDC_QUICKFORMAT), ulClusterSize, FormatExCallback);
 
 	if ((fs == FS_NTFS) && (enable_ntfs_compression) && (pfEnableVolumeCompression != NULL)) {
@@ -859,14 +859,14 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 
 	// FormatEx rewrites the MBR and removes the LBA attribute of FAT16
 	// and FAT32 partitions - we need to correct this in the MBR
-	buf = (unsigned char*)malloc(SelectedDrive.Geometry.BytesPerSector);
+	buf = (unsigned char*)malloc(SelectedDrive.SectorSize);
 	if (buf == NULL) {
 		uprintf("Could not allocate memory for MBR");
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_NOT_ENOUGH_MEMORY;
 		goto out;
 	}
 
-	if (!read_sectors(hPhysicalDrive, SelectedDrive.Geometry.BytesPerSector, 0, 1, buf)) {
+	if (!read_sectors(hPhysicalDrive, SelectedDrive.SectorSize, 0, 1, buf)) {
 		uprintf("Could not read MBR\n");
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_READ_FAULT;
 		goto out;
@@ -897,14 +897,14 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 		uprintf("Set bootable USB partition as 0x%02X\n", buf[0x1be]);
 	}
 
-	if (!write_sectors(hPhysicalDrive, SelectedDrive.Geometry.BytesPerSector, 0, 1, buf)) {
+	if (!write_sectors(hPhysicalDrive, SelectedDrive.SectorSize, 0, 1, buf)) {
 		uprintf("Could not write MBR\n");
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_WRITE_FAULT;
 		goto out;
 	}
 
 	fake_fd._handle = (char*)hPhysicalDrive;
-	set_bytes_per_sector(SelectedDrive.Geometry.BytesPerSector);
+	set_bytes_per_sector(SelectedDrive.SectorSize);
 
 	// What follows is really a case statement with complex conditions listed
 	// by order of preference
@@ -987,10 +987,10 @@ static BOOL WriteSBR(HANDLE hPhysicalDrive)
 	FILE* fp = (FILE*)&fake_fd;
 
 	fake_fd._handle = (char*)hPhysicalDrive;
-	set_bytes_per_sector(SelectedDrive.Geometry.BytesPerSector);
+	set_bytes_per_sector(SelectedDrive.SectorSize);
 	// Ensure that we have sufficient space for the SBR
 	max_size = IsChecked(IDC_EXTRA_PARTITION) ?
-		(DWORD)(SelectedDrive.Geometry.BytesPerSector * SelectedDrive.Geometry.SectorsPerTrack) : 1*MB;
+		(DWORD)(SelectedDrive.SectorsPerTrack * SelectedDrive.SectorSize) : 1*MB;
 	max_size -= mbr_size;
 	// Syslinux has precedence over Grub
 	if ((bt == BT_ISO) && (!HAS_SYSLINUX(img_report))) {
@@ -1059,7 +1059,7 @@ static BOOL WritePBR(HANDLE hLogicalVolume)
 	const char* using_msg = "Using %s %s partition boot record\n";
 
 	fake_fd._handle = (char*)hLogicalVolume;
-	set_bytes_per_sector(SelectedDrive.Geometry.BytesPerSector);
+	set_bytes_per_sector(SelectedDrive.SectorSize);
 
 	switch (ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem))) {
 	case FS_FAT16:
@@ -1103,7 +1103,7 @@ static BOOL WritePBR(HANDLE hLogicalVolume)
 			// Disk Drive ID needs to be corrected on XP
 			if (!write_partition_physical_disk_drive_id_fat32(fp))
 				break;
-			fake_fd._offset += 6 * SelectedDrive.Geometry.BytesPerSector;
+			fake_fd._offset += 6 * SelectedDrive.SectorSize;
 		}
 		return TRUE;
 	case FS_NTFS:
@@ -1281,7 +1281,7 @@ static BOOL SetupWinToGo(const char* drive_name, BOOL use_ms_efi)
 
 	uprintf("Windows To Go mode selected");
 	// Additional sanity checks
-	if ( ((use_ms_efi) && (SelectedDrive.Geometry.MediaType != FixedMedia)) ||
+	if ( ((use_ms_efi) && (SelectedDrive.MediaType != FixedMedia)) ||
 		 ((nWindowsVersion < WINDOWS_8) || ((WimExtractCheck() & 4) == 0)) ) {
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_NOT_SUPPORTED;
 		return FALSE;
@@ -1324,18 +1324,18 @@ static BOOL SetupWinToGo(const char* drive_name, BOOL use_ms_efi)
 		// According to Ubuntu (https://bugs.launchpad.net/ubuntu/+source/partman-efi/+bug/811485) you want to use FAT32.
 		// However, you have to be careful that the cluster size needs to be greater or equal to the sector size, which
 		// in turn has an impact on the minimum EFI partition size we can create (see ms_efi_size_MB in drive.c)
-		if (SelectedDrive.Geometry.BytesPerSector <= 1024)
+		if (SelectedDrive.SectorSize <= 1024)
 			cluster_size = 1024;
-		else if (SelectedDrive.Geometry.BytesPerSector <= 4096)
+		else if (SelectedDrive.SectorSize <= 4096)
 			cluster_size = 4096;
 		else	// Go for broke
-			cluster_size = (ULONG)SelectedDrive.Geometry.BytesPerSector;
+			cluster_size = (ULONG)SelectedDrive.SectorSize;
 		fs_index = 1;	// FAT32
 		task_number = 0;
 		wVolumeName[0] = ms_efi[0];
 
 		// Boy do you *NOT* want to specify a label here, and spend HOURS figuring out why your EFI partition cannot boot...
-		pfFormatEx(wVolumeName, SelectedDrive.Geometry.MediaType, L"FAT32", L"", TRUE, cluster_size, FormatExCallback);
+		pfFormatEx(wVolumeName, SelectedDrive.MediaType, L"FAT32", L"", TRUE, cluster_size, FormatExCallback);
 		if (IS_ERROR(FormatStatus)) {
 			uprintf("Failed to format EFI partition");
 			AltUnmountVolume(ms_efi);
@@ -1460,7 +1460,6 @@ static void update_progress(const uint64_t processed_bytes)
 /* Write an image file or zero a drive */
 static BOOL WriteDrive(HANDLE hPhysicalDrive, HANDLE hSourceImage)
 {
-	const DWORD SectorSize = SelectedDrive.Geometry.BytesPerSector;
 	BOOL s, ret = FALSE;
 	LARGE_INTEGER li;
 	DWORD rSize, wSize, BufSize;
@@ -1482,15 +1481,15 @@ static BOOL WriteDrive(HANDLE hPhysicalDrive, HANDLE hSourceImage)
 	} else {
 		uprintf(hSourceImage?"Writing Image...":"Zeroing drive...");
 		// Our buffer size must be a multiple of the sector size
-		BufSize = ((DD_BUFFER_SIZE + SectorSize - 1) / SectorSize) * SectorSize;
-		buffer = (uint8_t*)calloc(BufSize + SectorSize, 1);	// +1 sector for align
+		BufSize = ((DD_BUFFER_SIZE + SelectedDrive.SectorSize - 1) / SelectedDrive.SectorSize) * SelectedDrive.SectorSize;
+		buffer = (uint8_t*)calloc(BufSize + SelectedDrive.SectorSize, 1);	// +1 sector for align
 		if (buffer == NULL) {
 			FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_NOT_ENOUGH_MEMORY;
 			uprintf("could not allocate disk write buffer");
 			goto out;
 		}
 		// http://msdn.microsoft.com/en-us/library/windows/desktop/aa365747.aspx does buffer sector alignment
-		aligned_buffer = ((void *)((((uintptr_t)(buffer)) + (SectorSize)-1) & (~(((uintptr_t)(SectorSize)) - 1))));
+		aligned_buffer = ((void *)((((uintptr_t)(buffer)) + (SelectedDrive.SectorSize)-1) & (~(((uintptr_t)(SelectedDrive.SectorSize)) - 1))));
 
 		// Don't bother trying for something clever, using double buffering overlapped and whatnot:
 		// With Windows' default optimizations, sync read + sync write for sequential operations
@@ -1520,8 +1519,8 @@ static BOOL WriteDrive(HANDLE hPhysicalDrive, HANDLE hSourceImage)
 			}
 
 			// WriteFile fails unless the size is a multiple of sector size
-			if (rSize % SectorSize != 0)
-				rSize = ((rSize + SectorSize - 1) / SectorSize) * SectorSize;
+			if (rSize % SelectedDrive.SectorSize != 0)
+				rSize = ((rSize + SelectedDrive.SectorSize - 1) / SelectedDrive.SectorSize) * SelectedDrive.SectorSize;
 			for (i = 0; i < WRITE_RETRIES; i++) {
 				CHECK_FOR_USER_CANCEL;
 				s = WriteFile(hPhysicalDrive, aligned_buffer, rSize, &wSize, NULL);
@@ -1565,7 +1564,6 @@ DWORD WINAPI FormatThread(void* param)
 {
 	int i, r, pt, tt, fs, bt;
 	BOOL ret, use_large_fat32, windows_to_go;
-	const DWORD SectorSize = SelectedDrive.Geometry.BytesPerSector;
 	DWORD DriveIndex = (DWORD)(uintptr_t)param;
 	HANDLE hPhysicalDrive = INVALID_HANDLE_VALUE;
 	HANDLE hLogicalVolume = INVALID_HANDLE_VALUE;
@@ -1677,7 +1675,7 @@ DWORD WINAPI FormatThread(void* param)
 	// Note, Microsoft's way of cleaning partitions (IOCTL_DISK_CREATE_DISK, which is what we apply
 	// in InitializeDisk) is *NOT ENOUGH* to reset a disk and can render it inoperable for partitioning
 	// or formatting under Windows. See https://github.com/pbatard/rufus/issues/759 for details.
-	if ((!ClearMBRGPT(hPhysicalDrive, SelectedDrive.DiskSize, SectorSize, FALSE)) || (!InitializeDisk(hPhysicalDrive)) ) {
+	if ((!ClearMBRGPT(hPhysicalDrive, SelectedDrive.DiskSize, SelectedDrive.SectorSize, FALSE)) || (!InitializeDisk(hPhysicalDrive)) ) {
 		uprintf("Could not reset partitions\n");
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_PARTITION_FAILURE;
 		goto out;
@@ -1704,12 +1702,12 @@ DWORD WINAPI FormatThread(void* param)
 				fflush(log_fd);
 			}
 
-			if (!BadBlocks(hPhysicalDrive, SelectedDrive.DiskSize, SectorSize,
+			if (!BadBlocks(hPhysicalDrive, SelectedDrive.DiskSize, SelectedDrive.SectorSize,
 				ComboBox_GetCurSel(hNBPasses)+1, &report, log_fd)) {
 				uprintf("Bad blocks: Check failed.\n");
 				if (!IS_ERROR(FormatStatus))
 					FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_BADBLOCKS_FAILURE);
-				ClearMBRGPT(hPhysicalDrive, SelectedDrive.DiskSize, SectorSize, FALSE);
+				ClearMBRGPT(hPhysicalDrive, SelectedDrive.DiskSize, SelectedDrive.SectorSize, FALSE);
 				fclose(log_fd);
 				_unlink(logfile);
 				goto out;
@@ -1741,7 +1739,7 @@ DWORD WINAPI FormatThread(void* param)
 
 		// Especially after destructive badblocks test, you must zero the MBR/GPT completely
 		// before repartitioning. Else, all kind of bad things happen.
-		if (!ClearMBRGPT(hPhysicalDrive, SelectedDrive.DiskSize, SectorSize, use_large_fat32)) {
+		if (!ClearMBRGPT(hPhysicalDrive, SelectedDrive.DiskSize, SelectedDrive.SectorSize, use_large_fat32)) {
 			uprintf("unable to zero MBR/GPT\n");
 			if (!IS_ERROR(FormatStatus))
 				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_WRITE_FAULT;

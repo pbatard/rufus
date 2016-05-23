@@ -283,7 +283,7 @@ static BOOL DefineClusterSizes(void)
 
 		// ReFS (only supported for Windows 8.1 and later and for fixed disks)
 		if (SelectedDrive.DiskSize >= 512*MB) {
-			if ((nWindowsVersion >= WINDOWS_8_1) && (SelectedDrive.Geometry.MediaType == FixedMedia)) {
+			if ((nWindowsVersion >= WINDOWS_8_1) && (SelectedDrive.MediaType == FixedMedia)) {
 				SelectedDrive.ClusterSize[FS_REFS].Allowed = SINGLE_CLUSTERSIZE_DEFAULT;
 				SelectedDrive.ClusterSize[FS_REFS].Default = 1;
 			}
@@ -294,7 +294,7 @@ static BOOL DefineClusterSizes(void)
 	for (fs=0; fs<FS_MAX; fs++) {
 		// Remove all cluster sizes that are below the sector size
 		if (SelectedDrive.ClusterSize[fs].Allowed != SINGLE_CLUSTERSIZE_DEFAULT) {
-			SelectedDrive.ClusterSize[fs].Allowed &= ~(SelectedDrive.Geometry.BytesPerSector - 1);
+			SelectedDrive.ClusterSize[fs].Allowed &= ~(SelectedDrive.SectorSize - 1);
 			if ((SelectedDrive.ClusterSize[fs].Default & SelectedDrive.ClusterSize[fs].Allowed) == 0)
 				// We lost our default => Use rightmost bit to select the new one
 				SelectedDrive.ClusterSize[fs].Default =
@@ -1284,7 +1284,7 @@ static BOOL BootCheck(void)
 				// Windows To Go only works for NTFS
 				MessageBoxExU(hMainDialog, lmprintf(MSG_097, "Windows To Go"), lmprintf(MSG_092), MB_OK|MB_ICONERROR|MB_IS_RTL, selected_langid);
 				return FALSE;
-			} else if (SelectedDrive.Geometry.MediaType != FixedMedia) {
+			} else if (SelectedDrive.MediaType != FixedMedia) {
 				if ((tt == TT_UEFI) && (pt == PARTITION_STYLE_GPT)) {
 					// We're screwed since we need access to 2 partitions at the same time to set this, which
 					// Windows can't do. Cue in Arthur's Theme: "♫ I know it's stupid... but it's true. ♫"
@@ -2498,8 +2498,8 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 					zero_drive = FALSE;
 					break;
 				}
-				if ((!zero_drive) && (IsChecked(IDC_BOOT)) && (SelectedDrive.Geometry.BytesPerSector != 512) &&
-					(MessageBoxExU(hMainDialog, lmprintf(MSG_196, SelectedDrive.Geometry.BytesPerSector),
+				if ((!zero_drive) && (IsChecked(IDC_BOOT)) && (SelectedDrive.SectorSize != 512) &&
+					(MessageBoxExU(hMainDialog, lmprintf(MSG_196, SelectedDrive.SectorSize),
 						lmprintf(MSG_197), MB_OKCANCEL|MB_ICONWARNING|MB_IS_RTL, selected_langid) == IDCANCEL)) {
 					format_op_in_progress = FALSE;
 					break;

@@ -57,14 +57,16 @@ static __inline BOOL UnlockDrive(HANDLE hDrive) {
 
 /* Current drive info */
 typedef struct {
-	DWORD DeviceNumber;
 	LONGLONG DiskSize;
-	DISK_GEOMETRY Geometry;
+	DWORD DeviceNumber;
+	DWORD SectorsPerTrack;
+	DWORD SectorSize;
 	DWORD FirstSector;
-	char proposed_label[16];
+	MEDIA_TYPE MediaType;
 	int PartitionType;
 	int nPartitions;	// number of partitions we actually care about
 	int FSType;
+	char proposed_label[16];
 	BOOL has_protective_mbr;
 	BOOL has_mbr_uefi_marker;
 	struct {

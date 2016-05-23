@@ -592,7 +592,7 @@ BOOL AnalyzeMBR(HANDLE hPhysicalDrive, const char* TargetName)
 	int i;
 
 	fake_fd._handle = (char*)hPhysicalDrive;
-	set_bytes_per_sector(SelectedDrive.Geometry.BytesPerSector);
+	set_bytes_per_sector(SelectedDrive.SectorSize);
 
 	if (!is_br(fp)) {
 		uprintf("%s does not have an x86 %s\n", TargetName, mbr_name);
@@ -628,7 +628,7 @@ BOOL AnalyzePBR(HANDLE hLogicalVolume)
 	int i;
 
 	fake_fd._handle = (char*)hLogicalVolume;
-	set_bytes_per_sector(SelectedDrive.Geometry.BytesPerSector);
+	set_bytes_per_sector(SelectedDrive.SectorSize);
 
 	if (!is_br(fp)) {
 		uprintf("Volume does not have an x86 %s\n", pbr_name);
@@ -690,15 +690,18 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 		safe_closehandle(hPhysical);
 		return 0;
 	}
-	if (DiskGeometry->Geometry.BytesPerSector < 512) {
-		suprintf("Warning: Drive 0x%02x reports a sector size of %d - Correcting to 512 bytes.\n",
-			DriveIndex, DiskGeometry->Geometry.BytesPerSector);
-		DiskGeometry->Geometry.BytesPerSector = 512;
-	}
 	SelectedDrive.DiskSize = DiskGeometry->DiskSize.QuadPart;
-	memcpy(&SelectedDrive.Geometry, &DiskGeometry->Geometry, sizeof(DISK_GEOMETRY));
-	suprintf("Disk type: %s, Sector Size: %d bytes\n", (DiskGeometry->Geometry.MediaType == FixedMedia)?"Fixed":"Removable",
-		DiskGeometry->Geometry.BytesPerSector);
+	SelectedDrive.SectorSize = DiskGeometry->Geometry.BytesPerSector;
+	if (SelectedDrive.SectorSize < 512) {
+		suprintf("Warning: Drive 0x%02x reports a sector size of %d - Correcting to 512 bytes.\n",
+			DriveIndex, SelectedDrive.SectorSize);
+		SelectedDrive.SectorSize = 512;
+	}
+	SelectedDrive.SectorsPerTrack = DiskGeometry->Geometry.SectorsPerTrack;
+	SelectedDrive.MediaType = DiskGeometry->Geometry.MediaType;
+
+	suprintf("Disk type: %s, Sector Size: %d bytes\n", (SelectedDrive.MediaType == FixedMedia)?"Fixed":"Removable",
+		SelectedDrive.SectorSize);
 	suprintf("Cylinders: %" PRIi64 ", TracksPerCylinder: %d, SectorsPerTrack: %d\n",
 		DiskGeometry->Geometry.Cylinders, DiskGeometry->Geometry.TracksPerCylinder, DiskGeometry->Geometry.SectorsPerTrack);
 
@@ -1031,7 +1034,7 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 	BOOL r;
 	DWORD i, size, bufsize, pn = 0;
 	LONGLONG main_part_size_in_sectors, extra_part_size_in_tracks = 0, ms_efi_size;
-	const LONGLONG bytes_per_track = ((LONGLONG)SelectedDrive.Geometry.SectorsPerTrack) * SelectedDrive.Geometry.BytesPerSector;
+	const LONGLONG bytes_per_track = ((LONGLONG)SelectedDrive.SectorsPerTrack) * SelectedDrive.SectorSize;
 
 	PrintInfoDebug(0, MSG_238, PartitionTypeName[partition_style]);
 
@@ -1078,7 +1081,7 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 	// Set our main data partition
 	main_part_size_in_sectors = (SelectedDrive.DiskSize - DriveLayoutEx.PartitionEntry[pn].StartingOffset.QuadPart) /
 		// Need 33 sectors at the end for secondary GPT
-		SelectedDrive.Geometry.BytesPerSector - ((partition_style == PARTITION_STYLE_GPT)?33:0);
+		SelectedDrive.SectorSize - ((partition_style == PARTITION_STYLE_GPT)?33:0);
 	if (main_part_size_in_sectors <= 0)
 		return FALSE;
 
@@ -1088,9 +1091,9 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 		if (extra_partitions & XP_EFI) {
 			// The size of the EFI partition depends on the minimum size we're able to format in FAT32,
 			// which in turn depends on the cluster size used, which in turn depends on the disk sector size.
-			if (SelectedDrive.Geometry.BytesPerSector <= 1024)
+			if (SelectedDrive.SectorSize <= 1024)
 				ms_efi_size = 100*MB;
-			else if (SelectedDrive.Geometry.BytesPerSector <= 4096)
+			else if (SelectedDrive.SectorSize <= 4096)
 				ms_efi_size = 300*MB;
 			else
 				ms_efi_size = 1200*MB;	// That'll teach you to have a nonstandard disk!
@@ -1101,12 +1104,12 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 			extra_part_size_in_tracks = 1;	// One track for the extra partition
 		uprintf("Reserved %" PRIi64" tracks (%s) for extra partition", extra_part_size_in_tracks,
 			SizeToHumanReadable(extra_part_size_in_tracks * bytes_per_track, TRUE, FALSE));
-		main_part_size_in_sectors = ((main_part_size_in_sectors / SelectedDrive.Geometry.SectorsPerTrack) -
-			extra_part_size_in_tracks) * SelectedDrive.Geometry.SectorsPerTrack;
+		main_part_size_in_sectors = ((main_part_size_in_sectors / SelectedDrive.SectorsPerTrack) -
+			extra_part_size_in_tracks) * SelectedDrive.SectorsPerTrack;
 		if (main_part_size_in_sectors <= 0)
 			return FALSE;
 	}
-	DriveLayoutEx.PartitionEntry[pn].PartitionLength.QuadPart = main_part_size_in_sectors * SelectedDrive.Geometry.BytesPerSector;
+	DriveLayoutEx.PartitionEntry[pn].PartitionLength.QuadPart = main_part_size_in_sectors * SelectedDrive.SectorSize;
 	if (partition_style == PARTITION_STYLE_MBR) {
 		DriveLayoutEx.PartitionEntry[pn].Mbr.BootIndicator = IsChecked(IDC_BOOT);
 		switch (file_system) {
@@ -1139,7 +1142,7 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 		DriveLayoutEx.PartitionEntry[pn].StartingOffset.QuadPart = DriveLayoutEx.PartitionEntry[pn-1].StartingOffset.QuadPart +
 			DriveLayoutEx.PartitionEntry[pn-1].PartitionLength.QuadPart;
 		DriveLayoutEx.PartitionEntry[pn].PartitionLength.QuadPart = (extra_partitions & XP_UEFI_NTFS)?uefi_ntfs_size:
-			extra_part_size_in_tracks * SelectedDrive.Geometry.SectorsPerTrack * SelectedDrive.Geometry.BytesPerSector;
+			extra_part_size_in_tracks * SelectedDrive.SectorsPerTrack * SelectedDrive.SectorSize;
 		if (partition_style == PARTITION_STYLE_GPT) {
 			DriveLayoutEx.PartitionEntry[pn].Gpt.PartitionType = (extra_partitions & XP_UEFI_NTFS)?
 				PARTITION_BASIC_DATA_GUID:PARTITION_SYSTEM_GUID;
@@ -1149,7 +1152,7 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 			DriveLayoutEx.PartitionEntry[pn].Mbr.PartitionType = (extra_partitions & XP_UEFI_NTFS)?0xef:RUFUS_EXTRA_PARTITION_TYPE;
 			if (extra_partitions & XP_COMPAT)
 				// Set the one track compatibility partition to be all hidden sectors
-				DriveLayoutEx.PartitionEntry[pn].Mbr.HiddenSectors = SelectedDrive.Geometry.SectorsPerTrack;
+				DriveLayoutEx.PartitionEntry[pn].Mbr.HiddenSectors = SelectedDrive.SectorsPerTrack;
 		}
 
 		// We need to write the UEFI:NTFS partition before we refresh the disk
@@ -1207,8 +1210,8 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 		DriveLayoutEx.PartitionStyle = PARTITION_STYLE_GPT;
 		DriveLayoutEx.PartitionCount = pn;
 		// At the very least, a GPT disk has 34 reserved sectors at the beginning and 33 at the end.
-		DriveLayoutEx.Type.Gpt.StartingUsableOffset.QuadPart = 34 * SelectedDrive.Geometry.BytesPerSector;
-		DriveLayoutEx.Type.Gpt.UsableLength.QuadPart = SelectedDrive.DiskSize - (34+33) * SelectedDrive.Geometry.BytesPerSector;
+		DriveLayoutEx.Type.Gpt.StartingUsableOffset.QuadPart = 34 * SelectedDrive.SectorSize;
+		DriveLayoutEx.Type.Gpt.UsableLength.QuadPart = SelectedDrive.DiskSize - (34+33) * SelectedDrive.SectorSize;
 		DriveLayoutEx.Type.Gpt.MaxPartitionCount = MAX_GPT_PARTITIONS;
 		DriveLayoutEx.Type.Gpt.DiskId = CreateDisk.Gpt.DiskId;
 		break;
