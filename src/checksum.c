@@ -453,26 +453,24 @@ static void md5_transform(SUM_CONTEXT *ctx, const unsigned char *data)
 /* Update the message digest with the contents of the buffer (SHA-1) */
 static void sha1_write(SUM_CONTEXT *ctx, const unsigned char *buf, size_t len)
 {
-	size_t t;
+	size_t num = ctx->bytecount & 0x3f;
 
 	/* Update bytecount */
 	ctx->bytecount += len;
 
-	t = ctx->bytecount & 0x3f;
-
 	/* Handle any leading odd-sized chunks */
-	if (t) {
-		unsigned char *p = ctx->buf + t;
+	if (num) {
+		unsigned char *p = ctx->buf + num;
 
-		t = 64 - t;
-		if (len < t) {
+		num = 64 - num;
+		if (len < num) {
 			memcpy(p, buf, len);
 			return;
 		}
-		memcpy(p, buf, t);
+		memcpy(p, buf, num);
 		sha1_transform(ctx, ctx->buf);
-		buf += t;
-		len -= t;
+		buf += num;
+		len -= num;
 	}
 
 	/* Process data in 64-byte chunks */
@@ -490,26 +488,24 @@ static void sha1_write(SUM_CONTEXT *ctx, const unsigned char *buf, size_t len)
 /* Update the message digest with the contents of the buffer (SHA-256) */
 static void sha256_write(SUM_CONTEXT *ctx, const unsigned char *buf, size_t len)
 {
-	size_t t;
+	size_t num = ctx->bytecount & 0x3f;
 
 	/* Update bytecount */
 	ctx->bytecount += len;
 
-	t = ctx->bytecount & 0x3f;
-
 	/* Handle any leading odd-sized chunks */
-	if (t) {
-		unsigned char *p = ctx->buf + t;
+	if (num) {
+		unsigned char *p = ctx->buf + num;
 
-		t = 64 - t;
-		if (len < t) {
+		num = 64 - num;
+		if (len < num) {
 			memcpy(p, buf, len);
 			return;
 		}
-		memcpy(p, buf, t);
+		memcpy(p, buf, num);
 		sha256_transform(ctx, ctx->buf);
-		buf += t;
-		len -= t;
+		buf += num;
+		len -= num;
 	}
 
 	/* Process data in 64-byte chunks */
@@ -527,26 +523,24 @@ static void sha256_write(SUM_CONTEXT *ctx, const unsigned char *buf, size_t len)
 /* Update the message digest with the contents of the buffer (MD5) */
 static void md5_write(SUM_CONTEXT *ctx, const unsigned char *buf, size_t len)
 {
-	size_t t;
+	size_t num = ctx->bytecount & 0x3f;
 
 	/* Update bytecount */
 	ctx->bytecount += len;
 
-	t = ctx->bytecount & 0x3f;
-
 	/* Handle any leading odd-sized chunks */
-	if (t) {
-		unsigned char *p = ctx->buf + t;
+	if (num) {
+		unsigned char *p = ctx->buf + num;
 
-		t = 64 - t;
-		if (len < t) {
-			memcpy(p, buf, len);
+		num = 64 - num;
+		if (len < num) {
+			memcpy(p, buf, num);
 			return;
 		}
-		memcpy(p, buf, t);
+		memcpy(p, buf, num);
 		md5_transform(ctx, ctx->buf);
-		buf += t;
-		len -= t;
+		buf += num;
+		len -= num;
 	}
 
 	/* Process data in 64-byte chunks */
