@@ -2270,7 +2270,16 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			break;
 #ifdef RUFUS_TEST
 		case IDC_TEST:
+		{
+			int j;
+			char str[65];
+			uint8_t sum[32];
+			Checksum(CHECKSUM_SHA256, "C:\\rufus\\src\\.msvc\\rufus_files\\syslinux-6.03\\ldlinux.sys", sum);
+			for (j = 0; j < sizeof(sum); j++)
+				safe_sprintf(&str[2 * j], ARRAYSIZE(str) - 2 * j, "%02x", sum[j]);
+			uprintf("  Checksum: %s", str);
 			break;
+		}
 #endif
 		case IDC_ADVANCED:
 			advanced_mode = !advanced_mode;
@@ -2540,7 +2549,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				// Disable all controls except cancel
 				EnableControls(FALSE);
 				InitProgress(FALSE);
-				SetThreadAffinity(thread_affinity, NUM_CHECKSUMS + 1);
+				SetThreadAffinity(thread_affinity, CHECKSUM_MAX + 1);
 				format_thid = CreateThread(NULL, 0, SumThread, (LPVOID)thread_affinity, 0, NULL);
 				if (format_thid != NULL) {
 					PrintInfo(0, -1);

@@ -42,7 +42,7 @@
 #define APPLICATION_NAME            "Rufus"
 #define COMPANY_NAME                "Akeo Consulting"
 #define STR_NO_LABEL                "NO_LABEL"
-// Yes, there is a character between these seemingly empty quotes!
+// Yes, there exist characters between these seemingly empty quotes!
 #define LEFT_TO_RIGHT_MARK          "‎"
 #define RIGHT_TO_LEFT_MARK          "‏"
 #define LEFT_TO_RIGHT_EMBEDDING     "‪"
@@ -68,7 +68,6 @@
 #define MBR_UEFI_MARKER             0x49464555	// 'U', 'E', 'F', 'I', as a 32 bit little endian longword
 #define STATUS_MSG_TIMEOUT          3500		// How long should cheat mode messages appear for on the status bar
 #define WRITE_RETRIES               3
-#define NUM_CHECKSUMS               3			// Number of checksum algorithms we support (MD5, SHA1, SHA256)
 #define FS_DEFAULT                  FS_FAT32
 #define SINGLE_CLUSTERSIZE_DEFAULT  0x00000100
 #define BADBLOCK_PATTERNS           {0xaa, 0x55, 0xff, 0x00}
@@ -231,6 +230,13 @@ enum target_type {
 // For the partition types we'll use Microsoft's PARTITION_STYLE_### constants
 #define GETTARGETTYPE(x) (((x)>0)?(((x) >> 16) & 0xFFFF):0)
 #define GETPARTTYPE(x)   (((x)>0)?((x) & 0xFFFF):0);
+
+enum checksum_type {
+	CHECKSUM_MD5 = 0,
+	CHECKSUM_SHA1,
+	CHECKSUM_SHA256,
+	CHECKSUM_MAX
+};
 
 /* Special handling for old .c32 files we need to replace */
 #define NB_OLD_C32          2
@@ -450,6 +456,7 @@ extern BOOL IsFontAvailable(const char* font_name);
 extern BOOL WriteFileWithRetry(HANDLE hFile, LPCVOID lpBuffer, DWORD nNumberOfBytesToWrite,
 	LPDWORD lpNumberOfBytesWritten, DWORD nNumRetries);
 extern BOOL SetThreadAffinity(DWORD_PTR* thread_affinity, size_t num_threads);
+extern BOOL Checksum(const unsigned type, const char* path, uint8_t* sum);
 #define printbits(x) _printbits(sizeof(x), &x, 0)
 #define printbitslz(x) _printbits(sizeof(x), &x, 1)
 extern char* _printbits(size_t const size, void const * const ptr, int leading_zeroes);

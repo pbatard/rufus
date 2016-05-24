@@ -63,9 +63,9 @@
 #define WAIT_TIME       5000
 
 /* Globals */
-char sum_str[NUM_CHECKSUMS][65];
-uint32_t bufnum, sum_count[NUM_CHECKSUMS] = { 16, 20, 32 };
-HANDLE data_ready[NUM_CHECKSUMS], thread_ready[NUM_CHECKSUMS];
+char sum_str[CHECKSUM_MAX][65];
+uint32_t bufnum, sum_count[CHECKSUM_MAX] = { 16, 20, 32 };
+HANDLE data_ready[CHECKSUM_MAX], thread_ready[CHECKSUM_MAX];
 DWORD read_size[2];
 char ALIGNED(64) buffer[2][BUFFER_SIZE];
 
@@ -709,9 +709,52 @@ static void null_final(SUM_CONTEXT *ctx) { }
 typedef void sum_init_t(SUM_CONTEXT *ctx);
 typedef void sum_write_t(SUM_CONTEXT *ctx, const unsigned char *buf, size_t len);
 typedef void sum_final_t(SUM_CONTEXT *ctx);
-sum_init_t *sum_init[NUM_CHECKSUMS] = { md5_init, sha1_init , sha256_init };
-sum_write_t *sum_write[NUM_CHECKSUMS] = { md5_write, sha1_write , sha256_write };
-sum_final_t *sum_final[NUM_CHECKSUMS] = { md5_final, sha1_final , sha256_final };
+sum_init_t *sum_init[CHECKSUM_MAX] = { md5_init, sha1_init , sha256_init };
+sum_write_t *sum_write[CHECKSUM_MAX] = { md5_write, sha1_write , sha256_write };
+sum_final_t *sum_final[CHECKSUM_MAX] = { md5_final, sha1_final , sha256_final };
+
+// Compute an individual checksum without threading or buffering, for a single file
+BOOL Checksum(const unsigned type, const char* path, uint8_t* sum)
+{
+	BOOL r = FALSE;
+	SUM_CONTEXT sum_ctx = { 0 };
+	HANDLE h = INVALID_HANDLE_VALUE;
+	DWORD read_size = 0;
+	uint64_t rb;
+	char buffer[4096];
+
+	if ((type >= CHECKSUM_MAX) || (path == NULL) || (sum == NULL))
+		goto out;
+
+	uprintf("\r\nComputing checksum for '%s'...", path);
+	h = CreateFileU(path, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, NULL);
+	if (h == INVALID_HANDLE_VALUE) {
+		uprintf("Could not open file: %s", WindowsErrorString());
+		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_OPEN_FAILED;
+		goto out;
+	}
+
+	sum_init[type](&sum_ctx);
+	for (rb = 0; ; rb += read_size) {
+		CHECK_FOR_USER_CANCEL;
+		if (!ReadFile(h, buffer, sizeof(buffer), &read_size, NULL)) {
+			FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_READ_FAULT;
+			uprintf("  Read error: %s", WindowsErrorString());
+			goto out;
+		}
+		if (read_size == 0)
+			break;
+		sum_write[type](&sum_ctx, buffer, (size_t)read_size);
+	}
+	sum_final[type](&sum_ctx);
+
+	memcpy(sum, sum_ctx.buf, sum_count[type]);
+	r = TRUE;
+
+out:
+	safe_closehandle(h);
+	return r;
+}
 
 /*
  * Checksum dialog callback
@@ -817,7 +860,7 @@ error:
 DWORD WINAPI SumThread(void* param)
 {
 	DWORD_PTR* thread_affinity = (DWORD_PTR*)param;
-	HANDLE sum_thread[NUM_CHECKSUMS] = { NULL, NULL, NULL };
+	HANDLE sum_thread[CHECKSUM_MAX] = { NULL, NULL, NULL };
 	HANDLE h = INVALID_HANDLE_VALUE;
 	uint64_t rb, LastRefresh = 0;
 	int i, _bufnum, r = -1;
@@ -835,7 +878,7 @@ DWORD WINAPI SumThread(void* param)
 		// is usually in this first mask, for other tasks.
 		SetThreadAffinityMask(GetCurrentThread(), thread_affinity[0]);
 
-	for (i = 0; i < NUM_CHECKSUMS; i++) {
+	for (i = 0; i < CHECKSUM_MAX; i++) {
 		// NB: Can't use a single manual-reset event for data_ready as we
 		// wouldn't be able to ensure the event is reset before the thread
 		// gets into its next wait loop
@@ -882,7 +925,7 @@ DWORD WINAPI SumThread(void* param)
 			// Toggle the read buffer
 			_bufnum = (bufnum + 1) % 2;
 			// Signal the waiting threads
-			for (i = 0; i < NUM_CHECKSUMS; i++) {
+			for (i = 0; i < CHECKSUM_MAX; i++) {
 				if (!SetEvent(data_ready[i])) {
 					uprintf("Could not signal checksum thread %d: %s", i, WindowsErrorString());
 					goto out;
@@ -902,14 +945,14 @@ DWORD WINAPI SumThread(void* param)
 		}
 
 		// Wait for the thread to signal they are ready to process data
-		if (WaitForMultipleObjects(NUM_CHECKSUMS, thread_ready, TRUE, WAIT_TIME) != WAIT_OBJECT_0) {
+		if (WaitForMultipleObjects(CHECKSUM_MAX, thread_ready, TRUE, WAIT_TIME) != WAIT_OBJECT_0) {
 			uprintf("Checksum threads failed to signal: %s", WindowsErrorString());
 			goto out;
 		}
 	}
 
 	// Our last event with read_size=0 signaled the threads to exit - wait for that to happen
-	if (WaitForMultipleObjects(NUM_CHECKSUMS, sum_thread, TRUE, WAIT_TIME) != WAIT_OBJECT_0) {
+	if (WaitForMultipleObjects(CHECKSUM_MAX, sum_thread, TRUE, WAIT_TIME) != WAIT_OBJECT_0) {
 		uprintf("Checksum threads did not finalize: %s", WindowsErrorString());
 		goto out;
 	}
@@ -920,7 +963,7 @@ DWORD WINAPI SumThread(void* param)
 	r = 0;
 
 out:
-	for (i = 0; i < NUM_CHECKSUMS; i++) {
+	for (i = 0; i < CHECKSUM_MAX; i++) {
 		if (sum_thread[i] != NULL)
 			TerminateThread(sum_thread[i], 1);
 		CloseHandle(data_ready[i]);
