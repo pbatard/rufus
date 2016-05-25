@@ -148,7 +148,8 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int fs_type)
 				uprintf("Could not read %s", path);
 				goto out;
 			}
-			uprintf("Using existing './%s'", path);
+			uprintf("Using existing './%s' %s", path,
+				IsBufferInDB(syslinux_ldlinux[i], (size_t)syslinux_ldlinux_len[i])?"✓":"✗");
 		}
 	} else {
 		for (i=0; i<2; i++) {
@@ -313,8 +314,9 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int fs_type)
 			uprintf("Caution: No '%s' was provided. The target will be missing a required Syslinux file!", &path[3]);
 		} else {
 			fclose(fd);
-			if (CopyFileA(&path[3], path, TRUE)) {
-				uprintf("Created '%s' (from '%s/%s-%s/%s')", path, FILES_DIR, syslinux, embedded_sl_version_str[1], &path[3]);
+			if (CopyFileU(&path[3], path, TRUE)) {
+				uprintf("Created '%s' (from '%s/%s-%s/%s') %s", path, FILES_DIR, syslinux,
+					embedded_sl_version_str[1], &path[3], IsFileInDB(&path[3])?"✓":"✗");
 			} else {
 				uprintf("Failed to create '%s': %s", path, WindowsErrorString());
 			}

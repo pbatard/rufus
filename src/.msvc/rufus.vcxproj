@@ -222,6 +222,7 @@
     <ClInclude Include="..\resource.h" />
     <ClInclude Include="..\rufus.h" />
     <ClInclude Include="..\license.h" />
+    <ClInclude Include="..\db.h" />
     <ClInclude Include="..\smart.h" />
     <ClInclude Include="..\sys_types.h" />
     <ClInclude Include="..\dev.h" />

@@ -1002,7 +1002,7 @@ static BOOL WriteSBR(HANDLE hPhysicalDrive)
 
 	switch (bt) {
 	case BT_GRUB4DOS:
-		uprintf("Writing Grub4Dos SBR...");
+		uprintf("Writing Grub4Dos SBR");
 		buf = GetResource(hMainInstance, MAKEINTRESOURCEA(IDR_GR_GRUB_GRLDR_MBR), _RT_RCDATA, "grldr.mbr", &size, FALSE);
 		if ((buf == NULL) || (size <= mbr_size)) {
 			uprintf("grldr.mbr is either not present or too small");
@@ -1013,11 +1013,12 @@ static BOOL WriteSBR(HANDLE hPhysicalDrive)
 		break;
 	case BT_GRUB2:
 		if (grub2_buf != NULL) {
-			uprintf("Writing Grub 2.0 SBR (from download)...");
+			uprintf("Writing Grub 2.0 SBR (from download) %s",
+				IsBufferInDB(grub2_buf, grub2_len)?"✓":"✗");
 			buf = grub2_buf;
 			size = (DWORD)grub2_len;
 		} else {
-			uprintf("Writing Grub 2.0 SBR (from embedded)...");
+			uprintf("Writing Grub 2.0 SBR (from embedded)");
 			buf = GetResource(hMainInstance, MAKEINTRESOURCEA(IDR_GR_GRUB2_CORE_IMG), _RT_RCDATA, "core.img", &size, FALSE);
 			if (buf == NULL) {
 				uprintf("Could not access core.img");
@@ -1898,8 +1899,9 @@ DWORD WINAPI FormatThread(void* param)
 			}
 		} else if (bt == BT_GRUB4DOS) {
 			grub4dos_dst[0] = drive_name[0];
-			uprintf("Installing: %s (Grub4DOS loader)\n", grub4dos_dst);
 			IGNORE_RETVAL(_chdirU(app_dir));
+			uprintf("Installing: %s (Grub4DOS loader) %s\n", grub4dos_dst,
+				IsFileInDB(FILES_DIR "\\grub4dos-" GRUB4DOS_VERSION "\\grldr")?"✓":"✗");
 			if (!CopyFileU(FILES_DIR "\\grub4dos-" GRUB4DOS_VERSION "\\grldr", grub4dos_dst, FALSE))
 				uprintf("Failed to copy file: %s", WindowsErrorString());
 		} else if ((bt == BT_ISO) && (image_path != NULL)) {

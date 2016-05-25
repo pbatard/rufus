@@ -456,7 +456,10 @@ extern BOOL IsFontAvailable(const char* font_name);
 extern BOOL WriteFileWithRetry(HANDLE hFile, LPCVOID lpBuffer, DWORD nNumberOfBytesToWrite,
 	LPDWORD lpNumberOfBytesWritten, DWORD nNumRetries);
 extern BOOL SetThreadAffinity(DWORD_PTR* thread_affinity, size_t num_threads);
-extern BOOL Checksum(const unsigned type, const char* path, uint8_t* sum);
+extern BOOL HashFile(const unsigned type, const char* path, uint8_t* sum);
+extern BOOL HashBuffer(const unsigned type, const unsigned char* buf, const size_t len, uint8_t* sum);
+extern BOOL IsFileInDB(const char* path);
+extern BOOL IsBufferInDB(const unsigned char* buf, const size_t len);
 #define printbits(x) _printbits(sizeof(x), &x, 0)
 #define printbitslz(x) _printbits(sizeof(x), &x, 1)
 extern char* _printbits(size_t const size, void const * const ptr, int leading_zeroes);

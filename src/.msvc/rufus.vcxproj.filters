@@ -140,6 +140,9 @@
     <ClInclude Include="..\dev.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\db.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\res\rufus.ico">

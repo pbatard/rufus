@@ -51,6 +51,7 @@
 #include <errno.h>
 #include <windowsx.h>
 
+#include "db.h"
 #include "rufus.h"
 #include "missing.h"
 #include "resource.h"
@@ -714,19 +715,18 @@ sum_write_t *sum_write[CHECKSUM_MAX] = { md5_write, sha1_write , sha256_write };
 sum_final_t *sum_final[CHECKSUM_MAX] = { md5_final, sha1_final , sha256_final };
 
 // Compute an individual checksum without threading or buffering, for a single file
-BOOL Checksum(const unsigned type, const char* path, uint8_t* sum)
+BOOL HashFile(const unsigned type, const char* path, uint8_t* sum)
 {
 	BOOL r = FALSE;
 	SUM_CONTEXT sum_ctx = { 0 };
 	HANDLE h = INVALID_HANDLE_VALUE;
-	DWORD read_size = 0;
+	DWORD rs = 0;
 	uint64_t rb;
-	char buffer[4096];
+	unsigned char buf[4096];
 
 	if ((type >= CHECKSUM_MAX) || (path == NULL) || (sum == NULL))
 		goto out;
 
-	uprintf("\r\nComputing checksum for '%s'...", path);
 	h = CreateFileU(path, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, NULL);
 	if (h == INVALID_HANDLE_VALUE) {
 		uprintf("Could not open file: %s", WindowsErrorString());
@@ -735,16 +735,16 @@ BOOL Checksum(const unsigned type, const char* path, uint8_t* sum)
 	}
 
 	sum_init[type](&sum_ctx);
-	for (rb = 0; ; rb += read_size) {
+	for (rb = 0; ; rb += rs) {
 		CHECK_FOR_USER_CANCEL;
-		if (!ReadFile(h, buffer, sizeof(buffer), &read_size, NULL)) {
+		if (!ReadFile(h, buf, sizeof(buf), &rs, NULL)) {
 			FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_READ_FAULT;
 			uprintf("  Read error: %s", WindowsErrorString());
 			goto out;
 		}
-		if (read_size == 0)
+		if (rs == 0)
 			break;
-		sum_write[type](&sum_ctx, buffer, (size_t)read_size);
+		sum_write[type](&sum_ctx, buf, (size_t)rs);
 	}
 	sum_final[type](&sum_ctx);
 
@@ -753,6 +753,25 @@ BOOL Checksum(const unsigned type, const char* path, uint8_t* sum)
 
 out:
 	safe_closehandle(h);
+	return r;
+}
+
+BOOL HashBuffer(const unsigned type, const unsigned char* buf, const size_t len, uint8_t* sum)
+{
+	BOOL r = FALSE;
+	SUM_CONTEXT sum_ctx = { 0 };
+
+	if ((type >= CHECKSUM_MAX) || (sum == NULL))
+		goto out;
+
+	sum_init[type](&sum_ctx);
+	sum_write[type](&sum_ctx, buf, len);
+	sum_final[type](&sum_ctx);
+
+	memcpy(sum, sum_ctx.buf, sum_count[type]);
+	r = TRUE;
+
+out:
 	return r;
 }
 
@@ -974,4 +993,31 @@ out:
 	if (r == 0)
 		MyDialogBox(hMainInstance, IDD_CHECKSUM, hMainDialog, ChecksumCallback);
 	ExitThread(r);
+}
+
+/*
+ * The following 2 calls are used to check whether a buffer/file is in our hash DB
+ */
+BOOL IsBufferInDB(const unsigned char* buf, const size_t len)
+{
+	int i;
+	uint8_t sum[32];
+	if (!HashBuffer(CHECKSUM_SHA256, buf, len, sum))
+		return FALSE;
+	for (i = 0; i < ARRAYSIZE(sha256db); i += 32)
+		if (memcmp(sum, &sha256db[i], 32) == 0)
+			return TRUE;
+	return FALSE;
+}
+
+BOOL IsFileInDB(const char* path)
+{
+	int i;
+	uint8_t sum[32];
+	if (!HashFile(CHECKSUM_SHA256, path, sum))
+		return FALSE;
+	for (i = 0; i < ARRAYSIZE(sha256db); i += 32)
+		if (memcmp(sum, &sha256db[i], 32) == 0)
+			return TRUE;
+	return FALSE;
 }

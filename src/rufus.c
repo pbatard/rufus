@@ -2271,13 +2271,6 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 #ifdef RUFUS_TEST
 		case IDC_TEST:
 		{
-			int j;
-			char str[65];
-			uint8_t sum[32];
-			Checksum(CHECKSUM_SHA256, "C:\\rufus\\src\\.msvc\\rufus_files\\syslinux-6.03\\ldlinux.sys", sum);
-			for (j = 0; j < sizeof(sum); j++)
-				safe_sprintf(&str[2 * j], ARRAYSIZE(str) - 2 * j, "%02x", sum[j]);
-			uprintf("  Checksum: %s", str);
 			break;
 		}
 #endif

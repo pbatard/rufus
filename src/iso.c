@@ -366,7 +366,7 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 		i_length = (int)(3 + strlen(psz_path) + strlen(psz_basename) + strlen(psz_extract_dir) + 24);
 		psz_fullpath = (char*)calloc(sizeof(char), i_length);
 		if (psz_fullpath == NULL) {
-			uprintf("Error allocating file name\n");
+			uprintf("Error allocating file name");
 			goto out;
 		}
 		i_length = _snprintf(psz_fullpath, i_length, "%s%s/%s", psz_extract_dir, psz_path, psz_basename);
@@ -398,23 +398,23 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 			for (i=0; i<NB_OLD_C32; i++) {
 				if (props.is_old_c32[i] && use_own_c32[i]) {
 					static_sprintf(tmp, "%s/syslinux-%s/%s", FILES_DIR, embedded_sl_version_str[0], old_c32_name[i]);
-					if (CopyFileA(tmp, psz_fullpath, FALSE)) {
-						uprintf("  Replaced with local version\n");
+					if (CopyFileU(tmp, psz_fullpath, FALSE)) {
+						uprintf("  Replaced with local version %s", IsFileInDB(tmp)?"✓":"✗");
 						break;
 					}
-					uprintf("  Could not replace file: %s\n", WindowsErrorString());
+					uprintf("  Could not replace file: %s", WindowsErrorString());
 				}
 			}
 			if (i < NB_OLD_C32)
 				continue;
 			psz_sanpath = sanitize_filename(psz_fullpath, &is_identical);
 			if (!is_identical)
-				uprintf("  File name sanitized to '%s'\n", psz_sanpath);
+				uprintf("  File name sanitized to '%s'", psz_sanpath);
 			file_handle = CreateFileU(psz_sanpath, GENERIC_READ | GENERIC_WRITE,
 				FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 			if (file_handle == INVALID_HANDLE_VALUE) {
 				err = GetLastError();
-				uprintf("  Unable to create file: %s\n", WindowsErrorString());
+				uprintf("  Unable to create file: %s", WindowsErrorString());
 				if ((err == ERROR_ACCESS_DENIED) && (safe_strcmp(&psz_sanpath[3], autorun_name) == 0))
 					uprintf(stupid_antivirus);
 				else
@@ -424,7 +424,7 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 				memset(buf, 0, UDF_BLOCKSIZE);
 				i_read = udf_read_block(p_udf_dirent, buf, 1);
 				if (i_read < 0) {
-					uprintf("  Error reading UDF file %s\n", &psz_fullpath[strlen(psz_extract_dir)]);
+					uprintf("  Error reading UDF file %s", &psz_fullpath[strlen(psz_extract_dir)]);
 					goto out;
 				}
 				buf_size = (DWORD)MIN(i_file_length, i_read);
@@ -491,7 +491,7 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 
 	p_entlist = iso9660_ifs_readdir(p_iso, psz_path);
 	if (!p_entlist) {
-		uprintf("Could not access directory %s\n", psz_path);
+		uprintf("Could not access directory %s", psz_path);
 		return 1;
 	}
 
@@ -539,28 +539,28 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 			for (i=0; i<NB_OLD_C32; i++) {
 				if (props.is_old_c32[i] && use_own_c32[i]) {
 					static_sprintf(tmp, "%s/syslinux-%s/%s", FILES_DIR, embedded_sl_version_str[0], old_c32_name[i]);
-					if (CopyFileA(tmp, psz_fullpath, FALSE)) {
-						uprintf("  Replaced with local version\n");
+					if (CopyFileU(tmp, psz_fullpath, FALSE)) {
+						uprintf("  Replaced with local version %s", IsFileInDB(tmp)?"✓":"✗");
 						break;
 					}
-					uprintf("  Could not replace file: %s\n", WindowsErrorString());
+					uprintf("  Could not replace file: %s", WindowsErrorString());
 				}
 			}
 			if (i < NB_OLD_C32)
 				continue;
 			psz_sanpath = sanitize_filename(psz_fullpath, &is_identical);
 			if (!is_identical)
-				uprintf("  File name sanitized to '%s'\n", psz_sanpath);
+				uprintf("  File name sanitized to '%s'", psz_sanpath);
 			if (is_symlink) {
 				if (i_file_length == 0)
-					uprintf("  Ignoring Rock Ridge symbolic link to '%s'\n", p_statbuf->rr.psz_symlink);
+					uprintf("  Ignoring Rock Ridge symbolic link to '%s'", p_statbuf->rr.psz_symlink);
 				safe_free(p_statbuf->rr.psz_symlink);
 			}
 			file_handle = CreateFileU(psz_sanpath, GENERIC_READ | GENERIC_WRITE,
 				FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 			if (file_handle == INVALID_HANDLE_VALUE) {
 				err = GetLastError();
-				uprintf("  Unable to create file: %s\n", WindowsErrorString());
+				uprintf("  Unable to create file: %s", WindowsErrorString());
 				if ((err == ERROR_ACCESS_DENIED) && (safe_strcmp(&psz_sanpath[3], autorun_name) == 0))
 					uprintf(stupid_antivirus);
 				else
@@ -570,7 +570,7 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 				memset(buf, 0, ISO_BLOCKSIZE);
 				lsn = p_statbuf->lsn + (lsn_t)i;
 				if (iso9660_iso_seek_read(p_iso, buf, lsn, 1) != ISO_BLOCKSIZE) {
-					uprintf("  Error reading ISO9660 file %s at LSN %lu\n",
+					uprintf("  Error reading ISO9660 file %s at LSN %lu",
 						psz_iso_name, (long unsigned int)lsn);
 					goto out;
 				}
