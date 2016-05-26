@@ -549,6 +549,8 @@ t MSG_285 "The downloaded executable is signed by '%s'.\nThis is not a signature
 	"indicate some form of malicious activity...\nAre you sure you want to run this file?"
 t MSG_286 "Zeroing drive: %0.1f%% completed"
 t MSG_287 "Detection of non-USB removable drives"
+t MSG_288 "Missing elevated privileges"
+t MSG_289 "This application can only run with elevated privileges"
 
 ################################################################################
 ############################# TRANSLATOR END COPY ##############################

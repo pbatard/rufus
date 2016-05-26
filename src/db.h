@@ -21,7 +21,7 @@
 #pragma once
 
 /*
- * NB: Table data was generated from the files/ directory the server with:
+ * NB: Table data was generated from the files/ directory on the server with:
  * find . -not -name "*.txt" -not -name "*.sh" -not -name "*pre*" -type f -print0 | xargs -0 sha256sum | awk '{print $1}' | sort | uniq | xxd -r -p | hexdump -v -e '31/1 "0x%02x, " 1/1 " 0x%02x,\n"'
  */
 

@@ -2762,6 +2762,46 @@ static HANDLE SetHogger(BOOL attached_console, BOOL disable_hogger)
 	return hogmutex;
 }
 
+/*
+ * Returns true if:
+ * 1. The OS supports UAC, UAC is on, and the current process runs elevated, or
+ * 2. The OS doesn't support UAC or UAC is off, and the process is being run by a member of the admin group
+ */
+static BOOL IsCurrentProcessElevated(void)
+{
+	BOOL r = FALSE;
+	DWORD size;
+	HANDLE token = INVALID_HANDLE_VALUE;
+	TOKEN_ELEVATION te;
+	SID_IDENTIFIER_AUTHORITY auth = SECURITY_NT_AUTHORITY;
+	PSID psid;
+
+	if (ReadRegistryKey32(REGKEY_HKLM, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\System\\EnableLUA") == 1) {
+		uprintf("NOTE: UAC is on");
+		if (!OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &token)) {
+			uprintf("Could not get current process token: %s", WindowsErrorString());
+			goto out;
+		}
+		if (!GetTokenInformation(token, TokenElevation, &te, sizeof(te), &size)) {
+			uprintf("Could not get token information: %s", WindowsErrorString());
+			goto out;
+		}
+		r = (te.TokenIsElevated != 0);
+	} else {
+		uprintf("NOTE: UAC is either disabled or not available");
+		if (!AllocateAndInitializeSid(&auth, 2, SECURITY_BUILTIN_DOMAIN_RID,
+			DOMAIN_ALIAS_RID_ADMINS, 0, 0, 0, 0, 0, 0, &psid))
+			goto out;
+		if (!CheckTokenMembership(NULL, psid, &r))
+			r = FALSE;
+		FreeSid(psid);
+	}
+
+out:
+	safe_closehandle(token);
+	return r;
+}
+
 
 /*
  * Application Entrypoint
@@ -2975,6 +3015,17 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		goto out;
 	}
 	selected_langid = get_language_id(selected_locale);
+
+	// This is needed as there appears to be a *FLAW* in Windows allowing the app to run unelevated with some
+	// weirdly configured user accounts, even as we explicitly set 'requireAdministrator' in the manifest...
+	if (!IsCurrentProcessElevated()) {
+		uprintf("FATAL: No administrative privileges!");
+		// Load the translation before we print the error
+		get_loc_data_file(loc_file, selected_locale);
+		right_to_left_mode = ((selected_locale->ctrl_id) & LOC_RIGHT_TO_LEFT);
+		MessageBoxExU(NULL, lmprintf(MSG_289), lmprintf(MSG_288), MB_ICONSTOP | MB_IS_RTL | MB_SYSTEMMODAL, selected_langid);
+		goto out;
+	}
 
 	// Prevent 2 applications from running at the same time, unless "/W" is passed as an option
 	// in which case we wait for the mutex to be relinquished
