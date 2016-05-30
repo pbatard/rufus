@@ -167,7 +167,7 @@ char* GetPhysicalName(DWORD DriveIndex)
 	char physical_name[24];
 
 	CheckDriveIndex(DriveIndex);
-	safe_sprintf(physical_name, sizeof(physical_name), "\\\\.\\PHYSICALDRIVE%d", DriveIndex);
+	safe_sprintf(physical_name, sizeof(physical_name), "\\\\.\\PHYSICALDRIVE%lu", DriveIndex);
 	success = TRUE;
 out:
 	return (success)?safe_strdup(physical_name):NULL;

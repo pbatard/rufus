@@ -203,7 +203,7 @@ const char* WinInetErrorString(void)
 		InternetGetLastResponseInfoA(&error_code, error_string, &size);
 		return error_string;
 	default:
-		safe_sprintf(error_string, sizeof(error_string), "Unknown internet error 0x%08X", error_code);
+		safe_sprintf(error_string, sizeof(error_string), "Unknown internet error 0x%08luX", error_code);
 		return error_string;
 	}
 }
@@ -490,7 +490,7 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 		// and then remove each each of the <os_> components until we find our match. For instance, we may first
 		// look for rufus_win_x64_6.2.ver (Win8 x64) but only get a match for rufus_win_x64_6.ver (Vista x64 or later)
 		// This allows sunsetting OS versions (eg XP) or providing different downloads for different archs/groups.
-		safe_sprintf(urlpath, sizeof(urlpath), "%s%s%s_%s_%d.%d.ver", APPLICATION_NAME, (k==0)?"":"_",
+		safe_sprintf(urlpath, sizeof(urlpath), "%s%s%s_%s_%lu.%lu.ver", APPLICATION_NAME, (k==0)?"":"_",
 			(k==0)?"":channel[k], archname[is_x64()?1:0], os_version.dwMajorVersion, os_version.dwMinorVersion);
 		vuprintf("Base update check: %s\n", urlpath);
 		for (i=0, j=(int)safe_strlen(urlpath)-5; (j>0)&&(i<ARRAYSIZE(verpos)); j--) {
