@@ -147,6 +147,7 @@ enum user_message_type {
 	UM_PROGRESS_INIT,
 	UM_PROGRESS_EXIT,
 	UM_NO_UPDATE,
+	UM_SET_PARTITION_SCHEME_TOOLTIP,
 	// Start of the WM IDs for the language menu items
 	UM_LANGUAGE_MENU = WM_APP + 0x100
 };
@@ -364,7 +365,7 @@ extern HWND hInfo, hProgress, hDiskID, hStatusToolbar;
 extern float fScale;
 extern char szFolderPath[MAX_PATH], app_dir[MAX_PATH], system_dir[MAX_PATH], sysnative_dir[MAX_PATH];
 extern char* image_path;
-extern DWORD FormatStatus, DownloadStatus;
+extern DWORD FormatStatus, DownloadStatus, MainThreadId;
 extern BOOL PromptOnError;
 extern unsigned long syslinux_ldlinux_len[2];
 extern const int nb_steps[FS_MAX];

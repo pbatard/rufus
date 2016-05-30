@@ -803,7 +803,7 @@ BOOL SetLGP(BOOL bRestore, BOOL* bExistingKey, const char* szPath, const char* s
 		uprintf("SetLGP: Unable to start thread");
 		return FALSE;
 	}
-	if (WaitForSingleObject(thread_id, 5000) != WAIT_OBJECT_0) {
+	if (WaitForSingleObject(thread_id, 60000) != WAIT_OBJECT_0) {
 		uprintf("SetLGP: Killing stuck thread!");
 		TerminateThread(thread_id, 0);
 		CloseHandle(thread_id);

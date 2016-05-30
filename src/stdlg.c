@@ -963,12 +963,10 @@ INT_PTR CALLBACK TooltipCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM 
 	for (i=0; i<MAX_TOOLTIPS; i++) {
 		if (ttlist[i].hTip == hDlg) break;
 	}
-	if (i == MAX_TOOLTIPS) {
+	if (i == MAX_TOOLTIPS)
 		return (INT_PTR)FALSE;
-	}
 
-	switch (message)
-	{
+	switch (message) {
 	case WM_NOTIFY:
 		switch (((LPNMHDR)lParam)->code) {
 		case TTN_GETDISPINFOW:
@@ -979,6 +977,11 @@ INT_PTR CALLBACK TooltipCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM 
 		}
 		break;
 	}
+#ifdef _DEBUG
+	// comctl32 causes issues if the tooltips are not being manipulated from the same thread as their parent controls
+	if (GetCurrentThreadId() != MainThreadId)
+		uprintf("Warning: Tooltip callback is being called from wrong thread");
+#endif
 	return CallWindowProc(ttlist[i].original_proc, hDlg, message, wParam, lParam);
 }
 

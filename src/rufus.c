@@ -102,6 +102,7 @@ int default_fs;
 uint32_t dur_mins, dur_secs;
 loc_cmd* selected_locale = NULL;
 WORD selected_langid = MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT);
+DWORD MainThreadId;
 HWND hDeviceList, hPartitionScheme, hFileSystem, hClusterSize, hLabel, hBootType, hNBPasses, hLog = NULL;
 HWND hLogDlg = NULL, hProgress = NULL, hInfo, hDiskID, hStatusToolbar;
 BOOL use_own_c32[NB_OLD_C32] = {FALSE, FALSE}, mbr_selected_by_user = FALSE, togo_mode;
@@ -591,7 +592,8 @@ static void SetTargetSystem(void)
 		ts = 0;	// MBR/BIOS|UEFI
 	}
 	IGNORE_RETVAL(ComboBox_SetCurSel(hPartitionScheme, ts));
-	SetPartitionSchemeTooltip();
+	// Can't call SetPartitionSchemeTooltip() directly, as we may be on a different thread
+	SendMessage(hMainDialog, UM_SET_PARTITION_SCHEME_TOOLTIP, 0, 0);
 }
 
 static void SetProposedLabel(int ComboIndex)
@@ -1634,6 +1636,7 @@ void InitDialog(HWND hDlg)
 
 	// Quite a burden to carry around as parameters
 	hMainDialog = hDlg;
+	MainThreadId = GetCurrentThreadId();
 	hDeviceList = GetDlgItem(hDlg, IDC_DEVICE);
 	hPartitionScheme = GetDlgItem(hDlg, IDC_PARTITION_TYPE);
 	hFileSystem = GetDlgItem(hDlg, IDC_FILESYSTEM);
@@ -2694,6 +2697,11 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		FormatStatus = 0;
 		format_op_in_progress = FALSE;
 		return (INT_PTR)TRUE;
+
+	// Ensures that SetPartitionSchemeTooltip() can be called from the original thread
+	case UM_SET_PARTITION_SCHEME_TOOLTIP:
+		SetPartitionSchemeTooltip();
+		break;
 	}
 	return (INT_PTR)FALSE;
 }
