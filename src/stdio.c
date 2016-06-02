@@ -148,7 +148,7 @@ static char err_string[256] = {0};
 
 	error_code = GetLastError();
 
-	safe_sprintf(err_string, sizeof(err_string), "[0x%08luX] ", error_code);
+	safe_sprintf(err_string, sizeof(err_string), "[0x%08lX] ", error_code);
 
 	size = FormatMessageU(FORMAT_MESSAGE_FROM_SYSTEM|FORMAT_MESSAGE_IGNORE_INSERTS, NULL, HRESULT_CODE(error_code),
 		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), &err_string[strlen(err_string)],
@@ -157,9 +157,9 @@ static char err_string[256] = {0};
 		format_error = GetLastError();
 		if ((format_error) && (format_error != 0x13D))		// 0x13D, decode error, is returned for unknown codes
 			safe_sprintf(err_string, sizeof(err_string),
-				"Windows error code 0x%08luX (FormatMessage error code 0x%08luX)", error_code, format_error);
+				"Windows error code 0x%08lX (FormatMessage error code 0x%08lX)", error_code, format_error);
 		else
-			safe_sprintf(err_string, sizeof(err_string), "Unknown error 0x%08luX", error_code);
+			safe_sprintf(err_string, sizeof(err_string), "Unknown error 0x%08lX", error_code);
 	}
 
 	SetLastError(error_code);	// Make sure we don't change the errorcode on exit

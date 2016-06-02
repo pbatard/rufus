@@ -203,7 +203,7 @@ const char* WinInetErrorString(void)
 		InternetGetLastResponseInfoA(&error_code, error_string, &size);
 		return error_string;
 	default:
-		safe_sprintf(error_string, sizeof(error_string), "Unknown internet error 0x%08luX", error_code);
+		safe_sprintf(error_string, sizeof(error_string), "Unknown internet error 0x%08lX", error_code);
 		return error_string;
 	}
 }

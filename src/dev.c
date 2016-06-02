@@ -175,7 +175,7 @@ BOOL GetDevices(DWORD devnum)
 	const char* genstor_name[] = {
 		// Generic storage drivers (Careful now!)
 		"SCSI", // "STORAGE",	// "STORAGE" is used by 'Storage Spaces" and stuff => DANGEROUS!
-		// Non-USB card reader drivers - *MUST* start with "SD" (delimiter)
+		// Non-USB card reader drivers - This list *MUST* start with "SD" (delimiter)
 		// See http://itdoc.hitachi.co.jp/manuals/3021/30213B5200e/DMDS0094.HTM
 		// Also  http://www.carrona.org/dvrref.php. NB: These should be reported
 		// as enumerators by Rufus when Enum Debug is enabled
