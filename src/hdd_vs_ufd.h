@@ -273,4 +273,6 @@ static vidpid_score_t vidpid_score[] = {
 	{ 0x18a5, 0x0302, -20 },
 	{ 0x18a5, 0x0304, -20 },
 	{ 0x18a5, 0x3327, -20 },
+	// More Innostor
+	{ 0x1f75, 0x0917, -10 },	// Intenso Speed Line USB Device
 };
