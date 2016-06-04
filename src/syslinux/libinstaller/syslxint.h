@@ -23,7 +23,7 @@
 # define X86_MEM 0
 #endif
 
-#ifdef __GNUC__
+#if defined(__GNUC__) || defined(__clang__)
 # ifdef __MINGW32__
    /* gcc 4.7 miscompiles packed structures in MS-bitfield mode */
 #  define PACKME
