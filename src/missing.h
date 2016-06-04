@@ -46,7 +46,7 @@
  * We account for these built-in calls doing nothing if the
  * line has already been fetched, or if the address is invalid.
  */
-#if defined(__GNUC__)
+#if defined(__GNUC__) || defined(__clang__)
 #define PREFETCH64(m) do { __builtin_prefetch(m, 0, 0); __builtin_prefetch(m+32, 0, 0); } while(0)
 #elif defined(_MSC_VER)
 #define PREFETCH64(m) do { _m_prefetch(m); _m_prefetch(m+32); } while(0)
@@ -55,9 +55,11 @@
 /* Read/write with endianness swap */
 #if defined (_MSC_VER) && (_MSC_VER >= 1300)
 #include <stdlib.h>
+#if !defined(__clang__)
 #pragma intrinsic(_byteswap_ushort)
 #pragma intrinsic(_byteswap_ulong)
 #pragma intrinsic(_byteswap_uint64)
+#endif
 #define bswap_uint64 _byteswap_uint64
 #define bswap_uint32 _byteswap_ulong
 #define bswap_uint16 _byteswap_ushort

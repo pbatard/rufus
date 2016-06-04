@@ -33,7 +33,7 @@
 #include <cdio/types.h>
 #include "cdio_assert.h"
 
-static const char _rcsid[] = "$Id: ds.c,v 1.4 2008/04/22 15:29:12 karl Exp $";
+// static const char _rcsid[] = "$Id: ds.c,v 1.4 2008/04/22 15:29:12 karl Exp $";
 
 struct _CdioList
 {
@@ -243,7 +243,8 @@ _cdio_list_node_data (CdioListNode_t *p_node)
 
 /* eof */
 
-
+
+
 /* 
  * Local variables:
  *  c-file-style: "gnu"

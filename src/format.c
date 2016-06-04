@@ -1720,7 +1720,14 @@ DWORD WINAPI FormatThread(void* param)
 			if (report.bb_count) {
 				bb_msg = lmprintf(MSG_011, report.bb_count, report.num_read_errors, report.num_write_errors,
 					report.num_corruption_errors);
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wformat-security"
+#endif
 				fprintf(log_fd, bb_msg);
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
 				GetLocalTime(&lt);
 				fprintf(log_fd, APPLICATION_NAME " bad blocks check ended on: %04d.%02d.%02d %02d:%02d:%02d\n",
 				lt.wYear, lt.wMonth, lt.wDay, lt.wHour, lt.wMinute, lt.wSecond);

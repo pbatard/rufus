@@ -88,7 +88,7 @@ static inline int _stati64_utf8(const char *path, struct _stati64 *buffer) {
 #define _STRINGIFY(a) #a
 #define STRINGIFY(a) _STRINGIFY(a)
 
-static const char _rcsid[] = "$Id: _cdio_stdio.c,v 1.6 2008/04/22 15:29:11 karl Exp $";
+// static const char _rcsid[] = "$Id: _cdio_stdio.c,v 1.6 2008/04/22 15:29:11 karl Exp $";
 
 #define CDIO_STDIO_BUFSIZE (128*1024)
 
@@ -283,7 +283,8 @@ cdio_stdio_new(const char pathname[])
   return new_obj;
 }
 
-
+
+
 /* 
  * Local variables:
  *  c-file-style: "gnu"

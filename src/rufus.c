@@ -2781,7 +2781,7 @@ static BOOL IsCurrentProcessElevated(void)
 	DWORD size;
 	HANDLE token = INVALID_HANDLE_VALUE;
 	TOKEN_ELEVATION te;
-	SID_IDENTIFIER_AUTHORITY auth = SECURITY_NT_AUTHORITY;
+	SID_IDENTIFIER_AUTHORITY auth = { SECURITY_NT_AUTHORITY };
 	PSID psid;
 
 	if (ReadRegistryKey32(REGKEY_HKLM, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\System\\EnableLUA") == 1) {

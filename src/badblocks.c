@@ -50,8 +50,8 @@
 #include "file.h"
 
 FILE* log_fd = NULL;
-static const char* abort_msg = "Too many bad blocks, aborting test\n";
-static const char* bb_prefix = "Bad Blocks: ";
+static const char abort_msg[] = "Too many bad blocks, aborting test\n";
+static const char bb_prefix[] = "Bad Blocks: ";
 
 /*
  *From e2fsprogs/lib/ext2fs/badblocks.c

@@ -41,7 +41,7 @@
 #include <cdio/util.h>
 #include "_cdio_stream.h"
 
-static const char _rcsid[] = "$Id: _cdio_stream.c,v 1.9 2008/04/22 15:29:11 karl Exp $";
+// static const char _rcsid[] = "$Id: _cdio_stream.c,v 1.9 2008/04/22 15:29:11 karl Exp $";
 
 /* 
  * DataSource implementations
@@ -212,7 +212,8 @@ cdio_stream_stat(CdioDataSource_t *p_obj)
   return p_obj->op.stat(p_obj->user_data);
 }
 
-
+
+
 /* 
  * Local variables:
  *  c-file-style: "gnu"

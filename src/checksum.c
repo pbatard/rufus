@@ -68,7 +68,7 @@ char sum_str[CHECKSUM_MAX][65];
 uint32_t bufnum, sum_count[CHECKSUM_MAX] = { 16, 20, 32 };
 HANDLE data_ready[CHECKSUM_MAX], thread_ready[CHECKSUM_MAX];
 DWORD read_size[2];
-char ALIGNED(64) buffer[2][BUFFER_SIZE];
+unsigned char ALIGNED(64) buffer[2][BUFFER_SIZE];
 
 /*
  * Rotate 32 bit integers by n bytes.
@@ -718,7 +718,7 @@ sum_final_t *sum_final[CHECKSUM_MAX] = { md5_final, sha1_final , sha256_final };
 BOOL HashFile(const unsigned type, const char* path, uint8_t* sum)
 {
 	BOOL r = FALSE;
-	SUM_CONTEXT sum_ctx = { 0 };
+	SUM_CONTEXT sum_ctx = { {0} };
 	HANDLE h = INVALID_HANDLE_VALUE;
 	DWORD rs = 0;
 	uint64_t rb;
@@ -759,7 +759,7 @@ out:
 BOOL HashBuffer(const unsigned type, const unsigned char* buf, const size_t len, uint8_t* sum)
 {
 	BOOL r = FALSE;
-	SUM_CONTEXT sum_ctx = { 0 };
+	SUM_CONTEXT sum_ctx = { {0} };
 
 	if ((type >= CHECKSUM_MAX) || (sum == NULL))
 		goto out;
@@ -845,7 +845,7 @@ INT_PTR CALLBACK ChecksumCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 // Individual thread that computes one of MD5, SHA1 or SHA256 in parallel
 DWORD WINAPI IndividualSumThread(void* param)
 {
-	SUM_CONTEXT sum_ctx = { 0 }; // There's a memset in sum_init, but static analyzers still bug us
+	SUM_CONTEXT sum_ctx = { {0} }; // There's a memset in sum_init, but static analyzers still bug us
 	uint32_t i = (uint32_t)(uintptr_t)param, j;
 
 	sum_init[i](&sum_ctx);

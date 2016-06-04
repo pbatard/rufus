@@ -36,7 +36,7 @@
 
 #include <ctype.h>
 
-static const char _rcsid[] = "$Id: sector.c,v 1.5 2005/02/06 04:20:25 rocky Exp $";
+// static const char _rcsid[] = "$Id: sector.c,v 1.5 2005/02/06 04:20:25 rocky Exp $";
 
 /*! String of bytes used to identify the beginning of a Mode 1 or
   Mode 2 sector. */

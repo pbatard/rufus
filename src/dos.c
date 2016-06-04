@@ -71,10 +71,6 @@ typedef struct _TIME_FIELDS {
 #define ARGUMENT_PRESENT(ArgumentPointer) \
 	((CHAR*)((ULONG_PTR)(ArgumentPointer)) != (CHAR*)NULL)
 
-static const int YearLengths[2] =
-{
-	DAYSPERNORMALYEAR, DAYSPERLEAPYEAR
-};
 static const UCHAR MonthLengths[2][MONSPERYEAR] =
 {
 	{ 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 },
