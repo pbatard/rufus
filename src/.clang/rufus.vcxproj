@@ -164,6 +164,7 @@
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
+      <LinkTimeCodeGeneration />
     </Link>
     <ResourceCompile>
       <PreprocessorDefinitions>_UNICODE;UNICODE;RUFUS_LOC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -192,6 +193,7 @@
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX64</TargetMachine>
+      <LinkTimeCodeGeneration />
     </Link>
     <ResourceCompile>
       <PreprocessorDefinitions>_UNICODE;UNICODE;RUFUS_LOC;%(PreprocessorDefinitions)</PreprocessorDefinitions>

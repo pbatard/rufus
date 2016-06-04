@@ -126,7 +126,7 @@ typedef uint8_t ubyte;
   
   /* some GCC optimizations -- gcc 2.5+ */
   
-#if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ > 4)
+#if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ > 4) || __clang__
 #define GNUC_PRINTF( format_idx, arg_idx )              \
   __attribute__((format (printf, format_idx, arg_idx)))
 #define GNUC_SCANF( format_idx, arg_idx )               \
