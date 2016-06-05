@@ -182,6 +182,11 @@ BOOL GetDevices(DWORD devnum)
 		"SD", "PCISTOR", "RTSOR", "JMCR", "JMCF", "RIMMPTSK", "RIMSPTSK", "RIXDPTSK",
 		"TI21SONY", "ESD7SK", "ESM7SK", "O2MD", "O2SD", "VIACR"
 	};
+	// Oh, and we also have card devices (e.g. 'SCSI\DiskO2Micro_SD_...') under the SCSI enumerator...
+	const char* scsi_disk_prefix = "SCSI\\Disk";
+	const char* scsi_card_name[] = {
+		"_SD_", "_MMC_", "_MS_", "_MSPro_", "_xDPicture_", "_O2Media_"
+	};
 	const char* usb_speed_name[USB_SPEED_MAX] = { "USB", "USB 1.0", "USB 1.1", "USB 2.0", "USB 3.0" };
 	// Hash table and String Array used to match a Device ID with the parent hub's Device Interface Path
 	htab_table htab_devid = HTAB_EMPTY;
@@ -369,6 +374,15 @@ BOOL GetDevices(DWORD devnum)
 		memset(buffer, 0, sizeof(buffer));
 		props.is_VHD = SetupDiGetDeviceRegistryPropertyA(dev_info, &dev_info_data, SPDRP_HARDWAREID,
 			&datatype, (LPBYTE)buffer, sizeof(buffer), &size) && IsVHD(buffer);
+		// Additional detection for SCSI card readers
+		if ((!props.is_CARD) && (safe_strnicmp(buffer, scsi_disk_prefix, sizeof(scsi_disk_prefix)-1) == 0)) {
+			for (j = 0; j < ARRAYSIZE(scsi_card_name); j++) {
+				if (safe_strstr(buffer, scsi_card_name[j]) != NULL) {
+					props.is_CARD = TRUE;
+					break;
+				}
+			}
+		}
 		uuprintf("  Hardware ID: '%s'", buffer);
 
 		memset(buffer, 0, sizeof(buffer));
@@ -462,11 +476,12 @@ BOOL GetDevices(DWORD devnum)
 		} else if ((props.is_CARD) && ((!props.is_USB) || ((props.vid == 0) && (props.pid == 0)))) {
 			uprintf("Found card reader device '%s'", buffer);
 		} else if ((!props.is_USB) && (!props.is_UASP) && (props.is_Removable)) {
-			uprintf("Found non-USB removable device '%s' => Eliminated", buffer);
 			if (!list_non_usb_removable_drives) {
+				uprintf("Found non-USB removable device '%s' => Eliminated", buffer);
 				uuprintf("If you *REALLY* need, you can enable listing of this device with <Ctrl><Alt><F>");
 				continue;
 			}
+			uprintf("Found non-USB removable device '%s'", buffer);
 		} else {
 			if ((props.vid == 0) && (props.pid == 0)) {
 				if (!props.is_USB) {
