@@ -863,6 +863,26 @@ static __inline int _mkdirU(const char* dirname)
 	return ret;
 }
 
+// The following expects PropertyBuffer to contain a single Unicode string
+static __inline BOOL SetupDiGetDeviceRegistryPropertyU(HDEVINFO DeviceInfoSet, PSP_DEVINFO_DATA DeviceInfoData,
+	DWORD Property, PDWORD PropertyRegDataType, PBYTE PropertyBuffer, DWORD PropertyBufferSize, PDWORD RequiredSize)
+{
+	DWORD ret = FALSE, err = ERROR_INVALID_DATA;
+	walloc(PropertyBuffer, PropertyBufferSize);
+
+	ret = SetupDiGetDeviceRegistryPropertyW(DeviceInfoSet, DeviceInfoData, Property,
+		PropertyRegDataType, (PBYTE)wPropertyBuffer, PropertyBufferSize, RequiredSize);
+	err = GetLastError();
+	if ((ret != 0) && (wchar_to_utf8_no_alloc(wPropertyBuffer,
+		(char*)(uintptr_t)PropertyBuffer, PropertyBufferSize) == 0)) {
+		err = GetLastError();
+		ret = FALSE;
+	}
+	wfree(PropertyBuffer);
+	SetLastError(err);
+	return ret;
+}
+
 #ifdef __cplusplus
 }
 #endif

@@ -376,7 +376,7 @@ BOOL GetDevices(DWORD devnum)
 			&datatype, (LPBYTE)buffer, sizeof(buffer), &size) && IsRemovable(buffer);
 
 		memset(buffer, 0, sizeof(buffer));
-		if (!SetupDiGetDeviceRegistryPropertyA(dev_info, &dev_info_data, SPDRP_FRIENDLYNAME,
+		if (!SetupDiGetDeviceRegistryPropertyU(dev_info, &dev_info_data, SPDRP_FRIENDLYNAME,
 				&datatype, (LPBYTE)buffer, sizeof(buffer), &size)) {
 			uprintf("SetupDiGetDeviceRegistryProperty (Friendly Name) failed: %s\n", WindowsErrorString());
 			// We can afford a failure on this call - just replace the name with "USB Storage Device (Generic)"
