@@ -1138,6 +1138,7 @@ static BOOL SetupWinPE(char drive_letter)
 	const char* patch_str_rep[] = { "\\i386\\txtsetup.sif", "\\i386\\system32\\" };
 	const char *win_nt_bt_org = "$win_nt$.~bt", *win_nt_bt_rep = "i386";
 	const char *rdisk_zero = "rdisk(0)";
+	const LARGE_INTEGER liZero = { {0, 0} };
 	char setupsrcdev[64];
 	HANDLE handle = INVALID_HANDLE_VALUE;
 	DWORD i, j, size, rw_size, index = 0;
@@ -1203,7 +1204,7 @@ static BOOL SetupWinPE(char drive_letter)
 		uprintf("Could not read file %s: %s\n", dst, WindowsErrorString());
 		goto out;
 	}
-	SetFilePointer(handle, 0, NULL, FILE_BEGIN);
+	SetFilePointerEx(handle, liZero, NULL, FILE_BEGIN);
 
 	// Patch setupldr.bin
 	uprintf("Patching file %s\n", dst);

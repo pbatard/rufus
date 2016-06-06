@@ -55,20 +55,24 @@ uint32_t LIBFAT_SECTOR_MASK = 511;
 /*
  * Wrapper for ReadFile suitable for libfat
  */
-int libfat_readfile(intptr_t pp, void *buf, size_t secsize,
-		    libfat_sector_t sector)
+int libfat_readfile(intptr_t pp, void *buf, size_t secsize, libfat_sector_t sector)
 {
-	uint64_t offset = (uint64_t) sector * secsize;
-	LONG loword = (LONG) offset;
-	LONG hiword = (LONG) (offset >> 32);
-	LONG hiwordx = hiword;
+	LARGE_INTEGER offset;
 	DWORD bytes_read;
 
-	if (SetFilePointer((HANDLE) pp, loword, &hiwordx, FILE_BEGIN) != loword ||
-		hiword != hiwordx ||
-		!ReadFile((HANDLE) pp, buf, (DWORD)secsize, &bytes_read, NULL) ||
-		bytes_read != secsize) {
-		uprintf("Cannot read sector %u\n", sector);
+	offset.QuadPart = (LONGLONG) sector * secsize;
+	if (!SetFilePointerEx((HANDLE) pp, offset, NULL, FILE_BEGIN)) {
+		uprintf("Could not set pointer to position %llu: %s", offset.QuadPart, WindowsErrorString());
+		return 0;
+	}
+
+	if (!ReadFile((HANDLE) pp, buf, (DWORD) secsize, &bytes_read, NULL)) {
+		uprintf("Could not read sector %llu: %s", sector, WindowsErrorString());
+		return 0;
+	}
+
+	if (bytes_read != secsize) {
+		uprintf("Sector %llu: Read %d bytes instead of %d requested", sector, bytes_read, secsize);
 		return 0;
 	}
 
@@ -81,6 +85,7 @@ int libfat_readfile(intptr_t pp, void *buf, size_t secsize,
  */
 BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int fs_type)
 {
+	const LARGE_INTEGER liZero = { {0, 0} };
 	HANDLE f_handle = INVALID_HANDLE_VALUE;
 	HANDLE d_handle = INVALID_HANDLE_VALUE;
 	DWORD bytes_read, bytes_written, err;
@@ -198,7 +203,7 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int fs_type)
 
 	/* Reopen the volume (we already have a lock) */
 	d_handle = GetLogicalHandle(drive_index, TRUE, FALSE);
-	if (d_handle == INVALID_HANDLE_VALUE) {
+	if ((d_handle == INVALID_HANDLE_VALUE) || (d_handle == NULL)) {
 		uprintf("Could open volume for Syslinux installation");
 		goto out;
 	}
@@ -270,10 +275,10 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int fs_type)
 	}
 
 	/* Rewrite the file */
-	if (SetFilePointer(f_handle, 0, NULL, FILE_BEGIN) != 0 ||
+	if (!SetFilePointerEx(f_handle, liZero, NULL, FILE_BEGIN) ||
 		!WriteFileWithRetry(f_handle, syslinux_ldlinux[0], syslinux_ldlinux_len[0],
 			   &bytes_written, WRITE_RETRIES)) {
-		uprintf("Could not write '%s': %s\n", &path[3], WindowsErrorString());
+		uprintf("Could not rewrite '%s': %s\n", &path[3], WindowsErrorString());
 		goto out;
 	}
 
@@ -281,7 +286,7 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int fs_type)
 	safe_closehandle(f_handle);
 
 	/* Read existing FAT data into boot sector */
-	if (SetFilePointer(d_handle, 0, NULL, FILE_BEGIN) != 0 ||
+	if (!SetFilePointerEx(d_handle, liZero, NULL, FILE_BEGIN) ||
 		!ReadFile(d_handle, sectbuf, SECTOR_SIZE,
 			   &bytes_read, NULL)) {
 		uprintf("Could not read Syslinux boot record: %s", WindowsErrorString());
@@ -296,7 +301,7 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int fs_type)
 	syslinux_make_bootsect(sectbuf, (fs_type == FS_NTFS)?NTFS:VFAT);
 
 	/* Write boot sector back */
-	if (SetFilePointer(d_handle, 0, NULL, FILE_BEGIN) != 0 ||
+	if (!SetFilePointerEx(d_handle, liZero, NULL, FILE_BEGIN) ||
 		!WriteFileWithRetry(d_handle, sectbuf, SECTOR_SIZE,
 			   &bytes_written, WRITE_RETRIES)) {
 		uprintf("Could not write Syslinux boot record: %s", WindowsErrorString());
