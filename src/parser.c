@@ -136,6 +136,10 @@ static loc_cmd* get_loc_cmd(char c, char* line) {
 					lcmd->unum_size++;
 			}
 			lcmd->unum = (uint32_t*)malloc(lcmd->unum_size * sizeof(uint32_t));
+			if (lcmd->unum == NULL) {
+				luprint("could not allocate memory");
+				goto err;
+			}
 			token = strtok(&line[i], ".,");
 			for (l=0; (l<lcmd->unum_size) && (token != NULL); l++) {
 				lcmd->unum[l] = (int32_t)strtol(token, &endptr, 0);
@@ -1238,6 +1242,8 @@ char* replace_char(const char* src, const char c, const char* rep)
 			count++;
 	}
 	res = (char*)malloc(str_len + count*rep_len + 1);
+	if (res == NULL)
+		return NULL;
 	for (i=0,j=0; i<str_len; i++) {
 		if (src[i] == c) {
 			for(k=0; k<rep_len; k++)
