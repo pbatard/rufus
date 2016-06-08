@@ -2755,15 +2755,17 @@ static HANDLE SetHogger(BOOL attached_console, BOOL disable_hogger)
 
 		// Now launch the file from the commandline, by simulating keypresses
 		input = (INPUT*)calloc(strlen(cmdline_hogger)+1, sizeof(INPUT));
-		for (i=0; i<(int)strlen(cmdline_hogger); i++) {
+		if (input != NULL) {
+			for (i = 0; i < (int)strlen(cmdline_hogger); i++) {
+				input[i].type = INPUT_KEYBOARD;
+				input[i].ki.dwFlags = KEYEVENTF_UNICODE;
+				input[i].ki.wScan = (wchar_t)cmdline_hogger[i];
+			}
 			input[i].type = INPUT_KEYBOARD;
-			input[i].ki.dwFlags = KEYEVENTF_UNICODE;
-			input[i].ki.wScan = (wchar_t)cmdline_hogger[i];
+			input[i].ki.wVk = VK_RETURN;
+			SendInput(i + 1, input, sizeof(INPUT));
+			free(input);
 		}
-		input[i].type = INPUT_KEYBOARD;
-		input[i].ki.wVk = VK_RETURN;
-		SendInput(i+1, input, sizeof(INPUT));
-		safe_free(input);
 	}
 	if (hogmutex != NULL)
 		Sleep(200);	// Need to add a delay, otherwise we may get some printout before the hogger
@@ -2867,63 +2869,67 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	if (pf__wgetmainargs != NULL) {
 		pf__wgetmainargs(&argc, &wargv, &wenv, 1, &si);
 		argv = (char**)calloc(argc, sizeof(char*));
+		if (argv != NULL) {
+			// Non getopt parameter check
+			for (i = 0; i < argc; i++) {
+				argv[i] = wchar_to_utf8(wargv[i]);
+				// Check for " /W" (wait for mutex release for pre 1.3.3 versions)
+				if (strcmp(argv[i], "/W") == 0)
+					wait_for_mutex = 150;	// Try to acquire the mutex for 15 seconds
+				// We need to find if we need to disable the hogger BEFORE we start
+				// processing arguments with getopt, as we may want to print messages
+				// on the commandline then, which the hogger makes more intuitive.
+				if ((strcmp(argv[i], "-g") == 0) || (strcmp(argv[i], "--gui") == 0))
+					disable_hogger = TRUE;
+			}
 
-		// Non getopt parameter check
-		for (i=0; i<argc; i++) {
-			argv[i] = wchar_to_utf8(wargv[i]);
-			// Check for " /W" (wait for mutex release for pre 1.3.3 versions)
-			if (strcmp(argv[i], "/W") == 0)
-				wait_for_mutex = 150;	// Try to acquire the mutex for 15 seconds
-			// We need to find if we need to disable the hogger BEFORE we start
-			// processing arguments with getopt, as we may want to print messages
-			// on the commandline then, which the hogger makes more intuitive.
-			if ((strcmp(argv[i], "-g") == 0) || (strcmp(argv[i], "--gui") == 0))
-				disable_hogger = TRUE;
-		}
+			// If our application name contains a 'p' (for "portable") create a 'rufus.ini'
+			// NB: argv[0] is populated in the previous loop
+			tmp = &argv[0][strlen(argv[0]) - 1];
+			while ((((uintptr_t)tmp) > ((uintptr_t)argv[0])) && (*tmp != '\\'))
+				tmp--;
+			if ((strchr(tmp, 'p') != NULL) || (strchr(tmp, 'P') != NULL))
+				ini_flags[0] = 'a';
 
-		// If our application name contains a 'p' (for "portable") create a 'rufus.ini'
-		// NB: argv[0] is populated in the previous loop
-		tmp = &argv[0][strlen(argv[0]) -1];
-		while ((((uintptr_t)tmp)>((uintptr_t)argv[0])) && (*tmp != '\\'))
-			tmp--;
-		if ((strchr(tmp, 'p') != NULL) || (strchr(tmp, 'P') != NULL))
-			ini_flags[0] = 'a';
+			// Now enable the hogger before processing the rest of the arguments
+			hogmutex = SetHogger(attached_console, disable_hogger);
 
-		// Now enable the hogger before processing the rest of the arguments
-		hogmutex = SetHogger(attached_console, disable_hogger);
-
-		while ((opt = getopt_long(argc, argv, "?fghi:w:l:", long_options, &option_index)) != EOF)
-			switch (opt) {
-			case 'f':
-				enable_HDDs = TRUE;
-				break;
-			case 'g':
-				// No need to reprocess that option
-				break;
-			case 'i':
-				if (_access(optarg, 0) != -1) {
-					image_path = safe_strdup(optarg);
-					iso_provided = TRUE;
-				} else {
-					printf("Could not find ISO image '%s'\n", optarg);
+			while ((opt = getopt_long(argc, argv, "?fghi:w:l:", long_options, &option_index)) != EOF) {
+				switch (opt) {
+				case 'f':
+					enable_HDDs = TRUE;
+					break;
+				case 'g':
+					// No need to reprocess that option
+					break;
+				case 'i':
+					if (_access(optarg, 0) != -1) {
+						image_path = safe_strdup(optarg);
+						iso_provided = TRUE;
+					}
+					else {
+						printf("Could not find ISO image '%s'\n", optarg);
+					}
+					break;
+				case 'l':
+					if (isdigitU(optarg[0])) {
+						lcid = (int)strtol(optarg, NULL, 0);
+					}
+					else {
+						safe_free(locale_name);
+						locale_name = safe_strdup(optarg);
+					}
+					break;
+				case 'w':
+					wait_for_mutex = atoi(optarg);
+					break;
+				case '?':
+				case 'h':
+				default:
+					PrintUsage(argv[0]);
+					goto out;
 				}
-				break;
-			case 'l':
-				if (isdigitU(optarg[0])) {
-					lcid = (int)strtol(optarg, NULL, 0);
-				} else {
-					safe_free(locale_name);
-					locale_name =safe_strdup(optarg);
-				}
-				break;
-			case 'w':
-				wait_for_mutex = atoi(optarg);
-				break;
-			case '?':
-			case 'h':
-			default:
-				PrintUsage(argv[0]);
-				goto out;
+			}
 		}
 	} else {
 		uprintf("Could not access UTF-16 args");

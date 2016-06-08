@@ -561,7 +561,7 @@ static __inline int SHDeleteDirectoryExU(HWND hwnd, const char* pszPath, FILEOP_
 	// String needs to be double NULL terminated, so we just use the length of the UTF-8 string
 	// which is always expected to be larger than our UTF-16 one, and add 2 chars for good measure.
 	size_t wpszPath_len = strlen(pszPath) + 2;
-	wchar_t* wpszPath = (wchar_t*)calloc(wpszPath_len, sizeof(wchar_t));
+	walloc(pszPath, wpszPath_len);
 	SHFILEOPSTRUCTW shfo = { hwnd, FO_DELETE, wpszPath, NULL, fFlags, FALSE, NULL, NULL };
 	utf8_to_wchar_no_alloc(pszPath, wpszPath, (int)wpszPath_len);
 	// FOF_SILENT | FOF_NOERRORUI | FOF_NOCONFIRMATION,
