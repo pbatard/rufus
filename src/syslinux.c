@@ -105,18 +105,19 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int fs_type)
 	const char* ldlinux_ext[3] = { "sys", "bss", "c32" };
 	const char* mboot_c32 = "mboot.c32";
 	char path[MAX_PATH], tmp[64];
+	const char *errmsg;
 	struct libfat_filesystem *fs;
 	libfat_sector_t s, *secp;
 	libfat_sector_t *sectors = NULL;
 	int ldlinux_sectors;
 	uint32_t ldlinux_cluster;
-	int i, nsectors;
+	int i, nsectors, sl_fs_stype;
 	int bt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
 	BOOL use_v5 = (bt == BT_SYSLINUX_V6) || ((bt == BT_ISO) && (SL_MAJOR(img_report.sl_version) >= 5));
 
 	PrintInfoDebug(0, MSG_234, (bt == BT_ISO)?img_report.sl_version_str:embedded_sl_version_str[use_v5?1:0]);
 
-	// 4K sector size workaround
+	/* 4K sector size workaround */
 	SECTOR_SHIFT = 0;
 	SECTOR_SIZE = SelectedDrive.SectorSize;
 	while (SECTOR_SIZE>>=1)
@@ -126,9 +127,31 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int fs_type)
 	LIBFAT_SECTOR_SIZE = SECTOR_SIZE;
 	LIBFAT_SECTOR_MASK = SECTOR_SIZE - 1;
 
-	sectbuf = malloc(SECTOR_SIZE);
+	/* sectbuf should be aligned to at least 8 bytes - see github #767 */
+	sectbuf = _aligned_malloc(SECTOR_SIZE, 16);
 	if (sectbuf == NULL)
 		goto out;
+
+	/* First, reopen the volume (we already have a lock) */
+	d_handle = GetLogicalHandle(drive_index, TRUE, FALSE);
+	if ((d_handle == INVALID_HANDLE_VALUE) || (d_handle == NULL)) {
+		uprintf("Could open volume for Syslinux installation");
+		goto out;
+	}
+
+	/* Make sure we can read the boot sector (NB: Re-open already set us to offset 0) */
+	if (!ReadFile(d_handle, sectbuf, SECTOR_SIZE, &bytes_read, NULL)) {
+		uprintf("Could not read VBR");
+		goto out;
+	}
+	if (bytes_read != SECTOR_SIZE) {
+		uprintf("Could not read the whole VBR");
+		goto out;
+	}
+	if ((errmsg = syslinux_check_bootsect(sectbuf, &sl_fs_stype))) {
+		uprintf("Error: %s", errmsg);
+		goto out;
+	}
 
 	/* Initialize the ADV -- this should be smarter */
 	syslinux_reset_adv(syslinux_adv);
@@ -198,13 +221,6 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int fs_type)
 	/* Now flush the media */
 	if (!FlushFileBuffers(f_handle)) {
 		uprintf("FlushFileBuffers failed");
-		goto out;
-	}
-
-	/* Reopen the volume (we already have a lock) */
-	d_handle = GetLogicalHandle(drive_index, TRUE, FALSE);
-	if ((d_handle == INVALID_HANDLE_VALUE) || (d_handle == NULL)) {
-		uprintf("Could open volume for Syslinux installation");
 		goto out;
 	}
 
@@ -366,7 +382,8 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int fs_type)
 	r = TRUE;
 
 out:
-	safe_free(sectbuf);
+	if (sectbuf != NULL)
+		_aligned_free(sectbuf);
 	safe_free(syslinux_ldlinux[0]);
 	safe_free(syslinux_ldlinux[1]);
 	safe_free(sectors);

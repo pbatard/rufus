@@ -22,10 +22,19 @@
 #include "libfat.h"
 #include "fat.h"
 
+#if defined(__GNUC__)
+#define ALIGN_START(m)
+#define ALIGN_END(m) __attribute__ ((__aligned__(m)))
+#elif defined(_MSC_VER)
+#define ALIGN_START(m) __declspec(align(m))
+#define ALIGN_END(m)
+#endif
+
 struct libfat_sector {
-    libfat_sector_t n;		/* Sector number */
-    struct libfat_sector *next;	/* Next in list */
-    char data[0];
+	libfat_sector_t n;		/* Sector number */
+	struct libfat_sector *next;	/* Next in list */
+	/* data[0] MUST be aligned to at least 8 bytes - see cache.c */
+	ALIGN_START(16) char data[0] ALIGN_END(16);
 };
 
 enum fat_type {
