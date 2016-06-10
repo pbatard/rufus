@@ -847,7 +847,7 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 {
 	BOOL r = FALSE;
 	DWORD size;
-	unsigned char* buf = NULL;
+	unsigned char* buffer = NULL;
 	FAKE_FD fake_fd = { 0 };
 	FILE* fp = (FILE*)&fake_fd;
 	const char* using_msg = "Using %s MBR\n";
@@ -859,14 +859,14 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 
 	// FormatEx rewrites the MBR and removes the LBA attribute of FAT16
 	// and FAT32 partitions - we need to correct this in the MBR
-	buf = (unsigned char*)malloc(SelectedDrive.SectorSize);
-	if (buf == NULL) {
+	buffer = (unsigned char*)_mm_malloc(SelectedDrive.SectorSize, 16);
+	if (buffer == NULL) {
 		uprintf("Could not allocate memory for MBR");
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_NOT_ENOUGH_MEMORY;
 		goto out;
 	}
 
-	if (!read_sectors(hPhysicalDrive, SelectedDrive.SectorSize, 0, 1, buf)) {
+	if (!read_sectors(hPhysicalDrive, SelectedDrive.SectorSize, 0, 1, buffer)) {
 		uprintf("Could not read MBR\n");
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_READ_FAULT;
 		goto out;
@@ -874,30 +874,30 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 
 	switch (ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem))) {
 	case FS_FAT16:
-		if (buf[0x1c2] == 0x0e) {
+		if (buffer[0x1c2] == 0x0e) {
 			uprintf("Partition is already FAT16 LBA...\n");
-		} else if ((buf[0x1c2] != 0x04) && (buf[0x1c2] != 0x06)) {
-			uprintf("Warning: converting a non FAT16 partition to FAT16 LBA: FS type=0x%02x\n", buf[0x1c2]);
+		} else if ((buffer[0x1c2] != 0x04) && (buffer[0x1c2] != 0x06)) {
+			uprintf("Warning: converting a non FAT16 partition to FAT16 LBA: FS type=0x%02x\n", buffer[0x1c2]);
 		}
-		buf[0x1c2] = 0x0e;
+		buffer[0x1c2] = 0x0e;
 		break;
 	case FS_FAT32:
-		if (buf[0x1c2] == 0x0c) {
+		if (buffer[0x1c2] == 0x0c) {
 			uprintf("Partition is already FAT32 LBA...\n");
-		} else if (buf[0x1c2] != 0x0b) {
-			uprintf("Warning: converting a non FAT32 partition to FAT32 LBA: FS type=0x%02x\n", buf[0x1c2]);
+		} else if (buffer[0x1c2] != 0x0b) {
+			uprintf("Warning: converting a non FAT32 partition to FAT32 LBA: FS type=0x%02x\n", buffer[0x1c2]);
 		}
-		buf[0x1c2] = 0x0c;
+		buffer[0x1c2] = 0x0c;
 		break;
 	}
 	if ((IsChecked(IDC_BOOT)) && (tt == TT_BIOS)) {
 		// Set first partition bootable - masquerade as per the DiskID selected
-		buf[0x1be] = IsChecked(IDC_RUFUS_MBR) ?
+		buffer[0x1be] = IsChecked(IDC_RUFUS_MBR) ?
 			(BYTE)ComboBox_GetItemData(hDiskID, ComboBox_GetCurSel(hDiskID)):0x80;
-		uprintf("Set bootable USB partition as 0x%02X\n", buf[0x1be]);
+		uprintf("Set bootable USB partition as 0x%02X\n", buffer[0x1be]);
 	}
 
-	if (!write_sectors(hPhysicalDrive, SelectedDrive.SectorSize, 0, 1, buf)) {
+	if (!write_sectors(hPhysicalDrive, SelectedDrive.SectorSize, 0, 1, buffer)) {
 		uprintf("Could not write MBR\n");
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_WRITE_FAULT;
 		goto out;
@@ -970,7 +970,7 @@ notify:
 		uprintf("Failed to notify system about disk properties update: %s\n", WindowsErrorString());
 
 out:
-	safe_free(buf);
+	safe_mm_free(buffer);
 	return r;
 }
 
@@ -1143,7 +1143,7 @@ static BOOL SetupWinPE(char drive_letter)
 	HANDLE handle = INVALID_HANDLE_VALUE;
 	DWORD i, j, size, rw_size, index = 0;
 	BOOL r = FALSE;
-	char* buf = NULL;
+	char* buffer = NULL;
 
 	index = ((img_report.winpe&WINPE_I386) == WINPE_I386)?0:1;
 	// Allow other values than harddisk 1, as per user choice for disk ID
@@ -1197,10 +1197,10 @@ static BOOL SetupWinPE(char drive_letter)
 		uprintf("Could not get size for file %s: %s\n", dst, WindowsErrorString());
 		goto out;
 	}
-	buf = (char*)malloc(size);
-	if (buf == NULL)
+	buffer = (char*)malloc(size);
+	if (buffer == NULL)
 		goto out;
-	if ((!ReadFile(handle, buf, size, &rw_size, NULL)) || (size != rw_size)) {
+	if ((!ReadFile(handle, buffer, size, &rw_size, NULL)) || (size != rw_size)) {
 		uprintf("Could not read file %s: %s\n", dst, WindowsErrorString());
 		goto out;
 	}
@@ -1209,16 +1209,16 @@ static BOOL SetupWinPE(char drive_letter)
 	// Patch setupldr.bin
 	uprintf("Patching file %s\n", dst);
 	// Remove CRC check for 32 bit part of setupldr.bin from Win2k3
-	if ((size > 0x2061) && (buf[0x2060] == 0x74) && (buf[0x2061] == 0x03)) {
-		buf[0x2060] = 0xeb;
-		buf[0x2061] = 0x1a;
+	if ((size > 0x2061) && (buffer[0x2060] == 0x74) && (buffer[0x2061] == 0x03)) {
+		buffer[0x2060] = 0xeb;
+		buffer[0x2061] = 0x1a;
 		uprintf("  0x00002060: 0x74 0x03 -> 0xEB 0x1A (disable Win2k3 CRC check)\n");
 	}
 	for (i=1; i<size-32; i++) {
 		for (j=0; j<ARRAYSIZE(patch_str_org); j++) {
-			if (safe_strnicmp(&buf[i], patch_str_org[j], strlen(patch_str_org[j])-1) == 0) {
-				uprintf("  0x%08X: '%s' -> '%s'\n", i, &buf[i], patch_str_rep[j]);
-				strcpy(&buf[i], patch_str_rep[j]);
+			if (safe_strnicmp(&buffer[i], patch_str_org[j], strlen(patch_str_org[j])-1) == 0) {
+				uprintf("  0x%08X: '%s' -> '%s'\n", i, &buffer[i], patch_str_rep[j]);
+				strcpy(&buffer[i], patch_str_rep[j]);
 				i += (DWORD)max(strlen(patch_str_org[j]), strlen(patch_str_rep[j]));	// in case org is a substring of rep
 			}
 		}
@@ -1229,33 +1229,30 @@ static BOOL SetupWinPE(char drive_letter)
 		for (i=0; i<size-32; i++) {
 			// rdisk(0) -> rdisk(#) disk masquerading
 			// NB: only the first one seems to be needed
-			if (safe_strnicmp(&buf[i], rdisk_zero, strlen(rdisk_zero)-1) == 0) {
-				buf[i+6] = 0x30 + ComboBox_GetCurSel(hDiskID);
-				uprintf("  0x%08X: '%s' -> 'rdisk(%c)'\n", i, rdisk_zero, buf[i+6]);
+			if (safe_strnicmp(&buffer[i], rdisk_zero, strlen(rdisk_zero)-1) == 0) {
+				buffer[i+6] = 0x30 + ComboBox_GetCurSel(hDiskID);
+				uprintf("  0x%08X: '%s' -> 'rdisk(%c)'\n", i, rdisk_zero, buffer[i+6]);
 			}
 			// $WIN_NT$_~BT -> i386
-			if (safe_strnicmp(&buf[i], win_nt_bt_org, strlen(win_nt_bt_org)-1) == 0) {
-				uprintf("  0x%08X: '%s' -> '%s%s'\n", i, &buf[i], win_nt_bt_rep, &buf[i+strlen(win_nt_bt_org)]);
-				strcpy(&buf[i], win_nt_bt_rep);
+			if (safe_strnicmp(&buffer[i], win_nt_bt_org, strlen(win_nt_bt_org)-1) == 0) {
+				uprintf("  0x%08X: '%s' -> '%s%s'\n", i, &buffer[i], win_nt_bt_rep, &buffer[i+strlen(win_nt_bt_org)]);
+				strcpy(&buffer[i], win_nt_bt_rep);
 				// This ensures that we keep the terminator backslash
-				buf[i+strlen(win_nt_bt_rep)] = buf[i+strlen(win_nt_bt_org)];
-				buf[i+strlen(win_nt_bt_rep)+1] = 0;
+				buffer[i+strlen(win_nt_bt_rep)] = buffer[i+strlen(win_nt_bt_org)];
+				buffer[i+strlen(win_nt_bt_rep)+1] = 0;
 			}
 		}
 	}
 
-	if (!WriteFileWithRetry(handle, buf, size, &rw_size, WRITE_RETRIES)) {
+	if (!WriteFileWithRetry(handle, buffer, size, &rw_size, WRITE_RETRIES)) {
 		uprintf("Could not write patched file: %s\n", WindowsErrorString());
 		goto out;
 	}
-	safe_free(buf);
-	safe_closehandle(handle);
-
 	r = TRUE;
 
 out:
 	safe_closehandle(handle);
-	safe_free(buf);
+	safe_free(buffer);
 	return r;
 }
 
@@ -1466,7 +1463,7 @@ static BOOL WriteDrive(HANDLE hPhysicalDrive, HANDLE hSourceImage)
 	LARGE_INTEGER li;
 	DWORD rSize, wSize, BufSize;
 	uint64_t wb, target_size = hSourceImage?img_report.projected_size:SelectedDrive.DiskSize;
-	uint8_t *buffer = NULL, *aligned_buffer;
+	uint8_t *buffer = NULL;
 	int i;
 
 	// We poked the MBR and other stuff, so we need to rewind
@@ -1482,16 +1479,20 @@ static BOOL WriteDrive(HANDLE hPhysicalDrive, HANDLE hSourceImage)
 		bled_exit();
 	} else {
 		uprintf(hSourceImage?"Writing Image...":"Zeroing drive...");
-		// Our buffer size must be a multiple of the sector size
+		// Our buffer size must be a multiple of the sector size and *ALIGNED* to the sector size
 		BufSize = ((DD_BUFFER_SIZE + SelectedDrive.SectorSize - 1) / SelectedDrive.SectorSize) * SelectedDrive.SectorSize;
-		buffer = (uint8_t*)calloc(BufSize + SelectedDrive.SectorSize, 1);	// +1 sector for align
+		buffer = (uint8_t*)_mm_malloc(BufSize, SelectedDrive.SectorSize);
 		if (buffer == NULL) {
 			FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_NOT_ENOUGH_MEMORY;
-			uprintf("could not allocate disk write buffer");
+			uprintf("Could not allocate disk write buffer");
 			goto out;
 		}
-		// http://msdn.microsoft.com/en-us/library/windows/desktop/aa365747.aspx does buffer sector alignment
-		aligned_buffer = ((void *)((((uintptr_t)(buffer)) + (SelectedDrive.SectorSize)-1) & (~(((uintptr_t)(SelectedDrive.SectorSize)) - 1))));
+		// Sanity check
+		if ((uintptr_t)buffer % SelectedDrive.SectorSize != 0) {
+			FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_READ_FAULT;
+			uprintf("Write buffer is not aligned");
+			goto out;
+		}
 
 		// Don't bother trying for something clever, using double buffering overlapped and whatnot:
 		// With Windows' default optimizations, sync read + sync write for sequential operations
@@ -1506,7 +1507,7 @@ static BOOL WriteDrive(HANDLE hPhysicalDrive, HANDLE hSourceImage)
 			}
 
 			if (hSourceImage != NULL) {
-				s = ReadFile(hSourceImage, aligned_buffer, BufSize, &rSize, NULL);
+				s = ReadFile(hSourceImage, buffer, BufSize, &rSize, NULL);
 				if (!s) {
 					FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_READ_FAULT;
 					uprintf("read error: %s", WindowsErrorString());
@@ -1525,7 +1526,7 @@ static BOOL WriteDrive(HANDLE hPhysicalDrive, HANDLE hSourceImage)
 				rSize = ((rSize + SelectedDrive.SectorSize - 1) / SelectedDrive.SectorSize) * SelectedDrive.SectorSize;
 			for (i = 0; i < WRITE_RETRIES; i++) {
 				CHECK_FOR_USER_CANCEL;
-				s = WriteFile(hPhysicalDrive, aligned_buffer, rSize, &wSize, NULL);
+				s = WriteFile(hPhysicalDrive, buffer, rSize, &wSize, NULL);
 				if ((s) && (wSize == rSize))
 					break;
 				if (s)
@@ -1547,7 +1548,7 @@ static BOOL WriteDrive(HANDLE hPhysicalDrive, HANDLE hSourceImage)
 	RefreshDriveLayout(hPhysicalDrive);
 	ret = TRUE;
 out:
-	safe_free(buffer);
+	safe_mm_free(buffer);
 	return ret;
 }
 
@@ -2033,7 +2034,7 @@ DWORD WINAPI SaveImageThread(void* param)
 	}
 
 	uprintf("Saving to image '%s'...", vhd_save->path);
-	buffer = (uint8_t*)malloc(DD_BUFFER_SIZE);
+	buffer = (uint8_t*)_mm_malloc(DD_BUFFER_SIZE, 16);
 	if (buffer == NULL) {
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_NOT_ENOUGH_MEMORY;
 		uprintf("could not allocate buffer");
@@ -2094,7 +2095,7 @@ DWORD WINAPI SaveImageThread(void* param)
 
 out:
 	safe_free(vhd_save->path);
-	safe_free(buffer);
+	safe_mm_free(buffer);
 	safe_closehandle(hDestImage);
 	safe_unlockclose(hPhysicalDrive);
 	PostMessage(hMainDialog, UM_FORMAT_COMPLETED, (WPARAM)TRUE, 0);

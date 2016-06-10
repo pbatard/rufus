@@ -21,11 +21,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if defined(__MINGW32__)
-#define _aligned_malloc                 __mingw_aligned_malloc
-#define _aligned_free                   __mingw_aligned_free
-#endif
-
 // From http://stackoverflow.com/a/9284679
 #define COMPILE_TIME_ASSERT(pred)       switch(0) {case 0: case pred:;}
 

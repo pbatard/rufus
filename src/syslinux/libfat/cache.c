@@ -17,21 +17,17 @@
  */
 
 #include <stdlib.h>
+#include <malloc.h>
 #include "libfatint.h"
 
 /*
- * We need to align our sector buffers to at least the 8-byte mark, as some Windows
+ * NB: We need to align our sector buffers to at least the 8-byte mark, as some Windows
  * disk devices, notably O2Micro PCI-E SD card readers, return ERROR_INVALID_PARAMETER
  * when attempting to use ReadFile() against a non 8-byte aligned buffer.
  * For good measure, we'll go further and align our buffers on a 16-byte boundary.
  * Also, since struct libfat_sector's data[0] is our buffer, this means we must BOTH
  * align that member in the struct declaration, and use aligned malloc/free.
  */
-#if defined(__MINGW32__)
-#define _aligned_malloc                 __mingw_aligned_malloc
-#define _aligned_free                   __mingw_aligned_free
-#endif
-
 extern void _uprintf(const char *format, ...);
 void *libfat_get_sector(struct libfat_filesystem *fs, libfat_sector_t n)
 {
@@ -43,10 +39,10 @@ void *libfat_get_sector(struct libfat_filesystem *fs, libfat_sector_t n)
     }
 
     /* Not found in cache */
-    ls = _aligned_malloc(sizeof(struct libfat_sector) + LIBFAT_SECTOR_SIZE, 16);
+    ls = _mm_malloc(sizeof(struct libfat_sector) + LIBFAT_SECTOR_SIZE, 16);
     if (!ls) {
 	libfat_flush(fs);
-	ls = _aligned_malloc(sizeof(struct libfat_sector) + LIBFAT_SECTOR_SIZE, 16);
+	ls = _mm_malloc(sizeof(struct libfat_sector) + LIBFAT_SECTOR_SIZE, 16);
 
 	if (!ls)
 	    return NULL;	/* Can't allocate memory */
@@ -54,7 +50,7 @@ void *libfat_get_sector(struct libfat_filesystem *fs, libfat_sector_t n)
 
     if (fs->read(fs->readptr, ls->data, LIBFAT_SECTOR_SIZE, n)
 	!= LIBFAT_SECTOR_SIZE) {
-	_aligned_free(ls);
+	_mm_free(ls);
 	return NULL;		/* I/O error */
     }
 
@@ -74,6 +70,6 @@ void libfat_flush(struct libfat_filesystem *fs)
 
     for (ls = lsnext; ls; ls = lsnext) {
 	lsnext = ls->next;
-	_aligned_free(ls);
+	_mm_free(ls);
     }
 }

@@ -94,6 +94,7 @@
 #define CHECK_FOR_USER_CANCEL       if (IS_ERROR(FormatStatus)) goto out
 
 #define safe_free(p) do {free((void*)p); p = NULL;} while(0)
+#define safe_mm_free(p) do {_mm_free((void*)p); p = NULL;} while(0)
 #define safe_min(a, b) min((size_t)(a), (size_t)(b))
 #define safe_strcp(dst, dst_max, src, count) do {memcpy(dst, src, safe_min(count, dst_max)); \
 	((char*)dst)[safe_min(count, dst_max)-1] = 0;} while(0)

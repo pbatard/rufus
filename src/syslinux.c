@@ -45,7 +45,7 @@ unsigned long syslinux_ldlinux_len[2];
 unsigned char* syslinux_mboot = NULL;
 unsigned long syslinux_mboot_len;
 
-// Workaround for 4K support
+/* Workaround for 4K support */
 uint32_t SECTOR_SHIFT = 9;
 uint32_t SECTOR_SIZE = 512;
 uint32_t LIBFAT_SECTOR_SHIFT = 9;
@@ -128,7 +128,7 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int fs_type)
 	LIBFAT_SECTOR_MASK = SECTOR_SIZE - 1;
 
 	/* sectbuf should be aligned to at least 8 bytes - see github #767 */
-	sectbuf = _aligned_malloc(SECTOR_SIZE, 16);
+	sectbuf = _mm_malloc(SECTOR_SIZE, 16);
 	if (sectbuf == NULL)
 		goto out;
 
@@ -382,8 +382,7 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int fs_type)
 	r = TRUE;
 
 out:
-	if (sectbuf != NULL)
-		_aligned_free(sectbuf);
+	safe_mm_free(sectbuf);
 	safe_free(syslinux_ldlinux[0]);
 	safe_free(syslinux_ldlinux[1]);
 	safe_free(sectors);

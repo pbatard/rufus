@@ -30,12 +30,12 @@
 #define ALIGN_END(m)
 #endif
 
-struct libfat_sector {
+ALIGN_START(16) struct libfat_sector {
 	libfat_sector_t n;		/* Sector number */
 	struct libfat_sector *next;	/* Next in list */
 	/* data[0] MUST be aligned to at least 8 bytes - see cache.c */
 	ALIGN_START(16) char data[0] ALIGN_END(16);
-};
+} ALIGN_END(16);
 
 enum fat_type {
     FAT12,

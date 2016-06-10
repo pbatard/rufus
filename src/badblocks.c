@@ -256,19 +256,11 @@ static blk_t next_bad = 0;
 static bb_badblocks_iterate bb_iter = NULL;
 
 static __inline void *allocate_buffer(size_t size) {
-#ifdef __MINGW32__
-	return __mingw_aligned_malloc(size, BB_SYS_PAGE_SIZE);
-#else
-	return _aligned_malloc(size, BB_SYS_PAGE_SIZE);
-#endif
+	return _mm_malloc(size, BB_SYS_PAGE_SIZE);
 }
 
 static __inline void free_buffer(void* p) {
-#ifdef __MINGW32__
-	__mingw_aligned_free(p);
-#else
-	_aligned_free(p);
-#endif
+	_mm_free(p);
 }
 
 /*

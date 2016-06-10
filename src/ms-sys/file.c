@@ -99,22 +99,37 @@ int64_t read_sectors(HANDLE hDrive, uint64_t SectorSize,
 int contains_data(FILE *fp, uint64_t Position,
 	const void *pData, uint64_t Len)
 {
-	unsigned char aucBuf[MAX_DATA_LEN];
+   int r = 0;
+   unsigned char *aucBuf = _mm_malloc(MAX_DATA_LEN, 16);
 
-	if (!read_data(fp, Position, aucBuf, Len))
-		return 0;
-	if (memcmp(pData, aucBuf, (size_t)Len))
-		return 0;
-	return 1;
+   if(aucBuf == NULL)
+      return 0;
+
+   if(!read_data(fp, Position, aucBuf, Len))
+      goto out;
+
+   if(memcmp(pData, aucBuf, (size_t)Len))
+      goto out;
+
+   r = 1;
+
+out:
+   _mm_free(aucBuf);
+   return r;
 } /* contains_data */
 
 int read_data(FILE *fp, uint64_t Position,
               void *pData, uint64_t Len)
 {
-   unsigned char aucBuf[MAX_DATA_LEN];
+   int r = 0;
+   unsigned char *aucBuf = _mm_malloc(MAX_DATA_LEN, 16);
    FAKE_FD* fd = (FAKE_FD*)fp;
    HANDLE hDrive = (HANDLE)fd->_handle;
    uint64_t StartSector, EndSector, NumSectors;
+
+   if (aucBuf == NULL)
+      return 0;
+
    Position += fd->_offset;
 
    StartSector = Position/ulBytesPerSector;
@@ -123,32 +138,44 @@ int read_data(FILE *fp, uint64_t Position,
 
    if((NumSectors*ulBytesPerSector) > MAX_DATA_LEN)
    {
-      uprintf("contains_data: please increase MAX_DATA_LEN in file.h\n");
-      return 0;
+      uprintf("read_data: Please increase MAX_DATA_LEN in file.h\n");
+      goto out;
    }
 
    if(Len > 0xFFFFFFFFUL)
    {
-      uprintf("contains_data: Len is too big\n");
-      return 0;
+      uprintf("read_data: Len is too big\n");
+      goto out;
    }
 
    if(read_sectors(hDrive, ulBytesPerSector, StartSector,
                      NumSectors, aucBuf) <= 0)
-      return 0;
+   goto out;
 
    memcpy(pData, &aucBuf[Position - StartSector*ulBytesPerSector], (size_t)Len);
-   return 1;
+
+   r = 1;
+
+out:
+   _mm_free(aucBuf);
+   return r;
 }  /* read_data */
 
 /* May read/write the same sector many times, but compatible with existing ms-sys */
 int write_data(FILE *fp, uint64_t Position,
                const void *pData, uint64_t Len)
 {
-   unsigned char aucBuf[MAX_DATA_LEN];
+   int r = 0;
+   /* Windows' WriteFile() may require a buffer that is aligned to the sector size */
+   /* TODO: We may need to increase the alignment if we get report of issues on 4K */
+   unsigned char *aucBuf = _mm_malloc(MAX_DATA_LEN, 512);
    FAKE_FD* fd = (FAKE_FD*)fp;
    HANDLE hDrive = (HANDLE)fd->_handle;
    uint64_t StartSector, EndSector, NumSectors;
+
+   if (aucBuf == NULL)
+      return 0;
+
    Position += fd->_offset;
 
    StartSector = Position/ulBytesPerSector;
@@ -157,26 +184,31 @@ int write_data(FILE *fp, uint64_t Position,
 
    if((NumSectors*ulBytesPerSector) > MAX_DATA_LEN)
    {
-      uprintf("Please increase MAX_DATA_LEN in file.h\n");
-      return 0;
+      uprintf("write_data: Please increase MAX_DATA_LEN in file.h\n");
+      goto out;
    }
 
    if(Len > 0xFFFFFFFFUL)
    {
       uprintf("write_data: Len is too big\n");
-      return 0;
+      goto out;
    }
 
    /* Data to write may not be aligned on a sector boundary => read into a sector buffer first */
    if(read_sectors(hDrive, ulBytesPerSector, StartSector,
                      NumSectors, aucBuf) <= 0)
-      return 0;
+      goto out;
 
    if(!memcpy(&aucBuf[Position - StartSector*ulBytesPerSector], pData, (size_t)Len))
-      return 0;
+      goto out;
 
    if(write_sectors(hDrive, ulBytesPerSector, StartSector,
                      NumSectors, aucBuf) <= 0)
-      return 0;
-   return 1;
+      goto out;
+
+   r = 1;
+
+out:
+   _mm_free(aucBuf);
+   return r;
 } /* write_data */

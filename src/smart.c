@@ -331,7 +331,7 @@ BOOL Identify(HANDLE hPhysical)
 	// You'll get an error here if your compiler does not properly pack the IDENTIFY struct
 	COMPILE_TIME_ASSERT(sizeof(IDENTIFY_DEVICE_DATA) == 512);
 
-	idd = (IDENTIFY_DEVICE_DATA*)_aligned_malloc(sizeof(IDENTIFY_DEVICE_DATA), 0x10);
+	idd = (IDENTIFY_DEVICE_DATA*)_mm_malloc(sizeof(IDENTIFY_DEVICE_DATA), 0x10);
 	if (idd == NULL)
 		return FALSE;
 
@@ -352,7 +352,7 @@ BOOL Identify(HANDLE hPhysical)
 	if (i >= ARRAYSIZE(pt))
 		uprintf("NO ATA FOR YOU!\n");
 
-	_aligned_free(idd);
+	_mm_free(idd);
 	return TRUE;
 }
 #endif
