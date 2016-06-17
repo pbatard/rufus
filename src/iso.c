@@ -75,7 +75,9 @@ static const char* efi_dirname = "/efi/boot";
 static const char* efi_bootname[] = { "bootia32.efi", "bootia64.efi", "bootx64.efi", "bootarm.efi", "bootaa64.efi" };
 static const char* install_wim_path = "/sources";
 static const char* install_wim_name[] = { "install.wim", "install.swm" };
-static const char* grub_dirname = "/boot/grub"; // NB: We don't support nonstandard config dir such as AROS' "/boot/pc/grub/"
+// We only support GRUB/BIOS (x86) that uses a standard config dir (/boot/grub/i386-pc/)
+// If the disc was mastered properly, GRUB/EFI will take care of itself
+static const char* grub_dirname = "/boot/grub/i386-pc";
 static const char* grub_cfg = "grub.cfg";
 static const char* syslinux_cfg[] = { "isolinux.cfg", "syslinux.cfg", "extlinux.conf" };
 static const char dot_isolinux_bin[] = ".\\isolinux.bin";
@@ -156,9 +158,9 @@ static BOOL check_iso_props(const char* psz_dirname, int64_t i_file_length, cons
 			props->is_old_c32[i] = TRUE;
 	}
 
-	// Check for the Grub config file
+	// Check for GRUB artifacts
 	if (scan_only) {
-		if ((safe_stricmp(psz_dirname, grub_dirname) == 0) && (safe_stricmp(psz_basename, grub_cfg) == 0))
+		if (safe_stricmp(psz_dirname, grub_dirname) == 0)
 			img_report.has_grub2 = TRUE;
 	} else if (safe_stricmp(psz_basename, grub_cfg) == 0) {
 		props->is_grub_cfg = TRUE;
