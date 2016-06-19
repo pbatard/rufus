@@ -632,8 +632,7 @@ void GetGrubVersion(char* buf, size_t buf_size)
 
 BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan)
 {
-	size_t i, size;
-	int j;
+	size_t i, j, size, sl_index = 0;
 	uint16_t sl_version;
 	FILE* fd;
 	int r = 1;
@@ -735,7 +734,7 @@ out:
 	iso_blocking_status = -1;
 	if (scan_only) {
 		// Remove trailing spaces from the label
-		for (j=(int)safe_strlen(img_report.label)-1; ((j>=0)&&(isspaceU(img_report.label[j]))); j--)
+		for (j=safe_strlen(img_report.label)-1; ((j>0)&&(isspaceU(img_report.label[j]))); j--)
 			img_report.label[j] = 0;
 		// We use the fact that UDF_BLOCKSIZE and ISO_BLOCKSIZE are the same here
 		img_report.projected_size = total_blocks * ISO_BLOCKSIZE;
@@ -787,11 +786,19 @@ out:
 					if (img_report.sl_version == 0) {
 						safe_strcpy(img_report.sl_version_ext, sizeof(img_report.sl_version_ext), ext);
 						img_report.sl_version = sl_version;
-						j = (int)i;
+						sl_index = i;
 					} else if ((img_report.sl_version != sl_version) || (safe_strcmp(img_report.sl_version_ext, ext) != 0)) {
 						uprintf("  Found conflicting %s versions:\n  '%s' (%d.%02d%s) vs '%s' (%d.%02d%s)", isolinux_bin,
-							isolinux_path.String[j], SL_MAJOR(img_report.sl_version), SL_MINOR(img_report.sl_version),
+							isolinux_path.String[sl_index], SL_MAJOR(img_report.sl_version), SL_MINOR(img_report.sl_version),
 							img_report.sl_version_ext, isolinux_path.String[i], SL_MAJOR(sl_version), SL_MINOR(sl_version), ext);
+						// Workaround for Antergos and other ISOs, that have multiple Syslinux versions.
+						// Where possible, prefer to the one that resides in the same directory as the config file.
+						for (j=safe_strlen(img_report.cfg_path); (j>0) && (img_report.cfg_path[j]!='/'); j--);
+						if (safe_strnicmp(img_report.cfg_path, isolinux_path.String[i], j) == 0) {
+							safe_strcpy(img_report.sl_version_ext, sizeof(img_report.sl_version_ext), ext);
+							img_report.sl_version = sl_version;
+							sl_index = i;
+						}
 					}
 					free(buf);
 					_unlink(dot_isolinux_bin);
@@ -801,7 +808,7 @@ out:
 				static_sprintf(img_report.sl_version_str, "%d.%02d",
 					SL_MAJOR(img_report.sl_version), SL_MINOR(img_report.sl_version));
 				uprintf("  Detected Syslinux version: %s%s (from '%s')",
-					img_report.sl_version_str, img_report.sl_version_ext, isolinux_path.String[j]);
+					img_report.sl_version_str, img_report.sl_version_ext, isolinux_path.String[sl_index]);
 				if ( (has_ldlinux_c32 && (SL_MAJOR(img_report.sl_version) < 5))
 				  || (!has_ldlinux_c32 && (SL_MAJOR(img_report.sl_version) >= 5)) )
 					uprintf("  Warning: Conflict between Isolinux version and the presence of ldlinux.c32...");
