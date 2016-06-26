@@ -70,7 +70,7 @@ extern "C" {
 
 #define sfree(p) do {if (p != NULL) {free((void*)(p)); p = NULL;}} while(0)
 #define wconvert(p)     wchar_t* w ## p = utf8_to_wchar(p)
-#define walloc(p, size) wchar_t* w ## p = (wchar_t*)calloc(size, sizeof(wchar_t))
+#define walloc(p, size) wchar_t* w ## p = (p == NULL)?NULL:(wchar_t*)calloc(size, sizeof(wchar_t))
 #define wfree(p) sfree(w ## p)
 
 /*
@@ -106,6 +106,9 @@ static __inline wchar_t* utf8_to_wchar(const char* str)
 {
 	int size = 0;
 	wchar_t* wstr = NULL;
+
+	if (str == NULL)
+		return NULL;
 
 	// Find out the size we need to allocate for our converted string
 	size = MultiByteToWideChar(CP_UTF8, 0, str, -1, NULL, 0);
@@ -867,7 +870,8 @@ static __inline int _mkdirU(const char* dirname)
 static __inline BOOL SetupDiGetDeviceRegistryPropertyU(HDEVINFO DeviceInfoSet, PSP_DEVINFO_DATA DeviceInfoData,
 	DWORD Property, PDWORD PropertyRegDataType, PBYTE PropertyBuffer, DWORD PropertyBufferSize, PDWORD RequiredSize)
 {
-	DWORD ret = FALSE, err = ERROR_INVALID_DATA;
+	BOOL ret = FALSE;
+	DWORD err = ERROR_INVALID_DATA;
 	walloc(PropertyBuffer, PropertyBufferSize);
 
 	ret = SetupDiGetDeviceRegistryPropertyW(DeviceInfoSet, DeviceInfoData, Property,
@@ -882,6 +886,37 @@ static __inline BOOL SetupDiGetDeviceRegistryPropertyU(HDEVINFO DeviceInfoSet, P
 	SetLastError(err);
 	return ret;
 }
+
+static __inline BOOL GetVolumeInformationU(LPCSTR lpRootPathName, LPSTR lpVolumeNameBuffer,
+	DWORD nVolumeNameSize, LPDWORD lpVolumeSerialNumber, LPDWORD lpMaximumComponentLength,
+	LPDWORD lpFileSystemFlags, LPSTR lpFileSystemNameBuffer, DWORD nFileSystemNameSize)
+{
+	BOOL ret = FALSE;
+	DWORD err = ERROR_INVALID_DATA;
+	wconvert(lpRootPathName);
+	walloc(lpVolumeNameBuffer, nVolumeNameSize);
+	walloc(lpFileSystemNameBuffer, nFileSystemNameSize);
+
+	ret = GetVolumeInformationW(wlpRootPathName, wlpVolumeNameBuffer, nVolumeNameSize,
+		lpVolumeSerialNumber, lpMaximumComponentLength, lpFileSystemFlags,
+		wlpFileSystemNameBuffer, nFileSystemNameSize);
+	err = GetLastError();
+	if (ret) {
+		if ( ((lpVolumeNameBuffer != NULL) && (wchar_to_utf8_no_alloc(wlpVolumeNameBuffer,
+			lpVolumeNameBuffer, nVolumeNameSize) == 0))
+		  || ((lpFileSystemNameBuffer != NULL) && (wchar_to_utf8_no_alloc(wlpFileSystemNameBuffer,
+			lpFileSystemNameBuffer, nFileSystemNameSize) == 0)) ) {
+			err = GetLastError();
+			ret = FALSE;
+		}
+	}
+	wfree(lpVolumeNameBuffer);
+	wfree(lpFileSystemNameBuffer);
+	wfree(lpRootPathName);
+	SetLastError(err);
+	return ret;
+}
+
 
 #ifdef __cplusplus
 }

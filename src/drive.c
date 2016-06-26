@@ -486,10 +486,8 @@ BOOL GetDriveLabel(DWORD DriveIndex, char* letters, char** label)
 {
 	HANDLE hPhysical;
 	DWORD size;
-	char AutorunPath[] = "#:\\autorun.inf", *AutorunLabel = NULL;
-	wchar_t wDrivePath[] = L"#:\\";
-	wchar_t wVolumeLabel[MAX_PATH+1];
-	static char VolumeLabel[MAX_PATH+1];
+	static char VolumeLabel[MAX_PATH + 1];
+	char DrivePath[] = "#:\\", AutorunPath[] = "#:\\autorun.inf", *AutorunLabel = NULL;
 
 	*label = STR_NO_LABEL;
 
@@ -501,7 +499,7 @@ BOOL GetDriveLabel(DWORD DriveIndex, char* letters, char** label)
 	}
 	// We only care about an autorun.inf if we have a single volume
 	AutorunPath[0] = letters[0];
-	wDrivePath[0] = letters[0];
+	DrivePath[0] = letters[0];
 
 	// Try to read an extended label from autorun first. Fallback to regular label if not found.
 	// In the case of card readers with no card, users can get an annoying popup asking them
@@ -518,10 +516,11 @@ BOOL GetDriveLabel(DWORD DriveIndex, char* letters, char** label)
 		safe_strcpy(VolumeLabel, sizeof(VolumeLabel), AutorunLabel);
 		safe_free(AutorunLabel);
 		*label = VolumeLabel;
-	} else if (GetVolumeInformationW(wDrivePath, wVolumeLabel, ARRAYSIZE(wVolumeLabel),
-		NULL, NULL, NULL, NULL, 0) && *wVolumeLabel) {
-		wchar_to_utf8_no_alloc(wVolumeLabel, VolumeLabel, sizeof(VolumeLabel));
+	} else if (GetVolumeInformationU(DrivePath, VolumeLabel, ARRAYSIZE(VolumeLabel),
+		NULL, NULL, NULL, NULL, 0) && (VolumeLabel[0] != 0)) {
 		*label = VolumeLabel;
+	} else {
+		duprintf("Failed to read label: %s", WindowsErrorString());
 	}
 
 	return TRUE;

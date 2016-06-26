@@ -1848,6 +1848,13 @@ DWORD WINAPI FormatThread(void* param)
 	}
 	CHECK_FOR_USER_CANCEL;
 
+	// Refresh the drive label - This is needed as Windows may have altered it from
+	// the name we proposed, and we require an exact label, to patch config files.
+	if (!GetVolumeInformationU(drive_name, img_report.usb_label, ARRAYSIZE(img_report.usb_label),
+		NULL, NULL, NULL, NULL, 0)) {
+		uprintf("Warning: Failed to refresh label: %s", WindowsErrorString());
+	}
+
 	if (IsChecked(IDC_BOOT)) {
 		if (bt == BT_UEFI_NTFS) {
 			// All good
