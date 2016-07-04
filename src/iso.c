@@ -72,7 +72,7 @@ static const char* grldr_name = "grldr";
 static const char* ldlinux_name = "ldlinux.sys";
 static const char* ldlinux_c32 = "ldlinux.c32";
 static const char* efi_dirname = "/efi/boot";
-static const char* efi_bootname[] = { "bootia32.efi", "bootia64.efi", "bootx64.efi", "bootarm.efi", "bootaa64.efi" };
+static const char* efi_bootname[] = { "bootia32.efi", "bootia64.efi", "bootx64.efi", "bootarm.efi", "bootaa64.efi", "bootebc.efi" };
 static const char* install_wim_path = "/sources";
 static const char* install_wim_name[] = { "install.wim", "install.swm" };
 // We only support GRUB/BIOS (x86) that uses a standard config dir (/boot/grub/i386-pc/)
