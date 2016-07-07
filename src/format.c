@@ -808,7 +808,7 @@ out:
 static BOOL ClearMBRGPT(HANDLE hPhysicalDrive, LONGLONG DiskSize, DWORD SectorSize, BOOL add1MB)
 {
 	BOOL r = FALSE;
-	uint64_t i, last_sector = DiskSize/SectorSize;
+	uint64_t i, last_sector = DiskSize/SectorSize, num_sectors_to_clear;
 	unsigned char* pBuf = (unsigned char*) calloc(SectorSize, 1);
 
 	PrintInfoDebug(0, MSG_224);
@@ -820,10 +820,14 @@ static BOOL ClearMBRGPT(HANDLE hPhysicalDrive, LONGLONG DiskSize, DWORD SectorSi
 	// beginning and 33 at the end. We bump these values to MAX_SECTORS_TO_CLEAR each end to help
 	// with reluctant access to large drive.
 
-	// Must clear at least 1MB + the PBR for large FAT32 format to work on a large drive
-	// Don't do it if Large FAT32 is not enabled, as it can take time for slow drives.
-	uprintf("Erasing %d sectors", (add1MB?2048:0)+MAX_SECTORS_TO_CLEAR);
-	for (i=0; i<((add1MB?2048:0)+MAX_SECTORS_TO_CLEAR); i++) {
+	// We try to clear at least 1MB + the PBR when Large FAT32 is selected (add1MB), but
+	// don't do it otherwise, as it seems unnecessary and may take time for slow drives.
+	// Also, for various reasons (one of which being that Windows seems to have issues
+	// with GPT drives that contain a lot of small partitions) we try not not to clear
+	// sectors further than the lowest partition already residing on the disk.
+	num_sectors_to_clear = min(SelectedDrive.FirstDataSector, (add1MB ? 2048 : 0) + MAX_SECTORS_TO_CLEAR);
+	uprintf("Erasing %d sectors", num_sectors_to_clear);
+	for (i=0; i<num_sectors_to_clear; i++) {
 		if ((IS_ERROR(FormatStatus)) || (write_sectors(hPhysicalDrive, SectorSize, i, 1, pBuf) != SectorSize)) {
 			goto out;
 		}
@@ -1678,7 +1682,7 @@ DWORD WINAPI FormatThread(void* param)
 	// Note, Microsoft's way of cleaning partitions (IOCTL_DISK_CREATE_DISK, which is what we apply
 	// in InitializeDisk) is *NOT ENOUGH* to reset a disk and can render it inoperable for partitioning
 	// or formatting under Windows. See https://github.com/pbatard/rufus/issues/759 for details.
-	if ((!ClearMBRGPT(hPhysicalDrive, SelectedDrive.DiskSize, SelectedDrive.SectorSize, FALSE)) || (!InitializeDisk(hPhysicalDrive)) ) {
+	if ((!ClearMBRGPT(hPhysicalDrive, SelectedDrive.DiskSize, SelectedDrive.SectorSize, use_large_fat32)) || (!InitializeDisk(hPhysicalDrive)) ) {
 		uprintf("Could not reset partitions\n");
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_PARTITION_FAILURE;
 		goto out;

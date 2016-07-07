@@ -61,7 +61,7 @@ typedef struct {
 	DWORD DeviceNumber;
 	DWORD SectorsPerTrack;
 	DWORD SectorSize;
-	DWORD FirstSector;
+	DWORD FirstDataSector;
 	MEDIA_TYPE MediaType;
 	int PartitionType;
 	int nPartitions;	// number of partitions we actually care about

@@ -108,7 +108,7 @@ BOOL GetAutoMount(BOOL* enabled)
  */
 #define CheckDriveIndex(DriveIndex) do { \
 	if ((DriveIndex < DRIVE_INDEX_MIN) || (DriveIndex > DRIVE_INDEX_MAX)) { \
-		uprintf("ERROR: Bad index value. Please check the code!\n"); \
+		uprintf("ERROR: Bad index value %d. Please check the code!", DriveIndex); \
 		goto out; \
 	} \
 	DriveIndex -= DRIVE_INDEX_MIN; } while (0)
@@ -691,6 +691,7 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 	}
 	SelectedDrive.DiskSize = DiskGeometry->DiskSize.QuadPart;
 	SelectedDrive.SectorSize = DiskGeometry->Geometry.BytesPerSector;
+	SelectedDrive.FirstDataSector = MAXDWORD;
 	if (SelectedDrive.SectorSize < 512) {
 		suprintf("Warning: Drive 0x%02x reports a sector size of %d - Correcting to 512 bytes.\n",
 			DriveIndex, SelectedDrive.SectorSize);
@@ -741,12 +742,15 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 					}
 				}
 				// NB: MinGW's gcc 4.9.2 broke "%lld" printout on XP so we use the inttypes.h "PRI##" qualifiers
-				suprintf("  Type: %s (0x%02x)\r\n  Size: %s (%" PRIi64 " bytes)\r\n  Start Sector: %d, Boot: %s, Recognized: %s\n",
+				suprintf("  Type: %s (0x%02x)\r\n  Size: %s (%" PRIi64 " bytes)\r\n  Start Sector: %" PRIi64 ", Boot: %s, Recognized: %s\n",
 					((part_type==0x07)&&(FileSystemName[0]!=0))?FileSystemName:GetPartitionType(part_type), part_type,
 					SizeToHumanReadable(DriveLayout->PartitionEntry[i].PartitionLength.QuadPart, TRUE, FALSE),
-					DriveLayout->PartitionEntry[i].PartitionLength.QuadPart, DriveLayout->PartitionEntry[i].Mbr.HiddenSectors,
+					DriveLayout->PartitionEntry[i].PartitionLength.QuadPart,
+					DriveLayout->PartitionEntry[i].StartingOffset.QuadPart / SelectedDrive.SectorSize,
 					DriveLayout->PartitionEntry[i].Mbr.BootIndicator?"Yes":"No",
 					DriveLayout->PartitionEntry[i].Mbr.RecognizedPartition?"Yes":"No");
+				SelectedDrive.FirstDataSector = min(SelectedDrive.FirstDataSector,
+					(DWORD)(DriveLayout->PartitionEntry[i].StartingOffset.QuadPart / SelectedDrive.SectorSize));
 				if ((part_type == RUFUS_EXTRA_PARTITION_TYPE) || (isUefiNtfs))
 					// This is a partition Rufus created => we can safely ignore it
 					--SelectedDrive.nPartitions;
@@ -768,9 +772,13 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 			suprintf("Partition %d:\r\n  Type: %s\r\n  Name: '%s'\n", i+1,
 				GuidToString(&DriveLayout->PartitionEntry[i].Gpt.PartitionType), tmp);
 			suprintf("  ID: %s\r\n  Size: %s (%" PRIi64 " bytes)\r\n  Start Sector: %" PRIi64 ", Attributes: 0x%016" PRIX64 "\n",
-				GuidToString(&DriveLayout->PartitionEntry[i].Gpt.PartitionId), SizeToHumanReadable(DriveLayout->PartitionEntry[i].PartitionLength.QuadPart, TRUE, FALSE),
-				DriveLayout->PartitionEntry[i].PartitionLength, DriveLayout->PartitionEntry[i].StartingOffset.QuadPart / DiskGeometry->Geometry.BytesPerSector,
+				GuidToString(&DriveLayout->PartitionEntry[i].Gpt.PartitionId),
+				SizeToHumanReadable(DriveLayout->PartitionEntry[i].PartitionLength.QuadPart, TRUE, FALSE),
+				DriveLayout->PartitionEntry[i].PartitionLength,
+				DriveLayout->PartitionEntry[i].StartingOffset.QuadPart / SelectedDrive.SectorSize,
 				DriveLayout->PartitionEntry[i].Gpt.Attributes);
+			SelectedDrive.FirstDataSector = min(SelectedDrive.FirstDataSector,
+				(DWORD)(DriveLayout->PartitionEntry[i].StartingOffset.QuadPart / SelectedDrive.SectorSize));
 			// Don't register the partitions that we don't care about destroying
 			if ( (strcmp(tmp, "UEFI:NTFS") == 0) ||
 				 (CompareGUID(&DriveLayout->PartitionEntry[i].Gpt.PartitionType, &PARTITION_MSFT_RESERVED_GUID)) ||
