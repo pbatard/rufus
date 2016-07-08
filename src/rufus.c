@@ -2050,11 +2050,12 @@ void SaveVHD(void)
 /*
  * Main dialog callback
  */
+#define PROCESS_QUEUED_EVENTS if (queued_hotplug_event) SendMessage(hDlg, UM_MEDIA_CHANGE, 0, 0)
 static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	static DWORD DeviceNum = 0;
 	static uint64_t LastRefresh = 0;
-	static BOOL first_log_display = TRUE, isMarquee = FALSE;
+	static BOOL first_log_display = TRUE, isMarquee = FALSE, queued_hotplug_event = FALSE;
 	static ULONG ulRegister = 0;
 	static LPITEMIDLIST pidlDesktop = NULL;
 	static MY_SHChangeNotifyEntry NotifyEntry;
@@ -2096,8 +2097,13 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			case DBT_CUSTOMEVENT:	// Sent by our timer refresh function or for card reader media change
 				LastRefresh = _GetTickCount64();
 				KillTimer(hMainDialog, TID_REFRESH_TIMER);
-				GetDevices((DWORD)ComboBox_GetItemData(hDeviceList, ComboBox_GetCurSel(hDeviceList)));
-				user_changed_label = FALSE;
+				if (!format_op_in_progress) {
+					queued_hotplug_event = FALSE;
+					GetDevices((DWORD)ComboBox_GetItemData(hDeviceList, ComboBox_GetCurSel(hDeviceList)));
+					user_changed_label = FALSE;
+				} else {
+					queued_hotplug_event = TRUE;
+				}
 				return (INT_PTR)TRUE;
 			case DBT_DEVNODES_CHANGED:
 				// If it's been more than a second since last device refresh, arm a refresh timer
@@ -2455,6 +2461,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				if (!zero_drive) {
 					if ((IsChecked(IDC_BOOT)) && (!BootCheck())) {
 						format_op_in_progress = FALSE;
+						PROCESS_QUEUED_EVENTS;
 						break;
 					}
 
@@ -2482,6 +2489,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 							lmprintf(MSG_276, iso_image), lmprintf(MSG_277, dd_image));
 						if (i < 0) {	// Cancel
 							format_op_in_progress = FALSE;
+							PROCESS_QUEUED_EVENTS;
 							break;
 						} else if (i == 2) {
 							selection_default = BT_IMG;
@@ -2495,18 +2503,21 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 					APPLICATION_NAME, MB_OKCANCEL|MB_ICONWARNING|MB_IS_RTL, selected_langid) == IDCANCEL) {
 					format_op_in_progress = FALSE;
 					zero_drive = FALSE;
+					PROCESS_QUEUED_EVENTS;
 					break;
 				}
 				if ((SelectedDrive.nPartitions > 1) && (MessageBoxExU(hMainDialog, lmprintf(MSG_093),
 					lmprintf(MSG_094), MB_OKCANCEL|MB_ICONWARNING|MB_IS_RTL, selected_langid) == IDCANCEL)) {
 					format_op_in_progress = FALSE;
 					zero_drive = FALSE;
+					PROCESS_QUEUED_EVENTS;
 					break;
 				}
 				if ((!zero_drive) && (IsChecked(IDC_BOOT)) && (SelectedDrive.SectorSize != 512) &&
 					(MessageBoxExU(hMainDialog, lmprintf(MSG_196, SelectedDrive.SectorSize),
 						lmprintf(MSG_197), MB_OKCANCEL|MB_ICONWARNING|MB_IS_RTL, selected_langid) == IDCANCEL)) {
 					format_op_in_progress = FALSE;
+					PROCESS_QUEUED_EVENTS;
 					break;
 				}
 
@@ -2530,6 +2541,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			if (format_thid == NULL) {
 				format_op_in_progress = FALSE;
 				zero_drive = FALSE;
+				PROCESS_QUEUED_EVENTS;
 			}
 			break;
 		case IDC_HASH:
