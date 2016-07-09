@@ -825,7 +825,7 @@ static BOOL ClearMBRGPT(HANDLE hPhysicalDrive, LONGLONG DiskSize, DWORD SectorSi
 	// Also, for various reasons (one of which being that Windows seems to have issues
 	// with GPT drives that contain a lot of small partitions) we try not not to clear
 	// sectors further than the lowest partition already residing on the disk.
-	num_sectors_to_clear = min(SelectedDrive.FirstDataSector, (add1MB ? 2048 : 0) + MAX_SECTORS_TO_CLEAR);
+	num_sectors_to_clear = min(SelectedDrive.FirstDataSector, (DWORD)((add1MB ? 2048 : 0) + MAX_SECTORS_TO_CLEAR));
 	uprintf("Erasing %d sectors", num_sectors_to_clear);
 	for (i=0; i<num_sectors_to_clear; i++) {
 		if ((IS_ERROR(FormatStatus)) || (write_sectors(hPhysicalDrive, SectorSize, i, 1, pBuf) != SectorSize)) {
@@ -1406,50 +1406,6 @@ static BOOL SetupWinToGo(const char* drive_name, BOOL use_ms_efi)
 	return TRUE;
 }
 
-/*
- * Detect if a Windows Format prompt is active, by enumerating the
- * whole Windows tree and looking for the relevant popup
- */
-static BOOL CALLBACK FormatPromptCallback(HWND hWnd, LPARAM lParam)
-{
-	char str_buf[MAX_PATH];
-	HWND *hFound = (HWND*)lParam;
-	static const char* security_string = "Microsoft Windows";
-
-	// The format prompt has the popup window style
-	if (GetWindowLong(hWnd, GWL_STYLE) & WS_POPUPWINDOW) {
-		str_buf[0] = 0;
-		GetWindowTextA(hWnd, str_buf, MAX_PATH);
-		str_buf[MAX_PATH-1] = 0;
-		if (safe_strcmp(str_buf, security_string) == 0) {
-			*hFound = hWnd;
-			return TRUE;
-		}
-	}
-	return TRUE;
-}
-
-/*
- * When we format a drive that doesn't have any existing partitions, we can't lock it
- * prior to partitioning, which means that Windows will display a "You need to format the
- * disk in drive X: before you can use it'. You will also get that popup if you start a
- * bad blocks check and cancel it before it completes. We have to close that popup manually.
- */
-static DWORD WINAPI CloseFormatPromptThread(LPVOID param) {
-	HWND hFormatPrompt;
-
-	while(format_op_in_progress) {
-		hFormatPrompt = NULL;
-		EnumChildWindows(GetDesktopWindow(), FormatPromptCallback, (LPARAM)&hFormatPrompt);
-		if (hFormatPrompt != NULL) {
-			SendMessage(hFormatPrompt, WM_COMMAND, (WPARAM)IDCANCEL, (LPARAM)0);
-			uprintf("Closed Windows format prompt\n");
-		}
-		Sleep(100);
-	}
-	ExitThread(0);
-}
-
 static void update_progress(const uint64_t processed_bytes)
 {
 	if (_GetTickCount64() > LastRefresh + MAX_REFRESH) {
@@ -1687,7 +1643,6 @@ DWORD WINAPI FormatThread(void* param)
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_PARTITION_FAILURE;
 		goto out;
 	}
-	CreateThread(NULL, 0, CloseFormatPromptThread, NULL, 0, NULL);
 
 	if (IsChecked(IDC_BADBLOCKS)) {
 		do {

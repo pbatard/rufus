@@ -36,6 +36,8 @@ extern BOOL usb_debug;	// For uuprintf
 int  nWindowsVersion = WINDOWS_UNDEFINED;
 char WindowsVersionStr[128] = "Windows ";
 
+PF_TYPE_DECL(WINAPI, int, LCIDToLocaleName, (LCID, LPWSTR, int, DWORD));
+
 /*
  * Hash table functions - modified From glibc 2.3.2:
  * [Aho,Sethi,Ullman] Compilers: Principles, Techniques and Tools, 1986
@@ -846,4 +848,62 @@ BOOL SetThreadAffinity(DWORD_PTR* thread_affinity, size_t num_threads)
 	}
 	uuprintf("  thr_%d:\t%s", i, printbitslz(thread_affinity[i]));
 	return TRUE;
+}
+
+/*
+ * Returns true if:
+ * 1. The OS supports UAC, UAC is on, and the current process runs elevated, or
+ * 2. The OS doesn't support UAC or UAC is off, and the process is being run by a member of the admin group
+ */
+BOOL IsCurrentProcessElevated(void)
+{
+	BOOL r = FALSE;
+	DWORD size;
+	HANDLE token = INVALID_HANDLE_VALUE;
+	TOKEN_ELEVATION te;
+	SID_IDENTIFIER_AUTHORITY auth = { SECURITY_NT_AUTHORITY };
+	PSID psid;
+
+	if (ReadRegistryKey32(REGKEY_HKLM, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\System\\EnableLUA") == 1) {
+		uprintf("Note: UAC is active");
+		if (!OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &token)) {
+			uprintf("Could not get current process token: %s", WindowsErrorString());
+			goto out;
+		}
+		if (!GetTokenInformation(token, TokenElevation, &te, sizeof(te), &size)) {
+			uprintf("Could not get token information: %s", WindowsErrorString());
+			goto out;
+		}
+		r = (te.TokenIsElevated != 0);
+	}
+	else {
+		uprintf("Note: UAC is either disabled or not available");
+		if (!AllocateAndInitializeSid(&auth, 2, SECURITY_BUILTIN_DOMAIN_RID,
+			DOMAIN_ALIAS_RID_ADMINS, 0, 0, 0, 0, 0, 0, &psid))
+			goto out;
+		if (!CheckTokenMembership(NULL, psid, &r))
+			r = FALSE;
+		FreeSid(psid);
+	}
+
+out:
+	safe_closehandle(token);
+	return r;
+}
+
+char* GetCurrentMUI(void)
+{
+	static char mui_str[LOCALE_NAME_MAX_LENGTH];
+	wchar_t wmui_str[LOCALE_NAME_MAX_LENGTH];
+
+	// Of course LCIDToLocaleName() is not available on XP... grrrr!
+	PF_INIT(LCIDToLocaleName, kernel32);
+
+	if ( (pfLCIDToLocaleName != NULL) &&
+		 (pfLCIDToLocaleName(GetUserDefaultUILanguage(), wmui_str, LOCALE_NAME_MAX_LENGTH, 0) > 0) ) {
+		wchar_to_utf8_no_alloc(wmui_str, mui_str, LOCALE_NAME_MAX_LENGTH);
+	} else {
+		safe_strcpy(mui_str, LOCALE_NAME_MAX_LENGTH, "en-US");
+	}
+	return mui_str;
 }

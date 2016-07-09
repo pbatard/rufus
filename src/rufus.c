@@ -2076,115 +2076,13 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 
 	switch (message) {
 
-	case UM_MEDIA_CHANGE:
-		wParam = DBT_CUSTOMEVENT;
-		// Fall through
-	case WM_DEVICECHANGE:
-		// The Windows hotplug subsystem sucks. Among other things, if you insert a GPT partitioned
-		// USB drive with zero partitions, the only device messages you will get are a stream of
-		// DBT_DEVNODES_CHANGED and that's it. But those messages are also issued when you get a
-		// DBT_DEVICEARRIVAL and DBT_DEVICEREMOVECOMPLETE, and there's a whole slew of them so we
-		// can't really issue a refresh for each one we receive
-		// What we do then is arm a timer on DBT_DEVNODES_CHANGED, if it's been more than 1 second
-		// since last refresh/arm timer, and have that timer send DBT_CUSTOMEVENT when it expires.
-		// DO *NOT* USE WM_DEVICECHANGE AS THE MESSAGE FROM THE TIMER PROC, as it may be filtered!
-		// For instance filtering will occur when (un)plugging in a FreeBSD UFD on Windows 8.
-		// Instead, use a custom user message, such as UM_MEDIA_CHANGE, to set DBT_CUSTOMEVENT.
-		if (format_thid == NULL) {
-			switch (wParam) {
-			case DBT_DEVICEARRIVAL:
-			case DBT_DEVICEREMOVECOMPLETE:
-			case DBT_CUSTOMEVENT:	// Sent by our timer refresh function or for card reader media change
-				LastRefresh = _GetTickCount64();
-				KillTimer(hMainDialog, TID_REFRESH_TIMER);
-				if (!format_op_in_progress) {
-					queued_hotplug_event = FALSE;
-					GetDevices((DWORD)ComboBox_GetItemData(hDeviceList, ComboBox_GetCurSel(hDeviceList)));
-					user_changed_label = FALSE;
-				} else {
-					queued_hotplug_event = TRUE;
-				}
-				return (INT_PTR)TRUE;
-			case DBT_DEVNODES_CHANGED:
-				// If it's been more than a second since last device refresh, arm a refresh timer
-				if (_GetTickCount64() > LastRefresh + 1000) {
-					LastRefresh = _GetTickCount64();
-					SetTimer(hMainDialog, TID_REFRESH_TIMER, 1000, RefreshTimer);
-				}
-				break;
-			default:
-				break;
-			}
-		}
-		break;
-
-	case WM_INITDIALOG:
-		PF_INIT(SHChangeNotifyRegister, shell32);
-		// Make sure fScale is set before the first call to apply localization, so that move/resize scale appropriately
-		hDC = GetDC(hDlg);
-		fScale = GetDeviceCaps(hDC, LOGPIXELSX) / 96.0f;
-		if (hDC != NULL)
-			ReleaseDC(hDlg, hDC);
-		apply_localization(IDD_DIALOG, hDlg);
-		SetUpdateCheck();
-		togo_mode = TRUE;	// We display the ToGo controls by default and need to hide them
-		// Create the log window (hidden)
-		first_log_display = TRUE;
-		log_displayed = FALSE;
-		hLogDlg = MyCreateDialog(hMainInstance, IDD_LOG, hDlg, (DLGPROC)LogProc);
-		InitDialog(hDlg);
-		GetDevices(0);
-		CheckForUpdates(FALSE);
-		// Register MEDIA_INSERTED/MEDIA_REMOVED notifications for card readers
-		if ((pfSHChangeNotifyRegister != NULL) && (SUCCEEDED(SHGetSpecialFolderLocation(0, CSIDL_DESKTOP, &pidlDesktop)))) {
-			NotifyEntry.pidl = pidlDesktop;
-			NotifyEntry.fRecursive = TRUE;
-			// NB: The following only works if the media is already formatted.
-			// If you insert a blank card, notifications will not be sent... :(
-			ulRegister = pfSHChangeNotifyRegister(hDlg, 0x0001|0x0002|0x8000,
-				SHCNE_MEDIAINSERTED|SHCNE_MEDIAREMOVED, UM_MEDIA_CHANGE, 1, &NotifyEntry);
-		}
-		// Bring our Window on top. We have to go through all *THREE* of these, or Far Manager hides our window :(
-		SetWindowPos(hMainDialog, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE|SWP_NOMOVE);
-		SetWindowPos(hMainDialog, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOSIZE|SWP_NOMOVE);
-		SetWindowPos(hMainDialog, HWND_TOP, 0, 0, 0, 0, SWP_NOSIZE|SWP_NOMOVE);
-
-		// Set 'Start' as the selected button if it's enabled, otherwise use 'Select ISO', instead
-		SendMessage(hDlg, WM_NEXTDLGCTL, (WPARAM)(IsWindowEnabled(hStart) ? hStart : hSelectISO), TRUE);
-
-#if defined(ALPHA)
-		// Add a VERY ANNOYING popup for Alpha releases, so that people don't start redistributing them
-		MessageBoxA(NULL, "This is an Alpha version of " APPLICATION_NAME " - It is meant to be used for "
-			"testing ONLY and should NOT be distributed as a release.", "ALPHA VERSION", MSG_INFO);
-#elif defined(TEST)
-		// Same thing for Test releases
-		MessageBoxA(NULL, "This is a Test version of " APPLICATION_NAME " - It is meant to be used for "
-			"testing ONLY and should NOT be distributed as a release.", "TEST VERSION", MSG_INFO);
-#endif
-		return (INT_PTR)FALSE;
-
-	// The things one must do to get an ellipsis and text alignment on the status bar...
-	case WM_DRAWITEM:
-		if (wParam == IDC_STATUS) {
-			pDI = (DRAWITEMSTRUCT*)lParam;
-			pDI->rcItem.top -= (int)((4.0f * fScale) - 6.0f);
-			pDI->rcItem.left += (int)(((pDI->itemID == SB_SECTION_MIDDLE)?-2.0f:4.0f) * fScale);
-			SetBkMode(pDI->hDC, TRANSPARENT);
-			switch(pDI->itemID) {
-			case SB_SECTION_LEFT:
-				SetTextColor(pDI->hDC, GetSysColor(COLOR_BTNTEXT));
-				DrawTextExU(pDI->hDC, szStatusMessage, -1, &pDI->rcItem,
-					DT_LEFT|DT_END_ELLIPSIS|DT_PATH_ELLIPSIS, NULL);
-				return (INT_PTR)TRUE;
-			case SB_SECTION_RIGHT:
-				SetTextColor(pDI->hDC, GetSysColor(COLOR_3DSHADOW));
-				DrawTextExA(pDI->hDC, szTimer, -1, &pDI->rcItem, DT_LEFT, NULL);
-				return (INT_PTR)TRUE;
-			}
-		}
-		break;
-
 	case WM_COMMAND:
+#ifdef RUFUS_TEST
+		if (LOWORD(wParam) == IDC_TEST) {
+			break;
+		}
+#endif
+
 		if ((LOWORD(wParam) >= UM_LANGUAGE_MENU) && (LOWORD(wParam) < UM_LANGUAGE_MENU_MAX)) {
 			selected_language = LOWORD(wParam) - UM_LANGUAGE_MENU;
 			i = 0;
@@ -2277,12 +2175,6 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			// Must come last for the log window to get focus
 			ShowWindow(hLogDlg, log_displayed?SW_SHOW:SW_HIDE);
 			break;
-#ifdef RUFUS_TEST
-		case IDC_TEST:
-		{
-			break;
-		}
-#endif
 		case IDC_ADVANCED:
 			advanced_mode = !advanced_mode;
 			WriteSettingBool(SETTING_ADVANCED_MODE, advanced_mode);
@@ -2578,6 +2470,115 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		}
 		return (INT_PTR)TRUE;
 
+	case UM_MEDIA_CHANGE:
+		wParam = DBT_CUSTOMEVENT;
+		// Fall through
+	case WM_DEVICECHANGE:
+		// The Windows hotplug subsystem sucks. Among other things, if you insert a GPT partitioned
+		// USB drive with zero partitions, the only device messages you will get are a stream of
+		// DBT_DEVNODES_CHANGED and that's it. But those messages are also issued when you get a
+		// DBT_DEVICEARRIVAL and DBT_DEVICEREMOVECOMPLETE, and there's a whole slew of them so we
+		// can't really issue a refresh for each one we receive
+		// What we do then is arm a timer on DBT_DEVNODES_CHANGED, if it's been more than 1 second
+		// since last refresh/arm timer, and have that timer send DBT_CUSTOMEVENT when it expires.
+		// DO *NOT* USE WM_DEVICECHANGE AS THE MESSAGE FROM THE TIMER PROC, as it may be filtered!
+		// For instance filtering will occur when (un)plugging in a FreeBSD UFD on Windows 8.
+		// Instead, use a custom user message, such as UM_MEDIA_CHANGE, to set DBT_CUSTOMEVENT.
+		if (format_thid == NULL) {
+			switch (wParam) {
+			case DBT_DEVICEARRIVAL:
+			case DBT_DEVICEREMOVECOMPLETE:
+			case DBT_CUSTOMEVENT:	// Sent by our timer refresh function or for card reader media change
+				LastRefresh = _GetTickCount64();
+				KillTimer(hMainDialog, TID_REFRESH_TIMER);
+				if (!format_op_in_progress) {
+					queued_hotplug_event = FALSE;
+					GetDevices((DWORD)ComboBox_GetItemData(hDeviceList, ComboBox_GetCurSel(hDeviceList)));
+					user_changed_label = FALSE;
+				}
+				else {
+					queued_hotplug_event = TRUE;
+				}
+				return (INT_PTR)TRUE;
+			case DBT_DEVNODES_CHANGED:
+				// If it's been more than a second since last device refresh, arm a refresh timer
+				if (_GetTickCount64() > LastRefresh + 1000) {
+					LastRefresh = _GetTickCount64();
+					SetTimer(hMainDialog, TID_REFRESH_TIMER, 1000, RefreshTimer);
+				}
+				break;
+			default:
+				break;
+			}
+		}
+		break;
+
+	case WM_INITDIALOG:
+		PF_INIT(SHChangeNotifyRegister, shell32);
+		// Make sure fScale is set before the first call to apply localization, so that move/resize scale appropriately
+		hDC = GetDC(hDlg);
+		fScale = GetDeviceCaps(hDC, LOGPIXELSX) / 96.0f;
+		if (hDC != NULL)
+			ReleaseDC(hDlg, hDC);
+		apply_localization(IDD_DIALOG, hDlg);
+		SetUpdateCheck();
+		togo_mode = TRUE;	// We display the ToGo controls by default and need to hide them
+							// Create the log window (hidden)
+		first_log_display = TRUE;
+		log_displayed = FALSE;
+		hLogDlg = MyCreateDialog(hMainInstance, IDD_LOG, hDlg, (DLGPROC)LogProc);
+		InitDialog(hDlg);
+		GetDevices(0);
+		CheckForUpdates(FALSE);
+		// Register MEDIA_INSERTED/MEDIA_REMOVED notifications for card readers
+		if ((pfSHChangeNotifyRegister != NULL) && (SUCCEEDED(SHGetSpecialFolderLocation(0, CSIDL_DESKTOP, &pidlDesktop)))) {
+			NotifyEntry.pidl = pidlDesktop;
+			NotifyEntry.fRecursive = TRUE;
+			// NB: The following only works if the media is already formatted.
+			// If you insert a blank card, notifications will not be sent... :(
+			ulRegister = pfSHChangeNotifyRegister(hDlg, 0x0001 | 0x0002 | 0x8000,
+				SHCNE_MEDIAINSERTED | SHCNE_MEDIAREMOVED, UM_MEDIA_CHANGE, 1, &NotifyEntry);
+		}
+		// Bring our Window on top. We have to go through all *THREE* of these, or Far Manager hides our window :(
+		SetWindowPos(hMainDialog, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
+		SetWindowPos(hMainDialog, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
+		SetWindowPos(hMainDialog, HWND_TOP, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
+
+		// Set 'Start' as the selected button if it's enabled, otherwise use 'Select ISO', instead
+		SendMessage(hDlg, WM_NEXTDLGCTL, (WPARAM)(IsWindowEnabled(hStart) ? hStart : hSelectISO), TRUE);
+
+#if defined(ALPHA)
+		// Add a VERY ANNOYING popup for Alpha releases, so that people don't start redistributing them
+		MessageBoxA(NULL, "This is an Alpha version of " APPLICATION_NAME " - It is meant to be used for "
+			"testing ONLY and should NOT be distributed as a release.", "ALPHA VERSION", MSG_INFO);
+#elif defined(TEST)
+		// Same thing for Test releases
+		MessageBoxA(NULL, "This is a Test version of " APPLICATION_NAME " - It is meant to be used for "
+			"testing ONLY and should NOT be distributed as a release.", "TEST VERSION", MSG_INFO);
+#endif
+		return (INT_PTR)FALSE;
+
+		// The things one must do to get an ellipsis and text alignment on the status bar...
+	case WM_DRAWITEM:
+		if (wParam == IDC_STATUS) {
+			pDI = (DRAWITEMSTRUCT*)lParam;
+			pDI->rcItem.top -= (int)((4.0f * fScale) - 6.0f);
+			pDI->rcItem.left += (int)(((pDI->itemID == SB_SECTION_MIDDLE) ? -2.0f : 4.0f) * fScale);
+			SetBkMode(pDI->hDC, TRANSPARENT);
+			switch (pDI->itemID) {
+			case SB_SECTION_LEFT:
+				SetTextColor(pDI->hDC, GetSysColor(COLOR_BTNTEXT));
+				DrawTextExU(pDI->hDC, szStatusMessage, -1, &pDI->rcItem,
+					DT_LEFT | DT_END_ELLIPSIS | DT_PATH_ELLIPSIS, NULL);
+				return (INT_PTR)TRUE;
+			case SB_SECTION_RIGHT:
+				SetTextColor(pDI->hDC, GetSysColor(COLOR_3DSHADOW));
+				DrawTextExA(pDI->hDC, szTimer, -1, &pDI->rcItem, DT_LEFT, NULL);
+				return (INT_PTR)TRUE;
+			}
+		}
+		break;
+
 	case WM_NOTIFY:
 		switch (((LPNMHDR)lParam)->code) {
 		case TBN_DROPDOWN:
@@ -2782,46 +2783,6 @@ static HANDLE SetHogger(BOOL attached_console, BOOL disable_hogger)
 	if (hogmutex != NULL)
 		Sleep(200);	// Need to add a delay, otherwise we may get some printout before the hogger
 	return hogmutex;
-}
-
-/*
- * Returns true if:
- * 1. The OS supports UAC, UAC is on, and the current process runs elevated, or
- * 2. The OS doesn't support UAC or UAC is off, and the process is being run by a member of the admin group
- */
-static BOOL IsCurrentProcessElevated(void)
-{
-	BOOL r = FALSE;
-	DWORD size;
-	HANDLE token = INVALID_HANDLE_VALUE;
-	TOKEN_ELEVATION te;
-	SID_IDENTIFIER_AUTHORITY auth = { SECURITY_NT_AUTHORITY };
-	PSID psid;
-
-	if (ReadRegistryKey32(REGKEY_HKLM, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\System\\EnableLUA") == 1) {
-		uprintf("NOTE: UAC is on");
-		if (!OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &token)) {
-			uprintf("Could not get current process token: %s", WindowsErrorString());
-			goto out;
-		}
-		if (!GetTokenInformation(token, TokenElevation, &te, sizeof(te), &size)) {
-			uprintf("Could not get token information: %s", WindowsErrorString());
-			goto out;
-		}
-		r = (te.TokenIsElevated != 0);
-	} else {
-		uprintf("NOTE: UAC is either disabled or not available");
-		if (!AllocateAndInitializeSid(&auth, 2, SECURITY_BUILTIN_DOMAIN_RID,
-			DOMAIN_ALIAS_RID_ADMINS, 0, 0, 0, 0, 0, 0, &psid))
-			goto out;
-		if (!CheckTokenMembership(NULL, psid, &r))
-			r = FALSE;
-		FreeSid(psid);
-	}
-
-out:
-	safe_closehandle(token);
-	return r;
 }
 
 
@@ -3135,6 +3096,10 @@ relaunch:
 		}
 	}
 
+	// Set the hook to automatically close Windows' "You need to format the disk in drive..." prompt
+	if (!SetFormatPromptHook())
+		uprintf("Warning:Could not set 'Format Disk' prompt auto-close");
+
 	ShowWindow(hDlg, SW_SHOWNORMAL);
 	UpdateWindow(hDlg);
 
@@ -3348,6 +3313,7 @@ out:
 	if ((!external_loc_file) && (loc_file[0] != 0))
 		DeleteFileU(loc_file);
 	DestroyAllTooltips();
+	ClrFormatPromptHook();
 	exit_localization();
 	safe_free(image_path);
 	safe_free(locale_name);

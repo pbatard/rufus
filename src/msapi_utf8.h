@@ -226,6 +226,21 @@ static __inline int MessageBoxExU(HWND hWnd, LPCSTR lpText, LPCSTR lpCaption, UI
 	return ret;
 }
 
+static __inline int LoadStringU(HINSTANCE hInstance, UINT uID, LPSTR lpBuffer, int nBufferMax)
+{
+	int ret;
+	DWORD err = ERROR_INVALID_DATA;
+	walloc(lpBuffer, nBufferMax);
+	ret = LoadStringW(hInstance, uID, wlpBuffer, nBufferMax);
+	err = GetLastError();
+	if ((ret > 0) && ((ret = wchar_to_utf8_no_alloc(wlpBuffer, lpBuffer, nBufferMax)) == 0)) {
+		err = GetLastError();
+	}
+	wfree(lpBuffer);
+	SetLastError(err);
+	return ret;
+}
+
 static __inline int DrawTextU(HDC hDC, LPCSTR lpText, int nCount, LPRECT lpRect, UINT uFormat)
 {
 	int ret;
@@ -917,6 +932,14 @@ static __inline BOOL GetVolumeInformationU(LPCSTR lpRootPathName, LPSTR lpVolume
 	return ret;
 }
 
+static __inline HMODULE LoadLibraryU(LPCSTR lpFileName)
+{
+	HMODULE h;
+	wconvert(lpFileName);
+	h = LoadLibraryW(wlpFileName);
+	wfree(lpFileName);
+	return h;
+}
 
 #ifdef __cplusplus
 }

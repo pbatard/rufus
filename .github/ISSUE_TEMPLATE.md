@@ -1,7 +1,7 @@
+<PLEASE READ THIS CAREFULLY: You *MUST* read and complete the checklist below, by placing an x into each [ ], BEFORE clicking on 'Submit new issue'. Failure to perform these steps, WHICH ARE ONLY THERE TO HELP *YOU*, will result in the issue being dismissed without warning.>
+
 Checklist
 ---------
-<Please complete the following and place an x into each [ ] to confirm that you have read and performed these preliminary steps>
-
 - [ ] I looked at https://github.com/pbatard/rufus/wiki/FAQ to see if my question has already been answered.
 - [ ] I performed a search in the issue tracker for similar issues, using keywords relevant to my problem.
 - [ ] I clicked the `Log` button in Rufus and copy/pasted the log into the line that says `<FULL LOG>` below.

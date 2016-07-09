@@ -465,6 +465,10 @@ extern BOOL IsBufferInDB(const unsigned char* buf, const size_t len);
 #define printbits(x) _printbits(sizeof(x), &x, 0)
 #define printbitslz(x) _printbits(sizeof(x), &x, 1)
 extern char* _printbits(size_t const size, void const * const ptr, int leading_zeroes);
+extern BOOL IsCurrentProcessElevated(void);
+extern char* GetCurrentMUI(void);
+extern BOOL SetFormatPromptHook(void);
+extern void ClrFormatPromptHook(void);
 
 DWORD WINAPI FormatThread(void* param);
 DWORD WINAPI SaveImageThread(void* param);
