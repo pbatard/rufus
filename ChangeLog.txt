@@ -1,3 +1,14 @@
+o Version 2.10 (2016.07.??)
+    Add SHA-256 validation for downloaded files. You will now see an ✓ or ✗ in the log for relevant content
+    Add support for O2Micro PCI-E card readers
+    Improve automatic closure of the Windows default format prompt
+    Improve support for Ubuntu (silence a benign warning), Springdale (use the actual label) and Antergos (Syslinux version detection)
+    Work around a Windows bug that can render a GPT disk inaccessible after cleanup (e.g. ChromeOS image)
+    Fix hash computation for content that isn't a multiple of 64 bytes (NB: This did not affect ISOs)
+    Fix Syslinux installation on some media, with huge thanks to 424778940z for the tests
+    Fix a corner case where settings could be altered after Start had been pressed, if a hotplug event also occurred
+    Additional fixes and improvements
+
 o Version 2.9 (2016.05.17)
     Add ARM support for UEFI:NTFS
     Fix UEFI:NTFS support for HP and Gigabyte firmwares (with thanks to Rod Smith and linnaea)
