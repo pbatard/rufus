@@ -92,7 +92,7 @@ libfat_open(int (*readfunc) (intptr_t, void *, size_t, libfat_sector_t),
     } else
 	goto barf;		/* Impossibly many clusters */
 
-	minfatsize = (minfatsize + LIBFAT_SECTOR_SIZE - 1) >> LIBFAT_SECTOR_SHIFT;
+    minfatsize = (minfatsize + LIBFAT_SECTOR_SIZE - 1) >> LIBFAT_SECTOR_SHIFT;
 
     if (minfatsize > fatsize)
 	goto barf;		/* The FATs don't fit */

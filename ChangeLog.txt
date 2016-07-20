@@ -1,6 +1,7 @@
-o Version 2.10 (2016.07.??)
+o Version 2.10 (2016.07.20)
     Add SHA-256 validation for downloaded files. You will now see an ✓ or ✗ in the log for relevant content
     Add support for O2Micro PCI-E card readers
+    Add compressed NTFS support for UEFI:NTFS
     Improve automatic closure of the Windows default format prompt
     Improve support for Ubuntu (silence a benign warning), Springdale (use the actual label) and Antergos (Syslinux version detection)
     Work around a Windows bug that can render a GPT disk inaccessible after cleanup (e.g. ChromeOS image)
