@@ -1102,7 +1102,11 @@ static BOOL WritePBR(HANDLE hLogicalVolume)
 				if (!write_fat_32_ros_br(fp, 0)) break;
 			} else if ((bt == BT_ISO) && (img_report.has_kolibrios)) {
 				if (!write_fat_32_kos_br(fp, 0)) break;
-			} else {
+			} else if ((bt == BT_ISO) && (img_report.has_bootmgr)) {
+				if (!write_fat_32_pe_br(fp, 0)) break;
+			} else if ((bt == BT_ISO) && (img_report.has_ntldr)) {
+				if (!write_fat_32_nt_br(fp, 0)) break;
+			} else { /* This is a DOS boot record */
 				if (!write_fat_32_br(fp, 0)) break;
 			}
 			// Disk Drive ID needs to be corrected on XP
