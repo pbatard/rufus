@@ -172,8 +172,6 @@ int write_fat_32_nt_br(FILE *fp, int bKeepLabel)
 	    );
 } /* write_fat_32_nt_br */
 
-/* Not used by Rufus */
-#if 0
 int entire_fat_32_pe_br_matches(FILE *fp)
 {
    #include "br_fat32_0x0.h"
@@ -221,7 +219,6 @@ int write_fat_32_pe_br(FILE *fp, int bKeepLabel)
 	   write_data(fp, 0x1800, br_fat32pe_0x1800, sizeof(br_fat32pe_0x1800))
 	    );
 } /* write_fat_32_pe_br */
-#endif
 
 int entire_fat_32_ros_br_matches(FILE *fp)
 {

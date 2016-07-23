@@ -33,6 +33,9 @@
     <ClInclude Include="..\inc\br_fat32nt_0x1800.h" />
     <ClInclude Include="..\inc\br_fat32nt_0x3f0.h" />
     <ClInclude Include="..\inc\br_fat32nt_0x52.h" />
+    <ClInclude Include="..\inc\br_fat32pe_0x1800.h" />
+    <ClInclude Include="..\inc\br_fat32pe_0x3f0.h" />
+    <ClInclude Include="..\inc\br_fat32pe_0x52.h" />
     <ClInclude Include="..\inc\br_fat32ros_0x1c00.h" />
     <ClInclude Include="..\inc\br_fat32ros_0x3f0.h" />
     <ClInclude Include="..\inc\br_fat32ros_0x52.h" />
