@@ -16,7 +16,7 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 /* iso9660 filesystem-based routines */
-
+
 #if defined(HAVE_CONFIG_H) && !defined(__CDIO_CONFIG_H__)
 #include "config.h"
 #define __CDIO_CONFIG_H__ 1
@@ -270,8 +270,8 @@ check_pvd (const iso9660_pvd_t *p_pvd, cdio_log_level_t log_level)
 
   if (strncmp (p_pvd->id, ISO_STANDARD_ID, strlen (ISO_STANDARD_ID)))
     {
-      cdio_log (log_level, "unexpected ID encountered (expected `"
-		ISO_STANDARD_ID "', got `%.5s'", p_pvd->id);
+      cdio_log (log_level, "unexpected ID encountered (expected '"
+		ISO_STANDARD_ID "', got '%.5s')", p_pvd->id);
       return false;
     }
   return true;
