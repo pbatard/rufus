@@ -1,0 +1,18 @@
+version: 1.0.{build}
+configuration:
+- Debug
+- Release
+platform:
+- x86_32
+- x86_64
+build:
+  project: rufus.sln
+  parallel: true
+  verbosity: detailed
+install:
+- cmd: >-
+  xcopy /S C:\projects\rufus C:\msys64\home\appveyor\
+build_script:
+- cmd: >-
+  _appveyor_msvc.cmd
+  _appveyor_mingw.cmd

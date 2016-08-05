@@ -1,6 +1,9 @@
 Rufus: The Reliable USB Formatting Utility
 ==========================================
 
+[![Build status](https://ci.appveyor.com/api/projects/status/0nciqepn6hko4to9?svg=true)](https://ci.appveyor.com/project/pbatard/rufus)
+[![Coverity Scan Build Status](https://scan.coverity.com/projects/2172/badge.svg)](https://scan.coverity.com/projects/pbatard-rufus)
+
 ![Rufus logo](https://raw.githubusercontent.com/pbatard/rufus/master/res/icon-set/rufus-128.png)
 
 Features
