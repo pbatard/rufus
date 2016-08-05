@@ -1,16 +1,40 @@
-version: 1.0.{build}
-configuration:
-- Debug
-- Release
-platform:
-- x86_32
-- x86_64
+version: appveyor_build{build}
+
+os: Visual Studio 2015
+
+environment:
+  global:
+    PLATFORMTOOLSET: v140
+    BITS: 32
+  matrix:
+    - CONFIGURATION: Debug
+      COMPILER: MSVC15
+      PLATFORM: x86_32
+    - CONFIGURATION: Debug
+      COMPILER: MSVC15
+      PLATFORM: x86_64
+    - CONFIGURATION: Release
+      COMPILER: MSVC15
+      PLATFORM: x86_32
+    - CONFIGURATION: Release
+      COMPILER: MSVC15
+      PLATFORM: x86_64
+    - CONFIGURATION: Release
+      COMPILER: MinGW
+      PLATFORM: i686
+    - CONFIGURATION: Release
+      COMPILER: MinGW
+      PLATFORM: x86_64
+
 build:
   project: rufus.sln
   parallel: true
   verbosity: detailed
+
 install:
-  - cmd: xcopy /S C:\projects\rufus C:\msys64\home\appveyor\
+- if [%COMPILER%]==[MinGW] xcopy /SQ C:\projects\rufus C:\msys64\home\appveyor\
+- if [%PLATFORM%]==[x86_64] set BITS=64
+
 build_script:
-  - cmd: _appveyor_msvc.cmd
-  - cmd: _appveyor_mingw.cmd
+- if [%COMPILER%]==[MSVC15] msbuild rufus.sln /m /p:Configuration=%CONFIGURATION%,Platform=%PLATFORM% /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+- if [%COMPILER%]==[MinGW] C:\msys64\usr\bin\bash -lc "export PATH=/mingw%BITS%/bin:$PATH; ./configure --build=%PLATFORM%-w64-mingw32 --host=%PLATFORM%-w64-mingw32 --disable-debug; make -j4"
