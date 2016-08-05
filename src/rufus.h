@@ -147,6 +147,7 @@ enum user_message_type {
 	UM_MEDIA_CHANGE,
 	UM_PROGRESS_INIT,
 	UM_PROGRESS_EXIT,
+	UM_SET_ISO_IMAGE,
 	UM_NO_UPDATE,
 	UM_SET_PARTITION_SCHEME_TOOLTIP,
 	// Start of the WM IDs for the language menu items

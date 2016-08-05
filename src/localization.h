@@ -124,7 +124,7 @@ enum loc_command_type {
 };
 
 typedef struct loc_cmd_struct {
-	uint8_t		command;
+	enum loc_command_type		command;
 	uint8_t		unum_size;
 	uint16_t	line_nr;
 	int			ctrl_id;	// Also used as the attributes mask

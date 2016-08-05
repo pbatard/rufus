@@ -1054,6 +1054,7 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 			SetFSFromISO();
 			SetMBRProps();
 			SetProposedLabel(ComboBox_GetCurSel(hDeviceList));
+			SendMessage(hMainDialog, UM_SET_ISO_IMAGE, 0, 0);
 		} else {
 			SendMessage(hMainDialog, WM_COMMAND, (CBN_SELCHANGE<<16) | IDC_FILESYSTEM,
 				ComboBox_GetCurSel(hFileSystem));
@@ -1095,52 +1096,7 @@ static void SetPassesTooltip(void)
 // Toggle "advanced" mode
 static void ToggleAdvanced(BOOL enable)
 {
-	// Compute the shift according to the weird values we measured at different scales:
-	// {1.0, 82}, {1.25, 88}, {1.5, 90}, {2.0, 96}, {2.5, 94} (Seriously, WTF is wrong with your scaling Microsoft?!?!)
-	// https://www.wolframalpha.com/input/?i=cubic+fit+{1%2C82}%2C{1.25%2C88}%2C{1.5%2C90}%2C{2%2C96}%2C{2.5%2C94}
-	float dialog_shift = -3.22807f*fScale*fScale*fScale + 6.69173f*fScale*fScale + 15.8822f*fScale + 62.9737f;
-	RECT rect;
-	POINT point;
 	int toggle;
-
-	if (!enable)
-		dialog_shift = -dialog_shift;
-
-	// Increase or decrease the Window size
-	GetWindowRect(hMainDialog, &rect);
-	point.x = (rect.right - rect.left);
-	point.y = (rect.bottom - rect.top);
-	MoveWindow(hMainDialog, rect.left, rect.top, point.x,
-		point.y + (int)(fScale*dialog_shift), TRUE);
-
-	// Move the controls up or down
-	MoveCtrlY(hMainDialog, IDC_STATUS, dialog_shift);
-	MoveCtrlY(hMainDialog, IDC_STATUS_TOOLBAR, dialog_shift);
-	MoveCtrlY(hMainDialog, IDC_START, dialog_shift);
-	MoveCtrlY(hMainDialog, IDC_INFO, dialog_shift);
-	MoveCtrlY(hMainDialog, IDC_PROGRESS, dialog_shift);
-	MoveCtrlY(hMainDialog, IDC_ABOUT, dialog_shift);
-	MoveCtrlY(hMainDialog, IDC_LOG, dialog_shift);
-	MoveCtrlY(hMainDialog, IDCANCEL, dialog_shift);
-#ifdef RUFUS_TEST
-	MoveCtrlY(hMainDialog, IDC_TEST, dialog_shift);
-#endif
-
-	// And do the same for the log dialog while we're at it
-	GetWindowRect(hLogDlg, &rect);
-	point.x = (rect.right - rect.left);
-	point.y = (rect.bottom - rect.top);
-	MoveWindow(hLogDlg, rect.left, rect.top, point.x,
-		point.y + (int)(fScale*dialog_shift), TRUE);
-	MoveCtrlY(hLogDlg, IDC_LOG_CLEAR, dialog_shift);
-	MoveCtrlY(hLogDlg, IDC_LOG_SAVE, dialog_shift);
-	MoveCtrlY(hLogDlg, IDCANCEL, dialog_shift);
-	GetWindowRect(hLog, &rect);
-	point.x = (rect.right - rect.left);
-	point.y = (rect.bottom - rect.top) + (int)(fScale*dialog_shift);
-	SetWindowPos(hLog, NULL, 0, 0, point.x, point.y, SWP_NOZORDER);
-	// Don't forget to scroll the edit to the bottom after resize
-	SendMessage(hLog, EM_LINESCROLL, 0, SendMessage(hLog, EM_GETLINECOUNT, 0, 0));
 
 	// Hide or show the various advanced options
 	toggle = enable?SW_SHOW:SW_HIDE;
@@ -1188,22 +1144,7 @@ static void ToggleToGo(void)
 	if (!togo_mode)
 		dialog_shift = -dialog_shift;
 
-	// Increase or decrease the Window size
-	GetWindowRect(hMainDialog, &rect);
-	point.x = (rect.right - rect.left);
-	point.y = (rect.bottom - rect.top);
-	MoveWindow(hMainDialog, rect.left, rect.top, point.x,
-		point.y + (int)(fScale*dialog_shift), TRUE);
-
 	// Move the controls up or down
-	MoveCtrlY(hMainDialog, IDC_STATUS, dialog_shift);
-	MoveCtrlY(hMainDialog, IDC_STATUS_TOOLBAR, dialog_shift);
-	MoveCtrlY(hMainDialog, IDC_START, dialog_shift);
-	MoveCtrlY(hMainDialog, IDC_INFO, dialog_shift);
-	MoveCtrlY(hMainDialog, IDC_PROGRESS, dialog_shift);
-	MoveCtrlY(hMainDialog, IDC_ABOUT, dialog_shift);
-	MoveCtrlY(hMainDialog, IDC_LOG, dialog_shift);
-	MoveCtrlY(hMainDialog, IDCANCEL, dialog_shift);
 	MoveCtrlY(hMainDialog, IDC_SET_ICON, dialog_shift);
 	MoveCtrlY(hMainDialog, IDS_ADVANCED_OPTIONS_GRP, dialog_shift);
 	MoveCtrlY(hMainDialog, IDC_ENABLE_FIXED_DISKS, dialog_shift);
@@ -1668,12 +1609,13 @@ void InitDialog(HWND hDlg)
 	else if (s16 >= 20)
 		s16 = 24;
 
-	// Create the font and brush for the Info edit box
+	// Create the font and brush for the Source and Info edit box
 	hInfoFont = CreateFontA(lfHeight, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE, DEFAULT_CHARSET,
 		0, 0, PROOF_QUALITY, 0, (nWindowsVersion >= WINDOWS_VISTA)?"Segoe UI":"Arial Unicode MS");
 	SendDlgItemMessageA(hDlg, IDC_INFO, WM_SETFONT, (WPARAM)hInfoFont, TRUE);
+	SendDlgItemMessageA(hDlg, IDC_SOURCE, WM_SETFONT, (WPARAM)hInfoFont, TRUE);
 	hInfoBrush = CreateSolidBrush(GetSysColor(COLOR_BTNFACE));
-
+	
 	// Create the title bar icon
 	SetTitleBarIcon(hDlg);
 	GetWindowTextA(hDlg, tmp, sizeof(tmp));
@@ -1830,7 +1772,7 @@ void InitDialog(HWND hDlg)
 	// Subclass the Info box so that we can align its text vertically
 	info_original_proc = (WNDPROC)SetWindowLongPtr(hInfo, GWLP_WNDPROC, (LONG_PTR)InfoCallback);
 
-	// Set the icons on the the buttons
+	// Set the icons on the buttons
 	if ((pfImageList_Create != NULL) && (pfImageList_ReplaceIcon != NULL)) {
 
 		bi_iso.himl = pfImageList_Create(i16, i16, ILC_COLOR32 | ILC_MASK, 1, 0);
@@ -2310,6 +2252,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				}
 			}
 			FormatStatus = 0;
+			SetDlgItemText(hDlg, IDC_SOURCE, L"");	// clear ISO file path label until ISO file has been positively scanned
 			if (CreateThread(NULL, 0, ISOScanThread, NULL, 0, NULL) == NULL) {
 				uprintf("Unable to start ISO scanning thread");
 				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_START_THREAD);
@@ -2668,6 +2611,13 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		}
 		SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_NORMAL, 0);
 		SetTaskbarProgressState(TASKBAR_NORMAL);
+		break;
+
+	case UM_SET_ISO_IMAGE:
+		// set ISO file path label
+		wbuffer = utf8_to_wchar(image_path ? image_path : "");
+		SetDlgItemText(hDlg, IDC_SOURCE, wbuffer);
+		safe_free(wbuffer);
 		break;
 
 	case UM_NO_UPDATE:

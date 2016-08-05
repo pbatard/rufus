@@ -134,6 +134,7 @@
 #define IDC_SELECTION_LINE              1076
 #define IDC_SELECTION_CHOICE1           1077
 #define IDC_SELECTION_CHOICE2           1078
+#define IDC_SOURCE                      1079
 #define IDS_DEVICE_TXT                  2000
 #define IDS_PARTITION_TYPE_TXT          2001
 #define IDS_FILESYSTEM_TXT              2002
@@ -446,7 +447,7 @@
 #define _APS_NO_MFC                     1
 #define _APS_NEXT_RESOURCE_VALUE        505
 #define _APS_NEXT_COMMAND_VALUE         40001
-#define _APS_NEXT_CONTROL_VALUE         1079
+#define _APS_NEXT_CONTROL_VALUE         1080
 #define _APS_NEXT_SYMED_VALUE           4000
 #endif
 #endif
