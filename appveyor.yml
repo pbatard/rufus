@@ -10,9 +10,7 @@ build:
   parallel: true
   verbosity: detailed
 install:
-- cmd: >-
-  xcopy /S C:\projects\rufus C:\msys64\home\appveyor\
+  - cmd: xcopy /S C:\projects\rufus C:\msys64\home\appveyor\
 build_script:
-- cmd: >-
-  _appveyor_msvc.cmd
-  _appveyor_mingw.cmd
+  - cmd: _appveyor_msvc.cmd
+  - cmd: _appveyor_mingw.cmd
