@@ -1,12 +1,13 @@
-version: avb{build}
-
 os: Visual Studio 2015
 
 init:
   - ps: >-
-      if ($env:appveyor_repo_tag -eq "true") {
+      if ($env:appveyor_repo_tag -eq "true")
+      {
         Update-AppveyorBuild -Version "$env:appveyor_repo_tag_name"
-      } else {
+      }
+      else
+      {
         Update-AppveyorBuild -Version "dev-$($env:appveyor_repo_commit.substring(0,7))"
       }
 
