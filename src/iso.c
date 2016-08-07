@@ -80,8 +80,8 @@ static const char* install_wim_name[] = { "install.wim", "install.swm" };
 static const char* grub_dirname = "/boot/grub/i386-pc";
 static const char* grub_cfg = "grub.cfg";
 static const char* syslinux_cfg[] = { "isolinux.cfg", "syslinux.cfg", "extlinux.conf" };
-static const char dot_isolinux_bin[] = ".\\isolinux.bin";
-static const char* isolinux_bin = &dot_isolinux_bin[2];
+static const char* isolinux_tmp = ".\\isolinux.tmp";
+static const char* isolinux_bin[] = { "isolinux.bin", "boot.bin" };
 static const char* pe_dirname[] = { "/i386", "/minint" };
 static const char* pe_file[] = { "ntdetect.com", "setupldr.bin", "txtsetup.sif" };
 static const char* reactos_name = "setupldr.sys"; // TODO: freeldr.sys doesn't seem to work
@@ -217,9 +217,11 @@ static BOOL check_iso_props(const char* psz_dirname, int64_t i_file_length, cons
 			// Maintain a list of all the isolinux/syslinux configs identified so far
 			StrArrayAdd(&config_path, psz_fullpath);
 		}
-		if (safe_stricmp(psz_basename, isolinux_bin) == 0) {
-			// Maintain a list of all the isolinux.bin files found
-			StrArrayAdd(&isolinux_path, psz_fullpath);
+		for (i=0; i<ARRAYSIZE(isolinux_bin); i++) {
+			if (safe_stricmp(psz_basename, isolinux_bin[i]) == 0) {
+				// Maintain a list of all the isolinux.bin files found
+				StrArrayAdd(&isolinux_path, psz_fullpath);
+			}
 		}
 
 		for (i=0; i<NB_OLD_C32; i++) {
@@ -769,13 +771,13 @@ out:
 			uprintf("  Will use '%s' for Syslinux", img_report.cfg_path);
 			// Extract all of the isolinux.bin files we found to identify their versions
 			for (i=0; i<isolinux_path.Index; i++) {
-				size = (size_t)ExtractISOFile(src_iso, isolinux_path.String[i], dot_isolinux_bin, FILE_ATTRIBUTE_NORMAL);
+				size = (size_t)ExtractISOFile(src_iso, isolinux_path.String[i], isolinux_tmp, FILE_ATTRIBUTE_NORMAL);
 				if (size == 0) {
 					uprintf("  Could not access %s", isolinux_path.String[i]);
 				} else {
 					buf = (char*)calloc(size, 1);
 					if (buf == NULL) break;
-					fd = fopen(dot_isolinux_bin, "rb");
+					fd = fopen(isolinux_tmp, "rb");
 					if (fd == NULL) {
 						free(buf);
 						continue;
@@ -788,7 +790,7 @@ out:
 						img_report.sl_version = sl_version;
 						sl_index = i;
 					} else if ((img_report.sl_version != sl_version) || (safe_strcmp(img_report.sl_version_ext, ext) != 0)) {
-						uprintf("  Found conflicting %s versions:\n  '%s' (%d.%02d%s) vs '%s' (%d.%02d%s)", isolinux_bin,
+						uprintf("  Found conflicting isolinux versions:\n  '%s' (%d.%02d%s) vs '%s' (%d.%02d%s)",
 							isolinux_path.String[sl_index], SL_MAJOR(img_report.sl_version), SL_MINOR(img_report.sl_version),
 							img_report.sl_version_ext, isolinux_path.String[i], SL_MAJOR(sl_version), SL_MINOR(sl_version), ext);
 						// Workaround for Antergos and other ISOs, that have multiple Syslinux versions.
@@ -801,7 +803,7 @@ out:
 						}
 					}
 					free(buf);
-					_unlink(dot_isolinux_bin);
+					_unlink(isolinux_tmp);
 				}
 			}
 			if (img_report.sl_version != 0) {

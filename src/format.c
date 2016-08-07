@@ -912,7 +912,7 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 
 	// What follows is really a case statement with complex conditions listed
 	// by order of preference
-	if ((allow_dual_uefi_bios) && (tt == TT_BIOS))
+	if (IS_WINDOWS(img_report) && (allow_dual_uefi_bios) && (tt == TT_BIOS))
 		goto windows_mbr;
 
 	// Forced UEFI (by zeroing the MBR)
@@ -1826,7 +1826,7 @@ DWORD WINAPI FormatThread(void* param)
 			}
 		} else if ( (bt == BT_SYSLINUX_V4) || (bt == BT_SYSLINUX_V6) ||
 			((bt == BT_ISO) && (HAS_SYSLINUX(img_report) || IS_REACTOS(img_report)) &&
-				(!allow_dual_uefi_bios) && (IS_FAT(fs))) ) {
+				(!IS_WINDOWS(img_report) || !allow_dual_uefi_bios) && (IS_FAT(fs))) ) {
 			if (!InstallSyslinux(DriveIndex, drive_name[0], fs)) {
 				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_INSTALL_FAILURE;
 			}

@@ -253,6 +253,7 @@ enum checksum_type {
 #define HAS_INSTALL_WIM(r)  (r.install_wim_path[0] != 0)
 #define HAS_TOGO(r)         (r.has_bootmgr && r.has_efi && HAS_INSTALL_WIM(r) && (r.install_wim_version < MAX_WIM_VERSION))
 #define IS_WINPE(r)         (((r & WINPE_MININT) == WINPE_MININT)||(( r & WINPE_I386) == WINPE_I386))
+#define IS_WINDOWS(r)       ((r.has_bootmgr) || (r.uses_minint) || IS_WINPE(r.winpe))
 #define IS_WIN7_EFI(r)      ((r.has_efi == 1) && HAS_INSTALL_WIM(r))
 #define IS_REACTOS(r)       (r.reactos_path[0] != 0)
 #define IS_GRUB(r)          ((r.has_grub2) || (r.has_grub4dos))
