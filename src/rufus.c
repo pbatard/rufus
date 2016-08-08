@@ -1328,6 +1328,10 @@ static BOOL BootCheck(void)
 			return FALSE;
 		}
 
+		// If the selected target doesn't include include BIOS, skip file downloads for GRUB/Syslinux
+		if (tt != TT_BIOS)
+			goto uefi_target;
+
 		if ((img_report.has_grub2) && (img_report.grub2_version[0] != 0) &&
 			(strcmp(img_report.grub2_version, GRUB2_PACKAGE_VERSION) != 0)) {
 			// We may have to download a different Grub2 version if we can find one
@@ -1545,7 +1549,10 @@ static BOOL BootCheck(void)
 					return FALSE;
 			}
 		}
-	} else if (bt == BT_UEFI_NTFS) {
+	}
+
+uefi_target:
+	if (bt == BT_UEFI_NTFS) {
 		fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
 		if (fs != FS_NTFS) {
 			MessageBoxExU(hMainDialog, lmprintf(MSG_097, "UEFI:NTFS"), lmprintf(MSG_092), MB_OK|MB_ICONERROR|MB_IS_RTL, selected_langid);

@@ -1,4 +1,4 @@
-AC_INIT([rufus], [2.10], [https://github.com/pbatard/rufus/issues], [rufus], [http://rufus.akeo.ie])
+AC_INIT([rufus], [2.11], [https://github.com/pbatard/rufus/issues], [rufus], [http://rufus.akeo.ie])
 AM_INIT_AUTOMAKE([-Wno-portability foreign no-dist no-dependencies])
 AC_CONFIG_SRCDIR([src/rufus.c])
 AC_CONFIG_MACRO_DIR([m4])
