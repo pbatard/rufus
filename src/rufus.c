@@ -1310,10 +1310,10 @@ static BOOL BootCheck(void)
 					ShellExecuteA(hMainDialog, "open", SEVENZIP_URL, NULL, NULL, SW_SHOWNORMAL);
 				return FALSE;
 			}
-		} else if ( ((fs == FS_NTFS) && (!img_report.has_bootmgr) && (!IS_WINPE(img_report.winpe)) && (!IS_GRUB(img_report)))
+		} else if ( ((fs == FS_NTFS) && (!IS_WINDOWS(img_report)) && (!IS_GRUB(img_report)))
 				 || ((IS_FAT(fs)) && (!HAS_SYSLINUX(img_report)) && (!allow_dual_uefi_bios) && (!img_report.has_efi) &&
 					 (!IS_REACTOS(img_report)) && (!img_report.has_kolibrios) && (!IS_GRUB(img_report)))
-				 || ((IS_FAT(fs)) && (IS_WINPE(img_report.winpe) || HAS_INSTALL_WIM(img_report))) ) {
+				 || ((IS_FAT(fs)) && (IS_WINDOWS(img_report) || HAS_INSTALL_WIM(img_report))) ) {
 			// Incompatible FS and ISO
 			MessageBoxExU(hMainDialog, lmprintf(MSG_096), lmprintf(MSG_092), MB_OK|MB_ICONERROR|MB_IS_RTL, selected_langid);
 			return FALSE;
