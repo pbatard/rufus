@@ -58,6 +58,7 @@ uint32_t GetInstallWimVersion(const char* iso);
 typedef struct {
 	BOOLEAN is_syslinux_cfg;
 	BOOLEAN is_grub_cfg;
+	BOOLEAN is_arch_cfg;
 	BOOLEAN is_old_c32[NB_OLD_C32];
 } EXTRACT_PROPS;
 
@@ -80,6 +81,7 @@ static const char* install_wim_name[] = { "install.wim", "install.swm" };
 static const char* grub_dirname = "/boot/grub/i386-pc";
 static const char* grub_cfg = "grub.cfg";
 static const char* syslinux_cfg[] = { "isolinux.cfg", "syslinux.cfg", "extlinux.conf" };
+static const char* arch_cfg[] = { "archiso_sys32.cfg", "archiso_sys64.cfg" };
 static const char* isolinux_tmp = ".\\isolinux.tmp";
 static const char* isolinux_bin[] = { "isolinux.bin", "boot.bin" };
 static const char* pe_dirname[] = { "/i386", "/minint" };
@@ -156,6 +158,15 @@ static BOOL check_iso_props(const char* psz_dirname, int64_t i_file_length, cons
 	for (i=0; i<NB_OLD_C32; i++) {
 		if ((safe_stricmp(psz_basename, old_c32_name[i]) == 0) && (i_file_length <= old_c32_threshold[i]))
 			props->is_old_c32[i] = TRUE;
+	}
+
+	// Check for ArchLinux derivatives config files
+	if (!scan_only) {
+		for (i = 0; i<ARRAYSIZE(arch_cfg); i++) {
+			if (safe_stricmp(psz_basename, arch_cfg[i]) == 0) {
+				props->is_arch_cfg = TRUE;
+			}
+		}
 	}
 
 	// Check for GRUB artifacts
@@ -260,11 +271,12 @@ static void fix_config(const char* psz_fullpath, const char* psz_path, const cha
 
 	// Workaround for config files requiring an ISO label for kernel append that may be
 	// different from our USB label. Oh, and these labels must have spaces converted to \x20.
-	if ((props->is_syslinux_cfg) || (props->is_grub_cfg)) {
+	if ((props->is_syslinux_cfg) || (props->is_grub_cfg) || (props->is_arch_cfg)) {
 		iso_label = replace_char(img_report.label, ' ', "\\x20");
 		usb_label = replace_char(img_report.usb_label, ' ', "\\x20");
 		if ((iso_label != NULL) && (usb_label != NULL)) {
-			if (replace_in_token_data(src, (props->is_syslinux_cfg) ? "append" : "linuxefi", iso_label, usb_label, TRUE) != NULL)
+			if (replace_in_token_data(src, (props->is_grub_cfg) ? "linuxefi" : "append",
+				iso_label, usb_label, TRUE) != NULL)
 				uprintf("  Patched %s: '%s' ⇨ '%s'\n", src, iso_label, usb_label);
 		}
 		safe_free(iso_label);
@@ -451,7 +463,7 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 			// The drawback however is with cancellation. With a large file, CloseHandle()
 			// may take forever to complete and is not interruptible. We try to detect this.
 			ISO_BLOCKING(safe_closehandle(file_handle));
-			if (props.is_syslinux_cfg || props.is_grub_cfg)
+			if (props.is_syslinux_cfg || props.is_grub_cfg || props.is_arch_cfg)
 				fix_config(psz_sanpath, psz_path, psz_basename, &props);
 			safe_free(psz_sanpath);
 		}
@@ -594,7 +606,7 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 					uprintf("  Could not set timestamp: %s", WindowsErrorString());
 			}
 			ISO_BLOCKING(safe_closehandle(file_handle));
-			if (props.is_syslinux_cfg || props.is_grub_cfg)
+			if (props.is_syslinux_cfg || props.is_grub_cfg || props.is_arch_cfg)
 				fix_config(psz_sanpath, psz_path, psz_basename, &props);
 			safe_free(psz_sanpath);
 		}
