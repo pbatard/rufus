@@ -184,7 +184,7 @@ static BOOL check_iso_props(const char* psz_dirname, int64_t i_file_length, cons
 		}
 
 		// Check for various files in root (psz_dirname = "")
-		if (*psz_dirname == 0) {
+		if ((psz_dirname != NULL) && (psz_dirname[0] == 0)) {
 			if (safe_strnicmp(psz_basename, bootmgr_efi_name, safe_strlen(bootmgr_efi_name)-5) == 0) {
 				img_report.has_bootmgr = TRUE;
 			}
@@ -249,7 +249,7 @@ static BOOL check_iso_props(const char* psz_dirname, int64_t i_file_length, cons
 		return TRUE;
 	}
 	// In case there's an ldlinux.sys on the ISO, prevent it from overwriting ours
-	if ((*psz_dirname == 0) && (safe_strcmp(psz_basename, ldlinux_name) == 0)) {
+	if ((psz_dirname != NULL) && (psz_dirname[0] == 0) && (safe_strcmp(psz_basename, ldlinux_name) == 0)) {
 		uprintf("skipping % file from ISO image\n", ldlinux_name);
 		return TRUE;
 	}
