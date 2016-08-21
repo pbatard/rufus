@@ -826,6 +826,10 @@ static BOOL ClearMBRGPT(HANDLE hPhysicalDrive, LONGLONG DiskSize, DWORD SectorSi
 	// with GPT drives that contain a lot of small partitions) we try not not to clear
 	// sectors further than the lowest partition already residing on the disk.
 	num_sectors_to_clear = min(SelectedDrive.FirstDataSector, (DWORD)((add1MB ? 2048 : 0) + MAX_SECTORS_TO_CLEAR));
+	// Special case for big floppy disks (FirstDataSector = 0)
+	if (num_sectors_to_clear < 4)
+		num_sectors_to_clear = (DWORD)((add1MB ? 2048 : 0) + MAX_SECTORS_TO_CLEAR);
+
 	uprintf("Erasing %d sectors", num_sectors_to_clear);
 	for (i=0; i<num_sectors_to_clear; i++) {
 		if ((IS_ERROR(FormatStatus)) || (write_sectors(hPhysicalDrive, SectorSize, i, 1, pBuf) != SectorSize)) {

@@ -664,7 +664,7 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 	PDRIVE_LAYOUT_INFORMATION_EX DriveLayout = (PDRIVE_LAYOUT_INFORMATION_EX)(void*)layout;
 	char* volume_name;
 	char tmp[256];
-	DWORD i, j;
+	DWORD i, j, big_floppy = FALSE;
 
 	if (FileSystemName == NULL)
 		return FALSE;
@@ -725,16 +725,23 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 				SelectedDrive.nPartitions++;
 			}
 		}
-		suprintf("Partition type: MBR, NB Partitions: %d\n", SelectedDrive.nPartitions);
-		SelectedDrive.has_mbr_uefi_marker = (DriveLayout->Mbr.Signature == MBR_UEFI_MARKER);
-		suprintf("Disk ID: 0x%08X %s\n", DriveLayout->Mbr.Signature, SelectedDrive.has_mbr_uefi_marker?"(UEFI target)":"");
-		AnalyzeMBR(hPhysical, "Drive");
+		// Detect drives that are using the whole disk as a single partition
+		if ((DriveLayout->PartitionEntry[0].Mbr.PartitionType != PARTITION_ENTRY_UNUSED) &&
+			(DriveLayout->PartitionEntry[0].StartingOffset.QuadPart == 0LL)) {
+			suprintf("Partition type: BFD (Big Floppy Disk)");
+			big_floppy = TRUE;
+		} else {
+			suprintf("Partition type: MBR, NB Partitions: %d\n", SelectedDrive.nPartitions);
+			SelectedDrive.has_mbr_uefi_marker = (DriveLayout->Mbr.Signature == MBR_UEFI_MARKER);
+			suprintf("Disk ID: 0x%08X %s\n", DriveLayout->Mbr.Signature, SelectedDrive.has_mbr_uefi_marker ? "(UEFI target)" : "");
+			AnalyzeMBR(hPhysical, "Drive");
+		}
 		for (i=0; i<DriveLayout->PartitionCount; i++) {
 			if (DriveLayout->PartitionEntry[i].Mbr.PartitionType != PARTITION_ENTRY_UNUSED) {
 				part_type = DriveLayout->PartitionEntry[i].Mbr.PartitionType;
 				isUefiNtfs = (i == 1) && (part_type == 0xef) &&
 					(DriveLayout->PartitionEntry[i].PartitionLength.QuadPart <= 1*MB);
-				suprintf("Partition %d%s:\n", i+1, isUefiNtfs?" (UEFI:NTFS)":"");
+				suprintf("Partition %d%s:\n", i+(big_floppy?0:1), isUefiNtfs?" (UEFI:NTFS)":"");
 				for (j=0; j<ARRAYSIZE(mbr_mountable); j++) {
 					if (part_type == mbr_mountable[j]) {
 						ret = TRUE;
@@ -742,13 +749,12 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 					}
 				}
 				// NB: MinGW's gcc 4.9.2 broke "%lld" printout on XP so we use the inttypes.h "PRI##" qualifiers
-				suprintf("  Type: %s (0x%02x)\r\n  Size: %s (%" PRIi64 " bytes)\r\n  Start Sector: %" PRIi64 ", Boot: %s, Recognized: %s\n",
-					((part_type==0x07)&&(FileSystemName[0]!=0))?FileSystemName:GetPartitionType(part_type), part_type,
+				suprintf("  Type: %s (0x%02x)\r\n  Size: %s (%" PRIi64 " bytes)\r\n  Start Sector: %" PRIi64 ", Boot: %s",
+					((part_type==0x07||big_floppy)&&(FileSystemName[0]!=0))?FileSystemName:GetPartitionType(part_type), big_floppy?0:part_type,
 					SizeToHumanReadable(DriveLayout->PartitionEntry[i].PartitionLength.QuadPart, TRUE, FALSE),
 					DriveLayout->PartitionEntry[i].PartitionLength.QuadPart,
 					DriveLayout->PartitionEntry[i].StartingOffset.QuadPart / SelectedDrive.SectorSize,
-					DriveLayout->PartitionEntry[i].Mbr.BootIndicator?"Yes":"No",
-					DriveLayout->PartitionEntry[i].Mbr.RecognizedPartition?"Yes":"No");
+					DriveLayout->PartitionEntry[i].Mbr.BootIndicator?"Yes":"No");
 				SelectedDrive.FirstDataSector = min(SelectedDrive.FirstDataSector,
 					(DWORD)(DriveLayout->PartitionEntry[i].StartingOffset.QuadPart / SelectedDrive.SectorSize));
 				if ((part_type == RUFUS_EXTRA_PARTITION_TYPE) || (isUefiNtfs))
