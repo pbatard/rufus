@@ -109,7 +109,7 @@ BOOL use_own_c32[NB_OLD_C32] = {FALSE, FALSE}, mbr_selected_by_user = FALSE, tog
 BOOL iso_op_in_progress = FALSE, format_op_in_progress = FALSE, right_to_left_mode = FALSE;
 BOOL enable_HDDs = FALSE, force_update = FALSE, enable_ntfs_compression = FALSE, no_confirmation_on_cancel = FALSE, lock_drive = TRUE;
 BOOL advanced_mode, allow_dual_uefi_bios, detect_fakes, enable_vmdk, force_large_fat32, usb_debug, use_fake_units, preserve_timestamps;
-BOOL zero_drive = FALSE, list_non_usb_removable_drives = FALSE;
+BOOL zero_drive = FALSE, list_non_usb_removable_drives = FALSE, disable_file_indexing;
 int dialog_showing = 0, lang_button_id = 0;
 uint16_t rufus_version[3], embedded_sl_version[2];
 char embedded_sl_version_str[2][12] = { "?.??", "?.??" };
@@ -2964,6 +2964,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	allow_dual_uefi_bios = ReadSettingBool(SETTING_ENABLE_WIN_DUAL_EFI_BIOS);
 	force_large_fat32 = ReadSettingBool(SETTING_FORCE_LARGE_FAT32_FORMAT);
 	enable_vmdk = ReadSettingBool(SETTING_ENABLE_VMDK_DETECTION);
+	disable_file_indexing = ReadSettingBool(SETTING_DISABLE_FILE_INDEXING);
 
 	// Initialize the global scaling, in case we need it before we initialize the dialog
 	hDC = GetDC(NULL);
@@ -3112,6 +3113,8 @@ relaunch:
 
 	// Do our own event processing and process "magic" commands
 	while(GetMessage(&msg, NULL, 0, 0)) {
+		// ** *****  **** *  ******** *
+		// .,ABCDEFGHIJKLMNOPQRSTUVWXYZ
 
 		// Ctrl-A => Select the log data
 		if ( (IsWindowVisible(hLogDlg)) && (GetKeyState(VK_CONTROL) & 0x8000) &&
@@ -3220,6 +3223,14 @@ relaunch:
 			PrintStatusTimeout(lmprintf(MSG_260), enable_ntfs_compression);
 			continue;
 		}
+		// Alt-Q => Disable file indexing (for file systems that support it)
+		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'Q')) {
+			disable_file_indexing = !disable_file_indexing;
+			WriteSettingBool(SETTING_DISABLE_FILE_INDEXING, disable_file_indexing);
+			PrintStatusTimeout(lmprintf(MSG_290), !disable_file_indexing);
+			continue;
+		}
+
 		// Alt-R => Remove all the registry keys that may have been created by Rufus
 		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'R')) {
 			PrintStatus(2000, DeleteRegistryKey(REGKEY_HKCU, COMPANY_NAME "\\" APPLICATION_NAME)?MSG_248:MSG_249);

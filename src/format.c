@@ -61,7 +61,7 @@ static int task_number = 0;
 extern const int nb_steps[FS_MAX];
 extern uint32_t dur_mins, dur_secs;
 static int fs_index = 0;
-extern BOOL force_large_fat32, enable_ntfs_compression, lock_drive, zero_drive;
+extern BOOL force_large_fat32, enable_ntfs_compression, lock_drive, zero_drive, disable_file_indexing;
 uint8_t *grub2_buf = NULL;
 long grub2_len;
 static BOOL WritePBR(HANDLE hLogicalDrive);
@@ -1810,6 +1810,14 @@ DWORD WINAPI FormatThread(void* param)
 		goto out;
 	}
 	CHECK_FOR_USER_CANCEL;
+
+	// Disable file indexing if the option was selected by the user
+	if ((disable_file_indexing) && ((fs == FS_NTFS) || (fs == FS_UDF) || (fs == FS_REFS))) {
+		if (SetFileAttributesA(guid_volume, FILE_ATTRIBUTE_NOT_CONTENT_INDEXED))
+			uprintf("File indexing has been set to: Disabled");
+		else
+			uprintf("Could not disable file indexing: %s", WindowsErrorString());
+	} else
 
 	// Refresh the drive label - This is needed as Windows may have altered it from
 	// the name we proposed, and we require an exact label, to patch config files.
