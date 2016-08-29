@@ -1693,7 +1693,7 @@ LPCDLGTEMPLATE GetDialogTemplate(int Dialog_ID)
 		// We can't simply zero the characters we don't want, as the size of the font
 		// string determines the next item lookup. So we must memmove the remaining of
 		// our buffer. Oh, and those items are DWORD aligned.
-		if (IsFontAvailable("Segoe UI")) {
+		if ((nWindowsVersion > WINDOWS_XP) && IsFontAvailable("Segoe UI")) {
 			// 'Segoe UI Symbol' -> 'Segoe UI'
 			wBuf[8] = 0;
 		} else {
