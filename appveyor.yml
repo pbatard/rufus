@@ -38,9 +38,8 @@ build:
   verbosity: detailed
 
 install:
-- if [%COMPILER%]==[MinGW] xcopy /SQ C:\projects\rufus C:\msys64\home\appveyor\
 - if [%PLATFORM%]==[x86_64] set BITS=64
 
 build_script:
 - if [%COMPILER%]==[MSVC15] msbuild rufus.sln /m /p:Configuration=%CONFIGURATION%,Platform=%PLATFORM% /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
-- if [%COMPILER%]==[MinGW] C:\msys64\usr\bin\bash -lc "export PATH=/mingw%BITS%/bin:$PATH; ./configure --build=%PLATFORM%-w64-mingw32 --host=%PLATFORM%-w64-mingw32 --disable-debug; make -j4"
+- if [%COMPILER%]==[MinGW] C:\msys64\usr\bin\bash -lc "export PATH=/mingw%BITS%/bin:$PATH; cd /c/projects/rufus; ./configure --build=%PLATFORM%-w64-mingw32 --host=%PLATFORM%-w64-mingw32 --disable-debug; make -j4"
