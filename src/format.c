@@ -733,7 +733,7 @@ static BOOL FormatDrive(DWORD DriveIndex)
 	}
 	GetWindowTextW(hLabel, wLabel, ARRAYSIZE(wLabel));
 	// Make sure the label is valid
-	ToValidLabel(wLabel, (wFSType[0] == 'F') && (wFSType[1] == 'A') && (wFSType[2] == 'T'));
+	ToValidLabel(wLabel, (fs == FS_FAT16) || (fs == FS_FAT32) || (fs == FS_EXFAT));
 	ulClusterSize = (ULONG)ComboBox_GetItemData(hClusterSize, ComboBox_GetCurSel(hClusterSize));
 	if (ulClusterSize < 0x200) {
 		// 0 is FormatEx's value for default, which we need to use for UDF

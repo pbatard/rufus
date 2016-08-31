@@ -1,3 +1,12 @@
+o Version 2.11 (2016.09.??)
+    Do not download BIOS related files unless BIOS boot is selected
+    Improve support for Arch Linux derivatives
+    Add a cheat mode to disable drive indexing (Alt-Q) on format
+    Fix handling of 'Super Floppy Disk' formatted drives
+    Fix an issue that enabled FAT32 file system selection on some Windows images
+    Fix broken UI font for XP users
+    Fix sanitizing of exFAT labels
+
 o Version 2.10 (2016.07.20)
     Add SHA-256 validation for downloaded files. You will now see an ✓ or ✗ in the log for relevant content
     Add support for O2Micro PCI-E card readers

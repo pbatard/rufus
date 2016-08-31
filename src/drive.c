@@ -728,7 +728,7 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 		// Detect drives that are using the whole disk as a single partition
 		if ((DriveLayout->PartitionEntry[0].Mbr.PartitionType != PARTITION_ENTRY_UNUSED) &&
 			(DriveLayout->PartitionEntry[0].StartingOffset.QuadPart == 0LL)) {
-			suprintf("Partition type: BFD (Big Floppy Disk)");
+			suprintf("Partition type: SFD (Super Floppy Disk) or Unpartitioned");
 			big_floppy = TRUE;
 		} else {
 			suprintf("Partition type: MBR, NB Partitions: %d\n", SelectedDrive.nPartitions);
