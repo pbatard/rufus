@@ -3,6 +3,7 @@ o Version 2.11 (2016.09.??)
     Improve support for Arch Linux derivatives
     Add a cheat mode to disable drive indexing (Alt-Q) on format
     Fix handling of 'Super Floppy Disk' formatted drives
+    Fix handling of misleading short write reports for drives larger than 1 TB
     Fix an issue that enabled FAT32 file system selection on some Windows images
     Fix broken UI font for XP users
     Fix sanitizing of exFAT labels

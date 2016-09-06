@@ -47,12 +47,23 @@ int64_t write_sectors(HANDLE hDrive, uint64_t SectorSize,
       return -1;
    }
 
-   if((!WriteFile(hDrive, pBuf, Size, &Size, NULL)) || (Size != nSectors*SectorSize))
+   if(!WriteFile(hDrive, pBuf, Size, &Size, NULL))
    {
-      uprintf("write_sectors: Write error %s\n", (GetLastError()!=ERROR_SUCCESS)?WindowsErrorString():"");
-      uprintf("  Wrote: %d, Expected: %" PRIu64 "\n",  Size, nSectors*SectorSize);
+      uprintf("write_sectors: Write error %s\n", WindowsErrorString());
       uprintf("  StartSector: 0x%08" PRIx64 ", nSectors: 0x%" PRIx64 ", SectorSize: 0x%" PRIx64 "\n", StartSector, nSectors, SectorSize);
-      return Size;
+      return -1;
+   }
+   if (Size != nSectors*SectorSize)
+   {
+      /* Some large drives return 0, even though all the data was written - See github #787 */
+      if (large_drive && Size == 0) {
+         uprintf("Warning: Possible short write\n");
+         return 0;
+      }
+      uprintf("write_sectors:write error\n");
+      uprintf("  Wrote: %d, Expected: %" PRIu64 "\n", Size, nSectors*SectorSize);
+      uprintf("  StartSector: 0x%08" PRIx64 ", nSectors: 0x%" PRIx64 ", SectorSize: 0x%" PRIx64 "\n", StartSector, nSectors, SectorSize);
+      return -1;
    }
 
    return (int64_t)Size;

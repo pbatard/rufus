@@ -1557,6 +1557,9 @@ DWORD WINAPI FormatThread(void* param)
 	tt = GETTARGETTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
 	use_large_fat32 = (fs == FS_FAT32) && ((SelectedDrive.DiskSize > LARGE_FAT32_SIZE) || (force_large_fat32));
 	windows_to_go = (togo_mode) && HAS_TOGO(img_report) && (Button_GetCheck(GetDlgItem(hMainDialog, IDC_WINDOWS_TO_GO)) == BST_CHECKED);
+	large_drive = (SelectedDrive.DiskSize > (1*TB));
+	if (large_drive)
+		uprintf("Notice: Large drive detected (may produce short writes)");
 	// Find out if we need to add any extra partitions
 	if ((windows_to_go) && (tt == TT_UEFI) && (pt == PARTITION_STYLE_GPT))
 		// According to Microsoft, every GPT disk (we RUN Windows from) must have an MSR due to not having hidden sectors

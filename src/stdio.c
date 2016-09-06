@@ -336,10 +336,14 @@ BOOL WriteFileWithRetry(HANDLE hFile, LPCVOID lpBuffer, DWORD nNumberOfBytesToWr
 		if (WriteFile(hFile, lpBuffer, nNumberOfBytesToWrite, lpNumberOfBytesWritten, NULL)) {
 			if (nNumberOfBytesToWrite == *lpNumberOfBytesWritten)
 				return TRUE;
+			// Some large drives return 0, even though all the data was written - See github #787 */
+			if (large_drive && (*lpNumberOfBytesWritten == 0)) {
+				uprintf("Warning: Possible short write");
+				return TRUE;
+			}
 			uprintf("  Wrote %d bytes but requested %d%s", *lpNumberOfBytesWritten,
 				nNumberOfBytesToWrite, nTry < nNumRetries ? retry_msg : "");
-		}
-		else {
+		} else {
 			uprintf("  Write error [0x%08X]%s", GetLastError(), nTry < nNumRetries ? retry_msg : "");
 		}
 		// If we can't reposition for the next run, just abort
