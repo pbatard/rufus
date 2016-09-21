@@ -1,7 +1,9 @@
 /* First 446 bytes of MBR from Windows 2000, XP and 2003 */
 /* This is English version. Bytes 0x12c onwards vary with language. */
-/* Last two bytes 1b6 and 1b7 point to language-specific messages.  */
+/* Last three bytes 1b5-1b7 point to language-specific messages.    */
 /* Support of other languages is an exercise for the reader!        */
+/* see: http://thestarman.pcministry.com/asm/mbr/Win2kmbr.htm       */
+#define MBR_2000_LANG_INDEP_LEN 0x12c
 unsigned char mbr_2000_0x0[] = {
   0x33, 0xc0, 0x8e, 0xd0, 0xbc, 0x00, 0x7c, 0xfb, 0x50, 0x07, 0x50, 0x1f,
   0xfc, 0xbe, 0x1b, 0x7c, 0xbf, 0x1b, 0x06, 0x50, 0x57, 0xb9, 0xe5, 0x01,

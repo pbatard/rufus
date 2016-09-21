@@ -1,7 +1,9 @@
 /* First 446 bytes of MBR from Windows 7 */
-/* This is English version. Bytes 0x12c onwards vary with language. */
-/* Last two bytes 1b6 and 1b7 point to language-specific messages.  */
+/* This is English version. Bytes 0x163 onwards vary with language. */
+/* Last three bytes 1b5-1b7 point to language-specific messages.    */
 /* Support of other languages is an exercise for the reader!        */
+/* see: http://thestarman.pcministry.com/asm/mbr/W7MBR.htm          */
+#define MBR_WIN7_LANG_INDEP_LEN 0x163
 unsigned char mbr_win7_0x0[] = {
   0x33, 0xc0, 0x8e, 0xd0, 0xbc, 0x00, 0x7c, 0x8e, 0xc0, 0x8e, 0xd8, 0xbe,
   0x00, 0x7c, 0xbf, 0x00, 0x06, 0xb9, 0x00, 0x02, 0xfc, 0xf3, 0xa4, 0x50,
