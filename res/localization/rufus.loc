@@ -8736,7 +8736,7 @@ s IDC_ABOUT -10,0
 t IDC_ABOUT "Par..."
 s IDC_LOG 35,0
 m IDC_LOG -10,0
-t IDC_LOG "Logs"
+t IDC_LOG "Atskaite"
 t IDCANCEL "Aizvērt"
 m IDCANCEL 20,0
 t IDC_START "Sākt"
@@ -8768,10 +8768,16 @@ t IDNO "Nē"
 
 # Log dialog
 g IDD_LOG
-t IDD_LOG "Logs"
-t IDC_LOG_CLEAR "Notīrīt logu"
-t IDC_LOG_SAVE "Ierakstīt logu"
-t IDCANCEL "Aizvērt logu"
+m IDC_LOG_CLEAR -60,0
+s IDC_LOG_CLEAR +20,0
+m IDC_LOG_SAVE -40,0
+s IDC_LOG_SAVE +20,0
+m IDCANCEL -20,0
+s IDCANCEL +20,0
+t IDD_LOG "Atskaite"
+t IDC_LOG_CLEAR "Notīrīt atskaiti"
+t IDC_LOG_SAVE "Saglabāt atskaiti"
+t IDCANCEL "Aizvērt atskaiti"
 
 # About -> Updates
 g IDD_UPDATE_POLICY
@@ -8784,7 +8790,7 @@ t IDS_UPDATE_FREQUENCY_TXT "Pārbaudīt jauninājumus"
 s IDS_UPDATE_FREQUENCY_TXT +10,0
 s IDC_UPDATE_FREQUENCY +44,0
 m IDC_UPDATE_FREQUENCY +5,0
-t IDS_INCLUDE_BETAS_TXT "Ieskaitot Beta versijas"
+t IDS_INCLUDE_BETAS_TXT "Ieskaitot Beta versijas:"
 s IDS_INCLUDE_BETAS_TXT +10,0
 m IDC_INCLUDE_BETAS +5,0
 m IDS_CHECK_NOW_GRP +40,0
@@ -8797,11 +8803,12 @@ m IDCANCEL +29,0
 # Dialog that appears when a new version is available
 g IDD_NEW_VERSION
 t IDD_NEW_VERSION "Jaunākas versijas meklēšana"
-t IDS_NEW_VERSION_AVAIL_TXT "Ir pieejama jaunāka programmas versija. Varat to lejuplādēt!"
-t IDC_WEBSITE "Piespiediet šeit lai pāriet uz saitu"
+c IDS_NEW_VERSION_AVAIL_TXT 255,0,0
+t IDS_NEW_VERSION_AVAIL_TXT "Ir pieejama jaunāka programmas versija. Varat to lejupielādēt!"
+t IDC_WEBSITE "Piespiediet šeit lai pāriet uz programmas mājas lapu"
 t IDS_NEW_VERSION_NOTES_GRP "Piezīmes"
-t IDS_NEW_VERSION_DOWNLOAD_GRP "Lejuplādēt"
-t IDC_DOWNLOAD "Lejuplādēt"
+t IDS_NEW_VERSION_DOWNLOAD_GRP "Lejupielādes saite"
+t IDC_DOWNLOAD "Lejupielādēt"
 t IDCANCEL "Aizvērt"
 
 # Messages used throughout the application
@@ -8811,7 +8818,7 @@ t MSG_002 "Cits Rufus eksemplārs darbojas.\n"
 t MSG_003 "UZMANĪBU: VISI DATI NO NESĒJA '%s' TIKS IZDZĒSTI!!!\n"
 	"Turpinājumam piespiediet OK. Lai atcelt, piespiediet Atcelt."
 t MSG_004 "Rufus jaunināšanas noteikumi"
-t MSG_005 "Vai vēlaties programmai meklēt jauninājumus internetā?"
+t MSG_005 "Vai vēlaties atļaut programmai meklēt jauninājumus internetā?"
 # Must be the same as IDD_DIALOG:IDCANCEL (i.e. "Close" - I know it's confusing)
 t MSG_006 "Aizvērt"
 t MSG_007 "Atcelt"
@@ -8853,7 +8860,7 @@ t MSG_036 "ISO imidžs"
 t MSG_037 "Aplikācija"
 t MSG_038 "Pārtraukt"
 t MSG_039 "Startēt"
-t MSG_040 "Lejuplādēt"
+t MSG_040 "Lejupielādēt"
 t MSG_041 "Darbību atcēla lietotājs"
 t MSG_042 "Kļūda"
 t MSG_043 "Kļūda: %s"
@@ -8899,9 +8906,9 @@ t MSG_076 "Neizdevās izveidot failus ielādei."
 t MSG_077 "Neizdevās diskam piešķirt burtu."
 t MSG_078 "Neizdevās izveidot GUID disku."
 t MSG_079 "Ierīce nav gatava."
-t MSG_080 "Rufus noteica ka Windows nav beidzis darbu ar USB ierīces ātrpikļuves buferi.\n\n"
+t MSG_080 "Rufus noteica ka Windows nav beidzis darbu ar USB ierīces ātrpiekļuves buferi.\n\n"
 	"Atkarībā no USB ierīces ātruma šīs operācijas pabeigšana var aizņemt ilgāku laiku, "
-	"īpaši lielākiem failiem.\n\nIeteikums sagaidīt Windows darbības beigas, lai nesabojāt ierīci. "
+	"īpaši lielākiem failiem.\n\nIeteikums: sagaidīt Windows darbības beigas, lai nesabojāt ierīci. "
 	"Ja jums nav iespējas gaidīt, varat vienkārši atvienot ierīci..."
 t MSG_081 "Neatbalstāms imidža formāts"
 t MSG_082 "Izvēlētais imidžs nav ielādes, jeb izmanto Rufus nezināmu ielādes metodi vai saspiešanas formātu."
@@ -8912,7 +8919,7 @@ t MSG_084 "Šis ISO imidžs izmanto novecojušas versijas '%s'.\n"
 	"- Izvēlieties 'Jā' lai pieslēgtos pie interneta un ielādētu jaunāku versiju\n"
 	"- Izvēlieties 'Nē' lai ISO fails paliktu nemainīts\n"
 	"Ja nezināt ko darīt, izvēlieties 'Jā'.\n\n"
-	"Piezīme: Jaunais fails tiks lejuplādēts tekošajā mapē, un eksistējot "
+	"Piezīme: Jaunais fails tiks lejupielādēts tekošajā mapē, un eksistējošais "
 	"'%s' automātiski tiks samainīts."
 t MSG_085 "Lejuplādēts %s"
 t MSG_086 "Nav izvēlēts imidžs"
@@ -8924,11 +8931,11 @@ t MSG_088 "Imidžs pārāk liels"
 t MSG_089 "Izvēlētajam nesējam imidžs pārāk liels."
 t MSG_090 "Neatbalstāms ISO formāts"
 t MSG_091 "Izmantojot sistēmas interfeisu UEFI tikai EFI atbalsta ISO ielādes imidžu. "
-	"Izvēlieties EFI ielādes ISO vai izvēlieties interfeisu BIOS."
+	"Izvēlieties EFI ielādes ISO failu vai izvēlieties interfeisu BIOS."
 t MSG_092 "Neatbalstāma failu sistēma"
 t MSG_093 "SVARĪGI: ŠIS NESĒJS SATUR VAIRĀKAS PARTĪCIJAS!!\n\n"
-	"Nesējs var saturēt sadaļas kuras nav attēlotas vai redzamas no Windows. "
-	"Ja vēlaties turpināt, paši atbildat par datu zaudēšanu uz šādām partīcijām."
+	"Nesējs var saturēt sadaļas kuras nav attēlotas vai redzamas no Windows OS. "
+	"Ja vēlaties turpināt, paši esat atbildīgi par datu zaudēšanu uz šādām partīcijām."
 t MSG_094 "Konstatētas vairākas partīcijas"
 t MSG_095 "DD imidžs"
 t MSG_096 "Tekošā failu sistēma nevar tikt izmantota ar šo ISO tipu. "
@@ -8936,17 +8943,17 @@ t MSG_096 "Tekošā failu sistēma nevar tikt izmantota ar šo ISO tipu. "
 t MSG_097 "'%s' var izmantot tikai ar NTFS failu sistēmu."
 t MSG_098 "SVARĪGI: Jūs mēģinat instalēt 'Windows To Go', bet izvēlētajam diskam nav "
 	"nepieciešamā atribūta 'FIKSĒTS', līdz ar to Windows ielāde visticamāk nenotiks, "
-	"jo šis Microsoft prodikts neatbalsta iekārtas kurām nav atribūts 'NOŅEMAMS'. "
+	"jo šis Microsoft produkts neatbalsta iekārtas kurām ir atribūts 'NOŅEMAMS'. "
 	"\n\nVai vēlaties turpināt?\n\n"
-	"Piezīme: Atribūtu 'FIKSĒTS/NOŅEMAMS' var mainīt tikai iekārtas uzstāadījumos "
-	"izmantojot rīkus no iekārtas ražotāja. Šādi rīki parasti brīvā piekļuvē NETIEK IZLIKTI..."
+	"Piezīme: Atribūtu 'FIKSĒTS/NOŅEMAMS' var mainīt tikai iekārtas uzstādījumos "
+	"izmantojot rīkus no iekārtas ražotāja. Šādi rīki parasti brīvā piekļuvē NETIEK IZVIETOTI..."
 t MSG_099 "Failu sistēmas ierobežojums"
-t MSG_100 "Šis ISO imidžs satur failu lielāku kā 4GB, kas ir vairāk nekā "
+t MSG_100 "Šis ISO imidžs satur failu lielāku par 4GB, kas ir vairāk nekā "
 	"maksimāli pieļaujamais apjoms izmantojot FAT vai FAT32 failu sistēmu."
 t MSG_101 "Kļūdains WIM atbalsts"
 t MSG_102 "Jūsu OS nevar atpakot failus no WIM arhīviem. Savukārt tas "
 	"nepieciešams EFI ielādes diska izveidei OS Windows 7 vai Windows Vista USB diskiem. To var izlabot "
-	"instalējot pēdējo 7-Zip versiju.\nVai vēlaties apmeklēt 7-zip ielādes saitu?"
+	"instalējot pēdējo 7-Zip versiju.\nVai vēlaties apmeklēt 7-zip ielādes mājas lapu?"
 t MSG_103 "Lejuplādēts %s?"
 t MSG_104 "Instalācijai nepieciešama %s vai jaunāka faila '%s' versija.\n"
 	"Tā kā fails ir lielāks par 100 KB, un pieder %s ISO imidžiem, "
