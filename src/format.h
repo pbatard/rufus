@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <Windows.h>
+#include <windows.h>
 #include <winioctl.h>				// for MEDIA_TYPE
 
 #pragma once
