@@ -1,4 +1,4 @@
-<PLEASE READ THIS CAREFULLY: You *MUST* read and complete the checklist below, by placing an x into each [ ], BEFORE clicking on 'Submit new issue'. Failure to perform these steps, WHICH ARE ONLY THERE TO HELP *YOU*, will result in the issue being dismissed without warning.>
+<!--PLEASE READ THIS CAREFULLY: You *MUST* read and complete the checklist below, by placing an x into each [ ] (so that it shows [x], without any space inside [ and ]), BEFORE clicking on 'Submit new issue'. Failure to perform these steps, WHICH ARE ONLY THERE TO HELP *YOU*, will result in the issue being dismissed without warning.-->
 
 Checklist
 ---------
