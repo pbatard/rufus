@@ -1692,12 +1692,15 @@ void InitDialog(HWND hDlg)
 
 	// Redefine the title to be able to add "Alpha" or "Beta" and get the version in the right order for RTL
 	if (!right_to_left_mode) {
-		static_sprintf(tmp, APPLICATION_NAME " %d.%d.%d%s", rufus_version[0], rufus_version[1], rufus_version[2], IsAlphaOrBeta());
+		static_sprintf(tmp, APPLICATION_NAME " %d.%d.%d%s%s", rufus_version[0], rufus_version[1], rufus_version[2],
+			IsAlphaOrBeta(), (ini_file != NULL)?"(Portable)":"");
 	} else {
-		static_sprintf(tmp, "%s%d.%d.%d " APPLICATION_NAME, IsAlphaOrBeta(), rufus_version[0], rufus_version[1], rufus_version[2]);
+		static_sprintf(tmp, "%s%s%d.%d.%d " APPLICATION_NAME, (ini_file != NULL)?"(Portable)":"", IsAlphaOrBeta(),
+			rufus_version[0], rufus_version[1], rufus_version[2]);
 	}
 	SetWindowTextU(hDlg, tmp);
-	uprintf(APPLICATION_NAME " version: %d.%d.%d%s", rufus_version[0], rufus_version[1], rufus_version[2], IsAlphaOrBeta());
+	uprintf(APPLICATION_NAME " version: %d.%d.%d%s%s", rufus_version[0], rufus_version[1], rufus_version[2],
+		IsAlphaOrBeta(), (ini_file != NULL)?"(Portable)":"");
 	for (i=0; i<ARRAYSIZE(resource); i++) {
 		buf = (char*)GetResource(hMainInstance, resource[i], _RT_RCDATA, "ldlinux_sys", &len, TRUE);
 		if (buf == NULL) {
