@@ -3073,7 +3073,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 				uprintf("Failed to enable AutoMount");
 		}
 	}
-	srand((unsigned int)_GetTickCount64());
 
 relaunch:
 	uprintf("localization: using locale '%s'\n", selected_locale->txt[0]);
