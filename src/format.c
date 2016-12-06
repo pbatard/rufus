@@ -1992,7 +1992,7 @@ DWORD WINAPI SaveImageThread(void* param)
 {
 	BOOL s;
 	DWORD rSize, wSize;
-	VHD_SAVE *vhd_save = (VHD_SAVE*)param;
+	IMG_SAVE *img_save = (IMG_SAVE*)param;
 	HANDLE hPhysicalDrive = INVALID_HANDLE_VALUE;
 	HANDLE hDestImage = INVALID_HANDLE_VALUE;
 	LARGE_INTEGER li;
@@ -2002,39 +2002,57 @@ DWORD WINAPI SaveImageThread(void* param)
 
 	PrintInfoDebug(0, MSG_225);
 	LastRefresh = 0;
-	hPhysicalDrive = GetPhysicalHandle(vhd_save->DeviceNum, FALSE, TRUE);
+	switch (img_save->Type) {
+	case IMG_SAVE_TYPE_VHD:
+		hPhysicalDrive = GetPhysicalHandle(img_save->DeviceNum, FALSE, TRUE);
+		break;
+	case IMG_SAVE_TYPE_ISO:
+		hPhysicalDrive = CreateFileA(img_save->DevicePath, GENERIC_READ, FILE_SHARE_READ,
+			NULL, OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, NULL);
+		break;
+	default:
+		uprintf("invalid image type");
+	}
 	if (hPhysicalDrive == INVALID_HANDLE_VALUE) {
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_OPEN_FAILED;
 		goto out;
 	}
 
 	// Write an image file
-	// We poked the MBR and other stuff, so we need to rewind
+	// We may have poked the MBR and other stuff, so need to rewind
 	li.QuadPart = 0;
 	if (!SetFilePointerEx(hPhysicalDrive, li, NULL, FILE_BEGIN))
 		uprintf("Warning: Unable to rewind device position - wrong data might be copied!");
-	hDestImage = CreateFileU(vhd_save->path, GENERIC_WRITE, FILE_SHARE_WRITE, NULL,
+	hDestImage = CreateFileU(img_save->ImagePath, GENERIC_WRITE, FILE_SHARE_WRITE, NULL,
 		CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (hDestImage == INVALID_HANDLE_VALUE) {
-		uprintf("Could not open image '%s': %s", vhd_save->path, WindowsErrorString());
+		uprintf("Could not open image '%s': %s", img_save->ImagePath, WindowsErrorString());
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_OPEN_FAILED;
 		goto out;
 	}
 
-	uprintf("Saving to image '%s'...", vhd_save->path);
-	buffer = (uint8_t*)_mm_malloc(DD_BUFFER_SIZE, 16);
+	buffer = (uint8_t*)_mm_malloc(img_save->BufSize, 16);
 	if (buffer == NULL) {
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_NOT_ENOUGH_MEMORY;
 		uprintf("could not allocate buffer");
 		goto out;
 	}
 
+	uprintf("Will use a buffer size of %s", SizeToHumanReadable(img_save->BufSize, FALSE, FALSE));
+	uprintf("Saving to image '%s'...", img_save->ImagePath);
+
 	// Don't bother trying for something clever, using double buffering overlapped and whatnot:
 	// With Windows' default optimizations, sync read + sync write for sequential operations
 	// will be as fast, if not faster, than whatever async scheme you can come up with.
 	for (wb = 0; ; wb += wSize) {
+		if (img_save->Type == IMG_SAVE_TYPE_ISO) {
+			// Optical drives do not appear to increment the sectors to read automatically
+			li.QuadPart = wb;
+			if (!SetFilePointerEx(hPhysicalDrive, li, NULL, FILE_BEGIN))
+				uprintf("Warning: Unable to set device position - wrong data might be copied!");
+		}
 		s = ReadFile(hPhysicalDrive, buffer,
-			(DWORD)MIN(DD_BUFFER_SIZE, SelectedDrive.DiskSize - wb), &rSize, NULL);
+			(DWORD)MIN(img_save->BufSize, img_save->DeviceSize - wb), &rSize, NULL);
 		if (!s) {
 			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_READ_FAULT;
 			uprintf("read error: %s", WindowsErrorString());
@@ -2044,7 +2062,7 @@ DWORD WINAPI SaveImageThread(void* param)
 			break;
 		if (_GetTickCount64() > LastRefresh + MAX_REFRESH) {
 			LastRefresh = _GetTickCount64();
-			format_percent = (100.0f*wb)/(1.0f*SelectedDrive.DiskSize);
+			format_percent = (100.0f*wb)/(1.0f*img_save->DeviceSize);
 			PrintInfo(0, MSG_261, format_percent);
 			UpdateProgress(OP_FORMAT, format_percent);
 		}
@@ -2068,21 +2086,23 @@ DWORD WINAPI SaveImageThread(void* param)
 		}
 		if (i >= WRITE_RETRIES) goto out;
 	}
-	if (wb != SelectedDrive.DiskSize) {
-		uprintf("Error: wrote %" PRIu64 " bytes, expected %" PRIu64, wb, SelectedDrive.DiskSize);
+	if (wb != img_save->DeviceSize) {
+		uprintf("Error: wrote %s, expected %s", SizeToHumanReadable(wb, FALSE, FALSE),
+			SizeToHumanReadable(img_save->DeviceSize, FALSE, FALSE));
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_WRITE_FAULT;
 		goto out;
 	}
-	uprintf("%" PRIu64 " bytes written", wb);
-	uprintf("Appending VHD footer...");
-	if (!AppendVHDFooter(vhd_save->path)) {
-		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_WRITE_FAULT;
-		goto out;
+	if (img_save->Type == IMG_SAVE_TYPE_VHD) {
+		uprintf("Appending VHD footer...");
+		if (!AppendVHDFooter(img_save->ImagePath)) {
+			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_WRITE_FAULT;
+			goto out;
+		}
 	}
-	uprintf("Done");
+	uprintf("Operation complete (Wrote %s).", SizeToHumanReadable(wb, FALSE, FALSE));
 
 out:
-	safe_free(vhd_save->path);
+	safe_free(img_save->ImagePath);
 	safe_mm_free(buffer);
 	safe_closehandle(hDestImage);
 	safe_unlockclose(hPhysicalDrive);

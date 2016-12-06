@@ -960,7 +960,7 @@ static void DisplayISOProps(void)
 	int i;
 
 	uprintf("ISO label: '%s'", img_report.label);
-	uprintf("  Size: %" PRIu64 " bytes", img_report.projected_size);
+	uprintf("  Size: %s", SizeToHumanReadable( img_report.projected_size, FALSE, FALSE));
 	PRINT_ISO_PROP(img_report.has_4GB_file, "  Has a >4GB file");
 	PRINT_ISO_PROP(img_report.has_long_filename, "  Has a >64 chars filename");
 	PRINT_ISO_PROP(HAS_SYSLINUX(img_report), "  Uses: Syslinux/Isolinux v%s", img_report.sl_version_str);
@@ -1994,19 +1994,22 @@ void SetBoot(int fs, int tt)
 
 void SaveVHD(void)
 {
-	static VHD_SAVE vhd_save;
+	static IMG_SAVE img_save = { 0 };
 	char filename[128];
 	char path[MAX_PATH];
 	int DriveIndex = ComboBox_GetCurSel(hDeviceList);
-	EXT_DECL(vhd_ext, filename, __VA_GROUP__("*.vhd"), __VA_GROUP__("VHD File"));
+	EXT_DECL(img_ext, filename, __VA_GROUP__("*.vhd"), __VA_GROUP__(lmprintf(MSG_095)));
 	ULARGE_INTEGER free_space;
 
 	if (DriveIndex >= 0)
 		safe_sprintf(filename, sizeof(filename), "%s.vhd", DriveLabel.String[DriveIndex]);
 	if ((DriveIndex != CB_ERR) && (!format_op_in_progress) && (format_thid == NULL)) {
-		vhd_save.DeviceNum = (DWORD)ComboBox_GetItemData(hDeviceList, DriveIndex);
-		vhd_save.path = FileDialog(TRUE, NULL, &vhd_ext, 0);
-		if (vhd_save.path != NULL) {
+		img_save.Type = IMG_SAVE_TYPE_VHD;
+		img_save.DeviceNum = (DWORD)ComboBox_GetItemData(hDeviceList, DriveIndex);
+		img_save.ImagePath = FileDialog(TRUE, NULL, &img_ext, 0);
+		img_save.BufSize = DD_BUFFER_SIZE;
+		img_save.DeviceSize = SelectedDrive.DiskSize;
+		if (img_save.ImagePath != NULL) {
 			// Reset all progress bars
 			SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_NORMAL, 0);
 			SetTaskbarProgressState(TASKBAR_NORMAL);
@@ -2015,14 +2018,14 @@ void SaveVHD(void)
 			FormatStatus = 0;
 			format_op_in_progress = TRUE;
 			free_space.QuadPart = 0;
-			if ((GetVolumePathNameA(vhd_save.path, path, sizeof(path)))
+			if ((GetVolumePathNameA(img_save.ImagePath, path, sizeof(path)))
 				&& (GetDiskFreeSpaceExA(path, &free_space, NULL, NULL))
 				&& ((LONGLONG)free_space.QuadPart > (SelectedDrive.DiskSize + 512))) {
 				// Disable all controls except cancel
 				EnableControls(FALSE);
 				FormatStatus = 0;
 				InitProgress(TRUE);
-				format_thid = CreateThread(NULL, 0, SaveImageThread, &vhd_save, 0, NULL);
+				format_thid = CreateThread(NULL, 0, SaveImageThread, &img_save, 0, NULL);
 				if (format_thid != NULL) {
 					uprintf("\r\nSave to VHD operation started");
 					PrintInfo(0, -1);
@@ -2030,25 +2033,22 @@ void SaveVHD(void)
 					safe_sprintf(szTimer, sizeof(szTimer), "00:00:00");
 					SendMessageA(hStatus, SB_SETTEXTA, SBT_OWNERDRAW | SB_SECTION_RIGHT, (LPARAM)szTimer);
 					SetTimer(hMainDialog, TID_APP_TIMER, 1000, ClockTimer);
-				}
-				else {
+				} else {
 					uprintf("Unable to start VHD save thread");
 					FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_CANT_START_THREAD);
-					safe_free(vhd_save.path);
+					safe_free(img_save.ImagePath);
 					PostMessage(hMainDialog, UM_FORMAT_COMPLETED, (WPARAM)FALSE, 0);
 					format_op_in_progress = FALSE;
 				}
-			}
-			else {
+			} else {
 				if (free_space.QuadPart == 0) {
 					uprintf("Unable to isolate drive name for VHD save");
 					FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_PATH_NOT_FOUND;
-				}
-				else {
+				} else {
 					uprintf("The VHD size is too large for the target drive");
 					FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_FILE_TOO_LARGE;
 				}
-				safe_free(vhd_save.path);
+				safe_free(img_save.ImagePath);
 				PostMessage(hMainDialog, UM_FORMAT_COMPLETED, (WPARAM)FALSE, 0);
 				format_op_in_progress = FALSE;
 			}
@@ -2056,6 +2056,57 @@ void SaveVHD(void)
 	}
 }
 
+void SaveISO(void)
+{
+	static IMG_SAVE img_save = { 0 };
+	char filename[33] = "disc_image.iso";
+	EXT_DECL(img_ext, filename, __VA_GROUP__("*.iso"), __VA_GROUP__(lmprintf(MSG_036)));
+
+	if ((format_op_in_progress) || (format_thid != NULL))
+		return;
+
+	img_save.Type = IMG_SAVE_TYPE_ISO;
+	if (!GetOpticalMedia(&img_save)) {
+		uprintf("No dumpable optical media found.");
+		return;
+	}
+	// Adjust the buffer size according to the disc size so that we get a decent speed.
+	for (img_save.BufSize = 32 * MB;
+		(img_save.BufSize > 8 * MB) && (img_save.DeviceSize <= img_save.BufSize * 64);
+		img_save.BufSize /= 2);
+	if ((img_save.Label != NULL) && (img_save.Label[0] != 0))
+		safe_sprintf(filename, sizeof(filename), "%s.iso", img_save.Label);
+	uprintf("ISO media size %s", SizeToHumanReadable(img_save.DeviceSize, FALSE, FALSE));
+
+	img_save.ImagePath = FileDialog(TRUE, NULL, &img_ext, 0);
+	if (img_save.ImagePath == NULL)
+		return;
+	// Reset all progress bars
+	SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_NORMAL, 0);
+	SetTaskbarProgressState(TASKBAR_NORMAL);
+	SetTaskbarProgressValue(0, MAX_PROGRESS);
+	SendMessage(hProgress, PBM_SETPOS, 0, 0);
+	FormatStatus = 0;
+	format_op_in_progress = TRUE;
+	// Disable all controls except cancel
+	EnableControls(FALSE);
+	InitProgress(TRUE);
+	format_thid = CreateThread(NULL, 0, SaveImageThread, &img_save, 0, NULL);
+	if (format_thid != NULL) {
+		uprintf("\r\nSave to ISO operation started");
+		PrintInfo(0, -1);
+		timer = 0;
+		safe_sprintf(szTimer, sizeof(szTimer), "00:00:00");
+		SendMessageA(hStatus, SB_SETTEXTA, SBT_OWNERDRAW | SB_SECTION_RIGHT, (LPARAM)szTimer);
+		SetTimer(hMainDialog, TID_APP_TIMER, 1000, ClockTimer);
+	} else {
+		uprintf("Unable to start ISO save thread");
+		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_CANT_START_THREAD);
+		safe_free(img_save.ImagePath);
+		PostMessage(hMainDialog, UM_FORMAT_COMPLETED, (WPARAM)FALSE, 0);
+		format_op_in_progress = FALSE;
+	}
+}
 
 /*
  * Main dialog callback
@@ -3115,7 +3166,7 @@ relaunch:
 
 	// Do our own event processing and process "magic" commands
 	while(GetMessage(&msg, NULL, 0, 0)) {
-		// ** *****  **** *  ******** *
+		// ** *****  **** ** ******** *
 		// .,ABCDEFGHIJKLMNOPQRSTUVWXYZ
 
 		// Ctrl-A => Select the log data
@@ -3223,6 +3274,11 @@ relaunch:
 		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'N')) {
 			enable_ntfs_compression = !enable_ntfs_compression;
 			PrintStatusTimeout(lmprintf(MSG_260), enable_ntfs_compression);
+			continue;
+		}
+		// Alt-O => Save from Optical drive to ISO
+		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'O')) {
+			SaveISO();
 			continue;
 		}
 		// Alt-Q => Disable file indexing (for file systems that support it)

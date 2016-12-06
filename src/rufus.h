@@ -303,10 +303,18 @@ typedef struct {
 	char* release_notes;
 } RUFUS_UPDATE;
 
+#define IMG_SAVE_TYPE_VHD 1
+#define IMG_SAVE_TYPE_ISO 2
+
 typedef struct {
+	DWORD Type;
 	DWORD DeviceNum;
-	char* path;
-} VHD_SAVE;
+	DWORD BufSize;
+	LONGLONG DeviceSize;
+	char* DevicePath;
+	char* ImagePath;
+	char* Label;
+} IMG_SAVE;
 
 /*
  * Structure and macros used for the extensions specification of FileDialog()
@@ -432,6 +440,7 @@ extern DWORD GetResourceSize(HMODULE module, char* name, char* type, const char*
 extern DWORD RunCommand(const char* cmdline, const char* dir, BOOL log);
 extern BOOL CompareGUID(const GUID *guid1, const GUID *guid2);
 extern BOOL GetDevices(DWORD devnum);
+extern BOOL GetOpticalMedia(IMG_SAVE* img_save);
 extern BOOL SetLGP(BOOL bRestore, BOOL* bExistingKey, const char* szPath, const char* szPolicy, DWORD dwValue);
 extern LONG GetEntryWidth(HWND hDropDown, const char* entry);
 extern DWORD DownloadFile(const char* url, const char* file, HWND hProgressDialog);

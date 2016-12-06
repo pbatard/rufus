@@ -146,6 +146,104 @@ static __inline BOOL IsRemovable(const char* buffer)
 	}
 }
 
+BOOL GetOpticalMedia(IMG_SAVE* img_save)
+{
+	static char str[MAX_PATH];
+	static char label[33];
+	int k;
+	BYTE geometry[256], *buffer = NULL;
+	PDISK_GEOMETRY_EX DiskGeometry = (PDISK_GEOMETRY_EX)(void*)geometry;
+	DWORD i, j, size, datatype;
+	HDEVINFO dev_info = NULL;
+	SP_DEVINFO_DATA dev_info_data;
+	SP_DEVICE_INTERFACE_DATA devint_data;
+	PSP_DEVICE_INTERFACE_DETAIL_DATA_A devint_detail_data;
+	HANDLE hDrive = INVALID_HANDLE_VALUE;
+	LARGE_INTEGER li;
+
+	dev_info = SetupDiGetClassDevsA(&_GUID_DEVINTERFACE_CDROM, NULL, NULL, DIGCF_PRESENT | DIGCF_DEVICEINTERFACE);
+	if (dev_info == INVALID_HANDLE_VALUE) {
+		uprintf("SetupDiGetClassDevs (Interface) failed: %s\n", WindowsErrorString());
+		return FALSE;
+	}
+	dev_info_data.cbSize = sizeof(dev_info_data);
+	for (i = 0; SetupDiEnumDeviceInfo(dev_info, i, &dev_info_data); i++) {
+		memset(str, 0, sizeof(str));
+		if (!SetupDiGetDeviceRegistryPropertyU(dev_info, &dev_info_data, SPDRP_FRIENDLYNAME,
+			&datatype, (LPBYTE)str, sizeof(str), &size)) {
+			uprintf("SetupDiGetDeviceRegistryProperty (Friendly Name) failed: %s\n", WindowsErrorString());
+			safe_strcpy(str, sizeof(str), "Generic Optical Drive");
+		}
+		uprintf("Found '%s' optical device", str);
+		devint_data.cbSize = sizeof(devint_data);
+		devint_detail_data = NULL;
+		for (j = 0; ; j++) {
+			safe_closehandle(hDrive);
+			safe_free(devint_detail_data);
+			safe_free(buffer);
+
+			if (!SetupDiEnumDeviceInterfaces(dev_info, &dev_info_data, &_GUID_DEVINTERFACE_CDROM, j, &devint_data)) {
+				if (GetLastError() != ERROR_NO_MORE_ITEMS) {
+					uprintf("SetupDiEnumDeviceInterfaces failed: %s\n", WindowsErrorString());
+				}
+				break;
+			}
+
+			if (!SetupDiGetDeviceInterfaceDetailA(dev_info, &devint_data, NULL, 0, &size, NULL)) {
+				if (GetLastError() == ERROR_INSUFFICIENT_BUFFER) {
+					devint_detail_data = (PSP_DEVICE_INTERFACE_DETAIL_DATA_A)calloc(1, size);
+					if (devint_detail_data == NULL) {
+						uprintf("Unable to allocate data for SP_DEVICE_INTERFACE_DETAIL_DATA\n");
+						continue;
+					}
+					devint_detail_data->cbSize = sizeof(SP_DEVICE_INTERFACE_DETAIL_DATA_A);
+				} else {
+					uprintf("SetupDiGetDeviceInterfaceDetail (dummy) failed: %s\n", WindowsErrorString());
+					continue;
+				}
+			}
+			if (devint_detail_data == NULL) {
+				uprintf("SetupDiGetDeviceInterfaceDetail (dummy) - no data was allocated\n");
+				continue;
+			}
+			if (!SetupDiGetDeviceInterfaceDetailA(dev_info, &devint_data, devint_detail_data, size, &size, NULL)) {
+				uprintf("SetupDiGetDeviceInterfaceDetail (actual) failed: %s\n", WindowsErrorString());
+				continue;
+			}
+
+			// Get the size of the inserted media (if any)
+			hDrive = CreateFileA(devint_detail_data->DevicePath, GENERIC_READ,
+				FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, NULL);
+			if (hDrive == INVALID_HANDLE_VALUE)
+				continue;
+			if (!DeviceIoControl(hDrive, IOCTL_DISK_GET_DRIVE_GEOMETRY_EX,
+				NULL, 0, geometry, sizeof(geometry), &size, NULL))
+				continue;
+			// Rewritable media usually has a one sector
+			if (DiskGeometry->DiskSize.QuadPart <= 4096)
+				continue;
+			// Read the label directly, since it's a massive PITA to get it from Windows
+			li.QuadPart = 0x8000LL;
+			buffer = malloc(2048);
+			if ((buffer != NULL) && (SetFilePointerEx(hDrive, li, NULL, FILE_BEGIN)) &&
+				ReadFile(hDrive, buffer, 2048, &size, NULL) && (size == 2048)) {
+				safe_strcpy(label, sizeof(label), (char*)&buffer[0x28]);
+				for (k = safe_strlen(label) - 1; (k >= 0) && (label[k] == 0x20); k--)
+					label[k] = 0;
+				img_save->Label = label;
+			}
+			safe_strcpy(str, sizeof(str), devint_detail_data->DevicePath);
+			img_save->DevicePath = str;
+			img_save->DeviceSize = DiskGeometry->DiskSize.QuadPart;
+			safe_closehandle(hDrive);
+			safe_free(devint_detail_data);
+			safe_free(buffer);
+			return TRUE;
+		}
+	}
+	return FALSE;
+}
+
 /* For debugging user reports of HDDs vs UFDs */
 //#define FORCED_DEVICE
 #ifdef FORCED_DEVICE
