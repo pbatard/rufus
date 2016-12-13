@@ -54,7 +54,8 @@ PF_TYPE_DECL(WINAPI, LPITEMIDLIST, SHSimpleIDListFromPath, (PCWSTR pszPath));
 static HICON hMessageIcon = (HICON)INVALID_HANDLE_VALUE;
 static char* szMessageText = NULL;
 static char* szMessageTitle = NULL;
-static char *szChoice1, *szChoice2;
+static char **szChoice;
+static int nChoices;
 static HWND hBrowseEdit;
 extern HWND hUpdatesDlg;
 static WNDPROC pOrgBrowseWndproc;
@@ -67,6 +68,14 @@ static HWINEVENTHOOK fp_weh = NULL;
 static char *fp_title_str = "Microsoft Windows", *fp_button_str = "Format disk";
 
 extern loc_cmd* selected_locale;
+
+/*
+ * https://blogs.msdn.microsoft.com/oldnewthing/20040802-00/?p=38283/
+ */
+void SetDialogFocus(HWND hDlg, HWND hCtrl)
+{
+	SendMessage(hDlg, WM_NEXTDLGCTL, (WPARAM)hCtrl, TRUE);
+}
 
 /*
  * We need a sub-callback to read the content of the edit box on exit and update
@@ -99,7 +108,7 @@ INT CALLBACK BrowseInfoCallback(HWND hDlg, UINT message, LPARAM lParam, LPARAM p
 		// Get a handle to the edit control to fix that
 		hBrowseEdit = FindWindowExA(hDlg, NULL, "Edit", NULL);
 		SetWindowTextU(hBrowseEdit, szFolderPath);
-		SetFocus(hBrowseEdit);
+		SetDialogFocus(hDlg, hBrowseEdit);
 		// On XP, BFFM_SETSELECTION can't be used with a Unicode Path in SendMessageW
 		// or a pidl (at least with MinGW) => must use SendMessageA
 		if (nWindowsVersion <= WINDOWS_XP) {
@@ -849,6 +858,13 @@ INT_PTR CALLBACK SelectionCallback(HWND hDlg, UINT message, WPARAM wParam, LPARA
 
 	switch (message) {
 	case WM_INITDIALOG:
+		// Don't overflow our max radio button
+		if (nChoices > (IDC_SELECTION_CHOICEMAX - IDC_SELECTION_CHOICE1)) {
+			uprintf("WARNING: Too many options requested for Selection (%d vs %d)",
+				nChoices, IDC_SELECTION_CHOICEMAX - IDC_SELECTION_CHOICE1);
+			nChoices = IDC_SELECTION_CHOICEMAX - IDC_SELECTION_CHOICE1;
+		}
+		// TODO: This shouldn't be needed when using DS_SHELLFONT
 		// Get the system message box font. See http://stackoverflow.com/a/6057761
 		ncm.cbSize = sizeof(ncm);
 		// If we're compiling with the Vista SDK or later, the NONCLIENTMETRICS struct
@@ -865,8 +881,8 @@ INT_PTR CALLBACK SelectionCallback(HWND hDlg, UINT message, WPARAM wParam, LPARA
 		// Set the dialog to use the system message box font
 		SendMessage(hDlg, WM_SETFONT, (WPARAM)hDlgFont, MAKELPARAM(TRUE, 0));
 		SendMessage(GetDlgItem(hDlg, IDC_SELECTION_TEXT), WM_SETFONT, (WPARAM)hDlgFont, MAKELPARAM(TRUE, 0));
-		SendMessage(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1), WM_SETFONT, (WPARAM)hDlgFont, MAKELPARAM(TRUE, 0));
-		SendMessage(GetDlgItem(hDlg, IDC_SELECTION_CHOICE2), WM_SETFONT, (WPARAM)hDlgFont, MAKELPARAM(TRUE, 0));
+		for (i = 0; i < nChoices; i++)
+			SendMessage(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + i), WM_SETFONT, (WPARAM)hDlgFont, MAKELPARAM(TRUE, 0));
 		SendMessage(GetDlgItem(hDlg, IDYES), WM_SETFONT, (WPARAM)hDlgFont, MAKELPARAM(TRUE, 0));
 		SendMessage(GetDlgItem(hDlg, IDNO), WM_SETFONT, (WPARAM)hDlgFont, MAKELPARAM(TRUE, 0));
 
@@ -880,9 +896,10 @@ INT_PTR CALLBACK SelectionCallback(HWND hDlg, UINT message, WPARAM wParam, LPARA
 		SetWindowTextU(hDlg, szMessageTitle);
 		SetWindowTextU(GetDlgItem(hDlg, IDCANCEL), lmprintf(MSG_007));
 		SetWindowTextU(GetDlgItem(hDlg, IDC_SELECTION_TEXT), szMessageText);
-		SetWindowTextU(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1), szChoice1);
-		SetWindowTextU(GetDlgItem(hDlg, IDC_SELECTION_CHOICE2), szChoice2);
-
+		for (i = 0; i < nChoices; i++) {
+			SetWindowTextU(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + i), szChoice[i]);
+			ShowWindow(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + i), SW_SHOW);
+		}
 		// Move/Resize the controls as needed to fit our text
 		hCtrl = GetDlgItem(hDlg, IDC_SELECTION_TEXT);
 		hDC = GetDC(hCtrl);
@@ -893,13 +910,16 @@ INT_PTR CALLBACK SelectionCallback(HWND hDlg, UINT message, WPARAM wParam, LPARA
 		dh = rect.bottom - rect.top - dh;
 		if (hDC != NULL)
 			ReleaseDC(hCtrl, hDC);
-
 		ResizeMoveCtrl(hDlg, hCtrl, 0, 0, 0, dh, 1.0f);
+		for (i = 0; i < nChoices; i++)
+			ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + i), 0, dh, 0, 0, 1.0f);
+		if (nChoices > 2) {
+			GetWindowRect(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1), &rect);
+			dh += (nChoices - 1) * (rect.bottom - rect.top) - 5;
+		}
 		ResizeMoveCtrl(hDlg, hDlg, 0, 0, 0, dh, 1.0f);
 		ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, -1), 0, 0, 0, dh, 1.0f);	// IDC_STATIC = -1
 		ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDC_SELECTION_LINE), 0, dh, 0, 0, 1.0f);
-		ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDC_SELECTION_CHOICE1), 0, dh, 0, 0, 1.0f);
-		ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDC_SELECTION_CHOICE2), 0, dh, 0, 0, 1.0f);
 		ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDOK), 0, dh, 0, 0, 1.0f);
 		ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDCANCEL), 0, dh, 0, 0, 1.0f);
 
@@ -926,10 +946,10 @@ INT_PTR CALLBACK SelectionCallback(HWND hDlg, UINT message, WPARAM wParam, LPARA
 	case WM_COMMAND:
 		switch (LOWORD(wParam)) {
 		case IDOK:
-			if (Button_GetCheck(GetDlgItem(hDlg, IDC_SELECTION_CHOICE2)) == BST_CHECKED)
-				r = 2;
-			else
-				r = 1;
+			for (i = 0; (i < nChoices) &&
+				(Button_GetCheck(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + i)) != BST_CHECKED); i++);
+			if (i < nChoices)
+				r = i + 1;
 			// Fall through
 		case IDNO:
 		case IDCANCEL:
@@ -944,15 +964,15 @@ INT_PTR CALLBACK SelectionCallback(HWND hDlg, UINT message, WPARAM wParam, LPARA
 /*
 * Display a selection question
 */
-int Selection(char* title, char* message, char* choice1, char* choice2)
+int Selection(char* title, char* message, char** choices, int size)
 {
 	int ret;
 
 	dialog_showing++;
 	szMessageTitle = title;
 	szMessageText = message;
-	szChoice1 = choice1;
-	szChoice2 = choice2;
+	szChoice = choices;
+	nChoices = size;
 	ret = (int)MyDialogBox(hMainInstance, IDD_SELECTION, hMainDialog, SelectionCallback);
 	dialog_showing--;
 
@@ -1819,3 +1839,134 @@ void ClrFormatPromptHook(void) {
 	UnhookWinEvent(fp_weh);
 	fp_weh = NULL;
 }
+
+#ifdef RUFUS_TEST
+static inline LPWORD lpwAlign(LPWORD addr)
+{
+	return (LPWORD)((((uintptr_t)addr) + 3) & (~3));
+}
+
+INT_PTR CALLBACK SelectionDynCallback(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	int r = -1;
+	switch (message) {
+	case WM_INITDIALOG:
+		return (INT_PTR)TRUE;
+
+	case WM_COMMAND:
+		switch (LOWORD(wParam)) {
+		case IDOK:
+			r = 0;
+		case IDCANCEL:
+			EndDialog(hwndDlg, r);
+			return (INT_PTR)TRUE;
+		}
+	}
+	return FALSE;
+}
+
+int SelectionDyn(char* title, char* message, char** szChoice, int nChoices)
+{
+#define ID_RADIO  12345
+	LPCWSTR lpwszTypeFace = L"MS Shell Dlg";
+	LPDLGTEMPLATEA lpdt;
+	LPDLGITEMTEMPLATEA lpdit;
+	LPCWSTR lpwszCaption;
+	LPWORD lpw;
+	LPWSTR lpwsz;
+	int i, ret, nchar;
+
+	lpdt = (LPDLGTEMPLATE)calloc(512 + nChoices * 256, 1);
+
+	// Set up a dialog window
+	lpdt->style = WS_POPUP | WS_BORDER | WS_SYSMENU | WS_CAPTION | DS_MODALFRAME | DS_CENTER | DS_SHELLFONT;
+	lpdt->cdit = 2 + nChoices;
+	lpdt->x = 10;
+	lpdt->y = 10;
+	lpdt->cx = 300;
+	lpdt->cy = 100;
+
+	// https://msdn.microsoft.com/en-us/library/windows/desktop/ms645394.aspx:
+	// In a standard template for a dialog box, the DLGTEMPLATE structure is always immediately followed by
+	// three variable-length arrays that specify the menu, class, and title for the dialog box.
+	// When the DS_SETFONT style is specified, these arrays are also followed by a 16-bit value specifying
+	// point size and another variable-length array specifying a typeface name. Each array consists of one
+	// or more 16-bit elements. The menu, class, title, and font arrays must be aligned on WORD boundaries.
+	lpw = (LPWORD)(&lpdt[1]);
+	*lpw++ = 0;		// No menu
+	*lpw++ = 0;		// Default dialog class
+	lpwsz = (LPWSTR)lpw;
+	nchar = MultiByteToWideChar(CP_UTF8, 0, title, -1, lpwsz, 50);
+	lpw += nchar;
+
+	// Set point size and typeface name if required
+	if (lpdt->style & (DS_SETFONT | DS_SHELLFONT)) {
+		*lpw++ = 8;
+		for (lpwsz = (LPWSTR)lpw, lpwszCaption = lpwszTypeFace; (*lpwsz++ = *lpwszCaption++) != 0; );
+		lpw = (LPWORD)lpwsz;
+	}
+
+	// Add an OK button
+	lpw = lpwAlign(lpw);
+	lpdit = (LPDLGITEMTEMPLATE)lpw;
+	lpdit->style = WS_CHILD | WS_VISIBLE | BS_DEFPUSHBUTTON;
+	lpdit->x = 10;
+	lpdit->y = 70;
+	lpdit->cx = 50;
+	lpdit->cy = 14;
+	lpdit->id = IDOK;
+
+	lpw = (LPWORD)(&lpdit[1]);
+	*lpw++ = 0xFFFF;
+	*lpw++ = 0x0080;	// Button class
+
+	lpwsz = (LPWSTR)lpw;
+	nchar = MultiByteToWideChar(CP_UTF8, 0, "OK", -1, lpwsz, 50);
+	lpw += nchar;
+	*lpw++ = 0;		// No creation data
+
+					// Add a Cancel button
+	lpw = lpwAlign(lpw);
+	lpdit = (LPDLGITEMTEMPLATE)lpw;
+	lpdit->x = 90;
+	lpdit->y = 70;
+	lpdit->cx = 50;
+	lpdit->cy = 14;
+	lpdit->id = IDCANCEL;
+	lpdit->style = WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON;
+
+	lpw = (LPWORD)(&lpdit[1]);
+	*lpw++ = 0xFFFF;
+	*lpw++ = 0x0080;
+
+	lpwsz = (LPWSTR)lpw;
+	nchar = MultiByteToWideChar(CP_UTF8, 0, lmprintf(MSG_007), -1, lpwsz, 50);
+	lpw += nchar;
+	*lpw++ = 0;
+
+	// Add radio buttons
+	for (i = 0; i < nChoices; i++) {
+		lpw = lpwAlign(lpw);
+		lpdit = (LPDLGITEMTEMPLATE)lpw;
+		lpdit->x = 10;
+		lpdit->y = 10 + 15 * i;
+		lpdit->cx = 40;
+		lpdit->cy = 20;
+		lpdit->id = ID_RADIO;
+		lpdit->style = WS_CHILD | WS_VISIBLE | BS_AUTORADIOBUTTON | (i == 0 ? WS_GROUP : 0);
+
+		lpw = (LPWORD)(&lpdit[1]);
+		*lpw++ = 0xFFFF;
+		*lpw++ = 0x0080;
+
+		lpwsz = (LPWSTR)lpw;
+		nchar = MultiByteToWideChar(CP_UTF8, 0, szChoice[i], -1, lpwsz, 150);
+		lpw += nchar;
+		*lpw++ = 0;
+	}
+
+	ret = (int)DialogBoxIndirect(hMainInstance, (LPDLGTEMPLATE)lpdt, hMainDialog, (DLGPROC)SelectionDynCallback);
+	free(lpdt);
+	return ret;
+}
+#endif

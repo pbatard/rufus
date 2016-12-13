@@ -226,12 +226,12 @@ static BOOL check_iso_props(const char* psz_dirname, int64_t i_file_length, cons
 
 		if (props->is_syslinux_cfg) {
 			// Maintain a list of all the isolinux/syslinux configs identified so far
-			StrArrayAdd(&config_path, psz_fullpath);
+			StrArrayAdd(&config_path, psz_fullpath, TRUE);
 		}
 		for (i=0; i<ARRAYSIZE(isolinux_bin); i++) {
 			if (safe_stricmp(psz_basename, isolinux_bin[i]) == 0) {
 				// Maintain a list of all the isolinux.bin files found
-				StrArrayAdd(&isolinux_path, psz_fullpath);
+				StrArrayAdd(&isolinux_path, psz_fullpath, TRUE);
 			}
 		}
 

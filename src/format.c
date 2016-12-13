@@ -1277,8 +1277,11 @@ static BOOL SetupWinToGo(const char* drive_name, BOOL use_ms_efi)
 	static char san_policy_path[] = "?:\\san_policy.xml";
 #endif
 	static char unattend_path[] = "?:\\Windows\\System32\\sysprep\\unattend.xml";
+	StrArray version_name, version_index;
 	char *mounted_iso, *ms_efi = NULL, image[128], cmd[MAX_PATH];
+	char tmp_path[MAX_PATH] = "", xml_file[MAX_PATH] = "";
 	unsigned char *buffer;
+	int i, index;
 	wchar_t wVolumeName[] = L"?:";
 	DWORD bufsize;
 	ULONG cluster_size;
@@ -1305,11 +1308,50 @@ static BOOL SetupWinToGo(const char* drive_name, BOOL use_ms_efi)
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_ISO_EXTRACT);
 		return FALSE;
 	}
+	static_sprintf(image, "%s%s", mounted_iso, &img_report.install_wim_path[2]);
 	uprintf("Mounted ISO as '%s'", mounted_iso);
 
+	// Then we need to take a look at the XML file in install.wim to allow users
+	// to select the version they want to extract
+	if ((GetTempPathU(sizeof(tmp_path), tmp_path) == 0)
+		|| (GetTempFileNameU(tmp_path, APPLICATION_NAME, 0, xml_file) == 0)
+		|| (xml_file[0] == 0)) {
+		// Last ditch effort to get a loc file - just extract it to the current directory
+		safe_strcpy(xml_file, sizeof(xml_file), ".\\RufVXml.tmp");
+	}
+	// GetTempFileName() may leave a file behind
+	DeleteFileU(xml_file);
+
+	// Must use the Windows WIM API as 7z messes up the XML
+	if (!WimExtractFile_API(image, 0, "[1].xml", xml_file)) {
+		uprintf("Failed to acquire WIM index");
+	}
+	StrArrayCreate(&version_name, 16);
+	StrArrayCreate(&version_index, 16);
+	for (i = 0; (StrArrayAdd(&version_name, get_token_data_file_indexed("DISPLAYNAME", xml_file, i+1), FALSE) >= 0) &&
+		(StrArrayAdd(&version_index, get_token_data_file_indexed("IMAGE INDEX", xml_file, i+1), FALSE) >= 0); i++);
+	DeleteFileU(xml_file);
+
+	if (i > 1)
+		i = Selection(lmprintf(MSG_291), lmprintf(MSG_292), version_name.String, i);
+	if (i <= 0) {
+		uprintf("Cancelled by user");
+		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANCELLED;
+		UnMountISO();
+		StrArrayDestroy(&version_name);
+		StrArrayDestroy(&version_index);
+		return FALSE;
+	} else if (i == 0) {
+		index = 1;
+	} else {
+		index = atoi(version_index.String[i - 1]);
+	}
+	uprintf("Selected: '%s' (index %s)", version_name.String[i - 1], version_index.String[i - 1]);
+	StrArrayDestroy(&version_name);
+	StrArrayDestroy(&version_index);
+
 	// Now we use the WIM API to apply that image
-	static_sprintf(image, "%s%s", mounted_iso, &img_report.install_wim_path[2]);
-	if (!WimApplyImage(image, 1, drive_name)) {
+	if (!WimApplyImage(image, index, drive_name)) {
 		uprintf("Failed to apply Windows To Go image");
 		if (!IS_ERROR(FormatStatus))
 			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_ISO_EXTRACT);

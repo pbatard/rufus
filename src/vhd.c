@@ -93,6 +93,7 @@ PF_TYPE_DECL(WINAPI, BOOL, WIMSetTemporaryPath, (HANDLE, PWSTR));
 PF_TYPE_DECL(WINAPI, HANDLE, WIMLoadImage, (HANDLE, DWORD));
 PF_TYPE_DECL(WINAPI, BOOL, WIMApplyImage, (HANDLE, PCWSTR, DWORD));
 PF_TYPE_DECL(WINAPI, BOOL, WIMExtractImagePath, (HANDLE, PWSTR, PWSTR, DWORD));
+PF_TYPE_DECL(WINAPI, BOOL, WIMGetImageInformation, (HANDLE, PVOID, PDWORD));
 PF_TYPE_DECL(WINAPI, BOOL, WIMCloseHandle, (HANDLE));
 PF_TYPE_DECL(WINAPI, DWORD, WIMRegisterMessageCallback, (HANDLE, FARPROC, PVOID));
 PF_TYPE_DECL(WINAPI, DWORD, WIMUnregisterMessageCallback, (HANDLE, FARPROC));
@@ -345,6 +346,7 @@ uint8_t WimExtractCheck(void)
 	PF_INIT(WIMLoadImage, Wimgapi);
 	PF_INIT(WIMApplyImage, Wimgapi);
 	PF_INIT(WIMExtractImagePath, Wimgapi);
+	PF_INIT(WIMGetImageInformation, Wimgapi);
 	PF_INIT(WIMRegisterMessageCallback, Wimgapi);
 	PF_INIT(WIMUnregisterMessageCallback, Wimgapi);
 	PF_INIT(WIMCloseHandle, Wimgapi);
@@ -368,16 +370,19 @@ uint8_t WimExtractCheck(void)
 // Extract a file from a WIM image using wimgapi.dll (Windows 7 or later)
 // NB: if you want progress from a WIM callback, you must run the WIM API call in its own thread
 // (which we don't do here) as it won't work otherwise. Thanks go to Erwan for figuring this out!
-static BOOL WimExtractFile_API(const char* image, int index, const char* src, const char* dst)
+BOOL WimExtractFile_API(const char* image, int index, const char* src, const char* dst)
 {
+	static char* index_name = "[1].xml";
 	BOOL r = FALSE;
 	DWORD dw = 0;
 	HANDLE hWim = NULL;
 	HANDLE hImage = NULL;
+	HANDLE hFile = NULL;
 	wchar_t wtemp[MAX_PATH] = {0};
 	wchar_t* wimage = utf8_to_wchar(image);
 	wchar_t* wsrc = utf8_to_wchar(src);
 	wchar_t* wdst = utf8_to_wchar(dst);
+	char* wim_info;
 
 	PF_INIT_OR_OUT(WIMCreateFile, Wimgapi);
 	PF_INIT_OR_OUT(WIMSetTemporaryPath, Wimgapi);
@@ -402,19 +407,30 @@ static BOOL WimExtractFile_API(const char* image, int index, const char* src, co
 		goto out;
 	}
 
-	hImage = pfWIMLoadImage(hWim, (DWORD)index);
-	if (hImage == NULL) {
-		uprintf("  Could not set index: %s", WindowsErrorString());
-		goto out;
-	}
-
 	uprintf("Extracting: %s (From %s)", dst, src);
-	if (!pfWIMExtractImagePath(hImage, wsrc, wdst, 0)) {
-		uprintf("  Could not extract file: %s", WindowsErrorString());
-		goto out;
+	if (safe_strcmp(src, index_name) == 0) {
+		if (!pfWIMGetImageInformation(hWim, &wim_info, &dw)) {
+			uprintf("  Could not access WIM info: %s", WindowsErrorString());
+			goto out;
+		}
+		hFile = CreateFileW(wdst, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE,
+			NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+		if ((hFile == INVALID_HANDLE_VALUE) || (!WriteFile(hFile, wim_info, dw, &dw, NULL))) {
+			uprintf("  Could not extract file: %s", WindowsErrorString());
+			goto out;
+		}
+	} else {
+		hImage = pfWIMLoadImage(hWim, (DWORD)index);
+		if (hImage == NULL) {
+			uprintf("  Could not set index: %s", WindowsErrorString());
+			goto out;
+		}
+		if (!pfWIMExtractImagePath(hImage, wsrc, wdst, 0)) {
+			uprintf("  Could not extract file: %s", WindowsErrorString());
+			goto out;
+		}
 	}
 	r = TRUE;
-	UpdateProgress(OP_FINALIZE, -1.0f);
 
 out:
 	if ((hImage != NULL) || (hWim != NULL)) {
@@ -422,6 +438,7 @@ out:
 		if (hImage != NULL) pfWIMCloseHandle(hImage);
 		if (hWim != NULL) pfWIMCloseHandle(hWim);
 	}
+	safe_closehandle(hFile);
 	safe_free(wimage);
 	safe_free(wsrc);
 	safe_free(wdst);
@@ -429,7 +446,7 @@ out:
 }
 
 // Extract a file from a WIM image using 7-Zip
-static BOOL WimExtractFile_7z(const char* image, int index, const char* src, const char* dst)
+BOOL WimExtractFile_7z(const char* image, int index, const char* src, const char* dst)
 {
 	int n;
 	size_t i;
@@ -455,10 +472,7 @@ static BOOL WimExtractFile_7z(const char* image, int index, const char* src, con
 	// to issue 2 passes. See github issue #680.
 	for (n = 0; n < 2; n++) {
 		safe_strcpy(tmpdst, sizeof(tmpdst), dst);
-		for (i = strlen(tmpdst) - 1; i > 0; i--) {
-			if (tmpdst[i] == '\\')
-				break;
-		}
+		for (i = strlen(tmpdst) - 1; (i > 0) && (tmpdst[i] != '\\') && (tmpdst[i] != '/'); i--);
 		tmpdst[i] = 0;
 
 		safe_sprintf(cmdline, sizeof(cmdline), "\"%s\" -y e \"%s\" %s%s", sevenzip_path,
@@ -468,7 +482,10 @@ static BOOL WimExtractFile_7z(const char* image, int index, const char* src, con
 			return FALSE;
 		}
 
-		safe_strcat(tmpdst, sizeof(tmpdst), "\\bootmgfw.efi");
+		for (i = safe_strlen(src); (i > 0) && (src[i] != '\\') && (src[i] != '/'); i--);
+		if (i == 0)
+			safe_strcat(tmpdst, sizeof(tmpdst), "\\");
+		safe_strcat(tmpdst, sizeof(tmpdst), &src[i]);
 		if (_access(tmpdst, 0) == 0)
 			// File was extracted => move on
 			break;
@@ -481,7 +498,7 @@ static BOOL WimExtractFile_7z(const char* image, int index, const char* src, con
 
 	// coverity[toctou]
 	if (rename(tmpdst, dst) != 0) {
-		uprintf("  Could not rename %s to %s", tmpdst, dst);
+		uprintf("  Could not rename %s to %s: errno %d", tmpdst, dst, errno);
 		return FALSE;
 	}
 

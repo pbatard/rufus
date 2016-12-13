@@ -422,7 +422,7 @@ extern BOOL CreateTooltip(HWND hControl, const char* message, int duration);
 extern void DestroyTooltip(HWND hWnd);
 extern void DestroyAllTooltips(void);
 extern BOOL Notification(int type, const notification_info* more_info, char* title, char* format, ...);
-extern int Selection(char* title, char* message, char* selection1, char* selection2);
+extern int Selection(char* title, char* message, char** choices, int size);
 extern SIZE GetTextSize(HWND hCtrl);
 extern BOOL ExtractDOS(const char* path);
 extern BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan);
@@ -450,7 +450,8 @@ extern BOOL SetUpdateCheck(void);
 extern BOOL CheckForUpdates(BOOL force);
 extern void DownloadNewVersion(void);
 extern BOOL IsShown(HWND hDlg);
-extern char* get_token_data_file(const char* token, const char* filename);
+extern char* get_token_data_file_indexed(const char* token, const char* filename, int index);
+#define get_token_data_file(token, filename) get_token_data_file_indexed(token, filename, 1)
 extern char* set_token_data_file(const char* token, const char* data, const char* filename);
 extern char* get_token_data_buffer(const char* token, unsigned int n, const char* buffer, size_t buffer_size);
 extern char* insert_section_data(const char* filename, const char* section, const char* data, BOOL dos2unix);
@@ -459,6 +460,8 @@ extern char* replace_char(const char* src, const char c, const char* rep);
 extern void parse_update(char* buf, size_t len);
 extern uint8_t WimExtractCheck(void);
 extern BOOL WimExtractFile(const char* wim_image, int index, const char* src, const char* dst);
+extern BOOL WimExtractFile_API(const char* image, int index, const char* src, const char* dst);
+extern BOOL WimExtractFile_7z(const char* image, int index, const char* src, const char* dst);
 extern BOOL WimApplyImage(const char* image, int index, const char* dst);
 extern BOOL IsBootableImage(const char* path);
 extern BOOL AppendVHDFooter(const char* vhd_path);
@@ -507,7 +510,7 @@ typedef struct {
 	uint32_t Max;		// Maximum array size
 } StrArray;
 extern void StrArrayCreate(StrArray* arr, uint32_t initial_size);
-extern int32_t StrArrayAdd(StrArray* arr, const char* str);
+extern int32_t StrArrayAdd(StrArray* arr, const char* str, BOOL );
 extern void StrArrayClear(StrArray* arr);
 extern void StrArrayDestroy(StrArray* arr);
 #define IsStrArrayEmpty(arr) (arr.Index == 0)

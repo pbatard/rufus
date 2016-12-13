@@ -571,20 +571,24 @@ out:
 
 /*
  * Parse a line of UTF-16 text and return the data if it matches the 'token'
- * The parsed line is of the form: [ ]token[ ]=[ ]["]data["][ ] and is
+ * The parsed line is of the form: [ ][<][ ]token[ ][=|>][ ]["]data["][ ][<] and is
  * modified by the parser
  */
 static wchar_t* get_token_data_line(const wchar_t* wtoken, wchar_t* wline)
 {
 	size_t i, r;
 	BOOLEAN quoteth = FALSE;
+	BOOLEAN xml = FALSE;
 
 	if ((wtoken == NULL) || (wline == NULL) || (wline[0] == 0))
 		return NULL;
 
 	i = 0;
 
-	// Skip leading spaces
+	// Skip leading spaces and opening '<'
+	i += wcsspn(&wline[i], wspace);
+	if (wline[i] == L'<')
+		i++;
 	i += wcsspn(&wline[i], wspace);
 
 	// Our token should begin a line
@@ -597,12 +601,14 @@ static wchar_t* get_token_data_line(const wchar_t* wtoken, wchar_t* wline)
 	// Skip spaces
 	i += wcsspn(&wline[i], wspace);
 
-	// Check for an equal sign
-	if (wline[i] != L'=')
+	// Check for '=' or '>' sign
+	if (wline[i] == L'>')
+		xml = TRUE;
+	else if (wline[i] != L'=')
 		return NULL;
 	i++;
 
-	// Skip spaces after equal sign
+	// Skip spaces
 	i += wcsspn(&wline[i], wspace);
 
 	// eliminate leading quote, if it exists
@@ -615,7 +621,7 @@ static wchar_t* get_token_data_line(const wchar_t* wtoken, wchar_t* wline)
 	r = i;
 
 	// locate end of string or quote
-	while ( (wline[i] != 0) && ((wline[i] != L'"') || ((wline[i] == L'"') && (!quoteth))) )
+	while ( (wline[i] != 0) && (((wline[i] != L'"') && (wline[i] != L'<')) || ((wline[i] == L'"') && (!quoteth)) || ((wline[i] == L'<') && (!xml))) )
 		i++;
 	wline[i--] = 0;
 
@@ -627,11 +633,12 @@ static wchar_t* get_token_data_line(const wchar_t* wtoken, wchar_t* wline)
 }
 
 /*
- * Parse a file (ANSI or UTF-8 or UTF-16) and return the data for the first occurrence of 'token'
+ * Parse a file (ANSI or UTF-8 or UTF-16) and return the data for the 'index'th occurrence of 'token'
  * The returned string is UTF-8 and MUST be freed by the caller
  */
-char* get_token_data_file(const char* token, const char* filename)
+char* get_token_data_file_indexed(const char* token, const char* filename, int index)
 {
+	int i = 0;
 	wchar_t *wtoken = NULL, *wdata= NULL, *wfilename = NULL;
 	wchar_t buf[1024];
 	FILE* fd = NULL;
@@ -659,7 +666,7 @@ char* get_token_data_file(const char* token, const char* filename)
 	// Ideally, we'd check that our buffer fits the line
 	while (fgetws(buf, ARRAYSIZE(buf), fd) != NULL) {
 		wdata = get_token_data_line(wtoken, buf);
-		if (wdata != NULL) {
+		if ((wdata != NULL) && (++i == index)) {
 			ret = wchar_to_utf8(wdata);
 			break;
 		}

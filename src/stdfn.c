@@ -348,10 +348,10 @@ void StrArrayCreate(StrArray* arr, uint32_t initial_size)
 		uprintf("Could not allocate string array\n");
 }
 
-int32_t StrArrayAdd(StrArray* arr, const char* str)
+int32_t StrArrayAdd(StrArray* arr, const char* str, BOOL duplicate)
 {
 	char** old_table;
-	if ((arr == NULL) || (arr->String == NULL))
+	if ((arr == NULL) || (arr->String == NULL) || (str == NULL))
 		return -1;
 	if (arr->Index == arr->Max) {
 		arr->Max *= 2;
@@ -363,7 +363,7 @@ int32_t StrArrayAdd(StrArray* arr, const char* str)
 			return -1;
 		}
 	}
-	arr->String[arr->Index] = safe_strdup(str);
+	arr->String[arr->Index] = (duplicate)?safe_strdup(str):(char*)str;
 	if (arr->String[arr->Index] == NULL) {
 		uprintf("Could not store string in array\n");
 		return -1;

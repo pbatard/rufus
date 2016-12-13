@@ -2108,6 +2108,10 @@ void SaveISO(void)
 	}
 }
 
+#ifdef RUFUS_TEST
+	extern int SelectionDyn(char* title, char* message, char** szChoice, int nChoices);
+#endif
+
 /*
  * Main dialog callback
  */
@@ -2140,6 +2144,8 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	case WM_COMMAND:
 #ifdef RUFUS_TEST
 		if (LOWORD(wParam) == IDC_TEST) {
+			char* choices[] = { "Choice 1", "Choice 2", "Choice 3" };
+			SelectionDyn("Test Choice", "Unused", choices, ARRAYSIZE(choices));
 			break;
 		}
 #endif
@@ -2438,8 +2444,9 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 						(ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType)) == BT_ISO)) {
 						char* iso_image = lmprintf(MSG_036);
 						char* dd_image = lmprintf(MSG_095);
+						char* choices[2] = { lmprintf(MSG_276, iso_image), lmprintf(MSG_277, dd_image) };
 						i = Selection(lmprintf(MSG_274), lmprintf(MSG_275, iso_image, dd_image, iso_image, dd_image),
-							lmprintf(MSG_276, iso_image), lmprintf(MSG_277, dd_image));
+							choices, 2);
 						if (i < 0) {	// Cancel
 							format_op_in_progress = FALSE;
 							PROCESS_QUEUED_EVENTS;

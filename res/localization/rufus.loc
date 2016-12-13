@@ -553,6 +553,8 @@ t MSG_287 "Detection of non-USB removable drives"
 t MSG_288 "Missing elevated privileges"
 t MSG_289 "This application can only run with elevated privileges"
 t MSG_290 "File Indexing"
+t MSG_291 "Version selection"
+t MSG_292 "Please select the version of Windows you want to install:"
 
 ################################################################################
 ############################# TRANSLATOR END COPY ##############################

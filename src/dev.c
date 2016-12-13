@@ -313,7 +313,7 @@ BOOL GetDevices(DWORD devnum)
 	StrArrayClear(&DriveLabel);
 	StrArrayCreate(&dev_if_path, 128);
 	// Add a dummy for string index zero, as this is what non matching hashes will point to
-	StrArrayAdd(&dev_if_path, "");
+	StrArrayAdd(&dev_if_path, "", TRUE);
 
 	device_id = (char*)malloc(MAX_PATH);
 	if (device_id == NULL)
@@ -340,7 +340,7 @@ BOOL GetDevices(DWORD devnum)
 						// Find the Device IDs for all the children of this hub
 						if (CM_Get_Child(&device_inst, dev_info_data.DevInst, 0) == CR_SUCCESS) {
 							device_id[0] = 0;
-							s = StrArrayAdd(&dev_if_path, devint_detail_data->DevicePath);
+							s = StrArrayAdd(&dev_if_path, devint_detail_data->DevicePath, TRUE);
 							uuprintf("  Hub[%d] = '%s'", s, devint_detail_data->DevicePath);
 							if ((s>= 0) && (CM_Get_Device_IDA(device_inst, device_id, MAX_PATH, 0) == CR_SUCCESS)) {
 								if ((k = htab_hash(device_id, &htab_devid)) != 0) {
@@ -741,8 +741,8 @@ BOOL GetDevices(DWORD devnum)
 				}
 
 				// Must ensure that the combo box is UNSORTED for indexes to be the same
-				StrArrayAdd(&DriveID, buffer);
-				StrArrayAdd(&DriveLabel, label);
+				StrArrayAdd(&DriveID, buffer, TRUE);
+				StrArrayAdd(&DriveLabel, label, TRUE);
 
 				IGNORE_RETVAL(ComboBox_SetItemData(hDeviceList, ComboBox_AddStringU(hDeviceList, entry), drive_index));
 				maxwidth = max(maxwidth, GetEntryWidth(hDeviceList, entry));
