@@ -835,7 +835,7 @@ out:
 					img_report.sl_version_str);
 			}
 		}
-		if (IS_WINPE(img_report.winpe)) {
+		if (HAS_WINPE(img_report)) {
 			// In case we have a WinPE 1.x based iso, we extract and parse txtsetup.sif
 			// during scan, to see if /minint was provided for OsLoadOptions, as it decides
 			// whether we should use 0x80 or 0x81 as the disk ID in the MBR

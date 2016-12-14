@@ -342,7 +342,7 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int fs_type)
 				uprintf("Failed to create '%s': %s", path, WindowsErrorString());
 			}
 		}
-	} else if (IS_REACTOS(img_report)) {
+	} else if (HAS_REACTOS(img_report)) {
 		uprintf("Setting up ReactOS...");
 		syslinux_mboot = GetResource(hMainInstance, MAKEINTRESOURCEA(IDR_SL_MBOOT_C32),
 			_RT_RCDATA, "mboot.c32", &syslinux_mboot_len, FALSE);

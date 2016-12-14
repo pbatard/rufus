@@ -363,25 +363,36 @@ static BOOL SetClusterSizes(int FSType)
 
 // This call sets the first option for the "partition type and target system" field
 // according to whether we will be running in UEFI/CSM mode or standard UEFI
-static void SetMBRForUEFI(BOOL replace)
+// Return value is -1 if the image is pure EFI (non BIOS bootable), 0 otherwise.
+static int SetMBRForUEFI(BOOL replace)
 {
+	static BOOL pure_efi = FALSE;
 	BOOL useCSM = FALSE;
 
 	if (ComboBox_GetCurSel(hDeviceList) < 0)
-		return;
+		return 0;
 
 	if (image_path != NULL) {
-		if ( (!img_report.has_efi) || ((img_report.has_bootmgr) && (!allow_dual_uefi_bios) &&
+		if ( !IS_EFI_BOOTABLE(img_report) || (HAS_BOOTMGR(img_report) && (!allow_dual_uefi_bios) &&
 			 (Button_GetCheck(GetDlgItem(hMainDialog, IDC_WINDOWS_TO_GO)) != BST_CHECKED)) )
 			useCSM = TRUE;
 	}
 
-	if (replace)
+	if (replace && !pure_efi)
 		ComboBox_DeleteString(hPartitionScheme, 0);
+
+	if ((image_path != NULL) && IS_EFI_BOOTABLE(img_report) && !IS_BIOS_BOOTABLE(img_report)) {
+		pure_efi = TRUE;
+		return -1;
+	} else {
+		pure_efi = FALSE;
+	}
+
 	IGNORE_RETVAL(ComboBox_SetItemData(hPartitionScheme, ComboBox_InsertStringU(hPartitionScheme, 0,
 		lmprintf(MSG_031, PartitionTypeLabel[PARTITION_STYLE_MBR], useCSM?"UEFI-CSM":"UEFI")), (TT_BIOS<<16)|PARTITION_STYLE_MBR));
 	if (replace)
 		IGNORE_RETVAL(ComboBox_SetCurSel(hPartitionScheme, max(ComboBox_GetCurSel(hPartitionScheme), 0)));
+	return 0;
 }
 
 /*
@@ -457,7 +468,7 @@ static void SetFSFromISO(void)
 	int i, fs, selected_fs = FS_UNKNOWN;
 	uint32_t fs_mask = 0;
 	int tt = GETTARGETTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
-	BOOL windows_to_go = (togo_mode) && HAS_TOGO(img_report) &&
+	BOOL windows_to_go = (togo_mode) && HAS_WINTOGO(img_report) &&
 		(Button_GetCheck(GetDlgItem(hMainDialog, IDC_WINDOWS_TO_GO)) == BST_CHECKED);
 
 	if (image_path == NULL)
@@ -470,14 +481,14 @@ static void SetFSFromISO(void)
 	}
 
 	// Syslinux and EFI have precedence over bootmgr (unless the user selected BIOS as target type)
-	if ((HAS_SYSLINUX(img_report)) || (IS_REACTOS(img_report)) || (img_report.has_kolibrios) ||
-		((img_report.has_efi) && (tt == TT_UEFI) && (!img_report.has_4GB_file) && (!windows_to_go))) {
+	if ((HAS_SYSLINUX(img_report)) || (HAS_REACTOS(img_report)) || HAS_KOLIBRIOS(img_report) ||
+		(IS_EFI_BOOTABLE(img_report) && (tt == TT_UEFI) && (!img_report.has_4GB_file) && (!windows_to_go))) {
 		if (fs_mask & (1<<FS_FAT32)) {
 			selected_fs = FS_FAT32;
-		} else if ((fs_mask & (1<<FS_FAT16)) && (!img_report.has_kolibrios)) {
+		} else if ((fs_mask & (1<<FS_FAT16)) && !HAS_KOLIBRIOS(img_report)) {
 			selected_fs = FS_FAT16;
 		}
-	} else if ((windows_to_go) || (img_report.has_bootmgr) || (IS_WINPE(img_report.winpe))) {
+	} else if ((windows_to_go) || HAS_BOOTMGR(img_report) || HAS_WINPE(img_report)) {
 		if (fs_mask & (1<<FS_NTFS)) {
 			selected_fs = FS_NTFS;
 		}
@@ -498,16 +509,16 @@ static void SetMBRProps(void)
 {
 	int fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
 	int bt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
-	BOOL needs_masquerading = (IS_WINPE(img_report.winpe) && (!img_report.uses_minint));
+	BOOL needs_masquerading = HAS_WINPE(img_report) && (!img_report.uses_minint);
 
-	if ((!mbr_selected_by_user) && ((image_path == NULL) || (bt != BT_ISO) || (fs != FS_NTFS) || IS_GRUB(img_report) ||
+	if ((!mbr_selected_by_user) && ((image_path == NULL) || (bt != BT_ISO) || (fs != FS_NTFS) || HAS_GRUB(img_report) ||
 		((togo_mode) && (Button_GetCheck(GetDlgItem(hMainDialog, IDC_WINDOWS_TO_GO)) == BST_CHECKED)) )) {
 		CheckDlgButton(hMainDialog, IDC_RUFUS_MBR, BST_UNCHECKED);
 		IGNORE_RETVAL(ComboBox_SetCurSel(hDiskID, 0));
 		return;
 	}
 
-	uMBRChecked = (needs_masquerading || img_report.has_bootmgr || mbr_selected_by_user)?BST_CHECKED:BST_UNCHECKED;
+	uMBRChecked = (needs_masquerading || HAS_BOOTMGR(img_report) || mbr_selected_by_user)?BST_CHECKED:BST_UNCHECKED;
 	if (IsWindowEnabled(GetDlgItem(hMainDialog, IDC_RUFUS_MBR)))
 		CheckDlgButton(hMainDialog, IDC_RUFUS_MBR, uMBRChecked);
 	IGNORE_RETVAL(ComboBox_SetCurSel(hDiskID, needs_masquerading?1:0));
@@ -516,7 +527,7 @@ static void SetMBRProps(void)
 static void SetToGo(void)
 {
 	int bt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
-	if ( ((bt != BT_ISO) && (togo_mode)) || ((bt == BT_ISO) && (HAS_TOGO(img_report)) && (!togo_mode)) )
+	if ( ((bt != BT_ISO) && (togo_mode)) || ((bt == BT_ISO) && (HAS_WINTOGO(img_report)) && (!togo_mode)) )
 		ToggleToGo();
 }
 
@@ -527,7 +538,7 @@ static void EnableAdvancedBootOptions(BOOL enable, BOOL remove_checkboxes)
 	BOOL actual_enable_fix = ((tt==TT_UEFI)||(selection_default==BT_IMG)||!IsChecked(IDC_BOOT))?FALSE:enable;
 	static UINT uXPartChecked = BST_UNCHECKED;
 
-	if ((selection_default == BT_ISO) && (img_report.has_kolibrios || IS_GRUB(img_report) || IS_REACTOS(img_report) || HAS_SYSLINUX(img_report))) {
+	if ((selection_default == BT_ISO) && IS_BIOS_BOOTABLE(img_report) && !HAS_WINPE(img_report) && !HAS_BOOTMGR(img_report)) {
 		actual_enable_mbr = FALSE;
 		mbr_selected_by_user = FALSE;
 	}
@@ -579,17 +590,14 @@ static void SetPartitionSchemeTooltip(void)
 
 static void SetTargetSystem(void)
 {
-	int ts;
-
-	SetMBRForUEFI(TRUE);
+	int ts = SetMBRForUEFI(TRUE);	// Will be set to -1 for pure UEFI, 0 otherwise
 	if (SelectedDrive.PartitionType == PARTITION_STYLE_GPT) {
-		ts = 2;	// GPT/UEFI
-	} else if (SelectedDrive.has_protective_mbr || SelectedDrive.has_mbr_uefi_marker || ((img_report.has_efi) &&
-		(!HAS_SYSLINUX(img_report)) && (!img_report.has_bootmgr) && (!IS_REACTOS(img_report)) &&
-		(!img_report.has_kolibrios) && (!IS_GRUB(img_report)) && (!IS_WINPE(img_report.winpe))) ) {
-		ts = 1;	// MBR/UEFI
+		ts += 2;	// GPT/UEFI
+	} else if (SelectedDrive.has_protective_mbr || SelectedDrive.has_mbr_uefi_marker ||
+		(IS_EFI_BOOTABLE(img_report) && !IS_BIOS_BOOTABLE(img_report)) ) {
+		ts += 1;	// MBR/UEFI
 	} else {
-		ts = 0;	// MBR/BIOS|UEFI
+		ts += 0;	// MBR/BIOS|UEFI
 	}
 	IGNORE_RETVAL(ComboBox_SetCurSel(hPartitionScheme, ts));
 	// Can't call SetPartitionSchemeTooltip() directly, as we may be on a different thread
@@ -969,13 +977,13 @@ static void DisplayISOProps(void)
 			PRINT_ISO_PROP(img_report.has_old_c32[i], "    With an old %s", old_c32_name[i]);
 		}
 	}
-	PRINT_ISO_PROP(img_report.has_kolibrios, "  Uses: KolibriOS");
-	PRINT_ISO_PROP(IS_REACTOS(img_report), "  Uses: ReactOS");
+	PRINT_ISO_PROP(HAS_KOLIBRIOS(img_report), "  Uses: KolibriOS");
+	PRINT_ISO_PROP(HAS_REACTOS(img_report), "  Uses: ReactOS");
 	PRINT_ISO_PROP(img_report.has_grub4dos, "  Uses: Grub4DOS");
 	PRINT_ISO_PROP(img_report.has_grub2, "  Uses: GRUB2");
-	PRINT_ISO_PROP(img_report.has_efi, "  Uses: EFI %s", IS_WIN7_EFI(img_report) ? "(win7_x64)" : "");
-	PRINT_ISO_PROP(img_report.has_bootmgr, "  Uses: Bootmgr");
-	PRINT_ISO_PROP(IS_WINPE(img_report.winpe), "  Uses: WinPE %s", (img_report.uses_minint) ? "(with /minint)" : "");
+	PRINT_ISO_PROP(img_report.has_efi, "  Uses: EFI %s", HAS_WIN7_EFI(img_report) ? "(win7_x64)" : "");
+	PRINT_ISO_PROP(HAS_BOOTMGR(img_report), "  Uses: Bootmgr");
+	PRINT_ISO_PROP(HAS_WINPE(img_report), "  Uses: WinPE %s", (img_report.uses_minint) ? "(with /minint)" : "");
 	if (HAS_INSTALL_WIM(img_report)) {
 		uprintf("  Uses: Install.wim (version %d.%d.%d)", (img_report.install_wim_version >> 24) & 0xff,
 			(img_report.install_wim_version >> 16) & 0xff, (img_report.install_wim_version >> 8) & 0xff);
@@ -989,7 +997,7 @@ static void DisplayISOProps(void)
 
 	// We don't support ToGo on Windows 7 or earlier, for lack of native ISO mounting capabilities
 	if (nWindowsVersion >= WINDOWS_8)
-		if ( ((!togo_mode) && (HAS_TOGO(img_report))) || ((togo_mode) && (!HAS_TOGO(img_report))) )
+		if ( ((!togo_mode) && (HAS_WINTOGO(img_report))) || ((togo_mode) && (!HAS_WINTOGO(img_report))) )
 			ToggleToGo();
 }
 
@@ -1026,8 +1034,7 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 	if (img_report.is_iso) {
 		DisplayISOProps();
 		// If we have an ISOHybrid, but without an ISO method we support, disable ISO support altogether
-		if ((img_report.is_bootable_img) && (!img_report.has_bootmgr) && (!HAS_SYSLINUX(img_report)) && (!IS_WINPE(img_report.winpe))
-			&& (!IS_GRUB(img_report)) && (!img_report.has_efi) && (!IS_REACTOS(img_report)) && (!img_report.has_kolibrios)) {
+		if (IS_DD_BOOTABLE(img_report) && !IS_BIOS_BOOTABLE(img_report) && !IS_EFI_BOOTABLE(img_report)) {
 			uprintf("This ISOHybrid is not compatible with any of the ISO boot methods we support");
 			img_report.is_iso = FALSE;
 		} else {
@@ -1037,8 +1044,7 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 	}
 	// Only enable AFTER we have determined the image type
 	EnableControls(TRUE);
-	if ( (!img_report.has_bootmgr) && (!HAS_SYSLINUX(img_report)) && (!IS_WINPE(img_report.winpe)) && (!IS_GRUB(img_report))
-	  && (!img_report.has_efi) && (!IS_REACTOS(img_report)) && (!img_report.has_kolibrios) && (!img_report.is_bootable_img) ) {
+	if (!IS_DD_BOOTABLE(img_report) && !IS_BIOS_BOOTABLE(img_report) && !IS_EFI_BOOTABLE(img_report)) {
 		// No boot method that we support
 		PrintInfo(0, MSG_081);
 		safe_free(image_path);
@@ -1274,10 +1280,10 @@ static BOOL BootCheck(void)
 			return FALSE;
 		}
 		if (bt == BT_IMG) {
-			if (!img_report.is_bootable_img)
+			if (!IS_DD_BOOTABLE(img_report))
 			// The selected image doesn't match the boot option selected.
 				MessageBoxExU(hMainDialog, lmprintf(MSG_188), lmprintf(MSG_187), MB_OK|MB_ICONERROR|MB_IS_RTL, selected_langid);
-			return (img_report.is_bootable_img);
+			return IS_DD_BOOTABLE(img_report);
 		}
 		fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
 		tt = GETTARGETTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
@@ -1299,25 +1305,25 @@ static BOOL BootCheck(void)
 					return FALSE;
 			}
 		} else if (tt == TT_UEFI) {
-			if (!img_report.has_efi) {
+			if (!IS_EFI_BOOTABLE(img_report)) {
 				// Unsupported ISO
 				MessageBoxExU(hMainDialog, lmprintf(MSG_091), lmprintf(MSG_090), MB_OK|MB_ICONERROR|MB_IS_RTL, selected_langid);
 				return FALSE;
 			}
-			if (IS_WIN7_EFI(img_report) && (!WimExtractCheck())) {
+			if (HAS_WIN7_EFI(img_report) && (!WimExtractCheck())) {
 				// Your platform cannot extract files from WIM archives => download 7-zip?
 				if (MessageBoxExU(hMainDialog, lmprintf(MSG_102), lmprintf(MSG_101), MB_YESNO|MB_ICONERROR|MB_IS_RTL, selected_langid) == IDYES)
 					ShellExecuteA(hMainDialog, "open", SEVENZIP_URL, NULL, NULL, SW_SHOWNORMAL);
 				return FALSE;
 			}
-		} else if ( ((fs == FS_NTFS) && (!IS_WINDOWS(img_report)) && (!IS_GRUB(img_report)))
-				 || ((IS_FAT(fs)) && (!HAS_SYSLINUX(img_report)) && (!allow_dual_uefi_bios) && (!img_report.has_efi) &&
-					 (!IS_REACTOS(img_report)) && (!img_report.has_kolibrios) && (!IS_GRUB(img_report)))
-				 || ((IS_FAT(fs)) && (IS_WINDOWS(img_report) || HAS_INSTALL_WIM(img_report))) ) {
+		} else if ( ((fs == FS_NTFS) && (!HAS_WINDOWS(img_report)) && (!HAS_GRUB(img_report)))
+				 || ((IS_FAT(fs)) && (!HAS_SYSLINUX(img_report)) && (!allow_dual_uefi_bios) && !IS_EFI_BOOTABLE(img_report) &&
+					 (!HAS_REACTOS(img_report)) && !HAS_KOLIBRIOS(img_report) && (!HAS_GRUB(img_report)))
+				 || ((IS_FAT(fs)) && (HAS_WINDOWS(img_report) || HAS_INSTALL_WIM(img_report))) ) {
 			// Incompatible FS and ISO
 			MessageBoxExU(hMainDialog, lmprintf(MSG_096), lmprintf(MSG_092), MB_OK|MB_ICONERROR|MB_IS_RTL, selected_langid);
 			return FALSE;
-		} else if ((fs == FS_FAT16) && (img_report.has_kolibrios)) {
+		} else if ((fs == FS_FAT16) && HAS_KOLIBRIOS(img_report)) {
 			// KolibriOS doesn't support FAT16
 			MessageBoxExU(hMainDialog, lmprintf(MSG_189), lmprintf(MSG_099), MB_OK|MB_ICONERROR|MB_IS_RTL, selected_langid);
 			return FALSE;

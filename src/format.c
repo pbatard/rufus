@@ -916,7 +916,7 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 
 	// What follows is really a case statement with complex conditions listed
 	// by order of preference
-	if (IS_WINDOWS(img_report) && (allow_dual_uefi_bios) && (tt == TT_BIOS))
+	if (HAS_WINDOWS(img_report) && (allow_dual_uefi_bios) && (tt == TT_BIOS))
 		goto windows_mbr;
 
 	// Forced UEFI (by zeroing the MBR)
@@ -956,7 +956,7 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 	}
 
 	// KolibriOS
-	if ( (bt == BT_ISO) && (img_report.has_kolibrios) && (IS_FAT(fs))) {
+	if ( (bt == BT_ISO) && HAS_KOLIBRIOS(img_report) && (IS_FAT(fs))) {
 		uprintf(using_msg, "KolibriOS");
 		r = write_kolibrios_mbr(fp);
 		goto notify;
@@ -964,7 +964,7 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 
 	// If everything else failed, fall back to a conventional Windows/Rufus MBR
 windows_mbr:
-	if ((IS_WINPE(img_report.winpe) && !img_report.uses_minint) || (IsChecked(IDC_RUFUS_MBR))) {
+	if ((HAS_WINPE(img_report) && !img_report.uses_minint) || (IsChecked(IDC_RUFUS_MBR))) {
 		uprintf(using_msg, APPLICATION_NAME);
 		r = write_rufus_mbr(fp);
 	} else {
@@ -1056,7 +1056,7 @@ static __inline const char* bt_to_name(int bt) {
 	case BT_FREEDOS: return "FreeDOS";
 	case BT_REACTOS: return "ReactOS";
 	default:
-		return ((bt==BT_ISO)&&(img_report.has_kolibrios))?"KolibriOS":"Standard";
+		return ((bt==BT_ISO) && HAS_KOLIBRIOS(img_report)) ? "KolibriOS" : "Standard";
 	}
 }
 static BOOL WritePBR(HANDLE hLogicalVolume)
@@ -1082,7 +1082,7 @@ static BOOL WritePBR(HANDLE hLogicalVolume)
 			if (!write_fat_16_fd_br(fp, 0)) break;
 		} else if (bt == BT_REACTOS) {
 			if (!write_fat_16_ros_br(fp, 0)) break;
-		} else if ((bt == BT_ISO) && (img_report.has_kolibrios)) {
+		} else if ((bt == BT_ISO) && HAS_KOLIBRIOS(img_report)) {
 			uprintf("FAT16 is not supported for KolibriOS\n"); break;
 		} else {
 			if (!write_fat_16_br(fp, 0)) break;
@@ -1104,7 +1104,7 @@ static BOOL WritePBR(HANDLE hLogicalVolume)
 				if (!write_fat_32_fd_br(fp, 0)) break;
 			} else if (bt == BT_REACTOS) {
 				if (!write_fat_32_ros_br(fp, 0)) break;
-			} else if ((bt == BT_ISO) && (img_report.has_kolibrios)) {
+			} else if ((bt == BT_ISO) && HAS_KOLIBRIOS(img_report)) {
 				if (!write_fat_32_kos_br(fp, 0)) break;
 			} else {
 				if (!write_fat_32_br(fp, 0)) break;
@@ -1598,7 +1598,7 @@ DWORD WINAPI FormatThread(void* param)
 	pt = GETPARTTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
 	tt = GETTARGETTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
 	use_large_fat32 = (fs == FS_FAT32) && ((SelectedDrive.DiskSize > LARGE_FAT32_SIZE) || (force_large_fat32));
-	windows_to_go = (togo_mode) && HAS_TOGO(img_report) && (Button_GetCheck(GetDlgItem(hMainDialog, IDC_WINDOWS_TO_GO)) == BST_CHECKED);
+	windows_to_go = (togo_mode) && HAS_WINTOGO(img_report) && (Button_GetCheck(GetDlgItem(hMainDialog, IDC_WINDOWS_TO_GO)) == BST_CHECKED);
 	large_drive = (SelectedDrive.DiskSize > (1*TB));
 	if (large_drive)
 		uprintf("Notice: Large drive detected (may produce short writes)");
@@ -1608,7 +1608,7 @@ DWORD WINAPI FormatThread(void* param)
 		// http://msdn.microsoft.com/en-us/library/windows/hardware/dn640535.aspx#gpt_faq_what_disk_require_msr
 		extra_partitions = XP_MSR | XP_EFI;
 	else if ( (fs == FS_NTFS) && ((bt == BT_UEFI_NTFS) ||
-			  ((bt == BT_ISO) && (img_report.has_efi) && ((tt == TT_UEFI) || (windows_to_go) || (allow_dual_uefi_bios)))) )
+			  ((bt == BT_ISO) && IS_EFI_BOOTABLE(img_report) && ((tt == TT_UEFI) || (windows_to_go) || (allow_dual_uefi_bios)))) )
 		extra_partitions = XP_UEFI_NTFS;
 	else if (IsChecked(IDC_EXTRA_PARTITION))
 		extra_partitions = XP_COMPAT;
@@ -1883,14 +1883,14 @@ DWORD WINAPI FormatThread(void* param)
 			// All good
 		} else if (tt == TT_UEFI) {
 			// For once, no need to do anything - just check our sanity
-			if ( (bt != BT_ISO) || (!img_report.has_efi) || (fs > FS_NTFS) ) {
+			if ( (bt != BT_ISO) || !IS_EFI_BOOTABLE(img_report) || (fs > FS_NTFS) ) {
 				uprintf("Spock gone crazy error in %s:%d", __FILE__, __LINE__);
 				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_INSTALL_FAILURE;
 				goto out;
 			}
 		} else if ( (bt == BT_SYSLINUX_V4) || (bt == BT_SYSLINUX_V6) ||
-			((bt == BT_ISO) && (HAS_SYSLINUX(img_report) || IS_REACTOS(img_report)) &&
-				(!IS_WINDOWS(img_report) || !allow_dual_uefi_bios) && (IS_FAT(fs))) ) {
+			((bt == BT_ISO) && (HAS_SYSLINUX(img_report) || HAS_REACTOS(img_report)) &&
+				(!HAS_WINDOWS(img_report) || !allow_dual_uefi_bios) && (IS_FAT(fs))) ) {
 			if (!InstallSyslinux(DriveIndex, drive_name[0], fs)) {
 				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_INSTALL_FAILURE;
 			}
@@ -1960,7 +1960,7 @@ DWORD WINAPI FormatThread(void* param)
 						FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_ISO_EXTRACT);
 					goto out;
 				}
-				if (img_report.has_kolibrios) {
+				if (HAS_KOLIBRIOS(img_report)) {
 					kolibri_dst[0] = drive_name[0];
 					uprintf("Installing: %s (KolibriOS loader)\n", kolibri_dst);
 					if (ExtractISOFile(image_path, "HD_Load/USB_Boot/MTLD_F32", kolibri_dst,
@@ -1969,7 +1969,7 @@ DWORD WINAPI FormatThread(void* param)
 					}
 				}
 				// EFI mode selected, with no 'boot###.efi' but Windows 7 x64's 'bootmgr.efi' (bit #0)
-				if ((tt == TT_UEFI) && IS_WIN7_EFI(img_report)) {
+				if ((tt == TT_UEFI) && HAS_WIN7_EFI(img_report)) {
 					PrintInfoDebug(0, MSG_232);
 					img_report.install_wim_path[0] = drive_name[0];
 					efi_dst[0] = drive_name[0];
@@ -1985,7 +1985,7 @@ DWORD WINAPI FormatThread(void* param)
 						}
 					}
 				}
-				if ( (tt == TT_BIOS) && (IS_WINPE(img_report.winpe)) ) {
+				if ( (tt == TT_BIOS) && HAS_WINPE(img_report) ) {
 					// Apply WinPe fixup
 					if (!SetupWinPE(drive_name[0]))
 						FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_PATCH);

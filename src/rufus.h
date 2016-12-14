@@ -249,14 +249,19 @@ enum checksum_type {
 #define WINPE_MININT        0x2A
 #define WINPE_I386          0x15
 #define MAX_WIM_VERSION     0x000E0000
+#define HAS_KOLIBRIOS(r)    (r.has_kolibrios)
+#define HAS_REACTOS(r)      (r.reactos_path[0] != 0)
+#define HAS_GRUB(r)         ((r.has_grub2) || (r.has_grub4dos))
 #define HAS_SYSLINUX(r)     (r.sl_version != 0)
+#define HAS_BOOTMGR(r)      (r.has_bootmgr)
 #define HAS_INSTALL_WIM(r)  (r.install_wim_path[0] != 0)
-#define HAS_TOGO(r)         (r.has_bootmgr && r.has_efi && HAS_INSTALL_WIM(r) && (r.install_wim_version < MAX_WIM_VERSION))
-#define IS_WINPE(r)         (((r & WINPE_MININT) == WINPE_MININT)||(( r & WINPE_I386) == WINPE_I386))
-#define IS_WINDOWS(r)       ((r.has_bootmgr) || (r.uses_minint) || IS_WINPE(r.winpe))
-#define IS_WIN7_EFI(r)      ((r.has_efi == 1) && HAS_INSTALL_WIM(r))
-#define IS_REACTOS(r)       (r.reactos_path[0] != 0)
-#define IS_GRUB(r)          ((r.has_grub2) || (r.has_grub4dos))
+#define HAS_WINPE(r)        (((r.winpe & WINPE_MININT) == WINPE_MININT)||((r.winpe & WINPE_I386) == WINPE_I386))
+#define HAS_WINDOWS(r)      (HAS_BOOTMGR(r) || (r.uses_minint) || HAS_WINPE(r))
+#define HAS_WIN7_EFI(r)     ((r.has_efi == 1) && HAS_INSTALL_WIM(r))
+#define IS_DD_BOOTABLE(r)   (r.is_bootable_img)
+#define IS_EFI_BOOTABLE(r)  (r.has_efi)
+#define IS_BIOS_BOOTABLE(r) (HAS_BOOTMGR(r) || HAS_SYSLINUX(r) || HAS_WINPE(r) || HAS_GRUB(r) || HAS_REACTOS(r) || HAS_KOLIBRIOS(r))
+#define HAS_WINTOGO(r)      (HAS_BOOTMGR(r) && IS_EFI_BOOTABLE(r) && HAS_INSTALL_WIM(r) && (r.install_wim_version < MAX_WIM_VERSION))
 #define IS_FAT(fs)          ((fs == FS_FAT16) || (fs == FS_FAT32))
 
 typedef struct {
