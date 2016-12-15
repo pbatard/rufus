@@ -1319,7 +1319,8 @@ static BOOL BootCheck(void)
 					ShellExecuteA(hMainDialog, "open", SEVENZIP_URL, NULL, NULL, SW_SHOWNORMAL);
 				return FALSE;
 			}
-		} else if ( ((fs == FS_NTFS) && (!HAS_WINDOWS(img_report)) && (!HAS_GRUB(img_report)))
+		} else if ( ((fs == FS_NTFS) && !HAS_WINDOWS(img_report) && !HAS_GRUB(img_report) && 
+					 (!HAS_SYSLINUX(img_report) || (SL_MAJOR(img_report.sl_version) <= 5)))
 				 || ((IS_FAT(fs)) && (!HAS_SYSLINUX(img_report)) && (!allow_dual_uefi_bios) && !IS_EFI_BOOTABLE(img_report) &&
 					 (!HAS_REACTOS(img_report)) && !HAS_KOLIBRIOS(img_report) && (!HAS_GRUB(img_report)))
 				 || ((IS_FAT(fs)) && (HAS_WINDOWS(img_report) || HAS_INSTALL_WIM(img_report))) ) {
@@ -2490,7 +2491,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 					break;
 				}
 
-				// Disable all controls except cancel
+				// Disable all controls except Cancel
 				EnableControls(FALSE);
 				DeviceNum = (DWORD)ComboBox_GetItemData(hDeviceList, nDeviceIndex);
 				InitProgress(zero_drive);

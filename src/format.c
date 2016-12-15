@@ -928,7 +928,7 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 
 	// Syslinux
 	if ( (bt == BT_SYSLINUX_V4) || (bt == BT_SYSLINUX_V6) ||
-		 ((bt == BT_ISO) && (HAS_SYSLINUX(img_report)) && (IS_FAT(fs))) ) {
+		 ((bt == BT_ISO) && HAS_SYSLINUX(img_report)) ) {
 		uprintf(using_msg, "Syslinux");
 		r = write_syslinux_mbr(fp);
 		goto notify;
@@ -1903,7 +1903,7 @@ DWORD WINAPI FormatThread(void* param)
 			}
 		} else if ( (bt == BT_SYSLINUX_V4) || (bt == BT_SYSLINUX_V6) ||
 			((bt == BT_ISO) && (HAS_SYSLINUX(img_report) || HAS_REACTOS(img_report)) &&
-				(!HAS_WINDOWS(img_report) || !allow_dual_uefi_bios) && (IS_FAT(fs))) ) {
+				(!HAS_WINDOWS(img_report) || !allow_dual_uefi_bios)) ) {
 			if (!InstallSyslinux(DriveIndex, drive_name[0], fs)) {
 				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_INSTALL_FAILURE;
 			}
