@@ -60,7 +60,7 @@ static float format_percent = 0.0f;
 static int task_number = 0;
 extern const int nb_steps[FS_MAX];
 extern uint32_t dur_mins, dur_secs;
-static int fs_index = 0;
+static int fs_index = 0, wintogo_index = -1;
 extern BOOL force_large_fat32, enable_ntfs_compression, lock_drive, zero_drive, disable_file_indexing;
 uint8_t *grub2_buf = NULL;
 long grub2_len;
@@ -1264,55 +1264,31 @@ out:
 	return r;
 }
 
-// http://technet.microsoft.com/en-ie/library/jj721578.aspx
-
-// As opposed to the technet guide above, we no longer set internal drives offline,
-// due to people wondering why they can't see them by default, and also due to dism
-// incompatibilities from one version of Windows to the next.
-// Maybe when we use wimlib we'll review this, but for now just turn it off.
-//#define SET_INTERNAL_DRIVES_OFFLINE
-static BOOL SetupWinToGo(const char* drive_name, BOOL use_ms_efi)
+// Checks which versions of Windows are available in an install.wim image
+// to set our extraction index. Asks the user to select one if needed.
+BOOL SetWinToGoIndex(void)
 {
-#ifdef SET_INTERNAL_DRIVES_OFFLINE
-	static char san_policy_path[] = "?:\\san_policy.xml";
-#endif
-	static char unattend_path[] = "?:\\Windows\\System32\\sysprep\\unattend.xml";
-	StrArray version_name, version_index;
-	char *mounted_iso, *ms_efi = NULL, image[128], cmd[MAX_PATH];
+	char *mounted_iso, image[128];
 	char tmp_path[MAX_PATH] = "", xml_file[MAX_PATH] = "";
-	unsigned char *buffer;
-	int i, index;
-	wchar_t wVolumeName[] = L"?:";
-	DWORD bufsize;
-	ULONG cluster_size;
-	FILE* fd;
-	PF_DECL(FormatEx);
-	PF_INIT(FormatEx, Fmifs);
+	StrArray version_name, version_index;
+	int i;
 
-	uprintf("Windows To Go mode selected");
-	// Additional sanity checks
-	if ( ((use_ms_efi) && (SelectedDrive.MediaType != FixedMedia)) ||
-		 ((nWindowsVersion < WINDOWS_8) || ((WimExtractCheck() & 4) == 0)) ) {
-		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_NOT_SUPPORTED;
+	// Sanity checks
+	if ((nWindowsVersion < WINDOWS_8) || ((WimExtractCheck() & 4) == 0) ||
+		(ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem)) != FS_NTFS)) {
+		wintogo_index = -1;
 		return FALSE;
 	}
-	if (ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem)) != FS_NTFS) {
-		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_INCOMPATIBLE_FS);
-		return FALSE;
-	}
-
-	// First, we need to access the install.wim image, that resides on the ISO
+	// Mount the install.wim image, that resides on the ISO
 	mounted_iso = MountISO(image_path);
 	if (mounted_iso == NULL) {
-		uprintf("Could not mount ISO for Windows To Go installation");
-		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_ISO_EXTRACT);
+		uprintf("Could not mount ISO for Windows To Go selection");
+		wintogo_index = -1;
 		return FALSE;
 	}
 	static_sprintf(image, "%s%s", mounted_iso, &img_report.install_wim_path[2]);
-	uprintf("Mounted ISO as '%s'", mounted_iso);
 
-	// Then we need to take a look at the XML file in install.wim to allow users
-	// to select the version they want to extract
+	// Now take a look at the XML file in install.wim to list our versions
 	if ((GetTempPathU(sizeof(tmp_path), tmp_path) == 0)
 		|| (GetTempFileNameU(tmp_path, APPLICATION_NAME, 0, xml_file) == 0)
 		|| (xml_file[0] == 0)) {
@@ -1328,30 +1304,67 @@ static BOOL SetupWinToGo(const char* drive_name, BOOL use_ms_efi)
 	}
 	StrArrayCreate(&version_name, 16);
 	StrArrayCreate(&version_index, 16);
-	for (i = 0; (StrArrayAdd(&version_name, get_token_data_file_indexed("DISPLAYNAME", xml_file, i+1), FALSE) >= 0) &&
-		(StrArrayAdd(&version_index, get_token_data_file_indexed("IMAGE INDEX", xml_file, i+1), FALSE) >= 0); i++);
+	for (i = 0; (StrArrayAdd(&version_name, get_token_data_file_indexed("DISPLAYNAME", xml_file, i + 1), FALSE) >= 0) &&
+		(StrArrayAdd(&version_index, get_token_data_file_indexed("IMAGE INDEX", xml_file, i + 1), FALSE) >= 0); i++);
 	DeleteFileU(xml_file);
+	UnMountISO();
 
 	if (i > 1)
 		i = Selection(lmprintf(MSG_291), lmprintf(MSG_292), version_name.String, i);
-	if (i <= 0) {
-		uprintf("Cancelled by user");
-		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANCELLED;
-		UnMountISO();
-		StrArrayDestroy(&version_name);
-		StrArrayDestroy(&version_index);
-		return FALSE;
+	if (i < 0) {
+		wintogo_index = -1;
 	} else if (i == 0) {
-		index = 1;
+		wintogo_index = 1;
 	} else {
-		index = atoi(version_index.String[i - 1]);
+		wintogo_index = atoi(version_index.String[i - 1]);
 	}
-	uprintf("Selected: '%s' (index %s)", version_name.String[i - 1], version_index.String[i - 1]);
+	if (i >= 1)
+		uprintf("Will use '%s' (index %s) for Windows To Go", version_name.String[i - 1], version_index.String[i - 1]);
 	StrArrayDestroy(&version_name);
 	StrArrayDestroy(&version_index);
+	return (wintogo_index >= 0);
+}
+
+// http://technet.microsoft.com/en-ie/library/jj721578.aspx
+// As opposed to the technet guide above, we no longer set internal drives offline,
+// due to people wondering why they can't see them by default, and also due to dism
+// incompatibilities from one version of Windows to the next.
+// Maybe when we use wimlib we'll review this, but for now just turn it off.
+//#define SET_INTERNAL_DRIVES_OFFLINE
+static BOOL SetupWinToGo(const char* drive_name, BOOL use_ms_efi)
+{
+#ifdef SET_INTERNAL_DRIVES_OFFLINE
+	static char san_policy_path[] = "?:\\san_policy.xml";
+#endif
+	static char unattend_path[] = "?:\\Windows\\System32\\sysprep\\unattend.xml";
+	char *mounted_iso, *ms_efi = NULL, image[128], cmd[MAX_PATH];
+	unsigned char *buffer;
+	wchar_t wVolumeName[] = L"?:";
+	DWORD bufsize;
+	ULONG cluster_size;
+	FILE* fd;
+	PF_DECL(FormatEx);
+	PF_INIT(FormatEx, Fmifs);
+
+	uprintf("Windows To Go mode selected");
+	// Additional sanity checks
+	if ( (use_ms_efi) && (SelectedDrive.MediaType != FixedMedia) ) {
+		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_NOT_SUPPORTED;
+		return FALSE;
+	}
+
+	// First, we need to access the install.wim image, that resides on the ISO
+	mounted_iso = MountISO(image_path);
+	if (mounted_iso == NULL) {
+		uprintf("Could not mount ISO for Windows To Go installation");
+		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_ISO_EXTRACT);
+		return FALSE;
+	}
+	static_sprintf(image, "%s%s", mounted_iso, &img_report.install_wim_path[2]);
+	uprintf("Mounted ISO as '%s'", mounted_iso);
 
 	// Now we use the WIM API to apply that image
-	if (!WimApplyImage(image, index, drive_name)) {
+	if (!WimApplyImage(image, wintogo_index, drive_name)) {
 		uprintf("Failed to apply Windows To Go image");
 		if (!IS_ERROR(FormatStatus))
 			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_ISO_EXTRACT);

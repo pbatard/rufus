@@ -1304,6 +1304,9 @@ static BOOL BootCheck(void)
 				if (MessageBoxExU(hMainDialog, lmprintf(MSG_098), lmprintf(MSG_190), MB_YESNO|MB_ICONWARNING|MB_IS_RTL, selected_langid) != IDYES)
 					return FALSE;
 			}
+			// If multiple versions are available, asks the user to select one before we commit to format the drive
+			if (!SetWinToGoIndex())
+				return FALSE;
 		} else if (tt == TT_UEFI) {
 			if (!IS_EFI_BOOTABLE(img_report)) {
 				// Unsupported ISO
