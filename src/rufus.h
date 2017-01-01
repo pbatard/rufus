@@ -280,6 +280,7 @@ typedef struct {
 	BOOLEAN has_long_filename;
 	BOOLEAN has_symlinks;
 	BOOLEAN has_bootmgr;
+	BOOLEAN has_ntldr;
 	BOOLEAN has_autorun;
 	BOOLEAN has_old_c32[NB_OLD_C32];
 	BOOLEAN has_old_vesamenu;
