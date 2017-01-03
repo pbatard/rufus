@@ -1323,7 +1323,7 @@ static BOOL BootCheck(void)
 					 (!HAS_SYSLINUX(img_report) || (SL_MAJOR(img_report.sl_version) <= 5)))
 				 || ((IS_FAT(fs)) && (!HAS_SYSLINUX(img_report)) && (!allow_dual_uefi_bios) && !IS_EFI_BOOTABLE(img_report) &&
 					 (!HAS_REACTOS(img_report)) && !HAS_KOLIBRIOS(img_report) && (!HAS_GRUB(img_report)))
-				 || ((IS_FAT(fs)) && (HAS_WINDOWS(img_report) || HAS_INSTALL_WIM(img_report))) ) {
+				 || ((IS_FAT(fs)) && (HAS_WINDOWS(img_report) || HAS_INSTALL_WIM(img_report)) && (!allow_dual_uefi_bios)) ) {
 			// Incompatible FS and ISO
 			MessageBoxExU(hMainDialog, lmprintf(MSG_096), lmprintf(MSG_092), MB_OK|MB_ICONERROR|MB_IS_RTL, selected_langid);
 			return FALSE;

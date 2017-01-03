@@ -1106,6 +1106,10 @@ static BOOL WritePBR(HANDLE hLogicalVolume)
 				if (!write_fat_32_ros_br(fp, 0)) break;
 			} else if ((bt == BT_ISO) && HAS_KOLIBRIOS(img_report)) {
 				if (!write_fat_32_kos_br(fp, 0)) break;
+			} else if ((bt == BT_ISO) && HAS_BOOTMGR(img_report)) {
+				if (!write_fat_32_pe_br(fp, 0)) break;
+			} else if ((bt == BT_ISO) && HAS_WINPE(img_report)) {
+				if (!write_fat_32_nt_br(fp, 0)) break;
 			} else {
 				if (!write_fat_32_br(fp, 0)) break;
 			}
