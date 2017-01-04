@@ -5,6 +5,9 @@ set PWD=%~dp0
 rmdir cov-int /s /q >NUL 2>NUL
 del cov-int.zip >NUL 2>NUL
 mkdir cov-int
+rem *** for when/if Coverity manage to clean their act
+rem cov-build --dir cov-int msbuild rufus.sln /p:Configuration=Release,Platform=x86_32 /maxcpucount
+rem cov-build --dir cov-int C:\msys64\usr\bin\bash -cl "export PATH=/mingw32/bin:$PATH; cd /c/rufus; ./configure --build=i686-w64-mingw32 --host=i686-w64-mingw32 --disable-debug; make -j4"
 cov-build --dir cov-int wdk_build.cmd
 rem *** zip script by Peter Mortensen - http://superuser.com/a/111266/286681
 echo Set objArgs = WScript.Arguments> zip.vbs

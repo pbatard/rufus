@@ -1216,7 +1216,10 @@ static BOOL SetupWinPE(char drive_letter)
 		uprintf("Could not read file %s: %s\n", dst, WindowsErrorString());
 		goto out;
 	}
-	SetFilePointerEx(handle, liZero, NULL, FILE_BEGIN);
+	if (!SetFilePointerEx(handle, liZero, NULL, FILE_BEGIN)) {
+		uprintf("Could not rewind file %s: %s\n", dst, WindowsErrorString());
+		goto out;
+	}
 
 	// Patch setupldr.bin
 	uprintf("Patching file %s\n", dst);
@@ -1553,13 +1556,16 @@ static BOOL WriteDrive(HANDLE hPhysicalDrive, HANDLE hSourceImage)
 				if ((s) && (wSize == rSize))
 					break;
 				if (s)
-					uprintf("write error: Wrote %d bytes, expected %d bytes\n", wSize, rSize);
+					uprintf("write error: Wrote %d bytes, expected %d bytes", wSize, rSize);
 				else
 					uprintf("write error: %s", WindowsErrorString());
 				if (i < WRITE_RETRIES - 1) {
 					li.QuadPart = wb;
-					SetFilePointerEx(hPhysicalDrive, li, NULL, FILE_BEGIN);
 					uprintf("  RETRYING...\n");
+					if (!SetFilePointerEx(hPhysicalDrive, li, NULL, FILE_BEGIN)) {
+						uprintf("write error: could not reset position - %s", WindowsErrorString());
+						goto out;
+					}
 				} else {
 					FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_WRITE_FAULT;
 					goto out;
@@ -2136,8 +2142,11 @@ DWORD WINAPI SaveImageThread(void* param)
 				uprintf("write error: %s", WindowsErrorString());
 			if (i < WRITE_RETRIES-1) {
 				li.QuadPart = wb;
-				SetFilePointerEx(hDestImage, li, NULL, FILE_BEGIN);
 				uprintf("  RETRYING...\n");
+				if (!SetFilePointerEx(hDestImage, li, NULL, FILE_BEGIN)) {
+					uprintf("write error: could not reset position - %s", WindowsErrorString());
+					goto out;
+				}
 			} else {
 				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_WRITE_FAULT;
 				goto out;

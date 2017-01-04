@@ -227,8 +227,9 @@ BOOL GetOpticalMedia(IMG_SAVE* img_save)
 			buffer = malloc(2048);
 			if ((buffer != NULL) && (SetFilePointerEx(hDrive, li, NULL, FILE_BEGIN)) &&
 				ReadFile(hDrive, buffer, 2048, &size, NULL) && (size == 2048)) {
-				safe_strcpy(label, sizeof(label), (char*)&buffer[0x28]);
-				for (k = safe_strlen(label) - 1; (k >= 0) && (label[k] == 0x20); k--)
+				memcpy(label, &buffer[0x28], sizeof(label) - 1);
+				label[sizeof(label) - 1] = 0;
+				for (k = strlen(label) - 1; (k >= 0) && (label[k] == 0x20); k--)
 					label[k] = 0;
 				img_save->Label = label;
 			}
