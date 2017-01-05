@@ -197,7 +197,7 @@ char* GetLogicalName(DWORD DriveIndex, BOOL bKeepTrailingBackslash, BOOL bSilent
 	HANDLE hDrive = INVALID_HANDLE_VALUE, hVolume = INVALID_HANDLE_VALUE;
 	size_t len;
 	char path[MAX_PATH];
-	VOLUME_DISK_EXTENTS DiskExtents;
+	VOLUME_DISK_EXTENTS_REDEF DiskExtents;
 	DWORD size;
 	UINT drive_type;
 	int i, j;
