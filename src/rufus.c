@@ -1352,7 +1352,7 @@ static BOOL BootCheck(void)
 			fd = fopen(tmp, "rb");
 			if (fd != NULL) {
 				// If a file already exists in the current directory, use that one
-				uprintf("Will reuse '%s' from './" FILES_DIR "/%s-%s/' for Grub 2.x installation\n",
+				uprintf("Will reuse '%s' from './" FILES_DIR "/%s-%s/' for Grub 2.x installation",
 					core_img, grub, img_report.grub2_version);
 				fseek(fd, 0, SEEK_END);
 				grub2_len = ftell(fd);
@@ -1374,17 +1374,32 @@ static BOOL BootCheck(void)
 				else if (r == IDYES) {
 					static_sprintf(tmp, "%s-%s", grub, img_report.grub2_version);
 					IGNORE_RETVAL(_mkdir(tmp));
+					IGNORE_RETVAL(_chdir(tmp));
 					static_sprintf(tmp, "%s/%s-%s/%s", FILES_URL, grub, img_report.grub2_version, core_img);
 					PrintInfoDebug(0, MSG_085, tmp);
 					PromptOnError = FALSE;
-					grub2_len = (long)DownloadFile(tmp, &tmp[sizeof(FILES_URL)], hMainDialog);
+					grub2_len = (long)DownloadFile(tmp, core_img, hMainDialog);
 					PromptOnError = TRUE;
+					if ((grub2_len == 0) && (DownloadStatus == 404)) {
+						// Couldn't locate the file on the server => try to download without the version extra
+						uprintf("Extended version was not found, trying main version...");
+						safe_strcpy(tmp2, sizeof(tmp2), img_report.grub2_version);
+						// Isolate the #.### part
+						for (i = 0; ((tmp2[i] >= '0') && (tmp2[i] <= '9')) || (tmp2[i] == '.'); i++);
+						tmp2[i] = 0;
+						static_sprintf(tmp, "%s/%s-%s/%s", FILES_URL, grub, tmp2, core_img);
+						PrintInfoDebug(0, MSG_085, tmp);
+						PromptOnError = FALSE;
+						grub2_len = (long)DownloadFile(tmp, core_img, hMainDialog);
+						PromptOnError = TRUE;
+						static_sprintf(tmp, "%s/%s-%s/%s", FILES_URL, grub, img_report.grub2_version, core_img);
+					}
 					if (grub2_len <= 0) {
 						PrintInfo(0, MSG_195, "Grub2");
-						uprintf("%s was not found - will use embedded version\n", tmp);
+						uprintf("%s was not found - will use embedded version", tmp);
 					} else {
 						PrintInfo(0, MSG_193, tmp);
-						fd = fopen(&tmp[sizeof(FILES_URL)], "rb");
+						fd = fopen(core_img, "rb");
 						grub2_buf = malloc(grub2_len);
 						if ((fd == NULL) || (grub2_buf == NULL) || (fread(grub2_buf, 1, (size_t)grub2_len, fd) != (size_t)grub2_len)) {
 							uprintf("Failed to read '%s' data - will use embedded version", core_img);
@@ -1411,7 +1426,7 @@ static BOOL BootCheck(void)
 						fd = fopen(tmp, "rb");
 						if (fd != NULL) {
 							// If a file already exists in the current directory, use that one
-							uprintf("Will replace obsolete '%s' from ISO with the one found in './" FILES_DIR "/%s'\n", old_c32_name[i], tmp);
+							uprintf("Will replace obsolete '%s' from ISO with the one found in './" FILES_DIR "/%s'", old_c32_name[i], tmp);
 							fclose(fd);
 							use_own_c32[i] = TRUE;
 						} else {
@@ -1424,7 +1439,7 @@ static BOOL BootCheck(void)
 								PrintInfo(0, MSG_085, old_c32_name[i]);
 								len = DownloadFile(tmp, &tmp[sizeof(FILES_URL)], hMainDialog);
 								if (len == 0) {
-									uprintf("Could not download file - cancelling\n");
+									uprintf("Could not download file - cancelling");
 									return FALSE;
 								}
 								use_own_c32[i] = TRUE;
@@ -1450,7 +1465,7 @@ static BOOL BootCheck(void)
 					}
 				}
 				if ((syslinux_ldlinux_len[0] != 0) && (syslinux_ldlinux_len[1] != 0)) {
-					uprintf("Will reuse '%s.%s' and '%s.%s' from './" FILES_DIR "/%s/%s-%s%s/' for Syslinux installation\n",
+					uprintf("Will reuse '%s.%s' and '%s.%s' from './" FILES_DIR "/%s/%s-%s%s/' for Syslinux installation",
 						ldlinux, ldlinux_ext[0], ldlinux, ldlinux_ext[1], FILES_DIR, syslinux,
 						img_report.sl_version_str, img_report.sl_version_ext);
 				} else {
@@ -1475,7 +1490,7 @@ static BOOL BootCheck(void)
 						PromptOnError = TRUE;
 						if ((syslinux_ldlinux_len[i] == 0) && (DownloadStatus == 404) && (*img_report.sl_version_ext != 0)) {
 							// Couldn't locate the file on the server => try to download without the version extra
-							uprintf("Extended version was not found, trying main version\n");
+							uprintf("Extended version was not found, trying main version...");
 							static_sprintf(tmp, "%s/%s-%s/%s.%s", FILES_URL, syslinux, img_report.sl_version_str,
 								ldlinux, ldlinux_ext[i]);
 							PrintInfo(0, MSG_085, tmp);
@@ -1493,7 +1508,7 @@ static BOOL BootCheck(void)
 							if (img_report.sl_version == embedded_sl_version[1]) {
 								uprintf("Could not download the file - will try to use embedded %s version instead", img_report.sl_version_str);
 							} else {
-								uprintf("Could not download the file - cancelling\n");
+								uprintf("Could not download the file - cancelling");
 								return FALSE;
 							}
 						}
@@ -1508,7 +1523,7 @@ static BOOL BootCheck(void)
 		static_sprintf(tmp, "%s-%s/%s.%s", syslinux, embedded_sl_version_str[1], ldlinux, ldlinux_ext[2]);
 		fd = fopenU(tmp, "rb");
 		if (fd != NULL) {
-			uprintf("Will reuse './%s/%s' for Syslinux installation\n", FILES_DIR, tmp);
+			uprintf("Will reuse './%s/%s' for Syslinux installation", FILES_DIR, tmp);
 			fclose(fd);
 		} else {
 			static_sprintf(tmp, "%s.%s", ldlinux, ldlinux_ext[2]);
@@ -1540,7 +1555,7 @@ static BOOL BootCheck(void)
 		static_sprintf(tmp, "grub4dos-%s/grldr", GRUB4DOS_VERSION);
 		fd = fopenU(tmp, "rb");
 		if (fd != NULL) {
-			uprintf("Will reuse './%s/%s' for Grub4DOS installation\n", FILES_DIR, tmp);
+			uprintf("Will reuse './%s/%s' for Grub4DOS installation", FILES_DIR, tmp);
 			fclose(fd);
 		} else {
 			static_sprintf(tmp, "grldr");
