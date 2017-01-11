@@ -136,9 +136,9 @@ extern unsigned long* bled_cancel_request;
 #define xfunc_die() longjmp(bb_error_jmp, 1)
 #define bb_printf(...) do { if (bled_printf != NULL) bled_printf(__VA_ARGS__); \
 	else { printf(__VA_ARGS__); putchar('\n'); } } while(0)
-#define bb_error_msg bb_printf
-#define bb_error_msg_and_die(...) do {bb_printf(__VA_ARGS__); xfunc_die();} while(0)
-#define bb_error_msg_and_err(...) do {bb_printf(__VA_ARGS__); goto err;} while(0)
+#define bb_error_msg(...) bb_printf("Error: " __VA_ARGS__)
+#define bb_error_msg_and_die(...) do {bb_error_msg(__VA_ARGS__); xfunc_die();} while(0)
+#define bb_error_msg_and_err(...) do {bb_error_msg(__VA_ARGS__); goto err;} while(0)
 #define bb_perror_msg bb_error_msg
 #define bb_perror_msg_and_die bb_error_msg_and_die
 #define bb_putchar putchar
@@ -153,7 +153,7 @@ static inline void *xrealloc(void *ptr, size_t size) {
 #define bb_msg_read_error "read error"
 #define bb_msg_write_error "write error"
 #define bb_mode_string(mode) "[not implemented]"
-#define bb_copyfd_exact_size(fd1, fd2, size) bb_printf("not implemented")
+#define bb_copyfd_exact_size(fd1, fd2, size) bb_error_msg("Not implemented")
 #define bb_make_directory(path, mode, flags) SHCreateDirectoryExU(NULL, path, NULL)
 
 static inline int link(const char *oldpath, const char *newpath) {errno = ENOSYS; return -1;}

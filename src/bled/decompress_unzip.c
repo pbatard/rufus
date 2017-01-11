@@ -309,7 +309,7 @@ IF_DESKTOP(long long) int FAST_FUNC unpack_zip_stream(transformer_state_t *xstat
 		/* Read filename */
 		filename = xzalloc(zip_header.formatted.filename_len + 1);
 		safe_read(xstate->src_fd, filename, zip_header.formatted.filename_len);
-		bb_printf("processing archive file '%s'", filename);
+		bb_printf("Processing archive file '%s'", filename);
 		free(filename);
 
 		/* Skip extra header bytes */

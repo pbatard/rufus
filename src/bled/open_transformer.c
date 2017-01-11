@@ -44,7 +44,7 @@ ssize_t FAST_FUNC transformer_write(transformer_state_t *xstate, const void *buf
 	} else {
 		nwrote = full_write(xstate->dst_fd, buf, (unsigned)bufsize);
 		if (nwrote != (ssize_t)bufsize) {
-			bb_perror_msg("write");
+			bb_perror_msg("write error - %d bytes written but %d expected", (int)nwrote, (int)bufsize);
 			nwrote = -1;
 			goto ret;
 		}

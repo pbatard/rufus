@@ -700,7 +700,7 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 	SelectedDrive.SectorsPerTrack = DiskGeometry->Geometry.SectorsPerTrack;
 	SelectedDrive.MediaType = DiskGeometry->Geometry.MediaType;
 
-	suprintf("Disk type: %s, Sector Size: %d bytes\n", (SelectedDrive.MediaType == FixedMedia)?"Fixed":"Removable",
+	suprintf("Disk type: %s, Sector Size: %d bytes\n", (SelectedDrive.MediaType == FixedMedia)?"FIXED":"Removable",
 		SelectedDrive.SectorSize);
 	suprintf("Cylinders: %" PRIi64 ", TracksPerCylinder: %d, SectorsPerTrack: %d\n",
 		DiskGeometry->Geometry.Cylinders, DiskGeometry->Geometry.TracksPerCylinder, DiskGeometry->Geometry.SectorsPerTrack);
