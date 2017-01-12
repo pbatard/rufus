@@ -92,9 +92,15 @@ static BOOL GetUSBProperties(char* parent_path, char* device_id, usb_device_prop
 		goto out;
 	}
 
-	props->vid = conn_info.DeviceDescriptor.idVendor;
-	props->pid = conn_info.DeviceDescriptor.idProduct;
-	props->speed = conn_info.Speed + 1;
+	// Some poorly written proprietary Windows 7 USB 3.0 controller drivers (<cough>ASMedia<cough>)
+	// have a screwed up implementation of IOCTL_USB_GET_NODE_CONNECTION_INFORMATION_EX that succeeds
+	// but returns zeroed data => Add a workaround so that we don't lose our VID:PID...
+	if ((conn_info.DeviceDescriptor.idVendor != 0) || (conn_info.DeviceDescriptor.idProduct != 0)) {
+		props->vid = conn_info.DeviceDescriptor.idVendor;
+		props->pid = conn_info.DeviceDescriptor.idProduct;
+		props->speed = conn_info.Speed + 1;
+		r = TRUE;
+	}
 
 	// In their great wisdom, Microsoft decided to BREAK the USB speed report between Windows 7 and Windows 8
 	if (nWindowsVersion >= WINDOWS_8) {
@@ -111,7 +117,6 @@ static BOOL GetUSBProperties(char* parent_path, char* device_id, usb_device_prop
 			props->is_LowerSpeed = TRUE;
 		}
 	}
-	r = TRUE;
 
 out:
 	safe_closehandle(handle);
