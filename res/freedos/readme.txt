@@ -1,21 +1,21 @@
-o KERNEL.SYS was extracted from ke2041_386f32.zip available at:
-  https://sourceforge.net/projects/freedos/files/Kernel/2041/
+o KERNEL.SYS was taken from KERNL386.SYS in FreeDOS Kernel 2042:
+  http://ibiblio.org/pub/micro/pc-stuff/freedos/files/distributions/1.2/repos/base/kernel.zip
   It was modified to have FORCELBA enabled (byte offset 0x0D set to 0x01)
 
-o COMMAND.COM was extracted from the fd11src.iso -> ISOLINUX\FDBOOT.IMG at:
-  http://www.ibiblio.org/pub/micro/pc-stuff/freedos/files/distributions/1.1/
+o COMMAND.COM was extracted from FreeCom 0.84 pre 2:
+  http://ibiblio.org/pub/micro/pc-stuff/freedos/files/distributions/1.2/repos/base/command.zip
 
-o The EGA files were extracted from the cpidos30.zip available at:
-  http://www.ibiblio.org/pub/micro/pc-stuff/freedos/files/dos/cpi/
+o The EGA files were extracted from CPI (Code Page Information) Package 3.0:
+  http://ibiblio.org/pub/micro/pc-stuff/freedos/files/distributions/1.2/repos/base/cpidos.zip
 
-o DISPLAY.EXE was extracted from /disp013x.zip available at:
-  http://www.ibiblio.org/pub/micro/pc-stuff/freedos/files/dos/display
+o DISPLAY.EXE was extracted from Display 0.13b:
+  http://ibiblio.org/pub/micro/pc-stuff/freedos/files/distributions/1.2/repos/base/display.zip
 
-o KEYB.EXE was extracted from KEYB201.ZIP available at:
-  http://www.ibiblio.org/pub/micro/pc-stuff/freedos/files/dos/keyb/2.01/
+o KEYB.EXE was extracted from Keyb 2.01:
+  http://ibiblio.org/pub/micro/pc-stuff/freedos/files/distributions/1.2/repos/base/keyb.zip
   
-o The keyboard layouts (KEYB___.SYS) were extracted from kpdos31x.zip:
-  http://www.ibiblio.org/pub/micro/pc-stuff/freedos/files/dos/keyb/kblayout/
+o The keyboard layouts (KEYB___.SYS) were extracted from Keyb Layouts 3.1:
+  http://ibiblio.org/pub/micro/pc-stuff/freedos/files/distributions/1.2/repos/base/keyb_lay.zip
 
-o MODE.COM was extracted from mode-2005may12.zip available at:
-  http://www.ibiblio.org/pub/micro/pc-stuff/freedos/files/dos/mode/2005/
+o MODE.COM was extracted from Mode 2015-11-25:
+  http://ibiblio.org/pub/micro/pc-stuff/freedos/files/distributions/1.2/repos/base/mode.zip

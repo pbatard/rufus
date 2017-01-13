@@ -2,7 +2,7 @@
  * Rufus: The Reliable USB Formatting Utility
  * DOS boot file extraction, from the FAT12 floppy image in diskcopy.dll
  * (MS WinME DOS) or from the embedded FreeDOS resource files
- * Copyright © 2011-2016 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2017 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -352,11 +352,11 @@ out:
 BOOL ExtractFreeDOS(const char* path)
 {
 	const char* res_name[] = { "COMMAND.COM", "KERNEL.SYS", "DISPLAY.EXE", "KEYB.EXE",
-		"MODE.COM", "KEYBOARD.SYS", "KEYBRD2.SYS", "KEYBRD3.SYS", "KEYBRD4.SYS", "ega.cpx",
-		"ega2.cpx", "ega3.cpx", "ega4.cpx", "ega5.cpx", "ega6.cpx",
-		"ega7.cpx", "ega8.cpx", "ega9.cpx", "ega10.cpx", "ega11.cpx",
-		"ega12.cpx", "ega13.cpx", "ega14.cpx", "ega15.cpx", "ega16.cpx",
-		"ega17.cpx", "ega18.cpx" };
+		"MODE.COM", "KEYBOARD.SYS", "KEYBRD2.SYS", "KEYBRD3.SYS", "KEYBRD4.SYS", "EGA.CPX",
+		"EGA2.CPX", "EGA3.CPX", "EGA4.CPX", "EGA5.CPX", "EGA6.CPX",
+		"EGA7.CPX", "EGA8.CPX", "EGA9.CPX", "EGA10.CPX", "EGA11.CPX",
+		"EGA12.CPX", "EGA13.CPX", "EGA14.CPX", "EGA15.CPX", "EGA16.CPX",
+		"EGA17.CPX", "EGA18.CPX" };
 	const int res_id[ARRAYSIZE(res_name)] = { IDR_FD_COMMAND_COM, IDR_FD_KERNEL_SYS, IDR_FD_DISPLAY_EXE, IDR_FD_KEYB_EXE,
 		IDR_FD_MODE_COM, IDR_FD_KB1_SYS, IDR_FD_KB2_SYS, IDR_FD_KB3_SYS, IDR_FD_KB4_SYS, IDR_FD_EGA1_CPX,
 		IDR_FD_EGA2_CPX, IDR_FD_EGA3_CPX, IDR_FD_EGA4_CPX, IDR_FD_EGA5_CPX, IDR_FD_EGA6_CPX,

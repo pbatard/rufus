@@ -33,7 +33,7 @@ LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
 IDD_DIALOG DIALOGEX 12, 12, 242, 376
 STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_MINIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_ACCEPTFILES
-CAPTION "Rufus 2.12.1019"
+CAPTION "Rufus 2.12.1020"
 FONT 8, "Segoe UI Symbol", 400, 0, 0x0
 BEGIN
     LTEXT           "Device",IDS_DEVICE_TXT,9,6,200,8
@@ -247,24 +247,24 @@ BEGIN
     "IDR_FD_KB2_SYS          RCDATA                  ""../res/freedos/KEYBRD2.SYS""\r\n"
     "IDR_FD_KB3_SYS          RCDATA                  ""../res/freedos/KEYBRD3.SYS""\r\n"
     "IDR_FD_KB4_SYS          RCDATA                  ""../res/freedos/KEYBRD4.SYS""\r\n"
-    "IDR_FD_EGA1_CPX         RCDATA                  ""../res/freedos/ega.cpx""\r\n"
-    "IDR_FD_EGA2_CPX         RCDATA                  ""../res/freedos/ega2.cpx""\r\n"
-    "IDR_FD_EGA3_CPX         RCDATA                  ""../res/freedos/ega3.cpx""\r\n"
-    "IDR_FD_EGA4_CPX         RCDATA                  ""../res/freedos/ega4.cpx""\r\n"
-    "IDR_FD_EGA5_CPX         RCDATA                  ""../res/freedos/ega5.cpx""\r\n"
-    "IDR_FD_EGA6_CPX         RCDATA                  ""../res/freedos/ega6.cpx""\r\n"
-    "IDR_FD_EGA7_CPX         RCDATA                  ""../res/freedos/ega7.cpx""\r\n"
-    "IDR_FD_EGA8_CPX         RCDATA                  ""../res/freedos/ega8.cpx""\r\n"
-    "IDR_FD_EGA9_CPX         RCDATA                  ""../res/freedos/ega9.cpx""\r\n"
-    "IDR_FD_EGA10_CPX        RCDATA                  ""../res/freedos/ega10.cpx""\r\n"
-    "IDR_FD_EGA11_CPX        RCDATA                  ""../res/freedos/ega11.cpx""\r\n"
-    "IDR_FD_EGA12_CPX        RCDATA                  ""../res/freedos/ega12.cpx""\r\n"
-    "IDR_FD_EGA13_CPX        RCDATA                  ""../res/freedos/ega13.cpx""\r\n"
-    "IDR_FD_EGA14_CPX        RCDATA                  ""../res/freedos/ega14.cpx""\r\n"
-    "IDR_FD_EGA15_CPX        RCDATA                  ""../res/freedos/ega15.cpx""\r\n"
-    "IDR_FD_EGA16_CPX        RCDATA                  ""../res/freedos/ega16.cpx""\r\n"
-    "IDR_FD_EGA17_CPX        RCDATA                  ""../res/freedos/ega17.cpx""\r\n"
-    "IDR_FD_EGA18_CPX        RCDATA                  ""../res/freedos/ega18.cpx""\r\n"
+    "IDR_FD_EGA1_CPX         RCDATA                  ""../res/freedos/EGA.CPX""\r\n"
+    "IDR_FD_EGA2_CPX         RCDATA                  ""../res/freedos/EGA2.CPX""\r\n"
+    "IDR_FD_EGA3_CPX         RCDATA                  ""../res/freedos/EGA3.CPX""\r\n"
+    "IDR_FD_EGA4_CPX         RCDATA                  ""../res/freedos/EGA4.CPX""\r\n"
+    "IDR_FD_EGA5_CPX         RCDATA                  ""../res/freedos/EGA5.CPX""\r\n"
+    "IDR_FD_EGA6_CPX         RCDATA                  ""../res/freedos/EGA6.CPX""\r\n"
+    "IDR_FD_EGA7_CPX         RCDATA                  ""../res/freedos/EGA7.CPX""\r\n"
+    "IDR_FD_EGA8_CPX         RCDATA                  ""../res/freedos/EGA8.CPX""\r\n"
+    "IDR_FD_EGA9_CPX         RCDATA                  ""../res/freedos/EGA9.CPX""\r\n"
+    "IDR_FD_EGA10_CPX        RCDATA                  ""../res/freedos/EGA10.CPX""\r\n"
+    "IDR_FD_EGA11_CPX        RCDATA                  ""../res/freedos/EGA11.CPX""\r\n"
+    "IDR_FD_EGA12_CPX        RCDATA                  ""../res/freedos/EGA12.CPX""\r\n"
+    "IDR_FD_EGA13_CPX        RCDATA                  ""../res/freedos/EGA13.CPX""\r\n"
+    "IDR_FD_EGA14_CPX        RCDATA                  ""../res/freedos/EGA14.CPX""\r\n"
+    "IDR_FD_EGA15_CPX        RCDATA                  ""../res/freedos/EGA15.CPX""\r\n"
+    "IDR_FD_EGA16_CPX        RCDATA                  ""../res/freedos/EGA16.CPX""\r\n"
+    "IDR_FD_EGA17_CPX        RCDATA                  ""../res/freedos/EGA17.CPX""\r\n"
+    "IDR_FD_EGA18_CPX        RCDATA                  ""../res/freedos/EGA18.CPX""\r\n"
     "IDR_XT_HOGGER           RCDATA                  ""../res/hogger/hogger.exe""\r\n"
     "IDR_UEFI_NTFS           RCDATA                  ""../res/uefi/uefi-ntfs.img""\r\n"
     "IDR_TOGO_SAN_POLICY_XML RCDATA                  ""../res/togo/san_policy.xml""\r\n"
@@ -334,8 +334,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 2,12,1019,0
- PRODUCTVERSION 2,12,1019,0
+ FILEVERSION 2,12,1020,0
+ PRODUCTVERSION 2,12,1020,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -352,13 +352,13 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Akeo Consulting (http://akeo.ie)"
             VALUE "FileDescription", "Rufus"
-            VALUE "FileVersion", "2.12.1019"
+            VALUE "FileVersion", "2.12.1020"
             VALUE "InternalName", "Rufus"
             VALUE "LegalCopyright", "© 2011-2017 Pete Batard (GPL v3)"
             VALUE "LegalTrademarks", "http://www.gnu.org/copyleft/gpl.html"
             VALUE "OriginalFilename", "rufus.exe"
             VALUE "ProductName", "Rufus"
-            VALUE "ProductVersion", "2.12.1019"
+            VALUE "ProductVersion", "2.12.1020"
         END
     END
     BLOCK "VarFileInfo"
