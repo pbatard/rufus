@@ -1,7 +1,7 @@
 This directory contains the Grub4DOS boot records that are used by Rufus
 
-* grldr.mbr was taken from the official 2016.07.04 release from
-  http://grub4dos.chenall.net/downloads/grub4dos-0.4.6a-2016-07-04/
+* grldr.mbr was taken from the official 2016.12.24 release from
+  http://grub4dos.chenall.net/downloads/grub4dos-0.4.6a-2016-12-24/
 
 * Note that, for convenience reasons, the first 512 bytes from this grldr.mbr are
   *not* the ones that Rufus processes when writing the actual MBR (first 512 bytes).
