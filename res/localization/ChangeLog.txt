@@ -15,6 +15,28 @@ content. PLEASE, do not just look at this Changelog when updating your
 translation, but always use the English section of rufus.loc as your base.
 For instance, MSG_114, that was introduced in v1.0.8 is MORE than one line!
 
+o Version 1.0.21 (2017.01.16)
+  - *NEW* MSG_288 "Missing elevated privileges"
+  - *NEW* MSG_289 "This application can only run with elevated privileges"
+    This message, along with the previous, is just to notify the user when they have
+    managed to run Rufus in non-elevated mode. This shouldn't happen in most case
+    so this is not something that you can easily test.
+  - *NEW* MSG_290 "File Indexing"
+    This is a cheat mode that can be tested with Alt-Q, that is equivalent to the
+    "Allow files on this drive to have contents indexed in addition to file properties"
+    (i.e. file indexing) option one can see when looking at the drive properties. See:
+    https://rufus.akeo.ie/pics/FileIndexing.png
+  - *NEW* MSG_291 "Version selection"
+  - *NEW* MSG_292 "Please select the version of Windows you want to install:"
+    These two messages are used when the user has the possibility to select between
+    multiple versions of Windows in Windows To Go mode. In this case, a prompt like
+    this will appear, using these 2 messages: https://rufus.akeo.ie/pics/Win2GoVersion.png
+    If you have an official Windows ISO, and the platform you run Rufus on supports
+    Windows To Go (Windows 8 or later *ONLY*), you should be able to test this message.
+  - *NEW* MSG_293 "Unsupported Windows version"
+  - *NEW* MSG_294 "This version of Windows is no longer supported by Rufus."
+    These two messages are not used anywhere yet, but may be needed in a future prompt.
+
 o Version 1.0.20 (2016.05.09)
   - *NEW* MSG_286 "Zeroing drive: %0.1f%% completed"
     Used when filling a whole drive with zero bytes, to display progress in percent (e.g. "Zeroing drive: 12.3% completed")

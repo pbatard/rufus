@@ -1,3 +1,13 @@
+o Version 2.12 (2017.01.??)
+    Add Hebrew translation, courtesy of NSBuilder and פלוני אלמוני
+    Add a cheat mode (Alt-O) to create an ISO from the first optical media found
+    Enable target system selection for Windows To Go
+    Enable NTFS selection for Syslinux 6.x (EXPERIMENTAL)
+    Fix an issue that allowed BIOS target selection with pure UEFI images
+    Fix license display for RTL languages
+    Update Grub4DOS and FreeDOS to latest
+    Additional fixes and improvements
+
 o Version 2.11 (2016.09.08)
     Do not download BIOS related files unless BIOS boot is selected
     Improve support for Arch Linux derivatives
