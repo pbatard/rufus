@@ -12089,7 +12089,7 @@ t MSG_287 "Wykrywanie dysków wymiennych nie-USB"
 
 ################################################################################
 l "pt-BR" "Portuguese Brazilian (Português do Brasil)" 0x0416
-v 1.0.20
+v 1.0.21
 b "en-US"
 
 # Main dialog
@@ -12523,6 +12523,13 @@ t MSG_285 "O executável baixado é assinado por '%s'.\nEsta assinatura não é 
 	"indicar alguma forma de atividade maliciosa...\nVocê tem certeza que deseja executar este arquivo?"
 t MSG_286 "Zerando HD: %0.1f%% concluído"
 t MSG_287 "Detecção de drives não USB removíveis"
+t MSG_288 "Sem permissão elevada"
+t MSG_289 "Este programa só pode ser rodado usando permissão elevada"
+t MSG_290 "Indexação de arquivo"
+t MSG_291 "Seleção de versão"
+t MSG_292 "Por favor, selecione a versão do Windows que deseja instalar:"
+t MSG_293 "Versão do Windows não suportada"
+t MSG_294 "Esta versão do Windows não é mais suportada pelo Rufos"
 
 ################################################################################
 l "pt-PT" "Portuguese Standard (Português)" 0x0816
