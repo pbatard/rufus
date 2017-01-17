@@ -5492,7 +5492,7 @@ t MSG_294 "Cette version de Windows n'est plus supportée par Rufus."
 
 ################################################################################
 l "de-DE" "German (Deutsch)" 0x0407, 0x0807, 0x0c07, 0x1007, 0x1407
-v 1.0.20
+v 1.0.21
 b "en-US"
 
 g IDD_DIALOG
@@ -5936,6 +5936,13 @@ t MSG_285 "Die heruntergeladene ausführbare Datei ist von '%s' signiert.\nDiese
 	"auf eine böswillige Aktivität hindeuten...\nSind Sie sicher, dass Sie diese Datei ausführen wollen?"
 t MSG_286 "Überschreiben mit Nullen: %0.1f%% fertiggestellt"
 t MSG_287 "Erkennung nicht wechselbarer USB-Laufwerke"
+t MSG_288 "Administrative Rechte nicht vorhanden"
+t MSG_289 "Dieses Programm kann nur mit administrativen Rechten ausgeführt werden."
+t MSG_290 "Datei-Indizierung"
+t MSG_291 "Versionsauswahl"
+t MSG_292 "Bitte wählen Sie die Version von Windows aus, die Sie installieren wollen:"
+t MSG_293 "Nicht unterstützte Windows-Version"
+t MSG_294 "Diese Version von Windows ist nicht mehr von Rufus unterstützt."
 
 ################################################################################
 l "el-GR" "Greek (Ελληνικά)" 0x0408
