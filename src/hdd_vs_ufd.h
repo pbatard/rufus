@@ -116,7 +116,7 @@ static vid_score_t vid_score[] = {
 	{ 0x04e8, 5 },		// Samsung
 	{ 0x04f3, -5 },		// Elan
 	{ 0x04fc, 5 },		// Sunplus
-	{ 0x058f, -2 },		// Alcor
+	{ 0x058f, -5 },		// Alcor
 	{ 0x059b, 7 },		// Iomega
 	{ 0x059f, 5 },		// LaCie
 	{ 0x05ab, 10 },		// In-System Design

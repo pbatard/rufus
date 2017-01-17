@@ -253,9 +253,9 @@ BOOL GetOpticalMedia(IMG_SAVE* img_save)
 /* For debugging user reports of HDDs vs UFDs */
 //#define FORCED_DEVICE
 #ifdef FORCED_DEVICE
-#define FORCED_VID 0x1F75
-#define FORCED_PID 0x0917
-#define FORCED_NAME "Intenso Speed Line USB Device"
+#define FORCED_VID 0x058F
+#define FORCED_PID 0x6387
+#define FORCED_NAME "Intenso Rainbow Line USB Device"
 #endif
 
 /*
