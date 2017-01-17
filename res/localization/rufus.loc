@@ -12547,7 +12547,7 @@ t MSG_294 "Esta versão do Windows não é mais suportada pelo Rufos"
 
 ################################################################################
 l "pt-PT" "Portuguese Standard (Português)" 0x0816
-v 1.0.20
+v 1.0.21
 b "en-US"
 
 # Main dialog
@@ -13006,6 +13006,13 @@ t MSG_285 "O executável transferido está assinado por '%s'.\nNão é uma assin
 	"poderá indicar algum tipo de actividade mal intencionada...\nTem certeza de que deseja executar este ficheiro?"
 t MSG_286 "A limpar disco: %0.1f%% concluído"
 t MSG_287 "Detecção de unidades removíveis não-USB"
+t MSG_288 "Sem privilégios de administrador"
+t MSG_289 "Esta aplicação só pode ser executada com privilégios de administrador"
+t MSG_290 "indexação de ficheiros"
+t MSG_291 "Seleção de versão"
+t MSG_292 "Selecione a versão do Windows que deseja instalar:"
+t MSG_293 "Versão de Windows não suportada"
+t MSG_294 "Esta versão do Windows já não é suportada por Rufus."
 
 ################################################################################
 l "ro-RO" "Romanian (Română)" 0x0418, 0x0818
