@@ -10609,7 +10609,7 @@ t MSG_286 "Mensifarkan pemacu: %0.1f%% selesai"
 
 ################################################################################
 l "nb-NO" "Norwegian (Norsk)" 0x0414
-v 1.0.20
+v 1.0.21
 b "en-US"
 
 # Main dialog
@@ -11081,6 +11081,13 @@ t MSG_285 "Den nedlastede programfil er signert av '%s'.\nDette er en signatur v
 	"indikere en form for skadelig aktivitet...\nEr du sikker på at du vil kjøre denne filen?"
 t MSG_286 "Skriver 0-er til stasjon: %0.1f%% ferdig"
 t MSG_287 "Oppdagelse av ikke-USB flyttbare stasjoner"
+t MSG_288 "Mangler utvidede rettigheter"
+t MSG_289 "Dette programmet kan bare kjøre med utvidede rettigheter"
+t MSG_290 "Fil indeksering"
+t MSG_291 "Versjons valg"
+t MSG_292 "Vennligst velg den versjonen av Windows du ønsker å installere:"
+t MSG_293 "Ikke støttet Windows versjon"
+t MSG_294 "Denne versjonen av Windows er ikke støttet av Rufus lengre." 
 
 ################################################################################
 l "fa-IR" "Persian (فارسی)" 0x0429
