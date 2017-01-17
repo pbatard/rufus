@@ -7805,7 +7805,7 @@ t MSG_287 "Deteksi selain perangkat USB yang dapat dilepas"
 
 ################################################################################
 l "it-IT" "Italian (Italiano)" 0x0410, 0x0810
-v 1.0.20
+v 1.0.21
 b "en-US"
 
 g IDD_DIALOG
@@ -8235,6 +8235,13 @@ t MSG_285 "L'eseguibile scaricato è firmato da '%s'.\nQuesta non è una firma r
 	"indicare qualche forma di attività malevola.\nSei sicuro di voler eseguire questo file?"
 t MSG_286 "Azzeramento disco: %0.1f%% completato"
 t MSG_287 "Rilevamento di unità rimuovibili non USB"
+t MSG_288 "Privilegi elevati non disponibili"
+t MSG_289 "Questa applicazione può essere eseguita solo con privilegi elevati"
+t MSG_290 "Indicizzazione file"
+t MSG_291 "Selezione versione"
+t MSG_292 "Seleziona la versione di Windows che vuoi installare:"
+t MSG_293 "Versione Windows non supportata"
+t MSG_294 "Questa versione di Windows non è più supportata da Rufus."
 
 ######################################################################
 l "ja-JP" "Japanese (日本語)" 0x0411
