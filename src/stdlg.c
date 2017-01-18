@@ -849,7 +849,7 @@ INT_PTR CALLBACK SelectionCallback(HWND hDlg, UINT message, WPARAM wParam, LPARA
 	static HBRUSH background_brush, separator_brush;
 	// To use the system message font
 	NONCLIENTMETRICS ncm;
-	RECT rect;
+	RECT rect, rect2;
 	HFONT hDlgFont;
 	HWND hCtrl;
 	HDC hDC;
@@ -857,8 +857,8 @@ INT_PTR CALLBACK SelectionCallback(HWND hDlg, UINT message, WPARAM wParam, LPARA
 	switch (message) {
 	case WM_INITDIALOG:
 		// Don't overflow our max radio button
-		if (nChoices > (IDC_SELECTION_CHOICEMAX - IDC_SELECTION_CHOICE1)) {
-			uprintf("WARNING: Too many options requested for Selection (%d vs %d)",
+		if (nChoices > (IDC_SELECTION_CHOICEMAX - IDC_SELECTION_CHOICE1 + 1)) {
+			uprintf("Warning: Too many options requested for Selection (%d vs %d)",
 				nChoices, IDC_SELECTION_CHOICEMAX - IDC_SELECTION_CHOICE1);
 			nChoices = IDC_SELECTION_CHOICEMAX - IDC_SELECTION_CHOICE1;
 		}
@@ -913,7 +913,8 @@ INT_PTR CALLBACK SelectionCallback(HWND hDlg, UINT message, WPARAM wParam, LPARA
 			ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + i), 0, dh, 0, 0, 1.0f);
 		if (nChoices > 2) {
 			GetWindowRect(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1), &rect);
-			dh += (nChoices - 1) * (rect.bottom - rect.top) - 5;
+			GetWindowRect(GetDlgItem(hDlg, IDC_SELECTION_CHOICE2), &rect2);
+			dh += (nChoices - 2) * (rect2.top - rect.top) + 5;
 		}
 		ResizeMoveCtrl(hDlg, hDlg, 0, 0, 0, dh, 1.0f);
 		ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, -1), 0, 0, 0, dh, 1.0f);	// IDC_STATIC = -1
