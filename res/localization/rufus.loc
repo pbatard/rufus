@@ -14386,7 +14386,7 @@ t MSG_287 "Detekcija ne-USB diskova"
 
 ################################################################################
 l "sk-SK" "Slovak (Slovensky)" 0x041B
-v 1.0.20
+v 1.0.21
 b "en-US"
 
 # Main dialog
@@ -14830,6 +14830,13 @@ t MSG_285 "Stiahnutý inštalátor podpísal '%s'.\nTento podpis nebol rozoznan�
 	"nejakú formu škodlivej aktivity...\nSte si istý, že chcete spustiť tento súbor?"
 t MSG_286 "Vymazávanie zariadenia: %0.1f%% dokončených"
 t MSG_287 "Zisťovanie nie-USB vymeniteľných zariadení" 	
+t MSG_288 "Chýbajúce oprávnenia"
+t MSG_289 "Tento program je možné spustiť len s právami správcu"
+t MSG_290 "Indexovanie súborov"
+t MSG_291 "Výber verzie"
+t MSG_292 "Vyberte verziu systému Windows, ktorú chcete nainštalovať:"
+t MSG_293 "Nepodporovaná veria systému Windows"
+t MSG_294 "Táto verzia systému Windows už nie je podporovaná programom Rufus." 
 
 ################################################################################
 l "sl-SI" "Slovenian (Slovenščina)" 0x0424
