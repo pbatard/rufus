@@ -17626,7 +17626,7 @@ t MSG_287 "Виявлення знімних не-USB носіїв"
 
 ################################################################################
 l "vi-VN" "Vietnamese (Tiếng Việt)" 0x042A
-v 1.0.20
+v 1.0.21
 b "en-US"
 
 # Main dialog
@@ -18005,7 +18005,7 @@ t MSG_219 "Sắp xếp NTFS: đã hoàn tất %d%%"
 # eg. "Formatting (UDF) - Estimated duration 3:21..."
 # NB: if "estimated duration" is too long, just use "estimated" or an abbreviation
 t MSG_220 "Đang định dạng (%s) - thời gian dự kiến %d:%02d..."
-t MSG_221 "Setting Label (This may take while)..."
+t MSG_221 "Đang đặt tên (Có thể mất một ít thời gian)..."
 # Parameter: the file system. eg. "Formatting (NTFS)..."
 t MSG_222 "Đang định dạng (%s)..."
 t MSG_223 "Sắp xếp NTFS (Kiểm tra đĩa)..."
@@ -18081,3 +18081,10 @@ t MSG_285 "Tập tin thực thi đã tải xuống được ký bởi '%s'.\nĐ�
 	"xác định là một dạng hoạt động nguy hiểm...\nBạn chắc muốn chạy tập tin này?"
 t MSG_286 "Quy ổ đĩa về 0: đã hoàn thành %0.1f%%"
 t MSG_287 "Phát hiện ổ đĩa tháo được không phải USB"
+t MSG_288 "Thiếu đặc quyền"
+t MSG_289 "Ứng dụng này chỉ có thể chạy với đặc quyền quản trị"
+t MSG_290 "Lập chỉ mục tập tin"
+t MSG_291 "Chọn phiên bản"
+t MSG_292 "Hãy chọn phiên bản Windows bạn muốn cài đặt:"
+t MSG_293 "Phiên bản Windows không được hỗ trợ"
+t MSG_294 "Phiên bản này của Windows không còn được Rufus hỗ trợ nữa."
