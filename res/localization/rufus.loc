@@ -4620,7 +4620,7 @@ t MSG_287 "Verwijderbare niet-USB drives gedetecteerd"
 
 ################################################################################
 l "fi-FI" "Finnish (Suomi)" 0x040B
-v 1.0.20
+v 1.0.21
 b "en-US"
 
 # Main dialog
@@ -5068,6 +5068,13 @@ t MSG_285 "Ladatun tiedoston on allekirjoittanut '%s'.\nEmme tunnista kyseistä 
 	"saattaa viitata haitalliseen toimintaan...\nHaluatko varmasti suorittaa tämän tiedoston?"
 t MSG_286 "Nollataan asemaa: %0.1f%% suoritettu"
 t MSG_287 "Ei-USB-liitäntäisten irroitettavien asemien tunnistus"
+t MSG_288 "Laajennetut käyttöoikeudet puuttuvat"
+t MSG_289 "Tämä sovellus vaatii laajennetut käyttöoikeudet toimiakseen"
+t MSG_290 "Tiedostojen indeksointi"
+t MSG_291 "Version valinta"
+t MSG_292 "Valitse Windows-versio, jonka haluat asentaa:"
+t MSG_293 "Tätä Windows-versiota ei tueta"
+t MSG_294 "Rufus ei enää tue tätä Windows-versiota."
 
 ################################################################################
 l "fr-FR" "French (Français)" 0x040c, 0x080c, 0x0c0c, 0x100c, 0x140c, 0x180c, 0x1c0c, 0x200c, 0x240c, 0x280c, 0x2c0c, 0x300c, 0x340c, 0x380c, 0xe40c
