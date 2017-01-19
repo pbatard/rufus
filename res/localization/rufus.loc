@@ -13055,7 +13055,7 @@ t MSG_294 "Esta versão do Windows já não é suportada por Rufus."
 
 ################################################################################
 l "ro-RO" "Romanian (Română)" 0x0418, 0x0818
-v 1.0.20
+v 1.0.21
 b "en-US"
 
 g IDD_DIALOG
@@ -13469,6 +13469,13 @@ t MSG_285 "Executabilul descărcat este semnat de către '%s'.\nAceasta nu este 
 	"indica o anumită formă de activitate dăunătoare...\nSunteți sigur că doriți să executați acest fișier?"
 t MSG_286 "Unitatea zero: %0.1f%% finisat"	
 t MSG_287 "Detectarea unităților mobile de bază non-USB"
+t MSG_288 "Lipsă privilegii ridicate"
+t MSG_289 "Această aplicație rulează numai cu privilegii ridicate"
+t MSG_290 "Indexare fișier"
+t MSG_291 "Selectare versiune"
+t MSG_292 "Selectați versiunea de Windows pentru instalare: "
+t MSG_293 "Versiune Windows neacceptată"
+t MSG_294 "Această versiune Windows nu mai este suportată de Rufus."
 
 ################################################################################
 l "ru-RU" "Russian (Русский)" 0x0419, 0x0819
