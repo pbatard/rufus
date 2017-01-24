@@ -2838,7 +2838,7 @@ t MSG_294 "Rufus 已不再支援此 Windows 版本。"
 
 ################################################################################
 l "hr-HR" "Croatian (Hrvatski)" 0x041a, 0x081a, 0x101a
-v 1.0.20
+v 1.0.21
 b "en-US"
 
 # Main dialog
@@ -3273,6 +3273,13 @@ t MSG_285 "Preuzeta aplikacija je potpisana od strane ‘%s’.\nOvo nije prepoz
 	"i može biti zlonamjeran...\nŽelite li svejedno pokrenuti program?"
 t MSG_286 "Čišćenje uređaja: %0.1f%% završeno"
 t MSG_287 "Prikazivanje ostalih uklonjivih medija"
+t MSG_288 "Potrebna administratorska ovlaštenja"
+t MSG_289 "Ovaj program radi samo s administratorskim ovlaštenjem"
+t MSG_290 "Indeksiranje datoteka"
+t MSG_291 "Odabir verzije"
+t MSG_292 "Molimo odaberite verziju Windowsa koju želite instalirati:"
+t MSG_293 "Nepodržana verzija Windowsa"
+t MSG_294 "Ova verzija Windowsa više nije podržana od strane Rufusa."
 
 ################################################################################
 l "cs-CZ" "Czech (Čeština)" 0x0405
