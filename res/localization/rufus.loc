@@ -14875,7 +14875,7 @@ t MSG_294 "Táto verzia systému Windows už nie je podporovaná programom Rufus
 
 ################################################################################
 l "sl-SI" "Slovenian (Slovenščina)" 0x0424
-v 1.0.20
+v 1.0.21
 b "en-US"
 
 # Main dialog
@@ -15315,6 +15315,13 @@ t MSG_285 "Oseba, ki je podpisala preneseno datoteko, je '%s'.\nTa podpis se ne 
 	"da je to zlonamerna datoteka, ki jo vam je nekdo podtaknil.\nAli ste prepričani, da jo želite zagnati?"
 t MSG_286 "Zapolnjujem nosilec z ničlami: %0.1f%%"
 t MSG_287 "Zaznava neodstranljivih nosilcev"
+t MSG_288 "Nimate dovolj pravic"
+t MSG_289 "Za uporabo te aplikacije potrebujete dodatne pravice."
+t MSG_290 "Indeksiranje diska"
+t MSG_291 "Izbira verzije"
+t MSG_292 "Izberite, katero verzijo operacijskega sistema Windows želite namestiti:"
+t MSG_293 "Operacijski sistem ni podprt"
+t MSG_294 "Rufus več ne podpira tega operacijskega sistema."
 
 ################################################################################
 l "es-ES" "Spanish (Español)" 0x040a, 0x080a, 0x0c0a, 0x100a, 0x140a, 0x180a, 0x1c0a, 0x200a, 0x240a, 0x280a, 0x2c0a, 0x300a, 0x340a, 0x380a, 0x3c0a, 0x400a, 0x440a, 0x480a, 0x4c0a, 0x500a, 0x540a, 0x580a
