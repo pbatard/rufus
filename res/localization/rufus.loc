@@ -15332,7 +15332,7 @@ t MSG_294 "Rufus več ne podpira tega operacijskega sistema."
 
 ################################################################################
 l "es-ES" "Spanish (Español)" 0x040a, 0x080a, 0x0c0a, 0x100a, 0x140a, 0x180a, 0x1c0a, 0x200a, 0x240a, 0x280a, 0x2c0a, 0x300a, 0x340a, 0x380a, 0x3c0a, 0x400a, 0x440a, 0x480a, 0x4c0a, 0x500a, 0x540a, 0x580a
-v 1.0.20
+v 1.0.21
 b "en-US"
 
 # Main dialog
@@ -15706,7 +15706,7 @@ t MSG_207 "Etiqueta del volumen"
 # Same message, once for singular and plural ("1 device found", "2 devices found")
 t MSG_208 "%d dispositivo encontrado"
 t MSG_209 "%d dispositivos encontrados"
-t MSG_210 "LISTO"
+t MSG_210 "PREPARADO"
 t MSG_211 "CANCELADO"
 t MSG_212 "FALLO al realizar la operación"
 # Used when a new update has been downloaded and launched
@@ -15800,6 +15800,13 @@ t MSG_285 "El ejecutable descargado está firmado por '%s'.\nNo reconocemos este
 	"indicar alguna forma de actividad maliciosa...\n¿Está seguro de que quieres ejecutar este fichero?"
 t MSG_286 "Borrando a ceros la unidad: %0.1f%% completado"
 t MSG_287 "Detección de unidades extraibles no USB"
+t MSG_288 "Faltan elevación de permisos"
+t MSG_289 "Esta aplicación sólo puede funcionar con elevación de permisos "
+t MSG_290 "Indexando fichero"
+t MSG_291 "Selección de versión"
+t MSG_292 "Por favor seleccione la versión de Windows que desea instalar:"
+t MSG_293 "Versión de Windows no soportada"
+t MSG_294 "Esta versión de Windows ya no está soportada por Rufus."
 
 ################################################################################
 l "sv-SE" "Swedish (Svenska)" 0x041d, 0x081d
