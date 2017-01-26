@@ -4181,7 +4181,7 @@ t MSG_285 "Den hentede fil er signeret af '%s'.\nDet er ikke en signatur vi genk
 
 ################################################################################
 l "nl-NL" "Dutch (Nederlands)" 0x0413, 0x0813
-v 1.0.20
+v 1.0.21
 b "en-US"
 
 # Main dialog
@@ -4638,6 +4638,13 @@ t MSG_285 "Het gedownloade programmabestand is ondertekend door '%s'.\nDit is ge
 	"en zou dus kunnen betekenen dat iemand malware in dit bestand heeft verborgen...\nWeet u zeker dat u dit bestand wilt uitvoeren?"
 t MSG_286 "Nullen schrijven : %0.1f%% voltooid"
 t MSG_287 "Verwijderbare niet-USB drives gedetecteerd"
+t MSG_288 "Ontbrekende verhoogde rechten"
+t MSG_289 "Dit programma kan alleen starten met verhoogde rechten"
+t MSG_290 "Indexering van bestanden"
+t MSG_291 "Versie selectie"
+t MSG_292 "Selecteer a.u.b. de windows versie die u wilt installeren:"
+t MSG_293 "Niet ondersteunde Windows versie"
+t MSG_294 "Deze Windows versie wordt niet langer ondersteund door Rufus."
 
 ################################################################################
 l "fi-FI" "Finnish (Suomi)" 0x040B
