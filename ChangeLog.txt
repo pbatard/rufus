@@ -1,4 +1,4 @@
-o Version 2.12 (2017.01.??)
+o Version 2.12 (2017.01.27)
     Add Hebrew translation, courtesy of NSBuilder and פלוני אלמוני
     Add a cheat mode (Alt-O) to create an ISO from the first optical media found
     Enable target system selection for Windows To Go
