@@ -13980,7 +13980,7 @@ t MSG_294 "Эта версия Windows больше не поддерживае�
 
 ################################################################################
 l "sr-SP" "Serbian (Srpski)" 0x241a, 0x081a, 0x181a, 0x2c1a, 0x701a, 0x7c1a
-v 1.0.20
+v 1.0.21
 b "en-US"
 
 # Main dialog
@@ -14460,6 +14460,13 @@ t MSG_285 "Preuzeta izvršna datoteka je potpisana od strane '%s'.\nOvo nije pot
 	"ukazivati na neki oblik zlonamjerne aktivnosti...\nDa li ste sigurni da želite pokrenuti ovaj program?"
 t MSG_286 "Anuliranje uređaja: %0.1f%% završeno"
 t MSG_287 "Detekcija ne-USB diskova"
+t MSG_288 "Nedovoljno privilegija"
+t MSG_289 "Aplikacija može biti pokrenuta samo uz administratorske privilegije"
+t MSG_290 "Indeksiranje datoteka"
+t MSG_291 "Odabir verzije"
+t MSG_292 "Odaberite verziju Windows-a koju želite da instalirate:"
+t MSG_293 "Nepodržana verzija Windows-a"
+t MSG_294 "Rufus više ne podržava ovu verziju Windows-a."
 
 ################################################################################
 l "sk-SK" "Slovak (Slovensky)" 0x041B
