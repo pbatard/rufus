@@ -15807,7 +15807,7 @@ t MSG_285 "El ejecutable descargado está firmado por '%s'.\nNo reconocemos este
 	"indicar alguna forma de actividad maliciosa...\n¿Está seguro de que quieres ejecutar este fichero?"
 t MSG_286 "Borrando a ceros la unidad: %0.1f%% completado"
 t MSG_287 "Detección de unidades extraibles no USB"
-t MSG_288 "Faltan elevación de permisos"
+t MSG_288 "Falta elevación de permisos"
 t MSG_289 "Esta aplicación sólo puede funcionar con elevación de permisos "
 t MSG_290 "Indexando fichero"
 t MSG_291 "Selección de versión"
