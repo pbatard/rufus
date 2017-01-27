@@ -11700,7 +11700,7 @@ t MSG_294 "Rufus دیگر این نسخه از ویندوز را پشتیبان�
 
 ################################################################################
 l "pl-PL" "Polish (Polski)" 0x0415
-v 1.0.20
+v 1.0.21
 b "en-US"
 # my info: 6.9.2015,22:39
 
@@ -12174,6 +12174,13 @@ t MSG_285 "Pobrany plik wykonywalny jest podpisany przez '%s'.\nTo nie jest rozp
 	"wskazywać na pewne formy złośliwych zachowań...\nCzy na pewno chcesz uruchomić ten plik?"
 t MSG_286 "Zerowanie dysku: ukończono %0.1f%%"
 t MSG_287 "Wykrywanie dysków wymiennych nie-USB"
+t MSG_288 "Brakujące uprawnienia administratora"
+t MSG_289 "Ta aplikacja może działać wyłącznie z uprawnieniami administratora"
+t MSG_290 "Indeksowanie plików"
+t MSG_291 "Wybór wersji"
+t MSG_292 "Proszę wybrać wersję Windowsa którą chcesz zainstalować:"
+t MSG_293 "Niewspierana wersja Windowsa"
+t MSG_294 "Ta wersja Windowsa nie jest już wspierana przez Rufusa."
 
 ################################################################################
 l "pt-BR" "Portuguese Brazilian (Português do Brasil)" 0x0416
