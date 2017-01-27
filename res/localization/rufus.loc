@@ -9235,7 +9235,7 @@ t MSG_287 "비 이동식 USB 드라이브 검출"
 
 ################################################################################
 l "lv-LV" "Latvian (Latviešu)" 0x0426
-v 1.0.20
+v 1.0.21
 b "en-US"
 
 # Main dialog
@@ -9708,6 +9708,13 @@ t MSG_285 "Ielādētais izpildfails parakstīts kā '%s'.\nTas ir neatpazīts pa
 	"var radīt aizdomīgas aktivitātes...\nVai tiešām vēlaties izpildīt šo failu?"
 t MSG_286 "Nulles disks: %0.1f%% paveikts"
 t MSG_287 "neUSB disku noteikšana"
+t MSG_288 "Nepietiekamas lietotāja tiesības"
+t MSG_289 "Šai aplikācijai nepieciešamas speciālas tiesības"
+t MSG_290 "Failu indeksācija"
+t MSG_291 "Versijas izvēle"
+t MSG_292 "Izvēlieties Windows versiju, kuru vēlaties instalēt:"
+t MSG_293 "Neatbalstāma Windows versija"
+t MSG_294 "Šo Windows versiju Rufus vairs neatbalsta."
 
 ################################################################################
 l "lt-LT" "Lithuanian (Lietuvių)" 0x0427
