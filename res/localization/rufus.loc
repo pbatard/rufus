@@ -9725,7 +9725,7 @@ t MSG_294 "Šo Windows versiju Rufus vairs neatbalsta."
 
 ################################################################################
 l "lt-LT" "Lithuanian (Lietuvių)" 0x0427
-v 1.0.20
+v 1.0.21
 b "en-US"
 
 # Main dialog
@@ -10185,6 +10185,13 @@ t MSG_285 "Atsiųstą vykdomąjį failą pasirašė '%s'.\nŠio parašo mes neat
 	"būti tam tikros kenkėjiškos veiklos požymis...\nAr jūs tikrai norite vykdyti šį failą?"
 t MSG_286 "Nulinamas diskas: %0.1f%% baigta"
 t MSG_287 "Ne USB keičiamų diskų aptikimas"
+t MSG_288 "Reikia aukštesnių teisių"
+t MSG_289 "Šiai programai vykdyti būtinos aukštesnės teisės"
+t MSG_290 "Failų indeksavimas"
+t MSG_291 "Versijos parinktis"
+t MSG_292 "Prašome pasirinkti Windows versiją, kurią norite įdiegti:"
+t MSG_293 "Nepalaikoma Windows versija"
+t MSG_294 "Šios Windows versijos Rufus nebepalaiko."
 
 ################################################################################
 l "ms-MY" "Malay (Bahasa Malaysia)" 0x043e, 0x083e
