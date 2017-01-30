@@ -2722,13 +2722,16 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	case WM_CLIENTSHUTDOWN:
 	case WM_QUERYENDSESSION:
 	case WM_ENDSESSION:
-		// TODO: Do we want to use ShutdownBlockReasonCreate() in Vista and later to stop
-		// forced shutdown? See https://msdn.microsoft.com/en-us/library/ms700677.aspx
 		if (format_op_in_progress) {
-			// WM_QUERYENDSESSION uses this value to prevent shutdown
 			return (INT_PTR)TRUE;
 		}
-		SendMessage(hDlg, WM_COMMAND, (WPARAM)IDCANCEL, (LPARAM)0);
+		if (message == WM_CLOSE) {
+			// We must use PostQuitMessage() on VM_CLOSE, to prevent notification sound...
+			PostQuitMessage(0);
+		} else {
+			// ...but we must simulate Cancel on shutdown requests, else the app freezes.
+			SendMessage(hDlg, WM_COMMAND, (WPARAM)IDCANCEL, (LPARAM)0);
+		}
 		break;
 
 	case UM_PROGRESS_INIT:
