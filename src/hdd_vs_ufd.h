@@ -106,6 +106,7 @@ static str_score_t str_adjust[] = {
 static vid_score_t vid_score[] = {
 	{ 0x0011, -5 },		// Kingston
 	{ 0x03f0, -5 },		// HP
+	{ 0x0409, -10 },	// NEC/Toshiba
 	{ 0x0411, 5 },		// Buffalo
 	{ 0x0420, -5 },		// Chipsbank
 	{ 0x046d, -5 },		// Logitech
