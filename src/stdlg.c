@@ -1751,8 +1751,16 @@ HWND MyCreateDialog(HINSTANCE hInstance, int Dialog_ID, HWND hWndParent, DLGPROC
 
 INT_PTR MyDialogBox(HINSTANCE hInstance, int Dialog_ID, HWND hWndParent, DLGPROC lpDialogFunc)
 {
+	INT_PTR ret;
 	LPCDLGTEMPLATE rcTemplate = GetDialogTemplate(Dialog_ID);
-	INT_PTR ret = DialogBoxIndirect(hMainInstance, rcTemplate, hMainDialog, lpDialogFunc);
+
+	// A DialogBox doesn't handle reduce/restore so it won't pass restore messages to the
+	// main dialog if the main dialog was minimized. This can result in situations where the
+	// user cannot restore the main window if a new dialog prompt was triggered while the
+	// main dialog was reduced => Ensure the main dialog is visible before we display anything.
+	ShowWindow(hMainDialog, SW_NORMAL);
+
+	ret = DialogBoxIndirect(hMainInstance, rcTemplate, hWndParent, lpDialogFunc);
 	safe_free(rcTemplate);
 	return ret;
 }
