@@ -126,7 +126,7 @@ static HANDLE GetHandle(char* Path, BOOL bWriteAccess, BOOL bLockDrive)
 	if (Path == NULL)
 		goto out;
 	hDrive = CreateFileA(Path, GENERIC_READ|(bWriteAccess?GENERIC_WRITE:0),
-		FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+		FILE_SHARE_READ|(bWriteAccess?FILE_SHARE_WRITE:0), NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (hDrive == INVALID_HANDLE_VALUE) {
 		uprintf("Could not open drive %s: %s\n", Path, WindowsErrorString());
 		goto out;
@@ -1286,9 +1286,9 @@ BOOL InitializeDisk(HANDLE hDrive)
 		uprintf("Could not refresh drive layout: %s\n", WindowsErrorString());
 		safe_closehandle(hDrive);
 		return FALSE;
-}
+	}
 
-return TRUE;
+	return TRUE;
 }
 
 /*

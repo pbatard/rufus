@@ -1558,7 +1558,7 @@ static BOOL WriteDrive(HANDLE hPhysicalDrive, HANDLE hSourceImage)
 				if (s)
 					uprintf("write error: Wrote %d bytes, expected %d bytes", wSize, rSize);
 				else
-					uprintf("write error: %s", WindowsErrorString());
+					uprintf("write error at sector %d: %s", wb / SelectedDrive.SectorSize, WindowsErrorString());
 				if (i < WRITE_RETRIES - 1) {
 					li.QuadPart = wb;
 					uprintf("  RETRYING...\n");
@@ -1570,6 +1570,7 @@ static BOOL WriteDrive(HANDLE hPhysicalDrive, HANDLE hSourceImage)
 					FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_WRITE_FAULT;
 					goto out;
 				}
+				Sleep(200);
 			}
 			if (i >= WRITE_RETRIES) goto out;
 		}
@@ -1714,7 +1715,7 @@ DWORD WINAPI FormatThread(void* param)
 	// Note, Microsoft's way of cleaning partitions (IOCTL_DISK_CREATE_DISK, which is what we apply
 	// in InitializeDisk) is *NOT ENOUGH* to reset a disk and can render it inoperable for partitioning
 	// or formatting under Windows. See https://github.com/pbatard/rufus/issues/759 for details.
-	if (nWindowsVersion > WINDOWS_XP) {
+	if ((nWindowsVersion > WINDOWS_XP) && ((!IsChecked(IDC_BOOT)) || (bt != BT_IMG)))  {
 		if ((!ClearMBRGPT(hPhysicalDrive, SelectedDrive.DiskSize, SelectedDrive.SectorSize, use_large_fat32)) ||
 			(!InitializeDisk(hPhysicalDrive))) {
 			uprintf("Could not reset partitions\n");
@@ -2151,6 +2152,7 @@ DWORD WINAPI SaveImageThread(void* param)
 				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_WRITE_FAULT;
 				goto out;
 			}
+			Sleep(200);
 		}
 		if (i >= WRITE_RETRIES) goto out;
 	}

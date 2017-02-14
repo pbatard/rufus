@@ -3154,7 +3154,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			uprintf("Could not get AutoMount status");
 			automount = TRUE;	// So that we don't try to change its status on exit
 		} else if (!automount) {
-			uprintf("AutoMount was detected as disabled - temporary re-enabling it");
+			uprintf("AutoMount was detected as disabled - temporarily re-enabling it");
 			if (!SetAutoMount(TRUE))
 				uprintf("Failed to enable AutoMount");
 		}
