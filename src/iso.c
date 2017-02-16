@@ -350,7 +350,7 @@ static LPFILETIME __inline to_filetime(time_t t)
 static void __inline set_directory_timestamp(char* path, LPFILETIME creation, LPFILETIME last_access, LPFILETIME modify)
 {
 	HANDLE dir_handle = CreateFileU(path, GENERIC_READ | GENERIC_WRITE,
-		FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
+		FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
 	if ((dir_handle == INVALID_HANDLE_VALUE) || (!SetFileTime(dir_handle, creation, last_access, modify)))
 		uprintf("  Could not set timestamp for directory '%s': %s", path, WindowsErrorString());
 	safe_closehandle(dir_handle);
@@ -427,7 +427,7 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 			if (!is_identical)
 				uprintf("  File name sanitized to '%s'", psz_sanpath);
 			file_handle = CreateFileU(psz_sanpath, GENERIC_READ | GENERIC_WRITE,
-				FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+				FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 			if (file_handle == INVALID_HANDLE_VALUE) {
 				err = GetLastError();
 				uprintf("  Unable to create file: %s", WindowsErrorString());
@@ -573,7 +573,7 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 				safe_free(p_statbuf->rr.psz_symlink);
 			}
 			file_handle = CreateFileU(psz_sanpath, GENERIC_READ | GENERIC_WRITE,
-				FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+				FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 			if (file_handle == INVALID_HANDLE_VALUE) {
 				err = GetLastError();
 				uprintf("  Unable to create file: %s", WindowsErrorString());
@@ -936,7 +936,7 @@ int64_t ExtractISOFile(const char* iso, const char* iso_file, const char* dest_f
 	HANDLE file_handle = INVALID_HANDLE_VALUE;
 
 	file_handle = CreateFileU(dest_file, GENERIC_READ | GENERIC_WRITE,
-		FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, attributes, NULL);
+		FILE_SHARE_READ, NULL, CREATE_ALWAYS, attributes, NULL);
 	if (file_handle == INVALID_HANDLE_VALUE) {
 		uprintf("  Unable to create file %s: %s\n", dest_file, WindowsErrorString());
 		goto out;

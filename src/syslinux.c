@@ -132,8 +132,12 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int fs_type)
 	if (sectbuf == NULL)
 		goto out;
 
-	/* First, reopen the volume (we already have a lock) */
-	d_handle = GetLogicalHandle(drive_index, TRUE, FALSE);
+	/*
+	 * First, reopen the volume (we already have a lock). Also, for some
+	 * weird reason.the Syslinux install process *MUST* have FILE_SHARE_WRITE
+	 * on the volume, or else creating 'ldlinux.sys' will fail...
+	 */
+	d_handle = GetLogicalHandle(drive_index, TRUE, FALSE, TRUE);
 	if ((d_handle == INVALID_HANDLE_VALUE) || (d_handle == NULL)) {
 		uprintf("Could open volume for Syslinux installation");
 		goto out;
@@ -198,7 +202,7 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int fs_type)
 			  FILE_ATTRIBUTE_HIDDEN, NULL);
 
 	if (f_handle == INVALID_HANDLE_VALUE) {
-		uprintf("Unable to create '%s'", &path[3]);
+		uprintf("Unable to create '%s': %s", &path[3], WindowsErrorString());
 		goto out;
 	}
 
@@ -386,7 +390,7 @@ out:
 	safe_free(syslinux_ldlinux[0]);
 	safe_free(syslinux_ldlinux[1]);
 	safe_free(sectors);
-	safe_closehandle(d_handle);
+	safe_unlockclose(d_handle);
 	safe_closehandle(f_handle);
 	return r;
 }

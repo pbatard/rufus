@@ -413,7 +413,7 @@ BOOL WimExtractFile_API(const char* image, int index, const char* src, const cha
 			uprintf("  Could not access WIM info: %s", WindowsErrorString());
 			goto out;
 		}
-		hFile = CreateFileW(wdst, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE,
+		hFile = CreateFileW(wdst, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ,
 			NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 		if ((hFile == INVALID_HANDLE_VALUE) || (!WriteFile(hFile, wim_info, dw, &dw, NULL))) {
 			uprintf("  Could not extract file: %s", WindowsErrorString());

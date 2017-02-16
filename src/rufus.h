@@ -50,7 +50,7 @@
 #define POP_DIRECTIONAL_FORMATTING  "‬"
 #define RIGHT_TO_LEFT_OVERRIDE      "‮"
 #define DRIVE_ACCESS_TIMEOUT        15000		// How long we should retry drive access (in ms)
-#define DRIVE_ACCESS_RETRIES        60			// How many times we should retry
+#define DRIVE_ACCESS_RETRIES        150			// How many times we should retry
 #define DRIVE_INDEX_MIN             0x00000080
 #define DRIVE_INDEX_MAX             0x000000C0
 #define MIN_DRIVE_SIZE              8			// Minimum size a drive must have, to be formattable (in MB)

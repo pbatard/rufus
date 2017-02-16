@@ -414,7 +414,7 @@ static BOOL FormatFAT32(DWORD DriveIndex)
 	VolumeId = GetVolumeID();
 
 	// Open the drive and lock it
-	hLogicalVolume = GetLogicalHandle(DriveIndex, TRUE, TRUE);
+	hLogicalVolume = GetLogicalHandle(DriveIndex, TRUE, TRUE, FALSE);
 	if (IS_ERROR(FormatStatus)) goto out;
 	if ((hLogicalVolume == INVALID_HANDLE_VALUE) || (hLogicalVolume == NULL))
 		die("Invalid logical volume handle\n", ERROR_INVALID_HANDLE);
@@ -1198,7 +1198,7 @@ static BOOL SetupWinPE(char drive_letter)
 	}
 
 	// At this stage we only handle \i386
-	handle = CreateFileA(dst, GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ|FILE_SHARE_WRITE,
+	handle = CreateFileA(dst, GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ,
 		NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (handle == INVALID_HANDLE_VALUE) {
 		uprintf("Could not open %s for patching: %s\n", dst, WindowsErrorString());
@@ -1680,7 +1680,7 @@ DWORD WINAPI FormatThread(void* param)
 	uprintf("Will use '%c:' as volume mountpoint\n", drive_name[0]);
 
 	// ...but we need a lock to the logical drive to be able to write anything to it
-	hLogicalVolume = GetLogicalHandle(DriveIndex, FALSE, TRUE);
+	hLogicalVolume = GetLogicalHandle(DriveIndex, FALSE, TRUE, FALSE);
 	if (hLogicalVolume == INVALID_HANDLE_VALUE) {
 		uprintf("Could not lock volume\n");
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_OPEN_FAILED;
@@ -1917,11 +1917,12 @@ DWORD WINAPI FormatThread(void* param)
 				(!HAS_WINDOWS(img_report) || !allow_dual_uefi_bios)) ) {
 			if (!InstallSyslinux(DriveIndex, drive_name[0], fs)) {
 				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_INSTALL_FAILURE;
+				goto out;
 			}
 		} else {
 			// We still have a lock, which we need to modify the volume boot record
 			// => no need to reacquire the lock...
-			hLogicalVolume = GetLogicalHandle(DriveIndex, TRUE, FALSE);
+			hLogicalVolume = GetLogicalHandle(DriveIndex, TRUE, FALSE, FALSE);
 			if ((hLogicalVolume == INVALID_HANDLE_VALUE) || (hLogicalVolume == NULL)) {
 				uprintf("Could not re-mount volume for partition boot record access\n");
 				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_OPEN_FAILED;
