@@ -89,7 +89,7 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int fs_type)
 	HANDLE f_handle = INVALID_HANDLE_VALUE;
 	HANDLE d_handle = INVALID_HANDLE_VALUE;
 	DWORD bytes_read, bytes_written, err;
-	S_NTFSSECT_VOLINFO vol_info;
+	S_NTFSSECT_VOLINFO vol_info = { 0 };
 	LARGE_INTEGER vcn, lba, len;
 	S_NTFSSECT_EXTENT extent;
 	BOOL r = FALSE;
