@@ -151,6 +151,13 @@ static __inline BOOL IsRemovable(const char* buffer)
 	}
 }
 
+static __inline void ToUpper(char* str)
+{
+	int i;
+	for (i = 0; i < safe_strlen(str); i++)
+		str[i] = toupper(str[i]);
+}
+
 BOOL GetOpticalMedia(IMG_SAVE* img_save)
 {
 	static char str[MAX_PATH];
@@ -349,6 +356,7 @@ BOOL GetDevices(DWORD devnum)
 							s = StrArrayAdd(&dev_if_path, devint_detail_data->DevicePath, TRUE);
 							uuprintf("  Hub[%d] = '%s'", s, devint_detail_data->DevicePath);
 							if ((s>= 0) && (CM_Get_Device_IDA(device_inst, device_id, MAX_PATH, 0) == CR_SUCCESS)) {
+								ToUpper(device_id);
 								if ((k = htab_hash(device_id, &htab_devid)) != 0) {
 									htab_devid.table[k].data = (void*)(uintptr_t)s;
 								}
@@ -356,6 +364,7 @@ BOOL GetDevices(DWORD devnum)
 								while (CM_Get_Sibling(&device_inst, device_inst, 0) == CR_SUCCESS) {
 									device_id[0] = 0;
 									if (CM_Get_Device_IDA(device_inst, device_id, MAX_PATH, 0) == CR_SUCCESS) {
+										ToUpper(device_id);
 										if ((k = htab_hash(device_id, &htab_devid)) != 0) {
 											htab_devid.table[k].data = (void*)(uintptr_t)s;
 										}
@@ -529,6 +538,7 @@ BOOL GetDevices(DWORD devnum)
 				// If we're not dealing with the USBSTOR part of our list, then this is an UASP device
 				props.is_UASP = ((((uintptr_t)device_id)+2) >= ((uintptr_t)devid_list)+list_start[uasp_start]);
 				// Now get the properties of the device, and its Device ID, which we need to populate the properties
+				ToUpper(device_id);
 				j = htab_hash(device_id, &htab_devid);
 				uuprintf("  Matched with ID[%03d]: %s", j, device_id);
 
@@ -558,6 +568,7 @@ BOOL GetDevices(DWORD devnum)
 					&& (CM_Get_Device_IDA(grandparent_inst, str, MAX_PATH, 0) == CR_SUCCESS) ) {
 					device_id = str;
 					method_str = "[GP]";
+					ToUpper(device_id);
 					j = htab_hash(device_id, &htab_devid);
 					uuprintf("  Matched with (GP) ID[%03d]: %s", j, device_id);
 				}
