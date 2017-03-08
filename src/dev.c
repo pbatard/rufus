@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Device detection and enumeration
- * Copyright © 2014-2016 Pete Batard <pete@akeo.ie>
+ * Copyright © 2014-2017 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -153,7 +153,7 @@ static __inline BOOL IsRemovable(const char* buffer)
 
 static __inline void ToUpper(char* str)
 {
-	int i;
+	size_t i;
 	for (i = 0; i < safe_strlen(str); i++)
 		str[i] = toupper(str[i]);
 }
@@ -241,7 +241,7 @@ BOOL GetOpticalMedia(IMG_SAVE* img_save)
 				ReadFile(hDrive, buffer, 2048, &size, NULL) && (size == 2048)) {
 				memcpy(label, &buffer[0x28], sizeof(label) - 1);
 				label[sizeof(label) - 1] = 0;
-				for (k = strlen(label) - 1; (k >= 0) && (label[k] == 0x20); k--)
+				for (k = (int)strlen(label) - 1; (k >= 0) && (label[k] == 0x20); k--)
 					label[k] = 0;
 				img_save->Label = label;
 			}
