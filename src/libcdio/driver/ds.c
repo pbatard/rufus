@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2005, 2008, 2011 Rocky Bernstein <rocky@gnu.org>
+  Copyright (C) 2005, 2008, 2011, 2016 Rocky Bernstein <rocky@gnu.org>
   Copyright (C) 2000 Herbert Valerio Riedel <hvr@gnu.org>
 
   This program is free software: you can redistribute it and/or modify
@@ -32,8 +32,6 @@
 #include <cdio/util.h>
 #include <cdio/types.h>
 #include "cdio_assert.h"
-
-// static const char _rcsid[] = "$Id: ds.c,v 1.4 2008/04/22 15:29:12 karl Exp $";
 
 struct _CdioList
 {
@@ -87,7 +85,7 @@ _cdio_list_prepend (CdioList_t *p_list, void *p_data)
   cdio_assert (p_list != NULL);
 
   p_new_node = calloc (1, sizeof (CdioListNode_t));
-  
+
   p_new_node->list = p_list;
   p_new_node->next = p_list->begin;
   p_new_node->data = p_data;
@@ -111,7 +109,7 @@ _cdio_list_append (CdioList_t *p_list, void *p_data)
   else
     {
       CdioListNode_t *p_new_node = calloc (1, sizeof (CdioListNode_t));
-      
+
       p_new_node->list = p_list;
       p_new_node->next = NULL;
       p_new_node->data = p_data;
@@ -123,15 +121,15 @@ _cdio_list_append (CdioList_t *p_list, void *p_data)
     }
 }
 
-void 
-_cdio_list_foreach (CdioList_t *p_list, _cdio_list_iterfunc_t func, 
+void
+_cdio_list_foreach (CdioList_t *p_list, _cdio_list_iterfunc_t func,
                     void *p_user_data)
 {
   CdioListNode_t *node;
 
   cdio_assert (p_list != NULL);
   cdio_assert (func != 0);
-  
+
   for (node = _cdio_list_begin (p_list);
        node != NULL;
        node = _cdio_list_node_next (node))
@@ -139,14 +137,14 @@ _cdio_list_foreach (CdioList_t *p_list, _cdio_list_iterfunc_t func,
 }
 
 CdioListNode_t *
-_cdio_list_find (CdioList_t *p_list, _cdio_list_iterfunc_t cmp_func, 
+_cdio_list_find (CdioList_t *p_list, _cdio_list_iterfunc_t cmp_func,
                  void *p_user_data)
 {
   CdioListNode_t *p_node;
 
   cdio_assert (p_list != NULL);
   cdio_assert (cmp_func != 0);
-  
+
   for (p_node = _cdio_list_begin (p_list);
        p_node != NULL;
        p_node = _cdio_list_node_next (p_node))
@@ -181,14 +179,14 @@ _cdio_list_node_next (CdioListNode_t *p_node)
   return NULL;
 }
 
-void 
+void
 _cdio_list_node_free (CdioListNode_t *p_node, int free_data)
 {
   CdioList_t *p_list;
   CdioListNode_t *prev_node;
 
   cdio_assert (p_node != NULL);
-  
+
   p_list = p_node->list;
 
   cdio_assert (_cdio_list_length (p_list) > 0);
@@ -243,13 +241,11 @@ _cdio_list_node_data (CdioListNode_t *p_node)
 
 /* eof */
 
-
-
-/* 
+
+/*
  * Local variables:
  *  c-file-style: "gnu"
  *  tab-width: 8
  *  indent-tabs-mode: nil
  * End:
  */
-

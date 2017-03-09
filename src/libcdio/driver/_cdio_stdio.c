@@ -31,7 +31,7 @@
 #include <string.h>
 #endif
 #ifdef HAVE_UNISTD_H
-#include <unistd.h> 
+#include <unistd.h>
 #endif
 #ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
@@ -88,8 +88,6 @@ static inline int _stati64_utf8(const char *path, struct _stati64 *buffer) {
 #define _STRINGIFY(a) #a
 #define STRINGIFY(a) _STRINGIFY(a)
 
-// static const char _rcsid[] = "$Id: _cdio_stdio.c,v 1.6 2008/04/22 15:29:11 karl Exp $";
-
 #define CDIO_STDIO_BUFSIZE (128*1024)
 
 typedef struct {
@@ -100,7 +98,7 @@ typedef struct {
 } _UserData;
 
 static int
-_stdio_open (void *user_data) 
+_stdio_open (void *user_data)
 {
   _UserData *const ud = user_data;
 
@@ -120,7 +118,7 @@ _stdio_close(void *user_data)
 
   if (fclose (ud->fd))
     cdio_error ("fclose (): %s", strerror (errno));
- 
+
   ud->fd = NULL;
 
   free (ud->fd_buf);
@@ -138,14 +136,14 @@ _stdio_free(void *user_data)
     free(ud->pathname);
 
   if (ud->fd) /* should be NULL anyway... */
-    _stdio_close(user_data); 
+    _stdio_close(user_data);
 
   free(ud);
 }
 
-/*! 
+/*!
   Like fseek/fseeko(3) and in fact may be the same.
-  
+
   This  function sets the file position indicator for the stream
   pointed to by stream.  The new position, measured in bytes, is obtained
   by  adding offset bytes to the position specified by whence.  If whence
@@ -154,12 +152,12 @@ _stdio_free(void *user_data)
   respectively.  A successful call to the fseek function clears the end-
   of-file indicator for the stream and undoes any effects of the
   ungetc(3) function on the same stream.
-  
+
   @return upon successful completion, DRIVER_OP_SUCCESS, else,
   DRIVER_OP_ERROR is returned and the global variable errno is set to
   indicate the error.
 */
-static int 
+static int
 _stdio_seek(void *p_user_data, off_t i_offset, int whence)
 {
   _UserData *const ud = p_user_data;
@@ -190,18 +188,18 @@ _stdio_stat(void *p_user_data)
 
 /*!
   Like fread(3) and in fact is about the same.
-  
+
   DESCRIPTION:
   The function fread reads nmemb elements of data, each size bytes long,
   from the stream pointed to by stream, storing them at the location
   given by ptr.
-  
+
   RETURN VALUE:
   return the number of items successfully read or written (i.e.,
   not the number of characters).  If an error occurs, or the
   end-of-file is reached, the return value is a short item count
   (or zero).
-  
+
   We do not distinguish between end-of-file and error, and callers
   must use feof(3) and ferror(3) to determine which occurred.
   */
@@ -258,9 +256,9 @@ cdio_stdio_new(const char pathname[])
   if (pathdup == NULL)
     return NULL;
 
-  if (CDIO_STAT_CALL (pathdup, &statbuf) == -1) 
+  if (CDIO_STAT_CALL (pathdup, &statbuf) == -1)
     {
-      cdio_warn ("could not retrieve file info for `%s': %s", 
+      cdio_warn ("could not retrieve file info for `%s': %s",
                  pathdup, strerror (errno));
       cdio_free(pathdup);
       return NULL;
@@ -283,9 +281,8 @@ cdio_stdio_new(const char pathname[])
   return new_obj;
 }
 
-
-
-/* 
+
+/*
  * Local variables:
  *  c-file-style: "gnu"
  *  tab-width: 8

@@ -168,8 +168,27 @@ get_rock_ridge_filename(iso9660_dir_t * p_iso9660_dir,
 
     while (len > 1){ /* There may be one byte for padding somewhere */
       rr = (iso_extension_record_t *) chr;
-      if (rr->len == 0) goto out; /* Something got screwed up here */
       sig = *chr+(*(chr+1) << 8);
+      switch(sig){
+      case SIG('S','P'):
+      case SIG('C','E'):
+      case SIG('E','R'):
+      case SIG('R','R'):
+      case SIG('P','X'):
+      case SIG('P','N'):
+      case SIG('S','L'):
+      case SIG('N','M'):
+      case SIG('C','L'):
+      case SIG('P','L'):
+      case SIG('T','F'):
+      case SIG('Z','F'):
+	break;
+      default:
+	 /* Something got screwed up here */
+	goto out;
+      }
+
+      if (rr->len == 0) goto out; /* Something got screwed up here */
       chr += rr->len;
       len -= rr->len;
 

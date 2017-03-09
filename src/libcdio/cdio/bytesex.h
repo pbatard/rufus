@@ -1,6 +1,6 @@
 /*
     Copyright (C) 2000, 2004 Herbert Valerio Riedel <hvr@gnu.org>
-    Copyright (C) 2005, 2008, 2012 Rocky Bernstein <rocky@gnu.org>
+    Copyright (C) 2005, 2008, 2012, 2015 Rocky Bernstein <rocky@gnu.org>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/** \file bytesex.h 
+/** \file bytesex.h
  *  \brief  Generic Byte-swapping routines.
  *
  *   Note: this header will is slated to get removed and libcdio will
@@ -168,7 +168,7 @@ to_723(uint16_t i)
 }
 
 /** Convert from ISO 9660 7.2.3 format to uint16_t */
-static CDIO_INLINE uint16_t 
+static CDIO_INLINE uint16_t
 from_723 (uint32_t p)
 {
   if (uint32_swap_le_be (p) != p)
@@ -197,19 +197,31 @@ to_733(uint32_t i)
 }
 
 /** Convert from ISO 9660 7.3.3 format to uint32_t */
-static CDIO_INLINE uint32_t 
+static CDIO_INLINE uint32_t
 from_733 (uint64_t p)
 {
   if (uint64_swap_le_be (p) != p)
     cdio_warn ("from_733: broken byte order");
-    
+
+  return (UINT32_C(0xFFFFFFFF) & p);
+}
+
+static CDIO_INLINE uint32_t
+from_733_with_err (uint64_t p, bool *err)
+{
+  if (uint64_swap_le_be (p) != p) {
+    cdio_warn ("from_733: broken byte order");
+    *err = true;
+  } else {
+    *err = false;
+  }
   return (UINT32_C(0xFFFFFFFF) & p);
 }
 
 #endif /* CDIO_BYTESEX_H_ */
 
 
-/* 
+/*
  * Local variables:
  *  c-file-style: "gnu"
  *  tab-width: 8

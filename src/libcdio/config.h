@@ -134,7 +134,9 @@
 #define HAVE_STRING_H 1
 
 /* Define to 1 if you have the `strndup' function. */
-/* #undef HAVE_STRNDUP */
+#if defined(__MINGW32__)
+#define HAVE_STRNDUP 1
+#endif
 
 /* Define this if you have struct timespec */
 /* #undef HAVE_STRUCT_TIMESPEC */

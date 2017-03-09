@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2014 Robert Kausch <robert.kausch@freac.org>
+  Copyright (C) 2014-2015 Robert Kausch <robert.kausch@freac.org>
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -36,7 +36,6 @@
 void
 cdio_free (void *p_memory)
 {
-  if (p_memory == NULL) return;
-
-  free(p_memory);
+  if (p_memory != NULL)
+    free(p_memory);
 }

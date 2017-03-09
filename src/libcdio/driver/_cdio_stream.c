@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2005, 2006, 2008, 2011 Rocky Bernstein <rocky@gnu.org>
+  Copyright (C) 2005, 2006, 2008, 2011, 2016 Rocky Bernstein <rocky@gnu.org>
   Copyright (C) 2000, 2004, 2005 Herbert Valerio Riedel <hvr@gnu.org>
 
   This program is free software: you can redistribute it and/or modify
@@ -41,9 +41,7 @@
 #include <cdio/util.h>
 #include "_cdio_stream.h"
 
-// static const char _rcsid[] = "$Id: _cdio_stream.c,v 1.9 2008/04/22 15:29:11 karl Exp $";
-
-/* 
+/*
  * DataSource implementations
  */
 
@@ -81,10 +79,10 @@ cdio_stream_destroy(CdioDataSource_t *p_obj)
 
 /**
   Like 3 fgetpos.
-  
+
   This function gets the current file position indicator for the stream
-  pointed to by stream.  
-  
+  pointed to by stream.
+
   @return unpon successful completion, return value is positive, else,
   the global variable errno is set to indicate the error.
 */
@@ -108,8 +106,8 @@ cdio_stream_new(void *user_data, const cdio_stream_io_functions *funcs)
   return new_obj;
 }
 
-/* 
-   Open if not already open. 
+/*
+   Open if not already open.
    Return false if we hit an error. Errno should be set for that error.
 */
 static bool
@@ -132,18 +130,18 @@ _cdio_stream_open_if_necessary(CdioDataSource_t *p_obj)
 
 /**
   Like fread(3) and in fact may be the same.
-  
+
   DESCRIPTION:
   The function fread reads nmemb elements of data, each size bytes long,
   from the stream pointed to by stream, storing them at the location
   given by ptr.
-  
+
   RETURN VALUE:
   return the number of items successfully read or written (i.e.,
   not the number of characters).  If an error occurs, or the
   end-of-file is reached, the return value is a short item count
   (or zero).
-  
+
   We do not distinguish between end-of-file and error, and callers
   must use feof(3) and ferror(3) to determine which occurred.
 */
@@ -163,7 +161,7 @@ cdio_stream_read(CdioDataSource_t* p_obj, void *ptr, size_t size, size_t nmemb)
 
 /**
   Like 3 fseek and in fact may be the same.
-  
+
   This  function sets the file position indicator for the stream
   pointed to by stream.  The new position, measured in bytes, is obtained
   by  adding offset bytes to the position specified by whence.  If whence
@@ -172,7 +170,7 @@ cdio_stream_read(CdioDataSource_t* p_obj, void *ptr, size_t size, size_t nmemb)
   respectively.  A successful call to the fseek function clears the end-
   of-file indicator for the stream and undoes any effects of the
   ungetc(3) function on the same stream.
-  
+
   @return unpon successful completion, return value is positive, else,
   the global variable errno is set to indicate the error.
 */
@@ -181,7 +179,7 @@ cdio_stream_seek(CdioDataSource_t* p_obj, off_t offset, int whence)
 {
   if (!p_obj) return DRIVER_OP_UNINIT;
 
-  if (!_cdio_stream_open_if_necessary(p_obj)) 
+  if (!_cdio_stream_open_if_necessary(p_obj))
     /* errno is set by _cdio_stream_open_if necessary. */
     return DRIVER_OP_ERROR;
 
@@ -200,7 +198,7 @@ cdio_stream_seek(CdioDataSource_t* p_obj, off_t offset, int whence)
 }
 
 /**
-  Return whatever size of stream reports, I guess unit size is bytes. 
+  Return whatever size of stream reports, I guess unit size is bytes.
   On error return -1;
  */
 off_t
@@ -212,9 +210,8 @@ cdio_stream_stat(CdioDataSource_t *p_obj)
   return p_obj->op.stat(p_obj->user_data);
 }
 
-
-
-/* 
+
+/*
  * Local variables:
  *  c-file-style: "gnu"
  *  tab-width: 8

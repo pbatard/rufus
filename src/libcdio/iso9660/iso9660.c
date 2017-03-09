@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2003-2009, 2013-2014 Rocky Bernstein <rocky@gnu.org>
+  Copyright (C) 2003-2009, 2013-2014, 2016 Rocky Bernstein <rocky@gnu.org>
   Copyright (C) 2000 Herbert Valerio Riedel <hvr@gnu.org>
 
   This program is free software: you can redistribute it and/or modify
@@ -31,7 +31,6 @@ const char ISO_STANDARD_ID[] = {'C', 'D', '0', '0', '1'};
 #include <cdio/bytesex.h>
 #include <cdio/iso9660.h>
 #include <cdio/util.h>
-#include <cdio/portable.h>
 
 #include <time.h>
 #include <ctype.h>
@@ -92,7 +91,7 @@ timegm(struct tm *tm)
 #endif
 
 #ifndef HAVE_GMTIME_R
-struct tm *
+static struct tm *
 gmtime_r(const time_t *timer, struct tm *result)
 {
     struct tm *tmp = gmtime(timer);
@@ -106,7 +105,7 @@ gmtime_r(const time_t *timer, struct tm *result)
 #endif
 
 #ifndef HAVE_LOCALTIME_R
-struct tm *
+static struct tm *
 localtime_r(const time_t *timer, struct tm *result)
 {
     struct tm *tmp = localtime(timer);
@@ -118,8 +117,6 @@ localtime_r(const time_t *timer, struct tm *result)
     return tmp;
 }
 #endif
-
-// static const char _rcsid[] = "$Id: iso9660.c,v 1.41 2008/06/25 08:01:54 rocky Exp $";
 
 /* Variables to hold debugger-helping enumerations */
 enum iso_enum1_s     iso_enums1;

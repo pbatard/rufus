@@ -17,7 +17,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/** \file types.h 
+/** \file types.h
  *  \brief  Common type definitions used pervasively in libcdio.
  */
 
@@ -31,9 +31,9 @@ extern "C" {
 
 /* If <sys/types.h> is not available on your platform please
    contact the libcdio mailing list so that we can fix it! */
-#if !defined(ARE_THERE_STILL_ENVS_WITHOUT_SYS_TYPES) 
+#if !defined(ARE_THERE_STILL_ENVS_WITHOUT_SYS_TYPES)
 #include <sys/types.h>
-#endif 
+#endif
 
 #if defined(AMIGA)
 typedef u_int8_t uint8_t;
@@ -68,11 +68,11 @@ typedef uint8_t ubyte;
 
   /* if it's still not defined, take a good guess... should work for
      most 32bit and 64bit archs */
-  
+
 #ifndef UINT16_C
 # define UINT16_C(c) c ## U
 #endif
-  
+
 #ifndef UINT32_C
 # if defined (SIZEOF_INT) && SIZEOF_INT == 4
 #  define UINT32_C(c) c ## U
@@ -82,7 +82,7 @@ typedef uint8_t ubyte;
 #  define UINT32_C(c) c ## U
 # endif
 #endif
-  
+
 #ifndef UINT64_C
 # if defined (SIZEOF_LONG) && SIZEOF_LONG == 8
 #  define UINT64_C(c) c ## UL
@@ -92,17 +92,17 @@ typedef uint8_t ubyte;
 #  define UINT64_C(c) c ## ULL
 # endif
 #endif
-  
+
 #ifndef INT64_C
 # if defined (SIZEOF_LONG) && SIZEOF_LONG == 8
 #  define INT64_C(c) c ## L
 # elif defined (SIZEOF_INT) && SIZEOF_INT == 8
-#  define INT64_C(c) c 
+#  define INT64_C(c) c
 # else
 #  define INT64_C(c) c ## LL
 # endif
 #endif
-  
+
 #ifndef __cplusplus
 
 /* All the stdbool.h seem to define those */
@@ -123,10 +123,10 @@ typedef uint8_t ubyte;
 
 #endif /* __bool_true_false_are_defined */
 #endif /*C++*/
-  
+
   /* some GCC optimizations -- gcc 2.5+ */
-  
-#if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ > 4) || __clang__
+
+#if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ > 4)
 #define GNUC_PRINTF( format_idx, arg_idx )              \
   __attribute__((format (printf, format_idx, arg_idx)))
 #define GNUC_SCANF( format_idx, arg_idx )               \
@@ -150,13 +150,14 @@ typedef uint8_t ubyte;
 #define GNUC_UNUSED
 #define GNUC_PACKED
 #endif  /* !__GNUC__ */
-  
+
 #if defined(__MINGW32__)
 #  define PRAGMA_BEGIN_PACKED _Pragma("pack(push)") \
                               _Pragma("pack(1)")
 #  define PRAGMA_END_PACKED   _Pragma("pack(pop)")
-#elif defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901)
-     /* should work with most EDG-frontend based compilers */
+#elif __GNUC__ > 4  || (__STDC_VERSION__ >= 199901)
+     /* should work with GCC > 4.0 clang and most EDG-frontend based C
+        and C++ compilers */
 #    define PRAGMA_BEGIN_PACKED _Pragma("pack(1)")
 #    define PRAGMA_END_PACKED   _Pragma("pack()")
 #elif defined(_MSC_VER)
@@ -167,18 +168,18 @@ typedef uint8_t ubyte;
 #  define PRAGMA_BEGIN_PACKED
 #  define PRAGMA_END_PACKED
 #endif
-  
+
   /*
    * user directed static branch prediction gcc 2.96+
    */
 #if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ > 95)
 # define GNUC_LIKELY(x)   __builtin_expect((x),true)
 # define GNUC_UNLIKELY(x) __builtin_expect((x),false)
-#else 
-# define GNUC_LIKELY(x)   (x) 
+#else
+# define GNUC_LIKELY(x)   (x)
 # define GNUC_UNLIKELY(x) (x)
 #endif
-  
+
 #ifndef NULL
 # define NULL ((void*) 0)
 #endif
@@ -199,9 +200,9 @@ typedef uint8_t ubyte;
 
   /** our own offsetof()-like macro */
 #define __cd_offsetof(TYPE, MEMBER) ((size_t) &((TYPE *)0)->MEMBER)
-  
+
   /*!
-    \brief MSF (minute/second/frame) structure 
+    \brief MSF (minute/second/frame) structure
 
     One CD-ROMs addressing scheme especially used in audio formats
     (Red Book) is an address by minute, sector and frame which
@@ -211,7 +212,7 @@ typedef uint8_t ubyte;
     cdio_to_bcd8() or cdio_from_bcd8() to convert an integer into or
     out of this format. The format specifier %x (not %d) can be used
     if you need to format or print values in this structure.
-    
+
     @see lba_t
   */
   PRAGMA_BEGIN_PACKED
@@ -219,13 +220,13 @@ typedef uint8_t ubyte;
     uint8_t m, s, f; /* BCD encoded! */
   } GNUC_PACKED;
   PRAGMA_END_PACKED
-  
+
   typedef struct msf_s msf_t;
 
 #define msf_t_SIZEOF 3
 
   /*!
-    \brief UTF-8 char definition 
+    \brief UTF-8 char definition
 
     Type to denote UTF-8 strings.
   */
@@ -237,7 +238,7 @@ typedef uint8_t ubyte;
     yep   = 1,
     dunno = 2
   } bool_3way_t;
-  
+
   /* type used for bit-fields in structs (1 <= bits <= 8) */
 #if defined(__GNUC__)
   /* this is strict ISO C99 which allows only 'unsigned int', 'signed
@@ -249,23 +250,23 @@ typedef uint8_t ubyte;
      be pragma'ed on non-gcc compilers */
   typedef uint8_t bitfield_t;
 #endif
-  
-  /*! The type of a Logical Block Address. We allow for an lba to be 
+
+  /*! The type of a Logical Block Address. We allow for an lba to be
     negative to be consistent with an lba, although I'm not sure this
     this is possible.
-      
+
    */
   typedef int32_t lba_t;
-  
+
   /*! The type of a Logical Sector Number. Note that an lba can be negative
     and the MMC3 specs allow for a conversion of a negative lba.
 
     @see msf_t
   */
   typedef int32_t lsn_t;
-  
+
   /* Address in either MSF or logical format */
-  union cdio_cdrom_addr         
+  union cdio_cdrom_addr
   {
     msf_t       msf;
     lba_t       lba;
@@ -273,46 +274,46 @@ typedef uint8_t ubyte;
 
   /*! The type of a track number 0..99. */
   typedef uint8_t track_t;
-  
+
   /*! The type of a session number 0..99. */
   typedef uint8_t session_t;
-  
-  /*! 
+
+  /*!
     Constant for invalid session number
   */
 #define CDIO_INVALID_SESSION   0xFF
-  
-  /*! 
+
+  /*!
     Constant for invalid LBA. It is 151 less than the most negative
     LBA -45150. This provide slack for the 150-frame offset in
     LBA to LSN 150 conversions
   */
 #define CDIO_INVALID_LBA    -45301
-  
-  /*! 
+
+  /*!
     Constant for invalid LSN
   */
 #define CDIO_INVALID_LSN    CDIO_INVALID_LBA
 
-  /*! 
+  /*!
     Number of ASCII bytes in a media catalog number (MCN).
     We include an extra 0 byte so these can be used as C strings.
   */
 #define CDIO_MCN_SIZE       13
 
-  /*! 
+  /*!
     Type to hold ASCII bytes in a media catalog number (MCN).
     We include an extra 0 byte so these can be used as C strings.
   */
   typedef char cdio_mcn_t[CDIO_MCN_SIZE+1];
-  
 
-  /*! 
+
+  /*!
     Number of ASCII bytes in International Standard Recording Codes (ISRC)
   */
 #define CDIO_ISRC_SIZE       12
 
-  /*! 
+  /*!
     Type to hold ASCII bytes in a ISRC.
     We include an extra 0 byte so these can be used as C strings.
   */
@@ -320,7 +321,7 @@ typedef uint8_t ubyte;
 
   typedef int cdio_fs_anal_t;
 
-  /*! 
+  /*!
     track flags
     Q Sub-channel Control Field (4.2.3.3)
   */
@@ -341,7 +342,7 @@ typedef uint8_t ubyte;
 #endif /* CDIO_TYPES_H_ */
 
 
-/* 
+/*
  * Local variables:
  *  c-file-style: "gnu"
  *  tab-width: 8

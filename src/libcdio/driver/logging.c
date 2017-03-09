@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2003, 2004, 2008, 2011, 2012
+  Copyright (C) 2003, 2004, 2008, 2011, 2012, 2015
   Rocky Bernstein <rocky@gnu.org>
   Copyright (C) 2000 Herbert Valerio Riedel <hvr@gnu.org>
 
@@ -33,8 +33,9 @@
 #endif
 
 #include <cdio/logging.h>
-#include <cdio/portable.h>
 #include "cdio_assert.h"
+#include "portable.h"
+#include <assert.h>
 
 cdio_log_level_t cdio_loglevel_default = CDIO_LOG_WARN;
 
@@ -96,10 +97,24 @@ static void
 cdio_logv(cdio_log_level_t level, const char format[], va_list args)
 {
   char buf[1024] = { 0, };
-  static int in_recursion = 0;
 
-  if (in_recursion)
-    cdio_assert_not_reached ();
+  /* _handler() is user defined and we want to make sure _handler()
+  doesn't call us, cdio_logv. in_recursion is used for that, however
+  it has a problem in multi-threaded programs. I'm not sure how to
+  handle multi-threading and recursion checking both. For now, we'll
+  leave in the recursion checking, at the expense of handling
+  multi-threaded log calls. To ameliorate this, we'll check the log
+  level and handle calls where there is no output, before the
+  recursion check.
+  */
+ static int in_recursion = 0;
+
+  if (level < cdio_loglevel_default) return;
+
+  if (in_recursion) {
+    /* Can't use cdio_assert_not_reached() as that may call cdio_logv */
+    assert(0);
+  }
 
   in_recursion = 1;
 

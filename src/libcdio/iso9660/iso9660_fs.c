@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2003-2008, 2011-2014 Rocky Bernstein <rocky@gnu.org>
+  Copyright (C) 2003-2008, 2011-2015 Rocky Bernstein <rocky@gnu.org>
   Copyright (C) 2001 Herbert Valerio Riedel <hvr@gnu.org>
 
   This program is free software: you can redistribute it and/or modify
@@ -16,7 +16,7 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 /* iso9660 filesystem-based routines */
-
+
 #if defined(HAVE_CONFIG_H) && !defined(__CDIO_CONFIG_H__)
 #include "config.h"
 #define __CDIO_CONFIG_H__ 1
@@ -47,7 +47,6 @@
 #include <cdio/iso9660.h>
 #include <cdio/util.h>
 #include <cdio/utf8.h>
-#include <cdio/portable.h>
 
 /* Private headers */
 #include "cdio_assert.h"
@@ -264,6 +263,7 @@ static bool
 check_pvd (const iso9660_pvd_t *p_pvd, cdio_log_level_t log_level)
 {
   if ( ISO_VD_PRIMARY != from_711(p_pvd->type) ) {
+// Commented out for Rufus usage
 //    cdio_log (log_level, "unexpected PVD type %d", p_pvd->type);
     return false;
   }
@@ -443,6 +443,7 @@ iso9660_ifs_read_pvd_loglevel (const iso9660_t *p_iso,
 			       cdio_log_level_t log_level)
 {
   if (0 == iso9660_iso_seek_read (p_iso, p_pvd, ISO_PVD_SECTOR, 1)) {
+// Commented out for Rufus usage
 //    cdio_log ( log_level, "error reading PVD sector (%d)", ISO_PVD_SECTOR );
     return false;
   }
@@ -715,6 +716,7 @@ _iso9660_dir_to_statbuf (iso9660_dir_t *p_iso9660_dir, bool_3way_t b_xa,
   iso711_t i_fname;
   unsigned int stat_len;
   iso9660_stat_t *p_stat;
+  bool err;
 
   if (!dir_len) return NULL;
 
@@ -731,8 +733,16 @@ _iso9660_dir_to_statbuf (iso9660_dir_t *p_iso9660_dir, bool_3way_t b_xa,
     }
   p_stat->type    = (p_iso9660_dir->file_flags & ISO_DIRECTORY)
     ? _STAT_DIR : _STAT_FILE;
-  p_stat->lsn     = from_733 (p_iso9660_dir->extent);
-  p_stat->size    = from_733 (p_iso9660_dir->size);
+  p_stat->lsn     = from_733_with_err (p_iso9660_dir->extent, &err);
+  if (err) {
+    free(p_stat);
+    return NULL;
+  }
+  p_stat->size    = from_733_with_err (p_iso9660_dir->size, &err);
+  if (err) {
+    free(p_stat);
+    return NULL;
+  }
   p_stat->secsize = _cdio_len2blocks (p_stat->size, ISO_BLOCKSIZE);
   p_stat->rr.b3_rock = dunno; /*FIXME should do based on mask */
   p_stat->b_xa    = false;
@@ -1087,6 +1097,12 @@ _fs_iso_stat_traverse (iso9660_t *p_iso, const iso9660_stat_t *_root,
       p_stat = _iso9660_dir_to_statbuf (p_iso9660_dir, p_iso->b_xa,
 					p_iso->u_joliet_level);
 
+      if (!p_stat) {
+	cdio_warn("Bad directory information for %s", splitpath[0]);
+	free(_dirbuf);
+	return NULL;
+      }
+
       cmp = strcmp(splitpath[0], p_stat->filename);
 
       if ( 0 != cmp && 0 == p_iso->u_joliet_level
@@ -1334,24 +1350,38 @@ iso9660_ifs_readdir (iso9660_t *p_iso, const char psz_path[])
     unsigned offset = 0;
     uint8_t *_dirbuf = NULL;
     CdioList_t *retval = _cdio_list_new ();
+    const size_t dirbuf_len = p_stat->secsize * ISO_BLOCKSIZE;
 
-    _dirbuf = calloc(1, p_stat->secsize * ISO_BLOCKSIZE);
+
+    if (!dirbuf_len)
+      {
+        cdio_warn("Invalid directory buffer sector size %u", p_stat->secsize);
+	free(p_stat->rr.psz_symlink);
+	free(p_stat);
+	_cdio_list_free (retval, true);
+        return NULL;
+      }
+
+    _dirbuf = calloc(1, dirbuf_len);
     if (!_dirbuf)
       {
-        cdio_warn("Couldn't calloc(1, %d)", p_stat->secsize * ISO_BLOCKSIZE);
-      _cdio_list_free (retval, true);
+        cdio_warn("Couldn't calloc(1, %lu)", (unsigned long)dirbuf_len);
+	free(p_stat->rr.psz_symlink);
+	free(p_stat);
+	_cdio_list_free (retval, true);
         return NULL;
       }
 
     ret = iso9660_iso_seek_read (p_iso, _dirbuf, p_stat->lsn, p_stat->secsize);
-    if (ret != ISO_BLOCKSIZE*p_stat->secsize)
-	  {
-	    _cdio_list_free (retval, true);
-	    free (_dirbuf);
-	    return NULL;
-	  }
+    if (ret != dirbuf_len) 	  {
+      _cdio_list_free (retval, true);
+      free(p_stat->rr.psz_symlink);
+      free(p_stat);
+      free (_dirbuf);
+      return NULL;
+    }
 
-    while (offset < (p_stat->secsize * ISO_BLOCKSIZE))
+    while (offset < (dirbuf_len))
       {
 	iso9660_dir_t *p_iso9660_dir = (void *) &_dirbuf[offset];
 	iso9660_stat_t *p_iso9660_stat;
@@ -1372,15 +1402,14 @@ iso9660_ifs_readdir (iso9660_t *p_iso, const char psz_path[])
       }
 
     free (_dirbuf);
+    free(p_stat->rr.psz_symlink);
+    free (p_stat);
 
-    if (offset != (p_stat->secsize * ISO_BLOCKSIZE)) {
-      free (p_stat);
+    if (offset != dirbuf_len) {
       _cdio_list_free (retval, true);
       return NULL;
     }
 
-    free (p_stat->rr.psz_symlink);
-    free (p_stat);
     return retval;
   }
 }
