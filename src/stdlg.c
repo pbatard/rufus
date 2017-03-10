@@ -373,7 +373,14 @@ char* FileDialog(BOOL save, char* path, const ext_t* ext, DWORD options)
 	j = _snprintf(&ext_string[j], ext_strlen-j, "%s (*.*)\r*.*\r", all_files);
 	// Microsoft could really have picked a better delimiter!
 	for (i=0; i<ext_strlen; i++) {
+// Since the VS Code Analysis tool is dumb...
+#if defined(_MSC_VER)
+#pragma warning(suppress: 6385)
+#endif
 		if (ext_string[i] == '\r') {
+#if defined(_MSC_VER)
+#pragma warning(suppress: 6386)
+#endif
 			ext_string[i] = 0;
 		}
 	}

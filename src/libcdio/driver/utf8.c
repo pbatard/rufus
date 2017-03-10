@@ -42,6 +42,7 @@
 #include <cdio/utf8.h>
 #include <cdio/logging.h>
 #include <cdio/memory.h>
+#include "cdio_assert.h"
 
 /* Windows requires some basic UTF-8 support outside of Joliet */
 #if defined(_WIN32)
@@ -300,6 +301,7 @@ bool cdio_charset_from_utf8(cdio_utf8_t * src, char ** dst,
   /* Perform byte reversal */
   len = wcslen(le_dst);
   *dst = (char*)calloc(len+1, sizeof(wchar_t));
+  cdio_assert(*dst != NULL);
   for (i=0; i<2*len; i++) {
     (*dst)[i] = ((char*)le_dst)[i+1];
     (*dst)[i+1] = ((char*)le_dst)[i];
@@ -333,6 +335,7 @@ bool cdio_charset_to_utf8(const char *src, size_t src_len, cdio_utf8_t **dst,
 
   /* Perform byte reversal */
   le_src = (wchar_t*)malloc(2*src_len+2);
+  cdio_assert(le_src != NULL);
   for (i=0; i<src_len; i++) {
     ((char*)le_src)[2*i] = src[2*i+1];
     ((char*)le_src)[2*i+1] = src[2*i];

@@ -45,6 +45,7 @@
 #include <cdio/util.h>
 #include "_cdio_stream.h"
 #include "_cdio_stdio.h"
+#include "cdio_assert.h"
 
 /* On 32 bit platforms, fseek can only access streams of 2 GB or less.
    Prefer fseeko/fseeko64, that take a 64 bit offset when LFS is enabled */
@@ -265,6 +266,7 @@ cdio_stdio_new(const char pathname[])
     }
 
   ud = calloc (1, sizeof (_UserData));
+  cdio_assert (ud != NULL);
 
   ud->pathname = pathdup;
   ud->st_size  = statbuf.st_size; /* let's hope it doesn't change... */

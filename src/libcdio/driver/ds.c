@@ -85,6 +85,7 @@ _cdio_list_prepend (CdioList_t *p_list, void *p_data)
   cdio_assert (p_list != NULL);
 
   p_new_node = calloc (1, sizeof (CdioListNode_t));
+  cdio_assert (p_new_node != NULL);
 
   p_new_node->list = p_list;
   p_new_node->next = p_list->begin;
@@ -109,6 +110,7 @@ _cdio_list_append (CdioList_t *p_list, void *p_data)
   else
     {
       CdioListNode_t *p_new_node = calloc (1, sizeof (CdioListNode_t));
+      cdio_assert (p_new_node != NULL);
 
       p_new_node->list = p_list;
       p_new_node->next = NULL;

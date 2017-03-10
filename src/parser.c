@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Elementary Unicode compliant find/replace parser
- * Copyright © 2012-2016 Pete Batard <pete@akeo.ie>
+ * Copyright © 2012-2017 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1234,7 +1234,7 @@ out:
 }
 
 /*
- * Replace all 'c' characters in string 'src' with the subtsring 'rep'
+ * Replace all 'c' characters in string 'src' with the substring 'rep'
  * The returned string is allocated and must be freed by the caller.
  */
 char* replace_char(const char* src, const char c, const char* rep)
@@ -1256,6 +1256,10 @@ char* replace_char(const char* src, const char c, const char* rep)
 			for(k=0; k<rep_len; k++)
 				res[j++] = rep[k];
 		} else {
+// Since the VS Code Analysis tool is dumb...
+#if defined(_MSC_VER)
+#pragma warning(suppress: 6386)
+#endif
 			res[j++] = src[i];
 		}
 	}

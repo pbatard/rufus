@@ -20,7 +20,7 @@
 #include <inttypes.h>
 
 #if defined(_MSC_VER)
-// Disable some VS2012 Code Analysis warnings
+// Disable some VS Code Analysis warnings
 #pragma warning(disable: 4996)		// Ignore deprecated (eg. GetVersionEx()), as we have to contend with XP
 #pragma warning(disable: 28159)		// We use GetTickCount64() where possible, but it's not available on XP
 #pragma warning(disable: 6258)		// I know what I'm using TerminateThread for

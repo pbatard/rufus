@@ -151,6 +151,8 @@ DWORD M_NTFSSECT_API NtfsSectGetVolumeInfo(
       rc = NtfsSectGetVolumeHandle(VolumeName, VolumeInfo);
       if (rc != ERROR_SUCCESS)
         goto err_handle;
+      if ((VolumeInfo->Handle == NULL) || (VolumeInfo->Handle == INVALID_HANDLE_VALUE))
+        return ERROR_INVALID_HANDLE;
     }
 
     rc = NtfsSectLoadXpFuncs(&xp_funcs);

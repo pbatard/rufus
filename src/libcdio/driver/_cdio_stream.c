@@ -99,6 +99,7 @@ cdio_stream_new(void *user_data, const cdio_stream_io_functions *funcs)
   CdioDataSource_t *new_obj;
 
   new_obj = calloc (1, sizeof (CdioDataSource_t));
+  cdio_assert (new_obj != NULL);
 
   new_obj->user_data = user_data;
   memcpy(&(new_obj->op), funcs, sizeof(cdio_stream_io_functions));

@@ -62,7 +62,7 @@ void
 _cdio_strfreev(char **strv)
 {
   int n;
-  
+
   cdio_assert (strv != NULL);
 
   for(n = 0; strv[n]; n++)
@@ -88,14 +88,15 @@ _cdio_strsplit(const char str[], char delim) /* fixme -- non-reentrant */
 
   n = 1;
   p = _str;
-  while(*p) 
+  while(*p)
     if (*(p++) == delim)
       n++;
 
-  strv = calloc (1, sizeof (char *) * (n+1));
-  
+  strv = calloc (n+1, sizeof (char *));
+  cdio_assert (strv != NULL);
+
   n = 0;
-  while((p = strtok(n ? NULL : _str, _delim)) != NULL) 
+  while((p = strtok(n ? NULL : _str, _delim)) != NULL)
     strv[n++] = strdup(p);
 
   free(_str);
@@ -111,9 +112,10 @@ _cdio_memdup (const void *mem, size_t count)
   if (mem)
     {
       new_mem = calloc (1, count);
+      cdio_assert (new_mem != NULL);
       memcpy (new_mem, mem, count);
     }
-  
+
   return new_mem;
 }
 
@@ -141,7 +143,7 @@ _cdio_strdup_upper (const char str[])
 /* Convert MinGW/MSYS paths that start in "/c/..." to "c:/..."
    so that they can be used with fopen(), stat(), etc.
    Returned string must be freed by the caller using cdio_free().*/
-char * 
+char *
 _cdio_strdup_fixpath (const char path[])
 {
   char *new_path = NULL;
@@ -180,7 +182,7 @@ const char *cdio_version_string = CDIO_VERSION;
 const unsigned int libcdio_version_num = LIBCDIO_VERSION_NUM;
 
 
-/* 
+/*
  * Local variables:
  *  c-file-style: "gnu"
  *  tab-width: 8
