@@ -16178,7 +16178,7 @@ t MSG_161 "Kontrollera enheter om den har trasiga block genom att köra ett test
 t MSG_162 "Avmarkera om du vill använda \"långsam\" formateringsmetod"
 t MSG_163 "Markera för att göra enheten startbar"
 t MSG_164 "Metod som kommer att användas för att göra enheten startbar"
-t MSG_165 "Klicka för att välja ISO-fil..."
+t MSG_165 "Klicka för att välja avbildsfil..."
 t MSG_166 "Markera för att tillåta visa internationella namn "
 	"och sätt en enhetsikon (en autorun.inf skapas)"
 t MSG_167 "Installera en MBR som tillåter flera uppstartsmöjligheter och som kan maskera bort BIOS USB enhets-ID"
