@@ -109,7 +109,7 @@ BOOL use_own_c32[NB_OLD_C32] = {FALSE, FALSE}, mbr_selected_by_user = FALSE, tog
 BOOL iso_op_in_progress = FALSE, format_op_in_progress = FALSE, right_to_left_mode = FALSE;
 BOOL enable_HDDs = FALSE, force_update = FALSE, enable_ntfs_compression = FALSE, no_confirmation_on_cancel = FALSE, lock_drive = TRUE;
 BOOL advanced_mode, allow_dual_uefi_bios, detect_fakes, enable_vmdk, force_large_fat32, usb_debug, use_fake_units, preserve_timestamps;
-BOOL zero_drive = FALSE, list_non_usb_removable_drives = FALSE, disable_file_indexing, large_drive = FALSE;
+BOOL zero_drive = FALSE, list_non_usb_removable_drives = FALSE, disable_file_indexing, large_drive = FALSE, prefer_gpt = FALSE;
 int dialog_showing = 0, lang_button_id = 0;
 uint16_t rufus_version[3], embedded_sl_version[2];
 char embedded_sl_version_str[2][12] = { "?.??", "?.??" };
@@ -378,16 +378,17 @@ static int SetMBRForUEFI(BOOL replace)
 			useCSM = TRUE;
 	}
 
+	// If we weren't already dealing with pure EFI, we need to remove the first option
 	if (replace && !pure_efi)
 		ComboBox_DeleteString(hPartitionScheme, 0);
 
 	if ((image_path != NULL) && IS_EFI_BOOTABLE(img_report) && !IS_BIOS_BOOTABLE(img_report)) {
 		pure_efi = TRUE;
+		// Pure EFI -> no need to add the BIOS option
 		return -1;
-	} else {
-		pure_efi = FALSE;
 	}
 
+	pure_efi = FALSE;
 	IGNORE_RETVAL(ComboBox_SetItemData(hPartitionScheme, ComboBox_InsertStringU(hPartitionScheme, 0,
 		lmprintf(MSG_031, PartitionTypeLabel[PARTITION_STYLE_MBR], useCSM?"UEFI-CSM":"UEFI")), (TT_BIOS<<16)|PARTITION_STYLE_MBR));
 	if (replace)
@@ -591,7 +592,7 @@ static void SetPartitionSchemeTooltip(void)
 static void SetTargetSystem(void)
 {
 	int ts = SetMBRForUEFI(TRUE);	// Will be set to -1 for pure UEFI, 0 otherwise
-	if (SelectedDrive.PartitionType == PARTITION_STYLE_GPT) {
+	if ((prefer_gpt && IS_EFI_BOOTABLE(img_report)) || SelectedDrive.PartitionType == PARTITION_STYLE_GPT) {
 		ts += 2;	// GPT/UEFI
 	} else if (SelectedDrive.has_protective_mbr || SelectedDrive.has_mbr_uefi_marker ||
 		(IS_EFI_BOOTABLE(img_report) && !IS_BIOS_BOOTABLE(img_report)) ) {
@@ -2156,7 +2157,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	RECT DialogRect, DesktopRect, LangToolbarRect;
 	LONG progress_style;
 	HDC hDC;
-	int nDeviceIndex, fs, tt, i, nWidth, nHeight, nb_devices, selected_language, offset;
+	int nDeviceIndex, fs, tt, pt, i, nWidth, nHeight, nb_devices, selected_language, offset;
 	char tmp[128];
 	wchar_t* wbuffer = NULL;
 	loc_cmd* lcmd = NULL;
@@ -2301,6 +2302,9 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				break;
 			SetPartitionSchemeTooltip();
 			SetFSFromISO();
+			pt = GETPARTTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
+			// If a user switches to GPT before an image is selected, it is reasonable to assume that they prefer GPT
+			prefer_gpt = (pt == PARTITION_STYLE_GPT) && (image_path == NULL);
 			// fall-through
 		case IDC_FILESYSTEM:
 			if (HIWORD(wParam) != CBN_SELCHANGE)
