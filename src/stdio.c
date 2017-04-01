@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Standard User I/O Routines (logging, status, etc.)
- * Copyright © 2011-2016 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2017 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -102,6 +102,7 @@ char *_printbits(size_t const size, void const * const ptr, int leading_zeroes)
 	return str;
 }
 
+// Display an hex dump of buffer 'buf'
 void DumpBufferHex(void *buf, size_t size)
 {
 	unsigned char* buffer = (unsigned char*)buf;
@@ -135,10 +136,7 @@ void DumpBufferHex(void *buf, size_t size)
 	uprintf("%s\n", line);
 }
 
-/*
- * Convert a windows error to human readable string
- * uses retval as errorcode, or, if 0, use GetLastError()
- */
+// Convert a windows error to human readable string
 const char *WindowsErrorString(void)
 {
 static char err_string[256] = {0};
@@ -178,7 +176,7 @@ char* GuidToString(const GUID* guid)
 	return guid_string;
 }
 
-// find upper power of 2
+// Find upper power of 2
 static __inline uint16_t upo2(uint16_t v)
 {
 	v--;
@@ -225,6 +223,7 @@ char* SizeToHumanReadable(uint64_t size, BOOL copy_to_log, BOOL fake_units)
 	return str_size;
 }
 
+// Convert custom error code to messages
 const char* _StrError(DWORD error_code)
 {
 	if ( (!IS_ERROR(error_code)) || (SCODE_CODE(error_code) == ERROR_SUCCESS)) {
@@ -312,6 +311,7 @@ const char* StrError(DWORD error_code, BOOL use_default_locale)
 	return ret;
 }
 
+// A WriteFile() equivalent, with up to nNumRetries write attempts on error.
 BOOL WriteFileWithRetry(HANDLE hFile, LPCVOID lpBuffer, DWORD nNumberOfBytesToWrite,
 	LPDWORD lpNumberOfBytesWritten, DWORD nNumRetries)
 {

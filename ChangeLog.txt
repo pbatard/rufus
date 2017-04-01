@@ -1,3 +1,13 @@
+o Version 2.13 (2017.04.??)
+    Preserve 'GPT for UEFI' option if the user changed it before selecting an ISO
+    Fix unwanted notification sound when closing with the X button (#893)
+    Fix inability to restore the minimized application after a popup is displayed (#896)
+    Fix an issue when trying to install Syslinux/NTFS twice in a row (#904)
+    Work around Microsoft's inconsistent casing of device IDs during device enumeration
+    Work around Microsoft's aggressive locking of partitions in Windows 10 Creators Update (#883)
+    Restrict write sharing permissions when accessing a device
+    Update libcdio to latest
+
 o Version 2.12 (2017.01.27)
     Add Hebrew translation, courtesy of NSBuilder and פלוני אלמוני
     Add a cheat mode (Alt-O) to create an ISO from the first optical media found

@@ -77,10 +77,10 @@
 #define MAX_FAT32_SIZE              2.0f		// Threshold above which we disable FAT32 formatting (in TB)
 #define FAT32_CLUSTER_THRESHOLD     1.011f		// For FAT32, cluster size changes don't occur at power of 2 boundaries but sligthly above
 #define DD_BUFFER_SIZE              65536		// Minimum size of the buffer we use for DD operations
-#define RUFUS_URL                   "http://rufus.akeo.ie"
+#define RUFUS_URL                   "https://rufus.akeo.ie"
 #define DOWNLOAD_URL                RUFUS_URL "/downloads"
 #define FILES_URL                   RUFUS_URL "/files"
-#define SEVENZIP_URL                "http://sourceforge.net/projects/sevenzip/files/7-Zip/"
+#define SEVENZIP_URL                "http://www.7-zip.org"
 #define FILES_DIR                   "rufus_files"
 #define IGNORE_RETVAL(expr)         do { (void)(expr); } while(0)
 #ifndef ARRAYSIZE

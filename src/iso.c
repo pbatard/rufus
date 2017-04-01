@@ -104,7 +104,7 @@ static __inline char* sanitize_filename(char* filename, BOOL* is_identical)
 {
 	size_t i, j;
 	char* ret = NULL;
-	char unauthorized[] = {'<', '>', ':', '|', '*', '?'};
+	char unauthorized[] = { '*', '?', '<', '>', ':', '|', '\\', '/'};
 
 	*is_identical = TRUE;
 	ret = safe_strdup(filename);
