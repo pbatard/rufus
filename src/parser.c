@@ -236,7 +236,6 @@ out:
  * Parse a localization file, to construct the list of available locales.
  * The locale file must be UTF-8 with NO BOM.
  */
-extern char lost_translators[][6];
 BOOL get_supported_locales(const char* filename)
 {
 	FILE* fd = NULL;

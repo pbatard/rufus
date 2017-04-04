@@ -198,6 +198,22 @@ static __inline HWND CreateWindowU(char* lpClassName, char* lpWindowName,
 	return ret;
 }
 
+static __inline HWND CreateWindowExU(DWORD dwExStyle, char* lpClassName, char* lpWindowName,
+	DWORD dwStyle, int x, int y, int nWidth, int nHeight, HWND hWndParent, HMENU hMenu,
+	HINSTANCE hInstance, LPVOID lpParam)
+{
+	HWND ret = NULL;
+	DWORD err = ERROR_INVALID_DATA;
+	wconvert(lpClassName);
+	wconvert(lpWindowName);
+	ret = CreateWindowExW(dwExStyle, wlpClassName, wlpWindowName, dwStyle, x, y, nWidth, nHeight, hWndParent, hMenu, hInstance, lpParam);
+	err = GetLastError();
+	wfree(lpClassName);
+	wfree(lpWindowName);
+	SetLastError(err);
+	return ret;
+}
+
 static __inline int MessageBoxU(HWND hWnd, LPCSTR lpText, LPCSTR lpCaption, UINT uType)
 {
 	int ret;

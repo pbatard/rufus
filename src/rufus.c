@@ -1812,7 +1812,7 @@ void InitDialog(HWND hDlg)
 	}
 
 	// Create the language toolbar
-	hLangToolbar = CreateWindowEx(0, TOOLBARCLASSNAME, NULL, WS_CHILD | WS_TABSTOP | TBSTYLE_TRANSPARENT | CCS_NOPARENTALIGN |
+	hLangToolbar = CreateWindowExW(0, TOOLBARCLASSNAME, NULL, WS_CHILD | WS_TABSTOP | TBSTYLE_TRANSPARENT | CCS_NOPARENTALIGN |
 		CCS_NORESIZE | CCS_NODIVIDER, 0, 0, 0, 0, hMainDialog, NULL, hMainInstance, NULL);
 	if ((pfImageList_Create != NULL) && (pfImageList_AddIcon != NULL)) {
 		hLangToolbarImageList = pfImageList_Create(i16, i16, ILC_COLOR32, 1, 0);
