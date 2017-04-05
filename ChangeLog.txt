@@ -6,7 +6,7 @@ o Version 2.13 (2017.04.??)
     Work around Microsoft's inconsistent casing of device IDs during device enumeration
     Work around Microsoft's aggressive locking of partitions in Windows 10 Creators Update (#883)
     Restrict write sharing permissions when accessing a device
-    Update libcdio to latest
+    Update libcdio and GRUB 2.0 to latest
 
 o Version 2.12 (2017.01.27)
     Add Hebrew translation, courtesy of NSBuilder and פלוני אלמוני
