@@ -1,4 +1,4 @@
-o Version 2.13 (2017.04.??)
+o Version 2.13 (2017.04.06)
     Preserve 'GPT for UEFI' option if the user changed it before selecting an ISO
     Fix unwanted notification sound when closing with the X button (#893)
     Fix inability to restore the minimized application after a popup is displayed (#896)

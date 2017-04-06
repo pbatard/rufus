@@ -40,5 +40,7 @@ config.guess
 config.log
 config.status
 config.sub
+embedded.loc
+rufus_files
 depcomp
 stamp-h1
