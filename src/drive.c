@@ -57,6 +57,7 @@ const GUID PARTITION_SYSTEM_GUID =
  * Globals
  */
 RUFUS_DRIVE_INFO SelectedDrive;
+extern BOOL lock_drive;
 
 /*
  * The following methods get or set the AutoMount setting (which is different from AutoRun)
@@ -117,37 +118,51 @@ BOOL GetAutoMount(BOOL* enabled)
  * Open a drive or volume with optional write and lock access
  * Return INVALID_HANDLE_VALUE (/!\ which is DIFFERENT from NULL /!\) on failure.
  */
-static HANDLE GetHandle(char* Path, BOOL bWriteAccess, BOOL bLockDrive, BOOL bWriteShare)
+static HANDLE GetHandle(char* Path, BOOL bLockDrive, BOOL bWriteAccess, BOOL bWriteShare)
 {
 	int i;
 	DWORD size;
 	HANDLE hDrive = INVALID_HANDLE_VALUE;
+	char DevPath[MAX_PATH];
 
-	if (Path == NULL)
+	if ((safe_strlen(Path) < 5) || (Path[0] != '\\') || (Path[1] != '\\') || (Path[3] != '\\'))
 		goto out;
+
+	// Resolve a device path, so that users can seek for it in Process Explorer
+	// in case of access issues.
+	if (QueryDosDeviceA(&Path[4], DevPath, sizeof(DevPath)) == 0)
+		strcpy(DevPath, "???");
+
 	for (i = 0; i < DRIVE_ACCESS_RETRIES; i++) {
-		// Don't enable FILE_SHARE_WRITE (unless specifically requested) so that
+		// Try without FILE_SHARE_WRITE (unless specifically requested) so that
 		// we won't be bothered by the OS or other apps when we set up our data.
 		// However this means we might have to wait for an access gap...
 		// We keep FILE_SHARE_READ though, as this shouldn't hurt us any, and is
 		// required for enumeration.
 		hDrive = CreateFileA(Path, GENERIC_READ|(bWriteAccess?GENERIC_WRITE:0),
-			FILE_SHARE_READ|(bWriteShare?FILE_SHARE_WRITE:0), NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+			FILE_SHARE_READ|((bWriteAccess && bWriteShare)?FILE_SHARE_WRITE:0),
+			NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 		if (hDrive != INVALID_HANDLE_VALUE)
 			break;
 		if ((GetLastError() != ERROR_SHARING_VIOLATION) && (GetLastError() != ERROR_ACCESS_DENIED))
 			break;
-		if (i == 0)
+		if (i == 0) {
 			uprintf("Waiting for access...");
+		} else if (!lock_drive && bWriteAccess && !bWriteShare && (i > (2*DRIVE_ACCESS_RETRIES)/3)) {
+			// If we can't seem to get a hold of the drive for a long time,
+			// and Alt-, is enabled, make a last ditch effort with FILE_SHARE_WRITE...
+			uprintf("Can't access %s - Retrying with write sharing enabled...");
+			bWriteShare = TRUE;
+		}
 		Sleep(DRIVE_ACCESS_TIMEOUT / DRIVE_ACCESS_RETRIES);
 	}
 	if (hDrive == INVALID_HANDLE_VALUE) {
-		uprintf("Could not open drive %s: %s\n", Path, WindowsErrorString());
+		uprintf("Could not open %s [%s]: %s\n", Path, DevPath, WindowsErrorString());
 		goto out;
 	}
 
 	if (bWriteAccess) {
-		uprintf("Opened drive %s for write access\n", Path);
+		uprintf("Opened %s [%s] for write access\n", Path, DevPath);
 	}
 
 	if (bLockDrive) {
@@ -163,7 +178,7 @@ static HANDLE GetHandle(char* Path, BOOL bWriteAccess, BOOL bLockDrive, BOOL bWr
 			Sleep(DRIVE_ACCESS_TIMEOUT/DRIVE_ACCESS_RETRIES);
 		}
 		// If we reached this section, either we didn't manage to get a lock or the user cancelled
-		uprintf("Could not get exclusive access to device %s: %s\n", Path, WindowsErrorString());
+		uprintf("Could not get exclusive access to %s [%s]: %s\n", Path, DevPath, WindowsErrorString());
 		safe_closehandle(hDrive);
 	}
 
@@ -190,11 +205,11 @@ out:
 /*
  * Return a handle to the physical drive identified by DriveIndex
  */
-HANDLE GetPhysicalHandle(DWORD DriveIndex, BOOL bWriteAccess, BOOL bLockDrive)
+HANDLE GetPhysicalHandle(DWORD DriveIndex, BOOL bLockDrive, BOOL bWriteAccess)
 {
 	HANDLE hPhysical = INVALID_HANDLE_VALUE;
 	char* PhysicalPath = GetPhysicalName(DriveIndex);
-	hPhysical = GetHandle(PhysicalPath, bWriteAccess, bLockDrive, FALSE);
+	hPhysical = GetHandle(PhysicalPath, bLockDrive, bWriteAccess, FALSE);
 	safe_free(PhysicalPath);
 	return hPhysical;
 }
@@ -261,7 +276,6 @@ char* GetLogicalName(DWORD DriveIndex, BOOL bKeepTrailingBackslash, BOOL bSilent
 			continue;
 		}
 
-		// If we can't have FILE_SHARE_WRITE, forget it
 		hDrive = CreateFileA(volume_name, GENERIC_READ, FILE_SHARE_READ|FILE_SHARE_WRITE,
 			NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 		if (hDrive == INVALID_HANDLE_VALUE) {
@@ -315,7 +329,7 @@ BOOL WaitForLogical(DWORD DriveIndex)
  * Returns INVALID_HANDLE_VALUE on error or NULL if no logical path exists (typical
  * of unpartitioned drives)
  */
-HANDLE GetLogicalHandle(DWORD DriveIndex, BOOL bWriteAccess, BOOL bLockDrive, BOOL bWriteShare)
+HANDLE GetLogicalHandle(DWORD DriveIndex, BOOL bLockDrive, BOOL bWriteAccess, BOOL bWriteShare)
 {
 	HANDLE hLogical = INVALID_HANDLE_VALUE;
 	char* LogicalPath = GetLogicalName(DriveIndex, FALSE, FALSE);
@@ -325,7 +339,7 @@ HANDLE GetLogicalHandle(DWORD DriveIndex, BOOL bWriteAccess, BOOL bLockDrive, BO
 		return NULL;
 	}
 
-	hLogical = GetHandle(LogicalPath, bWriteAccess, bLockDrive, bWriteShare);
+	hLogical = GetHandle(LogicalPath, bLockDrive, bWriteAccess, bWriteShare);
 	free(LogicalPath);
 	return hLogical;
 }

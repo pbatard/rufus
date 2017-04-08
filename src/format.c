@@ -1641,7 +1641,7 @@ DWORD WINAPI FormatThread(void* param)
 		extra_partitions = XP_COMPAT;
 
 	PrintInfoDebug(0, MSG_225);
-	hPhysicalDrive = GetPhysicalHandle(DriveIndex, TRUE, lock_drive);
+	hPhysicalDrive = GetPhysicalHandle(DriveIndex, lock_drive, TRUE);
 	if (hPhysicalDrive == INVALID_HANDLE_VALUE) {
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_OPEN_FAILED;
 		goto out;
@@ -1683,7 +1683,7 @@ DWORD WINAPI FormatThread(void* param)
 	uprintf("Will use '%c:' as volume mountpoint\n", drive_name[0]);
 
 	// ...but we need a lock to the logical drive to be able to write anything to it
-	hLogicalVolume = GetLogicalHandle(DriveIndex, FALSE, TRUE, FALSE);
+	hLogicalVolume = GetLogicalHandle(DriveIndex, TRUE, FALSE, FALSE);
 	if (hLogicalVolume == INVALID_HANDLE_VALUE) {
 		uprintf("Could not lock volume\n");
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_OPEN_FAILED;
@@ -1925,7 +1925,7 @@ DWORD WINAPI FormatThread(void* param)
 		} else {
 			// We still have a lock, which we need to modify the volume boot record
 			// => no need to reacquire the lock...
-			hLogicalVolume = GetLogicalHandle(DriveIndex, TRUE, FALSE, FALSE);
+			hLogicalVolume = GetLogicalHandle(DriveIndex, FALSE, TRUE, FALSE);
 			if ((hLogicalVolume == INVALID_HANDLE_VALUE) || (hLogicalVolume == NULL)) {
 				uprintf("Could not re-mount volume for partition boot record access\n");
 				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_OPEN_FAILED;
@@ -2074,7 +2074,7 @@ DWORD WINAPI SaveImageThread(void* param)
 	LastRefresh = 0;
 	switch (img_save->Type) {
 	case IMG_SAVE_TYPE_VHD:
-		hPhysicalDrive = GetPhysicalHandle(img_save->DeviceNum, FALSE, TRUE);
+		hPhysicalDrive = GetPhysicalHandle(img_save->DeviceNum, TRUE, FALSE);
 		break;
 	case IMG_SAVE_TYPE_ISO:
 		hPhysicalDrive = CreateFileA(img_save->DevicePath, GENERIC_READ, FILE_SHARE_READ,
