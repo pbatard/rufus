@@ -57,7 +57,6 @@ const GUID PARTITION_SYSTEM_GUID =
  * Globals
  */
 RUFUS_DRIVE_INFO SelectedDrive;
-extern BOOL lock_drive;
 
 /*
  * The following methods get or set the AutoMount setting (which is different from AutoRun)
@@ -148,10 +147,10 @@ static HANDLE GetHandle(char* Path, BOOL bLockDrive, BOOL bWriteAccess, BOOL bWr
 			break;
 		if (i == 0) {
 			uprintf("Waiting for access...");
-		} else if (!lock_drive && bWriteAccess && !bWriteShare && (i > (2*DRIVE_ACCESS_RETRIES)/3)) {
-			// If we can't seem to get a hold of the drive for a long time,
-			// and Alt-, is enabled, make a last ditch effort with FILE_SHARE_WRITE...
-			uprintf("Can't access %s - Retrying with write sharing enabled...");
+		} else if (bWriteAccess && !bWriteShare && (i > DRIVE_ACCESS_RETRIES/3)) {
+			// If we can't seem to get a hold of the drive for some time,
+			// try to enable FILE_SHARE_WRITE...
+			uprintf("Warning: Could not obtain exclusive rights. Retrying with write sharing enabled...");
 			bWriteShare = TRUE;
 		}
 		Sleep(DRIVE_ACCESS_TIMEOUT / DRIVE_ACCESS_RETRIES);
