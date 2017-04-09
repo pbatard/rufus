@@ -172,7 +172,7 @@ BOOL SetAutorun(const char* path)
 	if (fd == NULL) {
 		uprintf("Unable to create %s", filename);
 		uprintf("NOTE: This may be caused by a poorly designed security solution. "
-			"See http://rufus.akeo.ie/compatibility.");
+			"See https://rufus.akeo.ie/compatibility.");
 		return FALSE;
 	}
 
