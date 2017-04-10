@@ -1,3 +1,6 @@
+o Version 2.14 (2017.04.10)  [BUGFIX RELEASE]
+    Fix inability to create BIOS-bootable drives, in some circumstances, due to write sharing permissions
+
 o Version 2.13 (2017.04.06)
     Preserve 'GPT for UEFI' option if the user changed it before selecting an ISO
     Fix unwanted notification sound when closing with the X button (#893)
