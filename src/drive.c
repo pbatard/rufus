@@ -306,10 +306,13 @@ out:
 /* Wait for a logical drive to reappear - Used when a drive has just been repartitioned */
 BOOL WaitForLogical(DWORD DriveIndex)
 {
-	DWORD i;
+	DWORD EndTime;
 	char* LogicalPath = NULL;
 
-	for (i = 0; i < DRIVE_ACCESS_RETRIES; i++) {
+	// GetLogicalName() calls may be slow, so use the system time to
+	// make sure we don't spend more than DRIVE_ACCESS_TIMEOUT in wait.
+	EndTime = GetTickCount() + DRIVE_ACCESS_TIMEOUT;
+	do {
 		LogicalPath = GetLogicalName(DriveIndex, FALSE, TRUE);
 		if (LogicalPath != NULL) {
 			free(LogicalPath);
@@ -318,7 +321,7 @@ BOOL WaitForLogical(DWORD DriveIndex)
 		if (IS_ERROR(FormatStatus))	// User cancel
 			return FALSE;
 		Sleep(DRIVE_ACCESS_TIMEOUT/DRIVE_ACCESS_RETRIES);
-	}
+	} while (GetTickCount() < EndTime);
 	uprintf("Timeout while waiting for logical drive\n");
 	return FALSE;
 }

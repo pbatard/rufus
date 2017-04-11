@@ -61,7 +61,7 @@ static int task_number = 0;
 extern const int nb_steps[FS_MAX];
 extern uint32_t dur_mins, dur_secs;
 static int fs_index = 0, wintogo_index = -1;
-extern BOOL force_large_fat32, enable_ntfs_compression, lock_drive, zero_drive, disable_file_indexing;
+extern BOOL force_large_fat32, enable_ntfs_compression, lock_drive, zero_drive, disable_file_indexing, usb_debug;
 uint8_t *grub2_buf = NULL;
 long grub2_len;
 static BOOL WritePBR(HANDLE hLogicalDrive);
@@ -681,7 +681,7 @@ static BOOL FormatDrive(DWORD DriveIndex)
 	BOOL r = FALSE;
 	PF_DECL(FormatEx);
 	PF_DECL(EnableVolumeCompression);
-	char FSType[32];
+	char FSType[32], path[MAX_PATH];
 	char *locale, *VolumeName = NULL;
 	WCHAR* wVolumeName = NULL;
 	WCHAR wFSType[64];
@@ -714,6 +714,16 @@ static BOOL FormatDrive(DWORD DriveIndex)
 	// Hey, nice consistency here, Microsoft! -  FormatEx() fails if wVolumeName has
 	// a trailing backslash, but EnableCompression() fails without...
 	wVolumeName[wcslen(wVolumeName)-1] = 0;		// Remove trailing backslash
+
+	// Check if Windows picked the UEFI:NTFS partition
+	// NB: No need to do this for Large FAT32, as this only applies to NTFS
+	safe_strcpy(path, MAX_PATH, VolumeName);
+	safe_strcat(path, MAX_PATH, "EFI\\Rufus\\ntfs_x64.efi");
+	if (PathFileExistsA(path)) {
+		uprintf("Windows selected the UEFI:NTFS partition for formatting - Retry needed", VolumeName);
+		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_RETRY;
+		goto out;
+	}
 
 	// LoadLibrary("fmifs.dll") appears to changes the locale, which can lead to
 	// problems with tolower(). Make sure we restore the locale. For more details,
@@ -1423,7 +1433,7 @@ static BOOL SetupWinToGo(const char* drive_name, BOOL use_ms_efi)
 	uprintf("Enabling boot...");
 	static_sprintf(cmd, "%s\\bcdboot.exe %s\\Windows /v /f ALL /s %s", sysnative_dir,
 		drive_name, (use_ms_efi)?ms_efi:drive_name);
-	if (RunCommand(cmd, sysnative_dir, TRUE) != 0) {
+	if (RunCommand(cmd, sysnative_dir, usb_debug) != 0) {
 		// Try to continue... but report a failure
 		uprintf("Failed to enable boot using command '%s'", cmd);
 		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_ISO_EXTRACT);

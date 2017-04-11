@@ -294,7 +294,6 @@ const char* _StrError(DWORD error_code)
 	case ERROR_NOT_READY:
 		return lmprintf(MSG_079);
 	default:
-		uprintf("Unknown error: %08X\n", error_code);
 		SetLastError(error_code);
 		return WindowsErrorString();
 	}
