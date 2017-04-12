@@ -36,7 +36,7 @@
 #define ENCODING (X509_ASN_ENCODING | PKCS_7_ASN_ENCODING)
 
 // Signatures names we accept (may be suffixed, but the signature should start with one of those)
-const char* valid_cert_names[] = { "Akeo Consulting", "Akeo Systems", "Pete Batard" };
+const char* cert_name[3] = { "Akeo Consulting", "Akeo Systems", "Pete Batard" };
 
 typedef struct {
 	LPWSTR lpszProgramName;
@@ -45,7 +45,7 @@ typedef struct {
 } SPROG_PUBLISHERINFO, *PSPROG_PUBLISHERINFO;
 
 // Mostly from https://support.microsoft.com/en-us/kb/323809
-static char* GetSignatureName(const char* path)
+char* GetSignatureName(const char* path)
 {
 	static char szSubjectName[128];
 	char* p = NULL;
@@ -148,15 +148,15 @@ LONG ValidateSignature(HWND hDlg, const char* path)
 		MessageBoxExU(hDlg, lmprintf(MSG_284), lmprintf(MSG_283), MB_OK | MB_ICONERROR | MB_IS_RTL, selected_langid);
 		return TRUST_E_NOSIGNATURE;
 	}
-	for (i = 0; i < ARRAYSIZE(valid_cert_names); i++) {
-		len = strlen(valid_cert_names[i]);
-		if (strncmp(signature_name, valid_cert_names[i], len) == 0) {
+	for (i = 0; i < ARRAYSIZE(cert_name); i++) {
+		len = strlen(cert_name[i]);
+		if (strncmp(signature_name, cert_name[i], len) == 0) {
 			// Test for whitespace after the part we match, for added safety
 			if ((len >= strlen(signature_name)) || isspace(signature_name[len]))
 				break;
 		}
 	}
-	if (i >= ARRAYSIZE(valid_cert_names)) {
+	if (i >= ARRAYSIZE(cert_name)) {
 		uprintf("PKI: Signature '%s' is unexpected...", signature_name);
 		if (MessageBoxExU(hDlg, lmprintf(MSG_285, signature_name), lmprintf(MSG_283),
 			MB_YESNO | MB_ICONWARNING | MB_IS_RTL, selected_langid) != IDYES)

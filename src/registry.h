@@ -50,6 +50,17 @@ static __inline BOOL DeleteRegistryKey(HKEY key_root, const char* key_name)
 	return ((s == ERROR_SUCCESS) || (s == ERROR_FILE_NOT_FOUND));
 }
 
+/* Find if a registry node exists */
+static __inline BOOL IsRegistryNode(HKEY key_root, const char* key_name)
+{
+	BOOL r;
+	HKEY hSoftware = NULL;
+	r = (RegOpenKeyExA(key_root, key_name, 0, KEY_READ, &hSoftware) == ERROR_SUCCESS);
+	if (hSoftware != NULL)
+		RegCloseKey(hSoftware);
+	return r;
+}
+
 /* Read a generic registry key value. If a short key_name is used, assume that it belongs to
    the application and create the app subkey if required */
 static __inline BOOL _GetRegistryKey(HKEY key_root, const char* key_name, DWORD reg_type, LPBYTE dest, DWORD dest_size)

@@ -61,6 +61,8 @@ PF_TYPE_DECL(WINAPI, ULONG, SHChangeNotifyRegister, (HWND, int, LONG, UINT, int,
 
 const char* cmdline_hogger = "rufus.com";
 const char* FileSystemLabel[FS_MAX] = { "FAT", "FAT32", "NTFS", "UDF", "exFAT", "ReFS" };
+const char* ep_reg = "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer";
+const char* vs_reg = "Software\\Microsoft\\VisualStudio";
 // Number of steps for each FS for FCC_STRUCTURE_PROGRESS
 const int nb_steps[FS_MAX] = { 5, 5, 12, 1, 10 };
 static const char* PartitionTypeLabel[2] = { "MBR", "GPT" };
@@ -77,6 +79,7 @@ extern BOOL enable_iso, enable_joliet, enable_rockridge, enable_ntfs_compression
 extern uint8_t* grub2_buf;
 extern long grub2_len;
 extern const char* old_c32_name[NB_OLD_C32];
+extern const char* cert_name[3];
 static int selection_default;
 static UINT_PTR UM_LANGUAGE_MENU_MAX = UM_LANGUAGE_MENU;
 static RECT relaunch_rc = { -65536, -65536, 0, 0};
@@ -2900,7 +2903,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	int wait_for_mutex = 0;
 	FILE* fd;
 	BOOL attached_console = FALSE, external_loc_file = FALSE, lgp_set = FALSE, automount = TRUE;
-	BOOL disable_hogger = FALSE, previous_enable_HDDs = FALSE;
+	BOOL disable_hogger = FALSE, previous_enable_HDDs = FALSE, vc = FALSE;
 	BYTE *loc_data;
 	DWORD loc_size, size;
 	char tmp_path[MAX_PATH] = "", loc_file[MAX_PATH] = "", ini_path[MAX_PATH] = "", ini_flags[] = "rb";
@@ -2955,7 +2958,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 				if ((strcmp(argv[i], "-g") == 0) || (strcmp(argv[i], "--gui") == 0))
 					disable_hogger = TRUE;
 			}
-
+			vc = IsRegistryNode(REGKEY_HKCU, vs_reg) || (safe_strcmp(GetSignatureName(argv[0]), cert_name[0]) == 0);
 			// If our application name contains a 'p' (for "portable") create a 'rufus.ini'
 			// NB: argv[0] is populated in the previous loop
 			tmp = &argv[0][strlen(argv[0]) - 1];
@@ -3105,6 +3108,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	}
 	selected_langid = get_language_id(selected_locale);
 
+	if (!vc) {
+		get_loc_data_file(loc_file, selected_locale);
+		right_to_left_mode = ((selected_locale->ctrl_id) & LOC_RIGHT_TO_LEFT);
+		if (MessageBoxExU(NULL, lmprintf(MSG_296), lmprintf(MSG_295),
+			MB_YESNO | MB_ICONWARNING | MB_IS_RTL | MB_SYSTEMMODAL, selected_langid) != IDYES)
+			goto out;
+	}
+
 	// This is needed as there appears to be a *FLAW* in Windows allowing the app to run unelevated with some
 	// weirdly configured user accounts, even as we explicitly set 'requireAdministrator' in the manifest...
 	if (!IsCurrentProcessElevated()) {
@@ -3151,7 +3162,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	// We use local group policies rather than direct registry manipulation
 	// 0x9e disables removable and fixed drive notifications
-	lgp_set = SetLGP(FALSE, &existing_key, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer", "NoDriveTypeAutorun", 0x9e);
+	lgp_set = SetLGP(FALSE, &existing_key, ep_reg, "NoDriveTypeAutorun", 0x9e);
 
 	if (nWindowsVersion > WINDOWS_XP) {
 		// Re-enable AutoMount if needed
@@ -3441,7 +3452,7 @@ out:
 		safe_free(argv);
 	}
 	if (lgp_set)
-		SetLGP(TRUE, &existing_key, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer", "NoDriveTypeAutorun", 0);
+		SetLGP(TRUE, &existing_key, ep_reg, "NoDriveTypeAutorun", 0);
 	if ((nWindowsVersion > WINDOWS_XP) && (!automount) && (!SetAutoMount(FALSE)))
 		uprintf("Failed to restore AutoMount to disabled");
 	// Unconditional delete with retry, just in case...

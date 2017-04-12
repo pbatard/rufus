@@ -557,6 +557,8 @@ t MSG_291 "Version selection"
 t MSG_292 "Please select the version of Windows you want to install:"
 t MSG_293 "Unsupported Windows version"
 t MSG_294 "This version of Windows is no longer supported by Rufus."
+t MSG_295 "Warning: Unofficial version"
+t MSG_296 "This version of Rufus was NOT produced by its official developer(s).\n\nAre you sure you want to run it?"
 
 ################################################################################
 ############################# TRANSLATOR END COPY ##############################
