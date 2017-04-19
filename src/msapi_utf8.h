@@ -836,16 +836,6 @@ static __inline int _openU(const char *filename, int oflag, int pmode)
 	wfree(filename);
 	return ret;
 }
-
-// returned UTF-8 string must be freed
-static __inline char* getenvU(const char* varname)
-{
-	wconvert(varname);
-	char* ret;
-	ret = wchar_to_utf8(_wgetenv(wvarname));
-	wfree(varname);
-	return ret;
-}
 #else
 static __inline FILE* fopenU(const char* filename, const char* mode)
 {
@@ -872,21 +862,26 @@ static __inline int _openU(const char *filename, int oflag , int pmode)
 	wfree(filename);
 	return ret;
 }
+#endif
 
 // returned UTF-8 string must be freed
 static __inline char* getenvU(const char* varname)
 {
 	wconvert(varname);
-	char *ret;
-	wchar_t value[256];
-	size_t value_size;
-	// MinGW and WDK don't know wdupenv_s, so we use wgetenv_s
-	_wgetenv_s(&value_size, value, ARRAYSIZE(value), wvarname);
-	ret = wchar_to_utf8(value);
+	char* ret = NULL;
+	wchar_t* wbuf = NULL;
+	// _wgetenv() is *BROKEN* in MS compilers => use GetEnvironmentVariableW()
+	DWORD dwSize = GetEnvironmentVariableW(wvarname, wbuf, 0);
+	wbuf = calloc(dwSize, sizeof(wchar_t));
+	if (wbuf == NULL)
+		return NULL;
+	dwSize = GetEnvironmentVariableW(wvarname, wbuf, dwSize);
+	if (dwSize != 0)
+		ret = wchar_to_utf8(wbuf);
+	free(wbuf);
 	wfree(varname);
 	return ret;
 }
-#endif
 
 static __inline int _mkdirU(const char* dirname)
 {
