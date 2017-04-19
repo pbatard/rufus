@@ -34,6 +34,7 @@
 
 extern BOOL usb_debug;	// For uuprintf
 int  nWindowsVersion = WINDOWS_UNDEFINED;
+int  nWindowsBuildNumber = -1;
 char WindowsVersionStr[128] = "Windows ";
 
 PF_TYPE_DECL(WINAPI, int, LCIDToLocaleName, (LCID, LPWSTR, int, DWORD));
@@ -328,6 +329,7 @@ void GetWindowsVersion(void)
 	if (nWindowsVersion >= 0x62) {
 		GetRegistryKeyStr(REGKEY_HKLM, "Microsoft\\Windows NT\\CurrentVersion\\CurrentBuildNumber", build_number, sizeof(build_number));
 		if (build_number[0] != 0) {
+			nWindowsBuildNumber = atoi(build_number);	// Keep a global copy
 			safe_strcat(WindowsVersionStr, sizeof(WindowsVersionStr), " (Build ");
 			safe_strcat(WindowsVersionStr, sizeof(WindowsVersionStr), build_number);
 			safe_strcat(WindowsVersionStr, sizeof(WindowsVersionStr), ")");

@@ -1288,22 +1288,21 @@ out:
 // to set our extraction index. Asks the user to select one if needed.
 BOOL SetWinToGoIndex(void)
 {
-	char *mounted_iso, image[128];
+	char *mounted_iso, *build, image[128];
 	char tmp_path[MAX_PATH] = "", xml_file[MAX_PATH] = "";
 	StrArray version_name, version_index;
-	int i;
+	int i, build_nr = 0;
 
 	// Sanity checks
+	wintogo_index = -1;
 	if ((nWindowsVersion < WINDOWS_8) || ((WimExtractCheck() & 4) == 0) ||
 		(ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem)) != FS_NTFS)) {
-		wintogo_index = -1;
 		return FALSE;
 	}
 	// Mount the install.wim image, that resides on the ISO
 	mounted_iso = MountISO(image_path);
 	if (mounted_iso == NULL) {
 		uprintf("Could not mount ISO for Windows To Go selection");
-		wintogo_index = -1;
 		return FALSE;
 	}
 	static_sprintf(image, "%s%s", mounted_iso, &img_report.install_wim_path[2]);
@@ -1321,13 +1320,13 @@ BOOL SetWinToGoIndex(void)
 	// Must use the Windows WIM API as 7z messes up the XML
 	if (!WimExtractFile_API(image, 0, "[1].xml", xml_file)) {
 		uprintf("Failed to acquire WIM index");
+		goto out;
 	}
+
 	StrArrayCreate(&version_name, 16);
 	StrArrayCreate(&version_index, 16);
 	for (i = 0; (StrArrayAdd(&version_name, get_token_data_file_indexed("DISPLAYNAME", xml_file, i + 1), FALSE) >= 0) &&
 		(StrArrayAdd(&version_index, get_token_data_file_indexed("IMAGE INDEX", xml_file, i + 1), FALSE) >= 0); i++);
-	DeleteFileU(xml_file);
-	UnMountISO();
 
 	if (i > 1)
 		i = Selection(lmprintf(MSG_291), lmprintf(MSG_292), version_name.String, i);
@@ -1338,10 +1337,27 @@ BOOL SetWinToGoIndex(void)
 	} else {
 		wintogo_index = atoi(version_index.String[i - 1]);
 	}
-	if (i >= 1)
-		uprintf("Will use '%s' (index %s) for Windows To Go", version_name.String[i - 1], version_index.String[i - 1]);
+	if (i >= 0) {
+		// Get the build version
+		build = get_token_data_file_indexed("BUILD", xml_file, i);
+		if (build != NULL)
+			build_nr = atoi(build);
+		free(build);
+		uprintf("Will use '%s' (Build: %d, Index %s) for Windows To Go",
+			version_name.String[i - 1], build_nr, version_index.String[i - 1]);
+		// Need Windows 10 Creator Update or later for boot on REMOVABLE to work
+		if ((build_nr < 15000) && (SelectedDrive.MediaType != FixedMedia)) {
+			if (MessageBoxExU(hMainDialog, lmprintf(MSG_098), lmprintf(MSG_190),
+				MB_YESNO | MB_ICONWARNING | MB_IS_RTL, selected_langid) != IDYES)
+				wintogo_index = -1;
+		}
+	}
 	StrArrayDestroy(&version_name);
 	StrArrayDestroy(&version_index);
+
+out:
+	DeleteFileU(xml_file);
+	UnMountISO();
 	return (wintogo_index >= 0);
 }
 
@@ -1368,7 +1384,7 @@ static BOOL SetupWinToGo(const char* drive_name, BOOL use_ms_efi)
 
 	uprintf("Windows To Go mode selected");
 	// Additional sanity checks
-	if ( (use_ms_efi) && (SelectedDrive.MediaType != FixedMedia) ) {
+	if ( (use_ms_efi) && (SelectedDrive.MediaType != FixedMedia) && (nWindowsBuildNumber < 15000)) {
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_NOT_SUPPORTED;
 		return FALSE;
 	}

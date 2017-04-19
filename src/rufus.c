@@ -1296,17 +1296,14 @@ static BOOL BootCheck(void)
 				// Windows To Go only works for NTFS
 				MessageBoxExU(hMainDialog, lmprintf(MSG_097, "Windows To Go"), lmprintf(MSG_092), MB_OK|MB_ICONERROR|MB_IS_RTL, selected_langid);
 				return FALSE;
-			} else if (SelectedDrive.MediaType != FixedMedia) {
-				if ((tt == TT_UEFI) && (pt == PARTITION_STYLE_GPT)) {
-					// We're screwed since we need access to 2 partitions at the same time to set this, which
-					// Windows can't do. Cue in Arthur's Theme: "♫ I know it's stupid... but it's true. ♫"
+			}
+			if (SelectedDrive.MediaType != FixedMedia) {
+				if ((tt == TT_UEFI) && (pt == PARTITION_STYLE_GPT) && (nWindowsBuildNumber < 15000)) {
+					// Up to Windows 10 Creators Update, we were screwed, since we need access to 2 partitions at the same time.
+					// Thankfully, the newer Windows allow mounting multiple partitions on the same REMOVABLE drive.
 					MessageBoxExU(hMainDialog, lmprintf(MSG_198), lmprintf(MSG_190), MB_OK|MB_ICONERROR|MB_IS_RTL, selected_langid);
 					return FALSE;
 				}
-				// I never had any success with drives that have the REMOVABLE attribute set, no matter the
-				// method or tool I tried. If you manage to get this working, I'd like to hear from you!
-				if (MessageBoxExU(hMainDialog, lmprintf(MSG_098), lmprintf(MSG_190), MB_YESNO|MB_ICONWARNING|MB_IS_RTL, selected_langid) != IDYES)
-					return FALSE;
 			}
 			// If multiple versions are available, asks the user to select one before we commit to format the drive
 			if (!SetWinToGoIndex())

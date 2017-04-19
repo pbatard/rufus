@@ -390,6 +390,7 @@ extern RUFUS_IMG_REPORT img_report;
 extern int64_t iso_blocking_status;
 extern uint16_t rufus_version[3], embedded_sl_version[2];
 extern int nWindowsVersion;
+extern int nWindowsBuildNumber;
 extern char WindowsVersionStr[128];
 extern char ubuffer[256];
 extern char embedded_sl_version_str[2][12];
