@@ -26,20 +26,16 @@ echo "setting micro to $TAGVER"
 echo $TAGVER > .tag
 
 cat > cmd.sed <<\_EOF
-s/^[ \t]*FILEVERSION[ \t]*\(.*\),\(.*\),.*,\(.*\)/ FILEVERSION \1,\2,@@TAGVER@@,\3/
-s/^[ \t]*PRODUCTVERSION[ \t]*\(.*\),\(.*\),.*,\(.*\)/ PRODUCTVERSION \1,\2,@@TAGVER@@,\3/
-s/^\([ \t]*\)VALUE[ \t]*"FileVersion",[ \t]*"\(.*\)\..*"/\1VALUE "FileVersion", "\2.@@TAGVER@@"/
-s/^\([ \t]*\)VALUE[ \t]*"ProductVersion",[ \t]*"\(.*\)\..*"/\1VALUE "ProductVersion", "\2.@@TAGVER@@"/
+s/^\([ \t]*\)*\(FILE\|PRODUCT\)VERSION\([ \t]*\)\([0-9]*\),\([0-9]*\),[0-9]*,\(.*\)/\1\2VERSION\3\4,\5,@@TAGVER@@,\6/
+s/^\([ \t]*\)VALUE\([ \t]*\)"\(File\|Product\)Version",\([ \t]*\)"\(.*\)\..*"[ \t]*/\1VALUE\2"\3Version",\4"\5.@@TAGVER@@"/
 s/^\(.*\)"Rufus \(.*\)\..*"\(.*\)/\1"Rufus \2.@@TAGVER@@"\3/
+s/^\([ \t]*\)Version="\([0-9]*\)\.\([0-9]*\)\.[0-9]*\.\([0-9]*\)"\(.*\)/\1Version="\2.\3.@@TAGVER@@.\4"\5/
 _EOF
 
 # First run sed to substitute our variable in the sed command file
 sed -i -e "s/@@TAGVER@@/$TAGVER/g" cmd.sed
-
 # Run sed to update the nano version
-sed -i -f cmd.sed src/rufus.rc
-# MinGW's sed has the bad habit of eating CRLFs - make sure we keep 'em
-sed -i 's/$/\r/' src/rufus.rc
+sed -b -i -f cmd.sed src/rufus.rc
 # NB: we need to run git add else the modified files may be ignored
 git add src/rufus.rc
 

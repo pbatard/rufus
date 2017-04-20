@@ -22,16 +22,17 @@ esac
 echo "changing version to $MAJOR.$MINOR"
 sed -i -e "s/^AC_INIT(\[\([^ ]*\)\], \[[^ ]*\]\(.*\)/AC_INIT([\1], [$MAJOR.$MINOR]\2/" configure.ac
 cat > cmd.sed <<\_EOF
-s/^[ \t]*FILEVERSION[ \t]*.*,.*,\(.*\),\(.*\)/ FILEVERSION @@MAJOR@@,@@MINOR@@,\1,\2/
-s/^[ \t]*PRODUCTVERSION[ \t]*.*,.*,\(.*\),\(.*\)/ PRODUCTVERSION @@MAJOR@@,@@MINOR@@,\1,\2/
-s/^\([ \t]*\)VALUE[ \t]*"FileVersion",[ \t]*".*\..*\.\(.*\)"/\1VALUE "FileVersion", "@@MAJOR@@.@@MINOR@@.\2"/
-s/^\([ \t]*\)VALUE[ \t]*"ProductVersion",[ \t]*".*\..*\.\(.*\)"/\1VALUE "ProductVersion", "@@MAJOR@@.@@MINOR@@.\2"/
-s/^\(.*\)"Rufus .*\..*\.\(.*\)"\(.*\)/\1"Rufus @@MAJOR@@.@@MINOR@@.\2"\3/
+s/^\([ \t]*\)\(FILE\|PRODUCT\)VERSION\([ \t]*\)[0-9]*,[0-9]*\(.*\)/\1\2VERSION\3@@MAJOR@@,@@MINOR@@\4/
+s/^\([ \t]*\)VALUE\([ \t]*\)"\(File\|Product\)Version",\([ \t]*\)"[0-9]*\.[0-9]*\.\(.*\)/\1VALUE\2"\3Version",\4"@@MAJOR@@.@@MINOR@@.\5/
+s/^\(.*\)"Rufus [0-9]*\.[0-9]*\.\(.*\)"\(.*\)/\1"Rufus @@MAJOR@@.@@MINOR@@.\2"\3/
+s/^\([ \t]*\)Version="[0-9]*\.[0-9]*\.\(.*\)"\(.*\)/\1Version="@@MAJOR@@.@@MINOR@@.\2"\3/
+s/^set VERSION=[0-9]*\.[0-9]*/set VERSION=@@MAJOR@@.@@MINOR@@/
 _EOF
 
 # First run sed to substitute our variable in the sed command file
 sed -i -e "s/@@MAJOR@@/$MAJOR/g" -e "s/@@MINOR@@/$MINOR/g" cmd.sed
-sed -i -f cmd.sed src/rufus.rc
-sed -i 's/$/\r/' src/rufus.rc
+sed -b -i -f cmd.sed src/rufus.rc
+sed -b -i -f cmd.sed res/appstore/AppxManifest.xml
+sed -b -i -f cmd.sed res/appstore/packme.cmd
 rm cmd.sed
 source ./bootstrap.sh

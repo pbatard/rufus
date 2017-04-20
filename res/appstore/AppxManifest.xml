@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Package
+ xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+ xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+ xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities">
+  <!-- NB: If you're signing with Authenticode, then the Publisher *MUST* match the LDAP fields from the
+       signature certificate exactly, else SignTool will fail with error 0x8007000b. Note that this makes
+       for an interesting struggle, when you also happen to have a comma in one of the fields... -->
+  <Identity
+   Name="Rufus"
+   Version="2.15.1091.0"
+   ProcessorArchitecture="x86"
+   Publisher='CN=Akeo Consulting, O=Akeo Consulting, STREET="24, Grey Rock", L=Milford, S=Co Donegal, PostalCode=Co Donegal, C=IE' />
+    <Properties>
+      <DisplayName>Rufus</DisplayName>
+      <PublisherDisplayName>Akeo Consulting</PublisherDisplayName>
+      <Description>Rufus</Description>
+      <Logo>Assets\Rufus-48.png</Logo>
+    </Properties>
+  <Resources>
+    <Resource Language="en-US" />
+  </Resources>
+  <Dependencies>
+    <TargetDeviceFamily
+     Name="Windows.Desktop"
+     MinVersion="10.0.14316.0"
+     MaxVersionTested="10.0.15063.0" />
+  </Dependencies>
+  <Capabilities>
+    <rescap:Capability Name="runFullTrust"/>
+  </Capabilities>
+  <Applications>
+    <Application
+     Id="Rufus"
+     Executable="rufus.exe"
+     EntryPoint="Windows.FullTrustApplication">
+      <uap:VisualElements
+       BackgroundColor="transparent"
+       DisplayName="Rufus"
+       Square150x150Logo="Assets\Rufus-150.png"
+       Square44x44Logo="Assets\Rufus-44.png"
+       Description="Rufus">
+        <uap:DefaultTile>
+          <uap:ShowNameOnTiles>
+            <uap:ShowOn Tile="square150x150Logo" />
+          </uap:ShowNameOnTiles>
+        </uap:DefaultTile>
+      </uap:VisualElements>
+    </Application>
+  </Applications>
+</Package>
