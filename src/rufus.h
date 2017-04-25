@@ -77,6 +77,7 @@
 #define MAX_FAT32_SIZE              2.0f		// Threshold above which we disable FAT32 formatting (in TB)
 #define FAT32_CLUSTER_THRESHOLD     1.011f		// For FAT32, cluster size changes don't occur at power of 2 boundaries but sligthly above
 #define DD_BUFFER_SIZE              65536		// Minimum size of the buffer we use for DD operations
+#define UBUFFER_SIZE                2048
 #define RUFUS_URL                   "https://rufus.akeo.ie"
 #define DOWNLOAD_URL                RUFUS_URL "/downloads"
 #define FILES_URL                   RUFUS_URL "/files"
@@ -121,9 +122,10 @@
 #ifdef RUFUS_DEBUG
 extern void _uprintf(const char *format, ...);
 #define uprintf(...) _uprintf(__VA_ARGS__)
-#define ubclear() do { ubuffer[0] = 0; } while (0);
-#define ubpushf(...) static_sprintf(ubuffer, __VA_ARGS__)
-#define ubpop() uprintf("%s", ubuffer)
+#define ubpushf(...) do { safe_sprintf(&ubuffer[ubuffer_pos], UBUFFER_SIZE - ubuffer_pos - 2, __VA_ARGS__); \
+	ubuffer_pos = strlen(ubuffer); ubuffer[ubuffer_pos++] = '\r'; ubuffer[ubuffer_pos++] = '\n'; \
+	ubuffer[ubuffer_pos] = 0; } while(0)
+#define ubpop() do { if (ubuffer_pos) uprintf("%s", ubuffer); ubuffer_pos = 0; } while(0)
 #define vuprintf(...) if (verbose) _uprintf(__VA_ARGS__)
 #define vvuprintf(...) if (verbose > 1) _uprintf(__VA_ARGS__)
 #define suprintf(...) if (!bSilent) _uprintf(__VA_ARGS__)
@@ -392,7 +394,8 @@ extern uint16_t rufus_version[3], embedded_sl_version[2];
 extern int nWindowsVersion;
 extern int nWindowsBuildNumber;
 extern char WindowsVersionStr[128];
-extern char ubuffer[256];
+extern size_t ubuffer_pos;
+extern char ubuffer[UBUFFER_SIZE];
 extern char embedded_sl_version_str[2][12];
 extern RUFUS_UPDATE update;
 extern int dialog_showing;

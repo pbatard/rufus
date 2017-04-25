@@ -1644,7 +1644,7 @@ static INT_PTR CALLBACK InfoCallback(HWND hCtrl, UINT message, WPARAM wParam, LP
 	return CallWindowProc(info_original_proc, hCtrl, message, wParam, lParam);
 }
 
-void InitDialog(HWND hDlg)
+static void InitDialog(HWND hDlg)
 {
 	HINSTANCE hShell32DllInst, hUserLanguagesCplDllInst, hINetCplDllInst;
 	HIMAGELIST hLangToolbarImageList;
@@ -1933,7 +1933,7 @@ static void PrintStatusTimeout(const char* str, BOOL val)
 	PrintStatus(STATUS_MSG_TIMEOUT, (val)?MSG_250:MSG_251, str);
 }
 
-void ShowLanguageMenu(RECT rcExclude)
+static void ShowLanguageMenu(RECT rcExclude)
 {
 	TPMPARAMS tpm;
 	HMENU menu;
@@ -1968,7 +1968,7 @@ void ShowLanguageMenu(RECT rcExclude)
 	DestroyMenu(menu);
 }
 
-void SetBoot(int fs, int tt)
+static void SetBoot(int fs, int tt)
 {
 	int i;
 	char tmp[32];
@@ -2018,7 +2018,7 @@ void SetBoot(int fs, int tt)
 	}
 }
 
-void SaveVHD(void)
+static void SaveVHD(void)
 {
 	static IMG_SAVE img_save = { 0 };
 	char filename[128];
@@ -2082,7 +2082,7 @@ void SaveVHD(void)
 	}
 }
 
-void SaveISO(void)
+static void SaveISO(void)
 {
 	static IMG_SAVE img_save = { 0 };
 	char filename[33] = "disc_image.iso";
@@ -3174,7 +3174,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	}
 
 relaunch:
-	uprintf("localization: using locale '%s'\n", selected_locale->txt[0]);
+	ubpushf("Localization set to '%s'", selected_locale->txt[0]);
 	right_to_left_mode = ((selected_locale->ctrl_id) & LOC_RIGHT_TO_LEFT);
 	SetProcessDefaultLayout(right_to_left_mode?LAYOUT_RTL:0);
 	if (get_loc_data_file(loc_file, selected_locale))
@@ -3207,7 +3207,7 @@ relaunch:
 
 	// Set the hook to automatically close Windows' "You need to format the disk in drive..." prompt
 	if (!SetFormatPromptHook())
-		uprintf("Warning:Could not set 'Format Disk' prompt auto-close");
+		uprintf("Warning: Could not set 'Format Disk' prompt auto-close");
 
 	ShowWindow(hDlg, SW_SHOWNORMAL);
 	UpdateWindow(hDlg);
@@ -3452,6 +3452,7 @@ out:
 		SetLGP(TRUE, &existing_key, ep_reg, "NoDriveTypeAutorun", 0);
 	if ((nWindowsVersion > WINDOWS_XP) && (!automount) && (!SetAutoMount(FALSE)))
 		uprintf("Failed to restore AutoMount to disabled");
+	ubpop();
 	// Unconditional delete with retry, just in case...
 	for (i = 0; (!DeleteFileA(cmdline_hogger)) && (i <= 10); i++)
 		Sleep(200);

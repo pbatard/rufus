@@ -1,5 +1,6 @@
 *.a
 *.aps
+*.appx
 *.db
 *.db-shm
 *.db-wal
@@ -18,6 +19,7 @@
 *.obj
 *.opendb
 *.opt
+*.patch
 *.pc
 *.pdb
 *.plg
@@ -40,6 +42,8 @@ config.guess
 config.log
 config.status
 config.sub
+cov-int
+cov-int.zip
 embedded.loc
 rufus_files
 depcomp

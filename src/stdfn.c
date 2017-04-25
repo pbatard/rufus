@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Standard Windows function calls
- * Copyright © 2013-2016 Pete Batard <pete@akeo.ie>
+ * Copyright © 2013-2017 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -717,19 +717,19 @@ DWORD WINAPI SetLGPThread(LPVOID param)
 	// We need an IGroupPolicyObject instance to set a Local Group Policy
 	hr = CoCreateInstance(&my_CLSID_GroupPolicyObject, NULL, CLSCTX_INPROC_SERVER, &my_IID_IGroupPolicyObject, (LPVOID*)&pLGPO);
 	if (FAILED(hr)) {
-		uprintf("SetLGP: CoCreateInstance failed; hr = %x\n", hr);
+		ubpushf("SetLGP: CoCreateInstance failed; hr = %x", hr);
 		goto error;
 	}
 
 	hr = pLGPO->lpVtbl->OpenLocalMachineGPO(pLGPO, GPO_OPEN_LOAD_REGISTRY);
 	if (FAILED(hr)) {
-		uprintf("SetLGP: OpenLocalMachineGPO failed - error %x\n", hr);
+		ubpushf("SetLGP: OpenLocalMachineGPO failed - error %x", hr);
 		goto error;
 	}
 
 	hr = pLGPO->lpVtbl->GetRegistryKey(pLGPO, GPO_SECTION_MACHINE, &path_key);
 	if (FAILED(hr)) {
-		uprintf("SetLGP: GetRegistryKey failed - error %x\n", hr);
+		ubpushf("SetLGP: GetRegistryKey failed - error %x", hr);
 		goto error;
 	}
 
@@ -737,7 +737,7 @@ DWORD WINAPI SetLGPThread(LPVOID param)
 	r = RegCreateKeyExA(path_key, p->szPath, 0, NULL, 0, KEY_SET_VALUE | KEY_QUERY_VALUE,
 		NULL, &policy_key, &disp);
 	if (r != ERROR_SUCCESS) {
-		uprintf("SetLGP: Failed to open LGPO path %s - error %x\n", p->szPath, hr);
+		ubpushf("SetLGP: Failed to open LGPO path %s - error %x", p->szPath, hr);
 		policy_key = NULL;
 		goto error;
 	}
@@ -751,7 +751,7 @@ DWORD WINAPI SetLGPThread(LPVOID param)
 			// The Key exists but not its value, which is OK
 			*(p->bExistingKey) = FALSE;
 		} else if (r != ERROR_SUCCESS) {
-			uprintf("SetLGP: Failed to read original %s policy value - error %x\n", p->szPolicy, r);
+			ubpushf("SetLGP: Failed to read original %s policy value - error %x", p->szPolicy, r);
 		}
 	}
 
@@ -762,7 +762,7 @@ DWORD WINAPI SetLGPThread(LPVOID param)
 		r = RegDeleteValueA(policy_key, p->szPolicy);
 	}
 	if (r != ERROR_SUCCESS) {
-		uprintf("SetLGP: RegSetValueEx / RegDeleteValue failed - error %x\n", r);
+		ubpushf("SetLGP: RegSetValueEx / RegDeleteValue failed - error %x", r);
 	}
 	RegCloseKey(policy_key);
 	policy_key = NULL;
@@ -770,13 +770,13 @@ DWORD WINAPI SetLGPThread(LPVOID param)
 	// Apply policy
 	hr = pLGPO->lpVtbl->Save(pLGPO, TRUE, (p->bRestore)?FALSE:TRUE, &ext_guid, &snap_guid);
 	if (hr != S_OK) {
-		uprintf("SetLGP: Unable to apply %s policy - error %x\n", p->szPolicy, hr);
+		ubpushf("SetLGP: Unable to apply %s policy - error %x", p->szPolicy, hr);
 		goto error;
 	} else {
 		if ((!p->bRestore) || (*(p->bExistingKey))) {
-			uprintf("SetLGP: Successfully %s %s policy to 0x%08X\n", (p->bRestore)?"restored":"set", p->szPolicy, val);
+			ubpushf("SetLGP: Successfully %s %s policy to 0x%08X", (p->bRestore)?"restored":"set", p->szPolicy, val);
 		} else {
-			uprintf("SetLGP: Successfully removed %s policy key\n", p->szPolicy);
+			ubpushf("SetLGP: Successfully removed %s policy key", p->szPolicy);
 		}
 	}
 
@@ -785,8 +785,10 @@ DWORD WINAPI SetLGPThread(LPVOID param)
 	return TRUE;
 
 error:
-	if (path_key != NULL) RegCloseKey(path_key);
-	if (pLGPO != NULL) pLGPO->lpVtbl->Release(pLGPO);
+	if (path_key != NULL)
+		RegCloseKey(path_key);
+	if (pLGPO != NULL)
+		pLGPO->lpVtbl->Release(pLGPO);
 	return FALSE;
 }
 #pragma pop_macro("INTERFACE")
@@ -798,17 +800,17 @@ BOOL SetLGP(BOOL bRestore, BOOL* bExistingKey, const char* szPath, const char* s
 	HANDLE thread_id;
 
 	if (ReadSettingBool(SETTING_DISABLE_LGP)) {
-		uprintf("LPG handling disabled, per settings");
+		ubpushf("LPG handling disabled, per settings");
 		return FALSE;
 	}
 
 	thread_id = CreateThread(NULL, 0, SetLGPThread, (LPVOID)&params, 0, NULL);
 	if (thread_id == NULL) {
-		uprintf("SetLGP: Unable to start thread");
+		ubpushf("SetLGP: Unable to start thread");
 		return FALSE;
 	}
-	if (WaitForSingleObject(thread_id, 60000) != WAIT_OBJECT_0) {
-		uprintf("SetLGP: Killing stuck thread!");
+	if (WaitForSingleObject(thread_id, 5000) != WAIT_OBJECT_0) {
+		ubpushf("SetLGP: Killing stuck thread!");
 		TerminateThread(thread_id, 0);
 		CloseHandle(thread_id);
 		return FALSE;
@@ -877,8 +879,7 @@ BOOL IsCurrentProcessElevated(void)
 			goto out;
 		}
 		r = (te.TokenIsElevated != 0);
-	}
-	else {
+	} else {
 		uprintf("Note: UAC is either disabled or not available");
 		if (!AllocateAndInitializeSid(&auth, 2, SECURITY_BUILTIN_DOMAIN_RID,
 			DOMAIN_ALIAS_RID_ADMINS, 0, 0, 0, 0, 0, 0, &psid))
