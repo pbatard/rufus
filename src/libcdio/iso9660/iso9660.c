@@ -363,7 +363,7 @@ iso9660_set_ltime_with_timezone(const struct tm *p_tm,
 
   if (!p_tm) return;
 
-  snprintf(_pvd_date, 17,
+  _snprintf(_pvd_date, 17,
            "%4.4d%2.2d%2.2d" "%2.2d%2.2d%2.2d" "%2.2d",
            p_tm->tm_year + 1900, p_tm->tm_mon + 1, p_tm->tm_mday,
            p_tm->tm_hour, p_tm->tm_min, p_tm->tm_sec,
@@ -1111,7 +1111,7 @@ iso9660_pathname_isofy (const char pathname[], uint16_t version)
 
   cdio_assert (strlen (pathname) < (sizeof (tmpbuf) - sizeof (";65535")));
 
-  snprintf (tmpbuf, sizeof(tmpbuf), "%s;%d", pathname, version);
+  _snprintf (tmpbuf, sizeof(tmpbuf), "%s;%d", pathname, version);
 
   return strdup (tmpbuf);
 }

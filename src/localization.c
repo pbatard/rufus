@@ -648,7 +648,7 @@ WORD get_language_id(loc_cmd* lcmd)
 	// Find if the selected language is the user default
 	for (i = 0; i<lcmd->unum_size; i++) {
 		if (lcmd->unum[i] == lang_id) {
-			ubpushf("Will use default UI locale 0x%04X", lang_id);
+			ubprintf("Will use default UI locale 0x%04X", lang_id);
 			return MAKELANGID(lang_id, SUBLANG_DEFAULT);
 		}
 	}
@@ -662,12 +662,12 @@ WORD get_language_id(loc_cmd* lcmd)
 		// boolean to tell us that we found what we were after.
 		EnumUILanguages(EnumUILanguagesProc, 0x4, (LONG_PTR)wlang);	// 0x04 = MUI_LANGUAGE_ID
 		if (found_lang) {
-			ubpushf("Detected installed Windows Language Pack for 0x%04X (%s)", lcmd->unum[i], lcmd->txt[1]);
+			ubprintf("Detected installed Windows Language Pack for 0x%04X (%s)", lcmd->unum[i], lcmd->txt[1]);
 			return MAKELANGID(lcmd->unum[i], SUBLANG_DEFAULT);
 		}
 	}
 
-	ubpushf("NOTE: No Windows Language Pack is installed for %s on this system.\r\n"
+	ubprintf("NOTE: No Windows Language Pack is installed for %s on this system.\r\n"
 		"This means that some controls may still be displayed using the system locale.", lcmd->txt[1]);
 	return MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT);
 }

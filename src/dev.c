@@ -155,7 +155,7 @@ static __inline void ToUpper(char* str)
 {
 	size_t i;
 	for (i = 0; i < safe_strlen(str); i++)
-		str[i] = toupper(str[i]);
+		str[i] = (char)toupper(str[i]);
 }
 
 BOOL GetOpticalMedia(IMG_SAVE* img_save)

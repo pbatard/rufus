@@ -35,7 +35,7 @@
 #pragma once
 
 /* Program options */
-#define RUFUS_DEBUG                 // print debug info to Debug facility
+#define RUFUS_LOGGING               // print info to logging facility
 /* Features not ready for prime time and that may *DESTROY* your data - USE AT YOUR OWN RISKS! */
 // #define RUFUS_TEST
 
@@ -119,17 +119,17 @@
 #define safe_vsnprintf vsnprintf
 #endif
 
-#ifdef RUFUS_DEBUG
+#ifdef RUFUS_LOGGING
 extern void _uprintf(const char *format, ...);
 #define uprintf(...) _uprintf(__VA_ARGS__)
-#define ubpushf(...) do { safe_sprintf(&ubuffer[ubuffer_pos], UBUFFER_SIZE - ubuffer_pos - 2, __VA_ARGS__); \
-	ubuffer_pos = strlen(ubuffer); ubuffer[ubuffer_pos++] = '\r'; ubuffer[ubuffer_pos++] = '\n'; \
-	ubuffer[ubuffer_pos] = 0; } while(0)
-#define ubpop() do { if (ubuffer_pos) uprintf("%s", ubuffer); ubuffer_pos = 0; } while(0)
 #define vuprintf(...) if (verbose) _uprintf(__VA_ARGS__)
 #define vvuprintf(...) if (verbose > 1) _uprintf(__VA_ARGS__)
 #define suprintf(...) if (!bSilent) _uprintf(__VA_ARGS__)
 #define uuprintf(...) if (usb_debug) _uprintf(__VA_ARGS__)
+#define ubprintf(...) do { safe_sprintf(&ubuffer[ubuffer_pos], UBUFFER_SIZE - ubuffer_pos - 2, __VA_ARGS__); \
+	ubuffer_pos = strlen(ubuffer); ubuffer[ubuffer_pos++] = '\r'; ubuffer[ubuffer_pos++] = '\n'; \
+	ubuffer[ubuffer_pos] = 0; } while(0)
+#define ubflush() do { if (ubuffer_pos) uprintf("%s", ubuffer); ubuffer_pos = 0; } while(0)
 #ifdef _DEBUG
 #define duprintf(...) _uprintf(__VA_ARGS__)
 #else
@@ -141,6 +141,11 @@ extern void _uprintf(const char *format, ...);
 #define vvuprintf(...)
 #define duprintf(...)
 #define suprintf(...)
+#define uuprintf(...)
+#define duprintf(...)
+#define ubprintf(...)
+#define ubflush()
+#define _uprintf NULL
 #endif
 
 /* Custom Windows messages */

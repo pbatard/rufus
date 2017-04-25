@@ -1743,7 +1743,7 @@ static void InitDialog(HWND hDlg)
 		embedded_sl_version_str[1], embedded_sl_version_ext[1]);
 	uprintf("Grub versions: %s, %s", GRUB4DOS_VERSION, GRUB2_PACKAGE_VERSION);
 	uprintf("System locale ID: 0x%04X", GetUserDefaultUILanguage());
-	ubpop();
+	ubflush();
 	if (selected_locale->ctrl_id & LOC_NEEDS_UPDATE) {
 		uprintf("NOTE: The %s translation requires an update, but the current translator hasn't submitted "
 			"one. Because of this, some messages will only be displayed in English.", selected_locale->txt[1]);
@@ -3174,7 +3174,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	}
 
 relaunch:
-	ubpushf("Localization set to '%s'", selected_locale->txt[0]);
+	ubprintf("Localization set to '%s'", selected_locale->txt[0]);
 	right_to_left_mode = ((selected_locale->ctrl_id) & LOC_RIGHT_TO_LEFT);
 	SetProcessDefaultLayout(right_to_left_mode?LAYOUT_RTL:0);
 	if (get_loc_data_file(loc_file, selected_locale))
@@ -3452,7 +3452,7 @@ out:
 		SetLGP(TRUE, &existing_key, ep_reg, "NoDriveTypeAutorun", 0);
 	if ((nWindowsVersion > WINDOWS_XP) && (!automount) && (!SetAutoMount(FALSE)))
 		uprintf("Failed to restore AutoMount to disabled");
-	ubpop();
+	ubflush();
 	// Unconditional delete with retry, just in case...
 	for (i = 0; (!DeleteFileA(cmdline_hogger)) && (i <= 10); i++)
 		Sleep(200);

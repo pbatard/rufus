@@ -41,7 +41,7 @@ HWND hStatus;
 size_t ubuffer_pos = 0;
 char ubuffer[UBUFFER_SIZE];	// Buffer for ubpushf() messages we don't log right away
 
-#ifdef RUFUS_DEBUG
+#ifdef RUFUS_LOGGING
 void _uprintf(const char *format, ...)
 {
 	static char buf[4096];

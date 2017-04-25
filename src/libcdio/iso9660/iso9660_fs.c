@@ -1437,7 +1437,7 @@ find_lsn_recurse (void *p_image, iso9660_readdir_t iso9660_readdir,
 
       if (*ppsz_full_filename != NULL) free(*ppsz_full_filename);
       *ppsz_full_filename = calloc(1, len);
-      snprintf (*ppsz_full_filename, len, "%s%s/", psz_path, psz_filename);
+      _snprintf (*ppsz_full_filename, len, "%s%s/", psz_path, psz_filename);
 
       if (statbuf->type == _STAT_DIR
           && strcmp ((char *) statbuf->filename, ".")

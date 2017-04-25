@@ -717,19 +717,19 @@ DWORD WINAPI SetLGPThread(LPVOID param)
 	// We need an IGroupPolicyObject instance to set a Local Group Policy
 	hr = CoCreateInstance(&my_CLSID_GroupPolicyObject, NULL, CLSCTX_INPROC_SERVER, &my_IID_IGroupPolicyObject, (LPVOID*)&pLGPO);
 	if (FAILED(hr)) {
-		ubpushf("SetLGP: CoCreateInstance failed; hr = %x", hr);
+		ubprintf("SetLGP: CoCreateInstance failed; hr = %x", hr);
 		goto error;
 	}
 
 	hr = pLGPO->lpVtbl->OpenLocalMachineGPO(pLGPO, GPO_OPEN_LOAD_REGISTRY);
 	if (FAILED(hr)) {
-		ubpushf("SetLGP: OpenLocalMachineGPO failed - error %x", hr);
+		ubprintf("SetLGP: OpenLocalMachineGPO failed - error %x", hr);
 		goto error;
 	}
 
 	hr = pLGPO->lpVtbl->GetRegistryKey(pLGPO, GPO_SECTION_MACHINE, &path_key);
 	if (FAILED(hr)) {
-		ubpushf("SetLGP: GetRegistryKey failed - error %x", hr);
+		ubprintf("SetLGP: GetRegistryKey failed - error %x", hr);
 		goto error;
 	}
 
@@ -737,7 +737,7 @@ DWORD WINAPI SetLGPThread(LPVOID param)
 	r = RegCreateKeyExA(path_key, p->szPath, 0, NULL, 0, KEY_SET_VALUE | KEY_QUERY_VALUE,
 		NULL, &policy_key, &disp);
 	if (r != ERROR_SUCCESS) {
-		ubpushf("SetLGP: Failed to open LGPO path %s - error %x", p->szPath, hr);
+		ubprintf("SetLGP: Failed to open LGPO path %s - error %x", p->szPath, hr);
 		policy_key = NULL;
 		goto error;
 	}
@@ -751,7 +751,7 @@ DWORD WINAPI SetLGPThread(LPVOID param)
 			// The Key exists but not its value, which is OK
 			*(p->bExistingKey) = FALSE;
 		} else if (r != ERROR_SUCCESS) {
-			ubpushf("SetLGP: Failed to read original %s policy value - error %x", p->szPolicy, r);
+			ubprintf("SetLGP: Failed to read original %s policy value - error %x", p->szPolicy, r);
 		}
 	}
 
@@ -762,7 +762,7 @@ DWORD WINAPI SetLGPThread(LPVOID param)
 		r = RegDeleteValueA(policy_key, p->szPolicy);
 	}
 	if (r != ERROR_SUCCESS) {
-		ubpushf("SetLGP: RegSetValueEx / RegDeleteValue failed - error %x", r);
+		ubprintf("SetLGP: RegSetValueEx / RegDeleteValue failed - error %x", r);
 	}
 	RegCloseKey(policy_key);
 	policy_key = NULL;
@@ -770,13 +770,13 @@ DWORD WINAPI SetLGPThread(LPVOID param)
 	// Apply policy
 	hr = pLGPO->lpVtbl->Save(pLGPO, TRUE, (p->bRestore)?FALSE:TRUE, &ext_guid, &snap_guid);
 	if (hr != S_OK) {
-		ubpushf("SetLGP: Unable to apply %s policy - error %x", p->szPolicy, hr);
+		ubprintf("SetLGP: Unable to apply %s policy - error %x", p->szPolicy, hr);
 		goto error;
 	} else {
 		if ((!p->bRestore) || (*(p->bExistingKey))) {
-			ubpushf("SetLGP: Successfully %s %s policy to 0x%08X", (p->bRestore)?"restored":"set", p->szPolicy, val);
+			ubprintf("SetLGP: Successfully %s %s policy to 0x%08X", (p->bRestore)?"restored":"set", p->szPolicy, val);
 		} else {
-			ubpushf("SetLGP: Successfully removed %s policy key", p->szPolicy);
+			ubprintf("SetLGP: Successfully removed %s policy key", p->szPolicy);
 		}
 	}
 
@@ -800,17 +800,17 @@ BOOL SetLGP(BOOL bRestore, BOOL* bExistingKey, const char* szPath, const char* s
 	HANDLE thread_id;
 
 	if (ReadSettingBool(SETTING_DISABLE_LGP)) {
-		ubpushf("LPG handling disabled, per settings");
+		ubprintf("LPG handling disabled, per settings");
 		return FALSE;
 	}
 
 	thread_id = CreateThread(NULL, 0, SetLGPThread, (LPVOID)&params, 0, NULL);
 	if (thread_id == NULL) {
-		ubpushf("SetLGP: Unable to start thread");
+		ubprintf("SetLGP: Unable to start thread");
 		return FALSE;
 	}
 	if (WaitForSingleObject(thread_id, 5000) != WAIT_OBJECT_0) {
-		ubpushf("SetLGP: Killing stuck thread!");
+		ubprintf("SetLGP: Killing stuck thread!");
 		TerminateThread(thread_id, 0);
 		CloseHandle(thread_id);
 		return FALSE;
