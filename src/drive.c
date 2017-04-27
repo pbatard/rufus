@@ -127,8 +127,7 @@ static HANDLE GetHandle(char* Path, BOOL bLockDrive, BOOL bWriteAccess, BOOL bWr
 	if ((safe_strlen(Path) < 5) || (Path[0] != '\\') || (Path[1] != '\\') || (Path[3] != '\\'))
 		goto out;
 
-	// Resolve a device path, so that users can seek for it in Process Explorer
-	// in case of access issues.
+	// Resolve a device path, so that we can look for that handle in case of access issues.
 	if (QueryDosDeviceA(&Path[4], DevPath, sizeof(DevPath)) == 0)
 		strcpy(DevPath, "???");
 
@@ -151,6 +150,7 @@ static HANDLE GetHandle(char* Path, BOOL bLockDrive, BOOL bWriteAccess, BOOL bWr
 			// If we can't seem to get a hold of the drive for some time,
 			// try to enable FILE_SHARE_WRITE...
 			uprintf("Warning: Could not obtain exclusive rights. Retrying with write sharing enabled...");
+			SearchProcess(DevPath, TRUE, TRUE);
 			bWriteShare = TRUE;
 		}
 		Sleep(DRIVE_ACCESS_TIMEOUT / DRIVE_ACCESS_RETRIES);
@@ -161,7 +161,7 @@ static HANDLE GetHandle(char* Path, BOOL bLockDrive, BOOL bWriteAccess, BOOL bWr
 	}
 
 	if (bWriteAccess) {
-		uprintf("Opened %s [%s] for write access\n", Path, DevPath);
+		uprintf("Opened %s [%s] for write access", Path, DevPath);
 	}
 
 	if (bLockDrive) {
@@ -177,7 +177,10 @@ static HANDLE GetHandle(char* Path, BOOL bLockDrive, BOOL bWriteAccess, BOOL bWr
 			Sleep(DRIVE_ACCESS_TIMEOUT/DRIVE_ACCESS_RETRIES);
 		}
 		// If we reached this section, either we didn't manage to get a lock or the user cancelled
-		uprintf("Could not get exclusive access to %s [%s]: %s\n", Path, DevPath, WindowsErrorString());
+		uprintf("Could not get exclusive access to %s: %s", Path, WindowsErrorString());
+		// See if we can tell the user what processes are accessing the drive
+		if (!IS_ERROR(FormatStatus))
+			SearchProcess(DevPath, TRUE, TRUE);
 		safe_closehandle(hDrive);
 	}
 

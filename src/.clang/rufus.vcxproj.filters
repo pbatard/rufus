@@ -75,6 +75,9 @@
     <ClCompile Include="..\dev.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\search.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\rufus.h">
@@ -141,6 +144,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\db.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\search.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -193,6 +193,7 @@
     <ClCompile Include="..\pki.c" />
     <ClCompile Include="..\rufus.c" />
     <ClCompile Include="..\checksum.c" />
+    <ClCompile Include="..\search.c" />
     <ClCompile Include="..\smart.c" />
     <ClCompile Include="..\stdfn.c" />
     <ClCompile Include="..\stdio.c" />
@@ -208,6 +209,7 @@
     <ClInclude Include="..\format.h" />
     <ClInclude Include="..\hdd_vs_ufd.h" />
     <ClInclude Include="..\missing.h" />
+    <ClInclude Include="..\search.h" />
     <ClInclude Include="..\settings.h" />
     <ClInclude Include="..\libcdio\cdio\cdio.h" />
     <ClInclude Include="..\libcdio\cdio\iso9660.h" />

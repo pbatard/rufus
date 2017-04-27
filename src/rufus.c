@@ -3469,3 +3469,11 @@ out:
 
 	return 0;
 }
+
+// The old WDK is showing its age and becoming a pain to support
+#if defined(DDKBUILD)
+BOOL SearchProcess(char* HandleName, BOOL bPartialMatch, BOOL bIgnoreSelf) {
+	uprintf("NOTE: Process search is not implemented on this platform");
+	return FALSE;
+}
+#endif
