@@ -2170,8 +2170,9 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	case WM_COMMAND:
 #ifdef RUFUS_TEST
 		if (LOWORD(wParam) == IDC_TEST) {
-			char* choices[] = { "Choice 1", "Choice 2", "Choice 3" };
-			SelectionDyn("Test Choice", "Unused", choices, ARRAYSIZE(choices));
+			SearchProcess("\\Device\\Harddisk5\\DR5", TRUE, TRUE);
+//			char* choices[] = { "Choice 1", "Choice 2", "Choice 3" };
+//			SelectionDyn("Test Choice", "Unused", choices, ARRAYSIZE(choices));
 			break;
 		}
 #endif

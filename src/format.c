@@ -61,7 +61,7 @@ static int task_number = 0;
 extern const int nb_steps[FS_MAX];
 extern uint32_t dur_mins, dur_secs;
 static int fs_index = 0, wintogo_index = -1;
-extern BOOL force_large_fat32, enable_ntfs_compression, lock_drive, zero_drive, disable_file_indexing, usb_debug;
+extern BOOL force_large_fat32, enable_ntfs_compression, lock_drive, zero_drive, disable_file_indexing;
 uint8_t *grub2_buf = NULL;
 long grub2_len;
 static BOOL WritePBR(HANDLE hLogicalDrive);

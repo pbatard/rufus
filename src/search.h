@@ -30,6 +30,8 @@
 
 #define PH_LARGE_BUFFER_SIZE			(256 * 1024 * 1024)
 
+#define STATUS_SUCCESS					((NTSTATUS)0x00000000L)
+#define STATUS_ALREADY_COMPLETE			((NTSTATUS)0x000000FFL)
 #define STATUS_UNSUCCESSFUL				((NTSTATUS)0x80000001L)
 #define STATUS_BUFFER_OVERFLOW			((NTSTATUS)0x80000005L)
 #define STATUS_NOT_IMPLEMENTED			((NTSTATUS)0xC0000002L)
@@ -40,6 +42,7 @@
 #define STATUS_OBJECT_TYPE_MISMATCH		((NTSTATUS)0xC0000024L)
 #define STATUS_OBJECT_NAME_INVALID		((NTSTATUS)0xC0000033L)
 #define STATUS_OBJECT_NAME_NOT_FOUND	((NTSTATUS)0xC0000034L)
+#define STATUS_OBJECT_PATH_INVALID		((NTSTATUS)0xC0000039L)
 #define STATUS_SHARING_VIOLATION		((NTSTATUS)0xC0000043L)
 #define STATUS_INSUFFICIENT_RESOURCES	((NTSTATUS)0xC000009AL)
 #define STATUS_NOT_SUPPORTED			((NTSTATUS)0xC00000BBL)
@@ -78,7 +81,61 @@ typedef struct _CLIENT_ID
 	HANDLE UniqueProcess;
 	HANDLE UniqueThread;
 } CLIENT_ID, *PCLIENT_ID;
+
+typedef struct _OBJECT_TYPE_INFORMATION
+{
+	UNICODE_STRING TypeName;
+	ULONG TotalNumberOfObjects;
+	ULONG TotalNumberOfHandles;
+	ULONG TotalPagedPoolUsage;
+	ULONG TotalNonPagedPoolUsage;
+	ULONG TotalNamePoolUsage;
+	ULONG TotalHandleTableUsage;
+	ULONG HighWaterNumberOfObjects;
+	ULONG HighWaterNumberOfHandles;
+	ULONG HighWaterPagedPoolUsage;
+	ULONG HighWaterNonPagedPoolUsage;
+	ULONG HighWaterNamePoolUsage;
+	ULONG HighWaterHandleTableUsage;
+	ULONG InvalidAttributes;
+	GENERIC_MAPPING GenericMapping;
+	ULONG ValidAccessMask;
+	BOOLEAN SecurityRequired;
+	BOOLEAN MaintainHandleCount;
+	UCHAR TypeIndex; // since WINBLUE
+	CHAR ReservedByte;
+	ULONG PoolType;
+	ULONG DefaultPagedPoolCharge;
+	ULONG DefaultNonPagedPoolCharge;
+} OBJECT_TYPE_INFORMATION, *POBJECT_TYPE_INFORMATION;
+
+typedef enum _MY_OBJECT_INFORMATION_CLASS
+{
+	_ObjectBasicInformation, // OBJECT_BASIC_INFORMATION
+	ObjectNameInformation, // OBJECT_NAME_INFORMATION
+	_ObjectTypeInformation, // OBJECT_TYPE_INFORMATION
+	ObjectTypesInformation, // OBJECT_TYPES_INFORMATION
+	ObjectHandleFlagInformation, // OBJECT_HANDLE_FLAG_INFORMATION
+	ObjectSessionInformation,
+	ObjectSessionObjectInformation,
+	MaxObjectInfoClass
+} MY_OBJECT_INFORMATION_CLASS;
 #endif
+
+typedef struct _OBJECT_TYPES_INFORMATION
+{
+	ULONG NumberOfTypes;
+} OBJECT_TYPES_INFORMATION, *POBJECT_TYPES_INFORMATION;
+
+#define ALIGN_UP_BY(Address, Align) (((ULONG_PTR)(Address) + (Align) - 1) & ~((Align) - 1))
+#define ALIGN_UP(Address, Type) ALIGN_UP_BY(Address, sizeof(Type))
+
+#define PH_FIRST_OBJECT_TYPE(ObjectTypes) \
+    (POBJECT_TYPE_INFORMATION)((PCHAR)(ObjectTypes) + ALIGN_UP(sizeof(OBJECT_TYPES_INFORMATION), ULONG_PTR))
+
+#define PH_NEXT_OBJECT_TYPE(ObjectType) \
+    (POBJECT_TYPE_INFORMATION)((PCHAR)(ObjectType) + sizeof(OBJECT_TYPE_INFORMATION) + \
+    ALIGN_UP(ObjectType->TypeName.MaximumLength, ULONG_PTR))
 
 // Heaps
 
@@ -184,3 +241,6 @@ typedef struct _RTL_HEAP_PARAMETERS
 #define HEAP_CLASS_7 0x00007000 // CSR shared heap
 #define HEAP_CLASS_8 0x00008000 // CSR port heap
 #define HEAP_CLASS_MASK 0x0000f000
+
+#define PF_INIT_OR_SET_STATUS(proc, name)  do {PF_INIT(proc, name);   \
+	if (pf##proc == NULL) status = STATUS_NOT_IMPLEMENTED; } while(0)

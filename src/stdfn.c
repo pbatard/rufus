@@ -32,7 +32,6 @@
 
 #include "settings.h"
 
-extern BOOL usb_debug;	// For uuprintf
 int  nWindowsVersion = WINDOWS_UNDEFINED;
 int  nWindowsBuildNumber = -1;
 char WindowsVersionStr[128] = "Windows ";
