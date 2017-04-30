@@ -1,6 +1,6 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
- * Search functionality for handles
+ * Process search functionality
  *
  * Modified from Process Hacker:
  *   https://github.com/processhacker2/processhacker2/
@@ -30,7 +30,7 @@
 #include <windows.h>
 
 #include "rufus.h"
-#include "search.h"
+#include "process.h"
 #include "missing.h"
 #include "msapi_utf8.h"
 
@@ -405,7 +405,8 @@ BOOL SearchProcess(char* HandleName, BOOL bPartialMatch, BOOL bIgnoreSelf)
 
 	for (i = 0; ; i++) {
 		ULONG attempts = 8;
-		PSYSTEM_HANDLE_TABLE_ENTRY_INFO_EX handleInfo = &handles->Handles[i];
+		PSYSTEM_HANDLE_TABLE_ENTRY_INFO_EX handleInfo =
+			(i < handles->NumberOfHandles) ? &handles->Handles[i] : NULL;
 
 		if ((dupHandle != NULL) && (processHandle != NtCurrentProcess())) {
 			pfNtClose(dupHandle);
@@ -414,12 +415,14 @@ BOOL SearchProcess(char* HandleName, BOOL bPartialMatch, BOOL bIgnoreSelf)
 
 #ifdef USE_OBJECT_TYPES
 		// Only look for File objects type
-		if ((fileObjectTypeIndex >= 0 ) && (handleInfo->ObjectTypeIndex != (USHORT)fileObjectTypeIndex))
+		if ((fileObjectTypeIndex >= 0 ) && (handleInfo != NULL) &&
+			(handleInfo->ObjectTypeIndex != (USHORT)fileObjectTypeIndex))
 			continue;
 #endif
 
 		// Update the current handle's process PID and compare against last
-		pid[cur_pid] = handleInfo->UniqueProcessId;
+		// Note: Be careful about not trying to overflow our list!
+		pid[cur_pid] = (handleInfo != NULL) ? handleInfo->UniqueProcessId : -1;
 
 		if (pid[0] != pid[1]) {
 			cur_pid = (cur_pid + 1) % 2;
@@ -433,13 +436,17 @@ BOOL SearchProcess(char* HandleName, BOOL bPartialMatch, BOOL bIgnoreSelf)
 
 		CHECK_FOR_USER_CANCEL;
 
+		// Exit loop condition
+		if (i >= handles->NumberOfHandles)
+			break;
+
 		// Don't bother with processes we can't access
 		if (handleInfo->UniqueProcessId == last_access_denied_pid)
 			continue;
 
-		// Exit loop condition
-		if (i >= handles->NumberOfHandles)
-			break;
+		// Filter out handles that aren't opened with Read (bit 0) or Write (bit 1) access
+		if ((handleInfo->GrantedAccess & 0x3) == 0)
+			continue;
 
 		// Open the process to which the handle we are after belongs, if not already opened
 		if (pid[0] != pid[1]) {
@@ -476,6 +483,7 @@ BOOL SearchProcess(char* HandleName, BOOL bPartialMatch, BOOL bIgnoreSelf)
 		// A loop is needed because the I/O subsystem likes to give us the wrong return lengths...
 		do {
 			ULONG returnSize;
+			// TODO: We might still need a timeout on ObjectName queries, as PH does...
 			status = pfNtQueryObject(dupHandle, ObjectNameInformation, buffer, bufferSize, &returnSize);
 			if (status == STATUS_BUFFER_OVERFLOW || status == STATUS_INFO_LENGTH_MISMATCH ||
 				status == STATUS_BUFFER_TOO_SMALL) {

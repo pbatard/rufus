@@ -1,6 +1,6 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
- * Search functionality for handles
+ * Process search functionality
  *
  * Modified from Process Hacker:
  *   https://github.com/processhacker2/processhacker2/

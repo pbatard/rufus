@@ -75,7 +75,7 @@
     <ClCompile Include="..\dev.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\search.c">
+    <ClCompile Include="..\process.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -146,7 +146,7 @@
     <ClInclude Include="..\db.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\search.h">
+    <ClInclude Include="..\process.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
