@@ -109,18 +109,9 @@ typedef struct _OBJECT_TYPE_INFORMATION
 	ULONG DefaultNonPagedPoolCharge;
 } OBJECT_TYPE_INFORMATION, *POBJECT_TYPE_INFORMATION;
 
-typedef enum _MY_OBJECT_INFORMATION_CLASS
-{
-	_ObjectBasicInformation, // OBJECT_BASIC_INFORMATION
-	ObjectNameInformation, // OBJECT_NAME_INFORMATION
-	_ObjectTypeInformation, // OBJECT_TYPE_INFORMATION
-	ObjectTypesInformation, // OBJECT_TYPES_INFORMATION
-	ObjectHandleFlagInformation, // OBJECT_HANDLE_FLAG_INFORMATION
-	ObjectSessionInformation,
-	ObjectSessionObjectInformation,
-	MaxObjectInfoClass
-} MY_OBJECT_INFORMATION_CLASS;
+#define ObjectNameInformation  1
 #endif
+#define ObjectTypesInformation 3
 
 typedef struct _OBJECT_TYPES_INFORMATION
 {

@@ -345,6 +345,7 @@ ULONG PhGetObjectTypeNumber(PUNICODE_STRING TypeName)
  */
 BOOL SearchProcess(char* HandleName, BOOL bPartialMatch, BOOL bIgnoreSelf)
 {
+	const char *access_rights_str[4] = { "n", "r", "w", "rw" };
 	NTSTATUS status = STATUS_SUCCESS;
 	PSYSTEM_HANDLE_INFORMATION_EX handles = NULL;
 	POBJECT_NAME_INFORMATION buffer = NULL;
@@ -361,14 +362,15 @@ BOOL SearchProcess(char* HandleName, BOOL bPartialMatch, BOOL bIgnoreSelf)
 	HANDLE dupHandle = NULL;
 	HANDLE processHandle = NULL;
 	BOOLEAN bFound = FALSE;
-	char exe[2][MAX_PATH];
-	int cur_exe, cur_pid;
+	ULONG access_rights = 0;
+	char exe_path[MAX_PATH];
+	int cur_pid;
 
 	PF_INIT_OR_SET_STATUS(NtQueryObject, Ntdll);
 	PF_INIT_OR_SET_STATUS(NtDuplicateObject, NtDll);
 	PF_INIT_OR_SET_STATUS(NtClose, NtDll);
 #ifdef USE_OBJECT_TYPES
-	PF_INIT(RtlInitUnicodeString, NtDll);
+	PF_INIT_OR_SET_STATUS(RtlInitUnicodeString, NtDll);
 #endif
 
 	if (NT_SUCCESS(status))
@@ -382,10 +384,9 @@ BOOL SearchProcess(char* HandleName, BOOL bPartialMatch, BOOL bIgnoreSelf)
 		goto out;
 	}
 
-	pid[0] = (ULONG_PTR)NULL;
+	exe_path[0] = 0;
+	pid[0] = (ULONG_PTR)0;
 	cur_pid = 1;
-	exe[0][0] = 0;
-	cur_exe = 1;
 
 	wHandleName = utf8_to_wchar(HandleName);
 	wHandleNameLen = (USHORT)wcslen(wHandleName);
@@ -400,7 +401,6 @@ BOOL SearchProcess(char* HandleName, BOOL bPartialMatch, BOOL bIgnoreSelf)
 	fileObjectTypeIndex = PhGetObjectTypeNumber(&fileTypeName);
 	if (fileObjectTypeIndex < 0)
 		uprintf("Warning: Could not get Object Index for file types");
-	}
 #endif
 
 	for (i = 0; ; i++) {
@@ -426,6 +426,14 @@ BOOL SearchProcess(char* HandleName, BOOL bPartialMatch, BOOL bIgnoreSelf)
 
 		if (pid[0] != pid[1]) {
 			cur_pid = (cur_pid + 1) % 2;
+
+			// If we're switching process and found a match, print it
+			if (bFound) {
+				uprintf("o '%s' (pid: %ld, access: %s)", exe_path, pid[cur_pid], access_rights_str[access_rights & 0x3]);
+				bFound = FALSE;
+				access_rights = 0;
+			}
+
 			// Close the previous handle
 			if (processHandle != NULL) {
 				if (processHandle != NtCurrentProcess())
@@ -483,7 +491,7 @@ BOOL SearchProcess(char* HandleName, BOOL bPartialMatch, BOOL bIgnoreSelf)
 		// A loop is needed because the I/O subsystem likes to give us the wrong return lengths...
 		do {
 			ULONG returnSize;
-			// TODO: We might still need a timeout on ObjectName queries, as PH does...
+			// TODO: We might potentially still need a timeout on ObjectName queries, as PH does...
 			status = pfNtQueryObject(dupHandle, ObjectNameInformation, buffer, bufferSize, &returnSize);
 			if (status == STATUS_BUFFER_OVERFLOW || status == STATUS_INFO_LENGTH_MISMATCH ||
 				status == STATUS_BUFFER_TOO_SMALL) {
@@ -513,28 +521,25 @@ BOOL SearchProcess(char* HandleName, BOOL bPartialMatch, BOOL bIgnoreSelf)
 		if (wcsncmp(wHandleName, buffer->Name.Buffer, wHandleNameLen) != 0)
 			continue;
 
-		if (!bFound) {
-			uprintf("\r\nNOTE: The following process(es) are accessing %s:", HandleName);
-			bFound = TRUE;
-		}
+		// If we are here, we have a process accessing our target!
+		bFound = TRUE;
 
-		// TODO: only list processes with conflicting access rights (ignore "Read attributes" or "Synchronize")
-		if (GetModuleFileNameExU(processHandle, 0, exe[cur_exe], MAX_PATH - 1)) {
-			// Avoid printing the same path repeatedly
-			if (strcmp(exe[0], exe[1]) != 0) {
-				uprintf("o %s", exe[cur_exe]);
-				cur_exe = (cur_exe + 1) % 2;
-			}
-		} else {
-			uprintf("o Unknown (Process ID %d)", GetProcessId(processHandle));
-		}
+		// Keep a mask of all the access rights being used
+		access_rights |= handleInfo->GrantedAccess;
+
+		// If this is the very first process we find, print a header
+		if (exe_path[0] == 0)
+			uprintf("\r\nNOTE: The following process(es) or service(s) are accessing %s:", HandleName);
+
+		if (!GetModuleFileNameExU(processHandle, 0, exe_path, MAX_PATH - 1))
+			safe_sprintf(exe_path, MAX_PATH, "Unknown_Process_%ld", handleInfo->UniqueProcessId);
 	}
 
 out:
-	if (bFound)
+	if (exe_path[0] != 0)
 		uprintf("You should try to close these applications before attempting to reformat the drive.");
 	else
-		uprintf("NOTE: " APPLICATION_NAME " was not able to identify the process(es) preventing access to %s", HandleName);
+		uprintf(APPLICATION_NAME " was unable to identify the process(es) or service(s) preventing access to %s", HandleName);
 
 	free(wHandleName);
 	PhFree(buffer);
