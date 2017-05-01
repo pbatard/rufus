@@ -480,7 +480,7 @@ extern BOOL WimExtractFile_7z(const char* image, int index, const char* src, con
 extern BOOL WimApplyImage(const char* image, int index, const char* dst);
 extern BOOL IsBootableImage(const char* path);
 extern BOOL AppendVHDFooter(const char* vhd_path);
-extern BOOL SetWinToGoIndex(void);
+extern int SetWinToGoIndex(void);
 extern int IsHDD(DWORD DriveIndex, uint16_t vid, uint16_t pid, const char* strid);
 extern char* GetSignatureName(const char* path);
 extern LONG ValidateSignature(HWND hDlg, const char* path);

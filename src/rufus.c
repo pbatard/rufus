@@ -1308,8 +1308,15 @@ static BOOL BootCheck(void)
 				}
 			}
 			// If multiple versions are available, asks the user to select one before we commit to format the drive
-			if (!SetWinToGoIndex())
+			switch(SetWinToGoIndex()) {
+			case -1:
+				MessageBoxExU(hMainDialog, lmprintf(MSG_073), lmprintf(MSG_291), MB_OK | MB_ICONERROR | MB_IS_RTL, selected_langid);
+				// fall through
+			case -2:
 				return FALSE;
+			default:
+				break;
+			}
 		} else if (tt == TT_UEFI) {
 			if (!IS_EFI_BOOTABLE(img_report)) {
 				// Unsupported ISO

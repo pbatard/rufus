@@ -1281,7 +1281,8 @@ out:
 
 // Checks which versions of Windows are available in an install.wim image
 // to set our extraction index. Asks the user to select one if needed.
-BOOL SetWinToGoIndex(void)
+// Returns -2 on user cancel, -1 on other error, >=0 on success.
+int SetWinToGoIndex(void)
 {
 	char *mounted_iso, *build, image[128];
 	char tmp_path[MAX_PATH] = "", xml_file[MAX_PATH] = "";
@@ -1344,7 +1345,7 @@ BOOL SetWinToGoIndex(void)
 		if ((build_nr < 15000) && (SelectedDrive.MediaType != FixedMedia)) {
 			if (MessageBoxExU(hMainDialog, lmprintf(MSG_098), lmprintf(MSG_190),
 				MB_YESNO | MB_ICONWARNING | MB_IS_RTL, selected_langid) != IDYES)
-				wintogo_index = -1;
+				wintogo_index = -2;
 		}
 	}
 	StrArrayDestroy(&version_name);
@@ -1353,7 +1354,7 @@ BOOL SetWinToGoIndex(void)
 out:
 	DeleteFileU(xml_file);
 	UnMountISO();
-	return (wintogo_index >= 0);
+	return wintogo_index;
 }
 
 // http://technet.microsoft.com/en-ie/library/jj721578.aspx
