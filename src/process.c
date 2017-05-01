@@ -532,7 +532,8 @@ BOOL SearchProcess(char* HandleName, BOOL bPartialMatch, BOOL bIgnoreSelf)
 			uprintf("\r\nNOTE: The following process(es) or service(s) are accessing %s:", HandleName);
 
 		if (!GetModuleFileNameExU(processHandle, 0, exe_path, MAX_PATH - 1))
-			safe_sprintf(exe_path, MAX_PATH, "Unknown_Process_%ld", handleInfo->UniqueProcessId);
+			safe_sprintf(exe_path, MAX_PATH, "Unknown_Process_%" PRIu64,
+				(ULONGLONG) handleInfo->UniqueProcessId);
 	}
 
 out:

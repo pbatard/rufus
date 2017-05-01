@@ -52,8 +52,8 @@ PF_TYPE_DECL(WINAPI, LPITEMIDLIST, SHSimpleIDListFromPath, (PCWSTR pszPath));
 static HICON hMessageIcon = (HICON)INVALID_HANDLE_VALUE;
 static char* szMessageText = NULL;
 static char* szMessageTitle = NULL;
-static char **szChoice;
-static int nChoices;
+static char **szSelectionChoice;
+static int nSelectionChoices;
 static HWND hBrowseEdit;
 extern HWND hUpdatesDlg;
 static WNDPROC pOrgBrowseWndproc;
@@ -864,10 +864,10 @@ INT_PTR CALLBACK SelectionCallback(HWND hDlg, UINT message, WPARAM wParam, LPARA
 	switch (message) {
 	case WM_INITDIALOG:
 		// Don't overflow our max radio button
-		if (nChoices > (IDC_SELECTION_CHOICEMAX - IDC_SELECTION_CHOICE1 + 1)) {
+		if (nSelectionChoices > (IDC_SELECTION_CHOICEMAX - IDC_SELECTION_CHOICE1 + 1)) {
 			uprintf("Warning: Too many options requested for Selection (%d vs %d)",
-				nChoices, IDC_SELECTION_CHOICEMAX - IDC_SELECTION_CHOICE1);
-			nChoices = IDC_SELECTION_CHOICEMAX - IDC_SELECTION_CHOICE1;
+				nSelectionChoices, IDC_SELECTION_CHOICEMAX - IDC_SELECTION_CHOICE1);
+			nSelectionChoices = IDC_SELECTION_CHOICEMAX - IDC_SELECTION_CHOICE1;
 		}
 		// TODO: This shouldn't be needed when using DS_SHELLFONT
 		// Get the system message box font. See http://stackoverflow.com/a/6057761
@@ -886,7 +886,7 @@ INT_PTR CALLBACK SelectionCallback(HWND hDlg, UINT message, WPARAM wParam, LPARA
 		// Set the dialog to use the system message box font
 		SendMessage(hDlg, WM_SETFONT, (WPARAM)hDlgFont, MAKELPARAM(TRUE, 0));
 		SendMessage(GetDlgItem(hDlg, IDC_SELECTION_TEXT), WM_SETFONT, (WPARAM)hDlgFont, MAKELPARAM(TRUE, 0));
-		for (i = 0; i < nChoices; i++)
+		for (i = 0; i < nSelectionChoices; i++)
 			SendMessage(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + i), WM_SETFONT, (WPARAM)hDlgFont, MAKELPARAM(TRUE, 0));
 		SendMessage(GetDlgItem(hDlg, IDYES), WM_SETFONT, (WPARAM)hDlgFont, MAKELPARAM(TRUE, 0));
 		SendMessage(GetDlgItem(hDlg, IDNO), WM_SETFONT, (WPARAM)hDlgFont, MAKELPARAM(TRUE, 0));
@@ -901,8 +901,8 @@ INT_PTR CALLBACK SelectionCallback(HWND hDlg, UINT message, WPARAM wParam, LPARA
 		SetWindowTextU(hDlg, szMessageTitle);
 		SetWindowTextU(GetDlgItem(hDlg, IDCANCEL), lmprintf(MSG_007));
 		SetWindowTextU(GetDlgItem(hDlg, IDC_SELECTION_TEXT), szMessageText);
-		for (i = 0; i < nChoices; i++) {
-			SetWindowTextU(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + i), szChoice[i]);
+		for (i = 0; i < nSelectionChoices; i++) {
+			SetWindowTextU(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + i), szSelectionChoice[i]);
 			ShowWindow(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + i), SW_SHOW);
 		}
 		// Move/Resize the controls as needed to fit our text
@@ -916,12 +916,12 @@ INT_PTR CALLBACK SelectionCallback(HWND hDlg, UINT message, WPARAM wParam, LPARA
 		if (hDC != NULL)
 			ReleaseDC(hCtrl, hDC);
 		ResizeMoveCtrl(hDlg, hCtrl, 0, 0, 0, dh, 1.0f);
-		for (i = 0; i < nChoices; i++)
+		for (i = 0; i < nSelectionChoices; i++)
 			ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + i), 0, dh, 0, 0, 1.0f);
-		if (nChoices > 2) {
+		if (nSelectionChoices > 2) {
 			GetWindowRect(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1), &rect);
 			GetWindowRect(GetDlgItem(hDlg, IDC_SELECTION_CHOICE2), &rect2);
-			dh += (nChoices - 2) * (rect2.top - rect.top) + 5;
+			dh += (nSelectionChoices - 2) * (rect2.top - rect.top) + 5;
 		}
 		ResizeMoveCtrl(hDlg, hDlg, 0, 0, 0, dh, 1.0f);
 		ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, -1), 0, 0, 0, dh, 1.0f);	// IDC_STATIC = -1
@@ -952,9 +952,9 @@ INT_PTR CALLBACK SelectionCallback(HWND hDlg, UINT message, WPARAM wParam, LPARA
 	case WM_COMMAND:
 		switch (LOWORD(wParam)) {
 		case IDOK:
-			for (i = 0; (i < nChoices) &&
+			for (i = 0; (i < nSelectionChoices) &&
 				(Button_GetCheck(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + i)) != BST_CHECKED); i++);
-			if (i < nChoices)
+			if (i < nSelectionChoices)
 				r = i + 1;
 			// Fall through
 		case IDNO:
@@ -977,8 +977,8 @@ int Selection(char* title, char* message, char** choices, int size)
 	dialog_showing++;
 	szMessageTitle = title;
 	szMessageText = message;
-	szChoice = choices;
-	nChoices = size;
+	szSelectionChoice = choices;
+	nSelectionChoices = size;
 	ret = (int)MyDialogBox(hMainInstance, IDD_SELECTION, hMainDialog, SelectionCallback);
 	dialog_showing--;
 
