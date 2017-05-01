@@ -931,10 +931,10 @@ DWORD WINAPI SumThread(void* param)
 		// Update the progress and check for cancel
 		if (_GetTickCount64() > LastRefresh + MAX_REFRESH) {
 			LastRefresh = _GetTickCount64();
-			format_percent = (100.0f*rb) / (1.0f*img_report.projected_size);
+			format_percent = (100.0f*rb) / (1.0f*img_report.image_size);
 			PrintInfo(0, MSG_271, format_percent);
 			SendMessage(hProgress, PBM_SETPOS, (WPARAM)((format_percent / 100.0f)*MAX_PROGRESS), 0);
-			SetTaskbarProgressValue(rb, img_report.projected_size);
+			SetTaskbarProgressValue(rb, img_report.image_size);
 		}
 		CHECK_FOR_USER_CANCEL;
 

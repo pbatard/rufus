@@ -1505,7 +1505,7 @@ static void update_progress(const uint64_t processed_bytes)
 {
 	if (_GetTickCount64() > LastRefresh + MAX_REFRESH) {
 		LastRefresh = _GetTickCount64();
-		format_percent = (100.0f*processed_bytes)/(1.0f*img_report.projected_size);
+		format_percent = (100.0f*processed_bytes)/(1.0f*img_report.image_size);
 		PrintInfo(0, MSG_261, format_percent);
 		UpdateProgress(OP_FORMAT, format_percent);
 	}
@@ -1517,7 +1517,7 @@ static BOOL WriteDrive(HANDLE hPhysicalDrive, HANDLE hSourceImage)
 	BOOL s, ret = FALSE;
 	LARGE_INTEGER li;
 	DWORD rSize, wSize, BufSize;
-	uint64_t wb, target_size = hSourceImage?img_report.projected_size:SelectedDrive.DiskSize;
+	uint64_t wb, target_size = hSourceImage?img_report.image_size:SelectedDrive.DiskSize;
 	uint8_t *buffer = NULL;
 	int i;
 

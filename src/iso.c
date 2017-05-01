@@ -242,9 +242,9 @@ static BOOL check_iso_props(const char* psz_dirname, int64_t i_file_length, cons
 		if (i_file_length >= FOUR_GIGABYTES)
 			img_report.has_4GB_file = TRUE;
 		// Compute projected size needed
-		total_blocks += i_file_length/UDF_BLOCKSIZE;
+		total_blocks += i_file_length / ISO_BLOCKSIZE;
 		// NB: ISO_BLOCKSIZE = UDF_BLOCKSIZE
-		if ((i_file_length != 0) && (i_file_length%ISO_BLOCKSIZE == 0))
+		if ((i_file_length != 0) && (i_file_length % ISO_BLOCKSIZE != 0))
 			total_blocks++;
 		return TRUE;
 	}
@@ -673,7 +673,6 @@ BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan)
 		uprintf("ISO analysis:");
 		SendMessage(hMainDialog, UM_PROGRESS_INIT, PBS_MARQUEE, 0);
 		total_blocks = 0;
-		memset(&img_report, 0, sizeof(img_report));
 		has_ldlinux_c32 = FALSE;
 		// String array of all isolinux/syslinux locations
 		StrArrayCreate(&config_path, 8);

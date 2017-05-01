@@ -277,6 +277,7 @@ typedef struct {
 	char cfg_path[128];			/* path to the ISO's isolinux.cfg */
 	char reactos_path[128];		/* path to the ISO's freeldr.sys or setupldr.sys */
 	char install_wim_path[64];	/* path to install.wim or install.swm */
+	uint64_t image_size;
 	uint64_t projected_size;
 	uint32_t install_wim_version;
 	BOOLEAN is_iso;

@@ -293,19 +293,19 @@ BOOL IsBootableImage(const char* path)
 		uprintf("  Could not get image size: %s", WindowsErrorString());
 		goto out;
 	}
-	img_report.projected_size = (uint64_t)liImageSize.QuadPart;
+	img_report.image_size = (uint64_t)liImageSize.QuadPart;
 
 	size = sizeof(vhd_footer);
-	if ((img_report.compression_type == BLED_COMPRESSION_NONE) && (img_report.projected_size >= (512 + size))) {
+	if ((img_report.compression_type == BLED_COMPRESSION_NONE) && (img_report.image_size >= (512 + size))) {
 		footer = (vhd_footer*)malloc(size);
-		ptr.QuadPart = img_report.projected_size - size;
+		ptr.QuadPart = img_report.image_size - size;
 		if ( (footer == NULL) || (!SetFilePointerEx(handle, ptr, NULL, FILE_BEGIN)) ||
 			 (!ReadFile(handle, footer, size, &size, NULL)) || (size != sizeof(vhd_footer)) ) {
 			uprintf("  Could not read VHD footer");
 			goto out;
 		}
 		if (memcmp(footer->cookie, conectix_str, sizeof(footer->cookie)) == 0) {
-			img_report.projected_size -= sizeof(vhd_footer);
+			img_report.image_size -= sizeof(vhd_footer);
 			if ( (bswap_uint32(footer->file_format_version) != VHD_FOOTER_FILE_FORMAT_V1_0)
 			  || (bswap_uint32(footer->disk_type) != VHD_FOOTER_TYPE_FIXED_HARD_DISK)) {
 				uprintf("  Unsupported type of VHD image");
