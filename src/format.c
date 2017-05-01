@@ -1663,7 +1663,7 @@ DWORD WINAPI FormatThread(void* param)
 		extra_partitions = XP_COMPAT;
 
 	PrintInfoDebug(0, MSG_225);
-	hPhysicalDrive = GetPhysicalHandle(DriveIndex, lock_drive, TRUE);
+	hPhysicalDrive = GetPhysicalHandle(DriveIndex, lock_drive, TRUE, FALSE);
 	if (hPhysicalDrive == INVALID_HANDLE_VALUE) {
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_OPEN_FAILED;
 		goto out;
@@ -2096,7 +2096,7 @@ DWORD WINAPI SaveImageThread(void* param)
 	LastRefresh = 0;
 	switch (img_save->Type) {
 	case IMG_SAVE_TYPE_VHD:
-		hPhysicalDrive = GetPhysicalHandle(img_save->DeviceNum, TRUE, FALSE);
+		hPhysicalDrive = GetPhysicalHandle(img_save->DeviceNum, TRUE, FALSE, FALSE);
 		break;
 	case IMG_SAVE_TYPE_ISO:
 		hPhysicalDrive = CreateFileA(img_save->DevicePath, GENERIC_READ, FILE_SHARE_READ,

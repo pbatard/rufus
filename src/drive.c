@@ -138,7 +138,7 @@ static HANDLE GetHandle(char* Path, BOOL bLockDrive, BOOL bWriteAccess, BOOL bWr
 		// We keep FILE_SHARE_READ though, as this shouldn't hurt us any, and is
 		// required for enumeration.
 		hDrive = CreateFileA(Path, GENERIC_READ|(bWriteAccess?GENERIC_WRITE:0),
-			FILE_SHARE_READ|((bWriteAccess && bWriteShare)?FILE_SHARE_WRITE:0),
+			FILE_SHARE_READ|(bWriteShare?FILE_SHARE_WRITE:0),
 			NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 		if (hDrive != INVALID_HANDLE_VALUE)
 			break;
@@ -146,11 +146,10 @@ static HANDLE GetHandle(char* Path, BOOL bLockDrive, BOOL bWriteAccess, BOOL bWr
 			break;
 		if (i == 0) {
 			uprintf("Waiting for access...");
-		} else if (bWriteAccess && !bWriteShare && (i > DRIVE_ACCESS_RETRIES/3)) {
+		} else if (!bWriteShare && (i > DRIVE_ACCESS_RETRIES/3)) {
 			// If we can't seem to get a hold of the drive for some time,
 			// try to enable FILE_SHARE_WRITE...
 			uprintf("Warning: Could not obtain exclusive rights. Retrying with write sharing enabled...");
-			SearchProcess(DevPath, TRUE, TRUE);
 			bWriteShare = TRUE;
 		}
 		Sleep(DRIVE_ACCESS_TIMEOUT / DRIVE_ACCESS_RETRIES);
@@ -207,11 +206,11 @@ out:
 /*
  * Return a handle to the physical drive identified by DriveIndex
  */
-HANDLE GetPhysicalHandle(DWORD DriveIndex, BOOL bLockDrive, BOOL bWriteAccess)
+HANDLE GetPhysicalHandle(DWORD DriveIndex, BOOL bLockDrive, BOOL bWriteAccess, BOOL bWriteShare)
 {
 	HANDLE hPhysical = INVALID_HANDLE_VALUE;
 	char* PhysicalPath = GetPhysicalName(DriveIndex);
-	hPhysical = GetHandle(PhysicalPath, bLockDrive, bWriteAccess, FALSE);
+	hPhysical = GetHandle(PhysicalPath, bLockDrive, bWriteAccess, bWriteShare);
 	safe_free(PhysicalPath);
 	return hPhysical;
 }
@@ -537,7 +536,7 @@ BOOL GetDriveLabel(DWORD DriveIndex, char* letters, char** label)
 	// Try to read an extended label from autorun first. Fallback to regular label if not found.
 	// In the case of card readers with no card, users can get an annoying popup asking them
 	// to insert media. Use IOCTL_STORAGE_CHECK_VERIFY to prevent this
-	hPhysical = GetPhysicalHandle(DriveIndex, FALSE, FALSE);
+	hPhysical = GetPhysicalHandle(DriveIndex, FALSE, FALSE, TRUE);
 	if (DeviceIoControl(hPhysical, IOCTL_STORAGE_CHECK_VERIFY, NULL, 0, NULL, 0, &size, NULL))
 		AutorunLabel = get_token_data_file("label", AutorunPath);
 	else if (GetLastError() == ERROR_NOT_READY)
@@ -570,7 +569,7 @@ uint64_t GetDriveSize(DWORD DriveIndex)
 	BYTE geometry[256];
 	PDISK_GEOMETRY_EX DiskGeometry = (PDISK_GEOMETRY_EX)(void*)geometry;
 
-	hPhysical = GetPhysicalHandle(DriveIndex, FALSE, FALSE);
+	hPhysical = GetPhysicalHandle(DriveIndex, FALSE, FALSE, TRUE);
 	if (hPhysical == INVALID_HANDLE_VALUE)
 		return FALSE;
 
@@ -592,7 +591,7 @@ BOOL IsMediaPresent(DWORD DriveIndex)
 	DWORD size;
 	BYTE geometry[128];
 
-	hPhysical = GetPhysicalHandle(DriveIndex, FALSE, FALSE);
+	hPhysical = GetPhysicalHandle(DriveIndex, FALSE, FALSE, TRUE);
 	r = DeviceIoControl(hPhysical, IOCTL_DISK_GET_DRIVE_GEOMETRY_EX,
 			NULL, 0, geometry, sizeof(geometry), &size, NULL) && (size > 0);
 	safe_closehandle(hPhysical);
@@ -711,7 +710,7 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 	}
 	safe_free(volume_name);
 
-	hPhysical = GetPhysicalHandle(DriveIndex, FALSE, FALSE);
+	hPhysical = GetPhysicalHandle(DriveIndex, FALSE, FALSE, TRUE);
 	if (hPhysical == INVALID_HANDLE_VALUE)
 		return 0;
 
