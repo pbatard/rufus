@@ -200,16 +200,16 @@ static BOOLEAN __stdcall ChkdskCallback(FILE_SYSTEM_CALLBACK_COMMAND Command, DW
 	if (IS_ERROR(FormatStatus))
 		return FALSE;
 
-	switch(Command) {
+	switch (Command) {
 	case FCC_PROGRESS:
 	case FCC_CHECKDISK_PROGRESS:
 		percent = (DWORD*)pData;
 		PrintInfo(0, MSG_219, *percent);
 		break;
 	case FCC_DONE:
-		if(*(BOOLEAN*)pData == FALSE) {
-			uprintf("Error while checking disk.\n");
-			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_GEN_FAILURE;
+		if (*(BOOLEAN*)pData == FALSE) {
+			uprintf("Error while checking disk");
+			return FALSE;
 		}
 		break;
 	case FCC_UNKNOWN1A:
@@ -217,37 +217,32 @@ static BOOLEAN __stdcall ChkdskCallback(FILE_SYSTEM_CALLBACK_COMMAND Command, DW
 		// Silence these specific calls
 		break;
 	case FCC_INCOMPATIBLE_FILE_SYSTEM:
-		uprintf("Incompatible File System\n");
-		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_INCOMPATIBLE_FS);
-		break;
+		uprintf("Incompatible File System");
+		return FALSE;
 	case FCC_ACCESS_DENIED:
-		uprintf("Access denied\n");
-		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_ACCESS_DENIED;
-		break;
+		uprintf("Access denied");
+		return FALSE;
 	case FCC_MEDIA_WRITE_PROTECTED:
-		uprintf("Media is write protected\n");
-		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_WRITE_PROTECT;
-		break;
+		uprintf("Media is write protected");
+		return FALSE;
 	case FCC_VOLUME_IN_USE:
-		uprintf("Volume is in use\n");
-		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_DEVICE_IN_USE;
-		break;
+		uprintf("Volume is in use");
+		return FALSE;
 	case FCC_OUTPUT:
 		OutputUTF8Message(((PTEXTOUTPUT)pData)->Output);
 		break;
 	case FCC_NO_MEDIA_IN_DRIVE:
-		uprintf("No media in drive\n");
-		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_NO_MEDIA_IN_DRIVE;
-		break;
+		uprintf("No media in drive");
+		return FALSE;
 	case FCC_READ_ONLY_MODE:
-		uprintf("Media has been switched to read-only - Leaving checkdisk\n");
+		uprintf("Media has been switched to read-only - Leaving checkdisk");
 		break;
 	default:
-		uprintf("ChkdskExCallback: received unhandled command %X\n", Command);
+		uprintf("ChkdskExCallback: received unhandled command %X", Command);
 		// Assume the command isn't an error
 		break;
 	}
-	return (!IS_ERROR(FormatStatus));
+	return TRUE;
 }
 
 /*
