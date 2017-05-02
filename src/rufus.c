@@ -3157,7 +3157,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	hMainInstance = hInstance;
 
 	// Initialize COM for folder selection
-	IGNORE_RETVAL(CoInitializeEx(NULL, COINIT_APARTMENTTHREADED));
+	IGNORE_RETVAL(CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE));
 
 	// Some dialogs have Rich Edit controls and won't display without this
 	if (GetLibraryHandle("Riched20") == NULL) {
@@ -3166,6 +3166,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	// Set the Windows version
 	GetWindowsVersion();
+
+	// Increase the application privileges (SE_DEBUG_PRIVILEGE), so that we can report
+	// the Windows Services preventing access to the disk or volume we want to format.
+	EnablePrivileges();
 
 	// We use local group policies rather than direct registry manipulation
 	// 0x9e disables removable and fixed drive notifications

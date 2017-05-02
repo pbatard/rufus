@@ -51,9 +51,11 @@ PF_TYPE_DECL(NTAPI, NTSTATUS, NtQuerySystemInformation, (SYSTEM_INFORMATION_CLAS
 PF_TYPE_DECL(NTAPI, NTSTATUS, NtQueryObject, (HANDLE, OBJECT_INFORMATION_CLASS, PVOID, ULONG, PULONG));
 PF_TYPE_DECL(NTAPI, NTSTATUS, NtDuplicateObject, (HANDLE, HANDLE, HANDLE, PHANDLE, ACCESS_MASK, ULONG, ULONG));
 PF_TYPE_DECL(NTAPI, NTSTATUS, NtOpenProcess, (PHANDLE, ACCESS_MASK, POBJECT_ATTRIBUTES, PCLIENT_ID));
+PF_TYPE_DECL(NTAPI, NTSTATUS, NtOpenProcessToken, (HANDLE, ACCESS_MASK, PHANDLE));
+PF_TYPE_DECL(NTAPI, NTSTATUS, NtAdjustPrivilegesToken, (HANDLE, BOOLEAN, PTOKEN_PRIVILEGES, ULONG, PTOKEN_PRIVILEGES, PULONG));
 PF_TYPE_DECL(NTAPI, NTSTATUS, NtClose, (HANDLE));
 
-PVOID PhHeapHandle = NULL;
+static PVOID PhHeapHandle = NULL;
 
 /*
  * Convert an NT Status to an error message
@@ -67,6 +69,8 @@ static char* NtStatusError(NTSTATUS Status) {
 	static char unknown[32];
 
 	switch (Status) {
+	case STATUS_SUCCESS:
+		return "Operation Successful";
 	case STATUS_UNSUCCESSFUL:
 		return "Operation Failed";
 	case STATUS_BUFFER_OVERFLOW:
@@ -547,4 +551,51 @@ out:
 	PhFree(handles);
 	PhDestroyHeap();
 	return bFound;
+}
+
+/**
+ * Increase the privileges of the current application.
+ *
+ * \return TRUE if the request was successful.
+ */
+BOOL EnablePrivileges(void)
+{
+	// List of the privileges we require. A list of requestable privileges can
+	// be obtained at https://technet.microsoft.com/en-us/library/dn221963.aspx
+	const DWORD requestedPrivileges[] = {
+		SE_DEBUG_PRIVILEGE,
+	};
+	NTSTATUS status = STATUS_NOT_IMPLEMENTED;
+	HANDLE tokenHandle;
+
+	PF_INIT_OR_OUT(NtClose, NtDll);
+	PF_INIT_OR_OUT(NtOpenProcessToken, NtDll);
+	PF_INIT_OR_OUT(NtAdjustPrivilegesToken, NtDll);
+
+	status = pfNtOpenProcessToken(NtCurrentProcess(), TOKEN_ADJUST_PRIVILEGES, &tokenHandle);
+
+	if (NT_SUCCESS(status)) {
+		CHAR privilegesBuffer[FIELD_OFFSET(TOKEN_PRIVILEGES, Privileges) +
+			sizeof(LUID_AND_ATTRIBUTES) * ARRAYSIZE(requestedPrivileges)];
+		PTOKEN_PRIVILEGES privileges;
+		ULONG i;
+
+		privileges = (PTOKEN_PRIVILEGES)privilegesBuffer;
+		privileges->PrivilegeCount = ARRAYSIZE(requestedPrivileges);
+
+		for (i = 0; i < privileges->PrivilegeCount; i++) {
+			privileges->Privileges[i].Attributes = SE_PRIVILEGE_ENABLED;
+			privileges->Privileges[i].Luid.HighPart = 0;
+			privileges->Privileges[0].Luid.LowPart = requestedPrivileges[i];
+		}
+
+		status = pfNtAdjustPrivilegesToken(tokenHandle, FALSE, privileges, 0, NULL, NULL);
+
+		pfNtClose(tokenHandle);
+	}
+
+out:
+	if (!NT_SUCCESS(status))
+		ubprintf("NOTE: Could not set process privileges: %s", NtStatusError(status));
+	return NT_SUCCESS(status);
 }

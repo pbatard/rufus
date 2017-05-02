@@ -500,6 +500,7 @@ extern char* GetCurrentMUI(void);
 extern BOOL SetFormatPromptHook(void);
 extern void ClrFormatPromptHook(void);
 extern BOOL SearchProcess(char* HandleName, BOOL bPartialMatch, BOOL bIgnoreSelf);
+extern BOOL EnablePrivileges(void);
 
 DWORD WINAPI FormatThread(void* param);
 DWORD WINAPI SaveImageThread(void* param);
