@@ -433,7 +433,7 @@ BOOL SearchProcess(char* HandleName, BOOL bPartialMatch, BOOL bIgnoreSelf)
 
 			// If we're switching process and found a match, print it
 			if (bFound) {
-				uprintf("o '%s' (pid: %ld, access: %s)", exe_path, pid[cur_pid], access_rights_str[access_rights & 0x3]);
+				uprintf("‣ '%s' (pid: %ld, access: %s)", exe_path, pid[cur_pid], access_rights_str[access_rights & 0x3]);
 				bFound = FALSE;
 				access_rights = 0;
 			}
@@ -533,7 +533,7 @@ BOOL SearchProcess(char* HandleName, BOOL bPartialMatch, BOOL bIgnoreSelf)
 
 		// If this is the very first process we find, print a header
 		if (exe_path[0] == 0)
-			uprintf("\r\nNOTE: The following process(es) or service(s) are accessing %s:", HandleName);
+			uprintf("NOTE: The following process(es) or service(s) are accessing %s:", HandleName);
 
 		if (!GetModuleFileNameExU(processHandle, 0, exe_path, MAX_PATH - 1))
 			safe_sprintf(exe_path, MAX_PATH, "Unknown_Process_%" PRIu64,
@@ -544,7 +544,7 @@ out:
 	if (exe_path[0] != 0)
 		uprintf("You should try to close these applications before attempting to reformat the drive.");
 	else
-		uprintf(APPLICATION_NAME " was unable to identify the process(es) or service(s) preventing access to %s", HandleName);
+		uprintf("NOTE: Could not identify the process(es) or service(s) accessing %s", HandleName);
 
 	free(wHandleName);
 	PhFree(buffer);

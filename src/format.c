@@ -1663,13 +1663,13 @@ DWORD WINAPI FormatThread(void* param)
 		extra_partitions = XP_COMPAT;
 
 	PrintInfoDebug(0, MSG_225);
-	hPhysicalDrive = GetPhysicalHandle(DriveIndex, lock_drive, TRUE, FALSE);
+	hPhysicalDrive = GetPhysicalHandle(DriveIndex, lock_drive, TRUE, !lock_drive);
 	if (hPhysicalDrive == INVALID_HANDLE_VALUE) {
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_OPEN_FAILED;
 		goto out;
 	}
 
-	// At this stage with have both a handle and a lock to the physical drive...
+	// At this stage we should have both a handle and a lock to the physical drive...
 	if (!GetDriveLetters(DriveIndex, drive_letters)) {
 		uprintf("Failed to get a drive letter\n");
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_ASSIGN_LETTER);
@@ -1705,7 +1705,7 @@ DWORD WINAPI FormatThread(void* param)
 	uprintf("Will use '%c:' as volume mountpoint\n", drive_name[0]);
 
 	// ...but we need a lock to the logical drive to be able to write anything to it
-	hLogicalVolume = GetLogicalHandle(DriveIndex, TRUE, FALSE, FALSE);
+	hLogicalVolume = GetLogicalHandle(DriveIndex, TRUE, FALSE, !lock_drive);
 	if (hLogicalVolume == INVALID_HANDLE_VALUE) {
 		uprintf("Could not lock volume\n");
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_OPEN_FAILED;

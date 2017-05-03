@@ -120,6 +120,7 @@ BOOL GetAutoMount(BOOL* enabled)
 static HANDLE GetHandle(char* Path, BOOL bLockDrive, BOOL bWriteAccess, BOOL bWriteShare)
 {
 	int i;
+	BOOL bSearchProcess = FALSE;
 	DWORD size;
 	HANDLE hDrive = INVALID_HANDLE_VALUE;
 	char DevPath[MAX_PATH];
@@ -145,22 +146,24 @@ static HANDLE GetHandle(char* Path, BOOL bLockDrive, BOOL bWriteAccess, BOOL bWr
 		if ((GetLastError() != ERROR_SHARING_VIOLATION) && (GetLastError() != ERROR_ACCESS_DENIED))
 			break;
 		if (i == 0) {
-			uprintf("Waiting for access...");
+			uprintf("Waiting for access on %s [%s]...", Path, DevPath);
 		} else if (!bWriteShare && (i > DRIVE_ACCESS_RETRIES/3)) {
-			// If we can't seem to get a hold of the drive for some time,
-			// try to enable FILE_SHARE_WRITE...
+			// If we can't seem to get a hold of the drive for some time, try to enable FILE_SHARE_WRITE...
 			uprintf("Warning: Could not obtain exclusive rights. Retrying with write sharing enabled...");
 			bWriteShare = TRUE;
+			// Try to report the process that is locking the drive
+			SearchProcess(DevPath, TRUE, TRUE);
+			bSearchProcess = TRUE;
 		}
 		Sleep(DRIVE_ACCESS_TIMEOUT / DRIVE_ACCESS_RETRIES);
 	}
 	if (hDrive == INVALID_HANDLE_VALUE) {
-		uprintf("Could not open %s [%s]: %s\n", Path, DevPath, WindowsErrorString());
+		uprintf("Could not open %s: %s\n", Path, WindowsErrorString());
 		goto out;
 	}
 
 	if (bWriteAccess) {
-		uprintf("Opened %s [%s] for write access", Path, DevPath);
+		uprintf("Opened %s for %s write access", Path, bWriteShare?"shared":"exclusive");
 	}
 
 	if (bLockDrive) {
@@ -168,6 +171,7 @@ static HANDLE GetHandle(char* Path, BOOL bLockDrive, BOOL bWriteAccess, BOOL bWr
 			uprintf("I/O boundary checks disabled\n");
 		}
 
+		uprintf("Requesting lock...");
 		for (i = 0; i < DRIVE_ACCESS_RETRIES; i++) {
 			if (DeviceIoControl(hDrive, FSCTL_LOCK_VOLUME, NULL, 0, NULL, 0, &size, NULL))
 				goto out;
@@ -176,9 +180,9 @@ static HANDLE GetHandle(char* Path, BOOL bLockDrive, BOOL bWriteAccess, BOOL bWr
 			Sleep(DRIVE_ACCESS_TIMEOUT/DRIVE_ACCESS_RETRIES);
 		}
 		// If we reached this section, either we didn't manage to get a lock or the user cancelled
-		uprintf("Could not get exclusive access to %s: %s", Path, WindowsErrorString());
+		uprintf("Could not lock access to %s: %s", Path, WindowsErrorString());
 		// See if we can tell the user what processes are accessing the drive
-		if (!IS_ERROR(FormatStatus))
+		if (!IS_ERROR(FormatStatus) && !bSearchProcess)
 			SearchProcess(DevPath, TRUE, TRUE);
 		safe_closehandle(hDrive);
 	}
@@ -1036,15 +1040,15 @@ BOOL RemountVolume(char* drive_name)
 		if (DeleteVolumeMountPointA(drive_name)) {
 			Sleep(200);
 			if (MountVolume(drive_name, drive_guid)) {
-				uprintf("Successfully remounted %s on %s\n", &drive_guid[4], drive_name);
+				uprintf("Successfully remounted %s on %C:", drive_guid, drive_name[0]);
 			} else {
-				uprintf("Failed to remount %s on %s\n", &drive_guid[4], drive_name);
+				uprintf("Failed to remount %s on %C:", drive_guid, drive_name[0]);
 				// This will leave the drive inaccessible and must be flagged as an error
 				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_REMOUNT_VOLUME);
 				return FALSE;
 			}
 		} else {
-			uprintf("Could not remount %s %s\n", drive_name, WindowsErrorString());
+			uprintf("Could not remount %C: %s", drive_name[0], WindowsErrorString());
 			// Try to continue regardless
 		}
 	}
