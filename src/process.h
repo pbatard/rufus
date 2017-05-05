@@ -47,7 +47,8 @@
 #define STATUS_INSUFFICIENT_RESOURCES	((NTSTATUS)0xC000009AL)
 #define STATUS_NOT_SUPPORTED			((NTSTATUS)0xC00000BBL)
 
-#define SystemExtendedHandleInformation	64
+#define SystemExtendedHandleInformation    64
+#define FileProcessIdsUsingFileInformation 47
 
 #define NtCurrentProcess() ((HANDLE)(LONG_PTR)-1)
 
@@ -117,6 +118,12 @@ typedef struct _OBJECT_TYPES_INFORMATION
 {
 	ULONG NumberOfTypes;
 } OBJECT_TYPES_INFORMATION, *POBJECT_TYPES_INFORMATION;
+
+
+typedef  struct _FILE_PROCESS_IDS_USING_FILE_INFORMATION {
+	ULONG NumberOfProcessIdsInList;
+	ULONG_PTR ProcessIdList[1];
+} FILE_PROCESS_IDS_USING_FILE_INFORMATION, *PFILE_PROCESS_IDS_USING_FILE_INFORMATION;
 
 #define ALIGN_UP_BY(Address, Align) (((ULONG_PTR)(Address) + (Align) - 1) & ~((Align) - 1))
 #define ALIGN_UP(Address, Type) ALIGN_UP_BY(Address, sizeof(Type))

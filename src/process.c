@@ -48,6 +48,7 @@ PF_TYPE_DECL(NTAPI, BOOLEAN, RtlEqualUnicodeString, (PCUNICODE_STRING, PCUNICODE
 #endif
 
 PF_TYPE_DECL(NTAPI, NTSTATUS, NtQuerySystemInformation, (SYSTEM_INFORMATION_CLASS, PVOID, ULONG, PULONG));
+PF_TYPE_DECL(NTAPI, NTSTATUS, NtQueryInformationFile, (HANDLE, PIO_STATUS_BLOCK, PVOID, ULONG, FILE_INFORMATION_CLASS));
 PF_TYPE_DECL(NTAPI, NTSTATUS, NtQueryObject, (HANDLE, OBJECT_INFORMATION_CLASS, PVOID, ULONG, PULONG));
 PF_TYPE_DECL(NTAPI, NTSTATUS, NtDuplicateObject, (HANDLE, HANDLE, HANDLE, PHANDLE, ACCESS_MASK, ULONG, ULONG));
 PF_TYPE_DECL(NTAPI, NTSTATUS, NtOpenProcess, (PHANDLE, ACCESS_MASK, POBJECT_ATTRIBUTES, PCLIENT_ID));
@@ -339,6 +340,54 @@ ULONG PhGetObjectTypeNumber(PUNICODE_STRING TypeName)
 #endif
 
 /**
+* Query processes with open handles to a file, volume or disk.
+*
+* \param VolumeOrFileHandle The handle to the target.
+* \param Information The returned list of processes.
+*
+* \return An NTStatus indicating success or the error code.
+*/
+NTSTATUS PhQueryProcessesUsingVolumeOrFile(HANDLE VolumeOrFileHandle,
+	PFILE_PROCESS_IDS_USING_FILE_INFORMATION *Information)
+{
+	static ULONG initialBufferSize = 16 * KB;
+	NTSTATUS status = STATUS_SUCCESS;
+	PVOID buffer;
+	ULONG bufferSize;
+	IO_STATUS_BLOCK isb;
+
+	PF_INIT_OR_SET_STATUS(NtQueryInformationFile, NtDll);
+	if (!NT_SUCCESS(status))
+		return status;
+
+	bufferSize = initialBufferSize;
+	buffer = PhAllocate(bufferSize);
+	if (buffer == NULL)
+		return STATUS_INSUFFICIENT_RESOURCES;
+
+	while ((status = pfNtQueryInformationFile(VolumeOrFileHandle, &isb, buffer, bufferSize,
+		FileProcessIdsUsingFileInformation)) == STATUS_INFO_LENGTH_MISMATCH) {
+		PhFree(buffer);
+		bufferSize *= 2;
+		// Fail if we're resizing the buffer to something very large.
+		if (bufferSize > 64 * MB)
+			return STATUS_INSUFFICIENT_RESOURCES;
+		buffer = PhAllocate(bufferSize);
+	}
+
+	if (!NT_SUCCESS(status)) {
+		PhFree(buffer);
+		return status;
+	}
+
+	if (bufferSize <= 64 * MB)
+		initialBufferSize = bufferSize;
+	*Information = (PFILE_PROCESS_IDS_USING_FILE_INFORMATION)buffer;
+
+	return status;
+}
+
+/**
  * Search all the processes and list the ones that have a specific handle open.
  *
  * \param HandleName The name of the handle to look for.
@@ -550,6 +599,51 @@ out:
 	PhFree(buffer);
 	PhFree(handles);
 	PhDestroyHeap();
+	return bFound;
+}
+
+/**
+ * Alternative search for processes keeping a handle on a specific disk or volume
+ * Note that this search requires opening the disk or volume, which may not always
+ * be convenient for our usage (since we might be looking for processes preventing
+ * us to open said target in exclusive mode).
+ *
+ * \param HandleName The name of the handle to look for.
+ *
+ * \return TRUE if processes were found, FALSE otherwise.
+ */
+BOOL SearchProcessAlt(char* HandleName)
+{
+	NTSTATUS status = STATUS_SUCCESS;
+	ULONG i;
+	HANDLE searchHandle = NULL;
+	BOOLEAN bFound = FALSE;
+	PFILE_PROCESS_IDS_USING_FILE_INFORMATION info = NULL;
+
+	status = PhCreateHeap();
+	if (!NT_SUCCESS(status))
+		goto out;
+
+	// Note that the access rights being used with CreateFile() might matter...
+	searchHandle = CreateFileA(HandleName, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE,
+		NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	
+	status = PhQueryProcessesUsingVolumeOrFile(searchHandle, &info);
+
+	if (NT_SUCCESS(status) && (info->NumberOfProcessIdsInList > 0)) {
+		bFound = TRUE;
+		uprintf("NOTE: The following process(es) or service(s) are accessing %s:", HandleName);
+		for (i = 0; i < info->NumberOfProcessIdsInList; i++) {
+			uprintf("o Process with PID %ld", info->ProcessIdList[i]);
+		}
+	}
+
+out:
+	safe_closehandle(searchHandle);
+	PhFree(info);
+	PhDestroyHeap();
+	if (!NT_SUCCESS(status))
+		uprintf("SearchProcessAlt('%s') failed: %s", HandleName, NtStatusError(status));
 	return bFound;
 }
 
