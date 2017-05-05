@@ -581,7 +581,7 @@ BOOL SearchProcess(char* HandleName, BOOL bPartialMatch, BOOL bIgnoreSelf)
 
 		// If this is the very first process we find, print a header
 		if (exe_path[0] == 0)
-			uprintf("NOTE: The following process(es) or service(s) are accessing %s:", HandleName);
+			uprintf("WARNING: The following process(es) or service(s) are accessing %s:", HandleName);
 
 		if (!GetModuleFileNameExU(processHandle, 0, exe_path, MAX_PATH - 1))
 			safe_sprintf(exe_path, MAX_PATH, "Unknown_Process_%" PRIu64,
@@ -631,7 +631,7 @@ BOOL SearchProcessAlt(char* HandleName)
 
 	if (NT_SUCCESS(status) && (info->NumberOfProcessIdsInList > 0)) {
 		bFound = TRUE;
-		uprintf("NOTE: The following process(es) or service(s) are accessing %s:", HandleName);
+		uprintf("WARNING: The following process(es) or service(s) are accessing %s:", HandleName);
 		for (i = 0; i < info->NumberOfProcessIdsInList; i++) {
 			uprintf("o Process with PID %ld", info->ProcessIdList[i]);
 		}
