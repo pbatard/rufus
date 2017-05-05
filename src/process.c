@@ -416,7 +416,7 @@ BOOL SearchProcess(char* HandleName, BOOL bPartialMatch, BOOL bIgnoreSelf)
 	HANDLE processHandle = NULL;
 	BOOLEAN bFound = FALSE;
 	ULONG access_rights = 0;
-	char exe_path[MAX_PATH];
+	char exe_path[MAX_PATH] = { 0 };
 	int cur_pid;
 
 	PF_INIT_OR_SET_STATUS(NtQueryObject, Ntdll);
@@ -437,7 +437,6 @@ BOOL SearchProcess(char* HandleName, BOOL bPartialMatch, BOOL bIgnoreSelf)
 		goto out;
 	}
 
-	exe_path[0] = 0;
 	pid[0] = (ULONG_PTR)0;
 	cur_pid = 1;
 
@@ -482,7 +481,7 @@ BOOL SearchProcess(char* HandleName, BOOL bPartialMatch, BOOL bIgnoreSelf)
 
 			// If we're switching process and found a match, print it
 			if (bFound) {
-				uprintf("‣ '%s' (pid: %ld, access: %s)", exe_path, pid[cur_pid], access_rights_str[access_rights & 0x3]);
+				uprintf("o '%s' (pid: %ld, access: %s)", exe_path, pid[cur_pid], access_rights_str[access_rights & 0x3]);
 				bFound = FALSE;
 				access_rights = 0;
 			}
