@@ -121,7 +121,7 @@ static HANDLE GetHandle(char* Path, BOOL bLockDrive, BOOL bWriteAccess, BOOL bWr
 {
 	int i;
 	BOOL bSearchProcess = FALSE;
-	DWORD size;
+	DWORD size, EndTime;
 	HANDLE hDrive = INVALID_HANDLE_VALUE;
 	char DevPath[MAX_PATH];
 
@@ -172,13 +172,14 @@ static HANDLE GetHandle(char* Path, BOOL bLockDrive, BOOL bWriteAccess, BOOL bWr
 		}
 
 		uprintf("Requesting lock...");
-		for (i = 0; i < DRIVE_ACCESS_RETRIES; i++) {
+		EndTime = GetTickCount() + DRIVE_ACCESS_TIMEOUT;
+		do {
 			if (DeviceIoControl(hDrive, FSCTL_LOCK_VOLUME, NULL, 0, NULL, 0, &size, NULL))
 				goto out;
 			if (IS_ERROR(FormatStatus))	// User cancel
 				break;
-			Sleep(DRIVE_ACCESS_TIMEOUT/DRIVE_ACCESS_RETRIES);
-		}
+			Sleep(DRIVE_ACCESS_TIMEOUT / DRIVE_ACCESS_RETRIES);
+		} while (GetTickCount() < EndTime);
 		// If we reached this section, either we didn't manage to get a lock or the user cancelled
 		uprintf("Could not lock access to %s: %s", Path, WindowsErrorString());
 		// See if we can tell the user what processes are accessing the drive

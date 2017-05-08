@@ -398,7 +398,7 @@ NTSTATUS PhQueryProcessesUsingVolumeOrFile(HANDLE VolumeOrFileHandle,
  */
 BOOL SearchProcess(char* HandleName, BOOL bPartialMatch, BOOL bIgnoreSelf)
 {
-	const char *access_rights_str[4] = { "n", "r", "w", "rw" };
+	const char *access_rights_str[8] = { "n", "r", "w", "rw", "x", "rx", "wx", "rwx" };
 	NTSTATUS status = STATUS_SUCCESS;
 	PSYSTEM_HANDLE_INFORMATION_EX handles = NULL;
 	POBJECT_NAME_INFORMATION buffer = NULL;
@@ -481,7 +481,7 @@ BOOL SearchProcess(char* HandleName, BOOL bPartialMatch, BOOL bIgnoreSelf)
 
 			// If we're switching process and found a match, print it
 			if (bFound) {
-				uprintf("o '%s' (pid: %ld, access: %s)", exe_path, pid[cur_pid], access_rights_str[access_rights & 0x3]);
+				uprintf("o '%s' (pid: %ld, access: %s)", exe_path, pid[cur_pid], access_rights_str[access_rights & 0x7]);
 				bFound = FALSE;
 				access_rights = 0;
 			}
@@ -504,8 +504,8 @@ BOOL SearchProcess(char* HandleName, BOOL bPartialMatch, BOOL bIgnoreSelf)
 		if (handleInfo->UniqueProcessId == last_access_denied_pid)
 			continue;
 
-		// Filter out handles that aren't opened with Read (bit 0) or Write (bit 1) access
-		if ((handleInfo->GrantedAccess & 0x3) == 0)
+		// Filter out handles that aren't opened with Read (bit 0), Write (bit 1) or Execute (bit 5) access
+		if ((handleInfo->GrantedAccess & 0x23) == 0)
 			continue;
 
 		// Open the process to which the handle we are after belongs, if not already opened
@@ -578,6 +578,9 @@ BOOL SearchProcess(char* HandleName, BOOL bPartialMatch, BOOL bIgnoreSelf)
 
 		// Keep a mask of all the access rights being used
 		access_rights |= handleInfo->GrantedAccess;
+		// The Executable bit is in a place we don't like => reposition it
+		if (access_rights & 0x20)
+			access_rights = (access_rights & 0x3) | 0x4;
 
 		// If this is the very first process we find, print a header
 		if (exe_path[0] == 0)
