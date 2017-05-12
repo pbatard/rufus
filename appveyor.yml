@@ -1,4 +1,4 @@
-os: Visual Studio 2015
+os: Visual Studio 2017
 
 init:
   - ps: >-
@@ -10,20 +10,19 @@ init:
 
 environment:
   global:
-    PLATFORMTOOLSET: v140
     BITS: 32
   matrix:
     - CONFIGURATION: Debug
-      COMPILER: MSVC15
+      COMPILER: MSVC
       PLATFORM: x86_32
     - CONFIGURATION: Debug
-      COMPILER: MSVC15
+      COMPILER: MSVC
       PLATFORM: x86_64
     - CONFIGURATION: Release
-      COMPILER: MSVC15
+      COMPILER: MSVC
       PLATFORM: x86_32
     - CONFIGURATION: Release
-      COMPILER: MSVC15
+      COMPILER: MSVC
       PLATFORM: x86_64
     - CONFIGURATION: Release
       COMPILER: MinGW
@@ -41,5 +40,5 @@ install:
 - if [%PLATFORM%]==[x86_64] set BITS=64
 
 build_script:
-- if [%COMPILER%]==[MSVC15] msbuild rufus.sln /m /p:Configuration=%CONFIGURATION%,Platform=%PLATFORM% /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+- if [%COMPILER%]==[MSVC] msbuild rufus.sln /m /p:Configuration=%CONFIGURATION%,Platform=%PLATFORM% /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
 - if [%COMPILER%]==[MinGW] C:\msys64\usr\bin\bash -lc "export PATH=/mingw%BITS%/bin:$PATH; cd /c/projects/rufus; ./configure --build=%PLATFORM%-w64-mingw32 --host=%PLATFORM%-w64-mingw32 --disable-debug; make -j4"

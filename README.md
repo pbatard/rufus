@@ -27,7 +27,7 @@ Features
 Compilation
 -----------
 
-Use either Visual Studio (2015 or later), WDK 7.1 (Windows Driver Kit) or MinGW and then
+Use either Visual Studio (2017 or later), WDK 7.1 (Windows Driver Kit) or MinGW and then
 invoke the `.sln`, `wdk_build.cmd` or `configure`/`make` respectively.
 
 #### Visual Studio
