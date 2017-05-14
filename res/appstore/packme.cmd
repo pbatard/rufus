@@ -5,13 +5,12 @@ rem Make sure you don't have anything you don't want included in the package, as
 rem current directory will be included, including any previous .appx, which makes for nice recursion...
 del /q *.appx >NUL 2>&1
 
-rem According to the link below, you need "altform-unplated" icons and run MakePri to get transparent icons
-rem on the taskbar... Still doesn't seem to work though :(
+rem As per the link below, you need "altform-unplated" icons and run MakePri to get transparent icons:
 rem https://social.msdn.microsoft.com/Forums/windowsapps/en-US/dc505f68-d120-43e3-a9e1-d7c77746d588/uwpdesktop-bridgeunplated-taskbar-icons-in-desktop-bridge-apps
 mkdir Assets >NUL 2>&1
 copy "..\icon-set\rufus-44.png"  "Assets\Square44x44Logo.png"
-copy "..\icon-set\rufus-48.png"  "Assets\Square44x44Logo_targetsize-48.png"
-copy "..\icon-set\rufus-48.png"  "Assets\Square44x44Logo_targetsize-48_altform-unplated.png"
+copy "..\icon-set\rufus-48.png"  "Assets\Square44x44Logo.targetsize-48.png"
+copy "..\icon-set\rufus-48.png"  "Assets\Square44x44Logo.targetsize-48_altform-unplated.png"
 copy "..\icon-set\rufus-150.png" "Assets\Square150x150Logo.png"
 copy "..\..\rufus-%VERSION%.exe" "rufus.exe"
 "C:\Program Files (x86)\Windows Kits\10\bin\x64\MakePri" createconfig /o /dq en-US /cf priconfig.xml
@@ -21,6 +20,8 @@ if ERRORLEVEL 1 goto out
 "C:\Program Files (x86)\Windows Kits\10\bin\x64\SignTool" sign /v /sha1 5759b23dc8f45e9120a7317f306e5b6890b612f0 /fd SHA256 /tr http://timestamp.comodoca.com/rfc3161 /td SHA256 Rufus-%VERSION%.appx
 :out
 del /q rufus.exe
+del /q priconfig.xml
+del /q resources.pri
 rmdir /s /q Assets
 pause
 exit
