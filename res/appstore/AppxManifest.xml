@@ -8,14 +8,14 @@
        for an interesting struggle, when you also happen to have a comma in one of the fields... -->
   <Identity
    Name="Rufus"
-   Version="2.15.1091.0"
+   Version="2.15.1112.0"
    ProcessorArchitecture="x86"
    Publisher='CN=Akeo Consulting, O=Akeo Consulting, STREET="24, Grey Rock", L=Milford, S=Co Donegal, PostalCode=Co Donegal, C=IE' />
     <Properties>
       <DisplayName>Rufus</DisplayName>
       <PublisherDisplayName>Akeo Consulting</PublisherDisplayName>
       <Description>Rufus</Description>
-      <Logo>Assets\Rufus-48.png</Logo>
+      <Logo>Assets\Square44x44Logo.png</Logo>
     </Properties>
   <Resources>
     <Resource Language="en-US" />
@@ -37,8 +37,8 @@
       <uap:VisualElements
        BackgroundColor="transparent"
        DisplayName="Rufus"
-       Square150x150Logo="Assets\Rufus-150.png"
-       Square44x44Logo="Assets\Rufus-44.png"
+       Square150x150Logo="Assets\Square150x150Logo.png"
+       Square44x44Logo="Assets\Square44x44Logo.png"
        Description="Rufus">
         <uap:DefaultTile>
           <uap:ShowNameOnTiles>
