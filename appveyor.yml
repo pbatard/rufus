@@ -1,11 +1,14 @@
 os: Visual Studio 2017
 
 init:
-  - ps: >-
-      if ($env:appveyor_repo_tag -eq "true") {
-        Update-AppveyorBuild -Version "$env:appveyor_repo_tag_name"
+  # Set the AppVeyor build version number to our tag or, if untagged, to the commit hash
+  # See https://github.com/appveyor/ci/issues/691
+  # Also include the build number, to distinguish between rebuilds of the same commit
+  - ps: |
+      if ($env:APPVEYOR_REPO_TAG -eq "true") {
+        Update-AppveyorBuild -Version "$($env:APPVEYOR_REPO_TAG_NAME)_#$env:APPVEYOR_BUILD_NUMBER"
       } else {
-        Update-AppveyorBuild -Version "dev-$($env:appveyor_repo_commit.substring(0,8))"
+        Update-AppveyorBuild -Version "dev-$($env:APPVEYOR_REPO_COMMIT.Substring(0,8))_#$env:APPVEYOR_BUILD_NUMBER"
       }
 
 environment:

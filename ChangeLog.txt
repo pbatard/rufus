@@ -3,7 +3,7 @@ o Version 2.15 (2017.05.??)
     Report external processes that may be preventing disk access (in the log)
     Improve Windows To Go support for Windows 10 Creators Update
     Don't report an error on checkdisk failure
-    Update GRUB 2.0 to latest
+    Update GRUB 2.0 and Grub4DOS to latest
     Additional fixes and improvements
 
 o Version 2.14 (2017.04.10)  [BUGFIX RELEASE]
