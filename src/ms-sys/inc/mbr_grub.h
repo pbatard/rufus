@@ -1,5 +1,5 @@
 /*
- * First 423 bytes of MBR from Grub4DOS (Converted from res/grub4dos/grldr.mbr)
+ * First 423 bytes of MBR from Grub4DOS (Converted from res/grub/grldr.mbr)
  */
 unsigned char mbr_grub_0x0[] = {
 	0xEB, 0x5E, 0x90, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,

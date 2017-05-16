@@ -33,6 +33,7 @@
 .deps
 .libs
 Makefile
+arm
 x86_32
 x86_64
 autom4te.cache
