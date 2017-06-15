@@ -61,6 +61,14 @@ char* GetSignatureName(const char* path)
 	SPROG_PUBLISHERINFO ProgPubInfo = { 0 };
 	wchar_t *szFileName = utf8_to_wchar(path);
 
+	// If the path is NULL, get the signature of the current runtime
+	if (path == NULL) {
+		szFileName = calloc(MAX_PATH, sizeof(wchar_t));
+		if (szFileName == NULL)
+			return NULL;
+		GetModuleFileNameW(GetModuleHandle(NULL), szFileName, MAX_PATH);
+	}
+
 	// Get message handle and store handle from the signed file.
 	r = CryptQueryObject(CERT_QUERY_OBJECT_FILE, szFileName,
 		CERT_QUERY_CONTENT_FLAG_PKCS7_SIGNED_EMBED, CERT_QUERY_FORMAT_FLAG_BINARY,

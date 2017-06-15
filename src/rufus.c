@@ -2910,7 +2910,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	int wait_for_mutex = 0;
 	FILE* fd;
 	BOOL attached_console = FALSE, external_loc_file = FALSE, lgp_set = FALSE, automount = TRUE;
-	BOOL disable_hogger = FALSE, previous_enable_HDDs = FALSE, vc = FALSE;
+	BOOL disable_hogger = FALSE, previous_enable_HDDs = FALSE, vc = IsRegistryNode(REGKEY_HKCU, vs_reg);
 	BYTE *loc_data;
 	DWORD loc_size, size;
 	char tmp_path[MAX_PATH] = "", loc_file[MAX_PATH] = "", ini_path[MAX_PATH] = "", ini_flags[] = "rb";
@@ -2965,7 +2965,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 				if ((strcmp(argv[i], "-g") == 0) || (strcmp(argv[i], "--gui") == 0))
 					disable_hogger = TRUE;
 			}
-			vc = IsRegistryNode(REGKEY_HKCU, vs_reg) || (safe_strcmp(GetSignatureName(argv[0]), cert_name[0]) == 0);
 			// If our application name contains a 'p' (for "portable") create a 'rufus.ini'
 			// NB: argv[0] is populated in the previous loop
 			tmp = &argv[0][strlen(argv[0]) - 1];
@@ -3046,6 +3045,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	// Look for a .ini file in the current app directory
 	static_sprintf(ini_path, "%s\\rufus.ini", app_dir);
 	fd = fopenU(ini_path, ini_flags);	// Will create the file if portable mode is requested
+	vc |= (safe_strcmp(GetSignatureName(NULL), cert_name[0]) == 0);
 	if (fd != NULL) {
 		ini_file = ini_path;
 		fclose(fd);
