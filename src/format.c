@@ -1327,7 +1327,7 @@ int SetWinToGoIndex(void)
 	if (i > 1)
 		i = Selection(lmprintf(MSG_291), lmprintf(MSG_292), version_name.String, i);
 	if (i < 0) {
-		wintogo_index = -1;
+		wintogo_index = -2;	// Cancelled by the user
 	} else if (i == 0) {
 		wintogo_index = 1;
 	} else {
@@ -1442,12 +1442,12 @@ static BOOL SetupWinToGo(const char* drive_name, BOOL use_ms_efi)
 	// Also, since Rufus should (usually) be running as a 32 bit app, on 64 bit systems, we need to use
 	// 'C:\Windows\Sysnative' and not 'C:\Windows\System32' to invoke bcdboot, as 'C:\Windows\System32'
 	// will get converted to 'C:\Windows\SysWOW64' behind the scenes, and ther is no bcdboot.exe there.
-	uprintf("Enabling boot...");
 	static_sprintf(cmd, "%s\\bcdboot.exe %s\\Windows /v /f ALL /s %s", sysnative_dir,
 		drive_name, (use_ms_efi)?ms_efi:drive_name);
+	uprintf("Enabling boot using command '%s'", cmd);
 	if (RunCommand(cmd, sysnative_dir, usb_debug) != 0) {
 		// Try to continue... but report a failure
-		uprintf("Failed to enable boot using command '%s'", cmd);
+		uprintf("Failed to enable boot");
 		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_ISO_EXTRACT);
 	}
 

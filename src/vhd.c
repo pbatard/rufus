@@ -614,8 +614,12 @@ DWORD WINAPI WimProgressCallback(DWORD dwMsgId, WPARAM wParam, LPARAM lParam, PV
 	case WIM_MSG_FILEINFO:
 		str = wchar_to_utf8((PWSTR)wParam);
 		pFileData = (PWIN32_FIND_DATA)lParam;
-		size = (((uint64_t)pFileData->nFileSizeHigh) << 32) + pFileData->nFileSizeLow;
-		uprintf("'%s' (%s)", str, SizeToHumanReadable(size, FALSE, FALSE));
+		if (pFileData->dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+			uprintf("Creating: %s", str);
+		} else {
+			size = (((uint64_t)pFileData->nFileSizeHigh) << 32) + pFileData->nFileSizeLow;
+			uprintf("Extracting: %s (%s)", str, SizeToHumanReadable(size, FALSE, FALSE));
+		}
 		break;
 	case WIM_MSG_RETRY:
 		level = "retry";
@@ -700,7 +704,7 @@ static DWORD WINAPI WimApplyImageThread(LPVOID param)
 	}
 	count_files = FALSE;
 	// Actual apply
-	if (!pfWIMApplyImage(hImage, wdst, 0)) {
+	if (!pfWIMApplyImage(hImage, wdst, WIM_FLAG_FILEINFO)) {
 		uprintf("  Could not apply image: %s", WindowsErrorString());
 		goto out;
 	}
