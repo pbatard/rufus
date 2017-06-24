@@ -651,6 +651,7 @@ BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan)
 	FILE* fd;
 	int r = 1;
 	iso9660_t* p_iso = NULL;
+	iso9660_pvd_t pvd;
 	udf_t* p_udf = NULL;
 	udf_dirent_t* p_udf_root;
 	char *tmp, *buf, *ext;
@@ -705,6 +706,8 @@ BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan)
 	if (scan_only) {
 		if (udf_get_logical_volume_id(p_udf, img_report.label, sizeof(img_report.label)) <= 0)
 			img_report.label[0] = 0;
+		// Open the UDF as ISO so that we can perform size checks
+		p_iso = iso9660_open(src_iso);
 	}
 	r = udf_extract_files(p_udf, p_udf_root, "");
 	goto out;
@@ -746,6 +749,10 @@ try_iso:
 out:
 	iso_blocking_status = -1;
 	if (scan_only) {
+		struct __stat64 stat;
+		// Find if there is a mismatch between the ISO size, as reported by the PVD, and the actual file size
+		if ((iso9660_ifs_read_pvd(p_iso, &pvd)) && (_stat64U(src_iso, &stat) == 0))
+			img_report.mismatch_size = (int64_t)(iso9660_get_pvd_space_size(&pvd)) * ISO_BLOCKSIZE - stat.st_size;
 		// Remove trailing spaces from the label
 		for (j=safe_strlen(img_report.label)-1; ((j>0)&&(isspaceU(img_report.label[j]))); j--)
 			img_report.label[j] = 0;

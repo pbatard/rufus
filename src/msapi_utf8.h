@@ -3,7 +3,7 @@
  * Compensating for what Microsoft should have done a long long time ago.
  * Also see http://utf8everywhere.org/
  *
- * Copyright © 2010-2015 Pete Batard <pete@akeo.ie>
+ * Copyright © 2010-2017 Pete Batard <pete@akeo.ie>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -31,6 +31,8 @@
 #include <share.h>
 #include <fcntl.h>
 #include <io.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #if !defined(DDKBUILD)
 #include <psapi.h>
 #endif
@@ -923,6 +925,15 @@ static __inline int _openU(const char *filename, int oflag , int pmode)
 	return ret;
 }
 #endif
+
+static __inline int _stat64U(const char *path, struct __stat64 *buffer)
+{
+	int ret;
+	wconvert(path);
+	ret = _wstat64(wpath, buffer);
+	wfree(path);
+	return ret;
+}
 
 // returned UTF-8 string must be freed
 static __inline char* getenvU(const char* varname)

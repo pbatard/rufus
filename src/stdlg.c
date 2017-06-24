@@ -813,7 +813,8 @@ BOOL Notification(int type, const notification_info* more_info, char* title, cha
 	dialog_showing++;
 	szMessageText = (char*)malloc(MAX_PATH);
 	if (szMessageText == NULL) return FALSE;
-	szMessageTitle = title;
+	szMessageTitle = safe_strdup(title);
+	if (szMessageTitle == NULL) return FALSE;
 	va_start(args, format);
 	safe_vsnprintf(szMessageText, MAX_PATH-1, format, args);
 	va_end(args);
@@ -839,6 +840,7 @@ BOOL Notification(int type, const notification_info* more_info, char* title, cha
 	}
 	ret = (MyDialogBox(hMainInstance, IDD_NOTIFICATION, hMainDialog, NotificationCallback) == IDYES);
 	safe_free(szMessageText);
+	safe_free(szMessageTitle);
 	dialog_showing--;
 	return ret;
 }

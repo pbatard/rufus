@@ -533,6 +533,9 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 		}
 		vuprintf("Found match for %s on server %s", urlpath, server_url);
 
+		// IMPORTANT: You might need to edit your server's MIME conf so that it returns
+		// 'text/plain' for .ver files. Use 'curl -I' to check that you get something
+		// like 'Content-Type: text/plain; charset=UTF-8' when fetching your .ver files.
 		dwSize = sizeof(mime);
 		HttpQueryInfoA(hRequest, HTTP_QUERY_CONTENT_TYPE, (LPVOID)&mime, &dwSize, NULL);
 		if (strncmp(mime, "text/plain", sizeof("text/plain")-1) != 0)

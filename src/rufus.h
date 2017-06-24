@@ -279,6 +279,7 @@ typedef struct {
 	char install_wim_path[64];	/* path to install.wim or install.swm */
 	uint64_t image_size;
 	uint64_t projected_size;
+	int64_t mismatch_size;
 	uint32_t install_wim_version;
 	BOOLEAN is_iso;
 	BOOLEAN is_bootable_img;

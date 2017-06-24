@@ -973,6 +973,17 @@ static void DisplayISOProps(void)
 
 	uprintf("ISO label: '%s'", img_report.label);
 	uprintf("  Size: %s (Projected)", SizeToHumanReadable(img_report.projected_size, FALSE, FALSE));
+	if (img_report.mismatch_size > 0) {
+		uprintf("  ERROR: Detected that file on disk has been truncated by %s!",
+			SizeToHumanReadable(img_report.mismatch_size, FALSE, FALSE));
+		MessageBoxU(hMainDialog, lmprintf(MSG_298, SizeToHumanReadable(img_report.mismatch_size, FALSE, FALSE)),
+			lmprintf(MSG_297), MB_ICONWARNING);
+	} else if (img_report.mismatch_size < 0) {
+		// Not an error (ISOHybrid?), but we report it just in case
+		uprintf("  Note: File on disk is larger than reported ISO size by %s...",
+			SizeToHumanReadable(-img_report.mismatch_size, FALSE, FALSE));
+	}
+
 	PRINT_ISO_PROP(img_report.has_4GB_file, "  Has a >4GB file");
 	PRINT_ISO_PROP(img_report.has_long_filename, "  Has a >64 chars filename");
 	PRINT_ISO_PROP(HAS_SYSLINUX(img_report), "  Uses: Syslinux/Isolinux v%s", img_report.sl_version_str);
