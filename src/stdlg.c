@@ -1856,6 +1856,21 @@ void ClrFormatPromptHook(void) {
 	fp_weh = NULL;
 }
 
+void FlashTaskbar(HANDLE handle)
+{
+	FLASHWINFO pf;
+
+	if (handle == NULL)
+		return;
+	pf.cbSize = sizeof(FLASHWINFO);
+	pf.hwnd = handle;
+	// Could also use FLASHW_ALL to flash the main dialog)
+	pf.dwFlags = FLASHW_TIMER | FLASHW_TRAY;
+	pf.uCount = 5;
+	pf.dwTimeout = 75;
+	FlashWindowEx(&pf);
+}
+
 #ifdef RUFUS_TEST
 static __inline LPWORD lpwAlign(LPWORD addr)
 {

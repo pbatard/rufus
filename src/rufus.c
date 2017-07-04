@@ -121,7 +121,7 @@ RUFUS_UPDATE update = { {0,0,0}, {0,0}, NULL, NULL};
 StrArray DriveID, DriveLabel;
 extern char* szStatusMessage;
 
-static HANDLE format_thid = NULL;
+static HANDLE format_thid = NULL, dialog_handle = NULL;
 static HWND hBoot = NULL, hSelectISO = NULL, hStart = NULL;
 static HICON hIconDisc, hIconDown, hIconUp, hIconLang;
 static char szTimer[12] = "00:00:00";
@@ -1745,6 +1745,8 @@ static void InitDialog(HWND hDlg)
 			rufus_version[0], rufus_version[1], rufus_version[2]);
 	}
 	SetWindowTextU(hDlg, tmp);
+	// Now that we have a title, we can find the handle of our Dialog
+	dialog_handle = FindWindowA(NULL, tmp);
 	uprintf(APPLICATION_NAME " version: %d.%d.%d%s%s", rufus_version[0], rufus_version[1], rufus_version[2],
 		IsAlphaOrBeta(), (ini_file != NULL)?"(Portable)":"");
 	for (i=0; i<ARRAYSIZE(resource); i++) {
@@ -2817,6 +2819,8 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			SendMessage(hProgress, PBM_SETRANGE, 0, (MAX_PROGRESS<<16) & 0xFFFF0000);
 			SetTaskbarProgressState(TASKBAR_NOPROGRESS);
 			PrintInfo(0, MSG_210);
+			MessageBeep(MB_OK);
+			FlashTaskbar(dialog_handle);
 		} else if (SCODE_CODE(FormatStatus) == ERROR_CANCELLED) {
 			SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_PAUSED, 0);
 			SetTaskbarProgressState(TASKBAR_PAUSED);
@@ -2827,6 +2831,8 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			SetTaskbarProgressState(TASKBAR_ERROR);
 			PrintInfo(0, MSG_212);
 			Notification(MSG_ERROR, NULL, lmprintf(MSG_042), lmprintf(MSG_043, StrError(FormatStatus, FALSE)));
+			MessageBeep(MB_ICONERROR);
+			FlashTaskbar(dialog_handle);
 		}
 		FormatStatus = 0;
 		format_op_in_progress = FALSE;
