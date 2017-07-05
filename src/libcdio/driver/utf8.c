@@ -206,16 +206,20 @@ do_convert(iconv_t cd, const char * src, int src_len,
       {
       switch(errno)
         {
+        char * ret_tmp;
+
         case E2BIG:
           output_pos = (int)(outbuf - ret);
 
           alloc_size   += BYTES_INCREMENT;
           outbytesleft += BYTES_INCREMENT;
 
+          ret_tmp = ret;
           ret = realloc(ret, alloc_size);
           if (ret == NULL)
             {
             cdio_warn("Can't realloc(%d).", alloc_size);
+            free(ret_tmp);
             return false;
             }
           outbuf = ret + output_pos;
