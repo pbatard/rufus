@@ -47,15 +47,11 @@
 #include "../res/grub/grub_version.h"
 #include "../res/grub2/grub2_version.h"
 
-// MinGW doesn't know these
-PF_TYPE(WINAPI, HIMAGELIST, ImageList_Create, (int, int, UINT, int, int));
-PF_TYPE(WINAPI, int, ImageList_AddIcon, (HIMAGELIST, HICON));
-PF_TYPE(WINAPI, int, ImageList_ReplaceIcon, (HIMAGELIST, int, HICON));
+// ImageList calls are unavailable on XP
+PF_TYPE_DECL(WINAPI, HIMAGELIST, ImageList_Create, (int, int, UINT, int, int));
+PF_TYPE_DECL(WINAPI, int, ImageList_AddIcon, (HIMAGELIST, HICON));
+PF_TYPE_DECL(WINAPI, int, ImageList_ReplaceIcon, (HIMAGELIST, int, HICON));
 
-// WDK blows up when trying to using PF_TYPE_DECL() for the ImageList calls... so we don't.
-PF_DECL(ImageList_Create);
-PF_DECL(ImageList_AddIcon);
-PF_DECL(ImageList_ReplaceIcon);
 PF_TYPE_DECL(WINAPI, BOOL, SHChangeNotifyDeregister, (ULONG));
 PF_TYPE_DECL(WINAPI, ULONG, SHChangeNotifyRegister, (HWND, int, LONG, UINT, int, const MY_SHChangeNotifyEntry*));
 
@@ -3500,11 +3496,3 @@ out:
 
 	return 0;
 }
-
-// The old WDK is showing its age and becoming a pain to support
-#if defined(DDKBUILD)
-BOOL SearchProcess(char* HandleName, BOOL bPartialMatch, BOOL bIgnoreSelf) {
-	uprintf("NOTE: Process search is not implemented on this platform");
-	return FALSE;
-}
-#endif

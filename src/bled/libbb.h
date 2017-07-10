@@ -20,15 +20,6 @@
 #error Only Windows platforms are supported
 #endif
 
-#if defined(DDKBUILD)
-#pragma warning(disable: 4242)		// "Conversion from x to y, possible loss of data"
-#pragma warning(disable: 4244)
-struct timeval {
-	long tv_sec;
-	long tv_usec;
-};
-#endif
-
 #include "platform.h"
 #include "msapi_utf8.h"
 
@@ -193,12 +184,8 @@ static inline int full_read(int fd, void *buf, size_t count) {
 }
 
 static inline struct tm *localtime_r(const time_t *timep, struct tm *result) {
-#if defined(DDKBUILD)
-	result = localtime(timep);
-#else
 	if (localtime_s(result, timep) != 0)
 		result = NULL;
-#endif
 	return result;
 }
 

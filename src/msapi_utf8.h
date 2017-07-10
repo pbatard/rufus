@@ -33,9 +33,7 @@
 #include <io.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#if !defined(DDKBUILD)
 #include <psapi.h>
-#endif
 
 #pragma once
 #if defined(_MSC_VER)
@@ -584,7 +582,6 @@ static __inline DWORD GetModuleFileNameU(HMODULE hModule, char* lpFilename, DWOR
 	return ret;
 }
 
-#if !defined(DDKBUILD)
 static __inline DWORD GetModuleFileNameExU(HANDLE hProcess, HMODULE hModule, char* lpFilename, DWORD nSize)
 {
 	DWORD ret = 0, err = ERROR_INVALID_DATA;
@@ -600,7 +597,6 @@ static __inline DWORD GetModuleFileNameExU(HANDLE hProcess, HMODULE hModule, cha
 	SetLastError(err);
 	return ret;
 }
-#endif
 
 static __inline DWORD GetFullPathNameU(const char* lpFileName, DWORD nBufferLength, char* lpBuffer, char** lpFilePart)
 {

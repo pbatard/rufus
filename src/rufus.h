@@ -24,12 +24,6 @@
 #pragma warning(disable: 4996)		// Ignore deprecated (eg. GetVersionEx()), as we have to contend with XP
 #pragma warning(disable: 28159)		// We use GetTickCount64() where possible, but it's not available on XP
 #pragma warning(disable: 6258)		// I know what I'm using TerminateThread for
-// Burn in HELL Windows XP!!!
-#ifdef DDKBUILD
-#if (_WIN32_WINNT < _WIN32_WINNT_VISTA)
-#error The Windows XP target is no longer supported for WDK compilation.
-#endif
-#endif
 #endif
 
 #pragma once

@@ -108,7 +108,7 @@ static __inline void *_reallocf(void *ptr, size_t size) {
 #define _RT_RCDATA			MAKEINTRESOURCEA(10)
 #define _RT_GROUP_ICON		MAKEINTRESOURCEA((ULONG_PTR)(MAKEINTRESOURCEA(3) + 11))
 
-/* UI redefinitions for WDK and MinGW */
+/* UI redefinitions for MinGW */
 #ifndef PBM_SETSTATE
 #define PBM_SETSTATE (WM_USER+16)
 #endif
