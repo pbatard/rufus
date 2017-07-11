@@ -27,8 +27,7 @@ Features
 Compilation
 -----------
 
-Use either Visual Studio (2017 or later), WDK 7.1 (Windows Driver Kit) or MinGW and then
-invoke the `.sln`, `wdk_build.cmd` or `configure`/`make` respectively.
+Use either Visual Studio (2017 or later) or MinGW and then invoke the `.sln` or `configure`/`make` respectively.
 
 #### Visual Studio
 Note that, since Rufus is an OSI compliant Open Source project, you are entitled to

@@ -57,6 +57,7 @@ PF_TYPE_DECL(NTAPI, NTSTATUS, NtAdjustPrivilegesToken, (HANDLE, BOOLEAN, PTOKEN_
 PF_TYPE_DECL(NTAPI, NTSTATUS, NtClose, (HANDLE));
 
 static PVOID PhHeapHandle = NULL;
+extern StrArray BlockingProcess;
 
 /*
  * Convert an NT Status to an error message
@@ -399,6 +400,7 @@ NTSTATUS PhQueryProcessesUsingVolumeOrFile(HANDLE VolumeOrFileHandle,
 BOOL SearchProcess(char* HandleName, BOOL bPartialMatch, BOOL bIgnoreSelf)
 {
 	const char *access_rights_str[8] = { "n", "r", "w", "rw", "x", "rx", "wx", "rwx" };
+	char tmp[MAX_PATH];
 	NTSTATUS status = STATUS_SUCCESS;
 	PSYSTEM_HANDLE_INFORMATION_EX handles = NULL;
 	POBJECT_NAME_INFORMATION buffer = NULL;
@@ -425,6 +427,8 @@ BOOL SearchProcess(char* HandleName, BOOL bPartialMatch, BOOL bIgnoreSelf)
 #ifdef USE_OBJECT_TYPES
 	PF_INIT_OR_SET_STATUS(RtlInitUnicodeString, NtDll);
 #endif
+
+	StrArrayClear(&BlockingProcess);
 
 	if (NT_SUCCESS(status))
 		status = PhCreateHeap();
@@ -481,7 +485,9 @@ BOOL SearchProcess(char* HandleName, BOOL bPartialMatch, BOOL bIgnoreSelf)
 
 			// If we're switching process and found a match, print it
 			if (bFound) {
-				uprintf("o '%s' (pid: %ld, access: %s)", exe_path, pid[cur_pid], access_rights_str[access_rights & 0x7]);
+				uprintf("● '%s' (pid: %ld, access: %s)", exe_path, pid[cur_pid], access_rights_str[access_rights & 0x7]);
+				static_sprintf(tmp, "● %s (pid %ld)", exe_path, pid[cur_pid]);
+				StrArrayAdd(&BlockingProcess, tmp, TRUE);
 				bFound = FALSE;
 				access_rights = 0;
 			}

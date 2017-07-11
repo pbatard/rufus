@@ -52,8 +52,8 @@ PF_TYPE_DECL(WINAPI, LPITEMIDLIST, SHSimpleIDListFromPath, (PCWSTR pszPath));
 static HICON hMessageIcon = (HICON)INVALID_HANDLE_VALUE;
 static char* szMessageText = NULL;
 static char* szMessageTitle = NULL;
-static char **szSelectionChoice;
-static int nSelectionChoices;
+static char **szDialogItem;
+static int nDialogItems;
 static HWND hBrowseEdit;
 extern HWND hUpdatesDlg;
 static WNDPROC pOrgBrowseWndproc;
@@ -846,8 +846,8 @@ BOOL Notification(int type, const notification_info* more_info, char* title, cha
 }
 
 /*
-* Custom dialog for radio button selection dialog
-*/
+ * Custom dialog for radio button selection dialog
+ */
 INT_PTR CALLBACK SelectionCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	LRESULT loc;
@@ -866,10 +866,10 @@ INT_PTR CALLBACK SelectionCallback(HWND hDlg, UINT message, WPARAM wParam, LPARA
 	switch (message) {
 	case WM_INITDIALOG:
 		// Don't overflow our max radio button
-		if (nSelectionChoices > (IDC_SELECTION_CHOICEMAX - IDC_SELECTION_CHOICE1 + 1)) {
+		if (nDialogItems > (IDC_SELECTION_CHOICEMAX - IDC_SELECTION_CHOICE1 + 1)) {
 			uprintf("Warning: Too many options requested for Selection (%d vs %d)",
-				nSelectionChoices, IDC_SELECTION_CHOICEMAX - IDC_SELECTION_CHOICE1);
-			nSelectionChoices = IDC_SELECTION_CHOICEMAX - IDC_SELECTION_CHOICE1;
+				nDialogItems, IDC_SELECTION_CHOICEMAX - IDC_SELECTION_CHOICE1);
+			nDialogItems = IDC_SELECTION_CHOICEMAX - IDC_SELECTION_CHOICE1;
 		}
 		// TODO: This shouldn't be needed when using DS_SHELLFONT
 		// Get the system message box font. See http://stackoverflow.com/a/6057761
@@ -888,7 +888,7 @@ INT_PTR CALLBACK SelectionCallback(HWND hDlg, UINT message, WPARAM wParam, LPARA
 		// Set the dialog to use the system message box font
 		SendMessage(hDlg, WM_SETFONT, (WPARAM)hDlgFont, MAKELPARAM(TRUE, 0));
 		SendMessage(GetDlgItem(hDlg, IDC_SELECTION_TEXT), WM_SETFONT, (WPARAM)hDlgFont, MAKELPARAM(TRUE, 0));
-		for (i = 0; i < nSelectionChoices; i++)
+		for (i = 0; i < nDialogItems; i++)
 			SendMessage(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + i), WM_SETFONT, (WPARAM)hDlgFont, MAKELPARAM(TRUE, 0));
 		SendMessage(GetDlgItem(hDlg, IDYES), WM_SETFONT, (WPARAM)hDlgFont, MAKELPARAM(TRUE, 0));
 		SendMessage(GetDlgItem(hDlg, IDNO), WM_SETFONT, (WPARAM)hDlgFont, MAKELPARAM(TRUE, 0));
@@ -903,8 +903,8 @@ INT_PTR CALLBACK SelectionCallback(HWND hDlg, UINT message, WPARAM wParam, LPARA
 		SetWindowTextU(hDlg, szMessageTitle);
 		SetWindowTextU(GetDlgItem(hDlg, IDCANCEL), lmprintf(MSG_007));
 		SetWindowTextU(GetDlgItem(hDlg, IDC_SELECTION_TEXT), szMessageText);
-		for (i = 0; i < nSelectionChoices; i++) {
-			SetWindowTextU(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + i), szSelectionChoice[i]);
+		for (i = 0; i < nDialogItems; i++) {
+			SetWindowTextU(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + i), szDialogItem[i]);
 			ShowWindow(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + i), SW_SHOW);
 		}
 		// Move/Resize the controls as needed to fit our text
@@ -918,12 +918,12 @@ INT_PTR CALLBACK SelectionCallback(HWND hDlg, UINT message, WPARAM wParam, LPARA
 		if (hDC != NULL)
 			ReleaseDC(hCtrl, hDC);
 		ResizeMoveCtrl(hDlg, hCtrl, 0, 0, 0, dh, 1.0f);
-		for (i = 0; i < nSelectionChoices; i++)
+		for (i = 0; i < nDialogItems; i++)
 			ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + i), 0, dh, 0, 0, 1.0f);
-		if (nSelectionChoices > 2) {
-			GetWindowRect(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1), &rect);
-			GetWindowRect(GetDlgItem(hDlg, IDC_SELECTION_CHOICE2), &rect2);
-			dh += (nSelectionChoices - 2) * (rect2.top - rect.top) + 5;
+		if (nDialogItems > 2) {
+			GetWindowRect(GetDlgItem(hDlg, IDC_SELECTION_CHOICE2), &rect);
+			GetWindowRect(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + nDialogItems - 1), &rect2);
+			dh += rect2.top - rect.top;
 		}
 		ResizeMoveCtrl(hDlg, hDlg, 0, 0, 0, dh, 1.0f);
 		ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, -1), 0, 0, 0, dh, 1.0f);	// IDC_STATIC = -1
@@ -954,9 +954,9 @@ INT_PTR CALLBACK SelectionCallback(HWND hDlg, UINT message, WPARAM wParam, LPARA
 	case WM_COMMAND:
 		switch (LOWORD(wParam)) {
 		case IDOK:
-			for (i = 0; (i < nSelectionChoices) &&
+			for (i = 0; (i < nDialogItems) &&
 				(Button_GetCheck(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + i)) != BST_CHECKED); i++);
-			if (i < nSelectionChoices)
+			if (i < nDialogItems)
 				r = i + 1;
 			// Fall through
 		case IDNO:
@@ -970,21 +970,150 @@ INT_PTR CALLBACK SelectionCallback(HWND hDlg, UINT message, WPARAM wParam, LPARA
 }
 
 /*
-* Display a selection question
-*/
-int Selection(char* title, char* message, char** choices, int size)
+ * Display an item selection dialog
+ */
+int SelectionDialog(char* title, char* message, char** choices, int size)
 {
 	int ret;
 
 	dialog_showing++;
 	szMessageTitle = title;
 	szMessageText = message;
-	szSelectionChoice = choices;
-	nSelectionChoices = size;
+	szDialogItem = choices;
+	nDialogItems = size;
 	ret = (int)MyDialogBox(hMainInstance, IDD_SELECTION, hMainDialog, SelectionCallback);
 	dialog_showing--;
 
 	return ret;
+}
+
+/*
+ * Custom dialog for list dialog
+ */
+INT_PTR CALLBACK ListCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	LRESULT loc;
+	int i, dh, r  = -1;
+	// Prevent resizing
+	static LRESULT disabled[9] = { HTLEFT, HTRIGHT, HTTOP, HTBOTTOM, HTSIZE,
+		HTTOPLEFT, HTTOPRIGHT, HTBOTTOMLEFT, HTBOTTOMRIGHT };
+	static HBRUSH background_brush, separator_brush;
+	// To use the system message font
+	NONCLIENTMETRICS ncm;
+	RECT rect, rect2;
+	HFONT hDlgFont;
+	HWND hCtrl;
+	HDC hDC;
+
+	switch (message) {
+	case WM_INITDIALOG:
+		// Don't overflow our max radio button
+		if (nDialogItems > (IDC_LIST_ITEMMAX - IDC_LIST_ITEM1 + 1)) {
+			uprintf("Warning: Too many items requested for List (%d vs %d)",
+				nDialogItems, IDC_LIST_ITEMMAX - IDC_LIST_ITEM1);
+			nDialogItems = IDC_LIST_ITEMMAX - IDC_LIST_ITEM1;
+		}
+		// TODO: This shouldn't be needed when using DS_SHELLFONT
+		// Get the system message box font. See http://stackoverflow.com/a/6057761
+		ncm.cbSize = sizeof(ncm);
+		// If we're compiling with the Vista SDK or later, the NONCLIENTMETRICS struct
+		// will be the wrong size for previous versions, so we need to adjust it.
+#if defined(_MSC_VER) && (_MSC_VER >= 1500) && (_WIN32_WINNT >= _WIN32_WINNT_VISTA)
+		if (nWindowsVersion >= WINDOWS_VISTA) {
+			// In versions of Windows prior to Vista, the iPaddedBorderWidth member
+			// is not present, so we need to subtract its size from cbSize.
+			ncm.cbSize -= sizeof(ncm.iPaddedBorderWidth);
+		}
+#endif
+		SystemParametersInfo(SPI_GETNONCLIENTMETRICS, ncm.cbSize, &ncm, 0);
+		hDlgFont = CreateFontIndirect(&(ncm.lfMessageFont));
+		// Set the dialog to use the system message box font
+		SendMessage(hDlg, WM_SETFONT, (WPARAM)hDlgFont, MAKELPARAM(TRUE, 0));
+		SendMessage(GetDlgItem(hDlg, IDC_LIST_TEXT), WM_SETFONT, (WPARAM)hDlgFont, MAKELPARAM(TRUE, 0));
+		for (i = 0; i < nDialogItems; i++)
+			SendMessage(GetDlgItem(hDlg, IDC_LIST_ITEM1 + i), WM_SETFONT, (WPARAM)hDlgFont, MAKELPARAM(TRUE, 0));
+		SendMessage(GetDlgItem(hDlg, IDYES), WM_SETFONT, (WPARAM)hDlgFont, MAKELPARAM(TRUE, 0));
+		SendMessage(GetDlgItem(hDlg, IDNO), WM_SETFONT, (WPARAM)hDlgFont, MAKELPARAM(TRUE, 0));
+
+		apply_localization(IDD_LIST, hDlg);
+		background_brush = CreateSolidBrush(GetSysColor(COLOR_WINDOW));
+		separator_brush = CreateSolidBrush(GetSysColor(COLOR_3DLIGHT));
+		SetTitleBarIcon(hDlg);
+		CenterDialog(hDlg);
+		// Change the default icon and set the text
+		Static_SetIcon(GetDlgItem(hDlg, IDC_LIST_ICON), LoadIcon(NULL, IDI_EXCLAMATION));
+		SetWindowTextU(hDlg, szMessageTitle);
+		SetWindowTextU(GetDlgItem(hDlg, IDCANCEL), lmprintf(MSG_007));
+		SetWindowTextU(GetDlgItem(hDlg, IDC_LIST_TEXT), szMessageText);
+		for (i = 0; i < nDialogItems; i++) {
+			SetWindowTextU(GetDlgItem(hDlg, IDC_LIST_ITEM1 + i), szDialogItem[i]);
+			ShowWindow(GetDlgItem(hDlg, IDC_LIST_ITEM1 + i), SW_SHOW);
+		}
+		// Move/Resize the controls as needed to fit our text
+		hCtrl = GetDlgItem(hDlg, IDC_LIST_TEXT);
+		hDC = GetDC(hCtrl);
+		SelectFont(hDC, hDlgFont);	// Yes, you *MUST* reapply the font to the DC, even after SetWindowText!
+		GetWindowRect(hCtrl, &rect);
+		dh = rect.bottom - rect.top;
+		DrawTextU(hDC, szMessageText, -1, &rect, DT_CALCRECT | DT_WORDBREAK);
+		dh = rect.bottom - rect.top - dh;
+		if (hDC != NULL)
+			ReleaseDC(hCtrl, hDC);
+		ResizeMoveCtrl(hDlg, hCtrl, 0, 0, 0, dh, 1.0f);
+		for (i = 0; i < nDialogItems; i++)
+			ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDC_LIST_ITEM1 + i), 0, dh, 0, 0, 1.0f);
+		if (nDialogItems > 1) {
+			GetWindowRect(GetDlgItem(hDlg, IDC_LIST_ITEM1), &rect);
+			GetWindowRect(GetDlgItem(hDlg, IDC_LIST_ITEM1 + nDialogItems - 1), &rect2);
+			dh += rect2.top - rect.top;
+		}
+		ResizeMoveCtrl(hDlg, hDlg, 0, 0, 0, dh, 1.0f);
+		ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, -1), 0, 0, 0, dh, 1.0f);	// IDC_STATIC = -1
+		ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDC_LIST_LINE), 0, dh, 0, 0, 1.0f);
+		ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDOK), 0, dh, 0, 0, 1.0f);
+		ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDCANCEL), 0, dh, 0, 0, 1.0f);
+		return (INT_PTR)TRUE;
+	case WM_CTLCOLORSTATIC:
+		// Change the background colour for static text and icon
+		SetBkMode((HDC)wParam, TRANSPARENT);
+		if ((HWND)lParam == GetDlgItem(hDlg, IDC_NOTIFICATION_LINE)) {
+			return (INT_PTR)separator_brush;
+		}
+		return (INT_PTR)background_brush;
+	case WM_NCHITTEST:
+		// Check coordinates to prevent resize actions
+		loc = DefWindowProc(hDlg, message, wParam, lParam);
+		for (i = 0; i < 9; i++) {
+			if (loc == disabled[i]) {
+				return (INT_PTR)TRUE;
+			}
+		}
+		return (INT_PTR)FALSE;
+	case WM_COMMAND:
+		switch (LOWORD(wParam)) {
+		case IDOK:
+		case IDNO:
+		case IDCANCEL:
+			EndDialog(hDlg, r);
+			return (INT_PTR)TRUE;
+		}
+		break;
+	}
+	return (INT_PTR)FALSE;
+}
+
+/*
+ * Display a dialog with a list of items
+ */
+void ListDialog(char* title, char* message, char** items, int size)
+{
+	dialog_showing++;
+	szMessageTitle = title;
+	szMessageText = message;
+	szDialogItem = items;
+	nDialogItems = size;
+	MyDialogBox(hMainInstance, IDD_LIST, hMainDialog, ListCallback);
+	dialog_showing--;
 }
 
 static struct {

@@ -114,7 +114,7 @@ uint16_t rufus_version[3], embedded_sl_version[2];
 char embedded_sl_version_str[2][12] = { "?.??", "?.??" };
 char embedded_sl_version_ext[2][32];
 RUFUS_UPDATE update = { {0,0,0}, {0,0}, NULL, NULL};
-StrArray DriveID, DriveLabel;
+StrArray DriveID, DriveLabel, BlockingProcess;
 extern char* szStatusMessage;
 
 static HANDLE format_thid = NULL, dialog_handle = NULL;
@@ -1802,6 +1802,7 @@ static void InitDialog(HWND hDlg)
 	// Create the string array
 	StrArrayCreate(&DriveID, MAX_DRIVES);
 	StrArrayCreate(&DriveLabel, MAX_DRIVES);
+	StrArrayCreate(&BlockingProcess, 16);
 	// Set various checkboxes
 	CheckDlgButton(hDlg, IDC_QUICKFORMAT, BST_CHECKED);
 	CheckDlgButton(hDlg, IDC_BOOT, BST_CHECKED);
@@ -2240,6 +2241,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			PostQuitMessage(0);
 			StrArrayDestroy(&DriveID);
 			StrArrayDestroy(&DriveLabel);
+			StrArrayDestroy(&BlockingProcess);
 			DestroyAllTooltips();
 			DestroyWindow(hLogDlg);
 			GetWindowRect(hDlg, &relaunch_rc);
@@ -2455,6 +2457,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				return (INT_PTR)TRUE;
 			}
 			FormatStatus = 0;
+			StrArrayClear(&BlockingProcess);
 			format_op_in_progress = TRUE;
 			no_confirmation_on_cancel = FALSE;
 			// Reset all progress bars
@@ -2493,7 +2496,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 						char* iso_image = lmprintf(MSG_036);
 						char* dd_image = lmprintf(MSG_095);
 						char* choices[2] = { lmprintf(MSG_276, iso_image), lmprintf(MSG_277, dd_image) };
-						i = Selection(lmprintf(MSG_274), lmprintf(MSG_275, iso_image, dd_image, iso_image, dd_image),
+						i = SelectionDialog(lmprintf(MSG_274), lmprintf(MSG_275, iso_image, dd_image, iso_image, dd_image),
 							choices, 2);
 						if (i < 0) {	// Cancel
 							format_op_in_progress = FALSE;
@@ -2826,9 +2829,12 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_ERROR, 0);
 			SetTaskbarProgressState(TASKBAR_ERROR);
 			PrintInfo(0, MSG_212);
-			Notification(MSG_ERROR, NULL, lmprintf(MSG_042), lmprintf(MSG_043, StrError(FormatStatus, FALSE)));
 			MessageBeep(MB_ICONERROR);
 			FlashTaskbar(dialog_handle);
+			if (BlockingProcess.Index > 0)
+				ListDialog(lmprintf(MSG_042), lmprintf(MSG_055), BlockingProcess.String, BlockingProcess.Index);
+			else
+				Notification(MSG_ERROR, NULL, lmprintf(MSG_042), lmprintf(MSG_043, StrError(FormatStatus, FALSE)));
 		}
 		FormatStatus = 0;
 		format_op_in_progress = FALSE;

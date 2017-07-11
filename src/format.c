@@ -1325,7 +1325,7 @@ int SetWinToGoIndex(void)
 		(StrArrayAdd(&version_index, get_token_data_file_indexed("IMAGE INDEX", xml_file, i + 1), FALSE) >= 0); i++);
 
 	if (i > 1)
-		i = Selection(lmprintf(MSG_291), lmprintf(MSG_292), version_name.String, i);
+		i = SelectionDialog(lmprintf(MSG_291), lmprintf(MSG_292), version_name.String, i);
 	if (i < 0) {
 		wintogo_index = -2;	// Cancelled by the user
 	} else if (i == 0) {
