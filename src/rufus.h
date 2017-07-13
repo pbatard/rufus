@@ -495,7 +495,7 @@ extern BOOL IsCurrentProcessElevated(void);
 extern char* GetCurrentMUI(void);
 extern BOOL SetFormatPromptHook(void);
 extern void ClrFormatPromptHook(void);
-extern BOOL SearchProcess(char* HandleName, BOOL bPartialMatch, BOOL bIgnoreSelf);
+extern BYTE SearchProcess(char* HandleName, BOOL bPartialMatch, BOOL bIgnoreSelf, BOOL bQuiet);
 extern BOOL EnablePrivileges(void);
 extern void FlashTaskbar(HANDLE handle);
 
