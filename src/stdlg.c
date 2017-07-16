@@ -823,6 +823,9 @@ BOOL Notification(int type, const notification_info* more_info, char* title, cha
 	notification_is_question = FALSE;
 
 	switch(type) {
+	case MSG_WARNING_QUESTION:
+		notification_is_question = TRUE;
+		// Fall through
 	case MSG_WARNING:
 		hMessageIcon = LoadIcon(NULL, IDI_WARNING);
 		break;

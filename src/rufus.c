@@ -2153,6 +2153,65 @@ static void SaveISO(void)
 	}
 }
 
+// Check for conflicting processes accessing the drive, and if any,
+// ask the user whether they want to proceed.
+static BOOL CheckDriveAccess(void)
+{
+	uint32_t i, j;
+	BOOL bProceed = TRUE;
+	BYTE access_mask;
+	char *PhysicalPath, DevPath[MAX_PATH];
+	char drive_letter[27], drive_name[] = "?:";
+	char *message, title[128];
+
+	// Get the current selected device
+	DWORD DeviceNum = (DWORD)ComboBox_GetItemData(hDeviceList, ComboBox_GetCurSel(hDeviceList));
+	if ((DeviceNum < 0x80) || (DeviceNum == (DWORD)-1))
+		return FALSE;
+
+	// Search for any blocking processes against the physical drive
+	PhysicalPath = GetPhysicalName(DeviceNum);
+	QueryDosDeviceA(&PhysicalPath[4], DevPath, sizeof(DevPath));
+	access_mask = SearchProcess(DevPath, TRUE, TRUE, TRUE);
+	if (access_mask != 0) {
+		bProceed = FALSE;
+		uprintf("Found potentially blocking process(es) against %s:", &PhysicalPath[4]);
+		for (j = 0; j < BlockingProcess.Index; j++)
+			uprintf(BlockingProcess.String[j]);
+	}
+	free(PhysicalPath);
+
+	// Search for any blocking processes against the logical volume(s)
+	GetDriveLetters(DeviceNum, drive_letter);
+	for (i = 0; drive_letter[i]; i++) {
+		drive_name[0] = drive_letter[i];
+		if (QueryDosDeviceA(drive_name, DevPath, sizeof(DevPath)) != 0) {
+			StrArrayClear(&BlockingProcess);
+			access_mask = SearchProcess(DevPath, TRUE, TRUE, TRUE);
+			// Ignore if all we have is read-only
+			if ((access_mask & 0x06) || (access_mask == 0x80)) {
+				bProceed = FALSE;
+				uprintf("Found potentially blocking process(es) against %s", drive_name);
+				for (j = 0; j < BlockingProcess.Index; j++)
+					uprintf(BlockingProcess.String[j]);
+			}
+		}
+	}
+
+	// Prompt the user if we detected blocking processes
+	if (!bProceed) {
+		// We'll use a system translated string instead of one from rufus.loc
+		message = GetMuiString("shell32.dll", 28701);	// "This drive is in use (...) Do you want to format it anyway?"
+		if (message != NULL) {
+			ComboBox_GetTextU(hDeviceList, title, sizeof(title));
+			bProceed = Notification(MSG_WARNING_QUESTION, NULL, title, message);
+			free(message);
+		}
+	}
+
+	return bProceed;
+}
+
 #ifdef RUFUS_TEST
 	extern int SelectionDyn(char* title, char* message, char** szChoice, int nChoices);
 #endif
@@ -2189,7 +2248,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	case WM_COMMAND:
 #ifdef RUFUS_TEST
 		if (LOWORD(wParam) == IDC_TEST) {
-			SearchProcess("\\Device\\Harddisk5\\DR5", TRUE, TRUE);
+			uprintf("Proceed = %s", CheckDriveAccess()?"True":"False");
 //			char* choices[] = { "Choice 1", "Choice 2", "Choice 3" };
 //			SelectionDyn("Test Choice", "Unused", choices, ARRAYSIZE(choices));
 			break;
@@ -2507,6 +2566,13 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 							SetComboEntry(hBootType, selection_default);
 						}
 					}
+				}
+
+				if (!CheckDriveAccess()) {
+					format_op_in_progress = FALSE;
+					zero_drive = FALSE;
+					PROCESS_QUEUED_EVENTS;
+					break;
 				}
 
 				GetWindowTextU(hDeviceList, tmp, ARRAYSIZE(tmp));

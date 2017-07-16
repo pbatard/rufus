@@ -384,7 +384,7 @@ BYTE SearchProcess(char* HandleName, BOOL bPartialMatch, BOOL bIgnoreSelf, BOOL 
 			// If we're switching process and found a match, print it
 			if (bFound) {
 				vuprintf("● '%s' (pid: %ld, access: %s)", exe_path, pid[cur_pid], access_rights_str[access_rights & 0x7]);
-				static_sprintf(tmp, "● %s (pid %ld)", exe_path, pid[cur_pid]);
+				static_sprintf(tmp, "● %s (%s)", exe_path, access_rights_str[access_rights & 0x7]);
 				StrArrayAdd(&BlockingProcess, tmp, TRUE);
 				bFound = FALSE;
 				access_rights = 0;

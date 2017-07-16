@@ -276,6 +276,11 @@ static __inline int LoadStringU(HINSTANCE hInstance, UINT uID, LPSTR lpBuffer, i
 {
 	int ret;
 	DWORD err = ERROR_INVALID_DATA;
+	if (nBufferMax == 0) {
+		// read-only pointer to resource mode is not supported
+		SetLastError(ERROR_INVALID_PARAMETER);
+		return 0;
+	}
 	// coverity[returned_null]
 	walloc(lpBuffer, nBufferMax);
 	ret = LoadStringW(hInstance, uID, wlpBuffer, nBufferMax);
@@ -458,6 +463,15 @@ static __inline BOOL DeleteFileU(const char* lpFileName)
 	err = GetLastError();
 	wfree(lpFileName);
 	SetLastError(err);
+	return ret;
+}
+
+static __inline BOOL PathFileExistsU(char* szPath)
+{
+	BOOL ret;
+	wconvert(szPath);
+	ret = PathFileExistsW(wszPath);
+	wfree(szPath);
 	return ret;
 }
 

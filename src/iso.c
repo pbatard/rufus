@@ -277,7 +277,7 @@ static void fix_config(const char* psz_fullpath, const char* psz_path, const cha
 		if ((iso_label != NULL) && (usb_label != NULL)) {
 			if (replace_in_token_data(src, (props->is_grub_cfg) ? "linuxefi" : "append",
 				iso_label, usb_label, TRUE) != NULL)
-				uprintf("  Patched %s: '%s' ⇨ '%s'\n", src, iso_label, usb_label);
+				uprintf("  Patched %s: '%s' ➔ '%s'\n", src, iso_label, usb_label);
 		}
 		safe_free(iso_label);
 		safe_free(usb_label);
@@ -301,7 +301,7 @@ static void fix_config(const char* psz_fullpath, const char* psz_path, const cha
 			safe_sprintf(iso_label, MAX_PATH, "cd9660:/dev/iso9660/%s", img_report.label);
 			safe_sprintf(usb_label, MAX_PATH, "msdosfs:/dev/msdosfs/%s", img_report.usb_label);
 			if (replace_in_token_data(src, "set", iso_label, usb_label, TRUE) != NULL)
-				uprintf("  Patched %s: '%s' ⇨ '%s'\n", src, iso_label, usb_label);
+				uprintf("  Patched %s: '%s' ➔ '%s'\n", src, iso_label, usb_label);
 		}
 		safe_free(iso_label);
 		safe_free(usb_label);
@@ -896,7 +896,7 @@ out:
 			fclose(fd);
 			fd = NULL;
 			safe_sprintf(path2, sizeof(path2), "%s\\syslinux.org", dest_dir);
-			uprintf("Renaming: %s ⇨ %s", path, path2);
+			uprintf("Renaming: %s ➔ %s", path, path2);
 			IGNORE_RETVAL(rename(path, path2));
 		}
 		if (fd == NULL) {

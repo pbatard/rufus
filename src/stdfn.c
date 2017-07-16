@@ -909,3 +909,35 @@ char* GetCurrentMUI(void)
 	}
 	return mui_str;
 }
+
+char* GetMuiString(char* szModuleName, UINT uID)
+{
+	HMODULE hModule;
+	char path[MAX_PATH], *str;
+	wchar_t* wstr;
+	void* ptr;
+	int len;
+	static_sprintf(path, "%s\\%s\\%s.mui", system_dir, GetCurrentMUI(), szModuleName);
+	// If the file doesn't exist, fall back to en-US
+	if (!PathFileExistsU(path))
+		static_sprintf(path, "%s\\en-US\\%s.mui", system_dir, szModuleName);
+	hModule = LoadLibraryExA(path, NULL, LOAD_LIBRARY_AS_IMAGE_RESOURCE | LOAD_LIBRARY_AS_DATAFILE);
+	if (hModule == NULL) {
+		uprintf("Could not load '%s': %s", path, WindowsErrorString());
+		return NULL;
+	}
+	// Calling LoadStringW with last parameter 0 returns the length of the string (without NUL terminator)
+	len = LoadStringW(hModule, uID, (LPWSTR)(&ptr), 0);
+	if (len <= 0) {
+		if (GetLastError() == ERROR_SUCCESS)
+			SetLastError(ERROR_RESOURCE_NAME_NOT_FOUND);
+		uprintf("Could not find string ID %d in '%s': %s", uID, path, WindowsErrorString());
+		return NULL;
+	}
+	len += 1;
+	wstr = calloc(len, sizeof(wchar_t));
+	len = LoadStringW(hModule, uID, wstr, len);
+	str = wchar_to_utf8(wstr);
+	free(wstr);
+	return str;
+}

@@ -160,6 +160,7 @@ enum notification_type {
 	MSG_WARNING,
 	MSG_ERROR,
 	MSG_QUESTION,
+	MSG_WARNING_QUESTION
 };
 typedef INT_PTR (CALLBACK *Callback_t)(HWND, UINT, WPARAM, LPARAM);
 typedef struct {
@@ -493,6 +494,7 @@ extern BOOL IsBufferInDB(const unsigned char* buf, const size_t len);
 extern char* _printbits(size_t const size, void const * const ptr, int leading_zeroes);
 extern BOOL IsCurrentProcessElevated(void);
 extern char* GetCurrentMUI(void);
+extern char* GetMuiString(char* szModuleName, UINT uID);
 extern BOOL SetFormatPromptHook(void);
 extern void ClrFormatPromptHook(void);
 extern BYTE SearchProcess(char* HandleName, BOOL bPartialMatch, BOOL bIgnoreSelf, BOOL bQuiet);
