@@ -15408,7 +15408,7 @@ t MSG_294 "Rufus več ne podpira tega operacijskega sistema."
 
 ################################################################################
 l "es-ES" "Spanish (Español)" 0x040a, 0x080a, 0x0c0a, 0x100a, 0x140a, 0x180a, 0x1c0a, 0x200a, 0x240a, 0x280a, 0x2c0a, 0x300a, 0x340a, 0x380a, 0x3c0a, 0x400a, 0x440a, 0x480a, 0x4c0a, 0x500a, 0x540a, 0x580a
-v 1.0.21
+v 1.0.22
 b "en-US"
 
 # Main dialog
@@ -15883,6 +15883,12 @@ t MSG_291 "Selección de versión"
 t MSG_292 "Por favor seleccione la versión de Windows que desea instalar:"
 t MSG_293 "Versión de Windows no soportada"
 t MSG_294 "Esta versión de Windows ya no está soportada por Rufus."
+t MSG_295 "Atención: Versión no oficial"
+t MSG_296 "Esta versión de Rufus NO ha sido generada por su(s) desarrollador(es) oficial(es).\n\n¿Está seguro de que desea ejecutarlo?"
+t MSG_297 "Se ha detectado una ISO truncada"
+t MSG_298 "El fichero ISO seleccionado no tiene su tamaño declarado: ¡Falta un %s de los datos!\n\nSi has obtenido este fichero de Internet, "
+	"deberías intentar una nueva descarga y verificar que los checksum MD5 y SHA coinciden con los originales.\n\nPuedes calcular los valores "
+	"MD5 o SHA con Rufus, desde el botón '#'."
 
 ################################################################################
 l "sv-SE" "Swedish (Svenska)" 0x041d, 0x081d
