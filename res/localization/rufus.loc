@@ -12666,6 +12666,15 @@ t MSG_291 "Seleção de versão"
 t MSG_292 "Por favor, selecione a versão do Windows que deseja instalar:"
 t MSG_293 "Versão do Windows não suportada"
 t MSG_294 "Esta versão do Windows não é mais suportada pelo Rufos"
+t MSG_295 "Atenção: versão não oficial"
+t MSG_296 "Esta versão do Rufos não foi desenvolvida pelo(s) desenvolvedor(es)"
+  " oficiais.\n\nTem certeza que deseja continuar?"
+t MSG_297 "ISO reduzida detectada"
+t MSG_298 "O arquivo ISO selecionado não corresponde ao tamanho "
+  "declarado: %s restantes!\n\nSAe você obteve este arquivo da "
+  "Internet, faça o download de uma nova cópia e verifique que o "
+  "MD5 ou SHA checksums correspondem aos oficiais.\n\nVocê pode "
+  "calcular o MD5 ou SHA no Rufus clicando no botão '#'."
 
 ################################################################################
 l "pt-PT" "Portuguese Standard (Português)" 0x0816
