@@ -7885,7 +7885,7 @@ t MSG_287 "Deteksi selain perangkat USB yang dapat dilepas"
 
 ################################################################################
 l "it-IT" "Italian (Italiano)" 0x0410, 0x0810
-v 1.0.21
+v 1.0.22
 b "en-US"
 
 g IDD_DIALOG
@@ -8322,6 +8322,12 @@ t MSG_291 "Selezione versione"
 t MSG_292 "Seleziona la versione di Windows che vuoi installare:"
 t MSG_293 "Versione Windows non supportata"
 t MSG_294 "Questa versione di Windows non è più supportata da Rufus."
+t MSG_295 "Attenzione: versione non ufficiale"
+t MSG_296 "Questa versione di Rufus non è stata sviluppata dai suoi sviluppatori ufficiali.\n\nSei sicuro di volerla eseguire?"
+t MSG_297 "Rilevato file ISO troncato"
+t MSG_298 "Il file ISO selezionato non corrisponde alla dimensione dichiarata: %s dei dati mancanti!\n\nSe hai scaricato "
+	"questo file da internet, prova a scaricarne una nuova copia e verifica che la checksum MD5 o SHA corrisponda alla checksum "
+	"ufficiale.\n\nNota che puoi calcolare in Rufus la checksum facendo clic sul pulsante '#'."
 
 ######################################################################
 l "ja-JP" "Japanese (日本語)" 0x0411
