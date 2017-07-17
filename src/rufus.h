@@ -116,10 +116,10 @@
 #ifdef RUFUS_LOGGING
 extern void _uprintf(const char *format, ...);
 #define uprintf(...) _uprintf(__VA_ARGS__)
-#define vuprintf(...) if (verbose) _uprintf(__VA_ARGS__)
-#define vvuprintf(...) if (verbose > 1) _uprintf(__VA_ARGS__)
-#define suprintf(...) if (!bSilent) _uprintf(__VA_ARGS__)
-#define uuprintf(...) if (usb_debug) _uprintf(__VA_ARGS__)
+#define vuprintf(...) do { if (verbose) _uprintf(__VA_ARGS__); } while(0)
+#define vvuprintf(...) do { if (verbose > 1) _uprintf(__VA_ARGS__); } while(0)
+#define suprintf(...) do { if (!bSilent) _uprintf(__VA_ARGS__); } while(0)
+#define uuprintf(...) do { if (usb_debug) _uprintf(__VA_ARGS__); } while(0)
 #define ubprintf(...) do { safe_sprintf(&ubuffer[ubuffer_pos], UBUFFER_SIZE - ubuffer_pos - 2, __VA_ARGS__); \
 	ubuffer_pos = strlen(ubuffer); ubuffer[ubuffer_pos++] = '\r'; ubuffer[ubuffer_pos++] = '\n'; \
 	ubuffer[ubuffer_pos] = 0; } while(0)

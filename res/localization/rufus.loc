@@ -93,7 +93,7 @@
 # http://download.microsoft.com/download/9/5/E/95EF66AF-9026-4BB0-A41D-A4F81802D92C/%5BMS-LCID%5D.pdf
 # for the LCID (0x####) codes you should use
 l "en-US" "English (English)" 0x0409, 0x0809, 0x0c09, 0x1009, 0x1409, 0x1809, 0x1c09, 0x2009, 0x2409, 0x2809, 0x2c09, 0x3009, 0x3409, 0x3809, 0x3c09, 0x4009, 0x4409, 0x4809
-v 1.0.21
+v 1.0.22
 
 # Main dialog
 g IDD_DIALOG
@@ -558,7 +558,7 @@ t MSG_292 "Please select the version of Windows you want to install:"
 t MSG_293 "Unsupported Windows version"
 t MSG_294 "This version of Windows is no longer supported by Rufus."
 t MSG_295 "Warning: Unofficial version"
-t MSG_296 "This version of Rufus was NOT produced by its official developer(s).\n\nAre you sure you want to run it?"
+t MSG_296 "This version of Rufus was not produced by its official developer(s).\n\nAre you sure you want to run it?"
 t MSG_297 "Truncated ISO detected"
 t MSG_298 "The ISO file you have selected does not match its declared size: %s of data is missing!\n\nIf you obtained "
 	"this file from the Internet, you should try to download a new copy and verify that the MD5 or SHA checksums match "
@@ -5119,7 +5119,7 @@ t MSG_294 "Rufus ei enää tue tätä Windows-versiota."
 
 ################################################################################
 l "fr-FR" "French (Français)" 0x040c, 0x080c, 0x0c0c, 0x100c, 0x140c, 0x180c, 0x1c0c, 0x200c, 0x240c, 0x280c, 0x2c0c, 0x300c, 0x340c, 0x380c, 0xe40c
-v 1.0.21
+v 1.0.22
 b "en-US"
 
 g IDD_DIALOG
@@ -5544,6 +5544,13 @@ t MSG_291 "Sélection de version"
 t MSG_292 "Sélectionnez la version de Windows que vous souhaitez installer :"
 t MSG_293 "Version de Windows non supportée"
 t MSG_294 "Cette version de Windows n'est plus supportée par Rufus."
+t MSG_295 "Alerte: Version non-officielle"
+t MSG_296 "Cette version de Rufus n'a pas produite par ses développeurs officiels.\n\nEtes-vous sur de vouloir la lancer ?"
+t MSG_297 "ISO tronquée détectée"
+t MSG_298 "Le fichier ISO que vous avez sélectionné ne fait pas la bonne taille : %s de données sont manquantes !\n\n"
+	"Si vous avez obtenu ce fichier depuis Internet, vous devriez essayer de le télécharger à nouveau et verifier que "
+	"le MD5 ou SHA correspond aux valeurs officielles.\n\nNotez que vous pouvez calculer le MD5 ou SHA depuis Rufus en "
+	"cliquant le bouton '#'."
 
 ################################################################################
 l "de-DE" "German (Deutsch)" 0x0407, 0x0807, 0x0c07, 0x1007, 0x1407

@@ -1,3 +1,10 @@
+o Version 2.16 (2017.07.??)
+    Add an audiovisual cue on completion/error
+    Notify user when an ISO is broken or truncated
+    Notify user if other processes are accessing the drive before format
+    List processes that are locking a drive, if any, on failure
+    Improve verbosity of the Windows To Go process
+
 o Version 2.15 (2017.05.17)
     Fix non-listing of drives that are opened for write access by another process
     Report external processes that may be preventing disk access (in the log)
