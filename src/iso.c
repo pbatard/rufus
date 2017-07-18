@@ -82,7 +82,6 @@ static const char* grub_dirname = "/boot/grub/i386-pc";
 static const char* grub_cfg = "grub.cfg";
 static const char* syslinux_cfg[] = { "isolinux.cfg", "syslinux.cfg", "extlinux.conf" };
 static const char* arch_cfg[] = { "archiso_sys32.cfg", "archiso_sys64.cfg" };
-static const char* isolinux_tmp = ".\\isolinux.tmp";
 static const char* isolinux_bin[] = { "isolinux.bin", "boot.bin" };
 static const char* pe_dirname[] = { "/i386", "/minint" };
 static const char* pe_file[] = { "ntdetect.com", "setupldr.bin", "txtsetup.sif" };
@@ -789,6 +788,8 @@ out:
 			uprintf("  Will use '%s' for Syslinux", img_report.cfg_path);
 			// Extract all of the isolinux.bin files we found to identify their versions
 			for (i=0; i<isolinux_path.Index; i++) {
+				char isolinux_tmp[MAX_PATH];
+				static_sprintf(isolinux_tmp, "%s\\isolinux.tmp", temp_dir);
 				size = (size_t)ExtractISOFile(src_iso, isolinux_path.String[i], isolinux_tmp, FILE_ATTRIBUTE_NORMAL);
 				if (size == 0) {
 					uprintf("  Could not access %s", isolinux_path.String[i]);
@@ -821,8 +822,8 @@ out:
 						}
 					}
 					free(buf);
-					_unlink(isolinux_tmp);
 				}
+				_unlink(isolinux_tmp);
 			}
 			if (img_report.sl_version != 0) {
 				static_sprintf(img_report.sl_version_str, "%d.%02d",

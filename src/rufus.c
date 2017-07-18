@@ -94,7 +94,7 @@ HINSTANCE hMainInstance;
 HWND hMainDialog, hLangToolbar = NULL, hUpdatesDlg = NULL;
 MY_BUTTON_IMAGELIST bi_iso = { 0 }, bi_up = { 0 }, bi_down = { 0 };
 GetTickCount64_t pfGetTickCount64 = NULL;
-char szFolderPath[MAX_PATH], app_dir[MAX_PATH], system_dir[MAX_PATH], sysnative_dir[MAX_PATH];
+char szFolderPath[MAX_PATH], app_dir[MAX_PATH], system_dir[MAX_PATH], temp_dir[MAX_PATH], sysnative_dir[MAX_PATH];
 char* image_path = NULL;
 float fScale = 1.0f;
 int default_fs;
@@ -3103,7 +3103,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		uprintf("Could not access UTF-16 args");
 	}
 
-	// Retrieve the current application directory as well as the system & sysnative dirs
+	// Retrieve various app & system directories
 	if (GetCurrentDirectoryU(sizeof(app_dir), app_dir) == 0) {
 		uprintf("Could not get current directory: %s", WindowsErrorString());
 		app_dir[0] = 0;
@@ -3111,6 +3111,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	if (GetSystemDirectoryU(system_dir, sizeof(system_dir)) == 0) {
 		uprintf("Could not get system directory: %s", WindowsErrorString());
 		safe_strcpy(system_dir, sizeof(system_dir), "C:\\Windows\\System32");
+	}
+	if (GetTempPathU(sizeof(temp_dir), temp_dir) == 0) {
+		uprintf("Could not get temp directory: %s", WindowsErrorString());
+		safe_strcpy(temp_dir, sizeof(temp_dir), ".\\");
 	}
 	// Construct Sysnative ourselves as there is no GetSysnativeDirectory() call
 	// By default (64bit app running on 64 bit OS or 32 bit app running on 32 bit OS)
@@ -3169,9 +3173,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		uprintf("loc file not found in current directory - embedded one will be used");
 
 		loc_data = (BYTE*)GetResource(hMainInstance, MAKEINTRESOURCEA(IDR_LC_RUFUS_LOC), _RT_RCDATA, "embedded.loc", &loc_size, FALSE);
-		if ( (GetTempPathU(sizeof(tmp_path), tmp_path) == 0)
-		  || (GetTempFileNameU(tmp_path, APPLICATION_NAME, 0, loc_file) == 0)
-		  || (loc_file[0] == 0) ) {
+		if ( (GetTempFileNameU(temp_dir, APPLICATION_NAME, 0, loc_file) == 0) || (loc_file[0] == 0) ) {
 			// Last ditch effort to get a loc file - just extract it to the current directory
 			safe_strcpy(loc_file, sizeof(loc_file), rufus_loc);
 		}
