@@ -15904,7 +15904,7 @@ t MSG_298 "El fichero ISO seleccionado no tiene su tamaño declarado: ¡Falta un
 
 ################################################################################
 l "sv-SE" "Swedish (Svenska)" 0x041d, 0x081d
-v 1.0.21
+v 1.0.22
 b "en-US"
 
 # Main dialog
@@ -16375,6 +16375,12 @@ t MSG_291 "Välj version"
 t MSG_292 "Välj den version av Windows du vill installera:"
 t MSG_293 "Denna version stöds inte"
 t MSG_294 "Denna version av Windows stöds inte längre av Rufus."
+t MSG_295 "Varning: Inofficiell version"
+t MSG_296 "Denna version av Rufus producerades inte av original utvecklaren.\n\nÄr du säker på att du vill använda den?"
+t MSG_297 "Ej komplett ISO-fil"
+t MSG_298 "ISO-filen du har valt matchar inte den angivna storleken: %s av data saknas!\n\nOm du har hämtat den här filen från internet, "
+	"prova då med att ladda ned filen igen och verifiera att checksumman MD5 eller SHA stämmer överens med den officiella filen.\n\n"
+	"Tips: Du kan beräkna MD5 eller SHA i Rufus genom att klicka på knappen '#'."
 
 ################################################################################
 l "th-TH" "Thai (ไทย)" 0x041e
