@@ -16887,7 +16887,7 @@ t MSG_294 "เวอร์ชั่นของ Windows นี้ไม่ได
 
 ################################################################################
 l "tr-TR" "Turkish (Türkçe)" 0x041F
-v 1.0.21
+v 1.0.22
 b "en-US"
 
 # Main dialog
@@ -17372,6 +17372,12 @@ t MSG_291 "Sürüm seçimi"
 t MSG_292 "Lütfen yüklemek istediğiniz Windows sürümünü seçin:"
 t MSG_293 "Desteklenmeyen Windows sürümü"
 t MSG_294 "Windows'un bu sürümü artık Rufus tarafından desteklenmiyor."
+t MSG_295 "Uyarı: Resmi olmayan sürüm"
+t MSG_296 "Rufus'un bu sürümü, resmi geliştirici(ler)i tarafından oluşturulmadı.\n\nÇalıştırmak istediğinize emin misiniz?"
+t MSG_297 "Kırpılmış ISO algılandı"
+t MSG_298 "Seçtiğiniz ISO dosyası bildirilen boyutla eşleşmiyor: Veri %s eksik!\n\nBu dosyayı İnternet'ten edindiyseniz, "
+	"yeni bir kopyasını indirip, MD5 veya SHA değerlerinin resmi dosyalarla eşleştiğini doğrulamanız gerekir.\n\n"
+	"Rufus'daki MD5 veya SHA'yı '#' işaretini tıklayarak hesaplayabileceğinizi unutmayın."
 
 ################################################################################
 l "uk-UA" "Ukrainian (Українська)" 0x0422
