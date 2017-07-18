@@ -48,6 +48,9 @@ PF_TYPE_DECL(NTAPI, NTSTATUS, NtOpenProcessToken, (HANDLE, ACCESS_MASK, PHANDLE)
 PF_TYPE_DECL(NTAPI, NTSTATUS, NtAdjustPrivilegesToken, (HANDLE, BOOLEAN, PTOKEN_PRIVILEGES, ULONG, PTOKEN_PRIVILEGES, PULONG));
 PF_TYPE_DECL(NTAPI, NTSTATUS, NtClose, (HANDLE));
 
+// This one is only available on Vista or later...
+PF_TYPE_DECL(WINAPI, BOOL, QueryFullProcessImageNameW, (HANDLE, DWORD, LPWSTR, PDWORD));
+
 static PVOID PhHeapHandle = NULL;
 extern StrArray BlockingProcess;
 
@@ -330,10 +333,12 @@ BYTE SearchProcess(char* HandleName, BOOL bPartialMatch, BOOL bIgnoreSelf, BOOL 
 	WCHAR *wHandleName = NULL;
 	HANDLE dupHandle = NULL;
 	HANDLE processHandle = NULL;
-	BOOLEAN bFound = FALSE, verbose = !bQuiet;
+	BOOLEAN bFound = FALSE, bGotExePath, verbose = !bQuiet;
 	ULONG access_rights = 0;
 	BYTE access_mask = 0;
+	DWORD size;
 	char exe_path[MAX_PATH] = { 0 };
+	wchar_t wexe_path[MAX_PATH];
 	int cur_pid;
 
 	PF_INIT_OR_SET_STATUS(NtQueryObject, Ntdll);
@@ -491,9 +496,28 @@ BYTE SearchProcess(char* HandleName, BOOL bPartialMatch, BOOL bIgnoreSelf, BOOL 
 		if (exe_path[0] == 0)
 			vuprintf("WARNING: The following process(es) or service(s) are accessing %s:", HandleName);
 
-		if (!GetModuleFileNameExU(processHandle, 0, exe_path, MAX_PATH - 1))
+		// First, we try to get the executable path using GetModuleFileNameEx
+		bGotExePath = (GetModuleFileNameExU(processHandle, 0, exe_path, MAX_PATH - 1) != 0);
+
+		// The above may not work on Windows 7, so try QueryFullProcessImageName (Vista or later)
+		if (!bGotExePath) {
+			size = MAX_PATH;
+			PF_INIT(QueryFullProcessImageNameW, kernel32);
+			if ( (pfQueryFullProcessImageNameW != NULL) &&
+				 (bGotExePath = pfQueryFullProcessImageNameW(processHandle, 0, wexe_path, &size)) )
+				wchar_to_utf8_no_alloc(wexe_path, exe_path, sizeof(exe_path));
+		}
+
+		// Still nothing? Try GetProcessImageFileName (but don't bother about Unicode)
+		// Note that GetProcessImageFileName uses '\Device\Harddisk#\Partition#' instead drive letters
+		if (!bGotExePath)
+			bGotExePath = (GetProcessImageFileNameA(processHandle, exe_path, MAX_PATH) != 0);
+
+		// Complete failure => Just craft a default process name that includes the PID
+		if (!bGotExePath) {
 			safe_sprintf(exe_path, MAX_PATH, "Unknown_Process_%" PRIu64,
-				(ULONGLONG) handleInfo->UniqueProcessId);
+				(ULONGLONG)handleInfo->UniqueProcessId);
+		}
 	}
 
 out:
