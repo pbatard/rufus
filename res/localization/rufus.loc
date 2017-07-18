@@ -9294,7 +9294,7 @@ t MSG_294 "이 Windows 버전은 Rufus에서 더 이상 지원하지 않습니�
 
 ################################################################################
 l "lv-LV" "Latvian (Latviešu)" 0x0426
-v 1.0.21
+v 1.0.22
 b "en-US"
 
 # Main dialog
@@ -9774,6 +9774,12 @@ t MSG_291 "Versijas izvēle"
 t MSG_292 "Izvēlieties Windows versiju, kuru vēlaties instalēt:"
 t MSG_293 "Neatbalstāma Windows versija"
 t MSG_294 "Šo Windows versiju Rufus vairs neatbalsta."
+t MSG_295 "Uzmanību: Neoficiālā programmas versija!"
+t MSG_296 "Šī Rufus versija nav no oficiālā izstrādātāja.\n\nVai tiešām vēlaties to izmantot?"
+t MSG_297 "Noteikts samazināts ISO"
+t MSG_298 "Izvēlētais ISO fails neatbilst noteiktajam izmēram: %s datu ir kļūdaini!\n\nJa šis fails tika "
+	"lejuplādēts no Interneta, nepieciešams lejuplādēt no jauna un pārbaudīt MD5 vai SHA kontrolsummu "
+	"atbilstību.\n\nPiezīme: aprēķināt MD5 vai SHA kontrolsummu programmā Rufus var piespiežot taustiņu '#'."
 
 ################################################################################
 l "lt-LT" "Lithuanian (Lietuvių)" 0x0427
