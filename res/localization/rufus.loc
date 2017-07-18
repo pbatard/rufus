@@ -13193,7 +13193,7 @@ t MSG_298 "O ficheiro ISO que selecionou não corresponde ao tamanho declarado: 
 
 ################################################################################
 l "ro-RO" "Romanian (Română)" 0x0418, 0x0818
-v 1.0.21
+v 1.0.22
 b "en-US"
 
 g IDD_DIALOG
@@ -13614,6 +13614,12 @@ t MSG_291 "Selectare versiune"
 t MSG_292 "Selectați versiunea de Windows pentru instalare: "
 t MSG_293 "Versiune Windows neacceptată"
 t MSG_294 "Această versiune Windows nu mai este suportată de Rufus."
+t MSG_295 "Atenție: versiune neoficială"
+t MSG_296 "Această versiune de Rufus nu a fost produsă de dezvoltatorul oficial.\n\nSigur doriți să îl rulați?"
+t MSG_297 "S-a detectat un ISO trunchiat"
+t MSG_298 "Fișierul ISO pe care l-ați selectat nu se potrivește dimensiunii sale declarate: %s de date lipsesc!\n\nDacă ați obținut "
+	"acest fișier de pe Internet, ar trebui să încercați să descărcați o copie nouă și să verificați dacă sumele de control MD5 sau SHA se potrivesc "
+	"cu cele oficiale.\n\nRețineți că puteți calcula MD5 sau SHA în Rufus făcând clic pe butonul '#'."
 
 ################################################################################
 l "ru-RU" "Russian (Русский)" 0x0419, 0x0819
