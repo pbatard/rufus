@@ -11778,7 +11778,7 @@ t MSG_294 "Rufus دیگر این نسخه از ویندوز را پشتیبان�
 
 ################################################################################
 l "pl-PL" "Polish (Polski)" 0x0415
-v 1.0.21
+v 1.0.22
 b "en-US"
 # my info: 6.9.2015,22:39
 
@@ -12259,6 +12259,12 @@ t MSG_291 "Wybór wersji"
 t MSG_292 "Proszę wybrać wersję Windowsa którą chcesz zainstalować:"
 t MSG_293 "Niewspierana wersja Windowsa"
 t MSG_294 "Ta wersja Windowsa nie jest już wspierana przez Rufusa."
+t MSG_295 "Uwaga: Nieoficjalna wersja"
+t MSG_296 "Ta wersja Rufusa nie została stworzona przez oficjalnego dewelopera(ów).\n\nCzy na pewno chcesz ją uruchomić?"
+t MSG_297 "Wykryto obcięte ISO"
+t MSG_298 "Rozmiar pliku ISO który wybrałeś nie zgadza się z jego deklarowanym rozmiarem: brakuje %s danych!\n\nJeżeli uzyskałeś ten plik "
+	"z internetu, powinieneś spróbować pobrać nową kopię oraz zweryfikować, że sumy kontrolne MD5 lub SHA zgadzają się "
+	"z oficjalnymi.\n\nZauważ, że możesz obliczyć sumy MD5 lub SHA w Rufusie klikając przycisk '#'."
 
 ################################################################################
 l "pt-BR" "Portuguese Brazilian (Português do Brasil)" 0x0416
