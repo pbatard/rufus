@@ -10728,7 +10728,7 @@ t MSG_286 "Mensifarkan pemacu: %0.1f%% selesai"
 
 ################################################################################
 l "nb-NO" "Norwegian (Norsk)" 0x0414
-v 1.0.21
+v 1.0.22
 b "en-US"
 
 # Main dialog
@@ -11207,6 +11207,12 @@ t MSG_291 "Versjons valg"
 t MSG_292 "Vennligst velg den versjonen av Windows du ønsker å installere:"
 t MSG_293 "Ikke støttet Windows versjon"
 t MSG_294 "Denne versjonen av Windows er ikke støttet av Rufus lengre."
+t MSG_295 "Advarsel: Uoffisiell versjon"
+t MSG_296 "Denne versjonen av Rufus er IKKE laget av dens offisielle utvikleren(e).\n\nEr du sikker på at du vil kjøre programmet?"
+t MSG_297 "Forkortet ISO oppdaget"
+t MSG_298 "ISO-filen du har valgt, stemmer ikke overens med den deklarerte størrelsen: %s av dataene mangler!\n\ nHvis du har lastet ned denne "
+	"filen fra internett, bør du prøve å laste ned en ny kopi, og verifisere at MD5 eller SHA kontrollsummen samsvarer med de offisielle.\n\n"
+	"Legg merke til at du kan beregne MD5 eller SHA i Rufus ved å klikke på '#'-knappen."
 
 ################################################################################
 l "fa-IR" "Persian (فارسی)" 0x0429
