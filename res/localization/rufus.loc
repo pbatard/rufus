@@ -17857,7 +17857,7 @@ t MSG_294 "Ця версія Windows більше не підтримуєтьс�
 
 ################################################################################
 l "vi-VN" "Vietnamese (Tiếng Việt)" 0x042A
-v 1.0.21
+v 1.0.22
 b "en-US"
 
 # Main dialog
@@ -18319,3 +18319,8 @@ t MSG_291 "Chọn phiên bản"
 t MSG_292 "Hãy chọn phiên bản Windows bạn muốn cài đặt:"
 t MSG_293 "Phiên bản Windows không được hỗ trợ"
 t MSG_294 "Phiên bản này của Windows không còn được Rufus hỗ trợ nữa."
+t MSG_295 "Cảnh báo: Phiên bản không chính thức"
+t MSG_296 "Phiên bản Rufus này KHÔNG PHẢI do chính tác giả tạo ra.\n\nBạn chắc muốn tiếp tục chạy chứ?"
+t MSG_297 "Đã phát hiện ISO bị cắt xén"
+t MSG_298 "Tập tin ISO bạn đã chọn không trùng khớp kích cỡ của nó: thiếu mất %s dữ liệu!\n\nnếu bạn tải tập tin này từ Internet, bạn nên tải lại một bản sao "
+	"mới và xác nhận rằng mã MD5 hoặc SHA trùng khớp với bản chính thức.\n\nHãy nhớ rằng bạn có thể tính mã MD5 hoặc SHA trong Rufus bằng cách chọn nút '#'."
