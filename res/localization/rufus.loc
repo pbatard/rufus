@@ -1,4 +1,4 @@
-# This file should be saved as UTF-8, no-BOM, in DOS mode (i.e. CR/LF as line terminators)
+<?xml vers# This file should be saved as UTF-8, no-BOM, in DOS mode (i.e. CR/LF as line terminators)
 
 ######################## HOW TO ADD A NEW TRANSLATION ###########################
 # For a more comprehensive set of instructions, please see the *FULL* Localization guide at:
@@ -12665,9 +12665,9 @@ t MSG_290 "Indexação de arquivo"
 t MSG_291 "Seleção de versão"
 t MSG_292 "Por favor, selecione a versão do Windows que deseja instalar:"
 t MSG_293 "Versão do Windows não suportada"
-t MSG_294 "Esta versão do Windows não é mais suportada pelo Rufos"
+t MSG_294 "Esta versão do Windows não é mais suportada pelo Rufus"
 t MSG_295 "Atenção: versão não oficial"
-t MSG_296 "Esta versão do Rufos não foi desenvolvida pelo(s) desenvolvedor(es)"
+t MSG_296 "Esta versão do Rufus não foi desenvolvida pelo(s) desenvolvedor(es)"
   " oficiais.\n\nTem certeza que deseja continuar?"
 t MSG_297 "ISO reduzida detectada"
 t MSG_298 "O arquivo ISO selecionado não corresponde ao tamanho "
