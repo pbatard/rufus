@@ -175,6 +175,8 @@ const char* WinInetErrorString(void)
 		return "The header could not be added because it already exists.";
 	case ERROR_HTTP_REDIRECT_FAILED:
 		return "The redirection failed because either the scheme changed or all attempts made to redirect failed.";
+	case ERROR_INTERNET_SECURITY_CHANNEL_ERROR:
+		return "This system's SSL library is too old to be able to access this website.";
 	case ERROR_INTERNET_CLIENT_AUTH_CERT_NEEDED:
 		return "Client Authentication certificate needed";
 	case ERROR_INTERNET_BAD_AUTO_PROXY_SCRIPT:
@@ -512,8 +514,10 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 				INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTP|INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTPS|
 				INTERNET_FLAG_NO_COOKIES|INTERNET_FLAG_NO_UI|INTERNET_FLAG_NO_CACHE_WRITE|INTERNET_FLAG_HYPERLINK|
 				((UrlParts.nScheme == INTERNET_SCHEME_HTTPS)?INTERNET_FLAG_SECURE:0), (DWORD_PTR)NULL);
-			if ((hRequest == NULL) || (!HttpSendRequestA(hRequest, NULL, 0, NULL, 0)))
+			if ((hRequest == NULL) || (!HttpSendRequestA(hRequest, NULL, 0, NULL, 0))) {
+				uprintf("Unable to send request: %s", WinInetErrorString());
 				goto out;
+			}
 
 			// Ensure that we get a text file
 			dwSize = sizeof(dwStatus);

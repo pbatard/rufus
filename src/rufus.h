@@ -497,7 +497,7 @@ extern char* GetCurrentMUI(void);
 extern char* GetMuiString(char* szModuleName, UINT uID);
 extern BOOL SetFormatPromptHook(void);
 extern void ClrFormatPromptHook(void);
-extern BYTE SearchProcess(char* HandleName, BOOL bPartialMatch, BOOL bIgnoreSelf, BOOL bQuiet);
+extern BYTE SearchProcess(char* HandleName, DWORD dwTimeout, BOOL bPartialMatch, BOOL bIgnoreSelf, BOOL bQuiet);
 extern BOOL EnablePrivileges(void);
 extern void FlashTaskbar(HANDLE handle);
 

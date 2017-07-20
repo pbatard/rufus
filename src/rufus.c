@@ -2172,7 +2172,7 @@ static BOOL CheckDriveAccess(void)
 	// Search for any blocking processes against the physical drive
 	PhysicalPath = GetPhysicalName(DeviceNum);
 	QueryDosDeviceA(&PhysicalPath[4], DevPath, sizeof(DevPath));
-	access_mask = SearchProcess(DevPath, TRUE, TRUE, TRUE);
+	access_mask = SearchProcess(DevPath, 2000, TRUE, TRUE, TRUE);
 	if (access_mask != 0) {
 		bProceed = FALSE;
 		uprintf("Found potentially blocking process(es) against %s:", &PhysicalPath[4]);
@@ -2187,7 +2187,7 @@ static BOOL CheckDriveAccess(void)
 		drive_name[0] = drive_letter[i];
 		if (QueryDosDeviceA(drive_name, DevPath, sizeof(DevPath)) != 0) {
 			StrArrayClear(&BlockingProcess);
-			access_mask = SearchProcess(DevPath, TRUE, TRUE, TRUE);
+			access_mask = SearchProcess(DevPath, 2000, TRUE, TRUE, TRUE);
 			// Ignore if all we have is read-only
 			if ((access_mask & 0x06) || (access_mask == 0x80)) {
 				bProceed = FALSE;

@@ -52,6 +52,9 @@ PF_TYPE_DECL(NTAPI, NTSTATUS, NtClose, (HANDLE));
 PF_TYPE_DECL(WINAPI, BOOL, QueryFullProcessImageNameW, (HANDLE, DWORD, LPWSTR, PDWORD));
 
 static PVOID PhHeapHandle = NULL;
+static char* _HandleName;
+static BOOL _bPartialMatch, _bIgnoreSelf, _bQuiet;
+static BYTE access_mask;
 extern StrArray BlockingProcess;
 
 /*
@@ -307,18 +310,8 @@ NTSTATUS PhQueryProcessesUsingVolumeOrFile(HANDLE VolumeOrFileHandle,
 	return status;
 }
 
-/**
- * Search all the processes and list the ones that have a specific handle open.
- *
- * \param HandleName The name of the handle to look for.
- * \param bPartialMatch Whether partial matches should be allowed.
- * \param bIgnoreSelf Whether the current process should be listed.
- * \param bQuiet Prints minimal output.
- *
- * \return a byte containing the cummulated access rights (f----xwr) from all the handles found
- *         with bit 7 ('f') also set if at least one process was found.
- */
-BYTE SearchProcess(char* HandleName, BOOL bPartialMatch, BOOL bIgnoreSelf, BOOL bQuiet)
+
+static DWORD WINAPI SearchProcessThread(LPVOID param)
 {
 	const char *access_rights_str[8] = { "n", "r", "w", "rw", "x", "rx", "wx", "rwx" };
 	char tmp[MAX_PATH];
@@ -333,9 +326,8 @@ BYTE SearchProcess(char* HandleName, BOOL bPartialMatch, BOOL bIgnoreSelf, BOOL 
 	WCHAR *wHandleName = NULL;
 	HANDLE dupHandle = NULL;
 	HANDLE processHandle = NULL;
-	BOOLEAN bFound = FALSE, bGotExePath, verbose = !bQuiet;
+	BOOLEAN bFound = FALSE, bGotExePath, verbose = !_bQuiet;
 	ULONG access_rights = 0;
-	BYTE access_mask = 0;
 	DWORD size;
 	char exe_path[MAX_PATH] = { 0 };
 	wchar_t wexe_path[MAX_PATH];
@@ -361,7 +353,7 @@ BYTE SearchProcess(char* HandleName, BOOL bPartialMatch, BOOL bIgnoreSelf, BOOL 
 	pid[0] = (ULONG_PTR)0;
 	cur_pid = 1;
 
-	wHandleName = utf8_to_wchar(HandleName);
+	wHandleName = utf8_to_wchar(_HandleName);
 	wHandleNameLen = (USHORT)wcslen(wHandleName);
 
 	bufferSize = 0x200;
@@ -435,7 +427,7 @@ BYTE SearchProcess(char* HandleName, BOOL bPartialMatch, BOOL bIgnoreSelf, BOOL 
 
 		// Now duplicate this handle onto our own process, so that we can access its properties
 		if (processHandle == NtCurrentProcess()) {
-			if (bIgnoreSelf)
+			if (_bIgnoreSelf)
 				continue;
 			dupHandle = (HANDLE)handleInfo->HandleValue;
 		} else {
@@ -471,11 +463,11 @@ BYTE SearchProcess(char* HandleName, BOOL bPartialMatch, BOOL bIgnoreSelf, BOOL 
 		}
 
 		// Don't bother comparing if we are looking for full match and the length is different
-		if ((!bPartialMatch) && (wHandleNameLen != buffer->Name.Length))
+		if ((!_bPartialMatch) && (wHandleNameLen != buffer->Name.Length))
 			continue;
 
 		// Likewise, if we are looking for a partial match and the current length is smaller
-		if ((bPartialMatch) && (wHandleNameLen > buffer->Name.Length))
+		if ((_bPartialMatch) && (wHandleNameLen > buffer->Name.Length))
 			continue;
 
 		// Match against our target string
@@ -494,7 +486,7 @@ BYTE SearchProcess(char* HandleName, BOOL bPartialMatch, BOOL bIgnoreSelf, BOOL 
 
 		// If this is the very first process we find, print a header
 		if (exe_path[0] == 0)
-			vuprintf("WARNING: The following process(es) or service(s) are accessing %s:", HandleName);
+			vuprintf("WARNING: The following process(es) or service(s) are accessing %s:", _HandleName);
 
 		// First, we try to get the executable path using GetModuleFileNameEx
 		bGotExePath = (GetModuleFileNameExU(processHandle, 0, exe_path, MAX_PATH - 1) != 0);
@@ -508,10 +500,12 @@ BYTE SearchProcess(char* HandleName, BOOL bPartialMatch, BOOL bIgnoreSelf, BOOL 
 				wchar_to_utf8_no_alloc(wexe_path, exe_path, sizeof(exe_path));
 		}
 
-		// Still nothing? Try GetProcessImageFileName (but don't bother about Unicode)
-		// Note that GetProcessImageFileName uses '\Device\Harddisk#\Partition#' instead drive letters
-		if (!bGotExePath)
-			bGotExePath = (GetProcessImageFileNameA(processHandle, exe_path, MAX_PATH) != 0);
+		// Still nothing? Try GetProcessImageFileName. Note that GetProcessImageFileName uses
+		// '\Device\Harddisk#\Partition#\' instead drive letters
+		if (!bGotExePath) {
+			if (bGotExePath = (GetProcessImageFileNameW(processHandle, wexe_path, MAX_PATH) != 0))
+				wchar_to_utf8_no_alloc(wexe_path, exe_path, sizeof(exe_path));
+		}
 
 		// Complete failure => Just craft a default process name that includes the PID
 		if (!bGotExePath) {
@@ -524,12 +518,51 @@ out:
 	if (exe_path[0] != 0)
 		vuprintf("You should close these applications before attempting to reformat the drive.");
 	else
-		vuprintf("NOTE: Could not identify the process(es) or service(s) accessing %s", HandleName);
+		vuprintf("NOTE: Could not identify the process(es) or service(s) accessing %s", _HandleName);
 
 	free(wHandleName);
 	PhFree(buffer);
 	PhFree(handles);
 	PhDestroyHeap();
+	ExitThread((DWORD)access_mask);
+}
+
+/**
+ * Search all the processes and list the ones that have a specific handle open.
+ *
+ * \param HandleName The name of the handle to look for.
+ * \param dwTimeOut The maximum amounf of time (ms) that may be spent searching
+ * \param bPartialMatch Whether partial matches should be allowed.
+ * \param bIgnoreSelf Whether the current process should be listed.
+ * \param bQuiet Prints minimal output.
+ *
+ * \return a byte containing the cummulated access rights (f----xwr) from all the handles found
+ *         with bit 7 ('f') also set if at least one process was found.
+ */
+BYTE SearchProcess(char* HandleName, DWORD dwTimeOut, BOOL bPartialMatch, BOOL bIgnoreSelf, BOOL bQuiet)
+{
+	HANDLE handle;
+	DWORD dw = 0;
+
+	_HandleName = HandleName;
+	_bPartialMatch = bPartialMatch;
+	_bIgnoreSelf = bIgnoreSelf;
+	_bQuiet = bQuiet;
+	access_mask = 0;
+
+	handle = CreateThread(NULL, 0, SearchProcessThread, NULL, 0, NULL);
+	if (handle == NULL) {
+		uprintf("Unable to create process search thread");
+		return 0x00;
+	}
+	dw = WaitForSingleObject(handle, dwTimeOut);
+	if (dw == WAIT_TIMEOUT) {
+		// Timeout - kill the thread
+		TerminateThread(handle, 0);
+		uprintf("Warning: Killed process search thread");
+	} else if (dw != WAIT_OBJECT_0) {
+		uprintf("Failed to wait for process search thread: %s", WindowsErrorString());
+	}
 	return access_mask;
 }
 
