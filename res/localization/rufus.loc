@@ -1003,7 +1003,7 @@ t MSG_281 "(فضلا اختر صورة)"
 
 ################################################################################
 l "az-AZ" "Azerbaijani (Azərbaycanca)" 0x042c, 0x782c
-v 1.0.21
+v 1.0.22
 b "en-US"
 
 # Main dialog
@@ -1488,6 +1488,11 @@ t MSG_291 "Versiyanı seçin"
 t MSG_292 "Xahiş edirik yükləmək istədiyiniz Windows versiyasını seçin:"
 t MSG_293 "Dəstəklənməyən bir Windows versiyası"
 t MSG_294 "Bu versiya artıq Rufus tərəfindən dəstəklənir."
+t MSG_295 "Xəbərdarlıq: Rəsmi olamyan versiya"
+t MSG_296 "Bu versiya Rufus tərəfindən təqdim olunmayıb yaradan(lar).\n\nİstifadə etməyinizdən əminsiniz?"
+t MSG_297 "Uyğun olmayan ISO aşkarlandı"
+t MSG_298 "Seçdiyiniz ISO faylı uyğun deyil ölçü: %s məlumat çatmadı!\n\nBu faylı seçin Siz sürətli yükləmək üçün, İnterneti yoxlamalısınız "
+	"MD5 və SHA nəzarət cəmləri uyğundur.\n\nBacaracağınıza diqqətinizi yönəldin '#' buttona vuraraq Rufus MD5 or SHA-nı hesablayın."
 
 ######################################################################
 l "bg-BG" "Bulgarian (Български)" 0x0402
