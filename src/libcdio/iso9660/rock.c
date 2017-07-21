@@ -182,9 +182,11 @@ get_rock_ridge_filename(iso9660_dir_t * p_iso9660_dir,
       case SIG('P','L'):
       case SIG('T','F'):
       case SIG('Z','F'):
+      case SIG('A','L'):	// Kali Linux *NONSTANDARD* extension
 	break;
       default:
-	 /* Something got screwed up here */
+	/* Warn about other nonstandard Rock Ridge extensions */
+	cdio_warn("Invalid Rock Ridge extension detected: '%c%c'\n", *chr, *(chr+1));
 	goto out;
       }
 
