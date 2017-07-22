@@ -42,10 +42,12 @@ size_t ubuffer_pos = 0;
 char ubuffer[UBUFFER_SIZE];	// Buffer for ubpushf() messages we don't log right away
 
 #ifdef RUFUS_LOGGING
+#define Edit_ReplaceSelW(hCtrl, wstr) ((void)SendMessageW(hCtrl, EM_REPLACESEL, (WPARAM)FALSE, (LPARAM)wstr))
 void _uprintf(const char *format, ...)
 {
 	static char buf[4096];
 	char* p = buf;
+	wchar_t* wbuf;
 	va_list args;
 	int n;
 
@@ -62,16 +64,19 @@ void _uprintf(const char *format, ...)
 	*p++ = '\n';
 	*p   = '\0';
 
+	// Yay, Windows 10 *FINALLY* added actual Unicode support for OutputDebugStringW()!
+	wbuf = utf8_to_wchar(buf);
 	// Send output to Windows debug facility
-	OutputDebugStringA(buf);
+	OutputDebugStringW(wbuf);
 	if ((hLog != NULL) && (hLog != INVALID_HANDLE_VALUE)) {
 		// Send output to our log Window
 		Edit_SetSel(hLog, MAX_LOG_SIZE, MAX_LOG_SIZE);
-		Edit_ReplaceSelU(hLog, buf);
+		Edit_ReplaceSelW(hLog, wbuf);
 		// Make sure the message scrolls into view
 		// (Or see code commented in LogProc:WM_SHOWWINDOW for a less forceful scroll)
 		SendMessage(hLog, EM_LINESCROLL, 0, SendMessage(hLog, EM_GETLINECOUNT, 0, 0));
 	}
+	free(wbuf);
 }
 #endif
 

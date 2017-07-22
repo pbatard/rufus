@@ -2515,6 +2515,8 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			if (format_thid != NULL) {
 				return (INT_PTR)TRUE;
 			}
+			// Disable all controls except Cancel
+			EnableControls(FALSE);
 			FormatStatus = 0;
 			StrArrayClear(&BlockingProcess);
 			format_op_in_progress = TRUE;
@@ -2528,11 +2530,8 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			nDeviceIndex = ComboBox_GetCurSel(hDeviceList);
 			if (nDeviceIndex != CB_ERR) {
 				if (!zero_drive) {
-					if ((IsChecked(IDC_BOOT)) && (!BootCheck())) {
-						format_op_in_progress = FALSE;
-						PROCESS_QUEUED_EVENTS;
-						break;
-					}
+					if ((IsChecked(IDC_BOOT)) && (!BootCheck()))
+						goto aborted_start;
 
 					// Display a warning about UDF formatting times
 					fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
@@ -2558,9 +2557,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 						i = SelectionDialog(lmprintf(MSG_274), lmprintf(MSG_275, iso_image, dd_image, iso_image, dd_image),
 							choices, 2);
 						if (i < 0) {	// Cancel
-							format_op_in_progress = FALSE;
-							PROCESS_QUEUED_EVENTS;
-							break;
+							goto aborted_start;
 						} else if (i == 2) {
 							selection_default = BT_IMG;
 							SetComboEntry(hBootType, selection_default);
@@ -2568,38 +2565,21 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 					}
 				}
 
-				if (!CheckDriveAccess()) {
-					format_op_in_progress = FALSE;
-					zero_drive = FALSE;
-					PROCESS_QUEUED_EVENTS;
-					break;
-				}
+				if (!CheckDriveAccess())
+					goto aborted_start;
 
 				GetWindowTextU(hDeviceList, tmp, ARRAYSIZE(tmp));
 				if (MessageBoxExU(hMainDialog, lmprintf(MSG_003, tmp),
-					APPLICATION_NAME, MB_OKCANCEL|MB_ICONWARNING|MB_IS_RTL, selected_langid) == IDCANCEL) {
-					format_op_in_progress = FALSE;
-					zero_drive = FALSE;
-					PROCESS_QUEUED_EVENTS;
-					break;
-				}
+					APPLICATION_NAME, MB_OKCANCEL|MB_ICONWARNING|MB_IS_RTL, selected_langid) == IDCANCEL) 
+					goto aborted_start;
 				if ((SelectedDrive.nPartitions > 1) && (MessageBoxExU(hMainDialog, lmprintf(MSG_093),
-					lmprintf(MSG_094), MB_OKCANCEL|MB_ICONWARNING|MB_IS_RTL, selected_langid) == IDCANCEL)) {
-					format_op_in_progress = FALSE;
-					zero_drive = FALSE;
-					PROCESS_QUEUED_EVENTS;
-					break;
-				}
+					lmprintf(MSG_094), MB_OKCANCEL|MB_ICONWARNING|MB_IS_RTL, selected_langid) == IDCANCEL))
+					goto aborted_start;
 				if ((!zero_drive) && (IsChecked(IDC_BOOT)) && (SelectedDrive.SectorSize != 512) &&
 					(MessageBoxExU(hMainDialog, lmprintf(MSG_196, SelectedDrive.SectorSize),
-						lmprintf(MSG_197), MB_OKCANCEL|MB_ICONWARNING|MB_IS_RTL, selected_langid) == IDCANCEL)) {
-					format_op_in_progress = FALSE;
-					PROCESS_QUEUED_EVENTS;
-					break;
-				}
+						lmprintf(MSG_197), MB_OKCANCEL|MB_ICONWARNING|MB_IS_RTL, selected_langid) == IDCANCEL))
+					goto aborted_start;
 
-				// Disable all controls except Cancel
-				EnableControls(FALSE);
 				DeviceNum = (DWORD)ComboBox_GetItemData(hDeviceList, nDeviceIndex);
 				InitProgress(zero_drive);
 				format_thid = CreateThread(NULL, 0, FormatThread, (LPVOID)(uintptr_t)DeviceNum, 0, NULL);
@@ -2607,19 +2587,22 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 					uprintf("Unable to start formatting thread");
 					FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_START_THREAD);
 					PostMessage(hMainDialog, UM_FORMAT_COMPLETED, (WPARAM)FALSE, 0);
+				} else {
+					uprintf("\r\nFormat operation started");
+					PrintInfo(0, -1);
+					timer = 0;
+					safe_sprintf(szTimer, sizeof(szTimer), "00:00:00");
+					SendMessageA(hStatus, SB_SETTEXTA, SBT_OWNERDRAW | SB_SECTION_RIGHT, (LPARAM)szTimer);
+					SetTimer(hMainDialog, TID_APP_TIMER, 1000, ClockTimer);
 				}
-				uprintf("\r\nFormat operation started");
-				PrintInfo(0, -1);
-				timer = 0;
-				safe_sprintf(szTimer, sizeof(szTimer), "00:00:00");
-				SendMessageA(hStatus, SB_SETTEXTA, SBT_OWNERDRAW | SB_SECTION_RIGHT, (LPARAM)szTimer);
-				SetTimer(hMainDialog, TID_APP_TIMER, 1000, ClockTimer);
 			}
-			if (format_thid == NULL) {
-				format_op_in_progress = FALSE;
-				zero_drive = FALSE;
-				PROCESS_QUEUED_EVENTS;
-			}
+			if (format_thid != NULL)
+				break;
+		aborted_start:
+			format_op_in_progress = FALSE;
+			EnableControls(TRUE);
+			zero_drive = FALSE;
+			PROCESS_QUEUED_EVENTS;
 			break;
 		case IDC_HASH:
 			if ((format_thid == NULL) && (image_path != NULL)) {

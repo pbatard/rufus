@@ -33,7 +33,7 @@ LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
 IDD_DIALOG DIALOGEX 12, 12, 242, 376
 STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_MINIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_ACCEPTFILES
-CAPTION "Rufus 2.16.1148"
+CAPTION "Rufus 2.16.1149"
 FONT 8, "Segoe UI Symbol", 400, 0, 0x0
 BEGIN
     LTEXT           "Device",IDS_DEVICE_TXT,9,6,200,8
@@ -366,8 +366,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 2,16,1148,0
- PRODUCTVERSION 2,16,1148,0
+ FILEVERSION 2,16,1149,0
+ PRODUCTVERSION 2,16,1149,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -384,13 +384,13 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Akeo Consulting (http://akeo.ie)"
             VALUE "FileDescription", "Rufus"
-            VALUE "FileVersion", "2.16.1148"
+            VALUE "FileVersion", "2.16.1149"
             VALUE "InternalName", "Rufus"
             VALUE "LegalCopyright", "© 2011-2017 Pete Batard (GPL v3)"
             VALUE "LegalTrademarks", "http://www.gnu.org/copyleft/gpl.html"
             VALUE "OriginalFilename", "rufus.exe"
             VALUE "ProductName", "Rufus"
-            VALUE "ProductVersion", "2.16.1148"
+            VALUE "ProductVersion", "2.16.1149"
         END
     END
     BLOCK "VarFileInfo"
