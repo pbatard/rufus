@@ -4684,7 +4684,7 @@ t MSG_294 "Deze Windows versie wordt niet langer ondersteund door Rufus."
 
 ################################################################################
 l "fi-FI" "Finnish (Suomi)" 0x040B
-v 1.0.21
+v 1.0.22
 b "en-US"
 
 # Main dialog
@@ -5139,6 +5139,12 @@ t MSG_291 "Version valinta"
 t MSG_292 "Valitse Windows-versio, jonka haluat asentaa:"
 t MSG_293 "Tätä Windows-versiota ei tueta"
 t MSG_294 "Rufus ei enää tue tätä Windows-versiota."
+t MSG_295 "Varoitus: Epävirallinen versio"
+t MSG_296 "Tämä versio ei ole Rufuksen virallisen kehittäjän tekemä.\n\nHaluatko varmasti suorittaa ohjelman?"
+t MSG_297 "Vajaakokoinen ISO-levykuva havaittu"
+t MSG_298 "Valitsemasi ISO-levykuva ei vastaa sen ilmoittamaa tiedostokokoa: %s ohjelmatiedosta puuttuu!\n\nJos latasit "
+	"tämän tiedoston internetistä, yritä ladata tiedosto uudelleen ja varmista, että MD5- tai SHA-tarkistussumma täsmää "
+	"alkuperäisen summan kanssa.\n\nVoit laskea MD5- tai SHA-tarkistussumman Rufuksessa painamalla '#'-painiketta."
 
 ################################################################################
 l "fr-FR" "French (Français)" 0x040c, 0x080c, 0x0c0c, 0x100c, 0x140c, 0x180c, 0x1c0c, 0x200c, 0x240c, 0x280c, 0x2c0c, 0x300c, 0x340c, 0x380c, 0xe40c
