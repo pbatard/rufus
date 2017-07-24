@@ -503,7 +503,8 @@ static DWORD WINAPI SearchProcessThread(LPVOID param)
 		// Still nothing? Try GetProcessImageFileName. Note that GetProcessImageFileName uses
 		// '\Device\Harddisk#\Partition#\' instead drive letters
 		if (!bGotExePath) {
-			if (bGotExePath = (GetProcessImageFileNameW(processHandle, wexe_path, MAX_PATH) != 0))
+			bGotExePath = (GetProcessImageFileNameW(processHandle, wexe_path, MAX_PATH) != 0);
+			if (bGotExePath)
 				wchar_to_utf8_no_alloc(wexe_path, exe_path, sizeof(exe_path));
 		}
 
@@ -524,7 +525,7 @@ out:
 	PhFree(buffer);
 	PhFree(handles);
 	PhDestroyHeap();
-	ExitThread((DWORD)access_mask);
+	ExitThread(0);
 }
 
 /**
@@ -542,7 +543,7 @@ out:
 BYTE SearchProcess(char* HandleName, DWORD dwTimeOut, BOOL bPartialMatch, BOOL bIgnoreSelf, BOOL bQuiet)
 {
 	HANDLE handle;
-	DWORD dw = 0;
+	DWORD res = 0;
 
 	_HandleName = HandleName;
 	_bPartialMatch = bPartialMatch;
@@ -552,16 +553,17 @@ BYTE SearchProcess(char* HandleName, DWORD dwTimeOut, BOOL bPartialMatch, BOOL b
 
 	handle = CreateThread(NULL, 0, SearchProcessThread, NULL, 0, NULL);
 	if (handle == NULL) {
-		uprintf("Unable to create process search thread");
+		uprintf("Warning: Unable to create conflicting process search thread");
 		return 0x00;
 	}
-	dw = WaitForSingleObject(handle, dwTimeOut);
-	if (dw == WAIT_TIMEOUT) {
+	res = WaitForSingleObjectWithMessages(handle, dwTimeOut);
+	if (res == WAIT_TIMEOUT) {
 		// Timeout - kill the thread
 		TerminateThread(handle, 0);
-		uprintf("Warning: Killed process search thread");
-	} else if (dw != WAIT_OBJECT_0) {
-		uprintf("Failed to wait for process search thread: %s", WindowsErrorString());
+		uprintf("Warning: Conflicting process search failed to complete due to timeout");
+	} else if (res != WAIT_OBJECT_0) {
+		TerminateThread(handle, 0);
+		uprintf("Warning: Failed to wait for conflicting process search thread: %s", WindowsErrorString());
 	}
 	return access_mask;
 }

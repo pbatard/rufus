@@ -1159,7 +1159,7 @@ static void ToggleAdvanced(BOOL enable)
 	point.y = (rect.bottom - rect.top) + (int)(fScale*dialog_shift);
 	SetWindowPos(hLog, NULL, 0, 0, point.x, point.y, SWP_NOZORDER);
 	// Don't forget to scroll the edit to the bottom after resize
-	SendMessage(hLog, EM_LINESCROLL, 0, SendMessage(hLog, EM_GETLINECOUNT, 0, 0));
+	Edit_Scroll(hLog, 0, Edit_GetLineCount(hLog));
 
 	// Hide or show the various advanced options
 	toggle = enable?SW_SHOW:SW_HIDE;
@@ -1249,7 +1249,7 @@ static void ToggleToGo(void)
 	point.y = (rect.bottom - rect.top) + (int)(fScale*dialog_shift);
 	SetWindowPos(hLog, NULL, 0, 0, point.x, point.y, SWP_NOZORDER);
 	// Don't forget to scroll the edit to the bottom after resize
-	SendMessage(hLog, EM_LINESCROLL, 0, SendMessage(hLog, EM_GETLINECOUNT, 0, 0));
+	Edit_Scroll(hLog, 0, Edit_GetLineCount(hLog));
 
 	// Hide or show the various advanced options
 	toggle = togo_mode?SW_SHOW:SW_HIDE;
@@ -2155,7 +2155,8 @@ static void SaveISO(void)
 
 // Check for conflicting processes accessing the drive, and if any,
 // ask the user whether they want to proceed.
-static BOOL CheckDriveAccess(void)
+// Parameter is the maximum amount of time we allow for this call to execute (in ms)
+static BOOL CheckDriveAccess(DWORD dwTimeOut)
 {
 	uint32_t i, j;
 	BOOL bProceed = TRUE;
@@ -2163,16 +2164,22 @@ static BOOL CheckDriveAccess(void)
 	char *PhysicalPath, DevPath[MAX_PATH];
 	char drive_letter[27], drive_name[] = "?:";
 	char *message, title[128];
+	DWORD cur_time, end_time = GetTickCount() + dwTimeOut;
 
 	// Get the current selected device
 	DWORD DeviceNum = (DWORD)ComboBox_GetItemData(hDeviceList, ComboBox_GetCurSel(hDeviceList));
 	if ((DeviceNum < 0x80) || (DeviceNum == (DWORD)-1))
 		return FALSE;
 
+	// TODO: "Checking for conflicting processes..." would be better but
+	// but "Requesting disk access..." will have to do for now.
+	PrintInfo(0, MSG_225);
+
 	// Search for any blocking processes against the physical drive
 	PhysicalPath = GetPhysicalName(DeviceNum);
 	QueryDosDeviceA(&PhysicalPath[4], DevPath, sizeof(DevPath));
-	access_mask = SearchProcess(DevPath, 2000, TRUE, TRUE, TRUE);
+	access_mask = SearchProcess(DevPath, dwTimeOut, TRUE, TRUE, TRUE);
+	CHECK_FOR_USER_CANCEL;
 	if (access_mask != 0) {
 		bProceed = FALSE;
 		uprintf("Found potentially blocking process(es) against %s:", &PhysicalPath[4]);
@@ -2187,7 +2194,11 @@ static BOOL CheckDriveAccess(void)
 		drive_name[0] = drive_letter[i];
 		if (QueryDosDeviceA(drive_name, DevPath, sizeof(DevPath)) != 0) {
 			StrArrayClear(&BlockingProcess);
-			access_mask = SearchProcess(DevPath, 2000, TRUE, TRUE, TRUE);
+			cur_time = GetTickCount();
+			if (cur_time >= end_time)
+				break;
+			access_mask = SearchProcess(DevPath, end_time - cur_time, TRUE, TRUE, TRUE);
+			CHECK_FOR_USER_CANCEL;
 			// Ignore if all we have is read-only
 			if ((access_mask & 0x06) || (access_mask == 0x80)) {
 				bProceed = FALSE;
@@ -2209,7 +2220,11 @@ static BOOL CheckDriveAccess(void)
 		}
 	}
 
+	PrintInfo(0, MSG_210);
 	return bProceed;
+out:
+	PrintInfo(0, MSG_210);
+	return FALSE;
 }
 
 #ifdef RUFUS_TEST
@@ -2219,7 +2234,6 @@ static BOOL CheckDriveAccess(void)
 /*
  * Main dialog callback
  */
-#define PROCESS_QUEUED_EVENTS if (queued_hotplug_event) SendMessage(hDlg, UM_MEDIA_CHANGE, 0, 0)
 static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	static DWORD DeviceNum = 0;
@@ -2248,7 +2262,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	case WM_COMMAND:
 #ifdef RUFUS_TEST
 		if (LOWORD(wParam) == IDC_TEST) {
-			uprintf("Proceed = %s", CheckDriveAccess()?"True":"False");
+			uprintf("Proceed = %s", CheckDriveAccess(2000)?"True":"False");
 //			char* choices[] = { "Choice 1", "Choice 2", "Choice 3" };
 //			SelectionDyn("Test Choice", "Unused", choices, ARRAYSIZE(choices));
 			break;
@@ -2293,6 +2307,11 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 					EnableWindow(GetDlgItem(hDlg, IDCANCEL), TRUE);
 				}
 				no_confirmation_on_cancel = FALSE;
+				return (INT_PTR)TRUE;
+			} else if (format_op_in_progress) {
+				// User might be trying to cancel during preliminary checks
+				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANCELLED;
+				PrintInfo(0, MSG_201);
 				return (INT_PTR)TRUE;
 			}
 			if ((pfSHChangeNotifyDeregister != NULL) && (ulRegister != 0))
@@ -2565,7 +2584,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 					}
 				}
 
-				if (!CheckDriveAccess())
+				if (!CheckDriveAccess(2000))
 					goto aborted_start;
 
 				GetWindowTextU(hDeviceList, tmp, ARRAYSIZE(tmp));
@@ -2602,7 +2621,9 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			format_op_in_progress = FALSE;
 			EnableControls(TRUE);
 			zero_drive = FALSE;
-			PROCESS_QUEUED_EVENTS;
+			if (queued_hotplug_event)
+				SendMessage(hDlg, UM_MEDIA_CHANGE, 0, 0);
+			EnableWindow(GetDlgItem(hDlg, IDCANCEL), TRUE);
 			break;
 		case IDC_HASH:
 			if ((format_thid == NULL) && (image_path != NULL)) {
@@ -3305,7 +3326,7 @@ relaunch:
 		if ( (IsWindowVisible(hLogDlg)) && (GetKeyState(VK_CONTROL) & 0x8000) &&
 			(msg.message == WM_KEYDOWN) && (msg.wParam == 'A') ) {
 			// Might also need ES_NOHIDESEL property if you want to select when not active
-			SendMessage(hLog, EM_SETSEL, 0, -1);
+			Edit_SetSel(hLog, 0, -1);
 		}
 		// Alt-. => Enable USB enumeration debug
 		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == VK_OEM_PERIOD)) {

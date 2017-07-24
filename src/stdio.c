@@ -42,7 +42,6 @@ size_t ubuffer_pos = 0;
 char ubuffer[UBUFFER_SIZE];	// Buffer for ubpushf() messages we don't log right away
 
 #ifdef RUFUS_LOGGING
-#define Edit_ReplaceSelW(hCtrl, wstr) ((void)SendMessageW(hCtrl, EM_REPLACESEL, (WPARAM)FALSE, (LPARAM)wstr))
 void _uprintf(const char *format, ...)
 {
 	static char buf[4096];
@@ -71,10 +70,10 @@ void _uprintf(const char *format, ...)
 	if ((hLog != NULL) && (hLog != INVALID_HANDLE_VALUE)) {
 		// Send output to our log Window
 		Edit_SetSel(hLog, MAX_LOG_SIZE, MAX_LOG_SIZE);
-		Edit_ReplaceSelW(hLog, wbuf);
+		Edit_ReplaceSel(hLog, wbuf);
 		// Make sure the message scrolls into view
 		// (Or see code commented in LogProc:WM_SHOWWINDOW for a less forceful scroll)
-		SendMessage(hLog, EM_LINESCROLL, 0, SendMessage(hLog, EM_GETLINECOUNT, 0, 0));
+		Edit_Scroll(hLog, 0, Edit_GetLineCount(hLog));
 	}
 	free(wbuf);
 }
@@ -359,4 +358,39 @@ BOOL WriteFileWithRetry(HANDLE hFile, LPCVOID lpBuffer, DWORD nNumberOfBytesToWr
 	if (SCODE_CODE(GetLastError()) == ERROR_SUCCESS)
 		SetLastError(ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_WRITE_FAULT);
 	return FALSE;
+}
+
+// A WaitForSingleObject() equivalent that doesn't block Windows messages
+// This is needed, for instance, if you are waiting for a thread that may issue uprintf's
+DWORD WaitForSingleObjectWithMessages(HANDLE hHandle, DWORD dwMilliseconds)
+{
+	DWORD res, dwCurTime, dwEndTime = GetTickCount() + dwMilliseconds;
+	MSG msg;
+
+	do {
+		// Read all of the messages in this next loop, removing each message as we read it.
+		while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+			if ((msg.message == WM_QUIT) || (msg.message == WM_CLOSE)) {
+				SetLastError(ERROR_CANCELLED);
+				return WAIT_FAILED;
+			} else {
+				DispatchMessage(&msg);
+			}
+		}
+
+		// Wait for any message sent or posted to this queue or for the handle to signaled.
+		res = MsgWaitForMultipleObjects(1, &hHandle, FALSE, dwMilliseconds, QS_ALLINPUT);
+
+		if (dwMilliseconds != INFINITE) {
+			dwCurTime = GetTickCount();
+			// Account for the case where we may reach the timeout condition while
+			// processing timestamps
+			if (dwCurTime < dwEndTime)
+				dwMilliseconds = dwEndTime - dwCurTime;
+			else
+				res = WAIT_TIMEOUT;
+		}
+	} while (res == (WAIT_OBJECT_0 + 1));
+
+	return res;
 }

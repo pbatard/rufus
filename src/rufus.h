@@ -500,6 +500,7 @@ extern void ClrFormatPromptHook(void);
 extern BYTE SearchProcess(char* HandleName, DWORD dwTimeout, BOOL bPartialMatch, BOOL bIgnoreSelf, BOOL bQuiet);
 extern BOOL EnablePrivileges(void);
 extern void FlashTaskbar(HANDLE handle);
+extern DWORD WaitForSingleObjectWithMessages(HANDLE hHandle, DWORD dwMilliseconds);
 
 DWORD WINAPI FormatThread(void* param);
 DWORD WINAPI SaveImageThread(void* param);
