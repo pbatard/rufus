@@ -14077,7 +14077,7 @@ t MSG_294 "Эта версия Windows больше не поддерживае�
 
 ################################################################################
 l "sr-SP" "Serbian (Srpski)" 0x241a, 0x081a, 0x181a, 0x2c1a, 0x701a, 0x7c1a
-v 1.0.21
+v 1.0.22
 b "en-US"
 
 # Main dialog
@@ -14563,6 +14563,12 @@ t MSG_291 "Odabir verzije"
 t MSG_292 "Odaberite verziju Windows-a koju želite da instalirate:"
 t MSG_293 "Nepodržana verzija Windows-a"
 t MSG_294 "Rufus više ne podržava ovu verziju Windows-a."
+t MSG_295 "Upozorenje: Nezvanična verzija"
+t MSG_296 "Ovu verziju Rufus-a nije proizveo zvanični programer(i).\n\nDa li ste sigurni da želite da je pokrenete?"
+t MSG_297 "ISO datoteka nije validna"
+t MSG_298 "ISO datoteka koju ste odabrali ne podudara se sa njenom zvaničnom veličinom: %s nedostaje!\n\nUkoliko ste preuzeli "
+	"ovu datoteka sa Interneta, pokušajte da ponovo preuzmete kopiju ove datoteke i provjerite da li se podudara za zvaničnom datotekom pomoću "
+	"MD5 ili SHA kontrolne sume.\n\nNapomena, možete izračunati kontrolnu sumu pomoću Rufus-a klikom na '#' dugme."
 
 ################################################################################
 l "sk-SK" "Slovak (Slovensky)" 0x041B
