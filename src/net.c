@@ -255,7 +255,7 @@ DWORD DownloadFile(const char* url, const char* file, HWND hProgressDialog)
 		}
 	}
 
-	PrintInfo(0, MSG_240, &file[last_slash]);
+	PrintInfo(0, MSG_085, &file[last_slash]);
 	uprintf("Downloading '%s' from %s\n", &file[last_slash], url);
 
 	if ( (!InternetCrackUrlA(url, (DWORD)safe_strlen(url), 0, &UrlParts))

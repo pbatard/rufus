@@ -1393,7 +1393,6 @@ static BOOL BootCheck(void)
 					IGNORE_RETVAL(_mkdir(tmp));
 					IGNORE_RETVAL(_chdir(tmp));
 					static_sprintf(tmp, "%s/%s-%s/%s", FILES_URL, grub, img_report.grub2_version, core_img);
-					PrintInfoDebug(0, MSG_085, tmp);
 					PromptOnError = FALSE;
 					grub2_len = (long)DownloadFile(tmp, core_img, hMainDialog);
 					PromptOnError = TRUE;
@@ -1405,7 +1404,6 @@ static BOOL BootCheck(void)
 						for (i = 0; ((tmp2[i] >= '0') && (tmp2[i] <= '9')) || (tmp2[i] == '.'); i++);
 						tmp2[i] = 0;
 						static_sprintf(tmp, "%s/%s-%s/%s", FILES_URL, grub, tmp2, core_img);
-						PrintInfoDebug(0, MSG_085, tmp);
 						PromptOnError = FALSE;
 						grub2_len = (long)DownloadFile(tmp, core_img, hMainDialog);
 						PromptOnError = TRUE;
@@ -1453,7 +1451,6 @@ static BOOL BootCheck(void)
 								static_sprintf(tmp, "%s-%s", syslinux, embedded_sl_version_str[0]);
 								IGNORE_RETVAL(_mkdir(tmp));
 								static_sprintf(tmp, "%s/%s-%s/%s", FILES_URL, syslinux, embedded_sl_version_str[0], old_c32_name[i]);
-								PrintInfo(0, MSG_085, old_c32_name[i]);
 								len = DownloadFile(tmp, &tmp[sizeof(FILES_URL)], hMainDialog);
 								if (len == 0) {
 									uprintf("Could not download file - cancelling");
@@ -1501,7 +1498,6 @@ static BOOL BootCheck(void)
 						}
 						static_sprintf(tmp, "%s/%s-%s%s/%s.%s", FILES_URL, syslinux, img_report.sl_version_str,
 							img_report.sl_version_ext, ldlinux, ldlinux_ext[i]);
-						PrintInfo(0, MSG_085, tmp);
 						PromptOnError = (*img_report.sl_version_ext == 0);
 						syslinux_ldlinux_len[i] = DownloadFile(tmp, &tmp[sizeof(FILES_URL)], hMainDialog);
 						PromptOnError = TRUE;
@@ -1510,7 +1506,6 @@ static BOOL BootCheck(void)
 							uprintf("Extended version was not found, trying main version...");
 							static_sprintf(tmp, "%s/%s-%s/%s.%s", FILES_URL, syslinux, img_report.sl_version_str,
 								ldlinux, ldlinux_ext[i]);
-							PrintInfo(0, MSG_085, tmp);
 							syslinux_ldlinux_len[i] = DownloadFile(tmp, &tmp[sizeof(FILES_URL)], hMainDialog);
 							if (syslinux_ldlinux_len[i] != 0) {
 								// Duplicate the file so that the user won't be prompted to download again
@@ -1554,7 +1549,6 @@ static BOOL BootCheck(void)
 				static_sprintf(tmp, "%s-%s", syslinux, embedded_sl_version_str[1]);
 				IGNORE_RETVAL(_mkdir(tmp));
 				static_sprintf(tmp, "%s/%s-%s/%s.%s", FILES_URL, syslinux, embedded_sl_version_str[1], ldlinux, ldlinux_ext[2]);
-				PrintInfo(0, MSG_085, tmp);
 				if (DownloadFile(tmp, &tmp[sizeof(FILES_URL)], hMainDialog) == 0)
 					return FALSE;
 			}
@@ -1585,8 +1579,6 @@ static BOOL BootCheck(void)
 				static_sprintf(tmp, "grub4dos-%s", GRUB4DOS_VERSION);
 				IGNORE_RETVAL(_mkdir(tmp));
 				static_sprintf(tmp, "%s/grub4dos-%s/grldr", FILES_URL, GRUB4DOS_VERSION);
-				PrintInfo(0, MSG_085, tmp);
-				uprintf("URL = %s", tmp);
 				if (DownloadFile(tmp, &tmp[sizeof(FILES_URL)], hMainDialog) == 0)
 					return FALSE;
 			}
@@ -1722,6 +1714,7 @@ static void InitDialog(HWND hDlg)
 		0, 0, PROOF_QUALITY, 0, (nWindowsVersion >= WINDOWS_VISTA)?"Segoe UI":"Arial Unicode MS");
 	SendDlgItemMessageA(hDlg, IDC_INFO, WM_SETFONT, (WPARAM)hInfoFont, TRUE);
 	hInfoBrush = CreateSolidBrush(GetSysColor(COLOR_BTNFACE));
+	HideCaret(hInfo);
 
 	// Create the title bar icon
 	SetTitleBarIcon(hDlg);
