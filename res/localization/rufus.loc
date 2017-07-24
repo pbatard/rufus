@@ -2868,7 +2868,7 @@ t MSG_298 "你選擇的 ISO 映像檔不符合它所宣告的大小: 缺少 %s !
 
 ################################################################################
 l "hr-HR" "Croatian (Hrvatski)" 0x041a, 0x081a, 0x101a
-v 1.0.21
+v 1.0.22
 b "en-US"
 
 # Main dialog
@@ -3310,6 +3310,12 @@ t MSG_291 "Odabir verzije"
 t MSG_292 "Molimo odaberite verziju Windowsa koju želite instalirati:"
 t MSG_293 "Nepodržana verzija Windowsa"
 t MSG_294 "Ova verzija Windowsa više nije podržana od strane Rufusa."
+t MSG_295 "Upozorenje: Neslužbena verzija"
+t MSG_296 "Ova verzija Rufusa NIJE proizvod službenog razvojnog programera.\n\nSvejedno pokrenuti program?"
+t MSG_297 "Otkrivena skraćena ISO datoteka"
+t MSG_298 "ISO datoteka koju ste odabrali ne odgovara deklariranoj veličini: %s podataka nedostaje!\n\n"
+	"Ako ste ovu datoteku preuzeli na internetu, pokušajte preuzeti novu kopiju i proverite da su MD5 ili SHA "
+	"kontrolni zbrojevi identični kao u originalu.\n\nRufus može provjeriti MD5 ili SHA pritiskom na '#' tipku."
 
 ################################################################################
 l "cs-CZ" "Czech (Čeština)" 0x0405
