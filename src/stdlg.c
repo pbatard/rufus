@@ -721,25 +721,23 @@ INT_PTR CALLBACK NotificationCallback(HWND hDlg, UINT message, WPARAM wParam, LP
 
 	switch (message) {
 	case WM_INITDIALOG:
-		// Get the system message box font. See http://stackoverflow.com/a/6057761
-		ncm.cbSize = sizeof(ncm);
-		// If we're compiling with the Vista SDK or later, the NONCLIENTMETRICS struct
-		// will be the wrong size for previous versions, so we need to adjust it.
-		#if defined(_MSC_VER) && (_MSC_VER >= 1500) && (_WIN32_WINNT >= _WIN32_WINNT_VISTA)
-		if (nWindowsVersion >= WINDOWS_VISTA) {
-			// In versions of Windows prior to Vista, the iPaddedBorderWidth member
-			// is not present, so we need to subtract its size from cbSize.
+		if (nWindowsVersion >= WINDOWS_VISTA) {	// of course, this stuff doesn't work on XP!
+			// Get the system message box font. See http://stackoverflow.com/a/6057761
+			ncm.cbSize = sizeof(ncm);
+			// If we're compiling with the Vista SDK or later, the NONCLIENTMETRICS struct
+			// will be the wrong size for previous versions, so we need to adjust it.
+			#if defined(_MSC_VER) && (_MSC_VER >= 1500) && (_WIN32_WINNT >= _WIN32_WINNT_VISTA)
 			ncm.cbSize -= sizeof(ncm.iPaddedBorderWidth);
+			#endif
+			SystemParametersInfo(SPI_GETNONCLIENTMETRICS, ncm.cbSize, &ncm, 0);
+			hDlgFont = CreateFontIndirect(&(ncm.lfMessageFont));
+			// Set the dialog to use the system message box font
+			SendMessage(hDlg, WM_SETFONT, (WPARAM)hDlgFont, MAKELPARAM(TRUE, 0));
+			SendMessage(GetDlgItem(hDlg, IDC_NOTIFICATION_TEXT), WM_SETFONT, (WPARAM)hDlgFont, MAKELPARAM(TRUE, 0));
+			SendMessage(GetDlgItem(hDlg, IDC_MORE_INFO), WM_SETFONT, (WPARAM)hDlgFont, MAKELPARAM(TRUE, 0));
+			SendMessage(GetDlgItem(hDlg, IDYES), WM_SETFONT, (WPARAM)hDlgFont, MAKELPARAM(TRUE, 0));
+			SendMessage(GetDlgItem(hDlg, IDNO), WM_SETFONT, (WPARAM)hDlgFont, MAKELPARAM(TRUE, 0));
 		}
-		#endif
-		SystemParametersInfo(SPI_GETNONCLIENTMETRICS, ncm.cbSize, &ncm, 0);
-		hDlgFont = CreateFontIndirect(&(ncm.lfMessageFont));
-		// Set the dialog to use the system message box font
-		SendMessage(hDlg, WM_SETFONT, (WPARAM)hDlgFont, MAKELPARAM(TRUE, 0));
-		SendMessage(GetDlgItem(hDlg, IDC_NOTIFICATION_TEXT), WM_SETFONT, (WPARAM)hDlgFont, MAKELPARAM(TRUE, 0));
-		SendMessage(GetDlgItem(hDlg, IDC_MORE_INFO), WM_SETFONT, (WPARAM)hDlgFont, MAKELPARAM(TRUE, 0));
-		SendMessage(GetDlgItem(hDlg, IDYES), WM_SETFONT, (WPARAM)hDlgFont, MAKELPARAM(TRUE, 0));
-		SendMessage(GetDlgItem(hDlg, IDNO), WM_SETFONT, (WPARAM)hDlgFont, MAKELPARAM(TRUE, 0));
 
 		apply_localization(IDD_NOTIFICATION, hDlg);
 		background_brush = CreateSolidBrush(GetSysColor(COLOR_WINDOW));
