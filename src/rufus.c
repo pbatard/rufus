@@ -2152,9 +2152,9 @@ static void SaveISO(void)
 static BOOL CheckDriveAccess(DWORD dwTimeOut)
 {
 	uint32_t i, j;
-	BOOL bProceed = TRUE;
+	BOOL ret = FALSE, proceed = TRUE;
 	BYTE access_mask;
-	char *PhysicalPath, DevPath[MAX_PATH];
+	char *PhysicalPath = NULL, DevPath[MAX_PATH];
 	char drive_letter[27], drive_name[] = "?:";
 	char *message, title[128];
 	DWORD cur_time, end_time = GetTickCount() + dwTimeOut;
@@ -2170,16 +2170,16 @@ static BOOL CheckDriveAccess(DWORD dwTimeOut)
 
 	// Search for any blocking processes against the physical drive
 	PhysicalPath = GetPhysicalName(DeviceNum);
-	QueryDosDeviceA(&PhysicalPath[4], DevPath, sizeof(DevPath));
-	access_mask = SearchProcess(DevPath, dwTimeOut, TRUE, TRUE, TRUE);
-	CHECK_FOR_USER_CANCEL;
-	if (access_mask != 0) {
-		bProceed = FALSE;
-		uprintf("Found potentially blocking process(es) against %s:", &PhysicalPath[4]);
-		for (j = 0; j < BlockingProcess.Index; j++)
-			uprintf(BlockingProcess.String[j]);
+	if (QueryDosDeviceA(&PhysicalPath[4], DevPath, sizeof(DevPath)) != 0) {
+		access_mask = SearchProcess(DevPath, dwTimeOut, TRUE, TRUE, TRUE);
+		CHECK_FOR_USER_CANCEL;
+		if (access_mask != 0) {
+			proceed = FALSE;
+			uprintf("Found potentially blocking process(es) against %s:", &PhysicalPath[4]);
+			for (j = 0; j < BlockingProcess.Index; j++)
+				uprintf(BlockingProcess.String[j]);
+		}
 	}
-	free(PhysicalPath);
 
 	// Search for any blocking processes against the logical volume(s)
 	GetDriveLetters(DeviceNum, drive_letter);
@@ -2194,7 +2194,7 @@ static BOOL CheckDriveAccess(DWORD dwTimeOut)
 			CHECK_FOR_USER_CANCEL;
 			// Ignore if all we have is read-only
 			if ((access_mask & 0x06) || (access_mask == 0x80)) {
-				bProceed = FALSE;
+				proceed = FALSE;
 				uprintf("Found potentially blocking process(es) against %s", drive_name);
 				for (j = 0; j < BlockingProcess.Index; j++)
 					uprintf(BlockingProcess.String[j]);
@@ -2203,21 +2203,21 @@ static BOOL CheckDriveAccess(DWORD dwTimeOut)
 	}
 
 	// Prompt the user if we detected blocking processes
-	if (!bProceed) {
+	if (!proceed) {
 		// We'll use a system translated string instead of one from rufus.loc
 		message = GetMuiString("shell32.dll", 28701);	// "This drive is in use (...) Do you want to format it anyway?"
 		if (message != NULL) {
 			ComboBox_GetTextU(hDeviceList, title, sizeof(title));
-			bProceed = Notification(MSG_WARNING_QUESTION, NULL, title, message);
+			proceed = Notification(MSG_WARNING_QUESTION, NULL, title, message);
 			free(message);
 		}
 	}
+	ret = proceed;
 
-	PrintInfo(0, MSG_210);
-	return bProceed;
 out:
 	PrintInfo(0, MSG_210);
-	return FALSE;
+	free(PhysicalPath);
+	return ret;
 }
 
 #ifdef RUFUS_TEST

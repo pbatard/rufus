@@ -124,6 +124,7 @@ static errcode_t bb_u64_list_add(bb_u64_list bb, uint64_t blk)
 			bb->size -= 100;
 			return BB_ET_NO_MEMORY;
 		}
+		// coverity[suspicious_sizeof]
 		memset(&bb->list[bb->size-100], 0, 100 * sizeof(uint64_t));
 	}
 
