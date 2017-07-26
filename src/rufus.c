@@ -1622,6 +1622,10 @@ static INT_PTR CALLBACK InfoCallback(HWND hCtrl, UINT message, WPARAM wParam, LP
 
 	switch (message) {
 
+	// Prevent text selection (wich Windows seems keen on doing on its own)
+	case EM_SETSEL:
+		return (INT_PTR)TRUE;
+
 	// Prevent select (which screws up our display as it redraws the font using different settings)
 	case WM_LBUTTONDOWN:
 		return (INT_PTR)FALSE;

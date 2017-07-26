@@ -427,7 +427,8 @@ static uint64_t last_msg_time[2] = { 0, 0 };
 
 static void PrintInfoMessage(char* msg) {
 	SetWindowTextU(hInfo, msg);
-	Edit_SetSel(hInfo, -1, 0);
+	// Make sure our field gets redrawn
+	SendMessage(hInfo, WM_PAINT, 0, 0);
 }
 static void PrintStatusMessage(char* msg) {
 	SendMessageLU(hStatus, SB_SETTEXTW, SBT_OWNERDRAW | SB_SECTION_LEFT, msg);
