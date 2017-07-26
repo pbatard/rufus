@@ -9799,7 +9799,7 @@ t MSG_298 "Izvēlētais ISO fails neatbilst noteiktajam izmēram: %s datu ir kļ
 
 ################################################################################
 l "lt-LT" "Lithuanian (Lietuvių)" 0x0427
-v 1.0.21
+v 1.0.22
 b "en-US"
 
 # Main dialog
@@ -10265,6 +10265,13 @@ t MSG_291 "Versijos parinktis"
 t MSG_292 "Prašome pasirinkti Windows versiją, kurią norite įdiegti:"
 t MSG_293 "Nepalaikoma Windows versija"
 t MSG_294 "Šios Windows versijos Rufus nebepalaiko."
+t MSG_295 "Įspėjimas: Neoficiali versija"
+t MSG_296 "Ši Rufus versija NĖRA išleista jos oficialaus kūrėjo(ų).\n\nAr jūs tikrai norite ją vykdyti?"
+t MSG_297 "Aptiktas nepilnas ISO"
+t MSG_298 "Jūsų pasirinktas ISO failas neatitinka deklaruojamo dydžio: %s duomenų trūksta!\n\n"
+	"Jei jūs gavote šį failą iš interneto, pabandykite atsisiųsti jį iš naujo ir patikrinkite, "
+	"ar MD5 or SHA kontrolinės sumos atitinka oficialiąsias.\n\nBeje, jūs galite apskaičiuoti "
+	"MD5 arba SHA per Rufus, paspaudę '#' mygtuką."
 
 ################################################################################
 l "ms-MY" "Malay (Bahasa Malaysia)" 0x043e, 0x083e
