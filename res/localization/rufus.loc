@@ -15045,7 +15045,7 @@ t MSG_294 "Táto verzia systému Windows už nie je podporovaná programom Rufus
 
 ################################################################################
 l "sl-SI" "Slovenian (Slovenščina)" 0x0424
-v 1.0.21
+v 1.0.22
 b "en-US"
 
 # Main dialog
@@ -15491,6 +15491,12 @@ t MSG_291 "Izbira verzije"
 t MSG_292 "Izberite, katero verzijo operacijskega sistema Windows želite namestiti:"
 t MSG_293 "Operacijski sistem ni podprt"
 t MSG_294 "Rufus več ne podpira tega operacijskega sistema."
+t MSG_295 "Opozorilo: neuradna verzija"
+t MSG_296 "Te verzije Rufusa ni izdelal njegov uradni razvijalec.\n\nAli ste prepričani, da jo želite uporabljati?"
+t MSG_297 "Odrezana datoteka ISO"
+t MSG_298 "Datoteka ISO, ki ste jo izbrali, ni pričakovane velikosti: %s njenih podatkov manjka.\n\n"
+	"Če ste jo prenesli z interneta, jo prenesite še enkrat in preverite, ali se vrednosti MD5 in SHA "
+	"ujemata z uradnima.\n\nV Rufusu ju lahko izračunate z gumbom '#'." 
 
 ################################################################################
 l "es-ES" "Spanish (Español)" 0x040a, 0x080a, 0x0c0a, 0x100a, 0x140a, 0x180a, 0x1c0a, 0x200a, 0x240a, 0x280a, 0x2c0a, 0x300a, 0x340a, 0x380a, 0x3c0a, 0x400a, 0x440a, 0x480a, 0x4c0a, 0x500a, 0x540a, 0x580a
