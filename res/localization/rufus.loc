@@ -7429,7 +7429,7 @@ t MSG_287 "Nem-USB eltávolítható eszközök észlelése"
 
 ################################################################################
 l "id-ID" "Indonesian (Bahasa Indonesia)" 0x0421
-v 1.0.20
+v 1.0.22
 b "en-US"
 
 # Main dialog
@@ -7912,6 +7912,19 @@ t MSG_285 "Berkas exe yang diunduh ditandatangani oleh '%s'.\nTanda tangan ini "
 	"Apakah Anda yakin ingin menjalankan berkas ini?"
 t MSG_286 "Mengosongkan perangkat: %0.1f%% selesai"
 t MSG_287 "Deteksi selain perangkat USB yang dapat dilepas"
+t MSG_288 "Hak akses yang tinggi tidak ada"
+t MSG_289 "Aplikasi ini hanya dapat dijalankan dengan hak akses yang tinggi"
+t MSG_290 "Pengindeksan Berkas"
+t MSG_291 "Pilihan versi"
+t MSG_292 "Silakan pilih versi Windows yang ingin dipasang:"
+t MSG_293 "Versi Windows Tidak didukung"
+t MSG_294 "Windows versi ini tidak lagi didukung oleh Rufus."
+t MSG_295 "Peringatan: Versi tidak resmi"
+t MSG_296 "Rufus versi ini TIDAK diproduksi oleh pengembang resminya.\n\nApakah Anda yakin ingin menjalankannya?"
+t MSG_297 "Terdeteksi ISO Terpotong"
+t MSG_298 "Berkas ISO yang Anda pilih tidak sesuai dengan ukuran yang dideklarasikan: %s data hilang!\n\n"
+	"Jika Anda mendapatkan berkas ini dari Internet, Anda sebaiknya mengunduh salinan yang baru dan pastikan ceksum MD5 atau SHA "
+	"cocok dengan yang asli.\n\nPerhatikan bahwa Anda dapat menghitung MD5 atau SHA dalam Rufus dengan mengklik tombol '#'."
 
 ################################################################################
 l "it-IT" "Italian (Italiano)" 0x0410, 0x0810
