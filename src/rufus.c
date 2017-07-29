@@ -972,8 +972,8 @@ static void DisplayISOProps(void)
 	if (img_report.mismatch_size > 0) {
 		uprintf("  ERROR: Detected that file on disk has been truncated by %s!",
 			SizeToHumanReadable(img_report.mismatch_size, FALSE, FALSE));
-		MessageBoxU(hMainDialog, lmprintf(MSG_298, SizeToHumanReadable(img_report.mismatch_size, FALSE, FALSE)),
-			lmprintf(MSG_297), MB_ICONWARNING);
+		MessageBoxExU(hMainDialog, lmprintf(MSG_298, SizeToHumanReadable(img_report.mismatch_size, FALSE, FALSE)),
+			lmprintf(MSG_297), MB_ICONWARNING | MB_IS_RTL, selected_langid);
 	} else if (img_report.mismatch_size < 0) {
 		// Not an error (ISOHybrid?), but we report it just in case
 		uprintf("  Note: File on disk is larger than reported ISO size by %s...",
@@ -3197,7 +3197,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	if ( (!get_supported_locales(loc_file))
 	  || ((selected_locale = ((locale_name == NULL)?get_locale_from_lcid(lcid, TRUE):get_locale_from_name(locale_name, TRUE))) == NULL) ) {
 		uprintf("FATAL: Could not access locale!");
-		MessageBoxU(NULL, "The locale data is missing or invalid. This application will now exit.",
+		MessageBoxA(NULL, "The locale data is missing or invalid. This application will now exit.",
 			"Fatal error", MB_ICONSTOP|MB_SYSTEMMODAL);
 		goto out;
 	}
