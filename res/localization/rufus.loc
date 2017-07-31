@@ -13238,7 +13238,7 @@ t MSG_294 "Esta versão do Windows já não é suportada por Rufus."
 t MSG_295 "Aviso: versão não oficial"
 t MSG_296 "Esta versão de Rufus NÃO foi desenvolvida pelo autor oficial.\n\nTem a certeza que pretende executar?"
 t MSG_297 "Detetado ISO truncado"
-t MSG_298 "O ficheiro ISO que selecionou não corresponde ao tamanho declarado: faltam %s de dados!\n\nSe obteve este ficheiro " 
+t MSG_298 "O ficheiro ISO que selecionou não corresponde ao tamanho declarado: faltam %s de dados!\n\nSe obteve este ficheiro "
 	"da Internet, deve tentar baixar uma nova cópia e verificar se os checksums MD5 ou SHA correspondem aos oficiais.\n\n"
 	"Saiba no Rufus que pode calcular o MD5 ou SHA clicando no botão '#'."
 
@@ -14698,7 +14698,7 @@ t MSG_001 "Zistený spustený program"
 t MSG_002 "Program Rufus je už spustený.\n"
 	"Pred spustením ďalšieho programu musíte zavrieť spustený program."
 t MSG_003 "VAROVANIE: PO SPUSTENÍ FORMÁTOVANIA BUDÚ VYMAZANÉ VŠETKY ÚDAJE NA CIEĽOVOM DISKU: %s\n"
-	"Ak chcete spustiť formátovanie disku stlačte tlačidlo OK.\nAk chcete túto operáciu ukončiť, stlačte tlačidlo ZRUŠIŤ." 
+	"Ak chcete spustiť formátovanie disku stlačte tlačidlo OK.\nAk chcete túto operáciu ukončiť, stlačte tlačidlo ZRUŠIŤ."
 t MSG_004 "Nastavenie automatických aktualizácií programu Rufus"
 t MSG_005 "Chcete povoliť kontrolu aktualizácií programu Rufus?"
 # Must be the same as IDD_DIALOG:IDCANCEL (i.e. "Close" - I know it's confusing)
@@ -15068,7 +15068,7 @@ t MSG_297 "Bol zistený skrátený ISO súbor"
 t MSG_298 "Veľkosť vybraného ISO súboru sa nezhoduje s jeho deklarovanou veľkosťou (chýba %s)!\n\n"
 	"Ak ste získali tento súbor z internetu, pokúste sa znova stiahnuť novú kópiu tohto súboru a overiť ju "
 	"MD5 alebo SHA kontrolným súčtom s originálnym súborom.\n\nAk chcete vypočítať kontrólny súčet MD5 alebo "
-	"SHA pre vybraný súbor v programe Rufus, stlačte tlačidlo '#'." 
+	"SHA pre vybraný súbor v programe Rufus, stlačte tlačidlo '#'."
 
 ################################################################################
 l "sl-SI" "Slovenian (Slovenščina)" 0x0424
@@ -15523,7 +15523,7 @@ t MSG_296 "Te verzije Rufusa ni izdelal njegov uradni razvijalec.\n\nAli ste pre
 t MSG_297 "Odrezana datoteka ISO"
 t MSG_298 "Datoteka ISO, ki ste jo izbrali, ni pričakovane velikosti: %s njenih podatkov manjka.\n\n"
 	"Če ste jo prenesli z interneta, jo prenesite še enkrat in preverite, ali se vrednosti MD5 in SHA "
-	"ujemata z uradnima.\n\nV Rufusu ju lahko izračunate z gumbom '#'." 
+	"ujemata z uradnima.\n\nV Rufusu ju lahko izračunate z gumbom '#'."
 
 ################################################################################
 l "es-ES" "Spanish (Español)" 0x040a, 0x080a, 0x0c0a, 0x100a, 0x140a, 0x180a, 0x1c0a, 0x200a, 0x240a, 0x280a, 0x2c0a, 0x300a, 0x340a, 0x380a, 0x3c0a, 0x400a, 0x440a, 0x480a, 0x4c0a, 0x500a, 0x540a, 0x580a

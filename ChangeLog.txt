@@ -1,9 +1,9 @@
-o Version 2.16 (2017.07.??)
+o Version 2.16 (2017.07.31)
     Add an audiovisual cue on completion/error
     Add a workaround for ISOs using nonstantard Rock Ridge extensions (looking at you Kali Linux!)
     Notify user when an ISO is broken or truncated
     Notify user if other processes are accessing the drive before format
-    List processes that are locking a drive, if any, on failure
+    List processes that are locking a drive on failure
     Improve verbosity of the Windows To Go process
     Other fixes and improvements
 
