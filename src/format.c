@@ -1288,6 +1288,7 @@ int SetWinToGoIndex(void)
 	char tmp_path[MAX_PATH] = "", xml_file[MAX_PATH] = "";
 	StrArray version_name, version_index;
 	int i, build_nr = 0;
+	BOOL bNonStandard = FALSE;
 
 	// Sanity checks
 	wintogo_index = -1;
@@ -1307,7 +1308,7 @@ int SetWinToGoIndex(void)
 	if ((GetTempPathU(sizeof(tmp_path), tmp_path) == 0)
 		|| (GetTempFileNameU(tmp_path, APPLICATION_NAME, 0, xml_file) == 0)
 		|| (xml_file[0] == 0)) {
-		// Last ditch effort to get a loc file - just extract it to the current directory
+		// Last ditch effort to get a tmp file - just extract it to the current directory
 		safe_strcpy(xml_file, sizeof(xml_file), ".\\RufVXml.tmp");
 	}
 	// GetTempFileName() may leave a file behind
@@ -1321,8 +1322,24 @@ int SetWinToGoIndex(void)
 
 	StrArrayCreate(&version_name, 16);
 	StrArrayCreate(&version_index, 16);
-	for (i = 0; (StrArrayAdd(&version_name, get_token_data_file_indexed("DISPLAYNAME", xml_file, i + 1), FALSE) >= 0) &&
-		(StrArrayAdd(&version_index, get_token_data_file_indexed("IMAGE INDEX", xml_file, i + 1), FALSE) >= 0); i++);
+	for (i = 0; StrArrayAdd(&version_index, get_token_data_file_indexed("IMAGE INDEX", xml_file, i + 1), FALSE) >= 0; i++) {
+		// Some people are apparently creating *unofficial* Windows ISOs that don't have DISPLAYNAME elements.
+		// If we are parsing such an ISO, try to fall back to using DESCRIPTION. Of course, since we don't use
+		// a formal XML parser, if an ISO mixes entries with both DISPLAYNAME and DESCRIPTION and others with
+		// only DESCRIPTION, the version names we report will be wrong.
+		// But hey, there's only so far I'm willing to go to help people who, not content to have demonstrated
+		// their utter ignorance on development matters, are also trying to lecture experienced developers
+		// about specific "noob mistakes"... that don't exist in the code they are trying to criticize.
+		if (StrArrayAdd(&version_name, get_token_data_file_indexed("DISPLAYNAME", xml_file, i + 1), FALSE) < 0) {
+			bNonStandard = TRUE;
+			if (StrArrayAdd(&version_name, get_token_data_file_indexed("DESCRIPTION", xml_file, i + 1), FALSE) < 0) {
+				uprintf("Warning: Could not find a description for image index %d", i + 1);
+				StrArrayAdd(&version_name, "Unknown Windows Version", TRUE);
+			}
+		}
+	}
+	if (bNonStandard)
+		uprintf("Warning: Nonstandard Windows image (missing <DISPLAYNAME> entries)");
 
 	if (i > 1)
 		i = SelectionDialog(lmprintf(MSG_291), lmprintf(MSG_292), version_name.String, i);
@@ -1333,7 +1350,7 @@ int SetWinToGoIndex(void)
 	} else {
 		wintogo_index = atoi(version_index.String[i - 1]);
 	}
-	if (i >= 0) {
+	if (i > 0) {
 		// Get the build version
 		build = get_token_data_file_indexed("BUILD", xml_file, i);
 		if (build != NULL)
