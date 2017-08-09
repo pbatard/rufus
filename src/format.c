@@ -2042,7 +2042,7 @@ DWORD WINAPI FormatThread(void* param)
 					efi_dst[0] = drive_name[0];
 					efi_dst[sizeof(efi_dst) - sizeof("\\bootx64.efi")] = 0;
 					if (!CreateDirectoryA(efi_dst, 0)) {
-						uprintf("Could not create directory '%s': %s\n", WindowsErrorString());
+						uprintf("Could not create directory '%s': %s\n", efi_dst, WindowsErrorString());
 						FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_PATCH);
 					} else {
 						efi_dst[sizeof(efi_dst) - sizeof("\\bootx64.efi")] = '\\';

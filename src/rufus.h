@@ -261,8 +261,9 @@ enum checksum_type {
 #define HAS_WINPE(r)        (((r.winpe & WINPE_MININT) == WINPE_MININT)||((r.winpe & WINPE_I386) == WINPE_I386))
 #define HAS_WINDOWS(r)      (HAS_BOOTMGR(r) || (r.uses_minint) || HAS_WINPE(r))
 #define HAS_WIN7_EFI(r)     ((r.has_efi == 1) && HAS_INSTALL_WIM(r))
+#define HAS_EFI_IMG(r)      (r.efi_img_path[0] != 0)
 #define IS_DD_BOOTABLE(r)   (r.is_bootable_img)
-#define IS_EFI_BOOTABLE(r)  (r.has_efi)
+#define IS_EFI_BOOTABLE(r)  (r.has_efi != 0)
 #define IS_BIOS_BOOTABLE(r) (HAS_BOOTMGR(r) || HAS_SYSLINUX(r) || HAS_WINPE(r) || HAS_GRUB(r) || HAS_REACTOS(r) || HAS_KOLIBRIOS(r))
 #define HAS_WINTOGO(r)      (HAS_BOOTMGR(r) && IS_EFI_BOOTABLE(r) && HAS_INSTALL_WIM(r) && (r.install_wim_version < MAX_WIM_VERSION))
 #define IS_FAT(fs)          ((fs == FS_FAT16) || (fs == FS_FAT32))
@@ -273,6 +274,7 @@ typedef struct {
 	char cfg_path[128];			/* path to the ISO's isolinux.cfg */
 	char reactos_path[128];		/* path to the ISO's freeldr.sys or setupldr.sys */
 	char install_wim_path[64];	/* path to install.wim or install.swm */
+	char efi_img_path[128];		/* path to an efi.img file */
 	uint64_t image_size;
 	uint64_t projected_size;
 	int64_t mismatch_size;
@@ -440,6 +442,7 @@ extern SIZE GetTextSize(HWND hCtrl);
 extern BOOL ExtractDOS(const char* path);
 extern BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan);
 extern int64_t ExtractISOFile(const char* iso, const char* iso_file, const char* dest_file, DWORD attributes);
+extern BOOL ExtractEfiImgFiles(const char* dir);
 extern char* MountISO(const char* path);
 extern void UnMountISO(void);
 extern BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int fs);

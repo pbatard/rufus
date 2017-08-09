@@ -992,7 +992,10 @@ static void DisplayISOProps(void)
 	PRINT_ISO_PROP(HAS_REACTOS(img_report), "  Uses: ReactOS");
 	PRINT_ISO_PROP(img_report.has_grub4dos, "  Uses: Grub4DOS");
 	PRINT_ISO_PROP(img_report.has_grub2, "  Uses: GRUB2");
-	PRINT_ISO_PROP(img_report.has_efi, "  Uses: EFI %s", HAS_WIN7_EFI(img_report) ? "(win7_x64)" : "");
+	if (img_report.has_efi == 0x80)
+		uprintf("  Uses: EFI (through '%s')", img_report.efi_img_path);
+	else
+		PRINT_ISO_PROP(img_report.has_efi, "  Uses: EFI %s", HAS_WIN7_EFI(img_report) ? "(win7_x64)" : "");
 	PRINT_ISO_PROP(HAS_BOOTMGR(img_report), "  Uses: Bootmgr");
 	PRINT_ISO_PROP(HAS_WINPE(img_report), "  Uses: WinPE %s", (img_report.uses_minint) ? "(with /minint)" : "");
 	if (HAS_INSTALL_WIM(img_report)) {
@@ -2259,7 +2262,9 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	case WM_COMMAND:
 #ifdef RUFUS_TEST
 		if (LOWORD(wParam) == IDC_TEST) {
-			uprintf("Proceed = %s", CheckDriveAccess(2000)?"True":"False");
+			ExtractEfiImgFiles("C:\\rufus");
+//			ExtractEFI("C:\\rufus\\efi.img", "C:\\rufus\\efi");
+//			uprintf("Proceed = %s", CheckDriveAccess(2000)?"True":"False");
 //			char* choices[] = { "Choice 1", "Choice 2", "Choice 3" };
 //			SelectionDyn("Test Choice", "Unused", choices, ARRAYSIZE(choices));
 			break;

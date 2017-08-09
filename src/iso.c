@@ -39,6 +39,7 @@
 #include <cdio/udf.h>
 
 #include "rufus.h"
+#include "libfat.h"
 #include "missing.h"
 #include "resource.h"
 #include "msapi_utf8.h"
@@ -73,6 +74,7 @@ static const char* grldr_name = "grldr";
 static const char* ldlinux_name = "ldlinux.sys";
 static const char* ldlinux_c32 = "ldlinux.c32";
 static const char* efi_dirname = "/efi/boot";
+static const char* efi_img_name = "efi.img";	// Used by Debian Live ISOHybrids
 static const char* efi_bootname[] = { "bootia32.efi", "bootia64.efi", "bootx64.efi", "bootarm.efi", "bootaa64.efi", "bootebc.efi" };
 static const char* install_wim_path = "/sources";
 static const char* install_wim_name[] = { "install.wim", "install.swm" };
@@ -201,6 +203,10 @@ static BOOL check_iso_props(const char* psz_dirname, int64_t i_file_length, cons
 		// Check for ReactOS' setupldr.sys anywhere
 		if ((img_report.reactos_path[0] == 0) && (safe_stricmp(psz_basename, reactos_name) == 0))
 			safe_strcpy(img_report.reactos_path, sizeof(img_report.reactos_path), psz_fullpath);
+
+		// Check for the first 'efi.img' we can find (that hopefully contains EFI boot files)
+		if (!HAS_EFI_IMG(img_report) && (safe_stricmp(psz_basename, efi_img_name) == 0))
+			safe_strcpy(img_report.efi_img_path, sizeof(img_report.efi_img_path), psz_fullpath);
 
 		// Check for the EFI boot entries
 		if (safe_stricmp(psz_dirname, efi_dirname) == 0) {
@@ -841,6 +847,9 @@ out:
 				uprintf("  Warning: Could not detect Isolinux version - Forcing to %s (embedded)",
 					img_report.sl_version_str);
 			}
+			if (!IS_EFI_BOOTABLE(img_report) && HAS_EFI_IMG(img_report) && ExtractEfiImgFiles(NULL)) {
+				img_report.has_efi = 0x80;
+			}
 		}
 		if (HAS_WINPE(img_report)) {
 			// In case we have a WinPE 1.x based iso, we extract and parse txtsetup.sif
@@ -889,35 +898,40 @@ out:
 		StrArrayDestroy(&config_path);
 		StrArrayDestroy(&isolinux_path);
 		SendMessage(hMainDialog, UM_PROGRESS_EXIT, 0, 0);
-	} else if (HAS_SYSLINUX(img_report)) {
-		safe_sprintf(path, sizeof(path), "%s\\syslinux.cfg", dest_dir);
-		// Create a /syslinux.cfg (if none exists) that points to the existing isolinux cfg
-		fd = fopen(path, "r");
-		if (fd != NULL && img_report.needs_syslinux_overwrite) {
-			fclose(fd);
-			fd = NULL;
-			safe_sprintf(path2, sizeof(path2), "%s\\syslinux.org", dest_dir);
-			uprintf("Renaming: %s ➔ %s", path, path2);
-			IGNORE_RETVAL(rename(path, path2));
-		}
-		if (fd == NULL) {
-			fd = fopen(path, "w");	// No "/syslinux.cfg" => create a new one
-			if (fd == NULL) {
-				uprintf("Unable to create %s - booting from USB will not work", path);
-				r = 1;
-			} else {
-				fprintf(fd, "DEFAULT loadconfig\n\nLABEL loadconfig\n  CONFIG %s\n", img_report.cfg_path);
-				for (i=safe_strlen(img_report.cfg_path); (i>0)&&(img_report.cfg_path[i]!='/'); i--);
-				if (i>0) {
-					img_report.cfg_path[i] = 0;
-					fprintf(fd, "  APPEND %s/\n", img_report.cfg_path);
-					img_report.cfg_path[i] = '/';
-				}
-				uprintf("Created: %s", path);
+	} else {
+		// For Debian live ISOs, that only provide EFI boot files in a FAT efi.img
+		if (img_report.has_efi == 0x80)
+			ExtractEfiImgFiles(dest_dir);
+		if (HAS_SYSLINUX(img_report)) {
+			safe_sprintf(path, sizeof(path), "%s\\syslinux.cfg", dest_dir);
+			// Create a /syslinux.cfg (if none exists) that points to the existing isolinux cfg
+			fd = fopen(path, "r");
+			if (fd != NULL && img_report.needs_syslinux_overwrite) {
+				fclose(fd);
+				fd = NULL;
+				safe_sprintf(path2, sizeof(path2), "%s\\syslinux.org", dest_dir);
+				uprintf("Renaming: %s ➔ %s", path, path2);
+				IGNORE_RETVAL(rename(path, path2));
 			}
+			if (fd == NULL) {
+				fd = fopen(path, "w");	// No "/syslinux.cfg" => create a new one
+				if (fd == NULL) {
+					uprintf("Unable to create %s - booting from USB will not work", path);
+					r = 1;
+				} else {
+					fprintf(fd, "DEFAULT loadconfig\n\nLABEL loadconfig\n  CONFIG %s\n", img_report.cfg_path);
+					for (i = safe_strlen(img_report.cfg_path); (i > 0) && (img_report.cfg_path[i] != '/'); i--);
+					if (i > 0) {
+						img_report.cfg_path[i] = 0;
+						fprintf(fd, "  APPEND %s/\n", img_report.cfg_path);
+						img_report.cfg_path[i] = '/';
+					}
+					uprintf("Created: %s", path);
+				}
+			}
+			if (fd != NULL)
+				fclose(fd);
 		}
-		if (fd != NULL)
-			fclose(fd);
 	}
 	if (p_iso != NULL)
 		iso9660_close(p_iso);
@@ -945,7 +959,7 @@ int64_t ExtractISOFile(const char* iso, const char* iso_file, const char* dest_f
 	file_handle = CreateFileU(dest_file, GENERIC_READ | GENERIC_WRITE,
 		FILE_SHARE_READ, NULL, CREATE_ALWAYS, attributes, NULL);
 	if (file_handle == INVALID_HANDLE_VALUE) {
-		uprintf("  Unable to create file %s: %s\n", dest_file, WindowsErrorString());
+		uprintf("  Could not create file %s: %s", dest_file, WindowsErrorString());
 		goto out;
 	}
 
@@ -956,12 +970,12 @@ int64_t ExtractISOFile(const char* iso, const char* iso_file, const char* dest_f
 
 	p_udf_root = udf_get_root(p_udf, true, 0);
 	if (p_udf_root == NULL) {
-		uprintf("Could not locate UDF root directory\n");
+		uprintf("Could not locate UDF root directory");
 		goto out;
 	}
 	p_udf_file = udf_fopen(p_udf_root, iso_file);
 	if (!p_udf_file) {
-		uprintf("Could not locate file %s in ISO image\n", iso_file);
+		uprintf("Could not locate file %s in ISO image", iso_file);
 		goto out;
 	}
 	file_length = udf_get_file_length(p_udf_file);
@@ -969,12 +983,12 @@ int64_t ExtractISOFile(const char* iso, const char* iso_file, const char* dest_f
 		memset(buf, 0, UDF_BLOCKSIZE);
 		read_size = udf_read_block(p_udf_file, buf, 1);
 		if (read_size < 0) {
-			uprintf("Error reading UDF file %s\n", iso_file);
+			uprintf("Error reading UDF file %s", iso_file);
 			goto out;
 		}
 		buf_size = (DWORD)MIN(file_length, read_size);
 		if (!WriteFileWithRetry(file_handle, buf, buf_size, &wr_size, WRITE_RETRIES)) {
-			uprintf("  Error writing file %s: %s\n", dest_file, WindowsErrorString());
+			uprintf("  Error writing file %s: %s", dest_file, WindowsErrorString());
 			goto out;
 		}
 		file_length -= read_size;
@@ -985,13 +999,13 @@ int64_t ExtractISOFile(const char* iso, const char* iso_file, const char* dest_f
 try_iso:
 	p_iso = iso9660_open(iso);
 	if (p_iso == NULL) {
-		uprintf("Unable to open image '%s'.\n", iso);
+		uprintf("Unable to open image '%s'", iso);
 		goto out;
 	}
 
 	p_statbuf = iso9660_ifs_stat_translate(p_iso, iso_file);
 	if (p_statbuf == NULL) {
-		uprintf("Could not get ISO-9660 file information for file %s\n", iso_file);
+		uprintf("Could not get ISO-9660 file information for file %s", iso_file);
 		goto out;
 	}
 
@@ -1000,12 +1014,12 @@ try_iso:
 		memset(buf, 0, ISO_BLOCKSIZE);
 		lsn = p_statbuf->lsn + (lsn_t)i;
 		if (iso9660_iso_seek_read(p_iso, buf, lsn, 1) != ISO_BLOCKSIZE) {
-			uprintf("  Error reading ISO9660 file %s at LSN %lu\n", iso_file, (long unsigned int)lsn);
+			uprintf("  Error reading ISO9660 file %s at LSN %lu", iso_file, (long unsigned int)lsn);
 			goto out;
 		}
 		buf_size = (DWORD)MIN(file_length, ISO_BLOCKSIZE);
 		if (!WriteFileWithRetry(file_handle, buf, buf_size, &wr_size, WRITE_RETRIES)) {
-			uprintf("  Error writing file %s: %s\n", dest_file, WindowsErrorString());
+			uprintf("  Error writing file %s: %s", dest_file, WindowsErrorString());
 			goto out;
 		}
 		file_length -= ISO_BLOCKSIZE;
@@ -1052,16 +1066,16 @@ uint32_t GetInstallWimVersion(const char* iso)
 
 	p_udf_root = udf_get_root(p_udf, true, 0);
 	if (p_udf_root == NULL) {
-		uprintf("Could not locate UDF root directory\n");
+		uprintf("Could not locate UDF root directory");
 		goto out;
 	}
 	p_udf_file = udf_fopen(p_udf_root, wim_path);
 	if (!p_udf_file) {
-		uprintf("Could not locate file %s in ISO image\n", wim_path);
+		uprintf("Could not locate file %s in ISO image", wim_path);
 		goto out;
 	}
 	if (udf_read_block(p_udf_file, buf, 1) != UDF_BLOCKSIZE) {
-		uprintf("Error reading UDF file %s\n", wim_path);
+		uprintf("Error reading UDF file %s", wim_path);
 		goto out;
 	}
 	r = wim_header[3];
@@ -1070,16 +1084,16 @@ uint32_t GetInstallWimVersion(const char* iso)
 try_iso:
 	p_iso = iso9660_open(iso);
 	if (p_iso == NULL) {
-		uprintf("Unable to open image '%s'.\n", iso);
+		uprintf("Could not open image '%s'", iso);
 		goto out;
 	}
 	p_statbuf = iso9660_ifs_stat_translate(p_iso, wim_path);
 	if (p_statbuf == NULL) {
-		uprintf("Could not get ISO-9660 file information for file %s\n", wim_path);
+		uprintf("Could not get ISO-9660 file information for file %s", wim_path);
 		goto out;
 	}
 	if (iso9660_iso_seek_read(p_iso, buf, p_statbuf->lsn, 1) != ISO_BLOCKSIZE) {
-		uprintf("Error reading ISO9660 file %s at LSN %lu\n", wim_path, (long unsigned int)p_statbuf->lsn);
+		uprintf("Error reading ISO-9660 file %s at LSN %lu", wim_path, (long unsigned int)p_statbuf->lsn);
 		goto out;
 	}
 	r = wim_header[3];
@@ -1098,6 +1112,184 @@ out:
 		udf_close(p_udf);
 	safe_free(wim_path);
 	return bswap_uint32(r);
+}
+
+#define ISO_NB_BLOCKS 16
+typedef struct {
+	iso9660_t*      p_iso;
+	lsn_t           lsn;
+	libfat_sector_t sec_start;
+	// Use a multi block buffer, to improve sector reads
+	uint8_t         buf[ISO_BLOCKSIZE * ISO_NB_BLOCKS];
+} iso9660_readfat_private;
+
+/*
+ * Read sectors from a FAT img file residing on an ISO-9660 filesystem.
+ * NB: This assumes that the img file sectors are contiguous on the ISO.
+  */
+int iso9660_readfat(intptr_t pp, void *buf, size_t secsize, libfat_sector_t sec)
+{
+	iso9660_readfat_private* p_private = (iso9660_readfat_private*)pp;
+
+	if (sizeof(p_private->buf) % secsize != 0) {
+		uprintf("iso9660_readfat: Sector size %d is not a divisor of %d", secsize, sizeof(p_private->buf));
+		return 0;
+	}
+
+	if ((sec < p_private->sec_start) || (sec >= p_private->sec_start + sizeof(p_private->buf) / secsize)) {
+		// Sector being queried is not in our multi block buffer -> Update it
+		p_private->sec_start = (((sec * secsize) / ISO_BLOCKSIZE) * ISO_BLOCKSIZE) / secsize;
+		if (iso9660_iso_seek_read(p_private->p_iso, p_private->buf,
+			p_private->lsn + (lsn_t)((p_private->sec_start * secsize) / ISO_BLOCKSIZE), ISO_NB_BLOCKS)
+			!= ISO_NB_BLOCKS * ISO_BLOCKSIZE) {
+			uprintf("Error reading ISO-9660 file %s at LSN %lu\n", img_report.efi_img_path,
+				(long unsigned int)(p_private->lsn + (p_private->sec_start * secsize) / ISO_BLOCKSIZE));
+			return 0;
+		}
+	}
+	memcpy(buf, &p_private->buf[(sec - p_private->sec_start)*secsize], secsize);
+	return (int)secsize;
+}
+
+/*
+ * Extract EFI bootloaders files from an ISO-9660 FAT img file into directory <dir>.
+ * If <dir> is NULL, returns TRUE if an EFI bootloader exists in the img.
+ * If <dir> is not NULL, returns TRUE if any if the bootloaders was properly written.
+ */
+BOOL ExtractEfiImgFiles(const char* dir)
+{
+	BOOL ret = FALSE;
+	HANDLE handle;
+	DWORD size, file_size, written;
+	iso9660_t* p_iso = NULL;
+	iso9660_stat_t* p_statbuf = NULL;
+	iso9660_readfat_private* p_private = NULL;
+	libfat_sector_t s;
+	int32_t dc, c;
+	struct libfat_filesystem *fs;
+	struct libfat_direntry direntry;
+	char name[12] = { 0 };
+	char path[64];
+	int i, j, k;
+	void* buf;
+
+	if ((image_path == NULL) || !HAS_EFI_IMG(img_report))
+		return FALSE;
+
+	p_iso = iso9660_open(image_path);
+	if (p_iso == NULL) {
+		uprintf("Could not open image '%s' as an ISO-9660 file system", image_path);
+		goto out;
+	}
+	p_statbuf = iso9660_ifs_stat_translate(p_iso, img_report.efi_img_path);
+	if (p_statbuf == NULL) {
+		uprintf("Could not get ISO-9660 file information for file %s\n", img_report.efi_img_path);
+		goto out;
+	}
+	p_private = malloc(sizeof(iso9660_readfat_private));
+	if (p_private == NULL)
+		goto out;
+	p_private->p_iso = p_iso;
+	p_private->lsn = p_statbuf->lsn;
+	p_private->sec_start = 0;
+	// Populate our intial buffer
+	if (iso9660_iso_seek_read(p_private->p_iso, p_private->buf, p_private->lsn, ISO_NB_BLOCKS) != ISO_NB_BLOCKS * ISO_BLOCKSIZE) {
+		uprintf("Error reading ISO-9660 file %s at LSN %lu\n", img_report.efi_img_path, (long unsigned int)p_private->lsn);
+		goto out;
+	}
+	fs = libfat_open(iso9660_readfat, (intptr_t)p_private);
+	if (fs == NULL) {
+		uprintf("FAT access error");
+		goto out;
+	}
+
+	// Navigate to /EFI/BOOT
+	if (libfat_searchdir(fs, 0, "EFI        ", &direntry) < 0)
+		goto out;
+	dc = direntry.entry[26] + (direntry.entry[27] << 8);
+	if (libfat_searchdir(fs, dc, "BOOT       ", &direntry) < 0)
+		goto out;
+	dc = direntry.entry[26] + (direntry.entry[27] << 8);
+
+	for (i = 0; i < ARRAYSIZE(efi_bootname); i++) {
+		// Sanity check in case the EFI forum comes up with a 'bootmips64.efi' or something...
+		if (strlen(efi_bootname[i]) > 12) {
+			uprintf("Internal error: FAT 8.3");
+			continue;
+		}
+		for (j = 0, k = 0; efi_bootname[i][j] != 0; j++) {
+			if (efi_bootname[i][j] == '.') {
+				while (k < 8)
+					name[k++] = ' ';
+			} else
+				name[k++] = toupper(efi_bootname[i][j]);
+		}
+		c = libfat_searchdir(fs, dc, name, &direntry);
+		if (c > 0) {
+			if (dir == NULL) {
+				if (!ret)
+					uprintf("  Detected EFI bootloader(s) (from '%s'):", img_report.efi_img_path);
+				uprintf("  ● '%s'", efi_bootname[i]);
+				ret = TRUE;
+			} else {
+				file_size = direntry.entry[28] + (direntry.entry[29] << 8) + (direntry.entry[30] << 16) +
+					(direntry.entry[31] << 24);
+				// Sanity check
+				if (file_size > 64 * MB) {
+					uprintf("Warning: File size is larger than 64 MB => not extracted");
+					continue;
+				}
+				static_sprintf(path, "%s\\efi", dir);
+				if (!CreateDirectoryA(path, 0) && (GetLastError() != ERROR_ALREADY_EXISTS)) {
+					uprintf("Could not create directory '%s': %s\n", path, WindowsErrorString());
+					continue;
+				}
+				safe_strcat(path, sizeof(path), "\\boot");
+				if (!CreateDirectoryA(path, 0) && (GetLastError() != ERROR_ALREADY_EXISTS)) {
+					uprintf("Could not create directory '%s': %s\n", path, WindowsErrorString());
+					continue;
+				}
+				safe_strcat(path, sizeof(path), "\\");
+				safe_strcat(path, sizeof(path), efi_bootname[i]);
+				uprintf("Extracting: %s (from '%s', %s)", path, img_report.efi_img_path,
+					SizeToHumanReadable(file_size, FALSE, FALSE));
+				handle = CreateFileA(path, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ,
+					NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+				if (handle == INVALID_HANDLE_VALUE) {
+					uprintf("Unable to create '%s': %s", path, WindowsErrorString());
+					continue;
+				}
+
+				written = 0;
+				s = libfat_clustertosector(fs, c);
+				while ((s != 0) && (s < 0xFFFFFFFFULL) && (written < file_size)) {
+					buf = libfat_get_sector(fs, s);
+					size = MIN(LIBFAT_SECTOR_SIZE, file_size - written);
+					if (!WriteFileWithRetry(handle, buf, size, &size, WRITE_RETRIES) ||
+						(size != MIN(LIBFAT_SECTOR_SIZE, file_size - written))) {
+						uprintf("Error writing '%s': %s", path, WindowsErrorString());
+						CloseHandle(handle);
+						continue;
+					}
+					written += size;
+					s = libfat_nextsector(fs, s);
+				}
+				CloseHandle(handle);
+				ret = TRUE;
+			}
+		}
+	}
+
+out:
+	if (fs != NULL)
+		libfat_close(fs);
+	if (p_statbuf != NULL)
+		safe_free(p_statbuf->rr.psz_symlink);
+	safe_free(p_statbuf);
+	safe_free(p_private);
+	if (p_iso != NULL)
+		iso9660_close(p_iso);
+	return ret;
 }
 
 // VirtDisk API Prototypes - Only available for Windows 8 or later
