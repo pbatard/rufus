@@ -204,7 +204,7 @@ char* GetPhysicalName(DWORD DriveIndex)
 	char physical_name[24];
 
 	CheckDriveIndex(DriveIndex);
-	safe_sprintf(physical_name, sizeof(physical_name), "\\\\.\\PHYSICALDRIVE%lu", DriveIndex);
+	static_sprintf(physical_name, "\\\\.\\PHYSICALDRIVE%lu", DriveIndex);
 	success = TRUE;
 out:
 	return (success)?safe_strdup(physical_name):NULL;
@@ -444,7 +444,7 @@ static BOOL _GetDriveLettersAndType(DWORD DriveIndex, char* drive_letters, UINT*
 		if ((_drive_type != DRIVE_REMOVABLE) && (_drive_type != DRIVE_FIXED))
 			continue;
 
-		safe_sprintf(logical_drive, sizeof(logical_drive), "\\\\.\\%c:", drive[0]);
+		static_sprintf(logical_drive, "\\\\.\\%c:", drive[0]);
 		hDrive = CreateFileA(logical_drive, GENERIC_READ, FILE_SHARE_READ|FILE_SHARE_WRITE,
 			NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 		if (hDrive == INVALID_HANDLE_VALUE) {
@@ -552,7 +552,7 @@ BOOL GetDriveLabel(DWORD DriveIndex, char* letters, char** label)
 	safe_closehandle(hPhysical);
 	if (AutorunLabel != NULL) {
 		uprintf("Using autorun.inf label for drive %c: '%s'\n", letters[0], AutorunLabel);
-		safe_strcpy(VolumeLabel, sizeof(VolumeLabel), AutorunLabel);
+		static_strcpy(VolumeLabel, AutorunLabel);
 		safe_free(AutorunLabel);
 		*label = VolumeLabel;
 	} else if (GetVolumeInformationU(DrivePath, VolumeLabel, ARRAYSIZE(VolumeLabel),

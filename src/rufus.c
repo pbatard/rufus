@@ -305,8 +305,8 @@ static BOOL DefineClusterSizes(void)
 			tmp[0] = 0;
 			// Tell the user if we're going to use Large FAT32 or regular
 			if ((fs == FS_FAT32) && ((SelectedDrive.DiskSize > LARGE_FAT32_SIZE) || (force_large_fat32)))
-				safe_strcat(tmp, sizeof(tmp), "Large ");
-			safe_strcat(tmp, sizeof(tmp), FileSystemLabel[fs]);
+				static_strcat(tmp, "Large ");
+			static_strcat(tmp, FileSystemLabel[fs]);
 			if (default_fs == FS_UNKNOWN) {
 				entry = lmprintf(MSG_030, tmp);
 				default_fs = fs;
@@ -665,7 +665,7 @@ static BOOL PopulateProperties(int ComboIndex)
 	EnableBootOptions(TRUE, TRUE);
 
 	// Set a proposed label according to the size (eg: "256MB", "8GB")
-	safe_sprintf(SelectedDrive.proposed_label, sizeof(SelectedDrive.proposed_label),
+	static_sprintf(SelectedDrive.proposed_label,
 		SizeToHumanReadable(SelectedDrive.DiskSize, FALSE, use_fake_units));
 
 	// Add a tooltip (with the size of the device in parenthesis)
@@ -925,8 +925,7 @@ BOOL CALLBACK LogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 static void CALLBACK ClockTimer(HWND hWnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
 {
 	timer++;
-	safe_sprintf(szTimer, sizeof(szTimer), "%02d:%02d:%02d",
-		timer/3600, (timer%3600)/60, timer%60);
+	static_sprintf(szTimer, "%02d:%02d:%02d", timer/3600, (timer%3600)/60, timer%60);
 	SendMessageA(hStatus, SB_SETTEXTA, SBT_OWNERDRAW | SB_SECTION_RIGHT, (LPARAM)szTimer);
 }
 
@@ -1402,7 +1401,7 @@ static BOOL BootCheck(void)
 					if ((grub2_len == 0) && (DownloadStatus == 404)) {
 						// Couldn't locate the file on the server => try to download without the version extra
 						uprintf("Extended version was not found, trying main version...");
-						safe_strcpy(tmp2, sizeof(tmp2), img_report.grub2_version);
+						static_strcpy(tmp2, img_report.grub2_version);
 						// Isolate the #.### part
 						for (i = 0; ((tmp2[i] >= '0') && (tmp2[i] <= '9')) || (tmp2[i] == '.'); i++);
 						tmp2[i] = 0;
@@ -1752,7 +1751,7 @@ static void InitDialog(HWND hDlg)
 		} else {
 			embedded_sl_version[i] = GetSyslinuxVersion(buf, len, &ext);
 			static_sprintf(embedded_sl_version_str[i], "%d.%02d", SL_MAJOR(embedded_sl_version[i]), SL_MINOR(embedded_sl_version[i]));
-			safe_strcpy(embedded_sl_version_ext[i], sizeof(embedded_sl_version_ext[i]), ext);
+			static_strcpy(embedded_sl_version_ext[i], ext);
 			free(buf);
 		}
 	}
@@ -1972,7 +1971,7 @@ static void ShowLanguageMenu(RECT rcExclude)
 			static_sprintf(lang, LEFT_TO_RIGHT_EMBEDDING "(%s) " POP_DIRECTIONAL_FORMATTING "%s", r, l);
 			safe_free(str);
 		} else {
-			safe_strcpy(lang, sizeof(lang), lcmd->txt[1]);
+			static_strcpy(lang, lcmd->txt[1]);
 		}
 		InsertMenuU(menu, -1, MF_BYPOSITION|((selected_locale == lcmd)?MF_CHECKED:0), UM_LANGUAGE_MENU_MAX++, lang);
 	}
@@ -2047,7 +2046,7 @@ static void SaveVHD(void)
 	ULARGE_INTEGER free_space;
 
 	if (DriveIndex >= 0)
-		safe_sprintf(filename, sizeof(filename), "%s.vhd", DriveLabel.String[DriveIndex]);
+		static_sprintf(filename, "%s.vhd", DriveLabel.String[DriveIndex]);
 	if ((DriveIndex != CB_ERR) && (!format_op_in_progress) && (format_thid == NULL)) {
 		img_save.Type = IMG_SAVE_TYPE_VHD;
 		img_save.DeviceNum = (DWORD)ComboBox_GetItemData(hDeviceList, DriveIndex);
@@ -2075,7 +2074,7 @@ static void SaveVHD(void)
 					uprintf("\r\nSave to VHD operation started");
 					PrintInfo(0, -1);
 					timer = 0;
-					safe_sprintf(szTimer, sizeof(szTimer), "00:00:00");
+					static_sprintf(szTimer, "00:00:00");
 					SendMessageA(hStatus, SB_SETTEXTA, SBT_OWNERDRAW | SB_SECTION_RIGHT, (LPARAM)szTimer);
 					SetTimer(hMainDialog, TID_APP_TIMER, 1000, ClockTimer);
 				} else {
@@ -2120,7 +2119,7 @@ static void SaveISO(void)
 		(img_save.BufSize > 8 * MB) && (img_save.DeviceSize <= img_save.BufSize * 64);
 		img_save.BufSize /= 2);
 	if ((img_save.Label != NULL) && (img_save.Label[0] != 0))
-		safe_sprintf(filename, sizeof(filename), "%s.iso", img_save.Label);
+		static_sprintf(filename, "%s.iso", img_save.Label);
 	uprintf("ISO media size %s", SizeToHumanReadable(img_save.DeviceSize, FALSE, FALSE));
 
 	img_save.ImagePath = FileDialog(TRUE, NULL, &img_ext, 0);
@@ -2141,7 +2140,7 @@ static void SaveISO(void)
 		uprintf("\r\nSave to ISO operation started");
 		PrintInfo(0, -1);
 		timer = 0;
-		safe_sprintf(szTimer, sizeof(szTimer), "00:00:00");
+		static_sprintf(szTimer, "00:00:00");
 		SendMessageA(hStatus, SB_SETTEXTA, SBT_OWNERDRAW | SB_SECTION_RIGHT, (LPARAM)szTimer);
 		SetTimer(hMainDialog, TID_APP_TIMER, 1000, ClockTimer);
 	} else {
@@ -2612,7 +2611,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 					uprintf("\r\nFormat operation started");
 					PrintInfo(0, -1);
 					timer = 0;
-					safe_sprintf(szTimer, sizeof(szTimer), "00:00:00");
+					static_sprintf(szTimer, "00:00:00");
 					SendMessageA(hStatus, SB_SETTEXTA, SBT_OWNERDRAW | SB_SECTION_RIGHT, (LPARAM)szTimer);
 					SetTimer(hMainDialog, TID_APP_TIMER, 1000, ClockTimer);
 				}
@@ -2645,7 +2644,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				if (format_thid != NULL) {
 					PrintInfo(0, -1);
 					timer = 0;
-					safe_sprintf(szTimer, sizeof(szTimer), "00:00:00");
+					static_sprintf(szTimer, "00:00:00");
 					SendMessageA(hStatus, SB_SETTEXTA, SBT_OWNERDRAW | SB_SECTION_RIGHT, (LPARAM)szTimer);
 					SetTimer(hMainDialog, TID_APP_TIMER, 1000, ClockTimer);
 				} else {
@@ -3116,24 +3115,24 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	}
 	if (GetSystemDirectoryU(system_dir, sizeof(system_dir)) == 0) {
 		uprintf("Could not get system directory: %s", WindowsErrorString());
-		safe_strcpy(system_dir, sizeof(system_dir), "C:\\Windows\\System32");
+		static_strcpy(system_dir, "C:\\Windows\\System32");
 	}
 	if (GetTempPathU(sizeof(temp_dir), temp_dir) == 0) {
 		uprintf("Could not get temp directory: %s", WindowsErrorString());
-		safe_strcpy(temp_dir, sizeof(temp_dir), ".\\");
+		static_strcpy(temp_dir, ".\\");
 	}
 	// Construct Sysnative ourselves as there is no GetSysnativeDirectory() call
 	// By default (64bit app running on 64 bit OS or 32 bit app running on 32 bit OS)
 	// Sysnative and System32 are the same
-	safe_strcpy(sysnative_dir, sizeof(sysnative_dir), system_dir);
+	static_strcpy(sysnative_dir, system_dir);
 	// But if the app is 32 bit and the OS is 64 bit, Sysnative must differ from System32
 #if (!defined(_WIN64) && !defined(BUILD64))
 	if (is_x64()) {
 		if (GetSystemWindowsDirectoryU(sysnative_dir, sizeof(sysnative_dir)) == 0) {
 			uprintf("Could not get Windows directory: %s", WindowsErrorString());
-			safe_strcpy(sysnative_dir, sizeof(sysnative_dir), "C:\\Windows");
+			static_strcpy(sysnative_dir, "C:\\Windows");
 		}
-		safe_strcat(sysnative_dir, sizeof(sysnative_dir), "\\Sysnative");
+		static_strcat(sysnative_dir, "\\Sysnative");
 	}
 #endif
 
@@ -3181,7 +3180,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		loc_data = (BYTE*)GetResource(hMainInstance, MAKEINTRESOURCEA(IDR_LC_RUFUS_LOC), _RT_RCDATA, "embedded.loc", &loc_size, FALSE);
 		if ( (GetTempFileNameU(temp_dir, APPLICATION_NAME, 0, loc_file) == 0) || (loc_file[0] == 0) ) {
 			// Last ditch effort to get a loc file - just extract it to the current directory
-			safe_strcpy(loc_file, sizeof(loc_file), rufus_loc);
+			static_strcpy(loc_file, rufus_loc);
 		}
 
 		hFile = CreateFileU(loc_file, GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ,
@@ -3194,7 +3193,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		uprintf("localization: extracted data to '%s'", loc_file);
 		safe_closehandle(hFile);
 	} else {
-		safe_sprintf(loc_file, sizeof(loc_file), "%s\\%s", app_dir, rufus_loc);
+		static_sprintf(loc_file, "%s\\%s", app_dir, rufus_loc);
 		external_loc_file = TRUE;
 		uprintf("using external loc file '%s'", loc_file);
 	}

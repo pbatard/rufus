@@ -184,7 +184,7 @@ BOOL GetOpticalMedia(IMG_SAVE* img_save)
 		if (!SetupDiGetDeviceRegistryPropertyU(dev_info, &dev_info_data, SPDRP_FRIENDLYNAME,
 			&datatype, (LPBYTE)str, sizeof(str), &size)) {
 			uprintf("SetupDiGetDeviceRegistryProperty (Friendly Name) failed: %s\n", WindowsErrorString());
-			safe_strcpy(str, sizeof(str), "Generic Optical Drive");
+			static_strcpy(str, "Generic Optical Drive");
 		}
 		uprintf("Found '%s' optical device", str);
 		devint_data.cbSize = sizeof(devint_data);
@@ -245,7 +245,7 @@ BOOL GetOpticalMedia(IMG_SAVE* img_save)
 					label[k] = 0;
 				img_save->Label = label;
 			}
-			safe_strcpy(str, sizeof(str), devint_detail_data->DevicePath);
+			static_strcpy(str, devint_detail_data->DevicePath);
 			img_save->DevicePath = str;
 			img_save->DeviceSize = DiskGeometry->DiskSize.QuadPart;
 			safe_closehandle(hDrive);
@@ -507,7 +507,7 @@ BOOL GetDevices(DWORD devnum)
 				&datatype, (LPBYTE)buffer, sizeof(buffer), &size)) {
 			uprintf("SetupDiGetDeviceRegistryProperty (Friendly Name) failed: %s\n", WindowsErrorString());
 			// We can afford a failure on this call - just replace the name with "USB Storage Device (Generic)"
-			safe_strcpy(buffer, sizeof(buffer), lmprintf(MSG_045));
+			static_strcpy(buffer, lmprintf(MSG_045));
 		} else if ((!props.is_VHD) && (devid_list != NULL)) {
 			// Get the properties of the device. We could avoid doing this lookup every time by keeping
 			// a lookup table, but there shouldn't be that many USB storage devices connected...
@@ -580,7 +580,7 @@ BOOL GetDevices(DWORD devnum)
 #ifdef FORCED_DEVICE
 					props.vid = FORCED_VID;
 					props.pid = FORCED_PID;
-					safe_strcpy(buffer, sizeof(buffer), FORCED_NAME);
+					static_strcpy(buffer, FORCED_NAME);
 #endif
 				}
 				break;
@@ -605,7 +605,7 @@ BOOL GetDevices(DWORD devnum)
 					uuprintf("Found non-USB non-removable device '%s' => Eliminated", buffer);
 					continue;
 				}
-				safe_strcpy(str, sizeof(str), "????:????");	// Couldn't figure VID:PID
+				static_strcpy(str, "????:????");	// Couldn't figure VID:PID
 			} else {
 				static_sprintf(str, "%04X:%04X", props.vid, props.pid);
 			}
@@ -731,14 +731,14 @@ BOOL GetDevices(DWORD devnum)
 					}
 					// We have multiple volumes assigned to the same device (multiple partitions)
 					// If that is the case, use "Multiple Volumes" instead of the label
-					safe_strcpy(entry_msg, sizeof(entry_msg), (((drive_letters[0] != 0) && (drive_letters[1] != 0))?
+					static_strcpy(entry_msg, (((drive_letters[0] != 0) && (drive_letters[1] != 0))?
 						lmprintf(MSG_047):label));
 					for (k=0, remove_drive=0; drive_letters[k] && (!remove_drive); k++) {
 						// Append all the drive letters we detected
 						letter_name[2] = drive_letters[k];
 						if (right_to_left_mode)
-							safe_strcat(entry_msg, sizeof(entry_msg), RIGHT_TO_LEFT_MARK);
-						safe_strcat(entry_msg, sizeof(entry_msg), letter_name);
+							static_strcat(entry_msg, RIGHT_TO_LEFT_MARK);
+						static_strcat(entry_msg, letter_name);
 						if (drive_letters[k] == (PathGetDriveNumberU(app_dir) + 'A'))
 							remove_drive = 1;
 						if (drive_letters[k] == (PathGetDriveNumberU(system_dir) + 'A'))

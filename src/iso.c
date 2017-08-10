@@ -202,11 +202,11 @@ static BOOL check_iso_props(const char* psz_dirname, int64_t i_file_length, cons
 
 		// Check for ReactOS' setupldr.sys anywhere
 		if ((img_report.reactos_path[0] == 0) && (safe_stricmp(psz_basename, reactos_name) == 0))
-			safe_strcpy(img_report.reactos_path, sizeof(img_report.reactos_path), psz_fullpath);
+			static_strcpy(img_report.reactos_path, psz_fullpath);
 
 		// Check for the first 'efi.img' we can find (that hopefully contains EFI boot files)
 		if (!HAS_EFI_IMG(img_report) && (safe_stricmp(psz_basename, efi_img_name) == 0))
-			safe_strcpy(img_report.efi_img_path, sizeof(img_report.efi_img_path), psz_fullpath);
+			static_strcpy(img_report.efi_img_path, psz_fullpath);
 
 		// Check for the EFI boot entries
 		if (safe_stricmp(psz_dirname, efi_dirname) == 0) {
@@ -632,7 +632,7 @@ void GetGrubVersion(char* buf, size_t buf_size)
 
 	for (i=0; i<buf_size; i++) {
 		if (memcmp(&buf[i], grub_version_str, sizeof(grub_version_str)) == 0) {
-			safe_strcpy(img_report.grub2_version, sizeof(img_report.grub2_version), &buf[i + sizeof(grub_version_str)]);
+			static_strcpy(img_report.grub2_version, &buf[i + sizeof(grub_version_str)]);
 			break;
 		}
 	}
@@ -738,7 +738,7 @@ try_iso:
 	i_joliet_level = iso9660_ifs_get_joliet_level(p_iso);
 	if (scan_only) {
 		if (iso9660_ifs_get_volume_id(p_iso, &tmp)) {
-			safe_strcpy(img_report.label, sizeof(img_report.label), tmp);
+			static_strcpy(img_report.label, tmp);
 			safe_free(tmp);
 		} else
 			img_report.label[0] = 0;
@@ -779,7 +779,7 @@ out:
 				// See https://github.com/openSUSE/kiwi/issues/354
 				if ( (_stricmp(config_path.String[i], "/boot/i386/loader/isolinux.cfg") == 0) ||
 					 (_stricmp(config_path.String[i], "/boot/x86_64/loader/isolinux.cfg") == 0)) {
-					safe_strcpy(img_report.cfg_path, sizeof(img_report.cfg_path), config_path.String[i]);
+					static_strcpy(img_report.cfg_path, config_path.String[i]);
 					img_report.needs_syslinux_overwrite = TRUE;
 					break;
 				}
@@ -789,7 +789,7 @@ out:
 				// We may have to revisit this and prefer a path that contains '/isolinux' if
 				// this hack is not enough for other images.
 				if (safe_strlen(img_report.cfg_path) >= safe_strlen(config_path.String[i]))
-					safe_strcpy(img_report.cfg_path, sizeof(img_report.cfg_path), config_path.String[i]);
+					static_strcpy(img_report.cfg_path, config_path.String[i]);
 			}
 			uprintf("  Will use '%s' for Syslinux", img_report.cfg_path);
 			// Extract all of the isolinux.bin files we found to identify their versions
@@ -811,7 +811,7 @@ out:
 					fclose(fd);
 					sl_version = GetSyslinuxVersion(buf, size, &ext);
 					if (img_report.sl_version == 0) {
-						safe_strcpy(img_report.sl_version_ext, sizeof(img_report.sl_version_ext), ext);
+						static_strcpy(img_report.sl_version_ext, ext);
 						img_report.sl_version = sl_version;
 						sl_index = i;
 					} else if ((img_report.sl_version != sl_version) || (safe_strcmp(img_report.sl_version_ext, ext) != 0)) {
@@ -822,7 +822,7 @@ out:
 						// Where possible, prefer to the one that resides in the same directory as the config file.
 						for (j=safe_strlen(img_report.cfg_path); (j>0) && (img_report.cfg_path[j]!='/'); j--);
 						if (safe_strnicmp(img_report.cfg_path, isolinux_path.String[i], j) == 0) {
-							safe_strcpy(img_report.sl_version_ext, sizeof(img_report.sl_version_ext), ext);
+							static_strcpy(img_report.sl_version_ext, ext);
 							img_report.sl_version = sl_version;
 							sl_index = i;
 						}
@@ -855,7 +855,7 @@ out:
 			// In case we have a WinPE 1.x based iso, we extract and parse txtsetup.sif
 			// during scan, to see if /minint was provided for OsLoadOptions, as it decides
 			// whether we should use 0x80 or 0x81 as the disk ID in the MBR
-			safe_sprintf(path, sizeof(path), "/%s/txtsetup.sif",
+			static_sprintf(path, "/%s/txtsetup.sif",
 				basedir[((img_report.winpe&WINPE_I386) == WINPE_I386)?0:1]);
 			ExtractISOFile(src_iso, path, tmp_sif, FILE_ATTRIBUTE_NORMAL);
 			tmp = get_token_data_file("OsLoadOptions", tmp_sif);
@@ -903,13 +903,13 @@ out:
 		if (img_report.has_efi == 0x80)
 			ExtractEfiImgFiles(dest_dir);
 		if (HAS_SYSLINUX(img_report)) {
-			safe_sprintf(path, sizeof(path), "%s\\syslinux.cfg", dest_dir);
+			static_sprintf(path, "%s\\syslinux.cfg", dest_dir);
 			// Create a /syslinux.cfg (if none exists) that points to the existing isolinux cfg
 			fd = fopen(path, "r");
 			if (fd != NULL && img_report.needs_syslinux_overwrite) {
 				fclose(fd);
 				fd = NULL;
-				safe_sprintf(path2, sizeof(path2), "%s\\syslinux.org", dest_dir);
+				static_sprintf(path2, "%s\\syslinux.org", dest_dir);
 				uprintf("Renaming: %s ➔ %s", path, path2);
 				IGNORE_RETVAL(rename(path, path2));
 			}
@@ -1166,7 +1166,7 @@ BOOL ExtractEfiImgFiles(const char* dir)
 	iso9660_readfat_private* p_private = NULL;
 	libfat_sector_t s;
 	int32_t dc, c;
-	struct libfat_filesystem *fs;
+	struct libfat_filesystem *fs = NULL;
 	struct libfat_direntry direntry;
 	char name[12] = { 0 };
 	char path[64];
@@ -1244,13 +1244,13 @@ BOOL ExtractEfiImgFiles(const char* dir)
 					uprintf("Could not create directory '%s': %s\n", path, WindowsErrorString());
 					continue;
 				}
-				safe_strcat(path, sizeof(path), "\\boot");
+				static_strcat(path, "\\boot");
 				if (!CreateDirectoryA(path, 0) && (GetLastError() != ERROR_ALREADY_EXISTS)) {
 					uprintf("Could not create directory '%s': %s\n", path, WindowsErrorString());
 					continue;
 				}
-				safe_strcat(path, sizeof(path), "\\");
-				safe_strcat(path, sizeof(path), efi_bootname[i]);
+				static_strcat(path, "\\");
+				static_strcat(path, efi_bootname[i]);
 				uprintf("Extracting: %s (from '%s', %s)", path, img_report.efi_img_path,
 					SizeToHumanReadable(file_size, FALSE, FALSE));
 				handle = CreateFileA(path, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ,

@@ -301,8 +301,8 @@ static BOOL ExtractMSDOS(const char* path)
 		return FALSE;
 
 	// Reduce the visible mess by placing all the locale files into a subdir
-	safe_strcpy(locale_path, sizeof(locale_path), path);
-	safe_strcat(locale_path, sizeof(locale_path), "LOCALE\\");
+	static_strcpy(locale_path, path);
+	static_strcat(locale_path, "LOCALE\\");
 	CreateDirectoryA(locale_path, NULL);
 
 	len = GetSystemDirectoryA(dllname, sizeof(dllname));
@@ -310,7 +310,7 @@ static BOOL ExtractMSDOS(const char* path)
 		uprintf("Unable to get system directory: %s\n", WindowsErrorString());
 		goto out;
 	}
-	safe_strcat(dllname, sizeof(dllname), "\\diskcopy.dll");
+	static_strcat(dllname, "\\diskcopy.dll");
 	hDLL = LoadLibraryA(dllname);
 	if (hDLL == NULL) {
 		uprintf("Unable to open %s: %s\n", dllname, WindowsErrorString());
@@ -375,15 +375,15 @@ BOOL ExtractFreeDOS(const char* path)
 	}
 
 	// Reduce the visible mess by placing all the locale files into a subdir
-	safe_strcpy(locale_path, sizeof(locale_path), path);
-	safe_strcat(locale_path, sizeof(locale_path), "LOCALE\\");
+	static_strcpy(locale_path, path);
+	static_strcat(locale_path, "LOCALE\\");
 	CreateDirectoryA(locale_path, NULL);
 
 	for (i=0; i<ARRAYSIZE(res_name); i++) {
 		res_data = (BYTE*)GetResource(hMainInstance, MAKEINTRESOURCEA(res_id[i]), _RT_RCDATA, res_name[i], &res_size, FALSE);
 
-		safe_strcpy(filename, sizeof(filename), ((i<2)?path:locale_path));
-		safe_strcat(filename, sizeof(filename), res_name[i]);
+		static_strcpy(filename, ((i<2)?path:locale_path));
+		static_strcat(filename, res_name[i]);
 
 		hFile = CreateFileA(filename, GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ, NULL,
 			CREATE_ALWAYS, (i<2)?(FILE_ATTRIBUTE_HIDDEN|FILE_ATTRIBUTE_SYSTEM):FILE_ATTRIBUTE_NORMAL, NULL);

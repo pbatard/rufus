@@ -712,8 +712,8 @@ static BOOL FormatDrive(DWORD DriveIndex)
 
 	// Check if Windows picked the UEFI:NTFS partition
 	// NB: No need to do this for Large FAT32, as this only applies to NTFS
-	safe_strcpy(path, MAX_PATH, VolumeName);
-	safe_strcat(path, MAX_PATH, "EFI\\Rufus\\ntfs_x64.efi");
+	static_strcpy(path, VolumeName);
+	static_strcat(path, "EFI\\Rufus\\ntfs_x64.efi");
 	if (PathFileExistsA(path)) {
 		uprintf("Windows selected the UEFI:NTFS partition for formatting - Retry needed", VolumeName);
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_RETRY;
@@ -1167,16 +1167,16 @@ static BOOL SetupWinPE(char drive_letter)
 
 	index = ((img_report.winpe&WINPE_I386) == WINPE_I386)?0:1;
 	// Allow other values than harddisk 1, as per user choice for disk ID
-	safe_sprintf(setupsrcdev, sizeof(setupsrcdev),
-		"SetupSourceDevice = \"\\device\\harddisk%d\\partition1\"", ComboBox_GetCurSel(hDiskID));
+	static_sprintf(setupsrcdev, "SetupSourceDevice = \"\\device\\harddisk%d\\partition1\"",
+		ComboBox_GetCurSel(hDiskID));
 	// Copy of ntdetect.com in root
-	safe_sprintf(src, sizeof(src), "%c:\\%s\\ntdetect.com", drive_letter, basedir[index]);
-	safe_sprintf(dst, sizeof(dst), "%c:\\ntdetect.com", drive_letter);
+	static_sprintf(src, "%c:\\%s\\ntdetect.com", drive_letter, basedir[index]);
+	static_sprintf(dst, "%c:\\ntdetect.com", drive_letter);
 	CopyFileA(src, dst, TRUE);
 	if (!img_report.uses_minint) {
 		// Create a copy of txtsetup.sif, as we want to keep the i386 files unmodified
-		safe_sprintf(src, sizeof(src), "%c:\\%s\\txtsetup.sif", drive_letter, basedir[index]);
-		safe_sprintf(dst, sizeof(dst), "%c:\\txtsetup.sif", drive_letter);
+		static_sprintf(src, "%c:\\%s\\txtsetup.sif", drive_letter, basedir[index]);
+		static_sprintf(dst, "%c:\\txtsetup.sif", drive_letter);
 		if (!CopyFileA(src, dst, TRUE)) {
 			uprintf("Did not copy %s as %s: %s\n", src, dst, WindowsErrorString());
 		}
@@ -1187,8 +1187,8 @@ static BOOL SetupWinPE(char drive_letter)
 		uprintf("Successfully added '%s' to %s\n", setupsrcdev, dst);
 	}
 
-	safe_sprintf(src, sizeof(src), "%c:\\%s\\setupldr.bin", drive_letter,  basedir[index]);
-	safe_sprintf(dst, sizeof(dst), "%c:\\BOOTMGR", drive_letter);
+	static_sprintf(src, "%c:\\%s\\setupldr.bin", drive_letter,  basedir[index]);
+	static_sprintf(dst, "%c:\\BOOTMGR", drive_letter);
 	if (!CopyFileA(src, dst, TRUE)) {
 		uprintf("Did not copy %s as %s: %s\n", src, dst, WindowsErrorString());
 	}
@@ -1309,7 +1309,7 @@ int SetWinToGoIndex(void)
 		|| (GetTempFileNameU(tmp_path, APPLICATION_NAME, 0, xml_file) == 0)
 		|| (xml_file[0] == 0)) {
 		// Last ditch effort to get a tmp file - just extract it to the current directory
-		safe_strcpy(xml_file, sizeof(xml_file), ".\\RufVXml.tmp");
+		static_strcpy(xml_file, ".\\RufVXml.tmp");
 	}
 	// GetTempFileName() may leave a file behind
 	DeleteFileU(xml_file);
@@ -1771,7 +1771,7 @@ DWORD WINAPI FormatThread(void* param)
 			// create a log file for bad blocks report. Since %USERPROFILE% may
 			// have localized characters, we use the UTF-8 API.
 			userdir = getenvU("USERPROFILE");
-			safe_strcpy(logfile, MAX_PATH, userdir);
+			static_strcpy(logfile, userdir);
 			safe_free(userdir);
 			GetLocalTime(&lt);
 			safe_sprintf(&logfile[strlen(logfile)], sizeof(logfile)-strlen(logfile)-1,

@@ -89,12 +89,12 @@ static __inline BOOL _GetRegistryKey(HKEY key_root, const char* key_name, DWORD 
 			if (i + sizeof(software_prefix) >= sizeof(long_key_name))
 				return FALSE;
 			strcpy(long_key_name, software_prefix);
-			safe_strcat(long_key_name, sizeof(long_key_name), key_name);
+			static_strcat(long_key_name, key_name);
 			long_key_name[sizeof(software_prefix) + i - 1] = 0;
 		} else {
 			if (i >= sizeof(long_key_name))
 				return FALSE;
-			safe_strcpy(long_key_name, sizeof(long_key_name), key_name);
+			static_strcpy(long_key_name, key_name);
 			long_key_name[i] = 0;
 		}
 		i++;
@@ -164,12 +164,12 @@ static __inline BOOL _SetRegistryKey(HKEY key_root, const char* key_name, DWORD 
 			if (i + sizeof(software_prefix) >= sizeof(long_key_name))
 				goto out;
 			strcpy(long_key_name, software_prefix);
-			safe_strcat(long_key_name, sizeof(long_key_name), key_name);
+			static_strcat(long_key_name, key_name);
 			long_key_name[sizeof(software_prefix) + i - 1] = 0;
 		} else {
 			if (i >= sizeof(long_key_name))
 				goto out;
-			safe_strcpy(long_key_name, sizeof(long_key_name), key_name);
+			static_strcpy(long_key_name, key_name);
 			long_key_name[i] = 0;
 		}
 		i++;
