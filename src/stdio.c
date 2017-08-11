@@ -73,7 +73,7 @@ void _uprintf(const char *format, ...)
 		Edit_ReplaceSel(hLog, wbuf);
 		// Make sure the message scrolls into view
 		// (Or see code commented in LogProc:WM_SHOWWINDOW for a less forceful scroll)
-		Edit_Scroll(hLog, 0, Edit_GetLineCount(hLog));
+		Edit_Scroll(hLog, Edit_GetLineCount(hLog), 0);
 	}
 	free(wbuf);
 }
