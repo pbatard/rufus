@@ -305,6 +305,7 @@ BOOL GetDevices(DWORD devnum)
 	char letter_name[] = " (?:)";
 	char drive_name[] = "?:\\";
 	char uefi_togo_check[] = "?:\\EFI\\Rufus\\ntfs_x64.efi";
+	char scsi_card_name_copy[16];
 	BOOL r = FALSE, found = FALSE, post_backslash;
 	HDEVINFO dev_info = NULL;
 	SP_DEVINFO_DATA dev_info_data;
@@ -490,7 +491,15 @@ BOOL GetDevices(DWORD devnum)
 		// Additional detection for SCSI card readers
 		if ((!props.is_CARD) && (safe_strnicmp(buffer, scsi_disk_prefix, sizeof(scsi_disk_prefix)-1) == 0)) {
 			for (j = 0; j < ARRAYSIZE(scsi_card_name); j++) {
-				if (safe_strstr(buffer, scsi_card_name[j]) != NULL) {
+				static_strcpy(scsi_card_name_copy, scsi_card_name[j]);
+				if (safe_strstr(buffer, scsi_card_name_copy) != NULL) {
+					props.is_CARD = TRUE;
+					break;
+				}
+				// Also test for "_SD&" instead of "_SD_" and so on to allow for devices like
+				// "SCSI\DiskRicoh_Storage_SD&REV_3.0" to be detected.
+				scsi_card_name_copy[strlen(scsi_card_name_copy) - 1] = '&';
+				if (safe_strstr(buffer, scsi_card_name_copy) != NULL) {
 					props.is_CARD = TRUE;
 					break;
 				}
