@@ -235,6 +235,7 @@ enum target_type {
 	TT_MAX
 };
 // For the partition types we'll use Microsoft's PARTITION_STYLE_### constants
+#define PARTITION_STYLE_SFD PARTITION_STYLE_RAW
 #define GETTARGETTYPE(x) (((x)>0)?(((x) >> 16) & 0xFFFF):0)
 #define GETPARTTYPE(x)   (((x)>0)?((x) & 0xFFFF):0);
 

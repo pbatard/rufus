@@ -456,6 +456,10 @@ static BOOL SetDriveInfo(int ComboIndex)
 				lmprintf(MSG_033, PartitionTypeLabel[pt])), (TT_UEFI<<16)|pt));
 		}
 	}
+	if (advanced_mode) {
+		IGNORE_RETVAL(ComboBox_SetItemData(hPartitionScheme,
+			ComboBox_AddStringU(hPartitionScheme, "Super Floppy Disk"), PARTITION_STYLE_SFD));
+	}
 
 	// At least one filesystem is go => enable formatting
 	EnableWindow(hStart, TRUE);
@@ -578,13 +582,17 @@ static void SetPartitionSchemeTooltip(void)
 	int tt = GETTARGETTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
 	int pt = GETPARTTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
 	if (tt == TT_BIOS) {
-		CreateTooltip(hPartitionScheme, lmprintf(MSG_150), 15000);
+		if (pt != PARTITION_STYLE_SFD)
+			CreateTooltip(hPartitionScheme, lmprintf(MSG_150), 15000);
+		else
+			DestroyTooltip(hPartitionScheme);
 	} else {
-		if (pt == PARTITION_STYLE_MBR) {
+		if (pt == PARTITION_STYLE_MBR)
 			CreateTooltip(hPartitionScheme, lmprintf(MSG_151), 15000);
-		} else {
+		else if (pt == PARTITION_STYLE_GPT)
 			CreateTooltip(hPartitionScheme, lmprintf(MSG_152), 15000);
-		}
+		else
+			DestroyTooltip(hPartitionScheme);
 	}
 }
 
@@ -1122,7 +1130,8 @@ static void ToggleAdvanced(BOOL enable)
 	float dialog_shift = -3.22807f*fScale*fScale*fScale + 6.69173f*fScale*fScale + 15.8822f*fScale + 62.9737f;
 	RECT rect;
 	POINT point;
-	int toggle;
+	BOOL needs_resel = FALSE;
+	int i, toggle;
 
 	if (!enable)
 		dialog_shift = -dialog_shift;
@@ -1170,6 +1179,21 @@ static void ToggleAdvanced(BOOL enable)
 	ShowWindow(GetDlgItem(hMainDialog, IDC_RUFUS_MBR), toggle);
 	ShowWindow(GetDlgItem(hMainDialog, IDC_DISK_ID), toggle);
 	ShowWindow(GetDlgItem(hMainDialog, IDS_ADVANCED_OPTIONS_GRP), toggle);
+
+	if (enable) {
+		IGNORE_RETVAL(ComboBox_SetItemData(hPartitionScheme,
+			ComboBox_AddStringU(hPartitionScheme, "Super Floppy Disk"), PARTITION_STYLE_SFD));
+	} else {
+		for (i = 0; i < ComboBox_GetCount(hPartitionScheme); i++) {
+			if (ComboBox_GetItemData(hPartitionScheme, i) == PARTITION_STYLE_SFD) {
+				if (ComboBox_GetCurSel(hPartitionScheme) == i)
+					needs_resel = TRUE;
+				ComboBox_DeleteString(hPartitionScheme, i);
+			}
+		}
+		if (needs_resel)
+			SetTargetSystem();
+	}
 
 	// Toggle the up/down icon
 	SendMessage(GetDlgItem(hMainDialog, IDC_ADVANCED), BCM_SETIMAGELIST, 0, (LPARAM)(enable?&bi_up:&bi_down));
@@ -1986,7 +2010,7 @@ static void ShowLanguageMenu(RECT rcExclude)
 	DestroyMenu(menu);
 }
 
-static void SetBoot(int fs, int tt)
+static void SetBoot(int fs, int tt, int pt)
 {
 	int i;
 	char tmp[32];
@@ -2026,7 +2050,7 @@ static void SetBoot(int fs, int tt)
 	if (i == ComboBox_GetCount(hBootType))
 		IGNORE_RETVAL(ComboBox_SetCurSel(hBootType, 0));
 
-	if (!IsWindowEnabled(hBoot)) {
+	if ((pt != PARTITION_STYLE_SFD) && !IsWindowEnabled(hBoot)) {
 		EnableWindow(hBoot, TRUE);
 		EnableWindow(hBootType, TRUE);
 		EnableWindow(hSelectISO, TRUE);
@@ -2411,10 +2435,11 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				break;
 			fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
 			tt = GETTARGETTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
+			pt = GETPARTTYPE((int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme)));
 			if ((selection_default == BT_IMG) && IsChecked(IDC_BOOT)) {
 				ToggleImage(FALSE);
 				EnableAdvancedBootOptions(FALSE, TRUE);
-				SetBoot(fs, tt);
+				SetBoot(fs, tt, pt);
 				SetToGo();
 				break;
 			}
@@ -2443,7 +2468,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				}
 				break;
 			}
-			if ((fs == FS_EXFAT) || (fs == FS_UDF) || (fs == FS_REFS)) {
+			if ((fs == FS_EXFAT) || (fs == FS_UDF) || (fs == FS_REFS) || (pt == PARTITION_STYLE_SFD)) {
 				if (IsWindowEnabled(hBoot)) {
 					// unlikely to be supported by BIOSes => don't bother
 					IGNORE_RETVAL(ComboBox_SetCurSel(hBootType, 0));
@@ -2458,7 +2483,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				break;
 			}
 			EnableAdvancedBootOptions(TRUE, TRUE);
-			SetBoot(fs, tt);
+			SetBoot(fs, tt, pt);
 			SetMBRProps();
 			SetToGo();
 			break;
