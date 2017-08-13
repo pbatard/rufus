@@ -296,7 +296,7 @@ BOOL GetDevices(DWORD devnum)
 	// Oh, and we also have card devices (e.g. 'SCSI\DiskO2Micro_SD_...') under the SCSI enumerator...
 	const char* scsi_disk_prefix = "SCSI\\Disk";
 	const char* scsi_card_name[] = {
-		"_SD_", "_MMC_", "_MS_", "_MSPro_", "_xDPicture_", "_O2Media_"
+		"_SD_", "_SDHC_", "_MMC_", "_MS_", "_MSPro_", "_xDPicture_", "_O2Media_"
 	};
 	const char* usb_speed_name[USB_SPEED_MAX] = { "USB", "USB 1.0", "USB 1.1", "USB 2.0", "USB 3.0" };
 	// Hash table and String Array used to match a Device ID with the parent hub's Device Interface Path
