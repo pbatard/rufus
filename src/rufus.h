@@ -73,9 +73,9 @@
 #define DD_BUFFER_SIZE              65536		// Minimum size of the buffer we use for DD operations
 #define UBUFFER_SIZE                2048
 #define RUFUS_URL                   "https://rufus.akeo.ie"
-#define UPDATE_URL                  "http://rufus.akeo.ie"	// Stupid XP can't handle a recent SSL implementation...
-#define DOWNLOAD_URL                RUFUS_URL "/downloads"
-#define FILES_URL                   RUFUS_URL "/files"
+#define RUFUS_NO_SSL_URL            "http://rufus.akeo.ie"	// Stupid XP can't handle a recent SSL implementation...
+#define DOWNLOAD_URL                RUFUS_NO_SSL_URL "/downloads"
+#define FILES_URL                   RUFUS_NO_SSL_URL "/files"
 #define SEVENZIP_URL                "http://www.7-zip.org"
 #define FILES_DIR                   "rufus_files"
 #define IGNORE_RETVAL(expr)         do { (void)(expr); } while(0)
