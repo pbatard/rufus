@@ -992,8 +992,8 @@ BOOL SetDOSLocale(const char* path, BOOL bFreeDOS)
 
 	if ((cp == 437) && (strcmp(kb, "us") == 0)) {
 		// Nothing much to do if US/US - just notify in autoexec.bat
-		safe_strcpy(filename, sizeof(filename), path);
-		safe_strcat(filename, sizeof(filename), "\\AUTOEXEC.BAT");
+		static_strcpy(filename, path);
+		static_strcat(filename, "\\AUTOEXEC.BAT");
 		fd = fopen(filename, "w+");
 		if (fd == NULL) {
 			uprintf("Unable to create 'AUTOEXEC.BAT': %s.\n", WindowsErrorString());
@@ -1008,8 +1008,8 @@ BOOL SetDOSLocale(const char* path, BOOL bFreeDOS)
 	}
 
 	// CONFIG.SYS
-	safe_strcpy(filename, sizeof(filename), path);
-	safe_strcat(filename, sizeof(filename), "\\CONFIG.SYS");
+	static_strcpy(filename, path);
+	static_strcat(filename, "\\CONFIG.SYS");
 	fd = fopen(filename, "w+");
 	if (fd == NULL) {
 		uprintf("Unable to create 'CONFIG.SYS': %s.\n", WindowsErrorString());
@@ -1033,8 +1033,8 @@ BOOL SetDOSLocale(const char* path, BOOL bFreeDOS)
 	uprintf("Successfully wrote 'CONFIG.SYS'\n");
 
 	// AUTOEXEC.BAT
-	safe_strcpy(filename, sizeof(filename), path);
-	safe_strcat(filename, sizeof(filename), "\\AUTOEXEC.BAT");
+	static_strcpy(filename, path);
+	static_strcat(filename, "\\AUTOEXEC.BAT");
 	fd = fopen(filename, "w+");
 	if (fd == NULL) {
 		uprintf("Unable to create 'AUTOEXEC.BAT': %s.\n", WindowsErrorString());

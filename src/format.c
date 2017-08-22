@@ -712,8 +712,8 @@ static BOOL FormatDrive(DWORD DriveIndex)
 
 	// Check if Windows picked the UEFI:NTFS partition
 	// NB: No need to do this for Large FAT32, as this only applies to NTFS
-	safe_strcpy(path, MAX_PATH, VolumeName);
-	safe_strcat(path, MAX_PATH, "EFI\\Rufus\\ntfs_x64.efi");
+	static_strcpy(path, VolumeName);
+	static_strcat(path, "EFI\\Rufus\\ntfs_x64.efi");
 	if (PathFileExistsA(path)) {
 		uprintf("Windows selected the UEFI:NTFS partition for formatting - Retry needed", VolumeName);
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_RETRY;
@@ -1167,16 +1167,16 @@ static BOOL SetupWinPE(char drive_letter)
 
 	index = ((img_report.winpe&WINPE_I386) == WINPE_I386)?0:1;
 	// Allow other values than harddisk 1, as per user choice for disk ID
-	safe_sprintf(setupsrcdev, sizeof(setupsrcdev),
-		"SetupSourceDevice = \"\\device\\harddisk%d\\partition1\"", ComboBox_GetCurSel(hDiskID));
+	static_sprintf(setupsrcdev, "SetupSourceDevice = \"\\device\\harddisk%d\\partition1\"",
+		ComboBox_GetCurSel(hDiskID));
 	// Copy of ntdetect.com in root
-	safe_sprintf(src, sizeof(src), "%c:\\%s\\ntdetect.com", drive_letter, basedir[index]);
-	safe_sprintf(dst, sizeof(dst), "%c:\\ntdetect.com", drive_letter);
+	static_sprintf(src, "%c:\\%s\\ntdetect.com", drive_letter, basedir[index]);
+	static_sprintf(dst, "%c:\\ntdetect.com", drive_letter);
 	CopyFileA(src, dst, TRUE);
 	if (!img_report.uses_minint) {
 		// Create a copy of txtsetup.sif, as we want to keep the i386 files unmodified
-		safe_sprintf(src, sizeof(src), "%c:\\%s\\txtsetup.sif", drive_letter, basedir[index]);
-		safe_sprintf(dst, sizeof(dst), "%c:\\txtsetup.sif", drive_letter);
+		static_sprintf(src, "%c:\\%s\\txtsetup.sif", drive_letter, basedir[index]);
+		static_sprintf(dst, "%c:\\txtsetup.sif", drive_letter);
 		if (!CopyFileA(src, dst, TRUE)) {
 			uprintf("Did not copy %s as %s: %s\n", src, dst, WindowsErrorString());
 		}
@@ -1187,8 +1187,8 @@ static BOOL SetupWinPE(char drive_letter)
 		uprintf("Successfully added '%s' to %s\n", setupsrcdev, dst);
 	}
 
-	safe_sprintf(src, sizeof(src), "%c:\\%s\\setupldr.bin", drive_letter,  basedir[index]);
-	safe_sprintf(dst, sizeof(dst), "%c:\\BOOTMGR", drive_letter);
+	static_sprintf(src, "%c:\\%s\\setupldr.bin", drive_letter,  basedir[index]);
+	static_sprintf(dst, "%c:\\BOOTMGR", drive_letter);
 	if (!CopyFileA(src, dst, TRUE)) {
 		uprintf("Did not copy %s as %s: %s\n", src, dst, WindowsErrorString());
 	}
@@ -1288,6 +1288,7 @@ int SetWinToGoIndex(void)
 	char tmp_path[MAX_PATH] = "", xml_file[MAX_PATH] = "";
 	StrArray version_name, version_index;
 	int i, build_nr = 0;
+	BOOL bNonStandard = FALSE;
 
 	// Sanity checks
 	wintogo_index = -1;
@@ -1307,8 +1308,8 @@ int SetWinToGoIndex(void)
 	if ((GetTempPathU(sizeof(tmp_path), tmp_path) == 0)
 		|| (GetTempFileNameU(tmp_path, APPLICATION_NAME, 0, xml_file) == 0)
 		|| (xml_file[0] == 0)) {
-		// Last ditch effort to get a loc file - just extract it to the current directory
-		safe_strcpy(xml_file, sizeof(xml_file), ".\\RufVXml.tmp");
+		// Last ditch effort to get a tmp file - just extract it to the current directory
+		static_strcpy(xml_file, ".\\RufVXml.tmp");
 	}
 	// GetTempFileName() may leave a file behind
 	DeleteFileU(xml_file);
@@ -1321,8 +1322,24 @@ int SetWinToGoIndex(void)
 
 	StrArrayCreate(&version_name, 16);
 	StrArrayCreate(&version_index, 16);
-	for (i = 0; (StrArrayAdd(&version_name, get_token_data_file_indexed("DISPLAYNAME", xml_file, i + 1), FALSE) >= 0) &&
-		(StrArrayAdd(&version_index, get_token_data_file_indexed("IMAGE INDEX", xml_file, i + 1), FALSE) >= 0); i++);
+	for (i = 0; StrArrayAdd(&version_index, get_token_data_file_indexed("IMAGE INDEX", xml_file, i + 1), FALSE) >= 0; i++) {
+		// Some people are apparently creating *unofficial* Windows ISOs that don't have DISPLAYNAME elements.
+		// If we are parsing such an ISO, try to fall back to using DESCRIPTION. Of course, since we don't use
+		// a formal XML parser, if an ISO mixes entries with both DISPLAYNAME and DESCRIPTION and others with
+		// only DESCRIPTION, the version names we report will be wrong.
+		// But hey, there's only so far I'm willing to go to help people who, not content to have demonstrated
+		// their utter ignorance on development matters, are also trying to lecture experienced developers
+		// about specific "noob mistakes"... that don't exist in the code they are trying to criticize.
+		if (StrArrayAdd(&version_name, get_token_data_file_indexed("DISPLAYNAME", xml_file, i + 1), FALSE) < 0) {
+			bNonStandard = TRUE;
+			if (StrArrayAdd(&version_name, get_token_data_file_indexed("DESCRIPTION", xml_file, i + 1), FALSE) < 0) {
+				uprintf("Warning: Could not find a description for image index %d", i + 1);
+				StrArrayAdd(&version_name, "Unknown Windows Version", TRUE);
+			}
+		}
+	}
+	if (bNonStandard)
+		uprintf("Warning: Nonstandard Windows image (missing <DISPLAYNAME> entries)");
 
 	if (i > 1)
 		i = SelectionDialog(lmprintf(MSG_291), lmprintf(MSG_292), version_name.String, i);
@@ -1333,7 +1350,7 @@ int SetWinToGoIndex(void)
 	} else {
 		wintogo_index = atoi(version_index.String[i - 1]);
 	}
-	if (i >= 0) {
+	if (i > 0) {
 		// Get the build version
 		build = get_token_data_file_indexed("BUILD", xml_file, i);
 		if (build != NULL)
@@ -1754,7 +1771,7 @@ DWORD WINAPI FormatThread(void* param)
 			// create a log file for bad blocks report. Since %USERPROFILE% may
 			// have localized characters, we use the UTF-8 API.
 			userdir = getenvU("USERPROFILE");
-			safe_strcpy(logfile, MAX_PATH, userdir);
+			static_strcpy(logfile, userdir);
 			safe_free(userdir);
 			GetLocalTime(&lt);
 			safe_sprintf(&logfile[strlen(logfile)], sizeof(logfile)-strlen(logfile)-1,
@@ -2025,7 +2042,7 @@ DWORD WINAPI FormatThread(void* param)
 					efi_dst[0] = drive_name[0];
 					efi_dst[sizeof(efi_dst) - sizeof("\\bootx64.efi")] = 0;
 					if (!CreateDirectoryA(efi_dst, 0)) {
-						uprintf("Could not create directory '%s': %s\n", WindowsErrorString());
+						uprintf("Could not create directory '%s': %s\n", efi_dst, WindowsErrorString());
 						FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_PATCH);
 					} else {
 						efi_dst[sizeof(efi_dst) - sizeof("\\bootx64.efi")] = '\\';

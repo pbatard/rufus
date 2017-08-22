@@ -104,7 +104,7 @@ static char* NtStatusError(NTSTATUS Status) {
 	case STATUS_NOT_SUPPORTED:
 		return "Operation is not supported";
 	default:
-		safe_sprintf(unknown, sizeof(unknown), "Unknown error 0x%08lx", Status);
+		static_sprintf(unknown, "Unknown error 0x%08lx", Status);
 		return unknown;
 	}
 }
@@ -510,7 +510,7 @@ static DWORD WINAPI SearchProcessThread(LPVOID param)
 
 		// Complete failure => Just craft a default process name that includes the PID
 		if (!bGotExePath) {
-			safe_sprintf(exe_path, MAX_PATH, "Unknown_Process_%" PRIu64,
+			static_sprintf(exe_path, "Unknown_Process_%" PRIu64,
 				(ULONGLONG)handleInfo->UniqueProcessId);
 		}
 	}

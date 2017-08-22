@@ -73,9 +73,9 @@
 #define DD_BUFFER_SIZE              65536		// Minimum size of the buffer we use for DD operations
 #define UBUFFER_SIZE                2048
 #define RUFUS_URL                   "https://rufus.akeo.ie"
-#define UPDATE_URL                  "http://rufus.akeo.ie"	// Stupid XP can't handle a recent SSL implementation...
-#define DOWNLOAD_URL                RUFUS_URL "/downloads"
-#define FILES_URL                   RUFUS_URL "/files"
+#define RUFUS_NO_SSL_URL            "http://rufus.akeo.ie"	// Stupid XP can't handle a recent SSL implementation...
+#define DOWNLOAD_URL                RUFUS_NO_SSL_URL "/downloads"
+#define FILES_URL                   RUFUS_NO_SSL_URL "/files"
 #define SEVENZIP_URL                "http://www.7-zip.org"
 #define FILES_DIR                   "rufus_files"
 #define IGNORE_RETVAL(expr)         do { (void)(expr); } while(0)
@@ -95,8 +95,10 @@
 #define safe_strcp(dst, dst_max, src, count) do {memcpy(dst, src, safe_min(count, dst_max)); \
 	((char*)dst)[safe_min(count, dst_max)-1] = 0;} while(0)
 #define safe_strcpy(dst, dst_max, src) safe_strcp(dst, dst_max, src, safe_strlen(src)+1)
+#define static_strcpy(dst, src) safe_strcpy(dst, sizeof(dst), src)
 #define safe_strncat(dst, dst_max, src, count) strncat(dst, src, safe_min(count, dst_max - safe_strlen(dst) - 1))
 #define safe_strcat(dst, dst_max, src) safe_strncat(dst, dst_max, src, safe_strlen(src)+1)
+#define static_strcat(dst, src) safe_strcat(dst, sizeof(dst), src)
 #define safe_strcmp(str1, str2) strcmp(((str1==NULL)?"<NULL>":str1), ((str2==NULL)?"<NULL>":str2))
 #define safe_strstr(str1, str2) strstr(((str1==NULL)?"<NULL>":str1), ((str2==NULL)?"<NULL>":str2))
 #define safe_stricmp(str1, str2) _stricmp(((str1==NULL)?"<NULL>":str1), ((str2==NULL)?"<NULL>":str2))
@@ -233,6 +235,7 @@ enum target_type {
 	TT_MAX
 };
 // For the partition types we'll use Microsoft's PARTITION_STYLE_### constants
+#define PARTITION_STYLE_SFD PARTITION_STYLE_RAW
 #define GETTARGETTYPE(x) (((x)>0)?(((x) >> 16) & 0xFFFF):0)
 #define GETPARTTYPE(x)   (((x)>0)?((x) & 0xFFFF):0);
 
@@ -261,8 +264,9 @@ enum checksum_type {
 #define HAS_WINPE(r)        (((r.winpe & WINPE_MININT) == WINPE_MININT)||((r.winpe & WINPE_I386) == WINPE_I386))
 #define HAS_WINDOWS(r)      (HAS_BOOTMGR(r) || (r.uses_minint) || HAS_WINPE(r))
 #define HAS_WIN7_EFI(r)     ((r.has_efi == 1) && HAS_INSTALL_WIM(r))
+#define HAS_EFI_IMG(r)      (r.efi_img_path[0] != 0)
 #define IS_DD_BOOTABLE(r)   (r.is_bootable_img)
-#define IS_EFI_BOOTABLE(r)  (r.has_efi)
+#define IS_EFI_BOOTABLE(r)  (r.has_efi != 0)
 #define IS_BIOS_BOOTABLE(r) (HAS_BOOTMGR(r) || HAS_SYSLINUX(r) || HAS_WINPE(r) || HAS_GRUB(r) || HAS_REACTOS(r) || HAS_KOLIBRIOS(r))
 #define HAS_WINTOGO(r)      (HAS_BOOTMGR(r) && IS_EFI_BOOTABLE(r) && HAS_INSTALL_WIM(r) && (r.install_wim_version < MAX_WIM_VERSION))
 #define IS_FAT(fs)          ((fs == FS_FAT16) || (fs == FS_FAT32))
@@ -273,6 +277,7 @@ typedef struct {
 	char cfg_path[128];			/* path to the ISO's isolinux.cfg */
 	char reactos_path[128];		/* path to the ISO's freeldr.sys or setupldr.sys */
 	char install_wim_path[64];	/* path to install.wim or install.swm */
+	char efi_img_path[128];		/* path to an efi.img file */
 	uint64_t image_size;
 	uint64_t projected_size;
 	int64_t mismatch_size;
@@ -440,6 +445,7 @@ extern SIZE GetTextSize(HWND hCtrl);
 extern BOOL ExtractDOS(const char* path);
 extern BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan);
 extern int64_t ExtractISOFile(const char* iso, const char* iso_file, const char* dest_file, DWORD attributes);
+extern BOOL ExtractEfiImgFiles(const char* dir);
 extern char* MountISO(const char* path);
 extern void UnMountISO(void);
 extern BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int fs);

@@ -110,7 +110,7 @@ static BOOL Get7ZipPath(void)
 {
 	if ( (GetRegistryKeyStr(REGKEY_HKCU, "7-Zip\\Path", sevenzip_path, sizeof(sevenzip_path)))
 	  || (GetRegistryKeyStr(REGKEY_HKLM, "7-Zip\\Path", sevenzip_path, sizeof(sevenzip_path))) ) {
-		safe_strcat(sevenzip_path, sizeof(sevenzip_path), "\\7z.exe");
+		static_strcat(sevenzip_path, "\\7z.exe");
 		return (_access(sevenzip_path, 0) != -1);
 	}
 	return FALSE;
@@ -471,11 +471,11 @@ BOOL WimExtractFile_7z(const char* image, int index, const char* src, const char
 	// return an error code if it can't extract the file), we need
 	// to issue 2 passes. See github issue #680.
 	for (n = 0; n < 2; n++) {
-		safe_strcpy(tmpdst, sizeof(tmpdst), dst);
+		static_strcpy(tmpdst, dst);
 		for (i = strlen(tmpdst) - 1; (i > 0) && (tmpdst[i] != '\\') && (tmpdst[i] != '/'); i--);
 		tmpdst[i] = 0;
 
-		safe_sprintf(cmdline, sizeof(cmdline), "\"%s\" -y e \"%s\" %s%s", sevenzip_path,
+		static_sprintf(cmdline, "\"%s\" -y e \"%s\" %s%s", sevenzip_path,
 			image, (n == 0) ? index_prefix : "", src);
 		if (RunCommand(cmdline, tmpdst, FALSE) != 0) {
 			uprintf("  Could not launch 7z.exe: %s", WindowsErrorString());
@@ -484,8 +484,8 @@ BOOL WimExtractFile_7z(const char* image, int index, const char* src, const char
 
 		for (i = safe_strlen(src); (i > 0) && (src[i] != '\\') && (src[i] != '/'); i--);
 		if (i == 0)
-			safe_strcat(tmpdst, sizeof(tmpdst), "\\");
-		safe_strcat(tmpdst, sizeof(tmpdst), &src[i]);
+			static_strcat(tmpdst, "\\");
+		static_strcat(tmpdst, &src[i]);
 		if (_access(tmpdst, 0) == 0)
 			// File was extracted => move on
 			break;

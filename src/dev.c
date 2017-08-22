@@ -184,7 +184,7 @@ BOOL GetOpticalMedia(IMG_SAVE* img_save)
 		if (!SetupDiGetDeviceRegistryPropertyU(dev_info, &dev_info_data, SPDRP_FRIENDLYNAME,
 			&datatype, (LPBYTE)str, sizeof(str), &size)) {
 			uprintf("SetupDiGetDeviceRegistryProperty (Friendly Name) failed: %s\n", WindowsErrorString());
-			safe_strcpy(str, sizeof(str), "Generic Optical Drive");
+			static_strcpy(str, "Generic Optical Drive");
 		}
 		uprintf("Found '%s' optical device", str);
 		devint_data.cbSize = sizeof(devint_data);
@@ -245,7 +245,7 @@ BOOL GetOpticalMedia(IMG_SAVE* img_save)
 					label[k] = 0;
 				img_save->Label = label;
 			}
-			safe_strcpy(str, sizeof(str), devint_detail_data->DevicePath);
+			static_strcpy(str, devint_detail_data->DevicePath);
 			img_save->DevicePath = str;
 			img_save->DeviceSize = DiskGeometry->DiskSize.QuadPart;
 			safe_closehandle(hDrive);
@@ -296,7 +296,7 @@ BOOL GetDevices(DWORD devnum)
 	// Oh, and we also have card devices (e.g. 'SCSI\DiskO2Micro_SD_...') under the SCSI enumerator...
 	const char* scsi_disk_prefix = "SCSI\\Disk";
 	const char* scsi_card_name[] = {
-		"_SD_", "_MMC_", "_MS_", "_MSPro_", "_xDPicture_", "_O2Media_"
+		"_SD_", "_SDHC_", "_MMC_", "_MS_", "_MSPro_", "_xDPicture_", "_O2Media_"
 	};
 	const char* usb_speed_name[USB_SPEED_MAX] = { "USB", "USB 1.0", "USB 1.1", "USB 2.0", "USB 3.0" };
 	// Hash table and String Array used to match a Device ID with the parent hub's Device Interface Path
@@ -305,6 +305,7 @@ BOOL GetDevices(DWORD devnum)
 	char letter_name[] = " (?:)";
 	char drive_name[] = "?:\\";
 	char uefi_togo_check[] = "?:\\EFI\\Rufus\\ntfs_x64.efi";
+	char scsi_card_name_copy[16];
 	BOOL r = FALSE, found = FALSE, post_backslash;
 	HDEVINFO dev_info = NULL;
 	SP_DEVINFO_DATA dev_info_data;
@@ -490,7 +491,15 @@ BOOL GetDevices(DWORD devnum)
 		// Additional detection for SCSI card readers
 		if ((!props.is_CARD) && (safe_strnicmp(buffer, scsi_disk_prefix, sizeof(scsi_disk_prefix)-1) == 0)) {
 			for (j = 0; j < ARRAYSIZE(scsi_card_name); j++) {
-				if (safe_strstr(buffer, scsi_card_name[j]) != NULL) {
+				static_strcpy(scsi_card_name_copy, scsi_card_name[j]);
+				if (safe_strstr(buffer, scsi_card_name_copy) != NULL) {
+					props.is_CARD = TRUE;
+					break;
+				}
+				// Also test for "_SD&" instead of "_SD_" and so on to allow for devices like
+				// "SCSI\DiskRicoh_Storage_SD&REV_3.0" to be detected.
+				scsi_card_name_copy[strlen(scsi_card_name_copy) - 1] = '&';
+				if (safe_strstr(buffer, scsi_card_name_copy) != NULL) {
 					props.is_CARD = TRUE;
 					break;
 				}
@@ -507,7 +516,7 @@ BOOL GetDevices(DWORD devnum)
 				&datatype, (LPBYTE)buffer, sizeof(buffer), &size)) {
 			uprintf("SetupDiGetDeviceRegistryProperty (Friendly Name) failed: %s\n", WindowsErrorString());
 			// We can afford a failure on this call - just replace the name with "USB Storage Device (Generic)"
-			safe_strcpy(buffer, sizeof(buffer), lmprintf(MSG_045));
+			static_strcpy(buffer, lmprintf(MSG_045));
 		} else if ((!props.is_VHD) && (devid_list != NULL)) {
 			// Get the properties of the device. We could avoid doing this lookup every time by keeping
 			// a lookup table, but there shouldn't be that many USB storage devices connected...
@@ -580,7 +589,7 @@ BOOL GetDevices(DWORD devnum)
 #ifdef FORCED_DEVICE
 					props.vid = FORCED_VID;
 					props.pid = FORCED_PID;
-					safe_strcpy(buffer, sizeof(buffer), FORCED_NAME);
+					static_strcpy(buffer, FORCED_NAME);
 #endif
 				}
 				break;
@@ -605,7 +614,7 @@ BOOL GetDevices(DWORD devnum)
 					uuprintf("Found non-USB non-removable device '%s' => Eliminated", buffer);
 					continue;
 				}
-				safe_strcpy(str, sizeof(str), "????:????");	// Couldn't figure VID:PID
+				static_strcpy(str, "????:????");	// Couldn't figure VID:PID
 			} else {
 				static_sprintf(str, "%04X:%04X", props.vid, props.pid);
 			}
@@ -731,14 +740,14 @@ BOOL GetDevices(DWORD devnum)
 					}
 					// We have multiple volumes assigned to the same device (multiple partitions)
 					// If that is the case, use "Multiple Volumes" instead of the label
-					safe_strcpy(entry_msg, sizeof(entry_msg), (((drive_letters[0] != 0) && (drive_letters[1] != 0))?
+					static_strcpy(entry_msg, (((drive_letters[0] != 0) && (drive_letters[1] != 0))?
 						lmprintf(MSG_047):label));
 					for (k=0, remove_drive=0; drive_letters[k] && (!remove_drive); k++) {
 						// Append all the drive letters we detected
 						letter_name[2] = drive_letters[k];
 						if (right_to_left_mode)
-							safe_strcat(entry_msg, sizeof(entry_msg), RIGHT_TO_LEFT_MARK);
-						safe_strcat(entry_msg, sizeof(entry_msg), letter_name);
+							static_strcat(entry_msg, RIGHT_TO_LEFT_MARK);
+						static_strcat(entry_msg, letter_name);
 						if (drive_letters[k] == (PathGetDriveNumberU(app_dir) + 'A'))
 							remove_drive = 1;
 						if (drive_letters[k] == (PathGetDriveNumberU(system_dir) + 'A'))

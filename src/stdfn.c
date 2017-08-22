@@ -235,7 +235,7 @@ void GetWindowsVersion(void)
 	BOOL ws;
 
 	nWindowsVersion = WINDOWS_UNDEFINED;
-	safe_strcpy(WindowsVersionStr, sizeof(WindowsVersionStr), "Windows Undefined");
+	static_strcpy(WindowsVersionStr, "Windows Undefined");
 
 	memset(&vi, 0, sizeof(vi));
 	vi.dwOSVersionInfoSize = sizeof(vi);
@@ -329,9 +329,9 @@ void GetWindowsVersion(void)
 		GetRegistryKeyStr(REGKEY_HKLM, "Microsoft\\Windows NT\\CurrentVersion\\CurrentBuildNumber", build_number, sizeof(build_number));
 		if (build_number[0] != 0) {
 			nWindowsBuildNumber = atoi(build_number);	// Keep a global copy
-			safe_strcat(WindowsVersionStr, sizeof(WindowsVersionStr), " (Build ");
-			safe_strcat(WindowsVersionStr, sizeof(WindowsVersionStr), build_number);
-			safe_strcat(WindowsVersionStr, sizeof(WindowsVersionStr), ")");
+			static_strcat(WindowsVersionStr, " (Build ");
+			static_strcat(WindowsVersionStr, build_number);
+			static_strcat(WindowsVersionStr, ")");
 		}
 	}
 
@@ -905,7 +905,7 @@ char* GetCurrentMUI(void)
 		 (pfLCIDToLocaleName(GetUserDefaultUILanguage(), wmui_str, LOCALE_NAME_MAX_LENGTH, 0) > 0) ) {
 		wchar_to_utf8_no_alloc(wmui_str, mui_str, LOCALE_NAME_MAX_LENGTH);
 	} else {
-		safe_strcpy(mui_str, LOCALE_NAME_MAX_LENGTH, "en-US");
+		static_strcpy(mui_str, "en-US");
 	}
 	return mui_str;
 }

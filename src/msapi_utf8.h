@@ -293,6 +293,18 @@ static __inline int LoadStringU(HINSTANCE hInstance, UINT uID, LPSTR lpBuffer, i
 	return ret;
 }
 
+static __inline HMODULE LoadLibraryU(LPCSTR lpFileName)
+{
+	HMODULE ret;
+	DWORD err = ERROR_INVALID_DATA;
+	wconvert(lpFileName);
+	ret = LoadLibraryW(wlpFileName);
+	err = GetLastError();
+	wfree(lpFileName);
+	SetLastError(err);
+	return ret;
+}
+
 static __inline int DrawTextU(HDC hDC, LPCSTR lpText, int nCount, LPRECT lpRect, UINT uFormat)
 {
 	int ret;
@@ -1025,15 +1037,6 @@ static __inline BOOL GetVolumeInformationU(LPCSTR lpRootPathName, LPSTR lpVolume
 	wfree(lpRootPathName);
 	SetLastError(err);
 	return ret;
-}
-
-static __inline HMODULE LoadLibraryU(LPCSTR lpFileName)
-{
-	HMODULE h;
-	wconvert(lpFileName);
-	h = LoadLibraryW(wlpFileName);
-	wfree(lpFileName);
-	return h;
 }
 
 #ifdef __cplusplus
