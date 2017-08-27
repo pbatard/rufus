@@ -3232,14 +3232,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	}
 	selected_langid = get_language_id(selected_locale);
 
-	if (!vc) {
-		get_loc_data_file(loc_file, selected_locale);
-		right_to_left_mode = ((selected_locale->ctrl_id) & LOC_RIGHT_TO_LEFT);
-		if (MessageBoxExU(NULL, lmprintf(MSG_296), lmprintf(MSG_295),
-			MB_YESNO | MB_ICONWARNING | MB_IS_RTL | MB_SYSTEMMODAL, selected_langid) != IDYES)
-			goto out;
-	}
-
 	// This is needed as there appears to be a *FLAW* in Windows allowing the app to run unelevated with some
 	// weirdly configured user accounts, even as we explicitly set 'requireAdministrator' in the manifest...
 	if (!IsCurrentProcessElevated()) {
@@ -3310,6 +3302,13 @@ relaunch:
 	SetProcessDefaultLayout(right_to_left_mode?LAYOUT_RTL:0);
 	if (get_loc_data_file(loc_file, selected_locale))
 		WriteSettingStr(SETTING_LOCALE, selected_locale->txt[0]);
+
+	if (!vc) {
+		if (MessageBoxExU(NULL, lmprintf(MSG_296), lmprintf(MSG_295),
+			MB_YESNO | MB_ICONWARNING | MB_IS_RTL | MB_SYSTEMMODAL, selected_langid) != IDYES)
+			goto out;
+		vc = TRUE;
+	}
 
 	/*
 	 * Create the main Window

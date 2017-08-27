@@ -44,29 +44,117 @@ typedef struct {
 	LPWSTR lpszMoreInfoLink;
 } SPROG_PUBLISHERINFO, *PSPROG_PUBLISHERINFO;
 
+
+/*
+ * FormatMessage does not handle PKI errors
+ */
+const char* WinPKIErrorString(void)
+{
+	static char error_string[64];
+	DWORD error_code = GetLastError();
+
+	if ((error_code >> 16) != 0x8009)
+		return WindowsErrorString();
+
+	switch (error_code) {
+	case NTE_BAD_UID:
+		return "Bad UID.";
+	case CRYPT_E_MSG_ERROR:
+		return "An error occurred while performing an operation on a cryptographic message.";
+	case CRYPT_E_UNKNOWN_ALGO:
+		return "Unknown cryptographic algorithm.";
+	case CRYPT_E_INVALID_MSG_TYPE:
+		return "Invalid cryptographic message type.";
+	case CRYPT_E_HASH_VALUE:
+		return "The hash value is not correct";
+	case CRYPT_E_ISSUER_SERIALNUMBER:
+		return "Invalid issuer and/or serial number.";
+	case CRYPT_E_BAD_LEN:
+		return "The length specified for the output data was insufficient.";
+	case CRYPT_E_BAD_ENCODE:
+		return "An error occurred during encode or decode operation.";
+	case CRYPT_E_FILE_ERROR:
+		return "An error occurred while reading or writing to a file.";
+	case CRYPT_E_NOT_FOUND:
+		return "Cannot find object or property.";
+	case CRYPT_E_EXISTS:
+		return "The object or property already exists.";
+	case CRYPT_E_NO_PROVIDER:
+		return "No provider was specified for the store or object.";
+	case CRYPT_E_DELETED_PREV:
+		return "The previous certificate or CRL context was deleted.";
+	case CRYPT_E_NO_MATCH:
+		return "Cannot find the requested object.";
+	case CRYPT_E_UNEXPECTED_MSG_TYPE:
+	case CRYPT_E_NO_KEY_PROPERTY:
+	case CRYPT_E_NO_DECRYPT_CERT:
+		return "Private key or certificate issue";
+	case CRYPT_E_BAD_MSG:
+		return "Not a cryptographic message.";
+	case CRYPT_E_NO_SIGNER:
+		return "The signed cryptographic message does not have a signer for the specified signer index.";
+	case CRYPT_E_REVOKED:
+		return "The certificate is revoked.";
+	case CRYPT_E_NO_REVOCATION_DLL:
+	case CRYPT_E_NO_REVOCATION_CHECK:
+	case CRYPT_E_REVOCATION_OFFLINE:
+	case CRYPT_E_NOT_IN_REVOCATION_DATABASE:
+		return "Cannot check certificate revocation.";
+	case CRYPT_E_INVALID_NUMERIC_STRING:
+	case CRYPT_E_INVALID_PRINTABLE_STRING:
+	case CRYPT_E_INVALID_IA5_STRING:
+	case CRYPT_E_INVALID_X500_STRING:
+	case  CRYPT_E_NOT_CHAR_STRING:
+		return "Invalid string.";
+	case CRYPT_E_SECURITY_SETTINGS:
+		return "The cryptographic operation failed due to a local security option setting.";
+	case CRYPT_E_NO_VERIFY_USAGE_CHECK:
+	case CRYPT_E_VERIFY_USAGE_OFFLINE:
+		return "Cannot complete usage check.";
+	case CRYPT_E_NO_TRUSTED_SIGNER:
+		return "None of the signers of the cryptographic message or certificate trust list is trusted.";
+	default:
+		static_sprintf(error_string, "Unknown PKI error 0x%08lX", error_code);
+		return error_string;
+	}
+}
+
 // Mostly from https://support.microsoft.com/en-us/kb/323809
 char* GetSignatureName(const char* path)
 {
 	static char szSubjectName[128];
-	char* p = NULL;
+	char *p = NULL, *mpath = NULL;
 	BOOL r;
+	HMODULE hm;
 	HCERTSTORE hStore = NULL;
 	HCRYPTMSG hMsg = NULL;
 	PCCERT_CONTEXT pCertContext = NULL;
-	DWORD dwEncoding, dwContentType, dwFormatType, dwSubjectSize;
+	DWORD dwSize, dwEncoding, dwContentType, dwFormatType, dwSubjectSize;
 	PCMSG_SIGNER_INFO pSignerInfo = NULL;
 	PCMSG_SIGNER_INFO pCounterSignerInfo = NULL;
 	DWORD dwSignerInfo = 0;
 	CERT_INFO CertInfo = { 0 };
 	SPROG_PUBLISHERINFO ProgPubInfo = { 0 };
-	wchar_t *szFileName = utf8_to_wchar(path);
+	wchar_t *szFileName;
 
 	// If the path is NULL, get the signature of the current runtime
 	if (path == NULL) {
 		szFileName = calloc(MAX_PATH, sizeof(wchar_t));
 		if (szFileName == NULL)
 			return NULL;
-		GetModuleFileNameW(GetModuleHandle(NULL), szFileName, MAX_PATH);
+		hm = GetModuleHandle(NULL);
+		if (hm == NULL) {
+			uprintf("PKI: Could not get current executable handle: %s", WinPKIErrorString());
+			return NULL;
+		}
+		dwSize = GetModuleFileNameW(hm, szFileName, MAX_PATH);
+		if ((dwSize == 0) || ((dwSize == MAX_PATH) && (GetLastError() == ERROR_INSUFFICIENT_BUFFER))) {
+			uprintf("PKI: Could not get module filename: %s", WinPKIErrorString());
+			return NULL;
+		}
+		mpath = wchar_to_utf8(szFileName);
+	} else {
+		szFileName = utf8_to_wchar(path);
 	}
 
 	// Get message handle and store handle from the signed file.
@@ -74,14 +162,14 @@ char* GetSignatureName(const char* path)
 		CERT_QUERY_CONTENT_FLAG_PKCS7_SIGNED_EMBED, CERT_QUERY_FORMAT_FLAG_BINARY,
 		0, &dwEncoding, &dwContentType, &dwFormatType, &hStore, &hMsg, NULL);
 	if (!r) {
-		uprintf("PKI: Failed to get store handle for '%s': %s", path, WindowsErrorString());
+		uprintf("PKI: Failed to get signature for '%s': %s", (path==NULL)?mpath:path, WinPKIErrorString());
 		goto out;
 	}
 
 	// Get signer information size.
 	r = CryptMsgGetParam(hMsg, CMSG_SIGNER_INFO_PARAM, 0, NULL, &dwSignerInfo);
 	if (!r) {
-		uprintf("PKI: Failed to get signer size: %s", WindowsErrorString);
+		uprintf("PKI: Failed to get signer size: %s", WinPKIErrorString());
 		goto out;
 	}
 
@@ -95,7 +183,7 @@ char* GetSignatureName(const char* path)
 	// Get Signer Information.
 	r = CryptMsgGetParam(hMsg, CMSG_SIGNER_INFO_PARAM, 0, (PVOID)pSignerInfo, &dwSignerInfo);
 	if (!r) {
-		uprintf("PKI: Failed to get signer information: %s", WindowsErrorString());
+		uprintf("PKI: Failed to get signer information: %s", WinPKIErrorString());
 		goto out;
 	}
 
@@ -105,7 +193,7 @@ char* GetSignatureName(const char* path)
 
 	pCertContext = CertFindCertificateInStore(hStore, ENCODING, 0, CERT_FIND_SUBJECT_CERT, (PVOID)&CertInfo, NULL);
 	if (!pCertContext) {
-		uprintf("PKI: Failed to locate signer certificate in temporary store: %s", WindowsErrorString());
+		uprintf("PKI: Failed to locate signer certificate in temporary store: %s", WinPKIErrorString());
 		goto out;
 	}
 
@@ -121,6 +209,7 @@ char* GetSignatureName(const char* path)
 	p = szSubjectName;
 
 out:
+	safe_free(mpath);
 	safe_free(szFileName);
 	safe_free(ProgPubInfo.lpszProgramName);
 	safe_free(ProgPubInfo.lpszPublisherLink);
