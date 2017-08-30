@@ -829,7 +829,7 @@ out:
 					}
 					free(buf);
 				}
-				_unlink(isolinux_tmp);
+				_unlinkU(isolinux_tmp);
 			}
 			if (img_report.sl_version != 0) {
 				static_sprintf(img_report.sl_version_str, "%d.%02d",
@@ -865,7 +865,7 @@ out:
 				uprintf("  Checking txtsetup.sif:\n  OsLoadOptions = %s", tmp);
 				img_report.uses_minint = (strstr(tmp, "/minint") != NULL);
 			}
-			_unlink(tmp_sif);
+			_unlinkU(tmp_sif);
 			safe_free(tmp);
 		}
 		if (HAS_INSTALL_WIM(img_report)) {
@@ -886,7 +886,7 @@ out:
 					GetGrubVersion(buf, size);
 				}
 				free(buf);
-				_unlink(path);
+				_unlinkU(path);
 			}
 			if (img_report.grub2_version[0] != 0)
 				uprintf("  Detected Grub version: %s", img_report.grub2_version);

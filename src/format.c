@@ -1793,7 +1793,7 @@ DWORD WINAPI FormatThread(void* param)
 					FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_BADBLOCKS_FAILURE);
 				ClearMBRGPT(hPhysicalDrive, SelectedDrive.DiskSize, SelectedDrive.SectorSize, FALSE);
 				fclose(log_fd);
-				_unlink(logfile);
+				_unlinkU(logfile);
 				goto out;
 			}
 			uprintf("Bad Blocks: Check completed, %d bad block%s found. (%d/%d/%d errors)\n",
@@ -1820,7 +1820,7 @@ DWORD WINAPI FormatThread(void* param)
 			} else {
 				// We didn't get any errors => delete the log file
 				fclose(log_fd);
-				_unlink(logfile);
+				_unlinkU(logfile);
 			}
 		} while (r == IDRETRY);
 		if (r == IDABORT) {

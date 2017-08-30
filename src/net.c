@@ -358,7 +358,7 @@ out:
 	if (fd != NULL) fclose(fd);
 	if (!r) {
 		if (file != NULL)
-			_unlink(file);
+			_unlinkU(file);
 		if (PromptOnError) {
 			PrintInfo(0, MSG_242);
 			SetLastError(error_code);

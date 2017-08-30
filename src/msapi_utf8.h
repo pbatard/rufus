@@ -948,6 +948,15 @@ static __inline int _openU(const char *filename, int oflag , int pmode)
 }
 #endif
 
+static __inline int _unlinkU(const char *path)
+{
+	int ret;
+	wconvert(path);
+	ret = _wunlink(wpath);
+	wfree(path);
+	return ret;
+}
+
 static __inline int _stat64U(const char *path, struct __stat64 *buffer)
 {
 	int ret;
