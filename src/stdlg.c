@@ -1674,8 +1674,12 @@ INT_PTR CALLBACK NewVersionCallback(HWND hDlg, UINT message, WPARAM wParam, LPAR
 			case 2:		// Launch newer version and close this one
 				Sleep(1000);	// Add a delay on account of antivirus scanners
 
-				if (ValidateSignature(hDlg, filepath) != NO_ERROR)
+				if (ValidateSignature(hDlg, filepath) != NO_ERROR) {
+					// Unconditionally delete the download and disable the "Launch" control
+					_unlinkU(filepath);
+					EnableWindow(GetDlgItem(hDlg, IDC_DOWNLOAD), FALSE);
 					break;
+				}
 
 				memset(&si, 0, sizeof(si));
 				memset(&pi, 0, sizeof(pi));
