@@ -119,6 +119,8 @@ const char* WinPKIErrorString(void)
 		return "Not digitally signed.";
 	case TRUST_E_EXPLICIT_DISTRUST:
 		return "One of the certificates used was marked as untrusted by the user.";
+	case TRUST_E_TIME_STAMP:
+		return "The timestamp could not be verified.";
 	default:
 		static_sprintf(error_string, "Unknown PKI error 0x%08lX", error_code);
 		return error_string;
@@ -137,7 +139,6 @@ char* GetSignatureName(const char* path)
 	PCCERT_CONTEXT pCertContext = NULL;
 	DWORD dwSize, dwEncoding, dwContentType, dwFormatType, dwSubjectSize;
 	PCMSG_SIGNER_INFO pSignerInfo = NULL;
-	PCMSG_SIGNER_INFO pCounterSignerInfo = NULL;
 	DWORD dwSignerInfo = 0;
 	CERT_INFO CertInfo = { 0 };
 	SPROG_PUBLISHERINFO ProgPubInfo = { 0 };
@@ -221,7 +222,6 @@ out:
 	safe_free(ProgPubInfo.lpszPublisherLink);
 	safe_free(ProgPubInfo.lpszMoreInfoLink);
 	safe_free(pSignerInfo);
-	safe_free(pCounterSignerInfo);
 	if (pCertContext != NULL)
 		CertFreeCertificateContext(pCertContext);
 	if (hStore != NULL)
@@ -229,6 +229,154 @@ out:
 	if (hMsg != NULL)
 		CryptMsgClose(hMsg);
 	return p;
+}
+
+// The timestamping authorities we use are RFC 3161 compliant
+static uint64_t GetRFC3161TimeStamp(PCMSG_SIGNER_INFO pSignerInfo)
+{
+	// Binary representation of szOID_TIMESTAMP_TOKEN or "1.2.840.113549.1.9.16.1.4"
+	const uint8_t OID_RFC3161_timeStamp[] = { 0x2a, 0x86, 0x48, 0x86, 0xf7, 0x0d, 0x01, 0x09, 0x10, 0x01, 0x04 };
+	BOOL r;
+	DWORD n, dwSize;
+	PCRYPT_CONTENT_INFO pCounterSignerInfo = NULL;
+	uint64_t ts = 0ULL;
+	uint8_t *timestamp_token;
+	size_t timestamp_token_size;
+	char* timestamp_str;
+	size_t timestamp_str_size;
+
+	// Loop through unathenticated attributes for szOID_RFC3161_counterSign OID
+	for (n = 0; n < pSignerInfo->UnauthAttrs.cAttr; n++) {
+		if (lstrcmpA(pSignerInfo->UnauthAttrs.rgAttr[n].pszObjId, szOID_RFC3161_counterSign) == 0) {
+			// Get size
+			r = CryptDecodeObject(PKCS_7_ASN_ENCODING, PKCS_CONTENT_INFO,
+				pSignerInfo->UnauthAttrs.rgAttr[n].rgValue[0].pbData,
+				pSignerInfo->UnauthAttrs.rgAttr[n].rgValue[0].cbData,
+				0, NULL, &dwSize);
+			if (!r) {
+				uprintf("PKI: Could not get CounterSigner (timestamp) data size: %s", WinPKIErrorString());
+				continue;
+			}
+
+			// Allocate memory.
+			pCounterSignerInfo = calloc(dwSize, 1);
+			if (pCounterSignerInfo == NULL) {
+				uprintf("PKI: Unable to allocate memory for CounterSigner (timestamp) data");
+				continue;
+			}
+
+			// Now read the CounterSigner message data
+			r = CryptDecodeObject(PKCS_7_ASN_ENCODING, PKCS_CONTENT_INFO,
+				pSignerInfo->UnauthAttrs.rgAttr[n].rgValue[0].pbData,
+				pSignerInfo->UnauthAttrs.rgAttr[n].rgValue[0].cbData,
+				0, (PVOID)pCounterSignerInfo, &dwSize);
+			if (!r) {
+				uprintf("PKI: Could not retrieve CounterSigner (timestamp) data: %s", WinPKIErrorString());
+				continue;
+			}
+
+			// Get the RFC 3161 timestamp message
+			timestamp_token = get_oid_data_from_asn1(pCounterSignerInfo->Content.pbData,
+				pCounterSignerInfo->Content.cbData, OID_RFC3161_timeStamp, sizeof(OID_RFC3161_timeStamp),
+				// 0x04 = "Octet String" ASN.1 tag
+				0x04, &timestamp_token_size);
+			if (timestamp_token) {
+				timestamp_str = get_oid_data_from_asn1(timestamp_token, timestamp_token_size, NULL, 0,
+					// 0x18 = "Generalized Time" ASN.1 tag
+					0x18, &timestamp_str_size);
+				if (timestamp_str) {
+					// As per RFC 3161 The syntax is: YYYYMMDDhhmmss[.s...]Z
+					if ((timestamp_str_size < 14) || (timestamp_str[timestamp_str_size - 1] != 'Z')) {
+						// Sanity checks
+						uprintf("PKI: Not an RFC 3161 timestamp");
+						DumpBufferHex(timestamp_str, timestamp_str_size);
+					} else {
+						ts = strtoull(timestamp_str, NULL, 10);
+					}
+				}
+			}
+			safe_free(pCounterSignerInfo);
+		}
+	}
+	return ts;
+}
+
+// Return the signature timestamp (as a YYYYMMDDHHMMSS value) or 0 on error
+uint64_t GetSignatureTimeStamp(const char* path)
+{
+	char *mpath = NULL;
+	BOOL r;
+	HMODULE hm;
+	HCERTSTORE hStore = NULL;
+	HCRYPTMSG hMsg = NULL;
+	DWORD dwSize, dwEncoding, dwContentType, dwFormatType;
+	PCMSG_SIGNER_INFO pSignerInfo = NULL;
+	DWORD dwSignerInfo = 0;
+	wchar_t *szFileName;
+	uint64_t timestamp = 0ULL;
+
+	// If the path is NULL, get the signature of the current runtime
+	if (path == NULL) {
+		szFileName = calloc(MAX_PATH, sizeof(wchar_t));
+		if (szFileName == NULL)
+			goto out;
+		hm = GetModuleHandle(NULL);
+		if (hm == NULL) {
+			uprintf("PKI: Could not get current executable handle: %s", WinPKIErrorString());
+			goto out;
+		}
+		dwSize = GetModuleFileNameW(hm, szFileName, MAX_PATH);
+		if ((dwSize == 0) || ((dwSize == MAX_PATH) && (GetLastError() == ERROR_INSUFFICIENT_BUFFER))) {
+			uprintf("PKI: Could not get module filename: %s", WinPKIErrorString());
+			goto out;
+		}
+		mpath = wchar_to_utf8(szFileName);
+	} else {
+		szFileName = utf8_to_wchar(path);
+	}
+
+	// Get message handle and store handle from the signed file.
+	r = CryptQueryObject(CERT_QUERY_OBJECT_FILE, szFileName,
+		CERT_QUERY_CONTENT_FLAG_PKCS7_SIGNED_EMBED, CERT_QUERY_FORMAT_FLAG_BINARY,
+		0, &dwEncoding, &dwContentType, &dwFormatType, &hStore, &hMsg, NULL);
+	if (!r) {
+		uprintf("PKI: Failed to get signature for '%s': %s", (path == NULL) ? mpath : path, WinPKIErrorString());
+		goto out;
+	}
+
+	// Get signer information size.
+	r = CryptMsgGetParam(hMsg, CMSG_SIGNER_INFO_PARAM, 0, NULL, &dwSignerInfo);
+	if (!r) {
+		uprintf("PKI: Failed to get signer size: %s", WinPKIErrorString());
+		goto out;
+	}
+
+	// Allocate memory for signer information.
+	pSignerInfo = (PCMSG_SIGNER_INFO)calloc(dwSignerInfo, 1);
+	if (!pSignerInfo) {
+		uprintf("PKI: Could not allocate memory for signer information");
+		goto out;
+	}
+
+	// Get Signer Information.
+	r = CryptMsgGetParam(hMsg, CMSG_SIGNER_INFO_PARAM, 0, (PVOID)pSignerInfo, &dwSignerInfo);
+	if (!r) {
+		uprintf("PKI: Failed to get signer information: %s", WinPKIErrorString());
+		goto out;
+	}
+
+	// Get the RFC 3161 timestamp
+	timestamp = GetRFC3161TimeStamp(pSignerInfo);
+
+out:
+	safe_free(mpath);
+	safe_free(szFileName);
+	safe_free(pSignerInfo);
+	if (hStore != NULL)
+		CertCloseStore(hStore, 0);
+	if (hMsg != NULL)
+		CryptMsgClose(hMsg);
+	return timestamp;
 }
 
 // From https://msdn.microsoft.com/en-us/library/windows/desktop/aa382384.aspx
@@ -241,6 +389,7 @@ LONG ValidateSignature(HWND hDlg, const char* path)
 		{ 0xaac56b, 0xcd44, 0x11d0,{ 0x8c, 0xc2, 0x0, 0xc0, 0x4f, 0xc2, 0x95, 0xee } };
 	char *signature_name;
 	size_t i, len;
+	uint64_t current_ts, update_ts;
 
 	// Check the signature name. Make it specific enough (i.e. don't simply check for "Akeo")
 	// so that, besides hacking our server, it'll place an extra hurdle on any malicious entity
@@ -292,6 +441,21 @@ LONG ValidateSignature(HWND hDlg, const char* path)
 	safe_free(trust_file.pcwszFilePath);
 	switch (r) {
 	case ERROR_SUCCESS:
+		// Verify that the timestamp of the downloaded update is in the future of our current one.
+		// This is done to prevent the use of an officially signed, but older binary, as potential attack vector.
+		current_ts = GetSignatureTimeStamp(NULL);
+		if (current_ts == 0ULL) {
+			uprintf("PKI: Cannot retreive the current binary's timestamp - Aborting update");
+			r = TRUST_E_TIME_STAMP;
+		} else {
+			update_ts = GetSignatureTimeStamp(path);
+			if (update_ts < current_ts) {
+				uprintf("PKI: Update timestamp (%" PRIi64 ") is older than ours (%" PRIi64 ")! - Aborting update", update_ts, current_ts);
+				r = TRUST_E_TIME_STAMP;
+			}
+		}
+		if (r != ERROR_SUCCESS)
+		MessageBoxExU(hDlg, lmprintf(MSG_300), lmprintf(MSG_299), MB_OK | MB_ICONERROR | MB_IS_RTL, selected_langid);
 		break;
 	case TRUST_E_NOSIGNATURE:
 		// Should already have been reported, but since we have a custom message for it...

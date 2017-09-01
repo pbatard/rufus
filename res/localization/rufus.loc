@@ -565,6 +565,10 @@ t MSG_297 "Truncated ISO detected"
 t MSG_298 "The ISO file you have selected does not match its declared size: %s of data is missing!\n\nIf you obtained "
 	"this file from the Internet, you should try to download a new copy and verify that the MD5 or SHA checksums match "
 	"the official ones.\n\nNote that you can compute the MD5 or SHA in Rufus by clicking the '#' button."
+t MSG_299 "Timestamp validation error"
+t MSG_300 "Rufus could not validate that the timestamp of the downloaded update is more recent than the one for the "
+	"current executable.\n\nIn order to prevent potential attack scenarios, the update process has been aborted and "
+	"the download will be deleted. Please check the log for more details."
 
 ################################################################################
 ############################# TRANSLATOR END COPY ##############################

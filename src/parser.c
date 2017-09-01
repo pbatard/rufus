@@ -1265,3 +1265,76 @@ char* replace_char(const char* src, const char c, const char* rep)
 	res[j] = 0;
 	return res;
 }
+
+static void* get_oid_data_from_asn1_internal(const uint8_t* buf, size_t buf_len, const void* oid,
+			size_t oid_len, uint8_t asn1_type, size_t* data_len, BOOL* matched)
+{
+	void* ret;
+	size_t pos = 0, len, len_len, i;
+	uint8_t tag;
+	BOOL is_sequence;
+
+	while (pos < buf_len) {
+		is_sequence = buf[pos] & 0x20;	// Only need to handle the sequence attribute
+		tag = buf[pos++] & 0x1F;
+
+		// Compute the length
+		len = 0;
+		len_len = 1;
+		if (tag == 0x05) {	// ignore "NULL" tag
+			pos++;
+		} else {
+			if (buf[pos] & 0x80) {
+				len_len = buf[pos++] & 0x7F;
+				// The data we're dealing with is not expected to ever be larger than 64K
+				if (len_len > 2) {
+					uprintf("get_oid_data_from_asn1: Length fields larger than 2 bytes are unsupported");
+					return NULL;
+				}
+				for (i = 0; i < len_len; i++) {
+					len <<= 8;
+					len += buf[pos++];
+				}
+			} else {
+				len = buf[pos++];
+			}
+
+			if (len > buf_len - pos) {
+				uprintf("get_oid_data_from_asn1: Overflow error (computed length %d is larger than remaining data)", len);
+				return NULL;
+			}
+		}
+
+		if (len != 0) {
+			if (is_sequence) {
+				ret = get_oid_data_from_asn1_internal(&buf[pos], len, oid, oid_len, asn1_type, data_len, matched);
+				if (ret != NULL)
+					return ret;
+			} else {
+				// NB: 0x06 = "OID" tag
+				if ((!*matched) && (tag == 0x06) && (len == oid_len) && (memcmp(&buf[pos], oid, oid_len) == 0)) {
+					*matched = TRUE;
+				} else if ((*matched) && (tag == asn1_type)) {
+					*data_len = len;
+					return (void*) &buf[pos];
+				}
+			}
+			pos += len;
+		}
+	};
+
+	return NULL;
+}
+
+/*
+ * Parse an ASN.1 binary buffer and return a pointer to the first instance of OID data of type 'asn1_type',
+ * matching the binary OID 'oid' (of size 'oid_len'). If successful, the length or the returned data is
+ * placed in 'data_len'.
+ * If 'oid' is NULL, the first data element of type 'asn1_type' is returned.
+ */
+void* get_oid_data_from_asn1(const uint8_t* buf, size_t buf_len, const uint8_t* oid, size_t oid_len,
+	uint8_t asn1_type, size_t* data_len)
+{
+	BOOL matched = (oid == NULL);
+	return get_oid_data_from_asn1_internal(buf, buf_len, oid, oid_len, asn1_type, data_len, &matched);
+}
