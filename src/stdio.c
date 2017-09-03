@@ -228,6 +228,23 @@ char* SizeToHumanReadable(uint64_t size, BOOL copy_to_log, BOOL fake_units)
 	return str_size;
 }
 
+// Convert a YYYYMMDDHHMMSS UTC timestamp to a more human readable version
+char* TimestampToHumanReadable(uint64_t ts)
+{
+	uint64_t rem = ts, divisor = 10000000000ULL;
+	uint16_t data[6];
+	int i;
+	static char str[64];
+
+	for (i = 0; i < 6; i++) {
+		data[i] = (uint16_t) ((divisor == 0)?rem:(rem / divisor));
+		rem %= divisor;
+		divisor /= 100ULL;
+	}
+	static_sprintf(str, "%04d.%02d.%02d %02d:%02d:%02d (UTC)", data[0], data[1], data[2], data[3], data[4], data[5]);
+	return str;
+}
+
 // Convert custom error code to messages
 const char* _StrError(DWORD error_code)
 {

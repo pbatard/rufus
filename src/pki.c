@@ -35,6 +35,11 @@
 
 #define ENCODING (X509_ASN_ENCODING | PKCS_7_ASN_ENCODING)
 
+// MinGW doesn't seem to have this one
+#if !defined(szOID_NESTED_SIGNATURE)
+#define szOID_NESTED_SIGNATURE "1.3.6.1.4.1.311.2.4.1"
+#endif
+
 // Signatures names we accept (may be suffixed, but the signature should start with one of those)
 const char* cert_name[3] = { "Akeo Consulting", "Akeo Systems", "Pete Batard" };
 
@@ -236,7 +241,7 @@ static uint64_t GetRFC3161TimeStamp(PCMSG_SIGNER_INFO pSignerInfo)
 {
 	// Binary representation of szOID_TIMESTAMP_TOKEN or "1.2.840.113549.1.9.16.1.4"
 	const uint8_t OID_RFC3161_timeStamp[] = { 0x2a, 0x86, 0x48, 0x86, 0xf7, 0x0d, 0x01, 0x09, 0x10, 0x01, 0x04 };
-	BOOL r;
+	BOOL r, found = FALSE;
 	DWORD n, dwSize;
 	PCRYPT_CONTENT_INFO pCounterSignerInfo = NULL;
 	uint64_t ts = 0ULL;
@@ -245,33 +250,25 @@ static uint64_t GetRFC3161TimeStamp(PCMSG_SIGNER_INFO pSignerInfo)
 	char* timestamp_str;
 	size_t timestamp_str_size;
 
-	// Loop through unathenticated attributes for szOID_RFC3161_counterSign OID
+	// Loop through unauthenticated attributes for szOID_RFC3161_counterSign OID
 	for (n = 0; n < pSignerInfo->UnauthAttrs.cAttr; n++) {
 		if (lstrcmpA(pSignerInfo->UnauthAttrs.rgAttr[n].pszObjId, szOID_RFC3161_counterSign) == 0) {
-			// Get size
-			r = CryptDecodeObject(PKCS_7_ASN_ENCODING, PKCS_CONTENT_INFO,
+			// Depending on how Microsoft implemented their timestamp checks, and the fact that we are dealing
+			// with UnauthAttrs, there's a possibility that an attacker may add a "fake" RFC 3161 countersigner
+			// to try to trick us into using their timestamp data. Detect that.
+			if (found) {
+				uprintf("PKI: Multiple RFC 3161 countersigners found. This could indicate something very nasty...");
+				return 0ULL;
+			}
+			found = TRUE;
+
+			// Read the countersigner message data
+			r = CryptDecodeObjectEx(PKCS_7_ASN_ENCODING, PKCS_CONTENT_INFO,
 				pSignerInfo->UnauthAttrs.rgAttr[n].rgValue[0].pbData,
 				pSignerInfo->UnauthAttrs.rgAttr[n].rgValue[0].cbData,
-				0, NULL, &dwSize);
+				CRYPT_DECODE_ALLOC_FLAG, NULL, (PVOID)&pCounterSignerInfo, &dwSize);
 			if (!r) {
-				uprintf("PKI: Could not get CounterSigner (timestamp) data size: %s", WinPKIErrorString());
-				continue;
-			}
-
-			// Allocate memory.
-			pCounterSignerInfo = calloc(dwSize, 1);
-			if (pCounterSignerInfo == NULL) {
-				uprintf("PKI: Unable to allocate memory for CounterSigner (timestamp) data");
-				continue;
-			}
-
-			// Now read the CounterSigner message data
-			r = CryptDecodeObject(PKCS_7_ASN_ENCODING, PKCS_CONTENT_INFO,
-				pSignerInfo->UnauthAttrs.rgAttr[n].rgValue[0].pbData,
-				pSignerInfo->UnauthAttrs.rgAttr[n].rgValue[0].cbData,
-				0, (PVOID)pCounterSignerInfo, &dwSize);
-			if (!r) {
-				uprintf("PKI: Could not retrieve CounterSigner (timestamp) data: %s", WinPKIErrorString());
+				uprintf("PKI: Could not retrieve RFC 3161 countersigner data: %s", WinPKIErrorString());
 				continue;
 			}
 
@@ -295,7 +292,73 @@ static uint64_t GetRFC3161TimeStamp(PCMSG_SIGNER_INFO pSignerInfo)
 					}
 				}
 			}
-			safe_free(pCounterSignerInfo);
+			LocalFree(pCounterSignerInfo);
+		}
+	}
+	return ts;
+}
+
+// The following is used to get the RFP 3161 timestamp of a nested signature
+static uint64_t GetNestedRFC3161TimeStamp(PCMSG_SIGNER_INFO pSignerInfo)
+{
+	BOOL r, found = FALSE;
+	DWORD n, dwSize;
+	PCRYPT_CONTENT_INFO pNestedSignature = NULL;
+	PCMSG_SIGNER_INFO pNestedSignerInfo = NULL;
+	HCRYPTMSG hMsg = NULL;
+	uint64_t ts = 0ULL;
+
+	// Loop through unauthenticated attributes for szOID_NESTED_SIGNATURE OID
+	for (n = 0; ; n++) {
+		if (pNestedSignature != NULL)
+			LocalFree(pNestedSignature);
+		if (hMsg != NULL)
+			CryptMsgClose(hMsg);
+		safe_free(pNestedSignerInfo);
+		if (n >= pSignerInfo->UnauthAttrs.cAttr)
+			break;
+		if (lstrcmpA(pSignerInfo->UnauthAttrs.rgAttr[n].pszObjId, szOID_NESTED_SIGNATURE) == 0) {
+			if (found) {
+				uprintf("PKI: Multiple nested signatures found. This could indicate something very nasty...");
+				return 0ULL;
+			}
+			found = TRUE;
+			r = CryptDecodeObjectEx(PKCS_7_ASN_ENCODING, PKCS_CONTENT_INFO,
+				pSignerInfo->UnauthAttrs.rgAttr[n].rgValue[0].pbData,
+				pSignerInfo->UnauthAttrs.rgAttr[n].rgValue[0].cbData,
+				CRYPT_DECODE_ALLOC_FLAG, NULL, (PVOID)&pNestedSignature, &dwSize);
+			if (!r) {
+				uprintf("PKI: Could not retrieve nested signature data: %s", WinPKIErrorString());
+				continue;
+			}
+
+			hMsg = CryptMsgOpenToDecode(ENCODING, CMSG_DETACHED_FLAG, CMSG_SIGNED, (HCRYPTPROV)NULL, NULL, NULL);
+			if (hMsg == NULL) {
+				uprintf("PKI: Could not create nested signature message: %s", WinPKIErrorString());
+				continue;
+			}
+			r = CryptMsgUpdate(hMsg, pNestedSignature->Content.pbData, pNestedSignature->Content.cbData, TRUE);
+			if (!r) {
+				uprintf("PKI: Could not update message: %s", WinPKIErrorString());
+				continue;
+			}
+			// Get nested signer
+			r = CryptMsgGetParam(hMsg, CMSG_SIGNER_INFO_PARAM, 0, NULL, &dwSize);
+			if (!r) {
+				uprintf("PKI: Failed to get nested signer size: %s", WinPKIErrorString());
+				continue;
+			}
+			pNestedSignerInfo = (PCMSG_SIGNER_INFO)calloc(dwSize, 1);
+			if (!pNestedSignerInfo) {
+				uprintf("PKI: Could not allocate memory for nested signer");
+				continue;
+			}
+			r = CryptMsgGetParam(hMsg, CMSG_SIGNER_INFO_PARAM, 0, (PVOID)pNestedSignerInfo, &dwSize);
+			if (!r) {
+				uprintf("PKI: Failed to get nested signer information: %s", WinPKIErrorString());
+				continue;
+			}
+			ts = GetRFC3161TimeStamp(pNestedSignerInfo);
 		}
 	}
 	return ts;
@@ -313,7 +376,7 @@ uint64_t GetSignatureTimeStamp(const char* path)
 	PCMSG_SIGNER_INFO pSignerInfo = NULL;
 	DWORD dwSignerInfo = 0;
 	wchar_t *szFileName;
-	uint64_t timestamp = 0ULL;
+	uint64_t timestamp = 0ULL, nested_timestamp;
 
 	// If the path is NULL, get the signature of the current runtime
 	if (path == NULL) {
@@ -340,7 +403,7 @@ uint64_t GetSignatureTimeStamp(const char* path)
 		CERT_QUERY_CONTENT_FLAG_PKCS7_SIGNED_EMBED, CERT_QUERY_FORMAT_FLAG_BINARY,
 		0, &dwEncoding, &dwContentType, &dwFormatType, &hStore, &hMsg, NULL);
 	if (!r) {
-		uprintf("PKI: Failed to get signature for '%s': %s", (path == NULL) ? mpath : path, WinPKIErrorString());
+		uprintf("PKI: Failed to get signature for '%s': %s", (path==NULL)?mpath:path, WinPKIErrorString());
 		goto out;
 	}
 
@@ -367,6 +430,26 @@ uint64_t GetSignatureTimeStamp(const char* path)
 
 	// Get the RFC 3161 timestamp
 	timestamp = GetRFC3161TimeStamp(pSignerInfo);
+	if (timestamp)
+		uprintf("Note: '%s' has timestamp %s", (path==NULL)?mpath:path, TimestampToHumanReadable(timestamp));
+	// Because we are currently using both SHA-1 and SHA-256 signatures, we are in the very specific
+	// situation that Windows may say our executable passes Authenticode validation on Windows 7 or
+	// later (which includes timestamp validation) even if the SHA-1 signature or timestamps have
+	// been altered.
+	// This means that, if we don't also check the nested SHA-256 signature timestamp, an attacker
+	// could alter the SHA-1 one (which is the one we use by default for chronology validation) and
+	// trick us into using an invalid timestamp value. To prevent this, we validate that, if we have
+	// both a regular and nested timestamp, they are within 60 seconds of each other.
+	nested_timestamp = GetNestedRFC3161TimeStamp(pSignerInfo);
+	if (nested_timestamp)
+		uprintf("Note: '%s' has nested timestamp %s", (path==NULL)?mpath:path, TimestampToHumanReadable(nested_timestamp));
+	if ((timestamp != 0ULL) && (nested_timestamp != 0ULL)) {
+		if (_abs64(nested_timestamp - timestamp) > 100) {
+			uprintf("PKI: Signature timestamp and nested timestamp differ by more than a minute. "
+				"This could indicate something very nasty...", timestamp, nested_timestamp);
+			timestamp = 0ULL;
+		}
+	}
 
 out:
 	safe_free(mpath);
@@ -437,7 +520,7 @@ LONG ValidateSignature(HWND hDlg, const char* path)
 	trust_data.dwUnionChoice = WTD_CHOICE_FILE;
 	trust_data.pFile = &trust_file;
 
-	r = WinVerifyTrust(NULL, &guid_generic_verify, &trust_data);
+	r = WinVerifyTrustEx(INVALID_HANDLE_VALUE, &guid_generic_verify, &trust_data);
 	safe_free(trust_file.pcwszFilePath);
 	switch (r) {
 	case ERROR_SUCCESS:
@@ -450,7 +533,7 @@ LONG ValidateSignature(HWND hDlg, const char* path)
 		} else {
 			update_ts = GetSignatureTimeStamp(path);
 			if (update_ts < current_ts) {
-				uprintf("PKI: Update timestamp (%" PRIi64 ") is older than ours (%" PRIi64 ")! - Aborting update", update_ts, current_ts);
+				uprintf("PKI: Update timestamp (%" PRIi64 ") is younger than ours (%" PRIi64 ")! - Aborting update", update_ts, current_ts);
 				r = TRUST_E_TIME_STAMP;
 			}
 		}

@@ -2285,7 +2285,8 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	case WM_COMMAND:
 #ifdef RUFUS_TEST
 		if (LOWORD(wParam) == IDC_TEST) {
-			ExtractEfiImgFiles("C:\\rufus");
+			uprintf("ts = %lld", GetSignatureTimeStamp("C:\\rufus\\rufus-2.17_BETA.exe"));
+//			ExtractEfiImgFiles("C:\\rufus");
 //			ExtractEFI("C:\\rufus\\efi.img", "C:\\rufus\\efi");
 //			uprintf("Proceed = %s", CheckDriveAccess(2000)?"True":"False");
 //			char* choices[] = { "Choice 1", "Choice 2", "Choice 3" };
