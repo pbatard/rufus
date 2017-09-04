@@ -239,8 +239,6 @@ out:
 // The timestamping authorities we use are RFC 3161 compliant
 static uint64_t GetRFC3161TimeStamp(PCMSG_SIGNER_INFO pSignerInfo)
 {
-	// Binary representation of szOID_TIMESTAMP_TOKEN or "1.2.840.113549.1.9.16.1.4"
-	const uint8_t OID_RFC3161_timeStamp[] = { 0x2a, 0x86, 0x48, 0x86, 0xf7, 0x0d, 0x01, 0x09, 0x10, 0x01, 0x04 };
 	BOOL r, found = FALSE;
 	DWORD n, dwSize;
 	PCRYPT_CONTENT_INFO pCounterSignerInfo = NULL;
@@ -273,12 +271,12 @@ static uint64_t GetRFC3161TimeStamp(PCMSG_SIGNER_INFO pSignerInfo)
 			}
 
 			// Get the RFC 3161 timestamp message
-			timestamp_token = get_oid_data_from_asn1(pCounterSignerInfo->Content.pbData,
-				pCounterSignerInfo->Content.cbData, OID_RFC3161_timeStamp, sizeof(OID_RFC3161_timeStamp),
+			timestamp_token = get_data_from_asn1(pCounterSignerInfo->Content.pbData,
+				pCounterSignerInfo->Content.cbData, szOID_TIMESTAMP_TOKEN,
 				// 0x04 = "Octet String" ASN.1 tag
 				0x04, &timestamp_token_size);
 			if (timestamp_token) {
-				timestamp_str = get_oid_data_from_asn1(timestamp_token, timestamp_token_size, NULL, 0,
+				timestamp_str = get_data_from_asn1(timestamp_token, timestamp_token_size, NULL,
 					// 0x18 = "Generalized Time" ASN.1 tag
 					0x18, &timestamp_str_size);
 				if (timestamp_str) {

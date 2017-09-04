@@ -478,8 +478,7 @@ extern char* insert_section_data(const char* filename, const char* section, cons
 extern char* replace_in_token_data(const char* filename, const char* token, const char* src, const char* rep, BOOL dos2unix);
 extern char* replace_char(const char* src, const char c, const char* rep);
 extern void parse_update(char* buf, size_t len);
-extern void* get_oid_data_from_asn1(const uint8_t* buf, size_t buf_len, const uint8_t* oid, size_t oid_len,
-	uint8_t asn1_type, size_t* data_len);
+extern void* get_data_from_asn1(const uint8_t* buf, size_t buf_len, const char* oid_str, uint8_t asn1_type, size_t* data_len);
 extern uint8_t WimExtractCheck(void);
 extern BOOL WimExtractFile(const char* wim_image, int index, const char* src, const char* dst);
 extern BOOL WimExtractFile_API(const char* image, int index, const char* src, const char* dst);
