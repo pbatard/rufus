@@ -531,7 +531,7 @@ LONG ValidateSignature(HWND hDlg, const char* path)
 		} else {
 			update_ts = GetSignatureTimeStamp(path);
 			if (update_ts < current_ts) {
-				uprintf("PKI: Update timestamp (%" PRIi64 ") is younger than ours (%" PRIi64 ")! - Aborting update", update_ts, current_ts);
+				uprintf("PKI: Update timestamp (%" PRIi64 ") is younger than ours (%" PRIi64 ") - Aborting update", update_ts, current_ts);
 				r = TRUST_E_TIME_STAMP;
 			}
 		}

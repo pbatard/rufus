@@ -1266,10 +1266,12 @@ char* replace_char(const char* src, const char c, const char* rep)
 	return res;
 }
 
-static void* get_data_from_asn1_internal(const uint8_t* buf, size_t buf_len, const void* oid,
-			size_t oid_len, uint8_t asn1_type, size_t* data_len, BOOL* matched)
+/*
+ * Internal recursive call for get_data_from_asn1(). Returns FALSE on error, TRUE otherwise.
+ */
+static BOOL get_data_from_asn1_internal(const uint8_t* buf, size_t buf_len, const void* oid,
+			size_t oid_len, uint8_t asn1_type, void** data, size_t* data_len, BOOL* matched)
 {
-	void* ret;
 	size_t pos = 0, len, len_len, i;
 	uint8_t tag;
 	BOOL is_sequence, is_universal_tag;
@@ -1280,7 +1282,7 @@ static void* get_data_from_asn1_internal(const uint8_t* buf, size_t buf_len, con
 		tag = buf[pos++] & 0x1F;
 		if (tag == 0x1F) {
 			uprintf("get_data_from_asn1: Long form tags are unsupported");
-			return NULL;
+			return FALSE;
 		}
 
 		// Compute the length
@@ -1294,7 +1296,7 @@ static void* get_data_from_asn1_internal(const uint8_t* buf, size_t buf_len, con
 				// The data we're dealing with is not expected to ever be larger than 64K
 				if (len_len > 2) {
 					uprintf("get_data_from_asn1: Length fields larger than 2 bytes are unsupported");
-					return NULL;
+					return FALSE;
 				}
 				for (i = 0; i < len_len; i++) {
 					len <<= 8;
@@ -1306,51 +1308,57 @@ static void* get_data_from_asn1_internal(const uint8_t* buf, size_t buf_len, con
 
 			if (len > buf_len - pos) {
 				uprintf("get_data_from_asn1: Overflow error (computed length %d is larger than remaining data)", len);
-				return NULL;
+				return FALSE;
 			}
 		}
 
 		if (len != 0) {
 			if (is_sequence) {
-				ret = get_data_from_asn1_internal(&buf[pos], len, oid, oid_len, asn1_type, data_len, matched);
-				if (ret != NULL)
-					return ret;
+				if (!get_data_from_asn1_internal(&buf[pos], len, oid, oid_len, asn1_type, data, data_len, matched))
+					return FALSE;	// error
+				if (*data != NULL)
+					return TRUE;
 			} else if (is_universal_tag) {	// Only process tags that belong to the UNIVERSAL class
 				// NB: 0x06 = "OID" tag
 				if ((!*matched) && (tag == 0x06) && (len == oid_len) && (memcmp(&buf[pos], oid, oid_len) == 0)) {
 					*matched = TRUE;
 				} else if ((*matched) && (tag == asn1_type)) {
 					*data_len = len;
-					return (void*)&buf[pos];
+					*data = (void*)&buf[pos];
+					return TRUE;
 				}
 			}
 			pos += len;
 		}
 	};
 
-	return NULL;
+	return TRUE;
 }
 
-// Helper functions to convert an OID string to an OID byte array
-// Taken from from openpgp-oid.c
-static size_t make_flagged_int(unsigned long value, uint8_t *buf, size_t buflen)
+/*
+ * Helper functions to convert an OID string to an OID byte array
+ * Taken from from openpgp-oid.c
+ */
+static size_t make_flagged_int(unsigned long value, uint8_t *buf, size_t buf_len)
 {
 	BOOL more = FALSE;
 	int shift;
 
 	for (shift = 28; shift > 0; shift -= 7) {
 		if (more || value >= ((unsigned long)1 << shift)) {
-			buf[buflen++] = (uint8_t) (0x80 | (value >> shift));
+			buf[buf_len++] = (uint8_t) (0x80 | (value >> shift));
 			value -= (value >> shift) << shift;
 			more = TRUE;
 		}
 	}
-	buf[buflen++] = (uint8_t) value;
-	return buflen;
+	buf[buf_len++] = (uint8_t) value;
+	return buf_len;
 }
 
-// Convert OID string 'oid_str' to an OID byte array of size 'ret_len'
-// The returned array must be freed by the caller.
+/*
+ * Convert OID string 'oid_str' to an OID byte array of size 'ret_len'
+ * The returned array must be freed by the caller.
+ */
 static uint8_t* oid_from_str(const char* oid_str, size_t* ret_len)
 {
 	uint8_t* oid = NULL;
@@ -1414,21 +1422,27 @@ err:
  */
 void* get_data_from_asn1(const uint8_t* buf, size_t buf_len, const char* oid_str, uint8_t asn1_type, size_t* data_len)
 {
-	void* ret;
+	void* data = NULL;
 	uint8_t* oid = NULL;
 	size_t oid_len = 0;
 	BOOL matched = ((oid_str == NULL) || (oid_str[0] == 0));
+
+	if (buf_len >= 65536) {
+		uprintf("get_data_from_asn1: Buffers larger than 64KB are not supported");
+		return NULL;
+	}
 
 	if (!matched) {
 		// We have an OID string to convert
 		oid = oid_from_str(oid_str, &oid_len);
 		if (oid == NULL) {
-			uprintf("get_oid_data_from_asn1: Could not convert OID string '%s'", oid_str);
+			uprintf("get_data_from_asn1: Could not convert OID string '%s'", oid_str);
 			return NULL;
 		}
 	}
 
-	ret = get_data_from_asn1_internal(buf, buf_len, oid, oid_len, asn1_type, data_len, &matched);
+	// No need to check for the return value as data is always NULL on error
+	get_data_from_asn1_internal(buf, buf_len, oid, oid_len, asn1_type, &data, data_len, &matched);
 	free(oid);
-	return ret;
+	return data;
 }
