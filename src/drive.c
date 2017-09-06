@@ -431,9 +431,6 @@ static BOOL _GetDriveLettersAndType(DWORD DriveIndex, char* drive_letters, UINT*
 		if (!isalpha(*drive))
 			continue;
 		*drive = (char)toupper((int)*drive);
-		if (*drive < 'C') {
-			continue;
-		}
 
 		// IOCTL_STORAGE_GET_DEVICE_NUMBER's STORAGE_DEVICE_NUMBER.DeviceNumber is
 		// not unique! An HDD, a DVD and probably other drives can have the same
@@ -502,7 +499,7 @@ char GetUnusedDriveLetter(void)
 		goto out;
 	}
 
-	for (drive_letter = 'C'; drive_letter < 'Z'; drive_letter++) {
+	for (drive_letter = 'C'; drive_letter <= 'Z'; drive_letter++) {
 		for (drive = drives ;*drive; drive += safe_strlen(drive)+1) {
 			if (!isalpha(*drive))
 				continue;
