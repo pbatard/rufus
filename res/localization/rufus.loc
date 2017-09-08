@@ -4247,7 +4247,7 @@ t MSG_285 "Den hentede fil er signeret af '%s'.\nDet er ikke en signatur vi genk
 
 ################################################################################
 l "nl-NL" "Dutch (Nederlands)" 0x0413, 0x0813
-v 1.0.21
+v 1.0.22
 b "en-US"
 
 # Main dialog
@@ -4535,9 +4535,9 @@ t MSG_116 "Deze image maakt gebruik van Grub %s maar de applicatie bevat alleen 
 # Tooltips
 # Partition Scheme and Target Type
 t MSG_150 "Normaal gesproken de veiligste keuze. Als u een UEFI computer hebt maar u wilt "
-         "\neen besturingssysteem in EFI mode installeren, selecteer dan één van de andere opties"
+	"\neen besturingssysteem in EFI mode installeren, selecteer dan één van de andere opties"
 t MSG_151 "Gebruik deze optie als u een besturingssysteem in EFI mode wilt installeren, maar toegang nodig hebt tot\n"
-         "de USB inhoud van Windows XP"
+	"de USB inhoud van Windows XP"
 t MSG_152 "Aanbevolen optie om een besturingssysteem in EFI mode te installeren en wanneer USB toegang niet nodig is voor Windows XP"
 t MSG_153 "Test patroon: 0x%02X"
 t MSG_154 "Test patroon: 0x%02X, 0x%02X"
@@ -4553,7 +4553,7 @@ t MSG_163 "Aanvinken om de USB drive opstartbaar te maken"
 t MSG_164 "Gebruikte methode om de drive opstartbaar te maken"
 t MSG_165 "Klik om een image te selecteren..."
 t MSG_166 "Vink aan om internationale labels te zien en een apparaat\n"
-         "pictogram in te stellen (creëert een autorun.inf bestand)"
+	"pictogram in te stellen (creëert een autorun.inf bestand)"
 t MSG_167 "Installeert een MBR die een opstartselectie toestaat en de BIOS USB drive ID kan verbergen"
 t MSG_168 "Probeert de eerste opstartbare USB drive (gewoonlijk 0x80) voor te laten doen als een andere disk.\n"
 	"Dit is alleen nodig als u Windows XP installeert en meer dan één disk heeft"
@@ -4710,6 +4710,14 @@ t MSG_291 "Versie selectie"
 t MSG_292 "Selecteer a.u.b. de windows versie die u wilt installeren:"
 t MSG_293 "Niet ondersteunde Windows versie"
 t MSG_294 "Deze Windows versie wordt niet langer ondersteund door Rufus."
+t MSG_295 "Waarschuwing: Onofficiële versie"
+t MSG_296 "Deze versie van Rufus is NIET gemaakt door de originele developer(s).\n\nWeet je zeker dat je dit programma wilt uitvoeren?"
+t MSG_297 "Onvolledige ISO gedetecteerd"
+t MSG_298 "Het ISO bestand dat u heeft geselecteerd komt niet overeen met de aangegeven waarde "
+	"grootte: %s van de data ontbreekt!\n\nAls u dit bestand van het "
+	"internet heeft gehaald, probeer een nieuwe kopie te downloaden en te verifiëren met de "
+	"MD5 of SHA checksums die overeenkomen met de officiële versie.\n\nU kunt de "
+	"MD5 of SHA in Rufus berekenen door op het '#' button te klikken."
 
 ################################################################################
 l "fi-FI" "Finnish (Suomi)" 0x040B
