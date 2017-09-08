@@ -157,12 +157,12 @@ char* GetSignatureName(const char* path)
 		hm = GetModuleHandle(NULL);
 		if (hm == NULL) {
 			uprintf("PKI: Could not get current executable handle: %s", WinPKIErrorString());
-			return NULL;
+			goto out;
 		}
 		dwSize = GetModuleFileNameW(hm, szFileName, MAX_PATH);
 		if ((dwSize == 0) || ((dwSize == MAX_PATH) && (GetLastError() == ERROR_INSUFFICIENT_BUFFER))) {
 			uprintf("PKI: Could not get module filename: %s", WinPKIErrorString());
-			return NULL;
+			goto out;
 		}
 		mpath = wchar_to_utf8(szFileName);
 	} else {
@@ -308,10 +308,14 @@ static uint64_t GetNestedRFC3161TimeStamp(PCMSG_SIGNER_INFO pSignerInfo)
 
 	// Loop through unauthenticated attributes for szOID_NESTED_SIGNATURE OID
 	for (n = 0; ; n++) {
-		if (pNestedSignature != NULL)
+		if (pNestedSignature != NULL) {
 			LocalFree(pNestedSignature);
-		if (hMsg != NULL)
+			pNestedSignature = NULL;
+		}
+		if (hMsg != NULL) {
 			CryptMsgClose(hMsg);
+			hMsg = NULL;
+		}
 		safe_free(pNestedSignerInfo);
 		if (n >= pSignerInfo->UnauthAttrs.cAttr)
 			break;

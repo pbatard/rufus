@@ -5,8 +5,8 @@ o Version 2.17 (2017.09.??)
     Strengthen download update checks, to prevent attack scenarios that leverage user unawareness
     Fix an issue with Spanish translation prompts not displaying properly
     Fix an issue with Windows To Go support on some non-official Windows ISOs
-    Fix an issue with using A: or B: as flash drive letters
     Fix an issue with log autoscrolling
+    Fix an issue when using A: or B: as drive letters
  
 o Version 2.16 (2017.07.31)
     Add an audiovisual cue on completion/error

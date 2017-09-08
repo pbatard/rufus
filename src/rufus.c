@@ -1089,7 +1089,8 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 		}
 		if (!dont_display_image_name) {
 			for (i = (int)safe_strlen(image_path); (i > 0) && (image_path[i] != '\\'); i--);
-			PrintStatusDebug(0, MSG_205, &image_path[i + 1]);
+			PrintStatus(0, MSG_205, &image_path[i + 1]);
+			uprintf("Using image: %s (%s)", &image_path[i + 1], SizeToHumanReadable(img_report.image_size, FALSE, FALSE));
 		}
 		// Lose the focus on the select ISO (but place it on Close)
 		SendMessage(hMainDialog, WM_NEXTDLGCTL, (WPARAM)FALSE, 0);
