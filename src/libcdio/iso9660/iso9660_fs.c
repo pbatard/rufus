@@ -799,6 +799,12 @@ _iso9660_dir_to_statbuf (iso9660_dir_t *p_iso9660_dir, bool_3way_t b_xa,
     }
   }
 
+  if (p_iso9660_dir->file_flags & ISO_MULTIEXTENT)
+  {
+    cdio_warn("Can't handle multi-extent file '%s' - Data will be truncated!", p_stat->filename);
+    free(p_stat);
+    return NULL;
+  }
 
   iso9660_get_dtime(&(p_iso9660_dir->recording_time), true, &(p_stat->tm));
 
