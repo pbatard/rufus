@@ -1,4 +1,4 @@
-o Version 2.17 (2017.09.??)
+o Version 2.17 (2017.09.12)
     Add support for Debian 9 live ISOs in UEFI mode
     Add support for Super Floppy Disk "partitioning" mode
     Add support for more non-USB card readers
