@@ -258,7 +258,7 @@ out:
 static uint64_t GetRFC3161TimeStamp(PCMSG_SIGNER_INFO pSignerInfo)
 {
 	BOOL r, found = FALSE;
-	DWORD n, dwSize;
+	DWORD n, dwSize = 0;
 	PCRYPT_CONTENT_INFO pCounterSignerInfo = NULL;
 	uint64_t ts = 0ULL;
 	uint8_t *timestamp_token;
@@ -318,7 +318,7 @@ static uint64_t GetRFC3161TimeStamp(PCMSG_SIGNER_INFO pSignerInfo)
 static uint64_t GetNestedRFC3161TimeStamp(PCMSG_SIGNER_INFO pSignerInfo)
 {
 	BOOL r, found = FALSE;
-	DWORD n, dwSize;
+	DWORD n, dwSize = 0;
 	PCRYPT_CONTENT_INFO pNestedSignature = NULL;
 	PCMSG_SIGNER_INFO pNestedSignerInfo = NULL;
 	HCRYPTMSG hMsg = NULL;

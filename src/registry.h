@@ -83,7 +83,7 @@ static __inline BOOL _GetRegistryKey(HKEY key_root, const char* key_name, DWORD 
 			break;
 	}
 
-	if (i != 0) {
+	if (i > 0) {
 		// Prefix with "SOFTWARE" if needed
 		if (_strnicmp(key_name, software_prefix, sizeof(software_prefix) - 1) != 0) {
 			if (i + sizeof(software_prefix) >= sizeof(long_key_name))
@@ -146,19 +146,12 @@ static __inline BOOL _SetRegistryKey(HKEY key_root, const char* key_name, DWORD 
 	}
 
 	// Find if we're dealing with a short key
-	for (i = safe_strlen(key_name); i>0; i--) {
+	for (i = safe_strlen(key_name); i > 0; i--) {
 		if (key_name[i] == '\\')
 			break;
 	}
 
-	if (i == 0) {
-		// If this is a short key name, store the value under our app sub-hive
-		if (RegCreateKeyExA(hRoot, "SOFTWARE\\" COMPANY_NAME "\\" APPLICATION_NAME, 0, NULL, 0,
-			KEY_SET_VALUE | KEY_QUERY_VALUE | KEY_CREATE_SUB_KEY, NULL, &hApp, &dwDisp) != ERROR_SUCCESS) {
-			hApp = NULL;
-			goto out;
-		}
-	} else {
+	if (i > 0) {
 		// Prefix with "SOFTWARE" if needed
 		if (_strnicmp(key_name, software_prefix, sizeof(software_prefix) - 1) != 0) {
 			if (i + sizeof(software_prefix) >= sizeof(long_key_name))
@@ -174,6 +167,13 @@ static __inline BOOL _SetRegistryKey(HKEY key_root, const char* key_name, DWORD 
 		}
 		i++;
 		if (RegCreateKeyExA(hRoot, long_key_name, 0, NULL, 0,
+			KEY_SET_VALUE | KEY_QUERY_VALUE | KEY_CREATE_SUB_KEY, NULL, &hApp, &dwDisp) != ERROR_SUCCESS) {
+			hApp = NULL;
+			goto out;
+		}
+	} else {
+		// This is a short key name, store the value under our app sub-hive
+		if (RegCreateKeyExA(hRoot, "SOFTWARE\\" COMPANY_NAME "\\" APPLICATION_NAME, 0, NULL, 0,
 			KEY_SET_VALUE | KEY_QUERY_VALUE | KEY_CREATE_SUB_KEY, NULL, &hApp, &dwDisp) != ERROR_SUCCESS) {
 			hApp = NULL;
 			goto out;

@@ -1,5 +1,5 @@
 @echo off
-set VERSION=2.17
+set VERSION=2.18
 
 rem Make sure you don't have anything you don't want included in the package, as anything residing in the
 rem current directory will be included, including any previous .appx, which makes for nice recursion...

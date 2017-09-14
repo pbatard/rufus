@@ -66,7 +66,7 @@
 /* Globals */
 char sum_str[CHECKSUM_MAX][65];
 uint32_t bufnum, sum_count[CHECKSUM_MAX] = { 16, 20, 32 };
-HANDLE data_ready[CHECKSUM_MAX], thread_ready[CHECKSUM_MAX];
+HANDLE data_ready[CHECKSUM_MAX] = { 0 }, thread_ready[CHECKSUM_MAX] = { 0 };
 DWORD read_size[2];
 unsigned char ALIGNED(64) buffer[2][BUFFER_SIZE];
 
@@ -886,7 +886,7 @@ DWORD WINAPI SumThread(void* param)
 	float format_percent = 0.0f;
 
 	if ((image_path == NULL) || (thread_affinity == NULL))
-		goto out;
+		ExitThread(r);
 
 	uprintf("\r\nComputing checksum for '%s'...", image_path);
 
@@ -985,8 +985,8 @@ out:
 	for (i = 0; i < CHECKSUM_MAX; i++) {
 		if (sum_thread[i] != NULL)
 			TerminateThread(sum_thread[i], 1);
-		CloseHandle(data_ready[i]);
-		CloseHandle(thread_ready[i]);
+		safe_closehandle(data_ready[i]);
+		safe_closehandle(thread_ready[i]);
 	}
 	safe_closehandle(h);
 	PostMessage(hMainDialog, UM_FORMAT_COMPLETED, (WPARAM)FALSE, 0);
