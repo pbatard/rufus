@@ -484,9 +484,14 @@ static void SetFSFromISO(void)
 		fs_mask |= 1<<fs;
 	}
 
+	// The presence of a 4GB file forces the use of NTFS as default FS
+	if (img_report.has_4GB_file) {
+		if (fs_mask & (1 << FS_NTFS)) {
+			selected_fs = FS_NTFS;
+		}
 	// Syslinux and EFI have precedence over bootmgr (unless the user selected BIOS as target type)
-	if ((HAS_SYSLINUX(img_report)) || (HAS_REACTOS(img_report)) || HAS_KOLIBRIOS(img_report) ||
-		(IS_EFI_BOOTABLE(img_report) && (tt == TT_UEFI) && (!img_report.has_4GB_file) && (!windows_to_go))) {
+	} else if ((HAS_SYSLINUX(img_report)) || (HAS_REACTOS(img_report)) || HAS_KOLIBRIOS(img_report) ||
+		(IS_EFI_BOOTABLE(img_report) && (tt == TT_UEFI) && (!windows_to_go))) {
 		if (fs_mask & (1<<FS_FAT32)) {
 			selected_fs = FS_FAT32;
 		} else if ((fs_mask & (1<<FS_FAT16)) && !HAS_KOLIBRIOS(img_report)) {

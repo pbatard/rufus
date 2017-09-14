@@ -156,6 +156,9 @@ extern enum iso_vd_enum_s {
 /*! \brief Maximum number of characters in a volume-set id. */
 #define ISO_MAX_VOLUMESET_ID 128
 
+/*! \brief Maximum number of multi file extent licdio supports. */
+#define ISO_MAX_MULTIEXTENT 8
+
 /*! String inside frame which identifies an ISO 9660 filesystem. This
     string is the "id" field of an iso9660_pvd_t or an iso9660_svd_t.
 */
@@ -517,17 +520,19 @@ PRAGMA_END_PACKED
 */
 struct iso9660_stat_s { /* big endian!! */
 
- iso_rock_statbuf_t rr;              /**< Rock Ridge-specific fields  */
+  iso_rock_statbuf_t rr;              /**< Rock Ridge-specific fields  */
 
   struct tm          tm;              /**< time on entry - FIXME merge with
                                          one of entries above, like ctime? */
-  lsn_t              lsn;             /**< start logical sector number */
-  uint32_t           size;            /**< total size in bytes */
-  uint32_t           secsize;         /**< number of sectors allocated */
+  uint64_t           total_size;      /**< total size in bytes */
+  uint8_t            extents;         /**< number of multiextents */
+  lsn_t              lsn[ISO_MAX_MULTIEXTENT];      /**< start logical sector number for each extent */
+  uint32_t           size[ISO_MAX_MULTIEXTENT];     /**< size of each extent */
+  uint32_t           secsize[ISO_MAX_MULTIEXTENT];  /**< number of sectors allocated for each extent*/
   iso9660_xa_t       xa;              /**< XA attributes */
   enum { _STAT_FILE = 1, _STAT_DIR = 2 } type;
   bool               b_xa;
-  char         filename[EMPTY_ARRAY_SIZE]; /**< filename */
+  char               filename[EMPTY_ARRAY_SIZE];    /**< filename */
 };
 
 /** A mask used in iso9660_ifs_read_vd which allows what kinds
