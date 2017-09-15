@@ -114,7 +114,8 @@ uint16_t rufus_version[3], embedded_sl_version[2];
 char embedded_sl_version_str[2][12] = { "?.??", "?.??" };
 char embedded_sl_version_ext[2][32];
 RUFUS_UPDATE update = { {0,0,0}, {0,0}, NULL, NULL};
-StrArray DriveID, DriveLabel, BlockingProcess;
+StrArray DriveID, DriveLabel, DriveHub, BlockingProcess;
+uint32_t DrivePort[MAX_DRIVES];
 extern char* szStatusMessage;
 
 static HANDLE format_thid = NULL, dialog_handle = NULL;
@@ -1828,9 +1829,10 @@ static void InitDialog(HWND hDlg)
 	}
 	IGNORE_RETVAL(ComboBox_SetCurSel(hDiskID, 0));
 
-	// Create the string array
+	// Create the string arrays
 	StrArrayCreate(&DriveID, MAX_DRIVES);
 	StrArrayCreate(&DriveLabel, MAX_DRIVES);
+	StrArrayCreate(&DriveHub, MAX_DRIVES);
 	StrArrayCreate(&BlockingProcess, 16);
 	// Set various checkboxes
 	CheckDlgButton(hDlg, IDC_QUICKFORMAT, BST_CHECKED);
@@ -2351,6 +2353,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			PostQuitMessage(0);
 			StrArrayDestroy(&DriveID);
 			StrArrayDestroy(&DriveLabel);
+			StrArrayDestroy(&DriveHub);
 			StrArrayDestroy(&BlockingProcess);
 			DestroyAllTooltips();
 			DestroyWindow(hLogDlg);
@@ -3351,7 +3354,7 @@ relaunch:
 
 	// Do our own event processing and process "magic" commands
 	while(GetMessage(&msg, NULL, 0, 0)) {
-		// ** *****  **** ** ******** *
+		// ** *****  **** ** **********
 		// .,ABCDEFGHIJKLMNOPQRSTUVWXYZ
 
 		// Ctrl-A => Select the log data
@@ -3359,6 +3362,7 @@ relaunch:
 			(msg.message == WM_KEYDOWN) && (msg.wParam == 'A') ) {
 			// Might also need ES_NOHIDESEL property if you want to select when not active
 			Edit_SetSel(hLog, 0, -1);
+			continue;
 		}
 		// Alt-. => Enable USB enumeration debug
 		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == VK_OEM_PERIOD)) {
@@ -3385,12 +3389,12 @@ relaunch:
 			PrintStatusTimeout(lmprintf(MSG_256), detect_fakes);
 			continue;
 		}
-		// Alt C => Force the update check to be successful
-		// This will set the reported current version of Rufus to 0.0.0.0 when performing an update
-		// check, so that it always succeeds. This is useful for translators.
+		// Alt-C => Cycle USB port for currently selected device
 		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'C')) {
-			force_update = !force_update;
-			PrintStatusTimeout(lmprintf(MSG_259), force_update);
+			int index = ComboBox_GetCurSel(hDeviceList);
+			if (index < 0)
+				break;
+			ResetDevice(index);
 			continue;
 		}
 		// Alt-D => Delete the NoDriveTypeAutorun key on exit (useful if the app crashed)
@@ -3473,7 +3477,6 @@ relaunch:
 			PrintStatusTimeout(lmprintf(MSG_290), !disable_file_indexing);
 			continue;
 		}
-
 		// Alt-R => Remove all the registry keys that may have been created by Rufus
 		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'R')) {
 			PrintStatus(2000, DeleteRegistryKey(REGKEY_HKCU, COMPANY_NAME "\\" APPLICATION_NAME)?MSG_248:MSG_249);
@@ -3525,11 +3528,20 @@ relaunch:
 			SHDeleteDirectoryExU(NULL, tmp_path, FOF_SILENT | FOF_NOERRORUI | FOF_NOCONFIRMATION);
 			continue;
 		}
+		// Alt Y => Force the update check to be successful
+		// This will set the reported current version of Rufus to 0.0.0.0 when performing an update
+		// check, so that it always succeeds. This is useful for translators.
+		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'Y')) {
+			force_update = !force_update;
+			PrintStatusTimeout(lmprintf(MSG_259), force_update);
+			continue;
+		}
 		// Alt-Z => Zero the drive
 		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'Z')) {
 			zero_drive = TRUE;
 			// Simulate a button click for Start
 			PostMessage(hDlg, WM_COMMAND, (WPARAM)IDC_START, 0);
+			continue;
 		}
 
 		// Hazardous cheat modes require Ctrl + Alt

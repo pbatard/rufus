@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Device listing
- * Copyright © 2014-2016 Pete Batard <pete@akeo.ie>
+ * Copyright Â© 2014-2016 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -106,9 +106,12 @@ DECLSPEC_IMPORT CONFIGRET WINAPI CM_Get_Sibling(PDEVINST pdnDevInst, DEVINST dnD
 // This last one is unknown from MinGW32 and needs to be fetched from the DLL
 PF_TYPE_DECL(WINAPI, CONFIGRET, CM_Get_DevNode_Registry_PropertyA, (DEVINST, ULONG, PULONG, PVOID, PULONG, ULONG));
 
+#define USB_HUB_CYCLE_PORT                        273
 #define USB_GET_NODE_CONNECTION_INFORMATION_EX    274
 #define USB_GET_NODE_CONNECTION_INFORMATION_EX_V2 279
 
+#define IOCTL_USB_HUB_CYCLE_PORT \
+  CTL_CODE(FILE_DEVICE_USB, USB_HUB_CYCLE_PORT, METHOD_BUFFERED, FILE_ANY_ACCESS)
 #define IOCTL_USB_GET_NODE_CONNECTION_INFORMATION_EX \
   CTL_CODE(FILE_DEVICE_USB, USB_GET_NODE_CONNECTION_INFORMATION_EX, METHOD_BUFFERED, FILE_ANY_ACCESS)
 #define IOCTL_USB_GET_NODE_CONNECTION_INFORMATION_EX_V2 \
@@ -171,6 +174,11 @@ typedef struct _USB_NODE_CONNECTION_INFORMATION_EX_V2 {
 	USB_PROTOCOLS SupportedUsbProtocols;
 	USB_NODE_CONNECTION_INFORMATION_EX_V2_FLAGS Flags;
 } USB_NODE_CONNECTION_INFORMATION_EX_V2, *PUSB_NODE_CONNECTION_INFORMATION_EX_V2;
+
+typedef struct {
+	ULONG ConnectionIndex;
+	ULONG StatusReturned;
+} USB_CYCLE_PORT_PARAMS;
 
 #pragma pack(pop)
 

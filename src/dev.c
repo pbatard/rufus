@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Device detection and enumeration
- * Copyright © 2014-2017 Pete Batard <pete@akeo.ie>
+ * Copyright Â© 2014-2017 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,7 +42,8 @@
 #include "drive.h"
 #include "dev.h"
 
-extern StrArray DriveID, DriveLabel;
+extern StrArray DriveID, DriveLabel, DriveHub;
+extern uint32_t DrivePort[MAX_DRIVES];
 extern BOOL enable_HDDs, use_fake_units, enable_vmdk, usb_debug, list_non_usb_removable_drives;
 
 /*
@@ -117,6 +118,51 @@ static BOOL GetUSBProperties(char* parent_path, char* device_id, usb_device_prop
 			props->is_LowerSpeed = TRUE;
 		}
 	}
+
+out:
+	safe_closehandle(handle);
+	return r;
+}
+
+/*
+ * Cycle port (reset) the selected device
+ */
+BOOL ResetDevice(int index)
+{
+	static uint64_t LastReset = 0;
+	BOOL r = FALSE;
+	HANDLE handle = INVALID_HANDLE_VALUE;
+	DWORD size;
+	USB_CYCLE_PORT_PARAMS cycle_port;
+
+	// Wait at least 10 secs between resets
+	if (_GetTickCount64() < LastReset + 10000ULL) {
+		uprintf("You must wait at least 10 seconds before trying to reset a device");
+		return FALSE;
+	}
+
+	if (DriveHub.String[index] == NULL)
+		return FALSE;
+
+	LastReset = _GetTickCount64();
+
+	handle = CreateFileA(DriveHub.String[index], GENERIC_WRITE, FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_FLAG_OVERLAPPED, NULL);
+	if (handle == INVALID_HANDLE_VALUE) {
+		uprintf("Could not open %s: %s", DriveHub.String[index], WindowsErrorString());
+		goto out;
+	}
+
+	memset(&cycle_port, 0, sizeof(cycle_port));
+	size = sizeof(cycle_port);
+	cycle_port.ConnectionIndex = DrivePort[index];
+	uprintf("Cycling port %d (reset) on %s", DrivePort[index], DriveHub.String[index]);
+	// As per https://msdn.microsoft.com/en-us/library/windows/hardware/ff537340.aspx
+	// IOCTL_USB_HUB_CYCLE_PORT is not supported on Windows 7, Windows Vista, and Windows Server 2008
+	if (!DeviceIoControl(handle, IOCTL_USB_HUB_CYCLE_PORT, &cycle_port, size, &cycle_port, size, &size, NULL)) {
+		uprintf("  Failed to cycle port: %s", WindowsErrorString());
+		goto out;
+	}
+	r = TRUE;
 
 out:
 	safe_closehandle(handle);
@@ -319,12 +365,13 @@ BOOL GetDevices(DWORD devnum)
 	LONG maxwidth = 0;
 	int s, score, drive_number, remove_drive;
 	char drive_letters[27], *device_id, *devid_list = NULL, entry_msg[128];
-	char *p, *label, *entry, buffer[MAX_PATH], str[MAX_PATH], *method_str;
+	char *p, *label, *entry, buffer[MAX_PATH], str[MAX_PATH], *method_str, *hub_path;
 	usb_device_props props;
 
 	IGNORE_RETVAL(ComboBox_ResetContent(hDeviceList));
 	StrArrayClear(&DriveID);
 	StrArrayClear(&DriveLabel);
+	StrArrayClear(&DriveHub);
 	StrArrayCreate(&dev_if_path, 128);
 	// Add a dummy for string index zero, as this is what non matching hashes will point to
 	StrArrayAdd(&dev_if_path, "", TRUE);
@@ -452,6 +499,7 @@ BOOL GetDevices(DWORD devnum)
 		memset(buffer, 0, sizeof(buffer));
 		memset(&props, 0, sizeof(props));
 		method_str = "";
+		hub_path = NULL;
 		if (!SetupDiGetDeviceRegistryPropertyA(dev_info, &dev_info_data, SPDRP_ENUMERATOR_NAME,
 				&datatype, (LPBYTE)buffer, sizeof(buffer), &size)) {
 			uprintf("SetupDiGetDeviceRegistryProperty (Enumerator Name) failed: %s\n", WindowsErrorString());
@@ -584,8 +632,10 @@ BOOL GetDevices(DWORD devnum)
 				if ((uintptr_t)htab_devid.table[j].data > 0) {
 					uuprintf("  Matched with Hub[%d]: '%s'", (uintptr_t)htab_devid.table[j].data,
 							dev_if_path.String[(uintptr_t)htab_devid.table[j].data]);
-					if (GetUSBProperties(dev_if_path.String[(uintptr_t)htab_devid.table[j].data], device_id, &props))
+					if (GetUSBProperties(dev_if_path.String[(uintptr_t)htab_devid.table[j].data], device_id, &props)) {
 						method_str = "";
+						hub_path = dev_if_path.String[(uintptr_t)htab_devid.table[j].data];
+					}
 #ifdef FORCED_DEVICE
 					props.vid = FORCED_VID;
 					props.pid = FORCED_PID;
@@ -769,6 +819,8 @@ BOOL GetDevices(DWORD devnum)
 				// Must ensure that the combo box is UNSORTED for indexes to be the same
 				StrArrayAdd(&DriveID, buffer, TRUE);
 				StrArrayAdd(&DriveLabel, label, TRUE);
+				if ((hub_path != NULL) && (StrArrayAdd(&DriveHub, hub_path, TRUE) >= 0))
+					DrivePort[DriveHub.Index - 1] = props.port;
 
 				IGNORE_RETVAL(ComboBox_SetItemData(hDeviceList, ComboBox_AddStringU(hDeviceList, entry), drive_index));
 				maxwidth = max(maxwidth, GetEntryWidth(hDeviceList, entry));

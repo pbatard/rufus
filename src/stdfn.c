@@ -284,20 +284,20 @@ void GetWindowsVersion(void)
 			switch (nWindowsVersion) {
 			case 0x51: w = "XP";
 				break;
-			case 0x52: w = (!GetSystemMetrics(89)?"2003":"2003_R2");
+			case 0x52: w = (!GetSystemMetrics(89)?"Server 2003":"Server 2003_R2");
 				break;
-			case 0x60: w = (ws?"Vista":"2008");
+			case 0x60: w = (ws?"Vista":"Server 2008");
 				break;
-			case 0x61: w = (ws?"7":"2008_R2");
+			case 0x61: w = (ws?"7":"Server 2008_R2");
 				break;
-			case 0x62: w = (ws?"8":"2012");
+			case 0x62: w = (ws?"8":"Server 2012");
 				break;
-			case 0x63: w = (ws?"8.1":"2012_R2");
+			case 0x63: w = (ws?"8.1":"Server 2012_R2");
 				break;
 			case 0x64: w = (ws?"10 (Preview 1)":"Server 10 (Preview 1)");
 				break;
 			// Starting with Windows 10 Preview 2, the major is the same as the public-facing version
-			case 0xA0: w = (ws?"10":"Server 10");
+			case 0xA0: w = (ws?"10":"Server 2016");
 				break;
 			default:
 				if (nWindowsVersion < 0x51)
