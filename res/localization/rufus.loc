@@ -3808,7 +3808,7 @@ t MSG_298 "U vybraného ISO soubor neodpovídá deklarovaná velikost: %s z úda
 
 ################################################################################
 l "da-DK" "Danish (Dansk)" 0x0406
-v 1.0.19
+v 1.0.22
 b "en-US"
 # Main dialog
 g IDD_DIALOG
@@ -4119,7 +4119,8 @@ t MSG_173 "Klik for at vælge..."
 t MSG_174 "Rufus - Det pålidelige USB-formateringsværktøj"
 t MSG_175 "Version %d.%d (Build %d)"
 t MSG_176 "Dansk oversættelse:  Jens Hansen <mailto:zenzay@gmail.com>\\line "
-	"\\tab\\tab      Bo Riis <mailto:supergoof@live.dk>"
+	"\\tab\\tab      Bo Riis <mailto:supergoof@live.dk>\\line"
+	"\\tab\\tab      Andrea Wood <mailto:annideer@gmail.com>"
 t MSG_177 "Rapporter fejl eller anmod om forbedringer på:"
 t MSG_178 "Yderligere rettigheder:"
 t MSG_179 "Opdateringspolitik:"
@@ -4244,6 +4245,21 @@ t MSG_283 "Ugyldig signatur"
 t MSG_284 "Den hentede fil mangler en digital signatur."
 t MSG_285 "Den hentede fil er signeret af '%s'.\nDet er ikke en signatur vi genkender og det kan tyde "
 	"på at der er en form for ondsindet aktivitet...\nEr du sikker på at du vil køre denne fil?"
+t MSG_286 "Skriver 0-er til stationer: %0.1f%% fuldført"
+t MSG_287 "Opdagelse af ikke-USB flytbare drev"
+t MSG_288 "Manglende udvidede rettigheder"
+t MSG_289 "Dette program kan bare køre med udvidede rettigheder"
+t MSG_290 "Fil Indeksering"
+t MSG_291 "Versions valg"
+t MSG_292 "Valg venligst versionen af Windows du ønsker at installere:"
+t MSG_293 "Ikke støttet Windows version"
+t MSG_294 "Denne version af Windows er ikke længere støttet af Rufus."
+t MSG_295 "Advarsel: Uofficiel version"
+t MSG_296 "Denne version af Rufus er IKKE produceret af dens officielle udvikler(e).\n\nEr du sikker på at du vil køre programmet?"
+t MSG_297 "Forkortet ISO opdaget"
+t MSG_298 "ISO-filen du har valgt, stemmer ikke overens med den erklærede størrelse: %s af dataene mangler!\n\nHvis du har "
+	"downloadet filen fra internettet, bør du prøve at downloade en ny kopi og verificere at MD5 eller SHA kontrolsummen svarer "
+	"til de officielle.\n\nLæg mærke til at du kan beregne MD5 eller SHA i Rufus ved at klikke på '#'-knappen."
 
 ################################################################################
 l "nl-NL" "Dutch (Nederlands)" 0x0413, 0x0813
