@@ -9881,7 +9881,7 @@ t IDC_BADBLOCKS "Tikrinti, ar įrenginyje yra blogų blokų"
 m IDC_NBPASSES +25,0
 s IDC_NBPASSES -25,0
 t IDC_QUICKFORMAT "Greitasis suženklinimas"
-t IDC_BOOT "Sistema paleidžiama iš laikmenos"
+t IDC_BOOT "Paleidžiama iš laikmenos"
 t IDC_WINDOWS_INSTALL "Standartinė Windows įdiegtis"
 t IDC_SET_ICON "Kurti išplėstinių žymių ir piktogramų failus"
 s IDC_ABOUT -15,0
@@ -9933,7 +9933,7 @@ s IDS_UPDATE_SETTINGS_GRP +17,0
 m IDS_CHECK_NOW_GRP +17,0
 s IDS_CHECK_NOW_GRP -12,0
 s IDS_UPDATE_FREQUENCY_TXT +6,0
-t IDS_UPDATE_FREQUENCY_TXT "Tikrinti, ar yra atnaujinimų"
+t IDS_UPDATE_FREQUENCY_TXT "Ieškoti atnaujinimų"
 m IDC_UPDATE_FREQUENCY -4,0
 s IDC_UPDATE_FREQUENCY +28,0
 t IDS_INCLUDE_BETAS_TXT "Įtraukti beta versijas"
@@ -10068,7 +10068,7 @@ t MSG_086 "Atvaizdis nepasirinktas"
 # The content between the quotes below (\"Create a bootable disk\") should match
 # the beginning of the IDC_BOOT text
 t MSG_087 "Spauskite disko mygtuką, jei norite pasirinkti paleidimo atvaizdį, "
-	"arba nežymėkite langelio „Sistema paleidžiama iš laikmenos“."
+	"arba nežymėkite langelio „Paleidžiama iš laikmenos“."
 t MSG_088 "Atvaizdis per didelis"
 t MSG_089 "Atvaizdis yra per didelis pasirinktai paskirčiai."
 t MSG_090 "Nepalaikomas ISO"
