@@ -66,6 +66,7 @@ static BOOL existing_key = FALSE;	// For LGP set/restore
 static BOOL size_check = TRUE;
 static BOOL log_displayed = FALSE;
 static BOOL iso_provided = FALSE;
+static BOOL dd_provided = FALSE;
 static BOOL user_notified = FALSE;
 static BOOL relaunch = FALSE;
 static BOOL dont_display_image_name = FALSE;
@@ -1974,6 +1975,12 @@ static void InitDialog(HWND hDlg)
 		// Simulate a button click for ISO selection
 		PostMessage(hDlg, WM_COMMAND, IDC_SELECT_ISO, 0);
 	}
+	if (dd_provided) {
+		// Simulate a button click for DD selection
+		selection_default = BT_IMG;
+		SetComboEntry(hBootType, selection_default);
+		PostMessage(hDlg, WM_COMMAND, IDC_SELECT_ISO, 0);
+	}
 
 	PrintInfo(0, MSG_210);
 }
@@ -2530,6 +2537,10 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			if (iso_provided) {
 				uprintf("\r\nImage provided: '%s'", image_path);
 				iso_provided = FALSE;	// One off thing...
+			}
+			else if (dd_provided) {
+				uprintf("\r\nImage provided: '%s'", image_path);
+				dd_provided = FALSE;	// One off thing...
 			} else {
 				safe_free(image_path);
 				EnableWindow(hStatusToolbar, FALSE);
@@ -2966,6 +2977,8 @@ static void PrintUsage(char* appname)
 	printf("     Start in GUI mode (disable the 'rufus.com' commandline hogger)\n");
 	printf("  -i PATH, --iso=PATH\n");
 	printf("     Select the ISO image pointed by PATH to be used on startup\n");
+	printf("  -d FILE, --dd=FILE\n");
+	printf("     Select the dd image pointed by FILE to be used on startup\n");
 	printf("  -l LOCALE, --locale=LOCALE\n");
 	printf("     Select the locale to be used on startup\n");
 	printf("  -w TIMEOUT, --wait=TIMEOUT\n");
@@ -3052,6 +3065,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		{"gui",     no_argument,       NULL, 'g'},
 		{"help",    no_argument,       NULL, 'h'},
 		{"iso",     required_argument, NULL, 'i'},
+		{"dd",      required_argument, NULL, 'd' },
 		{"locale",  required_argument, NULL, 'l'},
 		{"wait",    required_argument, NULL, 'w'},
 		{0, 0, NULL, 0}
@@ -3101,7 +3115,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			// Now enable the hogger before processing the rest of the arguments
 			hogmutex = SetHogger(attached_console, disable_hogger);
 
-			while ((opt = getopt_long(argc, argv, "?fghi:w:l:", long_options, &option_index)) != EOF) {
+			while ((opt = getopt_long(argc, argv, "?fghi:d:w:l:", long_options, &option_index)) != EOF) {
 				switch (opt) {
 				case 'f':
 					enable_HDDs = TRUE;
@@ -3117,6 +3131,16 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 					}
 					else {
 						printf("Could not find ISO image '%s'\n", optarg);
+					}
+					break;
+				case 'd':
+					if (_access(optarg, 0) != -1) {
+						safe_free(image_path);
+						image_path = safe_strdup(optarg);
+						dd_provided = TRUE;
+					}
+					else {
+						printf("Could not find dd image '%s'\n", optarg);
 					}
 					break;
 				case 'l':
