@@ -1531,6 +1531,7 @@ static BOOL WriteDrive(HANDLE hPhysicalDrive, HANDLE hSourceImage)
 	LARGE_INTEGER li;
 	DWORD rSize, wSize, BufSize;
 	uint64_t wb, target_size = hSourceImage?img_report.image_size:SelectedDrive.DiskSize;
+	int64_t bled_ret;
 	uint8_t *buffer = NULL;
 	int i;
 
@@ -1541,10 +1542,16 @@ static BOOL WriteDrive(HANDLE hPhysicalDrive, HANDLE hSourceImage)
 	LastRefresh = 0;
 
 	if (img_report.compression_type != BLED_COMPRESSION_NONE) {
-		uprintf("Writing Compressed Image...");
+		uprintf("Writing compressed image...");
 		bled_init(_uprintf, update_progress, &FormatStatus);
-		bled_uncompress_with_handles(hSourceImage, hPhysicalDrive, img_report.compression_type);
+		bled_ret = bled_uncompress_with_handles(hSourceImage, hPhysicalDrive, img_report.compression_type);
 		bled_exit();
+		if ((bled_ret < 0) && (SCODE_CODE(FormatStatus) != ERROR_CANCELLED)) {
+			// Unfortunately, different compression backends return different negative error codes
+			uprintf("Could not write compressed image: %" PRIi64, bled_ret);
+			FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_WRITE_FAULT;
+			goto out;
+		}
 	} else {
 		uprintf(hSourceImage?"Writing Image...":"Zeroing drive...");
 		// Our buffer size must be a multiple of the sector size and *ALIGNED* to the sector size
