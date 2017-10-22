@@ -139,7 +139,7 @@ const char* WinPKIErrorString(void)
 char* GetSignatureName(const char* path, const char* country_code)
 {
 	static char szSubjectName[128];
-	static char szCountry[3];
+	char szCountry[3] = "__";
 	char *p = NULL, *mpath = NULL;
 	BOOL r;
 	HMODULE hm;
