@@ -2293,12 +2293,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	case WM_COMMAND:
 #ifdef RUFUS_TEST
 		if (LOWORD(wParam) == IDC_TEST) {
-			uprintf("ts = %lld", GetSignatureTimeStamp("C:\\rufus\\rufus-2.17_BETA.exe"));
-//			ExtractEfiImgFiles("C:\\rufus");
-//			ExtractEFI("C:\\rufus\\efi.img", "C:\\rufus\\efi");
-//			uprintf("Proceed = %s", CheckDriveAccess(2000)?"True":"False");
-//			char* choices[] = { "Choice 1", "Choice 2", "Choice 3" };
-//			SelectionDyn("Test Choice", "Unused", choices, ARRAYSIZE(choices));
+			GetDevices(DeviceNum);
 			break;
 		}
 #endif
@@ -2425,6 +2420,8 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			PopulateProperties(ComboBox_GetCurSel(hDeviceList));
 			SendMessage(hMainDialog, WM_COMMAND, (CBN_SELCHANGE<<16) | IDC_FILESYSTEM,
 				ComboBox_GetCurSel(hFileSystem));
+			nDeviceIndex = ComboBox_GetCurSel(hDeviceList);
+			DeviceNum = (nDeviceIndex == CB_ERR) ? 0 : (DWORD)ComboBox_GetItemData(hDeviceList, nDeviceIndex);
 			break;
 		case IDC_NBPASSES:
 			if (HIWORD(wParam) != CBN_SELCHANGE)

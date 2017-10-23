@@ -31,7 +31,7 @@
 /* Program options */
 #define RUFUS_LOGGING               // print info to logging facility
 /* Features not ready for prime time and that may *DESTROY* your data - USE AT YOUR OWN RISKS! */
-// #define RUFUS_TEST
+//#define RUFUS_TEST
 
 #define APPLICATION_NAME            "Rufus"
 #define COMPANY_NAME                "Akeo Consulting"
