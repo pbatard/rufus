@@ -634,8 +634,10 @@ BOOL IsFontAvailable(const char* font_name) {
 	LOGFONTA lf = { 0 };
 	HDC hDC = GetDC(hMainDialog);
 
-	if (font_name == NULL)
+	if (font_name == NULL) {
+		ReleaseDC(hMainDialog, hDC);
 		return FALSE;
+	}
 
 	lf.lfCharSet = DEFAULT_CHARSET;
 	safe_strcpy(lf.lfFaceName, LF_FACESIZE, font_name);
