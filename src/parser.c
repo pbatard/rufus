@@ -1131,7 +1131,8 @@ char* replace_in_token_data(const char* filename, const char* token, const char*
 	}
 	// Check the input file's BOM and create an output file with the same
 	if (fread(&bom, sizeof(bom), 1, fd_in) != 1) {
-		uprintf("Could not read file '%s'\n", filename);
+		if (!feof(fd_in))
+			uprintf("Could not read file '%s'\n", filename);
 		goto out;
 	}
 	switch(bom) {
