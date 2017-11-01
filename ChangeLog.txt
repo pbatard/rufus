@@ -1,3 +1,13 @@
+o Version 2.18 (2017.11.??)
+    Ensure that the same drive is reselected on device refresh
+    Add a cheat mode to cycle the USB port of currently selected device
+    Make lookup for updatable .cfg file more generic (e.g. ESET SysRescue)
+    Fix handling of multiextent ISOs (e.g. BlackArch Linux)
+    Fix propagation of image decompression errors
+
+    IMPORTANT: THIS IS THE LAST RELEASE TO SUPPORT WINDOWS XP AND WINDOWS VITA
+    FUTURE RUFUS RELEASES WILL *NO LONGER* BE COMPATIBILE WITH THESE PLATFORMS
+
 o Version 2.17 (2017.09.12)
     Add support for Debian 9 live ISOs in UEFI mode
     Add support for Super Floppy Disk "partitioning" mode

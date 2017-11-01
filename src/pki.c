@@ -235,7 +235,10 @@ char* GetSignatureName(const char* path, const char* country_code)
 		goto out;
 	}
 
-	uprintf("Binary executable is signed by '%s' (%s)", szSubjectName, szCountry);
+	if (szCountry[0] == '_')
+		uprintf("Binary executable is signed by '%s'", szSubjectName);
+	else
+		uprintf("Binary executable is signed by '%s' (%s)", szSubjectName, szCountry);
 	p = szSubjectName;
 
 out:
