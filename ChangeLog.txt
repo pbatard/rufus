@@ -1,9 +1,10 @@
-o Version 2.18 (2017.11.??)
+o Version 2.18 (2017.11.07)
     Ensure that the same drive is reselected on device refresh
     Add a cheat mode to cycle the USB port of currently selected device
     Make lookup for updatable .cfg file more generic (e.g. ESET SysRescue)
     Fix handling of multiextent ISOs (e.g. BlackArch Linux)
     Fix propagation of image decompression errors
+    Update grub4dos to latest
 
     IMPORTANT: THIS IS THE LAST RELEASE TO SUPPORT WINDOWS XP AND WINDOWS VISTA
     FUTURE RUFUS RELEASES WILL *NO LONGER* BE COMPATIBLE WITH THESE PLATFORMS
