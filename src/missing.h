@@ -60,11 +60,9 @@
 /* Read/write with endianness swap */
 #if defined (_MSC_VER) && (_MSC_VER >= 1300)
 #include <stdlib.h>
-#if !defined(__clang__)
 #pragma intrinsic(_byteswap_ushort)
 #pragma intrinsic(_byteswap_ulong)
 #pragma intrinsic(_byteswap_uint64)
-#endif
 #define bswap_uint64 _byteswap_uint64
 #define bswap_uint32 _byteswap_ulong
 #define bswap_uint16 _byteswap_ushort
@@ -268,16 +266,6 @@ typedef struct _ATTACH_VIRTUAL_DISK_PARAMETERS {
 #endif
 #if !defined(ERROR_INTERNET_LOGIN_FAILURE_DISPLAY_ENTITY_BODY)
 #define ERROR_INTERNET_LOGIN_FAILURE_DISPLAY_ENTITY_BODY (INTERNET_ERROR_BASE + 174)
-#endif
-
-/* Clang/MinGW32 has an issue with intptr_t */
-#ifndef _UINTPTR_T_DEFINED
-#define _UINTPTR_T_DEFINED
-#ifdef _WIN64
-typedef unsigned __int64 uintptr_t;
-#else
-typedef unsigned int uintptr_t;
-#endif
 #endif
 
 /*
