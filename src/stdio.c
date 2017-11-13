@@ -381,7 +381,8 @@ BOOL WriteFileWithRetry(HANDLE hFile, LPCVOID lpBuffer, DWORD nNumberOfBytesToWr
 // This is needed, for instance, if you are waiting for a thread that may issue uprintf's
 DWORD WaitForSingleObjectWithMessages(HANDLE hHandle, DWORD dwMilliseconds)
 {
-	DWORD res, dwCurTime, dwEndTime = GetTickCount() + dwMilliseconds;
+	uint64_t CurTime, EndTime = GetTickCount64() + dwMilliseconds;
+	DWORD res;
 	MSG msg;
 
 	do {
@@ -399,11 +400,11 @@ DWORD WaitForSingleObjectWithMessages(HANDLE hHandle, DWORD dwMilliseconds)
 		res = MsgWaitForMultipleObjects(1, &hHandle, FALSE, dwMilliseconds, QS_ALLINPUT);
 
 		if (dwMilliseconds != INFINITE) {
-			dwCurTime = GetTickCount();
+			CurTime = GetTickCount64();
 			// Account for the case where we may reach the timeout condition while
 			// processing timestamps
-			if (dwCurTime < dwEndTime)
-				dwMilliseconds = dwEndTime - dwCurTime;
+			if (CurTime < EndTime)
+				dwMilliseconds = (DWORD) (EndTime - CurTime);
 			else
 				res = WAIT_TIMEOUT;
 		}

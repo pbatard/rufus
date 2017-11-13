@@ -121,7 +121,8 @@ static HANDLE GetHandle(char* Path, BOOL bLockDrive, BOOL bWriteAccess, BOOL bWr
 {
 	int i;
 	BYTE access_mask = 0;
-	DWORD size, EndTime;
+	DWORD size;
+	uint64_t EndTime;
 	HANDLE hDrive = INVALID_HANDLE_VALUE;
 	char DevPath[MAX_PATH];
 
@@ -172,14 +173,14 @@ static HANDLE GetHandle(char* Path, BOOL bLockDrive, BOOL bWriteAccess, BOOL bWr
 		}
 
 		uprintf("Requesting lock...");
-		EndTime = GetTickCount() + DRIVE_ACCESS_TIMEOUT;
+		EndTime = GetTickCount64() + DRIVE_ACCESS_TIMEOUT;
 		do {
 			if (DeviceIoControl(hDrive, FSCTL_LOCK_VOLUME, NULL, 0, NULL, 0, &size, NULL))
 				goto out;
 			if (IS_ERROR(FormatStatus))	// User cancel
 				break;
 			Sleep(DRIVE_ACCESS_TIMEOUT / DRIVE_ACCESS_RETRIES);
-		} while (GetTickCount() < EndTime);
+		} while (GetTickCount64() < EndTime);
 		// If we reached this section, either we didn't manage to get a lock or the user cancelled
 		uprintf("Could not lock access to %s: %s", Path, WindowsErrorString());
 		// See if we can report the processes are accessing the drive
@@ -315,12 +316,12 @@ out:
 /* Wait for a logical drive to reappear - Used when a drive has just been repartitioned */
 BOOL WaitForLogical(DWORD DriveIndex)
 {
-	DWORD EndTime;
+	uint64_t EndTime;
 	char* LogicalPath = NULL;
 
 	// GetLogicalName() calls may be slow, so use the system time to
 	// make sure we don't spend more than DRIVE_ACCESS_TIMEOUT in wait.
-	EndTime = GetTickCount() + DRIVE_ACCESS_TIMEOUT;
+	EndTime = GetTickCount64() + DRIVE_ACCESS_TIMEOUT;
 	do {
 		LogicalPath = GetLogicalName(DriveIndex, FALSE, TRUE);
 		if (LogicalPath != NULL) {
@@ -330,7 +331,7 @@ BOOL WaitForLogical(DWORD DriveIndex)
 		if (IS_ERROR(FormatStatus))	// User cancel
 			return FALSE;
 		Sleep(DRIVE_ACCESS_TIMEOUT/DRIVE_ACCESS_RETRIES);
-	} while (GetTickCount() < EndTime);
+	} while (GetTickCount64() < EndTime);
 	uprintf("Timeout while waiting for logical drive");
 	return FALSE;
 }
@@ -826,8 +827,7 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 				 (CompareGUID(&DriveLayout->PartitionEntry[i].Gpt.PartitionType, &PARTITION_MSFT_RESERVED_GUID)) ||
 				 (CompareGUID(&DriveLayout->PartitionEntry[i].Gpt.PartitionType, &PARTITION_SYSTEM_GUID)) )
 				--SelectedDrive.nPartitions;
-			if ( (memcmp(&PARTITION_BASIC_DATA_GUID, &DriveLayout->PartitionEntry[i].Gpt.PartitionType, sizeof(GUID)) == 0) &&
-				 (nWindowsVersion >= WINDOWS_VISTA) )
+			if (memcmp(&PARTITION_BASIC_DATA_GUID, &DriveLayout->PartitionEntry[i].Gpt.PartitionType, sizeof(GUID)) == 0)
 				ret = TRUE;
 		}
 		break;
@@ -1242,7 +1242,7 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 		// This helps us reselect the partition scheme option that was used when creating the
 		// drive in Rufus. As far as I can tell, Windows doesn't care much if this signature
 		// isn't unique for USB drives.
-		CreateDisk.Mbr.Signature = mbr_uefi_marker?MBR_UEFI_MARKER:(DWORD)_GetTickCount64();
+		CreateDisk.Mbr.Signature = mbr_uefi_marker?MBR_UEFI_MARKER:(DWORD)GetTickCount64();
 
 		DriveLayoutEx.PartitionStyle = PARTITION_STYLE_MBR;
 		DriveLayoutEx.PartitionCount = 4;	// Must be multiple of 4 for MBR

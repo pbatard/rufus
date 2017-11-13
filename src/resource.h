@@ -13,8 +13,6 @@
 #define IDD_CHECKSUM                    109
 #define IDD_LIST                        110
 #define IDI_ICON                        120
-#define IDI_UP                          121
-#define IDI_DOWN                        122
 #define IDD_DIALOG_XP                   151
 #define IDD_ABOUTBOX_XP                 152
 #define IDD_NOTIFICATION_XP             153

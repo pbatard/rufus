@@ -590,12 +590,12 @@ DWORD WINAPI WimProgressCallback(DWORD dwMsgId, WPARAM wParam, LPARAM lParam, PV
 			wim_nb_files++;
 		} else {
 			wim_proc_files++;
-			if (_GetTickCount64() > LastRefresh + 100) {
+			if (GetTickCount64() > LastRefresh + 100) {
 				// At the end of an actual apply, the WIM API re-lists a bunch of directories it
 				// already processed, so we end up with more entries than counted - ignore those.
 				if (wim_proc_files > wim_nb_files)
 					wim_proc_files = wim_nb_files;
-				LastRefresh = _GetTickCount64();
+				LastRefresh = GetTickCount64();
 				// x^3 progress, so as not to give a better idea right from the onset
 				// as to the dismal speed with which the WIM API can actually apply files...
 				apply_percent = 4.636942595f * ((float)wim_proc_files) / ((float)wim_nb_files);

@@ -447,7 +447,7 @@ static void CALLBACK OutputMessageTimeout(HWND hWnd, UINT uMsg, UINT_PTR idEvent
 	KillTimer(hMainDialog, idEvent);
 	bOutputTimerArmed[i] = FALSE;
 	PrintMessage[i](output_msg[i]);
-	last_msg_time[i] = _GetTickCount64();
+	last_msg_time[i] = GetTickCount64();
 }
 
 static void OutputMessage(BOOL info, char* msg)
@@ -460,7 +460,7 @@ static void OutputMessage(BOOL info, char* msg)
 		output_msg[i] = msg;
 	} else {
 		// Find if we need to arm a timer
-		delta = _GetTickCount64() - last_msg_time[i];
+		delta = GetTickCount64() - last_msg_time[i];
 		if (delta < (2 * MAX_REFRESH)) {
 			// Not enough time has elapsed since our last output => arm a timer
 			output_msg[i] = msg;
@@ -468,7 +468,7 @@ static void OutputMessage(BOOL info, char* msg)
 			bOutputTimerArmed[i] = TRUE;
 		} else {
 			PrintMessage[i](msg);
-			last_msg_time[i] = _GetTickCount64();
+			last_msg_time[i] = GetTickCount64();
 		}
 	}
 }

@@ -21,8 +21,8 @@
 
 #if defined(_MSC_VER)
 // Disable some VS Code Analysis warnings
-#pragma warning(disable: 4996)		// Ignore deprecated (eg. GetVersionEx()), as we have to contend with XP
-#pragma warning(disable: 28159)		// We use GetTickCount64() where possible, but it's not available on XP
+#pragma warning(disable: 4996)		// Ignore deprecated
+#pragma warning(disable: 28159)		// I'll keep using GetVersionEx(), thank you very much!
 #pragma warning(disable: 6258)		// I know what I'm using TerminateThread for
 #endif
 
@@ -599,7 +599,3 @@ static __inline HMODULE GetLibraryHandle(char* szLibraryName) {
 #define ERROR_CANT_ASSIGN_LETTER       0x120B
 #define ERROR_CANT_MOUNT_VOLUME        0x120C
 
-/* GetTickCount64 not being available on XP is a massive bother */
-PF_TYPE(WINAPI, ULONGLONG, GetTickCount64, (void));
-extern GetTickCount64_t pfGetTickCount64;
-#define _GetTickCount64() ((pfGetTickCount64 != NULL)?(uint64_t)pfGetTickCount64():(uint64_t)GetTickCount())

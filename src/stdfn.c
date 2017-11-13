@@ -36,8 +36,6 @@ int  nWindowsVersion = WINDOWS_UNDEFINED;
 int  nWindowsBuildNumber = -1;
 char WindowsVersionStr[128] = "Windows ";
 
-PF_TYPE_DECL(WINAPI, int, LCIDToLocaleName, (LCID, LPWSTR, int, DWORD));
-
 /*
  * Hash table functions - modified From glibc 2.3.2:
  * [Aho,Sethi,Ullman] Compilers: Principles, Techniques and Tools, 1986
@@ -900,11 +898,7 @@ char* GetCurrentMUI(void)
 	static char mui_str[LOCALE_NAME_MAX_LENGTH];
 	wchar_t wmui_str[LOCALE_NAME_MAX_LENGTH];
 
-	// Of course LCIDToLocaleName() is not available on XP... grrrr!
-	PF_INIT(LCIDToLocaleName, kernel32);
-
-	if ( (pfLCIDToLocaleName != NULL) &&
-		 (pfLCIDToLocaleName(GetUserDefaultUILanguage(), wmui_str, LOCALE_NAME_MAX_LENGTH, 0) > 0) ) {
+	if (LCIDToLocaleName(GetUserDefaultUILanguage(), wmui_str, LOCALE_NAME_MAX_LENGTH, 0) > 0) {
 		wchar_to_utf8_no_alloc(wmui_str, mui_str, LOCALE_NAME_MAX_LENGTH);
 	} else {
 		static_strcpy(mui_str, "en-US");

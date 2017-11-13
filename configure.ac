@@ -17,9 +17,7 @@ AC_CHECK_TOOL(WINDRES, windres, windres)
 AC_C_INLINE
 AC_DEFINE([_GNU_SOURCE], [], [Use GNU extensions])
 
-# Clang needs an explicit WIN32_WINNT defined else it produces warnings
-# in msapi_utf8.h - including winver.h only doesn't work
-AM_CFLAGS="${AM_CFLAGS} -DWINVER=0x501 -D_WIN32_IE=0x501 -D_WIN32_WINNT=0x501"
+AM_CFLAGS="${AM_CFLAGS} -DWINVER=0x601 -D_WIN32_WINNT=0x601 -D_WIN32_IE=0x800"
 # "-Wl,--nxcompat" to enable DEP (Data Execution Prevention)
 AM_LDFLAGS="${AM_LDFLAGS} -Wl,-no-undefined -Wl,--nxcompat"
 

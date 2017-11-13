@@ -136,7 +136,7 @@ BOOL ResetDevice(int index)
 	USB_CYCLE_PORT_PARAMS cycle_port;
 
 	// Wait at least 10 secs between resets
-	if (_GetTickCount64() < LastReset + 10000ULL) {
+	if (GetTickCount64() < LastReset + 10000ULL) {
 		uprintf("You must wait at least 10 seconds before trying to reset a device");
 		return FALSE;
 	}
@@ -144,7 +144,7 @@ BOOL ResetDevice(int index)
 	if (DriveHub.String[index] == NULL)
 		return FALSE;
 
-	LastReset = _GetTickCount64();
+	LastReset = GetTickCount64();
 
 	handle = CreateFileA(DriveHub.String[index], GENERIC_WRITE, FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_FLAG_OVERLAPPED, NULL);
 	if (handle == INVALID_HANDLE_VALUE) {
@@ -432,9 +432,7 @@ BOOL GetDevices(DWORD devnum)
 
 	// Build a single list of Device IDs from all the storage enumerators we know of
 	full_list_size = 0;
-	ulFlags = CM_GETIDLIST_FILTER_SERVICE;
-	if (nWindowsVersion >= WINDOWS_7)
-		ulFlags |= CM_GETIDLIST_FILTER_PRESENT;
+	ulFlags = CM_GETIDLIST_FILTER_SERVICE | CM_GETIDLIST_FILTER_PRESENT;
 	for (s=0; s<ARRAYSIZE(usbstor_name); s++) {
 		// Get a list of device IDs for all USB storage devices
 		// This will be used to find if a device is UASP

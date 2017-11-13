@@ -32,6 +32,7 @@
 #include <errno.h>
 #include <direct.h>
 #include <ctype.h>
+#include <virtdisk.h>
 
 #include <cdio/cdio.h>
 #include <cdio/logging.h>

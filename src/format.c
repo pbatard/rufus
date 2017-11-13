@@ -607,8 +607,8 @@ static BOOL FormatFAT32(DWORD DriveIndex)
 
 	format_percent = 0.0f;
 	for (i=0; i<(SystemAreaSize+BurstSize-1); i+=BurstSize) {
-		if (_GetTickCount64() > LastRefresh + MAX_REFRESH) {
-			LastRefresh = _GetTickCount64();
+		if (GetTickCount64() > LastRefresh + MAX_REFRESH) {
+			LastRefresh = GetTickCount64();
 			format_percent = (100.0f*i)/(1.0f*(SystemAreaSize+BurstSize));
 			PrintInfo(0, MSG_217, format_percent);
 			UpdateProgress(OP_FORMAT, format_percent);
@@ -1516,8 +1516,8 @@ static BOOL SetupWinToGo(const char* drive_name, BOOL use_ms_efi)
 
 static void update_progress(const uint64_t processed_bytes)
 {
-	if (_GetTickCount64() > LastRefresh + MAX_REFRESH) {
-		LastRefresh = _GetTickCount64();
+	if (GetTickCount64() > LastRefresh + MAX_REFRESH) {
+		LastRefresh = GetTickCount64();
 		format_percent = (100.0f*processed_bytes)/(1.0f*img_report.image_size);
 		PrintInfo(0, MSG_261, format_percent);
 		UpdateProgress(OP_FORMAT, format_percent);
@@ -1574,8 +1574,8 @@ static BOOL WriteDrive(HANDLE hPhysicalDrive, HANDLE hSourceImage)
 		// will be as fast, if not faster, than whatever async scheme you can come up with.
 		rSize = BufSize;
 		for (wb = 0, wSize = 0; wb < (uint64_t)SelectedDrive.DiskSize; wb += wSize) {
-			if (_GetTickCount64() > LastRefresh + MAX_REFRESH) {
-				LastRefresh = _GetTickCount64();
+			if (GetTickCount64() > LastRefresh + MAX_REFRESH) {
+				LastRefresh = GetTickCount64();
 				format_percent = (100.0f*wb) / (1.0f*target_size);
 				PrintInfo(0, hSourceImage?MSG_261:MSG_286, format_percent);
 				UpdateProgress(OP_FORMAT, format_percent);
@@ -1660,11 +1660,6 @@ DWORD WINAPI FormatThread(void* param)
 	char efi_dst[] = "?:\\efi\\boot\\bootx64.efi";
 	char kolibri_dst[] = "?:\\MTLD_F32";
 	char grub4dos_dst[] = "?:\\grldr";
-
-	PF_TYPE_DECL(WINAPI, LANGID, GetThreadUILanguage, (void));
-	PF_TYPE_DECL(WINAPI, LANGID, SetThreadUILanguage, (LANGID));
-	PF_INIT(GetThreadUILanguage, Kernel32);
-	PF_INIT(SetThreadUILanguage, Kernel32);
 
 	fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
 	bt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
@@ -1751,10 +1746,6 @@ DWORD WINAPI FormatThread(void* param)
 		UpdateProgress(OP_ANALYZE_MBR, -1.0f);
 	}
 
-	// Yet another half-workaround needed for XP...
-	if (nWindowsVersion <= WINDOWS_XP)
-		InitializeDisk(hPhysicalDrive);
-
 	if (zero_drive) {
 		WriteDrive(hPhysicalDrive, NULL);
 		goto out;
@@ -1764,7 +1755,7 @@ DWORD WINAPI FormatThread(void* param)
 	// Note, Microsoft's way of cleaning partitions (IOCTL_DISK_CREATE_DISK, which is what we apply
 	// in InitializeDisk) is *NOT ENOUGH* to reset a disk and can render it inoperable for partitioning
 	// or formatting under Windows. See https://github.com/pbatard/rufus/issues/759 for details.
-	if ((nWindowsVersion > WINDOWS_XP) && ((!IsChecked(IDC_BOOT)) || (bt != BT_IMG)))  {
+	if ((!IsChecked(IDC_BOOT)) || (bt != BT_IMG))  {
 		if ((!ClearMBRGPT(hPhysicalDrive, SelectedDrive.DiskSize, SelectedDrive.SectorSize, use_large_fat32)) ||
 			(!InitializeDisk(hPhysicalDrive))) {
 			uprintf("Could not reset partitions\n");
@@ -2068,9 +2059,9 @@ DWORD WINAPI FormatThread(void* param)
 		// NTFS fixup (WinPE/AIK images don't seem to boot without an extra checkdisk)
 		if ((bt == BT_ISO) && (fs == FS_NTFS)) {
 			// Try to ensure that all messages from Checkdisk will be in English
-			if ((pfGetThreadUILanguage != NULL) && (PRIMARYLANGID(pfGetThreadUILanguage()) != LANG_ENGLISH)) {
-				pfSetThreadUILanguage(MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US));
-				if (PRIMARYLANGID(pfGetThreadUILanguage()) != LANG_ENGLISH)
+			if (PRIMARYLANGID(GetThreadUILanguage()) != LANG_ENGLISH) {
+				SetThreadUILanguage(MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US));
+				if (PRIMARYLANGID(GetThreadUILanguage()) != LANG_ENGLISH)
 					uprintf("Note: CheckDisk messages may be localized");
 			}
 			CheckDisk(drive_name[0]);
@@ -2169,8 +2160,8 @@ DWORD WINAPI SaveImageThread(void* param)
 		}
 		if (rSize == 0)
 			break;
-		if (_GetTickCount64() > LastRefresh + MAX_REFRESH) {
-			LastRefresh = _GetTickCount64();
+		if (GetTickCount64() > LastRefresh + MAX_REFRESH) {
+			LastRefresh = GetTickCount64();
 			format_percent = (100.0f*wb)/(1.0f*img_save->DeviceSize);
 			PrintInfo(0, MSG_261, format_percent);
 			UpdateProgress(OP_FORMAT, format_percent);

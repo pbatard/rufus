@@ -929,8 +929,8 @@ DWORD WINAPI SumThread(void* param)
 	read_size[0] = 1;	// Don't trigger the first loop break
 	for (rb = 0; ;rb += read_size[_bufnum]) {
 		// Update the progress and check for cancel
-		if (_GetTickCount64() > LastRefresh + MAX_REFRESH) {
-			LastRefresh = _GetTickCount64();
+		if (GetTickCount64() > LastRefresh + MAX_REFRESH) {
+			LastRefresh = GetTickCount64();
 			format_percent = (100.0f*rb) / (1.0f*img_report.image_size);
 			PrintInfo(0, MSG_271, format_percent);
 			SendMessage(hProgress, PBM_SETPOS, (WPARAM)((format_percent / 100.0f)*MAX_PROGRESS), 0);
