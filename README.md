@@ -27,7 +27,8 @@ Features
 Compilation
 -----------
 
-Use either Visual Studio (2017 or later) or MinGW and then invoke the `.sln` or `configure`/`make` respectively.
+Use either Visual Studio 2017 (with Update 4 and SDK 10.0.16299 installed) or MinGW and
+then invoke the `.sln` or `configure`/`make` respectively.
 
 #### Visual Studio
 Note that, since Rufus is an OSI compliant Open Source project, you are entitled to

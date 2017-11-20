@@ -598,4 +598,3 @@ static __inline HMODULE GetLibraryHandle(char* szLibraryName) {
 #define ERROR_CANT_PATCH               0x120A
 #define ERROR_CANT_ASSIGN_LETTER       0x120B
 #define ERROR_CANT_MOUNT_VOLUME        0x120C
-
