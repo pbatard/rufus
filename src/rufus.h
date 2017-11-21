@@ -21,15 +21,9 @@
 
 #if defined(_MSC_VER)
 // Disable some VS Code Analysis warnings
-#pragma warning(disable: 4996)		// Ignore deprecated (eg. GetVersionEx()), as we have to contend with XP
-#pragma warning(disable: 28159)		// We use GetTickCount64() where possible, but it's not available on XP
+#pragma warning(disable: 4996)		// Ignore deprecated
+#pragma warning(disable: 28159)		// I'll keep using GetVersionEx(), thank you very much!
 #pragma warning(disable: 6258)		// I know what I'm using TerminateThread for
-// Burn in HELL Windows XP!!!
-#ifdef DDKBUILD
-#if (_WIN32_WINNT < _WIN32_WINNT_VISTA)
-#error The Windows XP target is no longer supported for WDK compilation.
-#endif
-#endif
 #endif
 
 #pragma once
@@ -37,7 +31,7 @@
 /* Program options */
 #define RUFUS_LOGGING               // print info to logging facility
 /* Features not ready for prime time and that may *DESTROY* your data - USE AT YOUR OWN RISKS! */
-// #define RUFUS_TEST
+//#define RUFUS_TEST
 
 #define APPLICATION_NAME            "Rufus"
 #define COMPANY_NAME                "Akeo Consulting"
@@ -79,8 +73,9 @@
 #define DD_BUFFER_SIZE              65536		// Minimum size of the buffer we use for DD operations
 #define UBUFFER_SIZE                2048
 #define RUFUS_URL                   "https://rufus.akeo.ie"
-#define DOWNLOAD_URL                RUFUS_URL "/downloads"
-#define FILES_URL                   RUFUS_URL "/files"
+#define RUFUS_NO_SSL_URL            "http://rufus.akeo.ie"	// Stupid XP can't handle a recent SSL implementation...
+#define DOWNLOAD_URL                RUFUS_NO_SSL_URL "/downloads"
+#define FILES_URL                   RUFUS_NO_SSL_URL "/files"
 #define SEVENZIP_URL                "http://www.7-zip.org"
 #define FILES_DIR                   "rufus_files"
 #define IGNORE_RETVAL(expr)         do { (void)(expr); } while(0)
@@ -100,8 +95,10 @@
 #define safe_strcp(dst, dst_max, src, count) do {memcpy(dst, src, safe_min(count, dst_max)); \
 	((char*)dst)[safe_min(count, dst_max)-1] = 0;} while(0)
 #define safe_strcpy(dst, dst_max, src) safe_strcp(dst, dst_max, src, safe_strlen(src)+1)
+#define static_strcpy(dst, src) safe_strcpy(dst, sizeof(dst), src)
 #define safe_strncat(dst, dst_max, src, count) strncat(dst, src, safe_min(count, dst_max - safe_strlen(dst) - 1))
 #define safe_strcat(dst, dst_max, src) safe_strncat(dst, dst_max, src, safe_strlen(src)+1)
+#define static_strcat(dst, src) safe_strcat(dst, sizeof(dst), src)
 #define safe_strcmp(str1, str2) strcmp(((str1==NULL)?"<NULL>":str1), ((str2==NULL)?"<NULL>":str2))
 #define safe_strstr(str1, str2) strstr(((str1==NULL)?"<NULL>":str1), ((str2==NULL)?"<NULL>":str2))
 #define safe_stricmp(str1, str2) _stricmp(((str1==NULL)?"<NULL>":str1), ((str2==NULL)?"<NULL>":str2))
@@ -122,10 +119,10 @@
 #ifdef RUFUS_LOGGING
 extern void _uprintf(const char *format, ...);
 #define uprintf(...) _uprintf(__VA_ARGS__)
-#define vuprintf(...) if (verbose) _uprintf(__VA_ARGS__)
-#define vvuprintf(...) if (verbose > 1) _uprintf(__VA_ARGS__)
-#define suprintf(...) if (!bSilent) _uprintf(__VA_ARGS__)
-#define uuprintf(...) if (usb_debug) _uprintf(__VA_ARGS__)
+#define vuprintf(...) do { if (verbose) _uprintf(__VA_ARGS__); } while(0)
+#define vvuprintf(...) do { if (verbose > 1) _uprintf(__VA_ARGS__); } while(0)
+#define suprintf(...) do { if (!bSilent) _uprintf(__VA_ARGS__); } while(0)
+#define uuprintf(...) do { if (usb_debug) _uprintf(__VA_ARGS__); } while(0)
 #define ubprintf(...) do { safe_sprintf(&ubuffer[ubuffer_pos], UBUFFER_SIZE - ubuffer_pos - 2, __VA_ARGS__); \
 	ubuffer_pos = strlen(ubuffer); ubuffer[ubuffer_pos++] = '\r'; ubuffer[ubuffer_pos++] = '\n'; \
 	ubuffer[ubuffer_pos] = 0; } while(0)
@@ -166,6 +163,7 @@ enum notification_type {
 	MSG_WARNING,
 	MSG_ERROR,
 	MSG_QUESTION,
+	MSG_WARNING_QUESTION
 };
 typedef INT_PTR (CALLBACK *Callback_t)(HWND, UINT, WPARAM, LPARAM);
 typedef struct {
@@ -237,6 +235,7 @@ enum target_type {
 	TT_MAX
 };
 // For the partition types we'll use Microsoft's PARTITION_STYLE_### constants
+#define PARTITION_STYLE_SFD PARTITION_STYLE_RAW
 #define GETTARGETTYPE(x) (((x)>0)?(((x) >> 16) & 0xFFFF):0)
 #define GETPARTTYPE(x)   (((x)>0)?((x) & 0xFFFF):0);
 
@@ -265,8 +264,9 @@ enum checksum_type {
 #define HAS_WINPE(r)        (((r.winpe & WINPE_MININT) == WINPE_MININT)||((r.winpe & WINPE_I386) == WINPE_I386))
 #define HAS_WINDOWS(r)      (HAS_BOOTMGR(r) || (r.uses_minint) || HAS_WINPE(r))
 #define HAS_WIN7_EFI(r)     ((r.has_efi == 1) && HAS_INSTALL_WIM(r))
+#define HAS_EFI_IMG(r)      (r.efi_img_path[0] != 0)
 #define IS_DD_BOOTABLE(r)   (r.is_bootable_img)
-#define IS_EFI_BOOTABLE(r)  (r.has_efi)
+#define IS_EFI_BOOTABLE(r)  (r.has_efi != 0)
 #define IS_BIOS_BOOTABLE(r) (HAS_BOOTMGR(r) || HAS_SYSLINUX(r) || HAS_WINPE(r) || HAS_GRUB(r) || HAS_REACTOS(r) || HAS_KOLIBRIOS(r))
 #define HAS_WINTOGO(r)      (HAS_BOOTMGR(r) && IS_EFI_BOOTABLE(r) && HAS_INSTALL_WIM(r) && (r.install_wim_version < MAX_WIM_VERSION))
 #define IS_FAT(fs)          ((fs == FS_FAT16) || (fs == FS_FAT32))
@@ -277,6 +277,7 @@ typedef struct {
 	char cfg_path[128];			/* path to the ISO's isolinux.cfg */
 	char reactos_path[128];		/* path to the ISO's freeldr.sys or setupldr.sys */
 	char install_wim_path[64];	/* path to install.wim or install.swm */
+	char efi_img_path[128];		/* path to an efi.img file */
 	uint64_t image_size;
 	uint64_t projected_size;
 	int64_t mismatch_size;
@@ -368,11 +369,11 @@ enum WindowsVersion {
 	WINDOWS_UNDEFINED = -1,
 	WINDOWS_UNSUPPORTED = 0,
 	WINDOWS_XP = 0x51,
-	WINDOWS_2003 = 0x52,	// Also XP x64
-	WINDOWS_VISTA = 0x60,
-	WINDOWS_7 = 0x61,
-	WINDOWS_8 = 0x62,
-	WINDOWS_8_1 = 0x63,
+	WINDOWS_2003 = 0x52,	// Also XP_64
+	WINDOWS_VISTA = 0x60,	// Also 2008
+	WINDOWS_7 = 0x61,		// Also 2008_R2
+	WINDOWS_8 = 0x62,		// Also 2012
+	WINDOWS_8_1 = 0x63,		// Also 2012_R2
 	WINDOWS_10_PREVIEW1 = 0x64,
 	WINDOWS_10 = 0xA0,
 	WINDOWS_MAX
@@ -387,7 +388,7 @@ extern HWND hMainDialog, hLogDlg, hStatus, hDeviceList, hCapacity;
 extern HWND hPartitionScheme, hFileSystem, hClusterSize, hLabel, hBootType, hNBPasses, hLog;
 extern HWND hInfo, hProgress, hDiskID, hStatusToolbar;
 extern float fScale;
-extern char szFolderPath[MAX_PATH], app_dir[MAX_PATH], system_dir[MAX_PATH], sysnative_dir[MAX_PATH];
+extern char szFolderPath[MAX_PATH], app_dir[MAX_PATH], temp_dir[MAX_PATH], system_dir[MAX_PATH], sysnative_dir[MAX_PATH];
 extern char* image_path;
 extern DWORD FormatStatus, DownloadStatus, MainThreadId;
 extern BOOL PromptOnError;
@@ -424,6 +425,7 @@ extern void UpdateProgress(int op, float percent);
 extern const char* StrError(DWORD error_code, BOOL use_default_locale);
 extern char* GuidToString(const GUID* guid);
 extern char* SizeToHumanReadable(uint64_t size, BOOL copy_to_log, BOOL fake_units);
+extern char* TimestampToHumanReadable(uint64_t ts);
 extern HWND MyCreateDialog(HINSTANCE hInstance, int Dialog_ID, HWND hWndParent, DLGPROC lpDialogFunc);
 extern INT_PTR MyDialogBox(HINSTANCE hInstance, int Dialog_ID, HWND hWndParent, DLGPROC lpDialogFunc);
 extern void CenterDialog(HWND hDlg);
@@ -438,11 +440,13 @@ extern BOOL CreateTooltip(HWND hControl, const char* message, int duration);
 extern void DestroyTooltip(HWND hWnd);
 extern void DestroyAllTooltips(void);
 extern BOOL Notification(int type, const notification_info* more_info, char* title, char* format, ...);
-extern int Selection(char* title, char* message, char** choices, int size);
+extern int SelectionDialog(char* title, char* message, char** choices, int size);
+extern void ListDialog(char* title, char* message, char** items, int size);
 extern SIZE GetTextSize(HWND hCtrl);
 extern BOOL ExtractDOS(const char* path);
 extern BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan);
 extern int64_t ExtractISOFile(const char* iso, const char* iso_file, const char* dest_file, DWORD attributes);
+extern BOOL ExtractEfiImgFiles(const char* dir);
 extern char* MountISO(const char* path);
 extern void UnMountISO(void);
 extern BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int fs);
@@ -456,6 +460,7 @@ extern DWORD GetResourceSize(HMODULE module, char* name, char* type, const char*
 extern DWORD RunCommand(const char* cmdline, const char* dir, BOOL log);
 extern BOOL CompareGUID(const GUID *guid1, const GUID *guid2);
 extern BOOL GetDevices(DWORD devnum);
+extern BOOL ResetDevice(int index);
 extern BOOL GetOpticalMedia(IMG_SAVE* img_save);
 extern BOOL SetLGP(BOOL bRestore, BOOL* bExistingKey, const char* szPath, const char* szPolicy, DWORD dwValue);
 extern LONG GetEntryWidth(HWND hDropDown, const char* entry);
@@ -474,6 +479,7 @@ extern char* insert_section_data(const char* filename, const char* section, cons
 extern char* replace_in_token_data(const char* filename, const char* token, const char* src, const char* rep, BOOL dos2unix);
 extern char* replace_char(const char* src, const char c, const char* rep);
 extern void parse_update(char* buf, size_t len);
+extern void* get_data_from_asn1(const uint8_t* buf, size_t buf_len, const char* oid_str, uint8_t asn1_type, size_t* data_len);
 extern uint8_t WimExtractCheck(void);
 extern BOOL WimExtractFile(const char* wim_image, int index, const char* src, const char* dst);
 extern BOOL WimExtractFile_API(const char* image, int index, const char* src, const char* dst);
@@ -483,7 +489,8 @@ extern BOOL IsBootableImage(const char* path);
 extern BOOL AppendVHDFooter(const char* vhd_path);
 extern int SetWinToGoIndex(void);
 extern int IsHDD(DWORD DriveIndex, uint16_t vid, uint16_t pid, const char* strid);
-extern char* GetSignatureName(const char* path);
+extern char* GetSignatureName(const char* path, const char* country_code);
+extern uint64_t GetSignatureTimeStamp(const char* path);
 extern LONG ValidateSignature(HWND hDlg, const char* path);
 extern BOOL IsFontAvailable(const char* font_name);
 extern BOOL WriteFileWithRetry(HANDLE hFile, LPCVOID lpBuffer, DWORD nNumberOfBytesToWrite,
@@ -498,10 +505,13 @@ extern BOOL IsBufferInDB(const unsigned char* buf, const size_t len);
 extern char* _printbits(size_t const size, void const * const ptr, int leading_zeroes);
 extern BOOL IsCurrentProcessElevated(void);
 extern char* GetCurrentMUI(void);
+extern char* GetMuiString(char* szModuleName, UINT uID);
 extern BOOL SetFormatPromptHook(void);
 extern void ClrFormatPromptHook(void);
-extern BOOL SearchProcess(char* HandleName, BOOL bPartialMatch, BOOL bIgnoreSelf);
+extern BYTE SearchProcess(char* HandleName, DWORD dwTimeout, BOOL bPartialMatch, BOOL bIgnoreSelf, BOOL bQuiet);
 extern BOOL EnablePrivileges(void);
+extern void FlashTaskbar(HANDLE handle);
+extern DWORD WaitForSingleObjectWithMessages(HANDLE hHandle, DWORD dwMilliseconds);
 
 DWORD WINAPI FormatThread(void* param);
 DWORD WINAPI SaveImageThread(void* param);
@@ -588,8 +598,3 @@ static __inline HMODULE GetLibraryHandle(char* szLibraryName) {
 #define ERROR_CANT_PATCH               0x120A
 #define ERROR_CANT_ASSIGN_LETTER       0x120B
 #define ERROR_CANT_MOUNT_VOLUME        0x120C
-
-/* GetTickCount64 not being available on XP is a massive bother */
-PF_TYPE(WINAPI, ULONGLONG, GetTickCount64, (void));
-extern GetTickCount64_t pfGetTickCount64;
-#define _GetTickCount64() ((pfGetTickCount64 != NULL)?(uint64_t)pfGetTickCount64():(uint64_t)GetTickCount())

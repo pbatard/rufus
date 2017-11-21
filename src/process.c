@@ -34,29 +34,28 @@
 #include "missing.h"
 #include "msapi_utf8.h"
 
-// Process Hacker does some filtering using Object Types, but this doesn't help us.
-// Keep this option, just in case.
-// #define USE_OBJECT_TYPES
-
 PF_TYPE_DECL(NTAPI, PVOID, RtlCreateHeap, (ULONG, PVOID, SIZE_T, SIZE_T, PVOID, PRTL_HEAP_PARAMETERS));
 PF_TYPE_DECL(NTAPI, PVOID, RtlDestroyHeap, (PVOID));
 PF_TYPE_DECL(NTAPI, PVOID, RtlAllocateHeap, (PVOID, ULONG, SIZE_T));
 PF_TYPE_DECL(NTAPI, BOOLEAN, RtlFreeHeap, (PVOID, ULONG, PVOID));
-#ifdef USE_OBJECT_TYPES
-PF_TYPE_DECL(NTAPI, VOID, RtlInitUnicodeString, (PUNICODE_STRING, PCWSTR));
-PF_TYPE_DECL(NTAPI, BOOLEAN, RtlEqualUnicodeString, (PCUNICODE_STRING, PCUNICODE_STRING, BOOLEAN));
-#endif
 
 PF_TYPE_DECL(NTAPI, NTSTATUS, NtQuerySystemInformation, (SYSTEM_INFORMATION_CLASS, PVOID, ULONG, PULONG));
 PF_TYPE_DECL(NTAPI, NTSTATUS, NtQueryInformationFile, (HANDLE, PIO_STATUS_BLOCK, PVOID, ULONG, FILE_INFORMATION_CLASS));
 PF_TYPE_DECL(NTAPI, NTSTATUS, NtQueryObject, (HANDLE, OBJECT_INFORMATION_CLASS, PVOID, ULONG, PULONG));
 PF_TYPE_DECL(NTAPI, NTSTATUS, NtDuplicateObject, (HANDLE, HANDLE, HANDLE, PHANDLE, ACCESS_MASK, ULONG, ULONG));
-PF_TYPE_DECL(NTAPI, NTSTATUS, NtOpenProcess, (PHANDLE, ACCESS_MASK, POBJECT_ATTRIBUTES, PCLIENT_ID));
+PF_TYPE_DECL(NTAPI, NTSTATUS, NtOpenProcess, (PHANDLE, ACCESS_MASK, POBJECT_ATTRIBUTES, CLIENT_ID*));
 PF_TYPE_DECL(NTAPI, NTSTATUS, NtOpenProcessToken, (HANDLE, ACCESS_MASK, PHANDLE));
 PF_TYPE_DECL(NTAPI, NTSTATUS, NtAdjustPrivilegesToken, (HANDLE, BOOLEAN, PTOKEN_PRIVILEGES, ULONG, PTOKEN_PRIVILEGES, PULONG));
 PF_TYPE_DECL(NTAPI, NTSTATUS, NtClose, (HANDLE));
 
+// This one is only available on Vista or later...
+PF_TYPE_DECL(WINAPI, BOOL, QueryFullProcessImageNameW, (HANDLE, DWORD, LPWSTR, PDWORD));
+
 static PVOID PhHeapHandle = NULL;
+static char* _HandleName;
+static BOOL _bPartialMatch, _bIgnoreSelf, _bQuiet;
+static BYTE access_mask;
+extern StrArray BlockingProcess;
 
 /*
  * Convert an NT Status to an error message
@@ -105,7 +104,7 @@ static char* NtStatusError(NTSTATUS Status) {
 	case STATUS_NOT_SUPPORTED:
 		return "Operation is not supported";
 	default:
-		safe_sprintf(unknown, sizeof(unknown), "Unknown error 0x%08lx", Status);
+		static_sprintf(unknown, "Unknown error 0x%08lx", Status);
 		return unknown;
 	}
 }
@@ -263,82 +262,6 @@ NTSTATUS PhOpenProcess(PHANDLE ProcessHandle, ACCESS_MASK DesiredAccess, HANDLE 
 	return status;
 }
 
-#ifdef USE_OBJECT_TYPES
-NTSTATUS PhEnumObjectTypes(POBJECT_TYPES_INFORMATION *ObjectTypes)
-{
-	NTSTATUS status = STATUS_SUCCESS;
-	PVOID buffer;
-	ULONG bufferSize;
-	ULONG returnLength;
-
-	PF_INIT_OR_SET_STATUS(NtQueryObject, Ntdll);
-	if (!NT_SUCCESS(status))
-		return status;
-
-	bufferSize = 0x1000;
-	buffer = PhAllocate(bufferSize);
-
-	while ((status = pfNtQueryObject(NULL, ObjectTypesInformation, buffer, bufferSize, &returnLength)) == STATUS_INFO_LENGTH_MISMATCH) {
-		PhFree(buffer);
-		bufferSize *= 2;
-
-		// Fail if we're resizing the buffer to something very large.
-		if (bufferSize > PH_LARGE_BUFFER_SIZE)
-			return STATUS_INSUFFICIENT_RESOURCES;
-
-		buffer = PhAllocate(bufferSize);
-	}
-
-	if (!NT_SUCCESS(status)) {
-		PhFree(buffer);
-		return status;
-	}
-
-	*ObjectTypes = (POBJECT_TYPES_INFORMATION)buffer;
-
-	return status;
-}
-
-ULONG PhGetObjectTypeNumber(PUNICODE_STRING TypeName)
-{
-	NTSTATUS status = STATUS_SUCCESS;
-	POBJECT_TYPES_INFORMATION objectTypes;
-	POBJECT_TYPE_INFORMATION objectType;
-	ULONG objectIndex = -1;
-	ULONG i;
-
-	PF_INIT_OR_SET_STATUS(RtlEqualUnicodeString, NtDll);
-	if (!NT_SUCCESS(status))
-		return -1;
-
-	status = PhEnumObjectTypes(&objectTypes);
-	if (NT_SUCCESS(status)) {
-		objectType = PH_FIRST_OBJECT_TYPE(objectTypes);
-
-		for (i = 0; i < objectTypes->NumberOfTypes; i++) {
-			if (pfRtlEqualUnicodeString(&objectType->TypeName, TypeName, TRUE)) {
-				if (nWindowsVersion >= WINDOWS_8_1) {
-					objectIndex = objectType->TypeIndex;
-					break;
-				} else if (nWindowsVersion >= WINDOWS_7) {
-					objectIndex = i + 2;
-					break;
-				} else {
-					objectIndex = i + 1;
-					break;
-				}
-			}
-
-			objectType = PH_NEXT_OBJECT_TYPE(objectType);
-		}
-
-		PhFree(objectTypes);
-	}
-
-	return objectIndex;
-}
-#endif
-
 /**
 * Query processes with open handles to a file, volume or disk.
 *
@@ -387,25 +310,14 @@ NTSTATUS PhQueryProcessesUsingVolumeOrFile(HANDLE VolumeOrFileHandle,
 	return status;
 }
 
-/**
- * Search all the processes and list the ones that have a specific handle open.
- *
- * \param HandleName The name of the handle to look for.
- * \param bPartialMatch Whether partial matches should be allowed.
- * \param bIgnoreSelf Whether the current process should be listed.
- *
- * \return TRUE if matching processes were found, FALSE otherwise.
- */
-BOOL SearchProcess(char* HandleName, BOOL bPartialMatch, BOOL bIgnoreSelf)
+
+static DWORD WINAPI SearchProcessThread(LPVOID param)
 {
 	const char *access_rights_str[8] = { "n", "r", "w", "rw", "x", "rx", "wx", "rwx" };
+	char tmp[MAX_PATH];
 	NTSTATUS status = STATUS_SUCCESS;
 	PSYSTEM_HANDLE_INFORMATION_EX handles = NULL;
 	POBJECT_NAME_INFORMATION buffer = NULL;
-#ifdef USE_OBJECT_TYPES
-	UNICODE_STRING fileTypeName;
-	ULONG fileObjectTypeIndex = -1;
-#endif
 	ULONG_PTR i;
 	ULONG_PTR pid[2];
 	ULONG_PTR last_access_denied_pid = 0;
@@ -414,17 +326,18 @@ BOOL SearchProcess(char* HandleName, BOOL bPartialMatch, BOOL bIgnoreSelf)
 	WCHAR *wHandleName = NULL;
 	HANDLE dupHandle = NULL;
 	HANDLE processHandle = NULL;
-	BOOLEAN bFound = FALSE;
+	BOOLEAN bFound = FALSE, bGotExePath, verbose = !_bQuiet;
 	ULONG access_rights = 0;
+	DWORD size;
 	char exe_path[MAX_PATH] = { 0 };
+	wchar_t wexe_path[MAX_PATH];
 	int cur_pid;
 
 	PF_INIT_OR_SET_STATUS(NtQueryObject, Ntdll);
 	PF_INIT_OR_SET_STATUS(NtDuplicateObject, NtDll);
 	PF_INIT_OR_SET_STATUS(NtClose, NtDll);
-#ifdef USE_OBJECT_TYPES
-	PF_INIT_OR_SET_STATUS(RtlInitUnicodeString, NtDll);
-#endif
+
+	StrArrayClear(&BlockingProcess);
 
 	if (NT_SUCCESS(status))
 		status = PhCreateHeap();
@@ -440,20 +353,13 @@ BOOL SearchProcess(char* HandleName, BOOL bPartialMatch, BOOL bIgnoreSelf)
 	pid[0] = (ULONG_PTR)0;
 	cur_pid = 1;
 
-	wHandleName = utf8_to_wchar(HandleName);
+	wHandleName = utf8_to_wchar(_HandleName);
 	wHandleNameLen = (USHORT)wcslen(wHandleName);
 
 	bufferSize = 0x200;
 	buffer = PhAllocate(bufferSize);
 	if (buffer == NULL)
 		goto out;
-
-#ifdef USE_OBJECT_TYPES
-	pfRtlInitUnicodeString(&fileTypeName, L"File");
-	fileObjectTypeIndex = PhGetObjectTypeNumber(&fileTypeName);
-	if (fileObjectTypeIndex < 0)
-		uprintf("Warning: Could not get Object Index for file types");
-#endif
 
 	for (i = 0; ; i++) {
 		ULONG attempts = 8;
@@ -465,13 +371,6 @@ BOOL SearchProcess(char* HandleName, BOOL bPartialMatch, BOOL bIgnoreSelf)
 			dupHandle = NULL;
 		}
 
-#ifdef USE_OBJECT_TYPES
-		// Only look for File objects type
-		if ((fileObjectTypeIndex >= 0 ) && (handleInfo != NULL) &&
-			(handleInfo->ObjectTypeIndex != (USHORT)fileObjectTypeIndex))
-			continue;
-#endif
-
 		// Update the current handle's process PID and compare against last
 		// Note: Be careful about not trying to overflow our list!
 		pid[cur_pid] = (handleInfo != NULL) ? handleInfo->UniqueProcessId : -1;
@@ -481,7 +380,9 @@ BOOL SearchProcess(char* HandleName, BOOL bPartialMatch, BOOL bIgnoreSelf)
 
 			// If we're switching process and found a match, print it
 			if (bFound) {
-				uprintf("o '%s' (pid: %ld, access: %s)", exe_path, pid[cur_pid], access_rights_str[access_rights & 0x7]);
+				vuprintf("● '%s' (pid: %ld, access: %s)", exe_path, pid[cur_pid], access_rights_str[access_rights & 0x7]);
+				static_sprintf(tmp, "● %s (%s)", exe_path, access_rights_str[access_rights & 0x7]);
+				StrArrayAdd(&BlockingProcess, tmp, TRUE);
 				bFound = FALSE;
 				access_rights = 0;
 			}
@@ -526,7 +427,7 @@ BOOL SearchProcess(char* HandleName, BOOL bPartialMatch, BOOL bIgnoreSelf)
 
 		// Now duplicate this handle onto our own process, so that we can access its properties
 		if (processHandle == NtCurrentProcess()) {
-			if (bIgnoreSelf)
+			if (_bIgnoreSelf)
 				continue;
 			dupHandle = (HANDLE)handleInfo->HandleValue;
 		} else {
@@ -562,11 +463,11 @@ BOOL SearchProcess(char* HandleName, BOOL bPartialMatch, BOOL bIgnoreSelf)
 		}
 
 		// Don't bother comparing if we are looking for full match and the length is different
-		if ((!bPartialMatch) && (wHandleNameLen != buffer->Name.Length))
+		if ((!_bPartialMatch) && (wHandleNameLen != buffer->Name.Length))
 			continue;
 
 		// Likewise, if we are looking for a partial match and the current length is smaller
-		if ((bPartialMatch) && (wHandleNameLen > buffer->Name.Length))
+		if ((_bPartialMatch) && (wHandleNameLen > buffer->Name.Length))
 			continue;
 
 		// Match against our target string
@@ -580,28 +481,91 @@ BOOL SearchProcess(char* HandleName, BOOL bPartialMatch, BOOL bIgnoreSelf)
 		access_rights |= handleInfo->GrantedAccess;
 		// The Executable bit is in a place we don't like => reposition it
 		if (access_rights & 0x20)
-			access_rights = (access_rights & 0x3) | 0x4;
+			access_rights = (access_rights & 0x03) | 0x04;
+		access_mask |= (BYTE) (access_rights & 0x7) + 0x80;	// Bit 7 is always set if a process was found
 
 		// If this is the very first process we find, print a header
 		if (exe_path[0] == 0)
-			uprintf("WARNING: The following process(es) or service(s) are accessing %s:", HandleName);
+			vuprintf("WARNING: The following process(es) or service(s) are accessing %s:", _HandleName);
 
-		if (!GetModuleFileNameExU(processHandle, 0, exe_path, MAX_PATH - 1))
-			safe_sprintf(exe_path, MAX_PATH, "Unknown_Process_%" PRIu64,
-				(ULONGLONG) handleInfo->UniqueProcessId);
+		// First, we try to get the executable path using GetModuleFileNameEx
+		bGotExePath = (GetModuleFileNameExU(processHandle, 0, exe_path, MAX_PATH - 1) != 0);
+
+		// The above may not work on Windows 7, so try QueryFullProcessImageName (Vista or later)
+		if (!bGotExePath) {
+			size = MAX_PATH;
+			PF_INIT(QueryFullProcessImageNameW, kernel32);
+			if ( (pfQueryFullProcessImageNameW != NULL) &&
+				 (bGotExePath = pfQueryFullProcessImageNameW(processHandle, 0, wexe_path, &size)) )
+				wchar_to_utf8_no_alloc(wexe_path, exe_path, sizeof(exe_path));
+		}
+
+		// Still nothing? Try GetProcessImageFileName. Note that GetProcessImageFileName uses
+		// '\Device\Harddisk#\Partition#\' instead drive letters
+		if (!bGotExePath) {
+			bGotExePath = (GetProcessImageFileNameW(processHandle, wexe_path, MAX_PATH) != 0);
+			if (bGotExePath)
+				wchar_to_utf8_no_alloc(wexe_path, exe_path, sizeof(exe_path));
+		}
+
+		// Complete failure => Just craft a default process name that includes the PID
+		if (!bGotExePath) {
+			static_sprintf(exe_path, "Unknown_Process_%" PRIu64,
+				(ULONGLONG)handleInfo->UniqueProcessId);
+		}
 	}
 
 out:
 	if (exe_path[0] != 0)
-		uprintf("You should try to close these applications before attempting to reformat the drive.");
+		vuprintf("You should close these applications before attempting to reformat the drive.");
 	else
-		uprintf("NOTE: Could not identify the process(es) or service(s) accessing %s", HandleName);
+		vuprintf("NOTE: Could not identify the process(es) or service(s) accessing %s", _HandleName);
 
 	free(wHandleName);
 	PhFree(buffer);
 	PhFree(handles);
 	PhDestroyHeap();
-	return bFound;
+	ExitThread(0);
+}
+
+/**
+ * Search all the processes and list the ones that have a specific handle open.
+ *
+ * \param HandleName The name of the handle to look for.
+ * \param dwTimeOut The maximum amounf of time (ms) that may be spent searching
+ * \param bPartialMatch Whether partial matches should be allowed.
+ * \param bIgnoreSelf Whether the current process should be listed.
+ * \param bQuiet Prints minimal output.
+ *
+ * \return a byte containing the cummulated access rights (f----xwr) from all the handles found
+ *         with bit 7 ('f') also set if at least one process was found.
+ */
+BYTE SearchProcess(char* HandleName, DWORD dwTimeOut, BOOL bPartialMatch, BOOL bIgnoreSelf, BOOL bQuiet)
+{
+	HANDLE handle;
+	DWORD res = 0;
+
+	_HandleName = HandleName;
+	_bPartialMatch = bPartialMatch;
+	_bIgnoreSelf = bIgnoreSelf;
+	_bQuiet = bQuiet;
+	access_mask = 0;
+
+	handle = CreateThread(NULL, 0, SearchProcessThread, NULL, 0, NULL);
+	if (handle == NULL) {
+		uprintf("Warning: Unable to create conflicting process search thread");
+		return 0x00;
+	}
+	res = WaitForSingleObjectWithMessages(handle, dwTimeOut);
+	if (res == WAIT_TIMEOUT) {
+		// Timeout - kill the thread
+		TerminateThread(handle, 0);
+		uprintf("Warning: Conflicting process search failed to complete due to timeout");
+	} else if (res != WAIT_OBJECT_0) {
+		TerminateThread(handle, 0);
+		uprintf("Warning: Failed to wait for conflicting process search thread: %s", WindowsErrorString());
+	}
+	return access_mask;
 }
 
 /**

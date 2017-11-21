@@ -33,7 +33,7 @@ LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
 IDD_DIALOG DIALOGEX 12, 12, 242, 376
 STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_MINIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_ACCEPTFILES
-CAPTION "Rufus 2.15.1120"
+CAPTION "Rufus 2.18.1217"
 FONT 8, "Segoe UI Symbol", 400, 0, 0x0
 BEGIN
     LTEXT           "Device",IDS_DEVICE_TXT,9,6,200,8
@@ -164,6 +164,34 @@ BEGIN
     CONTROL         "Choice 16",IDC_SELECTION_CHOICEMAX,"Button",BS_AUTORADIOBUTTON | NOT WS_VISIBLE,35,213,269,10,WS_EX_TRANSPARENT
 END
 
+IDD_LIST DIALOGEX 0, 0, 312, 59
+STYLE DS_SETFONT | DS_NOFAILCREATE | DS_CENTER | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_THICKFRAME
+CAPTION "Rufus"
+FONT 8, "Segoe UI Symbol", 400, 0, 0x0
+BEGIN
+    LTEXT           "",IDC_LIST_LINE,0,0,312,32
+    LTEXT           "",IDC_STATIC,0,0,312,31
+    ICON            IDI_ICON,IDC_LIST_ICON,6,6,20,20,0,WS_EX_TRANSPARENT
+    LTEXT           "Message",IDC_LIST_TEXT,35,5,269,8
+    PUSHBUTTON      "OK",IDOK,254,39,50,14
+    LTEXT           "List 1",IDC_LIST_ITEM1,35,17,269,10,SS_PATHELLIPSIS
+    LTEXT           "List 2",IDC_LIST_ITEM2,35,28,269,10,NOT WS_VISIBLE|SS_PATHELLIPSIS
+    LTEXT           "List 3",IDC_LIST_ITEM3,35,39,269,10,NOT WS_VISIBLE|SS_PATHELLIPSIS
+    LTEXT           "List 4",IDC_LIST_ITEM4,35,50,269,10,NOT WS_VISIBLE|SS_PATHELLIPSIS
+    LTEXT           "List 5",IDC_LIST_ITEM5,35,61,269,10,NOT WS_VISIBLE|SS_PATHELLIPSIS
+    LTEXT           "List 6",IDC_LIST_ITEM6,35,72,269,10,NOT WS_VISIBLE|SS_PATHELLIPSIS
+    LTEXT           "List 7",IDC_LIST_ITEM7,35,73,269,10,NOT WS_VISIBLE|SS_PATHELLIPSIS
+    LTEXT           "List 8",IDC_LIST_ITEM8,35,84,269,10,NOT WS_VISIBLE|SS_PATHELLIPSIS
+    LTEXT           "List 9",IDC_LIST_ITEM9,35,95,269,10,NOT WS_VISIBLE|SS_PATHELLIPSIS
+    LTEXT           "List 10",IDC_LIST_ITEM10,35,106,269,10,NOT WS_VISIBLE|SS_PATHELLIPSIS
+    LTEXT           "List 11",IDC_LIST_ITEM11,35,117,269,10,NOT WS_VISIBLE|SS_PATHELLIPSIS
+    LTEXT           "List 12",IDC_LIST_ITEM12,35,128,269,10,NOT WS_VISIBLE|SS_PATHELLIPSIS
+    LTEXT           "List 13",IDC_LIST_ITEM13,35,139,269,10,NOT WS_VISIBLE|SS_PATHELLIPSIS
+    LTEXT           "List 14",IDC_LIST_ITEM14,35,150,269,10,NOT WS_VISIBLE|SS_PATHELLIPSIS
+    LTEXT           "List 15",IDC_LIST_ITEM15,35,161,269,10,NOT WS_VISIBLE|SS_PATHELLIPSIS
+    LTEXT           "List 16",IDC_LIST_ITEMMAX,35,172,269,10,NOT WS_VISIBLE|SS_PATHELLIPSIS
+END
+
 IDD_UPDATE_POLICY DIALOGEX 0, 0, 287, 198
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Update policy and settings"
@@ -206,12 +234,12 @@ END
 // TEXTINCLUDE
 //
 
-1 TEXTINCLUDE
+1 TEXTINCLUDE 
 BEGIN
     "resource.h\0"
 END
 
-2 TEXTINCLUDE
+2 TEXTINCLUDE 
 BEGIN
     "#ifndef _USING_V110_SDK71_\r\n"
     "#define _USING_V110_SDK71_\r\n"
@@ -223,7 +251,7 @@ BEGIN
     "\0"
 END
 
-3 TEXTINCLUDE
+3 TEXTINCLUDE 
 BEGIN
     "\r\n"
     "#ifdef RUFUS_LOC\r\n"
@@ -317,6 +345,10 @@ BEGIN
     BEGIN
     END
 
+    IDD_LIST, DIALOG
+    BEGIN
+    END
+
     IDD_UPDATE_POLICY, DIALOG
     BEGIN
     END
@@ -334,8 +366,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 2,15,1120,0
- PRODUCTVERSION 2,15,1120,0
+ FILEVERSION 2,18,1217,0
+ PRODUCTVERSION 2,18,1217,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -352,13 +384,13 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Akeo Consulting (http://akeo.ie)"
             VALUE "FileDescription", "Rufus"
-            VALUE "FileVersion", "2.15.1120"
+            VALUE "FileVersion", "2.18.1217"
             VALUE "InternalName", "Rufus"
             VALUE "LegalCopyright", "© 2011-2017 Pete Batard (GPL v3)"
             VALUE "LegalTrademarks", "http://www.gnu.org/copyleft/gpl.html"
             VALUE "OriginalFilename", "rufus.exe"
             VALUE "ProductName", "Rufus"
-            VALUE "ProductVersion", "2.15.1120"
+            VALUE "ProductVersion", "2.18.1217"
         END
     END
     BLOCK "VarFileInfo"
@@ -376,10 +408,6 @@ END
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
 IDI_ICON                ICON                    "../res/rufus.ico"
-
-IDI_UP                  ICON                    "../res/up.ico"
-
-IDI_DOWN                ICON                    "../res/down.ico"
 
 #endif    // Neutral resources
 /////////////////////////////////////////////////////////////////////////////
@@ -413,24 +441,24 @@ IDR_FD_KB1_SYS          RCDATA                  "../res/freedos/KEYBOARD.SYS"
 IDR_FD_KB2_SYS          RCDATA                  "../res/freedos/KEYBRD2.SYS"
 IDR_FD_KB3_SYS          RCDATA                  "../res/freedos/KEYBRD3.SYS"
 IDR_FD_KB4_SYS          RCDATA                  "../res/freedos/KEYBRD4.SYS"
-IDR_FD_EGA1_CPX         RCDATA                  "../res/freedos/ega.cpx"
-IDR_FD_EGA2_CPX         RCDATA                  "../res/freedos/ega2.cpx"
-IDR_FD_EGA3_CPX         RCDATA                  "../res/freedos/ega3.cpx"
-IDR_FD_EGA4_CPX         RCDATA                  "../res/freedos/ega4.cpx"
-IDR_FD_EGA5_CPX         RCDATA                  "../res/freedos/ega5.cpx"
-IDR_FD_EGA6_CPX         RCDATA                  "../res/freedos/ega6.cpx"
-IDR_FD_EGA7_CPX         RCDATA                  "../res/freedos/ega7.cpx"
-IDR_FD_EGA8_CPX         RCDATA                  "../res/freedos/ega8.cpx"
-IDR_FD_EGA9_CPX         RCDATA                  "../res/freedos/ega9.cpx"
-IDR_FD_EGA10_CPX        RCDATA                  "../res/freedos/ega10.cpx"
-IDR_FD_EGA11_CPX        RCDATA                  "../res/freedos/ega11.cpx"
-IDR_FD_EGA12_CPX        RCDATA                  "../res/freedos/ega12.cpx"
-IDR_FD_EGA13_CPX        RCDATA                  "../res/freedos/ega13.cpx"
-IDR_FD_EGA14_CPX        RCDATA                  "../res/freedos/ega14.cpx"
-IDR_FD_EGA15_CPX        RCDATA                  "../res/freedos/ega15.cpx"
-IDR_FD_EGA16_CPX        RCDATA                  "../res/freedos/ega16.cpx"
-IDR_FD_EGA17_CPX        RCDATA                  "../res/freedos/ega17.cpx"
-IDR_FD_EGA18_CPX        RCDATA                  "../res/freedos/ega18.cpx"
+IDR_FD_EGA1_CPX         RCDATA                  "../res/freedos/EGA.CPX"
+IDR_FD_EGA2_CPX         RCDATA                  "../res/freedos/EGA2.CPX"
+IDR_FD_EGA3_CPX         RCDATA                  "../res/freedos/EGA3.CPX"
+IDR_FD_EGA4_CPX         RCDATA                  "../res/freedos/EGA4.CPX"
+IDR_FD_EGA5_CPX         RCDATA                  "../res/freedos/EGA5.CPX"
+IDR_FD_EGA6_CPX         RCDATA                  "../res/freedos/EGA6.CPX"
+IDR_FD_EGA7_CPX         RCDATA                  "../res/freedos/EGA7.CPX"
+IDR_FD_EGA8_CPX         RCDATA                  "../res/freedos/EGA8.CPX"
+IDR_FD_EGA9_CPX         RCDATA                  "../res/freedos/EGA9.CPX"
+IDR_FD_EGA10_CPX        RCDATA                  "../res/freedos/EGA10.CPX"
+IDR_FD_EGA11_CPX        RCDATA                  "../res/freedos/EGA11.CPX"
+IDR_FD_EGA12_CPX        RCDATA                  "../res/freedos/EGA12.CPX"
+IDR_FD_EGA13_CPX        RCDATA                  "../res/freedos/EGA13.CPX"
+IDR_FD_EGA14_CPX        RCDATA                  "../res/freedos/EGA14.CPX"
+IDR_FD_EGA15_CPX        RCDATA                  "../res/freedos/EGA15.CPX"
+IDR_FD_EGA16_CPX        RCDATA                  "../res/freedos/EGA16.CPX"
+IDR_FD_EGA17_CPX        RCDATA                  "../res/freedos/EGA17.CPX"
+IDR_FD_EGA18_CPX        RCDATA                  "../res/freedos/EGA18.CPX"
 IDR_XT_HOGGER           RCDATA                  "../res/hogger/hogger.exe"
 IDR_UEFI_NTFS           RCDATA                  "../res/uefi/uefi-ntfs.img"
 IDR_TOGO_SAN_POLICY_XML RCDATA                  "../res/togo/san_policy.xml"

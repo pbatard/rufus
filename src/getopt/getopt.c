@@ -210,7 +210,7 @@ static char *posixly_correct;
 
 #ifndef getenv
 #ifdef _MSC_VER
-// DDK will complain if you don't use the stdlib defined getenv
+// MSVC will complain if you don't use the stdlib defined getenv
 #include <stdlib.h>
 #else
 extern char *getenv ();

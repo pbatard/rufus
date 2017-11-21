@@ -160,7 +160,7 @@ BOOL SetAutorun(const char* path)
 	char filename[64];
 	wchar_t wlabel[128], wRufusVersion[32];
 
-	safe_sprintf(filename, sizeof(filename), "%sautorun.inf", path);
+	static_sprintf(filename, "%sautorun.inf", path);
 	fd = fopen(filename, "r");	// If there's an existing autorun, don't overwrite
 	if (fd != NULL) {
 		uprintf("%s already exists - keeping it", filename);

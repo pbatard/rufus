@@ -94,7 +94,7 @@ static __inline char* ReadIniKeyStr(const char* key) {
 	str[0] = 0;
 	val = get_token_data_file(key, ini_file);
 	if (val != NULL) {
-		safe_strcpy(str, sizeof(str), val);
+		static_strcpy(str, val);
 		free(val);
 	}
 	return str;

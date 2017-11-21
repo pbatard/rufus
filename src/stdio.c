@@ -46,6 +46,7 @@ void _uprintf(const char *format, ...)
 {
 	static char buf[4096];
 	char* p = buf;
+	wchar_t* wbuf;
 	va_list args;
 	int n;
 
@@ -62,16 +63,19 @@ void _uprintf(const char *format, ...)
 	*p++ = '\n';
 	*p   = '\0';
 
+	// Yay, Windows 10 *FINALLY* added actual Unicode support for OutputDebugStringW()!
+	wbuf = utf8_to_wchar(buf);
 	// Send output to Windows debug facility
-	OutputDebugStringA(buf);
+	OutputDebugStringW(wbuf);
 	if ((hLog != NULL) && (hLog != INVALID_HANDLE_VALUE)) {
 		// Send output to our log Window
 		Edit_SetSel(hLog, MAX_LOG_SIZE, MAX_LOG_SIZE);
-		Edit_ReplaceSelU(hLog, buf);
+		Edit_ReplaceSel(hLog, wbuf);
 		// Make sure the message scrolls into view
 		// (Or see code commented in LogProc:WM_SHOWWINDOW for a less forceful scroll)
-		SendMessage(hLog, EM_LINESCROLL, 0, SendMessage(hLog, EM_GETLINECOUNT, 0, 0));
+		Edit_Scroll(hLog, Edit_GetLineCount(hLog), 0);
 	}
+	free(wbuf);
 }
 #endif
 
@@ -147,7 +151,7 @@ static char err_string[256] = {0};
 
 	error_code = GetLastError();
 
-	safe_sprintf(err_string, sizeof(err_string), "[0x%08lX] ", error_code);
+	static_sprintf(err_string, "[0x%08lX] ", error_code);
 
 	size = FormatMessageU(FORMAT_MESSAGE_FROM_SYSTEM|FORMAT_MESSAGE_IGNORE_INSERTS, NULL, HRESULT_CODE(error_code),
 		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), &err_string[strlen(err_string)],
@@ -155,10 +159,10 @@ static char err_string[256] = {0};
 	if (size == 0) {
 		format_error = GetLastError();
 		if ((format_error) && (format_error != 0x13D))		// 0x13D, decode error, is returned for unknown codes
-			safe_sprintf(err_string, sizeof(err_string),
-				"Windows error code 0x%08lX (FormatMessage error code 0x%08lX)", error_code, format_error);
+			static_sprintf(err_string, "Windows error code 0x%08lX (FormatMessage error code 0x%08lX)",
+				error_code, format_error);
 		else
-			safe_sprintf(err_string, sizeof(err_string), "Unknown error 0x%08lX", error_code);
+			static_sprintf(err_string, "Unknown error 0x%08lX", error_code);
 	}
 
 	SetLastError(error_code);	// Make sure we don't change the errorcode on exit
@@ -222,6 +226,23 @@ char* SizeToHumanReadable(uint64_t size, BOOL copy_to_log, BOOL fake_units)
 			"%s%0.0f%s %s":"%s%0.1f%s %s", dir, hr_size, dir, _msg_table[MSG_020+suffix-MSG_000]);
 	}
 	return str_size;
+}
+
+// Convert a YYYYMMDDHHMMSS UTC timestamp to a more human readable version
+char* TimestampToHumanReadable(uint64_t ts)
+{
+	uint64_t rem = ts, divisor = 10000000000ULL;
+	uint16_t data[6];
+	int i;
+	static char str[64];
+
+	for (i = 0; i < 6; i++) {
+		data[i] = (uint16_t) ((divisor == 0)?rem:(rem / divisor));
+		rem %= divisor;
+		divisor /= 100ULL;
+	}
+	static_sprintf(str, "%04d.%02d.%02d %02d:%02d:%02d (UTC)", data[0], data[1], data[2], data[3], data[4], data[5]);
+	return str;
 }
 
 // Convert custom error code to messages
@@ -354,4 +375,40 @@ BOOL WriteFileWithRetry(HANDLE hFile, LPCVOID lpBuffer, DWORD nNumberOfBytesToWr
 	if (SCODE_CODE(GetLastError()) == ERROR_SUCCESS)
 		SetLastError(ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_WRITE_FAULT);
 	return FALSE;
+}
+
+// A WaitForSingleObject() equivalent that doesn't block Windows messages
+// This is needed, for instance, if you are waiting for a thread that may issue uprintf's
+DWORD WaitForSingleObjectWithMessages(HANDLE hHandle, DWORD dwMilliseconds)
+{
+	uint64_t CurTime, EndTime = GetTickCount64() + dwMilliseconds;
+	DWORD res;
+	MSG msg;
+
+	do {
+		// Read all of the messages in this next loop, removing each message as we read it.
+		while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+			if ((msg.message == WM_QUIT) || (msg.message == WM_CLOSE)) {
+				SetLastError(ERROR_CANCELLED);
+				return WAIT_FAILED;
+			} else {
+				DispatchMessage(&msg);
+			}
+		}
+
+		// Wait for any message sent or posted to this queue or for the handle to signaled.
+		res = MsgWaitForMultipleObjects(1, &hHandle, FALSE, dwMilliseconds, QS_ALLINPUT);
+
+		if (dwMilliseconds != INFINITE) {
+			CurTime = GetTickCount64();
+			// Account for the case where we may reach the timeout condition while
+			// processing timestamps
+			if (CurTime < EndTime)
+				dwMilliseconds = (DWORD) (EndTime - CurTime);
+			else
+				res = WAIT_TIMEOUT;
+		}
+	} while (res == (WAIT_OBJECT_0 + 1));
+
+	return res;
 }

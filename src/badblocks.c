@@ -124,6 +124,7 @@ static errcode_t bb_u64_list_add(bb_u64_list bb, uint64_t blk)
 			bb->size -= 100;
 			return BB_ET_NO_MEMORY;
 		}
+		// coverity[suspicious_sizeof]
 		memset(&bb->list[bb->size-100], 0, 100 * sizeof(uint64_t));
 	}
 
@@ -349,7 +350,7 @@ static void pattern_fill(unsigned char *buffer, unsigned int pattern,
 	unsigned char	bpattern[sizeof(pattern)], *ptr;
 
 	if (pattern == (unsigned int) ~0) {
-		srand((unsigned int)_GetTickCount64());
+		srand((unsigned int)GetTickCount64());
 		for (ptr = buffer; ptr < buffer + n; ptr++) {
 			// coverity[dont_call]
 			(*ptr) = rand() % (1 << (8 * sizeof(char)));
@@ -451,7 +452,7 @@ static unsigned int test_rw(HANDLE hDrive, blk_t last_block, size_t block_size, 
 	cur_pattern = 0;
 
 	for (pat_idx = 0; pat_idx < nb_passes; pat_idx++) {
-		srand((unsigned int)_GetTickCount64());
+		srand((unsigned int)GetTickCount64());
 		if (cancel_ops) goto out;
 		// coverity[dont_call]
 		id_offset = rand() * (block_size-sizeof(blk_t)) / RAND_MAX;

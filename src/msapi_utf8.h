@@ -33,9 +33,7 @@
 #include <io.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#if !defined(DDKBUILD)
 #include <psapi.h>
-#endif
 
 #pragma once
 #if defined(_MSC_VER)
@@ -278,6 +276,11 @@ static __inline int LoadStringU(HINSTANCE hInstance, UINT uID, LPSTR lpBuffer, i
 {
 	int ret;
 	DWORD err = ERROR_INVALID_DATA;
+	if (nBufferMax == 0) {
+		// read-only pointer to resource mode is not supported
+		SetLastError(ERROR_INVALID_PARAMETER);
+		return 0;
+	}
 	// coverity[returned_null]
 	walloc(lpBuffer, nBufferMax);
 	ret = LoadStringW(hInstance, uID, wlpBuffer, nBufferMax);
@@ -286,6 +289,18 @@ static __inline int LoadStringU(HINSTANCE hInstance, UINT uID, LPSTR lpBuffer, i
 		err = GetLastError();
 	}
 	wfree(lpBuffer);
+	SetLastError(err);
+	return ret;
+}
+
+static __inline HMODULE LoadLibraryU(LPCSTR lpFileName)
+{
+	HMODULE ret;
+	DWORD err = ERROR_INVALID_DATA;
+	wconvert(lpFileName);
+	ret = LoadLibraryW(wlpFileName);
+	err = GetLastError();
+	wfree(lpFileName);
 	SetLastError(err);
 	return ret;
 }
@@ -463,6 +478,15 @@ static __inline BOOL DeleteFileU(const char* lpFileName)
 	return ret;
 }
 
+static __inline BOOL PathFileExistsU(char* szPath)
+{
+	BOOL ret;
+	wconvert(szPath);
+	ret = PathFileExistsW(wszPath);
+	wfree(szPath);
+	return ret;
+}
+
 static __inline int PathGetDriveNumberU(char* lpPath)
 {
 	int ret = 0;
@@ -584,7 +608,6 @@ static __inline DWORD GetModuleFileNameU(HMODULE hModule, char* lpFilename, DWOR
 	return ret;
 }
 
-#if !defined(DDKBUILD)
 static __inline DWORD GetModuleFileNameExU(HANDLE hProcess, HMODULE hModule, char* lpFilename, DWORD nSize)
 {
 	DWORD ret = 0, err = ERROR_INVALID_DATA;
@@ -600,7 +623,6 @@ static __inline DWORD GetModuleFileNameExU(HANDLE hProcess, HMODULE hModule, cha
 	SetLastError(err);
 	return ret;
 }
-#endif
 
 static __inline DWORD GetFullPathNameU(const char* lpFileName, DWORD nBufferLength, char* lpBuffer, char** lpFilePart)
 {
@@ -926,6 +948,15 @@ static __inline int _openU(const char *filename, int oflag , int pmode)
 }
 #endif
 
+static __inline int _unlinkU(const char *path)
+{
+	int ret;
+	wconvert(path);
+	ret = _wunlink(wpath);
+	wfree(path);
+	return ret;
+}
+
 static __inline int _stat64U(const char *path, struct __stat64 *buffer)
 {
 	int ret;
@@ -1015,15 +1046,6 @@ static __inline BOOL GetVolumeInformationU(LPCSTR lpRootPathName, LPSTR lpVolume
 	wfree(lpRootPathName);
 	SetLastError(err);
 	return ret;
-}
-
-static __inline HMODULE LoadLibraryU(LPCSTR lpFileName)
-{
-	HMODULE h;
-	wconvert(lpFileName);
-	h = LoadLibraryW(wlpFileName);
-	wfree(lpFileName);
-	return h;
 }
 
 #ifdef __cplusplus

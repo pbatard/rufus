@@ -175,6 +175,8 @@ const char* WinInetErrorString(void)
 		return "The header could not be added because it already exists.";
 	case ERROR_HTTP_REDIRECT_FAILED:
 		return "The redirection failed because either the scheme changed or all attempts made to redirect failed.";
+	case ERROR_INTERNET_SECURITY_CHANNEL_ERROR:
+		return "This system's SSL library is too old to be able to access this website.";
 	case ERROR_INTERNET_CLIENT_AUTH_CERT_NEEDED:
 		return "Client Authentication certificate needed";
 	case ERROR_INTERNET_BAD_AUTO_PROXY_SCRIPT:
@@ -203,7 +205,7 @@ const char* WinInetErrorString(void)
 		InternetGetLastResponseInfoA(&error_code, error_string, &size);
 		return error_string;
 	default:
-		safe_sprintf(error_string, sizeof(error_string), "Unknown internet error 0x%08lX", error_code);
+		static_sprintf(error_string, "Unknown internet error 0x%08lX", error_code);
 		return error_string;
 	}
 }
@@ -253,7 +255,7 @@ DWORD DownloadFile(const char* url, const char* file, HWND hProgressDialog)
 		}
 	}
 
-	PrintInfo(0, MSG_240, &file[last_slash]);
+	PrintInfo(0, MSG_085, &file[last_slash]);
 	uprintf("Downloading '%s' from %s\n", &file[last_slash], url);
 
 	if ( (!InternetCrackUrlA(url, (DWORD)safe_strlen(url), 0, &UrlParts))
@@ -273,7 +275,7 @@ DWORD DownloadFile(const char* url, const char* file, HWND hProgressDialog)
 		uprintf("Network is unavailable: %s\n", WinInetErrorString());
 		goto out;
 	}
-	safe_sprintf(agent, ARRAYSIZE(agent), APPLICATION_NAME "/%d.%d.%d (Windows NT %d.%d%s)",
+	static_sprintf(agent, APPLICATION_NAME "/%d.%d.%d (Windows NT %d.%d%s)",
 		rufus_version[0], rufus_version[1], rufus_version[2],
 		nWindowsVersion>>4, nWindowsVersion&0x0F, is_x64()?"; WOW64":"");
 	hSession = InternetOpenA(agent, INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
@@ -356,7 +358,7 @@ out:
 	if (fd != NULL) fclose(fd);
 	if (!r) {
 		if (file != NULL)
-			_unlink(file);
+			_unlinkU(file);
 		if (PromptOnError) {
 			PrintInfo(0, MSG_242);
 			SetLastError(error_code);
@@ -402,7 +404,7 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 {
 	BOOL releases_only, found_new_version = FALSE;
 	int status = 0;
-	const char* server_url = RUFUS_URL "/";
+	const char* server_url = RUFUS_NO_SSL_URL "/";
 	int i, j, k, max_channel, verbose = 0, verpos[4];
 	static const char* archname[] = {"win_x86", "win_x64"};
 	static const char* channel[] = {"release", "beta", "test"};		// release channel
@@ -465,7 +467,7 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 		goto out;
 	hostname[sizeof(hostname)-1] = 0;
 
-	safe_sprintf(agent, ARRAYSIZE(agent), APPLICATION_NAME "/%d.%d.%d (Windows NT %d.%d%s)",
+	static_sprintf(agent, APPLICATION_NAME "/%d.%d.%d (Windows NT %d.%d%s)",
 		rufus_version[0], rufus_version[1], rufus_version[2],
 		nWindowsVersion >> 4, nWindowsVersion & 0x0F, is_x64() ? "; WOW64" : "");
 	hSession = InternetOpenA(agent, INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
@@ -491,7 +493,7 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 		// and then remove each each of the <os_> components until we find our match. For instance, we may first
 		// look for rufus_win_x64_6.2.ver (Win8 x64) but only get a match for rufus_win_x64_6.ver (Vista x64 or later)
 		// This allows sunsetting OS versions (eg XP) or providing different downloads for different archs/groups.
-		safe_sprintf(urlpath, sizeof(urlpath), "%s%s%s_%s_%lu.%lu.ver", APPLICATION_NAME, (k==0)?"":"_",
+		static_sprintf(urlpath, "%s%s%s_%s_%lu.%lu.ver", APPLICATION_NAME, (k==0)?"":"_",
 			(k==0)?"":channel[k], archname[is_x64()?1:0], os_version.dwMajorVersion, os_version.dwMinorVersion);
 		vuprintf("Base update check: %s\n", urlpath);
 		for (i=0, j=(int)safe_strlen(urlpath)-5; (j>0)&&(i<ARRAYSIZE(verpos)); j--) {
@@ -512,8 +514,10 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 				INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTP|INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTPS|
 				INTERNET_FLAG_NO_COOKIES|INTERNET_FLAG_NO_UI|INTERNET_FLAG_NO_CACHE_WRITE|INTERNET_FLAG_HYPERLINK|
 				((UrlParts.nScheme == INTERNET_SCHEME_HTTPS)?INTERNET_FLAG_SECURE:0), (DWORD_PTR)NULL);
-			if ((hRequest == NULL) || (!HttpSendRequestA(hRequest, NULL, 0, NULL, 0)))
+			if ((hRequest == NULL) || (!HttpSendRequestA(hRequest, NULL, 0, NULL, 0))) {
+				uprintf("Unable to send request: %s", WinInetErrorString());
 				goto out;
+			}
 
 			// Ensure that we get a text file
 			dwSize = sizeof(dwStatus);

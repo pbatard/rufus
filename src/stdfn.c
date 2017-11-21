@@ -36,8 +36,6 @@ int  nWindowsVersion = WINDOWS_UNDEFINED;
 int  nWindowsBuildNumber = -1;
 char WindowsVersionStr[128] = "Windows ";
 
-PF_TYPE_DECL(WINAPI, int, LCIDToLocaleName, (LCID, LPWSTR, int, DWORD));
-
 /*
  * Hash table functions - modified From glibc 2.3.2:
  * [Aho,Sethi,Ullman] Compilers: Principles, Techniques and Tools, 1986
@@ -235,7 +233,7 @@ void GetWindowsVersion(void)
 	BOOL ws;
 
 	nWindowsVersion = WINDOWS_UNDEFINED;
-	safe_strcpy(WindowsVersionStr, sizeof(WindowsVersionStr), "Windows Undefined");
+	static_strcpy(WindowsVersionStr, "Windows Undefined");
 
 	memset(&vi, 0, sizeof(vi));
 	vi.dwOSVersionInfoSize = sizeof(vi);
@@ -284,20 +282,20 @@ void GetWindowsVersion(void)
 			switch (nWindowsVersion) {
 			case 0x51: w = "XP";
 				break;
-			case 0x52: w = (!GetSystemMetrics(89)?"2003":"2003_R2");
+			case 0x52: w = (!GetSystemMetrics(89)?"Server 2003":"Server 2003_R2");
 				break;
-			case 0x60: w = (ws?"Vista":"2008");
+			case 0x60: w = (ws?"Vista":"Server 2008");
 				break;
-			case 0x61: w = (ws?"7":"2008_R2");
+			case 0x61: w = (ws?"7":"Server 2008_R2");
 				break;
-			case 0x62: w = (ws?"8":"2012");
+			case 0x62: w = (ws?"8":"Server 2012");
 				break;
-			case 0x63: w = (ws?"8.1":"2012_R2");
+			case 0x63: w = (ws?"8.1":"Server 2012_R2");
 				break;
 			case 0x64: w = (ws?"10 (Preview 1)":"Server 10 (Preview 1)");
 				break;
 			// Starting with Windows 10 Preview 2, the major is the same as the public-facing version
-			case 0xA0: w = (ws?"10":"Server 10");
+			case 0xA0: w = (ws?"10":"Server 2016");
 				break;
 			default:
 				if (nWindowsVersion < 0x51)
@@ -329,9 +327,9 @@ void GetWindowsVersion(void)
 		GetRegistryKeyStr(REGKEY_HKLM, "Microsoft\\Windows NT\\CurrentVersion\\CurrentBuildNumber", build_number, sizeof(build_number));
 		if (build_number[0] != 0) {
 			nWindowsBuildNumber = atoi(build_number);	// Keep a global copy
-			safe_strcat(WindowsVersionStr, sizeof(WindowsVersionStr), " (Build ");
-			safe_strcat(WindowsVersionStr, sizeof(WindowsVersionStr), build_number);
-			safe_strcat(WindowsVersionStr, sizeof(WindowsVersionStr), ")");
+			static_strcat(WindowsVersionStr, " (Build ");
+			static_strcat(WindowsVersionStr, build_number);
+			static_strcat(WindowsVersionStr, ")");
 		}
 	}
 
@@ -634,8 +632,10 @@ BOOL IsFontAvailable(const char* font_name) {
 	LOGFONTA lf = { 0 };
 	HDC hDC = GetDC(hMainDialog);
 
-	if (font_name == NULL)
+	if (font_name == NULL) {
+		ReleaseDC(hMainDialog, hDC);
 		return FALSE;
+	}
 
 	lf.lfCharSet = DEFAULT_CHARSET;
 	safe_strcpy(lf.lfFaceName, LF_FACESIZE, font_name);
@@ -898,14 +898,42 @@ char* GetCurrentMUI(void)
 	static char mui_str[LOCALE_NAME_MAX_LENGTH];
 	wchar_t wmui_str[LOCALE_NAME_MAX_LENGTH];
 
-	// Of course LCIDToLocaleName() is not available on XP... grrrr!
-	PF_INIT(LCIDToLocaleName, kernel32);
-
-	if ( (pfLCIDToLocaleName != NULL) &&
-		 (pfLCIDToLocaleName(GetUserDefaultUILanguage(), wmui_str, LOCALE_NAME_MAX_LENGTH, 0) > 0) ) {
+	if (LCIDToLocaleName(GetUserDefaultUILanguage(), wmui_str, LOCALE_NAME_MAX_LENGTH, 0) > 0) {
 		wchar_to_utf8_no_alloc(wmui_str, mui_str, LOCALE_NAME_MAX_LENGTH);
 	} else {
-		safe_strcpy(mui_str, LOCALE_NAME_MAX_LENGTH, "en-US");
+		static_strcpy(mui_str, "en-US");
 	}
 	return mui_str;
+}
+
+char* GetMuiString(char* szModuleName, UINT uID)
+{
+	HMODULE hModule;
+	char path[MAX_PATH], *str;
+	wchar_t* wstr;
+	void* ptr;
+	int len;
+	static_sprintf(path, "%s\\%s\\%s.mui", system_dir, GetCurrentMUI(), szModuleName);
+	// If the file doesn't exist, fall back to en-US
+	if (!PathFileExistsU(path))
+		static_sprintf(path, "%s\\en-US\\%s.mui", system_dir, szModuleName);
+	hModule = LoadLibraryExA(path, NULL, LOAD_LIBRARY_AS_IMAGE_RESOURCE | LOAD_LIBRARY_AS_DATAFILE);
+	if (hModule == NULL) {
+		uprintf("Could not load '%s': %s", path, WindowsErrorString());
+		return NULL;
+	}
+	// Calling LoadStringW with last parameter 0 returns the length of the string (without NUL terminator)
+	len = LoadStringW(hModule, uID, (LPWSTR)(&ptr), 0);
+	if (len <= 0) {
+		if (GetLastError() == ERROR_SUCCESS)
+			SetLastError(ERROR_RESOURCE_NAME_NOT_FOUND);
+		uprintf("Could not find string ID %d in '%s': %s", uID, path, WindowsErrorString());
+		return NULL;
+	}
+	len += 1;
+	wstr = calloc(len, sizeof(wchar_t));
+	len = LoadStringW(hModule, uID, wstr, len);
+	str = wchar_to_utf8(wstr);
+	free(wstr);
+	return str;
 }

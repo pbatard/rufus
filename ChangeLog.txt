@@ -1,3 +1,33 @@
+o Version 2.18 (2017.11.07)
+    Ensure that the same drive is reselected on device refresh
+    Add a cheat mode to cycle the USB port of currently selected device
+    Make lookup for updatable .cfg file more generic (e.g. ESET SysRescue)
+    Fix handling of multiextent ISOs (e.g. BlackArch Linux)
+    Fix propagation of image decompression errors
+    Update grub4dos to latest
+
+    IMPORTANT: THIS IS THE LAST RELEASE TO SUPPORT WINDOWS XP AND WINDOWS VISTA
+    FUTURE RUFUS RELEASES WILL *NO LONGER* BE COMPATIBLE WITH THESE PLATFORMS
+
+o Version 2.17 (2017.09.12)
+    Add support for Debian 9 live ISOs in UEFI mode
+    Add support for Super Floppy Disk "partitioning" mode
+    Add support for more non-USB card readers
+    Strengthen download update checks, to prevent attack scenarios that leverage user unawareness
+    Fix an issue with Spanish translation prompts not displaying properly
+    Fix an issue with Windows To Go support on some non-official Windows ISOs
+    Fix an issue with log autoscrolling
+    Fix an issue when using A: or B: as drive letters
+ 
+o Version 2.16 (2017.07.31)
+    Add an audiovisual cue on completion/error
+    Add a workaround for ISOs using nonstandard Rock Ridge extensions (looking at you Kali Linux!)
+    Notify user when an ISO is broken or truncated
+    Notify user if other processes are accessing the drive before format
+    List processes that are locking a drive on failure
+    Improve verbosity of the Windows To Go process
+    Other fixes and improvements
+
 o Version 2.15 (2017.05.17)
     Fix non-listing of drives that are opened for write access by another process
     Report external processes that may be preventing disk access (in the log)

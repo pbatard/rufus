@@ -1,5 +1,5 @@
 @echo off
-set VERSION=2.15
+set VERSION=2.18
 
 rem Make sure you don't have anything you don't want included in the package, as anything residing in the
 rem current directory will be included, including any previous .appx, which makes for nice recursion...
@@ -13,11 +13,11 @@ copy "..\icon-set\rufus-48.png"  "Assets\Square44x44Logo.targetsize-48.png"
 copy "..\icon-set\rufus-48.png"  "Assets\Square44x44Logo.targetsize-48_altform-unplated.png"
 copy "..\icon-set\rufus-150.png" "Assets\Square150x150Logo.png"
 copy "..\..\rufus-%VERSION%.exe" "rufus.exe"
-"C:\Program Files (x86)\Windows Kits\10\bin\x64\MakePri" createconfig /o /dq en-US /cf priconfig.xml
-"C:\Program Files (x86)\Windows Kits\10\bin\x64\MakePri" new /o /pr . /cf priconfig.xml
-"C:\Program Files (x86)\Windows Kits\10\bin\x64\MakeAppx" pack /o /d . /p Rufus-%VERSION%.appx
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.16299.0\x64\MakePri" createconfig /o /dq en-US /cf priconfig.xml
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.16299.0\x64\MakePri" new /o /pr . /cf priconfig.xml
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.16299.0\x64\MakeAppx" pack /o /d . /p Rufus-%VERSION%.appx
 if ERRORLEVEL 1 goto out
-"C:\Program Files (x86)\Windows Kits\10\bin\x64\SignTool" sign /v /sha1 5759b23dc8f45e9120a7317f306e5b6890b612f0 /fd SHA256 /tr http://timestamp.comodoca.com/rfc3161 /td SHA256 Rufus-%VERSION%.appx
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.16299.0\x64\SignTool" sign /v /sha1 5759b23dc8f45e9120a7317f306e5b6890b612f0 /fd SHA256 /tr http://timestamp.comodoca.com/rfc3161 /td SHA256 Rufus-%VERSION%.appx
 :out
 del /q rufus.exe
 del /q priconfig.xml

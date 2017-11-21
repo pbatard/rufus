@@ -182,10 +182,12 @@ get_rock_ridge_filename(iso9660_dir_t * p_iso9660_dir,
       case SIG('P','L'):
       case SIG('T','F'):
       case SIG('Z','F'):
+      case SIG('A','L'):	// libburnia's AAIP extension (used by Kali Linux)
 	break;
       default:
-	 /* Something got screwed up here */
-	goto out;
+	/* Warn about other Rock Ridge extensions */
+	cdio_warn("Unsupported Rock Ridge extension detected: '%c%c'\n", *chr, *(chr+1));
+	break;
       }
 
       if (rr->len == 0) goto out; /* Something got screwed up here */

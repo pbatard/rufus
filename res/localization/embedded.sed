@@ -1,7 +1,8 @@
 # This sed script removes everything we don't need from rufus.loc, for embedding.
 
-# remove comments (aggressively!)
-s/#.*$//
+# remove comments (but not so aggressively as to drop the end of MSG_298!)
+s/^#.*$//
+s/[ \t]#.*$//
 
 # remove empty lines
 /^$/d

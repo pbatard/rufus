@@ -68,7 +68,7 @@ const char* SptStrerr(int errcode)
 	static char scsi_err[64];
 
 	if ((errcode > 0) && (errcode <= 0xff)) {
-		safe_sprintf(scsi_err, sizeof(scsi_err), "SCSI status: 0x%02X", (uint8_t)errcode);
+		static_sprintf(scsi_err, "SCSI status: 0x%02X", (uint8_t)errcode);
 		return (const char*)scsi_err;
 	}
 

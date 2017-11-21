@@ -200,8 +200,9 @@ to_733(uint32_t i)
 static CDIO_INLINE uint32_t
 from_733 (uint64_t p)
 {
-  if (uint64_swap_le_be (p) != p)
-    cdio_warn ("from_733: broken byte order");
+// Commented out for Rufus
+//  if (uint64_swap_le_be (p) != p)
+//    cdio_warn ("from_733: broken byte order");
 
   return (UINT32_C(0xFFFFFFFF) & p);
 }

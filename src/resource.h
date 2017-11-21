@@ -11,9 +11,8 @@
 #define IDD_UPDATE_POLICY               107
 #define IDD_NEW_VERSION                 108
 #define IDD_CHECKSUM                    109
+#define IDD_LIST                        110
 #define IDI_ICON                        120
-#define IDI_UP                          121
-#define IDI_DOWN                        122
 #define IDD_DIALOG_XP                   151
 #define IDD_ABOUTBOX_XP                 152
 #define IDD_NOTIFICATION_XP             153
@@ -148,6 +147,25 @@
 #define IDC_SELECTION_CHOICE14          1090
 #define IDC_SELECTION_CHOICE15          1091
 #define IDC_SELECTION_CHOICEMAX         1092
+#define IDC_LIST_ICON                   1093
+#define IDC_LIST_TEXT                   1094
+#define IDC_LIST_LINE                   1095
+#define IDC_LIST_ITEM1                  1096
+#define IDC_LIST_ITEM2                  1097
+#define IDC_LIST_ITEM3                  1098
+#define IDC_LIST_ITEM4                  1099
+#define IDC_LIST_ITEM5                  1100
+#define IDC_LIST_ITEM6                  1101
+#define IDC_LIST_ITEM7                  1102
+#define IDC_LIST_ITEM8                  1103
+#define IDC_LIST_ITEM9                  1104
+#define IDC_LIST_ITEM10                 1105
+#define IDC_LIST_ITEM11                 1106
+#define IDC_LIST_ITEM12                 1107
+#define IDC_LIST_ITEM13                 1108
+#define IDC_LIST_ITEM14                 1109
+#define IDC_LIST_ITEM15                 1110
+#define IDC_LIST_ITEMMAX                1111
 #define IDS_DEVICE_TXT                  2000
 #define IDS_PARTITION_TYPE_TXT          2001
 #define IDS_FILESYSTEM_TXT              2002
@@ -461,7 +479,8 @@
 #define MSG_297                         3297
 #define MSG_298                         3298
 #define MSG_299                         3299
-#define MSG_MAX                         3300
+#define MSG_300                         3300
+#define MSG_MAX                         3301
 
 // Next default values for new objects
 // 

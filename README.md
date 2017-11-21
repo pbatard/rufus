@@ -11,15 +11,15 @@ Features
 --------
 
 * Format USB, flash card and virtual drives to FAT/FAT32/NTFS/UDF/exFAT/ReFS
-* Create DOS bootable USB drives, using [FreeDOS](http://www.freedos.org/) or MS-DOS
+* Create DOS bootable USB drives, using [FreeDOS](http://www.freedos.org/) or MS-DOS (Windows 8.1 or earlier)
 * Create BIOS or UEFI bootable drives, including [UEFI bootable NTFS](https://github.com/pbatard/uefi-ntfs)
 * Create bootable drives from bootable ISOs (Windows, Linux, etc.)
 * Create bootable drives from bootable disk images, including compressed ones
 * Create [Windows To Go](https://en.wikipedia.org/wiki/Windows_To_Go) drives
+* Compute MD5, SHA-1 and SHA-256 checksums of the selected image
 * Twice as fast as Microsoft's USB/DVD tool or UNetbootin, on ISO -> USB creation <sup>(1)</sup>
 * Perform bad blocks checks, including detection of "fake" flash drives
-* Compute MD5, SHA-1 and SHA-256 checksums of the selected image
-* Modern and familiar UI, with more than [35 languages natively supported](https://rufus.akeo.ie/translations)
+* Modern and familiar UI, with [39 languages natively supported](https://rufus.akeo.ie/translations)
 * Small footprint. No installation required.
 * Portable
 * 100% [Free Software](http://www.gnu.org/philosophy/free-sw.en.html) ([GPL v3](http://www.gnu.org/licenses/gpl-3.0.en.html))
@@ -27,8 +27,8 @@ Features
 Compilation
 -----------
 
-Use either Visual Studio (2017 or later), WDK 7.1 (Windows Driver Kit) or MinGW and then
-invoke the `.sln`, `wdk_build.cmd` or `configure`/`make` respectively.
+Use either Visual Studio 2017 (with Update 4 and SDK 10.0.16299 installed) or MinGW and
+then invoke the `.sln` or `configure`/`make` respectively.
 
 #### Visual Studio
 Note that, since Rufus is an OSI compliant Open Source project, you are entitled to
