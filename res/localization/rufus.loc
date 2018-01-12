@@ -98,7 +98,8 @@ v 1.0.22
 # Main dialog
 g IDD_DIALOG
 t IDS_DEVICE_TXT "Device"
-t IDS_PARTITION_TYPE_TXT "Partition scheme and target system type"
+t IDS_PARTITION_TYPE_TXT "Partition scheme"
+t IDS_TARGET_SYSTEM_TXT "Target system type"
 t IDS_FILESYSTEM_TXT "File system"
 t IDS_CLUSTERSIZE_TXT "Cluster size"
 t IDS_LABEL_TXT "New volume label"
@@ -213,8 +214,8 @@ t MSG_031 "%s partition scheme for BIOS or %s"
 t MSG_032 "%s partition scheme for BIOS"
 t MSG_033 "%s partition scheme for UEFI"
 # Number of bad block check passes (singular for 1 pass, plural for 2 or more passes)
-t MSG_034 "%d Pass"
-t MSG_035 "%d Passes"
+t MSG_034 "%d mass"
+t MSG_035 "%d masses"
 t MSG_036 "ISO Image"
 t MSG_037 "Application"
 t MSG_038 "Abort"

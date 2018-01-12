@@ -91,12 +91,17 @@
 #define IDC_SELECT_ISO                  1016
 #define IDC_SET_ICON                    1017
 #define IDC_RUFUS_MBR                   1018
+#define IDC_TARGET_SYSTEM               1019
 #define IDC_INFO                        1020
+#define IDC_LANG                        1021
 #define IDC_DISK_ID                     1022
 #define IDC_EXTRA_PARTITION             1023
 #define IDC_ENABLE_FIXED_DISKS          1024
 #define IDC_STATUS_TOOLBAR              1025
 #define IDC_HASH                        1026
+#define IDC_SAVE                        1027
+#define IDC_SELECTED_IMAGE              1028
+#define IDC_BOOT_OPTION                 1029
 #define IDC_ABOUT_LICENSE               1030
 #define IDC_ABOUT_ICON                  1031
 #define IDC_ABOUT_UPDATES               1032
@@ -179,6 +184,16 @@
 #define IDS_NEW_VERSION_DOWNLOAD_GRP    2010
 #define IDS_NEW_VERSION_NOTES_GRP       2011
 #define IDS_CHECK_NOW_GRP               2012
+#define IDS_TARGET_SYSTEM_TXT           2013
+#define IDS_SELETED_IMAGE_TXT           2014
+#define IDS_BOOT_OPTION_TXT             2015
+#define IDS_SELECTED_IMAGE_TXT          2016
+#define IDS_BOOT_TYPE_TXT               2017
+#define IDS_DEVICE_OPTIONS_TXT          2018
+#define IDS_FORMAT_OPTIONS_TXT          2019
+#define IDS_ADVANCED_OPTIONS_TXT        2020
+#define IDS_FORMAT_OPTIONS_TXT2         2020
+#define IDS_STATUS_TXT                  2021
 #define MSG_000                         3000
 #define MSG_001                         3001
 #define MSG_002                         3002
@@ -489,7 +504,7 @@
 #define _APS_NO_MFC                     1
 #define _APS_NEXT_RESOURCE_VALUE        505
 #define _APS_NEXT_COMMAND_VALUE         40001
-#define _APS_NEXT_CONTROL_VALUE         1079
+#define _APS_NEXT_CONTROL_VALUE         1112
 #define _APS_NEXT_SYMED_VALUE           4000
 #endif
 #endif

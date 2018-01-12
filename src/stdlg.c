@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Standard Dialog Routines (Browse for folder, About, etc)
- * Copyright © 2011-2017 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2018 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -606,7 +606,7 @@ INT_PTR CALLBACK AboutCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 			ShowWindow(GetDlgItem(hDlg, IDC_ABOUT_UPDATES), SW_SHOW);
 		static_sprintf(about_blurb, about_blurb_format, lmprintf(MSG_174|MSG_RTF),
 			lmprintf(MSG_175|MSG_RTF, rufus_version[0], rufus_version[1], rufus_version[2]),
-			right_to_left_mode?"Akeo \\\\ Pete Batard 2011-2017 © Copyright":"Copyright © 2011-2017 Pete Batard / Akeo",
+			right_to_left_mode?"Akeo \\\\ Pete Batard 2011-2018 © Copyright":"Copyright © 2011-2018 Pete Batard / Akeo",
 			lmprintf(MSG_176|MSG_RTF), lmprintf(MSG_177|MSG_RTF), lmprintf(MSG_178|MSG_RTF));
 		for (i=0; i<ARRAYSIZE(hEdit); i++) {
 			hEdit[i] = GetDlgItem(hDlg, edit_id[i]);
@@ -847,13 +847,6 @@ INT_PTR CALLBACK SelectionCallback(HWND hDlg, UINT message, WPARAM wParam, LPARA
 		// TODO: This shouldn't be needed when using DS_SHELLFONT
 		// Get the system message box font. See http://stackoverflow.com/a/6057761
 		ncm.cbSize = sizeof(ncm);
-		// If we're compiling with the Vista SDK or later, the NONCLIENTMETRICS struct
-		// will be the wrong size for previous versions, so we need to adjust it.
-#if defined(_MSC_VER) && (_MSC_VER >= 1500) && (_WIN32_WINNT >= _WIN32_WINNT_VISTA)
-		// In versions of Windows prior to Vista, the iPaddedBorderWidth member
-		// is not present, so we need to subtract its size from cbSize.
-		ncm.cbSize -= sizeof(ncm.iPaddedBorderWidth);
-#endif
 		SystemParametersInfo(SPI_GETNONCLIENTMETRICS, ncm.cbSize, &ncm, 0);
 		hDlgFont = CreateFontIndirect(&(ncm.lfMessageFont));
 		// Set the dialog to use the system message box font
@@ -987,13 +980,6 @@ INT_PTR CALLBACK ListCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
 		// TODO: This shouldn't be needed when using DS_SHELLFONT
 		// Get the system message box font. See http://stackoverflow.com/a/6057761
 		ncm.cbSize = sizeof(ncm);
-		// If we're compiling with the Vista SDK or later, the NONCLIENTMETRICS struct
-		// will be the wrong size for previous versions, so we need to adjust it.
-#if defined(_MSC_VER) && (_MSC_VER >= 1500) && (_WIN32_WINNT >= _WIN32_WINNT_VISTA)
-		// In versions of Windows prior to Vista, the iPaddedBorderWidth member
-		// is not present, so we need to subtract its size from cbSize.
-		ncm.cbSize -= sizeof(ncm.iPaddedBorderWidth);
-#endif
 		SystemParametersInfo(SPI_GETNONCLIENTMETRICS, ncm.cbSize, &ncm, 0);
 		hDlgFont = CreateFontIndirect(&(ncm.lfMessageFont));
 		// Set the dialog to use the system message box font
@@ -1692,7 +1678,6 @@ out:
  * The following is used to work around dialog template limitations when switching from LTR to RTL
  * or switching the font. This avoids having to multiply similar templates in the RC.
  * TODO: Can we use http://stackoverflow.com/questions/6057239/which-font-is-the-default-for-mfc-dialog-controls?
- * TODO: We are supposed to use Segoe with font size 9 in Vista or later
   */
 
 // Produce a dialog template from our RC, and update its RTL and Font settings dynamically
