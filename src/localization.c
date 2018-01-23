@@ -80,6 +80,8 @@ char* default_msg_table[MSG_MAX-MSG_000] = {"%s", 0};
 char* current_msg_table[MSG_MAX-MSG_000] = {"%s", 0};
 char** msg_table = NULL;
 
+extern progress_in_use;
+
 static void mtab_destroy(BOOL reinit)
 {
 	size_t j;
@@ -428,7 +430,15 @@ static uint64_t last_msg_time[2] = { 0, 0 };
 static void PrintInfoMessage(char* msg) {
 	SetWindowTextU(hProgress, msg);
 	// Make sure our field gets redrawn
-	SendMessage(hProgress, WM_PAINT, 0, 0);
+	// If the progress bar is not active, it looks like WM_PAINT is
+	// ignored. But InvalidateRect is causing refresh tearing so we
+	// don't want to use that while active.
+	// Refresh still sucks though and marquee no longer works... :(
+	// TODO: Create our own progress bar control with text overlay and inverted text
+	if (!progress_in_use)
+		InvalidateRect(hProgress, NULL, TRUE);
+	else
+		SendMessage(hProgress, WM_PAINT, 0, 0);
 }
 static void PrintStatusMessage(char* msg) {
 	SendMessageLU(hStatus, SB_SETTEXTW, SBT_OWNERDRAW | SB_SECTION_LEFT, msg);
@@ -446,6 +456,7 @@ static void CALLBACK OutputMessageTimeout(HWND hWnd, UINT uMsg, UINT_PTR idEvent
 
 	KillTimer(hMainDialog, idEvent);
 	bOutputTimerArmed[i] = FALSE;
+
 	PrintMessage[i](output_msg[i]);
 	last_msg_time[i] = GetTickCount64();
 }

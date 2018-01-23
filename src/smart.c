@@ -312,7 +312,7 @@ static int UsbCypressAtaPassthrough(HANDLE hPhysical, ATA_PASSTHROUGH_CMD* Comma
 }
 
 /* The various bridges we will try, in order */
-AtaPassThroughType pt[] = {
+AtaPassThroughType ata_pt[] = {
 	{ SatAtaPassthrough, "SAT" },
 	{ UsbJmicronAtaPassthrough, "JMicron" },
 	{ UsbProlificAtaPassthrough, "Prolific" },
@@ -335,10 +335,10 @@ BOOL Identify(HANDLE hPhysical)
 	if (idd == NULL)
 		return FALSE;
 
-	for (i=0; i<ARRAYSIZE(pt); i++) {
-		r = pt[i].fn(hPhysical, &Command, idd, sizeof(IDENTIFY_DEVICE_DATA), SPT_TIMEOUT_VALUE);
+	for (i=0; i<ARRAYSIZE(ata_pt); i++) {
+		r = ata_pt[i].fn(hPhysical, &Command, idd, sizeof(IDENTIFY_DEVICE_DATA), SPT_TIMEOUT_VALUE);
 		if (r == SPT_SUCCESS) {
-			uprintf("Success using %s\n", pt[i].type);
+			uprintf("Success using %s\n", ata_pt[i].type);
 			if (idd->CommandSetSupport.SmartCommands) {
 				DumpBufferHex(idd, sizeof(IDENTIFY_DEVICE_DATA));
 				uprintf("SMART support detected!\n");
@@ -347,9 +347,9 @@ BOOL Identify(HANDLE hPhysical)
 			}
 			break;
 		}
-		uprintf("No joy with: %s (%s)\n", pt[i].type, SptStrerr(r));
+		uprintf("No joy with: %s (%s)\n", ata_pt[i].type, SptStrerr(r));
 	}
-	if (i >= ARRAYSIZE(pt))
+	if (i >= ARRAYSIZE(ata_pt))
 		uprintf("NO ATA FOR YOU!\n");
 
 	_mm_free(idd);

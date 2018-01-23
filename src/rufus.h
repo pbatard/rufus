@@ -218,14 +218,14 @@ enum fs_type {
 enum boot_type {
 	BT_MSDOS = 0,
 	BT_FREEDOS,
-	BT_ISO,
-	BT_IMG,
+	BT_IMAGE,
 	BT_SYSLINUX_V4,		// Start of indexes that only display in advanced mode
 	BT_SYSLINUX_V6,
 	BT_REACTOS,
 	BT_GRUB4DOS,
 	BT_GRUB2,
 	BT_UEFI_NTFS,
+	BT_NON_BOOTABLE,
 	BT_MAX
 };
 
@@ -236,8 +236,6 @@ enum target_type {
 };
 // For the partition types we'll use Microsoft's PARTITION_STYLE_### constants
 #define PARTITION_STYLE_SFD PARTITION_STYLE_RAW
-#define GETTARGETTYPE(x) (((x)>0)?(((x) >> 16) & 0xFFFF):0)
-#define GETPARTTYPE(x)   (((x)>0)?((x) & 0xFFFF):0);
 
 enum checksum_type {
 	CHECKSUM_MD5 = 0,
@@ -385,7 +383,7 @@ enum WindowsVersion {
  */
 extern HINSTANCE hMainInstance;
 extern HWND hMainDialog, hLogDlg, hStatus, hDeviceList, hCapacity;
-extern HWND hPartitionScheme, hFileSystem, hClusterSize, hLabel, hBootType, hNBPasses, hLog;
+extern HWND hPartitionScheme, hTargetSystem, hFileSystem, hClusterSize, hLabel, hBootType, hNBPasses, hLog;
 extern HWND hInfo, hProgress, hDiskID, hStatusToolbar;
 extern float fScale;
 extern char szFolderPath[MAX_PATH], app_dir[MAX_PATH], temp_dir[MAX_PATH], system_dir[MAX_PATH], sysnative_dir[MAX_PATH];
@@ -401,6 +399,7 @@ extern int64_t iso_blocking_status;
 extern uint16_t rufus_version[3], embedded_sl_version[2];
 extern int nWindowsVersion;
 extern int nWindowsBuildNumber;
+extern int fs, bt, pt, tt;
 extern char WindowsVersionStr[128];
 extern size_t ubuffer_pos;
 extern char ubuffer[UBUFFER_SIZE];
@@ -541,6 +540,7 @@ typedef struct {
 } StrArray;
 extern void StrArrayCreate(StrArray* arr, uint32_t initial_size);
 extern int32_t StrArrayAdd(StrArray* arr, const char* str, BOOL );
+extern int32_t StrArrayFind(StrArray* arr, const char* str);
 extern void StrArrayClear(StrArray* arr);
 extern void StrArrayDestroy(StrArray* arr);
 #define IsStrArrayEmpty(arr) (arr.Index == 0)

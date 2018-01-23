@@ -82,13 +82,12 @@
 #define IDC_ABOUT                       1007
 #define IDC_LABEL                       1008
 #define IDC_QUICKFORMAT                 1009
-#define IDC_BOOT                        1010
 #define IDC_BADBLOCKS                   1011
 #define IDC_PROGRESS                    1012
 #define IDC_BOOTTYPE                    1013
 #define IDC_NBPASSES                    1014
 #define IDC_TEST                        1015
-#define IDC_SELECT_ISO                  1016
+#define IDC_SELECT_IMAGE                1016
 #define IDC_SET_ICON                    1017
 #define IDC_RUFUS_MBR                   1018
 #define IDC_TARGET_SYSTEM               1019
@@ -101,7 +100,7 @@
 #define IDC_HASH                        1026
 #define IDC_SAVE                        1027
 #define IDC_SELECTED_IMAGE              1028
-#define IDC_BOOT_OPTION                 1029
+#define IDC_IMAGE_OPTION                1029
 #define IDC_ABOUT_LICENSE               1030
 #define IDC_ABOUT_ICON                  1031
 #define IDC_ABOUT_UPDATES               1032
@@ -186,14 +185,14 @@
 #define IDS_CHECK_NOW_GRP               2012
 #define IDS_TARGET_SYSTEM_TXT           2013
 #define IDS_SELETED_IMAGE_TXT           2014
-#define IDS_BOOT_OPTION_TXT             2015
+#define IDS_IMAGE_OPTION_TXT            2015
 #define IDS_SELECTED_IMAGE_TXT          2016
 #define IDS_BOOT_TYPE_TXT               2017
-#define IDS_DEVICE_OPTIONS_TXT          2018
-#define IDS_FORMAT_OPTIONS_TXT          2019
-#define IDS_ADVANCED_OPTIONS_TXT        2020
-#define IDS_FORMAT_OPTIONS_TXT2         2020
-#define IDS_STATUS_TXT                  2021
+#define IDS_DEVICE_SETTINGS_TXT         2018
+#define IDS_IMAGE_SETTINGS_TXT          2019
+#define IDS_FORMAT_OPTIONS_TXT          2020
+#define IDS_ADVANCED_OPTIONS_TXT        2021
+#define IDS_STATUS_TXT                  2022
 #define MSG_000                         3000
 #define MSG_001                         3001
 #define MSG_002                         3002
@@ -495,7 +494,17 @@
 #define MSG_298                         3298
 #define MSG_299                         3299
 #define MSG_300                         3300
-#define MSG_MAX                         3301
+#define MSG_301                         3301
+#define MSG_302                         3302
+#define MSG_303                         3303
+#define MSG_304                         3304
+#define MSG_305                         3305
+#define MSG_306                         3306
+#define MSG_307                         3307
+#define MSG_308                         3308
+#define MSG_309                         3309
+#define MSG_310                         3310
+#define MSG_MAX                         3311
 
 // Next default values for new objects
 // 

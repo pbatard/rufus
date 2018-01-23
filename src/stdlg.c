@@ -409,16 +409,15 @@ void CreateStatusBar(void)
 	height = rect.bottom;
 
 	// Set the font we'll use to display the '#' sign in the toolbar button
-	hFont = CreateFontA(-MulDiv(10, GetDeviceCaps(GetDC(hMainDialog), LOGPIXELSY), 72),
+	hDC = GetDC(hMainDialog);
+	hFont = CreateFontA(-MulDiv(10, GetDeviceCaps(hDC, LOGPIXELSY), 72),
 		0, 0, 0, FW_MEDIUM, FALSE, FALSE, FALSE, DEFAULT_CHARSET,
 		0, 0, PROOF_QUALITY, 0, "Segoe UI");
 
 	// Find the width of our hash sign
-	hDC = GetDC(hMainDialog);
 	SelectObject(hDC, hFont);
 	GetTextExtentPoint32W(hDC, L"#", 1, &sz);
-	if (hDC != NULL)
-		ReleaseDC(hMainDialog, hDC);
+	safe_release_dc(hMainDialog, hDC);
 
 	// Create 3 status areas
 	GetClientRect(hMainDialog, &rect);
@@ -879,8 +878,7 @@ INT_PTR CALLBACK SelectionCallback(HWND hDlg, UINT message, WPARAM wParam, LPARA
 		dh = rect.bottom - rect.top;
 		DrawTextU(hDC, szMessageText, -1, &rect, DT_CALCRECT | DT_WORDBREAK);
 		dh = rect.bottom - rect.top - dh;
-		if (hDC != NULL)
-			ReleaseDC(hCtrl, hDC);
+		safe_release_dc(hCtrl, hDC);
 		ResizeMoveCtrl(hDlg, hCtrl, 0, 0, 0, dh, 1.0f);
 		for (i = 0; i < nDialogItems; i++)
 			ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + i), 0, dh, 0, 0, 1.0f);
@@ -1012,8 +1010,7 @@ INT_PTR CALLBACK ListCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
 		dh = rect.bottom - rect.top;
 		DrawTextU(hDC, szMessageText, -1, &rect, DT_CALCRECT | DT_WORDBREAK);
 		dh = rect.bottom - rect.top - dh;
-		if (hDC != NULL)
-			ReleaseDC(hCtrl, hDC);
+		safe_release_dc(hCtrl, hDC);
 		ResizeMoveCtrl(hDlg, hCtrl, 0, 0, 0, dh, 1.0f);
 		for (i = 0; i < nDialogItems; i++)
 			ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDC_LIST_ITEM1 + i), 0, dh, 0, 0, 1.0f);
@@ -1237,8 +1234,7 @@ LONG GetEntryWidth(HWND hDropDown, const char *entry)
 	if (hFont != NULL)
 		SelectObject(hDC, hDefFont);
 
-	if (hDC != NULL)
-		ReleaseDC(hDropDown, hDC);
+	safe_release_dc(hDropDown, hDC);
 	return size.cx;
 }
 
@@ -1669,8 +1665,7 @@ SIZE GetTextSize(HWND hCtrl)
 		GetTextExtentPoint32W(hDC, wstr, len, &sz);
 out:
 	safe_free(wstr);
-	if (hDC != NULL)
-		ReleaseDC(hCtrl, hDC);
+	safe_release_dc(hCtrl, hDC);
 	return sz;
 }
 

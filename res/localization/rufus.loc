@@ -98,20 +98,17 @@ v 1.0.22
 # Main dialog
 g IDD_DIALOG
 t IDS_DEVICE_TXT "Device"
+# TODO: use MSG_278 for translations
+t IDS_BOOT_TYPE_TXT "Boot type"
 t IDS_PARTITION_TYPE_TXT "Partition scheme"
-t IDS_TARGET_SYSTEM_TXT "Target system type"
+t IDS_TARGET_SYSTEM_TXT "Target system"
 t IDS_FILESYSTEM_TXT "File system"
 t IDS_CLUSTERSIZE_TXT "Cluster size"
-t IDS_LABEL_TXT "New volume label"
+t IDS_LABEL_TXT "Volume label"
 t IDS_FORMAT_OPTIONS_GRP "Format Options"
 # Note: The button (IDC_ADVANCED) that appears next to "Format Options" is repositioned automatically.
 t IDC_BADBLOCKS "Check device for bad blocks"
 t IDC_QUICKFORMAT "Quick format"
-t IDC_BOOT "Create a bootable disk using"
-t IDC_WINDOWS_INSTALL "Standard Windows installation"
-# Only translate if Microsoft has a specific name for http://en.wikipedia.org/wiki/Windows_To_Go in your language
-# Otherwise, you can add a parenthesis eg. "Windows To Go (hint at what it does)" and/or use the tooltip (MSG_200)
-t IDC_WINDOWS_TO_GO "Windows To Go"
 t IDC_SET_ICON "Create extended label and icon files"
 t IDC_ABOUT "About..."
 t IDC_LOG "Log"
@@ -180,8 +177,8 @@ t MSG_003 "WARNING: ALL DATA ON DEVICE '%s' WILL BE DESTROYED.\n"
 t MSG_004 "Rufus update policy"
 t MSG_005 "Do you want to allow Rufus to check for application updates online?"
 # Must be the same as IDD_DIALOG:IDCANCEL (i.e. "Close" - I know it's confusing)
-t MSG_006 "Close"
-t MSG_007 "Cancel"
+t MSG_006 "CLOSE"
+t MSG_007 "CANCEL"
 t MSG_008 "Yes"
 t MSG_009 "No"
 t MSG_010 "Bad blocks found"
@@ -210,13 +207,13 @@ t MSG_028 "megabytes"
 t MSG_029 "Default"
 # The following gets appended to the file system, cluster size, etc.
 t MSG_030 "%s (Default)"
-t MSG_031 "%s partition scheme for BIOS or %s"
-t MSG_032 "%s partition scheme for BIOS"
-t MSG_033 "%s partition scheme for UEFI"
+t MSG_031 "BIOS (or UEFI-CSM)"
+t MSG_032 "UEFI (non CSM)"
+t MSG_033 "BIOS or UEFI"
 # Number of bad block check passes (singular for 1 pass, plural for 2 or more passes)
-t MSG_034 "%d mass"
-t MSG_035 "%d masses"
-t MSG_036 "ISO Image"
+t MSG_034 "%d pass"
+t MSG_035 "%d passes"
+t MSG_036 "Disk or ISO Image"
 t MSG_037 "Application"
 t MSG_038 "Abort"
 t MSG_039 "Launch"
@@ -298,7 +295,7 @@ t MSG_093 "IMPORTANT: THIS DRIVE CONTAINS MULTIPLE PARTITIONS!!\n\n"
 	"This may include partitions/volumes that aren't listed or even visible from Windows. "
 	"Should you wish to proceed, you are responsible for any data loss on these partitions."
 t MSG_094 "Multiple partitions detected"
-t MSG_095 "DD Image"
+###### t MSG_095 "DD Image"
 t MSG_096 "The file system currently selected can not be used with this type of ISO. "
 	"Please select a different file system or use a different ISO."
 t MSG_097 "'%s' can only be applied if the file system is NTFS."
@@ -379,7 +376,7 @@ t MSG_159 "Use this field to set the drive label\nInternational characters are a
 t MSG_160 "Toggle advanced options"
 t MSG_161 "Check the device for bad blocks using a test pattern"
 t MSG_162 "Uncheck this box to use the \"slow\" format method"
-t MSG_163 "Check this box to make the USB drive bootable"
+### t MSG_163 ###FREE TO USE###
 t MSG_164 "Method that will be used to make the drive bootable"
 t MSG_165 "Click to select an image..."
 t MSG_166 "Check this box to allow the display of international labels "
@@ -570,6 +567,11 @@ t MSG_299 "Timestamp validation error"
 t MSG_300 "Rufus could not validate that the timestamp of the downloaded update is more recent than the one for the "
 	"current executable.\n\nIn order to prevent potential attack scenarios, the update process has been aborted and "
 	"the download will be deleted. Please check the log for more details."
+t MSG_301 "Standard Windows installation"
+# Only translate if Microsoft has a specific name for http://en.wikipedia.org/wiki/Windows_To_Go in your language
+# Otherwise, you can add a parenthesis eg. "Windows To Go (hint at what it does)" and/or use the tooltip (MSG_200)
+t MSG_302 "Windows To Go"
+
 
 ################################################################################
 ############################# TRANSLATOR END COPY ##############################
