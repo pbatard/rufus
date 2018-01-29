@@ -173,8 +173,7 @@ typedef struct {
 
 /* Status Bar sections */
 #define SB_SECTION_LEFT         0
-#define SB_SECTION_MIDDLE       1
-#define SB_SECTION_RIGHT        2
+#define SB_SECTION_RIGHT        1
 #define SB_TIMER_SECTION_SIZE   58.0f
 
 /* Timers used throughout the program */
@@ -430,6 +429,7 @@ extern INT_PTR MyDialogBox(HINSTANCE hInstance, int Dialog_ID, HWND hWndParent, 
 extern void CenterDialog(HWND hDlg);
 extern void ResizeMoveCtrl(HWND hDlg, HWND hCtrl, int dx, int dy, int dw, int dh, float scale);
 extern void CreateStatusBar(void);
+extern void CreateStaticFont(HDC hDC, HFONT* hFont, BOOL underlined);
 extern void SetTitleBarIcon(HWND hDlg);
 extern BOOL CreateTaskbarList(void);
 extern BOOL SetTaskbarProgressState(TASKBAR_PROGRESS_FLAGS tbpFlags);

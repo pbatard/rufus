@@ -99,7 +99,7 @@ v 1.0.22
 g IDD_DIALOG
 t IDS_DEVICE_TXT "Device"
 # TODO: use MSG_278 for translations
-t IDS_BOOT_TYPE_TXT "Boot type"
+t IDS_BOOT_TYPE_TXT "Boot selection"
 t IDS_PARTITION_TYPE_TXT "Partition scheme"
 t IDS_TARGET_SYSTEM_TXT "Target system"
 t IDS_FILESYSTEM_TXT "File system"
@@ -123,6 +123,7 @@ t IDC_EXTRA_PARTITION "Add fixes for old BIOSes (extra partition, align, etc.)"
 # Rufus can install it's own custom MBR (the Rufus MBR), which also allows users
 # to specify a custom disk ID for the BIOS. Note: the tooltip for this control is MSG_167.
 t IDC_RUFUS_MBR "Use Rufus MBR with BIOS ID"
+t IDC_SHOW_ADVANCED_OPTIONS "Show Advanced Options ⌵"
 
 # About dialog
 g IDD_ABOUTBOX
@@ -207,13 +208,14 @@ t MSG_028 "megabytes"
 t MSG_029 "Default"
 # The following gets appended to the file system, cluster size, etc.
 t MSG_030 "%s (Default)"
+## TODO: the changes for 3.0 with removal of %s will make these messages crash
 t MSG_031 "BIOS (or UEFI-CSM)"
 t MSG_032 "UEFI (non CSM)"
 t MSG_033 "BIOS or UEFI"
 # Number of bad block check passes (singular for 1 pass, plural for 2 or more passes)
 t MSG_034 "%d pass"
 t MSG_035 "%d passes"
-t MSG_036 "Disk or ISO Image"
+t MSG_036 "ISO Image"
 t MSG_037 "Application"
 t MSG_038 "Abort"
 t MSG_039 "Launch"
@@ -295,7 +297,7 @@ t MSG_093 "IMPORTANT: THIS DRIVE CONTAINS MULTIPLE PARTITIONS!!\n\n"
 	"This may include partitions/volumes that aren't listed or even visible from Windows. "
 	"Should you wish to proceed, you are responsible for any data loss on these partitions."
 t MSG_094 "Multiple partitions detected"
-###### t MSG_095 "DD Image"
+t MSG_095 "DD Image"
 t MSG_096 "The file system currently selected can not be used with this type of ISO. "
 	"Please select a different file system or use a different ISO."
 t MSG_097 "'%s' can only be applied if the file system is NTFS."
@@ -571,6 +573,8 @@ t MSG_301 "Standard Windows installation"
 # Only translate if Microsoft has a specific name for http://en.wikipedia.org/wiki/Windows_To_Go in your language
 # Otherwise, you can add a parenthesis eg. "Windows To Go (hint at what it does)" and/or use the tooltip (MSG_200)
 t MSG_302 "Windows To Go"
+t MSG_303 "Disk or ISO image"
+t MSG_304 "%s (Please select)"
 
 
 ################################################################################
@@ -5317,9 +5321,9 @@ t MSG_027 "kilo-octets"
 t MSG_028 "méga-octets"
 t MSG_029 "Défaut"
 t MSG_030 "%s (Défaut)"
-t MSG_031 "Type de partition %s pour BIOS ou %s"
-t MSG_032 "Type de partition %s pour BIOS"
-t MSG_033 "Type de partition %s pour UEFI"
+t MSG_031 "BIOS (ou UEFI-CSM)"
+t MSG_032 "UEFI (non CSM)"
+t MSG_033 "BIOS ou UEFI"
 t MSG_034 "%d passe"
 t MSG_035 "%d passes"
 t MSG_036 "Image ISO"

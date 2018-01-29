@@ -518,7 +518,8 @@ void PrintStatusInfo(BOOL info, BOOL debug, unsigned int duration, int msg_id, .
 	if (!info)
 		szStatusMessage = szMessage[MSG_STATUS][(duration > 0)?MSG_LOW_PRI:MSG_HIGH_PRI];
 
-	format = msg_table[msg_id - MSG_000];
+	if ((msg_id > MSG_000) && (msg_id < MSG_MAX))
+		format = msg_table[msg_id - MSG_000];
 	if (format == NULL) {
 		safe_sprintf(msg_hi, MSG_LEN, "MSG_%03d UNTRANSLATED", msg_id - MSG_000);
 		uprintf(msg_hi);
@@ -541,7 +542,8 @@ void PrintStatusInfo(BOOL info, BOOL debug, unsigned int duration, int msg_id, .
 
 	// Because we want the log messages in English, we go through the VA business once more, but this time with default_msg_table
 	if (debug) {
-		format = default_msg_table[msg_id - MSG_000];
+		if ((msg_id > MSG_000) && (msg_id < MSG_MAX))
+			format = default_msg_table[msg_id - MSG_000];
 		if (format == NULL) {
 			safe_sprintf(buf, sizeof(szStatusMessage), "(default) MSG_%03d UNTRANSLATED", msg_id - MSG_000);
 			return;
