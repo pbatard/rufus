@@ -372,19 +372,19 @@ int32_t StrArrayAdd(StrArray* arr, const char* str, BOOL duplicate)
 
 int32_t StrArrayFind(StrArray* arr, const char* str)
 {
-	size_t i;
+	uint32_t i;
 	if ((str == NULL) || (arr == NULL) || (arr->String == NULL))
 		return -1;
 	for (i = 0; i<arr->Index; i++) {
 		if (strcmp(arr->String[i], str) == 0)
-			return i;
+			return (int32_t)i;
 	}
 	return -1;
 }
 
 void StrArrayClear(StrArray* arr)
 {
-	size_t i;
+	uint32_t i;
 	if ((arr == NULL) || (arr->String == NULL))
 		return;
 	for (i=0; i<arr->Index; i++) {

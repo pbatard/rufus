@@ -89,14 +89,14 @@
 #define IDC_NBPASSES                    1014
 #define IDC_TEST                        1015
 #define IDC_SELECT_IMAGE                1016
-#define IDC_SET_ICON                    1017
+#define IDC_EXTENDED_LABEL              1017
 #define IDC_RUFUS_MBR                   1018
 #define IDC_TARGET_SYSTEM               1019
 #define IDC_INFO                        1020
 #define IDC_LANG                        1021
 #define IDC_DISK_ID                     1022
-#define IDC_EXTRA_PARTITION             1023
-#define IDC_ENABLE_FIXED_DISKS          1024
+#define IDC_OLD_BIOS_FIXES              1023
+#define IDC_LIST_USB_HDD                1024
 #define IDC_STATUS_TOOLBAR              1025
 #define IDC_HASH                        1026
 #define IDC_SAVE                        1027
@@ -111,7 +111,8 @@
 #define IDC_NOTIFICATION_ICON           1040
 #define IDC_NOTIFICATION_TEXT           1041
 #define IDC_NOTIFICATION_LINE           1042
-#define IDC_ADVANCED                    1043
+#define IDC_ADVANCED_DEVICE_TOOLBAR     1043
+#define IDC_ADVANCED_FORMAT_TOOLBAR     1044
 #define IDC_LOG                         1045
 #define IDC_WINDOWS_INSTALL             1047
 #define IDC_WINDOWS_TO_GO               1048
@@ -171,6 +172,8 @@
 #define IDC_LIST_ITEM14                 1109
 #define IDC_LIST_ITEM15                 1110
 #define IDC_LIST_ITEMMAX                1111
+#define IDC_ADVANCED_DEVICE_SETTINGS    1112
+#define IDC_ADVANCED_FORMAT_OPTIONS     1113
 #define IDS_DEVICE_TXT                  2000
 #define IDS_PARTITION_TYPE_TXT          2001
 #define IDS_FILESYSTEM_TXT              2002
@@ -188,8 +191,7 @@
 #define IDS_BOOT_TYPE_TXT               2015
 #define IDS_DEVICE_SETTINGS_TXT         2016
 #define IDS_FORMAT_OPTIONS_TXT          2017
-#define IDS_ADVANCED_OPTIONS_TXT        2018
-#define IDS_STATUS_TXT                  2019
+#define IDS_STATUS_TXT                  2018
 #define MSG_000                         3000
 #define MSG_001                         3001
 #define MSG_002                         3002
@@ -510,7 +512,7 @@
 #define _APS_NO_MFC                     1
 #define _APS_NEXT_RESOURCE_VALUE        505
 #define _APS_NEXT_COMMAND_VALUE         40001
-#define _APS_NEXT_CONTROL_VALUE         1112
+#define _APS_NEXT_CONTROL_VALUE         1114
 #define _APS_NEXT_SYMED_VALUE           4000
 #endif
 #endif

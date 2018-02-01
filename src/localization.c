@@ -80,7 +80,7 @@ char* default_msg_table[MSG_MAX-MSG_000] = {"%s", 0};
 char* current_msg_table[MSG_MAX-MSG_000] = {"%s", 0};
 char** msg_table = NULL;
 
-extern progress_in_use;
+extern BOOL progress_in_use;
 
 static void mtab_destroy(BOOL reinit)
 {

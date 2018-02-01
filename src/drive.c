@@ -1098,7 +1098,7 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 	}
 
 	// Compute the start offset of our first partition
-	if ((partition_style == PARTITION_STYLE_GPT) || (!IsChecked(IDC_EXTRA_PARTITION))) {
+	if ((partition_style == PARTITION_STYLE_GPT) || (!IsChecked(IDC_OLD_BIOS_FIXES))) {
 		// Go with the MS 1 MB wastage at the beginning...
 		DriveLayoutEx.PartitionEntry[pn].StartingOffset.QuadPart = MB;
 	} else {

@@ -69,7 +69,7 @@ uint32_t bufnum, sum_count[CHECKSUM_MAX] = { 16, 20, 32 };
 HANDLE data_ready[CHECKSUM_MAX] = { 0 }, thread_ready[CHECKSUM_MAX] = { 0 };
 DWORD read_size[2];
 unsigned char ALIGNED(64) buffer[2][BUFFER_SIZE];
-extern progress_in_use;
+extern BOOL progress_in_use;
 
 /*
  * Rotate 32 bit integers by n bytes.

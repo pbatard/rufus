@@ -1000,7 +1000,7 @@ static BOOL WriteSBR(HANDLE hPhysicalDrive)
 	fake_fd._handle = (char*)hPhysicalDrive;
 	set_bytes_per_sector(SelectedDrive.SectorSize);
 	// Ensure that we have sufficient space for the SBR
-	max_size = IsChecked(IDC_EXTRA_PARTITION) ?
+	max_size = IsChecked(IDC_OLD_BIOS_FIXES) ?
 		(DWORD)(SelectedDrive.SectorsPerTrack * SelectedDrive.SectorSize) : 1*MB;
 	max_size -= mbr_size;
 	// Syslinux has precedence over Grub
@@ -1670,7 +1670,7 @@ DWORD WINAPI FormatThread(void* param)
 	else if ( (fs == FS_NTFS) && ((bt == BT_UEFI_NTFS) ||
 			  ((bt == BT_IMAGE) && IS_EFI_BOOTABLE(img_report) && ((tt == TT_UEFI) || (windows_to_go) || (allow_dual_uefi_bios)))) )
 		extra_partitions = XP_UEFI_NTFS;
-	else if (IsChecked(IDC_EXTRA_PARTITION))
+	else if (IsChecked(IDC_OLD_BIOS_FIXES))
 		extra_partitions = XP_COMPAT;
 
 	PrintInfoDebug(0, MSG_225);
@@ -1965,7 +1965,7 @@ DWORD WINAPI FormatThread(void* param)
 			safe_unlockclose(hLogicalVolume);
 		}
 	} else {
-		if (IsChecked(IDC_SET_ICON))
+		if (IsChecked(IDC_EXTENDED_LABEL))
 			SetAutorun(drive_name);
 	}
 	CHECK_FOR_USER_CANCEL;
@@ -2044,7 +2044,7 @@ DWORD WINAPI FormatThread(void* param)
 		}
 		UpdateProgress(OP_FINALIZE, -1.0f);
 		PrintInfoDebug(0, MSG_233);
-		if (IsChecked(IDC_SET_ICON))
+		if (IsChecked(IDC_EXTENDED_LABEL))
 			SetAutorun(drive_name);
 		// Issue another complete remount before we exit, to ensure we're clean
 		RemountVolume(drive_name);

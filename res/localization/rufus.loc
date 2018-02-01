@@ -93,36 +93,40 @@
 # http://download.microsoft.com/download/9/5/E/95EF66AF-9026-4BB0-A41D-A4F81802D92C/%5BMS-LCID%5D.pdf
 # for the LCID (0x####) codes you should use
 l "en-US" "English (English)" 0x0409, 0x0809, 0x0c09, 0x1009, 0x1409, 0x1809, 0x1c09, 0x2009, 0x2409, 0x2809, 0x2c09, 0x3009, 0x3409, 0x3809, 0x3c09, 0x4009, 0x4409, 0x4809
-v 1.0.22
+v 1.0.23
 
 # Main dialog
 g IDD_DIALOG
+t IDS_DEVICE_SETTINGS_TXT "Device Settings"
 t IDS_DEVICE_TXT "Device"
 # TODO: use MSG_278 for translations
-t IDS_BOOT_TYPE_TXT "Boot selection"
+t IDS_BOOT_TYPE_TXT "Boot type"
+t IDS_IMAGE_OPTION_TXT "Image Option"
 t IDS_PARTITION_TYPE_TXT "Partition scheme"
 t IDS_TARGET_SYSTEM_TXT "Target system"
+t IDC_ADVANCED_DEVICE_SETTINGS "Advanced Device Settings"
+t IDC_LIST_USB_HDD "List USB Hard Drives"
+# Note: It is acceptable to drop the parenthesis () below if you are running out of space
+# as there is a tooltip (MSG_169) providing these details.
+t IDC_OLD_BIOS_FIXES "Add fixes for old BIOSes (extra partition, align, etc.)"
+# 'MBR': See http://en.wikipedia.org/wiki/Master_boot_record
+# Rufus can install it's own custom MBR (the Rufus MBR), which also allows users
+# to specify a custom disk ID for the BIOS. Note: the tooltip for this control is MSG_167.
+t IDC_RUFUS_MBR "Use Rufus MBR with BIOS ID"
+t IDS_FORMAT_OPTIONS_TXT "Format Options"
 t IDS_FILESYSTEM_TXT "File system"
 t IDS_CLUSTERSIZE_TXT "Cluster size"
 t IDS_LABEL_TXT "Volume label"
-t IDS_FORMAT_OPTIONS_GRP "Format Options"
-# Note: The button (IDC_ADVANCED) that appears next to "Format Options" is repositioned automatically.
-t IDC_BADBLOCKS "Check device for bad blocks"
+t IDC_ADVANCED_FORMAT_OPTIONS "Advanced Format Options"
 t IDC_QUICKFORMAT "Quick format"
-t IDC_SET_ICON "Create extended label and icon files"
+t IDC_BADBLOCKS "Check device for bad blocks"
+t IDC_EXTENDED_LABEL "Create extended label and icon files"
+t IDS_STATUS_TXT "Status"
 t IDC_ABOUT "About..."
 t IDC_LOG "Log"
 t IDCANCEL "Close"
 t IDC_START "Start"
 t IDS_ADVANCED_OPTIONS_GRP "Advanced Options"
-t IDC_ENABLE_FIXED_DISKS "List USB Hard Drives"
-# Note: It is acceptable to drop the parenthesis () below if you are running out of space
-# as there is a tooltip (MSG_169) providing these details.
-t IDC_EXTRA_PARTITION "Add fixes for old BIOSes (extra partition, align, etc.)"
-# 'MBR': See http://en.wikipedia.org/wiki/Master_boot_record
-# Rufus can install it's own custom MBR (the Rufus MBR), which also allows users
-# to specify a custom disk ID for the BIOS. Note: the tooltip for this control is MSG_167.
-t IDC_RUFUS_MBR "Use Rufus MBR with BIOS ID"
 t IDC_SHOW_ADVANCED_OPTIONS "Show Advanced Options ⌵"
 
 # About dialog
@@ -592,21 +596,21 @@ t IDS_PARTITION_TYPE_TXT "مخطط التقسيم ونوع النظام المس
 t IDS_FILESYSTEM_TXT "نظام الملفات"
 t IDS_CLUSTERSIZE_TXT "حجم الكلستر"
 t IDS_LABEL_TXT "تسمية وحدة التخزين"
-t IDS_FORMAT_OPTIONS_GRP "خيارات الفورمات"
+t IDS_FORMAT_OPTIONS_TXT "خيارات الفورمات"
 t IDC_BADBLOCKS "فحص الجهاز من الأجزاء التالفة"
 t IDC_QUICKFORMAT "فورمات سريع"
 t IDC_BOOT "إنشاء قرص إقلاع بإستخدام"
 t IDC_WINDOWS_INSTALL "تثبيت ويندوز قياسيا"
 t IDC_WINDOWS_TO_GO "Windows To Go (تشغيل ويندوز من USB)"
-t IDC_SET_ICON "إنشاء تسمية موسّعة وأيقونة ملفات"
+t IDC_EXTENDED_LABEL "إنشاء تسمية موسّعة وأيقونة ملفات"
 t IDC_ABOUT "حول..."
 s IDC_LOG +10,0
 t IDC_LOG "سجلّ"
 t IDCANCEL "إغلاق"
 t IDC_START "إبدأ"
 t IDS_ADVANCED_OPTIONS_GRP "خيارات متقدّمة"
-t IDC_ENABLE_FIXED_DISKS "قائمة بالمحركات الصلبة المحمولة USB"
-t IDC_EXTRA_PARTITION "إضافة إصلاح BIOSes قديمة (تقسم إضافي, معاينة..)"
+t IDC_LIST_USB_HDD "قائمة بالمحركات الصلبة المحمولة USB"
+t IDC_OLD_BIOS_FIXES "إضافة إصلاح BIOSes قديمة (تقسم إضافي, معاينة..)"
 t IDC_RUFUS_MBR "إستخدام MBR مع BIOS ID"
 
 # About dialog
@@ -1052,8 +1056,8 @@ s IDC_CLUSTERSIZE +5,0
 t IDS_LABEL_TXT "Yeni Tək Etiketi"
 s IDC_LABEL +5,0
 s IDC_PROGRESS +5,0
-t IDS_FORMAT_OPTIONS_GRP "Formatlama Variantları"
-s IDS_FORMAT_OPTIONS_GRP +5,0
+t IDS_FORMAT_OPTIONS_TXT "Formatlama Variantları"
+s IDS_FORMAT_OPTIONS_TXT +5,0
 t IDC_BADBLOCKS "Səhvli Bloklar üçün Cihazı Yoxla"
 s IDC_BADBLOCKS +25,0
 m IDC_NBPASSES +30,0
@@ -1065,7 +1069,7 @@ s IDC_INFO +5,0
 m IDC_BOOTTYPE +5,0
 m IDC_SELECT_ISO +5,0
 t IDC_WINDOWS_INSTALL "Standart Windows Yükləməsi"
-t IDC_SET_ICON "Genişləndirilmiş Etiket və Simvol Faylları Yarat"
+t IDC_EXTENDED_LABEL "Genişləndirilmiş Etiket və Simvol Faylları Yarat"
 t IDC_ABOUT "Haqqında..."
 s IDC_ABOUT -5,0
 t IDC_LOG "Günlük"
@@ -1077,8 +1081,8 @@ t IDC_START "Başlat"
 m IDC_START +5,0
 t IDS_ADVANCED_OPTIONS_GRP "İnkişaf etmiş Variantlar"
 s IDS_ADVANCED_OPTIONS_GRP +5,0
-t IDC_ENABLE_FIXED_DISKS "USB sabit sürücüləri siyahıla"
-t IDC_EXTRA_PARTITION "Köhnə BIOSLAR üçün düzəliş əlavə et (xüsusi hissə, sıralama və s.)"
+t IDC_LIST_USB_HDD "USB sabit sürücüləri siyahıla"
+t IDC_OLD_BIOS_FIXES "Köhnə BIOSLAR üçün düzəliş əlavə et (xüsusi hissə, sıralama və s.)"
 t IDC_RUFUS_MBR "Rufus MBR istifadə et. BIOS Növünü Seçin"
 s IDC_RUFUS_MBR +47,0
 m IDC_DISK_ID +45,0
@@ -1533,7 +1537,7 @@ b "en-US"
 # Main dialog
 g IDD_DIALOG
 s IDD_DIALOG +15,0
-s IDS_FORMAT_OPTIONS_GRP +15,0
+s IDS_FORMAT_OPTIONS_TXT +15,0
 s IDC_DEVICE +15,0
 s IDC_PARTITION_TYPE +15,0
 s IDC_FILESYSTEM +15,0
@@ -1556,20 +1560,20 @@ t IDS_PARTITION_TYPE_TXT "Схема на дяла и тип на интерфе
 t IDS_FILESYSTEM_TXT "Файлова система"
 t IDS_CLUSTERSIZE_TXT "Размер на клъстера"
 t IDS_LABEL_TXT "Нов етикет на тома"
-t IDS_FORMAT_OPTIONS_GRP "Свойства на форматирането"
+t IDS_FORMAT_OPTIONS_TXT "Свойства на форматирането"
 t IDC_BADBLOCKS "Провери за лоши сектори"
 t IDC_QUICKFORMAT "Бърз Формат"
 t IDC_BOOT "Създай стартиращ диск с"
 t IDC_WINDOWS_INSTALL "Стандартна Windows инсталация"
 t IDC_WINDOWS_TO_GO "Windows To Go (Windows за USB Flash устройство)"
-t IDC_SET_ICON "Създай разширен етикет и икони файлове"
+t IDC_EXTENDED_LABEL "Създай разширен етикет и икони файлове"
 t IDC_ABOUT "Относно..."
 t IDC_LOG "Регистър"
 t IDCANCEL "Затвори"
 t IDC_START "Старт"
 t IDS_ADVANCED_OPTIONS_GRP "Разширени свойства"
-t IDC_ENABLE_FIXED_DISKS "Списък с USB твърди дискове"
-t IDC_EXTRA_PARTITION "Добави поправки за стария BIOS"
+t IDC_LIST_USB_HDD "Списък с USB твърди дискове"
+t IDC_OLD_BIOS_FIXES "Добави поправки за стария BIOS"
 t IDC_RUFUS_MBR "Използвай Rufus MBR с BIOS ID"
 
 # About dialog
@@ -2031,7 +2035,7 @@ t IDS_PARTITION_TYPE_TXT "分区方案和目标系统类型"
 t IDS_FILESYSTEM_TXT "文件系统"
 t IDS_CLUSTERSIZE_TXT "簇大小"
 t IDS_LABEL_TXT "新卷标"
-t IDS_FORMAT_OPTIONS_GRP "格式化选项"
+t IDS_FORMAT_OPTIONS_TXT "格式化选项"
 # 注: 出现在 "Format Options" 旁边的按钮 (IDC_ADVANCED) 是自动重新定位的。。
 t IDC_BADBLOCKS "检查设备坏块"
 t IDC_QUICKFORMAT "快速格式化"
@@ -2040,17 +2044,17 @@ t IDC_WINDOWS_INSTALL "标准 Windows 安装"
 # Only translate if Microsoft has a specific name for http://en.wikipedia.org/wiki/Windows_To_Go in your language
 # Otherwise, you can add a parenthesis eg. "Windows To Go (hint at what it does)" and/or use the tooltip (MSG_200)
 t IDC_WINDOWS_TO_GO "Windows To Go"
-t IDC_SET_ICON "创建扩展的标签和图标文件"
+t IDC_EXTENDED_LABEL "创建扩展的标签和图标文件"
 t IDC_ABOUT "关于..."
 t IDC_LOG "日志"
 s IDC_LOG +16,0
 t IDCANCEL "关闭"
 t IDC_START "开始"
 t IDS_ADVANCED_OPTIONS_GRP "高级选项"
-t IDC_ENABLE_FIXED_DISKS "显示 USB 外置硬盘"
+t IDC_LIST_USB_HDD "显示 USB 外置硬盘"
 # Note: It is acceptable to drop the parenthesis () below if you are running out of space
 # as there is a tooltip (MSG_169) providing these details.
-t IDC_EXTRA_PARTITION "添加对旧 BIOS 修正(额外的分区，校准等)"
+t IDC_OLD_BIOS_FIXES "添加对旧 BIOS 修正(额外的分区，校准等)"
 # 'MBR': See http://en.wikipedia.org/wiki/Master_boot_record
 # Rufus can install it's own custom MBR (the Rufus MBR), which also allows users
 # to specify a custom disk ID for the BIOS. Note: the tooltip for this control is MSG_167.
@@ -2485,7 +2489,7 @@ t IDS_PARTITION_TYPE_TXT "資料分割配置及系統類型"
 t IDS_FILESYSTEM_TXT "檔案系統"
 t IDS_CLUSTERSIZE_TXT "配置單元大小"
 t IDS_LABEL_TXT "磁碟區標籤"
-t IDS_FORMAT_OPTIONS_GRP "選項"
+t IDS_FORMAT_OPTIONS_TXT "選項"
 t IDC_BADBLOCKS "檢查損毀磁區，測試次數"
 s IDC_BADBLOCKS -5,0
 m IDC_NBPASSES -5,0
@@ -2496,7 +2500,7 @@ s IDC_BOOT -5,0
 t IDC_WINDOWS_INSTALL "標準 Windows 安裝"
 m IDC_BOOTTYPE -5,0
 s IDC_BOOTTYPE +5,0
-t IDC_SET_ICON "建立延伸標籤及圖示"
+t IDC_EXTENDED_LABEL "建立延伸標籤及圖示"
 t IDC_ABOUT "關於..."
 s IDC_ABOUT +2,0
 t IDC_LOG "記錄檔"
@@ -2509,8 +2513,8 @@ t IDC_START "執行"
 m IDC_START -5,0
 s IDC_START +2,0
 t IDS_ADVANCED_OPTIONS_GRP "進階選項"
-t IDC_ENABLE_FIXED_DISKS "顯示 USB 外接硬碟"
-t IDC_EXTRA_PARTITION "相容性模式"
+t IDC_LIST_USB_HDD "顯示 USB 外接硬碟"
+t IDC_OLD_BIOS_FIXES "相容性模式"
 t IDC_RUFUS_MBR "客製 MBR 並設 ID 為"
 s IDC_RUFUS_MBR -5,0
 m IDC_DISK_ID -5,0
@@ -2913,18 +2917,18 @@ t IDS_PARTITION_TYPE_TXT "Shema particije i ciljani datotečni sustav"
 t IDS_FILESYSTEM_TXT "Sustav datoteka"
 t IDS_CLUSTERSIZE_TXT "Veličina grupiranja"
 t IDS_LABEL_TXT "Naziv nove particije"
-t IDS_FORMAT_OPTIONS_GRP "Dodatno"
+t IDS_FORMAT_OPTIONS_TXT "Dodatno"
 t IDC_BADBLOCKS "Provjeri blokove"
 t IDC_QUICKFORMAT "Brzo formatiranje"
 t IDC_BOOT "Stvori pogon za podizanje iz"
-t IDC_SET_ICON "Stvori produženu oznaku i ikone"
+t IDC_EXTENDED_LABEL "Stvori produženu oznaku i ikone"
 t IDC_ABOUT "O programu"
 t IDC_LOG "Zapis"
 t IDCANCEL "Zatvori"
 t IDC_START "Početak"
 t IDS_ADVANCED_OPTIONS_GRP "Napredne postavke"
-t IDC_ENABLE_FIXED_DISKS "Prikaži USB Hard Diskove"
-t IDC_EXTRA_PARTITION "Dodaj ispravke za stare BIOS-e (extra particije, itd.)"
+t IDC_LIST_USB_HDD "Prikaži USB Hard Diskove"
+t IDC_OLD_BIOS_FIXES "Dodaj ispravke za stare BIOS-e (extra particije, itd.)"
 t IDC_RUFUS_MBR "Koristi Rufusov MBR"
 
 # About dialog
@@ -3367,20 +3371,20 @@ t IDS_PARTITION_TYPE_TXT "Oddíl a typ cílového systému"
 t IDS_FILESYSTEM_TXT "Souborový systém"
 t IDS_CLUSTERSIZE_TXT "Velikost clusteru"
 t IDS_LABEL_TXT "Nový název svazku"
-t IDS_FORMAT_OPTIONS_GRP "Nastavení formátování"
+t IDS_FORMAT_OPTIONS_TXT "Nastavení formátování"
 t IDC_BADBLOCKS "Zkontrolovat chybné bloky"
 t IDC_QUICKFORMAT "Rychlé formátování"
 t IDC_BOOT "Vytvořit zaváděcí disk"
 t IDC_WINDOWS_INSTALL "Standartní instalace Windows"
 t IDC_WINDOWS_TO_GO "Přenosný systém Windows"
-t IDC_SET_ICON "Vytvořit soubory s jmenovkou a ikonou svazku"
+t IDC_EXTENDED_LABEL "Vytvořit soubory s jmenovkou a ikonou svazku"
 t IDC_ABOUT "O programu..."
 t IDC_LOG "Záznam"
 t IDCANCEL "Zavřít"
 t IDC_START "Spustit"
 t IDS_ADVANCED_OPTIONS_GRP "Pokročilé možnosti formátování "
-t IDC_ENABLE_FIXED_DISKS "Zobrazit seznam USB disků"
-t IDC_EXTRA_PARTITION "Přidat opravy pro starší verze BIOSu"
+t IDC_LIST_USB_HDD "Zobrazit seznam USB disků"
+t IDC_OLD_BIOS_FIXES "Přidat opravy pro starší verze BIOSu"
 t IDC_RUFUS_MBR "Použít Rufus MBR s BIOS ID"
 
 # About dialog
@@ -3824,20 +3828,20 @@ t IDS_PARTITION_TYPE_TXT "Partitionsordning og destinationssystem"
 t IDS_FILESYSTEM_TXT "Filsystem"
 t IDS_CLUSTERSIZE_TXT "Klyngestørrelse"
 t IDS_LABEL_TXT "Ny volume-etiket"
-t IDS_FORMAT_OPTIONS_GRP "Formateringsindstillinger"
+t IDS_FORMAT_OPTIONS_TXT "Formateringsindstillinger"
 t IDC_BADBLOCKS "Søg efter fejlbehæftede blokke"
 t IDC_QUICKFORMAT "Ekspresformatering"
 t IDC_BOOT "Opret en boot-disk med"
 t IDC_WINDOWS_INSTALL "Standard Windows-installation"
 t IDC_WINDOWS_TO_GO "Windows To Go (din PC på en USB-nøgle)"
-t IDC_SET_ICON "Brug udvidet etiket og ikon-filer"
+t IDC_EXTENDED_LABEL "Brug udvidet etiket og ikon-filer"
 t IDC_ABOUT "Om..."
 t IDC_LOG "Log"
 t IDCANCEL "Afslut"
 t IDC_START "Start"
 t IDS_ADVANCED_OPTIONS_GRP "Avancerede indstillinger"
-t IDC_ENABLE_FIXED_DISKS "Vis USB-harddiske"
-t IDC_EXTRA_PARTITION "Tilføj rettelser for ældre BIOS'er"
+t IDC_LIST_USB_HDD "Vis USB-harddiske"
+t IDC_OLD_BIOS_FIXES "Tilføj rettelser for ældre BIOS'er"
 t IDC_RUFUS_MBR "Brug Rufus MBR med BIOS ID"
 s IDC_BADBLOCKS +20,0
 s IDC_NBPASSES -25,0
@@ -4286,7 +4290,7 @@ t IDS_CLUSTERSIZE_TXT "Clustergrootte"
 s IDC_CLUSTERSIZE 20,0
 t IDS_LABEL_TXT "Nieuw volumelabel"
 s IDC_LABEL 20,0
-t IDS_FORMAT_OPTIONS_GRP "Formatteer Opties"
+t IDS_FORMAT_OPTIONS_TXT "Formatteer Opties"
 t IDC_BADBLOCKS "Controleer apparaat op slechte blokken"
 s IDC_BADBLOCKS 10,0
 t IDC_QUICKFORMAT "Snelformatteren"
@@ -4295,20 +4299,20 @@ s IDC_BOOT 19,0
 m IDC_BOOTTYPE 20,0
 m IDC_SELECT_ISO 20,0
 s IDC_INFO 20,0
-t IDC_SET_ICON "Creëer uitgebreide label- en icoon bestanden"
+t IDC_EXTENDED_LABEL "Creëer uitgebreide label- en icoon bestanden"
 t IDC_ABOUT "Over..."
 t IDC_LOG "Log"
 t IDCANCEL "Sluit"
 t IDC_START "Start"
 t IDS_ADVANCED_OPTIONS_GRP "Geavanceerde Opties"
-t IDC_ENABLE_FIXED_DISKS "Laat USB HD's zien"
-t IDC_EXTRA_PARTITION "Oplossingen voor oude BIOS'en (extra partitie, uitlijnen, etc.)"
-s IDC_EXTRA_PARTITION 20,0
+t IDC_LIST_USB_HDD "Laat USB HD's zien"
+t IDC_OLD_BIOS_FIXES "Oplossingen voor oude BIOS'en (extra partitie, uitlijnen, etc.)"
+s IDC_OLD_BIOS_FIXES 20,0
 t IDC_RUFUS_MBR "Gebruik Rufus MBR met BIOS ID"
 s IDC_RUFUS_MBR 13,0
 m IDC_DISK_ID 20,0
 m IDC_NBPASSES 20,0
-s IDS_FORMAT_OPTIONS_GRP 20,0
+s IDS_FORMAT_OPTIONS_TXT 20,0
 s IDS_ADVANCED_OPTIONS_GRP 20,0
 s IDC_PROGRESS 20,0
 m IDC_START 20,0
@@ -4754,7 +4758,7 @@ t IDS_PARTITION_TYPE_TXT "Osion ja kohdejärjestelmän tyyppi"
 t IDS_FILESYSTEM_TXT "Tiedostojärjestelmä"
 t IDS_CLUSTERSIZE_TXT "Tilanvarausyksikkö"
 t IDS_LABEL_TXT "Uuden aseman nimi"
-t IDS_FORMAT_OPTIONS_GRP "Alustusasetukset"
+t IDS_FORMAT_OPTIONS_TXT "Alustusasetukset"
 t IDC_BADBLOCKS "Vioittuneiden lohkojen tarkistus"
 s IDC_BADBLOCKS +16,0
 m IDC_NBPASSES +12,0
@@ -4765,15 +4769,15 @@ t IDC_WINDOWS_INSTALL "Tavanomainen Windowsin asennus"
 m IDC_BOOTTYPE +12,0
 s IDC_BOOTTYPE -6,0
 m IDC_SELECT_ISO +3,0
-t IDC_SET_ICON "Luo laajennetut nimi- ja kuvaketiedostot"
+t IDC_EXTENDED_LABEL "Luo laajennetut nimi- ja kuvaketiedostot"
 t IDC_ABOUT "Lisätietoja..."
 t IDC_LOG "Loki"
 s IDC_LOG +5,0
 t IDCANCEL "Sulje"
 t IDC_START "Aloita"
 t IDS_ADVANCED_OPTIONS_GRP "Lisäasetukset"
-t IDC_ENABLE_FIXED_DISKS "Näytä USB-kiintolevyt"
-t IDC_EXTRA_PARTITION "Lisää korjauksia vanhoja BIOS-versioita varten"
+t IDC_LIST_USB_HDD "Näytä USB-kiintolevyt"
+t IDC_OLD_BIOS_FIXES "Lisää korjauksia vanhoja BIOS-versioita varten"
 t IDC_RUFUS_MBR "Käytä Rufus-MBR:ää, BIOS ID"
 s IDC_RUFUS_MBR +10,0
 m IDC_DISK_ID +12,0
@@ -5207,16 +5211,21 @@ t MSG_298 "Valitsemasi ISO-levykuva ei vastaa sen ilmoittamaa tiedostokokoa: %s 
 
 ################################################################################
 l "fr-FR" "French (Français)" 0x040c, 0x080c, 0x0c0c, 0x100c, 0x140c, 0x180c, 0x1c0c, 0x200c, 0x240c, 0x280c, 0x2c0c, 0x300c, 0x340c, 0x380c, 0xe40c
-v 1.0.22
+v 1.0.23
 b "en-US"
 
 g IDD_DIALOG
+t IDS_DEVICE_SETTINGS_TXT "Options de Périphérique"
 t IDS_DEVICE_TXT "Périphérique"
-t IDS_PARTITION_TYPE_TXT "Type de partition et système de destination"
+t IDS_BOOT_TYPE_TXT "Type de démarrage"
+t IDS_IMAGE_OPTION_TXT "Option d'image"
+t IDS_PARTITION_TYPE_TXT "Schéma de partition"
+t IDC_ADVANCED_DEVICE_SETTINGS "Options de Périphérique Avancées"
+t IDS_TARGET_SYSTEM_TXT "Système de destination"
 t IDS_FILESYSTEM_TXT "Système de fichiers"
 t IDS_CLUSTERSIZE_TXT "Taille d'unité d'allocation"
 t IDS_LABEL_TXT "Nom de volume"
-t IDS_FORMAT_OPTIONS_GRP "Options de Formatage"
+t IDS_FORMAT_OPTIONS_TXT "Options de Formatage"
 t IDC_BADBLOCKS "Vérification de mauvais blocs"
 m IDC_NBPASSES +5,0
 s IDC_NBPASSES -2,0
@@ -5224,9 +5233,9 @@ t IDC_QUICKFORMAT "Formatage rapide"
 t IDC_BOOT "Créer un disque de démarrage"
 s IDC_BOOT +5,0
 t IDC_WINDOWS_INSTALL "Installation standard de Windows"
-m IDC_BOOTTYPE +5,0
-m IDC_SELECT_ISO +3,0
-t IDC_SET_ICON "Ajouter un label étendu et une icône"
+t IDC_EXTENDED_LABEL "Ajouter un label étendu et une icône"
+t IDC_ADVANCED_FORMAT_OPTIONS "Options de Formatage Avancées"
+t IDS_STATUS_TXT "Statut"
 t IDC_ABOUT "A propos..."
 t IDCANCEL "Fermer"
 t IDC_START "Démarrer"
@@ -5234,9 +5243,8 @@ m IDC_START +5,0
 s IDC_START -2,0
 m IDCANCEL +2,0
 s IDCANCEL -2,0
-t IDS_ADVANCED_OPTIONS_GRP "Options avancées"
-t IDC_ENABLE_FIXED_DISKS "Lister les disques durs USB"
-t IDC_EXTRA_PARTITION "Ajouter les options de compatibilité pour vieux BIOS"
+t IDC_LIST_USB_HDD "Lister les disques durs USB"
+t IDC_OLD_BIOS_FIXES "Ajouter les options de compatibilité pour vieux BIOS"
 t IDC_RUFUS_MBR "Utiliser le MBR Rufus avec ID"
 m IDC_DISK_ID +5,0
 s IDC_DISK_ID -2,0
@@ -5646,7 +5654,7 @@ b "en-US"
 
 g IDD_DIALOG
 s IDD_DIALOG +30,0
-s IDS_FORMAT_OPTIONS_GRP +29,0
+s IDS_FORMAT_OPTIONS_TXT +29,0
 s IDC_PROGRESS +30,0
 s IDC_DEVICE +28,0
 s IDC_PARTITION_TYPE +28,0
@@ -5654,8 +5662,8 @@ s IDC_FILESYSTEM +28,0
 s IDC_CLUSTERSIZE +28,0
 s IDC_LABEL +28,0
 s IDS_ADVANCED_OPTIONS_GRP +29,0
-s IDC_ENABLE_FIXED_DISKS +30,0
-s IDC_EXTRA_PARTITION +30,0
+s IDC_LIST_USB_HDD +30,0
+s IDC_OLD_BIOS_FIXES +30,0
 s IDC_RUFUS_MBR +25,0
 m IDC_NBPASSES +30,0
 s IDC_BOOT +32,0
@@ -5671,18 +5679,18 @@ t IDS_PARTITION_TYPE_TXT "Partitionsschema und Typ des Zielsystems"
 t IDS_FILESYSTEM_TXT "Dateisystem"
 t IDS_CLUSTERSIZE_TXT "Größe der Zuordnungseinheit"
 t IDS_LABEL_TXT "Neue Laufwerksbezeichnung"
-t IDS_FORMAT_OPTIONS_GRP "Formatierungseinstellungen"
+t IDS_FORMAT_OPTIONS_TXT "Formatierungseinstellungen"
 t IDC_BADBLOCKS "Auf defekte Blöcke prüfen"
 t IDC_QUICKFORMAT "Schnellformatierung"
 t IDC_BOOT "Startfähiges Laufwerk erstellen mit"
-t IDC_SET_ICON "Erweiterte Bezeichnung und Symbole erstellen"
+t IDC_EXTENDED_LABEL "Erweiterte Bezeichnung und Symbole erstellen"
 t IDC_ABOUT "Über..."
 t IDC_LOG "Log"
 t IDCANCEL "Schließen"
 t IDC_START "Start"
 t IDS_ADVANCED_OPTIONS_GRP "Erweiterte Einstellungen"
-t IDC_ENABLE_FIXED_DISKS "USB-Festplatten anzeigen"
-t IDC_EXTRA_PARTITION "Fix für ältere BIOSe verwenden (zus. Partition, usw.)"
+t IDC_LIST_USB_HDD "USB-Festplatten anzeigen"
+t IDC_OLD_BIOS_FIXES "Fix für ältere BIOSe verwenden (zus. Partition, usw.)"
 t IDC_RUFUS_MBR "Rufus MBR benutzen mit BIOS ID"
 t IDC_WINDOWS_INSTALL "Standard Windows-Installation"
 g IDD_ABOUTBOX
@@ -6116,8 +6124,8 @@ t IDS_CLUSTERSIZE_TXT "Μέγεθος μονάδας εκχώρησης"
 s IDC_CLUSTERSIZE +156,0
 t IDS_LABEL_TXT "Ετικέτα τόμου"
 s IDC_LABEL +156,0
-t IDS_FORMAT_OPTIONS_GRP "Επιλογές διαμόρφωσης"
-s IDS_FORMAT_OPTIONS_GRP +156,0
+t IDS_FORMAT_OPTIONS_TXT "Επιλογές διαμόρφωσης"
+s IDS_FORMAT_OPTIONS_TXT +156,0
 t IDC_BADBLOCKS "Ελέγξτε τη συσκευή για κατεστραμμένους τομείς"
 s IDC_BADBLOCKS +134,0
 m IDC_NBPASSES +149,0
@@ -6131,7 +6139,7 @@ m IDC_BOOTTYPE +149,0
 s IDC_BOOTTYPE +4,0
 m IDC_SELECT_ISO +156,0
 s IDC_INFO +156,0
-t IDC_SET_ICON "Δημιουργία εκτεταμένης ετικέτας και εικονιδίων"
+t IDC_EXTENDED_LABEL "Δημιουργία εκτεταμένης ετικέτας και εικονιδίων"
 t IDC_ABOUT "Σχετικά..."
 t IDC_LOG "Αρχείο καταγραφής"
 s IDC_LOG +90,0
@@ -6143,10 +6151,10 @@ t IDC_START "Εκκίνηση"
 m IDC_START +149,0
 t IDS_ADVANCED_OPTIONS_GRP "Επιλογές για προχωρημένους"
 s IDS_ADVANCED_OPTIONS_GRP +157,0
-t IDC_ENABLE_FIXED_DISKS "Εμφάνιση σκληρών δίσκων USB"
-s IDC_ENABLE_FIXED_DISKS +40,0
-t IDC_EXTRA_PARTITION "Προσθήκη διορθώσεων για παλαιότερα BIOS(επιπλέον διαμέριση, ευθυγράμμιση, κλπ.)"
-s IDC_EXTRA_PARTITION +156,0
+t IDC_LIST_USB_HDD "Εμφάνιση σκληρών δίσκων USB"
+s IDC_LIST_USB_HDD +40,0
+t IDC_OLD_BIOS_FIXES "Προσθήκη διορθώσεων για παλαιότερα BIOS(επιπλέον διαμέριση, ευθυγράμμιση, κλπ.)"
+s IDC_OLD_BIOS_FIXES +156,0
 t IDC_RUFUS_MBR "Χρησιμοποίηση του Rufus MBR με BIOS ID"
 s IDC_RUFUS_MBR +80,0
 m IDC_DISK_ID +149,0
@@ -6605,21 +6613,21 @@ t IDS_PARTITION_TYPE_TXT "תוכנית המחיצות וסוג מערכת היע
 t IDS_FILESYSTEM_TXT "מערכת קבצים"
 t IDS_CLUSTERSIZE_TXT "גודל אשכול"
 t IDS_LABEL_TXT "תווית חדשה לאמצעי האחסון"
-t IDS_FORMAT_OPTIONS_GRP "אפשרויות אתחול"
+t IDS_FORMAT_OPTIONS_TXT "אפשרויות אתחול"
 t IDC_BADBLOCKS "בדוק את ההתקן לאיזורים פגומים"
 t IDC_QUICKFORMAT "אתחול מהיר"
 t IDC_BOOT "צור דיסק בר אתחול עם"
 t IDC_WINDOWS_INSTALL "התקנת windows רגילה"
 t IDC_WINDOWS_TO_GO "Windows To Go"
-t IDC_SET_ICON "צור תווית מורחבת וקבצי תמונה"
+t IDC_EXTENDED_LABEL "צור תווית מורחבת וקבצי תמונה"
 t IDC_ABOUT "אודות..."
 s IDC_LOG +10,0
 t IDC_LOG "לוג"
 t IDCANCEL "סגור"
 t IDC_START "התחל"
 t IDS_ADVANCED_OPTIONS_GRP "אפשרויות מתקדמות"
-t IDC_ENABLE_FIXED_DISKS "חפש כוננים קשיחים של USB"
-t IDC_EXTRA_PARTITION "הוסף תיקונים ל BIOS ישן (מחיצה נוספת, יישור...)"
+t IDC_LIST_USB_HDD "חפש כוננים קשיחים של USB"
+t IDC_OLD_BIOS_FIXES "הוסף תיקונים ל BIOS ישן (מחיצה נוספת, יישור...)"
 t IDC_RUFUS_MBR "שימוש ב MBR של רופוס"
 
 # About dialog
@@ -7069,20 +7077,20 @@ t IDS_PARTITION_TYPE_TXT "Partíciós séma és a cél rendszer típusa"
 t IDS_FILESYSTEM_TXT "Fájlrendszer"
 t IDS_CLUSTERSIZE_TXT "Klaszter mérete"
 t IDS_LABEL_TXT "Új kötetcímke"
-t IDS_FORMAT_OPTIONS_GRP "Formázási beállítások"
+t IDS_FORMAT_OPTIONS_TXT "Formázási beállítások"
 t IDC_BADBLOCKS "Hibás blokkok keresése"
 t IDC_QUICKFORMAT "Gyorsformázás"
 t IDC_BOOT "Bootolható lemez készítése"
 t IDC_WINDOWS_INSTALL "Alap Windows telepítés"
-t IDC_SET_ICON "Kiterjesztett címke és ikon fájlok létrehozása"
+t IDC_EXTENDED_LABEL "Kiterjesztett címke és ikon fájlok létrehozása"
 t IDC_ABOUT "Névjegy"
 t IDC_LOG "Jegyzet"
 s IDC_LOG 40,0
 t IDCANCEL "Bezárás"
 t IDC_START "Indítás"
 t IDS_ADVANCED_OPTIONS_GRP "Haladó beállítások"
-t IDC_ENABLE_FIXED_DISKS "USB-s merevlemezek listázása"
-t IDC_EXTRA_PARTITION "Régi BIOS-ok javítása (extra partíció, sor, stb.)"
+t IDC_LIST_USB_HDD "USB-s merevlemezek listázása"
+t IDC_OLD_BIOS_FIXES "Régi BIOS-ok javítása (extra partíció, sor, stb.)"
 t IDC_RUFUS_MBR "Rufus MBR BIOS azonosítóval"
 s IDC_RUFUS_MBR +14,0
 m IDC_DISK_ID +25,0
@@ -7512,11 +7520,11 @@ s IDC_BADBLOCKS +64,0
 s IDC_BOOT +64,0
 s IDC_CLUSTERSIZE +62,0
 s IDC_DEVICE +62,0
-s IDC_ENABLE_FIXED_DISKS +10,0
-s IDC_EXTRA_PARTITION +10,0
-s IDC_EXTRA_PARTITION +62,0
+s IDC_LIST_USB_HDD +10,0
+s IDC_OLD_BIOS_FIXES +10,0
+s IDC_OLD_BIOS_FIXES +62,0
 s IDC_FILESYSTEM +62,0
-s IDS_FORMAT_OPTIONS_GRP +62,0
+s IDS_FORMAT_OPTIONS_TXT +62,0
 s IDC_LABEL +62,0
 s IDC_PARTITION_TYPE +62,0
 s IDC_PROGRESS +62,0
@@ -7540,7 +7548,7 @@ t IDS_PARTITION_TYPE_TXT "Skema partisi dan tipe sistem target"
 t IDS_FILESYSTEM_TXT "Sistem berkas"
 t IDS_CLUSTERSIZE_TXT "Ukuran klaster"
 t IDS_LABEL_TXT "Label volume baru"
-t IDS_FORMAT_OPTIONS_GRP "Opsi Format"
+t IDS_FORMAT_OPTIONS_TXT "Opsi Format"
 # Note: The button (IDC_ADVANCED) that appears next to "Format Options" is repositioned automatically.
 t IDC_BADBLOCKS "Periksa perangkat untuk blok buruk"
 t IDC_QUICKFORMAT "Format cepat"
@@ -7549,16 +7557,16 @@ t IDC_WINDOWS_INSTALL "Instalasi Windows standar"
 # Only translate if Microsoft has a specific name for http://en.wikipedia.org/wiki/Windows_To_Go in your language
 # Otherwise, you can add a parenthesis eg. "Windows To Go (hint at what it does)" and/or use the tooltip (MSG_200)
 t IDC_WINDOWS_TO_GO "Windows To Go"
-t IDC_SET_ICON "Buat label tambahan dan berkas ikon"
+t IDC_EXTENDED_LABEL "Buat label tambahan dan berkas ikon"
 t IDC_ABOUT "Tentang..."
 t IDC_LOG "Log"
 t IDCANCEL "Tutup"
 t IDC_START "Mulai"
 t IDS_ADVANCED_OPTIONS_GRP "Opsi Lanjutan"
-t IDC_ENABLE_FIXED_DISKS "Daftar Perangkat USB"
+t IDC_LIST_USB_HDD "Daftar Perangkat USB"
 # Note: It is acceptable to drop the parenthesis () below if you are running out of space
 # as there is a tooltip (MSG_169) providing these details.
-t IDC_EXTRA_PARTITION "Tambah perbaikan untuk BIOS lama (partisi ekstra, penyesuaian, dll.)"
+t IDC_OLD_BIOS_FIXES "Tambah perbaikan untuk BIOS lama (partisi ekstra, penyesuaian, dll.)"
 # 'MBR': See http://en.wikipedia.org/wiki/Master_boot_record
 # Rufus can install it's own custom MBR (the Rufus MBR), which also allows users
 # to specify a custom disk ID for the BIOS. Note: the tooltip for this control is MSG_167.
@@ -8007,7 +8015,7 @@ t IDS_PARTITION_TYPE_TXT "Schema partizione e tipo sistema destinazione"
 t IDS_FILESYSTEM_TXT "File system"
 t IDS_CLUSTERSIZE_TXT "Dimensione cluster"
 t IDS_LABEL_TXT "Nuova etichetta volume"
-t IDS_FORMAT_OPTIONS_GRP "Opzioni formattazione"
+t IDS_FORMAT_OPTIONS_TXT "Opzioni formattazione"
 t IDC_BADBLOCKS "Test controllo blocchi errati unità"
 s IDC_BADBLOCKS +25,0
 m IDC_NBPASSES +25,0
@@ -8015,7 +8023,7 @@ s IDC_NBPASSES -25,0
 t IDC_QUICKFORMAT "Formattazione rapida"
 t IDC_BOOT "Crea disco avviabile con"
 t IDC_WINDOWS_INSTALL "Installazione Windows standard"
-t IDC_SET_ICON "Crea etichetta estesa e file icone"
+t IDC_EXTENDED_LABEL "Crea etichetta estesa e file icone"
 t IDC_ABOUT "Info su..."
 s IDC_ABOUT -18,0
 m IDC_ABOUT -1,0
@@ -8026,8 +8034,8 @@ t IDCANCEL "Chiudi"
 s IDCANCEL 0,0
 t IDC_START "Avvia"
 t IDS_ADVANCED_OPTIONS_GRP "Opzioni avanzate"
-t IDC_ENABLE_FIXED_DISKS "Elenca dischi fissi USB"
-t IDC_EXTRA_PARTITION "Aggiungi correzioni per vecchi BIOS"
+t IDC_LIST_USB_HDD "Elenca dischi fissi USB"
+t IDC_OLD_BIOS_FIXES "Aggiungi correzioni per vecchi BIOS"
 t IDC_RUFUS_MBR "Usa MBR Rufus con ID BIOS"
 
 g IDD_ABOUTBOX
@@ -8456,11 +8464,11 @@ s IDC_PARTITION_TYPE +90,0
 s IDC_FILESYSTEM +90,0
 s IDC_CLUSTERSIZE +90,0
 s IDC_LABEL +90,0
-s IDS_FORMAT_OPTIONS_GRP +90,0
+s IDS_FORMAT_OPTIONS_TXT +90,0
 s IDS_ADVANCED_OPTIONS_GRP +90,0
 s IDC_BADBLOCKS +30,0
-s IDC_ENABLE_FIXED_DISKS +90,0
-s IDC_EXTRA_PARTITION +90,0
+s IDC_LIST_USB_HDD +90,0
+s IDC_OLD_BIOS_FIXES +90,0
 m IDC_NBPASSES +30,0
 s IDC_NBPASSES +60,0
 m IDC_BOOTTYPE +30,0
@@ -8483,19 +8491,19 @@ t IDS_PARTITION_TYPE_TXT "パーティション構成とターゲットシステ
 t IDS_FILESYSTEM_TXT "ファイルシステム"
 t IDS_CLUSTERSIZE_TXT "クラスタサイズ"
 t IDS_LABEL_TXT "新しいボリュームのラベル"
-t IDS_FORMAT_OPTIONS_GRP "フォーマット設定"
+t IDS_FORMAT_OPTIONS_TXT "フォーマット設定"
 t IDC_BADBLOCKS "不良ブロックを検出します"
 t IDC_QUICKFORMAT "クイックフォーマット"
 t IDC_BOOT "ブートディスクを作る"
 t IDC_WINDOWS_INSTALL "標準のWindowsインストール"
-t IDC_SET_ICON "機能拡張されたラベルとアイコンファイルを作成します"
+t IDC_EXTENDED_LABEL "機能拡張されたラベルとアイコンファイルを作成します"
 t IDC_ABOUT "Rufusについて"
 t IDC_LOG "ログ"
 t IDCANCEL "閉じる"
 t IDC_START "スタート"
 t IDS_ADVANCED_OPTIONS_GRP "高度な設定"
-t IDC_ENABLE_FIXED_DISKS "USB接続のHDDを一覧表示する"
-t IDC_EXTRA_PARTITION "古いBIOSのために修正を追加 (拡張パーティション、並び替え、その他)"
+t IDC_LIST_USB_HDD "USB接続のHDDを一覧表示する"
+t IDC_OLD_BIOS_FIXES "古いBIOSのために修正を追加 (拡張パーティション、並び替え、その他)"
 t IDC_RUFUS_MBR "BIOS IDでRufusのMBRを作る"
 
 # About dialog
@@ -8961,19 +8969,19 @@ t IDS_PARTITION_TYPE_TXT "디스크 형식과 부팅 시스템 유형"
 t IDS_FILESYSTEM_TXT "파일 시스템"
 t IDS_CLUSTERSIZE_TXT "할당 단위 크기"
 t IDS_LABEL_TXT "새 볼륨 레이블"
-t IDS_FORMAT_OPTIONS_GRP "포맷 옵션"
+t IDS_FORMAT_OPTIONS_TXT "포맷 옵션"
 t IDC_BADBLOCKS "배드 섹터 검사"
 t IDC_QUICKFORMAT "빠른 포맷"
 t IDC_BOOT "부팅 가능한 디스크 만들기"
 t IDC_WINDOWS_INSTALL "표준 Windows 설치"
-t IDC_SET_ICON "확장 레이블 및 아이콘 파일 만들기"
+t IDC_EXTENDED_LABEL "확장 레이블 및 아이콘 파일 만들기"
 t IDC_ABOUT "정보..."
 t IDC_LOG "로그"
 t IDCANCEL "닫기"
 t IDC_START "시작"
 t IDS_ADVANCED_OPTIONS_GRP "고급 옵션"
-t IDC_ENABLE_FIXED_DISKS "USB 하드 드라이브 목록"
-t IDC_EXTRA_PARTITION "구형BIOS를 위한 수정(별도의 파티션, 정렬 등)"
+t IDC_LIST_USB_HDD "USB 하드 드라이브 목록"
+t IDC_OLD_BIOS_FIXES "구형BIOS를 위한 수정(별도의 파티션, 정렬 등)"
 t IDC_RUFUS_MBR "BIOS ID와 Rufus MBR을 사용"
 
 # About dialog
@@ -9417,8 +9425,8 @@ t IDS_PARTITION_TYPE_TXT "Partīcijas veids un sistēmas tips"
 t IDS_FILESYSTEM_TXT "Failu sistēma"
 t IDS_CLUSTERSIZE_TXT "Bloka izmērs"
 t IDS_LABEL_TXT "Datu nesēja nosaukums"
-t IDS_FORMAT_OPTIONS_GRP "Formatēšanas opcijas"
-s IDS_FORMAT_OPTIONS_GRP 20,0
+t IDS_FORMAT_OPTIONS_TXT "Formatēšanas opcijas"
+s IDS_FORMAT_OPTIONS_TXT 20,0
 s IDC_BADBLOCKS 45,0
 t IDC_BADBLOCKS "Pārbaudīt ierīci uz bojātiem sektoriem"
 m IDC_NBPASSES 45,0
@@ -9430,7 +9438,7 @@ s IDC_BOOT 10,0
 m IDC_BOOTTYPE 20,0
 m IDC_SELECT_ISO 20,0
 s IDC_INFO 20,0
-t IDC_SET_ICON "Izveidot papildus nosaukumu un failu ikonas"
+t IDC_EXTENDED_LABEL "Izveidot papildus nosaukumu un failu ikonas"
 s IDC_ABOUT -10,0
 t IDC_ABOUT "Par..."
 s IDC_LOG 35,0
@@ -9442,9 +9450,9 @@ t IDC_START "Sākt"
 m IDC_START 20,0
 t IDS_ADVANCED_OPTIONS_GRP "Papildopcijas"
 s IDS_ADVANCED_OPTIONS_GRP 20,0
-t IDC_ENABLE_FIXED_DISKS "USB ierīču saraksts"
-t IDC_EXTRA_PARTITION "Pievienot vecāku BIOSu labojumus (partīcijām, dalījumam, u.c.)"
-s IDC_EXTRA_PARTITION 25,0
+t IDC_LIST_USB_HDD "USB ierīču saraksts"
+t IDC_OLD_BIOS_FIXES "Pievienot vecāku BIOSu labojumus (partīcijām, dalījumam, u.c.)"
+s IDC_OLD_BIOS_FIXES 25,0
 t IDC_RUFUS_MBR "Izmantot Rufus MBR ar BIOS ID"
 s IDC_RUFUS_MBR +10,0
 m IDC_DISK_ID 20,0
@@ -9898,7 +9906,7 @@ t IDS_PARTITION_TYPE_TXT "Skaidinių schema ir paskirties sistemos tipas"
 t IDS_FILESYSTEM_TXT "Failų sistema"
 t IDS_CLUSTERSIZE_TXT "Klasterio dydis"
 t IDS_LABEL_TXT "Nauja tomo žymė"
-t IDS_FORMAT_OPTIONS_GRP "Suženklinimo parinktys"
+t IDS_FORMAT_OPTIONS_TXT "Suženklinimo parinktys"
 s IDC_BADBLOCKS +25,0
 t IDC_BADBLOCKS "Tikrinti, ar įrenginyje yra blogų blokų"
 m IDC_NBPASSES +25,0
@@ -9906,7 +9914,7 @@ s IDC_NBPASSES -25,0
 t IDC_QUICKFORMAT "Greitasis suženklinimas"
 t IDC_BOOT "Paleidžiama iš laikmenos"
 t IDC_WINDOWS_INSTALL "Standartinė Windows įdiegtis"
-t IDC_SET_ICON "Kurti išplėstinių žymių ir piktogramų failus"
+t IDC_EXTENDED_LABEL "Kurti išplėstinių žymių ir piktogramų failus"
 s IDC_ABOUT -15,0
 t IDC_ABOUT "Apie..."
 m IDC_LOG -15,0
@@ -9915,8 +9923,8 @@ t IDC_LOG "Dienynas"
 t IDCANCEL "Užverti"
 t IDC_START "Pradėti"
 t IDS_ADVANCED_OPTIONS_GRP "Išsamesnės parinktys"
-t IDC_ENABLE_FIXED_DISKS "Rodyti USB standžiuosius diskus"
-t IDC_EXTRA_PARTITION "Pataisos seniems BIOS (papildomas skaidinys, ir kt.)"
+t IDC_LIST_USB_HDD "Rodyti USB standžiuosius diskus"
+t IDC_OLD_BIOS_FIXES "Pataisos seniems BIOS (papildomas skaidinys, ir kt.)"
 m IDC_DISK_ID +25,0
 s IDC_DISK_ID -25,0
 t IDC_RUFUS_MBR "Naudoti Rufus MBR su BIOS ID"
@@ -10382,8 +10390,8 @@ t IDS_PARTITION_TYPE_TXT "Skema partisyen dan jenis sistem sasaran"
 t IDS_FILESYSTEM_TXT "Sistem fail"
 t IDS_CLUSTERSIZE_TXT "Saiz gugusan"
 t IDS_LABEL_TXT "Label jilid baharu"
-t IDS_FORMAT_OPTIONS_GRP "Pilihan format"
-s IDS_FORMAT_OPTIONS_GRP +30,0
+t IDS_FORMAT_OPTIONS_TXT "Pilihan format"
+s IDS_FORMAT_OPTIONS_TXT +30,0
 s IDC_BADBLOCKS +30,0
 t IDC_BADBLOCKS "Semak peranti untuk blok rosak"
 m IDC_NBPASSES +30,0
@@ -10393,7 +10401,7 @@ s IDC_INFO +30,0
 m IDC_BOOTTYPE +30,0
 s IDC_BOOT +32,0
 t IDC_BOOT "Cipta disk boot menggunakan"
-t IDC_SET_ICON "Cipta label lanjut dan fail ikon"
+t IDC_EXTENDED_LABEL "Cipta label lanjut dan fail ikon"
 t IDC_ABOUT "Mengenai..."
 t IDC_LOG "Log"
 t IDCANCEL "Tutup"
@@ -10402,10 +10410,10 @@ t IDC_START "Mula"
 m IDC_START +30,0
 t IDS_ADVANCED_OPTIONS_GRP "Pilihan Lanjutan"
 s IDS_ADVANCED_OPTIONS_GRP +30,0
-t IDC_ENABLE_FIXED_DISKS "Senaraikan cakera keras USB"
-s IDC_ENABLE_FIXED_DISKS +30,0
-t IDC_EXTRA_PARTITION "Pembaikan tambahan untuk BIOS lama"
-s IDC_EXTRA_PARTITION +30,0
+t IDC_LIST_USB_HDD "Senaraikan cakera keras USB"
+s IDC_LIST_USB_HDD +30,0
+t IDC_OLD_BIOS_FIXES "Pembaikan tambahan untuk BIOS lama"
+s IDC_OLD_BIOS_FIXES +30,0
 m IDC_DISK_ID +30,0
 t IDC_RUFUS_MBR "Guna MBR Rufus dengan BIOS ID"
 
@@ -10856,20 +10864,20 @@ t IDS_PARTITION_TYPE_TXT "Partisjonskjema og målsystem-type"
 t IDS_FILESYSTEM_TXT "Filsystem"
 t IDS_CLUSTERSIZE_TXT "Cluster-størrelse"
 t IDS_LABEL_TXT "Nytt volumnavn"
-t IDS_FORMAT_OPTIONS_GRP "Format-valg"
+t IDS_FORMAT_OPTIONS_TXT "Format-valg"
 t IDC_BADBLOCKS "Sjekk enhet for dårlige blokker"
 t IDC_QUICKFORMAT "Hurtigformatering"
 t IDC_BOOT "Lager oppstartbar disk. Bruker"
 t IDC_WINDOWS_INSTALL "Standard Windows-installasjon"
 t IDC_WINDOWS_TO_GO "Windows To Go"
-t IDC_SET_ICON "Lager utvidet merke og ikon-filer"
+t IDC_EXTENDED_LABEL "Lager utvidet merke og ikon-filer"
 t IDC_ABOUT "Om..."
 t IDC_LOG "Logg"
 t IDCANCEL "Lukk"
 t IDC_START "Start"
 t IDS_ADVANCED_OPTIONS_GRP "Avanserte valg"
-t IDC_ENABLE_FIXED_DISKS "Før opp USB harddisker"
-t IDC_EXTRA_PARTITION "Legger til fiks for gamle BIOSer (ekstra partisjon, etc.)"
+t IDC_LIST_USB_HDD "Før opp USB harddisker"
+t IDC_OLD_BIOS_FIXES "Legger til fiks for gamle BIOSer (ekstra partisjon, etc.)"
 t IDC_RUFUS_MBR "Bruk Rufus MBR med BIOS ID"
 s IDC_RUFUS_MBR 10,0
 s IDC_DEVICE 10,0
@@ -10882,7 +10890,7 @@ s IDC_PROGRESS 10,0
 s IDC_INFO 10,0
 m IDCANCEL 10,0
 m IDC_START 10,0
-s IDS_FORMAT_OPTIONS_GRP 10,0
+s IDS_FORMAT_OPTIONS_TXT 10,0
 s IDS_ADVANCED_OPTIONS_GRP 10,0
 m IDC_NBPASSES 10,0
 m IDC_DISK_ID 10,0
@@ -11341,7 +11349,7 @@ b "en-US"
 # Main dialog
 g IDD_DIALOG
 s IDD_DIALOG +40,0
-s IDS_FORMAT_OPTIONS_GRP +40,0
+s IDS_FORMAT_OPTIONS_TXT +40,0
 s IDC_PROGRESS +40,0
 s IDC_DEVICE +40,0
 s IDC_PARTITION_TYPE +40,0
@@ -11349,8 +11357,8 @@ s IDC_FILESYSTEM +40,0
 s IDC_CLUSTERSIZE +40,0
 s IDC_LABEL +40,0
 s IDS_ADVANCED_OPTIONS_GRP +40,0
-s IDC_ENABLE_FIXED_DISKS +40,0
-s IDC_EXTRA_PARTITION +40,0
+s IDC_LIST_USB_HDD +40,0
+s IDC_OLD_BIOS_FIXES +40,0
 s IDC_BADBLOCKS +50,0
 s IDC_NBPASSES -15,0
 m IDC_NBPASSES +55,0
@@ -11372,7 +11380,7 @@ t IDS_PARTITION_TYPE_TXT "روش پارتیشن‌بندی و نوع ثابت‌
 t IDS_FILESYSTEM_TXT "سیستم فایل"
 t IDS_CLUSTERSIZE_TXT "اندازه کلاستر"
 t IDS_LABEL_TXT "نام دلخواه برای درایو USB موردنظر"
-t IDS_FORMAT_OPTIONS_GRP "گزینه‌ها و تنظیمات"
+t IDS_FORMAT_OPTIONS_TXT "گزینه‌ها و تنظیمات"
 # Note: The button (IDC_ADVANCED) that appears next to "Format Options" is repositioned automatically.
 t IDC_BADBLOCKS "بررسی وجود بدسکتور در درایو به روشِ"
 t IDC_QUICKFORMAT "فرمت کردن سریع (Quick format)"
@@ -11381,16 +11389,16 @@ t IDC_WINDOWS_INSTALL "نصب ویندوز به روش استاندارد و ر�
 # Only translate if Microsoft has a specific name for http://en.wikipedia.org/wiki/Windows_To_Go in your language
 # Otherwise, you can add a parenthesis eg. "Windows To Go (hint at what it does)" and/or use the tooltip (MSG_200)
 t IDC_WINDOWS_TO_GO "استفاده از ویژگی «Windows To Go»"
-t IDC_SET_ICON "ایجاد آیکون و نام‌گذاری درایو USB با استفاده از فایل autorun.inf"
+t IDC_EXTENDED_LABEL "ایجاد آیکون و نام‌گذاری درایو USB با استفاده از فایل autorun.inf"
 t IDC_ABOUT "درباره"
 t IDC_LOG "گزارش (Log)"
 t IDCANCEL "خروج"
 t IDC_START "شروع"
 t IDS_ADVANCED_OPTIONS_GRP "تنظیمات پیشرفته"
-t IDC_ENABLE_FIXED_DISKS "نمایش هارد دیسک‌های اکسترنال در فهرست درایوهای USB موجود"
+t IDC_LIST_USB_HDD "نمایش هارد دیسک‌های اکسترنال در فهرست درایوهای USB موجود"
 # Note: It is acceptable to drop the parenthesis () below if you are running out of space
 # as there is a tooltip (MSG_169) providing these details.
-t IDC_EXTRA_PARTITION "بهسازی و اصلاح تنظیمات برای شناسایی بهتر درایو در BIOSهای قدیمی"
+t IDC_OLD_BIOS_FIXES "بهسازی و اصلاح تنظیمات برای شناسایی بهتر درایو در BIOSهای قدیمی"
 # 'MBR': See http://en.wikipedia.org/wiki/Master_boot_record
 # Rufus can install it's own custom MBR (the Rufus MBR), which also allows users
 # to specify a custom disk ID for the BIOS. Note: the tooltip for this control is MSG_167.
@@ -11904,7 +11912,7 @@ b "en-US"
 # Main dialog
 g IDD_DIALOG
 s IDD_DIALOG +40,0
-s IDS_FORMAT_OPTIONS_GRP +40,0
+s IDS_FORMAT_OPTIONS_TXT +40,0
 s IDC_PROGRESS +40,0
 s IDC_DEVICE +40,0
 s IDC_PARTITION_TYPE +40,0
@@ -11912,8 +11920,8 @@ s IDC_FILESYSTEM +40,0
 s IDC_CLUSTERSIZE +40,0
 s IDC_LABEL +40,0
 s IDS_ADVANCED_OPTIONS_GRP +40,0
-s IDC_ENABLE_FIXED_DISKS +40,0
-s IDC_EXTRA_PARTITION +40,0
+s IDC_LIST_USB_HDD +40,0
+s IDC_OLD_BIOS_FIXES +40,0
 s IDC_RUFUS_MBR +40,0
 s IDC_BADBLOCKS +100,0
 s IDC_NBPASSES -60,0
@@ -11934,19 +11942,19 @@ t IDS_PARTITION_TYPE_TXT "Schemat partycjonowania i typ systemu docelowego"
 t IDS_FILESYSTEM_TXT "System plików"
 t IDS_CLUSTERSIZE_TXT "Rozmiar jednostki alokacji"
 t IDS_LABEL_TXT "Nowa nazwa woluminu"
-t IDS_FORMAT_OPTIONS_GRP "Opcje Formatowania"
+t IDS_FORMAT_OPTIONS_TXT "Opcje Formatowania"
 t IDC_BADBLOCKS "Szukaj błędnych sektorów na urządzeniu"
 t IDC_QUICKFORMAT "Szybkie formatowanie"
 t IDC_BOOT "Utwórz bootowalny dysk używając"
 t IDC_WINDOWS_INSTALL "Standardowa instalacja Windowsa"
-t IDC_SET_ICON "Utwórz rozszerzoną nazwę i pliki ikon"
+t IDC_EXTENDED_LABEL "Utwórz rozszerzoną nazwę i pliki ikon"
 t IDC_ABOUT "O programie..."
 t IDC_LOG "Log"
 t IDCANCEL "Zamknij"
 t IDC_START "Start"
 t IDS_ADVANCED_OPTIONS_GRP "Zaawansowane Opcje"
-t IDC_ENABLE_FIXED_DISKS "Pokaż Dyski Twarde USB"
-t IDC_EXTRA_PARTITION "Dodaj łatkę dla starych BIOSów (dodatkowa partycja, itp.)"
+t IDC_LIST_USB_HDD "Pokaż Dyski Twarde USB"
+t IDC_OLD_BIOS_FIXES "Dodaj łatkę dla starych BIOSów (dodatkowa partycja, itp.)"
 t IDC_RUFUS_MBR "Użyj MBR Rufusa z ID BIOSu"
 
 # About dialog
@@ -12396,7 +12404,7 @@ t IDS_PARTITION_TYPE_TXT "Esquema de partição e tipo do sistema de destino"
 t IDS_FILESYSTEM_TXT "Sistema de arquivos"
 t IDS_CLUSTERSIZE_TXT "Tamanho do cluster"
 t IDS_LABEL_TXT "Novo nome do volume"
-t IDS_FORMAT_OPTIONS_GRP "Opções de formatação"
+t IDS_FORMAT_OPTIONS_TXT "Opções de formatação"
 # Note: The button (IDC_ADVANCED) that appears next to "Format Options" is repositioned automatically.
 t IDC_BADBLOCKS "Procurar blocos defeituosos"
 s IDC_BADBLOCKS +4,0
@@ -12406,7 +12414,7 @@ t IDC_WINDOWS_INSTALL "Instalação Padrão do Windows"
 # Only translate if Microsoft has a specific name for http://en.wikipedia.org/wiki/Windows_To_Go in your language
 # Otherwise, you can add a parenthesis eg. "Windows To Go (hint at what it does)" and/or use the tooltip (MSG_200)
 t IDC_WINDOWS_TO_GO "Windows To Go (Windows Para Levar)"
-t IDC_SET_ICON "Criar arquivos de nome estendido e ícone"
+t IDC_EXTENDED_LABEL "Criar arquivos de nome estendido e ícone"
 t IDC_ABOUT "Sobre..."
 s IDC_ABOUT -5,0
 t IDC_LOG "Registro..."
@@ -12415,10 +12423,10 @@ m IDC_LOG -5,0
 t IDCANCEL "Fechar"
 t IDC_START "Iniciar"
 t IDS_ADVANCED_OPTIONS_GRP "Opções Avançadas"
-t IDC_ENABLE_FIXED_DISKS "Listar Discos Rígidos USB"
+t IDC_LIST_USB_HDD "Listar Discos Rígidos USB"
 # Note: It is acceptable to drop the parenthesis () below if you are running out of space
 # as there is a tooltip (MSG_169) providing these details.
-t IDC_EXTRA_PARTITION "Opções de compatibilidade para BIOSs antigos"
+t IDC_OLD_BIOS_FIXES "Opções de compatibilidade para BIOSs antigos"
 # 'MBR': See http://en.wikipedia.org/wiki/Master_boot_record
 # Rufus can install it's own custom MBR (the Rufus MBR), which also allows users
 # to specify a custom disk ID for the BIOS. Note: the tooltip for this control is MSG_167.
@@ -12908,13 +12916,13 @@ t IDS_PARTITION_TYPE_TXT "Tipo de partição e tipo de sistema destino"
 t IDS_FILESYSTEM_TXT "Sistema de ficheiros"
 t IDS_CLUSTERSIZE_TXT "Tamanho de cluster"
 t IDS_LABEL_TXT "Novo nome"
-t IDS_FORMAT_OPTIONS_GRP "Opções de formatação"
+t IDS_FORMAT_OPTIONS_TXT "Opções de formatação"
 t IDC_BADBLOCKS "Procurar erros no disco USB"
 s IDC_BADBLOCKS +4,0
 t IDC_QUICKFORMAT "Formatação rápida"
 t IDC_BOOT "Criar disco de arranque com"
 t IDC_WINDOWS_INSTALL "Instalação Standard em Windows"
-t IDC_SET_ICON "Criar nomes estendidos e ícones"
+t IDC_EXTENDED_LABEL "Criar nomes estendidos e ícones"
 t IDC_ABOUT "Sobre..."
 s IDC_ABOUT -5,0
 t IDC_LOG "Histórico..."
@@ -12923,8 +12931,8 @@ m IDC_LOG -5,0
 t IDCANCEL "Fechar"
 t IDC_START "Iniciar"
 t IDS_ADVANCED_OPTIONS_GRP "Opções avançadas"
-t IDC_ENABLE_FIXED_DISKS "Mostrar drives USB"
-t IDC_EXTRA_PARTITION "Opções de compatibilidade para BIOS antigas"
+t IDC_LIST_USB_HDD "Mostrar drives USB"
+t IDC_OLD_BIOS_FIXES "Opções de compatibilidade para BIOS antigas"
 t IDC_RUFUS_MBR "Usar MBR do Rufus, ID de BIOS"
 s IDC_RUFUS_MBR +25,0
 s IDC_DISK_ID -25,0
@@ -13381,13 +13389,13 @@ t IDS_PARTITION_TYPE_TXT "Schema de partiționare și tipul sistemului țintă"
 t IDS_FILESYSTEM_TXT "Sistemul de fișiere"
 t IDS_CLUSTERSIZE_TXT "Mărimea unității de alocare"
 t IDS_LABEL_TXT "Eticheta noului volum"
-t IDS_FORMAT_OPTIONS_GRP "Opțiuni de formatare"
+t IDS_FORMAT_OPTIONS_TXT "Opțiuni de formatare"
 t IDC_BADBLOCKS "Testează blocuri defecte"
 t IDC_QUICKFORMAT "Formatare rapidă"
 t IDC_BOOT "Creează disc USB boot-abil cu"
 t IDC_WINDOWS_INSTALL "Instalare standard pentru Windows"
 t IDC_WINDOWS_TO_GO "Windows To Go (Pornire Windows)"
-t IDC_SET_ICON "Creează etichete extinse și pictograme"
+t IDC_EXTENDED_LABEL "Creează etichete extinse și pictograme"
 t IDC_ABOUT "Despre..."
 s IDC_ABOUT -16,0
 t IDC_LOG "Registru"
@@ -13396,8 +13404,8 @@ m IDC_LOG -14,0
 t IDCANCEL "Închide"
 t IDC_START "Începe"
 t IDS_ADVANCED_OPTIONS_GRP "Opțiuni avansate"
-t IDC_ENABLE_FIXED_DISKS "Lista Hard-uri USB"
-t IDC_EXTRA_PARTITION "Adaugă remedieri pentru BIOS-ul vechi"
+t IDC_LIST_USB_HDD "Lista Hard-uri USB"
+t IDC_OLD_BIOS_FIXES "Adaugă remedieri pentru BIOS-ul vechi"
 t IDC_RUFUS_MBR "Utilizați MBR Rufus cu BIOS-ul"
 s IDC_RUFUS_MBR +5,0
 m IDC_DISK_ID +5,0
@@ -13814,19 +13822,19 @@ t IDS_PARTITION_TYPE_TXT "Схема раздела и тип системног
 t IDS_FILESYSTEM_TXT "Файловая система"
 t IDS_CLUSTERSIZE_TXT "Размер кластера"
 t IDS_LABEL_TXT "Новая метка тома"
-t IDS_FORMAT_OPTIONS_GRP "Параметры форматирования"
+t IDS_FORMAT_OPTIONS_TXT "Параметры форматирования"
 t IDC_BADBLOCKS "Проверить на плохие блоки"
 t IDC_QUICKFORMAT "Быстрое форматирование"
 t IDC_BOOT "Создать загрузочный диск"
 t IDC_WINDOWS_INSTALL "Стандартная установка Windows"
-t IDC_SET_ICON "Создать расширенную метку и значок устройства"
+t IDC_EXTENDED_LABEL "Создать расширенную метку и значок устройства"
 t IDC_ABOUT "О программе..."
 t IDC_LOG "Журнал"
 t IDCANCEL "Закрыть"
 t IDC_START "Старт"
 t IDS_ADVANCED_OPTIONS_GRP "Дополнительные параметры"
-t IDC_ENABLE_FIXED_DISKS "Показывать внешние USB накопители"
-t IDC_EXTRA_PARTITION "Добавить исправления для старых BIOS"
+t IDC_LIST_USB_HDD "Показывать внешние USB накопители"
+t IDC_OLD_BIOS_FIXES "Добавить исправления для старых BIOS"
 t IDC_RUFUS_MBR "Использовать MBR с BIOS ID"
 
 # About dialog
@@ -14255,7 +14263,7 @@ t IDS_PARTITION_TYPE_TXT "Particijska šema i ciljani sistem datoteka"
 t IDS_FILESYSTEM_TXT "Sistem datoteka"
 t IDS_CLUSTERSIZE_TXT "Veličina klastera"
 t IDS_LABEL_TXT "Naziv novog volumena"
-t IDS_FORMAT_OPTIONS_GRP "Podešavanja formata"
+t IDS_FORMAT_OPTIONS_TXT "Podešavanja formata"
 # Note: The button (IDC_ADVANCED) that appears next to "Format Options" is repositioned automatically.
 s IDC_NBPASSES -55,0
 m IDC_NBPASSES 55,0
@@ -14267,7 +14275,7 @@ t IDC_WINDOWS_INSTALL "Standardna instalacija Windows-a"
 # Only translate if Microsoft has a specific name for http://en.wikipedia.org/wiki/Windows_To_Go in your language
 # Otherwise, you can add a parenthesis eg. "Windows To Go (hint at what it does)" and/or use the tooltip (MSG_200)
 t IDC_WINDOWS_TO_GO "Windows To Go"
-t IDC_SET_ICON "Izradi produženu oznaku i ikone"
+t IDC_EXTENDED_LABEL "Izradi produženu oznaku i ikone"
 s IDC_ABOUT +10,0
 t IDC_ABOUT "O programu"
 s IDC_LOG +32,0
@@ -14276,10 +14284,10 @@ t IDC_LOG "Zapisnik"
 t IDCANCEL "Zatvori"
 t IDC_START "Započni"
 t IDS_ADVANCED_OPTIONS_GRP "Napredna podešavanja"
-t IDC_ENABLE_FIXED_DISKS "Lista USB čvrstih diskova"
+t IDC_LIST_USB_HDD "Lista USB čvrstih diskova"
 # Note: It is acceptable to drop the parenthesis () below if you are running out of space
 # as there is a tooltip (MSG_169) providing these details.
-t IDC_EXTRA_PARTITION "Dodaj ispravke za stare BIOS-e (dodatne particije, itd.)"
+t IDC_OLD_BIOS_FIXES "Dodaj ispravke za stare BIOS-e (dodatne particije, itd.)"
 # 'MBR': See http://en.wikipedia.org/wiki/Master_boot_record
 # Rufus can install it's own custom MBR (the Rufus MBR), which also allows users
 # to specify a custom disk ID for the BIOS. Note: the tooltip for this control is MSG_167.
@@ -14751,20 +14759,20 @@ t IDS_PARTITION_TYPE_TXT "Schéma oddielu a typ cieľového systému"
 t IDS_FILESYSTEM_TXT "Súborový systém"
 t IDS_CLUSTERSIZE_TXT "Veľkosť klastra"
 t IDS_LABEL_TXT "Nový názov zväzku"
-t IDS_FORMAT_OPTIONS_GRP "Nastavenia formátovania"
+t IDS_FORMAT_OPTIONS_TXT "Nastavenia formátovania"
 t IDC_BADBLOCKS "Skontrolovať chybné bloky"
 t IDC_QUICKFORMAT "Rýchle formátovanie"
 t IDC_BOOT "Vytvoriť bootovateľný disk"
 t IDC_WINDOWS_INSTALL "Štandardná inštalácia Windows (Inštalátor)"
 t IDC_WINDOWS_TO_GO "Windows To Go (Prenosná verzia)"
-t IDC_SET_ICON "Použiť poskytnutú menovku a súbory miniatúry"
+t IDC_EXTENDED_LABEL "Použiť poskytnutú menovku a súbory miniatúry"
 t IDC_ABOUT "O programe"
 t IDC_LOG "Záznam"
 t IDCANCEL "Zatvoriť"
 t IDC_START "Štart"
 t IDS_ADVANCED_OPTIONS_GRP "Pokročilé nastavenia formátovania "
-t IDC_ENABLE_FIXED_DISKS "Zobraziť zoznam USB pevných diskov (USB HDD)"
-t IDC_EXTRA_PARTITION "Pridať úpravy pre staré BIOSy"
+t IDC_LIST_USB_HDD "Zobraziť zoznam USB pevných diskov (USB HDD)"
+t IDC_OLD_BIOS_FIXES "Pridať úpravy pre staré BIOSy"
 t IDC_RUFUS_MBR "Použiť MBR s BIOS ID"
 
 # About dialog
@@ -15210,7 +15218,7 @@ t IDS_PARTITION_TYPE_TXT "Particijska shema in vrsta ciljnega sistema"
 t IDS_FILESYSTEM_TXT "Datotečni sistem"
 t IDS_CLUSTERSIZE_TXT "Velikost gruče"
 t IDS_LABEL_TXT "Oznaka novega nosilca"
-t IDS_FORMAT_OPTIONS_GRP "Možnosti formatiranja"
+t IDS_FORMAT_OPTIONS_TXT "Možnosti formatiranja"
 t IDC_BADBLOCKS "Odkrij slabe bloke"
 s IDC_BADBLOCKS -25,0
 m IDC_NBPASSES -25,0
@@ -15221,15 +15229,15 @@ s IDC_BOOT -25,0
 m IDC_BOOTTYPE -25,0
 s IDC_BOOTTYPE +25,0
 t IDC_WINDOWS_INSTALL "Standardna Windows namestitev"
-t IDC_SET_ICON "Ustvari datoteki za ikono in podaljšano oznako"
+t IDC_EXTENDED_LABEL "Ustvari datoteki za ikono in podaljšano oznako"
 t IDC_ABOUT "O programu"
 t IDC_LOG "Zapisnik"
 s IDC_LOG +30,0
 t IDCANCEL "Zapri"
 t IDC_START "Začni"
 t IDS_ADVANCED_OPTIONS_GRP "Dodatne možnosti"
-t IDC_ENABLE_FIXED_DISKS "Naštej USB trde diske"
-t IDC_EXTRA_PARTITION "Dodaj popravke za stare BIOSe"
+t IDC_LIST_USB_HDD "Naštej USB trde diske"
+t IDC_OLD_BIOS_FIXES "Dodaj popravke za stare BIOSe"
 t IDC_RUFUS_MBR "Rufusov MBR z BIOS ID"
 s IDC_RUFUS_MBR -25,0
 m IDC_DISK_ID -25,0
@@ -15672,13 +15680,13 @@ t IDS_PARTITION_TYPE_TXT "Tipo de partición y del sistema destino"
 t IDS_FILESYSTEM_TXT "Sistema de archivos"
 t IDS_CLUSTERSIZE_TXT "Tamaño del clúster"
 t IDS_LABEL_TXT "Etiqueta nueva"
-t IDS_FORMAT_OPTIONS_GRP "Opciones de formateo"
-s IDS_FORMAT_OPTIONS_GRP +5, 0
+t IDS_FORMAT_OPTIONS_TXT "Opciones de formateo"
+s IDS_FORMAT_OPTIONS_TXT +5, 0
 t IDC_BADBLOCKS "Buscar bloques dañados en USB"
 s IDC_BADBLOCKS +30,0
 t IDC_QUICKFORMAT "Formateo rápido"
 t IDC_BOOT "Crear disco de arranque con"
-t IDC_SET_ICON "Añadir etiquetas extendidas e iconos"
+t IDC_EXTENDED_LABEL "Añadir etiquetas extendidas e iconos"
 t IDC_ABOUT "Acerca de..."
 s IDC_ABOUT -5,0
 t IDC_LOG "Historial"
@@ -15690,8 +15698,8 @@ t IDC_START "Empezar"
 m IDC_START +5,0
 t IDS_ADVANCED_OPTIONS_GRP "Opciones avanzadas"
 s IDS_ADVANCED_OPTIONS_GRP +5, 0
-t IDC_ENABLE_FIXED_DISKS "Listar los discos duros USB"
-t IDC_EXTRA_PARTITION "Opciones de compatibilidad para BIOS antiguas"
+t IDC_LIST_USB_HDD "Listar los discos duros USB"
+t IDC_OLD_BIOS_FIXES "Opciones de compatibilidad para BIOS antiguas"
 t IDC_RUFUS_MBR "Usar MBR de Rufus con ID de BIOS"
 s IDC_RUFUS_MBR +25,0
 m IDC_NBPASSES +30,0
@@ -16150,19 +16158,19 @@ t IDS_PARTITION_TYPE_TXT "Partitionsschema och måltypssystem"
 t IDS_FILESYSTEM_TXT "Filsystem"
 t IDS_CLUSTERSIZE_TXT "Klusterstorlek"
 t IDS_LABEL_TXT "Ny volymetikett"
-t IDS_FORMAT_OPTIONS_GRP "Formateringsinställningar"
+t IDS_FORMAT_OPTIONS_TXT "Formateringsinställningar"
 t IDC_BADBLOCKS "Kontrollera enheten efter trasiga block"
 t IDC_QUICKFORMAT "Snabbformatering"
 t IDC_BOOT "Skapa startbar disk med"
 t IDC_WINDOWS_INSTALL "Standard Windowsinstallation"
-t IDC_SET_ICON "Skapa utökat namn och ikonfiler"
+t IDC_EXTENDED_LABEL "Skapa utökat namn och ikonfiler"
 t IDC_ABOUT "Om..."
 t IDC_LOG "Logg"
 t IDCANCEL "Stäng"
 t IDC_START "Starta"
 t IDS_ADVANCED_OPTIONS_GRP "Avancerade inställningar"
-t IDC_ENABLE_FIXED_DISKS "Lista USB-hårddiskar"
-t IDC_EXTRA_PARTITION "Lägg till korrigeringar för äldre BIOS:ar"
+t IDC_LIST_USB_HDD "Lista USB-hårddiskar"
+t IDC_OLD_BIOS_FIXES "Lägg till korrigeringar för äldre BIOS:ar"
 t IDC_RUFUS_MBR "Använd Rufus MBR med BIOS-ID"
 s IDC_RUFUS_MBR 20,0
 s IDC_DEVICE 50,0
@@ -16175,7 +16183,7 @@ s IDC_INFO 50,0
 s IDC_PROGRESS 50,0
 m IDCANCEL 50,0
 m IDC_START 50,0
-s IDS_FORMAT_OPTIONS_GRP 50,0
+s IDS_FORMAT_OPTIONS_TXT 50,0
 s IDS_ADVANCED_OPTIONS_GRP 50,0
 m IDC_NBPASSES 50,0
 m IDC_DISK_ID 50,0
@@ -16627,7 +16635,7 @@ t IDS_PARTITION_TYPE_TXT "รูปแบบของพาร์ทิชั่
 t IDS_FILESYSTEM_TXT "ระบบไฟล์"
 t IDS_CLUSTERSIZE_TXT "ขนาดของคลัสเตอร์"
 t IDS_LABEL_TXT "ตั้งชื่อของไดร์ฟใหม่"
-t IDS_FORMAT_OPTIONS_GRP "ตัวเลือกการฟอร์แมท"
+t IDS_FORMAT_OPTIONS_TXT "ตัวเลือกการฟอร์แมท"
 # Note: The button (IDC_ADVANCED) that appears next to "Format Options" is repositioned automatically.
 t IDC_BADBLOCKS "ตรวจหาข้อบกพร่องของอุปกรณ์"
 t IDC_QUICKFORMAT "ฟอร์แมทอย่างรวดเร็ว"
@@ -16636,16 +16644,16 @@ t IDC_WINDOWS_INSTALL "ตัวติดตั้ง Windows มาตรฐา
 # Only translate if Microsoft has a specific name for http://en.wikipedia.org/wiki/Windows_To_Go in your language
 # Otherwise, you can add a parenthesis eg. "Windows To Go (hint at what it does)" and/or use the tooltip (MSG_200)
 t IDC_WINDOWS_TO_GO "Windows To Go (Windows ที่สามารถใช้งานได้เลยบนอุปกรณ์โดยไม่ต้องติดตั้ง)"
-t IDC_SET_ICON "สร้างชื่อไดร์ฟมาตรฐานอัตโนมัติและไอคอนของไดร์ฟ"
+t IDC_EXTENDED_LABEL "สร้างชื่อไดร์ฟมาตรฐานอัตโนมัติและไอคอนของไดร์ฟ"
 t IDC_ABOUT "เกี่ยวกับ..."
 t IDC_LOG "Log"
 t IDCANCEL "ปิด"
 t IDC_START "เริ่ม"
 t IDS_ADVANCED_OPTIONS_GRP "ตัวเลือกเพิ่มเติม"
-t IDC_ENABLE_FIXED_DISKS "แสดงฮาร์ดไดร์ฟ USB"
+t IDC_LIST_USB_HDD "แสดงฮาร์ดไดร์ฟ USB"
 # Note: It is acceptable to drop the parenthesis () below if you are running out of space
 # as there is a tooltip (MSG_169) providing these details.
-t IDC_EXTRA_PARTITION "เพิ่มการรองรับให้กับ BIOS รุ่นเก่า"
+t IDC_OLD_BIOS_FIXES "เพิ่มการรองรับให้กับ BIOS รุ่นเก่า"
 # 'MBR': See http://en.wikipedia.org/wiki/Master_boot_record
 # Rufus can install it's own custom MBR (the Rufus MBR), which also allows users
 # to specify a custom disk ID for the BIOS. Note: the tooltip for this control is MSG_167.
@@ -17107,8 +17115,8 @@ s IDC_CLUSTERSIZE +5,0
 t IDS_LABEL_TXT "Yeni Birim Etiketi"
 s IDC_LABEL +5,0
 s IDC_PROGRESS +5,0
-t IDS_FORMAT_OPTIONS_GRP "Biçimlendirme Seçenekleri"
-s IDS_FORMAT_OPTIONS_GRP +5,0
+t IDS_FORMAT_OPTIONS_TXT "Biçimlendirme Seçenekleri"
+s IDS_FORMAT_OPTIONS_TXT +5,0
 t IDC_BADBLOCKS "Hatalı Bloklar için Aygıtı Denetle"
 s IDC_BADBLOCKS +25,0
 m IDC_NBPASSES +30,0
@@ -17120,7 +17128,7 @@ s IDC_INFO +5,0
 m IDC_BOOTTYPE +5,0
 m IDC_SELECT_ISO +5,0
 t IDC_WINDOWS_INSTALL "Standart Windows Yüklemesi"
-t IDC_SET_ICON "Genişletilmiş Etiket ve Simge Dosyaları Oluştur"
+t IDC_EXTENDED_LABEL "Genişletilmiş Etiket ve Simge Dosyaları Oluştur"
 t IDC_ABOUT "Hakkında..."
 s IDC_ABOUT -5,0
 t IDC_LOG "Günlük"
@@ -17132,8 +17140,8 @@ t IDC_START "Başlat"
 m IDC_START +5,0
 t IDS_ADVANCED_OPTIONS_GRP "Gelişmiş Seçenekler"
 s IDS_ADVANCED_OPTIONS_GRP +5,0
-t IDC_ENABLE_FIXED_DISKS "USB sabit sürücüleri listele"
-t IDC_EXTRA_PARTITION "Eski BIOSlar için düzeltme ekle(ekstra bölüm, hizalama vs.)"
+t IDC_LIST_USB_HDD "USB sabit sürücüleri listele"
+t IDC_OLD_BIOS_FIXES "Eski BIOSlar için düzeltme ekle(ekstra bölüm, hizalama vs.)"
 t IDC_RUFUS_MBR "Rufus MBR kullan. BIOS Kimliği Seçin"
 s IDC_RUFUS_MBR +47,0
 m IDC_DISK_ID +45,0
@@ -17589,7 +17597,7 @@ b "en-US"
 # Main dialog
 g IDD_DIALOG
 s IDD_DIALOG +20,0
-s IDS_FORMAT_OPTIONS_GRP +20,0
+s IDS_FORMAT_OPTIONS_TXT +20,0
 s IDS_ADVANCED_OPTIONS_GRP +20,0
 s IDC_ABOUT +26,0
 m IDC_LOG +26,0
@@ -17614,20 +17622,20 @@ t IDS_CLUSTERSIZE_TXT "Розмір кластера"
 s IDC_CLUSTERSIZE +20,0
 t IDS_LABEL_TXT "Нова мітка тому"
 s IDC_LABEL +20,0
-t IDS_FORMAT_OPTIONS_GRP "Параметри форматування"
+t IDS_FORMAT_OPTIONS_TXT "Параметри форматування"
 t IDC_BADBLOCKS "Перевірити на погані блоки"
 t IDC_QUICKFORMAT "Швидке форматування"
 t IDC_BOOT "Створити завантажувал. диск"
 s IDC_BOOT +20,0
 t IDC_WINDOWS_INSTALL "Стандартне встановлення Windows"
-t IDC_SET_ICON "Створити розширену мітку та значок пристрою"
+t IDC_EXTENDED_LABEL "Створити розширену мітку та значок пристрою"
 t IDC_ABOUT "Про програму..."
 t IDC_LOG "Журнал"
 t IDCANCEL "Закрити"
 t IDC_START "Почати"
 t IDS_ADVANCED_OPTIONS_GRP "Додаткові параметри"
-t IDC_ENABLE_FIXED_DISKS "Показувати зовнішні USB накопичувачі"
-t IDC_EXTRA_PARTITION "Додати виправлення для старих BIOS"
+t IDC_LIST_USB_HDD "Показувати зовнішні USB накопичувачі"
+t IDC_OLD_BIOS_FIXES "Додати виправлення для старих BIOS"
 t IDC_RUFUS_MBR "Використовувати MBR з BIOS ID"
 s IDC_RUFUS_MBR +20,0
 
@@ -18062,7 +18070,7 @@ t IDS_PARTITION_TYPE_TXT "Sắp xếp phân vùng và loại hệ thống"
 t IDS_FILESYSTEM_TXT "Hệ thống tập tin"
 t IDS_CLUSTERSIZE_TXT "Kích thước liên cung"
 t IDS_LABEL_TXT "Tên đĩa mới"
-t IDS_FORMAT_OPTIONS_GRP "Tùy chọn định dạng"
+t IDS_FORMAT_OPTIONS_TXT "Tùy chọn định dạng"
 t IDC_BADBLOCKS "Kiểm tra khối hỏng trong thiết bị"
 s IDC_BADBLOCKS +20,0
 m IDC_NBPASSES +20,0
@@ -18070,15 +18078,15 @@ s IDC_NBPASSES -20,0
 t IDC_QUICKFORMAT "Định dạng nhanh"
 t IDC_BOOT "Tạo đĩa khởi động bằng"
 t IDC_WINDOWS_INSTALL "Windows To Go (Cài đặt Windows tiêu chuẩn)"
-t IDC_SET_ICON "Tạo tên mở rộng và tập tin biểu tượng"
+t IDC_EXTENDED_LABEL "Tạo tên mở rộng và tập tin biểu tượng"
 t IDC_ABOUT "Thông tin..."
 t IDC_LOG "Nhật ký"
 s IDC_LOG +25,0
 t IDCANCEL "Đóng"
 t IDC_START "Bắt đầu"
 t IDS_ADVANCED_OPTIONS_GRP "Tuỳ chọn nâng cao"
-t IDC_ENABLE_FIXED_DISKS "Danh sách ổ cứng USB"
-t IDC_EXTRA_PARTITION "Thêm khắc phục cho BIOS cũ (phân vùng, sắp xếp...khác)"
+t IDC_LIST_USB_HDD "Danh sách ổ cứng USB"
+t IDC_OLD_BIOS_FIXES "Thêm khắc phục cho BIOS cũ (phân vùng, sắp xếp...khác)"
 t IDC_RUFUS_MBR "Dùng MBR của Rufus với ID BIOS"
 s IDC_RUFUS_MBR +20,0
 m IDC_DISK_ID +20,0
