@@ -107,7 +107,7 @@
 #define IDC_ABOUT_UPDATES               1032
 #define IDC_ABOUT_COPYRIGHTS            1033
 #define IDC_ABOUT_BLURB                 1034
-#define IDC_LICENSE_TEXT                1036
+#define IDC_LICENSE_TEXT                1035
 #define IDC_NOTIFICATION_ICON           1040
 #define IDC_NOTIFICATION_TEXT           1041
 #define IDC_NOTIFICATION_LINE           1042
@@ -117,9 +117,11 @@
 #define IDC_WINDOWS_INSTALL             1047
 #define IDC_WINDOWS_TO_GO               1048
 #define IDC_SHOW_ADVANCED_OPTIONS       1049
-#define IDC_LOG_EDIT                    1050
-#define IDC_LOG_SAVE                    1051
-#define IDC_LOG_CLEAR                   1052
+#define IDC_MULTI_TOOLBAR               1050
+#define IDC_SETTINGS                    1051
+#define IDC_LOG_EDIT                    1055
+#define IDC_LOG_SAVE                    1056
+#define IDC_LOG_CLEAR                   1057
 #define IDC_MORE_INFO                   1060
 #define IDC_POLICY                      1061
 #define IDC_UPDATE_FREQUENCY            1062

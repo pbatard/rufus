@@ -101,6 +101,7 @@ t IDS_DEVICE_SETTINGS_TXT "Device Settings"
 t IDS_DEVICE_TXT "Device"
 # TODO: use MSG_278 for translations
 t IDS_BOOT_TYPE_TXT "Boot type"
+t IDC_SELECT_IMAGE "SELECT"
 t IDS_IMAGE_OPTION_TXT "Image Option"
 t IDS_PARTITION_TYPE_TXT "Partition scheme"
 t IDS_TARGET_SYSTEM_TXT "Target system"
@@ -124,10 +125,9 @@ t IDC_EXTENDED_LABEL "Create extended label and icon files"
 t IDS_STATUS_TXT "Status"
 t IDC_ABOUT "About..."
 t IDC_LOG "Log"
-t IDCANCEL "Close"
-t IDC_START "Start"
+t IDCANCEL "CLOSE"
+t IDC_START "START"
 t IDS_ADVANCED_OPTIONS_GRP "Advanced Options"
-t IDC_SHOW_ADVANCED_OPTIONS "Show Advanced Options ⌵"
 
 # About dialog
 g IDD_ABOUTBOX
@@ -5218,6 +5218,7 @@ g IDD_DIALOG
 t IDS_DEVICE_SETTINGS_TXT "Options de Périphérique"
 t IDS_DEVICE_TXT "Périphérique"
 t IDS_BOOT_TYPE_TXT "Type de démarrage"
+t IDC_SELECT_IMAGE "SELECTION"
 t IDS_IMAGE_OPTION_TXT "Option d'image"
 t IDS_PARTITION_TYPE_TXT "Schéma de partition"
 t IDC_ADVANCED_DEVICE_SETTINGS "Options de Périphérique Avancées"
@@ -5227,27 +5228,18 @@ t IDS_CLUSTERSIZE_TXT "Taille d'unité d'allocation"
 t IDS_LABEL_TXT "Nom de volume"
 t IDS_FORMAT_OPTIONS_TXT "Options de Formatage"
 t IDC_BADBLOCKS "Vérification de mauvais blocs"
-m IDC_NBPASSES +5,0
-s IDC_NBPASSES -2,0
 t IDC_QUICKFORMAT "Formatage rapide"
 t IDC_BOOT "Créer un disque de démarrage"
-s IDC_BOOT +5,0
 t IDC_WINDOWS_INSTALL "Installation standard de Windows"
 t IDC_EXTENDED_LABEL "Ajouter un label étendu et une icône"
 t IDC_ADVANCED_FORMAT_OPTIONS "Options de Formatage Avancées"
 t IDS_STATUS_TXT "Statut"
 t IDC_ABOUT "A propos..."
-t IDCANCEL "Fermer"
-t IDC_START "Démarrer"
-m IDC_START +5,0
-s IDC_START -2,0
-m IDCANCEL +2,0
-s IDCANCEL -2,0
+t IDCANCEL "FERMER"
+t IDC_START "DEMARRER"
 t IDC_LIST_USB_HDD "Lister les disques durs USB"
 t IDC_OLD_BIOS_FIXES "Ajouter les options de compatibilité pour vieux BIOS"
 t IDC_RUFUS_MBR "Utiliser le MBR Rufus avec ID"
-m IDC_DISK_ID +5,0
-s IDC_DISK_ID -2,0
 
 g IDD_ABOUTBOX
 t IDD_ABOUTBOX "A propos de Rufus"
@@ -5336,7 +5328,7 @@ t MSG_034 "%d passe"
 t MSG_035 "%d passes"
 t MSG_036 "Image ISO"
 t MSG_037 "Application"
-t MSG_038 "Annuler"
+t MSG_038 "ANNULER"
 t MSG_039 "Lancer"
 t MSG_040 "Télécharger"
 t MSG_041 "Opération annulée par l'utilisateur"
@@ -5646,6 +5638,9 @@ t MSG_298 "Le fichier ISO que vous avez sélectionné ne fait pas la bonne taill
 	"Si vous avez obtenu ce fichier depuis Internet, vous devriez essayer de le télécharger à nouveau et verifier que "
 	"le MD5 ou SHA correspond aux valeurs officielles.\n\nNotez que vous pouvez calculer le MD5 ou SHA depuis Rufus en "
 	"cliquant le bouton '#'."
+t MSG_303 "Image disque ou ISO"
+t MSG_304 "%s (Veuillez sélectionner)"
+
 
 ################################################################################
 l "de-DE" "German (Deutsch)" 0x0407, 0x0807, 0x0c07, 0x1007, 0x1407

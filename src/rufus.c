@@ -75,6 +75,7 @@ static int image_option_move_ids[] = {
 	IDC_INFO,
 	IDC_ABOUT,
 	IDC_LOG,
+	IDC_MULTI_TOOLBAR,
 	IDC_TEST,
 	IDC_START,
 	IDCANCEL,
@@ -108,6 +109,7 @@ static int advanced_device_move_ids[] = {
 	IDC_INFO,
 	IDC_ABOUT,
 	IDC_LOG,
+	IDC_MULTI_TOOLBAR,
 	IDC_TEST,
 	IDC_START,
 	IDCANCEL,
@@ -129,6 +131,7 @@ static int advanced_format_move_ids[] = {
 	IDC_INFO,
 	IDC_ABOUT,
 	IDC_LOG,
+	IDC_MULTI_TOOLBAR,
 	IDC_TEST,
 	IDC_START,
 	IDCANCEL,
@@ -161,8 +164,9 @@ static BOOL app_changed_label = FALSE;
 static BOOL allowed_filesystem[FS_MAX] = { 0 };
 static int64_t last_iso_blocking_status;
 // TODO: rename 'selection_default' to something more explicit
-static int selection_default, row_height, advanced_device_section_height, advanced_format_section_height, image_settings_height, image_index;
+static int selection_default, row_height, advanced_device_section_height, advanced_format_section_height, image_index;
 static int device_vpos, format_vpos, status_vpos;
+static int cb_width, dd_width, sep_width, margin_width, half_width, full_width;
 static UINT_PTR UM_LANGUAGE_MENU_MAX = UM_LANGUAGE_MENU;
 static RECT relaunch_rc = { -65536, -65536, 0, 0};
 static UINT uQFChecked = BST_CHECKED, uMBRChecked = BST_UNCHECKED;
@@ -171,7 +175,7 @@ static HBRUSH hInfoBrush;
 static WNDPROC progress_original_proc = NULL;
 static HANDLE format_thid = NULL, dialog_handle = NULL;
 static HWND hSelectImage = NULL, hStart = NULL;
-static HICON hIconSave, hIconDown, hIconUp, hIconLang;
+static HICON hIconSave, hIconDown, hIconUp, hIconLang, hIconAbout, hIconSettings, hIconLog;
 static char szTimer[12] = "00:00:00";
 static unsigned int timer;
 
@@ -181,13 +185,14 @@ extern long grub2_len;
 extern char* szStatusMessage;
 extern const char* old_c32_name[NB_OLD_C32];
 extern const char* cert_name[3];
+extern const char* sfd_name;
 
 /*
  * Globals
  */
 OPENED_LIBRARIES_VARS;
 HINSTANCE hMainInstance;
-HWND hMainDialog, hLangToolbar = NULL, hAdvancedDeviceToolBar, hAdvancedFormatToolBar, hUpdatesDlg = NULL;
+HWND hMainDialog, hMultiToolbar = NULL, hAdvancedDeviceToolBar, hAdvancedFormatToolBar, hUpdatesDlg = NULL;
 HIMAGELIST hUpImageList, hDownImageList;
 BUTTON_IMAGELIST bi_iso = { 0 }, bi_up = { 0 }, bi_down = { 0 }, bi_save = { 0 };
 char szFolderPath[MAX_PATH], app_dir[MAX_PATH], system_dir[MAX_PATH], temp_dir[MAX_PATH], sysnative_dir[MAX_PATH];
@@ -248,14 +253,14 @@ static void SetComboEntry(HWND hDlg, int data) {
 // Fill in the cluster size names
 static void SetClusterSizeLabels(void)
 {
-	unsigned int i, j, k;
+	unsigned int i, j, msg_id;
 	safe_sprintf(ClusterSizeLabel[0], 64, lmprintf(MSG_029));
-	for (i=512, j=1, k=MSG_026; j<MAX_CLUSTER_SIZES; i<<=1, j++) {
+	for (i=512, j=1, msg_id=MSG_026; j<MAX_CLUSTER_SIZES; i<<=1, j++) {
 		if (i > 8192) {
 			i /= 1024;
-			k++;
+			msg_id++;
 		}
-		safe_sprintf(ClusterSizeLabel[j], 64, "%d %s", i, lmprintf(k));
+		safe_sprintf(ClusterSizeLabel[j], 64, "%d %s", i, lmprintf(msg_id));
 	}
 }
 
@@ -266,7 +271,6 @@ static void SetAllowedFileSystems(void)
 	memset(allowed_filesystem, 0, sizeof(allowed_filesystem));
 	switch (selection_default) {
 	case BT_NON_BOOTABLE:
-		// TODO: Disable target system control, add "Super Floppy" to the list
 		for (i = 0; i < FS_MAX; i++)
 			allowed_filesystem[i] = TRUE;
 		break;
@@ -410,7 +414,7 @@ static void SetPartitionSchemeAndTargetSystem(BOOL only_target)
 				ComboBox_AddStringU(hPartitionScheme, "GPT"), PARTITION_STYLE_GPT));
 		if (allowed_partition_scheme[PARTITION_STYLE_SFD])
 			IGNORE_RETVAL(ComboBox_SetItemData(hPartitionScheme,
-				ComboBox_AddStringU(hPartitionScheme, "Super Floppy Disk"), PARTITION_STYLE_SFD));
+				ComboBox_AddStringU(hPartitionScheme, sfd_name), PARTITION_STYLE_SFD));
 		SetComboEntry(hPartitionScheme, prefer_gpt ? PARTITION_STYLE_GPT : PARTITION_STYLE_MBR);
 	}
 
@@ -1048,7 +1052,7 @@ static void EnableControls(BOOL bEnable)
 	EnableWindow(hNBPasses, bEnable);
 	EnableWindow(hAdvancedDeviceToolBar, bEnable);
 	EnableWindow(hAdvancedFormatToolBar, bEnable);
-	EnableWindow(hLangToolbar, bEnable);
+	EnableWindow(hMultiToolbar, bEnable);
 	EnableWindow(hStatusToolbar, bEnable);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_LIST_USB_HDD), bEnable);
 	SetDlgItemTextU(hMainDialog, IDCANCEL, lmprintf(bEnable?MSG_006:MSG_007));
@@ -1879,31 +1883,12 @@ static INT_PTR CALLBACK ProgressCallback(HWND hCtrl, UINT message, WPARAM wParam
 
 static void CreateAdditionalControls(HWND hDlg)
 {
-	HINSTANCE hShell32DllInst, hComDlg32DllInst, hUserLanguagesCplDllInst, hINetCplDllInst;
+	HINSTANCE hDll;
 	HIMAGELIST hToolbarImageList;
-	HWND hCtrl;
 	RECT rc;
-	wchar_t wtmp[128];
 	static wchar_t wtbtext[2][128];
 	int i16, s16, toolbar_fudge = -6;
-	TBBUTTON tbToolbarButtons[1];
-
-	// Add trailing space to the "Format Options" text
-	hCtrl = GetDlgItem(hDlg, IDS_DEVICE_SETTINGS_TXT);
-	memset(wtmp, 0, sizeof(wtmp));
-	GetWindowTextW(hCtrl, wtmp, ARRAYSIZE(wtmp));
-	wtmp[wcslen(wtmp)] = ' ';
-	SetWindowTextW(hCtrl, wtmp);
-	hCtrl = GetDlgItem(hDlg, IDS_FORMAT_OPTIONS_TXT);
-	memset(wtmp, 0, sizeof(wtmp));
-	GetWindowTextW(hCtrl, wtmp, ARRAYSIZE(wtmp));
-	wtmp[wcslen(wtmp)] = ' ';
-	SetWindowTextW(hCtrl, wtmp);
-	hCtrl = GetDlgItem(hDlg, IDS_STATUS_TXT);
-	memset(wtmp, 0, sizeof(wtmp));
-	GetWindowTextW(hCtrl, wtmp, ARRAYSIZE(wtmp));
-	wtmp[wcslen(wtmp)] = ' ';
-	SetWindowTextW(hCtrl, wtmp);
+	TBBUTTON tbToolbarButtons[7];
 
 	// High DPI scaling
 	i16 = GetSystemMetrics(SM_CXSMICON);
@@ -1919,25 +1904,30 @@ static void CreateAdditionalControls(HWND hDlg)
 		s16 = 24;
 
 	// Load system icons (NB: Use the excellent http://www.nirsoft.net/utils/iconsext.html to find icon IDs)
-	hShell32DllInst = GetLibraryHandle("Shell32");
-	hIconSave = (HICON)LoadImage(hShell32DllInst, MAKEINTRESOURCE(16761), IMAGE_ICON, s16, s16, LR_DEFAULTCOLOR | LR_SHARED);
+	hDll = GetLibraryHandle("Shell32");
+	hIconSave = (HICON)LoadImage(hDll, MAKEINTRESOURCE(16761), IMAGE_ICON, s16, s16, LR_DEFAULTCOLOR | LR_SHARED);
+	hIconLog = (HICON)LoadImage(hDll, MAKEINTRESOURCE(281), IMAGE_ICON, s16, s16, LR_DEFAULTCOLOR | LR_SHARED);
+	hIconSettings = (HICON)LoadImage(hDll, MAKEINTRESOURCE(16826), IMAGE_ICON, s16, s16, LR_DEFAULTCOLOR | LR_SHARED);
+
+	hDll = GetLibraryHandle("User32");
+	hIconAbout = (HICON)LoadImage(hDll, MAKEINTRESOURCE(104), IMAGE_ICON, s16, s16, LR_DEFAULTCOLOR | LR_SHARED);
 
 	if (nWindowsVersion >= WINDOWS_8) {
 		// Use the icon from the Windows 8+ 'Language' Control Panel
-		hUserLanguagesCplDllInst = GetLibraryHandle("UserLanguagesCpl");
-		hIconLang = (HICON)LoadImage(hUserLanguagesCplDllInst, MAKEINTRESOURCE(1), IMAGE_ICON, s16, s16, LR_DEFAULTCOLOR | LR_SHARED);
+		hDll = GetLibraryHandle("UserLanguagesCpl");
+		hIconLang = (HICON)LoadImage(hDll, MAKEINTRESOURCE(1), IMAGE_ICON, s16, s16, LR_DEFAULTCOLOR | LR_SHARED);
 	} else {
 		// Otherwise use the globe icon, from the Internet Options Control Panel
-		hINetCplDllInst = GetLibraryHandle("inetcpl.cpl");
-		hIconLang = (HICON)LoadImage(hINetCplDllInst, MAKEINTRESOURCE(1313), IMAGE_ICON, s16, s16, LR_DEFAULTCOLOR | LR_SHARED);
+		hDll = GetLibraryHandle("inetcpl.cpl");
+		hIconLang = (HICON)LoadImage(hDll, MAKEINTRESOURCE(1313), IMAGE_ICON, s16, s16, LR_DEFAULTCOLOR | LR_SHARED);
 	}
 
 	// Fetch the up and down expand icons for the advanced options toolbar
-	hComDlg32DllInst = GetLibraryHandle("ComDlg32");
-	hIconDown = (HICON)LoadImage(hComDlg32DllInst, MAKEINTRESOURCE(577), IMAGE_ICON, s16, s16, LR_DEFAULTCOLOR | LR_SHARED);
+	hDll = GetLibraryHandle("ComDlg32");
+	hIconDown = (HICON)LoadImage(hDll, MAKEINTRESOURCE(577), IMAGE_ICON, s16, s16, LR_DEFAULTCOLOR | LR_SHARED);
 	hDownImageList = ImageList_Create(i16, i16, ILC_COLOR32, 1, 0);
 	ImageList_AddIcon(hDownImageList, hIconDown);
-	hIconUp = (HICON)LoadImage(hComDlg32DllInst, MAKEINTRESOURCE(578), IMAGE_ICON, s16, s16, LR_DEFAULTCOLOR | LR_SHARED);
+	hIconUp = (HICON)LoadImage(hDll, MAKEINTRESOURCE(578), IMAGE_ICON, s16, s16, LR_DEFAULTCOLOR | LR_SHARED);
 	hUpImageList = ImageList_Create(i16, i16, ILC_COLOR32, 1, 0);
 	ImageList_AddIcon(hUpImageList, hIconUp);
 
@@ -1954,16 +1944,12 @@ static void CreateAdditionalControls(HWND hDlg)
 	tbToolbarButtons[0].fsState = TBSTATE_ENABLED;
 	tbToolbarButtons[0].iString = (INT_PTR)wtbtext[0];
 	tbToolbarButtons[0].iBitmap = 0;
-	SendMessage(hAdvancedDeviceToolBar, TB_SETIMAGELIST, (WPARAM)0, (LPARAM)hUpImageList);
+	SendMessage(hAdvancedDeviceToolBar, TB_SETIMAGELIST, 0, (LPARAM)hUpImageList);
 	SendMessage(hAdvancedDeviceToolBar, TB_BUTTONSTRUCTSIZE, (WPARAM)sizeof(TBBUTTON), 0);
-	SendMessage(hAdvancedDeviceToolBar, TB_ADDBUTTONS, (WPARAM)1, (LPARAM)&tbToolbarButtons);
-	// So, it turns out that, if you attempt to rely on TB_AUTOSIZE, you end up in a world of pain trying
-	// to figure why Windows fails to consistently report the width of your toolbar button depending on
-	// what prior system calls have been issued.
-	// If you don't want to lose your sanity, just set the width to max you can and ignore TB_AUTOSIZE.
+	SendMessage(hAdvancedDeviceToolBar, TB_ADDBUTTONS, 1, (LPARAM)&tbToolbarButtons);
 	GetWindowRect(GetDlgItem(hDlg, IDC_ADVANCED_DEVICE_SETTINGS), &rc);
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
-	SetWindowPos(hAdvancedDeviceToolBar, HWND_TOP, rc.left + toolbar_fudge, rc.top, rc.right, rc.bottom, 0);
+	SetWindowPos(hAdvancedDeviceToolBar, HWND_TOP, rc.left + toolbar_fudge, rc.top, rc.right - rc.left, rc.bottom - rc.top, 0);
 
 	GetWindowTextW(GetDlgItem(hDlg, IDC_ADVANCED_FORMAT_OPTIONS), wtbtext[1], ARRAYSIZE(wtbtext[1]));
 	hAdvancedFormatToolBar = CreateWindowExW(0, TOOLBARCLASSNAME, NULL,
@@ -1984,17 +1970,47 @@ static void CreateAdditionalControls(HWND hDlg)
 	SetWindowPos(hAdvancedFormatToolBar, HWND_TOP, rc.left + toolbar_fudge, rc.top, rc.right, rc.bottom, 0);
 
 	// Create the language toolbar
-	hLangToolbar = CreateWindowExW(0, TOOLBARCLASSNAME, NULL, WS_CHILD | WS_TABSTOP | TBSTYLE_TRANSPARENT | CCS_NOPARENTALIGN |
-		CCS_NORESIZE | CCS_NODIVIDER, 0, 0, 0, 0, hMainDialog, NULL, hMainInstance, NULL);
-	hToolbarImageList = ImageList_Create(i16, i16, ILC_COLOR32, 1, 0);
+	hMultiToolbar = CreateWindowExW(0, TOOLBARCLASSNAME, NULL,
+		WS_CHILD | WS_TABSTOP | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CCS_NOPARENTALIGN | CCS_NODIVIDER | TBSTYLE_FLAT | TBSTYLE_LIST | TBSTYLE_TRANSPARENT | TBSTYLE_TOOLTIPS | TBSTYLE_AUTOSIZE,
+//		WS_CHILD | WS_TABSTOP | TBSTYLE_TRANSPARENT | CCS_NOPARENTALIGN | CCS_NORESIZE | CCS_NODIVIDER,
+		0, 0, 0, 0, hMainDialog, (HMENU)IDC_MULTI_TOOLBAR, hMainInstance, NULL);
+	hToolbarImageList = ImageList_Create(i16, i16, ILC_COLOR32, 4, 0);
+	ImageList_AddIcon(hToolbarImageList, hIconAbout);
+	ImageList_AddIcon(hToolbarImageList, hIconSettings);
 	ImageList_AddIcon(hToolbarImageList, hIconLang);
-	SendMessage(hLangToolbar, TB_SETIMAGELIST, (WPARAM)0, (LPARAM)hToolbarImageList);
-	SendMessage(hLangToolbar, TB_BUTTONSTRUCTSIZE, (WPARAM)sizeof(TBBUTTON), 0);
-	memset(tbToolbarButtons, 0, sizeof(TBBUTTON));
-	tbToolbarButtons[0].idCommand = IDC_LANG;
-	tbToolbarButtons[0].fsStyle = BTNS_WHOLEDROPDOWN;
+	ImageList_AddIcon(hToolbarImageList, hIconLog);
+	SendMessage(hMultiToolbar, TB_SETIMAGELIST, (WPARAM)0, (LPARAM)hToolbarImageList);
+	SendMessage(hMultiToolbar, TB_BUTTONSTRUCTSIZE, (WPARAM)sizeof(TBBUTTON), 0);
+	memset(tbToolbarButtons, 0, sizeof(TBBUTTON) * ARRAYSIZE(tbToolbarButtons));
+	tbToolbarButtons[0].idCommand = IDC_ABOUT;
+	tbToolbarButtons[0].fsStyle = BTNS_AUTOSIZE;
 	tbToolbarButtons[0].fsState = TBSTATE_ENABLED;
-	SendMessage(hLangToolbar, TB_ADDBUTTONS, (WPARAM)1, (LPARAM)&tbToolbarButtons); // Add just the 1 button
+	tbToolbarButtons[0].iBitmap = 0;
+	tbToolbarButtons[1].fsStyle = BTNS_AUTOSIZE;
+	tbToolbarButtons[1].fsState = TBSTATE_INDETERMINATE;
+	tbToolbarButtons[1].iBitmap = I_IMAGENONE;
+	tbToolbarButtons[1].iString = (INT_PTR)L" ";
+	tbToolbarButtons[2].idCommand = IDC_SETTINGS;
+	tbToolbarButtons[2].fsStyle = BTNS_AUTOSIZE;
+	tbToolbarButtons[2].fsState = TBSTATE_ENABLED;
+	tbToolbarButtons[2].iBitmap = 1;
+	tbToolbarButtons[3].fsStyle = BTNS_AUTOSIZE;
+	tbToolbarButtons[3].fsState = TBSTATE_INDETERMINATE;
+	tbToolbarButtons[3].iBitmap = I_IMAGENONE;
+	tbToolbarButtons[3].iString = (INT_PTR)L" ";
+	tbToolbarButtons[4].idCommand = IDC_LANG;
+	tbToolbarButtons[4].fsStyle = BTNS_AUTOSIZE;
+	tbToolbarButtons[4].fsState = TBSTATE_ENABLED;
+	tbToolbarButtons[4].iBitmap = 2;
+	tbToolbarButtons[5].fsStyle = BTNS_AUTOSIZE;
+	tbToolbarButtons[5].fsState = TBSTATE_INDETERMINATE;
+	tbToolbarButtons[5].iBitmap = I_IMAGENONE;
+	tbToolbarButtons[5].iString = (INT_PTR)L" ";
+	tbToolbarButtons[6].idCommand = IDC_LOG;
+	tbToolbarButtons[6].fsStyle = BTNS_AUTOSIZE;
+	tbToolbarButtons[6].fsState = TBSTATE_ENABLED;
+	tbToolbarButtons[6].iBitmap = 3;
+	SendMessage(hMultiToolbar, TB_ADDBUTTONS, (WPARAM)7, (LPARAM)&tbToolbarButtons);
 
 	// Set the icons on the the buttons
 	bi_save.himl = ImageList_Create(i16, i16, ILC_COLOR32 | ILC_MASK, 1, 0);
@@ -2014,23 +2030,138 @@ static void CreateAdditionalControls(HWND hDlg)
 	SendMessage(GetDlgItem(hDlg, IDC_SAVE), BCM_SETIMAGELIST, 0, (LPARAM)&bi_save);
 }
 
-static inline int GetControlWidth(HWND hDlg, int id)
+static inline int GetTextWidth(HWND hDlg, int id)
 {
-	return GetTextSize(GetDlgItem(hDlg, id)).cx;
+	return GetTextSize(GetDlgItem(hDlg, id), NULL).cx;
+}
+
+// TODO: START and right half-dropdowns should be aligned which means
+// half dropdown size should set to 2 x button size + spacing
+static void SetButtonWidth(HWND hDlg)
+{
+	RECT rc;
+	// TODO: width should be set according to DPI
+	int i, width = 00, control[3] = { IDC_SELECT_IMAGE, IDC_START, IDCANCEL };
+
+	for (i = 0; i < ARRAYSIZE(control); i++)
+		width = max(GetTextWidth(hDlg, control[i]), width);
+	// The 'CLOSE' button is also be used to display 'CANCEL' => measure that too
+	width = max(width, GetTextSize(GetDlgItem(hDlg, IDCANCEL), lmprintf(MSG_007)).cx);
+	// Use cb_width for how much border we should add
+	width += cb_width;
+	uprintf("MAX BUTTON = %d", width);
+	for (i = 0; i < ARRAYSIZE(control); i++) {
+		GetWindowRect(GetDlgItem(hDlg, control[i]), &rc);
+		MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
+		SetWindowPos(GetDlgItem(hDlg, control[i]), HWND_TOP, rc.left, rc.top, width, rc.bottom - rc.top, 0);
+	}
+}
+
+// The following goes over the data that gets populated into the half-width dropdowns
+// (Partition scheme, Target System, Disk ID, File system, Cluster size, Nb passes)
+// to figure out the minimum width we should allocate.
+static void GetHalfDropwdownWidth(HWND hDlg)
+{
+	RECT rc;
+	unsigned int i, j, msg_id;
+	char tmp[256];
+
+	// Initialize half width to the UI's default size
+	// TODO: verify that this works if we just resized from a language with larger width?
+	GetWindowRect(GetDlgItem(hDlg, IDC_PARTITION_TYPE), &rc);
+	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
+	half_width = rc.right - rc.left - cb_width;
+
+	// "Super Floppy Disk" is the longuest entry in the Partition Scheme dropdown
+	half_width = max(half_width, GetTextSize(GetDlgItem(hDlg, IDC_PARTITION_TYPE), (char*)sfd_name).cx);
+
+	// This is basically the same as SetClusterSizeLabels() except we're adding (Default) to each entry
+	for (i = 512, j = 1, msg_id = MSG_026; j<MAX_CLUSTER_SIZES; i <<= 1, j++) {
+		if (i > 8192) {
+			i /= 1024;
+			msg_id++;
+		}
+		safe_sprintf(tmp, 64, "%d %s", i, lmprintf(msg_id));
+		half_width = max(half_width, GetTextSize(GetDlgItem(hDlg, IDC_CLUSTERSIZE), lmprintf(MSG_030, tmp)).cx);
+	}
+	// We don't go over file systems, because none of them will be longer than "Super Floppy Disk"
+	// We do however go over the BIOS vs UEFI entries, as some of these are translated
+	for (msg_id = MSG_031; msg_id <= MSG_033; msg_id++)
+		half_width = max(half_width, GetTextSize(GetDlgItem(hDlg, IDC_TARGET_SYSTEM), lmprintf(msg_id)).cx);
+
+	// Just in case, we also do the number of passes
+	for (i = 1; i <= 4; i++)
+		half_width = max(half_width, GetTextSize(GetDlgItem(hDlg, IDC_TARGET_SYSTEM),
+			lmprintf((i == 1) ? MSG_034 : MSG_035, i)).cx);
+
+	// Finally, we must ensure that we'll have enough space for the 2 checkbox controls
+	// that end up with a half dropdown
+	half_width = max(half_width, GetTextWidth(hDlg, IDC_RUFUS_MBR) - sep_width);
+	half_width = max(half_width, GetTextWidth(hDlg, IDC_BADBLOCKS) - sep_width);
+
+	// Add the width of a blank checkbox
+	half_width += cb_width;
+
+	uprintf("half_width = %d", half_width);
+}
+
+/*
+ *                |                  full_width                  |
+ *      8       ->|<-    96     ->|<-    24    ->|<-    96     ->|<-     8
+ *  margin_width  |  half_width   |  sep_width   |  half_width   | margin_width
+ */
+static void GetFullWidth(HWND hDlg)
+{
+	RECT rc;
+	int i, control[] = { IDC_LIST_USB_HDD, IDC_OLD_BIOS_FIXES, IDC_QUICKFORMAT, IDC_EXTENDED_LABEL };
+
+	// Initialize full width to the UI's default size
+	GetWindowRect(GetDlgItem(hDlg, IDC_IMAGE_OPTION), &rc);
+	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
+	full_width = rc.right - rc.left - cb_width;
+
+	// Initialize the min width according to the longest message from the Boot Type drowpdown
+	full_width = max(full_width, GetTextSize(GetDlgItem(hDlg, IDC_BOOTTYPE), lmprintf(MSG_304, lmprintf(MSG_303))).cx);
+
+	// Go through the Image Options for Windows To Go
+	full_width = max(full_width, GetTextSize(GetDlgItem(hDlg, IDC_IMAGE_OPTION), lmprintf(MSG_301)).cx);
+	full_width = max(full_width, GetTextSize(GetDlgItem(hDlg, IDC_IMAGE_OPTION), lmprintf(MSG_302)).cx);
+
+
+	// Now deal with full length checkbox lines
+	for (i=0; i<ARRAYSIZE(control); i++)
+		full_width = max(full_width, GetTextWidth(hDlg, control[i]));
+
+	// All of the above is for text only, so we need to add cb space
+	full_width += cb_width;
+
+	// Our min also needs to be longer than 2 half length dropdowns + spacer
+	full_width = max(full_width, 2 * half_width + sep_width);
+
+	// TODO: Also pick a few choice messages from info/status
+	uprintf("full_width = %d", full_width);
+
+	//GetWindowRect(GetDlgItem(hDlg, IDC_RUFUS_MBR), &rc);
+	//MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
+	//full_width += rc.left;
+	//uprintf("rc.left = %d", rc.left);
+
+	// TESTING
+	GetWindowRect(GetDlgItem(hDlg, IDC_DISK_ID), &rc);
+	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
+	SetWindowPos(GetDlgItem(hDlg, IDC_DISK_ID), NULL, margin_width + half_width + sep_width, rc.top, rc.right - rc.left, rc.bottom - rc.top, 0);
 }
 
 
 // https://stackoverflow.com/a/20926332/1069307
 // https://msdn.microsoft.com/en-us/library/windows/desktop/bb226818.aspx
-static int GetMaxTextWidth(HWND hDlg)
+static void GetEmptyControlsWidth(HWND hDlg)
 {
 	int checkbox_internal_spacing = 12;
 //	const int dluCheckboxHeight = 10; // 10 vertical dlus
 	RECT rc = { 0, 0, 4, 8 };
 	SIZE bu;
 
-	// cb = checkbox, dd = dropdown, ib = image button
-	int width, cb_width, dd_width, ib_width, max_width = 100;
 	int top_half_start_x, bottom_half_start_x;
 
 	// Compute base unit sizes since GetDialogBaseUnits() returns garbage data.
@@ -2038,21 +2169,22 @@ static int GetMaxTextWidth(HWND hDlg)
 	MapDialogRect(hDlg, &rc);
 	bu.cx = rc.right;
 	bu.cy = rc.bottom;
-	uprintf("bu.cx = %d, bu.cy = %d", bu.cx, bu.cy);
+//	uprintf("bu.cx = %d, bu.cy = %d", bu.cx, bu.cy);
 
-	GetWindowRect(hSelectImage, &rc);
-	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
-	ib_width = rc.right - rc.left;
-	uprintf("button.width = %d", ib_width);
+	//GetWindowRect(hSelectImage, &rc);
+	//MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
+	//ib_width = rc.right - rc.left;
+	//uprintf("button.width = %d", ib_width);
 
 	// TODO: figure out the specifics of each Windows version
 	if (nWindowsVersion == WINDOWS_10)
 		checkbox_internal_spacing = 10;
 
 	cb_width = MulDiv(checkbox_internal_spacing, bu.cx, 4);
+	uprintf("BLANK CB WIDTH = %d", cb_width);
 //	Integer checkboxHeight = MulDiv(10, sz.cy, 8);
 
-	// Use Windows To Go checkbox and NB passed dropdown to
+	// Use Windows To Go checkbox and NB passes dropdown to
 	// compute the size of a blank checkbox and dropdown
 	GetWindowRect(GetDlgItem(hDlg, IDC_WINDOWS_TO_GO), &rc);
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
@@ -2063,49 +2195,57 @@ static int GetMaxTextWidth(HWND hDlg)
 	GetWindowRect(GetDlgItem(hDlg, IDC_NBPASSES), &rc);
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
 	dd_width = rc.right - rc.left;
+	uprintf("BLANK DD WIDTH = %d", dd_width);
 
-//	width = GetControlWidth(hDlg, IDS_PARTITION_TYPE_TXT);
-//	max_text_width = max(max_text_width, width);
-//	uprintf("mw = %d", max_text_width);
-	width = GetControlWidth(hDlg, IDC_OLD_BIOS_FIXES);
-	max_width = max(max_width, width);
-	uprintf("mw = %d", max_width);
+	// Also get the spacing width between half-length dropdowns
+	GetWindowRect(GetDlgItem(hDlg, IDC_TARGET_SYSTEM), &rc);
+	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
+	sep_width = rc.left;
+	GetWindowRect(GetDlgItem(hDlg, IDC_PARTITION_TYPE), &rc);
+	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
+	sep_width -= rc.right;
+	margin_width = rc.left;
+	uprintf("SEP WIDTH = %d, MARGIN WIDTH = %d", sep_width, rc.left);
 
-	return bottom_half_start_x + cb_width + max_width;
 }
 
-static void PositionControls(HWND hDlg)
+static void SetSectionHeaders(HWND hDlg)
 {
-	RECT rc, rcDeviceList, rcBootType, rcSelectedImage;
+	RECT rc;
 	HWND hCtrl;
 	SIZE sz;
 	HFONT hf;
-	int max_text_width = GetMaxTextWidth(hDlg);
-	// TODO: dynamicize this
-	int dialog_width = 770;
-	int dropdown_height, button_fudge = 2;
+	wchar_t wtmp[128];
+	int i, control[3] = { IDS_DEVICE_SETTINGS_TXT, IDS_FORMAT_OPTIONS_TXT, IDS_STATUS_TXT };
 
 	// Set the section header fonts and resize the static controls accordingly
 	hf = CreateFontA(48, 0, 0, 0, FW_SEMIBOLD, FALSE, FALSE, FALSE, DEFAULT_CHARSET,
 		0, 0, PROOF_QUALITY, 0, "Segoe UI");
-	SendDlgItemMessageA(hDlg, IDS_DEVICE_SETTINGS_TXT, WM_SETFONT, (WPARAM)hf, TRUE);
-	hCtrl = GetDlgItem(hDlg, IDS_DEVICE_SETTINGS_TXT);
-	GetWindowRect(hCtrl, &rc);
-	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
-	sz = GetTextSize(hCtrl);
-	SetWindowPos(hCtrl, NULL, rc.left, rc.top, sz.cx, sz.cy, SWP_NOZORDER);
-	SendDlgItemMessageA(hDlg, IDS_FORMAT_OPTIONS_TXT, WM_SETFONT, (WPARAM)hf, TRUE);
-	hCtrl = GetDlgItem(hDlg, IDS_FORMAT_OPTIONS_TXT);
-	GetWindowRect(hCtrl, &rc);
-	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
-	sz = GetTextSize(hCtrl);
-	SetWindowPos(hCtrl, NULL, rc.left, rc.top, sz.cx, sz.cy, SWP_NOZORDER);
-	SendDlgItemMessageA(hDlg, IDS_STATUS_TXT, WM_SETFONT, (WPARAM)hf, TRUE);
-	hCtrl = GetDlgItem(hDlg, IDS_STATUS_TXT);
-	GetWindowRect(hCtrl, &rc);
-	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
-	sz = GetTextSize(hCtrl);
-	SetWindowPos(hCtrl, NULL, rc.left, rc.top, sz.cx, sz.cy, SWP_NOZORDER);
+
+	for (i = 0; i < ARRAYSIZE(control); i++) {
+		SendDlgItemMessageA(hDlg, control[i], WM_SETFONT, (WPARAM)hf, TRUE);
+		hCtrl = GetDlgItem(hDlg, control[i]);
+		memset(wtmp, 0, sizeof(wtmp));
+		GetWindowTextW(hCtrl, wtmp, ARRAYSIZE(wtmp));
+		wtmp[wcslen(wtmp)] = ' ';
+		SetWindowTextW(hCtrl, wtmp);
+		GetWindowRect(hCtrl, &rc);
+		MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
+		sz = GetTextSize(hCtrl, NULL);
+		SetWindowPos(hCtrl, NULL, rc.left, rc.top, sz.cx, sz.cy, SWP_NOZORDER);
+	}
+}
+
+static void PositionControls(HWND hDlg)
+{
+	RECT rc, rcBootType, rcSelectedImage;
+	HWND hCtrl;
+	SIZE sz;
+	// TODO: dynamicize button_fudge
+	int dropdown_height, button_fudge = 2;
+
+	GetHalfDropwdownWidth(hDlg);
+	GetFullWidth(hDlg);
 
 	// Resize the height of the label and progress bar to the height of standard dropdowns
 	hCtrl = GetDlgItem(hDlg, IDC_DEVICE);
@@ -2153,42 +2293,25 @@ static void PositionControls(HWND hDlg)
 	hCtrl = GetDlgItem(hDlg, IDS_DEVICE_SETTINGS_TXT);
 	GetWindowRect(hCtrl, &rc);
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
-	sz = GetTextSize(hCtrl);
+	sz = GetTextSize(hCtrl, NULL);
 	device_vpos = rc.top + 2 * sz.cy / 3;
 	hCtrl = GetDlgItem(hDlg, IDS_FORMAT_OPTIONS_TXT);
 	GetWindowRect(hCtrl, &rc);
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
-	sz = GetTextSize(hCtrl);
+	sz = GetTextSize(hCtrl, NULL);
 	format_vpos = rc.top + 2 * sz.cy / 3;
 	hCtrl = GetDlgItem(hDlg, IDS_STATUS_TXT);
 	GetWindowRect(hCtrl, &rc);
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
-	sz = GetTextSize(hCtrl);
+	sz = GetTextSize(hCtrl, NULL);
 	status_vpos = rc.top + 2 * sz.cy / 3;
 
-	// Make the toolbar window just big enough to hold the button
-	// Set the top margin to 4 DIPs and the right margin so that it's aligned with the Device List Combobox
-	SendMessage(hLangToolbar, TB_GETRECT, IDC_LANG, (LPARAM)&rc);
-	GetWindowRect(hDeviceList, &rcDeviceList);
-	MapWindowPoints(NULL, hDlg, (POINT*)&rcDeviceList, 2);
-	// TODO:
-	SetWindowPos(hLangToolbar, HWND_TOP, dialog_width - rc.right,
-		(int)(4.0f * fScale), rc.right, rc.bottom, 0);
-	ShowWindow(hLangToolbar, SW_SHOWNORMAL);
-
-	// TODO: TEST TEST TEST
-	hCtrl = GetDlgItem(hDlg, IDC_DISK_ID);
-	GetWindowRect(hCtrl, &rc);
+	// Seriously, who designed this bullshit API call where you pass a SIZE
+	// struct but can only retreive one of cx or cy at a time?!?
+	SendMessage(hMultiToolbar, TB_GETIDEALSIZE, (WPARAM)FALSE, (LPARAM)&sz);
+	GetWindowRect(GetDlgItem(hDlg, IDC_ABOUT), &rc);
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
-	SetWindowPos(hCtrl, NULL, max_text_width, rc.top, rc.right - rc.left, rc.bottom - rc.top, 0);
-
-	// Reposition and resize the Advanced button
-	//hCtrl = GetDlgItem(hDlg, IDS_FORMAT_OPTIONS_TXT);
-	//GetWindowRect(hCtrl, &rc);
-	//MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
-	//// TODO: remove hardcoded shift
-	//SetWindowPos(GetDlgItem(hDlg, IDC_ADVANCED), hCtrl, dialog_width - 40,
-	//	rc.top, i16 + (int)(4.0f * fScale), i16 / 2 + (int)(8.0f * fScale), 0);
+	SetWindowPos(hMultiToolbar, HWND_TOP, rc.left, rc.top, sz.cx, dropdown_height, 0);
 
 	// Reposition and resize the SELECT and # buttons
 	GetWindowRect(hBootType, &rcBootType);
@@ -2209,28 +2332,15 @@ static void PositionControls(HWND hDlg)
 	SetWindowPos(hCtrl, NULL, rc.left, rc.top,
 		rc.right - rc.left, dropdown_height + button_fudge, SWP_NOZORDER);
 
-	// TODO: remove this once we use icons
-	hCtrl = GetDlgItem(hDlg, IDC_ABOUT);
+	// TODO: Reposition
+	hCtrl = GetDlgItem(hDlg, IDC_DEVICE);
 	GetWindowRect(hCtrl, &rc);
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
-	SetWindowPos(hCtrl, NULL, rc.left, rc.top,
-		rc.right - rc.left, dropdown_height + button_fudge, SWP_NOZORDER);
-	hCtrl = GetDlgItem(hDlg, IDC_LOG);
-	GetWindowRect(hCtrl, &rc);
-	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
-	SetWindowPos(hCtrl, NULL, rc.left, rc.top,
-		rc.right - rc.left, dropdown_height + button_fudge, SWP_NOZORDER);
-	hCtrl = GetDlgItem(hDlg, IDC_TEST);
-	GetWindowRect(hCtrl, &rc);
-	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
-	SetWindowPos(hCtrl, NULL, rc.left, rc.top,
-		rc.right - rc.left, dropdown_height + button_fudge, SWP_NOZORDER);
-
-	// TODO: Use a SAVE label and resize
+	sz.cy = rc.top;
 	hCtrl = GetDlgItem(hDlg, IDC_SAVE);
 	GetWindowRect(hCtrl, &rc);
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
-	SetWindowPos(hCtrl, NULL, rc.left, rcDeviceList.top - 1,
+	SetWindowPos(hCtrl, NULL, rc.left, sz.cy - 1,
 		rc.right - rc.left, dropdown_height + button_fudge, SWP_NOZORDER);
 
 	hCtrl = GetDlgItem(hDlg, IDC_BOOTTYPE);
@@ -2287,6 +2397,8 @@ static void InitDialog(HWND hDlg)
 	hNBPasses = GetDlgItem(hDlg, IDC_NBPASSES);
 	hDiskID = GetDlgItem(hDlg, IDC_DISK_ID);
 	hStart = GetDlgItem(hDlg, IDC_START);
+
+	GetEmptyControlsWidth(hDlg);
 
 	// TODO: Don't think this is used
 	// Create the font and brush for the Info edit box
@@ -2382,6 +2494,8 @@ static void InitDialog(HWND hDlg)
 	CheckDlgButton(hDlg, IDC_EXTENDED_LABEL, BST_CHECKED);
 
 	CreateAdditionalControls(hDlg);
+	SetSectionHeaders(hDlg);
+	SetButtonWidth(hDlg);
 	PositionControls(hDlg);
 
 	// Subclass the progress bar so that we can write on it
@@ -2407,7 +2521,7 @@ static void InitDialog(HWND hDlg)
 //	CreateTooltip(GetDlgItem(hDlg, IDC_WINDOWS_INSTALL), lmprintf(MSG_199), -1);
 //	CreateTooltip(GetDlgItem(hDlg, IDC_WINDOWS_TO_GO), lmprintf(MSG_200), -1);
 	CreateTooltip(GetDlgItem(hDlg, IDC_HASH), lmprintf(MSG_272), -1);
-	CreateTooltip(hLangToolbar, lmprintf(MSG_273), -1);
+	CreateTooltip(hMultiToolbar, lmprintf(MSG_273), -1);
 
 	// Set a label for the Advanced Mode and Select Image button for screen readers
 //	SetWindowTextU(GetDlgItem(hDlg, IDC_ADVANCED), lmprintf(MSG_160));
@@ -2678,11 +2792,10 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	DRAWITEMSTRUCT* pDI;
 	HDROP droppedFileInfo;
 	POINT Point;
-	RECT DialogRect, DesktopRect, LangToolbarRect;
+	RECT rc, DialogRect, DesktopRect;
 	LONG progress_style;
 	HDC hDC;
 	PAINTSTRUCT ps;
-	LPNMTOOLBAR lpnmtb;
 	int nDeviceIndex, i, nWidth, nHeight, nb_devices, selected_language, offset;
 	char tmp[128];
 	wchar_t* wbuffer = NULL;
@@ -2909,6 +3022,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			SetToGo();
 			ToggleHash();
 			SetProposedLabel(ComboBox_GetCurSel(hDeviceList));
+			PopulateProperties(ComboBox_GetCurSel(hDeviceList));
 			// TODO: Might wanna do this in PopulateProperties
 			tt = (int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme));
 			pt = (int)ComboBox_GetItemData(hTargetSystem, ComboBox_GetCurSel(hTargetSystem));
@@ -3057,6 +3171,13 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			if (queued_hotplug_event)
 				SendMessage(hDlg, UM_MEDIA_CHANGE, 0, 0);
 			EnableWindow(GetDlgItem(hDlg, IDCANCEL), TRUE);
+			break;
+		case IDC_LANG:
+			// Show the language menu such that it doesn't overlap the button
+			// by using the the next button (LOG) as our starting point.
+			SendMessage(hMultiToolbar, TB_GETRECT, (WPARAM)IDC_LOG, (LPARAM)&rc);
+			MapWindowPoints(hDlg, NULL, (POINT*)&rc, 2);
+			ShowLanguageMenu(rc);
 			break;
 		case IDC_HASH:
 			if ((format_thid == NULL) && (image_path != NULL)) {
@@ -3212,26 +3333,6 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			SelectObject((HDC)wParam, hLinkFont);
 			SetTextColor((HDC)wParam, RGB(0, 0, 125));
 			return (INT_PTR)GetStockObject(NULL_BRUSH);
-		}
-		break;
-
-	case WM_NOTIFY:
-		switch (((LPNMHDR)lParam)->code) {
-		case TBN_DROPDOWN:
-			lpnmtb = (LPNMTOOLBAR)lParam;
-
-			// We only care about the language button on the language toolbar
-			if (lpnmtb->hdr.hwndFrom == hLangToolbar
-				&& lpnmtb->iItem == IDC_LANG) {
-				// Get toolbar button rect and map it to actual screen pixels
-				SendMessage(lpnmtb->hdr.hwndFrom, TB_GETRECT, (WPARAM)lpnmtb->iItem, (LPARAM)&LangToolbarRect);
-				MapWindowPoints(lpnmtb->hdr.hwndFrom, NULL, (POINT*)&LangToolbarRect, 2);
-
-				// Show the language menu such that it doesn't overlap the button
-				ShowLanguageMenu(LangToolbarRect);
-				return (INT_PTR)TBDDRET_DEFAULT;
-			}
-			break;
 		}
 		break;
 
@@ -3807,11 +3908,11 @@ relaunch:
 			ResetDevice(index);
 			continue;
 		}
-		// Alt-D => Delete the NoDriveTypeAutorun key on exit (useful if the app crashed)
-		// This key is used to disable Windows popup messages when an USB drive is plugged in.
+		// Alt-D => Delete the 'rufus_files' subdirectory
 		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'D')) {
-			PrintStatus(2000, MSG_255);
-			existing_key = FALSE;
+			static_sprintf(tmp_path, "%s\\%s", app_dir, FILES_DIR);
+			PrintStatus(2000, MSG_264, tmp_path);
+			SHDeleteDirectoryExU(NULL, tmp_path, FOF_SILENT | FOF_NOERRORUI | FOF_NOCONFIRMATION);
 			continue;
 		}
 		// Alt-E => Enhanced installation mode (allow dual UEFI/BIOS mode and FAT32 for Windows)
@@ -3932,11 +4033,11 @@ relaunch:
 			GetDevices(0);
 			continue;
 		}
-		// Alt-X => Delete the 'rufus_files' subdirectory
+		// Alt-X => Delete the NoDriveTypeAutorun key on exit (useful if the app crashed)
+		// This key is used to disable Windows popup messages when an USB drive is plugged in.
 		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'X')) {
-			static_sprintf(tmp_path, "%s\\%s", app_dir, FILES_DIR);
-			PrintStatus(2000, MSG_264, tmp_path);
-			SHDeleteDirectoryExU(NULL, tmp_path, FOF_SILENT | FOF_NOERRORUI | FOF_NOCONFIRMATION);
+			PrintStatus(2000, MSG_255);
+			existing_key = FALSE;
 			continue;
 		}
 		// Alt Y => Force the update check to be successful
