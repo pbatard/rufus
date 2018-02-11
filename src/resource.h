@@ -104,7 +104,6 @@
 #define IDC_IMAGE_OPTION                1029
 #define IDC_ABOUT_LICENSE               1030
 #define IDC_ABOUT_ICON                  1031
-#define IDC_ABOUT_UPDATES               1032
 #define IDC_ABOUT_COPYRIGHTS            1033
 #define IDC_ABOUT_BLURB                 1034
 #define IDC_LICENSE_TEXT                1035

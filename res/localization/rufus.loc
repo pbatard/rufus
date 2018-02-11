@@ -100,7 +100,7 @@ g IDD_DIALOG
 t IDS_DEVICE_SETTINGS_TXT "Device Settings"
 t IDS_DEVICE_TXT "Device"
 # TODO: use MSG_278 for translations
-t IDS_BOOT_TYPE_TXT "Boot type"
+t IDS_BOOT_TYPE_TXT "Boot selection"
 t IDC_SELECT_IMAGE "SELECT"
 t IDS_IMAGE_OPTION_TXT "Image Option"
 t IDS_PARTITION_TYPE_TXT "Partition scheme"
@@ -123,8 +123,6 @@ t IDC_QUICKFORMAT "Quick format"
 t IDC_BADBLOCKS "Check device for bad blocks"
 t IDC_EXTENDED_LABEL "Create extended label and icon files"
 t IDS_STATUS_TXT "Status"
-t IDC_ABOUT "About..."
-t IDC_LOG "Log"
 t IDCANCEL "CLOSE"
 t IDC_START "START"
 t IDS_ADVANCED_OPTIONS_GRP "Advanced Options"
@@ -133,7 +131,6 @@ t IDS_ADVANCED_OPTIONS_GRP "Advanced Options"
 g IDD_ABOUTBOX
 t IDD_ABOUTBOX "About Rufus"
 t IDC_ABOUT_LICENSE "License"
-t IDC_ABOUT_UPDATES "Updates"
 t IDOK "OK"
 
 # About -> License dialog
@@ -579,6 +576,12 @@ t MSG_301 "Standard Windows installation"
 t MSG_302 "Windows To Go"
 t MSG_303 "Disk or ISO image"
 t MSG_304 "%s (Please select)"
+t MSG_305 "Settings"
+# Was 'IDC_ABOUT'
+t MSG_306 "About"
+# Was 'IDC_LOG'
+t MSG_307 "Log"
+
 
 
 ################################################################################
@@ -5295,8 +5298,8 @@ t MSG_003 "ATTENTION : TOUTES LES DONNEES DU VOLUME '%s' VONT ETRE EFFACEES.\n"
 	"Pour continuer cette opération, cliquez sur OK.\nPour quitter cliquez sur ANNULER."
 t MSG_004 "Mises à jour"
 t MSG_005 "Voulez-vous autoriser Rufus à chercher des mises à jour en ligne?"
-t MSG_006 "Fermer"
-t MSG_007 "Annuler"
+t MSG_006 "FERMER"
+t MSG_007 "ANNULER"
 t MSG_008 "Oui"
 t MSG_009 "Non"
 t MSG_010 "Blocs défectueux détectés"
@@ -5328,7 +5331,7 @@ t MSG_034 "%d passe"
 t MSG_035 "%d passes"
 t MSG_036 "Image ISO"
 t MSG_037 "Application"
-t MSG_038 "ANNULER"
+t MSG_038 "Annuler"
 t MSG_039 "Lancer"
 t MSG_040 "Télécharger"
 t MSG_041 "Opération annulée par l'utilisateur"

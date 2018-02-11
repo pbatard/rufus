@@ -54,7 +54,6 @@ static WNDPROC pOrgBrowseWndproc;
 static const SETTEXTEX friggin_microsoft_unicode_amateurs = {ST_DEFAULT, CP_UTF8};
 static BOOL notification_is_question;
 static const notification_info* notification_more_info;
-static BOOL settings_commcheck = FALSE;
 static WNDPROC update_original_proc = NULL;
 static HWINEVENTHOOK fp_weh = NULL;
 static char *fp_title_str = "Microsoft Windows", *fp_button_str = "Format disk";
@@ -526,8 +525,6 @@ INT_PTR CALLBACK AboutCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 		apply_localization(IDD_ABOUTBOX, hDlg);
 		SetTitleBarIcon(hDlg);
 		CenterDialog(hDlg);
-		if (settings_commcheck)
-			ShowWindow(GetDlgItem(hDlg, IDC_ABOUT_UPDATES), SW_SHOW);
 		static_sprintf(about_blurb, about_blurb_format, lmprintf(MSG_174|MSG_RTF),
 			lmprintf(MSG_175|MSG_RTF, rufus_version[0], rufus_version[1], rufus_version[2]),
 			right_to_left_mode?"Akeo \\\\ Pete Batard 2011-2018 © Copyright":"Copyright © 2011-2018 Pete Batard / Akeo",
@@ -583,9 +580,6 @@ INT_PTR CALLBACK AboutCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 			return (INT_PTR)TRUE;
 		case IDC_ABOUT_LICENSE:
 			MyDialogBox(hMainInstance, IDD_LICENSE, hDlg, LicenseCallback);
-			break;
-		case IDC_ABOUT_UPDATES:
-			MyDialogBox(hMainInstance, IDD_UPDATE_POLICY, hDlg, UpdateCallback);
 			break;
 		}
 		break;
@@ -1323,7 +1317,6 @@ BOOL SetUpdateCheck(void)
 	WriteSetting64(SETTING_COMM_CHECK, commcheck);
 	if (ReadSetting64(SETTING_COMM_CHECK) != commcheck)
 		return FALSE;
-	settings_commcheck = TRUE;
 
 	// If the update interval is not set, this is the first time we run so prompt the user
 	if (ReadSetting32(SETTING_UPDATE_INTERVAL) == 0) {
