@@ -79,16 +79,15 @@
 #define IDC_PARTITION_TYPE              1004
 #define IDC_CLUSTERSIZE                 1005
 #define IDC_STATUS                      1006
-#define IDC_ABOUT                       1007
 #define IDC_LABEL                       1008
 #define IDC_QUICKFORMAT                 1009
 #define IDC_SHOW_ADVANCED_TOOLBAR       1010
 #define IDC_BADBLOCKS                   1011
 #define IDC_PROGRESS                    1012
-#define IDC_BOOTTYPE                    1013
+#define IDC_BOOT_TYPE                   1013
 #define IDC_NBPASSES                    1014
 #define IDC_TEST                        1015
-#define IDC_SELECT_IMAGE                1016
+#define IDC_SELECT                      1016
 #define IDC_EXTENDED_LABEL              1017
 #define IDC_RUFUS_MBR                   1018
 #define IDC_TARGET_SYSTEM               1019
@@ -100,19 +99,19 @@
 #define IDC_STATUS_TOOLBAR              1025
 #define IDC_HASH                        1026
 #define IDC_SAVE                        1027
-#define IDC_SELECT                      1028
 #define IDC_IMAGE_OPTION                1029
 #define IDC_ABOUT_LICENSE               1030
 #define IDC_ABOUT_ICON                  1031
-#define IDC_ABOUT_COPYRIGHTS            1033
-#define IDC_ABOUT_BLURB                 1034
-#define IDC_LICENSE_TEXT                1035
+#define IDC_ABOUT_COPYRIGHTS            1032
+#define IDC_ABOUT_BLURB                 1033
+#define IDC_LICENSE_TEXT                1034
 #define IDC_NOTIFICATION_ICON           1040
 #define IDC_NOTIFICATION_TEXT           1041
 #define IDC_NOTIFICATION_LINE           1042
 #define IDC_ADVANCED_DEVICE_TOOLBAR     1043
 #define IDC_ADVANCED_FORMAT_TOOLBAR     1044
-#define IDC_LOG                         1045
+#define IDC_ABOUT                       1045
+#define IDC_LOG                         1046
 #define IDC_WINDOWS_INSTALL             1047
 #define IDC_WINDOWS_TO_GO               1048
 #define IDC_SHOW_ADVANCED_OPTIONS       1049
@@ -173,7 +172,7 @@
 #define IDC_LIST_ITEM14                 1109
 #define IDC_LIST_ITEM15                 1110
 #define IDC_LIST_ITEMMAX                1111
-#define IDC_ADVANCED_DEVICE_SETTINGS    1112
+#define IDC_ADVANCED_DRIVE_PROPERTIES   1112
 #define IDC_ADVANCED_FORMAT_OPTIONS     1113
 #define IDS_DEVICE_TXT                  2000
 #define IDS_PARTITION_TYPE_TXT          2001
@@ -190,7 +189,7 @@
 #define IDS_TARGET_SYSTEM_TXT           2013
 #define IDS_IMAGE_OPTION_TXT            2014
 #define IDS_BOOT_TYPE_TXT               2015
-#define IDS_DEVICE_SETTINGS_TXT         2016
+#define IDS_DRIVE_PROPERTIES_TXT        2016
 #define IDS_FORMAT_OPTIONS_TXT          2017
 #define IDS_STATUS_TXT                  2018
 #define MSG_000                         3000
@@ -504,7 +503,17 @@
 #define MSG_308                         3308
 #define MSG_309                         3309
 #define MSG_310                         3310
-#define MSG_MAX                         3311
+#define MSG_311                         3311
+#define MSG_312                         3312
+#define MSG_313                         3313
+#define MSG_314                         3314
+#define MSG_315                         3315
+#define MSG_316                         3316
+#define MSG_317                         3317
+#define MSG_318                         3318
+#define MSG_319                         3319
+#define MSG_320                         3320
+#define MSG_MAX                         3321
 
 // Next default values for new objects
 // 

@@ -36,7 +36,7 @@ extern char* ini_file;
 #define SETTING_DISABLE_LGP                 "DisableLGP"
 
 #define SETTING_ADVANCED_MODE               "AdvancedMode"
-#define SETTING_ADVANCED_MODE_DEVICE        "ShowAdvancedDeviceOptions"
+#define SETTING_ADVANCED_MODE_DEVICE        "ShowAdvancedDriveProperties"
 #define SETTING_ADVANCED_MODE_FORMAT        "ShowAdvancedFormatOptions"
 #define SETTING_PRESERVE_TIMESTAMPS         "PreserveTimestamps"
 #define SETTING_USE_PROPER_SIZE_UNITS       "UseProperSizeUnits"

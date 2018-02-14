@@ -97,15 +97,14 @@ v 1.0.23
 
 # Main dialog
 g IDD_DIALOG
-t IDS_DEVICE_SETTINGS_TXT "Device Settings"
+t IDS_DRIVE_PROPERTIES_TXT "Drive Properties"
 t IDS_DEVICE_TXT "Device"
 # TODO: use MSG_278 for translations
 t IDS_BOOT_TYPE_TXT "Boot selection"
-t IDC_SELECT_IMAGE "SELECT"
+t IDC_SELECT "SELECT"
 t IDS_IMAGE_OPTION_TXT "Image Option"
 t IDS_PARTITION_TYPE_TXT "Partition scheme"
 t IDS_TARGET_SYSTEM_TXT "Target system"
-t IDC_ADVANCED_DEVICE_SETTINGS "Advanced Device Settings"
 t IDC_LIST_USB_HDD "List USB Hard Drives"
 # Note: It is acceptable to drop the parenthesis () below if you are running out of space
 # as there is a tooltip (MSG_169) providing these details.
@@ -118,14 +117,12 @@ t IDS_FORMAT_OPTIONS_TXT "Format Options"
 t IDS_FILESYSTEM_TXT "File system"
 t IDS_CLUSTERSIZE_TXT "Cluster size"
 t IDS_LABEL_TXT "Volume label"
-t IDC_ADVANCED_FORMAT_OPTIONS "Advanced Format Options"
 t IDC_QUICKFORMAT "Quick format"
 t IDC_BADBLOCKS "Check device for bad blocks"
 t IDC_EXTENDED_LABEL "Create extended label and icon files"
 t IDS_STATUS_TXT "Status"
 t IDCANCEL "CLOSE"
 t IDC_START "START"
-t IDS_ADVANCED_OPTIONS_GRP "Advanced Options"
 
 # About dialog
 g IDD_ABOUTBOX
@@ -540,12 +537,9 @@ t MSG_276 "Write in %s mode (Recommended)"
 t MSG_277 "Write in %s mode"
 # The following will be used for new controls of the Rufus 3.0 interface
 # They are added as messages, so that I will have them available when needed.
-# 278 & 280 will be dropdown titles, similar to how IDS_DEVICE_TXT or IDS_PARTITION_TYPE_TXT are used
-# 279 & 281 will be items that can appear in the dropdowns
-t MSG_278 "Boot type"
 t MSG_279 "Non bootable"
-t MSG_280 "Image selection"
-t MSG_281 "(Please select an image)"
+t MSG_280 "Disk or ISO image"
+t MSG_281 "%s (Please select)"
 t MSG_282 "Exclusive USB drive locking"
 t MSG_283 "Invalid signature"
 t MSG_284 "The downloaded executable is missing a digital signature."
@@ -574,15 +568,14 @@ t MSG_301 "Standard Windows installation"
 # Only translate if Microsoft has a specific name for http://en.wikipedia.org/wiki/Windows_To_Go in your language
 # Otherwise, you can add a parenthesis eg. "Windows To Go (hint at what it does)" and/or use the tooltip (MSG_200)
 t MSG_302 "Windows To Go"
-t MSG_303 "Disk or ISO image"
-t MSG_304 "%s (Please select)"
-t MSG_305 "Settings"
-# Was 'IDC_ABOUT'
-t MSG_306 "About"
-# Was 'IDC_LOG'
-t MSG_307 "Log"
-
-
+t MSG_305 "Show application settings"
+t MSG_306 "Show information about this application"
+t MSG_307 "Show the log"
+t MSG_308 "advanced drive properties"
+t MSG_309 "advanced format options"
+t MSG_310 "Show %s"
+t MSG_311 "Hide %s"
+t MSG_312 "Create a disk image of the selected device"
 
 ################################################################################
 ############################# TRANSLATOR END COPY ##############################
@@ -5218,13 +5211,12 @@ v 1.0.23
 b "en-US"
 
 g IDD_DIALOG
-t IDS_DEVICE_SETTINGS_TXT "Options de Périphérique"
+t IDS_DRIVE_PROPERTIES_TXT "Options de Périphérique"
 t IDS_DEVICE_TXT "Périphérique"
 t IDS_BOOT_TYPE_TXT "Type de démarrage"
-t IDC_SELECT_IMAGE "SELECTION"
+t IDC_SELECT "SELECTION"
 t IDS_IMAGE_OPTION_TXT "Option d'image"
 t IDS_PARTITION_TYPE_TXT "Schéma de partition"
-t IDC_ADVANCED_DEVICE_SETTINGS "Options de Périphérique Avancées"
 t IDS_TARGET_SYSTEM_TXT "Système de destination"
 t IDS_FILESYSTEM_TXT "Système de fichiers"
 t IDS_CLUSTERSIZE_TXT "Taille d'unité d'allocation"
@@ -5235,7 +5227,6 @@ t IDC_QUICKFORMAT "Formatage rapide"
 t IDC_BOOT "Créer un disque de démarrage"
 t IDC_WINDOWS_INSTALL "Installation standard de Windows"
 t IDC_EXTENDED_LABEL "Ajouter un label étendu et une icône"
-t IDC_ADVANCED_FORMAT_OPTIONS "Options de Formatage Avancées"
 t IDS_STATUS_TXT "Statut"
 t IDC_ABOUT "A propos..."
 t IDCANCEL "FERMER"
@@ -5605,8 +5596,8 @@ t MSG_268 "Application de l'image Windows..."
 t MSG_269 "Préservation des dates de fichiers"
 t MSG_270 "Debug USB"
 t MSG_271 "Calculation des checksums de l'image : %0.1f%% complété"
-t MSG_272 "Calcule les checksums MD5, SHA1 et SHA256 pour l'image sélectionée"
-t MSG_273 "Change la langue de l'application"
+t MSG_272 "Calculer les checksums MD5, SHA1 et SHA256 pour l'image sélectionée"
+t MSG_273 "Changer la langue de l'application"
 t MSG_274 "Image ISOHybrid détectée"
 t MSG_275 "L'image que vous avez sélectionnée est une image 'ISOHybrid'. Cela veut dire qu’elle peut "
 	"être écrite soit en mode %s (copie de fichiers) ou en mode %s (image disque).\n"
@@ -5643,7 +5634,14 @@ t MSG_298 "Le fichier ISO que vous avez sélectionné ne fait pas la bonne taill
 	"cliquant le bouton '#'."
 t MSG_303 "Image disque ou ISO"
 t MSG_304 "%s (Veuillez sélectionner)"
-
+t MSG_305 "Afficher les paramètres de l'application"
+t MSG_306 "Afficher les informations à propos de cette application"
+t MSG_307 "Afficher le log"
+t MSG_308 "options de périphérique avancées"
+t MSG_309 "options de formatage avancées"
+t MSG_310 "Afficher les %s"
+t MSG_311 "Cacher les %s"
+t MSG_312 "Créer une image disque à partir du périphérique sélectionné"
 
 ################################################################################
 l "de-DE" "German (Deutsch)" 0x0407, 0x0807, 0x0c07, 0x1007, 0x1407

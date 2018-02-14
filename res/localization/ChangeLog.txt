@@ -15,6 +15,11 @@ content. PLEASE, do not just look at this Changelog when updating your
 translation, but always use the English section of rufus.loc as your base.
 For instance, MSG_114, that was introduced in v1.0.8 is MORE than one line!
 
+o Version 1.0.23 (2018.??.??)
+  - Changed MSG_280 "Image selection" -> "Disk or ISO image"
+  - Changed MSG_281 "(Please select an image)" -> "%s (Please select)"
+  MSG_281 + MSG_280 are used to create the message that appears in the boot selection dropdown when an image has not been selected.
+
 o Version 1.0.22 (2017.07.17)
   - *NEW* MSG_295 "Warning: Unofficial version"
   - *NEW* MSG_296 "This version of Rufus was NOT produced by its official developer(s).\n\nAre you sure you want to run it?"
