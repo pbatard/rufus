@@ -306,9 +306,9 @@ BOOL GetOpticalMedia(IMG_SAVE* img_save)
 /* For debugging user reports of HDDs vs UFDs */
 //#define FORCED_DEVICE
 #ifdef FORCED_DEVICE
-#define FORCED_VID 0x0409
-#define FORCED_PID 0x005A
-#define FORCED_NAME "TOSHIBA TransMemory USB Device"
+#define FORCED_VID 0x056E
+#define FORCED_PID 0x8008
+#define FORCED_NAME "Generic- USB3.0 CRW   -SD USB Device"
 #endif
 
 /*
