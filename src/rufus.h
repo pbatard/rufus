@@ -152,7 +152,6 @@ enum user_message_type {
 	UM_PROGRESS_INIT,
 	UM_PROGRESS_EXIT,
 	UM_NO_UPDATE,
-	UM_SET_PARTITION_SCHEME_TOOLTIP,
 	// Start of the WM IDs for the language menu items
 	UM_LANGUAGE_MENU = WM_APP + 0x100
 };
@@ -383,7 +382,7 @@ enum WindowsVersion {
 extern HINSTANCE hMainInstance;
 extern HWND hMainDialog, hLogDlg, hStatus, hDeviceList, hCapacity;
 extern HWND hPartitionScheme, hTargetSystem, hFileSystem, hClusterSize, hLabel, hBootType, hNBPasses, hLog;
-extern HWND hInfo, hProgress, hDiskID, hStatusToolbar;
+extern HWND hInfo, hProgress, hDiskID;
 extern float fScale;
 extern char szFolderPath[MAX_PATH], app_dir[MAX_PATH], temp_dir[MAX_PATH], system_dir[MAX_PATH], sysnative_dir[MAX_PATH];
 extern char* image_path;

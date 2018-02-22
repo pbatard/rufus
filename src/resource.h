@@ -90,7 +90,6 @@
 #define IDC_EXTENDED_LABEL              1015
 #define IDC_RUFUS_MBR                   1016
 #define IDC_TARGET_SYSTEM               1017
-#define IDC_INFO                        1018
 #define IDC_DISK_ID                     1020
 #define IDC_OLD_BIOS_FIXES              1021
 #define IDC_LIST_USB_HDD                1022
@@ -178,6 +177,7 @@
 #define IDS_FILESYSTEM_TXT              2002
 #define IDS_CLUSTERSIZE_TXT             2003
 #define IDS_LABEL_TXT                   2004
+#define IDS_CSM_HELP_TXT                2005
 #define IDS_UPDATE_SETTINGS_GRP         2006
 #define IDS_UPDATE_FREQUENCY_TXT        2007
 #define IDS_INCLUDE_BETAS_TXT           2008

@@ -61,7 +61,7 @@ static int task_number = 0;
 extern const int nb_steps[FS_MAX];
 extern uint32_t dur_mins, dur_secs;
 static int fs_index = 0, wintogo_index = -1;
-extern BOOL force_large_fat32, enable_ntfs_compression, lock_drive, zero_drive, disable_file_indexing;
+extern BOOL force_large_fat32, enable_ntfs_compression, lock_drive, zero_drive, disable_file_indexing, write_as_image;
 uint8_t *grub2_buf = NULL;
 long grub2_len;
 static BOOL WritePBR(HANDLE hLogicalDrive);
@@ -1654,8 +1654,6 @@ DWORD WINAPI FormatThread(void* param)
 	char efi_dst[] = "?:\\efi\\boot\\bootx64.efi";
 	char kolibri_dst[] = "?:\\MTLD_F32";
 	char grub4dos_dst[] = "?:\\grldr";
-	// TODO: Have a boolean to indicate DD writing
-	BOOL write_as_image = FALSE;
 
 	use_large_fat32 = (fs == FS_FAT32) && ((SelectedDrive.DiskSize > LARGE_FAT32_SIZE) || (force_large_fat32));
 	windows_to_go = (togo_mode) && HAS_WINTOGO(img_report) && (Button_GetCheck(GetDlgItem(hMainDialog, IDC_WINDOWS_TO_GO)) == BST_CHECKED);

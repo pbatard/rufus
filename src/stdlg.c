@@ -1399,11 +1399,11 @@ INT_PTR CALLBACK NewVersionCallback(HWND hDlg, UINT message, WPARAM wParam, LPAR
 	char cmdline[] = APPLICATION_NAME " -w 150";
 	static char* filepath = NULL;
 	static int download_status = 0;
+	static HFONT hyperlink_font = NULL;
 	LONG i;
 	HWND hNotes;
 	STARTUPINFOA si;
 	PROCESS_INFORMATION pi;
-	HFONT hyperlink_font = NULL;
 	EXT_DECL(dl_ext, NULL, __VA_GROUP__("*.exe"), __VA_GROUP__(lmprintf(MSG_037)));
 
 	switch (message) {

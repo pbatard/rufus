@@ -835,8 +835,6 @@ INT_PTR CALLBACK ChecksumCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 		case IDCANCEL:
 			reset_localization(IDD_CHECKSUM);
 			EndDialog(hDlg, LOWORD(wParam));
-			// Reset focus to our toolbar
-			PostMessage(hMainDialog, WM_NEXTDLGCTL, (WPARAM)hStatusToolbar, TRUE);
 			return (INT_PTR)TRUE;
 		}
 	}
