@@ -41,120 +41,12 @@
 #include "msapi_utf8.h"
 #include "localization.h"
 
+#include "ui.h"
 #include "drive.h"
 #include "settings.h"
 #include "bled/bled.h"
 #include "../res/grub/grub_version.h"
 #include "../res/grub2/grub2_version.h"
-
-// TODO: move this somewhere else (ui.h?)
-static int image_option_move_ids[] = {
-	IDS_PARTITION_TYPE_TXT,
-	IDC_PARTITION_TYPE,
-	IDS_TARGET_SYSTEM_TXT,
-	IDC_TARGET_SYSTEM,
-	IDS_CSM_HELP_TXT,
-	IDC_ADVANCED_DEVICE_TOOLBAR,
-	IDC_LIST_USB_HDD,
-	IDC_OLD_BIOS_FIXES,
-	IDC_RUFUS_MBR,
-	IDC_DISK_ID,
-	IDS_FORMAT_OPTIONS_TXT,
-	IDS_LABEL_TXT,
-	IDC_LABEL,
-	IDS_FILESYSTEM_TXT,
-	IDC_FILESYSTEM,
-	IDS_CLUSTERSIZE_TXT,
-	IDC_CLUSTERSIZE,
-	IDC_ADVANCED_FORMAT_TOOLBAR,
-	IDC_QUICKFORMAT,
-	IDC_BADBLOCKS,
-	IDC_NBPASSES,
-	IDC_EXTENDED_LABEL,
-	IDS_STATUS_TXT,
-	IDC_PROGRESS,
-	IDC_ABOUT,
-	IDC_LOG,
-	IDC_MULTI_TOOLBAR,
-	IDC_TEST,
-	IDC_START,
-	IDCANCEL,
-	IDC_STATUS,
-	IDC_STATUS_TOOLBAR,
-};
-
-static int image_option_toggle_ids[] = {
-	IDS_IMAGE_OPTION_TXT,
-	IDC_IMAGE_OPTION,
-};
-
-static int advanced_device_move_ids[] = {
-	IDC_LIST_USB_HDD,
-	IDC_OLD_BIOS_FIXES,
-	IDC_RUFUS_MBR,
-	IDS_FORMAT_OPTIONS_TXT,
-	IDS_LABEL_TXT,
-	IDC_LABEL,
-	IDS_FILESYSTEM_TXT,
-	IDC_FILESYSTEM,
-	IDS_CLUSTERSIZE_TXT,
-	IDC_CLUSTERSIZE,
-	IDC_ADVANCED_FORMAT_TOOLBAR,
-	IDC_QUICKFORMAT,
-	IDC_BADBLOCKS,
-	IDC_NBPASSES,
-	IDC_EXTENDED_LABEL,
-	IDS_STATUS_TXT,
-	IDC_PROGRESS,
-	IDC_ABOUT,
-	IDC_LOG,
-	IDC_MULTI_TOOLBAR,
-	IDC_TEST,
-	IDC_START,
-	IDCANCEL,
-	IDC_STATUS,
-	IDC_STATUS_TOOLBAR
-};
-
-static int advanced_device_toggle_ids[] = {
-	IDC_SAVE,
-	IDC_LIST_USB_HDD,
-	IDC_OLD_BIOS_FIXES,
-	IDC_RUFUS_MBR,
-	IDC_DISK_ID,
-};
-
-static int advanced_format_move_ids[] = {
-	IDS_STATUS_TXT,
-	IDC_PROGRESS,
-	IDC_ABOUT,
-	IDC_LOG,
-	IDC_MULTI_TOOLBAR,
-	IDC_TEST,
-	IDC_START,
-	IDCANCEL,
-	IDC_STATUS,
-	IDC_STATUS_TOOLBAR
-};
-
-static int advanced_format_toggle_ids[] = {
-	IDC_QUICKFORMAT,
-	IDC_BADBLOCKS,
-	IDC_NBPASSES,
-	IDC_EXTENDED_LABEL,
-};
-
-static int dd_image_toggle_ids[] = {
-	IDC_QUICKFORMAT,
-	IDC_PARTITION_TYPE,
-	IDC_TARGET_SYSTEM,
-	IDC_IMAGE_OPTION,
-	IDC_FILESYSTEM,
-	IDC_CLUSTERSIZE,
-	IDC_LABEL,
-	IDC_QUICKFORMAT,
-	IDC_EXTENDED_LABEL,
-};
 
 static const char* cmdline_hogger = "rufus.com";
 static const char* FileSystemLabel[FS_MAX] = { "FAT", "FAT32", "NTFS", "UDF", "exFAT", "ReFS" };
@@ -176,7 +68,8 @@ static int64_t last_iso_blocking_status;
 // TODO: rename 'selection_default' to something more explicit
 static int selection_default, row_height, advanced_device_section_height, advanced_format_section_height, image_index;
 static int device_vpos, format_vpos, status_vpos;
-static int cb_width, sep_width, margin_width, half_width, full_width, hash_button_width, small_button_width, small_sep_width;
+static int bw, hw, fw;	// Main button width, half dropdown width, full dropdown width
+static int cb_width, dd_width, sw, mw, bsw, hbw, sbw, ssw;
 static UINT_PTR UM_LANGUAGE_MENU_MAX = UM_LANGUAGE_MENU;
 static RECT relaunch_rc = { -65536, -65536, 0, 0};
 static UINT uQFChecked = BST_CHECKED, uMBRChecked = BST_UNCHECKED;
@@ -279,6 +172,9 @@ static void SetAllowedFileSystems(void)
 	int i;
 
 	memset(allowed_filesystem, 0, sizeof(allowed_filesystem));
+	// Nothing is allowed if we don't have a drive
+	if (ComboBox_GetCurSel(hDeviceList) < 0)
+		return;
 	switch (selection_default) {
 	case BT_NON_BOOTABLE:
 		for (i = 0; i < FS_MAX; i++)
@@ -456,7 +352,6 @@ static BOOL SetClusterSizes(int FSType)
 
 	if ((SelectedDrive.ClusterSize[FSType].Allowed == 0)
 		|| (SelectedDrive.ClusterSize[FSType].Default == 0)) {
-		uprintf("The drive is incompatible with FS type #%d\n", FSType);
 		return FALSE;
 	}
 
@@ -484,6 +379,7 @@ static BOOL SetFileSystemAndClusterSize(char* fs_type)
 	LONGLONG i;
 	char tmp[128] = "", *entry;
 
+	// TODO: something better with FS reselection
 	IGNORE_RETVAL(ComboBox_ResetContent(hFileSystem));
 	IGNORE_RETVAL(ComboBox_ResetContent(hClusterSize));
 	default_fs = FS_UNKNOWN;
@@ -851,7 +747,7 @@ static void EnableControls(BOOL bEnable)
 	SendMessage(hMultiToolbar, TB_ENABLEBUTTON, (WPARAM)IDC_SETTINGS, (LPARAM)bEnable);
 
 	// Checksum button is enabled if an image has been selected
-	EnableWindow(GetDlgItem(hMainDialog, IDC_HASH), bEnable && (image_path != NULL));
+	EnableWindow(GetDlgItem(hMainDialog, IDC_HASH), bEnable && (bt == BT_IMAGE) && (image_path != NULL));
 
 	// Toggle CLOSE/CANCEL
 	SetDlgItemTextU(hMainDialog, IDCANCEL, lmprintf(bEnable ? MSG_006 : MSG_007));
@@ -1280,7 +1176,7 @@ static void ToggleAdvancedDeviceOptions(BOOL enable)
 	GetWindowRect(hDeviceList, &rc);
 	MapWindowPoints(NULL, hMainDialog, (POINT*)&rc, 2);
 	SetWindowPos(hDeviceList, HWND_TOP, rc.left, rc.top,
-		enable ? full_width - small_sep_width - small_button_width : full_width, rc.bottom - rc.top, 0);
+		enable ? fw - ssw - sbw : fw, rc.bottom - rc.top, 0);
 
 	// Resize the main dialog and log window
 	ResizeDialogs(shift);
@@ -1366,12 +1262,6 @@ static void ToggleImageOption(void)
 	InvalidateRect(hMainDialog, NULL, TRUE);
 }
 
-// Toggle the display of the hash button
-static __inline void ToggleHash(void)
-{
-	EnableWindow(GetDlgItem(hMainDialog, IDC_HASH), (bt == BT_IMAGE) && (image_path != NULL));
-}
-
 static void SetBootTypeDropdownWidth()
 {
 	HDC hDC;
@@ -1408,6 +1298,7 @@ static void UpdateImage(void)
 		ComboBox_InsertStringU(hBootType, index, short_image_path);
 		ComboBox_SetItemData(hBootType, index, BT_IMAGE);
 		IGNORE_RETVAL(ComboBox_SetCurSel(hBootType, index));
+		bt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
 		SetBootTypeDropdownWidth();
 	}
 }
@@ -1462,12 +1353,18 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 		EnableControls(TRUE);
 		SetMBRProps();
 	} else {
+		if (!dont_display_image_name) {
+			for (i = (int)safe_strlen(image_path); (i > 0) && (image_path[i] != '\\'); i--);
+			short_image_path = &image_path[i + 1];
+			PrintStatus(0, MSG_205, short_image_path);
+			UpdateImage();
+			uprintf("Using image: %s (%s)", short_image_path, SizeToHumanReadable(img_report.image_size, FALSE, FALSE));
+		}
 		EnableControls(TRUE);
 		// Set Target and FS accordingly
 		if (img_report.is_iso) {
 			IGNORE_RETVAL(ComboBox_SetCurSel(hBootType, image_index));
 			SetPartitionSchemeAndTargetSystem(FALSE);
-			// TODO: Maybe we should just call PopulateProperties() here?
 			SetFileSystemAndClusterSize(NULL);
 			SetFSFromISO();
 			SetMBRProps();
@@ -1475,13 +1372,6 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 		} else {
 			SendMessage(hMainDialog, WM_COMMAND, (CBN_SELCHANGE << 16) | IDC_FILESYSTEM,
 				ComboBox_GetCurSel(hFileSystem));
-		}
-		if (!dont_display_image_name) {
-			for (i = (int)safe_strlen(image_path); (i > 0) && (image_path[i] != '\\'); i--);
-			short_image_path = &image_path[i + 1];
-			PrintStatus(0, MSG_205, short_image_path);
-			UpdateImage();
-			uprintf("Using image: %s (%s)", short_image_path, SizeToHumanReadable(img_report.image_size, FALSE, FALSE));
 		}
 		// Lose the focus on the select ISO (but place it on Close)
 		SendMessage(hMainDialog, WM_NEXTDLGCTL, (WPARAM)FALSE, 0);
@@ -2033,6 +1923,72 @@ static inline int GetTextWidth(HWND hDlg, int id)
 	return GetTextSize(GetDlgItem(hDlg, id), NULL).cx;
 }
 
+// https://stackoverflow.com/a/20926332/1069307
+// https://msdn.microsoft.com/en-us/library/windows/desktop/bb226818.aspx
+static void GetBasicControlsWidth(HWND hDlg)
+{
+	int checkbox_internal_spacing = 12, dropdown_internal_spacing = 15;
+	RECT rc = { 0, 0, 4, 8 };
+	SIZE bu;
+
+	// Compute base unit sizes since GetDialogBaseUnits() returns garbage data.
+	// See http://support.microsoft.com/kb/125681
+	MapDialogRect(hDlg, &rc);
+	bu.cx = rc.right;
+	bu.cy = rc.bottom;
+
+	// TODO: figure out the specifics of each Windows version
+	if (nWindowsVersion == WINDOWS_10) {
+		checkbox_internal_spacing = 10;
+		dropdown_internal_spacing = 13;
+	}
+
+	// Checkbox and (blank) dropdown widths
+	cb_width = MulDiv(checkbox_internal_spacing, bu.cx, 4);
+	dd_width = MulDiv(dropdown_internal_spacing, bu.cx, 4);
+
+	// Spacing width between half-length dropdowns (sep) as well as left margin
+	GetWindowRect(GetDlgItem(hDlg, IDC_TARGET_SYSTEM), &rc);
+	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
+	sw = rc.left;
+	GetWindowRect(GetDlgItem(hDlg, IDC_PARTITION_TYPE), &rc);
+	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
+	sw -= rc.right;
+	mw = rc.left;
+
+	// Small button and small separator widths
+	GetWindowRect(GetDlgItem(hDlg, IDC_SAVE), &rc);
+	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
+	sbw = rc.right - rc.left;
+	ssw = rc.left;
+	GetWindowRect(hDeviceList, &rc);
+	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
+	ssw -= rc.right;
+
+	// Hash button width
+	GetWindowRect(GetDlgItem(hDlg, IDC_HASH), &rc);
+	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
+	hbw = rc.right - rc.left;
+}
+
+// Compute the minimum size of the main buttons
+static void GetMainButtonsWidth(HWND hDlg)
+{
+	unsigned int i;
+	RECT rc;
+
+	GetWindowRect(GetDlgItem(hDlg, main_button_ids[0]), &rc);
+	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
+	bw = rc.right - rc.left;
+uprintf("initial bw = %d", bw);
+
+	for (i = 0; i < ARRAYSIZE(main_button_ids); i++)
+		bw = max(GetTextWidth(hDlg, main_button_ids[i]) + cb_width, bw);
+	// The 'CLOSE' button is also be used to display 'CANCEL' => measure that too
+	bw = max(bw, GetTextSize(GetDlgItem(hDlg, IDCANCEL), lmprintf(MSG_007)).cx + cb_width);
+uprintf("adjusted bw = %d", bw);
+}
+
 // The following goes over the data that gets populated into the half-width dropdowns
 // (Partition scheme, Target System, Disk ID, File system, Cluster size, Nb passes)
 // to figure out the minimum width we should allocate.
@@ -2046,10 +2002,11 @@ static void GetHalfDropwdownWidth(HWND hDlg)
 	// TODO: verify that this works if we just resized from a language with larger width?
 	GetWindowRect(GetDlgItem(hDlg, IDC_PARTITION_TYPE), &rc);
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
-	half_width = rc.right - rc.left - cb_width;
+uprintf("initial hw = %d", rc.right - rc.left);
+	hw = rc.right - rc.left - dd_width;
 
 	// "Super Floppy Disk" is the longuest entry in the Partition Scheme dropdown
-	half_width = max(half_width, GetTextSize(GetDlgItem(hDlg, IDC_PARTITION_TYPE), (char*)sfd_name).cx);
+	hw = max(hw, GetTextSize(GetDlgItem(hDlg, IDC_PARTITION_TYPE), (char*)sfd_name).cx);
 
 	// This is basically the same as SetClusterSizeLabels() except we're adding (Default) to each entry
 	for (i = 512, j = 1, msg_id = MSG_026; j<MAX_CLUSTER_SIZES; i <<= 1, j++) {
@@ -2058,115 +2015,100 @@ static void GetHalfDropwdownWidth(HWND hDlg)
 			msg_id++;
 		}
 		safe_sprintf(tmp, 64, "%d %s", i, lmprintf(msg_id));
-		half_width = max(half_width, GetTextSize(GetDlgItem(hDlg, IDC_CLUSTERSIZE), lmprintf(MSG_030, tmp)).cx);
+		hw = max(hw, GetTextSize(GetDlgItem(hDlg, IDC_CLUSTERSIZE), lmprintf(MSG_030, tmp)).cx);
 	}
 	// We don't go over file systems, because none of them will be longer than "Super Floppy Disk"
 	// We do however go over the BIOS vs UEFI entries, as some of these are translated
 	for (msg_id = MSG_031; msg_id <= MSG_033; msg_id++)
-		half_width = max(half_width, GetTextSize(GetDlgItem(hDlg, IDC_TARGET_SYSTEM), lmprintf(msg_id)).cx);
+		hw = max(hw, GetTextSize(GetDlgItem(hDlg, IDC_TARGET_SYSTEM), lmprintf(msg_id)).cx);
 
 	// Just in case, we also do the number of passes
 	for (i = 1; i <= 4; i++)
-		half_width = max(half_width, GetTextSize(GetDlgItem(hDlg, IDC_TARGET_SYSTEM),
+		hw = max(hw, GetTextSize(GetDlgItem(hDlg, IDC_TARGET_SYSTEM),
 			lmprintf((i == 1) ? MSG_034 : MSG_035, i)).cx);
 
 	// Finally, we must ensure that we'll have enough space for the 2 checkbox controls
 	// that end up with a half dropdown
-	half_width = max(half_width, GetTextWidth(hDlg, IDC_RUFUS_MBR) - sep_width);
-	half_width = max(half_width, GetTextWidth(hDlg, IDC_BADBLOCKS) - sep_width);
+	hw = max(hw, GetTextWidth(hDlg, IDC_RUFUS_MBR) - sw);
+	hw = max(hw, GetTextWidth(hDlg, IDC_BADBLOCKS) - sw);
 
-	// Add the width of a blank checkbox
-	half_width += cb_width;
-
-	uprintf("half_width = %d", half_width);
+	// Add the width of a blank dropdown
+	hw += dd_width;
+uprintf("adjusted hw = %d, 2*bw + ssw = %d", hw, 2 * bw + ssw);
 }
 
 /*
- *                |                  full_width                  |
- *      8       ->|<-    96     ->|<-    24    ->|<-    96     ->|<-     8
- *  margin_width  |  half_width   |  sep_width   |  half_width   | margin_width
+ * mw  = margin width
+ * fw  = full dropdown width
+ * hd  = half dropdown width
+ * bsw = boot selection dropdown width
+ * sw  = separator width
+ * ssw = small separator width
+ * bw  = button width
+ * sbw = small button width
+ * hbw = hash button width
+ * 
+ *      |                      fw                      |
+ *      |          bsw          | ssw | hbw | ssw | bw |
+ *  8 ->|<-    96     ->|<-    24    ->|<-    96     ->|<- 8
+ *  mw  |      hw       |      sw      |      hw       |  mw
+ *                                     | bw | ssw | bw |
  */
 static void GetFullWidth(HWND hDlg)
 {
 	RECT rc;
 	int i, control[] = { IDC_LIST_USB_HDD, IDC_OLD_BIOS_FIXES, IDC_QUICKFORMAT, IDC_EXTENDED_LABEL };
 
+	// Compute the minimum size needed for the Boot Selection dropdown
+	GetWindowRect(GetDlgItem(hDlg, IDC_BOOT_TYPE), &rc);
+	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
+uprintf("initial bsw = %d", rc.right - rc.left);
+	bsw = max(rc.right - rc.left, GetTextSize(hBootType, lmprintf(MSG_281, lmprintf(MSG_280))).cx + dd_width);
+uprintf("updated bsw = %d", bsw);
+uprintf("ssw = %d, sbw = %d", ssw, sbw);
+
 	// Initialize full width to the UI's default size
 	GetWindowRect(GetDlgItem(hDlg, IDC_IMAGE_OPTION), &rc);
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
-	full_width = rc.right - rc.left - cb_width;
-
-	// Initialize the min width according to the longest message from the Boot Type drowpdown
-	full_width = max(full_width, GetTextSize(GetDlgItem(hDlg, IDC_BOOT_TYPE), lmprintf(MSG_281, lmprintf(MSG_280))).cx);
+uprintf("initial fw = %d", rc.right - rc.left);
+	fw = rc.right - rc.left - dd_width;
 
 	// Go through the Image Options for Windows To Go
-	full_width = max(full_width, GetTextSize(GetDlgItem(hDlg, IDC_IMAGE_OPTION), lmprintf(MSG_301)).cx);
-	full_width = max(full_width, GetTextSize(GetDlgItem(hDlg, IDC_IMAGE_OPTION), lmprintf(MSG_302)).cx);
-
+	fw = max(fw, GetTextSize(GetDlgItem(hDlg, IDC_IMAGE_OPTION), lmprintf(MSG_301)).cx);
+	fw = max(fw, GetTextSize(GetDlgItem(hDlg, IDC_IMAGE_OPTION), lmprintf(MSG_302)).cx);
 
 	// Now deal with full length checkbox lines
 	for (i=0; i<ARRAYSIZE(control); i++)
-		full_width = max(full_width, GetTextWidth(hDlg, control[i]));
+		fw = max(fw, GetTextWidth(hDlg, control[i]));
 
-	// All of the above is for text only, so we need to add cb space
-	full_width += cb_width;
+	// All of the above is for text only, so we need to add dd space
+	fw += dd_width;
 
 	// Our min also needs to be longer than 2 half length dropdowns + spacer
-	full_width = max(full_width, 2 * half_width + sep_width);
+	fw = max(fw, 2 * hw + sw);
+uprintf("adjusted fw = %d", fw);
+uprintf("bsw + 2*ssw + hbw + bw = %d", bsw + 2*ssw + hbw + bw);
+
+
+	// Now that we have our minimum full width, adjust the button width if needed
+	// Adjust according to min full width
+	bw = max(bw, (fw - 2 * ssw - sw) / 4);
+	// Adjust according to min boot selection width
+	bw = max(bw, (bsw + hbw - sw) / 3);
+
+	uprintf("fw = %d, 4bw + 2ssw + sw = %d", fw, 4 * bw + 2 * ssw + sw);
+	uprintf("bsw + 2ssw + hbw + bw = %d", bsw + 2 * ssw + hbw + bw);
+
+	// Adjust according to min half width
+	bw = max(bw, (hw / 2) - ssw);
+
+	// Now that our button width is set, we can adjust the rest
+	hw = max(hw, 2 * bw + ssw);
+	fw = max(fw, 2 * hw + sw);
+
+	bsw = max(bsw, fw - bw - 2 * ssw - hbw);
 
 	// TODO: Also pick a few choice messages from info/status
-	uprintf("full_width = %d", full_width);
-
-	// TESTING
-//	GetWindowRect(GetDlgItem(hDlg, IDC_DISK_ID), &rc);
-//	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
-//	SetWindowPos(GetDlgItem(hDlg, IDC_DISK_ID), NULL, margin_width + half_width + sep_width, rc.top, rc.right - rc.left, rc.bottom - rc.top, 0);
-}
-
-
-// https://stackoverflow.com/a/20926332/1069307
-// https://msdn.microsoft.com/en-us/library/windows/desktop/bb226818.aspx
-static void GetBasicControlsWidth(HWND hDlg)
-{
-	int checkbox_internal_spacing = 12;
-	RECT rc = { 0, 0, 4, 8 };
-	SIZE bu;
-
-	// Compute base unit sizes since GetDialogBaseUnits() returns garbage data.
-	// See http://support.microsoft.com/kb/125681
-	MapDialogRect(hDlg, &rc);
-	bu.cx = rc.right;
-	bu.cy = rc.bottom;
-
-	// TODO: figure out the specifics of each Windows version
-	if (nWindowsVersion == WINDOWS_10)
-		checkbox_internal_spacing = 10;
-
-	// Checkbox width
-	cb_width = MulDiv(checkbox_internal_spacing, bu.cx, 4);
-
-	// Spacing width between half-length dropdowns (sep) as well as left margin
-	GetWindowRect(GetDlgItem(hDlg, IDC_TARGET_SYSTEM), &rc);
-	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
-	sep_width = rc.left;
-	GetWindowRect(GetDlgItem(hDlg, IDC_PARTITION_TYPE), &rc);
-	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
-	sep_width -= rc.right;
-	margin_width = rc.left;
-
-	// Small button and small separator widths
-	GetWindowRect(GetDlgItem(hDlg, IDC_SAVE), &rc);
-	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
-	small_button_width = rc.right - rc.left;
-	small_sep_width = rc.left;
-	GetWindowRect(hDeviceList, &rc);
-	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
-	small_sep_width -= rc.right;
-
-	// Hash button width
-	GetWindowRect(GetDlgItem(hDlg, IDC_HASH), &rc);
-	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
-	hash_button_width = rc.right - rc.left;
 }
 
 static void SetSectionHeaders(HWND hDlg)
@@ -2198,13 +2140,18 @@ static void SetSectionHeaders(HWND hDlg)
 
 static void PositionControls(HWND hDlg)
 {
-	RECT rc, rcBootType, rcSelectedImage;
+	RECT rc, rcSelectedImage;
 	HWND hCtrl;
 	SIZE sz;
 	// TODO: dynamicize button_fudge
-	int dropdown_height, button_fudge = 2;
-	// TODO: compute button width intependtly and use it to compute half_width
-	int i, width = (half_width - small_sep_width) / 2, x, control[3] = { IDC_SELECT, IDC_START, IDCANCEL };
+	int i, x, dropdown_height, button_fudge = 2;
+
+	// Start by resizing the whole dialog
+	GetWindowRect(hDlg, &rc);
+	uprintf("initial dialog width = %d (mw = %d)", rc.right - rc.left, mw);
+	// Don't ask me why we need 3 times the margin width here instead of 2...
+	// TODO: If that doesn't work, just pick additonal space from initial fw and reuse that
+	SetWindowPos(hDlg, NULL, -1, -1, 3*mw + fw, rc.bottom - rc.top, SWP_NOMOVE | SWP_NOZORDER);
 
 	// Resize the height of the label and progress bar to the height of standard dropdowns
 	hCtrl = GetDlgItem(hDlg, IDC_DEVICE);
@@ -2272,54 +2219,61 @@ static void PositionControls(HWND hDlg)
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
 	SetWindowPos(hMultiToolbar, HWND_TOP, rc.left, rc.top, sz.cx, dropdown_height, 0);
 
-	// Reposition and resize the SELECT and # buttons
-	GetWindowRect(hBootType, &rcBootType);
-	MapWindowPoints(NULL, hDlg, (POINT*)&rcBootType, 2);
-	GetWindowRect(hSelectImage, &rc);
-	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
-	SetWindowPos(hSelectImage, NULL, rc.left, rcBootType.top - 1,
-		rc.right - rc.left, dropdown_height + button_fudge, SWP_NOZORDER);
-
-	// Resize the START and CANCEL/CLOSE buttons
-	GetWindowRect(hStart, &rc);
-	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
-	SetWindowPos(hStart, NULL, rc.left, rc.top,
-		rc.right - rc.left, dropdown_height + button_fudge, SWP_NOZORDER);
-	hCtrl = GetDlgItem(hDlg, IDCANCEL);
-	GetWindowRect(hCtrl, &rc);
-	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
-	SetWindowPos(hCtrl, NULL, rc.left, rc.top,
-		rc.right - rc.left, dropdown_height + button_fudge, SWP_NOZORDER);
-
 	// Reposition the main buttons
-	for (i = 0; i < ARRAYSIZE(control); i++)
-		width = max(GetTextWidth(hDlg, control[i]) + cb_width, width);
-	// The 'CLOSE' button is also be used to display 'CANCEL' => measure that too
-	width = max(width, GetTextSize(GetDlgItem(hDlg, IDCANCEL), lmprintf(MSG_007)).cx + cb_width);
-	uprintf("MAX BUTTON = %d", width);
-	for (i = 0; i < ARRAYSIZE(control); i++) {
-		hCtrl = GetDlgItem(hDlg, control[i]);
+	for (i = 0; i < ARRAYSIZE(main_button_ids); i++) {
+		hCtrl = GetDlgItem(hDlg, main_button_ids[i]);
 		GetWindowRect(hCtrl, &rc);
 		MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
-		if (i % 2 == 0)
-			x = margin_width + full_width - width;
-		else
-			x = rc.left;
-		SetWindowPos(hCtrl, HWND_TOP, x, rc.top, width, rc.bottom - rc.top, 0);
+		x = mw + fw - bw;
+		if (i % 2 == 1)
+			x -= bw + ssw;
+		SetWindowPos(hCtrl, HWND_TOP, x, rc.top, bw, rc.bottom - rc.top, 0);
 	}
 
 	// Reposition the Hash button
 	hCtrl = GetDlgItem(hDlg, IDC_HASH);
 	GetWindowRect(hCtrl, &rc);
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
-	x -= small_sep_width + hash_button_width;
-	SetWindowPos(hCtrl, HWND_TOP, x, rc.top, hash_button_width, rc.bottom - rc.top, 0);
+	x -= ssw + hbw;
+	SetWindowPos(hCtrl, HWND_TOP, x, rc.top, hbw, rc.bottom - rc.top, 0);
 
-	// Resize the boot selection button
+	// Reposition the Save button
+	hCtrl = GetDlgItem(hDlg, IDC_SAVE);
+	GetWindowRect(hCtrl, &rc);
+	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
+	SetWindowPos(hCtrl, HWND_TOP, mw + fw - sbw, rc.top, sbw, rc.bottom - rc.top, 0);
+
+	if (advanced_mode_device) {
+		// Still need to adjust the width of the device selection dropdown
+		GetWindowRect(hDeviceList, &rc);
+		MapWindowPoints(NULL, hMainDialog, (POINT*)&rc, 2);
+		SetWindowPos(hDeviceList, HWND_TOP, rc.left, rc.top, fw - ssw - sbw, rc.bottom - rc.top, 0);
+	}
+
+	// Resize the full width controls
+	for (i = 0; i < ARRAYSIZE(full_width_controls); i++) {
+		hCtrl = GetDlgItem(hDlg, full_width_controls[i]);
+		GetWindowRect(hCtrl, &rc);
+		MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
+		SetWindowPos(hCtrl, HWND_TOP, rc.left, rc.top, fw, rc.bottom - rc.top, 0);
+	}
+
+	// Resize the half drowpdowns
+	for (i = 0; i < ARRAYSIZE(half_width_ids); i++) {
+		hCtrl = GetDlgItem(hDlg, half_width_ids[i]);
+		GetWindowRect(hCtrl, &rc);
+		MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
+		// First 5 controls are on the left handside
+		// First 2 controls may overflow into separator
+		SetWindowPos(hCtrl, HWND_TOP, (i < 5) ? rc.left : mw + hw + sw, rc.top,
+			(i <2) ? hw + sw : hw, rc.bottom - rc.top, 0);
+	}
+
+	// Resize the boot selection dropdown
 	hCtrl = GetDlgItem(hDlg, IDC_BOOT_TYPE);
 	GetWindowRect(hCtrl, &rc);
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
-	SetWindowPos(hCtrl, HWND_TOP, rc.left, rc.top, x - margin_width - small_sep_width, rc.bottom - rc.top, 0);
+	SetWindowPos(hCtrl, HWND_TOP, rc.left, rc.top, bsw, rc.bottom - rc.top, 0);
 
 	hCtrl = GetDlgItem(hDlg, IDC_DEVICE);
 	GetWindowRect(hCtrl, &rc);
@@ -2346,12 +2300,12 @@ void OnPaint(HDC hdc)
 {
 	HPEN hp = CreatePen(0, 3, RGB(0, 0, 0));
 	SelectObject(hdc, hp);
-	MoveToEx(hdc, margin_width + 10, device_vpos, NULL);
-	LineTo(hdc, margin_width + full_width, device_vpos);
-	MoveToEx(hdc, margin_width + 10, format_vpos, NULL);
-	LineTo(hdc, margin_width + full_width, format_vpos);
-	MoveToEx(hdc, margin_width + 10, status_vpos, NULL);
-	LineTo(hdc, margin_width + full_width, status_vpos);
+	MoveToEx(hdc, mw + 10, device_vpos, NULL);
+	LineTo(hdc, mw + fw, device_vpos);
+	MoveToEx(hdc, mw + 10, format_vpos, NULL);
+	LineTo(hdc, mw + fw, format_vpos);
+	MoveToEx(hdc, mw + 10, status_vpos, NULL);
+	LineTo(hdc, mw + fw, status_vpos);
 }
 
 static void InitDialog(HWND hDlg)
@@ -2387,6 +2341,7 @@ static void InitDialog(HWND hDlg)
 	hStart = GetDlgItem(hDlg, IDC_START);
 
 	GetBasicControlsWidth(hDlg);
+	GetMainButtonsWidth(hDlg);
 	GetHalfDropwdownWidth(hDlg);
 	GetFullWidth(hDlg);
 
@@ -2440,8 +2395,6 @@ static void InitDialog(HWND hDlg)
 	}
 
 	selection_default = BT_IMAGE;
-	// Create the status line and initialize the taskbar icon for progress overlay
-	CreateStatusBar();
 	CreateTaskbarList();
 	SetTaskbarProgressState(TASKBAR_NORMAL);
 
@@ -2478,6 +2431,8 @@ static void InitDialog(HWND hDlg)
 	CreateAdditionalControls(hDlg);
 	SetSectionHeaders(hDlg);
 	PositionControls(hDlg);
+	// Create the status line and initialize the taskbar icon for progress overlay
+	CreateStatusBar();
 
 	// Subclass the progress bar so that we can write on it
 	progress_original_proc = (WNDPROC)SetWindowLongPtr(hProgress, GWLP_WNDPROC, (LONG_PTR)ProgressCallback);
@@ -2502,8 +2457,6 @@ static void InitDialog(HWND hDlg)
 	CreateTooltip(hPartitionScheme, lmprintf(MSG_150), -1);
 	CreateTooltip(hTargetSystem, lmprintf(MSG_151), 30000);
 	CreateTooltip(GetDlgItem(hDlg, IDS_CSM_HELP_TXT), lmprintf(MSG_152), 30000);
-//	CreateTooltip(GetDlgItem(hDlg, IDC_WINDOWS_INSTALL), lmprintf(MSG_199), -1);
-//	CreateTooltip(GetDlgItem(hDlg, IDC_WINDOWS_TO_GO), lmprintf(MSG_200), -1);
 	CreateTooltip(GetDlgItem(hDlg, IDC_HASH), lmprintf(MSG_272), -1);
 	CreateTooltip(GetDlgItem(hDlg, IDC_SAVE), lmprintf(MSG_312), -1);
 
@@ -2697,9 +2650,8 @@ static BOOL CheckDriveAccess(DWORD dwTimeOut)
 	if ((DeviceNum < 0x80) || (DeviceNum == (DWORD)-1))
 		return FALSE;
 
-	// TODO: "Checking for conflicting processes..." would be better but
-	// but "Requesting disk access..." will have to do for now.
-	PrintInfo(0, MSG_225);
+	// "Checking for conflicting processes..."
+	PrintInfo(0, MSG_278);
 
 	// Search for any blocking processes against the physical drive
 	PhysicalPath = GetPhysicalName(DeviceNum);
@@ -3216,6 +3168,11 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 					GetDevices((DWORD)ComboBox_GetItemData(hDeviceList, ComboBox_GetCurSel(hDeviceList)));
 					user_changed_label = FALSE;
 					EnableControls(TRUE);
+					if (ComboBox_GetCurSel(hDeviceList) < 0) {
+						SetPartitionSchemeAndTargetSystem(FALSE);
+						SetFileSystemAndClusterSize(NULL);
+						ShowWindow(GetDlgItem(hDlg, IDS_CSM_HELP_TXT), SW_HIDE);
+					}
 				} else {
 					queued_hotplug_event = TRUE;
 				}
@@ -3901,9 +3858,8 @@ relaunch:
 		// Alt-C => Cycle USB port for currently selected device
 		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'C')) {
 			int index = ComboBox_GetCurSel(hDeviceList);
-			if (index < 0)
-				break;
-			ResetDevice(index);
+			if (index >= 0)
+				ResetDevice(index);
 			continue;
 		}
 		// Alt-D => Delete the 'rufus_files' subdirectory
@@ -3919,7 +3875,6 @@ relaunch:
 			WriteSettingBool(SETTING_ENABLE_WIN_DUAL_EFI_BIOS, allow_dual_uefi_bios);
 			PrintStatusTimeout(lmprintf(MSG_266), allow_dual_uefi_bios);
 			SetPartitionSchemeAndTargetSystem(FALSE);
-//			SetMBRForUEFI(TRUE);
 			continue;
 		}
 		// Alt-F => Toggle detection of USB HDDs

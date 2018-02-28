@@ -532,8 +532,7 @@ t MSG_275 "The image you have selected is an 'ISOHybrid' image. This means it ca
 t MSG_276 "Write in %s mode (Recommended)"
 # '%s' below will be replaced with your translation for MSG_095 ("DD Image")
 t MSG_277 "Write in %s mode"
-# The following will be used for new controls of the Rufus 3.0 interface
-# They are added as messages, so that I will have them available when needed.
+t MSG_278 "Checking for conflicting processes..."
 t MSG_279 "Non bootable"
 t MSG_280 "Disk or ISO image"
 t MSG_281 "%s (Please select)"
