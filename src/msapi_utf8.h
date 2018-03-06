@@ -437,6 +437,19 @@ static __inline int ComboBox_GetLBTextU(HWND hCtrl, int index, char* lpString)
 	return size;
 }
 
+static __inline DWORD CharUpperBuffU(char* lpString, DWORD len)
+{
+	DWORD ret;
+	wchar_t *wlpString = calloc(len, sizeof(wchar_t));
+	if (wlpString == NULL)
+		return 0;
+	utf8_to_wchar_no_alloc(lpString, wlpString, len);
+	ret = CharUpperBuffW(wlpString, len);
+	wchar_to_utf8_no_alloc(wlpString, lpString, len);
+	free(wlpString);
+	return ret;
+}
+
 static __inline HANDLE CreateFileU(const char* lpFileName, DWORD dwDesiredAccess, DWORD dwShareMode,
 								   LPSECURITY_ATTRIBUTES lpSecurityAttributes, DWORD dwCreationDisposition,
 								   DWORD dwFlagsAndAttributes,  HANDLE hTemplateFile)

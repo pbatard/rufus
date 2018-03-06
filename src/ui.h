@@ -152,6 +152,13 @@ static int full_width_controls[] = {
 	IDC_PROGRESS,
 };
 
+static int full_width_checkboxes[] = {
+	IDC_LIST_USB_HDD,
+	IDC_OLD_BIOS_FIXES,
+	IDC_QUICKFORMAT,
+	IDC_EXTENDED_LABEL,
+};
+
 static int half_width_ids[] = {
 	IDC_BADBLOCKS,
 	IDC_RUFUS_MBR,

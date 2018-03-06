@@ -69,7 +69,7 @@ static int64_t last_iso_blocking_status;
 static int selection_default, row_height, advanced_device_section_height, advanced_format_section_height, image_index;
 static int device_vpos, format_vpos, status_vpos;
 static int bw, hw, fw;	// Main button width, half dropdown width, full dropdown width
-static int cb_width, dd_width, sw, mw, bsw, hbw, sbw, ssw;
+static int sw, mw, bsw, hbw, sbw, ssw;
 static UINT_PTR UM_LANGUAGE_MENU_MAX = UM_LANGUAGE_MENU;
 static RECT relaunch_rc = { -65536, -65536, 0, 0};
 static UINT uQFChecked = BST_CHECKED, uMBRChecked = BST_UNCHECKED;
@@ -81,6 +81,7 @@ static HICON hIconSave, hIconDown, hIconUp, hIconLang, hIconAbout, hIconSettings
 static char szTimer[12] = "00:00:00";
 static wchar_t wtbtext[2][128];
 static unsigned int timer;
+static char uppercase_select[64], uppercase_start[64], uppercase_close[64], uppercase_cancel[64];
 
 extern BOOL enable_iso, enable_joliet, enable_rockridge, enable_ntfs_compression;
 extern uint8_t* grub2_buf;
@@ -102,13 +103,14 @@ char szFolderPath[MAX_PATH], app_dir[MAX_PATH], system_dir[MAX_PATH], temp_dir[M
 char *image_path = NULL, *short_image_path;
 float fScale = 1.0f;
 int default_fs, fs, bt, pt, tt;
+int cbw, ddw; // (empty) check box width, (empty) drop down width
 uint32_t dur_mins, dur_secs;
 loc_cmd* selected_locale = NULL;
 WORD selected_langid = MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT);
 DWORD MainThreadId;
 HWND hDeviceList, hPartitionScheme, hTargetSystem, hFileSystem, hClusterSize, hLabel, hBootType, hNBPasses, hLog = NULL;
 HWND hLogDlg = NULL, hProgress = NULL, hDiskID;
-BOOL use_own_c32[NB_OLD_C32] = {FALSE, FALSE}, mbr_selected_by_user = FALSE, togo_mode = FALSE;
+BOOL use_own_c32[NB_OLD_C32] = {FALSE, FALSE}, mbr_selected_by_user = FALSE, display_togo_option = FALSE;
 BOOL iso_op_in_progress = FALSE, format_op_in_progress = FALSE, right_to_left_mode = FALSE, progress_in_use = FALSE, has_uefi_csm;
 BOOL enable_HDDs = FALSE, force_update = FALSE, enable_ntfs_compression = FALSE, no_confirmation_on_cancel = FALSE, lock_drive = TRUE;
 BOOL advanced_mode_device, advanced_mode_format, allow_dual_uefi_bios, detect_fakes, enable_vmdk, force_large_fat32, usb_debug, use_fake_units, preserve_timestamps;
@@ -252,15 +254,15 @@ static void SetPartitionSchemeAndTargetSystem(BOOL only_target)
 	BOOL allowed_partition_scheme[3] = { TRUE, TRUE, FALSE };
 	//                                   BIOS, UEFI, DUAL
 	BOOL allowed_target_system[3]    = { TRUE, TRUE, FALSE };
-	BOOL dual_boot = FALSE;
-	// TODO: Windows To Go selected
-	BOOL is_windows_to_go_selected = FALSE;
+	BOOL is_windows_to_go_selected;
 
 	if (!only_target)
 		IGNORE_RETVAL(ComboBox_ResetContent(hPartitionScheme));
 	IGNORE_RETVAL(ComboBox_ResetContent(hTargetSystem));
 
 	bt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
+	is_windows_to_go_selected = (bt == BT_IMAGE) && (image_path != NULL) && HAS_WINTOGO(img_report) &&
+		(ComboBox_GetCurSel(GetDlgItem(hMainDialog, IDC_IMAGE_OPTION)) == 1);
 	// If no device is selected, don't populate anything
 	if (ComboBox_GetCurSel(hDeviceList) < 0)
 		return;
@@ -557,8 +559,8 @@ static void SetFSFromISO(void)
 {
 	int i, fs_tmp, selected_fs = FS_UNKNOWN;
 	uint32_t fs_mask = 0;
-	BOOL windows_to_go = (togo_mode) && HAS_WINTOGO(img_report) &&
-		(Button_GetCheck(GetDlgItem(hMainDialog, IDC_WINDOWS_TO_GO)) == BST_CHECKED);
+	BOOL windows_to_go = display_togo_option && (bt == BT_IMAGE) && HAS_WINTOGO(img_report) &&
+		(ComboBox_GetCurSel(GetDlgItem(hMainDialog, IDC_IMAGE_OPTION)) == 1);
 
 	if (image_path == NULL)
 		return;
@@ -604,7 +606,7 @@ static void SetMBRProps(void)
 	BOOL needs_masquerading = HAS_WINPE(img_report) && (!img_report.uses_minint);
 
 	if ((!mbr_selected_by_user) && ((image_path == NULL) || (bt != BT_IMAGE) || (fs != FS_NTFS) || HAS_GRUB(img_report) ||
-		((togo_mode) && (Button_GetCheck(GetDlgItem(hMainDialog, IDC_WINDOWS_TO_GO)) == BST_CHECKED)) )) {
+		((display_togo_option) && (ComboBox_GetCurSel(GetDlgItem(hMainDialog, IDC_IMAGE_OPTION)) == 1)) )) {
 		CheckDlgButton(hMainDialog, IDC_RUFUS_MBR, BST_UNCHECKED);
 		IGNORE_RETVAL(ComboBox_SetCurSel(hDiskID, 0));
 		return;
@@ -618,7 +620,7 @@ static void SetMBRProps(void)
 
 static void SetToGo(void)
 {
-	if (((bt != BT_IMAGE) && (togo_mode)) || ((bt == BT_IMAGE) && (HAS_WINTOGO(img_report)) && (!togo_mode))) {
+	if (((bt != BT_IMAGE) && (display_togo_option)) || ((bt == BT_IMAGE) && (HAS_WINTOGO(img_report)) && (!display_togo_option))) {
 		ToggleImageOption();
 	}
 }
@@ -750,7 +752,7 @@ static void EnableControls(BOOL bEnable)
 	EnableWindow(GetDlgItem(hMainDialog, IDC_HASH), bEnable && (bt == BT_IMAGE) && (image_path != NULL));
 
 	// Toggle CLOSE/CANCEL
-	SetDlgItemTextU(hMainDialog, IDCANCEL, lmprintf(bEnable ? MSG_006 : MSG_007));
+	SetDlgItemTextU(hMainDialog, IDCANCEL, bEnable ? uppercase_close : uppercase_cancel);
 
 	// Only enable the following controls if a device is active
 	bEnable = (ComboBox_GetCurSel(hDeviceList) < 0) ? FALSE : bEnable;
@@ -1097,7 +1099,7 @@ static void DisplayISOProps(void)
 
 	// We don't support ToGo on Windows 7 or earlier, for lack of native ISO mounting capabilities
 	if (nWindowsVersion >= WINDOWS_8)
-		if ( ((!togo_mode) && (HAS_WINTOGO(img_report))) || ((togo_mode) && (!HAS_WINTOGO(img_report))) )
+		if ( ((!display_togo_option) && (HAS_WINTOGO(img_report))) || ((display_togo_option) && (!HAS_WINTOGO(img_report))) )
 			ToggleImageOption();
 }
 
@@ -1154,7 +1156,7 @@ static void ToggleAdvancedDeviceOptions(BOOL enable)
 	status_vpos += shift;
 
 	// Toggle the Hide/Show toolbar text
-	utf8_to_wchar_no_alloc(lmprintf((enable) ? MSG_311 : MSG_310, lmprintf(MSG_308)), wtbtext[0], ARRAYSIZE(wtbtext[0]));
+	utf8_to_wchar_no_alloc(lmprintf((enable) ? MSG_122 : MSG_121, lmprintf(MSG_119)), wtbtext[0], ARRAYSIZE(wtbtext[0]));
 	button_info.cbSize = sizeof(button_info);
 	button_info.dwMask = TBIF_TEXT;
 	button_info.pszText = wtbtext[0];
@@ -1197,7 +1199,7 @@ static void ToggleAdvancedFormatOptions(BOOL enable)
 	status_vpos += shift;
 
 	// Toggle the Hide/Show toolbar text
-	utf8_to_wchar_no_alloc(lmprintf((enable) ? MSG_311 : MSG_310, lmprintf(MSG_309)), wtbtext[1], ARRAYSIZE(wtbtext[0]));
+	utf8_to_wchar_no_alloc(lmprintf((enable) ? MSG_122 : MSG_121, lmprintf(MSG_120)), wtbtext[1], ARRAYSIZE(wtbtext[0]));
 	button_info.cbSize = sizeof(button_info);
 	button_info.dwMask = TBIF_TEXT;
 	button_info.pszText = wtbtext[1];
@@ -1231,16 +1233,16 @@ static void ToggleImageOption(void)
 	// Windows To Go mode is only available for Windows 8 or later due to the lack
 	// of an ISO mounting API on previous versions.
 	// But we still need to be able to hide the Windows To Go option on startup.
-	if ((nWindowsVersion < WINDOWS_8) && (!togo_mode))
+	if ((nWindowsVersion < WINDOWS_8) && (!display_togo_option))
 		return;
 
-	togo_mode = !togo_mode;
-	if (togo_mode) {
+	display_togo_option = !display_togo_option;
+	if (display_togo_option) {
 		hCtrl = GetDlgItem(hMainDialog, IDC_IMAGE_OPTION);
 		// Populate the dropdown
 		IGNORE_RETVAL(ComboBox_ResetContent(hCtrl));
-		IGNORE_RETVAL(ComboBox_SetItemData(hCtrl, ComboBox_AddStringU(hCtrl, lmprintf(MSG_301)), FALSE));
-		IGNORE_RETVAL(ComboBox_SetItemData(hCtrl, ComboBox_AddStringU(hCtrl, lmprintf(MSG_302)), TRUE));
+		IGNORE_RETVAL(ComboBox_SetItemData(hCtrl, ComboBox_AddStringU(hCtrl, lmprintf(MSG_117)), FALSE));
+		IGNORE_RETVAL(ComboBox_SetItemData(hCtrl, ComboBox_AddStringU(hCtrl, lmprintf(MSG_118)), TRUE));
 		IGNORE_RETVAL(ComboBox_SetCurSel(hCtrl, 0));
 	} else
 		shift = -shift;
@@ -1256,7 +1258,7 @@ static void ToggleImageOption(void)
 
 	// Hide or show the boot options
 	for (i = 0; i < ARRAYSIZE(image_option_toggle_ids); i++)
-		ShowWindow(GetDlgItem(hMainDialog, image_option_toggle_ids[i]), togo_mode ? SW_SHOW : SW_HIDE);
+		ShowWindow(GetDlgItem(hMainDialog, image_option_toggle_ids[i]), display_togo_option ? SW_SHOW : SW_HIDE);
 
 	// If you don't force a redraw here, all kind of bad UI artifacts happen...
 	InvalidateRect(hMainDialog, NULL, TRUE);
@@ -1422,7 +1424,7 @@ static BOOL BootCheck(void)
 			// Pure DD images are fine at this stage
 			return TRUE;
 		}
-		if ((togo_mode) && (Button_GetCheck(GetDlgItem(hMainDialog, IDC_WINDOWS_TO_GO)) == BST_CHECKED)) {
+		if ((display_togo_option) && (ComboBox_GetCurSel(GetDlgItem(hMainDialog, IDC_IMAGE_OPTION)) == 1)) {
 			if (fs != FS_NTFS) {
 				// Windows To Go only works for NTFS
 				MessageBoxExU(hMainDialog, lmprintf(MSG_097, "Windows To Go"), lmprintf(MSG_092), MB_OK|MB_ICONERROR|MB_IS_RTL, selected_langid);
@@ -1818,7 +1820,7 @@ static void CreateAdditionalControls(HWND hDlg)
 
 	// Create the advanced options toolbars
 	memset(wtbtext, 0, sizeof(wtbtext));
-	utf8_to_wchar_no_alloc(lmprintf((advanced_mode_device) ? MSG_311 : MSG_310, lmprintf(MSG_308)), wtbtext[0], ARRAYSIZE(wtbtext[0]));
+	utf8_to_wchar_no_alloc(lmprintf((advanced_mode_device) ? MSG_122 : MSG_121, lmprintf(MSG_119)), wtbtext[0], ARRAYSIZE(wtbtext[0]));
 	hAdvancedDeviceToolbar = CreateWindowExW(0, TOOLBARCLASSNAME, NULL,
 		WS_CHILD | WS_TABSTOP | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CCS_NOPARENTALIGN |
 		CCS_NODIVIDER | TBSTYLE_FLAT | TBSTYLE_LIST | TBSTYLE_TRANSPARENT | TBSTYLE_TOOLTIPS | TBSTYLE_AUTOSIZE,
@@ -1838,7 +1840,7 @@ static void CreateAdditionalControls(HWND hDlg)
 	SendMessage(hAdvancedDeviceToolbar, TB_GETIDEALSIZE, (WPARAM)FALSE, (LPARAM)&sz);
 	SetWindowPos(hAdvancedDeviceToolbar, HWND_TOP, rc.left + toolbar_fudge, rc.top, sz.cx, rc.bottom - rc.top, 0);
 
-	utf8_to_wchar_no_alloc(lmprintf((advanced_mode_format) ? MSG_311 : MSG_310, lmprintf(MSG_309)), wtbtext[1], ARRAYSIZE(wtbtext[1]));
+	utf8_to_wchar_no_alloc(lmprintf((advanced_mode_format) ? MSG_122 : MSG_121, lmprintf(MSG_120)), wtbtext[1], ARRAYSIZE(wtbtext[1]));
 	hAdvancedFormatToolbar = CreateWindowExW(0, TOOLBARCLASSNAME, NULL,
 		WS_CHILD | WS_TABSTOP | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN  | CCS_NOPARENTALIGN |
 		CCS_NODIVIDER | TBSTYLE_FLAT | TBSTYLE_LIST | TBSTYLE_TRANSPARENT | TBSTYLE_TOOLTIPS | TBSTYLE_AUTOSIZE,
@@ -1944,8 +1946,8 @@ static void GetBasicControlsWidth(HWND hDlg)
 	}
 
 	// Checkbox and (blank) dropdown widths
-	cb_width = MulDiv(checkbox_internal_spacing, bu.cx, 4);
-	dd_width = MulDiv(dropdown_internal_spacing, bu.cx, 4);
+	cbw = MulDiv(checkbox_internal_spacing, bu.cx, 4);
+	ddw = MulDiv(dropdown_internal_spacing, bu.cx, 4);
 
 	// Spacing width between half-length dropdowns (sep) as well as left margin
 	GetWindowRect(GetDlgItem(hDlg, IDC_TARGET_SYSTEM), &rc);
@@ -1980,13 +1982,11 @@ static void GetMainButtonsWidth(HWND hDlg)
 	GetWindowRect(GetDlgItem(hDlg, main_button_ids[0]), &rc);
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
 	bw = rc.right - rc.left;
-uprintf("initial bw = %d", bw);
 
 	for (i = 0; i < ARRAYSIZE(main_button_ids); i++)
-		bw = max(GetTextWidth(hDlg, main_button_ids[i]) + cb_width, bw);
+		bw = max(bw, GetTextWidth(hDlg, main_button_ids[i]) + cbw);
 	// The 'CLOSE' button is also be used to display 'CANCEL' => measure that too
-	bw = max(bw, GetTextSize(GetDlgItem(hDlg, IDCANCEL), lmprintf(MSG_007)).cx + cb_width);
-uprintf("adjusted bw = %d", bw);
+	bw = max(bw, GetTextSize(GetDlgItem(hDlg, IDCANCEL), lmprintf(MSG_007)).cx + cbw);
 }
 
 // The following goes over the data that gets populated into the half-width dropdowns
@@ -1999,11 +1999,9 @@ static void GetHalfDropwdownWidth(HWND hDlg)
 	char tmp[256];
 
 	// Initialize half width to the UI's default size
-	// TODO: verify that this works if we just resized from a language with larger width?
 	GetWindowRect(GetDlgItem(hDlg, IDC_PARTITION_TYPE), &rc);
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
-uprintf("initial hw = %d", rc.right - rc.left);
-	hw = rc.right - rc.left - dd_width;
+	hw = rc.right - rc.left - ddw;
 
 	// "Super Floppy Disk" is the longuest entry in the Partition Scheme dropdown
 	hw = max(hw, GetTextSize(GetDlgItem(hDlg, IDC_PARTITION_TYPE), (char*)sfd_name).cx);
@@ -2033,8 +2031,7 @@ uprintf("initial hw = %d", rc.right - rc.left);
 	hw = max(hw, GetTextWidth(hDlg, IDC_BADBLOCKS) - sw);
 
 	// Add the width of a blank dropdown
-	hw += dd_width;
-uprintf("adjusted hw = %d, 2*bw + ssw = %d", hw, 2 * bw + ssw);
+	hw += ddw;
 }
 
 /*
@@ -2057,47 +2054,39 @@ uprintf("adjusted hw = %d, 2*bw + ssw = %d", hw, 2 * bw + ssw);
 static void GetFullWidth(HWND hDlg)
 {
 	RECT rc;
-	int i, control[] = { IDC_LIST_USB_HDD, IDC_OLD_BIOS_FIXES, IDC_QUICKFORMAT, IDC_EXTENDED_LABEL };
+	int i;
 
 	// Compute the minimum size needed for the Boot Selection dropdown
 	GetWindowRect(GetDlgItem(hDlg, IDC_BOOT_TYPE), &rc);
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
-uprintf("initial bsw = %d", rc.right - rc.left);
-	bsw = max(rc.right - rc.left, GetTextSize(hBootType, lmprintf(MSG_281, lmprintf(MSG_280))).cx + dd_width);
-uprintf("updated bsw = %d", bsw);
-uprintf("ssw = %d, sbw = %d", ssw, sbw);
+
+	bsw = max(rc.right - rc.left, GetTextSize(hBootType, lmprintf(MSG_279)).cx + ddw);
+	bsw = max(bsw, GetTextSize(hBootType, lmprintf(MSG_281, lmprintf(MSG_280))).cx + ddw);
 
 	// Initialize full width to the UI's default size
 	GetWindowRect(GetDlgItem(hDlg, IDC_IMAGE_OPTION), &rc);
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
-uprintf("initial fw = %d", rc.right - rc.left);
-	fw = rc.right - rc.left - dd_width;
+	fw = rc.right - rc.left - ddw;
 
 	// Go through the Image Options for Windows To Go
-	fw = max(fw, GetTextSize(GetDlgItem(hDlg, IDC_IMAGE_OPTION), lmprintf(MSG_301)).cx);
-	fw = max(fw, GetTextSize(GetDlgItem(hDlg, IDC_IMAGE_OPTION), lmprintf(MSG_302)).cx);
+	fw = max(fw, GetTextSize(GetDlgItem(hDlg, IDC_IMAGE_OPTION), lmprintf(MSG_117)).cx);
+	fw = max(fw, GetTextSize(GetDlgItem(hDlg, IDC_IMAGE_OPTION), lmprintf(MSG_118)).cx);
 
 	// Now deal with full length checkbox lines
-	for (i=0; i<ARRAYSIZE(control); i++)
-		fw = max(fw, GetTextWidth(hDlg, control[i]));
+	for (i=0; i<ARRAYSIZE(full_width_checkboxes); i++)
+		fw = max(fw, GetTextWidth(hDlg, full_width_checkboxes[i]));
 
 	// All of the above is for text only, so we need to add dd space
-	fw += dd_width;
+	fw += ddw;
 
 	// Our min also needs to be longer than 2 half length dropdowns + spacer
 	fw = max(fw, 2 * hw + sw);
-uprintf("adjusted fw = %d", fw);
-uprintf("bsw + 2*ssw + hbw + bw = %d", bsw + 2*ssw + hbw + bw);
-
 
 	// Now that we have our minimum full width, adjust the button width if needed
 	// Adjust according to min full width
 	bw = max(bw, (fw - 2 * ssw - sw) / 4);
 	// Adjust according to min boot selection width
 	bw = max(bw, (bsw + hbw - sw) / 3);
-
-	uprintf("fw = %d, 4bw + 2ssw + sw = %d", fw, 4 * bw + 2 * ssw + sw);
-	uprintf("bsw + 2ssw + hbw + bw = %d", bsw + 2 * ssw + hbw + bw);
 
 	// Adjust according to min half width
 	bw = max(bw, (hw / 2) - ssw);
@@ -2148,7 +2137,6 @@ static void PositionControls(HWND hDlg)
 
 	// Start by resizing the whole dialog
 	GetWindowRect(hDlg, &rc);
-	uprintf("initial dialog width = %d (mw = %d)", rc.right - rc.left, mw);
 	// Don't ask me why we need 3 times the margin width here instead of 2...
 	// TODO: If that doesn't work, just pick additonal space from initial fw and reuse that
 	SetWindowPos(hDlg, NULL, -1, -1, 3*mw + fw, rc.bottom - rc.top, SWP_NOMOVE | SWP_NOZORDER);
@@ -2242,6 +2230,13 @@ static void PositionControls(HWND hDlg)
 	GetWindowRect(hCtrl, &rc);
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
 	SetWindowPos(hCtrl, HWND_TOP, mw + fw - sbw, rc.top, sbw, rc.bottom - rc.top, 0);
+
+	// Reposition the CSM help tip
+	hCtrl = GetDlgItem(hDlg, IDS_CSM_HELP_TXT);
+	GetWindowRect(hCtrl, &rc);
+	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
+	// TODO: measure space and avoid button fudging
+	SetWindowPos(hCtrl, HWND_TOP, mw + fw + 5 * button_fudge / 2, rc.top, sbw, rc.bottom - rc.top, 0);
 
 	if (advanced_mode_device) {
 		// Still need to adjust the width of the device selection dropdown
@@ -2339,6 +2334,22 @@ static void InitDialog(HWND hDlg)
 	hNBPasses = GetDlgItem(hDlg, IDC_NBPASSES);
 	hDiskID = GetDlgItem(hDlg, IDC_DISK_ID);
 	hStart = GetDlgItem(hDlg, IDC_START);
+
+	// Convert the main button labels to uppercase
+	GetWindowTextU(hStart, uppercase_start, sizeof(uppercase_start));
+	CharUpperBuffU(uppercase_start, sizeof(uppercase_start));
+	SetWindowTextU(hStart, uppercase_start);
+	GetWindowTextU(GetDlgItem(hDlg, IDCANCEL), uppercase_close, sizeof(uppercase_close));
+	CharUpperBuffU(uppercase_close, sizeof(uppercase_close));
+	// Hardcoded exception for German
+	if (strcmp("SCHLIEßEN", uppercase_close) == 0)
+		strcpy(uppercase_close, "SCHLIESSEN");
+	SetWindowTextU(GetDlgItem(hDlg, IDCANCEL), uppercase_close);
+	GetWindowTextU(GetDlgItem(hDlg, IDC_SELECT), uppercase_select, sizeof(uppercase_select));
+	CharUpperBuffU(uppercase_select, sizeof(uppercase_select));
+	SetWindowTextU(GetDlgItem(hDlg, IDC_SELECT), uppercase_select);
+	strcpy(uppercase_cancel, lmprintf(MSG_007));
+	CharUpperBuffU(uppercase_cancel, sizeof(uppercase_cancel));
 
 	GetBasicControlsWidth(hDlg);
 	GetMainButtonsWidth(hDlg);
@@ -2458,7 +2469,7 @@ static void InitDialog(HWND hDlg)
 	CreateTooltip(hTargetSystem, lmprintf(MSG_151), 30000);
 	CreateTooltip(GetDlgItem(hDlg, IDS_CSM_HELP_TXT), lmprintf(MSG_152), 30000);
 	CreateTooltip(GetDlgItem(hDlg, IDC_HASH), lmprintf(MSG_272), -1);
-	CreateTooltip(GetDlgItem(hDlg, IDC_SAVE), lmprintf(MSG_312), -1);
+	CreateTooltip(GetDlgItem(hDlg, IDC_SAVE), lmprintf(MSG_304), -1);
 
 	if (!advanced_mode_device)	// Hide as needed, since we display the advanced controls by default
 		ToggleAdvancedDeviceOptions(FALSE);
@@ -2973,15 +2984,6 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_START_THREAD);
 			}
 			break;
-		case IDC_WINDOWS_INSTALL:
-		case IDC_WINDOWS_TO_GO:
-			if ( (Button_GetCheck(GetDlgItem(hMainDialog, IDC_WINDOWS_INSTALL)) == BST_CHECKED) ||
-				 (Button_GetCheck(GetDlgItem(hMainDialog, IDC_WINDOWS_TO_GO)) == BST_CHECKED) ) {
-//				SetFSFromISO();
-//				SetMBRProps();
-//				SetMBRForUEFI(TRUE);
-			}
-			break;
 		case IDC_RUFUS_MBR:
 			if ((HIWORD(wParam)) == BN_CLICKED)
 				mbr_selected_by_user = IsChecked(IDC_RUFUS_MBR);
@@ -3099,7 +3101,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			// Show the language menu such that it doesn't overlap the button
 			SendMessage(hMultiToolbar, TB_GETRECT, (WPARAM)IDC_ABOUT, (LPARAM)&rc);
 			MapWindowPoints(hDlg, NULL, (POINT*)&rc, 2);
-			rc.left += cb_width / 2;
+			rc.left += cbw / 2;
 			ShowLanguageMenu(rc);
 			break;
 		case IDC_SETTINGS:
@@ -3197,7 +3199,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		safe_release_dc(hDlg, hDC);
 		apply_localization(IDD_DIALOG, hDlg);
 		SetUpdateCheck();
-		togo_mode = TRUE;	// We display the ToGo controls by default and need to hide them
+		display_togo_option = TRUE;	// We display the ToGo controls by default and need to hide them
 		first_log_display = TRUE;
 		log_displayed = FALSE;
 		hLogDlg = MyCreateDialog(hMainInstance, IDD_LOG, hDlg, (DLGPROC)LogProc);
@@ -3275,11 +3277,11 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			lpttt = (LPTOOLTIPTEXT)lParam;
 			switch (lpttt->hdr.idFrom) {
 			case IDC_ABOUT:
-				utf8_to_wchar_no_alloc(lmprintf(MSG_306), wtooltip, ARRAYSIZE(wtooltip));
+				utf8_to_wchar_no_alloc(lmprintf(MSG_302), wtooltip, ARRAYSIZE(wtooltip));
 				lpttt->lpszText = wtooltip;
 				break;
 			case IDC_SETTINGS:
-				utf8_to_wchar_no_alloc(lmprintf(MSG_305), wtooltip, ARRAYSIZE(wtooltip));
+				utf8_to_wchar_no_alloc(lmprintf(MSG_301), wtooltip, ARRAYSIZE(wtooltip));
 				lpttt->lpszText = wtooltip;
 				break;
 			case IDC_LANG:
@@ -3287,7 +3289,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				lpttt->lpszText = wtooltip;
 				break;
 			case IDC_LOG:
-				utf8_to_wchar_no_alloc(lmprintf(MSG_307), wtooltip, ARRAYSIZE(wtooltip));
+				utf8_to_wchar_no_alloc(lmprintf(MSG_303), wtooltip, ARRAYSIZE(wtooltip));
 				lpttt->lpszText = wtooltip;
 				break;
 			}

@@ -107,8 +107,6 @@
 #define IDC_NOTIFICATION_LINE           1042
 #define IDC_ADVANCED_DEVICE_TOOLBAR     1043
 #define IDC_ADVANCED_FORMAT_TOOLBAR     1044
-#define IDC_WINDOWS_INSTALL             1047
-#define IDC_WINDOWS_TO_GO               1048
 #define IDC_CHECKSUM_TOOLBAR            1049
 #define IDC_MULTI_TOOLBAR               1050
 #define IDC_LANG                        1051

@@ -59,6 +59,7 @@ static HWINEVENTHOOK fp_weh = NULL;
 static char *fp_title_str = "Microsoft Windows", *fp_button_str = "Format disk";
 
 extern loc_cmd* selected_locale;
+extern int cbw, ddw;
 
 /*
  * https://blogs.msdn.microsoft.com/oldnewthing/20040802-00/?p=38283/
@@ -510,10 +511,10 @@ INT_PTR CALLBACK AboutCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 	const int edit_id[2] = {IDC_ABOUT_BLURB, IDC_ABOUT_COPYRIGHTS};
 	char about_blurb[2048];
 	const char* edit_text[2] = {about_blurb, additional_copyrights};
-	HWND hEdit[2];
+	HWND hEdit[2], hCtrl;
 	TEXTRANGEW tr;
 	ENLINK* enl;
-	RECT rect;
+	RECT rc;
 	REQRESIZE* rsz;
 	wchar_t wUrl[256];
 	static BOOL resized_already = TRUE;
@@ -525,6 +526,12 @@ INT_PTR CALLBACK AboutCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 		apply_localization(IDD_ABOUTBOX, hDlg);
 		SetTitleBarIcon(hDlg);
 		CenterDialog(hDlg);
+		// Resize the 'License' button
+		hCtrl = GetDlgItem(hDlg, IDC_ABOUT_LICENSE);
+		GetWindowRect(hCtrl, &rc);
+		MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
+		SetWindowPos(hCtrl, NULL, rc.left, rc.top,
+			max(rc.right - rc.left, GetTextSize(hCtrl, NULL).cx + cbw), rc.bottom - rc.top, SWP_NOZORDER);
 		static_sprintf(about_blurb, about_blurb_format, lmprintf(MSG_174|MSG_RTF),
 			lmprintf(MSG_175|MSG_RTF, rufus_version[0], rufus_version[1], rufus_version[2]),
 			right_to_left_mode?"Akeo \\\\ Pete Batard 2011-2018 © Copyright":"Copyright © 2011-2018 Pete Batard / Akeo",
@@ -550,8 +557,8 @@ INT_PTR CALLBACK AboutCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 		case EN_REQUESTRESIZE:
 			if (!resized_already) {
 				resized_already = TRUE;
-				GetWindowRect(GetDlgItem(hDlg, edit_id[0]), &rect);
-				dy = rect.bottom - rect.top;
+				GetWindowRect(GetDlgItem(hDlg, edit_id[0]), &rc);
+				dy = rc.bottom - rc.top;
 				rsz = (REQRESIZE *)lParam;
 				dy -= rsz->rc.bottom - rsz->rc.top;
 				ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, edit_id[0]), 0, 0, 0, -dy, 1.0f);
