@@ -749,9 +749,9 @@ static BOOL FormatDrive(DWORD DriveIndex)
 	task_number = 0;
 	fs_index = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
 
-	uprintf("%s format was selected\n", IsChecked(IDC_QUICKFORMAT)?"Quick":"Slow");
+	uprintf("%s format was selected\n", IsChecked(IDC_QUICK_FORMAT)?"Quick":"Slow");
 	pfFormatEx(wVolumeName, SelectedDrive.MediaType, wFSType, wLabel,
-		IsChecked(IDC_QUICKFORMAT), ulClusterSize, FormatExCallback);
+		IsChecked(IDC_QUICK_FORMAT), ulClusterSize, FormatExCallback);
 
 	if ((fs == FS_NTFS) && (enable_ntfs_compression) && (pfEnableVolumeCompression != NULL)) {
 		wVolumeName[wcslen(wVolumeName)] = '\\';	// Add trailing backslash back again
@@ -1755,7 +1755,7 @@ DWORD WINAPI FormatThread(void* param)
 		}
 	}
 
-	if (IsChecked(IDC_BADBLOCKS)) {
+	if (IsChecked(IDC_BAD_BLOCKS)) {
 		do {
 			// create a log file for bad blocks report. Since %USERPROFILE% may
 			// have localized characters, we use the UTF-8 API.

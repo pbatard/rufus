@@ -597,7 +597,7 @@ static void SetFSFromISO(void)
 			IGNORE_RETVAL(ComboBox_SetCurSel(hFileSystem, i));
 	}
 
-	SendMessage(hMainDialog, WM_COMMAND, (CBN_SELCHANGE<<16) | IDC_FILESYSTEM,
+	SendMessage(hMainDialog, WM_COMMAND, (CBN_SELCHANGE<<16) | IDC_FILE_SYSTEM,
 		ComboBox_GetCurSel(hFileSystem));
 }
 
@@ -684,9 +684,9 @@ static void EnableBootOptions(BOOL enable, BOOL remove_checkboxes)
 	EnableMBRBootOptions(actual_enable, remove_checkboxes);
 
 	EnableWindow(GetDlgItem(hMainDialog, IDC_LABEL), actual_enable);
-	EnableWindow(GetDlgItem(hMainDialog, IDC_QUICKFORMAT), actual_enable);
-	EnableWindow(GetDlgItem(hMainDialog, IDC_BADBLOCKS), actual_enable_bb);
-	EnableWindow(GetDlgItem(hMainDialog, IDC_NBPASSES), actual_enable_bb);
+	EnableWindow(GetDlgItem(hMainDialog, IDC_QUICK_FORMAT), actual_enable);
+	EnableWindow(GetDlgItem(hMainDialog, IDC_BAD_BLOCKS), actual_enable_bb);
+	EnableWindow(GetDlgItem(hMainDialog, IDC_NB_PASSES), actual_enable_bb);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_EXTENDED_LABEL), actual_enable);
 }
 
@@ -830,7 +830,7 @@ static void InitProgress(BOOL bOnlyFormat)
 		nb_slots[OP_FORMAT] = -1;
 	} else {
 		nb_slots[OP_ANALYZE_MBR] = 1;
-		if (IsChecked(IDC_BADBLOCKS)) {
+		if (IsChecked(IDC_BAD_BLOCKS)) {
 			nb_slots[OP_BADBLOCKS] = -1;
 		}
 		if (bt != BT_NON_BOOTABLE) {
@@ -858,7 +858,7 @@ static void InitProgress(BOOL bOnlyFormat)
 			nb_slots[OP_FIX_MBR] = 1;
 			nb_slots[OP_CREATE_FS] =
 				nb_steps[ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem))];
-			if ( (!IsChecked(IDC_QUICKFORMAT))
+			if ( (!IsChecked(IDC_QUICK_FORMAT))
 			  || ((fs == FS_FAT32) && ((SelectedDrive.DiskSize >= LARGE_FAT32_SIZE) || (force_large_fat32))) ) {
 				nb_slots[OP_FORMAT] = -1;
 			}
@@ -1372,7 +1372,7 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 			SetMBRProps();
 			SetProposedLabel(ComboBox_GetCurSel(hDeviceList));
 		} else {
-			SendMessage(hMainDialog, WM_COMMAND, (CBN_SELCHANGE << 16) | IDC_FILESYSTEM,
+			SendMessage(hMainDialog, WM_COMMAND, (CBN_SELCHANGE << 16) | IDC_FILE_SYSTEM,
 				ComboBox_GetCurSel(hFileSystem));
 		}
 		// Lose the focus on the select ISO (but place it on Close)
@@ -2013,7 +2013,7 @@ static void GetHalfDropwdownWidth(HWND hDlg)
 			msg_id++;
 		}
 		safe_sprintf(tmp, 64, "%d %s", i, lmprintf(msg_id));
-		hw = max(hw, GetTextSize(GetDlgItem(hDlg, IDC_CLUSTERSIZE), lmprintf(MSG_030, tmp)).cx);
+		hw = max(hw, GetTextSize(GetDlgItem(hDlg, IDC_CLUSTER_SIZE), lmprintf(MSG_030, tmp)).cx);
 	}
 	// We don't go over file systems, because none of them will be longer than "Super Floppy Disk"
 	// We do however go over the BIOS vs UEFI entries, as some of these are translated
@@ -2028,7 +2028,7 @@ static void GetHalfDropwdownWidth(HWND hDlg)
 	// Finally, we must ensure that we'll have enough space for the 2 checkbox controls
 	// that end up with a half dropdown
 	hw = max(hw, GetTextWidth(hDlg, IDC_RUFUS_MBR) - sw);
-	hw = max(hw, GetTextWidth(hDlg, IDC_BADBLOCKS) - sw);
+	hw = max(hw, GetTextWidth(hDlg, IDC_BAD_BLOCKS) - sw);
 
 	// Add the width of a blank dropdown
 	hw += ddw;
@@ -2057,7 +2057,7 @@ static void GetFullWidth(HWND hDlg)
 	int i;
 
 	// Compute the minimum size needed for the Boot Selection dropdown
-	GetWindowRect(GetDlgItem(hDlg, IDC_BOOT_TYPE), &rc);
+	GetWindowRect(GetDlgItem(hDlg, IDC_BOOT_SELECTION), &rc);
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
 
 	bsw = max(rc.right - rc.left, GetTextSize(hBootType, lmprintf(MSG_279)).cx + ddw);
@@ -2155,7 +2155,7 @@ static void PositionControls(HWND hDlg)
 	SetWindowPos(hProgress, NULL, rc.left, rc.top, rc.right - rc.left, dropdown_height, SWP_NOZORDER);
 
 	// Get the height of a typical row
-	hCtrl = GetDlgItem(hDlg, IDS_BOOT_TYPE_TXT);
+	hCtrl = GetDlgItem(hDlg, IDS_BOOT_SELECTION_TXT);
 	GetWindowRect(hCtrl, &rc);
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
 	row_height = rc.top;
@@ -2174,7 +2174,7 @@ static void PositionControls(HWND hDlg)
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
 	advanced_device_section_height = rc.bottom - advanced_device_section_height;
 
-	hCtrl = GetDlgItem(hDlg, IDC_QUICKFORMAT);
+	hCtrl = GetDlgItem(hDlg, IDC_QUICK_FORMAT);
 	GetWindowRect(hCtrl, &rc);
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
 	advanced_format_section_height = rc.top;
@@ -2265,7 +2265,7 @@ static void PositionControls(HWND hDlg)
 	}
 
 	// Resize the boot selection dropdown
-	hCtrl = GetDlgItem(hDlg, IDC_BOOT_TYPE);
+	hCtrl = GetDlgItem(hDlg, IDC_BOOT_SELECTION);
 	GetWindowRect(hCtrl, &rc);
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
 	SetWindowPos(hCtrl, HWND_TOP, rc.left, rc.top, bsw, rc.bottom - rc.top, 0);
@@ -2280,7 +2280,7 @@ static void PositionControls(HWND hDlg)
 	SetWindowPos(hCtrl, NULL, rc.left, sz.cy - 1,
 		rc.right - rc.left, dropdown_height + button_fudge, SWP_NOZORDER);
 
-	hCtrl = GetDlgItem(hDlg, IDC_BOOT_TYPE);
+	hCtrl = GetDlgItem(hDlg, IDC_BOOT_SELECTION);
 	GetWindowRect(hCtrl, &rcSelectedImage);
 	MapWindowPoints(NULL, hDlg, (POINT*)&rcSelectedImage, 2);
 	hCtrl = GetDlgItem(hDlg, IDC_HASH);
@@ -2325,13 +2325,13 @@ static void InitDialog(HWND hDlg)
 	hDeviceList = GetDlgItem(hDlg, IDC_DEVICE);
 	hPartitionScheme = GetDlgItem(hDlg, IDC_PARTITION_TYPE);
 	hTargetSystem = GetDlgItem(hDlg, IDC_TARGET_SYSTEM);
-	hFileSystem = GetDlgItem(hDlg, IDC_FILESYSTEM);
-	hClusterSize = GetDlgItem(hDlg, IDC_CLUSTERSIZE);
+	hFileSystem = GetDlgItem(hDlg, IDC_FILE_SYSTEM);
+	hClusterSize = GetDlgItem(hDlg, IDC_CLUSTER_SIZE);
 	hLabel = GetDlgItem(hDlg, IDC_LABEL);
 	hProgress = GetDlgItem(hDlg, IDC_PROGRESS);
-	hBootType = GetDlgItem(hDlg, IDC_BOOT_TYPE);
+	hBootType = GetDlgItem(hDlg, IDC_BOOT_SELECTION);
 	hSelectImage = GetDlgItem(hDlg, IDC_SELECT);
-	hNBPasses = GetDlgItem(hDlg, IDC_NBPASSES);
+	hNBPasses = GetDlgItem(hDlg, IDC_NB_PASSES);
 	hDiskID = GetDlgItem(hDlg, IDC_DISK_ID);
 	hStart = GetDlgItem(hDlg, IDC_START);
 
@@ -2436,7 +2436,7 @@ static void InitDialog(HWND hDlg)
 	StrArrayCreate(&BlockingProcess, 16);
 	StrArrayCreate(&ImageList, 16);
 	// Set various checkboxes
-	CheckDlgButton(hDlg, IDC_QUICKFORMAT, BST_CHECKED);
+	CheckDlgButton(hDlg, IDC_QUICK_FORMAT, BST_CHECKED);
 	CheckDlgButton(hDlg, IDC_EXTENDED_LABEL, BST_CHECKED);
 
 	CreateAdditionalControls(hDlg);
@@ -2454,8 +2454,8 @@ static void InitDialog(HWND hDlg)
 	CreateTooltip(hLabel, lmprintf(MSG_159), -1);
 	CreateTooltip(hAdvancedDeviceToolbar, lmprintf(MSG_160), -1);
 	CreateTooltip(hAdvancedFormatToolbar, lmprintf(MSG_160), -1);
-	CreateTooltip(GetDlgItem(hDlg, IDC_BADBLOCKS), lmprintf(MSG_161), -1);
-	CreateTooltip(GetDlgItem(hDlg, IDC_QUICKFORMAT), lmprintf(MSG_162), -1);
+	CreateTooltip(GetDlgItem(hDlg, IDC_BAD_BLOCKS), lmprintf(MSG_161), -1);
+	CreateTooltip(GetDlgItem(hDlg, IDC_QUICK_FORMAT), lmprintf(MSG_162), -1);
 	CreateTooltip(hBootType, lmprintf(MSG_164), -1);
 	CreateTooltip(hSelectImage, lmprintf(MSG_165), -1);
 	CreateTooltip(GetDlgItem(hDlg, IDC_EXTENDED_LABEL), lmprintf(MSG_166), 10000);
@@ -2860,7 +2860,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			bt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
 			EnableControls(TRUE);
 			SetFileSystemAndClusterSize(NULL);
-			SendMessage(hMainDialog, WM_COMMAND, (CBN_SELCHANGE << 16) | IDC_FILESYSTEM,
+			SendMessage(hMainDialog, WM_COMMAND, (CBN_SELCHANGE << 16) | IDC_FILE_SYSTEM,
 				ComboBox_GetCurSel(hFileSystem));
 			break;
 		case IDC_ADVANCED_FORMAT_OPTIONS:
@@ -2882,12 +2882,12 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			nb_devices = ComboBox_GetCount(hDeviceList);
 			PrintStatusDebug(0, (nb_devices==1)?MSG_208:MSG_209, nb_devices);
 			PopulateProperties(ComboBox_GetCurSel(hDeviceList));
-			SendMessage(hMainDialog, WM_COMMAND, (CBN_SELCHANGE<<16) | IDC_FILESYSTEM,
+			SendMessage(hMainDialog, WM_COMMAND, (CBN_SELCHANGE<<16) | IDC_FILE_SYSTEM,
 				ComboBox_GetCurSel(hFileSystem));
 			nDeviceIndex = ComboBox_GetCurSel(hDeviceList);
 			DeviceNum = (nDeviceIndex == CB_ERR) ? 0 : (DWORD)ComboBox_GetItemData(hDeviceList, nDeviceIndex);
 			break;
-		case IDC_NBPASSES:
+		case IDC_NB_PASSES:
 			if (HIWORD(wParam) != CBN_SELCHANGE)
 				break;
 			SetPassesTooltip();
@@ -2907,22 +2907,22 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			SetFileSystemAndClusterSize(NULL);
 			EnableMBRBootOptions(TRUE, FALSE);
 			break;
-		case IDC_FILESYSTEM:
+		case IDC_FILE_SYSTEM:
 			if (HIWORD(wParam) != CBN_SELCHANGE)
 				break;
 			fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
 			SetClusterSizes(fs);
 			// Disable/restore the quick format control depending on large FAT32 or ReFS
 			if ( ((fs == FS_FAT32) && ((SelectedDrive.DiskSize > LARGE_FAT32_SIZE) || (force_large_fat32))) || (fs == FS_REFS) ) {
-				if (IsWindowEnabled(GetDlgItem(hMainDialog, IDC_QUICKFORMAT))) {
-					uQFChecked = IsChecked(IDC_QUICKFORMAT);
-					CheckDlgButton(hMainDialog, IDC_QUICKFORMAT, BST_CHECKED);
-					EnableWindow(GetDlgItem(hMainDialog, IDC_QUICKFORMAT), FALSE);
+				if (IsWindowEnabled(GetDlgItem(hMainDialog, IDC_QUICK_FORMAT))) {
+					uQFChecked = IsChecked(IDC_QUICK_FORMAT);
+					CheckDlgButton(hMainDialog, IDC_QUICK_FORMAT, BST_CHECKED);
+					EnableWindow(GetDlgItem(hMainDialog, IDC_QUICK_FORMAT), FALSE);
 				}
 			} else {
-				if (!IsWindowEnabled(GetDlgItem(hMainDialog, IDC_QUICKFORMAT))) {
-					CheckDlgButton(hMainDialog, IDC_QUICKFORMAT, uQFChecked);
-					EnableWindow(GetDlgItem(hMainDialog, IDC_QUICKFORMAT), TRUE);
+				if (!IsWindowEnabled(GetDlgItem(hMainDialog, IDC_QUICK_FORMAT))) {
+					CheckDlgButton(hMainDialog, IDC_QUICK_FORMAT, uQFChecked);
+					EnableWindow(GetDlgItem(hMainDialog, IDC_QUICK_FORMAT), TRUE);
 				}
 			}
 			if (fs < 0) {
@@ -2939,7 +2939,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			EnableMBRBootOptions(TRUE, FALSE);
 			SetMBRProps();
 			break;
-		case IDC_BOOT_TYPE:
+		case IDC_BOOT_SELECTION:
 			bt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
 			if ((HIWORD(wParam) != CBN_SELCHANGE) || (bt == selection_default))
 				break;

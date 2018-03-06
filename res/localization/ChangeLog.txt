@@ -19,7 +19,7 @@ o Version 1.0.23 (2018.??.??)
   - All positioning ('m', 's') has now been removed as well as some controls, for the 3.0 UI redesign
   - Removed: MSG_086, MSG_087, MSG_163
   - *NEW*      IDS_DRIVE_PROPERTIES_TXT "Drive Properties"
-  - *NEW*      IDS_BOOT_TYPE_TXT "Boot selection"
+  - *NEW*      IDS_BOOT_SELECTION_TXT "Boot selection"
   - *NEW*      IDC_SELECT "SELECT"
   - *NEW*      IDS_IMAGE_OPTION_TXT "Image Option"
   - *UPDATED*  IDS_PARTITION_TYPE_TXT Partition scheme and target system type -> "Partition scheme"
