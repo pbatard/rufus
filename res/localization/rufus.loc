@@ -32,8 +32,6 @@
 #      rufus.exe -l zh-CN
 #      rufus.exe -l 0x0404
 #      rufus.exe -l 0x0804
-# 8. If you need to resize a control or a dialog to fid the translated text, use the 'm' (Move) or 's' (reSize)
-#    options. For an example of how these commands work, see https://github.com/pbatard/rufus/wiki/Localization
 #
 # Tips:
 # - Please make sure that you edit the language include *your* name and e-mail in MSG_176. It will be displayed
@@ -99,7 +97,6 @@ v 1.0.23
 g IDD_DIALOG
 t IDS_DRIVE_PROPERTIES_TXT "Drive Properties"
 t IDS_DEVICE_TXT "Device"
-# TODO: use MSG_278 for translations
 t IDS_BOOT_SELECTION_TXT "Boot selection"
 t IDC_SELECT "Select"
 t IDS_IMAGE_OPTION_TXT "Image Option"
@@ -147,7 +144,7 @@ t IDC_LOG_CLEAR "Clear"
 t IDC_LOG_SAVE "Save"
 t IDCANCEL "Close"
 
-# About -> Updates
+# Update Settings
 g IDD_UPDATE_POLICY
 t IDD_UPDATE_POLICY "Update policy and settings"
 t IDS_UPDATE_SETTINGS_GRP "Settings"
@@ -278,6 +275,7 @@ t MSG_084 "This ISO image seems to use an obsolete version of '%s'.\n"
 	"Note: The new file will be downloaded in the current directory and once a "
 	"'%s' exists there, it will be reused automatically."
 t MSG_085 "Downloading '%s'"
+t MSG_086 "No image selected"
 t MSG_088 "Image is too big"
 t MSG_089 "The image is too big for the selected target."
 t MSG_090 "Unsupported ISO"
@@ -363,7 +361,8 @@ t MSG_122 "Hide %s"
 t MSG_150 "Method that will be used to create partitions."
 t MSG_151 "Type of computer you plan to use this bootable drive with. It is up to YOU to find whether your target is of BIOS or UEFI type.\n"
 	"Be mindful that CSM, which can be enabled or disabled on UEFI computers, means 'BIOS emulation', and is not really UEFI."
-t MSG_152 "Note: 'UEFI-CSM' means BIOS emulation under UEFI, and is not the same as genuine UEFI."
+# Note: You shouldn't translate 'Legacy Mode' below, as this is an option that usually appears in English in the UEFI settings.
+t MSG_152 "Note: 'UEFI-CSM' means BIOS emulation under UEFI (i.e. 'Legacy Mode') and is not the same as genuine UEFI."
 t MSG_153 "Test pattern: 0x%02X"
 t MSG_154 "Test pattern: 0x%02X, 0x%02X"
 t MSG_155 "Test pattern: 0x%02X, 0x%02X, 0x%02X"
@@ -564,6 +563,8 @@ t MSG_301 "Show application settings"
 t MSG_302 "Show information about this application"
 t MSG_303 "Show the log"
 t MSG_304 "Create a disk image of the selected device"
+t MSG_305 "Use this option to indicate whether you want to use this device to install Windows on another disk, "
+	"or if you want to run Windows directly from this drive (Windows To Go)."
 
 ################################################################################
 ############################# TRANSLATOR END COPY ##############################
@@ -576,6 +577,7 @@ b "en-US"
 
 g IDD_DIALOG
 t IDS_DEVICE_TXT "الجهاز"
+t IDS_BOOT_SELECTION_TXT "نوع الإقلاع"
 t IDS_PARTITION_TYPE_TXT "مخطط التقسيم ونوع النظام المستهدف"
 t IDS_FILE_SYSTEM_TXT "نظام الملفات"
 t IDS_CLUSTER_SIZE_TXT "حجم الكلستر"
@@ -614,7 +616,7 @@ t IDC_LOG_CLEAR "مسح"
 t IDC_LOG_SAVE "حفظ"
 t IDCANCEL "إغلاق"
 
-# About -> Updates
+# Update Settings
 g IDD_UPDATE_POLICY
 t IDD_UPDATE_POLICY "سياسة التحديث وإعدادات"
 t IDS_UPDATE_SETTINGS_GRP "إعدادات"
@@ -745,6 +747,7 @@ t MSG_084 "صورة الـISO يبدو استخدامها لإصدار قديم 
 	"ملاحظة: سيتم تحميل ملف جديد في الدليل الحالي وبعد "
 	"العثور على ‘%s’ هناك, سوف يتم إعادة إستخدامه تلقائياً."
 t MSG_085 "تحميل '%s'"
+t MSG_086 "لم يتم إختيار الصورة"
 t MSG_088 "ملف الصورة (الإيميج) كبير جداً"
 t MSG_089 "ملف الصورة (الإيميج) كبير جداً بالنسبة للهدف المحدد."
 t MSG_090 "ISO غير مدعومة"
@@ -982,7 +985,6 @@ t MSG_275 "الصورة التي اخترتها هي صورة 'ISOHybrid'. هذ�
 	"فضلا اختر النمط الذي تريده لكتابة هاته الصورة:"
 t MSG_276 "كتابة في نمط %s (موصى به)"
 t MSG_277 "كتابة في نمط %s"
-t MSG_278 "نوع الإقلاع"
 t MSG_279 "لا يمكن الإقلاع منه"
 t MSG_280 "اختيار الصورة"
 t MSG_281 "(فضلا اختر صورة)"
@@ -1017,6 +1019,7 @@ b "en-US"
 # Main dialog
 g IDD_DIALOG
 t IDS_DEVICE_TXT "Cihaz"
+t IDS_BOOT_SELECTION_TXT "Önyükləmə növü"
 t IDS_PARTITION_TYPE_TXT "Disk Hissəsi və Hədəf Sistem Növü"
 t IDS_FILE_SYSTEM_TXT "Fayl Sistemi"
 t IDS_CLUSTER_SIZE_TXT "Ayırma Tək Ölçüsü"
@@ -1055,27 +1058,14 @@ t IDC_LOG_CLEAR "Təmizlə"
 t IDC_LOG_SAVE "Yadda saxla"
 t IDCANCEL "Bağla"
 
-# About -> Updates
+# Update Settings
 g IDD_UPDATE_POLICY
-s IDD_UPDATE_POLICY +20,0
-s IDC_POLICY +20,0
 t IDD_UPDATE_POLICY "Yeniləmə Prinsipi və Nizamlar"
 t IDS_UPDATE_SETTINGS_GRP "Nizamlar"
-s IDS_UPDATE_SETTINGS_GRP +20,0
 t IDS_UPDATE_FREQUENCY_TXT "Yeniləmələri Yoxla"
-s IDS_UPDATE_FREQUENCY_TXT +10,0
-m IDC_UPDATE_FREQUENCY +2,0
-s IDC_UPDATE_FREQUENCY +24,0
 t IDS_INCLUDE_BETAS_TXT "Beta versiyası keçsin"
-s IDS_INCLUDE_BETAS_TXT +10,0
-m IDC_INCLUDE_BETAS +2,0
 t IDC_CHECK_NOW "İndi Yoxla"
-m IDC_CHECK_NOW +15,0
-s IDC_CHECK_NOW +10,0
-m IDS_CHECK_NOW_GRP +20,0
 t IDCANCEL "Bağla"
-m IDCANCEL +15,0
-s IDCANCEL +10,0
 
 # Dialog that appears when a new version is available
 g IDD_NEW_VERSION
@@ -1198,6 +1188,7 @@ t MSG_084 "Bu ISO faylı '%s'in köhnə bir versiyanı istifadə edir kimi gör�
 	"Qeyd: Yeni Fayl mövcud göstəriciyə yüklənəcək və  "
 	"'%s'  Orda mövcud olduqda, avtomatik olaraq istifadə ediləcək."
 t MSG_085 "'%s' yüklənir"
+t MSG_086 "Fayl seçilmədi"
 t MSG_088 "Fayl çox böyükdür"
 t MSG_089 "Fayl seçilən hədəf üçün çox böyükdür."
 t MSG_090 "Dəstəklənməyən ISO"
@@ -1434,7 +1425,6 @@ t MSG_275 "Seçdiyiniz əks olunma bir 'ISOHybrid' faylıdır. Bu da faylın ya 
 	"Lütfən bu əks olunmanın yazılmasında istifadə etmək istədiyiniz rejimi seçin:"
 t MSG_276 "%s rejimində yazdır (Təklif edilən)"
 t MSG_277 "%s rejimində yazdır"
-t MSG_278 "Önyükləmə növü"
 t MSG_279 "Önyüklənə bilən deyil"
 t MSG_280 "Fayl seçimi"
 t MSG_281 "(Lütfən bir fayl seçin)"
@@ -1467,6 +1457,7 @@ b "en-US"
 # Main dialog
 g IDD_DIALOG
 t IDS_DEVICE_TXT "Устройство"
+t IDS_BOOT_SELECTION_TXT "Тип на Зареждането"
 t IDS_PARTITION_TYPE_TXT "Схема на дяла и тип на интерфейса"
 t IDS_FILE_SYSTEM_TXT "Файлова система"
 t IDS_CLUSTER_SIZE_TXT "Размер на клъстера"
@@ -1494,7 +1485,6 @@ t IDCANCEL "Затвори"
 # Notifications. You can trigger one of these by using Alt-R and re-launching Rufus
 g IDD_NOTIFICATION
 t IDC_MORE_INFO "Повече Информация"
-s IDC_MORE_INFO +16,0
 t IDYES "Да"
 t IDNO "Не"
 
@@ -1505,24 +1495,8 @@ t IDC_LOG_CLEAR "Изчистир"
 t IDC_LOG_SAVE "Запази"
 t IDCANCEL "Затвори"
 
-# About -> Updates
+# Update Settings
 g IDD_UPDATE_POLICY
-s IDS_UPDATE_SETTINGS_GRP +70,0
-m IDS_UPDATE_SETTINGS_GRP -61,0
-m IDC_UPDATE_FREQUENCY -41,0
-s IDC_UPDATE_FREQUENCY +57,0
-m IDC_INCLUDE_BETAS -41,0
-m IDS_UPDATE_FREQUENCY_TXT -61,0
-s IDS_UPDATE_FREQUENCY_TXT +27,0
-m IDS_INCLUDE_BETAS_TXT -61,0
-s IDS_INCLUDE_BETAS_TXT +27,0
-m IDS_CHECK_NOW_GRP +9,0
-s IDS_CHECK_NOW_GRP -9,0
-s IDC_CHECK_NOW +5,0
-m IDC_CHECK_NOW +2,0
-s IDCANCEL +5,0
-m IDCANCEL +2,0
-
 t IDD_UPDATE_POLICY "Политика на актуализация и настройки"
 t IDS_UPDATE_SETTINGS_GRP "Настройки"
 t IDS_UPDATE_FREQUENCY_TXT "Провери за Актуализация"
@@ -1652,6 +1626,7 @@ t MSG_084 "Изглежда че този ISO образ  използва ст�
 	"Бележка: Новият файл ще бъде изтеглен в настоящата директория  и щом бъде изтеглен "
 	"'%s',ще бъде използван автоматично."
 t MSG_085 "Изтегляне '%s'"
+t MSG_086 "Не е избран образ"
 t MSG_088 "Образът е твърде голям"
 t MSG_089 "Образът е твърде голям за избраната цел."
 t MSG_090 "Неподдържан ISO"
@@ -1887,7 +1862,6 @@ t MSG_275 "Образът който сте избрали е тип 'ISOHybrid'
 	"Моля изберете режимът с който желаете да запишете този образ:"
 t MSG_276 "Запиши в режим %s (Препорачителен)"
 t MSG_277 "Запиши в режим %s"
-t MSG_278 "Тип на Зареждането"
 t MSG_279 "Не Зареждащ"
 t MSG_280 "Избор на Образ"
 t MSG_281 "(Моля изберете образ)"
@@ -1922,6 +1896,7 @@ b "en-US"
 # Main dialog
 g IDD_DIALOG
 t IDS_DEVICE_TXT "设备"
+t IDS_BOOT_SELECTION_TXT "引导类型"
 t IDS_PARTITION_TYPE_TXT "分区方案和目标系统类型"
 t IDS_FILE_SYSTEM_TXT "文件系统"
 t IDS_CLUSTER_SIZE_TXT "簇大小"
@@ -1966,16 +1941,12 @@ t IDC_LOG_CLEAR "清除"
 t IDC_LOG_SAVE "保存"
 t IDCANCEL "关闭"
 
-# About -> Updates
+# Update Settings
 g IDD_UPDATE_POLICY
 t IDD_UPDATE_POLICY "更新策略和设置"
 t IDS_UPDATE_SETTINGS_GRP "设置"
 t IDS_UPDATE_FREQUENCY_TXT "检查更新:"
 t IDS_INCLUDE_BETAS_TXT "包括测试版本:"
-s IDS_UPDATE_FREQUENCY_TXT -30,0
-s IDS_INCLUDE_BETAS_TXT -30,0
-m IDC_UPDATE_FREQUENCY -30,0
-m IDC_INCLUDE_BETAS -30,0
 t IDC_CHECK_NOW "立即检查"
 t IDCANCEL "关闭"
 
@@ -2098,6 +2069,7 @@ t MSG_084 "这个 ISO 镜像似乎使用一个过时的 '%s' 版本。\n"
 	"如果不知道如何选择，请选择【是】。\n\n"
 	"注意：新文件将会下载到当前目录，一旦 '%s' 存在则会被自动选用。"
 t MSG_085 "下载 '%s' 中"
+t MSG_086 "未选择镜像"
 t MSG_088 "镜像文件过大"
 t MSG_089 "镜像对于选择目标来说太大。"
 t MSG_090 "不支持的 ISO"
@@ -2326,7 +2298,6 @@ t MSG_275 "您选择的镜像是一个 'ISOHybrid' (混合式)镜像。这意味
 	"请选择您想用于写入这个镜像所使用的模式:"
 t MSG_276 "以 %s 模式写入(推荐)"
 t MSG_277 "以 %s 模式写入"
-t MSG_278 "引导类型"
 t MSG_279 "非可引导"
 t MSG_280 "镜像选择"
 t MSG_281 "(请选择一个镜像)"
@@ -2359,6 +2330,7 @@ b "en-US"
 # Main dialog
 g IDD_DIALOG
 t IDS_DEVICE_TXT "裝置"
+t IDS_BOOT_SELECTION_TXT "開機模式"
 t IDS_PARTITION_TYPE_TXT "資料分割配置及系統類型"
 t IDS_FILE_SYSTEM_TXT "檔案系統"
 t IDS_CLUSTER_SIZE_TXT "配置單元大小"
@@ -2398,16 +2370,12 @@ t IDC_LOG_CLEAR "清除"
 t IDC_LOG_SAVE "儲存"
 t IDCANCEL "關閉"
 
-# About -> Updates
+# Update Settings
 g IDD_UPDATE_POLICY
 t IDD_UPDATE_POLICY "版本更新"
 t IDS_UPDATE_SETTINGS_GRP "設定"
 t IDS_UPDATE_FREQUENCY_TXT "自動檢查更新"
 t IDS_INCLUDE_BETAS_TXT "包含測試版本"
-s IDS_UPDATE_FREQUENCY_TXT -30,0
-s IDS_INCLUDE_BETAS_TXT -30,0
-m IDC_UPDATE_FREQUENCY -30,0
-m IDC_INCLUDE_BETAS -30,0
 t IDC_CHECK_NOW "立即檢查"
 t IDCANCEL "關閉"
 
@@ -2527,6 +2495,7 @@ t MSG_084 "此 ISO 映像檔似乎使用較舊版本的 '%s'，\n開機選單可
 	"如果你看不懂或不知該如何抉擇，強烈建議選「是」\n\n"
 	"注意: 一經下載後，Rufus 未來會自動套用新版 '%s'"
 t MSG_085 "下載中 '%s'"
+t MSG_086 "未選取任何映像檔"
 t MSG_088 "映像檔之檔案大小過大"
 t MSG_089 "此映像檔之檔案大小超過裝置可支援的空間"
 t MSG_090 "不支援的 ISO 映像檔"
@@ -2728,7 +2697,6 @@ t MSG_275 "你選擇的映像檔為 'ISOHybrid' 格式。該檔案格式可以�
 	"請選擇寫入模式: "
 t MSG_276 "以 %s 模式寫入 (建議)"
 t MSG_277 "以 %s 模式寫入"
-t MSG_278 "開機模式"
 t MSG_279 "不可開機"
 t MSG_280 "選擇映像檔"
 t MSG_281 "(請選擇一個映像檔)"
@@ -2761,6 +2729,7 @@ b "en-US"
 # Main dialog
 g IDD_DIALOG
 t IDS_DEVICE_TXT "Uređaj"
+t IDS_BOOT_SELECTION_TXT "Boot tip"
 t IDS_PARTITION_TYPE_TXT "Shema particije i ciljani datotečni sustav"
 t IDS_FILE_SYSTEM_TXT "Sustav datoteka"
 t IDS_CLUSTER_SIZE_TXT "Veličina grupiranja"
@@ -2798,12 +2767,8 @@ t IDC_LOG_CLEAR "Očisti"
 t IDC_LOG_SAVE "Spremi"
 t IDCANCEL "Zatvori"
 
-# About -> Updates
+# Update Settings
 g IDD_UPDATE_POLICY
-s IDS_UPDATE_FREQUENCY_TXT -10,0
-m IDC_UPDATE_FREQUENCY -10,0
-s IDC_UPDATE_FREQUENCY +13,0
-m IDC_INCLUDE_BETAS -10,0
 t IDD_UPDATE_POLICY "Ažuriraj postavke"
 t IDS_UPDATE_SETTINGS_GRP "Postavke"
 t IDS_UPDATE_FREQUENCY_TXT "Provjeri ažuriranja"
@@ -2931,6 +2896,7 @@ t MSG_084 "Ova ISO slika koristi staru verziju '%s'.\n"
 	"Preporučamo da odabarete 'Da'.\n\n"
 	"Nova datoteka preuzet će se u isti direktorij."
 t MSG_085 "Preuzimam '%s'"
+t MSG_086 "Nema odabira"
 t MSG_088 "Slika je prevelika"
 t MSG_089 "Ime mora biti manje za odabranu metu."
 t MSG_090 "Nepodržani ISO"
@@ -3166,7 +3132,6 @@ t MSG_275 "Slika koju ste odabrali je 'ISOHybrid'. Takva datoteka može biti zap
 	"Molimo odaberite metodu za ovu operaciju:"
 t MSG_276 "Metodom %s (Preporučeno)"
 t MSG_277 "Metodom %s"
-t MSG_278 "Boot tip"
 t MSG_279 "Non bootable"
 t MSG_280 "Odabir datoteke"
 t MSG_281 "(Molim odaberite datoteku)"
@@ -3199,6 +3164,7 @@ b "en-US"
 # Main dialog
 g IDD_DIALOG
 t IDS_DEVICE_TXT "Zařízení"
+t IDS_BOOT_SELECTION_TXT "Typ bootu"
 t IDS_PARTITION_TYPE_TXT "Oddíl a typ cílového systému"
 t IDS_FILE_SYSTEM_TXT "Souborový systém"
 t IDS_CLUSTER_SIZE_TXT "Velikost clusteru"
@@ -3236,18 +3202,12 @@ t IDC_LOG_CLEAR "Smazat"
 t IDC_LOG_SAVE "Uložit"
 t IDCANCEL "Zavřít"
 
-# About -> Updates
+# Update Settings
 g IDD_UPDATE_POLICY
 t IDD_UPDATE_POLICY "Zásady aktualizací a nastavení"
 t IDS_UPDATE_SETTINGS_GRP "Nastavení automatických aktualizací"
 t IDS_UPDATE_FREQUENCY_TXT "Kontrolovat"
-s IDS_UPDATE_FREQUENCY_TXT -10,0
-m IDC_UPDATE_FREQUENCY -10,0
-s IDC_UPDATE_FREQUENCY +10,0
 t IDS_INCLUDE_BETAS_TXT "Zahrnout beta verze"
-s IDS_INCLUDE_BETAS_TXT -10,0
-m IDC_INCLUDE_BETAS -10,0
-s IDC_INCLUDE_BETAS +10,0
 t IDC_CHECK_NOW "Zkontrolovat"
 t IDCANCEL "Zavřít"
 
@@ -3372,6 +3332,7 @@ t MSG_084 "Zdá se, že tento ISO obraz používá zastaralou verzi '%s'.\n"
 	"Poznámka: Nový soubor %s bude stažen do aktuální složky "
 	"pro opětovné automatické použití."
 t MSG_085 "Stahuji '%s'"
+t MSG_086 "Nebyl zvolen žádný obraz disku"
 t MSG_088 "Obraz disku je příliš velký"
 t MSG_089 "Obraz disku je příliš velký pro zvolený cíl."
 t MSG_090 "Nepodporovaný ISO obraz"
@@ -3610,7 +3571,6 @@ t MSG_275 "Obráz, který jste si vybrali, je obraz 'ISO Hybrid'. To znamená, �
 	"Vyberte režim, který chcete použít k zapsání tohoto obrázu:"
 t MSG_276 "Režim zápisu %s (Doporučená)"
 t MSG_277 "Režim zápisu %s"
-t MSG_278 "Typ bootu"
 t MSG_279 "Není boot"
 t MSG_280 "Volba obrazu"
 t MSG_281 "(Prosím, vyberte obraz)"
@@ -3644,6 +3604,7 @@ b "en-US"
 # Main dialog
 g IDD_DIALOG
 t IDS_DEVICE_TXT "Enhed"
+t IDS_BOOT_SELECTION_TXT "Opstartstype"
 t IDS_PARTITION_TYPE_TXT "Partitionsordning og destinationssystem"
 t IDS_FILE_SYSTEM_TXT "Filsystem"
 t IDS_CLUSTER_SIZE_TXT "Klyngestørrelse"
@@ -3680,26 +3641,14 @@ t IDC_LOG_CLEAR "Slet"
 t IDC_LOG_SAVE "Gem"
 t IDCANCEL "Luk"
 
-# About -> Updates
+# Update Settings
 g IDD_UPDATE_POLICY
 t IDD_UPDATE_POLICY "Opdateringspolitik og indstillinger"
 t IDS_UPDATE_SETTINGS_GRP "Indstillinger"
-s IDS_UPDATE_SETTINGS_GRP +10,0
-s IDS_CHECK_NOW_GRP -10,0
-m IDS_CHECK_NOW_GRP +10,0
 t IDS_UPDATE_FREQUENCY_TXT "Søg efter opdateringer"
-s IDS_UPDATE_FREQUENCY_TXT +6,0
-m IDS_UPDATE_FREQUENCY_TXT -2,0
-m IDC_UPDATE_FREQUENCY -3,0
-s IDC_UPDATE_FREQUENCY +18,0
 t IDS_INCLUDE_BETAS_TXT "Inkluder betaversioner"
-s IDS_INCLUDE_BETAS_TXT +6,0
-m IDS_INCLUDE_BETAS_TXT -2,0
-m IDC_INCLUDE_BETAS -3,0
 t IDC_CHECK_NOW "Søg nu"
-m IDC_CHECK_NOW +5,0
 t IDCANCEL "Luk"
-m IDCANCEL +5,0
 
 # Dialog that appears when a new version is available
 g IDD_NEW_VERSION
@@ -3823,6 +3772,7 @@ t MSG_084 "Dette ISO-image lader til at bruge en forældet version af '%s'.\n"
 	"Bemærk: '%s' bliver gemt i den nuværende mappe og "
 	"bliver efterfølgende automatisk genanvendt, hvis den er der."
 t MSG_085 "Downloader '%s'"
+t MSG_086 "Ingen image-fil er valgt"
 t MSG_088 "Image-filen er for stor"
 t MSG_089 "Diskbilledet er for stort til den valgte destination."
 t MSG_090 "ISO-filen er ikke understøttet"
@@ -4045,7 +3995,6 @@ t MSG_275 "Det diskbillede du har valgt er et 'ISOHybrid'-diskbillede. Det betyd
 	"Vælg den metode som du ønsker at bruge til at skrive diskbilledet:"
 t MSG_276 "Skriv som %s (Anbefalet)"
 t MSG_277 "Skriv som %s"
-t MSG_278 "Opstartstype"
 t MSG_279 "Ikke startbar"
 t MSG_280 "Diskbillede"
 t MSG_281 "(Vælg et diskbillede)"
@@ -4080,6 +4029,7 @@ b "en-US"
 # Main dialog
 g IDD_DIALOG
 t IDS_DEVICE_TXT "Apparaat"
+t IDS_BOOT_SELECTION_TXT "Opstart type"
 t IDS_PARTITION_TYPE_TXT "Partitie-indeling en type doelsysteem"
 t IDS_FILE_SYSTEM_TXT "Bestandssysteem"
 t IDS_CLUSTER_SIZE_TXT "Clustergrootte"
@@ -4116,33 +4066,14 @@ t IDC_LOG_CLEAR "Verwijder"
 t IDC_LOG_SAVE "Bewaar"
 t IDCANCEL "Sluiten"
 
-# About -> Updates
+# Update Settings
 g IDD_UPDATE_POLICY
-s IDD_UPDATE_POLICY +30,0
 t IDD_UPDATE_POLICY "Update beleid en instellingen"
 t IDS_UPDATE_SETTINGS_GRP "Instellingen"
-m IDS_UPDATE_SETTINGS_GRP -15,0
-s IDS_UPDATE_SETTINGS_GRP +38,0
 t IDS_UPDATE_FREQUENCY_TXT "Controleer op updates"
-m IDS_UPDATE_FREQUENCY_TXT -15,0
-s IDS_UPDATE_FREQUENCY_TXT +5,0
 t IDS_INCLUDE_BETAS_TXT "Inclusief bèta versies"
-m IDS_INCLUDE_BETAS_TXT -15,0
 t IDC_CHECK_NOW "Controleer nu"
-m IDC_CHECK_NOW +22,0
-s IDC_CHECK_NOW +8,0
 t IDCANCEL "Sluiten"
-s IDC_UPDATE_FREQUENCY +34,0
-m IDC_UPDATE_FREQUENCY -10,0
-m IDC_INCLUDE_BETAS -10,0
-m IDS_CHECK_NOW_GRP +23,0
-s IDS_CHECK_NOW_GRP +6,0
-s IDC_POLICY +45,0
-m IDC_POLICY -15,0
-m IDCANCEL +23,0
-s IDCANCEL +6,0
-m IDC_ABOUT_ICON -5,0
-t IDOK "OK"
 
 # Dialog that appears when a new version is available
 g IDD_NEW_VERSION
@@ -4264,6 +4195,7 @@ t MSG_084 "Deze ISO image lijkt een verouderde versie te gebruiken van '%s'.\n"
 	"Opmerking: Het nieuwe bestand wordt naar de huidige map gedownload en als er al een"
 	"'%s' bestaat, zal deze automatisch hergebruiktworden."
 t MSG_085 "Bezig met downloaden van '%s'"
+t MSG_086 "Geen image geselecteerd."
 t MSG_088 "Image is te groot"
 t MSG_089 "De image is te groot voor het geselecteerde doelapparaat."
 t MSG_090 "Niet-ondersteunde ISO"
@@ -4484,7 +4416,6 @@ t MSG_275 "De geselecteerde image is een 'ISOHybride' image. Dit betekent dat he
 	"Selecteer a.u.b. de modus die u wilt gebruiken om deze image te schrijven:"
 t MSG_276 "Schrijf in %s modus (Aanbevolen)"
 t MSG_277 "Schrijf in %s modus"
-t MSG_278 "Opstart type"
 t MSG_279 "Niet bootable"
 t MSG_280 "Image selectie"
 t MSG_281 "(Selecteer a.u.b. een image)"
@@ -4520,6 +4451,7 @@ b "en-US"
 # Main dialog
 g IDD_DIALOG
 t IDS_DEVICE_TXT "Laite"
+t IDS_BOOT_SELECTION_TXT "Käynnistystyyppi"
 t IDS_PARTITION_TYPE_TXT "Osion ja kohdejärjestelmän tyyppi"
 t IDS_FILE_SYSTEM_TXT "Tiedostojärjestelmä"
 t IDS_CLUSTER_SIZE_TXT "Tilanvarausyksikkö"
@@ -4557,15 +4489,12 @@ t IDC_LOG_CLEAR "Tyhjennä"
 t IDC_LOG_SAVE "Tallenna"
 t IDCANCEL "Sulje"
 
-# About -> Updates
+# Update Settings
 g IDD_UPDATE_POLICY
 t IDD_UPDATE_POLICY "Päivityskäytäntö ja -asetukset"
 t IDS_UPDATE_SETTINGS_GRP "Asetukset"
 t IDS_UPDATE_FREQUENCY_TXT "Tarkista päivitykset"
 t IDS_INCLUDE_BETAS_TXT "Sisällytä beta-versiot"
-m IDC_UPDATE_FREQUENCY -10,0
-s IDC_UPDATE_FREQUENCY +16,0
-m IDC_INCLUDE_BETAS -10,0
 t IDC_CHECK_NOW "Tarkista nyt"
 t IDCANCEL "Sulje"
 
@@ -4691,6 +4620,7 @@ t MSG_084 "Tämä ISO-levykuva vaikuttaisi käyttävän vanhentunutta '%s'-versi
 	"Huomio: Uusi tiedosto ladataan nykyiseen sijaintiin ja kun  "
 	"'%s' löytyy sijainnista, sitä käytetään automaattisesti."
 t MSG_085 "Ladataan '%s'"
+t MSG_086 "ISO-levykuvaa ei valittu"
 t MSG_088 "Levykuva on liian suuri"
 t MSG_089 "Levykuva on liian suuri valittuun kohteeseen."
 t MSG_090 "ISO-levykuvaa ei tueta"
@@ -4925,7 +4855,6 @@ t MSG_275 "Valitsemasi levykuva on muotoa 'ISOHybrid'. Tämä tarkoittaa, että 
 	"Valitse tila, jota haluat käyttää levykuvan kirjoittamiseen:"
 t MSG_276 "Kirjoita %sna (Suositellaan)"
 t MSG_277 "Kirjoita %sna"
-t MSG_278 "Käynnistystyyppi"
 t MSG_279 "Ei-boottaava"
 t MSG_280 "Levykuvan valinta"
 t MSG_281 "(Valitse levykuva)"
@@ -4997,22 +4926,12 @@ t IDC_LOG_SAVE "Enregistrer"
 t IDCANCEL "Fermer"
 
 g IDD_UPDATE_POLICY
-s IDD_UPDATE_POLICY +45,0
 t IDD_UPDATE_POLICY "Paramètres de mises à jour"
-s IDC_POLICY +45,0
 t IDS_UPDATE_SETTINGS_GRP "Options"
-s IDS_UPDATE_SETTINGS_GRP +25,0
 t IDS_UPDATE_FREQUENCY_TXT "Recherche mises à jour"
-s IDS_UPDATE_FREQUENCY_TXT +5,0
 t IDS_INCLUDE_BETAS_TXT "Inclure les bétas"
-s IDC_UPDATE_FREQUENCY +35,0
-m IDS_CHECK_NOW_GRP +25,0
-s IDS_CHECK_NOW_GRP +20,0
 t IDC_CHECK_NOW "Chercher maintenant"
-m IDC_CHECK_NOW +14,0
-s IDC_CHECK_NOW +40,0
 t IDCANCEL "Fermer"
-m IDCANCEL +34,0
 
 g IDD_NEW_VERSION
 t IDD_NEW_VERSION "Mise à jour de Rufus"
@@ -5129,6 +5048,7 @@ t MSG_084 "Cette image ISO utilise une version obsolète du fichier '%s'.\n"
 	"Note : Le nouveau fichier sera téléchargé dans le répertoire courant. "
 	"Si un '%s' existe à cet endroit, il sera réutilisé automatiquement."
 t MSG_085 "Téléchargement de '%s'"
+t MSG_086 "Aucune image sélectionnée"
 t MSG_088 "Image trop large"
 t MSG_089 "L'image est trop large pour être copiée sur le périphérique sélectionné."
 t MSG_090 "Image ISO non supportée"
@@ -5200,9 +5120,9 @@ t MSG_122 "Cacher les %s"
 
 # Tooltips
 t MSG_150 "Methode qui sera utilisée pour créer les partitions."
-t MSG_151 "Type d'ordinateur avec lequel vous comptez utiliser ce disque démarrable. Il est de VOTRE responsabilité de déterminer s'il s'agira d'un type BIOS ou UEFI.\n"
-	"Veuillez noter que CSM, qui peut etre activé ou désactivé sur les machines de type UEFI, signifie 'émulation BIOS', et n'est pas vraiment UEFI."
-t MSG_152 "Note: 'UEFI-CSM' signifie émulation BIOS sous UEFI et n'est pas véritablement UEFI."
+t MSG_151 "Type d'ordinateur avec lequel vous comptez utiliser ce disque démarrable. Il est de VOTRE responsabilité de savoir s'il s'agit d'un type BIOS ou UEFI.\n"
+	"Veuillez noter que CSM, qui peut être activé ou désactivé sur les machines de type UEFI, signifie 'émulation BIOS', et n'est pas vraiment UEFI."
+t MSG_152 "Note: 'UEFI-CSM' signifie émulation BIOS sous UEFI (i.e. 'Legacy Mode') et n'est pas véritablement UEFI."
 t MSG_153 "Motif de test : 0x%02X"
 t MSG_154 "Motif de test : 0x%02X, 0x%02X"
 t MSG_155 "Motif de test : 0x%02X, 0x%02X, 0x%02X"
@@ -5210,16 +5130,16 @@ t MSG_156 "Motif de test : 0x%02X, 0x%02X, 0x%02X, 0x%02X"
 t MSG_157 "Sélectionne le système de fichiers"
 t MSG_158 "Taille minimum qu’un bloc de données occupera sur le système de fichiers"
 t MSG_159 "Utilisez ce champ pour mettre à jour le nom du volume.\n"
-	"Les caractères étendus et les accents sont acceptés "
+	"Les caractères étendus et les accents sont acceptés"
 t MSG_160 "Affiche/Cache les options avancées "
-t MSG_161 "Détecte la présence de blocs défectueux en écrivant d'un motif de test"
+t MSG_161 "Détecte la présence de blocs défectueux en écrivant un motif de test"
 t MSG_162 "Décochez cette case si vous voulez utiliser la méthode de formatage \"lente\" "
 t MSG_164 "Méthode à utiliser pour rendre le périphérique démarrable "
 t MSG_165 "Cliquez ici pour sélectionner une image..."
 t MSG_166 "Cochez cette case pour permettre l’affichage des caractères étendus/internationaux "
-	"et ajouter une icône (ceci créera un fichier autorun.inf)"
+	"et ajouter une icône (ceci crée un fichier autorun.inf)"
 t MSG_167 "Installe un MBR permettant la sélection du périphérique de démarrage. Peut aussi "
-	"camoufler l’ID de disque pour le BIOS "
+	"camoufler l’ID de disque pour le BIOS"
 t MSG_168 "Camoufle le premier disque USB démarrable (généralement 0x80) sous une ID différente.\n"
 	"Changez cette option si vous installez Windows XP avec plus d’un disque dur"
 t MSG_169 "Créé une petite partition supplémentaire et aligner les partitions.\n"
@@ -5337,8 +5257,8 @@ t MSG_268 "Application de l'image Windows..."
 t MSG_269 "Préservation des dates de fichiers"
 t MSG_270 "Debug USB"
 t MSG_271 "Calculation des checksums de l'image : %0.1f%% complété"
-t MSG_272 "Calculer les checksums MD5, SHA1 et SHA256 pour l'image sélectionée"
-t MSG_273 "Changer la langue de l'application"
+t MSG_272 "Calcule les checksums MD5, SHA1 et SHA256 pour l'image sélectionée"
+t MSG_273 "Change la langue de l'application"
 t MSG_274 "Image ISOHybrid détectée"
 t MSG_275 "L'image que vous avez sélectionnée est une image 'ISOHybrid'. Cela veut dire qu’elle peut "
 	"être écrite soit en mode %s (copie de fichiers) ou en mode %s (image disque).\n"
@@ -5377,10 +5297,12 @@ t MSG_299 "Erreur de validation du timestamp"
 t MSG_300 "Rufus n'a pas pu valider que le timestamp du fichier de mise à jour téléchargé est plus récent que celui de "
 	"l'exécutable en cours.\n\nAfin de mitiger des scenarios d'attaque potentiels, le processus de mise à jour a été interrompu "
 	"et le téléchargement va être supprimé. Pour plus de détails, veuillez consulter le log."
-t MSG_301 "Afficher les paramètres de l'application"
-t MSG_302 "Afficher les informations à propos de cette application"
-t MSG_303 "Afficher le log"
-t MSG_304 "Créer une image disque à partir du périphérique sélectionné"
+t MSG_301 "Affiche les paramètres de l'application"
+t MSG_302 "Affiche les informations à propos de cette application"
+t MSG_303 "Affiche le log"
+t MSG_304 "Crée une image disque à partir du périphérique sélectionné"
+t MSG_305 "Utilisez cette option pour indiquer si vous voulez utiliser ce périphérique pour installer Windows sur un autre disque, "
+	"ou bien exécuter Windows directement depuis votre périphérique (Windows To Go)."
 
 ################################################################################
 l "de-DE" "German (Deutsch)" 0x0407, 0x0807, 0x0c07, 0x1007, 0x1407
@@ -5389,6 +5311,7 @@ b "en-US"
 
 g IDD_DIALOG
 t IDS_DEVICE_TXT "Laufwerk"
+t IDS_BOOT_SELECTION_TXT "Startart"
 t IDS_PARTITION_TYPE_TXT "Partitionsschema"
 t IDS_TARGET_SYSTEM_TXT "Zielsystem"
 t IDS_FILE_SYSTEM_TXT "Dateisystem"
@@ -5412,7 +5335,6 @@ t IDCANCEL "Schließen"
 
 g IDD_NOTIFICATION
 t IDC_MORE_INFO "Weitere Informationen"
-s IDC_MORE_INFO +28,0
 t IDYES "Ja"
 t IDNO "Nein"
 
@@ -5423,19 +5345,6 @@ t IDC_LOG_CLEAR "Löschen"
 t IDCANCEL "Schließen"
 
 g IDD_UPDATE_POLICY
-s IDS_UPDATE_SETTINGS_GRP +16,0
-s IDS_UPDATE_FREQUENCY_TXT +14,0
-m IDS_UPDATE_FREQUENCY_TXT -2,0
-s IDC_UPDATE_FREQUENCY +18,0
-m IDC_UPDATE_FREQUENCY +6,0
-s IDS_INCLUDE_BETAS_TXT +14,0
-m IDS_INCLUDE_BETAS_TXT -2,0
-m IDC_INCLUDE_BETAS +6,0
-m IDS_CHECK_NOW_GRP +16,0
-s IDS_CHECK_NOW_GRP -15,0
-m IDC_CHECK_NOW +8,0
-m IDCANCEL +8,0
-
 t IDD_UPDATE_POLICY "Aktualisierungseinstellungen"
 t IDS_UPDATE_SETTINGS_GRP "Einstellungen"
 t IDS_UPDATE_FREQUENCY_TXT "Auf neue Version prüfen"
@@ -5559,6 +5468,7 @@ t MSG_084 "Diese ISO-Abbild-Datei verwendet eine veraltete Version von '%s'.\n"
 	"Hinweis: Die neue Datei wird in das aktuelle Verzeichnis heruntergeladen und falls "
 	"'%s' bereits vorhanden ist, wird sie automatisch wiederverwendet."
 t MSG_085 "Download '%s'"
+t MSG_086 "Keine Abbild-Datei gewählt"
 t MSG_088 "Abbild ist zu groß"
 t MSG_089 "Dieses Abbild ist zu groß für das gewählte Ziel."
 t MSG_090 "ISO-Abbild nicht unterstützt"
@@ -5778,7 +5688,6 @@ t MSG_275 "Das gewählte Abbild ist eine hybrides ISO-Abbild. Es kann entweder i
 	"Bitte wählen Sie den Modus, mit dem Sie das Abbild schreiben wollen:"
 t MSG_276 "Im %s Modus schreiben (empfohlen)"
 t MSG_277 "Im %s Modus schreiben"
-t MSG_278 "Startart"
 t MSG_279 "Nicht startfähig"
 t MSG_280 "Abbildauswahl"
 t MSG_281 "(Bitte wählen Sie ein Abbild)"
@@ -5812,6 +5721,7 @@ b "en-US"
 # Main dialog
 g IDD_DIALOG
 t IDS_DEVICE_TXT "Συσκευή"
+t IDS_BOOT_SELECTION_TXT "Τύπος εκκίνησης"
 t IDS_PARTITION_TYPE_TXT "Σύστημα διαμερισμού"
 t IDS_TARGET_SYSTEM_TXT "Τύπος συστήματος"
 t IDS_FILE_SYSTEM_TXT "Σύστημα αρχείων"
@@ -5839,7 +5749,6 @@ t IDCANCEL "Κλείσιμο"
 
 # Notifications. You can trigger one of these by using Alt-R and re-launching Rufus
 g IDD_NOTIFICATION
-s IDC_MORE_INFO +48,0
 t IDC_MORE_INFO "Περισσότερες πληροφορίες"
 t IDYES "Ναι"
 t IDNO "Όχι"
@@ -5851,28 +5760,14 @@ t IDC_LOG_CLEAR "Καθαρισμός"
 t IDC_LOG_SAVE "Αποθήκευση"
 t IDCANCEL "Κλείσιμο"
 
-# About -> Updates
+# Update Settings
 g IDD_UPDATE_POLICY
-s IDD_UPDATE_POLICY +70,0
-s IDC_POLICY +62,0
 t IDD_UPDATE_POLICY "Πολιτική ενημέρωσης και ρυθμίσεων"
 t IDS_UPDATE_SETTINGS_GRP "Ρυθμίσεις"
-s IDS_UPDATE_SETTINGS_GRP +68,0
 t IDS_UPDATE_FREQUENCY_TXT "Έλεγχος για ενημερώσεις"
-s IDS_UPDATE_FREQUENCY_TXT +22,0
-s IDC_UPDATE_FREQUENCY +59,0
-m IDC_UPDATE_FREQUENCY +14,0
 t IDS_INCLUDE_BETAS_TXT "Συμπεριλάβετε τις εκδόσεις beta"
-s IDS_INCLUDE_BETAS_TXT +68,0
-m IDC_INCLUDE_BETAS +118,0
 t IDC_CHECK_NOW "Έλεγχος τώρα"
-m IDC_CHECK_NOW +62,0
-s IDC_CHECK_NOW +4,0
 t IDCANCEL "Κλείσιμο"
-m IDCANCEL +62,0
-s IDCANCEL +4,0
-m IDS_CHECK_NOW_GRP +68,0
-s IDS_CHECK_NOW_GRP -6,0
 
 # Dialog that appears when a new version is available
 g IDD_NEW_VERSION
@@ -5994,6 +5889,7 @@ t MSG_084 "Αυτό το είδωλο ISO φαίνεται να χρησιμοπ
 	"Σημείωση: Η λήψη του νέου αρχείου θα γίνει στον τρέχοντα κατάλογο και εφόσον το"
 	"'%s' υπάρχει εκεί, θα επαναχρησιμοποιηθεί αυτόματα."
 t MSG_085 "Λήψη '%s'"
+t MSG_086 "Δεν έχει επιλεχθεί κάποιο είδωλο"
 t MSG_088 "Το είδωλο έχει πολύ μεγάλο μέγεθος"
 t MSG_089 "Το μέγεθος του επιλεγμένου ειδώλου είναι μεγαλύτερο από την χωρητικότητα του επιλεγμένου μέσου."
 t MSG_090 "Μη υποστηριζόμενο είδωλο ISO"
@@ -6225,7 +6121,6 @@ t MSG_275 "Το είδωλο που χρησιμοποιήσατε είναι τ
 	"Παρακαλώ επιλέξτε τον τρόπο με τον οποίο θέλετε να κάνετε την εγγραφή του ειδώλου."
 t MSG_276 "Εγγραφή ως %s (Προτεινόμενο)"
 t MSG_277 "Εγγραφή ως %s"
-t MSG_278 "Τύπος εκκίνησης"
 t MSG_279 "Δεν διαθέτει δυνατότητα εκκίνησης"
 t MSG_280 "Επιλογή ειδώλου"
 t MSG_281 "(Παρακαλώ επιλέξτε κάποιο είδωλο)"
@@ -6261,6 +6156,7 @@ b "en-US"
 
 g IDD_DIALOG
 t IDS_DEVICE_TXT "התקן"
+t IDS_BOOT_SELECTION_TXT "סוג אתחול"
 t IDS_PARTITION_TYPE_TXT "תוכנית המחיצות וסוג מערכת היעד"
 t IDS_FILE_SYSTEM_TXT "מערכת קבצים"
 t IDS_CLUSTER_SIZE_TXT "גודל אשכול"
@@ -6299,7 +6195,7 @@ t IDC_LOG_CLEAR "נקה"
 t IDC_LOG_SAVE "שמור"
 t IDCANCEL "סגור"
 
-# About -> Updates
+# Update Settings
 g IDD_UPDATE_POLICY
 t IDD_UPDATE_POLICY "מדיניות והגדרות העדכונים"
 t IDS_UPDATE_SETTINGS_GRP "הגדרות"
@@ -6430,6 +6326,7 @@ t MSG_084 "נראה שקובץ ה ISO הזה משתמש בגרסה מיושנת 
 	"שים לב: הקובץ החדש ירד לתיקייה בה ממוקמת התוכנה וברגע ש "
 	"'%s' יהיה שם, רופוס ישתמש בו אוטומטית."
 t MSG_085 "מוריד '%s'"
+t MSG_086 "לא נבחר שום קובץ."
 t MSG_088 "הקובץ גדול מדי."
 t MSG_089 "הקובץ גדול מדי בשביל ההתקן שנבחר."
 t MSG_090 "קובץ ISO לא נתמך."
@@ -6674,11 +6571,6 @@ t MSG_275 "הקובץ שבחרת הוא קובץ ISOHybrid. זה אומר, שה�
 t MSG_276 "כתוב במצב %s (מומלץ)"
 # '%s' below will be replaced with your translation for MSG_095 ("DD Image")
 t MSG_277 "כתוב במצב %s"
-# The following will be used for new controls of the Rufus 3.0 interface
-# They are added as messages, so that I will have them available when needed.
-# 278 & 280 will be dropdown titles, similar to how IDS_DEVICE_TXT or IDS_PARTITION_TYPE_TXT are used
-# 279 & 281 will be items that can appear in the dropdowns
-t MSG_278 "סוג אתחול"
 t MSG_279 "לא בר אתחול"
 t MSG_280 "בחירת תמונה"
 t MSG_281 "(בבקשה בחר/י תמונה)"
@@ -6712,6 +6604,7 @@ b "en-US"
 # Main dialog
 g IDD_DIALOG
 t IDS_DEVICE_TXT "Eszköz"
+t IDS_BOOT_SELECTION_TXT "Boot típus"
 t IDS_PARTITION_TYPE_TXT "Partíciós séma és a cél rendszer típusa"
 t IDS_FILE_SYSTEM_TXT "Fájlrendszer"
 t IDS_CLUSTER_SIZE_TXT "Klaszter mérete"
@@ -6749,16 +6642,12 @@ t IDC_LOG_CLEAR "Törlés"
 t IDC_LOG_SAVE "Mentés"
 t IDCANCEL "Bezárás"
 
-# About -> Updates
+# Update Settings
 g IDD_UPDATE_POLICY
 t IDD_UPDATE_POLICY "Beállítások frissítése"
 t IDS_UPDATE_SETTINGS_GRP "Beállítások"
 t IDS_UPDATE_FREQUENCY_TXT "Frissítések keresése:"
-m IDC_UPDATE_FREQUENCY -8,0
-s IDC_UPDATE_FREQUENCY +8,0
 t IDS_INCLUDE_BETAS_TXT "Béta verziókat is:"
-m IDC_INCLUDE_BETAS -8,0
-s IDC_INCLUDE_BETAS +8,0
 t IDC_CHECK_NOW "Ellenőrzés"
 t IDCANCEL "Bezárás"
 
@@ -6881,6 +6770,7 @@ t MSG_084 "Ez az ISO fájl valószínűleg a(z) '%s' elavult verzióját haszná
 	"Megjegyzés: Az új fájl a jelenlegi mappába lesz letöltve, és ha egy "
 	"'%s' létezik, akkor az automatikusan újra lesz használva."
 t MSG_085 "Letöltés: '%s'"
+t MSG_086 "Nincs ISO fájl kiválasztva"
 t MSG_088 "Az ISO fájl túl nagy"
 t MSG_089 "Az ISO fájl túl nagy a kiválasztott háttértárnak."
 t MSG_090 "Nem támogatott ISO"
@@ -7116,7 +7006,6 @@ t MSG_275 "A kiválasztott képfájl egy 'ISOHybrid' képfájl. Ez azt jelenti, 
 	"Kérlek, válaszd ki, hogy mely írási módot szeretnéd használni:"
 t MSG_276 "Írás %s módban (Ajánlott)"
 t MSG_277 "Írás %s módban"
-t MSG_278 "Boot típus"
 t MSG_279 "Nem bootolható"
 t MSG_280 "Képfájl kiválasztása"
 t MSG_281 "(Kérlek, válassz ki egy képfájlt)"
@@ -7137,6 +7026,7 @@ b "en-US"
 # Main dialog
 g IDD_DIALOG
 t IDS_DEVICE_TXT "Perangkat"
+t IDS_BOOT_SELECTION_TXT "Tipe Boot"
 t IDS_PARTITION_TYPE_TXT "Skema partisi dan tipe sistem target"
 t IDS_FILE_SYSTEM_TXT "Sistem berkas"
 t IDS_CLUSTER_SIZE_TXT "Ukuran klaster"
@@ -7181,18 +7071,14 @@ t IDC_LOG_CLEAR "Bersihkan"
 t IDC_LOG_SAVE "Simpan"
 t IDCANCEL "Tutup"
 
-# About -> Updates
+# Update Settings
 g IDD_UPDATE_POLICY
 t IDD_UPDATE_POLICY "Ketentuan pembaruan dan setelan"
 t IDS_UPDATE_SETTINGS_GRP "Setelan"
 t IDS_UPDATE_FREQUENCY_TXT "Periksa Pembaruan:"
 t IDS_INCLUDE_BETAS_TXT "Sertakan versi beta:"
 t IDC_CHECK_NOW "Periksa Sekarang"
-s IDC_CHECK_NOW +10,0
-m IDC_CHECK_NOW -5,0
 t IDCANCEL "Tutup"
-s IDCANCEL +10,0
-m IDCANCEL -5,0
 
 # Dialog that appears when a new version is available
 g IDD_NEW_VERSION
@@ -7316,6 +7202,7 @@ t MSG_084 "ISO image ini tampaknya menggunakan versi lawas dari '%s'.\n"
 	"Catatan: Berkas baru akan diunduh di direktori saat ini dan karena "
 	"'%s' sudah ada disana, berkas tersebut akan digunakan kembali secara otomatis."
 t MSG_085 "Mengunduh '%s'"
+t MSG_086 "Tidak ada image terpilih"
 t MSG_088 "Image terlalu besar"
 t MSG_089 "Image terlalu besar untuk Target yang dipilih."
 t MSG_090 "ISO tidak didukung"
@@ -7556,7 +7443,6 @@ t MSG_275 "Image yang Anda pilih merupakan image 'ISOHybrid'. Ini artinya image 
 	"Silakan pilih mode mana yang ingin digunakan untuk menulis image ini:"
 t MSG_276 "Tulis dalam mode %s (Disarankan)"
 t MSG_277 "Tulis dalam mode %s"
-t MSG_278 "Tipe Boot"
 t MSG_279 "Non bootable"
 t MSG_280 "Pemilihan image"
 t MSG_281 "(Silakan pilih sebuah image)"
@@ -7590,6 +7476,7 @@ b "en-US"
 
 g IDD_DIALOG
 t IDS_DEVICE_TXT "Dispositivo/unità"
+t IDS_BOOT_SELECTION_TXT "Tipo boot"
 t IDS_PARTITION_TYPE_TXT "Schema partizione e tipo sistema destinazione"
 t IDS_FILE_SYSTEM_TXT "File system"
 t IDS_CLUSTER_SIZE_TXT "Dimensione cluster"
@@ -7624,23 +7511,12 @@ t IDC_LOG_SAVE "Salva"
 t IDCANCEL "Chiudi"
 
 g IDD_UPDATE_POLICY
-s IDD_UPDATE_POLICY +30,0
-s IDC_POLICY +30,0
 t IDD_UPDATE_POLICY "Impostazioni e policy aggiornamenti"
 t IDS_UPDATE_SETTINGS_GRP "Impostazioni"
-s IDS_UPDATE_SETTINGS_GRP +49,0
 t IDS_UPDATE_FREQUENCY_TXT "Controllo aggiornamenti"
-s IDS_UPDATE_FREQUENCY_TXT +16,0
-s IDC_UPDATE_FREQUENCY +50,0
-m IDC_UPDATE_FREQUENCY +8,0
 t IDS_INCLUDE_BETAS_TXT "Includi versioni beta"
-m IDC_INCLUDE_BETAS +8,0
-m IDS_CHECK_NOW_GRP +49,0
-s IDS_CHECK_NOW_GRP -18,0
 t IDC_CHECK_NOW "Controlla ora"
-m IDC_CHECK_NOW +39,0
 t IDCANCEL "Chiudi"
-m IDCANCEL +39,0
 
 g IDD_NEW_VERSION
 t IDD_NEW_VERSION "Rufus - Controllo aggiornamenti"
@@ -7754,6 +7630,7 @@ t MSG_084 "Questa immagine sembra che usi una versione obsoleta di '%s'.\n"
 	"Nota: il nuovo file verrà scaricato nella cartella attuale e una volta "
 	"scaricato '%s', verrà riusato automaticamente."
 t MSG_085 "Download '%s'"
+t MSG_086 "Nessuna immagine selezionata"
 t MSG_088 "Immagine troppo grande"
 t MSG_089 "Questa immagine è troppo grande per l'unità di destinazione."
 t MSG_090 "Formato ISO non supportato"
@@ -7978,7 +7855,6 @@ t MSG_275 "L'immagine selezionata è un'immagine ISO ibrida. Questo significa ch
 	"Seleziona il modo che vuoi usare per scrivere questa immagine:"
 t MSG_276 "Scrivi in modo %s (suggerito)"
 t MSG_277 "Scrivi in modo %s"
-t MSG_278 "Tipo boot"
 t MSG_279 "Non avviabile"
 t MSG_280 "Selezione immagine"
 t MSG_281 "(seleziona un'immagine)"
@@ -8012,6 +7888,7 @@ b "en-US"
 # Main dialog
 g IDD_DIALOG
 t IDS_DEVICE_TXT "デバイス"
+t IDS_BOOT_SELECTION_TXT "ブートの種類"
 t IDS_PARTITION_TYPE_TXT "パーティション構成とターゲットシステムの種類"
 t IDS_FILE_SYSTEM_TXT "ファイルシステム"
 t IDS_CLUSTER_SIZE_TXT "クラスタサイズ"
@@ -8050,28 +7927,14 @@ t IDC_LOG_CLEAR "消去する"
 t IDC_LOG_SAVE "保存する"
 t IDCANCEL "閉じる"
 
-# About -> Updates
+# Update Settings
 g IDD_UPDATE_POLICY
-s IDD_UPDATE_POLICY +45,0
-s IDC_POLICY +45,0
 t IDD_UPDATE_POLICY "アップデートポリシーと設定"
 t IDS_UPDATE_SETTINGS_GRP "設定"
-s IDS_UPDATE_SETTINGS_GRP +45,0
 t IDS_UPDATE_FREQUENCY_TXT "アップデートの確認"
-s IDS_UPDATE_FREQUENCY_TXT +30,0
 t IDS_INCLUDE_BETAS_TXT "ベータバージョンを含める"
-s IDS_INCLUDE_BETAS_TXT +30,0
 t IDC_CHECK_NOW "今すぐに確認"
-m IDC_CHECK_NOW +40,0
-s IDC_CHECK_NOW +10,0
 t IDCANCEL "閉じる"
-m IDCANCEL +40,0
-s IDCANCEL +10,0
-m IDC_UPDATE_FREQUENCY +30,0
-s IDC_UPDATE_FREQUENCY +20,0
-m IDC_INCLUDE_BETAS +30,0
-s IDC_INCLUDE_BETAS +10,0
-m IDS_CHECK_NOW_GRP +45,0
 
 # Dialog that appears when a new version is available
 g IDD_NEW_VERSION
@@ -8195,6 +8058,7 @@ t MSG_084 "このISOは '%s' の古いバージョンを使うようです。\n"
 	"注意: 新しいファイルは現在のディレクトリにダウンロードされます。"
 	"すでに'%s'のファイルが存在している場合は自動で再利用します。"
 t MSG_085 "「%s」 をダウンロード中"
+t MSG_086 "イメージが選択されていません。"
 t MSG_088 "イメージが大きすぎます。"
 t MSG_089 "イメージが選択したターゲットには大き過ぎます。"
 t MSG_090 "非対応ISOです"
@@ -8433,7 +8297,6 @@ t MSG_275 "選択されたイメージは「ISOHybrid｣です。下記のいず
 	"このイメージを書き込む際に使用するモードを選択してください:"
 t MSG_276 "%sモードで書き込む(推奨)"
 t MSG_277 "%sモードで書き込む"
-t MSG_278 "ブートの種類"
 t MSG_279 "非ブート"
 t MSG_280 "イメージ選択"
 t MSG_281 "(イメージを選択してください)"
@@ -8466,6 +8329,7 @@ b "en-US"
 # Main dialog
 g IDD_DIALOG
 t IDS_DEVICE_TXT "장치"
+t IDS_BOOT_SELECTION_TXT "부팅 유형"
 t IDS_PARTITION_TYPE_TXT "디스크 형식과 부팅 시스템 유형"
 t IDS_FILE_SYSTEM_TXT "파일 시스템"
 t IDS_CLUSTER_SIZE_TXT "할당 단위 크기"
@@ -8504,17 +8368,12 @@ t IDC_LOG_CLEAR "삭제"
 t IDC_LOG_SAVE "저장"
 t IDCANCEL "닫기"
 
-# About -> Updates
+# Update Settings
 g IDD_UPDATE_POLICY
 t IDD_UPDATE_POLICY "업데이트 정책과 설정"
 t IDS_UPDATE_SETTINGS_GRP "설정"
 t IDS_UPDATE_FREQUENCY_TXT "업데이트 확인"
-s IDS_UPDATE_FREQUENCY_TXT -20,0
-m IDC_UPDATE_FREQUENCY -20,0
 t IDS_INCLUDE_BETAS_TXT "테스트 버전 포함"
-s IDS_INCLUDE_BETAS_TXT -20,0
-s IDC_INCLUDE_BETAS +5,0
-m IDC_INCLUDE_BETAS -20,0
 t IDC_CHECK_NOW "지금 확인"
 t IDCANCEL "닫기"
 
@@ -8642,6 +8501,7 @@ t MSG_084 "이 ISO 이미지는 '%s'의 구 버전이기에\n"
 	"알림: 새 파일은 현재 디렉토리에 다운로드가 되며 이미 "
 	"'%s'가 있다면, 자동으로 다시 사용됩니다."
 t MSG_085 "'%s' 다운로드 중..."
+t MSG_086 "선택된 ISO 이미지가 없습니다"
 t MSG_088 "ISO가 너무 큽니다."
 t MSG_089 "이 ISO 이미지는 선택한 대상에 비해 너무 큽니다."
 t MSG_090 "지원되지 않는 ISO"
@@ -8870,7 +8730,6 @@ t MSG_275 "선택한 이미지는 'ISOHybrid'이미지입니다. 이 이미지�
 	"이 이미지를 작성하는 데 사용할 모드를 선택하세요:"
 t MSG_276 "ISO 이미지 모드로 쓰기 (권장)"
 t MSG_277 "DD 디스크 이미지 모드로 쓰기"
-t MSG_278 "부팅 유형"
 t MSG_279 "부팅 안 됨"
 t MSG_280 "이미지 선택"
 t MSG_281 "(이미지를 선택하세요)"
@@ -8904,6 +8763,7 @@ b "en-US"
 # Main dialog
 g IDD_DIALOG
 t IDS_DEVICE_TXT "Ierīce"
+t IDS_BOOT_SELECTION_TXT "Ielādes veids"
 t IDS_PARTITION_TYPE_TXT "Partīcijas veids un sistēmas tips"
 t IDS_FILE_SYSTEM_TXT "Failu sistēma"
 t IDS_CLUSTER_SIZE_TXT "Bloka izmērs"
@@ -8940,26 +8800,14 @@ t IDC_LOG_CLEAR "Notīrīt"
 t IDC_LOG_SAVE "Saglabāt"
 t IDCANCEL "Aizvērt"
 
-# About -> Updates
+# Update Settings
 g IDD_UPDATE_POLICY
-s IDD_UPDATE_POLICY +20,0
-s IDC_POLICY +20,0
 t IDD_UPDATE_POLICY "Jaunināšanas noteikumi un uzstādījumi"
 t IDS_UPDATE_SETTINGS_GRP "Uzstādījumi"
-s IDS_UPDATE_SETTINGS_GRP +40,0
 t IDS_UPDATE_FREQUENCY_TXT "Pārbaudīt jauninājumus"
-s IDS_UPDATE_FREQUENCY_TXT +10,0
-s IDC_UPDATE_FREQUENCY +44,0
-m IDC_UPDATE_FREQUENCY +5,0
 t IDS_INCLUDE_BETAS_TXT "Ieskaitot Beta versijas:"
-s IDS_INCLUDE_BETAS_TXT +10,0
-m IDC_INCLUDE_BETAS +5,0
-m IDS_CHECK_NOW_GRP +40,0
-s IDS_CHECK_NOW_GRP -20,0
 t IDC_CHECK_NOW "Pārbaudīt"
-m IDC_CHECK_NOW +29,0
 t IDCANCEL "Aizvērt"
-m IDCANCEL +29,0
 
 # Dialog that appears when a new version is available
 g IDD_NEW_VERSION
@@ -9083,6 +8931,7 @@ t MSG_084 "Šis ISO imidžs izmanto novecojušas versijas '%s'.\n"
 	"Piezīme: Jaunais fails tiks lejupielādēts tekošajā mapē, un eksistējošais "
 	"'%s' automātiski tiks samainīts."
 t MSG_085 "Lejuplādēts '%s'"
+t MSG_086 "Nav izvēlēts imidžs"
 t MSG_088 "Imidžs pārāk liels"
 t MSG_089 "Izvēlētajam nesējam imidžs pārāk liels."
 t MSG_090 "Neatbalstāms ISO formāts"
@@ -9317,7 +9166,6 @@ t MSG_275 "Izvēlētajam imidžam ir 'ISOHybrid' formāts. Tas nozīmē ka imid�
 	"Lūdzu, izvēlieties režīmu, kurš tiks izmantots izvēlētā imidža ierakstam:"
 t MSG_276 "Ierakstīt %s režīmā (Ieteicams)"
 t MSG_277 "Ierakstīt %s režīmā"
-t MSG_278 "Ielādes veids"
 t MSG_279 "Neielādējams imidžs"
 t MSG_280 "Imidža izvēle"
 t MSG_281 "(Lūdzu, izvēlieties imidžu)"
@@ -9351,6 +9199,7 @@ b "en-US"
 # Main dialog
 g IDD_DIALOG
 t IDS_DEVICE_TXT "Įrenginys"
+t IDS_BOOT_SELECTION_TXT "Jenis boot"
 t IDS_PARTITION_TYPE_TXT "Skaidinių schema ir paskirties sistemos tipas"
 t IDS_FILE_SYSTEM_TXT "Failų sistema"
 t IDS_CLUSTER_SIZE_TXT "Klasterio dydis"
@@ -9378,7 +9227,6 @@ t IDCANCEL "Užverti"
 
 # Notifications. You can trigger one of these by using Alt-R and re-launching Rufus
 g IDD_NOTIFICATION
-s IDC_MORE_INFO 18,0
 t IDC_MORE_INFO "Daugiau informacijos"
 t IDYES "Taip"
 t IDNO "Ne"
@@ -9390,23 +9238,14 @@ t IDC_LOG_CLEAR "Valyti"
 t IDC_LOG_SAVE "Išsaugoti"
 t IDCANCEL "Užverti"
 
-# About -> Updates
+# Update Settings
 g IDD_UPDATE_POLICY
 t IDD_UPDATE_POLICY "Naujinių politika ir nuostatos"
 t IDS_UPDATE_SETTINGS_GRP "Nuostatos"
-s IDS_UPDATE_SETTINGS_GRP +17,0
-m IDS_CHECK_NOW_GRP +17,0
-s IDS_CHECK_NOW_GRP -12,0
-s IDS_UPDATE_FREQUENCY_TXT +6,0
 t IDS_UPDATE_FREQUENCY_TXT "Ieškoti atnaujinimų"
-m IDC_UPDATE_FREQUENCY -4,0
-s IDC_UPDATE_FREQUENCY +28,0
 t IDS_INCLUDE_BETAS_TXT "Įtraukti beta versijas"
-m IDC_INCLUDE_BETAS -4,0
 t IDC_CHECK_NOW "Tikrinti dabar"
-m IDC_CHECK_NOW +10,0
 t IDCANCEL "Užverti"
-m IDCANCEL +10,0
 
 # Dialog that appears when a new version is available
 g IDD_NEW_VERSION
@@ -9529,6 +9368,7 @@ t MSG_084 "Atrodo, šis ISO atvaizdis naudoja pasenusią „%s“ versiją.\n"
 	"Pastaba: naujas failas bus atsiųstas į dabartinį katalogą ir jei "
 	"„%s“ ten jau yra, jis bus panaudotas iš naujo automatiškai."
 t MSG_085 "Parsiunčiama: „%s“"
+t MSG_086 "Atvaizdis nepasirinktas"
 t MSG_088 "Atvaizdis per didelis"
 t MSG_089 "Atvaizdis yra per didelis pasirinktai paskirčiai."
 t MSG_090 "Nepalaikomas ISO"
@@ -9769,11 +9609,6 @@ t MSG_275 "Jūsų pasirinktas atvaizdis yra „ISOHybrid“ atvaizdis. Tai reiš
 t MSG_276 "Įrašyti %s veiksena (rekomenduojama)"
 # '%s' below will be replaced with your translation for MSG_095 ("DD Image")
 t MSG_277 "Įrašyti %s veiksena"
-# The following will be used for new controls of the Rufus 3.0 interface
-# They are added as messages, so that I will have them available when needed.
-# 278 & 280 will be dropdown titles, similar to how IDS_DEVICE_TXT or IDS_PARTITION_TYPE_TXT are used
-# 279 & 281 will be items that can appear in the dropdowns
-t MSG_278 "Paleidimo tipas"
 t MSG_279 "Nepaleidžiamas"
 t MSG_280 "Atvaizdžio parinktis"
 t MSG_281 "(Prašome pasirinkti atvaizdį)"
@@ -9808,6 +9643,7 @@ b "en-US"
 # Main dialog
 g IDD_DIALOG
 t IDS_DEVICE_TXT "Peranti"
+t IDS_BOOT_SELECTION_TXT "Jenis boot"
 t IDS_PARTITION_TYPE_TXT "Skema partisyen dan jenis sistem sasaran"
 t IDS_FILE_SYSTEM_TXT "Sistem fail"
 t IDS_CLUSTER_SIZE_TXT "Saiz gugusan"
@@ -9845,27 +9681,13 @@ t IDC_LOG_CLEAR "Bersihkan"
 t IDC_LOG_SAVE "Simpan"
 t IDCANCEL "Tutup"
 
-# About -> Updates
+# Update Settings
 g IDD_UPDATE_POLICY
-s IDD_UPDATE_POLICY +20,0
 t IDD_UPDATE_POLICY "Dasar dan tetapan mengemas kini"
-s IDC_POLICY +20,0
 t IDS_UPDATE_SETTINGS_GRP "Tetapan"
-s IDS_UPDATE_SETTINGS_GRP +17,0
-m IDS_CHECK_NOW_GRP +17,0
-s IDS_CHECK_NOW_GRP +3,0
 t IDS_UPDATE_FREQUENCY_TXT "Semak untuk versi baharu"
-s IDS_UPDATE_FREQUENCY_TXT +20,0
-s IDC_UPDATE_FREQUENCY +10,0
-m IDC_UPDATE_FREQUENCY +15,0
 t IDS_INCLUDE_BETAS_TXT "Gunakan juga versi Beta"
-s IDS_INCLUDE_BETAS_TXT +14,0
-m IDC_INCLUDE_BETAS +15,0
-s IDC_CHECK_NOW +20,0
-m IDC_CHECK_NOW +7,0
 t IDC_CHECK_NOW "Semak sekarang"
-s IDCANCEL +20,0
-m IDCANCEL +7,0
 t IDCANCEL "Tutup"
 
 # Dialog that appears when a new version is available
@@ -9990,6 +9812,7 @@ t MSG_084 "Imej ISO ini menggunakan versi '%s' yang telah lapuk.\n"
 	"Perhatian: Fail yang dimuat turun akan disimpan di dalam direktori bersamaan dengan Rufus dan apabila terdapat "
 	"'%s' , ia akan digunakan secara automatik."
 t MSG_085 "Muat turun '%s'"
+t MSG_086 "Tiada imej yang dipilih"
 t MSG_088 "Imej terlalu besar"
 t MSG_089 "Imej ini terlalu besar untuk sasaran yang dipilih."
 t MSG_090 "ISO tidak disokong"
@@ -10232,11 +10055,6 @@ t MSG_275 "Imej yang anda telah pilih adalah imej 'ISOHybrid'. Ini bermaksud ia 
 t MSG_276 "Menulis dalam mod %s (Digalakkan)"
 # '%s' below will be replaced with your translation for MSG_095 ("DD Image")
 t MSG_277 "Menulis dalam mod %s"
-# The following will be used for new controls of the Rufus 3.0 interface
-# They are added as messages, so that I will have them available when needed.
-# 278 & 280 will be dropdown titles, similar to how IDS_DEVICE_TXT or IDS_PARTITION_TYPE_TXT are used
-# 279 & 281 will be items that can appear in the dropdowns
-t MSG_278 "Jenis boot"
 t MSG_279 "Tidak boleh boot"
 t MSG_280 "Pilihan imej"
 t MSG_281 "(Sila pilih satu imej)"
@@ -10255,6 +10073,7 @@ b "en-US"
 # Main dialog
 g IDD_DIALOG
 t IDS_DEVICE_TXT "Enhet"
+t IDS_BOOT_SELECTION_TXT "Oppstartstype"
 t IDS_PARTITION_TYPE_TXT "Partisjonskjema og målsystem-type"
 t IDS_FILE_SYSTEM_TXT "Filsystem"
 t IDS_CLUSTER_SIZE_TXT "Cluster-størrelse"
@@ -10292,7 +10111,7 @@ t IDC_LOG_CLEAR "Slett"
 t IDC_LOG_SAVE "Lagre"
 t IDCANCEL "Lukk"
 
-# About -> Updates
+# Update Settings
 g IDD_UPDATE_POLICY
 t IDD_UPDATE_POLICY "Oppdateringspolitikk og innstillinger"
 t IDS_UPDATE_SETTINGS_GRP "Innstillinger"
@@ -10300,16 +10119,6 @@ t IDS_UPDATE_FREQUENCY_TXT "Ser etter oppdateringer"
 t IDS_INCLUDE_BETAS_TXT "Inkluder betaversjoner"
 t IDC_CHECK_NOW "Sjekk nå"
 t IDCANCEL "Lukk"
-s IDS_UPDATE_FREQUENCY_TXT 10,0
-s IDS_INCLUDE_BETAS_TXT 10,0
-m IDC_UPDATE_FREQUENCY 3,0
-s IDC_UPDATE_FREQUENCY 16,0
-m IDC_INCLUDE_BETAS 3,0
-s IDS_UPDATE_SETTINGS_GRP 12,0
-m IDS_CHECK_NOW_GRP 12,0
-s IDS_CHECK_NOW_GRP -12,0
-m IDC_CHECK_NOW 5,0
-m IDCANCEL 5,0
 
 # Dialog that appears when a new version is available
 g IDD_NEW_VERSION
@@ -10433,6 +10242,7 @@ t MSG_084 "Dette ISO-bildet ser ut til å inneholde en foreldet versjon av '%s'.
 	"OBS: Den nye filen vil bli lastet ned i den gjeldende mappen, og når"
 	"'%s' er der, vil den bli brukt automatisk."
 t MSG_085 "Laster ned '%s'"
+t MSG_086 "Intet bilde valgt"
 t MSG_088 "Bildet er for stort"
 t MSG_089 "Bildet er for stort for det valgte målet."
 t MSG_090 "Ikke støttet ISO"
@@ -10676,7 +10486,6 @@ t MSG_275 "Bildet du har valgt er et 'ISOHybrid'-bilde. Dette betyr det enten ka
 	"Vennligst velg modus du ønsker å skrive dette bildet i:"
 t MSG_276 "Skriv i %s -modus (anbefalt)"
 t MSG_277 "Skriv i %s -modus"
-t MSG_278 "Oppstartstype"
 t MSG_279 "Ikke oppstartbar"
 t MSG_280 "Bildevalg"
 t MSG_281 "(Vennligst velg et bilde)"
@@ -10711,6 +10520,7 @@ b "en-US"
 # Main dialog
 g IDD_DIALOG
 t IDS_DEVICE_TXT "درایو USB (حافظه فلش یا سایر ابزارهای ذخیره‌سازی قابل‌حمل)"
+t IDS_BOOT_SELECTION_TXT "نوع راه‌اندازی (Boot)"
 t IDS_PARTITION_TYPE_TXT "روش پارتیشن‌بندی و نوع ثابت‌افزار (Firmware) رایانه موردنظر"
 t IDS_FILE_SYSTEM_TXT "سیستم فایل"
 t IDS_CLUSTER_SIZE_TXT "اندازه کلاستر"
@@ -10762,25 +10572,8 @@ t IDC_LOG_CLEAR "پاک کردن"
 t IDC_LOG_SAVE "ذخیره"
 t IDCANCEL "بستن"
 
-# About -> Updates
+# Update Settings
 g IDD_UPDATE_POLICY
-s IDC_POLICY +15,0
-s IDS_UPDATE_SETTINGS_GRP +45,0
-m IDS_UPDATE_SETTINGS_GRP -60,0
-s IDS_UPDATE_FREQUENCY_TXT +20,0
-m IDS_UPDATE_FREQUENCY_TXT -55,0
-s IDC_UPDATE_FREQUENCY +20,0
-m IDC_UPDATE_FREQUENCY -25,0
-s IDS_INCLUDE_BETAS_TXT +40,0
-m IDS_INCLUDE_BETAS_TXT -55,0
-s IDC_INCLUDE_BETAS +30,0
-m IDC_INCLUDE_BETAS -25,0
-s IDS_CHECK_NOW_GRP +10,0
-m IDS_CHECK_NOW_GRP -10,0
-s IDC_CHECK_NOW +25,0
-m IDC_CHECK_NOW -20,0
-s IDCANCEL +25,0
-m IDCANCEL -20,0
 t IDD_UPDATE_POLICY "سیاست و تنظیمات به‌روزرسانی نرم‌افزار"
 t IDS_UPDATE_SETTINGS_GRP "تنظیمات"
 t IDS_UPDATE_FREQUENCY_TXT "بررسی و به‌روزرسانی خودکار:"
@@ -10914,6 +10707,7 @@ t MSG_084 "انگار این فایل ISO از نسخه قدیمی «%s» است
 	"-اگر نمی‌خواهید این فایل را دانلود کنید، «خیر» را انتخاب کنید.\n\n"
 	"نکته: این فایل در پوشه نرم‌افزار دانلود می‌شود و در دفعات بعد به‌صورت خودکار از آن استفاده خواهد شد."
 t MSG_085 "در حال دانلود کردن '%s'"
+t MSG_086 "فایل ایمیج انتخاب نشده است"
 t MSG_088 "فایل ایمیج بیش از اندازه بزرگ است"
 t MSG_089 "اندازه فایل ایمیج (Image) از ظرفیت درایو انتخاب‌شده بیشتر است."
 t MSG_090 "خطا در انتخاب فایل ISO"
@@ -11184,11 +10978,6 @@ t MSG_275 "ایمیجی که شما انتخاب کرده‌اید از نوع �
 t MSG_276 "نوشتن به روش «%s» (پیشنهاد برنامه)"
 # '%s' below will be replaced with your translation for MSG_095 ("DD Image")
 t MSG_277 "نوشتن به روش «%s»"
-# The following will be used for new controls of the Rufus 3.0 interface
-# They are added as messages, so that I will have them available when needed.
-# 278 & 280 will be dropdown titles, similar to how IDS_DEVICE_TXT or IDS_PARTITION_TYPE_TXT are used
-# 279 & 281 will be items that can appear in the dropdowns
-t MSG_278 "نوع راه‌اندازی (Boot)"
 t MSG_279 "غیرقابل راه‌اندازی (Non bootable)"
 t MSG_280 "انتخاب ایمیج (Image)"
 t MSG_281 "(لطفاً یک ایمیج انتخاب کنید)"
@@ -11226,6 +11015,7 @@ b "en-US"
 # Main dialog
 g IDD_DIALOG
 t IDS_DEVICE_TXT "Urządzenie"
+t IDS_BOOT_SELECTION_TXT "Typ bootowania"
 t IDS_PARTITION_TYPE_TXT "Schemat partycjonowania i typ systemu docelowego"
 t IDS_FILE_SYSTEM_TXT "System plików"
 t IDS_CLUSTER_SIZE_TXT "Rozmiar jednostki alokacji"
@@ -11263,27 +11053,14 @@ t IDC_LOG_CLEAR "Wyczyść"
 t IDC_LOG_SAVE "Zapisz"
 t IDCANCEL "Zamknij"
 
-# About -> Updates
+# Update Settings
 g IDD_UPDATE_POLICY
-s IDD_UPDATE_POLICY +10,0
 t IDD_UPDATE_POLICY "Polityka aktualizacji i ustawienia"
-s IDC_POLICY +10,0
 t IDS_UPDATE_SETTINGS_GRP "Ustawienia"
-s IDS_UPDATE_SETTINGS_GRP +9,0
 t IDS_UPDATE_FREQUENCY_TXT "Szukaj aktualizacji"
-s IDS_UPDATE_FREQUENCY_TXT -10,0
-m IDC_UPDATE_FREQUENCY -20,0
-s IDC_UPDATE_FREQUENCY +30,0
 t IDS_INCLUDE_BETAS_TXT "Dołącz wersje beta"
-m IDC_INCLUDE_BETAS -20,0
-m IDS_CHECK_NOW_GRP +9,0
-s IDS_CHECK_NOW_GRP +1,0
 t IDC_CHECK_NOW "Sprawdź teraz"
-m IDC_CHECK_NOW +6,0
-s IDC_CHECK_NOW +6,0
 t IDCANCEL "Zamknij"
-m IDCANCEL +6,0
-s IDCANCEL +6,0
 
 # Dialog that appears when a new version is available
 g IDD_NEW_VERSION
@@ -11405,6 +11182,7 @@ t MSG_084 "Ten plik ISO wydaje się być przestarzałą wersją '%s'.\n"
 	"Informacja: Nowy plik będzie pobrany do aktualnej lokalizacji i gdy "
 	"'%s' jest tutaj, zostanie użyte automatycznie."
 t MSG_085 "Pobieranie '%s'"
+t MSG_086 "Nie wybrano obrazu"
 t MSG_088 "Obraz jest zbyt duży"
 t MSG_089 "Ten obraz jest zbyt duży dla wybranego celu."
 t MSG_090 "Niewspierane ISO"
@@ -11643,7 +11421,6 @@ t MSG_275 "Obraz który wybrałeś to obraz 'ISOHybrid'. To znacza iż może zos
 	"Proszę wybrać tryb którego chcesz użyć do zapisania tego obrazu:"
 t MSG_276 "Zapisz w trybie %s (zalecane)"
 t MSG_277 "Zapisz w trybie %s"
-t MSG_278 "Typ bootowania"
 t MSG_279 "Niebootowalne"
 t MSG_280 "Wybór obrazu"
 t MSG_281 "(Proszę wybrać obraz)"
@@ -11677,6 +11454,7 @@ b "en-US"
 # Main dialog
 g IDD_DIALOG
 t IDS_DEVICE_TXT "Dispositivo"
+t IDS_BOOT_SELECTION_TXT "Tipo de inicialização"
 t IDS_PARTITION_TYPE_TXT "Esquema de partição e tipo do sistema de destino"
 t IDS_FILE_SYSTEM_TXT "Sistema de arquivos"
 t IDS_CLUSTER_SIZE_TXT "Tamanho do cluster"
@@ -11720,18 +11498,8 @@ t IDC_LOG_CLEAR "Limpar"
 t IDC_LOG_SAVE "Salvar"
 t IDCANCEL "Fechar"
 
-# About -> Updates
+# Update Settings
 g IDD_UPDATE_POLICY
-s IDD_UPDATE_POLICY +20,0
-s IDC_POLICY +20,0
-s IDS_UPDATE_SETTINGS_GRP +25,0
-m IDC_UPDATE_FREQUENCY -6,0
-s IDC_UPDATE_FREQUENCY +34,0
-m IDC_INCLUDE_BETAS -6,0
-m IDS_CHECK_NOW_GRP +25,0
-s IDS_CHECK_NOW_GRP -5,0
-m IDC_CHECK_NOW +22,0
-m IDCANCEL +22,0
 t IDD_UPDATE_POLICY "Configurações e política de atualização"
 t IDS_UPDATE_SETTINGS_GRP "Configurações"
 t IDS_UPDATE_FREQUENCY_TXT "Procurar atualizações:"
@@ -11860,6 +11628,7 @@ t MSG_084 "Parece que esta imagem ISO usa uma versão obsoleta do arquivo '%s'.\
 	"Nota: O novo arquivo será baixado na pasta atual e, caso "
 	"exista um arquivo\n '%s' nela, ele será reutilizado automaticamente."
 t MSG_085 "Baixando '%s'"
+t MSG_086 "Nenhuma imagem ISO foi selecionada"
 t MSG_088 "Imagem ISO muito grande"
 t MSG_089 "A imagem ISO é muito grande para o destino selecionado."
 t MSG_090 "ISO não suportada"
@@ -12116,11 +11885,6 @@ t MSG_275 "A imagem que você selecionou é do tipo 'ISOHybrid'. Isso significa 
 t MSG_276 "Gravar no modo %s (Recomendado)"
 # '%s' below will be replaced with your translation for MSG_095 ("DD Image")
 t MSG_277 "Gravar no modo %s"
-# The following will be used for new controls of the Rufus 3.0 interface
-# They are added as messages, so that I will have them available when needed.
-# 278 & 280 will be dropdown titles, similar to how IDS_DEVICE_TXT or IDS_PARTITION_TYPE_TXT are used
-# 279 & 281 will be items that can appear in the dropdowns
-t MSG_278 "Tipo de inicialização"
 t MSG_279 "Não inicializável"
 t MSG_280 "Seleção de imagem"
 t MSG_281 "(Por favor, selecione uma imagem)"
@@ -12161,6 +11925,7 @@ b "en-US"
 # Main dialog
 g IDD_DIALOG
 t IDS_DEVICE_TXT "Dispositivo/Disco"
+t IDS_BOOT_SELECTION_TXT "Tipo de arranque"
 t IDS_PARTITION_TYPE_TXT "Tipo de partição e tipo de sistema destino"
 t IDS_FILE_SYSTEM_TXT "Sistema de ficheiros"
 t IDS_CLUSTER_SIZE_TXT "Tamanho de cluster"
@@ -12198,18 +11963,8 @@ t IDC_LOG_CLEAR "Limpar"
 t IDC_LOG_SAVE "Guardar"
 t IDCANCEL "Fechar"
 
-# About -> Updates
+# Update Settings
 g IDD_UPDATE_POLICY
-s IDD_UPDATE_POLICY +20,0
-s IDC_POLICY +20,0
-s IDS_UPDATE_SETTINGS_GRP +25,0
-m IDC_UPDATE_FREQUENCY -6,0
-s IDC_UPDATE_FREQUENCY +34,0
-m IDC_INCLUDE_BETAS -6,0
-m IDS_CHECK_NOW_GRP +25,0
-s IDS_CHECK_NOW_GRP -5,0
-m IDC_CHECK_NOW +22,0
-m IDCANCEL +22,0
 t IDD_UPDATE_POLICY "Configuração da atualização automática"
 t IDS_UPDATE_SETTINGS_GRP "Configurações"
 t IDS_UPDATE_FREQUENCY_TXT "Procurar atualizações"
@@ -12337,6 +12092,7 @@ t MSG_084 "Esta imagem ISO usa uma versão obsoleta do ficheiro '%s'.\n"
 	"Nota: O novo ficheiro será transferido para a pasta atual, e se "
 	"o ficheiro\n '%s' já existir, será substituído automaticamente."
 t MSG_085 "A transferir '%s'"
+t MSG_086 "Nenhuma imagem selecionada"
 t MSG_088 "Imagem demasiado grande"
 t MSG_089 "A imagem é demasiado grande para o destino selecionado."
 t MSG_090 "ISO não suportado"
@@ -12578,7 +12334,6 @@ t MSG_275 "A imagem selecionada é uma 'ISOHybrid'. Isto significa que pode ser 
 	"Selecione o modo que realmente pretende para escrever esta imagem:"
 t MSG_276 "Escrever no modo %s (Recomendado)"
 t MSG_277 "Escrever no modo %s
-t MSG_278 "Tipo de arranque"
 t MSG_279 "Não inicializável"
 t MSG_280 "Seleção da Imagem"
 t MSG_281 "(Selecione a imagem)"
@@ -12611,6 +12366,7 @@ b "en-US"
 
 g IDD_DIALOG
 t IDS_DEVICE_TXT "Dispozitiv"
+t IDS_BOOT_SELECTION_TXT "Tipul de boot-are"
 t IDS_PARTITION_TYPE_TXT "Schema de partiționare și tipul sistemului țintă"
 t IDS_FILE_SYSTEM_TXT "Sistemul de fișiere"
 t IDS_CLUSTER_SIZE_TXT "Mărimea unității de alocare"
@@ -12634,7 +12390,6 @@ t IDD_LICENSE "Licența Rufus"
 
 g IDD_NOTIFICATION
 t IDC_MORE_INFO "Mai multe informații"
-s IDC_MORE_INFO +10,0
 t IDYES "Da"
 t IDNO "Nu"
 
@@ -12645,24 +12400,12 @@ t IDC_LOG_SAVE "Salvează"
 t IDCANCEL "Închide"
 
 g IDD_UPDATE_POLICY
-s IDD_UPDATE_POLICY +30,0
-s IDC_POLICY +30,0
 t IDD_UPDATE_POLICY "Setări politică de actualizare"
 t IDS_UPDATE_SETTINGS_GRP "Setări"
-s IDS_UPDATE_SETTINGS_GRP +28,0
 t IDS_UPDATE_FREQUENCY_TXT "Verificare actualizări"
-s IDS_UPDATE_FREQUENCY_TXT -3,0
 t IDS_INCLUDE_BETAS_TXT "Include versiuni beta"
-m IDC_UPDATE_FREQUENCY -3,0
-m IDC_INCLUDE_BETAS -3,0
-s IDC_UPDATE_FREQUENCY +20,0
-m IDS_CHECK_NOW_GRP +28,0
 t IDC_CHECK_NOW "Verifică acum"
-m IDC_CHECK_NOW +25,0
-s IDC_CHECK_NOW +4,0
 t IDCANCEL "Închide"
-m IDCANCEL +25,0
-s IDCANCEL +4,0
 
 g IDD_NEW_VERSION
 t IDD_NEW_VERSION "Rufus - Verificare actualizări"
@@ -12775,6 +12518,7 @@ t MSG_084 "Acest lucru arată ca utilizați o versiune învechită a '%s'.\n"
 	"Notă: Noul fișier va fi descărcat în folderul curent și odată "
 	"descărcat '%s', va fi reutilizat automat."
 t MSG_085 "Descărcare '%s'"
+t MSG_086 "Nici o imagine selectată"
 t MSG_088 "Imagine prea mare"
 t MSG_089 "Această imagine este prea mare pentru acest dispozitiv."
 t MSG_090 "Formatul ISO nu este acceptat"
@@ -12986,7 +12730,6 @@ t MSG_275 "Imaginea selectată este 'ISOHybrid'. Înseamnă că poate fi scris f
 	"Selectați modul care doriți să-l utilizați pentru a scrie această imagine:"
 t MSG_276 "Scriere in modul %s (Recomandat)"
 t MSG_277 "Scriere in modul %s"
-t MSG_278 "Tipul de boot-are"
 t MSG_279 "Imagine nebootabilă"
 t MSG_280 "Selectare imagine"
 t MSG_281 "(Vă rugăm, selectați o imagine)"
@@ -13021,6 +12764,7 @@ b "en-US"
 # Main dialog
 g IDD_DIALOG
 t IDS_DEVICE_TXT "Устройство"
+t IDS_BOOT_SELECTION_TXT "Тип загрузки"
 t IDS_PARTITION_TYPE_TXT "Схема раздела и тип системного интерфейса"
 t IDS_FILE_SYSTEM_TXT "Файловая система"
 t IDS_CLUSTER_SIZE_TXT "Размер кластера"
@@ -13048,7 +12792,6 @@ t IDCANCEL "Закрыть"
 # Notifications. You can trigger one of these by using Alt-R and re-launching Rufus
 g IDD_NOTIFICATION
 t IDC_MORE_INFO "Больше информации"
-s IDC_MORE_INFO +20,0
 t IDYES "Да"
 t IDNO "Нет"
 
@@ -13059,26 +12802,14 @@ t IDC_LOG_CLEAR "Очистить"
 t IDC_LOG_SAVE "Сохранить"
 t IDCANCEL "Закрыть"
 
-# About -> Updates
+# Update Settings
 g IDD_UPDATE_POLICY
-s IDD_UPDATE_POLICY +100,0
-s IDC_POLICY +100,0
-m IDS_CHECK_NOW_GRP +119,0
-s IDS_CHECK_NOW_GRP -18,0
-m IDC_UPDATE_FREQUENCY +54,0
-s IDC_UPDATE_FREQUENCY +74,0
-m IDC_INCLUDE_BETAS +54,0
 t IDD_UPDATE_POLICY "Политика обновления и параметры"
 t IDS_UPDATE_SETTINGS_GRP "Параметры"
-s IDS_UPDATE_SETTINGS_GRP +119,0
 t IDS_UPDATE_FREQUENCY_TXT "Проверка наличия обновлений"
-s IDS_UPDATE_FREQUENCY_TXT +60,0
 t IDS_INCLUDE_BETAS_TXT "Включая бета-версии"
-s IDS_INCLUDE_BETAS_TXT +60,0
 t IDC_CHECK_NOW "Проверить"
-m IDC_CHECK_NOW +109,0
 t IDCANCEL "Закрыть"
-m IDCANCEL +109,0
 
 # Dialog that appears when a new version is available
 g IDD_NEW_VERSION
@@ -13198,6 +12929,7 @@ t MSG_084 "Выбранный ISO-образ использует устарев
 	"Если вы не знаете что делать, то выберите 'Да'.\n\n"
 	"Файл будет загружен в текущую директорию, а в случае наличия '%s' - заменен автоматически."
 t MSG_085 "Загружено '%s'"
+t MSG_086 "Не выбран образ"
 t MSG_088 "Образ слишком большой"
 t MSG_089 "Образ слишком большой для выбранного устройства."
 t MSG_090 "Неподдерживаемый ISO-образ"
@@ -13416,7 +13148,6 @@ t MSG_275 "Выбранный образ является 'ISOHybrid' образ
 	"Однако, при возникновении проблем во время загрузки вы можете еще раз попробовать записать образ в %s режиме.\n\n"
 	"Пожалуйста, выберите режим, который вы хотите использовать для записи выбранного образа:"
 t MSG_276 "Записать в %s режиме (Рекомендуется)"
-t MSG_278 "Тип загрузки"
 t MSG_279 "Незагрузочный образ"
 t MSG_280 "Выбор образа"
 t MSG_281 "(Пожалуйста, выберите образ)"
@@ -13444,6 +13175,7 @@ b "en-US"
 # Main dialog
 g IDD_DIALOG
 t IDS_DEVICE_TXT "Uređaj"
+t IDS_BOOT_SELECTION_TXT "Tip podizanja sistema"
 t IDS_PARTITION_TYPE_TXT "Particijska šema i ciljani sistem datoteka"
 t IDS_FILE_SYSTEM_TXT "Sistem datoteka"
 t IDS_CLUSTER_SIZE_TXT "Veličina klastera"
@@ -13489,19 +13221,12 @@ t IDC_LOG_CLEAR "Obriši"
 t IDC_LOG_SAVE "Sačuvaj"
 t IDCANCEL "Zatvori"
 
-# About -> Updates
+# Update Settings
 g IDD_UPDATE_POLICY
-s IDD_UPDATE_POLICY +40,0
 t IDD_UPDATE_POLICY "Polisa ažuriranja i podešavanja"
-s IDC_POLICY +40,0
-s IDS_UPDATE_SETTINGS_GRP +40,0
 t IDS_UPDATE_SETTINGS_GRP "Podešavanja"
-s IDC_UPDATE_FREQUENCY +40,0
 t IDS_UPDATE_FREQUENCY_TXT "Provjeri ažuriranja:"
 t IDS_INCLUDE_BETAS_TXT "Obuhvati beta verzije:"
-m IDS_CHECK_NOW_GRP +40,0
-m IDC_CHECK_NOW +40,0
-m IDCANCEL +40,0
 t IDC_CHECK_NOW "Provjeri"
 t IDCANCEL "Zatvori"
 
@@ -13627,6 +13352,7 @@ t MSG_084 "Ova ISO datoteka koristi zastarjelu verziju '%s'.\n"
 	"Napomena: Nova datoteka će biti sačuvana u istom direktorijumu kao i Rufus, i kad "
 	"datoteka '%s' postoji tamo, automatski će biti korišćena.\n"
 t MSG_085 "Preuzimam '%s'"
+t MSG_086 "Nije odabrana datoteka"
 t MSG_088 "Datoteka je prevelika"
 t MSG_089 "Datoteka je prevelika za odabrani uređaj."
 t MSG_090 "Nepodržana ISO datoteka"
@@ -13873,11 +13599,6 @@ t MSG_275 "Datoteka koju ste odabrali je 'ISOHybrid' datoteka. Takva datoteka mo
 t MSG_276 "Metodom %s (Preporučeno)"
 # '%s' below will be replaced with your translation for MSG_095 ("DD Image")
 t MSG_277 "Metodom %s"
-# The following will be used for new controls of the Rufus 3.0 interface
-# They are added as messages, so that I will have them available when needed.
-# 278 & 280 will be dropdown titles, similar to how IDS_DEVICE_TXT or IDS_PARTITION_TYPE_TXT are used
-# 279 & 281 will be items that can appear in the dropdowns
-t MSG_278 "Tip podizanja sistema"
 t MSG_279 "Nije za podizane sistema"
 t MSG_280 "Odabir datoteke"
 t MSG_281 "(Molimo Vas odaberite datoteku)"
@@ -13911,6 +13632,7 @@ b "en-US"
 # Main dialog
 g IDD_DIALOG
 t IDS_DEVICE_TXT "Zariadenie"
+t IDS_BOOT_SELECTION_TXT "Typ bootovania"
 t IDS_PARTITION_TYPE_TXT "Schéma oddielu a typ cieľového systému"
 t IDS_FILE_SYSTEM_TXT "Súborový systém"
 t IDS_CLUSTER_SIZE_TXT "Veľkosť klastra"
@@ -13948,24 +13670,14 @@ t IDC_LOG_CLEAR "Vyčistiť"
 t IDC_LOG_SAVE "Uložiť"
 t IDCANCEL "Zatvoriť"
 
-# About -> Updates
+# Update Settings
 g IDD_UPDATE_POLICY
 t IDD_UPDATE_POLICY "Zásady a nastavenia aktualizácií"
 t IDS_UPDATE_SETTINGS_GRP "Nastavenia automatických aktualizácií"
 t IDS_UPDATE_FREQUENCY_TXT "Aktualizácia"
-s IDS_UPDATE_FREQUENCY_TXT -14,0
-m IDC_UPDATE_FREQUENCY -14,0
-s IDC_UPDATE_FREQUENCY +18,0
 t IDS_INCLUDE_BETAS_TXT "Zahrnúť beta verzie"
-s IDS_INCLUDE_BETAS_TXT -14,0
-m IDC_INCLUDE_BETAS -14,0
-s IDC_INCLUDE_BETAS +10,0
 t IDC_CHECK_NOW "Skontrolovať"
-s IDC_CHECK_NOW +6,0
-m IDC_CHECK_NOW -3,0
 t IDCANCEL "Zavrieť"
-s IDCANCEL +6,0
-m IDCANCEL -3,0
 
 # Dialog that appears when a new version is available
 g IDD_NEW_VERSION
@@ -14088,6 +13800,7 @@ t MSG_084 "Zdá sa, že tento ISO obraz používa zastaralú verziu modulu %s.\n
 	"Poznámka: Nový súbor %s bude stiahnutý "
 	"do aktuálneho priečinka programu a potom bude automaticky použitý."
 t MSG_085 "Sťahovanie '%s'"
+t MSG_086 "Nie je vybraný žiadny obraz disku"
 t MSG_088 "Obraz disku je príliš veľký"
 t MSG_089 "Obraz disku je príliš veľký pre vybraný disk."
 t MSG_090 "Nepodporovaný ISO obraz"
@@ -14322,7 +14035,6 @@ t MSG_275 "Tento obraz bol označený ako 'Hybridný ISO obraz'. To znamená, ž
 	"Vyberte režim, v ktorom chcete zapísať tento obraz:"
 t MSG_276 "Zápis v režime %s (odporúčané)"
 t MSG_277 "Zápis v režime %s"
-t MSG_278 "Typ bootovania"
 t MSG_279 "Nie je možné bootovať"
 t MSG_280 "Výber obrazu"
 t MSG_281 "(Vyberte obraz)"
@@ -14358,6 +14070,7 @@ b "en-US"
 # Main dialog
 g IDD_DIALOG
 t IDS_DEVICE_TXT "Naprava"
+t IDS_BOOT_SELECTION_TXT "Način zagona"
 t IDS_PARTITION_TYPE_TXT "Particijska shema in vrsta ciljnega sistema"
 t IDS_FILE_SYSTEM_TXT "Datotečni sistem"
 t IDS_CLUSTER_SIZE_TXT "Velikost gruče"
@@ -14396,25 +14109,14 @@ t IDC_LOG_CLEAR "Izprazni"
 t IDC_LOG_SAVE "Shrani"
 t IDCANCEL "Zapri"
 
-# About -> Updates
+# Update Settings
 g IDD_UPDATE_POLICY
-s IDD_UPDATE_POLICY +20,0
-s IDC_POLICY +20,0
 t IDD_UPDATE_POLICY "Posodobitvena politika in nastavitve"
 t IDS_UPDATE_SETTINGS_GRP "Nastavitve"
-s IDS_UPDATE_SETTINGS_GRP +20,0
-m IDS_CHECK_NOW_GRP +20,0
 t IDS_UPDATE_FREQUENCY_TXT "Preveri za posodobitve"
-s IDS_UPDATE_FREQUENCY_TXT +5,0
-m IDC_UPDATE_FREQUENCY +3,0
-s IDC_UPDATE_FREQUENCY +15,0
 t IDS_INCLUDE_BETAS_TXT "Upoštevaj beta verzije"
-s IDS_INCLUDE_BETAS_TXT +5,0
-m IDC_INCLUDE_BETAS +3,0
 t IDC_CHECK_NOW "Preveri zdaj"
-m IDC_CHECK_NOW +20,0
 t IDCANCEL "Zapri"
-m IDCANCEL +20,0
 
 # Dialog that appears when a new version is available
 g IDD_NEW_VERSION
@@ -14538,6 +14240,7 @@ t MSG_084 "Zdi se, da ta ISO slika uporablja zastarelo verzijo \"%s\".\n"
 	"Opomba: nova datoteka bo prenesena v trenutni imenik in ko datoteka "
 	"\"%s\" tam enkrat obstaja, bo samodejno uporabljena tudi v bodoče."
 t MSG_085 "Prenašam '%s'"
+t MSG_086 "Izbrana ni nobena slika"
 t MSG_088 "Slika je prevelika"
 t MSG_089 "Ta slika je prevelika za izbrani cilj."
 t MSG_090 "Nepodprt ISO"
@@ -14757,7 +14460,6 @@ t MSG_275 "Slika, ki ste jo izbrali, je vrste \"ISOHybrid\". To pomeni, da jo la
 	"Izberite, kako jo želite zapisati:"
 t MSG_276 "Zapiši kot %s (priporočeno)"
 t MSG_277 "Zapiši kot %s"
-t MSG_278 "Način zagona"
 t MSG_279 "Nezagonska"
 t MSG_280 "Izbira slike"
 t MSG_281 "(Izberite sliko)"
@@ -14791,6 +14493,7 @@ b "en-US"
 # Main dialog
 g IDD_DIALOG
 t IDS_DEVICE_TXT "Dispositivo"
+t IDS_BOOT_SELECTION_TXT "Tipo de arranque"
 t IDS_PARTITION_TYPE_TXT "Tipo de partición y del sistema destino"
 t IDS_FILE_SYSTEM_TXT "Sistema de archivos"
 t IDS_CLUSTER_SIZE_TXT "Tamaño del clúster"
@@ -14828,20 +14531,14 @@ t IDC_LOG_CLEAR "Borrar"
 t IDC_LOG_SAVE "Guardar"
 t IDCANCEL "Cerrar"
 
-# About -> Updates
+# Update Settings
 g IDD_UPDATE_POLICY
 t IDD_UPDATE_POLICY "Configuración de auto-actualización"
 t IDS_UPDATE_SETTINGS_GRP "Configuraciones"
 t IDS_UPDATE_FREQUENCY_TXT "Buscar actualizaciones"
-s IDS_UPDATE_FREQUENCY_TXT +5,0
-s IDC_UPDATE_FREQUENCY +5,0
 t IDS_INCLUDE_BETAS_TXT "Incluir versiones beta"
 t IDC_CHECK_NOW "Buscar ahora"
-s IDC_CHECK_NOW +10,0
-m IDC_CHECK_NOW -5,0
 t IDCANCEL "Cerrar"
-s IDCANCEL +10,0
-m IDCANCEL -5,0
 
 # Dialog that appears when a new version is available
 g IDD_NEW_VERSION
@@ -14964,6 +14661,7 @@ t MSG_084 "Esta imagen ISO parece que usa una versión obsoleta del archivo '%s'
 	"Nota: El nuevo archivo se descargará en el directorio actual, en el momento que "
 	"un archivo\n '%s' exista ahí, será usado automáticamente."
 t MSG_085 "Descargando '%s'"
+t MSG_086 "No hay imagen ISO seleccionada"
 t MSG_088 "Imagen ISO demasiado grande"
 t MSG_089 "La imagen ISO es demasiado grande para el destino seleccionado."
 t MSG_090 "ISO no soportado"
@@ -15204,7 +14902,6 @@ t MSG_275 "La imagen que ha seleccionado es una imagen de tipo 'ISOHybrid', esto
 	"Por favor, selecciona el modo en el que quiere escribir esta imagen:"
 t MSG_276 "Escribir en modo %s (Recomendado)"
 t MSG_277 "Escribir en modo %s"
-t MSG_278 "Tipo de arranque"
 t MSG_279 "No auto-ejecutable"
 t MSG_280 "Selección de imagen"
 t MSG_281 "(Por favor seleccione una imagen)"
@@ -15237,6 +14934,7 @@ b "en-US"
 # Main dialog
 g IDD_DIALOG
 t IDS_DEVICE_TXT "Enhet"
+t IDS_BOOT_SELECTION_TXT "Starttyp"
 t IDS_PARTITION_TYPE_TXT "Partitionsschema och måltypssystem"
 t IDS_FILE_SYSTEM_TXT "Filsystem"
 t IDS_CLUSTER_SIZE_TXT "Klusterstorlek"
@@ -15274,25 +14972,14 @@ t IDC_LOG_CLEAR "Rensa"
 t IDC_LOG_SAVE "Spara"
 t IDCANCEL "Stäng"
 
-# About -> Updates
+# Update Settings
 g IDD_UPDATE_POLICY
 t IDD_UPDATE_POLICY "Uppdateringspolicy och inställningar"
 t IDS_UPDATE_SETTINGS_GRP "Inställningar"
-s IDS_UPDATE_SETTINGS_GRP 8,0
-s IDS_CHECK_NOW_GRP -8,0
-m IDS_CHECK_NOW_GRP 8,0
 t IDS_UPDATE_FREQUENCY_TXT "Kontrollera"
 t IDS_INCLUDE_BETAS_TXT "Även beta-versioner"
 t IDC_CHECK_NOW "Uppdatera nu"
 t IDCANCEL "Stäng"
-s IDC_UPDATE_FREQUENCY 30,0
-m IDC_UPDATE_FREQUENCY -14,0
-s IDS_UPDATE_FREQUENCY_TXT -14,0
-m IDC_INCLUDE_BETAS -14,0
-s IDC_CHECK_NOW 10,0
-m IDC_CHECK_NOW -2,0
-s IDCANCEL 10,0
-m IDCANCEL -2,0
 
 # Dialog that appears when a new version is available
 g IDD_NEW_VERSION
@@ -15415,6 +15102,7 @@ t MSG_084 "Denna ISO-avbild verkar använda en gammal version av '%s'.\n"
 	"Obs: Filen kommer att laddas ned i nuvarande katalog och när "
 	"'%s' sedan finns där, kommer den automatiskt att återanvändas."
 t MSG_085 "Laddar ned '%s'"
+t MSG_086 "Ingen avbild vald"
 t MSG_088 "Avbilden är för stor"
 t MSG_089 "Avbilden är för stor för det valda målet."
 t MSG_090 "ISO-filen stöds ej"
@@ -15649,7 +15337,6 @@ t MSG_275 "Avbilden du har valt är en 'ISOHybrid'. Detta innebär att den kan s
 	"Välj det läge du vill använda för att skriva avbilden:"
 t MSG_276 "Skriv i läge %s (Rekommenderas)"
 t MSG_277 "Skriv i läge %s"
-t MSG_278 "Starttyp"
 t MSG_279 "Icke startbar"
 t MSG_280 "Avbildsväljare"
 t MSG_281 "(Välj en avbild)"
@@ -15683,6 +15370,7 @@ b "en-US"
 # Main dialog
 g IDD_DIALOG
 t IDS_DEVICE_TXT "อุปกรณ์"
+t IDS_BOOT_SELECTION_TXT "ลักษณะการบูต"
 t IDS_PARTITION_TYPE_TXT "รูปแบบของพาร์ทิชั่นและรูปแบบของระบบของเครื่องเป้าหมาย"
 t IDS_FILE_SYSTEM_TXT "ระบบไฟล์"
 t IDS_CLUSTER_SIZE_TXT "ขนาดของคลัสเตอร์"
@@ -15727,7 +15415,7 @@ t IDC_LOG_CLEAR "ล้าง"
 t IDC_LOG_SAVE "บันทึก"
 t IDCANCEL "ปิด"
 
-# About -> Updates
+# Update Settings
 g IDD_UPDATE_POLICY
 t IDD_UPDATE_POLICY "นโยบายและการตั้งค่าการปรับรุ่น"
 t IDS_UPDATE_SETTINGS_GRP "ตั้งค่า"
@@ -15858,6 +15546,7 @@ t MSG_084 "ISO อิมเมจนี้อาจเป็นเวอร์�
 	"หมายเหตุ: ไฟล์ใหม่จะถูกจัดเก็บในโฟลเดอร์ปัจจุบัน และเมื่อไฟล์ "
 	"'%s มีแล้ว ไฟล์จะถูกเลือกใช้โดยอัตโนมัติ"
 t MSG_085 "กำลังดาวน์โหลด '%s'"
+t MSG_086 "ยังไม่ได้เลือกอิมเมจไฟล์"
 t MSG_088 "อิมเมจไฟล์มีขนาดใหญ่เกินไป"
 t MSG_089 "อิมเมจไฟล์มีขนาดใหญ่กว่าอุปกรณ์"
 t MSG_090 "ISO ไฟล์ไม่รองรับ"
@@ -16104,11 +15793,6 @@ t MSG_275 "อิมเมจที่คุณเลือกเป็นแบ
 t MSG_276 "เขียนในโหมด%s (แนะนำ)"
 # '%s' below will be replaced with your translation for MSG_095 ("DD Image")
 t MSG_277 "เขียนในโหมด%s"
-# The following will be used for new controls of the Rufus 3.0 interface
-# They are added as messages, so that I will have them available when needed.
-# 278 & 280 will be dropdown titles, similar to how IDS_DEVICE_TXT or IDS_PARTITION_TYPE_TXT are used
-# 279 & 281 will be items that can appear in the dropdowns
-t MSG_278 "ลักษณะการบูต"
 t MSG_279 "แบบบูตไม่ได้"
 t MSG_280 "เลือกอิมเมจไฟล์"
 t MSG_281 "(กรุณาเลือกอิมเมจไฟล์)"
@@ -16143,6 +15827,7 @@ b "en-US"
 # Main dialog
 g IDD_DIALOG
 t IDS_DEVICE_TXT "Aygıt"
+t IDS_BOOT_SELECTION_TXT "Önyükleme türü"
 t IDS_PARTITION_TYPE_TXT "Disk Bölüm Düzeni ve Hedef Sistem Türü"
 t IDS_FILE_SYSTEM_TXT "Dosya Sistemi"
 t IDS_CLUSTER_SIZE_TXT "Ayırma Birimi Boyutu"
@@ -16181,27 +15866,14 @@ t IDC_LOG_CLEAR "Temizle"
 t IDC_LOG_SAVE "Kaydet"
 t IDCANCEL "Kapat"
 
-# About -> Updates
+# Update Settings
 g IDD_UPDATE_POLICY
-s IDD_UPDATE_POLICY +20,0
-s IDC_POLICY +20,0
 t IDD_UPDATE_POLICY "Güncelleme İlkesi ve Ayarlar"
 t IDS_UPDATE_SETTINGS_GRP "Ayarlar"
-s IDS_UPDATE_SETTINGS_GRP +20,0
 t IDS_UPDATE_FREQUENCY_TXT "Güncellemeleri Denetle"
-s IDS_UPDATE_FREQUENCY_TXT +10,0
-m IDC_UPDATE_FREQUENCY +2,0
-s IDC_UPDATE_FREQUENCY +24,0
 t IDS_INCLUDE_BETAS_TXT "Beta sürümlerini içersin"
-s IDS_INCLUDE_BETAS_TXT +10,0
-m IDC_INCLUDE_BETAS +2,0
 t IDC_CHECK_NOW "Şimdi Denetle"
-m IDC_CHECK_NOW +15,0
-s IDC_CHECK_NOW +10,0
-m IDS_CHECK_NOW_GRP +20,0
 t IDCANCEL "Kapat"
-m IDCANCEL +15,0
-s IDCANCEL +10,0
 
 # Dialog that appears when a new version is available
 g IDD_NEW_VERSION
@@ -16324,6 +15996,7 @@ t MSG_084 "Bu ISO yansıması '%s'in eski bir sürümünü kullanıyor gibi gör
 	"Not: Yeni dosya mevcut dizine indirilecek ve  "
 	"'%s'  orda varolunca, otomatik olarak kullanılacak."
 t MSG_085 "'%s' indiriliyor"
+t MSG_086 "Yansıma seçilmedi"
 t MSG_088 "Yansıma çok büyük"
 t MSG_089 "Yansıması seçilen hedef için çok büyük."
 t MSG_090 "Desteklenmeyen ISO"
@@ -16560,7 +16233,6 @@ t MSG_275 "Seçtiğiniz yansıma bir 'ISOHybrid' yansımasıdır. Bu da yansıma
 	"Lütfen bu yansımanın yazdırılmasında kullanmak istediğiniz modu seçin:"
 t MSG_276 "%s modunda yazdır (Önerilen)"
 t MSG_277 "%s modunda yazdır"
-t MSG_278 "Önyükleme türü"
 t MSG_279 "Önyüklenebilir değil"
 t MSG_280 "Yansıma seçimi"
 t MSG_281 "(Lütfen bir yansıma seçin)"
@@ -16594,6 +16266,7 @@ b "en-US"
 # Main dialog
 g IDD_DIALOG
 t IDS_DEVICE_TXT "Пристрій"
+t IDS_BOOT_SELECTION_TXT "Тип завантаження"
 t IDS_PARTITION_TYPE_TXT "Схема розділу та тип системного інтерфейсу"
 t IDS_FILE_SYSTEM_TXT "Файлова система"
 t IDS_CLUSTER_SIZE_TXT "Розмір кластера"
@@ -16621,7 +16294,6 @@ t IDCANCEL "Закрити"
 # Notifications. You can trigger one of these by using Alt-R and re-launching Rufus
 g IDD_NOTIFICATION
 t IDC_MORE_INFO "Більше інформації"
-s IDC_MORE_INFO +12,0
 t IDYES "Так"
 t IDNO "Ні"
 
@@ -16632,25 +16304,14 @@ t IDC_LOG_CLEAR "Очистити"
 t IDC_LOG_SAVE "Зберегти"
 t IDCANCEL "Закрити"
 
-# About -> Updates
+# Update Settings
 g IDD_UPDATE_POLICY
-s IDD_UPDATE_POLICY +80,0
-s IDC_POLICY +80,0
-m IDS_CHECK_NOW_GRP +80,0
-m IDC_UPDATE_FREQUENCY +50,0
-s IDC_UPDATE_FREQUENCY +30,0
-m IDC_INCLUDE_BETAS +50,0
 t IDD_UPDATE_POLICY "Політика оновлення та параметри"
 t IDS_UPDATE_SETTINGS_GRP "Параметри"
-s IDS_UPDATE_SETTINGS_GRP +80,0
 t IDS_UPDATE_FREQUENCY_TXT "Перевірка наявності оновлень"
-s IDS_UPDATE_FREQUENCY_TXT +70,0
 t IDS_INCLUDE_BETAS_TXT "Включаючи бета-версії"
-s IDS_INCLUDE_BETAS_TXT +20,0
 t IDC_CHECK_NOW "Перевірити"
-m IDC_CHECK_NOW +80,0
 t IDCANCEL "Закрити"
-m IDCANCEL +80,0
 
 # Dialog that appears when a new version is available
 g IDD_NEW_VERSION
@@ -16768,6 +16429,7 @@ t MSG_084 "Обраний ISO-образ використовує застарі
 	"Якщо ви не знаєте що робити, то оберіть 'Так'.\n\n"
 	"Файл буде завантажений в поточну директорію, а в разі наявності '%s' - замінений автоматично."
 t MSG_085 "Завантажено '%s'"
+t MSG_086 "Образ не обрано"
 t MSG_088 "Образ занадто великий"
 t MSG_089 "Образ занадто великий для обраного пристрою."
 t MSG_090 "Непідтримуваний ISO-образ"
@@ -16989,7 +16651,6 @@ t MSG_275 "Обраний образ є образом 'ISOHybrid'. Це озн�
 	"Будь ласка, оберіть режим, який ви хочете використовувати для запису обраного образа:"
 t MSG_276 "Записати в %s режимі (Рекомендується)"
 t MSG_277 "Записати в %s режимі"
-t MSG_278 "Тип завантаження"
 t MSG_279 "Незавантажувальний образ"
 t MSG_280 "Вибір образа"
 t MSG_281 "(Будь ласка, оберіть образ)"
@@ -17023,6 +16684,7 @@ b "en-US"
 # Main dialog
 g IDD_DIALOG
 t IDS_DEVICE_TXT "Thiết bị"
+t IDS_BOOT_SELECTION_TXT "Phương thức khởi động"
 t IDS_PARTITION_TYPE_TXT "Sắp xếp phân vùng và loại hệ thống"
 t IDS_FILE_SYSTEM_TXT "Hệ thống tập tin"
 t IDS_CLUSTER_SIZE_TXT "Kích thước liên cung"
@@ -17060,23 +16722,14 @@ t IDC_LOG_CLEAR "Xoá"
 t IDC_LOG_SAVE "Lưu"
 t IDCANCEL "Đóng"
 
-# About -> Updates
+# Update Settings
 g IDD_UPDATE_POLICY
 t IDD_UPDATE_POLICY "Thiết lập và lập chính sách cập nhật"
 t IDS_UPDATE_SETTINGS_GRP "Thiết lập"
 t IDS_UPDATE_FREQUENCY_TXT "Kiểm tra cập nhật"
-s IDC_UPDATE_FREQUENCY +40,0
-m IDC_UPDATE_FREQUENCY -25,0
 t IDS_INCLUDE_BETAS_TXT "Gồm bản thử nghiệm"
-s IDC_INCLUDE_BETAS +30,0
-m IDC_INCLUDE_BETAS +30,0
-s IDS_UPDATE_SETTINGS_GRP +8,0
-s IDS_CHECK_NOW_GRP -8.0
-m IDS_CHECK_NOW_GRP +8,0
 t IDC_CHECK_NOW "Kiểm tra ngay"
-s IDC_CHECK_NOW +6,0
 t IDCANCEL "Đóng"
-s IDCANCEL +6,0
 
 # Dialog that appears when a new version is available
 g IDD_NEW_VERSION
@@ -17200,6 +16853,7 @@ t MSG_084 "Ảnh ISO này là phiên bản cũ của '%s'.\n"
 	"Ghi chú: Tập tin mới sẽ được tải xuống vào thư mục hiện tại và một khi '%s' có "
 	"trong đó, nó sẽ được tự động tái sử dụng."
 t MSG_085 "Đang tải xuống '%s'"
+t MSG_086 "Chưa chọn ảnh"
 t MSG_088 "Ảnh quá lớn"
 t MSG_089 "Ảnh quá lớn cho đĩa đã chọn."
 t MSG_090 "ISO không được hỗ trợ"
@@ -17439,7 +17093,6 @@ t MSG_275 "Ảnh bạn đã chọn là một ảnh 'ISOHybrid'. Điều này có
 	"Hãy chọn chế độ mà bạn muốn dùng để ghi ảnh này:"
 t MSG_276 "Ghi trong chế độ %s (Khuyến cáo)"
 t MSG_277 "Ghi trong chế độ %s"
-t MSG_278 "Phương thức khởi động"
 t MSG_279 "Không có khả năng khởi động"
 t MSG_280 "Chọn ảnh"
 t MSG_281 "(Hãy chọn một ảnh)"

@@ -44,7 +44,7 @@
  *   u: 32 bit unsigned CSV list
  * Remember to update the size of the array in localization.h when adding/removing elements
  */
-const loc_parse parse_cmd[9] = {
+const loc_parse parse_cmd[7] = {
 	// Translation name and Windows LCIDs it should apply to
 	{ 'l', LC_LOCALE, "ssu" },	// l "en_US" "English (US)" 0x0009,0x1009
 	// Base translation to add on top of (eg. "English (UK)" can be used to build on top of "English (US)"
@@ -55,10 +55,6 @@ const loc_parse parse_cmd[9] = {
 	{ 't', LC_TEXT, "cs" },		// t IDC_CONTROL "Translation"
 	// Set the section/dialog to which the next commands should apply
 	{ 'g', LC_GROUP, "c" },		// g IDD_DIALOG
-	// Resize a dialog (dx dy pixel increment)
-	{ 's', LC_SIZE, "cii" },	// s IDC_CONTROL +10 +10
-	// Move a dialog (dx dy pixed displacement)
-	{ 'm', LC_MOVE, "cii" },	// m IDC_CONTROL -5 0
 	// Set the font to use for the text controls that follow
 	// Use f "Default" 0 to reset the font
 	{ 'f', LC_FONT, "si" },		// f "MS Dialog" 10
@@ -261,8 +257,6 @@ BOOL dispatch_loc_cmd(loc_cmd* lcmd)
 	switch(lcmd->command) {
 	// NB: For commands that take an ID, ctrl_id is always a valid index at this stage
 	case LC_TEXT:
-	case LC_MOVE:
-	case LC_SIZE:
 		add_dialog_command(dlg_index, lcmd);
 		break;
 	case LC_GROUP:
@@ -344,16 +338,6 @@ void apply_localization(int dlg_id, HWND hDlg)
 				if (hCtrl != NULL) {
 					if ((lcmd->txt[1] != NULL) && (lcmd->txt[1][0] != 0))
 						SetWindowTextU(hCtrl, lcmd->txt[1]);
-				}
-				break;
-			case LC_MOVE:
-				if (hCtrl != NULL) {
-					ResizeMoveCtrl(hDlg, hCtrl, lcmd->num[0], lcmd->num[1], 0, 0, fScale);
-				}
-				break;
-			case LC_SIZE:
-				if (hCtrl != NULL) {
-					ResizeMoveCtrl(hDlg, hCtrl, 0, 0, lcmd->num[0], lcmd->num[1], fScale);
 				}
 				break;
 			}

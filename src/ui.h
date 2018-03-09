@@ -118,18 +118,6 @@ static int advanced_format_toggle_ids[] = {
 	IDC_EXTENDED_LABEL,
 };
 
-static int dd_image_toggle_ids[] = {
-	IDC_QUICK_FORMAT,
-	IDC_PARTITION_TYPE,
-	IDC_TARGET_SYSTEM,
-	IDC_IMAGE_OPTION,
-	IDC_FILE_SYSTEM,
-	IDC_CLUSTER_SIZE,
-	IDC_LABEL,
-	IDC_QUICK_FORMAT,
-	IDC_EXTENDED_LABEL,
-};
-
 static int main_button_ids[] = {
 	IDC_SELECT,
 	IDC_START,

@@ -20,6 +20,8 @@ o Version 1.0.23 (2018.??.??)
   - Removed: MSG_086, MSG_087, MSG_163
   - *NEW*      IDS_DRIVE_PROPERTIES_TXT "Drive Properties"
   - *NEW*      IDS_BOOT_SELECTION_TXT "Boot selection"
+               Note: The current translation was taken from MSG_278 when available, which was for "Boot type".
+               However, "Boot selection", is more appropriate, so please update if it makes sense.
   - *NEW*      IDC_SELECT "SELECT"
   - *NEW*      IDS_IMAGE_OPTION_TXT "Image Option"
   - *UPDATED*  IDS_PARTITION_TYPE_TXT Partition scheme and target system type -> "Partition scheme"
@@ -28,7 +30,6 @@ o Version 1.0.23 (2018.??.??)
   - *REPLACED* MSG_031 -> "BIOS (or UEFI-CSM)"
   - *REPLACED* MSG_032 -> "UEFI (non CSM)"
   - *REPLACED* MSG_033 -> "BIOS or UEFI" 
-  - *REMOVED*  MSG_086
   - *REMOVED*  MSG_087
 	- *RENAMED*  IDC_WINDOWS_INSTALL -> MSG_117
 	- *RENAMED*  IDC_WINDOWS_TO_GO -> MSG_118
@@ -40,7 +41,9 @@ o Version 1.0.23 (2018.??.??)
   - *REPLACED* MSG_150 -> "Method that will be used to create partitions."
   - *REPLACED* MSG_151 -> "Type of computer you plan to use this bootable drive with. It is up to YOU to find whether your target is of BIOS or UEFI type.\n"
 	                        "Be mindful that CSM, which can be enabled or disabled on UEFI computers, means 'BIOS emulation', and is not really UEFI."
-  - *REPLACED* MSG_152 -> "Note: 'UEFI-CSM' means BIOS emulation under UEFI, and is not the same as genuine UEFI."ement UEFI."
+  - *REPLACED* MSG_152 -> "Note: 'UEFI-CSM' means BIOS emulation under UEFI (i.e. 'Legacy Mode') and is not the same as genuine UEFI."
+               Be mindful that you probably don't want to translate 'Legacy Mode' as this is an option that usually appears in English in the UEFI settings. 
+  - *NEW*      MSG_278 "Checking for conflicting processes..."
   - *REPLACED* MSG_280 "Image selection" -> "Disk or ISO image"
   - *REPLACED* MSG_281 "(Please select an image)" -> "%s (Please select)"
      MSG_281 + MSG_280 are used to create the message that appears in the boot selection dropdown when an image has not been selected.

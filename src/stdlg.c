@@ -61,6 +61,18 @@ static char *fp_title_str = "Microsoft Windows", *fp_button_str = "Format disk";
 extern loc_cmd* selected_locale;
 extern int cbw, ddw;
 
+static int update_settings_reposition_ids[] = {
+	IDC_POLICY,
+	IDS_UPDATE_SETTINGS_GRP,
+	IDS_UPDATE_FREQUENCY_TXT,
+	IDS_INCLUDE_BETAS_TXT,
+	IDC_UPDATE_FREQUENCY,
+	IDC_INCLUDE_BETAS,
+	IDS_CHECK_NOW_GRP,
+	IDC_CHECK_NOW,
+	IDCANCEL,
+};
+
 /*
  * https://blogs.msdn.microsoft.com/oldnewthing/20040802-00/?p=38283/
  */
@@ -617,6 +629,8 @@ INT_PTR CALLBACK NotificationCallback(HWND hDlg, UINT message, WPARAM wParam, LP
 	// To use the system message font
 	NONCLIENTMETRICS ncm;
 	HFONT hDlgFont;
+	HWND hCtrl;
+	RECT rc;
 
 	switch (message) {
 	case WM_INITDIALOG:
@@ -656,7 +670,13 @@ INT_PTR CALLBACK NotificationCallback(HWND hDlg, UINT message, WPARAM wParam, LP
 			ShowWindow(GetDlgItem(hDlg, IDYES), SW_SHOW);
 		}
 		if ((notification_more_info != NULL) && (notification_more_info->callback != NULL)) {
-			ShowWindow(GetDlgItem(hDlg, IDC_MORE_INFO), SW_SHOW);
+			hCtrl = GetDlgItem(hDlg, IDC_MORE_INFO);
+			// Resize the 'More information' button
+			GetWindowRect(hCtrl, &rc);
+			MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
+			SetWindowPos(hCtrl, NULL, rc.left, rc.top,
+				max(rc.right - rc.left, GetTextSize(hCtrl, NULL).cx + cbw), rc.bottom - rc.top, SWP_NOZORDER);
+			ShowWindow(hCtrl, SW_SHOW);
 		}
 		// Set the control text
 		if (szMessageText != NULL) {
@@ -1197,12 +1217,81 @@ BOOL SetTaskbarProgressValue(ULONGLONG ullCompleted, ULONGLONG ullTotal)
 	return !FAILED(ptbl->lpVtbl->SetProgressValue(ptbl, hMainDialog, ullCompleted, ullTotal));
 }
 
+// TODO: Something like this in main?
+static void Reposition(HWND hDlg, int id, int dx, int dw)
+{
+	HWND hCtrl;
+	RECT rc;
+
+	hCtrl = GetDlgItem(hDlg, id);
+	GetWindowRect(hCtrl, &rc);
+	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
+	SetWindowPos(hCtrl, HWND_TOP, rc.left + dx, rc.top, rc.right - rc.left + dw, rc.bottom - rc.top, 0);
+}
+
+static void PositionControls(HWND hDlg)
+{
+	RECT rc;
+	HWND hCtrl;
+	int i, ow, dw;	// original width, delta
+
+	// Get the original size of the control
+	GetWindowRect(GetDlgItem(hDlg, IDS_UPDATE_FREQUENCY_TXT), &rc);
+	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
+	ow = rc.right - rc.left;
+	dw = GetTextWidth(hDlg, IDS_UPDATE_FREQUENCY_TXT) - ow;
+	dw = max(dw, GetTextWidth(hDlg, IDS_INCLUDE_BETAS_TXT) - ow);
+	if (dw > 0) {
+		GetWindowRect(hDlg, &rc);
+		SetWindowPos(hDlg, NULL, -1, -1, rc.right - rc.left + dw, rc.bottom - rc.top, SWP_NOMOVE | SWP_NOZORDER);
+		for (i = 0; i < ARRAYSIZE(update_settings_reposition_ids); i++)
+			Reposition(hDlg, update_settings_reposition_ids[i], (i < 4) ? 0 : dw, (i >= 4) ? 0 : dw);
+	}
+
+	hCtrl = GetDlgItem(hDlg, IDC_UPDATE_FREQUENCY);
+	GetWindowRect(hCtrl, &rc);
+	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
+	ow = rc.right - rc.left;
+
+	dw = GetTextSize(hCtrl, lmprintf(MSG_013)).cx;
+	dw = max(dw, GetTextSize(hCtrl, lmprintf(MSG_030, lmprintf(MSG_014))).cx);
+	dw = max(dw, GetTextSize(hCtrl, lmprintf(MSG_015)).cx);
+	dw = max(dw, GetTextSize(hCtrl, lmprintf(MSG_016)).cx);
+	dw = max(dw, GetTextSize(hCtrl, lmprintf(MSG_008)).cx);
+	dw = max(dw, GetTextSize(hCtrl, lmprintf(MSG_009)).cx);
+	dw -= ow - ddw;
+	if (dw > 0) {
+		GetWindowRect(hDlg, &rc);
+		SetWindowPos(hDlg, NULL, -1, -1, rc.right - rc.left + dw, rc.bottom - rc.top, SWP_NOMOVE | SWP_NOZORDER);
+		for (i = 0; i < ARRAYSIZE(update_settings_reposition_ids); i++) {
+			if ((i >= 2) && (i <= 3))
+				continue;
+			Reposition(hDlg, update_settings_reposition_ids[i], (i < 6) ? 0 : dw, (i >= 6) ? 0 : dw);
+		}
+	}
+
+	GetWindowRect(GetDlgItem(hDlg, IDC_CHECK_NOW), &rc);
+	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
+	ow = rc.right - rc.left;
+	dw = GetTextWidth(hDlg, IDC_CHECK_NOW) - ow + cbw;
+	dw = max(dw, GetTextWidth(hDlg, IDCANCEL) - ow + cbw);
+	if (dw > 0) {
+		GetWindowRect(hDlg, &rc);
+		SetWindowPos(hDlg, NULL, -1, -1, rc.right - rc.left + dw, rc.bottom - rc.top, SWP_NOMOVE | SWP_NOZORDER);
+		for (i = 0; i < ARRAYSIZE(update_settings_reposition_ids); i++) {
+			if ((i >= 1) && (i <= 5))
+				continue;
+			Reposition(hDlg, update_settings_reposition_ids[i], 0, dw);
+		}
+	}
+}
+
 /*
  * Update policy and settings dialog callback
  */
 INT_PTR CALLBACK UpdateCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	int dy;
+	int i, dy;
 	RECT rect;
 	REQRESIZE* rsz;
 	HWND hPolicy;
@@ -1216,6 +1305,7 @@ INT_PTR CALLBACK UpdateCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 		resized_already = FALSE;
 		hUpdatesDlg = hDlg;
 		apply_localization(IDD_UPDATE_POLICY, hDlg);
+		PositionControls(hDlg);
 		SetTitleBarIcon(hDlg);
 		CenterDialog(hDlg);
 		hFrequency = GetDlgItem(hDlg, IDC_UPDATE_FREQUENCY);
@@ -1270,14 +1360,8 @@ INT_PTR CALLBACK UpdateCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 			dy -= rsz->rc.bottom - rsz->rc.top + 6;	// add the border
 			ResizeMoveCtrl(hDlg, hDlg, 0, 0, 0, -dy, 1.0f);
 			ResizeMoveCtrl(hDlg, hPolicy, 0, 0, 0, -dy, 1.0f);
-			ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDS_UPDATE_SETTINGS_GRP), 0, -dy, 0, 0, 1.0f);
-			ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDS_UPDATE_FREQUENCY_TXT), 0, -dy, 0, 0, 1.0f);
-			ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDC_UPDATE_FREQUENCY), 0, -dy, 0, 0, 1.0f);
-			ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDS_INCLUDE_BETAS_TXT), 0, -dy, 0, 0, 1.0f);
-			ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDC_INCLUDE_BETAS), 0, -dy, 0, 0, 1.0f);
-			ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDS_CHECK_NOW_GRP), 0, -dy, 0, 0, 1.0f);
-			ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDC_CHECK_NOW), 0, -dy, 0, 0, 1.0f);
-			ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDCANCEL), 0, -dy, 0, 0, 1.0f);
+			for (i = 1; i < ARRAYSIZE(update_settings_reposition_ids); i++)
+				ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, update_settings_reposition_ids[i]), 0, -dy, 0, 0, 1.0f);
 		}
 		break;
 	case WM_COMMAND:

@@ -73,7 +73,7 @@ static int sw, mw, bsw, hbw, sbw, ssw;
 static UINT_PTR UM_LANGUAGE_MENU_MAX = UM_LANGUAGE_MENU;
 static RECT relaunch_rc = { -65536, -65536, 0, 0};
 static UINT uQFChecked = BST_CHECKED, uMBRChecked = BST_UNCHECKED;
-static HFONT hInfoFont, hLinkFont;
+static HFONT hInfoFont;
 static WNDPROC progress_original_proc = NULL;
 static HANDLE format_thid = NULL, dialog_handle = NULL;
 static HWND hSelectImage = NULL, hStart = NULL;
@@ -725,14 +725,6 @@ static void SetProposedLabel(int ComboIndex)
 	}
 }
 
-// Toggle available controls when dealing with a pure DD image
-static void ToggleImage(BOOL enable)
-{
-	int i;
-	for (i = 0; i < ARRAYSIZE(dd_image_toggle_ids); i++)
-		EnableWindow(GetDlgItem(hMainDialog, dd_image_toggle_ids[i]), enable);
-}
-
 // Toggle controls according to operation
 static void EnableControls(BOOL bEnable)
 {
@@ -1264,7 +1256,7 @@ static void ToggleImageOption(void)
 	InvalidateRect(hMainDialog, NULL, TRUE);
 }
 
-static void SetBootTypeDropdownWidth()
+static void SetBootTypeDropdownWidth(void)
 {
 	HDC hDC;
 	HFONT hFont;
@@ -1920,11 +1912,6 @@ static void CreateAdditionalControls(HWND hDlg)
 	SendMessage(GetDlgItem(hDlg, IDC_SAVE), BCM_SETIMAGELIST, 0, (LPARAM)&bi_save);
 }
 
-static inline int GetTextWidth(HWND hDlg, int id)
-{
-	return GetTextSize(GetDlgItem(hDlg, id), NULL).cx;
-}
-
 // https://stackoverflow.com/a/20926332/1069307
 // https://msdn.microsoft.com/en-us/library/windows/desktop/bb226818.aspx
 static void GetBasicControlsWidth(HWND hDlg)
@@ -2100,33 +2087,6 @@ static void GetFullWidth(HWND hDlg)
 	// TODO: Also pick a few choice messages from info/status
 }
 
-static void SetSectionHeaders(HWND hDlg)
-{
-	RECT rc;
-	HWND hCtrl;
-	SIZE sz;
-	HFONT hf;
-	wchar_t wtmp[128];
-	int i, control[3] = { IDS_DRIVE_PROPERTIES_TXT, IDS_FORMAT_OPTIONS_TXT, IDS_STATUS_TXT };
-
-	// Set the section header fonts and resize the static controls accordingly
-	hf = CreateFontA(48, 0, 0, 0, FW_SEMIBOLD, FALSE, FALSE, FALSE, DEFAULT_CHARSET,
-		0, 0, PROOF_QUALITY, 0, "Segoe UI");
-
-	for (i = 0; i < ARRAYSIZE(control); i++) {
-		SendDlgItemMessageA(hDlg, control[i], WM_SETFONT, (WPARAM)hf, TRUE);
-		hCtrl = GetDlgItem(hDlg, control[i]);
-		memset(wtmp, 0, sizeof(wtmp));
-		GetWindowTextW(hCtrl, wtmp, ARRAYSIZE(wtmp));
-		wtmp[wcslen(wtmp)] = ' ';
-		SetWindowTextW(hCtrl, wtmp);
-		GetWindowRect(hCtrl, &rc);
-		MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
-		sz = GetTextSize(hCtrl, NULL);
-		SetWindowPos(hCtrl, NULL, rc.left, rc.top, sz.cx, sz.cy, SWP_NOZORDER);
-	}
-}
-
 static void PositionControls(HWND hDlg)
 {
 	RECT rc, rcSelectedImage;
@@ -2288,6 +2248,33 @@ static void PositionControls(HWND hDlg)
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
 	SetWindowPos(hCtrl, NULL, rc.left, rcSelectedImage.top - 1,
 		rc.right - rc.left, dropdown_height + button_fudge, SWP_NOZORDER);
+}
+
+static void SetSectionHeaders(HWND hDlg)
+{
+	RECT rc;
+	HWND hCtrl;
+	SIZE sz;
+	HFONT hf;
+	wchar_t wtmp[128];
+	int i, control[3] = { IDS_DRIVE_PROPERTIES_TXT, IDS_FORMAT_OPTIONS_TXT, IDS_STATUS_TXT };
+
+	// Set the section header fonts and resize the static controls accordingly
+	hf = CreateFontA(48, 0, 0, 0, FW_SEMIBOLD, FALSE, FALSE, FALSE, DEFAULT_CHARSET,
+		0, 0, PROOF_QUALITY, 0, "Segoe UI");
+
+	for (i = 0; i < ARRAYSIZE(control); i++) {
+		SendDlgItemMessageA(hDlg, control[i], WM_SETFONT, (WPARAM)hf, TRUE);
+		hCtrl = GetDlgItem(hDlg, control[i]);
+		memset(wtmp, 0, sizeof(wtmp));
+		GetWindowTextW(hCtrl, wtmp, ARRAYSIZE(wtmp));
+		wtmp[wcslen(wtmp)] = ' ';
+		SetWindowTextW(hCtrl, wtmp);
+		GetWindowRect(hCtrl, &rc);
+		MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
+		sz = GetTextSize(hCtrl, NULL);
+		SetWindowPos(hCtrl, NULL, rc.left, rc.top, sz.cx, sz.cy, SWP_NOZORDER);
+	}
 }
 
 // Create the horizontal section lines
@@ -2470,6 +2457,7 @@ static void InitDialog(HWND hDlg)
 	CreateTooltip(GetDlgItem(hDlg, IDS_CSM_HELP_TXT), lmprintf(MSG_152), 30000);
 	CreateTooltip(GetDlgItem(hDlg, IDC_HASH), lmprintf(MSG_272), -1);
 	CreateTooltip(GetDlgItem(hDlg, IDC_SAVE), lmprintf(MSG_304), -1);
+	CreateTooltip(GetDlgItem(hDlg, IDC_IMAGE_OPTION), lmprintf(MSG_305), 30000);
 
 	if (!advanced_mode_device)	// Hide as needed, since we display the advanced controls by default
 		ToggleAdvancedDeviceOptions(FALSE);
