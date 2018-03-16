@@ -189,8 +189,10 @@ static void SetAllowedFileSystems(void)
 		break;
 	case BT_IMAGE:
 		if (!HAS_WINDOWS(img_report) || (tt != TT_BIOS) || allow_dual_uefi_bios) {
-			allowed_filesystem[FS_FAT16] = TRUE;
-			allowed_filesystem[FS_FAT32] = TRUE;
+			if (!HAS_WINTOGO(img_report) || (ComboBox_GetCurSel(GetDlgItem(hMainDialog, IDC_IMAGE_OPTION)) != 1)) {
+				allowed_filesystem[FS_FAT16] = TRUE;
+				allowed_filesystem[FS_FAT32] = TRUE;
+			}
 		}
 		allowed_filesystem[FS_NTFS] = TRUE;
 		break;
@@ -336,7 +338,8 @@ static void SetPartitionSchemeAndTargetSystem(BOOL only_target)
 			ComboBox_AddStringU(hTargetSystem, lmprintf(MSG_033)), TT_BIOS));
 	IGNORE_RETVAL(ComboBox_SetCurSel(hTargetSystem, 0));
 	tt = (int)ComboBox_GetItemData(hTargetSystem, ComboBox_GetCurSel(hTargetSystem));
-	ShowWindow(GetDlgItem(hMainDialog, IDS_CSM_HELP_TXT), has_uefi_csm ? SW_SHOW : SW_HIDE);
+	// Can't update a tooltip from a thread, so we send a message instead
+	SendMessage(hMainDialog, UM_UPDATE_CSM_TOOLTIP, 0, 0);
 }
 
 // Populate the Allocation unit size field
@@ -760,6 +763,7 @@ static void EnableControls(BOOL bEnable)
 	bEnable = ((bt == BT_IMAGE) && (image_path != NULL) && (!img_report.is_iso)) ? FALSE : bEnable;
 	EnableWindow(hPartitionScheme, bEnable);
 	EnableWindow(hTargetSystem, bEnable);
+	EnableWindow(GetDlgItem(hMainDialog, IDS_CSM_HELP_TXT), bEnable);
 	EnableWindow(hFileSystem, bEnable);
 	EnableWindow(hClusterSize, bEnable);
 }
@@ -2452,9 +2456,9 @@ static void InitDialog(HWND hDlg)
 	CreateTooltip(GetDlgItem(hDlg, IDC_LIST_USB_HDD), lmprintf(MSG_170), -1);
 	CreateTooltip(hStart, lmprintf(MSG_171), -1);
 	CreateTooltip(GetDlgItem(hDlg, IDC_ABOUT), lmprintf(MSG_172), -1);
-	CreateTooltip(hPartitionScheme, lmprintf(MSG_150), -1);
-	CreateTooltip(hTargetSystem, lmprintf(MSG_151), 30000);
-	CreateTooltip(GetDlgItem(hDlg, IDS_CSM_HELP_TXT), lmprintf(MSG_152), 30000);
+	CreateTooltip(hPartitionScheme, lmprintf(MSG_163), -1);
+	CreateTooltip(hTargetSystem, lmprintf(MSG_150), 30000);
+	CreateTooltip(GetDlgItem(hDlg, IDS_CSM_HELP_TXT), lmprintf(MSG_151), 30000);
 	CreateTooltip(GetDlgItem(hDlg, IDC_HASH), lmprintf(MSG_272), -1);
 	CreateTooltip(GetDlgItem(hDlg, IDC_SAVE), lmprintf(MSG_304), -1);
 	CreateTooltip(GetDlgItem(hDlg, IDC_IMAGE_OPTION), lmprintf(MSG_305), 30000);
@@ -2875,6 +2879,9 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			nDeviceIndex = ComboBox_GetCurSel(hDeviceList);
 			DeviceNum = (nDeviceIndex == CB_ERR) ? 0 : (DWORD)ComboBox_GetItemData(hDeviceList, nDeviceIndex);
 			break;
+		case IDC_IMAGE_OPTION:
+			SetFileSystemAndClusterSize(NULL);
+			break;
 		case IDC_NB_PASSES:
 			if (HIWORD(wParam) != CBN_SELCHANGE)
 				break;
@@ -2884,7 +2891,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			if (HIWORD(wParam) != CBN_SELCHANGE)
 				break;
 			tt = (int)ComboBox_GetItemData(hTargetSystem, ComboBox_GetCurSel(hTargetSystem));
-			ShowWindow(GetDlgItem(hMainDialog, IDS_CSM_HELP_TXT), ((tt == TT_BIOS) && (has_uefi_csm)) ? SW_SHOW : SW_HIDE);
+			SendMessage(hMainDialog, UM_UPDATE_CSM_TOOLTIP, 0, 0);
 			SetFileSystemAndClusterSize(NULL);
 			break;
 		case IDC_PARTITION_TYPE:
@@ -3132,6 +3139,10 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		}
 		return (INT_PTR)TRUE;
 
+	case UM_UPDATE_CSM_TOOLTIP:
+		ShowWindow(GetDlgItem(hMainDialog, IDS_CSM_HELP_TXT), ((tt == TT_UEFI) || has_uefi_csm) ? SW_SHOW : SW_HIDE);
+		CreateTooltip(GetDlgItem(hMainDialog, IDS_CSM_HELP_TXT), lmprintf((tt == TT_UEFI) ? MSG_152 : MSG_151), 30000);
+		break;
 	case UM_MEDIA_CHANGE:
 		wParam = DBT_CUSTOMEVENT;
 		// Fall through

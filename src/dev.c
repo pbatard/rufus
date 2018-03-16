@@ -84,8 +84,8 @@ static BOOL GetUSBProperties(char* parent_path, char* device_id, usb_device_prop
 		uprintf("Could not open hub %s: %s", parent_path, WindowsErrorString());
 		goto out;
 	}
-	memset(&conn_info, 0, sizeof(conn_info));
 	size = sizeof(conn_info);
+	memset(&conn_info, 0, size);
 	conn_info.ConnectionIndex = (ULONG)props->port;
 	// coverity[tainted_data_argument]
 	if (!DeviceIoControl(handle, IOCTL_USB_GET_NODE_CONNECTION_INFORMATION_EX, &conn_info, size, &conn_info, size, &size, NULL)) {
@@ -105,8 +105,8 @@ static BOOL GetUSBProperties(char* parent_path, char* device_id, usb_device_prop
 
 	// In their great wisdom, Microsoft decided to BREAK the USB speed report between Windows 7 and Windows 8
 	if (nWindowsVersion >= WINDOWS_8) {
-		memset(&conn_info_v2, 0, sizeof(conn_info_v2));
 		size = sizeof(conn_info_v2);
+		memset(&conn_info_v2, 0, size);
 		conn_info_v2.ConnectionIndex = (ULONG)props->port;
 		conn_info_v2.Length = size;
 		conn_info_v2.SupportedUsbProtocols.Usb300 = 1;
@@ -152,8 +152,8 @@ BOOL ResetDevice(int index)
 		goto out;
 	}
 
-	memset(&cycle_port, 0, sizeof(cycle_port));
 	size = sizeof(cycle_port);
+	memset(&cycle_port, 0, size);
 	cycle_port.ConnectionIndex = DrivePort[index];
 	uprintf("Cycling port %d (reset) on %s", DrivePort[index], DriveHub.String[index]);
 	// As per https://msdn.microsoft.com/en-us/library/windows/hardware/ff537340.aspx

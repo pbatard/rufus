@@ -38,11 +38,12 @@ o Version 1.0.23 (2018.??.??)
   - *NEW*      MSG_121 "Show %s"
   - *NEW*      MSG_122 "Hide %s"
      MSG_119/120 + MSG_121/122 are used to create the advanced options clickable toolbars
-  - *REPLACED* MSG_150 -> "Method that will be used to create partitions."
-  - *REPLACED* MSG_151 -> "Type of computer you plan to use this bootable drive with. It is up to YOU to find whether your target is of BIOS or UEFI type.\n"
+  - *REPLACED* MSG_150 -> "Type of computer you plan to use this bootable drive with. It is up to YOU to find whether your target is of BIOS or UEFI type.\n"
 	                        "Be mindful that CSM, which can be enabled or disabled on UEFI computers, means 'BIOS emulation', and is not really UEFI."
-  - *REPLACED* MSG_152 -> "Note: 'UEFI-CSM' means BIOS emulation under UEFI (i.e. 'Legacy Mode') and is not the same as genuine UEFI."
-               Be mindful that you probably don't want to translate 'Legacy Mode' as this is an option that usually appears in English in the UEFI settings. 
+  - *REPLACED* MSG_151 -> ""Note: 'UEFI-CSM' means that the device will only boot in BIOS emulation mode under UEFI (also known as 'Legacy Mode'), and not in native UEFI mode."
+               Be mindful that you probably don't want to translate 'Legacy Mode' as this is an option that usually appears in English in the UEFI settings.
+  - *REPLACED* MSG_152 -> "Note: 'non CSM' means that the device will only boot in native UEFI mode, and not in BIOS emulation mode (also known as 'Legacy Mode')."
+  - *REPLACED* MSG_163 -> "Method that will be used to create partitions."
   - *NEW*      MSG_278 "Checking for conflicting processes..."
   - *REPLACED* MSG_280 "Image selection" -> "Disk or ISO image"
   - *REPLACED* MSG_281 "(Please select an image)" -> "%s (Please select)"
@@ -57,6 +58,8 @@ o Version 1.0.23 (2018.??.??)
   - *NEW*      MSG_314 "Create a disk image of the selected device"
   - *UPDATED*  On IDD_LOG, IDC_LOG_CLEAR, IDC_LOG_SAVE and IDCANCEL were updated to remove the redundant mention of "Log" in the buttons
                for the languages who did that. *PLEASE* verify that the modification looks correct in your language.
+  - *UPDATED*  Log dialog buttons (in the 'g IDD_LOG' section). "Save Log", "Clear Log" "Close Log" have become "Save", "Clear", "Close".
+               I updated existing translations to remove the mention of "Log". Please check that it was done properly.
 
 o Version 1.0.22 (2017.07.17)
   - *NEW* MSG_295 "Warning: Unofficial version"
