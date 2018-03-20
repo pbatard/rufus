@@ -404,6 +404,7 @@ void CreateStatusBar(void)
 {
 	RECT rect;
 	int edge[2];
+	HFONT hFont;
 
 	// Create the status bar
 	hStatus = CreateWindowExW(0, STATUSCLASSNAME, NULL, WS_CHILD | WS_VISIBLE | SBARS_TOOLTIPS,
@@ -415,6 +416,12 @@ void CreateStatusBar(void)
 	edge[0] = rect.right - (int)(SB_TIMER_SECTION_SIZE * fScale);
 	edge[1] = rect.right;
 	SendMessage(hStatus, SB_SETPARTS, (WPARAM)ARRAYSIZE(edge), (LPARAM)&edge);
+
+	// Set the font
+	hFont = CreateFontA(-MulDiv(9, GetDeviceCaps(GetDC(hMainDialog), LOGPIXELSY), 72),
+		0, 0, 0, FW_MEDIUM, FALSE, FALSE, FALSE, DEFAULT_CHARSET,
+		0, 0, PROOF_QUALITY, 0, "Segoe UI");
+	SendMessage(hStatus, WM_SETFONT, (WPARAM)hFont, TRUE);
 }
 
 /*
@@ -789,7 +796,6 @@ INT_PTR CALLBACK SelectionCallback(HWND hDlg, UINT message, WPARAM wParam, LPARA
 				nDialogItems, IDC_SELECTION_CHOICEMAX - IDC_SELECTION_CHOICE1);
 			nDialogItems = IDC_SELECTION_CHOICEMAX - IDC_SELECTION_CHOICE1;
 		}
-		// TODO: This shouldn't be needed when using DS_SHELLFONT
 		// Get the system message box font. See http://stackoverflow.com/a/6057761
 		ncm.cbSize = sizeof(ncm);
 		SystemParametersInfo(SPI_GETNONCLIENTMETRICS, ncm.cbSize, &ncm, 0);
@@ -921,7 +927,6 @@ INT_PTR CALLBACK ListCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
 				nDialogItems, IDC_LIST_ITEMMAX - IDC_LIST_ITEM1);
 			nDialogItems = IDC_LIST_ITEMMAX - IDC_LIST_ITEM1;
 		}
-		// TODO: This shouldn't be needed when using DS_SHELLFONT
 		// Get the system message box font. See http://stackoverflow.com/a/6057761
 		ncm.cbSize = sizeof(ncm);
 		SystemParametersInfo(SPI_GETNONCLIENTMETRICS, ncm.cbSize, &ncm, 0);
@@ -1217,7 +1222,6 @@ BOOL SetTaskbarProgressValue(ULONGLONG ullCompleted, ULONGLONG ullTotal)
 	return !FAILED(ptbl->lpVtbl->SetProgressValue(ptbl, hMainDialog, ullCompleted, ullTotal));
 }
 
-// TODO: Something like this in main?
 static void Reposition(HWND hDlg, int id, int dx, int dw)
 {
 	HWND hCtrl;

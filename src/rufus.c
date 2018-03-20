@@ -65,11 +65,10 @@ static BOOL user_changed_label = FALSE;
 static BOOL app_changed_label = FALSE;
 static BOOL allowed_filesystem[FS_MAX] = { 0 };
 static int64_t last_iso_blocking_status;
-// TODO: rename 'selection_default' to something more explicit
 static int selection_default, row_height, advanced_device_section_height, advanced_format_section_height, image_index;
 static int device_vpos, format_vpos, status_vpos;
-static int bw, hw, fw;	// Main button width, half dropdown width, full dropdown width
-static int sw, mw, bsw, hbw, sbw, ssw;
+static int ddh, bw, hw, fw;	// DropDown Height, Main button width, half dropdown width, full dropdown width
+static int sw, mw, bsw, hbw, sbw, ssw, tw;
 static UINT_PTR UM_LANGUAGE_MENU_MAX = UM_LANGUAGE_MENU;
 static RECT relaunch_rc = { -65536, -65536, 0, 0};
 static UINT uQFChecked = BST_CHECKED, uMBRChecked = BST_UNCHECKED;
@@ -384,7 +383,6 @@ static BOOL SetFileSystemAndClusterSize(char* fs_type)
 	LONGLONG i;
 	char tmp[128] = "", *entry;
 
-	// TODO: something better with FS reselection
 	IGNORE_RETVAL(ComboBox_ResetContent(hFileSystem));
 	IGNORE_RETVAL(ComboBox_ResetContent(hClusterSize));
 	default_fs = FS_UNKNOWN;
@@ -1784,10 +1782,10 @@ static void CreateAdditionalControls(HWND hDlg)
 	hDll = GetLibraryHandle("Shell32");
 	hIconSave = (HICON)LoadImage(hDll, MAKEINTRESOURCE(16761), IMAGE_ICON, s16, s16, LR_DEFAULTCOLOR | LR_SHARED);
 	hIconLog = (HICON)LoadImage(hDll, MAKEINTRESOURCE(281), IMAGE_ICON, s16, s16, LR_DEFAULTCOLOR | LR_SHARED);
+	hIconAbout = (HICON)LoadImage(hDll, MAKEINTRESOURCE(16783), IMAGE_ICON, s16, s16, LR_DEFAULTCOLOR | LR_SHARED);
 	hIconSettings = (HICON)LoadImage(hDll, MAKEINTRESOURCE(16826), IMAGE_ICON, s16, s16, LR_DEFAULTCOLOR | LR_SHARED);
-
-	hDll = GetLibraryHandle("User32");
-	hIconAbout = (HICON)LoadImage(hDll, MAKEINTRESOURCE(104), IMAGE_ICON, s16, s16, LR_DEFAULTCOLOR | LR_SHARED);
+	if (hIconSettings == NULL)
+		hIconSettings = (HICON)LoadImage(hDll, MAKEINTRESOURCE(153), IMAGE_ICON, s16, s16, LR_DEFAULTCOLOR | LR_SHARED);
 
 	if (nWindowsVersion >= WINDOWS_8) {
 		// Use the icon from the Windows 8+ 'Language' Control Panel
@@ -1962,6 +1960,14 @@ static void GetBasicControlsWidth(HWND hDlg)
 	GetWindowRect(GetDlgItem(hDlg, IDC_HASH), &rc);
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
 	hbw = rc.right - rc.left;
+
+	// CSM tooltip separator width
+	GetWindowRect(GetDlgItem(hDlg, IDS_CSM_HELP_TXT), &rc);
+	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
+	tw = rc.left;
+	GetWindowRect(hTargetSystem, &rc);
+	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
+	tw -= rc.right;
 }
 
 // Compute the minimum size of the main buttons
@@ -2097,7 +2103,7 @@ static void PositionControls(HWND hDlg)
 	HWND hCtrl;
 	SIZE sz;
 	// TODO: dynamicize button_fudge
-	int i, x, dropdown_height, button_fudge = 2;
+	int i, x, button_fudge = 2;
 
 	// Start by resizing the whole dialog
 	GetWindowRect(hDlg, &rc);
@@ -2109,14 +2115,14 @@ static void PositionControls(HWND hDlg)
 	hCtrl = GetDlgItem(hDlg, IDC_DEVICE);
 	GetWindowRect(hCtrl, &rc);
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
-	dropdown_height = rc.bottom - rc.top;
+	ddh = rc.bottom - rc.top;
 	hCtrl = GetDlgItem(hDlg, IDC_LABEL);
 	GetWindowRect(hCtrl, &rc);
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
-	SetWindowPos(hCtrl, NULL, rc.left, rc.top, rc.right - rc.left, dropdown_height, SWP_NOZORDER);
+	SetWindowPos(hCtrl, NULL, rc.left, rc.top, rc.right - rc.left, ddh, SWP_NOZORDER);
 	GetWindowRect(hProgress, &rc);
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
-	SetWindowPos(hProgress, NULL, rc.left, rc.top, rc.right - rc.left, dropdown_height, SWP_NOZORDER);
+	SetWindowPos(hProgress, NULL, rc.left, rc.top, rc.right - rc.left, ddh, SWP_NOZORDER);
 
 	// Get the height of a typical row
 	hCtrl = GetDlgItem(hDlg, IDS_BOOT_SELECTION_TXT);
@@ -2142,7 +2148,7 @@ static void PositionControls(HWND hDlg)
 	GetWindowRect(hCtrl, &rc);
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
 	advanced_format_section_height = rc.top;
-	hCtrl = GetDlgItem(hDlg, IDC_EXTENDED_LABEL);
+	hCtrl = GetDlgItem(hDlg, IDC_BAD_BLOCKS);
 	GetWindowRect(hCtrl, &rc);
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
 	advanced_format_section_height = rc.bottom - advanced_format_section_height;
@@ -2169,7 +2175,7 @@ static void PositionControls(HWND hDlg)
 	SendMessage(hMultiToolbar, TB_GETIDEALSIZE, (WPARAM)FALSE, (LPARAM)&sz);
 	GetWindowRect(GetDlgItem(hDlg, IDC_ABOUT), &rc);
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
-	SetWindowPos(hMultiToolbar, HWND_TOP, rc.left, rc.top, sz.cx, dropdown_height, 0);
+	SetWindowPos(hMultiToolbar, HWND_TOP, rc.left, rc.top, sz.cx, ddh, 0);
 
 	// Reposition the main buttons
 	for (i = 0; i < ARRAYSIZE(main_button_ids); i++) {
@@ -2179,7 +2185,7 @@ static void PositionControls(HWND hDlg)
 		x = mw + fw - bw;
 		if (i % 2 == 1)
 			x -= bw + ssw;
-		SetWindowPos(hCtrl, HWND_TOP, x, rc.top, bw, rc.bottom - rc.top, 0);
+		SetWindowPos(hCtrl, HWND_TOP, x, rc.top, bw, ddh + button_fudge, 0);
 	}
 
 	// Reposition the Hash button
@@ -2199,8 +2205,7 @@ static void PositionControls(HWND hDlg)
 	hCtrl = GetDlgItem(hDlg, IDS_CSM_HELP_TXT);
 	GetWindowRect(hCtrl, &rc);
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
-	// TODO: measure space and avoid button fudging
-	SetWindowPos(hCtrl, HWND_TOP, mw + fw + 5 * button_fudge / 2, rc.top, sbw, rc.bottom - rc.top, 0);
+	SetWindowPos(hCtrl, HWND_TOP, mw + fw + tw, rc.top, sbw, rc.bottom - rc.top, 0);
 
 	if (advanced_mode_device) {
 		// Still need to adjust the width of the device selection dropdown
@@ -2242,7 +2247,7 @@ static void PositionControls(HWND hDlg)
 	GetWindowRect(hCtrl, &rc);
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
 	SetWindowPos(hCtrl, NULL, rc.left, sz.cy - 1,
-		rc.right - rc.left, dropdown_height + button_fudge, SWP_NOZORDER);
+		rc.right - rc.left, ddh + button_fudge, SWP_NOZORDER);
 
 	hCtrl = GetDlgItem(hDlg, IDC_BOOT_SELECTION);
 	GetWindowRect(hCtrl, &rcSelectedImage);
@@ -2251,7 +2256,7 @@ static void PositionControls(HWND hDlg)
 	GetWindowRect(hCtrl, &rc);
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
 	SetWindowPos(hCtrl, NULL, rc.left, rcSelectedImage.top - 1,
-		rc.right - rc.left, dropdown_height + button_fudge, SWP_NOZORDER);
+		rc.right - rc.left, ddh + button_fudge, SWP_NOZORDER);
 }
 
 static void SetSectionHeaders(HWND hDlg)
@@ -2264,7 +2269,7 @@ static void SetSectionHeaders(HWND hDlg)
 	int i, control[3] = { IDS_DRIVE_PROPERTIES_TXT, IDS_FORMAT_OPTIONS_TXT, IDS_STATUS_TXT };
 
 	// Set the section header fonts and resize the static controls accordingly
-	hf = CreateFontA(48, 0, 0, 0, FW_SEMIBOLD, FALSE, FALSE, FALSE, DEFAULT_CHARSET,
+	hf = CreateFontA(-MulDiv(14, GetDeviceCaps(GetDC(hMainDialog), LOGPIXELSY), 72), 0, 0, 0, FW_SEMIBOLD, FALSE, FALSE, FALSE, DEFAULT_CHARSET,
 		0, 0, PROOF_QUALITY, 0, "Segoe UI");
 
 	for (i = 0; i < ARRAYSIZE(control); i++) {
@@ -2284,7 +2289,7 @@ static void SetSectionHeaders(HWND hDlg)
 // Create the horizontal section lines
 void OnPaint(HDC hdc)
 {
-	HPEN hp = CreatePen(0, 3, RGB(0, 0, 0));
+	HPEN hp = CreatePen(0, (fScale < 1.5f)?2:3, RGB(0, 0, 0));
 	SelectObject(hdc, hp);
 	MoveToEx(hdc, mw + 10, device_vpos, NULL);
 	LineTo(hdc, mw + fw, device_vpos);
@@ -2938,15 +2943,12 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			bt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
 			if ((HIWORD(wParam) != CBN_SELCHANGE) || (bt == selection_default))
 				break;
-			// TODO: do we really need both bt and selection_default?
 			selection_default = bt;
 			SetPartitionSchemeAndTargetSystem(FALSE);
 			SetFileSystemAndClusterSize(NULL);
-			// TODO: SetToGo() would be better invoked from ShowImageSettings()
 			SetToGo();
 			SetProposedLabel(ComboBox_GetCurSel(hDeviceList));
 			EnableControls(TRUE);
-			// TODO: Might wanna do this in PopulateProperties
 			tt = (int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme));
 			pt = (int)ComboBox_GetItemData(hTargetSystem, ComboBox_GetCurSel(hTargetSystem));
 			return (INT_PTR)TRUE;
