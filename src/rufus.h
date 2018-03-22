@@ -153,6 +153,7 @@ enum user_message_type {
 	UM_PROGRESS_EXIT,
 	UM_NO_UPDATE,
 	UM_UPDATE_CSM_TOOLTIP,
+	UM_RESIZE_BUTTONS,
 	// Start of the WM IDs for the language menu items
 	UM_LANGUAGE_MENU = WM_APP + 0x100
 };
@@ -381,7 +382,7 @@ enum WindowsVersion {
  * Globals
  */
 extern HINSTANCE hMainInstance;
-extern HWND hMainDialog, hLogDlg, hStatus, hDeviceList, hCapacity;
+extern HWND hMainDialog, hLogDialog, hStatus, hDeviceList, hCapacity;
 extern HWND hPartitionScheme, hTargetSystem, hFileSystem, hClusterSize, hLabel, hBootType, hNBPasses, hLog;
 extern HWND hInfo, hProgress, hDiskID;
 extern float fScale;
@@ -428,6 +429,7 @@ extern HWND MyCreateDialog(HINSTANCE hInstance, int Dialog_ID, HWND hWndParent, 
 extern INT_PTR MyDialogBox(HINSTANCE hInstance, int Dialog_ID, HWND hWndParent, DLGPROC lpDialogFunc);
 extern void CenterDialog(HWND hDlg);
 extern void ResizeMoveCtrl(HWND hDlg, HWND hCtrl, int dx, int dy, int dw, int dh, float scale);
+extern void ResizeButtonHeight(HWND hDlg, int id);
 extern void CreateStatusBar(void);
 extern void CreateStaticFont(HDC hDC, HFONT* hFont, BOOL underlined);
 extern void SetTitleBarIcon(HWND hDlg);

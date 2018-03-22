@@ -819,6 +819,7 @@ INT_PTR CALLBACK ChecksumCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 		dw = rect.right - rect.left - dw + 12;
 		ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDC_MD5), 0, 0, dw, 0, 1.0f);
 		ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDC_SHA1), 0, 0, dw, 0, 1.0f);
+		ResizeButtonHeight(hDlg, IDOK);
 
 		safe_release_dc(GetDlgItem(hDlg, IDC_MD5), hDC);
 

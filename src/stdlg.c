@@ -59,7 +59,7 @@ static HWINEVENTHOOK fp_weh = NULL;
 static char *fp_title_str = "Microsoft Windows", *fp_button_str = "Format disk";
 
 extern loc_cmd* selected_locale;
-extern int cbw, ddw;
+extern int cbw, ddw, ddbh, bh;
 
 static int update_settings_reposition_ids[] = {
 	IDC_POLICY,
@@ -488,6 +488,20 @@ void ResizeMoveCtrl(HWND hDlg, HWND hCtrl, int dx, int dy, int dw, int dh, float
 	InvalidateRect(hCtrl, NULL, TRUE);
 }
 
+void ResizeButtonHeight(HWND hDlg, int id)
+{
+	HWND hCtrl;
+	RECT rc;
+	int dy = 0;
+
+	hCtrl = GetDlgItem(hDlg, id);
+	GetWindowRect(hCtrl, &rc);
+	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
+	if (rc.bottom - rc.top < bh)
+		dy = (bh - (rc.bottom - rc.top)) / 2;
+	SetWindowPos(hCtrl, HWND_TOP, rc.left, rc.top - dy, rc.right - rc.left, bh, 0);
+}
+
 /*
  * License callback
  */
@@ -500,6 +514,7 @@ INT_PTR CALLBACK LicenseCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM 
 		hLicense = GetDlgItem(hDlg, IDC_LICENSE_TEXT);
 		apply_localization(IDD_LICENSE, hDlg);
 		CenterDialog(hDlg);
+		ResizeButtonHeight(hDlg, IDCANCEL);
 		// Suppress any inherited RTL flags
 		style = GetWindowLong(hLicense, GWL_EXSTYLE);
 		style &= ~(WS_EX_RTLREADING | WS_EX_RIGHT | WS_EX_LEFTSCROLLBAR);
@@ -549,8 +564,12 @@ INT_PTR CALLBACK AboutCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 		hCtrl = GetDlgItem(hDlg, IDC_ABOUT_LICENSE);
 		GetWindowRect(hCtrl, &rc);
 		MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
-		SetWindowPos(hCtrl, NULL, rc.left, rc.top,
-			max(rc.right - rc.left, GetTextSize(hCtrl, NULL).cx + cbw), rc.bottom - rc.top, SWP_NOZORDER);
+		dy = 0;
+		if (rc.bottom - rc.top < bh)
+			dy = (bh - (rc.bottom - rc.top)) / 2;
+		SetWindowPos(hCtrl, NULL, rc.left, rc.top - dy,
+			max(rc.right - rc.left, GetTextSize(hCtrl, NULL).cx + cbw), bh, SWP_NOZORDER);
+		ResizeButtonHeight(hDlg, IDOK);
 		static_sprintf(about_blurb, about_blurb_format, lmprintf(MSG_174|MSG_RTF),
 			lmprintf(MSG_175|MSG_RTF, rufus_version[0], rufus_version[1], rufus_version[2]),
 			right_to_left_mode?"Akeo \\\\ Pete Batard 2011-2018 © Copyright":"Copyright © 2011-2018 Pete Batard / Akeo",
@@ -656,6 +675,11 @@ INT_PTR CALLBACK NotificationCallback(HWND hDlg, UINT message, WPARAM wParam, LP
 		SendMessage(GetDlgItem(hDlg, IDC_MORE_INFO), WM_SETFONT, (WPARAM)hDlgFont, MAKELPARAM(TRUE, 0));
 		SendMessage(GetDlgItem(hDlg, IDYES), WM_SETFONT, (WPARAM)hDlgFont, MAKELPARAM(TRUE, 0));
 		SendMessage(GetDlgItem(hDlg, IDNO), WM_SETFONT, (WPARAM)hDlgFont, MAKELPARAM(TRUE, 0));
+		if (bh != 0) {
+			ResizeButtonHeight(hDlg, IDC_MORE_INFO);
+			ResizeButtonHeight(hDlg, IDYES);
+			ResizeButtonHeight(hDlg, IDNO);
+		}
 
 		apply_localization(IDD_NOTIFICATION, hDlg);
 		background_brush = CreateSolidBrush(GetSysColor(COLOR_WINDOW));
@@ -844,6 +868,8 @@ INT_PTR CALLBACK SelectionCallback(HWND hDlg, UINT message, WPARAM wParam, LPARA
 		ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDC_SELECTION_LINE), 0, dh, 0, 0, 1.0f);
 		ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDOK), 0, dh, 0, 0, 1.0f);
 		ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDCANCEL), 0, dh, 0, 0, 1.0f);
+		ResizeButtonHeight(hDlg, IDOK);
+		ResizeButtonHeight(hDlg, IDCANCEL);
 
 		// Set the radio selection
 		Button_SetCheck(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1), BST_CHECKED);
@@ -975,6 +1001,8 @@ INT_PTR CALLBACK ListCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
 		ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDC_LIST_LINE), 0, dh, 0, 0, 1.0f);
 		ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDOK), 0, dh, 0, 0, 1.0f);
 		ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDCANCEL), 0, dh, 0, 0, 1.0f);
+		ResizeButtonHeight(hDlg, IDOK);
+		ResizeButtonHeight(hDlg, IDCANCEL);
 		return (INT_PTR)TRUE;
 	case WM_CTLCOLORSTATIC:
 		// Change the background colour for static text and icon
@@ -1288,6 +1316,14 @@ static void PositionControls(HWND hDlg)
 			Reposition(hDlg, update_settings_reposition_ids[i], 0, dw);
 		}
 	}
+	hCtrl = GetDlgItem(hDlg, IDC_CHECK_NOW);
+	GetWindowRect(hCtrl, &rc);
+	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
+	SetWindowPos(hCtrl, HWND_TOP, rc.left, rc.top, rc.right - rc.left, ddbh, 0);
+	hCtrl = GetDlgItem(hDlg, IDCANCEL);
+	GetWindowRect(hCtrl, &rc);
+	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
+	SetWindowPos(hCtrl, HWND_TOP, rc.left, rc.top, rc.right - rc.left, ddbh, 0);
 }
 
 /*
@@ -1522,6 +1558,7 @@ INT_PTR CALLBACK NewVersionCallback(HWND hDlg, UINT message, WPARAM wParam, LPAR
 		SendMessage(GetDlgItem(hDlg, IDC_PROGRESS), PBM_SETRANGE, 0, (MAX_PROGRESS<<16) & 0xFFFF0000);
 		if (update.download_url == NULL)
 			EnableWindow(GetDlgItem(hDlg, IDC_DOWNLOAD), FALSE);
+		ResizeButtonHeight(hDlg, IDCANCEL);
 		break;
 	case WM_CTLCOLORSTATIC:
 		if ((HWND)lParam != GetDlgItem(hDlg, IDC_WEBSITE))

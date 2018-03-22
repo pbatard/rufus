@@ -40,7 +40,7 @@ o Version 1.0.23 (2018.??.??)
      MSG_119/120 + MSG_121/122 are used to create the advanced options clickable toolbars
   - *REPLACED* MSG_150 -> "Type of computer you plan to use this bootable drive with. It is up to YOU to find whether your target is of BIOS or UEFI type.\n"
 	                        "Be mindful that CSM, which can be enabled or disabled on UEFI computers, means 'BIOS emulation', and is not really UEFI."
-  - *REPLACED* MSG_151 -> ""Note: 'UEFI-CSM' means that the device will only boot in BIOS emulation mode under UEFI (also known as 'Legacy Mode'), and not in native UEFI mode."
+  - *REPLACED* MSG_151 -> "Note: 'UEFI-CSM' means that the device will only boot in BIOS emulation mode (also known as 'Legacy Mode') under UEFI, and not in native UEFI mode."
                Be mindful that you probably don't want to translate 'Legacy Mode' as this is an option that usually appears in English in the UEFI settings.
   - *REPLACED* MSG_152 -> "Note: 'non CSM' means that the device will only boot in native UEFI mode, and not in BIOS emulation mode (also known as 'Legacy Mode')."
   - *REPLACED* MSG_163 -> "Method that will be used to create partitions."

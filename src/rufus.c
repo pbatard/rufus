@@ -68,7 +68,7 @@ static int64_t last_iso_blocking_status;
 static int selection_default, row_height, advanced_device_section_height, advanced_format_section_height, image_index;
 static int device_vpos, format_vpos, status_vpos;
 static int ddh, bw, hw, fw;	// DropDown Height, Main button width, half dropdown width, full dropdown width
-static int sw, mw, bsw, hbw, sbw, ssw, tw;
+static int sw, mw, bsw, hbw, sbw, ssw, tw, dbw;
 static UINT_PTR UM_LANGUAGE_MENU_MAX = UM_LANGUAGE_MENU;
 static RECT relaunch_rc = { -65536, -65536, 0, 0};
 static UINT uQFChecked = BST_CHECKED, uMBRChecked = BST_UNCHECKED;
@@ -102,13 +102,13 @@ char szFolderPath[MAX_PATH], app_dir[MAX_PATH], system_dir[MAX_PATH], temp_dir[M
 char *image_path = NULL, *short_image_path;
 float fScale = 1.0f;
 int default_fs, fs, bt, pt, tt;
-int cbw, ddw; // (empty) check box width, (empty) drop down width
+int cbw, ddw, ddbh = 0, bh = 0; // (empty) check box width, (empty) drop down width, button height (for and without dropdown match)
 uint32_t dur_mins, dur_secs;
 loc_cmd* selected_locale = NULL;
 WORD selected_langid = MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT);
 DWORD MainThreadId;
 HWND hDeviceList, hPartitionScheme, hTargetSystem, hFileSystem, hClusterSize, hLabel, hBootType, hNBPasses, hLog = NULL;
-HWND hLogDlg = NULL, hProgress = NULL, hDiskID;
+HWND hLogDialog = NULL, hProgress = NULL, hDiskID;
 BOOL use_own_c32[NB_OLD_C32] = {FALSE, FALSE}, mbr_selected_by_user = FALSE, display_togo_option = FALSE;
 BOOL iso_op_in_progress = FALSE, format_op_in_progress = FALSE, right_to_left_mode = FALSE, progress_in_use = FALSE, has_uefi_csm;
 BOOL enable_HDDs = FALSE, force_update = FALSE, enable_ntfs_compression = FALSE, no_confirmation_on_cancel = FALSE, lock_drive = TRUE;
@@ -933,7 +933,7 @@ void UpdateProgress(int op, float percent)
 }
 
 // Callback for the log window
-BOOL CALLBACK LogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+BOOL CALLBACK LogCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	HDC hDC;
 	HFONT hf;
@@ -968,7 +968,6 @@ BOOL CALLBACK LogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 		style = GetWindowLong(hLog, GWL_STYLE);
 		style &= ~(ES_RIGHT);
 		SetWindowLong(hLog, GWL_STYLE, style);
-
 		break;
 	case WM_COMMAND:
 		switch (LOWORD(wParam)) {
@@ -1003,6 +1002,12 @@ BOOL CALLBACK LogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 		ShowWindow(hDlg, SW_HIDE);
 		reset_localization(IDD_LOG);
 		log_displayed = FALSE;
+		return TRUE;
+	case UM_RESIZE_BUTTONS:
+		// Resize our buttons for low scaling factors
+		ResizeButtonHeight(hDlg, IDCANCEL);
+		ResizeButtonHeight(hDlg, IDC_LOG_SAVE);
+		ResizeButtonHeight(hDlg, IDC_LOG_CLEAR);
 		return TRUE;
 	}
 	return FALSE;
@@ -1121,13 +1126,13 @@ static void ResizeDialogs(int shift)
 	MoveWindow(hMainDialog, rc.left, rc.top, point.x, point.y + shift, TRUE);
 
 	// Resize the log
-	GetWindowRect(hLogDlg, &rc);
+	GetWindowRect(hLogDialog, &rc);
 	point.x = (rc.right - rc.left);
 	point.y = (rc.bottom - rc.top);
-	MoveWindow(hLogDlg, rc.left, rc.top, point.x, point.y + shift, TRUE);
-	MoveCtrlY(hLogDlg, IDC_LOG_CLEAR, shift);
-	MoveCtrlY(hLogDlg, IDC_LOG_SAVE, shift);
-	MoveCtrlY(hLogDlg, IDCANCEL, shift);
+	MoveWindow(hLogDialog, rc.left, rc.top, point.x, point.y + shift, TRUE);
+	MoveCtrlY(hLogDialog, IDC_LOG_CLEAR, shift);
+	MoveCtrlY(hLogDialog, IDC_LOG_SAVE, shift);
+	MoveCtrlY(hLogDialog, IDCANCEL, shift);
 	GetWindowRect(hLog, &rc);
 	point.x = (rc.right - rc.left);
 	point.y = (rc.bottom - rc.top) + shift;
@@ -1762,13 +1767,10 @@ static void CreateAdditionalControls(HWND hDlg)
 	HIMAGELIST hToolbarImageList;
 	RECT rc;
 	SIZE sz;
-	int i16, s16, toolbar_fudge = -6;
+	int i16, s16, toolbar_dx = -4 - ((fScale > 1.49f) ? 1 : 0) - ((fScale > 1.99f) ? 1 : 0);
 	TBBUTTON tbToolbarButtons[7];
 
-	// High DPI scaling
-	i16 = GetSystemMetrics(SM_CXSMICON);
-	// Adjust icon size lookup
-	s16 = i16;
+	s16 = i16 = GetSystemMetrics(SM_CXSMICON);
 	if (s16 >= 54)
 		s16 = 64;
 	else if (s16 >= 40)
@@ -1832,7 +1834,7 @@ static void CreateAdditionalControls(HWND hDlg)
 	GetWindowRect(GetDlgItem(hDlg, IDC_ADVANCED_DRIVE_PROPERTIES), &rc);
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
 	SendMessage(hAdvancedDeviceToolbar, TB_GETIDEALSIZE, (WPARAM)FALSE, (LPARAM)&sz);
-	SetWindowPos(hAdvancedDeviceToolbar, HWND_TOP, rc.left + toolbar_fudge, rc.top, sz.cx, rc.bottom - rc.top, 0);
+	SetWindowPos(hAdvancedDeviceToolbar, HWND_TOP, rc.left + toolbar_dx, rc.top, sz.cx, rc.bottom - rc.top, 0);
 
 	utf8_to_wchar_no_alloc(lmprintf((advanced_mode_format) ? MSG_122 : MSG_121, lmprintf(MSG_120)), wtbtext[1], ARRAYSIZE(wtbtext[1]));
 	hAdvancedFormatToolbar = CreateWindowExW(0, TOOLBARCLASSNAME, NULL,
@@ -1852,7 +1854,7 @@ static void CreateAdditionalControls(HWND hDlg)
 	GetWindowRect(GetDlgItem(hDlg, IDC_ADVANCED_FORMAT_OPTIONS), &rc);
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
 	SendMessage(hAdvancedFormatToolbar, TB_GETIDEALSIZE, (WPARAM)FALSE, (LPARAM)&sz);
-	SetWindowPos(hAdvancedFormatToolbar, HWND_TOP, rc.left + toolbar_fudge, rc.top, sz.cx, rc.bottom - rc.top, 0);
+	SetWindowPos(hAdvancedFormatToolbar, HWND_TOP, rc.left + toolbar_dx, rc.top, sz.cx, rc.bottom - rc.top, 0);
 
 	// Create the bottom toolbar
 	hMultiToolbar = CreateWindowExW(0, TOOLBARCLASSNAME, NULL,
@@ -1874,7 +1876,7 @@ static void CreateAdditionalControls(HWND hDlg)
 	tbToolbarButtons[1].fsStyle = BTNS_AUTOSIZE;
 	tbToolbarButtons[1].fsState = TBSTATE_INDETERMINATE;
 	tbToolbarButtons[1].iBitmap = I_IMAGENONE;
-	tbToolbarButtons[1].iString = (INT_PTR)L" ";
+	tbToolbarButtons[1].iString = (fScale < 1.5f) ? (INT_PTR)L"" : (INT_PTR)L" ";
 	tbToolbarButtons[2].idCommand = IDC_ABOUT;
 	tbToolbarButtons[2].fsStyle = BTNS_AUTOSIZE;
 	tbToolbarButtons[2].fsState = TBSTATE_ENABLED;
@@ -1882,7 +1884,7 @@ static void CreateAdditionalControls(HWND hDlg)
 	tbToolbarButtons[3].fsStyle = BTNS_AUTOSIZE;
 	tbToolbarButtons[3].fsState = TBSTATE_INDETERMINATE;
 	tbToolbarButtons[3].iBitmap = I_IMAGENONE;
-	tbToolbarButtons[3].iString = (INT_PTR)L" ";
+	tbToolbarButtons[3].iString = (fScale < 1.5f) ? (INT_PTR)L"" : (INT_PTR)L" ";
 	tbToolbarButtons[4].idCommand = IDC_SETTINGS;
 	tbToolbarButtons[4].fsStyle = BTNS_AUTOSIZE;
 	tbToolbarButtons[4].fsState = TBSTATE_ENABLED;
@@ -1890,7 +1892,7 @@ static void CreateAdditionalControls(HWND hDlg)
 	tbToolbarButtons[5].fsStyle = BTNS_AUTOSIZE;
 	tbToolbarButtons[5].fsState = TBSTATE_INDETERMINATE;
 	tbToolbarButtons[5].iBitmap = I_IMAGENONE;
-	tbToolbarButtons[5].iString = (INT_PTR)L" ";
+	tbToolbarButtons[5].iString = (fScale < 1.5f) ? (INT_PTR)L"" : (INT_PTR)L" ";
 	tbToolbarButtons[6].idCommand = IDC_LOG;
 	tbToolbarButtons[6].fsStyle = BTNS_AUTOSIZE;
 	tbToolbarButtons[6].fsState = TBSTATE_ENABLED;
@@ -1951,6 +1953,7 @@ static void GetBasicControlsWidth(HWND hDlg)
 	GetWindowRect(GetDlgItem(hDlg, IDC_SAVE), &rc);
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
 	sbw = rc.right - rc.left;
+	bh = rc.bottom - rc.top;
 	ssw = rc.left;
 	GetWindowRect(hDeviceList, &rc);
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
@@ -2032,6 +2035,7 @@ static void GetHalfDropwdownWidth(HWND hDlg)
 }
 
 /*
+ * dbw = dialog border width
  * mw  = margin width
  * fw  = full dropdown width
  * hd  = half dropdown width
@@ -2052,6 +2056,12 @@ static void GetFullWidth(HWND hDlg)
 {
 	RECT rc;
 	int i;
+
+	// Get the dialog border width
+	GetWindowRect(hDlg, &rc);
+	dbw = rc.right - rc.left;
+	GetClientRect(hDlg, &rc);
+	dbw -= rc.right - rc.left;
 
 	// Compute the minimum size needed for the Boot Selection dropdown
 	GetWindowRect(GetDlgItem(hDlg, IDC_BOOT_SELECTION), &rc);
@@ -2102,20 +2112,20 @@ static void PositionControls(HWND hDlg)
 	RECT rc, rcSelectedImage;
 	HWND hCtrl;
 	SIZE sz;
-	// TODO: dynamicize button_fudge
 	int i, x, button_fudge = 2;
 
 	// Start by resizing the whole dialog
 	GetWindowRect(hDlg, &rc);
-	// Don't ask me why we need 3 times the margin width here instead of 2...
-	// TODO: If that doesn't work, just pick additonal space from initial fw and reuse that
-	SetWindowPos(hDlg, NULL, -1, -1, 3*mw + fw, rc.bottom - rc.top, SWP_NOMOVE | SWP_NOZORDER);
+	// Don't forget to add the dialog border width, since we resize the whole dialog
+	SetWindowPos(hDlg, NULL, -1, -1, fw + 2*mw + dbw, rc.bottom - rc.top, SWP_NOMOVE | SWP_NOZORDER);
 
 	// Resize the height of the label and progress bar to the height of standard dropdowns
 	hCtrl = GetDlgItem(hDlg, IDC_DEVICE);
 	GetWindowRect(hCtrl, &rc);
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
 	ddh = rc.bottom - rc.top;
+	ddbh = ddh + button_fudge;
+	bh = max(bh, ddbh);
 	hCtrl = GetDlgItem(hDlg, IDC_LABEL);
 	GetWindowRect(hCtrl, &rc);
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
@@ -2185,7 +2195,7 @@ static void PositionControls(HWND hDlg)
 		x = mw + fw - bw;
 		if (i % 2 == 1)
 			x -= bw + ssw;
-		SetWindowPos(hCtrl, HWND_TOP, x, rc.top, bw, ddh + button_fudge, 0);
+		SetWindowPos(hCtrl, HWND_TOP, x, rc.top, bw, ddbh, 0);
 	}
 
 	// Reposition the Hash button
@@ -2247,7 +2257,7 @@ static void PositionControls(HWND hDlg)
 	GetWindowRect(hCtrl, &rc);
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
 	SetWindowPos(hCtrl, NULL, rc.left, sz.cy - 1,
-		rc.right - rc.left, ddh + button_fudge, SWP_NOZORDER);
+		rc.right - rc.left, ddbh, SWP_NOZORDER);
 
 	hCtrl = GetDlgItem(hDlg, IDC_BOOT_SELECTION);
 	GetWindowRect(hCtrl, &rcSelectedImage);
@@ -2256,7 +2266,46 @@ static void PositionControls(HWND hDlg)
 	GetWindowRect(hCtrl, &rc);
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
 	SetWindowPos(hCtrl, NULL, rc.left, rcSelectedImage.top - 1,
-		rc.right - rc.left, ddh + button_fudge, SWP_NOZORDER);
+		rc.right - rc.left, ddbh, SWP_NOZORDER);
+}
+
+// Thanks to Microsoft atrocious DPI handling, we must adjust for low DPI
+static void AdjustForLowDPI(HWND hDlg)
+{
+	static int ddy = 4;
+	int i, j;
+	RECT rc;
+	HWND hCtrl;
+	int dy = 0;
+
+	if (fScale >= 1.3f)
+		return;
+
+	for (i = 0; i < ARRAYSIZE(adjust_dpi_ids); i++) {
+		dy += ddy;
+		// "...and the other thing I really like about Microsoft's UI handling is how "
+		//."you never have to introduce weird hardcoded constants all over the place, "
+		// "just to make your UI look good...", said NO ONE ever.
+		if (adjust_dpi_ids[i][0] == IDC_QUICK_FORMAT)
+			dy += 1;
+		for (j = 0; j < 5; j++) {
+			if (adjust_dpi_ids[i][j] == 0)
+				break;
+			hCtrl = GetDlgItem(hDlg, adjust_dpi_ids[i][j]);
+			GetWindowRect(hCtrl, &rc);
+			MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
+			SetWindowPos(hCtrl, HWND_TOP, rc.left, rc.top + dy,
+				rc.right - rc.left, rc.bottom - rc.top, 0);
+		}
+	}
+
+	format_vpos += 9 * ddy;
+	status_vpos += 16 * ddy + 1;
+	advanced_device_section_height += 3 * ddy;
+	advanced_format_section_height += 3 * ddy + 1;
+
+	ResizeDialogs(dy + 2*ddy);
+	InvalidateRect(hDlg, NULL, TRUE);
 }
 
 static void SetSectionHeaders(HWND hDlg)
@@ -2269,8 +2318,8 @@ static void SetSectionHeaders(HWND hDlg)
 	int i, control[3] = { IDS_DRIVE_PROPERTIES_TXT, IDS_FORMAT_OPTIONS_TXT, IDS_STATUS_TXT };
 
 	// Set the section header fonts and resize the static controls accordingly
-	hf = CreateFontA(-MulDiv(14, GetDeviceCaps(GetDC(hMainDialog), LOGPIXELSY), 72), 0, 0, 0, FW_SEMIBOLD, FALSE, FALSE, FALSE, DEFAULT_CHARSET,
-		0, 0, PROOF_QUALITY, 0, "Segoe UI");
+	hf = CreateFontA(-MulDiv(14, GetDeviceCaps(GetDC(hMainDialog), LOGPIXELSY), 72), 0, 0, 0,
+		FW_SEMIBOLD, FALSE, FALSE, FALSE, DEFAULT_CHARSET, 0, 0, PROOF_QUALITY, 0, "Segoe UI");
 
 	for (i = 0; i < ARRAYSIZE(control); i++) {
 		SendDlgItemMessageA(hDlg, control[i], WM_SETFONT, (WPARAM)hf, TRUE);
@@ -2438,6 +2487,9 @@ static void InitDialog(HWND hDlg)
 	CreateAdditionalControls(hDlg);
 	SetSectionHeaders(hDlg);
 	PositionControls(hDlg);
+	AdjustForLowDPI(hDlg);
+	// Because we created the log dialog before we computed our sizes, we need to send a custom message
+	SendMessage(hLogDialog, UM_RESIZE_BUTTONS, 0, 0);
 	// Create the status line and initialize the taskbar icon for progress overlay
 	CreateStatusBar();
 
@@ -2803,7 +2855,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			StrArrayDestroy(&BlockingProcess);
 			StrArrayDestroy(&ImageList);
 			DestroyAllTooltips();
-			DestroyWindow(hLogDlg);
+			DestroyWindow(hLogDialog);
 			GetWindowRect(hDlg, &relaunch_rc);
 			EndDialog(hDlg, 0);
 			break;
@@ -2814,7 +2866,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			// Place the log Window to the right (or left for RTL) of our dialog on first display
 			if (first_log_display) {
 				GetClientRect(GetDesktopWindow(), &DesktopRect);
-				GetWindowRect(hLogDlg, &DialogRect);
+				GetWindowRect(hLogDialog, &DialogRect);
 				nWidth = DialogRect.right - DialogRect.left;
 				nHeight = DialogRect.bottom - DialogRect.top;
 				GetWindowRect(hDlg, &DialogRect);
@@ -2827,13 +2879,13 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 					Point.x = min(DialogRect.right + offset, DesktopRect.right - nWidth);
 
 				Point.y = max(DialogRect.top, DesktopRect.top - nHeight);
-				MoveWindow(hLogDlg, Point.x, Point.y, nWidth, nHeight, FALSE);
+				MoveWindow(hLogDialog, Point.x, Point.y, nWidth, nHeight, FALSE);
 				// The log may have been recentered to fit the screen, in which case, try to shift our main dialog left (or right for RTL)
 				nWidth = DialogRect.right - DialogRect.left;
 				nHeight = DialogRect.bottom - DialogRect.top;
 				if (right_to_left_mode) {
 					Point.x = DialogRect.left;
-					GetWindowRect(hLogDlg, &DialogRect);
+					GetWindowRect(hLogDialog, &DialogRect);
 					Point.x = max(Point.x, DialogRect.right - DialogRect.left + offset);
 				} else {
 					Point.x = max((DialogRect.left<0)?DialogRect.left:0, Point.x - offset - nWidth);
@@ -2847,7 +2899,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			SendMessage(hMainDialog, WM_NEXTDLGCTL, (WPARAM)FALSE, 0);
 			SendMessage(hMainDialog, WM_NEXTDLGCTL, (WPARAM)hStart, TRUE);
 			// Must come last for the log window to get focus
-			ShowWindow(hLogDlg, log_displayed?SW_SHOW:SW_HIDE);
+			ShowWindow(hLogDialog, log_displayed?SW_SHOW:SW_HIDE);
 			break;
 		case IDC_ADVANCED_DRIVE_PROPERTIES:
 			advanced_mode_device = !advanced_mode_device;
@@ -3203,7 +3255,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		display_togo_option = TRUE;	// We display the ToGo controls by default and need to hide them
 		first_log_display = TRUE;
 		log_displayed = FALSE;
-		hLogDlg = MyCreateDialog(hMainInstance, IDD_LOG, hDlg, (DLGPROC)LogProc);
+		hLogDialog = MyCreateDialog(hMainInstance, IDD_LOG, hDlg, (DLGPROC)LogCallback);
 		InitDialog(hDlg);
 		GetDevices(0);
 		EnableControls(TRUE);
@@ -3827,7 +3879,7 @@ relaunch:
 		// .,ABCDEFGHIJKLMNOPQRSTUVWXYZ
 
 		// Ctrl-A => Select the log data
-		if ( (IsWindowVisible(hLogDlg)) && (GetKeyState(VK_CONTROL) & 0x8000) &&
+		if ( (IsWindowVisible(hLogDialog)) && (GetKeyState(VK_CONTROL) & 0x8000) &&
 			(msg.message == WM_KEYDOWN) && (msg.wParam == 'A') ) {
 			// Might also need ES_NOHIDESEL property if you want to select when not active
 			Edit_SetSel(hLog, 0, -1);
@@ -4029,7 +4081,7 @@ relaunch:
 		}
 
 		// Let the system handle dialog messages (e.g. those from the tab key)
-		if (!IsDialogMessage(hDlg, &msg) && !IsDialogMessage(hLogDlg, &msg)) {
+		if (!IsDialogMessage(hDlg, &msg) && !IsDialogMessage(hLogDialog, &msg)) {
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
