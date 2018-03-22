@@ -69,6 +69,7 @@ uint32_t bufnum, sum_count[CHECKSUM_MAX] = { 16, 20, 32 };
 HANDLE data_ready[CHECKSUM_MAX] = { 0 }, thread_ready[CHECKSUM_MAX] = { 0 };
 DWORD read_size[2];
 unsigned char ALIGNED(64) buffer[2][BUFFER_SIZE];
+extern BOOL progress_in_use;
 
 /*
  * Rotate 32 bit integers by n bytes.
@@ -818,6 +819,7 @@ INT_PTR CALLBACK ChecksumCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 		dw = rect.right - rect.left - dw + 12;
 		ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDC_MD5), 0, 0, dw, 0, 1.0f);
 		ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDC_SHA1), 0, 0, dw, 0, 1.0f);
+		ResizeButtonHeight(hDlg, IDOK);
 
 		safe_release_dc(GetDlgItem(hDlg, IDC_MD5), hDC);
 
@@ -834,8 +836,6 @@ INT_PTR CALLBACK ChecksumCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 		case IDCANCEL:
 			reset_localization(IDD_CHECKSUM);
 			EndDialog(hDlg, LOWORD(wParam));
-			// Reset focus to our toolbar
-			PostMessage(hMainDialog, WM_NEXTDLGCTL, (WPARAM)hStatusToolbar, TRUE);
 			return (INT_PTR)TRUE;
 		}
 	}
@@ -927,6 +927,7 @@ DWORD WINAPI SumThread(void* param)
 	bufnum = 0;
 	_bufnum = 0;
 	read_size[0] = 1;	// Don't trigger the first loop break
+	progress_in_use = TRUE;
 	for (rb = 0; ;rb += read_size[_bufnum]) {
 		// Update the progress and check for cancel
 		if (GetTickCount64() > LastRefresh + MAX_REFRESH) {
@@ -982,6 +983,7 @@ DWORD WINAPI SumThread(void* param)
 	r = 0;
 
 out:
+	progress_in_use = FALSE;
 	for (i = 0; i < CHECKSUM_MAX; i++) {
 		if (sum_thread[i] != NULL)
 			TerminateThread(sum_thread[i], 1);

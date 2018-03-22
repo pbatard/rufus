@@ -366,6 +366,7 @@
     <ClInclude Include="..\src\smart.h" />
     <ClInclude Include="..\src\sys_types.h" />
     <ClInclude Include="..\src\dev.h" />
+    <ClInclude Include="..\src\ui.h" />
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="..\src\rufus.manifest" />

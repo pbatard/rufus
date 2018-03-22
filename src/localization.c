@@ -44,7 +44,7 @@
  *   u: 32 bit unsigned CSV list
  * Remember to update the size of the array in localization.h when adding/removing elements
  */
-const loc_parse parse_cmd[9] = {
+const loc_parse parse_cmd[7] = {
 	// Translation name and Windows LCIDs it should apply to
 	{ 'l', LC_LOCALE, "ssu" },	// l "en_US" "English (US)" 0x0009,0x1009
 	// Base translation to add on top of (eg. "English (UK)" can be used to build on top of "English (US)"
@@ -55,10 +55,6 @@ const loc_parse parse_cmd[9] = {
 	{ 't', LC_TEXT, "cs" },		// t IDC_CONTROL "Translation"
 	// Set the section/dialog to which the next commands should apply
 	{ 'g', LC_GROUP, "c" },		// g IDD_DIALOG
-	// Resize a dialog (dx dy pixel increment)
-	{ 's', LC_SIZE, "cii" },	// s IDC_CONTROL +10 +10
-	// Move a dialog (dx dy pixed displacement)
-	{ 'm', LC_MOVE, "cii" },	// m IDC_CONTROL -5 0
 	// Set the font to use for the text controls that follow
 	// Use f "Default" 0 to reset the font
 	{ 'f', LC_FONT, "si" },		// f "MS Dialog" 10
@@ -79,6 +75,8 @@ static BOOL localization_initialized = FALSE;
 char* default_msg_table[MSG_MAX-MSG_000] = {"%s", 0};
 char* current_msg_table[MSG_MAX-MSG_000] = {"%s", 0};
 char** msg_table = NULL;
+
+extern BOOL progress_in_use;
 
 static void mtab_destroy(BOOL reinit)
 {
@@ -259,8 +257,6 @@ BOOL dispatch_loc_cmd(loc_cmd* lcmd)
 	switch(lcmd->command) {
 	// NB: For commands that take an ID, ctrl_id is always a valid index at this stage
 	case LC_TEXT:
-	case LC_MOVE:
-	case LC_SIZE:
 		add_dialog_command(dlg_index, lcmd);
 		break;
 	case LC_GROUP:
@@ -344,16 +340,6 @@ void apply_localization(int dlg_id, HWND hDlg)
 						SetWindowTextU(hCtrl, lcmd->txt[1]);
 				}
 				break;
-			case LC_MOVE:
-				if (hCtrl != NULL) {
-					ResizeMoveCtrl(hDlg, hCtrl, lcmd->num[0], lcmd->num[1], 0, 0, fScale);
-				}
-				break;
-			case LC_SIZE:
-				if (hCtrl != NULL) {
-					ResizeMoveCtrl(hDlg, hCtrl, 0, 0, lcmd->num[0], lcmd->num[1], fScale);
-				}
-				break;
 			}
 		}
 	}
@@ -388,7 +374,7 @@ char* lmprintf(uint32_t msg_id, ...)
 	buf[buf_id][0] = 0;
 
 	msg_id &= MSG_MASK;
-	if ((msg_id > MSG_000) && (msg_id < MSG_MAX)) {
+	if ((msg_id >= MSG_000) && (msg_id < MSG_MAX)) {
 		format = msg_table[msg_id - MSG_000];
 	}
 
@@ -426,9 +412,17 @@ static char *output_msg[2];
 static uint64_t last_msg_time[2] = { 0, 0 };
 
 static void PrintInfoMessage(char* msg) {
-	SetWindowTextU(hInfo, msg);
+	SetWindowTextU(hProgress, msg);
 	// Make sure our field gets redrawn
-	SendMessage(hInfo, WM_PAINT, 0, 0);
+	// If the progress bar is not active, it looks like WM_PAINT is
+	// ignored. But InvalidateRect is causing refresh tearing so we
+	// don't want to use that while active.
+	// Refresh still sucks though and marquee no longer works... :(
+	// TODO: Create our own progress bar control with text overlay and inverted text
+	if (!progress_in_use)
+		InvalidateRect(hProgress, NULL, TRUE);
+	else
+		SendMessage(hProgress, WM_PAINT, 0, 0);
 }
 static void PrintStatusMessage(char* msg) {
 	SendMessageLU(hStatus, SB_SETTEXTW, SBT_OWNERDRAW | SB_SECTION_LEFT, msg);
@@ -446,6 +440,7 @@ static void CALLBACK OutputMessageTimeout(HWND hWnd, UINT uMsg, UINT_PTR idEvent
 
 	KillTimer(hMainDialog, idEvent);
 	bOutputTimerArmed[i] = FALSE;
+
 	PrintMessage[i](output_msg[i]);
 	last_msg_time[i] = GetTickCount64();
 }
@@ -507,7 +502,8 @@ void PrintStatusInfo(BOOL info, BOOL debug, unsigned int duration, int msg_id, .
 	if (!info)
 		szStatusMessage = szMessage[MSG_STATUS][(duration > 0)?MSG_LOW_PRI:MSG_HIGH_PRI];
 
-	format = msg_table[msg_id - MSG_000];
+	if ((msg_id >= MSG_000) && (msg_id < MSG_MAX))
+		format = msg_table[msg_id - MSG_000];
 	if (format == NULL) {
 		safe_sprintf(msg_hi, MSG_LEN, "MSG_%03d UNTRANSLATED", msg_id - MSG_000);
 		uprintf(msg_hi);
@@ -530,7 +526,8 @@ void PrintStatusInfo(BOOL info, BOOL debug, unsigned int duration, int msg_id, .
 
 	// Because we want the log messages in English, we go through the VA business once more, but this time with default_msg_table
 	if (debug) {
-		format = default_msg_table[msg_id - MSG_000];
+		if ((msg_id >= MSG_000) && (msg_id < MSG_MAX))
+			format = default_msg_table[msg_id - MSG_000];
 		if (format == NULL) {
 			safe_sprintf(buf, sizeof(szStatusMessage), "(default) MSG_%03d UNTRANSLATED", msg_id - MSG_000);
 			return;

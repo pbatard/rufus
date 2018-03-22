@@ -1,6 +1,6 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
- * Copyright © 2011-2017 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2018 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -152,7 +152,8 @@ enum user_message_type {
 	UM_PROGRESS_INIT,
 	UM_PROGRESS_EXIT,
 	UM_NO_UPDATE,
-	UM_SET_PARTITION_SCHEME_TOOLTIP,
+	UM_UPDATE_CSM_TOOLTIP,
+	UM_RESIZE_BUTTONS,
 	// Start of the WM IDs for the language menu items
 	UM_LANGUAGE_MENU = WM_APP + 0x100
 };
@@ -173,8 +174,7 @@ typedef struct {
 
 /* Status Bar sections */
 #define SB_SECTION_LEFT         0
-#define SB_SECTION_MIDDLE       1
-#define SB_SECTION_RIGHT        2
+#define SB_SECTION_RIGHT        1
 #define SB_TIMER_SECTION_SIZE   58.0f
 
 /* Timers used throughout the program */
@@ -218,14 +218,14 @@ enum fs_type {
 enum boot_type {
 	BT_MSDOS = 0,
 	BT_FREEDOS,
-	BT_ISO,
-	BT_IMG,
+	BT_IMAGE,
 	BT_SYSLINUX_V4,		// Start of indexes that only display in advanced mode
 	BT_SYSLINUX_V6,
 	BT_REACTOS,
 	BT_GRUB4DOS,
 	BT_GRUB2,
 	BT_UEFI_NTFS,
+	BT_NON_BOOTABLE,
 	BT_MAX
 };
 
@@ -236,8 +236,6 @@ enum target_type {
 };
 // For the partition types we'll use Microsoft's PARTITION_STYLE_### constants
 #define PARTITION_STYLE_SFD PARTITION_STYLE_RAW
-#define GETTARGETTYPE(x) (((x)>0)?(((x) >> 16) & 0xFFFF):0)
-#define GETPARTTYPE(x)   (((x)>0)?((x) & 0xFFFF):0);
 
 enum checksum_type {
 	CHECKSUM_MD5 = 0,
@@ -384,9 +382,9 @@ enum WindowsVersion {
  * Globals
  */
 extern HINSTANCE hMainInstance;
-extern HWND hMainDialog, hLogDlg, hStatus, hDeviceList, hCapacity;
-extern HWND hPartitionScheme, hFileSystem, hClusterSize, hLabel, hBootType, hNBPasses, hLog;
-extern HWND hInfo, hProgress, hDiskID, hStatusToolbar;
+extern HWND hMainDialog, hLogDialog, hStatus, hDeviceList, hCapacity;
+extern HWND hPartitionScheme, hTargetSystem, hFileSystem, hClusterSize, hLabel, hBootType, hNBPasses, hLog;
+extern HWND hInfo, hProgress, hDiskID;
 extern float fScale;
 extern char szFolderPath[MAX_PATH], app_dir[MAX_PATH], temp_dir[MAX_PATH], system_dir[MAX_PATH], sysnative_dir[MAX_PATH];
 extern char* image_path;
@@ -395,12 +393,13 @@ extern BOOL PromptOnError;
 extern unsigned long syslinux_ldlinux_len[2];
 extern const int nb_steps[FS_MAX];
 extern BOOL use_own_c32[NB_OLD_C32], detect_fakes, iso_op_in_progress, format_op_in_progress, right_to_left_mode;
-extern BOOL allow_dual_uefi_bios, togo_mode, large_drive, usb_debug;
+extern BOOL allow_dual_uefi_bios, display_togo_option, large_drive, usb_debug;
 extern RUFUS_IMG_REPORT img_report;
 extern int64_t iso_blocking_status;
 extern uint16_t rufus_version[3], embedded_sl_version[2];
 extern int nWindowsVersion;
 extern int nWindowsBuildNumber;
+extern int fs, bt, pt, tt;
 extern char WindowsVersionStr[128];
 extern size_t ubuffer_pos;
 extern char ubuffer[UBUFFER_SIZE];
@@ -430,7 +429,9 @@ extern HWND MyCreateDialog(HINSTANCE hInstance, int Dialog_ID, HWND hWndParent, 
 extern INT_PTR MyDialogBox(HINSTANCE hInstance, int Dialog_ID, HWND hWndParent, DLGPROC lpDialogFunc);
 extern void CenterDialog(HWND hDlg);
 extern void ResizeMoveCtrl(HWND hDlg, HWND hCtrl, int dx, int dy, int dw, int dh, float scale);
+extern void ResizeButtonHeight(HWND hDlg, int id);
 extern void CreateStatusBar(void);
+extern void CreateStaticFont(HDC hDC, HFONT* hFont, BOOL underlined);
 extern void SetTitleBarIcon(HWND hDlg);
 extern BOOL CreateTaskbarList(void);
 extern BOOL SetTaskbarProgressState(TASKBAR_PROGRESS_FLAGS tbpFlags);
@@ -442,7 +443,7 @@ extern void DestroyAllTooltips(void);
 extern BOOL Notification(int type, const notification_info* more_info, char* title, char* format, ...);
 extern int SelectionDialog(char* title, char* message, char** choices, int size);
 extern void ListDialog(char* title, char* message, char** items, int size);
-extern SIZE GetTextSize(HWND hCtrl);
+extern SIZE GetTextSize(HWND hCtrl, char* txt);
 extern BOOL ExtractDOS(const char* path);
 extern BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan);
 extern int64_t ExtractISOFile(const char* iso, const char* iso_file, const char* dest_file, DWORD attributes);
@@ -512,6 +513,7 @@ extern BYTE SearchProcess(char* HandleName, DWORD dwTimeout, BOOL bPartialMatch,
 extern BOOL EnablePrivileges(void);
 extern void FlashTaskbar(HANDLE handle);
 extern DWORD WaitForSingleObjectWithMessages(HANDLE hHandle, DWORD dwMilliseconds);
+#define GetTextWidth(hDlg, id) GetTextSize(GetDlgItem(hDlg, id), NULL).cx
 
 DWORD WINAPI FormatThread(void* param);
 DWORD WINAPI SaveImageThread(void* param);
@@ -541,6 +543,7 @@ typedef struct {
 } StrArray;
 extern void StrArrayCreate(StrArray* arr, uint32_t initial_size);
 extern int32_t StrArrayAdd(StrArray* arr, const char* str, BOOL );
+extern int32_t StrArrayFind(StrArray* arr, const char* str);
 extern void StrArrayClear(StrArray* arr);
 extern void StrArrayDestroy(StrArray* arr);
 #define IsStrArrayEmpty(arr) (arr.Index == 0)

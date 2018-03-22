@@ -1,5 +1,5 @@
 @echo off
-set VERSION=2.18
+set VERSION=3.0
 
 rem Make sure you don't have anything you don't want included in the package, as anything residing in the
 rem current directory will be included, including any previous .appx, which makes for nice recursion...
@@ -17,7 +17,7 @@ copy "..\..\rufus-%VERSION%.exe" "rufus.exe"
 "C:\Program Files (x86)\Windows Kits\10\bin\10.0.16299.0\x64\MakePri" new /o /pr . /cf priconfig.xml
 "C:\Program Files (x86)\Windows Kits\10\bin\10.0.16299.0\x64\MakeAppx" pack /o /d . /p Rufus-%VERSION%.appx
 if ERRORLEVEL 1 goto out
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.16299.0\x64\SignTool" sign /v /sha1 5759b23dc8f45e9120a7317f306e5b6890b612f0 /fd SHA256 /tr http://timestamp.comodoca.com/rfc3161 /td SHA256 Rufus-%VERSION%.appx
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.16299.0\x64\SignTool" sign /v /sha1 9ce9a71ccab3b38a74781b975f1c228222cf7d3b /fd SHA256 /tr http://timestamp.comodoca.com/rfc3161 /td SHA256 Rufus-%VERSION%.appx
 :out
 del /q rufus.exe
 del /q priconfig.xml

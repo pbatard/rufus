@@ -2,7 +2,7 @@
  *
  *   Copyright 2003 Lars Munch Christensen - All Rights Reserved
  *   Copyright 1998-2008 H. Peter Anvin - All Rights Reserved
- *   Copyright 2012-2016 Pete Batard
+ *   Copyright 2012-2018 Pete Batard
  *
  *   Based on the Linux installer program for SYSLINUX by H. Peter Anvin
  *
@@ -106,16 +106,15 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int fs_type)
 	const char* mboot_c32 = "mboot.c32";
 	char path[MAX_PATH], tmp[64];
 	const char *errmsg;
-	struct libfat_filesystem *fs;
+	struct libfat_filesystem *lf_fs;
 	libfat_sector_t s, *secp;
 	libfat_sector_t *sectors = NULL;
 	int ldlinux_sectors;
 	uint32_t ldlinux_cluster;
 	int i, nsectors, sl_fs_stype;
-	int bt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
-	BOOL use_v5 = (bt == BT_SYSLINUX_V6) || ((bt == BT_ISO) && (SL_MAJOR(img_report.sl_version) >= 5));
+	BOOL use_v5 = (bt == BT_SYSLINUX_V6) || ((bt == BT_IMAGE) && (SL_MAJOR(img_report.sl_version) >= 5));
 
-	PrintInfoDebug(0, MSG_234, (bt == BT_ISO)?img_report.sl_version_str:embedded_sl_version_str[use_v5?1:0]);
+	PrintInfoDebug(0, MSG_234, (bt == BT_IMAGE)?img_report.sl_version_str:embedded_sl_version_str[use_v5?1:0]);
 
 	/* 4K sector size workaround */
 	SECTOR_SHIFT = 0;
@@ -219,7 +218,7 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int fs_type)
 	}
 
 	uprintf("Successfully wrote '%s'", &path[3]);
-	if (bt != BT_ISO)
+	if (bt != BT_IMAGE)
 		UpdateProgress(OP_DOS, -1.0f);
 
 	/* Now flush the media */
@@ -266,21 +265,21 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int fs_type)
 	case FS_FAT16:
 	case FS_FAT32:
 	case FS_EXFAT:
-		fs = libfat_open(libfat_readfile, (intptr_t) d_handle);
-		if (fs == NULL) {
+		lf_fs = libfat_open(libfat_readfile, (intptr_t) d_handle);
+		if (lf_fs == NULL) {
 			uprintf("Syslinux FAT access error");
 			goto out;
 		}
-		ldlinux_cluster = libfat_searchdir(fs, 0, "LDLINUX SYS", NULL);
+		ldlinux_cluster = libfat_searchdir(lf_fs, 0, "LDLINUX SYS", NULL);
 		secp = sectors;
 		nsectors = 0;
-		s = libfat_clustertosector(fs, ldlinux_cluster);
+		s = libfat_clustertosector(lf_fs, ldlinux_cluster);
 		while (s && nsectors < ldlinux_sectors) {
 			*secp++ = s;
 			nsectors++;
-			s = libfat_nextsector(fs, s);
+			s = libfat_nextsector(lf_fs, s);
 		}
-		libfat_close(fs);
+		libfat_close(lf_fs);
 		break;
 	default:
 		uprintf("Unsupported Syslinux filesystem");
@@ -380,7 +379,7 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int fs_type)
 		fclose(fd);
 	}
 
-	if (bt != BT_ISO)
+	if (bt != BT_IMAGE)
 		UpdateProgress(OP_DOS, -1.0f);
 
 	r = TRUE;

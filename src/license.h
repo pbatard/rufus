@@ -34,6 +34,9 @@ RUFUS_URL "\\line\n"
 
 const char* additional_copyrights =
 "{\\rtf1\\ansi\n"
+"UI redesign concept by Fahad Al-Riyami\\line\n"
+"Used with kind authorization\\line\n"
+"\\line\n"
 "Icon by PC Unleashed:\\line\n"
 "http://pcunleashed.com\\line\n"
 "Freeware\\line\n"

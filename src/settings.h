@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Settings access, through either registry or INI file
- * Copyright © 2015-2016 Pete Batard <pete@akeo.ie>
+ * Copyright Â© 2015-2016 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,6 +36,8 @@ extern char* ini_file;
 #define SETTING_DISABLE_LGP                 "DisableLGP"
 
 #define SETTING_ADVANCED_MODE               "AdvancedMode"
+#define SETTING_ADVANCED_MODE_DEVICE        "ShowAdvancedDriveProperties"
+#define SETTING_ADVANCED_MODE_FORMAT        "ShowAdvancedFormatOptions"
 #define SETTING_PRESERVE_TIMESTAMPS         "PreserveTimestamps"
 #define SETTING_USE_PROPER_SIZE_UNITS       "UseProperSizeUnits"
 #define SETTING_ENABLE_USB_DEBUG            "EnableUsbDebug"

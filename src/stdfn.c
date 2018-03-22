@@ -370,9 +370,21 @@ int32_t StrArrayAdd(StrArray* arr, const char* str, BOOL duplicate)
 	return arr->Index++;
 }
 
+int32_t StrArrayFind(StrArray* arr, const char* str)
+{
+	uint32_t i;
+	if ((str == NULL) || (arr == NULL) || (arr->String == NULL))
+		return -1;
+	for (i = 0; i<arr->Index; i++) {
+		if (strcmp(arr->String[i], str) == 0)
+			return (int32_t)i;
+	}
+	return -1;
+}
+
 void StrArrayClear(StrArray* arr)
 {
-	size_t i;
+	uint32_t i;
 	if ((arr == NULL) || (arr->String == NULL))
 		return;
 	for (i=0; i<arr->Index; i++) {
@@ -628,19 +640,23 @@ static BOOL CALLBACK EnumFontFamExProc(const LOGFONTA *lpelfe,
 	return TRUE;
 }
 
-BOOL IsFontAvailable(const char* font_name) {
+BOOL IsFontAvailable(const char* font_name)
+{
+	BOOL r;
 	LOGFONTA lf = { 0 };
 	HDC hDC = GetDC(hMainDialog);
 
 	if (font_name == NULL) {
-		ReleaseDC(hMainDialog, hDC);
+		safe_release_dc(hMainDialog, hDC);
 		return FALSE;
 	}
 
 	lf.lfCharSet = DEFAULT_CHARSET;
 	safe_strcpy(lf.lfFaceName, LF_FACESIZE, font_name);
 
-	return EnumFontFamiliesExA(hDC, &lf, EnumFontFamExProc, 0, 0);
+	r = EnumFontFamiliesExA(hDC, &lf, EnumFontFamExProc, 0, 0);
+	safe_release_dc(hMainDialog, hDC);
+	return r;
 }
 
 /*

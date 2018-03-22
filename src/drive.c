@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Drive access function calls
- * Copyright © 2011-2016 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2018 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -57,6 +57,7 @@ const GUID PARTITION_SYSTEM_GUID =
  * Globals
  */
 RUFUS_DRIVE_INFO SelectedDrive;
+const char* sfd_name = "Super Floppy Disk";
 
 /*
  * The following methods get or set the AutoMount setting (which is different from AutoRun)
@@ -765,7 +766,7 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 		// Detect drives that are using the whole disk as a single partition
 		if ((DriveLayout->PartitionEntry[0].Mbr.PartitionType != PARTITION_ENTRY_UNUSED) &&
 			(DriveLayout->PartitionEntry[0].StartingOffset.QuadPart == 0LL)) {
-			suprintf("Partition type: SFD (Super Floppy Disk) or Unpartitioned");
+			suprintf("Partition type: SFD (%s) or Unpartitioned", sfd_name);
 			super_floppy_disk = TRUE;
 		} else {
 			suprintf("Partition type: MBR, NB Partitions: %d", SelectedDrive.nPartitions);
@@ -1098,7 +1099,7 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 	}
 
 	// Compute the start offset of our first partition
-	if ((partition_style == PARTITION_STYLE_GPT) || (!IsChecked(IDC_EXTRA_PARTITION))) {
+	if ((partition_style == PARTITION_STYLE_GPT) || (!IsChecked(IDC_OLD_BIOS_FIXES))) {
 		// Go with the MS 1 MB wastage at the beginning...
 		DriveLayoutEx.PartitionEntry[pn].StartingOffset.QuadPart = MB;
 	} else {
@@ -1164,7 +1165,7 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 	}
 	DriveLayoutEx.PartitionEntry[pn].PartitionLength.QuadPart = main_part_size_in_sectors * SelectedDrive.SectorSize;
 	if (partition_style == PARTITION_STYLE_MBR) {
-		DriveLayoutEx.PartitionEntry[pn].Mbr.BootIndicator = IsChecked(IDC_BOOT);
+		DriveLayoutEx.PartitionEntry[pn].Mbr.BootIndicator = (bt != BT_NON_BOOTABLE);
 		switch (file_system) {
 		case FS_FAT16:
 			DriveLayoutEx.PartitionEntry[pn].Mbr.PartitionType = 0x0e;	// FAT16 LBA
