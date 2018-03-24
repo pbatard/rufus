@@ -17,7 +17,6 @@ For instance, MSG_114, that was introduced in v1.0.8 is MORE than one line!
 
 o Version 1.0.23 (2018.??.??)
   - All positioning ('m', 's') has now been removed as well as some controls, for the 3.0 UI redesign
-  - Removed: MSG_086, MSG_087, MSG_163
   - *NEW*      IDS_DRIVE_PROPERTIES_TXT "Drive Properties"
   - *NEW*      IDS_BOOT_SELECTION_TXT "Boot selection"
                Note: The current translation was taken from MSG_278 when available, which was for "Boot type".
@@ -26,23 +25,25 @@ o Version 1.0.23 (2018.??.??)
   - *NEW*      IDS_IMAGE_OPTION_TXT "Image Option"
   - *UPDATED*  IDS_PARTITION_TYPE_TXT Partition scheme and target system type -> "Partition scheme"
   - *NEW*      IDS_TARGET_SYSTEM_TXT "Target system"
+  - *REPLACED* IDS_LABEL_TXT "New Volume label" -> "Volume label"
   - *NEW*      IDS_STATUS_TXT "Status"
   - *REPLACED* MSG_031 -> "BIOS (or UEFI-CSM)"
   - *REPLACED* MSG_032 -> "UEFI (non CSM)"
   - *REPLACED* MSG_033 -> "BIOS or UEFI" 
   - *REMOVED*  MSG_087
-	- *RENAMED*  IDC_WINDOWS_INSTALL -> MSG_117
-	- *RENAMED*  IDC_WINDOWS_TO_GO -> MSG_118
+  - *RENAMED*  IDC_WINDOWS_INSTALL -> MSG_117
+  - *RENAMED*  IDC_WINDOWS_TO_GO -> MSG_118
+               Note: In most cases, you should not have to add MSG_118 as the English for "Windows To Go" should work for most countries.
   - *NEW*      MSG_119 "advanced drive properties"
   - *NEW*      MSG_120 "advanced format options"
   - *NEW*      MSG_121 "Show %s"
   - *NEW*      MSG_122 "Hide %s"
      MSG_119/120 + MSG_121/122 are used to create the advanced options clickable toolbars
   - *REPLACED* MSG_150 -> "Type of computer you plan to use this bootable drive with. It is up to YOU to find whether your target is of BIOS or UEFI type.\n"
-	                        "Be mindful that CSM, which can be enabled or disabled on UEFI computers, means 'BIOS emulation', and is not really UEFI."
-  - *REPLACED* MSG_151 -> "Note: 'UEFI-CSM' means that the device will only boot in BIOS emulation mode (also known as 'Legacy Mode') under UEFI, and not in native UEFI mode."
+                          "Be mindful that CSM, which can be enabled or disabled on UEFI computers, means 'BIOS emulation', and is not really UEFI."
+  - *REPLACED* MSG_151 -> "'UEFI-CSM' means that the device will only boot in BIOS emulation mode (also known as 'Legacy Mode') under UEFI, and not in native UEFI mode."
                Be mindful that you probably don't want to translate 'Legacy Mode' as this is an option that usually appears in English in the UEFI settings.
-  - *REPLACED* MSG_152 -> "Note: 'non CSM' means that the device will only boot in native UEFI mode, and not in BIOS emulation mode (also known as 'Legacy Mode')."
+  - *REPLACED* MSG_152 -> "'non CSM' means that the device will only boot in native UEFI mode, and not in BIOS emulation mode (also known as 'Legacy Mode')."
   - *REPLACED* MSG_163 -> "Method that will be used to create partitions."
   - *NEW*      MSG_278 "Checking for conflicting processes..."
   - *REPLACED* MSG_280 "Image selection" -> "Disk or ISO image"
@@ -50,16 +51,17 @@ o Version 1.0.23 (2018.??.??)
      MSG_281 + MSG_280 are used to create the message that appears in the boot selection dropdown when an image has not been selected.
   - *NEW*      MSG_299 "Timestamp validation error"
   - *NEW*      MSG_300 "Rufus could not validate that the timestamp of the downloaded update is more recent than the one for the "
-	                     "current executable.\n\nIn order to prevent potential attack scenarios, the update process has been aborted and "
-	                     "the download will be deleted. Please check the log for more details."
-	- *NEW*      MSG_301 "Show application settings"
+                       "current executable.\n\nIn order to prevent potential attack scenarios, the update process has been aborted and "
+                       "the download will be deleted. Please check the log for more details."
+  - *NEW*      MSG_301 "Show application settings"
   - *NEW*      MSG_302 "Show information about this application"
   - *NEW*      MSG_303 "Show the log"
-  - *NEW*      MSG_314 "Create a disk image of the selected device"
+  - *NEW*      MSG_304 "Create a disk image of the selected device"
+  - *NEW*      MSG_305 "Use this option to indicate whether you want to use this device to install Windows on another disk, "
+                        "or if you want to run Windows directly from this drive (Windows To Go)."
   - *UPDATED*  On IDD_LOG, IDC_LOG_CLEAR, IDC_LOG_SAVE and IDCANCEL were updated to remove the redundant mention of "Log" in the buttons
-               for the languages who did that. *PLEASE* verify that the modification looks correct in your language.
-  - *UPDATED*  Log dialog buttons (in the 'g IDD_LOG' section). "Save Log", "Clear Log" "Close Log" have become "Save", "Clear", "Close".
-               I updated existing translations to remove the mention of "Log". Please check that it was done properly.
+               for the languages who did that. This means that "Save Log", "Clear Log" "Close Log" have become "Save", "Clear", "Close".
+               *PLEASE* verify that the modification looks correct in your language.
 
 o Version 1.0.22 (2017.07.17)
   - *NEW* MSG_295 "Warning: Unofficial version"
