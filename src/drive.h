@@ -63,7 +63,7 @@ typedef struct {
 	DWORD SectorSize;
 	DWORD FirstDataSector;
 	MEDIA_TYPE MediaType;
-	int PartitionType;
+	int PartitionStyle;
 	int nPartitions;	// number of partitions we actually care about
 	int FSType;
 	char proposed_label[16];

@@ -457,7 +457,7 @@ static PSID GetSID(void) {
  */
 BOOL FileIO(BOOL save, char* path, char** buffer, DWORD* size)
 {
-	SECURITY_ATTRIBUTES s_attr, *ps = NULL;
+	SECURITY_ATTRIBUTES s_attr, *sa = NULL;
 	SECURITY_DESCRIPTOR s_desc;
 	PSID sid = NULL;
 	HANDLE handle;
@@ -472,7 +472,7 @@ BOOL FileIO(BOOL save, char* path, char** buffer, DWORD* size)
 		s_attr.nLength = sizeof(SECURITY_ATTRIBUTES);
 		s_attr.bInheritHandle = FALSE;
 		s_attr.lpSecurityDescriptor = &s_desc;
-		ps = &s_attr;
+		sa = &s_attr;
 	} else {
 		uprintf("Could not set security descriptor: %s\n", WindowsErrorString());
 	}
@@ -481,7 +481,7 @@ BOOL FileIO(BOOL save, char* path, char** buffer, DWORD* size)
 		*buffer = NULL;
 	}
 	handle = CreateFileU(path, save?GENERIC_WRITE:GENERIC_READ, FILE_SHARE_READ,
-		ps, save?CREATE_ALWAYS:OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+		sa, save?CREATE_ALWAYS:OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 
 	if (handle == INVALID_HANDLE_VALUE) {
 		uprintf("Could not %s file '%s'\n", save?"create":"open", path);

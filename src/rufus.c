@@ -101,7 +101,7 @@ BUTTON_IMAGELIST bi_iso = { 0 }, bi_up = { 0 }, bi_down = { 0 }, bi_save = { 0 }
 char szFolderPath[MAX_PATH], app_dir[MAX_PATH], system_dir[MAX_PATH], temp_dir[MAX_PATH], sysnative_dir[MAX_PATH];
 char *image_path = NULL, *short_image_path;
 float fScale = 1.0f;
-int default_fs, fs, bt, pt, tt;
+int default_fs, fs, bt, ps, tt;
 int cbw, ddw, ddbh = 0, bh = 0; // (empty) check box width, (empty) drop down width, button height (for and without dropdown match)
 uint32_t dur_mins, dur_secs;
 loc_cmd* selected_locale = NULL;
@@ -310,6 +310,8 @@ static void SetPartitionSchemeAndTargetSystem(BOOL only_target)
 	}
 
 	if (!only_target) {
+		// Try to reselect the current drive's partition scheme
+		int preferred_ps = SelectedDrive.PartitionStyle;
 		if (allowed_partition_scheme[PARTITION_STYLE_MBR]) 
 			IGNORE_RETVAL(ComboBox_SetItemData(hPartitionScheme,
 				ComboBox_AddStringU(hPartitionScheme, "MBR"), PARTITION_STYLE_MBR));
@@ -319,20 +321,31 @@ static void SetPartitionSchemeAndTargetSystem(BOOL only_target)
 		if (allowed_partition_scheme[PARTITION_STYLE_SFD])
 			IGNORE_RETVAL(ComboBox_SetItemData(hPartitionScheme,
 				ComboBox_AddStringU(hPartitionScheme, sfd_name), PARTITION_STYLE_SFD));
-		SetComboEntry(hPartitionScheme, PARTITION_STYLE_GPT);
-		pt = (int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme));
+		// Override the partition scheme according to the current 
+		if (bt == BT_NON_BOOTABLE)
+			preferred_ps = PARTITION_STYLE_MBR;
+		else if (bt == BT_UEFI_NTFS)
+			preferred_ps = PARTITION_STYLE_GPT;
+		else if ((bt == BT_IMAGE) && (image_path != NULL) && (img_report.is_iso)) {
+			if (HAS_WINDOWS(img_report) && img_report.has_efi)
+				preferred_ps = allow_dual_uefi_bios? PARTITION_STYLE_MBR : PARTITION_STYLE_GPT;
+			if (img_report.is_bootable_img)
+				preferred_ps = PARTITION_STYLE_MBR;
+		}
+		SetComboEntry(hPartitionScheme, preferred_ps);
+		ps = (int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme));
 	}
 
 	has_uefi_csm = FALSE;
-	if (allowed_target_system[0] && (pt != PARTITION_STYLE_GPT)) {
+	if (allowed_target_system[0] && (ps != PARTITION_STYLE_GPT)) {
 		IGNORE_RETVAL(ComboBox_SetItemData(hTargetSystem,
 			ComboBox_AddStringU(hTargetSystem, lmprintf(MSG_031)), TT_BIOS));
 		has_uefi_csm = TRUE;
 	}
-	if (allowed_target_system[1] && !((pt == PARTITION_STYLE_MBR) && IS_BIOS_BOOTABLE(img_report) && IS_EFI_BOOTABLE(img_report)) )
+	if (allowed_target_system[1] && !((ps == PARTITION_STYLE_MBR) && IS_BIOS_BOOTABLE(img_report) && IS_EFI_BOOTABLE(img_report)) )
 		IGNORE_RETVAL(ComboBox_SetItemData(hTargetSystem,
 			ComboBox_AddStringU(hTargetSystem, lmprintf(MSG_032)), TT_UEFI));
-	if (allowed_target_system[2] && ((pt != PARTITION_STYLE_GPT) || (bt == BT_NON_BOOTABLE)))
+	if (allowed_target_system[2] && ((ps != PARTITION_STYLE_GPT) || (bt == BT_NON_BOOTABLE)))
 		IGNORE_RETVAL(ComboBox_SetItemData(hTargetSystem,
 			ComboBox_AddStringU(hTargetSystem, lmprintf(MSG_033)), TT_BIOS));
 	IGNORE_RETVAL(ComboBox_SetCurSel(hTargetSystem, 0));
@@ -633,7 +646,7 @@ static void EnableMBRBootOptions(BOOL enable, BOOL remove_checkboxes)
 	BOOL actual_enable_fix = enable;
 	static UINT uXPartChecked = BST_UNCHECKED;
 
-	if ((pt != PARTITION_STYLE_MBR) || (tt != TT_BIOS) || ((bt == BT_IMAGE) && !IS_BIOS_BOOTABLE(img_report))) {
+	if ((ps != PARTITION_STYLE_MBR) || (tt != TT_BIOS) || ((bt == BT_IMAGE) && !IS_BIOS_BOOTABLE(img_report))) {
 		// These options cannot apply if we aren't using MBR+BIOS, or are using an image that isn't BIOS bootable
 		actual_enable_mbr = FALSE;
 		actual_enable_fix = FALSE;
@@ -1430,7 +1443,7 @@ static BOOL BootCheck(void)
 				return FALSE;
 			}
 			if (SelectedDrive.MediaType != FixedMedia) {
-				if ((tt == TT_UEFI) && (pt == PARTITION_STYLE_GPT) && (nWindowsBuildNumber < 15000)) {
+				if ((tt == TT_UEFI) && (ps == PARTITION_STYLE_GPT) && (nWindowsBuildNumber < 15000)) {
 					// Up to Windows 10 Creators Update, we were screwed, since we need access to 2 partitions at the same time.
 					// Thankfully, the newer Windows allow mounting multiple partitions on the same REMOVABLE drive.
 					MessageBoxExU(hMainDialog, lmprintf(MSG_198), lmprintf(MSG_190), MB_OK|MB_ICONERROR|MB_IS_RTL, selected_langid);
@@ -1737,13 +1750,13 @@ static INT_PTR CALLBACK ProgressCallback(HWND hCtrl, UINT message, WPARAM wParam
 {
 	HDC hDC;
 	RECT rect;
-	PAINTSTRUCT ps;
+	PAINTSTRUCT paint_struct;
 	wchar_t winfo[128] = L"Copying ISO files...";
 
 	switch (message) {
 
 	case WM_PAINT:
-		hDC = BeginPaint(hCtrl, &ps);
+		hDC = BeginPaint(hCtrl, &paint_struct);
 		CallWindowProc(progress_original_proc, hCtrl, message, (WPARAM)hDC, lParam);
 		GetWindowTextW(hProgress, winfo, ARRAYSIZE(winfo));
 		SetBkMode(hDC, TRANSPARENT);
@@ -1754,7 +1767,7 @@ static INT_PTR CALLBACK ProgressCallback(HWND hCtrl, UINT message, WPARAM wParam
 		ExtTextOutW(hDC, rect.right / 2, rect.bottom / 2 + (int)(4.0f * fScale),
 			ETO_CLIPPED | ETO_NUMERICSLOCAL | (right_to_left_mode ? ETO_RTLREADING : 0),
 			&rect, winfo, (int)wcslen(winfo), NULL);
-		EndPaint(hCtrl, &ps);
+		EndPaint(hCtrl, &paint_struct);
 		return (INT_PTR)TRUE;
 	}
 
@@ -2785,7 +2798,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	RECT rc, DialogRect, DesktopRect;
 	LONG progress_style;
 	HDC hDC;
-	PAINTSTRUCT ps;
+	PAINTSTRUCT paint_struct;
 	int nDeviceIndex, i, nWidth, nHeight, nb_devices, selected_language, offset;
 	char tmp[128];
 	wchar_t* wbuffer = NULL;
@@ -2954,7 +2967,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		case IDC_PARTITION_TYPE:
 			if (HIWORD(wParam) != CBN_SELCHANGE)
 				break;
-			pt = (int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme));
+			ps = (int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme));
 			SetPartitionSchemeAndTargetSystem(TRUE);
 			SetFileSystemAndClusterSize(NULL);
 			EnableMBRBootOptions(TRUE, FALSE);
@@ -3002,7 +3015,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			SetProposedLabel(ComboBox_GetCurSel(hDeviceList));
 			EnableControls(TRUE);
 			tt = (int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme));
-			pt = (int)ComboBox_GetItemData(hTargetSystem, ComboBox_GetCurSel(hTargetSystem));
+			ps = (int)ComboBox_GetItemData(hTargetSystem, ComboBox_GetCurSel(hTargetSystem));
 			return (INT_PTR)TRUE;
 		case IDC_SELECT:
 			if (iso_provided) {
@@ -3051,7 +3064,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			// Just in case
 			bt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
 			tt = (int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme));
-			pt = (int)ComboBox_GetItemData(hTargetSystem, ComboBox_GetCurSel(hTargetSystem));
+			ps = (int)ComboBox_GetItemData(hTargetSystem, ComboBox_GetCurSel(hTargetSystem));
 			fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
 			write_as_image = FALSE;
 			// Disable all controls except Cancel
@@ -3310,9 +3323,9 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		break;
 
 	case WM_PAINT:
-		hDC = BeginPaint(hDlg, &ps);
+		hDC = BeginPaint(hDlg, &paint_struct);
 		OnPaint(hDC);
-		EndPaint(hDlg, &ps);
+		EndPaint(hDlg, &paint_struct);
 		break;
 
 	case WM_CTLCOLORSTATIC:

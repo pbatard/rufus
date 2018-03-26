@@ -757,7 +757,7 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 #endif
 	switch (DriveLayout->PartitionStyle) {
 	case PARTITION_STYLE_MBR:
-		SelectedDrive.PartitionType = PARTITION_STYLE_MBR;
+		SelectedDrive.PartitionStyle = PARTITION_STYLE_MBR;
 		for (i=0; i<DriveLayout->PartitionCount; i++) {
 			if (DriveLayout->PartitionEntry[i].Mbr.PartitionType != PARTITION_ENTRY_UNUSED) {
 				SelectedDrive.nPartitions++;
@@ -804,7 +804,7 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 		}
 		break;
 	case PARTITION_STYLE_GPT:
-		SelectedDrive.PartitionType = PARTITION_STYLE_GPT;
+		SelectedDrive.PartitionStyle = PARTITION_STYLE_GPT;
 		suprintf("Partition type: GPT, NB Partitions: %d", DriveLayout->PartitionCount);
 		suprintf("Disk GUID: %s", GuidToString(&DriveLayout->Gpt.DiskId));
 		suprintf("Max parts: %d, Start Offset: %" PRIi64 ", Usable = %" PRIi64 " bytes",
@@ -833,7 +833,7 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 		}
 		break;
 	default:
-		SelectedDrive.PartitionType = PARTITION_STYLE_MBR;
+		SelectedDrive.PartitionStyle = PARTITION_STYLE_MBR;
 		suprintf("Partition type: RAW");
 		break;
 	}
