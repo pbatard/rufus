@@ -21,7 +21,7 @@ o Version 1.0.23 (2018.??.??)
   - *NEW*      IDS_BOOT_SELECTION_TXT "Boot selection"
                Note: The current translation was taken from MSG_278 when available, which was for "Boot type".
                However, "Boot selection", is more appropriate, so please update if it makes sense.
-  - *NEW*      IDC_SELECT "SELECT"
+  - *NEW*      IDC_SELECT "Select"
   - *NEW*      IDS_IMAGE_OPTION_TXT "Image Option"
   - *UPDATED*  IDS_PARTITION_TYPE_TXT Partition scheme and target system type -> "Partition scheme"
   - *NEW*      IDS_TARGET_SYSTEM_TXT "Target system"
@@ -39,12 +39,12 @@ o Version 1.0.23 (2018.??.??)
   - *NEW*      MSG_121 "Show %s"
   - *NEW*      MSG_122 "Hide %s"
      MSG_119/120 + MSG_121/122 are used to create the advanced options clickable toolbars
-  - *REPLACED* MSG_150 -> "Type of computer you plan to use this bootable drive with. It is up to YOU to find whether your target is of BIOS or UEFI type.\n"
-                          "Be mindful that CSM, which can be enabled or disabled on UEFI computers, means 'BIOS emulation', and is not really UEFI."
+  - *REPLACED* MSG_150 -> "Type of computer you plan to use this bootable drive with. It is your responsibility to determine whether "
+                          "your target is of BIOS or UEFI type before you start creating the drive, as it may fail to boot otherwise."
   - *REPLACED* MSG_151 -> "'UEFI-CSM' means that the device will only boot in BIOS emulation mode (also known as 'Legacy Mode') under UEFI, and not in native UEFI mode."
                Be mindful that you probably don't want to translate 'Legacy Mode' as this is an option that usually appears in English in the UEFI settings.
   - *REPLACED* MSG_152 -> "'non CSM' means that the device will only boot in native UEFI mode, and not in BIOS emulation mode (also known as 'Legacy Mode')."
-  - *REPLACED* MSG_163 -> "Method that will be used to create partitions."
+  - *REPLACED* MSG_163 -> "Method that will be used to create partitions"
   - *NEW*      MSG_278 "Checking for conflicting processes..."
   - *REPLACED* MSG_280 "Image selection" -> "Disk or ISO image"
   - *REPLACED* MSG_281 "(Please select an image)" -> "%s (Please select)"

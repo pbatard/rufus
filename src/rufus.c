@@ -3628,7 +3628,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			tmp = &argv[0][strlen(argv[0]) - 1];
 			while ((((uintptr_t)tmp) > ((uintptr_t)argv[0])) && (*tmp != '\\'))
 				tmp--;
-			if ((strchr(tmp, 'p') != NULL) || (strchr(tmp, 'P') != NULL))
+			// Need to take 'ALPHA' into account
+			if ((strchr(tmp, 'p') != NULL) || ((strchr(tmp, 'P') != NULL) && (strchr(tmp, 'P')[1] != 'H')))
 				ini_flags[0] = 'a';
 
 			// Now enable the hogger before processing the rest of the arguments
