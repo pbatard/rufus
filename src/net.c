@@ -404,7 +404,7 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 {
 	BOOL releases_only, found_new_version = FALSE;
 	int status = 0;
-	const char* server_url = RUFUS_NO_SSL_URL "/";
+	const char* server_url = RUFUS_URL "/";
 	int i, j, k, max_channel, verbose = 0, verpos[4];
 	static const char* archname[] = {"win_x86", "win_x64"};
 	static const char* channel[] = {"release", "beta", "test"};		// release channel
