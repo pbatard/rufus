@@ -3218,26 +3218,36 @@ t MSG_298 "ISO datoteka koju ste odabrali ne odgovara deklariranoj veličini: %s
 
 ################################################################################
 l "cs-CZ" "Czech (Čeština)" 0x0405
-v 1.0.22
+v 1.0.23
 b "en-US"
 
 # Main dialog
 g IDD_DIALOG
+t IDS_DRIVE_PROPERTIES_TXT "Vlastnosti disku"
 t IDS_DEVICE_TXT "Zařízení"
-t IDS_BOOT_SELECTION_TXT "Typ bootu"
+t IDS_BOOT_SELECTION_TXT "Výběr bootu"
+t IDC_SELECT "Vybrat"
+t IDS_IMAGE_OPTION_TXT "Možnosti obrazu"
 t IDS_PARTITION_TYPE_TXT "Oddíl a typ cílového systému"
+t IDS_TARGET_SYSTEM_TXT "Cílový systém"
+t IDC_LIST_USB_HDD "Seznam USB disků"
+# Note: It is acceptable to drop the parenthesis () below if you are running out of space
+# as there is a tooltip (MSG_169) providing these details.
+t IDC_OLD_BIOS_FIXES "Přidat opravu pro starší BIOSy (extra partition, align, etc.)"
+# 'MBR': See http://en.wikipedia.org/wiki/Master_boot_record
+# Rufus can install it's own custom MBR (the Rufus MBR), which also allows users
+# to specify a custom disk ID for the BIOS. Note: the tooltip for this control is MSG_167.
+t IDC_RUFUS_MBR "Použijte Rufus MBR s ID BIOS"
+t IDS_FORMAT_OPTIONS_TXT "Možnosti formátování"
 t IDS_FILE_SYSTEM_TXT "Souborový systém"
 t IDS_CLUSTER_SIZE_TXT "Velikost clusteru"
-t IDS_LABEL_TXT "Nový název svazku"
-t IDS_FORMAT_OPTIONS_TXT "Nastavení formátování"
-t IDC_BAD_BLOCKS "Zkontrolovat chybné bloky"
-t IDC_QUICK_FORMAT "Rychlé formátování"
-t IDC_EXTENDED_LABEL "Vytvořit soubory s jmenovkou a ikonou svazku"
+t IDS_LABEL_TXT "Název svazku"
+t IDC_QUICK_FORMAT "Rychlý formát"
+t IDC_BAD_BLOCKS "Kontrola na vadné bloky"
+t IDC_EXTENDED_LABEL "Vytvořit rozšířené označení a symbol souborů"
+t IDS_STATUS_TXT "Stav"
 t IDCANCEL "Zavřít"
-t IDC_START "Spustit"
-t IDC_LIST_USB_HDD "Zobrazit seznam USB disků"
-t IDC_OLD_BIOS_FIXES "Přidat opravy pro starší verze BIOSu"
-t IDC_RUFUS_MBR "Použít Rufus MBR s BIOS ID"
+t IDC_START "Start"
 
 # About dialog
 g IDD_ABOUTBOX
@@ -3274,8 +3284,8 @@ t IDCANCEL "Zavřít"
 # Dialog that appears when a new version is available
 g IDD_NEW_VERSION
 t IDD_NEW_VERSION "Kontrola aktualizace - Rufus"
-t IDS_NEW_VERSION_AVAIL_TXT "Je dostupná novější verze. Stáhněte si poslední verzi!"
-t IDC_WEBSITE "Kliknutím přejdete na webové stránky aplikace"
+t IDS_NEW_VERSION_AVAIL_TXT "Je dostupná novější verze. Stáhněte poslední verzi!"
+t IDC_WEBSITE "Kliknutím přejdete na web aplikace"
 t IDS_NEW_VERSION_NOTES_GRP "Poznámky k vydání"
 t IDS_NEW_VERSION_DOWNLOAD_GRP "Stažení"
 t IDC_DOWNLOAD "Stáhnout"
@@ -3320,9 +3330,9 @@ t MSG_028 "megabajtů"
 t MSG_029 "Výchozí"
 # The following gets appended to the file system, cluster size, etc.
 t MSG_030 "%s (Výchozí)"
-#t MSG_031 "%s schéma oddílu BIOS nebo %s"
-#t MSG_032 "%s schéma oddílu BIOS"
-#t MSG_033 "%s schéma oddílu UEFI"
+t MSG_031 "BIOS (UEFI-CSM)"
+t MSG_032 "UEFI (ne CSM)"
+t MSG_033 "BIOS nebo UEFI"
 # Number of bad block check passes (singular for 1 pass, plural for 2 or more passes)
 t MSG_034 "%d pokus"
 t MSG_035 "%d pokusy"
@@ -3464,14 +3474,18 @@ t MSG_116 "Tento obraz používá Grub %s ale aplikace obsahuje pouze instalačn
 	"- Vybrat 'Zrušit' pro zrušení operace\n\n"
 	"Poznámka: Soubor se stáhne do aktuální složky aplikace a bude použit "
 	"automaticky, pokud je přítomen. Není-li shoda k dispozici online, pak bude použita standardní verze."
+t MSG_117 "Standardní instalace systému Windows"
+t MSG_119 "Pokročilé vlastnosti disku"
+t MSG_120 "Pokročilé možnosti formátování"
+t MSG_121 "Zobrazit %s"
+t MSG_122 "Skrýt %s"
 # Popisy
 # Partition Scheme and Target Type
-t MSG_150 "Obvykle nejbezpečnější volba. Pokud však máte UEFI počítač a chcete instalovat"
-	"OS v EFI režimu, měli byste zvolte některou z ostatních možností"
-t MSG_151 "Použijte, pokud chcete instalovat OS v EFI režimu, ale budete potřebovat "
-	"přístup k obsahu USB disku z Windows XP"
-t MSG_152 "Preferovaná volba pro instalaci OS v EFI režimu, pokud není požadován  "
-	"přístup k obsahu USB disku z Windows XP"
+t MSG_150 "Typ počítače, ve kterém chcete tuto zaváděcí jednotku používat. Je nutné zjistit zda "
+	"cílové zařízení má klasický BIOS nebo UEFI, zadejte při vytváření media jinak nepůjde správně zavést."
+# Note: You shouldn't translate 'Legacy Mode' below, as this is an option that usually appears in English in the UEFI settings.
+t MSG_151 "'UEFI-CSM' znamená, že zařízení bude spouštěno pouze v režimu emulace systému BIOS (také známý jako 'Legacy Mode') pod UEFI, a ne v nativním UEFI modu."
+t MSG_152 "'non CSM' znamená to, že zařízení bude startovat pouze v nativním UEFI modu, ne v BIOS emulaci režimu (také známý jako 'Legacy Mode')."
 t MSG_153 "Zkušební vzorek: 0x%02X"
 t MSG_154 "Zkušební vzorek: 0x%02X, 0x%02X"
 t MSG_155 "Zkušební vzorek: 0x%02X, 0x%02X, 0x%02X"
@@ -3482,6 +3496,7 @@ t MSG_159 "Pokud chcete nastavit jmenovku svazku, vyplňte pole.\nJsou podporova
 t MSG_160 "Přepnout pokročilá nastavení"
 t MSG_161 "Zkontrolovat zařízení na přítomnost chybných\nbloků použitím zkušebního vzorku"
 t MSG_162 "Odškrtnutím použijete pomalou metodu formátování"
+t MSG_163 "Metoda, která bude použita k vytváření oddílů"
 t MSG_164 "Vyberte metodu, která bude použitá k vytvoření boot zařízení"
 t MSG_165 "Klikněte pro výběr obrazu..."
 t MSG_166 "Povolíte v názvu disku zobrazení mezinárodních znaků "
@@ -3631,9 +3646,10 @@ t MSG_275 "Obráz, který jste si vybrali, je obraz 'ISO Hybrid'. To znamená, �
 	"Vyberte režim, který chcete použít k zapsání tohoto obrázu:"
 t MSG_276 "Režim zápisu %s (Doporučená)"
 t MSG_277 "Režim zápisu %s"
+t MSG_278 "Kontrola konfliktních procesů..."
 t MSG_279 "Není boot"
-t MSG_280 "Volba obrazu"
-t MSG_281 "(Prosím, vyberte obraz)"
+t MSG_280 "Disk nebo obraz ISO"
+t MSG_281 "%s (Prosím vyberte)"
 t MSG_282 "Uzamčení USB disku"
 t MSG_283 "Neplatný podpis"
 t MSG_284 "Schází digitální podpis u staženého programu."
@@ -3654,8 +3670,16 @@ t MSG_297 "Redukované ISO detekováno"
 t MSG_298 "U vybraného ISO soubor neodpovídá deklarovaná velikost: %s z údajů chybí!\n\nPokud jste jej získali "
 	"z internetu, měli by jste stáhnout novou kopii a ověřt, zda odpovídají kontrolní součty MD5 nebo SHA. "
 	"oficiálně.\n\nPoznámka: Klepnutím na'#'lze vypočítat MD5 nebo SHA v Rufusu."
-t MSG_117 "Standartní instalace Windows"
-t MSG_118 "Přenosný systém Windows (Windows To Go)"
+t MSG_299 "Chyba ověření časového razítka"
+t MSG_300 "Rufus nemohl ověřit časové razítko stažené aktualizace, zda je novější než časový údaj minulé "
+	"aktuální spustitelný soubor.\n\nAby se zabránilo možným scénářům útoků, proces aktualizace byl zrušen "
+	"stahování bude smazáno. Zkontrolujte podrobnosti protokolu."
+t MSG_301 "Zobrazit nastavení aplikace"
+t MSG_302 "Zobrazte informace o této aplikaci"
+t MSG_303 "Zobrazit protokol"
+t MSG_304 "Vytvořit obraz disku vybraného zařízení"
+t MSG_305 "Touto volbou označte, zda chcete toto zařízení používat k instalaci Windows na jiný disk, "
+	"nebo pokud chcete spustit systém Windows přímo z této jednotky (Windows To Go)."
 
 ################################################################################
 l "da-DK" "Danish (Dansk)" 0x0406
