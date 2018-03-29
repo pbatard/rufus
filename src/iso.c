@@ -75,7 +75,6 @@ static const char* grldr_name = "grldr";
 static const char* ldlinux_name = "ldlinux.sys";
 static const char* ldlinux_c32 = "ldlinux.c32";
 static const char* efi_dirname = "/efi/boot";
-static const char* efi_img_name = "efi.img";	// Used by Debian Live ISOHybrids
 static const char* efi_bootname[] = { "bootia32.efi", "bootia64.efi", "bootx64.efi", "bootarm.efi", "bootaa64.efi", "bootebc.efi" };
 static const char* install_wim_path = "/sources";
 static const char* install_wim_name[] = { "install.wim", "install.swm" };
@@ -203,8 +202,10 @@ static BOOL check_iso_props(const char* psz_dirname, int64_t i_file_length, cons
 		if ((img_report.reactos_path[0] == 0) && (safe_stricmp(psz_basename, reactos_name) == 0))
 			static_strcpy(img_report.reactos_path, psz_fullpath);
 
-		// Check for the first 'efi.img' we can find (that hopefully contains EFI boot files)
-		if (!HAS_EFI_IMG(img_report) && (safe_stricmp(psz_basename, efi_img_name) == 0))
+		// Check for the first 'efi*.img' we can find (that hopefully contains EFI boot files)
+		if (!HAS_EFI_IMG(img_report) && (safe_strlen(psz_basename) >= 7) &&
+			(safe_strnicmp(psz_basename, "efi", 3) == 0) &&
+			(safe_stricmp(&psz_basename[strlen(psz_basename) - 4], ".img") == 0))
 			static_strcpy(img_report.efi_img_path, psz_fullpath);
 
 		// Check for the EFI boot entries
