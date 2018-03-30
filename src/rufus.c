@@ -1847,6 +1847,9 @@ static void CreateAdditionalControls(HWND hDlg)
 	GetWindowRect(GetDlgItem(hDlg, IDC_ADVANCED_DRIVE_PROPERTIES), &rc);
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
 	SendMessage(hAdvancedDeviceToolbar, TB_GETIDEALSIZE, (WPARAM)FALSE, (LPARAM)&sz);
+	// Yeah, so, like, TB_GETIDEALSIZE totally super doesn't work on Windows 7, for low zoom factor and when compiled with MSVC...
+	if (sz.cx < 16)
+		sz.cx = fw;
 	SetWindowPos(hAdvancedDeviceToolbar, HWND_TOP, rc.left + toolbar_dx, rc.top, sz.cx, rc.bottom - rc.top, 0);
 
 	utf8_to_wchar_no_alloc(lmprintf((advanced_mode_format) ? MSG_122 : MSG_121, lmprintf(MSG_120)), wtbtext[1], ARRAYSIZE(wtbtext[1]));
@@ -1867,6 +1870,8 @@ static void CreateAdditionalControls(HWND hDlg)
 	GetWindowRect(GetDlgItem(hDlg, IDC_ADVANCED_FORMAT_OPTIONS), &rc);
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
 	SendMessage(hAdvancedFormatToolbar, TB_GETIDEALSIZE, (WPARAM)FALSE, (LPARAM)&sz);
+	if (sz.cx < 16)
+		sz.cx = fw;
 	SetWindowPos(hAdvancedFormatToolbar, HWND_TOP, rc.left + toolbar_dx, rc.top, sz.cx, rc.bottom - rc.top, 0);
 
 	// Create the bottom toolbar
