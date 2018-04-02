@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Drive access function calls
- * Copyright © 2011-2016 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2018 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,8 @@
 
 #include <windows.h>
 #include <stdint.h>
-#include <winioctl.h>				// for DISK_GEOMETRY
+#include <winioctl.h>   // for DISK_GEOMETRY
+#include <winternl.h>
 
 #pragma once
 
@@ -31,10 +32,28 @@
 #define IOCTL_MOUNTMGR_SET_AUTO_MOUNT       \
 	CTL_CODE(MOUNTMGRCONTROLTYPE, 16, METHOD_BUFFERED, FILE_READ_ACCESS | FILE_WRITE_ACCESS)
 
-#define XP_MSR       0x01
-#define XP_EFI       0x02
-#define XP_UEFI_NTFS 0x04
-#define XP_COMPAT    0x08
+#define XP_MSR                              0x01
+#define XP_EFI                              0x02
+#define XP_UEFI_NTFS                        0x04
+#define XP_COMPAT                           0x08
+
+#define FILE_FLOPPY_DISKETTE                0x00000004
+
+#if !defined(__MINGW32__)
+typedef enum _FSINFOCLASS {
+	FileFsVolumeInformation = 1,
+	FileFsLabelInformation,
+	FileFsSizeInformation,
+	FileFsDeviceInformation,
+	FileFsAttributeInformation,
+	FileFsControlInformation,
+	FileFsFullSizeInformation,
+	FileFsObjectIdInformation,
+	FileFsDriverPathInformation,
+	FileFsVolumeFlagsInformation,
+	FileFsMaximumInformation
+} FS_INFORMATION_CLASS, *PFS_INFORMATION_CLASS;
+#endif
 
 /* We need a redef of these MS structure */
 typedef struct {
@@ -48,6 +67,13 @@ typedef struct {
 	// The one from MS uses ANYSIZE_ARRAY, which can lead to all kind of problems
 	DISK_EXTENT Extents[8];
 } VOLUME_DISK_EXTENTS_REDEF;
+
+#if !defined(__MINGW32__)
+typedef struct _FILE_FS_DEVICE_INFORMATION {
+	DEVICE_TYPE DeviceType;
+	ULONG Characteristics;
+} FILE_FS_DEVICE_INFORMATION, *PFILE_FS_DEVICE_INFORMATION;
+#endif
 
 static __inline BOOL UnlockDrive(HANDLE hDrive) {
 	DWORD size;

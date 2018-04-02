@@ -53,6 +53,8 @@ const GUID PARTITION_SYSTEM_GUID =
 	{ 0xc12a7328L, 0xf81f, 0x11d2, {0xba, 0x4b, 0x00, 0xa0, 0xc9, 0x3e, 0xc9, 0x3b} };
 #endif
 
+PF_TYPE_DECL(NTAPI, NTSTATUS, NtQueryVolumeInformationFile, (HANDLE, PIO_STATUS_BLOCK, PVOID, ULONG, FS_INFORMATION_CLASS));
+
 /*
  * Globals
  */
@@ -401,9 +403,13 @@ static BOOL _GetDriveLettersAndType(DWORD DriveIndex, char* drive_letters, UINT*
 	BOOL r = FALSE;
 	HANDLE hDrive = INVALID_HANDLE_VALUE;
 	UINT _drive_type;
+	IO_STATUS_BLOCK io_status_block;
+	FILE_FS_DEVICE_INFORMATION file_fs_device_info;
 	int i = 0, drive_number;
 	char *drive, drives[26*4 + 1];	/* "D:\", "E:\", etc., plus one NUL */
 	char logical_drive[] = "\\\\.\\#:";
+
+	PF_INIT(NtQueryVolumeInformationFile, Ntdll);
 
 	if (drive_letters != NULL)
 		drive_letters[0] = 0;
@@ -449,6 +455,14 @@ static BOOL _GetDriveLettersAndType(DWORD DriveIndex, char* drive_letters, UINT*
 		if (hDrive == INVALID_HANDLE_VALUE) {
 //			uprintf("Warning: could not open drive %c: %s", drive[0], WindowsErrorString());
 			continue;
+		}
+
+		// Eliminate floppy drives
+		if ((pfNtQueryVolumeInformationFile != NULL) &&
+			(pfNtQueryVolumeInformationFile(hDrive, &io_status_block, &file_fs_device_info,
+				sizeof(file_fs_device_info), FileFsDeviceInformation) == NO_ERROR) &&
+			(file_fs_device_info.Characteristics & FILE_FLOPPY_DISKETTE) ) {
+				continue;
 		}
 
 		drive_number = GetDriveNumber(hDrive, logical_drive);
