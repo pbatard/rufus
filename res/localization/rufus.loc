@@ -16041,26 +16041,36 @@ t MSG_305 "เลือกตัวเลือกนี้หากต้อง
 
 ################################################################################
 l "tr-TR" "Turkish (Türkçe)" 0x041F
-v 1.0.22
+v 1.0.23
 b "en-US"
 
 # Main dialog
 g IDD_DIALOG
+t IDS_DRIVE_PROPERTIES_TXT "Sürücü Özellikleri"
 t IDS_DEVICE_TXT "Aygıt"
-t IDS_BOOT_SELECTION_TXT "Önyükleme türü"
-t IDS_PARTITION_TYPE_TXT "Disk Bölüm Düzeni ve Hedef Sistem Türü"
+t IDS_BOOT_SELECTION_TXT "Önyükleme seçimi"
+t IDC_SELECT "Seç"
+t IDS_IMAGE_OPTION_TXT "Yansı Seçeneği"
+t IDS_PARTITION_TYPE_TXT "Disk Bölüm Düzeni"
+t IDS_TARGET_SYSTEM_TXT "Hedef Sistem"
+t IDC_LIST_USB_HDD "USB sabit sürücüleri listele"
+# Note: It is acceptable to drop the parenthesis () below if you are running out of space
+# as there is a tooltip (MSG_169) providing these details.
+t IDC_OLD_BIOS_FIXES "Eski BIOSlar için düzeltme ekle (ekstra bölüm, hizalama vs.)"
+# 'MBR': See http://en.wikipedia.org/wiki/Master_boot_record
+# Rufus can install it's own custom MBR (the Rufus MBR), which also allows users
+# to specify a custom disk ID for the BIOS. Note: the tooltip for this control is MSG_167.
+t IDC_RUFUS_MBR "Rufus MBR kullan. BIOS Kimliği Seçin"
+t IDS_FORMAT_OPTIONS_TXT "Biçimlendirme Seçenekleri"
 t IDS_FILE_SYSTEM_TXT "Dosya Sistemi"
 t IDS_CLUSTER_SIZE_TXT "Ayırma Birimi Boyutu"
 t IDS_LABEL_TXT "Yeni Birim Etiketi"
-t IDS_FORMAT_OPTIONS_TXT "Biçimlendirme Seçenekleri"
-t IDC_BAD_BLOCKS "Hatalı Bloklar için Aygıtı Denetle"
 t IDC_QUICK_FORMAT "Hızlı Biçimlendir"
+t IDC_BAD_BLOCKS "Hatalı Bloklar için Aygıtı Denetle"
 t IDC_EXTENDED_LABEL "Genişletilmiş Etiket ve Simge Dosyaları Oluştur"
+t IDS_STATUS_TXT "Durum"
 t IDCANCEL "Kapat"
 t IDC_START "Başlat"
-t IDC_LIST_USB_HDD "USB sabit sürücüleri listele"
-t IDC_OLD_BIOS_FIXES "Eski BIOSlar için düzeltme ekle(ekstra bölüm, hizalama vs.)"
-t IDC_RUFUS_MBR "Rufus MBR kullan. BIOS Kimliği Seçin"
 
 # About dialog
 g IDD_ABOUTBOX
@@ -16144,9 +16154,9 @@ t MSG_028 "megabyte"
 t MSG_029 "Varsayılan"
 # The following gets appended to the file system, cluster size, etc.
 t MSG_030 "%s (Varsayılan)"
-#t MSG_031 "%s Bölüm Düzeni: BIOS ya da %s için"
-#t MSG_032 "BIOS için %s Bölüm Düzeni"
-#t MSG_033 "UEFI için %s Bölüm Düzeni"
+t MSG_031 "BIOS (ya da UEFI-CSM)"
+t MSG_032 "UEFI (CSM yok)"
+t MSG_033 "BIOS ya da UEFI"
 # Number of bad block check passes (singular for 1 pass, plural for 2 or more passes)
 t MSG_034 "%d Geçiş"
 t MSG_035 "%d Geçiş"
@@ -16286,14 +16296,17 @@ t MSG_116 "Bu yansıma Grub %s kullanıyor fakat bu uygulama yalnız Grub %s iç
 	"- İşlemden vazgeçmek için 'Vazgeç'i seçin\n\n"
 	"Not: Dosyalar mevcut uygulama dizinine indirilecek ve "
 	"hazır olduğunda otomatik olarak kullanılacak. Çevrimiçi bulunanlar eşleşmiyorsa varsayılan sürüm kullanılacak."
+t MSG_117 "Standart Windows Yüklemesi"
+t MSG_119 "Gelişmiş sürücü özellikleri"
+t MSG_120 "Gelimiş biçimlendirme seçenekleri"
+t MSG_121 "%sni göster"
+t MSG_122 "%sni gizle"
+
 # Tooltips
-# Partition Scheme and Target Type
-t MSG_150 "Genellikle en güvenli seçenektir. UEFI destekli bir bilgisayara sahipseniz ve bir işletim sistemini "
-	"EFI modunda yüklemek istiyorsanız diğer seçeneklerden birini seçmelisiniz."
-t MSG_151 "Bir işletim sistemini EFI modunda yüklemek istiyorsanız fakat "
-	"USB içeriğine Windows XP den erişmeniz gerekiyorsa bunu kullanın"
-t MSG_152 "Bir işletim sistemini EFI modunda yüklemek için ve Windows XP için USB erişimi gerekmediğinde "
-	" tercih edilen seçenek"
+t MSG_150 "Bu önyüklenebilir sürücüyü kullanmayı planladığınız bilgisayarın türü. Sürücüyü oluşturmaya başlamadan önce "
+	"hedefinizin BIOS ya da UEFI türü olup olmadığını belirlemek sizin sorumluluğunuzdur. Aksi halde önyükleme yapamayabilir."
+t MSG_151 "'UEFI-CSM', cihazın yalnızca UEFI modunda değil, UEFI modunda değil, BIOS öykünme modunda ('Legacy Mode' olarak da bilinir) önyükleme yapacağı anlamına gelir."
+t MSG_152 "'CSM yok', aygıtın BIOS'a benzeme modunda değil de ('Legacy Mode' olarak da bilinir) yalnızca yerel UEFI modunda önyükleme yapacağı anlamına gelir."
 t MSG_153 "Kalıbı Dene: 0x%02X"
 t MSG_154 "Kalıbı Dene: 0x%02X, 0x%02X"
 t MSG_155 "Kalıbı Dene: 0x%02X, 0x%02X, 0x%02X"
@@ -16304,6 +16317,7 @@ t MSG_159 "Bu alanı sürücü etiketini ayarlamak için kullanın\nUluslararas�
 t MSG_160 "Gelişmiş seçeneklere geçiş"
 t MSG_161 "Kalıp denemesi kullanarak hatalı blokları denetle"
 t MSG_162 "\"Yavaş\" biçimlendirme yöntemini kullanmak için bu onay kutusu seçimini kaldırın"
+t MSG_163 "Bölümleri oluşturmak için kullanılacak yöntem"
 t MSG_164 "Sürücüyü açılabilir yapmak için kullanılacak yöntem"
 t MSG_165 "Yansıma seçmek için tıklayın..."
 t MSG_166 "Uluslararası etiketleri görüntülemek için bu onay kutusunu seçin "
@@ -16411,6 +16425,9 @@ t MSG_237 "Hatalı Bloklar: 0x%02X kalıbıyla deneniyor"
 # eg. "Formatting (MBR)..."
 t MSG_238 "Bölümlendiriliyor (%s)..."
 t MSG_239 "Bölümler Siliniyor..."
+t MSG_240 "İndirilen güncellemenin imzası doğrulanamadı. Bu, sisteminizin imza doğrulaması için "
+	"yanlış yapılandırıldığı veya kötü amaçlı bir yüklemeyi gösterdiği anlamına gelebilir.\n\n"
+	"İndirme silinecek. Lütfen daha fazla aytıntı için günlüğü kontrol edin."
 t MSG_241 "İndiriliyor: %0.1f%%"
 t MSG_242 "Dosya indirilemedi."
 t MSG_243 "Rufus güncellemeleri denetleniyor..."
@@ -16453,9 +16470,10 @@ t MSG_275 "Seçtiğiniz yansıma bir 'ISOHybrid' yansımasıdır. Bu da yansıma
 	"Lütfen bu yansımanın yazdırılmasında kullanmak istediğiniz modu seçin:"
 t MSG_276 "%s modunda yazdır (Önerilen)"
 t MSG_277 "%s modunda yazdır"
+t MSG_278 "Çelişkili işlemler denetleniyor..."
 t MSG_279 "Önyüklenebilir değil"
-t MSG_280 "Yansıma seçimi"
-t MSG_281 "(Lütfen bir yansıma seçin)"
+t MSG_280 "Disk ya da ISO yansıması"
+t MSG_281 "%s (Lütfen seçin)"
 t MSG_282 "Özel USB sürücü kilitleme"
 t MSG_283 "Geçersiz imza"
 t MSG_284 "İndirilen yürütülebilir dosyanın dijital imzası eksik."
@@ -16476,7 +16494,16 @@ t MSG_297 "Kırpılmış ISO algılandı"
 t MSG_298 "Seçtiğiniz ISO dosyası bildirilen boyutla eşleşmiyor: Veri %s eksik!\n\nBu dosyayı İnternet'ten edindiyseniz, "
 	"yeni bir kopyasını indirip, MD5 veya SHA değerlerinin resmi dosyalarla eşleştiğini doğrulamanız gerekir.\n\n"
 	"Rufus'daki MD5 veya SHA'yı '#' işaretini tıklayarak hesaplayabileceğinizi unutmayın."
-t MSG_117 "Standart Windows Yüklemesi"
+t MSG_299 "Zaman damgası doğrulama hatası"
+t MSG_300 "Rufus, indirilen güncellemenin zaman damgasının geçerli yürütülebilir dosya için olandan daha güncel "
+	"olduğunu doğrulayamadı.\n\nPotansiyel saldırı senaryolarını önlemek için güncelleme işleminden vazgeçildi ve "
+	"indirme silinecek. Daha fazla bilgi için lütfen günlüğü kontrol edin."
+t MSG_301 "Uygulama ayarlarını göster"
+t MSG_302 "Bu uygulama hakkında bilgi göster"
+t MSG_303 "Günlüğü göster"
+t MSG_304 "Seçilen cihazın disk yansımasını oluşturur"
+t MSG_305 "Windows'u başka bir diske yüklemek için bu cihazı kullanmak isteyip istemediğinizi belirtmek için, "
+	"ya da Windows'u doğrudan bu sürücüden çalıştırmak istiyorsanız (Windows To Go) bu seçeneği kullanın."
 
 ################################################################################
 l "uk-UA" "Ukrainian (Українська)" 0x0422
