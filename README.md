@@ -27,13 +27,13 @@ Features
 Compilation
 -----------
 
-Use either Visual Studio 2017 (with Update 4 and SDK 10.0.16299 installed) or MinGW and
-then invoke the `.sln` or `configure`/`make` respectively.
+Use either Visual Studio 2017 (with Update 4 and SDK 10.0.16299 installed) or MinGW.
+Then invoke the `.sln` or `configure`/`make` respectively.
 
 #### Visual Studio
-Note that, since Rufus is an OSI compliant Open Source project, you are entitled to
-download and use the *freely available* [Visual Studio Community Edition](https://www.visualstudio.com/vs/community/)
-to build, run or develop for Rufus. As per the Visual Studio Community Edition license
+Because Rufus is an OSI compliant Open Source project, you are entitled to
+download and use the, *freely available*, [Visual Studio Community Edition](https://www.visualstudio.com/vs/community/)
+to build, run, or develop for Rufus. As per the Visual Studio Community Edition license
 this applies regardless of whether you are an individual or a corporate user.
 
 Additional information
