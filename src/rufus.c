@@ -65,6 +65,7 @@ static BOOL user_changed_label = FALSE;
 static BOOL app_changed_label = FALSE;
 static BOOL allowed_filesystem[FS_MAX] = { 0 };
 static int64_t last_iso_blocking_status;
+static int windows_to_go_selection = 0;
 static int selection_default, row_height, advanced_device_section_height, advanced_format_section_height, image_index;
 static int device_vpos, format_vpos, status_vpos;
 static int ddh, bw, hw, fw;	// DropDown Height, Main button width, half dropdown width, full dropdown width
@@ -1255,7 +1256,7 @@ static void ToggleImageOption(void)
 		IGNORE_RETVAL(ComboBox_ResetContent(hCtrl));
 		IGNORE_RETVAL(ComboBox_SetItemData(hCtrl, ComboBox_AddStringU(hCtrl, lmprintf(MSG_117)), FALSE));
 		IGNORE_RETVAL(ComboBox_SetItemData(hCtrl, ComboBox_AddStringU(hCtrl, lmprintf(MSG_118)), TRUE));
-		IGNORE_RETVAL(ComboBox_SetCurSel(hCtrl, 0));
+		IGNORE_RETVAL(ComboBox_SetCurSel(hCtrl, windows_to_go_selection));
 	} else
 		shift = -shift;
 	format_vpos += shift;
@@ -2955,7 +2956,10 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			DeviceNum = (nDeviceIndex == CB_ERR) ? 0 : (DWORD)ComboBox_GetItemData(hDeviceList, nDeviceIndex);
 			break;
 		case IDC_IMAGE_OPTION:
+			if (HIWORD(wParam) != CBN_SELCHANGE)
+				break;
 			SetFileSystemAndClusterSize(NULL);
+			windows_to_go_selection = ComboBox_GetCurSel(GetDlgItem(hDlg, IDC_IMAGE_OPTION));
 			break;
 		case IDC_NB_PASSES:
 			if (HIWORD(wParam) != CBN_SELCHANGE)
@@ -3010,6 +3014,8 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			SetMBRProps();
 			break;
 		case IDC_BOOT_SELECTION:
+			if (HIWORD(wParam) != CBN_SELCHANGE)
+				break;
 			bt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
 			if ((HIWORD(wParam) != CBN_SELCHANGE) || (bt == selection_default))
 				break;
