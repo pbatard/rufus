@@ -1124,7 +1124,7 @@ t MSG_029 "Fərz edilən"
 t MSG_030 "%s (Fərz edilən)"
 t MSG_031 "BIOS (və ya UEFI-CSM)"
 t MSG_032 "UEFI (yox CSM)"
-t MSG_033 "BIOS və ya UEFI" 
+t MSG_033 "BIOS və ya UEFI"
 # Number of bad block check passes (singular for 1 pass, plural for 2 or more passes)
 t MSG_034 "%d Keçid"
 t MSG_035 "%d Keçid"
@@ -5826,7 +5826,7 @@ t MSG_301 "Applikationseinstellungen anzeigen"
 t MSG_302 "Informationen über dieses Programm anzeigen"
 t MSG_303 "Log anzeigen"
 t MSG_304 "Erstelle ein Abbild des gewählten Laufwerks"
-t MSG_305 "Wollen Sie Windows auf einem anderen Laufwerk installieren oder Windows direkt nutzen (Windows To Go)"	
+t MSG_305 "Wollen Sie Windows auf einem anderen Laufwerk installieren oder Windows direkt nutzen (Windows To Go)"
 
 ################################################################################
 l "el-GR" "Greek (Ελληνικά)" 0x0408
@@ -11604,17 +11604,22 @@ t MSG_117 "Standardowa instalacja Windowsa"
 
 ################################################################################
 l "pt-BR" "Portuguese Brazilian (Português do Brasil)" 0x0416
-v 1.0.22
+v 1.0.23
 b "en-US"
 
 # Main dialog
 g IDD_DIALOG
+t IDS_DRIVE_PROPERTIES_TXT "Propriedades do Drive"
 t IDS_DEVICE_TXT "Dispositivo"
-t IDS_BOOT_SELECTION_TXT "Tipo de inicialização"
-t IDS_PARTITION_TYPE_TXT "Esquema de partição e tipo do sistema de destino"
+t IDS_BOOT_SELECTION_TXT "Seleção de Boot"
+t IDC_SELECT "Selecionar"
+t IDS_IMAGE_OPTION_TXT "Opções da Imagem"
+t IDS_PARTITION_TYPE_TXT "Esquema de partição"
+t IDS_TARGET_SYSTEM_TXT "Sistema de destino"
 t IDS_FILE_SYSTEM_TXT "Sistema de arquivos"
 t IDS_CLUSTER_SIZE_TXT "Tamanho do cluster"
-t IDS_LABEL_TXT "Novo nome do volume"
+t IDS_LABEL_TXT "Nome do volume"
+t IDS_STATUS_TXT "Status"
 t IDS_FORMAT_OPTIONS_TXT "Opções de formatação"
 # Note: The button (IDC_ADVANCED) that appears next to "Format Options" is repositioned automatically.
 t IDC_BAD_BLOCKS "Procurar blocos defeituosos"
@@ -11649,9 +11654,9 @@ t IDNO "Não"
 
 # Log dialog
 g IDD_LOG
-t IDD_LOG "Registro dos eventos"
+t IDD_LOG "Histórico de eventos"
 t IDC_LOG_CLEAR "Limpar"
-t IDC_LOG_SAVE "Salvar"
+t IDC_LOG_SAVE "Guardar"
 t IDCANCEL "Fechar"
 
 # Update Settings
@@ -11712,9 +11717,9 @@ t MSG_028 "megabytes"
 t MSG_029 "Padrão"
 # The following gets appended to the file system, cluster size, etc.
 t MSG_030 "%s (Padrão)"
-#t MSG_031 "Partição %s para BIOS ou %s"
-#t MSG_032 "Partição %s para BIOS"
-#t MSG_033 "Partição %s para UEFI"
+t MSG_031 "BIOS (ou UEFI-CSM)"
+t MSG_032 "UEFI (não CSM)"
+t MSG_033 "BIOS ou UEFI"
 # Number of bad block check passes (singular for 1 pass, plural for 2 or more passes)
 t MSG_034 "%d passo"
 t MSG_035 "%d passos"
@@ -11860,15 +11865,21 @@ t MSG_116 "Esta imagem usa o Grub %s, mas este aplicativo inclui somente os arqu
 	"- Selecione 'Cancelar' para abortar a operação\n\n"
 	"Nota: O arquivo será baixado no diretório atual do aplicativo e será reutilizado "
 	"automaticamente se estiver presente. Se nenhum arquivo correspondente puder ser encontrado online, será usada a versão padrão."
+t MSG_117 "Instalação padrão do Windows"
+t MSG_119 "propriedades avançadas do drive"
+t MSG_120 "opções avançadas de formatação"
+t MSG_121 "Exibir %s"
+t MSG_122 "Esconder %s"
+
 
 # Tooltips
 # Partition Scheme and Target Type
-t MSG_150 "Normalmente, a escolha mais segura. Entretanto, se você tem um computador baseada em com UEFI e quer instalar "
-	"um sistema operacional em modo EFI nativo, deve selecionar uma das outras opções"
-t MSG_151 "Use esta opção se quiser instalar um sistema operacional em modo EFI nativo, mas necessita de acessar "
-	"o conteúdo do USB a partir do Windows XP"
-t MSG_152 "A opção preferida para instalar um sistema operacional em modo EFI nativo, "
-	"quando o acesso ao USB não é requerido a partir do Windows XP"
+t MSG_150 "Tipo de computador no qual deseja utilizar o disco de inicialização. É de sua responsabilidade determinar "
+	"se o destino utiliza BIOS ou UEFI antes de começar a criar um disco, caso contrário poderá haver falhas."
+t MSG_151 "'UEFI-CSM' significa que o dispositivo apenas irá inicializar no modo BIOS emulação(também conhecido como 'Legacy Mode') quando UEFI, e não UEFI nativo."
+#Be mindful that you probably don't want to translate 'Legacy Mode' as this is an option that usually appears in English in the UEFI settings.
+t MSG_152 "'não CSM' significa que o dispositivo irá inicializar apenas no modo UEFI nativo, e não no modo BIOS emulação(também conhecido como 'Legacy Mode')."
+
 t MSG_153 "Padrão de teste: 0x%02X"
 t MSG_154 "Padrão de teste: 0x%02X, 0x%02X"
 t MSG_155 "Padrão de teste: 0x%02X, 0x%02X, 0x%02X"
@@ -11878,7 +11889,7 @@ t MSG_158 "Tamanho mínimo que um bloco de dados ocupará no sistema de arquivos
 t MSG_159 "Use este campo para definir o nome do drive\nCaracteres acentuados são aceitos"
 t MSG_160 "Exibir opções avançadas"
 t MSG_161 "Verificar o dispositivo para blocos defeituosos usando um padrão de teste"
-t MSG_162 "Desmarque esta opção para usar o método de formatação \"lento\" "
+t MSG_162 "Método que será usado para criar partições"
 t MSG_164 "Método que será usado para tornar a unidade inicializável"
 t MSG_165 "Clique para selecionar uma imagem..."
 t MSG_166 "Selecione esta opção para permitir a exibição de caracteres acentuados "
@@ -12041,9 +12052,10 @@ t MSG_275 "A imagem que você selecionou é do tipo 'ISOHybrid'. Isso significa 
 t MSG_276 "Gravar no modo %s (Recomendado)"
 # '%s' below will be replaced with your translation for MSG_095 ("DD Image")
 t MSG_277 "Gravar no modo %s"
+t MSG_278 "Checando por processos em conflito..."
 t MSG_279 "Não inicializável"
-t MSG_280 "Seleção de imagem"
-t MSG_281 "(Por favor, selecione uma imagem)"
+t MSG_280 "Disco ou imagem ISO"
+t MSG_281 "%s (Por favor, selecione)"
 t MSG_282 "Bloqueio exclusivo para drive USB"
 t MSG_283 "Assinatura digital inválida"
 t MSG_284 "O executável baixado não contém uma assinatura digital."
@@ -12070,8 +12082,12 @@ t MSG_299 "Erro de validação da marca temporal"
 t MSG_300 "O Rufus não pôde validar que a marca temporal da atualização baixada é mais recente do que aquela do "
 	"executável atual.\n\nPara evitar possíveis cenários de ataque, o processo de atualização foi interrompido e "
 	"o arquivo baixado será excluído. Verifique o registro para obter mais detalhes."
-t MSG_117 "Instalação Padrão do Windows"
-t MSG_118 "Windows To Go (Windows Para Levar)"
+t MSG_301 "Exibir configurações do programa"
+t MSG_302 "Exibir informações sobre este programa"
+t MSG_303 "Exibir o registro"
+t MSG_304 "Criar uma imagem do dispositivo selecionado"
+t MSG_305 "Use esta opção caso queira instalar o Windows neste dispositivo ou em outro, "
+	"ou se deseja rodar o Windows direto deste dispositivo (Windows To Go)."
 
 ################################################################################
 l "pt-PT" "Portuguese Standard (Português)" 0x0816
@@ -13197,7 +13213,7 @@ t MSG_121 "Показать %s"
 t MSG_122 "Скрыть %s"
 # Tooltips
 t MSG_150 "Тип компьютера, с которым вы планируете использовать этот загрузочный диск. Прежде чем создавать диск, вы должны "
-	"определить, что используется в вашей системе: BIOS или UEFI, поскольку в противном случае диск может не загрузиться."  
+	"определить, что используется в вашей системе: BIOS или UEFI, поскольку в противном случае диск может не загрузиться."
 # Note: You shouldn't translate 'Legacy Mode' below, as this is an option that usually appears in English in the UEFI settings.
 t MSG_151 "'UEFI-CSM' означает, что устройство будет загружаться только в режиме эмуляции BIOS (также называемом 'Legacy Mode') под UEFI, а не в режиме UEFI."
 t MSG_152 "'non-CSM' означает, что устройство будет загружаться только в исходном режиме UEFI, а не в режиме эмуляции BIOS (также известный как 'Legacy Mode')."
