@@ -413,16 +413,7 @@ static uint64_t last_msg_time[2] = { 0, 0 };
 
 static void PrintInfoMessage(char* msg) {
 	SetWindowTextU(hProgress, msg);
-	// Make sure our field gets redrawn
-	// If the progress bar is not active, it looks like WM_PAINT is
-	// ignored. But InvalidateRect is causing refresh tearing so we
-	// don't want to use that while active.
-	// Refresh still sucks though and marquee no longer works... :(
-	// TODO: Create our own progress bar control with text overlay and inverted text
-	if (!progress_in_use)
-		InvalidateRect(hProgress, NULL, TRUE);
-	else
-		SendMessage(hProgress, WM_PAINT, 0, 0);
+	InvalidateRect(hProgress, NULL, TRUE);
 }
 static void PrintStatusMessage(char* msg) {
 	SendMessageLU(hStatus, SB_SETTEXTW, SBT_OWNERDRAW | SB_SECTION_LEFT, msg);

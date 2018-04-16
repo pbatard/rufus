@@ -398,7 +398,7 @@ extern int64_t iso_blocking_status;
 extern uint16_t rufus_version[3], embedded_sl_version[2];
 extern int nWindowsVersion;
 extern int nWindowsBuildNumber;
-extern int fs, bt, ps, tt;
+extern int fs, bt, pt, tt;
 extern char WindowsVersionStr[128];
 extern size_t ubuffer_pos;
 extern char ubuffer[UBUFFER_SIZE];

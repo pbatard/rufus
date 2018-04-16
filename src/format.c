@@ -1662,7 +1662,7 @@ DWORD WINAPI FormatThread(void* param)
 	if (large_drive)
 		uprintf("Notice: Large drive detected (may produce short writes)");
 	// Find out if we need to add any extra partitions
-	if ((windows_to_go) && (tt == TT_UEFI) && (ps == PARTITION_STYLE_GPT))
+	if ((windows_to_go) && (tt == TT_UEFI) && (pt == PARTITION_STYLE_GPT))
 		// According to Microsoft, every GPT disk (we RUN Windows from) must have an MSR due to not having hidden sectors
 		// http://msdn.microsoft.com/en-us/library/windows/hardware/dn640535.aspx#gpt_faq_what_disk_require_msr
 		extra_partitions = XP_MSR | XP_EFI;
@@ -1848,7 +1848,7 @@ DWORD WINAPI FormatThread(void* param)
 	UpdateProgress(OP_ZERO_MBR, -1.0f);
 	CHECK_FOR_USER_CANCEL;
 
-	if (!CreatePartition(hPhysicalDrive, ps, fs, (ps==PARTITION_STYLE_MBR) && (tt==TT_UEFI), extra_partitions)) {
+	if (!CreatePartition(hPhysicalDrive, pt, fs, (pt==PARTITION_STYLE_MBR) && (tt==TT_UEFI), extra_partitions)) {
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_PARTITION_FAILURE;
 		goto out;
 	}
@@ -1882,7 +1882,7 @@ DWORD WINAPI FormatThread(void* param)
 	}
 
 	// Thanks to Microsoft, we must fix the MBR AFTER the drive has been formatted
-	if (ps == PARTITION_STYLE_MBR) {
+	if (pt == PARTITION_STYLE_MBR) {
 		PrintInfoDebug(0, MSG_228);	// "Writing master boot record..."
 		if ((!WriteMBR(hPhysicalDrive)) || (!WriteSBR(hPhysicalDrive))) {
 			if (!IS_ERROR(FormatStatus))
