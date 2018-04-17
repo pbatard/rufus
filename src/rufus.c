@@ -111,7 +111,7 @@ DWORD MainThreadId;
 HWND hDeviceList, hPartitionScheme, hTargetSystem, hFileSystem, hClusterSize, hLabel, hBootType, hNBPasses, hLog = NULL;
 HWND hLogDialog = NULL, hProgress = NULL, hDiskID;
 BOOL use_own_c32[NB_OLD_C32] = {FALSE, FALSE}, mbr_selected_by_user = FALSE, display_togo_option = FALSE;
-BOOL iso_op_in_progress = FALSE, format_op_in_progress = FALSE, right_to_left_mode = FALSE, progress_in_use = FALSE, has_uefi_csm;
+BOOL iso_op_in_progress = FALSE, format_op_in_progress = FALSE, right_to_left_mode = FALSE, has_uefi_csm;
 BOOL enable_HDDs = FALSE, force_update = FALSE, enable_ntfs_compression = FALSE, no_confirmation_on_cancel = FALSE, lock_drive = TRUE;
 BOOL advanced_mode_device, advanced_mode_format, allow_dual_uefi_bios, detect_fakes, enable_vmdk, force_large_fat32, usb_debug, use_fake_units, preserve_timestamps;
 BOOL zero_drive = FALSE, list_non_usb_removable_drives = FALSE, disable_file_indexing, large_drive = FALSE, write_as_image = FALSE;
@@ -680,6 +680,25 @@ static void EnableMBRBootOptions(BOOL enable, BOOL remove_checkboxes)
 	EnableWindow(hDiskID, actual_enable_mbr);
 }
 
+static void EnableQuickFormat(BOOL enable)
+{
+	HWND hCtrl = GetDlgItem(hMainDialog, IDC_QUICK_FORMAT);
+
+	// Disable/restore the quick format control depending on large FAT32 or ReFS
+	if (((fs == FS_FAT32) && ((SelectedDrive.DiskSize > LARGE_FAT32_SIZE) || (force_large_fat32))) || (fs == FS_REFS)) {
+		if (IsWindowEnabled(hCtrl)) {
+			uQFChecked = IsChecked(IDC_QUICK_FORMAT);
+			CheckDlgButton(hMainDialog, IDC_QUICK_FORMAT, BST_CHECKED);
+			EnableWindow(hCtrl, FALSE);
+		}
+	} else {
+		if (!IsWindowEnabled(hCtrl)) {
+			CheckDlgButton(hMainDialog, IDC_QUICK_FORMAT, uQFChecked);
+			EnableWindow(hCtrl, enable);
+		}
+	}
+}
+
 static void EnableBootOptions(BOOL enable, BOOL remove_checkboxes)
 {
 	BOOL actual_enable_bb, actual_enable = enable;
@@ -699,7 +718,7 @@ static void EnableBootOptions(BOOL enable, BOOL remove_checkboxes)
 	EnableMBRBootOptions(actual_enable, remove_checkboxes);
 
 	EnableWindow(GetDlgItem(hMainDialog, IDC_LABEL), actual_enable);
-	EnableWindow(GetDlgItem(hMainDialog, IDC_QUICK_FORMAT), actual_enable);
+	EnableQuickFormat(actual_enable);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_BAD_BLOCKS), actual_enable_bb);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_NB_PASSES), actual_enable_bb);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_EXTENDED_LABEL), actual_enable);
@@ -3030,19 +3049,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				break;
 			fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
 			SetClusterSizes(fs);
-			// Disable/restore the quick format control depending on large FAT32 or ReFS
-			if ( ((fs == FS_FAT32) && ((SelectedDrive.DiskSize > LARGE_FAT32_SIZE) || (force_large_fat32))) || (fs == FS_REFS) ) {
-				if (IsWindowEnabled(GetDlgItem(hMainDialog, IDC_QUICK_FORMAT))) {
-					uQFChecked = IsChecked(IDC_QUICK_FORMAT);
-					CheckDlgButton(hMainDialog, IDC_QUICK_FORMAT, BST_CHECKED);
-					EnableWindow(GetDlgItem(hMainDialog, IDC_QUICK_FORMAT), FALSE);
-				}
-			} else {
-				if (!IsWindowEnabled(GetDlgItem(hMainDialog, IDC_QUICK_FORMAT))) {
-					CheckDlgButton(hMainDialog, IDC_QUICK_FORMAT, uQFChecked);
-					EnableWindow(GetDlgItem(hMainDialog, IDC_QUICK_FORMAT), TRUE);
-				}
-			}
+			EnableQuickFormat(TRUE);
 			if (fs < 0) {
 				EnableBootOptions(TRUE, TRUE);
 				SetMBRProps();
@@ -3470,7 +3477,6 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		}
 		SetTaskbarProgressState(TASKBAR_NORMAL);
 		SetTaskbarProgressValue(0, MAX_PROGRESS);
-		progress_in_use = TRUE;
 		break;
 
 	case UM_PROGRESS_EXIT:
@@ -3489,7 +3495,6 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		}
 		SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_NORMAL, 0);
 		SetTaskbarProgressState(TASKBAR_NORMAL);
-		progress_in_use = FALSE;
 		break;
 
 	case UM_NO_UPDATE:

@@ -69,7 +69,6 @@ uint32_t bufnum, sum_count[CHECKSUM_MAX] = { 16, 20, 32 };
 HANDLE data_ready[CHECKSUM_MAX] = { 0 }, thread_ready[CHECKSUM_MAX] = { 0 };
 DWORD read_size[2];
 unsigned char ALIGNED(64) buffer[2][BUFFER_SIZE];
-extern BOOL progress_in_use;
 
 /*
  * Rotate 32 bit integers by n bytes.
@@ -927,7 +926,6 @@ DWORD WINAPI SumThread(void* param)
 	bufnum = 0;
 	_bufnum = 0;
 	read_size[0] = 1;	// Don't trigger the first loop break
-	progress_in_use = TRUE;
 	for (rb = 0; ;rb += read_size[_bufnum]) {
 		// Update the progress and check for cancel
 		if (GetTickCount64() > LastRefresh + MAX_REFRESH) {
@@ -983,7 +981,6 @@ DWORD WINAPI SumThread(void* param)
 	r = 0;
 
 out:
-	progress_in_use = FALSE;
 	for (i = 0; i < CHECKSUM_MAX; i++) {
 		if (sum_thread[i] != NULL)
 			TerminateThread(sum_thread[i], 1);
