@@ -1774,28 +1774,31 @@ static INT_PTR CALLBACK ProgressCallback(HWND hCtrl, UINT message, WPARAM wParam
 	SIZE size;
 	LONG full_right;
 	wchar_t winfo[128];
-	static WORD pos = 0, min = 0, max = 0xFFFF;
-	static COLORREF color = RGB(0x06, 0xB0, 0x25);
+	static BOOL marquee_mode = FALSE;
+	static uint32_t pos = 0, min = 0, max = 0xFFFF;
+	static COLORREF color = PROGRESS_BAR_NORMAL_COLOR;
 
 	switch (message) {
 
 	case PBM_SETSTATE:
 		switch (wParam) {
 		case PBST_NORMAL:
-			color = RGB(0x06, 0xB0, 0x25);
+			color = PROGRESS_BAR_NORMAL_COLOR;
 			break;
 		case PBST_PAUSED:
-			color = RGB(0xDA, 0xCB, 0x26);
+			color = PROGRESS_BAR_PAUSED_COLOR;
 			break;
 		case PBST_ERROR:
-			color = RGB(0xDA, 0x26, 0x26);
+			color = PROGRESS_BAR_ERROR_COLOR;
 			break;
 		}
 		return (INT_PTR)TRUE;
 
 	case PBM_SETRANGE:
-		min = lParam & 0xFFFF;
-		max = lParam >> 16;
+		// Don't bother sanity checking min and max: If *you* want to
+		// be an ass about the progress bar range, it's *your* problem.
+		min = (uint32_t)(lParam & 0xFFFF);
+		max = (uint32_t)(lParam >> 16);
 		return (INT_PTR)TRUE;
 
 	case PBM_SETPOS:
@@ -1803,34 +1806,95 @@ static INT_PTR CALLBACK ProgressCallback(HWND hCtrl, UINT message, WPARAM wParam
 		InvalidateRect(hProgress, NULL, TRUE);
 		return (INT_PTR)TRUE;
 
+	case PBM_SETMARQUEE:
+		if ((wParam == TRUE) && (!marquee_mode)) {
+			marquee_mode = TRUE;
+			pos = min;
+			color = PROGRESS_BAR_NORMAL_COLOR;
+			SetTimer(hCtrl, TID_MARQUEE_TIMER, MARQUEE_TIMER_REFRESH, NULL);
+			InvalidateRect(hProgress, NULL, TRUE);
+		} else if ((wParam == FALSE) && (marquee_mode)) {
+			marquee_mode = FALSE;
+			KillTimer(hCtrl, TID_MARQUEE_TIMER);
+			pos = min;
+			InvalidateRect(hProgress, NULL, TRUE);
+		}
+		return (INT_PTR)TRUE;
+
+	case WM_TIMER:
+		if ((wParam == TID_MARQUEE_TIMER) && marquee_mode) {
+			pos += max((max - min) / (1000 / MARQUEE_TIMER_REFRESH), 1);
+			if ((pos > max) || (pos < min))
+				pos = min;
+			InvalidateRect(hProgress, NULL, TRUE);
+			return (INT_PTR)TRUE;
+		}
+		return (INT_PTR)FALSE;
+
 	case WM_PAINT:
 		hDC = BeginPaint(hCtrl, &ps);
 		GetClientRect(hCtrl, &rc);
 		SelectObject(hDC, GetStockObject(DC_PEN));
 		SelectObject(hDC, GetStockObject(NULL_BRUSH));
-		SetDCPenColor(hDC, RGB(0xBC, 0xBC, 0xBC));
+		SetDCPenColor(hDC, PROGRESS_BAR_BOX_COLOR);
 		Rectangle(hDC, rc.left, rc.top, rc.right, rc.bottom);
 		InflateRect(&rc, -1, -1);
 		// TODO: Handle SetText message so we can avoid this call
 		GetWindowTextW(hProgress, winfo, ARRAYSIZE(winfo));
-		full_right = rc.right;
-		rc.right = (pos > min) ? MulDiv(pos - min, rc.right, max - min) : rc.left;
 		SelectObject(hDC, hInfoFont);
-		GetTextExtentPoint32(hDC, winfo, wcslen(winfo), &size);
-		// First half
-		SetTextColor(hDC, RGB(0xFF, 0xFF, 0xFF));
-		SetBkColor(hDC, color);
-		ExtTextOut(hDC, (full_right - size.cx) / 2, (rc.bottom - size.cy) / 2,
-			ETO_CLIPPED | ETO_OPAQUE | ETO_NUMERICSLOCAL | (right_to_left_mode ? ETO_RTLREADING : 0),
-			&rc, winfo, wcslen(winfo), NULL);
-		// Second half
-		SetTextColor(hDC, RGB(0x00, 0x00, 0x00));
-		SetBkColor(hDC, RGB(0xE6, 0xE6, 0xE6));
+		GetTextExtentPoint32(hDC, winfo, (int)wcslen(winfo), &size);
+		if (size.cx > rc.right)
+			size.cx = rc.right;
+		if (size.cy > rc.bottom)
+			size.cy = rc.bottom;
+		full_right = rc.right;
+		if (marquee_mode) {
+			// Optional first segment
+			if (pos + ((max - min) / 5) > max) {
+				rc.right = MulDiv(pos + ((max - min) / 5) - max, rc.right, max - min);
+				SetTextColor(hDC, PROGRESS_BAR_INVERTED_TEXT_COLOR);
+				SetBkColor(hDC, color);
+				ExtTextOut(hDC, (full_right - size.cx) / 2, (rc.bottom - size.cy) / 2,
+					ETO_CLIPPED | ETO_OPAQUE | ETO_NUMERICSLOCAL | (right_to_left_mode ? ETO_RTLREADING : 0),
+					&rc, winfo, (int)wcslen(winfo), NULL);
+				rc.left = rc.right;
+				rc.right = full_right;
+			}
+			// Optional second segment
+			if (pos > min) {
+				rc.right = MulDiv(pos - min, rc.right, max - min);
+				SetTextColor(hDC, PROGRESS_BAR_NORMAL_TEXT_COLOR);
+				SetBkColor(hDC, PROGRESS_BAR_BACKGROUND_COLOR);
+				ExtTextOut(hDC, (full_right - size.cx) / 2, (rc.bottom - size.cy) / 2,
+					ETO_CLIPPED | ETO_OPAQUE | ETO_NUMERICSLOCAL | (right_to_left_mode ? ETO_RTLREADING : 0),
+					&rc, winfo, (int)wcslen(winfo), NULL);
+				rc.left = rc.right;
+				rc.right = full_right;
+			}
+			// Second to last segment
+			rc.right = MulDiv(pos - min + ((max - min) / 5), rc.right, max - min);
+			SetTextColor(hDC, PROGRESS_BAR_INVERTED_TEXT_COLOR);
+			SetBkColor(hDC, color);
+			ExtTextOut(hDC, (full_right - size.cx) / 2, (rc.bottom - size.cy) / 2,
+				ETO_CLIPPED | ETO_OPAQUE | ETO_NUMERICSLOCAL | (right_to_left_mode ? ETO_RTLREADING : 0),
+				&rc, winfo, (int)wcslen(winfo), NULL);
+		} else {
+			// First segment
+			rc.right = (pos > min) ? MulDiv(pos - min, rc.right, max - min) : rc.left;
+			SetTextColor(hDC, PROGRESS_BAR_INVERTED_TEXT_COLOR);
+			SetBkColor(hDC, color);
+			ExtTextOut(hDC, (full_right - size.cx) / 2, (rc.bottom - size.cy) / 2,
+				ETO_CLIPPED | ETO_OPAQUE | ETO_NUMERICSLOCAL | (right_to_left_mode ? ETO_RTLREADING : 0),
+				&rc, winfo, (int)wcslen(winfo), NULL);
+		}
+		// Last segment
 		rc.left = rc.right;
 		rc.right = full_right;
+		SetTextColor(hDC, PROGRESS_BAR_NORMAL_TEXT_COLOR);
+		SetBkColor(hDC, PROGRESS_BAR_BACKGROUND_COLOR);
 		ExtTextOut(hDC, (full_right - size.cx) / 2, (rc.bottom - size.cy) / 2,
 			ETO_CLIPPED | ETO_OPAQUE | ETO_NUMERICSLOCAL | (right_to_left_mode ? ETO_RTLREADING : 0),
-			&rc, winfo, wcslen(winfo), NULL);
+			&rc, winfo, (int)wcslen(winfo), NULL);
 		EndPaint(hCtrl, &ps);
 		return (INT_PTR)TRUE;
 	}
@@ -2865,7 +2929,6 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	HDROP droppedFileInfo;
 	POINT Point;
 	RECT rc, DialogRect, DesktopRect;
-	LONG progress_style;
 	HDC hDC;
 	PAINTSTRUCT ps;
 	int nDeviceIndex, i, nWidth, nHeight, nb_devices, selected_language, offset;
@@ -3468,30 +3531,20 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 
 	case UM_PROGRESS_INIT:
 		isMarquee = (wParam == PBS_MARQUEE);
-		if (isMarquee) {
-			progress_style = GetWindowLong(hProgress, GWL_STYLE);
-			SetWindowLong(hProgress, GWL_STYLE, progress_style | PBS_MARQUEE);
+		if (isMarquee)
 			SendMessage(hProgress, PBM_SETMARQUEE, TRUE, 0);
-		} else {
+		else
 			SendMessage(hProgress, PBM_SETPOS, 0, 0);
-		}
 		SetTaskbarProgressState(TASKBAR_NORMAL);
 		SetTaskbarProgressValue(0, MAX_PROGRESS);
 		break;
 
 	case UM_PROGRESS_EXIT:
 		if (isMarquee) {
-			// Remove marquee style if previously set
-			progress_style = GetWindowLong(hProgress, GWL_STYLE);
-			SetWindowLong(hProgress, GWL_STYLE, progress_style & (~PBS_MARQUEE));
+			SendMessage(hProgress, PBM_SETMARQUEE, FALSE, 0);
 			SetTaskbarProgressValue(0, MAX_PROGRESS);
-			SendMessage(hProgress, PBM_SETPOS, 0, 0);
 		} else if (!IS_ERROR(FormatStatus)) {
 			SetTaskbarProgressValue(MAX_PROGRESS, MAX_PROGRESS);
-			// This is the only way to achieve instantaneous progress transition to 100%
-			SendMessage(hProgress, PBM_SETRANGE, 0, ((MAX_PROGRESS+1)<<16) & 0xFFFF0000);
-			SendMessage(hProgress, PBM_SETPOS, (MAX_PROGRESS+1), 0);
-			SendMessage(hProgress, PBM_SETRANGE, 0, (MAX_PROGRESS<<16) & 0xFFFF0000);
 		}
 		SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_NORMAL, 0);
 		SetTaskbarProgressState(TASKBAR_NORMAL);
@@ -3517,10 +3570,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			GetDevices(DeviceNum);
 		}
 		if (!IS_ERROR(FormatStatus)) {
-			// This is the only way to achieve instantaneous progress transition to 100%
-			SendMessage(hProgress, PBM_SETRANGE, 0, ((MAX_PROGRESS+1)<<16) & 0xFFFF0000);
-			SendMessage(hProgress, PBM_SETPOS, (MAX_PROGRESS+1), 0);
-			SendMessage(hProgress, PBM_SETRANGE, 0, (MAX_PROGRESS<<16) & 0xFFFF0000);
+			SendMessage(hProgress, PBM_SETPOS, MAX_PROGRESS, 0);
 			SetTaskbarProgressState(TASKBAR_NOPROGRESS);
 			PrintInfo(0, MSG_210);
 			MessageBeep(MB_OK);

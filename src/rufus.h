@@ -53,7 +53,7 @@
 #define MAX_TOOLTIPS                128
 #define MAX_SIZE_SUFFIXES           6			// bytes, KB, MB, GB, TB, PB
 #define MAX_CLUSTER_SIZES           18
-#define MAX_PROGRESS                (0xFFFF-1)	// leave room for 1 more for insta-progress workaround
+#define MAX_PROGRESS                0xFFFF
 #define MAX_LOG_SIZE                0x7FFFFFFE
 #define MAX_REFRESH                 25			// How long we should wait to refresh UI elements (in ms)
 #define MAX_GUID_STRING_LENGTH      40
@@ -62,6 +62,7 @@
 #define MBR_UEFI_MARKER             0x49464555	// 'U', 'E', 'F', 'I', as a 32 bit little endian longword
 #define STATUS_MSG_TIMEOUT          3500		// How long should cheat mode messages appear for on the status bar
 #define WRITE_RETRIES               3
+#define MARQUEE_TIMER_REFRESH       10			// Time between progress bar marquee refreshes, in ms
 #define FS_DEFAULT                  FS_FAT32
 #define SINGLE_CLUSTERSIZE_DEFAULT  0x00000100
 #define BADBLOCK_PATTERNS           {0xaa, 0x55, 0xff, 0x00}
@@ -185,7 +186,8 @@ enum timer_type {
 	TID_BADBLOCKS_UPDATE,
 	TID_APP_TIMER,
 	TID_BLOCKING_TIMER,
-	TID_REFRESH_TIMER
+	TID_REFRESH_TIMER,
+	TID_MARQUEE_TIMER
 };
 
 /* Action type, for progress bar breakdown */

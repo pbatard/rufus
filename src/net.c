@@ -223,7 +223,6 @@ DWORD DownloadFile(const char* url, const char* file, HWND hProgressDialog)
 	BOOL r = FALSE;
 	DWORD dwFlags, dwSize, dwDownloaded, dwTotalSize;
 	FILE* fd = NULL;
-	LONG progress_style;
 	const char* accept_types[] = {"*/*\0", NULL};
 	unsigned char buf[DOWNLOAD_BUFFER_SIZE];
 	char agent[64], hostname[64], urlpath[128];
@@ -238,8 +237,7 @@ DWORD DownloadFile(const char* url, const char* file, HWND hProgressDialog)
 		// Use the progress control provided, if any
 		hProgressBar = GetDlgItem(hProgressDialog, IDC_PROGRESS);
 		if (hProgressBar != NULL) {
-			progress_style = GetWindowLong(hProgressBar, GWL_STYLE);
-			SetWindowLong(hProgressBar, GWL_STYLE, progress_style & (~PBS_MARQUEE));
+			SendMessage(hProgressBar, PBM_SETMARQUEE, FALSE, 0);
 			SendMessage(hProgressBar, PBM_SETPOS, 0, 0);
 		}
 		SendMessage(hProgressDialog, UM_PROGRESS_INIT, 0, 0);
