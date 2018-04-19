@@ -114,7 +114,7 @@ BOOL use_own_c32[NB_OLD_C32] = {FALSE, FALSE}, mbr_selected_by_user = FALSE, dis
 BOOL iso_op_in_progress = FALSE, format_op_in_progress = FALSE, right_to_left_mode = FALSE, has_uefi_csm;
 BOOL enable_HDDs = FALSE, force_update = FALSE, enable_ntfs_compression = FALSE, no_confirmation_on_cancel = FALSE, lock_drive = TRUE;
 BOOL advanced_mode_device, advanced_mode_format, allow_dual_uefi_bios, detect_fakes, enable_vmdk, force_large_fat32, usb_debug, use_fake_units, preserve_timestamps;
-BOOL zero_drive = FALSE, list_non_usb_removable_drives = FALSE, disable_file_indexing, large_drive = FALSE, write_as_image = FALSE;
+BOOL zero_drive = FALSE, list_non_usb_removable_drives = FALSE, enable_file_indexing, large_drive = FALSE, write_as_image = FALSE;
 int dialog_showing = 0;
 uint16_t rufus_version[3], embedded_sl_version[2];
 char embedded_sl_version_str[2][12] = { "?.??", "?.??" };
@@ -3842,7 +3842,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	allow_dual_uefi_bios = ReadSettingBool(SETTING_ENABLE_WIN_DUAL_EFI_BIOS);
 	force_large_fat32 = ReadSettingBool(SETTING_FORCE_LARGE_FAT32_FORMAT);
 	enable_vmdk = ReadSettingBool(SETTING_ENABLE_VMDK_DETECTION);
-	disable_file_indexing = ReadSettingBool(SETTING_DISABLE_FILE_INDEXING);
+	enable_file_indexing = ReadSettingBool(SETTING_ENABLE_FILE_INDEXING);
 
 	// Initialize the global scaling, in case we need it before we initialize the dialog
 	hDC = GetDC(NULL);
@@ -4114,11 +4114,12 @@ relaunch:
 			SaveISO();
 			continue;
 		}
-		// Alt-Q => Disable file indexing (for file systems that support it)
+		// Alt-Q => Enable file indexing (for file systems that support it)
+		// For multiple reasons, file indexing is disabled by default
 		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'Q')) {
-			disable_file_indexing = !disable_file_indexing;
-			WriteSettingBool(SETTING_DISABLE_FILE_INDEXING, disable_file_indexing);
-			PrintStatusTimeout(lmprintf(MSG_290), !disable_file_indexing);
+			enable_file_indexing = !enable_file_indexing;
+			WriteSettingBool(SETTING_ENABLE_FILE_INDEXING, enable_file_indexing);
+			PrintStatusTimeout(lmprintf(MSG_290), !enable_file_indexing);
 			continue;
 		}
 		// Alt-R => Remove all the registry keys that may have been created by Rufus

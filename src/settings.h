@@ -45,7 +45,7 @@ extern char* ini_file;
 #define SETTING_ENABLE_WIN_DUAL_EFI_BIOS    "EnableWindowsDualUefiBiosMode"
 #define SETTING_FORCE_LARGE_FAT32_FORMAT    "ForceLargeFat32Formatting"
 #define SETTING_ENABLE_VMDK_DETECTION       "EnableVmdkDetection"
-#define SETTING_DISABLE_FILE_INDEXING       "DisableFileIndexing"
+#define SETTING_ENABLE_FILE_INDEXING        "EnableFileIndexing"
 
 
 
