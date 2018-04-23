@@ -1,3 +1,12 @@
+o Version 3.0 (2018.??.??)
+    UI redesign to follow the flow of user operations (with thanks to Fahad Al-Riyami for the concept)
+    Drop XP and Vista platform support
+    Switch all downloads to SSL and use rufus.ie as base URL
+    Improve support of efi.img files on Linux ISOs
+    Fix delays when querying floppy drives during device enumeration
+    Improve translation support and remove manual positioning
+    Internal fixes and improvements
+
 o Version 2.18 (2017.11.07)
     Ensure that the same drive is reselected on device refresh
     Add a cheat mode to cycle the USB port of currently selected device
@@ -7,7 +16,7 @@ o Version 2.18 (2017.11.07)
     Update grub4dos to latest
 
     IMPORTANT: THIS IS THE LAST RELEASE TO SUPPORT WINDOWS XP AND WINDOWS VISTA
-    FUTURE RUFUS RELEASES WILL *NO LONGER* BE COMPATIBLE WITH THESE PLATFORMS
+    SUBSEQUENT RUFUS RELEASES ARE *NO LONGER* COMPATIBLE WITH THESE PLATFORMS
 
 o Version 2.17 (2017.09.12)
     Add support for Debian 9 live ISOs in UEFI mode

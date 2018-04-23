@@ -5428,7 +5428,7 @@ t MSG_305 "Utilisez cette option pour indiquer si vous voulez utiliser ce périp
 
 ################################################################################
 l "de-DE" "German (Deutsch)" 0x0407, 0x0807, 0x0c07, 0x1007, 0x1407
-v 1.0.22
+v 1.0.23
 b "en-US"
 
 g IDD_DIALOG

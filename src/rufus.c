@@ -635,7 +635,16 @@ static void SetMBRProps(void)
 
 static void SetToGo(void)
 {
-	if (((bt != BT_IMAGE) && (display_togo_option)) || ((bt == BT_IMAGE) && (HAS_WINTOGO(img_report)) && (!display_togo_option))) {
+	HWND hCtrl = GetDlgItem(hMainDialog, IDC_IMAGE_OPTION);
+
+	// Populate the dropdown
+	IGNORE_RETVAL(ComboBox_ResetContent(hCtrl));
+	IGNORE_RETVAL(ComboBox_SetItemData(hCtrl, ComboBox_AddStringU(hCtrl, lmprintf(MSG_117)), FALSE));
+	IGNORE_RETVAL(ComboBox_SetItemData(hCtrl, ComboBox_AddStringU(hCtrl, lmprintf(MSG_118)), TRUE));
+	IGNORE_RETVAL(ComboBox_SetCurSel(hCtrl, windows_to_go_selection));
+
+	if ((((bt != BT_IMAGE) || (image_path == NULL)) && (display_togo_option)) ||
+		((bt == BT_IMAGE) && (HAS_WINTOGO(img_report)) && (!display_togo_option))) {
 		ToggleImageOption();
 	}
 }
@@ -1260,7 +1269,6 @@ static void ToggleAdvancedFormatOptions(BOOL enable)
 // Toggle the Image Option dropdown (Windows To Go or Casper settings)
 static void ToggleImageOption(void)
 {
-	HWND hCtrl;
 	int i, shift = row_height;
 	// Windows To Go mode is only available for Windows 8 or later due to the lack
 	// of an ISO mounting API on previous versions.
@@ -1269,14 +1277,7 @@ static void ToggleImageOption(void)
 		return;
 
 	display_togo_option = !display_togo_option;
-	if (display_togo_option) {
-		hCtrl = GetDlgItem(hMainDialog, IDC_IMAGE_OPTION);
-		// Populate the dropdown
-		IGNORE_RETVAL(ComboBox_ResetContent(hCtrl));
-		IGNORE_RETVAL(ComboBox_SetItemData(hCtrl, ComboBox_AddStringU(hCtrl, lmprintf(MSG_117)), FALSE));
-		IGNORE_RETVAL(ComboBox_SetItemData(hCtrl, ComboBox_AddStringU(hCtrl, lmprintf(MSG_118)), TRUE));
-		IGNORE_RETVAL(ComboBox_SetCurSel(hCtrl, windows_to_go_selection));
-	} else
+	if (!display_togo_option)
 		shift = -shift;
 	format_vpos += shift;
 	status_vpos += shift;
@@ -2670,7 +2671,7 @@ static void InitDialog(HWND hDlg)
 		ToggleAdvancedDeviceOptions(FALSE);
 	if (!advanced_mode_format)
 		ToggleAdvancedFormatOptions(FALSE);
-	ToggleImageOption();
+	SetToGo();
 
 	// Process commandline parameters
 	if (iso_provided) {
