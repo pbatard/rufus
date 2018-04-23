@@ -125,6 +125,7 @@ t IDC_START "Start"
 g IDD_ABOUTBOX
 t IDD_ABOUTBOX "About Rufus"
 t IDC_ABOUT_LICENSE "License"
+t IDOK "OK"
 
 # About -> License dialog
 g IDD_LICENSE
@@ -2382,7 +2383,6 @@ t IDS_FORMAT_OPTIONS_TXT "選項"
 t IDC_BAD_BLOCKS "檢查損毀磁區，測試次數"
 t IDC_QUICK_FORMAT "快速格式化"
 t IDC_EXTENDED_LABEL "建立延伸標籤及圖示"
-t IDC_LOG "記錄檔"
 t IDS_STATUS_TXT "狀態"
 t IDCANCEL "離開"
 t IDC_START "執行"
@@ -2774,11 +2774,11 @@ t MSG_298 "你選擇的 ISO 映像檔不符合它所宣告的大小: 缺少 %s !
 t MSG_299 "時間戳記驗證錯誤"
 t MSG_300 "Rufus 不能驗證下載的更新其時間戳記比現有的執行檔還新。\n\n"
 	"為避免可能的資安攻擊，更新流程已停止且下載的更新檔將會刪除。更多詳情請參見記錄檔。"
-MSG_301 "顯示應用程式設定"
-MSG_302 "顯示此應用程式資訊"
-MSG_303 "顯示記錄檔"
-MSG_304 "建立選擇的裝置的磁碟映像"
-MSG_305 "是否要使用此裝置來安裝 Windows 在另一個磁碟上，"
+t MSG_301 "顯示應用程式設定"
+t MSG_302 "顯示此應用程式資訊"
+t MSG_303 "顯示記錄檔"
+t MSG_304 "建立選擇的裝置的磁碟映像"
+t MSG_305 "是否要使用此裝置來安裝 Windows 在另一個磁碟上，"
 	"或是要直接在此磁碟上執行 Windows (Windows To Go)。"
 
 ################################################################################
@@ -3739,7 +3739,6 @@ t IDNO "Nej"
 
 # Log dialog
 g IDD_LOG
-t IDD_LOG "Log"
 t IDC_LOG_CLEAR "Slet"
 t IDC_LOG_SAVE "Gem"
 t IDCANCEL "Luk"
@@ -4023,7 +4022,7 @@ t MSG_202 "Scanner image..."
 t MSG_203 "Fejl opstod ved scanning af image"
 t MSG_204 "Forældet %s fundet"
 t MSG_205 "ISO-image: %s"
-t MSG_206 "Manglende %s fil
+t MSG_206 "Manglende %s fil"
 t MSG_207 "Ny disk"
 t MSG_208 "%d enhed fundet"
 t MSG_209 "%d enheder fundet"
@@ -5465,7 +5464,6 @@ t IDYES "Ja"
 t IDNO "Nein"
 
 g IDD_LOG
-t IDD_LOG "Log"
 t IDC_LOG_SAVE "Speichern"
 t IDC_LOG_CLEAR "Löschen"
 t IDCANCEL "Schließen"
@@ -6071,7 +6069,7 @@ t MSG_109 "0x%02X (Δίσκος %d)"
 t MSG_110 "Το MS-DOS δεν μπορεί να κάνει εκκίνηση από ένα δίσκο χρησιμοποιώντας μέγεθος συμπλέγματος 64 kilobyte.\n"
 	"Παρακαλώ αλλάξτε το μέγεθος συμπλέγματος ή χρησιμοποιήστε το FreeDOS."
 t MSG_111 "Μη συμβατό μέγεθος συμπλέγματος"
-t MSG_112 "Η διαμόρφωση μεγάλων τόμων UDF ίσως διαρκέσει αρκετά." Ο χρόνος διαμόρφωσης, στις ταχύτητες του USB 2.0 "
+t MSG_112 "Η διαμόρφωση μεγάλων τόμων UDF ίσως διαρκέσει αρκετά. Ο χρόνος διαμόρφωσης, στις ταχύτητες του USB 2.0 "
 	"είναι %d:%02d. Κατά την διάρκεια της διαμόρφωσης η μπάρα προόδου θα είναι στατική. Παρακαλώ περιμένετε!"
 t MSG_113 "Mεγάλος τόμος UDF"
 t MSG_114 "Αυτό το είδωλο χρησιμοποιεί το Syslinux %s%s παρόλα αυτά η εφαρμογή(Rufus) εμπεριέχει μόνο τα αρχεία εγκατάστασης του "
@@ -6261,7 +6259,7 @@ t MSG_281 "(Παρακαλώ επιλέξτε κάποιο είδωλο)"
 t MSG_282 "Κλείδωμα μονάδας USB"
 t MSG_283 "Μη έγκυρη ψηφιακή υπογραφή"
 t MSG_284 "Το εκτελέσιμο αρχείο που κατεβάσατε δεν περιλαμβάνει ψηφιακή υπογραφή."
-τ MSG_285 "Το εκτελέσιμο αρχείο που κατεβάσατε έχει υπογραφτεί από τον/την '%s'.\nΑύτη η υπογραφή δεν "
+t MSG_285 "Το εκτελέσιμο αρχείο που κατεβάσατε έχει υπογραφτεί από τον/την '%s'.\nΑύτη η υπογραφή δεν "
 	"αναγνωρίζεται από το Rufus. Ενδεχομένως να υπάρχει συσχέτιση με κάποια κακόβουλη προσπάθεια...\n"
 	"Είστε σίγουροι ότι θέλετε να εκτελέσετε αυτό το αρχείο?"
 t MSG_286 "Άδειασμα δίσκου: %0.1f%% ολοκληρώθηκε"
@@ -6721,9 +6719,9 @@ t MSG_290 "מצב מיון קבצים באינדקס"
 t MSG_291 "בחר/י/י גרסה"
 t MSG_292 "נא לבחור גרסת windows להתקנה:"
 t MSG_293 "גירסת Windows לא נתמכת"
-t MSG_294 "גרסת ה windows הזו לא נתמכת יותר ע"י רופוס."
+t MSG_294 "גרסת ה windows הזו לא נתמכת יותר ע י רופוס."
 t MSG_295 "אזהרה: גרסה לא רשמית"
-t MSG_296 "גרסה זו של רופוס לא נוצרה ע"י מפתחה הרשמי. \n\nהאם את/ה בטוח/ה שברצונך להריץ אותה?"
+t MSG_296 "גרסה זו של רופוס לא נוצרה ע י מפתחה הרשמי. \n\nהאם את/ה בטוח/ה שברצונך להריץ אותה?"
 t MSG_297 "קובץ ISO קטוע זוהה"
 t MSG_298 "קובץ ה ISO שבחרת לא מתאים לגודלו המוצהר: מידע בגודל של כ %s חסר!\n\nאםהורדת "
 	"את הקובץ הזה מהאינטרנט, את/ה צריכ/ה להוריד אותו שוב ולוודא שה checksum שלו ולוודאשביקורת ה MD5 או SHA מתאימים "
@@ -7200,7 +7198,6 @@ t IDNO "Tidak"
 
 # Log dialog
 g IDD_LOG
-t IDD_LOG "Log"
 t IDC_LOG_CLEAR "Bersihkan"
 t IDC_LOG_SAVE "Simpan"
 t IDCANCEL "Tutup"
@@ -9881,7 +9878,6 @@ t IDNO "Tidak"
 
 # Log dialog
 g IDD_LOG
-t IDD_LOG "Log"
 t IDC_LOG_CLEAR "Bersihkan"
 t IDC_LOG_SAVE "Simpan"
 t IDCANCEL "Tutup"
@@ -10531,8 +10527,8 @@ t MSG_121 "Vis %s"
 t MSG_122 "Skjul %s"
 # Tooltips
 # Partition Scheme and Target Type
-t MSG_150 ""Datamaskin typen du planlegger å bruke denne oppstartbare stasjonen med. Det er ditt ansvar å avgjøre om"
-"målet ditt er av BIOS eller UEFI-typen før du begynner å lage stasjonen, da det kan mislykkes å starte opp ellers."
+t MSG_150 "Datamaskin typen du planlegger å bruke denne oppstartbare stasjonen med. Det er ditt ansvar å avgjøre om "
+	"målet ditt er av BIOS eller UEFI-typen før du begynner å lage stasjonen, da det kan mislykkes å starte opp ellers."
 t MSG_151 "'UEFI-CSM' betyr at enheten bare starter opp i BIOS-emuleringsmodus (også kjent som 'Legacy Mode') under UEFI, og ikke i innebygde UEFI-modus."
 t MSG_152 "'ikke-CSM' betyr at enheten bare starter opp i innebygde UEFI-modus, og ikke i BIOS-emuleringsmodus (også kjent som 'Legacy Mode')."
 t MSG_153 "Testmønster: 0x%02X"
@@ -11296,7 +11292,6 @@ t IDNO "Nie"
 
 # Log dialog
 g IDD_LOG
-t IDD_LOG "Log"
 t IDC_LOG_CLEAR "Wyczyść"
 t IDC_LOG_SAVE "Zapisz"
 t IDCANCEL "Zamknij"
@@ -12513,7 +12508,7 @@ t MSG_189 "Esta imagem ISO não é compatível com o sistema de ficheiros seleci
 t MSG_190 "Detetada unidade incompatível"
 # See MSG_235 for where the 2 messages below are being used:
 t MSG_191 "Escrita"
-t MSG_192 "Leitura""
+t MSG_192 "Leitura"
 t MSG_193 "Transferido %s"
 t MSG_194 "Não é possível transferir %s"
 # eg. "Using embedded version of Grub2 file(s)"
@@ -12624,7 +12619,7 @@ t MSG_275 "A imagem selecionada é uma imagem 'ISOHybrid'. Isto significa que po
 	"No entanto, se existirem erros durante o arranque, pode tentar escrever no modo %s.\n\n"
 	"Selecione o modo que realmente pretende para escrever esta imagem:"
 t MSG_276 "Escrever no modo %s (Recomendado)"
-t MSG_277 "Escrever no modo %s
+t MSG_277 "Escrever no modo %s"
 t MSG_279 "Não inicializável"
 t MSG_280 "Disco ou imagem ISO"
 t MSG_281 "%s (Por favor, selecione)"
@@ -14386,8 +14381,8 @@ t MSG_277 "Zápis v režime %s"
 t MSG_279 "Nie je možné bootovať"
 t MSG_280 "Výber obrazu"
 t MSG_281 "(Vyberte obraz)"
-t MSG_282 "Uzamknutie USB zariadenia
-t MSG_283 "Neplatný podpis
+t MSG_282 "Uzamknutie USB zariadenia"
+t MSG_283 "Neplatný podpis"
 t MSG_284 "Stiahnutému inštalátoru chýba digitálny podpis."
 t MSG_285 "Stiahnutý inštalátor podpísal '%s'.\nTento podpis nebol rozoznaný a môže znamenať "
 	"nejakú formu škodlivej aktivity...\nSte si istý, že chcete spustiť tento súbor?"
@@ -15719,7 +15714,7 @@ t MSG_297 "Ej komplett ISO-fil"
 t MSG_298 "ISO-filen du har valt matchar inte den angivna storleken: %s av data saknas!\n\nOm du har hämtat den här filen från internet, "
 	"prova då med att ladda ner filen igen och verifiera att checksumman MD5 eller SHA stämmer överens med den officiella filen.\n\n"
 	"Tips: Du kan beräkna MD5 eller SHA i Rufus genom att klicka på knappen '#'."
-t MSG_299 "Valideringfel av tidsstämpeln
+t MSG_299 "Valideringfel av tidsstämpeln"
 t MSG_300 "Rufus kunde inte validera att tidsstämpeln på den nerladdade uppdateringen är nyare än den gamla.\n\n"
 	"För att förhindra potentiella angreppsscenarier, har uppdateringsprocessen avslutats och "
 	"den nerladdade filen har tagits bort. Kontrollera loggen för mer information."
@@ -15783,7 +15778,6 @@ t IDNO "ไม่ใช่"
 
 # Log dialog
 g IDD_LOG
-t IDD_LOG "Log"
 t IDC_LOG_CLEAR "ล้าง"
 t IDC_LOG_SAVE "บันทึก"
 t IDCANCEL "ปิด"
@@ -16194,7 +16188,7 @@ t MSG_298 "อิมเมจ ISO ที่คุณเลือกมีคุ�
 	"อินเทอร์เน็ต กรุณาดาวน์โหลดไฟล์อีกครั้ง และตรวจสอบว่าไฟล์นั้นมี MD5 หรือ SHA checksums ตรงกับไฟล์จากผู้ผลิต\n\nโปรดจำไว้ว่า"
 	"คุณสามารถตรวจสอบ checksum ของไฟล์ดังกล่าวได้จากโปรแกรม Rufus โดยกดปุ่ม '#'"
 t MSG_299 "การตรวจสอบ Timestamp ผิดพลาด"
-t MSG 300 "Rufus ไม่สามารถยืนยันความถูกต้องของ Timestamp ของโปรแกรมปรับรุ่นที่เพิ่งดาวน์โหลดมาว่าใหม่กว่า"
+t MSG_300 "Rufus ไม่สามารถยืนยันความถูกต้องของ Timestamp ของโปรแกรมปรับรุ่นที่เพิ่งดาวน์โหลดมาว่าใหม่กว่า"
 	"รุ่นที่กำลังใช้อยู่ในปัจจุบัน.\n\nเพื่อป้องกันความเป็นไปได้ที่จะถูกโจมตี การปรับรุ่นได้ถูกยกเลิกและลบทิ้งไป"
 	"กรุณาดู Log เพื่ออ่านรายละเอียดเพิ่มเติม"
 t MSG_301 "แสดงการตั้งค่าของโปรแกรม"
