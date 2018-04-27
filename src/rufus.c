@@ -65,7 +65,7 @@ static BOOL user_changed_label = FALSE;
 static BOOL app_changed_label = FALSE;
 static BOOL allowed_filesystem[FS_MAX] = { 0 };
 static int64_t last_iso_blocking_status;
-static int windows_to_go_selection = 0;
+static int windows_to_go_selection = 0, selected_pt = -1;
 static int selection_default, row_height, advanced_device_section_height, advanced_format_section_height, image_index;
 static int device_vpos, format_vpos, status_vpos;
 static int ddh, bw, hw, fw;	// DropDown Height, Main button width, half dropdown width, full dropdown width
@@ -113,7 +113,8 @@ HWND hLogDialog = NULL, hProgress = NULL, hDiskID;
 BOOL use_own_c32[NB_OLD_C32] = {FALSE, FALSE}, mbr_selected_by_user = FALSE, display_togo_option = FALSE;
 BOOL iso_op_in_progress = FALSE, format_op_in_progress = FALSE, right_to_left_mode = FALSE, has_uefi_csm;
 BOOL enable_HDDs = FALSE, force_update = FALSE, enable_ntfs_compression = FALSE, no_confirmation_on_cancel = FALSE, lock_drive = TRUE;
-BOOL advanced_mode_device, advanced_mode_format, allow_dual_uefi_bios, detect_fakes, enable_vmdk, force_large_fat32, usb_debug, use_fake_units, preserve_timestamps;
+BOOL advanced_mode_device, advanced_mode_format, allow_dual_uefi_bios, detect_fakes, enable_vmdk, force_large_fat32, usb_debug;
+BOOL use_fake_units, preserve_timestamps;
 BOOL zero_drive = FALSE, list_non_usb_removable_drives = FALSE, enable_file_indexing, large_drive = FALSE, write_as_image = FALSE;
 int dialog_showing = 0;
 uint16_t rufus_version[3], embedded_sl_version[2];
@@ -312,7 +313,7 @@ static void SetPartitionSchemeAndTargetSystem(BOOL only_target)
 
 	if (!only_target) {
 		// Try to reselect the current drive's partition scheme
-		int preferred_ps = SelectedDrive.PartitionStyle;
+		int preferred_pt = SelectedDrive.PartitionStyle;
 		if (allowed_partition_scheme[PARTITION_STYLE_MBR]) 
 			IGNORE_RETVAL(ComboBox_SetItemData(hPartitionScheme,
 				ComboBox_AddStringU(hPartitionScheme, "MBR"), PARTITION_STYLE_MBR));
@@ -324,16 +325,16 @@ static void SetPartitionSchemeAndTargetSystem(BOOL only_target)
 				ComboBox_AddStringU(hPartitionScheme, sfd_name), PARTITION_STYLE_SFD));
 		// Override the partition scheme according to the current 
 		if (bt == BT_NON_BOOTABLE)
-			preferred_ps = PARTITION_STYLE_MBR;
+			preferred_pt = (selected_pt >= 0) ? selected_pt : PARTITION_STYLE_MBR;
 		else if (bt == BT_UEFI_NTFS)
-			preferred_ps = PARTITION_STYLE_GPT;
+			preferred_pt = (selected_pt >= 0) ? selected_pt : PARTITION_STYLE_GPT;
 		else if ((bt == BT_IMAGE) && (image_path != NULL) && (img_report.is_iso)) {
 			if (HAS_WINDOWS(img_report) && img_report.has_efi)
-				preferred_ps = allow_dual_uefi_bios? PARTITION_STYLE_MBR : PARTITION_STYLE_GPT;
+				preferred_pt = allow_dual_uefi_bios? PARTITION_STYLE_MBR : PARTITION_STYLE_GPT;
 			if (img_report.is_bootable_img)
-				preferred_ps = PARTITION_STYLE_MBR;
+				preferred_pt = (selected_pt >= 0) ? selected_pt : PARTITION_STYLE_MBR;
 		}
-		SetComboEntry(hPartitionScheme, preferred_ps);
+		SetComboEntry(hPartitionScheme, preferred_pt);
 		pt = (int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme));
 	}
 
@@ -3107,6 +3108,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			SetPartitionSchemeAndTargetSystem(TRUE);
 			SetFileSystemAndClusterSize(NULL);
 			EnableMBRBootOptions(TRUE, FALSE);
+			selected_pt = pt;
 			break;
 		case IDC_FILE_SYSTEM:
 			if (HIWORD(wParam) != CBN_SELCHANGE)
@@ -3184,13 +3186,12 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			}
 			break;
 		case IDC_START:
-			if (format_thid != NULL) {
+			if (format_thid != NULL)
 				return (INT_PTR)TRUE;
-			}
 			// Just in case
 			bt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
-			tt = (int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme));
-			pt = (int)ComboBox_GetItemData(hTargetSystem, ComboBox_GetCurSel(hTargetSystem));
+			pt = (int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme));
+			tt = (int)ComboBox_GetItemData(hTargetSystem, ComboBox_GetCurSel(hTargetSystem));
 			fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
 			write_as_image = FALSE;
 			// Disable all controls except Cancel
