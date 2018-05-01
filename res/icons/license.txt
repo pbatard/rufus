@@ -1,0 +1,15 @@
+Please note the following licensing information for the icons:
+
+o rufus*.* - Public Domain, courtesy of PC Unleashed
+  http://pcunleashed.com
+
+o hash-*.png, info-*.png, lang-*.png, log-*.png, save-*.png, settings-*.png
+  From Axialis Fluent Pro 2018 Icon Set
+  CC BY-ND 4.0 when used as native resolution bitmaps, Commercial License otherwise
+  See https://www.axialis.com/icongenerator/iconset-license.html#free
+
+NB: To be on the safe side with regards to icon use and redistribution, we
+    did purchase a Commercial License for the Axialis icons.
+    If you are planning to use these icons outside of this project, you may
+    need to contact Axialis Software to clarify the extent to which you are
+    legally entitled to do so.

@@ -69,7 +69,7 @@ static int windows_to_go_selection = 0, selected_pt = -1;
 static int selection_default, row_height, advanced_device_section_height, advanced_format_section_height, image_index;
 static int device_vpos, format_vpos, status_vpos;
 static int ddh, bw, hw, fw;	// DropDown Height, Main button width, half dropdown width, full dropdown width
-static int sw, mw, bsw, hbw, sbw, ssw, tw, dbw;
+static int sw, mw, bsw, sbw, ssw, tw, dbw;	// See GetFullWidth() for details on how these values are used
 static UINT_PTR UM_LANGUAGE_MENU_MAX = UM_LANGUAGE_MENU;
 static RECT relaunch_rc = { -65536, -65536, 0, 0};
 static UINT uQFChecked = BST_CHECKED, uMBRChecked = BST_UNCHECKED;
@@ -77,7 +77,7 @@ static HFONT hInfoFont;
 static WNDPROC progress_original_proc = NULL;
 static HANDLE format_thid = NULL, dialog_handle = NULL;
 static HWND hSelectImage = NULL, hStart = NULL;
-static HICON hIconSave, hIconDown, hIconUp, hIconLang, hIconAbout, hIconSettings, hIconLog;
+static HICON hIconSave, hIconHash, hIconDown, hIconUp;
 static char szTimer[12] = "00:00:00";
 static wchar_t wtbtext[2][128];
 static unsigned int timer;
@@ -96,7 +96,7 @@ extern const char* sfd_name;
  */
 OPENED_LIBRARIES_VARS;
 HINSTANCE hMainInstance;
-HWND hMainDialog, hMultiToolbar, hAdvancedDeviceToolbar, hAdvancedFormatToolbar, hUpdatesDlg = NULL;
+HWND hMainDialog, hMultiToolbar, hSaveToolbar, hHashToolbar, hAdvancedDeviceToolbar, hAdvancedFormatToolbar, hUpdatesDlg = NULL;
 HIMAGELIST hUpImageList, hDownImageList;
 BUTTON_IMAGELIST bi_iso = { 0 }, bi_up = { 0 }, bi_down = { 0 }, bi_save = { 0 };
 char szFolderPath[MAX_PATH], app_dir[MAX_PATH], system_dir[MAX_PATH], temp_dir[MAX_PATH], sysnative_dir[MAX_PATH];
@@ -785,7 +785,8 @@ static void EnableControls(BOOL bEnable)
 	SendMessage(hMultiToolbar, TB_ENABLEBUTTON, (WPARAM)IDC_SETTINGS, (LPARAM)bEnable);
 
 	// Checksum button is enabled if an image has been selected
-	EnableWindow(GetDlgItem(hMainDialog, IDC_HASH), bEnable && (bt == BT_IMAGE) && (image_path != NULL));
+	SendMessage(hHashToolbar, TB_ENABLEBUTTON, (WPARAM)IDC_HASH,
+		(LPARAM)(bEnable && (bt == BT_IMAGE) && (image_path != NULL)));
 
 	// Toggle CLOSE/CANCEL
 	SetDlgItemTextU(hMainDialog, IDCANCEL, bEnable ? uppercase_close : uppercase_cancel);
@@ -793,7 +794,7 @@ static void EnableControls(BOOL bEnable)
 	// Only enable the following controls if a device is active
 	bEnable = (ComboBox_GetCurSel(hDeviceList) < 0) ? FALSE : bEnable;
 	EnableWindow(GetDlgItem(hMainDialog, IDC_IMAGE_OPTION), bEnable);
-	EnableWindow(GetDlgItem(hMainDialog, IDC_SAVE), bEnable);
+	SendMessage(hSaveToolbar, TB_ENABLEBUTTON, (WPARAM)IDC_SAVE, (LPARAM)bEnable);
 
 	// Enable or disable the Start button and the other boot options
 	bEnable = ((bt == BT_IMAGE) && (image_path == NULL)) ? FALSE : bEnable;
@@ -1904,14 +1905,66 @@ static INT_PTR CALLBACK ProgressCallback(HWND hCtrl, UINT message, WPARAM wParam
 	return CallWindowProc(progress_original_proc, hCtrl, message, wParam, lParam);
 }
 
+// We need to create the small toolbar buttons first so that we can compute their width
+static void CreateSmallButtons(HWND hDlg)
+{
+	HIMAGELIST hImageList;
+	int icon_offset = 0, i16 = GetSystemMetrics(SM_CXSMICON);
+	TBBUTTON tbToolbarButtons[1];
+	unsigned char* buffer;
+	DWORD bufsize;
+
+	if (i16 >= 28)
+		icon_offset = 20;
+	else if (i16 > 20)
+		icon_offset = 10;
+
+	buffer = GetResource(hMainInstance, MAKEINTRESOURCEA(IDI_SAVE_16 + icon_offset), _RT_RCDATA, "save icon", &bufsize, FALSE);
+	hIconSave = CreateIconFromResourceEx(buffer, bufsize, TRUE, 0x30000, 0, 0, 0);
+	buffer = GetResource(hMainInstance, MAKEINTRESOURCEA(IDI_HASH_16 + icon_offset), _RT_RCDATA, "hash icon", &bufsize, FALSE);
+	hIconHash = CreateIconFromResourceEx(buffer, bufsize, TRUE, 0x30000, 0, 0, 0);
+
+	hSaveToolbar = CreateWindowExW(0, TOOLBARCLASSNAME, NULL,
+		WS_CHILD | WS_TABSTOP | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CCS_NOPARENTALIGN |
+		CCS_NODIVIDER | TBSTYLE_BUTTON | TBSTYLE_TOOLTIPS | TBSTYLE_AUTOSIZE,
+		0, 0, 0, 0, hMainDialog, (HMENU)IDC_SAVE_TOOLBAR, hMainInstance, NULL);
+	hImageList = ImageList_Create(i16, i16, ILC_COLOR32, 1, 0);
+	ImageList_AddIcon(hImageList, hIconSave);
+	SendMessage(hSaveToolbar, TB_SETIMAGELIST, (WPARAM)0, (LPARAM)hImageList);
+	SendMessage(hSaveToolbar, TB_BUTTONSTRUCTSIZE, (WPARAM)sizeof(TBBUTTON), 0);
+	memset(tbToolbarButtons, 0, sizeof(TBBUTTON));
+	tbToolbarButtons[0].idCommand = IDC_SAVE;
+	tbToolbarButtons[0].fsStyle = BTNS_AUTOSIZE;
+	tbToolbarButtons[0].fsState = TBSTATE_ENABLED;
+	tbToolbarButtons[0].iBitmap = 0;
+	SendMessage(hSaveToolbar, TB_ADDBUTTONS, (WPARAM)1, (LPARAM)&tbToolbarButtons);
+
+	hHashToolbar = CreateWindowExW(0, TOOLBARCLASSNAME, NULL,
+		WS_CHILD | WS_TABSTOP | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CCS_NOPARENTALIGN |
+		CCS_NODIVIDER | TBSTYLE_BUTTON | TBSTYLE_TOOLTIPS | TBSTYLE_AUTOSIZE,
+		0, 0, 0, 0, hMainDialog, (HMENU)IDC_HASH_TOOLBAR, hMainInstance, NULL);
+	hImageList = ImageList_Create(i16, i16, ILC_COLOR32, 1, 0);
+	ImageList_AddIcon(hImageList, hIconHash);
+	SendMessage(hHashToolbar, TB_SETIMAGELIST, (WPARAM)0, (LPARAM)hImageList);
+	SendMessage(hHashToolbar, TB_BUTTONSTRUCTSIZE, (WPARAM)sizeof(TBBUTTON), 0);
+	memset(tbToolbarButtons, 0, sizeof(TBBUTTON));
+	tbToolbarButtons[0].idCommand = IDC_HASH;
+	tbToolbarButtons[0].fsStyle = BTNS_AUTOSIZE;
+	tbToolbarButtons[0].fsState = TBSTATE_ENABLED;
+	tbToolbarButtons[0].iBitmap = 0;
+	SendMessage(hHashToolbar, TB_ADDBUTTONS, (WPARAM)1, (LPARAM)&tbToolbarButtons);
+}
+
 static void CreateAdditionalControls(HWND hDlg)
 {
 	HINSTANCE hDll;
 	HIMAGELIST hToolbarImageList;
 	RECT rc;
 	SIZE sz;
-	int i16, s16, toolbar_dx = -4 - ((fScale > 1.49f) ? 1 : 0) - ((fScale > 1.99f) ? 1 : 0);
+	int icon_offset = 0, i, i16, s16, toolbar_dx = -4 - ((fScale > 1.49f) ? 1 : 0) - ((fScale > 1.99f) ? 1 : 0);
 	TBBUTTON tbToolbarButtons[7];
+	unsigned char* buffer;
+	DWORD bufsize;
 
 	s16 = i16 = GetSystemMetrics(SM_CXSMICON);
 	if (s16 >= 54)
@@ -1922,25 +1975,10 @@ static void CreateAdditionalControls(HWND hDlg)
 		s16 = 32;
 	else if (s16 >= 20)
 		s16 = 24;
-
-	// Load system icons (NB: Use the excellent http://www.nirsoft.net/utils/iconsext.html to find icon IDs)
-	hDll = GetLibraryHandle("Shell32");
-	hIconSave = (HICON)LoadImage(hDll, MAKEINTRESOURCE(16761), IMAGE_ICON, s16, s16, LR_DEFAULTCOLOR | LR_SHARED);
-	hIconLog = (HICON)LoadImage(hDll, MAKEINTRESOURCE(281), IMAGE_ICON, s16, s16, LR_DEFAULTCOLOR | LR_SHARED);
-	hIconAbout = (HICON)LoadImage(hDll, MAKEINTRESOURCE(16783), IMAGE_ICON, s16, s16, LR_DEFAULTCOLOR | LR_SHARED);
-	hIconSettings = (HICON)LoadImage(hDll, MAKEINTRESOURCE(16826), IMAGE_ICON, s16, s16, LR_DEFAULTCOLOR | LR_SHARED);
-	if (hIconSettings == NULL)
-		hIconSettings = (HICON)LoadImage(hDll, MAKEINTRESOURCE(153), IMAGE_ICON, s16, s16, LR_DEFAULTCOLOR | LR_SHARED);
-
-	if (nWindowsVersion >= WINDOWS_8) {
-		// Use the icon from the Windows 8+ 'Language' Control Panel
-		hDll = GetLibraryHandle("UserLanguagesCpl");
-		hIconLang = (HICON)LoadImage(hDll, MAKEINTRESOURCE(1), IMAGE_ICON, s16, s16, LR_DEFAULTCOLOR | LR_SHARED);
-	} else {
-		// Otherwise use the globe icon, from the Internet Options Control Panel
-		hDll = GetLibraryHandle("inetcpl.cpl");
-		hIconLang = (HICON)LoadImage(hDll, MAKEINTRESOURCE(1313), IMAGE_ICON, s16, s16, LR_DEFAULTCOLOR | LR_SHARED);
-	}
+	if (i16 >= 28)
+		icon_offset = 20;
+	else if (i16 > 20)
+		icon_offset = 10;
 
 	// Fetch the up and down expand icons for the advanced options toolbar
 	hDll = GetLibraryHandle("ComDlg32");
@@ -2004,21 +2042,21 @@ static void CreateAdditionalControls(HWND hDlg)
 		sz.cx = fw;
 	SetWindowPos(hAdvancedFormatToolbar, HWND_TOP, rc.left + toolbar_dx, rc.top, sz.cx, rc.bottom - rc.top, 0);
 
-	// Create the bottom toolbar
+	// Create the multi toolbar
 	hMultiToolbar = CreateWindowExW(0, TOOLBARCLASSNAME, NULL,
 		WS_CHILD | WS_TABSTOP | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CCS_NOPARENTALIGN |
 		CCS_NODIVIDER | TBSTYLE_FLAT | TBSTYLE_LIST | TBSTYLE_TRANSPARENT | TBSTYLE_TOOLTIPS | TBSTYLE_AUTOSIZE,
 		0, 0, 0, 0, hMainDialog, (HMENU)IDC_MULTI_TOOLBAR, hMainInstance, NULL);
-	hToolbarImageList = ImageList_Create(i16, i16, ILC_COLOR32, 4, 0);
-	ImageList_AddIcon(hToolbarImageList, hIconLang);
-	ImageList_AddIcon(hToolbarImageList, hIconAbout);
-	ImageList_AddIcon(hToolbarImageList, hIconSettings);
-	ImageList_AddIcon(hToolbarImageList, hIconLog);
+	hToolbarImageList = ImageList_Create(i16, i16, ILC_COLOR32, 8, 0);
+	for (i = 0; i < ARRAYSIZE(multitoolbar_icons); i++) {
+		buffer = GetResource(hMainInstance, MAKEINTRESOURCEA(multitoolbar_icons[i] + icon_offset), _RT_RCDATA, "toolbar icon", &bufsize, FALSE);
+		ImageList_AddIcon(hToolbarImageList, CreateIconFromResourceEx(buffer, bufsize, TRUE, 0x30000, 0, 0, 0));
+	}
 	SendMessage(hMultiToolbar, TB_SETIMAGELIST, (WPARAM)0, (LPARAM)hToolbarImageList);
 	SendMessage(hMultiToolbar, TB_BUTTONSTRUCTSIZE, (WPARAM)sizeof(TBBUTTON), 0);
 	memset(tbToolbarButtons, 0, sizeof(TBBUTTON) * ARRAYSIZE(tbToolbarButtons));
 	tbToolbarButtons[0].idCommand = IDC_LANG;
-	tbToolbarButtons[0].fsStyle = BTNS_AUTOSIZE;
+	tbToolbarButtons[0].fsStyle = BTNS_BUTTON;
 	tbToolbarButtons[0].fsState = TBSTATE_ENABLED;
 	tbToolbarButtons[0].iBitmap = 0;
 	tbToolbarButtons[1].fsStyle = BTNS_AUTOSIZE;
@@ -2026,7 +2064,7 @@ static void CreateAdditionalControls(HWND hDlg)
 	tbToolbarButtons[1].iBitmap = I_IMAGENONE;
 	tbToolbarButtons[1].iString = (fScale < 1.5f) ? (INT_PTR)L"" : (INT_PTR)L" ";
 	tbToolbarButtons[2].idCommand = IDC_ABOUT;
-	tbToolbarButtons[2].fsStyle = BTNS_AUTOSIZE;
+	tbToolbarButtons[2].fsStyle = BTNS_BUTTON;
 	tbToolbarButtons[2].fsState = TBSTATE_ENABLED;
 	tbToolbarButtons[2].iBitmap = 1;
 	tbToolbarButtons[3].fsStyle = BTNS_AUTOSIZE;
@@ -2034,7 +2072,7 @@ static void CreateAdditionalControls(HWND hDlg)
 	tbToolbarButtons[3].iBitmap = I_IMAGENONE;
 	tbToolbarButtons[3].iString = (fScale < 1.5f) ? (INT_PTR)L"" : (INT_PTR)L" ";
 	tbToolbarButtons[4].idCommand = IDC_SETTINGS;
-	tbToolbarButtons[4].fsStyle = BTNS_AUTOSIZE;
+	tbToolbarButtons[4].fsStyle = BTNS_BUTTON;
 	tbToolbarButtons[4].fsState = TBSTATE_ENABLED;
 	tbToolbarButtons[4].iBitmap = 2;
 	tbToolbarButtons[5].fsStyle = BTNS_AUTOSIZE;
@@ -2042,15 +2080,13 @@ static void CreateAdditionalControls(HWND hDlg)
 	tbToolbarButtons[5].iBitmap = I_IMAGENONE;
 	tbToolbarButtons[5].iString = (fScale < 1.5f) ? (INT_PTR)L"" : (INT_PTR)L" ";
 	tbToolbarButtons[6].idCommand = IDC_LOG;
-	tbToolbarButtons[6].fsStyle = BTNS_AUTOSIZE;
+	tbToolbarButtons[6].fsStyle = BTNS_BUTTON;
 	tbToolbarButtons[6].fsState = TBSTATE_ENABLED;
 	tbToolbarButtons[6].iBitmap = 3;
 	SendMessage(hMultiToolbar, TB_ADDBUTTONS, (WPARAM)7, (LPARAM)&tbToolbarButtons);
+	SendMessage(hMultiToolbar, TB_SETBUTTONSIZE, 0, MAKELPARAM(0, ddbh));
 
 	// Set the icons on the the buttons
-	bi_save.himl = ImageList_Create(i16, i16, ILC_COLOR32 | ILC_MASK, 1, 0);
-	ImageList_ReplaceIcon(bi_save.himl, -1, hIconSave);
-	SetRect(&bi_save.margin, 0, 1, 0, 0);
 	bi_save.uAlign = BUTTON_IMAGELIST_ALIGN_CENTER;
 	bi_down.himl = ImageList_Create(i16, i16, ILC_COLOR32 | ILC_MASK, 1, 0);
 	ImageList_ReplaceIcon(bi_down.himl, -1, hIconDown);
@@ -2060,8 +2096,6 @@ static void CreateAdditionalControls(HWND hDlg)
 	ImageList_ReplaceIcon(bi_up.himl, -1, hIconUp);
 	SetRect(&bi_up.margin, 0, 0, 0, 0);
 	bi_up.uAlign = BUTTON_IMAGELIST_ALIGN_CENTER;
-
-	SendMessage(GetDlgItem(hDlg, IDC_SAVE), BCM_SETIMAGELIST, 0, (LPARAM)&bi_save);
 }
 
 // https://stackoverflow.com/a/20926332/1069307
@@ -2070,13 +2104,13 @@ static void GetBasicControlsWidth(HWND hDlg)
 {
 	int checkbox_internal_spacing = 12, dropdown_internal_spacing = 15;
 	RECT rc = { 0, 0, 4, 8 };
-	SIZE bu;
+	SIZE sz;
 
 	// Compute base unit sizes since GetDialogBaseUnits() returns garbage data.
 	// See http://support.microsoft.com/kb/125681
 	MapDialogRect(hDlg, &rc);
-	bu.cx = rc.right;
-	bu.cy = rc.bottom;
+	sz.cx = rc.right;
+	sz.cy = rc.bottom;
 
 	// TODO: figure out the specifics of each Windows version
 	if (nWindowsVersion == WINDOWS_10) {
@@ -2085,8 +2119,8 @@ static void GetBasicControlsWidth(HWND hDlg)
 	}
 
 	// Checkbox and (blank) dropdown widths
-	cbw = MulDiv(checkbox_internal_spacing, bu.cx, 4);
-	ddw = MulDiv(dropdown_internal_spacing, bu.cx, 4);
+	cbw = MulDiv(checkbox_internal_spacing, sz.cx, 4);
+	ddw = MulDiv(dropdown_internal_spacing, sz.cx, 4);
 
 	// Spacing width between half-length dropdowns (sep) as well as left margin
 	GetWindowRect(GetDlgItem(hDlg, IDC_TARGET_SYSTEM), &rc);
@@ -2097,20 +2131,18 @@ static void GetBasicControlsWidth(HWND hDlg)
 	sw -= rc.right;
 	mw = rc.left;
 
-	// Small button and small separator widths
+	// Small button width
+	SendMessage(hSaveToolbar, TB_GETIDEALSIZE, (WPARAM)FALSE, (LPARAM)&sz);
+	sbw = sz.cx;
+
+	// Small separator widths and button height
 	GetWindowRect(GetDlgItem(hDlg, IDC_SAVE), &rc);
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
-	sbw = rc.right - rc.left;
 	bh = rc.bottom - rc.top;
 	ssw = rc.left;
 	GetWindowRect(hDeviceList, &rc);
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
 	ssw -= rc.right;
-
-	// Hash button width
-	GetWindowRect(GetDlgItem(hDlg, IDC_HASH), &rc);
-	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
-	hbw = rc.right - rc.left;
 
 	// CSM tooltip separator width
 	GetWindowRect(GetDlgItem(hDlg, IDS_CSM_HELP_TXT), &rc);
@@ -2192,13 +2224,12 @@ static void GetHalfDropwdownWidth(HWND hDlg)
  * ssw = small separator width
  * bw  = button width
  * sbw = small button width
- * hbw = hash button width
  * 
- *      |                      fw                      |
- *      |          bsw          | ssw | hbw | ssw | bw |
- *  8 ->|<-    96     ->|<-    24    ->|<-    96     ->|<- 8
- *  mw  |      hw       |      sw      |      hw       |  mw
- *                                     | bw | ssw | bw |
+ *      |                        fw                            |
+ *      |          bsw          | ssw | sbw | ssw |     bw     |
+ *  8 ->|<-      96       ->|<-    24    ->|<-      96       ->|<- 8
+ *  mw  |        hw         |      sw      |        hw         |  mw
+ *                             |     bw     | ssw |     bw     |
  */
 static void GetFullWidth(HWND hDlg)
 {
@@ -2241,7 +2272,7 @@ static void GetFullWidth(HWND hDlg)
 	// Adjust according to min full width
 	bw = max(bw, (fw - 2 * ssw - sw) / 4);
 	// Adjust according to min boot selection width
-	bw = max(bw, (bsw + hbw - sw) / 3);
+	bw = max(bw, (bsw + sbw - sw) / 3);
 
 	// Adjust according to min half width
 	bw = max(bw, (hw / 2) - ssw);
@@ -2250,14 +2281,14 @@ static void GetFullWidth(HWND hDlg)
 	hw = max(hw, 2 * bw + ssw);
 	fw = max(fw, 2 * hw + sw);
 
-	bsw = max(bsw, fw - bw - 2 * ssw - hbw);
+	bsw = max(bsw, fw - bw - 2 * ssw - sbw);
 
 	// TODO: Also pick a few choice messages from info/status
 }
 
 static void PositionControls(HWND hDlg)
 {
-	RECT rc, rcSelectedImage;
+	RECT rc;
 	HWND hCtrl;
 	SIZE sz;
 	int i, x, button_fudge = 2;
@@ -2333,7 +2364,7 @@ static void PositionControls(HWND hDlg)
 	SendMessage(hMultiToolbar, TB_GETIDEALSIZE, (WPARAM)FALSE, (LPARAM)&sz);
 	GetWindowRect(GetDlgItem(hDlg, IDC_ABOUT), &rc);
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
-	SetWindowPos(hMultiToolbar, HWND_TOP, rc.left, rc.top, sz.cx, ddh, 0);
+	SetWindowPos(hMultiToolbar, HWND_TOP, rc.left, rc.top, sz.cx, ddbh, 0);
 
 	// Reposition the main buttons
 	for (i = 0; i < ARRAYSIZE(main_button_ids); i++) {
@@ -2346,18 +2377,21 @@ static void PositionControls(HWND hDlg)
 		SetWindowPos(hCtrl, HWND_TOP, x, rc.top, bw, ddbh, 0);
 	}
 
-	// Reposition the Hash button
-	hCtrl = GetDlgItem(hDlg, IDC_HASH);
-	GetWindowRect(hCtrl, &rc);
-	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
-	x -= ssw + hbw;
-	SetWindowPos(hCtrl, HWND_TOP, x, rc.top, hbw, rc.bottom - rc.top, 0);
-
 	// Reposition the Save button
 	hCtrl = GetDlgItem(hDlg, IDC_SAVE);
 	GetWindowRect(hCtrl, &rc);
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
-	SetWindowPos(hCtrl, HWND_TOP, mw + fw - sbw, rc.top, sbw, rc.bottom - rc.top, 0);
+	SendMessage(hSaveToolbar, TB_GETIDEALSIZE, (WPARAM)FALSE, (LPARAM)&sz);
+	SendMessage(hSaveToolbar, TB_SETBUTTONSIZE, 0, MAKELPARAM(sz.cx, ddbh));
+	SetWindowPos(hSaveToolbar, HWND_TOP, mw + fw - sbw, rc.top, sbw, ddbh, 0);
+
+	// Reposition the Hash button
+	hCtrl = GetDlgItem(hDlg, IDC_HASH);
+	GetWindowRect(hCtrl, &rc);
+	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
+	SendMessage(hHashToolbar, TB_GETIDEALSIZE, (WPARAM)FALSE, (LPARAM)&sz);
+	SendMessage(hHashToolbar, TB_SETBUTTONSIZE, 0, MAKELPARAM(sz.cx, ddbh));
+	SetWindowPos(hHashToolbar, HWND_TOP, mw + bsw + ssw, rc.top, sz.cx, ddbh, 0);
 
 	// Reposition the CSM help tip
 	hCtrl = GetDlgItem(hDlg, IDS_CSM_HELP_TXT);
@@ -2396,25 +2430,6 @@ static void PositionControls(HWND hDlg)
 	GetWindowRect(hCtrl, &rc);
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
 	SetWindowPos(hCtrl, HWND_TOP, rc.left, rc.top, bsw, rc.bottom - rc.top, 0);
-
-	hCtrl = GetDlgItem(hDlg, IDC_DEVICE);
-	GetWindowRect(hCtrl, &rc);
-	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
-	sz.cy = rc.top;
-	hCtrl = GetDlgItem(hDlg, IDC_SAVE);
-	GetWindowRect(hCtrl, &rc);
-	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
-	SetWindowPos(hCtrl, NULL, rc.left, sz.cy - 1,
-		rc.right - rc.left, ddbh, SWP_NOZORDER);
-
-	hCtrl = GetDlgItem(hDlg, IDC_BOOT_SELECTION);
-	GetWindowRect(hCtrl, &rcSelectedImage);
-	MapWindowPoints(NULL, hDlg, (POINT*)&rcSelectedImage, 2);
-	hCtrl = GetDlgItem(hDlg, IDC_HASH);
-	GetWindowRect(hCtrl, &rc);
-	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
-	SetWindowPos(hCtrl, NULL, rc.left, rcSelectedImage.top - 1,
-		rc.right - rc.left, ddbh, SWP_NOZORDER);
 }
 
 // Thanks to Microsoft atrocious DPI handling, we must adjust for low DPI
@@ -2544,6 +2559,7 @@ static void InitDialog(HWND hDlg)
 	strcpy(uppercase_cancel, lmprintf(MSG_007));
 	CharUpperBuffU(uppercase_cancel, sizeof(uppercase_cancel));
 
+	CreateSmallButtons(hDlg);
 	GetBasicControlsWidth(hDlg);
 	GetMainButtonsWidth(hDlg);
 	GetHalfDropwdownWidth(hDlg);
@@ -2660,12 +2676,9 @@ static void InitDialog(HWND hDlg)
 	CreateTooltip(GetDlgItem(hDlg, IDC_OLD_BIOS_FIXES), lmprintf(MSG_169), -1);
 	CreateTooltip(GetDlgItem(hDlg, IDC_LIST_USB_HDD), lmprintf(MSG_170), -1);
 	CreateTooltip(hStart, lmprintf(MSG_171), -1);
-	CreateTooltip(GetDlgItem(hDlg, IDC_ABOUT), lmprintf(MSG_172), -1);
 	CreateTooltip(hPartitionScheme, lmprintf(MSG_163), -1);
 	CreateTooltip(hTargetSystem, lmprintf(MSG_150), 30000);
 	CreateTooltip(GetDlgItem(hDlg, IDS_CSM_HELP_TXT), lmprintf(MSG_151), 30000);
-	CreateTooltip(GetDlgItem(hDlg, IDC_HASH), lmprintf(MSG_272), -1);
-	CreateTooltip(GetDlgItem(hDlg, IDC_SAVE), lmprintf(MSG_304), -1);
 	CreateTooltip(GetDlgItem(hDlg, IDC_IMAGE_OPTION), lmprintf(MSG_305), 30000);
 
 	if (!advanced_mode_device)	// Hide as needed, since we display the advanced controls by default
@@ -3483,6 +3496,14 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				break;
 			case IDC_LOG:
 				utf8_to_wchar_no_alloc(lmprintf(MSG_303), wtooltip, ARRAYSIZE(wtooltip));
+				lpttt->lpszText = wtooltip;
+				break;
+			case IDC_SAVE:
+				utf8_to_wchar_no_alloc(lmprintf(MSG_304), wtooltip, ARRAYSIZE(wtooltip));
+				lpttt->lpszText = wtooltip;
+				break;
+			case IDC_HASH:
+				utf8_to_wchar_no_alloc(lmprintf(MSG_272), wtooltip, ARRAYSIZE(wtooltip));
 				lpttt->lpszText = wtooltip;
 				break;
 			}

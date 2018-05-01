@@ -386,7 +386,6 @@ t MSG_169 "Create an extra hidden partition and try to align partitions boundari
 	"This can improve boot detection for older BIOSes"
 t MSG_170 "Enable the listing of USB Hard Drive enclosures. USE AT YOUR OWN RISKS!!!"
 t MSG_171 "Start the formatting operation.\nThis will DESTROY any data on the target!"
-t MSG_172 "Licensing information and credits"
 t MSG_173 "Click to select..."
 # The following will appear in the about dialog
 t MSG_174 "Rufus - The Reliable USB Formatting Utility"
@@ -556,7 +555,7 @@ t MSG_296 "This version of Rufus was not produced by its official developer(s).\
 t MSG_297 "Truncated ISO detected"
 t MSG_298 "The ISO file you have selected does not match its declared size: %s of data is missing!\n\nIf you obtained "
 	"this file from the Internet, you should try to download a new copy and verify that the MD5 or SHA checksums match "
-	"the official ones.\n\nNote that you can compute the MD5 or SHA in Rufus by clicking the '#' button."
+	"the official ones.\n\nNote that you can compute the MD5 or SHA in Rufus by clicking the (✓) button."
 t MSG_299 "Timestamp validation error"
 t MSG_300 "Rufus could not validate that the timestamp of the downloaded update is more recent than the one for the "
 	"current executable.\n\nIn order to prevent potential attack scenarios, the update process has been aborted and "
@@ -849,7 +848,6 @@ t MSG_169 "إنشاء قسم إضافي خفي ومحاذاة حدود الأق�
 	"هذا يمكنه تحسين إكتشاف التمهيد لـ BIOSes قديمة"
 t MSG_170 "تمكين إدراج مرفقات القرص الصلب USB. إستخدمه على مسؤوليتك الخاصة!!!"
 t MSG_171 "بدء عملية الفرمتة. \nستم تدمير أية بيانات على الهدف!"
-t MSG_172 "معلومات الترخيص و اعتراف بالفضل"
 t MSG_173 "إضغط لاختيار..."
 # The following will appear in the about dialog
 # NOTE: Because it starts with English text, the line below requires an invisible
@@ -1009,7 +1007,7 @@ t MSG_296 "هذا الإصدار من روفوس لم يتم إنتاجه من �
 t MSG_297 "إكتشاف ISO مقطوعة"
 t MSG_298 "ملف الISO المحدد لا يطابق حجمه المعلن من قبله: %s من البيانات مفقود!\n\nإذا قمت بالحصول "
 	"على هذا الملف من الإنترنت, يجب عليك تحميل نسخة جديدة و التحقق من أن المجموع الإختباري لMD5 و SHA مطابق "
-	"للنسخ(ة) الأصلية.\n\nعلماُ بانه يمكنك مقارنة الMD5 و SHA في روفوس عن طريق الضغط على زر '#'"
+	"للنسخ(ة) الأصلية.\n\nعلماُ بانه يمكنك مقارنة الMD5 و SHA في روفوس عن طريق الضغط على زر (✓)"
 t MSG_117 "تثبيت ويندوز قياسيا"
 t MSG_118 "Windows To Go (تشغيل ويندوز من USB)"
 
@@ -1298,7 +1296,6 @@ t MSG_169 "Qeyri-adi gizli bir hissə təşkil edir və hissələrin sərhədlə
 	"Bu proses köhnə BIOSlar üçün açılış  keçidini inkişaf etdirir"
 t MSG_170 "USB sabit sürücü əlavələrini siyahılar üzrə sadalamağa aktivləşdirir. MƏSULİYYƏT SİZƏ MƏXSUSDUR!!!"
 t MSG_171 "Formatlama prosesini başlat.\nBu hədəf üzərində bütün məlumatları yox edəcək!"
-t MSG_172 "Lisenziya məlumatı və Köməyi Olanlar"
 t MSG_173 "Seçmək üçün vurun..."
 # The following will appear in the about dialog
 t MSG_174 "Rufus - Etibarlı USB Formatlama Proqramı"
@@ -1458,7 +1455,7 @@ t MSG_295 "Xəbərdarlıq: Rəsmi olamyan versiya"
 t MSG_296 "Bu versiya Rufus tərəfindən təqdim olunmayıb yaradan(lar).\n\nİstifadə etməyinizdən əminsiniz?"
 t MSG_297 "Uyğun olmayan ISO aşkarlandı"
 t MSG_298 "Seçdiyiniz ISO faylı uyğun deyil ölçü: %s məlumat çatmadı!\n\nBu faylı seçin Siz sürətli yükləmək üçün, İnterneti yoxlamalısınız "
-	"MD5 və SHA nəzarət cəmləri uyğundur.\n\nBacaracağınıza diqqətinizi yönəldin '#' buttona vuraraq Rufus MD5 or SHA-nı hesablayın."
+	"MD5 və SHA nəzarət cəmləri uyğundur.\n\nBacaracağınıza diqqətinizi yönəldin (✓) buttona vuraraq Rufus MD5 or SHA-nı hesablayın."
 t MSG_299 "Zaman ştampı təsdiqləmə səhvi"
 t MSG_300 "Rufus yüklənən yeniləmələrin zaman ştampını əsas olan fayl üçün yeni olduğunu "
 	"təsdiqləyə bilmədi.\n\nDüzgün olmayan hadisələri önləmək üçün, yenilənmə əməliyyatı ləğv ediləcək və yükləmə. "
@@ -1747,7 +1744,6 @@ t MSG_169 "Създай допълнителен скрит дял и опита
 	"Това може да подобри записването на стартираща система при по стари версии на BIOS"
 t MSG_170 "Разреши показването на USB  хард дискови заграждения . ИЗПОЛЗВАЙТЕ НА СВОЙ РИСК!!!"
 t MSG_171 "Стартирай форматиращата операция.\nТова ще УНИЩОЖИ всякаква информация на целта!"
-t MSG_172 "Лицензна информация и разработчици"
 t MSG_173 "Натиснете тук за да изберете..."
 # The following will appear in the about dialog
 t MSG_174 "Rufus - Надеждната USB Форматираща програма"
@@ -1905,7 +1901,7 @@ t MSG_296 "Тази версия на Rufus не е създадена от оф
 t MSG_297 "Открито е съкратено ISO"
 t MSG_298 "ISO файлът който сте избрали не  съвпада с обявения си размер: %s от информацията липсва.\n\n"
 	"Ако сте сездобили с този файл от интернет, опитайте се да изтеглите ново копие и се уверете че контролните стойности на MD5 или "
-	"SHA съвпадат с официялните.\n\nОтбележете че можете да изчислите MD5 или SHA изпозвайки Rufus като натиснете бутона '#'."
+	"SHA съвпадат с официялните.\n\nОтбележете че можете да изчислите MD5 или SHA изпозвайки Rufus като натиснете бутона (✓)."
 t MSG_117 "Стандартна Windows инсталация"
 t MSG_118 "Windows To Go (Windows за USB Flash устройство)"
 
@@ -2193,7 +2189,6 @@ t MSG_169 "创建一个额外的隐藏分区并尝试对齐分区分界。\n"
 	"这个可提高旧 BIOS 的引导检测率"
 t MSG_170 "启用涵盖 USB 硬盘的显示\n***请谨慎使用，后果自负！***"
 t MSG_171 "开始格式化操作。\n这将会清除目标设备上的任何数据！"
-t MSG_172 "许可信息和开发者信息"
 t MSG_173 "点击选择..."
 # The following will appear in the about dialog
 t MSG_174 "Rufus - 可靠的 USB 格式化工具"
@@ -2352,7 +2347,7 @@ t MSG_296 "此版本的 Rufus 不是由官方开发者发布的。\n\n您确定�
 t MSG_297 "检测到不完整镜像"
 t MSG_298 "您选择的镜像文件大小与其期望大小不符： %s 数据缺失！\n\n"
 	"如果此镜像文件下载自互联网，请重新下载并校验其 MD5 或 SHA 校验和。\n\n"
-	"您可在 Rufus 中点击 '#' 键来计算 MD5 或 SHA 校验和。"
+	"您可在 Rufus 中点击 (✓) 键来计算 MD5 或 SHA 校验和。"
 t MSG_299 "时间戳校验错误"
 t MSG_300 "Rufus 下载的更新比当前程序更旧。\n\n"
 	"为避免可能的攻击，更新已被阻止，下载的更新文件已被删除。如需了解更多，请查看软件日志。"
@@ -2619,7 +2614,6 @@ t MSG_168 "偽裝第一個可開機的 USB 磁碟為其他序列的磁碟\n"
 t MSG_169 "建立隱藏磁區分割並對齊資料分割界限值，可提高較舊的 BIOS 偵測開機片的機率\n"
 t MSG_170 "顯示所有連接到電腦的 USB 外接硬碟\n***請謹慎使用，後果自負!***"
 t MSG_171 "立即開始格式化作業\n注意: 裝置上所有的資料將被清除!"
-t MSG_172 "授權合約、開發者資料等資訊"
 t MSG_173 "選取內容..."
 # The following will appear in the about dialog
 t MSG_174 "Rufus - 快速可靠的 USB 格式化工具"
@@ -2770,7 +2764,7 @@ t MSG_296 "此 Rufus 版本不是由官方開發者發布的。\n\n你確定要�
 t MSG_297 "偵測到 ISO 映像檔不完整"
 t MSG_298 "你選擇的 ISO 映像檔不符合它所宣告的大小: 缺少 %s !\n\n"
 	"如果此檔案是從網路上下載的，請嘗試再次下載並且校驗 MD5 或 SHA 總和檢查碼是正確的。\n\n"
-	"提示: 可點選狀態列 '#' 按鈕來計算 MD5 或 SHA 總和檢查碼。"
+	"提示: 可點選狀態列 (✓) 按鈕來計算 MD5 或 SHA 總和檢查碼。"
 t MSG_299 "時間戳記驗證錯誤"
 t MSG_300 "Rufus 不能驗證下載的更新其時間戳記比現有的執行檔還新。\n\n"
 	"為避免可能的資安攻擊，更新流程已停止且下載的更新檔將會刪除。更多詳情請參見記錄檔。"
@@ -3064,7 +3058,6 @@ t MSG_169 "Stvori dodatnu skrivenu particiju i pokušaj poravnati granice partic
 	"Ovo je korisno za stare BIOS-e"
 t MSG_170 "Otkrivanje USB čvrstih diskova. Koristiti na vlastitu odgovornost!"
 t MSG_171 "Započni proces.\nTo UKLANJA sve s uređaja!"
-t MSG_172 "Info licenciranja i zahvale"
 t MSG_173 "Klikni za odabir..."
 # The following will appear in the about dialog
 t MSG_174 "Rufus - The Reliable USB Formatting Utility"
@@ -3223,7 +3216,7 @@ t MSG_296 "Ova verzija Rufusa NIJE proizvod službenog razvojnog programera.\n\n
 t MSG_297 "Otkrivena skraćena ISO datoteka"
 t MSG_298 "ISO datoteka koju ste odabrali ne odgovara deklariranoj veličini: %s podataka nedostaje!\n\n"
 	"Ako ste ovu datoteku preuzeli na internetu, pokušajte preuzeti novu kopiju i proverite da su MD5 ili SHA "
-	"kontrolni zbrojevi identični kao u originalu.\n\nRufus može provjeriti MD5 ili SHA pritiskom na '#' tipku."
+	"kontrolni zbrojevi identični kao u originalu.\n\nRufus može provjeriti MD5 ili SHA pritiskom na (✓) tipku."
 t MSG_299 "Pogreška kod potvrđivanja vremenske oznake" 
 t MSG_300 "Rufus nije mogao potvrditi da je vremenska oznaka preuzetog ažuriranja novija od iste oznake "
 	"u trenutnoj verziji.\n\nS ciljem sprječavanja mogućih eksploatacija sustava, postupak ažuriranja je obustavljen "
@@ -3527,7 +3520,6 @@ t MSG_169 "Vytvořit další skryté oddíly a pokusí se o zarovnání oddílů
 	"Toto nastavení může zlepšit detekci spustitelného zařízení pro starší BIOS"
 t MSG_170 "Zobrazí pevné disky a USB. !!!POUŽITÍ NA VLASTNÍ RIZIKO!!!"
 t MSG_171 "Klepnutím spustíte formátování.\nFORMÁTOVANÍM SE ODSTRANÍ VEŠKERÁ DATA NA CÍLOVÉM ZAŘÍZENÍ!"
-t MSG_172 "Informace o licenci a aktualizaci"
 t MSG_173 "Kliknutím zvolit..."
 # The following will appear in the about dialog
 t MSG_174 "Rufus - Spolehlivý program pro formátování USB"
@@ -3688,7 +3680,7 @@ t MSG_296 "Tato verze Rufus, nebyl nepochází z oficiálního vývoje.\n\nJsou 
 t MSG_297 "Redukované ISO detekováno"
 t MSG_298 "U vybraného ISO soubor neodpovídá deklarovaná velikost: %s z údajů chybí!\n\nPokud jste jej získali "
 	"z internetu, měli by jste stáhnout novou kopii a ověřt, zda odpovídají kontrolní součty MD5 nebo SHA. "
-	"oficiálně.\n\nPoznámka: Klepnutím na'#'lze vypočítat MD5 nebo SHA v Rufusu."
+	"oficiálně.\n\nPoznámka: Klepnutím na(✓)lze vypočítat MD5 nebo SHA v Rufusu."
 t MSG_299 "Chyba ověření časového razítka"
 t MSG_300 "Rufus nemohl ověřit časové razítko stažené aktualizace, zda je novější než časový údaj minulé "
 	"aktuální spustitelný soubor.\n\nAby se zabránilo možným scénářům útoků, proces aktualizace byl zrušen "
@@ -3975,7 +3967,6 @@ t MSG_169 "Opret en ekstra skjult partition og forsøg at tilpasse afgrænsning 
 	"Dette kan forbedre boot-disk genkendelse for ældre BIOS'er"
 t MSG_170 "Vis liste over USB harddisk kabinetter. Brug på egen RISIKO!!!"
 t MSG_171 "Start formateringen.\nDette vil SLETTE alle data på destinationsdrevet!"
-t MSG_172 "Licens information og anerkendelse"
 t MSG_173 "Klik for at vælge..."
 t MSG_174 "Rufus - Det pålidelige USB-formateringsværktøj"
 t MSG_175 "Version %d.%d (Build %d)"
@@ -4119,7 +4110,7 @@ t MSG_296 "Denne version af Rufus er IKKE produceret af dens officielle udvikler
 t MSG_297 "Forkortet ISO opdaget"
 t MSG_298 "ISO-filen du har valgt, stemmer ikke overens med den erklærede størrelse: %s af dataene mangler!\n\nHvis du har "
 	"downloadet filen fra internettet, bør du prøve at downloade en ny kopi og verificere at MD5 eller SHA kontrolsummen svarer "
-	"til de officielle.\n\nLæg mærke til at du kan beregne MD5 eller SHA i Rufus ved at klikke på '#'-knappen."
+	"til de officielle.\n\nLæg mærke til at du kan beregne MD5 eller SHA i Rufus ved at klikke på (✓)-knappen."
 t MSG_117 "Standard Windows-installation"
 t MSG_118 "Windows To Go (din PC på en USB-nøgle)"
 
@@ -4387,7 +4378,6 @@ t MSG_169 "Creëert een extra verborgen partitie en probeert de partitiegrenzen 
 	"Dit kan de opstart detectie verbeteren voor oudere BIOS'en"
 t MSG_170 "Activeer de lijst met externe USB HD's.\nGEBRUIK OP EIGEN RISICO!!!"
 t MSG_171 "Start het formatteren.\nDit zal alle data op de doel drive VERWIJDEREN!"
-t MSG_172 "Licentie informatie en credits"
 t MSG_173 "Klik om te selecteren..."
 # The following will appear in the about dialog
 t MSG_174 "Rufus - De betrouwbare USB Formatteer Tool"
@@ -4542,7 +4532,7 @@ t MSG_298 "Het ISO bestand dat u heeft geselecteerd komt niet overeen met de aan
 	"grootte: %s van de data ontbreekt!\n\nAls u dit bestand van het "
 	"internet heeft gehaald, probeer een nieuwe kopie te downloaden en te verifiëren met de "
 	"MD5 of SHA checksums die overeenkomen met de officiële versie.\n\nU kunt de "
-	"MD5 of SHA in Rufus berekenen door op het '#' button te klikken."
+	"MD5 of SHA in Rufus berekenen door op het (✓) button te klikken."
 t MSG_117 "Standaard Windows installatie"
 
 ################################################################################
@@ -4830,7 +4820,6 @@ t MSG_169 "Luo ylimääräinen, piilotettu osio ja yritä kohdistaa osioiden raj
 	"Tämä voi parantaa USB-laitteiden havaitsemista käynnistyksessä vanhemmissa BIOSeissa"
 t MSG_170 "Ota käyttöön USB-kiintolevyjen listaus. KÄYTÄ OMALLA VASTUULLA!!!"
 t MSG_171 "Käynnistä alustustoiminto.\nTämä POISTAA kaiken tiedon kohteesta!"
-t MSG_172 "Lisenssitiedot ja tekijät"
 t MSG_173 "Paina valitaksesi..."
 # The following will appear in the about dialog
 t MSG_174 "Rufus - Luotettava USB-alustusohjelma"
@@ -4989,7 +4978,7 @@ t MSG_296 "Tämä versio ei ole Rufuksen virallisen kehittäjän tekemä.\n\nHal
 t MSG_297 "Vajaakokoinen ISO-levykuva havaittu"
 t MSG_298 "Valitsemasi ISO-levykuva ei vastaa sen ilmoittamaa tiedostokokoa: %s ohjelmatiedosta puuttuu!\n\nJos latasit "
 	"tämän tiedoston internetistä, yritä ladata tiedosto uudelleen ja varmista, että MD5- tai SHA-tarkistussumma täsmää "
-	"alkuperäisen summan kanssa.\n\nVoit laskea MD5- tai SHA-tarkistussumman Rufuksessa painamalla '#'-painiketta."
+	"alkuperäisen summan kanssa.\n\nVoit laskea MD5- tai SHA-tarkistussumman Rufuksessa painamalla (✓)-painiketta."
 t MSG_299 "Aikaleiman vahvistusvirhe"
 t MSG_300 "Rufus ei pystynyt varmistamaan, että ladatun päivityksen aikaleima on nykyistä tiedostoa uudempi.\n\nMahdollisten "
 	"hyökkäysmahdollisuuksien estämiseksi päivitysprosessi on keskeytetty ja lataus tullaan poistamaan. "
@@ -5268,7 +5257,6 @@ t MSG_169 "Créé une petite partition supplémentaire et aligner les partitions
 	"Peut améliorer la détection du périphérique pour les vieux BIOS"
 t MSG_170 "Liste les disques durs externes USB. UTILISEZ A VOS PROPRES RISQUES !!! "
 t MSG_171 "Lance le formatage. Cette opération DETRUIT toutes les données sur le périphérique sélectionné !"
-t MSG_172 "Licence et remerciements"
 t MSG_173 "Cliquez pour sélectionner..."
 t MSG_174 "Rufus - The Reliable USB Formatting Utility"
 t MSG_175 "Version %d.%d (Build %d)"
@@ -5414,7 +5402,7 @@ t MSG_297 "ISO tronquée détectée"
 t MSG_298 "Le fichier ISO que vous avez sélectionné ne fait pas la bonne taille : %s de données sont manquantes !\n\n"
 	"Si vous avez obtenu ce fichier depuis Internet, vous devriez essayer de le télécharger à nouveau et verifier que "
 	"le MD5 ou SHA correspond aux valeurs officielles.\n\nNotez que vous pouvez calculer le MD5 ou SHA depuis Rufus en "
-	"cliquant le bouton '#'."
+	"cliquant le bouton (✓)."
 t MSG_299 "Erreur de validation du timestamp"
 t MSG_300 "Rufus n'a pas pu valider que le timestamp du fichier de mise à jour téléchargé est plus récent que celui de "
 	"l'exécutable en cours.\n\nAfin de mitiger des scenarios d'attaque potentiels, le processus de mise à jour a été interrompu "
@@ -5684,7 +5672,6 @@ t MSG_169 "Eine extra Partition erzeugen und die Partitionsgrenzen ausrichten.\n
 	"Das kann die Starterkennung unter älteren BIOSen verbessern"
 t MSG_170 "Erkennung von USB-Festplatten Gehäusen aktivieren. VERWENDUNG AUF EIGENES RISIKO!!!"
 t MSG_171 "Formatierung starten.\nAlle Daten auf dem Ziellaufwerk werden GELÖSCHT!"
-t MSG_172 "Lizenzinformationen und Mitwirkende"
 t MSG_173 "Klicken Sie, um auszuwählen..."
 # The following will appear in the about dialog
 t MSG_174 "Rufus - Das zuverlässige USB-Formatierungs Utility"
@@ -5835,7 +5822,7 @@ t MSG_296 "Diese Version von Rufus wurde nicht vom offiziellen Entwickler zur Ve
 t MSG_297 "Unvollständiges ISO-Abbild erkannt"
 t MSG_298 "Das ISO-Abbild, dass Sie gewählt haben, hat nicht die erwartete Größe. %s Daten fehlen!\n\nSollten Sie das Abbild vom "
 	"Internet heruntergeladen haben, sollten Sie den Download wiederholen und prüfen, ob die MD5- oder SHA-Prüfsummen übereinstimmen."
-	"\n\nHinweis: Mit der '#' Schaltfläche in der Statuszeile können Sie die Prüfsummen des gewählten Abbilds anzeigen."
+	"\n\nHinweis: Mit der (✓) Schaltfläche in der Statuszeile können Sie die Prüfsummen des gewählten Abbilds anzeigen."
 t MSG_299 "Fehler bei der Überprüfung des Zeitstempels"
 t MSG_300 "Rufus konnten nicht prüfen, ob der Zeitstempel des Update-Downloads aktueller ist, als der des aktuell ausgeführten Programms.\n\n"
 	"Aus Sicherheitsgründen wurde der Aktualisierungsprozess abgebrochen und der Download wurde gelöscht. Im Log finden Sie weitere Details."
@@ -6120,7 +6107,6 @@ t MSG_169 "Δημιουργία ενός επιπλέον κρυφού διαμ�
 	"Μπορεί να βελτιώσει την ανίχνευση εκκίνησης για παλαιότερα BIOS"
 t MSG_170 "Ενεργοποίηση της εμφάνισης σκληρών δίσκων USB. Η χρήση γίνεται με δική σας ευθύνη!!!"
 t MSG_171 "Εκκίνηση της λειτουργίας διαμόρφωσης.\nΗ λειτουργία θα διαγράψει όλα τα υπάρχοντα δεδομένα από την επιλεγμένη συσκευή."
-t MSG_172 "Πληροφορίες για την άδεια χρήσης και credits"
 t MSG_173 "Κάντε κλικ για επιλογή..."
 # The following will appear in the about dialog
 t MSG_174 "Rufus - Μία αξιόπιστη εφαρμογή διαμόρφωσης USB"
@@ -6276,7 +6262,7 @@ t MSG_296 "Αυτή η έκδοση του Rufus δεν έχει δημιουρ�
 t MSG_297 "Το αρχείο ISO δεν είναι έγκυρο/ολόκληρο."
 t MSG_298 "Το αρχείο ISO που επιλέξατε δεν ειναι έγκυρο/ολόκληρο. %s από τα δεδομένα του αρχείου λείπουν.\n\nΆν κατεβάσατε αυτό το αρχείο απο το διαδίκτυο, "
 	"προσπαθήστε να επαναλάβετε την λήψη του αρχείου. Βεβαιωθείτε ότι οι MD5 ή SHA σφραγίδες του αρχείου που κατεβάσατε είναι ίδιες με αυτες του αρχειου "
-	"που θέλατε να κατεβάσετε.\n\nΜπορείτε να ελέγξετε τις σφραγίδες MD5 ή SHA μέσω του Rufus πατώντας το κουμπί '#'."
+	"που θέλατε να κατεβάσετε.\n\nΜπορείτε να ελέγξετε τις σφραγίδες MD5 ή SHA μέσω του Rufus πατώντας το κουμπί (✓)."
 t MSG_117 "Προσαρμοσμένη εγκατάσταση των Windows"
 t MSG_118 "Windows To Go (USB με δυνατότητα εκκίνησης)"
 
@@ -6558,7 +6544,6 @@ t MSG_169 "צור מחיצה נסתרת ונסה ליישר את הגבולות 
 	"זה ייכול לשפר את קליטת האתחול ל BIOS ישן"
 t MSG_170 "להראות כוננים קשיחים של USB. השימוש באחריותך בלבד!!!"
 t MSG_171 "התחל את פעולת האתחול.\nזה ישמיד את כל המידע על ההתקן!"
-t MSG_172 "פרטי רישיון וקרדיט"
 t MSG_173 "לחץ/י כדי לבחור..."
 # The following will appear in the about dialog
 # NOTE: Because it starts with English text, the line below requires an invisible
@@ -6725,7 +6710,7 @@ t MSG_296 "גרסה זו של רופוס לא נוצרה ע י מפתחה הרש
 t MSG_297 "קובץ ISO קטוע זוהה"
 t MSG_298 "קובץ ה ISO שבחרת לא מתאים לגודלו המוצהר: מידע בגודל של כ %s חסר!\n\nאםהורדת "
 	"את הקובץ הזה מהאינטרנט, את/ה צריכ/ה להוריד אותו שוב ולוודא שה checksum שלו ולוודאשביקורת ה MD5 או SHA מתאימים "
-	"לקובץ החדש.\n\nקח/י בחשבון שניתן לחשב את ה MD5 או SHA בתוך רופוס עי לחיצה על הכפתור '#'."
+	"לקובץ החדש.\n\nקח/י בחשבון שניתן לחשב את ה MD5 או SHA בתוך רופוס עי לחיצה על הכפתור (✓)."
 t MSG_117 "התקנת windows רגילה"
 
 ################################################################################
@@ -7001,7 +6986,6 @@ t MSG_169 "Készíts egy extra rejtett partíciót és próbáld meg a partíci�
 	"Ez segíthet a régi BIOS-oknak a boot meghajtókat detektálni"
 t MSG_170 "USB-s merevlemezek listázásának engedélyezése. CSAK SAJÁT FELELŐSSÉGRE HASZNÁLD!!!"
 t MSG_171 "A formázás elkezdése.\nEz MINDEN ADATOT TÖRÖL az eszközön!"
-t MSG_172 "Licensszel kapcsolatos információk és készítők"
 t MSG_173 "Kattints a kiválasztáshoz..."
 # The following will appear in the about dialog
 t MSG_174 "Rufus - A megbízható USB formázó"
@@ -7436,7 +7420,6 @@ t MSG_169 "Membuat partisi tersembunyi tambahan dan memcoba menyelaraskan batas 
 	"Upaya ini dapat memperbaiki deteksi boot bagi BIOS versi lama"
 t MSG_170 "Aktifkan pencantuman USB Hard Drive enclosures. RESIKO DITANGGUNG ANDA SENDIRI!!!"
 t MSG_171 "Mulai operasi format.\nTindakan ini akan MENGHAPUS semua data pada target!"
-t MSG_172 "Informasi lisensi dan kredit"
 t MSG_173 "Klik untuk memilih..."
 # The following will appear in the about dialog
 t MSG_174 "Rufus - Utilitas Pemformatan USB yang Handal"
@@ -7597,7 +7580,7 @@ t MSG_296 "Rufus versi ini TIDAK diproduksi oleh pengembang resminya.\n\nApakah 
 t MSG_297 "Terdeteksi ISO Terpotong"
 t MSG_298 "Berkas ISO yang Anda pilih tidak sesuai dengan ukuran yang dideklarasikan: %s data hilang!\n\n"
 	"Jika Anda mendapatkan berkas ini dari Internet, Anda sebaiknya mengunduh salinan yang baru dan pastikan ceksum MD5 atau SHA "
-	"cocok dengan yang asli.\n\nPerhatikan bahwa Anda dapat menghitung MD5 atau SHA dalam Rufus dengan mengklik tombol '#'."
+	"cocok dengan yang asli.\n\nPerhatikan bahwa Anda dapat menghitung MD5 atau SHA dalam Rufus dengan mengklik tombol (✓)."
 t MSG_117 "Instalasi Windows standar"
 
 ################################################################################
@@ -7870,7 +7853,6 @@ t MSG_169 "Crea una partizione aggiuntiva e nascosta e prova ad allineare le div
 	"Questo può migliorare il rilevamento all'avvio con vecchi BIOS"
 t MSG_170 "Abilita il rilevamento per i dischi USB. USALO A TUO RISCHIO!!!"
 t MSG_171 "Avvia l'operazione di formattazione.\nQuesta operazione DISTRUGGERÀ qualsiasi dato sull'unità di destinazione!"
-t MSG_172 "Informazioni licenza e ringraziamenti"
 t MSG_173 "Fai clic per selezionare..."
 t MSG_174 "Rufus - Utility affidabile formattazione unità USB"
 t MSG_175 "Versione %d.%d (build %d)"
@@ -8021,7 +8003,7 @@ t MSG_296 "Questa versione di Rufus non è stata sviluppata dai suoi sviluppator
 t MSG_297 "Rilevato file ISO troncato"
 t MSG_298 "Il file ISO selezionato non corrisponde alla dimensione dichiarata: %s dei dati mancanti!\n\nSe hai scaricato "
 	"questo file da internet, prova a scaricarne una nuova copia e verifica che la checksum MD5 o SHA corrisponda alla checksum "
-	"ufficiale.\n\nNota che puoi calcolare in Rufus la checksum facendo clic sul pulsante '#'."
+	"ufficiale.\n\nNota che puoi calcolare in Rufus la checksum facendo clic sul pulsante (✓)."
 t MSG_299 "Errore validazione data/ora"
 t MSG_300 "Rufus non può validare che la data/ora del pacchetto aggiornamento è più recente di quello quello per l'attuale "
 	"eseguibile.\n\nPer prevenire possibili scenari di un attacco malware, il processo di aggiornamento è stato interrotto e "
@@ -8332,7 +8314,6 @@ t MSG_169 "特別な隠しパーティションを作成し、各パーティシ
 	"古いBIOS使用時にブート時の検出を改善できます。"
 t MSG_170 "外付けUSB HDDのリストを有効にします。自己責任です!!!"
 t MSG_171 "フォーマットを始めます。\nターゲット ドライブのデータは全て破壊されます。"
-t MSG_172 "ライセンス情報とクレジット"
 t MSG_173 "選択するにはクリックします。"
 # The following will appear in the about dialog
 t MSG_174 "Rufus - 信頼性の高いUSBフォーマット ユーティリティ"
@@ -8782,7 +8763,6 @@ t MSG_169 "여분의 숨김 파티션을 만들고 파티션의 경계를 정렬
 	"구형 BIOS에서 부팅 속도를 향상시킬 수 있습니다."
 t MSG_170 "USB 하드 드라이브의 목록을 사용할 수 있게 합니다.   주의!!! 사용상의 위험에 대한 책임은 모두 사용자에게 있습니다."
 t MSG_171 "포맷을 시작합니다.\n이 대상 드라이브의 모든 데이터가 삭제됩니다!"
-t MSG_172 "라이센스 정보와 신용"
 t MSG_173 "선택하려면 클릭..."
 # The following will appear in the about dialog
 t MSG_174 "Rufus - 믿을 수 있는 USB 포맷 유틸리티"
@@ -8937,7 +8917,7 @@ t MSG_296 "이 버전의 Rufus는 개발자의 공식 버전이 아닙니다.\n\
 t MSG_297 "깨진 ISO가 감지 됨."
 t MSG_298 "선택한 ISO파일이 선언된 것과 일치하지 않습니다. 크기 데이터 %s이(가) 없습니다!\n\n만약 이 파일을 인터넷에서 가져왔다면 "
 	"새로운 사본을 다운로드 하고 MD5 또는 SHA Checksum이 공식 버전과 일치하는지 확인하십시오.\n\nRufus에서 MD5 또는 SHA를 계산하려면 "
-	"'#' 버튼을 클릭하십시오."
+	"(✓) 버튼을 클릭하십시오."
 t MSG_117 "표준 Windows 설치"
 
 ################################################################################
@@ -9220,7 +9200,6 @@ t MSG_169 "IZveidot papildus slēpto partīciju un izlīdzināt partīciju robe�
 	"Šī opcija var atvieglot ielādes noteikšanu vecākās BIOS versijās."
 t MSG_170 "Rādīt ārējos USB pieslēguma HDD."
 t MSG_171 "Tiks sākta formatēšana.\nVisi dati no nesēja tiks IZNĪCINĀTI!!!"
-t MSG_172 "Informācija par licencēm un izstrādātājiem"
 t MSG_173 "Piespiediet izvēlei..."
 # The following will appear in the about dialog
 t MSG_174 "Rufus - uzticama un vienkārša USB formatēšanas utilīta"
@@ -9381,7 +9360,7 @@ t MSG_296 "Šī Rufus versija nav no oficiālā izstrādātāja.\n\nVai tiešām
 t MSG_297 "Noteikts samazināts ISO"
 t MSG_298 "Izvēlētais ISO fails neatbilst noteiktajam izmēram: %s datu ir kļūdaini!\n\nJa šis fails tika "
 	"lejuplādēts no Interneta, nepieciešams lejuplādēt no jauna un pārbaudīt MD5 vai SHA kontrolsummu "
-	"atbilstību.\n\nPiezīme: aprēķināt MD5 vai SHA kontrolsummu programmā Rufus var piespiežot taustiņu '#'."
+	"atbilstību.\n\nPiezīme: aprēķināt MD5 vai SHA kontrolsummu programmā Rufus var piespiežot taustiņu (✓)."
 t MSG_299 "Laika zīmoga kļūda"
 t MSG_300 "Rufus neizdevās identificēt jauninājuma laika zīmogu, kā jaunāku attiecībā pret "
 	"pašreizējo.\n\nLai nepieļaut iespējamu ļaundarības varbūtību, programmas jaunināšanas process tika pārtraukts, "
@@ -9670,7 +9649,6 @@ t MSG_169 "Sukurti papildomą slaptą skaidinį ir bandyti sulygiuoti skaidinių
 	"Tai gali pagerinti įkelties aptikimą su senais BIOSais"
 t MSG_170 "Įgalinti išorinių USB kietųjų diskų pateiktį. NAUDOTI SAVO RIZIKA!!!"
 t MSG_171 "Pradėti suženklinti.\nTai SUNAIKINS visus duomenis paskirtyje!"
-t MSG_172 "Licencijavimo informacija ir kreditai"
 t MSG_173 "Spauskite pasirinkti..."
 # The following will appear in the about dialog
 t MSG_174 "Rufus - patikima USB suženklinimo priemonė"
@@ -9834,7 +9812,7 @@ t MSG_297 "Aptiktas nepilnas ISO"
 t MSG_298 "Jūsų pasirinktas ISO failas neatitinka deklaruojamo dydžio: %s duomenų trūksta!\n\n"
 	"Jei jūs gavote šį failą internetu, pabandykite atsisiųsti jį iš naujo ir patikrinkite, "
 	"ar MD5 or SHA kontrolinės sumos atitinka oficialiąsias.\n\nBeje, jūs galite apskaičiuoti "
-	"MD5 arba SHA per Rufus, paspaudę mygtuką „#“."
+	"MD5 arba SHA per Rufus, paspaudę mygtuką (✓)."
 t MSG_117 "Standartinė Windows įdiegtis"
 
 ################################################################################
@@ -10114,7 +10092,6 @@ t MSG_169 "Ciptakan partisyen tambahan tersembunyi dan cuba melaraskan sempadan 
 	"Ini boleh mempertingkatkan pengesanan boot untuk BIOS lama"
 t MSG_170 "Membolehkan penyenaraian pagaran cakera keras USB. GUNAKAN ATAS RISIKO SENDIRI!!!"
 t MSG_171 "Mulakan operasi pemformatan.\nIni akan MEMADAMKAN semua data pada sasaran!"
-t MSG_172 "Maklumat pelesenan dan penghargaan"
 t MSG_173 "Klik untuk memilih..."
 # The following will appear in the about dialog
 t MSG_174 "Rufus - Utiliti pemformatan USB yang dipercayai"
@@ -10553,7 +10530,6 @@ t MSG_169 "Lager en ekstra skjult partisjon og forsøker å justere partisjonsgr
 	"Dette kan gjøre det lettere å oppdage for eldre BIOSer"
 t MSG_170 "Aktivere listen av USB-harddisk-kabinetter. BRUKES PÅ EGEN RISIKO!!!"
 t MSG_171 "Starter formateringsoperasjonen.\nDette vil SLETTE data på målstasjonen!"
-t MSG_172 "Lisensinformasjon og krediteringer"
 t MSG_173 "Klikk for å velge..."
 # The following will appear in the about dialog
 t MSG_174 "Rufus - Det pålitelige USB-formateringsprogrammet"
@@ -10719,7 +10695,7 @@ t MSG_296 "Denne versjonen av Rufus er IKKE laget av dens offisielle utvikler(e)
 t MSG_297 "Forkortet ISO oppdaget"
 t MSG_298 "ISO-filen du har valgt, stemmer ikke overens med den deklarerte størrelsen: %s av dataene mangler!\n\nHvis du har lastet ned denne "
 	"filen fra internett, bør du prøve å laste ned en ny kopi, og verifisere at MD5- eller SHA-kontrollsummen samsvarer med de offisielle.\n\n"
-	"Legg merke til at du kan beregne MD5 eller SHA i Rufus ved å klikke på '#'-knappen."
+	"Legg merke til at du kan beregne MD5 eller SHA i Rufus ved å klikke på (✓)-knappen."
 t MSG_299 "Tidspunkt bekreftelses feil"
 t MSG_300 "Rufus kunne ikke bekrefte at tidspunktet av den nedlastede oppdateringen er nyere enn den "
 	"nåværende startede.\n\nFor å forhindre potensielle angrepsscenarier, har oppdateringsprosessen blitt avbrutt og "
@@ -11047,7 +11023,6 @@ t MSG_169 "افزودن تنظیماتی مثل ساختن یک پارتیشن �
 t MSG_170 "لطفاً با آگاهی کامل این گزینه را انتخاب کنید و در صورت نیاز حتماً "
 	"از اطلاعات موجود در هارد اکسترنال یک نسخه پشتیبان (بکاپ) تهیه کنید."
 t MSG_171 "شروع فرآیند فرمت کردن\n با این کار، همه اطلاعات موجود در درایوی که انتخاب کرده‌اید «پاک» می‌شود"
-t MSG_172 "اطلاعات مربوط به پروانه (Licence)، به‌روزرسانی (آپدیت)، سازنده و مترجم نرم‌افزار"
 t MSG_173 "برای انتخاب کلیک کنید"
 # The following will appear in the about dialog
 # Translator Note: In the line below invisible RLE (at the beginning) and PDF (at the end) are used
@@ -11233,7 +11208,7 @@ t MSG_297 "‫فایل ISO ناقص شناسایی شده است‬"
 # Translator Note: In the lines below invisible RLE (at the beginning) and PDF (at the end) are used
 t MSG_298 "‫این فایل ISO که انتخاب کرده‌اید با اندازه تعیین شده در آن هماهنگی ندارد.‬ ‬‫%s از داده‌ها موجود نیست!‬\n\n"
 	"‫اگر این فایل را از اینترنت دانلود کرده‌اید، لطفا نسخه‌ای جدید از آن را دانلود کرده و مطمئن شوید که مقادیر کنترلی MD5 یا SHA آن عینا برابر با مقادیر رسمی آن‌هاست.‬\n\n"
-	"‫توجه داشته باشید که در Rufus می‌توانید با انتخاب دکمه '#' مقادیر MD5 یا SHA را  محاسبه کنید.‬"
+	"‫توجه داشته باشید که در Rufus می‌توانید با انتخاب دکمه (✓) مقادیر MD5 یا SHA را  محاسبه کنید.‬"
 t MSG_299 "خطای اعتبارسنجی برچسب زمان (timestamp)"
 t MSG_300 "از نظر برنامه، برچسب زمانی آپدیت دانلود شده معتبر نیست. \n\n"
 	"برای پیشگیری از حملات هک احتمالی، فرآیند به‌روزرسانی متوقف و فایل دانلود شده حذف خواهد شد. لطفا برای جزئیات بیشتر گزارش‌ها (لاگ) را بررسی کنید"
@@ -11529,7 +11504,6 @@ t MSG_169 "Tworzy dodatkową, ukrytą partycję i próbuje wyrównać granice pa
 	"To może poprawić wykrywanie uruchamiania dla starszych BIOSów"
 t MSG_170 "Włącza listowanie Dysków Twardrdych USB"
 t MSG_171 "Uruchamia operację formatowania.\nTo ZNISZCZY wszystkie dane na urządzeniu docelowym!"
-t MSG_172 "Informacje o licencji i creditsy"
 t MSG_173 "Kliknij aby wybrać..."
 # The following will appear in the about dialog
 t MSG_174 "Rufus - Solidne narzędzie do formatowania USB"
@@ -11695,7 +11669,7 @@ t MSG_296 "Ta wersja Rufusa nie została stworzona przez oficjalnego dewelopera(
 t MSG_297 "Wykryto obcięte ISO"
 t MSG_298 "Rozmiar pliku ISO który wybrałeś nie zgadza się z jego deklarowanym rozmiarem: brakuje %s danych!\n\nJeżeli uzyskałeś ten plik "
 	"z internetu, powinieneś spróbować pobrać nową kopię oraz zweryfikować, że sumy kontrolne MD5 lub SHA zgadzają się "
-	"z oficjalnymi.\n\nZauważ, że możesz obliczyć sumy MD5 lub SHA w Rufusie klikając przycisk '#'."
+	"z oficjalnymi.\n\nZauważ, że możesz obliczyć sumy MD5 lub SHA w Rufusie klikając przycisk (✓)."
 t MSG_299 "Błąd sprawdzania poprawności znacznika czasu"
 t MSG_300 "Rufus nie był w stanie potwierdzić, że znacznik czasu pobranej aktualizacji jest nowszy niż ten, który jest "
 	"dla obecnego pliku wykonywalnego.\n\nAby zapobiec potencjalnym atakom proces aktualizacji został przerwany, a "
@@ -12005,7 +11979,6 @@ t MSG_169 "Criar uma partição oculta extra e tentar alinhar os limites das par
 	"Isso pode melhorar a detecção de inicialização para BIOSs mais antigos"
 t MSG_170 "Ativar a listagem de discos rígidos portáteis USB. USE POR SUA CONTA E RISCO!!!"
 t MSG_171 "Iniciar a operação de formatação.\nTodos os dados no dispositivo serão DESTRUÍDOS!"
-t MSG_172 "Informações da licença e créditos"
 t MSG_173 "Clique para selecionar…"
 # The following will appear in the about dialog
 t MSG_174 "Rufus - O Utilitário de Formatação USB Confiável"
@@ -12180,7 +12153,7 @@ t MSG_297 "ISO truncada detectada"
 t MSG_298 "O arquivo ISO selecionado não corresponde ao seu tamanho declarado: %s de dados estão faltando!\n\n"
 	"Se você obteve este arquivo da Internet, faça o download de uma nova cópia e verifique se "
 	"as somas de verificação MD5 ou SHA correspondem às oficiais.\n\nVocê pode calcular o MD5 ou SHA no Rufus "
-	"clicando no botão '#'."
+	"clicando no botão (✓)."
 t MSG_299 "Erro de validação da marca temporal"
 t MSG_300 "O Rufus não pôde validar que a marca temporal da atualização baixada é mais recente do que aquela do "
 	"executável atual.\n\nPara evitar possíveis cenários de ataque, o processo de atualização foi interrompido e "
@@ -12480,7 +12453,6 @@ t MSG_169 "Criar uma partição extra oculta e tentar alinhar limites das parti�
 	"Isto pode melhorar a deteção do USB inicializável para as BIOS antigas"
 t MSG_170 "Ativa a deteção de discos rígidos portáteis USB. USE-O POR SEU PRÓPRIO RISCO!!!"
 t MSG_171 "Iniciar a operação de formatação.\nTodos os dados no dispositivo serão DESTRUÍDOS!"
-t MSG_172 "Informação da licença e créditos"
 t MSG_173 "Clique para selecionar..."
 # The following will appear in the about dialog
 t MSG_174 "Rufus - O utilitário de confiança para formatação USB"
@@ -12642,7 +12614,7 @@ t MSG_296 "Esta versão de Rufus NÃO foi desenvolvida pelo autor oficial.\n\nTe
 t MSG_297 "Detetado ISO truncado"
 t MSG_298 "O ficheiro ISO selecionado não corresponde ao tamanho declarado: faltam %s de dados!\n\nSe obteve este ficheiro "
 	"da Internet, deve tentar transferir uma nova cópia e verificar se os checksums MD5 ou SHA correspondem aos oficiais.\n\n"
-	"Rufus que pode calcular o MD5 ou SHA se clicar no botão '#'."
+	"Rufus que pode calcular o MD5 ou SHA se clicar no botão (✓)."
 t MSG_299 "Erro de validação de data/hora"
 t MSG_300 "Rufus could not validate that the timestamp of the downloaded update is more recent than the one for the "
 	"current executable.\n\nIn order to prevent potential attack scenarios, the update process has been aborted and "
@@ -12916,7 +12888,6 @@ t MSG_169 "Creați o partiție suplimentară și să încerce să alinieze difer
 	"Acest lucru poate îmbunătăți detectarea cu un vechi BIOS"
 t MSG_170 "Activați lista de USB Hard Drive anexate. O FOLOSESTI PE PROPRIUL RISC!!!"
 t MSG_171 "Începe operația de formatare.\n Aceasta va distruge orice date de pe dispozitiv!"
-t MSG_172 "Informații licența și confirmări"
 t MSG_173 "Faceți clic pentru a selecta..."
 t MSG_174 "Rufus - Dispozitive USB de formatare"
 t MSG_175 "Versiune %d.%d (build %d)"
@@ -13056,7 +13027,7 @@ t MSG_296 "Această versiune de Rufus nu a fost produsă de dezvoltatorul oficia
 t MSG_297 "S-a detectat un ISO trunchiat"
 t MSG_298 "Fișierul ISO pe care l-ați selectat nu se potrivește dimensiunii sale declarate: %s de date lipsesc!\n\nDacă ați obținut "
 	"acest fișier de pe Internet, ar trebui să încercați să descărcați o copie nouă și să verificați dacă sumele de control MD5 sau SHA se potrivesc"
-	"cu cele oficiale.\n\nRețineți că puteți calcula MD5 sau SHA în Rufus făcând clic pe butonul '#' ."
+	"cu cele oficiale.\n\nRețineți că puteți calcula MD5 sau SHA în Rufus făcând clic pe butonul (✓) ."
 t MSG_299 "Eroare validare și de timp"
 t MSG_300 "Rufus nu a putut valida că marcajul temporal al actualizării descărcate este mai recent decît "
 	"executabilul curent.\n\nPentru a preveni posibilele scenarii de atac, procesul de actualizare a fost anulat şi "
@@ -13342,7 +13313,6 @@ t MSG_169 "Добавить дополнительный скрытый разд
 	"Это поможет улучшить обнаружение загрузчика в старых версия BIOS."
 t MSG_170 "Показывать внешние USB накопители, подключенные к компьютеру.\n"
 t MSG_171 "Начать форматирование устройства.\nВсе данные на диске будут уничтожены!"
-t MSG_172 "Сведения о лицензировании и разработчиках"
 t MSG_173 "Нажмите для выбора..."
 # The following will appear in the about dialog
 t MSG_174 "Rufus - The Reliable USB Formatting Utility"
@@ -13498,7 +13468,7 @@ t MSG_296 "Эта версия Rufus не была выпущена официа
 t MSG_297 "Обнаружен обрезанный ISO-образ"
 t MSG_298 "Выбранный ISO-образ не соответствует заявленному размеру: %s данных отсутствует!\n\nЕсли вы скачали "
 	"этот файл из интернета, вы должны попытаться загрузить его снова и убедиться, что контрольные суммы MD5 или "
-	"SHA совпадают.\n\nОбратите внимание, что вы можете вычислить MD5 или SHA в Rufus, нажав кнопку '#'."
+	"SHA совпадают.\n\nОбратите внимание, что вы можете вычислить MD5 или SHA в Rufus, нажав кнопку (✓)."
 t MSG_299 "Ошибка проверки временной метки"
 t MSG_300 "Rufus не смог подтвердить, что временная метка загруженного обновления более поздняя, ​​чем дата текущего "
 	"исполняемого файла.\n\nЧтобы предотвратить возможный сценарий атаки, процесс обновления был прерван, а загрузка "
@@ -13798,7 +13768,6 @@ t MSG_169 "Izradi dodatnu skrivenu particiju i pokušaj poravnati granice partic
 	"Ovo je korisno za poboljšanje pronalaska uređaja za podizanje sistema kod starih BIOS-a"
 t MSG_170 "Pronalazak USB hard diskova. Koristiti na vlastitu odgovornost!"
 t MSG_171 "Započni proces formatiranja.\nOvo će UNIŠTITI sve podatke na uređaju!"
-t MSG_172 "Informacije o licenciranju i zaslugama"
 t MSG_173 "Kliknite za odabir..."
 # The following will appear in the about dialog
 t MSG_174 "Rufus - The Reliable USB Formatting Utility"
@@ -13964,7 +13933,7 @@ t MSG_296 "Ovu verziju Rufus-a nije proizveo zvanični programer(i).\n\nDa li st
 t MSG_297 "ISO datoteka nije validna"
 t MSG_298 "ISO datoteka koju ste odabrali ne podudara se sa njenom zvaničnom veličinom: %s nedostaje!\n\nUkoliko ste preuzeli "
 	"ovu datoteka sa Interneta, pokušajte da ponovo preuzmete kopiju ove datoteke i provjerite da li se podudara za zvaničnom datotekom pomoću "
-	"MD5 ili SHA kontrolne sume.\n\nNapomena, možete izračunati kontrolnu sumu pomoću Rufus-a klikom na '#' dugme."
+	"MD5 ili SHA kontrolne sume.\n\nNapomena, možete izračunati kontrolnu sumu pomoću Rufus-a klikom na (✓) dugme."
 t MSG_117 "Standardna instalacija Windows-a"
 
 ################################################################################
@@ -14243,7 +14212,6 @@ t MSG_169 "Bude naviac vytvorený skrytý oddiel, program sa pokúsi nastaviť h
 	"Toto nastavenie zlepší boot detekciu pre staršie BIOSy"
 t MSG_170 "Povolí zobrazovanie USB pevných diskov (USB HDD). POUŽITIE LEN NA VLASTNÉ RIZIKO!!!"
 t MSG_171 "Stlačením tohto tlačidla spustíte formátovanie.\nFormátovaním sa VYMAŽÚ všetky údaje na disku!"
-t MSG_172 "Informácie o licencii, aktualizácii a kredity"
 t MSG_173 "Stlačením vybrať..."
 # The following will appear in the about dialog
 t MSG_174 "Rufus - Spoľahlivý program pre formátovanie USB"
@@ -14401,7 +14369,7 @@ t MSG_297 "Bol zistený skrátený ISO súbor"
 t MSG_298 "Veľkosť vybraného ISO súboru sa nezhoduje s jeho deklarovanou veľkosťou (chýba %s)!\n\n"
 	"Ak ste získali tento súbor z internetu, pokúste sa znova stiahnuť novú kópiu tohto súboru a overiť ju "
 	"MD5 alebo SHA kontrolným súčtom s originálnym súborom.\n\nAk chcete vypočítať kontrólny súčet MD5 alebo "
-	"SHA pre vybraný súbor v programe Rufus, stlačte tlačidlo '#'."
+	"SHA pre vybraný súbor v programe Rufus, stlačte tlačidlo (✓)."
 t MSG_117 "Štandardná inštalácia Windows (Inštalátor)"
 t MSG_118 "Windows To Go (Prenosná verzia)"
 
@@ -14681,7 +14649,6 @@ t MSG_169 "Ta možnost ustvari dodatno skrito particijo in poskuša poravnati pa
 	"To lahko izboljša zaznavo zagonskih naprav v starih BIOS verzijah."
 t MSG_170 "Omogoči naštevanje trdih diskov, priključenih preko USB. TO JE NA VAŠO ODGOVORNOST!"
 t MSG_171 "Začne formatirati.\nTo bo UNIČILO vse podatke na ciljni napravi!"
-t MSG_172 "Licenčne informacije in zasluge"
 t MSG_173 "Kliknite, da izberete…"
 # The following will appear in the about dialog
 t MSG_174 "Rufus - zanesljivi pripomoček za USB formatiranje"
@@ -14825,7 +14792,7 @@ t MSG_296 "Te verzije Rufusa ni izdelal njegov uradni razvijalec.\n\nAli ste pre
 t MSG_297 "Odrezana datoteka ISO"
 t MSG_298 "Datoteka ISO, ki ste jo izbrali, ni pričakovane velikosti: %s njenih podatkov manjka.\n\n"
 	"Če ste jo prenesli z interneta, jo prenesite še enkrat in preverite, ali se vrednosti MD5 in SHA "
-	"ujemata z uradnima.\n\nV Rufusu ju lahko izračunate z gumbom '#'."
+	"ujemata z uradnima.\n\nV Rufusu ju lahko izračunate z gumbom (✓)."
 t MSG_118 "Standardna Windows namestitev"
 
 ################################################################################
@@ -15103,7 +15070,6 @@ t MSG_169 "Crea una partición oculta extra y trata de alinear los límites de l
 	"Esto puede mejorar la detección de dispositivos de arranque USB en las BIOS antiguas"
 t MSG_170 "Activa la detección de discos duros externos USB. ¡¡¡ÚSESE BAJO SU PROPIO RIESGO!!!"
 t MSG_171 "Comienza la operación de formateo.\n¡Todos los datos en el dispositivo elegido serán DESTRUIDOS!"
-t MSG_172 "Información de licencia y créditos"
 t MSG_173 "Haga clic para seleccionar..."
 # The following will appear in the about dialog
 t MSG_174 "Rufus - La fiable herramienta de formateo de USBs"
@@ -15267,7 +15233,7 @@ t MSG_296 "Esta versión de Rufus NO ha sido generada por su(s) desarrollador(es
 t MSG_297 "Se ha detectado una ISO truncada"
 t MSG_298 "El fichero ISO seleccionado no tiene su tamaño declarado: ¡Falta un %s de los datos!\n\nSi has obtenido este fichero de Internet, "
 	"deberías intentar una nueva descarga y verificar que los checksum MD5 y SHA coinciden con los originales.\n\nPuedes calcular los valores "
-	"MD5 o SHA con Rufus, desde el botón '#'."
+	"MD5 o SHA con Rufus, desde el botón (✓)."
 
 ################################################################################
 l "sv-SE" "Swedish (Svenska)" 0x041d, 0x081d
@@ -15553,7 +15519,6 @@ t MSG_169 "Skapa en extra gömd partition och prova att justera om partitionsupp
 	"Detta kan förbättra uppstarten för äldre BIOS:ar"
 t MSG_170 "Lista alla USB-hårddiskar (även icke flyttbara).\nANVÄND PÅ EGEN RISK!!!"
 t MSG_171 "Starta formateringen.\nDetta kommer att ta bort ALL data på målenheten!"
-t MSG_172 "Licensinformation och beröm"
 t MSG_173 "Tryck för att välja..."
 # The following will appear in the about dialog
 t MSG_174 "Rufus - Det pålitliga verktyget för USB-formatering"
@@ -15713,7 +15678,7 @@ t MSG_296 "Denna version av Rufus producerades inte av originalutvecklaren.\n\n�
 t MSG_297 "Ej komplett ISO-fil"
 t MSG_298 "ISO-filen du har valt matchar inte den angivna storleken: %s av data saknas!\n\nOm du har hämtat den här filen från internet, "
 	"prova då med att ladda ner filen igen och verifiera att checksumman MD5 eller SHA stämmer överens med den officiella filen.\n\n"
-	"Tips: Du kan beräkna MD5 eller SHA i Rufus genom att klicka på knappen '#'."
+	"Tips: Du kan beräkna MD5 eller SHA i Rufus genom att klicka på knappen (✓)."
 t MSG_299 "Valideringfel av tidsstämpeln"
 t MSG_300 "Rufus kunde inte validera att tidsstämpeln på den nerladdade uppdateringen är nyare än den gamla.\n\n"
 	"För att förhindra potentiella angreppsscenarier, har uppdateringsprocessen avslutats och "
@@ -16019,7 +15984,6 @@ t MSG_169 "สร้างพาร์ทิชั่นเพิ่มเติ
 	"เป็นข้อดีที่จะช่วยให้ BIOS รุ่นเก่าสามารถตรวจพบอุปกรณ์ได้ดีขึ้น"
 t MSG_170 "เปิดให้แสดงรายชื่อ USB Hard Drive ทั้งหมด (มีความเสี่ยง โปรดระมัดระวัง!!!)"
 t MSG_171 "กำลังเริ่มต้นฟอร์แมท\nข้อมูลทั้งหมดบนอุปกรณ์ที่เลือกจะถูกลบทิ้ง"
-t MSG_172 "ข้อมูลลิขสิทธิ์และเครดิต"
 t MSG_173 "คลิกเพื่อเลือก..."
 # The following will appear in the about dialog
 t MSG_174 "Rufus - The Reliable USB Formatting Utility"
@@ -16186,7 +16150,7 @@ t MSG_296 "Rufus เวอร์ชั่นนี้ ไม่ได้ถู�
 t MSG_297 "พบอิมเมจ ISO ที่ถูกตัดทอน"
 t MSG_298 "อิมเมจ ISO ที่คุณเลือกมีคุณสมบัติไม่ตรงกับที่ได้แจ้งไว้ ดังนี้ ขนาดไฟล์: %s ได้หายไปจากต้นฉบับ!\n\nหากคุณดาวน์โหลดไฟล์นี้มาจาก"
 	"อินเทอร์เน็ต กรุณาดาวน์โหลดไฟล์อีกครั้ง และตรวจสอบว่าไฟล์นั้นมี MD5 หรือ SHA checksums ตรงกับไฟล์จากผู้ผลิต\n\nโปรดจำไว้ว่า"
-	"คุณสามารถตรวจสอบ checksum ของไฟล์ดังกล่าวได้จากโปรแกรม Rufus โดยกดปุ่ม '#'"
+	"คุณสามารถตรวจสอบ checksum ของไฟล์ดังกล่าวได้จากโปรแกรม Rufus โดยกดปุ่ม (✓)"
 t MSG_299 "การตรวจสอบ Timestamp ผิดพลาด"
 t MSG_300 "Rufus ไม่สามารถยืนยันความถูกต้องของ Timestamp ของโปรแกรมปรับรุ่นที่เพิ่งดาวน์โหลดมาว่าใหม่กว่า"
 	"รุ่นที่กำลังใช้อยู่ในปัจจุบัน.\n\nเพื่อป้องกันความเป็นไปได้ที่จะถูกโจมตี การปรับรุ่นได้ถูกยกเลิกและลบทิ้งไป"
@@ -16488,7 +16452,6 @@ t MSG_169 "Ekstra gizli bir bölüm oluşturur ve bölümlerin sınırlarını h
 	"Bu işlem eski BIOSlar için açılış algılamasını geliştirir"
 t MSG_170 "USB sabit sürücü eklerini listelemeyi etkinleştirir. SORUMLULUK SİZE AİTTİR!!!"
 t MSG_171 "Biçimlendirme işlemini başlat.\nBu hedef üzerinde tüm veriyi yok edecek!"
-t MSG_172 "Lisans bilgisi ve Emeği Geçenler"
 t MSG_173 "Seçmek için tıklayın..."
 # The following will appear in the about dialog
 t MSG_174 "Rufus - Güvenilir USB Biçimlendirme Programı"
@@ -16652,7 +16615,7 @@ t MSG_296 "Rufus'un bu sürümü, resmi geliştirici(ler)i tarafından oluşturu
 t MSG_297 "Kırpılmış ISO algılandı"
 t MSG_298 "Seçtiğiniz ISO dosyası bildirilen boyutla eşleşmiyor: Veri %s eksik!\n\nBu dosyayı İnternet'ten edindiyseniz, "
 	"yeni bir kopyasını indirip, MD5 veya SHA değerlerinin resmi dosyalarla eşleştiğini doğrulamanız gerekir.\n\n"
-	"Rufus'daki MD5 veya SHA'yı '#' işaretini tıklayarak hesaplayabileceğinizi unutmayın."
+	"Rufus'daki MD5 veya SHA'yı (✓) işaretini tıklayarak hesaplayabileceğinizi unutmayın."
 t MSG_299 "Zaman damgası doğrulama hatası"
 t MSG_300 "Rufus, indirilen güncellemenin zaman damgasının geçerli yürütülebilir dosya için olandan daha güncel "
 	"olduğunu doğrulayamadı.\n\nPotansiyel saldırı senaryolarını önlemek için güncelleme işleminden vazgeçildi ve "
@@ -16926,7 +16889,6 @@ t MSG_169 "Додати додатковий прихований розділ �
 	"Це допоможе покращити виявлення завантажувача в старих версіях BIOS."
 t MSG_170 "Відображати зовнішні USB накопичувачі, які підімкнені до комп'ютера.\n"
 t MSG_171 "Почати форматування пристрою.\nВсі дані на диску будуть знищені!"
-t MSG_172 "Відомості про ліцензування та розробників"
 t MSG_173 "Натисніть для вибору..."
 # The following will appear in the about dialog
 t MSG_174 "Rufus - The Reliable USB Formatting Utility"
@@ -17079,7 +17041,7 @@ t MSG_296 "Ця версія Rufus НЕ була підготована її о�
 t MSG_297 "Виявлено усічений ISO"
 t MSG_298 "Розмір обраного файла ISO не співпадає з оголошеним розміром: %s даних відсутньо!\n\nЯкщо ви завантажили цей файл з "
 	"Інтернету, вам слід завантажити нову копію файла або перевірити співпадіння контрольних сум MD5 чи SHA з офіційним файлом.\n\n"
-	"Пам'ятайте, що ви можете порівняти MD5 чи SHA в Rufus, натиснувши кнопку '#'."
+	"Пам'ятайте, що ви можете порівняти MD5 чи SHA в Rufus, натиснувши кнопку (✓)."
 t MSG_117 "Стандартне встановлення Windows"
 
 ################################################################################
@@ -17362,7 +17324,6 @@ t MSG_169 "Tạo một phân vùng ẩn khác và thử gắn kết ranh giới 
 	"Điều này có thể cải thiện khả năng phát hiện khởi động cho BIOS cũ"
 t MSG_170 "Kích hoạt danh sách ổ cứng USB trong máy. DÙNG CẨN TRỌNG!!!"
 t MSG_171 "Bắt đầu hoạt động định dạng.\nViệc này sẽ TIÊU HUỶ mọi dữ liệu trên đĩa đã chọn!"
-t MSG_172 "Thông tin cấp phép và công trạng"
 t MSG_173 "Nhấn để chọn..."
 # The following will appear in the about dialog
 t MSG_174 "Rufus - Tiện ích Định dạng USB Đáng tin cậy"
@@ -17520,5 +17481,5 @@ t MSG_295 "Cảnh báo: Phiên bản không chính thức"
 t MSG_296 "Phiên bản Rufus này KHÔNG PHẢI do chính tác giả tạo ra.\n\nBạn chắc muốn tiếp tục chạy chứ?"
 t MSG_297 "Đã phát hiện ISO bị cắt xén"
 t MSG_298 "Tập tin ISO bạn đã chọn không trùng khớp kích cỡ của nó: thiếu mất %s dữ liệu!\n\nnếu bạn tải tập tin này từ Internet, bạn nên tải lại một bản sao "
-	"mới và xác nhận rằng mã MD5 hoặc SHA trùng khớp với bản chính thức.\n\nHãy nhớ rằng bạn có thể tính mã MD5 hoặc SHA trong Rufus bằng cách chọn nút '#'."
+	"mới và xác nhận rằng mã MD5 hoặc SHA trùng khớp với bản chính thức.\n\nHãy nhớ rằng bạn có thể tính mã MD5 hoặc SHA trong Rufus bằng cách chọn nút (✓)."
 t MSG_117 "Cài đặt Windows tiêu chuẩn"

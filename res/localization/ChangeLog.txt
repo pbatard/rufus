@@ -45,10 +45,12 @@ o Version 1.0.23 (2018.??.??)
                Be mindful that you probably don't want to translate 'Legacy Mode' as this is an option that usually appears in English in the UEFI settings.
   - *REPLACED* MSG_152 -> "'non CSM' means that the device will only boot in native UEFI mode, and not in BIOS emulation mode (also known as 'Legacy Mode')."
   - *REPLACED* MSG_163 -> "Method that will be used to create partitions"
+  - *REMOVED*  MSG_172
   - *NEW*      MSG_278 "Checking for conflicting processes..."
   - *REPLACED* MSG_280 "Image selection" -> "Disk or ISO image"
   - *REPLACED* MSG_281 "(Please select an image)" -> "%s (Please select)"
      MSG_281 + MSG_280 are used to create the message that appears in the boot selection dropdown when an image has not been selected.
+  - *UPDATED*  MSG_298 The '#' button is now the (✓) button
   - *NEW*      MSG_299 "Timestamp validation error"
   - *NEW*      MSG_300 "Rufus could not validate that the timestamp of the downloaded update is more recent than the one for the "
                        "current executable.\n\nIn order to prevent potential attack scenarios, the update process has been aborted and "

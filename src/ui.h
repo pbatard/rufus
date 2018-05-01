@@ -100,7 +100,7 @@ static int advanced_device_move_ids[] = {
 };
 
 static int advanced_device_toggle_ids[] = {
-	IDC_SAVE,
+	IDC_SAVE_TOOLBAR,
 	IDC_LIST_USB_HDD,
 	IDC_OLD_BIOS_FIXES,
 	IDC_RUFUS_MBR,
@@ -171,8 +171,8 @@ static int half_width_ids[] = {
 };
 
 static int adjust_dpi_ids[][5] = {
-	{IDS_DEVICE_TXT, IDC_DEVICE, IDC_SAVE, 0, 0},
-	{IDS_BOOT_SELECTION_TXT, IDC_BOOT_SELECTION, IDC_HASH, IDC_SELECT, 0},
+	{IDS_DEVICE_TXT, IDC_DEVICE, IDC_SAVE_TOOLBAR, 0, 0},
+	{IDS_BOOT_SELECTION_TXT, IDC_BOOT_SELECTION, IDC_HASH_TOOLBAR, IDC_SELECT, 0},
 	{IDS_IMAGE_OPTION_TXT, IDC_IMAGE_OPTION, 0, 0, 0},
 	{IDS_PARTITION_TYPE_TXT, IDC_PARTITION_TYPE, IDS_TARGET_SYSTEM_TXT, IDC_TARGET_SYSTEM, IDS_CSM_HELP_TXT},
 	{IDC_ADVANCED_DEVICE_TOOLBAR, 0, 0, 0, 0},
@@ -189,4 +189,11 @@ static int adjust_dpi_ids[][5] = {
 	{IDS_STATUS_TXT, 0, 0, 0, 0},
 	{IDC_PROGRESS, 0, 0, 0, 0 },
 	{IDC_MULTI_TOOLBAR, IDC_TEST, IDC_START, IDCANCEL, 0}
+};
+
+static int multitoolbar_icons[] = {
+	IDI_LANG_16,
+	IDI_INFO_16,
+	IDI_SETTINGS_16,
+	IDI_LOG_16
 };

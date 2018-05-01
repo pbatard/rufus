@@ -33,16 +33,16 @@ LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
 IDD_DIALOG DIALOGEX 12, 12, 232, 326
 STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_MINIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_ACCEPTFILES
-CAPTION "Rufus 3.0.1261"
+CAPTION "Rufus 3.0.1262"
 FONT 9, "Segoe UI Symbol", 400, 0, 0x0
 BEGIN
     LTEXT           "Drive Properties",IDS_DRIVE_PROPERTIES_TXT,8,6,53,12,NOT WS_GROUP
     LTEXT           "Device",IDS_DEVICE_TXT,8,21,216,8
     COMBOBOX        IDC_DEVICE,8,30,196,10,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    PUSHBUTTON      "...",IDC_SAVE,210,30,14,12,BS_ICON
+    PUSHBUTTON      "...",IDC_SAVE,210,30,14,12,BS_FLAT | NOT WS_VISIBLE
     LTEXT           "Boot selection",IDS_BOOT_SELECTION_TXT,8,43,216,8
     COMBOBOX        IDC_BOOT_SELECTION,8,52,148,10,CBS_DROPDOWNLIST | CBS_AUTOHSCROLL | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP
-    PUSHBUTTON      "#",IDC_HASH,162,52,10,10,BS_ICON
+    PUSHBUTTON      "#",IDC_HASH,162,52,10,12,BS_FLAT | NOT WS_VISIBLE
     PUSHBUTTON      "SELECT",IDC_SELECT,180,52,45,10
     LTEXT           "Image option",IDS_IMAGE_OPTION_TXT,8,65,216,8
     COMBOBOX        IDC_IMAGE_OPTION,8,74,216,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
@@ -302,6 +302,24 @@ BEGIN
     "IDR_UEFI_NTFS           RCDATA                  ""../res/uefi/uefi-ntfs.img""\r\n"
     "IDR_TOGO_SAN_POLICY_XML RCDATA                  ""../res/togo/san_policy.xml""\r\n"
     "IDR_TOGO_UNATTEND_XML   RCDATA                  ""../res/togo/unattend.xml""\r\n"
+    "IDI_LANG_16             RCDATA                  ""../res/icons/lang-16.png""\r\n"
+    "IDI_INFO_16             RCDATA                  ""../res/icons/info-16.png""\r\n"
+    "IDI_SETTINGS_16         RCDATA                  ""../res/icons/settings-16.png""\r\n"
+    "IDI_LOG_16              RCDATA                  ""../res/icons/log-16.png""\r\n"
+    "IDI_SAVE_16             RCDATA                  ""../res/icons/save-16.png""\r\n"
+    "IDI_HASH_16             RCDATA                  ""../res/icons/hash-16.png""\r\n"
+    "IDI_LANG_24             RCDATA                  ""../res/icons/lang-24.png""\r\n"
+    "IDI_INFO_24             RCDATA                  ""../res/icons/info-24.png""\r\n"
+    "IDI_SETTINGS_24         RCDATA                  ""../res/icons/settings-24.png""\r\n"
+    "IDI_LOG_24              RCDATA                  ""../res/icons/log-24.png""\r\n"
+    "IDI_SAVE_24             RCDATA                  ""../res/icons/save-24.png""\r\n"
+    "IDI_HASH_24             RCDATA                  ""../res/icons/hash-24.png""\r\n"
+    "IDI_LANG_32             RCDATA                  ""../res/icons/lang-32.png""\r\n"
+    "IDI_INFO_32             RCDATA                  ""../res/icons/info-32.png""\r\n"
+    "IDI_SETTINGS_32         RCDATA                  ""../res/icons/settings-32.png""\r\n"
+    "IDI_LOG_32              RCDATA                  ""../res/icons/log-32.png""\r\n"
+    "IDI_SAVE_32             RCDATA                  ""../res/icons/save-32.png""\r\n"
+    "IDI_HASH_32             RCDATA                  ""../res/icons/hash-32.png""\r\n"
     "\r\n"
     "// Must reference a manifest for visual styles and elevation\r\n"
     "// Oh, and it must happen at the end, or MinGW will ignore it!\r\n"
@@ -371,8 +389,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 3,0,1261,0
- PRODUCTVERSION 3,0,1261,0
+ FILEVERSION 3,0,1262,0
+ PRODUCTVERSION 3,0,1262,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -389,13 +407,13 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Akeo Consulting (http://akeo.ie)"
             VALUE "FileDescription", "Rufus"
-            VALUE "FileVersion", "3.0.1261"
+            VALUE "FileVersion", "3.0.1262"
             VALUE "InternalName", "Rufus"
             VALUE "LegalCopyright", "© 2011-2018 Pete Batard (GPL v3)"
             VALUE "LegalTrademarks", "http://www.gnu.org/copyleft/gpl.html"
             VALUE "OriginalFilename", "rufus.exe"
             VALUE "ProductName", "Rufus"
-            VALUE "ProductVersion", "3.0.1261"
+            VALUE "ProductVersion", "3.0.1262"
         END
     END
     BLOCK "VarFileInfo"
@@ -468,6 +486,24 @@ IDR_XT_HOGGER           RCDATA                  "../res/hogger/hogger.exe"
 IDR_UEFI_NTFS           RCDATA                  "../res/uefi/uefi-ntfs.img"
 IDR_TOGO_SAN_POLICY_XML RCDATA                  "../res/togo/san_policy.xml"
 IDR_TOGO_UNATTEND_XML   RCDATA                  "../res/togo/unattend.xml"
+IDI_LANG_16             RCDATA                  "../res/icons/lang-16.png"
+IDI_INFO_16             RCDATA                  "../res/icons/info-16.png"
+IDI_SETTINGS_16         RCDATA                  "../res/icons/settings-16.png"
+IDI_LOG_16              RCDATA                  "../res/icons/log-16.png"
+IDI_SAVE_16             RCDATA                  "../res/icons/save-16.png"
+IDI_HASH_16             RCDATA                  "../res/icons/hash-16.png"
+IDI_LANG_24             RCDATA                  "../res/icons/lang-24.png"
+IDI_INFO_24             RCDATA                  "../res/icons/info-24.png"
+IDI_SETTINGS_24         RCDATA                  "../res/icons/settings-24.png"
+IDI_LOG_24              RCDATA                  "../res/icons/log-24.png"
+IDI_SAVE_24             RCDATA                  "../res/icons/save-24.png"
+IDI_HASH_24             RCDATA                  "../res/icons/hash-24.png"
+IDI_LANG_32             RCDATA                  "../res/icons/lang-32.png"
+IDI_INFO_32             RCDATA                  "../res/icons/info-32.png"
+IDI_SETTINGS_32         RCDATA                  "../res/icons/settings-32.png"
+IDI_LOG_32              RCDATA                  "../res/icons/log-32.png"
+IDI_SAVE_32             RCDATA                  "../res/icons/save-32.png"
+IDI_HASH_32             RCDATA                  "../res/icons/hash-32.png"
 
 // Must reference a manifest for visual styles and elevation
 // Oh, and it must happen at the end, or MinGW will ignore it!
