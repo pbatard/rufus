@@ -1916,7 +1916,7 @@ static void CreateSmallButtons(HWND hDlg)
 
 	if (i16 >= 28)
 		icon_offset = 20;
-	else if (i16 > 20)
+	else if (i16 >= 20)
 		icon_offset = 10;
 
 	buffer = GetResource(hMainInstance, MAKEINTRESOURCEA(IDI_SAVE_16 + icon_offset), _RT_RCDATA, "save icon", &bufsize, FALSE);
@@ -1977,7 +1977,7 @@ static void CreateAdditionalControls(HWND hDlg)
 		s16 = 24;
 	if (i16 >= 28)
 		icon_offset = 20;
-	else if (i16 > 20)
+	else if (i16 >= 20)
 		icon_offset = 10;
 
 	// Fetch the up and down expand icons for the advanced options toolbar
@@ -3445,7 +3445,10 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	case WM_DRAWITEM:
 		if (wParam == IDC_STATUS) {
 			pDI = (DRAWITEMSTRUCT*)lParam;
-			pDI->rcItem.top -= (int)((4.0f * fScale) - 6.0f);
+			if (nWindowsVersion >= WINDOWS_10)
+				pDI->rcItem.top += (int)(1.0f * fScale);
+			else if (fScale >= 1.49f)
+				pDI->rcItem.top -= (int)(1.5f * fScale);
 			pDI->rcItem.left += (int)(4.0f * fScale);
 			SetBkMode(pDI->hDC, TRANSPARENT);
 			switch (pDI->itemID) {

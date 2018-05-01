@@ -5,7 +5,7 @@ Rufus: The Reliable USB Formatting Utility
 [![Coverity Scan Build Status](https://scan.coverity.com/projects/2172/badge.svg)](https://scan.coverity.com/projects/pbatard-rufus)
 [![Licence](https://img.shields.io/badge/license-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0.en.html)
 
-![Rufus logo](https://raw.githubusercontent.com/pbatard/rufus/master/res/icon-set/rufus-128.png)
+![Rufus logo](https://raw.githubusercontent.com/pbatard/rufus/master/res/icons/rufus-128.png)
 
 Features
 --------
