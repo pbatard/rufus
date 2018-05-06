@@ -845,8 +845,6 @@ BOOL GetDevices(DWORD devnum)
 		i = 0;
 	IGNORE_RETVAL(ComboBox_SetCurSel(hDeviceList, i));
 	SendMessage(hMainDialog, WM_COMMAND, (CBN_SELCHANGE<<16) | IDC_DEVICE, 0);
-	SendMessage(hMainDialog, WM_COMMAND, (CBN_SELCHANGE<<16) | IDC_FILE_SYSTEM,
-		ComboBox_GetCurSel(hFileSystem));
 	r = TRUE;
 
 out:

@@ -65,7 +65,7 @@ static BOOL user_changed_label = FALSE;
 static BOOL app_changed_label = FALSE;
 static BOOL allowed_filesystem[FS_MAX] = { 0 };
 static int64_t last_iso_blocking_status;
-static int windows_to_go_selection = 0, selected_pt = -1;
+static int windows_to_go_selection = 0, selected_pt = -1, selected_fs = -1;
 static int selection_default, row_height, advanced_device_section_height, advanced_format_section_height, image_index;
 static int device_vpos, format_vpos, status_vpos;
 static int ddh, bw, hw, fw;	// DropDown Height, Main button width, half dropdown width, full dropdown width
@@ -114,7 +114,7 @@ BOOL use_own_c32[NB_OLD_C32] = {FALSE, FALSE}, mbr_selected_by_user = FALSE, dis
 BOOL iso_op_in_progress = FALSE, format_op_in_progress = FALSE, right_to_left_mode = FALSE, has_uefi_csm;
 BOOL enable_HDDs = FALSE, force_update = FALSE, enable_ntfs_compression = FALSE, no_confirmation_on_cancel = FALSE, lock_drive = TRUE;
 BOOL advanced_mode_device, advanced_mode_format, allow_dual_uefi_bios, detect_fakes, enable_vmdk, force_large_fat32, usb_debug;
-BOOL use_fake_units, preserve_timestamps;
+BOOL use_fake_units, preserve_timestamps = FALSE;
 BOOL zero_drive = FALSE, list_non_usb_removable_drives = FALSE, enable_file_indexing, large_drive = FALSE, write_as_image = FALSE;
 int dialog_showing = 0;
 uint16_t rufus_version[3], embedded_sl_version[2];
@@ -553,7 +553,8 @@ static BOOL SetFileSystemAndClusterSize(char* fs_type)
 			}
 		}
 	} else {
-		SelectedDrive.FSType = FS_UNKNOWN;
+		// Re-select last user-selected FS
+		SelectedDrive.FSType = selected_fs;
 	}
 
 	for (i = 0; i<ComboBox_GetCount(hFileSystem); i++) {
@@ -573,7 +574,7 @@ static BOOL SetFileSystemAndClusterSize(char* fs_type)
 
 static void SetFSFromISO(void)
 {
-	int i, fs_tmp, selected_fs = FS_UNKNOWN;
+	int i, fs_tmp, preferred_fs = FS_UNKNOWN;
 	uint32_t fs_mask = 0;
 	BOOL windows_to_go = display_togo_option && (bt == BT_IMAGE) && HAS_WINTOGO(img_report) &&
 		(ComboBox_GetCurSel(GetDlgItem(hMainDialog, IDC_IMAGE_OPTION)) == 1);
@@ -590,30 +591,30 @@ static void SetFSFromISO(void)
 	// The presence of a 4GB file forces the use of NTFS as default FS
 	if (img_report.has_4GB_file) {
 		if (fs_mask & (1 << FS_NTFS)) {
-			selected_fs = FS_NTFS;
+			preferred_fs = FS_NTFS;
 		}
 	// Syslinux and EFI have precedence over bootmgr (unless the user selected BIOS as target type)
 	} else if ((HAS_SYSLINUX(img_report)) || (HAS_REACTOS(img_report)) || HAS_KOLIBRIOS(img_report) ||
 		(IS_EFI_BOOTABLE(img_report) && (tt == TT_UEFI) && (!windows_to_go))) {
 		if (fs_mask & (1<<FS_FAT32)) {
-			selected_fs = FS_FAT32;
+			preferred_fs = FS_FAT32;
 		} else if ((fs_mask & (1<<FS_FAT16)) && !HAS_KOLIBRIOS(img_report)) {
-			selected_fs = FS_FAT16;
+			preferred_fs = FS_FAT16;
 		}
 	} else if ((windows_to_go) || HAS_BOOTMGR(img_report) || HAS_WINPE(img_report)) {
 		if (fs_mask & (1<<FS_NTFS)) {
-			selected_fs = FS_NTFS;
+			preferred_fs = FS_NTFS;
 		}
 	}
 
 	// Try to select the FS
 	for (i=0; i<ComboBox_GetCount(hFileSystem); i++) {
 		fs_tmp = (int)ComboBox_GetItemData(hFileSystem, i);
-		if (fs_tmp == selected_fs)
+		if (fs_tmp == preferred_fs)
 			IGNORE_RETVAL(ComboBox_SetCurSel(hFileSystem, i));
 	}
 
-	SendMessage(hMainDialog, WM_COMMAND, (CBN_SELCHANGE<<16) | IDC_FILE_SYSTEM,
+	SendMessage(hMainDialog, WM_COMMAND, (CBN_SELCHANGE_INTERNAL<<16) | IDC_FILE_SYSTEM,
 		ComboBox_GetCurSel(hFileSystem));
 }
 
@@ -812,9 +813,10 @@ static void EnableControls(BOOL bEnable)
 
 // Populate the UI main dropdown properties.
 // This should be called on device or boot type change.
-static BOOL PopulateProperties(int device_index)
+static BOOL PopulateProperties(void)
 {
 	char* device_tooltip;
+	int device_index = ComboBox_GetCurSel(hDeviceList);
 	char fs_type[32];
 
 	memset(&SelectedDrive, 0, sizeof(SelectedDrive));
@@ -825,10 +827,11 @@ static BOOL PopulateProperties(int device_index)
 
 	// Get data from the currently selected drive
 	SelectedDrive.DeviceNumber = (DWORD)ComboBox_GetItemData(hDeviceList, device_index);
+	// This fills the SelectedDrive properties
 	GetDrivePartitionData(SelectedDrive.DeviceNumber, fs_type, sizeof(fs_type), FALSE);
-
 	SetPartitionSchemeAndTargetSystem(FALSE);
-	if (!SetFileSystemAndClusterSize(fs_type)) {
+	// Attempt to reselect the last file system explicitly set by the user
+	if (!SetFileSystemAndClusterSize((selected_fs == -1) ? fs_type : NULL)) {
 		SetProposedLabel(-1);
 		uprintf("No file system is selectable for this drive\n");
 		return FALSE;
@@ -1360,7 +1363,7 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 		safe_free(image_path);
 		EnableControls(TRUE);
 		SetMBRProps();
-		PopulateProperties(ComboBox_GetCurSel(hDeviceList));
+		PopulateProperties();
 		PrintInfoDebug(0, MSG_203);
 		PrintStatus(0, MSG_203);
 		goto out;
@@ -1407,7 +1410,7 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 			SetMBRProps();
 			SetProposedLabel(ComboBox_GetCurSel(hDeviceList));
 		} else {
-			SendMessage(hMainDialog, WM_COMMAND, (CBN_SELCHANGE << 16) | IDC_FILE_SYSTEM,
+			SendMessage(hMainDialog, WM_COMMAND, (CBN_SELCHANGE_INTERNAL<<16) | IDC_FILE_SYSTEM,
 				ComboBox_GetCurSel(hFileSystem));
 		}
 		// Lose the focus on the select ISO (but place it on Close)
@@ -2939,6 +2942,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	static SHChangeNotifyEntry NotifyEntry;
 	static DWORD_PTR thread_affinity[4];
 	static HFONT hyperlink_font = NULL;
+	BOOL set_selected_fs;
 	DRAWITEMSTRUCT* pDI;
 	LPTOOLTIPTEXT lpttt;
 	HDROP droppedFileInfo;
@@ -3069,7 +3073,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			bt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
 			EnableControls(TRUE);
 			SetFileSystemAndClusterSize(NULL);
-			SendMessage(hMainDialog, WM_COMMAND, (CBN_SELCHANGE << 16) | IDC_FILE_SYSTEM,
+			SendMessage(hMainDialog, WM_COMMAND, (CBN_SELCHANGE_INTERNAL<<16) | IDC_FILE_SYSTEM,
 				ComboBox_GetCurSel(hFileSystem));
 			break;
 		case IDC_ADVANCED_FORMAT_OPTIONS:
@@ -3090,11 +3094,11 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				break;
 			nb_devices = ComboBox_GetCount(hDeviceList);
 			PrintStatusDebug(0, (nb_devices==1)?MSG_208:MSG_209, nb_devices);
-			PopulateProperties(ComboBox_GetCurSel(hDeviceList));
-			SendMessage(hMainDialog, WM_COMMAND, (CBN_SELCHANGE<<16) | IDC_FILE_SYSTEM,
-				ComboBox_GetCurSel(hFileSystem));
+			PopulateProperties();
 			nDeviceIndex = ComboBox_GetCurSel(hDeviceList);
 			DeviceNum = (nDeviceIndex == CB_ERR) ? 0 : (DWORD)ComboBox_GetItemData(hDeviceList, nDeviceIndex);
+			SendMessage(hMainDialog, WM_COMMAND, (CBN_SELCHANGE_INTERNAL << 16) | IDC_FILE_SYSTEM,
+				ComboBox_GetCurSel(hFileSystem));
 			break;
 		case IDC_IMAGE_OPTION:
 			if (HIWORD(wParam) != CBN_SELCHANGE)
@@ -3124,8 +3128,9 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			selected_pt = pt;
 			break;
 		case IDC_FILE_SYSTEM:
-			if (HIWORD(wParam) != CBN_SELCHANGE)
+			if ((HIWORD(wParam) != CBN_SELCHANGE) && (HIWORD(wParam) != CBN_SELCHANGE_INTERNAL))
 				break;
+			set_selected_fs = (HIWORD(wParam) == CBN_SELCHANGE);
 			fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
 			SetClusterSizes(fs);
 			EnableQuickFormat(TRUE);
@@ -3139,6 +3144,9 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 					IGNORE_RETVAL(ComboBox_SetCurSel(hBootType, 1));
 				}
 				break;
+			} else if (set_selected_fs) {
+				// Try to keep track of user selection
+				selected_fs = fs;
 			}
 			EnableMBRBootOptions(TRUE, FALSE);
 			SetMBRProps();
@@ -3151,7 +3159,11 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				break;
 			selection_default = bt;
 			SetPartitionSchemeAndTargetSystem(FALSE);
-			SetFileSystemAndClusterSize(NULL);
+			// Try to reselect current FS from the drive for non-bootable
+			tmp[0] = 0;
+			if ((selected_fs == -1) && (SelectedDrive.DeviceNumber != 0))
+				GetDrivePartitionData(SelectedDrive.DeviceNumber, tmp, sizeof(tmp), TRUE);
+			SetFileSystemAndClusterSize(tmp);
 			SetToGo();
 			SetProposedLabel(ComboBox_GetCurSel(hDeviceList));
 			EnableControls(TRUE);
@@ -3226,7 +3238,6 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 						goto aborted_start;
 
 					// Display a warning about UDF formatting times
-					fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
 					if (fs == FS_UDF) {
 						dur_secs = (uint32_t)(((double)SelectedDrive.DiskSize) / 1073741824.0f / UDF_FORMAT_SPEED);
 						if (dur_secs > UDF_FORMAT_WARN) {
