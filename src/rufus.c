@@ -1775,7 +1775,7 @@ static __inline const char* IsAlphaOrBeta(void)
 static INT_PTR CALLBACK ProgressCallback(HWND hCtrl, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	HDC hDC;
-	RECT rc;
+	RECT rc, rc2;
 	PAINTSTRUCT ps;
 	SIZE size;
 	LONG full_right;
@@ -1840,11 +1840,10 @@ static INT_PTR CALLBACK ProgressCallback(HWND hCtrl, UINT message, WPARAM wParam
 	case WM_PAINT:
 		hDC = BeginPaint(hCtrl, &ps);
 		GetClientRect(hCtrl, &rc);
+		rc2 = rc;
+		InflateRect(&rc, -1, -1);
 		SelectObject(hDC, GetStockObject(DC_PEN));
 		SelectObject(hDC, GetStockObject(NULL_BRUSH));
-		SetDCPenColor(hDC, PROGRESS_BAR_BOX_COLOR);
-		Rectangle(hDC, rc.left, rc.top, rc.right, rc.bottom);
-		InflateRect(&rc, -1, -1);
 		// TODO: Handle SetText message so we can avoid this call
 		GetWindowTextW(hProgress, winfo, ARRAYSIZE(winfo));
 		SelectObject(hDC, hInfoFont);
@@ -1901,6 +1900,9 @@ static INT_PTR CALLBACK ProgressCallback(HWND hCtrl, UINT message, WPARAM wParam
 		ExtTextOut(hDC, (full_right - size.cx) / 2, (rc.bottom - size.cy) / 2,
 			ETO_CLIPPED | ETO_OPAQUE | ETO_NUMERICSLOCAL | (right_to_left_mode ? ETO_RTLREADING : 0),
 			&rc, winfo, (int)wcslen(winfo), NULL);
+		// Bounding rectangle
+		SetDCPenColor(hDC, PROGRESS_BAR_BOX_COLOR);
+		Rectangle(hDC, rc2.left, rc2.top, rc2.right, rc2.bottom);
 		EndPaint(hCtrl, &ps);
 		return (INT_PTR)TRUE;
 	}
@@ -3285,7 +3287,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 					goto aborted_start;
 
 				DeviceNum = (DWORD)ComboBox_GetItemData(hDeviceList, nDeviceIndex);
-				InitProgress(zero_drive);
+				InitProgress(zero_drive || write_as_image);
 				format_thid = CreateThread(NULL, 0, FormatThread, (LPVOID)(uintptr_t)DeviceNum, 0, NULL);
 				if (format_thid == NULL) {
 					uprintf("Unable to start formatting thread");

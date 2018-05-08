@@ -485,7 +485,7 @@ void ResizeMoveCtrl(HWND hDlg, HWND hCtrl, int dx, int dy, int dw, int dh, float
 	MoveWindow(hCtrl, point.x + (int)(scale*(float)dx), point.y + (int)(scale*(float)dy),
 		(rect.right - rect.left) + (int)(scale*(float)dw + border.cx),
 		(rect.bottom - rect.top) + (int)(scale*(float)dh + border.cy), TRUE);
-	InvalidateRect(hCtrl, NULL, TRUE);
+	// Don't be tempted to call InvalidateRect() here - it causes intempestive whole screen refreshes
 }
 
 void ResizeButtonHeight(HWND hDlg, int id)
