@@ -708,15 +708,13 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 {
 	// MBR partition types that can be mounted in Windows
 	const uint8_t mbr_mountable[] = { 0x01, 0x04, 0x06, 0x07, 0x0b, 0x0c, 0x0e, 0xef };
-	BOOL r, ret = FALSE, isUefiNtfs = FALSE;
+	BOOL r, ret = FALSE, isUefiNtfs;
 	HANDLE hPhysical;
-	DWORD size;
+	DWORD size, i, j, super_floppy_disk = FALSE;
 	BYTE geometry[256] = {0}, layout[4096] = {0}, part_type;
 	PDISK_GEOMETRY_EX DiskGeometry = (PDISK_GEOMETRY_EX)(void*)geometry;
 	PDRIVE_LAYOUT_INFORMATION_EX DriveLayout = (PDRIVE_LAYOUT_INFORMATION_EX)(void*)layout;
-	char* volume_name;
-	char tmp[256];
-	DWORD i, j, super_floppy_disk = FALSE;
+	char *volume_name, *buf, tmp[256];
 
 	if (FileSystemName == NULL)
 		return FALSE;
@@ -785,14 +783,23 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 		} else {
 			suprintf("Partition type: MBR, NB Partitions: %d", SelectedDrive.nPartitions);
 			SelectedDrive.has_mbr_uefi_marker = (DriveLayout->Mbr.Signature == MBR_UEFI_MARKER);
-			suprintf("Disk ID: 0x%08X %s", DriveLayout->Mbr.Signature, SelectedDrive.has_mbr_uefi_marker ? "(UEFI target)" : "");
+			suprintf("Disk ID: 0x%08X %s", DriveLayout->Mbr.Signature, SelectedDrive.has_mbr_uefi_marker?"(UEFI target)":"");
 			AnalyzeMBR(hPhysical, "Drive");
 		}
 		for (i=0; i<DriveLayout->PartitionCount; i++) {
+			isUefiNtfs = FALSE;
 			if (DriveLayout->PartitionEntry[i].Mbr.PartitionType != PARTITION_ENTRY_UNUSED) {
 				part_type = DriveLayout->PartitionEntry[i].Mbr.PartitionType;
-				isUefiNtfs = (i == 1) && (part_type == 0xef) &&
-					(DriveLayout->PartitionEntry[i].PartitionLength.QuadPart <= 1*MB);
+				if (part_type == 0xef) {
+					// Check the FAT label to see if we're dealing with an UEFI_NTFS partition
+					buf = calloc(SelectedDrive.SectorSize, 1);
+					if (buf != NULL) {
+						SetFilePointerEx(hPhysical, DriveLayout->PartitionEntry[i].StartingOffset, NULL, FILE_BEGIN);
+						ReadFile(hPhysical, buf, SelectedDrive.SectorSize, &size, NULL);
+						isUefiNtfs = (strncmp(&buf[0x2B], "UEFI_NTFS", 9) == 0);
+						free(buf);
+					}
+				}
 				suprintf("Partition %d%s:", i+(super_floppy_disk?0:1), isUefiNtfs?" (UEFI:NTFS)":"");
 				for (j=0; j<ARRAYSIZE(mbr_mountable); j++) {
 					if (part_type == mbr_mountable[j]) {
@@ -807,6 +814,7 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 					DriveLayout->PartitionEntry[i].PartitionLength.QuadPart,
 					DriveLayout->PartitionEntry[i].StartingOffset.QuadPart / SelectedDrive.SectorSize,
 					DriveLayout->PartitionEntry[i].Mbr.BootIndicator?"Yes":"No");
+				// suprintf("  GUID: %s", GuidToString(&DriveLayout->PartitionEntry[i].Mbr.PartitionId));
 				SelectedDrive.FirstDataSector = min(SelectedDrive.FirstDataSector,
 					(DWORD)(DriveLayout->PartitionEntry[i].StartingOffset.QuadPart / SelectedDrive.SectorSize));
 				if ((part_type == RUFUS_EXTRA_PARTITION_TYPE) || (isUefiNtfs))
@@ -827,7 +835,8 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 			SelectedDrive.nPartitions++;
 			tmp[0] = 0;
 			wchar_to_utf8_no_alloc(DriveLayout->PartitionEntry[i].Gpt.Name, tmp, sizeof(tmp));
-			suprintf("Partition %d:\r\n  Type: %s\r\n  Name: '%s'", i+1,
+			isUefiNtfs = (strcmp(tmp, "UEFI:NTFS") == 0);
+			suprintf("Partition %d%s:\r\n  Type: %s\r\n  Name: '%s'", i+1, isUefiNtfs ? " (UEFI:NTFS)" : "",
 				GuidToString(&DriveLayout->PartitionEntry[i].Gpt.PartitionType), tmp);
 			suprintf("  ID: %s\r\n  Size: %s (%" PRIi64 " bytes)\r\n  Start Sector: %" PRIi64 ", Attributes: 0x%016" PRIX64,
 				GuidToString(&DriveLayout->PartitionEntry[i].Gpt.PartitionId),
@@ -838,7 +847,7 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 			SelectedDrive.FirstDataSector = min(SelectedDrive.FirstDataSector,
 				(DWORD)(DriveLayout->PartitionEntry[i].StartingOffset.QuadPart / SelectedDrive.SectorSize));
 			// Don't register the partitions that we don't care about destroying
-			if ( (strcmp(tmp, "UEFI:NTFS") == 0) ||
+			if ( isUefiNtfs ||
 				 (CompareGUID(&DriveLayout->PartitionEntry[i].Gpt.PartitionType, &PARTITION_MSFT_RESERVED_GUID)) ||
 				 (CompareGUID(&DriveLayout->PartitionEntry[i].Gpt.PartitionType, &PARTITION_SYSTEM_GUID)) )
 				--SelectedDrive.nPartitions;
