@@ -31,6 +31,7 @@
 #include <winioctl.h>
 #include <shlobj.h>
 #include <process.h>
+#include <dwmapi.h>
 #include <dbt.h>
 #include <io.h>
 #include <getopt.h>
@@ -3036,9 +3037,14 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				nWidth = DialogRect.right - DialogRect.left;
 				nHeight = DialogRect.bottom - DialogRect.top;
 				GetWindowRect(hDlg, &DialogRect);
-				offset = GetSystemMetrics(SM_CXSIZEFRAME) + (int)(2.0f * fScale);
-				if (nWindowsVersion >= WINDOWS_10)
-					offset += (int)(-14.0f * fScale);
+				offset = GetSystemMetrics(SM_CXBORDER);
+				if (nWindowsVersion >= WINDOWS_10) {
+					// See https://stackoverflow.com/a/42491227/1069307
+					// I agree with Stephen Hazel: Whoever at Microsoft thought it would be a great idea to
+					// add a *FRIGGING INVISIBLE BORDER* in Windows 10 should face the harshest punishment!
+					DwmGetWindowAttribute(hDlg, DWMWA_EXTENDED_FRAME_BOUNDS, &rc, sizeof(RECT));
+					offset += 2 * (DialogRect.left - rc.left);
+				}
 				if (right_to_left_mode)
 					Point.x = max(DialogRect.left - offset - nWidth, 0);
 				else
