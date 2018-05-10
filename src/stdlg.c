@@ -1112,7 +1112,8 @@ BOOL CreateTooltip(HWND hControl, const char* message, int duration)
 	}
 
 	// Create the tooltip window
-	ttlist[i].hTip = CreateWindowExW(0, TOOLTIPS_CLASS, NULL, WS_POPUP | TTS_NOPREFIX | TTS_ALWAYSTIP,
+	ttlist[i].hTip = CreateWindowExW(right_to_left_mode ? WS_EX_LAYOUTRTL : 0,
+		TOOLTIPS_CLASS, NULL, WS_POPUP | TTS_NOPREFIX | TTS_ALWAYSTIP,
 		CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, hMainDialog, NULL,
 		hMainInstance, NULL);
 

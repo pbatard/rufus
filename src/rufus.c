@@ -843,10 +843,14 @@ static BOOL PopulateProperties(void)
 		SizeToHumanReadable(SelectedDrive.DiskSize, FALSE, use_fake_units));
 
 	// Add a tooltip (with the size of the device in parenthesis)
-	device_tooltip = (char*) malloc(safe_strlen(DriveID.String[device_index]) + 16);
+	device_tooltip = (char*) malloc(safe_strlen(DriveID.String[device_index]) + 32);
 	if (device_tooltip != NULL) {
-		safe_sprintf(device_tooltip, safe_strlen(DriveID.String[device_index]) + 16, "%s (%s)",
-			DriveID.String[device_index], SizeToHumanReadable(SelectedDrive.DiskSize, FALSE, FALSE));
+		if (right_to_left_mode)
+			safe_sprintf(device_tooltip, safe_strlen(DriveID.String[device_index]) + 32, "(%s) %s",
+				SizeToHumanReadable(SelectedDrive.DiskSize, FALSE, FALSE), DriveID.String[device_index]);
+		else
+			safe_sprintf(device_tooltip, safe_strlen(DriveID.String[device_index]) + 32, "%s (%s)",
+				DriveID.String[device_index], SizeToHumanReadable(SelectedDrive.DiskSize, FALSE, FALSE));
 		CreateTooltip(hDeviceList, device_tooltip, -1);
 		free(device_tooltip);
 	}
