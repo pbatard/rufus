@@ -78,7 +78,6 @@ static HFONT hInfoFont;
 static WNDPROC progress_original_proc = NULL;
 static HANDLE format_thid = NULL, dialog_handle = NULL;
 static HWND hSelectImage = NULL, hStart = NULL;
-static HICON hIconSave, hIconHash, hIconDown, hIconUp;
 static char szTimer[12] = "00:00:00";
 static wchar_t wtbtext[2][128];
 static unsigned int timer;
@@ -99,7 +98,6 @@ OPENED_LIBRARIES_VARS;
 HINSTANCE hMainInstance;
 HWND hMainDialog, hMultiToolbar, hSaveToolbar, hHashToolbar, hAdvancedDeviceToolbar, hAdvancedFormatToolbar, hUpdatesDlg = NULL;
 HIMAGELIST hUpImageList, hDownImageList;
-BUTTON_IMAGELIST bi_iso = { 0 }, bi_up = { 0 }, bi_down = { 0 }, bi_save = { 0 };
 char szFolderPath[MAX_PATH], app_dir[MAX_PATH], system_dir[MAX_PATH], temp_dir[MAX_PATH], sysnative_dir[MAX_PATH];
 char *image_path = NULL, *short_image_path;
 float fScale = 1.0f;
@@ -1915,6 +1913,7 @@ static INT_PTR CALLBACK ProgressCallback(HWND hCtrl, UINT message, WPARAM wParam
 static void CreateSmallButtons(HWND hDlg)
 {
 	HIMAGELIST hImageList;
+	HICON hIconSave, hIconHash;
 	int icon_offset = 0, i16 = GetSystemMetrics(SM_CXSMICON);
 	TBBUTTON tbToolbarButtons[1];
 	unsigned char* buffer;
@@ -1925,17 +1924,15 @@ static void CreateSmallButtons(HWND hDlg)
 	else if (i16 >= 20)
 		icon_offset = 10;
 
-	buffer = GetResource(hMainInstance, MAKEINTRESOURCEA(IDI_SAVE_16 + icon_offset), _RT_RCDATA, "save icon", &bufsize, FALSE);
-	hIconSave = CreateIconFromResourceEx(buffer, bufsize, TRUE, 0x30000, 0, 0, 0);
-	buffer = GetResource(hMainInstance, MAKEINTRESOURCEA(IDI_HASH_16 + icon_offset), _RT_RCDATA, "hash icon", &bufsize, FALSE);
-	hIconHash = CreateIconFromResourceEx(buffer, bufsize, TRUE, 0x30000, 0, 0, 0);
-
 	hSaveToolbar = CreateWindowExW(0, TOOLBARCLASSNAME, NULL,
 		WS_CHILD | WS_TABSTOP | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CCS_NOPARENTALIGN |
 		CCS_NODIVIDER | TBSTYLE_BUTTON | TBSTYLE_TOOLTIPS | TBSTYLE_AUTOSIZE,
 		0, 0, 0, 0, hMainDialog, (HMENU)IDC_SAVE_TOOLBAR, hMainInstance, NULL);
-	hImageList = ImageList_Create(i16, i16, ILC_COLOR32, 1, 0);
+	hImageList = ImageList_Create(i16, i16, ILC_COLOR32 | ILC_HIGHQUALITYSCALE | ILC_MIRROR, 1, 0);
+	buffer = GetResource(hMainInstance, MAKEINTRESOURCEA(IDI_SAVE_16 + icon_offset), _RT_RCDATA, "save icon", &bufsize, FALSE);
+	hIconSave = CreateIconFromResourceEx(buffer, bufsize, TRUE, 0x30000, 0, 0, 0);
 	ImageList_AddIcon(hImageList, hIconSave);
+	DestroyIcon(hIconSave);
 	SendMessage(hSaveToolbar, TB_SETIMAGELIST, (WPARAM)0, (LPARAM)hImageList);
 	SendMessage(hSaveToolbar, TB_BUTTONSTRUCTSIZE, (WPARAM)sizeof(TBBUTTON), 0);
 	memset(tbToolbarButtons, 0, sizeof(TBBUTTON));
@@ -1949,8 +1946,11 @@ static void CreateSmallButtons(HWND hDlg)
 		WS_CHILD | WS_TABSTOP | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CCS_NOPARENTALIGN |
 		CCS_NODIVIDER | TBSTYLE_BUTTON | TBSTYLE_TOOLTIPS | TBSTYLE_AUTOSIZE,
 		0, 0, 0, 0, hMainDialog, (HMENU)IDC_HASH_TOOLBAR, hMainInstance, NULL);
-	hImageList = ImageList_Create(i16, i16, ILC_COLOR32, 1, 0);
+	hImageList = ImageList_Create(i16, i16, ILC_COLOR32 | ILC_HIGHQUALITYSCALE | ILC_MIRROR, 1, 0);
+	buffer = GetResource(hMainInstance, MAKEINTRESOURCEA(IDI_HASH_16 + icon_offset), _RT_RCDATA, "hash icon", &bufsize, FALSE);
+	hIconHash = CreateIconFromResourceEx(buffer, bufsize, TRUE, 0x30000, 0, 0, 0);
 	ImageList_AddIcon(hImageList, hIconHash);
+	DestroyIcon(hIconHash);
 	SendMessage(hHashToolbar, TB_SETIMAGELIST, (WPARAM)0, (LPARAM)hImageList);
 	SendMessage(hHashToolbar, TB_BUTTONSTRUCTSIZE, (WPARAM)sizeof(TBBUTTON), 0);
 	memset(tbToolbarButtons, 0, sizeof(TBBUTTON));
@@ -1965,6 +1965,7 @@ static void CreateAdditionalControls(HWND hDlg)
 {
 	HINSTANCE hDll;
 	HIMAGELIST hToolbarImageList;
+	HICON hIcon, hIconUp, hIconDown;
 	RECT rc;
 	SIZE sz;
 	int icon_offset = 0, i, i16, s16, toolbar_dx = -4 - ((fScale > 1.49f) ? 1 : 0) - ((fScale > 1.99f) ? 1 : 0);
@@ -1996,8 +1997,8 @@ static void CreateAdditionalControls(HWND hDlg)
 		hIconUp = (HICON)LoadImage(hDll, MAKEINTRESOURCE(16749), IMAGE_ICON, s16, s16, LR_DEFAULTCOLOR | LR_SHARED);
 	if (hIconDown == NULL)
 		hIconDown = (HICON)LoadImage(hDll, MAKEINTRESOURCE(16750), IMAGE_ICON, s16, s16, LR_DEFAULTCOLOR | LR_SHARED);
-	hUpImageList = ImageList_Create(i16, i16, ILC_COLOR32, 1, 0);
-	hDownImageList = ImageList_Create(i16, i16, ILC_COLOR32, 1, 0);
+	hUpImageList = ImageList_Create(i16, i16, ILC_COLOR32 | ILC_HIGHQUALITYSCALE, 1, 0);
+	hDownImageList = ImageList_Create(i16, i16, ILC_COLOR32 | ILC_HIGHQUALITYSCALE, 1, 0);
 	ImageList_AddIcon(hUpImageList, hIconUp);
 	ImageList_AddIcon(hDownImageList, hIconDown);
 
@@ -2053,10 +2054,16 @@ static void CreateAdditionalControls(HWND hDlg)
 		WS_CHILD | WS_TABSTOP | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CCS_NOPARENTALIGN |
 		CCS_NODIVIDER | TBSTYLE_FLAT | TBSTYLE_LIST | TBSTYLE_TRANSPARENT | TBSTYLE_TOOLTIPS | TBSTYLE_AUTOSIZE,
 		0, 0, 0, 0, hMainDialog, (HMENU)IDC_MULTI_TOOLBAR, hMainInstance, NULL);
-	hToolbarImageList = ImageList_Create(i16, i16, ILC_COLOR32, 8, 0);
+	hToolbarImageList = ImageList_Create(i16, i16, ILC_COLOR32 | ILC_HIGHQUALITYSCALE, 8, 0);
 	for (i = 0; i < ARRAYSIZE(multitoolbar_icons); i++) {
-		buffer = GetResource(hMainInstance, MAKEINTRESOURCEA(multitoolbar_icons[i] + icon_offset), _RT_RCDATA, "toolbar icon", &bufsize, FALSE);
-		ImageList_AddIcon(hToolbarImageList, CreateIconFromResourceEx(buffer, bufsize, TRUE, 0x30000, 0, 0, 0));
+		buffer = GetResource(hMainInstance, MAKEINTRESOURCEA(multitoolbar_icons[i] + icon_offset),
+			_RT_RCDATA, "toolbar icon", &bufsize, FALSE);
+		hIcon = CreateIconFromResourceEx(buffer, bufsize, TRUE, 0x30000, 0, 0, 0);
+		// Mirror the "world" icon on RTL since we can't use an ImageList mirroring flag for that...
+		if (right_to_left_mode && (i == 0))
+			hIcon = CreateMirroredIcon(hIcon);
+		ImageList_AddIcon(hToolbarImageList, hIcon);
+		DestroyIcon(hIcon);
 	}
 	SendMessage(hMultiToolbar, TB_SETIMAGELIST, (WPARAM)0, (LPARAM)hToolbarImageList);
 	SendMessage(hMultiToolbar, TB_BUTTONSTRUCTSIZE, (WPARAM)sizeof(TBBUTTON), 0);
@@ -2091,17 +2098,6 @@ static void CreateAdditionalControls(HWND hDlg)
 	tbToolbarButtons[6].iBitmap = 3;
 	SendMessage(hMultiToolbar, TB_ADDBUTTONS, (WPARAM)7, (LPARAM)&tbToolbarButtons);
 	SendMessage(hMultiToolbar, TB_SETBUTTONSIZE, 0, MAKELPARAM(0, ddbh));
-
-	// Set the icons on the the buttons
-	bi_save.uAlign = BUTTON_IMAGELIST_ALIGN_CENTER;
-	bi_down.himl = ImageList_Create(i16, i16, ILC_COLOR32 | ILC_MASK, 1, 0);
-	ImageList_ReplaceIcon(bi_down.himl, -1, hIconDown);
-	SetRect(&bi_down.margin, 0, 0, 0, 0);
-	bi_down.uAlign = BUTTON_IMAGELIST_ALIGN_CENTER;
-	bi_up.himl = ImageList_Create(i16, i16, ILC_COLOR32 | ILC_MASK, 1, 0);
-	ImageList_ReplaceIcon(bi_up.himl, -1, hIconUp);
-	SetRect(&bi_up.margin, 0, 0, 0, 0);
-	bi_up.uAlign = BUTTON_IMAGELIST_ALIGN_CENTER;
 }
 
 // https://stackoverflow.com/a/20926332/1069307

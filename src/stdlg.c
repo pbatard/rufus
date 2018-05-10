@@ -1922,6 +1922,64 @@ void FlashTaskbar(HANDLE handle)
 	FlashWindowEx(&pf);
 }
 
+// https://docs.microsoft.com/en-us/globalization/localizability/mirroring-in-win32
+// Note: This function *destroys* the original icon
+HICON CreateMirroredIcon(HICON hiconOrg)
+{
+	HDC hdcScreen, hdcBitmap, hdcMask = NULL;
+	HBITMAP hbm, hbmMask, hbmOld, hbmOldMask;
+	BITMAP bm;
+	ICONINFO ii;
+	HICON hicon = NULL;
+	hdcBitmap = CreateCompatibleDC(NULL);
+	if (hdcBitmap) {
+		hdcMask = CreateCompatibleDC(NULL);
+		if (hdcMask) {
+			SetLayout(hdcBitmap, LAYOUT_RTL);
+			SetLayout(hdcMask, LAYOUT_RTL);
+		} else {
+			DeleteDC(hdcBitmap);
+			hdcBitmap = NULL;
+		}
+	}
+	hdcScreen = GetDC(NULL);
+	if (hdcScreen) {
+		if (hdcBitmap && hdcMask) {
+			if (hiconOrg) {
+				if (GetIconInfo(hiconOrg, &ii) && GetObject(ii.hbmColor, sizeof(BITMAP), &bm)) {
+					// Do the cleanup for the bitmaps.
+					DeleteObject(ii.hbmMask);
+					DeleteObject(ii.hbmColor);
+					ii.hbmMask = ii.hbmColor = NULL;
+					hbm = CreateCompatibleBitmap(hdcScreen, bm.bmWidth, bm.bmHeight);
+					hbmMask = CreateBitmap(bm.bmWidth, bm.bmHeight, 1, 1, NULL);
+					hbmOld = (HBITMAP)SelectObject(hdcBitmap, hbm);
+					hbmOldMask = (HBITMAP)SelectObject(hdcMask, hbmMask);
+					DrawIconEx(hdcBitmap, 0, 0, hiconOrg, bm.bmWidth, bm.bmHeight, 0, NULL, DI_IMAGE);
+					DrawIconEx(hdcMask, 0, 0, hiconOrg, bm.bmWidth, bm.bmHeight, 0, NULL, DI_MASK);
+					SelectObject(hdcBitmap, hbmOld);
+					SelectObject(hdcMask, hbmOldMask);
+
+					// Create the new mirrored icon and delete bitmaps
+					ii.hbmMask = hbmMask;
+					ii.hbmColor = hbm;
+					hicon = CreateIconIndirect(&ii);
+					DeleteObject(hbm);
+					DeleteObject(hbmMask);
+				}
+			}
+		}
+		ReleaseDC(NULL, hdcScreen);
+	}
+
+	if (hdcBitmap)
+		DeleteDC(hdcBitmap);
+	if (hdcMask)
+		DeleteDC(hdcMask);
+	DestroyIcon(hiconOrg);
+	return hicon;
+}
+
 #ifdef RUFUS_TEST
 static __inline LPWORD lpwAlign(LPWORD addr)
 {
