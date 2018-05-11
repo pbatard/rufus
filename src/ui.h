@@ -34,6 +34,14 @@
 // Toolbar icons main color
 #define TOOLBAR_ICON_COLOR					RGB(0x29, 0x80, 0xB9)
 
+// Toolbar default style
+#define TOOLBAR_STYLE						( WS_CHILD | WS_TABSTOP | WS_VISIBLE | \
+											  WS_CLIPSIBLINGS | WS_CLIPCHILDREN  | \
+											  CCS_NOPARENTALIGN | CCS_NODIVIDER  | \
+											  TBSTYLE_FLAT | TBSTYLE_BUTTON      | \
+											  TBSTYLE_AUTOSIZE | TBSTYLE_LIST    | \
+											  TBSTYLE_TOOLTIPS )
+
 static int section_control_ids[] = {
 	IDS_DRIVE_PROPERTIES_TXT,
 	IDS_FORMAT_OPTIONS_TXT,

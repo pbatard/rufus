@@ -407,7 +407,7 @@ void CreateStatusBar(void)
 	HFONT hFont;
 
 	// Create the status bar
-	hStatus = CreateWindowExW(0, STATUSCLASSNAME, NULL, WS_CHILD | WS_VISIBLE | SBARS_TOOLTIPS,
+	hStatus = CreateWindowEx(0, STATUSCLASSNAME, NULL, WS_CHILD | WS_VISIBLE | SBARS_TOOLTIPS,
 		CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, hMainDialog,
 		(HMENU)IDC_STATUS, hMainInstance, NULL);
 
@@ -490,7 +490,7 @@ void ResizeMoveCtrl(HWND hDlg, HWND hCtrl, int dx, int dy, int dw, int dh, float
 
 void ResizeButtonHeight(HWND hDlg, int id)
 {
-	HWND hCtrl;
+	HWND hCtrl, hPrevCtrl;
 	RECT rc;
 	int dy = 0;
 
@@ -499,7 +499,8 @@ void ResizeButtonHeight(HWND hDlg, int id)
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
 	if (rc.bottom - rc.top < bh)
 		dy = (bh - (rc.bottom - rc.top)) / 2;
-	SetWindowPos(hCtrl, HWND_TOP, rc.left, rc.top - dy, rc.right - rc.left, bh, 0);
+	hPrevCtrl = GetNextWindow(hCtrl, GW_HWNDPREV);
+	SetWindowPos(hCtrl, hPrevCtrl, rc.left, rc.top - dy, rc.right - rc.left, bh, 0);
 }
 
 /*
@@ -1112,7 +1113,7 @@ BOOL CreateTooltip(HWND hControl, const char* message, int duration)
 	}
 
 	// Create the tooltip window
-	ttlist[i].hTip = CreateWindowExW(right_to_left_mode ? WS_EX_LAYOUTRTL : 0,
+	ttlist[i].hTip = CreateWindowEx(right_to_left_mode ? WS_EX_LAYOUTRTL : 0,
 		TOOLTIPS_CLASS, NULL, WS_POPUP | TTS_NOPREFIX | TTS_ALWAYSTIP,
 		CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, hMainDialog, NULL,
 		hMainInstance, NULL);
@@ -1265,7 +1266,7 @@ static void Reposition(HWND hDlg, int id, int dx, int dw)
 static void PositionControls(HWND hDlg)
 {
 	RECT rc;
-	HWND hCtrl;
+	HWND hCtrl, hPrevCtrl;
 	int i, ow, dw;	// original width, delta
 
 	// Get the original size of the control
@@ -1320,11 +1321,13 @@ static void PositionControls(HWND hDlg)
 	hCtrl = GetDlgItem(hDlg, IDC_CHECK_NOW);
 	GetWindowRect(hCtrl, &rc);
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
-	SetWindowPos(hCtrl, HWND_TOP, rc.left, rc.top, rc.right - rc.left, ddbh, 0);
+	hPrevCtrl = GetNextWindow(hCtrl, GW_HWNDPREV);
+	SetWindowPos(hCtrl, hPrevCtrl, rc.left, rc.top, rc.right - rc.left, ddbh, 0);
 	hCtrl = GetDlgItem(hDlg, IDCANCEL);
 	GetWindowRect(hCtrl, &rc);
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
-	SetWindowPos(hCtrl, HWND_TOP, rc.left, rc.top, rc.right - rc.left, ddbh, 0);
+	hPrevCtrl = GetNextWindow(hCtrl, GW_HWNDPREV);
+	SetWindowPos(hCtrl, hPrevCtrl, rc.left, rc.top, rc.right - rc.left, ddbh, 0);
 }
 
 /*

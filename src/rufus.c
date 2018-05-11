@@ -784,8 +784,7 @@ static void EnableControls(BOOL bEnable)
 	SendMessage(hMultiToolbar, TB_ENABLEBUTTON, (WPARAM)IDC_SETTINGS, (LPARAM)bEnable);
 
 	// Checksum button is enabled if an image has been selected
-	SendMessage(hHashToolbar, TB_ENABLEBUTTON, (WPARAM)IDC_HASH,
-		(LPARAM)(bEnable && (bt == BT_IMAGE) && (image_path != NULL)));
+	EnableWindow(hHashToolbar, bEnable && (bt == BT_IMAGE) && (image_path != NULL));
 
 	// Toggle CLOSE/CANCEL
 	SetDlgItemTextU(hMainDialog, IDCANCEL, bEnable ? uppercase_close : uppercase_cancel);
@@ -793,7 +792,7 @@ static void EnableControls(BOOL bEnable)
 	// Only enable the following controls if a device is active
 	bEnable = (ComboBox_GetCurSel(hDeviceList) < 0) ? FALSE : bEnable;
 	EnableWindow(GetDlgItem(hMainDialog, IDC_IMAGE_OPTION), bEnable);
-	SendMessage(hSaveToolbar, TB_ENABLEBUTTON, (WPARAM)IDC_SAVE, (LPARAM)bEnable);
+	EnableWindow(hSaveToolbar, bEnable);
 
 	// Enable or disable the Start button and the other boot options
 	bEnable = ((bt == BT_IMAGE) && (image_path == NULL)) ? FALSE : bEnable;
@@ -1213,7 +1212,7 @@ static void ToggleAdvancedDeviceOptions(BOOL enable)
 	GetWindowRect(hAdvancedDeviceToolbar, &rc);
 	MapWindowPoints(NULL, hMainDialog, (POINT*)&rc, 2);
 	SendMessage(hAdvancedDeviceToolbar, TB_GETIDEALSIZE, (WPARAM)FALSE, (LPARAM)&sz);
-	SetWindowPos(hAdvancedDeviceToolbar, HWND_TOP, rc.left, rc.top, sz.cx, rc.bottom - rc.top, 0);
+	SetWindowPos(hAdvancedDeviceToolbar, hTargetSystem, rc.left, rc.top, sz.cx, rc.bottom - rc.top, 0);
 
 	// Move the controls up or down
 	for (i = 0; i<ARRAYSIZE(advanced_device_move_ids); i++)
@@ -1225,8 +1224,7 @@ static void ToggleAdvancedDeviceOptions(BOOL enable)
 
 	GetWindowRect(hDeviceList, &rc);
 	MapWindowPoints(NULL, hMainDialog, (POINT*)&rc, 2);
-	SetWindowPos(hDeviceList, HWND_TOP, rc.left, rc.top,
-		enable ? fw - ssw - sbw : fw, rc.bottom - rc.top, 0);
+	SetWindowPos(hDeviceList, HWND_TOP, rc.left, rc.top, enable ? fw - ssw - sbw : fw, rc.bottom - rc.top, 0);
 
 	// Resize the main dialog and log window
 	ResizeDialogs(shift);
@@ -1256,7 +1254,7 @@ static void ToggleAdvancedFormatOptions(BOOL enable)
 	GetWindowRect(hAdvancedFormatToolbar, &rc);
 	MapWindowPoints(NULL, hMainDialog, (POINT*)&rc, 2);
 	SendMessage(hAdvancedFormatToolbar, TB_GETIDEALSIZE, (WPARAM)FALSE, (LPARAM)&sz);
-	SetWindowPos(hAdvancedFormatToolbar, HWND_TOP, rc.left, rc.top, sz.cx, rc.bottom - rc.top, 0);
+	SetWindowPos(hAdvancedFormatToolbar, hClusterSize, rc.left, rc.top, sz.cx, rc.bottom - rc.top, 0);
 
 	// Move the controls up or down
 	for (i = 0; i<ARRAYSIZE(advanced_format_move_ids); i++)
@@ -1927,9 +1925,7 @@ static void CreateSmallButtons(HWND hDlg)
 	else if (i16 >= 20)
 		icon_offset = 10;
 
-	hSaveToolbar = CreateWindowExW(0, TOOLBARCLASSNAME, NULL,
-		WS_CHILD | WS_TABSTOP | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CCS_NOPARENTALIGN |
-		CCS_NODIVIDER | TBSTYLE_BUTTON | TBSTYLE_TOOLTIPS | TBSTYLE_AUTOSIZE,
+	hSaveToolbar = CreateWindowEx(0, TOOLBARCLASSNAME, NULL, TOOLBAR_STYLE,
 		0, 0, 0, 0, hMainDialog, (HMENU)IDC_SAVE_TOOLBAR, hMainInstance, NULL);
 	hImageList = ImageList_Create(i16, i16, ILC_COLOR32 | ILC_HIGHQUALITYSCALE | ILC_MIRROR, 1, 0);
 	buffer = GetResource(hMainInstance, MAKEINTRESOURCEA(IDI_SAVE_16 + icon_offset), _RT_RCDATA, "save icon", &bufsize, FALSE);
@@ -1945,9 +1941,7 @@ static void CreateSmallButtons(HWND hDlg)
 	tbToolbarButtons[0].iBitmap = 0;
 	SendMessage(hSaveToolbar, TB_ADDBUTTONS, (WPARAM)1, (LPARAM)&tbToolbarButtons);
 
-	hHashToolbar = CreateWindowExW(0, TOOLBARCLASSNAME, NULL,
-		WS_CHILD | WS_TABSTOP | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CCS_NOPARENTALIGN |
-		CCS_NODIVIDER | TBSTYLE_BUTTON | TBSTYLE_TOOLTIPS | TBSTYLE_AUTOSIZE,
+	hHashToolbar = CreateWindowEx(0, TOOLBARCLASSNAME, NULL, TOOLBAR_STYLE,
 		0, 0, 0, 0, hMainDialog, (HMENU)IDC_HASH_TOOLBAR, hMainInstance, NULL);
 	hImageList = ImageList_Create(i16, i16, ILC_COLOR32 | ILC_HIGHQUALITYSCALE | ILC_MIRROR, 1, 0);
 	buffer = GetResource(hMainInstance, MAKEINTRESOURCEA(IDI_HASH_16 + icon_offset), _RT_RCDATA, "hash icon", &bufsize, FALSE);
@@ -2008,9 +2002,7 @@ static void CreateAdditionalControls(HWND hDlg)
 	// Create the advanced options toolbars
 	memset(wtbtext, 0, sizeof(wtbtext));
 	utf8_to_wchar_no_alloc(lmprintf((advanced_mode_device) ? MSG_122 : MSG_121, lmprintf(MSG_119)), wtbtext[0], ARRAYSIZE(wtbtext[0]));
-	hAdvancedDeviceToolbar = CreateWindowExW(0, TOOLBARCLASSNAME, NULL,
-		WS_CHILD | WS_TABSTOP | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CCS_NOPARENTALIGN |
-		CCS_NODIVIDER | TBSTYLE_FLAT | TBSTYLE_LIST | TBSTYLE_TRANSPARENT | TBSTYLE_TOOLTIPS | TBSTYLE_AUTOSIZE,
+	hAdvancedDeviceToolbar = CreateWindowEx(0, TOOLBARCLASSNAME, NULL, TOOLBAR_STYLE,
 		0, 0, 0, 0, hMainDialog, (HMENU)IDC_ADVANCED_DEVICE_TOOLBAR, hMainInstance, NULL);
 	SendMessage(hAdvancedDeviceToolbar, CCM_SETVERSION, (WPARAM)6, 0);
 	memset(tbToolbarButtons, 0, sizeof(TBBUTTON));
@@ -2028,12 +2020,10 @@ static void CreateAdditionalControls(HWND hDlg)
 	// Yeah, so, like, TB_GETIDEALSIZE totally super doesn't work on Windows 7, for low zoom factor and when compiled with MSVC...
 	if (sz.cx < 16)
 		sz.cx = fw;
-	SetWindowPos(hAdvancedDeviceToolbar, HWND_TOP, rc.left + toolbar_dx, rc.top, sz.cx, rc.bottom - rc.top, 0);
+	SetWindowPos(hAdvancedDeviceToolbar, hTargetSystem, rc.left + toolbar_dx, rc.top, sz.cx, rc.bottom - rc.top, 0);
 
 	utf8_to_wchar_no_alloc(lmprintf((advanced_mode_format) ? MSG_122 : MSG_121, lmprintf(MSG_120)), wtbtext[1], ARRAYSIZE(wtbtext[1]));
-	hAdvancedFormatToolbar = CreateWindowExW(0, TOOLBARCLASSNAME, NULL,
-		WS_CHILD | WS_TABSTOP | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN  | CCS_NOPARENTALIGN |
-		CCS_NODIVIDER | TBSTYLE_FLAT | TBSTYLE_LIST | TBSTYLE_TRANSPARENT | TBSTYLE_TOOLTIPS | TBSTYLE_AUTOSIZE,
+	hAdvancedFormatToolbar = CreateWindowEx(0, TOOLBARCLASSNAME, NULL, TOOLBAR_STYLE,
 		0, 0, 0, 0, hMainDialog, (HMENU)IDC_ADVANCED_FORMAT_TOOLBAR, hMainInstance, NULL);
 	SendMessage(hAdvancedFormatToolbar, CCM_SETVERSION, (WPARAM)6, 0);
 	memset(tbToolbarButtons, 0, sizeof(TBBUTTON));
@@ -2050,12 +2040,10 @@ static void CreateAdditionalControls(HWND hDlg)
 	SendMessage(hAdvancedFormatToolbar, TB_GETIDEALSIZE, (WPARAM)FALSE, (LPARAM)&sz);
 	if (sz.cx < 16)
 		sz.cx = fw;
-	SetWindowPos(hAdvancedFormatToolbar, HWND_TOP, rc.left + toolbar_dx, rc.top, sz.cx, rc.bottom - rc.top, 0);
+	SetWindowPos(hAdvancedFormatToolbar, hClusterSize, rc.left + toolbar_dx, rc.top, sz.cx, rc.bottom - rc.top, 0);
 
 	// Create the multi toolbar
-	hMultiToolbar = CreateWindowExW(0, TOOLBARCLASSNAME, NULL,
-		WS_CHILD | WS_TABSTOP | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CCS_NOPARENTALIGN |
-		CCS_NODIVIDER | TBSTYLE_FLAT | TBSTYLE_LIST | TBSTYLE_TRANSPARENT | TBSTYLE_TOOLTIPS | TBSTYLE_AUTOSIZE,
+	hMultiToolbar = CreateWindowEx(0, TOOLBARCLASSNAME, NULL, TOOLBAR_STYLE,
 		0, 0, 0, 0, hMainDialog, (HMENU)IDC_MULTI_TOOLBAR, hMainInstance, NULL);
 	hToolbarImageList = ImageList_Create(i16, i16, ILC_COLOR32 | ILC_HIGHQUALITYSCALE, 8, 0);
 	for (i = 0; i < ARRAYSIZE(multitoolbar_icons); i++) {
@@ -2294,7 +2282,7 @@ static void GetFullWidth(HWND hDlg)
 static void PositionControls(HWND hDlg)
 {
 	RECT rc;
-	HWND hCtrl;
+	HWND hCtrl, hPrevCtrl;
 	SIZE sz;
 	int i, x, button_fudge = 2;
 
@@ -2313,10 +2301,10 @@ static void PositionControls(HWND hDlg)
 	hCtrl = GetDlgItem(hDlg, IDC_LABEL);
 	GetWindowRect(hCtrl, &rc);
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
-	SetWindowPos(hCtrl, NULL, rc.left, rc.top, rc.right - rc.left, ddh, SWP_NOZORDER);
+	SetWindowPos(hCtrl, hAdvancedFormatToolbar, rc.left, rc.top, rc.right - rc.left, ddh, SWP_NOZORDER);
 	GetWindowRect(hProgress, &rc);
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
-	SetWindowPos(hProgress, NULL, rc.left, rc.top, rc.right - rc.left, ddh, SWP_NOZORDER);
+	SetWindowPos(hProgress, hNBPasses, rc.left, rc.top, rc.right - rc.left, ddh, SWP_NOZORDER);
 
 	// Get the height of a typical row
 	hCtrl = GetDlgItem(hDlg, IDS_BOOT_SELECTION_TXT);
@@ -2369,7 +2357,7 @@ static void PositionControls(HWND hDlg)
 	SendMessage(hMultiToolbar, TB_GETIDEALSIZE, (WPARAM)FALSE, (LPARAM)&sz);
 	GetWindowRect(GetDlgItem(hDlg, IDC_ABOUT), &rc);
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
-	SetWindowPos(hMultiToolbar, HWND_TOP, rc.left, rc.top, sz.cx, ddbh, 0);
+	SetWindowPos(hMultiToolbar, hProgress, rc.left, rc.top, sz.cx, ddbh, 0);
 
 	// Reposition the main buttons
 	for (i = 0; i < ARRAYSIZE(main_button_ids); i++) {
@@ -2379,7 +2367,8 @@ static void PositionControls(HWND hDlg)
 		x = mw + fw - bw;
 		if (i % 2 == 1)
 			x -= bw + ssw;
-		SetWindowPos(hCtrl, HWND_TOP, x, rc.top, bw, ddbh, 0);
+		hPrevCtrl = GetNextWindow(hCtrl, GW_HWNDPREV);
+		SetWindowPos(hCtrl, hPrevCtrl, x, rc.top, bw, ddbh, 0);
 	}
 
 	// Reposition the Save button
@@ -2388,7 +2377,7 @@ static void PositionControls(HWND hDlg)
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
 	SendMessage(hSaveToolbar, TB_GETIDEALSIZE, (WPARAM)FALSE, (LPARAM)&sz);
 	SendMessage(hSaveToolbar, TB_SETBUTTONSIZE, 0, MAKELPARAM(sz.cx, ddbh));
-	SetWindowPos(hSaveToolbar, HWND_TOP, mw + fw - sbw, rc.top, sbw, ddbh, 0);
+	SetWindowPos(hSaveToolbar, hDeviceList, mw + fw - sbw, rc.top, sbw, ddbh, 0);
 
 	// Reposition the Hash button
 	hCtrl = GetDlgItem(hDlg, IDC_HASH);
@@ -2396,13 +2385,13 @@ static void PositionControls(HWND hDlg)
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
 	SendMessage(hHashToolbar, TB_GETIDEALSIZE, (WPARAM)FALSE, (LPARAM)&sz);
 	SendMessage(hHashToolbar, TB_SETBUTTONSIZE, 0, MAKELPARAM(sz.cx, ddbh));
-	SetWindowPos(hHashToolbar, HWND_TOP, mw + bsw + ssw, rc.top, sz.cx, ddbh, 0);
+	SetWindowPos(hHashToolbar, hBootType, mw + bsw + ssw, rc.top, sz.cx, ddbh, 0);
 
 	// Reposition the CSM help tip
 	hCtrl = GetDlgItem(hDlg, IDS_CSM_HELP_TXT);
 	GetWindowRect(hCtrl, &rc);
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
-	SetWindowPos(hCtrl, HWND_TOP, mw + fw + tw, rc.top, sbw, rc.bottom - rc.top, 0);
+	SetWindowPos(hCtrl, hTargetSystem, mw + fw + tw, rc.top, sbw, rc.bottom - rc.top, 0);
 
 	if (advanced_mode_device) {
 		// Still need to adjust the width of the device selection dropdown
@@ -2416,7 +2405,8 @@ static void PositionControls(HWND hDlg)
 		hCtrl = GetDlgItem(hDlg, full_width_controls[i]);
 		GetWindowRect(hCtrl, &rc);
 		MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
-		SetWindowPos(hCtrl, HWND_TOP, rc.left, rc.top, fw, rc.bottom - rc.top, 0);
+		hPrevCtrl = GetNextWindow(hCtrl, GW_HWNDPREV);
+		SetWindowPos(hCtrl, hPrevCtrl, rc.left, rc.top, fw, rc.bottom - rc.top, 0);
 	}
 
 	// Resize the half drowpdowns
@@ -2426,7 +2416,8 @@ static void PositionControls(HWND hDlg)
 		MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
 		// First 5 controls are on the left handside
 		// First 2 controls may overflow into separator
-		SetWindowPos(hCtrl, HWND_TOP, (i < 5) ? rc.left : mw + hw + sw, rc.top,
+		hPrevCtrl = GetNextWindow(hCtrl, GW_HWNDPREV);
+		SetWindowPos(hCtrl, hPrevCtrl, (i < 5) ? rc.left : mw + hw + sw, rc.top,
 			(i <2) ? hw + sw : hw, rc.bottom - rc.top, 0);
 	}
 
@@ -2434,7 +2425,8 @@ static void PositionControls(HWND hDlg)
 	hCtrl = GetDlgItem(hDlg, IDC_BOOT_SELECTION);
 	GetWindowRect(hCtrl, &rc);
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
-	SetWindowPos(hCtrl, HWND_TOP, rc.left, rc.top, bsw, rc.bottom - rc.top, 0);
+	hPrevCtrl = GetNextWindow(hCtrl, GW_HWNDPREV);
+	SetWindowPos(hCtrl, hPrevCtrl, rc.left, rc.top, bsw, rc.bottom - rc.top, 0);
 }
 
 // Thanks to Microsoft atrocious DPI handling, we must adjust for low DPI
@@ -2443,7 +2435,7 @@ static void AdjustForLowDPI(HWND hDlg)
 	static int ddy = 4;
 	int i, j;
 	RECT rc;
-	HWND hCtrl;
+	HWND hCtrl, hPrevCtrl;
 	int dy = 0;
 
 	if (fScale >= 1.3f)
@@ -2462,7 +2454,8 @@ static void AdjustForLowDPI(HWND hDlg)
 			hCtrl = GetDlgItem(hDlg, adjust_dpi_ids[i][j]);
 			GetWindowRect(hCtrl, &rc);
 			MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
-			SetWindowPos(hCtrl, HWND_TOP, rc.left, rc.top + dy,
+			hPrevCtrl = GetNextWindow(hCtrl, GW_HWNDPREV);
+			SetWindowPos(hCtrl, hPrevCtrl, rc.left, rc.top + dy,
 				rc.right - rc.left, rc.bottom - rc.top, 0);
 		}
 	}
