@@ -31,6 +31,17 @@
 #define PROGRESS_BAR_PAUSED_COLOR			RGB(0xDA, 0xCB, 0x26)
 #define PROGRESS_BAR_ERROR_COLOR			RGB(0xDA, 0x26, 0x26)
 
+// Toolbar icons main color
+#define TOOLBAR_ICON_COLOR					RGB(0x29, 0x80, 0xB9)
+
+static int section_control_ids[] = {
+	IDS_DRIVE_PROPERTIES_TXT,
+	IDS_FORMAT_OPTIONS_TXT,
+	IDS_STATUS_TXT
+};
+
+static int section_vpos[ARRAYSIZE(section_control_ids)];
+
 static int image_option_move_ids[] = {
 	IDS_PARTITION_TYPE_TXT,
 	IDC_PARTITION_TYPE,

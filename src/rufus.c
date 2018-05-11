@@ -68,7 +68,6 @@ static BOOL allowed_filesystem[FS_MAX] = { 0 };
 static int64_t last_iso_blocking_status;
 static int windows_to_go_selection = 0, selected_pt = -1, selected_fs = -1;
 static int selection_default, row_height, advanced_device_section_height, advanced_format_section_height, image_index;
-static int device_vpos, format_vpos, status_vpos;
 static int ddh, bw, hw, fw;	// DropDown Height, Main button width, half dropdown width, full dropdown width
 static int sw, mw, bsw, sbw, ssw, tw, dbw;	// See GetFullWidth() for details on how these values are used
 static UINT_PTR UM_LANGUAGE_MENU_MAX = UM_LANGUAGE_MENU;
@@ -1201,8 +1200,8 @@ static void ToggleAdvancedDeviceOptions(BOOL enable)
 
 	if (!enable)
 		shift = -shift;
-	format_vpos += shift;
-	status_vpos += shift;
+	section_vpos[1] += shift;
+	section_vpos[2] += shift;
 
 	// Toggle the Hide/Show toolbar text
 	utf8_to_wchar_no_alloc(lmprintf((enable) ? MSG_122 : MSG_121, lmprintf(MSG_119)), wtbtext[0], ARRAYSIZE(wtbtext[0]));
@@ -1245,7 +1244,7 @@ static void ToggleAdvancedFormatOptions(BOOL enable)
 
 	if (!enable)
 		shift = -shift;
-	status_vpos += shift;
+	section_vpos[2] += shift;
 
 	// Toggle the Hide/Show toolbar text
 	utf8_to_wchar_no_alloc(lmprintf((enable) ? MSG_122 : MSG_121, lmprintf(MSG_120)), wtbtext[1], ARRAYSIZE(wtbtext[0]));
@@ -1287,8 +1286,8 @@ static void ToggleImageOption(void)
 	display_togo_option = !display_togo_option;
 	if (!display_togo_option)
 		shift = -shift;
-	format_vpos += shift;
-	status_vpos += shift;
+	section_vpos[1] += shift;
+	section_vpos[2] += shift;
 
 	// Move the controls up or down
 	for (i = 0; i<ARRAYSIZE(image_option_move_ids); i++)
@@ -2353,17 +2352,17 @@ static void PositionControls(HWND hDlg)
 	GetWindowRect(hCtrl, &rc);
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
 	sz = GetTextSize(hCtrl, NULL);
-	device_vpos = rc.top + 2 * sz.cy / 3;
+	section_vpos[0] = rc.top + 2 * sz.cy / 3;
 	hCtrl = GetDlgItem(hDlg, IDS_FORMAT_OPTIONS_TXT);
 	GetWindowRect(hCtrl, &rc);
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
 	sz = GetTextSize(hCtrl, NULL);
-	format_vpos = rc.top + 2 * sz.cy / 3;
+	section_vpos[1] = rc.top + 2 * sz.cy / 3;
 	hCtrl = GetDlgItem(hDlg, IDS_STATUS_TXT);
 	GetWindowRect(hCtrl, &rc);
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
 	sz = GetTextSize(hCtrl, NULL);
-	status_vpos = rc.top + 2 * sz.cy / 3;
+	section_vpos[2] = rc.top + 2 * sz.cy / 3;
 
 	// Seriously, who designed this bullshit API call where you pass a SIZE
 	// struct but can only retreive one of cx or cy at a time?!?
@@ -2468,8 +2467,8 @@ static void AdjustForLowDPI(HWND hDlg)
 		}
 	}
 
-	format_vpos += 9 * ddy;
-	status_vpos += 16 * ddy + 1;
+	section_vpos[1] += 9 * ddy;
+	section_vpos[2] += 16 * ddy + 1;
 	advanced_device_section_height += 3 * ddy;
 	advanced_format_section_height += 3 * ddy + 1;
 
@@ -2484,18 +2483,21 @@ static void SetSectionHeaders(HWND hDlg)
 	SIZE sz;
 	HFONT hf;
 	wchar_t wtmp[128];
-	int i, control[3] = { IDS_DRIVE_PROPERTIES_TXT, IDS_FORMAT_OPTIONS_TXT, IDS_STATUS_TXT };
+	size_t wlen;
+	int i;
 
 	// Set the section header fonts and resize the static controls accordingly
 	hf = CreateFontA(-MulDiv(14, GetDeviceCaps(GetDC(hMainDialog), LOGPIXELSY), 72), 0, 0, 0,
 		FW_SEMIBOLD, FALSE, FALSE, FALSE, DEFAULT_CHARSET, 0, 0, PROOF_QUALITY, 0, "Segoe UI");
 
-	for (i = 0; i < ARRAYSIZE(control); i++) {
-		SendDlgItemMessageA(hDlg, control[i], WM_SETFONT, (WPARAM)hf, TRUE);
-		hCtrl = GetDlgItem(hDlg, control[i]);
+	for (i = 0; i < ARRAYSIZE(section_control_ids); i++) {
+		SendDlgItemMessageA(hDlg, section_control_ids[i], WM_SETFONT, (WPARAM)hf, TRUE);
+		hCtrl = GetDlgItem(hDlg, section_control_ids[i]);
 		memset(wtmp, 0, sizeof(wtmp));
 		GetWindowTextW(hCtrl, wtmp, ARRAYSIZE(wtmp));
-		wtmp[wcslen(wtmp)] = ' ';
+		wlen = wcslen(wtmp);
+		wtmp[wlen++] = L' ';
+		wtmp[wlen++] = L' ';
 		SetWindowTextW(hCtrl, wtmp);
 		GetWindowRect(hCtrl, &rc);
 		MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
@@ -2507,14 +2509,13 @@ static void SetSectionHeaders(HWND hDlg)
 // Create the horizontal section lines
 void OnPaint(HDC hdc)
 {
+	int i;
 	HPEN hp = CreatePen(0, (fScale < 1.5f)?2:3, RGB(0, 0, 0));
 	SelectObject(hdc, hp);
-	MoveToEx(hdc, mw + 10, device_vpos, NULL);
-	LineTo(hdc, mw + fw, device_vpos);
-	MoveToEx(hdc, mw + 10, format_vpos, NULL);
-	LineTo(hdc, mw + fw, format_vpos);
-	MoveToEx(hdc, mw + 10, status_vpos, NULL);
-	LineTo(hdc, mw + fw, status_vpos);
+	for (i = 0; i < ARRAYSIZE(section_vpos); i++) {
+		MoveToEx(hdc, mw + 10, section_vpos[i], NULL);
+		LineTo(hdc, mw + fw, section_vpos[i]);
+	}
 }
 
 static void InitDialog(HWND hDlg)
@@ -3496,7 +3497,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		SetBkMode((HDC)wParam, TRANSPARENT);
 		CreateStaticFont((HDC)wParam, &hyperlink_font, FALSE);
 		SelectObject((HDC)wParam, hyperlink_font);
-		SetTextColor((HDC)wParam, RGB(0, 0, 125));	// DARK_BLUE
+		SetTextColor((HDC)wParam, TOOLBAR_ICON_COLOR);
 		return (INT_PTR)CreateSolidBrush(GetSysColor(COLOR_BTNFACE));
 
 	case WM_NOTIFY:
