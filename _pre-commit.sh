@@ -6,11 +6,15 @@
 # .git/hooks/ with the following content:
 # #!/bin/sh
 # if [ -x ./_pre-commit.sh ]; then
-# 	source ./_pre-commit.sh
+# 	. ./_pre-commit.sh
 # fi
 
 type -P sed &>/dev/null || { echo "sed command not found. Aborting." >&2; exit 1; }
 type -P git &>/dev/null || { echo "git command not found. Aborting." >&2; exit 1; }
+
+if [ -x ./_detect-amend.sh ]; then
+	. ./_detect-amend.sh
+fi
 
 TAGVER=`git rev-list HEAD --count`
 # adjust so that we match the github commit count

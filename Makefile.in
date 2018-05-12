@@ -506,7 +506,7 @@ release: all
 	@mv src/$(TARGET)$(EXEEXT) .
 	@sleep 1
 	@$(STRIP) $(TARGET)$(EXEEXT)
-	@upx --lzma $(TARGET)$(EXEEXT)
+	@upx --lzma --best $(TARGET)$(EXEEXT)
 	@mv $(TARGET)$(EXEEXT) $(TARGET)-$(VERSION)$(SUFFIX)$(EXEEXT)
 	@cmd.exe //c _sign.cmd $(TARGET)-$(VERSION)$(SUFFIX)$(EXEEXT)
 
