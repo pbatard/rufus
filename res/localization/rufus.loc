@@ -422,8 +422,6 @@ t MSG_196 "IMPORTANT: THIS DRIVE USES A NONSTANDARD SECTOR SIZE!\n\n"
 t MSG_197 "Nonstandard sector size detected"
 t MSG_198 "'Windows To Go' can only be installed on a GPT partitioned drive if it has "
 	"the FIXED attribute set. The current drive was not detected as FIXED."
-t MSG_199 "Choose this if you plan to install Windows, to another disk, using the selected device as installation media."
-t MSG_200 "Choose this if you want to run Windows directly from the selected device."
 
 # Status messages - these messages will appear on the status bar
 t MSG_201 "Cancelling - Please wait..."
@@ -893,8 +891,6 @@ t MSG_196 "هام: هذا القرص يستخدم حجم قطاع غير قيا�
 t MSG_197 "إكتشاف حجم قطاع غير قياسي"
 t MSG_198 "يمكن تثبيت 'Windows To Go' على قرص بتقسيمات GPT فقط إذا كان عنده"
 	"السمة FIXED مُحددة. لم يتم إكتشاف FIXED في القرص الحالي."
-t MSG_199 "اختر هذا إذا كنت تنوي تثبيت ويندوز، على قرص آخر، باستعمال القرص المُختار كوسيط تثبيت."
-t MSG_200 "بشكل مباشر من القرص المُختار Windows إختر هذا إذا كنت تريد أن يقلع"
 # Status messages - these messages will appear on the status bar
 t MSG_201 "جاري الإلغاء – الرجاء الإنتظار..."
 t MSG_202 "مسح الصورة..."
@@ -1349,9 +1345,6 @@ t MSG_196 "MÜHÜM: BU SÜRÜCÜ STANDART OLMAYAN BİR SEKTOR ÖLÇÜSÜ İstifa
 t MSG_197 "Standart olmayan sektor ölçüsü tapıldı"
 t MSG_198 "'Windows To Go', SABİT disk xarakteri nizamlansa GPT olaraq bölümlənəndə "
 	"yüklənə bilər . Mövcud sürücü SABİT disk tapılmadı."
-t MSG_199 "Windows'u başqa bir diskə yükləmək üçün yükləmə mediası olaraq seçilən cihazı istifadə etməyi planlaşdırırsınızsa bunu seçin."
-t MSG_200 "Windows'u birbaşa seçilən sürücüdən işləmək istəyirsinizsə bunu seçin."
-
 # Status messages - these messages will appear on the status bar
 t MSG_201 "İmtina edilir - Lütfən Gözləyin..."
 t MSG_202 "Fayl Axtarılır..."
@@ -1795,9 +1788,6 @@ t MSG_196 "ВАЖНО: ТОВА УСТРОЙСТВО ИЗПОЛЗВА НЕСТА
 t MSG_197 "Открит е нестандартен размер на сектора"
 t MSG_198 "'Windows To Go' може да бъде инсталиран само на устройство с GPT дялове и атрибут (FIXED) .\n"
 	"Настоящотият дял не притежава атрибутът (FIXED)."
-t MSG_199 "Изберете това ако ще инсталирате Windows, на друг диск, използвайки избраното устройство за инсталационна среда"
-t MSG_200 "Изберете това ако искате да стартирате Windows директно от избраното устройство."
-
 # Status messages - these messages will appear on the status bar
 t MSG_201 "Прекратяване - Моля изчакайте..."
 t MSG_202 "Сканиране на образ..."
@@ -2239,9 +2229,6 @@ t MSG_196 "重要事项: 本驱动器使用了非标准的扇区大小!\n\n"
 t MSG_197 "检测到非标准扇区大小"
 t MSG_198 "'Windows To Go' 只可以在一个 GPT 分区的拥有 FIXED 属性设置的驱动器上安装"
 	"当前驱动器没有被检测为 FIXED(固定盘)。"
-t MSG_199 "如果你打算使用选择的设备作为安装介质来安装 Windows 到另一个盘，请选择本项。"
-t MSG_200 "如果你想从选择的设备直接运行 Windows 的话，选择这个。"
-
 # Status messages - these messages will appear on the status bar
 t MSG_201 "取消中 - 请稍候..."
 t MSG_202 "正在扫描镜像..."
@@ -2660,8 +2647,6 @@ t MSG_196 "注意! 此裝置的磁區大小為 %d-byte，而非常見的標準 5
 	"通常這表示此裝置無法作為開機碟，Rufus 可嘗試繼續執行作業，但不保證能正常開機"
 t MSG_197 "偵測到非標準磁區大小"
 t MSG_198 "'Windows To Go' 需安裝於 'FIXED' 屬性之裝置，目前裝置屬性非 'FIXED'"
-t MSG_199 "如欲將裝置設定為 Windows 安裝片，勾選此項"
-t MSG_200 "如欲直接從裝置執行 Windows，勾選此項"
 # Status messages - these messages will appear on the status bar
 t MSG_201 "取消中，請稍候..."
 t MSG_202 "掃描映像檔中..."
@@ -3109,9 +3094,6 @@ t MSG_196 "VAŽNO: OVAJ UREĐAJ NEMA STANDARDNU VELIČINU SEKTORA!\n\n"
 t MSG_197 "Nestandardna veličina sektora otkrivena"
 t MSG_198 "'Windows To Go' se može instalirati samo na uređaj s GPT particijom koja ima "
 	"FIXED atribut. Odabrani uređaj nema taj atribut."
-t MSG_199 "Odaberite ovo ako planirate instalirati Windows na drugi disk s odabranim uređajem kao instalacijskim medijem."
-t MSG_200 "Odaberite ovo ako planirate pokretati Windows direktno s odabranog uređaja."
-
 # Status messages - these messages will appear on the status bar
 t MSG_201 "Otkazujem - Pričekajte..."
 t MSG_202 "Skeniram sliku..."
@@ -3573,9 +3555,6 @@ t MSG_196 "DŮLEŽITÉ: TATO JEDNOTKA POUŽÍVÁ NESTANDARTNÍ VELIKOS SEKTORŮ!
 t MSG_197 "Zjištěna Nestandartní velikost sektorů"
 t MSG_198 "'Přenosný Windows' lze nainstalovat pouze na GPT oddíl"
 	"nastavte PEVNÝ atribut. Aktuální jednotka nebyla detekována jako PEVNÁ."
-t MSG_199 "Vyberte tuto možnost, pokud chcete instalovat Windows, na jiný disk, použitím vybraného zařízení jako instalačního média."
-t MSG_200 "Tuto možnost vyberte, pokud chcete spustit Windows přímo z vybraného zařízení."
-
 # Status messages - these messages will appear on the status bar
 t MSG_201 "Ukončuje se operace - čekejte..."
 t MSG_202 "Analýza obrazu disku..."
@@ -4021,9 +4000,6 @@ t MSG_196 "VIGTIGT: DETTE DREV BENYTTER IKKE STANDARD SEKTOR STØRRELSE!\n\n"
 t MSG_197 "IKKE standard sektor størrelse fundet"
 t MSG_198 "'Windows To Go' kan kun installeres på et GPT-partitioneret drev hvis det er "
 	"af 'Lokal' drev typen. Det valgte drev er IKKE af 'Lokal' typen."
-t MSG_199 "Vælg dette hvis du vil installere Windows på et andet drev med dette som installationsmedie."
-t MSG_200 "Vælg dette hvis du vil køre Windows fra dette drev."
-
 # Status messages - these messages will appear on the status bar
 t MSG_201 "Annullerer - vent venligst..."
 t MSG_202 "Scanner image..."
@@ -4437,9 +4413,6 @@ t MSG_196 "BELANGRIJK: DEZE DRIVE GEBRUIKT EEN NIET-STANDAARD SECTORGROOTTE!!\n\
 t MSG_197 "Niet-standaard sectorgrootte gedetecteerd"
 t MSG_198 "'Windows To Go' kan alleen worden geïnstalleerd op een GPT gepartitioneerde schijf als het "
 	"FIXED attribuut is ingesteld. De huidige drive wordt niet herkend als FIXED."
-t MSG_199 "Kies dit als u van plan bent om Windows op een andere schijf te installeren, waarvan het geselecteerde apparaat als installatie media wordt gebruikt."
-t MSG_200 "Kies dit als u Windows rechtstreeks vanaf het geselecteerde apparaat wilt starten."
-
 # Status messages - these messages will appear on the status bar
 t MSG_201 "Bezig met annuleren - Een moment geduld a.u.b. ..."
 t MSG_202 "Bezig met onderzoeken van image..."
@@ -4889,9 +4862,6 @@ t MSG_196 "TÄRKEÄÄ: TÄMÄ ASEMA KÄYTTÄÄ EPÄSTANDARDIA SEKTORIKOKOA!\n\n"
 t MSG_197 "Epästandardi sektorikoko havaittu"
 t MSG_198 "'Windows To Go' voidaan asentaa GPT-osioidulle asemalla vain, jos asema "
 	"on merkitty kiinteäksi. Valittua asemaa ei havaittu asetetuksi kiinteäksi."
-t MSG_199 "Valitse tämä, jos aiot asentaa Windowsin eri asemalle käyttäen valittua laitetta asennusmediana."
-t MSG_200 "Valitse tämä, jos haluat käyttää Windowsia siirreltävänä suoraan valitusta laitteesta."
-
 # Status messages - these messages will appear on the status bar
 t MSG_201 "Peruutetaan - Odota..."
 t MSG_202 "Skannataan ISO-levykuvaa..."
@@ -5327,10 +5297,6 @@ t MSG_196 "IMPORTANT : CE PÉRIPHÉRIQUE UTILISE UNE TAILLE DE SECTEUR NON STAND
 t MSG_197 "Taille de secteur non standard détectée"
 t MSG_198 "'Windows To Go' peut seulement être installé sur un disque partitionné au format GPT si il a l'attribut FIXE."
 	"Le disque sélectionné na pas été détecté comme FIXE."
-t MSG_199 "Choisissez cette option si vous comptez installer Windows, sur un autre disque, "
-	"en utilisant le périphérique sélectionné comme média d'installation."
-t MSG_200 "Choisissez cette option si vous voulez fair tourner Windows directement depuis ce périphérique."
-
 # Status messages
 t MSG_201 "Annulation - Veuillez patienter..."
 t MSG_202 "Analyse de l'image..."
@@ -5740,8 +5706,6 @@ t MSG_196 "WICHTIG: DIESES LAUFWERK HAT EINE NICHT STANDARDKONFORME SEKTORGRÖSS
 	"Rufus kann versuchen, ein bootfähiges Laufwerk zu erstellen, aber es gibt KEINE GARANTIE, dass es funktionieren wird."
 t MSG_197 "Nicht standardkonforme Sektorgröße erkannt"
 t MSG_198 "'Windows To Go' kann nur auf ein GPT-partitioniertes Laufwerk installiert werden, wenn das FIXED-Attribut gesetzt ist. Das aktuelle Laufwerk hat diese nicht."
-t MSG_199 "Wählen Sie dies, wenn Sie planen Windows auf eines anderes Laufwerk zu installieren."
-t MSG_200 "Wählen Sie dies, wenn Sie Windows direkt vom gewählten Laufwerk starten wollen."
 t MSG_201 "Abbrechen - Bitte warten..."
 t MSG_202 "Lese Abbild-Datei..."
 t MSG_203 "Fehler beim Lesen der Abbild-Datei"
@@ -6179,9 +6143,6 @@ t MSG_196 "Σημαντικό: Αυτή η μονάδα δίσκου χρησι�
 t MSG_197 "Ανιχνεύθηκε μη προσαρμοσμένο μέγεθος διαμερισμου"
 t MSG_198 "Τα 'Windows To Go' μπορούν να εγκαταστηθούν μόνο σε δίσκους με διαμερισμό GPT εάν αυτοί "
 	"διαθέτουν το χαρακτηριστικό ΄ΣΤΑΘΕΡΟΣ'. Ο επιλεγμενος δίσκος δε διαθέτει αυτο το χαρακτηριστικό."
-t MSG_199 "Επιλέξτε αυτό αν σκοπεύετε να εγκαταστήσετε τα Windows, σε άλλο δίσκο, χρησιμοποιώντας την επιλεγμένη συσκευή "
-	"ως μέσο εγκατάστασης."
-t MSG_200 "Επιλέξτε αυτό αν θέλετε να εκτελέσετε τα Windows απευθείας από την επιλεγμένη συσκευή μετά την εγκατάσταση."
 # Status messages - these messages will appear on the status bar
 t MSG_201 "Ακύρωση - Παρακαλώ περιμένετε..."
 t MSG_202 "Σάρωση ειδώλου..."
@@ -6616,9 +6577,6 @@ t MSG_196 "חשוב: ההתקן הזה משתמש בגרסה לא סטנדרטי
 t MSG_197 "גודל אשכול לא סטנדרטי זוהה"
 t MSG_198 "'Windows To Go' יכול להיות מותקן על התקן שמאותחל ב GPT רק אם יש לו"
 	"תכונה של FIXED מותקנת. להתקן הנוכחי אין תכונה FIXED."
-t MSG_199 "בחר/י בזה אם את/ה מתכנן להתקין Windows על דיסק אחר, ולהשתמש בהתקן הזה בשביל ההתקנה."
-t MSG_200 "בחר/י בזה אם את/ה רוצה להריץ את Windows ישר מתוך ההתקן הנוכחי."
-
 # Status messages - these messages will appear on the status bar
 t MSG_201 "מבטל - המתן בבקשה..."
 t MSG_202 "סורק את הקובץ..."
@@ -7056,9 +7014,6 @@ t MSG_196 "FONTOS: EZ AZ ESZKÖZ 'NEM SZABVÁNYOS' SZEKTOR MÉRETET HASZNÁL!\n\
 t MSG_197 "'Nem szabványos' szektor méret észlelve"
 t MSG_198 "'Windows To Go' csak akkor telepíthető GPT típusúra particionált eszközre, ha az "
 	"BEÉPÍTETT megjelölésű. A jelenlegi eszközt nem BEÉPÍTETT megjelölésűnek észleltük."
-t MSG_199 "Válaszd ezt, ha a Windows-t egy másik lemezre szeretnéd telepíteni, a kiválasztott eszközt pedig telepítő eszközként szeretnéd használni."
-t MSG_200 "Válaszd ezt, ha a Windows-t közvetlenül a kiválasztott eszközről szeretnéd indítani."
-
 # Status messages - these messages will appear on the status bar
 t MSG_201 "Megszakítás - Kérlek, várj..."
 t MSG_202 "Képfájl vizsgálata..."
@@ -7491,9 +7446,6 @@ t MSG_196 "PENTING: PERANGKAT INI MENGGUNAKAN UKURAN SEKTOR YANG TIDAK STANDAR!\
 t MSG_197 "Ukuran sektor tidak standar terdeteksi"
 t MSG_198 "'Windows To Go' hanya dapat diinstal pada perangkat yang berpartisi GPT yang memiliki "
 	"atribut FIXED. Perangkat saat ini tidak terdeteksi beratribut FIXED."
-t MSG_199 "Pilih ini jika Anda berencana untuk menginstal Windows, pada disk lain, menggunakan perangkat yang dipilih sebagai media instalasi."
-t MSG_200 "Pilih ini jika Anda ingin menjalankan Windows secara langsung dari perangkat yang dipilih."
-
 # Status messages - these messages will appear on the status bar
 t MSG_201 "Membatalkan - Silakan Tunggu..."
 t MSG_202 "Memindai image..."
@@ -7923,9 +7875,6 @@ t MSG_196 "IMPORTANTE: QUESTA UNITÀ USA UNA DIMENSIONE SETTORI NON STANDARD!\n\
 t MSG_197 "Rilevata dimensione settore non standard"
 t MSG_198 "'Windows To Go' può essere installato solo su una unità partizionata GPT se ha l'attributo FISSA "
 	"impostato. L'unità attuale non è stata rilevata come FISSA."
-t MSG_199 "Scegli se vuoi installare Windows, su un altro disco, usando il dispositivo selezionato come supporto di installazione."
-t MSG_200 "Scegli se vuoi installare Windows direttamente dal dispositivo selezionato."
-
 # Status messages - these messages will appear on the status bar
 t MSG_201 "Annullamento..."
 t MSG_202 "Analisi immagine..."
@@ -8385,9 +8334,6 @@ t MSG_196 "重要: このドライブは標準以外のセクタ サイズを使
 t MSG_197 "標準以外のセクタサイズが検出されました。"
 t MSG_198 "“FIXED”属性が設定されている場合に限り、GPTパーティションのドライブにWindows To Goを"
 	"インストールすることができます。 現在のドライブはFIXEDとして検出されませんでした。"
-t MSG_199 "インストール メディアとして選択中のデバイスを使用し、別のディスクにWindowsをインストールする場合はこちらを選んでください。"
-t MSG_200 "選択中のデバイスから直接Windowsを実行したい場合はこちらを選んでください。"
-
 # Status messages - these messages will appear on the status bar
 t MSG_201 "キャンセル中 - お待ちください..."
 t MSG_202 "イメージをスキャン中..."
@@ -8834,8 +8780,6 @@ t MSG_196 "중요: 이 드라이브는 비표준 섹터 크기를 사용합니�
 t MSG_197 "비표준 섹터 크기 검출"
 t MSG_198 "'Windows To Go'는 드라이브가 'FIXED' 속성인 경우 GPT파티션에만 설치됩니다. "
 	"현재 드라이브는 고정 드라이브가 아닙니다."
-t MSG_199 "선택한 장치를 설치매체로 사용해서 다른 디스크에 Windows를 설치하려는 경우 이 옵션을 선택."
-t MSG_200 "선택한 장치에서 직접 윈도우를 실행하고자 할 경우에 선택합니다."
 # Status messages - these messages will appear on the status bar
 t MSG_201 "쥐소 중 - 잠시만..."
 t MSG_202 "이미지 스캔..."
@@ -9271,9 +9215,6 @@ t MSG_196 "SVARĪGI: ŠĪ IEKĀRTA IZMANTO NESTANDARTA SEKTORU IZMĒRU!\n\n"
 t MSG_197 "Noteikts nestandarta sektoru izmērs"
 t MSG_198 "'Windows To Go' var tikt instalēts tikai uz GPT failu sistēmas nesēja, ja tam "
 	"ir atribūts 'FIKSĒTS'. Tekošai ierīcei NAV noteikts atribūts 'FIKSĒTS'."
-t MSG_199 "Izvēlieties, ja Windows tiks instalēts no cita diska, šo izmantojot kā papilddisku."
-t MSG_200 "Izvēlieties, ja ielādēsiet Windows tieši no izvēlētā ierīces."
-
 # Status messages - these messages will appear on the status bar
 t MSG_201 "Atcelšana - lūdzu uzgaidiet..."
 t MSG_202 "Diska virtuālā attēla pārskats..."
@@ -9719,9 +9660,6 @@ t MSG_196 "SVARBU: ŠIS DISKAS NAUDOJA NESTANDARTINĮ SEKTORIAUS DYDĮ!\n\n"
 t MSG_197 "Aptiktas nestandartinis sektoriaus dydis"
 t MSG_198 "„Windows To Go“ gali būti įdiegta tik į GPT skaidinių diską, jei jis turi įjungtą "
 	"atributą „FIXED“ (fiksuotas). Pasirinktas diskas nebuvo aptiktas kaip „FIXED“."
-t MSG_199 "Rinkitės šį, jei planuojate įdiegti Windows į kitą diską, naudodami pasirinktą įrenginį kaip įdiegimo laikmeną"
-t MSG_200 "Rinkitės šį, jei norite leisti Windows tiesiai iš pasirinkto įrenginio."
-
 # Status messages - these messages will appear on the status bar
 t MSG_201 "Atšaukiama - prašome palaukti..."
 t MSG_202 "Peržiūrimas atvaizdis..."
@@ -10163,10 +10101,6 @@ t MSG_196 "PENTING: PEMACU INI MENGGUNAKAN SAIZ SEKTOR BUKAN PIAWAIAN!\n\n"
 t MSG_197 "Saiz sektor bukan standard dikesan"
 t MSG_198 "'Windows To Go' hanya boleh dipasang dalam pemacu berpartisyen GPT jika ia mempunyai "
 	"set atribut 'FIXED'. Pemacu semasa tidak dikesan sebagai 'FIXED'."
-t MSG_199 "Pilih ini jika anda merancang untuk memasang Windows, ke cakera lain, "
-	"menggunakan peranti dipilih sebagai media pemasangan."
-t MSG_200 "Pilih ini jika anda mahu untuk menjalankan Windows secara langsung dari peranti dipilih."
-
 # Status messages - these messages will appear on the status bar
 t MSG_201 "Sedang membatalkan - Sila tunggu..."
 t MSG_202 "Mengimbas imej..."
@@ -10602,10 +10536,6 @@ t MSG_196 "VIKTIGT: DENNE STASJONEN BRUKER IKKE STANDARD SEKTORSTØRRELSE!!\n\n"
 t MSG_197 "Ikke standard sektorstørrelse oppdaget."
 t MSG_198 "'Windows To Go' kan kun installeres på en GPT-partisjonert stasjon hvis den er "
 	"FAST stasjonstype. Den aktuelle stasjonen ble ikke oppdaget som FAST."
-t MSG_199 "Velg dette hvis du planlegger å installere Windows, til en annen stasjon, "
-	"ved å bruke den valgte stasjonen som instaslasjonsmedia."
-t MSG_200 "Velg dette hvis du vil kjøre Windows direkte fra valgte stasjon."
-
 # Status messages - these messages will appear on the status bar
 t MSG_201 "Avbryter - Vennligst vent..."
 t MSG_202 "Skanner bilde..."
@@ -11097,9 +11027,6 @@ t MSG_196 "مهم!\n"
 t MSG_197 "شناسایی اندازه سکتور غیراستاندارد"
 t MSG_198 "استفاده از قابلیت «Windows To Go» فقط در درایوهای پارتیشن‌بندی‌شده به روش "
 	"GPT که دارای ویژگی «FIXED» هستند؛ امکان‌پذیر است. درایوی که شما انتخاب کرده‌اید ویژگی «FIXED» را ندارد."
-t MSG_199 "اگر می‌خواهید با استفاده از درایو انتخاب‌شده اقدام به «نصب ویندوز» کنید؛ این گزینه را انتخاب کنید."
-t MSG_200 "اگر می‌خواهید مستقیماً از روی درایو انتخاب‌شده اقدام به «اجرای ویندوز» کنید؛ این گزینه را انتخاب کنید."
-
 # Status messages - these messages will appear on the status bar
 # Translator Note: In the 2 lines below there are invisible Unicode directional formatting characters.
 #	RLE (RIGHT-TO-LEFT EMBEDDING) at the beginning of the string
@@ -11577,9 +11504,6 @@ t MSG_196 "WAŻNE: TEN DYSK UŻYWA NIESTANDARDOWEGO ROZMIARU SEKTORA!\n\n"
 t MSG_197 "Wysryto niestandardowy rozmiar sektora"
 t MSG_198 "'Windows To Go' może zostać zainstalowany jedynie na dysku ze strukturą GPT jeżeli ma on "
 	"ustawiony atrybut LOKALNY. Obecny dysk nie został wybryty jako LOKALNY."
-t MSG_199 "Wybierz to, jeżeli planujesz zainstalować Windows na innym dysku, używając wybranego dysku jako dysku instalacyjnego."
-t MSG_200 "Wybierz to, jeżeli chcesz uruchomić Windows bezpośrednio z wybranego urządzenia."
-
 # Status messages - these messages will appear on the status bar
 t MSG_201 "Anulowanie - Proszę czekać..."
 t MSG_202 "Skanowanie obrazu..."
@@ -12053,9 +11977,6 @@ t MSG_196 "IMPORTANTE: ESTE DRIVE USA UM TAMANHO DE SETOR FORA DO PADRÃO!\n\n"
 t MSG_197 "Detectado tamanho de setor fora do padrão"
 t MSG_198 "'Windows Para Levar' só pode ser instalado em um drive particionado como GPT se ele tiver "
 	"o atributo FIXO ativo. O drive atual não apresenta o atributo FIXO."
-t MSG_199 "Escolha isto se você planeja instalar o Windows, em outro disco, usando o dispositivo selecionado como mídia de instalação."
-t MSG_200 "Escolha isto se deseja executar o Windows diretamente do dispositivo selecionado."
-
 # Status messages - these messages will appear on the status bar
 t MSG_201 "Cancelando - Por favor, aguarde..."
 t MSG_202 "Escaneando a imagem..."
@@ -12527,8 +12448,6 @@ t MSG_196 "IMPORTANTE: ESTA DRIVE USA UM TAMANHO DE SECTOR NÃO STANDARD!\n\n"
 t MSG_197 "Detetado tamanho de sector não standard"
 t MSG_198 "'Windows To Go' apenas pode ser instalado numa drive com partição GPT se o "
 	"atributo FIXO estiver selecionado. A drive atual não foi detetada como FIXO."
-t MSG_199 "Escolha esta opção se pretender instalar o Windows, para outro disco, utilizando o dispositivo selecionado como disco de instalação."
-t MSG_200 "Escolha esta opção se deseja executar o Windows directamente a partir do dispositivo selecionado."
 # Status messages - these messages will appear on the status bar
 t MSG_201 "A cancelar - por favor aguarde..."
 t MSG_202 "A analisar a imagem ..."
@@ -12957,8 +12876,6 @@ t MSG_196 "IMPORTANT: Această unitate utilizează dimensiune de sector non-stan
 t MSG_197 "Mărimea sectorului detectat este non-standard."
 t MSG_198 "'Windows To Go' poate fi instalat doar pe unitatea cu partiția GPT, și dacă are "
 	"atributul FIX setat. Unitatea curentă nu are atributul FIXAT..."
-t MSG_199 "Alegeți această opțiune dacă doriți să instalați Windows, la un alt disc, folosind dispozitivul selectat ca suport de instalare."
-t MSG_200 "Alegeți această opțiune, pentru a executa Windows direct din dispozitivul selectat."
 t MSG_201 "Anulare..."
 t MSG_202 "Analiza imaginii..."
 t MSG_203 "Analiza eșuată a imaginii"
@@ -13386,9 +13303,6 @@ t MSG_196 "ВАЖНО: ЭТОТ ДИСК ИСПОЛЬЗУЕТ НЕСТАНДАР
 t MSG_197 "Обнаружен нестандартный размер сектора"
 t MSG_198 "'Windows To Go' может использоваться только с GPT разделом диска и если диск "
 	"является ФИКСИРОВАННЫМ. Выбранный диск не является ФИКСИРОВАННЫМ."
-t MSG_199 "Выберите это, если вы планируете установить Windows на другой диск, используя выбранное устройство как установочный диск."
-t MSG_200 "Выберите это, если вы хотите запустить Windows прямо с выбранного устройства."
-
 # Status messages - these messages will appear on the status bar
 t MSG_201 "Отмена - Пожалуйста, ждите..."
 t MSG_202 "Сканирование образа..."
@@ -13841,9 +13755,6 @@ t MSG_196 "VAŽNO: OVAJ UREĐAJ KORISTI NESTANDARDNU VELIČINU SEKTORA!\n\n"
 t MSG_197 "Pronađena nestandardna veličina sektora"
 t MSG_198 "'Windows To Go' može biti instaliran samo na GPT particionisanom uređaju ukoliko ima "
 	"postavljen FIXED atribut. U odabranom uređaju nije postavljen kao FIXED."
-t MSG_199 "Odaberite ovu opcije ukoliko planirate da instalirate Windows na drugi disk koristeći odabrani uređaj kao instalacijski medij."
-t MSG_200 "Odaberite ovu opcije ukoliko želite pokretati Windows direktno sa odabranog uređaja."
-
 # Status messages - these messages will appear on the status bar
 t MSG_201 "Otkazivanje - Molimo Vas sačekajte..."
 t MSG_202 "Skeniranje slike u toku..."
@@ -14283,8 +14194,6 @@ t MSG_196 "DÔLEŽITÉ: TOTO ZARIADENIE POUŽÍVA NEŠTANDARDNÚ VEĽKOSŤ SEKTO
 t MSG_197 "Zistená neštandardná veľkosť sektora"
 t MSG_198 "'Windows To Go' môže byť nainštalovaný iba na oddiely rozdelenú GPT jednotku "
 	"ak má nastavený atribút UPRAVENÝ. Aktuálna jednotka nebola zistená ako UPRAVENÁ."
-t MSG_199 "Vyberte, ak chcete nainštalovať Windows na iný disk, požitím vybranej jednotky ako inštalačného média."
-t MSG_200 "Vyberte, ak chcete spustiť Windows priamo z vybranej jednotky."
 # Status messages - these messages will appear on the status bar
 t MSG_201 "Ukončuje sa operácia - čakajte prosím..."
 t MSG_202 "Analýza obrazu disku..."
@@ -14723,9 +14632,6 @@ t MSG_196 "OPOZORILO: TA NAPRAVA UPORABLJA NESTANDARDNO VELIKOST SEKTORJEV!\n\n"
 t MSG_197 "Zaznana nestandardna velikost sektorjev"
 t MSG_198 "'Windows To Go' je lahko nameščen le na napravo s particijsko shemo GPT, "
 	"če naprava ni odstranljiva. Trenutna naprava pravi, da je odstranljiva."
-t MSG_199 "Izberite to, če nameravate namestiti Windows s te naprave na drug disk."
-t MSG_200 "Izberite to, če želite zagnati Windows neposredno s te naprave."
-
 # Status messages - these messages will appear on the status bar
 t MSG_201 "Preklicujem - prosim, počakajte…"
 t MSG_202 "Preiskujem sliko…"
@@ -15155,9 +15061,6 @@ t MSG_196 "¡IMPORTANTE: ESTE DISPOSITIVO USA UN TAMAÑO DE SECTOR NO ESTÁNDARD
 t MSG_197 "Detectado tamaño de sector no estándar"
 t MSG_198 "'Windows To Go' sólo puede ser instalado en una partición GPT si tiene el atributo FIXED activo. El dispositivo"
 	"actual no ha sido detectado como FIXED."
-t MSG_199 "Elija esta opción si pretende instalar Windows en otro disco, usando el dispositivo seleccionado como medio de instalación."
-t MSG_200 "Elija esta opción si desea iniciar Windows directamente desde el dispositivo seleccionado."
-
 # Status messages - these messages will appear on the status bar
 t MSG_201 "Cancelando - por favor espere..."
 t MSG_202 "Analizando la imagen..."
@@ -15612,8 +15515,6 @@ t MSG_196 "VIKTIGT: DENNA ENHET ANVÄNDER SIG AV EN ICKE STANDARD SEKTORSTORLEK!
 t MSG_197 "En icke standard sektorstorlek upptäckt"
 t MSG_198 "'Windows To Go' kan endast installeras på en enhet med GPT-partition om det är "
 	"en FIXERAD enhet. Nuvarande enhet är inte FIXERAD."
-t MSG_199 "Välj detta alternativ om du planerar att installera Windows till en annan enhet och du använder vald enhet som installationsmedia."
-t MSG_200 "Välj detta alternativ om du vill köra Windows direkt från vald enhet."
 # Status messages - these messages will appear on the status bar
 t MSG_201 "Avbryter - Vänta..."
 t MSG_202 "Söker igenom avbild..."
@@ -16077,9 +15978,6 @@ t MSG_196 "สำคัญมาก: อุปกรณ์นี้ใช้ข�
 t MSG_197 "พบไดร์ฟที่มีขนาดของเซคเตอร์ไม่เป็นมาตรฐาน"
 t MSG_198 "'Windows To Go' สามารถติดตั้งลงบนพาร์ทิชั่นแบบ GPT เท่านั้นหาก"
 	"มีแอททริบิทต์แบบ FIXED แต่ไดร์ฟปัจจุบันพบว่าไม่มีแอททริบิวต์แบบ FIXED"
-t MSG_199 "เลือกตัวเลือกนี้หากคุณตั้งใจจะลง Windows ลงบนดิสก์อื่นๆ โดยใช้อุปกรณ์ปัจจุบันเป็นสื่อการติดตั้ง"
-t MSG_200 "เลือกตัวเลือกนี้หากคุณตั้งใจจะเรียกใช้ Windows จากอุปกรณ์นี้โดยตรง"
-
 # Status messages - these messages will appear on the status bar
 t MSG_201 "กำลังยกเลิก - โปรดรอสักครู่..."
 t MSG_202 "กำลังสแกนอิมเมจ..."
@@ -16545,9 +16443,6 @@ t MSG_196 "ÖNEMLİ: BU SÜRÜCÜ STANDART OLMAYAN BİR SEKTÖR BOYUTU KULLANIYO
 t MSG_197 "Standart olmayan sektör boyutu algılandı"
 t MSG_198 "'Windows To Go', SABİT disk niteliği ayarlanmışsa GPT olarak bölümlendiğinde "
 	"yüklenebilir . Mevcut sürücü SABİT disk olarak algılanamadı."
-t MSG_199 "Windows'u başka bir diske yüklemek için yükleme medyası olarak seçilen aygıtı kullanmayı planlıyorsanız bunu seçin."
-t MSG_200 "Windows'u doğrudan seçilen sürücüden çalıştırmak istiyorsanız bunu seçin."
-
 # Status messages - these messages will appear on the status bar
 t MSG_201 "Vazgeçiliyor - Lütfen Bekleyin..."
 t MSG_202 "Yansıma taranıyor..."
@@ -16980,9 +16875,6 @@ t MSG_196 "ВАЖЛИВО: ЦЕЙ ДИСК ВИКОРИСТОВУЄ НЕСТАН
 t MSG_197 "Знайдено нестандартний розмір сектора"
 t MSG_198 "'Windows To Go' може використовуватись тільки з розділом GPT диска та якщо диск "
 	"являється ФІКСОВАНИМ. Обраний диск не являється ФІКСОВАНИМ."
-t MSG_199 "Оберіть це, якщо ви плануєте встановити Windows на інший диск, використовуючи обраний пристрій як завантажувальний диск."
-t MSG_200 "Оберіть це, якщо ви хочете запустити Windows напряму з обраного пристрою."
-
 # Status messages - these messages will appear on the status bar
 t MSG_201 "Відміна - Будь ласка, зачекайте..."
 t MSG_202 "Сканування образу..."
@@ -17417,9 +17309,6 @@ t MSG_196 "QUAN TRỌNG: ĐĨA NÀY DÙNG KÍCH CỠ CUNG KHÔNG CHUẨN!\n\n"
 t MSG_197 "Phát hiện kích cỡ cung không chuẩn"
 t MSG_198 "'Windows To Go chỉ có thể được cài đặt trên ổ đĩa đã phân vùng GPT nếu nó có "
 	"tập thuộc tính CỐ ĐỊNH. Ổ đĩa hiện tại không phải CỐ ĐỊNH."
-t MSG_199 "Chọn mục này nếu bạn có dự định cài đặt Windows vào đĩa khác bằng cách dùng thiết bị đã chọn như đĩa cài đặt."
-t MSG_200 "Chọn mục này nếu bạn muốn chạy Windows trực tiếp từ thiết bị đã chọn."
-
 # Status messages - these messages will appear on the status bar
 t MSG_201 "Đang huỷ - Vui lòng chờ..."
 t MSG_202 "Đang quét ảnh..."
