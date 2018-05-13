@@ -141,6 +141,7 @@ char* GetSignatureName(const char* path, const char* country_code)
 	static char szSubjectName[128];
 	char szCountry[3] = "__";
 	char *p = NULL, *mpath = NULL;
+	int i;
 	BOOL r;
 	HMODULE hm;
 	HCERTSTORE hStore = NULL;
@@ -174,13 +175,21 @@ char* GetSignatureName(const char* path, const char* country_code)
 	}
 
 	// Get message handle and store handle from the signed file.
-	r = CryptQueryObject(CERT_QUERY_OBJECT_FILE, szFileName,
-		CERT_QUERY_CONTENT_FLAG_PKCS7_SIGNED_EMBED, CERT_QUERY_FORMAT_FLAG_BINARY,
-		0, &dwEncoding, &dwContentType, &dwFormatType, &hStore, &hMsg, NULL);
-	if (!r) {
-		uprintf("PKI: Failed to get signature for '%s': %s", (path==NULL)?mpath:path, WinPKIErrorString());
-		goto out;
+	for (i = 0; i < 5; i++) {
+		r = CryptQueryObject(CERT_QUERY_OBJECT_FILE, szFileName,
+			CERT_QUERY_CONTENT_FLAG_PKCS7_SIGNED_EMBED, CERT_QUERY_FORMAT_FLAG_BINARY,
+			0, &dwEncoding, &dwContentType, &dwFormatType, &hStore, &hMsg, NULL);
+		if (r)
+			break;
+		if (i == 0)
+			uprintf("PKI: Failed to get signature for '%s': %s", (path==NULL)?mpath:path, WinPKIErrorString());
+		if (path == NULL)
+			break;
+		uprintf("PKI: Retrying...");
+		Sleep(2000);
 	}
+	if (!r)
+		goto out;
 
 	// Get signer information size.
 	r = CryptMsgGetParam(hMsg, CMSG_SIGNER_INFO_PARAM, 0, NULL, &dwSignerInfo);

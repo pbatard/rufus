@@ -221,8 +221,8 @@ DWORD DownloadFile(const char* url, const char* file, HWND hProgressDialog)
 {
 	HWND hProgressBar = NULL;
 	BOOL r = FALSE;
-	DWORD dwFlags, dwSize, dwDownloaded, dwTotalSize;
-	FILE* fd = NULL;
+	DWORD dwFlags, dwSize, dwWritten, dwDownloaded, dwTotalSize;
+	HANDLE hFile = INVALID_HANDLE_VALUE;
 	const char* accept_types[] = {"*/*\0", NULL};
 	unsigned char buf[DOWNLOAD_BUFFER_SIZE];
 	char agent[64], hostname[64], urlpath[128];
@@ -318,8 +318,8 @@ DWORD DownloadFile(const char* url, const char* file, HWND hProgressDialog)
 	}
 	uprintf("File length: %d bytes\n", dwTotalSize);
 
-	fd = fopenU(file, "wb");
-	if (fd == NULL) {
+	hFile = CreateFileU(file, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+	if (hFile == INVALID_HANDLE_VALUE) {
 		uprintf("Unable to create file '%s': %s\n", &file[last_slash], WinInetErrorString());
 		goto out;
 	}
@@ -335,8 +335,11 @@ DWORD DownloadFile(const char* url, const char* file, HWND hProgressDialog)
 		dwSize += dwDownloaded;
 		SendMessage(hProgressBar, PBM_SETPOS, (WPARAM)(MAX_PROGRESS*((1.0f*dwSize)/(1.0f*dwTotalSize))), 0);
 		PrintInfo(0, MSG_241, (100.0f*dwSize)/(1.0f*dwTotalSize));
-		if (fwrite(buf, 1, dwDownloaded, fd) != dwDownloaded) {
+		if (!WriteFile(hFile, buf, dwDownloaded, &dwWritten, NULL)) {
 			uprintf("Error writing file '%s': %s\n", &file[last_slash], WinInetErrorString());
+			goto out;
+		} else if (dwDownloaded != dwWritten) {
+			uprintf("Error writing file '%s': Only %d/%d bytes written\n", dwWritten, dwDownloaded);
 			goto out;
 		}
 	}
@@ -353,7 +356,11 @@ DWORD DownloadFile(const char* url, const char* file, HWND hProgressDialog)
 out:
 	if (hProgressDialog != NULL)
 		SendMessage(hProgressDialog, UM_PROGRESS_EXIT, (WPARAM)r, 0);
-	if (fd != NULL) fclose(fd);
+	if (hFile != INVALID_HANDLE_VALUE) {
+		// Force a flush - May help with the PKI API trying to process downloaded updates too early...
+		FlushFileBuffers(hFile);
+		CloseHandle(hFile);
+	}
 	if (!r) {
 		if (file != NULL)
 			_unlinkU(file);
