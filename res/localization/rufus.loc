@@ -7126,32 +7126,31 @@ t MSG_117 "Alap Windows telepítés"
 
 ################################################################################
 l "id-ID" "Indonesian (Bahasa Indonesia)" 0x0421
-v 1.0.22
+v 1.0.23
 b "en-US"
 
 # Main dialog
 g IDD_DIALOG
+t IDS_DRIVE_PROPERTIES_TXT "Properti Drive"
 t IDS_DEVICE_TXT "Perangkat"
-t IDS_BOOT_SELECTION_TXT "Tipe Boot"
-t IDS_PARTITION_TYPE_TXT "Skema partisi dan tipe sistem target"
-t IDS_FILE_SYSTEM_TXT "Sistem berkas"
-t IDS_CLUSTER_SIZE_TXT "Ukuran klaster"
-t IDS_LABEL_TXT "Label volume baru"
+t IDS_BOOT_SELECTION_TXT "Pilihan Boot"
+t IDC_SELECT "Pilih"
+t IDS_IMAGE_OPTION_TXT "Opsi Image"
+t IDS_PARTITION_TYPE_TXT "Skema partisi"
+t IDS_TARGET_SYSTEM_TXT "Sistem target"
+t IDC_LIST_USB_HDD "Daftar USB Hard Drives"
+t IDC_OLD_BIOS_FIXES "Tambah perbaikan untuk BIOS lama (partisi ekstra, penyesuaian, dll.)"
+t IDC_RUFUS_MBR "Gunakan MBR Rufus dengan ID BIOS"
 t IDS_FORMAT_OPTIONS_TXT "Opsi Format"
-# Note: The button (IDC_ADVANCED) that appears next to "Format Options" is repositioned automatically.
-t IDC_BAD_BLOCKS "Periksa perangkat untuk blok buruk"
+t IDS_LABEL_TXT "Label volume"
+t IDS_FILE_SYSTEM_TXT "Sistem berkas"
+t IDS_CLUSTER_SIZE_TXT "Ukuran klatser"
 t IDC_QUICK_FORMAT "Format cepat"
-t IDC_EXTENDED_LABEL "Buat label tambahan dan berkas ikon"
+t IDC_EXTENDED_LABEL "Buat label dan berkas ikon tambahan"
+t IDC_BAD_BLOCKS "Periksa blok buruk pada perangkat"
+t IDS_STATUS_TXT "Status"
 t IDCANCEL "Tutup"
 t IDC_START "Mulai"
-t IDC_LIST_USB_HDD "Daftar Perangkat USB"
-# Note: It is acceptable to drop the parenthesis () below if you are running out of space
-# as there is a tooltip (MSG_169) providing these details.
-t IDC_OLD_BIOS_FIXES "Tambah perbaikan untuk BIOS lama (partisi ekstra, penyesuaian, dll.)"
-# 'MBR': See http://en.wikipedia.org/wiki/Master_boot_record
-# Rufus can install it's own custom MBR (the Rufus MBR), which also allows users
-# to specify a custom disk ID for the BIOS. Note: the tooltip for this control is MSG_167.
-t IDC_RUFUS_MBR "Gunakan MBR Rufus dengan ID BIOS"
 
 # About dialog
 g IDD_ABOUTBOX
@@ -7234,12 +7233,12 @@ t MSG_028 "megabyte"
 t MSG_029 "Standar"
 # The following gets appended to the file system, cluster size, etc.
 t MSG_030 "%s (Standar)"
-#t MSG_031 "Skema partisi %s untuk BIOS atau %s"
-#t MSG_032 "Skema partisi %s untuk BIOS"
-#t MSG_033 "Skema partisi %s untuk UEFI"
+t MSG_031 "BIOS (atau UEFI-CSM)"
+t MSG_032 "UEFI (non CSM)"
+t MSG_033 "BIOS atau UEFI"
 # Number of bad block check passes (singular for 1 pass, plural for 2 or more passes)
-t MSG_034 "%d Pass"
-t MSG_035 "%d Passes"
+t MSG_034 "%d kali uji"
+t MSG_035 "%d kali uji"
 t MSG_036 "ISO Image"
 t MSG_037 "Aplikasi"
 t MSG_038 "Batal"
@@ -7381,14 +7380,17 @@ t MSG_116 "Image ini menggunakan Grub %s namun aplikasi ini hanya menyertakan be
 	"- Pilih 'Batal' untuk membatalkan operasi\n\n"
 	"Catatan: Berkas akan diunduh di direktori aplikasi saat ini dan akan digunakan kembali jika diminta. "
 	"Jika tidak ada yang cocok yang ditemukan secara online, versi default akan digunakan."
+t MSG_117 "Instalasi Windows standar"
+t MSG_119 "properti drive lanjutan"
+t MSG_120 "opsi format lanjutan"
+t MSG_121 "Tampilkan %s"
+t MSG_122 "Sembunyikan %s"
 # Tooltips
-# Partition Scheme and Target Type
-t MSG_150 "Umumnya merupakan pilihan teraman. Namun, jika Anda memiliki komputer UEFI dan ingin menginstal "
-	"sebuah Sistem Operasi di modus EFI murni, Anda harus memilih salah satu opsi lain"
-t MSG_151 "Gunakan ini jika Anda ingin menginstal Sistem Operasi di modus EFI murni, namun perlu mengakses "
-	"isi USB dari Windows XP"
-t MSG_152 "Pilihan yang paling disukai untuk menginstal Sistem Operasi di modus EFI murni, ketika akses USB "
-	"tidak diperlukan dari Windows XP"
+t MSG_150 "Tipe komputer yang akan menggunakan drive bootable ini. Anda harus menentukan apakah target komputer "
+	"bertipe BIOS atau UEFI sebelum Anda memulai pembuatan drive ini. Jika salah memilih, drive akan gagal diboot."
+# Note: You shouldn't translate 'Legacy Mode' below, as this is an option that usually appears in English in the UEFI settings.
+t MSG_151 "'UEFI-CSM' artinya perangkat tersebut hanya akan boot dalam mode emulasi BIOS (juga dikenal dengan 'Legacy Mode') di bawah UEFI, dan tidak dalam mode UEFI asli."
+t MSG_152 "'non CSM' artinya perangkat tersebut hanya akan boot dalam UEFI asli, dan tidak dalam mode emulasi BIOS (juga dikenal dengan 'Legacy Mode')."
 t MSG_153 "Tes pola: 0x%02X"
 t MSG_154 "Tes pola: 0x%02X, 0x%02X"
 t MSG_155 "Tes pola: 0x%02X, 0x%02X, 0x%02X"
@@ -7399,6 +7401,7 @@ t MSG_159 "Gunakan bidang ini untuk menyetel karakter Internasional yang diperbo
 t MSG_160 "Tombol untuk opsi lanjutan"
 t MSG_161 "Periksa blok buruk pada perangkat menggunakan tes pola"
 t MSG_162 "Hapus centang kotak ini untuk menggunakan metode format \"lambat\""
+t MSG_163 "Metode yang akan digunakan untuk membuat partisi"
 t MSG_164 "Metode yang akan digunakan untuk membuat perangkat bootable"
 t MSG_165 "Klik untuk memilih sebuah image..."
 t MSG_166 "Centang kotak ini untuk menampilkan label internasional "
@@ -7414,8 +7417,10 @@ t MSG_173 "Klik untuk memilih..."
 # The following will appear in the about dialog
 t MSG_174 "Rufus - Utilitas Pemformatan USB yang Handal"
 t MSG_175 "Versi %d.%d (Build %d)"
-t MSG_176 "Terjemahan Bahasa Indonesia: Abe Akatsuki, Arif Budiman"
-t MSG_177 "Laporkan bug atau permintaan perbaikan pada:"
+t MSG_176 "Terjemahan Bahasa Indonesia: \\line"
+	"• Abe Akatsuki\\line "
+	"• Arif Budiman <mailto:arifpedia@gmail.com>"
+t MSG_177 "Laporkan bug atau permintaan perbaikan di:"
 t MSG_178 "Hak Cipta Tambahan:"
 t MSG_179 "Ketentuan Pembaruan:"
 t MSG_180 "Jika Anda memilih untuk mengizinkan program ini memeriksa pembaruan aplikasi, "
@@ -7498,7 +7503,7 @@ t MSG_234 "Menginstal Syslinux %s..."
 # Bad blocks status. eg: "Bad Blocks: Write pass 1/2 - 12.34% (0/0/1 errors)"
 # See MSG_191/192 for "Write pass"/"Read pass" translation
 t MSG_235 "Blok Buruk: %s %d/%d - %0.2f%% (%d/%d/%d errors)"
-t MSG_236 "Blok Buruk: Mencoba denga pola acak"
+t MSG_236 "Blok Buruk: Mencoba dengan pola acak"
 t MSG_237 "Blok Buruk: Mencoba dengan pola 0x%02X"
 # eg. "Partitioning (MBR)..."
 t MSG_238 "Mempartisi (%s)..."
@@ -7544,9 +7549,10 @@ t MSG_275 "Image yang Anda pilih merupakan image 'ISOHybrid'. Ini artinya image 
 	"Silakan pilih mode mana yang ingin digunakan untuk menulis image ini:"
 t MSG_276 "Tulis dalam mode %s (Disarankan)"
 t MSG_277 "Tulis dalam mode %s"
+t MSG_278 "Memeriksa proses yang konflik..."
 t MSG_279 "Non bootable"
-t MSG_280 "Pemilihan image"
-t MSG_281 "(Silakan pilih sebuah image)"
+t MSG_280 "Disk atau ISO image"
+t MSG_281 "%s (Silakan Pilih)"
 t MSG_282 "Penguncian perangkat USB khusus"
 t MSG_283 "Tanda tangan digital tidak valid"
 t MSG_284 "Berkas exe yang diunduh memiliki tanda tangan digital yang salah."
@@ -7568,7 +7574,16 @@ t MSG_297 "Terdeteksi ISO Terpotong"
 t MSG_298 "Berkas ISO yang Anda pilih tidak sesuai dengan ukuran yang dideklarasikan: %s data hilang!\n\n"
 	"Jika Anda mendapatkan berkas ini dari Internet, Anda sebaiknya mengunduh salinan yang baru dan pastikan ceksum MD5 atau SHA "
 	"cocok dengan yang asli.\n\nPerhatikan bahwa Anda dapat menghitung MD5 atau SHA dalam Rufus dengan mengklik tombol (✓)."
-t MSG_117 "Instalasi Windows standar"
+t MSG_299 "Kesalahan memvalidasi stempel waktu"
+t MSG_300 "Rufus tidak dapat memvalidasi bahwa stempel waktu pembaruan yang diunduh lebih baru daripada yang sedang dijalankan saat ini. "
+	"Untuk mencegah kemungkinan skenario serangan, proses pembaruan telah dibatalkan dan unduhan akan dihapus. "
+	"Silakan periksa log untuk lebih jelasnya."
+t MSG_301 "Tampilkan pengaturan aplikasi"
+t MSG_302 "Tampilkan informasi tentang aplikasi ini"
+t MSG_303 "Tampilkan log"
+t MSG_304 "Buat disk image dari perangkat yang dipilih"
+t MSG_305 "Gunakan opsi ini jika Anda ingin menggunakan perangkat ini untuk menginstal Windows pada disk lain, "
+	"atau jika Anda ingin menjalankan Windows secara langsung dari drive ini (Windows To Go)."
 
 ################################################################################
 l "it-IT" "Italian (Italiano)" 0x0410, 0x0810
