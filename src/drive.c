@@ -794,9 +794,10 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 					// Check the FAT label to see if we're dealing with an UEFI_NTFS partition
 					buf = calloc(SelectedDrive.SectorSize, 1);
 					if (buf != NULL) {
-						SetFilePointerEx(hPhysical, DriveLayout->PartitionEntry[i].StartingOffset, NULL, FILE_BEGIN);
-						ReadFile(hPhysical, buf, SelectedDrive.SectorSize, &size, NULL);
-						isUefiNtfs = (strncmp(&buf[0x2B], "UEFI_NTFS", 9) == 0);
+						if (SetFilePointerEx(hPhysical, DriveLayout->PartitionEntry[i].StartingOffset, NULL, FILE_BEGIN) &&
+							ReadFile(hPhysical, buf, SelectedDrive.SectorSize, &size, NULL)) {
+							isUefiNtfs = (strncmp(&buf[0x2B], "UEFI_NTFS", 9) == 0);
+						}
 						free(buf);
 					}
 				}

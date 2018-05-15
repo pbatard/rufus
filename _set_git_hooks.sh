@@ -8,11 +8,11 @@ fi
 echo 'Creating pre-commit git hook...'
 echo '#!/bin/sh' > .git/hooks/pre-commit
 echo 'if [ -x ./_pre-commit.sh ]; then' >> .git/hooks/pre-commit
-echo '	source ./_pre-commit.sh' >> .git/hooks/pre-commit
+echo '	. ./_pre-commit.sh' >> .git/hooks/pre-commit
 echo 'fi' >> .git/hooks/pre-commit
 
 echo 'Creating post-commit git hook...'
 echo '#!/bin/sh' > .git/hooks/post-commit
 echo 'if [ -x ./_post-commit.sh ]; then' >> .git/hooks/post-commit
-echo '	source ./_post-commit.sh' >> .git/hooks/post-commit
+echo '	. ./_post-commit.sh' >> .git/hooks/post-commit
 echo 'fi' >> .git/hooks/post-commit

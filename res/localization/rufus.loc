@@ -352,7 +352,7 @@ t MSG_116 "This image uses Grub %s but the application only includes the install
 	"automatically if present. If no match can be found online, then the default version will be used."
 t MSG_117 "Standard Windows installation"
 # Only translate if Microsoft has a specific name for http://en.wikipedia.org/wiki/Windows_To_Go in your language
-# Otherwise, you can add a parenthesis eg. "Windows To Go (hint at what it does)" and/or use the tooltip (MSG_200)
+# Otherwise, you can add a parenthesis eg. "Windows To Go (hint at what it does)"
 t MSG_118 "Windows To Go"
 t MSG_119 "advanced drive properties"
 t MSG_120 "advanced format options"
