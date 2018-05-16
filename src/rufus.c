@@ -328,7 +328,8 @@ static void SetPartitionSchemeAndTargetSystem(BOOL only_target)
 			preferred_pt = (selected_pt >= 0) ? selected_pt : PARTITION_STYLE_GPT;
 		else if ((bt == BT_IMAGE) && (image_path != NULL) && (img_report.is_iso)) {
 			if (HAS_WINDOWS(img_report) && img_report.has_efi)
-				preferred_pt = allow_dual_uefi_bios? PARTITION_STYLE_MBR : PARTITION_STYLE_GPT;
+				preferred_pt = allow_dual_uefi_bios? PARTITION_STYLE_MBR :
+					((selected_pt >= 0) ? selected_pt : PARTITION_STYLE_GPT);
 			if (img_report.is_bootable_img)
 				preferred_pt = (selected_pt >= 0) ? selected_pt : PARTITION_STYLE_MBR;
 		}
@@ -1022,6 +1023,9 @@ BOOL CALLBACK LogCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 		case IDCANCEL:
 			ShowWindow(hDlg, SW_HIDE);
 			log_displayed = FALSE;
+			// Set focus to the Cancel button on the main dialog
+			// This avoids intempestive tooltip display from the log toolbar buttom
+			SendMessage(hMainDialog, WM_NEXTDLGCTL, (WPARAM)GetDlgItem(hMainDialog, IDCANCEL), TRUE);
 			return TRUE;
 		case IDC_LOG_CLEAR:
 			SetWindowTextA(hLog, "");
@@ -1050,6 +1054,9 @@ BOOL CALLBACK LogCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 		ShowWindow(hDlg, SW_HIDE);
 		reset_localization(IDD_LOG);
 		log_displayed = FALSE;
+		// Set focus to the Cancel button on the main dialog
+		// This avoids intempestive tooltip display from the log toolbar buttom
+		SendMessage(hMainDialog, WM_NEXTDLGCTL, (WPARAM)GetDlgItem(hMainDialog, IDCANCEL), TRUE);
 		return TRUE;
 	case UM_RESIZE_BUTTONS:
 		// Resize our buttons for low scaling factors
@@ -3300,6 +3307,8 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 					static_sprintf(szTimer, "00:00:00");
 					SendMessageA(hStatus, SB_SETTEXTA, SBT_OWNERDRAW | SB_SECTION_RIGHT, (LPARAM)szTimer);
 					SetTimer(hMainDialog, TID_APP_TIMER, 1000, ClockTimer);
+					// Set focus to the Cancel button
+					SendMessage(hMainDialog, WM_NEXTDLGCTL, (WPARAM)GetDlgItem(hMainDialog, IDCANCEL), TRUE);
 				}
 			}
 			if (format_thid != NULL)
@@ -3521,6 +3530,9 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			case IDC_HASH:
 				utf8_to_wchar_no_alloc(lmprintf(MSG_272), wtooltip, ARRAYSIZE(wtooltip));
 				lpttt->lpszText = wtooltip;
+				break;
+			default:
+				uprintf("TTN_GETDISPINFO called for unknown toolbar button!");
 				break;
 			}
 			break;
