@@ -365,8 +365,9 @@ char* lmprintf(uint32_t msg_id, ...)
 	static int buf_id = 0;
 	static char buf[LOC_MESSAGE_NB][LOC_MESSAGE_SIZE];
 	char *format = NULL;
+	size_t pos = 0;
 	va_list args;
-	BOOL needs_rtf_rtl_marks = (msg_id & MSG_RTF) && right_to_left_mode;
+	BOOL is_rtf = (msg_id & MSG_RTF);
 
 	buf_id %= LOC_MESSAGE_NB;
 	buf[buf_id][0] = 0;
@@ -379,13 +380,22 @@ char* lmprintf(uint32_t msg_id, ...)
 	if (format == NULL) {
 		safe_sprintf(buf[buf_id], LOC_MESSAGE_SIZE-1, "MSG_%03d UNTRANSLATED", msg_id - MSG_000);
 	} else {
-		if (needs_rtf_rtl_marks)
-			safe_strcpy(buf[buf_id], LOC_MESSAGE_SIZE-1, "\\rtlch");
+		if (right_to_left_mode) {
+			if (is_rtf) {
+				safe_strcpy(&buf[buf_id][pos], LOC_MESSAGE_SIZE - 1, "\\rtlch");
+				pos += 6;
+			}
+			safe_strcpy(&buf[buf_id][pos], LOC_MESSAGE_SIZE - 1, RIGHT_TO_LEFT_EMBEDDING);
+			pos += sizeof(RIGHT_TO_LEFT_EMBEDDING) - 1;
+		}
 		va_start(args, msg_id);
-		safe_vsnprintf(&buf[buf_id][needs_rtf_rtl_marks?6:0], LOC_MESSAGE_SIZE-1, format, args);
+		safe_vsnprintf(&buf[buf_id][pos], LOC_MESSAGE_SIZE- 1 - 2*pos, format, args);
 		va_end(args);
-		if (needs_rtf_rtl_marks)
-			safe_strcat(buf[buf_id], LOC_MESSAGE_SIZE-1, "\\ltrch");
+		if (right_to_left_mode) {
+			safe_strcat(buf[buf_id], LOC_MESSAGE_SIZE - 1, POP_DIRECTIONAL_FORMATTING);
+			if (is_rtf)
+				safe_strcat(buf[buf_id], LOC_MESSAGE_SIZE - 1, "\\ltrch");
+		}
 		buf[buf_id][LOC_MESSAGE_SIZE-1] = '\0';
 	}
 	return buf[buf_id++];

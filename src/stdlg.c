@@ -1073,7 +1073,9 @@ INT_PTR CALLBACK TooltipCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM 
 		case TTN_GETDISPINFOW:
 			lpnmtdi = (LPNMTTDISPINFOW)lParam;
 			lpnmtdi->lpszText = ttlist[i].wstring;
-			SendMessage(hDlg, TTM_SETMAXTIPWIDTH, 0, 300);
+			// Don't ask me WHY we need to clear RTLREADING for RTL multiline text to look good
+			lpnmtdi->uFlags &= ~TTF_RTLREADING;
+			SendMessage(hDlg, TTM_SETMAXTIPWIDTH, 0, (LPARAM)(int)(150.0f * fScale));
 			return (INT_PTR)TRUE;
 		}
 		break;
@@ -1758,7 +1760,7 @@ LPCDLGTEMPLATE GetDialogTemplate(int Dialog_ID)
 	if (right_to_left_mode) {
 		// Add the RTL styles into our RC copy, so that we don't have to multiply dialog definitions in the RC
 		dwBuf = (DWORD*)rcTemplate;
-		dwBuf[2] = WS_EX_RTLREADING | WS_EX_APPWINDOW | WS_EX_LAYOUTRTL;
+		dwBuf[2] = WS_EX_APPWINDOW | WS_EX_LAYOUTRTL;
 	}
 
 	// All our dialogs are set to use 'Segoe UI Symbol' by default:
