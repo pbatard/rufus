@@ -2673,6 +2673,8 @@ static void InitDialog(HWND hDlg)
 	CreateTooltip(hLabel, lmprintf(MSG_159), -1);
 	CreateTooltip(hAdvancedDeviceToolbar, lmprintf(MSG_160), -1);
 	CreateTooltip(hAdvancedFormatToolbar, lmprintf(MSG_160), -1);
+	CreateTooltip(hSaveToolbar, lmprintf(MSG_304), -1);
+	CreateTooltip(hHashToolbar, lmprintf(MSG_272), -1);
 	CreateTooltip(GetDlgItem(hDlg, IDC_BAD_BLOCKS), lmprintf(MSG_161), -1);
 	CreateTooltip(GetDlgItem(hDlg, IDC_QUICK_FORMAT), lmprintf(MSG_162), -1);
 	CreateTooltip(hBootType, lmprintf(MSG_164), -1);
@@ -3522,17 +3524,6 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			case IDC_LOG:
 				utf8_to_wchar_no_alloc(lmprintf(MSG_303), wtooltip, ARRAYSIZE(wtooltip));
 				lpttt->lpszText = wtooltip;
-				break;
-			case IDC_SAVE:
-				utf8_to_wchar_no_alloc(lmprintf(MSG_304), wtooltip, ARRAYSIZE(wtooltip));
-				lpttt->lpszText = wtooltip;
-				break;
-			case IDC_HASH:
-				utf8_to_wchar_no_alloc(lmprintf(MSG_272), wtooltip, ARRAYSIZE(wtooltip));
-				lpttt->lpszText = wtooltip;
-				break;
-			default:
-				uprintf("TTN_GETDISPINFO called for unknown toolbar button!");
 				break;
 			}
 			break;
