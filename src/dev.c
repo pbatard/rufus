@@ -766,7 +766,7 @@ BOOL GetDevices(DWORD devnum)
 					uprintf("Device eliminated because it was detected as a Hard Drive (score %d > 0)", score);
 					if (!list_non_usb_removable_drives)
 						uprintf("If this device is not a Hard Drive, please e-mail the author of this application");
-					uprintf("NOTE: You can enable the listing of Hard Drives in 'Advanced Options' (after clicking the white triangle)");
+					uprintf("NOTE: You can enable the listing of Hard Drives under 'advanced drive properties'");
 					safe_closehandle(hDrive);
 					safe_free(devint_detail_data);
 					break;
