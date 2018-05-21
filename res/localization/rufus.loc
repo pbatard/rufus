@@ -340,7 +340,7 @@ t MSG_114 "This image uses Syslinux %s%s but this application only includes the 
 	"automatically if present.\n"
 t MSG_115 "Download required"
 # Note: You should be able to test this message with Super Grub2 Disk ISO:
-# http://forja.cenatic.es/frs/download.php/file/1757/super_grub2_disk_hybrid_2.00s2.iso (11 MB)
+# https://sourceforge.net/projects/supergrub2/files/2.00s2/super_grub2_disk_hybrid_2.00s2.iso/download (11.9 MB)
 t MSG_116 "This image uses Grub %s but the application only includes the installation files for "
 	"Grub %s.\n\nAs different versions of Grub may not be compatible with one another, and it is "
 	"not possible to include them all, Rufus will attempt to locate a version of the Grub "
@@ -2150,8 +2150,6 @@ t MSG_114 "这个镜像使用 Syslinux %s%s，而本程序仅包含 Syslinux %s%
 	"- 选择 '否' 取消此项操作\n\n"
 	"注意：文件将会被下载到当前应用程序目录，如果存在则会自动选用。\n"
 t MSG_115 "需要下载"
-# Note: You should be able to test this message with Super Grub2 Disk ISO:
-# http://forja.cenatic.es/frs/download.php/file/1757/super_grub2_disk_hybrid_2.00s2.iso (11 MB)
 t MSG_116 "本镜像使用 Grub %s 而应用程序只包含 Grub %s 的安装文件。\n\n"
 	"由于不同版本的 Grub 彼此不能兼容，而且不可能包含它们全部，"
 	"Rufus 将尝试定位一个匹配来自你的镜像的 Grub 版本"
@@ -3470,8 +3468,6 @@ t MSG_114 "Tento obraz používá Syslinux %s%s, tato aplikace však obsahuje po
 	"Poznámka: Soubory budou staženy do aktuální složky programu "
 	"pro opětovné automatické použití.\n"
 t MSG_115 "Nutné stažení souborů"
-# Poznámka: Měli byste být schopni otestovat tuto zprávu Super Grub2 Disk ISO:
-# http://forja.cenatic.es/frs/download.php/file/1757/super_grub2_disk_hybrid_2.00s2.iso (11 MB)
 t MSG_116 "Tento obraz používá Grub %s ale aplikace obsahuje pouze instalační soubory "
 	"Grub %s.\n\nVzhledem k různým verzím Grub nemusí být kompatibilní mezi sebou, "
 	"Není možné je mít všechny, Rufus se pokusí najít verzi Grub "
@@ -3919,8 +3915,6 @@ t MSG_114 "Dette image benytter Syslinux %s%s men denne applikation indeholder k
 	"Bemærk: Disse filer bliver gemt i den nuværende mappe og "
 	"bliver efterfølgende automatisk genanvendt, hvis de er der.\n"
 t MSG_115 "Download nødvendig"
-# Note: You should be able to test this message with Super Grub2 Disk ISO:
-# http://forja.cenatic.es/frs/download.php/file/1757/super_grub2_disk_hybrid_2.00s2.iso (11 MB)
 t MSG_116 "Dette image bruger Grub %s, og dette program har kun installationsfiler til  "
 	"Grub %s.\n\nDa forskellige versioner af Grub muligvis ikke er kompatible med hinanden, og det ikke "
 	"er muligt at inkludere alle versioner vil Rufus forsøge at finde en version af Grub"
@@ -7401,8 +7395,6 @@ t MSG_114 "Image ini menggunakan Syslinux %s%s namun aplikasi ini hanya menyerta
 	"Catatan: Berkas akan diunduh di direktori aplikasi saat ini dan akan digunakan kembali secara otomatis "
 	"jika diminta.\n"
 t MSG_115 "Unduh diperlukan"
-# Note: You should be able to test this message with Super Grub2 Disk ISO:
-# http://forja.cenatic.es/frs/download.php/file/1757/super_grub2_disk_hybrid_2.00s2.iso (11 MB)
 t MSG_116 "Image ini menggunakan Grub %s namun aplikasi ini hanya menyertakan berkas instalasi untuk "
 	"Grub %s.\n\nKarena versi baru Grub tidak kompatibel satu dengan lainnya, dan tidak mungkin "
 	"bagi Rufus untuk menyertakan semuanya, Rufus akan mencoba mencari versi berkas instalasi Grub "
@@ -10998,8 +10990,6 @@ t MSG_114 "این ایمیج (Image) از «Syslinux %s%s» استفاده می�
 	"-اگر از ادامه این فرآیند منصرف شده‌اید، «خیر» را انتخاب کنید.\n\n"
 	"نکته: این فایل‌ها در پوشه نرم‌افزار دانلود می‌شود و در دفعات بعد به‌صورت خودکار از آن‌ها استفاده خواهد شد."
 t MSG_115 "دانلود چند فایل لازم است"
-# Note: You should be able to test this message with Super Grub2 Disk ISO:
-# http://forja.cenatic.es/frs/download.php/file/1757/super_grub2_disk_hybrid_2.00s2.iso (11 MB)
 t MSG_116 "این ایمیج (Image) از «Grub %s» استفاده می‌کند؛ اما نرم‌افزار Rufus فقط تنظیمات و فایل‌های نصب «Grub %s» را به همراه دارد. "
 	"از آنجا که نسخه‌های مختلف Grub ممکن است با یکدیگر سازگار نباشند و امکان قرار دادن همه آن‌ها در نرم‌افزار Rufus وجود ندارد؛ "
 	"Rufus تلاش می‌کند فایل نصب «core.img» مناسب ایمیج شما را در اینترنت پیدا کند.\n\n"
@@ -11936,8 +11926,6 @@ t MSG_114 "Esta imagem usa Syslinux %s%s, mas este aplicativo inclui somente os 
 	"Nota: Os arquivos serão baixados no diretório atual do aplicativo e serão reutilizados "
 	"automaticamente se estiverem presentes.\n"
 t MSG_115 "Download necessário"
-# Note: You should be able to test this message with Super Grub2 Disk ISO:
-# http://forja.cenatic.es/frs/download.php/file/1757/super_grub2_disk_hybrid_2.00s2.iso (11 MB)
 t MSG_116 "Esta imagem usa o Grub %s, mas este aplicativo inclui somente os arquivos de instalação para "
 	"Grub %s.\n\nComo novas versões do Grub podem não ser compatíveis entre si, e que não "
 	"é possível incluí-las todas, o Rufus tentará localizar uma versão do arquivo "
@@ -12408,8 +12396,6 @@ t MSG_114 "Esta imagem usa Syslinux %s%s mas a aplicação inclui apenas os fich
 	"Nota: Os ficheiros serão transferidos para a pasta atual da aplicação e serão usados "
 	"automaticamente se presentes.\n"
 t MSG_115 "Transferência"
-# Note: You should be able to test this message with Super Grub2 Disk ISO:
-# http://forja.cenatic.es/frs/download.php/file/1757/super_grub2_disk_hybrid_2.00s2.iso (11 MB)
 t MSG_116 "Esta imagem usa Grub %s mas a aplicação inclui apenas os ficheiros de instalação para "
 	"Grub %s.\n\nAs diferentes versões de Grub podem não ser compatíveis entre si e não é "
 	"possível incluir todas elas. Rufus irá tentar localizar para a versão de Grub "
@@ -13723,8 +13709,6 @@ t MSG_114 "Ova datoteka koristi Syslinux %s%s ali ova aplikacija uključuje samo
 	"Napomena: Nove datoteke će biti sačuvane u istom direktorijumu kao i Rufus, i kad "
 	"datoteke '%s' postoje tamo, automatski će biti korišćene.\n"
 t MSG_115 "Potrebno preuzimanje"
-# Note: You should be able to test this message with Super Grub2 Disk ISO:
-# http://forja.cenatic.es/frs/download.php/file/1757/super_grub2_disk_hybrid_2.00s2.iso (11 MB)
 t MSG_116 "Ova slika koristi Grub %s ali aplikacija sadrži samo instalacijske datoteke za "
 	"Grub %s.\n\nKako različite verzije Grub-a ne moraju biti kompatibilne, i nije ih "
 	"moguće sve obuhvatiti, Rufus će pokušati da pronađe verziju instalacijske datoteke "
@@ -14617,8 +14601,6 @@ t MSG_114 "Ta slika uporablja Syslinux %s%s, toda ta aplikacija vsebuje le names
 	"- Izberite \"Ne\", da prekinete dejanje.\n\n"
 	"Opomba: datoteki bosta prenešeni v mapo, kjer je nameščen Rufus, in bosta v prihodnje ponovno uporabljeni."
 t MSG_115 "Prenos potreben"
-# Note: You should be able to test this message with Super Grub2 Disk ISO:
-# http://forja.cenatic.es/frs/download.php/file/1757/super_grub2_disk_hybrid_2.00s2.iso (11 MB)
 t MSG_116 "Ta slika uporablja GRUB %s, toda ta aplikacija vsebuje le namestitvene datoteke za "
 	"GRUB %s.\n\nKer različne verzije programa GRUB niso nujno združljive in Rufus ne more vsebovati vseh, "
 	"bo Rufus poskušal najti verzijo namestitvene datoteke za GRUB (core.img), ki se ujema s tisto na sliki:\n"
@@ -15961,8 +15943,6 @@ t MSG_114 "อิมเมจนี้ใช้ Syslinux %s%s แต่โปร
 	"หมายเหตุ: ไฟล์ใหม่จะถูกจัดเก็บในโฟลเดอร์ปัจจุบัน และไฟล์ "
 	"จะถูกเลือกใช้โดยอัตโนมัติ\n"
 t MSG_115 "จำเป็นต้องดาวน์โหลดไฟล์"
-# Note: You should be able to test this message with Super Grub2 Disk ISO:
-# http://forja.cenatic.es/frs/download.php/file/1757/super_grub2_disk_hybrid_2.00s2.iso (11 MB)
 t MSG_116 "อิมเมจนี้ใช้ Grub %s แต่โปรแกรมนี้รวมเฉพาะไฟล์ติดตั้งของ "
 	"Grub %s \n\nโดยเวอร์ชั่นใหม่ของ Grub อาจไม่รองรับกับรุ่นที่ต่างกันไป "
 	"Rufus สามารถค้นหาอิมเมจของ Grub เวอร์ชั่นล่าสุด"
@@ -17320,8 +17300,6 @@ t MSG_114 "Ảnh này dùng Syslinux %s%s nhưng ứng dụng này chỉ bao g�
 	"Chú ý: Các tập tin sẽ được tải xuống vào thư mục ứng dụng hiện tại và sẽ được tự tái sử dụng "
 	"nếu có.\n"
 t MSG_115 "Yêu cầu tải xuống"
-# Note: You should be able to test this message with Super Grub2 Disk ISO:
-# http://forja.cenatic.es/frs/download.php/file/1757/super_grub2_disk_hybrid_2.00s2.iso (11 MB)
 t MSG_116 "Ảnh này dùng Grub %s nhưng ứng dụng này chỉ bao gồm tập tin cài đặt cho "
 	"Grub %s.\n\nPhiên bản khác của Grub không tương thích với các phiên bản khác nhau và "
 	"Rufus không thể kèm theo tất cả chúng, ứng dụng sẽ cố xác định phiên bảntập tin cài đặt Grub "

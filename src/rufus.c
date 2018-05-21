@@ -1867,8 +1867,7 @@ static INT_PTR CALLBACK ProgressCallback(HWND hCtrl, UINT message, WPARAM wParam
 				SetTextColor(hDC, PROGRESS_BAR_INVERTED_TEXT_COLOR);
 				SetBkColor(hDC, color);
 				ExtTextOut(hDC, (full_right - size.cx) / 2, (rc.bottom - size.cy) / 2,
-					ETO_CLIPPED | ETO_OPAQUE | ETO_NUMERICSLOCAL | (right_to_left_mode ? ETO_RTLREADING : 0),
-					&rc, winfo, (int)wcslen(winfo), NULL);
+					ETO_CLIPPED | ETO_OPAQUE | ETO_NUMERICSLOCAL, &rc, winfo, (int)wcslen(winfo), NULL);
 				rc.left = rc.right;
 				rc.right = full_right;
 			}
@@ -1878,8 +1877,7 @@ static INT_PTR CALLBACK ProgressCallback(HWND hCtrl, UINT message, WPARAM wParam
 				SetTextColor(hDC, PROGRESS_BAR_NORMAL_TEXT_COLOR);
 				SetBkColor(hDC, PROGRESS_BAR_BACKGROUND_COLOR);
 				ExtTextOut(hDC, (full_right - size.cx) / 2, (rc.bottom - size.cy) / 2,
-					ETO_CLIPPED | ETO_OPAQUE | ETO_NUMERICSLOCAL | (right_to_left_mode ? ETO_RTLREADING : 0),
-					&rc, winfo, (int)wcslen(winfo), NULL);
+					ETO_CLIPPED | ETO_OPAQUE | ETO_NUMERICSLOCAL, &rc, winfo, (int)wcslen(winfo), NULL);
 				rc.left = rc.right;
 				rc.right = full_right;
 			}
@@ -1888,16 +1886,14 @@ static INT_PTR CALLBACK ProgressCallback(HWND hCtrl, UINT message, WPARAM wParam
 			SetTextColor(hDC, PROGRESS_BAR_INVERTED_TEXT_COLOR);
 			SetBkColor(hDC, color);
 			ExtTextOut(hDC, (full_right - size.cx) / 2, (rc.bottom - size.cy) / 2,
-				ETO_CLIPPED | ETO_OPAQUE | ETO_NUMERICSLOCAL | (right_to_left_mode ? ETO_RTLREADING : 0),
-				&rc, winfo, (int)wcslen(winfo), NULL);
+				ETO_CLIPPED | ETO_OPAQUE | ETO_NUMERICSLOCAL, &rc, winfo, (int)wcslen(winfo), NULL);
 		} else {
 			// First segment
 			rc.right = (pos > min) ? MulDiv(pos - min, rc.right, max - min) : rc.left;
 			SetTextColor(hDC, PROGRESS_BAR_INVERTED_TEXT_COLOR);
 			SetBkColor(hDC, color);
 			ExtTextOut(hDC, (full_right - size.cx) / 2, (rc.bottom - size.cy) / 2,
-				ETO_CLIPPED | ETO_OPAQUE | ETO_NUMERICSLOCAL | (right_to_left_mode ? ETO_RTLREADING : 0),
-				&rc, winfo, (int)wcslen(winfo), NULL);
+				ETO_CLIPPED | ETO_OPAQUE | ETO_NUMERICSLOCAL, &rc, winfo, (int)wcslen(winfo), NULL);
 		}
 		// Last segment
 		rc.left = rc.right;
@@ -1905,8 +1901,7 @@ static INT_PTR CALLBACK ProgressCallback(HWND hCtrl, UINT message, WPARAM wParam
 		SetTextColor(hDC, PROGRESS_BAR_NORMAL_TEXT_COLOR);
 		SetBkColor(hDC, PROGRESS_BAR_BACKGROUND_COLOR);
 		ExtTextOut(hDC, (full_right - size.cx) / 2, (rc.bottom - size.cy) / 2,
-			ETO_CLIPPED | ETO_OPAQUE | ETO_NUMERICSLOCAL | (right_to_left_mode ? ETO_RTLREADING : 0),
-			&rc, winfo, (int)wcslen(winfo), NULL);
+			ETO_CLIPPED | ETO_OPAQUE | ETO_NUMERICSLOCAL, &rc, winfo, (int)wcslen(winfo), NULL);
 		// Bounding rectangle
 		SetDCPenColor(hDC, PROGRESS_BAR_BOX_COLOR);
 		Rectangle(hDC, rc2.left, rc2.top, rc2.right, rc2.bottom);
