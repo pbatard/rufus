@@ -2090,7 +2090,7 @@ static void CreateAdditionalControls(HWND hDlg)
 	tbToolbarButtons[6].fsState = TBSTATE_ENABLED;
 	tbToolbarButtons[6].iBitmap = 3;
 	SendMessage(hMultiToolbar, TB_ADDBUTTONS, (WPARAM)7, (LPARAM)&tbToolbarButtons);
-	SendMessage(hMultiToolbar, TB_SETBUTTONSIZE, 0, MAKELPARAM(0, ddbh));
+	SendMessage(hMultiToolbar, TB_SETBUTTONSIZE, 0, MAKELPARAM(i16, ddbh));
 }
 
 // https://stackoverflow.com/a/20926332/1069307
@@ -2286,6 +2286,7 @@ static void PositionControls(HWND hDlg)
 	RECT rc;
 	HWND hCtrl, hPrevCtrl;
 	SIZE sz;
+	DWORD padding;
 	int i, x, button_fudge = 2;
 
 	// Start by resizing the whole dialog
@@ -2379,6 +2380,11 @@ static void PositionControls(HWND hDlg)
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
 	SendMessage(hSaveToolbar, TB_GETIDEALSIZE, (WPARAM)FALSE, (LPARAM)&sz);
 	SendMessage(hSaveToolbar, TB_SETBUTTONSIZE, 0, MAKELPARAM(sz.cx, ddbh));
+	// Microsoft, how I loathe thee!!!
+	padding = SendMessage(hSaveToolbar, TB_GETPADDING, 0, 0);
+	sz.cx = padding & 0xFFFF;
+	sz.cy = padding >> 16;
+	SendMessage(hSaveToolbar, TB_SETPADDING, 0, MAKELPARAM(sz.cx + 3, sz.cy + 2));
 	SetWindowPos(hSaveToolbar, hDeviceList, mw + fw - sbw, rc.top, sbw, ddbh, 0);
 
 	// Reposition the Hash button
@@ -2387,7 +2393,11 @@ static void PositionControls(HWND hDlg)
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
 	SendMessage(hHashToolbar, TB_GETIDEALSIZE, (WPARAM)FALSE, (LPARAM)&sz);
 	SendMessage(hHashToolbar, TB_SETBUTTONSIZE, 0, MAKELPARAM(sz.cx, ddbh));
-	SetWindowPos(hHashToolbar, hBootType, mw + bsw + ssw, rc.top, sz.cx, ddbh, 0);
+	padding = SendMessage(hHashToolbar, TB_GETPADDING, 0, 0);
+	sz.cx = padding & 0xFFFF;
+	sz.cy = padding >> 16;
+	SendMessage(hHashToolbar, TB_SETPADDING, 0, MAKELPARAM(sz.cx + 3, sz.cy + 2));
+	SetWindowPos(hHashToolbar, hBootType, mw + bsw + ssw, rc.top, sbw, ddbh, 0);
 
 	// Reposition the CSM help tip
 	hCtrl = GetDlgItem(hDlg, IDS_CSM_HELP_TXT);
