@@ -211,7 +211,8 @@ static CDIO_INLINE uint32_t
 from_733_with_err (uint64_t p, bool *err)
 {
   if (uint64_swap_le_be (p) != p) {
-    cdio_warn ("from_733: broken byte order");
+// Commented out for Rufus
+//    cdio_warn ("from_733: broken byte order");
     *err = true;
   } else {
     *err = false;

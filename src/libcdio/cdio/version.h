@@ -7,7 +7,7 @@
 /*! CDIO_VERSION is a C-Preprocessor macro of a string that shows what
     version is used.  cdio_version_string has the same value, but it is a
     constant variable that can be accessed at run time. */
-#define CDIO_VERSION "0.94 i686-w64-mingw32"
+#define CDIO_VERSION "0.94 (Rufus)"
 extern const char *cdio_version_string; /**< = CDIO_VERSION */
 
 /*! LIBCDIO_VERSION_NUM is a C-Preprocessor macro that can be used for

@@ -1123,8 +1123,8 @@ _fs_iso_stat_traverse (iso9660_t *p_iso, const iso9660_stat_t *_root,
 
       if (!p_stat) {
 	cdio_warn("Bad directory information for %s", splitpath[0]);
-	free(_dirbuf);
-	return NULL;
+	// Patched for Rufus - Don't bail out on this
+	continue;
       }
 
       /* If we have multiextent file parts, loop until the last one */
