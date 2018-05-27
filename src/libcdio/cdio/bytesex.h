@@ -171,9 +171,6 @@ to_723(uint16_t i)
 static CDIO_INLINE uint16_t
 from_723 (uint32_t p)
 {
-  if (uint32_swap_le_be (p) != p)
-    cdio_warn ("from_723: broken byte order");
-
   return (0xFFFF & p);
 }
 
@@ -200,10 +197,6 @@ to_733(uint32_t i)
 static CDIO_INLINE uint32_t
 from_733 (uint64_t p)
 {
-// Commented out for Rufus
-//  if (uint64_swap_le_be (p) != p)
-//    cdio_warn ("from_733: broken byte order");
-
   return (UINT32_C(0xFFFFFFFF) & p);
 }
 
@@ -211,8 +204,7 @@ static CDIO_INLINE uint32_t
 from_733_with_err (uint64_t p, bool *err)
 {
   if (uint64_swap_le_be (p) != p) {
-// Commented out for Rufus
-//    cdio_warn ("from_733: broken byte order");
+    cdio_warn ("from_733: broken byte order");
     *err = true;
   } else {
     *err = false;
