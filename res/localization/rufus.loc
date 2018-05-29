@@ -7925,7 +7925,7 @@ t MSG_116 "Questa immagine usa Grub %s ma l'applicazione include solo i file di 
 	"se presenti. Se non sarà trovata online nessuna corrispondenza, verrà usata la versione predefinita."
 t MSG_117 "Installazione Windows standard"
 t MSG_119 "opzioni avanzate unità"
-t MSG_120 "opzioni avanzate formmttazione"
+t MSG_120 "opzioni avanzate formattazione"
 t MSG_121 "Visualizza %s"
 t MSG_122 "Nascondi %s"
 # Tooltips
