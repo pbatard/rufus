@@ -2381,7 +2381,7 @@ static void PositionControls(HWND hDlg)
 	SendMessage(hSaveToolbar, TB_GETIDEALSIZE, (WPARAM)FALSE, (LPARAM)&sz);
 	SendMessage(hSaveToolbar, TB_SETBUTTONSIZE, 0, MAKELPARAM(sz.cx, ddbh));
 	// Microsoft, how I loathe thee!!!
-	padding = SendMessage(hSaveToolbar, TB_GETPADDING, 0, 0);
+	padding = (DWORD) SendMessage(hSaveToolbar, TB_GETPADDING, 0, 0);
 	sz.cx = padding & 0xFFFF;
 	sz.cy = padding >> 16;
 	SendMessage(hSaveToolbar, TB_SETPADDING, 0, MAKELPARAM(sz.cx + 3, sz.cy + 2));
@@ -2393,7 +2393,7 @@ static void PositionControls(HWND hDlg)
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
 	SendMessage(hHashToolbar, TB_GETIDEALSIZE, (WPARAM)FALSE, (LPARAM)&sz);
 	SendMessage(hHashToolbar, TB_SETBUTTONSIZE, 0, MAKELPARAM(sz.cx, ddbh));
-	padding = SendMessage(hHashToolbar, TB_GETPADDING, 0, 0);
+	padding = (DWORD) SendMessage(hHashToolbar, TB_GETPADDING, 0, 0);
 	sz.cx = padding & 0xFFFF;
 	sz.cy = padding >> 16;
 	SendMessage(hHashToolbar, TB_SETPADDING, 0, MAKELPARAM(sz.cx + 3, sz.cy + 2));

@@ -1,4 +1,4 @@
-o Version 3.0 (2018.??.??)
+o Version 3.0 (2018.05.29)
     UI redesign to follow the flow of user operations (with thanks to Fahad Al-Riyami for the concept)
     Drop XP and Vista platform support
     Switch all downloads to SSL and use https://rufus.ie as the new base URL

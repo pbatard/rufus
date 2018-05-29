@@ -8,10 +8,10 @@ del /q *.appx >NUL 2>&1
 rem As per the link below, you need "altform-unplated" icons and run MakePri to get transparent icons:
 rem https://social.msdn.microsoft.com/Forums/windowsapps/en-US/dc505f68-d120-43e3-a9e1-d7c77746d588/uwpdesktop-bridgeunplated-taskbar-icons-in-desktop-bridge-apps
 mkdir Assets >NUL 2>&1
-copy "..\icon-set\rufus-44.png"  "Assets\Square44x44Logo.png"
-copy "..\icon-set\rufus-48.png"  "Assets\Square44x44Logo.targetsize-48.png"
-copy "..\icon-set\rufus-48.png"  "Assets\Square44x44Logo.targetsize-48_altform-unplated.png"
-copy "..\icon-set\rufus-150.png" "Assets\Square150x150Logo.png"
+copy "..\icons\rufus-44.png"  "Assets\Square44x44Logo.png"
+copy "..\icons\rufus-48.png"  "Assets\Square44x44Logo.targetsize-48.png"
+copy "..\icons\rufus-48.png"  "Assets\Square44x44Logo.targetsize-48_altform-unplated.png"
+copy "..\icons\rufus-150.png" "Assets\Square150x150Logo.png"
 copy "..\..\rufus-%VERSION%.exe" "rufus.exe"
 "C:\Program Files (x86)\Windows Kits\10\bin\10.0.16299.0\x64\MakePri" createconfig /o /dq en-US /cf priconfig.xml
 "C:\Program Files (x86)\Windows Kits\10\bin\10.0.16299.0\x64\MakePri" new /o /pr . /cf priconfig.xml
