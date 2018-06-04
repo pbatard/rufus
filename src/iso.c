@@ -94,7 +94,7 @@ static const char* stupid_antivirus = "  NOTE: This is usually caused by a poorl
 	"look into using a *SMARTER* antivirus solution.";
 const char* old_c32_name[NB_OLD_C32] = OLD_C32_NAMES;
 static const int64_t old_c32_threshold[NB_OLD_C32] = OLD_C32_THRESHOLD;
-static uint8_t i_joliet_level = 0;
+static uint8_t joliet_level = 0;
 static uint64_t total_blocks, nb_blocks;
 static BOOL scan_only = FALSE;
 static StrArray config_path, isolinux_path;
@@ -140,7 +140,7 @@ static void log_handler (cdio_log_level_t level, const char *message)
  * Scan and set ISO properties
  * Returns true if the the current file does not need to be processed further
  */
-static BOOL check_iso_props(const char* psz_dirname, int64_t i_file_length, const char* psz_basename,
+static BOOL check_iso_props(const char* psz_dirname, int64_t file_length, const char* psz_basename,
 	const char* psz_fullpath, EXTRACT_PROPS *props)
 {
 	size_t i, j, len;
@@ -157,7 +157,7 @@ static BOOL check_iso_props(const char* psz_dirname, int64_t i_file_length, cons
 
 	// Check for an old incompatible c32 file anywhere
 	for (i=0; i<NB_OLD_C32; i++) {
-		if ((safe_stricmp(psz_basename, old_c32_name[i]) == 0) && (i_file_length <= old_c32_threshold[i]))
+		if ((safe_stricmp(psz_basename, old_c32_name[i]) == 0) && (file_length <= old_c32_threshold[i]))
 			props->is_old_c32[i] = TRUE;
 	}
 
@@ -244,12 +244,12 @@ static BOOL check_iso_props(const char* psz_dirname, int64_t i_file_length, cons
 			if (props->is_old_c32[i])
 				img_report.has_old_c32[i] = TRUE;
 		}
-		if (i_file_length >= FOUR_GIGABYTES)
+		if (file_length >= FOUR_GIGABYTES)
 			img_report.has_4GB_file = TRUE;
 		// Compute projected size needed
-		total_blocks += i_file_length / ISO_BLOCKSIZE;
+		total_blocks += file_length / ISO_BLOCKSIZE;
 		// NB: ISO_BLOCKSIZE = UDF_BLOCKSIZE
-		if ((i_file_length != 0) && (i_file_length % ISO_BLOCKSIZE != 0))
+		if ((file_length != 0) && (file_length % ISO_BLOCKSIZE != 0))
 			total_blocks++;
 		return TRUE;
 	}
@@ -315,7 +315,7 @@ static void fix_config(const char* psz_fullpath, const char* psz_path, const cha
 	free(src);
 }
 
-static void print_extracted_file(char* psz_fullpath, int64_t i_file_length)
+static void print_extracted_file(char* psz_fullpath, int64_t file_length)
 {
 	size_t i, nul_pos;
 
@@ -325,9 +325,9 @@ static void print_extracted_file(char* psz_fullpath, int64_t i_file_length)
 	nul_pos = strlen(psz_fullpath);
 	for (i=0; i<nul_pos; i++)
 		if (psz_fullpath[i] == '/') psz_fullpath[i] = '\\';
-	safe_sprintf(&psz_fullpath[nul_pos], 24, " (%s)", SizeToHumanReadable(i_file_length, TRUE, FALSE));
+	safe_sprintf(&psz_fullpath[nul_pos], 24, " (%s)", SizeToHumanReadable(file_length, TRUE, FALSE));
 	uprintf("Extracting: %s\n", psz_fullpath);
-	safe_sprintf(&psz_fullpath[nul_pos], 24, " (%s)", SizeToHumanReadable(i_file_length, FALSE, FALSE));
+	safe_sprintf(&psz_fullpath[nul_pos], 24, " (%s)", SizeToHumanReadable(file_length, FALSE, FALSE));
 	PrintStatus(0, MSG_000, psz_fullpath);	// MSG_000 is "%s"
 	// ISO9660 cannot handle backslashes
 	for (i=0; i<nul_pos; i++)
@@ -368,13 +368,13 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 	DWORD buf_size, wr_size, err;
 	EXTRACT_PROPS props;
 	BOOL r, is_identical;
-	int i_length;
+	int length;
 	size_t i;
 	char tmp[128], *psz_fullpath = NULL, *psz_sanpath = NULL;
 	const char* psz_basename;
 	udf_dirent_t *p_udf_dirent2;
 	uint8_t buf[UDF_BLOCKSIZE];
-	int64_t i_read, i_file_length;
+	int64_t read, file_length;
 
 	if ((p_udf_dirent == NULL) || (psz_path == NULL))
 		return 1;
@@ -384,14 +384,14 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 		psz_basename = udf_get_filename(p_udf_dirent);
 		if (strlen(psz_basename) == 0)
 			continue;
-		i_length = (int)(3 + strlen(psz_path) + strlen(psz_basename) + strlen(psz_extract_dir) + 24);
-		psz_fullpath = (char*)calloc(sizeof(char), i_length);
+		length = (int)(3 + strlen(psz_path) + strlen(psz_basename) + strlen(psz_extract_dir) + 24);
+		psz_fullpath = (char*)calloc(sizeof(char), length);
 		if (psz_fullpath == NULL) {
 			uprintf("Error allocating file name");
 			goto out;
 		}
-		i_length = _snprintf(psz_fullpath, i_length, "%s%s/%s", psz_extract_dir, psz_path, psz_basename);
-		if (i_length < 0) {
+		length = _snprintf(psz_fullpath, length, "%s%s/%s", psz_extract_dir, psz_path, psz_basename);
+		if (length < 0) {
 			goto out;
 		}
 		if (udf_is_dir(p_udf_dirent)) {
@@ -410,12 +410,12 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 					goto out;
 			}
 		} else {
-			i_file_length = udf_get_file_length(p_udf_dirent);
-			if (check_iso_props(psz_path, i_file_length, psz_basename, psz_fullpath, &props)) {
+			file_length = udf_get_file_length(p_udf_dirent);
+			if (check_iso_props(psz_path, file_length, psz_basename, psz_fullpath, &props)) {
 				safe_free(psz_fullpath);
 				continue;
 			}
-			print_extracted_file(psz_fullpath, i_file_length);
+			print_extracted_file(psz_fullpath, file_length);
 			for (i=0; i<NB_OLD_C32; i++) {
 				if (props.is_old_c32[i] && use_own_c32[i]) {
 					static_sprintf(tmp, "%s/syslinux-%s/%s", FILES_DIR, embedded_sl_version_str[0], old_c32_name[i]);
@@ -440,21 +440,21 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 					uprintf(stupid_antivirus);
 				else
 					goto out;
-			} else while (i_file_length > 0) {
+			} else while (file_length > 0) {
 				if (FormatStatus) goto out;
 				memset(buf, 0, UDF_BLOCKSIZE);
-				i_read = udf_read_block(p_udf_dirent, buf, 1);
-				if (i_read < 0) {
+				read = udf_read_block(p_udf_dirent, buf, 1);
+				if (read < 0) {
 					uprintf("  Error reading UDF file %s", &psz_fullpath[strlen(psz_extract_dir)]);
 					goto out;
 				}
-				buf_size = (DWORD)MIN(i_file_length, i_read);
+				buf_size = (DWORD)MIN(file_length, read);
 				ISO_BLOCKING(r = WriteFileWithRetry(file_handle, buf, buf_size, &wr_size, WRITE_RETRIES));
 				if (!r) {
 					uprintf("  Error writing file: %s", WindowsErrorString());
 					goto out;
 				}
-				i_file_length -= i_read;
+				file_length -= read;
 				if (nb_blocks++ % PROGRESS_THRESHOLD == 0)
 					UpdateProgress(OP_DOS, 100.0f*nb_blocks/total_blocks);
 			}
@@ -491,24 +491,24 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 	DWORD buf_size, wr_size, err;
 	EXTRACT_PROPS props;
 	BOOL is_symlink, is_identical;
-	int i_length, r = 1;
+	int length, r = 1;
 	char tmp[128], psz_fullpath[MAX_PATH], *psz_basename, *psz_sanpath;
 	const char *psz_iso_name = &psz_fullpath[strlen(psz_extract_dir)];
 	unsigned char buf[ISO_BLOCKSIZE];
 	CdioListNode_t* p_entnode;
 	iso9660_stat_t *p_statbuf;
-	CdioList_t* p_entlist;
+	CdioISO9660FileList_t* p_entlist;
 	size_t i, j;
 	lsn_t lsn;
-	int64_t i_file_length;
+	int64_t file_length, extent_length;
 
 	if ((p_iso == NULL) || (psz_path == NULL))
 		return 1;
 
-	i_length = _snprintf(psz_fullpath, sizeof(psz_fullpath), "%s%s/", psz_extract_dir, psz_path);
-	if (i_length < 0)
+	length = _snprintf(psz_fullpath, sizeof(psz_fullpath), "%s%s/", psz_extract_dir, psz_path);
+	if (length < 0)
 		return 1;
-	psz_basename = &psz_fullpath[i_length];
+	psz_basename = &psz_fullpath[length];
 
 	p_entlist = iso9660_ifs_readdir(p_iso, psz_path);
 	if (!p_entlist) {
@@ -526,7 +526,7 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 		// Rock Ridge requires an exception
 		is_symlink = FALSE;
 		if ((p_statbuf->rr.b3_rock == yep) && enable_rockridge) {
-			safe_strcpy(psz_basename, sizeof(psz_fullpath)-i_length-1, p_statbuf->filename);
+			safe_strcpy(psz_basename, sizeof(psz_fullpath) - length - 1, p_statbuf->filename);
 			if (safe_strlen(p_statbuf->filename) > 64)
 				img_report.has_long_filename = TRUE;
 			// libcdio has a memleak for Rock Ridge symlinks. It doesn't look like there's an easy fix there as
@@ -537,7 +537,7 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 			if (scan_only)
 				safe_free(p_statbuf->rr.psz_symlink);
 		} else {
-			iso9660_name_translate_ext(p_statbuf->filename, psz_basename, i_joliet_level);
+			iso9660_name_translate_ext(p_statbuf->filename, psz_basename, joliet_level);
 		}
 		if (p_statbuf->type == _STAT_DIR) {
 			if (!scan_only) {
@@ -552,11 +552,11 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 			if (iso_extract_files(p_iso, psz_iso_name))
 				goto out;
 		} else {
-			i_file_length = p_statbuf->total_size;
-			if (check_iso_props(psz_path, i_file_length, psz_basename, psz_fullpath, &props)) {
+			file_length = p_statbuf->size;
+			if (check_iso_props(psz_path, file_length, psz_basename, psz_fullpath, &props)) {
 				continue;
 			}
-			print_extracted_file(psz_fullpath, i_file_length);
+			print_extracted_file(psz_fullpath, file_length);
 			for (i=0; i<NB_OLD_C32; i++) {
 				if (props.is_old_c32[i] && use_own_c32[i]) {
 					static_sprintf(tmp, "%s/syslinux-%s/%s", FILES_DIR, embedded_sl_version_str[0], old_c32_name[i]);
@@ -573,7 +573,7 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 			if (!is_identical)
 				uprintf("  File name sanitized to '%s'", psz_sanpath);
 			if (is_symlink) {
-				if (i_file_length == 0)
+				if (file_length == 0)
 					uprintf("  Ignoring Rock Ridge symbolic link to '%s'", p_statbuf->rr.psz_symlink);
 				safe_free(p_statbuf->rr.psz_symlink);
 			}
@@ -587,8 +587,8 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 				else
 					goto out;
 			} else for (j=0; j<p_statbuf->extents; j++) {
-				i_file_length = p_statbuf->size[j];
-				for (i=0; i_file_length>0; i++) {
+				extent_length = p_statbuf->extsize[j];
+				for (i=0; extent_length>0; i++) {
 					if (FormatStatus) goto out;
 					memset(buf, 0, ISO_BLOCKSIZE);
 					lsn = p_statbuf->lsn[j] + (lsn_t)i;
@@ -597,13 +597,13 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 							psz_iso_name, (long unsigned int)lsn);
 						goto out;
 					}
-					buf_size = (DWORD)MIN(i_file_length, ISO_BLOCKSIZE);
+					buf_size = (DWORD)MIN(extent_length, ISO_BLOCKSIZE);
 					ISO_BLOCKING(r = WriteFileWithRetry(file_handle, buf, buf_size, &wr_size, WRITE_RETRIES));
 					if (!r) {
 						uprintf("  Error writing file: %s", WindowsErrorString());
 						goto out;
 					}
-					i_file_length -= ISO_BLOCKSIZE;
+					extent_length -= ISO_BLOCKSIZE;
 					if (nb_blocks++ % PROGRESS_THRESHOLD == 0)
 						UpdateProgress(OP_DOS, 100.0f*nb_blocks/total_blocks);
 				}
@@ -623,7 +623,7 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 
 out:
 	ISO_BLOCKING(safe_closehandle(file_handle));
-	_cdio_list_free(p_entlist, true);
+	iso9660_filelist_free(p_entlist);
 	return r;
 }
 
@@ -738,7 +738,7 @@ try_iso:
 		goto out;
 	}
 	uprintf("%sImage is an ISO9660 image", spacing);
-	i_joliet_level = iso9660_ifs_get_joliet_level(p_iso);
+	joliet_level = iso9660_ifs_get_joliet_level(p_iso);
 	if (scan_only) {
 		if (iso9660_ifs_get_volume_id(p_iso, &tmp)) {
 			static_strcpy(img_report.label, tmp);
@@ -949,7 +949,7 @@ int64_t ExtractISOFile(const char* iso, const char* iso_file, const char* dest_f
 {
 	size_t i, j;
 	ssize_t read_size;
-	int64_t file_length, r = 0;
+	int64_t file_length, extent_length, r = 0;
 	char buf[UDF_BLOCKSIZE];
 	DWORD buf_size, wr_size;
 	iso9660_t* p_iso = NULL;
@@ -1013,20 +1013,20 @@ try_iso:
 	}
 
 	for (j = 0; j < p_statbuf->extents; j++) {
-		file_length = p_statbuf->size[j];
-		for (i = 0; file_length > 0; i++) {
+		extent_length = p_statbuf->extsize[j];
+		for (i = 0; extent_length > 0; i++) {
 			memset(buf, 0, ISO_BLOCKSIZE);
 			lsn = p_statbuf->lsn[j] + (lsn_t)i;
 			if (iso9660_iso_seek_read(p_iso, buf, lsn, 1) != ISO_BLOCKSIZE) {
 				uprintf("  Error reading ISO9660 file %s at LSN %lu", iso_file, (long unsigned int)lsn);
 				goto out;
 			}
-			buf_size = (DWORD)MIN(file_length, ISO_BLOCKSIZE);
+			buf_size = (DWORD)MIN(extent_length, ISO_BLOCKSIZE);
 			if (!WriteFileWithRetry(file_handle, buf, buf_size, &wr_size, WRITE_RETRIES)) {
 				uprintf("  Error writing file %s: %s", dest_file, WindowsErrorString());
 				goto out;
 			}
-			file_length -= ISO_BLOCKSIZE;
+			extent_length -= ISO_BLOCKSIZE;
 			r += ISO_BLOCKSIZE;
 		}
 	}

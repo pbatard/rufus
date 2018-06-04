@@ -61,10 +61,10 @@ _cdio_list_new (void)
 }
 
 void
-_cdio_list_free (CdioList_t *p_list, int free_data)
+_cdio_list_free (CdioList_t *p_list, int free_data, CdioDataFree_t free_fn)
 {
   while (_cdio_list_length (p_list))
-    _cdio_list_node_free (_cdio_list_begin (p_list), free_data);
+    _cdio_list_node_free (_cdio_list_begin (p_list), free_data, free_fn);
 
   free (p_list);
 }
@@ -182,7 +182,8 @@ _cdio_list_node_next (CdioListNode_t *p_node)
 }
 
 void
-_cdio_list_node_free (CdioListNode_t *p_node, int free_data)
+_cdio_list_node_free (CdioListNode_t *p_node,
+                      int free_data, CdioDataFree_t free_fn)
 {
   CdioList_t *p_list;
   CdioListNode_t *prev_node;
@@ -193,8 +194,8 @@ _cdio_list_node_free (CdioListNode_t *p_node, int free_data)
 
   cdio_assert (_cdio_list_length (p_list) > 0);
 
-  if (free_data)
-    free (_cdio_list_node_data (p_node));
+  if (free_data && free_fn)
+    free_fn (_cdio_list_node_data (p_node));
 
   if (_cdio_list_length (p_list) == 1)
     {

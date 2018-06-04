@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2005-2006, 2008, 2011, 2013-2014
+  Copyright (C) 2005-2006, 2008, 2011, 2013-2014, 2017
   Rocky Bernstein <rocky@gnu.org>
 
   This program is free software: you can redistribute it and/or modify
@@ -46,6 +46,8 @@
 # include "config.h"
 # define __CDIO_CONFIG_H__ 1
 #endif
+
+#include <cdio/util.h>
 
 #ifdef HAVE_STDIO_H
 #include <stdio.h>
@@ -634,7 +636,7 @@ udf_get_root (udf_t *p_udf, bool b_any_partition, partition_num_t i_partition)
 }
 
 #define free_and_null(x) \
-  free(x);		 \
+  CDIO_FREE_IF_NOT_NULL(x); \
   x=NULL
 
 /*!

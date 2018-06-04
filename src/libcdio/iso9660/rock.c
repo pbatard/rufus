@@ -1,5 +1,7 @@
 /*
-  Copyright (C) 2005, 2008, 2010-2011, 2014 Rocky Bernstein <rocky@gnu.org>
+  Copyright (C) 2005, 2008, 2010-2011, 2014, 2017 Rocky Bernstein
+  <rocky@gnu.org>
+
   Adapted from GNU/Linux fs/isofs/rock.c (C) 1992, 1993 Eric Youngdale
 
   This program is free software: you can redistribute it and/or modify
@@ -169,26 +171,12 @@ get_rock_ridge_filename(iso9660_dir_t * p_iso9660_dir,
     while (len > 1){ /* There may be one byte for padding somewhere */
       rr = (iso_extension_record_t *) chr;
       sig = *chr+(*(chr+1) << 8);
-      switch(sig){
-      case SIG('S','P'):
-      case SIG('C','E'):
-      case SIG('E','R'):
-      case SIG('R','R'):
-      case SIG('P','X'):
-      case SIG('P','N'):
-      case SIG('S','L'):
-      case SIG('N','M'):
-      case SIG('C','L'):
-      case SIG('P','L'):
-      case SIG('T','F'):
-      case SIG('Z','F'):
-      case SIG('A','L'):	// libburnia's AAIP extension (used by Kali Linux)
-	break;
-      default:
-	/* Warn about other Rock Ridge extensions */
-	cdio_warn("Unsupported Rock Ridge extension detected: '%c%c'\n", *chr, *(chr+1));
-	break;
-      }
+
+      /* We used to check for some vaid values of SIG, specifically
+	 SP, CE, ER, RR, PX, PN, SL, NM, CL, PL, TF, and ZF.
+	 However there are various extensions to this set. So we
+	 skip checking now.
+      */
 
       if (rr->len == 0) goto out; /* Something got screwed up here */
       chr += rr->len;
@@ -434,8 +422,9 @@ parse_rock_ridge_stat_internal(iso9660_dir_t *p_iso9660_dir,
 	    switch(p_sl->flags &~1){
 	    case 0:
 	      realloc_symlink(p_stat, p_sl->len);
-	      memcpy(&(p_stat->rr.psz_symlink[p_stat->rr.i_symlink]),
-		     p_sl->text, p_sl->len);
+	      if (p_sl->text && p_sl->len)
+		memcpy(&(p_stat->rr.psz_symlink[p_stat->rr.i_symlink]),
+		       p_sl->text, p_sl->len);
 	      p_stat->rr.i_symlink += p_sl->len;
 	      break;
 	    case 4:

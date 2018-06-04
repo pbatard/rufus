@@ -346,4 +346,6 @@ bool cdio_charset_to_utf8(const char *src, size_t src_len, cdio_utf8_t **dst,
 
   return (*dst != NULL);
 }
+#else
+# error "The iconv library is needed to build drivers, but it is not detected"
 #endif /* HAVE_ICONV */

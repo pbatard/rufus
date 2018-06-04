@@ -21,8 +21,8 @@
 #define CDIO_UTIL_H_
 
 /*!
-   \file util.h 
-   \brief Miscellaneous utility functions. 
+   \file util.h
+   \brief Miscellaneous utility functions.
 
    Warning: this will probably get removed/replaced by using glib.h
 */
@@ -65,8 +65,14 @@ _cdio_len2blocks (uint32_t i_len, uint16_t i_blocksize)
   return i_blocks;
 }
 
+
+/*! free() and NULL out p_obj it is not already null. */
+#define CDIO_FREE_IF_NOT_NULL(p_obj) \
+  if (NULL != p_obj) { free(p_obj); p_obj=NULL; };
+
+
 /* round up to next block boundary */
-static CDIO_INLINE unsigned 
+static CDIO_INLINE unsigned
 _cdio_ceil2block (unsigned offset, uint16_t i_blocksize)
 {
   return _cdio_len2blocks (offset, i_blocksize) * i_blocksize;
@@ -99,11 +105,11 @@ _cdio_memdup (const void *mem, size_t count);
 char *
 _cdio_strdup_upper (const char str[]);
 
-/* Duplicate path and make it platform compliant. Typically needed for
-   MinGW/MSYS where a "/c/..." path must be translated to "c:/..." for
-   use with fopen(), etc. Returned string must be freed by the caller
-   using cdio_free(). */
-char * 
+/*! Duplicate path and make it platform compliant. Typically needed for
+    MinGW/MSYS where a "/c/..." path must be translated to "c:/..." for
+    use with fopen(), etc. Returned string must be freed by the caller
+    using cdio_free(). */
+char *
 _cdio_strdup_fixpath (const char path[]);
 
 void
@@ -125,7 +131,7 @@ char *cdio_realpath (const char *psz_src, char *psz_dst);
 #ifdef WANT_FOLLOW_SYMLINK_COMPATIBILITY
 # define cdio_follow_symlink cdio_realpath
 #endif
-  
+
 #ifdef __cplusplus
 }
 #endif
@@ -133,7 +139,7 @@ char *cdio_realpath (const char *psz_src, char *psz_dst);
 #endif /* CDIO_UTIL_H_ */
 
 
-/* 
+/*
  * Local variables:
  *  c-file-style: "gnu"
  *  tab-width: 8

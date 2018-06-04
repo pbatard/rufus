@@ -171,6 +171,20 @@ to_723(uint16_t i)
 static CDIO_INLINE uint16_t
 from_723 (uint32_t p)
 {
+  uint8_t *u = (uint8_t *) &p;
+  /* Return the little-endian part always, to handle non-specs-compliant images */
+  return (u[0] | (u[1] << 8));
+}
+
+static CDIO_INLINE uint16_t
+from_723_with_err (uint32_t p, bool *err)
+{
+  if (uint32_swap_le_be (p) != p) {
+    cdio_warn ("from_723: broken byte order");
+    *err = true;
+  } else {
+    *err = false;
+  }
   return (0xFFFF & p);
 }
 
@@ -197,7 +211,9 @@ to_733(uint32_t i)
 static CDIO_INLINE uint32_t
 from_733 (uint64_t p)
 {
-  return (UINT32_C(0xFFFFFFFF) & p);
+  uint8_t *u = (uint8_t *) &p;
+  /* Return the little-endian part always, to handle non-specs-compliant images */
+  return (u[0] | (u[1] << 8) | (u[2] << 16) | (u[3] << 24));
 }
 
 static CDIO_INLINE uint32_t

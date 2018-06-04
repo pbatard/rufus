@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002, 2003, 2004, 2005, 2006, 2008, 2012
+    Copyright (C) 2002, 2003, 2004, 2005, 2006, 2008, 2012, 2017
                   Rocky Bernstein <rocky@gnu.org>
     Copyright (C) 2000 Herbert Valerio Riedel <hvr@gnu.org>
 
@@ -155,7 +155,7 @@ typedef uint8_t ubyte;
 #  define PRAGMA_BEGIN_PACKED _Pragma("pack(push)") \
                               _Pragma("pack(1)")
 #  define PRAGMA_END_PACKED   _Pragma("pack(pop)")
-#elif __GNUC__ > 4  || (__STDC_VERSION__ >= 199901)
+#elif __GNUC__ > 4  || (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901)
      /* should work with GCC > 4.0 clang and most EDG-frontend based C
         and C++ compilers */
 #    define PRAGMA_BEGIN_PACKED _Pragma("pack(1)")
@@ -334,6 +334,10 @@ typedef uint8_t ubyte;
     CDIO_TRACK_FLAG_FOUR_CHANNEL_AUDIO = 0x08,  /**< 4 audio channels */
   CDIO_TRACK_FLAG_SCMS =                 0x10   /**< SCMS (5.29.2.7) */
 } cdio_track_flag;
+
+
+/* Note that this matches the free() prototype.*/
+typedef void (*CdioDataFree_t)(void *ptr);
 
 #ifdef __cplusplus
 }

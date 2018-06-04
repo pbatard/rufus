@@ -1,5 +1,6 @@
 /*
-  Copyright (C) 2003-2009, 2013-2014, 2016 Rocky Bernstein <rocky@gnu.org>
+  Copyright (C) 2003-2009, 2013-2014, 2016-2017 Rocky Bernstein
+  <rocky@gnu.org>
   Copyright (C) 2000 Herbert Valerio Riedel <hvr@gnu.org>
 
   This program is free software: you can redistribute it and/or modify
@@ -204,6 +205,11 @@ iso9660_get_dtime (const iso9660_dtime_t *idr_date, bool b_localtime,
   p_tm->tm_sec    = idr_date->dt_second - idr_date->dt_gmtoff * (15 * 60);
   p_tm->tm_isdst  = -1; /* information not available */
 
+#ifdef HAVE_STRUCT_TM_TM_ZONE
+  /* Initialize everything */
+  p_tm->tm_zone   = 0;
+#endif
+
   /* Recompute tm_wday and tm_yday via mktime. mktime will also renormalize
      date values to account for the timezone offset. */
   {
@@ -270,6 +276,10 @@ iso9660_get_ltime (const iso9660_ltime_t *p_ldate,
   p_tm->tm_isdst= -1; /* information not available */
 #ifndef HAVE_TM_GMTOFF
   p_tm->tm_sec += p_ldate->lt_gmtoff * (15 * 60);
+#endif
+#ifdef HAVE_STRUCT_TM_TM_ZONE
+  /* Initialize everything */
+  p_tm->tm_zone = 0;
 #endif
 
   /* Recompute tm_wday and tm_yday via mktime. mktime will also renormalize
@@ -363,7 +373,7 @@ iso9660_set_ltime_with_timezone(const struct tm *p_tm,
 
   if (!p_tm) return;
 
-  _snprintf(_pvd_date, 17,
+  snprintf(_pvd_date, 17,
            "%4.4d%2.2d%2.2d" "%2.2d%2.2d%2.2d" "%2.2d",
            p_tm->tm_year + 1900, p_tm->tm_mon + 1, p_tm->tm_mday,
            p_tm->tm_hour, p_tm->tm_min, p_tm->tm_sec,
@@ -776,7 +786,8 @@ iso9660_dir_add_entry_su(void *dir,
                              ? strlen(filename) : 1); /* working hack! */
 
   memcpy(&idr->filename.str[1], filename, from_711(idr->filename.len));
-  memcpy(&dir8[offset] + su_offset, su_data, su_size);
+  if (su_size > 0 && su_data)
+    memcpy(&dir8[offset] + su_offset, su_data, su_size);
 }
 
 void
@@ -1111,7 +1122,7 @@ iso9660_pathname_isofy (const char pathname[], uint16_t version)
 
   cdio_assert (strlen (pathname) < (sizeof (tmpbuf) - sizeof (";65535")));
 
-  _snprintf (tmpbuf, sizeof(tmpbuf), "%s;%d", pathname, version);
+  snprintf (tmpbuf, sizeof(tmpbuf), "%s;%d", pathname, version);
 
   return strdup (tmpbuf);
 }

@@ -152,13 +152,11 @@ extern "C" {
     DRIVER_UNKNOWN, /**< Used as input when we don't care what kind
                          of driver to use. */
     DRIVER_AIX,     /**< AIX driver */
-    DRIVER_BSDI,    /**< BSDI driver */
     DRIVER_FREEBSD, /**< FreeBSD driver - includes CAM and ioctl access */
     DRIVER_NETBSD,  /**< NetBSD Driver. */
     DRIVER_LINUX,   /**< GNU/Linux Driver */
     DRIVER_SOLARIS, /**< Sun Solaris Driver */
-    DRIVER_OS2,     /**< IBM OS/2 Driver */
-    DRIVER_OSX,     /**< Apple OSX Driver */
+    DRIVER_OSX,     /**< Apple OSX (or MacOS) Driver */
     DRIVER_WIN32,   /**< Microsoft Windows Driver. Includes ASPI and
                          ioctl access. */
     DRIVER_CDRDAO,  /**< cdrdao format CD image. This is listed
@@ -191,18 +189,6 @@ extern "C" {
   */
   extern const driver_id_t cdio_os_driver;
 
-
-  /**
-     Those are deprecated; use cdio_drivers or cdio_device_drivers to
-     iterate over all drivers or only the device drivers.
-     Make sure what's listed for CDIO_MIN_DRIVER is the last
-     enumeration in driver_id_t. Since we have a bogus (but useful) 0th
-     entry above we don't have to add one.
-  */
-LIBCDIO_DEPRECATED(static const driver_id_t CDIO_MIN_DRIVER, "please use cdio_drivers") = DRIVER_AIX;
-LIBCDIO_DEPRECATED(static const driver_id_t CDIO_MIN_DEVICE_DRIVER, "please use cdio_device_drivers") = DRIVER_AIX;
-LIBCDIO_DEPRECATED(static const driver_id_t CDIO_MAX_DRIVER, "please use cdio_drivers") = DRIVER_NRG;
-LIBCDIO_DEPRECATED(static const driver_id_t CDIO_MAX_DEVICE_DRIVER, "please use cdio_device_drivers") = DRIVER_WIN32;
 
   /**
       The following are status codes for completion of a given cdio

@@ -73,7 +73,7 @@ cdio_stream_destroy(CdioDataSource_t *p_obj)
   cdio_stream_close(p_obj);
 
   p_obj->op.free(p_obj->user_data);
-
+  p_obj->user_data = NULL;
   free(p_obj);
 }
 

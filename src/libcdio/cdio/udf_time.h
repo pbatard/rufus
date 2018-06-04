@@ -1,4 +1,4 @@
-/*  
+/*
     Copyright (C) 2005, 2008, 2012 Rocky Bernstein <rocky@gnu.org>
 
     This program is free software: you can redistribute it and/or modify
@@ -16,18 +16,18 @@
 */
 
 /*!
- * \file udf_time.h 
+ * \file udf_time.h
  *
  * \brief UDF time conversion and access files.
  *
 */
 
 #ifndef UDF_TIME_H
-#define UDF_TIME_H 
+#define UDF_TIME_H
 
 #include <time.h>
 
-#if defined(__MINGW32__) && !defined(__MINGW64_VERSION_MAJOR)
+#if defined(__MINGW32__) && !defined(__MINGW64_VERSION_MAJOR) && !defined(__struct_timespec_defined)
 struct timespec {
   time_t  tv_sec;   /* Seconds */
   long    tv_nsec;  /* Nanoseconds */
@@ -61,7 +61,7 @@ extern "C" {
   /*!
     Return the modification timestamp of the file
   */
-  udf_timestamp_t *udf_get_modification_timestamp(const udf_dirent_t 
+  udf_timestamp_t *udf_get_modification_timestamp(const udf_dirent_t
 						  *p_udf_dirent);
 
   /*!
@@ -72,7 +72,7 @@ extern "C" {
   /*!
     Convert a UDF timestamp to a time_t. If microseconds are desired,
     use dest_usec. The return value is the same as dest. */
-  time_t *udf_stamp_to_time(time_t *dest, long int *dest_usec, 
+  time_t *udf_stamp_to_time(time_t *dest, long int *dest_usec,
 			  const udf_timestamp_t src);
 
   udf_timestamp_t *udf_timespec_to_stamp(const struct timespec ts,

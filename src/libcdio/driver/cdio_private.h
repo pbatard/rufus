@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2003-2005, 2008-2009, 2011-2012, 2016
+  Copyright (C) 2003-2005, 2008-2009, 2011-2012, 2016-2017
   Rocky Bernstein <rocky@gnu.org>
 
   This program is free software: you can redistribute it and/or modify
@@ -43,7 +43,9 @@ extern "C" {
 #endif /* __cplusplus */
 
 #ifndef HAVE_STRNDUP
-static inline char *strndup(const char *s, size_t n)
+#undef  strndup
+#define strndup libcdio_strndup
+static inline char *libcdio_strndup(const char *s, size_t n)
 {
     char *result;
     size_t len = strlen (s);
@@ -528,7 +530,6 @@ extern "C" {
   driver_return_code_t close_tray_freebsd (const char *psz_drive);
   driver_return_code_t close_tray_linux   (const char *psz_drive);
   driver_return_code_t close_tray_netbsd  (const char *psz_drive);
-  driver_return_code_t close_tray_os2     (const char *psz_drive);
   driver_return_code_t close_tray_osx     (const char *psz_drive);
   driver_return_code_t close_tray_solaris (const char *psz_drive);
   driver_return_code_t close_tray_win32   (const char *psz_drive);
