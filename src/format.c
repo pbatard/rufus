@@ -996,7 +996,7 @@ static BOOL WriteSBR(HANDLE hPhysicalDrive)
 {
 	// TODO: Do we need anything special for 4K sectors?
 	DWORD size, max_size, mbr_size = 0x200;
-	int r;
+	int r, sub_type = bt;
 	unsigned char* buf = NULL;
 	FAKE_FD fake_fd = { 0 };
 	FILE* fp = (FILE*)&fake_fd;
@@ -1010,12 +1010,12 @@ static BOOL WriteSBR(HANDLE hPhysicalDrive)
 	// Syslinux has precedence over Grub
 	if ((bt == BT_IMAGE) && (!HAS_SYSLINUX(img_report))) {
 		if (img_report.has_grub4dos)
-			bt = BT_GRUB4DOS;
+			sub_type = BT_GRUB4DOS;
 		if (img_report.has_grub2)
-			bt = BT_GRUB2;
+			sub_type = BT_GRUB2;
 	}
 
-	switch (bt) {
+	switch (sub_type) {
 	case BT_GRUB4DOS:
 		uprintf("Writing Grub4Dos SBR");
 		buf = GetResource(hMainInstance, MAKEINTRESOURCEA(IDR_GR_GRUB_GRLDR_MBR), _RT_RCDATA, "grldr.mbr", &size, FALSE);
