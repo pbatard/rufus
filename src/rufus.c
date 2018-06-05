@@ -644,7 +644,7 @@ static void SetToGo(void)
 	IGNORE_RETVAL(ComboBox_SetItemData(hCtrl, ComboBox_AddStringU(hCtrl, lmprintf(MSG_118)), TRUE));
 	IGNORE_RETVAL(ComboBox_SetCurSel(hCtrl, windows_to_go_selection));
 
-	if ((((bt != BT_IMAGE) || (image_path == NULL)) && (display_togo_option)) ||
+	if ((((bt != BT_IMAGE) || (image_path == NULL) || (!HAS_WINTOGO(img_report))) && (display_togo_option)) ||
 		((bt == BT_IMAGE) && (HAS_WINTOGO(img_report)) && (!display_togo_option))) {
 		ToggleImageOption();
 	}
