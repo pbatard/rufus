@@ -556,7 +556,7 @@ LONG ValidateSignature(HWND hDlg, const char* path)
 		// This is done to prevent the use of an officially signed, but older binary, as potential attack vector.
 		current_ts = GetSignatureTimeStamp(NULL);
 		if (current_ts == 0ULL) {
-			uprintf("PKI: Cannot retreive the current binary's timestamp - Aborting update");
+			uprintf("PKI: Cannot retrieve the current binary's timestamp - Aborting update");
 			r = TRUST_E_TIME_STAMP;
 		} else {
 			update_ts = GetSignatureTimeStamp(path);

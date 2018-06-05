@@ -2356,7 +2356,7 @@ static void PositionControls(HWND hDlg)
 	section_vpos[2] = rc.top + 2 * sz.cy / 3;
 
 	// Seriously, who designed this bullshit API call where you pass a SIZE
-	// struct but can only retreive one of cx or cy at a time?!?
+	// struct but can only retrieve one of cx or cy at a time?!?
 	SendMessage(hMultiToolbar, TB_GETIDEALSIZE, (WPARAM)FALSE, (LPARAM)&sz);
 	GetWindowRect(GetDlgItem(hDlg, IDC_ABOUT), &rc);
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
@@ -3040,6 +3040,9 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		case IDC_LOG:
 			// Place the log Window to the right (or left for RTL) of our dialog on first display
 			if (first_log_display) {
+				// Can't link to dwmapi.lib since it sideloads dwapi.dll *before* we get a chance
+				// to prevent local directory lookup (Sideloading mitigation).
+				PF_TYPE_DECL(WINAPI, HRESULT, DwmGetWindowAttribute, (HWND, DWORD, PVOID, DWORD));
 				GetClientRect(GetDesktopWindow(), &DesktopRect);
 				GetWindowRect(hLogDialog, &DialogRect);
 				nWidth = DialogRect.right - DialogRect.left;
@@ -3047,11 +3050,14 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				GetWindowRect(hDlg, &DialogRect);
 				offset = GetSystemMetrics(SM_CXBORDER);
 				if (nWindowsVersion >= WINDOWS_10) {
+					PF_INIT(DwmGetWindowAttribute, Dwmapi);
 					// See https://stackoverflow.com/a/42491227/1069307
 					// I agree with Stephen Hazel: Whoever at Microsoft thought it would be a great idea to
 					// add a *FRIGGING INVISIBLE BORDER* in Windows 10 should face the harshest punishment!
-					DwmGetWindowAttribute(hDlg, DWMWA_EXTENDED_FRAME_BOUNDS, &rc, sizeof(RECT));
-					offset += 2 * (DialogRect.left - rc.left);
+					if (pfDwmGetWindowAttribute != NULL) {
+						pfDwmGetWindowAttribute(hDlg, DWMWA_EXTENDED_FRAME_BOUNDS, &rc, sizeof(RECT));
+						offset += 2 * (DialogRect.left - rc.left);
+					}
 				}
 				if (right_to_left_mode)
 					Point.x = max(DialogRect.left - offset - nWidth, 0);
@@ -3723,6 +3729,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 #endif
 {
 	const char* rufus_loc = "rufus.loc";
+	wchar_t kernel32_path[MAX_PATH];
 	int i, opt, option_index = 0, argc = 0, si = 0, lcid = GetUserDefaultUILanguage();
 	int wait_for_mutex = 0;
 	FILE* fd;
@@ -3734,6 +3741,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	char *tmp, *locale_name = NULL, **argv = NULL;
 	wchar_t **wenv, **wargv;
 	PF_TYPE_DECL(CDECL, int, __wgetmainargs, (int*, wchar_t***, wchar_t***, int, int*));
+	PF_TYPE_DECL(WINAPI, BOOL, SetDefaultDllDirectories, (DWORD));
 	HANDLE mutex = NULL, hogmutex = NULL, hFile = NULL;
 	HWND hDlg = NULL;
 	HDC hDC;
@@ -3749,7 +3757,29 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	};
 
 	// Disable loading system DLLs from the current directory (sideloading mitigation)
+	// PS: You know that official MSDN documentation for SetDllDirectory() that explicitly
+	// indicates that "If the parameter is an empty string (""), the call removes the current
+	// directory from the default DLL search order"? Yeah, that doesn't work. At all.
+	// Still, we invoke it, for platforms where the following call might not work...
 	SetDllDirectoryA("");
+
+	// Also, even if you use SetDefaultDllDirectories(LOAD_LIBRARY_SEARCH_SYSTEM32), you're
+	// still going to be brought down if you link to wininet.lib or dwmapi.lib, as these two
+	// perform their DLL invocations before you've had a chance to execute anything.
+	// Of course, this is not something that security "researchers" will bother looking into
+	// to try to help fellow developers, when they can get an ego fix by simply throwing
+	// generic URLs around and deliberately refusing to practice *responsible disclosure*...
+	// Finally, we need to perform the whole gymkhana below, where we can't call on
+	// SetDefaultDllDirectories() directly, because Windows 7 doesn't have the API exposed.
+	GetSystemDirectoryW(kernel32_path, ARRAYSIZE(kernel32_path));
+	wcsncat(kernel32_path, L"\\kernel32.dll", ARRAYSIZE(kernel32_path) - wcslen(kernel32_path) - 1);
+	// NB: Because kernel32 should already be loaded, what we do above to ensure that we
+	// (re)pick the system one is mostly unnecessary. But since for a hammer everything is
+	// a nail...
+	pfSetDefaultDllDirectories = (SetDefaultDllDirectories_t)
+		GetProcAddress(LoadLibraryW(kernel32_path), "SetDefaultDllDirectories");
+	if (pfSetDefaultDllDirectories != NULL)
+		pfSetDefaultDllDirectories(LOAD_LIBRARY_SEARCH_SYSTEM32);
 
 	uprintf("*** " APPLICATION_NAME " init ***\n");
 
