@@ -4052,6 +4052,9 @@ relaunch:
 	/*
 	 * Create the main Window
 	 */
+	if (hDlg != NULL)
+		// Make sure any previous dialog is destroyed (e.g. when switching languages)
+		DestroyWindow(hDlg);
 	hDlg = MyCreateDialog(hInstance, IDD_DIALOG, NULL, MainCallback);
 	if (hDlg == NULL) {
 		MessageBoxExU(NULL, "Could not create Window", "DialogBox failure",
