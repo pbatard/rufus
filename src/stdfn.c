@@ -463,6 +463,7 @@ BOOL FileIO(BOOL save, char* path, char** buffer, DWORD* size)
 	HANDLE handle;
 	BOOL r;
 	BOOL ret = FALSE;
+	char* ltr_path;
 
 	// Change the owner from admin to regular user
 	sid = GetSID();
@@ -505,7 +506,16 @@ BOOL FileIO(BOOL save, char* path, char** buffer, DWORD* size)
 		goto out;
 	}
 
-	PrintInfoDebug(0, save?MSG_216:MSG_215, path);
+	// Ensure that the path is always displayed LTR
+	// Use of sizeof gets us the extra char needed for NUL terminator
+	ltr_path = malloc(safe_strlen(path) + sizeof(LEFT_TO_RIGHT_EMBEDDING) + sizeof(POP_DIRECTIONAL_FORMATTING));
+	if (ltr_path == NULL) {
+		PrintInfoDebug(0, save ? MSG_216 : MSG_215, path);
+	} else {
+		sprintf(ltr_path, "%s%s%s", LEFT_TO_RIGHT_EMBEDDING, path, POP_DIRECTIONAL_FORMATTING);
+		PrintInfoDebug(0, save ? MSG_216 : MSG_215, ltr_path);
+		free(ltr_path);
+	}
 	ret = TRUE;
 
 out:
