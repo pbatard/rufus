@@ -648,7 +648,7 @@ INT_PTR CreateAboutBox(void)
 INT_PTR CALLBACK NotificationCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	LRESULT loc;
-	int i;
+	int i, dh;
 	// Prevent resizing
 	static LRESULT disabled[9] = { HTLEFT, HTRIGHT, HTTOP, HTBOTTOM, HTSIZE,
 		HTTOPLEFT, HTTOPRIGHT, HTBOTTOMLEFT, HTBOTTOMRIGHT };
@@ -658,6 +658,7 @@ INT_PTR CALLBACK NotificationCallback(HWND hDlg, UINT message, WPARAM wParam, LP
 	HFONT hDlgFont;
 	HWND hCtrl;
 	RECT rc;
+	HDC hDC;
 
 	switch (message) {
 	case WM_INITDIALOG:
@@ -710,9 +711,26 @@ INT_PTR CALLBACK NotificationCallback(HWND hDlg, UINT message, WPARAM wParam, LP
 				max(rc.right - rc.left, GetTextSize(hCtrl, NULL).cx + cbw), rc.bottom - rc.top, SWP_NOZORDER);
 			ShowWindow(hCtrl, SW_SHOW);
 		}
-		// Set the control text
+		// Set the control text and resize the dialog if needed
 		if (szMessageText != NULL) {
-			SetWindowTextU(GetDlgItem(hDlg, IDC_NOTIFICATION_TEXT), szMessageText);
+			hCtrl = GetDlgItem(hDlg, IDC_NOTIFICATION_TEXT);
+			SetWindowTextU(hCtrl, szMessageText);
+			hDC = GetDC(hCtrl);
+			SelectFont(hDC, hDlgFont);	// Yes, you *MUST* reapply the font to the DC, even after SetWindowText!
+			GetWindowRect(hCtrl, &rc);
+			dh = rc.bottom - rc.top;
+			DrawTextU(hDC, szMessageText, -1, &rc, DT_CALCRECT | DT_WORDBREAK);
+			dh = rc.bottom - rc.top - dh + (int)(8.0f * fScale);
+			safe_release_dc(hCtrl, hDC);
+			if (dh > 0) {
+				ResizeMoveCtrl(hDlg, hCtrl, 0, 0, 0, dh, 1.0f);
+				ResizeMoveCtrl(hDlg, hDlg, 0, 0, 0, dh, 1.0f);
+				ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, -1), 0, 0, 0, dh, 1.0f);	// IDC_STATIC = -1
+				ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDC_SELECTION_LINE), 0, dh, 0, 0, 1.0f);
+				ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDC_MORE_INFO), 0, dh, 0, 0, 1.0f);
+				ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDYES), 0, dh, 0, 0, 1.0f);
+				ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDNO), 0, dh, 0, 0, 1.0f);
+			}
 		}
 		return (INT_PTR)TRUE;
 	case WM_CTLCOLORSTATIC:
@@ -808,7 +826,7 @@ INT_PTR CALLBACK SelectionCallback(HWND hDlg, UINT message, WPARAM wParam, LPARA
 	static HBRUSH background_brush, separator_brush;
 	// To use the system message font
 	NONCLIENTMETRICS ncm;
-	RECT rect, rect2;
+	RECT rc, rc2;
 	HFONT hDlgFont;
 	HWND hCtrl;
 	HDC hDC;
@@ -851,18 +869,18 @@ INT_PTR CALLBACK SelectionCallback(HWND hDlg, UINT message, WPARAM wParam, LPARA
 		hCtrl = GetDlgItem(hDlg, IDC_SELECTION_TEXT);
 		hDC = GetDC(hCtrl);
 		SelectFont(hDC, hDlgFont);	// Yes, you *MUST* reapply the font to the DC, even after SetWindowText!
-		GetWindowRect(hCtrl, &rect);
-		dh = rect.bottom - rect.top;
-		DrawTextU(hDC, szMessageText, -1, &rect, DT_CALCRECT | DT_WORDBREAK);
-		dh = rect.bottom - rect.top - dh;
+		GetWindowRect(hCtrl, &rc);
+		dh = rc.bottom - rc.top;
+		DrawTextU(hDC, szMessageText, -1, &rc, DT_CALCRECT | DT_WORDBREAK);
+		dh = rc.bottom - rc.top - dh;
 		safe_release_dc(hCtrl, hDC);
 		ResizeMoveCtrl(hDlg, hCtrl, 0, 0, 0, dh, 1.0f);
 		for (i = 0; i < nDialogItems; i++)
 			ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + i), 0, dh, 0, 0, 1.0f);
 		if (nDialogItems > 2) {
-			GetWindowRect(GetDlgItem(hDlg, IDC_SELECTION_CHOICE2), &rect);
-			GetWindowRect(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + nDialogItems - 1), &rect2);
-			dh += rect2.top - rect.top;
+			GetWindowRect(GetDlgItem(hDlg, IDC_SELECTION_CHOICE2), &rc);
+			GetWindowRect(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + nDialogItems - 1), &rc2);
+			dh += rc2.top - rc.top;
 		}
 		ResizeMoveCtrl(hDlg, hDlg, 0, 0, 0, dh, 1.0f);
 		ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, -1), 0, 0, 0, dh, 1.0f);	// IDC_STATIC = -1
@@ -941,7 +959,7 @@ INT_PTR CALLBACK ListCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
 	static HBRUSH background_brush, separator_brush;
 	// To use the system message font
 	NONCLIENTMETRICS ncm;
-	RECT rect, rect2;
+	RECT rc, rc2;
 	HFONT hDlgFont;
 	HWND hCtrl;
 	HDC hDC;
@@ -984,18 +1002,18 @@ INT_PTR CALLBACK ListCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
 		hCtrl = GetDlgItem(hDlg, IDC_LIST_TEXT);
 		hDC = GetDC(hCtrl);
 		SelectFont(hDC, hDlgFont);	// Yes, you *MUST* reapply the font to the DC, even after SetWindowText!
-		GetWindowRect(hCtrl, &rect);
-		dh = rect.bottom - rect.top;
-		DrawTextU(hDC, szMessageText, -1, &rect, DT_CALCRECT | DT_WORDBREAK);
-		dh = rect.bottom - rect.top - dh;
+		GetWindowRect(hCtrl, &rc);
+		dh = rc.bottom - rc.top;
+		DrawTextU(hDC, szMessageText, -1, &rc, DT_CALCRECT | DT_WORDBREAK);
+		dh = rc.bottom - rc.top - dh;
 		safe_release_dc(hCtrl, hDC);
 		ResizeMoveCtrl(hDlg, hCtrl, 0, 0, 0, dh, 1.0f);
 		for (i = 0; i < nDialogItems; i++)
 			ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDC_LIST_ITEM1 + i), 0, dh, 0, 0, 1.0f);
 		if (nDialogItems > 1) {
-			GetWindowRect(GetDlgItem(hDlg, IDC_LIST_ITEM1), &rect);
-			GetWindowRect(GetDlgItem(hDlg, IDC_LIST_ITEM1 + nDialogItems - 1), &rect2);
-			dh += rect2.top - rect.top;
+			GetWindowRect(GetDlgItem(hDlg, IDC_LIST_ITEM1), &rc);
+			GetWindowRect(GetDlgItem(hDlg, IDC_LIST_ITEM1 + nDialogItems - 1), &rc2);
+			dh += rc2.top - rc.top;
 		}
 		ResizeMoveCtrl(hDlg, hDlg, 0, 0, 0, dh, 1.0f);
 		ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, -1), 0, 0, 0, dh, 1.0f);	// IDC_STATIC = -1

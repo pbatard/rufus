@@ -2972,7 +2972,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	case WM_COMMAND:
 #ifdef RUFUS_TEST
 		if (LOWORD(wParam) == IDC_TEST) {
-			ToggleImageSettings("blah.iso");
+			Notification(MSG_ERROR, NULL, lmprintf(MSG_042), lmprintf(MSG_043, lmprintf(MSG_055)));
 			break;
 		}
 #endif

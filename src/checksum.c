@@ -781,7 +781,7 @@ out:
 INT_PTR CALLBACK ChecksumCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	int i, dw, dh;
-	RECT rect;
+	RECT rc;
 	HFONT hFont;
 	HDC hDC;
 
@@ -804,18 +804,18 @@ INT_PTR CALLBACK ChecksumCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 		hDC = GetDC(GetDlgItem(hDlg, IDC_MD5));
 		SelectFont(hDC, hFont);	// Yes, you *MUST* reapply the font to the DC, even after SetWindowText!
 
-		GetWindowRect(GetDlgItem(hDlg, IDC_MD5), &rect);
-		dw = rect.right - rect.left;
-		dh = rect.bottom - rect.top;
-		DrawTextU(hDC, sum_str[0], -1, &rect, DT_CALCRECT);
-		dw = rect.right - rect.left - dw + 12;	// Ideally we'd compute the field borders from the system, but hey...
-		dh = rect.bottom - rect.top - dh + 6;
+		GetWindowRect(GetDlgItem(hDlg, IDC_MD5), &rc);
+		dw = rc.right - rc.left;
+		dh = rc.bottom - rc.top;
+		DrawTextU(hDC, sum_str[0], -1, &rc, DT_CALCRECT);
+		dw = rc.right - rc.left - dw + 12;	// Ideally we'd compute the field borders from the system, but hey...
+		dh = rc.bottom - rc.top - dh + 6;
 		ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDC_SHA256), 0, 0, dw, dh, 1.0f);
 
-		GetWindowRect(GetDlgItem(hDlg, IDC_SHA1), &rect);
-		dw = rect.right - rect.left;
-		DrawTextU(hDC, sum_str[1], -1, &rect, DT_CALCRECT);
-		dw = rect.right - rect.left - dw + 12;
+		GetWindowRect(GetDlgItem(hDlg, IDC_SHA1), &rc);
+		dw = rc.right - rc.left;
+		DrawTextU(hDC, sum_str[1], -1, &rc, DT_CALCRECT);
+		dw = rc.right - rc.left - dw + 12;
 		ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDC_MD5), 0, 0, dw, 0, 1.0f);
 		ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDC_SHA1), 0, 0, dw, 0, 1.0f);
 		ResizeButtonHeight(hDlg, IDOK);
