@@ -910,8 +910,8 @@ t MSG_212 "فشلت"
 t MSG_213 "إطلاق تطبيق جديد..."
 t MSG_214 "فشل إطلاق تطبيق جديد"
 # Open/Save file
-t MSG_215 "فتح %s"
-t MSG_216 "حفظ %s"
+t MSG_215 "فتح ‪%s‬"
+t MSG_216 "حفظ ‪%s‬"
 # Formatting status (make sure you use a double % to print the percent sign)
 t MSG_217 "فرمتة: تم %0.1f%%"
 t MSG_218 "إنشاء نظام الملفات: تمت %d/%d عملية"
@@ -6649,8 +6649,8 @@ t MSG_212 "נכשל"
 t MSG_213 "פותח את היישום החדש..."
 t MSG_214 "נכשל בפתיחת היישום החדש"
 # Open/Save file
-t MSG_215 "הקובץ %s נפתח"
-t MSG_216 "הקובץ %s נשמר"
+t MSG_215 "הקובץ ‪%s‬ נפתח"
+t MSG_216 "הקובץ ‪%s‬ נשמר"
 # Formatting status (make sure you use a double % to print the percent sign)
 t MSG_217 "מאתחל: %0.1f%% הושלמו"
 t MSG_218 "יוצר מערכת קבצים: משימה %d/%d הושלמה"
@@ -11194,8 +11194,8 @@ t MSG_212 "ناموفق بود"
 t MSG_213 "در حال راه‌اندازی نسخه جدید نرم‌افزار..."
 t MSG_214 "راه‌اندازی نسخه جدید نرم‌افزار ناموفق بود"
 # Open/Save file
-t MSG_215 "%s باز شد"
-t MSG_216 "%s ذخیره شد"
+t MSG_215 "‪%s‬ باز شد"
+t MSG_216 "‪%s‬ ذخیره شد"
 # Formatting status (make sure you use a double % to print the percent sign)
 t MSG_217 "در حال فرمت کردن؛ درصد پیشرفت: %0.1f%%"
 t MSG_218 "در حال ساختن سیستم فایل؛ تعداد وظایف انجام شده: %d/%d"

@@ -774,16 +774,19 @@ BOOL Notification(int type, const notification_info* more_info, char* title, cha
 {
 	BOOL ret;
 	va_list args;
+	const int max_msg_size = 1024;
 
 	dialog_showing++;
-	szMessageText = (char*)malloc(MAX_PATH);
-	if (szMessageText == NULL) return FALSE;
+	szMessageText = (char*)malloc(max_msg_size);
+	if (szMessageText == NULL)
+		return FALSE;
 	szMessageTitle = safe_strdup(title);
-	if (szMessageTitle == NULL) return FALSE;
+	if (szMessageTitle == NULL)
+		return FALSE;
 	va_start(args, format);
-	safe_vsnprintf(szMessageText, MAX_PATH-1, format, args);
+	safe_vsnprintf(szMessageText, max_msg_size -1, format, args);
 	va_end(args);
-	szMessageText[MAX_PATH-1] = 0;
+	szMessageText[max_msg_size -1] = 0;
 	notification_more_info = more_info;
 	notification_is_question = FALSE;
 
