@@ -3639,10 +3639,25 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			PrintInfo(0, MSG_212);
 			MessageBeep(MB_ICONERROR);
 			FlashTaskbar(dialog_handle);
-			if (BlockingProcess.Index > 0)
+			if (BlockingProcess.Index > 0) {
 				ListDialog(lmprintf(MSG_042), lmprintf(MSG_055), BlockingProcess.String, BlockingProcess.Index);
-			else
+			} else {
+				if (nWindowsVersion >= WINDOWS_10) {
+					// Try to detect if 'Controlled Folder Access' is enabled on Windows 10 or later. See also:
+					// http://www.winhelponline.com/blog/use-controlled-folder-access-windows-10-windows-defender
+					switch (SCODE_CODE(FormatStatus)) {
+					case ERROR_PARTITION_FAILURE:
+					case ERROR_WRITE_FAULT:
+						if ((RunCommand("powershell.exe -NonInteractive -NoProfile -Command If (Get-Command -Commandtype Function Get-MpPreference -ErrorAction SilentlyContinue) { exit 1 } Else { exit 0 }", app_dir, TRUE) == 1) &&
+							(RunCommand("powershell.exe -NonInteractive -NoProfile -Command exit (Get-MpPreference).EnableControlledFolderAccess", app_dir, TRUE) == 1)) {
+							uprintf("\r\nWARNING: 'Controlled Folder Access' appears to be enabled on this system!");
+							uprintf("You may need to disable this feature, or add an exception, for Rufus to be able to work...\n");
+						}
+						break;
+					}
+				}
 				Notification(MSG_ERROR, NULL, lmprintf(MSG_042), lmprintf(MSG_043, StrError(FormatStatus, FALSE)));
+			}
 		}
 		FormatStatus = 0;
 		format_op_in_progress = FALSE;
