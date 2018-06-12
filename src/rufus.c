@@ -3645,13 +3645,28 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				if (nWindowsVersion >= WINDOWS_10) {
 					// Try to detect if 'Controlled Folder Access' is enabled on Windows 10 or later. See also:
 					// http://www.winhelponline.com/blog/use-controlled-folder-access-windows-10-windows-defender
+					char cmdline[256];
+					static const char* ps_cmd[2] = {
+						// Return 1 if the 'Get-MpPreference' PowerShell cmdlet exists
+						"If (Get-Command -Commandtype Function Get-MpPreference -ErrorAction SilentlyContinue) { Exit 1 } Else { Exit 0 }",
+						// Return 1 if Controlled Folder Access is enabled
+						"Exit (Get-MpPreference).EnableControlledFolderAccess" };
 					switch (SCODE_CODE(FormatStatus)) {
 					case ERROR_PARTITION_FAILURE:
 					case ERROR_WRITE_FAULT:
-						if ((RunCommand("powershell.exe -NonInteractive -NoProfile -Command If (Get-Command -Commandtype Function Get-MpPreference -ErrorAction SilentlyContinue) { exit 1 } Else { exit 0 }", app_dir, TRUE) == 1) &&
-							(RunCommand("powershell.exe -NonInteractive -NoProfile -Command exit (Get-MpPreference).EnableControlledFolderAccess", app_dir, TRUE) == 1)) {
-							uprintf("\r\nWARNING: 'Controlled Folder Access' appears to be enabled on this system!");
-							uprintf("You may need to disable this feature, or add an exception, for Rufus to be able to work...\n");
+						// Find if PowerShell is available at its expected location
+						static_sprintf(tmp, "%s\\WindowsPowerShell\\v1.0\\powershell.exe", system_dir);
+						if (PathFileExistsU(tmp)) {
+							for (i = 0; i < ARRAYSIZE(ps_cmd); i++) {
+								// Run the PowerShell commands
+								static_sprintf(cmdline, "%s -NonInteractive -NoProfile -Command %s", tmp, ps_cmd[i]);
+								if (RunCommand(cmdline, app_dir, TRUE) != 1)
+									break;
+							}
+							if (i == ARRAYSIZE(ps_cmd)) {
+								uprintf("\r\nWARNING: 'Controlled Folder Access' appears to be enabled on this system");
+								uprintf("You may need to disable this feature, or add an exception, for Rufus to to work...\n");
+							}
 						}
 						break;
 					}
