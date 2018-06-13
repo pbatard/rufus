@@ -141,8 +141,10 @@ BOOL ResetDevice(int index)
 		return FALSE;
 	}
 
-	if (DriveHub.String[index] == NULL)
+	if (DriveHub.String[index] == NULL) {
+		uprintf("The device you are trying to reset does not appear to be a USB device...");
 		return FALSE;
+	}
 
 	LastReset = GetTickCount64();
 
@@ -162,6 +164,7 @@ BOOL ResetDevice(int index)
 		uprintf("  Failed to cycle port: %s", WindowsErrorString());
 		goto out;
 	}
+	uprintf("Please wait for the device to re-appear...");
 	r = TRUE;
 
 out:

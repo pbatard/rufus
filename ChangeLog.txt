@@ -1,3 +1,11 @@
+o Version 3.1 (2018.06.??)
+    Fix ISO content not being extracted with GRUB based ISOs (Manjaro, Kaspersky, etc.)
+    Fix text being truncated on some dialogs (mostly for Russian and Thai)
+    Add detection & warning about the 'Controlled Folder Access' Windows 10 feature
+    Improve retry attempts for transient errors
+    Update GRUB 2.0 and Grub4DOS to latest
+    Update libcdio to latest
+
 o Version 3.0 (2018.05.29)
     UI redesign to follow the flow of user operations (with thanks to Fahad Al-Riyami for the concept)
     Drop XP and Vista platform support

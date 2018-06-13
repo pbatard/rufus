@@ -815,7 +815,7 @@ out:
 static BOOL ClearMBRGPT(HANDLE hPhysicalDrive, LONGLONG DiskSize, DWORD SectorSize, BOOL add1MB)
 {
 	BOOL r = FALSE;
-	uint64_t i, last_sector = DiskSize/SectorSize, num_sectors_to_clear;
+	uint64_t i, j, last_sector = DiskSize/SectorSize, num_sectors_to_clear;
 	unsigned char* pBuf = (unsigned char*) calloc(SectorSize, 1);
 
 	PrintInfoDebug(0, MSG_224);
@@ -839,13 +839,29 @@ static BOOL ClearMBRGPT(HANDLE hPhysicalDrive, LONGLONG DiskSize, DWORD SectorSi
 
 	uprintf("Erasing %d sectors", num_sectors_to_clear);
 	for (i=0; i<num_sectors_to_clear; i++) {
-		if ((IS_ERROR(FormatStatus)) || (write_sectors(hPhysicalDrive, SectorSize, i, 1, pBuf) != SectorSize)) {
-			goto out;
+		for (j = 1; j <= WRITE_RETRIES; j++) {
+			if (IS_ERROR(FormatStatus))
+				goto out;
+			if (write_sectors(hPhysicalDrive, SectorSize, i, 1, pBuf) != SectorSize) {
+				if (j < WRITE_RETRIES) {
+					uprintf("Retrying in %d seconds...", WRITE_TIMEOUT / 1000);
+					Sleep(WRITE_TIMEOUT);
+				} else
+					goto out;
+			}
 		}
 	}
-	for (i=last_sector-MAX_SECTORS_TO_CLEAR; i<last_sector; i++) {
-		if ((IS_ERROR(FormatStatus)) || (write_sectors(hPhysicalDrive, SectorSize, i, 1, pBuf) != SectorSize)) {
-			goto out;
+	for (i = last_sector - MAX_SECTORS_TO_CLEAR; i < last_sector; i++) {
+		for (j = 1; j <= WRITE_RETRIES; j++) {
+			if (IS_ERROR(FormatStatus))
+				goto out;
+			if (write_sectors(hPhysicalDrive, SectorSize, i, 1, pBuf) != SectorSize) {
+				if (j < WRITE_RETRIES) {
+					uprintf("Retrying in %d seconds...", WRITE_TIMEOUT / 1000);
+					Sleep(WRITE_TIMEOUT);
+				} else
+					goto out;
+			}
 		}
 	}
 	r = TRUE;
@@ -1583,7 +1599,7 @@ static BOOL WriteDrive(HANDLE hPhysicalDrive, HANDLE hSourceImage)
 				s = ReadFile(hSourceImage, buffer, BufSize, &rSize, NULL);
 				if (!s) {
 					FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_READ_FAULT;
-					uprintf("read error: %s", WindowsErrorString());
+					uprintf("Read error: %s", WindowsErrorString());
 					goto out;
 				}
 				if (rSize == 0)
@@ -1597,20 +1613,21 @@ static BOOL WriteDrive(HANDLE hPhysicalDrive, HANDLE hSourceImage)
 			// WriteFile fails unless the size is a multiple of sector size
 			if (rSize % SelectedDrive.SectorSize != 0)
 				rSize = ((rSize + SelectedDrive.SectorSize - 1) / SelectedDrive.SectorSize) * SelectedDrive.SectorSize;
-			for (i = 0; i < WRITE_RETRIES; i++) {
+			for (i = 1; i <= WRITE_RETRIES; i++) {
 				CHECK_FOR_USER_CANCEL;
 				s = WriteFile(hPhysicalDrive, buffer, rSize, &wSize, NULL);
 				if ((s) && (wSize == rSize))
 					break;
 				if (s)
-					uprintf("write error: Wrote %d bytes, expected %d bytes", wSize, rSize);
+					uprintf("Write error: Wrote %d bytes, expected %d bytes", wSize, rSize);
 				else
-					uprintf("write error at sector %" PRIi64 ": %s", wb / SelectedDrive.SectorSize, WindowsErrorString());
-				if (i < WRITE_RETRIES - 1) {
+					uprintf("Write error at sector %" PRIi64 ": %s", wb / SelectedDrive.SectorSize, WindowsErrorString());
+				if (i < WRITE_RETRIES) {
 					li.QuadPart = wb;
-					uprintf("  RETRYING...\n");
+					uprintf("Retrying in %d seconds...", WRITE_TIMEOUT / 1000);
+					Sleep(WRITE_TIMEOUT);
 					if (!SetFilePointerEx(hPhysicalDrive, li, NULL, FILE_BEGIN)) {
-						uprintf("write error: could not reset position - %s", WindowsErrorString());
+						uprintf("Write error: Could not reset position - %s", WindowsErrorString());
 						goto out;
 					}
 				} else {
@@ -1619,7 +1636,8 @@ static BOOL WriteDrive(HANDLE hPhysicalDrive, HANDLE hSourceImage)
 				}
 				Sleep(200);
 			}
-			if (i >= WRITE_RETRIES) goto out;
+			if (i > WRITE_RETRIES)
+				goto out;
 		}
 	}
 	RefreshDriveLayout(hPhysicalDrive);
@@ -2105,7 +2123,7 @@ DWORD WINAPI SaveImageThread(void* param)
 			NULL, OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, NULL);
 		break;
 	default:
-		uprintf("invalid image type");
+		uprintf("Invalid image type");
 	}
 	if (hPhysicalDrive == INVALID_HANDLE_VALUE) {
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_OPEN_FAILED;
@@ -2149,7 +2167,7 @@ DWORD WINAPI SaveImageThread(void* param)
 			(DWORD)MIN(img_save->BufSize, img_save->DeviceSize - wb), &rSize, NULL);
 		if (!s) {
 			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_READ_FAULT;
-			uprintf("read error: %s", WindowsErrorString());
+			uprintf("Read error: %s", WindowsErrorString());
 			goto out;
 		}
 		if (rSize == 0)
@@ -2160,20 +2178,21 @@ DWORD WINAPI SaveImageThread(void* param)
 			PrintInfo(0, MSG_261, format_percent);
 			UpdateProgress(OP_FORMAT, format_percent);
 		}
-		for (i=0; i<WRITE_RETRIES; i++) {
+		for (i = 1; i <= WRITE_RETRIES; i++) {
 			CHECK_FOR_USER_CANCEL;
 			s = WriteFile(hDestImage, buffer, rSize, &wSize, NULL);
 			if ((s) && (wSize == rSize))
 				break;
 			if (s)
-				uprintf("write error: Wrote %d bytes, expected %d bytes\n", wSize, rSize);
+				uprintf("Write error: Wrote %d bytes, expected %d bytes", wSize, rSize);
 			else
-				uprintf("write error: %s", WindowsErrorString());
-			if (i < WRITE_RETRIES-1) {
+				uprintf("Write error: %s", WindowsErrorString());
+			if (i < WRITE_RETRIES) {
 				li.QuadPart = wb;
-				uprintf("  RETRYING...\n");
+				uprintf("Retrying in %d seconds...", WRITE_TIMEOUT / 1000);
+				Sleep(WRITE_TIMEOUT);
 				if (!SetFilePointerEx(hDestImage, li, NULL, FILE_BEGIN)) {
-					uprintf("write error: could not reset position - %s", WindowsErrorString());
+					uprintf("Write error: Could not reset position - %s", WindowsErrorString());
 					goto out;
 				}
 			} else {
@@ -2182,7 +2201,8 @@ DWORD WINAPI SaveImageThread(void* param)
 			}
 			Sleep(200);
 		}
-		if (i >= WRITE_RETRIES) goto out;
+		if (i > WRITE_RETRIES)
+			goto out;
 	}
 	if (wb != img_save->DeviceSize) {
 		uprintf("Error: wrote %s, expected %s", SizeToHumanReadable(wb, FALSE, FALSE),
