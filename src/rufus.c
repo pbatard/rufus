@@ -3804,8 +3804,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	GetSystemDirectoryW(kernel32_path, ARRAYSIZE(kernel32_path));
 	wcsncat(kernel32_path, L"\\kernel32.dll", ARRAYSIZE(kernel32_path) - wcslen(kernel32_path) - 1);
 	// NB: Because kernel32 should already be loaded, what we do above to ensure that we
-	// (re)pick the system one is mostly unnecessary. But since for a hammer everything is
-	// a nail...
+	// (re)pick the system one is mostly unnecessary. But since for a hammer everything is a
+	// nail... Also, no, Coverity, we never need to care about freeing kernel32 as a library.
+	// coverity[leaked_storage]
 	pfSetDefaultDllDirectories = (SetDefaultDllDirectories_t)
 		GetProcAddress(LoadLibraryW(kernel32_path), "SetDefaultDllDirectories");
 	if (pfSetDefaultDllDirectories != NULL)
