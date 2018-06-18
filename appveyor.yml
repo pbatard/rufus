@@ -11,7 +11,18 @@ init:
         Update-AppveyorBuild -Version "dev-$($env:APPVEYOR_REPO_COMMIT.Substring(0,8))_#$env:APPVEYOR_BUILD_NUMBER"
       }
 
+skip_commits:
+  # Don't bother running AppVeyor on commits that only modify resource or .md/.sh files
+  files:
+    - res/*
+    - '**/*.md'
+    - '**/*.sh'
+
 environment:
+  COVERITY_SCAN_PROJECT_NAME:       "pbatard/rufus"
+  COVERITY_SCAN_NOTIFICATION_EMAIL: "pete@akeo.ie"
+  COVERITY_SCAN_TOKEN:
+    secure: XZADvwlRFo57sBA54pBH2oVT/eR/OytZYY/sCKq61io=
   global:
     BITS: 32
   matrix:
@@ -33,6 +44,9 @@ environment:
     - CONFIGURATION: Release
       COMPILER: MinGW
       PLATFORM: x86_64
+    - CONFIGURATION: Release
+      COMPILER: Coverity
+      PLATFORM: x86_32
 
 build:
   project: rufus.sln
@@ -40,8 +54,35 @@ build:
   verbosity: detailed
 
 install:
-- if [%PLATFORM%]==[x86_64] set BITS=64
+- ps: |
+    if ($env:PLATFORM -eq "x86_64") {
+      $env:BITS = 64
+    }
 
 build_script:
-- if [%COMPILER%]==[MSVC] msbuild rufus.sln /m /p:Configuration=%CONFIGURATION%,Platform=%PLATFORM% /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
-- if [%COMPILER%]==[MinGW] C:\msys64\usr\bin\bash -lc "export PATH=/mingw%BITS%/bin:$PATH; cd /c/projects/rufus; ./configure --build=%PLATFORM%-w64-mingw32 --host=%PLATFORM%-w64-mingw32 --disable-debug; make -j4"
+- ps: |
+    $APPVEYOR_LOGGER = "C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll";
+    switch ($env:COMPILER) {
+      MSVC {
+        msbuild rufus.sln /m /p:Configuration=$env:CONFIGURATION,Platform=$env:PLATFORM /l:$APPVEYOR_LOGGER;
+      }
+      MinGW {
+        C:\msys64\usr\bin\bash -lc "export PATH=/mingw$env:BITS/bin:`$PATH; cd /c/projects/rufus; mkdir -p m4; ./configure --build=$env:PLATFORM-w64-mingw32 --host=$env:PLATFORM-w64-mingw32 --disable-debug; make -j4";
+      }
+      Coverity {
+        $PUBLISHCOVERITY = "$env:APPVEYOR_BUILD_FOLDER\PublishCoverity\tools\PublishCoverity.exe";
+        if (!"$env:COVERITY_SCAN_TOKEN") {
+          Write-Output "Not running Coverity due to missing credential.";
+          return;
+        }
+        if ($env:APPVEYOR_REPO_TAG -eq "false") {
+          Write-Output "Not running Coverity due to missing tag.";
+          return;
+        }
+        & nuget install PublishCoverity -o "$env:APPVEYOR_BUILD_FOLDER" -excludeversion;
+        & cov-build.exe --dir cov-int msbuild rufus.sln /m /p:Configuration=$env:CONFIGURATION,Platform=$env:PLATFORM /l:$APPVEYOR_LOGGER;
+        & $PUBLISHCOVERITY compress --nologo -i "$env:APPVEYOR_BUILD_FOLDER\cov-int" -o "$env:APPVEYOR_BUILD_FOLDER\coverity.zip" --overwrite;
+        & $PUBLISHCOVERITY publish --nologo -t $env:COVERITY_SCAN_TOKEN -e $env:COVERITY_SCAN_NOTIFICATION_EMAIL -r $env:COVERITY_SCAN_PROJECT_NAME -z "$env:APPVEYOR_BUILD_FOLDER\coverity.zip" -d "Appveyor build." --codeVersion $env:APPVEYOR_BUILD_VERSION;
+        Get-ChildItem -Path ./ -Recurse | Remove-Item -Force -Recurse;
+      }
+    }

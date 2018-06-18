@@ -12,5 +12,8 @@
 type -P git &>/dev/null || { echo "git command not found. Aborting." >&2; exit 1; }
 
 TAGVER=`cat ./.tag`
-git tag "b$TAGVER"
+# Only apply a tag if we're dealing with the master branch
+if [ "`git rev-parse --abbrev-ref HEAD`" == "master" ]; then
+  git tag "b$TAGVER"
+fi
 rm ./.tag
