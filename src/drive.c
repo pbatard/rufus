@@ -1167,11 +1167,12 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 	if (extra_partitions) {
 		uprintf("Adding extra partition");
 		if (extra_partitions & XP_EFI) {
-			// The size of the EFI partition depends on the minimum size we're able to format in FAT32,
-			// which in turn depends on the cluster size used, which in turn depends on the disk sector size.
-			if (SelectedDrive.SectorSize <= 1024)
-				ms_efi_size = 100*MB;
-			else if (SelectedDrive.SectorSize <= 4096)
+			// The size of the EFI partition depends on the minimum size we're able to format in FAT32, which
+			// in turn depends on the cluster size used, which in turn depends on the disk sector size.
+			// Plus some people are complaining that the *OFFICIAL MINIMUM SIZE* as documented by Microsoft at
+			// https://docs.microsoft.com/en-us/windows-hardware/manufacture/desktop/configure-uefigpt-based-hard-drive-partitions
+			// is too small. See: https://github.com/pbatard/rufus/issues/979
+			if (SelectedDrive.SectorSize <= 4096)
 				ms_efi_size = 300*MB;
 			else
 				ms_efi_size = 1200*MB;	// That'll teach you to have a nonstandard disk!

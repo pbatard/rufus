@@ -12,11 +12,14 @@ init:
       }
 
 skip_commits:
-  # Don't bother running AppVeyor on commits that only modify resource or .md/.sh files
+  # Don't run AppVeyor for commits that only modify resource or non-code files
   files:
     - res/*
+    - '**/*.cmd'
     - '**/*.md'
     - '**/*.sh'
+    - '**/*.txt'
+    - '**/*.xml'
 
 environment:
   COVERITY_SCAN_PROJECT_NAME:       "pbatard/rufus"
