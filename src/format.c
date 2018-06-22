@@ -1167,10 +1167,11 @@ static BOOL WritePBR(HANDLE hLogicalVolume)
 static BOOL SetupWinPE(char drive_letter)
 {
 	char src[64], dst[32];
-	const char* basedir[] = { "i386", "minint" };
-	const char* patch_str_org[] = { "\\minint\\txtsetup.sif", "\\minint\\system32\\" };
-	const char* patch_str_rep[] = { "\\i386\\txtsetup.sif", "\\i386\\system32\\" };
-	const char *win_nt_bt_org = "$win_nt$.~bt", *win_nt_bt_rep = "i386";
+	const char* basedir[3] = { "i386", "amd64", "minint" };
+	const char* patch_str_org[2] = { "\\minint\\txtsetup.sif", "\\minint\\system32\\" };
+	const char* patch_str_rep[2][2] = { { "\\i386\\txtsetup.sif", "\\i386\\system32\\" } ,
+										{ "\\amd64\\txtsetup.sif", "\\amd64\\system32\\" } };
+	const char *win_nt_bt_org = "$win_nt$.~bt";
 	const char *rdisk_zero = "rdisk(0)";
 	const LARGE_INTEGER liZero = { {0, 0} };
 	char setupsrcdev[64];
@@ -1179,16 +1180,19 @@ static BOOL SetupWinPE(char drive_letter)
 	BOOL r = FALSE;
 	char* buffer = NULL;
 
-	index = ((img_report.winpe&WINPE_I386) == WINPE_I386)?0:1;
+	if ((img_report.winpe & WINPE_AMD64) == WINPE_AMD64)
+		index = 1;
+	else if ((img_report.winpe & WINPE_MININT) == WINPE_MININT)
+		index = 2;
 	// Allow other values than harddisk 1, as per user choice for disk ID
 	static_sprintf(setupsrcdev, "SetupSourceDevice = \"\\device\\harddisk%d\\partition1\"",
 		ComboBox_GetCurSel(hDiskID));
 	// Copy of ntdetect.com in root
-	static_sprintf(src, "%c:\\%s\\ntdetect.com", drive_letter, basedir[index]);
+	static_sprintf(src, "%c:\\%s\\ntdetect.com", drive_letter, basedir[2*(index/2)]);
 	static_sprintf(dst, "%c:\\ntdetect.com", drive_letter);
 	CopyFileA(src, dst, TRUE);
 	if (!img_report.uses_minint) {
-		// Create a copy of txtsetup.sif, as we want to keep the i386 files unmodified
+		// Create a copy of txtsetup.sif, as we want to keep the i386/amd64 files unmodified
 		static_sprintf(src, "%c:\\%s\\txtsetup.sif", drive_letter, basedir[index]);
 		static_sprintf(dst, "%c:\\txtsetup.sif", drive_letter);
 		if (!CopyFileA(src, dst, TRUE)) {
@@ -1201,7 +1205,7 @@ static BOOL SetupWinPE(char drive_letter)
 		uprintf("Successfully added '%s' to %s\n", setupsrcdev, dst);
 	}
 
-	static_sprintf(src, "%c:\\%s\\setupldr.bin", drive_letter,  basedir[index]);
+	static_sprintf(src, "%c:\\%s\\setupldr.bin", drive_letter,  basedir[2*(index/2)]);
 	static_sprintf(dst, "%c:\\BOOTMGR", drive_letter);
 	if (!CopyFileA(src, dst, TRUE)) {
 		uprintf("Did not copy %s as %s: %s\n", src, dst, WindowsErrorString());
@@ -1213,7 +1217,7 @@ static BOOL SetupWinPE(char drive_letter)
 		if (img_report.uses_minint) {
 			uprintf("Detected \\minint directory with /minint option: nothing to patch\n");
 			r = TRUE;
-		} else if (!(img_report.winpe&WINPE_I386)) {
+		} else if (!(img_report.winpe&(WINPE_I386|WINPE_AMD64))) {
 			uprintf("Detected \\minint directory only but no /minint option: not sure what to do\n");
 		}
 		goto out;
@@ -1254,9 +1258,9 @@ static BOOL SetupWinPE(char drive_letter)
 	for (i=1; i<size-32; i++) {
 		for (j=0; j<ARRAYSIZE(patch_str_org); j++) {
 			if (safe_strnicmp(&buffer[i], patch_str_org[j], strlen(patch_str_org[j])-1) == 0) {
-				uprintf("  0x%08X: '%s' -> '%s'\n", i, &buffer[i], patch_str_rep[j]);
-				strcpy(&buffer[i], patch_str_rep[j]);
-				i += (DWORD)max(strlen(patch_str_org[j]), strlen(patch_str_rep[j]));	// in case org is a substring of rep
+				uprintf("  0x%08X: '%s' -> '%s'\n", i, &buffer[i], patch_str_rep[index][j]);
+				strcpy(&buffer[i], patch_str_rep[index][j]);
+				i += (DWORD)max(strlen(patch_str_org[j]), strlen(patch_str_rep[index][j]));	// in case org is a substring of rep
 			}
 		}
 	}
@@ -1270,13 +1274,13 @@ static BOOL SetupWinPE(char drive_letter)
 				buffer[i+6] = 0x30 + ComboBox_GetCurSel(hDiskID);
 				uprintf("  0x%08X: '%s' -> 'rdisk(%c)'\n", i, rdisk_zero, buffer[i+6]);
 			}
-			// $WIN_NT$_~BT -> i386
+			// $WIN_NT$_~BT -> i386/amd64
 			if (safe_strnicmp(&buffer[i], win_nt_bt_org, strlen(win_nt_bt_org)-1) == 0) {
-				uprintf("  0x%08X: '%s' -> '%s%s'\n", i, &buffer[i], win_nt_bt_rep, &buffer[i+strlen(win_nt_bt_org)]);
-				strcpy(&buffer[i], win_nt_bt_rep);
+				uprintf("  0x%08X: '%s' -> '%s%s'\n", i, &buffer[i], basedir[index], &buffer[i+strlen(win_nt_bt_org)]);
+				strcpy(&buffer[i], basedir[index]);
 				// This ensures that we keep the terminator backslash
-				buffer[i+strlen(win_nt_bt_rep)] = buffer[i+strlen(win_nt_bt_org)];
-				buffer[i+strlen(win_nt_bt_rep)+1] = 0;
+				buffer[i+strlen(basedir[index])] = buffer[i+strlen(win_nt_bt_org)];
+				buffer[i+strlen(basedir[index])+1] = 0;
 			}
 		}
 	}
