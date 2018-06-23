@@ -361,6 +361,15 @@ static void __inline set_directory_timestamp(char* path, LPFILETIME creation, LP
 	safe_closehandle(dir_handle);
 }
 
+// Preallocates the target size of a newly created file in order to prevent fragmentation from repeated writes
+static void __inline preallocate_filesize(HANDLE hFile, int64_t file_length)
+{
+	SetFileInformationByHandle(hFile, FileEndOfFileInfo, &file_length, sizeof(file_length));
+
+	// FileAllocationInfo does not require the size to be a multiple of the cluster size; the FS driver takes care of this.
+	SetFileInformationByHandle(hFile, FileAllocationInfo, &file_length, sizeof(file_length));
+}
+
 // Returns 0 on success, nonzero on error
 static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const char *psz_path)
 {
@@ -440,23 +449,26 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 					uprintf(stupid_antivirus);
 				else
 					goto out;
-			} else while (file_length > 0) {
-				if (FormatStatus) goto out;
-				memset(buf, 0, UDF_BLOCKSIZE);
-				read = udf_read_block(p_udf_dirent, buf, 1);
-				if (read < 0) {
-					uprintf("  Error reading UDF file %s", &psz_fullpath[strlen(psz_extract_dir)]);
-					goto out;
+			} else {
+				preallocate_filesize(file_handle, file_length);
+				while (file_length > 0) {
+					if (FormatStatus) goto out;
+					memset(buf, 0, UDF_BLOCKSIZE);
+					read = udf_read_block(p_udf_dirent, buf, 1);
+					if (read < 0) {
+						uprintf("  Error reading UDF file %s", &psz_fullpath[strlen(psz_extract_dir)]);
+						goto out;
+					}
+					buf_size = (DWORD)MIN(file_length, read);
+					ISO_BLOCKING(r = WriteFileWithRetry(file_handle, buf, buf_size, &wr_size, WRITE_RETRIES));
+					if (!r) {
+						uprintf("  Error writing file: %s", WindowsErrorString());
+						goto out;
+					}
+					file_length -= read;
+					if (nb_blocks++ % PROGRESS_THRESHOLD == 0)
+						UpdateProgress(OP_DOS, 100.0f*nb_blocks/total_blocks);
 				}
-				buf_size = (DWORD)MIN(file_length, read);
-				ISO_BLOCKING(r = WriteFileWithRetry(file_handle, buf, buf_size, &wr_size, WRITE_RETRIES));
-				if (!r) {
-					uprintf("  Error writing file: %s", WindowsErrorString());
-					goto out;
-				}
-				file_length -= read;
-				if (nb_blocks++ % PROGRESS_THRESHOLD == 0)
-					UpdateProgress(OP_DOS, 100.0f*nb_blocks/total_blocks);
 			}
 			if ((preserve_timestamps) && (!SetFileTime(file_handle, to_filetime(udf_get_attribute_time(p_udf_dirent)),
 				to_filetime(udf_get_access_time(p_udf_dirent)), to_filetime(udf_get_modification_time(p_udf_dirent)))))
@@ -586,26 +598,29 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 					uprintf(stupid_antivirus);
 				else
 					goto out;
-			} else for (j=0; j<p_statbuf->extents; j++) {
-				extent_length = p_statbuf->extsize[j];
-				for (i=0; extent_length>0; i++) {
-					if (FormatStatus) goto out;
-					memset(buf, 0, ISO_BLOCKSIZE);
-					lsn = p_statbuf->lsn[j] + (lsn_t)i;
-					if (iso9660_iso_seek_read(p_iso, buf, lsn, 1) != ISO_BLOCKSIZE) {
-						uprintf("  Error reading ISO9660 file %s at LSN %lu",
-							psz_iso_name, (long unsigned int)lsn);
-						goto out;
+			} else {
+				preallocate_filesize(file_handle, file_length);
+				for (j=0; j<p_statbuf->extents; j++) {
+					extent_length = p_statbuf->extsize[j];
+					for (i=0; extent_length>0; i++) {
+						if (FormatStatus) goto out;
+						memset(buf, 0, ISO_BLOCKSIZE);
+						lsn = p_statbuf->lsn[j] + (lsn_t)i;
+						if (iso9660_iso_seek_read(p_iso, buf, lsn, 1) != ISO_BLOCKSIZE) {
+							uprintf("  Error reading ISO9660 file %s at LSN %lu",
+								psz_iso_name, (long unsigned int)lsn);
+							goto out;
+						}
+						buf_size = (DWORD)MIN(extent_length, ISO_BLOCKSIZE);
+						ISO_BLOCKING(r = WriteFileWithRetry(file_handle, buf, buf_size, &wr_size, WRITE_RETRIES));
+						if (!r) {
+							uprintf("  Error writing file: %s", WindowsErrorString());
+							goto out;
+						}
+						extent_length -= ISO_BLOCKSIZE;
+						if (nb_blocks++ % PROGRESS_THRESHOLD == 0)
+							UpdateProgress(OP_DOS, 100.0f*nb_blocks/total_blocks);
 					}
-					buf_size = (DWORD)MIN(extent_length, ISO_BLOCKSIZE);
-					ISO_BLOCKING(r = WriteFileWithRetry(file_handle, buf, buf_size, &wr_size, WRITE_RETRIES));
-					if (!r) {
-						uprintf("  Error writing file: %s", WindowsErrorString());
-						goto out;
-					}
-					extent_length -= ISO_BLOCKSIZE;
-					if (nb_blocks++ % PROGRESS_THRESHOLD == 0)
-						UpdateProgress(OP_DOS, 100.0f*nb_blocks/total_blocks);
 				}
 			}
 			if (preserve_timestamps) {
