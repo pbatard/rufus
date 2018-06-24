@@ -3,7 +3,7 @@ o Version 3.1 (2018.06.19)
     Fix text being truncated on some dialogs (mostly Russian and Thai)
     Add detection & warning about the 'Controlled Folder Access' Windows 10 feature
     Improve retry attempts for transient errors
-    Increase size of the ESP to 300MB, for Windows To Go drives using GPT
+    Increase size of the ESP to 300MB, for Windows To Go drives partitioned as GPT
     Update GRUB 2.0 and Grub4DOS to latest
     Update libcdio to latest
 

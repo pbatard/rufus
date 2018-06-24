@@ -2,7 +2,7 @@
 # -*- coding=utf-8 -*-
 
 # LIMITATIONS
-# this script was written as fast as possbile so it is broken/minimalistic:
+# this script was written as fast as possible so it is broken/minimalistic:
 # it assumes the first language in rufus.loc in English
 # written for 1.0.23, things may have changes since then
 # horrible code below
