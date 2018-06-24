@@ -254,8 +254,9 @@ enum checksum_type {
 #define OLD_C32_THRESHOLD   { 53500, 148000 }
 
 /* ISO details that the application may want */
-#define WINPE_MININT        0x2A
-#define WINPE_I386          0x15
+#define WINPE_MININT        0x124
+#define WINPE_I386          0x49
+#define WINPE_AMD64         0x89
 #define MAX_WIM_VERSION     0x000E0000
 #define HAS_KOLIBRIOS(r)    (r.has_kolibrios)
 #define HAS_REACTOS(r)      (r.reactos_path[0] != 0)
@@ -263,7 +264,7 @@ enum checksum_type {
 #define HAS_SYSLINUX(r)     (r.sl_version != 0)
 #define HAS_BOOTMGR(r)      (r.has_bootmgr)
 #define HAS_INSTALL_WIM(r)  (r.install_wim_path[0] != 0)
-#define HAS_WINPE(r)        (((r.winpe & WINPE_MININT) == WINPE_MININT)||((r.winpe & WINPE_I386) == WINPE_I386))
+#define HAS_WINPE(r)        (((r.winpe & WINPE_MININT) == WINPE_MININT)||((r.winpe & WINPE_I386) == WINPE_I386)||((r.winpe & WINPE_AMD64) == WINPE_AMD64))
 #define HAS_WINDOWS(r)      (HAS_BOOTMGR(r) || (r.uses_minint) || HAS_WINPE(r))
 #define HAS_WIN7_EFI(r)     ((r.has_efi == 1) && HAS_INSTALL_WIM(r))
 #define HAS_EFI_IMG(r)      (r.efi_img_path[0] != 0)
@@ -286,7 +287,7 @@ typedef struct {
 	uint32_t install_wim_version;
 	BOOLEAN is_iso;
 	BOOLEAN is_bootable_img;
-	uint8_t winpe;
+	uint16_t winpe;
 	uint8_t has_efi;
 	BOOLEAN has_4GB_file;
 	BOOLEAN has_long_filename;

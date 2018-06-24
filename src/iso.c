@@ -84,7 +84,7 @@ static const char* grub_dirname = "/boot/grub/i386-pc";
 static const char* grub_cfg = "grub.cfg";
 static const char* syslinux_cfg[] = { "isolinux.cfg", "syslinux.cfg", "extlinux.conf" };
 static const char* isolinux_bin[] = { "isolinux.bin", "boot.bin" };
-static const char* pe_dirname[] = { "/i386", "/minint" };
+static const char* pe_dirname[] = { "/i386", "/amd64", "/minint" };
 static const char* pe_file[] = { "ntdetect.com", "setupldr.bin", "txtsetup.sif" };
 static const char* reactos_name = "setupldr.sys"; // TODO: freeldr.sys doesn't seem to work
 static const char* kolibri_name = "kolibri.img";
@@ -222,7 +222,7 @@ static BOOL check_iso_props(const char* psz_dirname, int64_t file_length, const 
 					static_sprintf(img_report.install_wim_path, "?:\\%s\\%s", &install_wim_path[1], install_wim_name[i]);
 		}
 
-		// Check for PE (XP) specific files in "/i386" or "/minint"
+		// Check for PE (XP) specific files in "/i386", "/amd64" or "/minint"
 		for (i=0; i<ARRAYSIZE(pe_dirname); i++)
 			if (safe_stricmp(psz_dirname, pe_dirname[i]) == 0)
 				for (j=0; j<ARRAYSIZE(pe_file); j++)
@@ -664,7 +664,7 @@ BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan)
 	udf_dirent_t* p_udf_root;
 	char *tmp, *buf, *ext;
 	char path[MAX_PATH], path2[16];
-	const char* basedir[] = { "i386", "minint" };
+	const char* basedir[] = { "i386", "amd64", "minint" };
 	const char* tmp_sif = ".\\txtsetup.sif~";
 	iso_extension_mask_t iso_extension_mask = ISO_EXTENSION_ALL;
 	char* spacing = "  ";
@@ -859,7 +859,7 @@ out:
 			// during scan, to see if /minint was provided for OsLoadOptions, as it decides
 			// whether we should use 0x80 or 0x81 as the disk ID in the MBR
 			static_sprintf(path, "/%s/txtsetup.sif",
-				basedir[((img_report.winpe&WINPE_I386) == WINPE_I386)?0:1]);
+				basedir[((img_report.winpe&WINPE_I386) == WINPE_I386)?0:((img_report.winpe&WINPE_AMD64) == WINPE_AMD64?1:2)]);
 			ExtractISOFile(src_iso, path, tmp_sif, FILE_ATTRIBUTE_NORMAL);
 			tmp = get_token_data_file("OsLoadOptions", tmp_sif);
 			if (tmp != NULL) {
