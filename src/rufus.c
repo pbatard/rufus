@@ -114,6 +114,7 @@ BOOL enable_HDDs = FALSE, force_update = FALSE, enable_ntfs_compression = FALSE,
 BOOL advanced_mode_device, advanced_mode_format, allow_dual_uefi_bios, detect_fakes, enable_vmdk, force_large_fat32, usb_debug;
 BOOL use_fake_units, preserve_timestamps = FALSE;
 BOOL zero_drive = FALSE, list_non_usb_removable_drives = FALSE, enable_file_indexing, large_drive = FALSE, write_as_image = FALSE;
+BOOL smart_skip = FALSE;
 int dialog_showing = 0;
 uint16_t rufus_version[3], embedded_sl_version[2];
 char embedded_sl_version_str[2][12] = { "?.??", "?.??" };
@@ -4290,6 +4291,15 @@ relaunch:
 		// Alt-Z => Zero the drive
 		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'Z')) {
 			zero_drive = TRUE;
+			smart_skip = FALSE;
+			// Simulate a button click for Start
+			PostMessage(hDlg, WM_COMMAND, (WPARAM)IDC_START, 0);
+			continue;
+		}
+		// Alt-"-" => Erase the drive (skips empty blocks)
+		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == VK_OEM_MINUS)) {
+			zero_drive = TRUE;
+			smart_skip = TRUE;
 			// Simulate a button click for Start
 			PostMessage(hDlg, WM_COMMAND, (WPARAM)IDC_START, 0);
 			continue;
