@@ -51,6 +51,7 @@
 
 static const char* cmdline_hogger = "rufus.com";
 static const char* FileSystemLabel[FS_MAX] = { "FAT", "FAT32", "NTFS", "UDF", "exFAT", "ReFS" };
+static const char* flash_type[BADLOCKS_PATTERN_TYPES] = { "SLC", "MLC", "TLC" };
 static const char* ep_reg = "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer";
 static const char* vs_reg = "Software\\Microsoft\\VisualStudio";
 // Number of steps for each FS for FCC_STRUCTURE_PROGRESS
@@ -1164,9 +1165,12 @@ static __inline void MoveCtrlY(HWND hDlg, int nID, int vertical_shift) {
 
 static void SetPassesTooltip(void)
 {
-	const unsigned char pattern[] = BADBLOCK_PATTERNS;
-	CreateTooltip(hNBPasses, lmprintf(MSG_153 + ComboBox_GetCurSel(hNBPasses),
-		pattern[0], pattern[1], pattern[2], pattern[3]), -1);
+	const unsigned int pattern[BADLOCKS_PATTERN_TYPES][BADBLOCK_PATTERN_COUNT] =
+		{ BADBLOCK_PATTERN_SLC, BADCLOCK_PATTERN_MLC, BADBLOCK_PATTERN_TLC };
+	int sel = ComboBox_GetCurSel(hNBPasses);
+	int type = (sel < 2) ? 0 : sel - 2;
+	CreateTooltip(hNBPasses, lmprintf(MSG_153 + ((sel >= 2) ? 3 : sel),
+		pattern[type][0], pattern[type][1], pattern[type][2], pattern[type][3]), -1);
 }
 
 static void ResizeDialogs(int shift)
@@ -2196,9 +2200,10 @@ static void GetHalfDropwdownWidth(HWND hDlg)
 		hw = max(hw, GetTextSize(GetDlgItem(hDlg, IDC_TARGET_SYSTEM), lmprintf(msg_id)).cx);
 
 	// Just in case, we also do the number of passes
-	for (i = 1; i <= 4; i++)
-		hw = max(hw, GetTextSize(GetDlgItem(hDlg, IDC_TARGET_SYSTEM),
-			lmprintf((i == 1) ? MSG_034 : MSG_035, i)).cx);
+	for (i = 1; i <= 5; i++) {
+		char* msg = (i == 1) ? lmprintf(MSG_034, 1) : lmprintf(MSG_035, (i == 2) ? 2 : 4, (i == 2) ? "" : lmprintf(MSG_087, flash_type[i - 3]));
+		hw = max(hw, GetTextSize(GetDlgItem(hDlg, IDC_TARGET_SYSTEM), msg).cx);
+	}
 
 	// Finally, we must ensure that we'll have enough space for the 2 checkbox controls
 	// that end up with a half dropdown
@@ -2528,7 +2533,7 @@ static void InitDialog(HWND hDlg)
 	DWORD len;
 	HDC hDC;
 	int i, lfHeight;
-	char tmp[128], *token, *buf, *ext;
+	char tmp[128], *token, *buf, *ext, *msg;
 	static char* resource[2] = { MAKEINTRESOURCEA(IDR_SL_LDLINUX_V4_SYS), MAKEINTRESOURCEA(IDR_SL_LDLINUX_V6_SYS) };
 
 #ifdef RUFUS_TEST
@@ -2634,8 +2639,9 @@ static void InitDialog(HWND hDlg)
 	SendMessage(hProgress, PBM_SETRANGE, 0, (MAX_PROGRESS<<16) & 0xFFFF0000);
 
 	// Fill up the passes
-	for (i=0; i<4; i++) {
-		IGNORE_RETVAL(ComboBox_AddStringU(hNBPasses, lmprintf((i==0)?MSG_034:MSG_035, i+1)));
+	for (i = 1; i <= 5; i++) {
+		msg = (i == 1) ? lmprintf(MSG_034, 1) : lmprintf(MSG_035, (i == 2) ? 2 : 4, (i == 2) ? "" : lmprintf(MSG_087, flash_type[i - 3]));
+		IGNORE_RETVAL(ComboBox_AddStringU(hNBPasses, msg));
 	}
 	IGNORE_RETVAL(ComboBox_SetCurSel(hNBPasses, 0));
 	SetPassesTooltip();

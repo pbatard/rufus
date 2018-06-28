@@ -15,7 +15,10 @@ content. PLEASE, do not just look at this Changelog when updating your
 translation, but always use the English section of rufus.loc as your base.
 For instance, MSG_114, that was introduced in v1.0.8 is MORE than one line!
 
-o Version 1.0.23 (2018.??.??)
+o Version 1.0.24 (2018.??.??)
+  - *NEW*      MSG_087
+
+o Version 1.0.23 (2018.03.27)
   - All positioning ('m', 's') has now been removed as well as some controls, for the 3.0 UI redesign
   - *NEW*      IDS_DRIVE_PROPERTIES_TXT "Drive Properties"
   - *NEW*      IDS_BOOT_SELECTION_TXT "Boot selection"

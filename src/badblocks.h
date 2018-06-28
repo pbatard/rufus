@@ -7,7 +7,7 @@
  *
  * Copyright 1995, 1996, 1997, 1998, 1999 by Theodore Ts'o
  * Copyright 1999 by David Beattie
- * Copyright 2011-2013 by Pete Batard
+ * Copyright 2011-2018 by Pete Batard
  *
  * This file is based on the minix file system programs fsck and mkfs
  * written and copyrighted by Linus Torvalds <Linus.Torvalds@cs.helsinki.fi>
@@ -55,5 +55,5 @@ typedef struct {
 /*
  * Shared prototypes
  */
-BOOL BadBlocks(HANDLE hPhysicalDrive, ULONGLONG disk_size, size_t block_size,
-	int test_type, badblocks_report *report, FILE* fd);
+BOOL BadBlocks(HANDLE hPhysicalDrive, ULONGLONG disk_size, int nb_passes,
+	int flash_type, badblocks_report *report, FILE* fd);
