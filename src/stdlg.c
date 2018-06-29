@@ -1630,7 +1630,7 @@ INT_PTR CALLBACK NewVersionCallback(HWND hDlg, UINT message, WPARAM wParam, LPAR
 				si.cb = sizeof(si);
 				if (!CreateProcessU(filepath, cmdline, NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi)) {
 					PrintInfo(0, MSG_214);
-					uprintf("Failed to launch new application: %s\n", WindowsErrorString());
+					uprintf("Failed to launch new application: %s", WindowsErrorString());
 				} else {
 					PrintInfo(0, MSG_213);
 					PostMessage(hDlg, WM_COMMAND, (WPARAM)IDCLOSE, 0);
@@ -1639,19 +1639,19 @@ INT_PTR CALLBACK NewVersionCallback(HWND hDlg, UINT message, WPARAM wParam, LPAR
 				break;
 			default:	// Download
 				if (update.download_url == NULL) {
-					uprintf("Could not get download URL\n");
+					uprintf("Could not get download URL");
 					break;
 				}
 				for (i=(int)strlen(update.download_url); (i>0)&&(update.download_url[i]!='/'); i--);
 				dl_ext.filename = &update.download_url[i+1];
 				filepath = FileDialog(TRUE, app_dir, &dl_ext, OFN_NOCHANGEDIR);
 				if (filepath == NULL) {
-					uprintf("Could not get save path\n");
+					uprintf("Could not get save path");
 					break;
 				}
 				// Opening the File Dialog will make us lose tabbing focus - set it back
 				SendMessage(hDlg, WM_NEXTDLGCTL, (WPARAM)GetDlgItem(hDlg, IDC_DOWNLOAD), TRUE);
-				DownloadFileThreaded(update.download_url, filepath, hDlg);
+				DownloadSignedFileThreaded(update.download_url, filepath, hDlg);
 				break;
 			}
 			return (INT_PTR)TRUE;

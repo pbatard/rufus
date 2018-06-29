@@ -430,7 +430,7 @@ static unsigned int test_rw(HANDLE hDrive, blk_t last_block, size_t block_size, 
 	int i, pat_idx;
 	unsigned int bb_count = 0;
 	blk_t got, tryout, recover_block = ~0, *blk_id;
-	size_t id_offset;
+	size_t id_offset = 0;
 
 	if ((pattern_type < 0) || (pattern_type >= BADLOCKS_PATTERN_TYPES)) {
 		uprintf("%sInvalid pattern type\n", bb_prefix);

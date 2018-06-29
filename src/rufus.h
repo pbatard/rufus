@@ -80,6 +80,7 @@
 #define FAT32_CLUSTER_THRESHOLD     1.011f		// For FAT32, cluster size changes don't occur at power of 2 boundaries but sligthly above
 #define DD_BUFFER_SIZE              65536		// Minimum size of the buffer we use for DD operations
 #define UBUFFER_SIZE                2048
+#define RSA_SIGNATURE_SIZE          256
 #define CBN_SELCHANGE_INTERNAL      (CBN_SELCHANGE + 256)
 #define RUFUS_URL                   "https://rufus.ie"
 #define DOWNLOAD_URL                RUFUS_URL "/downloads"
@@ -475,8 +476,8 @@ extern BOOL ResetDevice(int index);
 extern BOOL GetOpticalMedia(IMG_SAVE* img_save);
 extern BOOL SetLGP(BOOL bRestore, BOOL* bExistingKey, const char* szPath, const char* szPolicy, DWORD dwValue);
 extern LONG GetEntryWidth(HWND hDropDown, const char* entry);
-extern DWORD DownloadFile(const char* url, const char* file, HWND hProgressDialog);
-extern HANDLE DownloadFileThreaded(const char* url, const char* file, HWND hProgressDialog);
+extern DWORD DownloadSignedFile(const char* url, const char* file, HWND hProgressDialog);
+extern HANDLE DownloadSignedFileThreaded(const char* url, const char* file, HWND hProgressDialog);
 extern INT_PTR CALLBACK UpdateCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
 extern BOOL SetUpdateCheck(void);
 extern BOOL CheckForUpdates(BOOL force);
@@ -503,6 +504,7 @@ extern int IsHDD(DWORD DriveIndex, uint16_t vid, uint16_t pid, const char* strid
 extern char* GetSignatureName(const char* path, const char* country_code);
 extern uint64_t GetSignatureTimeStamp(const char* path);
 extern LONG ValidateSignature(HWND hDlg, const char* path);
+extern BOOL ValidateOpensslSignature(BYTE* pbBuffer, DWORD dwBufferLen, BYTE* pbSignature, DWORD dwSigLen);
 extern BOOL IsFontAvailable(const char* font_name);
 extern BOOL WriteFileWithRetry(HANDLE hFile, LPCVOID lpBuffer, DWORD nNumberOfBytesToWrite,
 	LPDWORD lpNumberOfBytesWritten, DWORD nNumRetries);
