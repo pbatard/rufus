@@ -26,6 +26,7 @@
 #include <windows.h>
 #include <stdio.h>
 #include <string.h>
+#include <assert.h>
 
 #include "rufus.h"
 
@@ -288,8 +289,8 @@ static const char* kb_to_hr(const char* kb)
 		}
 	}
 	// Should never happen, so let's try to get some attention here
-	MessageBoxA(hMainDialog, "YO BNLA #1", "UHAHAHHA?", MB_OKCANCEL|MB_ICONWARNING);
-	return "Someone missed a keyboard!";
+	assert(i < ARRAYSIZE(kb_hr_list));
+	return NULL;
 }
 
 typedef struct {
@@ -425,8 +426,8 @@ static const char* cp_to_hr(ULONG cp)
 		}
 	}
 	// Should never happen, so this oughta get some attention
-	MessageBoxA(hMainDialog, "YO BNLA #2", "UHAHAHHA?", MB_OKCANCEL|MB_ICONWARNING);
-	return "Someone missed a codepage!";
+	assert(i < ARRAYSIZE(cp_hr_list));
+	return NULL;
 }
 
 // http://blogs.msdn.com/b/michkap/archive/2004/12/05/275231.aspx

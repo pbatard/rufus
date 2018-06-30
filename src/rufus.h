@@ -400,7 +400,6 @@ extern float fScale;
 extern char szFolderPath[MAX_PATH], app_dir[MAX_PATH], temp_dir[MAX_PATH], system_dir[MAX_PATH], sysnative_dir[MAX_PATH];
 extern char* image_path;
 extern DWORD FormatStatus, DownloadStatus, MainThreadId;
-extern BOOL PromptOnError;
 extern unsigned long syslinux_ldlinux_len[2];
 extern const int nb_steps[FS_MAX];
 extern BOOL use_own_c32[NB_OLD_C32], detect_fakes, iso_op_in_progress, format_op_in_progress, right_to_left_mode;
@@ -476,8 +475,8 @@ extern BOOL ResetDevice(int index);
 extern BOOL GetOpticalMedia(IMG_SAVE* img_save);
 extern BOOL SetLGP(BOOL bRestore, BOOL* bExistingKey, const char* szPath, const char* szPolicy, DWORD dwValue);
 extern LONG GetEntryWidth(HWND hDropDown, const char* entry);
-extern DWORD DownloadSignedFile(const char* url, const char* file, HWND hProgressDialog);
-extern HANDLE DownloadSignedFileThreaded(const char* url, const char* file, HWND hProgressDialog);
+extern DWORD DownloadSignedFile(const char* url, const char* file, HWND hProgressDialog, BOOL PromptOnError);
+extern HANDLE DownloadSignedFileThreaded(const char* url, const char* file, HWND hProgressDialog, BOOL bPromptOnError);
 extern INT_PTR CALLBACK UpdateCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
 extern BOOL SetUpdateCheck(void);
 extern BOOL CheckForUpdates(BOOL force);
@@ -614,3 +613,4 @@ static __inline HMODULE GetLibraryHandle(char* szLibraryName) {
 #define ERROR_CANT_PATCH               0x120A
 #define ERROR_CANT_ASSIGN_LETTER       0x120B
 #define ERROR_CANT_MOUNT_VOLUME        0x120C
+#define ERROR_BAD_SIGNATURE            0x120D

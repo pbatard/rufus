@@ -45,7 +45,6 @@
 #define DEFAULT_UPDATE_INTERVAL (24*3600)
 
 DWORD DownloadStatus;
-BOOL PromptOnError = TRUE;
 
 extern BOOL force_update;
 static DWORD error_code;
@@ -259,6 +258,7 @@ static DWORD DownloadToFileOrBuffer(const char* url, const char* file, BYTE** bu
 	PF_INIT_OR_OUT(HttpSendRequestA, WinInet);
 	PF_INIT_OR_OUT(HttpQueryInfoA, WinInet);
 
+	FormatStatus = 0;
 	DownloadStatus = 404;
 	if (hProgressDialog != NULL) {
 		// Use the progress control provided, if any
@@ -270,8 +270,7 @@ static DWORD DownloadToFileOrBuffer(const char* url, const char* file, BYTE** bu
 		SendMessage(hProgressDialog, UM_PROGRESS_INIT, 0, 0);
 	}
 
-	if (url == NULL)
-		goto out;
+	assert(url != NULL);
 
 	short_name = (file != NULL) ? PathFindFileNameU(file) : PathFindFileNameU(url);
 
@@ -361,6 +360,7 @@ static DWORD DownloadToFileOrBuffer(const char* url, const char* file, BYTE** bu
 	// Keep checking for data until there is nothing left.
 	dwSize = 0;
 	while (1) {
+		// User may have cancelled the download
 		if (IS_ERROR(FormatStatus))
 			goto out;
 		if (!pfInternetReadFile(hRequest, buf, sizeof(buf), &dwDownloaded) || (dwDownloaded == 0))
@@ -388,6 +388,7 @@ static DWORD DownloadToFileOrBuffer(const char* url, const char* file, BYTE** bu
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_WRITE_FAULT;
 		goto out;
 	} else {
+		DownloadStatus = 200;
 		r = TRUE;
 		uprintf("Successfully downloaded '%s'", short_name);
 		if (hProgressDialog != NULL) {
@@ -397,23 +398,13 @@ static DWORD DownloadToFileOrBuffer(const char* url, const char* file, BYTE** bu
 	}
 
 out:
-	if (hProgressDialog != NULL)
-		SendMessage(hProgressDialog, UM_PROGRESS_EXIT, (WPARAM)r, 0);
 	if (hFile != INVALID_HANDLE_VALUE) {
 		// Force a flush - May help with the PKI API trying to process downloaded updates too early...
 		FlushFileBuffers(hFile);
 		CloseHandle(hFile);
 	}
-	if (!r) {
-		if (file != NULL)
-			_unlinkU(file);
-		if (PromptOnError) {
-			PrintInfo(0, MSG_242);
-			SetLastError(error_code);
-			MessageBoxExU(hMainDialog, IS_ERROR(FormatStatus)?StrError(FormatStatus, FALSE):WinInetErrorString(),
-			lmprintf(MSG_044), MB_OK|MB_ICONERROR|MB_IS_RTL, selected_langid);
-		}
-	}
+	if ((!r) && (file != NULL))
+		_unlinkU(file);
 	if (hRequest)
 		pfInternetCloseHandle(hRequest);
 	if (hConnection)
@@ -421,11 +412,11 @@ out:
 	if (hSession)
 		pfInternetCloseHandle(hSession);
 
-	return r?dwSize:0;
+	return r ? dwSize : 0;
 }
 
 // Download and validate a signed file. The file must have a corresponding '.sig' on the server.
-DWORD DownloadSignedFile(const char* url, const char* file, HWND hProgressDialog)
+DWORD DownloadSignedFile(const char* url, const char* file, HWND hProgressDialog, BOOL bPromptOnError)
 {
 	char* url_sig = NULL;
 	BYTE *buf = NULL, *sig = NULL;
@@ -433,8 +424,7 @@ DWORD DownloadSignedFile(const char* url, const char* file, HWND hProgressDialog
 	DWORD ret = 0;
 	HANDLE hFile = INVALID_HANDLE_VALUE;
 
-	if (url == NULL)
-		goto out;
+	assert(url != NULL);
 
 	url_sig = malloc(strlen(url) + 5);
 	if (url_sig == NULL) {
@@ -451,6 +441,7 @@ DWORD DownloadSignedFile(const char* url, const char* file, HWND hProgressDialog
 	if ((sig_len != RSA_SIGNATURE_SIZE) || (!ValidateOpensslSignature(buf, buf_len, sig, sig_len))) {
 		uprintf("FATAL: Server signature is invalid!");
 		DownloadStatus = 403;	// Forbidden
+		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_BAD_SIGNATURE);
 		goto out;
 	}
 
@@ -473,6 +464,14 @@ DWORD DownloadSignedFile(const char* url, const char* file, HWND hProgressDialog
 	DownloadStatus = 200;	// Full content
 
 out:
+	if (hProgressDialog != NULL)
+		SendMessage(hProgressDialog, UM_PROGRESS_EXIT, (WPARAM)ret, 0);
+	if ((bPromptOnError) && (DownloadStatus != 200)) {
+		PrintInfo(0, MSG_242);
+		SetLastError(error_code);
+		MessageBoxExU(hMainDialog, IS_ERROR(FormatStatus) ? StrError(FormatStatus, FALSE) : WinInetErrorString(),
+			lmprintf(MSG_044), MB_OK | MB_ICONERROR | MB_IS_RTL, selected_langid);
+	}
 	safe_closehandle(hFile);
 	free(url_sig);
 	free(buf);
@@ -481,19 +480,27 @@ out:
 }
 
 /* Threaded download */
-static const char *_url, *_file;
-static HWND _hProgressDialog;
-static DWORD WINAPI _DownloadSignedFileThread(LPVOID param)
+typedef struct {
+	const char* url;
+	const char* file;
+	HWND hProgressDialog;
+	BOOL bPromptOnError;
+} DownloadSignedFileThreadArgs;
+
+static DWORD WINAPI DownloadSignedFileThread(LPVOID param)
 {
-	ExitThread(DownloadSignedFile(_url, _file, _hProgressDialog) != 0);
+	DownloadSignedFileThreadArgs* args = (DownloadSignedFileThreadArgs*)param;
+	ExitThread(DownloadSignedFile(args->url, args->file, args->hProgressDialog, args->bPromptOnError));
 }
 
-HANDLE DownloadSignedFileThreaded(const char* url, const char* file, HWND hProgressDialog)
+HANDLE DownloadSignedFileThreaded(const char* url, const char* file, HWND hProgressDialog, BOOL bPromptOnError)
 {
-	_url = url;
-	_file = file;
-	_hProgressDialog = hProgressDialog;
-	return CreateThread(NULL, 0, _DownloadSignedFileThread, NULL, 0, NULL);
+	static DownloadSignedFileThreadArgs args;
+	args.url = url;
+	args.file = file;
+	args.hProgressDialog = hProgressDialog;
+	args.bPromptOnError = bPromptOnError;
+	return CreateThread(NULL, 0, DownloadSignedFileThread, &args, 0, NULL);
 }
 
 static __inline uint64_t to_uint64_t(uint16_t x[4]) {

@@ -387,6 +387,7 @@ t MSG_169 "Create an extra hidden partition and try to align partitions boundari
 	"This can improve boot detection for older BIOSes"
 t MSG_170 "Enable the listing of USB Hard Drive enclosures. USE AT YOUR OWN RISKS!!!"
 t MSG_171 "Start the formatting operation.\nThis will DESTROY any data on the target!"
+t MSG_172 "Invalid download signature"
 t MSG_173 "Click to select..."
 # The following will appear in the about dialog
 t MSG_174 "Rufus - The Reliable USB Formatting Utility"

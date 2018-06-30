@@ -31,6 +31,7 @@
 #include <stddef.h>
 #include <ctype.h>
 #include <locale.h>
+#include <assert.h>
 
 #include "rufus.h"
 #include "missing.h"
@@ -1957,8 +1958,8 @@ DWORD WINAPI FormatThread(void* param)
 			// All good
 		} else if (tt == TT_UEFI) {
 			// For once, no need to do anything - just check our sanity
+			assert((bt == BT_IMAGE) && IS_EFI_BOOTABLE(img_report) && (fs <= FS_NTFS));
 			if ( (bt != BT_IMAGE) || !IS_EFI_BOOTABLE(img_report) || (fs > FS_NTFS) ) {
-				uprintf("Spock gone crazy error in %s:%d", __FILE__, __LINE__);
 				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_INSTALL_FAILURE;
 				goto out;
 			}

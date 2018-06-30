@@ -35,6 +35,7 @@
 #include <dbt.h>
 #include <io.h>
 #include <getopt.h>
+#include <assert.h>
 
 #include "rufus.h"
 #include "missing.h"
@@ -1459,11 +1460,9 @@ static BOOL BootCheck(void)
 	safe_free(grub2_buf);
 	if (bt == BT_IMAGE) {
 		// We should never be there
-		if (image_path == NULL) {
-			uprintf("Spock gone crazy error in %s:%d", __FILE__, __LINE__);
-			MessageBoxExU(hMainDialog, "image_path is NULL. Please report this error to the author of this application", "Logic error", MB_OK|MB_ICONERROR|MB_IS_RTL, selected_langid);
+		assert(image_path != NULL);
+		if (image_path == NULL)
 			return FALSE;
-		}
 		if ((size_check) && (img_report.projected_size > (uint64_t)SelectedDrive.DiskSize)) {
 			// This ISO image is too big for the selected target
 			MessageBoxExU(hMainDialog, lmprintf(MSG_089), lmprintf(MSG_088), MB_OK|MB_ICONERROR|MB_IS_RTL, selected_langid);
@@ -1566,9 +1565,7 @@ static BOOL BootCheck(void)
 					IGNORE_RETVAL(_mkdir(tmp));
 					IGNORE_RETVAL(_chdir(tmp));
 					static_sprintf(tmp, "%s/%s-%s/%s", FILES_URL, grub, img_report.grub2_version, core_img);
-					PromptOnError = FALSE;
-					grub2_len = (long)DownloadSignedFile(tmp, core_img, hMainDialog);
-					PromptOnError = TRUE;
+					grub2_len = (long)DownloadSignedFile(tmp, core_img, hMainDialog, FALSE);
 					if ((grub2_len == 0) && (DownloadStatus == 404)) {
 						// Couldn't locate the file on the server => try to download without the version extra
 						uprintf("Extended version was not found, trying main version...");
@@ -1577,9 +1574,7 @@ static BOOL BootCheck(void)
 						for (i = 0; ((tmp2[i] >= '0') && (tmp2[i] <= '9')) || (tmp2[i] == '.'); i++);
 						tmp2[i] = 0;
 						static_sprintf(tmp, "%s/%s-%s/%s", FILES_URL, grub, tmp2, core_img);
-						PromptOnError = FALSE;
-						grub2_len = (long)DownloadSignedFile(tmp, core_img, hMainDialog);
-						PromptOnError = TRUE;
+						grub2_len = (long)DownloadSignedFile(tmp, core_img, hMainDialog, FALSE);
 						static_sprintf(tmp, "%s/%s-%s/%s", FILES_URL, grub, img_report.grub2_version, core_img);
 					}
 					if (grub2_len <= 0) {
@@ -1624,7 +1619,7 @@ static BOOL BootCheck(void)
 								static_sprintf(tmp, "%s-%s", syslinux, embedded_sl_version_str[0]);
 								IGNORE_RETVAL(_mkdir(tmp));
 								static_sprintf(tmp, "%s/%s-%s/%s", FILES_URL, syslinux, embedded_sl_version_str[0], old_c32_name[i]);
-								len = DownloadSignedFile(tmp, &tmp[sizeof(FILES_URL)], hMainDialog);
+								len = DownloadSignedFile(tmp, &tmp[sizeof(FILES_URL)], hMainDialog, TRUE);
 								if (len == 0) {
 									uprintf("Could not download file - cancelling");
 									return FALSE;
@@ -1671,15 +1666,15 @@ static BOOL BootCheck(void)
 						}
 						static_sprintf(tmp, "%s/%s-%s%s/%s.%s", FILES_URL, syslinux, img_report.sl_version_str,
 							img_report.sl_version_ext, ldlinux, ldlinux_ext[i]);
-						PromptOnError = (*img_report.sl_version_ext == 0);
-						syslinux_ldlinux_len[i] = DownloadSignedFile(tmp, &tmp[sizeof(FILES_URL)], hMainDialog);
-						PromptOnError = TRUE;
+						syslinux_ldlinux_len[i] = DownloadSignedFile(tmp, &tmp[sizeof(FILES_URL)],
+							hMainDialog, (*img_report.sl_version_ext == 0));
 						if ((syslinux_ldlinux_len[i] == 0) && (DownloadStatus == 404) && (*img_report.sl_version_ext != 0)) {
 							// Couldn't locate the file on the server => try to download without the version extra
 							uprintf("Extended version was not found, trying main version...");
 							static_sprintf(tmp, "%s/%s-%s/%s.%s", FILES_URL, syslinux, img_report.sl_version_str,
 								ldlinux, ldlinux_ext[i]);
-							syslinux_ldlinux_len[i] = DownloadSignedFile(tmp, &tmp[sizeof(FILES_URL)], hMainDialog);
+							syslinux_ldlinux_len[i] = DownloadSignedFile(tmp, &tmp[sizeof(FILES_URL)],
+								hMainDialog, (*img_report.sl_version_ext == 0));
 							if (syslinux_ldlinux_len[i] != 0) {
 								// Duplicate the file so that the user won't be prompted to download again
 								static_sprintf(tmp, "%s-%s\\%s.%s", syslinux, img_report.sl_version_str, ldlinux, ldlinux_ext[i]);
@@ -1722,7 +1717,7 @@ static BOOL BootCheck(void)
 				static_sprintf(tmp, "%s-%s", syslinux, embedded_sl_version_str[1]);
 				IGNORE_RETVAL(_mkdir(tmp));
 				static_sprintf(tmp, "%s/%s-%s/%s.%s", FILES_URL, syslinux, embedded_sl_version_str[1], ldlinux, ldlinux_ext[2]);
-				if (DownloadSignedFile(tmp, &tmp[sizeof(FILES_URL)], hMainDialog) == 0)
+				if (DownloadSignedFile(tmp, &tmp[sizeof(FILES_URL)], hMainDialog, TRUE) == 0)
 					return FALSE;
 			}
 		}
@@ -1752,7 +1747,7 @@ static BOOL BootCheck(void)
 				static_sprintf(tmp, "grub4dos-%s", GRUB4DOS_VERSION);
 				IGNORE_RETVAL(_mkdir(tmp));
 				static_sprintf(tmp, "%s/grub4dos-%s/grldr", FILES_URL, GRUB4DOS_VERSION);
-				if (DownloadSignedFile(tmp, &tmp[sizeof(FILES_URL)], hMainDialog) == 0)
+				if (DownloadSignedFile(tmp, &tmp[sizeof(FILES_URL)], hMainDialog, TRUE) == 0)
 					return FALSE;
 			}
 		}

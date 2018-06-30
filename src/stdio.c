@@ -315,6 +315,8 @@ const char* _StrError(DWORD error_code)
 		return lmprintf(MSG_078);
 	case ERROR_NOT_READY:
 		return lmprintf(MSG_079);
+	case ERROR_BAD_SIGNATURE:
+		return lmprintf(MSG_172);
 	default:
 		SetLastError(error_code);
 		return WindowsErrorString();
