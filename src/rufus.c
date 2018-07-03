@@ -1443,11 +1443,12 @@ out:
 	ExitThread(0);
 }
 
-static BOOL BootCheck(void)
+static DWORD WINAPI BootCheckThread(LPVOID param)
 {
 	int i, r;
 	FILE *fd;
 	DWORD len;
+	WPARAM ret = -1;
 	BOOL in_files_dir = FALSE;
 	const char* grub = "grub";
 	const char* core_img = "core.img";
@@ -1458,32 +1459,42 @@ static BOOL BootCheck(void)
 
 	syslinux_ldlinux_len[0] = 0; syslinux_ldlinux_len[1] = 0;
 	safe_free(grub2_buf);
+
+	if (ComboBox_GetCurSel(hDeviceList) == CB_ERR)
+		goto out;
+
+	if ((zero_drive) || (bt == BT_NON_BOOTABLE)) {
+		// Nothing to check
+		ret = 0;
+		goto out;
+	}
+
 	if (bt == BT_IMAGE) {
-		// We should never be there
 		assert(image_path != NULL);
 		if (image_path == NULL)
-			return FALSE;
+			goto out;
 		if ((size_check) && (img_report.projected_size > (uint64_t)SelectedDrive.DiskSize)) {
 			// This ISO image is too big for the selected target
 			MessageBoxExU(hMainDialog, lmprintf(MSG_089), lmprintf(MSG_088), MB_OK|MB_ICONERROR|MB_IS_RTL, selected_langid);
-			return FALSE;
+			goto out;
 		}
 		if (IS_DD_BOOTABLE(img_report) && !img_report.is_iso) {
 			// Pure DD images are fine at this stage
-			return TRUE;
+			ret = 0;
+			goto out;
 		}
 		if ((display_togo_option) && (ComboBox_GetCurSel(GetDlgItem(hMainDialog, IDC_IMAGE_OPTION)) == 1)) {
 			if (fs != FS_NTFS) {
 				// Windows To Go only works for NTFS
 				MessageBoxExU(hMainDialog, lmprintf(MSG_097, "Windows To Go"), lmprintf(MSG_092), MB_OK|MB_ICONERROR|MB_IS_RTL, selected_langid);
-				return FALSE;
+				goto out;
 			}
 			if (SelectedDrive.MediaType != FixedMedia) {
 				if ((tt == TT_UEFI) && (pt == PARTITION_STYLE_GPT) && (nWindowsBuildNumber < 15000)) {
 					// Up to Windows 10 Creators Update, we were screwed, since we need access to 2 partitions at the same time.
 					// Thankfully, the newer Windows allow mounting multiple partitions on the same REMOVABLE drive.
 					MessageBoxExU(hMainDialog, lmprintf(MSG_198), lmprintf(MSG_190), MB_OK|MB_ICONERROR|MB_IS_RTL, selected_langid);
-					return FALSE;
+					goto out;
 				}
 			}
 			// If multiple versions are available, asks the user to select one before we commit to format the drive
@@ -1492,7 +1503,7 @@ static BOOL BootCheck(void)
 				MessageBoxExU(hMainDialog, lmprintf(MSG_073), lmprintf(MSG_291), MB_OK | MB_ICONERROR | MB_IS_RTL, selected_langid);
 				// fall through
 			case -2:
-				return FALSE;
+				goto out;
 			default:
 				break;
 			}
@@ -1500,13 +1511,13 @@ static BOOL BootCheck(void)
 			if (!IS_EFI_BOOTABLE(img_report)) {
 				// Unsupported ISO
 				MessageBoxExU(hMainDialog, lmprintf(MSG_091), lmprintf(MSG_090), MB_OK|MB_ICONERROR|MB_IS_RTL, selected_langid);
-				return FALSE;
+				goto out;
 			}
 			if (HAS_WIN7_EFI(img_report) && (!WimExtractCheck())) {
 				// Your platform cannot extract files from WIM archives => download 7-zip?
 				if (MessageBoxExU(hMainDialog, lmprintf(MSG_102), lmprintf(MSG_101), MB_YESNO|MB_ICONERROR|MB_IS_RTL, selected_langid) == IDYES)
 					ShellExecuteA(hMainDialog, "open", SEVENZIP_URL, NULL, NULL, SW_SHOWNORMAL);
-				return FALSE;
+				goto out;
 			}
 		} else if ( ((fs == FS_NTFS) && !HAS_WINDOWS(img_report) && !HAS_GRUB(img_report) && 
 					 (!HAS_SYSLINUX(img_report) || (SL_MAJOR(img_report.sl_version) <= 5)))
@@ -1515,16 +1526,16 @@ static BOOL BootCheck(void)
 				 || ((IS_FAT(fs)) && (HAS_WINDOWS(img_report) || HAS_INSTALL_WIM(img_report)) && (!allow_dual_uefi_bios)) ) {
 			// Incompatible FS and ISO
 			MessageBoxExU(hMainDialog, lmprintf(MSG_096), lmprintf(MSG_092), MB_OK|MB_ICONERROR|MB_IS_RTL, selected_langid);
-			return FALSE;
+			goto out;
 		} else if ((fs == FS_FAT16) && HAS_KOLIBRIOS(img_report)) {
 			// KolibriOS doesn't support FAT16
 			MessageBoxExU(hMainDialog, lmprintf(MSG_189), lmprintf(MSG_099), MB_OK|MB_ICONERROR|MB_IS_RTL, selected_langid);
-			return FALSE;
+			goto out;
 		}
 		if ((IS_FAT(fs)) && (img_report.has_4GB_file)) {
 			// This ISO image contains a file larger than 4GB file (FAT32)
 			MessageBoxExU(hMainDialog, lmprintf(MSG_100), lmprintf(MSG_099), MB_OK|MB_ICONERROR|MB_IS_RTL, selected_langid);
-			return FALSE;
+			goto out;
 		}
 
 		// If the selected target doesn't include include BIOS, skip file downloads for GRUB/Syslinux
@@ -1559,7 +1570,7 @@ static BOOL BootCheck(void)
 				r = MessageBoxExU(hMainDialog, lmprintf(MSG_116, img_report.grub2_version, GRUB2_PACKAGE_VERSION),
 					lmprintf(MSG_115), MB_YESNOCANCEL|MB_ICONWARNING|MB_IS_RTL, selected_langid);
 				if (r == IDCANCEL)
-					return FALSE;
+					goto out;
 				else if (r == IDYES) {
 					static_sprintf(tmp, "%s-%s", grub, img_report.grub2_version);
 					IGNORE_RETVAL(_mkdir(tmp));
@@ -1622,7 +1633,7 @@ static BOOL BootCheck(void)
 								len = DownloadSignedFile(tmp, &tmp[sizeof(FILES_URL)], hMainDialog, TRUE);
 								if (len == 0) {
 									uprintf("Could not download file - cancelling");
-									return FALSE;
+									goto out;
 								}
 								use_own_c32[i] = TRUE;
 							}
@@ -1655,7 +1666,7 @@ static BOOL BootCheck(void)
 						embedded_sl_version_str[1], embedded_sl_version_ext[1]),
 						lmprintf(MSG_115), MB_YESNO|MB_ICONWARNING|MB_IS_RTL, selected_langid);
 					if (r != IDYES)
-						return FALSE;
+						goto out;
 					for (i=0; i<2; i++) {
 						static_sprintf(tmp, "%s-%s", syslinux, img_report.sl_version_str);
 						IGNORE_RETVAL(_mkdir(tmp));
@@ -1689,7 +1700,7 @@ static BOOL BootCheck(void)
 								uprintf("Could not download the file - will try to use embedded %s version instead", img_report.sl_version_str);
 							} else {
 								uprintf("Could not download the file - cancelling");
-								return FALSE;
+								goto out;
 							}
 						}
 					}
@@ -1712,20 +1723,20 @@ static BOOL BootCheck(void)
 			r = MessageBoxExU(hMainDialog, lmprintf(MSG_104, "Syslinux v5.0", tmp, "Syslinux v5+", tmp),
 				lmprintf(MSG_103, tmp), MB_YESNOCANCEL|MB_ICONWARNING|MB_IS_RTL, selected_langid);
 			if (r == IDCANCEL)
-				return FALSE;
+				goto out;
 			if (r == IDYES) {
 				static_sprintf(tmp, "%s-%s", syslinux, embedded_sl_version_str[1]);
 				IGNORE_RETVAL(_mkdir(tmp));
 				static_sprintf(tmp, "%s/%s-%s/%s.%s", FILES_URL, syslinux, embedded_sl_version_str[1], ldlinux, ldlinux_ext[2]);
 				if (DownloadSignedFile(tmp, &tmp[sizeof(FILES_URL)], hMainDialog, TRUE) == 0)
-					return FALSE;
+					goto out;
 			}
 		}
 	} else if (bt == BT_MSDOS) {
 		if ((size_check) && (ComboBox_GetItemData(hClusterSize, ComboBox_GetCurSel(hClusterSize)) >= 65536)) {
 			// MS-DOS cannot boot from a drive using a 64 kilobytes Cluster size
 			MessageBoxExU(hMainDialog, lmprintf(MSG_110), lmprintf(MSG_111), MB_OK|MB_ICONERROR|MB_IS_RTL, selected_langid);
-			return FALSE;
+			goto out;
 		}
 	} else if (bt == BT_GRUB4DOS) {
 		IGNORE_RETVAL(_chdirU(app_dir));
@@ -1742,13 +1753,13 @@ static BOOL BootCheck(void)
 			r = MessageBoxExU(hMainDialog, lmprintf(MSG_104, "Grub4DOS 0.4", tmp, "Grub4DOS", tmp),
 				lmprintf(MSG_103, tmp), MB_YESNOCANCEL|MB_ICONWARNING|MB_IS_RTL, selected_langid);
 			if (r == IDCANCEL)
-				return FALSE;
+				goto out;
 			if (r == IDYES) {
 				static_sprintf(tmp, "grub4dos-%s", GRUB4DOS_VERSION);
 				IGNORE_RETVAL(_mkdir(tmp));
 				static_sprintf(tmp, "%s/grub4dos-%s/grldr", FILES_URL, GRUB4DOS_VERSION);
 				if (DownloadSignedFile(tmp, &tmp[sizeof(FILES_URL)], hMainDialog, TRUE) == 0)
-					return FALSE;
+					goto out;
 			}
 		}
 	}
@@ -1758,10 +1769,14 @@ uefi_target:
 		fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
 		if (fs != FS_NTFS) {
 			MessageBoxExU(hMainDialog, lmprintf(MSG_097, "UEFI:NTFS"), lmprintf(MSG_092), MB_OK|MB_ICONERROR|MB_IS_RTL, selected_langid);
-			return FALSE;
+			goto out;
 		}
 	}
-	return TRUE;
+	ret = 0;
+
+out:
+	PostMessage(hMainDialog, UM_FORMAT_START, ret, 0);
+	return (DWORD)ret;
 }
 
 static __inline const char* IsAlphaOrBeta(void)
@@ -3254,86 +3269,13 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			SetTaskbarProgressValue(0, MAX_PROGRESS);
 			SendMessage(hProgress, PBM_SETPOS, 0, 0);
 			selection_default = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
-			nDeviceIndex = ComboBox_GetCurSel(hDeviceList);
-			if (nDeviceIndex != CB_ERR) {
-				if (!zero_drive) {
-					if ((bt != BT_NON_BOOTABLE) && (!BootCheck()))
-						goto aborted_start;
-
-					// Display a warning about UDF formatting times
-					if (fs == FS_UDF) {
-						dur_secs = (uint32_t)(((double)SelectedDrive.DiskSize) / 1073741824.0f / UDF_FORMAT_SPEED);
-						if (dur_secs > UDF_FORMAT_WARN) {
-							dur_mins = dur_secs / 60;
-							dur_secs -= dur_mins * 60;
-							MessageBoxExU(hMainDialog, lmprintf(MSG_112, dur_mins, dur_secs), lmprintf(MSG_113),
-								MB_OK | MB_ICONASTERISK | MB_IS_RTL, selected_langid);
-						} else {
-							dur_secs = 0;
-							dur_mins = 0;
-						}
-					}
-
-					if ((bt == BT_IMAGE) && IS_DD_BOOTABLE(img_report)) {
-						if (img_report.is_iso) {
-							// Ask users how they want to write ISOHybrid images
-							char* iso_image = lmprintf(MSG_036);
-							char* dd_image = lmprintf(MSG_095);
-							char* choices[2] = { lmprintf(MSG_276, iso_image), lmprintf(MSG_277, dd_image) };
-							i = SelectionDialog(lmprintf(MSG_274), lmprintf(MSG_275, iso_image, dd_image, iso_image, dd_image),
-								choices, 2);
-							if (i < 0)	// Cancel
-								goto aborted_start;
-							else if (i == 2)
-								write_as_image = TRUE;
-						} else {
-							write_as_image = TRUE;
-						}
-					}
-				}
-
-				if (!CheckDriveAccess(2000))
-					goto aborted_start;
-
-				GetWindowTextU(hDeviceList, tmp, ARRAYSIZE(tmp));
-				if (MessageBoxExU(hMainDialog, lmprintf(MSG_003, tmp),
-					APPLICATION_NAME, MB_OKCANCEL|MB_ICONWARNING|MB_IS_RTL, selected_langid) == IDCANCEL) 
-					goto aborted_start;
-				if ((SelectedDrive.nPartitions > 1) && (MessageBoxExU(hMainDialog, lmprintf(MSG_093),
-					lmprintf(MSG_094), MB_OKCANCEL|MB_ICONWARNING|MB_IS_RTL, selected_langid) == IDCANCEL))
-					goto aborted_start;
-				if ((!zero_drive) && (bt != BT_NON_BOOTABLE) && (SelectedDrive.SectorSize != 512) &&
-					(MessageBoxExU(hMainDialog, lmprintf(MSG_196, SelectedDrive.SectorSize),
-						lmprintf(MSG_197), MB_OKCANCEL|MB_ICONWARNING|MB_IS_RTL, selected_langid) == IDCANCEL))
-					goto aborted_start;
-
-				DeviceNum = (DWORD)ComboBox_GetItemData(hDeviceList, nDeviceIndex);
-				InitProgress(zero_drive || write_as_image);
-				format_thid = CreateThread(NULL, 0, FormatThread, (LPVOID)(uintptr_t)DeviceNum, 0, NULL);
-				if (format_thid == NULL) {
-					uprintf("Unable to start formatting thread");
-					FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_START_THREAD);
-					PostMessage(hMainDialog, UM_FORMAT_COMPLETED, (WPARAM)FALSE, 0);
-				} else {
-					uprintf("\r\nFormat operation started");
-					PrintInfo(0, -1);
-					timer = 0;
-					static_sprintf(szTimer, "00:00:00");
-					SendMessageA(hStatus, SB_SETTEXTA, SBT_OWNERDRAW | SB_SECTION_RIGHT, (LPARAM)szTimer);
-					SetTimer(hMainDialog, TID_APP_TIMER, 1000, ClockTimer);
-					// Set focus to the Cancel button
-					SendMessage(hMainDialog, WM_NEXTDLGCTL, (WPARAM)GetDlgItem(hMainDialog, IDCANCEL), TRUE);
-				}
+			// Create a thread to validate options and download files as needed (so that we can update the UI).
+			// On exit, this thread sends message UM_FORMAT_START back to this dialog.
+			if (CreateThread(NULL, 0, BootCheckThread, NULL, 0, NULL) == NULL) {
+				uprintf("Unable to start boot check thread");
+				FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_CANT_START_THREAD);
+				PostMessage(hMainDialog, UM_FORMAT_COMPLETED, (WPARAM)FALSE, 0);
 			}
-			if (format_thid != NULL)
-				break;
-		aborted_start:
-			format_op_in_progress = FALSE;
-			EnableControls(TRUE);
-			zero_drive = FALSE;
-			if (queued_hotplug_event)
-				SendMessage(hDlg, UM_MEDIA_CHANGE, 0, 0);
-			EnableWindow(GetDlgItem(hDlg, IDCANCEL), TRUE);
 			break;
 		case IDC_LANG:
 			// Show the language menu such that it doesn't overlap the button
@@ -3608,6 +3550,87 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		Notification(MSG_INFO, NULL, lmprintf(MSG_243), lmprintf(MSG_247));
 		// Need to manually set focus back to "Check Now" for tabbing to work
 		SendMessage(hUpdatesDlg, WM_NEXTDLGCTL, (WPARAM)GetDlgItem(hUpdatesDlg, IDC_CHECK_NOW), TRUE);
+		break;
+
+	case UM_FORMAT_START:
+		if (wParam != 0)
+			goto aborted_start;
+
+		if (!zero_drive) {
+			// Display a warning about UDF formatting times
+			if (fs == FS_UDF) {
+				dur_secs = (uint32_t)(((double)SelectedDrive.DiskSize) / 1073741824.0f / UDF_FORMAT_SPEED);
+				if (dur_secs > UDF_FORMAT_WARN) {
+					dur_mins = dur_secs / 60;
+					dur_secs -= dur_mins * 60;
+					MessageBoxExU(hMainDialog, lmprintf(MSG_112, dur_mins, dur_secs), lmprintf(MSG_113),
+						MB_OK | MB_ICONASTERISK | MB_IS_RTL, selected_langid);
+				} else {
+					dur_secs = 0;
+					dur_mins = 0;
+				}
+			}
+
+			if ((bt == BT_IMAGE) && IS_DD_BOOTABLE(img_report)) {
+				if (img_report.is_iso) {
+					// Ask users how they want to write ISOHybrid images
+					char* iso_image = lmprintf(MSG_036);
+					char* dd_image = lmprintf(MSG_095);
+					char* choices[2] = { lmprintf(MSG_276, iso_image), lmprintf(MSG_277, dd_image) };
+					i = SelectionDialog(lmprintf(MSG_274), lmprintf(MSG_275, iso_image, dd_image, iso_image, dd_image),
+						choices, 2);
+					if (i < 0)	// Cancel
+						goto aborted_start;
+					else if (i == 2)
+						write_as_image = TRUE;
+				} else {
+					write_as_image = TRUE;
+				}
+			}
+		}
+
+		if (!CheckDriveAccess(2000))
+			goto aborted_start;
+
+		GetWindowTextU(hDeviceList, tmp, ARRAYSIZE(tmp));
+		if (MessageBoxExU(hMainDialog, lmprintf(MSG_003, tmp),
+			APPLICATION_NAME, MB_OKCANCEL | MB_ICONWARNING | MB_IS_RTL, selected_langid) == IDCANCEL)
+			goto aborted_start;
+		if ((SelectedDrive.nPartitions > 1) && (MessageBoxExU(hMainDialog, lmprintf(MSG_093),
+			lmprintf(MSG_094), MB_OKCANCEL | MB_ICONWARNING | MB_IS_RTL, selected_langid) == IDCANCEL))
+			goto aborted_start;
+		if ((!zero_drive) && (bt != BT_NON_BOOTABLE) && (SelectedDrive.SectorSize != 512) &&
+			(MessageBoxExU(hMainDialog, lmprintf(MSG_196, SelectedDrive.SectorSize),
+				lmprintf(MSG_197), MB_OKCANCEL | MB_ICONWARNING | MB_IS_RTL, selected_langid) == IDCANCEL))
+			goto aborted_start;
+
+		nDeviceIndex = ComboBox_GetCurSel(hDeviceList);
+		DeviceNum = (DWORD)ComboBox_GetItemData(hDeviceList, nDeviceIndex);
+		InitProgress(zero_drive || write_as_image);
+		format_thid = CreateThread(NULL, 0, FormatThread, (LPVOID)(uintptr_t)DeviceNum, 0, NULL);
+		if (format_thid == NULL) {
+			uprintf("Unable to start formatting thread");
+			FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_CANT_START_THREAD);
+			PostMessage(hMainDialog, UM_FORMAT_COMPLETED, (WPARAM)FALSE, 0);
+		} else {
+			uprintf("\r\nFormat operation started");
+			PrintInfo(0, -1);
+			timer = 0;
+			static_sprintf(szTimer, "00:00:00");
+			SendMessageA(hStatus, SB_SETTEXTA, SBT_OWNERDRAW | SB_SECTION_RIGHT, (LPARAM)szTimer);
+			SetTimer(hMainDialog, TID_APP_TIMER, 1000, ClockTimer);
+			// Set focus to the Cancel button
+			SendMessage(hMainDialog, WM_NEXTDLGCTL, (WPARAM)GetDlgItem(hMainDialog, IDCANCEL), TRUE);
+		}
+		if (format_thid != NULL)
+			break;
+	aborted_start:
+		format_op_in_progress = FALSE;
+		EnableControls(TRUE);
+		zero_drive = FALSE;
+		if (queued_hotplug_event)
+			SendMessage(hDlg, UM_MEDIA_CHANGE, 0, 0);
+		EnableWindow(GetDlgItem(hDlg, IDCANCEL), TRUE);
 		break;
 
 	case UM_FORMAT_COMPLETED:

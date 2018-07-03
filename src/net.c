@@ -274,9 +274,10 @@ static DWORD DownloadToFileOrBuffer(const char* url, const char* file, BYTE** bu
 
 	short_name = (file != NULL) ? PathFindFileNameU(file) : PathFindFileNameU(url);
 
-	if (hProgressDialog != NULL)
+	if (hProgressDialog != NULL) {
 		PrintInfo(0, MSG_085, short_name);
-	uprintf("Downloading %s", url);
+		uprintf("Downloading %s", url);
+	}
 
 	if ( (!pfInternetCrackUrlA(url, (DWORD)safe_strlen(url), 0, &UrlParts))
 	  || (UrlParts.lpszHostName == NULL) || (UrlParts.lpszUrlPath == NULL)) {
@@ -337,7 +338,8 @@ static DWORD DownloadToFileOrBuffer(const char* url, const char* file, BYTE** bu
 		uprintf("Unable to retrieve file length: %s", WinInetErrorString());
 		goto out;
 	}
-	uprintf("File length: %d bytes", dwTotalSize);
+	if (hProgressDialog != NULL)
+		uprintf("File length: %d bytes", dwTotalSize);
 
 	if (file != NULL) {
 		hFile = CreateFileU(file, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
@@ -390,8 +392,8 @@ static DWORD DownloadToFileOrBuffer(const char* url, const char* file, BYTE** bu
 	} else {
 		DownloadStatus = 200;
 		r = TRUE;
-		uprintf("Successfully downloaded '%s'", short_name);
 		if (hProgressDialog != NULL) {
+			uprintf("Successfully downloaded '%s'", short_name);
 			SendMessage(hProgressBar, PBM_SETPOS, (WPARAM)MAX_PROGRESS, 0);
 			PrintInfo(0, MSG_241, 100.0f);
 		}
@@ -439,13 +441,13 @@ DWORD DownloadSignedFile(const char* url, const char* file, HWND hProgressDialog
 		goto out;
 	sig_len = DownloadToFileOrBuffer(url_sig, NULL, &sig, NULL);
 	if ((sig_len != RSA_SIGNATURE_SIZE) || (!ValidateOpensslSignature(buf, buf_len, sig, sig_len))) {
-		uprintf("FATAL: Server signature is invalid!");
+		uprintf("FATAL: Download signature is invalid ✗");
 		DownloadStatus = 403;	// Forbidden
 		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_BAD_SIGNATURE);
 		goto out;
 	}
 
-	uprintf("Download signature is valid");
+	uprintf("Download signature is valid ✓");
 	DownloadStatus = 206;	// Partial content
 	hFile = CreateFileU(file, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (hFile == INVALID_HANDLE_VALUE) {
