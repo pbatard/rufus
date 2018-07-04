@@ -1345,14 +1345,13 @@ static void UpdateImage(void)
 		}
 	}
 
-	if (image_path != NULL) {
-		ComboBox_DeleteString(hBootType, index);
-		ComboBox_InsertStringU(hBootType, index, short_image_path);
-		ComboBox_SetItemData(hBootType, index, BT_IMAGE);
-		IGNORE_RETVAL(ComboBox_SetCurSel(hBootType, index));
-		bt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
-		SetBootTypeDropdownWidth();
-	}
+	ComboBox_DeleteString(hBootType, index);
+	ComboBox_InsertStringU(hBootType, index, 
+		(image_path == NULL) ? lmprintf(MSG_281, lmprintf(MSG_280)) : short_image_path);
+	ComboBox_SetItemData(hBootType, index, BT_IMAGE);
+	IGNORE_RETVAL(ComboBox_SetCurSel(hBootType, index));
+	bt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
+	SetBootTypeDropdownWidth();
 }
 
 // The scanning process can be blocking for message processing => use a thread
@@ -1362,6 +1361,7 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 
 	if (image_path == NULL)
 		goto out;
+	format_op_in_progress = TRUE;
 	PrintInfoDebug(0, MSG_202);
 	user_notified = FALSE;
 	EnableControls(FALSE);
@@ -1369,15 +1369,16 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 	img_report.is_iso = (BOOLEAN)ExtractISO(image_path, "", TRUE);
 	img_report.is_bootable_img = (BOOLEAN)IsBootableImage(image_path);
 
-	if ((img_report.image_size == 0) || (!img_report.is_iso && !img_report.is_bootable_img)) {
+	if (IS_ERROR(FormatStatus) || (img_report.image_size == 0) || (!img_report.is_iso && !img_report.is_bootable_img)) {
 		// Failed to scan image
 		SendMessage(hMainDialog, UM_PROGRESS_EXIT, 0, 0);
 		safe_free(image_path);
-		EnableControls(TRUE);
+		UpdateImage();
 		SetMBRProps();
 		PopulateProperties();
 		PrintInfoDebug(0, MSG_203);
 		PrintStatus(0, MSG_203);
+		EnableControls(TRUE);
 		goto out;
 	}
 
@@ -1439,10 +1440,12 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 
 out:
 	dont_display_image_name = FALSE;
+	format_op_in_progress = FALSE;
 	PrintInfo(0, MSG_210);
 	ExitThread(0);
 }
 
+// Likewise, boot check will block message processing => use a thread
 static DWORD WINAPI BootCheckThread(LPVOID param)
 {
 	int i, r;
@@ -1776,7 +1779,7 @@ uefi_target:
 
 out:
 	PostMessage(hMainDialog, UM_FORMAT_START, ret, 0);
-	return (DWORD)ret;
+	ExitThread((DWORD)ret);
 }
 
 static __inline const char* IsAlphaOrBeta(void)
@@ -3035,6 +3038,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				// User might be trying to cancel during preliminary checks
 				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANCELLED;
 				PrintInfo(0, MSG_201);
+				EnableWindow(GetDlgItem(hDlg, IDCANCEL), TRUE);
 				return (INT_PTR)TRUE;
 			}
 			if (ulRegister != 0)
@@ -3232,6 +3236,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				}
 			}
 			FormatStatus = 0;
+			format_op_in_progress = FALSE;
 			if (CreateThread(NULL, 0, ISOScanThread, NULL, 0, NULL) == NULL) {
 				uprintf("Unable to start ISO scanning thread");
 				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_START_THREAD);
