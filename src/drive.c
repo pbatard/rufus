@@ -25,6 +25,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
+#include <assert.h>
 
 #include "rufus.h"
 #include "missing.h"
@@ -109,11 +110,9 @@ BOOL GetAutoMount(BOOL* enabled)
  * clear the MBR of!), so we mitigate the risk by forcing our indexes to belong to
  * the specific range [DRIVE_INDEX_MIN; DRIVE_INDEX_MAX].
  */
-#define CheckDriveIndex(DriveIndex) do { \
-	if ((DriveIndex < DRIVE_INDEX_MIN) || (DriveIndex > DRIVE_INDEX_MAX)) { \
-		uprintf("ERROR: Bad index value %d. Please check the code!", DriveIndex); \
-		goto out; \
-	} \
+#define CheckDriveIndex(DriveIndex) do {                                            \
+	assert((DriveIndex >= DRIVE_INDEX_MIN) && (DriveIndex <= DRIVE_INDEX_MAX));     \
+	if ((DriveIndex < DRIVE_INDEX_MIN) || (DriveIndex > DRIVE_INDEX_MAX)) goto out; \
 	DriveIndex -= DRIVE_INDEX_MIN; } while (0)
 
 /*

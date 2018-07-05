@@ -32,6 +32,7 @@
 #include <inttypes.h>
 #include <commctrl.h>
 #include <setupapi.h>
+#include <assert.h>
 
 #include "rufus.h"
 #include "missing.h"
@@ -452,16 +453,12 @@ BOOL GetDevices(DWORD devnum)
 		if (strcmp(genstor_name[s], "SD") == 0)
 			card_start = s;
 	}
-	// Overkill, but better safe than sorry. And yeah, we could have used
-	// arrays of arrays to avoid this, but it's more readable this way.
-	if ((uasp_start <= 0) || (uasp_start >= ARRAYSIZE(usbstor_name))) {
-		uprintf("Spock gone crazy error in %s:%d", __FILE__, __LINE__);
-		goto out;
-	}
-	if ((card_start <= 0) || (card_start >= ARRAYSIZE(genstor_name))) {
-		uprintf("Spock gone crazy error in %s:%d", __FILE__, __LINE__);
-		goto out;
-	}
+
+	// Better safe than sorry. And yeah, we could have used arrays of
+	// arrays to avoid this, but it's more readable this way.
+	assert((uasp_start > 0) && (uasp_start < ARRAYSIZE(usbstor_name)));
+	assert((card_start > 0) && (card_start < ARRAYSIZE(genstor_name)));
+
 	devid_list = NULL;
 	if (full_list_size != 0) {
 		full_list_size += 1;	// add extra NUL terminator

@@ -1558,8 +1558,9 @@ INT_PTR CALLBACK NewVersionCallback(HWND hDlg, UINT message, WPARAM wParam, LPAR
 	static char* filepath = NULL;
 	static int download_status = 0;
 	static HFONT hyperlink_font = NULL;
-	LONG i;
+	static HANDLE hThread = NULL;
 	HWND hNotes;
+	DWORD exit_code;
 	STARTUPINFOA si;
 	PROCESS_INFORMATION pi;
 	EXT_DECL(dl_ext, NULL, __VA_GROUP__("*.exe"), __VA_GROUP__(lmprintf(MSG_037)));
@@ -1614,8 +1615,16 @@ INT_PTR CALLBACK NewVersionCallback(HWND hDlg, UINT message, WPARAM wParam, LPAR
 			case 1:		// Abort
 				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANCELLED;
 				download_status = 0;
+				hThread = NULL;
 				break;
 			case 2:		// Launch newer version and close this one
+				if ((hThread == NULL) || (!GetExitCodeThread(hThread, &exit_code)) || (exit_code == 0)) {
+					hThread = NULL;
+					EnableWindow(GetDlgItem(hDlg, IDC_DOWNLOAD), FALSE);
+					break;
+				}
+
+				hThread = NULL;
 				Sleep(1000);	// Add a delay on account of antivirus scanners
 
 				if (ValidateSignature(hDlg, filepath) != NO_ERROR) {
@@ -1630,7 +1639,7 @@ INT_PTR CALLBACK NewVersionCallback(HWND hDlg, UINT message, WPARAM wParam, LPAR
 				si.cb = sizeof(si);
 				if (!CreateProcessU(filepath, cmdline, NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi)) {
 					PrintInfo(0, MSG_214);
-					uprintf("Failed to launch new application: %s\n", WindowsErrorString());
+					uprintf("Failed to launch new application: %s", WindowsErrorString());
 				} else {
 					PrintInfo(0, MSG_213);
 					PostMessage(hDlg, WM_COMMAND, (WPARAM)IDCLOSE, 0);
@@ -1639,19 +1648,18 @@ INT_PTR CALLBACK NewVersionCallback(HWND hDlg, UINT message, WPARAM wParam, LPAR
 				break;
 			default:	// Download
 				if (update.download_url == NULL) {
-					uprintf("Could not get download URL\n");
+					uprintf("Could not get download URL");
 					break;
 				}
-				for (i=(int)strlen(update.download_url); (i>0)&&(update.download_url[i]!='/'); i--);
-				dl_ext.filename = &update.download_url[i+1];
+				dl_ext.filename = PathFindFileNameU(update.download_url);
 				filepath = FileDialog(TRUE, app_dir, &dl_ext, OFN_NOCHANGEDIR);
 				if (filepath == NULL) {
-					uprintf("Could not get save path\n");
+					uprintf("Could not get save path");
 					break;
 				}
 				// Opening the File Dialog will make us lose tabbing focus - set it back
 				SendMessage(hDlg, WM_NEXTDLGCTL, (WPARAM)GetDlgItem(hDlg, IDC_DOWNLOAD), TRUE);
-				DownloadFileThreaded(update.download_url, filepath, hDlg);
+				hThread = DownloadSignedFileThreaded(update.download_url, filepath, hDlg, TRUE);
 				break;
 			}
 			return (INT_PTR)TRUE;
@@ -1665,11 +1673,14 @@ INT_PTR CALLBACK NewVersionCallback(HWND hDlg, UINT message, WPARAM wParam, LPAR
 		return (INT_PTR)TRUE;
 	case UM_PROGRESS_EXIT:
 		EnableWindow(GetDlgItem(hDlg, IDCANCEL), TRUE);
-		if (wParam) {
+		if (wParam != 0) {
 			SetWindowTextU(GetDlgItem(hDlg, IDC_DOWNLOAD), lmprintf(MSG_039));
 			download_status = 2;
 		} else {
 			SetWindowTextU(GetDlgItem(hDlg, IDC_DOWNLOAD), lmprintf(MSG_040));
+			// Disable the download button if we found an invalid signature
+			EnableWindow(GetDlgItem(hDlg, IDC_DOWNLOAD),
+				FormatStatus != (ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_BAD_SIGNATURE)));
 			download_status = 0;
 		}
 		return (INT_PTR)TRUE;

@@ -27,6 +27,7 @@
 #include <stdio.h>
 #include <wincrypt.h>
 #include <wintrust.h>
+#include <assert.h>
 
 #include "rufus.h"
 #include "resource.h"
@@ -52,6 +53,63 @@ typedef struct {
 	LPWSTR lpszMoreInfoLink;
 } SPROG_PUBLISHERINFO, *PSPROG_PUBLISHERINFO;
 
+// https://msdn.microsoft.com/en-us/library/ee442238.aspx
+typedef struct {
+	BLOBHEADER BlobHeader;
+	RSAPUBKEY  RsaHeader;
+	BYTE       Modulus[256];	// 2048 bit modulus
+} RSA_2048_PUBKEY;
+
+// The RSA public key modulus for the private key we use to sign the files on the server.
+// NOTE 1: This openssl modulus must be *REVERSED* to be usable with Microsoft APIs
+// NOTE 2: Also, this modulus is 2052 bits, and not 2048, because openssl adds an extra
+// 0x00 at the beginning to force an integer sign. These extra 8 bits *MUST* be removed.
+static uint8_t rsa_pubkey_modulus[] = {
+	/*
+		$ openssl genrsa -aes256 -out private.pem 2048
+		$ openssl rsa -in private.pem -pubout -out public.pem
+		$ openssl rsa -pubin -inform PEM -text -noout < public.pem
+		Public-Key: (2048 bit)
+		Modulus:
+			00:b6:40:7d:d1:98:7b:81:9e:be:23:0f:32:5d:55:
+			60:c6:bf:b4:41:bb:43:1b:f1:e1:e6:f9:2b:d6:dd:
+			11:50:e8:b9:3f:19:97:5e:a7:8b:4a:30:c6:76:58:
+			72:1c:ac:ff:a1:f8:96:6c:51:5d:13:11:e3:5b:11:
+			82:f5:9a:69:e4:28:97:0f:ca:1f:02:ea:1f:7d:dc:
+			f9:fc:79:2f:61:ff:8e:45:60:65:ba:37:9b:de:49:
+			05:6a:a8:fd:70:d0:0c:79:b6:d7:81:aa:54:c3:c6:
+			4a:87:a0:45:ee:ca:d5:d5:c5:c2:ac:86:42:b3:58:
+			27:d2:43:b9:37:f2:e6:75:66:17:53:d0:38:d0:c6:
+			57:c2:55:36:a2:43:87:ea:24:f0:96:ec:34:dd:79:
+			4d:80:54:9d:84:81:a7:cf:0c:a5:7c:d6:63:fa:7a:
+			66:30:a9:50:ee:f0:e5:f8:a2:2d:ac:fc:24:21:fe:
+			ef:e8:d3:6f:0e:27:b0:64:22:95:3e:6d:a6:66:97:
+			c6:98:c2:47:b3:98:69:4d:b1:b5:d3:6f:43:f5:d7:
+			a5:13:5e:8c:28:4f:62:4e:01:48:0a:63:89:e7:ca:
+			34:aa:7d:2f:bb:70:e0:31:bb:39:49:a3:d2:c9:2e:
+			a6:30:54:9a:5c:4d:58:17:d9:fc:3a:43:e6:8e:2a:
+			18:e9
+		Exponent: 65537 (0x10001)
+	*/
+	0x00, 0xb6, 0x40, 0x7d, 0xd1, 0x98, 0x7b, 0x81, 0x9e, 0xbe, 0x23, 0x0f, 0x32, 0x5d, 0x55,
+	0x60, 0xc6, 0xbf, 0xb4, 0x41, 0xbb, 0x43, 0x1b, 0xf1, 0xe1, 0xe6, 0xf9, 0x2b, 0xd6, 0xdd,
+	0x11, 0x50, 0xe8, 0xb9, 0x3f, 0x19, 0x97, 0x5e, 0xa7, 0x8b, 0x4a, 0x30, 0xc6, 0x76, 0x58,
+	0x72, 0x1c, 0xac, 0xff, 0xa1, 0xf8, 0x96, 0x6c, 0x51, 0x5d, 0x13, 0x11, 0xe3, 0x5b, 0x11,
+	0x82, 0xf5, 0x9a, 0x69, 0xe4, 0x28, 0x97, 0x0f, 0xca, 0x1f, 0x02, 0xea, 0x1f, 0x7d, 0xdc,
+	0xf9, 0xfc, 0x79, 0x2f, 0x61, 0xff, 0x8e, 0x45, 0x60, 0x65, 0xba, 0x37, 0x9b, 0xde, 0x49,
+	0x05, 0x6a, 0xa8, 0xfd, 0x70, 0xd0, 0x0c, 0x79, 0xb6, 0xd7, 0x81, 0xaa, 0x54, 0xc3, 0xc6,
+	0x4a, 0x87, 0xa0, 0x45, 0xee, 0xca, 0xd5, 0xd5, 0xc5, 0xc2, 0xac, 0x86, 0x42, 0xb3, 0x58,
+	0x27, 0xd2, 0x43, 0xb9, 0x37, 0xf2, 0xe6, 0x75, 0x66, 0x17, 0x53, 0xd0, 0x38, 0xd0, 0xc6,
+	0x57, 0xc2, 0x55, 0x36, 0xa2, 0x43, 0x87, 0xea, 0x24, 0xf0, 0x96, 0xec, 0x34, 0xdd, 0x79,
+	0x4d, 0x80, 0x54, 0x9d, 0x84, 0x81, 0xa7, 0xcf, 0x0c, 0xa5, 0x7c, 0xd6, 0x63, 0xfa, 0x7a,
+	0x66, 0x30, 0xa9, 0x50, 0xee, 0xf0, 0xe5, 0xf8, 0xa2, 0x2d, 0xac, 0xfc, 0x24, 0x21, 0xfe,
+	0xef, 0xe8, 0xd3, 0x6f, 0x0e, 0x27, 0xb0, 0x64, 0x22, 0x95, 0x3e, 0x6d, 0xa6, 0x66, 0x97,
+	0xc6, 0x98, 0xc2, 0x47, 0xb3, 0x98, 0x69, 0x4d, 0xb1, 0xb5, 0xd3, 0x6f, 0x43, 0xf5, 0xd7,
+	0xa5, 0x13, 0x5e, 0x8c, 0x28, 0x4f, 0x62, 0x4e, 0x01, 0x48, 0x0a, 0x63, 0x89, 0xe7, 0xca,
+	0x34, 0xaa, 0x7d, 0x2f, 0xbb, 0x70, 0xe0, 0x31, 0xbb, 0x39, 0x49, 0xa3, 0xd2, 0xc9, 0x2e,
+	0xa6, 0x30, 0x54, 0x9a, 0x5c, 0x4d, 0x58, 0x17, 0xd9, 0xfc, 0x3a, 0x43, 0xe6, 0x8e, 0x2a,
+	0x18, 0xe9
+};
 
 /*
  * FormatMessage does not handle PKI errors
@@ -65,8 +123,19 @@ const char* WinPKIErrorString(void)
 		return WindowsErrorString();
 
 	switch (error_code) {
+	// See also https://docs.microsoft.com/en-gb/windows/desktop/com/com-error-codes-4
 	case NTE_BAD_UID:
 		return "Bad UID.";
+	case NTE_NO_KEY:
+		return "Key does not exist.";
+	case NTE_BAD_KEYSET:
+		return "Keyset does not exist.";
+	case NTE_BAD_ALGID:
+		return "Invalid algorithm specified.";
+	case NTE_BAD_VER:
+		return "Bad version of provider.";
+	case NTE_BAD_SIGNATURE:
+		return "Invalid Signature.";
 	case CRYPT_E_MSG_ERROR:
 		return "An error occurred while performing an operation on a cryptographic message.";
 	case CRYPT_E_UNKNOWN_ALGO:
@@ -579,5 +648,82 @@ LONG ValidateSignature(HWND hDlg, const char* path)
 		break;
 	}
 
+	return r;
+}
+
+// Why-oh-why am I the only one on github doing this openssl vs MS signature validation?!?
+// For once, I'd like to find code samples from *OTHER PEOPLE* who went through this ordeal first...
+BOOL ValidateOpensslSignature(BYTE* pbBuffer, DWORD dwBufferLen, BYTE* pbSignature, DWORD dwSigLen)
+{
+	HCRYPTPROV hProv = 0;
+	HCRYPTHASH hHash = 0;
+	HCRYPTKEY hPubKey;
+	// We could load and convert an openssl PEM, but since we know what we need...
+	RSA_2048_PUBKEY pbMyPubKey = {
+		{ PUBLICKEYBLOB, CUR_BLOB_VERSION, 0, CALG_RSA_KEYX },
+		// $ openssl genrsa -aes256 -out private.pem 2048
+		// Generating RSA private key, 2048 bit long modulus
+		// e is 65537 (0x010001)
+		// => 0x010001 below. Also 0x31415352 = "RSA1"
+		{ 0x31415352, sizeof(pbMyPubKey.Modulus) * 8, 0x010001 },
+		{ 0 }	// Modulus is initialized below
+	};
+	USHORT dwMyPubKeyLen = sizeof(pbMyPubKey);
+	BOOL r;
+	BYTE t;
+	int i, j;
+
+	// Get a handle to the default PROV_RSA_AES provider (AES so we get SHA-256 support).
+	// 2 passes in case we need to create a new container.
+	r = CryptAcquireContext(&hProv, NULL, NULL, PROV_RSA_AES, CRYPT_NEWKEYSET | CRYPT_VERIFYCONTEXT);
+	if (!r) {
+		uprintf("PKI: Could not create the default key container: %s", WinPKIErrorString());
+		goto out;
+	}
+
+	// Reverse the modulus bytes from openssl (and also remove the extra unwanted 0x00)
+	assert(sizeof(rsa_pubkey_modulus) >= sizeof(pbMyPubKey.Modulus));
+	for (i = 0; i < sizeof(pbMyPubKey.Modulus); i++)
+		pbMyPubKey.Modulus[i] = rsa_pubkey_modulus[sizeof(rsa_pubkey_modulus) -1 - i];
+
+	// Import our RSA public key so that the MS API can use it
+	r = CryptImportKey(hProv, (BYTE*)&pbMyPubKey.BlobHeader, dwMyPubKeyLen, 0, 0, &hPubKey);
+	if (!r) {
+		uprintf("Could not import public key: %s", WinPKIErrorString());
+		goto out;
+	}
+
+	// Create the hash object.
+	r = CryptCreateHash(hProv, CALG_SHA_256, 0, 0, &hHash);
+	if (!r) {
+		uprintf("Could not create empty hash: %s", WinPKIErrorString());
+		goto out;
+	}
+
+	// Compute the cryptographic hash of the buffer.
+	r = CryptHashData(hHash, pbBuffer, dwBufferLen, 0);
+	if (!r) {
+		uprintf("Could not hash data: %s", WinPKIErrorString());
+		goto out;
+	}
+
+	// Reverse the signature bytes
+	for (i = 0, j = dwSigLen - 1; i < j; i++, j--) {
+		t = pbSignature[i];
+		pbSignature[i] = pbSignature[j];
+		pbSignature[j] = t;
+	}
+
+	// Now that we have all of the public key, hash and signature data in a
+	// format that Microsoft can handle, we can call CryptVerifySignature().
+	r = CryptVerifySignature(hHash, pbSignature, dwSigLen, hPubKey, NULL, 0);
+	if (!r)
+		uprintf("Signature validation failed: %s", WinPKIErrorString());
+
+out:
+	if (hHash)
+		CryptDestroyHash(hHash);
+	if (hProv)
+		CryptReleaseContext(hProv, 0);
 	return r;
 }

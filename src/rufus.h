@@ -67,7 +67,12 @@
 #define MARQUEE_TIMER_REFRESH       10			// Time between progress bar marquee refreshes, in ms
 #define FS_DEFAULT                  FS_FAT32
 #define SINGLE_CLUSTERSIZE_DEFAULT  0x00000100
-#define BADBLOCK_PATTERNS           {0xaa, 0x55, 0xff, 0x00}
+#define BADLOCKS_PATTERN_TYPES      3
+#define BADBLOCK_PATTERN_COUNT      4
+#define BADBLOCK_PATTERN_SLC        {0x00, 0xff, 0x55, 0xaa}
+#define BADCLOCK_PATTERN_MLC        {0x00, 0xff, 0x33, 0xcc}
+#define BADBLOCK_PATTERN_TLC        {0x00, 0xff, 0x1c71c7, 0xe38e38}
+#define BADBLOCK_BLOCK_SIZE         (128 * 1024)
 #define LARGE_FAT32_SIZE            (32*1073741824LL)	// Size at which we need to use fat32format
 #define UDF_FORMAT_SPEED            3.1f		// Speed estimate at which we expect UDF drives to be formatted (GB/s)
 #define UDF_FORMAT_WARN             20			// Duration (in seconds) above which we warn about long UDF formatting times
@@ -75,6 +80,7 @@
 #define FAT32_CLUSTER_THRESHOLD     1.011f		// For FAT32, cluster size changes don't occur at power of 2 boundaries but sligthly above
 #define DD_BUFFER_SIZE              65536		// Minimum size of the buffer we use for DD operations
 #define UBUFFER_SIZE                2048
+#define RSA_SIGNATURE_SIZE          256
 #define CBN_SELCHANGE_INTERNAL      (CBN_SELCHANGE + 256)
 #define RUFUS_URL                   "https://rufus.ie"
 #define DOWNLOAD_URL                RUFUS_URL "/downloads"
@@ -157,6 +163,7 @@ enum user_message_type {
 	UM_NO_UPDATE,
 	UM_UPDATE_CSM_TOOLTIP,
 	UM_RESIZE_BUTTONS,
+	UM_FORMAT_START,
 	// Start of the WM IDs for the language menu items
 	UM_LANGUAGE_MENU = WM_APP + 0x100
 };
@@ -394,7 +401,6 @@ extern float fScale;
 extern char szFolderPath[MAX_PATH], app_dir[MAX_PATH], temp_dir[MAX_PATH], system_dir[MAX_PATH], sysnative_dir[MAX_PATH];
 extern char* image_path;
 extern DWORD FormatStatus, DownloadStatus, MainThreadId;
-extern BOOL PromptOnError;
 extern unsigned long syslinux_ldlinux_len[2];
 extern const int nb_steps[FS_MAX];
 extern BOOL use_own_c32[NB_OLD_C32], detect_fakes, iso_op_in_progress, format_op_in_progress, right_to_left_mode;
@@ -470,8 +476,8 @@ extern BOOL ResetDevice(int index);
 extern BOOL GetOpticalMedia(IMG_SAVE* img_save);
 extern BOOL SetLGP(BOOL bRestore, BOOL* bExistingKey, const char* szPath, const char* szPolicy, DWORD dwValue);
 extern LONG GetEntryWidth(HWND hDropDown, const char* entry);
-extern DWORD DownloadFile(const char* url, const char* file, HWND hProgressDialog);
-extern HANDLE DownloadFileThreaded(const char* url, const char* file, HWND hProgressDialog);
+extern DWORD DownloadSignedFile(const char* url, const char* file, HWND hProgressDialog, BOOL PromptOnError);
+extern HANDLE DownloadSignedFileThreaded(const char* url, const char* file, HWND hProgressDialog, BOOL bPromptOnError);
 extern INT_PTR CALLBACK UpdateCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
 extern BOOL SetUpdateCheck(void);
 extern BOOL CheckForUpdates(BOOL force);
@@ -498,6 +504,7 @@ extern int IsHDD(DWORD DriveIndex, uint16_t vid, uint16_t pid, const char* strid
 extern char* GetSignatureName(const char* path, const char* country_code);
 extern uint64_t GetSignatureTimeStamp(const char* path);
 extern LONG ValidateSignature(HWND hDlg, const char* path);
+extern BOOL ValidateOpensslSignature(BYTE* pbBuffer, DWORD dwBufferLen, BYTE* pbSignature, DWORD dwSigLen);
 extern BOOL IsFontAvailable(const char* font_name);
 extern BOOL WriteFileWithRetry(HANDLE hFile, LPCVOID lpBuffer, DWORD nNumberOfBytesToWrite,
 	LPDWORD lpNumberOfBytesWritten, DWORD nNumRetries);
@@ -607,3 +614,4 @@ static __inline HMODULE GetLibraryHandle(char* szLibraryName) {
 #define ERROR_CANT_PATCH               0x120A
 #define ERROR_CANT_ASSIGN_LETTER       0x120B
 #define ERROR_CANT_MOUNT_VOLUME        0x120C
+#define ERROR_BAD_SIGNATURE            0x120D
