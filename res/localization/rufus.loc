@@ -566,6 +566,7 @@ t MSG_303 "Show the log"
 t MSG_304 "Create a disk image of the selected device"
 t MSG_305 "Use this option to indicate whether you want to use this device to install Windows on another disk, "
 	"or if you want to run Windows directly from this drive (Windows To Go)."
+t MSG_306 "Erasing drive: %0.1f%% completed"
 
 ################################################################################
 ############################# TRANSLATOR END COPY ##############################
@@ -4552,6 +4553,7 @@ t MSG_303 "Toon het logboek"
 t MSG_304 "Maak een schijfkopie van het geselecteerde apparaat"
 t MSG_305 "Gebruik deze optie om aan te geven of u dit apparaat wilt gebruiken om Windows op een andere schijf te installeren, "
 	"of als u Windows rechtstreeks vanaf deze schijf wilt opstarten (Windows To Go)."
+t MSG_306 "Schijf wissen: %0.1f%% voltooid"
 
 ################################################################################
 l "fi-FI" "Finnish (Suomi)" 0x040B

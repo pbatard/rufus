@@ -62,7 +62,7 @@ static int task_number = 0;
 extern const int nb_steps[FS_MAX];
 extern uint32_t dur_mins, dur_secs;
 static int fs_index = 0, wintogo_index = -1;
-extern BOOL force_large_fat32, enable_ntfs_compression, lock_drive, zero_drive, enable_file_indexing, write_as_image;
+extern BOOL force_large_fat32, enable_ntfs_compression, lock_drive, zero_drive, smart_skip, enable_file_indexing, write_as_image;
 uint8_t *grub2_buf = NULL;
 long grub2_len;
 static BOOL WritePBR(HANDLE hLogicalDrive);
@@ -1548,11 +1548,13 @@ static BOOL WriteDrive(HANDLE hPhysicalDrive, HANDLE hSourceImage)
 {
 	BOOL s, ret = FALSE;
 	LARGE_INTEGER li;
-	DWORD rSize, wSize, BufSize;
+	DWORD rSize, wSize, xSize, BufSize;
 	uint64_t wb, target_size = hSourceImage?img_report.image_size:SelectedDrive.DiskSize;
 	int64_t bled_ret;
 	uint8_t *buffer = NULL;
+	uint8_t *readbuffer = NULL;
 	int i;
+	int smartskip_backoff = 0;
 
 	// We poked the MBR and other stuff, so we need to rewind
 	li.QuadPart = 0;
@@ -1572,7 +1574,7 @@ static BOOL WriteDrive(HANDLE hPhysicalDrive, HANDLE hSourceImage)
 			goto out;
 		}
 	} else {
-		uprintf(hSourceImage?"Writing Image...":"Zeroing drive...");
+		uprintf(hSourceImage?"Writing Image...":smart_skip?"Erasing drive...":"Zeroing drive...");
 		// Our buffer size must be a multiple of the sector size and *ALIGNED* to the sector size
 		BufSize = ((DD_BUFFER_SIZE + SelectedDrive.SectorSize - 1) / SelectedDrive.SectorSize) * SelectedDrive.SectorSize;
 		buffer = (uint8_t*)_mm_malloc(BufSize, SelectedDrive.SectorSize);
@@ -1587,6 +1589,21 @@ static BOOL WriteDrive(HANDLE hPhysicalDrive, HANDLE hSourceImage)
 			uprintf("Write buffer is not aligned");
 			goto out;
 		}
+		// Clear buffer
+		memset(buffer, smart_skip?0xff:0x00, BufSize);
+
+		readbuffer = (uint8_t*)_mm_malloc(BufSize, SelectedDrive.SectorSize);
+		if (readbuffer == NULL) {
+			FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_NOT_ENOUGH_MEMORY;
+			uprintf("Could not allocate disk read buffer");
+			goto out;
+		}
+		// Sanity check
+		if ((uintptr_t)readbuffer % SelectedDrive.SectorSize != 0) {
+			FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_READ_FAULT;
+			uprintf("Read buffer is not aligned");
+			goto out;
+		}
 
 		// Don't bother trying for something clever, using double buffering overlapped and whatnot:
 		// With Windows' default optimizations, sync read + sync write for sequential operations
@@ -1596,7 +1613,7 @@ static BOOL WriteDrive(HANDLE hPhysicalDrive, HANDLE hSourceImage)
 			if (GetTickCount64() > LastRefresh + MAX_REFRESH) {
 				LastRefresh = GetTickCount64();
 				format_percent = (100.0f*wb) / (1.0f*target_size);
-				PrintInfo(0, hSourceImage?MSG_261:MSG_286, format_percent);
+				PrintInfo(0, hSourceImage?MSG_261:smart_skip?MSG_306:MSG_286, format_percent);
 				UpdateProgress(OP_FORMAT, format_percent);
 			}
 
@@ -1618,6 +1635,61 @@ static BOOL WriteDrive(HANDLE hPhysicalDrive, HANDLE hSourceImage)
 			// WriteFile fails unless the size is a multiple of sector size
 			if (rSize % SelectedDrive.SectorSize != 0)
 				rSize = ((rSize + SelectedDrive.SectorSize - 1) / SelectedDrive.SectorSize) * SelectedDrive.SectorSize;
+
+			// Smart-skip: Reading a flash drive is faster than writing, so we
+			// can skip erasing empty blocks, or skip writing when the data is the same
+			// * a block is empty when all bits are either 0 (zeros) or 1 (flash block erased)
+			// * a back-off strategy is used to limit reading
+
+			if (smartskip_backoff) {
+				smartskip_backoff--;
+			} else if (smart_skip && (hSourceImage == NULL)) { // currently only enabled for erase
+
+				CHECK_FOR_USER_CANCEL;
+
+				// Read block and compare against the block that needs to be written
+				s = ReadFile(hPhysicalDrive, readbuffer, rSize, &xSize, NULL);
+				if (!s || (xSize != rSize) ) {
+					uprintf("Read error: could not read data to compare - %s", WindowsErrorString());
+					goto out;
+				}
+
+				// erase or write
+				if (hSourceImage == NULL) {
+					// Erase, check for an empty block
+					int *ptr = (int*)(readbuffer);
+					// Get first element
+					int value = ptr[0];
+					// Check all bits are the same
+					if (value!=0 && value!=-1) {
+						goto blocknotempty;
+					}
+					// Compare the rest of the block against the first element
+					for (i = 1; i < (int)(rSize/sizeof(int)); i++) {
+						if (ptr[i] != value)
+							goto blocknotempty;
+					}
+					// Block is empty, skip write
+					wSize = rSize;
+					continue;
+				blocknotempty:
+					;
+				} else if (memcmp(readbuffer, buffer, rSize)==0) {
+					// Write, block is unchanged, skip write
+					wSize = rSize;
+					continue;
+				}
+
+				// Move the file pointer position back for writing
+				li.QuadPart = wb;
+				if (!SetFilePointerEx(hPhysicalDrive, li, NULL, FILE_BEGIN)) {
+					uprintf("Error: Could not reset position - %s", WindowsErrorString());
+					goto out;
+				}
+				// throttle reading
+				smartskip_backoff = 15;
+			}
+
 			for (i = 1; i <= WRITE_RETRIES; i++) {
 				CHECK_FOR_USER_CANCEL;
 				s = WriteFile(hPhysicalDrive, buffer, rSize, &wSize, NULL);
@@ -1649,6 +1721,7 @@ static BOOL WriteDrive(HANDLE hPhysicalDrive, HANDLE hSourceImage)
 	ret = TRUE;
 out:
 	safe_mm_free(buffer);
+	safe_mm_free(readbuffer);
 	return ret;
 }
 
