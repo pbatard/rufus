@@ -36,6 +36,7 @@
 #include <io.h>
 #include <getopt.h>
 #include <assert.h>
+#include <intrin.h>
 
 #include "rufus.h"
 #include "missing.h"
@@ -96,37 +97,36 @@ extern const char* sfd_name;
  * Globals
  */
 OPENED_LIBRARIES_VARS;
+RUFUS_UPDATE update = { { 0,0,0 },{ 0,0 }, NULL, NULL };
 HINSTANCE hMainInstance;
 HWND hMainDialog, hMultiToolbar, hSaveToolbar, hHashToolbar, hAdvancedDeviceToolbar, hAdvancedFormatToolbar, hUpdatesDlg = NULL;
 HIMAGELIST hUpImageList, hDownImageList;
-char szFolderPath[MAX_PATH], app_dir[MAX_PATH], system_dir[MAX_PATH], temp_dir[MAX_PATH], sysnative_dir[MAX_PATH];
-char *image_path = NULL, *short_image_path;
-float fScale = 1.0f;
-int default_fs, fs, bt, pt, tt; // file system, boot type, partition type, target type
-int cbw, ddw, ddbh = 0, bh = 0; // (empty) check box width, (empty) drop down width, button height (for and without dropdown match)
-uint32_t dur_mins, dur_secs;
+uint8_t image_options = 0x00;
+uint16_t rufus_version[3], embedded_sl_version[2];
+uint32_t dur_mins, dur_secs, DrivePort[MAX_DRIVES];;
 loc_cmd* selected_locale = NULL;
 WORD selected_langid = MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT);
 DWORD MainThreadId;
 HWND hDeviceList, hPartitionScheme, hTargetSystem, hFileSystem, hClusterSize, hLabel, hBootType, hNBPasses, hLog = NULL;
 HWND hLogDialog = NULL, hProgress = NULL, hDiskID;
-BOOL use_own_c32[NB_OLD_C32] = {FALSE, FALSE}, mbr_selected_by_user = FALSE, display_togo_option = FALSE;
+BOOL use_own_c32[NB_OLD_C32] = { FALSE, FALSE }, mbr_selected_by_user = FALSE;
 BOOL iso_op_in_progress = FALSE, format_op_in_progress = FALSE, right_to_left_mode = FALSE, has_uefi_csm;
 BOOL enable_HDDs = FALSE, force_update = FALSE, enable_ntfs_compression = FALSE, no_confirmation_on_cancel = FALSE, lock_drive = TRUE;
 BOOL advanced_mode_device, advanced_mode_format, allow_dual_uefi_bios, detect_fakes, enable_vmdk, force_large_fat32, usb_debug;
 BOOL use_fake_units, preserve_timestamps = FALSE;
 BOOL zero_drive = FALSE, list_non_usb_removable_drives = FALSE, enable_file_indexing, large_drive = FALSE, write_as_image = FALSE;
+float fScale = 1.0f;
 int dialog_showing = 0;
-uint16_t rufus_version[3], embedded_sl_version[2];
+int default_fs, fs, bt, pt, tt; // file system, boot type, partition type, target type
+int cbw, ddw, ddbh = 0, bh = 0; // (empty) check box width, (empty) drop down width, button height (for and without dropdown match)
+char szFolderPath[MAX_PATH], app_dir[MAX_PATH], system_dir[MAX_PATH], temp_dir[MAX_PATH], sysnative_dir[MAX_PATH];
 char embedded_sl_version_str[2][12] = { "?.??", "?.??" };
 char embedded_sl_version_ext[2][32];
 char ClusterSizeLabel[MAX_CLUSTER_SIZES][64];
-char msgbox[1024], msgbox_title[32], *ini_file = NULL;
-RUFUS_UPDATE update = { {0,0,0}, {0,0}, NULL, NULL};
+char msgbox[1024], msgbox_title[32], *ini_file = NULL, *image_path = NULL, *short_image_path;
 StrArray DriveID, DriveLabel, DriveHub, BlockingProcess, ImageList;
-uint32_t DrivePort[MAX_DRIVES];
 
-static void ToggleImageOption(void);
+static void ToggleImageOption(uint8_t mask);
 
 /*
  * The following is used to allocate slots within the progress bar
@@ -577,7 +577,7 @@ static void SetFSFromISO(void)
 {
 	int i, fs_tmp, preferred_fs = FS_UNKNOWN;
 	uint32_t fs_mask = 0;
-	BOOL windows_to_go = display_togo_option && (bt == BT_IMAGE) && HAS_WINTOGO(img_report) &&
+	BOOL windows_to_go = (image_options & IMOP_WINTOGO) && (bt == BT_IMAGE) && HAS_WINTOGO(img_report) &&
 		(ComboBox_GetCurSel(GetDlgItem(hMainDialog, IDC_IMAGE_OPTION)) == 1);
 
 	if (image_path == NULL)
@@ -624,7 +624,7 @@ static void SetMBRProps(void)
 	BOOL needs_masquerading = HAS_WINPE(img_report) && (!img_report.uses_minint);
 
 	if ((!mbr_selected_by_user) && ((image_path == NULL) || (bt != BT_IMAGE) || (fs != FS_NTFS) || HAS_GRUB(img_report) ||
-		((display_togo_option) && (ComboBox_GetCurSel(GetDlgItem(hMainDialog, IDC_IMAGE_OPTION)) == 1)) )) {
+		((image_options & IMOP_WINTOGO) && (ComboBox_GetCurSel(GetDlgItem(hMainDialog, IDC_IMAGE_OPTION)) == 1)) )) {
 		CheckDlgButton(hMainDialog, IDC_RUFUS_MBR, BST_UNCHECKED);
 		IGNORE_RETVAL(ComboBox_SetCurSel(hDiskID, 0));
 		return;
@@ -636,19 +636,23 @@ static void SetMBRProps(void)
 	IGNORE_RETVAL(ComboBox_SetCurSel(hDiskID, needs_masquerading?1:0));
 }
 
-static void SetToGo(void)
+static void SetImageOptions(void)
 {
-	HWND hCtrl = GetDlgItem(hMainDialog, IDC_IMAGE_OPTION);
+	if ((bt != BT_IMAGE) || (image_path == NULL)) {
+		if (image_options & IMOP_WINTOGO)
+			ToggleImageOption(IMOP_WINTOGO);
+		if (image_options & IMOP_PERSISTENCE)
+			ToggleImageOption(IMOP_PERSISTENCE);
+		return;
+	}
 
-	// Populate the dropdown
-	IGNORE_RETVAL(ComboBox_ResetContent(hCtrl));
-	IGNORE_RETVAL(ComboBox_SetItemData(hCtrl, ComboBox_AddStringU(hCtrl, lmprintf(MSG_117)), FALSE));
-	IGNORE_RETVAL(ComboBox_SetItemData(hCtrl, ComboBox_AddStringU(hCtrl, lmprintf(MSG_118)), TRUE));
-	IGNORE_RETVAL(ComboBox_SetCurSel(hCtrl, windows_to_go_selection));
-
-	if ((((bt != BT_IMAGE) || (image_path == NULL) || (!HAS_WINTOGO(img_report))) && (display_togo_option)) ||
-		((bt == BT_IMAGE) && (HAS_WINTOGO(img_report)) && (!display_togo_option))) {
-		ToggleImageOption();
+	if ( (!HAS_WINTOGO(img_report) && ( (image_options & IMOP_WINTOGO))) ||
+		 ( HAS_WINTOGO(img_report) && (!(image_options & IMOP_WINTOGO))) ) {
+		ToggleImageOption(IMOP_WINTOGO);
+	}
+	if ( (!HAS_PERSISTENCE(img_report) && ( (image_options & IMOP_PERSISTENCE))) ||
+		 ( HAS_PERSISTENCE(img_report) && (!(image_options & IMOP_PERSISTENCE))) ) {
+		ToggleImageOption(IMOP_PERSISTENCE);
 	}
 }
 
@@ -1153,10 +1157,7 @@ static void DisplayISOProps(void)
 	PRINT_ISO_PROP(img_report.has_symlinks, "  Note: This ISO uses symbolic links, which will not be replicated due to file system limitations.");
 	PRINT_ISO_PROP(img_report.has_symlinks, "  Because of this, some features from this image may not work...");
 
-	// We don't support ToGo on Windows 7 or earlier, for lack of native ISO mounting capabilities
-	if (nWindowsVersion >= WINDOWS_8)
-		if ( ((!display_togo_option) && (HAS_WINTOGO(img_report))) || ((display_togo_option) && (!HAS_WINTOGO(img_report))) )
-			ToggleImageOption();
+	SetImageOptions();
 }
 
 // Move a control along the Y axis
@@ -1283,32 +1284,47 @@ static void ToggleAdvancedFormatOptions(BOOL enable)
 	InvalidateRect(hMainDialog, NULL, TRUE);
 }
 
-// Toggle the Image Option dropdown (Windows To Go or Casper settings)
-static void ToggleImageOption(void)
+// Toggle the Image Option dropdown (Windows To Go or persistence settings)
+static void ToggleImageOption(uint8_t mask)
 {
-	int i, shift = row_height;
-	// Windows To Go mode is only available for Windows 8 or later due to the lack
-	// of an ISO mounting API on previous versions.
-	// But we still need to be able to hide the Windows To Go option on startup.
-	if ((nWindowsVersion < WINDOWS_8) && (!display_togo_option))
-		return;
+	int i, shift = (__popcnt16(image_options) >= 2) ? 0 : row_height;
 
-	display_togo_option = !display_togo_option;
-	if (!display_togo_option)
-		shift = -shift;
-	section_vpos[1] += shift;
-	section_vpos[2] += shift;
+	assert(__popcnt16(mask) <= 1);
 
-	// Move the controls up or down
-	for (i = 0; i<ARRAYSIZE(image_option_move_ids); i++)
-		MoveCtrlY(hMainDialog, image_option_move_ids[i], shift);
+	if (mask & IMOP_WINTOGO) {
+		if (nWindowsVersion < WINDOWS_8)
+			return;
+		image_options ^= IMOP_WINTOGO;
+		// Set the Windows To Go selection in the dropdown
+		IGNORE_RETVAL(ComboBox_SetCurSel(GetDlgItem(hMainDialog, IDC_IMAGE_OPTION), windows_to_go_selection));
+	} else if (mask & IMOP_PERSISTENCE) {
+		image_options ^= IMOP_PERSISTENCE;
+	}
 
-	// Resize the main dialog and log window
-	ResizeDialogs(shift);
+	if (__popcnt16(image_options) >= 2)
+		shift = 0;
+
+	if (shift != 0) {
+		if ((mask == 0) || (image_options == 0))
+			shift = -shift;
+		section_vpos[1] += shift;
+		section_vpos[2] += shift;
+
+		if (__popcnt16(image_options) <= 1) {
+			// Move the controls up or down
+			for (i = 0; i < ARRAYSIZE(image_option_move_ids); i++)
+				MoveCtrlY(hMainDialog, image_option_move_ids[i], shift);
+
+			// Resize the main dialog and log window
+			ResizeDialogs(shift);
+		}
+	}
 
 	// Hide or show the boot options
-	for (i = 0; i < ARRAYSIZE(image_option_toggle_ids); i++)
-		ShowWindow(GetDlgItem(hMainDialog, image_option_toggle_ids[i]), display_togo_option ? SW_SHOW : SW_HIDE);
+	for (i = 0; i < ARRAYSIZE(image_option_toggle_ids); i++) {
+		ShowWindow(GetDlgItem(hMainDialog, image_option_toggle_ids[i][0]),
+			(image_options & image_option_toggle_ids[i][1]) ? SW_SHOW : SW_HIDE);
+	}
 
 	// If you don't force a redraw here, all kind of bad UI artifacts happen...
 	InvalidateRect(hMainDialog, NULL, TRUE);
@@ -1486,7 +1502,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 			ret = 0;
 			goto out;
 		}
-		if ((display_togo_option) && (ComboBox_GetCurSel(GetDlgItem(hMainDialog, IDC_IMAGE_OPTION)) == 1)) {
+		if ((image_options & IMOP_WINTOGO) && (ComboBox_GetCurSel(GetDlgItem(hMainDialog, IDC_IMAGE_OPTION)) == 1)) {
 			if (fs != FS_NTFS) {
 				// Windows To Go only works for NTFS
 				MessageBoxExU(hMainDialog, lmprintf(MSG_097, "Windows To Go"), lmprintf(MSG_092), MB_OK|MB_ICONERROR|MB_IS_RTL, selected_langid);
@@ -2544,6 +2560,7 @@ void OnPaint(HDC hdc)
 static void InitDialog(HWND hDlg)
 {
 	DWORD len;
+	HWND hCtrl;
 	HDC hDC;
 	int i, lfHeight;
 	char tmp[128], *token, *buf, *ext, *msg;
@@ -2662,6 +2679,11 @@ static void InitDialog(HWND hDlg)
 	// Fill up the boot options dropdown
 	SetBootOptions();
 
+	// Fill up the Image Options Windows To Go dropdown
+	hCtrl = GetDlgItem(hMainDialog, IDC_IMAGE_OPTION);
+	IGNORE_RETVAL(ComboBox_SetItemData(hCtrl, ComboBox_AddStringU(hCtrl, lmprintf(MSG_117)), FALSE));
+	IGNORE_RETVAL(ComboBox_SetItemData(hCtrl, ComboBox_AddStringU(hCtrl, lmprintf(MSG_118)), TRUE));
+
 	// Fill up the MBR masqueraded disk IDs ("8 disks should be enough for anybody")
 	IGNORE_RETVAL(ComboBox_SetItemData(hDiskID, ComboBox_AddStringU(hDiskID, lmprintf(MSG_030, LEFT_TO_RIGHT_EMBEDDING "0x80" POP_DIRECTIONAL_FORMATTING)), 0x80));
 	for (i=1; i<=7; i++) {
@@ -2718,7 +2740,7 @@ static void InitDialog(HWND hDlg)
 		ToggleAdvancedDeviceOptions(FALSE);
 	if (!advanced_mode_format)
 		ToggleAdvancedFormatOptions(FALSE);
-	SetToGo();
+	ToggleImageOption(0);
 
 	// Process commandline parameters
 	if (iso_provided) {
@@ -3206,7 +3228,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			if ((selected_fs == -1) && (SelectedDrive.DeviceNumber != 0))
 				GetDrivePartitionData(SelectedDrive.DeviceNumber, tmp, sizeof(tmp), TRUE);
 			SetFileSystemAndClusterSize(tmp);
-			SetToGo();
+			SetImageOptions();
 			SetProposedLabel(ComboBox_GetCurSel(hDeviceList));
 			EnableControls(TRUE);
 			tt = (int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme));
@@ -3388,7 +3410,6 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		safe_release_dc(hDlg, hDC);
 		apply_localization(IDD_DIALOG, hDlg);
 		SetUpdateCheck();
-		display_togo_option = TRUE;	// We display the ToGo controls by default and need to hide them
 		first_log_display = TRUE;
 		log_displayed = FALSE;
 		hLogDialog = MyCreateDialog(hMainInstance, IDD_LOG, hDlg, (DLGPROC)LogCallback);

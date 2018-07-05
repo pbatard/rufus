@@ -108,6 +108,8 @@
 #define IDC_EXTENDED_LABEL              1015
 #define IDC_RUFUS_MBR                   1016
 #define IDC_TARGET_SYSTEM               1017
+#define IDC_PERSISTENCE_SIZE            1118
+#define IDC_PERSISTENCE_UNITS           1019
 #define IDC_DISK_ID                     1020
 #define IDC_OLD_BIOS_FIXES              1021
 #define IDC_LIST_USB_HDD                1022
@@ -115,6 +117,9 @@
 #define IDC_SAVE                        1024
 #define IDC_HASH                        1025
 #define IDC_IMAGE_OPTION                1026
+#define IDC_PERSISTENCE_SLIDER          1027
+#define IDC_ADVANCED_DRIVE_PROPERTIES   1028
+#define IDC_ADVANCED_FORMAT_OPTIONS     1029
 #define IDC_ABOUT_LICENSE               1030
 #define IDC_ABOUT_ICON                  1031
 #define IDC_ABOUT_COPYRIGHTS            1032
@@ -187,8 +192,6 @@
 #define IDC_LIST_ITEM14                 1109
 #define IDC_LIST_ITEM15                 1110
 #define IDC_LIST_ITEMMAX                1111
-#define IDC_ADVANCED_DRIVE_PROPERTIES   1112
-#define IDC_ADVANCED_FORMAT_OPTIONS     1113
 #define IDS_DEVICE_TXT                  2000
 #define IDS_PARTITION_TYPE_TXT          2001
 #define IDS_FILE_SYSTEM_TXT             2002
@@ -538,7 +541,7 @@
 #define _APS_NO_MFC                     1
 #define _APS_NEXT_RESOURCE_VALUE        505
 #define _APS_NEXT_COMMAND_VALUE         40001
-#define _APS_NEXT_CONTROL_VALUE         1114
+#define _APS_NEXT_CONTROL_VALUE         1112
 #define _APS_NEXT_SYMED_VALUE           4000
 #endif
 #endif

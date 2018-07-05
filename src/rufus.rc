@@ -33,7 +33,7 @@ LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
 IDD_DIALOG DIALOGEX 12, 12, 232, 326
 STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_MINIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_ACCEPTFILES
-CAPTION "Rufus 3.2.1328"
+CAPTION "Rufus 3.2.1329"
 FONT 9, "Segoe UI Symbol", 400, 0, 0x0
 BEGIN
     LTEXT           "Drive Properties",IDS_DRIVE_PROPERTIES_TXT,8,6,53,12,NOT WS_GROUP
@@ -45,7 +45,10 @@ BEGIN
     PUSHBUTTON      "#",IDC_HASH,162,52,10,12,BS_FLAT | NOT WS_VISIBLE
     PUSHBUTTON      "SELECT",IDC_SELECT,180,52,45,10
     LTEXT           "Image option",IDS_IMAGE_OPTION_TXT,8,65,216,8
-    COMBOBOX        IDC_IMAGE_OPTION,8,74,216,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_IMAGE_OPTION,8,74,96,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    CONTROL         "",IDC_PERSISTENCE_SLIDER,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,125,76,34,8
+    EDITTEXT        IDC_PERSISTENCE_SIZE,160,74,36,12,ES_AUTOHSCROLL
+    COMBOBOX        IDC_PERSISTENCE_UNITS,200,74,24,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     LTEXT           "Partition scheme",IDS_PARTITION_TYPE_TXT,8,87,96,8
     COMBOBOX        IDC_PARTITION_TYPE,8,96,96,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     LTEXT           "Target system",IDS_TARGET_SYSTEM_TXT,128,87,96,8
@@ -389,8 +392,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 3,2,1328,0
- PRODUCTVERSION 3,2,1328,0
+ FILEVERSION 3,2,1329,0
+ PRODUCTVERSION 3,2,1329,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -407,13 +410,13 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Akeo Consulting (http://akeo.ie)"
             VALUE "FileDescription", "Rufus"
-            VALUE "FileVersion", "3.2.1328"
+            VALUE "FileVersion", "3.2.1329"
             VALUE "InternalName", "Rufus"
-            VALUE "LegalCopyright", "© 2011-2018 Pete Batard (GPL v3)"
+            VALUE "LegalCopyright", "Â© 2011-2018 Pete Batard (GPL v3)"
             VALUE "LegalTrademarks", "http://www.gnu.org/copyleft/gpl.html"
             VALUE "OriginalFilename", "rufus.exe"
             VALUE "ProductName", "Rufus"
-            VALUE "ProductVersion", "3.2.1328"
+            VALUE "ProductVersion", "3.2.1329"
         END
     END
     BLOCK "VarFileInfo"

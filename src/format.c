@@ -1683,7 +1683,7 @@ DWORD WINAPI FormatThread(void* param)
 	char grub4dos_dst[] = "?:\\grldr";
 
 	use_large_fat32 = (fs == FS_FAT32) && ((SelectedDrive.DiskSize > LARGE_FAT32_SIZE) || (force_large_fat32));
-	windows_to_go = display_togo_option && (bt == BT_IMAGE) && HAS_WINTOGO(img_report) &&
+	windows_to_go = (image_options & IMOP_WINTOGO) && (bt == BT_IMAGE) && HAS_WINTOGO(img_report) &&
 		(ComboBox_GetCurSel(GetDlgItem(hMainDialog, IDC_IMAGE_OPTION)) == 1);
 	large_drive = (SelectedDrive.DiskSize > (1*TB));
 	if (large_drive)

@@ -97,6 +97,9 @@
 #define IsChecked(CheckBox_ID)      (IsDlgButtonChecked(hMainDialog, CheckBox_ID) == BST_CHECKED)
 #define MB_IS_RTL                   (right_to_left_mode?MB_RTLREADING|MB_RIGHT:0)
 #define CHECK_FOR_USER_CANCEL       if (IS_ERROR(FormatStatus)) goto out
+// Bit masks used for the display of additional image options in the UI
+#define IMOP_WINTOGO                0x01
+#define IMOP_PERSISTENCE            0x02
 
 #define safe_free(p) do {free((void*)p); p = NULL;} while(0)
 #define safe_mm_free(p) do {_mm_free((void*)p); p = NULL;} while(0)
@@ -279,6 +282,12 @@ enum checksum_type {
 #define IS_EFI_BOOTABLE(r)  (r.has_efi != 0)
 #define IS_BIOS_BOOTABLE(r) (HAS_BOOTMGR(r) || HAS_SYSLINUX(r) || HAS_WINPE(r) || HAS_GRUB(r) || HAS_REACTOS(r) || HAS_KOLIBRIOS(r))
 #define HAS_WINTOGO(r)      (HAS_BOOTMGR(r) && IS_EFI_BOOTABLE(r) && HAS_INSTALL_WIM(r) && (r.install_wim_version < MAX_WIM_VERSION))
+#ifdef RUFUS_TEST
+// TODO: have a better test for persistence/Linux
+#define HAS_PERSISTENCE(r)  HAS_SYSLINUX(r)
+#else
+#define HAS_PERSISTENCE(r)  FALSE
+#endif
 #define IS_FAT(fs)          ((fs == FS_FAT16) || (fs == FS_FAT32))
 
 typedef struct {
@@ -393,31 +402,28 @@ enum WindowsVersion {
 /*
  * Globals
  */
+extern RUFUS_UPDATE update;
+extern RUFUS_IMG_REPORT img_report;
 extern HINSTANCE hMainInstance;
 extern HWND hMainDialog, hLogDialog, hStatus, hDeviceList, hCapacity;
 extern HWND hPartitionScheme, hTargetSystem, hFileSystem, hClusterSize, hLabel, hBootType, hNBPasses, hLog;
 extern HWND hInfo, hProgress, hDiskID;
+extern WORD selected_langid;
+extern DWORD FormatStatus, DownloadStatus, MainThreadId;
+extern BOOL use_own_c32[NB_OLD_C32], detect_fakes, iso_op_in_progress, format_op_in_progress, right_to_left_mode;
+extern BOOL allow_dual_uefi_bios, large_drive, usb_debug;
+extern int64_t iso_blocking_status;
+extern uint8_t image_options;
+extern uint16_t rufus_version[3], embedded_sl_version[2];
+extern size_t ubuffer_pos;
+extern const int nb_steps[FS_MAX];
 extern float fScale;
+extern int nWindowsVersion, nWindowsBuildNumber, dialog_showing;
+extern int fs, bt, pt, tt;
+extern unsigned long syslinux_ldlinux_len[2];
+extern char WindowsVersionStr[128], ubuffer[UBUFFER_SIZE], embedded_sl_version_str[2][12];
 extern char szFolderPath[MAX_PATH], app_dir[MAX_PATH], temp_dir[MAX_PATH], system_dir[MAX_PATH], sysnative_dir[MAX_PATH];
 extern char* image_path;
-extern DWORD FormatStatus, DownloadStatus, MainThreadId;
-extern unsigned long syslinux_ldlinux_len[2];
-extern const int nb_steps[FS_MAX];
-extern BOOL use_own_c32[NB_OLD_C32], detect_fakes, iso_op_in_progress, format_op_in_progress, right_to_left_mode;
-extern BOOL allow_dual_uefi_bios, display_togo_option, large_drive, usb_debug;
-extern RUFUS_IMG_REPORT img_report;
-extern int64_t iso_blocking_status;
-extern uint16_t rufus_version[3], embedded_sl_version[2];
-extern int nWindowsVersion;
-extern int nWindowsBuildNumber;
-extern int fs, bt, pt, tt;
-extern char WindowsVersionStr[128];
-extern size_t ubuffer_pos;
-extern char ubuffer[UBUFFER_SIZE];
-extern char embedded_sl_version_str[2][12];
-extern RUFUS_UPDATE update;
-extern int dialog_showing;
-extern WORD selected_langid;
 
 /*
  * Shared prototypes
