@@ -340,6 +340,7 @@
     <ClCompile Include="..\src\stdlg.c" />
     <ClCompile Include="..\src\syslinux.c" />
     <ClCompile Include="..\src\dev.c" />
+    <ClCompile Include="..\src\ui.c" />
     <ClCompile Include="..\src\vhd.c" />
   </ItemGroup>
   <ItemGroup>
@@ -367,6 +368,7 @@
     <ClInclude Include="..\src\sys_types.h" />
     <ClInclude Include="..\src\dev.h" />
     <ClInclude Include="..\src\ui.h" />
+    <ClInclude Include="..\src\ui_data.h" />
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="..\src\rufus.manifest" />

@@ -37,6 +37,7 @@
 #include "resource.h"
 #include "msapi_utf8.h"
 #include "localization.h"
+#include "ui.h"
 
 #include "registry.h"
 #include "settings.h"
@@ -57,9 +58,6 @@ static const notification_info* notification_more_info;
 static WNDPROC update_original_proc = NULL;
 static HWINEVENTHOOK fp_weh = NULL;
 static char *fp_title_str = "Microsoft Windows", *fp_button_str = "Format disk";
-
-extern loc_cmd* selected_locale;
-extern int cbw, ddw, ddbh, bh;
 
 static int update_settings_reposition_ids[] = {
 	IDC_POLICY,
