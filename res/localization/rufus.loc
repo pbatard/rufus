@@ -567,6 +567,7 @@ t MSG_303 "Show the log"
 t MSG_304 "Create a disk image of the selected device"
 t MSG_305 "Use this option to indicate whether you want to use this device to install Windows on another disk, "
 	"or if you want to run Windows directly from this drive (Windows To Go)."
+t MSG_306 "Fast-zeroing drive: %0.1f%% completed"
 
 ################################################################################
 ############################# TRANSLATOR END COPY ##############################

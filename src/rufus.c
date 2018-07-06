@@ -102,7 +102,7 @@ BOOL use_own_c32[NB_OLD_C32] = { FALSE, FALSE }, mbr_selected_by_user = FALSE;
 BOOL iso_op_in_progress = FALSE, format_op_in_progress = FALSE, right_to_left_mode = FALSE, has_uefi_csm;
 BOOL enable_HDDs = FALSE, force_update = FALSE, enable_ntfs_compression = FALSE, no_confirmation_on_cancel = FALSE, lock_drive = TRUE;
 BOOL advanced_mode_device, advanced_mode_format, allow_dual_uefi_bios, detect_fakes, enable_vmdk, force_large_fat32, usb_debug;
-BOOL use_fake_units, preserve_timestamps = FALSE;
+BOOL use_fake_units, preserve_timestamps = FALSE, fast_zeroing = FALSE;
 BOOL zero_drive = FALSE, list_non_usb_removable_drives = FALSE, enable_file_indexing, large_drive = FALSE, write_as_image = FALSE;
 float fScale = 1.0f;
 int dialog_showing = 0, selection_default = BT_IMAGE, windows_to_go_selection = 0, persistence_unit_selection = 0;
@@ -3235,12 +3235,22 @@ relaunch:
 		// Alt-Z => Zero the drive
 		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'Z')) {
 			zero_drive = TRUE;
+			fast_zeroing = FALSE;
+			// Simulate a button click for Start
+			PostMessage(hDlg, WM_COMMAND, (WPARAM)IDC_START, 0);
+			continue;
+		}
+		// Ctrl-Alt-Z => Zero the drive while trying to skip empty blocks
+		if ((msg.message == WM_KEYDOWN) && (msg.wParam == 'Z') &&
+			(GetKeyState(VK_CONTROL) & 0x8000) && (GetKeyState(VK_MENU) & 0x8000)) {
+			zero_drive = TRUE;
+			fast_zeroing = TRUE;
 			// Simulate a button click for Start
 			PostMessage(hDlg, WM_COMMAND, (WPARAM)IDC_START, 0);
 			continue;
 		}
 
-		// Hazardous cheat modes require Ctrl + Alt
+		// Other hazardous cheat modes require Ctrl + Alt
 		// Ctrl-Alt-F => List non USB removable drives such as eSATA, etc - CAUTION!!!
 		if ((msg.message == WM_KEYDOWN) && (msg.wParam == 'F') &&
 			(GetKeyState(VK_CONTROL) & 0x8000) && (GetKeyState(VK_MENU) & 0x8000)) {

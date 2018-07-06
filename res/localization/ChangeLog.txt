@@ -19,6 +19,7 @@ o Version 1.0.24 (2018.??.??)
   - *NEW*      MSG_087
   - *NEW*      MSG_172
   - *NEW*      MSG_199
+  - *NEW*      MSG_306
 
 o Version 1.0.23 (2018.03.27)
   - All positioning ('m', 's') has now been removed as well as some controls, for the 3.0 UI redesign
