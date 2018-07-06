@@ -424,6 +424,7 @@ t MSG_196 "IMPORTANT: THIS DRIVE USES A NONSTANDARD SECTOR SIZE!\n\n"
 t MSG_197 "Nonstandard sector size detected"
 t MSG_198 "'Windows To Go' can only be installed on a GPT partitioned drive if it has "
 	"the FIXED attribute set. The current drive was not detected as FIXED."
+t MSG_199 "Persistent partition size"
 
 # Status messages - these messages will appear on the status bar
 t MSG_201 "Cancelling - Please wait..."

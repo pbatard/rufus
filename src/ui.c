@@ -30,7 +30,6 @@
 #include <string.h>
 #include <winioctl.h>
 #include <assert.h>
-#include <intrin.h>
 
 #include "rufus.h"
 #include "drive.h"
@@ -287,7 +286,7 @@ void PositionMainControls(HWND hDlg)
 	// Don't forget to add the dialog border width, since we resize the whole dialog
 	SetWindowPos(hDlg, NULL, -1, -1, fw + 2 * mw + dbw, rc.bottom - rc.top, SWP_NOMOVE | SWP_NOZORDER);
 
-	// Resize the height of the label and progress bar to the height of standard dropdowns
+	// Resize the height of the label, persistence size and progress bar to the height of standard dropdowns
 	hCtrl = GetDlgItem(hDlg, IDC_DEVICE);
 	GetWindowRect(hCtrl, &rc);
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
@@ -298,6 +297,10 @@ void PositionMainControls(HWND hDlg)
 	GetWindowRect(hCtrl, &rc);
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
 	SetWindowPos(hCtrl, hAdvancedFormatToolbar, rc.left, rc.top, rc.right - rc.left, ddh, SWP_NOZORDER);
+	hCtrl = GetDlgItem(hDlg, IDC_PERSISTENCE_SIZE);
+	GetWindowRect(hCtrl, &rc);
+	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
+	SetWindowPos(hCtrl, GetDlgItem(hDlg, IDC_PERSISTENCE_SLIDER), rc.left, rc.top, rc.right - rc.left, ddh, SWP_NOZORDER);
 	GetWindowRect(hProgress, &rc);
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
 	SetWindowPos(hProgress, hNBPasses, rc.left, rc.top, rc.right - rc.left, ddh, SWP_NOZORDER);
@@ -391,6 +394,25 @@ void PositionMainControls(HWND hDlg)
 	sz.cy = padding >> 16;
 	SendMessage(hHashToolbar, TB_SETPADDING, 0, MAKELPARAM(sz.cx + 3, sz.cy + 2));
 	SetWindowPos(hHashToolbar, hBootType, mw + bsw + ssw, rc.top, sbw, ddbh, 0);
+
+	// Reposition the Persistence slider and resize it to the boot selection width
+	hCtrl = GetDlgItem(hDlg, IDC_PERSISTENCE_SLIDER);
+	GetWindowRect(hCtrl, &rc);
+	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
+	SetWindowPos(hCtrl, hTargetSystem, mw, rc.top, bsw, rc.bottom - rc.top, 0);
+
+	// Reposition the Persistence Units dropdown (no need to resize)
+	hCtrl = GetDlgItem(hDlg, IDC_PERSISTENCE_UNITS);
+	GetWindowRect(hCtrl, &rc);
+	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
+	sz.cx = fw - (rc.right - rc.left);
+	SetWindowPos(hCtrl, hTargetSystem, mw + sz.cx, rc.top, rc.right - rc.left, rc.bottom - rc.top, 0);
+
+	// Reposition and resize the Persistence Size edit
+	hCtrl = GetDlgItem(hDlg, IDC_PERSISTENCE_SIZE);
+	GetWindowRect(hCtrl, &rc);
+	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
+	SetWindowPos(hCtrl, hTargetSystem, mw + bsw + ssw, rc.top, sz.cx - bsw - 2*ssw, rc.bottom - rc.top, 0);
 
 	// Reposition the CSM help tip
 	hCtrl = GetDlgItem(hDlg, IDS_CSM_HELP_TXT);
@@ -613,12 +635,44 @@ void ToggleAdvancedFormatOptions(BOOL enable)
 	InvalidateRect(hMainDialog, NULL, TRUE);
 }
 
+void SetPersistenceSlider(uint64_t pos, uint64_t max)
+{
+	char tmp[12];
+	int i;
+	IGNORE_RETVAL(ComboBox_SetCurSel(GetDlgItem(hMainDialog, IDC_PERSISTENCE_UNITS), persistence_unit_selection));
+	pos /= MB;
+	max /= MB;
+	for (i = 0; i < persistence_unit_selection; i++) {
+		pos /= 1024;
+		max /= 1024;
+	}
+	SendMessage(GetDlgItem(hMainDialog, IDC_PERSISTENCE_SLIDER), TBM_SETRANGEMIN, (WPARAM)FALSE, (LPARAM)0);
+	SendMessage(GetDlgItem(hMainDialog, IDC_PERSISTENCE_SLIDER), TBM_SETRANGEMAX, (WPARAM)FALSE, (LPARAM)max);
+	SendMessage(GetDlgItem(hMainDialog, IDC_PERSISTENCE_SLIDER), TBM_SETPOS, (WPARAM)TRUE, (LPARAM)pos);
+	static_sprintf(tmp, "%ld", (LONG)pos);
+	SetWindowTextA(GetDlgItem(hMainDialog, IDC_PERSISTENCE_SIZE), tmp);
+}
+
 // Toggle the Image Option dropdown (Windows To Go or persistence settings)
 void ToggleImageOption(uint8_t mask)
 {
+	static BOOL relaunch = FALSE;
+	static char image_option_txt[128] = "";
 	int i, shift = (popcnt8(image_options) >= 2) ? 0 : rh;
 
 	assert(popcnt8(mask) <= 1);
+
+	// mask is set to 0 when called during (re)init
+	if (mask == 0) {
+		if (relaunch) {
+			if ((selection_default == BT_IMAGE) && (image_path != NULL))
+				goto skip;
+		} else {
+			relaunch = TRUE;
+			// Keep a copy of the original image option translation, as it'll be easier to toggle
+			GetWindowTextU(GetDlgItem(hMainDialog, IDS_IMAGE_OPTION_TXT), image_option_txt, sizeof(image_option_txt));
+		}
+	}
 
 	if (mask & IMOP_WINTOGO) {
 		if (nWindowsVersion < WINDOWS_8)
@@ -649,12 +703,22 @@ void ToggleImageOption(uint8_t mask)
 		}
 	}
 
+skip:
 	// Hide or show the boot options
 	for (i = 0; i < ARRAYSIZE(image_option_toggle_ids); i++) {
 		ShowWindow(GetDlgItem(hMainDialog, image_option_toggle_ids[i][0]),
 			(image_options & image_option_toggle_ids[i][1]) ? SW_SHOW : SW_HIDE);
 	}
-
+	// Set the dropdown default selection
+	if (image_options & IMOP_WINTOGO) {
+		SetWindowTextU(GetDlgItem(hMainDialog, IDS_IMAGE_OPTION_TXT), image_option_txt);
+		IGNORE_RETVAL(ComboBox_SetCurSel(GetDlgItem(hMainDialog, IDC_IMAGE_OPTION), windows_to_go_selection));
+	} else if (image_options & IMOP_PERSISTENCE) {
+		SetWindowTextU(GetDlgItem(hMainDialog, IDS_IMAGE_OPTION_TXT), lmprintf(MSG_199));
+		// TODO: Use projected size and reuse existing pos. For now force the selected ISO to a 4 GB size
+		uint64_t max_size = SelectedDrive.DiskSize - 4 * GB;
+		SetPersistenceSlider(max_size / 2, max_size);
+	}
 	// If you don't force a redraw here, all kind of bad UI artifacts happen...
 	InvalidateRect(hMainDialog, NULL, TRUE);
 }

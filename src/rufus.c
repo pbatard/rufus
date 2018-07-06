@@ -105,7 +105,7 @@ BOOL advanced_mode_device, advanced_mode_format, allow_dual_uefi_bios, detect_fa
 BOOL use_fake_units, preserve_timestamps = FALSE;
 BOOL zero_drive = FALSE, list_non_usb_removable_drives = FALSE, enable_file_indexing, large_drive = FALSE, write_as_image = FALSE;
 float fScale = 1.0f;
-int dialog_showing = 0, selection_default, windows_to_go_selection = 0;
+int dialog_showing = 0, selection_default = BT_IMAGE, windows_to_go_selection = 0, persistence_unit_selection = 0;
 int default_fs, fs, bt, pt, tt; // file system, boot type, partition type, target type
 char szFolderPath[MAX_PATH], app_dir[MAX_PATH], system_dir[MAX_PATH], temp_dir[MAX_PATH], sysnative_dir[MAX_PATH];
 char embedded_sl_version_str[2][12] = { "?.??", "?.??" };
@@ -1568,7 +1568,6 @@ static void InitDialog(HWND hDlg)
 		uprintf("If you think you can help update this translation, please e-mail the author of this application");
 	}
 
-	selection_default = BT_IMAGE;
 	CreateTaskbarList();
 	SetTaskbarProgressState(TASKBAR_NORMAL);
 
@@ -1590,6 +1589,11 @@ static void InitDialog(HWND hDlg)
 	hCtrl = GetDlgItem(hMainDialog, IDC_IMAGE_OPTION);
 	IGNORE_RETVAL(ComboBox_SetItemData(hCtrl, ComboBox_AddStringU(hCtrl, lmprintf(MSG_117)), FALSE));
 	IGNORE_RETVAL(ComboBox_SetItemData(hCtrl, ComboBox_AddStringU(hCtrl, lmprintf(MSG_118)), TRUE));
+
+	// Fill up the Persistence Units dropdown
+	hCtrl = GetDlgItem(hMainDialog, IDC_PERSISTENCE_UNITS);
+	for (i = 0; i < 3; i++)
+		IGNORE_RETVAL(ComboBox_SetItemData(hCtrl, ComboBox_AddStringU(hCtrl, lmprintf(MSG_022 + i)), i));
 
 	// Fill up the MBR masqueraded disk IDs ("8 disks should be enough for anybody")
 	IGNORE_RETVAL(ComboBox_SetItemData(hDiskID, ComboBox_AddStringU(hDiskID, lmprintf(MSG_030, LEFT_TO_RIGHT_EMBEDDING "0x80" POP_DIRECTIONAL_FORMATTING)), 0x80));
@@ -1614,6 +1618,8 @@ static void InitDialog(HWND hDlg)
 	AdjustForLowDPI(hDlg);
 	// Because we created the log dialog before we computed our sizes, we need to send a custom message
 	SendMessage(hLogDialog, UM_RESIZE_BUTTONS, 0, 0);
+	// Limit the amount of characters for the Persistence size field
+	SendMessage(GetDlgItem(hDlg, IDC_PERSISTENCE_SIZE), EM_LIMITTEXT, 7, 0);
 	// Create the status line and initialize the taskbar icon for progress overlay
 	CreateStatusBar();
 
@@ -1856,9 +1862,10 @@ out:
 static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	static DWORD DeviceNum = 0;
-	static uint64_t LastRefresh = 0;
+	static uint64_t LastRefresh = 0, pos;
 	static BOOL first_log_display = TRUE, isMarquee = FALSE, queued_hotplug_event = FALSE;
 	static ULONG ulRegister = 0;
+	static LONG lPos;
 	static LPITEMIDLIST pidlDesktop = NULL;
 	static SHChangeNotifyEntry NotifyEntry;
 	static DWORD_PTR thread_affinity[4];
@@ -2038,6 +2045,19 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				break;
 			SetFileSystemAndClusterSize(NULL);
 			windows_to_go_selection = ComboBox_GetCurSel(GetDlgItem(hDlg, IDC_IMAGE_OPTION));
+			break;
+		case IDC_PERSISTENCE_UNITS:
+			if (HIWORD(wParam) != CBN_SELCHANGE)
+				break;
+			if (ComboBox_GetCurSel(GetDlgItem(hDlg, IDC_PERSISTENCE_UNITS)) == persistence_unit_selection)
+				break;
+			GetWindowTextA(GetDlgItem(hMainDialog, IDC_PERSISTENCE_SIZE), tmp, sizeof(tmp));
+			pos = atol(tmp) * MB;
+			for (i = 0; i < persistence_unit_selection; i++)
+				pos *= 1024;
+			persistence_unit_selection = ComboBox_GetCurSel(GetDlgItem(hDlg, IDC_PERSISTENCE_UNITS));
+			// TODO: Use projected size. For now force the selected ISO to a 4 GB size
+			SetPersistenceSlider(pos, SelectedDrive.DiskSize - 4 * GB);
 			break;
 		case IDC_NB_PASSES:
 			if (HIWORD(wParam) != CBN_SELCHANGE)
@@ -2377,6 +2397,12 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			}
 			break;
 		}
+		break;
+
+	case WM_HSCROLL:
+		lPos = (LONG)SendMessage(GetDlgItem(hMainDialog, IDC_PERSISTENCE_SLIDER), TBM_GETPOS, 0, 0);
+		sprintf(tmp, "%ld", lPos);
+		SetWindowTextA(GetDlgItem(hMainDialog, IDC_PERSISTENCE_SIZE), tmp);
 		break;
 
 	case WM_DROPFILES:

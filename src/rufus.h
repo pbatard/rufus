@@ -282,12 +282,7 @@ enum checksum_type {
 #define IS_EFI_BOOTABLE(r)  (r.has_efi != 0)
 #define IS_BIOS_BOOTABLE(r) (HAS_BOOTMGR(r) || HAS_SYSLINUX(r) || HAS_WINPE(r) || HAS_GRUB(r) || HAS_REACTOS(r) || HAS_KOLIBRIOS(r))
 #define HAS_WINTOGO(r)      (HAS_BOOTMGR(r) && IS_EFI_BOOTABLE(r) && HAS_INSTALL_WIM(r) && (r.install_wim_version < MAX_WIM_VERSION))
-#ifdef RUFUS_TEST
-// TODO: have a better test for persistence/Linux
-#define HAS_PERSISTENCE(r)  HAS_SYSLINUX(r)
-#else
-#define HAS_PERSISTENCE(r)  FALSE
-#endif
+#define HAS_PERSISTENCE(r)  (r.has_casper)
 #define IS_FAT(fs)          ((fs == FS_FAT16) || (fs == FS_FAT32))
 
 typedef struct {
@@ -320,6 +315,7 @@ typedef struct {
 	BOOLEAN uses_minint;
 	BOOLEAN compression_type;
 	BOOLEAN is_vhd;
+	BOOLEAN has_casper;
 	uint16_t sl_version;	// Syslinux/Isolinux version
 	char sl_version_str[12];
 	char sl_version_ext[32];

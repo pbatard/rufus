@@ -50,7 +50,8 @@ extern BOOL advanced_mode_device, advanced_mode_format, force_large_fat32;
 extern loc_cmd* selected_locale;
 extern const char *sfd_name, *flash_type[BADLOCKS_PATTERN_TYPES];
 extern char *short_image_path;
-extern int advanced_device_section_height, advanced_format_section_height, windows_to_go_selection;
+extern int advanced_device_section_height, advanced_format_section_height;
+extern int windows_to_go_selection, persistence_unit_selection;
 extern int selection_default, cbw, ddw, ddbh, bh;
 
 extern void SetComboEntry(HWND hDlg, int data);
@@ -61,6 +62,7 @@ extern void GetFullWidth(HWND hDlg);
 extern void PositionMainControls(HWND hDlg);
 extern void AdjustForLowDPI(HWND hDlg);
 extern void SetSectionHeaders(HWND hDlg);
+extern void SetPersistenceSlider(uint64_t pos, uint64_t max);
 extern void ToggleAdvancedDeviceOptions(BOOL enable);
 extern void ToggleAdvancedFormatOptions(BOOL enable);
 extern void ToggleImageOption(uint8_t mask);
