@@ -45,7 +45,10 @@ config.status
 config.sub
 cov-int
 cov-int.zip
-embedded.loc
-rufus_files
 depcomp
+embedded.loc
+res/localization/.vs
+res/localization/bin
+res/localization/obj
+rufus_files
 stamp-h1
