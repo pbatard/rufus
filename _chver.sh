@@ -24,6 +24,7 @@ sed -i -e "s/^AC_INIT(\[\([^ ]*\)\], \[[^ ]*\]\(.*\)/AC_INIT([\1], [$MAJOR.$MINO
 cat > cmd.sed <<\_EOF
 s/^\([ \t]*\)\(FILE\|PRODUCT\)VERSION\([ \t]*\)[0-9]*,[0-9]*\(.*\)/\1\2VERSION\3@@MAJOR@@,@@MINOR@@\4/
 s/^\([ \t]*\)VALUE\([ \t]*\)"\(File\|Product\)Version",\([ \t]*\)"[0-9]*\.[0-9]*\.\(.*\)/\1VALUE\2"\3Version",\4"@@MAJOR@@.@@MINOR@@.\5/
+s/^\([ \t]*\)VALUE\([ \t]*\)"OriginalFilename",\([ \t]*\)"rufus-[0-9]*\.[0-9]*\.exe\(.*\)/\1VALUE\2"OriginalFilename",\3"rufus-@@MAJOR@@.@@MINOR@@.exe\4/
 s/^\(.*\)"Rufus [0-9]*\.[0-9]*\.\(.*\)"\(.*\)/\1"Rufus @@MAJOR@@.@@MINOR@@.\2"\3/
 s/^\([ \t]*\)Version="[0-9]*\.[0-9]*\.\(.*\)"\(.*\)/\1Version="@@MAJOR@@.@@MINOR@@.\2"\3/
 s/^set VERSION=[0-9]*\.[0-9]*/set VERSION=@@MAJOR@@.@@MINOR@@/

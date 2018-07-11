@@ -146,7 +146,7 @@ namespace pollock
                 switch (data[0])
                 {
                     case '#':
-                        comment += data.Substring(1).Trim() + " ";
+                        comment += data.Substring(1).Trim() + "\n";
                         break;
                     case 'l':
                         comment = null;
@@ -204,7 +204,7 @@ namespace pollock
                         last_key = parts[1];
                         if (comment != null)
                         {
-                            lang.comments[last_key] = comment.Trim().Replace(" below", "").Replace("The following", "This");
+                            lang.comments[last_key] = comment.Trim();
                             comment = null;
                         }
                         break;
@@ -276,9 +276,6 @@ namespace pollock
                     {
                         foreach (var msg in section.Value)
                         {
-                            // Not very efficient but hey
-                            if (msg.id == "SECTION")
-                                continue;
                             writer.WriteLine();
                             if (section.Key == "MSG")
                                 writer.WriteLine($"#. • {msg.id}");
@@ -286,8 +283,11 @@ namespace pollock
                                 writer.WriteLine($"#. • {section.Key} → {msg.id}");
                             if (lang.comments.ContainsKey(msg.id))
                             {
-                                writer.WriteLine($"#.");
-                                writer.WriteLine($"#. {lang.comments[msg.id]}");
+                                if (is_pot)
+                                    writer.WriteLine("#.");
+                                foreach (var comment in lang.comments[msg.id].Split('\n'))
+                                    if (comment.Trim() != "")
+                                        writer.WriteLine((is_pot ? "#. " : "# ") + comment);
                             }
                             if (is_pot)
                             {
@@ -329,7 +329,7 @@ namespace pollock
             string[] msg_data = new string[2] { null, null };
             Language lang = new Language();
             List<Id> ids = new List<Id>();
-            Dictionary<string, Dictionary<string, string>> comments = new Dictionary<string, Dictionary<string, string>>();
+            List<string> comments = new List<string>();
             List<string> codes = new List<string>();
             int msg_type = 0;
             foreach (var line in lines)
@@ -365,24 +365,7 @@ namespace pollock
                         lang.lcid = options[LANG_LCID];
                     }
                 }
-                // Break or EOF => Process the previous section
-                if (string.IsNullOrEmpty(data) || (line_nr == lines.Count()))
-                {
-                    if ((!string.IsNullOrEmpty(msg_data[0])) && (ids.Count() != 0))
-                    {
-                        foreach (var id in ids)
-                        {
-                            // Ignore messages that have the same translation as en-US
-                            if (msg_data[0] == msg_data[1])
-                                continue;
-                            if (!lang.sections.ContainsKey(id.group))
-                                lang.sections.Add(id.group, new List<Message>());
-                            lang.sections[id.group].Add(new Message(id.id, msg_data[is_pot?0:1]));
-                        }
-                    }
-                    ids = new List<Id>();
-                }
-                else if (data.StartsWith("\""))
+                if (data.StartsWith("\""))
                 {
                     if (data[data.Length - 1] != '"')
                     {
@@ -426,7 +409,40 @@ namespace pollock
                             ids.Add(new Id(str[0].Trim(), str[1].Trim()));
                     }
                 }
+                else if (data.StartsWith("#. "))
+                {
+                    if (comments == null)
+                        comments = new List<string>();
+                    comments.Add(data.Substring(2).Trim());
+                }
+                // Break or EOF => Process the previous section
+                if (string.IsNullOrEmpty(data) || (line_nr == lines.Count()))
+                {
+                    if ((!string.IsNullOrEmpty(msg_data[0])) && (ids.Count() != 0))
+                    {
+                        foreach (var id in ids)
+                        {
+                            if (comments != null)
+                            {
+                                lang.comments.Add(id.id, "");
+                                foreach (var comment in comments)
+                                    lang.comments[id.id] += comment + "\n";
+                            }
+                            // Ignore messages that have the same translation as en-US
+                            if (msg_data[0] == msg_data[1])
+                                continue;
+                            if (!lang.sections.ContainsKey(id.group))
+                                lang.sections.Add(id.group, new List<Message>());
+                            lang.sections[id.group].Add(new Message(id.id, msg_data[is_pot ? 0 : 1]));
+                        }
+                    }
+                    ids = new List<Id>();
+                    comments = null;
+                }
             }
+
+            // Sort the MSG section alphabetically
+            lang.sections["MSG"] = lang.sections["MSG"].OrderBy(x => x.id).ToList();
 
             watch.Stop();
             Console.WriteLine($"{(cancel_requested ? "CANCELLED after" : "DONE in")}" +
@@ -454,22 +470,19 @@ namespace pollock
             var sections = lang.sections.Keys.ToList();
             foreach (var section in sections)
             {
-                if (section == "MSG")
-                    continue;
                 writer.WriteLine();
-                writer.WriteLine($"g {section}");
+                if (section != "MSG")
+                    writer.WriteLine($"g {section}");
                 foreach (var msg in lang.sections[section])
                 {
+                    if (lang.comments.ContainsKey(msg.id))
+                    {
+                        foreach (var l in lang.comments[msg.id].Split('\n'))
+                            if (l.Trim() != "")
+                                writer.WriteLine($"# {l}");
+                    }
                     writer.WriteLine($"t {msg.id} \"{msg.str}\"");
                 }
-            }
-            // Sort the MSG_### entries as they may out of order
-            SortedDictionary<string, string> messages =
-                new SortedDictionary<string, string>(lang.sections["MSG"].ToDictionary(x => x.id, x => x.str));
-            writer.WriteLine();
-            foreach (var msg in messages)
-            {
-                writer.WriteLine($"t {msg.Key} \"{msg.Value}\"");
             }
         }
 
@@ -563,6 +576,8 @@ namespace pollock
             Console.WriteLine($"{app_name} {app_version} - Poedit to rufus.loc conversion utility");
 
             var path = @"C:\pollock";
+
+            // NB: Can find PoEdit from Computer\HKEY_CURRENT_USER\Software\Classes\Local Settings\Software\Microsoft\Windows\Shell\MuiCache
 
             //CreatePoFiles(path, ParseLocFile(@"C:\rufus\res\localization"));
 
