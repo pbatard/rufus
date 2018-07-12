@@ -19,11 +19,14 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 
 [assembly: AssemblyTitle("Pollock")]
 [assembly: AssemblyDescription("Poedit ↔ Rufus loc conversion utility")]
@@ -85,6 +88,11 @@ namespace pollock
         private const string LANG_LCID = "X-Rufus-LCID";
         private static Encoding encoding = new UTF8Encoding(false);
         private static List<string> rtl_languages = new List<string> { "ar-SA", "he-IL", "fa-IR" };
+        private static System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+        private static WebClient wc = new WebClient();
+        private static int download_status;
+        private static bool in_progress = false;
+        private static double speed = 0.0f;
 
         /// <summary>
         /// Wait for a key to be pressed.
@@ -104,11 +112,10 @@ namespace pollock
         /// </summary>
         /// <param name="path">The directy where the loc file is located.</param>
         /// <returns>A list of Language elements.</returns>
-        static List<Language> ParseLocFile(string path)
+        static List<Language> ParseLocFile(string path, string id = null)
         {
             var rufus_loc = path + @"\rufus.loc";
             var rufus_pot = path + @"\rufus.pot";
-            var watch = System.Diagnostics.Stopwatch.StartNew();
             var lines = File.ReadAllLines(rufus_loc);
             int line_nr = 0;
             string format = "D" + (int)(Math.Log10((double)lines.Count()) + 0.99999);
@@ -118,6 +125,9 @@ namespace pollock
             List<string> parts;
             List<Language> langs = new List<Language>();
             Language lang = null;
+            bool skip_line = false;
+
+            sw.Start();
 
             if (!File.Exists(rufus_loc))
             {
@@ -143,6 +153,8 @@ namespace pollock
                 }
                 if (string.IsNullOrEmpty(data))
                     continue;
+                if (skip_line && data[0] != 'l')
+                    continue;
                 switch (data[0])
                 {
                     case '#':
@@ -150,9 +162,6 @@ namespace pollock
                         break;
                     case 'l':
                         comment = null;
-                        if (lang != null)
-                            langs.Add(lang);
-                        lang = new Language();
                         parts = Regex.Matches(data, @"[\""].+?[\""]|[^ ]+")
                             .Cast<Match>()
                             .Select(m => m.Value)
@@ -162,6 +171,19 @@ namespace pollock
                             Console.WriteLine("Error: Invalid 'l' command");
                             return null;
                         }
+                        string lid = parts[1].Replace("\"", "");
+                        if (id != null)
+                        {
+                            if ((!skip_line) && (id != lid) && (lid != "en-US"))
+                                skip_line = true;
+                            else if (skip_line && (id == lid))
+                                skip_line = false;
+                            if (skip_line)
+                                break;
+                        }
+                        if (lang != null)
+                            langs.Add(lang);
+                        lang = new Language();
                         lang.id = parts[1].Replace("\"", "");
                         lang.name = parts[2].Replace("\"", "");
                         Console.WriteLine($"Found language {lang.id} '{lang.name}'");
@@ -222,9 +244,10 @@ namespace pollock
             if (lang != null)
                 langs.Add(lang);
 
-            watch.Stop();
+            sw.Stop();
             Console.WriteLine($"{(cancel_requested ? "CANCELLED after" : "DONE in")}" +
-                $" {watch.ElapsedMilliseconds / 1000.0}s.");
+                $" {sw.ElapsedMilliseconds / 1000.0}s.");
+            sw.Reset();
 
             return langs;
         }
@@ -235,7 +258,7 @@ namespace pollock
         /// <param name="path">The path where the .po/.pot files should be created.</param>
         /// <param name="langs">A lits of Languages elements</param>
         /// <returns>true on success, false on error.</returns>
-        static bool CreatePoFiles(string path, List<Language> langs)
+        static bool CreatePoFiles(string path, List<Language> langs, bool merge_pot = false)
         {
             if (langs == null)
                 return false;
@@ -244,14 +267,28 @@ namespace pollock
             if (en_US == null)
                 return false;
 
+            var msg_to_ids = new Dictionary<string, List<Id>>();
+
+            // Build a dictionary of message string to List<Id> so that we can identify duplicates and remove them
+            foreach (var section in en_US.sections)
+            {
+                foreach (var msg in section.Value)
+                {
+                    if (msg_to_ids.ContainsKey(msg.str))
+                        msg_to_ids[msg.str].Add(new Id(section.Key, msg.id));
+                    else
+                        msg_to_ids.Add(msg.str, new List<Id>() { new Id(section.Key, msg.id) });
+                }
+            }
+
             foreach (var lang in langs)
             {
                 bool is_pot = (lang.id == "en-US");
                 var target = path + @"\" + (is_pot ? "rufus.pot" : lang.id + ".po");
                 Console.WriteLine($"Creating '{target}'");
+
                 using (var writer = new StreamWriter(target, false, encoding))
                 {
-                    writer.WriteLine("#, fuzzy");
                     writer.WriteLine();
                     writer.WriteLine("msgid \"\"");
                     writer.WriteLine("msgstr \"\"");
@@ -272,15 +309,28 @@ namespace pollock
                     writer.WriteLine($"\"X-Rufus-LanguageName: {lang.name}\\n\"");
                     writer.WriteLine($"\"X-Rufus-LCID: {lang.lcid}\\n\"");
 
+                    var dupes = new List<string>();
+
                     foreach (var section in lang.sections)
                     {
                         foreach (var msg in section.Value)
                         {
+                            var en_str = en_US.sections[section.Key].Find(x => x.id == msg.id).str;
+
+                            // Handle duplicates
+                            if (dupes.Contains(en_str))
+                                continue;
                             writer.WriteLine();
-                            if (section.Key == "MSG")
-                                writer.WriteLine($"#. • {msg.id}");
-                            else
-                                writer.WriteLine($"#. • {section.Key} → {msg.id}");
+                            foreach (var id in msg_to_ids[en_str])
+                            {
+                                if (id.group == "MSG")
+                                    writer.WriteLine($"#. • {id.id}");
+                                else
+                                    writer.WriteLine($"#. • {id.group} → {id.id}");
+                            }
+                            if (msg_to_ids[en_str].Count > 1)
+                                dupes.Add(en_str);
+
                             if (lang.comments.ContainsKey(msg.id))
                             {
                                 if (is_pot)
@@ -296,7 +346,7 @@ namespace pollock
                             }
                             else
                             {
-                                writer.WriteLine($"msgid {en_US.sections[section.Key].Find(x => x.id == msg.id).str}");
+                                writer.WriteLine($"msgid {en_str}");
                                 writer.WriteLine($"msgstr {msg.str}");
                             }
                         }
@@ -321,7 +371,6 @@ namespace pollock
             }
             Console.WriteLine($"Importing data from '{file}':");
             bool is_pot = file.EndsWith(".pot");
-            var watch = System.Diagnostics.Stopwatch.StartNew();
             var lines = File.ReadAllLines(file);
             string format = "D" + (int)(Math.Log10((double)lines.Count()) + 0.99999);
             int line_nr = 0;
@@ -332,6 +381,9 @@ namespace pollock
             List<string> comments = new List<string>();
             List<string> codes = new List<string>();
             int msg_type = 0;
+
+            sw.Start();
+
             foreach (var line in lines)
             {
                 if (cancel_requested)
@@ -444,9 +496,10 @@ namespace pollock
             // Sort the MSG section alphabetically
             lang.sections["MSG"] = lang.sections["MSG"].OrderBy(x => x.id).ToList();
 
-            watch.Stop();
+            sw.Stop();
             Console.WriteLine($"{(cancel_requested ? "CANCELLED after" : "DONE in")}" +
-                $" {watch.ElapsedMilliseconds / 1000.0}s.");
+                $" {sw.ElapsedMilliseconds / 1000.0}s.");
+            sw.Reset();
 
             return lang;
         }
@@ -496,8 +549,6 @@ namespace pollock
         {
             if (lang == null)
                 return false;
-            Encoding encoding = new UTF8Encoding(false);
-            var watch = System.Diagnostics.Stopwatch.StartNew();
             var target = path + @"\rufus.loc";
             var lines = File.ReadAllLines(target);
             using (var writer = new StreamWriter(target, false, encoding))
@@ -532,9 +583,10 @@ namespace pollock
         {
             if ((list == null) || (list.Count == 0))
                 return false;
-
-            var watch = System.Diagnostics.Stopwatch.StartNew();
             var target = path + @"\rufus.loc";
+
+            sw.Start();
+
             Console.WriteLine($"Creating '{target}':");
             using (var writer = new StreamWriter(target, false, encoding))
             {
@@ -559,10 +611,81 @@ namespace pollock
                     WriteLoc(writer, lang);
                 }
             }
-            watch.Stop();
+
+            sw.Stop();
             Console.WriteLine($"{(cancel_requested ? "CANCELLED after" : "DONE in")}" +
-                $" {watch.ElapsedMilliseconds / 1000.0}s.");
+                $" {sw.ElapsedMilliseconds / 1000.0}s.");
+            sw.Reset();
+
             return true;
+        }
+
+        static bool DownloadFile(string url, string dest)
+        {
+            download_status = 0;
+            in_progress = false;
+            using (wc)
+            {
+                wc.DownloadFileCompleted += new AsyncCompletedEventHandler(DownloadCompleted);
+                wc.DownloadProgressChanged += new DownloadProgressChangedEventHandler(DownloadProgress);
+
+                Console.WriteLine($"Downloading {url}:");
+                sw.Start();
+
+                try
+                {
+                    wc.DownloadFileAsync(new Uri(url), dest);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("ERROR: " + e.Message);
+                    return false;
+                }
+            }
+            while (download_status == 0)
+                Thread.Sleep(100);
+
+            Console.WriteLine();
+            if (download_status == 1)
+            {
+                Console.WriteLine("Download complete");
+                return true;
+            }
+            
+            Console.WriteLine("Download has been canceled.");
+            return false;
+        }
+
+        // The event that will fire whenever the progress of the WebClient is changed
+        static void DownloadProgress(object sender, DownloadProgressChangedEventArgs e)
+        {
+            if (cancel_requested)
+            {
+                wc.CancelAsync();
+                return;
+            }
+            if (in_progress)
+                return;
+
+            // Prevent this call from being re-entrant
+            in_progress = true;
+
+            speed = (e.BytesReceived / 1024d / sw.Elapsed.TotalSeconds);
+            Console.SetCursorPosition(0, Console.CursorTop);
+            Console.Write($" {e.ProgressPercentage.ToString("000.0")} % ({speed.ToString("0.00")} KB/s)");
+            in_progress = false;
+        }
+
+        // The event that will trigger when the WebClient is completed
+        static void DownloadCompleted(object sender, AsyncCompletedEventArgs e)
+        {
+            if (!e.Cancelled)
+            {
+                Console.SetCursorPosition(0, Console.CursorTop);
+                Console.Write($" 100.0 % ({speed.ToString("0.00")} KB/s)");
+            }
+            sw.Reset();
+            download_status = (e.Cancelled) ? 2 : 1;
         }
 
         static void Main(string[] args)
@@ -576,23 +699,83 @@ namespace pollock
             Console.WriteLine($"{app_name} {app_version} - Poedit to rufus.loc conversion utility");
 
             var path = @"C:\pollock";
+            var loc = path + @"\download.loc";
+
+            // Download the loc file
+            //var url = "https://github.com/pbatard/rufus/raw/master/res/localization/rufus.loc";
+            //if (!DownloadFile(url, loc))
+            //    goto Exit;
+
+            // Convert to CRLF and get all the language ids
+            var lines = File.ReadAllLines(loc);
+            string id = "", name = "";
+            var list = new List<string[]>();
+            using (var writer = new StreamWriter(loc, false, encoding))
+            {
+                foreach (var line in lines)
+                {
+                    if (line.StartsWith("l "))
+                    {
+                        var el = line.Split('\"');
+                        id = el[1];
+                        name = el[3].Split('(')[0].Trim();
+                    }
+                    else if (line.StartsWith("v "))
+                    {
+                        if (id != "en-US")
+                            list.Add(new string[] { name, id, line.Substring(2) });
+                    }
+                    writer.WriteLine(line);
+                }
+            }
+
+Menu:
+            Console.WriteLine();
+            Console.WriteLine("Please enter the number of the language you want to edit or 'q' to quit:");
+            Console.WriteLine();
+            int split = (list.Count + 1) / 2;
+            for (int i = 0; i < split; i++)
+            {
+                name = $"{list[i][0]} ({list[i][1]})";
+                Console.Write($"[{(i+1).ToString("00")}] {name,-29} (v{list[i][2]})");
+                name = $"{list[i + split][0]} ({list[i + split][1]})";
+                Console.WriteLine($"  |  [{(i + 1 + split).ToString("00")}] {name,-29} (v{list[i + split][2]})");
+            }
+            Console.WriteLine();
+
+Retry:
+            string input = Console.ReadLine();
+            if (input.StartsWith("q"))
+                goto Exit;
+            if (!Int32.TryParse(input, out int number) || (number <= 0) || (number > list.Count))
+            {
+                if (input.StartsWith("m"))
+                    goto Menu;
+                Console.WriteLine("Invalid selection (Type 'm' to display the menu again)");
+                goto Retry;
+            }
+
+            number--;
+            Console.WriteLine($"{list[number][0]} was selected");
+            CreatePoFiles(path, ParseLocFile(path, list[number][1]));
 
             // NB: Can find PoEdit from Computer\HKEY_CURRENT_USER\Software\Classes\Local Settings\Software\Microsoft\Windows\Shell\MuiCache
 
             //CreatePoFiles(path, ParseLocFile(@"C:\rufus\res\localization"));
 
-            var en_US = ParsePoFile(path + @"\rufus.pot");
-            var fr_FR = ParsePoFile(path + @"\fr-FR.po");
-            var ar_SA = ParsePoFile(path + @"\ar-SA.po");
-            var vi_VN = ParsePoFile(path + @"\vi-VN.po");
-            List<Language> list = new List<Language>();
-            list.Add(en_US);
-            list.Add(ar_SA);
-            list.Add(fr_FR);
-            list.Add(vi_VN);
-            SaveLocFile(path, list);
+            //var en_US = ParsePoFile(path + @"\rufus.pot");
+            //var fr_FR = ParsePoFile(path + @"\fr-FR.po");
+            //var ar_SA = ParsePoFile(path + @"\ar-SA.po");
+            //var vi_VN = ParsePoFile(path + @"\vi-VN.po");
+            //List<Language> list = new List<Language>();
+            //list.Add(en_US);
+            //list.Add(ar_SA);
+            //list.Add(fr_FR);
+            //list.Add(vi_VN);
+            //SaveLocFile(path, list);
             //            UpdateLocFile(path + @"\test", fr_FR);
 
+Exit:
             WaitForKey();
         }
     }

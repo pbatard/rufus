@@ -10,6 +10,7 @@ skip_commits:
   files:
     - res/*
     - '**/*.cmd'
+    - '**/*.cs'
     - '**/*.md'
     - '**/*.sh'
     - '**/*.txt'
