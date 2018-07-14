@@ -114,7 +114,6 @@ namespace pollock
         private static Encoding encoding = new UTF8Encoding(false);
         private static List<string> rtl_languages = new List<string> { "ar-SA", "he-IL", "fa-IR" };
         private static Stopwatch sw = new System.Diagnostics.Stopwatch();
-        private static WebClient wc = new WebClient();
         private static DateTime last_changed = DateTime.MinValue;
         private static int download_status;
         private static int console_x_pos;
@@ -726,12 +725,15 @@ namespace pollock
             {
                 HttpWebResponse response = (HttpWebResponse)request.GetResponse();
                 status = response.StatusCode;
+                response.Close();
             }
             catch (WebException we)
             {
                 HttpWebResponse response = we.Response as HttpWebResponse;
                 status = response.StatusCode;
+                response.Close();
             }
+            request.Abort();
             switch (status)
             {
                 case HttpStatusCode.OK:
@@ -754,7 +756,7 @@ namespace pollock
             if (!ValidateDownload(url))
                 return null;
 
-            using (wc)
+            using (WebClient wc = new WebClient())
             {
                 try
                 {
@@ -789,7 +791,7 @@ namespace pollock
                 return false;
 
             console_x_pos = Console.CursorLeft;
-            using (wc)
+            using (WebClient wc = new WebClient())
             {
                 wc.CachePolicy = new RequestCachePolicy(RequestCacheLevel.NoCacheNoStore);
                 wc.DownloadFileCompleted += new AsyncCompletedEventHandler(DownloadCompleted);
@@ -823,13 +825,13 @@ namespace pollock
         {
             if (cancel_requested)
             {
-                wc.CancelAsync();
+                ((WebClient)sender).CancelAsync();
                 return;
             }
-            if (in_progress)
-                return;
 
             // Prevent this call from being re-entrant
+            if (in_progress)
+                return;
             in_progress = true;
 
             speed = (e.BytesReceived / 1024d / sw.Elapsed.TotalSeconds);
