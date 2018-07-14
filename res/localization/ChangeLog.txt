@@ -15,13 +15,13 @@ content. PLEASE, do not just look at this Changelog when updating your
 translation, but always use the English section of rufus.loc as your base.
 For instance, MSG_114, that was introduced in v1.0.8 is MORE than one line!
 
-o Version 1.0.24 (2018.??.??)
+o v3.2 (2018.??.??)
   - *NEW*      MSG_087
   - *NEW*      MSG_172
   - *NEW*      MSG_199
   - *NEW*      MSG_306
 
-o Version 1.0.23 (2018.03.27)
+o v3.0 (2018.03.27)
   - All positioning ('m', 's') has now been removed as well as some controls, for the 3.0 UI redesign
   - *NEW*      IDS_DRIVE_PROPERTIES_TXT "Drive Properties"
   - *NEW*      IDS_BOOT_SELECTION_TXT "Boot selection"
@@ -73,7 +73,7 @@ o Version 1.0.23 (2018.03.27)
                for the languages who did that. This means that "Save Log", "Clear Log" "Close Log" have become "Save", "Clear", "Close".
                *PLEASE* verify that the modification looks correct in your language.
 
-o Version 1.0.22 (2017.07.17)
+o v2.16 (2017.07.17)
   - *NEW* MSG_295 "Warning: Unofficial version"
   - *NEW* MSG_296 "This version of Rufus was NOT produced by its official developer(s).\n\nAre you sure you want to run it?"
   - *NEW* MSG_297 "Truncated ISO detected"
@@ -82,7 +82,7 @@ o Version 1.0.22 (2017.07.17)
     "official ones.\n\nNote that you can compute the MD5 or SHA in Rufus by clicking the '#' button."
   Note: You can test MSG_297/MSG_298 using https://rufus.akeo.ie/testing/arch_trunc.iso (A truncated version of archlinux-2017.07.01-x86_64.iso)
 
-o Version 1.0.21 (2017.01.16)
+o v2.12 (2017.01.16)
   - *NEW* MSG_288 "Missing elevated privileges"
   - *NEW* MSG_289 "This application can only run with elevated privileges"
     This message, along with the previous, is just to notify the user when they have
@@ -104,7 +104,7 @@ o Version 1.0.21 (2017.01.16)
   - *NEW* MSG_294 "This version of Windows is no longer supported by Rufus."
     These two messages are not used anywhere yet, but may be needed in a future prompt.
 
-o Version 1.0.20 (2016.05.09)
+o v2.9 (2016.05.09)
   - *NEW* MSG_286 "Zeroing drive: %0.1f%% completed"
     Used when filling a whole drive with zero bytes, to display progress in percent (e.g. "Zeroing drive: 12.3% completed")
     Can be tested with Alt-Z (CAUTION: THIS WILL COMPLETELY ERASE THE SELECTED DRIVE!!)
@@ -112,7 +112,7 @@ o Version 1.0.20 (2016.05.09)
     Note, this message is followed by either "enabled"/"disabled" (see MSG_250/251) and is similar to MSG_253
     The message appears on the status bar and can be tested with Ctrl-Alt-F.
 
-o Version 1.0.19 (2015.10.15)
+o v2.5 (2015.10.15)
     Note: The following message can be tested by pressing Alt-, (That's the 'Alt' and 'comma' keys on your keyboard)
           In case the message below is not clear, you can consider that it says "Exclusive locking of the USB drive"
   - *NEW* MSG_282 "Exclusive USB drive locking"
@@ -123,7 +123,7 @@ o Version 1.0.19 (2015.10.15)
   - *NEW* MSG_285 "The downloaded executable is signed by '%s'.\nThis is not a signature we recognize and could "
                   "indicate some form of malicious activity...\nAre you sure you want to run this file?"
 
-o Version 1.0.18 (2015.09.03)
+o v2.4 (2015.09.03)
   - Changed MSG_081 "Unsupported ISO" -> "Unsupported image"
   - Changed MSG_082 -> "This image is either non-bootable, or it uses a boot or compression method that is not supported by Rufus..."
   - *NEW* MSG_269 "Preserve timestamps"
@@ -148,7 +148,7 @@ o Version 1.0.18 (2015.09.03)
   - *NEW* MSG_280 "Image selection"
   - *NEW* MSG_281 "(Please select an image)"
 
-o Version 1.0.17 (2015.02.04)
+o v2.0 (2015.02.04)
   - *NEW CONTROL* IDC_WINDOWS_INSTALL "Standard Windows installation" (Main dialog)
   - *NEW CONTROL* IDC_WINDOWS_TO_GO "Windows To Go" (Main dialog)
   Note: to see the 2 controls above displayed, you will need to load the "Windows To Go.iso" image from

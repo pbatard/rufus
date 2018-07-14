@@ -91,7 +91,7 @@
 # http://download.microsoft.com/download/9/5/E/95EF66AF-9026-4BB0-A41D-A4F81802D92C/%5BMS-LCID%5D.pdf
 # for the LCID (0x####) codes you should use
 l "en-US" "English (English)" 0x0409, 0x0809, 0x0c09, 0x1009, 0x1409, 0x1809, 0x1c09, 0x2009, 0x2409, 0x2809, 0x2c09, 0x3009, 0x3409, 0x3809, 0x3c09, 0x4009, 0x4409, 0x4809
-v 1.0.23
+v 3.2
 
 g IDD_DIALOG
 t IDS_DRIVE_PROPERTIES_TXT "Drive Properties"
@@ -571,7 +571,7 @@ t MSG_306 "Fast-zeroing drive: %0.1f%% completed"
 
 l "ar-SA" "Arabic (العربية)" 0x0401, 0x0801, 0x0c01, 0x1001, 0x1401, 0x1801, 0x1c01, 0x2001, 0x2401, 0x2801, 0x2c01, 0x3001, 0x3401, 0x3801, 0x3c01, 0x4001
 a "r"
-v 1.0.23
+v 3.0
 b "en-US"
 
 g IDD_DIALOG
@@ -982,7 +982,7 @@ t MSG_305 "إستخدام هذا الخيار لبيان م إذا كنت تري
 
 ################################################################################
 l "az-AZ" "Azerbaijani (Azərbaycanca)" 0x042c, 0x782c
-v 1.0.23
+v 3.0
 b "en-US"
 
 g IDD_DIALOG
@@ -1393,7 +1393,7 @@ t MSG_305 "Windows'u başqa bir diskə yükləmək üçün bu cihazı istifadə 
 
 ######################################################################
 l "bg-BG" "Bulgarian (Български)" 0x0402
-v 1.0.22
+v 2.16
 b "en-US"
 
 g IDD_DIALOG
@@ -1784,7 +1784,7 @@ t MSG_118 "Windows To Go (Windows за USB Flash устройство)"
 
 ################################################################################
 l "zh-CN" "Chinese Simplified (简体中文)" 0x0804, 0x1004
-v 1.0.23
+v 3.0
 b "en-US"
 
 g IDD_DIALOG
@@ -2179,7 +2179,7 @@ t MSG_305 "请选择您希望将 Windows 安装至其他驱动器，还是直接
 
 ################################################################################
 l "zh-TW" "Chinese Traditional (正體中文)" 0x0404, 0x0c04, 0x1404, 0x7c04
-v 1.0.23
+v 3.0
 b "en-US"
 
 g IDD_DIALOG
@@ -2557,7 +2557,7 @@ t MSG_305 "是否要使用此裝置來安裝 Windows 在另一個磁碟上，"
 
 ################################################################################
 l "hr-HR" "Croatian (Hrvatski)" 0x041a, 0x081a, 0x101a
-v 1.0.23
+v 3.0
 b "en-US"
 
 g IDD_DIALOG
@@ -2965,7 +2965,7 @@ t MSG_305 "Ovom opcijom naznačite ako želite koristiti ovaj uređaj kako bi in
 
 ################################################################################
 l "cs-CZ" "Czech (Čeština)" 0x0405
-v 1.0.23
+v 3.0
 b "en-US"
 
 g IDD_DIALOG
@@ -3375,7 +3375,7 @@ t MSG_305 "Touto volbou označte, zda chcete toto zařízení používat k insta
 
 ################################################################################
 l "da-DK" "Danish (Dansk)" 0x0406
-v 1.0.23
+v 3.0
 b "en-US"
 
 g IDD_DIALOG
@@ -3787,7 +3787,7 @@ t MSG_305 "Brug dette alternativ for at angive om du vil bruge denne enhed til a
 
 ################################################################################
 l "nl-NL" "Dutch (Nederlands)" 0x0413, 0x0813
-v 1.0.23
+v 3.0
 b "en-US"
 
 g IDD_DIALOG
@@ -4190,7 +4190,7 @@ t MSG_305 "Gebruik deze optie om aan te geven of u dit apparaat wilt gebruiken o
 
 ################################################################################
 l "fi-FI" "Finnish (Suomi)" 0x040B
-v 1.0.23
+v 3.0
 b "en-US"
 
 g IDD_DIALOG
@@ -4599,7 +4599,7 @@ t MSG_305 "Käytä tätä vaihtoehtoa valitaksesi haluatko käyttää valittua l
 
 ################################################################################
 l "fr-FR" "French (Français)" 0x040c, 0x080c, 0x0c0c, 0x100c, 0x140c, 0x180c, 0x1c0c, 0x200c, 0x240c, 0x280c, 0x2c0c, 0x300c, 0x340c, 0x380c, 0xe40c
-v 1.0.23
+v 3.0
 b "en-US"
 
 g IDD_DIALOG
@@ -5012,7 +5012,7 @@ t MSG_305 "Utilisez cette option pour indiquer si vous voulez utiliser ce périp
 
 ################################################################################
 l "de-DE" "German (Deutsch)" 0x0407, 0x0807, 0x0c07, 0x1007, 0x1407
-v 1.0.23
+v 3.0
 b "en-US"
 
 g IDD_DIALOG
@@ -5407,7 +5407,7 @@ t MSG_305 "Wollen Sie Windows auf einem anderen Laufwerk installieren oder Windo
 
 ################################################################################
 l "el-GR" "Greek (Ελληνικά)" 0x0408
-v 1.0.23
+v 3.0
 b "en-US"
 
 g IDD_DIALOG
@@ -5823,7 +5823,7 @@ t MSG_305 "Επιλέξτε αυτό αν θέλετε να χρησιμοποι
 ################################################################################
 l "he-IL" "Hebrew (עברית)" 0x040d
 a "r"
-v 1.0.23
+v 3.0
 b "en-US"
 
 g IDD_DIALOG
@@ -6238,7 +6238,7 @@ t MSG_305 "ניתן להשתמש באפשרות זו כדי לציין האם ב
 
 ################################################################################
 l "hu-HU" "Hungarian (Magyar)" 0x040e
-v 1.0.23
+v 3.0
 b "en-US"
 
 g IDD_DIALOG
@@ -6649,7 +6649,7 @@ t MSG_305 "Ezt a lehetőséget arra használd, hogy jelezd, ezt az eszközt szer
 
 ################################################################################
 l "id-ID" "Indonesian (Bahasa Indonesia)" 0x0421
-v 1.0.23
+v 3.0
 b "en-US"
 
 g IDD_DIALOG
@@ -7062,7 +7062,7 @@ t MSG_305 "Gunakan opsi ini jika Anda ingin menggunakan perangkat ini untuk meng
 
 ################################################################################
 l "it-IT" "Italian (Italiano)" 0x0410, 0x0810
-v 1.0.23
+v 3.0
 b "en-US"
 
 g IDD_DIALOG
@@ -7474,7 +7474,7 @@ t MSG_305 "Usa questa opzione per indicare se vuoi usare questa unità per insta
 
 ######################################################################
 l "ja-JP" "Japanese (日本語)" 0x0411
-v 1.0.23
+v 3.0
 b "en-US"
 
 g IDD_DIALOG
@@ -7902,7 +7902,7 @@ t MSG_305 "このデバイスを使用して別のディスクにWindowsをイ�
 
 ################################################################################
 l "ko-KR" "Korean (한국어)" 0x0412
-v 1.0.23
+v 3.0
 b "en-US"
 
 g IDD_DIALOG
@@ -8313,7 +8313,7 @@ t MSG_305 "이 장치를 사용하여 다른 디스크에 Windows를 설치하�
 
 ################################################################################
 l "lv-LV" "Latvian (Latviešu)" 0x0426
-v 1.0.23
+v 3.0
 b "en-US"
 
 g IDD_DIALOG
@@ -8721,7 +8721,7 @@ t MSG_305 "Izmantojiet šo opciju, lai norādīt vai vēlaties izmantot ierīci 
 
 ################################################################################
 l "lt-LT" "Lithuanian (Lietuvių)" 0x0427
-v 1.0.23
+v 3.0
 b "en-US"
 
 g IDD_DIALOG
@@ -9137,7 +9137,7 @@ t MSG_305 "Šią parinktį naudokite norėdami nurodyti ar naudosite šį įreng
 
 ################################################################################
 l "ms-MY" "Malay (Bahasa Malaysia)" 0x043e, 0x083e
-v 1.0.19
+v 2.5
 b "en-US"
 
 g IDD_DIALOG
@@ -9515,7 +9515,7 @@ t MSG_286 "Mensifarkan pemacu: %0.1f%% selesai"
 
 ################################################################################
 l "nb-NO" "Norwegian (Norsk)" 0x0414
-v 1.0.23
+v 3.0
 b "en-US"
 
 g IDD_DIALOG
@@ -9929,7 +9929,7 @@ t MSG_305 "Bruk dette alternativet for å angi om du vil bruke denne enheten til
 ################################################################################
 l "fa-IR" "Persian (فارسی)" 0x0429
 a "r"
-v 1.0.23
+v 3.0
 b "en-US"
 
 g IDD_DIALOG
@@ -10358,7 +10358,7 @@ t MSG_305 "با استفاده از این گزینه مشخص کنید که آ�
 
 ################################################################################
 l "pl-PL" "Polish (Polski)" 0x0415
-v 1.0.23
+v 3.0
 b "en-US"
 
 g IDD_DIALOG
@@ -10772,7 +10772,7 @@ t MSG_305 "Użyj tej opcji aby wskazać, czy chcesz użyć tego dysku do instala
 
 ################################################################################
 l "pt-BR" "Portuguese Brazilian (Português do Brasil)" 0x0416
-v 1.0.23
+v 3.0
 b "en-US"
 
 g IDD_DIALOG
@@ -11194,7 +11194,7 @@ t MSG_305 "Use esta opção caso queira instalar o Windows neste dispositivo ou 
 
 ################################################################################
 l "pt-PT" "Portuguese Standard (Português)" 0x0816
-v 1.0.23
+v 3.0
 b "en-US"
 
 g IDD_DIALOG
@@ -11611,7 +11611,7 @@ t MSG_305 "Usar esta opção se pretende utilizar este dispositivo para instalar
 
 ################################################################################
 l "ro-RO" "Romanian (Română)" 0x0418, 0x0818
-v 1.0.23
+v 3.0
 b "en-US"
 
 g IDD_DIALOG
@@ -12021,7 +12021,7 @@ t MSG_305 "Utilizaţi această opţiune dacă doriţi să utilizaţi acest dispo
 
 ################################################################################
 l "ru-RU" "Russian (Русский)" 0x0419, 0x0819
-v 1.0.23
+v 3.0
 b "en-US"
 
 g IDD_DIALOG
@@ -12426,7 +12426,7 @@ t MSG_305 "Используйте этот параметр, чтобы указ
 
 ################################################################################
 l "sr-SP" "Serbian (Srpski)" 0x241a, 0x081a, 0x181a, 0x2c1a, 0x701a, 0x7c1a
-v 1.0.22
+v 2.16
 b "en-US"
 
 g IDD_DIALOG
@@ -12816,7 +12816,7 @@ t MSG_117 "Standardna instalacija Windows-a"
 
 ################################################################################
 l "sk-SK" "Slovak (Slovensky)" 0x041B
-v 1.0.23
+v 3.0
 b "en-US"
 
 g IDD_DIALOG
@@ -13229,7 +13229,7 @@ t MSG_305 "Použite túto možnosť, ak chcete použiť toto zariadenie na inšt
 
 ################################################################################
 l "sl-SI" "Slovenian (Slovenščina)" 0x0424
-v 1.0.23
+v 3.0
 b "en-US"
 
 g IDD_DIALOG
@@ -13640,7 +13640,7 @@ t MSG_305 "Tu izberete, ali želite uporabiti to napravo, da bi namestili operac
 
 ################################################################################
 l "es-ES" "Spanish (Español)" 0x040a, 0x080a, 0x0c0a, 0x100a, 0x140a, 0x180a, 0x1c0a, 0x200a, 0x240a, 0x280a, 0x2c0a, 0x300a, 0x340a, 0x380a, 0x3c0a, 0x400a, 0x440a, 0x480a, 0x4c0a, 0x500a, 0x540a, 0x580a
-v 1.0.23
+v 3.0
 b "en-US"
 
 g IDD_DIALOG
@@ -14056,7 +14056,7 @@ t MSG_305 "Use esta opción para indicar si desea usar este dispositivo para ins
 
 ################################################################################
 l "sv-SE" "Swedish (Svenska)" 0x041d, 0x081d
-v 1.0.23
+v 3.0
 b "en-US"
 
 g IDD_DIALOG
@@ -14465,7 +14465,7 @@ t MSG_305 "Använd det här alternativet om du vill använda den här enheten f�
 
 ################################################################################
 l "th-TH" "Thai (ไทย)" 0x041e
-v 1.0.23
+v 3.0
 b "en-US"
 
 g IDD_DIALOG
@@ -14876,7 +14876,7 @@ t MSG_305 "เลือกตัวเลือกนี้หากต้อง
 
 ################################################################################
 l "tr-TR" "Turkish (Türkçe)" 0x041F
-v 1.0.23
+v 3.0
 b "en-US"
 
 g IDD_DIALOG
@@ -15292,7 +15292,7 @@ t MSG_305 "Windows'u başka bir diske yüklemek için bu cihazı kullanmak istey
 
 ################################################################################
 l "uk-UA" "Ukrainian (Українська)" 0x0422
-v 1.0.23
+v 3.0
 b "en-US"
 
 g IDD_DIALOG
@@ -15702,7 +15702,7 @@ t MSG_305 "Використовуйте цей параметр, щоб вказ
 
 ################################################################################
 l "vi-VN" "Vietnamese (Tiếng Việt)" 0x042A
-v 1.0.22
+v 2.16
 b "en-US"
 
 g IDD_DIALOG
