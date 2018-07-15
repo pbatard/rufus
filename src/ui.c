@@ -638,7 +638,7 @@ void ToggleAdvancedFormatOptions(BOOL enable)
 void SetPersistenceSize(uint64_t pos, uint64_t max)
 {
 	char tmp[12];
-	int i, proposed_unit_selection;
+	int i, proposed_unit_selection = 0;
 	LONGLONG base_unit = MB;
 	HWND hCtrl;
 

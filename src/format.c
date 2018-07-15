@@ -1553,7 +1553,7 @@ static BOOL WriteDrive(HANDLE hPhysicalDrive, HANDLE hSourceImage)
 	int64_t bled_ret;
 	uint8_t *buffer = NULL;
 	uint8_t *cmp_buffer = NULL;
-	int i, throttle_fast_zeroing = 0;
+	int i, *ptr, zero_data, throttle_fast_zeroing = 0;
 
 	// We poked the MBR and other stuff, so we need to rewind
 	li.QuadPart = 0;
@@ -1630,11 +1630,10 @@ static BOOL WriteDrive(HANDLE hPhysicalDrive, HANDLE hSourceImage)
 			// we might speed things up by skipping empty blocks, or skipping the write if the data is the same.
 			// Notes: A block is declared empty when all bits are either 0 (zeros) or 1 (flash block erased).
 			// Also, a back-off strategy is used to limit reading.
-
 			if (throttle_fast_zeroing) {
 				throttle_fast_zeroing--;
-			} else if ((fast_zeroing) && (hSourceImage == NULL)) { // currently only enabled for erase
-
+			} else if (fast_zeroing) {
+				assert(hSourceImage == NULL);	// Only enabled for zeroing
 				CHECK_FOR_USER_CANCEL;
 
 				// Read block and compare against the block that needs to be written
@@ -1644,30 +1643,22 @@ static BOOL WriteDrive(HANDLE hPhysicalDrive, HANDLE hSourceImage)
 					goto out;
 				}
 
-				// erase or write
-				if (hSourceImage == NULL) {
-					// Erase, check for an empty block
-					int *ptr = (int*)(cmp_buffer);
-					// Get first element
-					int value = ptr[0];
-					// Check all bits are the same
-					if ((value != 0) && (value != -1)) {
-						goto blocknotempty;
-					}
+				// Check for an empty block
+				ptr = (int*)(cmp_buffer);
+				// Get first element
+				zero_data = ptr[0];
+				// Check all bits are the same
+				if ((zero_data == 0) || (zero_data == -1)) {
 					// Compare the rest of the block against the first element
-					for (i = 1; i < (int)(rSize/sizeof(int)); i++) {
-						if (ptr[i] != value)
-							goto blocknotempty;
+					for (i = 1; i < (int)(rSize / sizeof(int)); i++) {
+						if (ptr[i] != zero_data)
+							break;
 					}
-					// Block is empty, skip write
-					wSize = rSize;
-					continue;
-				blocknotempty:
-					;
-				} else if (memcmp(cmp_buffer, buffer, rSize) == 0) {
-					// Write, block is unchanged, skip write
-					wSize = rSize;
-					continue;
+					if (i >= (int)(rSize / sizeof(int))) {
+						// Block is empty, skip write
+						wSize = rSize;
+						continue;
+					}
 				}
 
 				// Move the file pointer position back for writing
@@ -1676,7 +1667,7 @@ static BOOL WriteDrive(HANDLE hPhysicalDrive, HANDLE hSourceImage)
 					uprintf("Error: Could not reset position - %s", WindowsErrorString());
 					goto out;
 				}
-				// throttle read operations
+				// Throttle read operations
 				throttle_fast_zeroing = 15;
 			}
 
