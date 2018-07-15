@@ -635,20 +635,41 @@ void ToggleAdvancedFormatOptions(BOOL enable)
 	InvalidateRect(hMainDialog, NULL, TRUE);
 }
 
-void SetPersistenceSlider(uint64_t pos, uint64_t max)
+void SetPersistenceSize(uint64_t pos, uint64_t max)
 {
 	char tmp[12];
-	int i;
-	IGNORE_RETVAL(ComboBox_SetCurSel(GetDlgItem(hMainDialog, IDC_PERSISTENCE_UNITS), persistence_unit_selection));
+	int i, proposed_unit_selection;
+	LONGLONG base_unit = MB;
+	HWND hCtrl;
+
+	// Reset the the Persistence Units dropdown
+	hCtrl = GetDlgItem(hMainDialog, IDC_PERSISTENCE_UNITS);
+	IGNORE_RETVAL(ComboBox_ResetContent(hCtrl));
+	for (i = 0; i < 3; i++) {
+		IGNORE_RETVAL(ComboBox_SetItemData(hCtrl, ComboBox_AddStringU(hCtrl, lmprintf(MSG_022 + i)), i));
+		// If we have more than 7 discrete positions, set this unit as our base
+		if (SelectedDrive.DiskSize > 7 * base_unit)
+			proposed_unit_selection = i;
+		base_unit *= 1024;
+		// Don't allow a base unit unless the drive is at least twice the size of that unit
+		if (SelectedDrive.DiskSize < 2 * base_unit)
+			break;
+	}
+	if (persistence_unit_selection < 0)
+		persistence_unit_selection = proposed_unit_selection;
+
+	IGNORE_RETVAL(ComboBox_SetCurSel(hCtrl, persistence_unit_selection));
 	pos /= MB;
 	max /= MB;
 	for (i = 0; i < persistence_unit_selection; i++) {
 		pos /= 1024;
 		max /= 1024;
 	}
-	SendMessage(GetDlgItem(hMainDialog, IDC_PERSISTENCE_SLIDER), TBM_SETRANGEMIN, (WPARAM)FALSE, (LPARAM)0);
-	SendMessage(GetDlgItem(hMainDialog, IDC_PERSISTENCE_SLIDER), TBM_SETRANGEMAX, (WPARAM)FALSE, (LPARAM)max);
-	SendMessage(GetDlgItem(hMainDialog, IDC_PERSISTENCE_SLIDER), TBM_SETPOS, (WPARAM)TRUE, (LPARAM)pos);
+
+	hCtrl = GetDlgItem(hMainDialog, IDC_PERSISTENCE_SLIDER);
+	SendMessage(hCtrl, TBM_SETRANGEMIN, (WPARAM)FALSE, (LPARAM)0);
+	SendMessage(hCtrl, TBM_SETRANGEMAX, (WPARAM)FALSE, (LPARAM)max);
+	SendMessage(hCtrl, TBM_SETPOS, (WPARAM)TRUE, (LPARAM)pos);
 	static_sprintf(tmp, "%ld", (LONG)pos);
 	SetWindowTextA(GetDlgItem(hMainDialog, IDC_PERSISTENCE_SIZE), tmp);
 }
@@ -717,7 +738,7 @@ skip:
 		SetWindowTextU(GetDlgItem(hMainDialog, IDS_IMAGE_OPTION_TXT), lmprintf(MSG_199));
 		// TODO: Use projected size and reuse existing pos. For now force the selected ISO to a 4 GB size
 		uint64_t max_size = SelectedDrive.DiskSize - 4 * GB;
-		SetPersistenceSlider(max_size / 2, max_size);
+		SetPersistenceSize(max_size / 2, max_size);
 	}
 	// If you don't force a redraw here, all kind of bad UI artifacts happen...
 	InvalidateRect(hMainDialog, NULL, TRUE);
@@ -1166,6 +1187,8 @@ void ShowLanguageMenu(RECT rcExclude)
 {
 	TPMPARAMS tpm;
 	HMENU menu;
+	RECT rc;
+	LONG nb_items = 1, adjust = 0;
 	loc_cmd* lcmd = NULL;
 	char lang[256];
 	char *search = "()";
@@ -1185,6 +1208,14 @@ void ShowLanguageMenu(RECT rcExclude)
 			static_strcpy(lang, lcmd->txt[1]);
 		}
 		InsertMenuU(menu, -1, MF_BYPOSITION | ((selected_locale == lcmd) ? MF_CHECKED : 0), UM_LANGUAGE_MENU_MAX++, lang);
+		nb_items++;
+	}
+
+	// Empirical adjust if we have a small enough number of languages to select
+	if (nb_items < 20) {
+		GetWindowRect(hMultiToolbar, &rc);
+		MapWindowPoints(NULL, hMainDialog, (POINT*)&rc, 2);
+		adjust = rc.top - (nb_items * ddh) / 2;
 	}
 
 	// Open the menu such that it doesn't overlap the specified rect
@@ -1193,8 +1224,7 @@ void ShowLanguageMenu(RECT rcExclude)
 	TrackPopupMenuEx(menu, 0,
 		// In RTL languages, the menu should be placed at the bottom-right of the rect
 		right_to_left_mode ? rcExclude.right : rcExclude.left,
-		rcExclude.bottom, hMainDialog, &tpm);
-
+		rcExclude.bottom + adjust, hMainDialog, &tpm);
 	DestroyMenu(menu);
 }
 

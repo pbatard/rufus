@@ -245,7 +245,7 @@ BOOL get_supported_locales(const char* filename)
 	loc_cmd *lcmd = NULL, *last_lcmd = NULL;
 	long end_of_block;
 	int version_line_nr = 0;
-	uint32_t loc_base_minor = -1, loc_base_micro = -1;
+	uint32_t loc_base_major = -1, loc_base_minor = -1;
 
 	fd = open_loc_file(filename);
 	if (fd == NULL)
@@ -326,30 +326,23 @@ BOOL get_supported_locales(const char* filename)
 		case LC_VERSION:
 			if (version_line_nr != 0) {
 				luprintf("[v]ersion was already provided at line %d", version_line_nr);
-			} else if (lcmd->unum_size != 3) {
+			} else if (lcmd->unum_size != 2) {
 				luprint("[v]ersion format is invalid");
 			} else if (last_lcmd == NULL) {
 				luprint("[v]ersion cannot precede [l]ocale");
-			} else if (lcmd->unum[0] != LOC_FRAMEWORK_VERSION) {
-				// If the localization framework evolved in a manner that makes existing
-				// translations incompatible, we need to discard them.
-				luprint("[v]ersion is not compatible with this framework");
-			} else if (loc_base_minor == -1) {
+			} else if (loc_base_major == -1) {
 				// We use the first version from our loc file (usually en-US) as our base
 				// as it should always be the most up to date.
+				loc_base_major = lcmd->unum[0];
 				loc_base_minor = lcmd->unum[1];
-				loc_base_micro = lcmd->unum[2];
 				version_line_nr = loc_line_nr;
-			} else if (lcmd->unum[1] < loc_base_minor) {
-				luprintf("the version of this locale is incompatible with this version of " APPLICATION_NAME " and MUST be updated to at least v%d.%d.0",
-					LOC_FRAMEWORK_VERSION, loc_base_minor);
 			} else {
-				if (lcmd->unum[2] < loc_base_micro) {
+				if ((lcmd->unum[0] < loc_base_major) || ((lcmd->unum[0] == loc_base_major) && (lcmd->unum[1] < loc_base_minor))) {
 					last_lcmd->ctrl_id |= LOC_NEEDS_UPDATE;
 					luprintf("the version of this translation is older than the base one and may result in some messages not being properly translated.\n"
-						"If you are the translator, please update your translation with the changes that intervened between v%d.%d.%d and v%d.%d.%d.\n"
+						"If you are the translator, please update your translation with the changes that intervened between v%d.%d and v%d.%d.\n"
 						"See https://github.com/pbatard/rufus/blob/master/res/localization/ChangeLog.txt",
-						LOC_FRAMEWORK_VERSION, loc_base_minor, lcmd->unum[2], LOC_FRAMEWORK_VERSION, loc_base_minor, loc_base_micro);
+						lcmd->unum[0], lcmd->unum[1], loc_base_major, loc_base_minor);
 				}
 				version_line_nr = loc_line_nr;
 			}

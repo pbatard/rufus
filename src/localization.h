@@ -32,10 +32,6 @@
 #define LOC_RIGHT_TO_LEFT       0x00000001
 #define LOC_NEEDS_UPDATE        0x00000002
 
-// The [v]ersion major from a translation must match this number or
-// the translation will be ignored
-#define LOC_FRAMEWORK_VERSION  1
-
 #define MSG_RTF                 0x10000000
 #define MSG_MASK                0x0FFFFFFF
 

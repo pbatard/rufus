@@ -62,7 +62,7 @@ extern void GetFullWidth(HWND hDlg);
 extern void PositionMainControls(HWND hDlg);
 extern void AdjustForLowDPI(HWND hDlg);
 extern void SetSectionHeaders(HWND hDlg);
-extern void SetPersistenceSlider(uint64_t pos, uint64_t max);
+extern void SetPersistenceSize(uint64_t pos, uint64_t max);
 extern void ToggleAdvancedDeviceOptions(BOOL enable);
 extern void ToggleAdvancedFormatOptions(BOOL enable);
 extern void ToggleImageOption(uint8_t mask);

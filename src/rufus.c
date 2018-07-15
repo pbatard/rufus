@@ -105,7 +105,7 @@ BOOL advanced_mode_device, advanced_mode_format, allow_dual_uefi_bios, detect_fa
 BOOL use_fake_units, preserve_timestamps = FALSE, fast_zeroing = FALSE;
 BOOL zero_drive = FALSE, list_non_usb_removable_drives = FALSE, enable_file_indexing, large_drive = FALSE, write_as_image = FALSE;
 float fScale = 1.0f;
-int dialog_showing = 0, selection_default = BT_IMAGE, windows_to_go_selection = 0, persistence_unit_selection = 0;
+int dialog_showing = 0, selection_default = BT_IMAGE, windows_to_go_selection = 0, persistence_unit_selection = -1;
 int default_fs, fs, bt, pt, tt; // file system, boot type, partition type, target type
 char szFolderPath[MAX_PATH], app_dir[MAX_PATH], system_dir[MAX_PATH], temp_dir[MAX_PATH], sysnative_dir[MAX_PATH];
 char embedded_sl_version_str[2][12] = { "?.??", "?.??" };
@@ -730,6 +730,9 @@ static void EnableBootOptions(BOOL enable, BOOL remove_checkboxes)
 		actual_enable = FALSE;
 
 	EnableWindow(GetDlgItem(hMainDialog, IDC_IMAGE_OPTION), actual_enable);
+	EnableWindow(GetDlgItem(hMainDialog, IDC_PERSISTENCE_SLIDER), actual_enable);
+	EnableWindow(GetDlgItem(hMainDialog, IDC_PERSISTENCE_SIZE), actual_enable);
+	EnableWindow(GetDlgItem(hMainDialog, IDC_PERSISTENCE_UNITS), actual_enable);
 	EnableMBRBootOptions(actual_enable, remove_checkboxes);
 
 	EnableWindow(GetDlgItem(hMainDialog, IDC_LABEL), actual_enable);
@@ -1590,11 +1593,6 @@ static void InitDialog(HWND hDlg)
 	IGNORE_RETVAL(ComboBox_SetItemData(hCtrl, ComboBox_AddStringU(hCtrl, lmprintf(MSG_117)), FALSE));
 	IGNORE_RETVAL(ComboBox_SetItemData(hCtrl, ComboBox_AddStringU(hCtrl, lmprintf(MSG_118)), TRUE));
 
-	// Fill up the Persistence Units dropdown
-	hCtrl = GetDlgItem(hMainDialog, IDC_PERSISTENCE_UNITS);
-	for (i = 0; i < 3; i++)
-		IGNORE_RETVAL(ComboBox_SetItemData(hCtrl, ComboBox_AddStringU(hCtrl, lmprintf(MSG_022 + i)), i));
-
 	// Fill up the MBR masqueraded disk IDs ("8 disks should be enough for anybody")
 	IGNORE_RETVAL(ComboBox_SetItemData(hDiskID, ComboBox_AddStringU(hDiskID, lmprintf(MSG_030, LEFT_TO_RIGHT_EMBEDDING "0x80" POP_DIRECTIONAL_FORMATTING)), 0x80));
 	for (i=1; i<=7; i++) {
@@ -2057,7 +2055,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				pos *= 1024;
 			persistence_unit_selection = ComboBox_GetCurSel(GetDlgItem(hDlg, IDC_PERSISTENCE_UNITS));
 			// TODO: Use projected size. For now force the selected ISO to a 4 GB size
-			SetPersistenceSlider(pos, SelectedDrive.DiskSize - 4 * GB);
+			SetPersistenceSize(pos, SelectedDrive.DiskSize - 4 * GB);
 			break;
 		case IDC_NB_PASSES:
 			if (HIWORD(wParam) != CBN_SELCHANGE)
