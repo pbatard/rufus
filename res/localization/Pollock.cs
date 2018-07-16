@@ -30,6 +30,7 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Windows.Forms;
 
 [assembly: AssemblyTitle("Pollock")]
 [assembly: AssemblyDescription("Poedit ↔ Rufus loc conversion utility")]
@@ -102,10 +103,10 @@ namespace pollock
     class Pollock
     {
         private static string app_name = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(Assembly.GetExecutingAssembly().GetName().Name);
+        private static string app_dir = AppDomain.CurrentDomain.BaseDirectory;
         private static int[] version = new int[2]
             { Assembly.GetEntryAssembly().GetName().Version.Major, Assembly.GetEntryAssembly().GetName().Version.Minor };
         private static string version_str = "v" + version[0].ToString() + "." + version[1].ToString();
-        private static string app_path = AppDomain.CurrentDomain.BaseDirectory;
         private static bool cancel_requested = false;
         private const string LANG_ID = "Language";
         private const string LANG_NAME = "X-Rufus-LanguageName";
@@ -133,6 +134,8 @@ namespace pollock
                 Console.ReadKey(true);
             Console.WriteLine("");
             Console.WriteLine(msg);
+            while (!Console.KeyAvailable)
+                Thread.Sleep(50);
             Console.ReadKey(true);
             while (Console.KeyAvailable)
                 Console.ReadKey(true);
@@ -307,7 +310,7 @@ namespace pollock
                 return 0;
 
             if (path == null)
-                path = app_path;
+                path = app_dir;
             if (!path.EndsWith("\\"))
                 path += '\\';
 
@@ -360,7 +363,7 @@ namespace pollock
                     writer.WriteLine();
                     writer.WriteLine("msgid \"\"");
                     writer.WriteLine("msgstr \"\"");
-                    writer.WriteLine($"\"Project-Id-Version: {lang.version}\\n\"");
+                    writer.WriteLine($"\"Project-Id-Version: {((old_en_US != null) ? cur_en_US.version : lang.version)}\\n\"");
                     writer.WriteLine($"\"Report-Msgid-Bugs-To: pete@akeo.ie\\n\"");
                     writer.WriteLine($"\"POT-Creation-Date: {DateTime.Now.ToString("yyyy-MM-dd HH:mmzz00")}\\n\"");
                     if (is_pot)
@@ -446,9 +449,26 @@ namespace pollock
                 Console.Error.WriteLine($"Could not open {file}");
                 return null;
             }
-            Console.WriteLine($"Importing data from '{file}':");
+            Console.Write($"Importing data from '{file}'... ");
             bool is_pot = file.EndsWith(".pot");
-            var lines = File.ReadAllLines(file);
+            bool file_locked = true;
+            string[] lines = null;
+            // May get an I/O expection if Poedit is not done
+            do
+            {
+                try
+                {
+                    lines = File.ReadAllLines(file);
+                    file_locked = false;
+                }
+                catch (IOException)
+                {
+                    if (cancel_requested)
+                        return null;
+                    Thread.Sleep(100);
+                }
+            }
+            while (file_locked);
             string format = "D" + (int)(Math.Log10((double)lines.Count()) + 0.99999);
             int line_nr = 0;
             // msg_data[0] -> msgid, msg_data[1] -> msgstr
@@ -459,15 +479,11 @@ namespace pollock
             List<string> codes = new List<string>();
             int msg_type = 0;
 
-            sw.Start();
-
             foreach (var line in lines)
             {
                 if (cancel_requested)
                     break;
                 ++line_nr;
-                Console.SetCursorPosition(0, Console.CursorTop);
-                Console.Write($"[{line_nr.ToString(format)}/{lines.Count()}] ");
                 var data = line.Trim();
                 if (!data.StartsWith("\""))
                 {
@@ -480,13 +496,13 @@ namespace pollock
                         {
                             if (string.IsNullOrEmpty(header_line))
                                 continue;
-                            string[] opt = header_line.Split(new string[] { ": " }, StringSplitOptions.None);
-                            if (opt.Length != 2)
+                            var sep = header_line.IndexOf(":");
+                            if (sep <= 0)
                             {
                                 Console.WriteLine($"ERROR: Invalid header line '{header_line}'");
                                 continue;
                             }
-                            options.Add(opt[0], opt[1]);
+                            options.Add(header_line.Substring(0, sep).Trim(), header_line.Substring(sep + 1).Trim());
                         }
                         lang.id = options[LANG_ID].Replace('_', '-');
                         lang.name = options[LANG_NAME];
@@ -538,7 +554,7 @@ namespace pollock
                             ids.Add(new Id(str[0].Trim(), str[1].Trim()));
                     }
                 }
-                else if (data.StartsWith("#. "))
+                else if ((is_pot && (data.StartsWith("#. "))) || (!is_pot && (data.StartsWith("# "))))
                 {
                     if (comments == null)
                         comments = new List<string>();
@@ -560,6 +576,9 @@ namespace pollock
                             // Ignore messages that have the same translation as en-US
                             if (msg_data[0] == msg_data[1])
                                 continue;
+                            // Ignore blank translations
+                            if (!is_pot && string.IsNullOrEmpty(msg_data[1]))
+                                continue;
                             if (!lang.sections.ContainsKey(id.group))
                                 lang.sections.Add(id.group, new List<Message>());
                             lang.sections[id.group].Add(new Message(id.id, msg_data[is_pot ? 0 : 1]));
@@ -573,10 +592,7 @@ namespace pollock
             // Sort the MSG section alphabetically
             lang.sections["MSG"] = lang.sections["MSG"].OrderBy(x => x.id).ToList();
 
-            sw.Stop();
-            Console.WriteLine($"{(cancel_requested ? "CANCELLED after" : "DONE in")}" +
-                $" {sw.ElapsedMilliseconds / 1000.0}s.");
-            sw.Reset();
+            Console.WriteLine(cancel_requested ? "CANCELLED" : "DONE");
 
             return lang;
         }
@@ -628,7 +644,7 @@ namespace pollock
             if (lang == null)
                 return false;
             if (path == null)
-                path = app_path;
+                path = app_dir;
             if (!path.EndsWith("\\"))
                 path += '\\';
 
@@ -667,7 +683,7 @@ namespace pollock
             if ((list == null) || (list.Count == 0))
                 return false;
             if (path == null)
-                path = app_path;
+                path = app_dir;
             if (!path.EndsWith("\\"))
                 path += '\\';
             var target = path + "rufus.loc";
@@ -880,18 +896,44 @@ namespace pollock
         }
 
         // Event handler for FileSystemWatcher. As usual, this is a completely BACKWARDS
-        // implementation by Microsoft that has to be worked areoun with timers and stuff...
+        // implementation by Microsoft that has to be worked around with timers and stuff...
         private static void OnChanged(object source, FileSystemEventArgs e)
         {
             if (in_on_change)
                 return;
             in_on_change = true;
-            DateTime file_changed_time = File.GetLastWriteTime(e.FullPath);
-            if (file_changed_time >= last_changed.AddMilliseconds(250))
+            FileInfo file = new FileInfo(e.FullPath);
+            FileStream stream = null;
+            if (file.LastWriteTime >= last_changed.AddMilliseconds(250))
             {
-                last_changed = file_changed_time;
-                Console.WriteLine("File " + e.FullPath + " was edited at " + file_changed_time.ToLongTimeString());
-                UpdateLocFile(ParsePoFile(e.FullPath));
+                // File may still be locked by Poedit => detect that
+                bool file_locked = true;
+                do
+                {
+                    try
+                    {
+                        stream = file.Open(FileMode.Open, FileAccess.Read, FileShare.None);
+                        file_locked = false;
+                    }
+                    catch (IOException)
+                    {
+                        if (cancel_requested)
+                            break;
+                        Thread.Sleep(100);
+                    }
+                    finally
+                    {
+                        if (!file_locked)
+                        {
+                            if (stream != null)
+                                stream.Close();
+                            last_changed = file.LastWriteTime;
+                            Console.Write(file.LastWriteTime.ToLongTimeString() + " - ");
+                            UpdateLocFile(ParsePoFile(e.FullPath));
+                        }
+                    }
+                }
+                while (file_locked);
             }
             in_on_change = false;
         }
@@ -899,6 +941,7 @@ namespace pollock
         //
         // Main entrypoint.
         //
+        [STAThread]
         static void Main(string[] args)
         {
             Console.OutputEncoding = System.Text.Encoding.UTF8;
@@ -906,9 +949,11 @@ namespace pollock
                 e.Cancel = true;
                 cancel_requested = true;
             };
-
             Console.WriteLine($"{app_name} {version_str} - Poedit to rufus.loc conversion utility");
             Console.WriteLine();
+
+            if (AppDomain.CurrentDomain.FriendlyName.Contains('m'))
+                goto Maintainer_Mode;
 
             string loc_url = "https://github.com/pbatard/rufus/raw/master/res/localization/rufus.loc";
             string ver_url = "https://rufus.ie/Loc.ver";
@@ -916,13 +961,16 @@ namespace pollock
             string rufus_file = null;
             string download_url = null;
             string po_file = null;
-            int[] update_version = new int[2];
+            int[] update_version = new int[2] { 0, 0 };
+            var list = new List<string[]>();
+            int index = -1;
 
             // Check for updates of this application
+            Console.Write("Downloading latest application data... ");
             var ver = DownloadString(ver_url);
             if (ver == null)
             {
-                Console.WriteLine("ERROR: Could not access latest application data.");
+                Console.WriteLine("ERROR: Could not access application data.");
                 goto Exit;
             }
             foreach (var line in ver.Split('\n'))
@@ -944,6 +992,12 @@ namespace pollock
                         break;
                 }
             }
+            if ((download_url == null) || (rufus_url == null) || (update_version[0] == 0))
+            {
+                Console.WriteLine("FAILED");
+                goto Exit;
+            }
+            Console.WriteLine("DONE");
 
             // Download new version
             if ((update_version[0] > version[0]) || ((update_version[0] == version[0]) && (update_version[1] > version[1])))
@@ -991,7 +1045,6 @@ namespace pollock
             // Convert to CRLF and get all the language ids
             var lines = File.ReadAllLines(loc_file);
             string id = "", name = "";
-            var list = new List<string[]>();
             using (var writer = new StreamWriter(loc_file, false, encoding))
             {
                 foreach (var line in lines)
@@ -1025,10 +1078,11 @@ Menu:
             Console.WriteLine();
 
 Retry:
+            Console.Write("> ");
             string input = Console.ReadLine();
             if ((input == null) || (input.StartsWith("q")))
                 goto Exit;
-            if (!Int32.TryParse(input, out int index) || (index <= 0) || (index > list.Count))
+            if (!Int32.TryParse(input, out index) || (index <= 0) || (index > list.Count))
             {
                 if (input.StartsWith("m"))
                     goto Menu;
@@ -1064,16 +1118,23 @@ Retry:
                     var url = "https://github.com/pbatard/rufus/releases/tag/v" + list[index][2];
                     var str = DownloadString(url);
                     if (str == null)
+                    {
+                        index = -1;
                         goto Exit;
+                    }
                     var sha = str.Substring(str.IndexOf("/pbatard/rufus/commit/") + 22, 40);
                     url = "https://github.com/pbatard/rufus/raw/" + sha + "/res/localization/rufus.loc";
                     if (!DownloadFile(url, old_loc_file))
+                    {
+                        index = -1;
                         goto Exit;
+                    }
                 }
                 var old_langs = ParseLocFile(old_loc_file, "en-US");
                 if ((old_langs == null) || (old_langs.Count != 1))
                 {
                     Console.WriteLine("Error: Unable to get en-US data from previous loc file.");
+                    index = -1;
                     goto Exit;
                 }
                 old_en_US = old_langs[0];
@@ -1082,12 +1143,13 @@ Retry:
             if (CreatePoFiles(ParseLocFile(loc_file, list[index][1]), old_en_US) != 1)
             {
                 Console.WriteLine("Failed to create PO file");
+                index = -1;
                 goto Exit;
             }
 
             // Watch for file modifications
             FileSystemWatcher watcher = new FileSystemWatcher();
-            watcher.Path = app_path;
+            watcher.Path = app_dir;
             watcher.NotifyFilter = NotifyFilters.LastAccess | NotifyFilters.LastWrite;
             watcher.Filter = po_file;
             watcher.Changed += new FileSystemEventHandler(OnChanged);
@@ -1100,33 +1162,65 @@ Retry:
                 Console.WriteLine();
                 //                Console.WriteLine("Please press any key to launch Poedit and edit the PO file.");
                 Console.WriteLine("*************************************************************************************");
-                Console.WriteLine($"* The {list[index][0]} translation file is now ready to be edited in Poedit.");
-                Console.WriteLine("* Please look for any entries highlited in red: They are the ones requiring an update.");
+                Console.WriteLine($"* The {list[index][0]} translation file ({list[index][1]}) is now ready to be edited in Poedit.");
+                Console.WriteLine("* Please look for entries highlited in orange - they are the ones requiring an update.");
                 Console.WriteLine("*");
-                Console.WriteLine("* Whenever you save your changes in Poedit, 'rufus.loc' will be updated for testing");
-                Console.WriteLine($"* with '{rufus_file}'. >>>PLEASE MAKE SURE YOU DON'T CLOSE THIS PROGRAM!<<<");
-                Console.WriteLine("* When you are done editing your translation, simply close Poedit.");
+                Console.WriteLine("* Whenever you save your changes in Poedit, an new 'rufus.loc' will be generated so");
+                Console.WriteLine($"* that you can test your changes using '{rufus_file}' in the same directory.");
+                Console.WriteLine("*");
+                Console.WriteLine("* PLEASE DO NOT CLOSE THIS CONSOLE APPLICATION - IT NEEDS TO RUN IN THE BACKGROUND!");
+                Console.WriteLine("* Instead, when you are done editing your translation, simply close Poedit.");
                 Console.WriteLine("*************************************************************************************");
                 WaitForKey("Press any key to launch Poedit...");
 
-                Process ExternalProcess = new Process();
-                ExternalProcess.StartInfo.FileName = poedit;
-                ExternalProcess.StartInfo.WorkingDirectory = app_path;
-                ExternalProcess.StartInfo.Arguments = $"{list[index][1]}.po";
-                ExternalProcess.StartInfo.WindowStyle = ProcessWindowStyle.Maximized;
-                ExternalProcess.Start();
+                Process process = new Process();
+                process.StartInfo.FileName = poedit;
+                process.StartInfo.WorkingDirectory = app_dir;
+                process.StartInfo.Arguments = $"{list[index][1]}.po";
+                process.StartInfo.WindowStyle = ProcessWindowStyle.Maximized;
+                if (!process.Start())
+                {
+                    Console.WriteLine("Error: Could not launch PoEdit");
+                    goto Exit;
+                }
                 Console.SetCursorPosition(0, Console.CursorTop - 1);
                 Console.WriteLine("Running Poedit...                ");
-                ExternalProcess.WaitForExit();
-                Console.WriteLine("Poedit was closed.");
+                DateTime launch_date = DateTime.Now;
+                process.WaitForExit();
+                Console.WriteLine($"Poedit {((DateTime.Now - launch_date).Milliseconds < 100? "is already running (?)..." : "was closed.")}");
+                // Delete the .mo files which we don't need
+                var dir = new DirectoryInfo(app_dir);
+                foreach (var file in dir.EnumerateFiles("*.mo"))
+                    file.Delete();
             }
             else
             {
                 Console.WriteLine("Poedit was not found. You will have to launch it and open the");
-                Console.WriteLine($"'{app_path + list[index][1]}.po' file manually.");
+                Console.WriteLine($"'{app_dir + list[index][1]}.po' file manually.");
             }
 
 Exit:
+            WaitForKey("Now press any key to launch your e-mail client and exit this application...");
+
+            if ((list.Count >= 2) && (index >= 0))
+            {
+                Process.Start($"mailto:pete@akeo.ie?subject=Rufus {list[index][0]} translation v{list[0][2]} update" +
+                    $"&body=Hi Pete,%0D%0A%0D%0APlease find attached the latest {list[index][0]} translation." +
+                    $"%0D%0A%0D%0A<PLEASE ATTACH '{app_dir + list[index][1]}.po' AND REMOVE THIS LINE>" +
+                    $"%0D%0A%0D%0ARegards,");
+            }
+            return;
+
+Maintainer_Mode:
+            string file_name;
+            OpenFileDialog file_dialog = new OpenFileDialog();
+            file_dialog.InitialDirectory = app_dir;
+            file_dialog.Filter = "PO files (*.po)|*.po|All files (*.*)|*.*";
+            file_dialog.ShowDialog();
+            file_name = file_dialog.FileName;
+            Console.WriteLine(file_name);
+            // TODO: fetch the .loc one directory up if we reorganize our loc dir to have loc\po
+            UpdateLocFile(ParsePoFile(file_name));
             WaitForKey("Press any key to exit...");
         }
     }
