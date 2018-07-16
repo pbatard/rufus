@@ -33,7 +33,7 @@ LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
 IDD_DIALOG DIALOGEX 12, 12, 232, 326
 STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_MINIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_ACCEPTFILES
-CAPTION "Rufus 3.2.1340"
+CAPTION "Rufus 3.2.1341"
 FONT 9, "Segoe UI Symbol", 400, 0, 0x0
 BEGIN
     LTEXT           "Drive Properties",IDS_DRIVE_PROPERTIES_TXT,8,6,53,12,NOT WS_GROUP
@@ -263,9 +263,9 @@ END
 BEGIN
     "\r\n"
     "#ifdef RUFUS_LOC\r\n"
-    "IDR_LC_RUFUS_LOC        RCDATA                  ""../res/localization/rufus.loc""\r\n"
+    "IDR_LC_RUFUS_LOC        RCDATA                  ""../res/loc/rufus.loc""\r\n"
     "#else\r\n"
-    "IDR_LC_RUFUS_LOC        RCDATA                  ""../res/localization/embedded.loc""\r\n"
+    "IDR_LC_RUFUS_LOC        RCDATA                  ""../res/loc/embedded.loc""\r\n"
     "#endif\r\n"
     "IDR_SL_LDLINUX_V4_BSS   RCDATA                  ""../res/syslinux/ldlinux_v4.bss""\r\n"
     "IDR_SL_LDLINUX_V4_SYS   RCDATA                  ""../res/syslinux/ldlinux_v4.sys""\r\n"
@@ -392,8 +392,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 3,2,1340,0
- PRODUCTVERSION 3,2,1340,0
+ FILEVERSION 3,2,1341,0
+ PRODUCTVERSION 3,2,1341,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -411,13 +411,13 @@ BEGIN
             VALUE "Comments", "https://akeo.ie"
             VALUE "CompanyName", "Akeo Consulting"
             VALUE "FileDescription", "Rufus"
-            VALUE "FileVersion", "3.2.1340"
+            VALUE "FileVersion", "3.2.1341"
             VALUE "InternalName", "Rufus"
             VALUE "LegalCopyright", "© 2011-2018 Pete Batard (GPL v3)"
             VALUE "LegalTrademarks", "https://www.gnu.org/copyleft/gpl.html"
             VALUE "OriginalFilename", "rufus-3.2.exe"
             VALUE "ProductName", "Rufus"
-            VALUE "ProductVersion", "3.2.1340"
+            VALUE "ProductVersion", "3.2.1341"
         END
     END
     BLOCK "VarFileInfo"
@@ -448,9 +448,9 @@ IDI_ICON                ICON                    "../res/rufus.ico"
 //
 
 #ifdef RUFUS_LOC
-IDR_LC_RUFUS_LOC        RCDATA                  "../res/localization/rufus.loc"
+IDR_LC_RUFUS_LOC        RCDATA                  "../res/loc/rufus.loc"
 #else
-IDR_LC_RUFUS_LOC        RCDATA                  "../res/localization/embedded.loc"
+IDR_LC_RUFUS_LOC        RCDATA                  "../res/loc/embedded.loc"
 #endif
 IDR_SL_LDLINUX_V4_BSS   RCDATA                  "../res/syslinux/ldlinux_v4.bss"
 IDR_SL_LDLINUX_V4_SYS   RCDATA                  "../res/syslinux/ldlinux_v4.sys"

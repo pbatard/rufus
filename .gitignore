@@ -47,8 +47,8 @@ cov-int
 cov-int.zip
 depcomp
 embedded.loc
-res/localization/.vs
-res/localization/bin
-res/localization/obj
+res/loc/pollock/.vs
+res/loc/pollock/bin
+res/loc/pollock/obj
 rufus_files
 stamp-h1

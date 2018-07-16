@@ -266,7 +266,7 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-SUBDIRS = bled ms-sys syslinux/libfat syslinux/libinstaller syslinux/win libcdio/iso9660 libcdio/udf libcdio/driver ../res/localization
+SUBDIRS = bled ms-sys syslinux/libfat syslinux/libinstaller syslinux/win libcdio/iso9660 libcdio/udf libcdio/driver ../res/loc
 AM_V_WINDRES_0 = @echo "  RC     $@";$(WINDRES)
 AM_V_WINDRES_1 = $(WINDRES)
 AM_V_WINDRES_ = $(AM_V_WINDRES_$(AM_DEFAULT_VERBOSITY))
@@ -682,7 +682,7 @@ uninstall-am:
 	uninstall-am
 
 
-%_rc.o: %.rc ../res/localization/embedded.loc
+%_rc.o: %.rc ../res/loc/embedded.loc
 	$(AM_V_WINDRES) $(AM_RCFLAGS) -i $< -o $@
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.

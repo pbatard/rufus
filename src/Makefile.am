@@ -1,4 +1,4 @@
-SUBDIRS = bled ms-sys syslinux/libfat syslinux/libinstaller syslinux/win libcdio/iso9660 libcdio/udf libcdio/driver ../res/localization
+SUBDIRS = bled ms-sys syslinux/libfat syslinux/libinstaller syslinux/win libcdio/iso9660 libcdio/udf libcdio/driver ../res/loc
 
 noinst_PROGRAMS = rufus
 
@@ -7,7 +7,7 @@ AM_V_WINDRES_1 = $(WINDRES)
 AM_V_WINDRES_  = $(AM_V_WINDRES_$(AM_DEFAULT_VERBOSITY))
 AM_V_WINDRES   = $(AM_V_WINDRES_$(V))
 
-%_rc.o: %.rc ../res/localization/embedded.loc
+%_rc.o: %.rc ../res/loc/embedded.loc
 	$(AM_V_WINDRES) $(AM_RCFLAGS) -i $< -o $@
 
 rufus_SOURCES = badblocks.c checksum.c dev.c dos.c dos_locale.c drive.c format.c icon.c iso.c localization.c \

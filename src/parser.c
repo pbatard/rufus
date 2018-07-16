@@ -341,7 +341,7 @@ BOOL get_supported_locales(const char* filename)
 					last_lcmd->ctrl_id |= LOC_NEEDS_UPDATE;
 					luprintf("the version of this translation is older than the base one and may result in some messages not being properly translated.\n"
 						"If you are the translator, please update your translation with the changes that intervened between v%d.%d and v%d.%d.\n"
-						"See https://github.com/pbatard/rufus/blob/master/res/localization/ChangeLog.txt",
+						"See https://github.com/pbatard/rufus/blob/master/res/loc/ChangeLog.txt",
 						lcmd->unum[0], lcmd->unum[1], loc_base_major, loc_base_minor);
 				}
 				version_line_nr = loc_line_nr;

@@ -261,7 +261,6 @@ namespace pollock
                         }
                         lang.sections[section_name].Add(new Message(parts[1], parts[2]));
                         // We also maintain global list of Id -> str for convenience
-                        // TODO: This lookup BREAKS on multiline!!
                         lang.id_to_str.Add(new Id(section_name, (parts[1])), parts[2]);
                         last_key = parts[1];
                         if (comment != null)
@@ -655,7 +654,23 @@ namespace pollock
                 bool skip = false;
                 foreach (var line in lines)
                 {
-                    if (line.StartsWith($"l \"{lang.id}\""))
+                    if (line.StartsWith($"# • v"))
+                    {
+                        var parts = line.Split('"');
+                        if (parts.Count() < 2)
+                        {
+                            writer.WriteLine(line);
+                            continue;
+                        }
+                        if (parts[1] != lang.id)
+                        {
+                            writer.WriteLine(line);
+                            continue;
+                        }
+                        writer.WriteLine($"# • v{lang.version,-4} \"{lang.id}\" \"{lang.name}\"");
+                        continue;
+                    }
+                    else if (line.StartsWith($"l \"{lang.id}\""))
                     {
                         skip = true;
                         WriteLoc(writer, lang);
@@ -702,7 +717,7 @@ namespace pollock
                 writer.WriteLine("# List of all languages included in this file (with version)");
                 foreach (var lang in list)
                 {
-                    writer.WriteLine($"# • v{lang.version} \"{lang.id}\" \"{lang.name}\"");
+                    writer.WriteLine($"# • v{lang.version, -4} \"{lang.id}\" \"{lang.name}\"");
                 }
                 foreach (var lang in list)
                 {
@@ -955,7 +970,7 @@ namespace pollock
             if (AppDomain.CurrentDomain.FriendlyName.Contains('m'))
                 goto Maintainer_Mode;
 
-            string loc_url = "https://github.com/pbatard/rufus/raw/master/res/localization/rufus.loc";
+            string loc_url = "https://github.com/pbatard/rufus/raw/master/res/loc/rufus.loc";
             string ver_url = "https://rufus.ie/Loc.ver";
             string rufus_url = null;
             string rufus_file = null;
@@ -1123,7 +1138,9 @@ Retry:
                         goto Exit;
                     }
                     var sha = str.Substring(str.IndexOf("/pbatard/rufus/commit/") + 22, 40);
-                    url = "https://github.com/pbatard/rufus/raw/" + sha + "/res/localization/rufus.loc";
+                    // TODO: Remove this once everyone has upgraded past 3.2
+                    string loc_dir = ((list[index][2][0] == '2') || ((list[index][2][0] == '3') && (list[index][2][2] == '0'))) ? "localization" : "loc";
+                    url = "https://github.com/pbatard/rufus/raw/" + sha + "/res/" + loc_dir + "/rufus.loc";
                     if (!DownloadFile(url, old_loc_file))
                     {
                         index = -1;
@@ -1219,7 +1236,7 @@ Maintainer_Mode:
             file_dialog.ShowDialog();
             file_name = file_dialog.FileName;
             Console.WriteLine(file_name);
-            // TODO: fetch the .loc one directory up if we reorganize our loc dir to have loc\po
+            // TODO: Fetch the .loc one directory up if we reorganize our loc dir to have loc\po
             UpdateLocFile(ParsePoFile(file_name));
             WaitForKey("Press any key to exit...");
         }

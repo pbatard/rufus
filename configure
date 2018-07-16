@@ -583,7 +583,7 @@ PACKAGE_TARNAME='rufus'
 PACKAGE_VERSION='3.2'
 PACKAGE_STRING='rufus 3.2'
 PACKAGE_BUGREPORT='https://github.com/pbatard/rufus/issues'
-PACKAGE_URL='https://rufus.akeo.ie'
+PACKAGE_URL='https://rufus.ie'
 
 ac_unique_file="src/rufus.c"
 ac_subst_vars='am__EXEEXT_FALSE
@@ -1322,7 +1322,7 @@ Use these variables to override the choices made by `configure' or to help
 it to find libraries and programs with nonstandard names/locations.
 
 Report bugs to <https://github.com/pbatard/rufus/issues>.
-rufus home page: <https://rufus.akeo.ie>.
+rufus home page: <https://rufus.ie>.
 _ACEOF
 ac_status=$?
 fi
@@ -3913,7 +3913,7 @@ ac_config_files="$ac_config_files src/libcdio/udf/Makefile"
 
 ac_config_files="$ac_config_files src/libcdio/driver/Makefile"
 
-ac_config_files="$ac_config_files res/localization/Makefile"
+ac_config_files="$ac_config_files res/loc/Makefile"
 
 ac_config_files="$ac_config_files src/ms-sys/Makefile"
 
@@ -4529,7 +4529,7 @@ Configuration files:
 $config_files
 
 Report bugs to <https://github.com/pbatard/rufus/issues>.
-rufus home page: <https://rufus.akeo.ie>."
+rufus home page: <https://rufus.ie>."
 
 _ACEOF
 cat >>$CONFIG_STATUS <<_ACEOF || ac_write_fail=1
@@ -4654,7 +4654,7 @@ do
     "src/libcdio/iso9660/Makefile") CONFIG_FILES="$CONFIG_FILES src/libcdio/iso9660/Makefile" ;;
     "src/libcdio/udf/Makefile") CONFIG_FILES="$CONFIG_FILES src/libcdio/udf/Makefile" ;;
     "src/libcdio/driver/Makefile") CONFIG_FILES="$CONFIG_FILES src/libcdio/driver/Makefile" ;;
-    "res/localization/Makefile") CONFIG_FILES="$CONFIG_FILES res/localization/Makefile" ;;
+    "res/loc/Makefile") CONFIG_FILES="$CONFIG_FILES res/loc/Makefile" ;;
     "src/ms-sys/Makefile") CONFIG_FILES="$CONFIG_FILES src/ms-sys/Makefile" ;;
     "src/syslinux/libfat/Makefile") CONFIG_FILES="$CONFIG_FILES src/syslinux/libfat/Makefile" ;;
     "src/syslinux/libinstaller/Makefile") CONFIG_FILES="$CONFIG_FILES src/syslinux/libinstaller/Makefile" ;;
