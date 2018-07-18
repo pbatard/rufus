@@ -1252,8 +1252,7 @@ Maintainer_Mode:
             file_dialog.ShowDialog();
             file_name = file_dialog.FileName;
             Console.WriteLine(file_name);
-            // TODO: Fetch the .loc one directory up if we reorganize our loc dir to have loc\po
-            UpdateLocFile(ParsePoFile(file_name));
+            UpdateLocFile(ParsePoFile(file_name), app_dir + @"..\");
             WaitForKey("Press any key to exit...");
         }
     }
