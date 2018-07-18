@@ -959,6 +959,7 @@ namespace pollock
         [STAThread]
         static void Main(string[] args)
         {
+            bool use_local_loc = false;
             Console.OutputEncoding = System.Text.Encoding.UTF8;
             Console.CancelKeyPress += delegate (object sender, ConsoleCancelEventArgs e) {
                 e.Cancel = true;
@@ -966,6 +967,11 @@ namespace pollock
             };
             Console.WriteLine($"{app_name} {version_str} - Poedit to rufus.loc conversion utility");
             Console.WriteLine();
+            foreach (var arg in args)
+            {
+                if (arg.Contains("l"))
+                    use_local_loc = true;
+            }
 
             if (AppDomain.CurrentDomain.FriendlyName.Contains('m'))
                 goto Maintainer_Mode;
@@ -986,7 +992,7 @@ namespace pollock
             if (ver == null)
             {
                 Console.WriteLine("ERROR: Could not access application data.");
-                goto Exit;
+                goto Error;
             }
             foreach (var line in ver.Split('\n'))
             {
@@ -1010,7 +1016,7 @@ namespace pollock
             if ((download_url == null) || (rufus_url == null) || (update_version[0] == 0))
             {
                 Console.WriteLine("FAILED");
-                goto Exit;
+                goto Error;
             }
             Console.WriteLine("DONE");
 
@@ -1023,7 +1029,7 @@ namespace pollock
                     if (DownloadFile(download_url))
                     {
                         Console.WriteLine("Now re-launch this program using the latest version.");
-                        goto Exit;
+                        goto Error;
                     }
                     Console.WriteLine("Download failed.");
                 }
@@ -1051,10 +1057,19 @@ namespace pollock
                 }
             }
 
-            // Download the latest loc file
-            Console.Write("Downloading the latest loc file... ");
-            if (!DownloadFile(loc_url))
-                goto Exit;
+            if (!use_local_loc)
+            {
+                // Download the latest loc file
+                Console.Write("Downloading the latest loc file... ");
+                if (!DownloadFile(loc_url))
+                    goto Error;
+            }
+            else
+            {
+                var local_loc = @"C:\rufus\res\loc\rufus.loc";
+                Console.Write($"Copying loc file from '{local_loc}'... ");
+                File.Copy(local_loc, "rufus.loc", true);
+            }
 
             var loc_file = loc_url.Split('/').Last();
             // Convert to CRLF and get all the language ids
@@ -1109,13 +1124,18 @@ Retry:
             Console.WriteLine($"{list[index][0]} was selected.");
             Console.WriteLine();
             po_file = $"{list[index][1]}.po";
+            if (File.Exists(po_file))
+            {
+                if (!PromptForQuestion($"A '{po_file}' file already exists. Do you want to overwrite it? (If unsure, answer 'y')"))
+                    goto Error;
+            }
 
             Language old_en_US = null;
             if (list[index][2] == list[0][2])
             {
                 Console.WriteLine("Note: This language is already at the most recent version!");
                 if (!PromptForQuestion("Do you still want to edit it?"))
-                    goto Exit;
+                    goto Error;
             }
             else
             {
@@ -1133,26 +1153,19 @@ Retry:
                     var url = "https://github.com/pbatard/rufus/releases/tag/v" + list[index][2];
                     var str = DownloadString(url);
                     if (str == null)
-                    {
-                        index = -1;
-                        goto Exit;
-                    }
+                        goto Error;
                     var sha = str.Substring(str.IndexOf("/pbatard/rufus/commit/") + 22, 40);
                     // TODO: Remove this once everyone has upgraded past 3.2
                     string loc_dir = ((list[index][2][0] == '2') || ((list[index][2][0] == '3') && (list[index][2][2] == '0'))) ? "localization" : "loc";
                     url = "https://github.com/pbatard/rufus/raw/" + sha + "/res/" + loc_dir + "/rufus.loc";
                     if (!DownloadFile(url, old_loc_file))
-                    {
-                        index = -1;
-                        goto Exit;
-                    }
+                        goto Error;
                 }
                 var old_langs = ParseLocFile(old_loc_file, "en-US");
                 if ((old_langs == null) || (old_langs.Count != 1))
                 {
                     Console.WriteLine("Error: Unable to get en-US data from previous loc file.");
-                    index = -1;
-                    goto Exit;
+                    goto Error;
                 }
                 old_en_US = old_langs[0];
             }
@@ -1160,8 +1173,7 @@ Retry:
             if (CreatePoFiles(ParseLocFile(loc_file, list[index][1]), old_en_US) != 1)
             {
                 Console.WriteLine("Failed to create PO file");
-                index = -1;
-                goto Exit;
+                goto Error;
             }
 
             // Watch for file modifications
@@ -1182,18 +1194,18 @@ Retry:
                 Console.WriteLine($"* The {list[index][0]} translation file ({list[index][1]}) is now ready to be edited in Poedit.");
                 Console.WriteLine("* Please look for entries highlited in orange - they are the ones requiring an update.");
                 Console.WriteLine("*");
-                Console.WriteLine("* Whenever you save your changes in Poedit, an new 'rufus.loc' will be generated so");
-                Console.WriteLine($"* that you can test your changes using '{rufus_file}' in the same directory.");
+                Console.WriteLine("* Whenever you save your changes in Poedit, a new 'rufus.loc' will be generated so");
+                Console.WriteLine($"* that you can test it with '{rufus_file}' in the same directory.");
                 Console.WriteLine("*");
                 Console.WriteLine("* PLEASE DO NOT CLOSE THIS CONSOLE APPLICATION - IT NEEDS TO RUN IN THE BACKGROUND!");
                 Console.WriteLine("* Instead, when you are done editing your translation, simply close Poedit.");
                 Console.WriteLine("*************************************************************************************");
-                WaitForKey("Press any key to launch Poedit...");
+                WaitForKey($"Press any key to open '{po_file}' in Poedit...");
 
                 Process process = new Process();
                 process.StartInfo.FileName = poedit;
                 process.StartInfo.WorkingDirectory = app_dir;
-                process.StartInfo.Arguments = $"{list[index][1]}.po";
+                process.StartInfo.Arguments = po_file;
                 process.StartInfo.WindowStyle = ProcessWindowStyle.Maximized;
                 if (!process.Start())
                 {
@@ -1201,7 +1213,7 @@ Retry:
                     goto Exit;
                 }
                 Console.SetCursorPosition(0, Console.CursorTop - 1);
-                Console.WriteLine("Running Poedit...                ");
+                Console.WriteLine("Running Poedit...                                 ");
                 DateTime launch_date = DateTime.Now;
                 process.WaitForExit();
                 Console.WriteLine($"Poedit {((DateTime.Now - launch_date).Milliseconds < 100? "is already running (?)..." : "was closed.")}");
@@ -1213,7 +1225,7 @@ Retry:
             else
             {
                 Console.WriteLine("Poedit was not found. You will have to launch it and open the");
-                Console.WriteLine($"'{app_dir + list[index][1]}.po' file manually.");
+                Console.WriteLine($"'{po_file}' file manually.");
             }
 
 Exit:
@@ -1223,9 +1235,13 @@ Exit:
             {
                 Process.Start($"mailto:pete@akeo.ie?subject=Rufus {list[index][0]} translation v{list[0][2]} update" +
                     $"&body=Hi Pete,%0D%0A%0D%0APlease find attached the latest {list[index][0]} translation." +
-                    $"%0D%0A%0D%0A<PLEASE ATTACH '{app_dir + list[index][1]}.po' AND REMOVE THIS LINE>" +
+                    $"%0D%0A%0D%0A<PLEASE ATTACH '{app_dir}{po_file}' AND REMOVE THIS LINE>" +
                     $"%0D%0A%0D%0ARegards,");
             }
+            return;
+
+Error:
+            WaitForKey("Press any key to exit...");
             return;
 
 Maintainer_Mode:

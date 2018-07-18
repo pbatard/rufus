@@ -5,15 +5,27 @@ When editing an existing translation, make sure to follow:
 https://github.com/pbatard/rufus/wiki/Localization#Editing_a_translation
 
 o v3.2 (2018.??.??)
-  - *NEW*      MSG_087
-    *NEW*      MSG_123
-    *NEW*      MSG_124
-    *NEW*      MSG_125
-    *NEW*      MSG_126
-    *NEW*      MSG_127
-  - *NEW*      MSG_172
-  - *NEW*      MSG_240
+	The following appears in Advanced format options → Check device for bad blocks → dropdown menu with
+  %s being replaced with SLC, MLC or TLC, which is a type of flash memory. In other words, this message
+  should mean "for a flash memory device of type %s". *Please* try to keep the translation as short as
+  possible so that it won't result in an overly large dropdown...
+  - *NEW*      MSG_087 "for %s devices"
+  The following 4 messages can be tested using https://github.com/pbatard/rufus/raw/master/res/loc/test/casper_test.iso
+  - *NEW*      MSG_123 "Persistent partition size"
+  - *NEW*      MSG_124 "No persistence"
+  - *NEW*      MSG_125 "Set the size of the persistent partition for live USB media. Setting the size to 0 disables the persistent partition."
+  - *NEW*      MSG_126 "Set the partition size units."
+  As of Rufus 3.2, *ALL* downloads from the servers are digitally signed, and their signature is validated using the
+  public key that is embedded in the application. This message appears in an error dialog if the validation fails.
+  - *NEW*      MSG_172 "Invalid download signature"
+  This message was present in 3.0, but I forgot to mention it then. It has to do with the signature
+  validation that Rufus uses when downloading an update.
+  - *NEW*      MSG_240 "The signature for the downloaded update can not be validated (...)"
+  You can see this status message by pressing <Ctrl>-<Alt>-<Z> and then selecting Start.
+  It's the same as MSG_286 but with a process that *may* be faster, hence the name.
   - *NEW*      MSG_306
+  Note: Because this is the introduction of a new translation framework, and I am a bit short of time for that
+  unification of MSG_084/MSG_104/MSG_114/MSG_116 will happen in another translation round...
 
 o v3.0 (2018.03.27)
   - All positioning ('m', 's') has now been removed as well as some controls, for the 3.0 UI redesign

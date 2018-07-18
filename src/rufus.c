@@ -1625,8 +1625,8 @@ static void InitDialog(HWND hDlg)
 	CreateTooltip(GetDlgItem(hDlg, IDS_CSM_HELP_TXT), lmprintf(MSG_151), 30000);
 	CreateTooltip(GetDlgItem(hDlg, IDC_IMAGE_OPTION), lmprintf(MSG_305), 30000);
 	CreateTooltip(GetDlgItem(hDlg, IDC_PERSISTENCE_SLIDER), lmprintf(MSG_125), 30000);
-	CreateTooltip(GetDlgItem(hDlg, IDC_PERSISTENCE_SIZE), lmprintf(MSG_126), 30000);
-	CreateTooltip(GetDlgItem(hDlg, IDC_PERSISTENCE_UNITS), lmprintf(MSG_127), 30000);
+	CreateTooltip(GetDlgItem(hDlg, IDC_PERSISTENCE_SIZE), lmprintf(MSG_125), 30000);
+	CreateTooltip(GetDlgItem(hDlg, IDC_PERSISTENCE_UNITS), lmprintf(MSG_126), 30000);
 
 	if (!advanced_mode_device)	// Hide as needed, since we display the advanced controls by default
 		ToggleAdvancedDeviceOptions(FALSE);
@@ -2050,7 +2050,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				lPos = (LONG)pos;
 				SendMessage(GetDlgItem(hMainDialog, IDC_PERSISTENCE_SLIDER), TBM_SETPOS, TRUE, lPos);
 				if (persistence_size >= (SelectedDrive.DiskSize - img_report.projected_size)) {
-					static_sprintf(tmp, "%d", lPos);
+					static_sprintf(tmp, "%ld", lPos);
 					app_changed_size = TRUE;
 					SetWindowTextU(GetDlgItem(hMainDialog, IDC_PERSISTENCE_SIZE), tmp);
 				}
@@ -2420,7 +2420,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		if (lPos != 0) {
 			if (persistence_size == 0)
 				TogglePersistenceControls(TRUE);
-			sprintf(tmp, "%ld", lPos);
+			static_sprintf(tmp, "%ld", lPos);
 		} else {
 			TogglePersistenceControls(FALSE);
 			static_sprintf(tmp, "0 (%s)", lmprintf(MSG_124));

@@ -157,7 +157,8 @@ t MSG_032 "UEFI (non CSM)"
 t MSG_033 "BIOS or UEFI"
 # Number of bad block check passes (singular for 1 pass)
 t MSG_034 "%d pass"
-# Number of bad block check passes (plural for 2 or more passes)
+# Number of bad block check passes (plural for 2 or more passes).
+# See MSG_087 for the message that %s gets replaced with.
 t MSG_035 "%d passes %s"
 t MSG_036 "ISO Image"
 t MSG_037 "Application"
@@ -225,6 +226,11 @@ t MSG_084 "This ISO image seems to use an obsolete version of '%s'.\n"
 	"'%s' exists there, it will be reused automatically."
 t MSG_085 "Downloading '%s'"
 t MSG_086 "No image selected"
+# This message appears in Advanced format options → Check device for bad blocks → dropdown menu
+# %s will be replaced with SLC, MLC or TLC, which is a type of flash memory. In other words, this
+# message should mean "for a flash memory device of type %s". *Please* try to keep the translation
+# as short as possible so that it won't result in an overly large dropdown... It's okay to use a
+# translation for "type" instead of "device"  (e.g. "for TLC type"). See also MSG_035.
 t MSG_087 "for %s devices"
 t MSG_088 "Image is too big"
 t MSG_089 "The image is too big for the selected target."
@@ -308,11 +314,18 @@ t MSG_119 "advanced drive properties"
 t MSG_120 "advanced format options"
 t MSG_121 "Show %s"
 t MSG_122 "Hide %s"
+# A persistent partitions can be used with "Live" USB media to store data.
+# It means that data can be preserved across reboots on "Live" USB drives.
+# To test this feature, please download and select 'casper_test.iso' from:
+# https://github.com/pbatard/rufus/raw/master/res/loc/test/casper_test.iso
 t MSG_123 "Persistent partition size"
+# This message appears in the persistence 'Size' control when the slider is set to 0.
+# If running out of space, it is okay to use "No partition" or "None" to indicate that a persistent
+# partition will not be created (because the 'Size' edit control is *not* adjusted for width).
 t MSG_124 "No persistence"
-t MSG_125 "Use this slider to set the size of the persistent partition. Setting the size to 0 disables the persistent partition."
-t MSG_126 "Use this field to enter the size of the persistent partition. Setting the size to 0 disables the persistent partition."
-t MSG_127 "Set the persistent partition size unit."
+# Tooltips used for the peristence size slider and edit control
+t MSG_125 "Set the size of the persistent partition for live USB media. Setting the size to 0 disables the persistent partition."
+t MSG_126 "Set the partition size units."
 t MSG_150 "Type of computer you plan to use this bootable drive with. It is your responsibility to determine whether "
 	"your target is of BIOS or UEFI type before you start creating the drive, as it may fail to boot otherwise."
 # You shouldn't translate 'Legacy Mode' as this is an option that usually appears in English in the UEFI settings.
@@ -340,6 +353,8 @@ t MSG_169 "Create an extra hidden partition and try to align partitions boundari
 	"This can improve boot detection for older BIOSes"
 t MSG_170 "Enable the listing of USB Hard Drive enclosures. USE AT YOUR OWN RISKS!!!"
 t MSG_171 "Start the formatting operation.\nThis will DESTROY any data on the target!"
+# As of Rufus 3.2, *ALL* downloads from the servers are digitally signed, and their signature is validated using the
+# public key that is embedded in the application. This message appears in an error dialog if the validation fails.
 t MSG_172 "Invalid download signature"
 t MSG_173 "Click to select..."
 t MSG_174 "Rufus - The Reliable USB Formatting Utility"
@@ -437,6 +452,7 @@ t MSG_237 "Bad Blocks: Testing with pattern 0x%02X"
 # Example: "Partitioning (MBR)..."
 t MSG_238 "Partitioning (%s)..."
 t MSG_239 "Deleting partitions..."
+# This message has to do with the signature validation that Rufus uses when downloading an update.
 t MSG_240 "The signature for the downloaded update can not be validated. This could mean that your "
 	"system is improperly configured for signature validation or indicate a malicious download.\n\n"
 	"The download will be deleted. Please check the log for more details."
@@ -521,6 +537,8 @@ t MSG_303 "Show the log"
 t MSG_304 "Create a disk image of the selected device"
 t MSG_305 "Use this option to indicate whether you want to use this device to install Windows on another disk, "
 	"or if you want to run Windows directly from this drive (Windows To Go)."
+# You can see this status message by pressing <Ctrl>-<Alt>-<Z> and then selecting START.
+# It's the same as MSG_286 but with a process that *may* be faster, hence the name.
 t MSG_306 "Fast-zeroing drive: %0.1f%% completed"
 
 #########################################################################
