@@ -1,24 +1,18 @@
 This file lists any change that has been applied to the en-US translation of
-rufus.loc since its original version. Translators are expected to keep their
-translations up to date by monitoring this file on regular basis and applying
-the same changes.
+rufus.loc since its original version.
 
-When editing an existing translation, make sure you always follow:
+When editing an existing translation, make sure to follow:
 https://github.com/pbatard/rufus/wiki/Localization#Editing_a_translation
-
-Remember to also update the version number for your translation ('v x.y.z')
-once you have matched all the changes that occurred for the en-US translation.
-
-!!IMPORTANT!! The changes below may NOT contain the full message and only tell
-you WHERE, in the English translation, you should look to find the full message
-content. PLEASE, do not just look at this Changelog when updating your
-translation, but always use the English section of rufus.loc as your base.
-For instance, MSG_114, that was introduced in v1.0.8 is MORE than one line!
 
 o v3.2 (2018.??.??)
   - *NEW*      MSG_087
+    *NEW*      MSG_123
+    *NEW*      MSG_124
+    *NEW*      MSG_125
+    *NEW*      MSG_126
+    *NEW*      MSG_127
   - *NEW*      MSG_172
-  - *NEW*      MSG_199
+  - *NEW*      MSG_240
   - *NEW*      MSG_306
 
 o v3.0 (2018.03.27)
@@ -80,7 +74,8 @@ o v2.16 (2017.07.17)
   - *NEW* MSG_298 "The ISO file you have selected does not match its declared size: %s of data is missing!\n\nIf you obtained "
     "this file from the Internet, you should try to download a new copy and verify that the MD5 or SHA checksums match the "
     "official ones.\n\nNote that you can compute the MD5 or SHA in Rufus by clicking the '#' button."
-  Note: You can test MSG_297/MSG_298 using https://rufus.akeo.ie/testing/arch_trunc.iso (A truncated version of archlinux-2017.07.01-x86_64.iso)
+  Note: You can test MSG_297/MSG_298 using https://github.com/pbatard/rufus/raw/master/res/loc/test/arch_trunc.iso
+  A truncated version of archlinux-2017.07.01-x86_64.iso)
 
 o v2.12 (2017.01.16)
   - *NEW* MSG_288 "Missing elevated privileges"
@@ -138,7 +133,7 @@ o v2.4 (2015.09.03)
     Note: You can see the message above by hovering on the language button
   - *NEW* MSG_274 "ISOHybrid image detected"
     Note: You can test this message and the one below by downloading and trying to write the latest menu_c32_test.iso (120 KB) from:
-    https://github.com/pbatard/rufus/raw/master/res/localization/menu_c32_test.iso
+    https://github.com/pbatard/rufus/raw/master/res/loc/test/menu_c32_test.iso
 	- *NEW* MSG_275 "The image you have selected is..." [TRANSLATORS: Please refer to the English section of 'rufus.loc' for the FULL message]
 	  For more info on the messages below, also see the comments in the English section of rufus.loc
   - *NEW* MSG_276 "Write in %s mode (Recommended)"
@@ -151,8 +146,8 @@ o v2.4 (2015.09.03)
 o v2.0 (2015.02.04)
   - *NEW CONTROL* IDC_WINDOWS_INSTALL "Standard Windows installation" (Main dialog)
   - *NEW CONTROL* IDC_WINDOWS_TO_GO "Windows To Go" (Main dialog)
-  Note: to see the 2 controls above displayed, you will need to load the "Windows To Go.iso" image from
-  https://github.com/pbatard/rufus/raw/master/res/localization/Windows%20To%20Go.iso (356 KB)
+  Note: to see the 2 controls above displayed, you will need to load the "windows_to_go.iso" image from
+  https://github.com/pbatard/rufus/raw/master/res/loc/test/windows_to_go.iso (356 KB)
   Also see the comment for IDC_WINDOWS_TO_GO in the English translation.
   - *NEW* MSG_096 "The file system currently selected can not be used with this type of ISO (...)"
   - *NEW* MSG_097 "'Windows To Go' can only be applied if the file system is NTFS."

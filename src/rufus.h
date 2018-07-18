@@ -230,7 +230,8 @@ enum fs_type {
 };
 
 enum boot_type {
-	BT_MSDOS = 0,
+	BT_NON_BOOTABLE = 0,
+	BT_MSDOS,
 	BT_FREEDOS,
 	BT_IMAGE,
 	BT_SYSLINUX_V4,		// Start of indexes that only display in advanced mode
@@ -239,7 +240,6 @@ enum boot_type {
 	BT_GRUB4DOS,
 	BT_GRUB2,
 	BT_UEFI_NTFS,
-	BT_NON_BOOTABLE,
 	BT_MAX
 };
 

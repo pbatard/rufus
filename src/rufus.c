@@ -90,7 +90,7 @@ RUFUS_UPDATE update = { { 0,0,0 },{ 0,0 }, NULL, NULL };
 HINSTANCE hMainInstance;
 HWND hMainDialog, hMultiToolbar, hSaveToolbar, hHashToolbar, hAdvancedDeviceToolbar, hAdvancedFormatToolbar, hUpdatesDlg = NULL;
 HFONT hInfoFont;
-uint8_t image_options = 0x00;
+uint8_t image_options = IMOP_WINTOGO;
 uint16_t rufus_version[3], embedded_sl_version[2];
 uint32_t dur_mins, dur_secs, DrivePort[MAX_DRIVES];;
 loc_cmd* selected_locale = NULL;
@@ -102,8 +102,9 @@ BOOL use_own_c32[NB_OLD_C32] = { FALSE, FALSE }, mbr_selected_by_user = FALSE;
 BOOL iso_op_in_progress = FALSE, format_op_in_progress = FALSE, right_to_left_mode = FALSE, has_uefi_csm;
 BOOL enable_HDDs = FALSE, force_update = FALSE, enable_ntfs_compression = FALSE, no_confirmation_on_cancel = FALSE, lock_drive = TRUE;
 BOOL advanced_mode_device, advanced_mode_format, allow_dual_uefi_bios, detect_fakes, enable_vmdk, force_large_fat32, usb_debug;
-BOOL use_fake_units, preserve_timestamps = FALSE, fast_zeroing = FALSE;
+BOOL use_fake_units, preserve_timestamps = FALSE, fast_zeroing = FALSE, app_changed_size = FALSE;
 BOOL zero_drive = FALSE, list_non_usb_removable_drives = FALSE, enable_file_indexing, large_drive = FALSE, write_as_image = FALSE;
+uint64_t persistence_size = 0;
 float fScale = 1.0f;
 int dialog_showing = 0, selection_default = BT_IMAGE, windows_to_go_selection = 0, persistence_unit_selection = -1;
 int default_fs, fs, bt, pt, tt; // file system, boot type, partition type, target type
@@ -112,6 +113,7 @@ char embedded_sl_version_str[2][12] = { "?.??", "?.??" };
 char embedded_sl_version_ext[2][32];
 char ClusterSizeLabel[MAX_CLUSTER_SIZES][64];
 char msgbox[1024], msgbox_title[32], *ini_file = NULL, *image_path = NULL, *short_image_path;
+char image_option_txt[128];
 StrArray DriveID, DriveLabel, DriveHub, BlockingProcess, ImageList;
 // Number of steps for each FS for FCC_STRUCTURE_PROGRESS
 const int nb_steps[FS_MAX] = { 5, 5, 12, 1, 10 };
@@ -600,26 +602,6 @@ static void SetMBRProps(void)
 	IGNORE_RETVAL(ComboBox_SetCurSel(hDiskID, needs_masquerading?1:0));
 }
 
-static void SetImageOptions(void)
-{
-	if ((bt != BT_IMAGE) || (image_path == NULL)) {
-		if (image_options & IMOP_WINTOGO)
-			ToggleImageOption(IMOP_WINTOGO);
-		if (image_options & IMOP_PERSISTENCE)
-			ToggleImageOption(IMOP_PERSISTENCE);
-		return;
-	}
-
-	if ( (!HAS_WINTOGO(img_report) && ( (image_options & IMOP_WINTOGO))) ||
-		 ( HAS_WINTOGO(img_report) && (!(image_options & IMOP_WINTOGO))) ) {
-		ToggleImageOption(IMOP_WINTOGO);
-	}
-	if ( (!HAS_PERSISTENCE(img_report) && ( (image_options & IMOP_PERSISTENCE))) ||
-		 ( HAS_PERSISTENCE(img_report) && (!(image_options & IMOP_PERSISTENCE))) ) {
-		ToggleImageOption(IMOP_PERSISTENCE);
-	}
-}
-
 static void SetProposedLabel(int ComboIndex)
 {
 	const char no_label[] = STR_NO_LABEL, empty[] = "";
@@ -731,8 +713,8 @@ static void EnableBootOptions(BOOL enable, BOOL remove_checkboxes)
 
 	EnableWindow(GetDlgItem(hMainDialog, IDC_IMAGE_OPTION), actual_enable);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_PERSISTENCE_SLIDER), actual_enable);
-	EnableWindow(GetDlgItem(hMainDialog, IDC_PERSISTENCE_SIZE), actual_enable);
-	EnableWindow(GetDlgItem(hMainDialog, IDC_PERSISTENCE_UNITS), actual_enable);
+	EnableWindow(GetDlgItem(hMainDialog, IDC_PERSISTENCE_SIZE), (persistence_size != 0) && actual_enable);
+	EnableWindow(GetDlgItem(hMainDialog, IDC_PERSISTENCE_UNITS), (persistence_size != 0) && actual_enable);
 	EnableMBRBootOptions(actual_enable, remove_checkboxes);
 
 	EnableWindow(GetDlgItem(hMainDialog, IDC_LABEL), actual_enable);
@@ -1001,8 +983,6 @@ static void DisplayISOProps(void)
 	}
 	PRINT_ISO_PROP(img_report.has_symlinks, "  Note: This ISO uses symbolic links, which will not be replicated due to file system limitations.");
 	PRINT_ISO_PROP(img_report.has_symlinks, "  Because of this, some features from this image may not work...");
-
-	SetImageOptions();
 }
 
 // Insert the image name into the Boot selection dropdown
@@ -1084,6 +1064,7 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 			UpdateImage();
 			uprintf("Using image: %s (%s)", short_image_path, SizeToHumanReadable(img_report.image_size, FALSE, FALSE));
 		}
+		ToggleImageOptions();
 		EnableControls(TRUE);
 		// Set Target and FS accordingly
 		if (img_report.is_iso) {
@@ -1643,12 +1624,15 @@ static void InitDialog(HWND hDlg)
 	CreateTooltip(hTargetSystem, lmprintf(MSG_150), 30000);
 	CreateTooltip(GetDlgItem(hDlg, IDS_CSM_HELP_TXT), lmprintf(MSG_151), 30000);
 	CreateTooltip(GetDlgItem(hDlg, IDC_IMAGE_OPTION), lmprintf(MSG_305), 30000);
+	CreateTooltip(GetDlgItem(hDlg, IDC_PERSISTENCE_SLIDER), lmprintf(MSG_125), 30000);
+	CreateTooltip(GetDlgItem(hDlg, IDC_PERSISTENCE_SIZE), lmprintf(MSG_126), 30000);
+	CreateTooltip(GetDlgItem(hDlg, IDC_PERSISTENCE_UNITS), lmprintf(MSG_127), 30000);
 
 	if (!advanced_mode_device)	// Hide as needed, since we display the advanced controls by default
 		ToggleAdvancedDeviceOptions(FALSE);
 	if (!advanced_mode_format)
 		ToggleAdvancedFormatOptions(FALSE);
-	ToggleImageOption(0);
+	ToggleImageOptions();
 
 	// Process commandline parameters
 	if (iso_provided) {
@@ -1860,14 +1844,14 @@ out:
 static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	static DWORD DeviceNum = 0;
-	static uint64_t LastRefresh = 0, pos;
+	static uint64_t LastRefresh = 0;
 	static BOOL first_log_display = TRUE, isMarquee = FALSE, queued_hotplug_event = FALSE;
 	static ULONG ulRegister = 0;
-	static LONG lPos;
 	static LPITEMIDLIST pidlDesktop = NULL;
 	static SHChangeNotifyEntry NotifyEntry;
 	static DWORD_PTR thread_affinity[4];
 	static HFONT hyperlink_font = NULL;
+	LONG lPos;
 	BOOL set_selected_fs;
 	DRAWITEMSTRUCT* pDI;
 	LPTOOLTIPTEXT lpttt;
@@ -2044,18 +2028,52 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			SetFileSystemAndClusterSize(NULL);
 			windows_to_go_selection = ComboBox_GetCurSel(GetDlgItem(hDlg, IDC_IMAGE_OPTION));
 			break;
+		case IDC_PERSISTENCE_SIZE:
+			if (HIWORD(wParam) == EN_CHANGE) {
+				uint64_t pos;
+				// We get EN_CHANGE when we change the size automatically, so we need to detect that
+				if (app_changed_size) {
+					app_changed_size = FALSE;
+					break;
+				}
+				GetWindowTextA(GetDlgItem(hDlg, IDC_PERSISTENCE_SIZE), tmp, sizeof(tmp));
+				lPos = atol(tmp);
+				persistence_unit_selection = ComboBox_GetCurSel(GetDlgItem(hDlg, IDC_PERSISTENCE_UNITS));
+				persistence_size = lPos * MB;
+				for (i = 0; i < persistence_unit_selection; i++)
+					persistence_size *= 1024;
+				if (persistence_size > SelectedDrive.DiskSize - img_report.projected_size)
+					persistence_size = SelectedDrive.DiskSize - img_report.projected_size;
+				pos = persistence_size / MB;
+				for (i = 0; i < persistence_unit_selection; i++)
+					pos /= 1024;
+				lPos = (LONG)pos;
+				SendMessage(GetDlgItem(hMainDialog, IDC_PERSISTENCE_SLIDER), TBM_SETPOS, TRUE, lPos);
+				if (persistence_size >= (SelectedDrive.DiskSize - img_report.projected_size)) {
+					static_sprintf(tmp, "%d", lPos);
+					app_changed_size = TRUE;
+					SetWindowTextU(GetDlgItem(hMainDialog, IDC_PERSISTENCE_SIZE), tmp);
+				}
+			} else if (HIWORD(wParam) == EN_KILLFOCUS) {
+				if (persistence_size == 0) {
+					TogglePersistenceControls(FALSE);
+					static_sprintf(tmp, "0 (%s)", lmprintf(MSG_124));
+					app_changed_size = TRUE;
+					SetWindowTextU(GetDlgItem(hMainDialog, IDC_PERSISTENCE_SIZE), tmp);
+				}
+			}
+			break;
 		case IDC_PERSISTENCE_UNITS:
 			if (HIWORD(wParam) != CBN_SELCHANGE)
 				break;
 			if (ComboBox_GetCurSel(GetDlgItem(hDlg, IDC_PERSISTENCE_UNITS)) == persistence_unit_selection)
 				break;
 			GetWindowTextA(GetDlgItem(hMainDialog, IDC_PERSISTENCE_SIZE), tmp, sizeof(tmp));
-			pos = atol(tmp) * MB;
+			persistence_size = atol(tmp) * MB;
 			for (i = 0; i < persistence_unit_selection; i++)
-				pos *= 1024;
+				persistence_size *= 1024;
 			persistence_unit_selection = ComboBox_GetCurSel(GetDlgItem(hDlg, IDC_PERSISTENCE_UNITS));
-			// TODO: Use projected size. For now force the selected ISO to a 4 GB size
-			SetPersistenceSize(pos, SelectedDrive.DiskSize - 4 * GB);
+			SetPersistenceSize(persistence_size, SelectedDrive.DiskSize - img_report.projected_size);
 			break;
 		case IDC_NB_PASSES:
 			if (HIWORD(wParam) != CBN_SELCHANGE)
@@ -2115,7 +2133,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			if ((selected_fs == -1) && (SelectedDrive.DeviceNumber != 0))
 				GetDrivePartitionData(SelectedDrive.DeviceNumber, tmp, sizeof(tmp), TRUE);
 			SetFileSystemAndClusterSize(tmp);
-			SetImageOptions();
+			ToggleImageOptions();
 			SetProposedLabel(ComboBox_GetCurSel(hDeviceList));
 			EnableControls(TRUE);
 			tt = (int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme));
@@ -2399,8 +2417,19 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 
 	case WM_HSCROLL:
 		lPos = (LONG)SendMessage(GetDlgItem(hMainDialog, IDC_PERSISTENCE_SLIDER), TBM_GETPOS, 0, 0);
-		sprintf(tmp, "%ld", lPos);
-		SetWindowTextA(GetDlgItem(hMainDialog, IDC_PERSISTENCE_SIZE), tmp);
+		if (lPos != 0) {
+			if (persistence_size == 0)
+				TogglePersistenceControls(TRUE);
+			sprintf(tmp, "%ld", lPos);
+		} else {
+			TogglePersistenceControls(FALSE);
+			static_sprintf(tmp, "0 (%s)", lmprintf(MSG_124));
+		}
+		persistence_size = lPos * MB;
+		for (i = 0; i < persistence_unit_selection; i++)
+			persistence_size *= 1024;
+		app_changed_size = TRUE;
+		SetWindowTextU(GetDlgItem(hMainDialog, IDC_PERSISTENCE_SIZE), tmp);
 		break;
 
 	case WM_DROPFILES:
@@ -3012,6 +3041,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 relaunch:
 	ubprintf("Localization set to '%s'", selected_locale->txt[0]);
 	right_to_left_mode = ((selected_locale->ctrl_id) & LOC_RIGHT_TO_LEFT);
+	// We always launch with the image options displaying
+	image_options = IMOP_WINTOGO;
+	image_option_txt[0] = 0;
 	SetProcessDefaultLayout(right_to_left_mode?LAYOUT_RTL:0);
 	if (get_loc_data_file(loc_file, selected_locale))
 		WriteSettingStr(SETTING_LOCALE, selected_locale->txt[0]);
