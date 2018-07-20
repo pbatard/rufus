@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 3.2\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2018-07-20 14:57+0100\n"
-"PO-Revision-Date: 2018-07-20 14:57+0100\n"
+"POT-Creation-Date: 2018-07-20 21:03+0100\n"
+"PO-Revision-Date: 2018-07-20 21:04+0100\n"
 "Language: fr_FR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -593,12 +593,13 @@ msgstr "Aucune image sélectionnée"
 #. • MSG_087
 #.
 #. This message appears in Advanced format options → Check device for bad blocks → dropdown menu
-#. %s will be replaced with SLC, MLC or TLC, which is a type of flash memory. In other words, this
-#. message should mean "for a flash memory device of type %s". *Please* try to keep the translation
-#. as short as possible so that it won't result in an overly large dropdown... It's okay to use a
-#. translation for "type" instead of "device"  (e.g. "for TLC type"). See also MSG_035.
-msgid "for %s devices"
-msgstr "pour type %s"
+#. %s will be replaced with SLC, MLC or TLC, which is a type of NAND (or flash memory). In other
+#. words, this message should mean "for a flash memory device of type %s". *Please* try to keep
+#. the translation as short as possible so that it won't result in an overly large dropdown...
+#. If you prefer, it's okay to use "type" or "device" instead of "NAND" (e.g. "for TLC type").
+#. See also MSG_035.
+msgid "for %s NAND"
+msgstr "pour NAND %s"
 
 #. • MSG_088
 msgid "Image is too big"

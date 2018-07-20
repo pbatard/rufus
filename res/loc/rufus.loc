@@ -227,11 +227,12 @@ t MSG_084 "This ISO image seems to use an obsolete version of '%s'.\n"
 t MSG_085 "Downloading '%s'"
 t MSG_086 "No image selected"
 # This message appears in Advanced format options → Check device for bad blocks → dropdown menu
-# %s will be replaced with SLC, MLC or TLC, which is a type of flash memory. In other words, this
-# message should mean "for a flash memory device of type %s". *Please* try to keep the translation
-# as short as possible so that it won't result in an overly large dropdown... It's okay to use a
-# translation for "type" instead of "device"  (e.g. "for TLC type"). See also MSG_035.
-t MSG_087 "for %s devices"
+# %s will be replaced with SLC, MLC or TLC, which is a type of NAND (or flash memory). In other
+# words, this message should mean "for a flash memory device of type %s". *Please* try to keep
+# the translation as short as possible so that it won't result in an overly large dropdown...
+# If you prefer, it's okay to use "type" or "device" instead of "NAND" (e.g. "for TLC type").
+# See also MSG_035.
+t MSG_087 "for %s NAND"
 t MSG_088 "Image is too big"
 t MSG_089 "The image is too big for the selected target."
 t MSG_090 "Unsupported ISO"
@@ -4620,7 +4621,7 @@ t IDS_NEW_VERSION_DOWNLOAD_GRP "Télécharger"
 t IDC_DOWNLOAD "Télécharger"
 
 g IDD_NOTIFICATION
-t IDC_MORE_INFO "Plus d'info..."
+t IDC_MORE_INFO "Plus d'information"
 t IDYES "Oui"
 t IDNO "Non"
 
@@ -4715,7 +4716,7 @@ t MSG_083 "Remplacer %s?"
 t MSG_084 "Cette image ISO utilise une version obsolète du fichier '%s'.\nLes menus de démarrage peuvent de pas fonctionner à cause de cela.\n\nRufus peut télécharger une nouvelle version du fichier pour résoudre ce problème :\n- Choisissez 'Oui' pour télécharger le fichier depuis Internet\n- Choisissez 'Non' pour garder le fichier de l'image ISO\nSi vous ne savez pas quoi faire, sélectionnez 'Oui'.\n\nNote : Le nouveau fichier sera téléchargé dans le répertoire courant. Si un '%s' existe à cet endroit, il sera réutilisé automatiquement."
 t MSG_085 "Téléchargement de '%s'"
 t MSG_086 "Aucune image sélectionnée"
-t MSG_087 "pour type %s"
+t MSG_087 "pour NAND %s"
 t MSG_088 "Image trop large"
 t MSG_089 "L'image est trop large pour être copiée sur le périphérique sélectionné."
 t MSG_090 "Image ISO non supportée"

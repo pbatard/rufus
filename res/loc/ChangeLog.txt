@@ -8,10 +8,11 @@ its directions.
 
 o v3.2 (2018.07.20)
 	The following appears in Advanced format options → Check device for bad blocks → dropdown menu with
-  %s being replaced with SLC, MLC or TLC, which is a type of flash memory. In other words, this message
-  should mean "for a flash memory device of type %s". *Please* try to keep the translation as short as
-  possible so that it won't result in an overly large dropdown...
-  - *NEW*      MSG_087 "for %s devices"
+  %s being replaced with SLC, MLC or TLC, which is a type of NAND (or flash memory. In other words,
+  this message should mean "for a flash memory device of type %s". *Please* try to keep the translation
+  as short as possible so that it won't result in an overly large dropdown...
+  See https://www.mydigitaldiscount.com/everything-you-need-to-know-about-slc-mlc-and-tlc-nand-flash.html
+  - *NEW*      MSG_087 "for %s NAND"
   The following 4 messages can be tested using https://github.com/pbatard/rufus/raw/master/res/loc/test/casper_test.iso
   - *NEW*      MSG_123 "Persistent partition size"
   - *NEW*      MSG_124 "No persistence"
@@ -25,7 +26,7 @@ o v3.2 (2018.07.20)
   - *NEW*      MSG_240 "The signature for the downloaded update can not be validated (...)"
   You can see this status message by pressing <Ctrl>-<Alt>-<Z> and then selecting Start.
   It's the same as MSG_286 but with a process that *may* be faster, hence the name.
-  - *NEW*      MSG_306
+  - *NEW*      MSG_306 "Fast-zeroing drive: %0.1f%% completed"
   Note: Because this is the introduction of a new translation framework, and I am a bit short of time for that
   unification of MSG_084/MSG_104/MSG_114/MSG_116 will happen in another translation round...
 
