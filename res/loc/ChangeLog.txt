@@ -1,10 +1,12 @@
-This file lists any change that has been applied to the en-US translation of
+This file lists all the changes that have been applied to the en-US translation of
 rufus.loc since its original version.
 
-When editing an existing translation, make sure to follow:
+To edit a translation, please make sure to follow:
 https://github.com/pbatard/rufus/wiki/Localization#Editing_a_translation
+Or simply download the latest pollock.exe from https://rufus.ie/locale/ and follow
+its directions. 
 
-o v3.2 (2018.??.??)
+o v3.2 (2018.07.20)
 	The following appears in Advanced format options → Check device for bad blocks → dropdown menu with
   %s being replaced with SLC, MLC or TLC, which is a type of flash memory. In other words, this message
   should mean "for a flash memory device of type %s". *Please* try to keep the translation as short as

@@ -13,6 +13,7 @@
 *.lo
 *.log
 *.mac
+*.mo
 *.ncb
 *.o
 *.obj

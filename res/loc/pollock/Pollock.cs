@@ -17,6 +17,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/*
+ * Icon courtesy of Axialis Fluent Pro 2018 - Letters and Symbols.
+ * CC BY-ND 4.0 - https://www.axialis.com/icons.
+ */
+
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -426,13 +431,13 @@ namespace pollock
                         else
                         {
                             writer.WriteLine($"msgid {en_str}");
-                            writer.WriteLine($"msgstr {msg_str}");
+                            writer.WriteLine($"msgstr {((msg_str == en_str) ? "\"\"" : msg_str)}");
                         }
                     }
                 }
                 nb_po_saved++;
+                Console.WriteLine("DONE");
             }
-            Console.WriteLine("DONE");
             return nb_po_saved;
         }
 
@@ -1124,11 +1129,6 @@ Retry:
             Console.WriteLine($"{list[index][0]} was selected.");
             Console.WriteLine();
             po_file = $"{list[index][1]}.po";
-            if (File.Exists(po_file))
-            {
-                if (!PromptForQuestion($"A '{po_file}' file already exists. Do you want to overwrite it? (If unsure, answer 'y')"))
-                    goto Error;
-            }
 
             Language old_en_US = null;
             if (list[index][2] == list[0][2])
@@ -1170,7 +1170,12 @@ Retry:
                 old_en_US = old_langs[0];
             }
 
-            if (CreatePoFiles(ParseLocFile(loc_file, list[index][1]), old_en_US) != 1)
+            if (File.Exists(po_file))
+            {
+                if (!PromptForQuestion($"A '{po_file}' file already exists. Do you want to overwrite it? (If unsure, say 'y')"))
+                    goto Error;
+            }
+            if (CreatePoFiles(ParseLocFile(loc_file, list[index][1]), old_en_US) < 1)
             {
                 Console.WriteLine("Failed to create PO file");
                 goto Error;

@@ -32,7 +32,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>../../rufus.ico</ApplicationIcon>
+    <ApplicationIcon>pollock.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -49,7 +49,27 @@
     <Compile Include="Pollock.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="../../rufus.ico" />
+    <Content Include="pollock.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Target Name="PostBuildMacros">
+    <GetAssemblyIdentity AssemblyFiles="$(TargetPath)">
+      <Output TaskParameter="Assemblies" ItemName="Targets" />
+    </GetAssemblyIdentity>
+    <ItemGroup>
+      <VersionNumber Include="@(Targets->'%(Version)')" />
+    </ItemGroup>
+  </Target>
+  <PropertyGroup>
+    <PostBuildEventDependsOn>
+      $(PostBuildEventDependsOn);
+      PostBuildMacros;
+    </PostBuildEventDependsOn>
+    <PostBuildEvent>for /f "tokens=1,2 delims=." %25%25i in ("@(VersionNumber)") do set "major=%25%25i" &amp;set "minor=%25%25j"
+set version=%25major%25.%25minor%25
+  if $(ConfigurationName) == Release (
+  copy $(TargetDir)$(TargetFileName) $(SolutionDir)..\..\..\pollock-%25version%25.exe /y
+  $(SolutionDir)..\..\..\_sign.cmd $(SolutionDir)..\..\..\pollock-%25version%25.exe
+)</PostBuildEvent>
+  </PropertyGroup>
 </Project>

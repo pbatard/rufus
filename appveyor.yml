@@ -6,6 +6,8 @@ os: Visual Studio 2017
 skip_commits:
   # Don't run AppVeyor for commits that only modify resource or non-code files
   files:
+    - .gitignore
+    - .gitattributes
     - res/*
     - '**/*.cmd'
     - '**/*.md'

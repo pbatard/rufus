@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 3.2\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2018-07-18 16:45+0100\n"
-"PO-Revision-Date: 2018-07-18 17:16+0100\n"
+"POT-Creation-Date: 2018-07-20 14:57+0100\n"
+"PO-Revision-Date: 2018-07-20 14:57+0100\n"
 "Language: fr_FR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -117,7 +117,7 @@ msgstr "Licence"
 
 #. • IDD_ABOUTBOX → IDOK
 msgid "OK"
-msgstr "OK"
+msgstr ""
 
 #. • IDD_LICENSE → IDD_LICENSE
 msgid "Rufus License"
@@ -125,7 +125,7 @@ msgstr "Licence Rufus"
 
 #. • IDD_NOTIFICATION → IDC_MORE_INFO
 msgid "More information"
-msgstr "Plus d'info..."
+msgstr "Plus d'information"
 
 #. • IDD_NOTIFICATION → IDYES
 #. • MSG_008
@@ -139,7 +139,7 @@ msgstr "Non"
 
 #. • IDD_LOG → IDD_LOG
 msgid "Log"
-msgstr "Log"
+msgstr ""
 
 #. • IDD_LOG → IDC_LOG_CLEAR
 msgid "Clear"
@@ -339,7 +339,7 @@ msgstr "BIOS (ou UEFI-CSM)"
 
 #. • MSG_032
 msgid "UEFI (non CSM)"
-msgstr "UEFI (non CSM)"
+msgstr ""
 
 #. • MSG_033
 msgid "BIOS or UEFI"
@@ -356,7 +356,7 @@ msgstr "%d passe"
 #. Number of bad block check passes (plural for 2 or more passes).
 #. See MSG_087 for the message that %s gets replaced with.
 msgid "%d passes %s"
-msgstr "%d passes %s"
+msgstr ""
 
 #. • MSG_036
 msgid "ISO Image"
@@ -364,7 +364,7 @@ msgstr "Image ISO"
 
 #. • MSG_037
 msgid "Application"
-msgstr "Application"
+msgstr ""
 
 #. • MSG_038
 msgid "Abort"
@@ -808,7 +808,7 @@ msgstr "Installation standard de Windows"
 #. http://en.wikipedia.org/wiki/Windows_To_Go in your language.
 #. Otherwise, you may add a parenthesis eg. "Windows To Go (<hint at what it does>)"
 msgid "Windows To Go"
-msgstr "Windows To Go"
+msgstr ""
 
 #. • MSG_119
 msgid "advanced drive properties"
@@ -838,8 +838,8 @@ msgstr "Taille de partition persistente"
 #. • MSG_124
 #.
 #. This message appears in the persistence 'Size' control when the slider is set to 0.
-#. If running out of space, it is okay to use "No partition" or "None" to indicate that a persistent
-#. partition will not be created (because the 'Size' edit control is *not* adjusted for width).
+#. It is okay to use "No partition" or "None" or "Deactivated" to indicate that a persistent partition will not be
+#. created if the width of the control is too small (since the 'Size' edit control is *not* adjusted for width).
 msgid "No persistence"
 msgstr "Désactivée"
 
@@ -970,11 +970,11 @@ msgstr "Cliquez pour sélectionner..."
 
 #. • MSG_174
 msgid "Rufus - The Reliable USB Formatting Utility"
-msgstr "Rufus - The Reliable USB Formatting Utility"
+msgstr ""
 
 #. • MSG_175
 msgid "Version %d.%d (Build %d)"
-msgstr "Version %d.%d (Build %d)"
+msgstr ""
 
 #. • MSG_176
 msgid "English translation: Pete Batard <mailto:pete@akeo.ie>"
