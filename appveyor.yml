@@ -8,7 +8,7 @@ skip_commits:
   files:
     - .gitignore
     - .gitattributes
-    - res/*
+    - res/
     - '**/*.cmd'
     - '**/*.md'
     - '**/*.rc'
