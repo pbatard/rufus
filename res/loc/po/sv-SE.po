@@ -1,0 +1,1613 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: 3.2\n"
+"Report-Msgid-Bugs-To: pete@akeo.ie\n"
+"POT-Creation-Date: 2018-07-20 23:42+0200\n"
+"PO-Revision-Date: 2018-07-21 00:29+0200\n"
+"Language: sv_SE\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Rufus-LanguageName: Swedish (Svenska)\n"
+"X-Rufus-LCID: 0x041d, 0x081d\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"X-Generator: Poedit 2.0.8\n"
+
+#. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
+msgid "Drive Properties"
+msgstr "Enhetsegenskaper"
+
+#. • IDD_DIALOG → IDS_DEVICE_TXT
+msgid "Device"
+msgstr "Enhet"
+
+#. • IDD_DIALOG → IDS_BOOT_SELECTION_TXT
+msgid "Boot selection"
+msgstr "Startval"
+
+#. • IDD_DIALOG → IDC_SELECT
+msgid "Select"
+msgstr "Välj"
+
+#. • IDD_DIALOG → IDS_IMAGE_OPTION_TXT
+msgid "Image Option"
+msgstr "Avbildsalternativ"
+
+#. • IDD_DIALOG → IDS_PARTITION_TYPE_TXT
+msgid "Partition scheme"
+msgstr "Partitionsschema"
+
+#. • IDD_DIALOG → IDS_TARGET_SYSTEM_TXT
+msgid "Target system"
+msgstr "Målsystem"
+
+#. • IDD_DIALOG → IDC_LIST_USB_HDD
+msgid "List USB Hard Drives"
+msgstr "Lista USB-hårddiskar"
+
+#. • IDD_DIALOG → IDC_OLD_BIOS_FIXES
+#.
+#. It is acceptable to drop the parenthesis () if you are running out of space
+#. as there is a tooltip (MSG_169) providing these details.
+msgid "Add fixes for old BIOSes (extra partition, align, etc.)"
+msgstr "Lägg till korrigeringar för äldre BIOS:ar"
+
+#. • IDD_DIALOG → IDC_RUFUS_MBR
+#.
+#. 'MBR': See http://en.wikipedia.org/wiki/Master_boot_record
+#. Rufus can install it's own custom MBR (the Rufus MBR), which also allows users to
+#. specify a custom disk ID for the BIOS. The tooltip for this control is MSG_167.
+msgid "Use Rufus MBR with BIOS ID"
+msgstr "Använd Rufus MBR med BIOS-ID"
+
+#. • IDD_DIALOG → IDS_FORMAT_OPTIONS_TXT
+msgid "Format Options"
+msgstr "Formateringsinställningar"
+
+#. • IDD_DIALOG → IDS_FILE_SYSTEM_TXT
+msgid "File system"
+msgstr "Filsystem"
+
+#. • IDD_DIALOG → IDS_CLUSTER_SIZE_TXT
+msgid "Cluster size"
+msgstr "Klusterstorlek"
+
+#. • IDD_DIALOG → IDS_LABEL_TXT
+msgid "Volume label"
+msgstr "Volymetikett"
+
+#. • IDD_DIALOG → IDC_QUICK_FORMAT
+msgid "Quick format"
+msgstr "Snabbformatering"
+
+#. • IDD_DIALOG → IDC_BAD_BLOCKS
+msgid "Check device for bad blocks"
+msgstr "Kontrollera enheten efter trasiga block"
+
+#. • IDD_DIALOG → IDC_EXTENDED_LABEL
+msgid "Create extended label and icon files"
+msgstr "Skapa utökat namn och ikonfiler"
+
+#. • IDD_DIALOG → IDS_STATUS_TXT
+msgid "Status"
+msgstr ""
+
+#. • IDD_DIALOG → IDCANCEL
+#. • IDD_LICENSE → IDCANCEL
+#. • IDD_LOG → IDCANCEL
+#. • IDD_UPDATE_POLICY → IDCANCEL
+#. • IDD_NEW_VERSION → IDCANCEL
+#. • MSG_006
+msgid "Close"
+msgstr "Stäng"
+
+#. • IDD_DIALOG → IDC_START
+msgid "Start"
+msgstr "Starta"
+
+#. • IDD_ABOUTBOX → IDD_ABOUTBOX
+msgid "About Rufus"
+msgstr "Om Rufus"
+
+#. • IDD_ABOUTBOX → IDC_ABOUT_LICENSE
+msgid "License"
+msgstr "Licens"
+
+#. • IDD_ABOUTBOX → IDOK
+msgid "OK"
+msgstr ""
+
+#. • IDD_LICENSE → IDD_LICENSE
+msgid "Rufus License"
+msgstr "Rufus licens"
+
+#. • IDD_NOTIFICATION → IDC_MORE_INFO
+msgid "More information"
+msgstr "Mer information"
+
+#. • IDD_NOTIFICATION → IDYES
+#. • MSG_008
+msgid "Yes"
+msgstr "Ja"
+
+#. • IDD_NOTIFICATION → IDNO
+#. • MSG_009
+msgid "No"
+msgstr "Nej"
+
+#. • IDD_LOG → IDD_LOG
+msgid "Log"
+msgstr "Logg"
+
+#. • IDD_LOG → IDC_LOG_CLEAR
+msgid "Clear"
+msgstr "Rensa"
+
+#. • IDD_LOG → IDC_LOG_SAVE
+msgid "Save"
+msgstr "Spara"
+
+#. • IDD_UPDATE_POLICY → IDD_UPDATE_POLICY
+msgid "Update policy and settings"
+msgstr "Uppdateringspolicy och inställningar"
+
+#. • IDD_UPDATE_POLICY → IDS_UPDATE_SETTINGS_GRP
+msgid "Settings"
+msgstr "Inställningar"
+
+#. • IDD_UPDATE_POLICY → IDS_UPDATE_FREQUENCY_TXT
+msgid "Check for updates:"
+msgstr "Sök efter uppdateringar:"
+
+#. • IDD_UPDATE_POLICY → IDS_INCLUDE_BETAS_TXT
+msgid "Include beta versions:"
+msgstr "Även beta-versioner:"
+
+#. • IDD_UPDATE_POLICY → IDC_CHECK_NOW
+msgid "Check Now"
+msgstr "Uppdatera nu"
+
+#. • IDD_NEW_VERSION → IDD_NEW_VERSION
+msgid "Check For Updates - Rufus"
+msgstr "Kontrollera efter uppdateringar - Rufus"
+
+#. • IDD_NEW_VERSION → IDS_NEW_VERSION_AVAIL_TXT
+msgid "A newer version is available. Please download the latest version!"
+msgstr "En nyare version finns tillgänglig. Ladda gärna ner senaste versionen!"
+
+#. • IDD_NEW_VERSION → IDC_WEBSITE
+msgid "Click here to go to the website"
+msgstr "Tryck här för att komma till hemsidan"
+
+#. • IDD_NEW_VERSION → IDS_NEW_VERSION_NOTES_GRP
+msgid "Release Notes"
+msgstr "Programinformation"
+
+#. • IDD_NEW_VERSION → IDS_NEW_VERSION_DOWNLOAD_GRP
+#. • IDD_NEW_VERSION → IDC_DOWNLOAD
+#. • MSG_040
+msgid "Download"
+msgstr "Nerladdning"
+
+#. • MSG_001
+msgid "Other instance detected"
+msgstr "Program redan i gång"
+
+#. • MSG_002
+msgid ""
+"Another Rufus application is running.\n"
+"Please close the first application before running another one."
+msgstr ""
+"Rufus körs redan.\n"
+"Stäng det andra programmet innan du startar ännu ett."
+
+#. • MSG_003
+msgid ""
+"WARNING: ALL DATA ON DEVICE '%s' WILL BE DESTROYED.\n"
+"To continue with this operation, click OK. To quit click CANCEL."
+msgstr ""
+"VARNING: ALL DATA PÅ ENHETEN '%s'\n"
+"KOMMER ATT FÖRSVINNA.\n"
+"För att fortsätta, tryck OK. För att avbryta tryck AVBRYT."
+
+#. • MSG_004
+msgid "Rufus update policy"
+msgstr "Rufus uppdateringspolicy"
+
+#. • MSG_005
+msgid "Do you want to allow Rufus to check for application updates online?"
+msgstr "Tillåter du att Rufus söker efter uppdateringar på nätet?"
+
+#. • MSG_007
+msgid "Cancel"
+msgstr "Avbryt"
+
+#. • MSG_010
+msgid "Bad blocks found"
+msgstr "Trasiga block funna"
+
+#. • MSG_011
+msgid ""
+"Check completed: %d bad block(s) found\n"
+"  %d read error(s)\n"
+"  %d write error(s)\n"
+"  %d corruption error(s)"
+msgstr ""
+"Kontroll klar: %d trasiga block funna\n"
+"  %d läsfel\n"
+"  %d skrivfel\n"
+"  %d korruptionsfel"
+
+#. • MSG_012
+#.
+#. This contains the formatted message from MSG_001 as well as the name of the bad blocks logfile
+msgid ""
+"%s\n"
+"A more detailed report can be found in:\n"
+"%s"
+msgstr ""
+"%s\n"
+"En mer detaljerad rapport hittar du i:\n"
+"%s"
+
+#. • MSG_013
+msgid "Disabled"
+msgstr "Inaktiverad"
+
+#. • MSG_014
+msgid "Daily"
+msgstr "Dagligen"
+
+#. • MSG_015
+msgid "Weekly"
+msgstr "Veckovis"
+
+#. • MSG_016
+msgid "Monthly"
+msgstr "Månadsvis"
+
+#. • MSG_017
+msgid "Custom"
+msgstr "Egen"
+
+#. • MSG_018
+msgid "Your version: %d.%d (Build %d)"
+msgstr "Din version: %d.%d (Build %d)"
+
+#. • MSG_019
+msgid "Latest version: %d.%d (Build %d)"
+msgstr "Senaste version: %d.%d (Build %d)"
+
+#. • MSG_020
+#. • MSG_026
+msgid "bytes"
+msgstr ""
+
+#. • MSG_021
+#.
+#. *Short* version of the kilobyte size suffix
+msgid "KB"
+msgstr ""
+
+#. • MSG_022
+#.
+#. *Short* version of the megabyte size suffix
+msgid "MB"
+msgstr ""
+
+#. • MSG_023
+#.
+#. *Short* version of the gigabyte size suffix
+msgid "GB"
+msgstr ""
+
+#. • MSG_024
+#.
+#. *Short* version of the terabyte size suffix
+msgid "TB"
+msgstr ""
+
+#. • MSG_025
+#.
+#. *Short* version of the pentabyte size suffix
+msgid "PB"
+msgstr ""
+
+#. • MSG_027
+msgid "kilobytes"
+msgstr ""
+
+#. • MSG_028
+msgid "megabytes"
+msgstr ""
+
+#. • MSG_029
+msgid "Default"
+msgstr "Standard"
+
+#. • MSG_030
+#.
+#. This gets appended to the file system, cluster size, etc.
+msgid "%s (Default)"
+msgstr "%s (Standard)"
+
+#. • MSG_031
+msgid "BIOS (or UEFI-CSM)"
+msgstr "BIOS (eller UEFI-CSM)"
+
+#. • MSG_032
+msgid "UEFI (non CSM)"
+msgstr "UEFI (icke CSM)"
+
+#. • MSG_033
+msgid "BIOS or UEFI"
+msgstr "BIOS eller UEFI"
+
+#. • MSG_034
+#.
+#. Number of bad block check passes (singular for 1 pass)
+msgid "%d pass"
+msgstr "%d gång"
+
+#. • MSG_035
+#.
+#. Number of bad block check passes (plural for 2 or more passes).
+#. See MSG_087 for the message that %s gets replaced with.
+msgid "%d passes %s"
+msgstr "%d gånger %s"
+
+#. • MSG_036
+msgid "ISO Image"
+msgstr "ISO-avbild"
+
+#. • MSG_037
+msgid "Application"
+msgstr "Program"
+
+#. • MSG_038
+msgid "Abort"
+msgstr "Avbryt"
+
+#. • MSG_039
+msgid "Launch"
+msgstr "Starta"
+
+#. • MSG_041
+msgid "Operation cancelled by the user"
+msgstr "Operationen avbröts av användaren"
+
+#. • MSG_042
+msgid "Error"
+msgstr "Fel"
+
+#. • MSG_043
+msgid "Error: %s"
+msgstr "Fel: %s"
+
+#. • MSG_044
+msgid "File download"
+msgstr "Filnerladdning"
+
+#. • MSG_045
+msgid "USB Storage Device (Generic)"
+msgstr ""
+
+#. • MSG_046
+msgid "%s (Disk %d) [%s]"
+msgstr ""
+
+#. • MSG_047
+#.
+#. Used when a drive is detected that contains more than one partition
+msgid "Multiple Partitions"
+msgstr "Flera partitioner"
+
+#. • MSG_048
+msgid "Rufus - Flushing buffers"
+msgstr "Rufus - Tömmer buffertar"
+
+#. • MSG_049
+msgid "Rufus - Cancellation"
+msgstr "Rufus - Avbryter"
+
+#. • MSG_050
+msgid "Success."
+msgstr "Lyckades."
+
+#. • MSG_051
+msgid "Undetermined error while formatting."
+msgstr "Obestämd fel vid formatering."
+
+#. • MSG_052
+msgid "Cannot use the selected file system for this media."
+msgstr "Kan inte använda valt filsystem för detta media."
+
+#. • MSG_053
+msgid "Access to the device is denied."
+msgstr "Åtkomst till enheten nekades."
+
+#. • MSG_054
+msgid "Media is write protected."
+msgstr "Mediet är skrivskyddat."
+
+#. • MSG_055
+msgid "The device is in use by another process. Please close any other process that may be accessing the device."
+msgstr "Enheten används redan av en annan process. Stäng andra processer som kan tänkas använda enheten."
+
+#. • MSG_056
+msgid "Quick format is not available for this device."
+msgstr "Enheten går inte att snabbformatera."
+
+#. • MSG_057
+msgid "The volume label is invalid."
+msgstr "Volymens namn är ogiltigt."
+
+#. • MSG_058
+msgid "The device handle is invalid."
+msgstr "Hantering av enheten är ogiltig."
+
+#. • MSG_059
+msgid "The selected cluster size is not valid for this device."
+msgstr "Klusterstorlek är ogiltig för denna enheten."
+
+#. • MSG_060
+msgid "The volume size is invalid."
+msgstr "Volymens storlek är ogiltig."
+
+#. • MSG_061
+msgid "Please insert a removable media in drive."
+msgstr "Sätt i ett flyttbart media i enheten."
+
+#. • MSG_062
+msgid "An unsupported command was received."
+msgstr "Tog emot ett ogiltigt kommando."
+
+#. • MSG_063
+msgid "Memory allocation error."
+msgstr "Minnesfel."
+
+#. • MSG_064
+msgid "Read error."
+msgstr "Läsfel."
+
+#. • MSG_065
+msgid "Write error."
+msgstr "Skrivfel."
+
+#. • MSG_066
+msgid "Installation failure"
+msgstr "Installationsfel"
+
+#. • MSG_067
+msgid "Could not open media. It may be in use by another process. Please re-plug the media and try again."
+msgstr "Kunde inte öppna mediet. Det verkar redan användas av en annan process. Prova ta ur och stoppa in mediet igen."
+
+#. • MSG_068
+msgid "Error while partitioning drive."
+msgstr "Fel när partitionering av enheten gjordes."
+
+#. • MSG_069
+msgid "Could not copy files to target drive."
+msgstr "Kunde inte kopiera filer till målenheten."
+
+#. • MSG_070
+msgid "Cancelled by user."
+msgstr "Avbruten av användaren."
+
+#. • MSG_071
+#.
+#. See http://en.wikipedia.org/wiki/Thread_%28computing%29
+msgid "Unable to start thread."
+msgstr "Kunde inte starta tråd."
+
+#. • MSG_072
+msgid "Bad blocks check didn't complete."
+msgstr "Kontroll efter trasiga block slutfördes inte."
+
+#. • MSG_073
+msgid "ISO image scan failure."
+msgstr "Misslyckades söka av ISO-avbilden."
+
+#. • MSG_074
+msgid "ISO image extraction failure."
+msgstr "Misslyckades packa upp ISO-avbilden."
+
+#. • MSG_075
+msgid "Unable to remount volume."
+msgstr "Kunde inte återmontera volymen."
+
+#. • MSG_076
+msgid "Unable to patch/setup files for boot."
+msgstr "Kunde inte installera filer för uppstarten (boot)."
+
+#. • MSG_077
+msgid "Unable to assign a drive letter."
+msgstr "Kunde inte tilldela enhetsbokstav."
+
+#. • MSG_078
+msgid "Can't mount GUID volume."
+msgstr "Kan inte montera GUID-volymen."
+
+#. • MSG_079
+msgid "The device is not ready."
+msgstr "Enheten är inte klar."
+
+#. • MSG_080
+msgid ""
+"Rufus detected that Windows is still flushing its internal buffers onto the USB device.\n"
+"\n"
+"Depending on the speed of your USB device, this operation may take a long time to complete, especially for large files.\n"
+"\n"
+"We recommend that you let Windows finish, to avoid corruption. But if you grow tired of waiting, you can just unplug the device..."
+msgstr ""
+"Rufus har upptäckt att Windows fortfarande tömmer den interna bufferten till USB-enheten.\n"
+"\n"
+"Beroende på hastigheten på din USB-enhet, kan detta ta en lång stund innan det är klart, speciellt för stora filer.\n"
+"\n"
+"Vi rekommenderar att du låter Windows få slutföra, för att undvika problem. Men tröttnar du på att vänta, kan du helt enkelt bara dra ur enheten..."
+
+#. • MSG_081
+msgid "Unsupported image"
+msgstr "Avbilden stöds ej"
+
+#. • MSG_082
+msgid "This image is either non-bootable, or it uses a boot or compression method that is not supported by Rufus..."
+msgstr "Denna avbild är antingen icke startbar, eller så använder den en start- eller kompression-metod som Rufus inte stöder..."
+
+#. • MSG_083
+msgid "Replace %s?"
+msgstr "Ersätt %s?"
+
+#. • MSG_084
+msgid ""
+"This ISO image seems to use an obsolete version of '%s'.\n"
+"Boot menus may not display properly because of this.\n"
+"\n"
+"A newer version can be downloaded by Rufus to fix this issue:\n"
+"- Choose 'Yes' to connect to the internet and download the file\n"
+"- Choose 'No' to leave the existing ISO file unmodified\n"
+"If you don't know what to do, you should select 'Yes'.\n"
+"\n"
+"Note: The new file will be downloaded in the current directory and once a '%s' exists there, it will be reused automatically."
+msgstr ""
+"Denna ISO-avbild verkar använda en gammal version av '%s'.\n"
+"Startmenyn visas kanske inte på ett korrekt sätt på grund av detta.\n"
+"\n"
+"Ladda ner en nyare version av Rufus så löser det problemet:\n"
+"- Välj 'Ja' för att ansluta till internet och ladda ner filen\n"
+"- Välj 'Nej' för att låta befintlig ISO-fil vara omodifierad\n"
+"Vet du inte vad du ska välja, så ska du välja 'Ja'.\n"
+"\n"
+"Obs: Filen kommer att laddas ner i nuvarande katalog och när '%s' sedan finns där, kommer den automatiskt att återanvändas."
+
+#. • MSG_085
+msgid "Downloading '%s'"
+msgstr "Laddar ner '%s'"
+
+#. • MSG_086
+msgid "No image selected"
+msgstr "Ingen avbild vald"
+
+#. • MSG_087
+#.
+#. This message appears in Advanced format options → Check device for bad blocks → dropdown menu
+#. %s will be replaced with SLC, MLC or TLC, which is a type of NAND (or flash memory). In other
+#. words, this message should mean "for a flash memory device of type %s". *Please* try to keep
+#. the translation as short as possible so that it won't result in an overly large dropdown...
+#. If you prefer, it's okay to use "type" or "device" instead of "NAND" (e.g. "for TLC type").
+#. See also MSG_035.
+msgid "for %s NAND"
+msgstr "för %s-NAND"
+
+#. • MSG_088
+msgid "Image is too big"
+msgstr "Avbilden är för stor"
+
+#. • MSG_089
+msgid "The image is too big for the selected target."
+msgstr "Avbilden är för stor för det valda målet."
+
+#. • MSG_090
+msgid "Unsupported ISO"
+msgstr "ISO-filen stöds ej"
+
+#. • MSG_091
+msgid "When using UEFI Target Type, only EFI bootable ISO images are supported. Please select an EFI bootable ISO or set the Target Type to BIOS."
+msgstr "När UEFI används som måltyp, kan endast EFI-startbara ISO-avbilder användas. Välj en EFI-startbar ISO-fil eller sätt måltypen till BIOS."
+
+#. • MSG_092
+msgid "Unsupported filesystem"
+msgstr "Filsystemet stöds ej"
+
+#. • MSG_093
+msgid ""
+"IMPORTANT: THIS DRIVE CONTAINS MULTIPLE PARTITIONS!!\n"
+"\n"
+"This may include partitions/volumes that aren't listed or even visible from Windows. Should you wish to proceed, you are responsible for any data loss on these partitions."
+msgstr ""
+"VIKTIGT: DENNA ENHETEN INNEHÅLLER FLERA PARTITIONER!!\n"
+"\n"
+"Detta kan inkludera partitioner/volymer som inte är listade eller synliga i Windows. Fortsätter du, är du själv ansvarig för all data som kan försvinna på dessa partitioner."
+
+#. • MSG_094
+msgid "Multiple partitions detected"
+msgstr "Flera partitioner upptäcktes"
+
+#. • MSG_095
+msgid "DD Image"
+msgstr "DD-avbild"
+
+#. • MSG_096
+msgid "The file system currently selected can not be used with this type of ISO. Please select a different file system or use a different ISO."
+msgstr "Det valda filsystemet kan inte användas med denna typ av ISO-fil. Välj ett annat filsystem eller en annan ISO-fil."
+
+#. • MSG_097
+msgid "'%s' can only be applied if the file system is NTFS."
+msgstr "'%s' kan endast tillämpas om filsystemet är NTFS."
+
+#. • MSG_098
+msgid ""
+"IMPORTANT: You are trying to install 'Windows To Go', but your target drive doesn't have the 'FIXED' attribute. Because of this Windows will most likely freeze during boot, as Microsoft hasn't designed it to work with drives that instead have the 'REMOVABLE' attribute.\n"
+"\n"
+"Do you still want to proceed?\n"
+"\n"
+"Note: The 'FIXED/REMOVABLE' attribute is a hardware property that can only be changed using custom tools from the drive manufacturer. However those tools are ALMOST NEVER provided to the public..."
+msgstr ""
+"VIKTIGT: Du försöker att installera 'Windows To Go', men din målenhet är inte en FIXERAD enhet. Därför kommer troligen Windows att låsa sig vid uppstart, eftersom Microsoft inte har designat det att fungera med FLYTTBARA enheter.\n"
+"\n"
+"Vill du ändå fortsätta?\n"
+"\n"
+"Obs: FIXERAD/FLYTTBAR enhet ligger i hårdvaran och kan endast ändras med hjälp utav speciella verktyg som endast tillverkarna har. Dessa vertyg är något som NÄSTAN ALDRIG allmänheten får tillgång till..."
+
+#. • MSG_099
+msgid "Filesystem limitation"
+msgstr "Begränsningar i filsystem"
+
+#. • MSG_100
+msgid "This ISO image contains a file larger than 4GB, which is more than the maximum size allowed for a FAT or FAT32 file system."
+msgstr "Denna ISO-avbild innehåller en fil som är större än 4GB, vilket är mer än maximal storlek tillåtet för FAT- och FAT32-filsystemen."
+
+#. • MSG_101
+msgid "Missing WIM support"
+msgstr "Stöd för WIM saknas"
+
+#. • MSG_102
+msgid ""
+"Your platform cannot extract files from WIM archives. WIM extraction is required to create EFI bootable Windows 7 and Windows Vista USB drives. You can fix that by installing a recent version of 7-Zip.\n"
+"Do you want to visit the 7-zip download page?"
+msgstr ""
+"Din dator kan inte packa upp filer från ett WIM-arkiv. WIM-uppackning krävs för att skapa EFI-startbar Windows 7 och Windows Vista USB-enheter. Du kan lösa detta genom att installera 7-Zip.\n"
+"Vill du besöka nerladdningssidan för 7-Zip?"
+
+#. • MSG_103
+msgid "Download %s?"
+msgstr "Ladda ner %s?"
+
+#. • MSG_104
+#.
+#. Example: "Grub4DOS v0.4 or later requires a 'grldr' file to be installed. Because this
+#. file is more than 100 KB in size, and always present on Grub4DOS ISO images (...)"
+msgid ""
+"%s or later requires a '%s' file to be installed.\n"
+"Because this file is more than 100 KB in size, and always present on %s ISO images, it is not embedded in Rufus.\n"
+"\n"
+"Rufus can download the missing file for you:\n"
+"- Select 'Yes' to connect to the internet and download the file\n"
+"- Select 'No' if you want to manually copy this file on the drive later\n"
+"\n"
+"Note: The file will be downloaded in the current directory and once a '%s' exists there, it will be reused automatically."
+msgstr ""
+"%s eller senare kräver en '%s' fil för att bli installerad.\n"
+"Eftersom filen är större än 100 KB, och alltid finns på %s ISO-avbilder, finns den inte inbyggd i Rufus.\n"
+"\n"
+"Rufus kan ladda ner denna filen åt dig:\n"
+"- Välj 'Ja' för att ansluta till internet och ladda ner filen\n"
+"- Välj 'Nej' om du själv senare vill kopiera in filen på enheten\n"
+"\n"
+"Obs: Filen kommer att laddas ner i nuvarande katalog och när '%s' sedan finns där, kommer den automatiskt att återanvändas."
+
+#. • MSG_105
+msgid ""
+"Cancelling may leave the device in an UNUSABLE state.\n"
+"If you are sure you want to cancel, click YES. Otherwise, click NO."
+msgstr "Avbryter du, finns det risk enheten blir oanvändbar.Är du säker du vill avbryta, tryck JA. Annars tryck NEJ."
+
+#. • MSG_106
+msgid "Please select folder"
+msgstr "Välj mapp"
+
+#. • MSG_107
+msgid "All files"
+msgstr "Alla filer"
+
+#. • MSG_108
+msgid "Rufus log"
+msgstr "Rufus logg"
+
+#. • MSG_109
+msgid "0x%02X (Disk %d)"
+msgstr ""
+
+#. • MSG_110
+#.
+#. "Cluster size" should be the same as the label for IDS_CLUSTER_SIZE_TXT
+#. "kilobytes" should be the same as in MSG_027
+msgid ""
+"MS-DOS cannot boot from a drive using a 64 kilobytes Cluster size.\n"
+"Please change the Cluster size or use FreeDOS."
+msgstr ""
+"MS-DOS kan inte starta från en enhet som använder 64 kilobytes klusterstorlek.\n"
+"Ändra klusterstorleken eller använd FreeDOS."
+
+#. • MSG_111
+msgid "Incompatible Cluster size"
+msgstr "Klusterstorlek stöds ej"
+
+#. • MSG_112
+#.
+#. "%d:%02d" is a duration (mins:secs)
+msgid "Formatting a large UDF volumes can take a lot of time. At USB 2.0 speeds, the estimated formatting duration is %d:%02d, during which the progress bar will appear frozen. Please be patient!"
+msgstr "Att formatera en stor UDF-volym kan ta lång tid. Vid USB 2.0-hastigheter, är den beräknade formateringstiden runt %d:%02d, och under tiden kan förloppsindikatorn se ut att stå stilla. Ta det bara lugnt, tack!"
+
+#. • MSG_113
+msgid "Large UDF volume"
+msgstr "Stor UDF-volym"
+
+#. • MSG_114
+msgid ""
+"This image uses Syslinux %s%s but this application only includes the installation files for Syslinux %s%s.\n"
+"\n"
+"As new versions of Syslinux are not compatible with one another, and it wouldn't be possible for Rufus to include them all, two additional files must be downloaded from the Internet ('ldlinux.sys' and 'ldlinux.bss'):\n"
+"- Select 'Yes' to connect to the Internet and download these files\n"
+"- Select 'No' to cancel the operation\n"
+"\n"
+"Note: The files will be downloaded in the current application directory and will be reused automatically if present."
+msgstr ""
+"Denna avbild använder Syslinux %s%s men detta programmet innehåller endast installationsfiler för Syslinux %s%s.\n"
+"\n"
+"Eftersom nya versioner av Syslinux inte är kompatibla med varandra, skulle det vara omöjligt att alla fanns med i Rufus, så därför måste två filer laddas ner från internet ('ldlinux.sys' och 'ldlinux.bss'):\n"
+"- Välj 'Ja' för att ansluta till internet och ladda ner filerna\n"
+"- Välj 'Nej' för att avbryta det hela\n"
+"\n"
+"Obs: Filerna kommer att laddas ner i programmets katalog och kommer att användas igen automatiskt om de finns där."
+
+#. • MSG_115
+msgid "Download required"
+msgstr "Nerladdning krävs"
+
+#. • MSG_116
+#.
+#. You should be able to test this message with Super Grub2 Disk ISO:
+#. https://sourceforge.net/projects/supergrub2/files/2.00s2/super_grub2_disk_hybrid_2.00s2.iso/download (11.9 MB)
+msgid ""
+"This image uses Grub %s but the application only includes the installation files for Grub %s.\n"
+"\n"
+"As different versions of Grub may not be compatible with one another, and it is not possible to include them all, Rufus will attempt to locate a version of the Grub installation file ('core.img') that matches the one from your image:\n"
+"- Select 'Yes' to connect to the Internet and attempt to download it\n"
+"- Select 'No' to use the default version from Rufus\n"
+"- Select 'Cancel' to abort the operation\n"
+"\n"
+"Note: The file will be downloaded in the current application directory and will be reused automatically if present. If no match can be found online, then the default version will be used."
+msgstr ""
+"Denna avbild använder Grub %s men programmet innehåller endast installationsfiler för Grub %s.\n"
+"\n"
+"Eftersom olika Grub-versioner inte är kompatibla med varandra och det skulle vara omöjligt att inkludera dem alla, därför kommer Rufus att försöka finna den versionen av Grub installationsfilen ('core.img') som matchar den från din avbild:\n"
+"- Välj 'Ja' för att ansluta till Internet och försöka ladda ner det\n"
+"- Välj 'Nej' för att använda standardversionen från Rufus\n"
+"- Välj 'Avbryt' för att avbryta\n"
+"\n"
+"Obs: Filen kommer att laddas ner i nuvarande katalog och kommer att automatiskt återanvändas om den existerar. Om ingen fil hittas online, kommer standardversionen att användas."
+
+#. • MSG_117
+msgid "Standard Windows installation"
+msgstr "Standard Windowsinstallation"
+
+#. • MSG_118
+#.
+#. Only translate this message *if* Microsoft has a specific name for
+#. http://en.wikipedia.org/wiki/Windows_To_Go in your language.
+#. Otherwise, you may add a parenthesis eg. "Windows To Go (<hint at what it does>)"
+msgid "Windows To Go"
+msgstr ""
+
+#. • MSG_119
+msgid "advanced drive properties"
+msgstr "avancerade enhetsegenskaper"
+
+#. • MSG_120
+msgid "advanced format options"
+msgstr "avancerade formatalternativ"
+
+#. • MSG_121
+msgid "Show %s"
+msgstr "Visa %s"
+
+#. • MSG_122
+msgid "Hide %s"
+msgstr "Dölj %s"
+
+#. • MSG_123
+#.
+#. A persistent partitions can be used with "Live" USB media to store data.
+#. It means that data can be preserved across reboots on "Live" USB drives.
+#. To test this feature, please download and select 'casper_test.iso' from:
+#. https://github.com/pbatard/rufus/raw/master/res/loc/test/casper_test.iso
+msgid "Persistent partition size"
+msgstr "Bestående partitionsstorlek"
+
+#. • MSG_124
+#.
+#. This message appears in the persistence 'Size' control when the slider is set to 0.
+#. It is okay to use "No partition" or "None" or "Deactivated" to indicate that a persistent partition will not be
+#. created if the width of the control is too small (since the 'Size' edit control is *not* adjusted for width).
+msgid "No persistence"
+msgstr "Ej bestående"
+
+#. • MSG_125
+#.
+#. Tooltips used for the peristence size slider and edit control
+msgid "Set the size of the persistent partition for live USB media. Setting the size to 0 disables the persistent partition."
+msgstr "Ställ in den bestående partitionens storlek för live USB-media. Om du ställer in storleken till 0 inaktiveras den bestående partitionen."
+
+#. • MSG_126
+msgid "Set the partition size units."
+msgstr "Ställ in partitionsstorlekarna."
+
+#. • MSG_150
+msgid "Type of computer you plan to use this bootable drive with. It is your responsibility to determine whether your target is of BIOS or UEFI type before you start creating the drive, as it may fail to boot otherwise."
+msgstr "Typ av dator du planerar att använda den här startbara enheten på. Det är ditt ansvar att avgöra om ditt mål är av typen BIOS eller UEFI innan du börjar skapa enheten, eftersom den kanske inte startar sen."
+
+#. • MSG_151
+#.
+#. You shouldn't translate 'Legacy Mode' as this is an option that usually appears in English in the UEFI settings.
+msgid "'UEFI-CSM' means that the device will only boot in BIOS emulation mode (also known as 'Legacy Mode') under UEFI, and not in native UEFI mode."
+msgstr "'UEFI-CSM' innebär att enheten startar i BIOS-emuleringsläge (kallas också för 'Legacy Mode') under UEFI och inte i nativ UEFI-läge."
+
+#. • MSG_152
+msgid "'non CSM' means that the device will only boot in native UEFI mode, and not in BIOS emulation mode (also known as 'Legacy Mode')."
+msgstr "'icke CSM' innebär att enheten startar i nativ UEFI-läge och inte i BIOS-emuleringsläge (kallas också för 'Legacy Mode')."
+
+#. • MSG_153
+msgid "Test pattern: 0x%02X"
+msgstr "Testmönster: 0x%02X"
+
+#. • MSG_154
+msgid "Test pattern: 0x%02X, 0x%02X"
+msgstr "Testmönster: 0x%02X, 0x%02X"
+
+#. • MSG_155
+msgid "Test pattern: 0x%02X, 0x%02X, 0x%02X"
+msgstr "Testmönster: 0x%02X, 0x%02X, 0x%02X"
+
+#. • MSG_156
+msgid "Test pattern: 0x%02X, 0x%02X, 0x%02X, 0x%02X"
+msgstr "Testmönster: 0x%02X, 0x%02X, 0x%02X, 0x%02X"
+
+#. • MSG_157
+msgid "Sets the target filesystem"
+msgstr "Ställer in målets filsystem"
+
+#. • MSG_158
+msgid "Minimum size that a block of data will occupy in the filesystem"
+msgstr "Minsta storlek som ett block av data kommer att ta plats i filsystemet"
+
+#. • MSG_159
+msgid ""
+"Use this field to set the drive label\n"
+"International characters are accepted"
+msgstr ""
+"Använd detta fältet till att ange enhetens namn\n"
+"Internationella bokstäver är tillåtna"
+
+#. • MSG_160
+msgid "Toggle advanced options"
+msgstr "Visa/Dölj avancerat"
+
+#. • MSG_161
+msgid "Check the device for bad blocks using a test pattern"
+msgstr "Kontrollera enheter om den har trasiga block genom att köra ett testmönster"
+
+#. • MSG_162
+msgid "Uncheck this box to use the \"slow\" format method"
+msgstr "Avmarkera om du vill använda \"långsam\" formateringsmetod"
+
+#. • MSG_163
+msgid "Method that will be used to create partitions"
+msgstr "Metod som kommer att användas för att skapa partitioner"
+
+#. • MSG_164
+msgid "Method that will be used to make the drive bootable"
+msgstr "Metod som kommer att användas för att göra enheten startbar"
+
+#. • MSG_165
+msgid "Click to select an image..."
+msgstr "Klicka för att välja avbildsfil..."
+
+#. • MSG_166
+msgid "Check this box to allow the display of international labels and set a device icon (creates an autorun.inf)"
+msgstr "Markera för att tillåta visa internationella namn och sätt en enhetsikon (en autorun.inf skapas)"
+
+#. • MSG_167
+msgid "Install an MBR that allows boot selection and can masquerade the BIOS USB drive ID"
+msgstr "Installera en MBR som tillåter flera uppstartsmöjligheter och som kan maskera bort BIOS USB enhets-ID"
+
+#. • MSG_168
+msgid ""
+"Try to masquerade first bootable USB drive (usually 0x80) as a different disk.\n"
+"This should only be necessary if you install Windows XP and have more than one disk"
+msgstr ""
+"Prova att maskera bort den första startbara USB-enheten (vanligtvis 0x80) som en annan disk.\n"
+"Detta är endast nödvändigt om du installerar Windows XP och du har mer än en disk"
+
+#. • MSG_169
+msgid ""
+"Create an extra hidden partition and try to align partitions boundaries.\n"
+"This can improve boot detection for older BIOSes"
+msgstr ""
+"Skapa en extra gömd partition och prova att justera om partitionsuppbyggnaden.\n"
+"Detta kan förbättra uppstarten för äldre BIOS:ar"
+
+#. • MSG_170
+msgid "Enable the listing of USB Hard Drive enclosures. USE AT YOUR OWN RISKS!!!"
+msgstr ""
+"Lista alla USB-hårddiskar (även icke flyttbara).\n"
+"ANVÄND PÅ EGEN RISK!!!"
+
+#. • MSG_171
+msgid ""
+"Start the formatting operation.\n"
+"This will DESTROY any data on the target!"
+msgstr ""
+"Starta formateringen.\n"
+"Detta kommer att ta bort ALL data på målenheten!"
+
+#. • MSG_172
+#.
+#. As of Rufus 3.2, *ALL* downloads from the servers are digitally signed, and their signature is validated using the
+#. public key that is embedded in the application. This message appears in an error dialog if the validation fails.
+msgid "Invalid download signature"
+msgstr "Ogiltig nerladdningssignatur"
+
+#. • MSG_173
+msgid "Click to select..."
+msgstr "Tryck för att välja..."
+
+#. • MSG_174
+msgid "Rufus - The Reliable USB Formatting Utility"
+msgstr "Rufus - Det pålitliga verktyget för USB-formatering"
+
+#. • MSG_175
+msgid "Version %d.%d (Build %d)"
+msgstr ""
+
+#. • MSG_176
+msgid "English translation: Pete Batard <mailto:pete@akeo.ie>"
+msgstr "Svensk översättning: Sopor <mailto:sopor@hotmail.com>"
+
+#. • MSG_177
+msgid "Report bugs or request enhancements at:"
+msgstr "Rapportera fel eller om du har några idéer:"
+
+#. • MSG_178
+msgid "Additional Copyrights:"
+msgstr "Andra upphovsrätter:"
+
+#. • MSG_179
+msgid "Update Policy:"
+msgstr "Uppdateringspolicy:"
+
+#. • MSG_180
+msgid "If you choose to allow this program to check for application updates, you agree that the following information may be collected on our server(s):"
+msgstr "Om du väljer att tillåta detta program att leta efter uppdateringar, tillåter du även att följande information sparas på våra servrar:"
+
+#. • MSG_181
+msgid "Your operating system's architecture and version"
+msgstr "Information om ditt operativsystem och version"
+
+#. • MSG_182
+msgid "The version of the application you use"
+msgstr "Version på programmet du använder"
+
+#. • MSG_183
+msgid "Your IP address"
+msgstr "Din IP-adress"
+
+#. • MSG_184
+msgid "For the purpose of generating private usage statistics, we may keep the information collected, \\b for at most a year\\b0 . However, we will not willingly disclose any of this individual data to third parties."
+msgstr "För att kunna skapa användningsstatistik, kommer vi att spara informationen, \\b i högst ett år\\b0 . Vi kommer dock behålla informationen för oss själva."
+
+#. • MSG_185
+msgid "Update Process:"
+msgstr "Uppdateringsprocess:"
+
+#. • MSG_186
+msgid ""
+"Rufus does not install or run background services, therefore update checks are performed only when the main application is running.\\line\n"
+"Internet access is of course required when checking for updates."
+msgstr ""
+"Rufus installerar inga bakgrundsprogram, därför sker endast uppdateringskontrollen när det körs.\\line\n"
+"För att kontrollera efter uppdateringar krävs naturligtvis internettillgång."
+
+#. • MSG_187
+msgid "Invalid image for selected boot option"
+msgstr "Ogiltig avbild för vald startinställning"
+
+#. • MSG_188
+msgid "The current image doesn't match the boot option selected. Please use a different image or choose a different boot option."
+msgstr "Nuvarande avbild matchar inte det startbara valet. Välj en annan avbild eller ändra de startbara valet."
+
+#. • MSG_189
+msgid "This ISO image is not compatible with the selected filesystem"
+msgstr "Denna ISO-avbild är inte kompatibel med valt filsystem"
+
+#. • MSG_190
+msgid "Incompatible drive detected"
+msgstr "Enheten är inte kompatibel"
+
+#. • MSG_191
+#.
+#. Used in MSG_235
+msgid "Write pass"
+msgstr "Skrivförsök"
+
+#. • MSG_192
+#.
+#. Used in MSG_235
+msgid "Read pass"
+msgstr "Läsförsök"
+
+#. • MSG_193
+msgid "Downloaded %s"
+msgstr "Nerladdad %s"
+
+#. • MSG_194
+msgid "Could not download %s"
+msgstr "Kunde inte ladda ner %s"
+
+#. • MSG_195
+#.
+#. Example: "Using embedded version of Grub2 file(s)"
+msgid "Using embedded version of %s file(s)"
+msgstr "Använder den inbyggda versionen av %s fil(er)"
+
+#. • MSG_196
+msgid ""
+"IMPORTANT: THIS DRIVE USES A NONSTANDARD SECTOR SIZE!\n"
+"\n"
+"Conventional drives use a 512-byte sector size but this drive uses a %d-byte one. In many cases, this means that you will NOT be able to boot from this drive.\n"
+"Rufus can try to create a bootable drive, but there is NO WARRANTY that it will work."
+msgstr ""
+"VIKTIGT: DENNA ENHET ANVÄNDER SIG AV EN ICKE STANDARD SEKTORSTORLEK!\n"
+"\n"
+"Konventionella enheter använder en sektorstorlek på 512-byte men denna enheten använder %d-byte. I de flesta fall innebär detta att du INTE kommer att kunna starta från denna enheten.\n"
+"Rufus kan försöka att skapa en startbar enhet, men det finns inga garantier på att den kommer att fungera."
+
+#. • MSG_197
+msgid "Nonstandard sector size detected"
+msgstr "En icke standard sektorstorlek upptäckt"
+
+#. • MSG_198
+msgid "'Windows To Go' can only be installed on a GPT partitioned drive if it has the FIXED attribute set. The current drive was not detected as FIXED."
+msgstr "'Windows To Go' kan endast installeras på en enhet med GPT-partition om det är en FIXERAD enhet. Nuvarande enhet är inte FIXERAD."
+
+#. • MSG_201
+msgid "Cancelling - Please wait..."
+msgstr "Avbryter - Vänta..."
+
+#. • MSG_202
+msgid "Scanning image..."
+msgstr "Söker igenom avbild..."
+
+#. • MSG_203
+msgid "Failed to scan image"
+msgstr "Misslyckades att söka igenom avbilden"
+
+#. • MSG_204
+#.
+#. %s is the name of an obsolete Syslinux .c32 module. Example: "Obsolete vesamenu.c32 detected"
+msgid "Obsolete %s detected"
+msgstr "Upptäckte en gammal %s"
+
+#. • MSG_205
+#.
+#. Display the name of the image selected. eg: "Using image: en_win7_x64_sp1.iso"
+msgid "Using image: %s"
+msgstr "Använder avbild: %s"
+
+#. • MSG_206
+#.
+#. Example: "Missing ldlinux.c32 file"
+msgid "Missing %s file"
+msgstr "Fil %s saknas"
+
+#. • MSG_207
+#.
+#. The name proposed by Windows' Computer Management → Disk Management when you try to format
+#. a drive with an empty label. For an example, see https://rufus.ie/pics/default_name.png.
+msgid "New Volume"
+msgstr "Ny volym"
+
+#. • MSG_208
+#.
+#. Singular. Example: "1 device found"
+msgid "%d device found"
+msgstr "Hittade %d enhet"
+
+#. • MSG_209
+#.
+#. Plural. Example: "3 devices found"
+msgid "%d devices found"
+msgstr "Hittade %d enheter"
+
+#. • MSG_210
+msgid "READY"
+msgstr "REDO"
+
+#. • MSG_211
+msgid "Cancelled"
+msgstr "Avbruten"
+
+#. • MSG_212
+msgid "Failed"
+msgstr "MISSLYCKADES"
+
+#. • MSG_213
+#.
+#. Used when a new update has been downloaded and launched
+msgid "Launching new application..."
+msgstr "Startar uppdaterad version..."
+
+#. • MSG_214
+msgid "Failed to launch new application"
+msgstr "Kunde inte starta den nya versionen"
+
+#. • MSG_215
+#.
+#. Example: "Opened some_file.txt"
+msgid "Opened %s"
+msgstr "Öppnad %s"
+
+#. • MSG_216
+#.
+#. Example: "Saved rufus.log"
+msgid "Saved %s"
+msgstr "Sparad %s"
+
+#. • MSG_217
+#.
+#. Formatting status (make sure you use a double % to print the percent sign)
+msgid "Formatting: %0.1f%% completed"
+msgstr "Formaterar: %0.1f%% klart"
+
+#. • MSG_218
+msgid "Creating file system: Task %d/%d completed"
+msgstr "Skapar filsystem: Uppgift %d/%d klart"
+
+#. • MSG_219
+msgid "NTFS Fixup: %d%% completed"
+msgstr "NTFS-Fixup: %d%% klart"
+
+#. • MSG_220
+#.
+#. Parameter: the file system and an estimated duration in mins and secs.
+#. Example: "Formatting (UDF) - Estimated duration 3:21..."
+#. If "estimated duration" is too long, just use "estimated" or an abbreviation
+msgid "Formatting (%s) - estimated duration %d:%02d..."
+msgstr "Formaterar (%s) - beräknad tid %d:%02d..."
+
+#. • MSG_221
+msgid "Setting Label (This may take a while)..."
+msgstr "Skriver etikett (detta kan ta lång tid)..."
+
+#. • MSG_222
+#.
+#. Example: "Formatting (FAT32)..."
+msgid "Formatting (%s)..."
+msgstr "Formaterar (%s)..."
+
+#. • MSG_223
+msgid "NTFS Fixup (Checkdisk)..."
+msgstr "NTFS-Fixup (Checkdisk)..."
+
+#. • MSG_224
+msgid "Clearing MBR/PBR/GPT structures..."
+msgstr "Rensar MBR/PBR/GPT strukturer..."
+
+#. • MSG_225
+msgid "Requesting disk access..."
+msgstr "Begära diskåtkomst..."
+
+#. • MSG_226
+msgid "Analyzing existing boot records..."
+msgstr "Analyserar nuvarande startsektor..."
+
+#. • MSG_227
+msgid "Closing existing volume..."
+msgstr "Stänger nuvarande volym..."
+
+#. • MSG_228
+msgid "Writing master boot record..."
+msgstr "Skriver huvudstartsektor..."
+
+#. • MSG_229
+msgid "Writing partition boot record..."
+msgstr "Skriver partitionsstartsektor..."
+
+#. • MSG_230
+msgid "Copying DOS files..."
+msgstr "Kopierar DOS-filer..."
+
+#. • MSG_231
+msgid "Copying ISO files..."
+msgstr "Kopierar ISO-filer..."
+
+#. • MSG_232
+msgid "Win7 EFI boot setup (This may take a while)..."
+msgstr "Win7 EFI boot setup (detta kan ta lång tid)..."
+
+#. • MSG_233
+msgid "Finalizing, please wait..."
+msgstr "Slutbehandlar, vänta..."
+
+#. • MSG_234
+#.
+#. Takes a Syslinux version as parameter.
+#. Example: "Installing Syslinux v5.10..."
+msgid "Installing Syslinux %s..."
+msgstr "Installerar Syslinux %s..."
+
+#. • MSG_235
+#.
+#. Bad blocks status. Example: "Bad Blocks: Write pass 1/2 - 12.34% (0/0/1 errors)"
+#. See MSG_191 & MSG_192 for "Write pass"/"Read pass" translation.
+msgid "Bad Blocks: %s %d/%d - %0.2f%% (%d/%d/%d errors)"
+msgstr "Trasiga block: %s %d/%d - %0.2f%% (%d/%d/%d fel)"
+
+#. • MSG_236
+msgid "Bad Blocks: Testing with random pattern"
+msgstr "Trasiga block: Testar med varierande mönster"
+
+#. • MSG_237
+msgid "Bad Blocks: Testing with pattern 0x%02X"
+msgstr "Trasiga block: Testar med mönster 0x%02X"
+
+#. • MSG_238
+#.
+#. Example: "Partitioning (MBR)..."
+msgid "Partitioning (%s)..."
+msgstr "Partitionerar (%s)..."
+
+#. • MSG_239
+msgid "Deleting partitions..."
+msgstr "Tar bort partitioner..."
+
+#. • MSG_240
+#.
+#. This message has to do with the signature validation that Rufus uses when downloading an update.
+msgid ""
+"The signature for the downloaded update can not be validated. This could mean that your system is improperly configured for signature validation or indicate a malicious download.\n"
+"\n"
+"The download will be deleted. Please check the log for more details."
+msgstr ""
+"Signaturen för den hämtade uppdateringen kan inte valideras. Detta kan innebära att ditt system är felaktigt konfigurerat för validering av signaturer eller en indikation på att du laddat ner skadlig kod.\n"
+"\n"
+"Nerladdad fil kommer att tas bort. Kontrollera loggfilen för mer detaljerad information."
+
+#. • MSG_241
+msgid "Downloading: %0.1f%%"
+msgstr "Laddar ner: %0.1f%%"
+
+#. • MSG_242
+msgid "Failed to download file."
+msgstr "Kunde inte ladda ner filen."
+
+#. • MSG_243
+msgid "Checking for Rufus updates..."
+msgstr "Kontrollerar efter Rufus uppdateringar..."
+
+#. • MSG_244
+msgid "Updates: Unable to connect to the internet"
+msgstr "Uppdateringar: Kunde inte ansluta till internet"
+
+#. • MSG_245
+msgid "Updates: Unable to access version data"
+msgstr "Uppdateringar: Har ingen tillgång till versionsdata"
+
+#. • MSG_246
+msgid "A new version of Rufus is available!"
+msgstr "Det finns en ny version av Rufus!"
+
+#. • MSG_247
+msgid "No new version of Rufus was found"
+msgstr "Det finns ingen ny version av Rufus"
+
+#. • MSG_248
+msgid "Application registry keys successfully deleted"
+msgstr "Programmets registernycklar har tagits bort"
+
+#. • MSG_249
+msgid "Failed to delete application registry keys"
+msgstr "Kunde inte ta bort programmets registernycklar"
+
+#. • MSG_250
+#.
+#. Example: "Fixed disk detection enabled", "ISO size check disabled", etc.
+msgid "%s enabled"
+msgstr "%s aktiverad"
+
+#. • MSG_251
+msgid "%s disabled"
+msgstr "%s inaktiverad"
+
+#. • MSG_252
+msgid "Size checks"
+msgstr "Storlekskontrollen är"
+
+#. • MSG_253
+msgid "Hard disk detection"
+msgstr "Hårddiskdetekteringen är"
+
+#. • MSG_254
+msgid "Force large FAT32 formatting"
+msgstr "Tvinga formatera 'large FAT32' är"
+
+#. • MSG_255
+msgid "NoDriveTypeAutorun will be deleted on exit"
+msgstr "NoDriveTypeAutorun kommer att tas bort vid avslut"
+
+#. • MSG_256
+msgid "Fake drive detection"
+msgstr "Upptäckte en falsk enhet är"
+
+#. • MSG_257
+msgid "Joliet support"
+msgstr "Joliet-stödet är"
+
+#. • MSG_258
+msgid "Rock Ridge support"
+msgstr "Rock Ridge-stödet är"
+
+#. • MSG_259
+msgid "Force update"
+msgstr "Tvinga uppdatering är"
+
+#. • MSG_260
+msgid "NTFS compression"
+msgstr "NTFS-kompressionen är"
+
+#. • MSG_261
+msgid "Writing image: %0.1f%% completed"
+msgstr "Skriver avbild: %0.1f%% klart"
+
+#. • MSG_262
+#.
+#. Cheat mode message to disable ISO Support, so that only DD images can be opened
+msgid "ISO Support"
+msgstr "ISO-stödet är"
+
+#. • MSG_263
+#.
+#. Cheat mode to force legacy size units, where 1 KB is 1024 bytes and NOT that fake 1000 bytes abomination!
+msgid "Use PROPER size units"
+msgstr "Använd 'RÄTT' storleksenhet är"
+
+#. • MSG_264
+msgid "Deleting directory '%s'"
+msgstr "Tar bort katalogen '%s'"
+
+#. • MSG_265
+msgid "VMWare disk detection"
+msgstr "VMWare diskdetekteringen är"
+
+#. • MSG_266
+msgid "Dual UEFI/BIOS mode"
+msgstr "Dubbla UEFI/BIOS-läget är"
+
+#. • MSG_267
+msgid "Applying Windows image: %0.1f%% completed"
+msgstr "Tillämpar Windows-avbild: %0.1f%% klart"
+
+#. • MSG_268
+msgid "Applying Windows image..."
+msgstr "Tillämpar Windows-avbild..."
+
+#. • MSG_269
+msgid "Preserve timestamps"
+msgstr "Bevara datum och tid är"
+
+#. • MSG_270
+msgid "USB debug"
+msgstr "USB-felsökning är"
+
+#. • MSG_271
+msgid "Computing image checksums: %0.1f%% completed"
+msgstr "Beräknar kontrollsummor för avbilden: %0.1f%% klart"
+
+#. • MSG_272
+msgid "Compute the MD5, SHA1 and SHA256 checksums for the selected image"
+msgstr "Beräkna MD5-, SHA1- och SHA256-kontrollsummor för den valda avbilden"
+
+#. • MSG_273
+msgid "Change the application language"
+msgstr "Ändra programspråk"
+
+#. • MSG_274
+msgid "ISOHybrid image detected"
+msgstr "Avbilden är av typen ISOHybrid"
+
+#. • MSG_275
+#.
+#. '%s' will be replaced with your translations for MSG_036 ("ISO Image") and MSG_095 ("DD Image")
+msgid ""
+"The image you have selected is an 'ISOHybrid' image. This means it can be written either in %s (file copy) mode or %s (disk image) mode.\n"
+"Rufus recommends using %s mode, so that you always have full access to the drive after writing it.\n"
+"However, if you encounter issues during boot, you can try writing this image again in %s mode.\n"
+"\n"
+"Please select the mode that you want to use to write this image:"
+msgstr ""
+"Avbilden du har valt är en 'ISOHybrid-avbild'. Detta innebär att den kan skrivas i både läge %s (filkopiering) eller i läge %s (disk-avbild).\n"
+"Rufus rekommenderar att läge %s används, så att du alltid har full tillgång till enheten efter att du skrivit till den.\n"
+"Skulle du få problem vid uppstarten, kan du i stället prova skriva avbilden i läge %s.\n"
+"\n"
+"Välj det läge du vill använda för att skriva avbilden:"
+
+#. • MSG_276
+#.
+#. '%s' will be replaced with your translation for MSG_036 ("ISO Image")
+msgid "Write in %s mode (Recommended)"
+msgstr "Skriv i läge %s (Rekommenderas)"
+
+#. • MSG_277
+#.
+#. '%s' will be replaced with your translation for MSG_095 ("DD Image")
+msgid "Write in %s mode"
+msgstr "Skriv i läge %s"
+
+#. • MSG_278
+msgid "Checking for conflicting processes..."
+msgstr "Kontrollerar om det finns några motstridiga processer..."
+
+#. • MSG_279
+msgid "Non bootable"
+msgstr "Icke startbar"
+
+#. • MSG_280
+msgid "Disk or ISO image"
+msgstr "Disk- eller ISO-avbild"
+
+#. • MSG_281
+msgid "%s (Please select)"
+msgstr "%s (välj)"
+
+#. • MSG_282
+msgid "Exclusive USB drive locking"
+msgstr "Exklusiv låsning av USB-enheten"
+
+#. • MSG_283
+msgid "Invalid signature"
+msgstr "Ogiltig signatur"
+
+#. • MSG_284
+msgid "The downloaded executable is missing a digital signature."
+msgstr "Den nerladdade körbara filen saknar digital signatur."
+
+#. • MSG_285
+msgid ""
+"The downloaded executable is signed by '%s'.\n"
+"This is not a signature we recognize and could indicate some form of malicious activity...\n"
+"Are you sure you want to run this file?"
+msgstr ""
+"Den nerladdade körbara filen är signerad av '%s'.\n"
+"Detta är inte en signatur vi känner igen och detta kan tyda på någon form av skadlig aktivitet...\n"
+"Är du säker på att du vill köra filen?"
+
+#. • MSG_286
+msgid "Zeroing drive: %0.1f%% completed"
+msgstr "Nollställer enheten: %0.1f%% klart"
+
+#. • MSG_287
+msgid "Detection of non-USB removable drives"
+msgstr "Visar även icke flyttbara USB-enheter"
+
+#. • MSG_288
+msgid "Missing elevated privileges"
+msgstr "Förhöjda privilegier saknas"
+
+#. • MSG_289
+msgid "This application can only run with elevated privileges"
+msgstr "Detta program kräver förhöjda privilegier för att fungera"
+
+#. • MSG_290
+msgid "File Indexing"
+msgstr "Filindexering"
+
+#. • MSG_291
+msgid "Version selection"
+msgstr "Välj version"
+
+#. • MSG_292
+msgid "Please select the version of Windows you want to install:"
+msgstr "Välj den version av Windows du vill installera:"
+
+#. • MSG_293
+msgid "Unsupported Windows version"
+msgstr "Denna version stöds inte"
+
+#. • MSG_294
+msgid "This version of Windows is no longer supported by Rufus."
+msgstr "Denna version av Windows stöds inte längre av Rufus."
+
+#. • MSG_295
+msgid "Warning: Unofficial version"
+msgstr "Varning: Inofficiell version"
+
+#. • MSG_296
+msgid ""
+"This version of Rufus was not produced by its official developer(s).\n"
+"\n"
+"Are you sure you want to run it?"
+msgstr ""
+"Denna version av Rufus producerades inte av originalutvecklaren.\n"
+"\n"
+"Är du säker på att du vill använda den?"
+
+#. • MSG_297
+msgid "Truncated ISO detected"
+msgstr "Ej komplett ISO-fil"
+
+#. • MSG_298
+msgid ""
+"The ISO file you have selected does not match its declared size: %s of data is missing!\n"
+"\n"
+"If you obtained this file from the Internet, you should try to download a new copy and verify that the MD5 or SHA checksums match the official ones.\n"
+"\n"
+"Note that you can compute the MD5 or SHA in Rufus by clicking the (✓) button."
+msgstr ""
+"ISO-filen du har valt matchar inte den angivna storleken: %s av data saknas!\n"
+"\n"
+"Om du har hämtat den här filen från internet, prova då med att ladda ner filen igen och verifiera att checksumman MD5 eller SHA stämmer överens med den officiella filen.\n"
+"\n"
+"Tips: Du kan beräkna MD5 eller SHA i Rufus genom att klicka på knappen (✓)."
+
+#. • MSG_299
+msgid "Timestamp validation error"
+msgstr "Valideringfel av tidsstämpeln"
+
+#. • MSG_300
+msgid ""
+"Rufus could not validate that the timestamp of the downloaded update is more recent than the one for the current executable.\n"
+"\n"
+"In order to prevent potential attack scenarios, the update process has been aborted and the download will be deleted. Please check the log for more details."
+msgstr ""
+"Rufus kunde inte validera att tidsstämpeln på den nerladdade uppdateringen är nyare än den gamla.\n"
+"\n"
+"För att förhindra potentiella angreppsscenarier, har uppdateringsprocessen avslutats och den nerladdade filen har tagits bort. Kontrollera loggen för mer information."
+
+#. • MSG_301
+msgid "Show application settings"
+msgstr "Visa programinställningar"
+
+#. • MSG_302
+msgid "Show information about this application"
+msgstr "Visa information om programmet"
+
+#. • MSG_303
+msgid "Show the log"
+msgstr "Visa loggen"
+
+#. • MSG_304
+msgid "Create a disk image of the selected device"
+msgstr "Skapa en skivavbildning av den valda enheten"
+
+#. • MSG_305
+msgid "Use this option to indicate whether you want to use this device to install Windows on another disk, or if you want to run Windows directly from this drive (Windows To Go)."
+msgstr "Använd det här alternativet om du vill använda den här enheten för att installera Windows på en annan disk, eller om du vill köra Windows direkt från den här enheten (Windows To Go)."
+
+#. • MSG_306
+#.
+#. You can see this status message by pressing <Ctrl>-<Alt>-<Z> and then selecting START.
+#. It's the same as MSG_286 but with a process that *may* be faster, hence the name.
+msgid "Fast-zeroing drive: %0.1f%% completed"
+msgstr "Snabbnollställer enheten: %0.1f%% klart"
