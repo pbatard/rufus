@@ -43,7 +43,7 @@ using System.Windows.Forms;
 [assembly: AssemblyProduct("Pollock")]
 [assembly: AssemblyCopyright("Copyright © 2018 Pete Batard <pete@akeo.ie>")]
 [assembly: AssemblyTrademark("GNU GPLv3")]
-[assembly: AssemblyVersion("1.0.*")]
+[assembly: AssemblyVersion("1.1.*")]
 
 namespace pollock
 {
@@ -750,7 +750,7 @@ namespace pollock
         /// <returns>true if URL is acessible, false on error.</returns>
         static bool ValidateDownload(string url)
         {
-            HttpStatusCode status = HttpStatusCode.NotFound;
+            HttpStatusCode status = HttpStatusCode.InternalServerError;
             var uri = new Uri(url);
             WebRequest request = WebRequest.Create(uri);
             request.CachePolicy = new RequestCachePolicy(RequestCacheLevel.NoCacheNoStore);
@@ -759,15 +759,17 @@ namespace pollock
             // This is soooooooo retarded. Trying to simply read a 404 response throws a 404 *exception*?!?
             try
             {
-                HttpWebResponse response = (HttpWebResponse)request.GetResponse();
-                status = response.StatusCode;
-                response.Close();
+                using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+                    status = response.StatusCode;
             }
             catch (WebException we)
             {
                 HttpWebResponse response = we.Response as HttpWebResponse;
-                status = response.StatusCode;
-                response.Close();
+                if (response != null)
+                {
+                    status = response.StatusCode;
+                    response.Close();
+                }
             }
             request.Abort();
             switch (status)
@@ -964,6 +966,13 @@ namespace pollock
         [STAThread]
         static void Main(string[] args)
         {
+            // Fix needed for Windows 7 to download from github SSL
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+
+            // Also set the Console width to something that can accomodate us
+            if (Console.WindowWidth < 100)
+                Console.SetWindowSize(100, Console.WindowHeight);
+
             bool use_local_loc = false;
             Console.OutputEncoding = System.Text.Encoding.UTF8;
             Console.CancelKeyPress += delegate (object sender, ConsoleCancelEventArgs e) {
