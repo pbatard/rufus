@@ -1,0 +1,1416 @@
+
+msgid ""
+msgstr ""
+"Project-Id-Version: 3.2\n"
+"Report-Msgid-Bugs-To: pete@akeo.ie\n"
+"POT-Creation-Date: 2018-07-21 18:13+0100\n"
+"PO-Revision-Date: 2018-07-21 18:13+0100\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: it_IT\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Rufus-LanguageName: Italian (Italiano)\n"
+"X-Rufus-LCID: 0x0410, 0x0810\n"
+
+#. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
+msgid "Drive Properties"
+msgstr "Opzioni unità"
+
+#. • IDD_DIALOG → IDS_DEVICE_TXT
+msgid "Device"
+msgstr "Dispositivo/unità"
+
+#. • IDD_DIALOG → IDS_BOOT_SELECTION_TXT
+msgid "Boot selection"
+msgstr "Selezione boot"
+
+#. • IDD_DIALOG → IDC_SELECT
+msgid "Select"
+msgstr "Seleziona"
+
+#. • IDD_DIALOG → IDS_IMAGE_OPTION_TXT
+msgid "Image Option"
+msgstr "Opzioni immagine"
+
+#. • IDD_DIALOG → IDS_PARTITION_TYPE_TXT
+msgid "Partition scheme"
+msgstr "Schema partizione"
+
+#. • IDD_DIALOG → IDS_TARGET_SYSTEM_TXT
+msgid "Target system"
+msgstr "Sistema destinazione"
+
+#. • IDD_DIALOG → IDC_LIST_USB_HDD
+msgid "List USB Hard Drives"
+msgstr "Elenco unità disco USB"
+
+#. • IDD_DIALOG → IDC_OLD_BIOS_FIXES
+#.
+#. It is acceptable to drop the parenthesis () if you are running out of space
+#. as there is a tooltip (MSG_169) providing these details.
+msgid "Add fixes for old BIOSes (extra partition, align, etc.)"
+msgstr "Aggiungi correzioni per vecchi BIOS (partizioni extra, allineamento, etc)"
+
+#. • IDD_DIALOG → IDC_RUFUS_MBR
+#.
+#. 'MBR': See http://en.wikipedia.org/wiki/Master_boot_record
+#. Rufus can install it's own custom MBR (the Rufus MBR), which also allows users to
+#. specify a custom disk ID for the BIOS. The tooltip for this control is MSG_167.
+msgid "Use Rufus MBR with BIOS ID"
+msgstr "Usa MBR Rufus con ID BIOS"
+
+#. • IDD_DIALOG → IDS_FORMAT_OPTIONS_TXT
+msgid "Format Options"
+msgstr "Opzioni formattazione"
+
+#. • IDD_DIALOG → IDS_FILE_SYSTEM_TXT
+msgid "File system"
+msgstr ""
+
+#. • IDD_DIALOG → IDS_CLUSTER_SIZE_TXT
+msgid "Cluster size"
+msgstr "Dimensione cluster"
+
+#. • IDD_DIALOG → IDS_LABEL_TXT
+msgid "Volume label"
+msgstr "Etichetta volume"
+
+#. • IDD_DIALOG → IDC_QUICK_FORMAT
+msgid "Quick format"
+msgstr "Formattazione rapida"
+
+#. • IDD_DIALOG → IDC_BAD_BLOCKS
+msgid "Check device for bad blocks"
+msgstr "Test controllo blocchi errati unità"
+
+#. • IDD_DIALOG → IDC_EXTENDED_LABEL
+msgid "Create extended label and icon files"
+msgstr "Crea etichetta estesa e file icone"
+
+#. • IDD_DIALOG → IDS_STATUS_TXT
+msgid "Status"
+msgstr "Stato"
+
+#. • IDD_DIALOG → IDCANCEL
+#. • IDD_LICENSE → IDCANCEL
+#. • IDD_LOG → IDCANCEL
+#. • IDD_UPDATE_POLICY → IDCANCEL
+#. • IDD_NEW_VERSION → IDCANCEL
+#. • MSG_006
+msgid "Close"
+msgstr "Chiudi"
+
+#. • IDD_DIALOG → IDC_START
+msgid "Start"
+msgstr "Avvia"
+
+#. • IDD_ABOUTBOX → IDD_ABOUTBOX
+msgid "About Rufus"
+msgstr "Info su Rufus"
+
+#. • IDD_ABOUTBOX → IDC_ABOUT_LICENSE
+msgid "License"
+msgstr "Licenza"
+
+#. • IDD_ABOUTBOX → IDOK
+msgid "OK"
+msgstr ""
+
+#. • IDD_LICENSE → IDD_LICENSE
+msgid "Rufus License"
+msgstr "Licenza Rufus"
+
+#. • IDD_NOTIFICATION → IDC_MORE_INFO
+msgid "More information"
+msgstr "Altre informazioni"
+
+#. • IDD_NOTIFICATION → IDYES
+#. • MSG_008
+msgid "Yes"
+msgstr "Sì"
+
+#. • IDD_NOTIFICATION → IDNO
+#. • MSG_009
+msgid "No"
+msgstr ""
+
+#. • IDD_LOG → IDD_LOG
+msgid "Log"
+msgstr "Registro eventi"
+
+#. • IDD_LOG → IDC_LOG_CLEAR
+msgid "Clear"
+msgstr "Azzera"
+
+#. • IDD_LOG → IDC_LOG_SAVE
+msgid "Save"
+msgstr "Salva"
+
+#. • IDD_UPDATE_POLICY → IDD_UPDATE_POLICY
+msgid "Update policy and settings"
+msgstr "Impostazioni e policy aggiornamenti"
+
+#. • IDD_UPDATE_POLICY → IDS_UPDATE_SETTINGS_GRP
+msgid "Settings"
+msgstr "Impostazioni"
+
+#. • IDD_UPDATE_POLICY → IDS_UPDATE_FREQUENCY_TXT
+msgid "Check for updates:"
+msgstr "Controllo aggiornamenti:"
+
+#. • IDD_UPDATE_POLICY → IDS_INCLUDE_BETAS_TXT
+msgid "Include beta versions:"
+msgstr "Includi versioni beta:"
+
+#. • IDD_UPDATE_POLICY → IDC_CHECK_NOW
+msgid "Check Now"
+msgstr "Controlla ora"
+
+#. • IDD_NEW_VERSION → IDD_NEW_VERSION
+msgid "Check For Updates - Rufus"
+msgstr "Rufus - Controllo aggiornamenti"
+
+#. • IDD_NEW_VERSION → IDS_NEW_VERSION_AVAIL_TXT
+msgid "A newer version is available. Please download the latest version!"
+msgstr "È disponibile una nuova versione. Scarica la versione aggiornata!"
+
+#. • IDD_NEW_VERSION → IDC_WEBSITE
+msgid "Click here to go to the website"
+msgstr "Fai clic qui per visitare il sito web"
+
+#. • IDD_NEW_VERSION → IDS_NEW_VERSION_NOTES_GRP
+msgid "Release Notes"
+msgstr "Informazioni versione"
+
+#. • IDD_NEW_VERSION → IDS_NEW_VERSION_DOWNLOAD_GRP
+#. • IDD_NEW_VERSION → IDC_DOWNLOAD
+#. • MSG_040
+msgid "Download"
+msgstr ""
+
+#. • MSG_001
+msgid "Other instance detected"
+msgstr "Rilevata altra istanza Rufus"
+
+#. • MSG_002
+msgid "Another Rufus application is running.\nPlease close the first application before running another one."
+msgstr "È in esecuzione un'altra applicazione Rufus.\nChiudi la prima applicazione prima di eseguirne una seconda."
+
+#. • MSG_003
+msgid "WARNING: ALL DATA ON DEVICE '%s' WILL BE DESTROYED.\nTo continue with this operation, click OK. To quit click CANCEL."
+msgstr "ATTENZIONE: TUTTI I DATI SULL'UNITÀ '%s' SARANNO CANCELLATI.\nPer continuare seleziona 'OK'. Per annullare seleziona 'ANNULLA'."
+
+#. • MSG_004
+msgid "Rufus update policy"
+msgstr "Policy aggiornamenti Rufus"
+
+#. • MSG_005
+msgid "Do you want to allow Rufus to check for application updates online?"
+msgstr "Vuoi permettere a Rufus di controllare gli aggiornamenti online?"
+
+#. • MSG_007
+msgid "Cancel"
+msgstr "Annulla"
+
+#. • MSG_010
+msgid "Bad blocks found"
+msgstr "Rilevato blocco difettoso"
+
+#. • MSG_011
+msgid "Check completed: %d bad block(s) found\n  %d read error(s)\n  %d write error(s)\n  %d corruption error(s)"
+msgstr "Controllo completato: trovati %d blocchi difettosi\n  %d errori lettura\n  %d errori scrittura\n  %d errori corruzione"
+
+#. • MSG_012
+#.
+#. This contains the formatted message from MSG_001 as well as the name of the bad blocks logfile
+msgid "%s\nA more detailed report can be found in:\n%s"
+msgstr "%s\nUn report più dettagliato è disponibile in:\n%s"
+
+#. • MSG_013
+msgid "Disabled"
+msgstr "Disabilitato"
+
+#. • MSG_014
+msgid "Daily"
+msgstr "Giornaliero"
+
+#. • MSG_015
+msgid "Weekly"
+msgstr "Settimanale"
+
+#. • MSG_016
+msgid "Monthly"
+msgstr "Mensile"
+
+#. • MSG_017
+msgid "Custom"
+msgstr "Personalizzato"
+
+#. • MSG_018
+msgid "Your version: %d.%d (Build %d)"
+msgstr "Versione installata: %d.%d (Build %d)"
+
+#. • MSG_019
+msgid "Latest version: %d.%d (Build %d)"
+msgstr "Versione aggiornata: %d.%d (Build %d)"
+
+#. • MSG_020
+#. • MSG_026
+msgid "bytes"
+msgstr "byte"
+
+#. • MSG_021
+#.
+#. *Short* version of the kilobyte size suffix
+msgid "KB"
+msgstr ""
+
+#. • MSG_022
+#.
+#. *Short* version of the megabyte size suffix
+msgid "MB"
+msgstr ""
+
+#. • MSG_023
+#.
+#. *Short* version of the gigabyte size suffix
+msgid "GB"
+msgstr ""
+
+#. • MSG_024
+#.
+#. *Short* version of the terabyte size suffix
+msgid "TB"
+msgstr ""
+
+#. • MSG_025
+#.
+#. *Short* version of the pentabyte size suffix
+msgid "PB"
+msgstr ""
+
+#. • MSG_027
+msgid "kilobytes"
+msgstr "kilobyte"
+
+#. • MSG_028
+msgid "megabytes"
+msgstr "megabyte"
+
+#. • MSG_029
+msgid "Default"
+msgstr "Predefinito"
+
+#. • MSG_030
+#.
+#. This gets appended to the file system, cluster size, etc.
+msgid "%s (Default)"
+msgstr "%s (predefinito)"
+
+#. • MSG_031
+msgid "BIOS (or UEFI-CSM)"
+msgstr "BIOS (o UEFI CSM)"
+
+#. • MSG_032
+msgid "UEFI (non CSM)"
+msgstr ""
+
+#. • MSG_033
+msgid "BIOS or UEFI"
+msgstr "BIOS o UEFI"
+
+#. • MSG_034
+#.
+#. Number of bad block check passes (singular for 1 pass)
+msgid "%d pass"
+msgstr "%d passaggio"
+
+#. • MSG_035
+#.
+#. Number of bad block check passes (plural for 2 or more passes).
+#. See MSG_087 for the message that %s gets replaced with.
+msgid "%d passes %s"
+msgstr "%d passaggi %s"
+
+#. • MSG_036
+msgid "ISO Image"
+msgstr "Immagine ISO"
+
+#. • MSG_037
+msgid "Application"
+msgstr "Applicazione"
+
+#. • MSG_038
+msgid "Abort"
+msgstr "Annulla"
+
+#. • MSG_039
+msgid "Launch"
+msgstr "Esegui"
+
+#. • MSG_041
+msgid "Operation cancelled by the user"
+msgstr "Operazione annullata dall'utente"
+
+#. • MSG_042
+msgid "Error"
+msgstr "Errore"
+
+#. • MSG_043
+msgid "Error: %s"
+msgstr "Errore: %s"
+
+#. • MSG_044
+msgid "File download"
+msgstr "Download file"
+
+#. • MSG_045
+msgid "USB Storage Device (Generic)"
+msgstr "Unità memorizzazione USB (generica)"
+
+#. • MSG_046
+msgid "%s (Disk %d) [%s]"
+msgstr "%s (disco %d) [%s]"
+
+#. • MSG_047
+#.
+#. Used when a drive is detected that contains more than one partition
+msgid "Multiple Partitions"
+msgstr "Partizioni multiple"
+
+#. • MSG_048
+msgid "Rufus - Flushing buffers"
+msgstr "Rufus - Svuotamento buffer"
+
+#. • MSG_049
+msgid "Rufus - Cancellation"
+msgstr "Rufus - Cancellazione"
+
+#. • MSG_050
+msgid "Success."
+msgstr "Completato."
+
+#. • MSG_051
+msgid "Undetermined error while formatting."
+msgstr "Errore sconosciuto durante la formattazione."
+
+#. • MSG_052
+msgid "Cannot use the selected file system for this media."
+msgstr "Impossibile usare il filesystem selezionato."
+
+#. • MSG_053
+msgid "Access to the device is denied."
+msgstr "Accesso negato all'unità."
+
+#. • MSG_054
+msgid "Media is write protected."
+msgstr "Il supporto è protetto da scrittura."
+
+#. • MSG_055
+msgid "The device is in use by another process. Please close any other process that may be accessing the device."
+msgstr "L'unità è in uso da un altro processo. Chiudi ogni altro processo che potrebbe accedere all'unità."
+
+#. • MSG_056
+msgid "Quick format is not available for this device."
+msgstr "Formattazione rapida non disponibile per questa unità."
+
+#. • MSG_057
+msgid "The volume label is invalid."
+msgstr "Etichetta volume non valida."
+
+#. • MSG_058
+msgid "The device handle is invalid."
+msgstr "Il gestore unità non è valido."
+
+#. • MSG_059
+msgid "The selected cluster size is not valid for this device."
+msgstr "Dimensione cluster selezionata non valida per questa unità."
+
+#. • MSG_060
+msgid "The volume size is invalid."
+msgstr "Dimensione volume non valida."
+
+#. • MSG_061
+msgid "Please insert a removable media in drive."
+msgstr "Inserisci un supporto nell'unità."
+
+#. • MSG_062
+msgid "An unsupported command was received."
+msgstr "È stato ricevuto un comando non supportato."
+
+#. • MSG_063
+msgid "Memory allocation error."
+msgstr "Errore allocazione memoria."
+
+#. • MSG_064
+msgid "Read error."
+msgstr "Errore lettura."
+
+#. • MSG_065
+msgid "Write error."
+msgstr "Errore scrittura."
+
+#. • MSG_066
+msgid "Installation failure"
+msgstr "Installazione fallita"
+
+#. • MSG_067
+msgid "Could not open media. It may be in use by another process. Please re-plug the media and try again."
+msgstr "Impossibile aprire il supporto. Potrebbe essere in uso da un altro processo.Riconnetti il supporto e riprova."
+
+#. • MSG_068
+msgid "Error while partitioning drive."
+msgstr "Errore nel partizionamento dell'unità."
+
+#. • MSG_069
+msgid "Could not copy files to target drive."
+msgstr "Impossibile copiare i file nell'unità destinazione."
+
+#. • MSG_070
+msgid "Cancelled by user."
+msgstr "Annullato dall'utente."
+
+#. • MSG_071
+#.
+#. See http://en.wikipedia.org/wiki/Thread_%28computing%29
+msgid "Unable to start thread."
+msgstr "Impossibile creare attività formattazione."
+
+#. • MSG_072
+msgid "Bad blocks check didn't complete."
+msgstr "Controllo blocchi errati non completato."
+
+#. • MSG_073
+msgid "ISO image scan failure."
+msgstr "Analisi fallita immagine ISO."
+
+#. • MSG_074
+msgid "ISO image extraction failure."
+msgstr "Estrazione fallita immagine ISO."
+
+#. • MSG_075
+msgid "Unable to remount volume."
+msgstr "Impossibile rimontare l'unità."
+
+#. • MSG_076
+msgid "Unable to patch/setup files for boot."
+msgstr "Impossibile correggere/impostare i file per il boot."
+
+#. • MSG_077
+msgid "Unable to assign a drive letter."
+msgstr "Impossibile assegnare una lettera all'unità."
+
+#. • MSG_078
+msgid "Can't mount GUID volume."
+msgstr "Impossibile montare volume GUID."
+
+#. • MSG_079
+msgid "The device is not ready."
+msgstr "L'unità non è pronta."
+
+#. • MSG_080
+msgid "Rufus detected that Windows is still flushing its internal buffers onto the USB device.\n\nDepending on the speed of your USB device, this operation may take a long time to complete, especially for large files.\n\nWe recommend that you let Windows finish, to avoid corruption. But if you grow tired of waiting, you can just unplug the device..."
+msgstr "Rufus ha rilevato che Windows sta ancora svuotando i buffer interni relativi all'unità USB.\n\nA seconda della velocità dell'unità USB, questa operazione potrebbe richiedere un certo tempo per essere completata, specialmente per file molto grandi.\n\nTi suggeriamo di attendere che Windows completi le operazioni per evitare la corruzione dei dati. Se non vuoi attendere oltre, puoi semplicemente scollegare l'unità..."
+
+#. • MSG_081
+msgid "Unsupported image"
+msgstr "Formato immagine non supportato"
+
+#. • MSG_082
+msgid "This image is either non-bootable, or it uses a boot or compression method that is not supported by Rufus..."
+msgstr "Questa immagine non è avviabile, o usa un metodo di boot o di compressione non supportato da Rufus..."
+
+#. • MSG_083
+msgid "Replace %s?"
+msgstr "Sostituire %s?"
+
+#. • MSG_084
+msgid "This ISO image seems to use an obsolete version of '%s'.\nBoot menus may not display properly because of this.\n\nA newer version can be downloaded by Rufus to fix this issue:\n- Choose 'Yes' to connect to the internet and download the file\n- Choose 'No' to leave the existing ISO file unmodified\nIf you don't know what to do, you should select 'Yes'.\n\nNote: The new file will be downloaded in the current directory and once a '%s' exists there, it will be reused automatically."
+msgstr "Questa immagine sembra che usi una versione obsoleta di '%s'.\nA causa di ciò il menu di avvio potrebbe non essere visualizzato correttamente.\n\nUna nuova versione può essere scaricata da Rufus per correggere questo problema:\n- Seleziona 'Sì' per collegarsi a internet e scaricare il file\n- Seleziona 'No' per lasciare inalterato il file immagine ISO\nIn caso di dubbi, è preferibile selezionare 'Sì'.\n\nNota: il nuovo file verrà scaricato nella cartella attuale e una volta scaricato '%s', verrà riusato automaticamente."
+
+#. • MSG_085
+msgid "Downloading '%s'"
+msgstr "Download '%s'"
+
+#. • MSG_086
+msgid "No image selected"
+msgstr "Nessuna immagine selezionata"
+
+#. • MSG_087
+#.
+#. This message appears in Advanced format options → Check device for bad blocks → dropdown menu
+#. %s will be replaced with SLC, MLC or TLC, which is a type of NAND (or flash memory). In other
+#. words, this message should mean "for a flash memory device of type %s". *Please* try to keep
+#. the translation as short as possible so that it won't result in an overly large dropdown...
+#. If you prefer, it's okay to use "type" or "device" instead of "NAND" (e.g. "for TLC type").
+#. See also MSG_035.
+msgid "for %s NAND"
+msgstr "per NAND %s"
+
+#. • MSG_088
+msgid "Image is too big"
+msgstr "Immagine troppo grande"
+
+#. • MSG_089
+msgid "The image is too big for the selected target."
+msgstr "Questa immagine è troppo grande per l'unità di destinazione."
+
+#. • MSG_090
+msgid "Unsupported ISO"
+msgstr "Formato ISO non supportato"
+
+#. • MSG_091
+msgid "When using UEFI Target Type, only EFI bootable ISO images are supported. Please select an EFI bootable ISO or set the Target Type to BIOS."
+msgstr "Quando usi una destinazione di tipo UEFI, sono supportate solo immagini ISO avviabili EFI. Scegli un'immagine avviabile EFI o imposta una destinazione di tipo BIOS."
+
+#. • MSG_092
+msgid "Unsupported filesystem"
+msgstr "Filesystem non supportato"
+
+#. • MSG_093
+msgid "IMPORTANT: THIS DRIVE CONTAINS MULTIPLE PARTITIONS!!\n\nThis may include partitions/volumes that aren't listed or even visible from Windows. Should you wish to proceed, you are responsible for any data loss on these partitions."
+msgstr "IMPORTANTE: QUESTA UNITÀ CONTIENE PARTIZIONI MULTIPLE!\n\nQuesto può includere partizioni/volumi che non sono elencati anche se visibili da Windows.Se vuoi procedere, sei responsabile per qualsiasi perdita di dati in queste partizioni."
+
+#. • MSG_094
+msgid "Multiple partitions detected"
+msgstr "Rilevate partizioni multiple"
+
+#. • MSG_095
+msgid "DD Image"
+msgstr "Immagine DD"
+
+#. • MSG_096
+msgid "The file system currently selected can not be used with this type of ISO. Please select a different file system or use a different ISO."
+msgstr "Il file system attualmente selezionato non può essere usato con questo tipo di file ISO. Seleziona un differente file system o usa un differente file ISO."
+
+#. • MSG_097
+msgid "'%s' can only be applied if the file system is NTFS."
+msgstr "'%s' può essere applicato solo se il file system è NTFS."
+
+#. • MSG_098
+msgid "IMPORTANT: You are trying to install 'Windows To Go', but your target drive doesn't have the 'FIXED' attribute. Because of this Windows will most likely freeze during boot, as Microsoft hasn't designed it to work with drives that instead have the 'REMOVABLE' attribute.\n\nDo you still want to proceed?\n\nNote: The 'FIXED/REMOVABLE' attribute is a hardware property that can only be changed using custom tools from the drive manufacturer. However those tools are ALMOST NEVER provided to the public..."
+msgstr "IMPORTANTE: stai tentando di installare 'Windows To Go', ma l'unità destinazione non ha l'attributo 'FISSO'. Windows molto probabilmente si bloccherà durante il boot, poichè non è stato disegnato per lavorare con unità che hanno invece l'attributo 'RIMOVIBILE'.\n\nVuoi ancora procedere?\n\nNota: l'attributo 'FISSO/RIMOVIBILE' è una proprietà hardware che può essere modificata solo usando strumenti personalizzati del produttore dell'unità. Comunque questi strumenti non sono QUASI MAI forniti all'utente..."
+
+#. • MSG_099
+msgid "Filesystem limitation"
+msgstr "Limitazione filesystem"
+
+#. • MSG_100
+msgid "This ISO image contains a file larger than 4GB, which is more than the maximum size allowed for a FAT or FAT32 file system."
+msgstr "Questa immagine ISO contiene un file più grande di 4 GB, che è maggiore della dimensione massima permessa per il filesystem FAT o FAT32."
+
+#. • MSG_101
+msgid "Missing WIM support"
+msgstr "Supporto WIN mancante"
+
+#. • MSG_102
+msgid "Your platform cannot extract files from WIM archives. WIM extraction is required to create EFI bootable Windows 7 and Windows Vista USB drives. You can fix that by installing a recent version of 7-Zip.\nDo you want to visit the 7-zip download page?"
+msgstr "Il tuo sistema operativo non può estrarre file dall'archivio WIM. L'estrazione WIM è necessaria per creare una unità USB avviabile EFI Windows 7 e Windows Vista. Puoi correggere ciò installando una versione recente di 7-Zip.\nVuoi visitare la pagina di downlaod di 7-zip?"
+
+#. • MSG_103
+msgid "Download %s?"
+msgstr "Vuoi scaricare %s?"
+
+#. • MSG_104
+#.
+#. Example: "Grub4DOS v0.4 or later requires a 'grldr' file to be installed. Because this
+#. file is more than 100 KB in size, and always present on Grub4DOS ISO images (...)"
+msgid "%s or later requires a '%s' file to be installed.\nBecause this file is more than 100 KB in size, and always present on %s ISO images, it is not embedded in Rufus.\n\nRufus can download the missing file for you:\n- Select 'Yes' to connect to the internet and download the file\n- Select 'No' if you want to manually copy this file on the drive later\n\nNote: The file will be downloaded in the current directory and once a '%s' exists there, it will be reused automatically."
+msgstr "%s o successivo richiedono l'installazione di un file '%s'.\nPoichè questo file è più grande di 100 KB, ed è sempre presente nell'immagine ISO di %s, il file non è incluso in Rufus.\n\nRufus può scaricare per te il file mancante:\n- Seleziona 'Sì' per collegarti a internet e scaricare il file\n- Seleziona 'No' se vuoi copiare manualmente questo file nell'unità più tardi\n\nNota: il file verrà scaricato nella cartella attuale e una volta che '%s' è stato scaricato, verrà riusato automaticamente."
+
+#. • MSG_105
+msgid "Cancelling may leave the device in an UNUSABLE state.\nIf you are sure you want to cancel, click YES. Otherwise, click NO."
+msgstr "La cancellazione potrebbe lasciare il dispositivo in uno stato NON USABILE.\nSei sicuro di volerlo cancellare, seleziona SI. Altrimenti, seleziona NO."
+
+#. • MSG_106
+msgid "Please select folder"
+msgstr "Seleziona la cartella"
+
+#. • MSG_107
+msgid "All files"
+msgstr "Tutti i file"
+
+#. • MSG_108
+msgid "Rufus log"
+msgstr "Registro eventi Rufus"
+
+#. • MSG_109
+msgid "0x%02X (Disk %d)"
+msgstr "0x%02X (disco %d)"
+
+#. • MSG_110
+#.
+#. "Cluster size" should be the same as the label for IDS_CLUSTER_SIZE_TXT
+#. "kilobytes" should be the same as in MSG_027
+msgid "MS-DOS cannot boot from a drive using a 64 kilobytes Cluster size.\nPlease change the Cluster size or use FreeDOS."
+msgstr "Non si può avviare MS-DOS da una unità che usa una dimensione del cluster di 64 kilobyte.\nModifica la dimensione del cluster o usa FreeDOS."
+
+#. • MSG_111
+msgid "Incompatible Cluster size"
+msgstr "Dimensione cluster incompatibile"
+
+#. • MSG_112
+#.
+#. "%d:%02d" is a duration (mins:secs)
+msgid "Formatting a large UDF volumes can take a lot of time. At USB 2.0 speeds, the estimated formatting duration is %d:%02d, during which the progress bar will appear frozen. Please be patient!"
+msgstr "La formattazione di un volume UDF di grandi dimensioni può richiedere molto tempo. In modo USB 2.0, il tempo stimato per la formattazione sarà di %d:%02d, durante il quale la barra di progresso non verrà aggiornata. Attendi il completamento dell'operazione!"
+
+#. • MSG_113
+msgid "Large UDF volume"
+msgstr "Volume UDF di grandi dimensioni"
+
+#. • MSG_114
+msgid "This image uses Syslinux %s%s but this application only includes the installation files for Syslinux %s%s.\n\nAs new versions of Syslinux are not compatible with one another, and it wouldn't be possible for Rufus to include them all, two additional files must be downloaded from the Internet ('ldlinux.sys' and 'ldlinux.bss'):\n- Select 'Yes' to connect to the Internet and download these files\n- Select 'No' to cancel the operation\n\nNote: The files will be downloaded in the current application directory and will be reused automatically if present."
+msgstr "Questa immagine usa Syslinux %s%s ma questa applicazione include solo i file di installazione per Syslinux %s%s.\n\nPoiché le nuove versioni di Syslinux non sono compatibili con le precedenti e non sarebbe possibile per Rufus includerle tutte, devono essere scaricati da internet due file aggiuntivi ('ldlinux.sys' e 'ldlinux.bss'):\n- Seleziona 'Sì' per collegarti a internet e scaricare questi due file\n- Seleziona 'No' per annullare l'operazione\n\nNota: questi file verranno scaricati nella cartella corrente dell'applicazione e se presenti verranno riusati automaticamente."
+
+#. • MSG_115
+msgid "Download required"
+msgstr "Richiede download"
+
+#. • MSG_116
+#.
+#. You should be able to test this message with Super Grub2 Disk ISO:
+#. https://sourceforge.net/projects/supergrub2/files/2.00s2/super_grub2_disk_hybrid_2.00s2.iso/download (11.9 MB)
+msgid "This image uses Grub %s but the application only includes the installation files for Grub %s.\n\nAs different versions of Grub may not be compatible with one another, and it is not possible to include them all, Rufus will attempt to locate a version of the Grub installation file ('core.img') that matches the one from your image:\n- Select 'Yes' to connect to the Internet and attempt to download it\n- Select 'No' to use the default version from Rufus\n- Select 'Cancel' to abort the operation\n\nNote: The file will be downloaded in the current application directory and will be reused automatically if present. If no match can be found online, then the default version will be used."
+msgstr "Questa immagine usa Grub %s ma l'applicazione include solo i file di installazione per Grub %s.\n\nQuesta differente versione di Grub potrebbe non essere compatibile con l'altra, e non è possibile includere i file di installazione. Rufus tenterà di trovare una versione dei file di installazione di Grub ('core.img') che corrisponda a quella dell'immagine.\n- Seleziona 'Sì' per collegarti a internet e tentare il download\n- Seleziona 'No' per usare la versione predefinita di Rufus\n- Seleziona 'Annulla' per interrompere l'operazione.\n\nNote: i file verranno scaricati nella cartella attuale dell'applicazione e verranno riusati automaticamente se presenti. Se non sarà trovata online nessuna corrispondenza, verrà usata la versione predefinita."
+
+#. • MSG_117
+msgid "Standard Windows installation"
+msgstr "Installazione Windows standard"
+
+#. • MSG_118
+#.
+#. Only translate this message *if* Microsoft has a specific name for
+#. http://en.wikipedia.org/wiki/Windows_To_Go in your language.
+#. Otherwise, you may add a parenthesis eg. "Windows To Go (<hint at what it does>)"
+msgid "Windows To Go"
+msgstr ""
+
+#. • MSG_119
+msgid "advanced drive properties"
+msgstr "opzioni avanzate unità"
+
+#. • MSG_120
+msgid "advanced format options"
+msgstr "opzioni avanzate formattazione"
+
+#. • MSG_121
+msgid "Show %s"
+msgstr "Visualizza %s"
+
+#. • MSG_122
+msgid "Hide %s"
+msgstr "Nascondi %s"
+
+#. • MSG_123
+#.
+#. A persistent partitions can be used with "Live" USB media to store data.
+#. It means that data can be preserved across reboots on "Live" USB drives.
+#. To test this feature, please download and select 'casper_test.iso' from:
+#. https://github.com/pbatard/rufus/raw/master/res/loc/test/casper_test.iso
+msgid "Persistent partition size"
+msgstr "Dim. partizione persistente"
+
+#. • MSG_124
+#.
+#. This message appears in the persistence 'Size' control when the slider is set to 0.
+#. It is okay to use "No partition" or "None" or "Deactivated" to indicate that a persistent partition will not be
+#. created if the width of the control is too small (since the 'Size' edit control is *not* adjusted for width).
+msgid "No persistence"
+msgstr "No persistenza"
+
+#. • MSG_125
+#.
+#. Tooltips used for the peristence size slider and edit control
+msgid "Set the size of the persistent partition for live USB media. Setting the size to 0 disables the persistent partition."
+msgstr "Imposta la dimensione della partizione persistente per il media USB live.\nImpostanmdo la dimensione a zero disabiliti la partizione persistente."
+
+#. • MSG_126
+msgid "Set the partition size units."
+msgstr "Imposta l'unità della dimensione partizione."
+
+#. • MSG_150
+msgid "Type of computer you plan to use this bootable drive with. It is your responsibility to determine whether your target is of BIOS or UEFI type before you start creating the drive, as it may fail to boot otherwise."
+msgstr "Tipo di computer con cui pensi di effettuare il boot. E' una tua responsabilità prima di creare l'unità identificare se il tipo di sistema destinazione è di tipo BIOS o UEFI. Altrimenti potrebbe fallire il boot."
+
+#. • MSG_151
+#.
+#. You shouldn't translate 'Legacy Mode' as this is an option that usually appears in English in the UEFI settings.
+msgid "'UEFI-CSM' means that the device will only boot in BIOS emulation mode (also known as 'Legacy Mode') under UEFI, and not in native UEFI mode."
+msgstr "'UEFI CSM' significa che l'unità effettuerà il boot solo in modo emulazione BIOS (conosciuto come 'Legacy Mode') in UEFI, e non in modo nativo UEFI."
+
+#. • MSG_152
+msgid "'non CSM' means that the device will only boot in native UEFI mode, and not in BIOS emulation mode (also known as 'Legacy Mode')."
+msgstr "'non CSM' significa che l'unità effettuerà il modo nativo UEFI, e non in modo emulazione BIOS (conosciuto come 'Legacy Mode')."
+
+#. • MSG_153
+msgid "Test pattern: 0x%02X"
+msgstr "Pattern test: 0x%02X"
+
+#. • MSG_154
+msgid "Test pattern: 0x%02X, 0x%02X"
+msgstr "Pattern test: 0x%02X, 0x%02X"
+
+#. • MSG_155
+msgid "Test pattern: 0x%02X, 0x%02X, 0x%02X"
+msgstr "Pattern test: 0x%02X, 0x%02X, 0x%02X"
+
+#. • MSG_156
+msgid "Test pattern: 0x%02X, 0x%02X, 0x%02X, 0x%02X"
+msgstr "Pattern test: 0x%02X, 0x%02X, 0x%02X, 0x%02X"
+
+#. • MSG_157
+msgid "Sets the target filesystem"
+msgstr "Impostazione filesystem destinazione"
+
+#. • MSG_158
+msgid "Minimum size that a block of data will occupy in the filesystem"
+msgstr "Dimensione minima blocco dati filesystem"
+
+#. • MSG_159
+msgid "Use this field to set the drive label\nInternational characters are accepted"
+msgstr "Usa questo campo per impostare l'etichetta dell'unità\nI caratteri internazionali sono permessi"
+
+#. • MSG_160
+msgid "Toggle advanced options"
+msgstr "Abilita/disabilita opzioni avanzate"
+
+#. • MSG_161
+msgid "Check the device for bad blocks using a test pattern"
+msgstr "Abilita questa opzione per effettuare un controllo dei blocchi danneggiati nel dispositivo usando un pattern di test"
+
+#. • MSG_162
+msgid "Uncheck this box to use the \"slow\" format method"
+msgstr "Deseleziona questa opzione per usare il metodo di formattazione completo ma 'lento'"
+
+#. • MSG_163
+msgid "Method that will be used to create partitions"
+msgstr "Metodo che verrà usato per creare le partizioni"
+
+#. • MSG_164
+msgid "Method that will be used to make the drive bootable"
+msgstr "Metodo che verrà usato per rendere l'unità USB avviabile"
+
+#. • MSG_165
+msgid "Click to select an image..."
+msgstr "Seleziona l'immagine..."
+
+#. • MSG_166
+msgid "Check this box to allow the display of international labels and set a device icon (creates an autorun.inf)"
+msgstr "Abilita questa opzione per permettere la visualizzazione delle etichette internazionali e impostare una icona dispositivo (creerà un file autorun.inf)"
+
+#. • MSG_167
+msgid "Install an MBR that allows boot selection and can masquerade the BIOS USB drive ID"
+msgstr "Installa un MBR che permette la selezione all'avvio e maschera l'ID unità USB del BIOS"
+
+#. • MSG_168
+msgid "Try to masquerade first bootable USB drive (usually 0x80) as a different disk.\nThis should only be necessary if you install Windows XP and have more than one disk"
+msgstr "Prova prima a mascherare l'unità avviabile USB (normalmente 0x80) come un disco differente.\nQuesto potrebbe essere necessario solo se installi Windows XP e hai più di un disco"
+
+#. • MSG_169
+msgid "Create an extra hidden partition and try to align partitions boundaries.\nThis can improve boot detection for older BIOSes"
+msgstr "Crea una partizione aggiuntiva e nascosta e prova ad allineare le diverse partizioni.\nQuesto può migliorare il rilevamento all'avvio con vecchi BIOS"
+
+#. • MSG_170
+msgid "Enable the listing of USB Hard Drive enclosures. USE AT YOUR OWN RISKS!!!"
+msgstr "Abilita il rilevamento per i dischi USB. USALO A TUO RISCHIO!!!"
+
+#. • MSG_171
+msgid "Start the formatting operation.\nThis will DESTROY any data on the target!"
+msgstr "Avvia l'operazione di formattazione.\nQuesta operazione DISTRUGGERÀ qualsiasi dato sull'unità di destinazione!"
+
+#. • MSG_172
+#.
+#. As of Rufus 3.2, *ALL* downloads from the servers are digitally signed, and their signature is validated using the
+#. public key that is embedded in the application. This message appears in an error dialog if the validation fails.
+msgid "Invalid download signature"
+msgstr "Firma download non valida"
+
+#. • MSG_173
+msgid "Click to select..."
+msgstr "Fai clic per selezionare..."
+
+#. • MSG_174
+msgid "Rufus - The Reliable USB Formatting Utility"
+msgstr "Rufus - Utility affidabile formattazione unità USB"
+
+#. • MSG_175
+msgid "Version %d.%d (Build %d)"
+msgstr "Versione %d.%d (build %d)"
+
+#. • MSG_176
+msgid "English translation: Pete Batard <mailto:pete@akeo.ie>"
+msgstr "Traduzione italiana a cura di bovirus"
+
+#. • MSG_177
+msgid "Report bugs or request enhancements at:"
+msgstr "Segnala i problemi o richiedi nuove funzionalità a:"
+
+#. • MSG_178
+msgid "Additional Copyrights:"
+msgstr "Diritti aggiuntivi:"
+
+#. • MSG_179
+msgid "Update Policy:"
+msgstr "Policy aggiornamenti:"
+
+#. • MSG_180
+msgid "If you choose to allow this program to check for application updates, you agree that the following information may be collected on our server(s):"
+msgstr "Se scegli di permette a questo programma di controllare automaticamente gli aggiornamenti, accetti che le seguenti informazioni sarranno catalogate nei nostri server:"
+
+#. • MSG_181
+msgid "Your operating system's architecture and version"
+msgstr "L'architettura del tuo sistema operativo e la versione"
+
+#. • MSG_182
+msgid "The version of the application you use"
+msgstr "La versione dell'applicazione in uso"
+
+#. • MSG_183
+msgid "Your IP address"
+msgstr "Il tuo indirizzo IP"
+
+#. • MSG_184
+msgid "For the purpose of generating private usage statistics, we may keep the information collected, \\b for at most a year\\b0 . However, we will not willingly disclose any of this individual data to third parties."
+msgstr "Potremmo mantenere le informazioni al solo scopo di creare una statistica privata di utilizzo, \\b per massimo un anno\\b0 . Comunque ti garantiamo che NON invieremo nessuno di questi dati a nessuna terza parte."
+
+#. • MSG_185
+msgid "Update Process:"
+msgstr "Processo aggiornamento:"
+
+#. • MSG_186
+msgid "Rufus does not install or run background services, therefore update checks are performed only when the main application is running.\\line\nInternet access is of course required when checking for updates."
+msgstr "Rufus non installa o esegue servizi in background. Il controllo aggiornamenti verrà effettuato solo quando l'applicazione è in esecuzione.\\line\nL'accesso internet è ovviamente richiesto quando si effettua il controllo aggiornamenti."
+
+#. • MSG_187
+msgid "Invalid image for selected boot option"
+msgstr "Immagine non valida per opzione boot selezionata"
+
+#. • MSG_188
+msgid "The current image doesn't match the boot option selected. Please use a different image or choose a different boot option."
+msgstr "L'immagine selezionata non corrisponde all'opzione boot scelta. Usa un'immagine differente o scegli un'opzione boot differente."
+
+#. • MSG_189
+msgid "This ISO image is not compatible with the selected filesystem"
+msgstr "Questa immagine non è compatibile con il filesystem selezionato"
+
+#. • MSG_190
+msgid "Incompatible drive detected"
+msgstr "Rilevata unità incompatibile"
+
+#. • MSG_191
+#.
+#. Used in MSG_235
+msgid "Write pass"
+msgstr "Fase scrittura"
+
+#. • MSG_192
+#.
+#. Used in MSG_235
+msgid "Read pass"
+msgstr "Fase lettura"
+
+#. • MSG_193
+msgid "Downloaded %s"
+msgstr "Scaricati %s"
+
+#. • MSG_194
+msgid "Could not download %s"
+msgstr "Impossibile scaricare %s"
+
+#. • MSG_195
+#.
+#. Example: "Using embedded version of Grub2 file(s)"
+msgid "Using embedded version of %s file(s)"
+msgstr "Utilizzo versione integrata dei file %s"
+
+#. • MSG_196
+msgid "IMPORTANT: THIS DRIVE USES A NONSTANDARD SECTOR SIZE!\n\nConventional drives use a 512-byte sector size but this drive uses a %d-byte one. In many cases, this means that you will NOT be able to boot from this drive.\nRufus can try to create a bootable drive, but there is NO WARRANTY that it will work."
+msgstr "IMPORTANTE: QUESTA UNITÀ USA UNA DIMENSIONE SETTORI NON STANDARD!\n\nLe unità convenzionali usano una dimensione settore di 512 byte ma questa unità usa una dimensione di %d byte. In molti casi, ciò significa che NON potrai effettuare il boot da questa unità.\nRufus può provare a creare una unità avviabile, ma non c'è NESSUNA GARANZIA che funzionerà."
+
+#. • MSG_197
+msgid "Nonstandard sector size detected"
+msgstr "Rilevata dimensione settore non standard"
+
+#. • MSG_198
+msgid "'Windows To Go' can only be installed on a GPT partitioned drive if it has the FIXED attribute set. The current drive was not detected as FIXED."
+msgstr "'Windows To Go' può essere installato solo su una unità partizionata GPT se ha l'attributo FISSA impostato. L'unità attuale non è stata rilevata come FISSA."
+
+#. • MSG_201
+msgid "Cancelling - Please wait..."
+msgstr "Annullamento..."
+
+#. • MSG_202
+msgid "Scanning image..."
+msgstr "Analisi immagine..."
+
+#. • MSG_203
+msgid "Failed to scan image"
+msgstr "Analisi immagine fallita"
+
+#. • MSG_204
+#.
+#. %s is the name of an obsolete Syslinux .c32 module. Example: "Obsolete vesamenu.c32 detected"
+msgid "Obsolete %s detected"
+msgstr "Rilevato %s obsoleto"
+
+#. • MSG_205
+#.
+#. Display the name of the image selected. eg: "Using image: en_win7_x64_sp1.iso"
+msgid "Using image: %s"
+msgstr "Uso immagine: %s"
+
+#. • MSG_206
+#.
+#. Example: "Missing ldlinux.c32 file"
+msgid "Missing %s file"
+msgstr "File %s mancante"
+
+#. • MSG_207
+#.
+#. The name proposed by Windows' Computer Management → Disk Management when you try to format
+#. a drive with an empty label. For an example, see https://rufus.ie/pics/default_name.png.
+msgid "New Volume"
+msgstr "Nuovo volume"
+
+#. • MSG_208
+#.
+#. Singular. Example: "1 device found"
+msgid "%d device found"
+msgstr "Rilevato %d dispositivo"
+
+#. • MSG_209
+#.
+#. Plural. Example: "3 devices found"
+msgid "%d devices found"
+msgstr "Rilevati %d dispositivi"
+
+#. • MSG_210
+msgid "READY"
+msgstr "PRONTO"
+
+#. • MSG_211
+msgid "Cancelled"
+msgstr "Annullata"
+
+#. • MSG_212
+msgid "Failed"
+msgstr "OPERAZIONE FALLITA"
+
+#. • MSG_213
+#.
+#. Used when a new update has been downloaded and launched
+msgid "Launching new application..."
+msgstr "Esecuzione nuova applicazione..."
+
+#. • MSG_214
+msgid "Failed to launch new application"
+msgstr "Esecuzione nuova applicazione fallita"
+
+#. • MSG_215
+#.
+#. Example: "Opened some_file.txt"
+msgid "Opened %s"
+msgstr "Aperto %s"
+
+#. • MSG_216
+#.
+#. Example: "Saved rufus.log"
+msgid "Saved %s"
+msgstr "Salvato %s"
+
+#. • MSG_217
+#.
+#. Formatting status (make sure you use a double % to print the percent sign)
+msgid "Formatting: %0.1f%% completed"
+msgstr "Formattazione: %0.1f%% completata"
+
+#. • MSG_218
+msgid "Creating file system: Task %d/%d completed"
+msgstr "Creazione filesystem: attività %d/%d completata"
+
+#. • MSG_219
+msgid "NTFS Fixup: %d%% completed"
+msgstr "Correzione NTFS: %d%% completata"
+
+#. • MSG_220
+#.
+#. Parameter: the file system and an estimated duration in mins and secs.
+#. Example: "Formatting (UDF) - Estimated duration 3:21..."
+#. If "estimated duration" is too long, just use "estimated" or an abbreviation
+msgid "Formatting (%s) - estimated duration %d:%02d..."
+msgstr "Formattazione (%s) - durata stimata %d:%02d..."
+
+#. • MSG_221
+msgid "Setting Label (This may take a while)..."
+msgstr "Impostazione etichetta (potrebbe richiedere del tempo)..."
+
+#. • MSG_222
+#.
+#. Example: "Formatting (FAT32)..."
+msgid "Formatting (%s)..."
+msgstr "Formattazione (%s)..."
+
+#. • MSG_223
+msgid "NTFS Fixup (Checkdisk)..."
+msgstr "Correzione NTFS (controllo disco)..."
+
+#. • MSG_224
+msgid "Clearing MBR/PBR/GPT structures..."
+msgstr "Azzeramento struttura MBR/PBR/GPT..."
+
+#. • MSG_225
+msgid "Requesting disk access..."
+msgstr "Richiesta accesso disco..."
+
+#. • MSG_226
+msgid "Analyzing existing boot records..."
+msgstr "Analisi dati avvio..."
+
+#. • MSG_227
+msgid "Closing existing volume..."
+msgstr "Chiusura volume esistente..."
+
+#. • MSG_228
+msgid "Writing master boot record..."
+msgstr "Scrittura master boot record..."
+
+#. • MSG_229
+msgid "Writing partition boot record..."
+msgstr "Scrittura partizione di avvio..."
+
+#. • MSG_230
+msgid "Copying DOS files..."
+msgstr "Copia file DOS..."
+
+#. • MSG_231
+msgid "Copying ISO files..."
+msgstr "Copia file immagine ISO..."
+
+#. • MSG_232
+msgid "Win7 EFI boot setup (This may take a while)..."
+msgstr "Impostazione avvio EFI Windows 7 (potrebbe richiedere del tempo)..."
+
+#. • MSG_233
+msgid "Finalizing, please wait..."
+msgstr "Finalizzazione..."
+
+#. • MSG_234
+#.
+#. Takes a Syslinux version as parameter.
+#. Example: "Installing Syslinux v5.10..."
+msgid "Installing Syslinux %s..."
+msgstr "Installazione Syslinux %s..."
+
+#. • MSG_235
+#.
+#. Bad blocks status. Example: "Bad Blocks: Write pass 1/2 - 12.34% (0/0/1 errors)"
+#. See MSG_191 & MSG_192 for "Write pass"/"Read pass" translation.
+msgid "Bad Blocks: %s %d/%d - %0.2f%% (%d/%d/%d errors)"
+msgstr "Blocchi danneggiati: %s %d/%d - %0.2f%% (%d/%d/%d errori)"
+
+#. • MSG_236
+msgid "Bad Blocks: Testing with random pattern"
+msgstr "Blocchi danneggiati: test con pattern casuali"
+
+#. • MSG_237
+msgid "Bad Blocks: Testing with pattern 0x%02X"
+msgstr "Blocchi danneggiati: testing con pattern 0x%02X"
+
+#. • MSG_238
+#.
+#. Example: "Partitioning (MBR)..."
+msgid "Partitioning (%s)..."
+msgstr "Partitionamento (%s)..."
+
+#. • MSG_239
+msgid "Deleting partitions..."
+msgstr "Eliminazione partizioni..."
+
+#. • MSG_240
+#.
+#. This message has to do with the signature validation that Rufus uses when downloading an update.
+msgid "The signature for the downloaded update can not be validated. This could mean that your system is improperly configured for signature validation or indicate a malicious download.\n\nThe download will be deleted. Please check the log for more details."
+msgstr "La firma per l'aggiornamento scaricato non può essere validata. Questo può significare che il sistema non è correttamente configurato per la validazione della firma o indica un download non corretto.\n\nIl file scaricato verrà eliminato. Per maggiori dettagli consulta il registro eventi."
+
+#. • MSG_241
+msgid "Downloading: %0.1f%%"
+msgstr "Download: %0.1f%%"
+
+#. • MSG_242
+msgid "Failed to download file."
+msgstr "Impossibile scaricare il file."
+
+#. • MSG_243
+msgid "Checking for Rufus updates..."
+msgstr "Verifica disponibilità aggiornamenti Rufus..."
+
+#. • MSG_244
+msgid "Updates: Unable to connect to the internet"
+msgstr "Aggiornamento: impossibile collegarsi a internet"
+
+#. • MSG_245
+msgid "Updates: Unable to access version data"
+msgstr "Aggiornamento: impossibile accedere alle info versione"
+
+#. • MSG_246
+msgid "A new version of Rufus is available!"
+msgstr "È disponibile una nuova versione di Rufus!"
+
+#. • MSG_247
+msgid "No new version of Rufus was found"
+msgstr "La versione installata è aggiornata"
+
+#. • MSG_248
+msgid "Application registry keys successfully deleted"
+msgstr "Registro applicazione correttamente eliminato"
+
+#. • MSG_249
+msgid "Failed to delete application registry keys"
+msgstr "Impossibile eliminare il registro applicazione"
+
+#. • MSG_250
+#.
+#. Example: "Fixed disk detection enabled", "ISO size check disabled", etc.
+msgid "%s enabled"
+msgstr "Abilitato %s"
+
+#. • MSG_251
+msgid "%s disabled"
+msgstr "Disabilitato %s"
+
+#. • MSG_252
+msgid "Size checks"
+msgstr "Controllo dimensione"
+
+#. • MSG_253
+msgid "Hard disk detection"
+msgstr "Rilevamento dischi fissi"
+
+#. • MSG_254
+msgid "Force large FAT32 formatting"
+msgstr "Forza formattazione FAT32 estesa"
+
+#. • MSG_255
+msgid "NoDriveTypeAutorun will be deleted on exit"
+msgstr "Verrà eliminato NoDriveTypeAutorun all'uscita"
+
+#. • MSG_256
+msgid "Fake drive detection"
+msgstr "Rilevamento unità fittizie"
+
+#. • MSG_257
+msgid "Joliet support"
+msgstr "Supporto Joliet"
+
+#. • MSG_258
+msgid "Rock Ridge support"
+msgstr "Supporto Rock Ridge"
+
+#. • MSG_259
+msgid "Force update"
+msgstr "Forza aggiornamento"
+
+#. • MSG_260
+msgid "NTFS compression"
+msgstr "Compressione NTFS"
+
+#. • MSG_261
+msgid "Writing image: %0.1f%% completed"
+msgstr "Scrittura immagine: %0.1f%% completata"
+
+#. • MSG_262
+#.
+#. Cheat mode message to disable ISO Support, so that only DD images can be opened
+msgid "ISO Support"
+msgstr "Supporto ISO"
+
+#. • MSG_263
+#.
+#. Cheat mode to force legacy size units, where 1 KB is 1024 bytes and NOT that fake 1000 bytes abomination!
+msgid "Use PROPER size units"
+msgstr "Usa unità dimensione CORRETTA"
+
+#. • MSG_264
+msgid "Deleting directory '%s'"
+msgstr "Eliminazione cartella '%s'"
+
+#. • MSG_265
+msgid "VMWare disk detection"
+msgstr "Rilevamento disco VMWare"
+
+#. • MSG_266
+msgid "Dual UEFI/BIOS mode"
+msgstr "Modo duale UEFI/BIOS"
+
+#. • MSG_267
+msgid "Applying Windows image: %0.1f%% completed"
+msgstr "Applicazione immagine Windows: %0.1f%% completata"
+
+#. • MSG_268
+msgid "Applying Windows image..."
+msgstr "Applicazione immagine Windows..."
+
+#. • MSG_269
+msgid "Preserve timestamps"
+msgstr "Preserva data/ora"
+
+#. • MSG_270
+msgid "USB debug"
+msgstr "Debug USB"
+
+#. • MSG_271
+msgid "Computing image checksums: %0.1f%% completed"
+msgstr "Calcolo checksum immagine: %0.1f%% completato"
+
+#. • MSG_272
+msgid "Compute the MD5, SHA1 and SHA256 checksums for the selected image"
+msgstr "Calcola le checksum MD5, SHA1 e SHA256 per l'immagine selezionata"
+
+#. • MSG_273
+msgid "Change the application language"
+msgstr "Cambia la lingua dell'interfaccia"
+
+#. • MSG_274
+msgid "ISOHybrid image detected"
+msgstr "Rilevata immagine ISO ibrida"
+
+#. • MSG_275
+#.
+#. '%s' will be replaced with your translations for MSG_036 ("ISO Image") and MSG_095 ("DD Image")
+msgid "The image you have selected is an 'ISOHybrid' image. This means it can be written either in %s (file copy) mode or %s (disk image) mode.\nRufus recommends using %s mode, so that you always have full access to the drive after writing it.\nHowever, if you encounter issues during boot, you can try writing this image again in %s mode.\n\nPlease select the mode that you want to use to write this image:"
+msgstr "L'immagine selezionata è un'immagine ISO ibrida. Questo significa che può essere registrata in modo '%s' (copia file) o in modo '%s' (immagine disco).\nRufus suggerisce di usare il modo '%s', in modo da avere sempre pieno accesso all'unità dopo la scrittura.\nSe incontri problemi al boot, puoi provare a scrivere questa immagine in modo %s.\n\nSeleziona il modo che vuoi usare per scrivere questa immagine:"
+
+#. • MSG_276
+#.
+#. '%s' will be replaced with your translation for MSG_036 ("ISO Image")
+msgid "Write in %s mode (Recommended)"
+msgstr "Scrivi in modo %s (suggerito)"
+
+#. • MSG_277
+#.
+#. '%s' will be replaced with your translation for MSG_095 ("DD Image")
+msgid "Write in %s mode"
+msgstr "Scrivi in modo %s"
+
+#. • MSG_278
+msgid "Checking for conflicting processes..."
+msgstr "Verifica processi in conflitto..."
+
+#. • MSG_279
+msgid "Non bootable"
+msgstr "Non avviabile"
+
+#. • MSG_280
+msgid "Disk or ISO image"
+msgstr "Immagine disco o ISO"
+
+#. • MSG_281
+msgid "%s (Please select)"
+msgstr "%s (seleziona)"
+
+#. • MSG_282
+msgid "Exclusive USB drive locking"
+msgstr "Blocco esclusivo unità USB"
+
+#. • MSG_283
+msgid "Invalid signature"
+msgstr "Firma non valida"
+
+#. • MSG_284
+msgid "The downloaded executable is missing a digital signature."
+msgstr "L'eseguibile scaricato non ha una firma digitale."
+
+#. • MSG_285
+msgid "The downloaded executable is signed by '%s'.\nThis is not a signature we recognize and could indicate some form of malicious activity...\nAre you sure you want to run this file?"
+msgstr "L'eseguibile scaricato è firmato da '%s'.\nQuesta non è una firma riconosciuta e potrebbe indicare qualche forma di attività malevola.\nSei sicuro di voler eseguire questo file?"
+
+#. • MSG_286
+msgid "Zeroing drive: %0.1f%% completed"
+msgstr "Azzeramento disco: %0.1f%% completato"
+
+#. • MSG_287
+msgid "Detection of non-USB removable drives"
+msgstr "Rilevamento di unità rimovibili non USB"
+
+#. • MSG_288
+msgid "Missing elevated privileges"
+msgstr "Privilegi elevati non disponibili"
+
+#. • MSG_289
+msgid "This application can only run with elevated privileges"
+msgstr "Questa applicazione può essere eseguita solo con privilegi elevati"
+
+#. • MSG_290
+msgid "File Indexing"
+msgstr "Indicizzazione file"
+
+#. • MSG_291
+msgid "Version selection"
+msgstr "Selezione versione"
+
+#. • MSG_292
+msgid "Please select the version of Windows you want to install:"
+msgstr "Seleziona la versione di Windows che vuoi installare:"
+
+#. • MSG_293
+msgid "Unsupported Windows version"
+msgstr "Versione Windows non supportata"
+
+#. • MSG_294
+msgid "This version of Windows is no longer supported by Rufus."
+msgstr "Questa versione di Windows non è più supportata da Rufus."
+
+#. • MSG_295
+msgid "Warning: Unofficial version"
+msgstr "Attenzione: versione non ufficiale"
+
+#. • MSG_296
+msgid "This version of Rufus was not produced by its official developer(s).\n\nAre you sure you want to run it?"
+msgstr "Questa versione di Rufus non è stata sviluppata dai suoi sviluppatori ufficiali.\n\nSei sicuro di volerla eseguire?"
+
+#. • MSG_297
+msgid "Truncated ISO detected"
+msgstr "Rilevato file ISO troncato"
+
+#. • MSG_298
+msgid "The ISO file you have selected does not match its declared size: %s of data is missing!\n\nIf you obtained this file from the Internet, you should try to download a new copy and verify that the MD5 or SHA checksums match the official ones.\n\nNote that you can compute the MD5 or SHA in Rufus by clicking the (✓) button."
+msgstr "Il file ISO selezionato non corrisponde alla dimensione dichiarata: %s dei dati mancanti!\n\nSe hai scaricato questo file da internet, prova a scaricarne una nuova copia e verifica che la checksum MD5 o SHA corrisponda alla checksum ufficiale.\n\nNota che puoi calcolare in Rufus la checksum facendo clic sul pulsante (✓)."
+
+#. • MSG_299
+msgid "Timestamp validation error"
+msgstr "Errore validazione data/ora"
+
+#. • MSG_300
+msgid "Rufus could not validate that the timestamp of the downloaded update is more recent than the one for the current executable.\n\nIn order to prevent potential attack scenarios, the update process has been aborted and the download will be deleted. Please check the log for more details."
+msgstr "Rufus non può validare che la data/ora del pacchetto aggiornamento è più recente di quello per l'attuale eseguibile.\n\nPer prevenire possibili scenari di un attacco malware, il processo di aggiornamento è stato interrotto e il file scaricato verrà eliminato. Per maggiori dettagli controlla il registro eventi."
+
+#. • MSG_301
+msgid "Show application settings"
+msgstr "Visualizza impostazioni applicazione"
+
+#. • MSG_302
+msgid "Show information about this application"
+msgstr "Visualizza informazioni su questa applicazione"
+
+#. • MSG_303
+msgid "Show the log"
+msgstr "Visualizza registro eventi"
+
+#. • MSG_304
+msgid "Create a disk image of the selected device"
+msgstr "Crea un'immagine disco dell'unità selezionata"
+
+#. • MSG_305
+msgid "Use this option to indicate whether you want to use this device to install Windows on another disk, or if you want to run Windows directly from this drive (Windows To Go)."
+msgstr "Usa questa opzione per indicare se vuoi usare questa unità per installare Windows in un altro disco, o se vuoi avviare Windows direttamente da questa unità (Windows To Go)."
+
+#. • MSG_306
+#.
+#. You can see this status message by pressing <Ctrl>-<Alt>-<Z> and then selecting START.
+#. It's the same as MSG_286 but with a process that *may* be faster, hence the name.
+msgid "Fast-zeroing drive: %0.1f%% completed"
+msgstr "Azzeramento veloce unità: %0.1f%% completato"
