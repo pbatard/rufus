@@ -973,7 +973,7 @@ namespace pollock
             if (Console.WindowWidth < 100)
                 Console.SetWindowSize(100, Console.WindowHeight);
 
-            bool use_local_loc = false;
+            bool maintainer_mode = false;
             Console.OutputEncoding = System.Text.Encoding.UTF8;
             Console.CancelKeyPress += delegate (object sender, ConsoleCancelEventArgs e) {
                 e.Cancel = true;
@@ -981,14 +981,6 @@ namespace pollock
             };
             Console.WriteLine($"{app_name} {version_str} - Poedit to rufus.loc conversion utility");
             Console.WriteLine();
-            foreach (var arg in args)
-            {
-                if (arg.Contains("l"))
-                    use_local_loc = true;
-            }
-
-            if (AppDomain.CurrentDomain.FriendlyName.Contains('m'))
-                goto Maintainer_Mode;
 
             string loc_url = "https://github.com/pbatard/rufus/raw/master/res/loc/rufus.loc";
             string ver_url = "https://rufus.ie/Loc.ver";
@@ -996,9 +988,40 @@ namespace pollock
             string rufus_file = null;
             string download_url = null;
             string po_file = null;
+            string loc_file = null;
+            string id = "", name = "";
             int[] update_version = new int[2] { 0, 0 };
             var list = new List<string[]>();
             int index = -1;
+
+            // Parse parameters
+            foreach (var arg in args)
+            {
+                if (arg.Contains("i"))
+                {
+                    maintainer_mode = true;
+                    goto Import;
+                }
+                else if (arg.Contains("l"))
+                {
+                    loc_file = @"..\rufus.loc";
+                    foreach (var line in File.ReadAllLines(loc_file))
+                    {
+                        if (line.StartsWith("l "))
+                        {
+                            var el = line.Split('\"');
+                            id = el[1];
+                            name = el[3].Split('(')[0].Trim();
+                        }
+                        else if (line.StartsWith("v "))
+                        {
+                            list.Add(new string[] { name, id, line.Substring(2) });
+                        }
+                    }
+                    maintainer_mode = true;
+                    goto Menu;
+                }
+            }
 
             // Check for updates of this application
             Console.Write("Downloading latest application data... ");
@@ -1006,7 +1029,7 @@ namespace pollock
             if (ver == null)
             {
                 Console.WriteLine("ERROR: Could not access application data.");
-                goto Error;
+                goto Exit;
             }
             foreach (var line in ver.Split('\n'))
             {
@@ -1030,7 +1053,7 @@ namespace pollock
             if ((download_url == null) || (rufus_url == null) || (update_version[0] == 0))
             {
                 Console.WriteLine("FAILED");
-                goto Error;
+                goto Exit;
             }
             Console.WriteLine("DONE");
 
@@ -1043,7 +1066,7 @@ namespace pollock
                     if (DownloadFile(download_url))
                     {
                         Console.WriteLine("Now re-launch this program using the latest version.");
-                        goto Error;
+                        goto Exit;
                     }
                     Console.WriteLine("Download failed.");
                 }
@@ -1071,12 +1094,12 @@ namespace pollock
                 }
             }
 
-            if (!use_local_loc)
+            if (!maintainer_mode)
             {
                 // Download the latest loc file
                 Console.Write("Downloading the latest loc file... ");
                 if (!DownloadFile(loc_url))
-                    goto Error;
+                    goto Exit;
             }
             else
             {
@@ -1085,10 +1108,9 @@ namespace pollock
                 File.Copy(local_loc, "rufus.loc", true);
             }
 
-            var loc_file = loc_url.Split('/').Last();
+            loc_file = loc_url.Split('/').Last();
             // Convert to CRLF and get all the language ids
             var lines = File.ReadAllLines(loc_file);
-            string id = "", name = "";
             using (var writer = new StreamWriter(loc_file, false, encoding))
             {
                 foreach (var line in lines)
@@ -1142,9 +1164,12 @@ Retry:
             Language old_en_US = null;
             if (list[index][2] == list[0][2])
             {
-                Console.WriteLine("Note: This language is already at the most recent version!");
-                if (!PromptForQuestion("Do you still want to edit it?"))
-                    goto Error;
+                if (!maintainer_mode)
+                {
+                    Console.WriteLine("Note: This language is already at the most recent version!");
+                    if (!PromptForQuestion("Do you still want to edit it?"))
+                        goto Exit;
+                }
             }
             else
             {
@@ -1162,33 +1187,36 @@ Retry:
                     var url = "https://github.com/pbatard/rufus/releases/tag/v" + list[index][2];
                     var str = DownloadString(url);
                     if (str == null)
-                        goto Error;
+                        goto Exit;
                     var sha = str.Substring(str.IndexOf("/pbatard/rufus/commit/") + 22, 40);
                     // TODO: Remove this once everyone has upgraded past 3.2
                     string loc_dir = ((list[index][2][0] == '2') || ((list[index][2][0] == '3') && (list[index][2][2] == '0'))) ? "localization" : "loc";
                     url = "https://github.com/pbatard/rufus/raw/" + sha + "/res/" + loc_dir + "/rufus.loc";
                     if (!DownloadFile(url, old_loc_file))
-                        goto Error;
+                        goto Exit;
                 }
                 var old_langs = ParseLocFile(old_loc_file, "en-US");
                 if ((old_langs == null) || (old_langs.Count != 1))
                 {
                     Console.WriteLine("Error: Unable to get en-US data from previous loc file.");
-                    goto Error;
+                    goto Exit;
                 }
                 old_en_US = old_langs[0];
             }
 
-            if (File.Exists(po_file))
+            if (File.Exists(po_file) && !maintainer_mode)
             {
                 if (!PromptForQuestion($"A '{po_file}' file already exists. Do you want to overwrite it? (If unsure, say 'y')"))
-                    goto Error;
+                    goto Exit;
             }
             if (CreatePoFiles(ParseLocFile(loc_file, list[index][1]), old_en_US) < 1)
             {
                 Console.WriteLine("Failed to create PO file");
-                goto Error;
+                goto Exit;
             }
+
+            if (maintainer_mode)
+                goto Exit;
 
             // Watch for file modifications
             FileSystemWatcher watcher = new FileSystemWatcher();
@@ -1242,7 +1270,6 @@ Retry:
                 Console.WriteLine($"'{po_file}' file manually.");
             }
 
-Exit:
             WaitForKey("Now press any key to launch your e-mail client and exit this application...");
 
             if ((list.Count >= 2) && (index >= 0))
@@ -1254,11 +1281,7 @@ Exit:
             }
             return;
 
-Error:
-            WaitForKey("Press any key to exit...");
-            return;
-
-Maintainer_Mode:
+Import:
             string file_name;
             OpenFileDialog file_dialog = new OpenFileDialog();
             file_dialog.InitialDirectory = app_dir;
@@ -1267,7 +1290,10 @@ Maintainer_Mode:
             file_name = file_dialog.FileName;
             Console.WriteLine(file_name);
             UpdateLocFile(ParsePoFile(file_name), app_dir + @"..\");
-            WaitForKey("Press any key to exit...");
+
+Exit:
+            if (!maintainer_mode)
+                WaitForKey("Press any key to exit...");
         }
     }
 }
