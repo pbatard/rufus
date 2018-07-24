@@ -85,7 +85,7 @@
 #define RUFUS_URL                   "https://rufus.ie"
 #define DOWNLOAD_URL                RUFUS_URL "/downloads"
 #define FILES_URL                   RUFUS_URL "/files"
-#define SEVENZIP_URL                "http://www.7-zip.org"
+#define SEVENZIP_URL                "https://www.7-zip.org"
 #define FILES_DIR                   "rufus_files"
 #define IGNORE_RETVAL(expr)         do { (void)(expr); } while(0)
 #ifndef ARRAYSIZE

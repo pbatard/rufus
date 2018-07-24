@@ -53,7 +53,7 @@ static BOOL force_update_check = FALSE;
 
 /*
  * FormatMessage does not handle internet errors
- * https://msdn.microsoft.com/en-us/library/windows/desktop/aa385465.aspx
+ * https://docs.microsoft.com/en-us/windows/desktop/wininet/wininet-errors
  */
 const char* WinInetErrorString(void)
 {
@@ -135,10 +135,18 @@ const char* WinInetErrorString(void)
 		return "The request to the proxy was invalid.";
 	case ERROR_INTERNET_HANDLE_EXISTS:
 		return "The request failed because the handle already exists.";
+	case ERROR_INTERNET_SEC_INVALID_CERT:
+		return "The SSL certificate is invalid.";
 	case ERROR_INTERNET_SEC_CERT_DATE_INVALID:
 		return "SSL certificate date that was received from the server is bad. The certificate is expired.";
 	case ERROR_INTERNET_SEC_CERT_CN_INVALID:
 		return "SSL certificate common name (host name field) is incorrect.";
+	case ERROR_INTERNET_SEC_CERT_ERRORS:
+		return "The SSL certificate contains errors.";
+	case ERROR_INTERNET_SEC_CERT_NO_REV:
+		return "The SSL certificate was not revoked.";
+	case ERROR_INTERNET_SEC_CERT_REV_FAILED:
+		return "The revocation check of the SSL certificate failed.";
 	case ERROR_INTERNET_HTTP_TO_HTTPS_ON_REDIR:
 		return "The application is moving from a non-SSL to an SSL connection because of a redirect.";
 	case ERROR_INTERNET_HTTPS_TO_HTTP_ON_REDIR:
