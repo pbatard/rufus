@@ -681,7 +681,13 @@ static __inline DWORD GetFileAttributesU(const char* lpFileName)
 {
 	DWORD ret = 0xFFFFFFFF, err = ERROR_INVALID_DATA;
 	wconvert(lpFileName);
-	ret = GetFileAttributesW(wlpFileName);
+	// Unlike Microsoft's version, ours doesn't fail if the string is quoted
+	if ((wlpFileName[0] == L'"') && (wlpFileName[wcslen(wlpFileName) - 1] == L'"')) {
+		wlpFileName[wcslen(wlpFileName) - 1] = 0;
+		ret = GetFileAttributesW(&wlpFileName[1]);
+	} else {
+		ret = GetFileAttributesW(wlpFileName);
+	}
 	err = GetLastError();
 	wfree(lpFileName);
 	SetLastError(err);
