@@ -27,6 +27,7 @@
 #include <stdio.h>
 #include <wincrypt.h>
 #include <wintrust.h>
+#undef NDEBUG
 #include <assert.h>
 
 #include "rufus.h"

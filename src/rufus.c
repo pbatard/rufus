@@ -35,6 +35,7 @@
 #include <dbt.h>
 #include <io.h>
 #include <getopt.h>
+#undef NDEBUG
 #include <assert.h>
 
 #include "rufus.h"
