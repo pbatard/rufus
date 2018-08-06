@@ -1,0 +1,1618 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: 3.2\n"
+"Report-Msgid-Bugs-To: pete@akeo.ie\n"
+"POT-Creation-Date: 2018-08-06 22:12+0800\n"
+"PO-Revision-Date: 2018-08-06 22:36+0800\n"
+"Language: zh_CN\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Rufus-LanguageName: Chinese Simplified (简体中文)\n"
+"X-Rufus-LCID: 0x0804, 0x1004\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"X-Generator: Poedit 2.1.1\n"
+
+#. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
+msgid "Drive Properties"
+msgstr "设备选项"
+
+#. • IDD_DIALOG → IDS_DEVICE_TXT
+msgid "Device"
+msgstr "设备"
+
+#. • IDD_DIALOG → IDS_BOOT_SELECTION_TXT
+msgid "Boot selection"
+msgstr "引导类型选择"
+
+#. • IDD_DIALOG → IDC_SELECT
+msgid "Select"
+msgstr "选择"
+
+#. • IDD_DIALOG → IDS_IMAGE_OPTION_TXT
+msgid "Image Option"
+msgstr "镜像选项"
+
+#. • IDD_DIALOG → IDS_PARTITION_TYPE_TXT
+msgid "Partition scheme"
+msgstr "分区类型"
+
+#. • IDD_DIALOG → IDS_TARGET_SYSTEM_TXT
+msgid "Target system"
+msgstr "目标系统类型"
+
+#. • IDD_DIALOG → IDC_LIST_USB_HDD
+msgid "List USB Hard Drives"
+msgstr "显示 USB 外置硬盘"
+
+#. • IDD_DIALOG → IDC_OLD_BIOS_FIXES
+#.
+#. It is acceptable to drop the parenthesis () if you are running out of space
+#. as there is a tooltip (MSG_169) providing these details.
+msgid "Add fixes for old BIOSes (extra partition, align, etc.)"
+msgstr "添加对旧 BIOS 修正(额外的分区，校准等)"
+
+#. • IDD_DIALOG → IDC_RUFUS_MBR
+#.
+#. 'MBR': See http://en.wikipedia.org/wiki/Master_boot_record
+#. Rufus can install it's own custom MBR (the Rufus MBR), which also allows users to
+#. specify a custom disk ID for the BIOS. The tooltip for this control is MSG_167.
+msgid "Use Rufus MBR with BIOS ID"
+msgstr "使用 Rufus MBR 配合 BIOS ID"
+
+#. • IDD_DIALOG → IDS_FORMAT_OPTIONS_TXT
+msgid "Format Options"
+msgstr "格式化选项"
+
+#. • IDD_DIALOG → IDS_FILE_SYSTEM_TXT
+msgid "File system"
+msgstr "文件系统"
+
+#. • IDD_DIALOG → IDS_CLUSTER_SIZE_TXT
+msgid "Cluster size"
+msgstr "簇大小"
+
+#. • IDD_DIALOG → IDS_LABEL_TXT
+msgid "Volume label"
+msgstr "卷标"
+
+#. • IDD_DIALOG → IDC_QUICK_FORMAT
+msgid "Quick format"
+msgstr "快速格式化"
+
+#. • IDD_DIALOG → IDC_BAD_BLOCKS
+msgid "Check device for bad blocks"
+msgstr "检查设备坏块"
+
+#. • IDD_DIALOG → IDC_EXTENDED_LABEL
+msgid "Create extended label and icon files"
+msgstr "创建扩展的标签和图标文件"
+
+#. • IDD_DIALOG → IDS_STATUS_TXT
+msgid "Status"
+msgstr "状态"
+
+#. • IDD_DIALOG → IDCANCEL
+#. • IDD_LICENSE → IDCANCEL
+#. • IDD_LOG → IDCANCEL
+#. • IDD_UPDATE_POLICY → IDCANCEL
+#. • IDD_NEW_VERSION → IDCANCEL
+#. • MSG_006
+msgid "Close"
+msgstr "关闭"
+
+#. • IDD_DIALOG → IDC_START
+msgid "Start"
+msgstr "开始"
+
+#. • IDD_ABOUTBOX → IDD_ABOUTBOX
+msgid "About Rufus"
+msgstr "关于 Rufus"
+
+#. • IDD_ABOUTBOX → IDC_ABOUT_LICENSE
+msgid "License"
+msgstr "许可"
+
+#. • IDD_ABOUTBOX → IDOK
+msgid "OK"
+msgstr "确定"
+
+#. • IDD_LICENSE → IDD_LICENSE
+msgid "Rufus License"
+msgstr "Rufus 许可"
+
+#. • IDD_NOTIFICATION → IDC_MORE_INFO
+msgid "More information"
+msgstr "更多信息"
+
+#. • IDD_NOTIFICATION → IDYES
+#. • MSG_008
+msgid "Yes"
+msgstr "是"
+
+#. • IDD_NOTIFICATION → IDNO
+#. • MSG_009
+msgid "No"
+msgstr "否"
+
+#. • IDD_LOG → IDD_LOG
+msgid "Log"
+msgstr "日志"
+
+#. • IDD_LOG → IDC_LOG_CLEAR
+msgid "Clear"
+msgstr "清除"
+
+#. • IDD_LOG → IDC_LOG_SAVE
+msgid "Save"
+msgstr "保存"
+
+#. • IDD_UPDATE_POLICY → IDD_UPDATE_POLICY
+msgid "Update policy and settings"
+msgstr "更新策略和设置"
+
+#. • IDD_UPDATE_POLICY → IDS_UPDATE_SETTINGS_GRP
+msgid "Settings"
+msgstr "设置"
+
+#. • IDD_UPDATE_POLICY → IDS_UPDATE_FREQUENCY_TXT
+msgid "Check for updates"
+msgstr "检查更新"
+
+#. • IDD_UPDATE_POLICY → IDS_INCLUDE_BETAS_TXT
+msgid "Include beta versions"
+msgstr "包括测试版本"
+
+#. • IDD_UPDATE_POLICY → IDC_CHECK_NOW
+msgid "Check Now"
+msgstr "立即检查"
+
+#. • IDD_NEW_VERSION → IDD_NEW_VERSION
+msgid "Check For Updates - Rufus"
+msgstr "检查更新 - Rufus"
+
+#. • IDD_NEW_VERSION → IDS_NEW_VERSION_AVAIL_TXT
+msgid "A newer version is available. Please download the latest version!"
+msgstr "有更新版本可用。请下载最新版本！"
+
+#. • IDD_NEW_VERSION → IDC_WEBSITE
+msgid "Click here to go to the website"
+msgstr "点击这里转到网站"
+
+#. • IDD_NEW_VERSION → IDS_NEW_VERSION_NOTES_GRP
+msgid "Release Notes"
+msgstr "发行说明"
+
+#. • IDD_NEW_VERSION → IDS_NEW_VERSION_DOWNLOAD_GRP
+#. • IDD_NEW_VERSION → IDC_DOWNLOAD
+#. • MSG_040
+msgid "Download"
+msgstr "下载"
+
+#. • MSG_001
+msgid "Other instance detected"
+msgstr "检测到其它进程"
+
+#. • MSG_002
+msgid ""
+"Another Rufus application is running.\n"
+"Please close the first application before running another one."
+msgstr ""
+"另一个 Rufus 应用程序正在运行。\n"
+"请在运行另一个应用程序前关闭第一个程序。"
+
+#. • MSG_003
+msgid ""
+"WARNING: ALL DATA ON DEVICE '%s' WILL BE DESTROYED.\n"
+"To continue with this operation, click OK. To quit click CANCEL."
+msgstr ""
+"警告：设备 '%s' 上的所有数据将会被清除。\n"
+"要继续本操作，请点击【确定】。要退出点击【取消】。"
+
+#. • MSG_004
+msgid "Rufus update policy"
+msgstr "Rufus 更新策略"
+
+#. • MSG_005
+msgid "Do you want to allow Rufus to check for application updates online?"
+msgstr "你是否允许 Rufus 联网检查程序更新？"
+
+#. • MSG_007
+msgid "Cancel"
+msgstr "取消"
+
+#. • MSG_010
+msgid "Bad blocks found"
+msgstr "检测到坏块"
+
+#. • MSG_011
+msgid ""
+"Check completed: %d bad block(s) found\n"
+"  %d read error(s)\n"
+"  %d write error(s)\n"
+"  %d corruption error(s)"
+msgstr ""
+"检查完成：找到 %d 个坏块\n"
+"  %d 个读取错误\n"
+"  %d 个写入错误\n"
+"  %d 个损坏错误"
+
+#. • MSG_012
+#.
+#. This contains the formatted message from MSG_001 as well as the name of the bad blocks logfile
+msgid ""
+"%s\n"
+"A more detailed report can be found in:\n"
+"%s"
+msgstr ""
+"%s\n"
+"详细的报告位于：\n"
+"%s"
+
+#. • MSG_013
+msgid "Disabled"
+msgstr "禁用"
+
+#. • MSG_014
+msgid "Daily"
+msgstr "每日"
+
+#. • MSG_015
+msgid "Weekly"
+msgstr "每周"
+
+#. • MSG_016
+msgid "Monthly"
+msgstr "每月"
+
+#. • MSG_017
+msgid "Custom"
+msgstr "自定义"
+
+#. • MSG_018
+msgid "Your version: %d.%d (Build %d)"
+msgstr "你的版本：%d.%d (Build %d)"
+
+#. • MSG_019
+msgid "Latest version: %d.%d (Build %d)"
+msgstr "最新版本：%d.%d (Build %d)"
+
+#. • MSG_020
+#. • MSG_026
+msgid "bytes"
+msgstr "字节"
+
+#. • MSG_021
+#.
+#. *Short* version of the kilobyte size suffix
+msgid "KB"
+msgstr ""
+
+#. • MSG_022
+#.
+#. *Short* version of the megabyte size suffix
+msgid "MB"
+msgstr ""
+
+#. • MSG_023
+#.
+#. *Short* version of the gigabyte size suffix
+msgid "GB"
+msgstr ""
+
+#. • MSG_024
+#.
+#. *Short* version of the terabyte size suffix
+msgid "TB"
+msgstr ""
+
+#. • MSG_025
+#.
+#. *Short* version of the pentabyte size suffix
+msgid "PB"
+msgstr ""
+
+#. • MSG_027
+msgid "kilobytes"
+msgstr "K 字节"
+
+#. • MSG_028
+msgid "megabytes"
+msgstr "M 字节"
+
+#. • MSG_029
+msgid "Default"
+msgstr "默认"
+
+#. • MSG_030
+#.
+#. This gets appended to the file system, cluster size, etc.
+msgid "%s (Default)"
+msgstr "%s (默认)"
+
+#. • MSG_031
+msgid "BIOS (or UEFI-CSM)"
+msgstr "BIOS (或 UEFI-CSM)"
+
+#. • MSG_032
+msgid "UEFI (non CSM)"
+msgstr "UEFI (非 CSM)"
+
+#. • MSG_033
+msgid "BIOS or UEFI"
+msgstr "BIOS 或 UEFI"
+
+#. • MSG_034
+#.
+#. Number of bad block check passes (singular for 1 pass)
+msgid "%d pass"
+msgstr "%d 遍"
+
+#. • MSG_035
+#.
+#. Number of bad block check passes (plural for 2 or more passes).
+#. See MSG_087 for the message that %s gets replaced with.
+msgid "%d passes %s"
+msgstr "%d 遍 %s"
+
+#. • MSG_036
+msgid "ISO Image"
+msgstr "ISO 镜像"
+
+#. • MSG_037
+msgid "Application"
+msgstr "程序"
+
+#. • MSG_038
+msgid "Abort"
+msgstr "中止"
+
+#. • MSG_039
+msgid "Launch"
+msgstr "启动"
+
+#. • MSG_041
+msgid "Operation cancelled by the user"
+msgstr "操作被用户取消"
+
+#. • MSG_042
+msgid "Error"
+msgstr "错误"
+
+#. • MSG_043
+msgid "Error: %s"
+msgstr "错误：%s"
+
+#. • MSG_044
+msgid "File download"
+msgstr "文件下载"
+
+#. • MSG_045
+msgid "USB Storage Device (Generic)"
+msgstr "USB 存储设备(通用)"
+
+#. • MSG_046
+msgid "%s (Disk %d) [%s]"
+msgstr "%s (磁盘 %d) [%s]"
+
+#. • MSG_047
+#.
+#. Used when a drive is detected that contains more than one partition
+msgid "Multiple Partitions"
+msgstr "多分区磁盘"
+
+#. • MSG_048
+msgid "Rufus - Flushing buffers"
+msgstr "Rufus - 刷新缓冲区"
+
+#. • MSG_049
+msgid "Rufus - Cancellation"
+msgstr "Rufus - 取消"
+
+#. • MSG_050
+msgid "Success."
+msgstr "成功。"
+
+#. • MSG_051
+msgid "Undetermined error while formatting."
+msgstr "未知格式化错误。"
+
+#. • MSG_052
+msgid "Cannot use the selected file system for this media."
+msgstr "本介质不能使用选择的文件系统。"
+
+#. • MSG_053
+msgid "Access to the device is denied."
+msgstr "设备被拒绝访问。"
+
+#. • MSG_054
+msgid "Media is write protected."
+msgstr "介质被写保护。"
+
+#. • MSG_055
+msgid "The device is in use by another process. Please close any other process that may be accessing the device."
+msgstr "设备正在被另一个使用中。请关闭可能访问设备的任意其它进程。"
+
+#. • MSG_056
+msgid "Quick format is not available for this device."
+msgstr "本设备不可使用快速格式化。"
+
+#. • MSG_057
+msgid "The volume label is invalid."
+msgstr "卷标无效。"
+
+#. • MSG_058
+msgid "The device handle is invalid."
+msgstr "设备句柄无效。"
+
+#. • MSG_059
+msgid "The selected cluster size is not valid for this device."
+msgstr "选择的簇大小对本设备来说无效。"
+
+#. • MSG_060
+msgid "The volume size is invalid."
+msgstr "卷大小无效。"
+
+#. • MSG_061
+msgid "Please insert a removable media in drive."
+msgstr "请在驱动器中插入可移动介质。"
+
+#. • MSG_062
+msgid "An unsupported command was received."
+msgstr "接收到一个不被支持的命令。"
+
+#. • MSG_063
+msgid "Memory allocation error."
+msgstr "内存分配错误。"
+
+#. • MSG_064
+msgid "Read error."
+msgstr "读取错误。"
+
+#. • MSG_065
+msgid "Write error."
+msgstr "写入错误。"
+
+#. • MSG_066
+msgid "Installation failure"
+msgstr "安装失败"
+
+#. • MSG_067
+msgid "Could not open media. It may be in use by another process. Please re-plug the media and try again."
+msgstr "不能打开介质。可能是其他进程正在使用该设备。请重新插入设备后再试。"
+
+#. • MSG_068
+msgid "Error while partitioning drive."
+msgstr "驱动器分区时错误。"
+
+#. • MSG_069
+msgid "Could not copy files to target drive."
+msgstr "无法复制文件到目标驱动器。"
+
+#. • MSG_070
+msgid "Cancelled by user."
+msgstr "用户取消操作。"
+
+#. • MSG_071
+#.
+#. See http://en.wikipedia.org/wiki/Thread_%28computing%29
+msgid "Unable to start thread."
+msgstr "不能创建线程。"
+
+#. • MSG_072
+msgid "Bad blocks check didn't complete."
+msgstr "坏块检查未完成。"
+
+#. • MSG_073
+msgid "ISO image scan failure."
+msgstr "ISO 镜像扫描失败。"
+
+#. • MSG_074
+msgid "ISO image extraction failure."
+msgstr "ISO 镜像提取失败。"
+
+#. • MSG_075
+msgid "Unable to remount volume."
+msgstr "不能重新装载卷。"
+
+#. • MSG_076
+msgid "Unable to patch/setup files for boot."
+msgstr "不能补丁/安装用于引导的文件。"
+
+#. • MSG_077
+msgid "Unable to assign a drive letter."
+msgstr "不能指派盘符。"
+
+#. • MSG_078
+msgid "Can't mount GUID volume."
+msgstr "未能装载 GUID 卷。"
+
+#. • MSG_079
+msgid "The device is not ready."
+msgstr "设备没有准备好。"
+
+#. • MSG_080
+msgid ""
+"Rufus detected that Windows is still flushing its internal buffers onto the USB device.\n"
+"\n"
+"Depending on the speed of your USB device, this operation may take a long time to complete, especially for large files.\n"
+"\n"
+"We recommend that you let Windows finish, to avoid corruption. But if you grow tired of waiting, you can just unplug the device..."
+msgstr ""
+"Rufus 检测到 Windows 仍在把它的内部缓冲区刷到 USB 设备上。\n"
+"\n"
+"根据你的 USB 设备的速度，此操作可能需要很长时间才能完成，尤其是大文件。\n"
+"\n"
+"我们建议你让 Windows 完成，避免数据损坏。但是如果你厌倦了等待的话，你可以就那样拔出设备..."
+
+#. • MSG_081
+msgid "Unsupported image"
+msgstr "不支持的镜像"
+
+#. • MSG_082
+msgid "This image is either non-bootable, or it uses a boot or compression method that is not supported by Rufus..."
+msgstr ""
+"本镜像是不可引导的，或者使用了不被 Rufus 所支持的引导或压缩方式...\n"
+"本版本 Rufus 仅支持基于 bootmgr, EFI, Grub4DOS, GRUB 2, isolinux 或 WinPE 的启动 ISO 镜像。"
+
+#. • MSG_083
+msgid "Replace %s?"
+msgstr "替换 %s?"
+
+#. • MSG_084
+msgid ""
+"This ISO image seems to use an obsolete version of '%s'.\n"
+"Boot menus may not display properly because of this.\n"
+"\n"
+"A newer version can be downloaded by Rufus to fix this issue:\n"
+"- Choose 'Yes' to connect to the internet and download the file\n"
+"- Choose 'No' to leave the existing ISO file unmodified\n"
+"If you don't know what to do, you should select 'Yes'.\n"
+"\n"
+"Note: The new file will be downloaded in the current directory and once a '%s' exists there, it will be reused automatically."
+msgstr ""
+"这个 ISO 镜像似乎使用一个过时的 '%s' 版本。\n"
+"引导菜单可能因此而无法正常显示。\n"
+"\n"
+"Rufus 可以下载更新的版本来修复这个问题：\n"
+"- 选择【是】连接网络并下载文件\n"
+"- 选择【否】保留现有的 ISO 文件不变\n"
+"如果不知道如何选择，请选择【是】。\n"
+"\n"
+"注意：新文件将会下载到当前目录，一旦 '%s' 存在则会被自动选用。"
+
+#. • MSG_085
+msgid "Downloading '%s'"
+msgstr "下载 '%s' 中"
+
+#. • MSG_086
+msgid "No image selected"
+msgstr "未选择镜像"
+
+#. • MSG_087
+#.
+#. This message appears in Advanced format options → Check device for bad blocks → dropdown menu
+#. %s will be replaced with SLC, MLC or TLC, which is a type of NAND (or flash memory). In other
+#. words, this message should mean "for a flash memory device of type %s". *Please* try to keep
+#. the translation as short as possible so that it won't result in an overly large dropdown...
+#. If you prefer, it's okay to use "type" or "device" instead of "NAND" (e.g. "for TLC type").
+#. See also MSG_035.
+msgid "for %s NAND"
+msgstr "对 %s 闪存"
+
+#. • MSG_088
+msgid "Image is too big"
+msgstr "镜像文件过大"
+
+#. • MSG_089
+msgid "The image is too big for the selected target."
+msgstr "镜像对于选择目标来说太大。"
+
+#. • MSG_090
+msgid "Unsupported ISO"
+msgstr "不支持的 ISO"
+
+#. • MSG_091
+msgid "When using UEFI Target Type, only EFI bootable ISO images are supported. Please select an EFI bootable ISO or set the Target Type to BIOS."
+msgstr ""
+"当使用 UEFI 目标类型时，只支持 EFI 可引导的 ISO 镜像。\n"
+"请选择一个 EFI 可引导的 ISO 镜像，或设置“目标类型”为 BIOS。"
+
+#. • MSG_092
+msgid "Unsupported filesystem"
+msgstr "不支持的文件系统"
+
+#. • MSG_093
+msgid ""
+"IMPORTANT: THIS DRIVE CONTAINS MULTIPLE PARTITIONS!!\n"
+"\n"
+"This may include partitions/volumes that aren't listed or even visible from Windows. Should you wish to proceed, you are responsible for any data loss on these partitions."
+msgstr ""
+"警告：本盘包含多分区！\n"
+"\n"
+"这个可能包含在 Windows 中无法列出甚至看到的分区/卷。如果你想继续操作可能造成这些分区上的数据丢失，后果自负。"
+
+#. • MSG_094
+msgid "Multiple partitions detected"
+msgstr "检测到多分区磁盘"
+
+#. • MSG_095
+msgid "DD Image"
+msgstr "DD 镜像"
+
+#. • MSG_096
+msgid "The file system currently selected can not be used with this type of ISO. Please select a different file system or use a different ISO."
+msgstr "当前选择的文件系统不能配合这个类型的 ISO 使用。请选择一个不同的文件系统或者使用不同的 ISO。"
+
+#. • MSG_097
+msgid "'%s' can only be applied if the file system is NTFS."
+msgstr "'%s' 仅适用于 NTFS 文件系统。"
+
+#. • MSG_098
+msgid ""
+"IMPORTANT: You are trying to install 'Windows To Go', but your target drive doesn't have the 'FIXED' attribute. Because of this Windows will most likely freeze during boot, as Microsoft hasn't designed it to work with drives that instead have the 'REMOVABLE' attribute.\n"
+"\n"
+"Do you still want to proceed?\n"
+"\n"
+"Note: The 'FIXED/REMOVABLE' attribute is a hardware property that can only be changed using custom tools from the drive manufacturer. However those tools are ALMOST NEVER provided to the public..."
+msgstr ""
+"重要事项: 你正在尝试安装 'Windows To Go'，然而你的目标盘没有 'FIXED' (固定)属性。因此，Windows 在引导时将很可能冻住，因为微软并没有针对配合拥有 'REMOVABLE' (可移动)属性的驱动器使用而设计。\n"
+"\n"
+"你是否仍想继续?\n"
+"\n"
+"注意: 'FIXED/REMOVABLE' 属性是尽可以使用来自驱动器制造商的定制工具更改的硬件性质。尽管如此，那些工具几乎永远不会公开提供..."
+
+#. • MSG_099
+msgid "Filesystem limitation"
+msgstr "文件系统限制"
+
+#. • MSG_100
+msgid "This ISO image contains a file larger than 4GB, which is more than the maximum size allowed for a FAT or FAT32 file system."
+msgstr "这个 ISO 镜像包含大于 4 GB 的单一文件，它超出了 FAT/FAT32 文件系统允许的最大尺寸。"
+
+#. • MSG_101
+msgid "Missing WIM support"
+msgstr "缺少 WIM 支持"
+
+#. • MSG_102
+msgid ""
+"Your platform cannot extract files from WIM archives. WIM extraction is required to create EFI bootable Windows 7 and Windows Vista USB drives. You can fix that by installing a recent version of 7-Zip.\n"
+"Do you want to visit the 7-zip download page?"
+msgstr ""
+"你的平台不能从 WIM 镜像提取文件。创建 EFI 可引导的 Windows 7 或 Windows Vista USB 盘需要 WIM 提取功能。你可以通过安装最新版本的 7-Zip 来解决这个问题。\n"
+"你是否想访问 7-Zip 下载网页？"
+
+#. • MSG_103
+msgid "Download %s?"
+msgstr "下载 %s 吗？"
+
+#. • MSG_104
+#.
+#. Example: "Grub4DOS v0.4 or later requires a 'grldr' file to be installed. Because this
+#. file is more than 100 KB in size, and always present on Grub4DOS ISO images (...)"
+msgid ""
+"%s or later requires a '%s' file to be installed.\n"
+"Because this file is more than 100 KB in size, and always present on %s ISO images, it is not embedded in Rufus.\n"
+"\n"
+"Rufus can download the missing file for you:\n"
+"- Select 'Yes' to connect to the internet and download the file\n"
+"- Select 'No' if you want to manually copy this file on the drive later\n"
+"\n"
+"Note: The file will be downloaded in the current directory and once a '%s' exists there, it will be reused automatically."
+msgstr ""
+"%s 或更新版本需要同时安装一个 '%s' 文件。\n"
+"由于这个文件尺寸大于 100 KB 且总是存在于 %s ISO 镜像上，而未内置于 Rufus 中。\n"
+"\n"
+"Rufus 可以为你下载缺少的文件：\n"
+"- 选择【是】则连接网络互联网并下载文件\n"
+"- 选择【否】则你自己稍后自行下载到磁盘\n"
+"\n"
+"注意：文件将会在当前目录中下载，一旦 '%s' 文件存在，则它将会被自动选用。"
+
+#. • MSG_105
+msgid ""
+"Cancelling may leave the device in an UNUSABLE state.\n"
+"If you are sure you want to cancel, click YES. Otherwise, click NO."
+msgstr ""
+"现在取消可能导致设备处于不稳定状态。\n"
+"如果你确定你想取消，请点击【是】。否则点击【否】。"
+
+#. • MSG_106
+msgid "Please select folder"
+msgstr "请选择文件夹"
+
+#. • MSG_107
+msgid "All files"
+msgstr "全部文件"
+
+#. • MSG_108
+msgid "Rufus log"
+msgstr "Rufus 日志"
+
+#. • MSG_109
+msgid "0x%02X (Disk %d)"
+msgstr "0x%02X (磁盘 %d)"
+
+#. • MSG_110
+#.
+#. "Cluster size" should be the same as the label for IDS_CLUSTER_SIZE_TXT
+#. "kilobytes" should be the same as in MSG_027
+msgid ""
+"MS-DOS cannot boot from a drive using a 64 kilobytes Cluster size.\n"
+"Please change the Cluster size or use FreeDOS."
+msgstr ""
+"MS-DOS 无法从 64 KB 簇大小磁盘启动。\n"
+"请更改簇大小或改用 FreeDOS。"
+
+#. • MSG_111
+msgid "Incompatible Cluster size"
+msgstr "不兼容的簇大小"
+
+#. • MSG_112
+#.
+#. "%d:%02d" is a duration (mins:secs)
+msgid "Formatting a large UDF volumes can take a lot of time. At USB 2.0 speeds, the estimated formatting duration is %d:%02d, during which the progress bar will appear frozen. Please be patient!"
+msgstr "格式化一个大 UDF 卷可能需要很长时间。以 USB 2.0 速度预计剩余时间：%d:%02d，在此期间进度条可能会呈禁止状态。请耐心等待！"
+
+#. • MSG_113
+msgid "Large UDF volume"
+msgstr "大容量 UDF 卷"
+
+#. • MSG_114
+msgid ""
+"This image uses Syslinux %s%s but this application only includes the installation files for Syslinux %s%s.\n"
+"\n"
+"As new versions of Syslinux are not compatible with one another, and it wouldn't be possible for Rufus to include them all, two additional files must be downloaded from the Internet ('ldlinux.sys' and 'ldlinux.bss'):\n"
+"- Select 'Yes' to connect to the Internet and download these files\n"
+"- Select 'No' to cancel the operation\n"
+"\n"
+"Note: The files will be downloaded in the current application directory and will be reused automatically if present."
+msgstr ""
+"这个镜像使用 Syslinux %s%s，而本程序仅包含 Syslinux %s%s 的安装文件。\n"
+"\n"
+"由于新版本的 Syslinux 和其它版本的不能兼容，而 Rufus 也不可能包括它们全部，需要从互联网下载两个额外的文件('ldlinux.sys' 和 'ldlinux.bss'):\n"
+"- 选择 '是' 连接网络并下载这些文件\n"
+"- 选择 '否' 取消此项操作\n"
+"\n"
+"注意：文件将会被下载到当前应用程序目录，如果存在则会自动选用。"
+
+#. • MSG_115
+msgid "Download required"
+msgstr "需要下载"
+
+#. • MSG_116
+#.
+#. You should be able to test this message with Super Grub2 Disk ISO:
+#. https://sourceforge.net/projects/supergrub2/files/2.00s2/super_grub2_disk_hybrid_2.00s2.iso/download (11.9 MB)
+msgid ""
+"This image uses Grub %s but the application only includes the installation files for Grub %s.\n"
+"\n"
+"As different versions of Grub may not be compatible with one another, and it is not possible to include them all, Rufus will attempt to locate a version of the Grub installation file ('core.img') that matches the one from your image:\n"
+"- Select 'Yes' to connect to the Internet and attempt to download it\n"
+"- Select 'No' to use the default version from Rufus\n"
+"- Select 'Cancel' to abort the operation\n"
+"\n"
+"Note: The file will be downloaded in the current application directory and will be reused automatically if present. If no match can be found online, then the default version will be used."
+msgstr ""
+"本镜像使用 Grub %s 而应用程序只包含 Grub %s 的安装文件。\n"
+"\n"
+"由于不同版本的 Grub 彼此不能兼容，而且不可能包含它们全部，Rufus 将尝试定位一个匹配来自你的镜像的 Grub 版本的 Grub 安装文件('core.img'):\n"
+"- 选择【是】则连接到互联网并尝试下载它\n"
+"- 选择【否】则使用来自 Rufus 的默认版本\n"
+"- 选择【取消】则放弃操作\n"
+"\n"
+"注意: 文件将会在当前应用程序目录下载，而如果存在的话则将会自动使用它。如果在线找不到匹配的，那么将会使用默认的版本。"
+
+#. • MSG_117
+msgid "Standard Windows installation"
+msgstr "标准 Windows 安装"
+
+#. • MSG_118
+#.
+#. Only translate this message *if* Microsoft has a specific name for
+#. http://en.wikipedia.org/wiki/Windows_To_Go in your language.
+#. Otherwise, you may add a parenthesis eg. "Windows To Go (<hint at what it does>)"
+msgid "Windows To Go"
+msgstr ""
+
+#. • MSG_119
+msgid "advanced drive properties"
+msgstr "高级设备选项"
+
+#. • MSG_120
+msgid "advanced format options"
+msgstr "高级格式化选项"
+
+#. • MSG_121
+msgid "Show %s"
+msgstr "显示%s"
+
+#. • MSG_122
+msgid "Hide %s"
+msgstr "隐藏%s"
+
+#. • MSG_123
+#.
+#. A persistent partitions can be used with "Live" USB media to store data.
+#. It means that data can be preserved across reboots on "Live" USB drives.
+#. To test this feature, please download and select 'casper_test.iso' from:
+#. https://github.com/pbatard/rufus/raw/master/res/loc/test/casper_test.iso
+msgid "Persistent partition size"
+msgstr "持久分区大小"
+
+#. • MSG_124
+#.
+#. This message appears in the persistence 'Size' control when the slider is set to 0.
+#. It is okay to use "No partition" or "None" or "Deactivated" to indicate that a persistent partition will not be
+#. created if the width of the control is too small (since the 'Size' edit control is *not* adjusted for width).
+msgid "No persistence"
+msgstr "无持久分区"
+
+#. • MSG_125
+#.
+#. Tooltips used for the peristence size slider and edit control
+msgid "Set the size of the persistent partition for live USB media. Setting the size to 0 disables the persistent partition."
+msgstr "设置Live USB驱动器的持久分区大小。设置为零将禁用持久分区。"
+
+#. • MSG_126
+msgid "Set the partition size units."
+msgstr "设置分区大小单位。"
+
+#. • MSG_150
+msgid "Type of computer you plan to use this bootable drive with. It is your responsibility to determine whether your target is of BIOS or UEFI type before you start creating the drive, as it may fail to boot otherwise."
+msgstr "请选择您计算机支持的启动类型，如 BIOS 或 UEFI，否则启动可能会失败。"
+
+#. • MSG_151
+#.
+#. You shouldn't translate 'Legacy Mode' as this is an option that usually appears in English in the UEFI settings.
+msgid "'UEFI-CSM' means that the device will only boot in BIOS emulation mode (also known as 'Legacy Mode') under UEFI, and not in native UEFI mode."
+msgstr "'UEFI-CSM' 指设备只会在 UEFI 系统的经典模式(Legacy Mode)下启动，不会在原生模式(UEFI Mode)下启动。"
+
+#. • MSG_152
+msgid "'non CSM' means that the device will only boot in native UEFI mode, and not in BIOS emulation mode (also known as 'Legacy Mode')."
+msgstr "'非 CSM' 指设备只会在 UEFI 系统的原生模式(UEFI Mode)下启动，不会在经典模式(Legacy Mode)下启动。"
+
+#. • MSG_153
+msgid "Test pattern: 0x%02X"
+msgstr "测试模式：0x%02X"
+
+#. • MSG_154
+msgid "Test pattern: 0x%02X, 0x%02X"
+msgstr "测试模式：0x%02X, 0x%02X"
+
+#. • MSG_155
+msgid "Test pattern: 0x%02X, 0x%02X, 0x%02X"
+msgstr "测试模式：0x%02X, 0x%02X, 0x%02X"
+
+#. • MSG_156
+msgid "Test pattern: 0x%02X, 0x%02X, 0x%02X, 0x%02X"
+msgstr "测试模式：0x%02X, 0x%02X, 0x%02X, 0x%02X"
+
+#. • MSG_157
+msgid "Sets the target filesystem"
+msgstr "设置目标文件系统"
+
+#. • MSG_158
+msgid "Minimum size that a block of data will occupy in the filesystem"
+msgstr "文件系统的数据块最少占用大小"
+
+#. • MSG_159
+msgid ""
+"Use this field to set the drive label.\n"
+"International characters are accepted."
+msgstr ""
+"使用本框以设置驱动器卷标。\n"
+"支持国际字符。"
+
+#. • MSG_160
+msgid "Toggle advanced options"
+msgstr "切换高级选项"
+
+#. • MSG_161
+msgid "Check the device for bad blocks using a test pattern"
+msgstr "使用测试模式检查设备坏块"
+
+#. • MSG_162
+msgid "Uncheck this box to use the \"slow\" format method"
+msgstr "取消本复选框使用\"慢速\"完全格式化方式"
+
+#. • MSG_163
+msgid "Method that will be used to create partitions"
+msgstr "用于创建分区的方法"
+
+#. • MSG_164
+msgid "Method that will be used to make the drive bootable"
+msgstr "用于使驱动器可引导的方法"
+
+#. • MSG_165
+msgid "Click to select an image..."
+msgstr "点击选择镜像..."
+
+#. • MSG_166
+msgid "Check this box to allow the display of international labels and set a device icon (creates an autorun.inf)"
+msgstr "勾选本框允许国际卷标的显示并设置一个设备图标(创建一个 autorun.inf)"
+
+#. • MSG_167
+msgid "Install an MBR that allows boot selection and can masquerade the BIOS USB drive ID"
+msgstr "安装一个可以引导选择内容并可以伪装 BIOS USB 盘 ID 的 MBR"
+
+#. • MSG_168
+msgid ""
+"Try to masquerade first bootable USB drive (usually 0x80) as a different disk.\n"
+"This should only be necessary if you install Windows XP and have more than one disk."
+msgstr ""
+"尝试将首个可引导的 USB 驱动器 (通常为 0x80) 伪装为不同的磁盘。\n"
+"只有当您安装 Windows XP，并拥有多个磁盘时才需要此选项。"
+
+#. • MSG_169
+msgid ""
+"Create an extra hidden partition and try to align partitions boundaries.\n"
+"This can improve boot detection for older BIOSes."
+msgstr ""
+"创建一个额外的隐藏分区并尝试对齐分区分界。\n"
+"这个可提高旧 BIOS 的引导检测率。"
+
+#. • MSG_170
+msgid "Enable the listing of USB Hard Drive enclosures. USE AT YOUR OWN RISKS!!!"
+msgstr ""
+"启用涵盖 USB 硬盘的显示\n"
+"***请谨慎使用，后果自负！***"
+
+#. • MSG_171
+msgid ""
+"Start the formatting operation.\n"
+"This will DESTROY any data on the target!"
+msgstr ""
+"开始格式化操作。\n"
+"这将会清除目标设备上的任何数据！"
+
+#. • MSG_172
+#.
+#. As of Rufus 3.2, *ALL* downloads from the servers are digitally signed, and their signature is validated using the
+#. public key that is embedded in the application. This message appears in an error dialog if the validation fails.
+msgid "Invalid download signature"
+msgstr "下载文件签名校验失败"
+
+#. • MSG_173
+msgid "Click to select..."
+msgstr "点击选择..."
+
+#. • MSG_174
+msgid "Rufus - The Reliable USB Formatting Utility"
+msgstr "Rufus - 可靠的 USB 格式化工具"
+
+#. • MSG_175
+msgid "Version %d.%d (Build %d)"
+msgstr "版本 %d.%d (Build %d)"
+
+#. • MSG_176
+msgid "English translation: Pete Batard <mailto:pete@akeo.ie>"
+msgstr "简体中文翻译者：佚名和就不告诉你"
+
+#. • MSG_177
+msgid "Report bugs or request enhancements at:"
+msgstr "报告错误或请求新功能："
+
+#. • MSG_178
+msgid "Additional Copyrights:"
+msgstr "更多版权信息："
+
+#. • MSG_179
+msgid "Update Policy:"
+msgstr "更新策略："
+
+#. • MSG_180
+msgid "If you choose to allow this program to check for application updates, you agree that the following information may be collected on our server(s):"
+msgstr "如果你选择允许本程序检查应用程序更新，那么表示您同意被我们的服务器收集以下信息："
+
+#. • MSG_181
+msgid "Your operating system's architecture and version"
+msgstr "你的操作系统的架构和版本"
+
+#. • MSG_182
+msgid "The version of the application you use"
+msgstr "你使用的应用程序的版本"
+
+#. • MSG_183
+msgid "Your IP address"
+msgstr "您的 IP 地址"
+
+#. • MSG_184
+msgid "For the purpose of generating private usage statistics, we may keep the information collected, \\b for at most a year\\b0 . However, we will not willingly disclose any of this individual data to third parties."
+msgstr "为了生成专用的使用情况统计，所收集的资料\\b最多保存一年\\b0。绝不会主动将资料提供给第三方。"
+
+#. • MSG_185
+msgid "Update Process:"
+msgstr "更新进程："
+
+#. • MSG_186
+msgid ""
+"Rufus does not install or run background services, therefore update checks are performed only when the main application is running.\\line\n"
+"Internet access is of course required when checking for updates."
+msgstr ""
+"Rufus 没有安装或运行后台服务，因此更新检查仅在主程序运行时进行。\\line\n"
+"当然检查更新时需要网络连接。"
+
+#. • MSG_187
+msgid "Invalid image for selected boot option"
+msgstr "镜像对选择的引导选项无效"
+
+#. • MSG_188
+msgid "The current image doesn't match the boot option selected. Please use a different image or choose a different boot option."
+msgstr "当前镜像不匹配选择的引导选项。请使用不同的镜像或选择不同的引导选项。"
+
+#. • MSG_189
+msgid "This ISO image is not compatible with the selected filesystem"
+msgstr "这个 ISO 镜像不兼容选择的文件系统"
+
+#. • MSG_190
+msgid "Incompatible drive detected"
+msgstr "检测到不兼容的驱动器"
+
+#. • MSG_191
+#.
+#. Used in MSG_235
+msgid "Write pass"
+msgstr "写入次数"
+
+#. • MSG_192
+#.
+#. Used in MSG_235
+msgid "Read pass"
+msgstr "读取次数"
+
+#. • MSG_193
+msgid "Downloaded %s"
+msgstr "已下载 %s"
+
+#. • MSG_194
+msgid "Could not download %s"
+msgstr "不能下载 %s"
+
+#. • MSG_195
+#.
+#. Example: "Using embedded version of Grub2 file(s)"
+msgid "Using embedded version of %s file(s)"
+msgstr "使用 %s 文件的嵌入版本"
+
+#. • MSG_196
+msgid ""
+"IMPORTANT: THIS DRIVE USES A NONSTANDARD SECTOR SIZE!\n"
+"\n"
+"Conventional drives use a 512-byte sector size but this drive uses a %d-byte one. In many cases, this means that you will NOT be able to boot from this drive.\n"
+"Rufus can try to create a bootable drive, but there is NO WARRANTY that it will work."
+msgstr ""
+"重要事项: 本驱动器使用了非标准的扇区大小!\n"
+"\n"
+"传统的驱动器使用 512 字节扇区大小而本驱动器使用 %d 字节的扇区。在许多情况下，这意味着你将不可以从本驱动器引导。\n"
+"Rufus 可以尝试创建一个可引导驱动器，但是不保证它有效。"
+
+#. • MSG_197
+msgid "Nonstandard sector size detected"
+msgstr "检测到非标准扇区大小"
+
+#. • MSG_198
+msgid "'Windows To Go' can only be installed on a GPT partitioned drive if it has the FIXED attribute set. The current drive was not detected as FIXED."
+msgstr "'Windows To Go' 只可以在一个 GPT 分区的拥有 FIXED 属性设置的驱动器上安装当前驱动器没有被检测为 FIXED(固定盘)。"
+
+#. • MSG_201
+msgid "Cancelling - Please wait..."
+msgstr "取消中 - 请稍候..."
+
+#. • MSG_202
+msgid "Scanning image..."
+msgstr "正在扫描镜像..."
+
+#. • MSG_203
+msgid "Failed to scan image"
+msgstr "未能扫描镜像"
+
+#. • MSG_204
+#.
+#. %s is the name of an obsolete Syslinux .c32 module. Example: "Obsolete vesamenu.c32 detected"
+msgid "Obsolete %s detected"
+msgstr "检测到过时的 %s"
+
+#. • MSG_205
+#.
+#. Display the name of the image selected. eg: "Using image: en_win7_x64_sp1.iso"
+msgid "Using image: %s"
+msgstr "正在使用镜像：%s"
+
+#. • MSG_206
+#.
+#. Example: "Missing ldlinux.c32 file"
+msgid "Missing %s file"
+msgstr "缺少 %s 文件"
+
+#. • MSG_207
+#.
+#. The name proposed by Windows' Computer Management → Disk Management when you try to format
+#. a drive with an empty label. For an example, see https://rufus.ie/pics/default_name.png.
+msgid "New Volume"
+msgstr "新加卷"
+
+#. • MSG_208
+#.
+#. Singular. Example: "1 device found"
+msgid "%d device found"
+msgstr "检测到 %d 个设备"
+
+#. • MSG_209
+#.
+#. Plural. Example: "3 devices found"
+msgid "%d devices found"
+msgstr "检测到 %d 个设备"
+
+#. • MSG_210
+msgid "READY"
+msgstr "准备就绪"
+
+#. • MSG_211
+msgid "Cancelled"
+msgstr "已取消"
+
+#. • MSG_212
+msgid "Failed"
+msgstr "操作失败"
+
+#. • MSG_213
+#.
+#. Used when a new update has been downloaded and launched
+msgid "Launching new application..."
+msgstr "正在启动新程序..."
+
+#. • MSG_214
+msgid "Failed to launch new application"
+msgstr "未能启动新程序"
+
+#. • MSG_215
+#.
+#. Example: "Opened some_file.txt"
+msgid "Opened %s"
+msgstr "已打开 %s"
+
+#. • MSG_216
+#.
+#. Example: "Saved rufus.log"
+msgid "Saved %s"
+msgstr "已保存 %s"
+
+#. • MSG_217
+#.
+#. Formatting status (make sure you use a double % to print the percent sign)
+msgid "Formatting: %0.1f%% completed"
+msgstr "正在格式化：已完成 %0.1f%%"
+
+#. • MSG_218
+msgid "Creating file system: Task %d/%d completed"
+msgstr "正在创建文件系统：已完成 %d/%d 项任务"
+
+#. • MSG_219
+msgid "NTFS Fixup: %d%% completed"
+msgstr "修复 NTFS：已完成 %d%%"
+
+#. • MSG_220
+#.
+#. Parameter: the file system and an estimated duration in mins and secs.
+#. Example: "Formatting (UDF) - Estimated duration 3:21..."
+#. If "estimated duration" is too long, just use "estimated" or an abbreviation
+msgid "Formatting (%s) - estimated duration %d:%02d..."
+msgstr "正在格式化 (%s) - 估计剩余时间 %d:%02d..."
+
+#. • MSG_221
+msgid "Setting Label (This may take a while)..."
+msgstr "正在设置卷标，请耐心等待..."
+
+#. • MSG_222
+#.
+#. Example: "Formatting (FAT32)..."
+msgid "Formatting (%s)..."
+msgstr "正在格式化 (%s)..."
+
+#. • MSG_223
+msgid "NTFS Fixup (Checkdisk)..."
+msgstr "修复 NTFS (Checkdisk)..."
+
+#. • MSG_224
+msgid "Clearing MBR/PBR/GPT structures..."
+msgstr "正在清除 MBR/PBR/GPT 架构..."
+
+#. • MSG_225
+msgid "Requesting disk access..."
+msgstr "正在请求磁盘访问..."
+
+#. • MSG_226
+msgid "Analyzing existing boot records..."
+msgstr "正在分析现有引导记录..."
+
+#. • MSG_227
+msgid "Closing existing volume..."
+msgstr "正在关闭现有卷..."
+
+#. • MSG_228
+msgid "Writing master boot record..."
+msgstr "正在写入主引导记录..."
+
+#. • MSG_229
+msgid "Writing partition boot record..."
+msgstr "正在写入分区引导记录..."
+
+#. • MSG_230
+msgid "Copying DOS files..."
+msgstr "正在复制 DOS 文件..."
+
+#. • MSG_231
+msgid "Copying ISO files..."
+msgstr "正在复制 ISO 文件..."
+
+#. • MSG_232
+msgid "Win7 EFI boot setup (This may take a while)..."
+msgstr "Win7 EFI 引导安装(这可能需要一段时间)..."
+
+#. • MSG_233
+msgid "Finalizing, please wait..."
+msgstr "完成中，请稍候..."
+
+#. • MSG_234
+#.
+#. Takes a Syslinux version as parameter.
+#. Example: "Installing Syslinux v5.10..."
+msgid "Installing Syslinux %s..."
+msgstr "正在安装 Syslinux %s..."
+
+#. • MSG_235
+#.
+#. Bad blocks status. Example: "Bad Blocks: Write pass 1/2 - 12.34% (0/0/1 errors)"
+#. See MSG_191 & MSG_192 for "Write pass"/"Read pass" translation.
+msgid "Bad Blocks: %s %d/%d - %0.2f%% (%d/%d/%d errors)"
+msgstr "检查坏块：%s 第 %d/%d 遍 - %0.2f%% (%d/%d/%d 错误)"
+
+#. • MSG_236
+msgid "Bad Blocks: Testing with random pattern"
+msgstr "检查坏块：正在使用随机模式测试"
+
+#. • MSG_237
+msgid "Bad Blocks: Testing with pattern 0x%02X"
+msgstr "检查坏块：正在使用模式 0x%02X 测试"
+
+#. • MSG_238
+#.
+#. Example: "Partitioning (MBR)..."
+msgid "Partitioning (%s)..."
+msgstr "正在分区 (%s)..."
+
+#. • MSG_239
+msgid "Deleting partitions..."
+msgstr "正在删除分区..."
+
+#. • MSG_240
+#.
+#. This message has to do with the signature validation that Rufus uses when downloading an update.
+msgid ""
+"The signature for the downloaded update can not be validated. This could mean that your system is improperly configured for signature validation or indicate a malicious download.\n"
+"\n"
+"The download will be deleted. Please check the log for more details."
+msgstr ""
+"下载的更新签名校验失败，这表明您的系统配置异常或收到恶意攻击。\n"
+"\n"
+"下载文件已被删除。详细信息请查看日志。"
+
+#. • MSG_241
+msgid "Downloading: %0.1f%%"
+msgstr "正在下载：%0.1f%%"
+
+#. • MSG_242
+msgid "Failed to download file."
+msgstr "未能下载文件。"
+
+#. • MSG_243
+msgid "Checking for Rufus updates..."
+msgstr "正在检查 Rufus 更新..."
+
+#. • MSG_244
+msgid "Updates: Unable to connect to the internet"
+msgstr "更新：无法连接到网络"
+
+#. • MSG_245
+msgid "Updates: Unable to access version data"
+msgstr "更新：无法访问版本数据"
+
+#. • MSG_246
+msgid "A new version of Rufus is available!"
+msgstr "检查到可用的新版本 Rufus！"
+
+#. • MSG_247
+msgid "No new version of Rufus was found"
+msgstr "找不到新版本的 Rufus"
+
+#. • MSG_248
+msgid "Application registry keys successfully deleted"
+msgstr "已成功删除程序注册表键"
+
+#. • MSG_249
+msgid "Failed to delete application registry keys"
+msgstr "未能删除程序注册表键"
+
+#. • MSG_250
+#.
+#. Example: "Fixed disk detection enabled", "ISO size check disabled", etc.
+msgid "%s enabled"
+msgstr "%s 已启用"
+
+#. • MSG_251
+msgid "%s disabled"
+msgstr "%s 已禁用"
+
+#. • MSG_252
+msgid "Size checks"
+msgstr "大小检查"
+
+#. • MSG_253
+msgid "Hard disk detection"
+msgstr "硬盘检测"
+
+#. • MSG_254
+msgid "Force large FAT32 formatting"
+msgstr "强制大 FAT32 格式化"
+
+#. • MSG_255
+msgid "NoDriveTypeAutorun will be deleted on exit"
+msgstr "在退出时将会删除 NoDriveTypeAutorun 注册表键"
+
+#. • MSG_256
+msgid "Fake drive detection"
+msgstr "检测扩容盘"
+
+#. • MSG_257
+msgid "Joliet support"
+msgstr "Joliet 支持"
+
+#. • MSG_258
+msgid "Rock Ridge support"
+msgstr "Rock Ridge 支持"
+
+#. • MSG_259
+msgid "Force update"
+msgstr "强制更新"
+
+#. • MSG_260
+msgid "NTFS compression"
+msgstr "NTFS 压缩"
+
+#. • MSG_261
+msgid "Writing image: %0.1f%% completed"
+msgstr "正在写入镜像：已完成 %0.1f%%"
+
+#. • MSG_262
+#.
+#. Cheat mode message to disable ISO Support, so that only DD images can be opened
+msgid "ISO Support"
+msgstr "ISO 镜像支持"
+
+#. • MSG_263
+#.
+#. Cheat mode to force legacy size units, where 1 KB is 1024 bytes and NOT that fake 1000 bytes abomination!
+msgid "Use PROPER size units"
+msgstr "使用恰当的大小单位"
+
+#. • MSG_264
+msgid "Deleting directory '%s'"
+msgstr "正在删除目录 '%s'"
+
+#. • MSG_265
+msgid "VMWare disk detection"
+msgstr "VMWare 磁盘检测"
+
+#. • MSG_266
+msgid "Dual UEFI/BIOS mode"
+msgstr "双 UEFI/BIOS 模式"
+
+#. • MSG_267
+msgid "Applying Windows image: %0.1f%% completed"
+msgstr "正在应用 Windows 镜像: 已完成 %0.1f%%"
+
+#. • MSG_268
+msgid "Applying Windows image..."
+msgstr "正在应用 Windows 镜像..."
+
+#. • MSG_269
+msgid "Preserve timestamps"
+msgstr "保留时间标记"
+
+#. • MSG_270
+msgid "USB debug"
+msgstr "USB 调试"
+
+#. • MSG_271
+msgid "Computing image checksums: %0.1f%% completed"
+msgstr "正在计算镜像校验和: 已完成 %0.1f%%"
+
+#. • MSG_272
+msgid "Compute the MD5, SHA1 and SHA256 checksums for the selected image"
+msgstr "计算所选镜像的 MD5, SHA1 和 SHA256 的校验和"
+
+#. • MSG_273
+msgid "Change the application language"
+msgstr "语言"
+
+#. • MSG_274
+msgid "ISOHybrid image detected"
+msgstr "检测到 ISOHybrid 镜像"
+
+#. • MSG_275
+#.
+#. '%s' will be replaced with your translations for MSG_036 ("ISO Image") and MSG_095 ("DD Image")
+msgid ""
+"The image you have selected is an 'ISOHybrid' image. This means it can be written either in %s (file copy) mode or %s (disk image) mode.\n"
+"Rufus recommends using %s mode, so that you always have full access to the drive after writing it.\n"
+"However, if you encounter issues during boot, you can try writing this image again in %s mode.\n"
+"\n"
+"Please select the mode that you want to use to write this image:"
+msgstr ""
+"您选择的镜像是一个 'ISOHybrid' (混合式)镜像。这意味着它可以以%s (文件复制) 模式或 %s (磁盘) 镜像模式写入。\n"
+"Rufus 推荐使用 %s 模式，以便您在写入它之后总是可以对驱动器有完全的访问权。\n"
+"尽管如此，如果您在引导时遇到问题，您可以尝试以 %s 模式再次写入这个镜像。\n"
+"\n"
+"请选择您想用于写入这个镜像所使用的模式:"
+
+#. • MSG_276
+#.
+#. '%s' will be replaced with your translation for MSG_036 ("ISO Image")
+msgid "Write in %s mode (Recommended)"
+msgstr "以 %s 模式写入(推荐)"
+
+#. • MSG_277
+#.
+#. '%s' will be replaced with your translation for MSG_095 ("DD Image")
+msgid "Write in %s mode"
+msgstr "以 %s 模式写入"
+
+#. • MSG_278
+msgid "Checking for conflicting processes..."
+msgstr "检测冲突进程中..."
+
+#. • MSG_279
+msgid "Non bootable"
+msgstr "非可引导"
+
+#. • MSG_280
+msgid "Disk or ISO image"
+msgstr "镜像文件"
+
+#. • MSG_281
+msgid "%s (Please select)"
+msgstr "%s (请选择)"
+
+#. • MSG_282
+msgid "Exclusive USB drive locking"
+msgstr "独占 USB 驱动器锁定"
+
+#. • MSG_283
+msgid "Invalid signature"
+msgstr "无效签名"
+
+#. • MSG_284
+msgid "The downloaded executable is missing a digital signature."
+msgstr "已下载的可执行文件缺少一个数字签名。"
+
+#. • MSG_285
+msgid ""
+"The downloaded executable is signed by '%s'.\n"
+"This is not a signature we recognize and could indicate some form of malicious activity...\n"
+"Are you sure you want to run this file?"
+msgstr ""
+"已下载的可执行文件是由 '%s' 签署的。\n"
+"这个不是我们能够识别的签名，而且这个可能意味着某种形式的恶意活动...\n"
+"您是否确认您想运行这个文件?"
+
+#. • MSG_286
+msgid "Zeroing drive: %0.1f%% completed"
+msgstr "正在清空磁盘: %0.1f%% 已完成"
+
+#. • MSG_287
+msgid "Detection of non-USB removable drives"
+msgstr "检测非USB的可移除设备"
+
+#. • MSG_288
+msgid "Missing elevated privileges"
+msgstr "缺少管理员权限"
+
+#. • MSG_289
+msgid "This application can only run with elevated privileges"
+msgstr "此程序只能以管理员权限执行"
+
+#. • MSG_290
+msgid "File Indexing"
+msgstr "文件索引"
+
+#. • MSG_291
+msgid "Version selection"
+msgstr "版本选择"
+
+#. • MSG_292
+msgid "Please select the version of Windows you want to install:"
+msgstr "请选择你要安装的 Windows 版本:"
+
+#. • MSG_293
+msgid "Unsupported Windows version"
+msgstr "不支持的 Windows 版本"
+
+#. • MSG_294
+msgid "This version of Windows is no longer supported by Rufus."
+msgstr "Rufus 已不再支持此 Windows 版本。"
+
+#. • MSG_295
+msgid "Warning: Unofficial version"
+msgstr "警告：非官方版本"
+
+#. • MSG_296
+msgid ""
+"This version of Rufus was not produced by its official developer(s).\n"
+"\n"
+"Are you sure you want to run it?"
+msgstr ""
+"此版本的 Rufus 不是由官方开发者发布的。\n"
+"\n"
+"您确定要运行它吗？"
+
+#. • MSG_297
+msgid "Truncated ISO detected"
+msgstr "检测到不完整镜像"
+
+#. • MSG_298
+msgid ""
+"The ISO file you have selected does not match its declared size: %s of data is missing!\n"
+"\n"
+"If you obtained this file from the Internet, you should try to download a new copy and verify that the MD5 or SHA checksums match the official ones.\n"
+"\n"
+"Note that you can compute the MD5 or SHA in Rufus by clicking the (✓) button."
+msgstr ""
+"您选择的镜像文件大小与其期望大小不符： %s 数据缺失！\n"
+"\n"
+"如果此镜像文件下载自互联网，请重新下载并校验其 MD5 或 SHA 校验和。\n"
+"\n"
+"您可在 Rufus 中点击 (✓) 键来计算 MD5 或 SHA 校验和。"
+
+#. • MSG_299
+msgid "Timestamp validation error"
+msgstr "时间戳校验错误"
+
+#. • MSG_300
+msgid ""
+"Rufus could not validate that the timestamp of the downloaded update is more recent than the one for the current executable.\n"
+"\n"
+"In order to prevent potential attack scenarios, the update process has been aborted and the download will be deleted. Please check the log for more details."
+msgstr ""
+"Rufus 下载的更新比当前程序更旧。\n"
+"\n"
+"为避免可能的攻击，更新已被阻止，下载的更新文件已被删除。如需了解更多，请查看软件日志。"
+
+#. • MSG_301
+msgid "Show application settings"
+msgstr "设置"
+
+#. • MSG_302
+msgid "Show information about this application"
+msgstr "关于"
+
+#. • MSG_303
+msgid "Show the log"
+msgstr "日志"
+
+#. • MSG_304
+msgid "Create a disk image of the selected device"
+msgstr "创建所选设备的镜像"
+
+#. • MSG_305
+msgid "Use this option to indicate whether you want to use this device to install Windows on another disk, or if you want to run Windows directly from this drive (Windows To Go)."
+msgstr "请选择您希望将 Windows 安装至其他驱动器，还是直接从此驱动器运行(即 Windows To Go)。"
+
+#. • MSG_306
+#.
+#. You can see this status message by pressing <Ctrl>-<Alt>-<Z> and then selecting START.
+#. It's the same as MSG_286 but with a process that *may* be faster, hence the name.
+msgid "Fast-zeroing drive: %0.1f%% completed"
+msgstr "正在快速清空磁盘: %0.1f%% 已完成"
