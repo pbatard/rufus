@@ -669,48 +669,66 @@ void TogglePersistenceControls(BOOL display)
 	ShowWindow(hUnits, display ? SW_SHOW : SW_HIDE);
 }
 
-void SetPersistenceSize(uint64_t pos, uint64_t max)
+void SetPeristencePos(uint64_t pos)
 {
 	char tmp[64];
-	int i, proposed_unit_selection = 0;
-	LONGLONG base_unit = MB;
-	HWND hCtrl;
 
-	// Reset the the Persistence Units dropdown
-	hCtrl = GetDlgItem(hMainDialog, IDC_PERSISTENCE_UNITS);
-	IGNORE_RETVAL(ComboBox_ResetContent(hCtrl));
-	for (i = 0; i < 3; i++) {
-		IGNORE_RETVAL(ComboBox_SetItemData(hCtrl, ComboBox_AddStringU(hCtrl, lmprintf(MSG_022 + i)), i));
-		// If we have more than 7 discrete positions, set this unit as our base
-		if (SelectedDrive.DiskSize > 7 * base_unit)
-			proposed_unit_selection = i;
-		base_unit *= 1024;
-		// Don't allow a base unit unless the drive is at least twice the size of that unit
-		if (SelectedDrive.DiskSize < 2 * base_unit)
-			break;
-	}
-	if (persistence_unit_selection < 0)
-		persistence_unit_selection = proposed_unit_selection;
-
-	IGNORE_RETVAL(ComboBox_SetCurSel(hCtrl, persistence_unit_selection));
-	pos /= MB;
-	max /= MB;
-	for (i = 0; i < persistence_unit_selection; i++) {
-		pos /= 1024;
-		max /= 1024;
-	}
-
-	hCtrl = GetDlgItem(hMainDialog, IDC_PERSISTENCE_SLIDER);
-	SendMessage(hCtrl, TBM_SETRANGEMIN, (WPARAM)FALSE, (LPARAM)0);
-	SendMessage(hCtrl, TBM_SETRANGEMAX, (WPARAM)FALSE, (LPARAM)max);
-	SendMessage(hCtrl, TBM_SETPOS, (WPARAM)TRUE, (LPARAM)pos);
 	if (pos != 0) {
+		TogglePersistenceControls(TRUE);
 		static_sprintf(tmp, "%ld", (LONG)pos);
 	} else {
+		TogglePersistenceControls(FALSE);
 		static_sprintf(tmp, "0 (%s)", lmprintf(MSG_124));
 	}
 	app_changed_size = TRUE;
 	SetWindowTextU(GetDlgItem(hMainDialog, IDC_PERSISTENCE_SIZE), tmp);
+}
+
+void SetPersistenceSize(void)
+{
+	int i, proposed_unit_selection = 0;
+	LONGLONG base_unit = MB;
+	HWND hCtrl;
+	uint64_t max = 0, pos = 0;
+
+	if (ComboBox_GetCurSel(hDeviceList) >= 0) {
+		max = SelectedDrive.DiskSize - img_report.projected_size;
+		persistence_size = min(persistence_size, max);
+		pos = persistence_size;
+
+		// Reset the the Persistence Units dropdown
+		hCtrl = GetDlgItem(hMainDialog, IDC_PERSISTENCE_UNITS);
+		IGNORE_RETVAL(ComboBox_ResetContent(hCtrl));
+		for (i = 0; i < 3; i++) {
+			IGNORE_RETVAL(ComboBox_SetItemData(hCtrl, ComboBox_AddStringU(hCtrl, lmprintf(MSG_022 + i)), i));
+			// If we have more than 7 discrete positions, set this unit as our base
+			if (SelectedDrive.DiskSize > 7 * base_unit)
+				proposed_unit_selection = i;
+			base_unit *= 1024;
+			// Don't allow a base unit unless the drive is at least twice the size of that unit
+			if (SelectedDrive.DiskSize < 2 * base_unit)
+				break;
+		}
+		if (persistence_unit_selection < 0)
+			persistence_unit_selection = proposed_unit_selection;
+
+		IGNORE_RETVAL(ComboBox_SetCurSel(hCtrl, persistence_unit_selection));
+		pos /= MB;
+		max /= MB;
+		for (i = 0; i < persistence_unit_selection; i++) {
+			pos /= 1024;
+			max /= 1024;
+		}
+	}
+
+	hCtrl = GetDlgItem(hMainDialog, IDC_PERSISTENCE_SLIDER);
+	// Wow! Unless you set *all* these redraw WPARAMs to true, the one from
+	// TBM_SETPOS gets completely ignored if the value is zero!
+	SendMessage(hCtrl, TBM_SETRANGEMIN, (WPARAM)TRUE, (LPARAM)0);
+	SendMessage(hCtrl, TBM_SETRANGEMAX, (WPARAM)TRUE, (LPARAM)max);
+	SendMessage(hCtrl, TBM_SETPOS, (WPARAM)TRUE, (LPARAM)pos);
+
+	SetPeristencePos(pos);
 }
 
 // Toggle the Image Option dropdown (Windows To Go or persistence settings)
@@ -770,7 +788,7 @@ void ToggleImageOptions(void)
 	} else if (image_options & IMOP_PERSISTENCE) {
 		SetWindowTextU(GetDlgItem(hMainDialog, IDS_IMAGE_OPTION_TXT), lmprintf(MSG_123));
 		TogglePersistenceControls(persistence_size != 0);
-		SetPersistenceSize(persistence_size, SelectedDrive.DiskSize - img_report.projected_size);
+		SetPersistenceSize();
 	}
 	// If you don't force a redraw here, all kind of bad UI artifacts happen...
 	InvalidateRect(hMainDialog, NULL, TRUE);

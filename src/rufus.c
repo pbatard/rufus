@@ -714,6 +714,9 @@ static void EnableBootOptions(BOOL enable, BOOL remove_checkboxes)
 
 	EnableWindow(GetDlgItem(hMainDialog, IDC_IMAGE_OPTION), actual_enable);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_PERSISTENCE_SLIDER), actual_enable);
+	// Make sure we set the range if we have persistence
+	if ((image_path != NULL) && HAS_PERSISTENCE(img_report))
+		SetPersistenceSize();
 	EnableWindow(GetDlgItem(hMainDialog, IDC_PERSISTENCE_SIZE), (persistence_size != 0) && actual_enable);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_PERSISTENCE_UNITS), (persistence_size != 0) && actual_enable);
 	EnableMBRBootOptions(actual_enable, remove_checkboxes);
@@ -779,6 +782,7 @@ static BOOL PopulateProperties(void)
 	if (device_index < 0)
 		goto out;
 
+	persistence_unit_selection = -1;
 	// Get data from the currently selected drive
 	SelectedDrive.DeviceNumber = (DWORD)ComboBox_GetItemData(hDeviceList, device_index);
 	// This fills the SelectedDrive properties
@@ -2074,7 +2078,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			for (i = 0; i < persistence_unit_selection; i++)
 				persistence_size *= 1024;
 			persistence_unit_selection = ComboBox_GetCurSel(GetDlgItem(hDlg, IDC_PERSISTENCE_UNITS));
-			SetPersistenceSize(persistence_size, SelectedDrive.DiskSize - img_report.projected_size);
+			SetPersistenceSize();
 			break;
 		case IDC_NB_PASSES:
 			if (HIWORD(wParam) != CBN_SELCHANGE)
@@ -2291,6 +2295,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 						SetPartitionSchemeAndTargetSystem(FALSE);
 						SetFileSystemAndClusterSize(NULL);
 						ShowWindow(GetDlgItem(hDlg, IDS_CSM_HELP_TXT), SW_HIDE);
+						persistence_unit_selection = -1;
 					}
 				} else {
 					queued_hotplug_event = TRUE;
@@ -2418,19 +2423,10 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 
 	case WM_HSCROLL:
 		lPos = (LONG)SendMessage(GetDlgItem(hMainDialog, IDC_PERSISTENCE_SLIDER), TBM_GETPOS, 0, 0);
-		if (lPos != 0) {
-			if (persistence_size == 0)
-				TogglePersistenceControls(TRUE);
-			static_sprintf(tmp, "%ld", lPos);
-		} else {
-			TogglePersistenceControls(FALSE);
-			static_sprintf(tmp, "0 (%s)", lmprintf(MSG_124));
-		}
+		SetPeristencePos(lPos);
 		persistence_size = lPos * MB;
 		for (i = 0; i < persistence_unit_selection; i++)
 			persistence_size *= 1024;
-		app_changed_size = TRUE;
-		SetWindowTextU(GetDlgItem(hMainDialog, IDC_PERSISTENCE_SIZE), tmp);
 		break;
 
 	case WM_DROPFILES:
