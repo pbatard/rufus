@@ -1521,14 +1521,9 @@ static void InitDialog(HWND hDlg)
 	for (i=0; (i<3) && ((token = strtok(NULL, ".")) != NULL); i++)
 		rufus_version[i] = (uint16_t)atoi(token);
 
-	// Redefine the title to be able to add "Alpha" or "Beta" and get the version in the right order for RTL
-	if (!right_to_left_mode) {
-		static_sprintf(tmp, APPLICATION_NAME " %d.%d.%d%s%s", rufus_version[0], rufus_version[1], rufus_version[2],
-			IsAlphaOrBeta(), (ini_file != NULL)?"(Portable)":"");
-	} else {
-		static_sprintf(tmp, "%s%s%d.%d.%d " APPLICATION_NAME, (ini_file != NULL)?"(Portable)":"", IsAlphaOrBeta(),
-			rufus_version[0], rufus_version[1], rufus_version[2]);
-	}
+	// Redefine the title to be able to add "Alpha" or "Beta"
+	static_sprintf(tmp, APPLICATION_NAME " %d.%d.%d%s%s", rufus_version[0], rufus_version[1], rufus_version[2],
+		IsAlphaOrBeta(), (ini_file != NULL)?"(Portable)":"");
 	SetWindowTextU(hDlg, tmp);
 	// Now that we have a title, we can find the handle of our Dialog
 	dialog_handle = FindWindowA(NULL, tmp);
