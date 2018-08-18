@@ -1,0 +1,1626 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: 3.2\n"
+"Report-Msgid-Bugs-To: pete@akeo.ie\n"
+"POT-Creation-Date: 2018-08-17 11:46+0400\n"
+"PO-Revision-Date: 2018-08-17 13:11+0430\n"
+"Language: fa_IR\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Rufus-LanguageName: Persian (فارسی)\n"
+"X-Rufus-LCID: 0x0429\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"X-Generator: Poedit 2.1.1\n"
+
+#. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
+msgid "Drive Properties"
+msgstr "مشخصات درایو"
+
+#. • IDD_DIALOG → IDS_DEVICE_TXT
+msgid "Device"
+msgstr "درایو USB (حافظه فلش یا سایر ابزارهای ذخیره‌سازی قابل‌حمل)"
+
+#. • IDD_DIALOG → IDS_BOOT_SELECTION_TXT
+msgid "Boot selection"
+msgstr "نوع راه‌اندازی (Boot)"
+
+#. • IDD_DIALOG → IDC_SELECT
+msgid "Select"
+msgstr "انتخاب"
+
+#. • IDD_DIALOG → IDS_IMAGE_OPTION_TXT
+msgid "Image Option"
+msgstr "تنظیمات ایمیج"
+
+#. • IDD_DIALOG → IDS_PARTITION_TYPE_TXT
+msgid "Partition scheme"
+msgstr "نوع پارتیشن"
+
+#. • IDD_DIALOG → IDS_TARGET_SYSTEM_TXT
+msgid "Target system"
+msgstr "سیستم موردنظر"
+
+#. • IDD_DIALOG → IDC_LIST_USB_HDD
+msgid "List USB Hard Drives"
+msgstr "نمایش هارد دیسک‌های اکسترنال در فهرست درایوهای USB موجود"
+
+#. • IDD_DIALOG → IDC_OLD_BIOS_FIXES
+#.
+#. It is acceptable to drop the parenthesis () if you are running out of space
+#. as there is a tooltip (MSG_169) providing these details.
+msgid "Add fixes for old BIOSes (extra partition, align, etc.)"
+msgstr "بهسازی و اصلاح تنظیمات برای شناسایی بهتر درایو در BIOSهای قدیمی"
+
+#. • IDD_DIALOG → IDC_RUFUS_MBR
+#.
+#. 'MBR': See http://en.wikipedia.org/wiki/Master_boot_record
+#. Rufus can install it's own custom MBR (the Rufus MBR), which also allows users to
+#. specify a custom disk ID for the BIOS. The tooltip for this control is MSG_167.
+msgid "Use Rufus MBR with BIOS ID"
+msgstr "استفاده از Rufus MBR با BIOS ID برابر با"
+
+#. • IDD_DIALOG → IDS_FORMAT_OPTIONS_TXT
+msgid "Format Options"
+msgstr "گزینه‌ها و تنظیمات"
+
+#. • IDD_DIALOG → IDS_FILE_SYSTEM_TXT
+msgid "File system"
+msgstr "سیستم فایل"
+
+#. • IDD_DIALOG → IDS_CLUSTER_SIZE_TXT
+msgid "Cluster size"
+msgstr "اندازه کلاستر"
+
+#. • IDD_DIALOG → IDS_LABEL_TXT
+msgid "Volume label"
+msgstr "نام دلخواه برای درایو USB"
+
+#. • IDD_DIALOG → IDC_QUICK_FORMAT
+msgid "Quick format"
+msgstr "فرمت کردن سریع (Quick format)"
+
+#. • IDD_DIALOG → IDC_BAD_BLOCKS
+msgid "Check device for bad blocks"
+msgstr "بررسی وجود بدسکتور در درایو به روشِ"
+
+#. • IDD_DIALOG → IDC_EXTENDED_LABEL
+msgid "Create extended label and icon files"
+msgstr "ایجاد آیکون و نام‌گذاری درایو USB با استفاده از فایل autorun.inf"
+
+#. • IDD_DIALOG → IDS_STATUS_TXT
+msgid "Status"
+msgstr "وضعیت"
+
+#. • IDD_DIALOG → IDCANCEL
+#. • IDD_LICENSE → IDCANCEL
+#. • IDD_LOG → IDCANCEL
+#. • IDD_UPDATE_POLICY → IDCANCEL
+#. • IDD_NEW_VERSION → IDCANCEL
+#. • MSG_006
+msgid "Close"
+msgstr "خروج"
+
+#. • IDD_DIALOG → IDC_START
+msgid "Start"
+msgstr "شروع"
+
+# To make the output look correct, there are two invisible Unicode directional formatting characters in the line below.
+# • RLE (right-to-left embedding, UTF-8: 0xE2 0x80 0xAB) at the beginning of the string
+# • PDF (pop directional formatting, UTF-8: 0xE2 0x80 0xAC) at the end of the string
+#. • IDD_ABOUTBOX → IDD_ABOUTBOX
+msgid "About Rufus"
+msgstr "‫درباره Rufus‬"
+
+#. • IDD_ABOUTBOX → IDC_ABOUT_LICENSE
+msgid "License"
+msgstr "پروانه نرم‌افزار (License)"
+
+#. • IDD_ABOUTBOX → IDOK
+msgid "OK"
+msgstr "بستن"
+
+# To make the output look correct, there are two invisible Unicode directional formatting characters in the line below.
+# • RLE (right-to-left embedding, UTF-8: 0xE2 0x80 0xAB) at the beginning of the string
+# • PDF (pop directional formatting, UTF-8: 0xE2 0x80 0xAC) at the end of the string
+#. • IDD_LICENSE → IDD_LICENSE
+msgid "Rufus License"
+msgstr "‫پروانه نرم‌افزار Rufus‬"
+
+#. • IDD_NOTIFICATION → IDC_MORE_INFO
+msgid "More information"
+msgstr "اطلاعات بیشتر"
+
+#. • IDD_NOTIFICATION → IDYES
+#. • MSG_008
+msgid "Yes"
+msgstr "بله"
+
+#. • IDD_NOTIFICATION → IDNO
+#. • MSG_009
+msgid "No"
+msgstr "خیر"
+
+# 'RLE' & 'PDF' are used
+#. • IDD_LOG → IDD_LOG
+msgid "Log"
+msgstr "‫گزارش‌های ثبت‌شده (Log)‬"
+
+#. • IDD_LOG → IDC_LOG_CLEAR
+msgid "Clear"
+msgstr "پاک کردن"
+
+#. • IDD_LOG → IDC_LOG_SAVE
+msgid "Save"
+msgstr "ذخیره"
+
+#. • IDD_UPDATE_POLICY → IDD_UPDATE_POLICY
+msgid "Update policy and settings"
+msgstr "سیاست و تنظیمات به‌روزرسانی نرم‌افزار"
+
+#. • IDD_UPDATE_POLICY → IDS_UPDATE_SETTINGS_GRP
+msgid "Settings"
+msgstr "تنظیمات"
+
+#. • IDD_UPDATE_POLICY → IDS_UPDATE_FREQUENCY_TXT
+msgid "Check for updates"
+msgstr "بررسی آپدیت‌های جدید"
+
+#. • IDD_UPDATE_POLICY → IDS_INCLUDE_BETAS_TXT
+msgid "Include beta versions"
+msgstr "شامل نسخه‌های آزمایشی (Beta)"
+
+#. • IDD_UPDATE_POLICY → IDC_CHECK_NOW
+msgid "Check Now"
+msgstr "همین الآن بررسی کن!"
+
+#. • IDD_NEW_VERSION → IDD_NEW_VERSION
+msgid "Check For Updates - Rufus"
+msgstr "Rufus بررسی آپدیت‌های جدید و به‌روزرسانی نرم‌افزار"
+
+#. • IDD_NEW_VERSION → IDS_NEW_VERSION_AVAIL_TXT
+msgid "A newer version is available. Please download the latest version!"
+msgstr "نسخه جدیدی از نرم‌افزار موجود است. لطفاً آخرین نسخه نرم‌افزار را دانلود کنید!"
+
+#. • IDD_NEW_VERSION → IDC_WEBSITE
+msgid "Click here to go to the website"
+msgstr "برای رفتن به سایت نرم‌افزار، کلیک کنید."
+
+#. • IDD_NEW_VERSION → IDS_NEW_VERSION_NOTES_GRP
+msgid "Release Notes"
+msgstr "یادداشت‌های انتشار نسخه جدید (Release Notes)"
+
+#. • IDD_NEW_VERSION → IDS_NEW_VERSION_DOWNLOAD_GRP
+#. • IDD_NEW_VERSION → IDC_DOWNLOAD
+#. • MSG_040
+msgid "Download"
+msgstr "دانلود"
+
+#. • MSG_001
+msgid "Other instance detected"
+msgstr "شناسایی نمونه دیگری از نرم‌افزار"
+
+#. • MSG_002
+msgid ""
+"Another Rufus application is running.\n"
+"Please close the first application before running another one."
+msgstr ""
+"نمونه دیگری از نرم‌افزار Rufus در حال اجراست.\n"
+"امکان اجرای همزمان دو نمونه از نرم‌افزار وجود ندارد. لطفاً قبل از باز کردن نرم‌افزار جدید، نمونه قبلی در حال اجرا را ببندید."
+
+# To make the output look correct, in the line below there are LRE & PDF invisible Unicode directional formatting characters.
+# Position: (LRE) At the beginning and (PDF) at the end of %s.
+#. • MSG_003
+msgid ""
+"WARNING: ALL DATA ON DEVICE '%s' WILL BE DESTROYED.\n"
+"To continue with this operation, click OK. To quit click CANCEL."
+msgstr ""
+"هشدار!\n"
+"تمام داده‌ها و اطلاعات موجود در درایو '‪%s‬' پاک خواهد شد.\n"
+"آیا برای ادامه این عملیات مطمئن هستید؟"
+
+#. • MSG_004
+msgid "Rufus update policy"
+msgstr "سیاست به‌روزرسانی نرم‌افزار"
+
+#. • MSG_005
+msgid "Do you want to allow Rufus to check for application updates online?"
+msgstr "آیا برای بررسی آپدیت جدید و به‌روزرسانی نرم‌افزار، به Rufus اجازه اتصال به اینترنت را می‌دهید؟"
+
+#. • MSG_007
+msgid "Cancel"
+msgstr "لغو"
+
+#. • MSG_010
+msgid "Bad blocks found"
+msgstr "تعدادی بدسکتور پیدا شده است"
+
+#. • MSG_011
+msgid ""
+"Check completed: %d bad block(s) found\n"
+"  %d read error(s)\n"
+"  %d write error(s)\n"
+"  %d corruption error(s)"
+msgstr ""
+"بررسی انجام شد. تعداد بدسکتور(های) پیدا شده: %d\n"
+"  خطا(های) خواندن: %d\n"
+"  خطا(های) نوشتن: %d\n"
+"  خطا(های) خرابی (corruption) داده‌ها: %d"
+
+#. • MSG_012
+#.
+#. This contains the formatted message from MSG_001 as well as the name of the bad blocks logfile
+msgid ""
+"%s\n"
+"A more detailed report can be found in:\n"
+"%s"
+msgstr ""
+"%s\n"
+" گزارش با جزئیات بیشتر را می‌توانید در فایل زیر مشاهده کنید.\n"
+"%s"
+
+#. • MSG_013
+msgid "Disabled"
+msgstr "غیرفعال"
+
+#. • MSG_014
+msgid "Daily"
+msgstr "روزانه"
+
+#. • MSG_015
+msgid "Weekly"
+msgstr "هفتگی"
+
+#. • MSG_016
+msgid "Monthly"
+msgstr "ماهانه"
+
+#. • MSG_017
+msgid "Custom"
+msgstr "سفارشی"
+
+# 'LRE' & 'PDF' are used
+#. • MSG_018
+msgid "Your version: %d.%d (Build %d)"
+msgstr "نسخه کنونی نرم‌افزار شما: ‪%d.%d (Build %d)‬"
+
+# 'LRE' & 'PDF' are used
+#. • MSG_019
+msgid "Latest version: %d.%d (Build %d)"
+msgstr "آخرین نسخه موجود: ‪%d.%d (Build %d)‬"
+
+#. • MSG_020
+#. • MSG_026
+msgid "bytes"
+msgstr ""
+
+#. • MSG_021
+#.
+#. *Short* version of the kilobyte size suffix
+msgid "KB"
+msgstr ""
+
+#. • MSG_022
+#.
+#. *Short* version of the megabyte size suffix
+msgid "MB"
+msgstr ""
+
+#. • MSG_023
+#.
+#. *Short* version of the gigabyte size suffix
+msgid "GB"
+msgstr ""
+
+#. • MSG_024
+#.
+#. *Short* version of the terabyte size suffix
+msgid "TB"
+msgstr ""
+
+#. • MSG_025
+#.
+#. *Short* version of the pentabyte size suffix
+msgid "PB"
+msgstr ""
+
+#. • MSG_027
+msgid "kilobytes"
+msgstr "کیلوبایت"
+
+#. • MSG_028
+msgid "megabytes"
+msgstr "مگابایت"
+
+#. • MSG_029
+msgid "Default"
+msgstr "پیش‌فرض"
+
+#. • MSG_030
+#.
+#. This gets appended to the file system, cluster size, etc.
+msgid "%s (Default)"
+msgstr "%s (پیش‌فرض)"
+
+#. • MSG_031
+msgid "BIOS (or UEFI-CSM)"
+msgstr "BIOS (یا UEFI-CSM)"
+
+#. • MSG_032
+msgid "UEFI (non CSM)"
+msgstr ""
+
+#. • MSG_033
+msgid "BIOS or UEFI"
+msgstr "BIOS یا UEFI"
+
+#. • MSG_034
+#.
+#. Number of bad block check passes (singular for 1 pass)
+msgid "%d pass"
+msgstr "%d گذره"
+
+#. • MSG_035
+#.
+#. Number of bad block check passes (plural for 2 or more passes).
+#. See MSG_087 for the message that %s gets replaced with.
+msgid "%d passes %s"
+msgstr "%d گذره %s"
+
+#. • MSG_036
+msgid "ISO Image"
+msgstr "ایمیج ISO"
+
+#. • MSG_037
+msgid "Application"
+msgstr "برنامه"
+
+#. • MSG_038
+msgid "Abort"
+msgstr "لغو"
+
+#. • MSG_039
+msgid "Launch"
+msgstr "اجرا"
+
+#. • MSG_041
+msgid "Operation cancelled by the user"
+msgstr "کاربر ادامه فرآیند را لغو کرد."
+
+#. • MSG_042
+msgid "Error"
+msgstr "خطا"
+
+#. • MSG_043
+msgid "Error: %s"
+msgstr "خطا: %s"
+
+#. • MSG_044
+msgid "File download"
+msgstr "دانلود فایل"
+
+#. • MSG_045
+msgid "USB Storage Device (Generic)"
+msgstr ""
+
+#. • MSG_046
+msgid "%s (Disk %d) [%s]"
+msgstr ""
+
+#. • MSG_047
+#.
+#. Used when a drive is detected that contains more than one partition
+msgid "Multiple Partitions"
+msgstr "درایو بیش از یک پارتیشن دارد."
+
+#. • MSG_048
+msgid "Rufus - Flushing buffers"
+msgstr "Rufus - در حال تخلیه میان‌گیر (بافر)"
+
+#. • MSG_049
+msgid "Rufus - Cancellation"
+msgstr "Rufus - در حال لغو کردن"
+
+#. • MSG_050
+msgid "Success."
+msgstr "موفق بود."
+
+#. • MSG_051
+msgid "Undetermined error while formatting."
+msgstr "برخورد با خطای نامشخص، هنگام فرمت کردن"
+
+#. • MSG_052
+msgid "Cannot use the selected file system for this media."
+msgstr "برای این ابزار ذخیره‌سازی نمی‌توان از سیستم فایل انتخاب‌شده استفاده کرد."
+
+#. • MSG_053
+msgid "Access to the device is denied."
+msgstr "اجازه دسترسی به درایو انتخاب‌شده وجود ندارد."
+
+#. • MSG_054
+msgid "Media is write protected."
+msgstr "درایو انتخاب‌شده نسبت به «نوشتن» محافظت شده است (Write Protected)."
+
+#. • MSG_055
+msgid "The device is in use by another process. Please close any other process that may be accessing the device."
+msgstr "برنامه یا فرآیند (Process) دیگری در حال استفاده از درایو انتخاب‌شده است.لطفاً سایر برنامه‌هایی را که در حال استفاده کردن از درایو موردنظر هستند؛ ببندید."
+
+#. • MSG_056
+msgid "Quick format is not available for this device."
+msgstr "برای درایو انتخاب‌شده، امکان «فرمت کردن سریع» وجود ندارد."
+
+#. • MSG_057
+msgid "The volume label is invalid."
+msgstr "نام انتخاب‌شده برای درایو، نامعتبر است. لطفاً نام دیگری را انتخاب کنید."
+
+#. • MSG_058
+msgid "The device handle is invalid."
+msgstr "دستگیره (handle) نرم‌افزاری درایو موردنظر نامعتبر است."
+
+#. • MSG_059
+msgid "The selected cluster size is not valid for this device."
+msgstr "برای درایو موردنظر اندازه کلاستری که انتخاب کرده‌اید نامعتبر است. لطفاً اندازه دیگری را انتخاب کنید."
+
+#. • MSG_060
+msgid "The volume size is invalid."
+msgstr "اندازه فضای ذخیره‌سازی درایو موردنظر نامعتبر است."
+
+#. • MSG_061
+msgid "Please insert a removable media in drive."
+msgstr "لطفاً در درایو USB، یک ابزار ذخیره‌سازی قابل‌حمل وارد کنید."
+
+#. • MSG_062
+msgid "An unsupported command was received."
+msgstr "فرمان غیرقابل پشتیبانی و نامشخصی دریافت شد."
+
+#. • MSG_063
+msgid "Memory allocation error."
+msgstr "خطا در تخصیص حافظه (Memory Allocation)"
+
+#. • MSG_064
+msgid "Read error."
+msgstr "خطا در خواندن"
+
+#. • MSG_065
+msgid "Write error."
+msgstr "خطا در نوشتن"
+
+#. • MSG_066
+msgid "Installation failure"
+msgstr "فرآیند نصب ناموفق بود."
+
+#. • MSG_067
+msgid "Could not open media. It may be in use by another process. Please re-plug the media and try again."
+msgstr ""
+"نرم‌افزار نتوانست درایو موردنظر را باز کند. ممکن است برنامه یا فرآیند دیگری در حال استفاده از این درایو باشد.\n"
+"لطفاً وسیله موردنظر را از درگاه USB بیرون بیاورید و سپس دوباره آن را متصل و امتحان کنید."
+
+#. • MSG_068
+msgid "Error while partitioning drive."
+msgstr "خطا در هنگام پارتیشن‌بندی درایو"
+
+#. • MSG_069
+msgid "Could not copy files to target drive."
+msgstr "نمی‌توان فایل‌ها را در درایو موردنظر کپی کرد."
+
+#. • MSG_070
+msgid "Cancelled by user."
+msgstr "کاربر ادامه فرآیند را لغو کرد."
+
+#. • MSG_071
+#.
+#. See http://en.wikipedia.org/wiki/Thread_%28computing%29
+msgid "Unable to start thread."
+msgstr "نرم‌افزار نتوانست ریسه (Thread) را اجرا کند."
+
+#. • MSG_072
+msgid "Bad blocks check didn't complete."
+msgstr "بررسی بدسکتورها کامل انجام نشد."
+
+#. • MSG_073
+msgid "ISO image scan failure."
+msgstr "بررسی اطلاعات موجود در فایل ISO ناموفق بود."
+
+#. • MSG_074
+msgid "ISO image extraction failure."
+msgstr "استخراج (Extraction) اطلاعات موجود در فایل ISO ناموفق بود."
+
+#. • MSG_075
+msgid "Unable to remount volume."
+msgstr "اتصال دوباره و سوار کردن (Mount) درایو ناموفق بود."
+
+#. • MSG_076
+msgid "Unable to patch/setup files for boot."
+msgstr "نصب فایل‌های موردنیاز برای راه‌اندازی (Boot) سیستم‌عامل ناموفق بود."
+
+#. • MSG_077
+msgid "Unable to assign a drive letter."
+msgstr "اختصاص حروف الفبا به درایو موردنظر ناموفق بود."
+
+#. • MSG_078
+msgid "Can't mount GUID volume."
+msgstr "امکان وصل و سوار کردن (Mount) فضای ذخیره‌سازی GUID وجود ندارد."
+
+#. • MSG_079
+msgid "The device is not ready."
+msgstr "درایو موردنظر هنوز آماده استفاده کردن نیست."
+
+#. • MSG_080
+msgid ""
+"Rufus detected that Windows is still flushing its internal buffers onto the USB device.\n"
+"\n"
+"Depending on the speed of your USB device, this operation may take a long time to complete, especially for large files.\n"
+"\n"
+"We recommend that you let Windows finish, to avoid corruption. But if you grow tired of waiting, you can just unplug the device..."
+msgstr ""
+"ویندوز در حال تخلیه اطلاعات و میان‌گیر (بافر) خود در درایو USB موردنظر است.\n"
+"\n"
+"با توجه به سرعت درایو USB، این فرآیند ممکن است کمی زمان‌بر باشد (به‌ویژه برای فایل‌های بزرگ).\n"
+"\n"
+"برای جلوگیری از خرابی فایل‌ها، بهتر است اجازه دهید ویندوز کار خود را کامل کند.اما اگر از صبر کردن خسته شده‌اید؛ می‌توانید وسیله موردنظر را از درگاه USB بیرون بیاورید."
+
+#. • MSG_081
+msgid "Unsupported image"
+msgstr "فایل ایمیج انتخاب‌شده پشتیبانی نمی‌شود"
+
+#. • MSG_082
+msgid "This image is either non-bootable, or it uses a boot or compression method that is not supported by Rufus..."
+msgstr "فایل ایمیج (Image) انتخاب‌شده، قابلیت راه‌اندازی سیستم‌عامل را ندارد (none-bootable) یا ساختاری دارد که Rufus آن را پشتیبانی نمی‌کند."
+
+#. • MSG_083
+msgid "Replace %s?"
+msgstr "%s جایگزین شود؟"
+
+#. • MSG_084
+msgid ""
+"This ISO image seems to use an obsolete version of '%s'.\n"
+"Boot menus may not display properly because of this.\n"
+"\n"
+"A newer version can be downloaded by Rufus to fix this issue:\n"
+"- Choose 'Yes' to connect to the internet and download the file\n"
+"- Choose 'No' to leave the existing ISO file unmodified\n"
+"If you don't know what to do, you should select 'Yes'.\n"
+"\n"
+"Note: The new file will be downloaded in the current directory and once a '%s' exists there, it will be reused automatically."
+msgstr ""
+"انگار این فایل ISO از نسخه قدیمی «%s» استفاده می‌کند.\n"
+"به همین دلیل، ممکن است منوی راه‌اندازی (Boot Menu) به‌درستی نمایش داده نشود.\n"
+"\n"
+"برای از بین بردن این مشکل، Rufus می‌تواند نسخه جدید آن را دانلود کند.\n"
+"-برای اتصال به اینترنت و دانلود این فایل «بله» را انتخاب کنید\n"
+"-اگر نمی‌خواهید این فایل را دانلود کنید، «خیر» را انتخاب کنید.\n"
+"\n"
+"نکته: این فایل در پوشه نرم‌افزار دانلود می‌شود و در دفعات بعد به‌صورت خودکار از آن استفاده خواهد شد."
+
+#. • MSG_085
+msgid "Downloading '%s'"
+msgstr "در حال دانلود کردن '%s'"
+
+#. • MSG_086
+msgid "No image selected"
+msgstr "فایل ایمیج انتخاب نشده است"
+
+#. • MSG_087
+#.
+#. This message appears in Advanced format options → Check device for bad blocks → dropdown menu
+#. %s will be replaced with SLC, MLC or TLC, which is a type of NAND (or flash memory). In other
+#. words, this message should mean "for a flash memory device of type %s". *Please* try to keep
+#. the translation as short as possible so that it won't result in an overly large dropdown...
+#. If you prefer, it's okay to use "type" or "device" instead of "NAND" (e.g. "for TLC type").
+#. See also MSG_035.
+msgid "for %s NAND"
+msgstr "برای نوع %s"
+
+#. • MSG_088
+msgid "Image is too big"
+msgstr "فایل ایمیج بیش از اندازه بزرگ است"
+
+#. • MSG_089
+msgid "The image is too big for the selected target."
+msgstr "اندازه فایل ایمیج (Image) از ظرفیت درایو انتخاب‌شده بیشتر است."
+
+#. • MSG_090
+msgid "Unsupported ISO"
+msgstr "خطا در انتخاب فایل ISO"
+
+#. • MSG_091
+msgid "When using UEFI Target Type, only EFI bootable ISO images are supported. Please select an EFI bootable ISO or set the Target Type to BIOS."
+msgstr "هنگامی‌که نوع UEFI را انتخاب می‌کنید؛ فقط می‌توانید از فایل‌های ISO با قابلیت راه‌اندازی EFI (EFI Bootable) استفاده کنید. لطفاً از یک فایل ISO با قابلیت راه‌اندازی EFI استفاده کنید یا در گزینه‌ها نوع BIOS را انتخاب کنید."
+
+#. • MSG_092
+msgid "Unsupported filesystem"
+msgstr "سیستم فایل پشتیبانی نمی‌شود"
+
+#. • MSG_093
+msgid ""
+"IMPORTANT: THIS DRIVE CONTAINS MULTIPLE PARTITIONS!!\n"
+"\n"
+"This may include partitions/volumes that aren't listed or even visible from Windows. Should you wish to proceed, you are responsible for any data loss on these partitions."
+msgstr ""
+"هشدار مهم! درایو انتخاب‌شده چندین پارتیشن دارد.\n"
+"\n"
+"ممکن است این پارتیشن‌ها پنهان باشند و شما آن‌ها را در فهرست ویندوز نبینید. اگر می‌خواهید ادامه دهید، مسئولیت هرگونه پاک شدن اطلاعات در این پارتیشن‌ها به عهده خود شما است!"
+
+#. • MSG_094
+msgid "Multiple partitions detected"
+msgstr "چندین پارتیشن شناسایی شده است"
+
+#. • MSG_095
+msgid "DD Image"
+msgstr "ایمیج DD"
+
+#. • MSG_096
+msgid "The file system currently selected can not be used with this type of ISO. Please select a different file system or use a different ISO."
+msgstr "سیستم فایلی را که انتخاب کرده‌اید  با این نوع از فایل ISO نمی‌توان استفاده کرد. لطفاً سیستم فایل یا فایل ISO دیگری را انتخاب کنید."
+
+#. • MSG_097
+msgid "'%s' can only be applied if the file system is NTFS."
+msgstr "«%s» فقط زمانی قابل استفاده است که سیستم فایل انتخاب‌شده NTFS باشد."
+
+#. • MSG_098
+msgid ""
+"IMPORTANT: You are trying to install 'Windows To Go', but your target drive doesn't have the 'FIXED' attribute. Because of this Windows will most likely freeze during boot, as Microsoft hasn't designed it to work with drives that instead have the 'REMOVABLE' attribute.\n"
+"\n"
+"Do you still want to proceed?\n"
+"\n"
+"Note: The 'FIXED/REMOVABLE' attribute is a hardware property that can only be changed using custom tools from the drive manufacturer. However those tools are ALMOST NEVER provided to the public..."
+msgstr ""
+"هشدار مهم! شما گزینه «Windows To Go» را انتخاب کرده‌اید اما درایو موردنظر شما فاقد ویژگی «FIXED» است. به همین دلیل هنگام راه‌اندازی سیستم‌عامل (Boot) با استفاده از این درایو به احتمال زیاد اجرای ویندوز متوقف می‌شود. چون‌که مایکروسافت این امکان را برای درایوهایی که ویژگی «REMOVABLE» دارند، طراحی نکرده است.\n"
+"\n"
+"آیا می‌خواهید این کار را ادامه دهید؟\n"
+"\n"
+"نکته: ویژگی‌های «FIXED» و «REMOVABLE» خاصیت سخت‌افزاری هستند و فقط شرکت‌های سازنده درایو با ابزارهای مخصوصی می‌توانند آن‌ها را تغییر دهند. این ابزارها تقریباً هیچ‌وقت در اختیار عموم مردم قرار نمی‌گیرد."
+
+#. • MSG_099
+msgid "Filesystem limitation"
+msgstr "محدودیت در سیستم فایل"
+
+#. • MSG_100
+msgid "This ISO image contains a file larger than 4GB, which is more than the maximum size allowed for a FAT or FAT32 file system."
+msgstr "ایمیج (Image) انتخاب‌شده فایلی بزرگ‌تر از ۴ گیگابایت دارد. این مقدار از حداکثر اندازه مجاز برای سیستم فایل FAT و FAT32 بیشتر است."
+
+#. • MSG_101
+msgid "Missing WIM support"
+msgstr "استخراج اطلاعات فایل WIM پشتیبانی نمی‌شود"
+
+#. • MSG_102
+msgid ""
+"Your platform cannot extract files from WIM archives. WIM extraction is required to create EFI bootable Windows 7 and Windows Vista USB drives. You can fix that by installing a recent version of 7-Zip.\n"
+"Do you want to visit the 7-zip download page?"
+msgstr ""
+"سیستم‌عامل شما نمی‌تواند اطلاعات فایل‌های WIM را از حالت فشرده خارج کند. استخراج اطلاعات موجود در این نوع از فایل‌ها، برای ساختن درایو USB «ویندوز ویستا» و «ویندوز ۷» با قابلیت راه‌اندازی EFI لازم است. شما می‌توانید با نصب کردن نرم‌افزار 7-Zip این مشکل را حل کنید.\n"
+"آیا می‌خواهید وارد سایت دانلود نرم‌افزار 7-Zip شوید؟"
+
+#. • MSG_103
+msgid "Download %s?"
+msgstr "%s دانلود شود؟"
+
+#. • MSG_104
+#.
+#. Example: "Grub4DOS v0.4 or later requires a 'grldr' file to be installed. Because this
+#. file is more than 100 KB in size, and always present on Grub4DOS ISO images (...)"
+msgid ""
+"%s or later requires a '%s' file to be installed.\n"
+"Because this file is more than 100 KB in size, and always present on %s ISO images, it is not embedded in Rufus.\n"
+"\n"
+"Rufus can download the missing file for you:\n"
+"- Select 'Yes' to connect to the internet and download the file\n"
+"- Select 'No' if you want to manually copy this file on the drive later\n"
+"\n"
+"Note: The file will be downloaded in the current directory and once a '%s' exists there, it will be reused automatically."
+msgstr ""
+"%s یا نسخه‌های بعدی آن، نیازمند فایل %s است.\n"
+"چون اندازه این فایل از ۱۰۰ کیلوبایت بیشتر است و معمولاً در ایمیج‌های %s موجود است؛ این فایل به همراه نرم‌افزار Rufus عرضه نشده است.\n"
+"\n"
+"Rufus می‌تواند این فایل را از اینترنت دانلود کند.\n"
+"-برای اتصال به اینترنت و دانلود این فایل «بله» را انتخاب کنید\n"
+"-اگر می‌خواهید بعداً خودتان این فایل را در درایو موردنظر کپی کنید؛ «خیر» را انتخاب کنید\n"
+"\n"
+"نکته: این فایل در پوشه نرم‌افزار دانلود می‌شود و در دفعات بعد به‌صورت خودکار از آن استفاده خواهد شد."
+
+#. • MSG_105
+msgid ""
+"Cancelling may leave the device in an UNUSABLE state.\n"
+"If you are sure you want to cancel, click YES. Otherwise, click NO."
+msgstr ""
+"لغو این فرآیند ممکن است درایو موردنظر را در وضعیت غیرقابل استفاده (UNUSABLE) قرار دهد.\n"
+"آیا مطمئن هستید که می‌خواهید این فرآیند را لغو کنید؟"
+
+#. • MSG_106
+msgid "Please select folder"
+msgstr "لطفاً یک پوشه انتخاب کنید"
+
+#. • MSG_107
+msgid "All files"
+msgstr "همه فایل‌ها"
+
+#. • MSG_108
+msgid "Rufus log"
+msgstr "گزارش Rufus"
+
+#. • MSG_109
+msgid "0x%02X (Disk %d)"
+msgstr "0x%02X (دیسک %d)"
+
+#. • MSG_110
+#.
+#. "Cluster size" should be the same as the label for IDS_CLUSTER_SIZE_TXT
+#. "kilobytes" should be the same as in MSG_027
+msgid ""
+"MS-DOS cannot boot from a drive using a 64 kilobytes Cluster size.\n"
+"Please change the Cluster size or use FreeDOS."
+msgstr ""
+"MS-DOS با استفاده از درایوی که اندازه کلاستر آن ۶۴ کیلوبایت است؛ راه‌اندازی (Boot) نمی‌شود.\n"
+"لطفاً اندازه کلاستر را تغییر دهید یا از FreeDOS استفاده کنید."
+
+#. • MSG_111
+msgid "Incompatible Cluster size"
+msgstr "اندازه کلاستر ناسازگار و نامناسب است"
+
+#. • MSG_112
+#.
+#. "%d:%02d" is a duration (mins:secs)
+msgid "Formatting a large UDF volumes can take a lot of time. At USB 2.0 speeds, the estimated formatting duration is %d:%02d, during which the progress bar will appear frozen. Please be patient!"
+msgstr ""
+"معمولاً فرمت کردن درایو UDF حجیم و بزرگ زمان‌بر است. زمان تخمینی با استفاده از درگاه USB 2.0 «%d:%02d» است. ممکن است هنگام فرمت کردن، نوار لغزنده‌ای که پیشرفت فرآیند را نشان می‌دهد بی‌حرکت و ثابت شود.\n"
+"پس لطفاً صبور باشید!"
+
+#. • MSG_113
+msgid "Large UDF volume"
+msgstr "درایو UDF حجیم"
+
+#. • MSG_114
+msgid ""
+"This image uses Syslinux %s%s but this application only includes the installation files for Syslinux %s%s.\n"
+"\n"
+"As new versions of Syslinux are not compatible with one another, and it wouldn't be possible for Rufus to include them all, two additional files must be downloaded from the Internet ('ldlinux.sys' and 'ldlinux.bss'):\n"
+"- Select 'Yes' to connect to the Internet and download these files\n"
+"- Select 'No' to cancel the operation\n"
+"\n"
+"Note: The files will be downloaded in the current application directory and will be reused automatically if present."
+msgstr ""
+"این ایمیج (Image) از «Syslinux %s%s» استفاده می‌کند؛ اما نرم‌افزار Rufus فقط تنظیمات و فایل‌های نصب «Syslinux %s%s» را به همراه دارد. از آنجا که نسخه‌های مختلف Syslinux با یکدیگر سازگار نیستند و امکان قرار دادن همه آن‌ها در نرم‌افزار Rufus وجود ندارد؛ Rufus باید دو فایل «ldlinux.sys» و «ldlinux.bss» را از اینترنت دانلود کند.\n"
+"-برای اتصال به اینترنت و دانلود این فایل‌ها «بله» را انتخاب کنید\n"
+"-اگر از ادامه این فرآیند منصرف شده‌اید، «خیر» را انتخاب کنید.\n"
+"\n"
+"نکته: این فایل‌ها در پوشه نرم‌افزار دانلود می‌شود و در دفعات بعد به‌صورت خودکار از آن‌ها استفاده خواهد شد."
+
+#. • MSG_115
+msgid "Download required"
+msgstr "دانلود چند فایل لازم است"
+
+#. • MSG_116
+#.
+#. You should be able to test this message with Super Grub2 Disk ISO:
+#. https://sourceforge.net/projects/supergrub2/files/2.00s2/super_grub2_disk_hybrid_2.00s2.iso/download (11.9 MB)
+msgid ""
+"This image uses Grub %s but the application only includes the installation files for Grub %s.\n"
+"\n"
+"As different versions of Grub may not be compatible with one another, and it is not possible to include them all, Rufus will attempt to locate a version of the Grub installation file ('core.img') that matches the one from your image:\n"
+"- Select 'Yes' to connect to the Internet and attempt to download it\n"
+"- Select 'No' to use the default version from Rufus\n"
+"- Select 'Cancel' to abort the operation\n"
+"\n"
+"Note: The file will be downloaded in the current application directory and will be reused automatically if present. If no match can be found online, then the default version will be used."
+msgstr ""
+"این ایمیج (Image) از «Grub %s» استفاده می‌کند؛ اما نرم‌افزار Rufus فقط تنظیمات و فایل‌های نصب «Grub %s» را به همراه دارد. از آنجا که نسخه‌های مختلف Grub ممکن است با یکدیگر سازگار نباشند و امکان قرار دادن همه آن‌ها در نرم‌افزار Rufus وجود ندارد؛ Rufus تلاش می‌کند فایل نصب «core.img» مناسب ایمیج شما را در اینترنت پیدا کند.\n"
+"\n"
+"installation file ('core.img') that matches the one from your image:\n"
+"-برای اتصال به اینترنت و تلاش برای دانلود این فایل «بله» را انتخاب کنید\n"
+"-اگر می‌خواهید از فایل کنونی و پیش‌فرض Rufus استفاده کنید «خیر» را انتخاب کنید\n"
+"-اگر از ادامه این فرآیند منصرف شده‌اید، «لغو» را انتخاب کنید.\n"
+"\n"
+"نکته: این فایل در پوشه نرم‌افزار دانلود می‌شود و در دفعات بعد به‌صورت خودکار از آن استفاده خواهد شد. اگر فایل مناسبی در اینترنت پیدا نشود، نرم‌افزار از نسخه پیش‌فرض استفاده خواهد کرد."
+
+#. • MSG_117
+msgid "Standard Windows installation"
+msgstr "نصب ویندوز به روش استاندارد و رایج"
+
+#. • MSG_118
+#.
+#. Only translate this message *if* Microsoft has a specific name for
+#. http://en.wikipedia.org/wiki/Windows_To_Go in your language.
+#. Otherwise, you may add a parenthesis eg. "Windows To Go (<hint at what it does>)"
+msgid "Windows To Go"
+msgstr ""
+
+#. • MSG_119
+msgid "advanced drive properties"
+msgstr "تنظیمات پیشرفته درایو"
+
+#. • MSG_120
+msgid "advanced format options"
+msgstr "تنظیمات پیشرفته فرمت"
+
+#. • MSG_121
+msgid "Show %s"
+msgstr "نمایش دادن %s"
+
+#. • MSG_122
+msgid "Hide %s"
+msgstr "پنهان کردن %s"
+
+#. • MSG_123
+#.
+#. A persistent partitions can be used with "Live" USB media to store data.
+#. It means that data can be preserved across reboots on "Live" USB drives.
+#. To test this feature, please download and select 'casper_test.iso' from:
+#. https://github.com/pbatard/rufus/raw/master/res/loc/test/casper_test.iso
+msgid "Persistent partition size"
+msgstr "اندازه پارتیشن پایدار ذخیره‌سازی اطلاعات"
+
+#. • MSG_124
+#.
+#. This message appears in the persistence 'Size' control when the slider is set to 0.
+#. It is okay to use "No partition" or "None" or "Deactivated" to indicate that a persistent partition will not be
+#. created if the width of the control is too small (since the 'Size' edit control is *not* adjusted for width).
+msgid "No persistence"
+msgstr "غیرفعال"
+
+#. • MSG_125
+#.
+#. Tooltips used for the peristence size slider and edit control
+msgid "Set the size of the persistent partition for live USB media. Setting the size to 0 disables the persistent partition."
+msgstr "برای ایجاد live USB با قابلیت ذخیره‌سازی اطلاعات، اندازه پارتیشن پایدار را تعیین کنید. در این حالت، اطلاعات با راه‌اندازی مجدد (ریست) از بین نخواهد رفت. برای غیرفعال کردن عدد صفر (۰) را وارد کنید."
+
+#. • MSG_126
+msgid "Set the partition size units."
+msgstr "واحد اندازه‌گیری پارتیشن را تعیین کنید"
+
+#. • MSG_150
+msgid "Type of computer you plan to use this bootable drive with. It is your responsibility to determine whether your target is of BIOS or UEFI type before you start creating the drive, as it may fail to boot otherwise."
+msgstr "نوع کامپیوتری که می‌خواهید درایو USB ساخته‌شده را در آن استفاده کنید. شما می‌بایست قبل از ساختن درایو نوع راه‌اندازی کامپیوتر مقصد را شناسایی و مشخص کنید که از نوع BIOS است یا UEFI. اگرنه ممکن است با استفاده از این درایو نتوانید سیستم مورد نظر را راه‌اندازی کنید"
+
+#. • MSG_151
+#.
+#. You shouldn't translate 'Legacy Mode' as this is an option that usually appears in English in the UEFI settings.
+msgid "'UEFI-CSM' means that the device will only boot in BIOS emulation mode (also known as 'Legacy Mode') under UEFI, and not in native UEFI mode."
+msgstr "'UEFI-CSM' به این معنی است که این دستگاه بجای راه‌اندازی به روش اصلی UEFI، در حالت شبیه‌سازی BIOS بالا می‌آید که به 'Legacy Mode' مشهور است. "
+
+#. • MSG_152
+msgid "'non CSM' means that the device will only boot in native UEFI mode, and not in BIOS emulation mode (also known as 'Legacy Mode')."
+msgstr "'non CSM' به این معنی است که این دستگاه برخلاف روش شبیه‌سازی BIOS ('Legacy Mode') به روش اصلی UEFI راه‌اندازی می‌شود"
+
+#. • MSG_153
+msgid "Test pattern: 0x%02X"
+msgstr "الگوی آزمایش: 0x%02X"
+
+#. • MSG_154
+msgid "Test pattern: 0x%02X, 0x%02X"
+msgstr "الگوی آزمایش: 0x%02X, 0x%02X"
+
+#. • MSG_155
+msgid "Test pattern: 0x%02X, 0x%02X, 0x%02X"
+msgstr "الگوی آزمایش: 0x%02X, 0x%02X, 0x%02X"
+
+#. • MSG_156
+msgid "Test pattern: 0x%02X, 0x%02X, 0x%02X, 0x%02X"
+msgstr "الگوی آزمایش: 0x%02X, 0x%02X, 0x%02X, 0x%02X"
+
+#. • MSG_157
+msgid "Sets the target filesystem"
+msgstr ""
+"سیستم فایل موردنظر را انتخاب کنید.\n"
+"اگر نمی‌دانید کدام گزینه مناسب است؛ مقدار پیش‌فرض را انتخاب کنید."
+
+#. • MSG_158
+msgid "Minimum size that a block of data will occupy in the filesystem"
+msgstr ""
+"کمترین مقداری که یک بلاک داده (Data block) در سیستم فایل اشغال می‌کند.\n"
+"اگر نمی‌دانید کدام گزینه مناسب است؛ مقدار پیش‌فرض را انتخاب کنید."
+
+#. • MSG_159
+msgid ""
+"Use this field to set the drive label.\n"
+"International characters are accepted."
+msgstr "شما می‌توانید برای درایو USB موردنظر؛ نام دلخواهی را انتخاب کنید."
+
+#. • MSG_160
+msgid "Toggle advanced options"
+msgstr "نمایش دادن/پنهان کردن تنظیمات پیشرفته"
+
+#. • MSG_161
+msgid "Check the device for bad blocks using a test pattern"
+msgstr "بررسی وجود بدسکتور (Bad sector) در حافظه و درایو موردنظر با استفاده از یک الگوی آزمایش (Test pattern)"
+
+#. • MSG_162
+msgid "Uncheck this box to use the \"slow\" format method"
+msgstr "برای فرمت کردن به روش آهسته یا کامل (Full format) این گزینه را غیرفعال کنید."
+
+#. • MSG_163
+msgid "Method that will be used to create partitions"
+msgstr "روشی که برای ساخت پارتیشن‌ها استفاده می‌شود"
+
+#. • MSG_164
+msgid "Method that will be used to make the drive bootable"
+msgstr "انتخاب روش و نوع فایلی که می‌خواهید با استفاده از آن یک درایو USB با قابلیت راه‌اندازی بسازید"
+
+#. • MSG_165
+msgid "Click to select an image..."
+msgstr "برای انتخاب فایل ایمیج (Image) کلیک کنید."
+
+#. • MSG_166
+msgid "Check this box to allow the display of international labels and set a device icon (creates an autorun.inf)"
+msgstr "اگر نامی که برای درایو موردنظر انتخاب کرده‌اید طولانی و یا دارای حروف غیر انگلیسی است و یا اگر می‌خواهید درایو موردنظر آیکون داشته باشد؛ این گزینه را انتخاب کنید."
+
+#. • MSG_167
+msgid "Install an MBR that allows boot selection and can masquerade the BIOS USB drive ID"
+msgstr "نصبِ MBR سفارشیِ نرم‌افزارِ Rufus که با استفاده از آن می‌توان نحوه راه‌اندازی را انتخاب و شناسه (ID) درایو USB بایوس را جعل کرد."
+
+#. • MSG_168
+msgid ""
+"Try to masquerade first bootable USB drive (usually 0x80) as a different disk.\n"
+"This should only be necessary if you install Windows XP and have more than one disk."
+msgstr ""
+"با انتخاب یکی از این گزینه‌ها می‌توانید به‌صورت ساختگی و جعلی، اولین درایو USB با قابلیت راه‌اندازی (معمولاً 0x80) را به‌عنوان هارددیسک جداگانه معرفی کنید.\n"
+"انتخاب این گزینه فقط زمانی ضروری است که بیش از یک هارددیسک دارید و می‌خواهید ویندوز XP نصب کنید."
+
+#. • MSG_169
+msgid ""
+"Create an extra hidden partition and try to align partitions boundaries.\n"
+"This can improve boot detection for older BIOSes."
+msgstr "افزودن تنظیماتی مثل ساختن یک پارتیشن اضافی و مخفی (Extra hidden partition) در درایو و یا تراز کردن (Align) حدود و مرزهای پارتیشن‌ها که باعث شناسایی بهتر درایو در بایوس‌های قدیمی می‌شود."
+
+#. • MSG_170
+msgid "Enable the listing of USB Hard Drive enclosures. USE AT YOUR OWN RISKS!!!"
+msgstr "لطفاً با آگاهی کامل این گزینه را انتخاب کنید و در صورت نیاز حتماً از اطلاعات موجود در هارد اکسترنال یک نسخه پشتیبان (بکاپ) تهیه کنید."
+
+#. • MSG_171
+msgid ""
+"Start the formatting operation.\n"
+"This will DESTROY any data on the target!"
+msgstr ""
+"شروع فرآیند فرمت کردن\n"
+" با این کار، همه اطلاعات موجود در درایوی که انتخاب کرده‌اید «پاک» می‌شود"
+
+#. • MSG_172
+#.
+#. As of Rufus 3.2, *ALL* downloads from the servers are digitally signed, and their signature is validated using the
+#. public key that is embedded in the application. This message appears in an error dialog if the validation fails.
+msgid "Invalid download signature"
+msgstr "امضای فایل دانلود شده معتبر نیست"
+
+#. • MSG_173
+msgid "Click to select..."
+msgstr "برای انتخاب کلیک کنید"
+
+#. • MSG_174
+msgid "Rufus - The Reliable USB Formatting Utility"
+msgstr "Rufus، ابزاری کاربردی و قابل‌اطمینان برای فرمت کردن درایوهای USB"
+
+#. • MSG_175
+msgid "Version %d.%d (Build %d)"
+msgstr "نسخه %d.%d (Build %d)"
+
+#. • MSG_176
+msgid "English translation: Pete Batard <mailto:pete@akeo.ie>"
+msgstr "ترجمه فارسی: سید ضیاءالدین عظیمی «mailto:s.zia.azimi@gmail.com»"
+
+#. • MSG_177
+msgid "Report bugs or request enhancements at:"
+msgstr "گزارش اشکال (Bug) یا درخواست قابلیت جدید و بهبود نرم‌افزار در:"
+
+#. • MSG_178
+msgid "Additional Copyrights:"
+msgstr "حقوق نشر دیگران:"
+
+#. • MSG_179
+msgid "Update Policy:"
+msgstr "سیاست به‌روزرسانی:"
+
+#. • MSG_180
+msgid "If you choose to allow this program to check for application updates, you agree that the following information may be collected on our server(s):"
+msgstr "اگر به این نرم‌افزار اجازه بررسی به‌روزرسانی‌های جدید را بدهید؛ شما موافقت خود را با احتمال جمع‌آوری اطلاعات زیر در سرور یا سرورهای ما اعلام کرده‌اید:"
+
+#. • MSG_181
+msgid "Your operating system's architecture and version"
+msgstr "معماری و نسخه سیستم‌عامل شما"
+
+#. • MSG_182
+msgid "The version of the application you use"
+msgstr "نسخه این نرم‌افزار که در حال استفاده از آن هستید"
+
+#. • MSG_183
+msgid "Your IP address"
+msgstr "آدرس IP شما"
+
+#. • MSG_184
+msgid "For the purpose of generating private usage statistics, we may keep the information collected, \\b for at most a year\\b0 . However, we will not willingly disclose any of this individual data to third parties."
+msgstr "به جهت تولید آمار استفاده شخصی، ممکن است ما این اطلاعات جمع‌آوری‌شده را \\b برای حداکثر یک سال \\b0نگه‌داری کنیم. با وجود این، ما از روی میل این داده‌های فردی را در اختیار شخص ثالث قرار نخواهیم داد."
+
+#. • MSG_185
+msgid "Update Process:"
+msgstr "فرآیند به‌روزرسانی:"
+
+#. • MSG_186
+msgid ""
+"Rufus does not install or run background services, therefore update checks are performed only when the main application is running.\\line\n"
+"Internet access is of course required when checking for updates."
+msgstr ""
+"Rufus هیچ سرویس پس‌زمینه‌ای را اجرا یا نصب نمی‌کند؛ بنابراین فقط زمانی که نرم‌افزار در حال اجرا است فرآیند بررسی به‌روزرسانی‌های جدید انجام می‌شود.\\line\n"
+"واضح است هنگام بررسی به‌روزرسانی‌ها، دسترسی به اینترنت لازم است."
+
+#. • MSG_187
+msgid "Invalid image for selected boot option"
+msgstr "ناهماهنگی بین ایمیج و گزینه راه‌اندازی انتخاب‌شده"
+
+#. • MSG_188
+msgid "The current image doesn't match the boot option selected. Please use a different image or choose a different boot option."
+msgstr "این فایل ایمیج (Image)، با تنظیمات راه‌اندازی (Boot) انتخاب‌شده؛ سازگار نیست. لطفاً فایل یا تنظیمات دیگری انتخاب کنید."
+
+#. • MSG_189
+msgid "This ISO image is not compatible with the selected filesystem"
+msgstr "این فایل ایمیج (Image) با سیستم فایل انتخاب‌شده سازگار نیست."
+
+#. • MSG_190
+msgid "Incompatible drive detected"
+msgstr "درایو ناسازگار و ناهماهنگ شناسایی شده است"
+
+#. • MSG_191
+#.
+#. Used in MSG_235
+msgid "Write pass"
+msgstr "مرحله نوشتن"
+
+#. • MSG_192
+#.
+#. Used in MSG_235
+msgid "Read pass"
+msgstr "مرحله خواندن"
+
+#. • MSG_193
+msgid "Downloaded %s"
+msgstr "%s دانلود شد"
+
+#. • MSG_194
+msgid "Could not download %s"
+msgstr "دانلود %s امکان‌پذیر نیست"
+
+#. • MSG_195
+#.
+#. Example: "Using embedded version of Grub2 file(s)"
+msgid "Using embedded version of %s file(s)"
+msgstr "در حال استفاده از نسخه جاسازی‌شده و داخلی فایل %s"
+
+#. • MSG_196
+msgid ""
+"IMPORTANT: THIS DRIVE USES A NONSTANDARD SECTOR SIZE!\n"
+"\n"
+"Conventional drives use a 512-byte sector size but this drive uses a %d-byte one. In many cases, this means that you will NOT be able to boot from this drive.\n"
+"Rufus can try to create a bootable drive, but there is NO WARRANTY that it will work."
+msgstr ""
+"مهم!\n"
+"این درایو اندازه سکتور غیراستانداردی دارد.\n"
+"\n"
+"درایوهای شناخته‌شده، اندازه سکتور ۵۱۲ بایت دارند اما این درایو از %d بایت استفاده می‌کند. این به این معنی است که (در بیشتر موارد) شما قادر به راه‌اندازی سیستم با استفاده از این درایو نخواهید بود.\n"
+"نرم‌افزار Rufus تلاش می‌کند یک درایو قابل راه‌اندازی را بسازد؛ اما در مورد درست کار کردن آن تضمینی نخواهد داد!"
+
+#. • MSG_197
+msgid "Nonstandard sector size detected"
+msgstr "شناسایی اندازه سکتور غیراستاندارد"
+
+#. • MSG_198
+msgid "'Windows To Go' can only be installed on a GPT partitioned drive if it has the FIXED attribute set. The current drive was not detected as FIXED."
+msgstr "استفاده از قابلیت «Windows To Go» فقط در درایوهای پارتیشن‌بندی‌شده به روش GPT که دارای ویژگی «FIXED» هستند؛ امکان‌پذیر است. درایوی که شما انتخاب کرده‌اید ویژگی «FIXED» را ندارد."
+
+#. • MSG_201
+msgid "Cancelling - Please wait..."
+msgstr "در حال لغو کردن؛ لطفاً صبور باشید..."
+
+#. • MSG_202
+msgid "Scanning image..."
+msgstr "در حال پویش و بررسی ایمیج..."
+
+#. • MSG_203
+msgid "Failed to scan image"
+msgstr "بررسی ایمیج ناموفق بود"
+
+#. • MSG_204
+#.
+#. %s is the name of an obsolete Syslinux .c32 module. Example: "Obsolete vesamenu.c32 detected"
+msgid "Obsolete %s detected"
+msgstr "فایل قدیمی و منسوخ %s شناسایی شد"
+
+#. • MSG_205
+#.
+#. Display the name of the image selected. eg: "Using image: en_win7_x64_sp1.iso"
+msgid "Using image: %s"
+msgstr "در حال استفاده از ایمیج: %s"
+
+#. • MSG_206
+#.
+#. Example: "Missing ldlinux.c32 file"
+msgid "Missing %s file"
+msgstr "فایل %s موجود نیست"
+
+#. • MSG_207
+#.
+#. The name proposed by Windows' Computer Management → Disk Management when you try to format
+#. a drive with an empty label. For an example, see https://rufus.ie/pics/default_name.png.
+msgid "New Volume"
+msgstr ""
+
+#. • MSG_208
+#.
+#. Singular. Example: "1 device found"
+msgid "%d device found"
+msgstr "%d درایو شناسایی شد"
+
+#. • MSG_209
+#.
+#. Plural. Example: "3 devices found"
+msgid "%d devices found"
+msgstr "%d درایو شناسایی شد"
+
+#. • MSG_210
+msgid "READY"
+msgstr "آماده"
+
+#. • MSG_211
+msgid "Cancelled"
+msgstr "لغو شد"
+
+#. • MSG_212
+msgid "Failed"
+msgstr "ناموفق بود"
+
+#. • MSG_213
+#.
+#. Used when a new update has been downloaded and launched
+msgid "Launching new application..."
+msgstr "در حال راه‌اندازی نسخه جدید نرم‌افزار..."
+
+#. • MSG_214
+msgid "Failed to launch new application"
+msgstr "راه‌اندازی نسخه جدید نرم‌افزار ناموفق بود"
+
+#. • MSG_215
+#.
+#. Example: "Opened some_file.txt"
+msgid "Opened %s"
+msgstr "‪%s‬ باز شد"
+
+#. • MSG_216
+#.
+#. Example: "Saved rufus.log"
+msgid "Saved %s"
+msgstr "‪%s‬ ذخیره شد"
+
+#. • MSG_217
+#.
+#. Formatting status (make sure you use a double % to print the percent sign)
+msgid "Formatting: %0.1f%% completed"
+msgstr "در حال فرمت کردن؛ درصد پیشرفت: %0.1f%%"
+
+#. • MSG_218
+msgid "Creating file system: Task %d/%d completed"
+msgstr "در حال ساختن سیستم فایل؛ تعداد وظایف انجام شده: %d/%d"
+
+#. • MSG_219
+msgid "NTFS Fixup: %d%% completed"
+msgstr "ایجاد ساختار NTFS Fixup؛ درصد پیشرفت: %d%%"
+
+#. • MSG_220
+#.
+#. Parameter: the file system and an estimated duration in mins and secs.
+#. Example: "Formatting (UDF) - Estimated duration 3:21..."
+#. If "estimated duration" is too long, just use "estimated" or an abbreviation
+msgid "Formatting (%s) - estimated duration %d:%02d..."
+msgstr "در حال فرمت کردن (%s)؛ زمان تخمینی: %d:%02d"
+
+#. • MSG_221
+msgid "Setting Label (This may take a while)..."
+msgstr "در حال نام‌گذاری درایو (ممکن است کمی زمان‌بر باشد)..."
+
+#. • MSG_222
+#.
+#. Example: "Formatting (FAT32)..."
+msgid "Formatting (%s)..."
+msgstr "در حال فرمت کردن (%s)..."
+
+#. • MSG_223
+msgid "NTFS Fixup (Checkdisk)..."
+msgstr "در حال ایجاد ساختار NTFS Fixup (Checkdisk)..."
+
+#. • MSG_224
+msgid "Clearing MBR/PBR/GPT structures..."
+msgstr "در حال پاک‌کردن ساختارهای MBR/PBR/GPT..."
+
+#. • MSG_225
+msgid "Requesting disk access..."
+msgstr "در حال درخواست دسترسی به دیسک..."
+
+#. • MSG_226
+msgid "Analyzing existing boot records..."
+msgstr "در حال بررسی رکوردهای راه‌انداز موجود..."
+
+#. • MSG_227
+msgid "Closing existing volume..."
+msgstr "در حال بستن درایوهای موجود..."
+
+#. • MSG_228
+msgid "Writing master boot record..."
+msgstr "در حال نوشتن رکورد راه‌انداز اصلی (MBR)..."
+
+#. • MSG_229
+msgid "Writing partition boot record..."
+msgstr "در حال نوشتن رکورد راه‌انداز پارتیشن (PBR)..."
+
+#. • MSG_230
+msgid "Copying DOS files..."
+msgstr "در حال کپی کردن فایل‌های DOS..."
+
+#. • MSG_231
+msgid "Copying ISO files..."
+msgstr "در حال کپی کردن محتویات فایل ISO..."
+
+#. • MSG_232
+msgid "Win7 EFI boot setup (This may take a while)..."
+msgstr "در حال نصب راه‌انداز EFI ویندوز ۷ (ممکن است کمی زمان‌بر باشد)..."
+
+#. • MSG_233
+msgid "Finalizing, please wait..."
+msgstr "در حال انجام مرحله نهایی، لطفاً صبور باشید..."
+
+#. • MSG_234
+#.
+#. Takes a Syslinux version as parameter.
+#. Example: "Installing Syslinux v5.10..."
+msgid "Installing Syslinux %s..."
+msgstr "در حال نصب Syslinux %s..."
+
+#. • MSG_235
+#.
+#. Bad blocks status. Example: "Bad Blocks: Write pass 1/2 - 12.34% (0/0/1 errors)"
+#. See MSG_191 & MSG_192 for "Write pass"/"Read pass" translation.
+msgid "Bad Blocks: %s %d/%d - %0.2f%% (%d/%d/%d errors)"
+msgstr "بررسی بدسکتور: %s %d/%d - %0.2f%% (%d/%d/%d خطاها)"
+
+#. • MSG_236
+msgid "Bad Blocks: Testing with random pattern"
+msgstr "بررسی بدسکتور: آزمایش با استفاده از الگوی تصادفی"
+
+#. • MSG_237
+msgid "Bad Blocks: Testing with pattern 0x%02X"
+msgstr "بررسی بدسکتور: آزمایش با استفاده از الگوی 0x%02X"
+
+#. • MSG_238
+#.
+#. Example: "Partitioning (MBR)..."
+msgid "Partitioning (%s)..."
+msgstr "در حال پارتیشن‌بندی (%s)..."
+
+#. • MSG_239
+msgid "Deleting partitions..."
+msgstr "در حال حذف پارتیشن‌ها..."
+
+#. • MSG_240
+#.
+#. This message has to do with the signature validation that Rufus uses when downloading an update.
+msgid ""
+"The signature for the downloaded update can not be validated. This could mean that your system is improperly configured for signature validation or indicate a malicious download.\n"
+"\n"
+"The download will be deleted. Please check the log for more details."
+msgstr ""
+"امضای دیجیتال آپدیت دانلود شده معتبر نیست. ممکن است تنظیمات اعتبارسنجی امضا در سیستم شما درست نباشد یا اینکه فایل دانلود شده خراب باشد.\n"
+"فایل دانلود شده پاک خواهد شد. برای جزئیات بیشتر گزارش (log) را مشاهده کنید."
+
+#. • MSG_241
+msgid "Downloading: %0.1f%%"
+msgstr "در حال دانلود: %0.1f%%"
+
+#. • MSG_242
+msgid "Failed to download file."
+msgstr "دانلود فایل ناموفق بود"
+
+#. • MSG_243
+msgid "Checking for Rufus updates..."
+msgstr "در حال بررسی به‌روزرسانی‌های Rufus..."
+
+#. • MSG_244
+msgid "Updates: Unable to connect to the internet"
+msgstr "به‌روزرسانی: نرم‌افزار نتوانست به اینترنت وصل شود"
+
+#. • MSG_245
+msgid "Updates: Unable to access version data"
+msgstr "به‌روزرسانی: نرم‌افزار نتوانست به اطلاعات نسخه برنامه دسترسی پیدا کند"
+
+#. • MSG_246
+msgid "A new version of Rufus is available!"
+msgstr "نسخه جدیدی از Rufus موجود است!"
+
+#. • MSG_247
+msgid "No new version of Rufus was found"
+msgstr "نسخه جدیدی برای Rufus پیدا نشد"
+
+#. • MSG_248
+msgid "Application registry keys successfully deleted"
+msgstr "کلیدهای رجیستری برنامه با موفقیت حذف شدند"
+
+#. • MSG_249
+msgid "Failed to delete application registry keys"
+msgstr "حذف کلیدهای رجیستری برنامه ناموفق بود"
+
+#. • MSG_250
+#.
+#. Example: "Fixed disk detection enabled", "ISO size check disabled", etc.
+msgid "%s enabled"
+msgstr "%s فعال شد."
+
+#. • MSG_251
+msgid "%s disabled"
+msgstr "%s غیرفعال شد."
+
+#. • MSG_252
+msgid "Size checks"
+msgstr "بررسی اندازه ایمیج"
+
+#. • MSG_253
+msgid "Hard disk detection"
+msgstr "تشخیص دیسک سخت (هارد دیسک) USB"
+
+#. • MSG_254
+msgid "Force large FAT32 formatting"
+msgstr "وادار کردن استفاده از فرمت Large FAT32"
+
+#. • MSG_255
+msgid "NoDriveTypeAutorun will be deleted on exit"
+msgstr "هنگام خروج، NoDriveTypeAutorun حذف خواهد شد."
+
+#. • MSG_256
+msgid "Fake drive detection"
+msgstr "تشخیص درایو ساختگی و تقلبی"
+
+#. • MSG_257
+msgid "Joliet support"
+msgstr "پشتیبانی از سیستم فایل Joliet"
+
+#. • MSG_258
+msgid "Rock Ridge support"
+msgstr "پشتیبانی از سیستم فایل Rock Ridge"
+
+#. • MSG_259
+msgid "Force update"
+msgstr "وادار کردن به‌روزرسانی"
+
+#. • MSG_260
+msgid "NTFS compression"
+msgstr "فشرده‌سازی NTFS"
+
+#. • MSG_261
+msgid "Writing image: %0.1f%% completed"
+msgstr "در حال نوشتن اطلاعات ایمیج؛ درصد پیشرفت: %0.1f%%"
+
+#. • MSG_262
+#.
+#. Cheat mode message to disable ISO Support, so that only DD images can be opened
+msgid "ISO Support"
+msgstr "پشتیبانی از فایل ISO"
+
+# 'LRE' & 'PDF' are used
+#. • MSG_263
+#.
+#. Cheat mode to force legacy size units, where 1 KB is 1024 bytes and NOT that fake 1000 bytes abomination!
+msgid "Use PROPER size units"
+msgstr "نمایش دودویی واحدهای حافظه (‪1 KB = 1024 bytes‬)"
+
+#. • MSG_264
+msgid "Deleting directory '%s'"
+msgstr "در حال حذف کردن پوشه '%s'"
+
+#. • MSG_265
+msgid "VMWare disk detection"
+msgstr "شناسایی دیسک VMWare"
+
+#. • MSG_266
+msgid "Dual UEFI/BIOS mode"
+msgstr "روش دوگانه UEFI/BIOS"
+
+#. • MSG_267
+msgid "Applying Windows image: %0.1f%% completed"
+msgstr "در حال استفاده از ایمیج ویندوز؛ درصد پیشرفت: %0.1f%%"
+
+#. • MSG_268
+msgid "Applying Windows image..."
+msgstr "در حال استفاده از ایمیج ویندوز..."
+
+#. • MSG_269
+msgid "Preserve timestamps"
+msgstr "نگه‌داری برچسب زمان (timestamp)"
+
+#. • MSG_270
+msgid "USB debug"
+msgstr "اشکال‌زدایی (debug) USB"
+
+#. • MSG_271
+msgid "Computing image checksums: %0.1f%% completed"
+msgstr "محاسبه جمع کنترلی (Checksum) ایمیج؛ درصد پیشرفت: %0.1f%%"
+
+#. • MSG_272
+msgid "Compute the MD5, SHA1 and SHA256 checksums for the selected image"
+msgstr "محاسبه جمع کنترلی (Checksum) SHA1 و MD5 برای ایمیج انتخاب‌شده"
+
+#. • MSG_273
+msgid "Change the application language"
+msgstr "تغییر زبان برنامه"
+
+#. • MSG_274
+msgid "ISOHybrid image detected"
+msgstr "ایمیج ISOHybrid شناسایی شد"
+
+#. • MSG_275
+#.
+#. '%s' will be replaced with your translations for MSG_036 ("ISO Image") and MSG_095 ("DD Image")
+msgid ""
+"The image you have selected is an 'ISOHybrid' image. This means it can be written either in %s (file copy) mode or %s (disk image) mode.\n"
+"Rufus recommends using %s mode, so that you always have full access to the drive after writing it.\n"
+"However, if you encounter issues during boot, you can try writing this image again in %s mode.\n"
+"\n"
+"Please select the mode that you want to use to write this image:"
+msgstr ""
+"ایمیجی که شما انتخاب کرده‌اید از نوع «ISOHybrid» است. به این معنی که این فایل می‌تواند به روش «%s (کپی کردن فایل)» یا «%s (ایمیج دیسک)» نوشته شود.\n"
+"Rufus استفاده از روش «%s» را پیشنهاد می‌کند. در این روش پس از نوشتن اطلاعات در درایو، شما همیشه دسترسی کاملی به درایو خواهید داشت. \n"
+"با این حال، اگر هنگام راه‌اندازی (boot) سیستم‌عامل با مشکلی برخورد کردید؛ شما می‌توانید دوباره نوشتن اطلاعات به روش «%s» را امتحان کنید.\n"
+"\n"
+"لطفاً شیوه‌ای را که می‌خواهید با استفاده از آن اطلاعات ایمیج نوشته شود؛ انتخاب کنید."
+
+#. • MSG_276
+#.
+#. '%s' will be replaced with your translation for MSG_036 ("ISO Image")
+msgid "Write in %s mode (Recommended)"
+msgstr "نوشتن به روش «%s» (پیشنهاد برنامه)"
+
+#. • MSG_277
+#.
+#. '%s' will be replaced with your translation for MSG_095 ("DD Image")
+msgid "Write in %s mode"
+msgstr "نوشتن به روش «%s»"
+
+#. • MSG_278
+msgid "Checking for conflicting processes..."
+msgstr "درحال بررسی فرآیندهای ناسازگار و متناقض..."
+
+#. • MSG_279
+msgid "Non bootable"
+msgstr "غیرقابل راه‌اندازی (Non bootable)"
+
+#. • MSG_280
+msgid "Disk or ISO image"
+msgstr "دیسک یا ایمیج ISO"
+
+#. • MSG_281
+msgid "%s (Please select)"
+msgstr "%s (لطفاً انتخاب کنید)"
+
+#. • MSG_282
+msgid "Exclusive USB drive locking"
+msgstr "قفل کردن اختصاصی درایو USB"
+
+#. • MSG_283
+msgid "Invalid signature"
+msgstr "امضای نامعتبر"
+
+#. • MSG_284
+msgid "The downloaded executable is missing a digital signature."
+msgstr "فایل اجرایی دانلود شده امضای دیجیتال ندارد."
+
+#. • MSG_285
+msgid ""
+"The downloaded executable is signed by '%s'.\n"
+"This is not a signature we recognize and could indicate some form of malicious activity...\n"
+"Are you sure you want to run this file?"
+msgstr ""
+"این فایل اجرایی دانلود شده، توسط '%s' امضا شده است.\n"
+" ما این امضا را نمی‌شناسیم و ناشناس بودن آن ممکن است نشانه نوعی فعالیت خرابکارانه باشد...\n"
+"آیا مطمئن هستید می‌خواهید این فایل را اجرا کنید؟"
+
+#. • MSG_286
+msgid "Zeroing drive: %0.1f%% completed"
+msgstr "درحال بازنویسی درایو با داده صفر؛ درصد پیشرفت: %0.1f%%"
+
+#. • MSG_287
+msgid "Detection of non-USB removable drives"
+msgstr "شناسایی درایوهای غیر USB"
+
+#. • MSG_288
+msgid "Missing elevated privileges"
+msgstr "دسترسی‌های سطح بالا وجود ندارد"
+
+#. • MSG_289
+msgid "This application can only run with elevated privileges"
+msgstr "این نرم‌افزار فقط با دسترسی‌های سطح بالا می‌تواند اجرا شود"
+
+#. • MSG_290
+msgid "File Indexing"
+msgstr "ایندکس گذاری فایل"
+
+#. • MSG_291
+msgid "Version selection"
+msgstr "انتخاب نسخه (ورژن)"
+
+#. • MSG_292
+msgid "Please select the version of Windows you want to install:"
+msgstr "لطفاً نسخه ویندوزی را که می‌خواهید نصب کنید؛ انتخاب کنید:"
+
+#. • MSG_293
+msgid "Unsupported Windows version"
+msgstr "نسخه ویندوز پشتیبانی نمی‌شود"
+
+#. • MSG_294
+msgid "This version of Windows is no longer supported by Rufus."
+msgstr "Rufus دیگر این نسخه از ویندوز را پشتیبانی نمی‌کند"
+
+#. • MSG_295
+msgid "Warning: Unofficial version"
+msgstr "هشدار: نسخه غیررسمی"
+
+#. • MSG_296
+msgid ""
+"This version of Rufus was not produced by its official developer(s).\n"
+"\n"
+"Are you sure you want to run it?"
+msgstr ""
+"این نسخه از Rufus توسط توسعه‌دهندگان اصلی و رسمی آن تهیه نشده است.\n"
+"\n"
+"آیا برای اجرای آن مطمئن هستید؟"
+
+#. • MSG_297
+msgid "Truncated ISO detected"
+msgstr "فایل ISO ناقص شناسایی شده است"
+
+#. • MSG_298
+msgid ""
+"The ISO file you have selected does not match its declared size: %s of data is missing!\n"
+"\n"
+"If you obtained this file from the Internet, you should try to download a new copy and verify that the MD5 or SHA checksums match the official ones.\n"
+"\n"
+"Note that you can compute the MD5 or SHA in Rufus by clicking the (✓) button."
+msgstr ""
+"این فایل ISO که انتخاب کرده‌اید با اندازه تعیین شده در آن هماهنگی ندارد. %s از داده‌ها موجود نیست!\n"
+"\n"
+"اگر این فایل را از اینترنت دانلود کرده‌اید، لطفا نسخه‌ای جدید از آن را دانلود کرده و مطمئن شوید که مقادیر کنترلی MD5 یا SHA آن عینا برابر با مقادیر رسمی آن‌هاست.\n"
+"\n"
+"توجه داشته باشید که در Rufus می‌توانید با انتخاب دکمه (✓) مقادیر MD5 یا SHA را  محاسبه کنید."
+
+#. • MSG_299
+msgid "Timestamp validation error"
+msgstr "خطای اعتبارسنجی برچسب زمان (timestamp)"
+
+#. • MSG_300
+msgid ""
+"Rufus could not validate that the timestamp of the downloaded update is more recent than the one for the current executable.\n"
+"\n"
+"In order to prevent potential attack scenarios, the update process has been aborted and the download will be deleted. Please check the log for more details."
+msgstr ""
+"از نظر برنامه، برچسب زمانی آپدیت دانلود شده معتبر نیست. \n"
+"\n"
+"برای پیشگیری از حملات هک احتمالی، فرآیند به‌روزرسانی متوقف و فایل دانلود شده حذف خواهد شد. لطفا برای جزئیات بیشتر گزارش‌ها (لاگ) را بررسی کنید"
+
+#. • MSG_301
+msgid "Show application settings"
+msgstr "نمایش تنظیمات برنامه"
+
+#. • MSG_302
+msgid "Show information about this application"
+msgstr "نمایش اطلاعات مربوط به این برنامه"
+
+#. • MSG_303
+msgid "Show the log"
+msgstr "نمایش گزارش‌ها (Log)"
+
+#. • MSG_304
+msgid "Create a disk image of the selected device"
+msgstr "ساخت ایمیج از دستگاه انتخاب‌شده"
+
+#. • MSG_305
+msgid "Use this option to indicate whether you want to use this device to install Windows on another disk, or if you want to run Windows directly from this drive (Windows To Go)."
+msgstr "با استفاده از این گزینه مشخص کنید که آیا می‌خواهید از این درایو برای نصب ویندوز استفاده کنید یا اینکه می‌خواهید مستقیما ویندوز را از روی آن اجرا کنید (Windows To Go)."
+
+#. • MSG_306
+#.
+#. You can see this status message by pressing <Ctrl>-<Alt>-<Z> and then selecting START.
+#. It's the same as MSG_286 but with a process that *may* be faster, hence the name.
+msgid "Fast-zeroing drive: %0.1f%% completed"
+msgstr "درحال بازنویسی سریع درایو با داده صفر؛ درصد پیشرفت: %0.1f%%"
