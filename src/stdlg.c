@@ -506,7 +506,7 @@ void ResizeButtonHeight(HWND hDlg, int id)
  */
 INT_PTR CALLBACK LicenseCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	long style;
+	LONG_PTR style;
 	HWND hLicense;
 	switch (message) {
 	case WM_INITDIALOG:
@@ -515,12 +515,12 @@ INT_PTR CALLBACK LicenseCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM 
 		CenterDialog(hDlg);
 		ResizeButtonHeight(hDlg, IDCANCEL);
 		// Suppress any inherited RTL flags
-		style = GetWindowLong(hLicense, GWL_EXSTYLE);
+		style = GetWindowLongPtr(hLicense, GWL_EXSTYLE);
 		style &= ~(WS_EX_RTLREADING | WS_EX_RIGHT | WS_EX_LEFTSCROLLBAR);
-		SetWindowLong(hLicense, GWL_EXSTYLE, style);
-		style = GetWindowLong(hLicense, GWL_STYLE);
+		SetWindowLongPtr(hLicense, GWL_EXSTYLE, style);
+		style = GetWindowLongPtr(hLicense, GWL_STYLE);
 		style &= ~(ES_RIGHT);
-		SetWindowLong(hLicense, GWL_STYLE, style);
+		SetWindowLongPtr(hLicense, GWL_STYLE, style);
 		SetDlgItemTextA(hDlg, IDC_LICENSE_TEXT, gplv3);
 		break;
 	case WM_COMMAND:
@@ -1891,7 +1891,7 @@ static void CALLBACK FormatPromptHook(HWINEVENTHOOK hWinEventHook, DWORD Event, 
 	BOOL found;
 
 	if (Event == EVENT_SYSTEM_FOREGROUND) {
-		if (GetWindowLong(hWnd, GWL_STYLE) & WS_POPUPWINDOW) {
+		if (GetWindowLongPtr(hWnd, GWL_STYLE) & WS_POPUPWINDOW) {
 			str[0] = 0;
 			GetWindowTextU(hWnd, str, sizeof(str));
 			if (safe_strcmp(str, fp_title_str) == 0) {

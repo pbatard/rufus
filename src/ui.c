@@ -643,16 +643,17 @@ void TogglePersistenceControls(BOOL display)
 {
 	RECT rc;
 	HWND hSize, hUnits;
-	LONG style, width = fw - bsw - ssw;
+	LONG_PTR style;
+	LONG width = fw - bsw - ssw;
 	hSize = GetDlgItem(hMainDialog, IDC_PERSISTENCE_SIZE);
 	hUnits = GetDlgItem(hMainDialog, IDC_PERSISTENCE_UNITS);
 
-	style = GetWindowLong(hSize, GWL_EXSTYLE);
+	style = GetWindowLongPtr(hSize, GWL_EXSTYLE);
 	if (display)
 		style |= WS_EX_RIGHT;
 	else
 		style &= ~WS_EX_RIGHT;
-	SetWindowLong(hSize, GWL_EXSTYLE, style);
+	SetWindowLongPtr(hSize, GWL_EXSTYLE, style);
 
 	if (display) {
 		GetWindowRect(hUnits, &rc);

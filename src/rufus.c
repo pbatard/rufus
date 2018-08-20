@@ -824,7 +824,8 @@ BOOL CALLBACK LogCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	HDC hDC;
 	HFONT hf;
-	long lfHeight, style;
+	LONG lfHeight;
+	LONG_PTR style;
 	DWORD log_size;
 	char *log_buffer = NULL, *filepath;
 	EXT_DECL(log_ext, "rufus.log", __VA_GROUP__("*.log"), __VA_GROUP__("Rufus log"));
@@ -849,12 +850,12 @@ BOOL CALLBACK LogCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 		// the displayed text becomes a mess due to Windows trying to interpret
 		// dots, parenthesis, columns and so on in an RTL context...
 		// We also take this opportunity to fix the scroll bar and text alignment.
-		style = GetWindowLong(hLog, GWL_EXSTYLE);
+		style = GetWindowLongPtr(hLog, GWL_EXSTYLE);
 		style &= ~(WS_EX_RTLREADING | WS_EX_RIGHT | WS_EX_LEFTSCROLLBAR);
-		SetWindowLong(hLog, GWL_EXSTYLE, style);
-		style = GetWindowLong(hLog, GWL_STYLE);
+		SetWindowLongPtr(hLog, GWL_EXSTYLE, style);
+		style = GetWindowLongPtr(hLog, GWL_STYLE);
 		style &= ~(ES_RIGHT);
-		SetWindowLong(hLog, GWL_STYLE, style);
+		SetWindowLongPtr(hLog, GWL_STYLE, style);
 		break;
 	case WM_COMMAND:
 		switch (LOWORD(wParam)) {
