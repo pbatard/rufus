@@ -690,21 +690,21 @@ BOOL ValidateOpensslSignature(BYTE* pbBuffer, DWORD dwBufferLen, BYTE* pbSignatu
 	// Import our RSA public key so that the MS API can use it
 	r = CryptImportKey(hProv, (BYTE*)&pbMyPubKey.BlobHeader, dwMyPubKeyLen, 0, 0, &hPubKey);
 	if (!r) {
-		uprintf("Could not import public key: %s", WinPKIErrorString());
+		uprintf("PKI: Could not import public key: %s", WinPKIErrorString());
 		goto out;
 	}
 
 	// Create the hash object.
 	r = CryptCreateHash(hProv, CALG_SHA_256, 0, 0, &hHash);
 	if (!r) {
-		uprintf("Could not create empty hash: %s", WinPKIErrorString());
+		uprintf("PKI: Could not create empty hash: %s", WinPKIErrorString());
 		goto out;
 	}
 
 	// Compute the cryptographic hash of the buffer.
 	r = CryptHashData(hHash, pbBuffer, dwBufferLen, 0);
 	if (!r) {
-		uprintf("Could not hash data: %s", WinPKIErrorString());
+		uprintf("PKI: Could not hash data: %s", WinPKIErrorString());
 		goto out;
 	}
 
@@ -718,8 +718,12 @@ BOOL ValidateOpensslSignature(BYTE* pbBuffer, DWORD dwBufferLen, BYTE* pbSignatu
 	// Now that we have all of the public key, hash and signature data in a
 	// format that Microsoft can handle, we can call CryptVerifySignature().
 	r = CryptVerifySignature(hHash, pbSignature, dwSigLen, hPubKey, NULL, 0);
-	if (!r)
+	if (!r) {
+		// If the signature is invalid, clear the buffer so that
+		// we don't keep potentially nasty stuff in memory.
+		memset(pbBuffer, 0, dwBufferLen);
 		uprintf("Signature validation failed: %s", WinPKIErrorString());
+	}
 
 out:
 	if (hHash)
