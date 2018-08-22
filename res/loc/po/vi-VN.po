@@ -1,0 +1,1416 @@
+
+msgid ""
+msgstr ""
+"Project-Id-Version: 3.2\n"
+"Report-Msgid-Bugs-To: pete@akeo.ie\n"
+"POT-Creation-Date: 2018-08-22 17:39+0100\n"
+"PO-Revision-Date: 2018-08-22 17:39+0100\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: vi_VN\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Rufus-LanguageName: Vietnamese (Tiếng Việt)\n"
+"X-Rufus-LCID: 0x042A\n"
+
+#. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
+msgid "Drive Properties"
+msgstr "Thuộc tính ổ đĩa"
+
+#. • IDD_DIALOG → IDS_DEVICE_TXT
+msgid "Device"
+msgstr "Thiết bị"
+
+#. • IDD_DIALOG → IDS_BOOT_SELECTION_TXT
+msgid "Boot selection"
+msgstr "Phương thức khởi động"
+
+#. • IDD_DIALOG → IDC_SELECT
+msgid "Select"
+msgstr "Chọn"
+
+#. • IDD_DIALOG → IDS_IMAGE_OPTION_TXT
+msgid "Image Option"
+msgstr "Tùy chọn file ảnh"
+
+#. • IDD_DIALOG → IDS_PARTITION_TYPE_TXT
+msgid "Partition scheme"
+msgstr "Định dạng phân vùng"
+
+#. • IDD_DIALOG → IDS_TARGET_SYSTEM_TXT
+msgid "Target system"
+msgstr "Hệ thống áp dụng"
+
+#. • IDD_DIALOG → IDC_LIST_USB_HDD
+msgid "List USB Hard Drives"
+msgstr "Danh sách ổ cứng USB"
+
+#. • IDD_DIALOG → IDC_OLD_BIOS_FIXES
+#.
+#. It is acceptable to drop the parenthesis () if you are running out of space
+#. as there is a tooltip (MSG_169) providing these details.
+msgid "Add fixes for old BIOSes (extra partition, align, etc.)"
+msgstr "Thêm khắc phục cho BIOS cũ (phân vùng, sắp xếp...khác)"
+
+#. • IDD_DIALOG → IDC_RUFUS_MBR
+#.
+#. 'MBR': See http://en.wikipedia.org/wiki/Master_boot_record
+#. Rufus can install it's own custom MBR (the Rufus MBR), which also allows users to
+#. specify a custom disk ID for the BIOS. The tooltip for this control is MSG_167.
+msgid "Use Rufus MBR with BIOS ID"
+msgstr "Dùng MBR của Rufus với ID BIOS"
+
+#. • IDD_DIALOG → IDS_FORMAT_OPTIONS_TXT
+msgid "Format Options"
+msgstr "Tùy chọn định dạng"
+
+#. • IDD_DIALOG → IDS_FILE_SYSTEM_TXT
+msgid "File system"
+msgstr "Hệ thống tập tin"
+
+#. • IDD_DIALOG → IDS_CLUSTER_SIZE_TXT
+msgid "Cluster size"
+msgstr "Kích thước liên cung"
+
+#. • IDD_DIALOG → IDS_LABEL_TXT
+msgid "Volume label"
+msgstr "Nhãn ổ đĩa"
+
+#. • IDD_DIALOG → IDC_QUICK_FORMAT
+msgid "Quick format"
+msgstr "Định dạng nhanh"
+
+#. • IDD_DIALOG → IDC_BAD_BLOCKS
+msgid "Check device for bad blocks"
+msgstr "Kiểm tra khối hỏng trong thiết bị"
+
+#. • IDD_DIALOG → IDC_EXTENDED_LABEL
+msgid "Create extended label and icon files"
+msgstr "Tạo tên mở rộng và tập tin biểu tượng"
+
+#. • IDD_DIALOG → IDS_STATUS_TXT
+msgid "Status"
+msgstr "Trạng thái"
+
+#. • IDD_DIALOG → IDCANCEL
+#. • IDD_LICENSE → IDCANCEL
+#. • IDD_LOG → IDCANCEL
+#. • IDD_UPDATE_POLICY → IDCANCEL
+#. • IDD_NEW_VERSION → IDCANCEL
+#. • MSG_006
+msgid "Close"
+msgstr "Đóng"
+
+#. • IDD_DIALOG → IDC_START
+msgid "Start"
+msgstr "Bắt đầu"
+
+#. • IDD_ABOUTBOX → IDD_ABOUTBOX
+msgid "About Rufus"
+msgstr "Thông tin về Rufus"
+
+#. • IDD_ABOUTBOX → IDC_ABOUT_LICENSE
+msgid "License"
+msgstr "Giấy phép"
+
+#. • IDD_ABOUTBOX → IDOK
+msgid "OK"
+msgstr ""
+
+#. • IDD_LICENSE → IDD_LICENSE
+msgid "Rufus License"
+msgstr "Giấy phép Rufus"
+
+#. • IDD_NOTIFICATION → IDC_MORE_INFO
+msgid "More information"
+msgstr "Thông tin thêm"
+
+#. • IDD_NOTIFICATION → IDYES
+#. • MSG_008
+msgid "Yes"
+msgstr "Có"
+
+#. • IDD_NOTIFICATION → IDNO
+#. • MSG_009
+msgid "No"
+msgstr "Không"
+
+#. • IDD_LOG → IDD_LOG
+msgid "Log"
+msgstr "Nhật ký"
+
+#. • IDD_LOG → IDC_LOG_CLEAR
+msgid "Clear"
+msgstr "Xoá"
+
+#. • IDD_LOG → IDC_LOG_SAVE
+msgid "Save"
+msgstr "Lưu"
+
+#. • IDD_UPDATE_POLICY → IDD_UPDATE_POLICY
+msgid "Update policy and settings"
+msgstr "Thiết lập và lập chính sách cập nhật"
+
+#. • IDD_UPDATE_POLICY → IDS_UPDATE_SETTINGS_GRP
+msgid "Settings"
+msgstr "Thiết lập"
+
+#. • IDD_UPDATE_POLICY → IDS_UPDATE_FREQUENCY_TXT
+msgid "Check for updates"
+msgstr "Kiểm tra cập nhật"
+
+#. • IDD_UPDATE_POLICY → IDS_INCLUDE_BETAS_TXT
+msgid "Include beta versions"
+msgstr "Gồm bản thử nghiệm"
+
+#. • IDD_UPDATE_POLICY → IDC_CHECK_NOW
+msgid "Check Now"
+msgstr "Kiểm tra ngay"
+
+#. • IDD_NEW_VERSION → IDD_NEW_VERSION
+msgid "Check For Updates - Rufus"
+msgstr "Kiểm tra cập nhật - Rufus"
+
+#. • IDD_NEW_VERSION → IDS_NEW_VERSION_AVAIL_TXT
+msgid "A newer version is available. Please download the latest version!"
+msgstr "Đã có phiên bản mới. Vui lòng tải phiên bản mới nhất!"
+
+#. • IDD_NEW_VERSION → IDC_WEBSITE
+msgid "Click here to go to the website"
+msgstr "Nhấn vào đây để truy cập website"
+
+#. • IDD_NEW_VERSION → IDS_NEW_VERSION_NOTES_GRP
+msgid "Release Notes"
+msgstr "Ghi chú phát hành"
+
+#. • IDD_NEW_VERSION → IDS_NEW_VERSION_DOWNLOAD_GRP
+#. • IDD_NEW_VERSION → IDC_DOWNLOAD
+#. • MSG_040
+msgid "Download"
+msgstr "Tải xuống"
+
+#. • MSG_001
+msgid "Other instance detected"
+msgstr "Một bản Rufus khác đang chạy"
+
+#. • MSG_002
+msgid "Another Rufus application is running.\nPlease close the first application before running another one."
+msgstr "Ứng dụng Rufus khác đang chạy.\nVui lòng đóng ứng dụng đầu tiên trước khi chạy tiếp."
+
+#. • MSG_003
+msgid "WARNING: ALL DATA ON DEVICE '%s' WILL BE DESTROYED.\nTo continue with this operation, click OK. To quit click CANCEL."
+msgstr "CẢNH BÁO: TẤT CẢ DỮ LIỆU TRÊN THIẾT BỊ '%s' SẼ BỊ HUỶ.\nĐể tiếp tục hoạt động này, nhấn OK. Để thoát nhấn HUỶ."
+
+#. • MSG_004
+msgid "Rufus update policy"
+msgstr "Chính sách cập nhật Rufus"
+
+#. • MSG_005
+msgid "Do you want to allow Rufus to check for application updates online?"
+msgstr "Bạn muốn cho phép Rufus kiểm tra cập nhật ứng dụng trực tuyến?"
+
+#. • MSG_007
+msgid "Cancel"
+msgstr "Huỷ"
+
+#. • MSG_010
+msgid "Bad blocks found"
+msgstr "Phát hiện khối hỏng"
+
+#. • MSG_011
+msgid "Check completed: %d bad block(s) found\n  %d read error(s)\n  %d write error(s)\n  %d corruption error(s)"
+msgstr "Kiểm tra hoàn tất: phát hiện %d khối hỏng\n  %d lỗi đọc\n  %d lỗi ghi\n  %d lỗi cấu trúc"
+
+#. • MSG_012
+#.
+#. This contains the formatted message from MSG_001 as well as the name of the bad blocks logfile
+msgid "%s\nA more detailed report can be found in:\n%s"
+msgstr "%s\nCó thể tìm thấy một báo cáo chi tiết hơn trong:\n%s"
+
+#. • MSG_013
+msgid "Disabled"
+msgstr "Đã vô hiệu"
+
+#. • MSG_014
+msgid "Daily"
+msgstr "Hàng ngày"
+
+#. • MSG_015
+msgid "Weekly"
+msgstr "Hàng tuần"
+
+#. • MSG_016
+msgid "Monthly"
+msgstr "Hàng tháng"
+
+#. • MSG_017
+msgid "Custom"
+msgstr "Tuỳ chỉnh"
+
+#. • MSG_018
+msgid "Your version: %d.%d (Build %d)"
+msgstr "Phiên bản của bạn: %d.%d (Bản xây dựng %d)"
+
+#. • MSG_019
+msgid "Latest version: %d.%d (Build %d)"
+msgstr "Phiên bản mới nhất: %d.%d (Bản xây dựng %d)"
+
+#. • MSG_020
+#. • MSG_026
+msgid "bytes"
+msgstr ""
+
+#. • MSG_021
+#.
+#. *Short* version of the kilobyte size suffix
+msgid "KB"
+msgstr ""
+
+#. • MSG_022
+#.
+#. *Short* version of the megabyte size suffix
+msgid "MB"
+msgstr ""
+
+#. • MSG_023
+#.
+#. *Short* version of the gigabyte size suffix
+msgid "GB"
+msgstr ""
+
+#. • MSG_024
+#.
+#. *Short* version of the terabyte size suffix
+msgid "TB"
+msgstr ""
+
+#. • MSG_025
+#.
+#. *Short* version of the pentabyte size suffix
+msgid "PB"
+msgstr ""
+
+#. • MSG_027
+msgid "kilobytes"
+msgstr ""
+
+#. • MSG_028
+msgid "megabytes"
+msgstr ""
+
+#. • MSG_029
+msgid "Default"
+msgstr "Mặc định"
+
+#. • MSG_030
+#.
+#. This gets appended to the file system, cluster size, etc.
+msgid "%s (Default)"
+msgstr "%s (Mặc định)"
+
+#. • MSG_031
+msgid "BIOS (or UEFI-CSM)"
+msgstr "BIOS (hoặc UEFI-CSM)"
+
+#. • MSG_032
+msgid "UEFI (non CSM)"
+msgstr "UEFI (không CSM)"
+
+#. • MSG_033
+msgid "BIOS or UEFI"
+msgstr "BIOS hoặc UEFI"
+
+#. • MSG_034
+#.
+#. Number of bad block check passes (singular for 1 pass)
+msgid "%d pass"
+msgstr "Qua %d lần"
+
+#. • MSG_035
+#.
+#. Number of bad block check passes (plural for 2 or more passes).
+#. See MSG_087 for the message that %s gets replaced with.
+msgid "%d passes %s"
+msgstr "Qua %d lần %s"
+
+#. • MSG_036
+msgid "ISO Image"
+msgstr "Ảnh ISO"
+
+#. • MSG_037
+msgid "Application"
+msgstr "Ứng dụng"
+
+#. • MSG_038
+msgid "Abort"
+msgstr "Huỷ bỏ"
+
+#. • MSG_039
+msgid "Launch"
+msgstr "Khởi chạy"
+
+#. • MSG_041
+msgid "Operation cancelled by the user"
+msgstr "Hoạt động bị huỷ bởi người dùng"
+
+#. • MSG_042
+msgid "Error"
+msgstr "Lỗi"
+
+#. • MSG_043
+msgid "Error: %s"
+msgstr "Lỗi: %s"
+
+#. • MSG_044
+msgid "File download"
+msgstr "Tải xuống tập tin"
+
+#. • MSG_045
+msgid "USB Storage Device (Generic)"
+msgstr "Thiết bị lưu trữ USB (Cơ bản)"
+
+#. • MSG_046
+msgid "%s (Disk %d) [%s]"
+msgstr "%s (Đĩa %d) [%s]"
+
+#. • MSG_047
+#.
+#. Used when a drive is detected that contains more than one partition
+msgid "Multiple Partitions"
+msgstr "Nhiều phân vùng"
+
+#. • MSG_048
+msgid "Rufus - Flushing buffers"
+msgstr "Rufus - Xoá bộ đệm"
+
+#. • MSG_049
+msgid "Rufus - Cancellation"
+msgstr "Rufus - Huỷ"
+
+#. • MSG_050
+msgid "Success."
+msgstr "Thành công."
+
+#. • MSG_051
+msgid "Undetermined error while formatting."
+msgstr "Lỗi chưa được xác định khi đang định dạng."
+
+#. • MSG_052
+msgid "Cannot use the selected file system for this media."
+msgstr "Không thể dùng hệ thống tập tin đã chọn cho thiết bị này."
+
+#. • MSG_053
+msgid "Access to the device is denied."
+msgstr "Từ chối truy cập đến thiết bị."
+
+#. • MSG_054
+msgid "Media is write protected."
+msgstr "Thiết bị được bảo vệ ghi."
+
+#. • MSG_055
+msgid "The device is in use by another process. Please close any other process that may be accessing the device."
+msgstr "Thiết bị đang được dùng bởi tiến trình khác. Vui lòng đóng mọi tiến trình có thể truy cập thiết bị."
+
+#. • MSG_056
+msgid "Quick format is not available for this device."
+msgstr "Định dạng nhanh không khả dụng với thiết bị này."
+
+#. • MSG_057
+msgid "The volume label is invalid."
+msgstr "Tên ổ đãi không hợp lệ."
+
+#. • MSG_058
+msgid "The device handle is invalid."
+msgstr "Xử lý thiết bị không hợp lệ."
+
+#. • MSG_059
+msgid "The selected cluster size is not valid for this device."
+msgstr "Kích cỡ liên cung đã chọn không thích hợp với thiết bị này."
+
+#. • MSG_060
+msgid "The volume size is invalid."
+msgstr "Kích cỡ ổ đĩa không hợp lệ."
+
+#. • MSG_061
+msgid "Please insert a removable media in drive."
+msgstr "Vui lòng kết nối ổ gắn ngoài vào."
+
+#. • MSG_062
+msgid "An unsupported command was received."
+msgstr "Đã nhận một lệnh không được hỗ trợ."
+
+#. • MSG_063
+msgid "Memory allocation error."
+msgstr "Lỗi sắp xếp bộ nhớ."
+
+#. • MSG_064
+msgid "Read error."
+msgstr "Lỗi đọc."
+
+#. • MSG_065
+msgid "Write error."
+msgstr "Lỗi ghi."
+
+#. • MSG_066
+msgid "Installation failure"
+msgstr "Cài đặt thất bại"
+
+#. • MSG_067
+msgid "Could not open media. It may be in use by another process. Please re-plug the media and try again."
+msgstr "Không thể mở phương tiện. Có thể nó đang được tiến trình khác sử dụng. Vui lòng tái kết nối và thử lại."
+
+#. • MSG_068
+msgid "Error while partitioning drive."
+msgstr "Lỗi khi phân vùng ổ đĩa."
+
+#. • MSG_069
+msgid "Could not copy files to target drive."
+msgstr "Không thể chép tập tin vào đĩa."
+
+#. • MSG_070
+msgid "Cancelled by user."
+msgstr "Đã huỷ bởi người dùng."
+
+#. • MSG_071
+#.
+#. See http://en.wikipedia.org/wiki/Thread_%28computing%29
+msgid "Unable to start thread."
+msgstr "Không thể bắt đầu luồn."
+
+#. • MSG_072
+msgid "Bad blocks check didn't complete."
+msgstr "Kiểm tra khối hỏng chưa hoàn tất."
+
+#. • MSG_073
+msgid "ISO image scan failure."
+msgstr "Quét ảnh ISO thất bại."
+
+#. • MSG_074
+msgid "ISO image extraction failure."
+msgstr "Trích xuất ảnh ISO thất bại."
+
+#. • MSG_075
+msgid "Unable to remount volume."
+msgstr "Không thể tái kết nối ổ đĩa."
+
+#. • MSG_076
+msgid "Unable to patch/setup files for boot."
+msgstr "Không thể vá/cài đặt tập tin cho việc khởi động."
+
+#. • MSG_077
+msgid "Unable to assign a drive letter."
+msgstr "Không thể định ký tự ổ đĩa."
+
+#. • MSG_078
+msgid "Can't mount GUID volume."
+msgstr "Không thể gắn kết ổ GUID."
+
+#. • MSG_079
+msgid "The device is not ready."
+msgstr "Thiết bị chưa sẵn sàng."
+
+#. • MSG_080
+msgid "Rufus detected that Windows is still flushing its internal buffers onto the USB device.\n\nDepending on the speed of your USB device, this operation may take a long time to complete, especially for large files.\n\nWe recommend that you let Windows finish, to avoid corruption. But if you grow tired of waiting, you can just unplug the device..."
+msgstr "Rufus đã phát hiện Windows vẫn đang làm sạch bộ đệm bên trong thiết bị USB.\n\nTuỳ thuộc vào tốc độ của thiết bị USB, hoạt động này có thể mất một thời gian dài để hoàn tất, đặc biệt với những tập tin lớn.\n\nChúng tôi khuyên bạn nên để Windows kết thúc để phòng hỏng dữ liệu. Nhưng nếu bạn mệt mỏi vì chờ đợi, hãy cứ rút thiết bị ra..."
+
+#. • MSG_081
+msgid "Unsupported image"
+msgstr "Ảnh không được hỗ trợ"
+
+#. • MSG_082
+msgid "This image is either non-bootable, or it uses a boot or compression method that is not supported by Rufus..."
+msgstr "Ảnh này không có khả năng khởi động hoặc sử dụng một phương thức khởi động hoặc nén không được Rufus hỗ trợ..."
+
+#. • MSG_083
+msgid "Replace %s?"
+msgstr "Thay thế %s?"
+
+#. • MSG_084
+msgid "This ISO image seems to use an obsolete version of '%s'.\nBoot menus may not display properly because of this.\n\nA newer version can be downloaded by Rufus to fix this issue:\n- Choose 'Yes' to connect to the internet and download the file\n- Choose 'No' to leave the existing ISO file unmodified\nIf you don't know what to do, you should select 'Yes'.\n\nNote: The new file will be downloaded in the current directory and once a '%s' exists there, it will be reused automatically."
+msgstr "Ảnh ISO này là phiên bản cũ của '%s'.\nMenu khởi động có thể không hiện chính xác vì điều này.\n\nMột phiên bản mới có thể được tải xuống bởi Rufus để khắc phục vấn đề này:\n- Chọn 'Có' để kết nối với Internet và tải tập tin xuống\n- Chọn 'Không' để không thay đổi tập tin ISO đang có\nNếu bạn không biết phải làm gì, bạn nên chọn 'Có'.\n\nGhi chú: Tập tin mới sẽ được tải xuống vào thư mục hiện tại và một khi '%s' có trong đó, nó sẽ được tự động tái sử dụng."
+
+#. • MSG_085
+msgid "Downloading '%s'"
+msgstr "Đang tải xuống '%s'"
+
+#. • MSG_086
+msgid "No image selected"
+msgstr "Chưa chọn ảnh"
+
+#. • MSG_087
+#.
+#. This message appears in Advanced format options → Check device for bad blocks → dropdown menu
+#. %s will be replaced with SLC, MLC or TLC, which is a type of NAND (or flash memory). In other
+#. words, this message should mean "for a flash memory device of type %s". *Please* try to keep
+#. the translation as short as possible so that it won't result in an overly large dropdown...
+#. If you prefer, it's okay to use "type" or "device" instead of "NAND" (e.g. "for TLC type").
+#. See also MSG_035.
+msgid "for %s NAND"
+msgstr "cho %s NAND"
+
+#. • MSG_088
+msgid "Image is too big"
+msgstr "Ảnh quá lớn"
+
+#. • MSG_089
+msgid "The image is too big for the selected target."
+msgstr "Ảnh quá lớn cho đĩa đã chọn."
+
+#. • MSG_090
+msgid "Unsupported ISO"
+msgstr "ISO không được hỗ trợ"
+
+#. • MSG_091
+msgid "When using UEFI Target Type, only EFI bootable ISO images are supported. Please select an EFI bootable ISO or set the Target Type to BIOS."
+msgstr "Khi dùng loại hệ thống là UEFI, chỉ có ảnh ISO có thể khởi động với EFI được hỗ trợ. Vui lòng chọn một ISO có thể khởi động với EFI hoặc chọn loại hệ thống là BIOS."
+
+#. • MSG_092
+msgid "Unsupported filesystem"
+msgstr "Hệ thống tập tin không được hỗ trợ"
+
+#. • MSG_093
+msgid "IMPORTANT: THIS DRIVE CONTAINS MULTIPLE PARTITIONS!!\n\nThis may include partitions/volumes that aren't listed or even visible from Windows. Should you wish to proceed, you are responsible for any data loss on these partitions."
+msgstr "QUAN TRỌNG: Ổ ĐĨA NÀY CHỨA NHIỀU PHÂN VÙNG!!\n\nĐiều này có thể bao gồm phân vùng/ổ đĩa không có trong danh sách hoặc không hiển thị trong Windows. Nếu bạn muốn tiến hành, bạn sẽ phải chịu trách nhiệm về mọi tổn thất dữ liệu trên những phân vùng này."
+
+#. • MSG_094
+msgid "Multiple partitions detected"
+msgstr "Đã phát hiện nhiều phân vùng"
+
+#. • MSG_095
+msgid "DD Image"
+msgstr "Ảnh DD"
+
+#. • MSG_096
+msgid "The file system currently selected can not be used with this type of ISO. Please select a different file system or use a different ISO."
+msgstr "Không thể dùng loại ISO này với hệ thống tập tin đã chọn. Vui lòng chọn một hệ thống tập tin hoặc ISO khác."
+
+#. • MSG_097
+msgid "'%s' can only be applied if the file system is NTFS."
+msgstr "Chỉ có thể áp dụng '%s' nếu hệ thống tập tin là NTFS."
+
+#. • MSG_098
+msgid "IMPORTANT: You are trying to install 'Windows To Go', but your target drive doesn't have the 'FIXED' attribute. Because of this Windows will most likely freeze during boot, as Microsoft hasn't designed it to work with drives that instead have the 'REMOVABLE' attribute.\n\nDo you still want to proceed?\n\nNote: The 'FIXED/REMOVABLE' attribute is a hardware property that can only be changed using custom tools from the drive manufacturer. However those tools are ALMOST NEVER provided to the public..."
+msgstr "QUAN TRỌNG: Bạn đang cố cài đặt 'Windows To Go', nhưng ổ đĩa không có thuộc tính 'CỐ ĐỊNH'. Vì điều này, Windows có thể sẽ dừng tại điểm khởi động, do Microsoft không thiết kế nó để chạy với ổ đĩa có thuộc tính 'CÓ THỂ THÁO ĐƯỢC'. \n\nBạn vẫn muốn tiến hành?\n\nGHi chú: Thuộc tính 'CỐ ĐỊNH/CÓ THỂ THÁO ĐƯỢC' là một thuộc tính phần cứng chỉ có thể thay đổi bằng các công cụ tuỳ chỉnh từ nhà sản xuất ổ đĩa. Tuy nhiên những công cụ này HẦU NHƯ KHÔNG BAO GIỜ được cung cấp công khai..."
+
+#. • MSG_099
+msgid "Filesystem limitation"
+msgstr "Giới hạn tập tin hệ thống"
+
+#. • MSG_100
+msgid "This ISO image contains a file larger than 4GB, which is more than the maximum size allowed for a FAT or FAT32 file system."
+msgstr "Ảnh ISO này chứa tập tin lớn hơn 4GB, là kích thước lớn hơn kích thước tập tin tối đa được tập tin hệ thống FAT hoặc FAT32 cho phép."
+
+#. • MSG_101
+msgid "Missing WIM support"
+msgstr "Thiếu hỗ trợ WIM"
+
+#. • MSG_102
+msgid "Your platform cannot extract files from WIM archives. WIM extraction is required to create EFI bootable Windows 7 and Windows Vista USB drives. You can fix that by installing a recent version of 7-Zip.\nDo you want to visit the 7-zip download page?"
+msgstr "Nền tảng của bạn không thể trích xuất tập tin từ lưu trữ WIM. Việc trích xuất WIM là yêu cầu để tạo đĩa USB khởi động EFI Windows 7 và Windows Vista. Bạn có thể khắc phục điều này bằng cách cài phiên bản mới nhất của 7-Zip.\nBạn muốn truy cập trang tải xuống của 7-Zip?"
+
+#. • MSG_103
+msgid "Download %s?"
+msgstr "Tải xuống %s?"
+
+#. • MSG_104
+#.
+#. Example: "Grub4DOS v0.4 or later requires a 'grldr' file to be installed. Because this
+#. file is more than 100 KB in size, and always present on Grub4DOS ISO images (...)"
+msgid "%s or later requires a '%s' file to be installed.\nBecause this file is more than 100 KB in size, and always present on %s ISO images, it is not embedded in Rufus.\n\nRufus can download the missing file for you:\n- Select 'Yes' to connect to the internet and download the file\n- Select 'No' if you want to manually copy this file on the drive later\n\nNote: The file will be downloaded in the current directory and once a '%s' exists there, it will be reused automatically."
+msgstr "%s hoặc mới hơn yêu cầu tập tin '%s' được cài đặt.\nVì tập tin này lớn hơn 100 KB, và luôn có trong ảnh ISO %s, nó không được kèm theo trong Rufus.\n\nRufus có thể tải xuống tập tin còn thiếu cho bạn:\n- Chọn 'Có' để kết nối với Internet và tải tập tin\n- Chọn 'Không' nếu bạn muốn tự chép tập tin này trên đĩa lúc khác\n\nGhu chú: tập tin sẽ được tải xuống thư mục hiện tại và khi có '%s' tồn tại tại đó, nó sẽ tự động được tái sử dụng."
+
+#. • MSG_105
+msgid "Cancelling may leave the device in an UNUSABLE state.\nIf you are sure you want to cancel, click YES. Otherwise, click NO."
+msgstr "Huỷ bỏ có thể làm thiết bị rơi vào tình trạng KHÔNG THỂ SỬ DỤNG.\nNếu bạn chắc muốn huỷ, chọn CÓ. Nếu không, hãy chọn KHÔNG."
+
+#. • MSG_106
+msgid "Please select folder"
+msgstr "Vui lòng chọn thư mục"
+
+#. • MSG_107
+msgid "All files"
+msgstr "Tất cả tập tin"
+
+#. • MSG_108
+msgid "Rufus log"
+msgstr "Nhật kýRufus"
+
+#. • MSG_109
+msgid "0x%02X (Disk %d)"
+msgstr "0x%02X (Đĩa %d)"
+
+#. • MSG_110
+#.
+#. "Cluster size" should be the same as the label for IDS_CLUSTER_SIZE_TXT
+#. "kilobytes" should be the same as in MSG_027
+msgid "MS-DOS cannot boot from a drive using a 64 kilobytes Cluster size.\nPlease change the Cluster size or use FreeDOS."
+msgstr "MS-DOS không thể khởi động từ ổ đĩa dùng kích thước liên cung 64 kilobyte.\nVui lòng thay đổi kích thước liên cung hoặc dùng FreeDOS."
+
+#. • MSG_111
+msgid "Incompatible Cluster size"
+msgstr "Kích thước liên cung không tương thích"
+
+#. • MSG_112
+#.
+#. "%d:%02d" is a duration (mins:secs)
+msgid "Formatting a large UDF volumes can take a lot of time. At USB 2.0 speeds, the estimated formatting duration is %d:%02d, during which the progress bar will appear frozen. Please be patient!"
+msgstr "Định dạng ổ UDF lớn cần nhiều thời gian. Với tốc độ USB 2.0, thời gian định dạng dự kiến là %d:%02d, trong lúc này thanh tiến trình không thay đổi. Vui lòng kiên nhẫn!"
+
+#. • MSG_113
+msgid "Large UDF volume"
+msgstr "Ổ UDF lớn"
+
+#. • MSG_114
+msgid "This image uses Syslinux %s%s but this application only includes the installation files for Syslinux %s%s.\n\nAs new versions of Syslinux are not compatible with one another, and it wouldn't be possible for Rufus to include them all, two additional files must be downloaded from the Internet ('ldlinux.sys' and 'ldlinux.bss'):\n- Select 'Yes' to connect to the Internet and download these files\n- Select 'No' to cancel the operation\n\nNote: The files will be downloaded in the current application directory and will be reused automatically if present."
+msgstr "Ảnh này dùng Syslinux %s%s nhưng ứng dụng này chỉ bao gồm tập tin cài đặt cho Syslinux %s%s.\n\nPhiên bản khác của Syslinux không tương thích với các phiên bản khác nhau và Rufus không thể kèm theo tất cả chúng, bạn phải tải xuống thêm hai tập tin từ Internet ('ldlinux.sys' và 'ldlinux.bss'):\n- Chọn 'Có' để kết nối với Internet và tải những tập tin này\n- Chọn 'Không' để huỷ hoạt động\n\nChú ý: Các tập tin sẽ được tải xuống vào thư mục ứng dụng hiện tại và sẽ được tự tái sử dụng nếu có."
+
+#. • MSG_115
+msgid "Download required"
+msgstr "Yêu cầu tải xuống"
+
+#. • MSG_116
+#.
+#. You should be able to test this message with Super Grub2 Disk ISO:
+#. https://sourceforge.net/projects/supergrub2/files/2.00s2/super_grub2_disk_hybrid_2.00s2.iso/download (11.9 MB)
+msgid "This image uses Grub %s but the application only includes the installation files for Grub %s.\n\nAs different versions of Grub may not be compatible with one another, and it is not possible to include them all, Rufus will attempt to locate a version of the Grub installation file ('core.img') that matches the one from your image:\n- Select 'Yes' to connect to the Internet and attempt to download it\n- Select 'No' to use the default version from Rufus\n- Select 'Cancel' to abort the operation\n\nNote: The file will be downloaded in the current application directory and will be reused automatically if present. If no match can be found online, then the default version will be used."
+msgstr "Ảnh này dùng Grub %s nhưng ứng dụng này chỉ bao gồm tập tin cài đặt cho Grub %s.\n\nPhiên bản khác của Grub không tương thích với các phiên bản khác nhau và Rufus không thể kèm theo tất cả chúng, ứng dụng sẽ cố xác định phiên bảntập tin cài đặt Grub ('core.img') khớp với cái có trong ảnh của bạn:\n- Chọn 'Có' để kết nối đến Internet và cố thử tải nó xuống\n- Chọn 'Không' để dùng phiên bản mặc định từ Rufus\n- Chọn 'Huỷ' để bỏ qua hoạt động\n\nChú ý: Các tập tin sẽ được tải xuống vào thư mục ứng dụng hiện tại và sẽ được tự tái sử dụng nếu có. Nếu không tìm thấy bản trùng khớp nào trực tuyến thì phiên bản mặc định sẽ được sử dụng."
+
+#. • MSG_117
+msgid "Standard Windows installation"
+msgstr "Cài đặt Windows tiêu chuẩn"
+
+#. • MSG_118
+#.
+#. Only translate this message *if* Microsoft has a specific name for
+#. http://en.wikipedia.org/wiki/Windows_To_Go in your language.
+#. Otherwise, you may add a parenthesis eg. "Windows To Go (<hint at what it does>)"
+msgid "Windows To Go"
+msgstr ""
+
+#. • MSG_119
+msgid "advanced drive properties"
+msgstr "thuộc tính nâng cao ổ đĩa"
+
+#. • MSG_120
+msgid "advanced format options"
+msgstr "tùy chọn định dạng nâng cao"
+
+#. • MSG_121
+msgid "Show %s"
+msgstr "Hiện %s"
+
+#. • MSG_122
+msgid "Hide %s"
+msgstr "Ẩn %s"
+
+#. • MSG_123
+#.
+#. A persistent partitions can be used with "Live" USB media to store data.
+#. It means that data can be preserved across reboots on "Live" USB drives.
+#. To test this feature, please download and select 'casper_test.iso' from:
+#. https://github.com/pbatard/rufus/raw/master/res/loc/test/casper_test.iso
+msgid "Persistent partition size"
+msgstr "Kích thước phân vùng cố định"
+
+#. • MSG_124
+#.
+#. This message appears in the persistence 'Size' control when the slider is set to 0.
+#. It is okay to use "No partition" or "None" or "Deactivated" to indicate that a persistent partition will not be
+#. created if the width of the control is too small (since the 'Size' edit control is *not* adjusted for width).
+msgid "No persistence"
+msgstr "Không cố định"
+
+#. • MSG_125
+#.
+#. Tooltips used for the peristence size slider and edit control
+msgid "Set the size of the persistent partition for live USB media. Setting the size to 0 disables the persistent partition."
+msgstr "Đặt kích thước phân vùng cố định cho bản live USB. Đặt kích thước là 0 để bỏ phân vùng cố định."
+
+#. • MSG_126
+msgid "Set the partition size units."
+msgstr "Chọn đơn vị kích thước cho phân vùng."
+
+#. • MSG_150
+msgid "Type of computer you plan to use this bootable drive with. It is your responsibility to determine whether your target is of BIOS or UEFI type before you start creating the drive, as it may fail to boot otherwise."
+msgstr "Loại máy tính mà bạn định sử dung với ổ USB boot. Bạn phải tìm hiểu máy đó là kiểu BIOS hay UEFI trước khi bạn tạo ổ USB bởi nó có thể bị lỗi khi boot."
+
+#. • MSG_151
+#.
+#. You shouldn't translate 'Legacy Mode' as this is an option that usually appears in English in the UEFI settings.
+msgid "'UEFI-CSM' means that the device will only boot in BIOS emulation mode (also known as 'Legacy Mode') under UEFI, and not in native UEFI mode."
+msgstr "'UEFI-CSM' nghĩa là thiết bị chỉ có thể boot ở chế độ giả lập BIOS (hay còn gọi là 'Legacy Mode') bên trong chế độ UEFI, và nó không phải là chế độ thuần UEFI."
+
+#. • MSG_152
+msgid "'non CSM' means that the device will only boot in native UEFI mode, and not in BIOS emulation mode (also known as 'Legacy Mode')."
+msgstr "'non CSM' nghĩa là thiết bị chỉ có thể boot ở chế độ thuần UEFI mà không phải chế độ giả lập BIOS (hay còn gọi là 'Legacy Mode')"
+
+#. • MSG_153
+msgid "Test pattern: 0x%02X"
+msgstr "Mẫu thử: 0x%02X"
+
+#. • MSG_154
+msgid "Test pattern: 0x%02X, 0x%02X"
+msgstr "Mẫu thử: 0x%02X, 0x%02X"
+
+#. • MSG_155
+msgid "Test pattern: 0x%02X, 0x%02X, 0x%02X"
+msgstr "Mẫu thử: 0x%02X, 0x%02X, 0x%02X"
+
+#. • MSG_156
+msgid "Test pattern: 0x%02X, 0x%02X, 0x%02X, 0x%02X"
+msgstr "Mẫu thử: 0x%02X, 0x%02X, 0x%02X, 0x%02X"
+
+#. • MSG_157
+msgid "Sets the target filesystem"
+msgstr "Đặt loại hệ thống tập tin"
+
+#. • MSG_158
+msgid "Minimum size that a block of data will occupy in the filesystem"
+msgstr "Kích thước tối thiểu của khối dữ liệu sẽ chiếm dụng trong hệ thống tập tin"
+
+#. • MSG_159
+msgid "Use this field to set the drive label.\nInternational characters are accepted."
+msgstr "Dùng trường này để đặt tên đĩa.\nChấp nhận các ký tự quốc tế."
+
+#. • MSG_160
+msgid "Toggle advanced options"
+msgstr "Bật tắt tuỳ chọn nâng cao"
+
+#. • MSG_161
+msgid "Check the device for bad blocks using a test pattern"
+msgstr "Kiểm tra khối hỏng bằng mẫu thử"
+
+#. • MSG_162
+msgid "Uncheck this box to use the \"slow\" format method"
+msgstr "Bỏ chọn mục này để dùng cách định dạng chậm"
+
+#. • MSG_163
+msgid "Method that will be used to create partitions"
+msgstr "Cách thức tạo phân vùng"
+
+#. • MSG_164
+msgid "Method that will be used to make the drive bootable"
+msgstr "Cách sẽ dùng để tạo ổ đĩa có thể khởi động"
+
+#. • MSG_165
+msgid "Click to select an image..."
+msgstr "Nhấn để chọn file ảnh..."
+
+#. • MSG_166
+msgid "Check this box to allow the display of international labels and set a device icon (creates an autorun.inf)"
+msgstr "Chọn mục này để cho phép hiện tên quốc tế và đặt biểu tượng thiết bị (tạo một autorun.inf)"
+
+#. • MSG_167
+msgid "Install an MBR that allows boot selection and can masquerade the BIOS USB drive ID"
+msgstr "Cài đặt một MBR cho phép lựa chọn khởi động và có thể giả ID ổ đĩa USB BIOS"
+
+#. • MSG_168
+msgid "Try to masquerade first bootable USB drive (usually 0x80) as a different disk.\nThis should only be necessary if you install Windows XP and have more than one disk."
+msgstr "Thử giả ổ đĩa USB khởi động đầu tiên (thường là 0x80) như một đĩa khác.\nĐiều này chỉ cần thiết nếu bạn cài đặt Windows XP và có nhiều hơn một đĩa."
+
+#. • MSG_169
+msgid "Create an extra hidden partition and try to align partitions boundaries.\nThis can improve boot detection for older BIOSes."
+msgstr "Tạo một phân vùng ẩn khác và thử gắn kết ranh giới phân vùng.\nĐiều này có thể cải thiện khả năng phát hiện khởi động cho BIOS cũ."
+
+#. • MSG_170
+msgid "Enable the listing of USB Hard Drive enclosures. USE AT YOUR OWN RISKS!!!"
+msgstr "Kích hoạt danh sách ổ cứng USB trong máy. DÙNG CẨN TRỌNG!!!"
+
+#. • MSG_171
+msgid "Start the formatting operation.\nThis will DESTROY any data on the target!"
+msgstr "Bắt đầu hoạt động định dạng.\nViệc này sẽ TIÊU HUỶ mọi dữ liệu trên đĩa đã chọn!"
+
+#. • MSG_172
+#.
+#. As of Rufus 3.2, *ALL* downloads from the servers are digitally signed, and their signature is validated using the
+#. public key that is embedded in the application. This message appears in an error dialog if the validation fails.
+msgid "Invalid download signature"
+msgstr "Chữ kí tải xuống không hợp lệ"
+
+#. • MSG_173
+msgid "Click to select..."
+msgstr "Nhấn để chọn..."
+
+#. • MSG_174
+msgid "Rufus - The Reliable USB Formatting Utility"
+msgstr "Rufus - Tiện ích Định dạng USB Đáng tin cậy"
+
+#. • MSG_175
+msgid "Version %d.%d (Build %d)"
+msgstr "Phiên bản %d.%d (Bản dựng %d)"
+
+#. • MSG_176
+msgid "English translation: Pete Batard <mailto:pete@akeo.ie>"
+msgstr "Bản dịch tiếng Việt:\\line• thanhtai2009 <mailto:thanhtai2009@outlook.com>\\line• caobach <mailto:caobach@gmail.com>"
+
+#. • MSG_177
+msgid "Report bugs or request enhancements at:"
+msgstr "Báo lỗi hoặc yêu cầu cải tiến tại:"
+
+#. • MSG_178
+msgid "Additional Copyrights:"
+msgstr "Bản quyền khác:"
+
+#. • MSG_179
+msgid "Update Policy:"
+msgstr "Chính sách cập nhật:"
+
+#. • MSG_180
+msgid "If you choose to allow this program to check for application updates, you agree that the following information may be collected on our server(s):"
+msgstr "Nếu bạn chọn cho phép chương trình này kiểm tra cập nhật ứng dụng, bạn đồng ý rằng những thông tin dưới đây có thể được thu thập trên (các) máy chủ của chúng tôi:"
+
+#. • MSG_181
+msgid "Your operating system's architecture and version"
+msgstr "Kiến trúc và phiên bản hệ điều hành của bạn"
+
+#. • MSG_182
+msgid "The version of the application you use"
+msgstr "Phiên bản của ứng dụng bạn dùng"
+
+#. • MSG_183
+msgid "Your IP address"
+msgstr "Địa chỉ IP của bạn"
+
+#. • MSG_184
+msgid "For the purpose of generating private usage statistics, we may keep the information collected, \\b for at most a year\\b0 . However, we will not willingly disclose any of this individual data to third parties."
+msgstr "Vì mục đích tạo thống kê sử dụng riêng tư, chúng tôi có thể giữ thông tin đã thu thập, \\b tối đa một năm\\b0 . Tuy nhiên, chúng tôi sẽ không tiết lộ bất kỳ dữ liệu cá nhân nào cho bên thứ ba."
+
+#. • MSG_185
+msgid "Update Process:"
+msgstr "Tiến trình cập nhật:"
+
+#. • MSG_186
+msgid "Rufus does not install or run background services, therefore update checks are performed only when the main application is running.\\line\nInternet access is of course required when checking for updates."
+msgstr "Rufus không cài đặt hoặc chạy dịch vụ nền, do đó việc kiểm tra cập nhật chỉ được thực hiện khi ứng dụng chính đang chạy.\\line\nQuyền truy cập Internet dĩ nhiên cần thiết khi kiểm tra cập nhật."
+
+#. • MSG_187
+msgid "Invalid image for selected boot option"
+msgstr "Ảnh không hợp lệ chio tuỳ chọn khởi động đã chọn"
+
+#. • MSG_188
+msgid "The current image doesn't match the boot option selected. Please use a different image or choose a different boot option."
+msgstr "Ảnh hiện tại khong hợp với tuỳ chọn khởi động đã chọn. Vui lòng chọn ảnh hoặc tuỳ chọn khởi động khác."
+
+#. • MSG_189
+msgid "This ISO image is not compatible with the selected filesystem"
+msgstr "Ảnh ISO không tương thích với hệ thống tập tin đã chọn"
+
+#. • MSG_190
+msgid "Incompatible drive detected"
+msgstr "Phát hiện ổ đĩa không tương thích"
+
+#. • MSG_191
+#.
+#. Used in MSG_235
+msgid "Write pass"
+msgstr "Qua lượt ghi"
+
+#. • MSG_192
+#.
+#. Used in MSG_235
+msgid "Read pass"
+msgstr "Qua lượt đọc"
+
+#. • MSG_193
+msgid "Downloaded %s"
+msgstr "Đã tải xuống %s"
+
+#. • MSG_194
+msgid "Could not download %s"
+msgstr "Không thể tải xuống %s"
+
+#. • MSG_195
+#.
+#. Example: "Using embedded version of Grub2 file(s)"
+msgid "Using embedded version of %s file(s)"
+msgstr "Dùng phiên bản (các) tập tin %s được nhúng sẵn"
+
+#. • MSG_196
+msgid "IMPORTANT: THIS DRIVE USES A NONSTANDARD SECTOR SIZE!\n\nConventional drives use a 512-byte sector size but this drive uses a %d-byte one. In many cases, this means that you will NOT be able to boot from this drive.\nRufus can try to create a bootable drive, but there is NO WARRANTY that it will work."
+msgstr "QUAN TRỌNG: ĐĨA NÀY DÙNG KÍCH CỠ CUNG KHÔNG CHUẨN!\n\nỔ cứng thông thườn dùng kích cỡ cung 512 byte nhưng ổ đĩa này lại dùng cỡ %d byte. Trong nhiều trường hợp, điều này có nghĩa bạn sẽ KHÔNG thể khởi động từ ổ đĩa này.\nRufus có thể thử tạo một ổ đĩa khởi động, nhưng KHÔNG ĐẢM BẢO rằng nó sẽ hoạt động."
+
+#. • MSG_197
+msgid "Nonstandard sector size detected"
+msgstr "Phát hiện kích cỡ cung không chuẩn"
+
+#. • MSG_198
+msgid "'Windows To Go' can only be installed on a GPT partitioned drive if it has the FIXED attribute set. The current drive was not detected as FIXED."
+msgstr "'Windows To Go chỉ có thể được cài đặt trên ổ đĩa đã phân vùng GPT nếu nó có tập thuộc tính CỐ ĐỊNH. Ổ đĩa hiện tại không phải CỐ ĐỊNH."
+
+#. • MSG_201
+msgid "Cancelling - Please wait..."
+msgstr "Đang huỷ - Vui lòng chờ..."
+
+#. • MSG_202
+msgid "Scanning image..."
+msgstr "Đang quét ảnh..."
+
+#. • MSG_203
+msgid "Failed to scan image"
+msgstr "Không thể quét ảnh"
+
+#. • MSG_204
+#.
+#. %s is the name of an obsolete Syslinux .c32 module. Example: "Obsolete vesamenu.c32 detected"
+msgid "Obsolete %s detected"
+msgstr "Đã phát hiện %s cũ"
+
+#. • MSG_205
+#.
+#. Display the name of the image selected. eg: "Using image: en_win7_x64_sp1.iso"
+msgid "Using image: %s"
+msgstr "Đang dùng ảnh: %s"
+
+#. • MSG_206
+#.
+#. Example: "Missing ldlinux.c32 file"
+msgid "Missing %s file"
+msgstr "Thiết tập tin %s"
+
+#. • MSG_207
+#.
+#. The name proposed by Windows' Computer Management → Disk Management when you try to format
+#. a drive with an empty label. For an example, see https://rufus.ie/pics/default_name.png.
+msgid "New Volume"
+msgstr "O_Dia_Moi"
+
+#. • MSG_208
+#.
+#. Singular. Example: "1 device found"
+msgid "%d device found"
+msgstr "Phát hiện %d thiết bị"
+
+#. • MSG_209
+#.
+#. Plural. Example: "3 devices found"
+msgid "%d devices found"
+msgstr "Phát hiện %d thiết bị"
+
+#. • MSG_210
+msgid "READY"
+msgstr "SẴN SÀNG"
+
+#. • MSG_211
+msgid "Cancelled"
+msgstr "Đã huỷ"
+
+#. • MSG_212
+msgid "Failed"
+msgstr "Thất bại"
+
+#. • MSG_213
+#.
+#. Used when a new update has been downloaded and launched
+msgid "Launching new application..."
+msgstr "Đang khởi chạy ứng dụng mới..."
+
+#. • MSG_214
+msgid "Failed to launch new application"
+msgstr "Không thể khởi chạy ứng dụng mới"
+
+#. • MSG_215
+#.
+#. Example: "Opened some_file.txt"
+msgid "Opened %s"
+msgstr "Đã mở %s"
+
+#. • MSG_216
+#.
+#. Example: "Saved rufus.log"
+msgid "Saved %s"
+msgstr "Đã lưu %s"
+
+#. • MSG_217
+#.
+#. Formatting status (make sure you use a double % to print the percent sign)
+msgid "Formatting: %0.1f%% completed"
+msgstr "Đang định dạng: %0.1f%% đã hoàn thành"
+
+#. • MSG_218
+msgid "Creating file system: Task %d/%d completed"
+msgstr "Đang tạo hệ thống tập tin: Tác vụ đã hoàn tất %d/%d"
+
+#. • MSG_219
+msgid "NTFS Fixup: %d%% completed"
+msgstr "Sắp xếp NTFS: %d%% đã hoàn thành"
+
+#. • MSG_220
+#.
+#. Parameter: the file system and an estimated duration in mins and secs.
+#. Example: "Formatting (UDF) - Estimated duration 3:21..."
+#. If "estimated duration" is too long, just use "estimated" or an abbreviation
+msgid "Formatting (%s) - estimated duration %d:%02d..."
+msgstr "Đang định dạng (%s) - thời gian dự kiến %d:%02d..."
+
+#. • MSG_221
+msgid "Setting Label (This may take a while)..."
+msgstr "Đang đặt tên (Có thể mất một ít thời gian)..."
+
+#. • MSG_222
+#.
+#. Example: "Formatting (FAT32)..."
+msgid "Formatting (%s)..."
+msgstr "Đang định dạng (%s)..."
+
+#. • MSG_223
+msgid "NTFS Fixup (Checkdisk)..."
+msgstr "Sắp xếp NTFS (Kiểm tra đĩa)..."
+
+#. • MSG_224
+msgid "Clearing MBR/PBR/GPT structures..."
+msgstr "Đang xoá cấu trúc MBR/PBR/GPT..."
+
+#. • MSG_225
+msgid "Requesting disk access..."
+msgstr "Đang yêu cầu truy cập đĩa..."
+
+#. • MSG_226
+msgid "Analyzing existing boot records..."
+msgstr "Đang phân tích bản ghi khởi động đang có..."
+
+#. • MSG_227
+msgid "Closing existing volume..."
+msgstr "Đang đóng ổ đang có..."
+
+#. • MSG_228
+msgid "Writing master boot record..."
+msgstr "Đang ghi bản ghi khởi động chính..."
+
+#. • MSG_229
+msgid "Writing partition boot record..."
+msgstr "Đang ghi bản ghi khởi động phân vùng..."
+
+#. • MSG_230
+msgid "Copying DOS files..."
+msgstr "Đang chép các tập tin DOS..."
+
+#. • MSG_231
+msgid "Copying ISO files..."
+msgstr "Đang chép các tập tin ISO..."
+
+#. • MSG_232
+msgid "Win7 EFI boot setup (This may take a while)..."
+msgstr "Cài đặt khởi động Win7 EFI (có thể mất một thời gian)..."
+
+#. • MSG_233
+msgid "Finalizing, please wait..."
+msgstr "Đang hoàn thiện, vui lòng chờ..."
+
+#. • MSG_234
+#.
+#. Takes a Syslinux version as parameter.
+#. Example: "Installing Syslinux v5.10..."
+msgid "Installing Syslinux %s..."
+msgstr "Đang cài đặt Syslinux %s..."
+
+#. • MSG_235
+#.
+#. Bad blocks status. Example: "Bad Blocks: Write pass 1/2 - 12.34% (0/0/1 errors)"
+#. See MSG_191 & MSG_192 for "Write pass"/"Read pass" translation.
+msgid "Bad Blocks: %s %d/%d - %0.2f%% (%d/%d/%d errors)"
+msgstr "Khối hỏng: %s %d/%d - %0.2f%% (%d/%d/%d lỗi)"
+
+#. • MSG_236
+msgid "Bad Blocks: Testing with random pattern"
+msgstr "Khối hỏng: Kiểm tra với mẫu ngẫu nhiên"
+
+#. • MSG_237
+msgid "Bad Blocks: Testing with pattern 0x%02X"
+msgstr "Khối hỏng: Kiểm tra với mẫu 0x%02X"
+
+#. • MSG_238
+#.
+#. Example: "Partitioning (MBR)..."
+msgid "Partitioning (%s)..."
+msgstr "Đang phân vùng (%s)..."
+
+#. • MSG_239
+msgid "Deleting partitions..."
+msgstr "Đang xoá phân vùng..."
+
+#. • MSG_240
+#.
+#. This message has to do with the signature validation that Rufus uses when downloading an update.
+msgid "The signature for the downloaded update can not be validated. This could mean that your system is improperly configured for signature validation or indicate a malicious download.\n\nThe download will be deleted. Please check the log for more details."
+msgstr "Chữ kí cho bản cập nhật không thể chứng thực. Lỗi này có thể do hệ thống của bạn không được cấu hình chuẩn để chứng thực chữ ký hoặc bản tải bị lỗi.\n\nFile tải sẽ bị xóa. Kiểm tra log để biết thêm thông tin."
+
+#. • MSG_241
+msgid "Downloading: %0.1f%%"
+msgstr "Đang tải xuống: %0.1f%%"
+
+#. • MSG_242
+msgid "Failed to download file."
+msgstr "Không thể tải xuống tập tin."
+
+#. • MSG_243
+msgid "Checking for Rufus updates..."
+msgstr "Đang kiểm tra cập nhật Rufus..."
+
+#. • MSG_244
+msgid "Updates: Unable to connect to the internet"
+msgstr "Cập nhật: Không thể kết nối với Internet"
+
+#. • MSG_245
+msgid "Updates: Unable to access version data"
+msgstr "Cập nhật: Không thể truy cập dữ liệu phiên bản"
+
+#. • MSG_246
+msgid "A new version of Rufus is available!"
+msgstr "Đã có phiên bản mới của Rufus!"
+
+#. • MSG_247
+msgid "No new version of Rufus was found"
+msgstr "Không tìm thấy phiên bản mới của Rufus"
+
+#. • MSG_248
+msgid "Application registry keys successfully deleted"
+msgstr "Đã xoá các khoá registry của ứng dụng thành công"
+
+#. • MSG_249
+msgid "Failed to delete application registry keys"
+msgstr "Không thể xoá các khoá registry của ứng dụng"
+
+#. • MSG_250
+#.
+#. Example: "Fixed disk detection enabled", "ISO size check disabled", etc.
+msgid "%s enabled"
+msgstr "%s được kích hoạt"
+
+#. • MSG_251
+msgid "%s disabled"
+msgstr "%s bị vô hiệu"
+
+#. • MSG_252
+msgid "Size checks"
+msgstr "Kiểm tra kích cỡ"
+
+#. • MSG_253
+msgid "Hard disk detection"
+msgstr "Phát hiện đĩa cứng"
+
+#. • MSG_254
+msgid "Force large FAT32 formatting"
+msgstr "Buộc định dạng FAT32 lớn"
+
+#. • MSG_255
+msgid "NoDriveTypeAutorun will be deleted on exit"
+msgstr "NoDriveTypeAutorun sẽ bị xoá khi thoát"
+
+#. • MSG_256
+msgid "Fake drive detection"
+msgstr "Phát hiện ổ đĩa giả"
+
+#. • MSG_257
+msgid "Joliet support"
+msgstr "Hỗ trợ Joliet"
+
+#. • MSG_258
+msgid "Rock Ridge support"
+msgstr "Hỗ trợ Rock Ridge"
+
+#. • MSG_259
+msgid "Force update"
+msgstr "Buộc cập nhật"
+
+#. • MSG_260
+msgid "NTFS compression"
+msgstr "Nén NTFS"
+
+#. • MSG_261
+msgid "Writing image: %0.1f%% completed"
+msgstr "Ghi ảnh: %0.1f%% đã hoàn thành"
+
+#. • MSG_262
+#.
+#. Cheat mode message to disable ISO Support, so that only DD images can be opened
+msgid "ISO Support"
+msgstr "Hỗ trợ ISO"
+
+#. • MSG_263
+#.
+#. Cheat mode to force legacy size units, where 1 KB is 1024 bytes and NOT that fake 1000 bytes abomination!
+msgid "Use PROPER size units"
+msgstr "Dùng đơn vị kích cỡ ĐÚNG"
+
+#. • MSG_264
+msgid "Deleting directory '%s'"
+msgstr "Đang xoá thư mục '%s'"
+
+#. • MSG_265
+msgid "VMWare disk detection"
+msgstr "Phát hiện đĩa VMWare"
+
+#. • MSG_266
+msgid "Dual UEFI/BIOS mode"
+msgstr "Chế độ Dual UEFI/BIOS"
+
+#. • MSG_267
+msgid "Applying Windows image: %0.1f%% completed"
+msgstr "Đang áp dụng ảnh Windows: %0.1f%% đã hoàn thành"
+
+#. • MSG_268
+msgid "Applying Windows image..."
+msgstr "Đang áp dụng ảnh Windows..."
+
+#. • MSG_269
+msgid "Preserve timestamps"
+msgstr "Giữ dấu thời gian"
+
+#. • MSG_270
+msgid "USB debug"
+msgstr "Gỡ rối USB"
+
+#. • MSG_271
+msgid "Computing image checksums: %0.1f%% completed"
+msgstr "Đang tính toán kiểm tổng ảnh: %0.1f%% đã hoàn thành"
+
+#. • MSG_272
+msgid "Compute the MD5, SHA1 and SHA256 checksums for the selected image"
+msgstr "Tính toán giá trị tổng kiểm tra MD5, SHA1 và SHA256 với ảnh đã chọn"
+
+#. • MSG_273
+msgid "Change the application language"
+msgstr "Thay đổi ngôn ngữ ứng dụng"
+
+#. • MSG_274
+msgid "ISOHybrid image detected"
+msgstr "Đã phát hiện ảnh ISOHybrid"
+
+#. • MSG_275
+#.
+#. '%s' will be replaced with your translations for MSG_036 ("ISO Image") and MSG_095 ("DD Image")
+msgid "The image you have selected is an 'ISOHybrid' image. This means it can be written either in %s (file copy) mode or %s (disk image) mode.\nRufus recommends using %s mode, so that you always have full access to the drive after writing it.\nHowever, if you encounter issues during boot, you can try writing this image again in %s mode.\n\nPlease select the mode that you want to use to write this image:"
+msgstr "Ảnh bạn đã chọn là một ảnh 'ISOHybrid'. Điều này có nghĩa nó có thể được ghi trong chế độ %s (chép tập tin) hoặc %s (ảnh đĩa).\nRufus khuyến cáo sử dụng chế độ %s, vì bạn luôn có toàn quyền truy nhập ổ đĩa sau khi ghi nó.\nTuy nhiên, nếu bạn gặp vấn đề trong lúc khởi động, bạn có thể thử ghi lại ảnh này trong chế độ %s.\n\nHãy chọn chế độ mà bạn muốn dùng để ghi ảnh này:"
+
+#. • MSG_276
+#.
+#. '%s' will be replaced with your translation for MSG_036 ("ISO Image")
+msgid "Write in %s mode (Recommended)"
+msgstr "Ghi trong chế độ %s (Khuyến cáo)"
+
+#. • MSG_277
+#.
+#. '%s' will be replaced with your translation for MSG_095 ("DD Image")
+msgid "Write in %s mode"
+msgstr "Ghi trong chế độ %s"
+
+#. • MSG_278
+msgid "Checking for conflicting processes..."
+msgstr "Đang kiểm tra các tiến trình xung đột..."
+
+#. • MSG_279
+msgid "Non bootable"
+msgstr "Không có khả năng khởi động"
+
+#. • MSG_280
+msgid "Disk or ISO image"
+msgstr "Đĩa hoặc file ảnh"
+
+#. • MSG_281
+msgid "%s (Please select)"
+msgstr "%s (Hãy chọn một ảnh)"
+
+#. • MSG_282
+msgid "Exclusive USB drive locking"
+msgstr "Khoá ổ USB đặc biệt"
+
+#. • MSG_283
+msgid "Invalid signature"
+msgstr "Chữ ký không hợp lệ"
+
+#. • MSG_284
+msgid "The downloaded executable is missing a digital signature."
+msgstr "Tập tin thực thi đã tải xuống thiếu chữ ký số."
+
+#. • MSG_285
+msgid "The downloaded executable is signed by '%s'.\nThis is not a signature we recognize and could indicate some form of malicious activity...\nAre you sure you want to run this file?"
+msgstr "Tập tin thực thi đã tải xuống được ký bởi '%s'.\nĐây không phải chữ ký số chúng tôi công nhận và có thể xác định là một dạng hoạt động nguy hiểm...\nBạn chắc muốn chạy tập tin này?"
+
+#. • MSG_286
+msgid "Zeroing drive: %0.1f%% completed"
+msgstr "Đang xóa ổ đĩa: %0.1f%% đã hoàn thành"
+
+#. • MSG_287
+msgid "Detection of non-USB removable drives"
+msgstr "Phát hiện ổ đĩa tháo được không phải USB"
+
+#. • MSG_288
+msgid "Missing elevated privileges"
+msgstr "Thiếu đặc quyền"
+
+#. • MSG_289
+msgid "This application can only run with elevated privileges"
+msgstr "Ứng dụng này chỉ có thể chạy với đặc quyền quản trị"
+
+#. • MSG_290
+msgid "File Indexing"
+msgstr "Lập chỉ mục tập tin"
+
+#. • MSG_291
+msgid "Version selection"
+msgstr "Chọn phiên bản"
+
+#. • MSG_292
+msgid "Please select the version of Windows you want to install:"
+msgstr "Hãy chọn phiên bản Windows bạn muốn cài đặt:"
+
+#. • MSG_293
+msgid "Unsupported Windows version"
+msgstr "Phiên bản Windows không được hỗ trợ"
+
+#. • MSG_294
+msgid "This version of Windows is no longer supported by Rufus."
+msgstr "Phiên bản này của Windows không còn được Rufus hỗ trợ nữa."
+
+#. • MSG_295
+msgid "Warning: Unofficial version"
+msgstr "Cảnh báo: Phiên bản không chính thức"
+
+#. • MSG_296
+msgid "This version of Rufus was not produced by its official developer(s).\n\nAre you sure you want to run it?"
+msgstr "Phiên bản Rufus này KHÔNG PHẢI do chính tác giả tạo ra.\n\nBạn chắc muốn tiếp tục chạy chứ?"
+
+#. • MSG_297
+msgid "Truncated ISO detected"
+msgstr "Đã phát hiện ISO bị cắt xén"
+
+#. • MSG_298
+msgid "The ISO file you have selected does not match its declared size: %s of data is missing!\n\nIf you obtained this file from the Internet, you should try to download a new copy and verify that the MD5 or SHA checksums match the official ones.\n\nNote that you can compute the MD5 or SHA in Rufus by clicking the (✓) button."
+msgstr "Tập tin ISO bạn đã chọn không trùng khớp kích cỡ của nó: thiếu mất %s dữ liệu!\n\nnếu bạn tải tập tin này từ Internet, bạn nên tải lại một bản sao mới và xác nhận rằng mã MD5 hoặc SHA trùng khớp với bản chính thức.\n\nHãy nhớ rằng bạn có thể tính mã MD5 hoặc SHA trong Rufus bằng cách chọn nút (✓)."
+
+#. • MSG_299
+msgid "Timestamp validation error"
+msgstr "Lỗi xác thực dấu thời gian"
+
+#. • MSG_300
+msgid "Rufus could not validate that the timestamp of the downloaded update is more recent than the one for the current executable.\n\nIn order to prevent potential attack scenarios, the update process has been aborted and the download will be deleted. Please check the log for more details."
+msgstr "Rufus không thể xác thực dấu thời gian trên phiên bản cập nhật được tải xuống gần đây mới hơn so với phiên bản đang chạy.\n\nĐể tránh nguy cơ bị tấn công tiềm ẩn, quá trình cập nhật đã bị hủy và file tải sẽ bị xóa. Hãy kiểm tra log để biết thêm thông tin."
+
+#. • MSG_301
+msgid "Show application settings"
+msgstr "Hiển thị cài đặt chương trình"
+
+#. • MSG_302
+msgid "Show information about this application"
+msgstr "Hiện thông tin về chương trình"
+
+#. • MSG_303
+msgid "Show the log"
+msgstr "Hiển thị log"
+
+#. • MSG_304
+msgid "Create a disk image of the selected device"
+msgstr "Tạo file ảnh ổ đĩa từ thiết bị được chọn"
+
+#. • MSG_305
+msgid "Use this option to indicate whether you want to use this device to install Windows on another disk, or if you want to run Windows directly from this drive (Windows To Go)."
+msgstr "Sử dung tùy chọn này để chỉ thị rằng bạn muốn sử dung thiết bị này cài Windows lên một ổ đĩa khác, hoặc nếu bạn muốn chạy Windows trực tiếp từ thiết bị này (Windows To Go)."
+
+#. • MSG_306
+#.
+#. You can see this status message by pressing <Ctrl>-<Alt>-<Z> and then selecting START.
+#. It's the same as MSG_286 but with a process that *may* be faster, hence the name.
+msgid "Fast-zeroing drive: %0.1f%% completed"
+msgstr "Đang xóa nhanh ổ đĩa: %0.1f%% đã hoàn thành"
