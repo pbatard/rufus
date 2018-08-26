@@ -1,0 +1,1416 @@
+
+msgid ""
+msgstr ""
+"Project-Id-Version: 3.2\n"
+"Report-Msgid-Bugs-To: pete@akeo.ie\n"
+"POT-Creation-Date: 2018-08-26 19:41+0100\n"
+"PO-Revision-Date: 2018-08-26 19:41+0100\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: uk_UA\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Rufus-LanguageName: Ukrainian (Українська)\n"
+"X-Rufus-LCID: 0x0422\n"
+
+#. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
+msgid "Drive Properties"
+msgstr "Властивості приводу"
+
+#. • IDD_DIALOG → IDS_DEVICE_TXT
+msgid "Device"
+msgstr "Пристрій"
+
+#. • IDD_DIALOG → IDS_BOOT_SELECTION_TXT
+msgid "Boot selection"
+msgstr "Тип завантаження"
+
+#. • IDD_DIALOG → IDC_SELECT
+msgid "Select"
+msgstr "Обрати"
+
+#. • IDD_DIALOG → IDS_IMAGE_OPTION_TXT
+msgid "Image Option"
+msgstr "Параметри образу"
+
+#. • IDD_DIALOG → IDS_PARTITION_TYPE_TXT
+msgid "Partition scheme"
+msgstr "Схема розділу"
+
+#. • IDD_DIALOG → IDS_TARGET_SYSTEM_TXT
+msgid "Target system"
+msgstr "Цільова система"
+
+#. • IDD_DIALOG → IDC_LIST_USB_HDD
+msgid "List USB Hard Drives"
+msgstr "Список USB накопичувачів"
+
+#. • IDD_DIALOG → IDC_OLD_BIOS_FIXES
+#.
+#. It is acceptable to drop the parenthesis () if you are running out of space
+#. as there is a tooltip (MSG_169) providing these details.
+msgid "Add fixes for old BIOSes (extra partition, align, etc.)"
+msgstr "Додати виправлення для старих BIOS (додатковий розділ, вирівнювання, тощо)"
+
+#. • IDD_DIALOG → IDC_RUFUS_MBR
+#.
+#. 'MBR': See http://en.wikipedia.org/wiki/Master_boot_record
+#. Rufus can install it's own custom MBR (the Rufus MBR), which also allows users to
+#. specify a custom disk ID for the BIOS. The tooltip for this control is MSG_167.
+msgid "Use Rufus MBR with BIOS ID"
+msgstr "Використовувати Rufus MBR з BIOS ID"
+
+#. • IDD_DIALOG → IDS_FORMAT_OPTIONS_TXT
+msgid "Format Options"
+msgstr "Параметри форматування"
+
+#. • IDD_DIALOG → IDS_FILE_SYSTEM_TXT
+msgid "File system"
+msgstr "Файлова система"
+
+#. • IDD_DIALOG → IDS_CLUSTER_SIZE_TXT
+msgid "Cluster size"
+msgstr "Розмір кластеру"
+
+#. • IDD_DIALOG → IDS_LABEL_TXT
+msgid "Volume label"
+msgstr "Мітка тому"
+
+#. • IDD_DIALOG → IDC_QUICK_FORMAT
+msgid "Quick format"
+msgstr "Швидке форматування"
+
+#. • IDD_DIALOG → IDC_BAD_BLOCKS
+msgid "Check device for bad blocks"
+msgstr "Перевірити пристрій на погані блоки"
+
+#. • IDD_DIALOG → IDC_EXTENDED_LABEL
+msgid "Create extended label and icon files"
+msgstr "Створити розширену мітку та значок пристрою"
+
+#. • IDD_DIALOG → IDS_STATUS_TXT
+msgid "Status"
+msgstr "Статус"
+
+#. • IDD_DIALOG → IDCANCEL
+#. • IDD_LICENSE → IDCANCEL
+#. • IDD_LOG → IDCANCEL
+#. • IDD_UPDATE_POLICY → IDCANCEL
+#. • IDD_NEW_VERSION → IDCANCEL
+#. • MSG_006
+msgid "Close"
+msgstr "Закрити"
+
+#. • IDD_DIALOG → IDC_START
+msgid "Start"
+msgstr "Почати"
+
+#. • IDD_ABOUTBOX → IDD_ABOUTBOX
+msgid "About Rufus"
+msgstr "Про Rufus"
+
+#. • IDD_ABOUTBOX → IDC_ABOUT_LICENSE
+msgid "License"
+msgstr "Ліцензія"
+
+#. • IDD_ABOUTBOX → IDOK
+msgid "OK"
+msgstr "ОК"
+
+#. • IDD_LICENSE → IDD_LICENSE
+msgid "Rufus License"
+msgstr "Ліцензія Rufus"
+
+#. • IDD_NOTIFICATION → IDC_MORE_INFO
+msgid "More information"
+msgstr "Детальніше"
+
+#. • IDD_NOTIFICATION → IDYES
+#. • MSG_008
+msgid "Yes"
+msgstr "Так"
+
+#. • IDD_NOTIFICATION → IDNO
+#. • MSG_009
+msgid "No"
+msgstr "Ні"
+
+#. • IDD_LOG → IDD_LOG
+msgid "Log"
+msgstr "Журнал"
+
+#. • IDD_LOG → IDC_LOG_CLEAR
+msgid "Clear"
+msgstr "Очистити"
+
+#. • IDD_LOG → IDC_LOG_SAVE
+msgid "Save"
+msgstr "Зберегти"
+
+#. • IDD_UPDATE_POLICY → IDD_UPDATE_POLICY
+msgid "Update policy and settings"
+msgstr "Політика оновлення та параметри"
+
+#. • IDD_UPDATE_POLICY → IDS_UPDATE_SETTINGS_GRP
+msgid "Settings"
+msgstr "Параметри"
+
+#. • IDD_UPDATE_POLICY → IDS_UPDATE_FREQUENCY_TXT
+msgid "Check for updates"
+msgstr "Перевірити наявність оновлень"
+
+#. • IDD_UPDATE_POLICY → IDS_INCLUDE_BETAS_TXT
+msgid "Include beta versions"
+msgstr "Включаючи бета-версії"
+
+#. • IDD_UPDATE_POLICY → IDC_CHECK_NOW
+msgid "Check Now"
+msgstr "Перевірити зараз"
+
+#. • IDD_NEW_VERSION → IDD_NEW_VERSION
+msgid "Check For Updates - Rufus"
+msgstr "Перевірити наявність оновлень - Rufus"
+
+#. • IDD_NEW_VERSION → IDS_NEW_VERSION_AVAIL_TXT
+msgid "A newer version is available. Please download the latest version!"
+msgstr "Доступна нова версія. Будь ласка, завантажте останню версію!"
+
+#. • IDD_NEW_VERSION → IDC_WEBSITE
+msgid "Click here to go to the website"
+msgstr "Натисніть тут, щоб перейти на домашню сторінку"
+
+#. • IDD_NEW_VERSION → IDS_NEW_VERSION_NOTES_GRP
+msgid "Release Notes"
+msgstr "Нотатки про випуск"
+
+#. • IDD_NEW_VERSION → IDS_NEW_VERSION_DOWNLOAD_GRP
+#. • IDD_NEW_VERSION → IDC_DOWNLOAD
+#. • MSG_040
+msgid "Download"
+msgstr "Завантажити"
+
+#. • MSG_001
+msgid "Other instance detected"
+msgstr "Виявлено інший екземпляр Rufus"
+
+#. • MSG_002
+msgid "Another Rufus application is running.\nPlease close the first application before running another one."
+msgstr "Запущено інший додаток Rufus.\nЗакрийте перший додаток перед тим, як запустити ще один."
+
+#. • MSG_003
+msgid "WARNING: ALL DATA ON DEVICE '%s' WILL BE DESTROYED.\nTo continue with this operation, click OK. To quit click CANCEL."
+msgstr "УВАГА: ВСІ ДАНІ НА ДИСКУ '%s' БУДУТЬ ЗНИЩЕНІ.\nДля того, щоб продовжити, натисніть ОК. Для виходу натисніть Відмінити."
+
+#. • MSG_004
+msgid "Rufus update policy"
+msgstr "Політика оновлення Rufus"
+
+#. • MSG_005
+msgid "Do you want to allow Rufus to check for application updates online?"
+msgstr "Чи хочете ви, щоб Rufus перевіряв оновлення автоматично?"
+
+#. • MSG_007
+msgid "Cancel"
+msgstr "Відмінити"
+
+#. • MSG_010
+msgid "Bad blocks found"
+msgstr "Знайдені погані блоки"
+
+#. • MSG_011
+msgid "Check completed: %d bad block(s) found\n  %d read error(s)\n  %d write error(s)\n  %d corruption error(s)"
+msgstr "Перевірка завершена: %d поганих блоків знайдено\n  %d помилок читання\n  %d помилок запису\n  %d пошкоджених блоків"
+
+#. • MSG_012
+#.
+#. This contains the formatted message from MSG_001 as well as the name of the bad blocks logfile
+msgid "%s\nA more detailed report can be found in:\n%s"
+msgstr "%s\nБільш детальний звіт можна знайти в:\n%s"
+
+#. • MSG_013
+msgid "Disabled"
+msgstr "Відімкнено"
+
+#. • MSG_014
+msgid "Daily"
+msgstr "Щодня"
+
+#. • MSG_015
+msgid "Weekly"
+msgstr "Щотижня"
+
+#. • MSG_016
+msgid "Monthly"
+msgstr "Щомісяця"
+
+#. • MSG_017
+msgid "Custom"
+msgstr "За вибором"
+
+#. • MSG_018
+msgid "Your version: %d.%d (Build %d)"
+msgstr "Ваша версія: %d.%d (Збірка %d)"
+
+#. • MSG_019
+msgid "Latest version: %d.%d (Build %d)"
+msgstr "Остання версія: %d.%d (Збірка %d)"
+
+#. • MSG_020
+#. • MSG_026
+msgid "bytes"
+msgstr "байт"
+
+#. • MSG_021
+#.
+#. *Short* version of the kilobyte size suffix
+msgid "KB"
+msgstr "Кб"
+
+#. • MSG_022
+#.
+#. *Short* version of the megabyte size suffix
+msgid "MB"
+msgstr "Мб"
+
+#. • MSG_023
+#.
+#. *Short* version of the gigabyte size suffix
+msgid "GB"
+msgstr "Гб"
+
+#. • MSG_024
+#.
+#. *Short* version of the terabyte size suffix
+msgid "TB"
+msgstr "Тб"
+
+#. • MSG_025
+#.
+#. *Short* version of the pentabyte size suffix
+msgid "PB"
+msgstr "Пб"
+
+#. • MSG_027
+msgid "kilobytes"
+msgstr "кілобайт"
+
+#. • MSG_028
+msgid "megabytes"
+msgstr "мегабайт"
+
+#. • MSG_029
+msgid "Default"
+msgstr "За замовчуванням"
+
+#. • MSG_030
+#.
+#. This gets appended to the file system, cluster size, etc.
+msgid "%s (Default)"
+msgstr "%s (за замовчуванням)"
+
+#. • MSG_031
+msgid "BIOS (or UEFI-CSM)"
+msgstr "BIOS (чи UEFI-CSM)"
+
+#. • MSG_032
+msgid "UEFI (non CSM)"
+msgstr "UEFI (без CSM)"
+
+#. • MSG_033
+msgid "BIOS or UEFI"
+msgstr "BIOS чи UEFI"
+
+#. • MSG_034
+#.
+#. Number of bad block check passes (singular for 1 pass)
+msgid "%d pass"
+msgstr "%d прохід"
+
+#. • MSG_035
+#.
+#. Number of bad block check passes (plural for 2 or more passes).
+#. See MSG_087 for the message that %s gets replaced with.
+msgid "%d passes %s"
+msgstr "%d проходів %s"
+
+#. • MSG_036
+msgid "ISO Image"
+msgstr "ISO-образ"
+
+#. • MSG_037
+msgid "Application"
+msgstr "Додаток"
+
+#. • MSG_038
+msgid "Abort"
+msgstr "Відмінити"
+
+#. • MSG_039
+msgid "Launch"
+msgstr "Запустити"
+
+#. • MSG_041
+msgid "Operation cancelled by the user"
+msgstr "Операція скасована користувачем"
+
+#. • MSG_042
+msgid "Error"
+msgstr "Помилка"
+
+#. • MSG_043
+msgid "Error: %s"
+msgstr "Помилка: %s"
+
+#. • MSG_044
+msgid "File download"
+msgstr "Завантаження файлу"
+
+#. • MSG_045
+msgid "USB Storage Device (Generic)"
+msgstr "USB-пристрій збереження даних"
+
+#. • MSG_046
+msgid "%s (Disk %d) [%s]"
+msgstr "%s (Диск %d) [%s]"
+
+#. • MSG_047
+#.
+#. Used when a drive is detected that contains more than one partition
+msgid "Multiple Partitions"
+msgstr "Декілька розділів"
+
+#. • MSG_048
+msgid "Rufus - Flushing buffers"
+msgstr "Rufus - Очищення буферів"
+
+#. • MSG_049
+msgid "Rufus - Cancellation"
+msgstr "Rufus - Скасування"
+
+#. • MSG_050
+msgid "Success."
+msgstr "Успішно."
+
+#. • MSG_051
+msgid "Undetermined error while formatting."
+msgstr "Невідомі помилки під час форматування."
+
+#. • MSG_052
+msgid "Cannot use the selected file system for this media."
+msgstr "Неможливо використовувати обрану файлову систему для даного пристрою."
+
+#. • MSG_053
+msgid "Access to the device is denied."
+msgstr "Доступ до пристрою заборонений."
+
+#. • MSG_054
+msgid "Media is write protected."
+msgstr "Обраний пристрій захищений від запису."
+
+#. • MSG_055
+msgid "The device is in use by another process. Please close any other process that may be accessing the device."
+msgstr "Обраний пристрій використовується іншим процесом. Будь ласка, закінчіть процес перед використанням обраного пристрою."
+
+#. • MSG_056
+msgid "Quick format is not available for this device."
+msgstr "Швидке форматування недоступне для обраного пристрою."
+
+#. • MSG_057
+msgid "The volume label is invalid."
+msgstr "Неприпустима мітка пристрою."
+
+#. • MSG_058
+msgid "The device handle is invalid."
+msgstr "Неприпустимий дескриптор пристрою."
+
+#. • MSG_059
+msgid "The selected cluster size is not valid for this device."
+msgstr "Обраний розмір кластеру не являється припустимим для даного пристрою."
+
+#. • MSG_060
+msgid "The volume size is invalid."
+msgstr "Невірний розмір тому."
+
+#. • MSG_061
+msgid "Please insert a removable media in drive."
+msgstr "Вставте знімний носій до приводу."
+
+#. • MSG_062
+msgid "An unsupported command was received."
+msgstr "Була отримана непідтримувана команда."
+
+#. • MSG_063
+msgid "Memory allocation error."
+msgstr "Помилка розподілу пам'яті."
+
+#. • MSG_064
+msgid "Read error."
+msgstr "Помилка читання."
+
+#. • MSG_065
+msgid "Write error."
+msgstr "Помилка запису."
+
+#. • MSG_066
+msgid "Installation failure"
+msgstr "Помилка встановлення."
+
+#. • MSG_067
+msgid "Could not open media. It may be in use by another process. Please re-plug the media and try again."
+msgstr "Неможливо зчитати носій інформації. Можливо він використовується іншим процесом. Будь ласка, витягніть носій інформації та вставте його знову."
+
+#. • MSG_068
+msgid "Error while partitioning drive."
+msgstr "Помилка при створенні розділу."
+
+#. • MSG_069
+msgid "Could not copy files to target drive."
+msgstr "Неможливо скопіювати файли на обраний пристрій."
+
+#. • MSG_070
+msgid "Cancelled by user."
+msgstr "Скасовано користувачем"
+
+#. • MSG_071
+#.
+#. See http://en.wikipedia.org/wiki/Thread_%28computing%29
+msgid "Unable to start thread."
+msgstr "Неможливо запустити потік виконання."
+
+#. • MSG_072
+msgid "Bad blocks check didn't complete."
+msgstr "Перевірка на погані блоки не завершена."
+
+#. • MSG_073
+msgid "ISO image scan failure."
+msgstr "Помилка перевірки ISO-образу."
+
+#. • MSG_074
+msgid "ISO image extraction failure."
+msgstr "Помилка видобування ISO-образу."
+
+#. • MSG_075
+msgid "Unable to remount volume."
+msgstr "Неможливо змонтувати том."
+
+#. • MSG_076
+msgid "Unable to patch/setup files for boot."
+msgstr "Неможливо пропатчити настановні файли для завантаження."
+
+#. • MSG_077
+msgid "Unable to assign a drive letter."
+msgstr "Неможливо призначити літеру приводу."
+
+#. • MSG_078
+msgid "Can't mount GUID volume."
+msgstr "Неможливо змонтувати GUID-том."
+
+#. • MSG_079
+msgid "The device is not ready."
+msgstr "Пристрій не готовий."
+
+#. • MSG_080
+msgid "Rufus detected that Windows is still flushing its internal buffers onto the USB device.\n\nDepending on the speed of your USB device, this operation may take a long time to complete, especially for large files.\n\nWe recommend that you let Windows finish, to avoid corruption. But if you grow tired of waiting, you can just unplug the device..."
+msgstr "Rufus виявив, що Windows все ще очищає внутрішній буфер USB-пристрою.\n\nВ залежності від швидкості вашого USB-пристрою, ця операція може зайняти багато часу, особливо для великих файлів.\n\nДочекайтесь доки Windows завершить очищення для того, щоб запобігти пошкодження пристрою. Однак, якщо ви втомились від очікування, можете просто відімкнути пристрій..."
+
+#. • MSG_081
+msgid "Unsupported image"
+msgstr "Непідтримуваний ISO-образ"
+
+#. • MSG_082
+msgid "This image is either non-bootable, or it uses a boot or compression method that is not supported by Rufus..."
+msgstr "Обраний образ або незавантажувальний або використовує метод завантаження чи стиснення, який не підтримується Rufus..."
+
+#. • MSG_083
+msgid "Replace %s?"
+msgstr "Перемістити %s?"
+
+#. • MSG_084
+msgid "This ISO image seems to use an obsolete version of '%s'.\nBoot menus may not display properly because of this.\n\nA newer version can be downloaded by Rufus to fix this issue:\n- Choose 'Yes' to connect to the internet and download the file\n- Choose 'No' to leave the existing ISO file unmodified\nIf you don't know what to do, you should select 'Yes'.\n\nNote: The new file will be downloaded in the current directory and once a '%s' exists there, it will be reused automatically."
+msgstr "Обраний ISO-образ використовує застарілу версію '%s'.\nЧерез це завантажувальне меню може відображатися неправильно.\n\nНову версію можна завантажити за допомогою Rufus:\n- Оберіть 'Так', щоб завантажити файл з інтернету\n- Оберіть 'Ні', щоб не модифікувати ISO-образ\nЯкщо ви не знаєте що робити, то оберіть 'Так'.\n\nФайл буде завантажений в поточну директорію, а в разі наявності '%s' - замінений автоматично."
+
+#. • MSG_085
+msgid "Downloading '%s'"
+msgstr "Завантаженя '%s'"
+
+#. • MSG_086
+msgid "No image selected"
+msgstr "Образ не обрано"
+
+#. • MSG_087
+#.
+#. This message appears in Advanced format options → Check device for bad blocks → dropdown menu
+#. %s will be replaced with SLC, MLC or TLC, which is a type of NAND (or flash memory). In other
+#. words, this message should mean "for a flash memory device of type %s". *Please* try to keep
+#. the translation as short as possible so that it won't result in an overly large dropdown...
+#. If you prefer, it's okay to use "type" or "device" instead of "NAND" (e.g. "for TLC type").
+#. See also MSG_035.
+msgid "for %s NAND"
+msgstr "для %s NAND"
+
+#. • MSG_088
+msgid "Image is too big"
+msgstr "Образ занадто великий"
+
+#. • MSG_089
+msgid "The image is too big for the selected target."
+msgstr "Образ занадто великий для обраного пристрою."
+
+#. • MSG_090
+msgid "Unsupported ISO"
+msgstr "Непідтримуваний ISO-образ"
+
+#. • MSG_091
+msgid "When using UEFI Target Type, only EFI bootable ISO images are supported. Please select an EFI bootable ISO or set the Target Type to BIOS."
+msgstr "При використанні системного інтерфейсу UEFI підтримуються тільки завантажувальні EFI ISO-образи. Будь ласка, оберіть завантажувальний EFI ISO-образ чи змініть системний інтерфейс на BIOS."
+
+#. • MSG_092
+msgid "Unsupported filesystem"
+msgstr "Непідтримувана файлова система"
+
+#. • MSG_093
+msgid "IMPORTANT: THIS DRIVE CONTAINS MULTIPLE PARTITIONS!!\n\nThis may include partitions/volumes that aren't listed or even visible from Windows. Should you wish to proceed, you are responsible for any data loss on these partitions."
+msgstr "ВАЖЛИВО: ДАНИЙ ДИСК МІСТИТЬ КІЛЬКА РОЗДІЛІВ!!\n\nДаний диск може включати розділи/томи, які не були перераховані або навіть видимі у Windows. Якщо ви хочете продовжити, то будете нести відповідальність за втрату даних на цих розділах."
+
+#. • MSG_094
+msgid "Multiple partitions detected"
+msgstr "Виявлено декілька розділів"
+
+#. • MSG_095
+msgid "DD Image"
+msgstr "DD-образ"
+
+#. • MSG_096
+msgid "The file system currently selected can not be used with this type of ISO. Please select a different file system or use a different ISO."
+msgstr "Обрана файлова система не може використовуватись з цим типом ISO-образу. Будь ласка, оберіть іншу файлову систему чи інший ISO-образ."
+
+#. • MSG_097
+msgid "'%s' can only be applied if the file system is NTFS."
+msgstr "'%s' може використовуватись тільки з файловою системою NTFS."
+
+#. • MSG_098
+msgid "IMPORTANT: You are trying to install 'Windows To Go', but your target drive doesn't have the 'FIXED' attribute. Because of this Windows will most likely freeze during boot, as Microsoft hasn't designed it to work with drives that instead have the 'REMOVABLE' attribute.\n\nDo you still want to proceed?\n\nNote: The 'FIXED/REMOVABLE' attribute is a hardware property that can only be changed using custom tools from the drive manufacturer. However those tools are ALMOST NEVER provided to the public..."
+msgstr "ВАЖЛИВО: Ви намагаєтесь встановити 'Windows To Go', але ваш диск призначення не повинен бути 'ФІКСОВАНИМ'. Через це Windows, швидше за все, зависне під час завантаження, так як Microsoft не передбачав дану функцію для роботи з 'ФІКСОВАНИМИ' дисками, а тільки зі 'ЗНІМНИМИ'.\n\nВи все ще хочете продовжити?\n\nПримітка: Атрибути 'ФІКСОВАНИЙ/ЗНІМНИЙ' являються апаратними властивостями, які можуть бути змінені тільки за допомогою інструментів від виробників. Проте ці інструменти МАЙЖЕ НІКОЛИ не надаються громадськості..."
+
+#. • MSG_099
+msgid "Filesystem limitation"
+msgstr "Обмеження файлової системи"
+
+#. • MSG_100
+msgid "This ISO image contains a file larger than 4GB, which is more than the maximum size allowed for a FAT or FAT32 file system."
+msgstr "Цей ISO-образ містить файл розміром більш ніж 4 Гб, що неприпустимо при використанні файлової системи FAT чи FAT32"
+
+#. • MSG_101
+msgid "Missing WIM support"
+msgstr "Відсутня підтримка WIM"
+
+#. • MSG_102
+msgid "Your platform cannot extract files from WIM archives. WIM extraction is required to create EFI bootable Windows 7 and Windows Vista USB drives. You can fix that by installing a recent version of 7-Zip.\nDo you want to visit the 7-zip download page?"
+msgstr "Ваша система не може видобувати файли з WIM-архівів, однак це необхідно для створення завантажувального USB-диску з Windows 7 чи Windows Vista. Ви можете виправити це встановивши останню версію 7-Zip\nХочете відвідати сторінку завантаження 7-zip?"
+
+#. • MSG_103
+msgid "Download %s?"
+msgstr "Завантажити %s?"
+
+#. • MSG_104
+#.
+#. Example: "Grub4DOS v0.4 or later requires a 'grldr' file to be installed. Because this
+#. file is more than 100 KB in size, and always present on Grub4DOS ISO images (...)"
+msgid "%s or later requires a '%s' file to be installed.\nBecause this file is more than 100 KB in size, and always present on %s ISO images, it is not embedded in Rufus.\n\nRufus can download the missing file for you:\n- Select 'Yes' to connect to the internet and download the file\n- Select 'No' if you want to manually copy this file on the drive later\n\nNote: The file will be downloaded in the current directory and once a '%s' exists there, it will be reused automatically."
+msgstr "%s чи більш пізньої версії потребує наявності '%s'.\nОскільки цей файл більший за 100 Кб, і завжди присутній в %s ISO-образах, він не був вбудований в Rufus.\n\nRufus може завантажити бракуючий файл:\n- Оберіть 'Так', якщо хочете завантажити даний файл\n- Оберіть 'Ні', якщо хочете завантажити його вручну пізніше\n\nПримітка: Файл буде завантажений в поточну директорію. За наявності '%s', він буде перезаписаний автоматично."
+
+#. • MSG_105
+msgid "Cancelling may leave the device in an UNUSABLE state.\nIf you are sure you want to cancel, click YES. Otherwise, click NO."
+msgstr "Скасування може залишити пристрій у НЕРОБОЧОМУ стані.\nЯкщо ви впевнені, що хочете скасувати процес, натисність кнопку ТАК. В іншому випадку натисніть кнопку НІ."
+
+#. • MSG_106
+msgid "Please select folder"
+msgstr "Будь ласка, оберіть теку"
+
+#. • MSG_107
+msgid "All files"
+msgstr "Всі файли"
+
+#. • MSG_108
+msgid "Rufus log"
+msgstr "Журнал Rufus"
+
+#. • MSG_109
+msgid "0x%02X (Disk %d)"
+msgstr "0x%02X (Диск %d)"
+
+#. • MSG_110
+#.
+#. "Cluster size" should be the same as the label for IDS_CLUSTER_SIZE_TXT
+#. "kilobytes" should be the same as in MSG_027
+msgid "MS-DOS cannot boot from a drive using a 64 kilobytes Cluster size.\nPlease change the Cluster size or use FreeDOS."
+msgstr "MS-DOS не може завантажитися при використанні розміру кластера 64 Кб...\nБудь ласка, змініть розмір кластеру чи використайте FreeDOS."
+
+#. • MSG_111
+msgid "Incompatible Cluster size"
+msgstr "Несумісний розмір кластера"
+
+#. • MSG_112
+#.
+#. "%d:%02d" is a duration (mins:secs)
+msgid "Formatting a large UDF volumes can take a lot of time. At USB 2.0 speeds, the estimated formatting duration is %d:%02d, during which the progress bar will appear frozen. Please be patient!"
+msgstr "Форматування великих UDF-томів займає багато часу. На швидкості USB 2.0 приблизна тривалість форматування складе %d:%02d, протягом якої індикатор прогресу буде заморожено. Будь ласка, будьте терплячі!"
+
+#. • MSG_113
+msgid "Large UDF volume"
+msgstr "Великий UDF-том"
+
+#. • MSG_114
+msgid "This image uses Syslinux %s%s but this application only includes the installation files for Syslinux %s%s.\n\nAs new versions of Syslinux are not compatible with one another, and it wouldn't be possible for Rufus to include them all, two additional files must be downloaded from the Internet ('ldlinux.sys' and 'ldlinux.bss'):\n- Select 'Yes' to connect to the Internet and download these files\n- Select 'No' to cancel the operation\n\nNote: The files will be downloaded in the current application directory and will be reused automatically if present."
+msgstr "Даний образ використовує Syslinux %s%s, проте даний додаток включає в себе тільки настановні файли для Syslinux %s%s.\n\nТак як нові версії Syslinux несумісні одна з одною, необхідно, щоб додаткові файли ('ldlinux.sys' та 'ldlinux.bss') були завантажені з інтернету:\n- Оберіть 'Так', щоб завантажити файли з інтернету\n- Оберіть 'Ні', щоб відмінити операцію\n\nПримітка: Файли будуть завантажені в поточний каталог додатку і будуть використовуватися повторно за необхідності."
+
+#. • MSG_115
+msgid "Download required"
+msgstr "Необхідно завантажити"
+
+#. • MSG_116
+#.
+#. You should be able to test this message with Super Grub2 Disk ISO:
+#. https://sourceforge.net/projects/supergrub2/files/2.00s2/super_grub2_disk_hybrid_2.00s2.iso/download (11.9 MB)
+msgid "This image uses Grub %s but the application only includes the installation files for Grub %s.\n\nAs different versions of Grub may not be compatible with one another, and it is not possible to include them all, Rufus will attempt to locate a version of the Grub installation file ('core.img') that matches the one from your image:\n- Select 'Yes' to connect to the Internet and attempt to download it\n- Select 'No' to use the default version from Rufus\n- Select 'Cancel' to abort the operation\n\nNote: The file will be downloaded in the current application directory and will be reused automatically if present. If no match can be found online, then the default version will be used."
+msgstr "Даний образ використовує завантажувач Grub %s, але додаток включає тільки настановні файли для завантажувача Grub %s.\n\nРізні версії завантажувача Grub можуть бути несумісними одна з одною та увімкнення їх усіх не являється можливим. Rufus намагатиметься знайти потрібну версію настановного файла завантажува Grub ('core.img'), що відповідає версії завантажувача вашого образу:\n- Оберіть 'Так', щоб скачати завантажувальний файл з Інтернета\n- Оберіть 'Ні', щоб використовувати версію за замовчуванням із Rufus\n- Оберіть 'Відмінити', щоб відмінити операцію\n\nПримітка: Файл буде завантажено в поточний каталог додатку та буде використаний повторно наступного разу. Якщо потрібна версія настановного файла не буде знайдена в інтернеті, то буде використовуватися версія за замовчуванням."
+
+#. • MSG_117
+msgid "Standard Windows installation"
+msgstr "Стандартне встановлення Windows"
+
+#. • MSG_118
+#.
+#. Only translate this message *if* Microsoft has a specific name for
+#. http://en.wikipedia.org/wiki/Windows_To_Go in your language.
+#. Otherwise, you may add a parenthesis eg. "Windows To Go (<hint at what it does>)"
+msgid "Windows To Go"
+msgstr ""
+
+#. • MSG_119
+msgid "advanced drive properties"
+msgstr "розширені властивості приводу"
+
+#. • MSG_120
+msgid "advanced format options"
+msgstr "розширені властивості форматування"
+
+#. • MSG_121
+msgid "Show %s"
+msgstr "Показати %s"
+
+#. • MSG_122
+msgid "Hide %s"
+msgstr "Сховати %s"
+
+#. • MSG_123
+#.
+#. A persistent partitions can be used with "Live" USB media to store data.
+#. It means that data can be preserved across reboots on "Live" USB drives.
+#. To test this feature, please download and select 'casper_test.iso' from:
+#. https://github.com/pbatard/rufus/raw/master/res/loc/test/casper_test.iso
+msgid "Persistent partition size"
+msgstr "Розмір розділу збереження"
+
+#. • MSG_124
+#.
+#. This message appears in the persistence 'Size' control when the slider is set to 0.
+#. It is okay to use "No partition" or "None" or "Deactivated" to indicate that a persistent partition will not be
+#. created if the width of the control is too small (since the 'Size' edit control is *not* adjusted for width).
+msgid "No persistence"
+msgstr "Деактивовано"
+
+#. • MSG_125
+#.
+#. Tooltips used for the peristence size slider and edit control
+msgid "Set the size of the persistent partition for live USB media. Setting the size to 0 disables the persistent partition."
+msgstr "Встановіть розмір розділу збереження для Live USB-пристрою. Щоб вимкнути розділ збереження встановіть розмір 0."
+
+#. • MSG_126
+msgid "Set the partition size units."
+msgstr "Встановити розмір одиниць розділу."
+
+#. • MSG_150
+msgid "Type of computer you plan to use this bootable drive with. It is your responsibility to determine whether your target is of BIOS or UEFI type before you start creating the drive, as it may fail to boot otherwise."
+msgstr "Тип комп'ютера, разом з яким ви хочете використовувати завантажувальний диск. Ви повинні визначити який тип інтерфейсу (BIOS чи UEFI) використовує ваш комп'ютер перед початком створення диску, оскільки неправильний вибір може спровокувати помилку завантаження."
+
+#. • MSG_151
+#.
+#. You shouldn't translate 'Legacy Mode' as this is an option that usually appears in English in the UEFI settings.
+msgid "'UEFI-CSM' means that the device will only boot in BIOS emulation mode (also known as 'Legacy Mode') under UEFI, and not in native UEFI mode."
+msgstr "'UEFI-CSM' означає, що пристрій завантажується лише в режимі емуляції BIOS (також відомому як 'Legacy Mode'), а не в рідному режимі UEFI."
+
+#. • MSG_152
+msgid "'non CSM' means that the device will only boot in native UEFI mode, and not in BIOS emulation mode (also known as 'Legacy Mode')."
+msgstr "'без CSM' означає, що пристрій завантажується лише в режимі UEFI."
+
+#. • MSG_153
+msgid "Test pattern: 0x%02X"
+msgstr "Тестовий паттерн: 0x%02X"
+
+#. • MSG_154
+msgid "Test pattern: 0x%02X, 0x%02X"
+msgstr "Тестовий паттерн: 0x%02X, 0x%02X"
+
+#. • MSG_155
+msgid "Test pattern: 0x%02X, 0x%02X, 0x%02X"
+msgstr "Тестовий паттерн: 0x%02X, 0x%02X, 0x%02X"
+
+#. • MSG_156
+msgid "Test pattern: 0x%02X, 0x%02X, 0x%02X, 0x%02X"
+msgstr "Тестовий паттерн: 0x%02X, 0x%02X, 0x%02X, 0x%02X"
+
+#. • MSG_157
+msgid "Sets the target filesystem"
+msgstr "Встановити цільову файлову систему"
+
+#. • MSG_158
+msgid "Minimum size that a block of data will occupy in the filesystem"
+msgstr "Вибір мінімального розміру кластера, що займає кожен блок даних"
+
+#. • MSG_159
+msgid "Use this field to set the drive label.\nInternational characters are accepted."
+msgstr "Встановлення нової мітки тому.\nПідтримуються міжнародні символи."
+
+#. • MSG_160
+msgid "Toggle advanced options"
+msgstr "Показати розширені властивості"
+
+#. • MSG_161
+msgid "Check the device for bad blocks using a test pattern"
+msgstr "Перевірка пристрою на наявність поганих (пошкоджених) блоків за допомогою тестового паттерну"
+
+#. • MSG_162
+msgid "Uncheck this box to use the \"slow\" format method"
+msgstr "Швидке форматування пристрою"
+
+#. • MSG_163
+msgid "Method that will be used to create partitions"
+msgstr "Метод створення розділів"
+
+#. • MSG_164
+msgid "Method that will be used to make the drive bootable"
+msgstr "Метод створення завантажувального диску"
+
+#. • MSG_165
+msgid "Click to select an image..."
+msgstr "Натисніть, щоб обрати образ..."
+
+#. • MSG_166
+msgid "Check this box to allow the display of international labels and set a device icon (creates an autorun.inf)"
+msgstr "Дозволити відображення міток з міжнародними символами та задати значок пристрою (створюється autorun.inf)"
+
+#. • MSG_167
+msgid "Install an MBR that allows boot selection and can masquerade the BIOS USB drive ID"
+msgstr "Використовувати MBR, що дозволяє вибрати завантажувач та може замаскувати ідентифікатор пристрою в BIOS"
+
+#. • MSG_168
+msgid "Try to masquerade first bootable USB drive (usually 0x80) as a different disk.\nThis should only be necessary if you install Windows XP and have more than one disk."
+msgstr "Спробуйте замаскувати перший завантажувальний USB-диск (зазвичай 0x80) як інший диск.\nЦе необхідно тільки для встановлення Windows XP та маєте більше ніж один диск."
+
+#. • MSG_169
+msgid "Create an extra hidden partition and try to align partitions boundaries.\nThis can improve boot detection for older BIOSes."
+msgstr "Створити додатковий прихований розділ і вирівняти межі розділів.\nЦе допоможе покращити виявлення завантажувача в старих версіях BIOS."
+
+#. • MSG_170
+msgid "Enable the listing of USB Hard Drive enclosures. USE AT YOUR OWN RISKS!!!"
+msgstr "Відображати зовнішні USB накопичувачі. ВИКОРИСТОВУЙТЕ НА СВІЙ СТРАХ І РИЗИК!!!"
+
+#. • MSG_171
+msgid "Start the formatting operation.\nThis will DESTROY any data on the target!"
+msgstr "Почати форматування пристрою.\nВсі дані на диску будуть ЗНИЩЕНІ!"
+
+#. • MSG_172
+#.
+#. As of Rufus 3.2, *ALL* downloads from the servers are digitally signed, and their signature is validated using the
+#. public key that is embedded in the application. This message appears in an error dialog if the validation fails.
+msgid "Invalid download signature"
+msgstr "Помилка завантаження підпису"
+
+#. • MSG_173
+msgid "Click to select..."
+msgstr "Натисніть для вибору..."
+
+#. • MSG_174
+msgid "Rufus - The Reliable USB Formatting Utility"
+msgstr "Rufus - надійна утиліта для форматування USB-дисків"
+
+#. • MSG_175
+msgid "Version %d.%d (Build %d)"
+msgstr "Версія %d.%d (Збірка %d)"
+
+#. • MSG_176
+msgid "English translation: Pete Batard <mailto:pete@akeo.ie>"
+msgstr "Українською переклав: Великожон Костянтин <mailto:mind.converter@gmail.com>"
+
+#. • MSG_177
+msgid "Report bugs or request enhancements at:"
+msgstr "Повідомити про помилку чи запропонувати покращення на веб-сайті:"
+
+#. • MSG_178
+msgid "Additional Copyrights:"
+msgstr "Додаткові авторські права:"
+
+#. • MSG_179
+msgid "Update Policy:"
+msgstr "Політика оновлення:"
+
+#. • MSG_180
+msgid "If you choose to allow this program to check for application updates, you agree that the following information may be collected on our server(s):"
+msgstr "Якщо ви дозволите цій програмі перевіряти наявність оновлень, значить ви погоджуєтесь, що наступна інформація може збиратися на наших серверах:"
+
+#. • MSG_181
+msgid "Your operating system's architecture and version"
+msgstr "Версія та архітектура вашої операційної системи"
+
+#. • MSG_182
+msgid "The version of the application you use"
+msgstr "Версія використовуваного додатку"
+
+#. • MSG_183
+msgid "Your IP address"
+msgstr "Ваша IP-адреса"
+
+#. • MSG_184
+msgid "For the purpose of generating private usage statistics, we may keep the information collected, \\b for at most a year\\b0 . However, we will not willingly disclose any of this individual data to third parties."
+msgstr "Для отримання статистики використання програми, ми можемо зберігати зібрану інформацію \\b до одного року\\b0. Проте, ми не будемо розкривати будь-які особисті дані третім сторонам."
+
+#. • MSG_185
+msgid "Update Process:"
+msgstr "Процес оновлення:"
+
+#. • MSG_186
+msgid "Rufus does not install or run background services, therefore update checks are performed only when the main application is running.\\line\nInternet access is of course required when checking for updates."
+msgstr "Додаток Rufus не встановлює та не запускає фонові служби, тому перевірка наявності оновлень виконується тільки тоді, коли запущений основний додаток.\\line\nДля перевірки наявності оновлень необхідний доступ до інтернету."
+
+#. • MSG_187
+msgid "Invalid image for selected boot option"
+msgstr "Невірний образ для вибраного варіанта завантаження"
+
+#. • MSG_188
+msgid "The current image doesn't match the boot option selected. Please use a different image or choose a different boot option."
+msgstr "Обрано невірний образ для вибраного варіанта завантаження. Будь ласка, оберіть інший образ чи виберіть інший варіант завантаження."
+
+#. • MSG_189
+msgid "This ISO image is not compatible with the selected filesystem"
+msgstr "Даний ISO-образ несумісний з обраною файловою системою"
+
+#. • MSG_190
+msgid "Incompatible drive detected"
+msgstr "Знайдено несумісний диск"
+
+#. • MSG_191
+#.
+#. Used in MSG_235
+msgid "Write pass"
+msgstr "Прохід запису"
+
+#. • MSG_192
+#.
+#. Used in MSG_235
+msgid "Read pass"
+msgstr "Прохід читання"
+
+#. • MSG_193
+msgid "Downloaded %s"
+msgstr "Завантажено %s"
+
+#. • MSG_194
+msgid "Could not download %s"
+msgstr "Неможливо завантажити %s"
+
+#. • MSG_195
+#.
+#. Example: "Using embedded version of Grub2 file(s)"
+msgid "Using embedded version of %s file(s)"
+msgstr "Використовувати вбудовану версію %s файлів"
+
+#. • MSG_196
+msgid "IMPORTANT: THIS DRIVE USES A NONSTANDARD SECTOR SIZE!\n\nConventional drives use a 512-byte sector size but this drive uses a %d-byte one. In many cases, this means that you will NOT be able to boot from this drive.\nRufus can try to create a bootable drive, but there is NO WARRANTY that it will work."
+msgstr "ВАЖЛИВО: ЦЕЙ ДИСК ВИКОРИСТОВУЄ НЕСТАНДАРТНИЙ РОЗМІР СЕКТОРА!\n\nЗазвичай диски використовують сектора на 512 байт, проте цей диск використовує сектор на %d байт. В більшості випадків це означає, що ви НЕ ЗМОЖЕТЕ завантажитись з цього диску.\nRufus може спробувати створити завантажувальний диск, але НЕ ДАЄ ГАРАНТІЇ, що він буде працювати."
+
+#. • MSG_197
+msgid "Nonstandard sector size detected"
+msgstr "Знайдено нестандартний розмір сектора"
+
+#. • MSG_198
+msgid "'Windows To Go' can only be installed on a GPT partitioned drive if it has the FIXED attribute set. The current drive was not detected as FIXED."
+msgstr "'Windows To Go' може використовуватись тільки з розділом GPT диска та якщо диск являється ФІКСОВАНИМ. Обраний диск не являється ФІКСОВАНИМ."
+
+#. • MSG_201
+msgid "Cancelling - Please wait..."
+msgstr "Скасування - Будь ласка, зачекайте..."
+
+#. • MSG_202
+msgid "Scanning image..."
+msgstr "Сканування образу..."
+
+#. • MSG_203
+msgid "Failed to scan image"
+msgstr "Не вдалося відсканувати образ"
+
+#. • MSG_204
+#.
+#. %s is the name of an obsolete Syslinux .c32 module. Example: "Obsolete vesamenu.c32 detected"
+msgid "Obsolete %s detected"
+msgstr "Виявлено застарілий %s"
+
+#. • MSG_205
+#.
+#. Display the name of the image selected. eg: "Using image: en_win7_x64_sp1.iso"
+msgid "Using image: %s"
+msgstr "Використання образа: %s"
+
+#. • MSG_206
+#.
+#. Example: "Missing ldlinux.c32 file"
+msgid "Missing %s file"
+msgstr "Відсутній файл %s"
+
+#. • MSG_207
+#.
+#. The name proposed by Windows' Computer Management → Disk Management when you try to format
+#. a drive with an empty label. For an example, see https://rufus.ie/pics/default_name.png.
+msgid "New Volume"
+msgstr "Новий том"
+
+#. • MSG_208
+#.
+#. Singular. Example: "1 device found"
+msgid "%d device found"
+msgstr "Виявлено пристрій: %d"
+
+#. • MSG_209
+#.
+#. Plural. Example: "3 devices found"
+msgid "%d devices found"
+msgstr "Виявлено пристроїв: %d"
+
+#. • MSG_210
+msgid "READY"
+msgstr "Готово"
+
+#. • MSG_211
+msgid "Cancelled"
+msgstr "Скасовано"
+
+#. • MSG_212
+msgid "Failed"
+msgstr "Невдало"
+
+#. • MSG_213
+#.
+#. Used when a new update has been downloaded and launched
+msgid "Launching new application..."
+msgstr "Запуск нового додатка..."
+
+#. • MSG_214
+msgid "Failed to launch new application"
+msgstr "Не вдалося запустити новий додаток"
+
+#. • MSG_215
+#.
+#. Example: "Opened some_file.txt"
+msgid "Opened %s"
+msgstr "Відкрито %s"
+
+#. • MSG_216
+#.
+#. Example: "Saved rufus.log"
+msgid "Saved %s"
+msgstr "Збережено %s"
+
+#. • MSG_217
+#.
+#. Formatting status (make sure you use a double % to print the percent sign)
+msgid "Formatting: %0.1f%% completed"
+msgstr "Форматування: %0.1f%% виконано"
+
+#. • MSG_218
+msgid "Creating file system: Task %d/%d completed"
+msgstr "Створення файлової системи: Завдання виконано на %d/%d "
+
+#. • MSG_219
+msgid "NTFS Fixup: %d%% completed"
+msgstr "Створення NTFS області Fixup: %d%% виконано"
+
+#. • MSG_220
+#.
+#. Parameter: the file system and an estimated duration in mins and secs.
+#. Example: "Formatting (UDF) - Estimated duration 3:21..."
+#. If "estimated duration" is too long, just use "estimated" or an abbreviation
+msgid "Formatting (%s) - estimated duration %d:%02d..."
+msgstr "Форматування (%s) - завершення через %d:%02d..."
+
+#. • MSG_221
+msgid "Setting Label (This may take a while)..."
+msgstr "Встановлення мітки тому (Це може тривати деякий час)..."
+
+#. • MSG_222
+#.
+#. Example: "Formatting (FAT32)..."
+msgid "Formatting (%s)..."
+msgstr "Форматування (%s)..."
+
+#. • MSG_223
+msgid "NTFS Fixup (Checkdisk)..."
+msgstr "Перевірка NTFS області Fixup (Checkdisk)..."
+
+#. • MSG_224
+msgid "Clearing MBR/PBR/GPT structures..."
+msgstr "Очистка структури MBR/PBR/GPT..."
+
+#. • MSG_225
+msgid "Requesting disk access..."
+msgstr "Запит доступу до диску..."
+
+#. • MSG_226
+msgid "Analyzing existing boot records..."
+msgstr "Аналіз завантажувальних записів..."
+
+#. • MSG_227
+msgid "Closing existing volume..."
+msgstr "Закриття існуючого розділу..."
+
+#. • MSG_228
+msgid "Writing master boot record..."
+msgstr "Створення головного завантажувального запису..."
+
+#. • MSG_229
+msgid "Writing partition boot record..."
+msgstr "Створення завантажувального запису розділу..."
+
+#. • MSG_230
+msgid "Copying DOS files..."
+msgstr "Копіювання DOS-файлів..."
+
+#. • MSG_231
+msgid "Copying ISO files..."
+msgstr "Копіювання ISO-файлів..."
+
+#. • MSG_232
+msgid "Win7 EFI boot setup (This may take a while)..."
+msgstr "Налаштування завантажувача Win7 EFI (Це може тривати деякий час)..."
+
+#. • MSG_233
+msgid "Finalizing, please wait..."
+msgstr "Завершення, будь ласка, чекайте..."
+
+#. • MSG_234
+#.
+#. Takes a Syslinux version as parameter.
+#. Example: "Installing Syslinux v5.10..."
+msgid "Installing Syslinux %s..."
+msgstr "Встановлення Syslinux %s..."
+
+#. • MSG_235
+#.
+#. Bad blocks status. Example: "Bad Blocks: Write pass 1/2 - 12.34% (0/0/1 errors)"
+#. See MSG_191 & MSG_192 for "Write pass"/"Read pass" translation.
+msgid "Bad Blocks: %s %d/%d - %0.2f%% (%d/%d/%d errors)"
+msgstr "Погані блоки: %s %d/%d - %0.2f%% (%d/%d/%d помилок)"
+
+#. • MSG_236
+msgid "Bad Blocks: Testing with random pattern"
+msgstr "Погані блоки: Тестування випадковим паттерном"
+
+#. • MSG_237
+msgid "Bad Blocks: Testing with pattern 0x%02X"
+msgstr "Погані блоки: Тестування паттерном 0x%02X"
+
+#. • MSG_238
+#.
+#. Example: "Partitioning (MBR)..."
+msgid "Partitioning (%s)..."
+msgstr "Розмітка розділу (%s)..."
+
+#. • MSG_239
+msgid "Deleting partitions..."
+msgstr "Видалення розділів..."
+
+#. • MSG_240
+#.
+#. This message has to do with the signature validation that Rufus uses when downloading an update.
+msgid "The signature for the downloaded update can not be validated. This could mean that your system is improperly configured for signature validation or indicate a malicious download.\n\nThe download will be deleted. Please check the log for more details."
+msgstr "Підпис для завантаженого оновлення не може бути підтверджено. Це може означати, що ваша система неправильно налаштована для перевірки підпису чи бути ознакою шкідливої програми.\n\nЗавантаження було видалено. Будь ласка, перегляньте логи для більш детальної інформації."
+
+#. • MSG_241
+msgid "Downloading: %0.1f%%"
+msgstr "Завантаження: %0.1f%%"
+
+#. • MSG_242
+msgid "Failed to download file."
+msgstr "Не вдалося завантажити файл."
+
+#. • MSG_243
+msgid "Checking for Rufus updates..."
+msgstr "Перевірка наявності оновлень..."
+
+#. • MSG_244
+msgid "Updates: Unable to connect to the internet"
+msgstr "Помилка: Необхідний доступ до інтернету"
+
+#. • MSG_245
+msgid "Updates: Unable to access version data"
+msgstr "Оновлення: Неможливо отримати доступ до даних про версію"
+
+#. • MSG_246
+msgid "A new version of Rufus is available!"
+msgstr "Доступна нова версія Rufus!"
+
+#. • MSG_247
+msgid "No new version of Rufus was found"
+msgstr "Нових версій Rufus не знайдено"
+
+#. • MSG_248
+msgid "Application registry keys successfully deleted"
+msgstr "Ключі додатку в реєстрі успішно видалені"
+
+#. • MSG_249
+msgid "Failed to delete application registry keys"
+msgstr "Не вдалося видалити ключі додатку в реєстрі"
+
+#. • MSG_250
+#.
+#. Example: "Fixed disk detection enabled", "ISO size check disabled", etc.
+msgid "%s enabled"
+msgstr "%s увімкнено"
+
+#. • MSG_251
+msgid "%s disabled"
+msgstr "%s вимкнено"
+
+#. • MSG_252
+msgid "Size checks"
+msgstr "Визначення розміру"
+
+#. • MSG_253
+msgid "Hard disk detection"
+msgstr "Визначення USB накопичувачів"
+
+#. • MSG_254
+msgid "Force large FAT32 formatting"
+msgstr "Примусове форматування в розширений FAT32"
+
+#. • MSG_255
+msgid "NoDriveTypeAutorun will be deleted on exit"
+msgstr "NoDriveTypeAutorun буде видалений при виході"
+
+#. • MSG_256
+msgid "Fake drive detection"
+msgstr "Виявлено фальшивий диск"
+
+#. • MSG_257
+msgid "Joliet support"
+msgstr "Підтримка Joliet"
+
+#. • MSG_258
+msgid "Rock Ridge support"
+msgstr "Підтримка Rock Ridge"
+
+#. • MSG_259
+msgid "Force update"
+msgstr "Примусове оновлення"
+
+#. • MSG_260
+msgid "NTFS compression"
+msgstr "Стиснення NTFS"
+
+#. • MSG_261
+msgid "Writing image: %0.1f%% completed"
+msgstr "Запис образа: %0.1f%% виконано"
+
+#. • MSG_262
+#.
+#. Cheat mode message to disable ISO Support, so that only DD images can be opened
+msgid "ISO Support"
+msgstr "Підтримка ISO"
+
+#. • MSG_263
+#.
+#. Cheat mode to force legacy size units, where 1 KB is 1024 bytes and NOT that fake 1000 bytes abomination!
+msgid "Use PROPER size units"
+msgstr "Використання ПРАВИЛЬНОГО розміру одиниць"
+
+#. • MSG_264
+msgid "Deleting directory '%s'"
+msgstr "Видалення каталогу '%s'"
+
+#. • MSG_265
+msgid "VMWare disk detection"
+msgstr "Виявлено диск VMWare"
+
+#. • MSG_266
+msgid "Dual UEFI/BIOS mode"
+msgstr "Подвійний режим UEFI/BIOS"
+
+#. • MSG_267
+msgid "Applying Windows image: %0.1f%% completed"
+msgstr "Застосування Windows-образа: %0.1f%% виконано"
+
+#. • MSG_268
+msgid "Applying Windows image..."
+msgstr "Застосування Windows-образа..."
+
+#. • MSG_269
+msgid "Preserve timestamps"
+msgstr "Зберігати мітки часу"
+
+#. • MSG_270
+msgid "USB debug"
+msgstr "Режим USB-відлагодження"
+
+#. • MSG_271
+msgid "Computing image checksums: %0.1f%% completed"
+msgstr "Обчислення контрольних сум: %0.1f%% завершено"
+
+#. • MSG_272
+msgid "Compute the MD5, SHA1 and SHA256 checksums for the selected image"
+msgstr "Обчислити контрольні суми MD5, SHA1 та SHA256 для обраного образа"
+
+#. • MSG_273
+msgid "Change the application language"
+msgstr "Змінити мову додатка"
+
+#. • MSG_274
+msgid "ISOHybrid image detected"
+msgstr "Виявлено образ ISOHybrid"
+
+#. • MSG_275
+#.
+#. '%s' will be replaced with your translations for MSG_036 ("ISO Image") and MSG_095 ("DD Image")
+msgid "The image you have selected is an 'ISOHybrid' image. This means it can be written either in %s (file copy) mode or %s (disk image) mode.\nRufus recommends using %s mode, so that you always have full access to the drive after writing it.\nHowever, if you encounter issues during boot, you can try writing this image again in %s mode.\n\nPlease select the mode that you want to use to write this image:"
+msgstr "Обраний образ є образом 'ISOHybrid'. Це означає, що образ можна записати або в %s (режимі копіювання) або в %s (режимі образа диска).\nRufus рекомендує використовувати %s режим для повного доступу до диска після запису.\nОднак, якщо ви зіштовхнетесь з проблемами під час завантаження ви можете ще раз спробувати записати образ в %s режимі.\n\nБудь ласка, оберіть режим, який ви хочете використовувати для запису обраного образа:"
+
+#. • MSG_276
+#.
+#. '%s' will be replaced with your translation for MSG_036 ("ISO Image")
+msgid "Write in %s mode (Recommended)"
+msgstr "Записати в %s режимі (Рекомендується)"
+
+#. • MSG_277
+#.
+#. '%s' will be replaced with your translation for MSG_095 ("DD Image")
+msgid "Write in %s mode"
+msgstr "Записати в %s режимі"
+
+#. • MSG_278
+msgid "Checking for conflicting processes..."
+msgstr "Перевірка конфліктних процесів..."
+
+#. • MSG_279
+msgid "Non bootable"
+msgstr "Незавантажувальний образ"
+
+#. • MSG_280
+msgid "Disk or ISO image"
+msgstr "Диск чи ISO-образ"
+
+#. • MSG_281
+msgid "%s (Please select)"
+msgstr "%s (Будь ласка, оберіть)"
+
+#. • MSG_282
+msgid "Exclusive USB drive locking"
+msgstr "Особливе блокування USB-диску"
+
+#. • MSG_283
+msgid "Invalid signature"
+msgstr "Невірний підпис"
+
+#. • MSG_284
+msgid "The downloaded executable is missing a digital signature."
+msgstr "У завантаженого файлу відсутній цифровий підпис."
+
+#. • MSG_285
+msgid "The downloaded executable is signed by '%s'.\nThis is not a signature we recognize and could indicate some form of malicious activity...\nAre you sure you want to run this file?"
+msgstr "Завантажений файл підписаний '%s'.\nЦе не той підпис, який визнається нами, що вказує на деякі форми шкідливих дій...\nВи впевнені, що хочете запустити цей файл?"
+
+#. • MSG_286
+msgid "Zeroing drive: %0.1f%% completed"
+msgstr "Обнуління диска: %0.1f%% завершено"
+
+#. • MSG_287
+msgid "Detection of non-USB removable drives"
+msgstr "Виявлення знімних не-USB носіїв"
+
+#. • MSG_288
+msgid "Missing elevated privileges"
+msgstr "Підвищені привілеї відсутні"
+
+#. • MSG_289
+msgid "This application can only run with elevated privileges"
+msgstr "Ця програма може бути запущена лише з підвищеними привілеями"
+
+#. • MSG_290
+msgid "File Indexing"
+msgstr "Індексація файлів"
+
+#. • MSG_291
+msgid "Version selection"
+msgstr "Вибір версії"
+
+#. • MSG_292
+msgid "Please select the version of Windows you want to install:"
+msgstr "Будь ласка, виберіть версію Windows, яку ви хочете встановити:"
+
+#. • MSG_293
+msgid "Unsupported Windows version"
+msgstr "Непідтримувана версія Windows"
+
+#. • MSG_294
+msgid "This version of Windows is no longer supported by Rufus."
+msgstr "Ця версія Windows більше не підтримується Rufus."
+
+#. • MSG_295
+msgid "Warning: Unofficial version"
+msgstr "Увага: Неофіційна версія"
+
+#. • MSG_296
+msgid "This version of Rufus was not produced by its official developer(s).\n\nAre you sure you want to run it?"
+msgstr "Ця версія Rufus не була підготована її офіційним розробником.\n\nВи впевнені, що хочете запустити її?"
+
+#. • MSG_297
+msgid "Truncated ISO detected"
+msgstr "Виявлено усічений ISO"
+
+#. • MSG_298
+msgid "The ISO file you have selected does not match its declared size: %s of data is missing!\n\nIf you obtained this file from the Internet, you should try to download a new copy and verify that the MD5 or SHA checksums match the official ones.\n\nNote that you can compute the MD5 or SHA in Rufus by clicking the (✓) button."
+msgstr "Розмір обраного файла ISO не співпадає з оголошеним розміром: %s даних відсутньо!\n\nЯкщо ви завантажили цей файл з Інтернету, вам слід завантажити нову копію файла або перевірити співпадіння контрольних сум MD5 чи SHA з офіційним файлом.\n\nПам'ятайте, що ви можете порівняти MD5 чи SHA в Rufus, натиснувши кнопку (✓)."
+
+#. • MSG_299
+msgid "Timestamp validation error"
+msgstr "Помилка перевірки мітки часу"
+
+#. • MSG_300
+msgid "Rufus could not validate that the timestamp of the downloaded update is more recent than the one for the current executable.\n\nIn order to prevent potential attack scenarios, the update process has been aborted and the download will be deleted. Please check the log for more details."
+msgstr "Rufus не може підтвердити, що мітка часу для завантаженого оновлення більш пізня, ніж мітка запущеної програми.\n\nЩоб запобігти можливим сценаріям атаки, процес оновлення було скасовано та завантаження було видалено. Будь ласка, перегляньте логи для більш детальної інформації."
+
+#. • MSG_301
+msgid "Show application settings"
+msgstr "Показати налаштування додатку"
+
+#. • MSG_302
+msgid "Show information about this application"
+msgstr "Показати інформацію про цей додаток"
+
+#. • MSG_303
+msgid "Show the log"
+msgstr "Показати логи"
+
+#. • MSG_304
+msgid "Create a disk image of the selected device"
+msgstr "Створити образ диска для вибраного пристрою"
+
+#. • MSG_305
+msgid "Use this option to indicate whether you want to use this device to install Windows on another disk, or if you want to run Windows directly from this drive (Windows To Go)."
+msgstr "Використовуйте цей параметр, щоб вказати, чи хочете ви використовувати цей пристрій для встановлення Windows на інший диск, чи хочете запускати Windows напряму з пристрою (Windows To Go)."
+
+#. • MSG_306
+#.
+#. You can see this status message by pressing <Ctrl>-<Alt>-<Z> and then selecting START.
+#. It's the same as MSG_286 but with a process that *may* be faster, hence the name.
+msgid "Fast-zeroing drive: %0.1f%% completed"
+msgstr "Швидке обнуління диска: %0.1f%% завершено"
