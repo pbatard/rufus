@@ -3,8 +3,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 3.2\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2018-08-23 10:24+0100\n"
-"PO-Revision-Date: 2018-08-23 10:24+0100\n"
+"POT-Creation-Date: 2018-08-29 16:36+0100\n"
+"PO-Revision-Date: 2018-08-29 16:36+0100\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: nl_NL\n"
@@ -17,7 +17,7 @@ msgstr ""
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
-msgstr "Drive-eigenschappen"
+msgstr "Eigenschappen van drive"
 
 #. • IDD_DIALOG → IDS_DEVICE_TXT
 msgid "Device"
@@ -25,7 +25,7 @@ msgstr "Apparaat"
 
 #. • IDD_DIALOG → IDS_BOOT_SELECTION_TXT
 msgid "Boot selection"
-msgstr "Boot-selectie"
+msgstr "Opstartselectie"
 
 #. • IDD_DIALOG → IDC_SELECT
 msgid "Select"
@@ -45,14 +45,14 @@ msgstr "Doelsysteem"
 
 #. • IDD_DIALOG → IDC_LIST_USB_HDD
 msgid "List USB Hard Drives"
-msgstr "Usb-harde schijven weergeven"
+msgstr "USB-harde schijven weergeven"
 
 #. • IDD_DIALOG → IDC_OLD_BIOS_FIXES
 #.
 #. It is acceptable to drop the parenthesis () if you are running out of space
 #. as there is a tooltip (MSG_169) providing these details.
 msgid "Add fixes for old BIOSes (extra partition, align, etc.)"
-msgstr "Oplossingen voor oude BIOS'en (extra partitie, uitlijnen, etc.)"
+msgstr "Oplossingen voor oude BIOS'en toevoegen (extra partitie, uitlijnen, etc.)"
 
 #. • IDD_DIALOG → IDC_RUFUS_MBR
 #.
@@ -64,7 +64,7 @@ msgstr "Rufus MBR met BIOS ID gebruiken"
 
 #. • IDD_DIALOG → IDS_FORMAT_OPTIONS_TXT
 msgid "Format Options"
-msgstr "Formatteer-opties"
+msgstr "Opties voor formatteren"
 
 #. • IDD_DIALOG → IDS_FILE_SYSTEM_TXT
 msgid "File system"
@@ -197,7 +197,7 @@ msgstr "Andere instantie gedetecteerd"
 
 #. • MSG_002
 msgid "Another Rufus application is running.\nPlease close the first application before running another one."
-msgstr "Een andere Rufus-applicatie is geopend.\nSluit de eerste applicatie voordat u een andere opent."
+msgstr "Er is een andere Rufus-toepassing actief.\nSluit de eerste toepassing voordat u een andere opent."
 
 #. • MSG_003
 msgid "WARNING: ALL DATA ON DEVICE '%s' WILL BE DESTROYED.\nTo continue with this operation, click OK. To quit click CANCEL."
@@ -209,7 +209,7 @@ msgstr "Rufus updatebeleid"
 
 #. • MSG_005
 msgid "Do you want to allow Rufus to check for application updates online?"
-msgstr "Wilt u Rufus toestaan om online te zoeken naar programma updates?"
+msgstr "Wilt u Rufus toestaan om online te zoeken naar programma-updates?"
 
 #. • MSG_007
 msgid "Cancel"
@@ -251,7 +251,7 @@ msgstr "Aangepast"
 
 #. • MSG_018
 msgid "Your version: %d.%d (Build %d)"
-msgstr "Huidige versie: %d.%d (Build %d)"
+msgstr "Uw versie: %d.%d (Build %d)"
 
 #. • MSG_019
 msgid "Latest version: %d.%d (Build %d)"
@@ -266,7 +266,7 @@ msgstr ""
 #.
 #. *Short* version of the kilobyte size suffix
 msgid "KB"
-msgstr "kB"
+msgstr ""
 
 #. • MSG_022
 #.
@@ -369,7 +369,7 @@ msgstr "Bestand-download"
 
 #. • MSG_045
 msgid "USB Storage Device (Generic)"
-msgstr "usb-opslagapparaat (algemeen)"
+msgstr "USB-opslagapparaat (algemeen)"
 
 #. • MSG_046
 msgid "%s (Disk %d) [%s]"
@@ -399,7 +399,7 @@ msgstr "Onbepaalde fout tijdens formatteren."
 
 #. • MSG_052
 msgid "Cannot use the selected file system for this media."
-msgstr "Kan geselecteerde bestandssysteem niet gebruiken voor dit medium."
+msgstr "Kan het geselecteerde bestandssysteem niet gebruiken voor dit medium."
 
 #. • MSG_053
 msgid "Access to the device is denied."
@@ -423,7 +423,7 @@ msgstr "Het volumelabel is ongeldig."
 
 #. • MSG_058
 msgid "The device handle is invalid."
-msgstr "De apparaat tabel is ongeldig."
+msgstr "De apparaat-handle is ongeldig."
 
 #. • MSG_059
 msgid "The selected cluster size is not valid for this device."
@@ -443,7 +443,7 @@ msgstr "Er werd een niet-ondersteunde opdracht ontvangen."
 
 #. • MSG_063
 msgid "Memory allocation error."
-msgstr "Geheugentoewijzing mislukt."
+msgstr "Geheugentoewijzingsfout."
 
 #. • MSG_064
 msgid "Read error."
@@ -459,7 +459,7 @@ msgstr "Installatie mislukt"
 
 #. • MSG_067
 msgid "Could not open media. It may be in use by another process. Please re-plug the media and try again."
-msgstr "Medium kan niet geopend worden. Het is in gebruik door een ander proces. Sluit het medium opnieuw aan en probeer het opnieuw."
+msgstr "Kon medium niet openen. Het kan in gebruik zijn door een ander proces. Sluit het medium opnieuw aan en probeer het opnieuw."
 
 #. • MSG_068
 msgid "Error while partitioning drive."
@@ -467,17 +467,17 @@ msgstr "Fout tijdens het partitioneren van de drive."
 
 #. • MSG_069
 msgid "Could not copy files to target drive."
-msgstr "Kan bestanden niet kopiëren naar de doel-drive."
+msgstr "Kon bestanden niet kopiëren naar de doel-drive."
 
 #. • MSG_070
 msgid "Cancelled by user."
-msgstr "Geannuleerd door de gebruiker."
+msgstr "Geannuleerd door gebruiker."
 
 #. • MSG_071
 #.
 #. See http://en.wikipedia.org/wiki/Thread_%28computing%29
 msgid "Unable to start thread."
-msgstr "Thread starten is niet mogelijk."
+msgstr "Kon thread niet starten."
 
 #. • MSG_072
 msgid "Bad blocks check didn't complete."
@@ -485,7 +485,7 @@ msgstr "Controle van slechte blokken niet voltooid."
 
 #. • MSG_073
 msgid "ISO image scan failure."
-msgstr "ISO-image scanfout"
+msgstr "ISO-image scanfout."
 
 #. • MSG_074
 msgid "ISO image extraction failure."
@@ -493,19 +493,19 @@ msgstr "ISO-image extractiefout."
 
 #. • MSG_075
 msgid "Unable to remount volume."
-msgstr "Herkoppelen van volume niet mogelijk."
+msgstr "Kon volume niet opnieuw koppelen."
 
 #. • MSG_076
 msgid "Unable to patch/setup files for boot."
-msgstr "Patchen/klaarmaken van bestanden voor opstarten niet mogelijk."
+msgstr "Kon bestanden niet patchen/instellen voor opstarten."
 
 #. • MSG_077
 msgid "Unable to assign a drive letter."
-msgstr "Niet mogelijk om een driveletter toe te wijzen."
+msgstr "Kon geen driveletter toewijzen."
 
 #. • MSG_078
 msgid "Can't mount GUID volume."
-msgstr "Kan GUID volume niet koppelen."
+msgstr "Kan GUID-volume niet koppelen."
 
 #. • MSG_079
 msgid "The device is not ready."
@@ -513,7 +513,7 @@ msgstr "Het apparaat is niet klaar."
 
 #. • MSG_080
 msgid "Rufus detected that Windows is still flushing its internal buffers onto the USB device.\n\nDepending on the speed of your USB device, this operation may take a long time to complete, especially for large files.\n\nWe recommend that you let Windows finish, to avoid corruption. But if you grow tired of waiting, you can just unplug the device..."
-msgstr "Rufus heeft gedetecteerd dat Windows nog steeds bezig is om zijn interne buffers te legen naar het usb-apparaat.\n\nAfhankelijk van de snelheid van uw usb-apparaat kan deze operatie een lange tijd duren voordat deze voltooid is.\nZeker voor grote bestanden.\n\nHet is aanbevolen om Windows de taak volledig te laten voltooien om datacorruptie te voorkomen.\nAls het erg lang duurt dan kunt u het apparaat ontkoppelen..."
+msgstr "Rufus heeft gedetecteerd dat Windows nog steeds bezig is om zijn interne buffers te legen naar het USB-apparaat.\n\nAfhankelijk van de snelheid van uw USB-apparaat kan deze handeling een lange tijd duren voordat ze voltooid is, zeker voor grote bestanden.\n\nHet is aanbevolen om Windows de taak volledig te laten voltooien om datacorruptie te voorkomen, maar als het erg lang duurt dan kunt u het apparaat gewoon loskoppelen..."
 
 #. • MSG_081
 msgid "Unsupported image"
@@ -529,7 +529,7 @@ msgstr "%s vervangen?"
 
 #. • MSG_084
 msgid "This ISO image seems to use an obsolete version of '%s'.\nBoot menus may not display properly because of this.\n\nA newer version can be downloaded by Rufus to fix this issue:\n- Choose 'Yes' to connect to the internet and download the file\n- Choose 'No' to leave the existing ISO file unmodified\nIf you don't know what to do, you should select 'Yes'.\n\nNote: The new file will be downloaded in the current directory and once a '%s' exists there, it will be reused automatically."
-msgstr "Deze ISO-image lijkt een verouderde versie te gebruiken van '%s'.\nOpstartmenu's worden mogelijk niet goed getoond.\n\nEen nieuwere versie kan gedownload worden door Rufus om dit probleem op te lossen:\n- Kies 'Ja' om een connectie met het internet te maken en het bestand te downloaden\n- Kies 'Nee' om het bestaande ISO-bestand ongewijzigd te laten.\nAls u niet weet wat u moet doen, selecteer dan 'Ja'.\n\nOpmerking: Het nieuwe bestand wordt naar de huidige map gedownload en als er al een'%s' bestaat, zal deze automatisch hergebruikt worden."
+msgstr "Deze ISO-image lijkt een verouderde versie te gebruiken van '%s'.\nOpstartmenu's worden hierdoor mogelijk niet goed weergegeven.\n\nEen nieuwere versie kan gedownload worden door Rufus om dit probleem op te lossen:\n- Kies 'Ja' om met het internet te verbinden en het bestand te downloaden\n- Kies 'Nee' om het bestaande ISO-bestand ongewijzigd te laten.\nAls u niet weet wat u moet doen, selecteert u best 'Ja'.\n\nOpmerking: Het nieuwe bestand wordt naar de huidige map gedownload en eens er een '%s' bestaat, zal deze automatisch opnieuw gebruikt worden."
 
 #. • MSG_085
 msgid "Downloading '%s'"
@@ -537,7 +537,7 @@ msgstr "'%s' downloaden"
 
 #. • MSG_086
 msgid "No image selected"
-msgstr "Geen image geselecteerd."
+msgstr "Geen image geselecteerd"
 
 #. • MSG_087
 #.
@@ -564,7 +564,7 @@ msgstr "Niet-ondersteunde ISO"
 
 #. • MSG_091
 msgid "When using UEFI Target Type, only EFI bootable ISO images are supported. Please select an EFI bootable ISO or set the Target Type to BIOS."
-msgstr "Bij gebruik van UEFI-doeltype, zijn alleen EFI opstartbare ISO-images ondersteund. Selecteer een EFI-opstartbare ISO of kies als type \"MBR partitie-indeling voor BIOS-computer."
+msgstr "Bij gebruik van UEFI-doeltype zijn alleen EFI-opstartbare ISO-images ondersteund. Selecteer een EFI-opstartbare ISO of stel het doeltype in op BIOS."
 
 #. • MSG_092
 msgid "Unsupported filesystem"
@@ -584,15 +584,15 @@ msgstr "DD-image"
 
 #. • MSG_096
 msgid "The file system currently selected can not be used with this type of ISO. Please select a different file system or use a different ISO."
-msgstr "Het geselecteerde bestandssysteem kan niet worden gebruikt met dit type ISO. Selecteer een ander bestandssysteem of gebruik een andere ISO."
+msgstr "Het geselecteerde bestandssysteem kan niet gebruikt worden met dit type ISO. Selecteer een ander bestandssysteem of gebruik een andere ISO."
 
 #. • MSG_097
 msgid "'%s' can only be applied if the file system is NTFS."
-msgstr "'%s' kan alleen worden toegepast als het bestandssysteem NTFS is."
+msgstr "'%s' kan alleen toegepast worden als het bestandssysteem NTFS is."
 
 #. • MSG_098
 msgid "IMPORTANT: You are trying to install 'Windows To Go', but your target drive doesn't have the 'FIXED' attribute. Because of this Windows will most likely freeze during boot, as Microsoft hasn't designed it to work with drives that instead have the 'REMOVABLE' attribute.\n\nDo you still want to proceed?\n\nNote: The 'FIXED/REMOVABLE' attribute is a hardware property that can only be changed using custom tools from the drive manufacturer. However those tools are ALMOST NEVER provided to the public..."
-msgstr "BELANGRIJK: U probeert 'Windows To Go' te installeren, maar uw doelschijf heeft het 'FIXED'-attribuut niet. Hierdoor zal Windows hoogstwaarschijnlijk vastlopen tijdens het opstarten omdat Microsoft het niet zo heeft ontworpen dat het werkt met drives die het 'REMOVABLE' attribuut hebben.\n\nWilt u nog steeds doorgaan?\n\nAantekening: Het 'FIXED/REMOVABLE'-attribuut is een hardware-eigenschap die alleen veranderd kan worden door gebruik te maken van tools van de drive-fabrikant. Maar deze tools worden BIJNA NOOIT aan het publiek aangeboden..."
+msgstr "BELANGRIJK: U probeert 'Windows To Go' te installeren, maar uw doelschijf heeft het 'FIXED'-attribuut niet. Hierdoor zal Windows hoogstwaarschijnlijk vastlopen tijdens het opstarten omdat Microsoft het niet zo heeft ontworpen dat het werkt met drives die het 'REMOVABLE' attribuut hebben.\n\nWilt u nog steeds doorgaan?\n\nOpmerking: Het 'FIXED/REMOVABLE'-attribuut is een hardware-eigenschap die alleen veranderd kan worden door gebruik te maken van tools van de drive-fabrikant. Deze tools worden echter BIJNA NOOIT aan het publiek aangeboden..."
 
 #. • MSG_099
 msgid "Filesystem limitation"
@@ -604,11 +604,11 @@ msgstr "Deze ISO-image bevat een bestand dat groter is dan 4 GB wat groter is da
 
 #. • MSG_101
 msgid "Missing WIM support"
-msgstr "WIM ondersteuning ontbreekt."
+msgstr "WIM-ondersteuning ontbreekt"
 
 #. • MSG_102
 msgid "Your platform cannot extract files from WIM archives. WIM extraction is required to create EFI bootable Windows 7 and Windows Vista USB drives. You can fix that by installing a recent version of 7-Zip.\nDo you want to visit the 7-zip download page?"
-msgstr "Uw OS kan geen bestanden uitpakken van WIM-archieven. WIM-extractie is nodig om EFI-opstartbare Windows 7 en Windows Vista usb-drives te maken. U kunt dit oplossen door een recente versie van 7-Zip te installeren.\nWilt u de 7-Zip downloadpagina openen?"
+msgstr "Uw platform kan geen bestanden uitpakken van WIM-archieven. WIM-extractie is nodig om EFI-opstartbare Windows 7 en Windows Vista USB-drives te maken. U kunt dit oplossen door een recente versie van 7-Zip te installeren.\nWilt u de 7-Zip downloadpagina bezoeken?"
 
 #. • MSG_103
 msgid "Download %s?"
@@ -619,7 +619,7 @@ msgstr "%s downloaden?"
 #. Example: "Grub4DOS v0.4 or later requires a 'grldr' file to be installed. Because this
 #. file is more than 100 KB in size, and always present on Grub4DOS ISO images (...)"
 msgid "%s or later requires a '%s' file to be installed.\nBecause this file is more than 100 KB in size, and always present on %s ISO images, it is not embedded in Rufus.\n\nRufus can download the missing file for you:\n- Select 'Yes' to connect to the internet and download the file\n- Select 'No' if you want to manually copy this file on the drive later\n\nNote: The file will be downloaded in the current directory and once a '%s' exists there, it will be reused automatically."
-msgstr "%s of hoger vereist een '%s' bestand om het te kunnen installeren.\nOmdat dit bestand groter is dan 100 KB en altijd aanwezig is op %s ISO-images,is het niet in Rufus ingebouwd.\n\nRufus kan het missende bestand voor u downloaden:\n- Selecteer 'Ja' om verbinding met het internet te maken en het bestand te downloaden\n- Selecteer 'Nee' als u later dit bestand handmatig naar de drive wilt kopiëren\n\nOpmerking: Het bestand wordt gedownload in de huidige map en wanneer er een %s' al bestaat, zal deze automatisch vervangen worden."
+msgstr "%s of hoger vereist een '%s'-bestand om het te kunnen installeren.\nOmdat dit bestand groter is dan 100 kB en altijd aanwezig is op %s ISO-images,is het niet in Rufus ingebouwd.\n\nRufus kan het ontbrekende bestand voor u downloaden:\n- Selecteer 'Ja' om verbinding met het internet te maken en het bestand te downloaden\n- Selecteer 'Nee' als u dit bestand later handmatig naar de drive wilt kopiëren\n\nOpmerking: Het bestand wordt gedownload in de huidige map en wanneer er al een '%s' bestaat, zal die automatisch vervangen worden."
 
 #. • MSG_105
 msgid "Cancelling may leave the device in an UNUSABLE state.\nIf you are sure you want to cancel, click YES. Otherwise, click NO."
@@ -656,7 +656,7 @@ msgstr "Incompatibele clustergrootte"
 #.
 #. "%d:%02d" is a duration (mins:secs)
 msgid "Formatting a large UDF volumes can take a lot of time. At USB 2.0 speeds, the estimated formatting duration is %d:%02d, during which the progress bar will appear frozen. Please be patient!"
-msgstr "Het formatteren van grote UDF volumes kan een lange tijd duren..."
+msgstr "Het formatteren van grote UDF-volumes kan een lange tijd duren. Bij USB 2.0-snelheden is de geschatte formatteertijd %d:%02d, waarbij de voortgangsbalk zal geblokkeerd lijken. Wees geduldig!"
 
 #. • MSG_113
 msgid "Large UDF volume"
@@ -664,7 +664,7 @@ msgstr "Groot UDF-volume"
 
 #. • MSG_114
 msgid "This image uses Syslinux %s%s but this application only includes the installation files for Syslinux %s%s.\n\nAs new versions of Syslinux are not compatible with one another, and it wouldn't be possible for Rufus to include them all, two additional files must be downloaded from the Internet ('ldlinux.sys' and 'ldlinux.bss'):\n- Select 'Yes' to connect to the Internet and download these files\n- Select 'No' to cancel the operation\n\nNote: The files will be downloaded in the current application directory and will be reused automatically if present."
-msgstr "Deze image maakt gebruik van Syslinux %s%s maar de applicatie bevat alleen de installatiebestanden voorSyslinux %s%s.\n\nOmdat oude en nieuwe versies van Syslinux niet compatibel zijn met elkaar, en het niet mogelijk is voor Rufus om alle versies te beheren, moeten twee extra bestanden gedownload worden van het internet ('ldlinux.sys' en 'ldlinux.bss'):\n- Klik op 'Ja' om via internet deze bestanden te downloaden\n- Klik op 'Nee' om de opdracht te annuleren\n\nLet op: De bestanden worden in de huidige applicatiemap opgeslagen en zullen automatisch vervangen worden als het bestand al bestaat."
+msgstr "Deze image maakt gebruik van Syslinux %s%s maar de toepassing bevat alleen de installatiebestanden voor Syslinux %s%s.\n\nOmdat oude en nieuwe versies van Syslinux niet compatibel zijn met elkaar, en het niet mogelijk is voor Rufus om alle versies te beheren, moeten twee extra bestanden gedownload worden van het internet ('ldlinux.sys' en 'ldlinux.bss'):\n- Klik op 'Ja' om via internet deze bestanden te downloaden\n- Klik op 'Nee' om de opdracht te annuleren\n\nLet op: De bestanden worden in de huidige map opgeslagen en zullen automatisch vervangen worden als het bestand al bestaat."
 
 #. • MSG_115
 msgid "Download required"
@@ -675,7 +675,7 @@ msgstr "Download is vereist"
 #. You should be able to test this message with Super Grub2 Disk ISO:
 #. https://sourceforge.net/projects/supergrub2/files/2.00s2/super_grub2_disk_hybrid_2.00s2.iso/download (11.9 MB)
 msgid "This image uses Grub %s but the application only includes the installation files for Grub %s.\n\nAs different versions of Grub may not be compatible with one another, and it is not possible to include them all, Rufus will attempt to locate a version of the Grub installation file ('core.img') that matches the one from your image:\n- Select 'Yes' to connect to the Internet and attempt to download it\n- Select 'No' to use the default version from Rufus\n- Select 'Cancel' to abort the operation\n\nNote: The file will be downloaded in the current application directory and will be reused automatically if present. If no match can be found online, then the default version will be used."
-msgstr "Deze image maakt gebruik van Grub %s maar de applicatie bevat alleen de installatiebestanden voor Grub %s.\n\nAls verschillende versies van Grub mogelijk niet compatibel met elkaar zijn, en het is niet mogelijk om ze allemaal toe te voegen, dan zal Rufus proberen om een versie van het Grub installatie bestand ('core.img') te zoeken dat overeenkomst met uw image:\n- Selecteer 'Ja' om te proberen het te downloaden\n- Selecteer 'Nee' om de standaard versie van Rufus te gebruiken\n- Selecteer 'Annuleren' om de bewerking te stoppen\n\nAantekening: Het bestand zal in de huidige programma map gedownload en automatisch vervangen worden als het bestand al bestaat. Als er geen bestand online wordt gevonden, dan zal de standaard versie worden gebruikt."
+msgstr "Deze image maakt gebruik van Grub %s maar de toepassing bevat alleen de installatiebestanden voor Grub %s.\n\nAls verschillende versies van Grub mogelijk niet compatibel met elkaar zijn, en het is niet mogelijk om ze allemaal toe te voegen, dan zal Rufus proberen om een versie van het Grub installatie bestand ('core.img') te zoeken dat overeenkomst met uw image:\n- Selecteer 'Ja' om te proberen het te downloaden\n- Selecteer 'Nee' om de standaard versie van Rufus te gebruiken\n- Selecteer 'Annuleren' om de bewerking te stoppen\n\nAantekening: Het bestand zal in de huidige programma map gedownload en automatisch vervangen worden als het bestand al bestaat. Als er geen bestand online wordt gevonden, dan zal de standaard versie worden gebruikt."
 
 #. • MSG_117
 msgid "Standard Windows installation"
@@ -691,11 +691,11 @@ msgstr ""
 
 #. • MSG_119
 msgid "advanced drive properties"
-msgstr "Geavanceerde drive-eigenschappen"
+msgstr "Geavanceerde eigenschappen van drive"
 
 #. • MSG_120
 msgid "advanced format options"
-msgstr "Geavanceerde formatteer-opties"
+msgstr "Geavanceerde opties voor formatteren"
 
 #. • MSG_121
 msgid "Show %s"
@@ -726,7 +726,7 @@ msgstr "Geen persistentie"
 #.
 #. Tooltips used for the peristence size slider and edit control
 msgid "Set the size of the persistent partition for live USB media. Setting the size to 0 disables the persistent partition."
-msgstr "De grootte van de persistente partitie instellen voor live usb-media. De grootte op 0 instellen schakelt de persistente partitie uit."
+msgstr "De grootte van de persistente partitie instellen voor live USB-media. De grootte op 0 instellen schakelt de persistente partitie uit."
 
 #. • MSG_126
 msgid "Set the partition size units."
@@ -772,7 +772,7 @@ msgstr "Minimumruimte die een datablok inneemt in het bestandssysteem"
 
 #. • MSG_159
 msgid "Use this field to set the drive label.\nInternational characters are accepted."
-msgstr "Gebruik dit veld om de drive-naam in te stellen.\nInternationale tekens worden aanvaard.d"
+msgstr "Gebruik dit veld om de drive-naam in te stellen.\nInternationale tekens worden aanvaard."
 
 #. • MSG_160
 msgid "Toggle advanced options"
@@ -788,11 +788,11 @@ msgstr "Uitvinken om de \"langzame\" formatteermethode te gebruiken"
 
 #. • MSG_163
 msgid "Method that will be used to create partitions"
-msgstr "Methode die wordt gebruikt om partities te maken"
+msgstr "Methode die gebruikt zal worden om partities te maken"
 
 #. • MSG_164
 msgid "Method that will be used to make the drive bootable"
-msgstr "Gebruikte methode om de drive opstartbaar te maken"
+msgstr "Methode die gebruikt zal worden om de drive opstartbaar te maken"
 
 #. • MSG_165
 msgid "Click to select an image..."
@@ -800,23 +800,23 @@ msgstr "Klikken om een image te selecteren..."
 
 #. • MSG_166
 msgid "Check this box to allow the display of international labels and set a device icon (creates an autorun.inf)"
-msgstr "Vink aan om internationale labels te zien en een apparaat\npictogram in te stellen (creëert een autorun.inf bestand)"
+msgstr "Aanvinken om weergave van internationale labels toe te laten en een apparaat-pictogram in te stellen (maakt een autorun.inf aan)"
 
 #. • MSG_167
 msgid "Install an MBR that allows boot selection and can masquerade the BIOS USB drive ID"
-msgstr "Installeert een MBR die een opstartselectie toestaat en de BIOS usb-drive ID kan verbergen"
+msgstr "Installeert een MBR die een opstartselectie toestaat en de BIOS USB-drive ID kan verbergen"
 
 #. • MSG_168
 msgid "Try to masquerade first bootable USB drive (usually 0x80) as a different disk.\nThis should only be necessary if you install Windows XP and have more than one disk."
-msgstr "Probeert de eerste opstartbare usb drive (gewoonlijk 0x80) voor te laten doen als een andere disk.\nDit is alleen nodig als u Windows XP installeert en meer dan één disk heeft."
+msgstr "Probeert de eerste opstartbare USB drive (gewoonlijk 0x80) voor te laten doen als een andere schijf.\nDit is alleen nodig als u Windows XP installeert en meer dan één schijf heeft."
 
 #. • MSG_169
 msgid "Create an extra hidden partition and try to align partitions boundaries.\nThis can improve boot detection for older BIOSes."
-msgstr "Creëert een extra verborgen partitie en probeert de partitiegrenzen uit te lijnen.\nDit kan de opstart detectie verbeteren voor oudere BIOS'en"
+msgstr "Een extra verborgen partitie aanmaken en proberen om partitiegrenzen uit te lijnen.\nDit kan de opstartdetectie verbeteren voor oudere BIOS'en."
 
 #. • MSG_170
 msgid "Enable the listing of USB Hard Drive enclosures. USE AT YOUR OWN RISKS!!!"
-msgstr "Activeer de lijst met externe usb HD's.\nGEBRUIK OP EIGEN RISICO!!!"
+msgstr "Weergeven van USB-harde schijfbehuizingen inschakelen. GEBRUIK OP EIGEN RISICO!!!"
 
 #. • MSG_171
 msgid "Start the formatting operation.\nThis will DESTROY any data on the target!"
@@ -835,7 +835,7 @@ msgstr "Klikken om te selecteren..."
 
 #. • MSG_174
 msgid "Rufus - The Reliable USB Formatting Utility"
-msgstr "Rufus - de betrouwbare usb-formatteertool"
+msgstr "Rufus - de betrouwbare USB-formatteertool"
 
 #. • MSG_175
 msgid "Version %d.%d (Build %d)"
@@ -867,7 +867,7 @@ msgstr "Type besturingssysteem en versienummer"
 
 #. • MSG_182
 msgid "The version of the application you use"
-msgstr "Versienummer van de applicatie die u gebruikt"
+msgstr "Versienummer van de toepassing die u gebruikt"
 
 #. • MSG_183
 msgid "Your IP address"
@@ -875,7 +875,7 @@ msgstr "Uw IP-adres"
 
 #. • MSG_184
 msgid "For the purpose of generating private usage statistics, we may keep the information collected, \\b for at most a year\\b0 . However, we will not willingly disclose any of this individual data to third parties."
-msgstr "Ten behoeve van het genereren van statistieken voor privégebruik, kunnen we de informatie blijven verzamelen\\b van ten hoogste een jaar\\b0 . Wij zullen deze individuele gegevens echter niet vrijwillig openbaar maken aan derden."
+msgstr "Om statistieken voor privégebruik te genereren, kunnen we de informatie blijven verzamelen\\b voor maximaal een jaar\\b0 . Wij zullen deze individuele gegevens echter niet vrijwillig openbaar maken aan derden."
 
 #. • MSG_185
 msgid "Update Process:"
@@ -883,7 +883,7 @@ msgstr "Update-proces:"
 
 #. • MSG_186
 msgid "Rufus does not install or run background services, therefore update checks are performed only when the main application is running.\\line\nInternet access is of course required when checking for updates."
-msgstr "Rufus voert geen installatie van of achtergrondservices uit, Daarom worden updatecontroles alleen uitgevoerd als de toepassing wordt uitgevoerd.\\line\nInternettoegang is natuurlijk vereist wanneer er op updates gecontroleerd wordt."
+msgstr "Rufus installeert of start geen achtergrondservices. Daarom worden updatecontroles alleen uitgevoerd als de toepassing uitgevoerd wordt.\\line\nInternettoegang is natuurlijk vereist wanneer er op updates gecontroleerd wordt."
 
 #. • MSG_187
 msgid "Invalid image for selected boot option"
@@ -895,11 +895,11 @@ msgstr "De huidige image komt niet overeen met de opstartoptie die geselecteerd 
 
 #. • MSG_189
 msgid "This ISO image is not compatible with the selected filesystem"
-msgstr "Dit ISO beeldbestand is niet compatibel met het geselecteerde bestandssysteem."
+msgstr "Deze ISO-image is niet compatibel met het geselecteerde bestandssysteem"
 
 #. • MSG_190
 msgid "Incompatible drive detected"
-msgstr "niet compatibel drive gedetecteerd"
+msgstr "Niet-compatibele drive gedetecteerd"
 
 #. • MSG_191
 #.
@@ -925,11 +925,11 @@ msgstr "Kon %s niet downloaden"
 #.
 #. Example: "Using embedded version of Grub2 file(s)"
 msgid "Using embedded version of %s file(s)"
-msgstr "Geïntegreerde versie van %s bestand(en) gebruiken"
+msgstr "Geïntegreerde versie van %s-bestand(en) gebruiken"
 
 #. • MSG_196
 msgid "IMPORTANT: THIS DRIVE USES A NONSTANDARD SECTOR SIZE!\n\nConventional drives use a 512-byte sector size but this drive uses a %d-byte one. In many cases, this means that you will NOT be able to boot from this drive.\nRufus can try to create a bootable drive, but there is NO WARRANTY that it will work."
-msgstr "BELANGRIJK: DEZE DRIVE GEBRUIKT EEN NIET-STANDAARD SECTORGROOTTE!!\n\nConventionele drives gebruiken een 512-byte sector grootte maar deze drive gebruikt een %d-byte one. In veel gevallen betekent dit dat u NIET van deze drive kan opstarten.\nRufus kan proberen om een opstartbare drive te maken, maar er is GEEN GARANTIE dat het gaat werken."
+msgstr "BELANGRIJK: DEZE DRIVE GEBRUIKT EEN NIET-STANDAARD SECTORGROOTTE!!\n\nConventionele drives gebruiken een 512-byte sectorgrootte maar deze drive gebruikt er een van %d byte. In veel gevallen betekent dit dat u NIET van deze drive kan opstarten.\nRufus kan proberen om een opstartbare drive te maken, maar er is GEEN GARANTIE dat het gaat werken."
 
 #. • MSG_197
 msgid "Nonstandard sector size detected"
@@ -1014,13 +1014,13 @@ msgstr "Nieuwe toepassing starten mislukt"
 #.
 #. Example: "Opened some_file.txt"
 msgid "Opened %s"
-msgstr "Geopend %s"
+msgstr "%s geopend"
 
 #. • MSG_216
 #.
 #. Example: "Saved rufus.log"
 msgid "Saved %s"
-msgstr "Opgeslagen %s"
+msgstr "%s opgeslagen"
 
 #. • MSG_217
 #.
@@ -1042,7 +1042,7 @@ msgstr "NTFS herstellen: %d%% voltooid"
 #. Example: "Formatting (UDF) - Estimated duration 3:21..."
 #. If "estimated duration" is too long, just use "estimated" or an abbreviation
 msgid "Formatting (%s) - estimated duration %d:%02d..."
-msgstr "Formatteren (UDF) (%s) - Geschatte duur %d:%02d..."
+msgstr "Formatteren (%s) - geschatte duur %d:%02d..."
 
 #. • MSG_221
 msgid "Setting Label (This may take a while)..."
@@ -1103,7 +1103,7 @@ msgstr "Afwerken, even geduld..."
 #. Takes a Syslinux version as parameter.
 #. Example: "Installing Syslinux v5.10..."
 msgid "Installing Syslinux %s..."
-msgstr "Installeren van Syslinux %s..."
+msgstr "Syslinux %s installeren..."
 
 #. • MSG_235
 #.
@@ -1134,7 +1134,7 @@ msgstr "Partities verwijderen..."
 #.
 #. This message has to do with the signature validation that Rufus uses when downloading an update.
 msgid "The signature for the downloaded update can not be validated. This could mean that your system is improperly configured for signature validation or indicate a malicious download.\n\nThe download will be deleted. Please check the log for more details."
-msgstr "De handtekening voor de gedownloade update kan niet gevalideerd worden. Dit kan betekenen dat uw systeem onjuist geconfigureerd is voor handtekeningvalidatie of een kwaadwillende download aantonen.\n\nDe download zal verwijderd worden. Controleer de log voor meer details."
+msgstr "De handtekening voor de gedownloade update kan niet gevalideerd worden. Dit kan betekenen dat uw systeem onjuist geconfigureerd is voor handtekeningvalidatie of een kwaadwillende download aantonen.\n\nDe download zal verwijderd worden. Controleer het logboek voor meer details."
 
 #. • MSG_241
 msgid "Downloading: %0.1f%%"
@@ -1154,7 +1154,7 @@ msgstr "Updates: verbinden met het internet niet mogelijk"
 
 #. • MSG_245
 msgid "Updates: Unable to access version data"
-msgstr "Updates: Versienummer ophalen niet mogelijk"
+msgstr "Updates: kon versie-data niet ophalen"
 
 #. • MSG_246
 msgid "A new version of Rufus is available!"
@@ -1162,15 +1162,15 @@ msgstr "Er is een nieuwe versie van Rufus beschikbaar!"
 
 #. • MSG_247
 msgid "No new version of Rufus was found"
-msgstr "Geen nieuwe versies van Rufus gevonden"
+msgstr "Geen nieuwe versie van Rufus gevonden"
 
 #. • MSG_248
 msgid "Application registry keys successfully deleted"
-msgstr "Registersleutels van applicatie succesvol verwijderd"
+msgstr "Registersleutels van toepassing succesvol verwijderd"
 
 #. • MSG_249
 msgid "Failed to delete application registry keys"
-msgstr "Registersleutels van applicatie verwijderen mislukt"
+msgstr "Registersleutels van toepassing verwijderen mislukt"
 
 #. • MSG_250
 #.
@@ -1192,7 +1192,7 @@ msgstr "Detectie harde schijven"
 
 #. • MSG_254
 msgid "Force large FAT32 formatting"
-msgstr "Forceer uitgebreide FAT32-formattering"
+msgstr "Uitgebreide FAT32-formattering forceren"
 
 #. • MSG_255
 msgid "NoDriveTypeAutorun will be deleted on exit"
@@ -1232,11 +1232,11 @@ msgstr "ISO-ondersteuning"
 #.
 #. Cheat mode to force legacy size units, where 1 KB is 1024 bytes and NOT that fake 1000 bytes abomination!
 msgid "Use PROPER size units"
-msgstr "Gebruik de juiste grootte-eenheden"
+msgstr "JUISTE grootte-eenheden gebruiken"
 
 #. • MSG_264
 msgid "Deleting directory '%s'"
-msgstr "De map '%s' wordt verwijderd"
+msgstr "Map '%s' verwijderen"
 
 #. • MSG_265
 msgid "VMWare disk detection"
@@ -1268,7 +1268,7 @@ msgstr "Image checksums berekenen: %0.1f%% voltooid"
 
 #. • MSG_272
 msgid "Compute the MD5, SHA1 and SHA256 checksums for the selected image"
-msgstr "Bereken de MD5, SHA1 en SHA256 checksums voor de geselecteerde image"
+msgstr "MD5-, SHA1- en SHA256-checksums voor de geselecteerde image berekenen"
 
 #. • MSG_273
 msgid "Change the application language"
@@ -1276,25 +1276,25 @@ msgstr "De taal van de toepassing wijzigen"
 
 #. • MSG_274
 msgid "ISOHybrid image detected"
-msgstr "ISOHybride image gedetecteerd"
+msgstr "ISOHybrid-image gedetecteerd"
 
 #. • MSG_275
 #.
 #. '%s' will be replaced with your translations for MSG_036 ("ISO Image") and MSG_095 ("DD Image")
 msgid "The image you have selected is an 'ISOHybrid' image. This means it can be written either in %s (file copy) mode or %s (disk image) mode.\nRufus recommends using %s mode, so that you always have full access to the drive after writing it.\nHowever, if you encounter issues during boot, you can try writing this image again in %s mode.\n\nPlease select the mode that you want to use to write this image:"
-msgstr "De geselecteerde image is een 'ISOHybride' image. Dit betekent dat het in %s (bestands copy) modus of %s (disk image) modus weggeschreven kan worden.\nRufus beveelt de %s modus aan zodat er altijd volledige toegang is tot de schijf nadat deze beschreven is.\nEchter, als er problemen zijn tijdens het opstarten, kunt u proberen om deze image opnieuw te schrijven in %s modus.\n\nSelecteer de modus die u wilt gebruiken om deze image te schrijven:"
+msgstr "De geselecteerde image is een 'ISOHybrid'-image. Dit betekent dat hij geschreven kan worden in %s (bestandskopie)-modus of %s (schijf-image)-modus.\nRufus beveelt de %s-modus aan zodat er altijd volledige toegang is tot de schijf nadat ze geschreven is.\nAls er problemen zijn tijdens het opstarten, kunt u echter proberen om deze image opnieuw te schrijven in %s-modus.\n\nSelecteer de modus die u wilt gebruiken om deze image te schrijven:"
 
 #. • MSG_276
 #.
 #. '%s' will be replaced with your translation for MSG_036 ("ISO Image")
 msgid "Write in %s mode (Recommended)"
-msgstr "In %s-modus schrijven (aanbevolen)"
+msgstr "Schrijven in %s-modus (aanbevolen)"
 
 #. • MSG_277
 #.
 #. '%s' will be replaced with your translation for MSG_095 ("DD Image")
 msgid "Write in %s mode"
-msgstr "In %s-modus schrijven"
+msgstr "Schrijven in %s-modus"
 
 #. • MSG_278
 msgid "Checking for conflicting processes..."
@@ -1314,7 +1314,7 @@ msgstr "%s (selecteren)"
 
 #. • MSG_282
 msgid "Exclusive USB drive locking"
-msgstr "Exclusieve usb drive vergrendeling"
+msgstr "Exclusieve USB-drive vergrendeling"
 
 #. • MSG_283
 msgid "Invalid signature"
@@ -1322,7 +1322,7 @@ msgstr "Ongeldige handtekening"
 
 #. • MSG_284
 msgid "The downloaded executable is missing a digital signature."
-msgstr "het gedownloade programmabestand heeft geen digitale handtekening."
+msgstr "Het gedownloade programmabestand heeft geen digitale handtekening."
 
 #. • MSG_285
 msgid "The downloaded executable is signed by '%s'.\nThis is not a signature we recognize and could indicate some form of malicious activity...\nAre you sure you want to run this file?"
@@ -1334,7 +1334,7 @@ msgstr "Nullen schrijven : %0.1f%% voltooid"
 
 #. • MSG_287
 msgid "Detection of non-USB removable drives"
-msgstr "Detectie van niet-usb verwijderbare drives"
+msgstr "Detectie van niet-USB verwijderbare drives"
 
 #. • MSG_288
 msgid "Missing elevated privileges"
@@ -1366,7 +1366,7 @@ msgstr "Deze Windows-versie wordt niet langer ondersteund door Rufus."
 
 #. • MSG_295
 msgid "Warning: Unofficial version"
-msgstr "Waarschuwing: onofficiële versie"
+msgstr "Waarschuwing: niet-officiële versie"
 
 #. • MSG_296
 msgid "This version of Rufus was not produced by its official developer(s).\n\nAre you sure you want to run it?"
@@ -1374,15 +1374,15 @@ msgstr "Deze versie van Rufus is NIET gemaakt door de originele ontwikkelaar(s).
 
 #. • MSG_297
 msgid "Truncated ISO detected"
-msgstr "Onvolledige ISO-gedetecteerd"
+msgstr "Onvolledige ISO gedetecteerd"
 
 #. • MSG_298
 msgid "The ISO file you have selected does not match its declared size: %s of data is missing!\n\nIf you obtained this file from the Internet, you should try to download a new copy and verify that the MD5 or SHA checksums match the official ones.\n\nNote that you can compute the MD5 or SHA in Rufus by clicking the (✓) button."
-msgstr "Het ISO-bestand dat u heeft geselecteerd komt niet overeen met de aangegeven waarde grootte: %s van de data ontbreekt!\n\nAls u dit bestand van het internet heeft gehaald, probeer een nieuwe kopie te downloaden en te verifiëren of de MD5- of SHA-checksums overeenkomen met de officiële versie.\n\nU kunt de MD5 of SHA in Rufus berekenen door op de (✓)-knop te klikken."
+msgstr "Het ISO-bestand dat u geselecteerd heeft, komt niet overeen met zijn opgegeven grootte: %s van de data ontbreekt!\n\nAls u dit bestand van het internet heeft gehaald, probeer een nieuwe kopie te downloaden en te verifiëren of de MD5- of SHA-checksums overeenkomen met de officiële versies.\n\nMerk op dat u de MD5 of SHA in Rufus kunt berekenen door op de (✓)-knop te klikken."
 
 #. • MSG_299
 msgid "Timestamp validation error"
-msgstr "Tijdstempel validatiefout"
+msgstr "Validatiefout tijdstempel"
 
 #. • MSG_300
 msgid "Rufus could not validate that the timestamp of the downloaded update is more recent than the one for the current executable.\n\nIn order to prevent potential attack scenarios, the update process has been aborted and the download will be deleted. Please check the log for more details."
@@ -1402,7 +1402,7 @@ msgstr "Logboek weergeven"
 
 #. • MSG_304
 msgid "Create a disk image of the selected device"
-msgstr "Schijf-image aanmaken van het geselecteerde apparaat"
+msgstr "Een schijf-image aanmaken van het geselecteerde apparaat"
 
 #. • MSG_305
 msgid "Use this option to indicate whether you want to use this device to install Windows on another disk, or if you want to run Windows directly from this drive (Windows To Go)."
