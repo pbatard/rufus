@@ -850,9 +850,9 @@ _iso9660_dir_to_statbuf (iso9660_dir_t *p_iso9660_dir,
       strncpy(p_stat->filename, rr_fname, i_rr_fname+1);
     } else {
       if ('\0' == p_iso9660_dir->filename.str[1] && 1 == i_fname)
-	strncpy (p_stat->filename, ".", sizeof("."));
+	strncpy (p_stat->filename, ".", 2);
       else if ('\1' == p_iso9660_dir->filename.str[1] && 1 == i_fname)
-	strncpy (p_stat->filename, "..", sizeof(".."));
+	strncpy (p_stat->filename, "..", 3);
 #ifdef HAVE_JOLIET
       else if (u_joliet_level) {
 	int i_inlen = i_fname;

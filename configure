@@ -3894,7 +3894,7 @@ fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 CFLAGS="${saved_CFLAGS}"
 
-AM_CFLAGS="$AM_CFLAGS -DUNICODE -D_UNICODE -std=gnu99 -Wshadow -Wall -Wundef -Wunused -Wstrict-prototypes -Werror-implicit-function-declaration $nopointersign_cflags"
+AM_CFLAGS="$AM_CFLAGS -DUNICODE -D_UNICODE -std=gnu99 -Wshadow -Wall -Wundef -Wunused -Wstrict-prototypes -Wno-restrict -Werror-implicit-function-declaration $nopointersign_cflags"
 
 
 

@@ -632,8 +632,7 @@ iso9660_set_pvd(void *pd,
   memset(&ipd,0,sizeof(ipd)); /* paranoia? */
 
   /* magic stuff ... thatis CD XA marker... */
-  strncpy(((char*)&ipd)+ISO_XA_MARKER_OFFSET, ISO_XA_MARKER_STRING,
-          sizeof(ISO_XA_MARKER_STRING));
+  strncpy(((char*)&ipd)+ISO_XA_MARKER_OFFSET, ISO_XA_MARKER_STRING,8);
 
   ipd.type = to_711(ISO_VD_PRIMARY);
   iso9660_strncpy_pad (ipd.id, ISO_STANDARD_ID, 5, ISO9660_DCHARS);
