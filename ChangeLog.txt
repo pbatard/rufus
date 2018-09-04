@@ -1,3 +1,12 @@
+o Version 3.2 (2018.09.??)
+    Add RSA-2048 signature validation on all the server downloads
+    Add "Quick" erase cheat mode (courtesy of René van der Zee)
+    Add support for XP/Server 2003 x64 ISOs (courtesy of Mattiwatti) 
+    Improve ISO extraction performance by preallocating files (courtesy of Mattiwatti)
+    Improve bad blocks check algorithm (from suggestions by AL.Skywalker)
+    Fix progress not being displayed for Sylinux or GRUB downloads
+    Fix application close when cancelling an image scan
+
 o Version 3.1 (2018.06.19)
     Fix extraction of ISO content for GRUB based ISOs (Manjaro, Kaspersky, etc.)
     Fix text being truncated on some dialogs (mostly Russian and Thai)
