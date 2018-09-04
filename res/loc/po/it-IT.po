@@ -3,8 +3,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 3.2\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2018-07-21 18:13+0100\n"
-"PO-Revision-Date: 2018-07-21 18:13+0100\n"
+"POT-Creation-Date: 2018-09-04 12:14+0100\n"
+"PO-Revision-Date: 2018-09-04 12:14+0100\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: it_IT\n"
@@ -158,12 +158,12 @@ msgid "Settings"
 msgstr "Impostazioni"
 
 #. • IDD_UPDATE_POLICY → IDS_UPDATE_FREQUENCY_TXT
-msgid "Check for updates:"
-msgstr "Controllo aggiornamenti:"
+msgid "Check for updates"
+msgstr "Controllo aggiornamenti"
 
 #. • IDD_UPDATE_POLICY → IDS_INCLUDE_BETAS_TXT
-msgid "Include beta versions:"
-msgstr "Includi versioni beta:"
+msgid "Include beta versions"
+msgstr "Includi versioni beta"
 
 #. • IDD_UPDATE_POLICY → IDC_CHECK_NOW
 msgid "Check Now"
@@ -771,8 +771,8 @@ msgid "Minimum size that a block of data will occupy in the filesystem"
 msgstr "Dimensione minima blocco dati filesystem"
 
 #. • MSG_159
-msgid "Use this field to set the drive label\nInternational characters are accepted"
-msgstr "Usa questo campo per impostare l'etichetta dell'unità\nI caratteri internazionali sono permessi"
+msgid "Use this field to set the drive label.\nInternational characters are accepted."
+msgstr "Usa questo campo per impostare l'etichetta dell'unità.\nI caratteri internazionali sono permessi."
 
 #. • MSG_160
 msgid "Toggle advanced options"
@@ -807,12 +807,12 @@ msgid "Install an MBR that allows boot selection and can masquerade the BIOS USB
 msgstr "Installa un MBR che permette la selezione all'avvio e maschera l'ID unità USB del BIOS"
 
 #. • MSG_168
-msgid "Try to masquerade first bootable USB drive (usually 0x80) as a different disk.\nThis should only be necessary if you install Windows XP and have more than one disk"
-msgstr "Prova prima a mascherare l'unità avviabile USB (normalmente 0x80) come un disco differente.\nQuesto potrebbe essere necessario solo se installi Windows XP e hai più di un disco"
+msgid "Try to masquerade first bootable USB drive (usually 0x80) as a different disk.\nThis should only be necessary if you install Windows XP and have more than one disk."
+msgstr "Prova prima a mascherare l'unità avviabile USB (normalmente 0x80) come un disco differente.\nQuesto potrebbe essere necessario solo se installi Windows XP e hai più di un disco."
 
 #. • MSG_169
-msgid "Create an extra hidden partition and try to align partitions boundaries.\nThis can improve boot detection for older BIOSes"
-msgstr "Crea una partizione aggiuntiva e nascosta e prova ad allineare le diverse partizioni.\nQuesto può migliorare il rilevamento all'avvio con vecchi BIOS"
+msgid "Create an extra hidden partition and try to align partitions boundaries.\nThis can improve boot detection for older BIOSes."
+msgstr "Crea una partizione aggiuntiva e nascosta e prova ad allineare le diverse partizioni.\nQuesto può migliorare il rilevamento all'avvio con vecchi BIOS."
 
 #. • MSG_170
 msgid "Enable the listing of USB Hard Drive enclosures. USE AT YOUR OWN RISKS!!!"
