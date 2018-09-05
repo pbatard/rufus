@@ -3,8 +3,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 3.2\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2018-08-29 16:36+0100\n"
-"PO-Revision-Date: 2018-08-29 16:36+0100\n"
+"POT-Creation-Date: 2018-09-05 11:10+0100\n"
+"PO-Revision-Date: 2018-09-05 11:10+0100\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: nl_NL\n"
@@ -266,7 +266,7 @@ msgstr ""
 #.
 #. *Short* version of the kilobyte size suffix
 msgid "KB"
-msgstr ""
+msgstr "kB"
 
 #. • MSG_022
 #.
