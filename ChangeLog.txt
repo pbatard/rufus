@@ -1,7 +1,7 @@
 o Version 3.2 (2018.09.??)
     Add RSA-2048 signature validation on all the server downloads
     Add "Fast zeroing" cheat mode (courtesy of René van der Zee)
-    Add support for XP/Server 2003 x64 ISOs (courtesy of Mattiwatti) 
+    Add support for XP/Server 2003 x64 ISOs (courtesy of Mattiwatti)
     Improve ISO extraction performance by preallocating files (courtesy of Mattiwatti)
     Improve bad blocks check algorithm (from suggestions by AL.Skywalker)
     Fix progress not being displayed for Sylinux or GRUB downloads
@@ -47,7 +47,7 @@ o Version 2.17 (2017.09.12)
     Fix an issue with Windows To Go support on some non-official Windows ISOs
     Fix an issue with log autoscrolling
     Fix an issue when using A: or B: as drive letters
- 
+
 o Version 2.16 (2017.07.31)
     Add an audiovisual cue on completion/error
     Add a workaround for ISOs using nonstandard Rock Ridge extensions (looking at you Kali Linux!)
@@ -200,7 +200,7 @@ o Version 2.1 (2015.03.23)
 o Version 2.0 (2015.03.03)
     Major UI improvements (improved font, new info field, no separate progress dialog, etc.)
     Add support for Windows To Go (if Rufus is running on Windows 8 or later)
-    Add support for Grub4DOS and GRUB 2 based images (e.g. FreeNAS) 
+    Add support for Grub4DOS and GRUB 2 based images (e.g. FreeNAS)
     Add portable application support, through a 'rufus.ini' file
     Add native decompression support for DD images (.Z, .gz, .lzma, .bz2 and .xz)
     Add seamless UEFI boot of NTFS partitions, for Windows ISOs with large files (>4GB)
@@ -287,7 +287,7 @@ o Version 1.4.4 (2014.02.26)
     Ignore failure on ISO autorun.inf creation, to keep dumb security applications happy
     Improve hotplug detection
     Improve Syslinux v5+ support (requires an internet connection to download extra files)
-    Fix support for latest gparted, ArchLinux, and other Syslinux v5+ based ISOs 
+    Fix support for latest gparted, ArchLinux, and other Syslinux v5+ based ISOs
     Fix detection for Toshiba drives (again)
     Fix UDF Unicode support
 

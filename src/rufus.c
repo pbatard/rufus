@@ -156,13 +156,16 @@ static void SetAllowedFileSystems(void)
 		allowed_filesystem[FS_FAT32] = TRUE;
 		break;
 	case BT_IMAGE:
+		allowed_filesystem[FS_NTFS] = TRUE;
+		// Don't allow anything besides NTFS if the image has a >4GB file
+		if ((image_path != NULL) && (img_report.has_4GB_file))
+			break;
 		if (!HAS_WINDOWS(img_report) || (tt != TT_BIOS) || allow_dual_uefi_bios) {
 			if (!HAS_WINTOGO(img_report) || (ComboBox_GetCurSel(GetDlgItem(hMainDialog, IDC_IMAGE_OPTION)) != 1)) {
 				allowed_filesystem[FS_FAT16] = TRUE;
 				allowed_filesystem[FS_FAT32] = TRUE;
 			}
 		}
-		allowed_filesystem[FS_NTFS] = TRUE;
 		break;
 	case BT_SYSLINUX_V6:
 		allowed_filesystem[FS_NTFS] = TRUE;
