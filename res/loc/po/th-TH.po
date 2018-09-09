@@ -1,0 +1,1416 @@
+
+msgid ""
+msgstr ""
+"Project-Id-Version: 3.2\n"
+"Report-Msgid-Bugs-To: pete@akeo.ie\n"
+"POT-Creation-Date: 2018-09-10 00:49+0100\n"
+"PO-Revision-Date: 2018-09-10 00:49+0100\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: th_TH\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Rufus-LanguageName: Thai (ไทย)\n"
+"X-Rufus-LCID: 0x041e\n"
+
+#. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
+msgid "Drive Properties"
+msgstr "คุณสมบัติไดร์ฟ"
+
+#. • IDD_DIALOG → IDS_DEVICE_TXT
+msgid "Device"
+msgstr "อุปกรณ์"
+
+#. • IDD_DIALOG → IDS_BOOT_SELECTION_TXT
+msgid "Boot selection"
+msgstr "ลักษณะการบูต"
+
+#. • IDD_DIALOG → IDC_SELECT
+msgid "Select"
+msgstr "เลือก"
+
+#. • IDD_DIALOG → IDS_IMAGE_OPTION_TXT
+msgid "Image Option"
+msgstr "ตัวเลือกอิมเมจ"
+
+#. • IDD_DIALOG → IDS_PARTITION_TYPE_TXT
+msgid "Partition scheme"
+msgstr "รูปแบบของพาร์ทิชั่น"
+
+#. • IDD_DIALOG → IDS_TARGET_SYSTEM_TXT
+msgid "Target system"
+msgstr "รูปแบบเครื่องเป้าหมาย"
+
+#. • IDD_DIALOG → IDC_LIST_USB_HDD
+msgid "List USB Hard Drives"
+msgstr "แสดงฮาร์ดไดร์ฟ USB"
+
+#. • IDD_DIALOG → IDC_OLD_BIOS_FIXES
+#.
+#. It is acceptable to drop the parenthesis () if you are running out of space
+#. as there is a tooltip (MSG_169) providing these details.
+msgid "Add fixes for old BIOSes (extra partition, align, etc.)"
+msgstr "เพิ่มการรองรับให้กับ BIOS รุ่นเก่า"
+
+#. • IDD_DIALOG → IDC_RUFUS_MBR
+#.
+#. 'MBR': See http://en.wikipedia.org/wiki/Master_boot_record
+#. Rufus can install it's own custom MBR (the Rufus MBR), which also allows users to
+#. specify a custom disk ID for the BIOS. The tooltip for this control is MSG_167.
+msgid "Use Rufus MBR with BIOS ID"
+msgstr "ใช้ Rufus MBR กับ BIOS ID"
+
+#. • IDD_DIALOG → IDS_FORMAT_OPTIONS_TXT
+msgid "Format Options"
+msgstr "ตัวเลือกการฟอร์แมต"
+
+#. • IDD_DIALOG → IDS_FILE_SYSTEM_TXT
+msgid "File system"
+msgstr "ระบบไฟล์"
+
+#. • IDD_DIALOG → IDS_CLUSTER_SIZE_TXT
+msgid "Cluster size"
+msgstr "ขนาดของคลัสเตอร์"
+
+#. • IDD_DIALOG → IDS_LABEL_TXT
+msgid "Volume label"
+msgstr "ชื่อของไดร์ฟใหม่"
+
+#. • IDD_DIALOG → IDC_QUICK_FORMAT
+msgid "Quick format"
+msgstr "ฟอร์แมทอย่างรวดเร็ว"
+
+#. • IDD_DIALOG → IDC_BAD_BLOCKS
+msgid "Check device for bad blocks"
+msgstr "ตรวจหาข้อบกพร่องของอุปกรณ์"
+
+#. • IDD_DIALOG → IDC_EXTENDED_LABEL
+msgid "Create extended label and icon files"
+msgstr "สร้างชื่อไดร์ฟมาตรฐานอัตโนมัติและไอคอนของไดร์ฟ"
+
+#. • IDD_DIALOG → IDS_STATUS_TXT
+msgid "Status"
+msgstr "สถานะ"
+
+#. • IDD_DIALOG → IDCANCEL
+#. • IDD_LICENSE → IDCANCEL
+#. • IDD_LOG → IDCANCEL
+#. • IDD_UPDATE_POLICY → IDCANCEL
+#. • IDD_NEW_VERSION → IDCANCEL
+#. • MSG_006
+msgid "Close"
+msgstr "ปิด"
+
+#. • IDD_DIALOG → IDC_START
+msgid "Start"
+msgstr "เริ่ม"
+
+#. • IDD_ABOUTBOX → IDD_ABOUTBOX
+msgid "About Rufus"
+msgstr "เกี่ยวกับ Rufus"
+
+#. • IDD_ABOUTBOX → IDC_ABOUT_LICENSE
+msgid "License"
+msgstr "ลิขสิทธิ์"
+
+#. • IDD_ABOUTBOX → IDOK
+msgid "OK"
+msgstr "ตกลง"
+
+#. • IDD_LICENSE → IDD_LICENSE
+msgid "Rufus License"
+msgstr "ลิขสิทธิ์ของ Rufus"
+
+#. • IDD_NOTIFICATION → IDC_MORE_INFO
+msgid "More information"
+msgstr "ข้อมูลเพิ่มเติม"
+
+#. • IDD_NOTIFICATION → IDYES
+#. • MSG_008
+msgid "Yes"
+msgstr "ใช่"
+
+#. • IDD_NOTIFICATION → IDNO
+#. • MSG_009
+msgid "No"
+msgstr "ไม่ใช่"
+
+#. • IDD_LOG → IDD_LOG
+msgid "Log"
+msgstr ""
+
+#. • IDD_LOG → IDC_LOG_CLEAR
+msgid "Clear"
+msgstr "ล้าง"
+
+#. • IDD_LOG → IDC_LOG_SAVE
+msgid "Save"
+msgstr "บันทึก"
+
+#. • IDD_UPDATE_POLICY → IDD_UPDATE_POLICY
+msgid "Update policy and settings"
+msgstr "นโยบายและการตั้งค่าการปรับรุ่น"
+
+#. • IDD_UPDATE_POLICY → IDS_UPDATE_SETTINGS_GRP
+msgid "Settings"
+msgstr "ตั้งค่า"
+
+#. • IDD_UPDATE_POLICY → IDS_UPDATE_FREQUENCY_TXT
+msgid "Check for updates"
+msgstr "ตรวจหาการปรับรุ่น"
+
+#. • IDD_UPDATE_POLICY → IDS_INCLUDE_BETAS_TXT
+msgid "Include beta versions"
+msgstr "รวมเวอร์ชั่นทดสอบ"
+
+#. • IDD_UPDATE_POLICY → IDC_CHECK_NOW
+msgid "Check Now"
+msgstr "ตรวจสอบ"
+
+#. • IDD_NEW_VERSION → IDD_NEW_VERSION
+msgid "Check For Updates - Rufus"
+msgstr "การปรับรุ่นของ Rufus"
+
+#. • IDD_NEW_VERSION → IDS_NEW_VERSION_AVAIL_TXT
+msgid "A newer version is available. Please download the latest version!"
+msgstr "พบ Rufus รุ่นใหม่กว่า! โปรดปรับรุ่นโปรแกรมให้เป็นรุ่นล่าสุด"
+
+#. • IDD_NEW_VERSION → IDC_WEBSITE
+msgid "Click here to go to the website"
+msgstr "คลิกเพื่อเปิดเว็บไซต์"
+
+#. • IDD_NEW_VERSION → IDS_NEW_VERSION_NOTES_GRP
+msgid "Release Notes"
+msgstr "สิ่งที่เพิ่มมาใหม่"
+
+#. • IDD_NEW_VERSION → IDS_NEW_VERSION_DOWNLOAD_GRP
+#. • IDD_NEW_VERSION → IDC_DOWNLOAD
+#. • MSG_040
+msgid "Download"
+msgstr "ดาวน์โหลด"
+
+#. • MSG_001
+msgid "Other instance detected"
+msgstr "Rufus กำลังถูกเรียกใช้งานอยู่"
+
+#. • MSG_002
+msgid "Another Rufus application is running.\nPlease close the first application before running another one."
+msgstr "คุณได้เปิด Rufus ไว้ก่อนหน้าแล้ว\nกรุณาปิดหน้าต่างเก่าก่อนเรียกใช้งาน Rufus อีกครั้งหนึ่ง"
+
+#. • MSG_003
+msgid "WARNING: ALL DATA ON DEVICE '%s' WILL BE DESTROYED.\nTo continue with this operation, click OK. To quit click CANCEL."
+msgstr "โปรดระวัง: ข้อมูลทั้งหมดบนอุปกรณ์ '%s' จะถูกลบทิ้งทั้งหมด\nเมื่อต้องการดำเนินการต่อ โปรดคลิก OK หากต้องการยกเลิก โปรดคลิก Cancel"
+
+#. • MSG_004
+msgid "Rufus update policy"
+msgstr "นโยบายการปรับรุ่นของ Rufus"
+
+#. • MSG_005
+msgid "Do you want to allow Rufus to check for application updates online?"
+msgstr "คุณต้องการให้ Rufus ตรวจหาการปรับรุ่นออนไลน์หรือไม่?"
+
+#. • MSG_007
+msgid "Cancel"
+msgstr "ยกเลิก"
+
+#. • MSG_010
+msgid "Bad blocks found"
+msgstr "พบข้อบกพร่อง"
+
+#. • MSG_011
+msgid "Check completed: %d bad block(s) found\n  %d read error(s)\n  %d write error(s)\n  %d corruption error(s)"
+msgstr "ตรวจสอบเรียบร้อง: พบ %d จุดบกพร่อง\n  อ่านบกพร่อง %d จุด\n  เขียนบกพร่อง %d จุด\n  จุดเสียหาย %d จุด"
+
+#. • MSG_012
+#.
+#. This contains the formatted message from MSG_001 as well as the name of the bad blocks logfile
+msgid "%s\nA more detailed report can be found in:\n%s"
+msgstr "%s\nรายงานแบบละเอียดสามารถดูได้ที่:\n%s"
+
+#. • MSG_013
+msgid "Disabled"
+msgstr "ปิดใช้งาน"
+
+#. • MSG_014
+msgid "Daily"
+msgstr "ทุกวัน"
+
+#. • MSG_015
+msgid "Weekly"
+msgstr "สัปดาห์ละครั้ง"
+
+#. • MSG_016
+msgid "Monthly"
+msgstr "เดือนละครั้ง"
+
+#. • MSG_017
+msgid "Custom"
+msgstr "กำหนดเอง"
+
+#. • MSG_018
+msgid "Your version: %d.%d (Build %d)"
+msgstr "รุ่นของคุณ: %d.%d (Build %d)"
+
+#. • MSG_019
+msgid "Latest version: %d.%d (Build %d)"
+msgstr "รุ่นล่าสุด: %d.%d (Build %d)"
+
+#. • MSG_020
+#. • MSG_026
+msgid "bytes"
+msgstr ""
+
+#. • MSG_021
+#.
+#. *Short* version of the kilobyte size suffix
+msgid "KB"
+msgstr ""
+
+#. • MSG_022
+#.
+#. *Short* version of the megabyte size suffix
+msgid "MB"
+msgstr ""
+
+#. • MSG_023
+#.
+#. *Short* version of the gigabyte size suffix
+msgid "GB"
+msgstr ""
+
+#. • MSG_024
+#.
+#. *Short* version of the terabyte size suffix
+msgid "TB"
+msgstr ""
+
+#. • MSG_025
+#.
+#. *Short* version of the pentabyte size suffix
+msgid "PB"
+msgstr ""
+
+#. • MSG_027
+msgid "kilobytes"
+msgstr "กิโลไบต์"
+
+#. • MSG_028
+msgid "megabytes"
+msgstr "เมกะไบต์"
+
+#. • MSG_029
+msgid "Default"
+msgstr "ค่าเริ่มต้น"
+
+#. • MSG_030
+#.
+#. This gets appended to the file system, cluster size, etc.
+msgid "%s (Default)"
+msgstr "%s (ค่าเริ่มต้น)"
+
+#. • MSG_031
+msgid "BIOS (or UEFI-CSM)"
+msgstr "BIOS (หรือ UEFI-CSM)"
+
+#. • MSG_032
+msgid "UEFI (non CSM)"
+msgstr "UEFI (ที่ไม่ใช่ CSM)"
+
+#. • MSG_033
+msgid "BIOS or UEFI"
+msgstr "BIOS หรือ UEFI"
+
+#. • MSG_034
+#.
+#. Number of bad block check passes (singular for 1 pass)
+msgid "%d pass"
+msgstr "%d รอบ"
+
+#. • MSG_035
+#.
+#. Number of bad block check passes (plural for 2 or more passes).
+#. See MSG_087 for the message that %s gets replaced with.
+msgid "%d passes %s"
+msgstr "%d รอบ %s"
+
+#. • MSG_036
+msgid "ISO Image"
+msgstr "อิมเมจ ISO"
+
+#. • MSG_037
+msgid "Application"
+msgstr "แอพพลิเคชั่น"
+
+#. • MSG_038
+msgid "Abort"
+msgstr "ยกเลิก"
+
+#. • MSG_039
+msgid "Launch"
+msgstr "เปิด"
+
+#. • MSG_041
+msgid "Operation cancelled by the user"
+msgstr "การกระทำถูกยกเลิกโดยผู้ใช้"
+
+#. • MSG_042
+msgid "Error"
+msgstr "ความผิดพลาด"
+
+#. • MSG_043
+msgid "Error: %s"
+msgstr "ผิดพลาด: %s"
+
+#. • MSG_044
+msgid "File download"
+msgstr "ดาวน์โหลดไฟล์"
+
+#. • MSG_045
+msgid "USB Storage Device (Generic)"
+msgstr ""
+
+#. • MSG_046
+msgid "%s (Disk %d) [%s]"
+msgstr ""
+
+#. • MSG_047
+#.
+#. Used when a drive is detected that contains more than one partition
+msgid "Multiple Partitions"
+msgstr "พบหลายพาร์ทิชั่น"
+
+#. • MSG_048
+msgid "Rufus - Flushing buffers"
+msgstr "Rufus - กำลังล้างบัฟเฟอร์"
+
+#. • MSG_049
+msgid "Rufus - Cancellation"
+msgstr "Rufus - กำลังยกเลิกการดำเนินการ"
+
+#. • MSG_050
+msgid "Success."
+msgstr "สำเร็จ"
+
+#. • MSG_051
+msgid "Undetermined error while formatting."
+msgstr "พบข้อบกพร่องขณะดำเนินการฟอร์แมท"
+
+#. • MSG_052
+msgid "Cannot use the selected file system for this media."
+msgstr "ไม่สามารถใช้ระบบไฟล์ที่เลือกกับอุปกรณ์นี้ได้"
+
+#. • MSG_053
+msgid "Access to the device is denied."
+msgstr "ไม่สามารถเข้าถึงอุปกรณ์ได้"
+
+#. • MSG_054
+msgid "Media is write protected."
+msgstr "อุปกรณ์นี้ถูกป้องกันการเขียน"
+
+#. • MSG_055
+msgid "The device is in use by another process. Please close any other process that may be accessing the device."
+msgstr "อุปกรณ์นี้กำลังถูกใช้งานโดยโปรแกรมอื่น กรุณาปิดโปรแกรมที่สงสัยว่ากำลังใช้งานอุปกรณ์นี้อยู่"
+
+#. • MSG_056
+msgid "Quick format is not available for this device."
+msgstr "อุปกรณ์นี้ไม่สามารถใช้การฟอร์แมทแบบรวดเร็วได้"
+
+#. • MSG_057
+msgid "The volume label is invalid."
+msgstr "ชื่ออุปกรณ์ที่ตั้งไม่ถูกต้อง"
+
+#. • MSG_058
+msgid "The device handle is invalid."
+msgstr "การระบุตัวอุปกรณ์ผิดพลาด"
+
+#. • MSG_059
+msgid "The selected cluster size is not valid for this device."
+msgstr "ขนาดของคลัสเตอร์ไม่เข้ากับอุปกรณ์"
+
+#. • MSG_060
+msgid "The volume size is invalid."
+msgstr "ขนาดพื้นที่ของอุปกรณ์ไม่ถูกต้อง"
+
+#. • MSG_061
+msgid "Please insert a removable media in drive."
+msgstr "กรุณาเสียบอุปกรณ์เข้ากับเครื่องคอมพิวเตอร์"
+
+#. • MSG_062
+msgid "An unsupported command was received."
+msgstr "โปรแกรมได้รับคำสั่งที่ไม่รองรับ"
+
+#. • MSG_063
+msgid "Memory allocation error."
+msgstr "การจัดสรรหน่วยความจำผิดพลาด"
+
+#. • MSG_064
+msgid "Read error."
+msgstr "การอ่านผิดพลาด"
+
+#. • MSG_065
+msgid "Write error."
+msgstr "การเขียนผิดพลาด"
+
+#. • MSG_066
+msgid "Installation failure"
+msgstr "การติดตั้งโปรแกรมผิดพลาด"
+
+#. • MSG_067
+msgid "Could not open media. It may be in use by another process. Please re-plug the media and try again."
+msgstr "ไม่สามารถเข้าถึงอุปกรณ์ได้ อุปกรณ์นี้อาจกำลังถูกใช้งานโดยโปรแกรมอื่นโปรดถอดและใส่อุปกรณ์ใหม่แล้วลองอีกครั้ง"
+
+#. • MSG_068
+msgid "Error while partitioning drive."
+msgstr "พบข้อผิดพลาดขณะแบ่งพาร์ทิชั่นของไดร์ฟ"
+
+#. • MSG_069
+msgid "Could not copy files to target drive."
+msgstr "ไม่สามารถคัดลอกไฟล์ลงไปยังไดร์ฟได้"
+
+#. • MSG_070
+msgid "Cancelled by user."
+msgstr "ถูกยกเลิกโดยผู้ใช้"
+
+#. • MSG_071
+#.
+#. See http://en.wikipedia.org/wiki/Thread_%28computing%29
+msgid "Unable to start thread."
+msgstr "ไม่สามารถเริ่มต้นเทรด (Thread) การทำงานได้"
+
+#. • MSG_072
+msgid "Bad blocks check didn't complete."
+msgstr "การตรวจสอบจุดพกพร่องของไดร์ฟไม่แล้วเสร็จ"
+
+#. • MSG_073
+msgid "ISO image scan failure."
+msgstr "การตรวจสอบอิมเมจ ISO ผิดพลาด"
+
+#. • MSG_074
+msgid "ISO image extraction failure."
+msgstr "การแตกไฟล์อิมเมจ ISO ผิดพลาด"
+
+#. • MSG_075
+msgid "Unable to remount volume."
+msgstr "ไม่สามารถ Remount โวลุ่มได้"
+
+#. • MSG_076
+msgid "Unable to patch/setup files for boot."
+msgstr "ไม่สามารถติดตั้งไฟล์สำหรับบูตได้"
+
+#. • MSG_077
+msgid "Unable to assign a drive letter."
+msgstr "ตั้งอักษรประจำไดร์ฟไม่ได้"
+
+#. • MSG_078
+msgid "Can't mount GUID volume."
+msgstr "ไม่สามารถเมาท์ GUID โวลุ่มได้"
+
+#. • MSG_079
+msgid "The device is not ready."
+msgstr "อุปกรณ์ไม่พร้อมใช้งาน"
+
+#. • MSG_080
+msgid "Rufus detected that Windows is still flushing its internal buffers onto the USB device.\n\nDepending on the speed of your USB device, this operation may take a long time to complete, especially for large files.\n\nWe recommend that you let Windows finish, to avoid corruption. But if you grow tired of waiting, you can just unplug the device..."
+msgstr "ขณะนี้พบว่าวินโดวส์กำลังดำเนินการเขียนไฟล์ลงบนอุปกรณ์ USB\n\nความเร็วขึ้นอยู่กับความสามารถของ USB ของคุณ ดังนั้นการกระทำนี้อาจใช้เวลานานโดยเฉพาะอย่างยิ่งกับไฟล์ที่มีขนาดใหญ่มากๆ\n\nเราแนะนำให้คุณรอให้เสร็จสิ้น เพื่อป้องกันไฟล์เสียหาย อย่างไรก็ตาม หากคุณไม่อยากรอก็สามารถดึงอุปกรณ์ออกไปได้เลย..."
+
+#. • MSG_081
+msgid "Unsupported image"
+msgstr "อิมเมจไฟล์ไม่รองรับ"
+
+#. • MSG_082
+msgid "This image is either non-bootable, or it uses a boot or compression method that is not supported by Rufus..."
+msgstr "อิมเมจไฟล์นี้ไม่สามารถบูตได้ หรืออาจใช้วิธีการบูตอื่นๆ ที่ Rufus ไม่รองรับ"
+
+#. • MSG_083
+msgid "Replace %s?"
+msgstr "แทนที่ %s?"
+
+#. • MSG_084
+msgid "This ISO image seems to use an obsolete version of '%s'.\nBoot menus may not display properly because of this.\n\nA newer version can be downloaded by Rufus to fix this issue:\n- Choose 'Yes' to connect to the internet and download the file\n- Choose 'No' to leave the existing ISO file unmodified\nIf you don't know what to do, you should select 'Yes'.\n\nNote: The new file will be downloaded in the current directory and once a '%s' exists there, it will be reused automatically."
+msgstr "ISO อิมเมจนี้อาจเป็นเวอร์ชั่นที่ล้าสมัยของ '%s'\nอาจทำให้เมนูการบูตไม่สามารถแสดงได้ถูกต้อง\n\nRufus สามารถดาวน์โหลดเวอร์ชั่นที่ใหม่กว่าให้คุณได้:\n- เลือก 'ใช่' เพื่อดาวน์โหลดไฟล์\n- เลือก 'ไม่ใช่' เพื่อใช้อิมเมจไฟล์อันเดิม\nหากไม่รู้จะเลือกวิธีใด ให้เลือก 'ใช่'\n\nหมายเหตุ: ไฟล์ใหม่จะถูกจัดเก็บในโฟลเดอร์ปัจจุบัน และเมื่อไฟล์ '%s มีแล้ว ไฟล์จะถูกเลือกใช้โดยอัตโนมัติ"
+
+#. • MSG_085
+msgid "Downloading '%s'"
+msgstr "กำลังดาวน์โหลด '%s'"
+
+#. • MSG_086
+msgid "No image selected"
+msgstr "ยังไม่ได้เลือกอิมเมจไฟล์"
+
+#. • MSG_087
+#.
+#. This message appears in Advanced format options → Check device for bad blocks → dropdown menu
+#. %s will be replaced with SLC, MLC or TLC, which is a type of NAND (or flash memory). In other
+#. words, this message should mean "for a flash memory device of type %s". *Please* try to keep
+#. the translation as short as possible so that it won't result in an overly large dropdown...
+#. If you prefer, it's okay to use "type" or "device" instead of "NAND" (e.g. "for TLC type").
+#. See also MSG_035.
+msgid "for %s NAND"
+msgstr "สำหรับ %s NAND"
+
+#. • MSG_088
+msgid "Image is too big"
+msgstr "อิมเมจไฟล์มีขนาดใหญ่เกินไป"
+
+#. • MSG_089
+msgid "The image is too big for the selected target."
+msgstr "อิมเมจไฟล์มีขนาดใหญ่กว่าอุปกรณ์"
+
+#. • MSG_090
+msgid "Unsupported ISO"
+msgstr "ISO ไฟล์ไม่รองรับ"
+
+#. • MSG_091
+msgid "When using UEFI Target Type, only EFI bootable ISO images are supported. Please select an EFI bootable ISO or set the Target Type to BIOS."
+msgstr "เมื่อเลือกใช้รูปแบบ UEFI อิมเมจไฟล์ที่รองรับต้องเป็นแบบ EFI ด้วยกรุณาเลือก ISO ลักษณะแบบ EFI หรือเปลี่ยนรูปแบบเป็น BIOS แทน"
+
+#. • MSG_092
+msgid "Unsupported filesystem"
+msgstr "ระบบไฟล์ไม่รองรับ"
+
+#. • MSG_093
+msgid "IMPORTANT: THIS DRIVE CONTAINS MULTIPLE PARTITIONS!!\n\nThis may include partitions/volumes that aren't listed or even visible from Windows. Should you wish to proceed, you are responsible for any data loss on these partitions."
+msgstr "สำคัญมาก:ไดร์ฟนี้มีหลายพาร์ทิชั่น!!\n\nซึ่งอาจรวมไปถึงพาร์ทิชั่นที่ไม่สามารถมองเห็นได้บน Windows หากดำเนินการต่อ ข้อมูลบนพาร์ทิชั่นดังกล่าวจะหายไปอย่างถาวร"
+
+#. • MSG_094
+msgid "Multiple partitions detected"
+msgstr "พบหลายพาร์ทิชั่น"
+
+#. • MSG_095
+msgid "DD Image"
+msgstr "อิมเมจ DD"
+
+#. • MSG_096
+msgid "The file system currently selected can not be used with this type of ISO. Please select a different file system or use a different ISO."
+msgstr "ระบบไฟล์ที่เลือกปัจจุบันไม่สามารถใช้ได้กับ ISO รูปแบบนี้กรุณาเลือกระบบไฟล์หรือ ISO ใหม่ที่ต่างไปจากเดิม"
+
+#. • MSG_097
+msgid "'%s' can only be applied if the file system is NTFS."
+msgstr "'%s' สามารถใช้ได้เฉพาะกับระบบไฟล์ NTFS เท่านั้น"
+
+#. • MSG_098
+msgid "IMPORTANT: You are trying to install 'Windows To Go', but your target drive doesn't have the 'FIXED' attribute. Because of this Windows will most likely freeze during boot, as Microsoft hasn't designed it to work with drives that instead have the 'REMOVABLE' attribute.\n\nDo you still want to proceed?\n\nNote: The 'FIXED/REMOVABLE' attribute is a hardware property that can only be changed using custom tools from the drive manufacturer. However those tools are ALMOST NEVER provided to the public..."
+msgstr "สำคัญมาก: คุณกำลังเลือกติดตั้งแบบ 'Windows To Go' แต่อุปกรณ์ของคุณไม่มีแอททริบิวต์แบบ 'FIXED' ดังนั้น Windows อาจจะค้างขณะทำการบูตได้ เพราะ Microsoft ไม่ได้ออกแบบให้ทำงานบนอุปกรณ์แบบถอดได้ (Removable Attribute)\n\nคุณต้องการดำเนินการต่อหรือไม่?\n\nหมายเหตุ: แอททริบิวต์แบบ 'FIXED/REMOVABLE' เป็นคุณสมบัติเฉพาะของอุปกรณ์ และสามารถถูกแก้ไขได้โดยเครื่องมือที่สร้างโดยผู้ผลิตเท่านั้น ซึ่งหาได้ยากมาก และไม่ถูกปล่อยให้ใช้โดยทั่วไป..."
+
+#. • MSG_099
+msgid "Filesystem limitation"
+msgstr "ข้อจำกัดของแต่ละระบบไฟล์"
+
+#. • MSG_100
+msgid "This ISO image contains a file larger than 4GB, which is more than the maximum size allowed for a FAT or FAT32 file system."
+msgstr "อิมเมจไฟล์นี้ประกอบไปด้วยไฟล์ที่มีขนาดใหญ่กว่า 4GB ซึ่งมากกว่าขนาดสูงสุดที่รองรับได้ของระบบไฟล์แบบ FAT หรือ FAT32"
+
+#. • MSG_101
+msgid "Missing WIM support"
+msgstr "ไม่รองรับรูปแบบ WIM"
+
+#. • MSG_102
+msgid "Your platform cannot extract files from WIM archives. WIM extraction is required to create EFI bootable Windows 7 and Windows Vista USB drives. You can fix that by installing a recent version of 7-Zip.\nDo you want to visit the 7-zip download page?"
+msgstr "ระบบปฏิบัติการของคุณไม่สามารถแตกไฟล์สกุล WIM ได้ โดยไฟล์ WIMนี้ จำเป็นที่ต้องใช้ในการสร้าง Windows 7 บูตได้แบบ EFI และ Windows Vista USB ซึ่งแก้ไขได้โดย การติดตั้ง 7-Zip เวอร์ชั่นล่าสุด\nต้องการเปิดหน้าดาวน์โหลด 7-zip หรือไม่?"
+
+#. • MSG_103
+msgid "Download %s?"
+msgstr "ดาวน์โหลด %s?"
+
+#. • MSG_104
+#.
+#. Example: "Grub4DOS v0.4 or later requires a 'grldr' file to be installed. Because this
+#. file is more than 100 KB in size, and always present on Grub4DOS ISO images (...)"
+msgid "%s or later requires a '%s' file to be installed.\nBecause this file is more than 100 KB in size, and always present on %s ISO images, it is not embedded in Rufus.\n\nRufus can download the missing file for you:\n- Select 'Yes' to connect to the internet and download the file\n- Select 'No' if you want to manually copy this file on the drive later\n\nNote: The file will be downloaded in the current directory and once a '%s' exists there, it will be reused automatically."
+msgstr "%s หรือใหม่กว่า จำเป็นต้องมี  '%s' ติดตั้งไว้\nเนื่องจากไฟล์นี้มีขนาดใหญ่กว่า 100 KB และพบตลอดใน ISO อิมเมจไฟล์จึงไม่ได้รวมไว้ในโปรแกรม Rufus\n\nRufus สามารถดาวน์โหลดไฟล์ดังกล่าวให้คุณได้:\n- เลือก 'ใช่' เพื่อดาวน์โหลดไฟล์ผ่านอินเทอร์เน็ต\n- เลือก 'ไม่ใช่' คุณต้องการคัดลอกไฟล์ดังกล่าวด้วยตัวเอง\n\nหมายเหตุ: ไฟล์ใหม่จะถูกจัดเก็บในโฟลเดอร์ปัจจุบัน และเมื่อไฟล์ '%s มีแล้ว ไฟล์จะถูกเลือกใช้โดยอัตโนมัติ"
+
+#. • MSG_105
+msgid "Cancelling may leave the device in an UNUSABLE state.\nIf you are sure you want to cancel, click YES. Otherwise, click NO."
+msgstr "การยกเลิกนี้อาจทำให้อุปกรณ์อยู่ในสถานะที่ไม่สามารถใช้การได้ !\nหากคุณยืนยันที่จะยกเลิก คลิกที่ปุ่ม ใช่"
+
+#. • MSG_106
+msgid "Please select folder"
+msgstr "กรุณาเลือกโฟลเดอร์"
+
+#. • MSG_107
+msgid "All files"
+msgstr "ไฟล์ทั้งหมด"
+
+#. • MSG_108
+msgid "Rufus log"
+msgstr ""
+
+#. • MSG_109
+msgid "0x%02X (Disk %d)"
+msgstr ""
+
+#. • MSG_110
+#.
+#. "Cluster size" should be the same as the label for IDS_CLUSTER_SIZE_TXT
+#. "kilobytes" should be the same as in MSG_027
+msgid "MS-DOS cannot boot from a drive using a 64 kilobytes Cluster size.\nPlease change the Cluster size or use FreeDOS."
+msgstr "MS-DOS ไม่สามารถบูตไดร์ฟที่ใช้ขนาดของคลัสเตอร์ 64 kilobytes ได้\nโปรดเปลี่ยนขนาดของคลัสเตอร์ หรือเลือกใช้ FreeDOS."
+
+#. • MSG_111
+msgid "Incompatible Cluster size"
+msgstr "ขนาดของคลัสเตอร์ไม่รองรับ"
+
+#. • MSG_112
+#.
+#. "%d:%02d" is a duration (mins:secs)
+msgid "Formatting a large UDF volumes can take a lot of time. At USB 2.0 speeds, the estimated formatting duration is %d:%02d, during which the progress bar will appear frozen. Please be patient!"
+msgstr "การฟอร์แมทโวลุ่ม UDF ขนาดใหญ่อาจใช้เวลานาน โดยความเร็วของ USB 2.0 ความเร็วการฟอร์แมทโดยประมาณคือ %d:%02d โดยขณะทำงาน แถบแสดงความคืบหน้าอาจหยุดนิ่ง โปรดรอ"
+
+#. • MSG_113
+msgid "Large UDF volume"
+msgstr "โวลุ่ม UDF ขนาดใหญ่"
+
+#. • MSG_114
+msgid "This image uses Syslinux %s%s but this application only includes the installation files for Syslinux %s%s.\n\nAs new versions of Syslinux are not compatible with one another, and it wouldn't be possible for Rufus to include them all, two additional files must be downloaded from the Internet ('ldlinux.sys' and 'ldlinux.bss'):\n- Select 'Yes' to connect to the Internet and download these files\n- Select 'No' to cancel the operation\n\nNote: The files will be downloaded in the current application directory and will be reused automatically if present."
+msgstr "อิมเมจนี้ใช้ Syslinux %s%s แต่โปรแกรมนี้รวมเฉพาะไฟล์ติดตั้งของ Syslinux %s%s \n\nโดยเวอร์ชั่นใหม่ของ Syslinux อาจไม่รองรับกับรุ่นที่ต่างกันไปไฟล์จำนวน 2 ไฟล์ต่อไปนี้จะถูกดาวน์โหลดจากอินเทอร์เน็ต ('ldlinux.sys' and 'ldlinux.bss'):\n- เลือก 'ใช่' เพื่อดาวน์โหลดไฟล์ผ่านอินเทอร์เน็ต\n- เลือก 'ไม่ใช่' เมื่อคุณต้องการคัดลอกไฟล์ดังกล่าวด้วยตัวเอง\n\nหมายเหตุ: ไฟล์ใหม่จะถูกจัดเก็บในโฟลเดอร์ปัจจุบัน และไฟล์ จะถูกเลือกใช้โดยอัตโนมัติ"
+
+#. • MSG_115
+msgid "Download required"
+msgstr "จำเป็นต้องดาวน์โหลดไฟล์"
+
+#. • MSG_116
+#.
+#. You should be able to test this message with Super Grub2 Disk ISO:
+#. https://sourceforge.net/projects/supergrub2/files/2.00s2/super_grub2_disk_hybrid_2.00s2.iso/download (11.9 MB)
+msgid "This image uses Grub %s but the application only includes the installation files for Grub %s.\n\nAs different versions of Grub may not be compatible with one another, and it is not possible to include them all, Rufus will attempt to locate a version of the Grub installation file ('core.img') that matches the one from your image:\n- Select 'Yes' to connect to the Internet and attempt to download it\n- Select 'No' to use the default version from Rufus\n- Select 'Cancel' to abort the operation\n\nNote: The file will be downloaded in the current application directory and will be reused automatically if present. If no match can be found online, then the default version will be used."
+msgstr "อิมเมจนี้ใช้ Grub %s แต่โปรแกรมนี้รวมเฉพาะไฟล์ติดตั้งของ Grub %s \n\nโดยเวอร์ชั่นใหม่ของ Grub อาจไม่รองรับกับรุ่นที่ต่างกันไป Rufus สามารถค้นหาอิมเมจของ Grub เวอร์ชั่นล่าสุด ('core.img') ที่เข้ากันได้กับอิมเมจไฟล์ที่คุณเลือก:\n- เลือก 'ใช่' เพื่อดาวน์โหลดไฟล์ผ่านอินเทอร์เน็ต\n- เลือก 'ไม่ใช่' เพื่อใช้เวอร์ชั่นปัจจุบันที่ติดมากับ Rufus\n- เลือก 'ยกเลิก' เพื่อยกเลิกการกระทำนี้\n\nหมายเหตุ: ไฟล์ใหม่จะถูกจัดเก็บในโฟลเดอร์ปัจจุบัน และไฟล์จะถูกเลือกใช้โดยอัตโนมัติหากไม่พบไฟล์ที่ใหม่กว่า ไฟล์เวอร์ชั่นปัจจุบันจะถูกใช้แทน"
+
+#. • MSG_117
+msgid "Standard Windows installation"
+msgstr "ตัวติดตั้ง Windows มาตรฐาน"
+
+#. • MSG_118
+#.
+#. Only translate this message *if* Microsoft has a specific name for
+#. http://en.wikipedia.org/wiki/Windows_To_Go in your language.
+#. Otherwise, you may add a parenthesis eg. "Windows To Go (<hint at what it does>)"
+msgid "Windows To Go"
+msgstr ""
+
+#. • MSG_119
+msgid "advanced drive properties"
+msgstr "คุณสมบัติไดร์ฟขั้นสูง"
+
+#. • MSG_120
+msgid "advanced format options"
+msgstr "คุณสมบัติการฟอร์แมตขั้นสูง"
+
+#. • MSG_121
+msgid "Show %s"
+msgstr "แสดง%s"
+
+#. • MSG_122
+msgid "Hide %s"
+msgstr "ซ่อน%s"
+
+#. • MSG_123
+#.
+#. A persistent partitions can be used with "Live" USB media to store data.
+#. It means that data can be preserved across reboots on "Live" USB drives.
+#. To test this feature, please download and select 'casper_test.iso' from:
+#. https://github.com/pbatard/rufus/raw/master/res/loc/test/casper_test.iso
+msgid "Persistent partition size"
+msgstr "ขนาดของ Persistent partition"
+
+#. • MSG_124
+#.
+#. This message appears in the persistence 'Size' control when the slider is set to 0.
+#. It is okay to use "No partition" or "None" or "Deactivated" to indicate that a persistent partition will not be
+#. created if the width of the control is too small (since the 'Size' edit control is *not* adjusted for width).
+msgid "No persistence"
+msgstr "ไม่มี"
+
+#. • MSG_125
+#.
+#. Tooltips used for the peristence size slider and edit control
+msgid "Set the size of the persistent partition for live USB media. Setting the size to 0 disables the persistent partition."
+msgstr "ตั้งค่าขนาดของพาร์ติชันสำหรับ live USB media (ตั้งขนาดเป็น 0 เพื่อปิดการทำงานของ persistent partition)"
+
+#. • MSG_126
+msgid "Set the partition size units."
+msgstr "ตั้งขนาดของ Persistent partition"
+
+#. • MSG_150
+msgid "Type of computer you plan to use this bootable drive with. It is your responsibility to determine whether your target is of BIOS or UEFI type before you start creating the drive, as it may fail to boot otherwise."
+msgstr "รูปแบบของเครื่องคอมพิวเตอร์ที่คุณจะใช้ไดร์ฟที่คุณกำลังสร้างด้วย ซึ่งเป็นหน้าที่ของคุณเองที่ต้องทราบว่าเครื่องเป้าหมายมีรูปแบบการบูตแบบ BIOS หรือ UEFI หากเลือกผิดรูปแบบจะส่งผลให้ท่านไม่สามารถบูตด้วยไดรฟ์นี้ได้"
+
+#. • MSG_151
+#.
+#. You shouldn't translate 'Legacy Mode' as this is an option that usually appears in English in the UEFI settings.
+msgid "'UEFI-CSM' means that the device will only boot in BIOS emulation mode (also known as 'Legacy Mode') under UEFI, and not in native UEFI mode."
+msgstr "'UEFI-CSM' หมายถึงอุปกรณ์คุณจะสามารถบูตในโหมด BIOS emulation (Legacy Mode) ภายใต้ระบบ UEFI โดยต้องไม่ใช่แบบ Native UEFI"
+
+#. • MSG_152
+msgid "'non CSM' means that the device will only boot in native UEFI mode, and not in BIOS emulation mode (also known as 'Legacy Mode')."
+msgstr "'ที่ไม่ใช่ CSM' หมายถึงอุปกรณ์คุณจะสามารถบูตในโหมด Native UEFI โดยที่ไม่ใช่ BIOS emulation หรือ Legacy Mode"
+
+#. • MSG_153
+msgid "Test pattern: 0x%02X"
+msgstr "รูปแบบการทดสอบ: 0x%02X"
+
+#. • MSG_154
+msgid "Test pattern: 0x%02X, 0x%02X"
+msgstr "รูปแบบการทดสอบ: 0x%02X, 0x%02X"
+
+#. • MSG_155
+msgid "Test pattern: 0x%02X, 0x%02X, 0x%02X"
+msgstr "รูปแบบการทดสอบ: 0x%02X, 0x%02X, 0x%02X"
+
+#. • MSG_156
+msgid "Test pattern: 0x%02X, 0x%02X, 0x%02X, 0x%02X"
+msgstr "รูปแบบการทดสอบ: 0x%02X, 0x%02X, 0x%02X, 0x%02X"
+
+#. • MSG_157
+msgid "Sets the target filesystem"
+msgstr "เลือกระบบไฟล์"
+
+#. • MSG_158
+msgid "Minimum size that a block of data will occupy in the filesystem"
+msgstr "ขนาดที่เก็บข้อมูลที่น้อยที่สุดต่อไฟล์ที่ระบบไฟล์จะจัดสรรให้"
+
+#. • MSG_159
+msgid "Use this field to set the drive label.\nInternational characters are accepted."
+msgstr "กรอกชื่อไดร์ฟแบบกำหนดเองในช่องนี้ ตัวอักษรสากลสามารถใช้ได้"
+
+#. • MSG_160
+msgid "Toggle advanced options"
+msgstr "เปิด/ปิดตัวเลือกขั้นสูง"
+
+#. • MSG_161
+msgid "Check the device for bad blocks using a test pattern"
+msgstr "ตรวจสอบข้อบกพร่องของอุปกรณ์โดยใช้รูปแบบการทดสอบต่างๆ"
+
+#. • MSG_162
+msgid "Uncheck this box to use the \"slow\" format method"
+msgstr "ไม่ต้องเลือกตัวเลือกนี้หากต้องการฟอร์แมทแบบช้า"
+
+#. • MSG_163
+msgid "Method that will be used to create partitions"
+msgstr "วิธีการที่จะใช้สร้างพาร์ติชั่น"
+
+#. • MSG_164
+msgid "Method that will be used to make the drive bootable"
+msgstr "วิธีที่จะใช้ในการทำให้ไดร์ฟบูตได้"
+
+#. • MSG_165
+msgid "Click to select an image..."
+msgstr "คลิกเพื่อเลือกอิมเมจไฟล์..."
+
+#. • MSG_166
+msgid "Check this box to allow the display of international labels and set a device icon (creates an autorun.inf)"
+msgstr "เลือกตัวเลือกนี้เพื่อสร้างไฟล์ autorun.inf สำหรับสร้างชื่อไดร์ฟแบบอัตโนมัติและเพิ่มไอคอนกราฟฟิคให้กับไดร์ฟด้วย"
+
+#. • MSG_167
+msgid "Install an MBR that allows boot selection and can masquerade the BIOS USB drive ID"
+msgstr "ติดตั้ง MBR ที่ยินยอมให้แปลง BIOS USB drive ID"
+
+#. • MSG_168
+msgid "Try to masquerade first bootable USB drive (usually 0x80) as a different disk.\nThis should only be necessary if you install Windows XP and have more than one disk."
+msgstr "ลองแปลง bootable USB drive แรก (ที่ตำแหน่ง 0x80) ให้เป็นดิสก์อื่น.\nจำเป็นก็ต่อเมื่อคุณติดตั้ง Windows XP และมีหลายดิสก์ในเวลาเดียวกัน"
+
+#. • MSG_169
+msgid "Create an extra hidden partition and try to align partitions boundaries.\nThis can improve boot detection for older BIOSes."
+msgstr "สร้างพาร์ทิชั่นเพิ่มเติมและปรับเปลี่ยนขอบเขตของพาร์ทิชั่น\nเป็นข้อดีที่จะช่วยให้ BIOS รุ่นเก่าสามารถตรวจพบอุปกรณ์ได้ดีขึ้น"
+
+#. • MSG_170
+msgid "Enable the listing of USB Hard Drive enclosures. USE AT YOUR OWN RISKS!!!"
+msgstr "เปิดให้แสดงรายชื่อ USB Hard Drive ทั้งหมด (มีความเสี่ยง โปรดระมัดระวัง!!!)"
+
+#. • MSG_171
+msgid "Start the formatting operation.\nThis will DESTROY any data on the target!"
+msgstr "กำลังเริ่มต้นฟอร์แมท\nข้อมูลทั้งหมดบนอุปกรณ์ที่เลือกจะถูกลบทิ้ง"
+
+#. • MSG_172
+#.
+#. As of Rufus 3.2, *ALL* downloads from the servers are digitally signed, and their signature is validated using the
+#. public key that is embedded in the application. This message appears in an error dialog if the validation fails.
+msgid "Invalid download signature"
+msgstr "ลายเซ็นดิจิทัลของการดาวน์โหลดไม่ถูกต้อง"
+
+#. • MSG_173
+msgid "Click to select..."
+msgstr "คลิกเพื่อเลือก..."
+
+#. • MSG_174
+msgid "Rufus - The Reliable USB Formatting Utility"
+msgstr ""
+
+#. • MSG_175
+msgid "Version %d.%d (Build %d)"
+msgstr "เวอร์ชั่น %d.%d (Build %d)"
+
+#. • MSG_176
+msgid "English translation: Pete Batard <mailto:pete@akeo.ie>"
+msgstr "แปลไทยโดย: Sippapas Wangsri <mailto:sippapas_w@cmu.ac.th>"
+
+#. • MSG_177
+msgid "Report bugs or request enhancements at:"
+msgstr "รายงานข้อบกพร่องหรือแนะนำข้อเสนอแนะได้ที่:"
+
+#. • MSG_178
+msgid "Additional Copyrights:"
+msgstr "ลิขสิทธิ์เพิ่มเติม:"
+
+#. • MSG_179
+msgid "Update Policy:"
+msgstr "นโยบายการปรับรุ่น:"
+
+#. • MSG_180
+msgid "If you choose to allow this program to check for application updates, you agree that the following information may be collected on our server(s):"
+msgstr "เมื่อคุณอนุญาตให้โปรแกรมตรวจหาการปรับรุ่น ถือว่าคุณยอมรับว่าข้อมูลต่อไปนี้จะถูกส่งให้แก่เซริฟเวอร์:"
+
+#. • MSG_181
+msgid "Your operating system's architecture and version"
+msgstr "สถาปัตยกรรมและเวอร์ชั่นของระบบปฏิบัติการของคุณ"
+
+#. • MSG_182
+msgid "The version of the application you use"
+msgstr "เวอร์ชั่นของโปรแกรมที่คุณใช้"
+
+#. • MSG_183
+msgid "Your IP address"
+msgstr "IP address ของคุณ"
+
+#. • MSG_184
+msgid "For the purpose of generating private usage statistics, we may keep the information collected, \\b for at most a year\\b0 . However, we will not willingly disclose any of this individual data to third parties."
+msgstr "เพื่อจุดประสงค์ในการจัดทำสถิติ เราอาจเก็บข้อมูลดังกล่าว \\b ไว้เป็นระยะเวลาหนึ่ง\\b0 อย่างไรก็ตาม เราไม่มีนโยบายในการเปิดเผยข้อมูลของท่านให้แก่บุคคลที่สาม"
+
+#. • MSG_185
+msgid "Update Process:"
+msgstr "กระบวนการการอัพเดต:"
+
+#. • MSG_186
+msgid "Rufus does not install or run background services, therefore update checks are performed only when the main application is running.\\line\nInternet access is of course required when checking for updates."
+msgstr "Rufus ไม่ได้ติดตั้ง service ที่ทำงานในพื้นหลัง ดังนั้นการตรวจสอบการปรับรุ่นจะเกิดขึ้นก็ต่อเมื่อมีการเปิดโปรแกรมเท่านั้น\\line\nการเชื่อมต่ออินเทอร์เน็ตมีความจำเป็นที่จะทำการปรับรุ่น"
+
+#. • MSG_187
+msgid "Invalid image for selected boot option"
+msgstr "อิมเมจสำหรับตัวเลือกการบูทไม่ถูกต้อง"
+
+#. • MSG_188
+msgid "The current image doesn't match the boot option selected. Please use a different image or choose a different boot option."
+msgstr "อิมเมจปัจจุบันไม่ตรงกับตัวเลือกการบูตที่เลือก กรุณาเลือกอิมเมจหรือตัวเลือกการบูตใหม่"
+
+#. • MSG_189
+msgid "This ISO image is not compatible with the selected filesystem"
+msgstr "ISO อิมเมจนี้ไม่รองรับกับระบบไฟล์ที่เลือก"
+
+#. • MSG_190
+msgid "Incompatible drive detected"
+msgstr "ตรวจพบไดร์ฟที่ไม่รองรับ"
+
+#. • MSG_191
+#.
+#. Used in MSG_235
+msgid "Write pass"
+msgstr "การเขียนรอบที่"
+
+#. • MSG_192
+#.
+#. Used in MSG_235
+msgid "Read pass"
+msgstr "การอ่านรอบที่"
+
+#. • MSG_193
+msgid "Downloaded %s"
+msgstr "ดาวน์โหลด %s แล้ว"
+
+#. • MSG_194
+msgid "Could not download %s"
+msgstr "ไม่สามารถดาวน์โหลด %s ได้"
+
+#. • MSG_195
+#.
+#. Example: "Using embedded version of Grub2 file(s)"
+msgid "Using embedded version of %s file(s)"
+msgstr "กำลังใช้ไฟล์ที่ติดมาของ %s ไฟล์"
+
+#. • MSG_196
+msgid "IMPORTANT: THIS DRIVE USES A NONSTANDARD SECTOR SIZE!\n\nConventional drives use a 512-byte sector size but this drive uses a %d-byte one. In many cases, this means that you will NOT be able to boot from this drive.\nRufus can try to create a bootable drive, but there is NO WARRANTY that it will work."
+msgstr "สำคัญมาก: อุปกรณ์นี้ใช้ขนาดของเซคเตอร์ที่ไม่เป็นมาตรฐาน!!\n\nโดยทั่วไปไดร์ฟจะใช้ขนาดของเซคเตอร์เป็น 512-byte แต่อุปกรณ์นี้เป็น %d-byteหมายความว่าคุณจะไม่สามารถบูตจากอุปกรณ์นี้ได้\nอย่างไรก็ตาม เราสามารถลองสร้างไดร์ฟดังกล่าว แต่ไม่รับรองได้ว่าอุปกรณ์นั้นจะสามารถทำงานได้อย่างที่ควรเป็น"
+
+#. • MSG_197
+msgid "Nonstandard sector size detected"
+msgstr "พบไดร์ฟที่มีขนาดของเซคเตอร์ไม่เป็นมาตรฐาน"
+
+#. • MSG_198
+msgid "'Windows To Go' can only be installed on a GPT partitioned drive if it has the FIXED attribute set. The current drive was not detected as FIXED."
+msgstr "'Windows To Go' สามารถติดตั้งลงบนพาร์ทิชั่นแบบ GPT เท่านั้นหากมีแอททริบิทต์แบบ FIXED แต่ไดร์ฟปัจจุบันพบว่าไม่มีแอททริบิวต์แบบ FIXED"
+
+#. • MSG_201
+msgid "Cancelling - Please wait..."
+msgstr "กำลังยกเลิก - โปรดรอสักครู่..."
+
+#. • MSG_202
+msgid "Scanning image..."
+msgstr "กำลังสแกนอิมเมจ..."
+
+#. • MSG_203
+msgid "Failed to scan image"
+msgstr "การสแกนอิมเมจผิดพลาด"
+
+#. • MSG_204
+#.
+#. %s is the name of an obsolete Syslinux .c32 module. Example: "Obsolete vesamenu.c32 detected"
+msgid "Obsolete %s detected"
+msgstr "พบไฟล์ %s ที่ล้าสมัย"
+
+#. • MSG_205
+#.
+#. Display the name of the image selected. eg: "Using image: en_win7_x64_sp1.iso"
+msgid "Using image: %s"
+msgstr "กำลังเรียกใช้อิมเมจ: %s"
+
+#. • MSG_206
+#.
+#. Example: "Missing ldlinux.c32 file"
+msgid "Missing %s file"
+msgstr "ไม่พบไฟล์ %s"
+
+#. • MSG_207
+#.
+#. The name proposed by Windows' Computer Management → Disk Management when you try to format
+#. a drive with an empty label. For an example, see https://rufus.ie/pics/default_name.png.
+msgid "New Volume"
+msgstr ""
+
+#. • MSG_208
+#.
+#. Singular. Example: "1 device found"
+msgid "%d device found"
+msgstr "พบ %d อุปกรณ์"
+
+#. • MSG_209
+#.
+#. Plural. Example: "3 devices found"
+msgid "%d devices found"
+msgstr "พบ %d อุปกรณ์"
+
+#. • MSG_210
+msgid "READY"
+msgstr "พร้อมทำงาน"
+
+#. • MSG_211
+msgid "Cancelled"
+msgstr "ยกเลิกแล้ว"
+
+#. • MSG_212
+msgid "Failed"
+msgstr "เกิดข้อผิดพลาด!"
+
+#. • MSG_213
+#.
+#. Used when a new update has been downloaded and launched
+msgid "Launching new application..."
+msgstr "กำลังเปิดแอพพลิเคชั่น..."
+
+#. • MSG_214
+msgid "Failed to launch new application"
+msgstr "ไม่สามารถเปิดแอพพลิเคชั่นได้"
+
+#. • MSG_215
+#.
+#. Example: "Opened some_file.txt"
+msgid "Opened %s"
+msgstr "เปิด %s แล้ว"
+
+#. • MSG_216
+#.
+#. Example: "Saved rufus.log"
+msgid "Saved %s"
+msgstr "บันทึก %s แล้ว"
+
+#. • MSG_217
+#.
+#. Formatting status (make sure you use a double % to print the percent sign)
+msgid "Formatting: %0.1f%% completed"
+msgstr "กำลังฟอร์แมท: %0.1f%%"
+
+#. • MSG_218
+msgid "Creating file system: Task %d/%d completed"
+msgstr "กำลังสร้างระบบไฟล์: แล้วเสร็จ %d จาก %d"
+
+#. • MSG_219
+msgid "NTFS Fixup: %d%% completed"
+msgstr "ตรวจสอบระบบ NTFS: %d%%"
+
+#. • MSG_220
+#.
+#. Parameter: the file system and an estimated duration in mins and secs.
+#. Example: "Formatting (UDF) - Estimated duration 3:21..."
+#. If "estimated duration" is too long, just use "estimated" or an abbreviation
+msgid "Formatting (%s) - estimated duration %d:%02d..."
+msgstr "กำลังฟอร์แมท (%s) - เวลาคงเหลือ %d:%02d..."
+
+#. • MSG_221
+msgid "Setting Label (This may take a while)..."
+msgstr "กำลังตั้งชื่อไดร์ฟ..."
+
+#. • MSG_222
+#.
+#. Example: "Formatting (FAT32)..."
+msgid "Formatting (%s)..."
+msgstr "กำลังฟอร์แมท (%s)..."
+
+#. • MSG_223
+msgid "NTFS Fixup (Checkdisk)..."
+msgstr "ตรวจสอบระบบ NTFS (Checkdisk)..."
+
+#. • MSG_224
+msgid "Clearing MBR/PBR/GPT structures..."
+msgstr "กำลังจัดการโครงสร้าง MBR/PBR/GPT..."
+
+#. • MSG_225
+msgid "Requesting disk access..."
+msgstr "กำลังเข้าถึงดิสก์..."
+
+#. • MSG_226
+msgid "Analyzing existing boot records..."
+msgstr "กำลังวิเคราะห์ Boot Record..."
+
+#. • MSG_227
+msgid "Closing existing volume..."
+msgstr "กำลังปิดโวลุ่มปัจจุบัน..."
+
+#. • MSG_228
+msgid "Writing master boot record..."
+msgstr "กำลังเขียน master boot record..."
+
+#. • MSG_229
+msgid "Writing partition boot record..."
+msgstr "กำลังเขียน partition boot record..."
+
+#. • MSG_230
+msgid "Copying DOS files..."
+msgstr "กำลังคัดลอกไฟล์ DOS..."
+
+#. • MSG_231
+msgid "Copying ISO files..."
+msgstr "กำลังคัดลอกไฟล์ ISO..."
+
+#. • MSG_232
+msgid "Win7 EFI boot setup (This may take a while)..."
+msgstr "Win7 EFI boot setup..."
+
+#. • MSG_233
+msgid "Finalizing, please wait..."
+msgstr "กำลังทำให้เสร็จสมบูรณ์..."
+
+#. • MSG_234
+#.
+#. Takes a Syslinux version as parameter.
+#. Example: "Installing Syslinux v5.10..."
+msgid "Installing Syslinux %s..."
+msgstr "กำลังติดตั้ง Syslinux %s..."
+
+#. • MSG_235
+#.
+#. Bad blocks status. Example: "Bad Blocks: Write pass 1/2 - 12.34% (0/0/1 errors)"
+#. See MSG_191 & MSG_192 for "Write pass"/"Read pass" translation.
+msgid "Bad Blocks: %s %d/%d - %0.2f%% (%d/%d/%d errors)"
+msgstr "พบข้อบกพร่อง: %s %d/%d - %0.2f%% (%d/%d/%d errors)"
+
+#. • MSG_236
+msgid "Bad Blocks: Testing with random pattern"
+msgstr "พบข้อบกพร่อง: กำลังทดสอบโดยรูปแบบแบบสุ่ม"
+
+#. • MSG_237
+msgid "Bad Blocks: Testing with pattern 0x%02X"
+msgstr "พบข้อบกพร่อง: กำลังทดสอบโดยรูปแบบ 0x%02X"
+
+#. • MSG_238
+#.
+#. Example: "Partitioning (MBR)..."
+msgid "Partitioning (%s)..."
+msgstr "กำลังแบ่งพาร์ทิชั่น (%s)..."
+
+#. • MSG_239
+msgid "Deleting partitions..."
+msgstr "กำลังลบพาร์ทิชั่น..."
+
+#. • MSG_240
+#.
+#. This message has to do with the signature validation that Rufus uses when downloading an update.
+msgid "The signature for the downloaded update can not be validated. This could mean that your system is improperly configured for signature validation or indicate a malicious download.\n\nThe download will be deleted. Please check the log for more details."
+msgstr "ไม่สามารถตรวจความถูกต้องของไฟล์ที่ดาวน์โหลดมาได้ กรณีนี้อาจหมายถึงการตั้งค่าเครื่องของคุณผิดพลาดหรืออาจดาวน์โหลดไฟล์ที่เป็นอันตราย\n\nไฟล์ที่ดาวน์โหลดมาจะถูกลบทิ้ง กรุณาตรวจสอบ log file สำหรับข้อมูลเพิ่มเติม"
+
+#. • MSG_241
+msgid "Downloading: %0.1f%%"
+msgstr "ดาวน์โหลดแล้ว: %0.1f%%"
+
+#. • MSG_242
+msgid "Failed to download file."
+msgstr "ไม่สามารถดาวน์โหลดไฟล์ได้"
+
+#. • MSG_243
+msgid "Checking for Rufus updates..."
+msgstr "กำลังตรวจหาการปรับรุ่น Rufus..."
+
+#. • MSG_244
+msgid "Updates: Unable to connect to the internet"
+msgstr "การปรับรุ่น: ไม่สามารถเชื่อมต่ออินเทอร์เน็ต"
+
+#. • MSG_245
+msgid "Updates: Unable to access version data"
+msgstr "การปรับรุ่น: ไม่สามารถหาเวอร์ชั่นปัจจุบันได้"
+
+#. • MSG_246
+msgid "A new version of Rufus is available!"
+msgstr "พบ Rufus เวอร์ชั่นใหม่!!!"
+
+#. • MSG_247
+msgid "No new version of Rufus was found"
+msgstr "ไม่พบ Rufus เวอร์ชั่นที่ใหม่กว่า"
+
+#. • MSG_248
+msgid "Application registry keys successfully deleted"
+msgstr "Registry keys ของแอพพลิเคชั่นถูกลบแล้ว"
+
+#. • MSG_249
+msgid "Failed to delete application registry keys"
+msgstr "ไม่สามารถลบ Registry Keys ของแอพพลิเคชั่นได้"
+
+#. • MSG_250
+#.
+#. Example: "Fixed disk detection enabled", "ISO size check disabled", etc.
+msgid "%s enabled"
+msgstr "เปิดใช้งาน%s แล้ว"
+
+#. • MSG_251
+msgid "%s disabled"
+msgstr "ปิดใช้งาน%s แล้ว"
+
+#. • MSG_252
+msgid "Size checks"
+msgstr "ตรวจสอบขนาด"
+
+#. • MSG_253
+msgid "Hard disk detection"
+msgstr "การตรวจหาฮาร์ดดิสก์"
+
+#. • MSG_254
+msgid "Force large FAT32 formatting"
+msgstr "บังคับให้ฟอร์แมท FAT32 ขนาดใหญ่"
+
+#. • MSG_255
+msgid "NoDriveTypeAutorun will be deleted on exit"
+msgstr "NoDriveTypeAutorun จะถูกลบเมื่อปิดโปรแกรม"
+
+#. • MSG_256
+msgid "Fake drive detection"
+msgstr "ตรวจสอบไดร์ฟปลอม"
+
+#. • MSG_257
+msgid "Joliet support"
+msgstr "รองรับ Joliet"
+
+#. • MSG_258
+msgid "Rock Ridge support"
+msgstr "รองรับ Rock Ridge"
+
+#. • MSG_259
+msgid "Force update"
+msgstr "บังคับปรับรุ่น"
+
+#. • MSG_260
+msgid "NTFS compression"
+msgstr "บีบอัดแบบ NTFS"
+
+#. • MSG_261
+msgid "Writing image: %0.1f%% completed"
+msgstr "กำลังเขียนอิมเมจไฟล์: %0.1f%%"
+
+#. • MSG_262
+#.
+#. Cheat mode message to disable ISO Support, so that only DD images can be opened
+msgid "ISO Support"
+msgstr "การรองรับ ISO"
+
+#. • MSG_263
+#.
+#. Cheat mode to force legacy size units, where 1 KB is 1024 bytes and NOT that fake 1000 bytes abomination!
+msgid "Use PROPER size units"
+msgstr "ใช้หน่วยของขนาดตามจริง (เช่น 1KB คือ 1024 bytes)"
+
+#. • MSG_264
+msgid "Deleting directory '%s'"
+msgstr "กำลังลบไดเรคทอรี่ '%s'"
+
+#. • MSG_265
+msgid "VMWare disk detection"
+msgstr "กำลังตรวจหาดิสก์ VMWare"
+
+#. • MSG_266
+msgid "Dual UEFI/BIOS mode"
+msgstr "ระบบบูตคู่ UEFI/BIOS"
+
+#. • MSG_267
+msgid "Applying Windows image: %0.1f%% completed"
+msgstr "กำลังใช้อิมเมจ Windows: %0.1f%%"
+
+#. • MSG_268
+msgid "Applying Windows image..."
+msgstr "กำลังใช้อิมเมจ Windows..."
+
+#. • MSG_269
+msgid "Preserve timestamps"
+msgstr ""
+
+#. • MSG_270
+msgid "USB debug"
+msgstr ""
+
+#. • MSG_271
+msgid "Computing image checksums: %0.1f%% completed"
+msgstr "กำลังตรวจสอบความถูกต้องของอิมเมจ: %0.1f%%"
+
+#. • MSG_272
+msgid "Compute the MD5, SHA1 and SHA256 checksums for the selected image"
+msgstr "คำนวณความถูกต้องของอิมเมจด้วย MD5, SHA1 และ SHA256 checksums"
+
+#. • MSG_273
+msgid "Change the application language"
+msgstr "เปลี่ยนภาษา"
+
+#. • MSG_274
+msgid "ISOHybrid image detected"
+msgstr "พบอิมเมจแบบ ISOHybrid"
+
+#. • MSG_275
+#.
+#. '%s' will be replaced with your translations for MSG_036 ("ISO Image") and MSG_095 ("DD Image")
+msgid "The image you have selected is an 'ISOHybrid' image. This means it can be written either in %s (file copy) mode or %s (disk image) mode.\nRufus recommends using %s mode, so that you always have full access to the drive after writing it.\nHowever, if you encounter issues during boot, you can try writing this image again in %s mode.\n\nPlease select the mode that you want to use to write this image:"
+msgstr "อิมเมจที่คุณเลือกเป็นแบบ 'ISOHybrid' ดังนั้นจึงสามารถเขียนได้ใน โหมด %s (file copy) หรือโหมด %s (disk image)\nเราแนะนำให้ใช้โหมด %s เพราะจะทำให้คุณยังสามารถได้สิทธิ์เต็มในการเข้าถึงไดร์ฟหลังจากเขียนเสร็จแล้ว\nอย่างไรก็ตาม หากคุณพบปัญหาขณะบูต คุณสามารถลองเขียนอิมเมจนี้ใหม่อีกครั้งในโหมด %s แทน\n\nกรุณาเลือกรูปแบบที่คุณต้องใช้ในการเขียนอิมเมจนี้:"
+
+#. • MSG_276
+#.
+#. '%s' will be replaced with your translation for MSG_036 ("ISO Image")
+msgid "Write in %s mode (Recommended)"
+msgstr "เขียนในโหมด%s (แนะนำ)"
+
+#. • MSG_277
+#.
+#. '%s' will be replaced with your translation for MSG_095 ("DD Image")
+msgid "Write in %s mode"
+msgstr "เขียนในโหมด%s"
+
+#. • MSG_278
+msgid "Checking for conflicting processes..."
+msgstr "กำลังตรวจหา Process ที่ขัดแย้งกัน..."
+
+#. • MSG_279
+msgid "Non bootable"
+msgstr "แบบบูตไม่ได้"
+
+#. • MSG_280
+msgid "Disk or ISO image"
+msgstr "อิมเมจไฟล์"
+
+#. • MSG_281
+msgid "%s (Please select)"
+msgstr "%s (กรุณาเลือก)"
+
+#. • MSG_282
+msgid "Exclusive USB drive locking"
+msgstr ""
+
+#. • MSG_283
+msgid "Invalid signature"
+msgstr "ใบรับรองผิดพลาด"
+
+#. • MSG_284
+msgid "The downloaded executable is missing a digital signature."
+msgstr "ไฟล์ที่ดาวน์โหลดมาไม่มีการรับรองดิจิทัล"
+
+#. • MSG_285
+msgid "The downloaded executable is signed by '%s'.\nThis is not a signature we recognize and could indicate some form of malicious activity...\nAre you sure you want to run this file?"
+msgstr "ไฟล์ที่ดาวน์โหลดมาถูกรับรองโดย '%s'.\nซึ่งไม่ใช่การรับรองที่เรารู้จัก ซึ่งอาจทำให้เกิดกิจกรรมที่เกิดภัยคุกคามได้...\nคุณต้องการจะเปิดไฟล์นี้หรือไม่?"
+
+#. • MSG_286
+msgid "Zeroing drive: %0.1f%% completed"
+msgstr "กำลังเขียนไดร์ฟด้วย zero byte: %0.1f%%"
+
+#. • MSG_287
+msgid "Detection of non-USB removable drives"
+msgstr "กำลังตรวจสอบไดร์ฟที่ไม่ใช่ USB"
+
+#. • MSG_288
+msgid "Missing elevated privileges"
+msgstr "ไม่มีสิทธิ์อนุญาตระดับสูง"
+
+#. • MSG_289
+msgid "This application can only run with elevated privileges"
+msgstr "แอพพลิเคชั่นนี้สามารถใช้งานได้เฉพาะการรันด้วยสิทธิ์อนุญาตระดับสูงเท่านั้น"
+
+#. • MSG_290
+msgid "File Indexing"
+msgstr "ดรรชนีแฟ้มข้อมูล"
+
+#. • MSG_291
+msgid "Version selection"
+msgstr "การเลือกเวอร์ชั่น"
+
+#. • MSG_292
+msgid "Please select the version of Windows you want to install:"
+msgstr "กรุณาเลือกเวอร์ชั่นของ Windows ที่ต้องการลง:"
+
+#. • MSG_293
+msgid "Unsupported Windows version"
+msgstr "เวอร์ชั่นของ Windows ไม่รองรับ"
+
+#. • MSG_294
+msgid "This version of Windows is no longer supported by Rufus."
+msgstr "เวอร์ชั่นของ Windows นี้ไม่ได้รับการสนับสนุนโดย Rufus อีกต่อไป"
+
+#. • MSG_295
+msgid "Warning: Unofficial version"
+msgstr "คำเตือน: เวอร์ชั่นที่ไม่เป็นทางการ"
+
+#. • MSG_296
+msgid "This version of Rufus was not produced by its official developer(s).\n\nAre you sure you want to run it?"
+msgstr "Rufus เวอร์ชั่นนี้ ไม่ได้ถูกพัฒนาขึ้นโดยผู้พัฒนาหลัก\n\nคุณต้องการเริ่มโปรแกรมหรือไม่?"
+
+#. • MSG_297
+msgid "Truncated ISO detected"
+msgstr "พบอิมเมจ ISO ที่ถูกตัดทอน"
+
+#. • MSG_298
+msgid "The ISO file you have selected does not match its declared size: %s of data is missing!\n\nIf you obtained this file from the Internet, you should try to download a new copy and verify that the MD5 or SHA checksums match the official ones.\n\nNote that you can compute the MD5 or SHA in Rufus by clicking the (✓) button."
+msgstr "อิมเมจ ISO ที่คุณเลือกมีคุณสมบัติไม่ตรงกับที่ได้แจ้งไว้ ดังนี้ ขนาดไฟล์: %s ได้หายไปจากต้นฉบับ!\n\nหากคุณดาวน์โหลดไฟล์นี้มาจากอินเทอร์เน็ต กรุณาดาวน์โหลดไฟล์อีกครั้ง และตรวจสอบว่าไฟล์นั้นมี MD5 หรือ SHA checksums ตรงกับไฟล์จากผู้ผลิต\n\nโปรดจำไว้ว่าคุณสามารถตรวจสอบ checksum ของไฟล์ดังกล่าวได้จากโปรแกรม Rufus โดยกดปุ่ม (✓)"
+
+#. • MSG_299
+msgid "Timestamp validation error"
+msgstr "การตรวจสอบ Timestamp ผิดพลาด"
+
+#. • MSG_300
+msgid "Rufus could not validate that the timestamp of the downloaded update is more recent than the one for the current executable.\n\nIn order to prevent potential attack scenarios, the update process has been aborted and the download will be deleted. Please check the log for more details."
+msgstr "Rufus ไม่สามารถยืนยันความถูกต้องของ Timestamp ของโปรแกรมปรับรุ่นที่เพิ่งดาวน์โหลดมาว่าใหม่กว่ารุ่นที่กำลังใช้อยู่ในปัจจุบัน\n\nเพื่อป้องกันความเป็นไปได้ที่จะถูกโจมตี การปรับรุ่นได้ถูกยกเลิกและลบทิ้งไปกรุณาดู Log เพื่ออ่านรายละเอียดเพิ่มเติม"
+
+#. • MSG_301
+msgid "Show application settings"
+msgstr "แสดงการตั้งค่าของโปรแกรม"
+
+#. • MSG_302
+msgid "Show information about this application"
+msgstr "แสดงรายละเอียดของโปรแกรมนี้"
+
+#. • MSG_303
+msgid "Show the log"
+msgstr "แสดง Log"
+
+#. • MSG_304
+msgid "Create a disk image of the selected device"
+msgstr "สร้างดิสก์อิมเมจของอุปกรณ์ที่เลือก"
+
+#. • MSG_305
+msgid "Use this option to indicate whether you want to use this device to install Windows on another disk, or if you want to run Windows directly from this drive (Windows To Go)."
+msgstr "เลือกตัวเลือกนี้หากต้องการเลือกว่าท่านจะใช้อุปกรณ์นี้ในการลง Windows บนเครื่องอื่นหรือต้องการจะเรียกใช้ Windows จากอุปกรณ์นี้โดยตรง (Windows To Go)."
+
+#. • MSG_306
+#.
+#. You can see this status message by pressing <Ctrl>-<Alt>-<Z> and then selecting START.
+#. It's the same as MSG_286 but with a process that *may* be faster, hence the name.
+msgid "Fast-zeroing drive: %0.1f%% completed"
+msgstr "กำลังล้างไดร์ฟแบบรวดเร็ว: สำเร็จแล้ว %0.1f%%"
