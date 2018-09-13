@@ -1,3 +1,6 @@
+o Version 3.2 (2018.09.??) [BUGFIX RELEASE]
+    Fix a regression when processing uncompressed bootable DD images
+
 o Version 3.2 (2018.09.11)
     Add RSA-2048 signature validation on all the server downloads
     Add "Fast zeroing" cheat mode (courtesy of René van der Zee)
@@ -66,7 +69,7 @@ o Version 2.15 (2017.05.17)
     Update GRUB 2.0 and Grub4DOS to latest
     Other fixes and improvements
 
-o Version 2.14 (2017.04.10)  [BUGFIX RELEASE]
+o Version 2.14 (2017.04.10) [BUGFIX RELEASE]
     Fix inability to create BIOS-bootable drives, in some circumstances, due to write sharing permissions
 
 o Version 2.13 (2017.04.06)

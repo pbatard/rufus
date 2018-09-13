@@ -1029,7 +1029,8 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 	img_report.is_iso = (BOOLEAN)ExtractISO(image_path, "", TRUE);
 	img_report.is_bootable_img = (BOOLEAN)IsBootableImage(image_path);
 
-	if (IS_ERROR(FormatStatus) || (img_report.image_size == 0) || (!img_report.is_iso && !img_report.is_bootable_img)) {
+	if ((FormatStatus == (ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_CANCELLED)) ||
+		(img_report.image_size == 0) || (!img_report.is_iso && !img_report.is_bootable_img)) {
 		// Failed to scan image
 		SendMessage(hMainDialog, UM_PROGRESS_EXIT, 0, 0);
 		safe_free(image_path);

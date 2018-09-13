@@ -55,9 +55,9 @@
 /*
  * Globals
  */
-DWORD FormatStatus;
-badblocks_report report;
-static uint64_t LastRefresh;
+DWORD FormatStatus = 0;
+badblocks_report report = { 0 };
+static uint64_t LastRefresh = 0;
 static float format_percent = 0.0f;
 static int task_number = 0;
 extern const int nb_steps[FS_MAX];
