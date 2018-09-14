@@ -980,7 +980,8 @@ static void DisplayISOProps(void)
 		uprintf("  Uses: EFI (through '%s')", img_report.efi_img_path);
 	else
 		PRINT_ISO_PROP(img_report.has_efi, "  Uses: EFI %s", HAS_WIN7_EFI(img_report) ? "(win7_x64)" : "");
-	PRINT_ISO_PROP(HAS_BOOTMGR(img_report), "  Uses: Bootmgr");
+	PRINT_ISO_PROP(HAS_BOOTMGR(img_report), "  Uses: Bootmgr (%s)",
+		HAS_BOOTMGR_BIOS(img_report) ? (HAS_BOOTMGR_EFI(img_report) ? "BIOS and UEFI" : "BIOS only") : "UEFI only");
 	PRINT_ISO_PROP(HAS_WINPE(img_report), "  Uses: WinPE %s", (img_report.uses_minint) ? "(with /minint)" : "");
 	if (HAS_INSTALL_WIM(img_report)) {
 		uprintf("  Uses: Install.wim (version %d.%d.%d)", (img_report.install_wim_version >> 24) & 0xff,

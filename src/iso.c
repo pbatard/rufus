@@ -70,6 +70,7 @@ extern BOOL preserve_timestamps;
 BOOL enable_iso = TRUE, enable_joliet = TRUE, enable_rockridge = TRUE, has_ldlinux_c32;
 #define ISO_BLOCKING(x) do {x; iso_blocking_status++; } while(0)
 static const char* psz_extract_dir;
+static const char* bootmgr_name = "bootmgr";
 static const char* bootmgr_efi_name = "bootmgr.efi";
 static const char* grldr_name = "grldr";
 static const char* ldlinux_name = "ldlinux.sys";
@@ -185,8 +186,11 @@ static BOOL check_iso_props(const char* psz_dirname, int64_t file_length, const 
 
 		// Check for various files in root (psz_dirname = "")
 		if ((psz_dirname != NULL) && (psz_dirname[0] == 0)) {
-			if (safe_strnicmp(psz_basename, bootmgr_efi_name, safe_strlen(bootmgr_efi_name)-5) == 0) {
+			if (safe_stricmp(psz_basename, bootmgr_name) == 0) {
 				img_report.has_bootmgr = TRUE;
+			}
+			if (safe_stricmp(psz_basename, bootmgr_efi_name) == 0) {
+				img_report.has_bootmgr_efi = TRUE;
 			}
 			if (safe_stricmp(psz_basename, grldr_name) == 0) {
 				img_report.has_grub4dos = TRUE;

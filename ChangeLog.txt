@@ -1,5 +1,6 @@
-o Version 3.2 (2018.09.??) [BUGFIX RELEASE]
+o Version 3.3 (2018.09.??) [BUGFIX RELEASE]
     Fix a regression when processing uncompressed bootable DD images
+    Fix Windows To Go drive creation for ARM64 Windows ISOs
 
 o Version 3.2 (2018.09.11)
     Add RSA-2048 signature validation on all the server downloads

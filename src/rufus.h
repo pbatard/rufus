@@ -272,7 +272,9 @@ enum checksum_type {
 #define HAS_REACTOS(r)      (r.reactos_path[0] != 0)
 #define HAS_GRUB(r)         ((r.has_grub2) || (r.has_grub4dos))
 #define HAS_SYSLINUX(r)     (r.sl_version != 0)
-#define HAS_BOOTMGR(r)      (r.has_bootmgr)
+#define HAS_BOOTMGR_BIOS(r) (r.has_bootmgr)
+#define HAS_BOOTMGR_EFI(r)  (r.has_bootmgr_efi)
+#define HAS_BOOTMGR(r)      (HAS_BOOTMGR_BIOS(r) || HAS_BOOTMGR_EFI(r))
 #define HAS_INSTALL_WIM(r)  (r.install_wim_path[0] != 0)
 #define HAS_WINPE(r)        (((r.winpe & WINPE_I386) == WINPE_I386)||((r.winpe & WINPE_AMD64) == WINPE_AMD64)||((r.winpe & WINPE_MININT) == WINPE_MININT))
 #define HAS_WINDOWS(r)      (HAS_BOOTMGR(r) || (r.uses_minint) || HAS_WINPE(r))
@@ -304,6 +306,7 @@ typedef struct {
 	BOOLEAN has_long_filename;
 	BOOLEAN has_symlinks;
 	BOOLEAN has_bootmgr;
+	BOOLEAN has_bootmgr_efi;
 	BOOLEAN has_autorun;
 	BOOLEAN has_old_c32[NB_OLD_C32];
 	BOOLEAN has_old_vesamenu;

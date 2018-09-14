@@ -1479,8 +1479,9 @@ static BOOL SetupWinToGo(const char* drive_name, BOOL use_ms_efi)
 	// Also, since Rufus should (usually) be running as a 32 bit app, on 64 bit systems, we need to use
 	// 'C:\Windows\Sysnative' and not 'C:\Windows\System32' to invoke bcdboot, as 'C:\Windows\System32'
 	// will get converted to 'C:\Windows\SysWOW64' behind the scenes, and there is no bcdboot.exe there.
-	static_sprintf(cmd, "%s\\bcdboot.exe %s\\Windows /v /f ALL /s %s", sysnative_dir,
-		drive_name, (use_ms_efi)?ms_efi:drive_name);
+	static_sprintf(cmd, "%s\\bcdboot.exe %s\\Windows /v /f %s /s %s", sysnative_dir, drive_name,
+		HAS_BOOTMGR_BIOS(img_report) ? (HAS_BOOTMGR_EFI(img_report) ? "ALL" : "BIOS") : "UEFI",
+		(use_ms_efi)?ms_efi:drive_name);
 	uprintf("Enabling boot using command '%s'", cmd);
 	if (RunCommand(cmd, sysnative_dir, usb_debug) != 0) {
 		// Try to continue... but report a failure
