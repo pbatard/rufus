@@ -1,4 +1,4 @@
-o Version 3.3 (2018.09.??) [BUGFIX RELEASE]
+o Version 3.3 (2018.09.17) [BUGFIX RELEASE]
     Fix a regression when processing uncompressed bootable DD images
     Fix Windows To Go drive creation for ARM64 Windows ISOs
 
