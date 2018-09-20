@@ -435,7 +435,7 @@ msgstr "Dimensione volume non valida."
 
 #. • MSG_061
 msgid "Please insert a removable media in drive."
-msgstr "Inserisci un supporto nell'unità."
+msgstr "Connetti un supporto nell'unità."
 
 #. • MSG_062
 msgid "An unsupported command was received."
@@ -459,7 +459,7 @@ msgstr "Installazione fallita"
 
 #. • MSG_067
 msgid "Could not open media. It may be in use by another process. Please re-plug the media and try again."
-msgstr "Impossibile aprire il supporto. Potrebbe essere in uso da un altro processo.Riconnetti il supporto e riprova."
+msgstr "Impossibile aprire il supporto. Potrebbe essere in uso da un altro processo. Riconnetti il supporto e riprova."
 
 #. • MSG_068
 msgid "Error while partitioning drive."
@@ -572,7 +572,7 @@ msgstr "Filesystem non supportato"
 
 #. • MSG_093
 msgid "IMPORTANT: THIS DRIVE CONTAINS MULTIPLE PARTITIONS!!\n\nThis may include partitions/volumes that aren't listed or even visible from Windows. Should you wish to proceed, you are responsible for any data loss on these partitions."
-msgstr "IMPORTANTE: QUESTA UNITÀ CONTIENE PARTIZIONI MULTIPLE!\n\nQuesto può includere partizioni/volumi che non sono elencati anche se visibili da Windows.Se vuoi procedere, sei responsabile per qualsiasi perdita di dati in queste partizioni."
+msgstr "IMPORTANTE: QUESTA UNITÀ CONTIENE PARTIZIONI MULTIPLE!\n\nQuesto può includere partizioni/volumi che non sono elencati anche se visibili da Windows. Se vuoi procedere, sei responsabile per qualsiasi perdita di dati in queste partizioni."
 
 #. • MSG_094
 msgid "Multiple partitions detected"
@@ -604,7 +604,7 @@ msgstr "Questa immagine ISO contiene un file più grande di 4 GB, che è maggior
 
 #. • MSG_101
 msgid "Missing WIM support"
-msgstr "Supporto WIN mancante"
+msgstr "Supporto WIM mancante"
 
 #. • MSG_102
 msgid "Your platform cannot extract files from WIM archives. WIM extraction is required to create EFI bootable Windows 7 and Windows Vista USB drives. You can fix that by installing a recent version of 7-Zip.\nDo you want to visit the 7-zip download page?"
@@ -726,7 +726,7 @@ msgstr "No persistenza"
 #.
 #. Tooltips used for the peristence size slider and edit control
 msgid "Set the size of the persistent partition for live USB media. Setting the size to 0 disables the persistent partition."
-msgstr "Imposta la dimensione della partizione persistente per il media USB live.\nImpostanmdo la dimensione a zero disabiliti la partizione persistente."
+msgstr "Imposta la dimensione della partizione persistente per il media USB live.\nImpostando la dimensione a zero disabiliti la partizione persistente."
 
 #. • MSG_126
 msgid "Set the partition size units."
@@ -734,7 +734,7 @@ msgstr "Imposta l'unità della dimensione partizione."
 
 #. • MSG_150
 msgid "Type of computer you plan to use this bootable drive with. It is your responsibility to determine whether your target is of BIOS or UEFI type before you start creating the drive, as it may fail to boot otherwise."
-msgstr "Tipo di computer con cui pensi di effettuare il boot. E' una tua responsabilità prima di creare l'unità identificare se il tipo di sistema destinazione è di tipo BIOS o UEFI. Altrimenti potrebbe fallire il boot."
+msgstr "Tipo di computer con cui pensi di effettuare il boot. E' una tua responsabilità, prima di creare l'unità, identificare se il tipo di sistema destinazione è di tipo BIOS o UEFI. Altrimenti il boot potrebbe fallire ."
 
 #. • MSG_151
 #.
@@ -859,7 +859,7 @@ msgstr "Policy aggiornamenti:"
 
 #. • MSG_180
 msgid "If you choose to allow this program to check for application updates, you agree that the following information may be collected on our server(s):"
-msgstr "Se scegli di permette a questo programma di controllare automaticamente gli aggiornamenti, accetti che le seguenti informazioni sarranno catalogate nei nostri server:"
+msgstr "Se scegli di permettere a questo programma di controllare automaticamente gli aggiornamenti, accetti che le seguenti informazioni saranno catalogate nei nostri server:"
 
 #. • MSG_181
 msgid "Your operating system's architecture and version"
@@ -1386,7 +1386,7 @@ msgstr "Errore validazione data/ora"
 
 #. • MSG_300
 msgid "Rufus could not validate that the timestamp of the downloaded update is more recent than the one for the current executable.\n\nIn order to prevent potential attack scenarios, the update process has been aborted and the download will be deleted. Please check the log for more details."
-msgstr "Rufus non può validare che la data/ora del pacchetto aggiornamento è più recente di quello per l'attuale eseguibile.\n\nPer prevenire possibili scenari di un attacco malware, il processo di aggiornamento è stato interrotto e il file scaricato verrà eliminato. Per maggiori dettagli controlla il registro eventi."
+msgstr "Rufus non può validare che la data/ora del pacchetto aggiornamento sia più recente di quello per l'attuale eseguibile.\n\nPer prevenire possibili scenari di un attacco malware, il processo di aggiornamento è stato interrotto e il file scaricato verrà eliminato. Per maggiori dettagli controlla il registro eventi."
 
 #. • MSG_301
 msgid "Show application settings"
