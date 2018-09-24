@@ -863,7 +863,7 @@ static BOOL ClearMBRGPT(HANDLE hPhysicalDrive, LONGLONG DiskSize, DWORD SectorSi
 					Sleep(WRITE_TIMEOUT);
 				} else {
 					// Windows seems to be an ass about keeping a lock on a backup GPT,
-					// so we try to be lenient about about not being able to clear it.
+					// so we try to be lenient about not being able to clear it.
 					uprintf("Warning: Failed to clear backup GPT...");
 					r = TRUE;
 					goto out;

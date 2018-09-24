@@ -1,4 +1,4 @@
-AC_INIT([rufus], [3.3], [https://github.com/pbatard/rufus/issues], [rufus], [https://rufus.ie])
+AC_INIT([rufus], [3.4], [https://github.com/pbatard/rufus/issues], [rufus], [https://rufus.ie])
 AM_INIT_AUTOMAKE([-Wno-portability foreign no-dist no-dependencies])
 AC_CONFIG_SRCDIR([src/rufus.c])
 AC_CONFIG_MACRO_DIR([m4])
@@ -19,7 +19,7 @@ AC_DEFINE([_GNU_SOURCE], [], [Use GNU extensions])
 
 AM_CFLAGS="${AM_CFLAGS} -DWINVER=0x601 -D_WIN32_WINNT=0x601 -D_WIN32_IE=0x800"
 # "-Wl,--nxcompat" to enable DEP (Data Execution Prevention)
-AM_LDFLAGS="${AM_LDFLAGS} -Wl,-no-undefined -Wl,--nxcompat"
+AM_LDFLAGS="${AM_LDFLAGS} -Wl,-no-undefined -Wl,--nxcompat -Wl,--no-insert-timestamp"
 
 # Debug symbols
 AC_ARG_ENABLE([debug],
