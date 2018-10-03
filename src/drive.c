@@ -635,7 +635,7 @@ const struct {int (*fn)(FILE *fp); char* str;} known_mbr[] = {
 };
 
 // Returns TRUE if the drive seems bootable, FALSE otherwise
-BOOL AnalyzeMBR(HANDLE hPhysicalDrive, const char* TargetName)
+BOOL AnalyzeMBR(HANDLE hPhysicalDrive, const char* TargetName, BOOL bSilent)
 {
 	const char* mbr_name = "Master Boot Record";
 	FAKE_FD fake_fd = { 0 };
@@ -646,17 +646,17 @@ BOOL AnalyzeMBR(HANDLE hPhysicalDrive, const char* TargetName)
 	set_bytes_per_sector(SelectedDrive.SectorSize);
 
 	if (!is_br(fp)) {
-		uprintf("%s does not have an x86 %s", TargetName, mbr_name);
+		suprintf("%s does not have an x86 %s", TargetName, mbr_name);
 		return FALSE;
 	}
 	for (i=0; i<ARRAYSIZE(known_mbr); i++) {
 		if (known_mbr[i].fn(fp)) {
-			uprintf("%s has a %s %s", TargetName, known_mbr[i].str, mbr_name);
+			suprintf("%s has a %s %s", TargetName, known_mbr[i].str, mbr_name);
 			return TRUE;
 		}
 	}
 
-	uprintf("%s has an unknown %s", TargetName, mbr_name);
+	suprintf("%s has an unknown %s", TargetName, mbr_name);
 	return TRUE;
 }
 
@@ -784,7 +784,7 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 			suprintf("Partition type: MBR, NB Partitions: %d", SelectedDrive.nPartitions);
 			SelectedDrive.has_mbr_uefi_marker = (DriveLayout->Mbr.Signature == MBR_UEFI_MARKER);
 			suprintf("Disk ID: 0x%08X %s", DriveLayout->Mbr.Signature, SelectedDrive.has_mbr_uefi_marker?"(UEFI target)":"");
-			AnalyzeMBR(hPhysical, "Drive");
+			AnalyzeMBR(hPhysical, "Drive", bSilent);
 		}
 		for (i=0; i<DriveLayout->PartitionCount; i++) {
 			isUefiNtfs = FALSE;

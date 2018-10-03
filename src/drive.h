@@ -116,7 +116,7 @@ char GetUnusedDriveLetter(void);
 BOOL GetDriveLabel(DWORD DriveIndex, char* letter, char** label);
 uint64_t GetDriveSize(DWORD DriveIndex);
 BOOL IsMediaPresent(DWORD DriveIndex);
-BOOL AnalyzeMBR(HANDLE hPhysicalDrive, const char* TargetName);
+BOOL AnalyzeMBR(HANDLE hPhysicalDrive, const char* TargetName, BOOL bSilent);
 BOOL AnalyzePBR(HANDLE hLogicalVolume);
 BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSystemNameSize, BOOL bSilent);
 BOOL UnmountVolume(HANDLE hDrive);

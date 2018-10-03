@@ -287,7 +287,7 @@ BOOL IsBootableImage(const char* path)
 
 	is_bootable_img = (BOOLEAN)IsCompressedBootableImage(path);
 	if (img_report.compression_type == BLED_COMPRESSION_NONE)
-		is_bootable_img = (BOOLEAN)AnalyzeMBR(handle, "  Image");
+		is_bootable_img = (BOOLEAN)AnalyzeMBR(handle, "  Image", FALSE);
 
 	if (!GetFileSizeEx(handle, &liImageSize)) {
 		uprintf("  Could not get image size: %s", WindowsErrorString());

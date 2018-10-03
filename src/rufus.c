@@ -687,17 +687,18 @@ static void EnableQuickFormat(BOOL enable)
 
 	// Disable/restore the quick format control depending on large FAT32 or ReFS
 	if (((fs == FS_FAT32) && ((SelectedDrive.DiskSize > LARGE_FAT32_SIZE) || (force_large_fat32))) || (fs == FS_REFS)) {
-		if (IsWindowEnabled(hCtrl)) {
-			uQFChecked = IsChecked(IDC_QUICK_FORMAT);
-			CheckDlgButton(hMainDialog, IDC_QUICK_FORMAT, BST_CHECKED);
-			EnableWindow(hCtrl, FALSE);
-		}
-	} else {
-		if (!IsWindowEnabled(hCtrl)) {
-			CheckDlgButton(hMainDialog, IDC_QUICK_FORMAT, uQFChecked);
-			EnableWindow(hCtrl, enable);
-		}
+		enable = FALSE;
 	}
+
+	if (IsWindowEnabled(hCtrl) && !enable) {
+		uQFChecked = IsChecked(IDC_QUICK_FORMAT);
+		CheckDlgButton(hMainDialog, IDC_QUICK_FORMAT, BST_CHECKED);
+	} else if (!IsWindowEnabled(hCtrl) && enable) {
+		CheckDlgButton(hMainDialog, IDC_QUICK_FORMAT, uQFChecked);
+	}
+
+	// Now enable or disable the control
+	EnableWindow(hCtrl, enable);
 }
 
 static void EnableBootOptions(BOOL enable, BOOL remove_checkboxes)
@@ -2106,9 +2107,8 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			if ((HIWORD(wParam) != CBN_SELCHANGE) && (HIWORD(wParam) != CBN_SELCHANGE_INTERNAL))
 				break;
 			set_selected_fs = (HIWORD(wParam) == CBN_SELCHANGE);
-			fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
+			fs = IsWindowEnabled(hFileSystem) ? (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem)) : -1; 
 			SetClusterSizes(fs);
-			EnableQuickFormat(TRUE);
 			if (fs < 0) {
 				EnableBootOptions(TRUE, TRUE);
 				SetMBRProps();
@@ -2119,9 +2119,11 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 					IGNORE_RETVAL(ComboBox_SetCurSel(hBootType, 1));
 				}
 				break;
-			} else if (set_selected_fs) {
+			} else {
+				EnableQuickFormat(TRUE);
 				// Try to keep track of user selection
-				selected_fs = fs;
+				if (set_selected_fs)
+					selected_fs = fs;
 			}
 			EnableMBRBootOptions(TRUE, FALSE);
 			SetMBRProps();

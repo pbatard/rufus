@@ -890,7 +890,7 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 	FILE* fp = (FILE*)&fake_fd;
 	const char* using_msg = "Using %s MBR\n";
 
-	AnalyzeMBR(hPhysicalDrive, "Drive");
+	AnalyzeMBR(hPhysicalDrive, "Drive", FALSE);
 
 	if (SelectedDrive.SectorSize < 512)
 		goto out;
@@ -1818,7 +1818,7 @@ DWORD WINAPI FormatThread(void* param)
 
 	if (!zero_drive && !write_as_image) {
 		PrintInfoDebug(0, MSG_226);
-		AnalyzeMBR(hPhysicalDrive, "Drive");
+		AnalyzeMBR(hPhysicalDrive, "Drive", FALSE);
 		if ((hLogicalVolume != NULL) && (hLogicalVolume != INVALID_HANDLE_VALUE)) {
 			AnalyzePBR(hLogicalVolume);
 		}
