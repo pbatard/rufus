@@ -246,21 +246,23 @@ static vidpid_score_t vidpid_score[] = {
 	{ 0x04e8, 0x6845, -20 },	// 16 GB UFD
 	{ 0x04e8, 0x685E, -20 },	// 16 GB UFD
 	// Sunplus exceptions
-	{ 0x04fc, 0x05d8, -20 },	// Verbatim flash drive
-	{ 0x04fc, 0x5720, -20 },	// Card reader
+	{ 0x04fc, 0x05d8, -20 },	// Verbatim Flash Drive
+	{ 0x04fc, 0x5720, -20 },	// Card Reader
 	// LaCie exceptions
 	{ 0x059f, 0x1027, -20 },	// 16 GB UFD
 	{ 0x059f, 0x103B, -20 },	// 16 GB UFD
 	{ 0x059f, 0x1064, -20 },	// 16 GB UFD
 	// Prolific exceptions
+	{ 0x067b, 0x2506, -20 },	// 8 GB Micro Hard Drive
 	{ 0x067b, 0x2517, -20 },	// 1 GB UFD
 	{ 0x067b, 0x2528, -20 },	// 8 GB UFD
+	{ 0x067b, 0x2731, -20 },	// SD/TF Card Reader
 	{ 0x067b, 0x3400, -10 },	// Hi-Speed Flash Disk with TruePrint AES3400
 	{ 0x067b, 0x3500, -10 },	// Hi-Speed Flash Disk with TruePrint AES3500
 	// Freecom exceptions
 	{ 0x07ab, 0xfcab, -20 },	// 4 GB UFD
 	// Samsung exceptions
-	{ 0x090c, 0x1000, -20 },	// Samsung Flash drive
+	{ 0x090c, 0x1000, -20 },	// Samsung Flash Drive
 	// Toshiba exceptions
 	{ 0x0930, 0x1400, -20 },
 	{ 0x0930, 0x6533, -20 },

@@ -311,9 +311,9 @@ BOOL GetOpticalMedia(IMG_SAVE* img_save)
 /* For debugging user reports of HDDs vs UFDs */
 //#define FORCED_DEVICE
 #ifdef FORCED_DEVICE
-#define FORCED_VID 0x056E
-#define FORCED_PID 0x8008
-#define FORCED_NAME "Generic- USB3.0 CRW   -SD USB Device"
+#define FORCED_VID 0x067B
+#define FORCED_PID 0x2731
+#define FORCED_NAME "SD Card Reader USB Device"
 #endif
 
 /*
