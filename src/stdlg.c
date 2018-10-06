@@ -280,13 +280,26 @@ char* FileDialog(BOOL save, char* path, const ext_t* ext, DWORD options)
 		// Set the file extension filters
 		pfd->lpVtbl->SetFileTypes(pfd, (UINT)ext->count + 1, filter_spec);
 
-		// Set the default directory
-		wpath = utf8_to_wchar(path);
-		hr = SHCreateItemFromParsingName(wpath, NULL, &IID_IShellItem, (LPVOID)&si_path);
-		if (SUCCEEDED(hr)) {
-			pfd->lpVtbl->SetFolder(pfd, si_path);
+		if (path == NULL) {
+			// Try to use the "Downloads" folder as the initial default directory
+			const GUID download_dir_guid =
+				{ 0x374de290, 0x123f, 0x4565, { 0x91, 0x64, 0x39, 0xc4, 0x92, 0x5e, 0x46, 0x7b } };
+			hr = SHGetKnownFolderPath(&download_dir_guid, 0, 0, &wpath);
+			if (SUCCEEDED(hr)) {
+				hr = SHCreateItemFromParsingName(wpath, NULL, &IID_IShellItem, (LPVOID)&si_path);
+				if (SUCCEEDED(hr)) {
+					pfd->lpVtbl->SetDefaultFolder(pfd, si_path);
+				}
+				CoTaskMemFree(wpath);
+			}
+		} else {
+			wpath = utf8_to_wchar(path);
+			hr = SHCreateItemFromParsingName(wpath, NULL, &IID_IShellItem, (LPVOID)&si_path);
+			if (SUCCEEDED(hr)) {
+				pfd->lpVtbl->SetFolder(pfd, si_path);
+			}
+			safe_free(wpath);
 		}
-		safe_free(wpath);
 
 		// Set the default filename
 		wfilename = utf8_to_wchar((ext->filename == NULL) ? "" : ext->filename);
