@@ -315,7 +315,7 @@ static void SetPartitionSchemeAndTargetSystem(BOOL only_target)
 			ComboBox_AddStringU(hTargetSystem, lmprintf(MSG_031)), TT_BIOS));
 		has_uefi_csm = TRUE;
 	}
-	if (allowed_target_system[1] && !((pt == PARTITION_STYLE_MBR) && IS_BIOS_BOOTABLE(img_report) && IS_EFI_BOOTABLE(img_report)) )
+	if (allowed_target_system[1] && !((pt == PARTITION_STYLE_MBR) && (bt == BT_IMAGE) && IS_BIOS_BOOTABLE(img_report) && IS_EFI_BOOTABLE(img_report)) )
 		IGNORE_RETVAL(ComboBox_SetItemData(hTargetSystem,
 			ComboBox_AddStringU(hTargetSystem, lmprintf(MSG_032)), TT_UEFI));
 	if (allowed_target_system[2] && ((pt != PARTITION_STYLE_GPT) || (bt == BT_NON_BOOTABLE)))
@@ -2104,8 +2104,10 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		case IDC_FILE_SYSTEM:
 			if ((HIWORD(wParam) != CBN_SELCHANGE) && (HIWORD(wParam) != CBN_SELCHANGE_INTERNAL))
 				break;
+			if (IsWindowEnabled(hFileSystem))
+				EnableQuickFormat(TRUE);
 			set_selected_fs = (HIWORD(wParam) == CBN_SELCHANGE);
-			fs = IsWindowEnabled(hFileSystem) ? (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem)) : -1; 
+			fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem)); 
 			SetClusterSizes(fs);
 			if (fs < 0) {
 				EnableBootOptions(TRUE, TRUE);
@@ -2118,7 +2120,6 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				}
 				break;
 			} else {
-				EnableQuickFormat(TRUE);
 				// Try to keep track of user selection
 				if (set_selected_fs)
 					selected_fs = fs;
