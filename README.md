@@ -19,7 +19,7 @@ Features
 * Compute MD5, SHA-1 and SHA-256 checksums of the selected image
 * Twice as fast as Microsoft's USB/DVD tool or UNetbootin, on ISO -> USB creation <sup>(1)</sup>
 * Perform bad blocks checks, including detection of "fake" flash drives
-* Modern and familiar UI, with [39 languages natively supported](https://rufus.akeo.ie/translations)
+* Modern and familiar UI, with [39 languages natively supported](https://github.com/pbatard/rufus/wiki/FAQ#What_languages_are_natively_supported_by_Rufus)
 * Small footprint. No installation required.
 * Portable
 * 100% [Free Software](http://www.gnu.org/philosophy/free-sw.en.html) ([GPL v3](http://www.gnu.org/licenses/gpl-3.0.en.html))
@@ -42,8 +42,8 @@ Additional information
 Rufus provides extensive information about what it is doing, either through
 its easily accessible log, or through the Windows debug facility.
 
-* [Official Website](https://rufus.akeo.ie)
-* [FAQ](https://rufus.akeo.ie/FAQ)
+* [Official Website](https://rufus.ie)
+* [FAQ](https://github.com/pbatard/rufus/wiki/FAQ)
 
 Enhancements/Bugs
 -----------------

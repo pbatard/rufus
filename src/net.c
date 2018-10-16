@@ -537,7 +537,7 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 	DWORD dwFlags, dwSize, dwDownloaded, dwTotalSize, dwStatus;
 	BYTE *sig = NULL;
 	char* buf = NULL;
-	char agent[64], hostname[64], urlpath[128], sigpath[256], mime[32];
+	char agent[64], hostname[64], urlpath[128], sigpath[256];
 	OSVERSIONINFOA os_version = {sizeof(OSVERSIONINFOA), 0, 0, 0, 0, ""};
 	HINTERNET hSession = NULL, hConnection = NULL, hRequest = NULL;
 	URL_COMPONENTSA UrlParts = {sizeof(URL_COMPONENTSA), NULL, 1, (INTERNET_SCHEME)0,
@@ -680,15 +680,7 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 		}
 		vuprintf("Found match for %s on server %s", urlpath, server_url);
 
-		// IMPORTANT: You might need to edit your server's MIME conf so that it returns
-		// 'text/plain' for .ver files. Use 'curl -I' to check that you get something
-		// like 'Content-Type: text/plain; charset=UTF-8' when fetching your .ver files.
-		dwSize = sizeof(mime);
-		pfHttpQueryInfoA(hRequest, HTTP_QUERY_CONTENT_TYPE, (LPVOID)&mime, &dwSize, NULL);
-		if (strncmp(mime, "text/plain", sizeof("text/plain")-1) != 0)
-			goto out;
-
-		// We also get a date from Apache, which we'll use to avoid out of sync check,
+		// We also get a date from the web server, which we'll use to avoid out of sync check,
 		// in case some set their clock way into the future and back.
 		// On the other hand, if local clock is set way back in the past, we will never check.
 		dwSize = sizeof(ServerTime);

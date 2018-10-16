@@ -92,7 +92,7 @@ static const char* kolibri_name = "kolibri.img";
 static const char* autorun_name = "autorun.inf";
 static const char* casper_name = "CASPER";
 static const char* stupid_antivirus = "  NOTE: This is usually caused by a poorly designed security solution. "
-	"See https://rufus.akeo.ie/compatibility.\r\n  This file will be skipped for now, but you should really "
+	"See https://goo.gl/QTobxX.\r\n  This file will be skipped for now, but you should really "
 	"look into using a *SMARTER* antivirus solution.";
 const char* old_c32_name[NB_OLD_C32] = OLD_C32_NAMES;
 static const int64_t old_c32_threshold[NB_OLD_C32] = OLD_C32_THRESHOLD;

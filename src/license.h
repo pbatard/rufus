@@ -38,7 +38,6 @@ const char* additional_copyrights =
 "Used with kind authorization\\line\n"
 "\\line\n"
 "Rufus icon by PC Unleashed:\\line\n"
-"http://pcunleashed.com\\line\n"
 "Freeware\\line\n"
 "\\line\n"
 "Additional icons courtesy of Axialis Software:\\line\n"
