@@ -1,8 +1,5 @@
 os: Visual Studio 2017
 
-# May choose to enable the following if we get tired of seeing double AppVeyor builds for tagged and untagged
-# skip_non_tags: true
-
 skip_commits:
   # Don't run AppVeyor for commits that only modify resource or non-code files
   files:
@@ -55,10 +52,6 @@ init:
         Update-AppveyorBuild -Version "$($env:APPVEYOR_REPO_TAG_NAME)_#$env:APPVEYOR_BUILD_NUMBER";
       } else {
         Update-AppveyorBuild -Version "dev-$($env:APPVEYOR_REPO_COMMIT.Substring(0,8))_#$env:APPVEYOR_BUILD_NUMBER";
-        if ("$env:APPVEYOR_REPO_NAME" -eq "pbatard/rufus" -and "$env:APPVEYOR_REPO_BRANCH" -eq "master") {
-          Write-Output "Not running dev-build since we expect a tagged commit.";
-          Exit-AppVeyorBuild;
-        }
       }
 
 build:
@@ -86,10 +79,6 @@ build_script:
         $PUBLISHCOVERITY = "$env:APPVEYOR_BUILD_FOLDER\PublishCoverity\tools\PublishCoverity.exe";
         if (!"$env:COVERITY_SCAN_TOKEN") {
           Write-Output "Not running Coverity due to missing credential.";
-          return;
-        }
-        if ($env:APPVEYOR_REPO_TAG -eq "false") {
-          Write-Output "Not running Coverity due to missing tag.";
           return;
         }
         & nuget install PublishCoverity -o "$env:APPVEYOR_BUILD_FOLDER" -excludeversion;
