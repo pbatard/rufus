@@ -82,7 +82,11 @@
 #define UBUFFER_SIZE                2048
 #define RSA_SIGNATURE_SIZE          256
 #define CBN_SELCHANGE_INTERNAL      (CBN_SELCHANGE + 256)
+#if defined(RUFUS_TEST)
+#define RUFUS_URL                   "http://pi3"
+#else
 #define RUFUS_URL                   "https://rufus.ie"
+#endif
 #define DOWNLOAD_URL                RUFUS_URL "/downloads"
 #define FILES_URL                   RUFUS_URL "/files"
 #define SEVENZIP_URL                "https://www.7-zip.org"
@@ -397,6 +401,14 @@ enum WindowsVersion {
 	WINDOWS_MAX
 };
 
+enum CpuArch {
+	CPU_ARCH_X86_32 = 0,
+	CPU_ARCH_X86_64,
+	CPU_ARCH_ARM_32,
+	CPU_ARCH_ARM_64,
+	CPU_ARCH_UNDEFINED,
+	CPU_ARCH_MAX
+};
 
 /*
  * Globals
@@ -430,6 +442,7 @@ extern char* image_path;
 extern uint8_t popcnt8(uint8_t val);
 extern void GetWindowsVersion(void);
 extern BOOL is_x64(void);
+extern BOOL GetCpuArch(void);
 extern const char *WindowsErrorString(void);
 extern void DumpBufferHex(void *buf, size_t size);
 extern void PrintStatusInfo(BOOL info, BOOL debug, unsigned int duration, int msg_id, ...);

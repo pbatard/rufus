@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Networking functionality (web file download, check for update, etc.)
- * Copyright © 2012-2016 Pete Batard <pete@akeo.ie>
+ * Copyright © 2012-2018 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -531,7 +531,7 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 	int status = 0;
 	const char* server_url = RUFUS_URL "/";
 	int i, j, k, max_channel, verbose = 0, verpos[4];
-	static const char* archname[] = {"win_x86", "win_x64"};
+	static const char* archname[] = {"win_x86", "win_x64", "win_arm", "win_arm64", "win_none"};
 	static const char* channel[] = {"release", "beta", "test"};		// release channel
 	const char* accept_types[] = {"*/*\0", NULL};
 	DWORD dwFlags, dwSize, dwDownloaded, dwTotalSize, dwStatus;
@@ -636,11 +636,11 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 		uprintf("Checking %s channel...", channel[k]);
 		// At this stage we can query the server for various update version files.
 		// We first try to lookup for "<appname>_<os_arch>_<os_version_major>_<os_version_minor>.ver"
-		// and then remove each each of the <os_> components until we find our match. For instance, we may first
+		// and then remove each of the <os_> components until we find our match. For instance, we may first
 		// look for rufus_win_x64_6.2.ver (Win8 x64) but only get a match for rufus_win_x64_6.ver (Vista x64 or later)
 		// This allows sunsetting OS versions (eg XP) or providing different downloads for different archs/groups.
 		static_sprintf(urlpath, "%s%s%s_%s_%lu.%lu.ver", APPLICATION_NAME, (k==0)?"":"_",
-			(k==0)?"":channel[k], archname[is_x64()?1:0], os_version.dwMajorVersion, os_version.dwMinorVersion);
+			(k==0)?"":channel[k], archname[GetCpuArch()], os_version.dwMajorVersion, os_version.dwMinorVersion);
 		vuprintf("Base update check: %s", urlpath);
 		for (i=0, j=(int)safe_strlen(urlpath)-5; (j>0)&&(i<ARRAYSIZE(verpos)); j--) {
 			if ((urlpath[j] == '.') || (urlpath[j] == '_')) {

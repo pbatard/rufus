@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Standard Windows function calls
- * Copyright © 2013-2017 Pete Batard <pete@akeo.ie>
+ * Copyright © 2013-2018 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -228,6 +228,24 @@ BOOL is_x64(void)
 		ret = TRUE;
 	}
 	return ret;
+}
+
+int GetCpuArch(void)
+{
+	SYSTEM_INFO info = { 0 };
+	GetNativeSystemInfo(&info);
+	switch (info.wProcessorArchitecture) {
+	case PROCESSOR_ARCHITECTURE_AMD64:
+		return CPU_ARCH_X86_64;
+	case PROCESSOR_ARCHITECTURE_INTEL:
+		return CPU_ARCH_X86_64;
+	case PROCESSOR_ARCHITECTURE_ARM64:
+		return CPU_ARCH_ARM_64;
+	case PROCESSOR_ARCHITECTURE_ARM:
+		return CPU_ARCH_ARM_32;
+	default:
+		return CPU_ARCH_UNDEFINED;
+	}
 }
 
 // From smartmontools os_win32.cpp

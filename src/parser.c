@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Elementary Unicode compliant find/replace parser
- * Copyright © 2012-2017 Pete Batard <pete@akeo.ie>
+ * Copyright © 2012-2018 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -903,6 +903,8 @@ void parse_update(char* buf, size_t len)
 	char *data = NULL, *token;
 	char allowed_rtf_chars[] = "abcdefghijklmnopqrstuvwxyz|~-_:*'";
 	char allowed_std_chars[] = "\r\n ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!\"$%^&+=<>(){}[].,;#@/?";
+	char download_url_name[24];
+	char *arch_names[CPU_ARCH_MAX] = { "x86", "x64", "arm", "arm64", "none" };
 
 	// strchr includes the NUL terminator in the search, so take care of backslash before NUL
 	if ((buf == NULL) || (len < 2) || (len > 65536) || (buf[len-1] != 0) || (buf[len-2] == '\\'))
@@ -939,7 +941,10 @@ void parse_update(char* buf, size_t len)
 		}
 		safe_free(data);
 	}
-	update.download_url = get_sanitized_token_data_buffer("download_url", 1, buf, len);
+	static_sprintf(download_url_name, "download_url_%s", arch_names[GetCpuArch()]);
+	update.download_url = get_sanitized_token_data_buffer(download_url_name, 1, buf, len);
+	if (update.download_url == NULL)
+		update.download_url = get_sanitized_token_data_buffer("download_url", 1, buf, len);
 	update.release_notes = get_sanitized_token_data_buffer("release_notes", 1, buf, len);
 }
 

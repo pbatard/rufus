@@ -1876,7 +1876,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	case WM_COMMAND:
 #ifdef RUFUS_TEST
 		if (LOWORD(wParam) == IDC_TEST) {
-			DownloadSignedFile(FILES_URL "/gendb.sh", "C:\\Downloads\\gendb.sh", hProgress, TRUE);
+			uprintf("CPU ARCH: %d", GetCpuArch());
 			break;
 		}
 #endif
