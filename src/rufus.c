@@ -1071,7 +1071,9 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 	} else {
 		if (!dont_display_image_name) {
 			for (i = (int)safe_strlen(image_path); (i > 0) && (image_path[i] != '\\'); i--);
-			short_image_path = &image_path[i + 1];
+			if (i != 0)
+				i++;
+			short_image_path = &image_path[i];
 			PrintStatus(0, MSG_205, short_image_path);
 			UpdateImage();
 			uprintf("Using image: %s (%s)", short_image_path, SizeToHumanReadable(img_report.image_size, FALSE, FALSE));
