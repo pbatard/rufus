@@ -1891,6 +1891,8 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 					if (selected_locale != lcmd) {
 						selected_locale = lcmd;
 						selected_langid = get_language_id(lcmd);
+						// Avoid the FS being reset on language change
+						selected_fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
 						relaunch = TRUE;
 						PostMessage(hDlg, WM_COMMAND, IDCANCEL, 0);
 					}
@@ -3102,6 +3104,11 @@ relaunch:
 			(msg.message == WM_KEYDOWN) && (msg.wParam == 'A') ) {
 			// Might also need ES_NOHIDESEL property if you want to select when not active
 			Edit_SetSel(hLog, 0, -1);
+			continue;
+		}
+		// Ctrl-L => Open/Close the log
+		if ((GetKeyState(VK_CONTROL) & 0x8000) && (msg.message == WM_KEYDOWN) && (msg.wParam == 'L')) {
+			SendMessage(hMainDialog, WM_COMMAND, IDC_LOG, 0);
 			continue;
 		}
 		// Alt-. => Enable USB enumeration debug
