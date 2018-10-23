@@ -114,6 +114,7 @@ char embedded_sl_version_str[2][12] = { "?.??", "?.??" };
 char embedded_sl_version_ext[2][32];
 char ClusterSizeLabel[MAX_CLUSTER_SIZES][64];
 char msgbox[1024], msgbox_title[32], *ini_file = NULL, *image_path = NULL, *short_image_path;
+int cmdln_preferred_fs = FS_UNKNOWN;
 char image_option_txt[128];
 StrArray DriveID, DriveLabel, DriveHub, BlockingProcess, ImageList;
 // Number of steps for each FS for FCC_STRUCTURE_PROGRESS
@@ -564,17 +565,30 @@ static void SetFSFromISO(void)
 		if (fs_mask & (1 << FS_NTFS)) {
 			preferred_fs = FS_NTFS;
 		}
-	// Syslinux and EFI have precedence over bootmgr (unless the user selected BIOS as target type)
-	} else if ((HAS_SYSLINUX(img_report)) || (HAS_REACTOS(img_report)) || HAS_KOLIBRIOS(img_report) ||
-		(IS_EFI_BOOTABLE(img_report) && (tt == TT_UEFI) && (!windows_to_go))) {
-		if (fs_mask & (1<<FS_FAT32)) {
-			preferred_fs = FS_FAT32;
-		} else if ((fs_mask & (1<<FS_FAT16)) && !HAS_KOLIBRIOS(img_report)) {
-			preferred_fs = FS_FAT16;
+	}
+
+	if ((preferred_fs == FS_UNKNOWN) && (cmdln_preferred_fs != FS_UNKNOWN))
+	{
+		// If the FS requested from the command line is valid use it
+		if (fs_mask & (1 << cmdln_preferred_fs)) {
+			preferred_fs = cmdln_preferred_fs;
 		}
-	} else if ((windows_to_go) || HAS_BOOTMGR(img_report) || HAS_WINPE(img_report)) {
-		if (fs_mask & (1<<FS_NTFS)) {
-			preferred_fs = FS_NTFS;
+	}
+
+	if (preferred_fs == FS_UNKNOWN)
+	{
+		// Syslinux and EFI have precedence over bootmgr (unless the user selected BIOS as target type)
+		if ((HAS_SYSLINUX(img_report)) || (HAS_REACTOS(img_report)) || HAS_KOLIBRIOS(img_report) ||
+			(IS_EFI_BOOTABLE(img_report) && (tt == TT_UEFI) && (!windows_to_go))) {
+			if (fs_mask & (1<<FS_FAT32)) {
+				preferred_fs = FS_FAT32;
+			} else if ((fs_mask & (1<<FS_FAT16)) && !HAS_KOLIBRIOS(img_report)) {
+				preferred_fs = FS_FAT16;
+			}
+		} else if ((windows_to_go) || HAS_BOOTMGR(img_report) || HAS_WINPE(img_report)) {
+			if (fs_mask & (1<<FS_NTFS)) {
+				preferred_fs = FS_NTFS;
+			}
 		}
 	}
 
@@ -2677,6 +2691,8 @@ static void PrintUsage(char* appname)
 	printf("     Select the ISO image pointed by PATH to be used on startup\n");
 	printf("  -l LOCALE, --locale=LOCALE\n");
 	printf("     Select the locale to be used on startup\n");
+	printf("  -p FILESYS, --pfilesys=FILESYS\n");
+	printf("     Select the preferred Filesystem to be used when formatting\n");
 	printf("  -w TIMEOUT, --wait=TIMEOUT\n");
 	printf("     Wait TIMEOUT tens of seconds for the global application mutex to be released.\n");
 	printf("     Used when launching a newer version of " APPLICATION_NAME " from a running application.\n");
@@ -2729,6 +2745,21 @@ static HANDLE SetHogger(BOOL attached_console, BOOL disable_hogger)
 	return hogmutex;
 }
 
+// preferred file system should be passed on command line as a string
+// convert string to index used for validity check and file system enum
+static int GetFSindexFromString(const char* fs_name)
+{
+	int rv = FS_UNKNOWN;
+	int i;
+
+	for (i = 0; i<ARRAYSIZE(FileSystemLabel); i++) {
+		if (safe_stricmp(fs_name, FileSystemLabel[i]) == 0) {
+			rv = i;
+			break;
+		}
+	}
+	return rv;
+}
 
 /*
  * Application Entrypoint
@@ -2763,6 +2794,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		{"help",    no_argument,       NULL, 'h'},
 		{"iso",     required_argument, NULL, 'i'},
 		{"locale",  required_argument, NULL, 'l'},
+		{"pfilesys",required_argument, NULL, 'p'},
 		{"wait",    required_argument, NULL, 'w'},
 		{0, 0, NULL, 0}
 	};
@@ -2834,7 +2866,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			// Now enable the hogger before processing the rest of the arguments
 			hogmutex = SetHogger(attached_console, disable_hogger);
 
-			while ((opt = getopt_long(argc, argv, "?fghi:w:l:", long_options, &option_index)) != EOF) {
+			while ((opt = getopt_long(argc, argv, "?fghi:w:l:p:", long_options, &option_index)) != EOF) {
 				switch (opt) {
 				case 'f':
 					enable_HDDs = TRUE;
@@ -2860,6 +2892,20 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 						safe_free(locale_name);
 						locale_name = safe_strdup(optarg);
 					}
+					break;
+				case 'p':
+				{
+					int tmp_fs = FS_UNKNOWN;
+					if (isdigitU(optarg[0])) {
+						tmp_fs = (int)strtol(optarg, NULL, 0);
+					}
+					else {
+						tmp_fs = GetFSindexFromString(optarg);
+					}
+					if ((tmp_fs > FS_UNKNOWN) && (tmp_fs < FS_MAX)) {
+						cmdln_preferred_fs = tmp_fs;
+					}
+				}
 					break;
 				case 'w':
 					wait_for_mutex = atoi(optarg);
