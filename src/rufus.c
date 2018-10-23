@@ -66,7 +66,7 @@ static BOOL user_changed_label = FALSE;
 static BOOL app_changed_label = FALSE;
 static BOOL allowed_filesystem[FS_MAX] = { 0 };
 static int64_t last_iso_blocking_status;
-static int selected_pt = -1, selected_fs = -1;
+static int selected_pt = -1, selected_fs = FS_UNKNOWN, preselected_fs = FS_UNKNOWN;
 static int image_index;
 static RECT relaunch_rc = { -65536, -65536, 0, 0};
 static UINT uQFChecked = BST_CHECKED, uMBRChecked = BST_UNCHECKED;
@@ -559,23 +559,32 @@ static void SetFSFromISO(void)
 		fs_mask |= 1<<fs_tmp;
 	}
 
-	// The presence of a 4GB file forces the use of NTFS as default FS
-	if (img_report.has_4GB_file) {
-		if (fs_mask & (1 << FS_NTFS)) {
-			preferred_fs = FS_NTFS;
+	if ((preferred_fs == FS_UNKNOWN) && (preselected_fs != FS_UNKNOWN)) {
+		// If the FS requested from the command line is valid use it
+		if (fs_mask & (1 << preselected_fs)) {
+			preferred_fs = preselected_fs;
 		}
-	// Syslinux and EFI have precedence over bootmgr (unless the user selected BIOS as target type)
-	} else if ((HAS_SYSLINUX(img_report)) || (HAS_REACTOS(img_report)) || HAS_KOLIBRIOS(img_report) ||
-		(IS_EFI_BOOTABLE(img_report) && (tt == TT_UEFI) && (!windows_to_go))) {
-		if (fs_mask & (1<<FS_FAT32)) {
-			preferred_fs = FS_FAT32;
-		} else if ((fs_mask & (1<<FS_FAT16)) && !HAS_KOLIBRIOS(img_report)) {
-			preferred_fs = FS_FAT16;
+	}
+
+	if (preferred_fs == FS_UNKNOWN) {
+		// Syslinux and EFI have precedence over bootmgr (unless the user selected BIOS as target type)
+		if ((HAS_SYSLINUX(img_report)) || (HAS_REACTOS(img_report)) || HAS_KOLIBRIOS(img_report) ||
+			(IS_EFI_BOOTABLE(img_report) && (tt == TT_UEFI) && (!windows_to_go))) {
+			if (fs_mask & (1 << FS_FAT32)) {
+				preferred_fs = FS_FAT32;
+			} else if ((fs_mask & (1 << FS_FAT16)) && !HAS_KOLIBRIOS(img_report)) {
+				preferred_fs = FS_FAT16;
+			}
+		} else if ((windows_to_go) || HAS_BOOTMGR(img_report) || HAS_WINPE(img_report)) {
+			if (fs_mask & (1 << FS_NTFS)) {
+				preferred_fs = FS_NTFS;
+			}
 		}
-	} else if ((windows_to_go) || HAS_BOOTMGR(img_report) || HAS_WINPE(img_report)) {
-		if (fs_mask & (1<<FS_NTFS)) {
-			preferred_fs = FS_NTFS;
-		}
+	}
+
+	// The presence of a 4GB file forces the use of NTFS as default FS if available
+	if (img_report.has_4GB_file && (fs_mask & (1 << FS_NTFS))) {
+		preferred_fs = FS_NTFS;
 	}
 
 	// Try to select the FS
@@ -793,7 +802,7 @@ static BOOL PopulateProperties(void)
 	GetDrivePartitionData(SelectedDrive.DeviceNumber, fs_type, sizeof(fs_type), FALSE);
 	SetPartitionSchemeAndTargetSystem(FALSE);
 	// Attempt to reselect the last file system explicitly set by the user
-	if (!SetFileSystemAndClusterSize((selected_fs == -1) ? fs_type : NULL)) {
+	if (!SetFileSystemAndClusterSize((selected_fs == FS_UNKNOWN) ? fs_type : NULL)) {
 		SetProposedLabel(-1);
 		uprintf("No file system is selectable for this drive\n");
 		return FALSE;
@@ -2141,7 +2150,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			SetPartitionSchemeAndTargetSystem(FALSE);
 			// Try to reselect current FS from the drive for non-bootable
 			tmp[0] = 0;
-			if ((selected_fs == -1) && (SelectedDrive.DeviceNumber != 0))
+			if ((selected_fs == FS_UNKNOWN) && (SelectedDrive.DeviceNumber != 0))
 				GetDrivePartitionData(SelectedDrive.DeviceNumber, tmp, sizeof(tmp), TRUE);
 			SetFileSystemAndClusterSize(tmp);
 			ToggleImageOptions();
@@ -2670,15 +2679,17 @@ static void PrintUsage(char* appname)
 	char fname[_MAX_FNAME];
 
 	_splitpath(appname, NULL, NULL, fname, NULL);
-	printf("\nUsage: %s [-f] [-g] [-h] [-i PATH] [-l LOCALE] [-w TIMEOUT]\n", fname);
-	printf("  -f, --fixed\n");
-	printf("     Enable the listing of fixed/HDD USB drives\n");
+	printf("\nUsage: %s [-x] [-g] [-h] [-f FILESYSTEM] [-i PATH] [-l LOCALE] [-w TIMEOUT]\n", fname);
+	printf("  -x, --extra-devs\n");
+	printf("     List extra devices, such as USB HDDs\n");
 	printf("  -g, --gui\n");
 	printf("     Start in GUI mode (disable the 'rufus.com' commandline hogger)\n");
 	printf("  -i PATH, --iso=PATH\n");
 	printf("     Select the ISO image pointed by PATH to be used on startup\n");
 	printf("  -l LOCALE, --locale=LOCALE\n");
 	printf("     Select the locale to be used on startup\n");
+	printf("  -f FILESYSTEM, --filesystem=FILESYSTEM\n");
+	printf("     Preselect the file system to be preferred when formatting\n");
 	printf("  -w TIMEOUT, --wait=TIMEOUT\n");
 	printf("     Wait TIMEOUT tens of seconds for the global application mutex to be released.\n");
 	printf("     Used when launching a newer version of " APPLICATION_NAME " from a running application.\n");
@@ -2760,12 +2771,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	HDC hDC;
 	MSG msg;
 	struct option long_options[] = {
-		{"fixed",   no_argument,       NULL, 'f'},
-		{"gui",     no_argument,       NULL, 'g'},
-		{"help",    no_argument,       NULL, 'h'},
-		{"iso",     required_argument, NULL, 'i'},
-		{"locale",  required_argument, NULL, 'l'},
-		{"wait",    required_argument, NULL, 'w'},
+		{"extra-devs", no_argument,       NULL, 'x'},
+		{"gui",        no_argument,       NULL, 'g'},
+		{"help",       no_argument,       NULL, 'h'},
+		{"iso",        required_argument, NULL, 'i'},
+		{"locale",     required_argument, NULL, 'l'},
+		{"filesystem", required_argument, NULL, 'f'},
+		{"wait",       required_argument, NULL, 'w'},
 		{0, 0, NULL, 0}
 	};
 
@@ -2836,9 +2848,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			// Now enable the hogger before processing the rest of the arguments
 			hogmutex = SetHogger(attached_console, disable_hogger);
 
-			while ((opt = getopt_long(argc, argv, "?fghi:w:l:", long_options, &option_index)) != EOF) {
+			while ((opt = getopt_long(argc, argv, "?xghf:i:w:l:", long_options, &option_index)) != EOF) {
 				switch (opt) {
-				case 'f':
+				case 'x':
 					enable_HDDs = TRUE;
 					break;
 				case 'g':
@@ -2862,6 +2874,21 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 						safe_free(locale_name);
 						locale_name = safe_strdup(optarg);
 					}
+					break;
+				case 'f':
+					if (isdigitU(optarg[0])) {
+						preselected_fs = (int)strtol(optarg, NULL, 0);
+					} else {
+						for (i = 0; i < ARRAYSIZE(FileSystemLabel); i++) {
+							if (safe_stricmp(optarg, FileSystemLabel[i]) == 0) {
+								preselected_fs = i;
+								break;
+							}
+						}
+					}
+					if ((preselected_fs < FS_UNKNOWN) || (preselected_fs >= FS_MAX))
+						preselected_fs = FS_UNKNOWN;
+					selected_fs = preselected_fs;
 					break;
 				case 'w':
 					wait_for_mutex = atoi(optarg);
