@@ -8,7 +8,7 @@ o Version 3.2 (2018.09.11)
     Add support for XP/Server 2003 x64 ISOs (courtesy of Mattiwatti)
     Improve ISO extraction performance by preallocating files (courtesy of Mattiwatti)
     Improve bad blocks check algorithm (from suggestions by AL.Skywalker)
-    Fix progress not being displayed for Sylinux or GRUB downloads
+    Fix progress not being displayed for Syslinux or GRUB downloads
     Fix unwanted application close when cancelling an image scan
     Fix an issue where FAT32 could still be selected for ISOs containing a >4GB file
 

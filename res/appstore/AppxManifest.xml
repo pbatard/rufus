@@ -11,12 +11,12 @@
    Version="3.4.1411.0"
    ProcessorArchitecture="x86"
    Publisher='CN=Akeo Consulting, O=Akeo Consulting, STREET=24 Grey Rock, L=Milford, S=Co. Donegal, PostalCode=F92 D667, C=IE' />
-    <Properties>
-      <DisplayName>Rufus</DisplayName>
-      <PublisherDisplayName>Akeo Consulting</PublisherDisplayName>
-      <Description>Rufus</Description>
-      <Logo>Assets\Square44x44Logo.png</Logo>
-    </Properties>
+  <Properties>
+    <DisplayName>Rufus</DisplayName>
+    <PublisherDisplayName>Akeo Consulting</PublisherDisplayName>
+    <Description>Rufus</Description>
+    <Logo>Assets\Square44x44Logo.png</Logo>
+  </Properties>
   <Resources>
     <Resource Language="en-US" />
   </Resources>
@@ -24,7 +24,7 @@
     <TargetDeviceFamily
      Name="Windows.Desktop"
      MinVersion="10.0.14316.0"
-     MaxVersionTested="10.0.15063.0" />
+     MaxVersionTested="10.0.17763.0" />
   </Dependencies>
   <Capabilities>
     <rescap:Capability Name="runFullTrust" />

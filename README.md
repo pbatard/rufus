@@ -1,9 +1,10 @@
 Rufus: The Reliable USB Formatting Utility
 ==========================================
 
-[![Build status](https://ci.appveyor.com/api/projects/status/0nciqepn6hko4to9?svg=true)](https://ci.appveyor.com/project/pbatard/rufus)
-[![Coverity Scan Build Status](https://scan.coverity.com/projects/2172/badge.svg)](https://scan.coverity.com/projects/pbatard-rufus)
-[![Licence](https://img.shields.io/badge/license-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0.en.html)
+[![Build status](https://img.shields.io/appveyor/ci/pbatard/rufus.svg?style=for-the-badge)](https://ci.appveyor.com/project/pbatard/rufus)
+[![Coverity Scan Build Status](https://img.shields.io/coverity/scan/2172.svg?style=for-the-badge)](https://scan.coverity.com/projects/pbatard-rufus)
+[![Build contributors](https://img.shields.io/github/contributors/pbatard/rufus.svg?style=for-the-badge)](https://github.com/pbatard/rufus/graphs/contributors)
+[![Licence](https://img.shields.io/badge/license-GPLv3-blue.svg?style=for-the-badge)](https://www.gnu.org/licenses/gpl-3.0.en.html)
 
 ![Rufus logo](https://raw.githubusercontent.com/pbatard/rufus/master/res/icons/rufus-128.png)
 
