@@ -23,16 +23,16 @@ environment:
   matrix:
     - CONFIGURATION: Debug
       COMPILER: MSVC
-      PLATFORM: x86_32
+      PLATFORM: x86
     - CONFIGURATION: Debug
       COMPILER: MSVC
-      PLATFORM: x86_64
+      PLATFORM: x64
     - CONFIGURATION: Release
       COMPILER: MSVC
-      PLATFORM: x86_32
+      PLATFORM: x86
     - CONFIGURATION: Release
       COMPILER: MSVC
-      PLATFORM: x86_64
+      PLATFORM: x64
     - CONFIGURATION: Release
       COMPILER: MinGW
       PLATFORM: i686
@@ -41,7 +41,7 @@ environment:
       PLATFORM: x86_64
     - CONFIGURATION: Release
       COMPILER: Coverity
-      PLATFORM: x86_32
+      PLATFORM: x86
 
 init:
   # Set the AppVeyor build version number to our tag or, if untagged, to the commit hash
