@@ -34,6 +34,17 @@
 //#define RUFUS_TEST
 
 #define APPLICATION_NAME            "Rufus"
+#if defined(_M_AMD64)
+#define APPLICATION_ARCH            "x64"
+#elif defined(_M_IX86)
+#define APPLICATION_ARCH            "x86"
+#elif defined(_M_ARM64)
+#define APPLICATION_ARCH            "Arm64"
+#elif defined(_M_ARM)
+#define APPLICATION_ARCH            "Arm"
+#else
+#define APPLICATION_ARCH            "(Unknown Arch)"
+#endif
 #define COMPANY_NAME                "Akeo Consulting"
 #define STR_NO_LABEL                "NO_LABEL"
 // Yes, there exist characters between these seemingly empty quotes!
