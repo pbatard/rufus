@@ -67,7 +67,7 @@ static BOOL app_changed_label = FALSE;
 static BOOL allowed_filesystem[FS_MAX] = { 0 };
 static int64_t last_iso_blocking_status;
 static int selected_pt = -1, selected_fs = FS_UNKNOWN, preselected_fs = FS_UNKNOWN;
-static int image_index;
+static int image_index = 0;
 static RECT relaunch_rc = { -65536, -65536, 0, 0};
 static UINT uQFChecked = BST_CHECKED, uMBRChecked = BST_UNCHECKED;
 static HANDLE format_thid = NULL, dialog_handle = NULL;
@@ -1008,19 +1008,14 @@ static void DisplayISOProps(void)
 // Insert the image name into the Boot selection dropdown
 static void UpdateImage(void)
 {
-	int index;
+	assert(image_index != 0);
 
-	for (index = 0; index < ComboBox_GetCount(hBootType); index++) {
-		if (ComboBox_GetItemData(hBootType, index) == BT_IMAGE) {
-			break;
-		}
-	}
-
-	ComboBox_DeleteString(hBootType, index);
-	ComboBox_InsertStringU(hBootType, index, 
+	if (ComboBox_GetItemData(hBootType, image_index) == BT_IMAGE)
+		ComboBox_DeleteString(hBootType, image_index);
+	ComboBox_InsertStringU(hBootType, image_index,
 		(image_path == NULL) ? lmprintf(MSG_281, lmprintf(MSG_280)) : short_image_path);
-	ComboBox_SetItemData(hBootType, index, BT_IMAGE);
-	IGNORE_RETVAL(ComboBox_SetCurSel(hBootType, index));
+	ComboBox_SetItemData(hBootType, image_index, BT_IMAGE);
+	IGNORE_RETVAL(ComboBox_SetCurSel(hBootType, image_index));
 	bt = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
 	SetBootTypeDropdownWidth();
 }
@@ -1656,6 +1651,8 @@ static void InitDialog(HWND hDlg)
 		PostMessage(hDlg, WM_COMMAND, IDC_SELECT, 0);
 	}
 	SetBootTypeDropdownWidth();
+
+	CheckDlgButton(hMainDialog, IDC_LIST_USB_HDD, enable_HDDs ? BST_CHECKED : BST_UNCHECKED);
 
 	PrintInfo(0, MSG_210);
 }
