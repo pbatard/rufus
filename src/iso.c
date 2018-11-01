@@ -873,9 +873,9 @@ out:
 				uprintf("  Warning: Could not detect Isolinux version - Forcing to %s (embedded)",
 					img_report.sl_version_str);
 			}
-			if (!IS_EFI_BOOTABLE(img_report) && HAS_EFI_IMG(img_report) && ExtractEfiImgFiles(NULL)) {
-				img_report.has_efi = 0x80;
-			}
+		}
+		if (!IS_EFI_BOOTABLE(img_report) && HAS_EFI_IMG(img_report) && ExtractEfiImgFiles(NULL)) {
+			img_report.has_efi = 0x80;
 		}
 		if (HAS_WINPE(img_report)) {
 			// In case we have a WinPE 1.x based iso, we extract and parse txtsetup.sif
