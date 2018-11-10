@@ -2694,7 +2694,7 @@ static void PrintUsage(char* appname)
 	printf("     This usage guide.\n");
 }
 
-static HANDLE SetHogger(BOOL attached_console, BOOL disable_hogger)
+static HANDLE SetHogger(void)
 {
 	INPUT* input;
 	BYTE* hog_data;
@@ -2702,12 +2702,9 @@ static HANDLE SetHogger(BOOL attached_console, BOOL disable_hogger)
 	HANDLE hogmutex = NULL, hFile = NULL;
 	int i;
 
-	if (!attached_console)
-		return NULL;
-
 	hog_data = GetResource(hMainInstance, MAKEINTRESOURCEA(IDR_XT_HOGGER),
 		_RT_RCDATA, cmdline_hogger, &hog_size, FALSE);
-	if ((hog_data != NULL) && (!disable_hogger)) {
+	if (hog_data != NULL) {
 		// Create our synchronisation mutex
 		hogmutex = CreateMutexA(NULL, TRUE, "Global/Rufus_CmdLine");
 
@@ -2806,15 +2803,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	uprintf("*** " APPLICATION_NAME " init ***\n");
 
-	// Reattach the console, if we were started from commandline
-	if (AttachConsole(ATTACH_PARENT_PROCESS) != 0) {
-		attached_console = TRUE;
-		IGNORE_RETVAL(freopen("CONIN$", "r", stdin));
-		IGNORE_RETVAL(freopen("CONOUT$", "w", stdout));
-		IGNORE_RETVAL(freopen("CONOUT$", "w", stderr));
-		_flushall();
-	}
-
 	// We have to process the arguments before we acquire the lock and process the locale
 	PF_INIT(__wgetmainargs, Msvcrt);
 	if (pf__wgetmainargs != NULL) {
@@ -2843,7 +2831,19 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 				ini_flags[0] = 'a';
 
 			// Now enable the hogger before processing the rest of the arguments
-			hogmutex = SetHogger(attached_console, disable_hogger);
+			if (!disable_hogger)
+			{
+				// Reattach the console, if we were started from commandline
+				if (AttachConsole(ATTACH_PARENT_PROCESS) != 0) {
+					attached_console = TRUE;
+					IGNORE_RETVAL(freopen("CONIN$", "r", stdin));
+					IGNORE_RETVAL(freopen("CONOUT$", "w", stdout));
+					IGNORE_RETVAL(freopen("CONOUT$", "w", stderr));
+					_flushall();
+
+					hogmutex = SetHogger();
+				}
+			}
 
 			while ((opt = getopt_long(argc, argv, "?xghf:i:w:l:", long_options, &option_index)) != EOF) {
 				switch (opt) {
