@@ -34,6 +34,7 @@ extern char* ini_file;
 #define SETTING_COMM_CHECK                  "CommCheck64"
 #define SETTING_LOCALE                      "Locale"
 #define SETTING_DISABLE_LGP                 "DisableLGP"
+#define SETTING_DISABLE_SECURE_BOOT_NOTICE  "DisableSecureBootNotice"
 
 #define SETTING_ADVANCED_MODE               "AdvancedMode"
 #define SETTING_ADVANCED_MODE_DEVICE        "ShowAdvancedDriveProperties"

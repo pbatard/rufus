@@ -108,7 +108,7 @@
 #define IDC_EXTENDED_LABEL              1015
 #define IDC_RUFUS_MBR                   1016
 #define IDC_TARGET_SYSTEM               1017
-#define IDC_PERSISTENCE_SIZE            1118
+#define IDC_PERSISTENCE_SIZE            1018
 #define IDC_PERSISTENCE_UNITS           1019
 #define IDC_DISK_ID                     1020
 #define IDC_OLD_BIOS_FIXES              1021
@@ -140,6 +140,7 @@
 #define IDC_LOG_EDIT                    1055
 #define IDC_LOG_SAVE                    1056
 #define IDC_LOG_CLEAR                   1057
+#define IDC_DONT_DISPLAY_AGAIN          1059
 #define IDC_MORE_INFO                   1060
 #define IDC_POLICY                      1061
 #define IDC_UPDATE_FREQUENCY            1062

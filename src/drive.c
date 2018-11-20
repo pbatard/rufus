@@ -61,6 +61,7 @@ PF_TYPE_DECL(NTAPI, NTSTATUS, NtQueryVolumeInformationFile, (HANDLE, PIO_STATUS_
  * Globals
  */
 RUFUS_DRIVE_INFO SelectedDrive;
+BOOL installed_uefi_ntfs;
 const char* sfd_name = "Super Floppy Disk";
 
 /*
@@ -1250,6 +1251,7 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 				uprintf("Write error: %s", WindowsErrorString());
 				return FALSE;
 			}
+			installed_uefi_ntfs = TRUE;
 		}
 		pn++;
 	}

@@ -72,6 +72,7 @@
 #define MAX_GPT_PARTITIONS          128
 #define MAX_SECTORS_TO_CLEAR        128			// nb sectors to zap when clearing the MBR/GPT (must be >34)
 #define MBR_UEFI_MARKER             0x49464555	// 'U', 'E', 'F', 'I', as a 32 bit little endian longword
+#define MORE_INFO_URL               0xFFFF
 #define STATUS_MSG_TIMEOUT          3500		// How long should cheat mode messages appear for on the status bar
 #define WRITE_RETRIES               4
 #define WRITE_TIMEOUT               5000		// How long we should wait between write retries
@@ -100,6 +101,7 @@
 #endif
 #define DOWNLOAD_URL                RUFUS_URL "/downloads"
 #define FILES_URL                   RUFUS_URL "/files"
+#define SECURE_BOOT_MORE_INFO_URL   "https://github.com/pbatard/rufus/wiki/FAQ#Why_do_I_need_to_disable_Secure_Boot_to_use_UEFINTFS"
 #define SEVENZIP_URL                "https://www.7-zip.org"
 #define FILES_DIR                   "rufus_files"
 #define IGNORE_RETVAL(expr)         do { (void)(expr); } while(0)
@@ -197,7 +199,10 @@ enum notification_type {
 typedef INT_PTR (CALLBACK *Callback_t)(HWND, UINT, WPARAM, LPARAM);
 typedef struct {
 	WORD id;
-	Callback_t callback;
+	union {
+		Callback_t callback;
+		char* url;
+	};
 } notification_info;	// To provide a "More info..." on notifications
 
 /* Status Bar sections */
@@ -481,7 +486,7 @@ extern INT_PTR CreateAboutBox(void);
 extern BOOL CreateTooltip(HWND hControl, const char* message, int duration);
 extern void DestroyTooltip(HWND hWnd);
 extern void DestroyAllTooltips(void);
-extern BOOL Notification(int type, const notification_info* more_info, char* title, char* format, ...);
+extern BOOL Notification(int type, const char* dont_display_setting, const notification_info* more_info, char* title, char* format, ...);
 extern int SelectionDialog(char* title, char* message, char** choices, int size);
 extern void ListDialog(char* title, char* message, char** items, int size);
 extern SIZE GetTextSize(HWND hCtrl, char* txt);

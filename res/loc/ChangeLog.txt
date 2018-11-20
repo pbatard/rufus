@@ -6,6 +6,11 @@ https://github.com/pbatard/rufus/wiki/Localization#Editing_a_translation
 Or simply download the latest pollock.exe from https://rufus.ie/locale/ and follow
 its directions. 
 
+o v3.x
+  - *NEW*      MSG_127 "Do not show this message again"
+  - *NEW*      MSG_128 "Important notice about Secure Boot"
+  - *NEW*      MSG_129 "You have just created a media that includes the UEFI:NTFS bootloader (...)"
+
 o v3.2 (2018.07.20)
 	The following appears in Advanced format options → Check device for bad blocks → dropdown menu with
   %s being replaced with SLC, MLC or TLC, which is a type of NAND (or flash memory. In other words,
