@@ -29,7 +29,6 @@
 #include <malloc.h>
 #include <string.h>
 #include <inttypes.h>
-#undef NDEBUG
 #include <assert.h>
 
 #include "rufus.h"

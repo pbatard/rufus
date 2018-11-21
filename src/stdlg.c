@@ -31,7 +31,6 @@
 #include <shlobj.h>
 #include <commdlg.h>
 #include <richedit.h>
-#undef NDEBUG
 #include <assert.h>
 
 #include "rufus.h"

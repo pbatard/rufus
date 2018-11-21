@@ -29,7 +29,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <winioctl.h>
-#undef NDEBUG
 #include <assert.h>
 
 #include "rufus.h"

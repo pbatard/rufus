@@ -32,7 +32,6 @@
 #include <inttypes.h>
 #include <commctrl.h>
 #include <setupapi.h>
-#undef NDEBUG
 #include <assert.h>
 
 #include "rufus.h"

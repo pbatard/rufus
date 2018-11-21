@@ -35,7 +35,6 @@
 #include <dbt.h>
 #include <io.h>
 #include <getopt.h>
-#undef NDEBUG
 #include <assert.h>
 
 #include "rufus.h"
@@ -1885,10 +1884,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	case WM_COMMAND:
 #ifdef RUFUS_TEST
 		if (LOWORD(wParam) == IDC_TEST) {
-			notification_info more_info;
-			more_info.id = MORE_INFO_URL;
-			more_info.url = SECURE_BOOT_MORE_INFO_URL;
-			Notification(MSG_INFO, SETTING_DISABLE_SECURE_BOOT_NOTICE, &more_info, lmprintf(MSG_128), lmprintf(MSG_129));
+			assert(1 == 0);
 			break;
 		}
 #endif

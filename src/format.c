@@ -31,7 +31,6 @@
 #include <stddef.h>
 #include <ctype.h>
 #include <locale.h>
-#undef NDEBUG
 #include <assert.h>
 
 #include "rufus.h"

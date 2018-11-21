@@ -26,7 +26,6 @@
 #include <windows.h>
 #include <stdio.h>
 #include <string.h>
-#undef NDEBUG
 #include <assert.h>
 
 #include "rufus.h"
