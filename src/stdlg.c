@@ -158,7 +158,7 @@ void BrowseForFolder(void) {
 		pfod = NULL;	// Just in case
 		goto fallback;
 	}
-	hr = pfod->lpVtbl->SetOptions(pfod, FOS_PICKFOLDERS);
+	hr = IFileOpenDialog_SetOptions(pfod, FOS_PICKFOLDERS);
 	if (FAILED(hr)) {
 		uprintf("Failed to set folder option for FileOpenDialog: error %X\n", hr);
 		goto fallback;
@@ -180,19 +180,19 @@ void BrowseForFolder(void) {
 	hr = SHCreateItemFromParsingName(wpath, NULL, &IID_IShellItem, (LPVOID)&si_path);
 	if (SUCCEEDED(hr)) {
 		if (wpath != NULL) {
-			pfod->lpVtbl->SetFolder(pfod, si_path);
+			IFileOpenDialog_SetFolder(pfod, si_path);
 		}
 		if (fname != NULL) {
-			pfod->lpVtbl->SetFileName(pfod, fname);
+			IFileOpenDialog_SetFileName(pfod, fname);
 		}
 	}
 	safe_free(wpath);
 
-	hr = pfod->lpVtbl->Show(pfod, hMainDialog);
+	hr = IFileOpenDialog_Show(pfod, hMainDialog);
 	if (SUCCEEDED(hr)) {
-		hr = pfod->lpVtbl->GetResult(pfod, &psi);
+		hr = IFileOpenDialog_GetResult(pfod, &psi);
 		if (SUCCEEDED(hr)) {
-			psi->lpVtbl->GetDisplayName(psi, SIGDN_FILESYSPATH, &wpath);
+			IShellItem_GetDisplayName(psi, SIGDN_FILESYSPATH, &wpath);
 			tmp_path = wchar_to_utf8(wpath);
 			CoTaskMemFree(wpath);
 			if (tmp_path == NULL) {
@@ -209,12 +209,12 @@ void BrowseForFolder(void) {
 		uprintf("Could not show FileOpenDialog: error %X\n", hr);
 		goto fallback;
 	}
-	pfod->lpVtbl->Release(pfod);
+	IFileOpenDialog_Release(pfod);
 	dialog_showing--;
 	return;
 fallback:
 	if (pfod != NULL) {
-		pfod->lpVtbl->Release(pfod);
+		IFileOpenDialog_Release(pfod);
 	}
 
 	memset(&bi, 0, sizeof(BROWSEINFOW));
@@ -280,7 +280,7 @@ char* FileDialog(BOOL save, char* path, const ext_t* ext, DWORD options)
 		}
 
 		// Set the file extension filters
-		pfd->lpVtbl->SetFileTypes(pfd, (UINT)ext->count + 1, filter_spec);
+		IFileDialog_SetFileTypes(pfd, (UINT)ext->count + 1, filter_spec);
 
 		if (path == NULL) {
 			// Try to use the "Downloads" folder as the initial default directory
@@ -290,7 +290,7 @@ char* FileDialog(BOOL save, char* path, const ext_t* ext, DWORD options)
 			if (SUCCEEDED(hr)) {
 				hr = SHCreateItemFromParsingName(wpath, NULL, &IID_IShellItem, (LPVOID)&si_path);
 				if (SUCCEEDED(hr)) {
-					pfd->lpVtbl->SetDefaultFolder(pfd, si_path);
+					IFileDialog_SetDefaultFolder(pfd, si_path);
 				}
 				CoTaskMemFree(wpath);
 			}
@@ -298,7 +298,7 @@ char* FileDialog(BOOL save, char* path, const ext_t* ext, DWORD options)
 			wpath = utf8_to_wchar(path);
 			hr = SHCreateItemFromParsingName(wpath, NULL, &IID_IShellItem, (LPVOID)&si_path);
 			if (SUCCEEDED(hr)) {
-				pfd->lpVtbl->SetFolder(pfd, si_path);
+				IFileDialog_SetFolder(pfd, si_path);
 			}
 			safe_free(wpath);
 		}
@@ -306,11 +306,11 @@ char* FileDialog(BOOL save, char* path, const ext_t* ext, DWORD options)
 		// Set the default filename
 		wfilename = utf8_to_wchar((ext->filename == NULL) ? "" : ext->filename);
 		if (wfilename != NULL) {
-			pfd->lpVtbl->SetFileName(pfd, wfilename);
+			IFileDialog_SetFileName(pfd, wfilename);
 		}
 
 		// Display the dialog
-		hr = pfd->lpVtbl->Show(pfd, hMainDialog);
+		hr = IFileDialog_Show(pfd, hMainDialog);
 
 		// Cleanup
 		safe_free(wfilename);
@@ -323,9 +323,9 @@ char* FileDialog(BOOL save, char* path, const ext_t* ext, DWORD options)
 
 		if (SUCCEEDED(hr)) {
 			// Obtain the result of the user's interaction with the dialog.
-			hr = pfd->lpVtbl->GetResult(pfd, &psiResult);
+			hr = IFileDialog_GetResult(pfd, &psiResult);
 			if (SUCCEEDED(hr)) {
-				hr = psiResult->lpVtbl->GetDisplayName(psiResult, SIGDN_FILESYSPATH, &wpath);
+				hr = IShellItem_GetDisplayName(psiResult, SIGDN_FILESYSPATH, &wpath);
 				if (SUCCEEDED(hr)) {
 					filepath = wchar_to_utf8(wpath);
 					CoTaskMemFree(wpath);
@@ -333,7 +333,7 @@ char* FileDialog(BOOL save, char* path, const ext_t* ext, DWORD options)
 					SetLastError(hr);
 					uprintf("Unable to access file path: %s\n", WindowsErrorString());
 				}
-				psiResult->lpVtbl->Release(psiResult);
+				IShellItem_Release(psiResult);
 			}
 		} else if ((hr & 0xFFFF) != ERROR_CANCELLED) {
 			// If it's not a user cancel, assume the dialog didn't show and fallback
@@ -341,7 +341,7 @@ char* FileDialog(BOOL save, char* path, const ext_t* ext, DWORD options)
 			uprintf("Could not show FileOpenDialog: %s\n", WindowsErrorString());
 			goto fallback;
 		}
-		pfd->lpVtbl->Release(pfd);
+		IFileDialog_Release(pfd);
 		dialog_showing--;
 		return filepath;
 	}
@@ -349,7 +349,7 @@ char* FileDialog(BOOL save, char* path, const ext_t* ext, DWORD options)
 fallback:
 	safe_free(filter_spec);
 	if (pfd != NULL) {
-		pfd->lpVtbl->Release(pfd);
+		IFileDialog_Release(pfd);
 	}
 
 	memset(&ofn, 0, sizeof(ofn));
@@ -1301,14 +1301,14 @@ BOOL SetTaskbarProgressState(TASKBAR_PROGRESS_FLAGS tbpFlags)
 {
 	if (ptbl == NULL)
 		return FALSE;
-	return !FAILED(ptbl->lpVtbl->SetProgressState(ptbl, hMainDialog, tbpFlags));
+	return !FAILED(ITaskbarList3_SetProgressState(ptbl, hMainDialog, tbpFlags));
 }
 
 BOOL SetTaskbarProgressValue(ULONGLONG ullCompleted, ULONGLONG ullTotal)
 {
 	if (ptbl == NULL)
 		return FALSE;
-	return !FAILED(ptbl->lpVtbl->SetProgressValue(ptbl, hMainDialog, ullCompleted, ullTotal));
+	return !FAILED(ITaskbarList3_SetProgressValue(ptbl, hMainDialog, ullCompleted, ullTotal));
 }
 
 static void Reposition(HWND hDlg, int id, int dx, int dw)
