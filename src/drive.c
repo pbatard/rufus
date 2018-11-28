@@ -26,6 +26,10 @@
 #include <string.h>
 #include <ctype.h>
 #include <assert.h>
+#if !defined(__MINGW32__)
+#include <initguid.h>
+#endif
+#include <vds.h>
 
 #include "rufus.h"
 #include "missing.h"
@@ -52,6 +56,16 @@ const GUID PARTITION_MSFT_RESERVED_GUID =
 #if !defined(PARTITION_SYSTEM_GUID)
 const GUID PARTITION_SYSTEM_GUID =
 	{ 0xc12a7328L, 0xf81f, 0x11d2, {0xba, 0x4b, 0x00, 0xa0, 0xc9, 0x3e, 0xc9, 0x3b} };
+#endif
+
+#if defined(__MINGW32__)
+const IID CLSID_VdsLoader = { 0x9c38ed61, 0xd565, 0x4728, { 0xae, 0xee, 0xc8, 0x09, 0x52, 0xf0, 0xec, 0xde } };
+const IID IID_IVdsServiceLoader = { 0xe0393303, 0x90d4, 0x4a97, { 0xab, 0x71, 0xe9, 0xb6, 0x71, 0xee, 0x27, 0x29 } };
+const IID IID_IVdsProvider = { 0x10c5e575, 0x7984, 0x4e81, { 0xa5, 0x6b, 0x43, 0x1f, 0x5f, 0x92, 0xae, 0x42 } };
+const IID IID_IVdsSwProvider = { 0x9aa58360, 0xce33, 0x4f92, { 0xb6, 0x58, 0xed, 0x24, 0xb1, 0x44, 0x25, 0xb8 } };
+const IID IID_IVdsPack = { 0x3b69d7f5, 0x9d94, 0x4648, { 0x91, 0xca, 0x79, 0x93, 0x9b, 0xa2, 0x63, 0xbf } };
+const IID IID_IVdsDisk = { 0x07e5c822, 0xf00c, 0x47a1, { 0x8f, 0xce, 0xb2, 0x44, 0xda, 0x56, 0xfd, 0x06 } };
+const IID IID_IVdsAdvancedDisk = { 0x6e6f6b40, 0x977c, 0x4069, { 0xbd, 0xdd, 0xac, 0x71, 0x00, 0x59, 0xf8, 0xc0 } };
 #endif
 
 PF_TYPE_DECL(NTAPI, NTSTATUS, NtQueryVolumeInformationFile, (HANDLE, PIO_STATUS_BLOCK, PVOID, ULONG, FS_INFORMATION_CLASS));
@@ -112,6 +126,7 @@ BOOL GetAutoMount(BOOL* enabled)
  * the specific range [DRIVE_INDEX_MIN; DRIVE_INDEX_MAX].
  */
 #define CheckDriveIndex(DriveIndex) do {                                            \
+	if ((int)DriveIndex < 0) goto out;                                              \
 	assert((DriveIndex >= DRIVE_INDEX_MIN) && (DriveIndex <= DRIVE_INDEX_MAX));     \
 	if ((DriveIndex < DRIVE_INDEX_MIN) || (DriveIndex > DRIVE_INDEX_MAX)) goto out; \
 	DriveIndex -= DRIVE_INDEX_MIN; } while (0)
@@ -175,7 +190,6 @@ static HANDLE GetHandle(char* Path, BOOL bLockDrive, BOOL bWriteAccess, BOOL bWr
 			uprintf("I/O boundary checks disabled");
 		}
 
-		uprintf("Requesting lock...");
 		EndTime = GetTickCount64() + DRIVE_ACCESS_TIMEOUT;
 		do {
 			if (DeviceIoControl(hDrive, FSCTL_LOCK_VOLUME, NULL, 0, NULL, 0, &size, NULL))
@@ -208,7 +222,7 @@ char* GetPhysicalName(DWORD DriveIndex)
 	char physical_name[24];
 
 	CheckDriveIndex(DriveIndex);
-	static_sprintf(physical_name, "\\\\.\\PHYSICALDRIVE%lu", DriveIndex);
+	static_sprintf(physical_name, "\\\\.\\PhysicalDrive%lu", DriveIndex);
 	success = TRUE;
 out:
 	return (success)?safe_strdup(physical_name):NULL;
@@ -247,7 +261,7 @@ char* GetLogicalName(DWORD DriveIndex, BOOL bKeepTrailingBackslash, BOOL bSilent
 
 	CheckDriveIndex(DriveIndex);
 
-	for (i=0; hDrive == INVALID_HANDLE_VALUE; i++) {
+	for (i = 0; hDrive == INVALID_HANDLE_VALUE; i++) {
 		if (i == 0) {
 			hVolume = FindFirstVolumeA(volume_name, sizeof(volume_name));
 			if (hVolume == INVALID_HANDLE_VALUE) {
@@ -265,10 +279,9 @@ char* GetLogicalName(DWORD DriveIndex, BOOL bKeepTrailingBackslash, BOOL bSilent
 
 		// Sanity checks
 		len = safe_strlen(volume_name);
-		if ((len <= 1) || (safe_strnicmp(volume_name, volume_start, 4) != 0) || (volume_name[len-1] != '\\')) {
-			suprintf("'%s' is not a GUID volume name", volume_name);
-			continue;
-		}
+		assert(len > 4);
+		assert(safe_strnicmp(volume_name, volume_start, 4) == 0);
+		assert(volume_name[len - 1] == '\\');
 
 		drive_type = GetDriveTypeA(volume_name);
 		if ((drive_type != DRIVE_REMOVABLE) && (drive_type != DRIVE_FIXED))
@@ -315,6 +328,205 @@ out:
 		FindVolumeClose(hVolume);
 	return (success)?safe_strdup(volume_name):NULL;
 }
+
+/*
+ * Delete all the partitions from a disk, using VDS
+ * Mostly copied from https://social.msdn.microsoft.com/Forums/vstudio/en-US/b90482ae-4e44-4b08-8731-81915030b32a/createpartition-using-vds-interface-throw-error-enointerface-dcom?forum=vcgeneral
+ */
+BOOL DeletePartitions(DWORD DriveIndex)
+{
+	BOOL r = FALSE;
+	HRESULT hr;
+	ULONG ulFetched;
+	wchar_t wPhysicalName[24];
+	IVdsServiceLoader *pLoader;
+	IVdsService *pService;
+	IEnumVdsObject *pEnum;
+	IUnknown *pUnk;
+
+	CheckDriveIndex(DriveIndex);
+	wnsprintf(wPhysicalName, ARRAYSIZE(wPhysicalName), L"\\\\?\\PhysicalDrive%lu", DriveIndex);
+
+	// Initialize COM
+	IGNORE_RETVAL(CoInitializeEx(NULL, COINIT_APARTMENTTHREADED));
+	IGNORE_RETVAL(CoInitializeSecurity(NULL, -1, NULL, NULL, RPC_C_AUTHN_LEVEL_CONNECT,
+		RPC_C_IMP_LEVEL_IMPERSONATE, NULL, 0, NULL));
+
+	// Create a VDS Loader Instance
+	hr = CoCreateInstance(&CLSID_VdsLoader, NULL, CLSCTX_LOCAL_SERVER | CLSCTX_REMOTE_SERVER,
+		&IID_IVdsServiceLoader, (void **)&pLoader);
+	if (hr != S_OK) {
+		uprintf("Could not create VDS Loader Instance: hr=%X\n", hr);
+		goto out;
+	}
+
+	// Load the VDS Service
+	hr = IVdsServiceLoader_LoadService(pLoader, L"", &pService);
+	IVdsServiceLoader_Release(pLoader);
+	if (hr != S_OK) {
+		uprintf("Could not load VDS Service: 0x%08X", hr);
+		goto out;
+	}
+
+	// Query the VDS Service Providers
+	hr = IVdsService_QueryProviders(pService, VDS_QUERY_SOFTWARE_PROVIDERS, &pEnum);
+	if (hr != S_OK) {
+		uprintf("Could not query VDS Service Providers: 0x%08X", hr);
+		goto out;
+	}
+
+	while (IEnumVdsObject_Next(pEnum, 1, &pUnk, &ulFetched) == S_OK) {
+		IVdsProvider *pProvider;
+		IVdsSwProvider *pSwProvider;
+		IEnumVdsObject *pEnumPack;
+		IUnknown *pPackUnk;
+
+		// Get VDS Provider
+		hr = IUnknown_QueryInterface(pUnk, &IID_IVdsProvider, (void **)&pProvider);
+		IUnknown_Release(pUnk);
+		if (hr != S_OK) {
+			uprintf("Could not get VDS Provider: 0x%08X", hr);
+			goto out;
+		}
+
+		// Get VDS Software Provider
+		hr = IVdsSwProvider_QueryInterface(pProvider, &IID_IVdsSwProvider, (void **)&pSwProvider);
+		IVdsProvider_Release(pProvider);
+		if (hr != S_OK) {
+			uprintf("Could not get VDS Software Provider: 0x%08X", hr);
+			goto out;
+		}
+
+		// Get VDS Software Provider Packs
+		hr = IVdsSwProvider_QueryPacks(pSwProvider, &pEnumPack);
+		IVdsSwProvider_Release(pSwProvider);
+		if (hr != S_OK) {
+			uprintf("Could not get VDS Software Provider Packs: 0x%08X", hr);
+			goto out;
+		}
+
+		// Enumerate Provider Packs
+		while (IEnumVdsObject_Next(pEnumPack, 1, &pPackUnk, &ulFetched) == S_OK) {
+			IVdsPack *pPack;
+			IEnumVdsObject *pEnumDisk;
+			IUnknown *pDiskUnk;
+
+			hr = IUnknown_QueryInterface(pPackUnk, &IID_IVdsPack, (void **)&pPack);
+			IUnknown_Release(pPackUnk);
+			if (hr != S_OK) {
+				uprintf("Could not query VDS Software Provider Pack: 0x%08X", hr);
+				goto out;
+			}
+
+			// Use the pack interface to access the disks
+			hr = IVdsPack_QueryDisks(pPack, &pEnumDisk);
+			if (hr != S_OK) {
+				uprintf("Could not query VDS disks: 0x%08X", hr);
+				goto out;
+			}
+
+			// List disks
+			while (IEnumVdsObject_Next(pEnumDisk, 1, &pDiskUnk, &ulFetched) == S_OK) {
+				VDS_DISK_PROP diskprop;
+				VDS_PARTITION_PROP* prop_array;
+				LONG i, prop_array_size;
+				IVdsDisk *pDisk;
+				IVdsAdvancedDisk *pAdvancedDisk;
+
+				// Get the disk interface.
+				hr = IUnknown_QueryInterface(pDiskUnk, &IID_IVdsDisk, (void **)&pDisk);
+				if (hr != S_OK) {
+					uprintf("Could not query VDS Disk Interface: 0x%08X", hr);
+					goto out;
+				}
+
+				// Get the disk properties
+				hr = IVdsDisk_GetProperties(pDisk, &diskprop);
+				if (hr != S_OK) {
+					uprintf("Could not query VDS Disk Properties: 0x%08X", hr);
+					goto out;
+				}
+
+				// Isolate the disk we want
+				if (_wcsicmp(wPhysicalName, diskprop.pwszName) != 0) {
+					IVdsDisk_Release(pDisk);
+					continue;
+				}
+
+				// Instantiate the AdvanceDisk interface for our disk.
+				hr = IVdsDisk_QueryInterface(pDisk, &IID_IVdsAdvancedDisk, (void **)&pAdvancedDisk);
+				IVdsDisk_Release(pDisk);
+				if (hr != S_OK) {
+					uprintf("Could not access VDS Advanced Disk interface: 0x%08X", hr);
+					goto out;
+				}
+
+				// Query the partition data, so we can get the start offset, which we need for deletion
+				hr = IVdsAdvancedDisk_QueryPartitions(pAdvancedDisk, &prop_array, &prop_array_size);
+				if (hr != S_OK) {
+					uprintf("No partition to delete on disk '%ws'", diskprop.pwszName);
+					goto out;
+				}
+
+				uprintf("Deleting ALL partitions from disk '%ws':", diskprop.pwszName);
+
+				// Now go through each partition
+				r = (prop_array_size >= 1);
+				for (i = 0; i < prop_array_size; i++) {
+					uprintf("● Partition %d (offset: %lld, size: %s)", prop_array[i].ulPartitionNumber,
+						prop_array[i].ullOffset, SizeToHumanReadable(prop_array[i].ullSize, FALSE, FALSE));
+					hr = IVdsAdvancedDisk_DeletePartition(pAdvancedDisk, prop_array[i].ullOffset, TRUE, TRUE);
+					if (hr != S_OK) {
+						r = FALSE;
+						uprintf("Could not delete partitions: 0x%08X", hr);
+					}
+				}
+				CoTaskMemFree(prop_array);
+
+// NB: In the future, we could try something like this to format partitions:
+#if 0
+				// Initiate formatting and wait for completion.
+				LPWSTR pwszLabel[8] = L"TEST";
+				ULONGLONG Offset = 1024 * 1024;
+				BOOL QuickFormat = TRUE;
+				BOOL EnableCompression = FALSE;
+				IVdsAsync* pAsync;
+				hr = IVdsAdvancedDisk_FormatPartition(pAdvancedDisk, Offset, FileSystemType,
+					pwszLabel, 0, TRUE, QuickFormat, EnableCompression, &pAsync);
+				if (hr != S_OK) {
+					uprintf("Could not start formatting: 0x%08X", hr);
+					goto out;
+				}
+				VDS_ASYNC_OUTPUT AsyncOut;
+				ULONG ulPercentCompleted;
+				HRESULT hr2 = E_FAIL;
+				do {
+					hr = IVdsAsync_QueryStatus(pAsync, &hr2, &ulPercentCompleted);
+					if (SUCCEEDED(hr)) {
+						printf("%ld%%", ulPercentCompleted);
+						if ((hr2 != S_OK) && (hr2 != VDS_E_OPERATION_PENDING)) {
+							uprintf("hr2: %X", hr2);
+							break;
+						}
+						if (hr2 == S_OK) {
+							break;
+						}
+					}
+					Sleep(500);
+				} while (SUCCEEDED(hr));
+				hr = IVdsAsync_Wait(pAsync, &hr2, &AsyncOut);
+				IVdsAsync_Release(pAsync);
+#endif
+				IVdsAdvancedDisk_Release(pAdvancedDisk);
+				goto out;
+			}
+		}
+	}
+
+out:
+	return r;
+}
+
 
 /* Wait for a logical drive to reappear - Used when a drive has just been repartitioned */
 BOOL WaitForLogical(DWORD DriveIndex)

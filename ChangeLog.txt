@@ -2,6 +2,7 @@ o Version 3.4 (2018.12.??)
     Set the default image selection directory to Downloads\ instead of My Documents\
     Add ARM/ARM64 automatic update support
     Improve UEFI:NTFS compatibility
+    Improve access issues by using VDS to delete all partitions
     Update the .appx to include all architectures as well as request elevation
     Fix broken detection of some EFI based images
     Fix broken update check due to new server

@@ -1884,7 +1884,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	case WM_COMMAND:
 #ifdef RUFUS_TEST
 		if (LOWORD(wParam) == IDC_TEST) {
-			assert(1 == 0);
+			DeletePartitions((DWORD)ComboBox_GetItemData(hDeviceList, ComboBox_GetCurSel(hDeviceList)));
 			break;
 		}
 #endif
