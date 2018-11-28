@@ -1831,9 +1831,6 @@ DWORD WINAPI FormatThread(void* param)
 	if (!zero_drive && !write_as_image) {
 		PrintInfoDebug(0, MSG_226);
 		AnalyzeMBR(hPhysicalDrive, "Drive", FALSE);
-		if ((hLogicalVolume != NULL) && (hLogicalVolume != INVALID_HANDLE_VALUE)) {
-			AnalyzePBR(hLogicalVolume);
-		}
 		UpdateProgress(OP_ANALYZE_MBR, -1.0f);
 	}
 
@@ -1842,7 +1839,7 @@ DWORD WINAPI FormatThread(void* param)
 		goto out;
 	}
 
-	// Zap any existing partitions. This helps prevent access errors.
+	// Zap partition records. This helps prevent access errors.
 	// Note, Microsoft's way of cleaning partitions (IOCTL_DISK_CREATE_DISK, which is what we apply
 	// in InitializeDisk) is *NOT ENOUGH* to reset a disk and can render it inoperable for partitioning
 	// or formatting under Windows. See https://github.com/pbatard/rufus/issues/759 for details.

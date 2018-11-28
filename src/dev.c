@@ -320,12 +320,6 @@ BOOL GetOpticalMedia(IMG_SAVE* img_save)
  */
 BOOL GetDevices(DWORD devnum)
 {
-	// Make sure at least one second has elapsed since we last displayed devices
-	static ULONGLONG LastRefresh = 0;
-	if (GetTickCount64() < LastRefresh + 1000)
-		return FALSE;
-	LastRefresh = GetTickCount64();
-
 	// List of USB storage drivers we know - list may be incomplete!
 	const char* usbstor_name[] = {
 		// Standard MS USB storage driver
