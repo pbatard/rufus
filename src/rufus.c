@@ -1557,7 +1557,7 @@ static void InitDialog(HWND hDlg)
 	uprintf("Syslinux versions: %s%s, %s%s", embedded_sl_version_str[0], embedded_sl_version_ext[0],
 		embedded_sl_version_str[1], embedded_sl_version_ext[1]);
 	uprintf("Grub versions: %s, %s", GRUB4DOS_VERSION, GRUB2_PACKAGE_VERSION);
-	uprintf("System locale ID: 0x%04X", GetUserDefaultUILanguage());
+	uprintf("System locale ID: 0x%04X (%s)", GetUserDefaultUILanguage(), GetCurrentMUI());
 	ubflush();
 	if (selected_locale->ctrl_id & LOC_NEEDS_UPDATE) {
 		uprintf("NOTE: The %s translation requires an update, but the current translator hasn't submitted "
@@ -1841,6 +1841,9 @@ static BOOL CheckDriveAccess(DWORD dwTimeOut)
 			ComboBox_GetTextU(hDeviceList, title, sizeof(title));
 			proceed = Notification(MSG_WARNING_QUESTION, NULL, NULL, title, message);
 			free(message);
+		} else {
+			proceed = Notification(MSG_WARNING_QUESTION, NULL, NULL, title,
+				"This drive is in use. Do you want to format it anyway?");
 		}
 	}
 	ret = proceed;

@@ -1955,7 +1955,7 @@ BOOL SetFormatPromptHook(void)
 	if (fp_weh != NULL)
 		return TRUE;	// No need to set again if active
 
-						// Fetch the localized strings in the relevant
+	// Fetch the localized strings in the relevant MUI
 	static_sprintf(mui_path, "%s\\%s\\shell32.dll.mui", system_dir, GetCurrentMUI());
 	mui_lib = LoadLibraryU(mui_path);
 	if (mui_lib != NULL) {
