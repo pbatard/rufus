@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 3.2\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2018-07-20 23:42+0200\n"
-"PO-Revision-Date: 2018-07-21 00:29+0200\n"
+"POT-Creation-Date: 2018-12-17 16:55+0000\n"
+"PO-Revision-Date: 2018-12-17 16:55+0000\n"
 "Language: sv_SE\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Rufus-LCID: 0x041d, 0x081d\n"
 "Last-Translator: \n"
 "Language-Team: \n"
-"X-Generator: Poedit 2.0.8\n"
+"X-Generator: Poedit 2.2\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -895,11 +895,11 @@ msgstr "Minsta storlek som ett block av data kommer att ta plats i filsystemet"
 
 #. • MSG_159
 msgid ""
-"Use this field to set the drive label\n"
-"International characters are accepted"
+"Use this field to set the drive label.\n"
+"International characters are accepted."
 msgstr ""
-"Använd detta fältet till att ange enhetens namn\n"
-"Internationella bokstäver är tillåtna"
+"Använd detta fältet till att ange enhetens namn.\n"
+"Internationella bokstäver är tillåtna."
 
 #. • MSG_160
 msgid "Toggle advanced options"
@@ -927,7 +927,7 @@ msgstr "Klicka för att välja avbildsfil..."
 
 #. • MSG_166
 msgid "Check this box to allow the display of international labels and set a device icon (creates an autorun.inf)"
-msgstr "Markera för att tillåta visa internationella namn och sätt en enhetsikon (en autorun.inf skapas)"
+msgstr "Markera för att tillåta visa internationella namn och sätta en enhetsikon (en autorun.inf skapas)"
 
 #. • MSG_167
 msgid "Install an MBR that allows boot selection and can masquerade the BIOS USB drive ID"
@@ -936,18 +936,18 @@ msgstr "Installera en MBR som tillåter flera uppstartsmöjligheter och som kan 
 #. • MSG_168
 msgid ""
 "Try to masquerade first bootable USB drive (usually 0x80) as a different disk.\n"
-"This should only be necessary if you install Windows XP and have more than one disk"
+"This should only be necessary if you install Windows XP and have more than one disk."
 msgstr ""
 "Prova att maskera bort den första startbara USB-enheten (vanligtvis 0x80) som en annan disk.\n"
-"Detta är endast nödvändigt om du installerar Windows XP och du har mer än en disk"
+"Detta är endast nödvändigt om du installerar Windows XP och du har mer än en disk."
 
 #. • MSG_169
 msgid ""
 "Create an extra hidden partition and try to align partitions boundaries.\n"
-"This can improve boot detection for older BIOSes"
+"This can improve boot detection for older BIOSes."
 msgstr ""
 "Skapa en extra gömd partition och prova att justera om partitionsuppbyggnaden.\n"
-"Detta kan förbättra uppstarten för äldre BIOS:ar"
+"Detta kan förbättra uppstarten för äldre BIOS:ar."
 
 #. • MSG_170
 msgid "Enable the listing of USB Hard Drive enclosures. USE AT YOUR OWN RISKS!!!"
