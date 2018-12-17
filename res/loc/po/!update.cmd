@@ -1,5 +1,5 @@
 @echo off
-if not exist pollock.exe curl https://rufus.ie/locale/pollock.exe --output pollock.exe
+if not exist pollock.exe curl https://rufus-web.akeo.ie/locale/pollock.exe --output pollock.exe
 cls
 :menu
 echo 1 - Import .po into .loc
@@ -16,5 +16,5 @@ if ERRORLEVEL==1 (
   goto menu
 )
 :exit
-del *.pot
-del *.mo
+del *.pot 2>NUL:
+del *.mo 2>NUL:
