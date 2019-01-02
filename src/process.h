@@ -4,9 +4,9 @@
  *
  * Modified from Process Hacker:
  *   https://github.com/processhacker2/processhacker2/
- * Copyright © 2009-2016 wj32
+ * Copyright © 2017-2019 Pete Batard <pete@akeo.ie>
  * Copyright © 2017 dmex
- * Copyright © 2017 Pete Batard <pete@akeo.ie>
+ * Copyright © 2009-2016 wj32
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,6 +49,11 @@
 
 #define SystemExtendedHandleInformation    64
 #define FileProcessIdsUsingFileInformation 47
+
+// MinGW doesn't know this one yet
+#if !defined(PROCESSOR_ARCHITECTURE_ARM64)
+#define PROCESSOR_ARCHITECTURE_ARM64       12
+#endif
 
 #define NtCurrentProcess() ((HANDLE)(LONG_PTR)-1)
 
@@ -113,8 +118,24 @@ typedef struct _OBJECT_TYPES_INFORMATION
 	ULONG NumberOfTypes;
 } OBJECT_TYPES_INFORMATION, *POBJECT_TYPES_INFORMATION;
 
+typedef struct _PROCESS_BASIC_INFORMATION_WOW64
+{
+	PVOID Reserved1[2];
+	PVOID64 PebBaseAddress;
+	PVOID Reserved2[4];
+	ULONG_PTR UniqueProcessId[2];
+	PVOID Reserved3[2];
+} PROCESS_BASIC_INFORMATION_WOW64;
 
-typedef  struct _FILE_PROCESS_IDS_USING_FILE_INFORMATION {
+typedef struct _UNICODE_STRING_WOW64
+{
+	USHORT Length;
+	USHORT MaximumLength;
+	PVOID64 Buffer;
+} UNICODE_STRING_WOW64;
+
+typedef struct _FILE_PROCESS_IDS_USING_FILE_INFORMATION
+{
 	ULONG NumberOfProcessIdsInList;
 	ULONG_PTR ProcessIdList[1];
 } FILE_PROCESS_IDS_USING_FILE_INFORMATION, *PFILE_PROCESS_IDS_USING_FILE_INFORMATION;
@@ -123,11 +144,11 @@ typedef  struct _FILE_PROCESS_IDS_USING_FILE_INFORMATION {
 #define ALIGN_UP(Address, Type) ALIGN_UP_BY(Address, sizeof(Type))
 
 #define PH_FIRST_OBJECT_TYPE(ObjectTypes) \
-    (POBJECT_TYPE_INFORMATION)((PCHAR)(ObjectTypes) + ALIGN_UP(sizeof(OBJECT_TYPES_INFORMATION), ULONG_PTR))
+	(POBJECT_TYPE_INFORMATION)((PCHAR)(ObjectTypes) + ALIGN_UP(sizeof(OBJECT_TYPES_INFORMATION), ULONG_PTR))
 
 #define PH_NEXT_OBJECT_TYPE(ObjectType) \
-    (POBJECT_TYPE_INFORMATION)((PCHAR)(ObjectType) + sizeof(OBJECT_TYPE_INFORMATION) + \
-    ALIGN_UP(ObjectType->TypeName.MaximumLength, ULONG_PTR))
+	(POBJECT_TYPE_INFORMATION)((PCHAR)(ObjectType) + sizeof(OBJECT_TYPE_INFORMATION) + \
+	ALIGN_UP(ObjectType->TypeName.MaximumLength, ULONG_PTR))
 
 // Heaps
 

@@ -41,6 +41,9 @@ PF_TYPE_DECL(NTAPI, BOOLEAN, RtlFreeHeap, (PVOID, ULONG, PVOID));
 
 PF_TYPE_DECL(NTAPI, NTSTATUS, NtQuerySystemInformation, (SYSTEM_INFORMATION_CLASS, PVOID, ULONG, PULONG));
 PF_TYPE_DECL(NTAPI, NTSTATUS, NtQueryInformationFile, (HANDLE, PIO_STATUS_BLOCK, PVOID, ULONG, FILE_INFORMATION_CLASS));
+PF_TYPE_DECL(NTAPI, NTSTATUS, NtQueryInformationProcess, (HANDLE, PROCESSINFOCLASS, PVOID, ULONG, PULONG));
+PF_TYPE_DECL(NTAPI, NTSTATUS, NtWow64QueryInformationProcess64, (HANDLE, ULONG, PVOID, ULONG, PULONG));
+PF_TYPE_DECL(NTAPI, NTSTATUS, NtWow64ReadVirtualMemory64, (HANDLE, PVOID64, PVOID, ULONG64, PULONG64));
 PF_TYPE_DECL(NTAPI, NTSTATUS, NtQueryObject, (HANDLE, OBJECT_INFORMATION_CLASS, PVOID, ULONG, PULONG));
 PF_TYPE_DECL(NTAPI, NTSTATUS, NtDuplicateObject, (HANDLE, HANDLE, HANDLE, PHANDLE, ACCESS_MASK, ULONG, ULONG));
 PF_TYPE_DECL(NTAPI, NTSTATUS, NtOpenProcess, (PHANDLE, ACCESS_MASK, POBJECT_ATTRIBUTES, CLIENT_ID*));
@@ -263,13 +266,13 @@ NTSTATUS PhOpenProcess(PHANDLE ProcessHandle, ACCESS_MASK DesiredAccess, HANDLE 
 }
 
 /**
-* Query processes with open handles to a file, volume or disk.
-*
-* \param VolumeOrFileHandle The handle to the target.
-* \param Information The returned list of processes.
-*
-* \return An NTStatus indicating success or the error code.
-*/
+ * Query processes with open handles to a file, volume or disk.
+ *
+ * \param VolumeOrFileHandle The handle to the target.
+ * \param Information The returned list of processes.
+ *
+ * \return An NTStatus indicating success or the error code.
+ */
 NTSTATUS PhQueryProcessesUsingVolumeOrFile(HANDLE VolumeOrFileHandle,
 	PFILE_PROCESS_IDS_USING_FILE_INFORMATION *Information)
 {
@@ -310,6 +313,110 @@ NTSTATUS PhQueryProcessesUsingVolumeOrFile(HANDLE VolumeOrFileHandle,
 	return status;
 }
 
+/**
+ * Query the full commandline that was used to create a process.
+ * This can be helpful to differentiate between service instances (svchost.exe).
+ * Taken from: https://stackoverflow.com/a/14012919/1069307
+ *
+ * \param hProcess A handle to a process.
+ *
+ * \return A Unicode commandline string, or NULL on error.
+ *         The returned string must be freed by the caller.
+ */
+static PWSTR GetProcessCommandLine(HANDLE hProcess)
+{
+	PWSTR wcmdline = NULL;
+	BOOL wow;
+	DWORD pp_offset, cmd_offset;
+	NTSTATUS status = STATUS_SUCCESS;
+	SYSTEM_INFO si;
+	PBYTE peb = NULL, pp = NULL;
+
+	// Determine if 64 or 32-bit processor
+	GetNativeSystemInfo(&si);
+	if ((si.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_AMD64) || (si.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_ARM64)) {
+		pp_offset = 0x20;
+		cmd_offset = 0x70;
+	} else {
+		pp_offset = 0x10;
+		cmd_offset = 0x40;
+	}
+
+	// PEB and Process Parameters (we only need the beginning of these structs)
+	peb = (PBYTE)calloc(pp_offset + 8, 1);
+	if (peb == NULL)
+		goto out;
+	pp = (PBYTE)calloc(cmd_offset + 16, 1);
+	if (pp == NULL)
+		goto out;
+
+	IsWow64Process(GetCurrentProcess(), &wow);
+	if (wow) {
+		// 32-bit process running on a 64-bit OS
+		PROCESS_BASIC_INFORMATION_WOW64 pbi = { 0 };
+		PVOID64 params;
+		UNICODE_STRING_WOW64* ucmdline;
+
+		PF_INIT_OR_OUT(NtWow64QueryInformationProcess64, NtDll);
+		PF_INIT_OR_OUT(NtWow64ReadVirtualMemory64, NtDll);
+
+		status = pfNtWow64QueryInformationProcess64(hProcess, 0, &pbi, sizeof(pbi), NULL);
+		if (!NT_SUCCESS (status))
+			goto out;
+
+		status = pfNtWow64ReadVirtualMemory64(hProcess, pbi.PebBaseAddress, peb, pp_offset + 8, NULL);
+		if (!NT_SUCCESS (status))
+			goto out;
+
+		// Read Process Parameters from the 64-bit address space
+		params = (PVOID64) *((PVOID64*)(peb + pp_offset));
+		status = pfNtWow64ReadVirtualMemory64(hProcess, params, pp, cmd_offset + 16, NULL);
+		if (!NT_SUCCESS (status))
+			goto out;
+
+		ucmdline = (UNICODE_STRING_WOW64*)(pp + cmd_offset);
+		wcmdline = (PWSTR)calloc(ucmdline->Length + 1, sizeof(WCHAR));
+		if (wcmdline == NULL)
+			goto out;
+		status = pfNtWow64ReadVirtualMemory64(hProcess, ucmdline->Buffer, wcmdline, ucmdline->Length, NULL);
+		if (!NT_SUCCESS (status)) {
+			safe_free(wcmdline);
+			goto out;
+		}
+	} else {
+		// 32-bit process on a 32-bit OS, or 64-bit process on a 64-bit OS
+		PROCESS_BASIC_INFORMATION pbi = { 0 };
+		PBYTE* params;
+		UNICODE_STRING* ucmdline;
+
+		PF_INIT_OR_OUT(NtQueryInformationProcess, NtDll);
+
+		status = pfNtQueryInformationProcess(hProcess, 0, &pbi, sizeof(pbi), NULL);
+		if (!NT_SUCCESS (status))
+			goto out;
+
+		// Read PEB
+		if (!ReadProcessMemory(hProcess, pbi.PebBaseAddress, peb, pp_offset + 8, NULL))
+			goto out;
+
+		// Read Process Parameters
+		params = (PBYTE*)*(LPVOID*)(peb + pp_offset);
+		if (!ReadProcessMemory(hProcess, params, pp, cmd_offset + 16, NULL))
+			goto out;
+
+		ucmdline = (UNICODE_STRING*)(pp + cmd_offset);
+		wcmdline = (PWSTR)calloc(ucmdline->Length + 1, sizeof(WCHAR));
+		if (!ReadProcessMemory(hProcess, ucmdline->Buffer, wcmdline, ucmdline->Length, NULL)) {
+			safe_free(wcmdline);
+			goto out;
+		}
+	}
+
+out:
+	free(peb);
+	free(pp);
+	return wcmdline;
+}
 
 static DWORD WINAPI SearchProcessThread(LPVOID param)
 {
@@ -326,11 +433,11 @@ static DWORD WINAPI SearchProcessThread(LPVOID param)
 	WCHAR *wHandleName = NULL;
 	HANDLE dupHandle = NULL;
 	HANDLE processHandle = NULL;
-	BOOLEAN bFound = FALSE, bGotExePath, verbose = !_bQuiet;
+	BOOLEAN bFound = FALSE, bGotCmdLine, verbose = !_bQuiet;
 	ULONG access_rights = 0;
 	DWORD size;
-	char exe_path[MAX_PATH] = { 0 };
-	wchar_t wexe_path[MAX_PATH];
+	char cmdline[MAX_PATH] = { 0 };
+	wchar_t wexe_path[MAX_PATH], *wcmdline;
 	int cur_pid;
 
 	PF_INIT_OR_SET_STATUS(NtQueryObject, Ntdll);
@@ -380,7 +487,7 @@ static DWORD WINAPI SearchProcessThread(LPVOID param)
 
 			// If we're switching process and found a match, print it
 			if (bFound) {
-				static_sprintf (tmp, "● [%06u] %s (%s)", (uint32_t)pid[cur_pid], exe_path, access_rights_str[access_rights & 0x7]);
+				static_sprintf (tmp, "● [%06u] %s (%s)", (uint32_t)pid[cur_pid], cmdline, access_rights_str[access_rights & 0x7]);
 				vuprintf(tmp);
 				StrArrayAdd(&BlockingProcess, tmp, TRUE);
 				bFound = FALSE;
@@ -411,7 +518,7 @@ static DWORD WINAPI SearchProcessThread(LPVOID param)
 
 		// Open the process to which the handle we are after belongs, if not already opened
 		if (pid[0] != pid[1]) {
-			status = PhOpenProcess(&processHandle, PROCESS_DUP_HANDLE | PROCESS_QUERY_INFORMATION,
+			status = PhOpenProcess(&processHandle, PROCESS_DUP_HANDLE | PROCESS_QUERY_INFORMATION | PROCESS_VM_READ,
 				(HANDLE)handleInfo->UniqueProcessId);
 			// There exists some processes we can't access
 			if (!NT_SUCCESS(status)) {
@@ -485,38 +592,47 @@ static DWORD WINAPI SearchProcessThread(LPVOID param)
 		access_mask |= (BYTE) (access_rights & 0x7) + 0x80;	// Bit 7 is always set if a process was found
 
 		// If this is the very first process we find, print a header
-		if (exe_path[0] == 0)
+		if (cmdline[0] == 0)
 			vuprintf("WARNING: The following process(es) or service(s) are accessing %s:", _HandleName);
 
-		// First, we try to get the executable path using GetModuleFileNameEx
-		bGotExePath = (GetModuleFileNameExU(processHandle, 0, exe_path, MAX_PATH - 1) != 0);
+		// Where possible, try to get the full command line
+		wcmdline = GetProcessCommandLine(processHandle);
+		if (wcmdline != NULL) {
+			bGotCmdLine = TRUE;
+			wchar_to_utf8_no_alloc(wcmdline, cmdline, sizeof(cmdline));
+			free(wcmdline);
+		}
+
+		// If we couldn't get the full commandline, try to get the executable path
+		if (!bGotCmdLine)
+			bGotCmdLine = (GetModuleFileNameExU(processHandle, 0, cmdline, MAX_PATH - 1) != 0);
 
 		// The above may not work on Windows 7, so try QueryFullProcessImageName (Vista or later)
-		if (!bGotExePath) {
+		if (!bGotCmdLine) {
 			size = MAX_PATH;
 			PF_INIT(QueryFullProcessImageNameW, kernel32);
 			if ( (pfQueryFullProcessImageNameW != NULL) &&
-				 (bGotExePath = pfQueryFullProcessImageNameW(processHandle, 0, wexe_path, &size)) )
-				wchar_to_utf8_no_alloc(wexe_path, exe_path, sizeof(exe_path));
+				 (bGotCmdLine = pfQueryFullProcessImageNameW(processHandle, 0, wexe_path, &size)) )
+				wchar_to_utf8_no_alloc(wexe_path, cmdline, sizeof(cmdline));
 		}
 
 		// Still nothing? Try GetProcessImageFileName. Note that GetProcessImageFileName uses
 		// '\Device\Harddisk#\Partition#\' instead drive letters
-		if (!bGotExePath) {
-			bGotExePath = (GetProcessImageFileNameW(processHandle, wexe_path, MAX_PATH) != 0);
-			if (bGotExePath)
-				wchar_to_utf8_no_alloc(wexe_path, exe_path, sizeof(exe_path));
+		if (!bGotCmdLine) {
+			bGotCmdLine = (GetProcessImageFileNameW(processHandle, wexe_path, MAX_PATH) != 0);
+			if (bGotCmdLine)
+				wchar_to_utf8_no_alloc(wexe_path, cmdline, sizeof(cmdline));
 		}
 
 		// Complete failure => Just craft a default process name that includes the PID
-		if (!bGotExePath) {
-			static_sprintf(exe_path, "Unknown_Process_%" PRIu64,
+		if (!bGotCmdLine) {
+			static_sprintf(cmdline, "Unknown_Process_%" PRIu64,
 				(ULONGLONG)handleInfo->UniqueProcessId);
 		}
 	}
 
 out:
-	if (exe_path[0] != 0)
+	if (cmdline[0] != 0)
 		vuprintf("You should close these applications before attempting to reformat the drive.");
 	else
 		vuprintf("NOTE: Could not identify the process(es) or service(s) accessing %s", _HandleName);
