@@ -4,9 +4,9 @@
  *
  * Modified from Process Hacker:
  *   https://github.com/processhacker2/processhacker2/
- * Copyright © 2009-2016 wj32
+ * Copyright © 2017-2019 Pete Batard <pete@akeo.ie>
  * Copyright © 2017 dmex
- * Copyright © 2017 Pete Batard <pete@akeo.ie>
+ * Copyright © 2009-2016 wj32
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -380,8 +380,8 @@ static DWORD WINAPI SearchProcessThread(LPVOID param)
 
 			// If we're switching process and found a match, print it
 			if (bFound) {
-				vuprintf("● '%s' (pid: %ld, access: %s)", exe_path, pid[cur_pid], access_rights_str[access_rights & 0x7]);
-				static_sprintf(tmp, "● %s (%s)", exe_path, access_rights_str[access_rights & 0x7]);
+				static_sprintf (tmp, "● [%06u] %s (%s)", (uint32_t)pid[cur_pid], exe_path, access_rights_str[access_rights & 0x7]);
+				vuprintf(tmp);
 				StrArrayAdd(&BlockingProcess, tmp, TRUE);
 				bFound = FALSE;
 				access_rights = 0;
