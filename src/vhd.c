@@ -564,7 +564,6 @@ DWORD WINAPI WimProgressCallback(DWORD dwMsgId, WPARAM wParam, LPARAM lParam, PV
 {
 	PBOOL pbCancel = NULL;
 	PWIN32_FIND_DATA pFileData;
-	char* str = NULL;
 	const char* level = NULL;
 	uint64_t size;
 	float apply_percent;
@@ -582,8 +581,7 @@ DWORD WINAPI WimProgressCallback(DWORD dwMsgId, WPARAM wParam, LPARAM lParam, PV
 		// The amount of files processed is overwhelming (16k+ for a typical image),
 		// and trying to display it *WILL* slow us down, so we don't.
 #if 0
-		str = wchar_to_utf8((PWSTR)wParam);
-		uprintf("%s", str);
+		uprintf("%S", (PWSTR)wParam);
 		PrintStatus(0, MSG_000, str);	// MSG_000 is "%s"
 #endif
 		if (count_files) {
@@ -612,13 +610,12 @@ DWORD WINAPI WimProgressCallback(DWORD dwMsgId, WPARAM wParam, LPARAM lParam, PV
 		}
 		break;
 	case WIM_MSG_FILEINFO:
-		str = wchar_to_utf8((PWSTR)wParam);
 		pFileData = (PWIN32_FIND_DATA)lParam;
 		if (pFileData->dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
-			uprintf("Creating: %s", str);
+			uprintf("Creating: %S", (PWSTR)wParam);
 		} else {
 			size = (((uint64_t)pFileData->nFileSizeHigh) << 32) + pFileData->nFileSizeLow;
-			uprintf("Extracting: %s (%s)", str, SizeToHumanReadable(size, FALSE, FALSE));
+			uprintf("Extracting: %S (%s)", (PWSTR)wParam, SizeToHumanReadable(size, FALSE, FALSE));
 		}
 		break;
 	case WIM_MSG_RETRY:
@@ -632,12 +629,10 @@ DWORD WINAPI WimProgressCallback(DWORD dwMsgId, WPARAM wParam, LPARAM lParam, PV
 		// fall through
 	case WIM_MSG_ERROR:
 		if (level == NULL) level = "error";
-		str = wchar_to_utf8((PWSTR)wParam);
 		SetLastError((DWORD)lParam);
-		uprintf("Apply %s: %s [err = %d]\n", level, str, WindowsErrorString());
+		uprintf("Apply %s: %S [err = %d]\n", level, (PWSTR)wParam, WindowsErrorString());
 		break;
 	}
-	safe_free(str);
 
 	return IS_ERROR(FormatStatus)?WIM_MSG_ABORT_IMAGE:WIM_MSG_SUCCESS;
 }

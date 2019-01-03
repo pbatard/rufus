@@ -73,7 +73,6 @@ static BOOL WritePBR(HANDLE hLogicalDrive);
 static void OutputUTF8Message(const char* src)
 {
 	int len;
-	char *dst = NULL;
 	wchar_t* wdst = NULL;
 
 	if (src == NULL)
@@ -90,13 +89,9 @@ static void OutputUTF8Message(const char* src)
 	wdst = (wchar_t*)calloc(len+1, sizeof(wchar_t));
 	if ((wdst == NULL) || (MultiByteToWideChar(CP_OEMCP, 0, src, len, wdst, len+1) == 0))
 		goto out;
-	dst = wchar_to_utf8(wdst);
-	if (dst == NULL)
-		goto out;
-	uprintf("%s", dst);
+	uprintf("%S", wdst);
 
 out:
-	safe_free(dst);
 	safe_free(wdst);
 }
 

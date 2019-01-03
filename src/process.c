@@ -405,6 +405,8 @@ static PWSTR GetProcessCommandLine(HANDLE hProcess)
 			goto out;
 
 		ucmdline = (UNICODE_STRING*)(pp + cmd_offset);
+		// In the absolute, someone could craft a process with dodgy attributes to try to cause an overflow
+		ucmdline->Length = min(ucmdline->Length, 512);
 		wcmdline = (PWSTR)calloc(ucmdline->Length + 1, sizeof(WCHAR));
 		if (!ReadProcessMemory(hProcess, ucmdline->Buffer, wcmdline, ucmdline->Length, NULL)) {
 			safe_free(wcmdline);
@@ -433,7 +435,7 @@ static DWORD WINAPI SearchProcessThread(LPVOID param)
 	WCHAR *wHandleName = NULL;
 	HANDLE dupHandle = NULL;
 	HANDLE processHandle = NULL;
-	BOOLEAN bFound = FALSE, bGotCmdLine, verbose = !_bQuiet;
+	BOOLEAN bFound = FALSE, bGotCmdLine = FALSE, verbose = !_bQuiet;
 	ULONG access_rights = 0;
 	DWORD size;
 	char cmdline[MAX_PATH] = { 0 };
