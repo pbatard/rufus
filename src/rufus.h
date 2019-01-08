@@ -71,6 +71,7 @@
 #define MAX_GUID_STRING_LENGTH      40
 #define MAX_GPT_PARTITIONS          128
 #define MAX_SECTORS_TO_CLEAR        128			// nb sectors to zap when clearing the MBR/GPT (must be >34)
+#define MAX_WININST                 4			// Max number of install[.wim|.esd] we can handle on an image
 #define MBR_UEFI_MARKER             0x49464555	// 'U', 'E', 'F', 'I', as a 32 bit little endian longword
 #define MORE_INFO_URL               0xFFFF
 #define STATUS_MSG_TIMEOUT          3500		// How long should cheat mode messages appear for on the status bar
@@ -287,7 +288,7 @@ enum checksum_type {
 #define WINPE_I386          0x0007
 #define WINPE_AMD64         0x0023
 #define WINPE_MININT        0x01C0
-#define MAX_WIM_VERSION     0x000E0000
+#define SPECIAL_WIM_VERSION 0x000E0000
 #define HAS_KOLIBRIOS(r)    (r.has_kolibrios)
 #define HAS_REACTOS(r)      (r.reactos_path[0] != 0)
 #define HAS_GRUB(r)         ((r.has_grub2) || (r.has_grub4dos))
@@ -295,33 +296,34 @@ enum checksum_type {
 #define HAS_BOOTMGR_BIOS(r) (r.has_bootmgr)
 #define HAS_BOOTMGR_EFI(r)  (r.has_bootmgr_efi)
 #define HAS_BOOTMGR(r)      (HAS_BOOTMGR_BIOS(r) || HAS_BOOTMGR_EFI(r))
-#define HAS_INSTALL_WIM(r)  (r.install_wim_path[0] != 0)
+#define HAS_WININST(r)      (r.wininst_index != 0)
 #define HAS_WINPE(r)        (((r.winpe & WINPE_I386) == WINPE_I386)||((r.winpe & WINPE_AMD64) == WINPE_AMD64)||((r.winpe & WINPE_MININT) == WINPE_MININT))
 #define HAS_WINDOWS(r)      (HAS_BOOTMGR(r) || (r.uses_minint) || HAS_WINPE(r))
-#define HAS_WIN7_EFI(r)     ((r.has_efi == 1) && HAS_INSTALL_WIM(r))
+#define HAS_WIN7_EFI(r)     ((r.has_efi == 1) && HAS_WININST(r))
 #define HAS_EFI_IMG(r)      (r.efi_img_path[0] != 0)
 #define IS_DD_BOOTABLE(r)   (r.is_bootable_img)
 #define IS_EFI_BOOTABLE(r)  (r.has_efi != 0)
 #define IS_BIOS_BOOTABLE(r) (HAS_BOOTMGR(r) || HAS_SYSLINUX(r) || HAS_WINPE(r) || HAS_GRUB(r) || HAS_REACTOS(r) || HAS_KOLIBRIOS(r))
-#define HAS_WINTOGO(r)      (HAS_BOOTMGR(r) && IS_EFI_BOOTABLE(r) && HAS_INSTALL_WIM(r) && (r.install_wim_version < MAX_WIM_VERSION))
+#define HAS_WINTOGO(r)      (HAS_BOOTMGR(r) && IS_EFI_BOOTABLE(r) && HAS_WININST(r))
 #define HAS_PERSISTENCE(r)  (r.has_casper)
 #define IS_FAT(fs)          ((fs == FS_FAT16) || (fs == FS_FAT32))
 
 typedef struct {
-	char label[192];			/* 3*64 to account for UTF-8 */
-	char usb_label[192];		/* converted USB label for workaround */
-	char cfg_path[128];			/* path to the ISO's isolinux.cfg */
-	char reactos_path[128];		/* path to the ISO's freeldr.sys or setupldr.sys */
-	char install_wim_path[64];	/* path to install.wim or install.swm */
-	char efi_img_path[128];		/* path to an efi.img file */
+	char label[192];					// 3*64 to account for UTF-8
+	char usb_label[192];				// converted USB label for workaround
+	char cfg_path[128];					// path to the ISO's isolinux.cfg
+	char reactos_path[128];				// path to the ISO's freeldr.sys or setupldr.sys
+	char wininst_path[MAX_WININST][64];	// path to the Windows install image(s)
+	char efi_img_path[128];				// path to an efi.img file
 	uint64_t image_size;
 	uint64_t projected_size;
 	int64_t mismatch_size;
-	uint32_t install_wim_version;
+	uint32_t wininst_version;
 	BOOLEAN is_iso;
 	BOOLEAN is_bootable_img;
 	uint16_t winpe;
 	uint8_t has_efi;
+	uint8_t wininst_index;
 	BOOLEAN has_4GB_file;
 	BOOLEAN has_long_filename;
 	BOOLEAN has_symlinks;

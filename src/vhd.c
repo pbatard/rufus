@@ -86,8 +86,9 @@ typedef struct vhd_footer {
 #pragma pack(pop)
 
 // WIM API Prototypes
-#define WIM_GENERIC_READ	GENERIC_READ
-#define WIM_OPEN_EXISTING	OPEN_EXISTING
+#define WIM_GENERIC_READ            GENERIC_READ
+#define WIM_OPEN_EXISTING           OPEN_EXISTING
+#define WIM_UNDOCUMENTED_BULLSHIT   0x20000000
 PF_TYPE_DECL(WINAPI, HANDLE, WIMCreateFile, (PWSTR, DWORD, DWORD, DWORD, DWORD, PDWORD));
 PF_TYPE_DECL(WINAPI, BOOL, WIMSetTemporaryPath, (HANDLE, PWSTR));
 PF_TYPE_DECL(WINAPI, HANDLE, WIMLoadImage, (HANDLE, DWORD));
@@ -396,7 +397,12 @@ BOOL WimExtractFile_API(const char* image, int index, const char* src, const cha
 		goto out;
 	}
 
-	hWim = pfWIMCreateFile(wimage, WIM_GENERIC_READ, WIM_OPEN_EXISTING, 0, 0, &dw);
+	// Thanks to dism++ for figuring out that you can use UNDOCUMENTED FLAG 0x20000000
+	// to open newer install.wim/install.esd images, without running into obnoxious error:
+	// [0x0000000B] An attempt was made to load a program with an incorrect format.
+	// No thanks to Microsoft for NOT DOCUMENTING THEIR UTTER BULLSHIT with the WIM API!
+	hWim = pfWIMCreateFile(wimage, WIM_GENERIC_READ, WIM_OPEN_EXISTING,
+		(img_report.wininst_version >= SPECIAL_WIM_VERSION) ? WIM_UNDOCUMENTED_BULLSHIT : 0, 0, NULL);
 	if (hWim == NULL) {
 		uprintf("  Could not access image: %s", WindowsErrorString());
 		goto out;
@@ -643,7 +649,6 @@ DWORD WINAPI WimProgressCallback(DWORD dwMsgId, WPARAM wParam, LPARAM lParam, PV
 static DWORD WINAPI WimApplyImageThread(LPVOID param)
 {
 	BOOL r = FALSE;
-	DWORD dw = 0;
 	HANDLE hWim = NULL;
 	HANDLE hImage = NULL;
 	wchar_t wtemp[MAX_PATH] = {0};
@@ -670,7 +675,8 @@ static DWORD WINAPI WimApplyImageThread(LPVOID param)
 		goto out;
 	}
 
-	hWim = pfWIMCreateFile(wimage, WIM_GENERIC_READ, WIM_OPEN_EXISTING, 0, 0, &dw);
+	hWim = pfWIMCreateFile(wimage, WIM_GENERIC_READ, WIM_OPEN_EXISTING,
+		(img_report.wininst_version >= SPECIAL_WIM_VERSION) ? WIM_UNDOCUMENTED_BULLSHIT : 0, 0, NULL);
 	if (hWim == NULL) {
 		uprintf("  Could not access image: %s", WindowsErrorString());
 		goto out;

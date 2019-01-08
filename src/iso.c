@@ -77,8 +77,8 @@ static const char* ldlinux_name = "ldlinux.sys";
 static const char* ldlinux_c32 = "ldlinux.c32";
 static const char* efi_dirname = "/efi/boot";
 static const char* efi_bootname[] = { "bootia32.efi", "bootia64.efi", "bootx64.efi", "bootarm.efi", "bootaa64.efi", "bootebc.efi" };
-static const char* install_wim_path = "/sources";
-static const char* install_wim_name[] = { "install.wim", "install.swm" };
+static const char* sources_str = "/sources";
+static const char* wininst_name[] = { "install.wim", "install.esd", "install.swm" };
 // We only support GRUB/BIOS (x86) that uses a standard config dir (/boot/grub/i386-pc/)
 // If the disc was mastered properly, GRUB/EFI will take care of itself
 static const char* grub_dirname = "/boot/grub/i386-pc";
@@ -223,11 +223,16 @@ static BOOL check_iso_props(const char* psz_dirname, int64_t file_length, const 
 					img_report.has_efi |= (2<<i);	// start at 2 since "bootmgr.efi" is bit 0
 		}
 
-		// Check for "install.wim" or "install.swm" in "/sources"
-		if ((install_wim_path != NULL) && (safe_stricmp(psz_dirname, install_wim_path) == 0)) {
-			for (i=0; i<ARRAYSIZE(install_wim_name); i++)
-				if (safe_stricmp(psz_basename, install_wim_name[i]) == 0)
-					static_sprintf(img_report.install_wim_path, "?:\\%s\\%s", &install_wim_path[1], install_wim_name[i]);
+		// Check for "install.###" in "###/sources/"
+		if (safe_stricmp(&psz_dirname[max(0, safe_strlen(psz_dirname) - strlen(sources_str))], sources_str) == 0) {
+			for (i = 0; i < ARRAYSIZE(wininst_name); i++) {
+				if (safe_stricmp(psz_basename, wininst_name[i]) == 0) {
+					if (img_report.wininst_index < MAX_WININST) {
+						static_sprintf(img_report.wininst_path[img_report.wininst_index], "?:%s", psz_fullpath);
+						img_report.wininst_index++;
+					}
+				}
+			}
 		}
 
 		// Check for PE (XP) specific files in "/i386", "/amd64" or "/minint"
@@ -894,8 +899,8 @@ out:
 			_unlinkU(tmp_sif);
 			safe_free(tmp);
 		}
-		if (HAS_INSTALL_WIM(img_report)) {
-			img_report.install_wim_version = GetInstallWimVersion(src_iso);
+		if (HAS_WININST(img_report)) {
+			img_report.wininst_version = GetInstallWimVersion(src_iso);
 		}
 		if (img_report.has_grub2) {
 			// In case we have a GRUB2 based iso, we extract boot/grub/i386-pc/normal.mod to parse its version
@@ -1079,7 +1084,7 @@ uint32_t GetInstallWimVersion(const char* iso)
 	udf_dirent_t *p_udf_root = NULL, *p_udf_file = NULL;
 	iso9660_stat_t *p_statbuf = NULL;
 
-	wim_path = safe_strdup(&img_report.install_wim_path[2]);
+	wim_path = safe_strdup(&img_report.wininst_path[0][2]);
 	if (wim_path == NULL)
 		goto out;
 	// UDF indiscriminately accepts slash or backslash delimiters,

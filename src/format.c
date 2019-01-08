@@ -61,7 +61,7 @@ static float format_percent = 0.0f;
 static int task_number = 0;
 extern const int nb_steps[FS_MAX];
 extern uint32_t dur_mins, dur_secs;
-static int fs_index = 0, wintogo_index = -1;
+static int fs_index = 0, wintogo_index = -1, wininst_index = 0;
 extern BOOL force_large_fat32, enable_ntfs_compression, lock_drive, zero_drive, fast_zeroing, enable_file_indexing, write_as_image;
 uint8_t *grub2_buf = NULL;
 long grub2_len;
@@ -1298,30 +1298,45 @@ out:
 	return r;
 }
 
-// Checks which versions of Windows are available in an install.wim image
+// Checks which versions of Windows are available in an install image
 // to set our extraction index. Asks the user to select one if needed.
 // Returns -2 on user cancel, -1 on other error, >=0 on success.
 int SetWinToGoIndex(void)
 {
 	char *mounted_iso, *build, image[128];
 	char tmp_path[MAX_PATH] = "", xml_file[MAX_PATH] = "";
+	char *install_names[MAX_WININST];
 	StrArray version_name, version_index;
 	int i, build_nr = 0;
 	BOOL bNonStandard = FALSE;
 
 	// Sanity checks
 	wintogo_index = -1;
+	wininst_index = 0;
 	if ((nWindowsVersion < WINDOWS_8) || ((WimExtractCheck() & 4) == 0) ||
 		(ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem)) != FS_NTFS)) {
-		return FALSE;
+		return -1;
 	}
+
+	// If we have multiple windows install images, ask the user the one to use
+	if (img_report.wininst_index > 1) {
+		for (i = 0; i < img_report.wininst_index; i++)
+			install_names[i] = &img_report.wininst_path[i][2];
+		wininst_index = SelectionDialog(lmprintf(MSG_130), lmprintf(MSG_131), install_names, img_report.wininst_index);
+		if (wininst_index < 0)
+			return -2;
+		wininst_index--;
+		if ((wininst_index < 0) || (wininst_index >= MAX_WININST))
+			wininst_index = 0;
+	}
+
 	// Mount the install.wim image, that resides on the ISO
 	mounted_iso = MountISO(image_path);
 	if (mounted_iso == NULL) {
 		uprintf("Could not mount ISO for Windows To Go selection");
 		return FALSE;
 	}
-	static_sprintf(image, "%s%s", mounted_iso, &img_report.install_wim_path[2]);
+	static_sprintf(image, "%s%s", mounted_iso, &img_report.wininst_path[wininst_index][2]);
 
 	// Now take a look at the XML file in install.wim to list our versions
 	if ((GetTempPathU(sizeof(tmp_path), tmp_path) == 0)
@@ -1335,7 +1350,7 @@ int SetWinToGoIndex(void)
 
 	// Must use the Windows WIM API as 7z messes up the XML
 	if (!WimExtractFile_API(image, 0, "[1].xml", xml_file)) {
-		uprintf("Failed to acquire WIM index");
+		uprintf("Could not acquire WIM index");
 		goto out;
 	}
 
@@ -1428,7 +1443,7 @@ static BOOL SetupWinToGo(const char* drive_name, BOOL use_ms_efi)
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_ISO_EXTRACT);
 		return FALSE;
 	}
-	static_sprintf(image, "%s%s", mounted_iso, &img_report.install_wim_path[2]);
+	static_sprintf(image, "%s%s", mounted_iso, &img_report.wininst_path[wininst_index][2]);
 	uprintf("Mounted ISO as '%s'", mounted_iso);
 
 	// Now we use the WIM API to apply that image
@@ -2112,7 +2127,7 @@ DWORD WINAPI FormatThread(void* param)
 				// EFI mode selected, with no 'boot###.efi' but Windows 7 x64's 'bootmgr.efi' (bit #0)
 				if ((tt == TT_UEFI) && HAS_WIN7_EFI(img_report)) {
 					PrintInfoDebug(0, MSG_232);
-					img_report.install_wim_path[0] = drive_name[0];
+					img_report.wininst_path[0][0] = drive_name[0];
 					efi_dst[0] = drive_name[0];
 					efi_dst[sizeof(efi_dst) - sizeof("\\bootx64.efi")] = 0;
 					if (!CreateDirectoryA(efi_dst, 0)) {
@@ -2120,7 +2135,7 @@ DWORD WINAPI FormatThread(void* param)
 						FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_PATCH);
 					} else {
 						efi_dst[sizeof(efi_dst) - sizeof("\\bootx64.efi")] = '\\';
-						if (!WimExtractFile(img_report.install_wim_path, 1, "Windows\\Boot\\EFI\\bootmgfw.efi", efi_dst)) {
+						if (!WimExtractFile(img_report.wininst_path[0], 1, "Windows\\Boot\\EFI\\bootmgfw.efi", efi_dst)) {
 							uprintf("Failed to setup Win7 EFI boot\n");
 							FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_PATCH);
 						}

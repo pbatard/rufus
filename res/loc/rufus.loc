@@ -330,6 +330,8 @@ t MSG_126 "Set the partition size units."
 t MSG_127 "Do not show this message again"
 t MSG_128 "Important notice about Secure Boot"
 t MSG_129 "You have just created a media that uses the UEFI:NTFS bootloader. Please remember that, to boot this media, YOU MUST DISABLE SECURE BOOT.\nFor details on why this is necessary, see the 'More Information' button below."
+t MSG_130 "Windows image selection"
+t MSG_131 "This ISO contains multiple Windows images.\nPlease select the one you wish to use for installation:"
 t MSG_150 "Type of computer you plan to use this bootable drive with. It is your responsibility to determine whether "
 	"your target is of BIOS or UEFI type before you start creating the drive, as it may fail to boot otherwise."
 # You shouldn't translate 'Legacy Mode' as this is an option that usually appears in English in the UEFI settings.
