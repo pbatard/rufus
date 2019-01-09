@@ -45,7 +45,7 @@ msgstr "Docelowy system"
 
 #. • IDD_DIALOG → IDC_LIST_USB_HDD
 msgid "List USB Hard Drives"
-msgstr "Pokaż Dyski Twarde USB"
+msgstr "Pokaż dyski twarde USB"
 
 #. • IDD_DIALOG → IDC_OLD_BIOS_FIXES
 #.
@@ -64,7 +64,7 @@ msgstr "Użyj MBR Rufusa z ID BIOSu"
 
 #. • IDD_DIALOG → IDS_FORMAT_OPTIONS_TXT
 msgid "Format Options"
-msgstr "Opcje Formatowania"
+msgstr "Opcje formatowania"
 
 #. • IDD_DIALOG → IDS_FILE_SYSTEM_TXT
 msgid "File system"
@@ -183,7 +183,7 @@ msgstr "Kliknij tutaj aby przejść na stronę www"
 
 #. • IDD_NEW_VERSION → IDS_NEW_VERSION_NOTES_GRP
 msgid "Release Notes"
-msgstr "Informacje o Wydaniu"
+msgstr "Informacje o wydaniu"
 
 #. • IDD_NEW_VERSION → IDS_NEW_VERSION_DOWNLOAD_GRP
 #. • IDD_NEW_VERSION → IDC_DOWNLOAD
@@ -217,11 +217,11 @@ msgstr "Anuluj"
 
 #. • MSG_010
 msgid "Bad blocks found"
-msgstr "Znaleziono uskodzone sektory"
+msgstr "Znaleziono uszkodzone sektory"
 
 #. • MSG_011
 msgid "Check completed: %d bad block(s) found\n  %d read error(s)\n  %d write error(s)\n  %d corruption error(s)"
-msgstr "Sprawdzanie zakończone: znaleziono %d uskodzone sektory(ów)\n  %d błędów odczytu\n  %d błędów zapisu\n  %d błędy(ów) uszkodzeń"
+msgstr "Sprawdzanie zakończone: znaleziono %d uszkodzone sektory(ów)\n  %d błędów odczytu\n  %d błędów zapisu\n  %d błędy(ów) uszkodzeń"
 
 #. • MSG_012
 #.
@@ -1060,7 +1060,7 @@ msgstr "Naprawianie NTFS (Checkdisk)..."
 
 #. • MSG_224
 msgid "Clearing MBR/PBR/GPT structures..."
-msgstr "Cyszczenie struktur MBR/PBR/GPT..."
+msgstr "Czyszczenie struktur MBR/PBR/GPT..."
 
 #. • MSG_225
 msgid "Requesting disk access..."
