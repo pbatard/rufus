@@ -555,7 +555,6 @@ extern BOOL IsBufferInDB(const unsigned char* buf, const size_t len);
 extern char* _printbits(size_t const size, void const * const ptr, int leading_zeroes);
 extern BOOL IsCurrentProcessElevated(void);
 extern char* GetCurrentMUI(void);
-extern char* GetMuiString(char* szModuleName, UINT uID);
 extern BOOL SetFormatPromptHook(void);
 extern void ClrFormatPromptHook(void);
 extern BYTE SearchProcess(char* HandleName, DWORD dwTimeout, BOOL bPartialMatch, BOOL bIgnoreSelf, BOOL bQuiet);

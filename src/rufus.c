@@ -1788,7 +1788,7 @@ static BOOL CheckDriveAccess(DWORD dwTimeOut)
 	BYTE access_mask;
 	char *PhysicalPath = NULL, DevPath[MAX_PATH];
 	char drive_letter[27], drive_name[] = "?:";
-	char *message, title[128];
+	char title[128];
 	uint64_t cur_time, end_time = GetTickCount64() + dwTimeOut;
 
 	// Get the current selected device
@@ -1835,16 +1835,8 @@ static BOOL CheckDriveAccess(DWORD dwTimeOut)
 
 	// Prompt the user if we detected blocking processes
 	if (!proceed) {
-		// We'll use a system translated string instead of one from rufus.loc
-		message = GetMuiString("shell32.dll", 28701);	// "This drive is in use (...) Do you want to format it anyway?"
-		if (message != NULL) {
-			ComboBox_GetTextU(hDeviceList, title, sizeof(title));
-			proceed = Notification(MSG_WARNING_QUESTION, NULL, NULL, title, message);
-			free(message);
-		} else {
-			proceed = Notification(MSG_WARNING_QUESTION, NULL, NULL, title,
-				"This drive is in use. Do you want to format it anyway?");
-		}
+		ComboBox_GetTextU(hDeviceList, title, sizeof(title));
+		proceed = Notification(MSG_WARNING_QUESTION, NULL, NULL, title, lmprintf(MSG_132));
 	}
 	ret = proceed;
 

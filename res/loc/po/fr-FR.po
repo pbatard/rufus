@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 3.2\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2018-07-20 21:03+0100\n"
-"PO-Revision-Date: 2018-07-20 21:04+0100\n"
+"POT-Creation-Date: 2019-01-09 13:59+0000\n"
+"PO-Revision-Date: 2019-01-09 14:02+0000\n"
 "Language: fr_FR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Rufus-LCID: 0x040c, 0x080c, 0x0c0c, 0x100c, 0x140c, 0x180c, 0x1c0c, 0x200c, 0x240c, 0x280c, 0x2c0c, 0x300c, 0x340c, 0x380c, 0xe40c\n"
 "Last-Translator: \n"
 "Language-Team: \n"
-"X-Generator: Poedit 2.0.9\n"
+"X-Generator: Poedit 2.2\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -158,12 +158,12 @@ msgid "Settings"
 msgstr "Options"
 
 #. • IDD_UPDATE_POLICY → IDS_UPDATE_FREQUENCY_TXT
-msgid "Check for updates:"
-msgstr "Recherche mises à jour:"
+msgid "Check for updates"
+msgstr "Recherche mises à jour"
 
 #. • IDD_UPDATE_POLICY → IDS_INCLUDE_BETAS_TXT
-msgid "Include beta versions:"
-msgstr "Inclure les bétas:"
+msgid "Include beta versions"
+msgstr "Inclure les bétas"
 
 #. • IDD_UPDATE_POLICY → IDC_CHECK_NOW
 msgid "Check Now"
@@ -218,7 +218,7 @@ msgstr "Mises à jour"
 
 #. • MSG_005
 msgid "Do you want to allow Rufus to check for application updates online?"
-msgstr "Voulez-vous autoriser Rufus à chercher des mises à jour en ligne?"
+msgstr "Voulez-vous autoriser Rufus à chercher des mises à jour en ligne ?"
 
 #. • MSG_007
 msgid "Cancel"
@@ -558,7 +558,7 @@ msgstr "Cette image n'est pas démarrable, ou bien elle utilise une méthode de 
 
 #. • MSG_083
 msgid "Replace %s?"
-msgstr "Remplacer %s?"
+msgstr "Remplacer %s ?"
 
 #. • MSG_084
 msgid ""
@@ -657,7 +657,7 @@ msgid ""
 msgstr ""
 "IMPORTANT : Vous essayez d'installer 'Windows To Go', mais votre périphérique de destination ne possède pas l'attribut 'FIXE'. A cause de cela, Windows va très probablement geler lors du démarrage, car Microsoft ne l'a pas conçu pour fonctionner avec des périphériques qui possèdent l'attribut 'AMOVIBLE'.\n"
 "\n"
-"Voulez vous continuer malgré celà?\n"
+"Voulez vous continuer malgré celà ?\n"
 "\n"
 "Note : L'attribut 'FIXE/AMOVIBLE' est une propriété matérielle qui peut uniquement être changée avec des outils propriétaires, que les fabriquants de périphériques ne fournissent PRESQUE JAMAIS au public..."
 
@@ -679,11 +679,11 @@ msgid ""
 "Do you want to visit the 7-zip download page?"
 msgstr ""
 "Votre plateforme ne peut pas extraire les fichiers depuis les archives WIM. L'extraction de données WIM est nécessaire pour créer des médias USB démarrable avec EFI pour Windows 7/8 ou Windows Vista. Vous pouvez adresser ce problème en téléchargeant une version récente de l'utilitaire 7-Zip.\n"
-"Voulez-vous visiter la page de téléchargements de 7-zip?"
+"Voulez-vous visiter la page de téléchargements de 7-zip ?"
 
 #. • MSG_103
 msgid "Download %s?"
-msgstr "Télécharger %s?"
+msgstr "Télécharger %s ?"
 
 #. • MSG_104
 #.
@@ -854,6 +854,38 @@ msgstr "Etablit la taille de la partition persistente pour media USB de type \"l
 msgid "Set the partition size units."
 msgstr "Unité de taille utilisée pour la partition persistente."
 
+#. • MSG_127
+msgid "Do not show this message again"
+msgstr "Ne plus montrer ce message"
+
+#. • MSG_128
+msgid "Important notice about Secure Boot"
+msgstr "Note importante à propos de Secure Boot"
+
+#. • MSG_129
+msgid ""
+"You have just created a media that uses the UEFI:NTFS bootloader. Please remember that, to boot this media, YOU MUST DISABLE SECURE BOOT.\n"
+"For details on why this is necessary, see the 'More Information' button below."
+msgstr ""
+"Vous venez juste de créer un média qui utilise UEFI:NTFS. Veuillez prendre note que, pour pouvoir démarrer ce média, VOUS DEVEZ DESACTIVER SECURE BOOT.\n"
+"Pour plus d'informations (en Anglais) sur les raisons nécessitant ce changement, vous pouvez cliquer sur le bouton ci dessous."
+
+#. • MSG_130
+msgid "Windows image selection"
+msgstr "Sélection d'image Windows"
+
+#. • MSG_131
+msgid ""
+"This ISO contains multiple Windows images.\n"
+"Please select the one you wish to use for installation:"
+msgstr ""
+"Cette ISO contient plusieurs images Windows.\n"
+"Veuillez sélectioner l'image que vous souhaitez utiliser pour cette installation :"
+
+#. • MSG_132
+msgid "Another program or process is accessing this drive. Do you want to format it anyway?"
+msgstr "Ce lecteur est utilisé par une autre application ou un autre processus. Voulez-vous quand même le formater ?"
+
 #. • MSG_150
 msgid "Type of computer you plan to use this bootable drive with. It is your responsibility to determine whether your target is of BIOS or UEFI type before you start creating the drive, as it may fail to boot otherwise."
 msgstr "Type d'ordinateur avec lequel vous comptez utiliser ce disque démarrable. Il est de votre responsabilité de déterminer s'il s'agit d'un type BIOS ou UEFI avant de commencer a créer votre périphérique, car il risque de ne pas démarrer sinon."
@@ -894,11 +926,11 @@ msgstr "Taille minimum qu’un bloc de données occupera sur le système de fich
 
 #. • MSG_159
 msgid ""
-"Use this field to set the drive label\n"
-"International characters are accepted"
+"Use this field to set the drive label.\n"
+"International characters are accepted."
 msgstr ""
 "Utilisez ce champ pour mettre à jour le nom du volume.\n"
-"Les caractères étendus et les accents sont acceptés"
+"Les caractères étendus et les accents sont acceptés."
 
 #. • MSG_160
 msgid "Toggle advanced options"
@@ -935,18 +967,18 @@ msgstr "Installe un MBR permettant la sélection du périphérique de démarrage
 #. • MSG_168
 msgid ""
 "Try to masquerade first bootable USB drive (usually 0x80) as a different disk.\n"
-"This should only be necessary if you install Windows XP and have more than one disk"
+"This should only be necessary if you install Windows XP and have more than one disk."
 msgstr ""
 "Camoufle le premier disque USB démarrable (généralement 0x80) sous une ID différente.\n"
-"Changez cette option si vous installez Windows XP avec plus d’un disque dur"
+"Changez cette option si vous installez Windows XP avec plus d’un disque dur."
 
 #. • MSG_169
 msgid ""
 "Create an extra hidden partition and try to align partitions boundaries.\n"
-"This can improve boot detection for older BIOSes"
+"This can improve boot detection for older BIOSes."
 msgstr ""
 "Créé une petite partition supplémentaire et aligner les partitions.\n"
-"Peut améliorer la détection du périphérique pour les vieux BIOS"
+"Peut améliorer la détection du périphérique pour les vieux BIOS."
 
 #. • MSG_170
 msgid "Enable the listing of USB Hard Drive enclosures. USE AT YOUR OWN RISKS!!!"
@@ -1272,7 +1304,7 @@ msgstr "Test de défauts : Test avec motif 0x%02X"
 #.
 #. Example: "Partitioning (MBR)..."
 msgid "Partitioning (%s)..."
-msgstr "Partitionage (%s)..."
+msgstr "Partitionnement (%s)..."
 
 #. • MSG_239
 msgid "Deleting partitions..."
@@ -1496,7 +1528,7 @@ msgid ""
 msgstr ""
 "L'exécutable téléchargé est signé par '%s'.\n"
 "Ce n’est pas une signature que nous reconnaissons et pourrait indiquer une activité malicieuse...\n"
-"Êtes-vous certain de vouloir lancer ce fichier?"
+"Êtes-vous certain de vouloir lancer ce fichier ?"
 
 #. • MSG_286
 msgid "Zeroing drive: %0.1f%% completed"
