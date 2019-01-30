@@ -594,26 +594,23 @@ DWORD RunCommand(const char* cmd, const char* dir, BOOL log)
 	DWORD ret, dwRead, dwAvail, dwPipeSize = 4096;
 	STARTUPINFOA si = {0};
 	PROCESS_INFORMATION pi = {0};
+	SECURITY_ATTRIBUTES sa = { sizeof(SECURITY_ATTRIBUTES), NULL, TRUE };
 	HANDLE hOutputRead = INVALID_HANDLE_VALUE, hOutputWrite = INVALID_HANDLE_VALUE;
-	HANDLE hDupOutputWrite = INVALID_HANDLE_VALUE;
 	static char* output;
 
 	si.cb = sizeof(si);
 	if (log) {
 		// NB: The size of a pipe is a suggestion, NOT an absolute guarantee
 		// This means that you may get a pipe of 4K even if you requested 1K
-		if (!CreatePipe(&hOutputRead, &hOutputWrite, NULL, dwPipeSize)) {
+		if (!CreatePipe(&hOutputRead, &hOutputWrite, &sa, dwPipeSize)) {
 			ret = GetLastError();
 			uprintf("Could not set commandline pipe: %s", WindowsErrorString());
 			goto out;
 		}
-		// We need an inheritable pipe endpoint handle
-		DuplicateHandle(GetCurrentProcess(), hOutputWrite, GetCurrentProcess(), &hDupOutputWrite,
-			0L, TRUE, DUPLICATE_CLOSE_SOURCE | DUPLICATE_SAME_ACCESS);
 		si.dwFlags = STARTF_USESHOWWINDOW | STARTF_USESTDHANDLES;
 		si.wShowWindow = SW_HIDE;
-		si.hStdOutput = hDupOutputWrite;
-		si.hStdError = hDupOutputWrite;
+		si.hStdOutput = hOutputWrite;
+		si.hStdError = hOutputWrite;
 	}
 
 	if (!CreateProcessU(NULL, cmd, NULL, NULL, TRUE,
@@ -651,7 +648,7 @@ DWORD RunCommand(const char* cmd, const char* dir, BOOL log)
 	CloseHandle(pi.hThread);
 
 out:
-	safe_closehandle(hDupOutputWrite);
+	safe_closehandle(hOutputWrite);
 	safe_closehandle(hOutputRead);
 	return ret;
 }
