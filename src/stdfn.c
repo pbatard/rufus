@@ -352,14 +352,11 @@ void GetWindowsVersion(void)
 		safe_sprintf(vptr, vlen, "%s %s", w, w64);
 
 	// Add the build number for Windows 8.0 and later
+	nWindowsBuildNumber = vi.dwBuildNumber;
 	if (nWindowsVersion >= 0x62) {
-		GetRegistryKeyStr(REGKEY_HKLM, "Microsoft\\Windows NT\\CurrentVersion\\CurrentBuildNumber", build_number, sizeof(build_number));
-		if (build_number[0] != 0) {
-			nWindowsBuildNumber = atoi(build_number);	// Keep a global copy
-			static_strcat(WindowsVersionStr, " (Build ");
-			static_strcat(WindowsVersionStr, build_number);
-			static_strcat(WindowsVersionStr, ")");
-		}
+		vptr = &WindowsVersionStr[safe_strlen(WindowsVersionStr)];
+		vlen = sizeof(WindowsVersionStr) - safe_strlen(WindowsVersionStr) - 1;
+		safe_sprintf(vptr, vlen, " (Build %d)", nWindowsBuildNumber);
 	}
 
 }

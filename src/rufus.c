@@ -2617,7 +2617,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				notification_info more_info;
 				more_info.id = MORE_INFO_URL;
 				more_info.url = SECURE_BOOT_MORE_INFO_URL;
-				Notification(MSG_INFO, SETTING_DISABLE_SECURE_BOOT_NOTICE, &more_info, lmprintf(MSG_128), lmprintf(MSG_129));
+				Notification(MSG_INFO, SETTING_DISABLE_SECURE_BOOT_NOTICE, &more_info, lmprintf(MSG_128, "Secure Boot"), lmprintf(MSG_129));
 			}
 		} else if (SCODE_CODE(FormatStatus) == ERROR_CANCELLED) {
 			SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_PAUSED, 0);

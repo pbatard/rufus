@@ -103,6 +103,7 @@
 #define DOWNLOAD_URL                RUFUS_URL "/downloads"
 #define FILES_URL                   RUFUS_URL "/files"
 #define SECURE_BOOT_MORE_INFO_URL   "https://github.com/pbatard/rufus/wiki/FAQ#Why_do_I_need_to_disable_Secure_Boot_to_use_UEFINTFS"
+#define WPPRECORDER_MORE_INFO_URL   "https://github.com/pbatard/rufus/wiki/FAQ#BSODs_with_Windows_To_Go_drives_created_from_Windows_10_1809_ISOs"
 #define SEVENZIP_URL                "https://www.7-zip.org"
 #define FILES_DIR                   "rufus_files"
 #define IGNORE_RETVAL(expr)         do { (void)(expr); } while(0)

@@ -1398,6 +1398,13 @@ int SetWinToGoIndex(void)
 				MB_YESNO | MB_ICONWARNING | MB_IS_RTL, selected_langid) != IDYES)
 				wintogo_index = -2;
 		}
+		// Display a notice about WppRecorder.sys for 1809 ISOs
+		if (build_nr == 17763) {
+			notification_info more_info;
+			more_info.id = MORE_INFO_URL;
+			more_info.url = WPPRECORDER_MORE_INFO_URL;
+			Notification(MSG_INFO, NULL, &more_info, lmprintf(MSG_128, "Windows To Go"), lmprintf(MSG_133));
+		}
 	}
 	StrArrayDestroy(&version_name);
 	StrArrayDestroy(&version_index);
