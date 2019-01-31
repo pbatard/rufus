@@ -172,7 +172,7 @@ static HANDLE GetHandle(char* Path, BOOL bLockDrive, BOOL bWriteAccess, BOOL bWr
 			bWriteShare = TRUE;
 			// Try to report the process that is locking the drive
 			// We also use bit 6 as a flag to indicate that SearchProcess was called.
-			access_mask = SearchProcess(DevPath, 5000, TRUE, TRUE, FALSE) | 0x40;
+			access_mask = SearchProcess(DevPath, SEARCH_PROCESS_TIMEOUT, TRUE, TRUE, FALSE) | 0x40;
 		}
 		Sleep(DRIVE_ACCESS_TIMEOUT / DRIVE_ACCESS_RETRIES);
 	}
@@ -202,7 +202,7 @@ static HANDLE GetHandle(char* Path, BOOL bLockDrive, BOOL bWriteAccess, BOOL bWr
 		uprintf("Could not lock access to %s: %s", Path, WindowsErrorString());
 		// See if we can report the processes are accessing the drive
 		if (!IS_ERROR(FormatStatus) && (access_mask == 0))
-			access_mask = SearchProcess(DevPath, 5000, TRUE, TRUE, FALSE);
+			access_mask = SearchProcess(DevPath, SEARCH_PROCESS_TIMEOUT, TRUE, TRUE, FALSE);
 		// Try to continue if the only access rights we saw were for read-only
 		if ((access_mask & 0x07) != 0x01)
 			safe_closehandle(hDrive);

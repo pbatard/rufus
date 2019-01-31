@@ -959,7 +959,7 @@ static void CALLBACK BlockingTimer(HWND hWnd, UINT uMsg, UINT_PTR idEvent, DWORD
 #define PRINT_ISO_PROP(b, ...) do {if (b) uprintf(__VA_ARGS__);} while(0)
 static void DisplayISOProps(void)
 {
-	static char* inst_str = "[1/#]";
+	static char inst_str[] = " [1/#]";
 	int i;
 
 	uprintf("ISO label: '%s'", img_report.label);
@@ -995,7 +995,7 @@ static void DisplayISOProps(void)
 		HAS_BOOTMGR_BIOS(img_report) ? (HAS_BOOTMGR_EFI(img_report) ? "BIOS and UEFI" : "BIOS only") : "UEFI only");
 	PRINT_ISO_PROP(HAS_WINPE(img_report), "  Uses: WinPE %s", (img_report.uses_minint) ? "(with /minint)" : "");
 	if (HAS_WININST(img_report)) {
-		inst_str[3] = '0' + img_report.wininst_index;
+		inst_str[4] = '0' + img_report.wininst_index;
 		uprintf("  Uses: Install.%s%s (version %d.%d.%d%s)", &img_report.wininst_path[0][strlen(img_report.wininst_path[0]) - 3],
 			(img_report.wininst_index > 1) ? inst_str : "", (img_report.wininst_version >> 24) & 0xff,
 			(img_report.wininst_version >> 16) & 0xff, (img_report.wininst_version >> 8) & 0xff,

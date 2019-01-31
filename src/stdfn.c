@@ -255,7 +255,7 @@ void GetWindowsVersion(void)
 	OSVERSIONINFOEXA vi, vi2;
 	const char* w = 0;
 	const char* w64 = "32 bit";
-	char *vptr, build_number[10] = "";
+	char *vptr;
 	size_t vlen;
 	unsigned major, minor;
 	ULONGLONG major_equal, minor_equal;

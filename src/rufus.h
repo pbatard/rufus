@@ -76,7 +76,8 @@
 #define MORE_INFO_URL               0xFFFF
 #define STATUS_MSG_TIMEOUT          3500		// How long should cheat mode messages appear for on the status bar
 #define WRITE_RETRIES               4
-#define WRITE_TIMEOUT               5000		// How long we should wait between write retries
+#define WRITE_TIMEOUT               5000		// How long we should wait between write retries (in ms)
+#define SEARCH_PROCESS_TIMEOUT      10000		// How long we should search for conflicting processes before giving up (in ms)
 #define MARQUEE_TIMER_REFRESH       10			// Time between progress bar marquee refreshes, in ms
 #define FS_DEFAULT                  FS_FAT32
 #define SINGLE_CLUSTERSIZE_DEFAULT  0x00000100
