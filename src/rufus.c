@@ -282,6 +282,9 @@ static void SetPartitionSchemeAndTargetSystem(BOOL only_target)
 	}
 
 	if (!only_target) {
+		// Override partition type selection to GPT for drives larger than 2TB
+		if (SelectedDrive.DiskSize > 2 * TB)
+			selected_pt = PARTITION_STYLE_GPT;
 		// Try to reselect the current drive's partition scheme
 		int preferred_pt = SelectedDrive.PartitionStyle;
 		if (allowed_partition_scheme[PARTITION_STYLE_MBR]) 
@@ -2114,21 +2117,8 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			set_selected_fs = (HIWORD(wParam) == CBN_SELCHANGE);
 			fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem)); 
 			SetClusterSizes(fs);
-			if (fs < 0) {
-				EnableBootOptions(TRUE, TRUE);
-				SetMBRProps();
-				// Remove the SysLinux and ReactOS options if they exists
-				if (ComboBox_GetItemData(hBootType, ComboBox_GetCount(hBootType)-1) == (BT_MAX-1)) {
-					for (i=BT_SYSLINUX_V4; i<BT_MAX; i++)
-						IGNORE_RETVAL(ComboBox_DeleteString(hBootType,  ComboBox_GetCount(hBootType)-1));
-					IGNORE_RETVAL(ComboBox_SetCurSel(hBootType, 1));
-				}
-				break;
-			} else {
-				// Try to keep track of user selection
-				if (set_selected_fs)
-					selected_fs = fs;
-			}
+			if (set_selected_fs && (fs > 0))
+				selected_fs = fs;
 			EnableMBRBootOptions(TRUE, FALSE);
 			SetMBRProps();
 			break;
@@ -2516,6 +2506,12 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	case UM_FORMAT_START:
 		if (wParam != 0)
 			goto aborted_start;
+
+		if ((pt == PARTITION_STYLE_MBR) && (SelectedDrive.DiskSize > 2 * TB)) {
+			if (MessageBoxExU(hMainDialog, lmprintf(MSG_134, SizeToHumanReadable(SelectedDrive.DiskSize - 2 * TB, FALSE, FALSE)),
+				lmprintf(MSG_128, "MBR"), MB_YESNO | MB_ICONWARNING | MB_IS_RTL, selected_langid) != IDYES)
+				goto aborted_start;
+		}
 
 		if (!zero_drive) {
 			// Display a warning about UDF formatting times

@@ -68,14 +68,17 @@ static float previous_end;
 // Set the combo selection according to the data
 void SetComboEntry(HWND hDlg, int data)
 {
-	int i;
-	for (i = 0; i < ComboBox_GetCount(hDlg); i++) {
+	int i, nb_entries = ComboBox_GetCount(hDlg);
+
+	if (nb_entries <= 0)
+		return;
+	for (i = 0; i < nb_entries; i++) {
 		if (ComboBox_GetItemData(hDlg, i) == data) {
 			IGNORE_RETVAL(ComboBox_SetCurSel(hDlg, i));
-			break;
+			return;
 		}
 	}
-	if (i == ComboBox_GetCount(hDlg))
+	if (i == nb_entries)
 		IGNORE_RETVAL(ComboBox_SetCurSel(hDlg, 0));
 }
 

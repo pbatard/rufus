@@ -6,10 +6,15 @@ https://github.com/pbatard/rufus/wiki/Localization#Editing_a_translation
 Or simply download the latest pollock.exe from https://rufus.ie/locale/ and follow
 its directions. 
 
-o v3.x
+o v3.5
   - *NEW*      MSG_127 "Do not show this message again"
-  - *NEW*      MSG_128 "Important notice about Secure Boot"
+  - *NEW*      MSG_128 "Important notice about %s" where %s will be one of "MBR", "Secure Boot", "Windows To Go"
   - *NEW*      MSG_129 "You have just created a media that includes the UEFI:NTFS bootloader (...)"
+  - *NEW*      MSG_130 "Windows image selection"
+  - *NEW*      MSG_131 "This ISO contains multiple Windows images.\nPlease select the image you wish to use for this installation:"
+  - *NEW*      MSG_132 "Another program or process is accessing this drive. Do you want to format it anyway?"
+  - *NEW*      MSG_133 "Rufus has detected that you are attempting to create a Windows To Go media based on a 1809 ISO. (...)"
+  - *NEW*      MSG_134 "Because MBR has been selected for the partition scheme, Rufus can only create a partition up to 2 TB (...)"
 
 o v3.2 (2018.07.20)
 	The following appears in Advanced format options → Check device for bad blocks → dropdown menu with

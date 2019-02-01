@@ -337,7 +337,9 @@ t MSG_132 "Another program or process is accessing this drive. Do you want to fo
 t MSG_133 "Rufus has detected that you are attempting to create a Windows To Go media based on a 1809 ISO.\n\n"
 	"Because of a *MICROSOFT BUG*, this media will crash during Windows boot (Blue Screen Of Death), unless you manually replace the file 'WppRecorder.sys' with a 1803 version.\n\n"
 	"Also note that the reason Rufus cannot automatically fix this for you is that 'WppRecorder.sys' is a Microsoft copyrighted file, so we cannot legally embed a copy of the file in the application..."
-t MSG_150 "Type of computer you plan to use this bootable drive with. It is your responsibility to determine whether 
+t MSG_134 "Because MBR has been selected for the partition scheme, Rufus can only create a partition up to 2 TB on this media, which will leave %s of disk space unavailable.\n\n"
+	"Are you sure you want to continue?"
+t MSG_150 "Type of computer you plan to use this bootable drive with. It is your responsibility to determine whether "
 	"your target is of BIOS or UEFI type before you start creating the drive, as it may fail to boot otherwise."
 # You shouldn't translate 'Legacy Mode' as this is an option that usually appears in English in the UEFI settings.
 t MSG_151 "'UEFI-CSM' means that the device will only boot in BIOS emulation mode (also known as 'Legacy Mode') under UEFI, and not in native UEFI mode."
@@ -4270,6 +4272,7 @@ t MSG_130 "Sélection d'image Windows"
 t MSG_131 "Cette ISO contient plusieurs images Windows.\nVeuillez sélectioner l'image que vous souhaitez utiliser pour cette installation :"
 t MSG_132 "Ce lecteur est utilisé par une autre application ou un autre processus. Voulez-vous quand même le formater ?"
 t MSG_133 "Rufus a détecté que vous êtes en train de créer un média 'Windows To Go' à partir d'une ISO 1809.\n\nA cause d'un *BUG MICROSOFT*, ce média va planter durant le démarrage de Windows (Blue Screen Of Death), à moins que vous ne remplaciez le fichier 'WppRecorder.sys' par la version 1803.\n\nVeuillez aussi noter que la raison pour laquelle Rufus ne peut pas corriger ce problème pour vous est que le fichier 'WppRecorder.sys' est sujet au copyright de Microsoft, donc nous ne pouvons pas légalement en produire une copie avec cette application..."
+t MSG_134 "Parce que MBR a été sélectionné pour le schéma de partition, Rufus peut seulement créer une partition sur ce média occupant jusqu’à 2 To, ce qui laissera %s d’espace disque non-disponible.\n\nEtes-vous sûr de vouloir continuer ?"
 t MSG_150 "Type d'ordinateur avec lequel vous comptez utiliser ce disque démarrable. Il est de votre responsabilité de déterminer s'il s'agit d'un type BIOS ou UEFI avant de commencer a créer votre périphérique, car il risque de ne pas démarrer sinon."
 t MSG_151 "'UEFI-CSM' signifie que le périphérique démarrera seulement en mode émulation BIOS (i.e. 'Legacy Mode') sous UEFI, et non pas en mode UEFI natif."
 t MSG_152 "'non CSM' signifie que le périphérique démarrera seulement en mode UEFI natif, et non pas en mode émulation BIOS (i.e. 'Legacy Mode')."
