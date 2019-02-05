@@ -46,7 +46,7 @@
 
 DWORD DownloadStatus;
 
-extern BOOL force_update;
+extern BOOL force_update, is_x86_32;
 static DWORD error_code;
 static BOOL update_check_in_progress = FALSE;
 static BOOL force_update_check = FALSE;
@@ -526,7 +526,7 @@ static __inline uint64_t to_uint64_t(uint16_t x[4]) {
  */
 static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 {
-	BOOL releases_only, found_new_version = FALSE;
+	BOOL releases_only = TRUE, found_new_version = FALSE;
 	int status = 0;
 	const char* server_url = RUFUS_URL "/";
 	int i, j, k, max_channel, verbose = 0, verpos[4];
@@ -623,7 +623,9 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 		goto out;
 
 	status++;	// 2
-	releases_only = !ReadSettingBool(SETTING_INCLUDE_BETAS);
+	// BETAs are only made available for x86_32
+	if (is_x86_32)
+		releases_only = !ReadSettingBool(SETTING_INCLUDE_BETAS);
 
 	// Test releases get their own distribution channel (and also force beta checks)
 #if defined(TEST)

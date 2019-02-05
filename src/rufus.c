@@ -98,7 +98,7 @@ WORD selected_langid = MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT);
 DWORD MainThreadId;
 HWND hDeviceList, hPartitionScheme, hTargetSystem, hFileSystem, hClusterSize, hLabel, hBootType, hNBPasses, hLog = NULL;
 HWND hLogDialog = NULL, hProgress = NULL, hDiskID;
-BOOL use_own_c32[NB_OLD_C32] = { FALSE, FALSE }, mbr_selected_by_user = FALSE;
+BOOL is_x86_32, use_own_c32[NB_OLD_C32] = { FALSE, FALSE }, mbr_selected_by_user = FALSE;
 BOOL iso_op_in_progress = FALSE, format_op_in_progress = FALSE, right_to_left_mode = FALSE, has_uefi_csm;
 BOOL enable_HDDs = FALSE, force_update = FALSE, enable_ntfs_compression = FALSE, no_confirmation_on_cancel = FALSE, lock_drive = TRUE;
 BOOL advanced_mode_device, advanced_mode_format, allow_dual_uefi_bios, detect_fakes, enable_vmdk, force_large_fat32, usb_debug;
@@ -2800,6 +2800,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		pfSetDefaultDllDirectories(LOAD_LIBRARY_SEARCH_SYSTEM32);
 
 	uprintf("*** " APPLICATION_NAME " init ***\n");
+	is_x86_32 = (strcmp(APPLICATION_ARCH, "x86") == 0);
 
 	// We have to process the arguments before we acquire the lock and process the locale
 	PF_INIT(__wgetmainargs, Msvcrt);
