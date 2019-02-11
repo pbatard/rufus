@@ -697,15 +697,19 @@ static void EnableQuickFormat(BOOL enable)
 {
 	HWND hCtrl = GetDlgItem(hMainDialog, IDC_QUICK_FORMAT);
 
+	// Keep track of the current state if we are going to disable it
+	if (IsWindowEnabled(hCtrl) && !enable) {
+		uQFChecked = IsChecked(IDC_QUICK_FORMAT);
+	}
+
 	// Disable/restore the quick format control depending on large FAT32 or ReFS
 	if (((fs == FS_FAT32) && ((SelectedDrive.DiskSize > LARGE_FAT32_SIZE) || (force_large_fat32))) || (fs == FS_REFS)) {
 		enable = FALSE;
+		CheckDlgButton(hMainDialog, IDC_QUICK_FORMAT, BST_CHECKED);
 	}
 
-	if (IsWindowEnabled(hCtrl) && !enable) {
-		uQFChecked = IsChecked(IDC_QUICK_FORMAT);
-		CheckDlgButton(hMainDialog, IDC_QUICK_FORMAT, BST_CHECKED);
-	} else if (!IsWindowEnabled(hCtrl) && enable) {
+	// Restore state if we are re-enabling the control
+	if (!IsWindowEnabled(hCtrl) && enable) {
 		CheckDlgButton(hMainDialog, IDC_QUICK_FORMAT, uQFChecked);
 	}
 
