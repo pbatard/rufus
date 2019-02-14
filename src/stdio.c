@@ -198,7 +198,7 @@ char* SizeToHumanReadable(uint64_t size, BOOL copy_to_log, BOOL fake_units)
 {
 	int suffix;
 	static char str_size[32];
-	const char* dir = ((right_to_left_mode)&&(!copy_to_log))?RIGHT_TO_LEFT_MARK:"";
+	const char* dir = ((right_to_left_mode) && (!copy_to_log)) ? LEFT_TO_RIGHT_MARK : "";
 	double hr_size = (double)size;
 	double t;
 	uint16_t i_size;
