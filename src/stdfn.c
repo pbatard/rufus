@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Standard Windows function calls
- * Copyright © 2013-2018 Pete Batard <pete@akeo.ie>
+ * Copyright © 2013-2019 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -604,7 +604,7 @@ DWORD RunCommand(const char* cmd, const char* dir, BOOL log)
 			uprintf("Could not set commandline pipe: %s", WindowsErrorString());
 			goto out;
 		}
-		si.dwFlags = STARTF_USESHOWWINDOW | STARTF_USESTDHANDLES;
+		si.dwFlags = STARTF_USESHOWWINDOW | STARTF_USESTDHANDLES | STARTF_PREVENTPINNING | STARTF_TITLEISAPPID;
 		si.wShowWindow = SW_HIDE;
 		si.hStdOutput = hOutputWrite;
 		si.hStdError = hOutputWrite;

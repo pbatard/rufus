@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Extract icon from executable and set autorun.inf
- * Copyright © 2012-2016 Pete Batard <pete@akeo.ie>
+ * Copyright © 2012-2019 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -86,9 +86,9 @@ typedef struct
 #pragma pack(pop)
 
 /*
- * Extract an icon set from the exe and save it as .ico
+ * Extract the main icon set from the exe
  */
-static BOOL SaveIcon(const char* filename)
+BOOL ExtractAppIcon(const char* path, BOOL bSilent)
 {
 	HGLOBAL res_handle;
 	HRSRC res;
@@ -101,10 +101,10 @@ static BOOL SaveIcon(const char* filename)
 
 	icondir = (GRPICONDIR*)GetResource(hMainInstance, MAKEINTRESOURCEA(IDI_ICON), _RT_GROUP_ICON, "icon", &res_size, FALSE);
 
-	hFile = CreateFileA(filename, GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ,
-			NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
+	hFile = CreateFileU(path, GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ,
+			NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (hFile == INVALID_HANDLE_VALUE) {
-		uprintf("Unable to create icon '%s': %s.", filename, WindowsErrorString());
+		uprintf("Unable to create icon '%s': %s.", path, WindowsErrorString());
 		goto out;
 	}
 
@@ -141,7 +141,7 @@ static BOOL SaveIcon(const char* filename)
 			goto out;
 		}
 	}
-	uprintf("Created: %s", filename);
+	suprintf("Created: %s", path);
 	r = TRUE;
 
 out:
@@ -185,5 +185,5 @@ BOOL SetAutorun(const char* path)
 	// .inf -> .ico
 	filename[strlen(filename)-1] = 'o';
 	filename[strlen(filename)-2] = 'c';
-	return SaveIcon(filename);
+	return ExtractAppIcon(filename, FALSE);
 }

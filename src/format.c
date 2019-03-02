@@ -2,7 +2,7 @@
  * Rufus: The Reliable USB Formatting Utility
  * Formatting function calls
  * Copyright © 2007-2009 Tom Thornhill/Ridgecrop
- * Copyright © 2011-2018 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2019 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1897,7 +1897,7 @@ DWORD WINAPI FormatThread(void* param)
 					FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_BADBLOCKS_FAILURE);
 				ClearMBRGPT(hPhysicalDrive, SelectedDrive.DiskSize, SelectedDrive.SectorSize, FALSE);
 				fclose(log_fd);
-				_unlinkU(logfile);
+				DeleteFileU(logfile);
 				goto out;
 			}
 			uprintf("Bad Blocks: Check completed, %d bad block%s found. (%d/%d/%d errors)\n",
@@ -1917,7 +1917,7 @@ DWORD WINAPI FormatThread(void* param)
 			} else {
 				// We didn't get any errors => delete the log file
 				fclose(log_fd);
-				_unlinkU(logfile);
+				DeleteFileU(logfile);
 			}
 		} while (r == IDRETRY);
 		if (r == IDABORT) {

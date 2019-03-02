@@ -45,7 +45,7 @@
 #include "license.h"
 
 /* Globals */
-extern BOOL is_x86_32;
+extern BOOL is_x86_32, enable_fido;
 static HICON hMessageIcon = (HICON)INVALID_HANDLE_VALUE;
 static char* szMessageText = NULL;
 static char* szMessageTitle = NULL;
@@ -1542,6 +1542,13 @@ BOOL SetUpdateCheck(void)
 			 ((ReadSetting32(SETTING_UPDATE_INTERVAL) == -1) && enable_updates) )
 			WriteSetting32(SETTING_UPDATE_INTERVAL, 86400);
 	}
+	// Also detect if we can use FIDO, which depends on:
+	// - Update check being enabled
+	// - URL for the script being reachable
+	if (ReadSetting32(SETTING_UPDATE_INTERVAL) > 0) {
+		uprintf("Checking for %s...", FIDO_URL);
+		enable_fido = IsDownloadable(FIDO_URL);
+	}
 	return TRUE;
 }
 
@@ -1668,7 +1675,7 @@ INT_PTR CALLBACK NewVersionCallback(HWND hDlg, UINT message, WPARAM wParam, LPAR
 
 				if (ValidateSignature(hDlg, filepath) != NO_ERROR) {
 					// Unconditionally delete the download and disable the "Launch" control
-					_unlinkU(filepath);
+					DeleteFileU(filepath);
 					EnableWindow(GetDlgItem(hDlg, IDC_DOWNLOAD), FALSE);
 					break;
 				}

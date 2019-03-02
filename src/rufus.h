@@ -1,6 +1,6 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
- * Copyright © 2011-2018 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2019 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -97,12 +97,14 @@
 #define RSA_SIGNATURE_SIZE          256
 #define CBN_SELCHANGE_INTERNAL      (CBN_SELCHANGE + 256)
 #if defined(RUFUS_TEST)
-#define RUFUS_URL                   "http://pi3"
+#define RUFUS_URL                   "http://nano/~rufus"
 #else
 #define RUFUS_URL                   "https://rufus.ie"
 #endif
 #define DOWNLOAD_URL                RUFUS_URL "/downloads"
 #define FILES_URL                   RUFUS_URL "/files"
+// TODO: Resolve https://github.com/pbatard/Fido/releases/latest and use that as our base
+#define FIDO_URL                    "https://github.com/pbatard/Fido/releases/download/v1.0/Fido.ps1"
 #define SECURE_BOOT_MORE_INFO_URL   "https://github.com/pbatard/rufus/wiki/FAQ#Why_do_I_need_to_disable_Secure_Boot_to_use_UEFINTFS"
 #define WPPRECORDER_MORE_INFO_URL   "https://github.com/pbatard/rufus/wiki/FAQ#BSODs_with_Windows_To_Go_drives_created_from_Windows_10_1809_ISOs"
 #define SEVENZIP_URL                "https://www.7-zip.org"
@@ -186,6 +188,7 @@ enum user_message_type {
 	UM_NO_UPDATE,
 	UM_UPDATE_CSM_TOOLTIP,
 	UM_RESIZE_BUTTONS,
+	UM_ENABLE_CONTROLS,
 	UM_FORMAT_START,
 	// Start of the WM IDs for the language menu items
 	UM_LANGUAGE_MENU = WM_APP + 0x100
@@ -453,7 +456,8 @@ extern int nWindowsVersion, nWindowsBuildNumber, dialog_showing;
 extern int fs, bt, pt, tt;
 extern unsigned long syslinux_ldlinux_len[2];
 extern char WindowsVersionStr[128], ubuffer[UBUFFER_SIZE], embedded_sl_version_str[2][12];
-extern char szFolderPath[MAX_PATH], app_dir[MAX_PATH], temp_dir[MAX_PATH], system_dir[MAX_PATH], sysnative_dir[MAX_PATH];
+extern char szFolderPath[MAX_PATH], app_dir[MAX_PATH], temp_dir[MAX_PATH], system_dir[MAX_PATH];
+extern char sysnative_dir[MAX_PATH];
 extern char* image_path;
 
 /*
@@ -494,6 +498,7 @@ extern BOOL Notification(int type, const char* dont_display_setting, const notif
 extern int SelectionDialog(char* title, char* message, char** choices, int size);
 extern void ListDialog(char* title, char* message, char** items, int size);
 extern SIZE GetTextSize(HWND hCtrl, char* txt);
+extern BOOL ExtractAppIcon(const char* filename, BOOL bSilent);
 extern BOOL ExtractDOS(const char* path);
 extern BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan);
 extern int64_t ExtractISOFile(const char* iso, const char* iso_file, const char* dest_file, DWORD attributes);
@@ -521,6 +526,8 @@ extern INT_PTR CALLBACK UpdateCallback(HWND hDlg, UINT message, WPARAM wParam, L
 extern BOOL SetUpdateCheck(void);
 extern BOOL CheckForUpdates(BOOL force);
 extern void DownloadNewVersion(void);
+extern BOOL DownloadISO(void);
+extern BOOL IsDownloadable(char* url);
 extern BOOL IsShown(HWND hDlg);
 extern char* get_token_data_file_indexed(const char* token, const char* filename, int index);
 #define get_token_data_file(token, filename) get_token_data_file_indexed(token, filename, 1)

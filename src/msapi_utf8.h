@@ -1,9 +1,9 @@
 /*
  * MSAPI_UTF8: Common API calls using UTF-8 strings
  * Compensating for what Microsoft should have done a long long time ago.
- * Also see http://utf8everywhere.org/
+ * Also see https://utf8everywhere.org
  *
- * Copyright © 2010-2017 Pete Batard <pete@akeo.ie>
+ * Copyright © 2010-2019 Pete Batard <pete@akeo.ie>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -982,15 +982,6 @@ static __inline int _openU(const char *filename, int oflag , int pmode)
 	return ret;
 }
 #endif
-
-static __inline int _unlinkU(const char *path)
-{
-	int ret;
-	wconvert(path);
-	ret = _wunlink(wpath);
-	wfree(path);
-	return ret;
-}
 
 static __inline int _stat64U(const char *path, struct __stat64 *buffer)
 {

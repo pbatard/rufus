@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * UI-related function calls
- * Copyright © 2018 Pete Batard <pete@akeo.ie>
+ * Copyright © 2018-2019 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,6 +43,7 @@
 
 UINT_PTR UM_LANGUAGE_MENU_MAX = UM_LANGUAGE_MENU;
 HIMAGELIST hUpImageList, hDownImageList;
+extern BOOL enable_fido;
 int advanced_device_section_height, advanced_format_section_height;
 // (empty) check box width, (empty) drop down width, button height (for and without dropdown match)
 int cbw, ddw, ddbh = 0, bh = 0;
@@ -147,6 +148,8 @@ void GetMainButtonsWidth(HWND hDlg)
 {
 	unsigned int i;
 	RECT rc;
+	LONG style;
+	char download[64];
 
 	GetWindowRect(GetDlgItem(hDlg, main_button_ids[0]), &rc);
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
@@ -154,8 +157,17 @@ void GetMainButtonsWidth(HWND hDlg)
 
 	for (i = 0; i < ARRAYSIZE(main_button_ids); i++)
 		bw = max(bw, GetTextWidth(hDlg, main_button_ids[i]) + cbw);
-	// The 'CLOSE' button is also be used to display 'CANCEL' => measure that too
+	// The 'CLOSE' button is also be used to display 'CANCEL' and we sometimes
+	// want to add "DOWNLOAD" into the Select split button => measure that too.
 	bw = max(bw, GetTextSize(GetDlgItem(hDlg, IDCANCEL), lmprintf(MSG_007)).cx + cbw);
+	if (enable_fido) {
+		static_strcpy(download, lmprintf(MSG_040));
+		CharUpperBuffU(download, sizeof(download));
+		bw = max(bw, GetTextSize(GetDlgItem(hDlg, IDC_SELECT), download).cx + (3 * cbw) / 2);
+		style = GetWindowLong(GetDlgItem(hDlg, IDC_SELECT), GWL_STYLE);
+		style|= BS_SPLITBUTTON;
+		SetWindowLong(GetDlgItem(hDlg, IDC_SELECT), GWL_STYLE, style);
+	}
 }
 
 // The following goes over the data that gets populated into the half-width dropdowns

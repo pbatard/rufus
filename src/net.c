@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Networking functionality (web file download, check for update, etc.)
- * Copyright © 2012-2018 Pete Batard <pete@akeo.ie>
+ * Copyright © 2012-2019 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,9 +45,12 @@
 #define DEFAULT_UPDATE_INTERVAL (24*3600)
 
 DWORD DownloadStatus;
+BYTE* fido_script = NULL;
 
+extern loc_cmd* selected_locale;
+extern HANDLE dialog_handle;
 extern BOOL force_update, is_x86_32;
-static DWORD error_code;
+static DWORD error_code, fido_len = 0;
 static BOOL update_check_in_progress = FALSE;
 static BOOL force_update_check = FALSE;
 
@@ -231,19 +234,20 @@ const char* WinInetErrorString(void)
  * to the dialog in question, with WPARAM being set to nonzero for EXIT on success
  * and also attempt to indicate progress using an IDC_PROGRESS control
  */
-static DWORD DownloadToFileOrBuffer(const char* url, const char* file, BYTE** buffer, HWND hProgressDialog)
+static uint64_t DownloadToFileOrBuffer(const char* url, const char* file, BYTE** buffer, HWND hProgressDialog)
 {
 	HWND hProgressBar = NULL;
 	BOOL r = FALSE;
-	DWORD dwFlags, dwSize, dwWritten, dwDownloaded, dwTotalSize;
+	DWORD dwFlags, dwSize, dwWritten, dwDownloaded;
 	HANDLE hFile = INVALID_HANDLE_VALUE;
 	const char* accept_types[] = {"*/*\0", NULL};
+	const char* short_name;
 	unsigned char buf[DOWNLOAD_BUFFER_SIZE];
-	char agent[64], hostname[64], urlpath[128];
+	char agent[64], hostname[64], urlpath[128], strsize[32];;
 	HINTERNET hSession = NULL, hConnection = NULL, hRequest = NULL;
 	URL_COMPONENTSA UrlParts = {sizeof(URL_COMPONENTSA), NULL, 1, (INTERNET_SCHEME)0,
 		hostname, sizeof(hostname), 0, NULL, 1, urlpath, sizeof(urlpath), NULL, 1};
-	const char* short_name;
+	uint64_t size = 0, total_size = 0;
 	size_t i;
 
 	// Can't link with wininet.lib because of sideloading issues
@@ -338,16 +342,18 @@ static DWORD DownloadToFileOrBuffer(const char* url, const char* file, BYTE** bu
 	pfHttpQueryInfoA(hRequest, HTTP_QUERY_STATUS_CODE|HTTP_QUERY_FLAG_NUMBER, (LPVOID)&DownloadStatus, &dwSize, NULL);
 	if (DownloadStatus != 200) {
 		error_code = ERROR_INTERNET_ITEM_NOT_FOUND;
+		SetLastError(ERROR_SEVERITY_ERROR | FAC(FACILITY_HTTP) | error_code);
 		uprintf("Unable to access file: %d", DownloadStatus);
 		goto out;
 	}
-	dwSize = sizeof(dwTotalSize);
-	if (!pfHttpQueryInfoA(hRequest, HTTP_QUERY_CONTENT_LENGTH|HTTP_QUERY_FLAG_NUMBER, (LPVOID)&dwTotalSize, &dwSize, NULL)) {
+	dwSize = sizeof(strsize);
+	if (!pfHttpQueryInfoA(hRequest, HTTP_QUERY_CONTENT_LENGTH, (LPVOID)strsize, &dwSize, NULL)) {
 		uprintf("Unable to retrieve file length: %s", WinInetErrorString());
 		goto out;
 	}
+	total_size = (uint64_t)atoll(strsize);
 	if (hProgressDialog != NULL)
-		uprintf("File length: %d bytes", dwTotalSize);
+		uprintf("File length: %s", SizeToHumanReadable(total_size, FALSE, FALSE));
 
 	if (file != NULL) {
 		hFile = CreateFileU(file, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
@@ -360,7 +366,7 @@ static DWORD DownloadToFileOrBuffer(const char* url, const char* file, BYTE** bu
 			uprintf("No buffer pointer provided for download");
 			goto out;
 		}
-		*buffer = malloc(dwTotalSize);
+		*buffer = malloc(total_size);
 		if (*buffer == NULL) {
 			uprintf("Could not allocate buffer for download");
 			goto out;
@@ -368,7 +374,6 @@ static DWORD DownloadToFileOrBuffer(const char* url, const char* file, BYTE** bu
 	}
 
 	// Keep checking for data until there is nothing left.
-	dwSize = 0;
 	while (1) {
 		// User may have cancelled the download
 		if (IS_ERROR(FormatStatus))
@@ -376,8 +381,8 @@ static DWORD DownloadToFileOrBuffer(const char* url, const char* file, BYTE** bu
 		if (!pfInternetReadFile(hRequest, buf, sizeof(buf), &dwDownloaded) || (dwDownloaded == 0))
 			break;
 		if (hProgressDialog != NULL) {
-			SendMessage(hProgressBar, PBM_SETPOS, (WPARAM)(MAX_PROGRESS*((1.0f*dwSize) / (1.0f*dwTotalSize))), 0);
-			PrintInfo(0, MSG_241, (100.0f*dwSize) / (1.0f*dwTotalSize));
+			SendMessage(hProgressBar, PBM_SETPOS, (WPARAM)(MAX_PROGRESS*((1.0f*size) / (1.0f*total_size))), 0);
+			PrintInfo(0, MSG_241, (100.0f*size) / (1.0f*total_size));
 		}
 		if (file != NULL) {
 			if (!WriteFile(hFile, buf, dwDownloaded, &dwWritten, NULL)) {
@@ -388,13 +393,13 @@ static DWORD DownloadToFileOrBuffer(const char* url, const char* file, BYTE** bu
 				goto out;
 			}
 		} else {
-			memcpy(&(*buffer)[dwSize], buf, dwDownloaded);
+			memcpy(&(*buffer)[size], buf, dwDownloaded);
 		}
-		dwSize += dwDownloaded;
+		size += dwDownloaded;
 	}
 
-	if (dwSize != dwTotalSize) {
-		uprintf("Could not download complete file - read: %d bytes, expected: %d bytes", dwSize, dwTotalSize);
+	if (size != total_size) {
+		uprintf("Could not download complete file - read: %lld bytes, expected: %lld bytes", size, total_size);
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_WRITE_FAULT;
 		goto out;
 	} else {
@@ -408,13 +413,18 @@ static DWORD DownloadToFileOrBuffer(const char* url, const char* file, BYTE** bu
 	}
 
 out:
+	error_code = GetLastError();
 	if (hFile != INVALID_HANDLE_VALUE) {
 		// Force a flush - May help with the PKI API trying to process downloaded updates too early...
 		FlushFileBuffers(hFile);
 		CloseHandle(hFile);
 	}
-	if ((!r) && (file != NULL))
-		_unlinkU(file);
+	if (!r) {
+		if (file != NULL)
+			DeleteFileU(file);
+		if (buffer != NULL)
+			safe_free(*buffer);
+	}
 	if (hRequest)
 		pfInternetCloseHandle(hRequest);
 	if (hConnection)
@@ -422,7 +432,8 @@ out:
 	if (hSession)
 		pfInternetCloseHandle(hSession);
 
-	return r ? dwSize : 0;
+	SetLastError(error_code);
+	return r ? size : 0;
 }
 
 // Download and validate a signed file. The file must have a corresponding '.sig' on the server.
@@ -444,10 +455,10 @@ DWORD DownloadSignedFile(const char* url, const char* file, HWND hProgressDialog
 	strcpy(url_sig, url);
 	strcat(url_sig, ".sig");
 
-	buf_len = DownloadToFileOrBuffer(url, NULL, &buf, hProgressDialog);
+	buf_len = (DWORD)DownloadToFileOrBuffer(url, NULL, &buf, hProgressDialog);
 	if (buf_len == 0)
 		goto out;
-	sig_len = DownloadToFileOrBuffer(url_sig, NULL, &sig, NULL);
+	sig_len = (DWORD)DownloadToFileOrBuffer(url_sig, NULL, &sig, NULL);
 	if ((sig_len != RSA_SIGNATURE_SIZE) || (!ValidateOpensslSignature(buf, buf_len, sig, sig_len))) {
 		uprintf("FATAL: Download signature is invalid ✗");
 		DownloadStatus = 403;	// Forbidden
@@ -633,6 +644,7 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 #else
 	max_channel = releases_only ? 1 : (int)ARRAYSIZE(channel) - 1;
 #endif
+	vuprintf("Using %s for the update check", RUFUS_URL);
 	for (k=0; (k<max_channel) && (!found_new_version); k++) {
 		uprintf("Checking %s channel...", channel[k]);
 		// At this stage we can query the server for various update version files.
@@ -717,7 +729,7 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 
 		// Now download the signature file
 		static_sprintf(sigpath, "%s/%s.sig", server_url, urlpath);
-		dwDownloaded = DownloadToFileOrBuffer(sigpath, NULL, &sig, NULL);
+		dwDownloaded = (DWORD)DownloadToFileOrBuffer(sigpath, NULL, &sig, NULL);
 		if ((dwDownloaded != RSA_SIGNATURE_SIZE) || (!ValidateOpensslSignature(buf, dwTotalSize, sig, dwDownloaded))) {
 			uprintf("FATAL: Version signature is invalid!");
 			goto out;
@@ -725,7 +737,7 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 		vuprintf("Version signature is valid");
 
 		status++;
-		parse_update(buf, dwTotalSize+1);
+		parse_update(buf, dwTotalSize + 1);
 
 		vuprintf("UPDATE DATA:");
 		vuprintf("  version: %d.%d.%d (%s)", update.version[0], update.version[1], update.version[2], channel[k]);
@@ -733,9 +745,9 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 		vuprintf("  url: %s", update.download_url);
 
 		found_new_version = ((to_uint64_t(update.version) > to_uint64_t(rufus_version)) || (force_update))
-			&& ( (os_version.dwMajorVersion > update.platform_min[0])
-			  || ( (os_version.dwMajorVersion == update.platform_min[0]) && (os_version.dwMinorVersion >= update.platform_min[1])) );
-		uprintf("N%sew %s version found%c", found_new_version?"":"o n", channel[k], found_new_version?'!':'.');
+			&& ((os_version.dwMajorVersion > update.platform_min[0])
+				|| ((os_version.dwMajorVersion == update.platform_min[0]) && (os_version.dwMinorVersion >= update.platform_min[1])));
+		uprintf("N%sew %s version found%c", found_new_version ? "" : "o n", channel[k], found_new_version ? '!' : '.');
 	}
 
 out:
@@ -747,7 +759,7 @@ out:
 		pfInternetCloseHandle(hConnection);
 	if (hSession)
 		pfInternetCloseHandle(hSession);
-	switch(status) {
+	switch (status) {
 	case 1:
 		PrintInfoDebug(3000, MSG_244);
 		break;
@@ -756,14 +768,14 @@ out:
 		break;
 	case 3:
 	case 4:
-		PrintInfo(3000, found_new_version?MSG_246:MSG_247);
+		PrintInfo(3000, found_new_version ? MSG_246 : MSG_247);
 	default:
 		break;
 	}
 	// Start the new download after cleanup
 	if (found_new_version) {
 		// User may have started an operation while we were checking
-		while ((!force_update_check) && (iso_op_in_progress || format_op_in_progress || (dialog_showing>0))) {
+		while ((!force_update_check) && (iso_op_in_progress || format_op_in_progress || (dialog_showing > 0))) {
 			Sleep(15000);
 		}
 		DownloadNewVersion();
@@ -788,4 +800,264 @@ BOOL CheckForUpdates(BOOL force)
 		return FALSE;
 	}
 	return TRUE;
+}
+
+/*
+ * Download an ISO through Fido
+ */
+static DWORD WINAPI DownloadISOThread(LPVOID param)
+{
+	char cmdline[512], locale_str[1024], iso_name[128], pipe[64] = "\\\\.\\pipe\\";
+	char powershell_path[MAX_PATH], icon_path[MAX_PATH] = "", script_path[MAX_PATH] = "";
+	char *p, *url = NULL;
+	BYTE *sig = NULL;
+	HANDLE hFile, hPipe;
+	DWORD i, dwSize, dwAvail, dwPipeSize = 4096;
+	GUID guid;
+
+	IGNORE_RETVAL(CoInitializeEx(NULL, COINIT_APARTMENTTHREADED));
+
+	// Use a GUID as random unique string, else ill-intentioned security "researchers"
+	// may either spam our pipe or replace our script to fool antivirus solutions into
+	// thinking that Rufus is doing something malicious...
+	CoCreateGuid(&guid);
+	strcpy(&pipe[9], GuidToString(&guid));
+	static_sprintf(icon_path, "%s%s.ico", temp_dir, APPLICATION_NAME);
+	ExtractAppIcon(icon_path, TRUE);
+
+	PrintInfo(0, MSG_149);
+
+#if defined(RUFUS_TEST)
+	// In test mode, just use our local script
+	static_strcpy(script_path, "D:\\Projects\\Fido\\Fido.ps1");
+#else
+	// If we don't have the script, download it
+	if (fido_len == 0) {
+		fido_len = (DWORD)DownloadToFileOrBuffer(FIDO_URL, NULL, &fido_script, hMainDialog);
+		if (fido_len == 0)
+			goto out;
+		dwSize = (DWORD)DownloadToFileOrBuffer(FIDO_URL ".sig", NULL, &sig, NULL);
+		if ((dwSize != RSA_SIGNATURE_SIZE) || (!ValidateOpensslSignature(fido_script, fido_len, sig, dwSize))) {
+			uprintf("FATAL: Signature is invalid ✗");
+			free(sig);
+			goto out;
+		}
+		free(sig);
+		uprintf("Signature is valid ✓");
+	}
+
+	assert((fido_script != NULL) && (fido_len != 0));
+
+	static_sprintf(script_path, "%s%s.ps1", temp_dir, GuidToString(&guid));
+	hFile = CreateFileU(script_path, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+	if (hFile == INVALID_HANDLE_VALUE) {
+		uprintf("Unable to create download script '%s': %s", script_path, WindowsErrorString());
+		goto out;
+	}
+	if ((!WriteFile(hFile, fido_script, fido_len, &dwSize, NULL)) || (dwSize != fido_len)) {
+		uprintf("Unable to write download script '%s': %s", script_path, WindowsErrorString());
+		goto out;
+	}
+	// TODO: Try to Harden this so that only us and the powershell we launch can access the file
+	safe_closehandle(hFile);
+#endif
+	static_sprintf(powershell_path, "%s\\WindowsPowerShell\\v1.0\\powershell.exe", system_dir);
+	static_sprintf(locale_str, "%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s",
+		selected_locale->txt[0], lmprintf(MSG_135), lmprintf(MSG_136), lmprintf(MSG_137),
+		lmprintf(MSG_138), lmprintf(MSG_139), lmprintf(MSG_040), lmprintf(MSG_140),
+		lmprintf(MSG_141), lmprintf(MSG_006), lmprintf(MSG_007), lmprintf(MSG_042),
+		lmprintf(MSG_142), lmprintf(MSG_143));
+
+	hPipe = CreateNamedPipeA(pipe, PIPE_ACCESS_INBOUND,
+		PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE | PIPE_WAIT, PIPE_UNLIMITED_INSTANCES,
+		dwPipeSize, dwPipeSize, 0, NULL);
+	if (hPipe == INVALID_HANDLE_VALUE) {
+		uprintf("Could not create pipe '%s': %s", pipe, WindowsErrorString);
+	}
+
+	static_sprintf(cmdline, "%s -NonInteractive -NoProfile –ExecutionPolicy Bypass "
+		"-File %s -PipeName %s -LocData \"%s\" -Icon %s -AppTitle \"%s\" -ShowBrowserOption",
+		powershell_path, script_path, &pipe[9], locale_str, icon_path, lmprintf(MSG_143));
+	FormatStatus = RunCommand(cmdline, app_dir, TRUE);
+	if ((FormatStatus == 0) && PeekNamedPipe(hPipe, NULL, dwPipeSize, NULL, &dwAvail, NULL) && (dwAvail != 0)) {
+		url = malloc(dwAvail + 1);
+		if ((url != NULL) && ReadFile(hPipe, url, dwAvail, &dwSize, NULL) && (dwSize != 0)) {
+			IMG_SAVE img_save = { 0 };
+			url[dwSize] = 0;
+			for (i = dwSize - 1; i != 0; i--) {
+				if (url[i] == '/')
+					break;
+			}
+			static_strcpy(iso_name, &url[i + 1]);
+			// There's extra stuff after the ISO name, which we need to account for
+			p = strstr(iso_name, ".iso");
+			if (p != NULL) {
+				p[4] = 0;
+			} else {
+				for (i = 0; i < strlen(iso_name); i++) {
+					if (iso_name[i] == '?') {
+						iso_name[i] = 0;
+						break;
+					}
+				}
+			}
+
+			EXT_DECL(img_ext, iso_name, __VA_GROUP__("*.iso"), __VA_GROUP__(lmprintf(MSG_036)));
+			img_save.Type = IMG_SAVE_TYPE_ISO;
+			img_save.ImagePath = FileDialog(TRUE, NULL, &img_ext, 0);
+			if (img_save.ImagePath == NULL) {
+				goto out;
+			}
+			// Download the ISO and report errors if any
+			// TODO: We may want to start a timer here too...
+			SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_NORMAL, 0);
+			SetTaskbarProgressState(TASKBAR_NORMAL);
+			SetTaskbarProgressValue(0, MAX_PROGRESS);
+			SendMessage(hProgress, PBM_SETPOS, 0, 0);
+			FormatStatus = 0;
+			format_op_in_progress = TRUE;
+			if (DownloadToFileOrBuffer(url, img_save.ImagePath, NULL, hMainDialog) == 0) {
+				if (SCODE_CODE(FormatStatus) == ERROR_CANCELLED) {
+					uprintf("Download cancelled by user");
+					SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_PAUSED, 0);
+					SetTaskbarProgressState(TASKBAR_PAUSED);
+					PrintInfo(0, MSG_211);
+					Notification(MSG_INFO, NULL, NULL, lmprintf(MSG_211), lmprintf(MSG_041));
+				} else {
+					FormatStatus = GetLastError();
+					SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_ERROR, 0);
+					SetTaskbarProgressState(TASKBAR_ERROR);
+					PrintInfo(0, MSG_212);
+					MessageBeep(MB_ICONERROR);
+					FlashTaskbar(dialog_handle);
+					SetLastError(FormatStatus);
+					Notification(MSG_ERROR, NULL, NULL, lmprintf(MSG_194, iso_name), lmprintf(MSG_043, WinInetErrorString()));
+				}
+			}
+			// TODO: If download was successful we should select and scan the ISO
+			format_op_in_progress = FALSE;
+			safe_free(img_save.ImagePath);
+		}
+	}
+
+out:
+	if (icon_path[0] != 0)
+		DeleteFileU(icon_path);
+#if !defined(RUFUS_TEST)
+	if (script_path[0] != 0)
+		DeleteFileU(script_path);
+#endif
+	free(url);
+	SendMessage(hMainDialog, UM_ENABLE_CONTROLS, 0, 0);
+	ExitThread(FormatStatus);
+}
+
+BOOL DownloadISO()
+{
+	if (CreateThread(NULL, 0, DownloadISOThread, NULL, 0, NULL) == NULL) {
+		uprintf("Unable to start Windows ISO download thread");
+		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_CANT_START_THREAD);
+		SendMessage(hMainDialog, UM_ENABLE_CONTROLS, 0, 0);
+		return FALSE;
+	}
+	// TODO: Can we locate our modal Window and position it/set it on top?
+	// TODO: Send close message to Fido if the user closes Rufus
+	return TRUE;
+}
+
+BOOL IsDownloadable(char* url)
+{
+	DWORD dwFlags, dwSize, dwTotalSize = 0;
+	const char* accept_types[] = { "*/*\0", NULL };
+	char agent[64], hostname[64], urlpath[128];
+	HINTERNET hSession = NULL, hConnection = NULL, hRequest = NULL;
+	URL_COMPONENTSA UrlParts = { sizeof(URL_COMPONENTSA), NULL, 1, (INTERNET_SCHEME)0,
+		hostname, sizeof(hostname), 0, NULL, 1, urlpath, sizeof(urlpath), NULL, 1 };
+
+	PF_TYPE_DECL(WINAPI, BOOL, InternetCrackUrlA, (LPCSTR, DWORD, DWORD, LPURL_COMPONENTSA));
+	PF_TYPE_DECL(WINAPI, BOOL, InternetGetConnectedState, (LPDWORD, DWORD));
+	PF_TYPE_DECL(WINAPI, HINTERNET, InternetOpenA, (LPCSTR, DWORD, LPCSTR, LPCSTR, DWORD));
+	PF_TYPE_DECL(WINAPI, HINTERNET, InternetConnectA, (HINTERNET, LPCSTR, INTERNET_PORT, LPCSTR, LPCSTR, DWORD, DWORD, DWORD_PTR));
+	PF_TYPE_DECL(WINAPI, BOOL, InternetCloseHandle, (HINTERNET));
+	PF_TYPE_DECL(WINAPI, HINTERNET, HttpOpenRequestA, (HINTERNET, LPCSTR, LPCSTR, LPCSTR, LPCSTR, LPCSTR*, DWORD, DWORD_PTR));
+	PF_TYPE_DECL(WINAPI, BOOL, HttpSendRequestA, (HINTERNET, LPCSTR, DWORD, LPVOID, DWORD));
+	PF_TYPE_DECL(WINAPI, BOOL, HttpQueryInfoA, (HINTERNET, DWORD, LPVOID, LPDWORD, LPDWORD));
+	PF_INIT_OR_OUT(InternetCrackUrlA, WinInet);
+	PF_INIT_OR_OUT(InternetGetConnectedState, WinInet);
+	PF_INIT_OR_OUT(InternetOpenA, WinInet);
+	PF_INIT_OR_OUT(InternetConnectA, WinInet);
+	PF_INIT_OR_OUT(InternetCloseHandle, WinInet);
+	PF_INIT_OR_OUT(HttpOpenRequestA, WinInet);
+	PF_INIT_OR_OUT(HttpSendRequestA, WinInet);
+	PF_INIT_OR_OUT(HttpQueryInfoA, WinInet);
+
+	FormatStatus = 0;
+	DownloadStatus = 404;
+
+	assert(url != NULL);
+
+	if ((!pfInternetCrackUrlA(url, (DWORD)safe_strlen(url), 0, &UrlParts))
+		|| (UrlParts.lpszHostName == NULL) || (UrlParts.lpszUrlPath == NULL)) {
+		uprintf("Unable to decode URL: %s", WinInetErrorString());
+		goto out;
+	}
+	hostname[sizeof(hostname) - 1] = 0;
+
+	// Open an Internet session
+	if (!pfInternetGetConnectedState(&dwFlags, 0)) {
+		SetLastError(ERROR_INTERNET_NOT_INITIALIZED);
+		uprintf("Network is unavailable: %s", WinInetErrorString());
+		goto out;
+	}
+
+	static_sprintf(agent, APPLICATION_NAME "/%d.%d.%d (Windows NT %d.%d%s)",
+		rufus_version[0], rufus_version[1], rufus_version[2],
+		nWindowsVersion >> 4, nWindowsVersion & 0x0F, is_x64() ? "; WOW64" : "");
+	hSession = pfInternetOpenA(agent, INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
+	if (hSession == NULL) {
+		uprintf("Could not open Internet session: %s", WinInetErrorString());
+		goto out;
+	}
+
+	hConnection = pfInternetConnectA(hSession, UrlParts.lpszHostName, UrlParts.nPort, NULL, NULL, INTERNET_SERVICE_HTTP, 0, (DWORD_PTR)NULL);
+	if (hConnection == NULL) {
+		uprintf("Could not connect to server %s:%d: %s", UrlParts.lpszHostName, UrlParts.nPort, WinInetErrorString());
+		goto out;
+	}
+
+	hRequest = pfHttpOpenRequestA(hConnection, "GET", UrlParts.lpszUrlPath, NULL, NULL, accept_types,
+		INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTP | INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTPS |
+		INTERNET_FLAG_NO_COOKIES | INTERNET_FLAG_NO_UI | INTERNET_FLAG_NO_CACHE_WRITE | INTERNET_FLAG_HYPERLINK |
+		((UrlParts.nScheme == INTERNET_SCHEME_HTTPS) ? INTERNET_FLAG_SECURE : 0), (DWORD_PTR)NULL);
+	if (hRequest == NULL) {
+		uprintf("Could not open URL %s: %s", url, WinInetErrorString());
+		goto out;
+	}
+
+	if (!pfHttpSendRequestA(hRequest, NULL, 0, NULL, 0)) {
+		uprintf("Unable to send request: %s", WinInetErrorString());
+		goto out;
+	}
+
+	// Get the file size
+	dwSize = sizeof(DownloadStatus);
+	pfHttpQueryInfoA(hRequest, HTTP_QUERY_STATUS_CODE | HTTP_QUERY_FLAG_NUMBER, (LPVOID)&DownloadStatus, &dwSize, NULL);
+	if (DownloadStatus != 200) {
+		error_code = ERROR_INTERNET_ITEM_NOT_FOUND;
+		uprintf("Unable to access file: %d", DownloadStatus);
+		goto out;
+	}
+	dwSize = sizeof(dwTotalSize);
+	if (!pfHttpQueryInfoA(hRequest, HTTP_QUERY_CONTENT_LENGTH | HTTP_QUERY_FLAG_NUMBER, (LPVOID)&dwTotalSize, &dwSize, NULL))
+		uprintf("Unable to retrieve file length: %s", WinInetErrorString());
+
+out:
+	if (hRequest)
+		pfInternetCloseHandle(hRequest);
+	if (hConnection)
+		pfInternetCloseHandle(hConnection);
+	if (hSession)
+		pfInternetCloseHandle(hSession);
+
+	return (dwTotalSize > 0);
 }

@@ -1,6 +1,6 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
- * Copyright © 2011-2018 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2019 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -66,16 +66,17 @@ static BOOL app_changed_label = FALSE;
 static BOOL allowed_filesystem[FS_MAX] = { 0 };
 static int64_t last_iso_blocking_status;
 static int selected_pt = -1, selected_fs = FS_UNKNOWN, preselected_fs = FS_UNKNOWN;
-static int image_index = 0;
+static int image_index = 0, select_index = 0;
 static RECT relaunch_rc = { -65536, -65536, 0, 0};
 static UINT uQFChecked = BST_CHECKED, uMBRChecked = BST_UNCHECKED;
-static HANDLE format_thid = NULL, dialog_handle = NULL;
+static HANDLE format_thid = NULL;
 static HWND hSelectImage = NULL, hStart = NULL;
 static char szTimer[12] = "00:00:00";
 static unsigned int timer;
-static char uppercase_select[64], uppercase_start[64], uppercase_close[64], uppercase_cancel[64];
+static char uppercase_select[2][64], uppercase_start[64], uppercase_close[64], uppercase_cancel[64];
 
-extern BOOL enable_iso, enable_joliet, enable_rockridge, enable_ntfs_compression;
+extern BOOL enable_iso, enable_joliet, enable_rockridge;
+extern BYTE* fido_script;
 extern uint8_t* grub2_buf;
 extern long grub2_len;
 extern char* szStatusMessage;
@@ -98,13 +99,14 @@ WORD selected_langid = MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT);
 DWORD MainThreadId;
 HWND hDeviceList, hPartitionScheme, hTargetSystem, hFileSystem, hClusterSize, hLabel, hBootType, hNBPasses, hLog = NULL;
 HWND hLogDialog = NULL, hProgress = NULL, hDiskID;
+HANDLE dialog_handle = NULL;
 BOOL is_x86_32, use_own_c32[NB_OLD_C32] = { FALSE, FALSE }, mbr_selected_by_user = FALSE;
 BOOL iso_op_in_progress = FALSE, format_op_in_progress = FALSE, right_to_left_mode = FALSE, has_uefi_csm;
 BOOL enable_HDDs = FALSE, force_update = FALSE, enable_ntfs_compression = FALSE, no_confirmation_on_cancel = FALSE, lock_drive = TRUE;
 BOOL advanced_mode_device, advanced_mode_format, allow_dual_uefi_bios, detect_fakes, enable_vmdk, force_large_fat32, usb_debug;
 BOOL use_fake_units, preserve_timestamps = FALSE, fast_zeroing = FALSE, app_changed_size = FALSE;
 BOOL zero_drive = FALSE, list_non_usb_removable_drives = FALSE, enable_file_indexing, large_drive = FALSE;
-BOOL write_as_image = FALSE, installed_uefi_ntfs;
+BOOL write_as_image = FALSE, installed_uefi_ntfs = FALSE, enable_fido = FALSE;
 uint64_t persistence_size = 0;
 float fScale = 1.0f;
 int dialog_showing = 0, selection_default = BT_IMAGE, windows_to_go_selection = 0, persistence_unit_selection = -1;
@@ -1516,9 +1518,11 @@ static void InitDialog(HWND hDlg)
 	if (strcmp("SCHLIEßEN", uppercase_close) == 0)
 		strcpy(uppercase_close, "SCHLIESSEN");
 	SetWindowTextU(GetDlgItem(hDlg, IDCANCEL), uppercase_close);
-	GetWindowTextU(GetDlgItem(hDlg, IDC_SELECT), uppercase_select, sizeof(uppercase_select));
-	CharUpperBuffU(uppercase_select, sizeof(uppercase_select));
-	SetWindowTextU(GetDlgItem(hDlg, IDC_SELECT), uppercase_select);
+	GetWindowTextU(GetDlgItem(hDlg, IDC_SELECT), uppercase_select[0], sizeof(uppercase_select[0]));
+	static_strcpy(uppercase_select[1], lmprintf(MSG_040));
+	CharUpperBuffU(uppercase_select[0], sizeof(uppercase_select[0]));
+	CharUpperBuffU(uppercase_select[1], sizeof(uppercase_select[1]));
+	SetWindowTextU(GetDlgItem(hDlg, IDC_SELECT), uppercase_select[0]);
 	strcpy(uppercase_cancel, lmprintf(MSG_007));
 	CharUpperBuffU(uppercase_cancel, sizeof(uppercase_cancel));
 
@@ -1870,7 +1874,9 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	BOOL set_selected_fs;
 	DRAWITEMSTRUCT* pDI;
 	LPTOOLTIPTEXT lpttt;
+	NMBCDROPDOWN* pDropDown;
 	HDROP droppedFileInfo;
+	HMENU hMenu;
 	POINT Point;
 	RECT rc, DialogRect, DesktopRect;
 	HDC hDC;
@@ -1886,7 +1892,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	case WM_COMMAND:
 #ifdef RUFUS_TEST
 		if (LOWORD(wParam) == IDC_TEST) {
-			DeletePartitions((DWORD)ComboBox_GetItemData(hDeviceList, ComboBox_GetCurSel(hDeviceList)));
+			uprintf("%s is %s", FIDO_URL, IsDownloadable(FIDO_URL) ? "available" : "NOT available");
 			break;
 		}
 #endif
@@ -2146,33 +2152,38 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			pt = (int)ComboBox_GetItemData(hTargetSystem, ComboBox_GetCurSel(hTargetSystem));
 			return (INT_PTR)TRUE;
 		case IDC_SELECT:
-			if (iso_provided) {
-				uprintf("\r\nImage provided: '%s'", image_path);
-				iso_provided = FALSE;	// One off thing...
+			if (select_index == 1) {
+				EnableControls(FALSE);
+				DownloadISO();
 			} else {
-				char* old_image_path = image_path;
-				// If declared globaly, lmprintf(MSG_036) would be called on each message...
-				EXT_DECL(img_ext, NULL, __VA_GROUP__("*.iso;*.img;*.vhd;*.gz;*.bzip2;*.bz2;*.xz;*.lzma;*.Z;*.zip"),
-					__VA_GROUP__(lmprintf(MSG_036)));
-				image_path = FileDialog(FALSE, NULL, &img_ext, 0);
-				if (image_path == NULL) {
-					if (old_image_path != NULL) {
-						// Reselect previous image
-						image_path = old_image_path;
-					} else {
-						CreateTooltip(hSelectImage, lmprintf(MSG_173), -1);
-						PrintStatus(0, MSG_086);
-					}
-					break;
+				if (iso_provided) {
+					uprintf("\r\nImage provided: '%s'", image_path);
+					iso_provided = FALSE;	// One off thing...
 				} else {
-					free(old_image_path);
+					char* old_image_path = image_path;
+					// If declared globaly, lmprintf(MSG_036) would be called on each message...
+					EXT_DECL(img_ext, NULL, __VA_GROUP__("*.iso;*.img;*.vhd;*.gz;*.bzip2;*.bz2;*.xz;*.lzma;*.Z;*.zip"),
+						__VA_GROUP__(lmprintf(MSG_036)));
+					image_path = FileDialog(FALSE, NULL, &img_ext, 0);
+					if (image_path == NULL) {
+						if (old_image_path != NULL) {
+							// Reselect previous image
+							image_path = old_image_path;
+						} else {
+							CreateTooltip(hSelectImage, lmprintf(MSG_173), -1);
+							PrintStatus(0, MSG_086);
+						}
+						break;
+					} else {
+						free(old_image_path);
+					}
 				}
-			}
-			FormatStatus = 0;
-			format_op_in_progress = FALSE;
-			if (CreateThread(NULL, 0, ISOScanThread, NULL, 0, NULL) == NULL) {
-				uprintf("Unable to start ISO scanning thread");
-				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_START_THREAD);
+				FormatStatus = 0;
+				format_op_in_progress = FALSE;
+				if (CreateThread(NULL, 0, ISOScanThread, NULL, 0, NULL) == NULL) {
+					uprintf("Unable to start ISO scanning thread");
+					FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_CANT_START_THREAD);
+				}
 			}
 			break;
 		case IDC_RUFUS_MBR:
@@ -2258,6 +2269,11 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		case IDC_SAVE:
 			SaveVHD();
 			break;
+		case IDM_SELECT:
+		case IDM_DOWNLOAD:
+			select_index = LOWORD(wParam) - IDM_SELECT;
+			SetWindowTextU(GetDlgItem(hDlg, IDC_SELECT), uppercase_select[select_index]);
+			break;
 		default:
 			return (INT_PTR)FALSE;
 		}
@@ -2266,6 +2282,15 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	case UM_UPDATE_CSM_TOOLTIP:
 		ShowWindow(GetDlgItem(hMainDialog, IDS_CSM_HELP_TXT), ((tt == TT_UEFI) || has_uefi_csm) ? SW_SHOW : SW_HIDE);
 		CreateTooltip(GetDlgItem(hMainDialog, IDS_CSM_HELP_TXT), lmprintf((tt == TT_UEFI) ? MSG_152 : MSG_151), 30000);
+		break;
+	case UM_ENABLE_CONTROLS:
+		if (!IS_ERROR(FormatStatus))
+			PrintInfo(0, MSG_210);
+		else if (SCODE_CODE(FormatStatus))
+			PrintInfo(0, MSG_211);
+		else
+			PrintInfo(0, MSG_212);
+		EnableControls(TRUE);
 		break;
 	case UM_MEDIA_CHANGE:
 		wParam = DBT_CUSTOMEVENT;
@@ -2427,6 +2452,17 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				lpttt->lpszText = wtooltip;
 				break;
 			}
+			break;
+		case BCN_DROPDOWN:
+			pDropDown = (LPNMBCDROPDOWN)lParam;
+			Point.x = pDropDown->rcButton.left;
+			Point.y = pDropDown->rcButton.bottom;
+			ClientToScreen(pDropDown->hdr.hwndFrom, &Point);
+			hMenu = CreatePopupMenu();
+			InsertMenuU(hMenu, -1, MF_BYPOSITION | ((select_index == 0) ? MF_CHECKED : 0), IDM_SELECT, uppercase_select[0]);
+			InsertMenuU(hMenu, -1, MF_BYPOSITION | ((select_index == 1) ? MF_CHECKED : 0), IDM_DOWNLOAD, uppercase_select[1]);
+			TrackPopupMenuEx(hMenu, TPM_LEFTALIGN | TPM_TOPALIGN, Point.x, Point.y, hMainDialog, NULL);
+			DestroyMenu(hMenu);
 			break;
 		}
 		break;
@@ -3080,6 +3116,8 @@ relaunch:
 	// We always launch with the image options displaying
 	image_options = IMOP_WINTOGO;
 	image_option_txt[0] = 0;
+	select_index = 0;
+	enable_fido = FALSE;
 	SetProcessDefaultLayout(right_to_left_mode?LAYOUT_RTL:0);
 	if (get_loc_data_file(loc_file, selected_locale))
 		WriteSettingStr(SETTING_LOCALE, selected_locale->txt[0]);
@@ -3370,6 +3408,7 @@ out:
 	safe_free(update.download_url);
 	safe_free(update.release_notes);
 	safe_free(grub2_buf);
+	safe_free(fido_script);
 	if (argv != NULL) {
 		for (i=0; i<argc; i++) safe_free(argv[i]);
 		safe_free(argv);

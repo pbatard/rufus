@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * ISO file extraction
- * Copyright © 2011-2018 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2019 Pete Batard <pete@akeo.ie>
  * Based on libcdio's iso & udf samples:
  * Copyright © 2003-2014 Rocky Bernstein <rocky@gnu.org>
  *
@@ -860,7 +860,7 @@ out:
 					}
 					free(buf);
 				}
-				_unlinkU(isolinux_tmp);
+				DeleteFileU(isolinux_tmp);
 			}
 			if (img_report.sl_version != 0) {
 				static_sprintf(img_report.sl_version_str, "%d.%02d",
@@ -896,7 +896,7 @@ out:
 				uprintf("  Checking txtsetup.sif:\n  OsLoadOptions = %s", tmp);
 				img_report.uses_minint = (strstr(tmp, "/minint") != NULL);
 			}
-			_unlinkU(tmp_sif);
+			DeleteFileU(tmp_sif);
 			safe_free(tmp);
 		}
 		if (HAS_WININST(img_report)) {
@@ -917,7 +917,7 @@ out:
 					GetGrubVersion(buf, size);
 				}
 				free(buf);
-				_unlinkU(path);
+				DeleteFileU(path);
 			}
 			if (img_report.grub2_version[0] != 0)
 				uprintf("  Detected Grub version: %s", img_report.grub2_version);
