@@ -116,7 +116,7 @@ char embedded_sl_version_str[2][12] = { "?.??", "?.??" };
 char embedded_sl_version_ext[2][32];
 char ClusterSizeLabel[MAX_CLUSTER_SIZES][64];
 char msgbox[1024], msgbox_title[32], *ini_file = NULL, *image_path = NULL, *short_image_path;
-char image_option_txt[128];
+char image_option_txt[128], fido_url[128];
 StrArray DriveID, DriveLabel, DriveHub, BlockingProcess, ImageList;
 // Number of steps for each FS for FCC_STRUCTURE_PROGRESS
 const int nb_steps[FS_MAX] = { 5, 5, 12, 1, 10 };
@@ -1886,7 +1886,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	case WM_COMMAND:
 #ifdef RUFUS_TEST
 		if (LOWORD(wParam) == IDC_TEST) {
-			uprintf("%s is %s", FIDO_URL, IsDownloadable(FIDO_URL) ? "available" : "NOT available");
+			uprintf("%s -> %s", FIDO_BASE, ResolveRedirect(FIDO_BASE));
 			break;
 		}
 #endif

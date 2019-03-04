@@ -1542,13 +1542,31 @@ BOOL SetUpdateCheck(void)
 			 ((ReadSetting32(SETTING_UPDATE_INTERVAL) == -1) && enable_updates) )
 			WriteSetting32(SETTING_UPDATE_INTERVAL, 86400);
 	}
-	// Also detect if we can use FIDO, which depends on:
+	// Also detect if we can use Fido, which depends on:
 	// - Update check being enabled
 	// - URL for the script being reachable
 	if (ReadSetting32(SETTING_UPDATE_INTERVAL) > 0) {
-		uprintf("Checking for %s...", FIDO_URL);
-		enable_fido = IsDownloadable(FIDO_URL);
+		char *p, url[128];
+		// Obviously, we could fetch https://api.github.com/repos/pbatard/Fido/releases/latest
+		// and then parse 'browser_download_url' in the JSON data to get the direct link we
+		// want. But that would force us to download an extra 5 KB of data, which we *really*
+		// don't want to do when we need a superfast availability check.
+		// Therefore, since we don't expect GitHub to change their scheme anytime soon, we
+		// just hack the redirected URL we got back to replace '/tag/' with '/download/'...
+		static_sprintf(url, "%s/%s", ResolveRedirect(FIDO_BASE), FIDO_NAME);
+		p = strstr(url, "/tag/");
+		if (p != NULL) {
+			*p = 0;
+			strcpy(fido_url, url);
+			strcat(fido_url, "/download/");
+			strcat(fido_url, &p[5]);
+		} else {
+			strcpy(fido_url, url);
+		}
+		enable_fido = IsDownloadable(fido_url);
 	}
+	if (!enable_fido)
+		uprintf("Note: ISO download feature will be disabled");
 	return TRUE;
 }
 

@@ -103,8 +103,8 @@
 #endif
 #define DOWNLOAD_URL                RUFUS_URL "/downloads"
 #define FILES_URL                   RUFUS_URL "/files"
-// TODO: Resolve https://github.com/pbatard/Fido/releases/latest and use that as our base
-#define FIDO_URL                    "https://github.com/pbatard/Fido/releases/download/v1.0/Fido.ps1"
+#define FIDO_BASE                   "https://github.com/pbatard/Fido/releases/latest"
+#define FIDO_NAME                   "Fido.ps1"
 #define SECURE_BOOT_MORE_INFO_URL   "https://github.com/pbatard/rufus/wiki/FAQ#Why_do_I_need_to_disable_Secure_Boot_to_use_UEFINTFS"
 #define WPPRECORDER_MORE_INFO_URL   "https://github.com/pbatard/rufus/wiki/FAQ#BSODs_with_Windows_To_Go_drives_created_from_Windows_10_1809_ISOs"
 #define SEVENZIP_URL                "https://www.7-zip.org"
@@ -459,7 +459,7 @@ extern int fs, bt, pt, tt;
 extern unsigned long syslinux_ldlinux_len[2];
 extern char WindowsVersionStr[128], ubuffer[UBUFFER_SIZE], embedded_sl_version_str[2][12];
 extern char szFolderPath[MAX_PATH], app_dir[MAX_PATH], temp_dir[MAX_PATH], system_dir[MAX_PATH];
-extern char sysnative_dir[MAX_PATH];
+extern char sysnative_dir[MAX_PATH], fido_url[128];
 extern char* image_path;
 
 /*
@@ -529,7 +529,8 @@ extern BOOL SetUpdateCheck(void);
 extern BOOL CheckForUpdates(BOOL force);
 extern void DownloadNewVersion(void);
 extern BOOL DownloadISO(void);
-extern BOOL IsDownloadable(char* url);
+extern BOOL IsDownloadable(const char* url);
+extern const char* ResolveRedirect(const char* url);
 extern BOOL IsShown(HWND hDlg);
 extern char* get_token_data_file_indexed(const char* token, const char* filename, int index);
 #define get_token_data_file(token, filename) get_token_data_file_indexed(token, filename, 1)
