@@ -189,6 +189,8 @@ enum user_message_type {
 	UM_UPDATE_CSM_TOOLTIP,
 	UM_RESIZE_BUTTONS,
 	UM_ENABLE_CONTROLS,
+	UM_SELECT_ISO,
+	UM_TIMER_START,
 	UM_FORMAT_START,
 	// Start of the WM IDs for the language menu items
 	UM_LANGUAGE_MENU = WM_APP + 0x100

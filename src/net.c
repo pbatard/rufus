@@ -825,8 +825,8 @@ static DWORD WINAPI DownloadISOThread(LPVOID param)
 	static_sprintf(icon_path, "%s%s.ico", temp_dir, APPLICATION_NAME);
 	ExtractAppIcon(icon_path, TRUE);
 
-	PrintInfo(0, MSG_149);
-
+//#define FORCE_URL "https://github.com/pbatard/rufus/raw/master/res/loc/test/windows_to_go.iso"
+#if !defined(FORCE_URL)
 #if defined(RUFUS_TEST)
 	// In test mode, just use our local script
 	static_strcpy(script_path, "D:\\Projects\\Fido\\Fido.ps1");
@@ -844,7 +844,12 @@ static DWORD WINAPI DownloadISOThread(LPVOID param)
 		}
 		free(sig);
 		uprintf("Signature is valid ✓");
+		SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_NORMAL, 0);
+		SetTaskbarProgressState(TASKBAR_NORMAL);
+		SetTaskbarProgressValue(0, MAX_PROGRESS);
+		SendMessage(hProgress, PBM_SETPOS, 0, 0);
 	}
+	PrintInfo(0, MSG_149);
 
 	assert((fido_script != NULL) && (fido_len != 0));
 
@@ -881,7 +886,11 @@ static DWORD WINAPI DownloadISOThread(LPVOID param)
 	FormatStatus = RunCommand(cmdline, app_dir, TRUE);
 	if ((FormatStatus == 0) && PeekNamedPipe(hPipe, NULL, dwPipeSize, NULL, &dwAvail, NULL) && (dwAvail != 0)) {
 		url = malloc(dwAvail + 1);
-		if ((url != NULL) && ReadFile(hPipe, url, dwAvail, &dwSize, NULL) && (dwSize != 0)) {
+		if ((url != NULL) && ReadFile(hPipe, url, dwAvail, &dwSize, NULL) && (dwSize > 4)) {
+#else
+	{	{	url = strdup(FORCE_URL);
+			dwSize = (DWORD)strlen(FORCE_URL);
+#endif
 			IMG_SAVE img_save = { 0 };
 			url[dwSize] = 0;
 			for (i = dwSize - 1; i != 0; i--) {
@@ -893,12 +902,10 @@ static DWORD WINAPI DownloadISOThread(LPVOID param)
 			p = strstr(iso_name, ".iso");
 			if (p != NULL) {
 				p[4] = 0;
-			} else {
-				for (i = 0; i < strlen(iso_name); i++) {
-					if (iso_name[i] == '?') {
-						iso_name[i] = 0;
-						break;
-					}
+			} else for (i = 0; i < strlen(iso_name); i++) {
+				if (iso_name[i] == '?') {
+					iso_name[i] = 0;
+					break;
 				}
 			}
 
@@ -909,13 +916,13 @@ static DWORD WINAPI DownloadISOThread(LPVOID param)
 				goto out;
 			}
 			// Download the ISO and report errors if any
-			// TODO: We may want to start a timer here too...
 			SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_NORMAL, 0);
 			SetTaskbarProgressState(TASKBAR_NORMAL);
 			SetTaskbarProgressValue(0, MAX_PROGRESS);
 			SendMessage(hProgress, PBM_SETPOS, 0, 0);
 			FormatStatus = 0;
 			format_op_in_progress = TRUE;
+			SendMessage(hMainDialog, UM_TIMER_START, 0, 0);
 			if (DownloadToFileOrBuffer(url, img_save.ImagePath, NULL, hMainDialog) == 0) {
 				if (SCODE_CODE(FormatStatus) == ERROR_CANCELLED) {
 					uprintf("Download cancelled by user");
@@ -934,7 +941,9 @@ static DWORD WINAPI DownloadISOThread(LPVOID param)
 					Notification(MSG_ERROR, NULL, NULL, lmprintf(MSG_194, iso_name), lmprintf(MSG_043, WinInetErrorString()));
 				}
 			}
-			// TODO: If download was successful we should select and scan the ISO
+			// Download was successful => Select and scan the ISO
+			image_path = safe_strdup(img_save.ImagePath);
+			PostMessage(hMainDialog, UM_SELECT_ISO, 0, 0);
 			format_op_in_progress = FALSE;
 			safe_free(img_save.ImagePath);
 		}

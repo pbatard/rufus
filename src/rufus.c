@@ -1710,10 +1710,7 @@ static void SaveVHD(void)
 				if (format_thid != NULL) {
 					uprintf("\r\nSave to VHD operation started");
 					PrintInfo(0, -1);
-					timer = 0;
-					static_sprintf(szTimer, "00:00:00");
-					SendMessageA(hStatus, SB_SETTEXTA, SBT_OWNERDRAW | SB_SECTION_RIGHT, (LPARAM)szTimer);
-					SetTimer(hMainDialog, TID_APP_TIMER, 1000, ClockTimer);
+					SendMessage(hMainDialog, UM_TIMER_START, 0, 0);
 				} else {
 					uprintf("Unable to start VHD save thread");
 					FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_CANT_START_THREAD);
@@ -1776,10 +1773,7 @@ static void SaveISO(void)
 	if (format_thid != NULL) {
 		uprintf("\r\nSave to ISO operation started");
 		PrintInfo(0, -1);
-		timer = 0;
-		static_sprintf(szTimer, "00:00:00");
-		SendMessageA(hStatus, SB_SETTEXTA, SBT_OWNERDRAW | SB_SECTION_RIGHT, (LPARAM)szTimer);
-		SetTimer(hMainDialog, TID_APP_TIMER, 1000, ClockTimer);
+		SendMessage(hMainDialog, UM_TIMER_START, 0, 0);
 	} else {
 		uprintf("Unable to start ISO save thread");
 		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_CANT_START_THREAD);
@@ -2254,10 +2248,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				format_thid = CreateThread(NULL, 0, SumThread, (LPVOID)thread_affinity, 0, NULL);
 				if (format_thid != NULL) {
 					PrintInfo(0, -1);
-					timer = 0;
-					static_sprintf(szTimer, "00:00:00");
-					SendMessageA(hStatus, SB_SETTEXTA, SBT_OWNERDRAW | SB_SECTION_RIGHT, (LPARAM)szTimer);
-					SetTimer(hMainDialog, TID_APP_TIMER, 1000, ClockTimer);
+					SendMessage(hMainDialog, UM_TIMER_START, 0, 0);
 				} else {
 					uprintf("Unable to start checksum thread");
 					FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_CANT_START_THREAD);
@@ -2284,6 +2275,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		CreateTooltip(GetDlgItem(hMainDialog, IDS_CSM_HELP_TXT), lmprintf((tt == TT_UEFI) ? MSG_152 : MSG_151), 30000);
 		break;
 	case UM_ENABLE_CONTROLS:
+		KillTimer(hMainDialog, TID_APP_TIMER);
 		if (!IS_ERROR(FormatStatus))
 			PrintInfo(0, MSG_210);
 		else if (SCODE_CODE(FormatStatus))
@@ -2291,6 +2283,19 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		else
 			PrintInfo(0, MSG_212);
 		EnableControls(TRUE);
+		break;
+	case UM_TIMER_START:
+		PrintInfo(0, -1);
+		timer = 0;
+		static_sprintf(szTimer, "00:00:00");
+		SendMessageA(hStatus, SB_SETTEXTA, SBT_OWNERDRAW | SB_SECTION_RIGHT, (LPARAM)szTimer);
+		SetTimer(hMainDialog, TID_APP_TIMER, 1000, ClockTimer);
+		break;
+	case UM_SELECT_ISO:
+		select_index = 0;
+		iso_provided = TRUE;
+		SetWindowTextU(GetDlgItem(hDlg, IDC_SELECT), uppercase_select[0]);
+		SendMessage(hDlg, WM_COMMAND, IDC_SELECT, 0);
 		break;
 	case UM_MEDIA_CHANGE:
 		wParam = DBT_CUSTOMEVENT;
@@ -2611,11 +2616,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			PostMessage(hMainDialog, UM_FORMAT_COMPLETED, (WPARAM)FALSE, 0);
 		} else {
 			uprintf("\r\nFormat operation started");
-			PrintInfo(0, -1);
-			timer = 0;
-			static_sprintf(szTimer, "00:00:00");
-			SendMessageA(hStatus, SB_SETTEXTA, SBT_OWNERDRAW | SB_SECTION_RIGHT, (LPARAM)szTimer);
-			SetTimer(hMainDialog, TID_APP_TIMER, 1000, ClockTimer);
+			SendMessage(hMainDialog, UM_TIMER_START, 0, 0);
 			// Set focus to the Cancel button
 			SendMessage(hMainDialog, WM_NEXTDLGCTL, (WPARAM)GetDlgItem(hMainDialog, IDCANCEL), TRUE);
 		}
