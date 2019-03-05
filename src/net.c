@@ -49,7 +49,7 @@ BYTE* fido_script = NULL;
 
 extern loc_cmd* selected_locale;
 extern HANDLE dialog_handle;
-extern BOOL force_update, is_x86_32;
+extern BOOL force_update, is_x86_32, close_fido_cookie_prompts;
 static DWORD error_code, fido_len = 0;
 static BOOL update_check_in_progress = FALSE;
 static BOOL force_update_check = FALSE;
@@ -385,7 +385,7 @@ static uint64_t DownloadToFileOrBuffer(const char* url, const char* file, BYTE**
 			uprintf("No buffer pointer provided for download");
 			goto out;
 		}
-		*buffer = malloc(total_size);
+		*buffer = malloc((size_t)total_size);
 		if (*buffer == NULL) {
 			uprintf("Could not allocate buffer for download");
 			goto out;
@@ -897,9 +897,12 @@ static DWORD WINAPI DownloadISOThread(LPVOID param)
 	}
 
 	static_sprintf(cmdline, "%s -NonInteractive -NoProfile –ExecutionPolicy Bypass "
-		"-File %s -PipeName %s -LocData \"%s\" -Icon %s -AppTitle \"%s\" -ShowBrowserOption",
+		"-File %s -PipeName %s -LocData \"%s\" -Icon %s -AppTitle \"%s\"",
 		powershell_path, script_path, &pipe[9], locale_str, icon_path, lmprintf(MSG_143));
+	// Signal our Windows alerts hook that it should close the IE cookie prompts from Fido
+	close_fido_cookie_prompts = TRUE;
 	FormatStatus = RunCommand(cmdline, app_dir, TRUE);
+	close_fido_cookie_prompts = FALSE;
 	if ((FormatStatus == 0) && PeekNamedPipe(hPipe, NULL, dwPipeSize, NULL, &dwAvail, NULL) && (dwAvail != 0)) {
 		url = malloc(dwAvail + 1);
 		if ((url != NULL) && ReadFile(hPipe, url, dwAvail, &dwSize, NULL) && (dwSize > 4)) {
