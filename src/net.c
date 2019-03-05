@@ -232,13 +232,15 @@ static HINTERNET GetInternetSession(BOOL bRetry)
 	int i;
 	char agent[64];
 	BOOL r;
-	DWORD dwFlags;
+	DWORD dwFlags, dwTimeout = NET_SESSION_TIMEOUT;
 	HINTERNET hSession = NULL;
 
 	PF_TYPE_DECL(WINAPI, BOOL, InternetGetConnectedState, (LPDWORD, DWORD));
 	PF_TYPE_DECL(WINAPI, HINTERNET, InternetOpenA, (LPCSTR, DWORD, LPCSTR, LPCSTR, DWORD));
+	PF_TYPE_DECL(WINAPI, BOOL, InternetSetOptionA, (HINTERNET, DWORD, LPVOID, DWORD));
 	PF_INIT_OR_OUT(InternetGetConnectedState, WinInet);
 	PF_INIT_OR_OUT(InternetOpenA, WinInet);
+	PF_INIT_OR_OUT(InternetSetOptionA, WinInet);
 
 	for (i = 0; i <= WRITE_RETRIES; i++) {
 		r = pfInternetGetConnectedState(&dwFlags, 0);
@@ -256,6 +258,10 @@ static HINTERNET GetInternetSession(BOOL bRetry)
 		rufus_version[0], rufus_version[1], rufus_version[2],
 		nWindowsVersion >> 4, nWindowsVersion & 0x0F, is_x64() ? "; WOW64" : "");
 	hSession = pfInternetOpenA(agent, INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
+	// Set the timeouts
+	pfInternetSetOptionA(hSession, INTERNET_OPTION_CONNECT_TIMEOUT, (LPVOID)&dwTimeout, sizeof(dwTimeout));
+	pfInternetSetOptionA(hSession, INTERNET_OPTION_SEND_TIMEOUT, (LPVOID)&dwTimeout, sizeof(dwTimeout));
+	pfInternetSetOptionA(hSession, INTERNET_OPTION_RECEIVE_TIMEOUT, (LPVOID)&dwTimeout, sizeof(dwTimeout));
 
 out:
 	return hSession;
@@ -896,7 +902,7 @@ static DWORD WINAPI DownloadISOThread(LPVOID param)
 		uprintf("Could not create pipe '%s': %s", pipe, WindowsErrorString);
 	}
 
-	static_sprintf(cmdline, "%s -NonInteractive -NoProfile –ExecutionPolicy Bypass "
+	static_sprintf(cmdline, "%s -NonInteractive -Sta -NoProfile –ExecutionPolicy Bypass "
 		"-File %s -PipeName %s -LocData \"%s\" -Icon %s -AppTitle \"%s\"",
 		powershell_path, script_path, &pipe[9], locale_str, icon_path, lmprintf(MSG_143));
 	// Signal our Windows alerts hook that it should close the IE cookie prompts from Fido
@@ -1110,7 +1116,7 @@ const char* ResolveRedirect(const char* url)
 
 	hRequest = pfHttpOpenRequestA(hConnection, "GET", UrlParts.lpszUrlPath, NULL, NULL, accept_types,
 		INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTP | INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTPS | INTERNET_FLAG_NO_AUTO_REDIRECT |
-		INTERNET_FLAG_NO_COOKIES | INTERNET_FLAG_NO_UI | INTERNET_FLAG_NO_CACHE_WRITE | INTERNET_FLAG_HYPERLINK |
+		INTERNET_FLAG_NO_COOKIES | INTERNET_FLAG_NO_UI | INTERNET_FLAG_HYPERLINK |
 		((UrlParts.nScheme == INTERNET_SCHEME_HTTPS) ? INTERNET_FLAG_SECURE : 0), (DWORD_PTR)NULL);
 	if (hRequest == NULL)
 		goto out;
@@ -1132,5 +1138,12 @@ const char* ResolveRedirect(const char* url)
 	}
 
 out:
+	if (hRequest)
+		pfInternetCloseHandle(hRequest);
+	if (hConnection)
+		pfInternetCloseHandle(hConnection);
+	if (hSession)
+		pfInternetCloseHandle(hSession);
+
 	return r ? ret_url : url;
 }

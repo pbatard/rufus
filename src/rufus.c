@@ -3153,7 +3153,7 @@ relaunch:
 
 	// Set the hook to automatically close Windows' "You need to format the disk in drive..." prompt
 	if (!SetAlertPromptHook())
-		uprintf("Warning: Could not set 'Format Disk' prompt auto-close");
+		uprintf("Warning: Could not set alert prompts hook");
 
 	ShowWindow(hDlg, SW_SHOWNORMAL);
 	UpdateWindow(hDlg);
