@@ -484,7 +484,7 @@ extern char* SizeToHumanReadable(uint64_t size, BOOL copy_to_log, BOOL fake_unit
 extern char* TimestampToHumanReadable(uint64_t ts);
 extern HWND MyCreateDialog(HINSTANCE hInstance, int Dialog_ID, HWND hWndParent, DLGPROC lpDialogFunc);
 extern INT_PTR MyDialogBox(HINSTANCE hInstance, int Dialog_ID, HWND hWndParent, DLGPROC lpDialogFunc);
-extern void CenterDialog(HWND hDlg);
+extern void CenterDialog(HWND hDlg, HWND hParent);
 extern void ResizeMoveCtrl(HWND hDlg, HWND hCtrl, int dx, int dy, int dw, int dh, float scale);
 extern void ResizeButtonHeight(HWND hDlg, int id);
 extern void CreateStatusBar(void);

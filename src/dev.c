@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Device detection and enumeration
- * Copyright © 2014-2018 Pete Batard <pete@akeo.ie>
+ * Copyright © 2014-2019 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -311,8 +311,8 @@ BOOL GetOpticalMedia(IMG_SAVE* img_save)
 //#define FORCED_DEVICE
 #ifdef FORCED_DEVICE
 #define FORCED_VID 0x067B
-#define FORCED_PID 0x2731
-#define FORCED_NAME "SD Card Reader USB Device"
+#define FORCED_PID 0x2733
+#define FORCED_NAME "EAGET Mass Storage USB Device"
 #endif
 
 /*

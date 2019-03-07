@@ -77,6 +77,7 @@ static char uppercase_select[2][64], uppercase_start[64], uppercase_close[64], u
 
 extern BOOL enable_iso, enable_joliet, enable_rockridge;
 extern BYTE* fido_script;
+extern HWND hFidoDlg;
 extern uint8_t* grub2_buf;
 extern long grub2_len;
 extern char* szStatusMessage;
@@ -1692,10 +1693,7 @@ static void SaveVHD(void)
 		img_save.DeviceSize = SelectedDrive.DiskSize;
 		if (img_save.ImagePath != NULL) {
 			// Reset all progress bars
-			SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_NORMAL, 0);
-			SetTaskbarProgressState(TASKBAR_NORMAL);
-			SetTaskbarProgressValue(0, MAX_PROGRESS);
-			SendMessage(hProgress, PBM_SETPOS, 0, 0);
+			SendMessage(hMainDialog, UM_PROGRESS_INIT, 0, 0);
 			FormatStatus = 0;
 			format_op_in_progress = TRUE;
 			free_space.QuadPart = 0;
@@ -1759,11 +1757,7 @@ static void SaveISO(void)
 	img_save.ImagePath = FileDialog(TRUE, NULL, &img_ext, 0);
 	if (img_save.ImagePath == NULL)
 		return;
-	// Reset all progress bars
-	SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_NORMAL, 0);
-	SetTaskbarProgressState(TASKBAR_NORMAL);
-	SetTaskbarProgressValue(0, MAX_PROGRESS);
-	SendMessage(hProgress, PBM_SETPOS, 0, 0);
+	SendMessage(hMainDialog, UM_PROGRESS_INIT, 0, 0);
 	FormatStatus = 0;
 	format_op_in_progress = TRUE;
 	// Disable all controls except cancel
@@ -1875,7 +1869,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	RECT rc, DialogRect, DesktopRect;
 	HDC hDC;
 	PAINTSTRUCT ps;
-	int nDeviceIndex, i, nWidth, nHeight, nb_devices, selected_language, offset;
+	int nDeviceIndex, i, nWidth, nHeight, nb_devices, selected_language, offset, tb_state, tb_flags;
 	char tmp[128];
 	wchar_t* wbuffer = NULL;
 	loc_cmd* lcmd = NULL;
@@ -2207,11 +2201,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			StrArrayClear(&BlockingProcess);
 			format_op_in_progress = TRUE;
 			no_confirmation_on_cancel = FALSE;
-			// Reset all progress bars
-			SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_NORMAL, 0);
-			SetTaskbarProgressState(TASKBAR_NORMAL);
-			SetTaskbarProgressValue(0, MAX_PROGRESS);
-			SendMessage(hProgress, PBM_SETPOS, 0, 0);
+			SendMessage(hMainDialog, UM_PROGRESS_INIT, 0, 0);
 			selection_default = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
 			// Create a thread to validate options and download files as needed (so that we can update the UI).
 			// On exit, this thread sends message UM_FORMAT_START back to this dialog.
@@ -2236,11 +2226,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				FormatStatus = 0;
 				format_op_in_progress = TRUE;
 				no_confirmation_on_cancel = TRUE;
-				// Reset all progress bars
-				SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_NORMAL, 0);
-				SetTaskbarProgressState(TASKBAR_NORMAL);
-				SetTaskbarProgressValue(0, MAX_PROGRESS);
-				SendMessage(hProgress, PBM_SETPOS, 0, 0);
+				SendMessage(hMainDialog, UM_PROGRESS_INIT, 0, 0);
 				// Disable all controls except cancel
 				EnableControls(FALSE);
 				InitProgress(FALSE);
@@ -2513,7 +2499,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			return (INT_PTR)TRUE;
 		}
 		if (message == WM_CLOSE) {
-			// We must use PostQuitMessage() on VM_CLOSE, to prevent notification sound...
+			// We must use PostQuitMessage() on WM_CLOSE, to prevent notification sound...
 			PostQuitMessage(0);
 		} else {
 			// ...but we must simulate Cancel on shutdown requests, else the app freezes.
@@ -2532,14 +2518,24 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		break;
 
 	case UM_PROGRESS_EXIT:
+		tb_state = PBST_NORMAL;
+		tb_flags = TASKBAR_NORMAL;
 		if (isMarquee) {
 			SendMessage(hProgress, PBM_SETMARQUEE, FALSE, 0);
 			SetTaskbarProgressValue(0, MAX_PROGRESS);
 		} else if (!IS_ERROR(FormatStatus)) {
 			SetTaskbarProgressValue(MAX_PROGRESS, MAX_PROGRESS);
+		} else if (SCODE_CODE(FormatStatus) == ERROR_CANCELLED) {
+			tb_state = PBST_PAUSED;
+			tb_flags = TASKBAR_PAUSED;
+		} else {
+			tb_state = PBST_ERROR;
+			tb_flags = TASKBAR_ERROR;
+			MessageBeep(MB_ICONERROR);
+			FlashTaskbar(dialog_handle);
 		}
-		SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_NORMAL, 0);
-		SetTaskbarProgressState(TASKBAR_NORMAL);
+		SendMessage(hProgress, PBM_SETSTATE, (WPARAM)tb_state, 0);
+		SetTaskbarProgressState(tb_flags);
 		break;
 
 	case UM_NO_UPDATE:
@@ -3387,6 +3383,8 @@ relaunch:
 			DispatchMessage(&msg);
 		}
 	}
+	if (hFidoDlg != NULL)
+		SendMessage(hFidoDlg, WM_CLOSE, 0, 0);
 	if (relaunch) {
 		relaunch = FALSE;
 		reinit_localization();

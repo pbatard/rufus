@@ -226,6 +226,38 @@ const char* WinInetErrorString(void)
 	}
 }
 
+static char* GetShortName(const char* url)
+{
+	static char short_name[128];
+	char *p;
+	size_t i, len = safe_strlen(url);
+	if (len < 5)
+		return NULL;
+
+	for (i = len - 1; i > 0; i--) {
+		if (url[i] == '/') {
+			i++;
+			break;
+		}
+	}
+	static_strcpy(short_name, &url[i]);
+	// If the URL is followed by a query, remove that part
+	// Make sure we detect escaped queries too
+	p = strstr(short_name, "%3F");
+	if (p != NULL)
+		*p = 0;
+	p = strstr(short_name, "%3f");
+	if (p != NULL)
+		*p = 0;
+	for (i = 0; i < strlen(short_name); i++) {
+		if ((short_name[i] == '?') || (short_name[i] == '#')) {
+			short_name[i] = 0;
+			break;
+		}
+	}
+	return short_name;
+}
+
 // Open an Internet session
 static HINTERNET GetInternetSession(BOOL bRetry)
 {
@@ -275,7 +307,7 @@ out:
  * to the dialog in question, with WPARAM being set to nonzero for EXIT on success
  * and also attempt to indicate progress using an IDC_PROGRESS control
  */
-static uint64_t DownloadToFileOrBuffer(const char* url, const char* file, BYTE** buffer, HWND hProgressDialog)
+static uint64_t DownloadToFileOrBuffer(const char* url, const char* file, BYTE** buffer, HWND hProgressDialog, BOOL bTaskBarProgress)
 {
 	const char* accept_types[] = {"*/*\0", NULL};
 	const char* short_name;
@@ -377,8 +409,12 @@ static uint64_t DownloadToFileOrBuffer(const char* url, const char* file, BYTE**
 		goto out;
 	}
 	total_size = (uint64_t)atoll(strsize);
-	if (hProgressDialog != NULL)
+	if (hProgressDialog != NULL) {
+		char msg[128];
 		uprintf("File length: %s", SizeToHumanReadable(total_size, FALSE, FALSE));
+		static_sprintf(msg, "%s (%s)", GetShortName(url), SizeToHumanReadable(total_size, FALSE, FALSE));
+		PrintStatus(0, MSG_085, msg);
+	}
 
 	if (file != NULL) {
 		hFile = CreateFileU(file, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
@@ -406,7 +442,9 @@ static uint64_t DownloadToFileOrBuffer(const char* url, const char* file, BYTE**
 		if (!pfInternetReadFile(hRequest, buf, sizeof(buf), &dwDownloaded) || (dwDownloaded == 0))
 			break;
 		if (hProgressDialog != NULL) {
-			SendMessage(hProgressBar, PBM_SETPOS, (WPARAM)(MAX_PROGRESS*((1.0f*size) / (1.0f*total_size))), 0);
+			SendMessage(hProgressBar, PBM_SETPOS, (WPARAM)((1.0f * MAX_PROGRESS * size) / (1.0f * total_size)), 0);
+			if (bTaskBarProgress)
+				SetTaskbarProgressValue((ULONGLONG)((1.0f * MAX_PROGRESS * size) / (1.0f * total_size)), MAX_PROGRESS);
 			PrintInfo(0, MSG_241, (100.0f*size) / (1.0f*total_size));
 		}
 		if (file != NULL) {
@@ -480,10 +518,10 @@ DWORD DownloadSignedFile(const char* url, const char* file, HWND hProgressDialog
 	strcpy(url_sig, url);
 	strcat(url_sig, ".sig");
 
-	buf_len = (DWORD)DownloadToFileOrBuffer(url, NULL, &buf, hProgressDialog);
+	buf_len = (DWORD)DownloadToFileOrBuffer(url, NULL, &buf, hProgressDialog, FALSE);
 	if (buf_len == 0)
 		goto out;
-	sig_len = (DWORD)DownloadToFileOrBuffer(url_sig, NULL, &sig, NULL);
+	sig_len = (DWORD)DownloadToFileOrBuffer(url_sig, NULL, &sig, NULL, FALSE);
 	if ((sig_len != RSA_SIGNATURE_SIZE) || (!ValidateOpensslSignature(buf, buf_len, sig, sig_len))) {
 		uprintf("FATAL: Download signature is invalid ✗");
 		DownloadStatus = 403;	// Forbidden
@@ -750,7 +788,7 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 
 		// Now download the signature file
 		static_sprintf(sigpath, "%s/%s.sig", server_url, urlpath);
-		dwDownloaded = (DWORD)DownloadToFileOrBuffer(sigpath, NULL, &sig, NULL);
+		dwDownloaded = (DWORD)DownloadToFileOrBuffer(sigpath, NULL, &sig, NULL, FALSE);
 		if ((dwDownloaded != RSA_SIGNATURE_SIZE) || (!ValidateOpensslSignature(buf, dwTotalSize, sig, dwDownloaded))) {
 			uprintf("FATAL: Version signature is invalid ✗");
 			goto out;
@@ -828,12 +866,12 @@ BOOL CheckForUpdates(BOOL force)
  */
 static DWORD WINAPI DownloadISOThread(LPVOID param)
 {
-	char cmdline[512], locale_str[1024], iso_name[128], pipe[64] = "\\\\.\\pipe\\";
+	char cmdline[512], locale_str[1024], pipe[64] = "\\\\.\\pipe\\";
 	char powershell_path[MAX_PATH], icon_path[MAX_PATH] = "", script_path[MAX_PATH] = "";
-	char *p, *url = NULL, sig_url[128];
+	char *url = NULL, sig_url[128];
 	BYTE *sig = NULL;
 	HANDLE hFile, hPipe;
-	DWORD i, dwSize, dwAvail, dwPipeSize = 4096;
+	DWORD dwSize, dwAvail, dwPipeSize = 4096;
 	GUID guid;
 
 	IGNORE_RETVAL(CoInitializeEx(NULL, COINIT_APARTMENTTHREADED));
@@ -847,6 +885,7 @@ static DWORD WINAPI DownloadISOThread(LPVOID param)
 	ExtractAppIcon(icon_path, TRUE);
 
 //#define FORCE_URL "https://github.com/pbatard/rufus/raw/master/res/loc/test/windows_to_go.iso"
+//#define FORCE_URL "https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-9.8.0-amd64-netinst.iso"
 #if !defined(FORCE_URL)
 #if defined(RUFUS_TEST)
 	// In test mode, just use our local script
@@ -854,11 +893,11 @@ static DWORD WINAPI DownloadISOThread(LPVOID param)
 #else
 	// If we don't have the script, download it
 	if (fido_len == 0) {
-		fido_len = (DWORD)DownloadToFileOrBuffer(fido_url, NULL, &fido_script, hMainDialog);
+		fido_len = (DWORD)DownloadToFileOrBuffer(fido_url, NULL, &fido_script, hMainDialog, FALSE);
 		if (fido_len == 0)
 			goto out;
 		static_sprintf(sig_url, "%s.sig", fido_url);
-		dwSize = (DWORD)DownloadToFileOrBuffer(sig_url, NULL, &sig, NULL);
+		dwSize = (DWORD)DownloadToFileOrBuffer(sig_url, NULL, &sig, NULL, FALSE);
 		if ((dwSize != RSA_SIGNATURE_SIZE) || (!ValidateOpensslSignature(fido_script, fido_len, sig, dwSize))) {
 			uprintf("FATAL: Signature is invalid ✗");
 			free(sig);
@@ -918,57 +957,32 @@ static DWORD WINAPI DownloadISOThread(LPVOID param)
 #endif
 			IMG_SAVE img_save = { 0 };
 			url[dwSize] = 0;
-			for (i = dwSize - 1; i != 0; i--) {
-				if (url[i] == '/')
-					break;
-			}
-			static_strcpy(iso_name, &url[i + 1]);
-			// There's extra stuff after the ISO name, which we need to account for
-			p = strstr(iso_name, ".iso");
-			if (p != NULL) {
-				p[4] = 0;
-			} else for (i = 0; i < strlen(iso_name); i++) {
-				if (iso_name[i] == '?') {
-					iso_name[i] = 0;
-					break;
-				}
-			}
-
-			EXT_DECL(img_ext, iso_name, __VA_GROUP__("*.iso"), __VA_GROUP__(lmprintf(MSG_036)));
+			EXT_DECL(img_ext, GetShortName(url), __VA_GROUP__("*.iso"), __VA_GROUP__(lmprintf(MSG_036)));
 			img_save.Type = IMG_SAVE_TYPE_ISO;
 			img_save.ImagePath = FileDialog(TRUE, NULL, &img_ext, 0);
 			if (img_save.ImagePath == NULL) {
 				goto out;
 			}
 			// Download the ISO and report errors if any
-			SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_NORMAL, 0);
-			SetTaskbarProgressState(TASKBAR_NORMAL);
-			SetTaskbarProgressValue(0, MAX_PROGRESS);
-			SendMessage(hProgress, PBM_SETPOS, 0, 0);
+			SendMessage(hMainDialog, UM_PROGRESS_INIT, 0, 0);
 			FormatStatus = 0;
 			format_op_in_progress = TRUE;
 			SendMessage(hMainDialog, UM_TIMER_START, 0, 0);
-			if (DownloadToFileOrBuffer(url, img_save.ImagePath, NULL, hMainDialog) == 0) {
+			if (DownloadToFileOrBuffer(url, img_save.ImagePath, NULL, hMainDialog, TRUE) == 0) {
+				SendMessage(hMainDialog, UM_PROGRESS_EXIT, 0, 0);
 				if (SCODE_CODE(FormatStatus) == ERROR_CANCELLED) {
 					uprintf("Download cancelled by user");
-					SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_PAUSED, 0);
-					SetTaskbarProgressState(TASKBAR_PAUSED);
-					PrintInfo(0, MSG_211);
 					Notification(MSG_INFO, NULL, NULL, lmprintf(MSG_211), lmprintf(MSG_041));
+					PrintInfo(0, MSG_211);
 				} else {
-					FormatStatus = GetLastError();
-					SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_ERROR, 0);
-					SetTaskbarProgressState(TASKBAR_ERROR);
+					Notification(MSG_ERROR, NULL, NULL, lmprintf(MSG_194, GetShortName(url)), lmprintf(MSG_043, WinInetErrorString()));
 					PrintInfo(0, MSG_212);
-					MessageBeep(MB_ICONERROR);
-					FlashTaskbar(dialog_handle);
-					SetLastError(FormatStatus);
-					Notification(MSG_ERROR, NULL, NULL, lmprintf(MSG_194, iso_name), lmprintf(MSG_043, WinInetErrorString()));
 				}
+			} else {
+				// Download was successful => Select and scan the ISO
+				image_path = safe_strdup(img_save.ImagePath);
+				PostMessage(hMainDialog, UM_SELECT_ISO, 0, 0);
 			}
-			// Download was successful => Select and scan the ISO
-			image_path = safe_strdup(img_save.ImagePath);
-			PostMessage(hMainDialog, UM_SELECT_ISO, 0, 0);
 			format_op_in_progress = FALSE;
 			safe_free(img_save.ImagePath);
 		}

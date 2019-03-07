@@ -4,7 +4,7 @@
  * Copyright © 1998-2001 Free Software Foundation, Inc.
  * Copyright © 2004 g10 Code GmbH
  * Copyright © 2002-2015 Wei Dai & Igor Pavlov
- * Copyright © 2015-2016 Pete Batard <pete@akeo.ie>
+ * Copyright © 2015-2019 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -827,7 +827,7 @@ INT_PTR CALLBACK ChecksumCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 			SetWindowTextU(hDlg, &image_path[i+1]);
 		// Set focus on the OK button
 		SendMessage(hDlg, WM_NEXTDLGCTL, (WPARAM)GetDlgItem(hDlg, IDOK), TRUE);
-		CenterDialog(hDlg);
+		CenterDialog(hDlg, NULL);
 		break;
 	case WM_COMMAND:
 		switch (LOWORD(wParam)) {
