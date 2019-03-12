@@ -117,7 +117,7 @@ char embedded_sl_version_str[2][12] = { "?.??", "?.??" };
 char embedded_sl_version_ext[2][32];
 char ClusterSizeLabel[MAX_CLUSTER_SIZES][64];
 char msgbox[1024], msgbox_title[32], *ini_file = NULL, *image_path = NULL, *short_image_path;
-char image_option_txt[128], fido_url[128];
+char image_option_txt[128], *fido_url = NULL;
 StrArray DriveID, DriveLabel, DriveHub, BlockingProcess, ImageList;
 // Number of steps for each FS for FCC_STRUCTURE_PROGRESS
 const int nb_steps[FS_MAX] = { 5, 5, 12, 1, 10 };
@@ -1880,7 +1880,6 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	case WM_COMMAND:
 #ifdef RUFUS_TEST
 		if (LOWORD(wParam) == IDC_TEST) {
-			uprintf("%s -> %s", FIDO_BASE, ResolveRedirect(FIDO_BASE));
 			break;
 		}
 #endif
@@ -2264,10 +2263,17 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		KillTimer(hMainDialog, TID_APP_TIMER);
 		if (!IS_ERROR(FormatStatus))
 			PrintInfo(0, MSG_210);
-		else if (SCODE_CODE(FormatStatus))
+		else switch (SCODE_CODE(FormatStatus)) {
+		case ERROR_CANCELLED:
 			PrintInfo(0, MSG_211);
-		else
+			break;
+		case ERROR_BAD_SIGNATURE:
+			PrintInfo(0, MSG_283);
+			break;
+		default:
 			PrintInfo(0, MSG_212);
+			break;
+		}
 		EnableControls(TRUE);
 		break;
 	case UM_TIMER_START:
@@ -3114,6 +3120,7 @@ relaunch:
 	image_options = IMOP_WINTOGO;
 	image_option_txt[0] = 0;
 	select_index = 0;
+	safe_free(fido_url);
 	enable_fido = FALSE;
 	SetProcessDefaultLayout(right_to_left_mode?LAYOUT_RTL:0);
 	if (get_loc_data_file(loc_file, selected_locale))
@@ -3407,6 +3414,7 @@ out:
 	safe_free(update.download_url);
 	safe_free(update.release_notes);
 	safe_free(grub2_buf);
+	safe_free(fido_url);
 	safe_free(fido_script);
 	if (argv != NULL) {
 		for (i=0; i<argc; i++) safe_free(argv[i]);

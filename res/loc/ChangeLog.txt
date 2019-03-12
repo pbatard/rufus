@@ -2,19 +2,31 @@ This file lists all the changes that have been applied to the en-US translation 
 rufus.loc since its original version.
 
 To edit a translation, please make sure to follow:
-https://github.com/pbatard/rufus/wiki/Localization#Editing_a_translation
-Or simply download the latest pollock.exe from https://rufus.ie/locale/ and follow
-its directions.
+https://github.com/pbatard/rufus/wiki/Localization#Editing_an_existing_translation
+Or simply download https://rufus-web.akeo.ie/locale/pollock.exe and follow its directions.
 
-o v3.5
+o v3.5 (2019.03.12)
+  The following 3 messages can be tested by creating a UEFI:NTFS drive in Rufus ('Show advanced drive properties' must be enabled
+  and then you can just select 'UEFI:NTFS' under 'Boot selection' and click 'START'. Then, when the drive creation is complete, you
+  will see a dialog using the 3 messages below)
   - *NEW*      MSG_127 "Do not show this message again"
-  - *NEW*      MSG_128 "Important notice about %s" where %s will be one of "MBR", "Secure Boot", "Windows To Go"
+  In the following '%s' will be one of "MBR", "Secure Boot", "Windows To Go" (in English). Please be mindful that the (...) below
+  means that there is MORE DATA to this message and that you need to look at the English version in the loc file for the full text.
+  - *NEW*      MSG_128 "Important notice about %s"
   - *NEW*      MSG_129 "You have just created a media that includes the UEFI:NTFS bootloader (...)"
+  The following 2 messages can be tested when creating a Windows image from the latest Windows 10 retail ISOs
   - *NEW*      MSG_130 "Windows image selection"
   - *NEW*      MSG_131 "This ISO contains multiple Windows images.\nPlease select the image you wish to use for this installation:"
+  You should be able to see this message if you open a command prompt to the root of your flash drive and then attempt to format
+  it in Rufus. For instance, if your flash drive is E: just open cmd.exe and then type E: to navigate to that drive.
   - *NEW*      MSG_132 "Another program or process is accessing this drive. Do you want to format it anyway?"
+  The following message will appear if you create a Windows To Go drive from a Windows 10 1809 ISO. Please be mindful that the (...)
+  below means that there is MORE DATA to this message and that you need to look at the English version to translate it.
   - *NEW*      MSG_133 "Rufus has detected that you are attempting to create a Windows To Go media based on a 1809 ISO. (...)"
+  The following will appear if you attempt to format a drive that is larger than 2 TB. Again, please be mindful that (...) means
+  that there is more data to this message and that you must look at the English version to translate it.
   - *NEW*      MSG_134 "Because MBR has been selected for the partition scheme, Rufus can only create a partition up to 2 TB (...)"
+  MSG_135 to 149 appear in the "Download ISO Image" dialog that is proposed from the SELECT split button when clicking DOWNLOAD
   - *NEW*      MSG_135 "Version"
   - *NEW*      MSG_136 "Release"
   - *NEW*      MSG_137 "Edition"
@@ -23,10 +35,15 @@ o v3.5
   - *NEW*      MSG_140 "Confirm"
   - *NEW*      MSG_141 "Back"
   - *NEW*      MSG_142 "Please wait..."
-  - *NEW*      MSG_143 "Download ISO Image"
-  - *NEW*      MSG_144 "Download using a browser"
-  - *NEW*      MSG_149 "Running download script..."
-  - *UPDATED*  MSG_165
+  - *NEW*      MSG_143 "Download using a browser"
+  - *NEW*      MSG_144 "Temporarily banned by Microsoft for requesting too many downloads - Please try again later..."
+  The following 2 messages should only appear on vanilla Windows 7 platforms when launching the 'Download ISO Image' script
+  - *NEW*      MSG_145 "PowerShell 3.0 or later is required to run this script."
+  - *NEW*      MSG_146 "Do you want to go online and download it?"
+  - *NEW*      MSG_148 "Running download script..."
+  - *NEW*      MSG_149 "Download ISO Image"
+  The tooltip for the SELECT button has been updated to mention downloads
+  - *UPDATED*  MSG_165 "Click to select an image..." -> "Click to select or download an image..."
 
 o v3.2 (2018.07.20)
 	The following appears in Advanced format options → Check device for bad blocks → dropdown menu with

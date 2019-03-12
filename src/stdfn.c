@@ -23,6 +23,7 @@
 
 #include <windows.h>
 #include <sddl.h>
+#include <gpedit.h>
 
 #include "rufus.h"
 #include "missing.h"
@@ -685,40 +686,6 @@ BOOL IsFontAvailable(const char* font_name)
 /*
  * Set or restore a Local Group Policy DWORD key indexed by szPath/SzPolicy
  */
-#pragma push_macro("INTERFACE")
-#undef  INTERFACE
-#define INTERFACE IGroupPolicyObject
-#define REGISTRY_EXTENSION_GUID { 0x35378EACL, 0x683F, 0x11D2, {0xA8, 0x9A, 0x00, 0xC0, 0x4F, 0xBB, 0xCF, 0xA2} }
-#define GPO_OPEN_LOAD_REGISTRY  1
-#define GPO_SECTION_MACHINE     2
-typedef enum _GROUP_POLICY_OBJECT_TYPE {
-	GPOTypeLocal = 0, GPOTypeRemote, GPOTypeDS
-} GROUP_POLICY_OBJECT_TYPE, *PGROUP_POLICY_OBJECT_TYPE;
-DECLARE_INTERFACE_(IGroupPolicyObject, IUnknown) {
-	STDMETHOD(QueryInterface) (THIS_ REFIID riid, LPVOID *ppvObj) PURE;
-	STDMETHOD_(ULONG, AddRef) (THIS) PURE;
-	STDMETHOD_(ULONG, Release) (THIS) PURE;
-	STDMETHOD(New) (THIS_ LPOLESTR pszDomainName, LPOLESTR pszDisplayName, DWORD dwFlags) PURE;
-	STDMETHOD(OpenDSGPO) (THIS_ LPOLESTR pszPath, DWORD dwFlags) PURE;
-	STDMETHOD(OpenLocalMachineGPO) (THIS_ DWORD dwFlags) PURE;
-	STDMETHOD(OpenRemoteMachineGPO) (THIS_ LPOLESTR pszComputerName, DWORD dwFlags) PURE;
-	STDMETHOD(Save) (THIS_ BOOL bMachine, BOOL bAdd,GUID *pGuidExtension, GUID *pGuid) PURE;
-	STDMETHOD(Delete) (THIS) PURE;
-	STDMETHOD(GetName) (THIS_ LPOLESTR pszName, int cchMaxLength) PURE;
-	STDMETHOD(GetDisplayName) (THIS_ LPOLESTR pszName, int cchMaxLength) PURE;
-	STDMETHOD(SetDisplayName) (THIS_ LPOLESTR pszName) PURE;
-	STDMETHOD(GetPath) (THIS_ LPOLESTR pszPath, int cchMaxPath) PURE;
-	STDMETHOD(GetDSPath) (THIS_ DWORD dwSection, LPOLESTR pszPath ,int cchMaxPath) PURE;
-	STDMETHOD(GetFileSysPath) (THIS_ DWORD dwSection, LPOLESTR pszPath, int cchMaxPath) PURE;
-	STDMETHOD(GetRegistryKey) (THIS_ DWORD dwSection, HKEY *hKey) PURE;
-	STDMETHOD(GetOptions) (THIS_ DWORD *dwOptions) PURE;
-	STDMETHOD(SetOptions) (THIS_ DWORD dwOptions, DWORD dwMask) PURE;
-	STDMETHOD(GetType) (THIS_ GROUP_POLICY_OBJECT_TYPE *gpoType) PURE;
-	STDMETHOD(GetMachineName) (THIS_ LPOLESTR pszName, int cchMaxLength) PURE;
-	STDMETHOD(GetPropertySheetPages) (THIS_ HPROPSHEETPAGE **hPages, UINT *uPageCount) PURE;
-};
-typedef IGroupPolicyObject *LPGROUPPOLICYOBJECT;
-
 // I've seen rare cases where pLGPO->lpVtbl->Save(...) gets stuck, which prevents the
 // application from launching altogether. To alleviate this, use a thread that we can
 // terminate if needed...
@@ -740,7 +707,7 @@ DWORD WINAPI SetLGPThread(LPVOID param)
 	// Along with global 'existing_key', this static value is used to restore initial state
 	static DWORD original_val;
 	HKEY path_key = NULL, policy_key = NULL;
-	// MSVC is finicky about these ones => redefine them
+	// MSVC is finicky about these ones even if you link against gpedit.lib => redefine them
 	const IID my_IID_IGroupPolicyObject =
 		{ 0xea502723L, 0xa23d, 0x11d1, { 0xa7, 0xd3, 0x0, 0x0, 0xf8, 0x75, 0x71, 0xe3 } };
 	const IID my_CLSID_GroupPolicyObject =
@@ -771,7 +738,6 @@ DWORD WINAPI SetLGPThread(LPVOID param)
 		goto error;
 	}
 
-	// The DisableSystemRestore is set in Software\Policies\Microsoft\Windows\DeviceInstall\Settings
 	r = RegCreateKeyExA(path_key, p->szPath, 0, NULL, 0, KEY_SET_VALUE | KEY_QUERY_VALUE,
 		NULL, &policy_key, &disp);
 	if (r != ERROR_SUCCESS) {
@@ -829,7 +795,6 @@ error:
 		pLGPO->lpVtbl->Release(pLGPO);
 	return FALSE;
 }
-#pragma pop_macro("INTERFACE")
 
 BOOL SetLGP(BOOL bRestore, BOOL* bExistingKey, const char* szPath, const char* szPolicy, DWORD dwValue)
 {

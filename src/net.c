@@ -234,7 +234,7 @@ static char* GetShortName(const char* url)
 	if (len < 5)
 		return NULL;
 
-	for (i = len - 1; i > 0; i--) {
+	for (i = len - 2; i > 0; i--) {
 		if (url[i] == '/') {
 			i++;
 			break;
@@ -306,8 +306,10 @@ out:
  * If hProgressDialog is not NULL, this function will send INIT and EXIT messages
  * to the dialog in question, with WPARAM being set to nonzero for EXIT on success
  * and also attempt to indicate progress using an IDC_PROGRESS control
+ * Note that when a buffer is used, the actual size of the buffer is one more than its reported
+ * size (with the extra byte set to 0) to accomodate for calls that need a NUL-terminated buffer.
  */
-static uint64_t DownloadToFileOrBuffer(const char* url, const char* file, BYTE** buffer, HWND hProgressDialog, BOOL bTaskBarProgress)
+uint64_t DownloadToFileOrBuffer(const char* url, const char* file, BYTE** buffer, HWND hProgressDialog, BOOL bTaskBarProgress)
 {
 	const char* accept_types[] = {"*/*\0", NULL};
 	const char* short_name;
@@ -344,6 +346,7 @@ static uint64_t DownloadToFileOrBuffer(const char* url, const char* file, BYTE**
 		// Use the progress control provided, if any
 		hProgressBar = GetDlgItem(hProgressDialog, IDC_PROGRESS);
 		if (hProgressBar != NULL) {
+			SendMessage(hProgressBar, PBM_SETSTATE, (WPARAM)PBST_NORMAL, 0);
 			SendMessage(hProgressBar, PBM_SETMARQUEE, FALSE, 0);
 			SendMessage(hProgressBar, PBM_SETPOS, 0, 0);
 		}
@@ -427,7 +430,8 @@ static uint64_t DownloadToFileOrBuffer(const char* url, const char* file, BYTE**
 			uprintf("No buffer pointer provided for download");
 			goto out;
 		}
-		*buffer = malloc((size_t)total_size);
+		// Allocate one extra byte, so that caller can rely on NUL-terminated text if needed
+		*buffer = calloc((size_t)total_size + 1, 1);
 		if (*buffer == NULL) {
 			uprintf("Could not allocate buffer for download");
 			goto out;
@@ -526,6 +530,8 @@ DWORD DownloadSignedFile(const char* url, const char* file, HWND hProgressDialog
 		uprintf("FATAL: Download signature is invalid ✗");
 		DownloadStatus = 403;	// Forbidden
 		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_BAD_SIGNATURE);
+		SendMessage(GetDlgItem(hProgressDialog, IDC_PROGRESS), PBM_SETSTATE, (WPARAM)PBST_ERROR, 0);
+		SetTaskbarProgressState(TASKBAR_ERROR);
 		goto out;
 	}
 
@@ -866,7 +872,7 @@ BOOL CheckForUpdates(BOOL force)
  */
 static DWORD WINAPI DownloadISOThread(LPVOID param)
 {
-	char cmdline[512], locale_str[1024], pipe[64] = "\\\\.\\pipe\\";
+	char locale_str[1024], cmdline[sizeof(locale_str) + 512], pipe[64] = "\\\\.\\pipe\\";
 	char powershell_path[MAX_PATH], icon_path[MAX_PATH] = "", script_path[MAX_PATH] = "";
 	char *url = NULL, sig_url[128];
 	BYTE *sig = NULL;
@@ -879,7 +885,7 @@ static DWORD WINAPI DownloadISOThread(LPVOID param)
 	// Use a GUID as random unique string, else ill-intentioned security "researchers"
 	// may either spam our pipe or replace our script to fool antivirus solutions into
 	// thinking that Rufus is doing something malicious...
-	CoCreateGuid(&guid);
+	IGNORE_RETVAL(CoCreateGuid(&guid));
 	strcpy(&pipe[9], GuidToString(&guid));
 	static_sprintf(icon_path, "%s%s.ico", temp_dir, APPLICATION_NAME);
 	ExtractAppIcon(icon_path, TRUE);
@@ -892,7 +898,7 @@ static DWORD WINAPI DownloadISOThread(LPVOID param)
 	static_strcpy(script_path, "D:\\Projects\\Fido\\Fido.ps1");
 #else
 	// If we don't have the script, download it
-	if (fido_len == 0) {
+	if (fido_script == NULL) {
 		fido_len = (DWORD)DownloadToFileOrBuffer(fido_url, NULL, &fido_script, hMainDialog, FALSE);
 		if (fido_len == 0)
 			goto out;
@@ -900,6 +906,10 @@ static DWORD WINAPI DownloadISOThread(LPVOID param)
 		dwSize = (DWORD)DownloadToFileOrBuffer(sig_url, NULL, &sig, NULL, FALSE);
 		if ((dwSize != RSA_SIGNATURE_SIZE) || (!ValidateOpensslSignature(fido_script, fido_len, sig, dwSize))) {
 			uprintf("FATAL: Signature is invalid ✗");
+			FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_BAD_SIGNATURE);
+			SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_ERROR, 0);
+			SetTaskbarProgressState(TASKBAR_ERROR);
+			safe_free(fido_script);
 			free(sig);
 			goto out;
 		}
@@ -910,7 +920,7 @@ static DWORD WINAPI DownloadISOThread(LPVOID param)
 		SetTaskbarProgressValue(0, MAX_PROGRESS);
 		SendMessage(hProgress, PBM_SETPOS, 0, 0);
 	}
-	PrintInfo(0, MSG_149);
+	PrintInfo(0, MSG_148);
 
 	assert((fido_script != NULL) && (fido_len != 0));
 
@@ -928,11 +938,11 @@ static DWORD WINAPI DownloadISOThread(LPVOID param)
 	safe_closehandle(hFile);
 #endif
 	static_sprintf(powershell_path, "%s\\WindowsPowerShell\\v1.0\\powershell.exe", system_dir);
-	static_sprintf(locale_str, "%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s",
+	static_sprintf(locale_str, "%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s",
 		selected_locale->txt[0], lmprintf(MSG_135), lmprintf(MSG_136), lmprintf(MSG_137),
-		lmprintf(MSG_138), lmprintf(MSG_139), lmprintf(MSG_040), lmprintf(MSG_140),
-		lmprintf(MSG_141), lmprintf(MSG_006), lmprintf(MSG_007), lmprintf(MSG_042),
-		lmprintf(MSG_142), lmprintf(MSG_143));
+		lmprintf(MSG_138), lmprintf(MSG_139), lmprintf(MSG_040), lmprintf(MSG_140), lmprintf(MSG_141),
+		lmprintf(MSG_006), lmprintf(MSG_007), lmprintf(MSG_042), lmprintf(MSG_142), lmprintf(MSG_143),
+		lmprintf(MSG_144), lmprintf(MSG_145), lmprintf(MSG_146));
 
 	hPipe = CreateNamedPipeA(pipe, PIPE_ACCESS_INBOUND,
 		PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE | PIPE_WAIT, PIPE_UNLIMITED_INSTANCES,
@@ -942,9 +952,9 @@ static DWORD WINAPI DownloadISOThread(LPVOID param)
 	}
 
 	static_sprintf(cmdline, "%s -NonInteractive -Sta -NoProfile –ExecutionPolicy Bypass "
-		"-File %s -PipeName %s -LocData \"%s\" -Icon %s -AppTitle \"%s\"",
-		powershell_path, script_path, &pipe[9], locale_str, icon_path, lmprintf(MSG_143));
-	// Signal our Windows alerts hook that it should close the IE cookie prompts from Fido
+		"-File %s -DisableFirstRunCustomize -PipeName %s -LocData \"%s\" -Icon %s -AppTitle \"%s\"",
+		powershell_path, script_path, &pipe[9], locale_str, icon_path, lmprintf(MSG_149));
+	// Signal our Windows alert hook that it should close the IE cookie prompts from Fido
 	close_fido_cookie_prompts = TRUE;
 	FormatStatus = RunCommand(cmdline, app_dir, TRUE);
 	close_fido_cookie_prompts = FALSE;
@@ -1008,8 +1018,6 @@ BOOL DownloadISO()
 		SendMessage(hMainDialog, UM_ENABLE_CONTROLS, 0, 0);
 		return FALSE;
 	}
-	// TODO: Can we locate our modal Window and position it/set it on top?
-	// TODO: Send close message to Fido if the user closes Rufus
 	return TRUE;
 }
 
@@ -1082,82 +1090,4 @@ out:
 		pfInternetCloseHandle(hSession);
 
 	return (dwTotalSize > 0);
-}
-
-// Resolve an HTTP 301/302 redirect (for a *SINGLE* level)
-// If no redirect is in effect, or if there is an error, the original URL is returned
-const char* ResolveRedirect(const char* url)
-{
-	static char ret_url[128];
-	const char* accept_types[] = { "*/*\0", NULL };
-	char hostname[64], urlpath[128];
-	BOOL r = FALSE;
-	DWORD dwSize;
-	HINTERNET hSession = NULL, hConnection = NULL, hRequest = NULL;
-	URL_COMPONENTSA UrlParts = { sizeof(URL_COMPONENTSA), NULL, 1, (INTERNET_SCHEME)0,
-		hostname, sizeof(hostname), 0, NULL, 1, urlpath, sizeof(urlpath), NULL, 1 };
-
-	PF_TYPE_DECL(WINAPI, BOOL, InternetCrackUrlA, (LPCSTR, DWORD, DWORD, LPURL_COMPONENTSA));
-	PF_TYPE_DECL(WINAPI, HINTERNET, InternetConnectA, (HINTERNET, LPCSTR, INTERNET_PORT, LPCSTR, LPCSTR, DWORD, DWORD, DWORD_PTR));
-	PF_TYPE_DECL(WINAPI, BOOL, InternetReadFile, (HINTERNET, LPVOID, DWORD, LPDWORD));
-	PF_TYPE_DECL(WINAPI, BOOL, InternetCloseHandle, (HINTERNET));
-	PF_TYPE_DECL(WINAPI, HINTERNET, HttpOpenRequestA, (HINTERNET, LPCSTR, LPCSTR, LPCSTR, LPCSTR, LPCSTR*, DWORD, DWORD_PTR));
-	PF_TYPE_DECL(WINAPI, BOOL, HttpSendRequestA, (HINTERNET, LPCSTR, DWORD, LPVOID, DWORD));
-	PF_TYPE_DECL(WINAPI, BOOL, HttpQueryInfoA, (HINTERNET, DWORD, LPVOID, LPDWORD, LPDWORD));
-	PF_INIT_OR_OUT(InternetCrackUrlA, WinInet);
-	PF_INIT_OR_OUT(InternetConnectA, WinInet);
-	PF_INIT_OR_OUT(InternetReadFile, WinInet);
-	PF_INIT_OR_OUT(InternetCloseHandle, WinInet);
-	PF_INIT_OR_OUT(HttpOpenRequestA, WinInet);
-	PF_INIT_OR_OUT(HttpSendRequestA, WinInet);
-	PF_INIT_OR_OUT(HttpQueryInfoA, WinInet);
-
-	if (url == NULL)
-		return NULL;
-
-	if ((!pfInternetCrackUrlA(url, (DWORD)safe_strlen(url), 0, &UrlParts))
-		|| (UrlParts.lpszHostName == NULL) || (UrlParts.lpszUrlPath == NULL))
-		goto out;
-	hostname[sizeof(hostname) - 1] = 0;
-
-	hSession = GetInternetSession(FALSE);
-	if (hSession == NULL)
-		goto out;
-
-	hConnection = pfInternetConnectA(hSession, UrlParts.lpszHostName, UrlParts.nPort, NULL, NULL, INTERNET_SERVICE_HTTP, 0, (DWORD_PTR)NULL);
-	if (hConnection == NULL)
-		goto out;
-
-	hRequest = pfHttpOpenRequestA(hConnection, "GET", UrlParts.lpszUrlPath, NULL, NULL, accept_types,
-		INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTP | INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTPS | INTERNET_FLAG_NO_AUTO_REDIRECT |
-		INTERNET_FLAG_NO_COOKIES | INTERNET_FLAG_NO_UI | INTERNET_FLAG_HYPERLINK |
-		((UrlParts.nScheme == INTERNET_SCHEME_HTTPS) ? INTERNET_FLAG_SECURE : 0), (DWORD_PTR)NULL);
-	if (hRequest == NULL)
-		goto out;
-
-	if (!pfHttpSendRequestA(hRequest, NULL, 0, NULL, 0))
-		goto out;
-
-	DownloadStatus = 404;
-	dwSize = sizeof(DownloadStatus);
-	pfHttpQueryInfoA(hRequest, HTTP_QUERY_STATUS_CODE | HTTP_QUERY_FLAG_NUMBER, (LPVOID)&DownloadStatus, &dwSize, NULL);
-	switch (DownloadStatus) {
-	case 301:
-	case 302:
-		dwSize = sizeof(ret_url);
-		r = (pfHttpQueryInfoA(hRequest, HTTP_QUERY_LOCATION, (LPVOID)ret_url, &dwSize, NULL) && (dwSize > 0));
-		break;
-	default:
-		break;
-	}
-
-out:
-	if (hRequest)
-		pfInternetCloseHandle(hRequest);
-	if (hConnection)
-		pfInternetCloseHandle(hConnection);
-	if (hSession)
-		pfInternetCloseHandle(hSession);
-
-	return r ? ret_url : url;
 }

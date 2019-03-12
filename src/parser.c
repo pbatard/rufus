@@ -907,7 +907,7 @@ void parse_update(char* buf, size_t len)
 	char *arch_names[CPU_ARCH_MAX] = { "x86", "x64", "arm", "arm64", "none" };
 
 	// strchr includes the NUL terminator in the search, so take care of backslash before NUL
-	if ((buf == NULL) || (len < 2) || (len > 65536) || (buf[len-1] != 0) || (buf[len-2] == '\\'))
+	if ((buf == NULL) || (len < 2) || (len > 64 * KB) || (buf[len-1] != 0) || (buf[len-2] == '\\'))
 		return;
 	// Sanitize the data - Not a silver bullet, but it helps
 	len = safe_strlen(buf)+1;	// Someone may be inserting NULs

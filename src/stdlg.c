@@ -1544,27 +1544,24 @@ BOOL SetUpdateCheck(void)
 			WriteSetting32(SETTING_UPDATE_INTERVAL, 86400);
 	}
 	// Also detect if we can use Fido, which depends on:
+	// - Powershell being installed
 	// - Update check being enabled
 	// - URL for the script being reachable
-	if (ReadSetting32(SETTING_UPDATE_INTERVAL) > 0) {
-		char *p, url[128];
-		// Obviously, we could fetch https://api.github.com/repos/pbatard/Fido/releases/latest
-		// and then parse 'browser_download_url' in the JSON data to get the direct link we
-		// want. But that would force us to download an extra 5 KB of data, which we *really*
-		// don't want to do when we need a superfast availability check.
-		// Therefore, since we don't expect GitHub to change their scheme anytime soon, we
-		// just hack the redirected URL we got back to replace '/tag/' with '/download/'...
-		static_sprintf(url, "%s/%s", ResolveRedirect(FIDO_BASE), FIDO_NAME);
-		p = strstr(url, "/tag/");
-		if (p != NULL) {
-			*p = 0;
-			strcpy(fido_url, url);
-			strcat(fido_url, "/download/");
-			strcat(fido_url, &p[5]);
-		} else {
-			strcpy(fido_url, url);
+	if (((ReadRegistryKey32(REGKEY_HKLM, "Microsoft\\PowerShell\\1\\Install") > 0) ||
+		 (ReadRegistryKey32(REGKEY_HKLM, "Microsoft\\PowerShell\\3\\Install") > 0)) &&
+		(ReadSetting32(SETTING_UPDATE_INTERVAL) > 0)) {
+		char *loc = NULL;
+		// Get the Fido URL from parsing a 'Fido.ver' on our server. This enables the use of different
+		// Fido versions from different versions of Rufus, if needed, as opposed to always downloading
+		// the latest release from GitHub, which may contain incompatible changes...
+		uint64_t loc_len = DownloadToFileOrBuffer(RUFUS_URL "/Fido.ver", NULL, (BYTE**)&loc, NULL, FALSE);
+		if ((loc_len != 0) && (loc_len < 4 * KB)) {
+			loc_len++;	// DownloadToFileOrBuffer allocated an extra NUL character if needed
+			fido_url = get_token_data_buffer(FIDO_VERSION, 1, loc, (size_t)loc_len);
+			uprintf("Fido URL is %s", fido_url);
+			enable_fido = IsDownloadable(fido_url);
 		}
-		enable_fido = IsDownloadable(fido_url);
+		safe_free(loc);
 	}
 	if (!enable_fido)
 		uprintf("Note: ISO download feature will be disabled");
@@ -2015,7 +2012,7 @@ BOOL SetAlertPromptHook(void)
 		}
 		FreeLibrary(mui_lib);
 	}
-	static_strcpy(title_str[2], lmprintf(MSG_143));
+	static_strcpy(title_str[2], lmprintf(MSG_149));
 
 	ap_weh = SetWinEventHook(EVENT_SYSTEM_FOREGROUND, EVENT_SYSTEM_FOREGROUND, NULL,
 		AlertPromptHook, 0, 0, WINEVENT_OUTOFCONTEXT | WINEVENT_SKIPOWNPROCESS);
