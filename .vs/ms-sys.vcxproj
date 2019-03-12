@@ -193,6 +193,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <DisableSpecificWarnings>28252;28253</DisableSpecificWarnings>
       <CompileAs>CompileAsC</CompileAs>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -212,7 +213,7 @@
       <AdditionalIncludeDirectories>..\src\ms-sys\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <AdditionalOptions>/analyze:stacksize32850 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/analyze:stacksize32850 /utf-8 %(AdditionalOptions)</AdditionalOptions>
       <DisableSpecificWarnings>28252;28253</DisableSpecificWarnings>
     </ClCompile>
     <Link>
@@ -231,7 +232,7 @@
       <AdditionalIncludeDirectories>..\src\ms-sys\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <AdditionalOptions>/analyze:stacksize32850 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/analyze:stacksize32850 /utf-8 %(AdditionalOptions)</AdditionalOptions>
       <DisableSpecificWarnings>28252;28253</DisableSpecificWarnings>
     </ClCompile>
     <Link>
@@ -249,6 +250,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <DisableSpecificWarnings>28252;28253</DisableSpecificWarnings>
       <CompileAs>CompileAsC</CompileAs>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Lib>
       <TargetMachine>MachineX86</TargetMachine>
@@ -265,7 +267,7 @@
       <AdditionalIncludeDirectories>..\src\ms-sys\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <AdditionalOptions>/analyze:stacksize32850 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/analyze:stacksize32850 /utf-8 %(AdditionalOptions)</AdditionalOptions>
       <DisableSpecificWarnings>28252;28253</DisableSpecificWarnings>
     </ClCompile>
     <Lib />
@@ -281,7 +283,7 @@
       <AdditionalIncludeDirectories>..\src\ms-sys\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <AdditionalOptions>/analyze:stacksize32850 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/analyze:stacksize32850 /utf-8 %(AdditionalOptions)</AdditionalOptions>
       <DisableSpecificWarnings>28252;28253</DisableSpecificWarnings>
     </ClCompile>
     <Lib />
@@ -296,6 +298,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <DisableSpecificWarnings>28252;28253</DisableSpecificWarnings>
       <CompileAs>CompileAsC</CompileAs>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -314,6 +317,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <DisableSpecificWarnings>28252;28253</DisableSpecificWarnings>
       <CompileAs>CompileAsC</CompileAs>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
