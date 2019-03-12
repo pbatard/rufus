@@ -1,7 +1,7 @@
 ﻿/*
  * Rufus: The Reliable USB Formatting Utility
  * Poedit <-> rufus.loc conversion utility
- * Copyright © 2018 Pete Batard <pete@akeo.ie>
+ * Copyright © 2018-2019 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,7 +43,7 @@ using System.Windows.Forms;
 [assembly: AssemblyProduct("Pollock")]
 [assembly: AssemblyCopyright("Copyright © 2018 Pete Batard <pete@akeo.ie>")]
 [assembly: AssemblyTrademark("GNU GPLv3")]
-[assembly: AssemblyVersion("1.1.*")]
+[assembly: AssemblyVersion("1.2.*")]
 
 namespace pollock
 {
@@ -744,45 +744,6 @@ namespace pollock
         }
 
         /// <summary>
-        /// Validate a download URL by checking its HTTP status code.
-        /// </summary>
-        /// <param name="url">The URL to validate.</param>
-        /// <returns>true if URL is acessible, false on error.</returns>
-        static bool ValidateDownload(string url)
-        {
-            HttpStatusCode status = HttpStatusCode.InternalServerError;
-            var uri = new Uri(url);
-            WebRequest request = WebRequest.Create(uri);
-            request.CachePolicy = new RequestCachePolicy(RequestCacheLevel.NoCacheNoStore);
-            request.Method = "HEAD";
-
-            // This is soooooooo retarded. Trying to simply read a 404 response throws a 404 *exception*?!?
-            try
-            {
-                using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
-                    status = response.StatusCode;
-            }
-            catch (WebException we)
-            {
-                HttpWebResponse response = we.Response as HttpWebResponse;
-                if (response != null)
-                {
-                    status = response.StatusCode;
-                    response.Close();
-                }
-            }
-            request.Abort();
-            switch (status)
-            {
-                case HttpStatusCode.OK:
-                    return true;
-                default:
-                    Console.WriteLine($"Error downloading {url}: {(int)status} - {status}");
-                    return false;
-            }
-        }
-
-        /// <summary>
         /// Download a file as a string. Codepage is assumed to be UTF-8.
         /// </summary>
         /// <param name="url">The URL to download from.</param>
@@ -790,9 +751,6 @@ namespace pollock
         static string DownloadString(string url)
         {
             string str = null;
-
-            if (!ValidateDownload(url))
-                return null;
 
             using (WebClient wc = new WebClient())
             {
@@ -824,9 +782,6 @@ namespace pollock
 
             if (dest == null)
                 dest = url.Split('/').Last();
-
-            if (!ValidateDownload(url))
-                return false;
 
             console_x_pos = Console.CursorLeft;
             using (WebClient wc = new WebClient())
