@@ -3155,8 +3155,9 @@ relaunch:
 	ChangeWindowMessageFilter(WM_COPYGLOBALDATA, MSGFLT_ADD);
 
 	// Set the hook to automatically close Windows' "You need to format the disk in drive..." prompt
+	SetAlertPromptMessages();
 	if (!SetAlertPromptHook())
-		uprintf("Warning: Could not set alert prompts hook");
+		uprintf("Warning: Could not set alert prompt hook");
 
 	ShowWindow(hDlg, SW_SHOWNORMAL);
 	UpdateWindow(hDlg);

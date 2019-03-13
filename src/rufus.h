@@ -567,6 +567,7 @@ extern BOOL IsBufferInDB(const unsigned char* buf, const size_t len);
 extern char* _printbits(size_t const size, void const * const ptr, int leading_zeroes);
 extern BOOL IsCurrentProcessElevated(void);
 extern char* GetCurrentMUI(void);
+extern void SetAlertPromptMessages(void);
 extern BOOL SetAlertPromptHook(void);
 extern void ClrAlertPromptHook(void);
 extern BYTE SearchProcess(char* HandleName, DWORD dwTimeout, BOOL bPartialMatch, BOOL bIgnoreSelf, BOOL bQuiet);

@@ -1977,13 +1977,10 @@ static void CALLBACK AlertPromptHook(HWINEVENTHOOK hWinEventHook, DWORD Event, H
 	}
 }
 
-BOOL SetAlertPromptHook(void)
+void SetAlertPromptMessages(void)
 {
 	HMODULE mui_lib;
 	char mui_path[MAX_PATH];
-
-	if (ap_weh != NULL)
-		return TRUE;	// No need to set again if active
 
 	// Fetch the localized strings in the relevant MUI
 	static_sprintf(mui_path, "%s\\%s\\shell32.dll.mui", system_dir, GetCurrentMUI());
@@ -2013,7 +2010,12 @@ BOOL SetAlertPromptHook(void)
 		FreeLibrary(mui_lib);
 	}
 	static_strcpy(title_str[2], lmprintf(MSG_149));
+}
 
+BOOL SetAlertPromptHook(void)
+{
+	if (ap_weh != NULL)
+		return TRUE;	// No need to set again if active
 	ap_weh = SetWinEventHook(EVENT_SYSTEM_FOREGROUND, EVENT_SYSTEM_FOREGROUND, NULL,
 		AlertPromptHook, 0, 0, WINEVENT_OUTOFCONTEXT | WINEVENT_SKIPOWNPROCESS);
 	return (ap_weh != NULL);
