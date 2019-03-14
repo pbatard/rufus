@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: 3.2\n"
+"Project-Id-Version: 3.5\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2018-09-05 09:47+0100\n"
-"PO-Revision-Date: 2018-09-05 11:15+0100\n"
+"POT-Creation-Date: 2019-03-14 12:25+0000\n"
+"PO-Revision-Date: 2019-03-14 12:25+0000\n"
 "Language: pt_PT\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Rufus-LCID: 0x0816\n"
 "Last-Translator: \n"
 "Language-Team: \n"
-"X-Generator: Poedit 2.1.1\n"
+"X-Generator: Poedit 2.2.1\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -583,8 +583,8 @@ msgstr ""
 " '%s' já existir, será substituído automaticamente."
 
 #. • MSG_085
-msgid "Downloading '%s'"
-msgstr "A transferir '%s'"
+msgid "Downloading %s"
+msgstr "A transferir %s"
 
 #. • MSG_086
 msgid "No image selected"
@@ -859,6 +859,118 @@ msgstr "Defina o tamanho da partição persistente para a unidade USB. Definir o
 msgid "Set the partition size units."
 msgstr "Defina as unidades do tamanho da partição."
 
+#. • MSG_127
+msgid "Do not show this message again"
+msgstr "Não mostrar esta mensagem novamente"
+
+#. • MSG_128
+msgid "Important notice about %s"
+msgstr "Aviso importante sobre %s"
+
+#. • MSG_129
+msgid ""
+"You have just created a media that uses the UEFI:NTFS bootloader. Please remember that, to boot this media, YOU MUST DISABLE SECURE BOOT.\n"
+"For details on why this is necessary, see the 'More Information' button below."
+msgstr ""
+"Acabou de criar um disco que usa o carregador de inicialização UEFI:NTFS. Lembre-se de que, para inicializar com este disco, TEM DE DESATIVAR O ARRANQUE SEGURO.\n"
+"Para detalhes ou para saber o motivo, clique no botão \"Mais informações\" abaixo."
+
+#. • MSG_130
+msgid "Windows image selection"
+msgstr "Seleção de imagem do Windows"
+
+#. • MSG_131
+msgid ""
+"This ISO contains multiple Windows images.\n"
+"Please select the image you wish to use for this installation:"
+msgstr ""
+"Este ISO contém várias imagens do Windows.\n"
+"Por favor, selecione a imagem que pretende usar para esta instalação:"
+
+#. • MSG_132
+msgid "Another program or process is accessing this drive. Do you want to format it anyway?"
+msgstr "Outro programa ou processo está a aceder esta unidade. Pretende formatá-lo mesmo assim?"
+
+#. • MSG_133
+msgid ""
+"Rufus has detected that you are attempting to create a Windows To Go media based on a 1809 ISO.\n"
+"\n"
+"Because of a *MICROSOFT BUG*, this media will crash during Windows boot (Blue Screen Of Death), unless you manually replace the file 'WppRecorder.sys' with a 1803 version.\n"
+"\n"
+"Also note that the reason Rufus cannot automatically fix this for you is that 'WppRecorder.sys' is a Microsoft copyrighted file, so we cannot legally embed a copy of the file in the application..."
+msgstr ""
+"Rufus detetou que está a tentar criar um disco do Windows To Go com base num ISO da versão 1809.\n"
+"\n"
+"Devido a um *BUG da MICROSOFT*, este disco irá bloquear durante a inicialização do Windows (Ecrã Azul da Morte), a menos que substitua manualmente o ficheiro 'WppRecorder.sys' por um da versão 1803.\n"
+"\n"
+"Tenha em atenção também que a razão pela qual o Rufus não pode corrigir automaticamente é que 'WppRecorder.sys' é um ficheiro protegido por direitos de autor da Microsoft, portanto, não podemos incorporar legalmente uma cópia do do ficheiro no Rufus..."
+
+#. • MSG_134
+msgid ""
+"Because MBR has been selected for the partition scheme, Rufus can only create a partition up to 2 TB on this media, which will leave %s of disk space unavailable.\n"
+"\n"
+"Are you sure you want to continue?"
+msgstr ""
+"Uma vez que foi selecionado o MBR para o esquema de partição, o Rufus só pode criar uma partição de até 2 TB neste disco, o que deixará %s de espaço em disco indisponível.\n"
+"\n"
+"Tem a certeza de que pretende continuar?"
+
+#. • MSG_135
+msgid "Version"
+msgstr "Versão"
+
+#. • MSG_136
+msgid "Release"
+msgstr "Lançamento"
+
+#. • MSG_137
+msgid "Edition"
+msgstr "Edição"
+
+#. • MSG_138
+msgid "Language"
+msgstr "Idioma"
+
+#. • MSG_139
+msgid "Architecture"
+msgstr "Arquitetura"
+
+#. • MSG_140
+msgid "Continue"
+msgstr "Continuar"
+
+#. • MSG_141
+msgid "Back"
+msgstr "Voltar"
+
+#. • MSG_142
+msgid "Please wait..."
+msgstr "Por favor, aguarde..."
+
+#. • MSG_143
+msgid "Download using a browser"
+msgstr "Transferir no browser"
+
+#. • MSG_144
+msgid "Temporarily banned by Microsoft for requesting too many downloads - Please try again later..."
+msgstr "Temporariamente banido pela Microsoft por solicitar muitas transferências - Por favor, tente novamente mais tarde..."
+
+#. • MSG_145
+msgid "PowerShell 3.0 or later is required to run this script."
+msgstr "É necessário o PowerShell 3.0 ou posterior para executar este script."
+
+#. • MSG_146
+msgid "Do you want to go online and download it?"
+msgstr "Pretende ligar e fazer a transferência?"
+
+#. • MSG_148
+msgid "Running download script..."
+msgstr "A executar script da transferência"
+
+#. • MSG_149
+msgid "Download ISO Image"
+msgstr "Transferir imagem ISO"
+
 #. • MSG_150
 msgid "Type of computer you plan to use this bootable drive with. It is your responsibility to determine whether your target is of BIOS or UEFI type before you start creating the drive, as it may fail to boot otherwise."
 msgstr "Tipo de computador com o qual pretende usar esta unidade inicializável. É da sua responsabilidade determinar se o computador é do tipo BIOS ou UEFI antes de começar a criar a unidade, pois pode falhar no arranque."
@@ -926,8 +1038,8 @@ msgid "Method that will be used to make the drive bootable"
 msgstr "Método a usar para tornar a unidade inicializável"
 
 #. • MSG_165
-msgid "Click to select an image..."
-msgstr "Selecione uma imagem..."
+msgid "Click to select or download an image..."
+msgstr "Clique para selecionar ou transferir uma imagem.."
 
 #. • MSG_166
 msgid "Check this box to allow the display of international labels and set a device icon (creates an autorun.inf)"
@@ -1501,7 +1613,7 @@ msgid ""
 msgstr ""
 "O executável transferido está assinado por '%s'.\n"
 "Não é uma assinatura reconhecida e poderá indicar algum tipo de actividade mal intencionada...\n"
-"Tem certeza de que pretende executar este ficheiro?"
+"Tem a certeza de que pretende executar este ficheiro?"
 
 #. • MSG_286
 msgid "Zeroing drive: %0.1f%% completed"
@@ -1551,7 +1663,7 @@ msgid ""
 msgstr ""
 "Esta versão de Rufus NÃO foi desenvolvida pelo autor oficial.\n"
 "\n"
-"Tem a certeza que pretende executar?"
+"Tem a certeza de que pretende executar?"
 
 #. • MSG_297
 msgid "Truncated ISO detected"
@@ -1569,7 +1681,7 @@ msgstr ""
 "\n"
 "Se obteve este ficheiro da Internet, deve tentar transferir uma nova cópia e verificar se os checksums MD5 ou SHA correspondem aos oficiais.\n"
 "\n"
-"Rufus que pode calcular o MD5 ou SHA se clicar no botão (✓)."
+"Para calcular o MD5 ou SHA com Rufus, clique no botão (✓)."
 
 #. • MSG_299
 msgid "Timestamp validation error"
