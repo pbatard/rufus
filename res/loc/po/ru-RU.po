@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: 3.2\n"
+"Project-Id-Version: 3.5\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2018-08-16 16:27+0100\n"
-"PO-Revision-Date: 2018-08-16 16:32+0100\n"
+"POT-Creation-Date: 2019-03-14 14:59+0300\n"
+"PO-Revision-Date: 2019-03-14 13:03+0000\n"
 "Language: ru_RU\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Rufus-LCID: 0x0419, 0x0819\n"
 "Last-Translator: \n"
 "Language-Team: \n"
-"X-Generator: Poedit 2.1.1\n"
+"X-Generator: Poedit 2.2.1\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -117,7 +117,7 @@ msgstr "Лицензия"
 
 #. • IDD_ABOUTBOX → IDOK
 msgid "OK"
-msgstr ""
+msgstr "ОК"
 
 #. • IDD_LICENSE → IDD_LICENSE
 msgid "Rufus License"
@@ -582,8 +582,9 @@ msgstr ""
 "Файл будет загружен в текущую директорию, а в случае наличия '%s' - заменен автоматически."
 
 #. • MSG_085
-msgid "Downloading '%s'"
-msgstr "Загружено '%s'"
+#, fuzzy
+msgid "Downloading %s"
+msgstr "Загружено %s"
 
 #. • MSG_086
 msgid "No image selected"
@@ -809,7 +810,7 @@ msgstr "Стандартная установка Windows"
 #. http://en.wikipedia.org/wiki/Windows_To_Go in your language.
 #. Otherwise, you may add a parenthesis eg. "Windows To Go (<hint at what it does>)"
 msgid "Windows To Go"
-msgstr ""
+msgstr "Windows To Go"
 
 #. • MSG_119
 msgid "advanced drive properties"
@@ -853,6 +854,118 @@ msgstr "Установите размер Persistent-раздела для Live 
 #. • MSG_126
 msgid "Set the partition size units."
 msgstr "Установите единицы размера раздела."
+
+#. • MSG_127
+msgid "Do not show this message again"
+msgstr "Не показывать больше это сообщение"
+
+#. • MSG_128
+msgid "Important notice about %s"
+msgstr "Важное примечание о %s"
+
+#. • MSG_129
+msgid ""
+"You have just created a media that uses the UEFI:NTFS bootloader. Please remember that, to boot this media, YOU MUST DISABLE SECURE BOOT.\n"
+"For details on why this is necessary, see the 'More Information' button below."
+msgstr ""
+"Вы только что создали носитель с загрузчиком UEFI:NTFS. Пожалуйста, помните, что для загрузки этого носителя ВЫ ДОЛЖНЫ ОТКЛЮЧИТЬ БЕЗОПАСНУЮ ЗАГРУЗКУ.\n"
+"Подробнее о том, почему это необходимо, см. кнопка «Дополнительная информация» ниже."
+
+#. • MSG_130
+msgid "Windows image selection"
+msgstr "Выбор образа Windows"
+
+#. • MSG_131
+msgid ""
+"This ISO contains multiple Windows images.\n"
+"Please select the image you wish to use for this installation:"
+msgstr ""
+"Этот ISO-образ содержит несколько образов Windows.\n"
+"Пожалуйста, выберите образ, который вы хотите использовать для этой установки:"
+
+#. • MSG_132
+msgid "Another program or process is accessing this drive. Do you want to format it anyway?"
+msgstr "Другая программа или процесс обращается к этому диску. Вы все равно хотите отформатировать?"
+
+#. • MSG_133
+msgid ""
+"Rufus has detected that you are attempting to create a Windows To Go media based on a 1809 ISO.\n"
+"\n"
+"Because of a *MICROSOFT BUG*, this media will crash during Windows boot (Blue Screen Of Death), unless you manually replace the file 'WppRecorder.sys' with a 1803 version.\n"
+"\n"
+"Also note that the reason Rufus cannot automatically fix this for you is that 'WppRecorder.sys' is a Microsoft copyrighted file, so we cannot legally embed a copy of the file in the application..."
+msgstr ""
+"Rufus обнаружил, что вы пытаетесь создать носитель Windows To Go на основе ISO 1809.\n"
+"\n"
+"Из-за *MICROSOFT BUG* этот носитель будет зависать при загрузке Windows (Синий экран), если вы вручную не замените файл 'WppRecorder.sys' версией 1803.\n"
+"\n"
+"Также обратите внимание, что причина, по которой Rufus не может автоматически исправить это за вас, заключается в том, что 'WppRecorder.sys' является файлом, защищенным авторским правом Microsoft, поэтому мы не можем легально встраивать копию файла в приложение ..."
+
+#. • MSG_134
+msgid ""
+"Because MBR has been selected for the partition scheme, Rufus can only create a partition up to 2 TB on this media, which will leave %s of disk space unavailable.\n"
+"\n"
+"Are you sure you want to continue?"
+msgstr ""
+"Поскольку для схемы разделов была выбрана MBR, Rufus может создать на этом носителе только раздел размером до 2 ТБ, что приведет к недоступности %s дискового пространства.\n"
+"\n"
+"Вы уверены что хотите продолжить?"
+
+#. • MSG_135
+msgid "Version"
+msgstr "Версия"
+
+#. • MSG_136
+msgid "Release"
+msgstr "Релиз"
+
+#. • MSG_137
+msgid "Edition"
+msgstr "Издание"
+
+#. • MSG_138
+msgid "Language"
+msgstr "Язык"
+
+#. • MSG_139
+msgid "Architecture"
+msgstr "Архитектура"
+
+#. • MSG_140
+msgid "Continue"
+msgstr "Продолжить"
+
+#. • MSG_141
+msgid "Back"
+msgstr "Назад"
+
+#. • MSG_142
+msgid "Please wait..."
+msgstr "Пожалуйста, подождите..."
+
+#. • MSG_143
+msgid "Download using a browser"
+msgstr "Скачать с помощью браузера"
+
+#. • MSG_144
+msgid "Temporarily banned by Microsoft for requesting too many downloads - Please try again later..."
+msgstr "Microsoft временно заблокировала запрос из-за слишком большого количества загрузок. Повторите попытку позже..."
+
+#. • MSG_145
+msgid "PowerShell 3.0 or later is required to run this script."
+msgstr "PowerShell 3.0 или более поздняя версия требуется для запуска этого сценария."
+
+#. • MSG_146
+msgid "Do you want to go online and download it?"
+msgstr "Хотите зайти в интернет и скачать его?"
+
+#. • MSG_148
+msgid "Running download script..."
+msgstr "Запуск загрузки скрипта..."
+
+#. • MSG_149
+msgid "Download ISO Image"
+msgstr "Загрузить ISO-образ"
 
 #. • MSG_150
 msgid "Type of computer you plan to use this bootable drive with. It is your responsibility to determine whether your target is of BIOS or UEFI type before you start creating the drive, as it may fail to boot otherwise."
@@ -921,8 +1034,8 @@ msgid "Method that will be used to make the drive bootable"
 msgstr "Метод, который будет использоваться для создания загрузочного диска"
 
 #. • MSG_165
-msgid "Click to select an image..."
-msgstr "Нажмите, чтобы выбрать образ..."
+msgid "Click to select or download an image..."
+msgstr "Нажмите, чтобы выбрать или загрузить образ..."
 
 #. • MSG_166
 msgid "Check this box to allow the display of international labels and set a device icon (creates an autorun.inf)"
@@ -978,7 +1091,7 @@ msgstr "Нажмите для выбора..."
 
 #. • MSG_174
 msgid "Rufus - The Reliable USB Formatting Utility"
-msgstr ""
+msgstr "Rufus - Надежная утилита для форматирования USB"
 
 #. • MSG_175
 msgid "Version %d.%d (Build %d)"
