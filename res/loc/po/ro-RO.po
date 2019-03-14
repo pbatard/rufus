@@ -1,12 +1,9 @@
-
 msgid ""
 msgstr ""
-"Project-Id-Version: 3.2\n"
+"Project-Id-Version: 3.5\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2018-07-21 16:13+0100\n"
-"PO-Revision-Date: 2018-07-21 16:13+0100\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"POT-Creation-Date: 2019-03-14 20:21+0000\n"
+"PO-Revision-Date: 2019-03-14 20:33+0000\n"
 "Language: ro_RO\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -14,6 +11,9 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Rufus-LanguageName: Romanian (Română)\n"
 "X-Rufus-LCID: 0x0418, 0x0818\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"X-Generator: Poedit 2.2.1\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -37,7 +37,7 @@ msgstr "Opțiuni Imagine"
 
 #. • IDD_DIALOG → IDS_PARTITION_TYPE_TXT
 msgid "Partition scheme"
-msgstr "Schema de Partiție"
+msgstr "Schema de Partiționare"
 
 #. • IDD_DIALOG → IDS_TARGET_SYSTEM_TXT
 msgid "Target system"
@@ -117,7 +117,7 @@ msgstr "Licența"
 
 #. • IDD_ABOUTBOX → IDOK
 msgid "OK"
-msgstr ""
+msgstr "Ok"
 
 #. • IDD_LICENSE → IDD_LICENSE
 msgid "Rufus License"
@@ -158,12 +158,12 @@ msgid "Settings"
 msgstr "Setări"
 
 #. • IDD_UPDATE_POLICY → IDS_UPDATE_FREQUENCY_TXT
-msgid "Check for updates:"
-msgstr "Verificare actualizări:"
+msgid "Check for updates"
+msgstr "Verificare actualizări"
 
 #. • IDD_UPDATE_POLICY → IDS_INCLUDE_BETAS_TXT
-msgid "Include beta versions:"
-msgstr "Include versiuni beta:"
+msgid "Include beta versions"
+msgstr "Include versiuni beta"
 
 #. • IDD_UPDATE_POLICY → IDC_CHECK_NOW
 msgid "Check Now"
@@ -196,12 +196,20 @@ msgid "Other instance detected"
 msgstr "Altă instanță detectată"
 
 #. • MSG_002
-msgid "Another Rufus application is running.\nPlease close the first application before running another one."
-msgstr "Rulează o altă aplicație Rufus.\nÎnchideți prima aplicație înainte de a efectua a doua."
+msgid ""
+"Another Rufus application is running.\n"
+"Please close the first application before running another one."
+msgstr ""
+"Rulează o altă aplicație Rufus.\n"
+"Închideți prima aplicație înainte de a efectua a doua."
 
 #. • MSG_003
-msgid "WARNING: ALL DATA ON DEVICE '%s' WILL BE DESTROYED.\nTo continue with this operation, click OK. To quit click CANCEL."
-msgstr "AVERTISMENT: TOATE DATELE DE PE DISPOZITIVUL '%s' VOR FI ŞTERSE.\nPentru a continua cu această operație, faceți click pe OK. Pentru a renunța faceți click pe Cancel."
+msgid ""
+"WARNING: ALL DATA ON DEVICE '%s' WILL BE DESTROYED.\n"
+"To continue with this operation, click OK. To quit click CANCEL."
+msgstr ""
+"AVERTISMENT: TOATE DATELE DE PE DISPOZITIVUL '%s' VOR FI ŞTERSE.\n"
+"Pentru a continua cu această operație, faceți click pe OK. Pentru a renunța faceți click pe Cancel."
 
 #. • MSG_004
 msgid "Rufus update policy"
@@ -220,14 +228,28 @@ msgid "Bad blocks found"
 msgstr "Bloc defect Detectat"
 
 #. • MSG_011
-msgid "Check completed: %d bad block(s) found\n  %d read error(s)\n  %d write error(s)\n  %d corruption error(s)"
-msgstr "Verificare completă: s-au găsit %d blocuri defecte\n  %d erori de citire\n  %d erori de scriere\n  %d erori de corupere"
+msgid ""
+"Check completed: %d bad block(s) found\n"
+"  %d read error(s)\n"
+"  %d write error(s)\n"
+"  %d corruption error(s)"
+msgstr ""
+"Verificare completă: s-au găsit %d blocuri defecte\n"
+"  %d erori de citire\n"
+"  %d erori de scriere\n"
+"  %d erori de corupere"
 
 #. • MSG_012
 #.
 #. This contains the formatted message from MSG_001 as well as the name of the bad blocks logfile
-msgid "%s\nA more detailed report can be found in:\n%s"
-msgstr "%s\n Un raport mai detaliat este disponibil în:\n%s"
+msgid ""
+"%s\n"
+"A more detailed report can be found in:\n"
+"%s"
+msgstr ""
+"%s\n"
+"Un raport mai detaliat este disponibil în:\n"
+"%s"
 
 #. • MSG_013
 msgid "Disabled"
@@ -512,8 +534,18 @@ msgid "The device is not ready."
 msgstr "Dispozitivul nu este gata."
 
 #. • MSG_080
-msgid "Rufus detected that Windows is still flushing its internal buffers onto the USB device.\n\nDepending on the speed of your USB device, this operation may take a long time to complete, especially for large files.\n\nWe recommend that you let Windows finish, to avoid corruption. But if you grow tired of waiting, you can just unplug the device..."
-msgstr "Rufus a detectat că Windows-ul nu a terminat de scris datele din buffer pe dispozitivul USB.\n\nÎn funcție de viteza dispozitivului USB, această operație poate dura o perioadă lungă de timp pentru a finaliza, în special pentru fișiere mari.\n\nPentru a evita coruperea datelor vă recomandăm să lăsați Windows-ul să finalizeze. Dar, dacă ați obosit să așteptați, aveți posibilitatea să deconectați doar dispozitivul..."
+msgid ""
+"Rufus detected that Windows is still flushing its internal buffers onto the USB device.\n"
+"\n"
+"Depending on the speed of your USB device, this operation may take a long time to complete, especially for large files.\n"
+"\n"
+"We recommend that you let Windows finish, to avoid corruption. But if you grow tired of waiting, you can just unplug the device..."
+msgstr ""
+"Rufus a detectat că Windows-ul nu a terminat de scris datele din buffer pe dispozitivul USB.\n"
+"\n"
+"În funcție de viteza dispozitivului USB, această operație poate dura o perioadă lungă de timp pentru a finaliza, în special pentru fișiere mari.\n"
+"\n"
+"Pentru a evita coruperea datelor vă recomandăm să lăsați Windows-ul să finalizeze. Dar, dacă ați obosit să așteptați, aveți posibilitatea să deconectați doar dispozitivul..."
 
 #. • MSG_081
 msgid "Unsupported image"
@@ -528,12 +560,30 @@ msgid "Replace %s?"
 msgstr "Înlocuire %s?"
 
 #. • MSG_084
-msgid "This ISO image seems to use an obsolete version of '%s'.\nBoot menus may not display properly because of this.\n\nA newer version can be downloaded by Rufus to fix this issue:\n- Choose 'Yes' to connect to the internet and download the file\n- Choose 'No' to leave the existing ISO file unmodified\nIf you don't know what to do, you should select 'Yes'.\n\nNote: The new file will be downloaded in the current directory and once a '%s' exists there, it will be reused automatically."
-msgstr "Acest lucru arată ca utilizați o versiune învechită a '%s'.\nDin acest motiv, meniul de boot nu este vizualizat corect.\n\nO versiune nouă poate fi descărcată de la Rufus, pentru a corecta această problemă:\n- Selectați 'Da' pentru a vă conecta la Internet și a descărca fișierul\n- Selectați 'Nu' pentru a lăsa neschimbat fișierul din imaginea ISO\nDacă nu știi ce să faci, este recomandat să alegi 'Da'.\n\nNotă: Noul fișier va fi descărcat în folderul curent și odată descărcat '%s', va fi reutilizat automat."
+msgid ""
+"This ISO image seems to use an obsolete version of '%s'.\n"
+"Boot menus may not display properly because of this.\n"
+"\n"
+"A newer version can be downloaded by Rufus to fix this issue:\n"
+"- Choose 'Yes' to connect to the internet and download the file\n"
+"- Choose 'No' to leave the existing ISO file unmodified\n"
+"If you don't know what to do, you should select 'Yes'.\n"
+"\n"
+"Note: The new file will be downloaded in the current directory and once a '%s' exists there, it will be reused automatically."
+msgstr ""
+"Acest lucru arată ca utilizați o versiune învechită a '%s'.\n"
+"Din acest motiv, meniul de boot nu este vizualizat corect.\n"
+"\n"
+"O versiune nouă poate fi descărcată de la Rufus, pentru a corecta această problemă:\n"
+"- Selectați 'Da' pentru a vă conecta la Internet și a descărca fișierul\n"
+"- Selectați 'Nu' pentru a lăsa neschimbat fișierul din imaginea ISO\n"
+"Dacă nu știi ce să faci, este recomandat să alegi 'Da'.\n"
+"\n"
+"Notă: Noul fișier va fi descărcat în folderul curent și odată descărcat '%s', va fi reutilizat automat."
 
 #. • MSG_085
-msgid "Downloading '%s'"
-msgstr "Descărcare '%s'"
+msgid "Downloading %s"
+msgstr "Descărcare %s"
 
 #. • MSG_086
 msgid "No image selected"
@@ -571,7 +621,10 @@ msgid "Unsupported filesystem"
 msgstr "Sistem de fișiere neacceptat"
 
 #. • MSG_093
-msgid "IMPORTANT: THIS DRIVE CONTAINS MULTIPLE PARTITIONS!!\n\nThis may include partitions/volumes that aren't listed or even visible from Windows. Should you wish to proceed, you are responsible for any data loss on these partitions."
+msgid ""
+"IMPORTANT: THIS DRIVE CONTAINS MULTIPLE PARTITIONS!!\n"
+"\n"
+"This may include partitions/volumes that aren't listed or even visible from Windows. Should you wish to proceed, you are responsible for any data loss on these partitions."
 msgstr "IMPORTANT: Această unitate conține mai multe partiții sau volume!!! Aceasta poate include paravane/volume care nu sunt listate sau chiar vizibile de la Windows. Dacă doriți să continuați, sunteți responsabil pentru orice pierdere de date de pe aceste partiții."
 
 #. • MSG_094
@@ -591,8 +644,18 @@ msgid "'%s' can only be applied if the file system is NTFS."
 msgstr "'%s' poate fi aplicată numai în cazul în care sistemul de fișiere este NTFS.Vă rugăm să selectați un sistem de fișiere ISO diferit."
 
 #. • MSG_098
-msgid "IMPORTANT: You are trying to install 'Windows To Go', but your target drive doesn't have the 'FIXED' attribute. Because of this Windows will most likely freeze during boot, as Microsoft hasn't designed it to work with drives that instead have the 'REMOVABLE' attribute.\n\nDo you still want to proceed?\n\nNote: The 'FIXED/REMOVABLE' attribute is a hardware property that can only be changed using custom tools from the drive manufacturer. However those tools are ALMOST NEVER provided to the public..."
-msgstr "IMPORTANT: Încercați să instalați 'Windows To Go', dar unitatea aleasă nu are atributul 'FIXAT'. Din aceasta cauza Windows-ul cel mai probabil nu va funcționa în timpul de boot, Microsoft nu a proiectat să funcționeze cu drive-urile care au atributul nefixat.\n\nDoriți totuși să continuați?\n\nNotă: Atributul 'FIX/DETAȘABIL' este o proprietate de hardware care poate fi schimbat doarfolosind instrumentele personalizate de la producător, dar aceste instrumente nu suntoferite publicului ..."
+msgid ""
+"IMPORTANT: You are trying to install 'Windows To Go', but your target drive doesn't have the 'FIXED' attribute. Because of this Windows will most likely freeze during boot, as Microsoft hasn't designed it to work with drives that instead have the 'REMOVABLE' attribute.\n"
+"\n"
+"Do you still want to proceed?\n"
+"\n"
+"Note: The 'FIXED/REMOVABLE' attribute is a hardware property that can only be changed using custom tools from the drive manufacturer. However those tools are ALMOST NEVER provided to the public..."
+msgstr ""
+"IMPORTANT: Încercați să instalați 'Windows To Go', dar unitatea aleasă nu are atributul 'FIXAT'. Din aceasta cauza Windows-ul cel mai probabil nu va funcționa în timpul de boot, Microsoft nu a proiectat să funcționeze cu drive-urile care au atributul nefixat.\n"
+"\n"
+"Doriți totuși să continuați?\n"
+"\n"
+"Notă: Atributul 'FIX/DETAȘABIL' este o proprietate de hardware care poate fi schimbat doarfolosind instrumentele personalizate de la producător, dar aceste instrumente nu suntoferite publicului..."
 
 #. • MSG_099
 msgid "Filesystem limitation"
@@ -607,8 +670,12 @@ msgid "Missing WIM support"
 msgstr "Suport WIN lipsă"
 
 #. • MSG_102
-msgid "Your platform cannot extract files from WIM archives. WIM extraction is required to create EFI bootable Windows 7 and Windows Vista USB drives. You can fix that by installing a recent version of 7-Zip.\nDo you want to visit the 7-zip download page?"
-msgstr "Sistemul de operare nu poate extrage fișierele de WIM. Extragerea WIM este necesar pentru a crea un dispozitiv USB boot-abil UEFI Windows 7 și Windows Vista. Puteți corecta aceasta instalați o versiune recentă a 7-Zip.\n Doriți să vizitați pagina de Descărcare a 7-Zip?"
+msgid ""
+"Your platform cannot extract files from WIM archives. WIM extraction is required to create EFI bootable Windows 7 and Windows Vista USB drives. You can fix that by installing a recent version of 7-Zip.\n"
+"Do you want to visit the 7-zip download page?"
+msgstr ""
+"Sistemul de operare nu poate extrage fișierele de WIM. Extragerea WIM este necesar pentru a crea un dispozitiv USB boot-abil UEFI Windows 7 și Windows Vista. Puteți corecta aceasta instalați o versiune recentă a 7-Zip.\n"
+" Doriți să vizitați pagina de Descărcare a 7-Zip?"
 
 #. • MSG_103
 msgid "Download %s?"
@@ -618,12 +685,32 @@ msgstr "Descărcare %s?"
 #.
 #. Example: "Grub4DOS v0.4 or later requires a 'grldr' file to be installed. Because this
 #. file is more than 100 KB in size, and always present on Grub4DOS ISO images (...)"
-msgid "%s or later requires a '%s' file to be installed.\nBecause this file is more than 100 KB in size, and always present on %s ISO images, it is not embedded in Rufus.\n\nRufus can download the missing file for you:\n- Select 'Yes' to connect to the internet and download the file\n- Select 'No' if you want to manually copy this file on the drive later\n\nNote: The file will be downloaded in the current directory and once a '%s' exists there, it will be reused automatically."
-msgstr "%s sau mai mare, necesită instalarea unui fișier'%s'.\nDeoarece acest fișier este mai mare de 100 KB, și este prezentă în imaginea ISO %s, fișierul nu este inclus în Rufus.\n\n Rufus poate descărca fișierul lipsă pentru tine:\n- Selectați 'Da' pentru a vă conecta la Internet și a descărca fișierul\n- Selectați 'Nu' dacă doriți să copiați manual acest fișier mai târziu\n\nNotă: fișierul va fi descărcat în folderul curent și o dată ce'%s' a fost descărcat, acesta va fi reutilizat automat."
+msgid ""
+"%s or later requires a '%s' file to be installed.\n"
+"Because this file is more than 100 KB in size, and always present on %s ISO images, it is not embedded in Rufus.\n"
+"\n"
+"Rufus can download the missing file for you:\n"
+"- Select 'Yes' to connect to the internet and download the file\n"
+"- Select 'No' if you want to manually copy this file on the drive later\n"
+"\n"
+"Note: The file will be downloaded in the current directory and once a '%s' exists there, it will be reused automatically."
+msgstr ""
+"%s sau mai mare, necesită instalarea unui fișier'%s'.\n"
+"Deoarece acest fișier este mai mare de 100 KB, și este prezentă în imaginea ISO %s, fișierul nu este inclus în Rufus.\n"
+"\n"
+" Rufus poate descărca fișierul lipsă pentru tine:\n"
+"- Selectați 'Da' pentru a vă conecta la Internet și a descărca fișierul\n"
+"- Selectați 'Nu' dacă doriți să copiați manual acest fișier mai târziu\n"
+"\n"
+"Notă: fișierul va fi descărcat în folderul curent și o dată ce'%s' a fost descărcat, acesta va fi reutilizat automat."
 
 #. • MSG_105
-msgid "Cancelling may leave the device in an UNUSABLE state.\nIf you are sure you want to cancel, click YES. Otherwise, click NO."
-msgstr "Eliminarea ar lăsa dispozitivul într-o stare inutilizabilă.\nSunteți sigur că doriți să ștergeți, selectați Da. În caz contrar, selectați Nu."
+msgid ""
+"Cancelling may leave the device in an UNUSABLE state.\n"
+"If you are sure you want to cancel, click YES. Otherwise, click NO."
+msgstr ""
+"Eliminarea ar lăsa dispozitivul într-o stare inutilizabilă.\n"
+"Sunteți sigur că doriți să ștergeți, selectați Da. În caz contrar, selectați Nu."
 
 #. • MSG_106
 msgid "Please select folder"
@@ -645,8 +732,12 @@ msgstr "0x%02X (discul %d)"
 #.
 #. "Cluster size" should be the same as the label for IDS_CLUSTER_SIZE_TXT
 #. "kilobytes" should be the same as in MSG_027
-msgid "MS-DOS cannot boot from a drive using a 64 kilobytes Cluster size.\nPlease change the Cluster size or use FreeDOS."
-msgstr "MS-DOS nu poate fi pornit de pe o unitate care are dimensiunea clusterului de 64 de kiloocteți.\nTe rugăm să modifici dimensiunea clusterului sau utilizează FreeDOS."
+msgid ""
+"MS-DOS cannot boot from a drive using a 64 kilobytes Cluster size.\n"
+"Please change the Cluster size or use FreeDOS."
+msgstr ""
+"MS-DOS nu poate fi pornit de pe o unitate care are dimensiunea clusterului de 64 de kiloocteți.\n"
+"Te rugăm să modifici dimensiunea clusterului sau utilizează FreeDOS."
 
 #. • MSG_111
 msgid "Incompatible Cluster size"
@@ -663,8 +754,22 @@ msgid "Large UDF volume"
 msgstr "Volumul UDF mare"
 
 #. • MSG_114
-msgid "This image uses Syslinux %s%s but this application only includes the installation files for Syslinux %s%s.\n\nAs new versions of Syslinux are not compatible with one another, and it wouldn't be possible for Rufus to include them all, two additional files must be downloaded from the Internet ('ldlinux.sys' and 'ldlinux.bss'):\n- Select 'Yes' to connect to the Internet and download these files\n- Select 'No' to cancel the operation\n\nNote: The files will be downloaded in the current application directory and will be reused automatically if present."
-msgstr "Această imagine folosește Syslinux %s%s, dar această aplicație include doar fișierele de instalare pentru Syslinux %s%s.\n\nNoile versiuni ale syslinux, nu sunt compatibile cu altele, și nu ar fi este posibil ca Rufus să le includă, două fișiere suplimentare, ele trebuie să fi descărcate de pe Internet ('ldlinux.sys' şi 'ldlinux.bss'):\n- Selectați 'Da' pentru a vă conecta la Internet și de a descărca aceste fișiere\n- Selectați 'Nu' pentru a anula operațiunea\n\nNotă: Fișierele vor fi descărcate în aplicația curentă director și vor fi reutilizate în mod automat în cazul în prezent."
+msgid ""
+"This image uses Syslinux %s%s but this application only includes the installation files for Syslinux %s%s.\n"
+"\n"
+"As new versions of Syslinux are not compatible with one another, and it wouldn't be possible for Rufus to include them all, two additional files must be downloaded from the Internet ('ldlinux.sys' and 'ldlinux.bss'):\n"
+"- Select 'Yes' to connect to the Internet and download these files\n"
+"- Select 'No' to cancel the operation\n"
+"\n"
+"Note: The files will be downloaded in the current application directory and will be reused automatically if present."
+msgstr ""
+"Această imagine folosește Syslinux %s%s, dar această aplicație include doar fișierele de instalare pentru Syslinux %s%s.\n"
+"\n"
+"Noile versiuni ale syslinux, nu sunt compatibile cu altele, și nu ar fi este posibil ca Rufus să le includă, două fișiere suplimentare, ele trebuie să fi descărcate de pe Internet ('ldlinux.sys' şi 'ldlinux.bss'):\n"
+"- Selectați 'Da' pentru a vă conecta la Internet și de a descărca aceste fișiere\n"
+"- Selectați 'Nu' pentru a anula operațiunea\n"
+"\n"
+"Notă: Fișierele vor fi descărcate în aplicația curentă director și vor fi reutilizate în mod automat în cazul în prezent."
 
 #. • MSG_115
 msgid "Download required"
@@ -674,8 +779,24 @@ msgstr "Descărcare necesară"
 #.
 #. You should be able to test this message with Super Grub2 Disk ISO:
 #. https://sourceforge.net/projects/supergrub2/files/2.00s2/super_grub2_disk_hybrid_2.00s2.iso/download (11.9 MB)
-msgid "This image uses Grub %s but the application only includes the installation files for Grub %s.\n\nAs different versions of Grub may not be compatible with one another, and it is not possible to include them all, Rufus will attempt to locate a version of the Grub installation file ('core.img') that matches the one from your image:\n- Select 'Yes' to connect to the Internet and attempt to download it\n- Select 'No' to use the default version from Rufus\n- Select 'Cancel' to abort the operation\n\nNote: The file will be downloaded in the current application directory and will be reused automatically if present. If no match can be found online, then the default version will be used."
-msgstr "Această imagine folosește Grub %s dar cererea include doar fișierele de instalare pentru Grub %s.\n\n Versiuni diferite ale Grub pot să nu fie compatibile cu altele, deci Nu este posibil să le includă, Rufus va încerca să localizeze o versiune a Grub fișierul de instalare ('core.img'), care se potrivește cu cel din imagine:\n- Selectați 'Da' pentru a vă conecta la Internet și să încercați să-l descărcați\n- Selectați 'Nu' pentru a utiliza versiunea implicită de la Rufus\n- Selectați 'Anulare' pentru a abandona operațiunea\n\nNotă: Fișierul va fi descărcat în directorul aplicației curente și va fi reutilizat în mod automat dacă este prezent. În cazul în care nu se potrivesc pot fi găsite online, atunci versiunea implicită va fi folosită."
+msgid ""
+"This image uses Grub %s but the application only includes the installation files for Grub %s.\n"
+"\n"
+"As different versions of Grub may not be compatible with one another, and it is not possible to include them all, Rufus will attempt to locate a version of the Grub installation file ('core.img') that matches the one from your image:\n"
+"- Select 'Yes' to connect to the Internet and attempt to download it\n"
+"- Select 'No' to use the default version from Rufus\n"
+"- Select 'Cancel' to abort the operation\n"
+"\n"
+"Note: The file will be downloaded in the current application directory and will be reused automatically if present. If no match can be found online, then the default version will be used."
+msgstr ""
+"Această imagine folosește Grub %s dar cererea include doar fișierele de instalare pentru Grub %s.\n"
+"\n"
+" Versiuni diferite ale Grub pot să nu fie compatibile cu altele, deci Nu este posibil să le includă, Rufus va încerca să localizeze o versiune a Grub fișierul de instalare ('core.img'), care se potrivește cu cel din imagine:\n"
+"- Selectați 'Da' pentru a vă conecta la Internet și să încercați să-l descărcați\n"
+"- Selectați 'Nu' pentru a utiliza versiunea implicită de la Rufus\n"
+"- Selectați 'Anulare' pentru a abandona operațiunea\n"
+"\n"
+"Notă: Fișierul va fi descărcat în directorul aplicației curente și va fi reutilizat în mod automat dacă este prezent. În cazul în care nu se potrivesc pot fi găsite online, atunci versiunea implicită va fi folosită."
 
 #. • MSG_117
 msgid "Standard Windows installation"
@@ -732,6 +853,118 @@ msgstr "Setați dimensiunea partiției persistente pentru mediul USB live. Setar
 msgid "Set the partition size units."
 msgstr "Setați unitățile de dimensiune a partițiilor."
 
+#. • MSG_127
+msgid "Do not show this message again"
+msgstr "Nu afișați mesajul din nou"
+
+#. • MSG_128
+msgid "Important notice about %s"
+msgstr "Notă importantă despre %s"
+
+#. • MSG_129
+msgid ""
+"You have just created a media that uses the UEFI:NTFS bootloader. Please remember that, to boot this media, YOU MUST DISABLE SECURE BOOT.\n"
+"For details on why this is necessary, see the 'More Information' button below."
+msgstr ""
+"Tocmai ați creat media care include UEFI:NTFS bootloader. Retineti pentru a boot-a acest mediu, trebuie să dezactivați TEMPORAR 'SECURE BOOT'.\n"
+"Pentru detalii de ce este asta necesar, utilizati 'Mai multe informatii'."
+
+#. • MSG_130
+msgid "Windows image selection"
+msgstr "Selectare imagine Windows"
+
+#. • MSG_131
+msgid ""
+"This ISO contains multiple Windows images.\n"
+"Please select the image you wish to use for this installation:"
+msgstr ""
+"Acest ISO contine multiple imagini Windows.\n"
+"Selectati imaginea pentru instalare:"
+
+#. • MSG_132
+msgid "Another program or process is accessing this drive. Do you want to format it anyway?"
+msgstr "Alt program sau proces utilizeaza dispozitivul. Doriti sa il formatati?"
+
+#. • MSG_133
+msgid ""
+"Rufus has detected that you are attempting to create a Windows To Go media based on a 1809 ISO.\n"
+"\n"
+"Because of a *MICROSOFT BUG*, this media will crash during Windows boot (Blue Screen Of Death), unless you manually replace the file 'WppRecorder.sys' with a 1803 version.\n"
+"\n"
+"Also note that the reason Rufus cannot automatically fix this for you is that 'WppRecorder.sys' is a Microsoft copyrighted file, so we cannot legally embed a copy of the file in the application..."
+msgstr ""
+"Rufus a detectat că încercați să creați media Windows To Go bazat pe ISO 1809.\n"
+"\n"
+"Din cauza unei erori *MICROSOFT BUG*, acest mediu se va prăbuși în timpul pornirii Windows (Blue Screen Of Death), cu excepția cazului în care înlocuiți manual fișierul 'WppRecorder.sys' cu o versiune 1803.\n"
+"\n"
+"De asemenea, rețineți că motivul pentru care Rufus nu poate remedia automat acest lucru pentru dvs. este că 'WppRecorder.sys' este un fișier Microsoft protejat prin drepturi de autor, deci nu putem încorpora în mod legal o copie a fișierului în aplicație..."
+
+#. • MSG_134
+msgid ""
+"Because MBR has been selected for the partition scheme, Rufus can only create a partition up to 2 TB on this media, which will leave %s of disk space unavailable.\n"
+"\n"
+"Are you sure you want to continue?"
+msgstr ""
+"Deoarece MBR a fost selectat pentru schema de partiționare, Rufus poate crea doar o partiție de pină la 2 TB pe acest suport media, ceea ce va lăsa %s spațiu de disc indisponibil.\n"
+"\n"
+"Esti sigur ca vrei sa continui?"
+
+#. • MSG_135
+msgid "Version"
+msgstr "Versiune"
+
+#. • MSG_136
+msgid "Release"
+msgstr "Lansare"
+
+#. • MSG_137
+msgid "Edition"
+msgstr "Editie"
+
+#. • MSG_138
+msgid "Language"
+msgstr "Limba"
+
+#. • MSG_139
+msgid "Architecture"
+msgstr "Arhitectura"
+
+#. • MSG_140
+msgid "Continue"
+msgstr "Continuare"
+
+#. • MSG_141
+msgid "Back"
+msgstr "Inapoi"
+
+#. • MSG_142
+msgid "Please wait..."
+msgstr "Va rog asteptati..."
+
+#. • MSG_143
+msgid "Download using a browser"
+msgstr "Descarcare folosind un browser"
+
+#. • MSG_144
+msgid "Temporarily banned by Microsoft for requesting too many downloads - Please try again later..."
+msgstr "Interzis temporar de Microsoft pentru solicitarea de descărcări prea multe - încercați din nou mai tîrziu..."
+
+#. • MSG_145
+msgid "PowerShell 3.0 or later is required to run this script."
+msgstr "PowerShell 3.0 sau mai nou este necesar pentru a rula acest script."
+
+#. • MSG_146
+msgid "Do you want to go online and download it?"
+msgstr "Dorești să te duci online și să descarci?"
+
+#. • MSG_148
+msgid "Running download script..."
+msgstr "Rularea scriptului de descărcare..."
+
+#. • MSG_149
+msgid "Download ISO Image"
+msgstr "Descarcare imagine ISO"
+
 #. • MSG_150
 msgid "Type of computer you plan to use this bootable drive with. It is your responsibility to determine whether your target is of BIOS or UEFI type before you start creating the drive, as it may fail to boot otherwise."
 msgstr "Tipul computerului, pe care doriţi să-l utilizați cu unitatea bootabilă, ține de responsabilitatea dvs. să determinați dacăeste de tip BIOS sau UEFI înainte de a crea unitatea, deoarece ar putea să nu booteze altfel."
@@ -771,8 +1004,12 @@ msgid "Minimum size that a block of data will occupy in the filesystem"
 msgstr "Dimensiunea minimă a blocului de date a sistemului de fișiere"
 
 #. • MSG_159
-msgid "Use this field to set the drive label\nInternational characters are accepted"
-msgstr "Utilizați acest câmp pentru a seta eticheta unității\ncaractere internaționale sunt permise"
+msgid ""
+"Use this field to set the drive label.\n"
+"International characters are accepted."
+msgstr ""
+"Utilizați acest câmp pentru a seta eticheta unității.\n"
+"caractere internaționale sunt permise."
 
 #. • MSG_160
 msgid "Toggle advanced options"
@@ -795,8 +1032,8 @@ msgid "Method that will be used to make the drive bootable"
 msgstr "Definește metoda care va fi folosită pentru a face unitatea USB boot-abilă"
 
 #. • MSG_165
-msgid "Click to select an image..."
-msgstr "Selectați imaginea..."
+msgid "Click to select or download an image..."
+msgstr "Selectați sau descarcati imaginea..."
 
 #. • MSG_166
 msgid "Check this box to allow the display of international labels and set a device icon (creates an autorun.inf)"
@@ -807,20 +1044,32 @@ msgid "Install an MBR that allows boot selection and can masquerade the BIOS USB
 msgstr "Instalați un MBR care permite pornirea și selecția dispozitivului USB din BIOS"
 
 #. • MSG_168
-msgid "Try to masquerade first bootable USB drive (usually 0x80) as a different disk.\nThis should only be necessary if you install Windows XP and have more than one disk"
-msgstr "În primul rând încearcă să mascheze unitatea de boot USB (de obicei 0x80), ca un alt disc.\nAcest lucru ar putea fi necesar numai dacă ați instalat Windows XP și aveți mai mult de un singur disc"
+msgid ""
+"Try to masquerade first bootable USB drive (usually 0x80) as a different disk.\n"
+"This should only be necessary if you install Windows XP and have more than one disk."
+msgstr ""
+"În primul rând încearcă să mascheze unitatea de boot USB (de obicei 0x80), ca un alt disc.\n"
+"Acest lucru ar putea fi necesar numai dacă ați instalat Windows XP și aveți mai mult de un singur disc."
 
 #. • MSG_169
-msgid "Create an extra hidden partition and try to align partitions boundaries.\nThis can improve boot detection for older BIOSes"
-msgstr "Creați o partiție suplimentară și să încerce să alinieze diferite partiții.\nAcest lucru poate îmbunătăți detectarea cu un vechi BIOS"
+msgid ""
+"Create an extra hidden partition and try to align partitions boundaries.\n"
+"This can improve boot detection for older BIOSes."
+msgstr ""
+"Creați o partiție suplimentară și să încerce să alinieze diferite partiții.\n"
+"Acest lucru poate îmbunătăți detectarea cu un vechi BIOS."
 
 #. • MSG_170
 msgid "Enable the listing of USB Hard Drive enclosures. USE AT YOUR OWN RISKS!!!"
 msgstr "Activați lista de USB Hard Drive anexate. O FOLOSESTI PE PROPRIUL RISC!!!"
 
 #. • MSG_171
-msgid "Start the formatting operation.\nThis will DESTROY any data on the target!"
-msgstr "Începe operația de formatare.\n Aceasta va distruge orice date de pe dispozitiv!"
+msgid ""
+"Start the formatting operation.\n"
+"This will DESTROY any data on the target!"
+msgstr ""
+"Începe operația de formatare.\n"
+" Aceasta va distruge orice date de pe dispozitiv!"
 
 #. • MSG_172
 #.
@@ -882,8 +1131,12 @@ msgid "Update Process:"
 msgstr "Actualizare proces:"
 
 #. • MSG_186
-msgid "Rufus does not install or run background services, therefore update checks are performed only when the main application is running.\\line\nInternet access is of course required when checking for updates."
-msgstr "Rufus nu instalează sau rulează servicii de background. Verificarea actualizări va fi făcută doar atunci când aplicația rulează.\\line\nAccesul la internet este, evident, necesar atunci când verificați actualizările."
+msgid ""
+"Rufus does not install or run background services, therefore update checks are performed only when the main application is running.\\line\n"
+"Internet access is of course required when checking for updates."
+msgstr ""
+"Rufus nu instalează sau rulează servicii de background. Verificarea actualizări va fi făcută doar atunci când aplicația rulează.\\line\n"
+"Accesul la internet este, evident, necesar atunci când verificați actualizările."
 
 #. • MSG_187
 msgid "Invalid image for selected boot option"
@@ -928,8 +1181,16 @@ msgid "Using embedded version of %s file(s)"
 msgstr "Folosiți versiunea integrată de %s fișiere"
 
 #. • MSG_196
-msgid "IMPORTANT: THIS DRIVE USES A NONSTANDARD SECTOR SIZE!\n\nConventional drives use a 512-byte sector size but this drive uses a %d-byte one. In many cases, this means that you will NOT be able to boot from this drive.\nRufus can try to create a bootable drive, but there is NO WARRANTY that it will work."
-msgstr "IMPORTANT: Această unitate utilizează dimensiune de sector non-standard!\n\nUnitățile convenționale folosesc dimensiunea sectorului de 512 octeți, dar această unitate folosește %d octeți. În multe cazuri, acest lucru înseamnă că nu va fi capabil să boot-eze de pe această unitate.\nRufus poate încerca să creeze o unitate de boot, dar nu există nicio garanție că va funcționa corect."
+msgid ""
+"IMPORTANT: THIS DRIVE USES A NONSTANDARD SECTOR SIZE!\n"
+"\n"
+"Conventional drives use a 512-byte sector size but this drive uses a %d-byte one. In many cases, this means that you will NOT be able to boot from this drive.\n"
+"Rufus can try to create a bootable drive, but there is NO WARRANTY that it will work."
+msgstr ""
+"IMPORTANT: Această unitate utilizează dimensiune de sector non-standard!\n"
+"\n"
+"Unitățile convenționale folosesc dimensiunea sectorului de 512 octeți, dar această unitate folosește %d octeți. În multe cazuri, acest lucru înseamnă că nu va fi capabil să boot-eze de pe această unitate.\n"
+"Rufus poate încerca să creeze o unitate de boot, dar nu există nicio garanție că va funcționa corect."
 
 #. • MSG_197
 msgid "Nonstandard sector size detected"
@@ -1133,7 +1394,10 @@ msgstr "Eliminare partiții..."
 #. • MSG_240
 #.
 #. This message has to do with the signature validation that Rufus uses when downloading an update.
-msgid "The signature for the downloaded update can not be validated. This could mean that your system is improperly configured for signature validation or indicate a malicious download.\n\nThe download will be deleted. Please check the log for more details."
+msgid ""
+"The signature for the downloaded update can not be validated. This could mean that your system is improperly configured for signature validation or indicate a malicious download.\n"
+"\n"
+"The download will be deleted. Please check the log for more details."
 msgstr "Descărcare de %s: conexiune..."
 
 #. • MSG_241
@@ -1281,8 +1545,18 @@ msgstr "Imagine detectată ISOHybrid"
 #. • MSG_275
 #.
 #. '%s' will be replaced with your translations for MSG_036 ("ISO Image") and MSG_095 ("DD Image")
-msgid "The image you have selected is an 'ISOHybrid' image. This means it can be written either in %s (file copy) mode or %s (disk image) mode.\nRufus recommends using %s mode, so that you always have full access to the drive after writing it.\nHowever, if you encounter issues during boot, you can try writing this image again in %s mode.\n\nPlease select the mode that you want to use to write this image:"
-msgstr "Imaginea selectată este 'ISOHybrid'. Înseamnă că poate fi scris fie în modul (copiere dosar) %s sau in modul (imagine de disc) %s.\nRufus recomandă modul %s, astfel încât să aveți acces deplin la unitatea utilizată.\nDacă vă confruntați cu probleme în timpul de boot-are, puteți încerca să scrieți imaginea din nou în modul %s.\n\nSelectați modul care doriți să-l utilizați pentru a scrie această imagine:"
+msgid ""
+"The image you have selected is an 'ISOHybrid' image. This means it can be written either in %s (file copy) mode or %s (disk image) mode.\n"
+"Rufus recommends using %s mode, so that you always have full access to the drive after writing it.\n"
+"However, if you encounter issues during boot, you can try writing this image again in %s mode.\n"
+"\n"
+"Please select the mode that you want to use to write this image:"
+msgstr ""
+"Imaginea selectată este 'ISOHybrid'. Înseamnă că poate fi scris fie în modul (copiere dosar) %s sau in modul (imagine de disc) %s.\n"
+"Rufus recomandă modul %s, astfel încât să aveți acces deplin la unitatea utilizată.\n"
+"Dacă vă confruntați cu probleme în timpul de boot-are, puteți încerca să scrieți imaginea din nou în modul %s.\n"
+"\n"
+"Selectați modul care doriți să-l utilizați pentru a scrie această imagine:"
 
 #. • MSG_276
 #.
@@ -1325,8 +1599,14 @@ msgid "The downloaded executable is missing a digital signature."
 msgstr "Executabilul descărcat nu este semnat."
 
 #. • MSG_285
-msgid "The downloaded executable is signed by '%s'.\nThis is not a signature we recognize and could indicate some form of malicious activity...\nAre you sure you want to run this file?"
-msgstr "Executabilul descărcat este semnat de către '%s'.\nAceasta nu este o semnătură recunoscută și ar putea indica o anumită formă de activitate dăunătoare...\nSunteți sigur că doriți să executați acest fișier?"
+msgid ""
+"The downloaded executable is signed by '%s'.\n"
+"This is not a signature we recognize and could indicate some form of malicious activity...\n"
+"Are you sure you want to run this file?"
+msgstr ""
+"Executabilul descărcat este semnat de către '%s'.\n"
+"Aceasta nu este o semnătură recunoscută și ar putea indica o anumită formă de activitate dăunătoare...\n"
+"Sunteți sigur că doriți să executați acest fișier?"
 
 #. • MSG_286
 msgid "Zeroing drive: %0.1f%% completed"
@@ -1369,24 +1649,46 @@ msgid "Warning: Unofficial version"
 msgstr "Atenție: versiune neoficială"
 
 #. • MSG_296
-msgid "This version of Rufus was not produced by its official developer(s).\n\nAre you sure you want to run it?"
-msgstr "Această versiune de Rufus nu a fost produsă de dezvoltatorul oficial.\n\nSigur doriți să îl rulați?"
+msgid ""
+"This version of Rufus was not produced by its official developer(s).\n"
+"\n"
+"Are you sure you want to run it?"
+msgstr ""
+"Această versiune de Rufus nu a fost produsă de dezvoltatorul oficial.\n"
+"\n"
+"Sigur doriți să îl rulați?"
 
 #. • MSG_297
 msgid "Truncated ISO detected"
 msgstr "S-a detectat un ISO trunchiat"
 
 #. • MSG_298
-msgid "The ISO file you have selected does not match its declared size: %s of data is missing!\n\nIf you obtained this file from the Internet, you should try to download a new copy and verify that the MD5 or SHA checksums match the official ones.\n\nNote that you can compute the MD5 or SHA in Rufus by clicking the (✓) button."
-msgstr "Fișierul ISO pe care l-ați selectat nu se potrivește dimensiunii sale declarate: %s de date lipsesc!\n\nDacă ați obținut acest fișier de pe Internet, ar trebui să încercați să descărcați o copie nouă și să verificați dacă sumele de control MD5 sau SHA se potrivesccu cele oficiale.\n\nRețineți că puteți calcula MD5 sau SHA în Rufus făcând clic pe butonul (✓) ."
+msgid ""
+"The ISO file you have selected does not match its declared size: %s of data is missing!\n"
+"\n"
+"If you obtained this file from the Internet, you should try to download a new copy and verify that the MD5 or SHA checksums match the official ones.\n"
+"\n"
+"Note that you can compute the MD5 or SHA in Rufus by clicking the (✓) button."
+msgstr ""
+"Fișierul ISO pe care l-ați selectat nu se potrivește dimensiunii sale declarate: %s de date lipsesc!\n"
+"\n"
+"Dacă ați obținut acest fișier de pe Internet, ar trebui să încercați să descărcați o copie nouă și să verificați dacă sumele de control MD5 sau SHA se potrivesccu cele oficiale.\n"
+"\n"
+"Rețineți că puteți calcula MD5 sau SHA în Rufus făcând clic pe butonul (✓)."
 
 #. • MSG_299
 msgid "Timestamp validation error"
 msgstr "Eroare validare și de timp"
 
 #. • MSG_300
-msgid "Rufus could not validate that the timestamp of the downloaded update is more recent than the one for the current executable.\n\nIn order to prevent potential attack scenarios, the update process has been aborted and the download will be deleted. Please check the log for more details."
-msgstr "Rufus nu a putut valida că marcajul temporal al actualizării descărcate este mai recent decît executabilul curent.\n\nPentru a preveni posibilele scenarii de atac, procesul de actualizare a fost anulat şi descărcarea va fi ştearsă. Vă rugăm să verificaţi jurnalul pentru mai multe detalii."
+msgid ""
+"Rufus could not validate that the timestamp of the downloaded update is more recent than the one for the current executable.\n"
+"\n"
+"In order to prevent potential attack scenarios, the update process has been aborted and the download will be deleted. Please check the log for more details."
+msgstr ""
+"Rufus nu a putut valida că marcajul temporal al actualizării descărcate este mai recent decît executabilul curent.\n"
+"\n"
+"Pentru a preveni posibilele scenarii de atac, procesul de actualizare a fost anulat şi descărcarea va fi ştearsă. Vă rugăm să verificaţi jurnalul pentru mai multe detalii."
 
 #. • MSG_301
 msgid "Show application settings"
