@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: 3.2\n"
+"Project-Id-Version: 3.5\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2018-07-21 16:48+0400\n"
-"PO-Revision-Date: 2018-07-21 17:23+0400\n"
+"POT-Creation-Date: 2019-03-14 15:55+0000\n"
+"PO-Revision-Date: 2019-03-14 15:56+0000\n"
 "Language: ar_SA\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Rufus-LCID: 0x0401, 0x0801, 0x0c01, 0x1001, 0x1401, 0x1801, 0x1c01, 0x2001, 0x2401, 0x2801, 0x2c01, 0x3001, 0x3401, 0x3801, 0x3c01, 0x4001\n"
 "Last-Translator: \n"
 "Language-Team: \n"
-"X-Generator: Poedit 2.0.9\n"
+"X-Generator: Poedit 2.2.1\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -160,12 +160,12 @@ msgid "Settings"
 msgstr "إعدادات"
 
 #. • IDD_UPDATE_POLICY → IDS_UPDATE_FREQUENCY_TXT
-msgid "Check for updates:"
-msgstr "تحقق من تحديثات."
+msgid "Check for updates"
+msgstr "تحقق من تحديثات"
 
 #. • IDD_UPDATE_POLICY → IDS_INCLUDE_BETAS_TXT
-msgid "Include beta versions:"
-msgstr "شمل النسخ التجريبية."
+msgid "Include beta versions"
+msgstr "شمل النسخ التجريبية"
 
 #. • IDD_UPDATE_POLICY → IDC_CHECK_NOW
 msgid "Check Now"
@@ -584,8 +584,8 @@ msgstr ""
 "ملاحظة: سيتم تحميل ملف جديد في الدليل الحالي وبعد العثور على ‘%s’ هناك, سوف يتم إعادة إستخدامه تلقائياً."
 
 #. • MSG_085
-msgid "Downloading '%s'"
-msgstr "تحميل '%s'"
+msgid "Downloading %s"
+msgstr "جاري التحميل %s"
 
 #. • MSG_086
 msgid "No image selected"
@@ -858,6 +858,119 @@ msgstr "حدد حجم التقسيم المستمر لجهاز ال USB الحي
 msgid "Set the partition size units."
 msgstr "حدد وحدات حجم التقسيم."
 
+#. • MSG_127
+msgid "Do not show this message again"
+msgstr "لا تظهر هذه الرسالة مرة آخرى"
+
+#. • MSG_128
+msgid "Important notice about %s"
+msgstr "تنويه مهم عن %s"
+
+#. • MSG_129
+msgid ""
+"You have just created a media that uses the UEFI:NTFS bootloader. Please remember that, to boot this media, YOU MUST DISABLE SECURE BOOT.\n"
+"For details on why this is necessary, see the 'More Information' button below."
+msgstr ""
+"لقد قمت بإنشاء وسائط تستخدم محمل الإقلاع UEFI:NTFS. يرجى التذكر أنه يجب تعطيل Secure Boot للتمكن من إقلاع الوسائط.\n"
+"للمزيد من التفاصيل عن ضرورة الإجراء المذكور, إضغط على زر 'مزيد من المعلومات' أدناه."
+
+#. • MSG_130
+msgid "Windows image selection"
+msgstr "تحديد صورة Windows"
+
+#. • MSG_131
+msgid ""
+"This ISO contains multiple Windows images.\n"
+"Please select the image you wish to use for this installation:"
+msgstr ""
+"تحتوي هذه ال ISO على صور Windows متعددة.\n"
+"يرجى تحديد الصورة الذي ترغب في إستخدامها لهذا التنصيب:"
+
+#. • MSG_132
+msgid "Another program or process is accessing this drive. Do you want to format it anyway?"
+msgstr "هذا القرص يستخدم من قبل برنامج / إجراء آخر. هل تود التهيئة على أية حال ؟"
+
+#. • MSG_133
+msgid ""
+"Rufus has detected that you are attempting to create a Windows To Go media based on a 1809 ISO.\n"
+"\n"
+"Because of a *MICROSOFT BUG*, this media will crash during Windows boot (Blue Screen Of Death), unless you manually replace the file 'WppRecorder.sys' with a 1803 version.\n"
+"\n"
+"Also note that the reason Rufus cannot automatically fix this for you is that 'WppRecorder.sys' is a Microsoft copyrighted file, so we cannot legally embed a copy of the file in the application..."
+msgstr ""
+"لقد قام روفوس بإكتشاف أنك تحاول إنشاء وسائط Windows To Go بناءً على ISO 1809\n"
+"\n"
+"بسبب عيب في Microsoft, سوف تتوقف الوسائط خلال إقلاع Windows (شاشة الموت الزرقاء) ما لم تقم يدوياً بإستبدال ملف 'WppRecorder.sys' بإصدار 1803.\n"
+"\n"
+"يرجى العلم أن سبب عدم إمكانية روفوس من إصلاح المشكلة تلقائيا هو أن ملف 'WppRecorder.sys' محفوظ الحقوق ل Microsoft, لذلك لا يمكننا تضمين نسخة من الملف في التطبيق..."
+
+#. • MSG_134
+msgid ""
+"Because MBR has been selected for the partition scheme, Rufus can only create a partition up to 2 TB on this media, which will leave %s of disk space unavailable.\n"
+"\n"
+"Are you sure you want to continue?"
+msgstr ""
+"بسبب إختيار نظام التجزئة MBR, روفوس قادر فقط على إنشاء تجزئة لغاية 2 TB على هذه الوسائط, الذي سوف يؤدي إلى عدم توفر %s من مساحة القرص.\n"
+"\n"
+"هل تريد المتابعة ؟"
+
+#. • MSG_135
+msgid "Version"
+msgstr "إصدار"
+
+#. • MSG_136
+msgid "Release"
+msgstr "إصدارة"
+
+#. • MSG_137
+msgid "Edition"
+msgstr "نسخة"
+
+#. • MSG_138
+msgid "Language"
+msgstr "اللغة"
+
+#. • MSG_139
+msgid "Architecture"
+msgstr "بُنٍية"
+
+#. • MSG_140
+msgid "Continue"
+msgstr "متابعة"
+
+#. • MSG_141
+msgid "Back"
+msgstr "رجوع"
+
+#. • MSG_142
+msgid "Please wait..."
+msgstr "يرجى الانتظار ..."
+
+#. • MSG_143
+msgid "Download using a browser"
+msgstr "تحميل باستخدام المتصفح"
+
+# mentioned the minimum 12 hours wait.
+#. • MSG_144
+msgid "Temporarily banned by Microsoft for requesting too many downloads - Please try again later..."
+msgstr "لقد تم حظرك مؤقتا من قبل Microsoft كثرة طلبات التحميل, يرجى المحاولة مرة آخرى لاحقا (بعد 12 ساعة كحد أدنى)..."
+
+#. • MSG_145
+msgid "PowerShell 3.0 or later is required to run this script."
+msgstr "تحتاج إلى إصدار PowerShell 3.0 او أحدث لتشغيل النص المكتوب."
+
+#. • MSG_146
+msgid "Do you want to go online and download it?"
+msgstr "هل ترغب بالتحميل عن طريق الإنترنت ؟"
+
+#. • MSG_148
+msgid "Running download script..."
+msgstr "تشغيل النص المكتوب للتحميل ..."
+
+#. • MSG_149
+msgid "Download ISO Image"
+msgstr "تحميل صورة ISO"
+
 #. • MSG_150
 msgid "Type of computer you plan to use this bootable drive with. It is your responsibility to determine whether your target is of BIOS or UEFI type before you start creating the drive, as it may fail to boot otherwise."
 msgstr "نوع جهاز الحاسوب الذي تخطط لاستخدام محرك الأقراص القابل للأقلاع الحالي, إنها مسؤوليتك لتحديد إذا كان الجهاز من نوع BIOS أو UEFI قبل إنشاء محرك الأقراص, وإلا قد يفشل محرك الأقراص في الأقلاع."
@@ -898,11 +1011,11 @@ msgstr "الحد الأدنى لحجم كتلة البيانات التي ستش
 
 #. • MSG_159
 msgid ""
-"Use this field to set the drive label\n"
-"International characters are accepted"
+"Use this field to set the drive label.\n"
+"International characters are accepted."
 msgstr ""
 "استخدام هذا الحقل لتعيين تسمية محرك الأقراص \n"
-"الرموز الدولية مقبولة"
+"الرموز الدولية مقبولة."
 
 #. • MSG_160
 msgid "Toggle advanced options"
@@ -914,7 +1027,7 @@ msgstr "فحص الجهاز من الأجزاء التالفة باستخدام 
 
 #. • MSG_162
 msgid "Uncheck this box to use the \"slow\" format method"
-msgstr "قم بإلغاء الإختيار لهذا المربّع لاستخدام طريقة فرمتة \"بطيئة \"."
+msgstr "قم بإلغاء الإختيار لهذا المربّع لاستخدام طريقة فرمتة \"بطيئة \""
 
 #. • MSG_163
 msgid "Method that will be used to create partitions"
@@ -925,8 +1038,8 @@ msgid "Method that will be used to make the drive bootable"
 msgstr "الطريقة التي سيتّم إستخدامها لخلق محرك أقراص تمهيدي"
 
 #. • MSG_165
-msgid "Click to select an image..."
-msgstr "إضغط لاختيار الـ صورة..."
+msgid "Click to select or download an image..."
+msgstr "إضغط لإختيار أو تحميل صورة ..."
 
 #. • MSG_166
 msgid "Check this box to allow the display of international labels and set a device icon (creates an autorun.inf)"
@@ -939,18 +1052,18 @@ msgstr "تثبيت MBR للسماح باختيار التمهيد ويمكن ت�
 #. • MSG_168
 msgid ""
 "Try to masquerade first bootable USB drive (usually 0x80) as a different disk.\n"
-"This should only be necessary if you install Windows XP and have more than one disk"
+"This should only be necessary if you install Windows XP and have more than one disk."
 msgstr ""
 "محاولة تنكّر محرّك قرص USB (عادة 0x80) كقرص مختلف.\n"
-"Tهذا ضروري فقط إذا أردت تثبيت ويندوز إكس بي ولديك أكثر من قرص واحد"
+"Tهذا ضروري فقط إذا أردت تثبيت ويندوز إكس بي ولديك أكثر من قرص واحد."
 
 #. • MSG_169
 msgid ""
 "Create an extra hidden partition and try to align partitions boundaries.\n"
-"This can improve boot detection for older BIOSes"
+"This can improve boot detection for older BIOSes."
 msgstr ""
 "إنشاء قسم إضافي خفي ومحاذاة حدود الأقسام.\n"
-"هذا يمكنه تحسين إكتشاف التمهيد لـ BIOSes قديمة"
+"هذا يمكنه تحسين إكتشاف التمهيد لـ BIOSes قديمة."
 
 #. • MSG_170
 msgid "Enable the listing of USB Hard Drive enclosures. USE AT YOUR OWN RISKS!!!"
@@ -1180,7 +1293,7 @@ msgstr "حفظ ‪%s‬"
 #.
 #. Formatting status (make sure you use a double % to print the percent sign)
 msgid "Formatting: %0.1f%% completed"
-msgstr "فرمتة: تم %0.1f%%."
+msgstr "فرمتة: تم %0.1f%%"
 
 #. • MSG_218
 msgid "Creating file system: Task %d/%d completed"
@@ -1188,7 +1301,7 @@ msgstr "إنشاء نظام الملفات: تمت %d/%d عملية"
 
 #. • MSG_219
 msgid "NTFS Fixup: %d%% completed"
-msgstr "إصلاح NTFS: تم %d%%."
+msgstr "إصلاح NTFS: تم %d%%"
 
 #. • MSG_220
 #.
@@ -1298,7 +1411,7 @@ msgstr ""
 
 #. • MSG_241
 msgid "Downloading: %0.1f%%"
-msgstr "تحميل: %0.1f%%..."
+msgstr "تحميل: %0.1f%%"
 
 #. • MSG_242
 msgid "Failed to download file."
@@ -1380,7 +1493,7 @@ msgstr "إنضغاط NTFS"
 
 #. • MSG_261
 msgid "Writing image: %0.1f%% completed"
-msgstr "كتابة صورة: تم %0.1f%%."
+msgstr "كتابة صورة: تم %0.1f%%"
 
 #. • MSG_262
 #.
@@ -1408,7 +1521,7 @@ msgstr "نمط UEFI/BIOS ثنائي"
 
 #. • MSG_267
 msgid "Applying Windows image: %0.1f%% completed"
-msgstr "تطبيق صورة (إيميج) ويندوز: تم %0.1f%%."
+msgstr "تطبيق صورة (إيميج) ويندوز: تم %0.1f%%"
 
 #. • MSG_268
 msgid "Applying Windows image..."
@@ -1501,7 +1614,7 @@ msgid ""
 "Are you sure you want to run this file?"
 msgstr ""
 "الملف التنفيذي المحمل موقع من قبل '%s'.\n"
-"هذا ليس بتوقيع رقمي موثوق من قبلنا وقد يسببنشاطات تخريبية...\n"
+"هذا ليس بتوقيع رقمي موثوق من قبلنا وقد يسبب نشاطات تخريبية...\n"
 "هل أنت متأكد من الأستمرار؟"
 
 #. • MSG_286
@@ -1552,7 +1665,7 @@ msgid ""
 msgstr ""
 "هذا الإصدار من روفوس لم يتم إنتاجه من قبل المطورين الرسميين.\n"
 "\n"
-"؟هل أنت متأكد من الأستمرار."
+"؟هل أنت متأكد من الأستمرار?"
 
 #. • MSG_297
 msgid "Truncated ISO detected"
@@ -1611,4 +1724,4 @@ msgstr "إستخدام هذا الخيار لبيان م إذا كنت تريد 
 #. You can see this status message by pressing <Ctrl>-<Alt>-<Z> and then selecting START.
 #. It's the same as MSG_286 but with a process that *may* be faster, hence the name.
 msgid "Fast-zeroing drive: %0.1f%% completed"
-msgstr "التصفير السريع للقرص: %0.1f%% تم."
+msgstr "التصفير السريع للقرص: %0.1f%% تم"
