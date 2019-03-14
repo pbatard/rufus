@@ -552,7 +552,7 @@ static BOOL SetFileSystemAndClusterSize(char* fs_type)
 static void SetFSFromISO(void)
 {
 	int i, fs_tmp, preferred_fs = FS_UNKNOWN;
-	uint32_t fs_mask = 0;
+	uint32_t fs_mask = FS_FAT32 | FS_NTFS;
 	BOOL windows_to_go = (image_options & IMOP_WINTOGO) && (bt == BT_IMAGE) && HAS_WINTOGO(img_report) &&
 		(ComboBox_GetCurSel(GetDlgItem(hMainDialog, IDC_IMAGE_OPTION)) == 1);
 
@@ -594,11 +594,15 @@ static void SetFSFromISO(void)
 	}
 
 	// Try to select the FS
-	for (i=0; i<ComboBox_GetCount(hFileSystem); i++) {
+	for (i = 0; i < ComboBox_GetCount(hFileSystem); i++) {
 		fs_tmp = (int)ComboBox_GetItemData(hFileSystem, i);
-		if (fs_tmp == preferred_fs)
+		if (fs_tmp == preferred_fs) {
 			IGNORE_RETVAL(ComboBox_SetCurSel(hFileSystem, i));
+			break;
+		}
 	}
+	if (selected_fs == FS_UNKNOWN)
+		selected_fs = preferred_fs;
 
 	SendMessage(hMainDialog, WM_COMMAND, (CBN_SELCHANGE_INTERNAL<<16) | IDC_FILE_SYSTEM,
 		ComboBox_GetCurSel(hFileSystem));
@@ -1225,7 +1229,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 		if (tt != TT_BIOS)
 			goto uefi_target;
 
-		if ((img_report.has_grub2) && (img_report.grub2_version[0] != 0) &&
+		if ((pt == PARTITION_STYLE_MBR) && (img_report.has_grub2) && (img_report.grub2_version[0] != 0) &&
 			(strcmp(img_report.grub2_version, GRUB2_PACKAGE_VERSION) != 0)) {
 			// We may have to download a different Grub2 version if we can find one
 			IGNORE_RETVAL(_chdirU(app_dir));
@@ -1289,7 +1293,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 			}
 		}
 
-		if (HAS_SYSLINUX(img_report)) {
+		if ((pt == PARTITION_STYLE_MBR) && HAS_SYSLINUX(img_report)) {
 			if (SL_MAJOR(img_report.sl_version) < 5) {
 				IGNORE_RETVAL(_chdirU(app_dir));
 				for (i=0; i<NB_OLD_C32; i++) {

@@ -877,7 +877,7 @@ static DWORD WINAPI DownloadISOThread(LPVOID param)
 	char *url = NULL, sig_url[128];
 	BYTE *sig = NULL;
 	HANDLE hFile, hPipe;
-	DWORD dwSize, dwAvail, dwPipeSize = 4096;
+	DWORD dwExitCode, dwSize, dwAvail, dwPipeSize = 4096;
 	GUID guid;
 
 	IGNORE_RETVAL(CoInitializeEx(NULL, COINIT_APARTMENTTHREADED));
@@ -956,9 +956,10 @@ static DWORD WINAPI DownloadISOThread(LPVOID param)
 		powershell_path, script_path, &pipe[9], locale_str, icon_path, lmprintf(MSG_149));
 	// Signal our Windows alert hook that it should close the IE cookie prompts from Fido
 	close_fido_cookie_prompts = TRUE;
-	FormatStatus = RunCommand(cmdline, app_dir, TRUE);
+	dwExitCode = RunCommand(cmdline, app_dir, TRUE);
+	uprintf("Exited download script with code: %d", dwExitCode);
 	close_fido_cookie_prompts = FALSE;
-	if ((FormatStatus == 0) && PeekNamedPipe(hPipe, NULL, dwPipeSize, NULL, &dwAvail, NULL) && (dwAvail != 0)) {
+	if ((dwExitCode == 0) && PeekNamedPipe(hPipe, NULL, dwPipeSize, NULL, &dwAvail, NULL) && (dwAvail != 0)) {
 		url = malloc(dwAvail + 1);
 		if ((url != NULL) && ReadFile(hPipe, url, dwAvail, &dwSize, NULL) && (dwSize > 4)) {
 #else
@@ -1007,7 +1008,7 @@ out:
 #endif
 	free(url);
 	SendMessage(hMainDialog, UM_ENABLE_CONTROLS, 0, 0);
-	ExitThread(FormatStatus);
+	ExitThread(dwExitCode);
 }
 
 BOOL DownloadISO()
