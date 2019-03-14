@@ -877,7 +877,7 @@ static DWORD WINAPI DownloadISOThread(LPVOID param)
 	char *url = NULL, sig_url[128];
 	BYTE *sig = NULL;
 	HANDLE hFile, hPipe;
-	DWORD dwExitCode, dwSize, dwAvail, dwPipeSize = 4096;
+	DWORD dwExitCode = 99, dwSize, dwAvail, dwPipeSize = 4096;
 	GUID guid;
 
 	IGNORE_RETVAL(CoInitializeEx(NULL, COINIT_APARTMENTTHREADED));
