@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 3.5\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
 "POT-Creation-Date: 2019-03-13 19:29+0200\n"
-"PO-Revision-Date: 2019-03-13 22:20+0000\n"
+"PO-Revision-Date: 2019-03-15 10:25+0000\n"
 "Language: he_IL\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -375,7 +375,7 @@ msgstr "פתיחה"
 
 #. • MSG_041
 msgid "Operation cancelled by the user"
-msgstr "הפעולה בוטלה על ידי המשתמש"
+msgstr "הפעולה בוטלה על־ידי המשתמש"
 
 #. • MSG_042
 msgid "Error"
@@ -433,7 +433,7 @@ msgstr "ההתקן מוגן מפני כתיבה."
 
 #. • MSG_055
 msgid "The device is in use by another process. Please close any other process that may be accessing the device."
-msgstr "ההתקן בשימוש על ידי תהליך אחר. נא לסגור כל תהליך אחר שעשוי להשתמש בהתקן."
+msgstr "ההתקן בשימוש על־ידי תהליך אחר. נא לסגור כל תהליך אחר שעשוי להשתמש בהתקן."
 
 #. • MSG_056
 msgid "Quick format is not available for this device."
@@ -481,7 +481,7 @@ msgstr "שגיאת התקנה"
 
 #. • MSG_067
 msgid "Could not open media. It may be in use by another process. Please re-plug the media and try again."
-msgstr "לא ניתן לפתוח את המדיה. יתכן שהיא בשימוש על ידי תהליך אחר. נא לחבר מחדש את המדיה ולנסות שוב."
+msgstr "לא ניתן לפתוח את המדיה. יתכן שהיא בשימוש על־ידי תהליך אחר. נא לחבר מחדש את המדיה ולנסות שוב."
 
 #. • MSG_068
 msgid "Error while partitioning drive."
@@ -493,7 +493,7 @@ msgstr "לא ניתן להעתיק קבצים לכונן היעד."
 
 #. • MSG_070
 msgid "Cancelled by user."
-msgstr "בוטל על ידי המשתמש."
+msgstr "בוטל על־ידי המשתמש."
 
 #. • MSG_071
 #.
@@ -553,7 +553,7 @@ msgstr "קובץ לא נתמך"
 
 #. • MSG_082
 msgid "This image is either non-bootable, or it uses a boot or compression method that is not supported by Rufus..."
-msgstr "קובץ זה לא ניתן לאתחול, או שהוא משתמש בשיטת כיווץ או אתחול שלא נתמכת על ידי Rufus..."
+msgstr "קובץ תמונה זה לא ניתן לאתחול, או שהוא משתמש בשיטת כיווץ או אתחול שלא נתמכת על־ידי Rufus..."
 
 #. • MSG_083
 msgid "Replace %s?"
@@ -677,7 +677,7 @@ msgid ""
 "Your platform cannot extract files from WIM archives. WIM extraction is required to create EFI bootable Windows 7 and Windows Vista USB drives. You can fix that by installing a recent version of 7-Zip.\n"
 "Do you want to visit the 7-zip download page?"
 msgstr ""
-"מערכת ההפעלה שלך לא יכולה לחלץ קבצים מארכיוני WIM. חילוץ מ־WIM דרוש ליצירת כונני USB הניתנים לאתחול מסוג EFI של Windows Vista ו־Windows 7. ניתן לתקן את זה על ידי הורדת הגרסה האחרונה של ‎7-Zip‏.\n"
+"מערכת ההפעלה שלך לא יכולה לחלץ קבצים מארכיוני WIM. חילוץ מ־WIM דרוש ליצירת כונני USB של Windows Vista ו־Windows 7 הניתנים לאתחול מסוג EFI. ניתן לתקן את זה על־ידי הורדת הגרסה האחרונה של ‎7-Zip‏.\n"
 "האם ברצונך לעבור לאתר ההורדה של ‎7-Zip‏?"
 
 #. • MSG_103
@@ -740,7 +740,7 @@ msgid ""
 "MS-DOS cannot boot from a drive using a 64 kilobytes Cluster size.\n"
 "Please change the Cluster size or use FreeDOS."
 msgstr ""
-"MS-DOS לא יכול לאתחל מכונן המשתמש בגודל אשכול של 64 קילו בתים.\n"
+"MS-DOS לא יכול לעלות באתחול מכונן המשתמש בגודל אשכול של 64 קילו בתים.\n"
 "נא לשנות את גודל האשכול או להשתמש ב־FreeDOS."
 
 #. • MSG_111
@@ -899,7 +899,7 @@ msgid ""
 msgstr ""
 "Rufus מזהה שברצונך ליצור מדיית Windows To Go המבוססת על קובץ ISO בגרסה 1809.\n"
 "\n"
-"בגלל *באג של Microsoft*, מדיה זו תקרוס במהלך האתחול של ה־Windows (מסך המוות הכחול) אלא אם הקובץ WppRecorder.sys יוחלף באופן ידני בקובץ מה־ISO של 1803.\n"
+"בגלל *באג של Microsoft*, מדיה זו תקרוס במהלך העלייה באתחול של ה־Windows (מסך המוות הכחול) אלא אם הקובץ WppRecorder.sys יוחלף באופן ידני בקובץ מה־ISO של 1803.\n"
 "\n"
 "לתשומת ליבך, הסיבה לכך של־Rufus אין אפשרות לתקן זאת עבורך היא ש־WppRecorder.sys הוא קובץ המוגן בזכויות יוצרים של Microsoft, כך שאיננו יכולים משפטית להטמיע עותק של הקובץ ביישום..."
 
@@ -909,7 +909,7 @@ msgid ""
 "\n"
 "Are you sure you want to continue?"
 msgstr ""
-"מכיוון ש־MBR נבחר כסוג המחיצה, ל־Rufus יש אפשרות ליצור מחיצה בגודל של עד 2TB על המדיה הזו, פעולה שתגרום ל־%s מנפח הדיסק להיות לא זמינים.\n"
+"מכיוון ש־MBR נבחר כסוג המחיצה, ל־Rufus יש אפשרות ליצור מחיצה בגודל של עד ‎2 TB‏ על המדיה הזו, פעולה שתגרום ל־%s מנפח הדיסק להיות לא זמינים.\n"
 "האם ברצונך להמשיך בכל זאת?"
 
 #. • MSG_135
@@ -976,11 +976,11 @@ msgstr "סוג המחשב שברצונך להשתמש עם הכונן בר־הא
 #.
 #. You shouldn't translate 'Legacy Mode' as this is an option that usually appears in English in the UEFI settings.
 msgid "'UEFI-CSM' means that the device will only boot in BIOS emulation mode (also known as 'Legacy Mode') under UEFI, and not in native UEFI mode."
-msgstr "הכוונה באפשרות 'UEFI-CSM' היא שההתקן יוכל לעלות באתחול רק במצב הדמיית BIOS (הידוע גם כ־'Legacy Mode') תחת UEFI, ולא במצב UEFI טבעי."
+msgstr "הכוונה באפשרות 'UEFI-CSM' היא שההתקן יוכל לעלות באתחול רק במצב הדמיית BIOS (הידוע גם כ־Legacy Mode) תחת UEFI, ולא במצב UEFI טבעי."
 
 #. • MSG_152
 msgid "'non CSM' means that the device will only boot in native UEFI mode, and not in BIOS emulation mode (also known as 'Legacy Mode')."
-msgstr "הכוונה באפשרות 'שאינו CSM' היא שההתקן יוכל לעלות באתחול רק במצב UEFI טבעי, ולא במצב הדמיית BIOS (הידוע גם כ־'Legacy Mode')."
+msgstr "הכוונה באפשרות 'שאינו CSM' היא שההתקן יוכל לעלות באתחול רק במצב UEFI טבעי, ולא במצב הדמיית BIOS (הידוע גם כ־Legacy Mode)."
 
 #. • MSG_153
 msgid "Test pattern: 0x%02X"
@@ -1138,7 +1138,7 @@ msgid ""
 "Rufus does not install or run background services, therefore update checks are performed only when the main application is running.\\line\n"
 "Internet access is of course required when checking for updates."
 msgstr ""
-"Rufus לא מתקין או מפעיל שירותים ברקע, לכן חיפוש אחר עדכונים יתבצע רק כשהיישום הראשי פועל. \\line\n"
+"Rufus לא מתקין או מפעיל שירותים ברקע, לכן חיפוש אחר עדכונים יתבצע רק כשהיישום הראשי פועל.\\line\n"
 "כמובן שנדרשת גישה לאינטרנט כדי לחפש עדכונים."
 
 #. • MSG_187
@@ -1192,7 +1192,7 @@ msgid ""
 msgstr ""
 "חשוב: כונן זה משתמש בגודל אשכול שאינו סטנדרטי!\n"
 "\n"
-"כוננים רגילים משתמשים בגודל אשכול של 512 בתים אבל הכונן הזה משתמש בגודל של %d בתים. בהרבה מקרים, זה אומר שלא תוכל לעלות באתחול מכונן זה.\n"
+"כוננים רגילים משתמשים בגודל אשכול של 512 בתים אבל הכונן הזה משתמש בגודל של %d בתים. בהרבה מקרים, זה אומר שלא תהיה לך אפשרות לעלות באתחול מכונן זה.\n"
 "Rufus יכול לנסות ליצור כונן בר־אתחול, אבל אין שום אחריות או הבטחה שזה יעבוד."
 
 #. • MSG_197
@@ -1610,7 +1610,7 @@ msgid ""
 "This is not a signature we recognize and could indicate some form of malicious activity...\n"
 "Are you sure you want to run this file?"
 msgstr ""
-"קובץ ההרצה שהורד חתום על ידי '%s'.\n"
+"קובץ ההרצה שהורד חתום על־ידי '%s'.\n"
 "זוהי לא חתימה שאנחנו מזהים, מה שיכול להצביע על פעילות זדונית...\n"
 "האם ברצונך להפעיל קובץ זה בכל זאת?"
 
@@ -1648,7 +1648,7 @@ msgstr "גירסת Windows לא נתמכת"
 
 #. • MSG_294
 msgid "This version of Windows is no longer supported by Rufus."
-msgstr "גרסת ה־Windows הזו לא נתמכת יותר על ידי Rufus."
+msgstr "גרסת ה־Windows הזו לא נתמכת יותר על־ידי Rufus."
 
 #. • MSG_295
 msgid "Warning: Unofficial version"
@@ -1660,7 +1660,7 @@ msgid ""
 "\n"
 "Are you sure you want to run it?"
 msgstr ""
-"גרסה זו של Rufus לא נוצרה על ידי המפתחים הרשמיים שלה.\n"
+"גרסה זו של Rufus לא נוצרה על־ידי המפתחים הרשמיים שלה.\n"
 "\n"
 "האם ברצונך להריץ אותה בכל זאת?"
 
@@ -1680,7 +1680,7 @@ msgstr ""
 "\n"
 "אם הורדת את הקובץ הזה מהאינטרנט, כדאי לנסות להוריד עותק חדש ולוודא שסיכומי הביקורת MD5 או SHA תואמים לאלו הרשמיים.\n"
 "\n"
-"לתשומת ליבך, ניתן לחשב את ה־MD5 או SHA בתוך Rufus על ידי לחיצה על הכפתור (✓)."
+"לתשומת ליבך, ניתן לחשב את ה־MD5 או SHA בתוך Rufus על־ידי לחיצה על הכפתור (✓)."
 
 #. • MSG_299
 msgid "Timestamp validation error"
