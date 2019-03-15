@@ -224,12 +224,14 @@ static BOOL check_iso_props(const char* psz_dirname, int64_t file_length, const 
 		}
 
 		// Check for "install.###" in "###/sources/"
-		if (safe_stricmp(&psz_dirname[max(0, safe_strlen(psz_dirname) - strlen(sources_str))], sources_str) == 0) {
-			for (i = 0; i < ARRAYSIZE(wininst_name); i++) {
-				if (safe_stricmp(psz_basename, wininst_name[i]) == 0) {
-					if (img_report.wininst_index < MAX_WININST) {
-						static_sprintf(img_report.wininst_path[img_report.wininst_index], "?:%s", psz_fullpath);
-						img_report.wininst_index++;
+		if (psz_dirname != NULL) {
+			if (safe_stricmp(&psz_dirname[max(0, ((int)safe_strlen(psz_dirname)) - ((int)strlen(sources_str)))], sources_str) == 0) {
+				for (i = 0; i < ARRAYSIZE(wininst_name); i++) {
+					if (safe_stricmp(psz_basename, wininst_name[i]) == 0) {
+						if (img_report.wininst_index < MAX_WININST) {
+							static_sprintf(img_report.wininst_path[img_report.wininst_index], "?:%s", psz_fullpath);
+							img_report.wininst_index++;
+						}
 					}
 				}
 			}

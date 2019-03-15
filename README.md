@@ -17,6 +17,7 @@ Features
 * Create bootable drives from bootable ISOs (Windows, Linux, etc.)
 * Create bootable drives from bootable disk images, including compressed ones
 * Create [Windows To Go](https://en.wikipedia.org/wiki/Windows_To_Go) drives
+* Download official Microsoft Windows 8 or Windows 10 retail ISOs
 * Compute MD5, SHA-1 and SHA-256 checksums of the selected image
 * Twice as fast as Microsoft's USB/DVD tool or UNetbootin, on ISO -> USB creation <sup>(1)</sup>
 * Perform bad blocks checks, including detection of "fake" flash drives

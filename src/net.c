@@ -872,7 +872,7 @@ BOOL CheckForUpdates(BOOL force)
  */
 static DWORD WINAPI DownloadISOThread(LPVOID param)
 {
-	char locale_str[1024], cmdline[sizeof(locale_str) + 512], pipe[64] = "\\\\.\\pipe\\";
+	char locale_str[1024], cmdline[sizeof(locale_str) + 512], pipe[MAX_GUID_STRING_LENGTH + 16] = "\\\\.\\pipe\\";
 	char powershell_path[MAX_PATH], icon_path[MAX_PATH] = "", script_path[MAX_PATH] = "";
 	char *url = NULL, sig_url[128];
 	BYTE *sig = NULL;
@@ -886,6 +886,7 @@ static DWORD WINAPI DownloadISOThread(LPVOID param)
 	// may either spam our pipe or replace our script to fool antivirus solutions into
 	// thinking that Rufus is doing something malicious...
 	IGNORE_RETVAL(CoCreateGuid(&guid));
+	// coverity[fixed_size_dest]
 	strcpy(&pipe[9], GuidToString(&guid));
 	static_sprintf(icon_path, "%s%s.ico", temp_dir, APPLICATION_NAME);
 	ExtractAppIcon(icon_path, TRUE);

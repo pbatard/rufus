@@ -2519,6 +2519,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 
 	case UM_PROGRESS_INIT:
 		isMarquee = (wParam == PBS_MARQUEE);
+		SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_NORMAL, 0);
 		if (isMarquee)
 			SendMessage(hProgress, PBM_SETMARQUEE, TRUE, 0);
 		else
@@ -2847,6 +2848,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		pfSetDefaultDllDirectories(LOAD_LIBRARY_SEARCH_SYSTEM32);
 
 	uprintf("*** " APPLICATION_NAME " init ***\n");
+	// coverity[pointless_string_compare]
 	is_x86_32 = (strcmp(APPLICATION_ARCH, "x86") == 0);
 
 	// We have to process the arguments before we acquire the lock and process the locale
