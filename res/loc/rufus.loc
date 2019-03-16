@@ -41,7 +41,7 @@
 # • v3.2  "th-TH" "Thai (ไทย)"
 # • v3.2  "tr-TR" "Turkish (Türkçe)"
 # • v3.2  "uk-UA" "Ukrainian (Українська)"
-# • v3.2  "vi-VN" "Vietnamese (Tiếng Việt)"
+# • v3.5  "vi-VN" "Vietnamese (Tiếng Việt)"
 
 #########################################################################
 l "en-US" "English (English)" 0x0409, 0x0809, 0x0c09, 0x1009, 0x1409, 0x1809, 0x1c09, 0x2009, 0x2409, 0x2809, 0x2c09, 0x3009, 0x3409, 0x3809, 0x3c09, 0x4009, 0x4409, 0x4809
@@ -13639,7 +13639,7 @@ t MSG_306 "Швидке обнуління диска: %0.1f%% завершен�
 
 #########################################################################
 l "vi-VN" "Vietnamese (Tiếng Việt)" 0x042A
-v 3.2
+v 3.5
 b "en-US"
 
 g IDD_ABOUTBOX
@@ -13816,6 +13816,28 @@ t MSG_123 "Kích thước phân vùng cố định"
 t MSG_124 "Không cố định"
 t MSG_125 "Đặt kích thước phân vùng cố định cho bản live USB. Đặt kích thước là 0 để bỏ phân vùng cố định."
 t MSG_126 "Chọn đơn vị kích thước cho phân vùng."
+t MSG_127 "Không hiển thị lại thông báo này"
+t MSG_128 "Chú ý quan trọng về %s"
+t MSG_129 "Bạn vừa mới tạo ổ đĩa sử dung UEFI:NTFS bootloader. Hãy nhớ rằng để boot được đĩa này BẠN PHẢI VÔ HIỆU SECURE BOOT.\nXem phần 'Thông tin thêm' phía dưới để tìm hiểu thêm."
+t MSG_130 "Chọn file ảnh Windows"
+t MSG_131 "File ISO này chứa nhiều file ảnh Windows.\nHãy chọn file ảnh bạn muốn sử dung cho việc cài đặt này:"
+t MSG_132 "Đang có một chương trình hoặc tiến trình nào đó truy cập vào ổ. Bạn vẫn muốn định dạng ổ đĩa?"
+t MSG_133 "Rufus nhận thấy bạn đang cố gắng tạo ổ đĩa Windows To Go dựa vào định dạng ISO 1809.\n\nBởi vì một lỗi của MICROSOFT, ổ đĩa này sẽ bị lỗi trong quá trình khởi động Windows (Màn hình xanh chết chóc), trừ khi bạn thay thế thủ công file 'WppRecorder.sys' phiên bản 1803.\n\nCũng xin lưu ý rằng Rufus không thể tự động sửa lỗi này vì file 'WppRecorder.sys' thuộc bản quyền của Microsoft, vì vậy chúng ta không thể nhúng file này vào chương trình..."
+t MSG_134 "Bởi vì MBR được chọn để định dạng phân vùng, Rufus chỉ có thể tạo phân vùng tới 2 TB cho ổ đĩa này, việc này sẽ bỏ phí %s không được sử dung.\n\nBạn có muốn tiếp tục?"
+t MSG_135 "Hệ điều hành"
+t MSG_136 "Bản phát hành"
+t MSG_137 "Phiên bản"
+t MSG_138 "Ngôn ngữ"
+t MSG_139 "Kiến trúc"
+t MSG_140 "Tiếp tục"
+t MSG_141 "Quay lại"
+t MSG_142 "Xin hãy đợi..."
+t MSG_143 "Sử dụng trình duyệt để tải"
+t MSG_144 "Tạm thời bị khóa bởi Microsoft vì yêu cầu tải quá nhiều - Xin hãy thử lại sau..."
+t MSG_145 "Yêu cầu phiên bản PowerShell 3.0 hoặc cao hơn để chạy đoạn mã này."
+t MSG_146 "Bạn có muốn kết nối Internet và tải nó?"
+t MSG_148 "Đang chạy đoạn mã tải file..."
+t MSG_149 "Tải file ảnh ISO"
 t MSG_150 "Loại máy tính mà bạn định sử dung với ổ USB boot. Bạn phải tìm hiểu máy đó là kiểu BIOS hay UEFI trước khi bạn tạo ổ USB bởi nó có thể bị lỗi khi boot."
 t MSG_151 "'UEFI-CSM' nghĩa là thiết bị chỉ có thể boot ở chế độ giả lập BIOS (hay còn gọi là 'Legacy Mode') bên trong chế độ UEFI, và nó không phải là chế độ thuần UEFI."
 t MSG_152 "'non CSM' nghĩa là thiết bị chỉ có thể boot ở chế độ thuần UEFI mà không phải chế độ giả lập BIOS (hay còn gọi là 'Legacy Mode')"
@@ -13831,7 +13853,7 @@ t MSG_161 "Kiểm tra khối hỏng bằng mẫu thử"
 t MSG_162 "Bỏ chọn mục này để dùng cách định dạng chậm"
 t MSG_163 "Cách thức tạo phân vùng"
 t MSG_164 "Cách sẽ dùng để tạo ổ đĩa có thể khởi động"
-t MSG_165 "Nhấn để chọn file ảnh..."
+t MSG_165 "Nhấn để chọn hoặc tải file ảnh..."
 t MSG_166 "Chọn mục này để cho phép hiện tên quốc tế và đặt biểu tượng thiết bị (tạo một autorun.inf)"
 t MSG_167 "Cài đặt một MBR cho phép lựa chọn khởi động và có thể giả ID ổ đĩa USB BIOS"
 t MSG_168 "Thử giả ổ đĩa USB khởi động đầu tiên (thường là 0x80) như một đĩa khác.\nĐiều này chỉ cần thiết nếu bạn cài đặt Windows XP và có nhiều hơn một đĩa."
@@ -13969,6 +13991,6 @@ t MSG_301 "Hiển thị cài đặt chương trình"
 t MSG_302 "Hiện thông tin về chương trình"
 t MSG_303 "Hiển thị log"
 t MSG_304 "Tạo file ảnh ổ đĩa từ thiết bị được chọn"
-t MSG_305 "Sử dung tùy chọn này để chỉ thị rằng bạn muốn sử dung thiết bị này cài Windows lên một ổ đĩa khác, hoặc nếu bạn muốn chạy Windows trực tiếp từ thiết bị này (Windows To Go)."
+t MSG_305 "Sử dụng tùy chọn này để chỉ thị rằng bạn muốn sử dung thiết bị này cài Windows lên một ổ đĩa khác, hoặc nếu bạn muốn chạy Windows trực tiếp từ thiết bị này (Windows To Go)."
 t MSG_306 "Đang xóa nhanh ổ đĩa: %0.1f%% đã hoàn thành"
 
