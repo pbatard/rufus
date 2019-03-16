@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: 3.2\n"
+"Project-Id-Version: 3.5\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2018-07-26 10:38+0100\n"
-"PO-Revision-Date: 2018-07-26 11:28+0100\n"
+"POT-Creation-Date: 2019-03-16 16:17+0000\n"
+"PO-Revision-Date: 2019-03-16 18:52+0000\n"
 "Language: cs_CZ\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Rufus-LCID: 0x0405\n"
 "Last-Translator: \n"
 "Language-Team: \n"
-"X-Generator: Poedit 2.1\n"
+"X-Generator: Poedit 2.2.1\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -158,11 +158,11 @@ msgid "Settings"
 msgstr "Nastavení automatických aktualizací"
 
 #. • IDD_UPDATE_POLICY → IDS_UPDATE_FREQUENCY_TXT
-msgid "Check for updates:"
+msgid "Check for updates"
 msgstr "Kontrolovat"
 
 #. • IDD_UPDATE_POLICY → IDS_INCLUDE_BETAS_TXT
-msgid "Include beta versions:"
+msgid "Include beta versions"
 msgstr "Zahrnout beta verze"
 
 #. • IDD_UPDATE_POLICY → IDC_CHECK_NOW
@@ -555,7 +555,7 @@ msgstr "Nepodporovaný obraz"
 
 #. • MSG_082
 msgid "This image is either non-bootable, or it uses a boot or compression method that is not supported by Rufus..."
-msgstr "Obraz není bootovací, nebo používá metodu spuštění nebo kompresi, která není podporován Rufusem ..."
+msgstr "Obraz není bootovací, nebo používá metodu spuštění nebo kompresi, která není podporován Rufusem..."
 
 #. • MSG_083
 msgid "Replace %s?"
@@ -584,8 +584,8 @@ msgstr ""
 "Poznámka: Nový soubor %s bude stažen do aktuální složky pro opětovné automatické použití."
 
 #. • MSG_085
-msgid "Downloading '%s'"
-msgstr "Stahuji '%s'"
+msgid "Downloading %s"
+msgstr "Staženo %s"
 
 #. • MSG_086
 msgid "No image selected"
@@ -600,7 +600,7 @@ msgstr "Nebyl zvolen žádný obraz disku"
 #. If you prefer, it's okay to use "type" or "device" instead of "NAND" (e.g. "for TLC type").
 #. See also MSG_035.
 msgid "for %s NAND"
-msgstr ""
+msgstr "pro %s NAND"
 
 #. • MSG_088
 msgid "Image is too big"
@@ -817,11 +817,11 @@ msgstr ""
 
 #. • MSG_119
 msgid "advanced drive properties"
-msgstr "Pokročilé vlastnosti disku"
+msgstr "pokročilé vlastnosti disku"
 
 #. • MSG_120
 msgid "advanced format options"
-msgstr "Pokročilé možnosti formátování"
+msgstr "pokročilé možnosti formátování"
 
 #. • MSG_121
 msgid "Show %s"
@@ -857,6 +857,118 @@ msgstr "Nastavte velikost trvalého oddílu pro živá média USB. Nastavení ve
 #. • MSG_126
 msgid "Set the partition size units."
 msgstr "Nastavení velikosti jednotky."
+
+#. • MSG_127
+msgid "Do not show this message again"
+msgstr "Příště zprávu nezobrazovat"
+
+#. • MSG_128
+msgid "Important notice about %s"
+msgstr "Důležité upozornění o %s"
+
+#. • MSG_129
+msgid ""
+"You have just created a media that uses the UEFI:NTFS bootloader. Please remember that, to boot this media, YOU MUST DISABLE SECURE BOOT.\n"
+"For details on why this is necessary, see the 'More Information' button below."
+msgstr ""
+"Vytvořili jste médium, které používá zavaděč UEFI: NTFS. Pamatujte, že pro zavedení tohoto média MUSÍTE VYPNOUT SECURE BOOT.\n"
+"Podrobnosti o tom, proč je to nutné, naleznete níže v části „Další informace“."
+
+#. • MSG_130
+msgid "Windows image selection"
+msgstr "Vybrat obrazu systému Windows"
+
+#. • MSG_131
+msgid ""
+"This ISO contains multiple Windows images.\n"
+"Please select the image you wish to use for this installation:"
+msgstr ""
+"ISO obsahuje více obrazů Windows..\n"
+"Vyberte prosím obraz, který chcete použít pro tuto instalaci:"
+
+#. • MSG_132
+msgid "Another program or process is accessing this drive. Do you want to format it anyway?"
+msgstr "K tomuto disku přistupuje jiný program nebo proces. Chcete ho přesto formátovat?"
+
+#. • MSG_133
+msgid ""
+"Rufus has detected that you are attempting to create a Windows To Go media based on a 1809 ISO.\n"
+"\n"
+"Because of a *MICROSOFT BUG*, this media will crash during Windows boot (Blue Screen Of Death), unless you manually replace the file 'WppRecorder.sys' with a 1803 version.\n"
+"\n"
+"Also note that the reason Rufus cannot automatically fix this for you is that 'WppRecorder.sys' is a Microsoft copyrighted file, so we cannot legally embed a copy of the file in the application..."
+msgstr ""
+"Rufus zjistil, že se pokoušíte vytvořit Windows To Go médií založené na 1809 ISO.\n"
+"\n"
+"Vzhledem k tomu, že *MICROSOFT BUG*, toto médium se při spouštění systému Windows zhroutí (Blue Screen), pokud soubor „WppRecorder.sys“ ručně nenahradíte verzí 1803.\n"
+"\n"
+"Důvodem proč Rufus nemůže automaticky opravit, je, že soubor „WppRecorder.sys“ je souborem chráněným autorskými právy společnosti Microsoft, takže nemůžeme legálně vložit kopii souboru do aplikace..."
+
+#. • MSG_134
+msgid ""
+"Because MBR has been selected for the partition scheme, Rufus can only create a partition up to 2 TB on this media, which will leave %s of disk space unavailable.\n"
+"\n"
+"Are you sure you want to continue?"
+msgstr ""
+"Pro schéma oddílu byla vybráno MBR, Rufus na tomto médiu vytvořit pouze oddíl o velikosti až 2 TB, což ponechá místo na disku %s nedostupné.\n"
+"\n"
+"Jste si jistý, že chcete pokračovat?"
+
+#. • MSG_135
+msgid "Version"
+msgstr "Verze"
+
+#. • MSG_136
+msgid "Release"
+msgstr "Vydání"
+
+#. • MSG_137
+msgid "Edition"
+msgstr "Edice"
+
+#. • MSG_138
+msgid "Language"
+msgstr "Jazyk"
+
+#. • MSG_139
+msgid "Architecture"
+msgstr "Architektura"
+
+#. • MSG_140
+msgid "Continue"
+msgstr "Pokračovat"
+
+#. • MSG_141
+msgid "Back"
+msgstr "Zpět"
+
+#. • MSG_142
+msgid "Please wait..."
+msgstr "Počkejte prosím..."
+
+#. • MSG_143
+msgid "Download using a browser"
+msgstr "Stáhnout pomocí prohlížeče"
+
+#. • MSG_144
+msgid "Temporarily banned by Microsoft for requesting too many downloads - Please try again later..."
+msgstr "Microsoft dočasně zakázal žádostí z důvodu příliš mnoho stahování - zkuste to znovu později ..."
+
+#. • MSG_145
+msgid "PowerShell 3.0 or later is required to run this script."
+msgstr "Pro spuštění skriptu je nutná verze PowerShell 3.0 nebo novější."
+
+#. • MSG_146
+msgid "Do you want to go online and download it?"
+msgstr "Chcete přejít do režimu online a stáhnout ji?"
+
+#. • MSG_148
+msgid "Running download script..."
+msgstr "Spuštění skriptu pro stahování ..."
+
+#. • MSG_149
+msgid "Download ISO Image"
+msgstr "Stáhnout obraz ISO"
 
 #. • MSG_150
 msgid "Type of computer you plan to use this bootable drive with. It is your responsibility to determine whether your target is of BIOS or UEFI type before you start creating the drive, as it may fail to boot otherwise."
@@ -898,8 +1010,8 @@ msgstr "Minimální velikost, kterou zabere blok dat v souborovém systému"
 
 #. • MSG_159
 msgid ""
-"Use this field to set the drive label\n"
-"International characters are accepted"
+"Use this field to set the drive label.\n"
+"International characters are accepted."
 msgstr ""
 "Pokud chcete nastavit jmenovku svazku, vyplňte pole.\n"
 "Jsou podporované i mezinárodní znaky."
@@ -927,8 +1039,8 @@ msgid "Method that will be used to make the drive bootable"
 msgstr "Vyberte metodu, která bude použitá k vytvoření boot zařízení"
 
 #. • MSG_165
-msgid "Click to select an image..."
-msgstr "Klikněte pro výběr obrazu..."
+msgid "Click to select or download an image..."
+msgstr "Kliknutím vyberte nebo stáhněte obraz..."
 
 #. • MSG_166
 msgid "Check this box to allow the display of international labels and set a device icon (creates an autorun.inf)"
@@ -941,18 +1053,18 @@ msgstr "Instalovat MBR, který umožní výběr při zavádění systému a zama
 #. • MSG_168
 msgid ""
 "Try to masquerade first bootable USB drive (usually 0x80) as a different disk.\n"
-"This should only be necessary if you install Windows XP and have more than one disk"
+"This should only be necessary if you install Windows XP and have more than one disk."
 msgstr ""
 "Pokusit se o zamaskování boot USB jednotky (většinou 0x80) jako jiného disku.\n"
-"Obvykle nutné pouze pokud chcete instalovat Windows XP a máte více jak jeden disk"
+"Obvykle nutné pouze pokud chcete instalovat Windows XP a máte více jak jeden disk."
 
 #. • MSG_169
 msgid ""
 "Create an extra hidden partition and try to align partitions boundaries.\n"
-"This can improve boot detection for older BIOSes"
+"This can improve boot detection for older BIOSes."
 msgstr ""
 "Vytvořit další skryté oddíly a pokusí se o zarovnání oddílů.\n"
-"Toto nastavení může zlepšit detekci spustitelného zařízení pro starší BIOS"
+"Toto nastavení může zlepšit detekci spustitelného zařízení pro starší BIOS."
 
 #. • MSG_170
 msgid "Enable the listing of USB Hard Drive enclosures. USE AT YOUR OWN RISKS!!!"
