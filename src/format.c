@@ -889,6 +889,15 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 	if (SelectedDrive.SectorSize < 512)
 		goto out;
 
+	if (pt == PARTITION_STYLE_GPT) {
+		// Add a notice in the protective MBR
+		fake_fd._handle = (char*)hPhysicalDrive;
+		set_bytes_per_sector(SelectedDrive.SectorSize);
+		uprintf(using_msg, "Rufus protective");
+		r = write_rufus_gpt_mbr(fp);
+		goto notify;
+	}
+
 	// FormatEx rewrites the MBR and removes the LBA attribute of FAT16
 	// and FAT32 partitions - we need to correct this in the MBR
 	buffer = (unsigned char*)_mm_malloc(SelectedDrive.SectorSize, 16);
@@ -1017,6 +1026,9 @@ static BOOL WriteSBR(HANDLE hPhysicalDrive)
 	unsigned char* buf = NULL;
 	FAKE_FD fake_fd = { 0 };
 	FILE* fp = (FILE*)&fake_fd;
+
+	if (pt == PARTITION_STYLE_GPT)
+		return TRUE;
 
 	fake_fd._handle = (char*)hPhysicalDrive;
 	set_bytes_per_sector(SelectedDrive.SectorSize);
@@ -1997,7 +2009,7 @@ DWORD WINAPI FormatThread(void* param)
 	}
 
 	// Thanks to Microsoft, we must fix the MBR AFTER the drive has been formatted
-	if (pt == PARTITION_STYLE_MBR) {
+	if ((pt == PARTITION_STYLE_MBR) || ((bt != BT_NON_BOOTABLE) && (pt == PARTITION_STYLE_GPT))) {
 		PrintInfoDebug(0, MSG_228);	// "Writing master boot record..."
 		if ((!WriteMBR(hPhysicalDrive)) || (!WriteSBR(hPhysicalDrive))) {
 			if (!IS_ERROR(FormatStatus))

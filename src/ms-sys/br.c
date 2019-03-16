@@ -148,6 +148,15 @@ int is_rufus_mbr(FILE *fp)
       is_br(fp);
 } /* is_rufus_mbr */
 
+int is_rufus_gpt_mbr(FILE *fp)
+{
+#include "mbr_gpt_rufus.h"
+
+    return
+       contains_data(fp, 0x0, mbr_gpt_rufus_0x0, sizeof(mbr_gpt_rufus_0x0)) &&
+       is_br(fp);
+} /* is_rufus_gpt_mbr */
+
 int is_reactos_mbr(FILE *fp)
 {
    #include "mbr_reactos.h"
@@ -288,6 +297,15 @@ int write_rufus_mbr(FILE *fp)
       write_data(fp, 0x0, mbr_rufus_0x0, sizeof(mbr_rufus_0x0)) &&
       write_bootmark(fp);
 } /* write_rufus_mbr */
+
+int write_rufus_gpt_mbr(FILE *fp)
+{
+#include "mbr_gpt_rufus.h"
+
+    return
+       write_data(fp, 0x0, mbr_gpt_rufus_0x0, sizeof(mbr_gpt_rufus_0x0)) &&
+       write_bootmark(fp);
+} /* write_rufus_gpt_mbr */
 
 int write_reactos_mbr(FILE *fp)
 {

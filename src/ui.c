@@ -155,8 +155,10 @@ void GetMainButtonsWidth(HWND hDlg)
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
 	bw = rc.right - rc.left;
 
-	for (i = 0; i < ARRAYSIZE(main_button_ids); i++)
-		bw = max(bw, GetTextWidth(hDlg, main_button_ids[i]) + cbw);
+	for (i = 0; i < ARRAYSIZE(main_button_ids); i++) {
+		// Make sure we add extra space for the SELECT split button (i == 0) if Fido is enabled
+		bw = max(bw, GetTextWidth(hDlg, main_button_ids[i]) + ((enable_fido && i == 0) ? (3 * cbw) / 2 : cbw));
+	}
 	// The 'CLOSE' button is also be used to display 'CANCEL' and we sometimes
 	// want to add "DOWNLOAD" into the Select split button => measure that too.
 	bw = max(bw, GetTextSize(GetDlgItem(hDlg, IDCANCEL), lmprintf(MSG_007)).cx + cbw);
