@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: 3.2\n"
+"Project-Id-Version: 3.5\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2018-07-22 20:29-0300\n"
-"PO-Revision-Date: 2018-07-22 20:35-0300\n"
+"POT-Creation-Date: 2019-03-16 12:12+0000\n"
+"PO-Revision-Date: 2019-03-16 12:22+0000\n"
 "Language: pt_BR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Rufus-LCID: 0x0416\n"
 "Last-Translator: \n"
 "Language-Team: \n"
-"X-Generator: Poedit 2.0.9\n"
+"X-Generator: Poedit 2.2.1\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -158,12 +158,12 @@ msgid "Settings"
 msgstr "Configurações"
 
 #. • IDD_UPDATE_POLICY → IDS_UPDATE_FREQUENCY_TXT
-msgid "Check for updates:"
-msgstr "Procurar atualizações:"
+msgid "Check for updates"
+msgstr "Procurar atualizações"
 
 #. • IDD_UPDATE_POLICY → IDS_INCLUDE_BETAS_TXT
-msgid "Include beta versions:"
-msgstr "Incluir versões beta:"
+msgid "Include beta versions"
+msgstr "Incluir versões beta"
 
 #. • IDD_UPDATE_POLICY → IDC_CHECK_NOW
 msgid "Check Now"
@@ -189,7 +189,7 @@ msgstr "Notas de Lançamento"
 #. • IDD_NEW_VERSION → IDC_DOWNLOAD
 #. • MSG_040
 msgid "Download"
-msgstr ""
+msgstr "Baixar"
 
 #. • MSG_001
 msgid "Other instance detected"
@@ -583,8 +583,8 @@ msgstr ""
 " '%s' nela, ele será reutilizado automaticamente."
 
 #. • MSG_085
-msgid "Downloading '%s'"
-msgstr "Baixando '%s'"
+msgid "Downloading %s"
+msgstr "Baixando %s"
 
 #. • MSG_086
 msgid "No image selected"
@@ -699,7 +699,7 @@ msgid ""
 "\n"
 "Note: The file will be downloaded in the current directory and once a '%s' exists there, it will be reused automatically."
 msgstr ""
-"%s ou posterior requer que esteja instalado um arquivo '%s' .\n"
+"%s ou posterior requer que esteja instalado um arquivo '%s'.\n"
 "Uma vez que este arquivo tem mais de 100 KB e está sempre presente nas \n"
 "imagens ISO %s, o Rufus não o inclui na sua distribuição.\n"
 "\n"
@@ -859,6 +859,116 @@ msgstr "Defina o tamanho da partição persistente para mídia USB ativa. Defini
 msgid "Set the partition size units."
 msgstr "Defina as unidades de tamanho da partição."
 
+#. • MSG_127
+msgid "Do not show this message again"
+msgstr "Não mostrar esta mensagem novamente"
+
+#. • MSG_128
+msgid "Important notice about %s"
+msgstr "Aviso importante sobre %s"
+
+#. • MSG_129
+msgid ""
+"You have just created a media that uses the UEFI:NTFS bootloader. Please remember that, to boot this media, YOU MUST DISABLE SECURE BOOT.\n"
+"For details on why this is necessary, see the 'More Information' button below."
+msgstr ""
+"Você acabou de criar uma mídia que usa o carregador de inicialização UEFI: NTFS. Lembre-se de que, para inicializar esta mídia, VOCÊ DEVE DESABILITAR O BOOT SEGURO.\n"
+"Para detalhes sobre por que isso é necessário, consulte o botão \"Mais informações\" abaixo."
+
+#. • MSG_130
+msgid "Windows image selection"
+msgstr "Seleção de imagem do Windows"
+
+#. • MSG_131
+msgid ""
+"This ISO contains multiple Windows images.\n"
+"Please select the image you wish to use for this installation:"
+msgstr ""
+"Este ISO contém várias imagens do Windows.\n"
+"Por favor, selecione a imagem que você deseja usar para esta instalação:"
+
+#. • MSG_132
+msgid "Another program or process is accessing this drive. Do you want to format it anyway?"
+msgstr "Outro programa ou processo está acessando esta unidade. Você quer formatá-lo mesmo assim?"
+
+#. • MSG_133
+msgid ""
+"Rufus has detected that you are attempting to create a Windows To Go media based on a 1809 ISO.\n"
+"\n"
+"Because of a *MICROSOFT BUG*, this media will crash during Windows boot (Blue Screen Of Death), unless you manually replace the file 'WppRecorder.sys' with a 1803 version.\n"
+"\n"
+"Also note that the reason Rufus cannot automatically fix this for you is that 'WppRecorder.sys' is a Microsoft copyrighted file, so we cannot legally embed a copy of the file in the application..."
+msgstr ""
+"Rufus detectou que você está tentando criar uma mídia do Windows To Go com base em uma ISO 1809.\n"
+"Devido a um *MICROSOFT BUG*, esta mídia irá travar durante a inicialização do Windows (Tela Azul da Morte), a menos que você substitua manualmente o arquivo 'WppRecorder.sys' por uma versão 1803.\n"
+"Observe também que a razão pela qual o Rufus não pode corrigir isso automaticamente para você é que 'WppRecorder.sys' é um arquivo protegido por direitos autorais da Microsoft, portanto, não podemos incorporar legalmente uma cópia do arquivo no aplicativo..."
+
+#. • MSG_134
+msgid ""
+"Because MBR has been selected for the partition scheme, Rufus can only create a partition up to 2 TB on this media, which will leave %s of disk space unavailable.\n"
+"\n"
+"Are you sure you want to continue?"
+msgstr ""
+"Como o MBR foi selecionado para o esquema de partição, o Rufus só pode criar uma partição de até 2 TB nessa mídia, o que deixará %s de espaço em disco indisponível.\n"
+"\n"
+"Você tem certeza que quer continuar?"
+
+#. • MSG_135
+msgid "Version"
+msgstr "Versão"
+
+#. • MSG_136
+msgid "Release"
+msgstr "Lançamento"
+
+#. • MSG_137
+msgid "Edition"
+msgstr "Edição"
+
+#. • MSG_138
+msgid "Language"
+msgstr "Idioma"
+
+#. • MSG_139
+msgid "Architecture"
+msgstr "Arquitetura"
+
+#. • MSG_140
+msgid "Continue"
+msgstr "Continuar"
+
+#. • MSG_141
+msgid "Back"
+msgstr "Voltar"
+
+#. • MSG_142
+msgid "Please wait..."
+msgstr "Por favor, aguarde..."
+
+#. • MSG_143
+msgid "Download using a browser"
+msgstr "Baixar usando um navegador"
+
+#. • MSG_144
+msgid "Temporarily banned by Microsoft for requesting too many downloads - Please try again later..."
+msgstr "Banido temporariamente pela Microsoft pelo alto número de requisições - Por favor, tente mais tarde..."
+
+#. • MSG_145
+msgid "PowerShell 3.0 or later is required to run this script."
+msgstr "PowerShell 3.0 ou superior é requerido para rodar esse script."
+
+#. • MSG_146
+msgid "Do you want to go online and download it?"
+msgstr "Deseja ir online e baixar?"
+
+#. • MSG_148
+msgid "Running download script..."
+msgstr "Rodando o script de download..."
+
+#. • MSG_149
+msgid "Download ISO Image"
+msgstr "Baixar imagem ISO"
+
 #. • MSG_150
 msgid "Type of computer you plan to use this bootable drive with. It is your responsibility to determine whether your target is of BIOS or UEFI type before you start creating the drive, as it may fail to boot otherwise."
 msgstr "Tipo de computador no qual deseja utilizar o disco de inicialização. É de sua responsabilidade determinar se o destino utiliza BIOS ou UEFI antes de começar a criar um disco, caso contrário poderá haver falhas."
@@ -899,11 +1009,11 @@ msgstr "Tamanho mínimo que um bloco de dados ocupará no sistema de arquivos"
 
 #. • MSG_159
 msgid ""
-"Use this field to set the drive label\n"
-"International characters are accepted"
+"Use this field to set the drive label.\n"
+"International characters are accepted."
 msgstr ""
-"Use este campo para definir o nome do drive\n"
-"Caracteres acentuados são aceitos"
+"Use este campo para definir o nome do drive.\n"
+"Caracteres acentuados são aceitos."
 
 #. • MSG_160
 msgid "Toggle advanced options"
@@ -926,8 +1036,8 @@ msgid "Method that will be used to make the drive bootable"
 msgstr "Método que será usado para tornar a unidade inicializável"
 
 #. • MSG_165
-msgid "Click to select an image..."
-msgstr "Clique para selecionar uma imagem..."
+msgid "Click to select or download an image..."
+msgstr "Clique para selecionar ou baixar uma imagem..."
 
 #. • MSG_166
 msgid "Check this box to allow the display of international labels and set a device icon (creates an autorun.inf)"
@@ -940,15 +1050,15 @@ msgstr "Instalar um MBR que permita a seleção de inicialização e possa masca
 #. • MSG_168
 msgid ""
 "Try to masquerade first bootable USB drive (usually 0x80) as a different disk.\n"
-"This should only be necessary if you install Windows XP and have more than one disk"
+"This should only be necessary if you install Windows XP and have more than one disk."
 msgstr ""
 "Tenta mascarar o primeiro drive USB inicializável (geralmente 0x80) como um disco diferente.\n"
-"Isso só deve ser necessário se você instalar o Windows XP e tiver mais de um disco"
+"Isso só deve ser necessário se você instalar o Windows XP e tiver mais de um disco."
 
 #. • MSG_169
 msgid ""
 "Create an extra hidden partition and try to align partitions boundaries.\n"
-"This can improve boot detection for older BIOSes"
+"This can improve boot detection for older BIOSes."
 msgstr ""
 "Criar uma partição oculta extra e tentar alinhar os limites das partições.\n"
 "Isso pode melhorar a detecção de inicialização para BIOSs mais antigos"
