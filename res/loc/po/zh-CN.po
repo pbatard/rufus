@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: 3.2\n"
+"Project-Id-Version: 3.5\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2018-08-06 22:12+0800\n"
-"PO-Revision-Date: 2018-08-06 22:36+0800\n"
+"POT-Creation-Date: 2019-03-17 22:29+0800\n"
+"PO-Revision-Date: 2019-03-18 12:22+0000\n"
 "Language: zh_CN\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Rufus-LCID: 0x0804, 0x1004\n"
 "Last-Translator: \n"
 "Language-Team: \n"
-"X-Generator: Poedit 2.1.1\n"
+"X-Generator: Poedit 2.2.1\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -584,8 +584,8 @@ msgstr ""
 "注意：新文件将会下载到当前目录，一旦 '%s' 存在则会被自动选用。"
 
 #. • MSG_085
-msgid "Downloading '%s'"
-msgstr "下载 '%s' 中"
+msgid "Downloading %s"
+msgstr "下载 %s 中"
 
 #. • MSG_086
 msgid "No image selected"
@@ -860,6 +860,118 @@ msgstr "设置Live USB驱动器的持久分区大小。设置为零将禁用持�
 msgid "Set the partition size units."
 msgstr "设置分区大小单位。"
 
+#. • MSG_127
+msgid "Do not show this message again"
+msgstr "不再显示此消息"
+
+#. • MSG_128
+msgid "Important notice about %s"
+msgstr "关于 %s 的重要提示"
+
+#. • MSG_129
+msgid ""
+"You have just created a media that uses the UEFI:NTFS bootloader. Please remember that, to boot this media, YOU MUST DISABLE SECURE BOOT.\n"
+"For details on why this is necessary, see the 'More Information' button below."
+msgstr ""
+"您刚刚创建了使用 UEFI:NTFS 引导方式的驱动器。请注意您必须禁用安全启动(Secure Boot)以从此驱动器启动。\n"
+"欲了解详情，请点击下方的'更多信息'按钮。"
+
+#. • MSG_130
+msgid "Windows image selection"
+msgstr "Windows 镜像选择"
+
+#. • MSG_131
+msgid ""
+"This ISO contains multiple Windows images.\n"
+"Please select the image you wish to use for this installation:"
+msgstr ""
+"本 ISO 文件包含多个 Windows 镜像。\n"
+"请选择要使用的镜像："
+
+#. • MSG_132
+msgid "Another program or process is accessing this drive. Do you want to format it anyway?"
+msgstr "另一程序正在使用此驱动器。您仍然要格式化它吗？"
+
+#. • MSG_133
+msgid ""
+"Rufus has detected that you are attempting to create a Windows To Go media based on a 1809 ISO.\n"
+"\n"
+"Because of a *MICROSOFT BUG*, this media will crash during Windows boot (Blue Screen Of Death), unless you manually replace the file 'WppRecorder.sys' with a 1803 version.\n"
+"\n"
+"Also note that the reason Rufus cannot automatically fix this for you is that 'WppRecorder.sys' is a Microsoft copyrighted file, so we cannot legally embed a copy of the file in the application..."
+msgstr ""
+"Rufus 检测到您正在使用 1809 版本的 ISO 文件创建 Windows To Go 驱动器。\n"
+"\n"
+"由于微软的程序故障，本驱动器启动 Windows 时将出现蓝屏崩溃，除非您手动将 'WppRecorder.sys' 文件替换为 1803 镜像中的版本。\n"
+"\n"
+"由于 'WppRecorder.sys' 是微软的版权文件，Rufus 无法包含此文件来自动为您修复此问题。"
+
+#. • MSG_134
+msgid ""
+"Because MBR has been selected for the partition scheme, Rufus can only create a partition up to 2 TB on this media, which will leave %s of disk space unavailable.\n"
+"\n"
+"Are you sure you want to continue?"
+msgstr ""
+"由于选择了 MBR 分区方式，在此驱动器上 Rufus 只能创建不大于 2 TB 的分区，这会导致 %s 的大小无法使用。 \n"
+"\n"
+"您确定要继续吗？"
+
+#. • MSG_135
+msgid "Version"
+msgstr "版本"
+
+#. • MSG_136
+msgid "Release"
+msgstr "发行"
+
+#. • MSG_137
+msgid "Edition"
+msgstr "类型"
+
+#. • MSG_138
+msgid "Language"
+msgstr "语言"
+
+#. • MSG_139
+msgid "Architecture"
+msgstr "处理器架构"
+
+#. • MSG_140
+msgid "Continue"
+msgstr "继续"
+
+#. • MSG_141
+msgid "Back"
+msgstr "返回"
+
+#. • MSG_142
+msgid "Please wait..."
+msgstr "请稍等"
+
+#. • MSG_143
+msgid "Download using a browser"
+msgstr "使用浏览器下载"
+
+#. • MSG_144
+msgid "Temporarily banned by Microsoft for requesting too many downloads - Please try again later..."
+msgstr "由于短时间内下载过多，已被微软临时封禁。请稍后再试。"
+
+#. • MSG_145
+msgid "PowerShell 3.0 or later is required to run this script."
+msgstr "此脚本依赖于 PowerShell 3.0 或更新版本。"
+
+#. • MSG_146
+msgid "Do you want to go online and download it?"
+msgstr "您想要下载它吗？"
+
+#. • MSG_148
+msgid "Running download script..."
+msgstr "运行下载脚本"
+
+#. • MSG_149
+msgid "Download ISO Image"
+msgstr "下载 ISO 镜像"
+
 #. • MSG_150
 msgid "Type of computer you plan to use this bootable drive with. It is your responsibility to determine whether your target is of BIOS or UEFI type before you start creating the drive, as it may fail to boot otherwise."
 msgstr "请选择您计算机支持的启动类型，如 BIOS 或 UEFI，否则启动可能会失败。"
@@ -927,8 +1039,8 @@ msgid "Method that will be used to make the drive bootable"
 msgstr "用于使驱动器可引导的方法"
 
 #. • MSG_165
-msgid "Click to select an image..."
-msgstr "点击选择镜像..."
+msgid "Click to select or download an image..."
+msgstr "点击以选择或下载镜像..."
 
 #. • MSG_166
 msgid "Check this box to allow the display of international labels and set a device icon (creates an autorun.inf)"
