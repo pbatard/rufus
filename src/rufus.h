@@ -94,7 +94,7 @@
 #define MAX_FAT32_SIZE              2.0f		// Threshold above which we disable FAT32 formatting (in TB)
 #define FAT32_CLUSTER_THRESHOLD     1.011f		// For FAT32, cluster size changes don't occur at power of 2 boundaries but sligthly above
 #define DD_BUFFER_SIZE              65536		// Minimum size of the buffer we use for DD operations
-#define UBUFFER_SIZE                2048
+#define UBUFFER_SIZE                4096
 #define RSA_SIGNATURE_SIZE          256
 #define CBN_SELCHANGE_INTERNAL      (CBN_SELCHANGE + 256)
 #if defined(RUFUS_TEST)

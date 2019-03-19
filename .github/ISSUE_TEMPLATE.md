@@ -4,7 +4,7 @@ Checklist
 ---------
 - [ ] I looked at https://github.com/pbatard/rufus/wiki/FAQ to see if my question has already been answered.
 - [ ] I performed a search in the issue tracker for similar issues using keywords relevant to my problem, such as the error message I got from the log.
-- [ ] I clicked the "Log" button in Rufus (last small blue button before _START_) and copy/pasted the log into the line that says `<FULL LOG>` below.
+- [ ] I clicked the 'Log' button or pressed <kbd>Ctrl</kbd>-<kbd>L</kbd> in Rufus, and copy/pasted the log into the line that says `<FULL LOG>` below.
 - [ ] The log I am copying is the FULL log, starting with the line `Rufus version: x.y.z` - I have NOT removed any part of it.
 
 Additionally (if applicable):

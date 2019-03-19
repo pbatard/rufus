@@ -1563,8 +1563,10 @@ BOOL SetUpdateCheck(void)
 		}
 		safe_free(loc);
 	}
-	if (!enable_fido)
-		uprintf("Note: ISO download feature will be disabled");
+	if (!enable_fido) {
+		ubprintf("Notice: The ISO download feature has been deactivated because %s", (ReadSetting32(SETTING_UPDATE_INTERVAL) <= 0) ?
+			"'Check for updates' is disabled in your settings." : "the remote download script can not be accessed.");
+	}
 	return TRUE;
 }
 

@@ -720,8 +720,8 @@ static BOOL FormatDrive(DWORD DriveIndex)
 	// problems with tolower(). Make sure we restore the locale. For more details,
 	// see http://comments.gmane.org/gmane.comp.gnu.mingw.user/39300
 	locale = setlocale(LC_ALL, NULL);
-	PF_INIT_OR_OUT(FormatEx, Fmifs);
-	PF_INIT(EnableVolumeCompression, Fmifs);
+	PF_INIT_OR_OUT(FormatEx, fmifs);
+	PF_INIT(EnableVolumeCompression, fmifs);
 	setlocale(LC_ALL, locale);
 
 	GetWindowTextW(hFileSystem, wFSType, ARRAYSIZE(wFSType));
@@ -768,6 +768,8 @@ static BOOL FormatDrive(DWORD DriveIndex)
 	}
 
 out:
+	if (!r && !IS_ERROR(FormatStatus))
+		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|SCODE_CODE(GetLastError());
 	safe_free(VolumeName);
 	safe_free(wVolumeName);
 	return r;
