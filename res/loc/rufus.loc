@@ -19,7 +19,7 @@
 # • v3.2  "el-GR" "Greek (Ελληνικά)"
 # • v3.5  "he-IL" "Hebrew (עברית)"
 # • v3.0  "hu-HU" "Hungarian (Magyar)"
-# • v3.2  "id-ID" "Indonesian (Bahasa Indonesia)"
+# • v3.5  "id-ID" "Indonesian (Bahasa Indonesia)"
 # • v3.5  "it-IT" "Italian (Italiano)"
 # • v3.2  "ja-JP" "Japanese (日本語)"
 # • v3.2  "ko-KR" "Korean (한국어)"
@@ -6023,7 +6023,7 @@ t MSG_305 "Ezt a lehetőséget arra használd, hogy jelezd, ezt az eszközt szer
 
 #########################################################################
 l "id-ID" "Indonesian (Bahasa Indonesia)" 0x0421
-v 3.2
+v 3.5
 b "en-US"
 
 g IDD_ABOUTBOX
@@ -6199,7 +6199,26 @@ t MSG_125 "Atur ukuran partisi persisten untuk media USB live. Mengatur ukuran k
 t MSG_126 "Atur unit ukuran pastisi."
 t MSG_127 "Jangan tampilkan pesan ini lagi"
 t MSG_128 "Pemberitahuan penting tentang %s"
-t MSG_129 "Anda baru saja membuat media yang menggunakan UEFI: NTFS bootloader. Harap diingat bahwa, untuk mem-boot media ini, ANDA HARUS MENONAKTIFKAN SECURE BOOT.\nUntuk rincian mengapa hal ini perlu dilakukan, lihat tombol 'Informasi Lebih Lanjut' dibawah."
+t MSG_129 "Anda baru saja membuat media yang menggunakan UEFI: NTFS bootloader. Harap diingat bahwa, untuk mem-boot media ini, ANDA HARUS MENONAKTIFKAN SECURE BOOT.\nUntuk rincian mengapa hal ini perlu dilakukan, lihat tombol 'Informasi lebih lanjut' dibawah."
+t MSG_130 "Pemilihan image Windows"
+t MSG_131 "Berkas ISO ini berisi beberapa image Windows.\nSilakan pilih image yang ingin Anda gunakan untuk instalasi:"
+t MSG_132 "Program atau proses lain sedang mengakses drive ini. Apakah Anda tetap ingin memformatnya?"
+t MSG_133 "Rufus mendeteksi Anda sedang mencoba membuat media Windows To Go berbasis pada ISO 1809.\n\nKarena terdapat *MICROSOFT BUG*, media ini akan crash saat proses booting Windows (Blue Screen Of Death), kecuali Anda mengganti secara manual berkas 'WppRecorder.sys' dengan versi 1803.\n\nPerhatikan juga bahwa alasan Rufus tidak dapat secara otomatis memperbaikinya untuk Anda adalah bahwa 'WppRecorder.sys' adalah berkas yang dilindungi hak cipta Microsoft, jadi kami tidak dapat secara legal menyematkan salinan berkas tersebut ke dalam aplikasi ..."
+t MSG_134 "Karena MBR telah dipilih untuk skema partisi ini, Rufus hanya dapat membuat partisi sampai 2 TB pada media ini, yang akan membuat %s ruang disk menjadi tidak tersedia.\n\nApakah Anda yakin ingin melanjutkan?"
+t MSG_135 "Versi"
+t MSG_136 "Rilis"
+t MSG_137 "Edisi"
+t MSG_138 "Bahasa"
+t MSG_139 "Arsitektur"
+t MSG_140 "Lanjut"
+t MSG_141 "Kembali"
+t MSG_142 "Mohon tunggu..."
+t MSG_143 "Unduh menggunakan browser"
+t MSG_144 "Dicekal sementara oleh Microsoft karena meminta terlalu banyak unduhan - Silakan coba lagi nanti..."
+t MSG_145 "Diperlukan PowerShell 3.0 atau yang lebih baru untuk menjalankan skrip ini."
+t MSG_146 "Apakah Anda ingin mengunduhnya?"
+t MSG_148 "Menjalankan skrip unduhan..."
+t MSG_149 "Unduh ISO Image"
 t MSG_150 "Tipe komputer yang akan menggunakan drive bootable ini. Anda harus menentukan apakah target komputer bertipe BIOS atau UEFI sebelum Anda memulai pembuatan drive ini. Jika salah memilih, drive akan gagal diboot."
 t MSG_151 "'UEFI-CSM' artinya perangkat tersebut hanya akan boot dalam mode emulasi BIOS (juga dikenal dengan 'Legacy Mode') di bawah UEFI, dan tidak dalam mode UEFI asli."
 t MSG_152 "'non CSM' artinya perangkat tersebut hanya akan boot dalam UEFI asli, dan tidak dalam mode emulasi BIOS (juga dikenal dengan 'Legacy Mode')."

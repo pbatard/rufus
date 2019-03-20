@@ -1,12 +1,9 @@
-
 msgid ""
 msgstr ""
-"Project-Id-Version: 3.2\n"
+"Project-Id-Version: 3.5\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2019-01-08 22:06+0000\n"
-"PO-Revision-Date: 2019-01-08 22:06+0000\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"POT-Creation-Date: 2019-03-20 23:40+0700\n"
+"PO-Revision-Date: 2019-03-20 17:16+0000\n"
 "Language: id_ID\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -14,6 +11,9 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Rufus-LanguageName: Indonesian (Bahasa Indonesia)\n"
 "X-Rufus-LCID: 0x0421\n"
+"Last-Translator: Arif Budiman <arifpedia@gmail.com>\n"
+"Language-Team: \n"
+"X-Generator: Poedit 2.2.1\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -196,12 +196,20 @@ msgid "Other instance detected"
 msgstr "Rufus lain terdeteksi"
 
 #. • MSG_002
-msgid "Another Rufus application is running.\nPlease close the first application before running another one."
-msgstr "Aplikasi Rufus lain sedang berjalan.\nSilakan tutup aplikasi tersebut dulu sebelum menjalankan yang lain."
+msgid ""
+"Another Rufus application is running.\n"
+"Please close the first application before running another one."
+msgstr ""
+"Aplikasi Rufus lain sedang berjalan.\n"
+"Silakan tutup aplikasi tersebut dulu sebelum menjalankan yang lain."
 
 #. • MSG_003
-msgid "WARNING: ALL DATA ON DEVICE '%s' WILL BE DESTROYED.\nTo continue with this operation, click OK. To quit click CANCEL."
-msgstr "PERINGATAN: SEMUA DATA PADA PERANGKAT '%s' AKAN DIHAPUS.\nUntuk melanjutkan operasi ini, klik OKE. Untuk keluar klik BATAL."
+msgid ""
+"WARNING: ALL DATA ON DEVICE '%s' WILL BE DESTROYED.\n"
+"To continue with this operation, click OK. To quit click CANCEL."
+msgstr ""
+"PERINGATAN: SEMUA DATA PADA PERANGKAT '%s' AKAN DIHAPUS.\n"
+"Untuk melanjutkan operasi ini, klik OKE. Untuk keluar klik BATAL."
 
 #. • MSG_004
 msgid "Rufus update policy"
@@ -220,14 +228,28 @@ msgid "Bad blocks found"
 msgstr "Blok buruk ditemukan"
 
 #. • MSG_011
-msgid "Check completed: %d bad block(s) found\n  %d read error(s)\n  %d write error(s)\n  %d corruption error(s)"
-msgstr "Pemeriksaan selesai: %d blok buruk ditemukan\n  %d kesalahan baca\n  %d kesalahan tulis\n  %d kesalahan korupsi"
+msgid ""
+"Check completed: %d bad block(s) found\n"
+"  %d read error(s)\n"
+"  %d write error(s)\n"
+"  %d corruption error(s)"
+msgstr ""
+"Pemeriksaan selesai: %d blok buruk ditemukan\n"
+"  %d kesalahan baca\n"
+"  %d kesalahan tulis\n"
+"  %d kesalahan korupsi"
 
 #. • MSG_012
 #.
 #. This contains the formatted message from MSG_001 as well as the name of the bad blocks logfile
-msgid "%s\nA more detailed report can be found in:\n%s"
-msgstr "%s\nLaporan lebih lengkap dapat ditemukan di:\n%s"
+msgid ""
+"%s\n"
+"A more detailed report can be found in:\n"
+"%s"
+msgstr ""
+"%s\n"
+"Laporan lebih lengkap dapat ditemukan di:\n"
+"%s"
 
 #. • MSG_013
 msgid "Disabled"
@@ -512,8 +534,18 @@ msgid "The device is not ready."
 msgstr "Perangkat tidak siap."
 
 #. • MSG_080
-msgid "Rufus detected that Windows is still flushing its internal buffers onto the USB device.\n\nDepending on the speed of your USB device, this operation may take a long time to complete, especially for large files.\n\nWe recommend that you let Windows finish, to avoid corruption. But if you grow tired of waiting, you can just unplug the device..."
-msgstr "Rufus mendeteksi bahwa Windows masih mem-buffer ke perangkat USB.\n\nTergantung pada kecepatan perangkat USB Anda , operasi ini mungkin memakan waktu lama untuk selesai, terutama untuk file besar.\n\nKami menyarankan Anda membiarkan Windows selesai, untuk menghindari kerusakan. Tapi jika Anda bosan menunggu, Anda dapat mencabut perangkat..."
+msgid ""
+"Rufus detected that Windows is still flushing its internal buffers onto the USB device.\n"
+"\n"
+"Depending on the speed of your USB device, this operation may take a long time to complete, especially for large files.\n"
+"\n"
+"We recommend that you let Windows finish, to avoid corruption. But if you grow tired of waiting, you can just unplug the device..."
+msgstr ""
+"Rufus mendeteksi bahwa Windows masih mem-buffer ke perangkat USB.\n"
+"\n"
+"Tergantung pada kecepatan perangkat USB Anda , operasi ini mungkin memakan waktu lama untuk selesai, terutama untuk file besar.\n"
+"\n"
+"Kami menyarankan Anda membiarkan Windows selesai, untuk menghindari kerusakan. Tapi jika Anda bosan menunggu, Anda dapat mencabut perangkat..."
 
 #. • MSG_081
 msgid "Unsupported image"
@@ -528,12 +560,31 @@ msgid "Replace %s?"
 msgstr "Ganti %s?"
 
 #. • MSG_084
-msgid "This ISO image seems to use an obsolete version of '%s'.\nBoot menus may not display properly because of this.\n\nA newer version can be downloaded by Rufus to fix this issue:\n- Choose 'Yes' to connect to the internet and download the file\n- Choose 'No' to leave the existing ISO file unmodified\nIf you don't know what to do, you should select 'Yes'.\n\nNote: The new file will be downloaded in the current directory and once a '%s' exists there, it will be reused automatically."
-msgstr "ISO image ini tampaknya menggunakan versi lawas dari '%s'.\nMenu Boot mungkin tidak ditampilkan dengan baik karena masalah ini.\n\nVersi yang lebih baru dapat diunduh oleh Rufus untuk menyelesaikan masalah ini:\n- Pilih 'Ya' untuk menyambungkan ke internet dan mengunduh berkas\n- Pilih 'Tidak' untuk membiarkan berkas ISO yang ada tidak termodifikasi\nJika Anda tidak mengetahui apa yang harus dilakukan, sebaiknya pilih 'Ya'.\n\nCatatan: Berkas baru akan diunduh di direktori saat ini dan karena '%s' sudah ada disana, berkas tersebut akan digunakan kembali secara otomatis."
+msgid ""
+"This ISO image seems to use an obsolete version of '%s'.\n"
+"Boot menus may not display properly because of this.\n"
+"\n"
+"A newer version can be downloaded by Rufus to fix this issue:\n"
+"- Choose 'Yes' to connect to the internet and download the file\n"
+"- Choose 'No' to leave the existing ISO file unmodified\n"
+"If you don't know what to do, you should select 'Yes'.\n"
+"\n"
+"Note: The new file will be downloaded in the current directory and once a '%s' exists there, it will be reused automatically."
+msgstr ""
+"ISO image ini tampaknya menggunakan versi lawas dari '%s'.\n"
+"Menu Boot mungkin tidak ditampilkan dengan baik karena masalah ini.\n"
+"\n"
+"Versi yang lebih baru dapat diunduh oleh Rufus untuk menyelesaikan masalah ini:\n"
+"- Pilih 'Ya' untuk menyambungkan ke internet dan mengunduh berkas\n"
+"- Pilih 'Tidak' untuk membiarkan berkas ISO yang ada tidak termodifikasi\n"
+"Jika Anda tidak mengetahui apa yang harus dilakukan, sebaiknya pilih 'Ya'.\n"
+"\n"
+"Catatan: Berkas baru akan diunduh di direktori saat ini dan karena '%s' sudah ada disana, berkas tersebut akan digunakan kembali secara otomatis."
 
 #. • MSG_085
-msgid "Downloading '%s'"
-msgstr "Mengunduh '%s'"
+#, fuzzy
+msgid "Downloading %s"
+msgstr "Mengunduh %s"
 
 #. • MSG_086
 msgid "No image selected"
@@ -571,8 +622,14 @@ msgid "Unsupported filesystem"
 msgstr "Sistem berkas tidak didukung"
 
 #. • MSG_093
-msgid "IMPORTANT: THIS DRIVE CONTAINS MULTIPLE PARTITIONS!!\n\nThis may include partitions/volumes that aren't listed or even visible from Windows. Should you wish to proceed, you are responsible for any data loss on these partitions."
-msgstr "PENTING: PERANGKAT INI BERISI BANYAK PARTISI!!\n\nPerangkat ini berisi partisi/volume yang tidak tercantum atau bahkan terlihat dari Windows. Jika Anda tetap ingin melanjutkan, Anda bertanggung jawab atas kehilangan data pada partisi tersebut."
+msgid ""
+"IMPORTANT: THIS DRIVE CONTAINS MULTIPLE PARTITIONS!!\n"
+"\n"
+"This may include partitions/volumes that aren't listed or even visible from Windows. Should you wish to proceed, you are responsible for any data loss on these partitions."
+msgstr ""
+"PENTING: PERANGKAT INI BERISI BANYAK PARTISI!!\n"
+"\n"
+"Perangkat ini berisi partisi/volume yang tidak tercantum atau bahkan terlihat dari Windows. Jika Anda tetap ingin melanjutkan, Anda bertanggung jawab atas kehilangan data pada partisi tersebut."
 
 #. • MSG_094
 msgid "Multiple partitions detected"
@@ -591,8 +648,18 @@ msgid "'%s' can only be applied if the file system is NTFS."
 msgstr "'%s' hanya dapat diterapkan jika sistem berkas NTFS."
 
 #. • MSG_098
-msgid "IMPORTANT: You are trying to install 'Windows To Go', but your target drive doesn't have the 'FIXED' attribute. Because of this Windows will most likely freeze during boot, as Microsoft hasn't designed it to work with drives that instead have the 'REMOVABLE' attribute.\n\nDo you still want to proceed?\n\nNote: The 'FIXED/REMOVABLE' attribute is a hardware property that can only be changed using custom tools from the drive manufacturer. However those tools are ALMOST NEVER provided to the public..."
-msgstr "PENTING: Anda mencoba untuk menginstal 'Windows To Go', namun perangkat target tidak memiliki atribut 'FIXED'. Windows ini kemungkinan akan berhenti saat boot, karena Microsoft tidak merancangnya untuk bekerja dengan perangkat yang tidak memiliki atribut 'REMOVABLE'.\n\nApakah Anda tetap ingin melanjutkan?\n\nCatatan: Atribut 'FIXED/REMOVABLE' adalah properti hardware yang hanya dapat diubah menggunakan alat kostum dari produsen perangkat. Namun alat ini HAMPIR TIDAK PERNAH disediakan kepada publik..."
+msgid ""
+"IMPORTANT: You are trying to install 'Windows To Go', but your target drive doesn't have the 'FIXED' attribute. Because of this Windows will most likely freeze during boot, as Microsoft hasn't designed it to work with drives that instead have the 'REMOVABLE' attribute.\n"
+"\n"
+"Do you still want to proceed?\n"
+"\n"
+"Note: The 'FIXED/REMOVABLE' attribute is a hardware property that can only be changed using custom tools from the drive manufacturer. However those tools are ALMOST NEVER provided to the public..."
+msgstr ""
+"PENTING: Anda mencoba untuk menginstal 'Windows To Go', namun perangkat target tidak memiliki atribut 'FIXED'. Windows ini kemungkinan akan berhenti saat boot, karena Microsoft tidak merancangnya untuk bekerja dengan perangkat yang tidak memiliki atribut 'REMOVABLE'.\n"
+"\n"
+"Apakah Anda tetap ingin melanjutkan?\n"
+"\n"
+"Catatan: Atribut 'FIXED/REMOVABLE' adalah properti hardware yang hanya dapat diubah menggunakan alat kostum dari produsen perangkat. Namun alat ini HAMPIR TIDAK PERNAH disediakan kepada publik..."
 
 #. • MSG_099
 msgid "Filesystem limitation"
@@ -607,8 +674,12 @@ msgid "Missing WIM support"
 msgstr "Dukungan WIM hilang"
 
 #. • MSG_102
-msgid "Your platform cannot extract files from WIM archives. WIM extraction is required to create EFI bootable Windows 7 and Windows Vista USB drives. You can fix that by installing a recent version of 7-Zip.\nDo you want to visit the 7-zip download page?"
-msgstr "Platform Anda tidak dapat mengekstrak berkas dari arsip WIM. Pengektrakan WIM diperlukan untuk membuat bootable EFI Windows 7 dan Windows Vista di perangkat USB. Anda dapat memperbaikinya dengan mengunduh versi terbaru 7-Zip.\nApakah Anda ingin mengunjungi halaman unduhan 7-zip?"
+msgid ""
+"Your platform cannot extract files from WIM archives. WIM extraction is required to create EFI bootable Windows 7 and Windows Vista USB drives. You can fix that by installing a recent version of 7-Zip.\n"
+"Do you want to visit the 7-zip download page?"
+msgstr ""
+"Platform Anda tidak dapat mengekstrak berkas dari arsip WIM. Pengektrakan WIM diperlukan untuk membuat bootable EFI Windows 7 dan Windows Vista di perangkat USB. Anda dapat memperbaikinya dengan mengunduh versi terbaru 7-Zip.\n"
+"Apakah Anda ingin mengunjungi halaman unduhan 7-zip?"
 
 #. • MSG_103
 msgid "Download %s?"
@@ -618,12 +689,32 @@ msgstr "Unduh %s?"
 #.
 #. Example: "Grub4DOS v0.4 or later requires a 'grldr' file to be installed. Because this
 #. file is more than 100 KB in size, and always present on Grub4DOS ISO images (...)"
-msgid "%s or later requires a '%s' file to be installed.\nBecause this file is more than 100 KB in size, and always present on %s ISO images, it is not embedded in Rufus.\n\nRufus can download the missing file for you:\n- Select 'Yes' to connect to the internet and download the file\n- Select 'No' if you want to manually copy this file on the drive later\n\nNote: The file will be downloaded in the current directory and once a '%s' exists there, it will be reused automatically."
-msgstr "%s  atau yang lebih baru memerlukan berkas '%s' untuk diinstal.\nKarena berkas ini berukuran lebih dari 100 KB, dan selalu ada pada ISO images %s, berkas ini tidak tersematkan didalam Rufus.\n\nRufus dapat mengunduh berkas yang hilang ini untuk Anda:\n- Pilih 'Ya' untuk menyambungkan ke internet dan mengunduh berkas\n- Pilih 'Tidak' jika Anda ingin menyalin berkas ini secara manual pada perangkat nanti\n\nCatatan: Berkas akan diunduh di direktori saat ini dan karena berkas '%s' sudah ada disana, berkas ini akan digunakan kembali secara otomatis."
+msgid ""
+"%s or later requires a '%s' file to be installed.\n"
+"Because this file is more than 100 KB in size, and always present on %s ISO images, it is not embedded in Rufus.\n"
+"\n"
+"Rufus can download the missing file for you:\n"
+"- Select 'Yes' to connect to the internet and download the file\n"
+"- Select 'No' if you want to manually copy this file on the drive later\n"
+"\n"
+"Note: The file will be downloaded in the current directory and once a '%s' exists there, it will be reused automatically."
+msgstr ""
+"%s  atau yang lebih baru memerlukan berkas '%s' untuk diinstal.\n"
+"Karena berkas ini berukuran lebih dari 100 KB, dan selalu ada pada ISO images %s, berkas ini tidak tersematkan didalam Rufus.\n"
+"\n"
+"Rufus dapat mengunduh berkas yang hilang ini untuk Anda:\n"
+"- Pilih 'Ya' untuk menyambungkan ke internet dan mengunduh berkas\n"
+"- Pilih 'Tidak' jika Anda ingin menyalin berkas ini secara manual pada perangkat nanti\n"
+"\n"
+"Catatan: Berkas akan diunduh di direktori saat ini dan karena berkas '%s' sudah ada disana, berkas ini akan digunakan kembali secara otomatis."
 
 #. • MSG_105
-msgid "Cancelling may leave the device in an UNUSABLE state.\nIf you are sure you want to cancel, click YES. Otherwise, click NO."
-msgstr "Membatalkan dapat menyebabkan perangkat TIDAK DAPAT DIGUNAKAN.\nJika Anda yakin ingin membatalkan, klik YA. Jika tidak ingin, klik TIDAK."
+msgid ""
+"Cancelling may leave the device in an UNUSABLE state.\n"
+"If you are sure you want to cancel, click YES. Otherwise, click NO."
+msgstr ""
+"Membatalkan dapat menyebabkan perangkat TIDAK DAPAT DIGUNAKAN.\n"
+"Jika Anda yakin ingin membatalkan, klik YA. Jika tidak ingin, klik TIDAK."
 
 #. • MSG_106
 msgid "Please select folder"
@@ -645,8 +736,12 @@ msgstr ""
 #.
 #. "Cluster size" should be the same as the label for IDS_CLUSTER_SIZE_TXT
 #. "kilobytes" should be the same as in MSG_027
-msgid "MS-DOS cannot boot from a drive using a 64 kilobytes Cluster size.\nPlease change the Cluster size or use FreeDOS."
-msgstr "MS-DOS tidak dapat boot dari perangkat yang menggunakan ukuran Klaster 64 kilobyte.\nSilakan ubah ukuran Klaster atau gunakan FreeDOS."
+msgid ""
+"MS-DOS cannot boot from a drive using a 64 kilobytes Cluster size.\n"
+"Please change the Cluster size or use FreeDOS."
+msgstr ""
+"MS-DOS tidak dapat boot dari perangkat yang menggunakan ukuran Klaster 64 kilobyte.\n"
+"Silakan ubah ukuran Klaster atau gunakan FreeDOS."
 
 #. • MSG_111
 msgid "Incompatible Cluster size"
@@ -663,8 +758,22 @@ msgid "Large UDF volume"
 msgstr "Volume UDF besar"
 
 #. • MSG_114
-msgid "This image uses Syslinux %s%s but this application only includes the installation files for Syslinux %s%s.\n\nAs new versions of Syslinux are not compatible with one another, and it wouldn't be possible for Rufus to include them all, two additional files must be downloaded from the Internet ('ldlinux.sys' and 'ldlinux.bss'):\n- Select 'Yes' to connect to the Internet and download these files\n- Select 'No' to cancel the operation\n\nNote: The files will be downloaded in the current application directory and will be reused automatically if present."
-msgstr "Image ini menggunakan Syslinux %s%s namun aplikasi ini hanya menyertakan berkas instalasi untuk Syslinux %s%s.\n\nKarena versi baru Syslinux tidak kompatibel satu dengan lainnya, dan tidak mungkin bagi Rufus untuk menyertakan semuanya, dua berkas tambahan harus diunduh dari Internet ('ldlinux.sys' dan 'ldlinux.bss'):\n- Pilih 'Ya' untuk menyambungkan ke Internet dan mengunduh berkas tersebut\n- Pilih 'Tidak' untuk membatalkan operasi\n\nCatatan: Berkas akan diunduh di direktori aplikasi saat ini dan akan digunakan kembali secara otomatis jika diminta."
+msgid ""
+"This image uses Syslinux %s%s but this application only includes the installation files for Syslinux %s%s.\n"
+"\n"
+"As new versions of Syslinux are not compatible with one another, and it wouldn't be possible for Rufus to include them all, two additional files must be downloaded from the Internet ('ldlinux.sys' and 'ldlinux.bss'):\n"
+"- Select 'Yes' to connect to the Internet and download these files\n"
+"- Select 'No' to cancel the operation\n"
+"\n"
+"Note: The files will be downloaded in the current application directory and will be reused automatically if present."
+msgstr ""
+"Image ini menggunakan Syslinux %s%s namun aplikasi ini hanya menyertakan berkas instalasi untuk Syslinux %s%s.\n"
+"\n"
+"Karena versi baru Syslinux tidak kompatibel satu dengan lainnya, dan tidak mungkin bagi Rufus untuk menyertakan semuanya, dua berkas tambahan harus diunduh dari Internet ('ldlinux.sys' dan 'ldlinux.bss'):\n"
+"- Pilih 'Ya' untuk menyambungkan ke Internet dan mengunduh berkas tersebut\n"
+"- Pilih 'Tidak' untuk membatalkan operasi\n"
+"\n"
+"Catatan: Berkas akan diunduh di direktori aplikasi saat ini dan akan digunakan kembali secara otomatis jika diminta."
 
 #. • MSG_115
 msgid "Download required"
@@ -674,8 +783,24 @@ msgstr "Unduh diperlukan"
 #.
 #. You should be able to test this message with Super Grub2 Disk ISO:
 #. https://sourceforge.net/projects/supergrub2/files/2.00s2/super_grub2_disk_hybrid_2.00s2.iso/download (11.9 MB)
-msgid "This image uses Grub %s but the application only includes the installation files for Grub %s.\n\nAs different versions of Grub may not be compatible with one another, and it is not possible to include them all, Rufus will attempt to locate a version of the Grub installation file ('core.img') that matches the one from your image:\n- Select 'Yes' to connect to the Internet and attempt to download it\n- Select 'No' to use the default version from Rufus\n- Select 'Cancel' to abort the operation\n\nNote: The file will be downloaded in the current application directory and will be reused automatically if present. If no match can be found online, then the default version will be used."
-msgstr "Image ini menggunakan Grub %s namun aplikasi ini hanya menyertakan berkas instalasi untuk Grub %s.\n\nKarena versi baru Grub tidak kompatibel satu dengan lainnya, dan tidak mungkin bagi Rufus untuk menyertakan semuanya, Rufus akan mencoba mencari versi berkas instalasi Grub ('core.img') yang sesuai dengan image Anda:\n- Pilih 'Ya' untuk menyambungkan ke Internet dan mencoba untuk mengunduhnya\n- Pilih 'Tidak' untuk menggunakan versi default dari Rufus\n- Pilih 'Batal' untuk membatalkan operasi\n\nCatatan: Berkas akan diunduh di direktori aplikasi saat ini dan akan digunakan kembali jika diminta. Jika tidak ada yang cocok yang ditemukan secara online, versi default akan digunakan."
+msgid ""
+"This image uses Grub %s but the application only includes the installation files for Grub %s.\n"
+"\n"
+"As different versions of Grub may not be compatible with one another, and it is not possible to include them all, Rufus will attempt to locate a version of the Grub installation file ('core.img') that matches the one from your image:\n"
+"- Select 'Yes' to connect to the Internet and attempt to download it\n"
+"- Select 'No' to use the default version from Rufus\n"
+"- Select 'Cancel' to abort the operation\n"
+"\n"
+"Note: The file will be downloaded in the current application directory and will be reused automatically if present. If no match can be found online, then the default version will be used."
+msgstr ""
+"Image ini menggunakan Grub %s namun aplikasi ini hanya menyertakan berkas instalasi untuk Grub %s.\n"
+"\n"
+"Karena versi baru Grub tidak kompatibel satu dengan lainnya, dan tidak mungkin bagi Rufus untuk menyertakan semuanya, Rufus akan mencoba mencari versi berkas instalasi Grub ('core.img') yang sesuai dengan image Anda:\n"
+"- Pilih 'Ya' untuk menyambungkan ke Internet dan mencoba untuk mengunduhnya\n"
+"- Pilih 'Tidak' untuk menggunakan versi default dari Rufus\n"
+"- Pilih 'Batal' untuk membatalkan operasi\n"
+"\n"
+"Catatan: Berkas akan diunduh di direktori aplikasi saat ini dan akan digunakan kembali jika diminta. Jika tidak ada yang cocok yang ditemukan secara online, versi default akan digunakan."
 
 #. • MSG_117
 msgid "Standard Windows installation"
@@ -737,20 +862,112 @@ msgid "Do not show this message again"
 msgstr "Jangan tampilkan pesan ini lagi"
 
 #. • MSG_128
-msgid "Important notice about Secure Boot"
-msgstr "Pemberitahuan penting tentang Secure Boot"
+msgid "Important notice about %s"
+msgstr "Pemberitahuan penting tentang %s"
 
 #. • MSG_129
-msgid "You have just created a media that uses the UEFI:NTFS bootloader. Please remember that, to boot this media, YOU MUST DISABLE SECURE BOOT.\nFor details on why this is necessary, see the 'More Information' button below."
-msgstr "Anda baru saja membuat media yang menggunakan UEFI: NTFS bootloader. Harap diingat bahwa, untuk mem-boot media ini, ANDA HARUS MENONAKTIFKAN SECURE BOOT.\nUntuk rincian mengapa hal ini perlu dilakukan, lihat tombol 'Informasi Lebih Lanjut' dibawah."
+msgid ""
+"You have just created a media that uses the UEFI:NTFS bootloader. Please remember that, to boot this media, YOU MUST DISABLE SECURE BOOT.\n"
+"For details on why this is necessary, see the 'More Information' button below."
+msgstr ""
+"Anda baru saja membuat media yang menggunakan UEFI: NTFS bootloader. Harap diingat bahwa, untuk mem-boot media ini, ANDA HARUS MENONAKTIFKAN SECURE BOOT.\n"
+"Untuk rincian mengapa hal ini perlu dilakukan, lihat tombol 'Informasi lebih lanjut' dibawah."
 
 #. • MSG_130
 msgid "Windows image selection"
-msgstr ""
+msgstr "Pemilihan image Windows"
 
 #. • MSG_131
-msgid "This ISO contains multiple Windows images.\nPlease select the one you wish to use for installation:"
+msgid ""
+"This ISO contains multiple Windows images.\n"
+"Please select the image you wish to use for this installation:"
 msgstr ""
+"Berkas ISO ini berisi beberapa image Windows.\n"
+"Silakan pilih image yang ingin Anda gunakan untuk instalasi:"
+
+#. • MSG_132
+msgid "Another program or process is accessing this drive. Do you want to format it anyway?"
+msgstr "Program atau proses lain sedang mengakses drive ini. Apakah Anda tetap ingin memformatnya?"
+
+#. • MSG_133
+msgid ""
+"Rufus has detected that you are attempting to create a Windows To Go media based on a 1809 ISO.\n"
+"\n"
+"Because of a *MICROSOFT BUG*, this media will crash during Windows boot (Blue Screen Of Death), unless you manually replace the file 'WppRecorder.sys' with a 1803 version.\n"
+"\n"
+"Also note that the reason Rufus cannot automatically fix this for you is that 'WppRecorder.sys' is a Microsoft copyrighted file, so we cannot legally embed a copy of the file in the application..."
+msgstr ""
+"Rufus mendeteksi Anda sedang mencoba membuat media Windows To Go berbasis pada ISO 1809.\n"
+"\n"
+"Karena terdapat *MICROSOFT BUG*, media ini akan crash saat proses booting Windows (Blue Screen Of Death), kecuali Anda mengganti secara manual berkas 'WppRecorder.sys' dengan versi 1803.\n"
+"\n"
+"Perhatikan juga bahwa alasan Rufus tidak dapat secara otomatis memperbaikinya untuk Anda adalah bahwa 'WppRecorder.sys' adalah berkas yang dilindungi hak cipta Microsoft, jadi kami tidak dapat secara legal menyematkan salinan berkas tersebut ke dalam aplikasi ..."
+
+#. • MSG_134
+msgid ""
+"Because MBR has been selected for the partition scheme, Rufus can only create a partition up to 2 TB on this media, which will leave %s of disk space unavailable.\n"
+"\n"
+"Are you sure you want to continue?"
+msgstr ""
+"Karena MBR telah dipilih untuk skema partisi ini, Rufus hanya dapat membuat partisi sampai 2 TB pada media ini, yang akan membuat %s ruang disk menjadi tidak tersedia.\n"
+"\n"
+"Apakah Anda yakin ingin melanjutkan?"
+
+#. • MSG_135
+msgid "Version"
+msgstr "Versi"
+
+#. • MSG_136
+msgid "Release"
+msgstr "Rilis"
+
+#. • MSG_137
+msgid "Edition"
+msgstr "Edisi"
+
+#. • MSG_138
+msgid "Language"
+msgstr "Bahasa"
+
+#. • MSG_139
+msgid "Architecture"
+msgstr "Arsitektur"
+
+#. • MSG_140
+msgid "Continue"
+msgstr "Lanjut"
+
+#. • MSG_141
+msgid "Back"
+msgstr "Kembali"
+
+#. • MSG_142
+msgid "Please wait..."
+msgstr "Mohon tunggu..."
+
+#. • MSG_143
+msgid "Download using a browser"
+msgstr "Unduh menggunakan browser"
+
+#. • MSG_144
+msgid "Temporarily banned by Microsoft for requesting too many downloads - Please try again later..."
+msgstr "Dicekal sementara oleh Microsoft karena meminta terlalu banyak unduhan - Silakan coba lagi nanti..."
+
+#. • MSG_145
+msgid "PowerShell 3.0 or later is required to run this script."
+msgstr "Diperlukan PowerShell 3.0 atau yang lebih baru untuk menjalankan skrip ini."
+
+#. • MSG_146
+msgid "Do you want to go online and download it?"
+msgstr "Apakah Anda ingin mengunduhnya?"
+
+#. • MSG_148
+msgid "Running download script..."
+msgstr "Menjalankan skrip unduhan..."
+
+#. • MSG_149
+msgid "Download ISO Image"
+msgstr "Unduh ISO Image"
 
 #. • MSG_150
 msgid "Type of computer you plan to use this bootable drive with. It is your responsibility to determine whether your target is of BIOS or UEFI type before you start creating the drive, as it may fail to boot otherwise."
@@ -791,8 +1008,12 @@ msgid "Minimum size that a block of data will occupy in the filesystem"
 msgstr "Ukuran minimal blok data yang akan menempati sistem berkas"
 
 #. • MSG_159
-msgid "Use this field to set the drive label.\nInternational characters are accepted."
-msgstr "Gunakan bidang ini untuk mengatur label perangkat.\nKarakter internasional diperbolehkan."
+msgid ""
+"Use this field to set the drive label.\n"
+"International characters are accepted."
+msgstr ""
+"Gunakan bidang ini untuk mengatur label perangkat.\n"
+"Karakter internasional diperbolehkan."
 
 #. • MSG_160
 msgid "Toggle advanced options"
@@ -815,7 +1036,8 @@ msgid "Method that will be used to make the drive bootable"
 msgstr "Metode yang akan digunakan untuk membuat perangkat bootable"
 
 #. • MSG_165
-msgid "Click to select an image..."
+#, fuzzy
+msgid "Click to select or download an image..."
 msgstr "Klik untuk memilih sebuah image..."
 
 #. • MSG_166
@@ -827,20 +1049,32 @@ msgid "Install an MBR that allows boot selection and can masquerade the BIOS USB
 msgstr "Menginstal MBR memungkinkan untuk boot dan dapat memanipulasi ID perangkat USB di BIOS"
 
 #. • MSG_168
-msgid "Try to masquerade first bootable USB drive (usually 0x80) as a different disk.\nThis should only be necessary if you install Windows XP and have more than one disk."
-msgstr "Mencoba menyamarkan perangkat USB bootable pertama (biasanya 0x80) sebagai disk yang berbeda.\nBiasanya hanya diperlukan jika Anda memasang Windows XP dan memiliki lebih dari satu disk."
+msgid ""
+"Try to masquerade first bootable USB drive (usually 0x80) as a different disk.\n"
+"This should only be necessary if you install Windows XP and have more than one disk."
+msgstr ""
+"Mencoba menyamarkan perangkat USB bootable pertama (biasanya 0x80) sebagai disk yang berbeda.\n"
+"Biasanya hanya diperlukan jika Anda memasang Windows XP dan memiliki lebih dari satu disk."
 
 #. • MSG_169
-msgid "Create an extra hidden partition and try to align partitions boundaries.\nThis can improve boot detection for older BIOSes."
-msgstr "Membuat partisi tersembunyi tambahan dan memcoba menyelaraskan batas partisi.\nUpaya ini dapat memperbaiki deteksi boot bagi BIOS versi lama."
+msgid ""
+"Create an extra hidden partition and try to align partitions boundaries.\n"
+"This can improve boot detection for older BIOSes."
+msgstr ""
+"Membuat partisi tersembunyi tambahan dan memcoba menyelaraskan batas partisi.\n"
+"Upaya ini dapat memperbaiki deteksi boot bagi BIOS versi lama."
 
 #. • MSG_170
 msgid "Enable the listing of USB Hard Drive enclosures. USE AT YOUR OWN RISKS!!!"
 msgstr "Aktifkan pencantuman USB Hard Drive enclosures. RESIKO DITANGGUNG ANDA SENDIRI!!!"
 
 #. • MSG_171
-msgid "Start the formatting operation.\nThis will DESTROY any data on the target!"
-msgstr "Mulai operasi format.\nTindakan ini akan MENGHAPUS semua data pada target!"
+msgid ""
+"Start the formatting operation.\n"
+"This will DESTROY any data on the target!"
+msgstr ""
+"Mulai operasi format.\n"
+"Tindakan ini akan MENGHAPUS semua data pada target!"
 
 #. • MSG_172
 #.
@@ -902,8 +1136,12 @@ msgid "Update Process:"
 msgstr "Proses Pembaruan:"
 
 #. • MSG_186
-msgid "Rufus does not install or run background services, therefore update checks are performed only when the main application is running.\\line\nInternet access is of course required when checking for updates."
-msgstr "Rufus tidak memasang atau menjalankan layanan latar belakang, oleh karena itu pemeriksaan pembaruan dapat dilakukan hanya ketika aplikasi utama berjalan.\\line\nAkses internet tentu saja diperlukan bila memeriksa pembaruan."
+msgid ""
+"Rufus does not install or run background services, therefore update checks are performed only when the main application is running.\\line\n"
+"Internet access is of course required when checking for updates."
+msgstr ""
+"Rufus tidak memasang atau menjalankan layanan latar belakang, oleh karena itu pemeriksaan pembaruan dapat dilakukan hanya ketika aplikasi utama berjalan.\\line\n"
+"Akses internet tentu saja diperlukan bila memeriksa pembaruan."
 
 #. • MSG_187
 msgid "Invalid image for selected boot option"
@@ -948,8 +1186,16 @@ msgid "Using embedded version of %s file(s)"
 msgstr "Menggunakan %s berkas versi tersemat"
 
 #. • MSG_196
-msgid "IMPORTANT: THIS DRIVE USES A NONSTANDARD SECTOR SIZE!\n\nConventional drives use a 512-byte sector size but this drive uses a %d-byte one. In many cases, this means that you will NOT be able to boot from this drive.\nRufus can try to create a bootable drive, but there is NO WARRANTY that it will work."
-msgstr "PENTING: PERANGKAT INI MENGGUNAKAN UKURAN SEKTOR YANG TIDAK STANDAR!\n\nPerangkat konvensional menggunakan ukuran sektor 512-byte tetapi perangkat ini menggunakan %d-byte. Biasanya, hal ini berarti Anda TIDAK dapat melakukan boot dari perangkat ini.\nRufus dapat mencoba untuk membuat perangkat bootable, tetapi TIDAK ADA JAMINAN ini akan dapat bekerja."
+msgid ""
+"IMPORTANT: THIS DRIVE USES A NONSTANDARD SECTOR SIZE!\n"
+"\n"
+"Conventional drives use a 512-byte sector size but this drive uses a %d-byte one. In many cases, this means that you will NOT be able to boot from this drive.\n"
+"Rufus can try to create a bootable drive, but there is NO WARRANTY that it will work."
+msgstr ""
+"PENTING: PERANGKAT INI MENGGUNAKAN UKURAN SEKTOR YANG TIDAK STANDAR!\n"
+"\n"
+"Perangkat konvensional menggunakan ukuran sektor 512-byte tetapi perangkat ini menggunakan %d-byte. Biasanya, hal ini berarti Anda TIDAK dapat melakukan boot dari perangkat ini.\n"
+"Rufus dapat mencoba untuk membuat perangkat bootable, tetapi TIDAK ADA JAMINAN ini akan dapat bekerja."
 
 #. • MSG_197
 msgid "Nonstandard sector size detected"
@@ -1153,8 +1399,14 @@ msgstr "Menghapus partisi..."
 #. • MSG_240
 #.
 #. This message has to do with the signature validation that Rufus uses when downloading an update.
-msgid "The signature for the downloaded update can not be validated. This could mean that your system is improperly configured for signature validation or indicate a malicious download.\n\nThe download will be deleted. Please check the log for more details."
-msgstr "Tanda tangan untuk pembaruan yang diunduh tidak dapat divalidasi. Kemungkinan sistem Anda tidak terkonfigurasi dengan benar untuk validasi tanda tangan atau mengindikasikan unduhan berbahaya.\n\nUnduhan akan dihapus. Silakan periksa log untuk lebih rinci."
+msgid ""
+"The signature for the downloaded update can not be validated. This could mean that your system is improperly configured for signature validation or indicate a malicious download.\n"
+"\n"
+"The download will be deleted. Please check the log for more details."
+msgstr ""
+"Tanda tangan untuk pembaruan yang diunduh tidak dapat divalidasi. Kemungkinan sistem Anda tidak terkonfigurasi dengan benar untuk validasi tanda tangan atau mengindikasikan unduhan berbahaya.\n"
+"\n"
+"Unduhan akan dihapus. Silakan periksa log untuk lebih rinci."
 
 #. • MSG_241
 msgid "Downloading: %0.1f%%"
@@ -1301,8 +1553,18 @@ msgstr "Image ISOHybrid terdeteksi"
 #. • MSG_275
 #.
 #. '%s' will be replaced with your translations for MSG_036 ("ISO Image") and MSG_095 ("DD Image")
-msgid "The image you have selected is an 'ISOHybrid' image. This means it can be written either in %s (file copy) mode or %s (disk image) mode.\nRufus recommends using %s mode, so that you always have full access to the drive after writing it.\nHowever, if you encounter issues during boot, you can try writing this image again in %s mode.\n\nPlease select the mode that you want to use to write this image:"
-msgstr "Image yang Anda pilih merupakan image 'ISOHybrid'. Ini artinya image tersebut dapat ditulis dalam mode %s (salin berkas) atau mode %s (disk image).\nRufus menyarankan untuk menggunakan mode %s, sehingga Anda tetap memiliki akses pada perangkat setelah menulisnya.\nNamun, jika Anda menemukan masalah saat boot, Anda bisa mencoba menulis image ini kembali dalam mode %s.\n\nSilakan pilih mode mana yang ingin digunakan untuk menulis image ini:"
+msgid ""
+"The image you have selected is an 'ISOHybrid' image. This means it can be written either in %s (file copy) mode or %s (disk image) mode.\n"
+"Rufus recommends using %s mode, so that you always have full access to the drive after writing it.\n"
+"However, if you encounter issues during boot, you can try writing this image again in %s mode.\n"
+"\n"
+"Please select the mode that you want to use to write this image:"
+msgstr ""
+"Image yang Anda pilih merupakan image 'ISOHybrid'. Ini artinya image tersebut dapat ditulis dalam mode %s (salin berkas) atau mode %s (disk image).\n"
+"Rufus menyarankan untuk menggunakan mode %s, sehingga Anda tetap memiliki akses pada perangkat setelah menulisnya.\n"
+"Namun, jika Anda menemukan masalah saat boot, Anda bisa mencoba menulis image ini kembali dalam mode %s.\n"
+"\n"
+"Silakan pilih mode mana yang ingin digunakan untuk menulis image ini:"
 
 #. • MSG_276
 #.
@@ -1345,8 +1607,14 @@ msgid "The downloaded executable is missing a digital signature."
 msgstr "Berkas exe yang diunduh memiliki tanda tangan digital yang salah."
 
 #. • MSG_285
-msgid "The downloaded executable is signed by '%s'.\nThis is not a signature we recognize and could indicate some form of malicious activity...\nAre you sure you want to run this file?"
-msgstr "Berkas exe yang diunduh ditandatangani oleh '%s'.\nTanda tangan ini tidak kami kenali dan bisa menjadi pertanda dari aktivitas berbahaya...\nApakah Anda yakin ingin menjalankan berkas ini?"
+msgid ""
+"The downloaded executable is signed by '%s'.\n"
+"This is not a signature we recognize and could indicate some form of malicious activity...\n"
+"Are you sure you want to run this file?"
+msgstr ""
+"Berkas exe yang diunduh ditandatangani oleh '%s'.\n"
+"Tanda tangan ini tidak kami kenali dan bisa menjadi pertanda dari aktivitas berbahaya...\n"
+"Apakah Anda yakin ingin menjalankan berkas ini?"
 
 #. • MSG_286
 msgid "Zeroing drive: %0.1f%% completed"
@@ -1389,23 +1657,42 @@ msgid "Warning: Unofficial version"
 msgstr "Peringatan: Versi tidak resmi"
 
 #. • MSG_296
-msgid "This version of Rufus was not produced by its official developer(s).\n\nAre you sure you want to run it?"
-msgstr "Rufus versi ini TIDAK diproduksi oleh pengembang resminya.\n\nApakah Anda yakin ingin menjalankannya?"
+msgid ""
+"This version of Rufus was not produced by its official developer(s).\n"
+"\n"
+"Are you sure you want to run it?"
+msgstr ""
+"Rufus versi ini TIDAK diproduksi oleh pengembang resminya.\n"
+"\n"
+"Apakah Anda yakin ingin menjalankannya?"
 
 #. • MSG_297
 msgid "Truncated ISO detected"
 msgstr "Terdeteksi ISO Terpotong"
 
 #. • MSG_298
-msgid "The ISO file you have selected does not match its declared size: %s of data is missing!\n\nIf you obtained this file from the Internet, you should try to download a new copy and verify that the MD5 or SHA checksums match the official ones.\n\nNote that you can compute the MD5 or SHA in Rufus by clicking the (✓) button."
-msgstr "Berkas ISO yang Anda pilih tidak sesuai dengan ukuran yang dideklarasikan: %s data hilang!\n\nJika Anda mendapatkan berkas ini dari Internet, Anda sebaiknya mengunduh salinan yang baru dan pastikan ceksum MD5 atau SHA cocok dengan yang asli.\n\nPerhatikan bahwa Anda dapat menghitung MD5 atau SHA dalam Rufus dengan mengklik tombol (✓)."
+msgid ""
+"The ISO file you have selected does not match its declared size: %s of data is missing!\n"
+"\n"
+"If you obtained this file from the Internet, you should try to download a new copy and verify that the MD5 or SHA checksums match the official ones.\n"
+"\n"
+"Note that you can compute the MD5 or SHA in Rufus by clicking the (✓) button."
+msgstr ""
+"Berkas ISO yang Anda pilih tidak sesuai dengan ukuran yang dideklarasikan: %s data hilang!\n"
+"\n"
+"Jika Anda mendapatkan berkas ini dari Internet, Anda sebaiknya mengunduh salinan yang baru dan pastikan ceksum MD5 atau SHA cocok dengan yang asli.\n"
+"\n"
+"Perhatikan bahwa Anda dapat menghitung MD5 atau SHA dalam Rufus dengan mengklik tombol (✓)."
 
 #. • MSG_299
 msgid "Timestamp validation error"
 msgstr "Kesalahan memvalidasi stempel waktu"
 
 #. • MSG_300
-msgid "Rufus could not validate that the timestamp of the downloaded update is more recent than the one for the current executable.\n\nIn order to prevent potential attack scenarios, the update process has been aborted and the download will be deleted. Please check the log for more details."
+msgid ""
+"Rufus could not validate that the timestamp of the downloaded update is more recent than the one for the current executable.\n"
+"\n"
+"In order to prevent potential attack scenarios, the update process has been aborted and the download will be deleted. Please check the log for more details."
 msgstr "Rufus tidak dapat memvalidasi bahwa stempel waktu pembaruan yang diunduh lebih baru daripada yang sedang dijalankan saat ini. Untuk mencegah kemungkinan skenario serangan, proses pembaruan telah dibatalkan dan unduhan akan dihapus. Silakan periksa log untuk lebih jelasnya."
 
 #. • MSG_301
