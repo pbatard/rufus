@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: 3.2\n"
+"Project-Id-Version: 3.5\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2018-07-28 12:01+0100\n"
-"PO-Revision-Date: 2018-07-28 12:09+0100\n"
+"POT-Creation-Date: 2019-03-20 13:31+0000\n"
+"PO-Revision-Date: 2019-03-20 13:31+0000\n"
 "Language: sk_SK\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Rufus-LCID: 0x041B\n"
 "Last-Translator: \n"
 "Language-Team: \n"
-"X-Generator: Poedit 2.1.1\n"
+"X-Generator: Poedit 2.2.1\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -585,8 +585,8 @@ msgstr ""
 "Poznámka: Nový súbor „%s\" bude stiahnutý do aktuálneho priečinka programu a potom bude automaticky použitý."
 
 #. • MSG_085
-msgid "Downloading '%s'"
-msgstr "Sťahovanie '%s'"
+msgid "Downloading %s"
+msgstr "Sťahovanie %s"
 
 #. • MSG_086
 msgid "No image selected"
@@ -862,6 +862,118 @@ msgstr "Nastavte veľkosť trvalej partície pre Live USB médium. Nastavením h
 msgid "Set the partition size units."
 msgstr "Nastavte veľkosť partície."
 
+#. • MSG_127
+msgid "Do not show this message again"
+msgstr "Nabudúce nezobrazovať túto správu"
+
+#. • MSG_128
+msgid "Important notice about %s"
+msgstr "Dôležité upozornenie o %s"
+
+#. • MSG_129
+msgid ""
+"You have just created a media that uses the UEFI:NTFS bootloader. Please remember that, to boot this media, YOU MUST DISABLE SECURE BOOT.\n"
+"For details on why this is necessary, see the 'More Information' button below."
+msgstr ""
+"Práve ste vytvorili médium, ktoré používa UEFI: NTFS bootloader. Pamätajte prosím, že na zavedenie tohto média, MUSÍTE VYPNÚŤ SECURE BOOT.\n"
+"Podrobnosti o tom, prečo je to potrebné, nájdete v nižšie uvedenom tlačidle \"Ďalšie informácie\"."
+
+#. • MSG_130
+msgid "Windows image selection"
+msgstr "Výber obrázkov systému Windows"
+
+#. • MSG_131
+msgid ""
+"This ISO contains multiple Windows images.\n"
+"Please select the image you wish to use for this installation:"
+msgstr ""
+"Tento ISO obsahuje viac obrazov Windows.\n"
+"Prosím, vyberte obrázok, ktorý chcete použiť pre túto inštaláciu:"
+
+#. • MSG_132
+msgid "Another program or process is accessing this drive. Do you want to format it anyway?"
+msgstr "Prístup k tejto jednotke má iný program alebo proces. Chcete ho napriek tomu naformátovať?"
+
+#. • MSG_133
+msgid ""
+"Rufus has detected that you are attempting to create a Windows To Go media based on a 1809 ISO.\n"
+"\n"
+"Because of a *MICROSOFT BUG*, this media will crash during Windows boot (Blue Screen Of Death), unless you manually replace the file 'WppRecorder.sys' with a 1803 version.\n"
+"\n"
+"Also note that the reason Rufus cannot automatically fix this for you is that 'WppRecorder.sys' is a Microsoft copyrighted file, so we cannot legally embed a copy of the file in the application..."
+msgstr ""
+"Program Rufus zistil, že sa pokúšate vytvoriť Windows To Go médium založeného na 1809 ISO.\n"
+"\n"
+"Kvôli *MICROSOFT BUG*, toto médium môže zlyhať počas zavádzania systému Windows (modrá obrazovka smrti), pokiaľ manuálne nenahradíte súbor \"WppRecorder. sys\" verziou 1803.\n"
+"\n"
+"Dôvodom, prečo program Rufus nemôže automaticky toto opraviť to, že súbor \"WppRecorder.sys\" je chránený súbor spoločnosti Microsoft, takže nie je legálne vložiť kópiu súboru do aplikácie..."
+
+#. • MSG_134
+msgid ""
+"Because MBR has been selected for the partition scheme, Rufus can only create a partition up to 2 TB on this media, which will leave %s of disk space unavailable.\n"
+"\n"
+"Are you sure you want to continue?"
+msgstr ""
+"Pretože bola vybraná MBR schéma disku, program Rufus môže na tomto médiu vytvoriť partíciu iba do veľkosti 2 TB a zvyšných %s na disku ostane nedostupných.\n"
+"\n"
+"Naozaj chcete pokračovať?"
+
+#. • MSG_135
+msgid "Version"
+msgstr "Verzia"
+
+#. • MSG_136
+msgid "Release"
+msgstr "Poznámky k vydaniu"
+
+#. • MSG_137
+msgid "Edition"
+msgstr "Vydanie"
+
+#. • MSG_138
+msgid "Language"
+msgstr "Jazyk"
+
+#. • MSG_139
+msgid "Architecture"
+msgstr "Architektúra"
+
+#. • MSG_140
+msgid "Continue"
+msgstr "Pokračovať"
+
+#. • MSG_141
+msgid "Back"
+msgstr "Späť"
+
+#. • MSG_142
+msgid "Please wait..."
+msgstr "Čakajte prosím..."
+
+#. • MSG_143
+msgid "Download using a browser"
+msgstr "Prevzatie pomocou prehliadača"
+
+#. • MSG_144
+msgid "Temporarily banned by Microsoft for requesting too many downloads - Please try again later..."
+msgstr "Dočasne zakázané spoločnosťou Microsoft pre príliš časté pokusy o sťahovanie. Skúste to prosím neskôr..."
+
+#. • MSG_145
+msgid "PowerShell 3.0 or later is required to run this script."
+msgstr "Pre spustenie tohto skriptu je potrebný PowerShell 3.0 alebo novší."
+
+#. • MSG_146
+msgid "Do you want to go online and download it?"
+msgstr "Chcete prejsť do režimu online a stiahnúť ho?"
+
+#. • MSG_148
+msgid "Running download script..."
+msgstr "Spúšťanie sťahovania skriptu..."
+
+#. • MSG_149
+msgid "Download ISO Image"
+msgstr "Stiahnúť ISO obraz"
+
 #. • MSG_150
 msgid "Type of computer you plan to use this bootable drive with. It is your responsibility to determine whether your target is of BIOS or UEFI type before you start creating the drive, as it may fail to boot otherwise."
 msgstr "Vyberte typ bootovateľného disku, ktorým chcete nabootovať počítač. Musíte určiť, či chcete vytvoriť BIOS alebo UEFI predtým, ako začnete vytvárať disk, inak sa zariadenie nemusí spustiť."
@@ -931,8 +1043,8 @@ msgid "Method that will be used to make the drive bootable"
 msgstr "Vyberte metódu, ktorá bude použitá na vytvorenie bootovateľného zariadenia"
 
 #. • MSG_165
-msgid "Click to select an image..."
-msgstr "Stlačte tlačidlo a vyberte obraz..."
+msgid "Click to select or download an image..."
+msgstr "Stlačte tlačidlo alebo stiahnite obraz..."
 
 #. • MSG_166
 msgid "Check this box to allow the display of international labels and set a device icon (creates an autorun.inf)"
@@ -1606,7 +1718,7 @@ msgstr "Zobraziť záznam činnosti programu"
 
 #. • MSG_304
 msgid "Create a disk image of the selected device"
-msgstr "Vytvoriť obraz disku na vybrané zariadenie"
+msgstr "Vytvoriť obraz disku z vybraného zariadenia"
 
 #. • MSG_305
 msgid "Use this option to indicate whether you want to use this device to install Windows on another disk, or if you want to run Windows directly from this drive (Windows To Go)."
