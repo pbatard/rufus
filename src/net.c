@@ -415,7 +415,10 @@ uint64_t DownloadToFileOrBuffer(const char* url, const char* file, BYTE** buffer
 	if (hProgressDialog != NULL) {
 		char msg[128];
 		uprintf("File length: %s", SizeToHumanReadable(total_size, FALSE, FALSE));
-		static_sprintf(msg, "%s (%s)", GetShortName(url), SizeToHumanReadable(total_size, FALSE, FALSE));
+		if (right_to_left_mode)
+			static_sprintf(msg, "(%s) %s", SizeToHumanReadable(total_size, FALSE, FALSE), GetShortName(url));
+		else
+			static_sprintf(msg, "%s (%s)", GetShortName(url), SizeToHumanReadable(total_size, FALSE, FALSE));
 		PrintStatus(0, MSG_085, msg);
 	}
 
