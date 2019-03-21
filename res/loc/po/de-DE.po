@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: 3.2\n"
+"Project-Id-Version: 3.5\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2018-07-21 19:52+0200\n"
-"PO-Revision-Date: 2018-07-22 00:20+0100\n"
+"POT-Creation-Date: 2019-03-21 08:26+0100\n"
+"PO-Revision-Date: 2019-03-21 09:24+0000\n"
 "Language: de_DE\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Rufus-LCID: 0x0407, 0x0807, 0x0c07, 0x1007, 0x1407\n"
 "Last-Translator: \n"
 "Language-Team: \n"
-"X-Generator: Poedit 2.0.9\n"
+"X-Generator: Poedit 2.2.1\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -158,12 +158,12 @@ msgid "Settings"
 msgstr "Einstellungen"
 
 #. • IDD_UPDATE_POLICY → IDS_UPDATE_FREQUENCY_TXT
-msgid "Check for updates:"
-msgstr "Auf neue Version prüfen:"
+msgid "Check for updates"
+msgstr "Auf neue Version prüfen"
 
 #. • IDD_UPDATE_POLICY → IDS_INCLUDE_BETAS_TXT
-msgid "Include beta versions:"
-msgstr "Beta-Version verwenden:"
+msgid "Include beta versions"
+msgstr "Beta-Version verwenden"
 
 #. • IDD_UPDATE_POLICY → IDC_CHECK_NOW
 msgid "Check Now"
@@ -582,8 +582,8 @@ msgstr ""
 "Hinweis: Die neue Datei wird in das aktuelle Verzeichnis heruntergeladen und falls '%s' bereits vorhanden ist, wird sie automatisch wiederverwendet."
 
 #. • MSG_085
-msgid "Downloading '%s'"
-msgstr "Download '%s'"
+msgid "Downloading %s"
+msgstr "Download %s"
 
 #. • MSG_086
 msgid "No image selected"
@@ -614,7 +614,7 @@ msgstr "ISO-Abbild nicht unterstützt"
 
 #. • MSG_091
 msgid "When using UEFI Target Type, only EFI bootable ISO images are supported. Please select an EFI bootable ISO or set the Target Type to BIOS."
-msgstr "Wenn UEFI als Typ des Zielsystems gewählt ist, werden nur EFI-bootfähige ISO-Abbilder unterstützt.Bitte wählen Sie ein EFI-bootfähiges ISO-Abbild oder ändern Sie den Typ des Zielsystems zu BIOS."
+msgstr "Wenn UEFI als Typ des Zielsystems gewählt ist, werden nur EFI-startfähige ISO-Abbilder unterstützt. Bitte wählen Sie ein EFI-startfähiges ISO-Abbild oder ändern Sie den Typ des Zielsystems zu BIOS."
 
 #. • MSG_092
 msgid "Unsupported filesystem"
@@ -748,7 +748,7 @@ msgstr "Inkompatible Zuordnungseinheitengröße"
 #.
 #. "%d:%02d" is a duration (mins:secs)
 msgid "Formatting a large UDF volumes can take a lot of time. At USB 2.0 speeds, the estimated formatting duration is %d:%02d, during which the progress bar will appear frozen. Please be patient!"
-msgstr "Großes UDF-Laufwerke zu formatieren, kann viel Zeit benötigen..."
+msgstr "Großes UDF-Laufwerke zu formatieren, kann viel Zeit benötigen. Bei USB 2.0-Geschwindigkeiten beträgt die geschätzte Formatierungsdauer %d:%02d, während der die Fortschrittsleiste eingefroren erscheint. Bitte haben Sie Geduld!"
 
 #. • MSG_113
 msgid "Large UDF volume"
@@ -854,6 +854,119 @@ msgstr "Größe der persistenten Partition des Live-USB Systems. Eine Größe vo
 msgid "Set the partition size units."
 msgstr "Einheit der Partitionsgröße festlegen."
 
+#. • MSG_127
+msgid "Do not show this message again"
+msgstr "Diese Nachricht nicht mehr anzeigen"
+
+#. • MSG_128
+msgid "Important notice about %s"
+msgstr "Wichtiger Hinweis zu %s"
+
+#. • MSG_129
+msgid ""
+"You have just created a media that uses the UEFI:NTFS bootloader. Please remember that, to boot this media, YOU MUST DISABLE SECURE BOOT.\n"
+"For details on why this is necessary, see the 'More Information' button below."
+msgstr ""
+"Sie haben gerade ein Medium erstellt, das den UEFI:NTFS Bootloader verwendet. Bitte denken Sie daran, dass Sie SECURE BOOT deaktivieren müssen, um dieses Medium zu starten.\n"
+"Nach dem Abschluss des Vorgangs sollten Sie SECURE BOOT wieder aktivieren.\n"
+"Weitere Informationen, u. a. warum dies notwendig ist, finden Sie über die \"Weitere Informationen\" Schaltfläche."
+
+#. • MSG_130
+msgid "Windows image selection"
+msgstr "Windows-Abbild auswählen"
+
+#. • MSG_131
+msgid ""
+"This ISO contains multiple Windows images.\n"
+"Please select the image you wish to use for this installation:"
+msgstr ""
+"Dieses ISO-Abbild enthält mehrere Windows-Abbilder.\n"
+"Bitte wählen Sie das Abbild aus, das Sie für diese Installation verwenden möchten:"
+
+#. • MSG_132
+msgid "Another program or process is accessing this drive. Do you want to format it anyway?"
+msgstr "Ein anderer Prozess bzw. ein anderes Programm verwenden das Laufwerk gerade. Wollen Sie es trotzdem formatieren?"
+
+#. • MSG_133
+msgid ""
+"Rufus has detected that you are attempting to create a Windows To Go media based on a 1809 ISO.\n"
+"\n"
+"Because of a *MICROSOFT BUG*, this media will crash during Windows boot (Blue Screen Of Death), unless you manually replace the file 'WppRecorder.sys' with a 1803 version.\n"
+"\n"
+"Also note that the reason Rufus cannot automatically fix this for you is that 'WppRecorder.sys' is a Microsoft copyrighted file, so we cannot legally embed a copy of the file in the application..."
+msgstr ""
+"Rufus hat erkannt, dass Sie ein Windows To Go Startmedium - basierend auf Windows 10 Version 1809 - erstellen wollen.\n"
+"\n"
+"Aufgrund eines \"MICROSOFT BUGS\" wird das Startmedium nicht funktionieren (Blue Screen), wenn Sie die Datei 'WppRecorder.sys' nicht mit der 1803-Version ersetzen.\n"
+"\n"
+"Aufgrund von Copyright-Richtlinien kann Rufus die Datei 'WppRecorder.sys' nicht selbst reparieren, weil wir diese Datei nicht in unsere Applikation einbetten dürfen."
+
+#. • MSG_134
+msgid ""
+"Because MBR has been selected for the partition scheme, Rufus can only create a partition up to 2 TB on this media, which will leave %s of disk space unavailable.\n"
+"\n"
+"Are you sure you want to continue?"
+msgstr ""
+"Weil MBR als Partitions-Schema gewählt wurde, kann Rufus nur eine maximal 2 TB große Partition auf diesem Laufwerk erstellen. %s des Speicherplatzes bleiben ungenutzt. \n"
+"\n"
+"Wollen Sie fortfahren?"
+
+#. • MSG_135
+msgid "Version"
+msgstr "Version"
+
+#. • MSG_136
+msgid "Release"
+msgstr "Release"
+
+#. • MSG_137
+msgid "Edition"
+msgstr "Edition"
+
+#. • MSG_138
+msgid "Language"
+msgstr "Sprache"
+
+#. • MSG_139
+msgid "Architecture"
+msgstr "Architektur"
+
+#. • MSG_140
+msgid "Continue"
+msgstr "Weiter"
+
+#. • MSG_141
+msgid "Back"
+msgstr "Zurück"
+
+#. • MSG_142
+msgid "Please wait..."
+msgstr "Bitte warten..."
+
+#. • MSG_143
+msgid "Download using a browser"
+msgstr "Mit dem Browser herunterladen"
+
+#. • MSG_144
+msgid "Temporarily banned by Microsoft for requesting too many downloads - Please try again later..."
+msgstr "Download von Microsoft, aufgrund zu vieler Versuche, blockiert. Bitte versuchen Sie es später..."
+
+#. • MSG_145
+msgid "PowerShell 3.0 or later is required to run this script."
+msgstr "PowerShell 3.0 oder neuer ist erforderlich, um dieses Skript auszuführen."
+
+#. • MSG_146
+msgid "Do you want to go online and download it?"
+msgstr "Wollen Sie online gehen und den Download ausführen?"
+
+#. • MSG_148
+msgid "Running download script..."
+msgstr "Führe Download-Skript aus..."
+
+#. • MSG_149
+msgid "Download ISO Image"
+msgstr "ISO-Abbild herunterladen"
+
 #. • MSG_150
 msgid "Type of computer you plan to use this bootable drive with. It is your responsibility to determine whether your target is of BIOS or UEFI type before you start creating the drive, as it may fail to boot otherwise."
 msgstr "Der Typ des Computers, an dem Sie das startfähige Laufwerk verwenden wollen. Sie müssen entscheiden, ob BIOS oder UEFI. Andernfalls schlägt der Start fehl."
@@ -894,11 +1007,11 @@ msgstr "Kleinste Größe, die ein Datenblock im Dateisystem belegt"
 
 #. • MSG_159
 msgid ""
-"Use this field to set the drive label\n"
-"International characters are accepted"
+"Use this field to set the drive label.\n"
+"International characters are accepted."
 msgstr ""
-"Geben Sie hier die Datenträgerbezeichnung ein\n"
-"International Schriftzeichen sind erlaubt"
+"Geben Sie hier die Datenträgerbezeichnung ein.\n"
+"International Schriftzeichen sind erlaubt."
 
 #. • MSG_160
 msgid "Toggle advanced options"
@@ -921,8 +1034,8 @@ msgid "Method that will be used to make the drive bootable"
 msgstr "Methode, um das Laufwerk startfähig zu machen"
 
 #. • MSG_165
-msgid "Click to select an image..."
-msgstr "Wählen Sie eine Abbild-Datei..."
+msgid "Click to select or download an image..."
+msgstr "Abbild-Datei oder Download auswählen..."
 
 #. • MSG_166
 msgid "Check this box to allow the display of international labels and set a device icon (creates an autorun.inf)"
@@ -935,7 +1048,7 @@ msgstr "Erzeugt einen MBR, der eine Bootmenü erzeugt und die ID des BIOS USB-La
 #. • MSG_168
 msgid ""
 "Try to masquerade first bootable USB drive (usually 0x80) as a different disk.\n"
-"This should only be necessary if you install Windows XP and have more than one disk"
+"This should only be necessary if you install Windows XP and have more than one disk."
 msgstr ""
 "Das erste startfähige USB-Laufwerk maskieren (normalerweise 0x80) als andere Festplatte.\n"
 "Das sollte nur notwendig sein, wenn Sie Windows XP installieren und mehr als ein Festplatte haben."
@@ -943,10 +1056,10 @@ msgstr ""
 #. • MSG_169
 msgid ""
 "Create an extra hidden partition and try to align partitions boundaries.\n"
-"This can improve boot detection for older BIOSes"
+"This can improve boot detection for older BIOSes."
 msgstr ""
 "Eine extra Partition erzeugen und die Partitionsgrenzen ausrichten.\n"
-"Das kann die Starterkennung unter älteren BIOSen verbessern"
+"Das kann die Starterkennung unter älteren BIOSen verbessern."
 
 #. • MSG_170
 msgid "Enable the listing of USB Hard Drive enclosures. USE AT YOUR OWN RISKS!!!"
@@ -1078,8 +1191,8 @@ msgid ""
 msgstr ""
 "WICHTIG: DIESES LAUFWERK HAT EINE NICHT STANDARDKONFORME SEKTORGRÖSSE!\n"
 "\n"
-"Herkömmliche Laufwerke nutzen eine 512-Byte Sektorgröße, aber dieses Laufwerk nutzt %d-Byte. Höchstwahrscheinlich können Sie von diesem Laufwerk NICHT booten.\n"
-"Rufus kann versuchen, ein bootfähiges Laufwerk zu erstellen, aber es gibt KEINE GARANTIE, dass es funktionieren wird."
+"Herkömmliche Laufwerke nutzen eine 512-Byte Sektorgröße, aber dieses Laufwerk nutzt %d-Byte. Höchstwahrscheinlich können Sie von diesem Laufwerk NICHT starten.\n"
+"Rufus kann versuchen, ein startfähiges Laufwerk zu erstellen, aber es gibt KEINE GARANTIE, dass es funktionieren wird."
 
 #. • MSG_197
 msgid "Nonstandard sector size detected"
@@ -1206,11 +1319,11 @@ msgstr "Formatiere (%s)..."
 
 #. • MSG_223
 msgid "NTFS Fixup (Checkdisk)..."
-msgstr ""
+msgstr "NTFS-Reparatur (Checkdisk)..."
 
 #. • MSG_224
 msgid "Clearing MBR/PBR/GPT structures..."
-msgstr ""
+msgstr "MBR/PBR/GPT zurücksetzen..."
 
 #. • MSG_225
 msgid "Requesting disk access..."
@@ -1514,7 +1627,7 @@ msgstr "Administrative Rechte nicht vorhanden"
 
 #. • MSG_289
 msgid "This application can only run with elevated privileges"
-msgstr "Dieses Programm kann nur mit administrativen Rechten ausgeführt werden."
+msgstr "Dieses Programm kann nur mit administrativen Rechten ausgeführt werden"
 
 #. • MSG_290
 msgid "File Indexing"
