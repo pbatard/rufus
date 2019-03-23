@@ -1558,8 +1558,13 @@ BOOL SetUpdateCheck(void)
 		if ((loc_len != 0) && (loc_len < 4 * KB)) {
 			loc_len++;	// DownloadToFileOrBuffer allocated an extra NUL character if needed
 			fido_url = get_token_data_buffer(FIDO_VERSION, 1, loc, (size_t)loc_len);
-			uprintf("Fido URL is %s", fido_url);
-			enable_fido = IsDownloadable(fido_url);
+			if (safe_strncmp(fido_url, "https://github.com/pbatard/Fido", 31) != 0) {
+				ubprintf("WARNING: Download script URL %s is invalid ✗", fido_url);
+				safe_free(fido_url);
+			} else {
+				uprintf("Fido URL is %s", fido_url);
+				enable_fido = IsDownloadable(fido_url);
+			}
 		}
 		safe_free(loc);
 	}

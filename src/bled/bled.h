@@ -39,6 +39,9 @@ int64_t bled_uncompress_with_handles(HANDLE hSrc, HANDLE hDst, int type);
 /* Uncompress file 'src', compressed using 'type', to buffer 'buf' of size 'size' */
 int64_t bled_uncompress_to_buffer(const char* src, char* buf, size_t size, int type);
 
+/* Uncompress buffer 'src' of length 'src_len' to buffer 'dst' of size 'dst_len' */
+int64_t bled_uncompress_from_buffer_to_buffer(const char* src, const size_t src_len, char* dst, size_t dst_len, int type);
+
 /* Initialize the library.
  * When the parameters are not NULL you can:
  * - specify the printf-like function you want to use to output message

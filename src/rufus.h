@@ -104,7 +104,7 @@
 #endif
 #define DOWNLOAD_URL                RUFUS_URL "/downloads"
 #define FILES_URL                   RUFUS_URL "/files"
-#define FIDO_VERSION                "v1"
+#define FIDO_VERSION                "z1"
 #define SECURE_BOOT_MORE_INFO_URL   "https://github.com/pbatard/rufus/wiki/FAQ#Why_do_I_need_to_disable_Secure_Boot_to_use_UEFINTFS"
 #define WPPRECORDER_MORE_INFO_URL   "https://github.com/pbatard/rufus/wiki/FAQ#BSODs_with_Windows_To_Go_drives_created_from_Windows_10_1809_ISOs"
 #define SEVENZIP_URL                "https://www.7-zip.org"

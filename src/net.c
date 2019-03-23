@@ -36,6 +36,7 @@
 #include "resource.h"
 #include "msapi_utf8.h"
 #include "localization.h"
+#include "bled/bled.h"
 
 #include "settings.h"
 
@@ -878,11 +879,14 @@ static DWORD WINAPI DownloadISOThread(LPVOID param)
 	char locale_str[1024], cmdline[sizeof(locale_str) + 512], pipe[MAX_GUID_STRING_LENGTH + 16] = "\\\\.\\pipe\\";
 	char powershell_path[MAX_PATH], icon_path[MAX_PATH] = "", script_path[MAX_PATH] = "";
 	char *url = NULL, sig_url[128];
-	BYTE *sig = NULL;
+	uint64_t uncompressed_size;
+	int64_t size = -1;
+	BYTE *compressed = NULL, *sig = NULL;
 	HANDLE hFile, hPipe;
-	DWORD dwExitCode = 99, dwSize, dwAvail, dwPipeSize = 4096;
+	DWORD dwExitCode = 99, dwCompressedSize, dwSize, dwAvail, dwPipeSize = 4096;
 	GUID guid;
 
+	dialog_showing++;
 	IGNORE_RETVAL(CoInitializeEx(NULL, COINIT_APARTMENTTHREADED));
 
 	// Use a GUID as random unique string, else ill-intentioned security "researchers"
@@ -903,22 +907,38 @@ static DWORD WINAPI DownloadISOThread(LPVOID param)
 #else
 	// If we don't have the script, download it
 	if (fido_script == NULL) {
-		fido_len = (DWORD)DownloadToFileOrBuffer(fido_url, NULL, &fido_script, hMainDialog, FALSE);
-		if (fido_len == 0)
+		dwCompressedSize = (DWORD)DownloadToFileOrBuffer(fido_url, NULL, &compressed, hMainDialog, FALSE);
+		if (dwCompressedSize == 0)
 			goto out;
 		static_sprintf(sig_url, "%s.sig", fido_url);
 		dwSize = (DWORD)DownloadToFileOrBuffer(sig_url, NULL, &sig, NULL, FALSE);
-		if ((dwSize != RSA_SIGNATURE_SIZE) || (!ValidateOpensslSignature(fido_script, fido_len, sig, dwSize))) {
+		if ((dwSize != RSA_SIGNATURE_SIZE) || (!ValidateOpensslSignature(compressed, dwCompressedSize, sig, dwSize))) {
 			uprintf("FATAL: Signature is invalid ✗");
 			FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_BAD_SIGNATURE);
 			SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_ERROR, 0);
 			SetTaskbarProgressState(TASKBAR_ERROR);
-			safe_free(fido_script);
+			safe_free(compressed);
 			free(sig);
 			goto out;
 		}
 		free(sig);
 		uprintf("Signature is valid ✓");
+		uncompressed_size = *((uint64_t*)&compressed[5]);
+		if ((uncompressed_size < 1 * MB) && (bled_init(_uprintf, NULL, &FormatStatus) >= 0)) {
+			fido_script = malloc((size_t)uncompressed_size);
+			size = bled_uncompress_from_buffer_to_buffer(compressed, dwCompressedSize, fido_script, (size_t)uncompressed_size, BLED_COMPRESSION_LZMA);
+			bled_exit();
+		}
+		safe_free(compressed);
+		if (size != uncompressed_size) {
+			uprintf("FATAL: Could not uncompressed download script");
+			safe_free(fido_script);
+			FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_INVALID_DATA;
+			SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_ERROR, 0);
+			SetTaskbarProgressState(TASKBAR_ERROR);
+			goto out;
+		}
+		fido_len = (DWORD)size;
 		SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_NORMAL, 0);
 		SetTaskbarProgressState(TASKBAR_NORMAL);
 		SetTaskbarProgressValue(0, MAX_PROGRESS);
@@ -1012,6 +1032,7 @@ out:
 #endif
 	free(url);
 	SendMessage(hMainDialog, UM_ENABLE_CONTROLS, 0, 0);
+	dialog_showing--;
 	ExitThread(dwExitCode);
 }
 

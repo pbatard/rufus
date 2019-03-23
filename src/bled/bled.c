@@ -25,6 +25,9 @@ progress_t bled_progress = NULL;
 unsigned long* bled_cancel_request;
 static bool bled_initialized = 0;
 jmp_buf bb_error_jmp;
+char* bb_virtual_buf = NULL;
+size_t bb_virtual_len = 0, bb_virtual_pos = 0;
+int bb_virtual_fd = -1;
 
 static long long int unpack_none(transformer_state_t *xstate)
 {
@@ -49,8 +52,10 @@ int64_t bled_uncompress(const char* src, const char* dst, int type)
 	transformer_state_t xstate;
 	int64_t ret;
 
-	if (!bled_initialized)
+	if (!bled_initialized) {
+		bb_error_msg("The library has not been initialized");
 		return -1;
+	}
 
 	bb_total_rb = 0;
 	init_transformer_state(&xstate);
@@ -95,8 +100,10 @@ int64_t bled_uncompress_with_handles(HANDLE hSrc, HANDLE hDst, int type)
 {
 	transformer_state_t xstate;
 
-	if (!bled_initialized)
+	if (!bled_initialized) {
+		bb_error_msg("The library has not been initialized");
 		return -1;
+	}
 
 	bb_total_rb = 0;
 	init_transformer_state(&xstate);
@@ -132,8 +139,15 @@ int64_t bled_uncompress_to_buffer(const char* src, char* buf, size_t size, int t
 	transformer_state_t xstate;
 	int64_t ret;
 
-	if (!bled_initialized)
+	if (!bled_initialized) {
+		bb_error_msg("The library has not been initialized");
 		return -1;
+	}
+
+	if ((src == NULL) || (buf == NULL)) {
+		bb_error_msg("Invalid parameter");
+		return -1;
+	}
 
 	bb_total_rb = 0;
 	init_transformer_state(&xstate);
@@ -141,7 +155,11 @@ int64_t bled_uncompress_to_buffer(const char* src, char* buf, size_t size, int t
 	xstate.dst_fd = -1;
 	xstate.check_signature = 1;
 
-	xstate.src_fd = _openU(src, _O_RDONLY | _O_BINARY, 0);
+	if (src[0] == 0) {
+		xstate.src_fd = bb_virtual_fd;
+	} else {
+		xstate.src_fd = _openU(src, _O_RDONLY | _O_BINARY, 0);
+	}
 	if (xstate.src_fd < 0) {
 		bb_error_msg("Could not open '%s' (errno: %d)", src, errno);
 		goto err;
@@ -159,13 +177,47 @@ int64_t bled_uncompress_to_buffer(const char* src, char* buf, size_t size, int t
 	if (setjmp(bb_error_jmp))
 		goto err;
 	ret = unpacker[type](&xstate);
-	_close(xstate.src_fd);
+	if (src[0] != 0)
+		_close(xstate.src_fd);
 	return ret;
 
 err:
 	if (xstate.src_fd > 0)
 		_close(xstate.src_fd);
 	return -1;
+}
+
+int64_t bled_uncompress_from_buffer_to_buffer(const char* src, const size_t src_len, char* dst, size_t dst_len, int type)
+{
+	int64_t ret;
+
+	if (!bled_initialized) {
+		bb_error_msg("The library has not been initialized");
+		return -1;
+	}
+
+	if ((src == NULL) || (dst == NULL)) {
+		bb_error_msg("Invalid parameter");
+		return -1;
+	}
+
+	if (bb_virtual_buf != NULL) {
+		bb_error_msg("Can not decompress more than one buffer at once");
+		return -1;
+	}
+
+	bb_virtual_buf = (char*)src;
+	bb_virtual_len = src_len;
+	bb_virtual_pos = 0;
+	bb_virtual_fd = 0;
+
+	ret = bled_uncompress_to_buffer("", dst, dst_len, type);
+
+	bb_virtual_buf = NULL;
+	bb_virtual_len = 0;
+	bb_virtual_fd = -1;
+
+	return ret;
 }
 
 /* Initialize the library.
