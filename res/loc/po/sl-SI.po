@@ -1,0 +1,1724 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: 3.5\n"
+"Report-Msgid-Bugs-To: pete@akeo.ie\n"
+"POT-Creation-Date: 2019-03-25 19:50+0100\n"
+"PO-Revision-Date: 2019-03-25 19:53+0000\n"
+"Language: sl_SI\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Rufus-LanguageName: Slovenian (Slovenščina)\n"
+"X-Rufus-LCID: 0x0424\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"X-Generator: Poedit 2.2.1\n"
+
+#. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
+msgid "Drive Properties"
+msgstr "Lastnosti pogona"
+
+#. • IDD_DIALOG → IDS_DEVICE_TXT
+msgid "Device"
+msgstr "Naprava"
+
+#. • IDD_DIALOG → IDS_BOOT_SELECTION_TXT
+msgid "Boot selection"
+msgstr "Izbira zagona"
+
+#. • IDD_DIALOG → IDC_SELECT
+msgid "Select"
+msgstr "Izberi"
+
+#. • IDD_DIALOG → IDS_IMAGE_OPTION_TXT
+msgid "Image Option"
+msgstr "Možnosti slike"
+
+#. • IDD_DIALOG → IDS_PARTITION_TYPE_TXT
+msgid "Partition scheme"
+msgstr "Particijska shema"
+
+#. • IDD_DIALOG → IDS_TARGET_SYSTEM_TXT
+msgid "Target system"
+msgstr "Ciljni sistem"
+
+#. • IDD_DIALOG → IDC_LIST_USB_HDD
+msgid "List USB Hard Drives"
+msgstr "Naštej USB trde diske"
+
+#. • IDD_DIALOG → IDC_OLD_BIOS_FIXES
+#.
+#. It is acceptable to drop the parenthesis () if you are running out of space
+#. as there is a tooltip (MSG_169) providing these details.
+msgid "Add fixes for old BIOSes (extra partition, align, etc.)"
+msgstr "Dodaj popravke za stare BIOSe"
+
+#. • IDD_DIALOG → IDC_RUFUS_MBR
+#.
+#. 'MBR': See http://en.wikipedia.org/wiki/Master_boot_record
+#. Rufus can install it's own custom MBR (the Rufus MBR), which also allows users to
+#. specify a custom disk ID for the BIOS. The tooltip for this control is MSG_167.
+msgid "Use Rufus MBR with BIOS ID"
+msgstr "Rufusov MBR z BIOS ID"
+
+#. • IDD_DIALOG → IDS_FORMAT_OPTIONS_TXT
+msgid "Format Options"
+msgstr "Možnosti formatiranja"
+
+#. • IDD_DIALOG → IDS_FILE_SYSTEM_TXT
+msgid "File system"
+msgstr "Datotečni sistem"
+
+#. • IDD_DIALOG → IDS_CLUSTER_SIZE_TXT
+msgid "Cluster size"
+msgstr "Velikost gruče"
+
+#. • IDD_DIALOG → IDS_LABEL_TXT
+msgid "Volume label"
+msgstr "Oznaka nosilca"
+
+#. • IDD_DIALOG → IDC_QUICK_FORMAT
+msgid "Quick format"
+msgstr "Hitro formatiranje"
+
+#. • IDD_DIALOG → IDC_BAD_BLOCKS
+msgid "Check device for bad blocks"
+msgstr "Odkrij slabe bloke"
+
+#. • IDD_DIALOG → IDC_EXTENDED_LABEL
+msgid "Create extended label and icon files"
+msgstr "Ustvari datoteki za ikono in podaljšano oznako"
+
+#. • IDD_DIALOG → IDS_STATUS_TXT
+msgid "Status"
+msgstr "Stanje"
+
+#. • IDD_DIALOG → IDCANCEL
+#. • IDD_LICENSE → IDCANCEL
+#. • IDD_LOG → IDCANCEL
+#. • IDD_UPDATE_POLICY → IDCANCEL
+#. • IDD_NEW_VERSION → IDCANCEL
+#. • MSG_006
+msgid "Close"
+msgstr "Zapri"
+
+#. • IDD_DIALOG → IDC_START
+msgid "Start"
+msgstr "Začni"
+
+#. • IDD_ABOUTBOX → IDD_ABOUTBOX
+msgid "About Rufus"
+msgstr "O Rufusu"
+
+#. • IDD_ABOUTBOX → IDC_ABOUT_LICENSE
+msgid "License"
+msgstr "Licenca"
+
+#. • IDD_ABOUTBOX → IDOK
+msgid "OK"
+msgstr "V redu"
+
+#. • IDD_LICENSE → IDD_LICENSE
+msgid "Rufus License"
+msgstr "Rufusova licenca"
+
+#. • IDD_NOTIFICATION → IDC_MORE_INFO
+msgid "More information"
+msgstr "Več informacij"
+
+#. • IDD_NOTIFICATION → IDYES
+#. • MSG_008
+msgid "Yes"
+msgstr "Da"
+
+#. • IDD_NOTIFICATION → IDNO
+#. • MSG_009
+msgid "No"
+msgstr "Ne"
+
+#. • IDD_LOG → IDD_LOG
+msgid "Log"
+msgstr "Zapisnik"
+
+#. • IDD_LOG → IDC_LOG_CLEAR
+msgid "Clear"
+msgstr "Izprazni"
+
+#. • IDD_LOG → IDC_LOG_SAVE
+msgid "Save"
+msgstr "Shrani"
+
+#. • IDD_UPDATE_POLICY → IDD_UPDATE_POLICY
+msgid "Update policy and settings"
+msgstr "Posodobitvena politika in nastavitve"
+
+#. • IDD_UPDATE_POLICY → IDS_UPDATE_SETTINGS_GRP
+msgid "Settings"
+msgstr "Nastavitve"
+
+#. • IDD_UPDATE_POLICY → IDS_UPDATE_FREQUENCY_TXT
+msgid "Check for updates"
+msgstr "Preveri za posodobitve"
+
+#. • IDD_UPDATE_POLICY → IDS_INCLUDE_BETAS_TXT
+msgid "Include beta versions"
+msgstr "Upoštevaj beta verzije"
+
+#. • IDD_UPDATE_POLICY → IDC_CHECK_NOW
+msgid "Check Now"
+msgstr "Preveri zdaj"
+
+#. • IDD_NEW_VERSION → IDD_NEW_VERSION
+msgid "Check For Updates - Rufus"
+msgstr "Rufus - posodobitve"
+
+#. • IDD_NEW_VERSION → IDS_NEW_VERSION_AVAIL_TXT
+msgid "A newer version is available. Please download the latest version!"
+msgstr "Novejša verzija je na voljo. Prosim, prenesite jo!"
+
+#. • IDD_NEW_VERSION → IDC_WEBSITE
+msgid "Click here to go to the website"
+msgstr "Kliknite sem, da greste na spletno stran"
+
+#. • IDD_NEW_VERSION → IDS_NEW_VERSION_NOTES_GRP
+msgid "Release Notes"
+msgstr "Opombe ob izdaji"
+
+#. • IDD_NEW_VERSION → IDS_NEW_VERSION_DOWNLOAD_GRP
+#. • IDD_NEW_VERSION → IDC_DOWNLOAD
+#. • MSG_040
+msgid "Download"
+msgstr "Prenesi"
+
+#. • MSG_001
+msgid "Other instance detected"
+msgstr "Drug primerek zaznan"
+
+#. • MSG_002
+msgid ""
+"Another Rufus application is running.\n"
+"Please close the first application before running another one."
+msgstr ""
+"Še en primerek Rufusa se izvaja.\n"
+"Prosim, zaprite ga, preden zaženete še enega."
+
+#. • MSG_003
+msgid ""
+"WARNING: ALL DATA ON DEVICE '%s' WILL BE DESTROYED.\n"
+"To continue with this operation, click OK. To quit click CANCEL."
+msgstr ""
+"OPOZORILO: VSI PODATKI NA NAPRAVI \"%s\" BODO UNIČENI.\n"
+"Če želite nadaljevati s to operacijo, izberite \"V redu\", drugače izberite \"Prekliči\"."
+
+#. • MSG_004
+msgid "Rufus update policy"
+msgstr "Rufusova posodobitvena politika"
+
+#. • MSG_005
+msgid "Do you want to allow Rufus to check for application updates online?"
+msgstr "Ali dovolite, da Rufus na internetu išče posodobitve zase?"
+
+#. • MSG_007
+msgid "Cancel"
+msgstr "Prekliči"
+
+#. • MSG_010
+msgid "Bad blocks found"
+msgstr "Slabi bloki najdeni"
+
+#. • MSG_011
+msgid ""
+"Check completed: %d bad block(s) found\n"
+"  %d read error(s)\n"
+"  %d write error(s)\n"
+"  %d corruption error(s)"
+msgstr ""
+"Preizkus končan: %d slabih blokov najdenih\n"
+"  Napak pri branju: %d\n"
+"  Napak pri pisanju: %d\n"
+"  Nezanesljivih blokov: %d"
+
+#. • MSG_012
+#.
+#. This contains the formatted message from MSG_001 as well as the name of the bad blocks logfile
+msgid ""
+"%s\n"
+"A more detailed report can be found in:\n"
+"%s"
+msgstr ""
+"%s\n"
+"Podrobnejše poročilo lahko najdete v datoteki\n"
+"%s"
+
+#. • MSG_013
+msgid "Disabled"
+msgstr "Onemogočeno"
+
+#. • MSG_014
+msgid "Daily"
+msgstr "Dnevno"
+
+#. • MSG_015
+msgid "Weekly"
+msgstr "Tedensko"
+
+#. • MSG_016
+msgid "Monthly"
+msgstr "Mesečno"
+
+#. • MSG_017
+msgid "Custom"
+msgstr "Po meri"
+
+#. • MSG_018
+msgid "Your version: %d.%d (Build %d)"
+msgstr "Vaša verzija: %d.%d (izgradnja %d)"
+
+#. • MSG_019
+msgid "Latest version: %d.%d (Build %d)"
+msgstr "Najnovejša verzija: %d.%d (izgradnja %d)"
+
+#. • MSG_020
+#. • MSG_026
+msgid "bytes"
+msgstr "bajtov"
+
+#. • MSG_021
+#.
+#. *Short* version of the kilobyte size suffix
+msgid "KB"
+msgstr ""
+
+#. • MSG_022
+#.
+#. *Short* version of the megabyte size suffix
+msgid "MB"
+msgstr ""
+
+#. • MSG_023
+#.
+#. *Short* version of the gigabyte size suffix
+msgid "GB"
+msgstr ""
+
+#. • MSG_024
+#.
+#. *Short* version of the terabyte size suffix
+msgid "TB"
+msgstr ""
+
+#. • MSG_025
+#.
+#. *Short* version of the pentabyte size suffix
+msgid "PB"
+msgstr ""
+
+#. • MSG_027
+msgid "kilobytes"
+msgstr "kilobajtov"
+
+#. • MSG_028
+msgid "megabytes"
+msgstr "megabajtov"
+
+#. • MSG_029
+msgid "Default"
+msgstr "Privzeto"
+
+#. • MSG_030
+#.
+#. This gets appended to the file system, cluster size, etc.
+msgid "%s (Default)"
+msgstr "%s (privzeto)"
+
+#. • MSG_031
+msgid "BIOS (or UEFI-CSM)"
+msgstr "BIOS (oz. UEFI-CSM)"
+
+#. • MSG_032
+msgid "UEFI (non CSM)"
+msgstr "UEFI (brez CSM)"
+
+#. • MSG_033
+msgid "BIOS or UEFI"
+msgstr "BIOS ali UEFI"
+
+#. • MSG_034
+#.
+#. Number of bad block check passes (singular for 1 pass)
+msgid "%d pass"
+msgstr "%d prehod"
+
+#. • MSG_035
+#.
+#. Number of bad block check passes (plural for 2 or more passes).
+#. See MSG_087 for the message that %s gets replaced with.
+msgid "%d passes %s"
+msgstr "%d prehoda/-i %s"
+
+#. • MSG_036
+msgid "ISO Image"
+msgstr "Sliko ISO"
+
+#. • MSG_037
+msgid "Application"
+msgstr "Aplikacija"
+
+#. • MSG_038
+msgid "Abort"
+msgstr "Prekini"
+
+#. • MSG_039
+msgid "Launch"
+msgstr "Zaženi"
+
+#. • MSG_041
+msgid "Operation cancelled by the user"
+msgstr "Operacijo je prekinil uporabnik"
+
+#. • MSG_042
+msgid "Error"
+msgstr "Napaka"
+
+#. • MSG_043
+msgid "Error: %s"
+msgstr "Napaka: %s"
+
+#. • MSG_044
+msgid "File download"
+msgstr "Prenos datoteke"
+
+#. • MSG_045
+msgid "USB Storage Device (Generic)"
+msgstr "USB podatkovni nosilec (generičen)"
+
+#. • MSG_046
+msgid "%s (Disk %d) [%s]"
+msgstr "%s (disk %d) [%s]"
+
+#. • MSG_047
+#.
+#. Used when a drive is detected that contains more than one partition
+msgid "Multiple Partitions"
+msgstr "Več particij"
+
+#. • MSG_048
+msgid "Rufus - Flushing buffers"
+msgstr "Rufus - izpiranje medpomnilnika"
+
+#. • MSG_049
+msgid "Rufus - Cancellation"
+msgstr "Rufus - preklic"
+
+#. • MSG_050
+msgid "Success."
+msgstr "Uspešno zaključeno."
+
+#. • MSG_051
+msgid "Undetermined error while formatting."
+msgstr "Nedoločena napaka med formatiranjem."
+
+#. • MSG_052
+msgid "Cannot use the selected file system for this media."
+msgstr "Za ta medij tega datotečnega sistema ni mogoče uporabiti."
+
+#. • MSG_053
+msgid "Access to the device is denied."
+msgstr "Dostop do naprave je zavrnjen."
+
+#. • MSG_054
+msgid "Media is write protected."
+msgstr "Na medij ni mogoče pisati."
+
+#. • MSG_055
+msgid "The device is in use by another process. Please close any other process that may be accessing the device."
+msgstr "Napravo uporablja drug proces. Prosim, zaprite vse procese, ki bi lahko uporabljali to napravo."
+
+#. • MSG_056
+msgid "Quick format is not available for this device."
+msgstr "Za to napravo hitro formatiranje ni na voljo."
+
+#. • MSG_057
+msgid "The volume label is invalid."
+msgstr "Oznaka nosilca je neveljavna."
+
+#. • MSG_058
+msgid "The device handle is invalid."
+msgstr "Napravin oprimek je neveljaven."
+
+#. • MSG_059
+msgid "The selected cluster size is not valid for this device."
+msgstr "Izbrana velikost gruče ni veljavna za to napravo."
+
+#. • MSG_060
+msgid "The volume size is invalid."
+msgstr "Velikost nosilca je neveljavna."
+
+#. • MSG_061
+msgid "Please insert a removable media in drive."
+msgstr "Prosim, vstavite izmenljiv medij v pogon."
+
+#. • MSG_062
+msgid "An unsupported command was received."
+msgstr "Prejet je bil nepodprt ukaz."
+
+#. • MSG_063
+msgid "Memory allocation error."
+msgstr "Napaka pri dodelitvi spomina."
+
+#. • MSG_064
+msgid "Read error."
+msgstr "Napaka pri branju."
+
+#. • MSG_065
+msgid "Write error."
+msgstr "Napaka pri pisanju."
+
+#. • MSG_066
+msgid "Installation failure"
+msgstr "Napaka pri nameščanju"
+
+#. • MSG_067
+msgid "Could not open media. It may be in use by another process. Please re-plug the media and try again."
+msgstr "Ni mogoče odpreti medija. Morda ga uporablja drug proces. Prosim, ponovno priključite medij in poskusite znova."
+
+#. • MSG_068
+msgid "Error while partitioning drive."
+msgstr "Napaka pri ustvarjanju particije."
+
+#. • MSG_069
+msgid "Could not copy files to target drive."
+msgstr "Ni bilo mogoče kopirati datotek na ciljni pogon."
+
+#. • MSG_070
+msgid "Cancelled by user."
+msgstr "Uporabnik je prekinil operacijo."
+
+#. • MSG_071
+#.
+#. See http://en.wikipedia.org/wiki/Thread_%28computing%29
+msgid "Unable to start thread."
+msgstr "Niti ni mogoče zagnati."
+
+#. • MSG_072
+msgid "Bad blocks check didn't complete."
+msgstr "Preizkus blokov se ni zaključil."
+
+#. • MSG_073
+msgid "ISO image scan failure."
+msgstr "Napaka pri preiskovanju ISO slike."
+
+#. • MSG_074
+msgid "ISO image extraction failure."
+msgstr "Napaka pri vlečenju iz ISO slike."
+
+#. • MSG_075
+msgid "Unable to remount volume."
+msgstr "Nosilca ni mogoče ponovno priklopiti."
+
+#. • MSG_076
+msgid "Unable to patch/setup files for boot."
+msgstr "Ni mogoče popraviti oz. pripraviti zagonskih datotek."
+
+#. • MSG_077
+msgid "Unable to assign a drive letter."
+msgstr "Pogonu ni mogoče dodeliti črke."
+
+#. • MSG_078
+msgid "Can't mount GUID volume."
+msgstr "Ni mogoče priklopiti nosilca z GUID."
+
+#. • MSG_079
+msgid "The device is not ready."
+msgstr "Naprava ni pripravljena."
+
+#. • MSG_080
+msgid ""
+"Rufus detected that Windows is still flushing its internal buffers onto the USB device.\n"
+"\n"
+"Depending on the speed of your USB device, this operation may take a long time to complete, especially for large files.\n"
+"\n"
+"We recommend that you let Windows finish, to avoid corruption. But if you grow tired of waiting, you can just unplug the device..."
+msgstr ""
+"Rufus je zaznal, da Windows še vedno izpira svoje notranje medpomnilnike na napravo USB.\n"
+"\n"
+"Odvisno od hitrosti naprave to lahko traja veliko časa, še posebej za velike datoteke.\n"
+"\n"
+"Priporočamo vam, da počakate, da Windows opravi svoje, da se izognete poškodbi podatkov. Če pa se čakanja naveličate, lahko napravo kar izvlečete…"
+
+#. • MSG_081
+msgid "Unsupported image"
+msgstr "Nepodprta slika"
+
+#. • MSG_082
+msgid "This image is either non-bootable, or it uses a boot or compression method that is not supported by Rufus..."
+msgstr "Ta slika ni zagonska ali pa Rufus ne podpira njenega načina zagona ali metode stiskanja.Ta ISO očitno ne uporablja nobenega izmed njih…"
+
+#. • MSG_083
+msgid "Replace %s?"
+msgstr "Zamenjam %s?"
+
+#. • MSG_084
+msgid ""
+"This ISO image seems to use an obsolete version of '%s'.\n"
+"Boot menus may not display properly because of this.\n"
+"\n"
+"A newer version can be downloaded by Rufus to fix this issue:\n"
+"- Choose 'Yes' to connect to the internet and download the file\n"
+"- Choose 'No' to leave the existing ISO file unmodified\n"
+"If you don't know what to do, you should select 'Yes'.\n"
+"\n"
+"Note: The new file will be downloaded in the current directory and once a '%s' exists there, it will be reused automatically."
+msgstr ""
+"Zdi se, da ta ISO slika uporablja zastarelo verzijo \"%s\".\n"
+"Zaradi tega se zagonski meniji morda ne bodo prikazovali pravilno.\n"
+"\n"
+"Rufus lahko prenese novejšo verzijo, da to težavo odpravi.\n"
+"- Izberite \"Da\", da se povežete na internet in prenesete datoteko.\n"
+"- Izberite \"Ne\", da slike ne spreminjate.\n"
+"Če ne veste, kaj storiti, izberite \"Da\".\n"
+"\n"
+"Opomba: nova datoteka bo prenesena v trenutni imenik in ko datoteka \"%s\" tam enkrat obstaja, bo samodejno uporabljena tudi v bodoče."
+
+#. • MSG_085
+msgid "Downloading %s"
+msgstr "Prenašam %s"
+
+#. • MSG_086
+msgid "No image selected"
+msgstr "Izbrana ni nobena slika"
+
+#. • MSG_087
+#.
+#. This message appears in Advanced format options → Check device for bad blocks → dropdown menu
+#. %s will be replaced with SLC, MLC or TLC, which is a type of NAND (or flash memory). In other
+#. words, this message should mean "for a flash memory device of type %s". *Please* try to keep
+#. the translation as short as possible so that it won't result in an overly large dropdown...
+#. If you prefer, it's okay to use "type" or "device" instead of "NAND" (e.g. "for TLC type").
+#. See also MSG_035.
+msgid "for %s NAND"
+msgstr "za nosilec vrste %s"
+
+#. • MSG_088
+msgid "Image is too big"
+msgstr "Slika je prevelika"
+
+#. • MSG_089
+msgid "The image is too big for the selected target."
+msgstr "Ta slika je prevelika za izbrani cilj."
+
+#. • MSG_090
+msgid "Unsupported ISO"
+msgstr "Nepodprt ISO"
+
+#. • MSG_091
+msgid "When using UEFI Target Type, only EFI bootable ISO images are supported. Please select an EFI bootable ISO or set the Target Type to BIOS."
+msgstr "Za cilj UEFI so podprte samo zagonske ISO slike, združljive z EFI. Prosim, izberite zagonski ISO, združljiv z EFI, ali nastavite cilj na BIOS."
+
+#. • MSG_092
+msgid "Unsupported filesystem"
+msgstr "Nepodprt datotečni sistem"
+
+#. • MSG_093
+msgid ""
+"IMPORTANT: THIS DRIVE CONTAINS MULTIPLE PARTITIONS!!\n"
+"\n"
+"This may include partitions/volumes that aren't listed or even visible from Windows. Should you wish to proceed, you are responsible for any data loss on these partitions."
+msgstr ""
+"TA POGON IMA VEČ PARTICIJ!\n"
+"\n"
+"To lahko vključuje particije, ki jih Windows niti ne prikazuje. Če nadaljujete, ste odgovorni za morebitno izgubo podatkov na teh particijah."
+
+#. • MSG_094
+msgid "Multiple partitions detected"
+msgstr "Zaznanih več particij"
+
+#. • MSG_095
+msgid "DD Image"
+msgstr "Sliko DD"
+
+#. • MSG_096
+msgid "The file system currently selected can not be used with this type of ISO. Please select a different file system or use a different ISO."
+msgstr "Trenutno izbranega datotečnega sistema ni mogoče uporabljati s to vrsto slike ISO. Izberite drug datotečni sistem ali pa uporabite drugo sliko."
+
+#. • MSG_097
+msgid "'%s' can only be applied if the file system is NTFS."
+msgstr "'%so' je mogoče uporabiti samo z datotečnim sistemom NTFS."
+
+#. • MSG_098
+msgid ""
+"IMPORTANT: You are trying to install 'Windows To Go', but your target drive doesn't have the 'FIXED' attribute. Because of this Windows will most likely freeze during boot, as Microsoft hasn't designed it to work with drives that instead have the 'REMOVABLE' attribute.\n"
+"\n"
+"Do you still want to proceed?\n"
+"\n"
+"Note: The 'FIXED/REMOVABLE' attribute is a hardware property that can only be changed using custom tools from the drive manufacturer. However those tools are ALMOST NEVER provided to the public..."
+msgstr ""
+"POMEMBNO: Namestiti poskušate 'Windows To Go' na odstranljiv nosilec. Windows se bo najverjetneje ustavil med zagonom, ker zagon z odstranljivega nosilca ni uradno podprt.\n"
+"\n"
+"Ali še vedno želite nadaljevati?\n"
+"\n"
+"Opomba: atribut, ki določa, ali je nosilec \"fiksen\" ali \"odstranljiv\", je mogoče spremeniti le s posebnim programom proizvajalca naprave. Takšni programi navadno niso na voljo javnosti."
+
+#. • MSG_099
+msgid "Filesystem limitation"
+msgstr "Omejitev datotečnega sistema"
+
+#. • MSG_100
+msgid "This ISO image contains a file larger than 4GB, which is more than the maximum size allowed for a FAT or FAT32 file system."
+msgstr "Ta slika vsebuje datoteko, večjo od 4 GB, kar je več od največje velikosti, ki jo dopuščata datotečna sistema FAT in FAT32."
+
+#. • MSG_101
+msgid "Missing WIM support"
+msgstr "Manjkajoča podpora za WIM"
+
+#. • MSG_102
+msgid ""
+"Your platform cannot extract files from WIM archives. WIM extraction is required to create EFI bootable Windows 7 and Windows Vista USB drives. You can fix that by installing a recent version of 7-Zip.\n"
+"Do you want to visit the 7-zip download page?"
+msgstr ""
+"Vaš sistem ne more vleči datotek iz arhivov WIM. To je potrebno za ustvarjanje zagonskih pogonov USB z operacijskim sistemom Windows Vista ali Windows 7. To lahko popravite, če namestite nedavno verzijo programa 7-Zip.\n"
+"Želite obiskati spletno stran, kjer lahko 7-Zip prenesete?"
+
+#. • MSG_103
+msgid "Download %s?"
+msgstr "Prenesem %s?"
+
+#. • MSG_104
+#.
+#. Example: "Grub4DOS v0.4 or later requires a 'grldr' file to be installed. Because this
+#. file is more than 100 KB in size, and always present on Grub4DOS ISO images (...)"
+msgid ""
+"%s or later requires a '%s' file to be installed.\n"
+"Because this file is more than 100 KB in size, and always present on %s ISO images, it is not embedded in Rufus.\n"
+"\n"
+"Rufus can download the missing file for you:\n"
+"- Select 'Yes' to connect to the internet and download the file\n"
+"- Select 'No' if you want to manually copy this file on the drive later\n"
+"\n"
+"Note: The file will be downloaded in the current directory and once a '%s' exists there, it will be reused automatically."
+msgstr ""
+"%s ali novejši zahteva, da je nameščena datoteka \"%s\".\n"
+"Ker je ta datoteka večja od 100 KB in je vedno prisotna na ISO slikah s %s ali novejšim, ni vgrajena v Rufus.\n"
+"\n"
+"Rufus jo lahko prenese namesto vas.\n"
+"- Izberite \"Da\", da se povežete na internet in prenesete datoteko.\n"
+"- Izberite \"Ne\", če želite to datoteko pozneje sami kopirati na pogon.\n"
+"\n"
+"Opomba: nova datoteka bo prenesena v trenutni imenik in ko datoteka \"%s\" tam enkrat obstaja, bo samodejno uporabljena tudi v bodoče."
+
+#. • MSG_105
+msgid ""
+"Cancelling may leave the device in an UNUSABLE state.\n"
+"If you are sure you want to cancel, click YES. Otherwise, click NO."
+msgstr ""
+"Preklic lahko pusti napravo v NEUPORABNEM stanju.\n"
+"Če ste prepričani, da želite operacijo preklicati, izberite DA, drugače izberite NE."
+
+#. • MSG_106
+msgid "Please select folder"
+msgstr "Prosim, izberite mapo"
+
+#. • MSG_107
+msgid "All files"
+msgstr "Vse datoteke"
+
+#. • MSG_108
+msgid "Rufus log"
+msgstr "Rufusov zapisnik"
+
+#. • MSG_109
+msgid "0x%02X (Disk %d)"
+msgstr "0x%02X (disk %d)"
+
+#. • MSG_110
+#.
+#. "Cluster size" should be the same as the label for IDS_CLUSTER_SIZE_TXT
+#. "kilobytes" should be the same as in MSG_027
+msgid ""
+"MS-DOS cannot boot from a drive using a 64 kilobytes Cluster size.\n"
+"Please change the Cluster size or use FreeDOS."
+msgstr ""
+"MS-DOS se ne more zagnati s pogona, na katerem so gruče velike 64 KB.\n"
+"Prosim, spremenite velikost gruče ali uporabite FreeDOS."
+
+#. • MSG_111
+msgid "Incompatible Cluster size"
+msgstr "Nezdružljiva velikost gruče"
+
+#. • MSG_112
+#.
+#. "%d:%02d" is a duration (mins:secs)
+msgid "Formatting a large UDF volumes can take a lot of time. At USB 2.0 speeds, the estimated formatting duration is %d:%02d, during which the progress bar will appear frozen. Please be patient!"
+msgstr "Formatiranje velikih nosilcev UDF lahko traja veliko časa. Pri hitrostih USB 2.0 je predvideno trajanje formatiranja %d:%02d, med čimer se kazalnik poteka ne bo premaknil. Prosim, bodite potrpežljivi!"
+
+#. • MSG_113
+msgid "Large UDF volume"
+msgstr "Velik nosilec UDF"
+
+#. • MSG_114
+msgid ""
+"This image uses Syslinux %s%s but this application only includes the installation files for Syslinux %s%s.\n"
+"\n"
+"As new versions of Syslinux are not compatible with one another, and it wouldn't be possible for Rufus to include them all, two additional files must be downloaded from the Internet ('ldlinux.sys' and 'ldlinux.bss'):\n"
+"- Select 'Yes' to connect to the Internet and download these files\n"
+"- Select 'No' to cancel the operation\n"
+"\n"
+"Note: The files will be downloaded in the current application directory and will be reused automatically if present."
+msgstr ""
+"Ta slika uporablja Syslinux %s%s, toda ta aplikacija vsebuje le namestitvene datoteke za Syslinux %s%s.\n"
+"\n"
+"Ker novejše verzije Syslinuxa niso združljive in Rufus ne more vsebovati vseh, morata biti prenešeni še dve dodatni datoteki (ldlinux.sys in ldlinux.bss):\n"
+"- Izberite \"Da\", da se povežete na internet in prenesete ti dve datoteki.\n"
+"- Izberite \"Ne\", da prekinete dejanje.\n"
+"\n"
+"Opomba: datoteki bosta prenešeni v mapo, kjer je nameščen Rufus, in bosta v prihodnje ponovno uporabljeni."
+
+#. • MSG_115
+msgid "Download required"
+msgstr "Prenos potreben"
+
+#. • MSG_116
+#.
+#. You should be able to test this message with Super Grub2 Disk ISO:
+#. https://sourceforge.net/projects/supergrub2/files/2.00s2/super_grub2_disk_hybrid_2.00s2.iso/download (11.9 MB)
+msgid ""
+"This image uses Grub %s but the application only includes the installation files for Grub %s.\n"
+"\n"
+"As different versions of Grub may not be compatible with one another, and it is not possible to include them all, Rufus will attempt to locate a version of the Grub installation file ('core.img') that matches the one from your image:\n"
+"- Select 'Yes' to connect to the Internet and attempt to download it\n"
+"- Select 'No' to use the default version from Rufus\n"
+"- Select 'Cancel' to abort the operation\n"
+"\n"
+"Note: The file will be downloaded in the current application directory and will be reused automatically if present. If no match can be found online, then the default version will be used."
+msgstr ""
+"Ta slika uporablja GRUB %s, toda ta aplikacija vsebuje le namestitvene datoteke za GRUB %s.\n"
+"\n"
+"Ker različne verzije programa GRUB niso nujno združljive in Rufus ne more vsebovati vseh, bo Rufus poskušal najti verzijo namestitvene datoteke za GRUB (core.img), ki se ujema s tisto na sliki:\n"
+"- Izberite \"Da\", da se povežete na internet in prenesete to datoteko.\n"
+"- Izberite \"Ne\", da uporabite privzeto verzijo, ki jo Rufus že vsebuje.\n"
+"- Izberite \"Prekliči\", da prekinete dejanje.\n"
+"\n"
+"Opomba: datoteka bo prenešena v mapo, kjer je nameščen Rufus, in bo v prihodnje ponovno uporabljena. Če Rufus ne more najti ustrezne datoteke, bo uporabljena privzeta verzija."
+
+#. • MSG_117
+msgid "Standard Windows installation"
+msgstr "Standardna namestitev operacijskega sistema Windows"
+
+#. • MSG_118
+#.
+#. Only translate this message *if* Microsoft has a specific name for
+#. http://en.wikipedia.org/wiki/Windows_To_Go in your language.
+#. Otherwise, you may add a parenthesis eg. "Windows To Go (<hint at what it does>)"
+msgid "Windows To Go"
+msgstr ""
+
+#. • MSG_119
+msgid "advanced drive properties"
+msgstr "napredne lastnosti pogona"
+
+#. • MSG_120
+msgid "advanced format options"
+msgstr "napredne možnosti formatiranja"
+
+#. • MSG_121
+msgid "Show %s"
+msgstr "Pokaži %s"
+
+#. • MSG_122
+msgid "Hide %s"
+msgstr "Skrij %s"
+
+#. • MSG_123
+#.
+#. A persistent partitions can be used with "Live" USB media to store data.
+#. It means that data can be preserved across reboots on "Live" USB drives.
+#. To test this feature, please download and select 'casper_test.iso' from:
+#. https://github.com/pbatard/rufus/raw/master/res/loc/test/casper_test.iso
+msgid "Persistent partition size"
+msgstr "Velikost trajne particije"
+
+#. • MSG_124
+#.
+#. This message appears in the persistence 'Size' control when the slider is set to 0.
+#. It is okay to use "No partition" or "None" or "Deactivated" to indicate that a persistent partition will not be
+#. created if the width of the control is too small (since the 'Size' edit control is *not* adjusted for width).
+msgid "No persistence"
+msgstr "Brez"
+
+#. • MSG_125
+#.
+#. Tooltips used for the peristence size slider and edit control
+msgid "Set the size of the persistent partition for live USB media. Setting the size to 0 disables the persistent partition."
+msgstr "Nastavi velikost trajne particije za \"živ\" medij. Velikost 0 onemogoči trajno particijo."
+
+#. • MSG_126
+msgid "Set the partition size units."
+msgstr "Nastavi enote velikosti particije."
+
+#. • MSG_127
+msgid "Do not show this message again"
+msgstr "Tega sporočila ne prikaži več"
+
+#. • MSG_128
+msgid "Important notice about %s"
+msgstr "Pomembno obvestilo o %s"
+
+#. • MSG_129
+msgid ""
+"You have just created a media that uses the UEFI:NTFS bootloader. Please remember that, to boot this media, YOU MUST DISABLE SECURE BOOT.\n"
+"For details on why this is necessary, see the 'More Information' button below."
+msgstr ""
+"Ustvarili ste medij, ki uporablja nalagalnik UEFI:NTFS. Pomnite, da morate za zagon s tega medija ONEMOGOČITI Secure Boot.\n"
+"Za razlago, zakaj je to potrebno, kliknite gumb \"Več informacij\" spodaj."
+
+#. • MSG_130
+msgid "Windows image selection"
+msgstr "Izbira slike Windowsa"
+
+#. • MSG_131
+msgid ""
+"This ISO contains multiple Windows images.\n"
+"Please select the image you wish to use for this installation:"
+msgstr ""
+"Ta ISO vsebuje več slik Windowsa.\n"
+"Izberite sliko, ki jo želite uporabiti za to namestitev:"
+
+#. • MSG_132
+msgid "Another program or process is accessing this drive. Do you want to format it anyway?"
+msgstr "Do tega pogona dostopa drug program oz. proces. Ali ga želite vseeno formatirati?"
+
+#. • MSG_133
+msgid ""
+"Rufus has detected that you are attempting to create a Windows To Go media based on a 1809 ISO.\n"
+"\n"
+"Because of a *MICROSOFT BUG*, this media will crash during Windows boot (Blue Screen Of Death), unless you manually replace the file 'WppRecorder.sys' with a 1803 version.\n"
+"\n"
+"Also note that the reason Rufus cannot automatically fix this for you is that 'WppRecorder.sys' is a Microsoft copyrighted file, so we cannot legally embed a copy of the file in the application..."
+msgstr ""
+"Rufus je zaznal, da poskušate ustvariti medij za Windows To Go z verzijo 1809.\n"
+"\n"
+"Zaradi hrošča v Windowsu bo ta medij povzročil sesutje (\"blue screen of death\" - BSOD) med zagonom, razen če ročno zamenjate datoteko WppRecorder.sys s tisto iz verzije 1803.\n"
+"\n"
+"Ker avtorske pravice za to datoteko pripadajo Microsoftu, Rufus te datoteke ne vključuje in zato tega ne more storiti namesto vas."
+
+#. • MSG_134
+msgid ""
+"Because MBR has been selected for the partition scheme, Rufus can only create a partition up to 2 TB on this media, which will leave %s of disk space unavailable.\n"
+"\n"
+"Are you sure you want to continue?"
+msgstr ""
+"Največja možna velikost particije v particijski shemi MBR je 2 TB. To bo pustilo %s prostora neizkoriščenega.\n"
+"\n"
+"Ali želite nadaljevati?"
+
+#. • MSG_135
+msgid "Version"
+msgstr "Verzija"
+
+#. • MSG_136
+msgid "Release"
+msgstr "Izdaja"
+
+#. • MSG_137
+msgid "Edition"
+msgstr "Različica"
+
+#. • MSG_138
+msgid "Language"
+msgstr "Jezik"
+
+#. • MSG_139
+msgid "Architecture"
+msgstr "Arhitektura"
+
+#. • MSG_140
+msgid "Continue"
+msgstr "Nadaljuj"
+
+#. • MSG_141
+msgid "Back"
+msgstr "Nazaj"
+
+#. • MSG_142
+msgid "Please wait..."
+msgstr "Prosim, počakajte…"
+
+#. • MSG_143
+msgid "Download using a browser"
+msgstr "Prenesi z brskalnikom"
+
+#. • MSG_144
+msgid "Temporarily banned by Microsoft for requesting too many downloads - Please try again later..."
+msgstr "Prenos trenutno ni mogoč zaradi preveč poskusov prenosa - prosim, poskusite znova pozneje…"
+
+#. • MSG_145
+msgid "PowerShell 3.0 or later is required to run this script."
+msgstr "Ta skripta zahteva PowerShell 3.0 ali novejši."
+
+#. • MSG_146
+msgid "Do you want to go online and download it?"
+msgstr "Ali ga želite prenesti?"
+
+#. • MSG_148
+msgid "Running download script..."
+msgstr "Izvajam skripto za prenos…"
+
+#. • MSG_149
+msgid "Download ISO Image"
+msgstr "Prenesi sliko ISO"
+
+#. • MSG_150
+msgid "Type of computer you plan to use this bootable drive with. It is your responsibility to determine whether your target is of BIOS or UEFI type before you start creating the drive, as it may fail to boot otherwise."
+msgstr "Vrsta računalnika, ki jo nameravate zagnati s tem pogonom. To morate ugotoviti, preden ustvarite pogon, drugače zagon morda ne bo uspel."
+
+#. • MSG_151
+#.
+#. You shouldn't translate 'Legacy Mode' as this is an option that usually appears in English in the UEFI settings.
+msgid "'UEFI-CSM' means that the device will only boot in BIOS emulation mode (also known as 'Legacy Mode') under UEFI, and not in native UEFI mode."
+msgstr "'UEFI-CSM' pomeni, da se bo v UEFI s pogona mogoče zagnati le v načinu emulacije BIOS (imenovanem tudi 'Legacy Mode') in ne v običajnem UEFI načinu."
+
+#. • MSG_152
+msgid "'non CSM' means that the device will only boot in native UEFI mode, and not in BIOS emulation mode (also known as 'Legacy Mode')."
+msgstr "'brez CSM' pomeni, da se bo v UEFI s pogona mogoče zagnati le v običajnem UEFI načinu in ne v načinu emulacije BIOS (imenovanem tudi 'Legacy Mode')."
+
+#. • MSG_153
+msgid "Test pattern: 0x%02X"
+msgstr "Testni vzorec: 0x%02X"
+
+#. • MSG_154
+msgid "Test pattern: 0x%02X, 0x%02X"
+msgstr "Testni vzorec: 0x%02X, 0x%02X"
+
+#. • MSG_155
+msgid "Test pattern: 0x%02X, 0x%02X, 0x%02X"
+msgstr "Testni vzorec: 0x%02X, 0x%02X, 0x%02X"
+
+#. • MSG_156
+msgid "Test pattern: 0x%02X, 0x%02X, 0x%02X, 0x%02X"
+msgstr "Testni vzorec: 0x%02X, 0x%02X, 0x%02X, 0x%02X"
+
+#. • MSG_157
+msgid "Sets the target filesystem"
+msgstr "Nastavi ciljni datotečni sistem"
+
+#. • MSG_158
+msgid "Minimum size that a block of data will occupy in the filesystem"
+msgstr "Minimalna velikost, ki jo bo zasedel kos podatkov v datotečnem sistemu"
+
+#. • MSG_159
+msgid ""
+"Use this field to set the drive label.\n"
+"International characters are accepted."
+msgstr ""
+"S tem poljem nastavite oznako pogona.\n"
+"Lahko uporabite mednarodne znake (npr. Č, Š, Ž)."
+
+#. • MSG_160
+msgid "Toggle advanced options"
+msgstr "Prikaže ali skrije dodatne možnosti"
+
+#. • MSG_161
+msgid "Check the device for bad blocks using a test pattern"
+msgstr "Preveri, ali so na napravi slabi bloki z uporabo testnega vzorca"
+
+#. • MSG_162
+msgid "Uncheck this box to use the \"slow\" format method"
+msgstr "To možnost odznačite za \"počasen\" način formatiranja"
+
+#. • MSG_163
+msgid "Method that will be used to create partitions"
+msgstr "Metoda, ki bo uporabljena za ustvarjanje particij"
+
+#. • MSG_164
+msgid "Method that will be used to make the drive bootable"
+msgstr "Metoda, ki bo uporabljena, da bo s pogona mogoče zagnati računalnik"
+
+#. • MSG_165
+msgid "Click to select or download an image..."
+msgstr "Kliknite, da izberete sliko…"
+
+#. • MSG_166
+msgid "Check this box to allow the display of international labels and set a device icon (creates an autorun.inf)"
+msgstr "To možnost izberite, če želite omogočiti prikaz \"mednarodnih\" oznak nosilca in nastaviti ikono za napravo (to ustvari datoteko autorun.inf)."
+
+#. • MSG_167
+msgid "Install an MBR that allows boot selection and can masquerade the BIOS USB drive ID"
+msgstr "Ta možnost namesti zagonski sektor, ki omogoča izbiro pri zagonu in lahko \"zamaskira\" BIOS ID pogona USB"
+
+#. • MSG_168
+msgid ""
+"Try to masquerade first bootable USB drive (usually 0x80) as a different disk.\n"
+"This should only be necessary if you install Windows XP and have more than one disk."
+msgstr ""
+"Poskuša \"zamaskirati\" prvi zagonski pogon USB (navadno 0x80) kot drug disk.\n"
+"Navadno je to potrebno samo, če nameščate Windows XP in imate več kot en disk."
+
+#. • MSG_169
+msgid ""
+"Create an extra hidden partition and try to align partitions boundaries.\n"
+"This can improve boot detection for older BIOSes."
+msgstr ""
+"Ta možnost ustvari dodatno skrito particijo in poskuša poravnati particije.\n"
+"To lahko izboljša zaznavo zagonskih naprav v starih BIOS verzijah."
+
+#. • MSG_170
+msgid "Enable the listing of USB Hard Drive enclosures. USE AT YOUR OWN RISKS!!!"
+msgstr "Omogoči naštevanje trdih diskov, priključenih preko USB. TO JE NA VAŠO ODGOVORNOST!"
+
+#. • MSG_171
+msgid ""
+"Start the formatting operation.\n"
+"This will DESTROY any data on the target!"
+msgstr ""
+"Začne formatirati.\n"
+"To bo UNIČILO vse podatke na ciljni napravi!"
+
+#. • MSG_172
+#.
+#. As of Rufus 3.2, *ALL* downloads from the servers are digitally signed, and their signature is validated using the
+#. public key that is embedded in the application. This message appears in an error dialog if the validation fails.
+msgid "Invalid download signature"
+msgstr "Podpis prenesene datoteke ni pristen"
+
+#. • MSG_173
+msgid "Click to select..."
+msgstr "Kliknite, da izberete…"
+
+#. • MSG_174
+msgid "Rufus - The Reliable USB Formatting Utility"
+msgstr "Rufus - zanesljivi pripomoček za USB formatiranje"
+
+#. • MSG_175
+msgid "Version %d.%d (Build %d)"
+msgstr "Verzija %d.%d (izgradnja %d)"
+
+#. • MSG_176
+msgid "English translation: Pete Batard <mailto:pete@akeo.ie>"
+msgstr "V slovenščino prevedel Matej Horvat <mailto:matej.horvat@guest.arnes.si>"
+
+#. • MSG_177
+msgid "Report bugs or request enhancements at:"
+msgstr "Prijavite hrošče ali zahtevajte izboljšave na:"
+
+#. • MSG_178
+msgid "Additional Copyrights:"
+msgstr "Dodatne avtorske pravice:"
+
+#. • MSG_179
+msgid "Update Policy:"
+msgstr "Politika posodobitev:"
+
+#. • MSG_180
+msgid "If you choose to allow this program to check for application updates, you agree that the following information may be collected on our server(s):"
+msgstr "Če programu dovolite, da preverja za posodobitve, se strinjate, da se na naših strežnikih lahko zbirajo naslednje informacije:"
+
+#. • MSG_181
+msgid "Your operating system's architecture and version"
+msgstr "Arhitektura in verzija vašega operacijskega sistema"
+
+#. • MSG_182
+msgid "The version of the application you use"
+msgstr "Verzija programa, ki jo uporabljate"
+
+#. • MSG_183
+msgid "Your IP address"
+msgstr "Vaš IP naslov"
+
+#. • MSG_184
+msgid "For the purpose of generating private usage statistics, we may keep the information collected, \\b for at most a year\\b0 . However, we will not willingly disclose any of this individual data to third parties."
+msgstr "Za računanje zasebne statistike o uporabi programa bomo morda te informacije obdržali \\b največ eno leto\\b0 . Ne bomo pa jih nalašč predali nikomur drugemu."
+
+#. • MSG_185
+msgid "Update Process:"
+msgstr "Postopek posodobitve:"
+
+#. • MSG_186
+msgid ""
+"Rufus does not install or run background services, therefore update checks are performed only when the main application is running.\\line\n"
+"Internet access is of course required when checking for updates."
+msgstr ""
+"Rufus ne namesti ali zaganja storitev v ozadju, zato se posodobitve prenašajo samo, ko Rufus zaženete sami.\\line\n"
+"Za preverjanje in prenos posodobitev seveda potrebujete povezavo z internetom."
+
+#. • MSG_187
+msgid "Invalid image for selected boot option"
+msgstr "Neveljavna slika za izbran način zagona"
+
+#. • MSG_188
+msgid "The current image doesn't match the boot option selected. Please use a different image or choose a different boot option."
+msgstr "Trenutna slika se ne ujema z izbranim načinom zagona. Prosim, uporabite drugo sliko ali izberite drug način zagona."
+
+#. • MSG_189
+msgid "This ISO image is not compatible with the selected filesystem"
+msgstr "Ta slika ni združljiva z izbranim datotečnim sistemom"
+
+#. • MSG_190
+msgid "Incompatible drive detected"
+msgstr "Zaznana je bila nezdružljiva naprava"
+
+#. • MSG_191
+#.
+#. Used in MSG_235
+msgid "Write pass"
+msgstr "Pisalni prehod"
+
+#. • MSG_192
+#.
+#. Used in MSG_235
+msgid "Read pass"
+msgstr "Bralni prehod"
+
+#. • MSG_193
+msgid "Downloaded %s"
+msgstr "Prenesel %s"
+
+#. • MSG_194
+msgid "Could not download %s"
+msgstr "Ni bilo mogoče prenesti %s"
+
+#. • MSG_195
+#.
+#. Example: "Using embedded version of Grub2 file(s)"
+msgid "Using embedded version of %s file(s)"
+msgstr "Uporabljam vgrajeno verzijo datotek(e) %s."
+
+#. • MSG_196
+msgid ""
+"IMPORTANT: THIS DRIVE USES A NONSTANDARD SECTOR SIZE!\n"
+"\n"
+"Conventional drives use a 512-byte sector size but this drive uses a %d-byte one. In many cases, this means that you will NOT be able to boot from this drive.\n"
+"Rufus can try to create a bootable drive, but there is NO WARRANTY that it will work."
+msgstr ""
+"OPOZORILO: TA NAPRAVA UPORABLJA NESTANDARDNO VELIKOST SEKTORJEV!\n"
+"\n"
+"Večina naprav uporablja 512-bajtne sektorje, ta naprava pa %d-bajtne. V večini primerov to pomeni, da z nje NE boste mogli zagnati računalnika.\n"
+"Rufus lahko poskusi ustvariti zagonski disk, vendar NI ZAGOTOVILA, da bo to delovalo."
+
+#. • MSG_197
+msgid "Nonstandard sector size detected"
+msgstr "Zaznana nestandardna velikost sektorjev"
+
+#. • MSG_198
+msgid "'Windows To Go' can only be installed on a GPT partitioned drive if it has the FIXED attribute set. The current drive was not detected as FIXED."
+msgstr "'Windows To Go' je lahko nameščen le na napravo s particijsko shemo GPT, če naprava ni odstranljiva. Trenutna naprava pravi, da je odstranljiva."
+
+#. • MSG_201
+msgid "Cancelling - Please wait..."
+msgstr "Preklicujem - prosim, počakajte…"
+
+#. • MSG_202
+msgid "Scanning image..."
+msgstr "Preiskujem sliko…"
+
+#. • MSG_203
+msgid "Failed to scan image"
+msgstr "Preiskava slike ni uspela"
+
+#. • MSG_204
+#.
+#. %s is the name of an obsolete Syslinux .c32 module. Example: "Obsolete vesamenu.c32 detected"
+msgid "Obsolete %s detected"
+msgstr "Zaznan je bil zastarel %s"
+
+#. • MSG_205
+#.
+#. Display the name of the image selected. eg: "Using image: en_win7_x64_sp1.iso"
+msgid "Using image: %s"
+msgstr "Uporabljam sliko: %s"
+
+#. • MSG_206
+#.
+#. Example: "Missing ldlinux.c32 file"
+msgid "Missing %s file"
+msgstr "Manjkajoča datoteka %s"
+
+#. • MSG_207
+#.
+#. The name proposed by Windows' Computer Management → Disk Management when you try to format
+#. a drive with an empty label. For an example, see https://rufus.ie/pics/default_name.png.
+msgid "New Volume"
+msgstr "Nov nosilec"
+
+#. • MSG_208
+#.
+#. Singular. Example: "1 device found"
+msgid "%d device found"
+msgstr "%d naprava najdena"
+
+#. • MSG_209
+#.
+#. Plural. Example: "3 devices found"
+msgid "%d devices found"
+msgstr "%d naprav najdenih"
+
+#. • MSG_210
+msgid "READY"
+msgstr "PRIPRAVLJEN"
+
+#. • MSG_211
+msgid "Cancelled"
+msgstr "Preklicano"
+
+#. • MSG_212
+msgid "Failed"
+msgstr "NI USPELO"
+
+#. • MSG_213
+#.
+#. Used when a new update has been downloaded and launched
+msgid "Launching new application..."
+msgstr "Zaganjam novo aplikacijo…"
+
+#. • MSG_214
+msgid "Failed to launch new application"
+msgstr "Ni mogoče zagnati nove aplikacije"
+
+#. • MSG_215
+#.
+#. Example: "Opened some_file.txt"
+msgid "Opened %s"
+msgstr "Odprl %s"
+
+#. • MSG_216
+#.
+#. Example: "Saved rufus.log"
+msgid "Saved %s"
+msgstr "Shranil %s"
+
+#. • MSG_217
+#.
+#. Formatting status (make sure you use a double % to print the percent sign)
+msgid "Formatting: %0.1f%% completed"
+msgstr "Formatiranje: %0.1f%% končano"
+
+#. • MSG_218
+msgid "Creating file system: Task %d/%d completed"
+msgstr "Ustvarjam datotečni sistem: opravilo %d/%d končano"
+
+#. • MSG_219
+msgid "NTFS Fixup: %d%% completed"
+msgstr "Popravki za NTFS: %d%% končano"
+
+#. • MSG_220
+#.
+#. Parameter: the file system and an estimated duration in mins and secs.
+#. Example: "Formatting (UDF) - Estimated duration 3:21..."
+#. If "estimated duration" is too long, just use "estimated" or an abbreviation
+msgid "Formatting (%s) - estimated duration %d:%02d..."
+msgstr "Formatiranje (%s) - predviden čas trajanja %d:%02d…"
+
+#. • MSG_221
+msgid "Setting Label (This may take a while)..."
+msgstr "Nastavljam oznako (to utegne trajati nekaj časa)…"
+
+#. • MSG_222
+#.
+#. Example: "Formatting (FAT32)..."
+msgid "Formatting (%s)..."
+msgstr "Formatiranje (%s)…"
+
+#. • MSG_223
+msgid "NTFS Fixup (Checkdisk)..."
+msgstr "Popravki za NTFS (chkdsk)…"
+
+#. • MSG_224
+msgid "Clearing MBR/PBR/GPT structures..."
+msgstr "Brišem strukture MBR/PBR/GPT…"
+
+#. • MSG_225
+msgid "Requesting disk access..."
+msgstr "Zahtevam dostop do diska…"
+
+#. • MSG_226
+msgid "Analyzing existing boot records..."
+msgstr "Pregledujem obstoječe zagonske vnose…"
+
+#. • MSG_227
+msgid "Closing existing volume..."
+msgstr "Zapiram obstoječi nosilec…"
+
+#. • MSG_228
+msgid "Writing master boot record..."
+msgstr "Zapisujem glavni zagonski sektor (MBR)…"
+
+#. • MSG_229
+msgid "Writing partition boot record..."
+msgstr "Zapisujem particijske podatke…"
+
+#. • MSG_230
+msgid "Copying DOS files..."
+msgstr "Kopiram DOS datoteke…"
+
+#. • MSG_231
+msgid "Copying ISO files..."
+msgstr "Kopiram ISO datoteke…"
+
+#. • MSG_232
+msgid "Win7 EFI boot setup (This may take a while)..."
+msgstr "Pripravljam pogon za zagon Windows 7 na EFI (to lahko traja)…"
+
+#. • MSG_233
+msgid "Finalizing, please wait..."
+msgstr "Zaključujem; prosim, počakajte…"
+
+#. • MSG_234
+#.
+#. Takes a Syslinux version as parameter.
+#. Example: "Installing Syslinux v5.10..."
+msgid "Installing Syslinux %s..."
+msgstr "Nameščam Syslinux %s…"
+
+#. • MSG_235
+#.
+#. Bad blocks status. Example: "Bad Blocks: Write pass 1/2 - 12.34% (0/0/1 errors)"
+#. See MSG_191 & MSG_192 for "Write pass"/"Read pass" translation.
+msgid "Bad Blocks: %s %d/%d - %0.2f%% (%d/%d/%d errors)"
+msgstr "Slabi bloki: %s %d/%d - %0.2f%% (%d/%d/%d napak)"
+
+#. • MSG_236
+msgid "Bad Blocks: Testing with random pattern"
+msgstr "Slabi bloki: testiram z naključnim vzorcem"
+
+#. • MSG_237
+msgid "Bad Blocks: Testing with pattern 0x%02X"
+msgstr "Slabi bloki: testiram z vzorcem 0x%02X"
+
+#. • MSG_238
+#.
+#. Example: "Partitioning (MBR)..."
+msgid "Partitioning (%s)..."
+msgstr "Ustvarjam particije (%s)…"
+
+#. • MSG_239
+msgid "Deleting partitions..."
+msgstr "Brišem particije…"
+
+#. • MSG_240
+#.
+#. This message has to do with the signature validation that Rufus uses when downloading an update.
+msgid ""
+"The signature for the downloaded update can not be validated. This could mean that your system is improperly configured for signature validation or indicate a malicious download.\n"
+"\n"
+"The download will be deleted. Please check the log for more details."
+msgstr ""
+"Ni mogoče potrditi pristnosti podpisa prenesene posodobitve. To lahko pomeni ali, da vaš sistem nima ustreznih nastavitev za preverjanje podpisov, ali vam nekdo poskuša podtakniti zlonamerno vsebino.\n"
+"\n"
+"Prenesena datoteka bo izbrisana. Prosim, preverite zapisnik za več podrobnosti."
+
+#. • MSG_241
+msgid "Downloading: %0.1f%%"
+msgstr "Prenos: %0.1f%%"
+
+#. • MSG_242
+msgid "Failed to download file."
+msgstr "Ni mogoče prenesti datoteke."
+
+#. • MSG_243
+msgid "Checking for Rufus updates..."
+msgstr "Preverjam za posodobitve Rufusa…"
+
+#. • MSG_244
+msgid "Updates: Unable to connect to the internet"
+msgstr "Posodobitve: ni se mogoče povezati na internet"
+
+#. • MSG_245
+msgid "Updates: Unable to access version data"
+msgstr "Posodobitve: ni mogoče dostopati do podatka o verziji"
+
+#. • MSG_246
+msgid "A new version of Rufus is available!"
+msgstr "Nova verzija Rufusa je na voljo!"
+
+#. • MSG_247
+msgid "No new version of Rufus was found"
+msgstr "Najdena ni bila nobena novejša verzija"
+
+#. • MSG_248
+msgid "Application registry keys successfully deleted"
+msgstr "Registrski ključi uspešno izbrisani"
+
+#. • MSG_249
+msgid "Failed to delete application registry keys"
+msgstr "Brisanje registrskih ključev ni uspelo"
+
+#. • MSG_250
+#.
+#. Example: "Fixed disk detection enabled", "ISO size check disabled", etc.
+msgid "%s enabled"
+msgstr "%s: omogočeno"
+
+#. • MSG_251
+msgid "%s disabled"
+msgstr "%s: onemogočeno"
+
+#. • MSG_252
+msgid "Size checks"
+msgstr "Preverjanje velikosti"
+
+#. • MSG_253
+msgid "Hard disk detection"
+msgstr "Zaznava trdih diskov"
+
+#. • MSG_254
+msgid "Force large FAT32 formatting"
+msgstr "Prisili véliko formatiranje FAT32"
+
+#. • MSG_255
+msgid "NoDriveTypeAutorun will be deleted on exit"
+msgstr "NoDriveTypeAutorun bo izbrisan ob izhodu"
+
+#. • MSG_256
+msgid "Fake drive detection"
+msgstr "Zaznava lažnih pogonov"
+
+#. • MSG_257
+msgid "Joliet support"
+msgstr "Podpora za Joliet"
+
+#. • MSG_258
+msgid "Rock Ridge support"
+msgstr "Podpora za Rock Ridge"
+
+#. • MSG_259
+msgid "Force update"
+msgstr "Prisili posodobitev"
+
+#. • MSG_260
+msgid "NTFS compression"
+msgstr "NTFS stiskanje"
+
+#. • MSG_261
+msgid "Writing image: %0.1f%% completed"
+msgstr "Zapisujem sliko: %0.1f%%"
+
+#. • MSG_262
+#.
+#. Cheat mode message to disable ISO Support, so that only DD images can be opened
+msgid "ISO Support"
+msgstr "Podpora za slike ISO"
+
+#. • MSG_263
+#.
+#. Cheat mode to force legacy size units, where 1 KB is 1024 bytes and NOT that fake 1000 bytes abomination!
+msgid "Use PROPER size units"
+msgstr "Uporabi enote PRAVIH velikosti"
+
+#. • MSG_264
+msgid "Deleting directory '%s'"
+msgstr "Brišem imenik %s"
+
+#. • MSG_265
+msgid "VMWare disk detection"
+msgstr "Zaznavanje diskov VMware"
+
+#. • MSG_266
+msgid "Dual UEFI/BIOS mode"
+msgstr "Dvojni način BIOS/UEFI"
+
+#. • MSG_267
+msgid "Applying Windows image: %0.1f%% completed"
+msgstr "Nameščam sliko za Windows: %0.1f%%"
+
+#. • MSG_268
+msgid "Applying Windows image..."
+msgstr "Nameščam sliko za Windows…"
+
+#. • MSG_269
+msgid "Preserve timestamps"
+msgstr "Ohranjanje časov datotek"
+
+#. • MSG_270
+msgid "USB debug"
+msgstr "Razhroščevanje USB"
+
+#. • MSG_271
+msgid "Computing image checksums: %0.1f%% completed"
+msgstr "Računam zgoščene vrednosti: %0.1f%%"
+
+#. • MSG_272
+msgid "Compute the MD5, SHA1 and SHA256 checksums for the selected image"
+msgstr "Izračuna zgoščene vrednosti MD5, SHA1 in SHA256 za izbrano sliko"
+
+#. • MSG_273
+msgid "Change the application language"
+msgstr "Spremeni jezik aplikacije"
+
+#. • MSG_274
+msgid "ISOHybrid image detected"
+msgstr "Zaznana je bila slika ISOHybrid"
+
+#. • MSG_275
+#.
+#. '%s' will be replaced with your translations for MSG_036 ("ISO Image") and MSG_095 ("DD Image")
+msgid ""
+"The image you have selected is an 'ISOHybrid' image. This means it can be written either in %s (file copy) mode or %s (disk image) mode.\n"
+"Rufus recommends using %s mode, so that you always have full access to the drive after writing it.\n"
+"However, if you encounter issues during boot, you can try writing this image again in %s mode.\n"
+"\n"
+"Please select the mode that you want to use to write this image:"
+msgstr ""
+"Slika, ki ste jo izbrali, je vrste \"ISOHybrid\". To pomeni, da jo lahko zapišete kot %s (s kopiranjem datotek) ali pa kot %s (s kopiranjem cele slike).\n"
+"Rufus priporoča, da jo zapišete kot %s, tako da boste imeli poln dostop do nosilca, ko bo slika zapisana.\n"
+"Če opazite težave pri zaganjanju, pa jo lahko še enkrat zapišete kot %s..\n"
+"\n"
+"Izberite, kako jo želite zapisati:"
+
+#. • MSG_276
+#.
+#. '%s' will be replaced with your translation for MSG_036 ("ISO Image")
+msgid "Write in %s mode (Recommended)"
+msgstr "Zapiši kot %s (priporočeno)"
+
+#. • MSG_277
+#.
+#. '%s' will be replaced with your translation for MSG_095 ("DD Image")
+msgid "Write in %s mode"
+msgstr "Zapiši kot %s"
+
+#. • MSG_278
+msgid "Checking for conflicting processes..."
+msgstr "Preverjam, ali se izvajajo konfliktni procesi…"
+
+#. • MSG_279
+msgid "Non bootable"
+msgstr "Nezagonska"
+
+#. • MSG_280
+msgid "Disk or ISO image"
+msgstr "Slika diska oz. ISO"
+
+#. • MSG_281
+msgid "%s (Please select)"
+msgstr "%s (izberite)"
+
+#. • MSG_282
+msgid "Exclusive USB drive locking"
+msgstr "Ekskluzivno zaklepanje nosilca USB"
+
+#. • MSG_283
+msgid "Invalid signature"
+msgstr "Neveljaven podpis"
+
+#. • MSG_284
+msgid "The downloaded executable is missing a digital signature."
+msgstr "Prenesena datoteka nima digitalnega podpisa."
+
+#. • MSG_285
+msgid ""
+"The downloaded executable is signed by '%s'.\n"
+"This is not a signature we recognize and could indicate some form of malicious activity...\n"
+"Are you sure you want to run this file?"
+msgstr ""
+"Oseba, ki je podpisala preneseno datoteko, je '%s'.\n"
+"Ta podpis se ne ujema s pričakovanim, kar lahko pomeni, da je to zlonamerna datoteka, ki jo vam je nekdo podtaknil.\n"
+"Ali ste prepričani, da jo želite zagnati?"
+
+#. • MSG_286
+msgid "Zeroing drive: %0.1f%% completed"
+msgstr "Zapolnjujem nosilec z ničlami: %0.1f%%"
+
+#. • MSG_287
+msgid "Detection of non-USB removable drives"
+msgstr "Zaznava neodstranljivih nosilcev"
+
+#. • MSG_288
+msgid "Missing elevated privileges"
+msgstr "Nimate dovolj pravic"
+
+#. • MSG_289
+msgid "This application can only run with elevated privileges"
+msgstr "Za uporabo te aplikacije potrebujete dodatne pravice"
+
+#. • MSG_290
+msgid "File Indexing"
+msgstr "Indeksiranje diska"
+
+#. • MSG_291
+msgid "Version selection"
+msgstr "Izbira verzije"
+
+#. • MSG_292
+msgid "Please select the version of Windows you want to install:"
+msgstr "Izberite, katero verzijo operacijskega sistema Windows želite namestiti:"
+
+#. • MSG_293
+msgid "Unsupported Windows version"
+msgstr "Operacijski sistem ni podprt"
+
+#. • MSG_294
+msgid "This version of Windows is no longer supported by Rufus."
+msgstr "Rufus več ne podpira tega operacijskega sistema."
+
+#. • MSG_295
+msgid "Warning: Unofficial version"
+msgstr "Opozorilo: neuradna verzija"
+
+#. • MSG_296
+msgid ""
+"This version of Rufus was not produced by its official developer(s).\n"
+"\n"
+"Are you sure you want to run it?"
+msgstr ""
+"Te verzije Rufusa ni izdelal njegov uradni razvijalec.\n"
+"\n"
+"Ali ste prepričani, da jo želite uporabljati?"
+
+#. • MSG_297
+msgid "Truncated ISO detected"
+msgstr "Odrezana datoteka ISO"
+
+#. • MSG_298
+msgid ""
+"The ISO file you have selected does not match its declared size: %s of data is missing!\n"
+"\n"
+"If you obtained this file from the Internet, you should try to download a new copy and verify that the MD5 or SHA checksums match the official ones.\n"
+"\n"
+"Note that you can compute the MD5 or SHA in Rufus by clicking the (✓) button."
+msgstr ""
+"Datoteka ISO, ki ste jo izbrali, ni pričakovane velikosti: %s njenih podatkov manjka.\n"
+"\n"
+"Če ste jo prenesli z interneta, jo prenesite še enkrat in preverite, ali se vrednosti MD5 in SHA ujemata z uradnima.\n"
+"\n"
+"V Rufusu ju lahko izračunate z gumbom (✓)."
+
+#. • MSG_299
+msgid "Timestamp validation error"
+msgstr "Napaka pri preverjanju časovnega žiga"
+
+#. • MSG_300
+msgid ""
+"Rufus could not validate that the timestamp of the downloaded update is more recent than the one for the current executable.\n"
+"\n"
+"In order to prevent potential attack scenarios, the update process has been aborted and the download will be deleted. Please check the log for more details."
+msgstr ""
+"Ni bilo mogoče ugotoviti, da je časovni žig prenesene posodobitve res novejši od vaše trenutne verzije Rufusa.\n"
+"\n"
+"Da ne bi prišlo do potencialnega napada, je bil postopek posodobitve prekinjen, prenesena posodobitev pa bo izbrisana. Za več podrobnosti preverite zapisnik."
+
+#. • MSG_301
+msgid "Show application settings"
+msgstr "Pokaže nastavitve aplikacije"
+
+#. • MSG_302
+msgid "Show information about this application"
+msgstr "Pokaže informacije o tej aplikaciji"
+
+#. • MSG_303
+msgid "Show the log"
+msgstr "Pokaže zapisnik"
+
+#. • MSG_304
+msgid "Create a disk image of the selected device"
+msgstr "Ustvari sliko izbrane naprave"
+
+#. • MSG_305
+msgid "Use this option to indicate whether you want to use this device to install Windows on another disk, or if you want to run Windows directly from this drive (Windows To Go)."
+msgstr "Tu izberete, ali želite uporabiti to napravo, da bi namestili operacijski sistem Windows na drug disk, ali da bi ga neposredno izvajali s tega pogona (Windows To Go)."
+
+#. • MSG_306
+#.
+#. You can see this status message by pressing <Ctrl>-<Alt>-<Z> and then selecting START.
+#. It's the same as MSG_286 but with a process that *may* be faster, hence the name.
+msgid "Fast-zeroing drive: %0.1f%% completed"
+msgstr "Hitro zapolnjujem nosilec z ničlami: %0.1f%%"
