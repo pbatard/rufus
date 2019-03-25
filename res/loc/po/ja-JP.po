@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 3.5\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
 "POT-Creation-Date: 2019-03-24 23:31+0900\n"
-"PO-Revision-Date: 2019-03-25 13:54+0000\n"
+"PO-Revision-Date: 2019-03-25 16:15+0000\n"
 "Language: ja_JP\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -679,7 +679,7 @@ msgid ""
 "Do you want to visit the 7-zip download page?"
 msgstr ""
 "利用中のこの環境では WIM ファイルからファイルを抽出できません。EFI でのブートを必要とする Windows 7 と Windows Vista 用の USB ドライブを作るためには、WIM ファイルを展開できる必要があります。最近のバージョンの 7-Zip で展開することができます。\n"
-"7-Zip のダウンロードページを開きますか?"
+"7-Zip のダウンロード ページを開きますか?"
 
 #. • MSG_103
 msgid "Download %s?"
@@ -872,7 +872,7 @@ msgid ""
 "For details on why this is necessary, see the 'More Information' button below."
 msgstr ""
 "UEFI:NTFS ブートローダーを使用するメディアを作成しました。 このメディアを起動するには、セキュアブートを無効にする必要があります。\n"
-"この変更が必要な理由については、下の「詳細情報」ボタンから確認してください。"
+"この変更が必要な理由については、下の [詳細情報] から確認してください。"
 
 #. • MSG_130
 #, fuzzy
@@ -901,9 +901,9 @@ msgid ""
 msgstr ""
 "1809 バージョンの ISO を使用して Windows To Go のメディアを作成しようとしていることを検出しました。\n"
 "\n"
-"このメディアは、\"WppRecorder.sys\" を 1803 バージョンのファイルに手動で置き換えない限り、Windowsのブート中にクラッシュ (ブルースクリーン) します。これは *Microsoftのバグ* によるものです。\n"
+"このメディアは、“WppRecorder.sys” を 1803 バージョンのファイルに手動で置き換えない限り、Windowsのブート中にクラッシュ (ブルースクリーン) します。これは * Microsoftのバグ * によるものです。\n"
 "\n"
-"\"WppRecorder.sys\" は Microsoft の著作権で保護されたファイルであり、アプリケーションにファイルのコピーを合法的に埋め込めないため、Rufus が自動的にこの不具合を修正することはできません。"
+"“WppRecorder.sys” は Microsoft の著作権で保護されたファイルであり、アプリケーションにファイルのコピーを合法的に埋め込めないため、Rufus が自動的にこの不具合を修正することはできません。"
 
 #. • MSG_134
 #, fuzzy
@@ -912,7 +912,7 @@ msgid ""
 "\n"
 "Are you sure you want to continue?"
 msgstr ""
-"パーティション構成に MBR が選択されているため、Rufus はこのメディア上に最大 2TB のパーティションしか作成できません。そのため、％s のディスク容量が使用できなくなります。\n"
+"パーティション構成に MBR が選択されているため、Rufus はこのメディア上に最大 2 TB のパーティションしか作成できません。そのため、％s のディスク容量が使用できなくなります。\n"
 "\n"
 "続けますか?"
 
@@ -957,9 +957,8 @@ msgid "Please wait..."
 msgstr "お待ちください..."
 
 #. • MSG_143
-#, fuzzy
 msgid "Download using a browser"
-msgstr "ブラウザを使ってダウンロードする"
+msgstr "ブラウザーを使ってダウンロードする"
 
 #. • MSG_144
 #, fuzzy
@@ -977,9 +976,8 @@ msgid "Do you want to go online and download it?"
 msgstr "ネットワークに接続してダウンロードしますか?"
 
 #. • MSG_148
-#, fuzzy
 msgid "Running download script..."
-msgstr "ダウンロードスクリプトを実行中..."
+msgstr "ダウンロード スクリプトを実行中..."
 
 #. • MSG_149
 msgid "Download ISO Image"
@@ -1060,7 +1058,7 @@ msgstr "イメージを選択するか、イメージをダウンロードする
 
 #. • MSG_166
 msgid "Check this box to allow the display of international labels and set a device icon (creates an autorun.inf)"
-msgstr "機能拡張されたラベルの表示とデバイス アイコンの設定を有効するにはこのチェック ボックスをオンにします。\"autorun.inf\" を作成します。"
+msgstr "機能拡張されたラベルの表示とデバイス アイコンの設定を有効するにはこのチェック ボックスをオンにします。“autorun.inf” を作成します。"
 
 #. • MSG_167
 msgid "Install an MBR that allows boot selection and can masquerade the BIOS USB drive ID"
@@ -1201,7 +1199,7 @@ msgstr "%s はダウンロードできませんでした。"
 #.
 #. Example: "Using embedded version of Grub2 file(s)"
 msgid "Using embedded version of %s file(s)"
-msgstr "内蔵している %sファイルを使用します。"
+msgstr "内蔵している %s ファイルを使用します。"
 
 #. • MSG_196
 msgid ""
@@ -1212,7 +1210,7 @@ msgid ""
 msgstr ""
 "重要: このドライブは標準以外のセクタ サイズを使用しています!\n"
 "\n"
-"従来のドライブは、512バイトのセクタ サイズを使用しますが、このドライブは%dバイトを使用しています。多くの場合、このようなドライブからブートできません。\n"
+"従来のドライブは、512 バイトのセクタ サイズを使用しますが、このドライブは %d バイトを使用しています。多くの場合、このようなドライブからブートできません。\n"
 "このままブート用ドライブを作成しようとしますが、動作保証はありません。"
 
 #. • MSG_197
@@ -1221,7 +1219,7 @@ msgstr "標準以外のセクタサイズが検出されました。"
 
 #. • MSG_198
 msgid "'Windows To Go' can only be installed on a GPT partitioned drive if it has the FIXED attribute set. The current drive was not detected as FIXED."
-msgstr "“FIXED”属性が設定されている場合に限り、GPTパーティションのドライブにWindows To Goをインストールすることができます。 現在のドライブはFIXEDとして検出されませんでした。"
+msgstr "“FIXED” 属性が設定されている場合に限り、 GPT パーティションのドライブに Windows To Go をインストールすることができます。 現在のドライブは FIXED として検出されませんでした。"
 
 #. • MSG_201
 msgid "Cancelling - Please wait..."
@@ -1387,7 +1385,7 @@ msgstr "最終処理中です。もう間もなく終わります..."
 #. Takes a Syslinux version as parameter.
 #. Example: "Installing Syslinux v5.10..."
 msgid "Installing Syslinux %s..."
-msgstr "Syslinux %sをインストール中..."
+msgstr "Syslinux %s をインストール中..."
 
 #. • MSG_235
 #.
