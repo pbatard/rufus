@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: 3.2\n"
+"Project-Id-Version: 3.5\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2018-08-23 03:34+0900\n"
-"PO-Revision-Date: 2018-08-26 19:44+0100\n"
+"POT-Creation-Date: 2019-03-24 23:31+0900\n"
+"PO-Revision-Date: 2019-03-25 13:54+0000\n"
 "Language: ja_JP\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Rufus-LCID: 0x0411\n"
 "Last-Translator: \n"
 "Language-Team: \n"
-"X-Generator: Poedit 2.1.1\n"
+"X-Generator: Poedit 2.2.1\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -45,14 +45,14 @@ msgstr "ターゲット システム"
 
 #. • IDD_DIALOG → IDC_LIST_USB_HDD
 msgid "List USB Hard Drives"
-msgstr "USB接続のHDDを一覧表示"
+msgstr "USB 接続の HDD を一覧表示"
 
 #. • IDD_DIALOG → IDC_OLD_BIOS_FIXES
 #.
 #. It is acceptable to drop the parenthesis () if you are running out of space
 #. as there is a tooltip (MSG_169) providing these details.
 msgid "Add fixes for old BIOSes (extra partition, align, etc.)"
-msgstr "古いBIOSのために修正を追加 (パーティションの拡張、並び替え、その他)"
+msgstr "古い BIOS のために修正を追加 (パーティションの拡張、並び替え、その他)"
 
 #. • IDD_DIALOG → IDC_RUFUS_MBR
 #.
@@ -60,7 +60,7 @@ msgstr "古いBIOSのために修正を追加 (パーティションの拡張、
 #. Rufus can install it's own custom MBR (the Rufus MBR), which also allows users to
 #. specify a custom disk ID for the BIOS. The tooltip for this control is MSG_167.
 msgid "Use Rufus MBR with BIOS ID"
-msgstr "BIOS IDでRufusのMBRを作成"
+msgstr "BIOS ID で Rufus の MBR を作成"
 
 #. • IDD_DIALOG → IDS_FORMAT_OPTIONS_TXT
 msgid "Format Options"
@@ -109,7 +109,7 @@ msgstr "スタート"
 
 #. • IDD_ABOUTBOX → IDD_ABOUTBOX
 msgid "About Rufus"
-msgstr "Rufusについて"
+msgstr "Rufus について"
 
 #. • IDD_ABOUTBOX → IDC_ABOUT_LICENSE
 msgid "License"
@@ -117,11 +117,11 @@ msgstr "ライセンス"
 
 #. • IDD_ABOUTBOX → IDOK
 msgid "OK"
-msgstr "OK"
+msgstr ""
 
 #. • IDD_LICENSE → IDD_LICENSE
 msgid "Rufus License"
-msgstr "Rufusのライセンス"
+msgstr "Rufus のライセンス"
 
 #. • IDD_NOTIFICATION → IDC_MORE_INFO
 msgid "More information"
@@ -200,20 +200,20 @@ msgid ""
 "Another Rufus application is running.\n"
 "Please close the first application before running another one."
 msgstr ""
-"Rufusは既に実行されています。\n"
-"もう一度実行する前に既に起動中のRufusを終了してください。"
+"Rufus は既に実行されています。\n"
+"もう一度実行する前に既に起動中の Rufus を終了してください。"
 
 #. • MSG_003
 msgid ""
 "WARNING: ALL DATA ON DEVICE '%s' WILL BE DESTROYED.\n"
 "To continue with this operation, click OK. To quit click CANCEL."
 msgstr ""
-"警告: デバイス“%s”のデータは消去されます。\n"
+"警告: デバイス “%s” のデータは消去されます。\n"
 "この操作を続けるには [OK] を、終了する場合は [キャンセル] をクリックしてください。"
 
 #. • MSG_004
 msgid "Rufus update policy"
-msgstr "Rufusの更新ポリシー"
+msgstr "Rufus の更新ポリシー"
 
 #. • MSG_005
 msgid "Do you want to allow Rufus to check for application updates online?"
@@ -288,31 +288,31 @@ msgstr "バイト"
 #.
 #. *Short* version of the kilobyte size suffix
 msgid "KB"
-msgstr "KB"
+msgstr ""
 
 #. • MSG_022
 #.
 #. *Short* version of the megabyte size suffix
 msgid "MB"
-msgstr "MB"
+msgstr ""
 
 #. • MSG_023
 #.
 #. *Short* version of the gigabyte size suffix
 msgid "GB"
-msgstr "GB"
+msgstr ""
 
 #. • MSG_024
 #.
 #. *Short* version of the terabyte size suffix
 msgid "TB"
-msgstr "TB"
+msgstr ""
 
 #. • MSG_025
 #.
 #. *Short* version of the pentabyte size suffix
 msgid "PB"
-msgstr "PB"
+msgstr ""
 
 #. • MSG_027
 msgid "kilobytes"
@@ -334,15 +334,15 @@ msgstr "%s (規定)"
 
 #. • MSG_031
 msgid "BIOS (or UEFI-CSM)"
-msgstr "BIOS (またはUEFI-CSM)"
+msgstr "BIOS (または UEFI-CSM)"
 
 #. • MSG_032
 msgid "UEFI (non CSM)"
-msgstr "UEFI (CSM無効)"
+msgstr "UEFI (CSM 無効)"
 
 #. • MSG_033
 msgid "BIOS or UEFI"
-msgstr "BIOSまたはUEFI"
+msgstr "BIOS または UEFI"
 
 #. • MSG_034
 #.
@@ -359,7 +359,7 @@ msgstr "%d パス %s"
 
 #. • MSG_036
 msgid "ISO Image"
-msgstr "ISOイメージ"
+msgstr "ISO イメージ"
 
 #. • MSG_037
 msgid "Application"
@@ -391,7 +391,7 @@ msgstr "ファイルダウンロード"
 
 #. • MSG_045
 msgid "USB Storage Device (Generic)"
-msgstr "USB記憶装置 (汎用)"
+msgstr "USB 記憶装置 (汎用)"
 
 #. • MSG_046
 msgid "%s (Disk %d) [%s]"
@@ -477,7 +477,7 @@ msgstr "書き込みエラー"
 
 #. • MSG_066
 msgid "Installation failure"
-msgstr "インストールに失敗しました。"
+msgstr "インストールに失敗"
 
 #. • MSG_067
 msgid "Could not open media. It may be in use by another process. Please re-plug the media and try again."
@@ -507,11 +507,11 @@ msgstr "不良ブロックの検出処理が完了しませんでした。"
 
 #. • MSG_073
 msgid "ISO image scan failure."
-msgstr "ISOイメージのスキャンに失敗しました。"
+msgstr "ISO イメージのスキャンに失敗しました。"
 
 #. • MSG_074
 msgid "ISO image extraction failure."
-msgstr "ISOイメージからの抽出に失敗しました。"
+msgstr "ISO イメージからの抽出に失敗しました。"
 
 #. • MSG_075
 msgid "Unable to remount volume."
@@ -527,7 +527,7 @@ msgstr "ドライブ レターを割り振れません。"
 
 #. • MSG_078
 msgid "Can't mount GUID volume."
-msgstr "GUIDボリュームをマウントできません。"
+msgstr "GUID ボリュームをマウントできません。"
 
 #. • MSG_079
 msgid "The device is not ready."
@@ -541,9 +541,9 @@ msgid ""
 "\n"
 "We recommend that you let Windows finish, to avoid corruption. But if you grow tired of waiting, you can just unplug the device..."
 msgstr ""
-"Windowsが内部バッファからUSBデバイスに書き込み中であることを検出しました。\n"
+"Windows が内部バッファから USB デバイスに書き込み中であることを検出しました。\n"
 "\n"
-"特に大きなファイルの場合、USBデバイスのスピードによっては、この操作に時間がかかるかもしれません。\n"
+"特に大きなファイルの場合、 USB デバイスのスピードによっては、この操作に時間がかかるかもしれません。\n"
 "\n"
 "ファイル破損を避けるためには、作業完了まで待つことを推奨しますが、デバイスを取り外すこともできます。"
 
@@ -553,7 +553,7 @@ msgstr "非対応のイメージです。"
 
 #. • MSG_082
 msgid "This image is either non-bootable, or it uses a boot or compression method that is not supported by Rufus..."
-msgstr "このイメージはブート非対応あるいはRufusでサポートされていないブート方式、圧縮方式を使用しています。"
+msgstr "このイメージはブート非対応あるいは Rufus でサポートされていないブート方式、圧縮方式を使用しています。"
 
 #. • MSG_083
 msgid "Replace %s?"
@@ -571,7 +571,7 @@ msgid ""
 "\n"
 "Note: The new file will be downloaded in the current directory and once a '%s' exists there, it will be reused automatically."
 msgstr ""
-"このISOは“%s”の古いバージョンを使用するようです。\n"
+"この ISO は “%s” の古いバージョンを使用するようです。\n"
 "ブートメニューが正しく表示できないかもしれません。\n"
 "\n"
 "この問題を解決するために新しいバージョンをダウンロードできます。\n"
@@ -579,11 +579,12 @@ msgstr ""
 "- 既存のISOを変更しない場合は [いいえ] をクリックしてください。\n"
 "どうしたらよいかわからない場合は [はい] をクリックすることを推奨します。\n"
 "\n"
-"注意: 新しいファイルは現在のフォルダーにダウンロードされます。すでに“%s”のファイルがある場合は自動的に再利用します。"
+"注意: 新しいファイルは現在のフォルダーにダウンロードされます。すでに “%s” のファイルがある場合は自動的に再利用します。"
 
 #. • MSG_085
-msgid "Downloading '%s'"
-msgstr "“%s”をダウンロード中"
+#, fuzzy
+msgid "Downloading %s"
+msgstr "%s をダウンロード中"
 
 #. • MSG_086
 msgid "No image selected"
@@ -598,7 +599,7 @@ msgstr "イメージが選択されていません。"
 #. If you prefer, it's okay to use "type" or "device" instead of "NAND" (e.g. "for TLC type").
 #. See also MSG_035.
 msgid "for %s NAND"
-msgstr "(%s NAND用)"
+msgstr "(%s NAND 用)"
 
 #. • MSG_088
 msgid "Image is too big"
@@ -610,11 +611,11 @@ msgstr "イメージが選択したターゲットには大きすぎます。"
 
 #. • MSG_090
 msgid "Unsupported ISO"
-msgstr "非対応のISOです。"
+msgstr "非対応の ISO です。"
 
 #. • MSG_091
 msgid "When using UEFI Target Type, only EFI bootable ISO images are supported. Please select an EFI bootable ISO or set the Target Type to BIOS."
-msgstr "UEFIターゲット タイプを使用する場合、EFIでブート可能なISOだけがサポートされています。EFIでブート可能なISOを選択するか、BIOSの設定でターゲット タイプを設定し直してください。"
+msgstr "UEFI ターゲット タイプを使用する場合、EFI でブート可能な ISO だけがサポートされています。 EFI でブート可能な ISO を選択するか、 BIOS の設定でターゲット タイプを設定し直してください。"
 
 #. • MSG_092
 msgid "Unsupported filesystem"
@@ -628,7 +629,7 @@ msgid ""
 msgstr ""
 "重要: このドライブは複数のパーティションを含んでいます!! \n"
 "\n"
-"Windowsが認識できないあるいはリスト化できないパーティションやボリュームが存在する可能性があります。続行する場合、これらのパーティションでのデータ損失の責任はユーザーにあります。"
+"Windows が認識できないあるいはリスト化できないパーティションやボリュームが存在する可能性があります。続行する場合、これらのパーティションでのデータ損失の責任はユーザーにあります。"
 
 #. • MSG_094
 msgid "Multiple partitions detected"
@@ -636,15 +637,15 @@ msgstr "複数のパーティションを検出しました。"
 
 #. • MSG_095
 msgid "DD Image"
-msgstr "DDイメージ"
+msgstr "DD イメージ"
 
 #. • MSG_096
 msgid "The file system currently selected can not be used with this type of ISO. Please select a different file system or use a different ISO."
-msgstr "現在の選択されたファイル システムではこのISOを使用することができません。別のファイル システムかISOを使用してください。"
+msgstr "現在の選択されたファイル システムではこの ISO を使用することができません。別のファイル システムか別の ISO を使用してください。"
 
 #. • MSG_097
 msgid "'%s' can only be applied if the file system is NTFS."
-msgstr "ファイル システムがNTFSの場合のみ“%s”は適用可能です。"
+msgstr "ファイル システムが NTFS の場合のみ “%s” は適用可能です。"
 
 #. • MSG_098
 msgid ""
@@ -654,11 +655,11 @@ msgid ""
 "\n"
 "Note: The 'FIXED/REMOVABLE' attribute is a hardware property that can only be changed using custom tools from the drive manufacturer. However those tools are ALMOST NEVER provided to the public..."
 msgstr ""
-"注意: Windows To Goをインストールしようとしていますが、ターゲット ドライブは“FIXED”属性を持ちません。“REMOVABLE”属性があるドライブで動作するようにMicrosoftはWindowsを設計していないため、Windowsのブート中にフリーズする可能性が高くなります。\n"
+"注意: Windows To Go をインストールしようとしていますが、ターゲット ドライブは “FIXED” 属性を持ちません。“REMOVABLE” 属性があるドライブで動作するように Microsoft は Windows を設計していないため、Windows のブート中にフリーズする可能性が高くなります。\n"
 "\n"
 "続けてよろしいですか?\n"
 "\n"
-"注意: “FIXED/REMOVABLE”属性は、ハードウェア固有のプロパティで製造メーカーからのツール等でのみ変更可能ですが、残念ながらそのようなツールは全くと言っていいほど公開されていません。"
+"注意: “FIXED/REMOVABLE” 属性は、ハードウェア固有のプロパティで製造メーカーからのツール等でのみ変更可能ですが、残念ながらそのようなツールは全くと言っていいほど公開されていません。"
 
 #. • MSG_099
 msgid "Filesystem limitation"
@@ -666,23 +667,23 @@ msgstr "ファイル システム制限"
 
 #. • MSG_100
 msgid "This ISO image contains a file larger than 4GB, which is more than the maximum size allowed for a FAT or FAT32 file system."
-msgstr "ISOイメージに4GBより大きなファイルがあります。FAT、FAT32ファイル システムで使用可能な最大のサイズを超えています。"
+msgstr "ISO イメージに 4 GB より大きなファイルがあります。FAT、FAT32 ファイル システムで使用可能な最大のサイズを超えています。"
 
 #. • MSG_101
 msgid "Missing WIM support"
-msgstr "WIMのサポートがありません"
+msgstr "WIM のサポートがありません"
 
 #. • MSG_102
 msgid ""
 "Your platform cannot extract files from WIM archives. WIM extraction is required to create EFI bootable Windows 7 and Windows Vista USB drives. You can fix that by installing a recent version of 7-Zip.\n"
 "Do you want to visit the 7-zip download page?"
 msgstr ""
-"利用中のこの環境ではWIMファイルからファイルを抽出できません。EFIでのブートを必要とするWindows 7とWindows Vista用のUSBドライブを作るためには、WIMファイルを展開できる必要があります。最近のバージョンの7-Zipで展開することができます。\n"
-"7-Zipのダウンロードページへ行きますか?"
+"利用中のこの環境では WIM ファイルからファイルを抽出できません。EFI でのブートを必要とする Windows 7 と Windows Vista 用の USB ドライブを作るためには、WIM ファイルを展開できる必要があります。最近のバージョンの 7-Zip で展開することができます。\n"
+"7-Zip のダウンロードページを開きますか?"
 
 #. • MSG_103
 msgid "Download %s?"
-msgstr "%sをダウンロードしますか?"
+msgstr "%s をダウンロードしますか?"
 
 #. • MSG_104
 #.
@@ -698,14 +699,14 @@ msgid ""
 "\n"
 "Note: The file will be downloaded in the current directory and once a '%s' exists there, it will be reused automatically."
 msgstr ""
-"%sまたはそれ以後のバージョンは“%s”ファイルがインストールされている必要があります。\n"
-"このファイルは100KBより大きいのでRufusに内蔵していません。%sにISOイメージが常時あるためです。\n"
+"%s またはそれ以後のバージョンは “%s” ファイルがインストールされている必要があります。\n"
+"このファイルは 100 KB より大きいので Rufus に内蔵していません。%s に ISO イメージが常時あるためです。\n"
 "\n"
-"Rufusで不足しているファイルをダウンロードすることができます。\n"
+"Rufus で不足しているファイルをダウンロードすることができます。\n"
 "- インターネットに接続し、ファイルをダウンロードするには [はい] を選択してください。\n"
 "- 後でファイルをドライブに置いて手動でコピーする場合は [いいえ] を選択してください。\n"
 "\n"
-"注意:ファイルは現在のディレクトリへダウンロードされます。“%s”が既にディレクトリにある場合、自動的に再使用します。"
+"注意:ファイルは現在のディレクトリへダウンロードされます。“%s” が既にディレクトリにある場合、自動的に再使用します。"
 
 #. • MSG_105
 msgid ""
@@ -725,7 +726,7 @@ msgstr "全てのファイル"
 
 #. • MSG_108
 msgid "Rufus log"
-msgstr "Rufusのログ"
+msgstr "Rufus のログ"
 
 #. • MSG_109
 msgid "0x%02X (Disk %d)"
@@ -739,8 +740,8 @@ msgid ""
 "MS-DOS cannot boot from a drive using a 64 kilobytes Cluster size.\n"
 "Please change the Cluster size or use FreeDOS."
 msgstr ""
-"MS-DOSはクラスター サイズが64キロバイトのドライブからブートできません。\n"
-"クラスター サイズを変更、またはFreeDOSを使用してください。"
+"MS-DOS はクラスター サイズが 64 キロバイトのドライブからブートできません。\n"
+"クラスター サイズを変更、または FreeDOS を使用してください。"
 
 #. • MSG_111
 msgid "Incompatible Cluster size"
@@ -750,11 +751,11 @@ msgstr "互換性のないクラスター サイズ"
 #.
 #. "%d:%02d" is a duration (mins:secs)
 msgid "Formatting a large UDF volumes can take a lot of time. At USB 2.0 speeds, the estimated formatting duration is %d:%02d, during which the progress bar will appear frozen. Please be patient!"
-msgstr "大きなUDFボリュームをフォーマットするには時間がかかります。USB2.0接続の場合、フォーマット完了までの推定時間は%d:%02dです。この間、プログレス バーは進んでいないように見えます。終了までしばらくお待ちください。"
+msgstr "大きな UDF ボリュームをフォーマットするには時間がかかります。USB2.0 接続の場合、フォーマット完了までの推定時間は %d:%02d です。この間、プログレス バーは進んでいないように見えます。終了までしばらくお待ちください。"
 
 #. • MSG_113
 msgid "Large UDF volume"
-msgstr "大きなUDFボリューム"
+msgstr "大きな UDF ボリューム"
 
 #. • MSG_114
 msgid ""
@@ -766,9 +767,9 @@ msgid ""
 "\n"
 "Note: The files will be downloaded in the current application directory and will be reused automatically if present."
 msgstr ""
-"このイメージはSyslinux %s%sを使用しますが、このアプリケーションにはSyslinux %s%sのインストールファイルのみ内蔵しています。\n"
+"このイメージは Syslinux %s%s を使用しますが、このアプリケーションには Syslinux %s%s のインストールファイルのみ内蔵しています。\n"
 "\n"
-"新しいバージョンのSyslinuxは古いSyslinuxと完全な互換性はありません。RufusにすべてのバージョンのSyslinuxデータを含むことはできないため、インターネットから2つのファイル (ldlinux.sysとldlinux.bss) を追加でダウンロードする必要があります。\n"
+"新しいバージョンの Syslinux は古い Syslinux と完全な互換性はありません。Rufus にすべてのバージョンの Syslinux データを含むことはできないため、インターネットから 2 つのファイル (ldlinux.sys と ldlinux.bss) を追加でダウンロードする必要があります。\n"
 "- インターネットに接続し、ファイルをダウンロードするには [はい] を選択してください。\n"
 "- 取り消したい場合は [いいえ] を選択してください。\n"
 "\n"
@@ -792,19 +793,19 @@ msgid ""
 "\n"
 "Note: The file will be downloaded in the current application directory and will be reused automatically if present. If no match can be found online, then the default version will be used."
 msgstr ""
-"このイメージはGrub %sを使用しますが、このアプリケーションにはGrub %sのインストールファイルのみ内蔵しています。\n"
+"このイメージは Grub %s を使用しますが、このアプリケーションには Grub %s のインストールファイルのみ内蔵しています。\n"
 "\n"
-"それぞれのバージョンのGrubは他のバージョンのGrubと完全な互換性はありません。イメージに適合したバージョンのGrubインストール ファイル (core.img) を探すことができます。\n"
+"それぞれのバージョンの Grub は他のバージョンの Grub と完全な互換性はありません。イメージに適合したバージョンの Grub インストール ファイル (core.img) を探すことができます。\n"
 "- インターネットに接続し、ダウンロードを試行するには [はい] を選択してください。\n"
-"- Rufusのデフォルトのバージョンを使用する場合は [いいえ] を選択してください。\n"
+"- Rufus のデフォルトのバージョンを使用する場合は [いいえ] を選択してください。\n"
 "- この操作を中止する場合は [キャンセル] を選択してください。\n"
 "\n"
 "注意: ファイルは現在のディレクトリへダウンロードされます。ファイルが既に現在のディレクトリにある場合はダウンロードせず自動的に再使用されます。\n"
-"適合するバージョンがオンラインで見つからなかった場合は内蔵しているバージョンのGrubが使用されます。"
+"適合するバージョンがオンラインで見つからなかった場合は内蔵しているバージョンの Grub が使用されます。"
 
 #. • MSG_117
 msgid "Standard Windows installation"
-msgstr "標準のWindowsインストール"
+msgstr "標準の Windows インストール"
 
 #. • MSG_118
 #.
@@ -812,7 +813,7 @@ msgstr "標準のWindowsインストール"
 #. http://en.wikipedia.org/wiki/Windows_To_Go in your language.
 #. Otherwise, you may add a parenthesis eg. "Windows To Go (<hint at what it does>)"
 msgid "Windows To Go"
-msgstr "Windows To Go"
+msgstr ""
 
 #. • MSG_119
 msgid "advanced drive properties"
@@ -824,11 +825,11 @@ msgstr "詳細なフォーマット オプション"
 
 #. • MSG_121
 msgid "Show %s"
-msgstr "%sを表示"
+msgstr "%s を表示"
 
 #. • MSG_122
 msgid "Hide %s"
-msgstr "%sを隠す"
+msgstr "%s を隠す"
 
 #. • MSG_123
 #.
@@ -851,27 +852,154 @@ msgstr "保存領域なし"
 #.
 #. Tooltips used for the peristence size slider and edit control
 msgid "Set the size of the persistent partition for live USB media. Setting the size to 0 disables the persistent partition."
-msgstr "ライブUSBメディアの保存領域のサイズを設定します。 サイズを0に設定すると保存領域が無効になります。保存領域は「Persistentパーティション」「Persistence機能」とも言われます。"
+msgstr "ライブ USB メディアの保存領域のサイズを設定します。 サイズを 0 に設定すると保存領域が無効になります。保存領域は「Persistent パーティション」「Persistence 機能」とも言われます。"
 
 #. • MSG_126
 msgid "Set the partition size units."
 msgstr "パーティション サイズの単位を設定します。"
 
+#. • MSG_127
+msgid "Do not show this message again"
+msgstr "次回からこのメッセージを表示しない"
+
+#. • MSG_128
+msgid "Important notice about %s"
+msgstr "%s に関する重要なお知らせ"
+
+#. • MSG_129
+msgid ""
+"You have just created a media that uses the UEFI:NTFS bootloader. Please remember that, to boot this media, YOU MUST DISABLE SECURE BOOT.\n"
+"For details on why this is necessary, see the 'More Information' button below."
+msgstr ""
+"UEFI:NTFS ブートローダーを使用するメディアを作成しました。 このメディアを起動するには、セキュアブートを無効にする必要があります。\n"
+"この変更が必要な理由については、下の「詳細情報」ボタンから確認してください。"
+
+#. • MSG_130
+#, fuzzy
+msgid "Windows image selection"
+msgstr "Windows イメージの選択"
+
+#. • MSG_131
+msgid ""
+"This ISO contains multiple Windows images.\n"
+"Please select the image you wish to use for this installation:"
+msgstr ""
+"この ISO には複数の Windows イメージが含まれます。\n"
+"このインストールに使用したいイメージを選択してください。"
+
+#. • MSG_132
+msgid "Another program or process is accessing this drive. Do you want to format it anyway?"
+msgstr "別のプログラムまたはプロセスがこのドライブにアクセスしています。このままフォーマットしますか?"
+
+#. • MSG_133
+msgid ""
+"Rufus has detected that you are attempting to create a Windows To Go media based on a 1809 ISO.\n"
+"\n"
+"Because of a *MICROSOFT BUG*, this media will crash during Windows boot (Blue Screen Of Death), unless you manually replace the file 'WppRecorder.sys' with a 1803 version.\n"
+"\n"
+"Also note that the reason Rufus cannot automatically fix this for you is that 'WppRecorder.sys' is a Microsoft copyrighted file, so we cannot legally embed a copy of the file in the application..."
+msgstr ""
+"1809 バージョンの ISO を使用して Windows To Go のメディアを作成しようとしていることを検出しました。\n"
+"\n"
+"このメディアは、\"WppRecorder.sys\" を 1803 バージョンのファイルに手動で置き換えない限り、Windowsのブート中にクラッシュ (ブルースクリーン) します。これは *Microsoftのバグ* によるものです。\n"
+"\n"
+"\"WppRecorder.sys\" は Microsoft の著作権で保護されたファイルであり、アプリケーションにファイルのコピーを合法的に埋め込めないため、Rufus が自動的にこの不具合を修正することはできません。"
+
+#. • MSG_134
+#, fuzzy
+msgid ""
+"Because MBR has been selected for the partition scheme, Rufus can only create a partition up to 2 TB on this media, which will leave %s of disk space unavailable.\n"
+"\n"
+"Are you sure you want to continue?"
+msgstr ""
+"パーティション構成に MBR が選択されているため、Rufus はこのメディア上に最大 2TB のパーティションしか作成できません。そのため、％s のディスク容量が使用できなくなります。\n"
+"\n"
+"続けますか?"
+
+#. • MSG_135
+#, fuzzy
+msgid "Version"
+msgstr "バージョン"
+
+#. • MSG_136
+#, fuzzy
+msgid "Release"
+msgstr "リリース"
+
+#. • MSG_137
+#, fuzzy
+msgid "Edition"
+msgstr "エディション"
+
+#. • MSG_138
+#, fuzzy
+msgid "Language"
+msgstr "言語"
+
+#. • MSG_139
+#, fuzzy
+msgid "Architecture"
+msgstr "アーキテクチャ"
+
+#. • MSG_140
+#, fuzzy
+msgid "Continue"
+msgstr "続ける"
+
+#. • MSG_141
+#, fuzzy
+msgid "Back"
+msgstr "戻る"
+
+#. • MSG_142
+#, fuzzy
+msgid "Please wait..."
+msgstr "お待ちください..."
+
+#. • MSG_143
+#, fuzzy
+msgid "Download using a browser"
+msgstr "ブラウザを使ってダウンロードする"
+
+#. • MSG_144
+#, fuzzy
+msgid "Temporarily banned by Microsoft for requesting too many downloads - Please try again later..."
+msgstr "リクエストが多すぎたため Microsoft が一時的にダウンロードを禁止しました - しばらくしてからもう一度お試しください..."
+
+#. • MSG_145
+#, fuzzy
+msgid "PowerShell 3.0 or later is required to run this script."
+msgstr "このスクリプトの実行には PowerShell 3.0 以降が必要です。"
+
+#. • MSG_146
+#, fuzzy
+msgid "Do you want to go online and download it?"
+msgstr "ネットワークに接続してダウンロードしますか?"
+
+#. • MSG_148
+#, fuzzy
+msgid "Running download script..."
+msgstr "ダウンロードスクリプトを実行中..."
+
+#. • MSG_149
+msgid "Download ISO Image"
+msgstr "ISO イメージのダウンロード"
+
 #. • MSG_150
 msgid "Type of computer you plan to use this bootable drive with. It is your responsibility to determine whether your target is of BIOS or UEFI type before you start creating the drive, as it may fail to boot otherwise."
 msgstr ""
 "このブート用ドライブを使用する予定のコンピューターの種類です。\n"
-"起動に失敗する可能性を減らすため、ドライブの作成を開始する前にターゲットがBIOSとUEFIのどちらの形式を使うかを確認してください。"
+"起動に失敗する可能性を減らすため、ドライブの作成を開始する前にターゲットが BIOS と UEFI のどちらの形式を使うかを確認してください。"
 
 #. • MSG_151
 #.
 #. You shouldn't translate 'Legacy Mode' as this is an option that usually appears in English in the UEFI settings.
 msgid "'UEFI-CSM' means that the device will only boot in BIOS emulation mode (also known as 'Legacy Mode') under UEFI, and not in native UEFI mode."
-msgstr "UEFI-CSMではUEFIモードではなく、UEFI環境下でのBIOSエミュレーション モード (レガシー モード) でのみデバイスを起動することができます。"
+msgstr "UEFI-CSM では UEFI モードではなく、UEFI 環境下での BIOS エミュレーション モード (レガシー モード) でのみデバイスを起動することができます。"
 
 #. • MSG_152
 msgid "'non CSM' means that the device will only boot in native UEFI mode, and not in BIOS emulation mode (also known as 'Legacy Mode')."
-msgstr "CSMが無効な環境ではUEFI環境下でのBIOSエミュレーション モード (レガシー モード) ではなく、UEFIモードでのみデバイスを起動することができます。"
+msgstr "CSM が無効な環境では UEFI 環境下での BIOS エミュレーション モード (レガシー モード) ではなく、 UEFI モードでのみデバイスを起動することができます。"
 
 #. • MSG_153
 msgid "Test pattern: 0x%02X"
@@ -926,24 +1054,25 @@ msgid "Method that will be used to make the drive bootable"
 msgstr "ドライブを起動可能にするために使用する方法です。"
 
 #. • MSG_165
-msgid "Click to select an image..."
-msgstr "クリックしてイメージを選択してください。"
+#, fuzzy
+msgid "Click to select or download an image..."
+msgstr "イメージを選択するか、イメージをダウンロードするにはここをクリックしてください。"
 
 #. • MSG_166
 msgid "Check this box to allow the display of international labels and set a device icon (creates an autorun.inf)"
-msgstr "機能拡張されたラベルの表示とデバイス アイコンの設定を有効するにはこのチェック ボックスをオンにします。autorun.infを作成します。"
+msgstr "機能拡張されたラベルの表示とデバイス アイコンの設定を有効するにはこのチェック ボックスをオンにします。\"autorun.inf\" を作成します。"
 
 #. • MSG_167
 msgid "Install an MBR that allows boot selection and can masquerade the BIOS USB drive ID"
-msgstr "ブート選択が可能でBIOSのUSBドライブIDに見えるよう偽装されたMBRをインストールします。"
+msgstr "ブート選択が可能で BIOS の USB ドライブ ID に見えるよう偽装された MBR をインストールします。"
 
 #. • MSG_168
 msgid ""
 "Try to masquerade first bootable USB drive (usually 0x80) as a different disk.\n"
 "This should only be necessary if you install Windows XP and have more than one disk."
 msgstr ""
-"最優先でブートするUSBドライブ (通常は0x80) を別のディスクとして偽装します。\n"
-"Windows XPをインストールして複数のディスクを使用する場合にのみ必要です。"
+"最優先でブートする USB ドライブ (通常は 0x80) を別のディスクとして偽装します。\n"
+"Windows XP をインストールして複数のディスクを使用する場合にのみ必要です。"
 
 #. • MSG_169
 msgid ""
@@ -951,11 +1080,11 @@ msgid ""
 "This can improve boot detection for older BIOSes."
 msgstr ""
 "特別な隠しパーティションを作成し、各パーティションの位置合わせを行います。\n"
-"古いBIOSを使用する場合にブート時の検出を改善できます。"
+"古い BIOS を使用する場合にブート時の検出を改善できます。"
 
 #. • MSG_170
 msgid "Enable the listing of USB Hard Drive enclosures. USE AT YOUR OWN RISKS!!!"
-msgstr "外付けUSB HDDのリストを有効にします。自己責任で使用してください。"
+msgstr "外付け USB HDD のリストを有効にします。自己責任で使用してください。"
 
 #. • MSG_171
 msgid ""
@@ -978,7 +1107,7 @@ msgstr "選択するにはクリックしてください。"
 
 #. • MSG_174
 msgid "Rufus - The Reliable USB Formatting Utility"
-msgstr "Rufus - 信頼性の高いUSBフォーマット ユーティリティ"
+msgstr "Rufus - 信頼性の高い USB フォーマット ユーティリティ"
 
 #. • MSG_175
 msgid "Version %d.%d (Build %d)"
@@ -1006,15 +1135,15 @@ msgstr "このアプリケーションのアップデート確認を許可した
 
 #. • MSG_181
 msgid "Your operating system's architecture and version"
-msgstr "ご使用中のOSの種類とバージョン"
+msgstr "ご使用中の OS の種類とバージョン"
 
 #. • MSG_182
 msgid "The version of the application you use"
-msgstr "ご使用中のRufusのバージョン"
+msgstr "ご使用中の Rufus のバージョン"
 
 #. • MSG_183
 msgid "Your IP address"
-msgstr "IPアドレス"
+msgstr "IP アドレス"
 
 #. • MSG_184
 msgid "For the purpose of generating private usage statistics, we may keep the information collected, \\b for at most a year\\b0 . However, we will not willingly disclose any of this individual data to third parties."
@@ -1029,7 +1158,7 @@ msgid ""
 "Rufus does not install or run background services, therefore update checks are performed only when the main application is running.\\line\n"
 "Internet access is of course required when checking for updates."
 msgstr ""
-"Rufusは、本アプリケーション実行時のみアップデートの確認を行います。インストールまたはバックグラウンド サービスを実行して処理を行うことは一切ありません。\\line\n"
+"Rufus は、本アプリケーション実行時のみアップデートの確認を行います。インストールまたはバックグラウンド サービスを実行して処理を行うことは一切ありません。\\line\n"
 "また、アップデートの確認にはインターネット接続が必要です。"
 
 #. • MSG_187
@@ -1042,7 +1171,7 @@ msgstr "現在選択中のイメージとブート設定が一致しません。
 
 #. • MSG_189
 msgid "This ISO image is not compatible with the selected filesystem"
-msgstr "このISOは選択中のファイル システムと互換性がありません。"
+msgstr "この ISO は選択中のファイル システムと互換性がありません。"
 
 #. • MSG_190
 msgid "Incompatible drive detected"
@@ -1062,11 +1191,11 @@ msgstr "読み出しをパスしました。"
 
 #. • MSG_193
 msgid "Downloaded %s"
-msgstr "%sをダウンロードしました。"
+msgstr "%s をダウンロードしました。"
 
 #. • MSG_194
 msgid "Could not download %s"
-msgstr "%sはダウンロードできませんでした。"
+msgstr "%s はダウンロードできませんでした。"
 
 #. • MSG_195
 #.
@@ -1104,19 +1233,19 @@ msgstr "イメージをスキャン中..."
 
 #. • MSG_203
 msgid "Failed to scan image"
-msgstr "イメージのスキャンに失敗しました。"
+msgstr "イメージのスキャンに失敗"
 
 #. • MSG_204
 #.
 #. %s is the name of an obsolete Syslinux .c32 module. Example: "Obsolete vesamenu.c32 detected"
 msgid "Obsolete %s detected"
-msgstr "廃止された%sを検出しました"
+msgstr "廃止された %s を検出しました"
 
 #. • MSG_205
 #.
 #. Display the name of the image selected. eg: "Using image: en_win7_x64_sp1.iso"
 msgid "Using image: %s"
-msgstr "%sを使用中"
+msgstr "%s を使用中"
 
 #. • MSG_206
 #.
@@ -1149,7 +1278,7 @@ msgstr "準備完了"
 
 #. • MSG_211
 msgid "Cancelled"
-msgstr "キャンセルしました。"
+msgstr "キャンセル"
 
 #. • MSG_212
 msgid "Failed"
@@ -1169,13 +1298,13 @@ msgstr "更新されたアプリケーションを開始することができま
 #.
 #. Example: "Opened some_file.txt"
 msgid "Opened %s"
-msgstr "%sを開きました。"
+msgstr "%s を開きました。"
 
 #. • MSG_216
 #.
 #. Example: "Saved rufus.log"
 msgid "Saved %s"
-msgstr "%sを保存しました。"
+msgstr "%s を保存しました。"
 
 #. • MSG_217
 #.
@@ -1211,11 +1340,11 @@ msgstr "フォーマット中 (%s)..."
 
 #. • MSG_223
 msgid "NTFS Fixup (Checkdisk)..."
-msgstr "NTFSの修正が必要か確認中 (チェックディスク)..."
+msgstr "NTFS の修正が必要か確認中 (チェックディスク)..."
 
 #. • MSG_224
 msgid "Clearing MBR/PBR/GPT structures..."
-msgstr "MBR/PBR/GPT構造のクリーニング中..."
+msgstr "MBR/PBR/GPT 構造のクリーニング中..."
 
 #. • MSG_225
 msgid "Requesting disk access..."
@@ -1239,11 +1368,11 @@ msgstr "パーティション ブート レコードを書き込んでいます.
 
 #. • MSG_230
 msgid "Copying DOS files..."
-msgstr "DOSファイルをコピー中..."
+msgstr "DOS ファイルをコピー中..."
 
 #. • MSG_231
 msgid "Copying ISO files..."
-msgstr "ISOファイルをコピー中..."
+msgstr "ISO ファイルをコピー中..."
 
 #. • MSG_232
 msgid "Win7 EFI boot setup (This may take a while)..."
@@ -1307,7 +1436,7 @@ msgstr "ファイルのダウンロードに失敗しました。"
 
 #. • MSG_243
 msgid "Checking for Rufus updates..."
-msgstr "Rufusのアップデートを確認しています..."
+msgstr "Rufus のアップデートを確認しています..."
 
 #. • MSG_244
 msgid "Updates: Unable to connect to the internet"
@@ -1319,11 +1448,11 @@ msgstr "アップデート: バージョン管理データにアクセスでき�
 
 #. • MSG_246
 msgid "A new version of Rufus is available!"
-msgstr "Rufusの新しいバージョンを利用できます!"
+msgstr "Rufus の新しいバージョンを利用できます!"
 
 #. • MSG_247
 msgid "No new version of Rufus was found"
-msgstr "Rufusの新しいバージョンはありませんでした。"
+msgstr "Rufus の新しいバージョンはありませんでした。"
 
 #. • MSG_248
 msgid "Application registry keys successfully deleted"
@@ -1353,11 +1482,11 @@ msgstr "ハードディスクの検出"
 
 #. • MSG_254
 msgid "Force large FAT32 formatting"
-msgstr "ラージFAT32でのフォーマットを強制"
+msgstr "Large FAT32 でのフォーマットを強制"
 
 #. • MSG_255
 msgid "NoDriveTypeAutorun will be deleted on exit"
-msgstr "NoDriveTypeAutorunはRufusを閉じる時に削除されます。"
+msgstr "NoDriveTypeAutorun は Rufus を閉じる時に削除されます。"
 
 #. • MSG_256
 msgid "Fake drive detection"
@@ -1365,11 +1494,11 @@ msgstr "偽装されたドライブの検出"
 
 #. • MSG_257
 msgid "Joliet support"
-msgstr "Julietのサポート"
+msgstr "Juliet のサポート"
 
 #. • MSG_258
 msgid "Rock Ridge support"
-msgstr "Rock Ridgeのサポート"
+msgstr "Rock Ridge のサポート"
 
 #. • MSG_259
 msgid "Force update"
@@ -1377,7 +1506,7 @@ msgstr "強制的にアップデート"
 
 #. • MSG_260
 msgid "NTFS compression"
-msgstr "NTFS圧縮"
+msgstr "NTFS 圧縮"
 
 #. • MSG_261
 msgid "Writing image: %0.1f%% completed"
@@ -1387,7 +1516,7 @@ msgstr "イメージを書き込み中: %0.1f%% 完了"
 #.
 #. Cheat mode message to disable ISO Support, so that only DD images can be opened
 msgid "ISO Support"
-msgstr "ISOのサポート"
+msgstr "ISO のサポート"
 
 #. • MSG_263
 #.
@@ -1397,11 +1526,11 @@ msgstr "正確なサイズ単位を使用"
 
 #. • MSG_264
 msgid "Deleting directory '%s'"
-msgstr "“%s”フォルダーを削除しています。"
+msgstr "“%s” フォルダーを削除しています。"
 
 #. • MSG_265
 msgid "VMWare disk detection"
-msgstr "VMWareディスクの検出"
+msgstr "VMWare ディスクの検出"
 
 #. • MSG_266
 msgid "Dual UEFI/BIOS mode"
@@ -1409,19 +1538,19 @@ msgstr "デュアル UEFI/BIOS モード"
 
 #. • MSG_267
 msgid "Applying Windows image: %0.1f%% completed"
-msgstr "Windowsイメージを適用中: %0.1f%% 完了"
+msgstr "Windows イメージを適用中: %0.1f%% 完了"
 
 #. • MSG_268
 msgid "Applying Windows image..."
-msgstr "Windowsイメージを適用します..."
+msgstr "Windows イメージを適用します..."
 
 #. • MSG_269
 msgid "Preserve timestamps"
-msgstr "タイムスタンプ(ファイル更新日付)を保持"
+msgstr "タイムスタンプ (ファイル更新日付) を保持"
 
 #. • MSG_270
 msgid "USB debug"
-msgstr "USBデバッグ"
+msgstr "USB デバッグ"
 
 #. • MSG_271
 msgid "Computing image checksums: %0.1f%% completed"
@@ -1429,7 +1558,7 @@ msgstr "イメージのチェックサムを計算中 : %0.1f%% 完了"
 
 #. • MSG_272
 msgid "Compute the MD5, SHA1 and SHA256 checksums for the selected image"
-msgstr "選択したイメージのMD5、SHA1、SHA256チェックサムを計算します。"
+msgstr "選択したイメージの MD5、SHA1、SHA256 チェックサムを計算します。"
 
 #. • MSG_273
 msgid "Change the application language"
@@ -1437,7 +1566,7 @@ msgstr "アプリケーションの使用言語を変更します。"
 
 #. • MSG_274
 msgid "ISOHybrid image detected"
-msgstr "ISOHybridイメージを検出しました。"
+msgstr "ハイブリッド ISO イメージの検出"
 
 #. • MSG_275
 #.
@@ -1449,9 +1578,9 @@ msgid ""
 "\n"
 "Please select the mode that you want to use to write this image:"
 msgstr ""
-"選択されたイメージはISOHybridです。\n"
+"選択されたイメージはハイブリッド ISO 形式です。\n"
 "%s (ファイル コピー) モードまたは%s (ディスク イメージ) モードで書き込むことができます。\n"
-"書き込み後、ドライブにフルアクセスできるよう、Rufusは%sモードを推奨します。\n"
+"書き込み後、ドライブにフルアクセスできるよう、 Rufus は%sモードを推奨します。\n"
 "ブート中にエラーが発生する場合には、%sモードで再度試してみてください。\n"
 "\n"
 "このイメージを書き込む際に使用するモードを選択してください。"
@@ -1460,13 +1589,13 @@ msgstr ""
 #.
 #. '%s' will be replaced with your translation for MSG_036 ("ISO Image")
 msgid "Write in %s mode (Recommended)"
-msgstr "%sモードで書き込む (推奨)"
+msgstr "%s モードで書き込む (推奨)"
 
 #. • MSG_277
 #.
 #. '%s' will be replaced with your translation for MSG_095 ("DD Image")
 msgid "Write in %s mode"
-msgstr "%sモードで書き込む"
+msgstr "%s モードで書き込む"
 
 #. • MSG_278
 msgid "Checking for conflicting processes..."
@@ -1478,7 +1607,7 @@ msgstr "非ブート用"
 
 #. • MSG_280
 msgid "Disk or ISO image"
-msgstr "ディスクまたはISOイメージ"
+msgstr "ディスクまたは ISO イメージ"
 
 #. • MSG_281
 msgid "%s (Please select)"
@@ -1486,7 +1615,7 @@ msgstr "%s (選択してください)"
 
 #. • MSG_282
 msgid "Exclusive USB drive locking"
-msgstr "排他的なUSBドライブのロック"
+msgstr "USB ドライブを専用にロック"
 
 #. • MSG_283
 msgid "Invalid signature"
@@ -1502,17 +1631,17 @@ msgid ""
 "This is not a signature we recognize and could indicate some form of malicious activity...\n"
 "Are you sure you want to run this file?"
 msgstr ""
-"このダウンロードした実行可能ファイルのデジタル署名は“%s”です。\n"
+"このダウンロードした実行可能ファイルのデジタル署名は “%s” です。\n"
 "これは正規の署名ではありません。悪意のあるソフトウェアの可能性があります。\n"
 "このファイルを実行しますか?"
 
 #. • MSG_286
 msgid "Zeroing drive: %0.1f%% completed"
-msgstr "“0”をドライブへ書き込み初期化中: %0.1f%% 完了"
+msgstr "“0” をドライブへ書き込み初期化中: %0.1f%% 完了"
 
 #. • MSG_287
 msgid "Detection of non-USB removable drives"
-msgstr "USB接続でないリムーバブル ディスクを検出しました。"
+msgstr "USB 接続でないリムーバブル ディスクを検出しました。"
 
 #. • MSG_288
 msgid "Missing elevated privileges"
@@ -1532,15 +1661,15 @@ msgstr "バージョン選択"
 
 #. • MSG_292
 msgid "Please select the version of Windows you want to install:"
-msgstr "インストールしたいWindowsのバージョンを選択してください。"
+msgstr "インストールしたい Windows のバージョンを選択してください。"
 
 #. • MSG_293
 msgid "Unsupported Windows version"
-msgstr "サポートされていないWindowsのバージョンです。"
+msgstr "サポートされていない Windows のバージョンです。"
 
 #. • MSG_294
 msgid "This version of Windows is no longer supported by Rufus."
-msgstr "このバージョンのWindowsはRufusのサポート対象外となりました。"
+msgstr "このバージョンの Windows は Rufus のサポート対象外となりました。"
 
 #. • MSG_295
 msgid "Warning: Unofficial version"
@@ -1552,13 +1681,13 @@ msgid ""
 "\n"
 "Are you sure you want to run it?"
 msgstr ""
-"このバージョンのRufusは公式の開発者によって提供されたものではありません。\n"
+"このバージョンの Rufus は公式の開発者によって提供されたものではありません。\n"
 "\n"
-"非公式版Rufusを実行しますか?"
+"非公式版 Rufus を実行しますか?"
 
 #. • MSG_297
 msgid "Truncated ISO detected"
-msgstr "不完全なISOファイルを検出しました。"
+msgstr "不完全な ISO ファイルを検出しました。"
 
 #. • MSG_298
 msgid ""
@@ -1568,11 +1697,11 @@ msgid ""
 "\n"
 "Note that you can compute the MD5 or SHA in Rufus by clicking the (✓) button."
 msgstr ""
-"選択されたISOファイルは定義されているファイル サイズと一致しません。%sのデータが不足しています。\n"
+"選択された ISO ファイルは定義されているファイル サイズと一致しません。%sのデータが不足しています。\n"
 "\n"
-"このファイルがインターネットからダウンロードされたものならば、再ダウンロードし、MD5かSHAのチェックサムが公式のものと一致しているか確認してください。\n"
+"このファイルがインターネットからダウンロードされたものならば、再ダウンロードし、 MD5 または SHA のチェックサムが公式のものと一致しているか確認してください。\n"
 "\n"
-"MD5とSHAは(✓)ボタンをクリックすればRufusで確認できます。"
+"MD5 と SHA は(✓)ボタンをクリックすれば Rufus で確認できます。"
 
 #. • MSG_299
 msgid "Timestamp validation error"
@@ -1606,7 +1735,7 @@ msgstr "選択したデバイスのディスク イメージを作成します�
 
 #. • MSG_305
 msgid "Use this option to indicate whether you want to use this device to install Windows on another disk, or if you want to run Windows directly from this drive (Windows To Go)."
-msgstr "このデバイスを使用して別のディスクにWindowsをインストールしたい場合、またはこのドライブからWindowsを直接実行 (Windows To Go) したい場合にこのオプションを使用します。"
+msgstr "このデバイスを使用して別のディスクに Windows をインストールしたい場合、またはこのドライブから Windows を直接実行 (Windows To Go) したい場合にこのオプションを使用します。"
 
 #. • MSG_306
 #.
