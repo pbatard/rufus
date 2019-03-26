@@ -1,6 +1,6 @@
 o Version 3.5 (2019.03.??)
     Add a feature to download official retail Windows 8.1 or Windows 10 ISOs
-    (Note: 'Check for updates' must also be enabled for the above to be active)
+    (Note: 'Check for updates' must be enabled for the above to be active)
     Add Windows To Go support for MCT generated Windows ISOs
     Add a notice about the 'WppRecorder.sys' Microsoft bug for Windows 10 1809 ISOs
     Add a notice about trying to format a drive larger than 2 TB in MBR mode
@@ -8,7 +8,7 @@ o Version 3.5 (2019.03.??)
     Report the full PID and command line of potentially blocking processes in the log
     Fix a potential silent abort when the drive is in use
     Fix 'Quick Format' option always being activated
-    Fix some unwanted file system changes occurring after an ISO had been selected
+    Fix potential change of the selected file system after an ISO has been loaded
 
 o Version 3.4 (2018.12.05)
     Set the default image selection directory to Downloads\ instead of My Documents\
