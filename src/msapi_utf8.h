@@ -694,6 +694,23 @@ static __inline DWORD GetFileAttributesU(const char* lpFileName)
 	return ret;
 }
 
+static __inline BOOL SetFileAttributesU(const char* lpFileName, DWORD dwFileAttributes)
+{
+	BOOL ret = FALSE, err = ERROR_INVALID_DATA;
+	wconvert(lpFileName);
+	// Unlike Microsoft's version, ours doesn't fail if the string is quoted
+	if ((wlpFileName[0] == L'"') && (wlpFileName[wcslen(wlpFileName) - 1] == L'"')) {
+		wlpFileName[wcslen(wlpFileName) - 1] = 0;
+		ret = SetFileAttributesW(&wlpFileName[1], dwFileAttributes);
+	} else {
+		ret = SetFileAttributesW(wlpFileName, dwFileAttributes);
+	}
+	err = GetLastError();
+	wfree(lpFileName);
+	SetLastError(err);
+	return ret;
+}
+
 static __inline int SHCreateDirectoryExU(HWND hwnd, const char* pszPath, SECURITY_ATTRIBUTES *psa)
 {
 	int ret = ERROR_INVALID_DATA;

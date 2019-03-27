@@ -949,7 +949,7 @@ static DWORD WINAPI DownloadISOThread(LPVOID param)
 	assert((fido_script != NULL) && (fido_len != 0));
 
 	static_sprintf(script_path, "%s%s.ps1", temp_dir, GuidToString(&guid));
-	hFile = CreateFileU(script_path, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+	hFile = CreateFileU(script_path, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_READONLY, NULL);
 	if (hFile == INVALID_HANDLE_VALUE) {
 		uprintf("Unable to create download script '%s': %s", script_path, WindowsErrorString());
 		goto out;
@@ -958,7 +958,8 @@ static DWORD WINAPI DownloadISOThread(LPVOID param)
 		uprintf("Unable to write download script '%s': %s", script_path, WindowsErrorString());
 		goto out;
 	}
-	// TODO: Try to Harden this so that only us and the powershell we launch can access the file
+	// Why oh why does PowerShell refuse to open read-only files that haven't been closed?
+	// Because of this limitation, we can't use LockFileEx() on the file we create...
 	safe_closehandle(hFile);
 #endif
 	static_sprintf(powershell_path, "%s\\WindowsPowerShell\\v1.0\\powershell.exe", system_dir);
@@ -973,6 +974,7 @@ static DWORD WINAPI DownloadISOThread(LPVOID param)
 		dwPipeSize, dwPipeSize, 0, NULL);
 	if (hPipe == INVALID_HANDLE_VALUE) {
 		uprintf("Could not create pipe '%s': %s", pipe, WindowsErrorString);
+		goto out;
 	}
 
 	static_sprintf(cmdline, "%s -NonInteractive -Sta -NoProfile –ExecutionPolicy Bypass "
@@ -1027,8 +1029,10 @@ out:
 	if (icon_path[0] != 0)
 		DeleteFileU(icon_path);
 #if !defined(RUFUS_TEST)
-	if (script_path[0] != 0)
+	if (script_path[0] != 0) {
+		SetFileAttributesU(script_path, FILE_ATTRIBUTE_NORMAL);
 		DeleteFileU(script_path);
+	}
 #endif
 	free(url);
 	SendMessage(hMainDialog, UM_ENABLE_CONTROLS, 0, 0);

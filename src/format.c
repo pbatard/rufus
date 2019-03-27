@@ -2146,7 +2146,7 @@ DWORD WINAPI FormatThread(void* param)
 					}
 				}
 				// EFI mode selected, with no 'boot###.efi' but Windows 7 x64's 'bootmgr.efi' (bit #0)
-				if ((tt == TT_UEFI) && HAS_WIN7_EFI(img_report)) {
+				if (((tt == TT_UEFI) || allow_dual_uefi_bios) && HAS_WIN7_EFI(img_report)) {
 					PrintInfoDebug(0, MSG_232);
 					img_report.wininst_path[0][0] = drive_name[0];
 					efi_dst[0] = drive_name[0];

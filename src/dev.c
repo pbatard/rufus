@@ -340,7 +340,7 @@ BOOL GetDevices(DWORD devnum)
 		// See http://itdoc.hitachi.co.jp/manuals/3021/30213B5200e/DMDS0094.HTM
 		// Also  http://www.carrona.org/dvrref.php. NB: These should be reported
 		// as enumerators by Rufus when Enum Debug is enabled
-		"SD", "PCISTOR", "RTSOR", "JMCR", "JMCF", "RIMMPTSK", "RIMSPTSK", "RIXDPTSK",
+		"SD", "PCISTOR", "RTSOR", "JMCR", "JMCF", "RIMMPTSK", "RIMSPTSK", "RISD", "RIXDPTSK",
 		"TI21SONY", "ESD7SK", "ESM7SK", "O2MD", "O2SD", "VIACR"
 	};
 	// Oh, and we also have card devices (e.g. 'SCSI\DiskO2Micro_SD_...') under the SCSI enumerator...
