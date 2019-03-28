@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: 3.2\n"
+"Project-Id-Version: 3.5\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2018-09-03 01:21+0200\n"
-"PO-Revision-Date: 2018-09-03 01:55+0200\n"
+"POT-Creation-Date: 2019-03-28 23:41+0000\n"
+"PO-Revision-Date: 2019-03-28 23:42+0000\n"
 "Language: lt_LT\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Rufus-LCID: 0x0427\n"
 "Last-Translator: \n"
 "Language-Team: \n"
-"X-Generator: Poedit 2.0.9\n"
+"X-Generator: Poedit 2.2.1\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -582,8 +582,8 @@ msgstr ""
 "Pastaba: naujas failas bus atsiųstas į dabartinį katalogą ir jei „%s“ ten jau yra, jis bus panaudotas iš naujo automatiškai."
 
 #. • MSG_085
-msgid "Downloading '%s'"
-msgstr "Siunčiama: „%s“"
+msgid "Downloading %s"
+msgstr "Atsisiunčiama: %s"
 
 #. • MSG_086
 msgid "No image selected"
@@ -856,9 +856,121 @@ msgstr "Nustatykite išliekamojo skaidinio dydį gyvai USB laikmenai. Nustačius
 msgid "Set the partition size units."
 msgstr "Nustatykite skaidinio dydžio vienetus."
 
+#. • MSG_127
+msgid "Do not show this message again"
+msgstr "Neberodyti šio pranešimo"
+
+#. • MSG_128
+msgid "Important notice about %s"
+msgstr "Svarbi pastaba apie %s"
+
+#. • MSG_129
+msgid ""
+"You have just created a media that uses the UEFI:NTFS bootloader. Please remember that, to boot this media, YOU MUST DISABLE SECURE BOOT.\n"
+"For details on why this is necessary, see the 'More Information' button below."
+msgstr ""
+"Jūs ką tik sukūrėte laikmeną, kuri naudoja UEFI:NTFS įkėliklį. Atminkite, norėdami įkelti sistemą iš šios laikmenos, turite išjungti SECURE BOOT.\n"
+"Išsamiau apie tai, kodėl tai būtina, žiūrėkite žemiau esančiame mygtuke \"Daugiau informacijos\"."
+
+#. • MSG_130
+msgid "Windows image selection"
+msgstr "\"Windows\" atvaizdo pasirinkimas"
+
+#. • MSG_131
+msgid ""
+"This ISO contains multiple Windows images.\n"
+"Please select the image you wish to use for this installation:"
+msgstr ""
+"Šiame ISO yra keli \"Windows\" atvaizdai.\n"
+"Pasirinkite atvaizdą, kurį norite naudoti šiam diegimui:"
+
+#. • MSG_132
+msgid "Another program or process is accessing this drive. Do you want to format it anyway?"
+msgstr "Kita programa arba procesas kreipiasi į šį diską. Ar vis tiek norite jį formatuoti?"
+
+#. • MSG_133
+msgid ""
+"Rufus has detected that you are attempting to create a Windows To Go media based on a 1809 ISO.\n"
+"\n"
+"Because of a *MICROSOFT BUG*, this media will crash during Windows boot (Blue Screen Of Death), unless you manually replace the file 'WppRecorder.sys' with a 1803 version.\n"
+"\n"
+"Also note that the reason Rufus cannot automatically fix this for you is that 'WppRecorder.sys' is a Microsoft copyrighted file, so we cannot legally embed a copy of the file in the application..."
+msgstr ""
+"Rufus aptiko, kad jūs bandote sukurti Windows To Go laikmeną remiantis 1809 ISO.\n"
+"\n"
+"Dėl  *MICROSOFT klaidos*, ši laikmena užlūš įkeliant Windows (mėlynas mirties ekranas), nebent jūs rankiniu būdu pakeisite failą \"WppRecorder. sys\" į 1803 versiją.\n"
+"\n"
+"Taip pat atkreipkite dėmesį, kad Rufus negali automatiškai pataisyti to už jus, nes \"WppRecorder. sys\" yra \"Microsoft\" autorių teisėmis apsaugotas failas, todėl mes negalime legaliai įterpti šio failo kopijos mūsų programoje..."
+
+#. • MSG_134
+msgid ""
+"Because MBR has been selected for the partition scheme, Rufus can only create a partition up to 2 TB on this media, which will leave %s of disk space unavailable.\n"
+"\n"
+"Are you sure you want to continue?"
+msgstr ""
+"Kadangi MBR buvo pasirinkta kaip skaidinio schema, Rufus gali sukurti tik iki 2 TB skaidinį šioje laikmenoje, dėl ko %s disko vietos liks nepasiekiama.\n"
+"\n"
+"Ar tikrai norite tęsti?"
+
+#. • MSG_135
+msgid "Version"
+msgstr "Versija"
+
+#. • MSG_136
+msgid "Release"
+msgstr "Laida"
+
+#. • MSG_137
+msgid "Edition"
+msgstr "Leidimas"
+
+#. • MSG_138
+msgid "Language"
+msgstr "Kalba"
+
+#. • MSG_139
+msgid "Architecture"
+msgstr "Architektūra"
+
+#. • MSG_140
+msgid "Continue"
+msgstr "Tęsti"
+
+#. • MSG_141
+msgid "Back"
+msgstr "Atgal"
+
+#. • MSG_142
+msgid "Please wait..."
+msgstr "Palaukite..."
+
+#. • MSG_143
+msgid "Download using a browser"
+msgstr "Atsisiųsti naudojant naršyklę"
+
+#. • MSG_144
+msgid "Temporarily banned by Microsoft for requesting too many downloads - Please try again later..."
+msgstr "Laikinai uždrausta Microsoft dėl per didelio atsisiuntimų skaičiaus - Bandykite vėliau..."
+
+#. • MSG_145
+msgid "PowerShell 3.0 or later is required to run this script."
+msgstr "PowerShell 3.0 ar vėlesnis būtinas šiam scenarijui vykdyti."
+
+#. • MSG_146
+msgid "Do you want to go online and download it?"
+msgstr "Ar norite jungtis prie interneto ir atsisiųsti?"
+
+#. • MSG_148
+msgid "Running download script..."
+msgstr "Vykdomas atsisiuntimo scenarijus..."
+
+#. • MSG_149
+msgid "Download ISO Image"
+msgstr "Atsisiųsti ISO atvaizdą"
+
 #. • MSG_150
 msgid "Type of computer you plan to use this bootable drive with. It is your responsibility to determine whether your target is of BIOS or UEFI type before you start creating the drive, as it may fail to boot otherwise."
-msgstr "Paprastai saugiausias pasirinkimas. Bet jei turite UEFI kompiuterį ir norite įdiegti operacinę sistemą EFI režimu, turėtumėte pasirinkit vieną iš kitų parinkčių"
+msgstr "Paprastai saugiausias pasirinkimas. Bet jei turite UEFI kompiuterį ir norite įdiegti operacinę sistemą EFI režimu, turėtumėte pasirinkit vieną iš kitų parinkčių."
 
 #. • MSG_151
 #.
@@ -923,8 +1035,8 @@ msgid "Method that will be used to make the drive bootable"
 msgstr "Būdas, kuris bus naudojamas padaryti diską įkeliamą"
 
 #. • MSG_165
-msgid "Click to select an image..."
-msgstr "Spauskite, kad pasirinktumėte atvaizdą..."
+msgid "Click to select or download an image..."
+msgstr "Spauskite, jei norite pasirinkti ar atsisiųsti atvaizdą..."
 
 #. • MSG_166
 msgid "Check this box to allow the display of international labels and set a device icon (creates an autorun.inf)"
@@ -948,7 +1060,7 @@ msgid ""
 "This can improve boot detection for older BIOSes."
 msgstr ""
 "Sukurti papildomą slaptą skaidinį ir bandyti sulygiuoti skaidinių ribas.\n"
-"Tai gali pagerinti įkelties aptikimą su senais BIOSais"
+"Tai gali pagerinti įkelties aptikimą su senais BIOSais."
 
 #. • MSG_170
 msgid "Enable the listing of USB Hard Drive enclosures. USE AT YOUR OWN RISKS!!!"
@@ -1568,7 +1680,7 @@ msgstr ""
 "\n"
 "Jei jūs gavote šį failą iš interneto, pabandykite atsisiųsti jį iš naujo ir patikrinkite, ar MD5 arba SHA kontrolinės sumos atitinka oficialiąsias.\n"
 "\n"
-"Beje, jūs galite apskaičiuoti MD5 arba SHA per Rufus, paspaudę "
+"Beje, jūs galite apskaičiuoti MD5 arba SHA per Rufus, paspaudę."
 
 # ´ mygtuką."
 #. • MSG_299
