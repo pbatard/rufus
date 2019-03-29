@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 3.5\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
 "POT-Creation-Date: 2019-03-19 13:07+0000\n"
-"PO-Revision-Date: 2019-03-19 13:07+0000\n"
+"PO-Revision-Date: 2019-03-29 10:34+0300\n"
 "Language: tr_TR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -45,7 +45,7 @@ msgstr "Hedef Sistem"
 
 #. • IDD_DIALOG → IDC_LIST_USB_HDD
 msgid "List USB Hard Drives"
-msgstr "USB sabit sürücüleri listele"
+msgstr "USB Sabit Sürücüleri Listele"
 
 #. • IDD_DIALOG → IDC_OLD_BIOS_FIXES
 #.
@@ -60,7 +60,7 @@ msgstr "Eski BIOSlar için düzeltme ekle (ekstra bölüm, hizalama vs.)"
 #. Rufus can install it's own custom MBR (the Rufus MBR), which also allows users to
 #. specify a custom disk ID for the BIOS. The tooltip for this control is MSG_167.
 msgid "Use Rufus MBR with BIOS ID"
-msgstr "Rufus MBR kullan. BIOS Kimliği Seçin"
+msgstr "Rufus MBR'yi BIOS Kimliği ile Kullan"
 
 #. • IDD_DIALOG → IDS_FORMAT_OPTIONS_TXT
 msgid "Format Options"
@@ -209,7 +209,7 @@ msgid ""
 "To continue with this operation, click OK. To quit click CANCEL."
 msgstr ""
 "UYARI: '%s' AYGITINDAKİ TÜM VERİ YOK EDİLECEK.\n"
-"İşleme devam etmek için Tamam'a tıklayın. Çıkmak için İPTAL'e tıklayın."
+"İşleme devam etmek için TAMAM'a tıklayın. Çıkmak için İPTAL'e tıklayın."
 
 #. • MSG_004
 msgid "Rufus update policy"
@@ -237,7 +237,7 @@ msgstr ""
 "Denetim Tamamlandı: %d hatalı blok bulundu\n"
 "  %d okuma hatası\n"
 "  %d yazma hatası\n"
-"  %d hata oluşumu"
+"  %d bozulma hatası"
 
 #. • MSG_012
 #.
@@ -282,45 +282,45 @@ msgstr "En son sürüm: %d.%d (Yapı %d)"
 #. • MSG_020
 #. • MSG_026
 msgid "bytes"
-msgstr "byte"
+msgstr "bayt"
 
 #. • MSG_021
 #.
 #. *Short* version of the kilobyte size suffix
 msgid "KB"
-msgstr ""
+msgstr "KB"
 
 #. • MSG_022
 #.
 #. *Short* version of the megabyte size suffix
 msgid "MB"
-msgstr ""
+msgstr "MB"
 
 #. • MSG_023
 #.
 #. *Short* version of the gigabyte size suffix
 msgid "GB"
-msgstr ""
+msgstr "GB"
 
 #. • MSG_024
 #.
 #. *Short* version of the terabyte size suffix
 msgid "TB"
-msgstr ""
+msgstr "TB"
 
 #. • MSG_025
 #.
 #. *Short* version of the pentabyte size suffix
 msgid "PB"
-msgstr ""
+msgstr "PB"
 
 #. • MSG_027
 msgid "kilobytes"
-msgstr "kilobyte"
+msgstr "kilobayt"
 
 #. • MSG_028
 msgid "megabytes"
-msgstr "megabyte"
+msgstr "megabayt"
 
 #. • MSG_029
 msgid "Default"
@@ -395,7 +395,7 @@ msgstr "USB Depolama Aygıtı (Genel)"
 
 #. • MSG_046
 msgid "%s (Disk %d) [%s]"
-msgstr ""
+msgstr "%s (Disk %d) [%s]"
 
 #. • MSG_047
 #.
@@ -545,7 +545,7 @@ msgstr ""
 "\n"
 "USB aygıtınızın hızına bağlı olarak, bu işlemin tamamlanması özellikle büyük dosyalar için, uzun bir süre alabilir.\n"
 "\n"
-"Bozulmayı önlemek için Windows'un işini bitirmesine izin vermenizi öneriyoruz. Fakat beklemekten yorulduysanız, yalnız aygıtı çıkarabilirsiniz..."
+"Bozulmayı önlemek için Windows'un işini bitirmesine izin vermenizi öneriyoruz. Fakat beklemekten yorulduysanız, aygıtı çıkarmanız yeterlidir..."
 
 #. • MSG_081
 msgid "Unsupported image"
@@ -557,7 +557,7 @@ msgstr "Bu yansıma ya önyüklenebilir değil ya da Rufus tarafından desteklen
 
 #. • MSG_083
 msgid "Replace %s?"
-msgstr "%s yerdeğiştirilsin mi?"
+msgstr "%s değiştirilsin mi?"
 
 #. • MSG_084
 msgid ""
@@ -571,15 +571,15 @@ msgid ""
 "\n"
 "Note: The new file will be downloaded in the current directory and once a '%s' exists there, it will be reused automatically."
 msgstr ""
-"Bu ISO yansıması '%s'in eski bir sürümünü kullanıyor gibi görünüyor.\n"
+"Bu ISO yansıması eski bir '%s' sürümünü kullanıyor gibi görünüyor.\n"
 "Açılış menüsü bundan dolayı düzgün görüntülenmeyebilir.\n"
 "\n"
 "Bu durumu düzeltmek için yeni sürümü Rufus tarafından indirilebilir:\n"
-"- İnternete bağlanıp dosyayı indirmek için 'Evet'i ssçin\n"
-"- Varolan ISO dosyasını olduğu gibi bırakmak için 'Hayır'ı seçin\n"
+"- İnternete bağlanıp dosyayı indirmek için 'Evet'i seçin\n"
+"- Mevcut ISO dosyasını olduğu gibi bırakmak için 'Hayır'ı seçin\n"
 "Ne yapacağınızı bilmiyorsanız, 'Evet'i seçmelisiniz.\n"
 "\n"
-"Not: Yeni dosya mevcut dizine indirilecek ve  '%s'  orda varolunca, otomatik olarak kullanılacak."
+"Not: Yeni dosya mevcut dizine indirilecek ve  '%s'  orada var olunca, otomatik olarak kullanılacak."
 
 #. • MSG_085
 msgid "Downloading %s"
@@ -614,7 +614,7 @@ msgstr "Desteklenmeyen ISO"
 
 #. • MSG_091
 msgid "When using UEFI Target Type, only EFI bootable ISO images are supported. Please select an EFI bootable ISO or set the Target Type to BIOS."
-msgstr "EFI Hedef Türünü kullanıyorken, sadece EFI açılabilir ISO yansımaları desteklenir. Lütfen bir EFI açılabilir ISO'su seçin yada Hedef Türüni BIOSa ayarlayın."
+msgstr "EFI Hedef Türünü kullanıyorken, sadece EFI açılabilir ISO yansımaları desteklenir. Lütfen bir EFI açılabilir ISO'su seçin yada Hedef Türünü BIOSa ayarlayın."
 
 #. • MSG_092
 msgid "Unsupported filesystem"
@@ -636,7 +636,7 @@ msgstr "Çoklu disk bölümü algılandı"
 
 #. • MSG_095
 msgid "DD Image"
-msgstr "DD Yansıma"
+msgstr "DD Yansıması"
 
 #. • MSG_096
 msgid "The file system currently selected can not be used with this type of ISO. Please select a different file system or use a different ISO."
@@ -699,13 +699,13 @@ msgid ""
 "Note: The file will be downloaded in the current directory and once a '%s' exists there, it will be reused automatically."
 msgstr ""
 "%s yada daha üstünün yüklenebilmesi için '%s' dosyası gerekir.\n"
-"Çünkü bu dosyanın boyutu 100 KB tan daha büyüktür ve %s ISO yansımalarında mutlaka bulunur, Rufus'a gömülü değildir.\n"
+"Çünkü bu dosyanın boyutu 100 Kilobayttan daha büyüktür ve %s ISO yansımalarında mutlaka bulunur, Rufus'a gömülü değildir.\n"
 "\n"
 "Rufus eksik dosyayı sizin için indirebilir:\n"
-"- İnternete bağlanıp dosyayı indirmek için 'Evet'i ssçin\n"
+"- İnternete bağlanıp dosyayı indirmek için 'Evet'i seçin\n"
 "- Dosyayı daha sonra sürücüye elle kopyalamak istiyorsanız 'Hayır'ı seçin\n"
 "\n"
-"Not: Dosya mevcut dizine indirilecek ve '%s' orda varolunca, otomatik olarak kullanılacak."
+"Not: Dosya mevcut dizine indirilecek ve '%s' orda var olunca, otomatik olarak kullanılacak."
 
 #. • MSG_105
 msgid ""
@@ -729,7 +729,7 @@ msgstr "Rufus günlüğü"
 
 #. • MSG_109
 msgid "0x%02X (Disk %d)"
-msgstr ""
+msgstr "0x%02X (Disk %d)"
 
 #. • MSG_110
 #.
@@ -739,7 +739,7 @@ msgid ""
 "MS-DOS cannot boot from a drive using a 64 kilobytes Cluster size.\n"
 "Please change the Cluster size or use FreeDOS."
 msgstr ""
-"MS-DOS, 64 kilobyte Ayırma Birimi Boyutu kullanan bir sürücüden başlatılamaz.\n"
+"MS-DOS, 64 kilobayt Ayırma Birimi Boyutu kullanan bir sürücüden başlatılamaz.\n"
 "Lütfen farklı bir Ayırma Birimi Boyutu seçin yada FreeDOS kullanın."
 
 #. • MSG_111
@@ -768,7 +768,7 @@ msgid ""
 msgstr ""
 "Bu yansıma Syslinux %s%s kullanıyor fakat bu uygulama yalnız Syslinux %s%s için yükleme dosyalarını içeriyor.\n"
 "\n"
-"Syslinux'un yeni sürümleri bir başkasıyla uyumlu olmadığından ve Rufus'un bunlarıntamamını içermesi mümkün olmadığından, iki ek dosyanın('ldlinux.sys' ve 'ldlinux.bss') internet üzerinden indirilmesi gerekli:\n"
+"Syslinux'un yeni sürümleri bir başkasıyla uyumlu olmadığından ve Rufus'un bunların tamamını içermesi mümkün olmadığından, iki ek dosyanın ('ldlinux.sys' ve 'ldlinux.bss') internet üzerinden indirilmesi gerekli:\n"
 "- İnternete bağlanıp bu dosyaları indirmek için 'Evet'i seçin\n"
 "- İşlemden vazgeçmek için 'Hayır'ı seçin\n"
 "\n"
@@ -794,7 +794,7 @@ msgid ""
 msgstr ""
 "Bu yansıma Grub %s kullanıyor fakat bu uygulama yalnız Grub %s için yükleme dosyalarını içeriyor.\n"
 "\n"
-"Grub 'un yeni sürümleri bir başkasıyla uyumlu olmadığından ve Rufus'un bunların tamamını içermesi mümkün olmadığından, Rufus yansımanızla eşleşen Grub'un bir yükleme dosyasını('core.img') edinmeyi çalışacak:\n"
+"Grub 'un yeni sürümleri bir başkasıyla uyumlu olmadığından ve Rufus'un bunların tamamını içermesi mümkün olmadığından, Rufus yansımanızla eşleşen Grub'un bir yükleme dosyasını ('core.img') edinmeyi çalışacak:\n"
 "- İnternete bağlanıp bu dosyaları indirmek için 'Evet'i seçin\n"
 "- Rufustan varsayılan sürümü kullanmak için 'Hayır''ı seçin\n"
 "- İşlemden vazgeçmek için 'Vazgeç'i seçin\n"
@@ -811,7 +811,7 @@ msgstr "Standart Windows Yüklemesi"
 #. http://en.wikipedia.org/wiki/Windows_To_Go in your language.
 #. Otherwise, you may add a parenthesis eg. "Windows To Go (<hint at what it does>)"
 msgid "Windows To Go"
-msgstr ""
+msgstr "Windows To Go"
 
 #. • MSG_119
 msgid "advanced drive properties"
@@ -844,7 +844,7 @@ msgstr "Kalıcı disk bölümü boyutu"
 #. It is okay to use "No partition" or "None" or "Deactivated" to indicate that a persistent partition will not be
 #. created if the width of the control is too small (since the 'Size' edit control is *not* adjusted for width).
 msgid "No persistence"
-msgstr "Kalıcılık yok"
+msgstr "Kalıcı bölüm yok"
 
 #. • MSG_125
 #.
@@ -900,7 +900,7 @@ msgstr ""
 "\n"
 "Bir *MICROSOFT HATASI* nedeniyle, 'WppRecorder.sys' dosyasını 1803 sürümüyle el ile değiştirmediğiniz sürece, bu medya Windows açılışında (Ölü Mavi Ekran) çökecektir.\n"
 "\n"
-"Ayrıca, Rufus'un bunu sizin için otomatik olarak çözememesinin nedeninin 'WppRecorder.sys' dosyasının Microsoft'un telif hakkı olan bir dosya olduğunu ve bu nedenle dosyanın yasal olarak bir kopyasını uygulamaya koyamayacağımızı unutmayın ..."
+"Ayrıca, Rufus'un bunu sizin için otomatik olarak çözememesinin nedeninin 'WppRecorder.sys' dosyasının Microsoft'un telif hakkı olan bir dosya olduğunu ve bu nedenle dosyanın yasal olarak bir kopyasını uygulamaya koyamayacağımızı unutmayın..."
 
 #. • MSG_134
 msgid ""
@@ -950,7 +950,7 @@ msgstr "Web tarayıcı kullanarak indir"
 
 #. • MSG_144
 msgid "Temporarily banned by Microsoft for requesting too many downloads - Please try again later..."
-msgstr "Çok fazla indirme isteğinde bulunduğu için Microsoft tarafından geçici olarak yasaklandı - Lütfen daha sonra tekrar deneyin ..."
+msgstr "Çok fazla indirme isteğinde bulunduğu için Microsoft tarafından geçici olarak yasaklandı - Lütfen daha sonra tekrar deneyin..."
 
 #. • MSG_145
 msgid "PowerShell 3.0 or later is required to run this script."
@@ -976,27 +976,27 @@ msgstr "Bu önyüklenebilir sürücüyü kullanmayı planladığınız bilgisaya
 #.
 #. You shouldn't translate 'Legacy Mode' as this is an option that usually appears in English in the UEFI settings.
 msgid "'UEFI-CSM' means that the device will only boot in BIOS emulation mode (also known as 'Legacy Mode') under UEFI, and not in native UEFI mode."
-msgstr "'UEFI-CSM', cihazın yalnızca UEFI modunda değil, UEFI modunda değil, BIOS öykünme modunda ('Legacy Mode' olarak da bilinir) önyükleme yapacağı anlamına gelir."
+msgstr "'UEFI-CSM', cihazın normal UEFI modunda değil, BIOS öykünme modunda ('Legacy Mod' olarak da bilinir) önyükleme yapacağı anlamına gelir."
 
 #. • MSG_152
 msgid "'non CSM' means that the device will only boot in native UEFI mode, and not in BIOS emulation mode (also known as 'Legacy Mode')."
-msgstr "'CSM yok', aygıtın BIOS'a benzeme modunda değil de ('Legacy Mode' olarak da bilinir) yalnızca yerel UEFI modunda önyükleme yapacağı anlamına gelir."
+msgstr "'CSM yok', aygıtın BIOS'a öykünme modunda değil de ('Legacy Mod' olarak da bilinir) yalnızca yerel UEFI modunda önyükleme yapacağı anlamına gelir."
 
 #. • MSG_153
 msgid "Test pattern: 0x%02X"
-msgstr "Kalıbı Dene: 0x%02X"
+msgstr "Deneme Düzeni: 0x%02X"
 
 #. • MSG_154
 msgid "Test pattern: 0x%02X, 0x%02X"
-msgstr "Kalıbı Dene: 0x%02X, 0x%02X"
+msgstr "Deneme Düzeni: 0x%02X, 0x%02X"
 
 #. • MSG_155
 msgid "Test pattern: 0x%02X, 0x%02X, 0x%02X"
-msgstr "Kalıbı Dene: 0x%02X, 0x%02X, 0x%02X"
+msgstr "Deneme Düzeni: 0x%02X, 0x%02X, 0x%02X"
 
 #. • MSG_156
 msgid "Test pattern: 0x%02X, 0x%02X, 0x%02X, 0x%02X"
-msgstr "Kalıbı Dene: 0x%02X, 0x%02X, 0x%02X, 0x%02X"
+msgstr "Deneme Düzeni: 0x%02X, 0x%02X, 0x%02X, 0x%02X"
 
 #. • MSG_157
 msgid "Sets the target filesystem"
@@ -1040,7 +1040,7 @@ msgstr "Yansıma seçmek ya da indirmek için tıklayın..."
 
 #. • MSG_166
 msgid "Check this box to allow the display of international labels and set a device icon (creates an autorun.inf)"
-msgstr "Uluslararası etiketleri görüntülemek için bu onay kutusunu seçin ve  aygıt simgesini belirleyin (autorun.inf oluşturur)"
+msgstr "Uluslararası etiketleri görüntülemek için bu onay kutusunu seçin ve aygıt simgesini belirleyin (autorun.inf oluşturur)"
 
 #. • MSG_167
 msgid "Install an MBR that allows boot selection and can masquerade the BIOS USB drive ID"
@@ -1127,7 +1127,7 @@ msgstr "IP Adresiniz"
 
 #. • MSG_184
 msgid "For the purpose of generating private usage statistics, we may keep the information collected, \\b for at most a year\\b0 . However, we will not willingly disclose any of this individual data to third parties."
-msgstr "Özel kullanım istatistikleri oluşturmak amacıyla, bilgi toplamaya \\b en fazla bir yıl için\\b0  devam edebiliriz. Fakat, Üçüncü şahıslarla isteyerek herhangi bir veri paylaşılmaz."
+msgstr "Özel kullanım istatistikleri oluşturmak amacıyla, bilgi toplamaya \\b en fazla bir yıl için\\b0 devam edebiliriz. Fakat, Üçüncü şahıslarla isteyerek herhangi bir veri paylaşılmaz."
 
 #. • MSG_185
 msgid "Update Process:"
@@ -1192,7 +1192,7 @@ msgid ""
 msgstr ""
 "ÖNEMLİ: BU SÜRÜCÜ STANDART OLMAYAN BİR SEKTÖR BOYUTU KULLANIYOR!\n"
 "\n"
-"Geleneksel sürücüler 512-byte sektör boyutu kullanır fakat bu sürücü %d-byte kullanıyor. Birçok durumda, bu demek oluyor ki bu sürücüden önyükleme yapılamayacak.\n"
+"Geleneksel sürücüler 512-bayt sektör boyutu kullanır fakat bu sürücü %d-bayt kullanıyor. Birçok durumda, bu demek oluyor ki bu sürücüden önyükleme yapılamayacak.\n"
 "Rufus önyüklemeli bir sürücü oluşturmayı deneyecektir fakat bunun olacağının GARANTİSİ verilemez."
 
 #. • MSG_197
@@ -1378,7 +1378,7 @@ msgstr "Hatalı Bloklar: %s %d/%d - %0.2f%% (%d/%d/%d hata)"
 
 #. • MSG_236
 msgid "Bad Blocks: Testing with random pattern"
-msgstr "Hatalı Bloklar: Rasgele kalıpla deneniyor"
+msgstr "Hatalı Bloklar: Rastgele düzenle deneniyor"
 
 #. • MSG_237
 msgid "Bad Blocks: Testing with pattern 0x%02X"
@@ -1404,7 +1404,7 @@ msgid ""
 msgstr ""
 "İndirilen güncellemenin imzası doğrulanamadı. Bu, sisteminizin imza doğrulaması için yanlış yapılandırıldığı veya kötü amaçlı bir yüklemeyi gösterdiği anlamına gelebilir.\n"
 "\n"
-"İndirme silinecek. Lütfen daha fazla aytıntı için günlüğü kontrol edin."
+"İndirme silinecek. Lütfen daha fazla ayrıntı için günlüğü kontrol edin."
 
 #. • MSG_241
 msgid "Downloading: %0.1f%%"
@@ -1578,7 +1578,7 @@ msgstr "%s modunda yazdır"
 
 #. • MSG_278
 msgid "Checking for conflicting processes..."
-msgstr "Çelişkili işlemler denetleniyor..."
+msgstr "Çakışan işlemler denetleniyor..."
 
 #. • MSG_279
 msgid "Non bootable"
@@ -1624,7 +1624,7 @@ msgstr "USB olmayan çıkarılabilir aygıtlar taranıyor"
 
 #. • MSG_288
 msgid "Missing elevated privileges"
-msgstr "Kayıp yüksek ayrıcalıklar"
+msgstr "Yükseltilmiş ayrıcalıklar bulunamadı"
 
 #. • MSG_289
 msgid "This application can only run with elevated privileges"
