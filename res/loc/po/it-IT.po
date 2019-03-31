@@ -905,7 +905,7 @@ msgstr ""
 "\n"
 "A causa di un *BUG MICROSOFT*, questo supporto si arresta in modo anomalo durante l'avvio di Windows (Blue Screen Of Death), a meno che non si sostituisca manualmente il file 'WppRecorder.sys' con una versione 1803.\n"
 "\n"
-"Nota inoltre che il motivo per cui Rufus non può risolvere automaticamente questo problema è che 'WppRecorder.sys' è un file protetto da copyright di Microsoft, quindi non è possibile incorporarlo legalmente una copia del file nell'applicazione ..."
+"Nota inoltre che il motivo per cui Rufus non può risolvere automaticamente questo problema è che 'WppRecorder.sys' è un file protetto da copyright di Microsoft, quindi non è possibile incorporare legalmente una copia del file nell'applicazione..."
 
 #. • MSG_134
 msgid ""
