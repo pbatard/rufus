@@ -1629,6 +1629,7 @@ INT_PTR CALLBACK NewVersionCallback(HWND hDlg, UINT message, WPARAM wParam, LPAR
 	static HFONT hyperlink_font = NULL;
 	static HANDLE hThread = NULL;
 	HWND hNotes;
+	LONG err;
 	DWORD exit_code;
 	STARTUPINFOA si;
 	PROCESS_INFORMATION pi;
@@ -1694,12 +1695,20 @@ INT_PTR CALLBACK NewVersionCallback(HWND hDlg, UINT message, WPARAM wParam, LPAR
 				}
 
 				hThread = NULL;
-				Sleep(1000);	// Add a delay on account of antivirus scanners
+				EnableWindow(GetDlgItem(hDlg, IDC_DOWNLOAD), FALSE);
+				// Add a 1.5 sec delay, with coundown, on account of antivirus scanners
+				SetWindowTextA(GetDlgItem(hDlg, IDC_DOWNLOAD), "3");
+				Sleep(500);
+				SetWindowTextA(GetDlgItem(hDlg, IDC_DOWNLOAD), "2");
+				Sleep(500);
+				SetWindowTextA(GetDlgItem(hDlg, IDC_DOWNLOAD), "1");
+				Sleep(500);
+				SetWindowTextU(GetDlgItem(hDlg, IDC_DOWNLOAD), lmprintf(MSG_142));
 
-				if (ValidateSignature(hDlg, filepath) != NO_ERROR) {
-					// Unconditionally delete the download and disable the "Launch" control
+				err = ValidateSignature(hDlg, filepath);
+				if ((err != NO_ERROR) && ((force_update < 2) || (err != TRUST_E_TIME_STAMP))) {
+					// Unconditionally delete the download
 					DeleteFileU(filepath);
-					EnableWindow(GetDlgItem(hDlg, IDC_DOWNLOAD), FALSE);
 					break;
 				}
 

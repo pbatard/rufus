@@ -47,12 +47,12 @@
 
 DWORD DownloadStatus;
 BYTE* fido_script = NULL;
+HANDLE update_check_thread = NULL;
 
 extern loc_cmd* selected_locale;
 extern HANDLE dialog_handle;
-extern BOOL force_update, is_x86_32, close_fido_cookie_prompts;
+extern BOOL is_x86_32, close_fido_cookie_prompts;
 static DWORD error_code, fido_len = 0;
-static BOOL update_check_in_progress = FALSE;
 static BOOL force_update_check = FALSE;
 
 /*
@@ -645,7 +645,6 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 	PF_INIT_OR_OUT(HttpSendRequestA, WinInet);
 	PF_INIT_OR_OUT(HttpQueryInfoA, WinInet);
 
-	update_check_in_progress = TRUE;
 	verbose = ReadSetting32(SETTING_VERBOSE_UPDATES);
 	// Without this the FileDialog will produce error 0x8001010E when compiled for Vista or later
 	IGNORE_RETVAL(CoInitializeEx(NULL, COINIT_APARTMENTTHREADED));
@@ -852,7 +851,7 @@ out:
 		PostMessage(hMainDialog, UM_NO_UPDATE, 0, 0);
 	}
 	force_update_check = FALSE;
-	update_check_in_progress = FALSE;
+	update_check_thread = NULL;
 	ExitThread(0);
 }
 
@@ -862,9 +861,11 @@ out:
 BOOL CheckForUpdates(BOOL force)
 {
 	force_update_check = force;
-	if (update_check_in_progress)
+	if (update_check_thread != NULL)
 		return FALSE;
-	if (CreateThread(NULL, 0, CheckForUpdatesThread, NULL, 0, NULL) == NULL) {
+
+	update_check_thread = CreateThread(NULL, 0, CheckForUpdatesThread, NULL, 0, NULL);
+	if (update_check_thread == NULL) {
 		uprintf("Unable to start update check thread");
 		return FALSE;
 	}

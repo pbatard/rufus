@@ -634,8 +634,8 @@ LONG ValidateSignature(HWND hDlg, const char* path)
 				r = TRUST_E_TIME_STAMP;
 			}
 		}
-		if (r != ERROR_SUCCESS)
-		MessageBoxExU(hDlg, lmprintf(MSG_300), lmprintf(MSG_299), MB_OK | MB_ICONERROR | MB_IS_RTL, selected_langid);
+		if ((r != ERROR_SUCCESS) && (force_update < 2))
+			MessageBoxExU(hDlg, lmprintf(MSG_300), lmprintf(MSG_299), MB_OK | MB_ICONERROR | MB_IS_RTL, selected_langid);
 		break;
 	case TRUST_E_NOSIGNATURE:
 		// Should already have been reported, but since we have a custom message for it...

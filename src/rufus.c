@@ -75,6 +75,7 @@ static char szTimer[12] = "00:00:00";
 static unsigned int timer;
 static char uppercase_select[2][64], uppercase_start[64], uppercase_close[64], uppercase_cancel[64];
 
+extern HANDLE update_check_thread;
 extern BOOL enable_iso, enable_joliet, enable_rockridge;
 extern BYTE* fido_script;
 extern HWND hFidoDlg;
@@ -103,7 +104,7 @@ HWND hLogDialog = NULL, hProgress = NULL, hDiskID;
 HANDLE dialog_handle = NULL;
 BOOL is_x86_32, use_own_c32[NB_OLD_C32] = { FALSE, FALSE }, mbr_selected_by_user = FALSE;
 BOOL iso_op_in_progress = FALSE, format_op_in_progress = FALSE, right_to_left_mode = FALSE, has_uefi_csm;
-BOOL enable_HDDs = FALSE, force_update = FALSE, enable_ntfs_compression = FALSE, no_confirmation_on_cancel = FALSE, lock_drive = TRUE;
+BOOL enable_HDDs = FALSE, enable_ntfs_compression = FALSE, no_confirmation_on_cancel = FALSE, lock_drive = TRUE;
 BOOL advanced_mode_device, advanced_mode_format, allow_dual_uefi_bios, detect_fakes, enable_vmdk, force_large_fat32, usb_debug;
 BOOL use_fake_units, preserve_timestamps = FALSE, fast_zeroing = FALSE, app_changed_size = FALSE;
 BOOL zero_drive = FALSE, list_non_usb_removable_drives = FALSE, enable_file_indexing, large_drive = FALSE;
@@ -112,6 +113,7 @@ uint64_t persistence_size = 0;
 float fScale = 1.0f;
 int dialog_showing = 0, selection_default = BT_IMAGE, windows_to_go_selection = 0, persistence_unit_selection = -1;
 int default_fs, fs, bt, pt, tt; // file system, boot type, partition type, target type
+int force_update = 0;
 char szFolderPath[MAX_PATH], app_dir[MAX_PATH], system_dir[MAX_PATH], temp_dir[MAX_PATH], sysnative_dir[MAX_PATH];
 char embedded_sl_version_str[2][12] = { "?.??", "?.??" };
 char embedded_sl_version_ext[2][32];
@@ -3348,7 +3350,7 @@ relaunch:
 		// This will set the reported current version of Rufus to 0.0.0.0 when performing an update
 		// check, so that it always succeeds. This is useful for translators.
 		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'Y')) {
-			force_update = !force_update;
+			force_update = (force_update > 0) ? 0 : 1;
 			PrintStatusTimeout(lmprintf(MSG_259), force_update);
 			continue;
 		}
@@ -3391,6 +3393,14 @@ relaunch:
 			continue;
 		}
 
+		// Ctrl-Alt-Y => Force update check to be successful and ignore timestamp errors
+		if ((msg.message == WM_KEYDOWN) && (msg.wParam == 'Y') &&
+			(GetKeyState(VK_CONTROL) & 0x8000) && (GetKeyState(VK_MENU) & 0x8000)) {
+			force_update = (force_update > 0) ? 0 : 2;
+			PrintStatusTimeout(lmprintf(MSG_259), force_update);
+			continue;
+		}
+
 		// Let the system handle dialog messages (e.g. those from the tab key)
 		if (!IsDialogMessage(hDlg, &msg) && !IsDialogMessage(hLogDialog, &msg)) {
 			TranslateMessage(&msg);
@@ -3411,6 +3421,9 @@ out:
 		ReleaseMutex(hogmutex);
 		safe_closehandle(hogmutex);
 	}
+	// Kill the update check thread if running
+	if (update_check_thread != NULL)
+		TerminateThread(update_check_thread, 1);
 	if ((!external_loc_file) && (loc_file[0] != 0))
 		DeleteFileU(loc_file);
 	DestroyAllTooltips();
