@@ -43,7 +43,7 @@ PF_TYPE_DECL(NTAPI, NTSTATUS, NtQuerySystemInformation, (SYSTEM_INFORMATION_CLAS
 PF_TYPE_DECL(NTAPI, NTSTATUS, NtQueryInformationFile, (HANDLE, PIO_STATUS_BLOCK, PVOID, ULONG, FILE_INFORMATION_CLASS));
 PF_TYPE_DECL(NTAPI, NTSTATUS, NtQueryInformationProcess, (HANDLE, PROCESSINFOCLASS, PVOID, ULONG, PULONG));
 PF_TYPE_DECL(NTAPI, NTSTATUS, NtWow64QueryInformationProcess64, (HANDLE, ULONG, PVOID, ULONG, PULONG));
-PF_TYPE_DECL(NTAPI, NTSTATUS, NtWow64ReadVirtualMemory64, (HANDLE, PVOID64, PVOID, ULONG64, PULONG64));
+PF_TYPE_DECL(NTAPI, NTSTATUS, NtWow64ReadVirtualMemory64, (HANDLE, ULONGLONG, PVOID, ULONG64, PULONG64));
 PF_TYPE_DECL(NTAPI, NTSTATUS, NtQueryObject, (HANDLE, OBJECT_INFORMATION_CLASS, PVOID, ULONG, PULONG));
 PF_TYPE_DECL(NTAPI, NTSTATUS, NtDuplicateObject, (HANDLE, HANDLE, HANDLE, PHANDLE, ACCESS_MASK, ULONG, ULONG));
 PF_TYPE_DECL(NTAPI, NTSTATUS, NtOpenProcess, (PHANDLE, ACCESS_MASK, POBJECT_ATTRIBUTES, CLIENT_ID*));
@@ -354,22 +354,22 @@ static PWSTR GetProcessCommandLine(HANDLE hProcess)
 	if (wow) {
 		// 32-bit process running on a 64-bit OS
 		PROCESS_BASIC_INFORMATION_WOW64 pbi = { 0 };
-		PVOID64 params;
+		ULONGLONG params;
 		UNICODE_STRING_WOW64* ucmdline;
 
 		PF_INIT_OR_OUT(NtWow64QueryInformationProcess64, NtDll);
 		PF_INIT_OR_OUT(NtWow64ReadVirtualMemory64, NtDll);
 
 		status = pfNtWow64QueryInformationProcess64(hProcess, 0, &pbi, sizeof(pbi), NULL);
-		if (!NT_SUCCESS (status))
+		if (!NT_SUCCESS(status))
 			goto out;
 
 		status = pfNtWow64ReadVirtualMemory64(hProcess, pbi.PebBaseAddress, peb, pp_offset + 8, NULL);
-		if (!NT_SUCCESS (status))
+		if (!NT_SUCCESS(status))
 			goto out;
 
 		// Read Process Parameters from the 64-bit address space
-		params = (PVOID64) *((PVOID64*)(peb + pp_offset));
+		params = (ULONGLONG) *((ULONGLONG*)(peb + pp_offset));
 		status = pfNtWow64ReadVirtualMemory64(hProcess, params, pp, cmd_offset + 16, NULL);
 		if (!NT_SUCCESS (status))
 			goto out;
@@ -379,7 +379,7 @@ static PWSTR GetProcessCommandLine(HANDLE hProcess)
 		if (wcmdline == NULL)
 			goto out;
 		status = pfNtWow64ReadVirtualMemory64(hProcess, ucmdline->Buffer, wcmdline, ucmdline->Length, NULL);
-		if (!NT_SUCCESS (status)) {
+		if (!NT_SUCCESS(status)) {
 			safe_free(wcmdline);
 			goto out;
 		}
@@ -392,7 +392,7 @@ static PWSTR GetProcessCommandLine(HANDLE hProcess)
 		PF_INIT_OR_OUT(NtQueryInformationProcess, NtDll);
 
 		status = pfNtQueryInformationProcess(hProcess, 0, &pbi, sizeof(pbi), NULL);
-		if (!NT_SUCCESS (status))
+		if (!NT_SUCCESS(status))
 			goto out;
 
 		// Read PEB
@@ -435,7 +435,7 @@ static DWORD WINAPI SearchProcessThread(LPVOID param)
 	WCHAR *wHandleName = NULL;
 	HANDLE dupHandle = NULL;
 	HANDLE processHandle = NULL;
-	BOOLEAN bFound = FALSE, bGotCmdLine = FALSE, verbose = !_bQuiet;
+	BOOLEAN bFound = FALSE, bGotCmdLine, verbose = !_bQuiet;
 	ULONG access_rights = 0;
 	DWORD size;
 	char cmdline[MAX_PATH] = { 0 };
@@ -598,6 +598,7 @@ static DWORD WINAPI SearchProcessThread(LPVOID param)
 			vuprintf("WARNING: The following process(es) or service(s) are accessing %s:", _HandleName);
 
 		// Where possible, try to get the full command line
+		bGotCmdLine = FALSE;
 		wcmdline = GetProcessCommandLine(processHandle);
 		if (wcmdline != NULL) {
 			bGotCmdLine = TRUE;

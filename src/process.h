@@ -121,7 +121,8 @@ typedef struct _OBJECT_TYPES_INFORMATION
 typedef struct _PROCESS_BASIC_INFORMATION_WOW64
 {
 	PVOID Reserved1[2];
-	PVOID64 PebBaseAddress;
+	// MinGW32 screws us with a sizeof(PVOID64) of 4 instead of 8 => Use an ULONGLONG instead
+	ULONGLONG PebBaseAddress;
 	PVOID Reserved2[4];
 	ULONG_PTR UniqueProcessId[2];
 	PVOID Reserved3[2];
@@ -131,7 +132,7 @@ typedef struct _UNICODE_STRING_WOW64
 {
 	USHORT Length;
 	USHORT MaximumLength;
-	PVOID64 Buffer;
+	ULONGLONG Buffer;
 } UNICODE_STRING_WOW64;
 
 typedef struct _FILE_PROCESS_IDS_USING_FILE_INFORMATION
