@@ -9549,11 +9549,11 @@ t MSG_296 "Ta wersja Rufusa nie została stworzona przez oficjalnego dewelopera(
 t MSG_297 "Wykryto obcięte ISO"
 t MSG_298 "Rozmiar pliku ISO który wybrałeś nie zgadza się z jego deklarowanym rozmiarem: brakuje %s danych!\n\nJeżeli uzyskałeś ten plik z internetu, powinieneś spróbować pobrać nową kopię oraz zweryfikować, że sumy kontrolne MD5 lub SHA zgadzają się z oficjalnymi.\n\nZauważ, że możesz obliczyć sumy MD5 lub SHA w Rufusie klikając przycisk (✓)."
 t MSG_299 "Błąd sprawdzania poprawności znacznika czasu"
-t MSG_300 "Rufus nie był w stanie potwierdzić, że znacznik czasu pobranej aktualizacji jest nowszy niż ten, który jest dla obecnego pliku wykonywalnego.\n\nAby zapobiec potencjalnym atakom proces aktualizacji został przerwany, a pobrana aktualizacja zostanie usunięta. Proszę sprawdzić dziennik dla większej ilości szczegłów."
+t MSG_300 "Rufus nie był w stanie potwierdzić, że znacznik czasu pobranej aktualizacji jest nowszy niż ten, który jest dla obecnego pliku wykonywalnego.\n\nAby zapobiec potencjalnym atakom proces aktualizacji został przerwany, a pobrana aktualizacja zostanie usunięta. Proszę sprawdzić dziennik dla większej ilości szczegółów."
 t MSG_301 "Pokaż ustawienia aplikacji"
 t MSG_302 "Pokaż informacje o tej aplikacji"
 t MSG_303 "Pokaż dziennik"
-t MSG_304 "Utórz obraz dysku wybranego urządzenia"
+t MSG_304 "Utwórz obraz dysku wybranego urządzenia"
 t MSG_305 "Użyj tej opcji aby wskazać, czy chcesz użyć tego dysku do instalacji Windowsa na innym dysku, czy chcesz uruchomić Windowsa bezpośrednio z tego dysku (Windows To Go)."
 t MSG_306 "Szybkie zerowanie dysku: %0.1f%% ukończenia"
 
