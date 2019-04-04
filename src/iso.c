@@ -59,6 +59,7 @@ uint32_t GetInstallWimVersion(const char* iso);
 
 typedef struct {
 	BOOLEAN is_cfg;
+	BOOLEAN is_conf;
 	BOOLEAN is_syslinux_cfg;
 	BOOLEAN is_grub_cfg;
 	BOOLEAN is_old_c32[NB_OLD_C32];
@@ -291,11 +292,11 @@ static void fix_config(const char* psz_fullpath, const char* psz_path, const cha
 
 	// Workaround for config files requiring an ISO label for kernel append that may be
 	// different from our USB label. Oh, and these labels must have spaces converted to \x20.
-	if (props->is_cfg) {
+	if ((props->is_cfg) || (props->is_conf)) {
 		iso_label = replace_char(img_report.label, ' ', "\\x20");
 		usb_label = replace_char(img_report.usb_label, ' ', "\\x20");
 		if ((iso_label != NULL) && (usb_label != NULL)) {
-			if (replace_in_token_data(src, (props->is_grub_cfg) ? "linuxefi" : "append",
+			if (replace_in_token_data(src, (props->is_grub_cfg) ? "linuxefi" : ((props->is_conf) ? "options" : "append"),
 				iso_label, usb_label, TRUE) != NULL)
 				uprintf("  Patched %s: '%s' ➔ '%s'\n", src, iso_label, usb_label);
 		}
@@ -881,7 +882,7 @@ out:
 					img_report.sl_version_str);
 			}
 		}
-		if (!IS_EFI_BOOTABLE(img_report) && HAS_EFI_IMG(img_report) && ExtractEfiImgFiles(NULL)) {
+		if (!IS_EFI_BOOTABLE(img_report) && HAS_EFI_IMG(img_report) && HasEfiImgBootLoaders()) {
 			img_report.has_efi = 0x80;
 		}
 		if (HAS_WINPE(img_report)) {
@@ -932,9 +933,9 @@ out:
 		StrArrayDestroy(&isolinux_path);
 		SendMessage(hMainDialog, UM_PROGRESS_EXIT, 0, 0);
 	} else {
-		// For Debian live ISOs, that only provide EFI boot files in a FAT efi.img
+		// Solus and other ISOs only provide EFI boot files in a FAT efi.img
 		if (img_report.has_efi == 0x80)
-			ExtractEfiImgFiles(dest_dir);
+			DumpFatDir(dest_dir, 0);
 		if (HAS_SYSLINUX(img_report)) {
 			static_sprintf(path, "%s\\syslinux.cfg", dest_dir);
 			// Create a /syslinux.cfg (if none exists) that points to the existing isolinux cfg
@@ -1187,26 +1188,19 @@ int iso9660_readfat(intptr_t pp, void *buf, size_t secsize, libfat_sector_t sec)
 }
 
 /*
- * Extract EFI bootloaders files from an ISO-9660 FAT img file into directory <dir>.
- * If <dir> is NULL, returns TRUE if an EFI bootloader exists in the img.
- * If <dir> is not NULL, returns TRUE if any if the bootloaders was properly written.
+ * Returns TRUE if an EFI bootloader exists in the img.
  */
-BOOL ExtractEfiImgFiles(const char* dir)
+BOOL HasEfiImgBootLoaders(void)
 {
 	BOOL ret = FALSE;
-	HANDLE handle;
-	DWORD size, file_size, written;
 	iso9660_t* p_iso = NULL;
 	iso9660_stat_t* p_statbuf = NULL;
 	iso9660_readfat_private* p_private = NULL;
-	libfat_sector_t s;
 	int32_t dc, c;
 	struct libfat_filesystem *lf_fs = NULL;
 	struct libfat_direntry direntry;
 	char name[12] = { 0 };
-	char path[64];
 	int i, j, k;
-	void* buf;
 
 	if ((image_path == NULL) || !HAS_EFI_IMG(img_report))
 		return FALSE;
@@ -1261,57 +1255,10 @@ BOOL ExtractEfiImgFiles(const char* dir)
 		}
 		c = libfat_searchdir(lf_fs, dc, name, &direntry);
 		if (c > 0) {
-			if (dir == NULL) {
-				if (!ret)
-					uprintf("  Detected EFI bootloader(s) (from '%s'):", img_report.efi_img_path);
-				uprintf("  ● '%s'", efi_bootname[i]);
-				ret = TRUE;
-			} else {
-				file_size = direntry.entry[28] + (direntry.entry[29] << 8) + (direntry.entry[30] << 16) +
-					(direntry.entry[31] << 24);
-				// Sanity check
-				if (file_size > 64 * MB) {
-					uprintf("Warning: File size is larger than 64 MB => not extracted");
-					continue;
-				}
-				static_sprintf(path, "%s\\efi", dir);
-				if (!CreateDirectoryA(path, 0) && (GetLastError() != ERROR_ALREADY_EXISTS)) {
-					uprintf("Could not create directory '%s': %s\n", path, WindowsErrorString());
-					continue;
-				}
-				static_strcat(path, "\\boot");
-				if (!CreateDirectoryA(path, 0) && (GetLastError() != ERROR_ALREADY_EXISTS)) {
-					uprintf("Could not create directory '%s': %s\n", path, WindowsErrorString());
-					continue;
-				}
-				static_strcat(path, "\\");
-				static_strcat(path, efi_bootname[i]);
-				uprintf("Extracting: %s (from '%s', %s)", path, img_report.efi_img_path,
-					SizeToHumanReadable(file_size, FALSE, FALSE));
-				handle = CreateFileA(path, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ,
-					NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-				if (handle == INVALID_HANDLE_VALUE) {
-					uprintf("Unable to create '%s': %s", path, WindowsErrorString());
-					continue;
-				}
-
-				written = 0;
-				s = libfat_clustertosector(lf_fs, c);
-				while ((s != 0) && (s < 0xFFFFFFFFULL) && (written < file_size)) {
-					buf = libfat_get_sector(lf_fs, s);
-					size = MIN(LIBFAT_SECTOR_SIZE, file_size - written);
-					if (!WriteFileWithRetry(handle, buf, size, &size, WRITE_RETRIES) ||
-						(size != MIN(LIBFAT_SECTOR_SIZE, file_size - written))) {
-						uprintf("Error writing '%s': %s", path, WindowsErrorString());
-						CloseHandle(handle);
-						continue;
-					}
-					written += size;
-					s = libfat_nextsector(lf_fs, s);
-				}
-				CloseHandle(handle);
-				ret = TRUE;
-			}
+			if (!ret)
+				uprintf("  Detected EFI bootloader(s) (from '%s'):", img_report.efi_img_path);
+			uprintf("  ● '%s'", efi_bootname[i]);
+			ret = TRUE;
 		}
 	}
 
@@ -1324,6 +1271,135 @@ out:
 	safe_free(p_private);
 	if (p_iso != NULL)
 		iso9660_close(p_iso);
+	return ret;
+}
+
+BOOL DumpFatDir(const char* path, int32_t cluster)
+{
+	// We don't have concurrent calls to this function, so a static lf_fs is fine
+	static struct libfat_filesystem *lf_fs = NULL;
+	void* buf;
+	char *target = NULL, *name = NULL;
+	BOOL ret = FALSE;
+	HANDLE handle;
+	DWORD size, written;
+	libfat_diritem_t diritem = { 0 };
+	libfat_dirpos_t dirpos = { cluster, -1, 0 };
+	libfat_sector_t s;
+	iso9660_t* p_iso = NULL;
+	iso9660_stat_t* p_statbuf = NULL;
+	iso9660_readfat_private* p_private = NULL;
+
+	if (path == NULL)
+		return -1;
+
+	if (cluster == 0) {
+		// Root dir => Perform init stuff
+		if (image_path == NULL)
+			return FALSE;
+		p_iso = iso9660_open(image_path);
+		if (p_iso == NULL) {
+			uprintf("Could not open image '%s' as an ISO-9660 file system", image_path);
+			goto out;
+		}
+		p_statbuf = iso9660_ifs_stat_translate(p_iso, img_report.efi_img_path);
+		if (p_statbuf == NULL) {
+			uprintf("Could not get ISO-9660 file information for file %s\n", img_report.efi_img_path);
+			goto out;
+		}
+		p_private = malloc(sizeof(iso9660_readfat_private));
+		if (p_private == NULL)
+			goto out;
+		p_private->p_iso = p_iso;
+		p_private->lsn = p_statbuf->lsn[0];	// Image should be small enough not to use multiextents
+		p_private->sec_start = 0;
+		// Populate our intial buffer
+		if (iso9660_iso_seek_read(p_private->p_iso, p_private->buf, p_private->lsn, ISO_NB_BLOCKS) != ISO_NB_BLOCKS * ISO_BLOCKSIZE) {
+			uprintf("Error reading ISO-9660 file %s at LSN %lu\n", img_report.efi_img_path, (long unsigned int)p_private->lsn);
+			goto out;
+		}
+		lf_fs = libfat_open(iso9660_readfat, (intptr_t)p_private);
+		if (lf_fs == NULL) {
+			uprintf("FAT access error");
+			goto out;
+		}
+	}
+
+	do {
+		dirpos.cluster = libfat_dumpdir(lf_fs, &dirpos, &diritem);
+		if (dirpos.cluster >= 0) {
+			name = wchar_to_utf8(diritem.name);
+			target = malloc(strlen(path) + safe_strlen(name) + 2);
+			if ((name == NULL) || (target == NULL)) {
+				uprintf("Could not allocate buffer");
+				safe_free(name);
+				goto out;
+			}
+			strcpy(target, path);
+			strcat(target, "\\");
+			strcat(target, name);
+			if (diritem.attributes & 0x10) {
+				// Directory => Create directory
+				if (!CreateDirectoryU(target, 0) && (GetLastError() != ERROR_ALREADY_EXISTS)) {
+					uprintf("Could not create directory '%s': %s\n", target, WindowsErrorString());
+					continue;
+				}
+				if (!DumpFatDir(target, dirpos.cluster))
+					goto out;
+			} else {
+				// Need to figure out if it's a .conf file (Damn you Solus!!)
+				EXTRACT_PROPS props = { 0 };
+				size_t len = strlen(name);
+				props.is_conf = ((len > 4) && (stricmp(&name[len - 5], ".conf") == 0));
+				uprintf("Extracting: %s (from '%s', %s)", target, img_report.efi_img_path,
+					SizeToHumanReadable(diritem.size, FALSE, FALSE));
+				handle = CreateFileU(target, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ,
+					NULL, CREATE_ALWAYS, diritem.attributes, NULL);
+				if (handle == INVALID_HANDLE_VALUE) {
+					uprintf("Unable to create '%s': %s", target, WindowsErrorString());
+					continue;
+				}
+
+				written = 0;
+				s = libfat_clustertosector(lf_fs, dirpos.cluster);
+				while ((s != 0) && (s < 0xFFFFFFFFULL) && (written < diritem.size)) {
+					if (FormatStatus) goto out;
+					buf = libfat_get_sector(lf_fs, s);
+					size = MIN(LIBFAT_SECTOR_SIZE, diritem.size - written);
+					if (!WriteFileWithRetry(handle, buf, size, &size, WRITE_RETRIES) ||
+						(size != MIN(LIBFAT_SECTOR_SIZE, diritem.size - written))) {
+						uprintf("Error writing '%s': %s", target, WindowsErrorString());
+						CloseHandle(handle);
+						continue;
+					}
+					written += size;
+					s = libfat_nextsector(lf_fs, s);
+					// Trust me, you *REALLY* want to invoke libfat_flush() here
+					libfat_flush(lf_fs);
+				}
+				CloseHandle(handle);
+				if (props.is_conf)
+					fix_config(target, NULL, NULL, &props);
+			}
+			safe_free(target);
+			safe_free(name);
+		}
+	} while (dirpos.cluster >= 0);
+	ret = TRUE;
+
+out:
+	if (cluster == 0) {
+		if (lf_fs != NULL) {
+			libfat_close(lf_fs);
+			lf_fs = NULL;
+		}
+		if (p_statbuf != NULL)
+			safe_free(p_statbuf->rr.psz_symlink);
+		safe_free(p_statbuf);
+		safe_free(p_private);
+		if (p_iso != NULL)
+			iso9660_close(p_iso);
+	}
 	return ret;
 }
 

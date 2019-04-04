@@ -28,7 +28,6 @@
  * Also, since struct libfat_sector's data[0] is our buffer, this means we must BOTH
  * align that member in the struct declaration, and use aligned malloc/free.
  */
-extern void _uprintf(const char *format, ...);
 void *libfat_get_sector(struct libfat_filesystem *fs, libfat_sector_t n)
 {
     struct libfat_sector *ls;

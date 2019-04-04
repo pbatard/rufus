@@ -39,6 +39,18 @@ struct libfat_direntry {
     unsigned char entry[32];
 };
 
+typedef struct libfat_dirpos {
+    int32_t cluster;
+    int32_t offset;
+    libfat_sector_t sector;
+} libfat_dirpos_t;
+
+typedef struct libfat_diritem {
+    wchar_t  name[256];
+    uint32_t size;
+    uint8_t  attributes;    /* [--ad-shr] */
+} libfat_diritem_t;
+
 /*
  * Open the filesystem.  The readfunc is the function to read
  * sectors, in the format:
@@ -85,5 +97,15 @@ void *libfat_get_sector(struct libfat_filesystem *fs, libfat_sector_t n);
  */
 int32_t libfat_searchdir(struct libfat_filesystem *fs, int32_t dirclust,
 			 const void *name, struct libfat_direntry *direntry);
+
+/*
+ * Return all the files and directory items from a FAT directory.
+ * Initial call must set dp->offset to negative and dp->cluster to the cluster
+ * that contains the directory data. After that each subsequent call must use
+ * the same dp.
+ * Return value is the cluster for the corresponding item or negative on error.
+ */
+int libfat_dumpdir(struct libfat_filesystem *fs, libfat_dirpos_t *dp,
+		   libfat_diritem_t *di);
 
 #endif /* LIBFAT_H */

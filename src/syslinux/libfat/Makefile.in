@@ -95,7 +95,7 @@ libfat_a_AR = $(AR) $(ARFLAGS)
 libfat_a_LIBADD =
 am_libfat_a_OBJECTS = libfat_a-cache.$(OBJEXT) \
 	libfat_a-fatchain.$(OBJEXT) libfat_a-open.$(OBJEXT) \
-	libfat_a-searchdir.$(OBJEXT)
+	libfat_a-searchdir.$(OBJEXT) libfat_a-dumpdir.$(OBJEXT)
 libfat_a_OBJECTS = $(am_libfat_a_OBJECTS)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -243,7 +243,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 noinst_LIBRARIES = libfat.a
-libfat_a_SOURCES = cache.c fatchain.c open.c searchdir.c
+libfat_a_SOURCES = cache.c fatchain.c open.c searchdir.c dumpdir.c
 libfat_a_CFLAGS = $(AM_CFLAGS)
 all: all-am
 
@@ -323,6 +323,12 @@ libfat_a-searchdir.o: searchdir.c
 
 libfat_a-searchdir.obj: searchdir.c
 	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfat_a_CFLAGS) $(CFLAGS) -c -o libfat_a-searchdir.obj `if test -f 'searchdir.c'; then $(CYGPATH_W) 'searchdir.c'; else $(CYGPATH_W) '$(srcdir)/searchdir.c'; fi`
+
+libfat_a-dumpdir.o: dumpdir.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfat_a_CFLAGS) $(CFLAGS) -c -o libfat_a-dumpdir.o `test -f 'dumpdir.c' || echo '$(srcdir)/'`dumpdir.c
+
+libfat_a-dumpdir.obj: dumpdir.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfat_a_CFLAGS) $(CFLAGS) -c -o libfat_a-dumpdir.obj `if test -f 'dumpdir.c'; then $(CYGPATH_W) 'dumpdir.c'; else $(CYGPATH_W) '$(srcdir)/dumpdir.c'; fi`
 
 ID: $(am__tagged_files)
 	$(am__define_uniq_tagged_files); mkid -fID $$unique

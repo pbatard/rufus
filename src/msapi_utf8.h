@@ -452,7 +452,7 @@ static __inline DWORD CharUpperBuffU(char* lpString, DWORD len)
 
 static __inline HANDLE CreateFileU(const char* lpFileName, DWORD dwDesiredAccess, DWORD dwShareMode,
 								   LPSECURITY_ATTRIBUTES lpSecurityAttributes, DWORD dwCreationDisposition,
-								   DWORD dwFlagsAndAttributes,  HANDLE hTemplateFile)
+								   DWORD dwFlagsAndAttributes, HANDLE hTemplateFile)
 {
 	HANDLE ret = INVALID_HANDLE_VALUE;
 	DWORD err = ERROR_INVALID_DATA;
@@ -461,6 +461,18 @@ static __inline HANDLE CreateFileU(const char* lpFileName, DWORD dwDesiredAccess
 		dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile);
 	err = GetLastError();
 	wfree(lpFileName);
+	SetLastError(err);
+	return ret;
+}
+
+static __inline BOOL CreateDirectoryU(const char* lpPathName, LPSECURITY_ATTRIBUTES lpSecurityAttributes)
+{
+	BOOL ret = FALSE;
+	DWORD err = ERROR_INVALID_DATA;
+	wconvert(lpPathName);
+	ret = CreateDirectoryW(wlpPathName, lpSecurityAttributes);
+	err = GetLastError();
+	wfree(lpPathName);
 	SetLastError(err);
 	return ret;
 }

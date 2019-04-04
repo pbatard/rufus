@@ -37,5 +37,8 @@
     <ClCompile Include="..\src\syslinux\libfat\searchdir.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\syslinux\libfat\dumpdir.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

@@ -1886,6 +1886,10 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	case WM_COMMAND:
 #ifdef RUFUS_TEST
 		if (LOWORD(wParam) == IDC_TEST) {
+			image_path = "C:\\Downloads\\fat.iso";
+			strcpy(img_report.efi_img_path, "efi.img");
+			DumpFatDir("C:\\tmp", 0);
+			image_path = NULL;
 			break;
 		}
 #endif
