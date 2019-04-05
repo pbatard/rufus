@@ -252,6 +252,15 @@ static vidpid_score_t vidpid_score[] = {
 	{ 0x059f, 0x1027, -20 },	// 16 GB UFD
 	{ 0x059f, 0x103B, -20 },	// 16 GB UFD
 	{ 0x059f, 0x1064, -20 },	// 16 GB UFD
+	// Apple exceptions
+	{ 0x05ac, 0x8400, -20},
+	{ 0x05ac, 0x8401, -20},
+	{ 0x05ac, 0x8402, -20},
+	{ 0x05ac, 0x8403, -20},
+	{ 0x05ac, 0x8404, -20},
+	{ 0x05ac, 0x8405, -20},
+	{ 0x05ac, 0x8406, -20},
+	{ 0x05ac, 0x8407, -20},
 	// Prolific exceptions
 	{ 0x067b, 0x2506, -20 },	// 8 GB Micro Hard Drive
 	{ 0x067b, 0x2517, -20 },	// 1 GB UFD

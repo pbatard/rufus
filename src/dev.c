@@ -310,9 +310,9 @@ BOOL GetOpticalMedia(IMG_SAVE* img_save)
 /* For debugging user reports of HDDs vs UFDs */
 //#define FORCED_DEVICE
 #ifdef FORCED_DEVICE
-#define FORCED_VID 0x067B
-#define FORCED_PID 0x2733
-#define FORCED_NAME "EAGET Mass Storage USB Device"
+#define FORCED_VID 0x05AC
+#define FORCED_PID 0x8406
+#define FORCED_NAME "APPLE SD Card Reader USB Device"
 #endif
 
 /*

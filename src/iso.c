@@ -1332,7 +1332,6 @@ BOOL DumpFatDir(const char* path, int32_t cluster)
 			target = malloc(strlen(path) + safe_strlen(name) + 2);
 			if ((name == NULL) || (target == NULL)) {
 				uprintf("Could not allocate buffer");
-				safe_free(name);
 				goto out;
 			}
 			strcpy(target, path);
@@ -1400,6 +1399,8 @@ out:
 		if (p_iso != NULL)
 			iso9660_close(p_iso);
 	}
+	safe_free(name);
+	safe_free(target);
 	return ret;
 }
 
