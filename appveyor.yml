@@ -5,6 +5,7 @@ skip_commits:
   files:
     - .gitignore
     - .gitattributes
+    - .github/
     - res/
     - '**/*.cmd'
     - '**/*.md'
