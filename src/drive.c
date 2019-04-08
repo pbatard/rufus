@@ -1119,44 +1119,42 @@ BOOL UnmountVolume(HANDLE hDrive)
 }
 
 /*
- * Mount the volume identified by drive_guid to mountpoint drive_name
+ * Mount the volume identified by drive_guid to mountpoint drive_name.
+ * If drive_guid is already mounted, but with a different letter than the
+ * one requested, drive_name is updated to use that letter.
  */
 BOOL MountVolume(char* drive_name, char *drive_guid)
 {
-	char mounted_guid[52];	// You need at least 51 characters on XP
-	char mounted_letter[16] = {0};
+	char mounted_guid[52];
+	char mounted_letter[27] = { 0 };
 	DWORD size;
 
 	if (drive_name[0] == '?')
 		return FALSE;
 
-	// For fixed disks, Windows may already have remounted the volume, but with a different letter
-	// than the one we want. If that's the case, we need to unmount first.
+	// Windows may already have the volume mounted but under a different letter.
+	// If that is the case, update drive_name to that letter.
 	if ( (GetVolumePathNamesForVolumeNameA(drive_guid, mounted_letter, sizeof(mounted_letter), &size))
 	  && (size > 1) && (mounted_letter[0] != drive_name[0]) ) {
-		uprintf("Volume is already mounted, but as %c: instead of %c: - Unmounting...", mounted_letter[0], drive_name[0]);
-		if (!DeleteVolumeMountPointA(mounted_letter))
-			uprintf("Failed to unmount volume: %s", WindowsErrorString());
-		// Also delete the destination mountpoint if needed (Don't care about errors)
-		DeleteVolumeMountPointA(drive_name);
-		Sleep(200);
+		uprintf("%s is already mounted as %C: instead of %C: - Will now use this target instead...", mounted_letter[0], drive_name[0]);
+		drive_name[0] = mounted_letter[0];
+		return TRUE;
 	}
 
 	if (!SetVolumeMountPointA(drive_name, drive_guid)) {
-		// If the OS was faster than us at remounting the drive, this operation can fail
-		// with ERROR_DIR_NOT_EMPTY. If that's the case, just check that mountpoints match
+		// If we get ERROR_DIR_NOT_EMPTY, check that mountpoints match...
 		if (GetLastError() == ERROR_DIR_NOT_EMPTY) {
 			if (!GetVolumeNameForVolumeMountPointA(drive_name, mounted_guid, sizeof(mounted_guid))) {
-				uprintf("%s already mounted, but volume GUID could not be checked: %s",
+				uprintf("%s is already mounted, but volume GUID could not be checked: %s",
 					drive_name, WindowsErrorString());
 				return FALSE;
 			}
 			if (safe_strcmp(drive_guid, mounted_guid) != 0) {
-				uprintf("%s already mounted, but volume GUID doesn't match:\r\n  expected %s, got %s",
+				uprintf("%s is mounted, but volume GUID doesn't match:\r\n  expected %s, got %s",
 					drive_name, drive_guid, mounted_guid);
 				return FALSE;
 			}
-			uprintf("%s was already mounted as %s", drive_guid, drive_name);
+			uprintf("%s is already mounted as %C:", drive_guid, drive_name[0]);
 		} else {
 			return FALSE;
 		}
@@ -1263,7 +1261,8 @@ BOOL AltUnmountVolume(const char* drive_name)
 }
 
 /*
- * Issue a complete remount of the volume
+ * Issue a complete remount of the volume.
+ * Note that drive_name *may* be altered when the volume gets remounted.
  */
 BOOL RemountVolume(char* drive_name)
 {
@@ -1275,15 +1274,15 @@ BOOL RemountVolume(char* drive_name)
 		if (DeleteVolumeMountPointA(drive_name)) {
 			Sleep(200);
 			if (MountVolume(drive_name, drive_guid)) {
-				uprintf("Successfully remounted %s on %C:", drive_guid, drive_name[0]);
+				uprintf("Successfully remounted %s as %C:", drive_guid, drive_name[0]);
 			} else {
-				uprintf("Failed to remount %s on %C:", drive_guid, drive_name[0]);
+				uprintf("Failed to remount %s as %C:", drive_guid, drive_name[0]);
 				// This will leave the drive inaccessible and must be flagged as an error
 				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_REMOUNT_VOLUME);
 				return FALSE;
 			}
 		} else {
-			uprintf("Could not remount %C: %s", drive_name[0], WindowsErrorString());
+			uprintf("Could not remount %s as %C: %s", drive_guid, drive_name[0], WindowsErrorString());
 			// Try to continue regardless
 		}
 	}

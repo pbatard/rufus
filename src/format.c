@@ -1969,7 +1969,7 @@ DWORD WINAPI FormatThread(void* param)
 		if (GetDrivePartitionData(SelectedDrive.DeviceNumber, fs_type, sizeof(fs_type), TRUE)) {
 			guid_volume = GetLogicalName(DriveIndex, TRUE, TRUE);
 			if ((guid_volume != NULL) && (MountVolume(drive_name, guid_volume)))
-				uprintf("Remounted %s on %s\n", guid_volume, drive_name);
+				uprintf("Remounted %s as %C:\n", guid_volume, drive_name[0]);
 		}
 		goto out;
 	}
@@ -2034,7 +2034,7 @@ DWORD WINAPI FormatThread(void* param)
 	uprintf("Found volume GUID %s\n", guid_volume);
 
 	if (!MountVolume(drive_name, guid_volume)) {
-		uprintf("Could not remount %s on %s: %s\n", guid_volume, drive_name, WindowsErrorString());
+		uprintf("Could not remount %s as %C: %s\n", guid_volume, drive_name[0], WindowsErrorString());
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_MOUNT_VOLUME);
 		goto out;
 	}
@@ -2199,7 +2199,7 @@ out:
 		guid_volume = GetLogicalName(DriveIndex, TRUE, FALSE);
 		if (guid_volume != NULL) {
 			if (MountVolume(drive_name, guid_volume))
-				uprintf("Re-mounted volume as '%c:' after error\n", drive_name[0]);
+				uprintf("Re-mounted volume as %C: after error\n", drive_name[0]);
 			free(guid_volume);
 		}
 	}
