@@ -54,7 +54,7 @@
 /*
  * Globals
  */
-DWORD FormatStatus = 0;
+DWORD FormatStatus = 0, LastWriteError = 0;
 badblocks_report report = { 0 };
 static uint64_t LastRefresh = 0;
 static float format_percent = 0.0f;
@@ -843,7 +843,8 @@ static BOOL ClearMBRGPT(HANDLE hPhysicalDrive, LONGLONG DiskSize, DWORD SectorSi
 			if (write_sectors(hPhysicalDrive, SectorSize, i, 1, pBuf) != SectorSize) {
 				if (j < WRITE_RETRIES) {
 					uprintf("Retrying in %d seconds...", WRITE_TIMEOUT / 1000);
-					Sleep(WRITE_TIMEOUT);
+					// Don't sit idly but use the downtime to check for conflicting processes...
+					Sleep(CheckDriveAccess(WRITE_TIMEOUT, FALSE));
 				} else
 					goto out;
 			}
@@ -856,7 +857,7 @@ static BOOL ClearMBRGPT(HANDLE hPhysicalDrive, LONGLONG DiskSize, DWORD SectorSi
 			if (write_sectors(hPhysicalDrive, SectorSize, i, 1, pBuf) != SectorSize) {
 				if (j < WRITE_RETRIES) {
 					uprintf("Retrying in %d seconds...", WRITE_TIMEOUT / 1000);
-					Sleep(WRITE_TIMEOUT);
+					Sleep(CheckDriveAccess(WRITE_TIMEOUT, FALSE));
 				} else {
 					// Windows seems to be an ass about keeping a lock on a backup GPT,
 					// so we try to be lenient about not being able to clear it.
@@ -1799,15 +1800,15 @@ DWORD WINAPI FormatThread(void* param)
 
 	// At this stage we have both a handle and a lock to the physical drive
 	if (!GetDriveLetters(DriveIndex, drive_letters)) {
-		uprintf("Failed to get a drive letter\n");
+		uprintf("Failed to get a drive letter");
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_ASSIGN_LETTER);
 		goto out;
 	}
 	if (drive_letters[0] == 0) {
-		uprintf("No drive letter was assigned...\n");
+		uprintf("No drive letter was assigned...");
 		drive_name[0] =  GetUnusedDriveLetter();
 		if (drive_name[0] == 0) {
-			uprintf("Could not find a suitable drive letter\n");
+			uprintf("Could not find a suitable drive letter");
 			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_ASSIGN_LETTER);
 			goto out;
 		}
@@ -1819,18 +1820,18 @@ DWORD WINAPI FormatThread(void* param)
 			if (bt == BT_IMAGE) {
 				// If we are using an image, check that it isn't located on the drive we are trying to format
 				if ((PathGetDriveNumberU(image_path) + 'A') == drive_letters[i-1]) {
-					uprintf("ABORTED: Cannot use an image that is located on the target drive!\n");
+					uprintf("ABORTED: Cannot use an image that is located on the target drive!");
 					FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_ACCESS_DENIED;
 					goto out;
 				}
 			}
 			if (!DeleteVolumeMountPointA(drive_name)) {
-				uprintf("Failed to delete mountpoint %s: %s\n", drive_name, WindowsErrorString());
+				uprintf("Failed to delete mountpoint %s: %", drive_name, WindowsErrorString());
 				// Try to continue. We will bail out if this causes an issue.
 			}
 		}
 	}
-	uprintf("Will use '%c:' as volume mountpoint\n", drive_name[0]);
+	uprintf("Will use '%c:' as volume mountpoint", drive_name[0]);
 
 	// It kind of blows, but we have to relinquish access to the physical drive
 	// for VDS to be able to delete the partitions that reside on it...
@@ -1848,14 +1849,14 @@ DWORD WINAPI FormatThread(void* param)
 	// ...and get a lock to the logical drive so that we can actually write something
 	hLogicalVolume = GetLogicalHandle(DriveIndex, TRUE, FALSE, !lock_drive);
 	if (hLogicalVolume == INVALID_HANDLE_VALUE) {
-		uprintf("Could not lock volume\n");
+		uprintf("Could not lock volume");
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_OPEN_FAILED;
 		goto out;
 	} else if (hLogicalVolume == NULL) {
 		// NULL is returned for cases where the drive is not yet partitioned
-		uprintf("Drive does not appear to be partitioned\n");
+		uprintf("Drive does not appear to be partitioned");
 	} else if (!UnmountVolume(hLogicalVolume)) {
-		uprintf("Trying to continue regardless...\n");
+		uprintf("Trying to continue regardless...");
 	}
 	CHECK_FOR_USER_CANCEL;
 
@@ -1877,8 +1878,8 @@ DWORD WINAPI FormatThread(void* param)
 	if ((bt != BT_IMAGE) || (img_report.is_iso && !write_as_image)) {
 		if ((!ClearMBRGPT(hPhysicalDrive, SelectedDrive.DiskSize, SelectedDrive.SectorSize, use_large_fat32)) ||
 			(!InitializeDisk(hPhysicalDrive))) {
-			uprintf("Could not reset partitions\n");
-			FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_PARTITION_FAILURE;
+			uprintf("Could not reset partitions");
+			FormatStatus = (LastWriteError != 0) ? LastWriteError : (ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_PARTITION_FAILURE);
 			goto out;
 		}
 	}
@@ -1897,16 +1898,16 @@ DWORD WINAPI FormatThread(void* param)
 				lt.wYear, lt.wMonth, lt.wDay, lt.wHour, lt.wMinute, lt.wSecond);
 			log_fd = fopenU(logfile, "w+");
 			if (log_fd == NULL) {
-				uprintf("Could not create log file for bad blocks check\n");
+				uprintf("Could not create log file for bad blocks check");
 			} else {
-				fprintf(log_fd, APPLICATION_NAME " bad blocks check started on: %04d.%02d.%02d %02d:%02d:%02d\n",
+				fprintf(log_fd, APPLICATION_NAME " bad blocks check started on: %04d.%02d.%02d %02d:%02d:%02d",
 				lt.wYear, lt.wMonth, lt.wDay, lt.wHour, lt.wMinute, lt.wSecond);
 				fflush(log_fd);
 			}
 
 			if (!BadBlocks(hPhysicalDrive, SelectedDrive.DiskSize, (sel >= 2) ? 4 : sel +1,
 				(sel < 2) ? 0 : sel - 2, &report, log_fd)) {
-				uprintf("Bad blocks: Check failed.\n");
+				uprintf("Bad blocks: Check failed.");
 				if (!IS_ERROR(FormatStatus))
 					FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_BADBLOCKS_FAILURE);
 				ClearMBRGPT(hPhysicalDrive, SelectedDrive.DiskSize, SelectedDrive.SectorSize, FALSE);
@@ -1914,7 +1915,7 @@ DWORD WINAPI FormatThread(void* param)
 				DeleteFileU(logfile);
 				goto out;
 			}
-			uprintf("Bad Blocks: Check completed, %d bad block%s found. (%d/%d/%d errors)\n",
+			uprintf("Bad Blocks: Check completed, %d bad block%s found. (%d/%d/%d errors)",
 				report.bb_count, (report.bb_count==1)?"":"s",
 				report.num_read_errors, report.num_write_errors, report.num_corruption_errors);
 			r = IDOK;
@@ -1923,7 +1924,7 @@ DWORD WINAPI FormatThread(void* param)
 					report.num_corruption_errors);
 				fprintf(log_fd, bb_msg);
 				GetLocalTime(&lt);
-				fprintf(log_fd, APPLICATION_NAME " bad blocks check ended on: %04d.%02d.%02d %02d:%02d:%02d\n",
+				fprintf(log_fd, APPLICATION_NAME " bad blocks check ended on: %04d.%02d.%02d %02d:%02d:%02d",
 				lt.wYear, lt.wMonth, lt.wDay, lt.wHour, lt.wMinute, lt.wSecond);
 				fclose(log_fd);
 				r = MessageBoxExU(hMainDialog, lmprintf(MSG_012, bb_msg, logfile),
@@ -1942,7 +1943,7 @@ DWORD WINAPI FormatThread(void* param)
 		// Especially after destructive badblocks test, you must zero the MBR/GPT completely
 		// before repartitioning. Else, all kind of bad things happen.
 		if (!ClearMBRGPT(hPhysicalDrive, SelectedDrive.DiskSize, SelectedDrive.SectorSize, use_large_fat32)) {
-			uprintf("unable to zero MBR/GPT\n");
+			uprintf("unable to zero MBR/GPT");
 			if (!IS_ERROR(FormatStatus))
 				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_WRITE_FAULT;
 			goto out;
@@ -1969,7 +1970,7 @@ DWORD WINAPI FormatThread(void* param)
 		if (GetDrivePartitionData(SelectedDrive.DeviceNumber, fs_type, sizeof(fs_type), TRUE)) {
 			guid_volume = GetLogicalName(DriveIndex, TRUE, TRUE);
 			if ((guid_volume != NULL) && (MountVolume(drive_name, guid_volume)))
-				uprintf("Remounted %s as %C:\n", guid_volume, drive_name[0]);
+				uprintf("Remounted %s as %C:", guid_volume, drive_name[0]);
 		}
 		goto out;
 	}
@@ -1978,7 +1979,7 @@ DWORD WINAPI FormatThread(void* param)
 	CHECK_FOR_USER_CANCEL;
 
 	if (!CreatePartition(hPhysicalDrive, pt, fs, (pt==PARTITION_STYLE_MBR) && (tt==TT_UEFI), extra_partitions)) {
-		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_PARTITION_FAILURE;
+		FormatStatus = (LastWriteError != 0) ? LastWriteError : (ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_PARTITION_FAILURE);
 		goto out;
 	}
 	UpdateProgress(OP_PARTITION, -1.0f);
@@ -1987,7 +1988,7 @@ DWORD WINAPI FormatThread(void* param)
 	if ((hLogicalVolume != NULL) && (hLogicalVolume != INVALID_HANDLE_VALUE)) {
 		PrintInfoDebug(0, MSG_227);
 		if (!CloseHandle(hLogicalVolume)) {
-			uprintf("Could not close volume: %s\n", WindowsErrorString());
+			uprintf("Could not close volume: %s", WindowsErrorString());
 			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_ACCESS_DENIED;
 			goto out;
 		}
@@ -1995,7 +1996,7 @@ DWORD WINAPI FormatThread(void* param)
 	hLogicalVolume = INVALID_HANDLE_VALUE;
 
 	// Wait for the logical drive we just created to appear
-	uprintf("Waiting for logical drive to reappear...\n");
+	uprintf("Waiting for logical drive to reappear...");
 	Sleep(200);
 	if (!WaitForLogical(DriveIndex))
 		uprintf("Logical drive was not found!");	// We try to continue even if this fails, just in case
@@ -2006,7 +2007,7 @@ DWORD WINAPI FormatThread(void* param)
 	ret = use_large_fat32?FormatFAT32(DriveIndex):FormatDrive(DriveIndex);
 	if (!ret) {
 		// Error will be set by FormatDrive() in FormatStatus
-		uprintf("Format error: %s\n", StrError(FormatStatus, TRUE));
+		uprintf("Format error: %s", StrError(FormatStatus, TRUE));
 		goto out;
 	}
 
@@ -2027,11 +2028,11 @@ DWORD WINAPI FormatThread(void* param)
 
 	guid_volume = GetLogicalName(DriveIndex, TRUE, TRUE);
 	if (guid_volume == NULL) {
-		uprintf("Could not get GUID volume name\n");
+		uprintf("Could not get GUID volume name");
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_NO_VOLUME_ID;
 		goto out;
 	}
-	uprintf("Found volume GUID %s\n", guid_volume);
+	uprintf("Found volume GUID %s, guid_volume");
 
 	if (!MountVolume(drive_name, guid_volume)) {
 		uprintf("Could not remount %s as %C: %s\n", guid_volume, drive_name[0], WindowsErrorString());
@@ -2076,7 +2077,7 @@ DWORD WINAPI FormatThread(void* param)
 			// => no need to reacquire the lock...
 			hLogicalVolume = GetLogicalHandle(DriveIndex, FALSE, TRUE, FALSE);
 			if ((hLogicalVolume == INVALID_HANDLE_VALUE) || (hLogicalVolume == NULL)) {
-				uprintf("Could not re-mount volume for partition boot record access\n");
+				uprintf("Could not re-mount volume for partition boot record access");
 				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_OPEN_FAILED;
 				goto out;
 			}
@@ -2116,7 +2117,7 @@ DWORD WINAPI FormatThread(void* param)
 		} else if (bt == BT_GRUB4DOS) {
 			grub4dos_dst[0] = drive_name[0];
 			IGNORE_RETVAL(_chdirU(app_dir));
-			uprintf("Installing: %s (Grub4DOS loader) %s\n", grub4dos_dst,
+			uprintf("Installing: %s (Grub4DOS loader) %s", grub4dos_dst,
 				IsFileInDB(FILES_DIR "\\grub4dos-" GRUB4DOS_VERSION "\\grldr")?"✓":"✗");
 			if (!CopyFileU(FILES_DIR "\\grub4dos-" GRUB4DOS_VERSION "\\grldr", grub4dos_dst, FALSE))
 				uprintf("Failed to copy file: %s", WindowsErrorString());
@@ -2139,10 +2140,10 @@ DWORD WINAPI FormatThread(void* param)
 				}
 				if (HAS_KOLIBRIOS(img_report)) {
 					kolibri_dst[0] = drive_name[0];
-					uprintf("Installing: %s (KolibriOS loader)\n", kolibri_dst);
+					uprintf("Installing: %s (KolibriOS loader)", kolibri_dst);
 					if (ExtractISOFile(image_path, "HD_Load/USB_Boot/MTLD_F32", kolibri_dst,
 						FILE_ATTRIBUTE_HIDDEN|FILE_ATTRIBUTE_SYSTEM) == 0) {
-						uprintf("Warning: loader installation failed - KolibriOS will not boot!\n");
+						uprintf("Warning: loader installation failed - KolibriOS will not boot!");
 					}
 				}
 				// EFI mode selected, with no 'boot###.efi' but Windows 7 x64's 'bootmgr.efi' (bit #0)
@@ -2152,12 +2153,12 @@ DWORD WINAPI FormatThread(void* param)
 					efi_dst[0] = drive_name[0];
 					efi_dst[sizeof(efi_dst) - sizeof("\\bootx64.efi")] = 0;
 					if (!CreateDirectoryA(efi_dst, 0)) {
-						uprintf("Could not create directory '%s': %s\n", efi_dst, WindowsErrorString());
+						uprintf("Could not create directory '%s': %s", efi_dst, WindowsErrorString());
 						FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_PATCH);
 					} else {
 						efi_dst[sizeof(efi_dst) - sizeof("\\bootx64.efi")] = '\\';
 						if (!WimExtractFile(img_report.wininst_path[0], 1, "Windows\\Boot\\EFI\\bootmgfw.efi", efi_dst)) {
-							uprintf("Failed to setup Win7 EFI boot\n");
+							uprintf("Failed to setup Win7 EFI boot");
 							FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_PATCH);
 						}
 					}
@@ -2199,7 +2200,7 @@ out:
 		guid_volume = GetLogicalName(DriveIndex, TRUE, FALSE);
 		if (guid_volume != NULL) {
 			if (MountVolume(drive_name, guid_volume))
-				uprintf("Re-mounted volume as %C: after error\n", drive_name[0]);
+				uprintf("Re-mounted volume as %C: after error", drive_name[0]);
 			free(guid_volume);
 		}
 	}

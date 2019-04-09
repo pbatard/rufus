@@ -79,6 +79,7 @@
 #define WRITE_TIMEOUT               5000		// How long we should wait between write retries (in ms)
 #define SEARCH_PROCESS_TIMEOUT      10000		// How long we should search for conflicting processes before giving up (in ms)
 #define NET_SESSION_TIMEOUT         3500		// How long we should wait to connect, send or receive internet data
+#define CHECK_DRIVE_TIMEOUT         2000
 #define MARQUEE_TIMER_REFRESH       10			// Time between progress bar marquee refreshes, in ms
 #define FS_DEFAULT                  FS_FAT32
 #define SINGLE_CLUSTERSIZE_DEFAULT  0x00000100
@@ -445,7 +446,7 @@ extern HWND hMainDialog, hLogDialog, hStatus, hDeviceList, hCapacity;
 extern HWND hPartitionScheme, hTargetSystem, hFileSystem, hClusterSize, hLabel, hBootType, hNBPasses, hLog;
 extern HWND hInfo, hProgress, hDiskID;
 extern WORD selected_langid;
-extern DWORD FormatStatus, DownloadStatus, MainThreadId;
+extern DWORD FormatStatus, DownloadStatus, MainThreadId, LastWriteError;
 extern BOOL use_own_c32[NB_OLD_C32], detect_fakes, iso_op_in_progress, format_op_in_progress, right_to_left_mode;
 extern BOOL allow_dual_uefi_bios, large_drive, usb_debug;
 extern int64_t iso_blocking_status;
@@ -571,6 +572,7 @@ extern char* GetCurrentMUI(void);
 extern void SetAlertPromptMessages(void);
 extern BOOL SetAlertPromptHook(void);
 extern void ClrAlertPromptHook(void);
+extern DWORD CheckDriveAccess(DWORD dwTimeOut, BOOL bPrompt);
 extern BYTE SearchProcess(char* HandleName, DWORD dwTimeout, BOOL bPartialMatch, BOOL bIgnoreSelf, BOOL bQuiet);
 extern BOOL EnablePrivileges(void);
 extern void FlashTaskbar(HANDLE handle);

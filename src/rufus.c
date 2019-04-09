@@ -1783,18 +1783,21 @@ static void SaveISO(void)
 	}
 }
 
-// Check for conflicting processes accessing the drive, and if any,
-// ask the user whether they want to proceed.
-// Parameter is the maximum amount of time we allow for this call to execute (in ms)
-static BOOL CheckDriveAccess(DWORD dwTimeOut)
+// Check for conflicting processes accessing the drive.
+// If bPrompt is true, ask the user whether they want to proceed.
+// dwTimeOut is the maximum amount of time we allow for this call to execute (in ms)
+// If bPrompt is false, the return value is the amount of time remaining before
+// dwTimeOut would expire (or zero if we spent more than dwTimeout in this procedure).
+// If bPrompt is true, the return value is 0 on error, non-zero on success.
+DWORD CheckDriveAccess(DWORD dwTimeOut, BOOL bPrompt)
 {
 	uint32_t i, j;
-	BOOL ret = FALSE, proceed = TRUE;
+	DWORD ret = 0, proceed = TRUE;
 	BYTE access_mask;
 	char *PhysicalPath = NULL, DevPath[MAX_PATH];
 	char drive_letter[27], drive_name[] = "?:";
 	char title[128];
-	uint64_t cur_time, end_time = GetTickCount64() + dwTimeOut;
+	uint64_t start_time = GetTickCount64(), cur_time, end_time = start_time + dwTimeOut;
 
 	// Get the current selected device
 	DWORD DeviceNum = (DWORD)ComboBox_GetItemData(hDeviceList, ComboBox_GetCurSel(hDeviceList));
@@ -1802,7 +1805,8 @@ static BOOL CheckDriveAccess(DWORD dwTimeOut)
 		return FALSE;
 
 	// "Checking for conflicting processes..."
-	PrintInfo(0, MSG_278);
+	if (bPrompt)
+		PrintInfo(0, MSG_278);
 
 	// Search for any blocking processes against the physical drive
 	PhysicalPath = GetPhysicalName(DeviceNum);
@@ -1839,11 +1843,16 @@ static BOOL CheckDriveAccess(DWORD dwTimeOut)
 	}
 
 	// Prompt the user if we detected blocking processes
-	if (!proceed) {
+	if (bPrompt && !proceed) {
 		ComboBox_GetTextU(hDeviceList, title, sizeof(title));
 		proceed = Notification(MSG_WARNING_QUESTION, NULL, NULL, title, lmprintf(MSG_132));
 	}
-	ret = proceed;
+	if (bPrompt) {
+		ret = (DWORD)proceed;
+	} else {
+		ret = (DWORD)(GetTickCount64() - start_time);
+		ret = (dwTimeOut > ret) ? (dwTimeOut - ret) : 0;
+	}
 
 out:
 	PrintInfo(0, MSG_210);
@@ -2207,6 +2216,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			// Disable all controls except Cancel
 			EnableControls(FALSE);
 			FormatStatus = 0;
+			LastWriteError = 0;
 			StrArrayClear(&BlockingProcess);
 			format_op_in_progress = TRUE;
 			no_confirmation_on_cancel = FALSE;
@@ -2604,7 +2614,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			}
 		}
 
-		if (!CheckDriveAccess(2000))
+		if (!CheckDriveAccess(CHECK_DRIVE_TIMEOUT, TRUE))
 			goto aborted_start;
 
 		GetWindowTextU(hDeviceList, tmp, ARRAYSIZE(tmp));
@@ -2712,10 +2722,19 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 						break;
 					}
 				}
+				if (SCODE_CODE(FormatStatus) == ERROR_NOT_READY) {
+					// A port cycle usually helps with a device not ready
+					int index = ComboBox_GetCurSel(hDeviceList);
+					if (index >= 0) {
+						uprintf("Device not ready → Trying to cycle port...");
+						ResetDevice(index);
+					}
+				}
 				Notification(MSG_ERROR, NULL, NULL, lmprintf(MSG_042), lmprintf(MSG_043, StrError(FormatStatus, FALSE)));
 			}
 		}
 		FormatStatus = 0;
+		LastWriteError = 0;
 		format_op_in_progress = FALSE;
 		return (INT_PTR)TRUE;
 

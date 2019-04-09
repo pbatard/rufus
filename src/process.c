@@ -679,7 +679,7 @@ BYTE SearchProcess(char* HandleName, DWORD dwTimeOut, BOOL bPartialMatch, BOOL b
 	if (res == WAIT_TIMEOUT) {
 		// Timeout - kill the thread
 		TerminateThread(handle, 0);
-		uprintf("Warning: Conflicting process search failed to complete due to timeout");
+		uprintf("Warning: Search for conflicting processes was interrupted due to timeout");
 	} else if (res != WAIT_OBJECT_0) {
 		TerminateThread(handle, 0);
 		uprintf("Warning: Failed to wait for conflicting process search thread: %s", WindowsErrorString());
