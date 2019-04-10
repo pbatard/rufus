@@ -1788,7 +1788,7 @@ static void SaveISO(void)
 // dwTimeOut is the maximum amount of time we allow for this call to execute (in ms)
 // If bPrompt is false, the return value is the amount of time remaining before
 // dwTimeOut would expire (or zero if we spent more than dwTimeout in this procedure).
-// If bPrompt is true, the return value is 0 on error, non-zero on success.
+// If bPrompt is true, the return value is 0 on error, dwTimeOut on success.
 DWORD CheckDriveAccess(DWORD dwTimeOut, BOOL bPrompt)
 {
 	uint32_t i, j;
@@ -1848,7 +1848,7 @@ DWORD CheckDriveAccess(DWORD dwTimeOut, BOOL bPrompt)
 		proceed = Notification(MSG_WARNING_QUESTION, NULL, NULL, title, lmprintf(MSG_132));
 	}
 	if (bPrompt) {
-		ret = (DWORD)proceed;
+		ret = proceed ? dwTimeOut : 0;
 	} else {
 		ret = (DWORD)(GetTickCount64() - start_time);
 		ret = (dwTimeOut > ret) ? (dwTimeOut - ret) : 0;

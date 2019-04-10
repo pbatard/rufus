@@ -28,6 +28,7 @@
 #endif
 
 #include <windows.h>
+#include <assert.h>
 
 #include "rufus.h"
 #include "process.h"
@@ -55,7 +56,7 @@ PF_TYPE_DECL(NTAPI, NTSTATUS, NtClose, (HANDLE));
 PF_TYPE_DECL(WINAPI, BOOL, QueryFullProcessImageNameW, (HANDLE, DWORD, LPWSTR, PDWORD));
 
 static PVOID PhHeapHandle = NULL;
-static char* _HandleName;
+static wchar_t* _wHandleName;
 static BOOL _bPartialMatch, _bIgnoreSelf, _bQuiet;
 static BYTE access_mask;
 extern StrArray BlockingProcess;
@@ -432,7 +433,6 @@ static DWORD WINAPI SearchProcessThread(LPVOID param)
 	ULONG_PTR last_access_denied_pid = 0;
 	ULONG bufferSize;
 	USHORT wHandleNameLen;
-	WCHAR *wHandleName = NULL;
 	HANDLE dupHandle = NULL;
 	HANDLE processHandle = NULL;
 	BOOLEAN bFound = FALSE, bGotCmdLine, verbose = !_bQuiet;
@@ -462,8 +462,7 @@ static DWORD WINAPI SearchProcessThread(LPVOID param)
 	pid[0] = (ULONG_PTR)0;
 	cur_pid = 1;
 
-	wHandleName = utf8_to_wchar(_HandleName);
-	wHandleNameLen = (USHORT)wcslen(wHandleName);
+	wHandleNameLen = (USHORT)wcslen(_wHandleName);
 
 	bufferSize = 0x200;
 	buffer = PhAllocate(bufferSize);
@@ -580,7 +579,7 @@ static DWORD WINAPI SearchProcessThread(LPVOID param)
 			continue;
 
 		// Match against our target string
-		if (wcsncmp(wHandleName, buffer->Name.Buffer, wHandleNameLen) != 0)
+		if (wcsncmp(_wHandleName, buffer->Name.Buffer, wHandleNameLen) != 0)
 			continue;
 
 		// If we are here, we have a process accessing our target!
@@ -595,7 +594,7 @@ static DWORD WINAPI SearchProcessThread(LPVOID param)
 
 		// If this is the very first process we find, print a header
 		if (cmdline[0] == 0)
-			vuprintf("WARNING: The following process(es) or service(s) are accessing %s:", _HandleName);
+			vuprintf("WARNING: The following process(es) or service(s) are accessing %S:", _wHandleName);
 
 		// Where possible, try to get the full command line
 		bGotCmdLine = FALSE;
@@ -638,9 +637,8 @@ out:
 	if (cmdline[0] != 0)
 		vuprintf("You should close these applications before attempting to reformat the drive.");
 	else
-		vuprintf("NOTE: Could not identify the process(es) or service(s) accessing %s", _HandleName);
+		vuprintf("NOTE: Could not identify the process(es) or service(s) accessing %S", _wHandleName);
 
-	free(wHandleName);
 	PhFree(buffer);
 	PhFree(handles);
 	PhDestroyHeap();
@@ -664,26 +662,30 @@ BYTE SearchProcess(char* HandleName, DWORD dwTimeOut, BOOL bPartialMatch, BOOL b
 	HANDLE handle;
 	DWORD res = 0;
 
-	_HandleName = HandleName;
+	_wHandleName = utf8_to_wchar(HandleName);
 	_bPartialMatch = bPartialMatch;
 	_bIgnoreSelf = bIgnoreSelf;
 	_bQuiet = bQuiet;
-	access_mask = 0;
+	access_mask = 0x00;
+
+	assert(_wHandleName != NULL);
 
 	handle = CreateThread(NULL, 0, SearchProcessThread, NULL, 0, NULL);
 	if (handle == NULL) {
 		uprintf("Warning: Unable to create conflicting process search thread");
-		return 0x00;
+		goto out;
 	}
 	res = WaitForSingleObjectWithMessages(handle, dwTimeOut);
 	if (res == WAIT_TIMEOUT) {
 		// Timeout - kill the thread
 		TerminateThread(handle, 0);
-		uprintf("Warning: Search for conflicting processes was interrupted due to timeout");
+		uprintf("Search for conflicting processes was interrupted due to timeout");
 	} else if (res != WAIT_OBJECT_0) {
 		TerminateThread(handle, 0);
-		uprintf("Warning: Failed to wait for conflicting process search thread: %s", WindowsErrorString());
+		uprintf("Warning: Failed to wait for conflicting process search thread %s", WindowsErrorString());
 	}
+out:
+	free(_wHandleName);
 	return access_mask;
 }
 

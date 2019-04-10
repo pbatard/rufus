@@ -354,7 +354,7 @@ BOOL WriteFileWithRetry(HANDLE hFile, LPCVOID lpBuffer, DWORD nNumberOfBytesToWr
 	// Need to get the current file pointer in case we need to retry
 	readFilePointer = SetFilePointerEx(hFile, liZero, &liFilePointer, FILE_CURRENT);
 	if (!readFilePointer)
-		uprintf("Warning: Could not read file pointer: %s", WindowsErrorString());
+		uprintf("Warning: Could not read file pointer %s", WindowsErrorString());
 
 	if (nNumRetries == 0)
 		nNumRetries = 1;
@@ -375,7 +375,7 @@ BOOL WriteFileWithRetry(HANDLE hFile, LPCVOID lpBuffer, DWORD nNumberOfBytesToWr
 			}
 			uprintf("Wrote %d bytes but requested %d", *lpNumberOfBytesWritten, nNumberOfBytesToWrite);
 		} else {
-			uprintf("Write error [0x%08X]", GetLastError());
+			uprintf("Write error %s", WindowsErrorString());
 			LastWriteError = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|GetLastError();
 		}
 		// If we can't reposition for the next run, just abort
