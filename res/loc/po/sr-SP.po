@@ -462,7 +462,7 @@ msgid "Could not open media. It may be in use by another process. Please re-plug
 msgstr "Nije moguće otvoriti medij. Možda ga koristi drugi proces. Ponovo umetnite uređaj i pokušajte ponovo."
 
 #. • MSG_068
-msgid "Error while partitioning drive."
+msgid "Could not partition drive."
 msgstr "Greška pri particionisanju uređaja."
 
 #. • MSG_069
@@ -599,8 +599,8 @@ msgid "Filesystem limitation"
 msgstr "Ograničenja sistema datoteka"
 
 #. • MSG_100
-msgid "This ISO image contains a file larger than 4GB, which is more than the maximum size allowed for a FAT or FAT32 file system."
-msgstr "Ova ISO datoteka sadrži poddatoteku veću od 4GB, što je više nego dozvoljeno za FAT ili FAT32 sisteme datoteka."
+msgid "This ISO image contains a file larger than 4 GB, which is more than the maximum size allowed for a FAT or FAT32 file system."
+msgstr "Ova ISO datoteka sadrži poddatoteku veću od 4 GB, što je više nego dozvoljeno za FAT ili FAT32 sisteme datoteka."
 
 #. • MSG_101
 msgid "Missing WIM support"

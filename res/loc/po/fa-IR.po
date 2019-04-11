@@ -498,7 +498,7 @@ msgstr ""
 "لطفاً وسیله موردنظر را از درگاه USB بیرون بیاورید و سپس دوباره آن را متصل و امتحان کنید."
 
 #. • MSG_068
-msgid "Error while partitioning drive."
+msgid "Could not partition drive."
 msgstr "خطا در هنگام پارتیشن‌بندی درایو"
 
 #. • MSG_069
@@ -678,7 +678,7 @@ msgid "Filesystem limitation"
 msgstr "محدودیت در سیستم فایل"
 
 #. • MSG_100
-msgid "This ISO image contains a file larger than 4GB, which is more than the maximum size allowed for a FAT or FAT32 file system."
+msgid "This ISO image contains a file larger than 4 GB, which is more than the maximum size allowed for a FAT or FAT32 file system."
 msgstr "ایمیج (Image) انتخاب‌شده فایلی بزرگ‌تر از ۴ گیگابایت دارد. این مقدار از حداکثر اندازه مجاز برای سیستم فایل FAT و FAT32 بیشتر است."
 
 #. • MSG_101

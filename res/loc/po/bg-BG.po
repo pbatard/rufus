@@ -484,7 +484,7 @@ msgid "Could not open media. It may be in use by another process. Please re-plug
 msgstr "Устройството не можа да бъде отворено. Възможно е да се използва от друг процес. Моля, изкарайте и вкарайте повторно устройството и опитайте отново."
 
 #. • MSG_068
-msgid "Error while partitioning drive."
+msgid "Could not partition drive."
 msgstr "Грешка при създаването на дялове."
 
 #. • MSG_069
@@ -665,8 +665,8 @@ msgid "Filesystem limitation"
 msgstr "Ограничение на файловата система"
 
 #. • MSG_100
-msgid "This ISO image contains a file larger than 4GB, which is more than the maximum size allowed for a FAT or FAT32 file system."
-msgstr "Този ISO образ съдържа файл по голям от 4GB, което е повече от допустимият размер за FAT или FAT32 файлова система."
+msgid "This ISO image contains a file larger than 4 GB, which is more than the maximum size allowed for a FAT or FAT32 file system."
+msgstr "Този ISO образ съдържа файл по голям от 4 GB, което е повече от допустимият размер за FAT или FAT32 файлова система."
 
 #. • MSG_101
 msgid "Missing WIM support"

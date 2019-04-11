@@ -484,7 +484,7 @@ msgid "Could not open media. It may be in use by another process. Please re-plug
 msgstr "メディアを開けませんでした。他のプログラムで使われている可能性があります。もう一度接続し、やり直してください。"
 
 #. • MSG_068
-msgid "Error while partitioning drive."
+msgid "Could not partition drive."
 msgstr "ドライブのパーティション設定中にエラーが発生しました。"
 
 #. • MSG_069
@@ -666,7 +666,7 @@ msgid "Filesystem limitation"
 msgstr "ファイル システム制限"
 
 #. • MSG_100
-msgid "This ISO image contains a file larger than 4GB, which is more than the maximum size allowed for a FAT or FAT32 file system."
+msgid "This ISO image contains a file larger than 4 GB, which is more than the maximum size allowed for a FAT or FAT32 file system."
 msgstr "ISO イメージに 4 GB より大きなファイルがあります。FAT、FAT32 ファイル システムで使用可能な最大のサイズを超えています。"
 
 #. • MSG_101

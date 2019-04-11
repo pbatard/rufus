@@ -484,7 +484,7 @@ msgid "Could not open media. It may be in use by another process. Please re-plug
 msgstr "Không thể mở phương tiện. Có thể nó đang được tiến trình khác sử dụng. Vui lòng tái kết nối và thử lại."
 
 #. • MSG_068
-msgid "Error while partitioning drive."
+msgid "Could not partition drive."
 msgstr "Lỗi khi phân vùng ổ đĩa."
 
 #. • MSG_069
@@ -665,8 +665,8 @@ msgid "Filesystem limitation"
 msgstr "Giới hạn tập tin hệ thống"
 
 #. • MSG_100
-msgid "This ISO image contains a file larger than 4GB, which is more than the maximum size allowed for a FAT or FAT32 file system."
-msgstr "Ảnh ISO này chứa tập tin lớn hơn 4GB, là kích thước lớn hơn kích thước tập tin tối đa được tập tin hệ thống FAT hoặc FAT32 cho phép."
+msgid "This ISO image contains a file larger than 4 GB, which is more than the maximum size allowed for a FAT or FAT32 file system."
+msgstr "Ảnh ISO này chứa tập tin lớn hơn 4 GB, là kích thước lớn hơn kích thước tập tin tối đa được tập tin hệ thống FAT hoặc FAT32 cho phép."
 
 #. • MSG_101
 msgid "Missing WIM support"

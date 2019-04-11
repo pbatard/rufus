@@ -462,7 +462,7 @@ msgid "Could not open media. It may be in use by another process. Please re-plug
 msgstr "ไม่สามารถเข้าถึงอุปกรณ์ได้ อุปกรณ์นี้อาจกำลังถูกใช้งานโดยโปรแกรมอื่นโปรดถอดและใส่อุปกรณ์ใหม่แล้วลองอีกครั้ง"
 
 #. • MSG_068
-msgid "Error while partitioning drive."
+msgid "Could not partition drive."
 msgstr "พบข้อผิดพลาดขณะแบ่งพาร์ทิชั่นของไดร์ฟ"
 
 #. • MSG_069
@@ -599,8 +599,8 @@ msgid "Filesystem limitation"
 msgstr "ข้อจำกัดของแต่ละระบบไฟล์"
 
 #. • MSG_100
-msgid "This ISO image contains a file larger than 4GB, which is more than the maximum size allowed for a FAT or FAT32 file system."
-msgstr "อิมเมจไฟล์นี้ประกอบไปด้วยไฟล์ที่มีขนาดใหญ่กว่า 4GB ซึ่งมากกว่าขนาดสูงสุดที่รองรับได้ของระบบไฟล์แบบ FAT หรือ FAT32"
+msgid "This ISO image contains a file larger than 4 GB, which is more than the maximum size allowed for a FAT or FAT32 file system."
+msgstr "อิมเมจไฟล์นี้ประกอบไปด้วยไฟล์ที่มีขนาดใหญ่กว่า 4 GB ซึ่งมากกว่าขนาดสูงสุดที่รองรับได้ของระบบไฟล์แบบ FAT หรือ FAT32"
 
 #. • MSG_101
 msgid "Missing WIM support"

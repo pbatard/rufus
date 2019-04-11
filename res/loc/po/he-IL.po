@@ -484,7 +484,7 @@ msgid "Could not open media. It may be in use by another process. Please re-plug
 msgstr "לא ניתן לפתוח את המדיה. יתכן שהיא בשימוש על־ידי תהליך אחר. נא לחבר מחדש את המדיה ולנסות שוב."
 
 #. • MSG_068
-msgid "Error while partitioning drive."
+msgid "Could not partition drive."
 msgstr "שגיאה בחלוקת הכונן למחיצות."
 
 #. • MSG_069
@@ -665,7 +665,7 @@ msgid "Filesystem limitation"
 msgstr "מגבלה של מערכת הקבצים"
 
 #. • MSG_100
-msgid "This ISO image contains a file larger than 4GB, which is more than the maximum size allowed for a FAT or FAT32 file system."
+msgid "This ISO image contains a file larger than 4 GB, which is more than the maximum size allowed for a FAT or FAT32 file system."
 msgstr "קובץ ה־ISO הזה מכיל קובץ שגדול מ־‎4 GB‏, וזה יותר מהגודל המירבי המותר עבור מערכות הקבצים FAT או FAT32."
 
 #. • MSG_101

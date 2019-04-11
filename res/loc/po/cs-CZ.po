@@ -486,7 +486,7 @@ msgid "Could not open media. It may be in use by another process. Please re-plug
 msgstr "Není možné otevřít zařízení. Zřejmě je používáno jiným procesem. Odpojte a opět připojte zařízení a zkuste to znovu."
 
 #. • MSG_068
-msgid "Error while partitioning drive."
+msgid "Could not partition drive."
 msgstr "Chyba při vytváření oddílu."
 
 #. • MSG_069
@@ -667,8 +667,8 @@ msgid "Filesystem limitation"
 msgstr "Omezení souborového systému"
 
 #. • MSG_100
-msgid "This ISO image contains a file larger than 4GB, which is more than the maximum size allowed for a FAT or FAT32 file system."
-msgstr "Tento ISO obraz obsahuje soubor větší než 4GB, přesahující maximální přípustnou velikost souborového systému FAT nebo FAT32."
+msgid "This ISO image contains a file larger than 4 GB, which is more than the maximum size allowed for a FAT or FAT32 file system."
+msgstr "Tento ISO obraz obsahuje soubor větší než 4 GB, přesahující maximální přípustnou velikost souborového systému FAT nebo FAT32."
 
 #. • MSG_101
 msgid "Missing WIM support"

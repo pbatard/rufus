@@ -484,7 +484,7 @@ msgid "Could not open media. It may be in use by another process. Please re-plug
 msgstr "Nevar atvērt ierīci. Iespējams, to izmanto kāds cits process. Atvienojiet ierīci, un pieslēdziet no jauna."
 
 #. • MSG_068
-msgid "Error while partitioning drive."
+msgid "Could not partition drive."
 msgstr "Diska veidošanas kļūda."
 
 #. • MSG_069
@@ -665,8 +665,8 @@ msgid "Filesystem limitation"
 msgstr "Failu sistēmas ierobežojums"
 
 #. • MSG_100
-msgid "This ISO image contains a file larger than 4GB, which is more than the maximum size allowed for a FAT or FAT32 file system."
-msgstr "Šis ISO virtuālais attēls satur failu(-s) lielāku(-s) par 4GB, kas ir vairāk nekā maksimāli pieļaujamais apjoms izmantojot FAT vai FAT32 failu sistēmu."
+msgid "This ISO image contains a file larger than 4 GB, which is more than the maximum size allowed for a FAT or FAT32 file system."
+msgstr "Šis ISO virtuālais attēls satur failu(-s) lielāku(-s) par 4 GB, kas ir vairāk nekā maksimāli pieļaujamais apjoms izmantojot FAT vai FAT32 failu sistēmu."
 
 #. • MSG_101
 msgid "Missing WIM support"

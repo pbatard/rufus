@@ -484,7 +484,7 @@ msgid "Could not open media. It may be in use by another process. Please re-plug
 msgstr "Medya açılamadı. Başka bir işlem tarafından kullanılıyor olabilir. Lütfen medyayı yeniden takın ve deneyin."
 
 #. • MSG_068
-msgid "Error while partitioning drive."
+msgid "Could not partition drive."
 msgstr "Sürücü bölümlendirilirken hata."
 
 #. • MSG_069
@@ -665,8 +665,8 @@ msgid "Filesystem limitation"
 msgstr "Dosya Sistemi Sınırlandırması"
 
 #. • MSG_100
-msgid "This ISO image contains a file larger than 4GB, which is more than the maximum size allowed for a FAT or FAT32 file system."
-msgstr "Bu ISO yansıması, FAT yada FAT32 dosya sisteminin desteklediği en fazla boyut olan 4GB'tan daha büyük bir dosya içeriyor."
+msgid "This ISO image contains a file larger than 4 GB, which is more than the maximum size allowed for a FAT or FAT32 file system."
+msgstr "Bu ISO yansıması, FAT yada FAT32 dosya sisteminin desteklediği en fazla boyut olan 4 GB'tan daha büyük bir dosya içeriyor."
 
 #. • MSG_101
 msgid "Missing WIM support"

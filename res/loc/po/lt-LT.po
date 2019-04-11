@@ -484,7 +484,7 @@ msgid "Could not open media. It may be in use by another process. Please re-plug
 msgstr "Nepavyko atverti laikmenos. Ji gali būti naudojama kito proceso. Prašau įdėti laikmeną iš naujo ir bandykite vėl."
 
 #. • MSG_068
-msgid "Error while partitioning drive."
+msgid "Could not partition drive."
 msgstr "Klaida skaidant diską."
 
 #. • MSG_069
@@ -665,7 +665,7 @@ msgid "Filesystem limitation"
 msgstr "Failų sistemos apribojimas"
 
 #. • MSG_100
-msgid "This ISO image contains a file larger than 4GB, which is more than the maximum size allowed for a FAT or FAT32 file system."
+msgid "This ISO image contains a file larger than 4 GB, which is more than the maximum size allowed for a FAT or FAT32 file system."
 msgstr "Šiame ISO atvaizde yra failas, didesnis negu 4 GB, tai daugiau negu maksimalus leistinas dydis FAT arba FAT32 failų sistemai."
 
 #. • MSG_101

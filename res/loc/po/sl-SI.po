@@ -484,7 +484,7 @@ msgid "Could not open media. It may be in use by another process. Please re-plug
 msgstr "Ni mogoče odpreti medija. Morda ga uporablja drug proces. Prosim, ponovno priključite medij in poskusite znova."
 
 #. • MSG_068
-msgid "Error while partitioning drive."
+msgid "Could not partition drive."
 msgstr "Napaka pri ustvarjanju particije."
 
 #. • MSG_069
@@ -665,7 +665,7 @@ msgid "Filesystem limitation"
 msgstr "Omejitev datotečnega sistema"
 
 #. • MSG_100
-msgid "This ISO image contains a file larger than 4GB, which is more than the maximum size allowed for a FAT or FAT32 file system."
+msgid "This ISO image contains a file larger than 4 GB, which is more than the maximum size allowed for a FAT or FAT32 file system."
 msgstr "Ta slika vsebuje datoteko, večjo od 4 GB, kar je več od največje velikosti, ki jo dopuščata datotečna sistema FAT in FAT32."
 
 #. • MSG_101

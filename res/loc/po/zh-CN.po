@@ -484,7 +484,7 @@ msgid "Could not open media. It may be in use by another process. Please re-plug
 msgstr "不能打开介质。可能是其他进程正在使用该设备。请重新插入设备后再试。"
 
 #. • MSG_068
-msgid "Error while partitioning drive."
+msgid "Could not partition drive."
 msgstr "驱动器分区时错误。"
 
 #. • MSG_069
@@ -669,7 +669,7 @@ msgid "Filesystem limitation"
 msgstr "文件系统限制"
 
 #. • MSG_100
-msgid "This ISO image contains a file larger than 4GB, which is more than the maximum size allowed for a FAT or FAT32 file system."
+msgid "This ISO image contains a file larger than 4 GB, which is more than the maximum size allowed for a FAT or FAT32 file system."
 msgstr "这个 ISO 镜像包含大于 4 GB 的单一文件，它超出了 FAT/FAT32 文件系统允许的最大尺寸。"
 
 #. • MSG_101

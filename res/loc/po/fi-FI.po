@@ -484,7 +484,7 @@ msgid "Could not open media. It may be in use by another process. Please re-plug
 msgstr "Tietovälinettä ei voitu avata. Se voi olla toisen prosessin käytössä. Irroita ja yhdistä tietoväline ja yritä uudelleen."
 
 #. • MSG_068
-msgid "Error while partitioning drive."
+msgid "Could not partition drive."
 msgstr "Virhe osioidessa levyä."
 
 #. • MSG_069
@@ -665,8 +665,8 @@ msgid "Filesystem limitation"
 msgstr "Tiedostojärjestelmärajoitus"
 
 #. • MSG_100
-msgid "This ISO image contains a file larger than 4GB, which is more than the maximum size allowed for a FAT or FAT32 file system."
-msgstr "Tämä ISO-levykuva sisältää yli 4GB-kokoisen tiedoston, joka ylittää FAT ja FAT32 -tiedostojärjestelmien maksimikoon."
+msgid "This ISO image contains a file larger than 4 GB, which is more than the maximum size allowed for a FAT or FAT32 file system."
+msgstr "Tämä ISO-levykuva sisältää yli 4 GB-kokoisen tiedoston, joka ylittää FAT ja FAT32 -tiedostojärjestelmien maksimikoon."
 
 #. • MSG_101
 msgid "Missing WIM support"

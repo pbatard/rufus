@@ -484,7 +484,7 @@ msgid "Could not open media. It may be in use by another process. Please re-plug
 msgstr "Imposibilitatea de a deschide dispozitivul. Posibil e utilizat de un alt proces.Reintroduceți dispozitivul și încercați din nou."
 
 #. • MSG_068
-msgid "Error while partitioning drive."
+msgid "Could not partition drive."
 msgstr "Eroare în partiționare a dispozitivului."
 
 #. • MSG_069
@@ -662,7 +662,7 @@ msgid "Filesystem limitation"
 msgstr "Limitarea sistemului de fișiere"
 
 #. • MSG_100
-msgid "This ISO image contains a file larger than 4GB, which is more than the maximum size allowed for a FAT or FAT32 file system."
+msgid "This ISO image contains a file larger than 4 GB, which is more than the maximum size allowed for a FAT or FAT32 file system."
 msgstr "Această imagine ISO conține un fișier mai mare de 4 GB, care este mai mare decât dimensiunea maximă permisă pentru sistemul de fișiere FAT sau FAT32."
 
 #. • MSG_101

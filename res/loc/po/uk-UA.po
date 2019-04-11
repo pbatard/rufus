@@ -484,7 +484,7 @@ msgid "Could not open media. It may be in use by another process. Please re-plug
 msgstr "Неможливо зчитати носій інформації. Можливо він використовується іншим процесом. Будь ласка, витягніть носій інформації та вставте його знову."
 
 #. • MSG_068
-msgid "Error while partitioning drive."
+msgid "Could not partition drive."
 msgstr "Помилка при створенні розділу."
 
 #. • MSG_069
@@ -665,7 +665,7 @@ msgid "Filesystem limitation"
 msgstr "Обмеження файлової системи"
 
 #. • MSG_100
-msgid "This ISO image contains a file larger than 4GB, which is more than the maximum size allowed for a FAT or FAT32 file system."
+msgid "This ISO image contains a file larger than 4 GB, which is more than the maximum size allowed for a FAT or FAT32 file system."
 msgstr "Цей ISO-образ містить файл розміром більш ніж 4 Гб, що неприпустимо при використанні файлової системи FAT чи FAT32."
 
 #. • MSG_101

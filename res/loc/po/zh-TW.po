@@ -484,7 +484,7 @@ msgid "Could not open media. It may be in use by another process. Please re-plug
 msgstr "無法開啟裝置，可能被其他程序占用。請重新插拔一次試試。"
 
 #. • MSG_068
-msgid "Error while partitioning drive."
+msgid "Could not partition drive."
 msgstr "分割磁碟發生錯誤。"
 
 #. • MSG_069
@@ -665,8 +665,8 @@ msgid "Filesystem limitation"
 msgstr "檔案系統限制"
 
 #. • MSG_100
-msgid "This ISO image contains a file larger than 4GB, which is more than the maximum size allowed for a FAT or FAT32 file system."
-msgstr "此 ISO 映像檔內含大一個大於 4GB 的檔案，遠超出 FAT 或 FAT32 檔案系統可支援的上限。"
+msgid "This ISO image contains a file larger than 4 GB, which is more than the maximum size allowed for a FAT or FAT32 file system."
+msgstr "此 ISO 映像檔內含大一個大於 4 GB 的檔案，遠超出 FAT 或 FAT32 檔案系統可支援的上限。"
 
 #. • MSG_101
 msgid "Missing WIM support"

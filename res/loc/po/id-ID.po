@@ -484,7 +484,7 @@ msgid "Could not open media. It may be in use by another process. Please re-plug
 msgstr "Tidak dapat membuka media. Media mungkin sedang digunakan oleh proses lain. Silakan pasang ulang media dan coba lagi."
 
 #. • MSG_068
-msgid "Error while partitioning drive."
+msgid "Could not partition drive."
 msgstr "Kesalahan saat mempartisi perangkat."
 
 #. • MSG_069
@@ -666,8 +666,8 @@ msgid "Filesystem limitation"
 msgstr "Batasan sistem berkas"
 
 #. • MSG_100
-msgid "This ISO image contains a file larger than 4GB, which is more than the maximum size allowed for a FAT or FAT32 file system."
-msgstr "Image ISO ini berisi berkas yang lebih besar dari 4GB, yang lebih dari ukuran maksimal yang diizinkan untuk sistem berkas FAT atau FAT32."
+msgid "This ISO image contains a file larger than 4 GB, which is more than the maximum size allowed for a FAT or FAT32 file system."
+msgstr "Image ISO ini berisi berkas yang lebih besar dari 4 GB, yang lebih dari ukuran maksimal yang diizinkan untuk sistem berkas FAT atau FAT32."
 
 #. • MSG_101
 msgid "Missing WIM support"

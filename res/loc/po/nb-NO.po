@@ -484,7 +484,7 @@ msgid "Could not open media. It may be in use by another process. Please re-plug
 msgstr "Kunne ikke åpne media. Er muligens i bruk av en annen prosess. Vennligst koble fra, og prøv å koble til på nytt."
 
 #. • MSG_068
-msgid "Error while partitioning drive."
+msgid "Could not partition drive."
 msgstr "Feil under stasjonspartisjonering."
 
 #. • MSG_069
@@ -665,8 +665,8 @@ msgid "Filesystem limitation"
 msgstr "Filsystem begrensning"
 
 #. • MSG_100
-msgid "This ISO image contains a file larger than 4GB, which is more than the maximum size allowed for a FAT or FAT32 file system."
-msgstr "Dette ISO-bildet inneholder filer større en 4GB, som er mer enn detmaksimalt tillate størrelsen for FAT eller FAT32 fil systemet."
+msgid "This ISO image contains a file larger than 4 GB, which is more than the maximum size allowed for a FAT or FAT32 file system."
+msgstr "Dette ISO-bildet inneholder filer større en 4 GB, som er mer enn detmaksimalt tillate størrelsen for FAT eller FAT32 fil systemet."
 
 #. • MSG_101
 msgid "Missing WIM support"

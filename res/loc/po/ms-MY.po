@@ -484,7 +484,7 @@ msgid "Could not open media. It may be in use by another process. Please re-plug
 msgstr "Media tidak boleh dibuka. Ia mungkin digunakan dalam proses yang lain. Sila cabut dan masukkan semula dan cuba sekali lagi."
 
 #. • MSG_068
-msgid "Error while partitioning drive."
+msgid "Could not partition drive."
 msgstr "Masalah semasa pembahagian pemacu."
 
 #. • MSG_069
@@ -665,8 +665,8 @@ msgid "Filesystem limitation"
 msgstr "Had sistem fail"
 
 #. • MSG_100
-msgid "This ISO image contains a file larger than 4GB, which is more than the maximum size allowed for a FAT or FAT32 file system."
-msgstr "Imej ISO ini mengandungi fail yang lebih besar daripada 4GB iaitu saiz maksima yang dibenarkan untuk sistem fail FAT/FAT32."
+msgid "This ISO image contains a file larger than 4 GB, which is more than the maximum size allowed for a FAT or FAT32 file system."
+msgstr "Imej ISO ini mengandungi fail yang lebih besar daripada 4 GB iaitu saiz maksima yang dibenarkan untuk sistem fail FAT/FAT32."
 
 #. • MSG_101
 msgid "Missing WIM support"

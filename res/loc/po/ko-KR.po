@@ -484,7 +484,7 @@ msgid "Could not open media. It may be in use by another process. Please re-plug
 msgstr "미디어를 열 수 없습니다. 다른 프로세스에서 사용 중일 수 있습니다. 미디어를 다시 연결하고 다시 시도하십시오."
 
 #. • MSG_068
-msgid "Error while partitioning drive."
+msgid "Could not partition drive."
 msgstr "드라이브를 분할하는 중 오류 발생."
 
 #. • MSG_069
@@ -667,8 +667,8 @@ msgid "Filesystem limitation"
 msgstr "파일 시스템 제한"
 
 #. • MSG_100
-msgid "This ISO image contains a file larger than 4GB, which is more than the maximum size allowed for a FAT or FAT32 file system."
-msgstr "이 ISO 이미지는 FAT 또는 FAT32 파일 시스템에 허용되는 최대 크기 4GB보다 더 큰 파일이 포함되어 있습니다."
+msgid "This ISO image contains a file larger than 4 GB, which is more than the maximum size allowed for a FAT or FAT32 file system."
+msgstr "이 ISO 이미지는 FAT 또는 FAT32 파일 시스템에 허용되는 최대 크기 4 GB보다 더 큰 파일이 포함되어 있습니다."
 
 #. • MSG_101
 msgid "Missing WIM support"
