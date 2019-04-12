@@ -31,4 +31,12 @@ typedef int ssize_t;
 #endif /* _WIN64 */
 #endif /* _SSIZE_T_DEFINED */
 
+/* ext2fs needs this, which we picked from libcdio-driver/filemode.h */
+#if !defined S_IFBLK && defined _WIN32
+# define S_IFBLK 0x3000
+#endif
+#if !defined S_ISBLK && defined S_IFBLK
+# define S_ISBLK(m) (((m) & S_IFMT) == S_IFBLK)
+#endif
+
 #endif

@@ -69,7 +69,7 @@ extern StrArray BlockingProcess;
  * \return An error message string.
  *
  */
-static char* NtStatusError(NTSTATUS Status) {
+char* NtStatusError(NTSTATUS Status) {
 	static char unknown[32];
 
 	switch (Status) {

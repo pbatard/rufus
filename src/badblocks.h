@@ -21,8 +21,7 @@
 #include <windows.h>
 #include <stdint.h>
 
-typedef uint64_t blk_t;
-typedef DWORD    errcode_t;
+#include "ext2fs/ext2fs.h"
 
 typedef struct bb_struct_u64_list         *bb_badblocks_list;
 typedef struct bb_struct_u64_iterate      *bb_badblocks_iterate;

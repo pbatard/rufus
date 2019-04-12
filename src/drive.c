@@ -229,6 +229,22 @@ out:
 }
 
 /*
+ * Return an NT path to access the physical drive, or NULL on error.
+ * The string is allocated and must be freed (to ensure concurrent access)
+ */
+char* GetNtPhysicalName(DWORD DriveIndex)
+{
+	BOOL success = FALSE;
+	char physical_name[32];
+
+	CheckDriveIndex(DriveIndex);
+	static_sprintf(physical_name, "\\??\\PHYSICALDRIVE%lu", DriveIndex);
+	success = TRUE;
+out:
+	return (success) ? safe_strdup(physical_name) : NULL;
+}
+
+/*
  * Return a handle to the physical drive identified by DriveIndex
  */
 HANDLE GetPhysicalHandle(DWORD DriveIndex, BOOL bLockDrive, BOOL bWriteAccess, BOOL bWriteShare)

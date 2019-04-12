@@ -49,6 +49,7 @@
 #include "format.h"
 #include "badblocks.h"
 #include "bled/bled.h"
+#include "ext2fs/ext2fs.h"
 #include "../res/grub/grub_version.h"
 
 /*
@@ -662,6 +663,124 @@ out:
 	safe_free(pFirstSectOfFat);
 	safe_free(pZeroSect);
 	return r;
+}
+
+extern io_manager nt_io_manager(void);
+BOOL FormatExt2Fs(void)
+{
+	const char* path = "\\??\\C:\\tmp\\disk.img";
+	int i, count;
+	struct ext2_super_block features = { 0 };
+	io_manager manager = nt_io_manager();
+	blk64_t size = 0, cur;
+	ext2_filsys ext2fs;
+	errcode_t r;
+	HANDLE h;
+	DWORD dwSize;
+	const uint8_t buf[1024] = { 0 };
+
+	// Create a 32 MB zeroed file to test
+	h = CreateFileU(path, GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+	for (i = 0; i < 32 * 1024; i++) {
+		if (!WriteFile(h, buf, sizeof(buf), &dwSize, NULL) || (dwSize != sizeof(buf))) {
+			uprintf("Write error: %s", WindowsErrorString());
+			break;
+		}
+	}
+	CloseHandle(h);
+
+	// TODO: We could probably remove that call and get our size from a different means
+	r = ext2fs_get_device_size(path, EXT2_BLOCK_SIZE(&features), &size);
+	uprintf("ext2fs_get_device_size: %d", r);
+	// TODO: ERROR HANDLING
+	// Set the number of blocks and reserved blocks
+	ext2fs_blocks_count_set(&features, size);
+	ext2fs_r_blocks_count_set(&features, (blk64_t)(0.05f * ext2fs_blocks_count(&features)));
+	features.s_rev_level = 1;
+	features.s_inode_size = EXT2_GOOD_OLD_INODE_SIZE;
+	// TODO: This needs to be computed according to volume size
+	features.s_inodes_count = 8192;
+
+	// TODO: Set a volume label
+
+	// Initialize the superblock
+	r = ext2fs_initialize(path, EXT2_FLAG_EXCLUSIVE | EXT2_FLAG_64BITS, &features, manager, &ext2fs);
+	uprintf("ext2fs_initialize: %d", r);
+	// TODO: ERROR HANDLING
+
+	// TODO: Erase superblock data
+	// Now that the superblock has been initialized, set it up
+	CoCreateGuid((GUID*)ext2fs->super->s_uuid);
+	ext2fs_init_csum_seed(ext2fs);
+	ext2fs->super->s_def_hash_version = EXT2_HASH_HALF_MD4;
+	CoCreateGuid((GUID*)ext2fs->super->s_hash_seed);
+	ext2fs->super->s_max_mnt_count = -1;
+	ext2fs->super->s_creator_os = EXT2_OS_WINDOWS;
+	ext2fs->super->s_errors = EXT2_ERRORS_CONTINUE;
+
+	// TODO: ext2 + journaling = ext3, so the way to set ext3 is to add features:
+	// ext_attr, resize_inode, dir_index, filetype, sparse_super, has_journal, needs_recovery
+	ext2fs_set_feature_xattr(&features);
+	// ext2fs_set_feature_resize_inode(&sb);
+	// ext2fs_set_feature_dir_index(&sb);
+	ext2fs_set_feature_filetype(&features);
+	// ext2fs_set_feature_sparse_super(&sb);
+	// ext2fs_set_feature_journal(&sb);
+	// ext2fs_set_feature_journal_needs_recovery(&sb);
+
+	// Optional we may want to add:
+	// ext2fs_set_feature_64bit(&sb);
+	// NB: the following is not needed as it is set by the OS automatically when creating a > 2GB file
+	// ext2fs_set_feature_large_file(&sb);
+
+	r = ext2fs_allocate_tables(ext2fs);
+	uprintf("ext2fs_allocate_tables: %d", r);
+	// TODO: ERROR HANDLING
+	r = ext2fs_convert_subcluster_bitmap(ext2fs, &ext2fs->block_map);
+	uprintf("ext2fs_convert_subcluster_bitmap: %d", r);
+	// TODO: ERROR HANDLING
+
+	// Wipe inode table
+	for (i = 0; i < (int)ext2fs->group_desc_count; i++) {
+		cur = ext2fs_inode_table_loc(ext2fs, i);
+		count = ext2fs_div_ceil((ext2fs->super->s_inodes_per_group - ext2fs_bg_itable_unused(ext2fs, i))
+			* EXT2_GOOD_OLD_INODE_SIZE, EXT2_GOOD_OLD_INODE_SIZE);
+		r = ext2fs_zero_blocks2(ext2fs, cur, count, &cur, &count);
+		if (r != 0) {
+			uprintf("Could not zero inode at %llu (%d blocks): %d\n", cur, count, r);
+			// TODO: ERROR HANDLING
+			break;
+		}
+	}
+
+	// Create root dir
+	r = ext2fs_mkdir(ext2fs, EXT2_ROOT_INO, EXT2_ROOT_INO, 0);
+	uprintf("ext2fs_mkdir(root): %d", r);
+	// TODO: ERROR HANDLING
+
+	// Create 'lost+found'
+	ext2fs->umask = 077;
+	r = ext2fs_mkdir(ext2fs, EXT2_ROOT_INO, 0, "lost+found");
+	uprintf("ext2fs_mkdir(lost+found): %d", r);
+	// TODO: ERROR HANDLING
+
+	for (i = EXT2_ROOT_INO + 1; i < (int)EXT2_FIRST_INODE(ext2fs->super); i++)
+		ext2fs_inode_alloc_stats2(ext2fs, i, +1, 0);
+	ext2fs_mark_ib_dirty(ext2fs);
+
+	r = ext2fs_mark_inode_bitmap2(ext2fs->inode_map, EXT2_BAD_INO);
+	uprintf("ext2fs_mark_inode_bitmap2: %d", r);
+	// TODO: ERROR HANDLING
+	ext2fs_inode_alloc_stats2(ext2fs, EXT2_BAD_INO, 1, 0);
+	r = ext2fs_update_bb_inode(ext2fs, NULL);
+	uprintf("ext2fs_update_bb_inode: %d", r);
+	// TODO: ERROR HANDLING
+
+	r = ext2fs_close_free(&ext2fs);
+	uprintf("ext2fs_close_free: %d", r);
+	// TODO: ERROR HANDLING
+
+	return TRUE;
 }
 
 /*

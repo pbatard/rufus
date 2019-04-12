@@ -73,7 +73,7 @@ const char* additional_copyrights =
 "http://svn.reactos.org/svn/reactos/trunk/reactos\\line\n"
 "GNU General Public License (GPL) v2 or later\\line\n"
 "\\line\n"
-"Bad blocks testing from e2fsprogs by Theodore T'so et al.:\\line\n"
+"Bad blocks testing and ext2/ext3 formattinmg from e2fsprogs by Theodore T'so et al.:\\line\n"
 "http://e2fsprogs.sourceforge.net\\line\n"
 "GNU General Public License (GPL) v3 compatible\\line\n"
 "\\line\n"
