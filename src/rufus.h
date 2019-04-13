@@ -314,7 +314,7 @@ enum checksum_type {
 #define IS_BIOS_BOOTABLE(r) (HAS_BOOTMGR(r) || HAS_SYSLINUX(r) || HAS_WINPE(r) || HAS_GRUB(r) || HAS_REACTOS(r) || HAS_KOLIBRIOS(r))
 #define HAS_WINTOGO(r)      (HAS_BOOTMGR(r) && IS_EFI_BOOTABLE(r) && HAS_WININST(r))
 #define HAS_PERSISTENCE(r)  (r.has_casper)
-#define IS_FAT(fs)          ((fs == FS_FAT16) || (fs == FS_FAT32))
+#define IS_FAT(fs)          ((fs_type == FS_FAT16) || (fs_type == FS_FAT32))
 
 typedef struct {
 	char label[192];					// 3*64 to account for UTF-8
@@ -456,7 +456,7 @@ extern size_t ubuffer_pos;
 extern const int nb_steps[FS_MAX];
 extern float fScale;
 extern int nWindowsVersion, nWindowsBuildNumber, dialog_showing, force_update;
-extern int fs, bt, pt, tt;
+extern int fs_type, boot_type, partition_type, target_type;
 extern unsigned long syslinux_ldlinux_len[2];
 extern char WindowsVersionStr[128], ubuffer[UBUFFER_SIZE], embedded_sl_version_str[2][12];
 extern char szFolderPath[MAX_PATH], app_dir[MAX_PATH], temp_dir[MAX_PATH], system_dir[MAX_PATH], sysnative_dir[MAX_PATH];

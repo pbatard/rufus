@@ -755,8 +755,8 @@ void ToggleImageOptions(void)
 	uint8_t entry_image_options = image_options;
 	int i, shift = rh;
 
-	has_wintogo = ((bt == BT_IMAGE) && (image_path != NULL) && (img_report.is_iso) && (nWindowsVersion >= WINDOWS_8) && (HAS_WINTOGO(img_report)));
-	has_persistence = ((bt == BT_IMAGE) && (image_path != NULL) && (img_report.is_iso) && (HAS_PERSISTENCE(img_report)));
+	has_wintogo = ((boot_type == BT_IMAGE) && (image_path != NULL) && (img_report.is_iso) && (nWindowsVersion >= WINDOWS_8) && (HAS_WINTOGO(img_report)));
+	has_persistence = ((boot_type == BT_IMAGE) && (image_path != NULL) && (img_report.is_iso) && (HAS_PERSISTENCE(img_report)));
 
 	assert(popcnt8(image_options) <= 1);
 
@@ -1145,7 +1145,7 @@ void InitProgress(BOOL bOnlyFormat)
 		if (IsChecked(IDC_BAD_BLOCKS)) {
 			nb_slots[OP_BADBLOCKS] = -1;
 		}
-		if (bt != BT_NON_BOOTABLE) {
+		if (boot_type != BT_NON_BOOTABLE) {
 			// 1 extra slot for PBR writing
 			switch (selection_default) {
 			case BT_MSDOS:
@@ -1171,10 +1171,10 @@ void InitProgress(BOOL bOnlyFormat)
 			nb_slots[OP_CREATE_FS] =
 				nb_steps[ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem))];
 			if ((!IsChecked(IDC_QUICK_FORMAT))
-				|| ((fs == FS_FAT32) && ((SelectedDrive.DiskSize >= LARGE_FAT32_SIZE) || (force_large_fat32)))) {
+				|| ((fs_type == FS_FAT32) && ((SelectedDrive.DiskSize >= LARGE_FAT32_SIZE) || (force_large_fat32)))) {
 				nb_slots[OP_FORMAT] = -1;
 			}
-			nb_slots[OP_FINALIZE] = ((selection_default == BT_IMAGE) && (fs == FS_NTFS)) ? 3 : 2;
+			nb_slots[OP_FINALIZE] = ((selection_default == BT_IMAGE) && (fs_type == FS_NTFS)) ? 3 : 2;
 		}
 	}
 

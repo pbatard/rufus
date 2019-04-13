@@ -83,7 +83,7 @@ int libfat_readfile(intptr_t pp, void *buf, size_t secsize, libfat_sector_t sect
  * Extract the ldlinux.sys and ldlinux.bss from resources,
  * then patch and install them
  */
-BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int fs_type)
+BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int file_system)
 {
 	const LARGE_INTEGER liZero = { {0, 0} };
 	HANDLE f_handle = INVALID_HANDLE_VALUE;
@@ -112,9 +112,9 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int fs_type)
 	int ldlinux_sectors;
 	uint32_t ldlinux_cluster;
 	int i, nsectors, sl_fs_stype;
-	BOOL use_v5 = (bt == BT_SYSLINUX_V6) || ((bt == BT_IMAGE) && (SL_MAJOR(img_report.sl_version) >= 5));
+	BOOL use_v5 = (boot_type == BT_SYSLINUX_V6) || ((boot_type == BT_IMAGE) && (SL_MAJOR(img_report.sl_version) >= 5));
 
-	PrintInfoDebug(0, MSG_234, (bt == BT_IMAGE)?img_report.sl_version_str:embedded_sl_version_str[use_v5?1:0]);
+	PrintInfoDebug(0, MSG_234, (boot_type == BT_IMAGE)?img_report.sl_version_str:embedded_sl_version_str[use_v5?1:0]);
 
 	/* 4K sector size workaround */
 	SECTOR_SHIFT = 0;
@@ -218,7 +218,7 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int fs_type)
 	}
 
 	uprintf("Successfully wrote '%s'", &path[3]);
-	if (bt != BT_IMAGE)
+	if (boot_type != BT_IMAGE)
 		UpdateProgress(OP_DOS, -1.0f);
 
 	/* Now flush the media */
@@ -233,7 +233,7 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int fs_type)
 	if (sectors == NULL)
 		goto out;
 
-	switch (fs_type) {
+	switch (file_system) {
 	case FS_NTFS:
 		static_sprintf(tmp, "%C:\\", drive_letter);
 		vol_info.Handle = d_handle;
@@ -317,7 +317,7 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int fs_type)
 	}
 
 	/* Make the syslinux boot sector */
-	syslinux_make_bootsect(sectbuf, (fs_type == FS_NTFS)?NTFS:VFAT);
+	syslinux_make_bootsect(sectbuf, (file_system == FS_NTFS)?NTFS:VFAT);
 
 	/* Write boot sector back */
 	if (!SetFilePointerEx(d_handle, liZero, NULL, FILE_BEGIN) ||
@@ -328,7 +328,7 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int fs_type)
 	}
 	uprintf("Successfully wrote Syslinux boot record");
 
-	if (bt == BT_SYSLINUX_V6) {
+	if (boot_type == BT_SYSLINUX_V6) {
 		IGNORE_RETVAL(_chdirU(app_dir));
 		static_sprintf(path, "%s/%s-%s", FILES_DIR, syslinux, embedded_sl_version_str[1]);
 		IGNORE_RETVAL(_chdir(path));
@@ -379,7 +379,7 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int fs_type)
 		fclose(fd);
 	}
 
-	if (bt != BT_IMAGE)
+	if (boot_type != BT_IMAGE)
 		UpdateProgress(OP_DOS, -1.0f);
 
 	r = TRUE;

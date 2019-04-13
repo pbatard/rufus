@@ -809,7 +809,7 @@ static BOOL FormatDrive(DWORD DriveIndex)
 			break;
 		}
 	}
-	if ((fs == FS_UDF) && !((dur_mins == 0) && (dur_secs == 0))) {
+	if ((fs_type == FS_UDF) && !((dur_mins == 0) && (dur_secs == 0))) {
 		PrintInfoDebug(0, MSG_220, &FSType[index], dur_mins, dur_secs);
 	} else {
 		PrintInfoDebug(0, MSG_222, &FSType[index]);
@@ -855,7 +855,7 @@ static BOOL FormatDrive(DWORD DriveIndex)
 	}
 	GetWindowTextW(hLabel, wLabel, ARRAYSIZE(wLabel));
 	// Make sure the label is valid
-	ToValidLabel(wLabel, (fs == FS_FAT16) || (fs == FS_FAT32) || (fs == FS_EXFAT));
+	ToValidLabel(wLabel, (fs_type == FS_FAT16) || (fs_type == FS_FAT32) || (fs_type == FS_EXFAT));
 	ulClusterSize = (ULONG)ComboBox_GetItemData(hClusterSize, ComboBox_GetCurSel(hClusterSize));
 	if (ulClusterSize < 0x200) {
 		// 0 is FormatEx's value for default, which we need to use for UDF
@@ -872,7 +872,7 @@ static BOOL FormatDrive(DWORD DriveIndex)
 	pfFormatEx(wVolumeName, SelectedDrive.MediaType, &wFSType[index], wLabel,
 		IsChecked(IDC_QUICK_FORMAT), ulClusterSize, FormatExCallback);
 
-	if ((fs == FS_NTFS) && (enable_ntfs_compression) && (pfEnableVolumeCompression != NULL)) {
+	if ((fs_type == FS_NTFS) && (enable_ntfs_compression) && (pfEnableVolumeCompression != NULL)) {
 		wVolumeName[wcslen(wVolumeName)] = '\\';	// Add trailing backslash back again
 		if (pfEnableVolumeCompression(wVolumeName, FPF_COMPRESSED)) {
 			uprintf("Enabled NTFS compression\n");
@@ -1011,7 +1011,7 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 	if (SelectedDrive.SectorSize < 512)
 		goto out;
 
-	if (pt == PARTITION_STYLE_GPT) {
+	if (partition_type == PARTITION_STYLE_GPT) {
 		// Add a notice in the protective MBR
 		fake_fd._handle = (char*)hPhysicalDrive;
 		set_bytes_per_sector(SelectedDrive.SectorSize);
@@ -1053,7 +1053,7 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 		buffer[0x1c2] = 0x0c;
 		break;
 	}
-	if ((bt != BT_NON_BOOTABLE) && (tt == TT_BIOS)) {
+	if ((boot_type != BT_NON_BOOTABLE) && (target_type == TT_BIOS)) {
 		// Set first partition bootable - masquerade as per the DiskID selected
 		buffer[0x1be] = IsChecked(IDC_RUFUS_MBR) ?
 			(BYTE)ComboBox_GetItemData(hDiskID, ComboBox_GetCurSel(hDiskID)):0x80;
@@ -1071,47 +1071,47 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 
 	// What follows is really a case statement with complex conditions listed
 	// by order of preference
-	if (HAS_WINDOWS(img_report) && (allow_dual_uefi_bios) && (tt == TT_BIOS))
+	if (HAS_WINDOWS(img_report) && (allow_dual_uefi_bios) && (target_type == TT_BIOS))
 		goto windows_mbr;
 
 	// Forced UEFI (by zeroing the MBR)
-	if (tt == TT_UEFI) {
+	if (target_type == TT_UEFI) {
 		uprintf(using_msg, "zeroed");
 		r = write_zero_mbr(fp);
 		goto notify;
 	}
 
 	// Syslinux
-	if ( (bt == BT_SYSLINUX_V4) || (bt == BT_SYSLINUX_V6) ||
-		 ((bt == BT_IMAGE) && HAS_SYSLINUX(img_report)) ) {
+	if ( (boot_type == BT_SYSLINUX_V4) || (boot_type == BT_SYSLINUX_V6) ||
+		 ((boot_type == BT_IMAGE) && HAS_SYSLINUX(img_report)) ) {
 		uprintf(using_msg, "Syslinux");
 		r = write_syslinux_mbr(fp);
 		goto notify;
 	}
 
 	// Grub 2.0
-	if ( ((bt == BT_IMAGE) && (img_report.has_grub2)) || (bt == BT_GRUB2) ) {
+	if ( ((boot_type == BT_IMAGE) && (img_report.has_grub2)) || (boot_type == BT_GRUB2) ) {
 		uprintf(using_msg, "Grub 2.0");
 		r = write_grub2_mbr(fp);
 		goto notify;
 	}
 
 	// Grub4DOS
-	if ( ((bt == BT_IMAGE) && (img_report.has_grub4dos)) || (bt == BT_GRUB4DOS) ) {
+	if ( ((boot_type == BT_IMAGE) && (img_report.has_grub4dos)) || (boot_type == BT_GRUB4DOS) ) {
 		uprintf(using_msg, "Grub4DOS");
 		r = write_grub4dos_mbr(fp);
 		goto notify;
 	}
 
 	// ReactOS
-	if (bt == BT_REACTOS) {
+	if (boot_type == BT_REACTOS) {
 		uprintf(using_msg, "ReactOS");
 		r = write_reactos_mbr(fp);
 		goto notify;
 	}
 
 	// KolibriOS
-	if ( (bt == BT_IMAGE) && HAS_KOLIBRIOS(img_report) && (IS_FAT(fs))) {
+	if ( (boot_type == BT_IMAGE) && HAS_KOLIBRIOS(img_report) && (IS_FAT(fs_type))) {
 		uprintf(using_msg, "KolibriOS");
 		r = write_kolibrios_mbr(fp);
 		goto notify;
@@ -1144,12 +1144,12 @@ static BOOL WriteSBR(HANDLE hPhysicalDrive)
 {
 	// TODO: Do we need anything special for 4K sectors?
 	DWORD size, max_size, mbr_size = 0x200;
-	int r, sub_type = bt;
+	int r, sub_type = boot_type;
 	unsigned char* buf = NULL;
 	FAKE_FD fake_fd = { 0 };
 	FILE* fp = (FILE*)&fake_fd;
 
-	if (pt == PARTITION_STYLE_GPT)
+	if (partition_type == PARTITION_STYLE_GPT)
 		return TRUE;
 
 	fake_fd._handle = (char*)hPhysicalDrive;
@@ -1159,7 +1159,7 @@ static BOOL WriteSBR(HANDLE hPhysicalDrive)
 		(DWORD)(SelectedDrive.SectorsPerTrack * SelectedDrive.SectorSize) : 1*MB;
 	max_size -= mbr_size;
 	// Syslinux has precedence over Grub
-	if ((bt == BT_IMAGE) && (!HAS_SYSLINUX(img_report))) {
+	if ((boot_type == BT_IMAGE) && (!HAS_SYSLINUX(img_report))) {
 		if (img_report.has_grub4dos)
 			sub_type = BT_GRUB4DOS;
 		if (img_report.has_grub2)
@@ -1210,11 +1210,11 @@ static BOOL WriteSBR(HANDLE hPhysicalDrive)
  * Process the Partition Boot Record
  */
 static __inline const char* bt_to_name(void) {
-	switch (bt) {
+	switch (boot_type) {
 	case BT_FREEDOS: return "FreeDOS";
 	case BT_REACTOS: return "ReactOS";
 	default:
-		return ((bt==BT_IMAGE) && HAS_KOLIBRIOS(img_report)) ? "KolibriOS" : "Standard";
+		return ((boot_type == BT_IMAGE) && HAS_KOLIBRIOS(img_report)) ? "KolibriOS" : "Standard";
 	}
 }
 static BOOL WritePBR(HANDLE hLogicalVolume)
@@ -1235,11 +1235,11 @@ static BOOL WritePBR(HANDLE hLogicalVolume)
 			break;
 		}
 		uprintf("Confirmed new volume has a FAT16 boot sector\n");
-		if (bt == BT_FREEDOS) {
+		if (boot_type == BT_FREEDOS) {
 			if (!write_fat_16_fd_br(fp, 0)) break;
-		} else if (bt == BT_REACTOS) {
+		} else if (boot_type == BT_REACTOS) {
 			if (!write_fat_16_ros_br(fp, 0)) break;
-		} else if ((bt == BT_IMAGE) && HAS_KOLIBRIOS(img_report)) {
+		} else if ((boot_type == BT_IMAGE) && HAS_KOLIBRIOS(img_report)) {
 			uprintf("FAT16 is not supported for KolibriOS\n"); break;
 		} else {
 			if (!write_fat_16_br(fp, 0)) break;
@@ -1257,15 +1257,15 @@ static BOOL WritePBR(HANDLE hLogicalVolume)
 			}
 			uprintf("Confirmed new volume has a %s FAT32 boot sector\n", i?"secondary":"primary");
 			uprintf("Setting %s FAT32 boot sector for boot...\n", i?"secondary":"primary");
-			if (bt == BT_FREEDOS) {
+			if (boot_type == BT_FREEDOS) {
 				if (!write_fat_32_fd_br(fp, 0)) break;
-			} else if (bt == BT_REACTOS) {
+			} else if (boot_type == BT_REACTOS) {
 				if (!write_fat_32_ros_br(fp, 0)) break;
-			} else if ((bt == BT_IMAGE) && HAS_KOLIBRIOS(img_report)) {
+			} else if ((boot_type == BT_IMAGE) && HAS_KOLIBRIOS(img_report)) {
 				if (!write_fat_32_kos_br(fp, 0)) break;
-			} else if ((bt == BT_IMAGE) && HAS_BOOTMGR(img_report)) {
+			} else if ((boot_type == BT_IMAGE) && HAS_BOOTMGR(img_report)) {
 				if (!write_fat_32_pe_br(fp, 0)) break;
-			} else if ((bt == BT_IMAGE) && HAS_WINPE(img_report)) {
+			} else if ((boot_type == BT_IMAGE) && HAS_WINPE(img_report)) {
 				if (!write_fat_32_nt_br(fp, 0)) break;
 			} else {
 				if (!write_fat_32_br(fp, 0)) break;
@@ -1887,25 +1887,25 @@ DWORD WINAPI FormatThread(void* param)
 	uint8_t *buffer = NULL, extra_partitions = 0;
 	char *bb_msg, *guid_volume = NULL;
 	char drive_name[] = "?:\\";
-	char drive_letters[27], fs_type[32];
+	char drive_letters[27], fs_name[32];
 	char logfile[MAX_PATH], *userdir;
 	char efi_dst[] = "?:\\efi\\boot\\bootx64.efi";
 	char kolibri_dst[] = "?:\\MTLD_F32";
 	char grub4dos_dst[] = "?:\\grldr";
 
-	use_large_fat32 = (fs == FS_FAT32) && ((SelectedDrive.DiskSize > LARGE_FAT32_SIZE) || (force_large_fat32));
-	windows_to_go = (image_options & IMOP_WINTOGO) && (bt == BT_IMAGE) && HAS_WINTOGO(img_report) &&
+	use_large_fat32 = (fs_type == FS_FAT32) && ((SelectedDrive.DiskSize > LARGE_FAT32_SIZE) || (force_large_fat32));
+	windows_to_go = (image_options & IMOP_WINTOGO) && (boot_type == BT_IMAGE) && HAS_WINTOGO(img_report) &&
 		(ComboBox_GetCurSel(GetDlgItem(hMainDialog, IDC_IMAGE_OPTION)) == 1);
 	large_drive = (SelectedDrive.DiskSize > (1*TB));
 	if (large_drive)
 		uprintf("Notice: Large drive detected (may produce short writes)");
 	// Find out if we need to add any extra partitions
-	if ((windows_to_go) && (tt == TT_UEFI) && (pt == PARTITION_STYLE_GPT))
+	if ((windows_to_go) && (target_type == TT_UEFI) && (partition_type == PARTITION_STYLE_GPT))
 		// According to Microsoft, every GPT disk (we RUN Windows from) must have an MSR due to not having hidden sectors
 		// http://msdn.microsoft.com/en-us/library/windows/hardware/dn640535.aspx#gpt_faq_what_disk_require_msr
 		extra_partitions = XP_MSR | XP_EFI;
-	else if ( (fs == FS_NTFS) && ((bt == BT_UEFI_NTFS) ||
-			  ((bt == BT_IMAGE) && IS_EFI_BOOTABLE(img_report) && ((tt == TT_UEFI) || (windows_to_go) || (allow_dual_uefi_bios)))) )
+	else if ( (fs_type == FS_NTFS) && ((boot_type == BT_UEFI_NTFS) ||
+			  ((boot_type == BT_IMAGE) && IS_EFI_BOOTABLE(img_report) && ((target_type == TT_UEFI) || (windows_to_go) || (allow_dual_uefi_bios)))) )
 		extra_partitions = XP_UEFI_NTFS;
 	else if (IsChecked(IDC_OLD_BIOS_FIXES))
 		extra_partitions = XP_COMPAT;
@@ -1936,7 +1936,7 @@ DWORD WINAPI FormatThread(void* param)
 		// Do it in reverse so that we always end on the first volume letter
 		for (i = (int)safe_strlen(drive_letters); i > 0; i--) {
 			drive_name[0] = drive_letters[i-1];
-			if (bt == BT_IMAGE) {
+			if (boot_type == BT_IMAGE) {
 				// If we are using an image, check that it isn't located on the drive we are trying to format
 				if ((PathGetDriveNumberU(image_path) + 'A') == drive_letters[i-1]) {
 					uprintf("ABORTED: Cannot use an image that is located on the target drive!");
@@ -1994,7 +1994,7 @@ DWORD WINAPI FormatThread(void* param)
 	// Note, Microsoft's way of cleaning partitions (IOCTL_DISK_CREATE_DISK, which is what we apply
 	// in InitializeDisk) is *NOT ENOUGH* to reset a disk and can render it inoperable for partitioning
 	// or formatting under Windows. See https://github.com/pbatard/rufus/issues/759 for details.
-	if ((bt != BT_IMAGE) || (img_report.is_iso && !write_as_image)) {
+	if ((boot_type != BT_IMAGE) || (img_report.is_iso && !write_as_image)) {
 		if ((!ClearMBRGPT(hPhysicalDrive, SelectedDrive.DiskSize, SelectedDrive.SectorSize, use_large_fat32)) ||
 			(!InitializeDisk(hPhysicalDrive))) {
 			uprintf("Could not reset partitions");
@@ -2070,7 +2070,7 @@ DWORD WINAPI FormatThread(void* param)
 	}
 
 	// Write an image file
-	if ((bt == BT_IMAGE) && write_as_image) {
+	if ((boot_type == BT_IMAGE) && write_as_image) {
 		hSourceImage = CreateFileU(image_path, GENERIC_READ, FILE_SHARE_READ, NULL,
 			OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, NULL);
 		if (hSourceImage == INVALID_HANDLE_VALUE) {
@@ -2086,7 +2086,7 @@ DWORD WINAPI FormatThread(void* param)
 		safe_unlockclose(hLogicalVolume);
 		Sleep(200);
 		WaitForLogical(DriveIndex);
-		if (GetDrivePartitionData(SelectedDrive.DeviceNumber, fs_type, sizeof(fs_type), TRUE)) {
+		if (GetDrivePartitionData(SelectedDrive.DeviceNumber, fs_name, sizeof(fs_name), TRUE)) {
 			guid_volume = GetLogicalName(DriveIndex, TRUE, TRUE);
 			if ((guid_volume != NULL) && (MountVolume(drive_name, guid_volume)))
 				uprintf("Remounted %s as %C:", guid_volume, drive_name[0]);
@@ -2097,7 +2097,7 @@ DWORD WINAPI FormatThread(void* param)
 	UpdateProgress(OP_ZERO_MBR, -1.0f);
 	CHECK_FOR_USER_CANCEL;
 
-	if (!CreatePartition(hPhysicalDrive, pt, fs, (pt==PARTITION_STYLE_MBR) && (tt==TT_UEFI), extra_partitions)) {
+	if (!CreatePartition(hPhysicalDrive, partition_type, fs_type, (partition_type==PARTITION_STYLE_MBR) && (target_type==TT_UEFI), extra_partitions)) {
 		FormatStatus = (LastWriteError != 0) ? LastWriteError : (ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_PARTITION_FAILURE);
 		goto out;
 	}
@@ -2131,7 +2131,7 @@ DWORD WINAPI FormatThread(void* param)
 	}
 
 	// Thanks to Microsoft, we must fix the MBR AFTER the drive has been formatted
-	if ((pt == PARTITION_STYLE_MBR) || ((bt != BT_NON_BOOTABLE) && (pt == PARTITION_STYLE_GPT))) {
+	if ((partition_type == PARTITION_STYLE_MBR) || ((boot_type != BT_NON_BOOTABLE) && (partition_type == PARTITION_STYLE_GPT))) {
 		PrintInfoDebug(0, MSG_228);	// "Writing master boot record..."
 		if ((!WriteMBR(hPhysicalDrive)) || (!WriteSBR(hPhysicalDrive))) {
 			if (!IS_ERROR(FormatStatus))
@@ -2161,7 +2161,7 @@ DWORD WINAPI FormatThread(void* param)
 	CHECK_FOR_USER_CANCEL;
 
 	// Disable file indexing, unless it was force-enabled by the user
-	if ((!enable_file_indexing) && ((fs == FS_NTFS) || (fs == FS_UDF) || (fs == FS_REFS))) {
+	if ((!enable_file_indexing) && ((fs_type == FS_NTFS) || (fs_type == FS_UDF) || (fs_type == FS_REFS))) {
 		uprintf("Disabling file indexing...");
 		if (!SetFileAttributesA(guid_volume, FILE_ATTRIBUTE_NOT_CONTENT_INDEXED))
 			uprintf("Could not disable file indexing: %s", WindowsErrorString());
@@ -2174,20 +2174,20 @@ DWORD WINAPI FormatThread(void* param)
 		uprintf("Warning: Failed to refresh label: %s", WindowsErrorString());
 	}
 
-	if (bt != BT_NON_BOOTABLE) {
-		if (bt == BT_UEFI_NTFS) {
+	if (boot_type != BT_NON_BOOTABLE) {
+		if (boot_type == BT_UEFI_NTFS) {
 			// All good
-		} else if (tt == TT_UEFI) {
+		} else if (target_type == TT_UEFI) {
 			// For once, no need to do anything - just check our sanity
-			assert((bt == BT_IMAGE) && IS_EFI_BOOTABLE(img_report) && (fs <= FS_NTFS));
-			if ( (bt != BT_IMAGE) || !IS_EFI_BOOTABLE(img_report) || (fs > FS_NTFS) ) {
+			assert((boot_type == BT_IMAGE) && IS_EFI_BOOTABLE(img_report) && (fs_type <= FS_NTFS));
+			if ( (boot_type != BT_IMAGE) || !IS_EFI_BOOTABLE(img_report) || (fs_type > FS_NTFS) ) {
 				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_INSTALL_FAILURE;
 				goto out;
 			}
-		} else if ( (bt == BT_SYSLINUX_V4) || (bt == BT_SYSLINUX_V6) ||
-			((bt == BT_IMAGE) && (HAS_SYSLINUX(img_report) || HAS_REACTOS(img_report)) &&
+		} else if ( (boot_type == BT_SYSLINUX_V4) || (boot_type == BT_SYSLINUX_V6) ||
+			((boot_type == BT_IMAGE) && (HAS_SYSLINUX(img_report) || HAS_REACTOS(img_report)) &&
 				(!HAS_WINDOWS(img_report) || !allow_dual_uefi_bios)) ) {
-			if (!InstallSyslinux(DriveIndex, drive_name[0], fs)) {
+			if (!InstallSyslinux(DriveIndex, drive_name[0], fs_type)) {
 				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_INSTALL_FAILURE;
 				goto out;
 			}
@@ -2224,8 +2224,8 @@ DWORD WINAPI FormatThread(void* param)
 		goto out;
 	CHECK_FOR_USER_CANCEL;
 
-	if (bt != BT_NON_BOOTABLE) {
-		if ((bt == BT_MSDOS) || (bt == BT_FREEDOS)) {
+	if (boot_type != BT_NON_BOOTABLE) {
+		if ((boot_type == BT_MSDOS) || (boot_type == BT_FREEDOS)) {
 			UpdateProgress(OP_DOS, -1.0f);
 			PrintInfoDebug(0, MSG_230);
 			if (!ExtractDOS(drive_name)) {
@@ -2233,14 +2233,14 @@ DWORD WINAPI FormatThread(void* param)
 					FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANNOT_COPY;
 				goto out;
 			}
-		} else if (bt == BT_GRUB4DOS) {
+		} else if (boot_type == BT_GRUB4DOS) {
 			grub4dos_dst[0] = drive_name[0];
 			IGNORE_RETVAL(_chdirU(app_dir));
 			uprintf("Installing: %s (Grub4DOS loader) %s", grub4dos_dst,
 				IsFileInDB(FILES_DIR "\\grub4dos-" GRUB4DOS_VERSION "\\grldr")?"✓":"✗");
 			if (!CopyFileU(FILES_DIR "\\grub4dos-" GRUB4DOS_VERSION "\\grldr", grub4dos_dst, FALSE))
 				uprintf("Failed to copy file: %s", WindowsErrorString());
-		} else if ((bt == BT_IMAGE) && (image_path != NULL) && (img_report.is_iso)) {
+		} else if ((boot_type == BT_IMAGE) && (image_path != NULL) && (img_report.is_iso)) {
 			UpdateProgress(OP_DOS, 0.0f);
 			drive_name[2] = 0;	// Ensure our drive is something like 'D:'
 			if (windows_to_go) {
@@ -2266,7 +2266,7 @@ DWORD WINAPI FormatThread(void* param)
 					}
 				}
 				// EFI mode selected, with no 'boot###.efi' but Windows 7 x64's 'bootmgr.efi' (bit #0)
-				if (((tt == TT_UEFI) || allow_dual_uefi_bios) && HAS_WIN7_EFI(img_report)) {
+				if (((target_type == TT_UEFI) || allow_dual_uefi_bios) && HAS_WIN7_EFI(img_report)) {
 					PrintInfoDebug(0, MSG_232);
 					img_report.wininst_path[0][0] = drive_name[0];
 					efi_dst[0] = drive_name[0];
@@ -2282,7 +2282,7 @@ DWORD WINAPI FormatThread(void* param)
 						}
 					}
 				}
-				if ( (tt == TT_BIOS) && HAS_WINPE(img_report) ) {
+				if ( (target_type == TT_BIOS) && HAS_WINPE(img_report) ) {
 					// Apply WinPe fixup
 					if (!SetupWinPE(drive_name[0]))
 						FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_PATCH);
@@ -2296,7 +2296,7 @@ DWORD WINAPI FormatThread(void* param)
 		// Issue another complete remount before we exit, to ensure we're clean
 		RemountVolume(drive_name);
 		// NTFS fixup (WinPE/AIK images don't seem to boot without an extra checkdisk)
-		if ((bt == BT_IMAGE) && (img_report.is_iso) && (fs == FS_NTFS)) {
+		if ((boot_type == BT_IMAGE) && (img_report.is_iso) && (fs_type == FS_NTFS)) {
 			// Try to ensure that all messages from Checkdisk will be in English
 			if (PRIMARYLANGID(GetThreadUILanguage()) != LANG_ENGLISH) {
 				SetThreadUILanguage(MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US));

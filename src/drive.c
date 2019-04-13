@@ -1415,7 +1415,7 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 	}
 	DriveLayoutEx.PartitionEntry[pn].PartitionLength.QuadPart = main_part_size_in_sectors * SelectedDrive.SectorSize;
 	if (partition_style == PARTITION_STYLE_MBR) {
-		DriveLayoutEx.PartitionEntry[pn].Mbr.BootIndicator = (bt != BT_NON_BOOTABLE);
+		DriveLayoutEx.PartitionEntry[pn].Mbr.BootIndicator = (boot_type != BT_NON_BOOTABLE);
 		switch (file_system) {
 		case FS_FAT16:
 			DriveLayoutEx.PartitionEntry[pn].Mbr.PartitionType = 0x0e;	// FAT16 LBA
