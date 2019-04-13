@@ -284,7 +284,9 @@ static errcode_t ext2fs_punch_extent(ext2_filsys fs, ext2_ino_t ino,
 	 * there aren't any blocks mapped past this point in the file, so we're
 	 * done.
 	 */
-	ext2fs_extent_goto(handle, start);
+	retval = ext2fs_extent_goto(handle, start);
+	if (retval)
+		goto errout;
 	retval = ext2fs_extent_get(handle, EXT2_EXTENT_CURRENT, &extent);
 	if (retval == EXT2_ET_NO_CURRENT_NODE) {
 		retval = 0;

@@ -329,6 +329,8 @@ struct rb_node *ext2fs_rb_augment_erase_begin(struct rb_node *node)
 		deepest = node->rb_right;
 	else {
 		deepest = ext2fs_rb_next(node);
+		if (!deepest)
+			return NULL;
 		if (deepest->rb_right)
 			deepest = deepest->rb_right;
 		else if (ext2fs_rb_parent(deepest) != node)

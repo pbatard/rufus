@@ -592,7 +592,7 @@ typedef struct ext2_icount *ext2_icount_t;
  */
 
 #define EXT2_CHECK_MAGIC(struct, code) \
-	  if ((struct)->magic != (code)) return (code)
+	  if (!(struct) || (struct)->magic != (code)) return (code)
 
 /*
  * Features supported by this version of the library

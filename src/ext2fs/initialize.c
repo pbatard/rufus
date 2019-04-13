@@ -553,6 +553,7 @@ ipg_retry:
 	ext2fs_free_blocks_count_set(super, free_blocks);
 
 	c = (char) 255;
+	// coverity[dead_error_condition]
 	if (((int) c) == -1) {
 		super->s_flags |= EXT2_FLAGS_SIGNED_HASH;
 	} else {

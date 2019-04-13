@@ -65,6 +65,7 @@ void ext2fs_free(ext2_filsys fs)
 
 	fs->magic = 0;
 
+	// coverity[check_return]
 	ext2fs_zero_blocks2(NULL, 0, 0, NULL, NULL);
 	ext2fs_free_mem(&fs);
 }

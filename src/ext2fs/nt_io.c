@@ -50,7 +50,6 @@ PF_TYPE_DECL(NTAPI, NTSTATUS, NtDelayExecution, (BOOLEAN, PLARGE_INTEGER));
 
 #define BooleanFlagOn(Flags, SingleFlag)    ((BOOLEAN)((((Flags) & (SingleFlag)) != 0)))
 
-#define EXT2_CHECK_MAGIC(struct, code)      if ((struct)->magic != (code)) return (code)
 #define EXT2_ET_MAGIC_NT_IO_CHANNEL         0x10ed
 
 // Private data block
@@ -280,16 +279,8 @@ static __inline NTSTATUS _CloseDisk(IN HANDLE Handle)
 	return (pfNtClose == NULL) ? STATUS_DLL_NOT_FOUND : pfNtClose(Handle);
 }
 
-//
-// Make NT name from any recognized name
-//
-
 static PCSTR _NormalizeDeviceName(IN PCSTR Device, IN PSTR NormalizedDeviceNameBuffer)
 {
-	int PartitionNumber = -1;
-	UCHAR DiskNumber;
-	PSTR p;
-
 	// Convert non NT paths to NT
 	if (Device[0] == '\\') {
 		if ((strlen(Device) < 4) || (Device[3] != '\\'))
@@ -302,83 +293,9 @@ static PCSTR _NormalizeDeviceName(IN PCSTR Device, IN PSTR NormalizedDeviceNameB
 		return NormalizedDeviceNameBuffer;
 	}
 
-	// For now, don't allow the conversion of non absolute paths.
+	// Don't allow the conversion of non absolute paths.
 	// Too easy to get a C:\ drive altered on a mishap otherwise...
 	return NULL;
-
-	// Strip leading '/dev/' if any
-	if ((Device[0] == '/') &&
-		(Device[1] == 'd') &&
-		(Device[2] == 'e') &&
-		(Device[3] == 'v') &&
-		(Device[4] == '/')) {
-		Device = &Device[5];
-	}
-
-	if (Device[0] == '\0') {
-		return NULL;
-	}
-
-	// forms: hda[n], sda[n], fd[n]
-	if (Device[1] != 'd') {
-		return NULL;
-	}
-
-	if ((Device[0] == 'h') || (Device[0] == 's')) {
-		if ((Device[2] < 'a') || (Device[2] > ('a' + 9)) ||
-		    ((Device[3] != '\0') &&
-			((Device[4] != '\0') ||
-			 ((Device[3] < '0') || (Device[3] > '9'))
-			)
-		    )
-		   ) {
-			return NULL;
-		}
-
-		DiskNumber = (UCHAR)(Device[2] - 'a');
-
-		if(Device[3] != '\0') {
-			PartitionNumber = (*(Device + 3) - '0');
-		}
-	} else if (Device[0] == 'f') {
-		// 3-d letter should be a digit.
-		if ((Device[3] != '\0') ||
-		    (Device[2] < '0') || (Device[2] > '9')) {
-			return NULL;
-		}
-
-		DiskNumber = (UCHAR)(*(Device + 2) - '0');
-	} else {
-		// invalid prefix
-		return NULL;
-	}
-
-
-	// Prefix
-	strcpy(NormalizedDeviceNameBuffer, "\\Device\\");
-
-	// Media name
-	switch(*Device) {
-	case 'f':
-		strcat(NormalizedDeviceNameBuffer, "Floppy0");
-		break;
-	case 'h':
-		strcat(NormalizedDeviceNameBuffer, "Harddisk0");
-		break;
-	}
-
-	p = NormalizedDeviceNameBuffer + strlen(NormalizedDeviceNameBuffer) - 1;
-	p[0] = (CHAR)(p[0] + DiskNumber);
-
-	// Partition nr.
-	if (PartitionNumber >= 0) {
-		strcat(NormalizedDeviceNameBuffer, "\\Partition0");
-
-		p = NormalizedDeviceNameBuffer + strlen(NormalizedDeviceNameBuffer) - 1;
-		p[0] = (CHAR)(p[0] + PartitionNumber);
-	}
-
-	return NormalizedDeviceNameBuffer;
 }
 
 static VOID _GetDeviceSize(IN HANDLE h, OUT unsigned __int64 *FsSize)
@@ -562,60 +479,49 @@ static errcode_t nt_open(const char *name, int flags, io_channel *channel)
 	if (name == NULL)
 		return EXT2_ET_BAD_DEVICE_NAME;
 
-	// Allocate channel handle
-	io = (io_channel) malloc(sizeof(struct struct_io_channel));
+	// Allocate buffers
+	io = (io_channel) calloc(1, sizeof(struct struct_io_channel));
 	if (io == NULL) {
 		errcode = ENOMEM;
 		goto out;
 	}
 
-	RtlZeroMemory(io, sizeof(struct struct_io_channel));
-	io->magic = EXT2_ET_MAGIC_IO_CHANNEL;
-
-	nt_data = (PNT_PRIVATE_DATA) malloc(sizeof(NT_PRIVATE_DATA));
-	if (nt_data == NULL) {
-		errcode = ENOMEM;
-		goto out;
-	}
-
-	io->manager = nt_io_manager();
-	io->name = malloc(strlen(name) + 1);
+	io->name = calloc(strlen(name) + 1, 1);
 	if (io->name == NULL) {
 		errcode = ENOMEM;
 		goto out;
 	}
 
-	strcpy(io->name, name);
-	io->private_data = nt_data;
-	io->block_size = 1024;
-	io->read_error = 0;
-	io->write_error = 0;
-	io->refcount = 1;
+	nt_data = (PNT_PRIVATE_DATA) calloc(1, sizeof(NT_PRIVATE_DATA));
+	if (nt_data == NULL) {
+		errcode = ENOMEM;
+		goto out;
+	}
 
-	// Initialize data
-	RtlZeroMemory(nt_data, sizeof(NT_PRIVATE_DATA));
-
-	nt_data->magic = EXT2_ET_MAGIC_NT_IO_CHANNEL;
-	nt_data->buffer_block_number = 0xffffffff;
-	nt_data->buffer_size = 1024;
-	nt_data->buffer = malloc(nt_data->buffer_size);
+	nt_data->buffer = malloc(EXT2_MIN_BLOCK_SIZE);
 	if (nt_data->buffer == NULL) {
 		errcode = ENOMEM;
 		goto out;
 	}
 
+	// Initialize data
+	io->magic = EXT2_ET_MAGIC_IO_CHANNEL;
+	io->manager = nt_io_manager();
+	strcpy(io->name, name);
+	io->block_size = EXT2_MIN_BLOCK_SIZE;
+	io->refcount = 1;
+
+	nt_data->magic = EXT2_ET_MAGIC_NT_IO_CHANNEL;
+	nt_data->buffer_block_number = 0xffffffff;
+	nt_data->buffer_size = EXT2_MIN_BLOCK_SIZE;
+	io->private_data = nt_data;
+
 	// Open the device
-	if (!_Ext2OpenDevice(name, (BOOLEAN)!BooleanFlagOn(flags, EXT2_FLAG_RW), &nt_data->handle, &nt_data->read_only, &errcode))
+	if (!_Ext2OpenDevice(name, (BOOLEAN)!BooleanFlagOn(flags, EXT2_FLAG_RW), &nt_data->handle, &nt_data->read_only, &errcode)) {
+		if (!errcode)
+			errcode = EIO;
 		goto out;
-
-	// Get the size
-//	_GetDeviceSize(nt_data->handle, &fs_size);
-//	strcpy(known_device, name);
-
-
-	// Lock/dismount
-//	if (!NT_SUCCESS(_LockDrive(nt_data->handle)) /*|| !NT_SUCCESS(_DismountDrive(NtData->Handle))*/)
-//		nt_data->read_only = TRUE;
+	}
 
 	// Done
 	*channel = io;
