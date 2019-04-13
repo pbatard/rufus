@@ -36,7 +36,7 @@
 #define O_DIRECT 0
 #endif
 
-#ifndef _MSC_VER
+#if __GNUC_PREREQ (4, 6)
 #pragma GCC diagnostic push
 #ifndef CONFIG_MMP
 #pragma GCC diagnostic ignored "-Wunused-parameter"
@@ -198,7 +198,7 @@ static errcode_t ext2fs_mmp_reset(ext2_filsys fs)
 	mmp_s->mmp_magic = EXT4_MMP_MAGIC;
 	mmp_s->mmp_seq = EXT4_MMP_SEQ_CLEAN;
 	mmp_s->mmp_time = 0;
-#if _BSD_SOURCE || _XOPEN_SOURCE >= 500
+#ifdef HAVE_GETHOSTNAME
 	gethostname(mmp_s->mmp_nodename, sizeof(mmp_s->mmp_nodename));
 #else
 	mmp_s->mmp_nodename[0] = '\0';
@@ -273,6 +273,10 @@ out:
 #endif
 }
 
+#ifndef min
+#define min(x, y) ((x) < (y) ? (x) : (y))
+#endif
+
 /*
  * Make sure that the fs is not mounted or being fsck'ed while opening the fs.
  */
@@ -320,7 +324,7 @@ errcode_t ext2fs_mmp_start(ext2_filsys fs)
 	if (mmp_s->mmp_check_interval > mmp_check_interval)
 		mmp_check_interval = mmp_s->mmp_check_interval;
 
-	sleep(2 * mmp_check_interval + 1);
+	sleep(min(mmp_check_interval * 2 + 1, mmp_check_interval + 60));
 
 	retval = ext2fs_mmp_read(fs, fs->super->s_mmp_block, fs->mmp_buf);
 	if (retval)
@@ -336,7 +340,7 @@ clean_seq:
 		goto mmp_error;
 
 	mmp_s->mmp_seq = seq = ext2fs_mmp_new_seq();
-#if _BSD_SOURCE || _XOPEN_SOURCE >= 500
+#ifdef HAVE_GETHOSTNAME
 	gethostname(mmp_s->mmp_nodename, sizeof(mmp_s->mmp_nodename));
 #else
 	strcpy(mmp_s->mmp_nodename, "unknown host");
@@ -348,7 +352,7 @@ clean_seq:
 	if (retval)
 		goto mmp_error;
 
-	sleep(2 * mmp_check_interval + 1);
+	sleep(min(2 * mmp_check_interval + 1, mmp_check_interval + 60));
 
 	retval = ext2fs_mmp_read(fs, fs->super->s_mmp_block, fs->mmp_buf);
 	if (retval)
@@ -465,6 +469,6 @@ mmp_error:
 	return EXT2_ET_OP_NOT_SUPPORTED;
 #endif
 }
-#ifndef _MSC_VER
+#if __GNUC_PREREQ (4, 6)
 #pragma GCC diagnostic pop
 #endif

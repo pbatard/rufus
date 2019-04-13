@@ -190,22 +190,16 @@
 #define INTDIV0_RAISES_SIGFPE 1
 
 /* The size of `int', as computed by sizeof. */
-#define SIZEOF_INT sizeof(int)
+#define SIZEOF_INT 4
 
 /* The size of `long', as computed by sizeof. */
-#define SIZEOF_LONG sizeof(long)
+#define SIZEOF_LONG 4
 
 /* The size of `long long', as computed by sizeof. */
-#define SIZEOF_LONG_LONG sizeof(long long)
-
-/* The size of `off_t', as computed by sizeof. */
-#define SIZEOF_OFF_T 4
+#define SIZEOF_LONG_LONG 8
 
 /* The size of `short', as computed by sizeof. */
 #define SIZEOF_SHORT 2
-
-/* The size of `time_t', as computed by sizeof. */
-#define SIZEOF_TIME_T 4
 
 /* Define to 1 if you have the ANSI C header files. */
 #define STDC_HEADERS 1
@@ -216,43 +210,15 @@
 /* Define if the POSIX multithreading library can be used. */
 #define USE_POSIX_THREADS 1
 
-/* Enable extensions on AIX 3, Interix.  */
-#ifndef _ALL_SOURCE
-# define _ALL_SOURCE 1
-#endif
 /* Enable GNU extensions on systems that have them.  */
 #ifndef _GNU_SOURCE
 # define _GNU_SOURCE 1
 #endif
-/* Enable threading extensions on Solaris.  */
-#ifndef _POSIX_PTHREAD_SEMANTICS
-# define _POSIX_PTHREAD_SEMANTICS 1
-#endif
-/* Enable extensions on HP NonStop.  */
-#ifndef _TANDEM_SOURCE
-# define _TANDEM_SOURCE 1
-#endif
-/* Enable general extensions on Solaris.  */
-#ifndef __EXTENSIONS__
-# define __EXTENSIONS__ 1
-#endif
-
-/* Define to 1 to build uuidd */
-#define USE_UUIDD 1
 
 /* Define if the native Windows multithreading API can be used. */
 /* #undef USE_WINDOWS_THREADS */
 #define USE_WINDOWS_THREADS 1
 
-/* version for gettext */
-//#define VERSION "0.14.1"
-
-/* Define to 2 if the system does not provide POSIX.1 features except with
-   this defined. */
-/* #undef _POSIX_1_SOURCE */
-
-/* Define to 1 if you need to in order for `stat' and other things to work. */
-/* #undef _POSIX_SOURCE */
 
 /* Please see the Gnulib manual for how to use these macros.
 
@@ -369,24 +335,6 @@
 #ifdef _MSC_VER
 #define __attribute__(x)
 #endif
-
-
-/* Define to `__inline__' or `__inline' if that's what the C compiler
-   calls it, or to nothing if 'inline' is not supported under any name.  */
-#ifndef __cplusplus
-/* #undef inline */
-#endif
-
-/* Define as the type of the result of subtracting two pointers, if the system
-   doesn't define it. */
-/* #undef ptrdiff_t */
-
-/* Define to `unsigned int' if <sys/types.h> does not define. */
-/* #undef size_t */
-
-/* Define to unsigned long or unsigned long long if <stdint.h> and
-   <inttypes.h> don't define. */
-/* #undef uintmax_t */
 
 #define __libc_lock_t                   gl_lock_t
 #define __libc_lock_define              gl_lock_define

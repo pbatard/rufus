@@ -690,7 +690,7 @@ BOOL FormatExt2Fs(void)
 	CloseHandle(h);
 
 	// TODO: We could probably remove that call and get our size from a different means
-	r = ext2fs_get_device_size(path, EXT2_BLOCK_SIZE(&features), &size);
+	r = ext2fs_get_device_size2(path, EXT2_BLOCK_SIZE(&features), &size);
 	uprintf("ext2fs_get_device_size: %d", r);
 	// TODO: ERROR HANDLING
 	// Set the number of blocks and reserved blocks

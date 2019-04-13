@@ -16,10 +16,31 @@
 #ifndef _LINUX_EXT2_FS_H
 #define _LINUX_EXT2_FS_H
 
-#include "ext2_types.h"		/* Changed from linux/types.h */
+#include <ext2fs/ext2_types.h>		/* Changed from linux/types.h */
 
-#ifdef _MSC_VER
-#define __attribute__(x)
+#if defined(__GNUC__) || defined(__clang__)
+# ifdef __MINGW32__
+ /* gcc 4.7 miscompiles packed structures in MS-bitfield mode */
+#  define EXT2FS_PACKME
+#  define EXT2FS_PACKED __attribute__((packed,gcc_struct))
+# else
+#  define EXT2FS_PACKME
+#  define EXT2FS_PACKED __attribute__((packed))
+# endif
+#elif defined(_MSC_VER)
+# define EXT2FS_PACKME __pragma(pack(push, 1))
+# define EXT2FS_PACKED __pragma(pack(pop))
+#else
+# error "EXT2FS_PACKED is not defined for this compiler"
+#endif
+
+#ifndef __GNUC_PREREQ
+#if defined(__GNUC__) && defined(__GNUC_MINOR__)
+#define __GNUC_PREREQ(maj, min) \
+	((__GNUC__ << 16) + __GNUC_MINOR__ >= ((maj) << 16) + (min))
+#else
+#define __GNUC_PREREQ(maj, min) 0
+#endif
 #endif
 
 /*
@@ -325,6 +346,7 @@ struct ext2_dx_tail {
 #define EXT2_TOPDIR_FL			0x00020000 /* Top of directory hierarchies*/
 #define EXT4_HUGE_FILE_FL               0x00040000 /* Set to each huge file */
 #define EXT4_EXTENTS_FL 		0x00080000 /* Inode uses extents */
+#define EXT4_VERITY_FL			0x00100000 /* Verity protected inode */
 #define EXT4_EA_INODE_FL	        0x00200000 /* Inode used for large EA */
 /* EXT4_EOFBLOCKS_FL 0x00400000 was here */
 #define FS_NOCOW_FL			0x00800000 /* Do not cow file */
@@ -333,10 +355,11 @@ struct ext2_dx_tail {
 #define EXT4_SNAPFILE_SHRUNK_FL		0x08000000  /* Snapshot shrink has completed */
 #define EXT4_INLINE_DATA_FL		0x10000000 /* Inode has inline data */
 #define EXT4_PROJINHERIT_FL		0x20000000 /* Create with parents projid */
+#define EXT4_CASEFOLD_FL		0x40000000 /* Casefolded file */
 #define EXT2_RESERVED_FL		0x80000000 /* reserved for ext2 lib */
 
-#define EXT2_FL_USER_VISIBLE		0x204BDFFF /* User visible flags */
-#define EXT2_FL_USER_MODIFIABLE		0x204B80FF /* User modifiable flags */
+#define EXT2_FL_USER_VISIBLE		0x604BDFFF /* User visible flags */
+#define EXT2_FL_USER_MODIFIABLE		0x604B80FF /* User modifiable flags */
 
 /*
  * ioctl commands
@@ -382,17 +405,17 @@ struct ext4_new_group_input {
  * Structure of an inode on the disk
  */
 struct ext2_inode {
-	__u16	i_mode;		/* File mode */
+/*00*/	__u16	i_mode;		/* File mode */
 	__u16	i_uid;		/* Low 16 bits of Owner Uid */
 	__u32	i_size;		/* Size in bytes */
 	__u32	i_atime;	/* Access time */
 	__u32	i_ctime;	/* Inode change time */
-	__u32	i_mtime;	/* Modification time */
+/*10*/	__u32	i_mtime;	/* Modification time */
 	__u32	i_dtime;	/* Deletion Time */
 	__u16	i_gid;		/* Low 16 bits of Group Id */
 	__u16	i_links_count;	/* Links count */
 	__u32	i_blocks;	/* Blocks count */
-	__u32	i_flags;	/* File flags */
+/*20*/	__u32	i_flags;	/* File flags */
 	union {
 		struct {
 			__u32	l_i_version; /* was l_i_reserved1 */
@@ -401,11 +424,11 @@ struct ext2_inode {
 			__u32  h_i_translator;
 		} hurd1;
 	} osd1;				/* OS dependent 1 */
-	__u32	i_block[EXT2_N_BLOCKS];/* Pointers to blocks */
-	__u32	i_generation;	/* File version (for NFS) */
+/*28*/	__u32	i_block[EXT2_N_BLOCKS];/* Pointers to blocks */
+/*64*/	__u32	i_generation;	/* File version (for NFS) */
 	__u32	i_file_acl;	/* File ACL */
 	__u32	i_size_high;
-	__u32	i_faddr;	/* Fragment address */
+/*70*/	__u32	i_faddr;	/* Fragment address */
 	union {
 		struct {
 			__u16	l_i_blocks_hi;
@@ -430,17 +453,17 @@ struct ext2_inode {
  * Permanent part of an large inode on the disk
  */
 struct ext2_inode_large {
-	__u16	i_mode;		/* File mode */
+/*00*/	__u16	i_mode;		/* File mode */
 	__u16	i_uid;		/* Low 16 bits of Owner Uid */
 	__u32	i_size;		/* Size in bytes */
 	__u32	i_atime;	/* Access time */
 	__u32	i_ctime;	/* Inode Change time */
-	__u32	i_mtime;	/* Modification time */
+/*10*/	__u32	i_mtime;	/* Modification time */
 	__u32	i_dtime;	/* Deletion Time */
 	__u16	i_gid;		/* Low 16 bits of Group Id */
 	__u16	i_links_count;	/* Links count */
 	__u32	i_blocks;	/* Blocks count */
-	__u32	i_flags;	/* File flags */
+/*20*/	__u32	i_flags;	/* File flags */
 	union {
 		struct {
 			__u32	l_i_version; /* was l_i_reserved1 */
@@ -449,11 +472,11 @@ struct ext2_inode_large {
 			__u32  h_i_translator;
 		} hurd1;
 	} osd1;				/* OS dependent 1 */
-	__u32	i_block[EXT2_N_BLOCKS];/* Pointers to blocks */
-	__u32	i_generation;	/* File version (for NFS) */
+/*28*/	__u32	i_block[EXT2_N_BLOCKS];/* Pointers to blocks */
+/*64*/	__u32	i_generation;	/* File version (for NFS) */
 	__u32	i_file_acl;	/* File ACL */
 	__u32	i_size_high;
-	__u32	i_faddr;	/* Fragment address */
+/*70*/	__u32	i_faddr;	/* Fragment address */
 	union {
 		struct {
 			__u16	l_i_blocks_hi;
@@ -472,15 +495,15 @@ struct ext2_inode_large {
 			__u32	h_i_author;
 		} hurd2;
 	} osd2;				/* OS dependent 2 */
-	__u16	i_extra_isize;
+/*80*/	__u16	i_extra_isize;
 	__u16	i_checksum_hi;	/* crc32c(uuid+inum+inode) */
 	__u32	i_ctime_extra;	/* extra Change time (nsec << 2 | epoch) */
 	__u32	i_mtime_extra;	/* extra Modification time (nsec << 2 | epoch) */
 	__u32	i_atime_extra;	/* extra Access time (nsec << 2 | epoch) */
-	__u32	i_crtime;	/* File creation time */
+/*90*/	__u32	i_crtime;	/* File creation time */
 	__u32	i_crtime_extra;	/* extra File creation time (nsec << 2 | epoch)*/
 	__u32	i_version_hi;	/* high 32 bits for 64-bit version */
-	__u32   i_projid;       /* Project ID */
+/*9c*/	__u32   i_projid;       /* Project ID */
 };
 
 #define EXT4_INODE_CSUM_HI_EXTRA_END	\
@@ -612,48 +635,48 @@ struct ext2_inode *EXT2_INODE(struct ext2_inode_large *large_inode)
  * Policy provided via an ioctl on the topmost directory. This
  * structure is also in the kernel.
  */
-struct ext4_encryption_policy {
+EXT2FS_PACKME struct ext4_encryption_policy {
   char version;
   char contents_encryption_mode;
   char filenames_encryption_mode;
   char flags;
   char master_key_descriptor[EXT4_KEY_DESCRIPTOR_SIZE];
-} __attribute__((__packed__));
+} EXT2FS_PACKED;
 
-struct ext4_encryption_key {
+EXT2FS_PACKME struct ext4_encryption_key {
         __u32 mode;
         char raw[EXT4_MAX_KEY_SIZE];
         __u32 size;
-} __attribute__((__packed__));
+} EXT2FS_PACKED;
 
 /*
  * Structure of the super block
  */
 struct ext2_super_block {
-	__u32	s_inodes_count;		/* Inodes count */
+/*000*/	__u32	s_inodes_count;		/* Inodes count */
 	__u32	s_blocks_count;		/* Blocks count */
 	__u32	s_r_blocks_count;	/* Reserved blocks count */
 	__u32	s_free_blocks_count;	/* Free blocks count */
-	__u32	s_free_inodes_count;	/* Free inodes count */
+/*010*/	__u32	s_free_inodes_count;	/* Free inodes count */
 	__u32	s_first_data_block;	/* First Data Block */
 	__u32	s_log_block_size;	/* Block size */
 	__u32	s_log_cluster_size;	/* Allocation cluster size */
-	__u32	s_blocks_per_group;	/* # Blocks per group */
+/*020*/	__u32	s_blocks_per_group;	/* # Blocks per group */
 	__u32	s_clusters_per_group;	/* # Fragments per group */
 	__u32	s_inodes_per_group;	/* # Inodes per group */
 	__u32	s_mtime;		/* Mount time */
-	__u32	s_wtime;		/* Write time */
+/*030*/	__u32	s_wtime;		/* Write time */
 	__u16	s_mnt_count;		/* Mount count */
 	__s16	s_max_mnt_count;	/* Maximal mount count */
 	__u16	s_magic;		/* Magic signature */
 	__u16	s_state;		/* File system state */
 	__u16	s_errors;		/* Behaviour when detecting errors */
 	__u16	s_minor_rev_level;	/* minor revision level */
-	__u32	s_lastcheck;		/* time of last check */
+/*040*/	__u32	s_lastcheck;		/* time of last check */
 	__u32	s_checkinterval;	/* max. time between checks */
 	__u32	s_creator_os;		/* OS */
 	__u32	s_rev_level;		/* Revision level */
-	__u16	s_def_resuid;		/* Default uid for reserved blocks */
+/*050*/	__u16	s_def_resuid;		/* Default uid for reserved blocks */
 	__u16	s_def_resgid;		/* Default gid for reserved blocks */
 	/*
 	 * These fields are for EXT2_DYNAMIC_REV superblocks only.
@@ -669,15 +692,15 @@ struct ext2_super_block {
 	 * things it doesn't understand...
 	 */
 	__u32	s_first_ino;		/* First non-reserved inode */
-	__u16	s_inode_size;		/* size of inode structure */
+	__u16   s_inode_size;		/* size of inode structure */
 	__u16	s_block_group_nr;	/* block group # of this superblock */
 	__u32	s_feature_compat;	/* compatible feature set */
-	__u32	s_feature_incompat;	/* incompatible feature set */
+/*060*/	__u32	s_feature_incompat;	/* incompatible feature set */
 	__u32	s_feature_ro_compat;	/* readonly-compatible feature set */
-	__u8	s_uuid[16];		/* 128-bit uuid for volume */
-	char	s_volume_name[EXT2_LABEL_LEN];	/* volume name */
-	char	s_last_mounted[64];	/* directory where last mounted */
-	__u32	s_algorithm_usage_bitmap; /* For compression */
+/*068*/	__u8	s_uuid[16];		/* 128-bit uuid for volume */
+/*078*/	char	s_volume_name[EXT2_LABEL_LEN];	/* volume name */
+/*088*/	char	s_last_mounted[64];	/* directory where last mounted */
+/*0c8*/	__u32	s_algorithm_usage_bitmap; /* For compression */
 	/*
 	 * Performance hints.  Directory preallocation should only
 	 * happen if the EXT2_FEATURE_COMPAT_DIR_PREALLOC flag is on.
@@ -688,63 +711,71 @@ struct ext2_super_block {
 	/*
 	 * Journaling support valid if EXT2_FEATURE_COMPAT_HAS_JOURNAL set.
 	 */
-	__u8	s_journal_uuid[16];	/* uuid of journal superblock */
-	__u32	s_journal_inum;		/* inode number of journal file */
+/*0d0*/	__u8	s_journal_uuid[16];	/* uuid of journal superblock */
+/*0e0*/	__u32	s_journal_inum;		/* inode number of journal file */
 	__u32	s_journal_dev;		/* device number of journal file */
 	__u32	s_last_orphan;		/* start of list of inodes to delete */
-	__u32	s_hash_seed[4];		/* HTREE hash seed */
-	__u8	s_def_hash_version;	/* Default hash version to use */
-	__u8	s_jnl_backup_type; 	/* Default type of journal backup */
+/*0ec*/	__u32	s_hash_seed[4];		/* HTREE hash seed */
+/*0fc*/	__u8	s_def_hash_version;	/* Default hash version to use */
+	__u8	s_jnl_backup_type;	/* Default type of journal backup */
 	__u16	s_desc_size;		/* Group desc. size: INCOMPAT_64BIT */
-	__u32	s_default_mount_opts;
+/*100*/	__u32	s_default_mount_opts;	/* default EXT2_MOUNT_* flags used */
 	__u32	s_first_meta_bg;	/* First metablock group */
 	__u32	s_mkfs_time;		/* When the filesystem was created */
-	__u32	s_jnl_blocks[17]; 	/* Backup of the journal inode */
-	__u32	s_blocks_count_hi;	/* Blocks count high 32bits */
+/*10c*/	__u32	s_jnl_blocks[17];	/* Backup of the journal inode */
+/*150*/	__u32	s_blocks_count_hi;	/* Blocks count high 32bits */
 	__u32	s_r_blocks_count_hi;	/* Reserved blocks count high 32 bits*/
-	__u32	s_free_blocks_hi; 	/* Free blocks count */
+	__u32	s_free_blocks_hi;	/* Free blocks count */
 	__u16	s_min_extra_isize;	/* All inodes have at least # bytes */
-	__u16	s_want_extra_isize; 	/* New inodes should reserve # bytes */
-	__u32	s_flags;		/* Miscellaneous flags */
-	__u16	s_raid_stride;		/* RAID stride */
+	__u16	s_want_extra_isize;	/* New inodes should reserve # bytes */
+/*160*/	__u32	s_flags;		/* Miscellaneous flags */
+	__u16	s_raid_stride;		/* RAID stride in blocks */
 	__u16	s_mmp_update_interval;  /* # seconds to wait in MMP checking */
-	__u64	s_mmp_block;            /* Block for multi-mount protection */
-	__u32	s_raid_stripe_width;    /* blocks on all data disks (N*stride)*/
+	__u64	s_mmp_block;		/* Block for multi-mount protection */
+/*170*/	__u32	s_raid_stripe_width;	/* blocks on all data disks (N*stride)*/
 	__u8	s_log_groups_per_flex;	/* FLEX_BG group size */
 	__u8	s_checksum_type;	/* metadata checksum algorithm */
 	__u8	s_encryption_level;	/* versioning level for encryption */
 	__u8	s_reserved_pad;		/* Padding to next 32bits */
 	__u64	s_kbytes_written;	/* nr of lifetime kilobytes written */
-	__u32	s_snapshot_inum;	/* Inode number of active snapshot */
+/*180*/	__u32	s_snapshot_inum;	/* Inode number of active snapshot */
 	__u32	s_snapshot_id;		/* sequential ID of active snapshot */
-	__u64	s_snapshot_r_blocks_count; /* reserved blocks for active
-					      snapshot's future use */
-	__u32	s_snapshot_list;	/* inode number of the head of the on-disk snapshot list */
+	__u64	s_snapshot_r_blocks_count; /* active snapshot reserved blocks */
+/*190*/	__u32	s_snapshot_list;	/* inode number of disk snapshot list */
 #define EXT4_S_ERR_START ext4_offsetof(struct ext2_super_block, s_error_count)
 	__u32	s_error_count;		/* number of fs errors */
 	__u32	s_first_error_time;	/* first time an error happened */
 	__u32	s_first_error_ino;	/* inode involved in first error */
-	__u64	s_first_error_block;	/* block involved of first error */
+/*1a0*/	__u64	s_first_error_block;	/* block involved in first error */
 	__u8	s_first_error_func[32];	/* function where the error happened */
-	__u32	s_first_error_line;	/* line number where error happened */
+/*1c8*/	__u32	s_first_error_line;	/* line number where error happened */
 	__u32	s_last_error_time;	/* most recent time of an error */
-	__u32	s_last_error_ino;	/* inode involved in last error */
+/*1d0*/	__u32	s_last_error_ino;	/* inode involved in last error */
 	__u32	s_last_error_line;	/* line number where error happened */
 	__u64	s_last_error_block;	/* block involved of last error */
-	__u8	s_last_error_func[32];	/* function where the error happened */
+/*1e0*/	__u8	s_last_error_func[32];	/* function where the error happened */
 #define EXT4_S_ERR_END ext4_offsetof(struct ext2_super_block, s_mount_opts)
-	__u8	s_mount_opts[64];
-	__u32	s_usr_quota_inum;	/* inode number of user quota file */
+/*200*/	__u8	s_mount_opts[64];
+/*240*/	__u32	s_usr_quota_inum;	/* inode number of user quota file */
 	__u32	s_grp_quota_inum;	/* inode number of group quota file */
 	__u32	s_overhead_blocks;	/* overhead blocks/clusters in fs */
-	__u32	s_backup_bgs[2];	/* If sparse_super2 enabled */
-	__u8	s_encrypt_algos[4];	/* Encryption algorithms in use  */
-	__u8	s_encrypt_pw_salt[16];	/* Salt used for string2key algorithm */
-	__le32	s_lpf_ino;		/* Location of the lost+found inode */
-	__le32	s_prj_quota_inum;	/* inode for tracking project quota */
-	__le32	s_checksum_seed;	/* crc32c(orig_uuid) if csum_seed set */
-	__le32	s_reserved[98];		/* Padding to the end of the block */
-	__u32	s_checksum;		/* crc32c(superblock) */
+/*24c*/	__u32	s_backup_bgs[2];	/* If sparse_super2 enabled */
+/*254*/	__u8	s_encrypt_algos[4];	/* Encryption algorithms in use  */
+/*258*/	__u8	s_encrypt_pw_salt[16];	/* Salt used for string2key algorithm */
+/*268*/	__le32	s_lpf_ino;		/* Location of the lost+found inode */
+	__le32  s_prj_quota_inum;	/* inode for tracking project quota */
+/*270*/	__le32	s_checksum_seed;	/* crc32c(orig_uuid) if csum_seed set */
+/*274*/	__u8	s_wtime_hi;
+	__u8	s_mtime_hi;
+	__u8	s_mkfs_time_hi;
+	__u8	s_lastcheck_hi;
+	__u8	s_first_error_time_hi;
+	__u8	s_last_error_time_hi;
+	__u8	s_pad[2];
+/*27c*/ __le16	s_encoding;		/* Filename charset encoding */
+	__le16	s_encoding_flags;	/* Filename charset encoding flags */
+	__le32	s_reserved[95];		/* Padding to the end of the block */
+/*3fc*/	__u32	s_checksum;		/* crc32c(superblock) */
 };
 
 #define EXT4_S_ERR_LEN (EXT4_S_ERR_END - EXT4_S_ERR_START)
@@ -816,7 +847,8 @@ struct ext2_super_block {
 #define EXT4_FEATURE_RO_COMPAT_REPLICA		0x0800
 #define EXT4_FEATURE_RO_COMPAT_READONLY		0x1000
 #define EXT4_FEATURE_RO_COMPAT_PROJECT		0x2000 /* Project quota */
-
+#define EXT4_FEATURE_RO_COMPAT_SHARED_BLOCKS	0x4000
+#define EXT4_FEATURE_RO_COMPAT_VERITY		0x8000
 
 #define EXT2_FEATURE_INCOMPAT_COMPRESSION	0x0001
 #define EXT2_FEATURE_INCOMPAT_FILETYPE		0x0002
@@ -833,6 +865,7 @@ struct ext2_super_block {
 #define EXT4_FEATURE_INCOMPAT_LARGEDIR		0x4000 /* >2GB or 3-lvl htree */
 #define EXT4_FEATURE_INCOMPAT_INLINE_DATA	0x8000 /* data in inode */
 #define EXT4_FEATURE_INCOMPAT_ENCRYPT		0x10000
+#define EXT4_FEATURE_INCOMPAT_FNAME_ENCODING	0x20000
 
 #define EXT4_FEATURE_COMPAT_FUNCS(name, ver, flagname) \
 static inline int ext2fs_has_feature_##name(struct ext2_super_block *sb) \
@@ -908,6 +941,8 @@ EXT4_FEATURE_RO_COMPAT_FUNCS(metadata_csum,	4, METADATA_CSUM)
 EXT4_FEATURE_RO_COMPAT_FUNCS(replica,		4, REPLICA)
 EXT4_FEATURE_RO_COMPAT_FUNCS(readonly,		4, READONLY)
 EXT4_FEATURE_RO_COMPAT_FUNCS(project,		4, PROJECT)
+EXT4_FEATURE_RO_COMPAT_FUNCS(shared_blocks,	4, SHARED_BLOCKS)
+EXT4_FEATURE_RO_COMPAT_FUNCS(verity,		4, VERITY)
 
 EXT4_FEATURE_INCOMPAT_FUNCS(compression,	2, COMPRESSION)
 EXT4_FEATURE_INCOMPAT_FUNCS(filetype,		2, FILETYPE)
@@ -924,6 +959,7 @@ EXT4_FEATURE_INCOMPAT_FUNCS(csum_seed,		4, CSUM_SEED)
 EXT4_FEATURE_INCOMPAT_FUNCS(largedir,		4, LARGEDIR)
 EXT4_FEATURE_INCOMPAT_FUNCS(inline_data,	4, INLINE_DATA)
 EXT4_FEATURE_INCOMPAT_FUNCS(encrypt,		4, ENCRYPT)
+EXT4_FEATURE_INCOMPAT_FUNCS(fname_encoding,	4, FNAME_ENCODING)
 
 #define EXT2_FEATURE_COMPAT_SUPP	0
 #define EXT2_FEATURE_INCOMPAT_SUPP    (EXT2_FEATURE_INCOMPAT_FILETYPE| \
@@ -933,7 +969,8 @@ EXT4_FEATURE_INCOMPAT_FUNCS(encrypt,		4, ENCRYPT)
 #define EXT2_FEATURE_RO_COMPAT_SUPP	(EXT2_FEATURE_RO_COMPAT_SPARSE_SUPER| \
 					 EXT2_FEATURE_RO_COMPAT_LARGE_FILE| \
 					 EXT4_FEATURE_RO_COMPAT_DIR_NLINK| \
-					 EXT2_FEATURE_RO_COMPAT_BTREE_DIR)
+					 EXT2_FEATURE_RO_COMPAT_BTREE_DIR| \
+					 EXT4_FEATURE_RO_COMPAT_VERITY)
 
 /*
  * Default values for user and/or group using reserved blocks
@@ -1106,5 +1143,12 @@ struct mmp_struct {
  * Size of a parent inode in inline data directory.
  */
 #define EXT4_INLINE_DATA_DOTDOT_SIZE	(4)
+
+#define EXT4_ENC_ASCII		0
+#define EXT4_ENC_UTF8_11_0	1
+
+#define EXT4_ENC_STRICT_MODE_FL			(1 << 0) /* Reject invalid sequences */
+#define EXT4_UTF8_NORMALIZATION_TYPE_NFKD	(1 << 1)
+#define EXT4_UTF8_CASEFOLD_TYPE_NFKDCF		(1 << 4)
 
 #endif	/* _LINUX_EXT2_FS_H */

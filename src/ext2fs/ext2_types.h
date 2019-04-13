@@ -7,151 +7,46 @@
 	!defined(_EXT2_TYPES_H))
 #define _EXT2_TYPES_H
 
+#include <stdint.h>
 
 #ifndef HAVE___U8
 #define HAVE___U8
-#ifdef __U8_TYPEDEF
-typedef __U8_TYPEDEF __u8;
-#else
-typedef unsigned char __u8;
-#endif
+typedef uint8_t __u8;
 #endif /* HAVE___U8 */
 
 #ifndef HAVE___S8
 #define HAVE___S8
-#ifdef __S8_TYPEDEF
-typedef __S8_TYPEDEF __s8;
-#else
-typedef signed char __s8;
-#endif
+typedef int8_t __s8;
 #endif /* HAVE___S8 */
 
 #ifndef HAVE___U16
 #define HAVE___U16
-#ifdef __U16_TYPEDEF
-typedef __U16_TYPEDEF __u16;
-#else
-#if (4 == 2)
-typedef	unsigned int	__u16;
-#else
-#if (2 == 2)
-typedef	unsigned short	__u16;
-#else
-#undef HAVE___U16
-  ?==error: undefined 16 bit type
-#endif /* SIZEOF_SHORT == 2 */
-#endif /* SIZEOF_INT == 2 */
-#endif /* __U16_TYPEDEF */
+typedef uint16_t __u16;
 #endif /* HAVE___U16 */
 
 #ifndef HAVE___S16
 #define HAVE___S16
-#ifdef __S16_TYPEDEF
-typedef __S16_TYPEDEF __s16;
-#else
-#if (4 == 2)
-typedef	int		__s16;
-#else
-#if (2 == 2)
-typedef	short		__s16;
-#else
-#undef HAVE___S16
-  ?==error: undefined 16 bit type
-#endif /* SIZEOF_SHORT == 2 */
-#endif /* SIZEOF_INT == 2 */
-#endif /* __S16_TYPEDEF */
+typedef int16_t __s16;
 #endif /* HAVE___S16 */
 
 #ifndef HAVE___U32
 #define HAVE___U32
-#ifdef __U32_TYPEDEF
-typedef __U32_TYPEDEF __u32;
-#else
-#if (4 == 4)
-typedef	unsigned int	__u32;
-#else
-#if (4 == 4)
-typedef	unsigned long	__u32;
-#else
-#if (2 == 4)
-typedef	unsigned short	__u32;
-#else
-#undef HAVE___U32
- ?== error: undefined 32 bit type
-#endif /* SIZEOF_SHORT == 4 */
-#endif /* SIZEOF_LONG == 4 */
-#endif /* SIZEOF_INT == 4 */
-#endif /* __U32_TYPEDEF */
+typedef uint32_t __u32;
 #endif /* HAVE___U32 */
 
 #ifndef HAVE___S32
 #define HAVE___S32
-#ifdef __S32_TYPEDEF
-typedef __S32_TYPEDEF __s32;
-#else
-#if (4 == 4)
-typedef	int		__s32;
-#else
-#if (4 == 4)
-typedef	long		__s32;
-#else
-#if (2 == 4)
-typedef	short		__s32;
-#else
-#undef HAVE___S32
- ?== error: undefined 32 bit type
-#endif /* SIZEOF_SHORT == 4 */
-#endif /* SIZEOF_LONG == 4 */
-#endif /* SIZEOF_INT == 4 */
-#endif /* __S32_TYPEDEF */
+typedef int32_t __s32;
 #endif /* HAVE___S32 */
 
 #ifndef HAVE___U64
 #define HAVE___U64
-#ifdef __U64_TYPEDEF
-typedef __U64_TYPEDEF __u64;
-#else
-#if (4 == 8)
-typedef unsigned int	__u64;
-#else
-#if (8 == 8)
-typedef unsigned long long	__u64;
-#else
-#if (4 == 8)
-typedef unsigned long	__u64;
-#else
-#undef HAVE___U64
- ?== error: undefined 64 bit type
-#endif /* SIZEOF_LONG_LONG == 8 */
-#endif /* SIZEOF_LONG == 8 */
-#endif /* SIZEOF_INT == 8 */
-#endif /* __U64_TYPEDEF */
+typedef uint64_t __u64;
 #endif /* HAVE___U64 */
 
 #ifndef HAVE___S64
 #define HAVE___S64
-#ifdef __S64_TYPEDEF
-typedef __S64_TYPEDEF __s64;
-#else
-#if (4 == 8)
-typedef int		__s64;
-#else
-#if (8 == 8)
-#if defined(__GNUC__)
-typedef __signed__ long long	__s64;
-#else
-typedef signed long long	__s64;
-#endif /* __GNUC__ */
-#else
-#if (4 == 8)
-typedef long		__s64;
-#else
-#undef HAVE___S64
- ?== error: undefined 64 bit type
-#endif /* SIZEOF_LONG_LONG == 8 */
-#endif /* SIZEOF_LONG == 8 */
-#endif /* SIZEOF_INT == 8 */
-#endif /* __S64_TYPEDEF */
+typedef int64_t __s64;
 #endif /* HAVE___S64 */
 
 #undef __S8_TYPEDEF
@@ -164,8 +59,6 @@ typedef long		__s64;
 #undef __U64_TYPEDEF
 
 #endif /* _*_TYPES_H */
-
-#include <stdint.h>
 
 /* endian checking stuff */
 #ifndef EXT2_ENDIAN_H_

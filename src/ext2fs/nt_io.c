@@ -23,6 +23,7 @@
 
 #include <windows.h>
 #include <winternl.h>
+#include <assert.h>
 
 #include "config.h"
 #include "ext2fs.h"
@@ -41,9 +42,6 @@ PF_TYPE_DECL(NTAPI, NTSTATUS, NtDeviceIoControlFile, (HANDLE, HANDLE, PIO_APC_RO
 PF_TYPE_DECL(NTAPI, NTSTATUS, NtFsControlFile, (HANDLE, HANDLE, PIO_APC_ROUTINE, PVOID, PIO_STATUS_BLOCK, ULONG, PVOID, ULONG, PVOID, ULONG));
 PF_TYPE_DECL(NTAPI, NTSTATUS, NtDelayExecution, (BOOLEAN, PLARGE_INTEGER));
 
-// TODO: Sort out ASSERT and __attribute__(align)
-#define ASSERT(x)
-
 #define ARGUMENT_PRESENT(ArgumentPointer)   ((CHAR *)((ULONG_PTR)(ArgumentPointer)) != (CHAR *)(NULL))
 
 #define STATUS_SUCCESS                      ((NTSTATUS)0x00000000L)
@@ -52,8 +50,8 @@ PF_TYPE_DECL(NTAPI, NTSTATUS, NtDelayExecution, (BOOLEAN, PLARGE_INTEGER));
 
 #define BooleanFlagOn(Flags, SingleFlag)    ((BOOLEAN)((((Flags) & (SingleFlag)) != 0)))
 
-#define EXT2_CHECK_MAGIC(struct, code) if ((struct)->magic != (code)) return (code)
-#define EXT2_ET_MAGIC_NT_IO_CHANNEL  0x10ed
+#define EXT2_CHECK_MAGIC(struct, code)      if ((struct)->magic != (code)) return (code)
+#define EXT2_ET_MAGIC_NT_IO_CHANNEL         0x10ed
 
 // Private data block
 typedef struct _NT_PRIVATE_DATA {
@@ -148,7 +146,7 @@ static ERROR_ENTRY ErrorTable[] = {
         {  ERROR_NOT_ENOUGH_QUOTA,       ENOMEM    }
 };
 
-static unsigned _MapDosError (IN ULONG WinError)
+static unsigned _MapDosError(IN ULONG WinError)
 {
 	int i;
 
@@ -167,7 +165,6 @@ static unsigned _MapDosError (IN ULONG WinError)
 		return EINVAL;
 }
 
-
 // Map NT status to dos error.
 static __inline unsigned _MapNtStatus(IN NTSTATUS Status)
 {
@@ -180,7 +177,6 @@ static __inline unsigned _MapNtStatus(IN NTSTATUS Status)
 //
 static NTSTATUS _OpenNtName(IN PCSTR Name, IN BOOLEAN Readonly, OUT PHANDLE Handle, OUT PBOOLEAN OpenedReadonly OPTIONAL)
 {
-//	ANSI_STRING    AnsiString;
 	UNICODE_STRING UnicodeString;
 	WCHAR Buffer[512];
 	NTSTATUS Status = EFAULT;
@@ -189,8 +185,8 @@ static NTSTATUS _OpenNtName(IN PCSTR Name, IN BOOLEAN Readonly, OUT PHANDLE Hand
 	PF_INIT(NtDelayExecution, Ntdll);
 	PF_INIT_OR_OUT(NtOpenFile, Ntdll);
 
-	utf8_to_wchar_no_alloc(Name, Buffer, ARRAYSIZE(Buffer));
 	// Make Unicode name from input string
+	utf8_to_wchar_no_alloc(Name, Buffer, ARRAYSIZE(Buffer));
 	UnicodeString.Buffer = Buffer;
 	UnicodeString.Length = (USHORT) wcslen(Buffer) * 2;
 	UnicodeString.MaximumLength = sizeof(Buffer); // in bytes!!!
@@ -210,10 +206,7 @@ static NTSTATUS _OpenNtName(IN PCSTR Name, IN BOOLEAN Readonly, OUT PHANDLE Hand
 		// Maybe was just mounted? wait 0.5 sec and retry.
 		LARGE_INTEGER Interval;
 		Interval.QuadPart = -5000000; // 0.5 sec. from now
-		if (pfNtDelayExecution != NULL)
-			pfNtDelayExecution(FALSE, &Interval);
-		else
-			Sleep(500);
+		pfNtDelayExecution(FALSE, &Interval);
 
 		Status = pfNtOpenFile(Handle, SYNCHRONIZE | FILE_READ_DATA | (Readonly ? 0 : FILE_WRITE_DATA),
 				      &ObjectAttributes, &IoStatusBlock, FILE_SHARE_WRITE | FILE_SHARE_READ,
@@ -388,7 +381,6 @@ static PCSTR _NormalizeDeviceName(IN PCSTR Device, IN PSTR NormalizedDeviceNameB
 	return NormalizedDeviceNameBuffer;
 }
 
-
 static VOID _GetDeviceSize(IN HANDLE h, OUT unsigned __int64 *FsSize)
 {
 	PARTITION_INFORMATION_EX pi;
@@ -473,8 +465,8 @@ static BOOLEAN _BlockIo(IN HANDLE Handle, IN LARGE_INTEGER Offset, IN ULONG Byte
 	PF_INIT_OR_OUT(NtWriteFile, NtDll);
 
 	// Should be aligned
-	ASSERT(0 == (Bytes % 512));
-	ASSERT(0 == (Offset.LowPart % 512));
+	assert((Bytes % 512) == 0);
+	assert((Offset.LowPart % 512) == 0);
 
 	// Perform io
 	if(Read) {
@@ -496,8 +488,6 @@ out:
 	return FALSE;
 }
 
-
-
 static BOOLEAN _RawWrite(IN HANDLE Handle, IN LARGE_INTEGER Offset, IN ULONG Bytes, OUT const CHAR* Buffer, OUT unsigned* Errno)
 {
 	return _BlockIo(Handle, Offset, Bytes, (PCHAR)Buffer, FALSE, Errno);
@@ -515,18 +505,14 @@ static BOOLEAN _SetPartType(IN HANDLE Handle, IN UCHAR Type)
 	if (pfNtDeviceIoControlFile == NULL)
 		return FALSE;
 	return NT_SUCCESS(pfNtDeviceIoControlFile(Handle, NULL, NULL, NULL, &IoStatusBlock,
-						  IOCTL_DISK_SET_PARTITION_INFO, &Type,
-						  sizeof(Type), NULL, 0));
+						  IOCTL_DISK_SET_PARTITION_INFO, &Type, sizeof(Type), NULL, 0));
 }
-
 
 //
 // Interface functions.
 // Is_mounted is set to 1 if the device is mounted, 0 otherwise
 //
-
-errcode_t
-ext2fs_check_if_mounted(const char *file, int *mount_flags)
+errcode_t ext2fs_check_if_mounted(const char *file, int *mount_flags)
 {
 	HANDLE h;
 	BOOLEAN Readonly;
@@ -542,12 +528,10 @@ ext2fs_check_if_mounted(const char *file, int *mount_flags)
 	return 0;
 }
 
-
-
 // Returns the number of blocks in a partition
 // Note: Do *NOT* be tempted to cache the device size according to the NT path as
 // different removable devices (e.g. UFD) may be remounted under the same path.
-errcode_t ext2fs_get_device_size(const char *file, int blocksize, blk64_t *retblocks)
+errcode_t ext2fs_get_device_size2(const char *file, int blocksize, blk64_t *retblocks)
 {
 	__int64 fs_size = 0;
 	HANDLE h;
@@ -569,7 +553,6 @@ errcode_t ext2fs_get_device_size(const char *file, int blocksize, blk64_t *retbl
 //
 // Table elements
 //
-
 static errcode_t nt_open(const char *name, int flags, io_channel *channel)
 {
 	io_channel io = NULL;
@@ -698,7 +681,7 @@ static errcode_t nt_set_blksize(io_channel channel, int blksize)
 		free(nt_data->buffer);
 		nt_data->buffer_block_number = 0xffffffff;
 		nt_data->buffer_size = channel->block_size;
-		ASSERT(0 == (nt_data->BufferSize % 512));
+		assert((nt_data->buffer_size % 512) == 0);
 
 		nt_data->buffer = malloc(nt_data->buffer_size);
 		if (nt_data->buffer == NULL)
@@ -741,7 +724,7 @@ static errcode_t nt_read_blk(io_channel channel, unsigned long block, int count,
 	} else {
 		read_size = size;
 		read_buffer = buf;
-		ASSERT((read_size % channel->block_size) == 0);
+		assert((read_size % channel->block_size) == 0);
 	}
 
 	if (!_RawRead(nt_data->handle, offset, read_size, read_buffer, &errcode)) {
@@ -752,7 +735,7 @@ static errcode_t nt_read_blk(io_channel channel, unsigned long block, int count,
 	}
 
 	if (read_buffer != buf) {
-		ASSERT(size <= read_size);
+		assert(size <= read_size);
 		memcpy(buf, read_buffer, size);
 	}
 
@@ -785,7 +768,7 @@ static errcode_t nt_write_blk(io_channel channel, unsigned long block, int count
 	}
 
 
-	ASSERT(0 == (write_size % 512));
+	assert((write_size % 512) == 0);
 	offset.QuadPart = block * channel->block_size;
 
 	if (!_RawWrite(nt_data->handle, offset, write_size, buf, &errcode)) {

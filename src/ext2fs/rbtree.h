@@ -97,8 +97,17 @@ static inline struct page * rb_insert_page_cache(struct inode * inode,
 #include <stdlib.h>
 #include <stdint.h>
 
-// TODO: MSVC __attribute__(x)
-#define __attribute__(x)
+#include "config.h"
+
+#if defined(__GNUC__) || defined(__clang__)
+#define EXT2FS_ALIGN_START(m)
+#define EXT2FS_ALIGN_END(m) __attribute__ ((__aligned__(m)))
+#elif defined(_MSC_VER)
+#define EXT2FS_ALIGN_START(m) __declspec(align(m))
+#define EXT2FS_ALIGN_END(m)
+#else
+#error 
+#endif
 
 #undef offsetof
 #ifdef __compiler_offsetof
@@ -111,14 +120,14 @@ static inline struct page * rb_insert_page_cache(struct inode * inode,
 	const __typeof__( ((type *)0)->member ) *__mptr = (ptr);	\
 	(type *)( (char *)__mptr - offsetof(type,member) );})
 
-struct rb_node
+EXT2FS_ALIGN_START(SIZEOF_LONG) struct rb_node
 {
 	uintptr_t  rb_parent_color;
 #define	RB_RED		0
 #define	RB_BLACK	1
 	struct rb_node *rb_right;
 	struct rb_node *rb_left;
-} __attribute__((aligned(sizeof(long))));
+} EXT2FS_ALIGN_END(SIZEOF_LONG);
     /* The alignment might seem pointless, but allegedly CRIS needs it */
 
 struct rb_root

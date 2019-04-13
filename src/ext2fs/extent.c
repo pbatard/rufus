@@ -1737,6 +1737,54 @@ size_t ext2fs_max_extent_depth(ext2_extent_handle_t handle)
 	return last_result;
 }
 
+errcode_t ext2fs_fix_extents_checksums(ext2_filsys fs, ext2_ino_t ino,
+				       struct ext2_inode *inode)
+{
+	ext2_extent_handle_t	handle;
+	struct ext2fs_extent	extent;
+	errcode_t		errcode;
+	int    			save_flags = fs->flags;
+
+	if (!ext2fs_has_feature_metadata_csum(fs->super) ||
+	    (inode && !(inode->i_flags & EXT4_EXTENTS_FL)))
+		return 0;
+
+	errcode = ext2fs_extent_open2(fs, ino, inode, &handle);
+	if (errcode) {
+		if (errcode == EXT2_ET_INODE_NOT_EXTENT)
+			errcode = 0;
+		return errcode;
+	}
+
+	fs->flags &= ~EXT2_FLAG_IGNORE_CSUM_ERRORS;
+	errcode = ext2fs_extent_get(handle, EXT2_EXTENT_ROOT, &extent);
+	if (errcode)
+		goto out;
+
+	do {
+		/* Skip to the end of a block of leaf nodes */
+		if (extent.e_flags & EXT2_EXTENT_FLAGS_LEAF) {
+			errcode = ext2fs_extent_get(handle,
+						    EXT2_EXTENT_LAST_SIB,
+						    &extent);
+			if (errcode)
+				break;
+		}
+
+		errcode = ext2fs_extent_get(handle, EXT2_EXTENT_NEXT, &extent);
+		if (errcode == EXT2_ET_EXTENT_CSUM_INVALID)
+			errcode = update_path(handle);
+	} while (errcode == 0);
+
+out:
+	/* Ok if we run off the end */
+	if (errcode == EXT2_ET_EXTENT_NO_NEXT)
+		errcode = 0;
+	ext2fs_extent_free(handle);
+	fs->flags = save_flags;
+	return errcode;
+}
+
 #ifdef DEBUG
 /*
  * Override debugfs's prompt

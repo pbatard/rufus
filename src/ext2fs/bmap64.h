@@ -37,7 +37,7 @@ struct ext2_bmap_statistics {
 };
 
 
-struct ext2fs_struct_generic_bitmap {
+struct ext2fs_struct_generic_bitmap_64 {
 	errcode_t		magic;
 	ext2_filsys 		fs;
 	struct ext2_bitmap_ops	*bitmap_ops;
@@ -53,6 +53,8 @@ struct ext2fs_struct_generic_bitmap {
 #endif
 };
 
+typedef struct ext2fs_struct_generic_bitmap_64 *ext2fs_generic_bitmap_64;
+
 #define EXT2FS_IS_32_BITMAP(bmap) \
 	(((bmap)->magic == EXT2_ET_MAGIC_GENERIC_BITMAP) || \
 	 ((bmap)->magic == EXT2_ET_MAGIC_BLOCK_BITMAP) || \
@@ -66,37 +68,37 @@ struct ext2fs_struct_generic_bitmap {
 struct ext2_bitmap_ops {
 	int	type;
 	/* Generic bmap operators */
-	errcode_t (*new_bmap)(ext2_filsys fs, ext2fs_generic_bitmap bmap);
-	void	(*free_bmap)(ext2fs_generic_bitmap bitmap);
-	errcode_t (*copy_bmap)(ext2fs_generic_bitmap src,
-			     ext2fs_generic_bitmap dest);
-	errcode_t (*resize_bmap)(ext2fs_generic_bitmap bitmap,
+	errcode_t (*new_bmap)(ext2_filsys fs, ext2fs_generic_bitmap_64 bmap);
+	void	(*free_bmap)(ext2fs_generic_bitmap_64 bitmap);
+	errcode_t (*copy_bmap)(ext2fs_generic_bitmap_64 src,
+			     ext2fs_generic_bitmap_64 dest);
+	errcode_t (*resize_bmap)(ext2fs_generic_bitmap_64 bitmap,
 			       __u64 new_end,
 			       __u64 new_real_end);
 	/* bit set/test operators */
-	int	(*mark_bmap)(ext2fs_generic_bitmap bitmap, __u64 arg);
-	int	(*unmark_bmap)(ext2fs_generic_bitmap bitmap, __u64 arg);
-	int	(*test_bmap)(ext2fs_generic_bitmap bitmap, __u64 arg);
-	void	(*mark_bmap_extent)(ext2fs_generic_bitmap bitmap, __u64 arg,
+	int	(*mark_bmap)(ext2fs_generic_bitmap_64 bitmap, __u64 arg);
+	int	(*unmark_bmap)(ext2fs_generic_bitmap_64 bitmap, __u64 arg);
+	int	(*test_bmap)(ext2fs_generic_bitmap_64 bitmap, __u64 arg);
+	void	(*mark_bmap_extent)(ext2fs_generic_bitmap_64 bitmap, __u64 arg,
 				    unsigned int num);
-	void	(*unmark_bmap_extent)(ext2fs_generic_bitmap bitmap, __u64 arg,
+	void	(*unmark_bmap_extent)(ext2fs_generic_bitmap_64 bitmap, __u64 arg,
 				      unsigned int num);
-	int	(*test_clear_bmap_extent)(ext2fs_generic_bitmap bitmap,
+	int	(*test_clear_bmap_extent)(ext2fs_generic_bitmap_64 bitmap,
 					  __u64 arg, unsigned int num);
-	errcode_t (*set_bmap_range)(ext2fs_generic_bitmap bitmap,
+	errcode_t (*set_bmap_range)(ext2fs_generic_bitmap_64 bitmap,
 				    __u64 start, size_t num, void *in);
-	errcode_t (*get_bmap_range)(ext2fs_generic_bitmap bitmap,
+	errcode_t (*get_bmap_range)(ext2fs_generic_bitmap_64 bitmap,
 				    __u64 start, size_t num, void *out);
-	void (*clear_bmap)(ext2fs_generic_bitmap bitmap);
-	void (*print_stats)(ext2fs_generic_bitmap);
+	void (*clear_bmap)(ext2fs_generic_bitmap_64 bitmap);
+	void (*print_stats)(ext2fs_generic_bitmap_64);
 
 	/* Find the first zero bit between start and end, inclusive.
 	 * May be NULL, in which case a generic function is used. */
-	errcode_t (*find_first_zero)(ext2fs_generic_bitmap bitmap,
+	errcode_t (*find_first_zero)(ext2fs_generic_bitmap_64 bitmap,
 				     __u64 start, __u64 end, __u64 *out);
 	/* Find the first set bit between start and end, inclusive.
 	 * May be NULL, in which case a generic function is used. */
-	errcode_t (*find_first_set)(ext2fs_generic_bitmap bitmap,
+	errcode_t (*find_first_set)(ext2fs_generic_bitmap_64 bitmap,
 				    __u64 start, __u64 end, __u64 *out);
 };
 

@@ -12,7 +12,7 @@
 #ifndef _EXT2FS_EXT2_IO_H
 #define _EXT2FS_EXT2_IO_H
 
-#include "ext2_types.h"
+#include <ext2fs/ext2_types.h>
 
 /*
  * ext2_loff_t is defined here since unix_io.c needs it.

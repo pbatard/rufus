@@ -95,6 +95,8 @@ typedef __u32 __bitwise		ext2_dirhash_t;
 #include <ext2fs/ext2_ext_attr.h>
 #endif
 
+#include "hashmap.h"
+
 #define EXT2_QSORT_TYPE int
 
 typedef struct struct_ext2_filsys *ext2_filsys;
@@ -103,9 +105,14 @@ typedef struct struct_ext2_filsys *ext2_filsys;
 #define EXT2FS_UNMARK_ERROR 	1
 #define EXT2FS_TEST_ERROR	2
 
-typedef struct ext2fs_struct_generic_bitmap *ext2fs_generic_bitmap;
-typedef struct ext2fs_struct_generic_bitmap *ext2fs_inode_bitmap;
-typedef struct ext2fs_struct_generic_bitmap *ext2fs_block_bitmap;
+struct ext2fs_struct_generic_bitmap_base {
+	errcode_t		magic;
+	ext2_filsys 		fs;
+};
+
+typedef struct ext2fs_struct_generic_bitmap_base *ext2fs_generic_bitmap;
+typedef struct ext2fs_struct_generic_bitmap_base *ext2fs_inode_bitmap;
+typedef struct ext2fs_struct_generic_bitmap_base *ext2fs_block_bitmap;
 
 #define EXT2_FIRST_INODE(s)	EXT2_FIRST_INO(s)
 
@@ -189,6 +196,8 @@ typedef struct ext2_file *ext2_file_t;
 #define EXT2_FLAG_DIRECT_IO		0x80000
 #define EXT2_FLAG_SKIP_MMP		0x100000
 #define EXT2_FLAG_IGNORE_CSUM_ERRORS	0x200000
+#define EXT2_FLAG_SHARE_DUP		0x400000
+#define EXT2_FLAG_IGNORE_SB_ERRORS	0x800000
 
 /*
  * Special flag in the ext2 inode i_flag field that means that this is
@@ -289,10 +298,15 @@ struct struct_ext2_filsys {
 			       blk64_t len, blk64_t *pblk, blk64_t *plen);
 	void (*block_alloc_stats_range)(ext2_filsys fs, blk64_t blk, blk_t num,
 					int inuse);
+
+	/* hashmap for SHA of data blocks */
+	struct ext2fs_hashmap* block_sha_map;
+
+	const struct nls_table *encoding;
 };
 
-#ifdef EXT2_FLAT_INCLUDES
-#include "bitops.h"
+#if EXT2_FLAT_INCLUDES
+#include "e2_bitops.h"
 #else
 #include <ext2fs/bitops.h>
 #endif
@@ -558,6 +572,16 @@ typedef struct ext2_icount *ext2_icount_t;
 #define BMAP_RET_UNINIT	0x0001
 
 /*
+ * Flags for ext2fs_read_inode2
+ */
+#define READ_INODE_NOCSUM	0x0001
+
+/*
+ * Flags for ext2fs_write_inode2
+ */
+#define WRITE_INODE_NOCSUM	0x0001
+
+/*
  * Flags for imager.c functions
  */
 #define IMAGER_FLAG_INODEMAP	1
@@ -598,6 +622,7 @@ typedef struct ext2_icount *ext2_icount_t;
 					 EXT4_FEATURE_INCOMPAT_64BIT|\
 					 EXT4_FEATURE_INCOMPAT_INLINE_DATA|\
 					 EXT4_FEATURE_INCOMPAT_ENCRYPT|\
+					 EXT4_FEATURE_INCOMPAT_FNAME_ENCODING|\
 					 EXT4_FEATURE_INCOMPAT_CSUM_SEED|\
 					 EXT4_FEATURE_INCOMPAT_LARGEDIR)
 
@@ -611,7 +636,9 @@ typedef struct ext2_icount *ext2_icount_t;
 					 EXT4_FEATURE_RO_COMPAT_QUOTA|\
 					 EXT4_FEATURE_RO_COMPAT_METADATA_CSUM|\
 					 EXT4_FEATURE_RO_COMPAT_READONLY |\
-					 EXT4_FEATURE_RO_COMPAT_PROJECT)
+					 EXT4_FEATURE_RO_COMPAT_PROJECT |\
+					 EXT4_FEATURE_RO_COMPAT_SHARED_BLOCKS |\
+					 EXT4_FEATURE_RO_COMPAT_VERITY)
 
 /*
  * These features are only allowed if EXT2_FLAG_SOFTSUPP_FEATURES is passed
@@ -1153,6 +1180,12 @@ extern errcode_t ext2fs_dirhash(int version, const char *name, int len,
 				ext2_dirhash_t *ret_hash,
 				ext2_dirhash_t *ret_minor_hash);
 
+extern errcode_t ext2fs_dirhash2(int version, const char *name, int len,
+				 const struct nls_table *charset,
+				 int hash_flags,
+				 const __u32 *seed,
+				 ext2_dirhash_t *ret_hash,
+				 ext2_dirhash_t *ret_minor_hash);
 
 /* dir_iterate.c */
 extern errcode_t ext2fs_get_rec_len(ext2_filsys fs,
@@ -1275,7 +1308,9 @@ extern errcode_t ext2fs_extent_goto(ext2_extent_handle_t handle,
 extern errcode_t ext2fs_extent_goto2(ext2_extent_handle_t handle,
 				     int leaf_level, blk64_t blk);
 extern errcode_t ext2fs_extent_fix_parents(ext2_extent_handle_t handle);
-size_t ext2fs_max_extent_depth(ext2_extent_handle_t handle);
+extern size_t ext2fs_max_extent_depth(ext2_extent_handle_t handle);
+extern errcode_t ext2fs_fix_extents_checksums(ext2_filsys fs, ext2_ino_t ino,
+					      struct ext2_inode *inode);
 
 /* fallocate.c */
 #define EXT2_FALLOCATE_ZERO_BLOCKS	(0x1)
@@ -1400,7 +1435,7 @@ extern errcode_t ext2fs_get_num_dirs(ext2_filsys fs, ext2_ino_t *ret_num_dirs);
 
 /* getsize.c */
 extern errcode_t ext2fs_get_device_size(const char *file, int blocksize,
-					blk64_t *retblocks);
+					blk_t *retblocks);
 extern errcode_t ext2fs_get_device_size2(const char *file, int blocksize,
 					blk64_t *retblocks);
 
@@ -1499,13 +1534,19 @@ extern int ext2fs_inode_scan_flags(ext2_inode_scan scan, int set_flags,
 extern errcode_t ext2fs_read_inode_full(ext2_filsys fs, ext2_ino_t ino,
 					struct ext2_inode * inode,
 					int bufsize);
-extern errcode_t ext2fs_read_inode (ext2_filsys fs, ext2_ino_t ino,
+extern errcode_t ext2fs_read_inode(ext2_filsys fs, ext2_ino_t ino,
 			    struct ext2_inode * inode);
+extern errcode_t ext2fs_read_inode2(ext2_filsys fs, ext2_ino_t ino,
+				    struct ext2_inode * inode,
+				    int bufsize, int flags);
 extern errcode_t ext2fs_write_inode_full(ext2_filsys fs, ext2_ino_t ino,
 					 struct ext2_inode * inode,
 					 int bufsize);
 extern errcode_t ext2fs_write_inode(ext2_filsys fs, ext2_ino_t ino,
 			    struct ext2_inode * inode);
+extern errcode_t ext2fs_write_inode2(ext2_filsys fs, ext2_ino_t ino,
+				     struct ext2_inode * inode,
+				     int bufsize, int flags);
 extern errcode_t ext2fs_write_new_inode(ext2_filsys fs, ext2_ino_t ino,
 			    struct ext2_inode * inode);
 extern errcode_t ext2fs_get_blocks(ext2_filsys fs, ext2_ino_t ino, blk_t *blocks);
@@ -1724,6 +1765,7 @@ extern blk_t ext2fs_group_first_block(ext2_filsys fs, dgrp_t group);
 extern blk_t ext2fs_group_last_block(ext2_filsys fs, dgrp_t group);
 extern blk_t ext2fs_inode_data_blocks(ext2_filsys fs,
 				      struct ext2_inode *inode);
+extern int ext2fs_htree_intnode_maxrecs(ext2_filsys fs, int blocks);
 extern unsigned int ext2fs_div_ceil(unsigned int a, unsigned int b);
 extern __u64 ext2fs_div64_ceil(__u64 a, __u64 b);
 extern int ext2fs_dirent_name_len(const struct ext2_dir_entry *entry);
@@ -1959,18 +2001,6 @@ _INLINE_ blk_t ext2fs_inode_data_blocks(ext2_filsys fs,
 	return (blk_t) ext2fs_inode_data_blocks2(fs, inode);
 }
 
-/* htree levels for ext4 */
-#define EXT4_HTREE_LEVEL_COMPAT 2
-#define EXT4_HTREE_LEVEL	3
-
-static inline unsigned int ext2_dir_htree_level(ext2_filsys fs)
-{
-	if (ext2fs_has_feature_largedir(fs->super))
-		return EXT4_HTREE_LEVEL;
-
-	return EXT4_HTREE_LEVEL_COMPAT;
-}
-
 _INLINE_ int ext2fs_htree_intnode_maxrecs(ext2_filsys fs, int blocks)
 {
 	return blocks * ((fs->blocksize - 8) / sizeof(struct ext2_dx_entry));
@@ -2028,6 +2058,18 @@ ext2fs_const_inode(const struct ext2_inode_large * large_inode)
 
 #undef _INLINE_
 #endif
+
+/* htree levels for ext4 */
+#define EXT4_HTREE_LEVEL_COMPAT 2
+#define EXT4_HTREE_LEVEL	3
+
+static inline unsigned int ext2_dir_htree_level(ext2_filsys fs)
+{
+	if (ext2fs_has_feature_largedir(fs->super))
+		return EXT4_HTREE_LEVEL;
+
+	return EXT4_HTREE_LEVEL_COMPAT;
+}
 
 #ifdef __cplusplus
 }

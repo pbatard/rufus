@@ -111,7 +111,8 @@ am_libext2fs_a_OBJECTS = libext2fs_a-alloc.$(OBJEXT) \
 	libext2fs_a-gen_bitmap.$(OBJEXT) \
 	libext2fs_a-gen_bitmap64.$(OBJEXT) \
 	libext2fs_a-get_num_dirs.$(OBJEXT) \
-	libext2fs_a-i_block.$(OBJEXT) libext2fs_a-ind_block.$(OBJEXT) \
+	libext2fs_a-hashmap.$(OBJEXT) libext2fs_a-i_block.$(OBJEXT) \
+	libext2fs_a-ind_block.$(OBJEXT) \
 	libext2fs_a-initialize.$(OBJEXT) libext2fs_a-inline.$(OBJEXT) \
 	libext2fs_a-inline_data.$(OBJEXT) libext2fs_a-inode.$(OBJEXT) \
 	libext2fs_a-io_manager.$(OBJEXT) libext2fs_a-link.$(OBJEXT) \
@@ -120,7 +121,8 @@ am_libext2fs_a_OBJECTS = libext2fs_a-alloc.$(OBJEXT) \
 	libext2fs_a-newdir.$(OBJEXT) libext2fs_a-nt_io.$(OBJEXT) \
 	libext2fs_a-punch.$(OBJEXT) libext2fs_a-rbtree.$(OBJEXT) \
 	libext2fs_a-read_bb.$(OBJEXT) libext2fs_a-rw_bitmaps.$(OBJEXT) \
-	libext2fs_a-symlink.$(OBJEXT) libext2fs_a-valid_blk.$(OBJEXT)
+	libext2fs_a-sha512.$(OBJEXT) libext2fs_a-symlink.$(OBJEXT) \
+	libext2fs_a-valid_blk.$(OBJEXT)
 libext2fs_a_OBJECTS = $(am_libext2fs_a_OBJECTS)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -268,13 +270,14 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 noinst_LIBRARIES = libext2fs.a
-libext2fs_a_SOURCES = alloc.c alloc_sb.c alloc_stats.c alloc_tables.c badblocks.c bb_inode.c bitmaps.c \
-	bitops.c blkmap64_ba.c blkmap64_rb.c blknum.c block.c bmap.c closefs.c crc16.c crc32c.c csum.c \
-	dirblock.c dir_iterate.c extent.c ext_attr.c extent.c fileio.c freefs.c gen_bitmap.c gen_bitmap64.c \
-	get_num_dirs.c i_block.c ind_block.c initialize.c inline.c inline_data.c inode.c io_manager.c link.c \
-	lookup.c missing.c mkdir.c mmp.c newdir.c nt_io.c punch.c rbtree.c read_bb.c rw_bitmaps.c symlink.c valid_blk.c
+libext2fs_a_SOURCES = alloc.c alloc_sb.c alloc_stats.c alloc_tables.c badblocks.c bb_inode.c       \
+	bitmaps.c bitops.c blkmap64_ba.c blkmap64_rb.c blknum.c block.c bmap.c closefs.c crc16.c         \
+	crc32c.c csum.c dirblock.c dir_iterate.c extent.c ext_attr.c extent.c fileio.c freefs.c          \
+	gen_bitmap.c gen_bitmap64.c get_num_dirs.c hashmap.c i_block.c ind_block.c initialize.c inline.c \
+	inline_data.c inode.c io_manager.c link.c lookup.c missing.c mkdir.c mmp.c newdir.c nt_io.c      \
+	punch.c rbtree.c read_bb.c rw_bitmaps.c sha512.c symlink.c valid_blk.c
 
-libext2fs_a_CFLAGS = $(AM_CFLAGS) -DEXT2_FLAT_INCLUDES -DHAVE_CONFIG_H -I. -I.. -Wno-undef -Wno-strict-aliasing -Wno-shadow
+libext2fs_a_CFLAGS = $(AM_CFLAGS) -DEXT2_FLAT_INCLUDES=0 -DHAVE_CONFIG_H -I. -I.. -Wno-undef -Wno-strict-aliasing -Wno-shadow
 all: all-am
 
 .SUFFIXES:
@@ -486,6 +489,12 @@ libext2fs_a-get_num_dirs.o: get_num_dirs.c
 libext2fs_a-get_num_dirs.obj: get_num_dirs.c
 	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libext2fs_a_CFLAGS) $(CFLAGS) -c -o libext2fs_a-get_num_dirs.obj `if test -f 'get_num_dirs.c'; then $(CYGPATH_W) 'get_num_dirs.c'; else $(CYGPATH_W) '$(srcdir)/get_num_dirs.c'; fi`
 
+libext2fs_a-hashmap.o: hashmap.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libext2fs_a_CFLAGS) $(CFLAGS) -c -o libext2fs_a-hashmap.o `test -f 'hashmap.c' || echo '$(srcdir)/'`hashmap.c
+
+libext2fs_a-hashmap.obj: hashmap.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libext2fs_a_CFLAGS) $(CFLAGS) -c -o libext2fs_a-hashmap.obj `if test -f 'hashmap.c'; then $(CYGPATH_W) 'hashmap.c'; else $(CYGPATH_W) '$(srcdir)/hashmap.c'; fi`
+
 libext2fs_a-i_block.o: i_block.c
 	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libext2fs_a_CFLAGS) $(CFLAGS) -c -o libext2fs_a-i_block.o `test -f 'i_block.c' || echo '$(srcdir)/'`i_block.c
 
@@ -593,6 +602,12 @@ libext2fs_a-rw_bitmaps.o: rw_bitmaps.c
 
 libext2fs_a-rw_bitmaps.obj: rw_bitmaps.c
 	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libext2fs_a_CFLAGS) $(CFLAGS) -c -o libext2fs_a-rw_bitmaps.obj `if test -f 'rw_bitmaps.c'; then $(CYGPATH_W) 'rw_bitmaps.c'; else $(CYGPATH_W) '$(srcdir)/rw_bitmaps.c'; fi`
+
+libext2fs_a-sha512.o: sha512.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libext2fs_a_CFLAGS) $(CFLAGS) -c -o libext2fs_a-sha512.o `test -f 'sha512.c' || echo '$(srcdir)/'`sha512.c
+
+libext2fs_a-sha512.obj: sha512.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libext2fs_a_CFLAGS) $(CFLAGS) -c -o libext2fs_a-sha512.obj `if test -f 'sha512.c'; then $(CYGPATH_W) 'sha512.c'; else $(CYGPATH_W) '$(srcdir)/sha512.c'; fi`
 
 libext2fs_a-symlink.o: symlink.c
 	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libext2fs_a_CFLAGS) $(CFLAGS) -c -o libext2fs_a-symlink.o `test -f 'symlink.c' || echo '$(srcdir)/'`symlink.c

@@ -50,6 +50,13 @@ typedef struct {
 
 typedef struct {
         __le32                  a_version;
+#if __GNUC_PREREQ (4, 8)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
+#endif
         posix_acl_xattr_entry   a_entries[0];
+#if __GNUC_PREREQ (4, 8)
+#pragma GCC diagnostic pop
+#endif
 } posix_acl_xattr_header;
 

@@ -125,6 +125,7 @@ errcode_t ext2fs_allocate_subcluster_bitmap(ext2_filsys fs,
 {
 	__u64			start, end, real_end;
 	ext2fs_generic_bitmap	bmap;
+	ext2fs_generic_bitmap_64 bmap64;
 	errcode_t		retval;
 
 	EXT2_CHECK_MAGIC(fs, EXT2_ET_MAGIC_EXT2FS_FILSYS);
@@ -147,14 +148,15 @@ errcode_t ext2fs_allocate_subcluster_bitmap(ext2_filsys fs,
 					   end, real_end, descr, &bmap);
 	if (retval)
 		return retval;
-	bmap->cluster_bits = 0;
+	bmap64 = (ext2fs_generic_bitmap_64) bmap;
+	bmap64->cluster_bits = 0;
 	*ret = bmap;
 	return 0;
 }
 
 int ext2fs_get_bitmap_granularity(ext2fs_block_bitmap bitmap)
 {
-	ext2fs_generic_bitmap bmap = bitmap;
+	ext2fs_generic_bitmap_64 bmap = (ext2fs_generic_bitmap_64) bitmap;
 
 	if (!EXT2FS_IS_64_BITMAP(bmap))
 		return 0;

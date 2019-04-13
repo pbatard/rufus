@@ -225,8 +225,10 @@ static errcode_t extent_bmap(ext2_filsys fs, ext2_ino_t ino,
 	retval = ext2fs_extent_goto(handle, block);
 	if (retval) {
 		/* If the extent is not found, return phys_blk = 0 */
-		if (retval == EXT2_ET_EXTENT_NOT_FOUND)
+		if (retval == EXT2_ET_EXTENT_NOT_FOUND) {
+			extent.e_lblk = block;
 			goto got_block;
+		}
 		return retval;
 	}
 	retval = ext2fs_extent_get(handle, EXT2_EXTENT_CURRENT, &extent);

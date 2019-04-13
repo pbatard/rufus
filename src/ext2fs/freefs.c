@@ -17,6 +17,7 @@
 
 #include "ext2_fs.h"
 #include "ext2fsP.h"
+#include "hashmap.h"
 
 void ext2fs_free(ext2_filsys fs)
 {
@@ -58,6 +59,9 @@ void ext2fs_free(ext2_filsys fs)
 		ext2fs_free_mem(&fs->mmp_buf);
 	if (fs->mmp_cmp)
 		ext2fs_free_mem(&fs->mmp_cmp);
+
+	if (fs->block_sha_map)
+		ext2fs_hashmap_free(fs->block_sha_map);
 
 	fs->magic = 0;
 
