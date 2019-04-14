@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: 3.2\n"
+"Project-Id-Version: 3.5\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2018-08-21 08:45+0800\n"
-"PO-Revision-Date: 2018-08-21 12:35+0100\n"
+"POT-Creation-Date: 2019-04-14 08:46+0800\n"
+"PO-Revision-Date: 2019-04-14 15:20+0100\n"
 "Language: ms_MY\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Rufus-LCID: 0x043e, 0x083e\n"
 "Last-Translator: \n"
 "Language-Team: \n"
-"X-Generator: Poedit 2.1.1\n"
+"X-Generator: Poedit 2.2.1\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -485,7 +485,7 @@ msgstr "Media tidak boleh dibuka. Ia mungkin digunakan dalam proses yang lain. S
 
 #. • MSG_068
 msgid "Could not partition drive."
-msgstr "Masalah semasa pembahagian pemacu."
+msgstr "Tidak dapat membahagi pemacu."
 
 #. • MSG_069
 msgid "Could not copy files to target drive."
@@ -582,8 +582,8 @@ msgstr ""
 "Perhatian: Fail yang dimuat turun akan disimpan di dalam direktori bersamaan dengan Rufus dan apabila terdapat '%s' , ia akan digunakan secara automatik."
 
 #. • MSG_085
-msgid "Downloading '%s'"
-msgstr "Memuat turun '%s'"
+msgid "Downloading %s"
+msgstr "Sedang memuat turun %s"
 
 #. • MSG_086
 msgid "No image selected"
@@ -666,7 +666,7 @@ msgstr "Had sistem fail"
 
 #. • MSG_100
 msgid "This ISO image contains a file larger than 4 GB, which is more than the maximum size allowed for a FAT or FAT32 file system."
-msgstr "Imej ISO ini mengandungi fail yang lebih besar daripada 4 GB iaitu saiz maksima yang dibenarkan untuk sistem fail FAT/FAT32."
+msgstr "Imej ISO ini mengandungi fail yang lebih besar daripada 4 GB iaitu saiz maksima yang dibenarkan untuk sistem fail FAT atau FAT32."
 
 #. • MSG_101
 msgid "Missing WIM support"
@@ -856,6 +856,118 @@ msgstr "Mengeset saiz pemetakan berterusan (persistent partition) untuk media 'l
 msgid "Set the partition size units."
 msgstr "Set saiz unit pemetakan."
 
+#. • MSG_127
+msgid "Do not show this message again"
+msgstr "Henti papar mesej ini"
+
+#. • MSG_128
+msgid "Important notice about %s"
+msgstr "Notis penting berkenaan %s"
+
+#. • MSG_129
+msgid ""
+"You have just created a media that uses the UEFI:NTFS bootloader. Please remember that, to boot this media, YOU MUST DISABLE SECURE BOOT.\n"
+"For details on why this is necessary, see the 'More Information' button below."
+msgstr ""
+"Anda telah menghasilkan media yang menggunakan bootloader UEFI:NTFS. ANDA PERLU MEMATIKAN PILIHAN SECURE BOOT.\n"
+"Untuk mengetahui dengan lebih lanjut, sila klik butang 'Maklumat Lanjut' di bawah."
+
+#. • MSG_130
+msgid "Windows image selection"
+msgstr "Pemilihan imej Windows"
+
+#. • MSG_131
+msgid ""
+"This ISO contains multiple Windows images.\n"
+"Please select the image you wish to use for this installation:"
+msgstr ""
+"ISO ini mengandungi beberapa imej Windows.\n"
+"Sila pilih imej yang anda ingin gunakan untuk pemasangan:"
+
+#. • MSG_132
+msgid "Another program or process is accessing this drive. Do you want to format it anyway?"
+msgstr "Terdapat program atau proses lain sedang mencapai pemacu ini. Adakah anda mahu memformatnya juga?"
+
+#. • MSG_133
+msgid ""
+"Rufus has detected that you are attempting to create a Windows To Go media based on a 1809 ISO.\n"
+"\n"
+"Because of a *MICROSOFT BUG*, this media will crash during Windows boot (Blue Screen Of Death), unless you manually replace the file 'WppRecorder.sys' with a 1803 version.\n"
+"\n"
+"Also note that the reason Rufus cannot automatically fix this for you is that 'WppRecorder.sys' is a Microsoft copyrighted file, so we cannot legally embed a copy of the file in the application..."
+msgstr ""
+"Rufus telah mengesan bahawa anda sedang mencuba untuk mencipta media Windows To Go berasaskan imej ISO 1809.\n"
+"\n"
+"Memandangkan terdapat pepijat dari MICROSOFT, media ini akan menghadapi masalah (Blue Scree Of Death) semasa memulakan Windows, melainkan anda menukar fail 'WppRecorder.sys' kepada versi 1803.\n"
+"\n"
+"Sila ambil perhatian. Rufus tidak akan membaiki masalah ini kerana 'WppRecorder.sys' adalah hak cipta milik Microsoft dan kami tidak dapat menyertakan salinan fail berkenaan bersama-sama aplikasi ini..."
+
+#. • MSG_134
+msgid ""
+"Because MBR has been selected for the partition scheme, Rufus can only create a partition up to 2 TB on this media, which will leave %s of disk space unavailable.\n"
+"\n"
+"Are you sure you want to continue?"
+msgstr ""
+"Memandangkan skema pemetakan MBR telah dipilih, Rufus akan menghasilkan petak storan media dengan saiz maksimum 2 TB, di mana %s ruang cakera adalah tidak tersedia.\n"
+"\n"
+"Adakah anda pasti ingin meneruskan operasi?"
+
+#. • MSG_135
+msgid "Version"
+msgstr "Versi"
+
+#. • MSG_136
+msgid "Release"
+msgstr "Keluaran"
+
+#. • MSG_137
+msgid "Edition"
+msgstr "Edisi"
+
+#. • MSG_138
+msgid "Language"
+msgstr "Bahasa"
+
+#. • MSG_139
+msgid "Architecture"
+msgstr "Kerangka"
+
+#. • MSG_140
+msgid "Continue"
+msgstr "Terus"
+
+#. • MSG_141
+msgid "Back"
+msgstr "Undur"
+
+#. • MSG_142
+msgid "Please wait..."
+msgstr "Sila tunggu..."
+
+#. • MSG_143
+msgid "Download using a browser"
+msgstr "Muat turun menggunakan pelayar web"
+
+#. • MSG_144
+msgid "Temporarily banned by Microsoft for requesting too many downloads - Please try again later..."
+msgstr "Dihalang buat sementara waktu kerana permintaan untuk memuat turun yang terlampau kerap- Sila cuba sebentar lagi..."
+
+#. • MSG_145
+msgid "PowerShell 3.0 or later is required to run this script."
+msgstr "PowerShell 3.0 atau versi lebih baru diperlukan untuk menjalankan skrip ini."
+
+#. • MSG_146
+msgid "Do you want to go online and download it?"
+msgstr "Adakah anda ingin ke dalam talian dan memuat turun?"
+
+#. • MSG_148
+msgid "Running download script..."
+msgstr "Menjalankan skrip untuk memuat turun..."
+
+#. • MSG_149
+msgid "Download ISO Image"
+msgstr "Memuat turun imej ISO"
+
 #. • MSG_150
 msgid "Type of computer you plan to use this bootable drive with. It is your responsibility to determine whether your target is of BIOS or UEFI type before you start creating the drive, as it may fail to boot otherwise."
 msgstr "Jenis komputer yang anda merancang untuk menggunakan cakera \"bootable\" ini. Adalah menjadi tanggungjawab anda untuk menentukan sama ada sasaran anda adalah jenis BIOS atau UEFI sebelum anda wujudkan cakera tersebut, kerana ia mungkin gagal untuk boot."
@@ -923,8 +1035,8 @@ msgid "Method that will be used to make the drive bootable"
 msgstr "Kaedah yang digunakan untuk membuat cakera boot"
 
 #. • MSG_165
-msgid "Click to select an image..."
-msgstr "Klik untuk memilih imej..."
+msgid "Click to select or download an image..."
+msgstr "Klik untuk memilih atau memuat turun imej..."
 
 #. • MSG_166
 msgid "Check this box to allow the display of international labels and set a device icon (creates an autorun.inf)"
@@ -986,7 +1098,8 @@ msgid "English translation: Pete Batard <mailto:pete@akeo.ie>"
 msgstr ""
 "Terjemahan Bahasa Malaysia:\\line\n"
 "• Muhammad Aman <mailto:aman.tifli@gmail.com>\\line\n"
-"• VGPlayer <mailto:razman90a@yahoo.com.my>"
+"• VGPlayer <mailto:razman90a@yahoo.com.my>\\line\n"
+"• Mohamad Ikhwan bin Kori <mailto:ikhwankori@gmail.com>"
 
 #. • MSG_177
 msgid "Report bugs or request enhancements at:"
@@ -1315,7 +1428,7 @@ msgstr "Kemas kini: Tidak dapat menyambung ke internet"
 
 #. • MSG_245
 msgid "Updates: Unable to access version data"
-msgstr "Kemsa kini: Tidak dapat mengakses data versi"
+msgstr "Kemas kini: Tidak dapat mengakses data versi"
 
 #. • MSG_246
 msgid "A new version of Rufus is available!"
@@ -1583,7 +1696,7 @@ msgid ""
 "\n"
 "In order to prevent potential attack scenarios, the update process has been aborted and the download will be deleted. Please check the log for more details."
 msgstr ""
-"Rufus tidak boleh mengasahkan bahawa kemas kini dimuat turun adalah lebih baru daripada aplikasi yang dijalankan sekarang.\n"
+"Rufus tidak dapat mengesahkan bahawa kemas kini yang dimuat turun adalah lebih baru daripada aplikasi yang dijalankan sekarang.\n"
 "\n"
 "Untuk mengelakkan daripada senario dimana PC diserang dengan virus, proses kemaskini telah dibatalkan dan fail yang telah dimuat turun akan dipadam. Sila semak log untuk maklumat lanjut."
 
