@@ -785,9 +785,11 @@ struct ext2_super_block {
  */
 #define EXT2_OS_LINUX		0
 #define EXT2_OS_HURD		1
-#define EXT2_OS_WINDOWS		2
+#define EXT2_OBSO_OS_MASIX	2
 #define EXT2_OS_FREEBSD		3
 #define EXT2_OS_LITES		4
+#define EXT2_OS_WINDOWS		5
+#define EXT2_OS_MACOS		6
 
 /*
  * Revision levels

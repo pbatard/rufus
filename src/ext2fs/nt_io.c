@@ -316,23 +316,17 @@ static VOID _GetDeviceSize(IN HANDLE h, OUT unsigned __int64 *FsSize)
 					 IOCTL_DISK_GET_PARTITION_INFO_EX,
 					 &pi, sizeof(pi), &pi, sizeof(pi));
 	if (NT_SUCCESS(Status)) {
-		uprintf("Size retrieved with: IOCTL_DISK_GET_PARTITION_INFO_EX");
 		*FsSize = pi.PartitionLength.QuadPart;
 	} else if (Status == STATUS_INVALID_DEVICE_REQUEST) {
 		// No partitions: Try a drive geometry request
-		uprintf("IOCTL_DISK_GET_PARTITION_INFO_EX failed, trying with IOCTL_DISK_GET_DRIVE_GEOMETRY_EX");
 		RtlZeroMemory(&gi, sizeof(gi));
 
 		Status = pfNtDeviceIoControlFile(h, NULL, NULL, NULL, &IoStatusBlock,
 						 IOCTL_DISK_GET_DRIVE_GEOMETRY_EX,
 						 &gi, sizeof(gi), &gi, sizeof(gi));
 
-		if (NT_SUCCESS(Status)) {
-			uprintf("Size retrieved with: IOCTL_DISK_GET_DRIVE_GEOMETRY_EX");
+		if (NT_SUCCESS(Status))
 			*FsSize = gi.DiskSize.QuadPart;
-		} else {
-			uprintf("IOCTL_DISK_GET_DRIVE_GEOMETRY_EX: [%x] %s", Status, NtStatusError(Status));
-		}
 	} else if (Status == STATUS_INVALID_PARAMETER) {
 		// Possibly a straight image file
 		if (GetFileSizeEx(h, &li))
@@ -443,6 +437,12 @@ errcode_t ext2fs_check_if_mounted(const char *file, int *mount_flags)
 	_CloseDisk(h);
 
 	return 0;
+}
+
+// Not implemented
+errcode_t ext2fs_check_mount_point(const char *file, int *mount_flags, char *mtpt, int mtlen)
+{
+	return EXT2_ET_OP_NOT_SUPPORTED;
 }
 
 // Returns the number of blocks in a partition
@@ -648,7 +648,6 @@ static errcode_t nt_read_blk(io_channel channel, unsigned long block, int count,
 	return 0;
 }
 
-// TODO: Add an nt_write_blk64()
 static errcode_t nt_write_blk(io_channel channel, unsigned long block, int count, const void *buf)
 {
 	ULONG write_size;

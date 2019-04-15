@@ -27,9 +27,6 @@
     <ClCompile Include="..\src\ext2fs\bitmaps.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\ext2fs\missing.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\ext2fs\closefs.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -153,6 +150,12 @@
     <ClCompile Include="..\src\ext2fs\sha512.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\ext2fs\mkjournal.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\ext2fs\fallocate.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\ext2fs\ext2_fs.h">
@@ -210,6 +213,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\src\ext2fs\hashmap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ext2fs\kernel-list.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ext2fs\kernel-jbd.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ext2fs\jfs_compat.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

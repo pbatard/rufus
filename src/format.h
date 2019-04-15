@@ -20,6 +20,8 @@
 #include <windows.h>
 #include <winioctl.h>				// for MEDIA_TYPE
 
+#include "ext2fs/ext2fs.h"
+
 #pragma once
 
 /* Callback command types (some errorcode were filled from HPUSBFW V2.2.3 and their
@@ -154,3 +156,13 @@ typedef struct {
 #define die(msg, err) do { uprintf(msg); \
 	FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|err; \
 	goto out; } while(0)
+
+// For ext2/ext3/ext4 formatting
+typedef struct {
+	uint64_t max_size;
+	uint32_t block_size;
+	uint32_t inode_size;
+	uint32_t inode_ratio;	// inode to data ration (bitshift)
+} ext2fs_default_t;
+
+extern io_manager nt_io_manager(void);

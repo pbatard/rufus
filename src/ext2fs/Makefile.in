@@ -107,8 +107,8 @@ am_libext2fs_a_OBJECTS = libext2fs_a-alloc.$(OBJEXT) \
 	libext2fs_a-dirblock.$(OBJEXT) \
 	libext2fs_a-dir_iterate.$(OBJEXT) libext2fs_a-extent.$(OBJEXT) \
 	libext2fs_a-ext_attr.$(OBJEXT) libext2fs_a-extent.$(OBJEXT) \
-	libext2fs_a-fileio.$(OBJEXT) libext2fs_a-freefs.$(OBJEXT) \
-	libext2fs_a-gen_bitmap.$(OBJEXT) \
+	libext2fs_a-fallocate.$(OBJEXT) libext2fs_a-fileio.$(OBJEXT) \
+	libext2fs_a-freefs.$(OBJEXT) libext2fs_a-gen_bitmap.$(OBJEXT) \
 	libext2fs_a-gen_bitmap64.$(OBJEXT) \
 	libext2fs_a-get_num_dirs.$(OBJEXT) \
 	libext2fs_a-hashmap.$(OBJEXT) libext2fs_a-i_block.$(OBJEXT) \
@@ -116,8 +116,8 @@ am_libext2fs_a_OBJECTS = libext2fs_a-alloc.$(OBJEXT) \
 	libext2fs_a-initialize.$(OBJEXT) libext2fs_a-inline.$(OBJEXT) \
 	libext2fs_a-inline_data.$(OBJEXT) libext2fs_a-inode.$(OBJEXT) \
 	libext2fs_a-io_manager.$(OBJEXT) libext2fs_a-link.$(OBJEXT) \
-	libext2fs_a-lookup.$(OBJEXT) libext2fs_a-missing.$(OBJEXT) \
-	libext2fs_a-mkdir.$(OBJEXT) libext2fs_a-mmp.$(OBJEXT) \
+	libext2fs_a-lookup.$(OBJEXT) libext2fs_a-mkdir.$(OBJEXT) \
+	libext2fs_a-mkjournal.$(OBJEXT) libext2fs_a-mmp.$(OBJEXT) \
 	libext2fs_a-newdir.$(OBJEXT) libext2fs_a-nt_io.$(OBJEXT) \
 	libext2fs_a-punch.$(OBJEXT) libext2fs_a-rbtree.$(OBJEXT) \
 	libext2fs_a-read_bb.$(OBJEXT) libext2fs_a-rw_bitmaps.$(OBJEXT) \
@@ -272,10 +272,10 @@ top_srcdir = @top_srcdir@
 noinst_LIBRARIES = libext2fs.a
 libext2fs_a_SOURCES = alloc.c alloc_sb.c alloc_stats.c alloc_tables.c badblocks.c bb_inode.c       \
 	bitmaps.c bitops.c blkmap64_ba.c blkmap64_rb.c blknum.c block.c bmap.c closefs.c crc16.c         \
-	crc32c.c csum.c dirblock.c dir_iterate.c extent.c ext_attr.c extent.c fileio.c freefs.c          \
-	gen_bitmap.c gen_bitmap64.c get_num_dirs.c hashmap.c i_block.c ind_block.c initialize.c inline.c \
-	inline_data.c inode.c io_manager.c link.c lookup.c missing.c mkdir.c mmp.c newdir.c nt_io.c      \
-	punch.c rbtree.c read_bb.c rw_bitmaps.c sha512.c symlink.c valid_blk.c
+	crc32c.c csum.c dirblock.c dir_iterate.c extent.c ext_attr.c extent.c fallocate.c fileio.c       \
+	freefs.c gen_bitmap.c gen_bitmap64.c get_num_dirs.c hashmap.c i_block.c ind_block.c initialize.c \
+	inline.c inline_data.c inode.c io_manager.c link.c lookup.c mkdir.c mkjournal.c mmp.c newdir.c   \
+	nt_io.c punch.c rbtree.c read_bb.c rw_bitmaps.c sha512.c symlink.c valid_blk.c
 
 libext2fs_a_CFLAGS = $(AM_CFLAGS) -DEXT2_FLAT_INCLUDES=0 -DHAVE_CONFIG_H -I. -I.. -Wno-undef -Wno-strict-aliasing -Wno-shadow
 all: all-am
@@ -459,6 +459,12 @@ libext2fs_a-ext_attr.o: ext_attr.c
 libext2fs_a-ext_attr.obj: ext_attr.c
 	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libext2fs_a_CFLAGS) $(CFLAGS) -c -o libext2fs_a-ext_attr.obj `if test -f 'ext_attr.c'; then $(CYGPATH_W) 'ext_attr.c'; else $(CYGPATH_W) '$(srcdir)/ext_attr.c'; fi`
 
+libext2fs_a-fallocate.o: fallocate.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libext2fs_a_CFLAGS) $(CFLAGS) -c -o libext2fs_a-fallocate.o `test -f 'fallocate.c' || echo '$(srcdir)/'`fallocate.c
+
+libext2fs_a-fallocate.obj: fallocate.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libext2fs_a_CFLAGS) $(CFLAGS) -c -o libext2fs_a-fallocate.obj `if test -f 'fallocate.c'; then $(CYGPATH_W) 'fallocate.c'; else $(CYGPATH_W) '$(srcdir)/fallocate.c'; fi`
+
 libext2fs_a-fileio.o: fileio.c
 	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libext2fs_a_CFLAGS) $(CFLAGS) -c -o libext2fs_a-fileio.o `test -f 'fileio.c' || echo '$(srcdir)/'`fileio.c
 
@@ -549,17 +555,17 @@ libext2fs_a-lookup.o: lookup.c
 libext2fs_a-lookup.obj: lookup.c
 	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libext2fs_a_CFLAGS) $(CFLAGS) -c -o libext2fs_a-lookup.obj `if test -f 'lookup.c'; then $(CYGPATH_W) 'lookup.c'; else $(CYGPATH_W) '$(srcdir)/lookup.c'; fi`
 
-libext2fs_a-missing.o: missing.c
-	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libext2fs_a_CFLAGS) $(CFLAGS) -c -o libext2fs_a-missing.o `test -f 'missing.c' || echo '$(srcdir)/'`missing.c
-
-libext2fs_a-missing.obj: missing.c
-	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libext2fs_a_CFLAGS) $(CFLAGS) -c -o libext2fs_a-missing.obj `if test -f 'missing.c'; then $(CYGPATH_W) 'missing.c'; else $(CYGPATH_W) '$(srcdir)/missing.c'; fi`
-
 libext2fs_a-mkdir.o: mkdir.c
 	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libext2fs_a_CFLAGS) $(CFLAGS) -c -o libext2fs_a-mkdir.o `test -f 'mkdir.c' || echo '$(srcdir)/'`mkdir.c
 
 libext2fs_a-mkdir.obj: mkdir.c
 	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libext2fs_a_CFLAGS) $(CFLAGS) -c -o libext2fs_a-mkdir.obj `if test -f 'mkdir.c'; then $(CYGPATH_W) 'mkdir.c'; else $(CYGPATH_W) '$(srcdir)/mkdir.c'; fi`
+
+libext2fs_a-mkjournal.o: mkjournal.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libext2fs_a_CFLAGS) $(CFLAGS) -c -o libext2fs_a-mkjournal.o `test -f 'mkjournal.c' || echo '$(srcdir)/'`mkjournal.c
+
+libext2fs_a-mkjournal.obj: mkjournal.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libext2fs_a_CFLAGS) $(CFLAGS) -c -o libext2fs_a-mkjournal.obj `if test -f 'mkjournal.c'; then $(CYGPATH_W) 'mkjournal.c'; else $(CYGPATH_W) '$(srcdir)/mkjournal.c'; fi`
 
 libext2fs_a-mmp.o: mmp.c
 	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libext2fs_a_CFLAGS) $(CFLAGS) -c -o libext2fs_a-mmp.o `test -f 'mmp.c' || echo '$(srcdir)/'`mmp.c

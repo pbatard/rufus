@@ -49,7 +49,6 @@
 #include "format.h"
 #include "badblocks.h"
 #include "bled/bled.h"
-#include "ext2fs/ext2fs.h"
 #include "../res/grub/grub_version.h"
 
 /*
@@ -665,51 +664,110 @@ out:
 	return r;
 }
 
-extern io_manager nt_io_manager(void);
-BOOL FormatExt2Fs(void)
+BOOL FormatExt2Fs(const char* label)
 {
-	const char* path = "\\??\\C:\\tmp\\disk.img";
+	// Mostly taken from mke2fs.conf
+	const float reserve_ratio = 0.05f;
+	const ext2fs_default_t ext2fs_default[5] = {
+		{ 3*MB, 1024, 128, 3},		// "floppy"
+		{ 512*MB, 1024, 128, 2},	// "small"
+		{ 4*GB, 4096, 256, 2},		// "default"
+		{ 16*GB, 4096, 256, 3},		// "big"
+		{ 1024*TB, 4096, 256, 4}	// "huge"
+	};
+
+	BOOL ret = FALSE;
+	char* path = NULL;
 	int i, count;
 	struct ext2_super_block features = { 0 };
 	io_manager manager = nt_io_manager();
+	blk_t journal_size;
 	blk64_t size = 0, cur;
-	ext2_filsys ext2fs;
+	ext2_filsys ext2fs = NULL;
 	errcode_t r;
+	uint8_t* buf = NULL;
+
+#if defined(RUFUS_TEST)
+	// Create a 32 MB disk image file to test
+	uint8_t zb[1024];
 	HANDLE h;
 	DWORD dwSize;
-	const uint8_t buf[1024] = { 0 };
-
-	// Create a 32 MB zeroed file to test
+	path = strdup("\\??\\C:\\tmp\\disk.img");
+	memset(zb, 0xFF, sizeof(zb));	// Set to nonzero so we can detect init issues
 	h = CreateFileU(path, GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 	for (i = 0; i < 32 * 1024; i++) {
-		if (!WriteFile(h, buf, sizeof(buf), &dwSize, NULL) || (dwSize != sizeof(buf))) {
+		if (!WriteFile(h, zb, sizeof(zb), &dwSize, NULL) || (dwSize != sizeof(zb))) {
 			uprintf("Write error: %s", WindowsErrorString());
 			break;
 		}
 	}
 	CloseHandle(h);
+#else
+	path = GetPartitionName((DWORD)ComboBox_GetItemData(hDeviceList, ComboBox_GetCurSel(hDeviceList)), CASPER_PARTITION_DEFAULT);
+#endif
+	if (path == NULL)
+		goto out;
 
-	// TODO: We could probably remove that call and get our size from a different means
-	r = ext2fs_get_device_size2(path, EXT2_BLOCK_SIZE(&features), &size);
-	uprintf("ext2fs_get_device_size: %d", r);
-	// TODO: ERROR HANDLING
-	// Set the number of blocks and reserved blocks
+	PrintInfoDebug(0, MSG_222, "ext3");
+
+	// Figure out the volume size and block size
+	r = ext2fs_get_device_size2(path, KB, &size);
+	if ((r != 0) || (size == 0)) {
+		uprintf("Could not read device size: %d", r);
+		goto out;
+	}
+	size *= KB;
+	for (i = 0; i < ARRAYSIZE(ext2fs_default); i++) {
+		if (size < ext2fs_default[i].max_size)
+			break;
+	}
+	assert(i < ARRAYSIZE(ext2fs_default));
+	size /= ext2fs_default[i].block_size;
+	for (features.s_log_block_size = 0; EXT2_BLOCK_SIZE_BITS(&features) <= EXT2_MAX_BLOCK_LOG_SIZE; features.s_log_block_size++) {
+		if (EXT2_BLOCK_SIZE(&features) == ext2fs_default[i].block_size)
+			break;
+	}
+	assert(EXT2_BLOCK_SIZE_BITS(&features) <= EXT2_MAX_BLOCK_LOG_SIZE);
+
+	// Set the blocks, reserved blocks and inodes
 	ext2fs_blocks_count_set(&features, size);
-	ext2fs_r_blocks_count_set(&features, (blk64_t)(0.05f * ext2fs_blocks_count(&features)));
+	ext2fs_r_blocks_count_set(&features, (blk64_t)(reserve_ratio * size));
 	features.s_rev_level = 1;
-	features.s_inode_size = EXT2_GOOD_OLD_INODE_SIZE;
-	// TODO: This needs to be computed according to volume size
-	features.s_inodes_count = 8192;
+	features.s_inode_size = ext2fs_default[i].inode_size;
+	features.s_inodes_count = ((ext2fs_blocks_count(&features) >> ext2fs_default[i].inode_ratio) > UINT32_MAX) ?
+		UINT32_MAX : (uint32_t)(ext2fs_blocks_count(&features) >> ext2fs_default[i].inode_ratio);
+	uprintf("%d inodes, %lld blocks (block size = %d)", features.s_inodes_count, size, EXT2_BLOCK_SIZE(&features));
+	uprintf("%lld blocks (%0.1f%%) reserved for the super user", ext2fs_r_blocks_count(&features), reserve_ratio * 100.0f);
 
-	// TODO: Set a volume label
+	// Set features for ext3
+	ext2fs_set_feature_journal(&features);
+	ext2fs_set_feature_xattr(&features);
+	ext2fs_set_feature_resize_inode(&features);
+	ext2fs_set_feature_dir_index(&features);
+	ext2fs_set_feature_filetype(&features);
+	ext2fs_set_feature_sparse_super(&features);
+	ext2fs_set_feature_large_file(&features);
+	features.s_backup_bgs[0] = 1;
+	features.s_default_mount_opts = EXT2_DEFM_XATTR_USER | EXT2_DEFM_ACL;
 
-	// Initialize the superblock
+	// Now that we have set our base features, initialize a virtual superblock
 	r = ext2fs_initialize(path, EXT2_FLAG_EXCLUSIVE | EXT2_FLAG_64BITS, &features, manager, &ext2fs);
-	uprintf("ext2fs_initialize: %d", r);
-	// TODO: ERROR HANDLING
+	if (r != 0) {
+		uprintf("Could not initialize ext2fs features: %d", r);
+		goto out;
+	}
 
-	// TODO: Erase superblock data
-	// Now that the superblock has been initialized, set it up
+	// Zero 16 blocks of data from the start of our volume
+	buf = calloc(16, ext2fs->io->block_size);
+	assert(buf != NULL);
+	r = io_channel_write_blk64(ext2fs->io, 0, 16, buf);
+	safe_free(buf);
+	if (r != 0) {
+		uprintf("Could not zero ext2fs superblock area: %d", r);
+		goto out;
+	}
+
+	// Finish setting up the file system
 	CoCreateGuid((GUID*)ext2fs->super->s_uuid);
 	ext2fs_init_csum_seed(ext2fs);
 	ext2fs->super->s_def_hash_version = EXT2_HASH_HALF_MD4;
@@ -717,70 +775,79 @@ BOOL FormatExt2Fs(void)
 	ext2fs->super->s_max_mnt_count = -1;
 	ext2fs->super->s_creator_os = EXT2_OS_WINDOWS;
 	ext2fs->super->s_errors = EXT2_ERRORS_CONTINUE;
-
-	// TODO: ext2 + journaling = ext3, so the way to set ext3 is to add features:
-	// ext_attr, resize_inode, dir_index, filetype, sparse_super, has_journal, needs_recovery
-	ext2fs_set_feature_xattr(&features);
-	// ext2fs_set_feature_resize_inode(&sb);
-	// ext2fs_set_feature_dir_index(&sb);
-	ext2fs_set_feature_filetype(&features);
-	// ext2fs_set_feature_sparse_super(&sb);
-	// ext2fs_set_feature_journal(&sb);
-	// ext2fs_set_feature_journal_needs_recovery(&sb);
-
-	// Optional we may want to add:
-	// ext2fs_set_feature_64bit(&sb);
-	// NB: the following is not needed as it is set by the OS automatically when creating a > 2GB file
-	// ext2fs_set_feature_large_file(&sb);
+	static_strcpy(ext2fs->super->s_volume_name, label);
 
 	r = ext2fs_allocate_tables(ext2fs);
-	uprintf("ext2fs_allocate_tables: %d", r);
-	// TODO: ERROR HANDLING
+	if (r != 0) {
+		uprintf("Could not allocate ext2fs tables: %d", r);
+		goto out;
+	}
 	r = ext2fs_convert_subcluster_bitmap(ext2fs, &ext2fs->block_map);
-	uprintf("ext2fs_convert_subcluster_bitmap: %d", r);
-	// TODO: ERROR HANDLING
+	if (r != 0) {
+		uprintf("Could set ext2fs cluster bitmap: %d", r);
+		goto out;
+	}
 
 	// Wipe inode table
 	for (i = 0; i < (int)ext2fs->group_desc_count; i++) {
 		cur = ext2fs_inode_table_loc(ext2fs, i);
 		count = ext2fs_div_ceil((ext2fs->super->s_inodes_per_group - ext2fs_bg_itable_unused(ext2fs, i))
-			* EXT2_GOOD_OLD_INODE_SIZE, EXT2_GOOD_OLD_INODE_SIZE);
+			* EXT2_BLOCK_SIZE(ext2fs->super), EXT2_BLOCK_SIZE(ext2fs->super));
 		r = ext2fs_zero_blocks2(ext2fs, cur, count, &cur, &count);
 		if (r != 0) {
-			uprintf("Could not zero inode at %llu (%d blocks): %d\n", cur, count, r);
-			// TODO: ERROR HANDLING
-			break;
+			uprintf("Could not zero ext2fs inode at %llu (%d blocks): %d\n", cur, count, r);
+			goto out;
 		}
 	}
 
-	// Create root dir
+	// Create root and lost+found dirs
 	r = ext2fs_mkdir(ext2fs, EXT2_ROOT_INO, EXT2_ROOT_INO, 0);
-	uprintf("ext2fs_mkdir(root): %d", r);
-	// TODO: ERROR HANDLING
-
-	// Create 'lost+found'
+	if (r != 0) {
+		uprintf("Failed to create ext2fs root dir: %d", r);
+		goto out;
+	}
 	ext2fs->umask = 077;
 	r = ext2fs_mkdir(ext2fs, EXT2_ROOT_INO, 0, "lost+found");
-	uprintf("ext2fs_mkdir(lost+found): %d", r);
-	// TODO: ERROR HANDLING
+	if (r != 0) {
+		uprintf("Failed to create ext2fs 'lost+found' dir: %d", r);
+		goto out;
+	}
 
+	// Create bitmaps
 	for (i = EXT2_ROOT_INO + 1; i < (int)EXT2_FIRST_INODE(ext2fs->super); i++)
-		ext2fs_inode_alloc_stats2(ext2fs, i, +1, 0);
+		ext2fs_inode_alloc_stats(ext2fs, i, 1);
 	ext2fs_mark_ib_dirty(ext2fs);
 
 	r = ext2fs_mark_inode_bitmap2(ext2fs->inode_map, EXT2_BAD_INO);
-	uprintf("ext2fs_mark_inode_bitmap2: %d", r);
-	// TODO: ERROR HANDLING
-	ext2fs_inode_alloc_stats2(ext2fs, EXT2_BAD_INO, 1, 0);
+	if (r != 0) {
+		uprintf("Could not set ext2fs inode bitmaps: %d", r);
+		goto out;
+	}
+	ext2fs_inode_alloc_stats(ext2fs, EXT2_BAD_INO, 1);
 	r = ext2fs_update_bb_inode(ext2fs, NULL);
-	uprintf("ext2fs_update_bb_inode: %d", r);
-	// TODO: ERROR HANDLING
+	if (r != 0) {
+		uprintf("Could not set ext2fs inode stats: %d", r);
+		goto out;
+	}
 
-	r = ext2fs_close_free(&ext2fs);
-	uprintf("ext2fs_close_free: %d", r);
-	// TODO: ERROR HANDLING
+	// Create the journal
+	journal_size = ext2fs_default_journal_size(ext2fs_blocks_count(ext2fs->super));
+	uprintf("Creating journal (%d blocks)", journal_size);
+	r = ext2fs_add_journal_inode(ext2fs, journal_size, EXT2_MKJOURNAL_NO_MNT_CHECK | EXT2_MKJOURNAL_LAZYINIT);
 
-	return TRUE;
+	// Finally we can call close() to get the file system gets created
+	r = ext2fs_close(ext2fs);
+	if (r != 0) {
+		uprintf("Could not create ext3 volume: %d", r);
+		goto out;
+	}
+	ret = TRUE;
+
+out:
+	ext2fs_free(ext2fs);
+	free(buf);
+	free(path);
+	return ret;
 }
 
 /*
@@ -2123,6 +2190,7 @@ DWORD WINAPI FormatThread(void* param)
 
 	// If FAT32 is requested and we have a large drive (>32 GB) use
 	// large FAT32 format, else use MS's FormatEx.
+	// TODO: We'll want a single call for ext2/ext3/ext4, large FAT32 and everything (after we switch to VDS?)
 	ret = use_large_fat32?FormatFAT32(DriveIndex):FormatDrive(DriveIndex);
 	if (!ret) {
 		// Error will be set by FormatDrive() in FormatStatus

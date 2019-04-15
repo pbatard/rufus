@@ -56,6 +56,7 @@
     <ClCompile Include="..\src\ext2fs\dir_iterate.c" />
     <ClCompile Include="..\src\ext2fs\extent.c" />
     <ClCompile Include="..\src\ext2fs\ext_attr.c" />
+    <ClCompile Include="..\src\ext2fs\fallocate.c" />
     <ClCompile Include="..\src\ext2fs\fileio.c" />
     <ClCompile Include="..\src\ext2fs\freefs.c" />
     <ClCompile Include="..\src\ext2fs\gen_bitmap.c" />
@@ -71,8 +72,8 @@
     <ClCompile Include="..\src\ext2fs\i_block.c" />
     <ClCompile Include="..\src\ext2fs\link.c" />
     <ClCompile Include="..\src\ext2fs\lookup.c" />
-    <ClCompile Include="..\src\ext2fs\missing.c" />
     <ClCompile Include="..\src\ext2fs\mkdir.c" />
+    <ClCompile Include="..\src\ext2fs\mkjournal.c" />
     <ClCompile Include="..\src\ext2fs\mmp.c" />
     <ClCompile Include="..\src\ext2fs\newdir.c" />
     <ClCompile Include="..\src\ext2fs\nt_io.c" />
@@ -103,6 +104,9 @@
     <ClInclude Include="..\src\ext2fs\ext3_extents.h" />
     <ClInclude Include="..\src\ext2fs\ext4_acl.h" />
     <ClInclude Include="..\src\ext2fs\hashmap.h" />
+    <ClInclude Include="..\src\ext2fs\jfs_compat.h" />
+    <ClInclude Include="..\src\ext2fs\kernel-jbd.h" />
+    <ClInclude Include="..\src\ext2fs\kernel-list.h" />
     <ClInclude Include="..\src\ext2fs\rbtree.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

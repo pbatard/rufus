@@ -177,6 +177,9 @@
 /* Define if you have the 'wint_t' type. */
 #define HAVE_WINT_T 1
 
+/* Define if you have 'winsock.h'. */
+#define HAVE_WINSOCK_H 1
+
 /* Define to 1 if O_NOATIME works. */
 #define HAVE_WORKING_O_NOATIME 0
 

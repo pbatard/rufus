@@ -82,6 +82,7 @@
 #define CHECK_DRIVE_TIMEOUT         2000
 #define MARQUEE_TIMER_REFRESH       10			// Time between progress bar marquee refreshes, in ms
 #define FS_DEFAULT                  FS_FAT32
+#define CASPER_PARTITION_DEFAULT    2
 #define SINGLE_CLUSTERSIZE_DEFAULT  0x00000100
 #define BADLOCKS_PATTERN_TYPES      3
 #define BADBLOCK_PATTERN_COUNT      4

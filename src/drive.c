@@ -229,19 +229,20 @@ out:
 }
 
 /*
- * Return an NT path to access the physical drive, or NULL on error.
+ * Return the path to access a partition on a specific disk, or NULL on error.
  * The string is allocated and must be freed (to ensure concurrent access)
  */
-char* GetNtPhysicalName(DWORD DriveIndex)
+char* GetPartitionName(DWORD DriveIndex, DWORD PartitionNumber)
 {
 	BOOL success = FALSE;
-	char physical_name[32];
+	char partition_name[32];
 
 	CheckDriveIndex(DriveIndex);
-	static_sprintf(physical_name, "\\??\\PHYSICALDRIVE%lu", DriveIndex);
+	
+	static_sprintf(partition_name, "\\Device\\Harddisk%lu\\Partition%lu", DriveIndex, PartitionNumber);
 	success = TRUE;
 out:
-	return (success) ? safe_strdup(physical_name) : NULL;
+	return (success) ? safe_strdup(partition_name) : NULL;
 }
 
 /*
