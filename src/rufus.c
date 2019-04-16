@@ -109,7 +109,6 @@ BOOL advanced_mode_device, advanced_mode_format, allow_dual_uefi_bios, detect_fa
 BOOL use_fake_units, preserve_timestamps = FALSE, fast_zeroing = FALSE, app_changed_size = FALSE;
 BOOL zero_drive = FALSE, list_non_usb_removable_drives = FALSE, enable_file_indexing, large_drive = FALSE;
 BOOL write_as_image = FALSE, installed_uefi_ntfs = FALSE, enable_fido = FALSE;
-uint64_t persistence_size = 0;
 float fScale = 1.0f;
 int dialog_showing = 0, selection_default = BT_IMAGE, windows_to_go_selection = 0, persistence_unit_selection = -1;
 int default_fs, fs_type, boot_type, partition_type, target_type; // file system, boot type, partition type, target type

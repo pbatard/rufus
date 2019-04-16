@@ -692,6 +692,7 @@ static errcode_t extent_fallocate(ext2_filsys fs, int flags, ext2_ino_t ino,
 	 * _get() will error out.
 	 */
 start_again:
+	// coverity[check_return]
 	ext2fs_extent_goto(handle, start);
 	err = ext2fs_extent_get(handle, EXT2_EXTENT_CURRENT, &left_extent);
 	if (err == EXT2_ET_NO_CURRENT_NODE) {
@@ -808,7 +809,7 @@ errcode_t ext2fs_fallocate(ext2_filsys fs, int flags, ext2_ino_t ino,
 {
 	struct ext2_inode	inode_buf;
 	blk64_t			blk, x;
-	errcode_t		err;
+	errcode_t		err = 0;
 
 	if (((flags & EXT2_FALLOCATE_FORCE_INIT) &&
 	    (flags & EXT2_FALLOCATE_FORCE_UNINIT)) ||
@@ -837,6 +838,10 @@ errcode_t ext2fs_fallocate(ext2_filsys fs, int flags, ext2_ino_t ino,
 
 	/* XXX: Allocate a bunch of blocks the slow way */
 	for (blk = start; blk < start + len; blk++) {
+		/* For Rufus usage */
+		err = ext2fs_print_progress(blk, start + len);
+		if (err)
+			return err;
 		err = ext2fs_bmap2(fs, ino, inode, NULL, 0, blk, 0, &x);
 		if (err)
 			return err;

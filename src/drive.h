@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Drive access function calls
- * Copyright © 2011-2018 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2019 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,6 +36,7 @@
 #define XP_EFI                              0x02
 #define XP_UEFI_NTFS                        0x04
 #define XP_COMPAT                           0x08
+#define XP_CASPER                           0x10
 
 #define FILE_FLOPPY_DISKETTE                0x00000004
 
@@ -254,6 +255,7 @@ typedef struct {
 	} ClusterSize[FS_MAX];
 } RUFUS_DRIVE_INFO;
 extern RUFUS_DRIVE_INFO SelectedDrive;
+extern uint64_t persistence_size;
 
 BOOL SetAutoMount(BOOL enable);
 BOOL GetAutoMount(BOOL* enabled);

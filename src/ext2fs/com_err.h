@@ -19,8 +19,6 @@
 #include <stddef.h>
 #include <stdarg.h>
 
-#include "rufus.h"
-
 typedef long errcode_t;
 
 struct error_table {
@@ -30,8 +28,10 @@ struct error_table {
 };
 struct et_list;
 
+/* For use with Rufus */
+extern void _uprintf(const char *format, ...);
 #define VA_ARGS(...) , ##__VA_ARGS__
-#define com_err(src, err, fmt, ...) uprintf("%s: [%d] " # fmt, src?src:"ext2fs", err VA_ARGS(__VA_ARGS__))
+#define com_err(src, err, fmt, ...) _uprintf("%s: [%08X] " # fmt, src?src:"ext2fs", err - EXT2_ET_BASE VA_ARGS(__VA_ARGS__))
 
 extern char const *error_message (long);
 extern void (*com_err_hook) (const char *, long, const char *, va_list);

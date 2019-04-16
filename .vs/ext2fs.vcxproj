@@ -197,7 +197,7 @@
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <AdditionalIncludeDirectories>..\src;..\src\msvc-missing</AdditionalIncludeDirectories>
       <CompileAs>CompileAsC</CompileAs>
-      <DisableSpecificWarnings>4018;4146;4244;4267</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4018;4146;4244;4267;4996</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -214,7 +214,7 @@
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_CRTDBG_MAP_ALLOC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <AdditionalIncludeDirectories>..\src;..\src\msvc-missing</AdditionalIncludeDirectories>
-      <DisableSpecificWarnings>4018;4146;4244;4267</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4018;4146;4244;4267;4996</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -231,7 +231,7 @@
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_CRTDBG_MAP_ALLOC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <AdditionalIncludeDirectories>..\src;..\src\msvc-missing</AdditionalIncludeDirectories>
-      <DisableSpecificWarnings>4018;4146;4244;4267</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4018;4146;4244;4267;4996</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -250,7 +250,7 @@
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <AdditionalIncludeDirectories>..\src;..\src\msvc-missing</AdditionalIncludeDirectories>
       <CompileAs>CompileAsC</CompileAs>
-      <DisableSpecificWarnings>4018;4146;4244;4267</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4018;4146;4244;4267;4996</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -266,7 +266,7 @@
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <AdditionalIncludeDirectories>..\src;..\src\msvc-missing</AdditionalIncludeDirectories>
       <CompileAs>CompileAsC</CompileAs>
-      <DisableSpecificWarnings>4018;4146;4244;4267</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4018;4146;4244;4267;4996</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -285,7 +285,7 @@
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <AdditionalIncludeDirectories>..\src;..\src\msvc-missing</AdditionalIncludeDirectories>
-      <DisableSpecificWarnings>4018;4146;4244;4267</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4018;4146;4244;4267;4996</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -303,7 +303,7 @@
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <AdditionalIncludeDirectories>..\src;..\src\msvc-missing</AdditionalIncludeDirectories>
-      <DisableSpecificWarnings>4018;4146;4244;4267</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4018;4146;4244;4267;4996</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -321,7 +321,7 @@
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <AdditionalIncludeDirectories>..\src;..\src\msvc-missing</AdditionalIncludeDirectories>
       <CompileAs>CompileAsC</CompileAs>
-      <DisableSpecificWarnings>4018;4146;4244;4267</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4018;4146;4244;4267;4996</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SuppressStartupBanner>true</SuppressStartupBanner>

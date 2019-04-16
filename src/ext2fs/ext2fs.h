@@ -31,7 +31,7 @@ extern "C" {
 /*
  * Non-GNU C compilers won't necessarily understand inline
  */
-#if (!defined(__GNUC__) && !defined(__WATCOMC__))
+#if (!defined(__GNUC__) && !defined(__WATCOMC__) && !defined(_MSC_VER))
 #define NO_INLINE_FUNCS
 #endif
 
@@ -1737,6 +1737,8 @@ extern errcode_t ext2fs_write_bb_FILE(ext2_badblocks_list bb_list,
 				      unsigned int flags,
 				      FILE *f);
 
+/* Rufus addtional */
+extern errcode_t ext2fs_print_progress(uint64_t cur, uint64_t max);
 
 /* inline functions */
 #ifdef NO_INLINE_FUNCS
@@ -1796,6 +1798,8 @@ extern const struct ext2_inode *ext2fs_const_inode(const struct ext2_inode_large
 #else
 #ifdef __GNUC__
 #define _INLINE_ extern __inline__
+#elif defined(_MSC_VER)
+#define _INLINE_ extern __inline
 #else				/* For Watcom C */
 #define _INLINE_ extern inline
 #endif /* __GNUC__ */

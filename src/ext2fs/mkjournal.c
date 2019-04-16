@@ -156,7 +156,7 @@ errcode_t ext2fs_zero_blocks2(ext2_filsys fs, blk64_t blk, int num,
 {
 	int		j, count;
 	static void	*buf;
-	static int	stride_length;
+	static int	stride_length = 0;
 	errcode_t	retval;
 
 	/* If fs is null, clean up the static buffer and return */
@@ -509,6 +509,7 @@ errcode_t ext2fs_add_journal_inode2(ext2_filsys fs, blk_t num_blocks,
 		retval = ioctl(fd, EXT2_IOC_SETFLAGS, &f);
 #endif
 #endif
+		// coverity[dead_error_condition]
 		if (retval) {
 			retval = errno;
 			goto errout;

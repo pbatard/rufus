@@ -28,8 +28,6 @@
 
 #pragma once
 
-/* Program options */
-#define RUFUS_LOGGING               // print info to logging facility
 /* Features not ready for prime time and that may *DESTROY* your data - USE AT YOUR OWN RISKS! */
 //#define RUFUS_TEST
 
@@ -152,9 +150,10 @@
 #define safe_vsnprintf vsnprintf
 #endif
 
-#ifdef RUFUS_LOGGING
 extern void _uprintf(const char *format, ...);
+extern void _uprintfs(const char *str);
 #define uprintf(...) _uprintf(__VA_ARGS__)
+#define uprintfs(s) _uprintfs(s)
 #define vuprintf(...) do { if (verbose) _uprintf(__VA_ARGS__); } while(0)
 #define vvuprintf(...) do { if (verbose > 1) _uprintf(__VA_ARGS__); } while(0)
 #define suprintf(...) do { if (!bSilent) _uprintf(__VA_ARGS__); } while(0)
@@ -167,18 +166,6 @@ extern void _uprintf(const char *format, ...);
 #define duprintf(...) _uprintf(__VA_ARGS__)
 #else
 #define duprintf(...)
-#endif
-#else
-#define uprintf(...)
-#define vuprintf(...)
-#define vvuprintf(...)
-#define duprintf(...)
-#define suprintf(...)
-#define uuprintf(...)
-#define duprintf(...)
-#define ubprintf(...)
-#define ubflush()
-#define _uprintf NULL
 #endif
 
 /* Custom Windows messages */
@@ -314,7 +301,7 @@ enum checksum_type {
 #define IS_EFI_BOOTABLE(r)  (r.has_efi != 0)
 #define IS_BIOS_BOOTABLE(r) (HAS_BOOTMGR(r) || HAS_SYSLINUX(r) || HAS_WINPE(r) || HAS_GRUB(r) || HAS_REACTOS(r) || HAS_KOLIBRIOS(r))
 #define HAS_WINTOGO(r)      (HAS_BOOTMGR(r) && IS_EFI_BOOTABLE(r) && HAS_WININST(r))
-#define HAS_PERSISTENCE(r)  (r.has_casper)
+#define HAS_PERSISTENCE(r)  ((HAS_SYSLINUX(r) || HAS_GRUB(r)) && !(HAS_WINDOWS(r) || HAS_REACTOS(r) || HAS_KOLIBRIOS(r)))
 #define IS_FAT(fs)          ((fs_type == FS_FAT16) || (fs_type == FS_FAT32))
 
 typedef struct {
@@ -349,7 +336,6 @@ typedef struct {
 	BOOLEAN uses_minint;
 	BOOLEAN compression_type;
 	BOOLEAN is_vhd;
-	BOOLEAN has_casper;
 	uint16_t sl_version;	// Syslinux/Isolinux version
 	char sl_version_str[12];
 	char sl_version_ext[32];

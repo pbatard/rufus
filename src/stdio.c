@@ -42,7 +42,6 @@ HWND hStatus;
 size_t ubuffer_pos = 0;
 char ubuffer[UBUFFER_SIZE];	// Buffer for ubpushf() messages we don't log right away
 
-#ifdef RUFUS_LOGGING
 void _uprintf(const char *format, ...)
 {
 	static char buf[4096];
@@ -78,7 +77,19 @@ void _uprintf(const char *format, ...)
 	}
 	free(wbuf);
 }
-#endif
+
+void _uprintfs(const char* str)
+{
+	wchar_t* wstr;
+	wstr = utf8_to_wchar(str);
+	OutputDebugStringW(wstr);
+	if ((hLog != NULL) && (hLog != INVALID_HANDLE_VALUE)) {
+		Edit_SetSel(hLog, MAX_LOG_SIZE, MAX_LOG_SIZE);
+		Edit_ReplaceSel(hLog, wstr);
+		Edit_Scroll(hLog, Edit_GetLineCount(hLog), 0);
+	}
+	free(wstr);
+}
 
 // Prints a bitstring of a number of any size, with or without leading zeroes.
 // See also the printbits() and printbitslz() helper macros in rufus.h

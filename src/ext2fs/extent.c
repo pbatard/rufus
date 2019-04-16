@@ -1733,6 +1733,8 @@ size_t ext2fs_max_extent_depth(ext2_extent_handle_t handle)
 	if (ul_log2(extents_per_block) == 0)
 		return last_result;
 
+	// Nice work, Coverity: We've just validated that ul_log2(extents_per_block) is non-zero!
+	// coverity[divide_by_zero]
 	last_result = 1 + ((ul_log2(EXT_MAX_EXTENT_LBLK) - ul_log2(iblock_extents)) /
 		    ul_log2(extents_per_block));
 	last_blocksize = handle->fs->blocksize;

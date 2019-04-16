@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Drive access function calls
- * Copyright © 2011-2018 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2019 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -57,6 +57,10 @@ const GUID PARTITION_MSFT_RESERVED_GUID =
 const GUID PARTITION_SYSTEM_GUID =
 	{ 0xc12a7328L, 0xf81f, 0x11d2, {0xba, 0x4b, 0x00, 0xa0, 0xc9, 0x3e, 0xc9, 0x3b} };
 #endif
+#if !defined(PARTITION_LINUX_HOME_GUID)
+const GUID PARTITION_LINUX_HOME_GUID =
+	{ 0x933ac7e1l, 0x2eb4, 0x4f13, {0xb8, 0x44, 0x0e, 0x14, 0xe2, 0xae, 0xf9, 0x15 } };
+#endif
 
 #if defined(__MINGW32__)
 const IID CLSID_VdsLoader = { 0x9c38ed61, 0xd565, 0x4728, { 0xae, 0xee, 0xc8, 0x09, 0x52, 0xf0, 0xec, 0xde } };
@@ -75,6 +79,7 @@ PF_TYPE_DECL(NTAPI, NTSTATUS, NtQueryVolumeInformationFile, (HANDLE, PIO_STATUS_
  */
 RUFUS_DRIVE_INFO SelectedDrive;
 BOOL installed_uefi_ntfs;
+uint64_t persistence_size = 0;
 const char* sfd_name = "Super Floppy Disk";
 
 /*
@@ -1159,22 +1164,30 @@ BOOL MountVolume(char* drive_name, char *drive_guid)
 	}
 
 	if (!SetVolumeMountPointA(drive_name, drive_guid)) {
-		// If we get ERROR_DIR_NOT_EMPTY, check that mountpoints match...
 		if (GetLastError() == ERROR_DIR_NOT_EMPTY) {
 			if (!GetVolumeNameForVolumeMountPointA(drive_name, mounted_guid, sizeof(mounted_guid))) {
 				uprintf("%s is already mounted, but volume GUID could not be checked: %s",
 					drive_name, WindowsErrorString());
-				return FALSE;
-			}
-			if (safe_strcmp(drive_guid, mounted_guid) != 0) {
+			} else if (safe_strcmp(drive_guid, mounted_guid) != 0) {
 				uprintf("%s is mounted, but volume GUID doesn't match:\r\n  expected %s, got %s",
 					drive_name, drive_guid, mounted_guid);
-				return FALSE;
+			} else {
+				uprintf("%s is already mounted as %C:", drive_guid, drive_name[0]);
+				return TRUE;
 			}
-			uprintf("%s is already mounted as %C:", drive_guid, drive_name[0]);
-		} else {
-			return FALSE;
+			uprintf("Retrying after dismount...");
+			if (!DeleteVolumeMountPointA(drive_name))
+				uprintf("Warning: Could not delete volume mountpoint: %s", WindowsErrorString());
+			if (SetVolumeMountPointA(drive_name, drive_guid))
+				return TRUE;
+			if ((GetLastError() == ERROR_DIR_NOT_EMPTY) &&
+				GetVolumeNameForVolumeMountPointA(drive_name, mounted_guid, sizeof(mounted_guid)) &&
+				(safe_strcmp(drive_guid, mounted_guid) == 0)) {
+				uprintf("%s was remounted as %C: (second time lucky!)", drive_guid, drive_name[0]);
+				return TRUE;
+			}
 		}
+		return FALSE;
 	}
 	return TRUE;
 }
@@ -1403,10 +1416,14 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 			else
 				ms_efi_size = 1200*MB;	// That'll teach you to have a nonstandard disk!
 			extra_part_size_in_tracks = (ms_efi_size + bytes_per_track - 1) / bytes_per_track;
-		} else if (extra_partitions & XP_UEFI_NTFS)
+		} else if (extra_partitions & XP_UEFI_NTFS) {
 			extra_part_size_in_tracks = (max(MIN_EXTRA_PART_SIZE, uefi_ntfs_size) + bytes_per_track - 1) / bytes_per_track;
-		else if (extra_partitions & XP_COMPAT)
+		} else if (extra_partitions & XP_COMPAT) {
 			extra_part_size_in_tracks = 1;	// One track for the extra partition
+		} else if ((extra_partitions & XP_CASPER)) {
+			assert(persistence_size != 0);
+			extra_part_size_in_tracks = persistence_size / bytes_per_track;
+		}
 		uprintf("Reserved %" PRIi64" tracks (%s) for extra partition", extra_part_size_in_tracks,
 			SizeToHumanReadable(extra_part_size_in_tracks * bytes_per_track, TRUE, FALSE));
 		main_part_size_in_sectors = ((main_part_size_in_sectors / SelectedDrive.SectorsPerTrack) -
@@ -1449,15 +1466,37 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 		DriveLayoutEx.PartitionEntry[pn].PartitionLength.QuadPart = (extra_partitions & XP_UEFI_NTFS)?uefi_ntfs_size:
 			extra_part_size_in_tracks * SelectedDrive.SectorsPerTrack * SelectedDrive.SectorSize;
 		if (partition_style == PARTITION_STYLE_GPT) {
-			DriveLayoutEx.PartitionEntry[pn].Gpt.PartitionType = (extra_partitions & XP_UEFI_NTFS)?
-				PARTITION_BASIC_DATA_GUID:PARTITION_SYSTEM_GUID;
+			const wchar_t* name = L"Basic Data";
+			const GUID* guid = &PARTITION_BASIC_DATA_GUID;
+			if (extra_partitions & XP_MSR) {
+				guid = &PARTITION_SYSTEM_GUID;
+				name = L"EFI system partition";
+			} else if (extra_partitions & XP_CASPER) {
+				// TODO: We may also want to use PARTITION_LINUX_HOME_GUID as fallback
+				// to automout as /home in case casper-rw fails.
+				name = L"casper-rw";	// Just in case
+			} else if (extra_partitions & XP_UEFI_NTFS) {
+				name = L"UEFI:NTFS";
+			} else {
+				assert(FALSE);
+			}
+			DriveLayoutEx.PartitionEntry[pn].Gpt.PartitionType = *guid;
 			IGNORE_RETVAL(CoCreateGuid(&DriveLayoutEx.PartitionEntry[pn].Gpt.PartitionId));
-			wcscpy(DriveLayoutEx.PartitionEntry[pn].Gpt.Name, (extra_partitions & XP_UEFI_NTFS)?L"UEFI:NTFS":L"EFI system partition");
+			wcscpy(DriveLayoutEx.PartitionEntry[pn].Gpt.Name, name);
 		} else {
-			DriveLayoutEx.PartitionEntry[pn].Mbr.PartitionType = (extra_partitions & XP_UEFI_NTFS)?0xef:RUFUS_EXTRA_PARTITION_TYPE;
-			if (extra_partitions & XP_COMPAT)
+			BYTE type = 0;
+			if (extra_partitions & XP_UEFI_NTFS) {
+				type = 0xef;
+			} else if (extra_partitions & XP_CASPER) {
+				type = 0x83;
+			}  else if (extra_partitions & XP_COMPAT) {
+				type = RUFUS_EXTRA_PARTITION_TYPE;
 				// Set the one track compatibility partition to be all hidden sectors
 				DriveLayoutEx.PartitionEntry[pn].Mbr.HiddenSectors = SelectedDrive.SectorsPerTrack;
+			} else {
+				assert(FALSE);
+			}
+			DriveLayoutEx.PartitionEntry[pn].Mbr.PartitionType = type;
 		}
 
 		// We need to write the UEFI:NTFS partition before we refresh the disk

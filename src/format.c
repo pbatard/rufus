@@ -601,15 +601,9 @@ static BOOL FormatFAT32(DWORD DriveIndex)
 		die("Failed to allocate memory\n", ERROR_NOT_ENOUGH_MEMORY);
 	}
 
-	format_percent = 0.0f;
 	for (i=0; i<(SystemAreaSize+BurstSize-1); i+=BurstSize) {
-		if (GetTickCount64() > LastRefresh + MAX_REFRESH) {
-			LastRefresh = GetTickCount64();
-			format_percent = (100.0f*i)/(1.0f*(SystemAreaSize+BurstSize));
-			PrintInfo(0, MSG_217, format_percent);
-			UpdateProgress(OP_FORMAT, format_percent);
-		}
-		if (IS_ERROR(FormatStatus)) goto out;	// For cancellation
+		UPDATE_PERCENT(MSG_217, (100.0f*i) / (1.0f*(SystemAreaSize + BurstSize)));
+		CHECK_FOR_USER_CANCEL;
 		if (write_sectors(hLogicalVolume, BytesPerSect, i, BurstSize, pZeroSect) != (BytesPerSect*BurstSize)) {
 			die("Error clearing reserved sectors\n", ERROR_WRITE_FAULT);
 		}
@@ -664,6 +658,139 @@ out:
 	return r;
 }
 
+errcode_t ext2fs_print_progress(uint64_t cur, uint64_t max)
+{
+	UPDATE_PERCENT(MSG_217, 25.0f + 75.0f * cur / (float)max);
+	return IS_ERROR(FormatStatus) ? EXT2_ET_CANCEL_REQUESTED : 0;
+}
+
+const char* error_message(errcode_t error_code)
+{
+	static char error_string[256];
+
+	switch (error_code) {
+	case EXT2_ET_MAGIC_EXT2FS_FILSYS:
+	case EXT2_ET_MAGIC_BADBLOCKS_LIST:
+	case EXT2_ET_MAGIC_BADBLOCKS_ITERATE:
+	case EXT2_ET_MAGIC_INODE_SCAN:
+	case EXT2_ET_MAGIC_IO_CHANNEL:
+	case EXT2_ET_MAGIC_IO_MANAGER:
+	case EXT2_ET_MAGIC_BLOCK_BITMAP:
+	case EXT2_ET_MAGIC_INODE_BITMAP:
+	case EXT2_ET_MAGIC_GENERIC_BITMAP:
+	case EXT2_ET_MAGIC_ICOUNT:
+	case EXT2_ET_MAGIC_EXTENT_HANDLE:
+	case EXT2_ET_BAD_MAGIC:
+		return "Bad magic";
+	case EXT2_ET_RO_FILSYS:
+		return "Read-only file system";
+	case EXT2_ET_GDESC_BAD_BLOCK_MAP:
+	case EXT2_ET_GDESC_BAD_INODE_MAP:
+	case EXT2_ET_GDESC_BAD_INODE_TABLE:
+		return "Bad map or table";
+	case EXT2_ET_UNEXPECTED_BLOCK_SIZE:
+		return "Unexpected block size";
+	case EXT2_ET_DIR_CORRUPTED:
+		return "Corrupted entry";
+	case EXT2_ET_GDESC_READ:
+	case EXT2_ET_GDESC_WRITE:
+	case EXT2_ET_INODE_BITMAP_WRITE:
+	case EXT2_ET_INODE_BITMAP_READ:
+	case EXT2_ET_BLOCK_BITMAP_WRITE:
+	case EXT2_ET_BLOCK_BITMAP_READ:
+	case EXT2_ET_INODE_TABLE_WRITE:
+	case EXT2_ET_INODE_TABLE_READ:
+	case EXT2_ET_NEXT_INODE_READ:
+	case EXT2_ET_SHORT_READ:
+	case EXT2_ET_SHORT_WRITE:
+		return "read/write error";
+	case EXT2_ET_DIR_NO_SPACE:
+		return "no space left";
+	case EXT2_ET_TOOSMALL:
+		return "Too small";
+	case EXT2_ET_BAD_DEVICE_NAME:
+		return "Bad device name";
+	case EXT2_ET_MISSING_INODE_TABLE:
+		return "Missing inode table";
+	case EXT2_ET_CORRUPT_SUPERBLOCK:
+		return "Superblock is corrupted";
+	case EXT2_ET_CALLBACK_NOTHANDLED:
+		return "Unhandled callback";
+	case EXT2_ET_BAD_BLOCK_IN_INODE_TABLE:
+		return "Bad block in inode table";
+	case EXT2_ET_UNSUPP_FEATURE:
+	case EXT2_ET_RO_UNSUPP_FEATURE:
+	case EXT2_ET_UNIMPLEMENTED:
+		return "Unsupported feature";
+	case EXT2_ET_LLSEEK_FAILED:
+		return "Seek failed";
+	case EXT2_ET_NO_MEMORY:
+	case EXT2_ET_BLOCK_ALLOC_FAIL:
+	case EXT2_ET_INODE_ALLOC_FAIL:
+		return "Out of memory";
+	case EXT2_ET_INVALID_ARGUMENT:
+		return "Invalid argument";
+	case EXT2_ET_NO_DIRECTORY:
+		return "No directory";
+	case EXT2_ET_FILE_NOT_FOUND:
+		return "File not found";
+	case EXT2_ET_FILE_RO:
+		return "File is read-only";
+	case EXT2_ET_DIR_EXISTS:
+		return "Directory already exists";
+	case EXT2_ET_CANCEL_REQUESTED:
+		return "Cancel requested";
+	case EXT2_ET_FILE_TOO_BIG:
+		return "File too big";
+	case EXT2_ET_JOURNAL_NOT_BLOCK:
+	case EXT2_ET_NO_JOURNAL_SB:
+		return "No journal superblock";
+	case EXT2_ET_JOURNAL_TOO_SMALL:
+		return "Journal too small";
+	case EXT2_ET_NO_JOURNAL:
+		return "No journal";
+	case EXT2_ET_TOO_MANY_INODES:
+		return "Too many inodes";
+	case EXT2_ET_NO_CURRENT_NODE:
+		return "No current node";
+	case EXT2_ET_OP_NOT_SUPPORTED:
+		return "Operation not supported";
+	case EXT2_ET_IO_CHANNEL_NO_SUPPORT_64:
+		return "I/O Channel does not support 64-bit operation";
+	case EXT2_ET_BAD_DESC_SIZE:
+		return "Bad descriptor size";
+	case EXT2_ET_INODE_CSUM_INVALID:
+	case EXT2_ET_INODE_BITMAP_CSUM_INVALID:
+	case EXT2_ET_EXTENT_CSUM_INVALID:
+	case EXT2_ET_DIR_CSUM_INVALID:
+	case EXT2_ET_EXT_ATTR_CSUM_INVALID:
+	case EXT2_ET_SB_CSUM_INVALID:
+	case EXT2_ET_BLOCK_BITMAP_CSUM_INVALID:
+	case EXT2_ET_MMP_CSUM_INVALID:
+		return "Invalid checksum";
+	case EXT2_ET_UNKNOWN_CSUM:
+		return "Unknown checksum";
+	case EXT2_ET_FILE_EXISTS:
+		return "File exists";
+	case EXT2_ET_INODE_IS_GARBAGE:
+		return "Inode is garbage";
+	case EXT2_ET_JOURNAL_FLAGS_WRONG:
+		return "Wrong journal flags";
+	case EXT2_ET_FILESYSTEM_CORRUPTED:
+		return "File system is corrupted";
+	case EXT2_ET_BAD_CRC:
+		return "Bad CRC";
+	case EXT2_ET_CORRUPT_JOURNAL_SB:
+		return "Journal Superblock is corrupted";
+	case EXT2_ET_INODE_CORRUPTED:
+	case EXT2_ET_EA_INODE_CORRUPTED:
+		return "Inode is corrupted";
+	default:
+		static_sprintf(error_string, "Unknown ext2fs error 0x%08lX", error_code - EXT2_ET_BASE);
+		return error_string;
+	}
+}
+
 BOOL FormatExt2Fs(const char* label)
 {
 	// Mostly taken from mke2fs.conf
@@ -709,11 +836,12 @@ BOOL FormatExt2Fs(const char* label)
 		goto out;
 
 	PrintInfoDebug(0, MSG_222, "ext3");
+	LastRefresh = 0;
 
 	// Figure out the volume size and block size
 	r = ext2fs_get_device_size2(path, KB, &size);
 	if ((r != 0) || (size == 0)) {
-		uprintf("Could not read device size: %d", r);
+		uprintf("Could not read device size: %s", error_message(r));
 		goto out;
 	}
 	size *= KB;
@@ -736,7 +864,7 @@ BOOL FormatExt2Fs(const char* label)
 	features.s_inode_size = ext2fs_default[i].inode_size;
 	features.s_inodes_count = ((ext2fs_blocks_count(&features) >> ext2fs_default[i].inode_ratio) > UINT32_MAX) ?
 		UINT32_MAX : (uint32_t)(ext2fs_blocks_count(&features) >> ext2fs_default[i].inode_ratio);
-	uprintf("%d inodes, %lld blocks (block size = %d)", features.s_inodes_count, size, EXT2_BLOCK_SIZE(&features));
+	uprintf("%d possible inodes out of %lld blocks (block size = %d)", features.s_inodes_count, size, EXT2_BLOCK_SIZE(&features));
 	uprintf("%lld blocks (%0.1f%%) reserved for the super user", ext2fs_r_blocks_count(&features), reserve_ratio * 100.0f);
 
 	// Set features for ext3
@@ -747,13 +875,13 @@ BOOL FormatExt2Fs(const char* label)
 	ext2fs_set_feature_filetype(&features);
 	ext2fs_set_feature_sparse_super(&features);
 	ext2fs_set_feature_large_file(&features);
-	features.s_backup_bgs[0] = 1;
+	features.s_backup_bgs[0] = ~0;
 	features.s_default_mount_opts = EXT2_DEFM_XATTR_USER | EXT2_DEFM_ACL;
 
 	// Now that we have set our base features, initialize a virtual superblock
 	r = ext2fs_initialize(path, EXT2_FLAG_EXCLUSIVE | EXT2_FLAG_64BITS, &features, manager, &ext2fs);
 	if (r != 0) {
-		uprintf("Could not initialize ext2fs features: %d", r);
+		uprintf("Could not initialize ext2fs features: %s", error_message(r));
 		goto out;
 	}
 
@@ -763,15 +891,15 @@ BOOL FormatExt2Fs(const char* label)
 	r = io_channel_write_blk64(ext2fs->io, 0, 16, buf);
 	safe_free(buf);
 	if (r != 0) {
-		uprintf("Could not zero ext2fs superblock area: %d", r);
+		uprintf("Could not zero ext2fs superblock area: %s", error_message(r));
 		goto out;
 	}
 
 	// Finish setting up the file system
-	CoCreateGuid((GUID*)ext2fs->super->s_uuid);
+	IGNORE_RETVAL(CoCreateGuid((GUID*)ext2fs->super->s_uuid));
 	ext2fs_init_csum_seed(ext2fs);
 	ext2fs->super->s_def_hash_version = EXT2_HASH_HALF_MD4;
-	CoCreateGuid((GUID*)ext2fs->super->s_hash_seed);
+	IGNORE_RETVAL(CoCreateGuid((GUID*)ext2fs->super->s_hash_seed));
 	ext2fs->super->s_max_mnt_count = -1;
 	ext2fs->super->s_creator_os = EXT2_OS_WINDOWS;
 	ext2fs->super->s_errors = EXT2_ERRORS_CONTINUE;
@@ -779,37 +907,45 @@ BOOL FormatExt2Fs(const char* label)
 
 	r = ext2fs_allocate_tables(ext2fs);
 	if (r != 0) {
-		uprintf("Could not allocate ext2fs tables: %d", r);
+		uprintf("Could not allocate ext2fs tables: %s", error_message(r));
 		goto out;
 	}
 	r = ext2fs_convert_subcluster_bitmap(ext2fs, &ext2fs->block_map);
 	if (r != 0) {
-		uprintf("Could set ext2fs cluster bitmap: %d", r);
+		uprintf("Could set ext2fs cluster bitmap: %s", error_message(r));
 		goto out;
 	}
 
-	// Wipe inode table
+	// This should take about 10%
+	uprintf("Creating %d inodes...", ext2fs->group_desc_count);
 	for (i = 0; i < (int)ext2fs->group_desc_count; i++) {
+		UPDATE_PERCENT(MSG_217, 25.0f * i / ((float)ext2fs->group_desc_count))
+		CHECK_FOR_USER_CANCEL;
 		cur = ext2fs_inode_table_loc(ext2fs, i);
 		count = ext2fs_div_ceil((ext2fs->super->s_inodes_per_group - ext2fs_bg_itable_unused(ext2fs, i))
 			* EXT2_BLOCK_SIZE(ext2fs->super), EXT2_BLOCK_SIZE(ext2fs->super));
+		uprintfs("+");
+		if ((i + 1) % 80 == 0)
+			uprintfs("\r\n");
 		r = ext2fs_zero_blocks2(ext2fs, cur, count, &cur, &count);
 		if (r != 0) {
-			uprintf("Could not zero ext2fs inode at %llu (%d blocks): %d\n", cur, count, r);
+			uprintf("Could not zero ext2fs inode at %llu (%d blocks): %s\n", cur, count, error_message(r));
 			goto out;
 		}
 	}
+	uprintfs("\r\n");
+	UPDATE_PERCENT(MSG_217, 25.0f);
 
 	// Create root and lost+found dirs
 	r = ext2fs_mkdir(ext2fs, EXT2_ROOT_INO, EXT2_ROOT_INO, 0);
 	if (r != 0) {
-		uprintf("Failed to create ext2fs root dir: %d", r);
+		uprintf("Failed to create ext2fs root dir: %s", error_message(r));
 		goto out;
 	}
 	ext2fs->umask = 077;
 	r = ext2fs_mkdir(ext2fs, EXT2_ROOT_INO, 0, "lost+found");
 	if (r != 0) {
-		uprintf("Failed to create ext2fs 'lost+found' dir: %d", r);
+		uprintf("Failed to create ext2fs 'lost+found' dir: %s", error_message(r));
 		goto out;
 	}
 
@@ -820,27 +956,35 @@ BOOL FormatExt2Fs(const char* label)
 
 	r = ext2fs_mark_inode_bitmap2(ext2fs->inode_map, EXT2_BAD_INO);
 	if (r != 0) {
-		uprintf("Could not set ext2fs inode bitmaps: %d", r);
+		uprintf("Could not set ext2fs inode bitmaps: %s", error_message(r));
 		goto out;
 	}
 	ext2fs_inode_alloc_stats(ext2fs, EXT2_BAD_INO, 1);
 	r = ext2fs_update_bb_inode(ext2fs, NULL);
 	if (r != 0) {
-		uprintf("Could not set ext2fs inode stats: %d", r);
+		uprintf("Could not set ext2fs inode stats:%s", error_message(r));
 		goto out;
 	}
 
 	// Create the journal
 	journal_size = ext2fs_default_journal_size(ext2fs_blocks_count(ext2fs->super));
+	journal_size /= 2;	// That journal init is really killing us!
 	uprintf("Creating journal (%d blocks)", journal_size);
+	// Even with EXT2_MKJOURNAL_LAZYINIT, this call is absolutely dreadful in terms of speed...
 	r = ext2fs_add_journal_inode(ext2fs, journal_size, EXT2_MKJOURNAL_NO_MNT_CHECK | EXT2_MKJOURNAL_LAZYINIT);
+	if (r != 0) {
+		uprintf("Could not create Journal: %s", error_message(r));
+		goto out;
+	}
 
 	// Finally we can call close() to get the file system gets created
 	r = ext2fs_close(ext2fs);
 	if (r != 0) {
-		uprintf("Could not create ext3 volume: %d", r);
+		uprintf("Could not create ext3 volume: %s", error_message(r));
 		goto out;
 	}
+	UPDATE_PERCENT(MSG_217, 100.0f);
+	uprintf("Done");
 	ret = TRUE;
 
 out:
@@ -1024,22 +1168,19 @@ static BOOL ClearMBRGPT(HANDLE hPhysicalDrive, LONGLONG DiskSize, DWORD SectorSi
 	uprintf("Erasing %d sectors", num_sectors_to_clear);
 	for (i=0; i<num_sectors_to_clear; i++) {
 		for (j = 1; j <= WRITE_RETRIES; j++) {
-			if (IS_ERROR(FormatStatus))
-				goto out;
+			CHECK_FOR_USER_CANCEL;
 			if (write_sectors(hPhysicalDrive, SectorSize, i, 1, pBuf) != SectorSize) {
-				if (j < WRITE_RETRIES) {
-					uprintf("Retrying in %d seconds...", WRITE_TIMEOUT / 1000);
-					// Don't sit idly but use the downtime to check for conflicting processes...
-					Sleep(CheckDriveAccess(WRITE_TIMEOUT, FALSE));
-				} else
+				if (j >= WRITE_RETRIES)
 					goto out;
+				uprintf("Retrying in %d seconds...", WRITE_TIMEOUT / 1000);
+				// Don't sit idly but use the downtime to check for conflicting processes...
+				Sleep(CheckDriveAccess(WRITE_TIMEOUT, FALSE));
 			}
 		}
 	}
 	for (i = last_sector - MAX_SECTORS_TO_CLEAR; i < last_sector; i++) {
 		for (j = 1; j <= WRITE_RETRIES; j++) {
-			if (IS_ERROR(FormatStatus))
-				goto out;
+			CHECK_FOR_USER_CANCEL;
 			if (write_sectors(hPhysicalDrive, SectorSize, i, 1, pBuf) != SectorSize) {
 				if (j < WRITE_RETRIES) {
 					uprintf("Retrying in %d seconds...", WRITE_TIMEOUT / 1000);
@@ -1759,12 +1900,7 @@ static BOOL SetupWinToGo(const char* drive_name, BOOL use_ms_efi)
 
 static void update_progress(const uint64_t processed_bytes)
 {
-	if (GetTickCount64() > LastRefresh + MAX_REFRESH) {
-		LastRefresh = GetTickCount64();
-		format_percent = (100.0f*processed_bytes)/(1.0f*img_report.image_size);
-		PrintInfo(0, MSG_261, format_percent);
-		UpdateProgress(OP_FORMAT, format_percent);
-	}
+	UPDATE_PERCENT(MSG_261, (100.0f*processed_bytes) / (1.0f*img_report.image_size));
 }
 
 /* Write an image file or zero a drive */
@@ -1824,13 +1960,7 @@ static BOOL WriteDrive(HANDLE hPhysicalDrive, HANDLE hSourceImage)
 		// will be as fast, if not faster, than whatever async scheme you can come up with.
 		rSize = BufSize;
 		for (wb = 0, wSize = 0; wb < (uint64_t)SelectedDrive.DiskSize; wb += wSize) {
-			if (GetTickCount64() > LastRefresh + MAX_REFRESH) {
-				LastRefresh = GetTickCount64();
-				format_percent = (100.0f*wb) / (1.0f*target_size);
-				PrintInfo(0, hSourceImage?MSG_261:fast_zeroing?MSG_306:MSG_286, format_percent);
-				UpdateProgress(OP_FORMAT, format_percent);
-			}
-
+			UPDATE_PERCENT(hSourceImage?MSG_261:fast_zeroing?MSG_306:MSG_286, (100.0f*wb)/(1.0f*target_size));
 			if (hSourceImage != NULL) {
 				s = ReadFile(hSourceImage, buffer, BufSize, &rSize, NULL);
 				if (!s) {
@@ -1976,6 +2106,8 @@ DWORD WINAPI FormatThread(void* param)
 		extra_partitions = XP_UEFI_NTFS;
 	else if (IsChecked(IDC_OLD_BIOS_FIXES))
 		extra_partitions = XP_COMPAT;
+	else if ((boot_type == BT_IMAGE) && !write_as_image && HAS_PERSISTENCE(img_report) && persistence_size)
+		extra_partitions = XP_CASPER;
 
 	PrintInfoDebug(0, MSG_225);
 	hPhysicalDrive = GetPhysicalHandle(DriveIndex, lock_drive, FALSE, !lock_drive);
@@ -2198,6 +2330,11 @@ DWORD WINAPI FormatThread(void* param)
 		goto out;
 	}
 
+	// Format Casper partition if it exists
+	if (extra_partitions & XP_CASPER) {
+		ret = FormatExt2Fs("casper-rw");
+	}
+
 	// Thanks to Microsoft, we must fix the MBR AFTER the drive has been formatted
 	if ((partition_type == PARTITION_STYLE_MBR) || ((boot_type != BT_NON_BOOTABLE) && (partition_type == PARTITION_STYLE_GPT))) {
 		PrintInfoDebug(0, MSG_228);	// "Writing master boot record..."
@@ -2219,7 +2356,7 @@ DWORD WINAPI FormatThread(void* param)
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_NO_VOLUME_ID;
 		goto out;
 	}
-	uprintf("Found volume GUID %s, guid_volume");
+	uprintf("Found volume GUID %s", guid_volume);
 
 	if (!MountVolume(drive_name, guid_volume)) {
 		uprintf("Could not remount %s as %C: %s\n", guid_volume, drive_name[0], WindowsErrorString());
@@ -2467,12 +2604,7 @@ DWORD WINAPI SaveImageThread(void* param)
 		}
 		if (rSize == 0)
 			break;
-		if (GetTickCount64() > LastRefresh + MAX_REFRESH) {
-			LastRefresh = GetTickCount64();
-			format_percent = (100.0f*wb)/(1.0f*img_save->DeviceSize);
-			PrintInfo(0, MSG_261, format_percent);
-			UpdateProgress(OP_FORMAT, format_percent);
-		}
+		UPDATE_PERCENT(MSG_261, (100.0f*wb)/(1.0f*img_save->DeviceSize));
 		for (i = 1; i <= WRITE_RETRIES; i++) {
 			CHECK_FOR_USER_CANCEL;
 			s = WriteFile(hDestImage, buffer, rSize, &wSize, NULL);
