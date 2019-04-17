@@ -36,6 +36,7 @@
 #include "rufus.h"
 #include "missing.h"
 #include "resource.h"
+#include "settings.h"
 #include "msapi_utf8.h"
 #include "localization.h"
 
@@ -658,12 +659,7 @@ out:
 	return r;
 }
 
-errcode_t ext2fs_print_progress(uint64_t cur, uint64_t max)
-{
-	UPDATE_PERCENT(MSG_217, 25.0f + 75.0f * cur / (float)max);
-	return IS_ERROR(FormatStatus) ? EXT2_ET_CANCEL_REQUESTED : 0;
-}
-
+// Error messages for ext2fs
 const char* error_message(errcode_t error_code)
 {
 	static char error_string[256];
@@ -786,12 +782,30 @@ const char* error_message(errcode_t error_code)
 	case EXT2_ET_EA_INODE_CORRUPTED:
 		return "Inode is corrupted";
 	default:
-		static_sprintf(error_string, "Unknown ext2fs error 0x%08lX", error_code - EXT2_ET_BASE);
+		if ((error_code > EXT2_ET_BASE) && error_code < (EXT2_ET_BASE + 1000))
+			static_sprintf(error_string, "Unknown ext2fs error %ld (EXT2_ET_BASE + %ld)", error_code, error_code - EXT2_ET_BASE);
+		else
+			static_sprintf(error_string, "Unknown ext2fs error 0x%08lX", error_code);
 		return error_string;
 	}
 }
 
-BOOL FormatExt2Fs(const char* label)
+static float ext2_percent_start = 0.0f, ext2_percent_share = 50.0f;
+errcode_t ext2fs_print_progress(int64_t cur_value, int64_t max_value)
+{
+	static int64_t last_value = -1;
+	if (max_value == 0)
+		return 0;
+	UPDATE_PERCENT(MSG_217, ext2_percent_start + ext2_percent_share * cur_value / (float)max_value);
+	cur_value = (int64_t)(((float)cur_value / (float)max_value) * min(80.0f, (float)max_value));
+	if ((cur_value < last_value) || (cur_value > last_value)) {
+		last_value = cur_value;
+		uprintfs("+");
+	}
+	return IS_ERROR(FormatStatus) ? EXT2_ET_CANCEL_REQUESTED : 0;
+}
+
+BOOL FormatExtFs(const char* label, uint32_t version)
 {
 	// Mostly taken from mke2fs.conf
 	const float reserve_ratio = 0.05f;
@@ -804,7 +818,7 @@ BOOL FormatExt2Fs(const char* label)
 	};
 
 	BOOL ret = FALSE;
-	char* path = NULL;
+	char *path = NULL, *extfs_name = "ext#";;
 	int i, count;
 	struct ext2_super_block features = { 0 };
 	io_manager manager = nt_io_manager();
@@ -834,8 +848,16 @@ BOOL FormatExt2Fs(const char* label)
 #endif
 	if (path == NULL)
 		goto out;
+	if ((version < 2) || (version > 3)) {
+		if (version == 4)
+			uprintf("ext4 file system is not supported, will use ext3 instead");
+		else
+			uprintf("invalid ext file system version requested, will use ext3");
+		version = 3;
+	}
 
-	PrintInfoDebug(0, MSG_222, "ext3");
+	extfs_name[3] = '0' + version;
+	PrintInfoDebug(0, MSG_222, extfs_name);
 	LastRefresh = 0;
 
 	// Figure out the volume size and block size
@@ -867,21 +889,22 @@ BOOL FormatExt2Fs(const char* label)
 	uprintf("%d possible inodes out of %lld blocks (block size = %d)", features.s_inodes_count, size, EXT2_BLOCK_SIZE(&features));
 	uprintf("%lld blocks (%0.1f%%) reserved for the super user", ext2fs_r_blocks_count(&features), reserve_ratio * 100.0f);
 
-	// Set features for ext3
-	ext2fs_set_feature_journal(&features);
+	// Set features
 	ext2fs_set_feature_xattr(&features);
 	ext2fs_set_feature_resize_inode(&features);
 	ext2fs_set_feature_dir_index(&features);
 	ext2fs_set_feature_filetype(&features);
 	ext2fs_set_feature_sparse_super(&features);
 	ext2fs_set_feature_large_file(&features);
+	if (version >= 3)
+		ext2fs_set_feature_journal(&features);
 	features.s_backup_bgs[0] = ~0;
 	features.s_default_mount_opts = EXT2_DEFM_XATTR_USER | EXT2_DEFM_ACL;
 
 	// Now that we have set our base features, initialize a virtual superblock
 	r = ext2fs_initialize(path, EXT2_FLAG_EXCLUSIVE | EXT2_FLAG_64BITS, &features, manager, &ext2fs);
 	if (r != 0) {
-		uprintf("Could not initialize ext2fs features: %s", error_message(r));
+		uprintf("Could not initialize %s features: %s", extfs_name, error_message(r));
 		goto out;
 	}
 
@@ -891,7 +914,7 @@ BOOL FormatExt2Fs(const char* label)
 	r = io_channel_write_blk64(ext2fs->io, 0, 16, buf);
 	safe_free(buf);
 	if (r != 0) {
-		uprintf("Could not zero ext2fs superblock area: %s", error_message(r));
+		uprintf("Could not zero %s superblock area: %s", extfs_name, error_message(r));
 		goto out;
 	}
 
@@ -907,29 +930,27 @@ BOOL FormatExt2Fs(const char* label)
 
 	r = ext2fs_allocate_tables(ext2fs);
 	if (r != 0) {
-		uprintf("Could not allocate ext2fs tables: %s", error_message(r));
+		uprintf("Could not allocate %s tables: %s", extfs_name, error_message(r));
 		goto out;
 	}
 	r = ext2fs_convert_subcluster_bitmap(ext2fs, &ext2fs->block_map);
 	if (r != 0) {
-		uprintf("Could set ext2fs cluster bitmap: %s", error_message(r));
+		uprintf("Could set %s cluster bitmap: %s", extfs_name, error_message(r));
 		goto out;
 	}
 
-	// This should take about 10%
-	uprintf("Creating %d inodes...", ext2fs->group_desc_count);
+	ext2_percent_start = 0.0f;
+	ext2_percent_share = (version < 3) ? 100.0f : 50.0f;
+	uprintf("Creating %d inode sets:", ext2fs->group_desc_count);
 	for (i = 0; i < (int)ext2fs->group_desc_count; i++) {
-		UPDATE_PERCENT(MSG_217, 25.0f * i / ((float)ext2fs->group_desc_count))
-		CHECK_FOR_USER_CANCEL;
+		if (ext2fs_print_progress((int64_t)i, (int64_t)ext2fs->group_desc_count))
+			goto out;
 		cur = ext2fs_inode_table_loc(ext2fs, i);
 		count = ext2fs_div_ceil((ext2fs->super->s_inodes_per_group - ext2fs_bg_itable_unused(ext2fs, i))
 			* EXT2_BLOCK_SIZE(ext2fs->super), EXT2_BLOCK_SIZE(ext2fs->super));
-		uprintfs("+");
-		if ((i + 1) % 80 == 0)
-			uprintfs("\r\n");
 		r = ext2fs_zero_blocks2(ext2fs, cur, count, &cur, &count);
 		if (r != 0) {
-			uprintf("Could not zero ext2fs inode at %llu (%d blocks): %s\n", cur, count, error_message(r));
+			uprintf("\r\nCould not zero inode set at position %llu (%d blocks): %s", cur, count, error_message(r));
 			goto out;
 		}
 	}
@@ -939,13 +960,13 @@ BOOL FormatExt2Fs(const char* label)
 	// Create root and lost+found dirs
 	r = ext2fs_mkdir(ext2fs, EXT2_ROOT_INO, EXT2_ROOT_INO, 0);
 	if (r != 0) {
-		uprintf("Failed to create ext2fs root dir: %s", error_message(r));
+		uprintf("Failed to create %s root dir: %s", extfs_name, error_message(r));
 		goto out;
 	}
 	ext2fs->umask = 077;
 	r = ext2fs_mkdir(ext2fs, EXT2_ROOT_INO, 0, "lost+found");
 	if (r != 0) {
-		uprintf("Failed to create ext2fs 'lost+found' dir: %s", error_message(r));
+		uprintf("Failed to create %s 'lost+found' dir: %s", extfs_name, error_message(r));
 		goto out;
 	}
 
@@ -956,31 +977,35 @@ BOOL FormatExt2Fs(const char* label)
 
 	r = ext2fs_mark_inode_bitmap2(ext2fs->inode_map, EXT2_BAD_INO);
 	if (r != 0) {
-		uprintf("Could not set ext2fs inode bitmaps: %s", error_message(r));
+		uprintf("Could not set inode bitmaps: %s", error_message(r));
 		goto out;
 	}
 	ext2fs_inode_alloc_stats(ext2fs, EXT2_BAD_INO, 1);
 	r = ext2fs_update_bb_inode(ext2fs, NULL);
 	if (r != 0) {
-		uprintf("Could not set ext2fs inode stats:%s", error_message(r));
+		uprintf("Could not set inode stats: %s", error_message(r));
 		goto out;
 	}
 
-	// Create the journal
-	journal_size = ext2fs_default_journal_size(ext2fs_blocks_count(ext2fs->super));
-	journal_size /= 2;	// That journal init is really killing us!
-	uprintf("Creating journal (%d blocks)", journal_size);
-	// Even with EXT2_MKJOURNAL_LAZYINIT, this call is absolutely dreadful in terms of speed...
-	r = ext2fs_add_journal_inode(ext2fs, journal_size, EXT2_MKJOURNAL_NO_MNT_CHECK | EXT2_MKJOURNAL_LAZYINIT);
-	if (r != 0) {
-		uprintf("Could not create Journal: %s", error_message(r));
-		goto out;
+	if (version >= 3) {
+		// Create the journal
+		ext2_percent_start = 50.0f;
+		journal_size = ext2fs_default_journal_size(ext2fs_blocks_count(ext2fs->super));
+		journal_size /= 2;	// That journal init is really killing us!
+		uprintf("Creating %d journal blocks:", journal_size);
+		// Even with EXT2_MKJOURNAL_LAZYINIT, this call is absolutely dreadful in terms of speed...
+		r = ext2fs_add_journal_inode(ext2fs, journal_size, EXT2_MKJOURNAL_NO_MNT_CHECK | EXT2_MKJOURNAL_LAZYINIT);
+		uprintfs("\r\n");
+		if (r != 0) {
+			uprintf("Could not create %s journal: %s", extfs_name, error_message(r));
+			goto out;
+		}
 	}
 
 	// Finally we can call close() to get the file system gets created
 	r = ext2fs_close(ext2fs);
 	if (r != 0) {
-		uprintf("Could not create ext3 volume: %s", error_message(r));
+		uprintf("Could not create %s volume: %s", extfs_name, error_message(r));
 		goto out;
 	}
 	UPDATE_PERCENT(MSG_217, 100.0f);
@@ -2320,6 +2345,16 @@ DWORD WINAPI FormatThread(void* param)
 		uprintf("Logical drive was not found!");	// We try to continue even if this fails, just in case
 	CHECK_FOR_USER_CANCEL;
 
+	// Format Casper partition if required. Do it before we format anything with
+	// a file system that Windows will recognize, to avoid concurrent access.
+	if (extra_partitions & XP_CASPER) {
+		if (!FormatExtFs("casper-rw", ReadSetting32(SETTING_USE_EXTFS_VERSION))) {
+			if (!IS_ERROR(FormatStatus))
+				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_WRITE_FAULT;
+			goto out;
+		}
+	}
+
 	// If FAT32 is requested and we have a large drive (>32 GB) use
 	// large FAT32 format, else use MS's FormatEx.
 	// TODO: We'll want a single call for ext2/ext3/ext4, large FAT32 and everything (after we switch to VDS?)
@@ -2328,11 +2363,6 @@ DWORD WINAPI FormatThread(void* param)
 		// Error will be set by FormatDrive() in FormatStatus
 		uprintf("Format error: %s", StrError(FormatStatus, TRUE));
 		goto out;
-	}
-
-	// Format Casper partition if it exists
-	if (extra_partitions & XP_CASPER) {
-		ret = FormatExt2Fs("casper-rw");
 	}
 
 	// Thanks to Microsoft, we must fix the MBR AFTER the drive has been formatted

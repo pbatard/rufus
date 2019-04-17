@@ -1738,7 +1738,7 @@ extern errcode_t ext2fs_write_bb_FILE(ext2_badblocks_list bb_list,
 				      FILE *f);
 
 /* Rufus addtional */
-extern errcode_t ext2fs_print_progress(uint64_t cur, uint64_t max);
+extern errcode_t ext2fs_print_progress(int64_t cur, int64_t max);
 
 /* inline functions */
 #ifdef NO_INLINE_FUNCS

@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Settings access, through either registry or INI file
- * Copyright © 2015-2016 Pete Batard <pete@akeo.ie>
+ * Copyright © 2015-2019 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,27 +27,26 @@ extern char* ini_file;
 /*
  * List of setting names used by this application
  */
-#define SETTING_VERBOSE_UPDATES             "VerboseUpdateCheck"
-#define SETTING_LAST_UPDATE                 "LastUpdateCheck"
-#define SETTING_UPDATE_INTERVAL             "UpdateCheckInterval"
-#define SETTING_INCLUDE_BETAS               "CheckForBetas"
-#define SETTING_COMM_CHECK                  "CommCheck64"
-#define SETTING_LOCALE                      "Locale"
-#define SETTING_DISABLE_LGP                 "DisableLGP"
-#define SETTING_DISABLE_SECURE_BOOT_NOTICE  "DisableSecureBootNotice"
-
 #define SETTING_ADVANCED_MODE               "AdvancedMode"
 #define SETTING_ADVANCED_MODE_DEVICE        "ShowAdvancedDriveProperties"
 #define SETTING_ADVANCED_MODE_FORMAT        "ShowAdvancedFormatOptions"
-#define SETTING_PRESERVE_TIMESTAMPS         "PreserveTimestamps"
-#define SETTING_USE_PROPER_SIZE_UNITS       "UseProperSizeUnits"
-#define SETTING_ENABLE_USB_DEBUG            "EnableUsbDebug"
+#define SETTING_COMM_CHECK                  "CommCheck64"
 #define SETTING_DISABLE_FAKE_DRIVES_CHECK   "DisableFakeDrivesCheck"
+#define SETTING_DISABLE_LGP                 "DisableLGP"
+#define SETTING_DISABLE_SECURE_BOOT_NOTICE  "DisableSecureBootNotice"
+#define SETTING_ENABLE_FILE_INDEXING        "EnableFileIndexing"
+#define SETTING_ENABLE_USB_DEBUG            "EnableUsbDebug"
+#define SETTING_ENABLE_VMDK_DETECTION       "EnableVmdkDetection"
 #define SETTING_ENABLE_WIN_DUAL_EFI_BIOS    "EnableWindowsDualUefiBiosMode"
 #define SETTING_FORCE_LARGE_FAT32_FORMAT    "ForceLargeFat32Formatting"
-#define SETTING_ENABLE_VMDK_DETECTION       "EnableVmdkDetection"
-#define SETTING_ENABLE_FILE_INDEXING        "EnableFileIndexing"
-
+#define SETTING_INCLUDE_BETAS               "CheckForBetas"
+#define SETTING_LAST_UPDATE                 "LastUpdateCheck"
+#define SETTING_LOCALE                      "Locale"
+#define SETTING_UPDATE_INTERVAL             "UpdateCheckInterval"
+#define SETTING_USE_EXTFS_VERSION           "UseExtFsVersion"
+#define SETTING_USE_PROPER_SIZE_UNITS       "UseProperSizeUnits"
+#define SETTING_PRESERVE_TIMESTAMPS         "PreserveTimestamps"
+#define SETTING_VERBOSE_UPDATES             "VerboseUpdateCheck"
 
 
 static __inline BOOL CheckIniKey(const char* key) {

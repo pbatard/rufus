@@ -1860,10 +1860,12 @@ out:
 }
 
 
+#ifdef RUFUS_TEST
+extern BOOL FormatExtFs(const char* label, uint32_t version);
+#endif
 /*
  * Main dialog callback
  */
-extern BOOL FormatExt2Fs(const char* label);
 static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	static DWORD DeviceNum = 0;
@@ -1896,7 +1898,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	case WM_COMMAND:
 #ifdef RUFUS_TEST
 		if (LOWORD(wParam) == IDC_TEST) {
-			FormatExt2Fs("casper-rw");
+			FormatExtFs("casper-rw", 3);
 			break;
 		}
 #endif
