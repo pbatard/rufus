@@ -1158,7 +1158,8 @@ BOOL MountVolume(char* drive_name, char *drive_guid)
 	// If that is the case, update drive_name to that letter.
 	if ( (GetVolumePathNamesForVolumeNameA(drive_guid, mounted_letter, sizeof(mounted_letter), &size))
 	  && (size > 1) && (mounted_letter[0] != drive_name[0]) ) {
-		uprintf("%s is already mounted as %C: instead of %C: - Will now use this target instead...", mounted_letter[0], drive_name[0]);
+		uprintf("%s is already mounted as %C: instead of %C: - Will now use this target instead...",
+			drive_guid, mounted_letter[0], drive_name[0]);
 		drive_name[0] = mounted_letter[0];
 		return TRUE;
 	}
@@ -1404,7 +1405,7 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 
 	// Adjust the size according to extra partitions (which we always align to a track)
 	if (extra_partitions) {
-		uprintf("Adding extra partition");
+		uprintf("Adding %s partition", (extra_partitions & XP_CASPER) ? "casper-rw": "extra");
 		if (extra_partitions & XP_EFI) {
 			// The size of the EFI partition depends on the minimum size we're able to format in FAT32, which
 			// in turn depends on the cluster size used, which in turn depends on the disk sector size.
@@ -1424,8 +1425,9 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 			assert(persistence_size != 0);
 			extra_part_size_in_tracks = persistence_size / bytes_per_track;
 		}
-		uprintf("Reserved %" PRIi64" tracks (%s) for extra partition", extra_part_size_in_tracks,
-			SizeToHumanReadable(extra_part_size_in_tracks * bytes_per_track, TRUE, FALSE));
+		uprintf("Reserved %" PRIi64" tracks (%s) for %s partition", extra_part_size_in_tracks,
+			SizeToHumanReadable(extra_part_size_in_tracks * bytes_per_track, TRUE, FALSE),
+			(extra_partitions & XP_CASPER) ? "casper-rw" : "extra");
 		main_part_size_in_sectors = ((main_part_size_in_sectors / SelectedDrive.SectorsPerTrack) -
 			extra_part_size_in_tracks) * SelectedDrive.SectorsPerTrack;
 		if (main_part_size_in_sectors <= 0)
@@ -1464,11 +1466,11 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 		DriveLayoutEx.PartitionEntry[pn].StartingOffset.QuadPart = DriveLayoutEx.PartitionEntry[pn-1].StartingOffset.QuadPart +
 			DriveLayoutEx.PartitionEntry[pn-1].PartitionLength.QuadPart;
 		DriveLayoutEx.PartitionEntry[pn].PartitionLength.QuadPart = (extra_partitions & XP_UEFI_NTFS)?uefi_ntfs_size:
-			extra_part_size_in_tracks * SelectedDrive.SectorsPerTrack * SelectedDrive.SectorSize;
+			extra_part_size_in_tracks * bytes_per_track;
 		if (partition_style == PARTITION_STYLE_GPT) {
 			const wchar_t* name = L"Basic Data";
 			const GUID* guid = &PARTITION_BASIC_DATA_GUID;
-			if (extra_partitions & XP_MSR) {
+			if (extra_partitions & XP_EFI) {
 				guid = &PARTITION_SYSTEM_GUID;
 				name = L"EFI system partition";
 			} else if (extra_partitions & XP_CASPER) {

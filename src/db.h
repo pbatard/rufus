@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * DB of the hash values we know for downloadable content (GRUB, Syslinux, etc.)
- * Copyright © 2016-2017 Pete Batard <pete@akeo.ie>
+ * Copyright © 2016-2019 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

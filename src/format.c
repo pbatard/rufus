@@ -791,13 +791,14 @@ const char* error_message(errcode_t error_code)
 }
 
 static float ext2_percent_start = 0.0f, ext2_percent_share = 50.0f;
+const float ext2_max_marker = 80.0f;
 errcode_t ext2fs_print_progress(int64_t cur_value, int64_t max_value)
 {
 	static int64_t last_value = -1;
 	if (max_value == 0)
 		return 0;
 	UPDATE_PERCENT(MSG_217, ext2_percent_start + ext2_percent_share * cur_value / (float)max_value);
-	cur_value = (int64_t)(((float)cur_value / (float)max_value) * min(80.0f, (float)max_value));
+	cur_value = (int64_t)(((float)cur_value / (float)max_value) * min(ext2_max_marker, (float)max_value));
 	if ((cur_value < last_value) || (cur_value > last_value)) {
 		last_value = cur_value;
 		uprintfs("+");
@@ -851,7 +852,7 @@ BOOL FormatExtFs(const char* label, uint32_t version)
 	if ((version < 2) || (version > 3)) {
 		if (version == 4)
 			uprintf("ext4 file system is not supported, will use ext3 instead");
-		else
+		else if (version != 0)
 			uprintf("invalid ext file system version requested, will use ext3");
 		version = 3;
 	}
@@ -941,7 +942,8 @@ BOOL FormatExtFs(const char* label, uint32_t version)
 
 	ext2_percent_start = 0.0f;
 	ext2_percent_share = (version < 3) ? 100.0f : 50.0f;
-	uprintf("Creating %d inode sets:", ext2fs->group_desc_count);
+	uprintf("Creating %d inode sets: [1 marker = %0.1f set(s)]", ext2fs->group_desc_count,
+		max((float)ext2fs->group_desc_count / ext2_max_marker, 1.0f));
 	for (i = 0; i < (int)ext2fs->group_desc_count; i++) {
 		if (ext2fs_print_progress((int64_t)i, (int64_t)ext2fs->group_desc_count))
 			goto out;
@@ -955,7 +957,6 @@ BOOL FormatExtFs(const char* label, uint32_t version)
 		}
 	}
 	uprintfs("\r\n");
-	UPDATE_PERCENT(MSG_217, 25.0f);
 
 	// Create root and lost+found dirs
 	r = ext2fs_mkdir(ext2fs, EXT2_ROOT_INO, EXT2_ROOT_INO, 0);
@@ -992,7 +993,8 @@ BOOL FormatExtFs(const char* label, uint32_t version)
 		ext2_percent_start = 50.0f;
 		journal_size = ext2fs_default_journal_size(ext2fs_blocks_count(ext2fs->super));
 		journal_size /= 2;	// That journal init is really killing us!
-		uprintf("Creating %d journal blocks:", journal_size);
+		uprintf("Creating %d journal blocks: [1 marker = %0.1f block(s)]", journal_size,
+			max((float)journal_size / ext2_max_marker, 1.0f));
 		// Even with EXT2_MKJOURNAL_LAZYINIT, this call is absolutely dreadful in terms of speed...
 		r = ext2fs_add_journal_inode(ext2fs, journal_size, EXT2_MKJOURNAL_NO_MNT_CHECK | EXT2_MKJOURNAL_LAZYINIT);
 		uprintfs("\r\n");

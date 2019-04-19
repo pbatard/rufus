@@ -2598,16 +2598,19 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 
 			if ((boot_type == BT_IMAGE) && IS_DD_BOOTABLE(img_report)) {
 				if (img_report.is_iso) {
-					// Ask users how they want to write ISOHybrid images
-					char* iso_image = lmprintf(MSG_036);
-					char* dd_image = lmprintf(MSG_095);
-					char* choices[2] = { lmprintf(MSG_276, iso_image), lmprintf(MSG_277, dd_image) };
-					i = SelectionDialog(lmprintf(MSG_274), lmprintf(MSG_275, iso_image, dd_image, iso_image, dd_image),
-						choices, 2);
-					if (i < 0)	// Cancel
-						goto aborted_start;
-					else if (i == 2)
-						write_as_image = TRUE;
+					// Ask users how they want to write ISOHybrid images,
+					// but only do so if persistence has not been selected.
+					if (persistence_size == 0) {
+						char* iso_image = lmprintf(MSG_036);
+						char* dd_image = lmprintf(MSG_095);
+						char* choices[2] = { lmprintf(MSG_276, iso_image), lmprintf(MSG_277, dd_image) };
+						i = SelectionDialog(lmprintf(MSG_274), lmprintf(MSG_275, iso_image, dd_image, iso_image, dd_image),
+							choices, 2);
+						if (i < 0)	// Cancel
+							goto aborted_start;
+						else if (i == 2)
+							write_as_image = TRUE;
+					}
 				} else {
 					write_as_image = TRUE;
 				}
