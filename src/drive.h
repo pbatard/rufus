@@ -33,12 +33,26 @@
 	CTL_CODE(MOUNTMGRCONTROLTYPE, 16, METHOD_BUFFERED, FILE_READ_ACCESS | FILE_WRITE_ACCESS)
 
 #define XP_MSR                              0x01
-#define XP_EFI                              0x02
+#define XP_ESP                              0x02
 #define XP_UEFI_NTFS                        0x04
 #define XP_COMPAT                           0x08
 #define XP_CASPER                           0x10
 
+#define PI_MAIN                             0
+#define PI_ESP                              1
+#define PI_CASPER                           2
+
+// The following should match VDS_FSOF_FLAGS as much as possible
+#define FP_FORCE                            0x00000001
+#define FP_QUICK                            0x00000002
+#define FP_COMPRESSION                      0x00000004
+#define FP_DUPLICATE_METADATA               0x00000008
+#define FP_LARGE_FAT32                      0x00010000
+#define FP_NO_BOOT                          0x00020000
+
 #define FILE_FLOPPY_DISKETTE                0x00000004
+
+#define VDS_SET_ERROR(hr) do { if (hr == S_FALSE) hr = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_GEN_FAILURE; FormatStatus = hr; SetLastError(hr); } while(0)
 
 #if !defined(__MINGW32__)
 typedef enum _FSINFOCLASS {
@@ -87,6 +101,25 @@ typedef interface IVdsDisk IVdsDisk;
 typedef interface IVdsAdvancedDisk IVdsAdvancedDisk;
 typedef interface IVdsAdviseSink IVdsAdviseSink;
 typedef interface IVdsAsync IVdsAsync;
+typedef interface IVdsVolume IVdsVolume;
+typedef interface IVdsVolumeMF3 IVdsVolumeMF3;
+
+extern const IID CLSID_VdsLoader;
+extern const IID IID_IVdsServiceLoader;
+extern const IID IID_IVdsProvider;
+extern const IID IID_IVdsSwProvider;
+extern const IID IID_IVdsPack;
+extern const IID IID_IVdsDisk;
+extern const IID IID_IVdsAdvancedDisk;
+extern const IID IID_IVdsVolume;
+extern const IID IID_IVdsVolumeMF3;
+
+#ifndef VDS_S_PROPERTIES_INCOMPLETE
+#define VDS_S_PROPERTIES_INCOMPLETE ((HRESULT)0x00042715L)
+#endif
+#ifndef VDS_E_OPERATION_PENDING
+#define VDS_E_OPERATION_PENDING ((HRESULT)0x80042409L)
+#endif
 
 typedef struct IVdsServiceLoaderVtbl {
 	HRESULT(STDMETHODCALLTYPE *QueryInterface)(__RPC__in IVdsServiceLoader *This, __RPC__in REFIID riid, _COM_Outptr_ void **ppvObject);
@@ -212,21 +245,77 @@ interface IVdsAdvancedDisk {
 	CONST_VTBL struct IVdsAdvancedDiskVtbl *lpVtbl;
 };
 
-#define IVdsServiceLoader_LoadService(This,pwszMachineName,ppService) (This)->lpVtbl->LoadService(This,pwszMachineName,ppService)
+typedef struct IVdsVolumeVtbl {
+	HRESULT (STDMETHODCALLTYPE *QueryInterface)(__RPC__in IVdsVolume *This, __RPC__in REFIID riid, _COM_Outptr_  void **ppvObject);
+	ULONG (STDMETHODCALLTYPE *AddRef)(__RPC__in IVdsVolume *This);
+	ULONG (STDMETHODCALLTYPE *Release)(__RPC__in IVdsVolume *This);
+	HRESULT (STDMETHODCALLTYPE *GetProperties)(__RPC__in IVdsVolume *This, __RPC__out VDS_VOLUME_PROP *pVolumeProperties);
+	HRESULT (STDMETHODCALLTYPE *GetPack)(__RPC__in IVdsVolume *This, __RPC__deref_out_opt IVdsPack **ppPack);
+	HRESULT (STDMETHODCALLTYPE *QueryPlexes)(__RPC__in IVdsVolume *This, __RPC__deref_out_opt IEnumVdsObject **ppEnum);
+	HRESULT (STDMETHODCALLTYPE *Extend)(__RPC__in IVdsVolume *This, __RPC__in_ecount_full_opt(lNumberOfDisks) VDS_INPUT_DISK *pInputDiskArray, LONG lNumberOfDisks, __RPC__deref_out_opt IVdsAsync **ppAsync);
+	HRESULT (STDMETHODCALLTYPE *Shrink)(__RPC__in IVdsVolume *This, ULONGLONG ullNumberOfBytesToRemove, __RPC__deref_out_opt IVdsAsync **ppAsync);
+	HRESULT (STDMETHODCALLTYPE *AddPlex)(__RPC__in IVdsVolume *This, VDS_OBJECT_ID VolumeId,__RPC__deref_out_opt IVdsAsync **ppAsync);
+	HRESULT (STDMETHODCALLTYPE *BreakPlex)(__RPC__in IVdsVolume *This, VDS_OBJECT_ID plexId, __RPC__deref_out_opt IVdsAsync **ppAsync);
+	HRESULT (STDMETHODCALLTYPE *RemovePlex)(__RPC__in IVdsVolume *This, VDS_OBJECT_ID plexId, __RPC__deref_out_opt IVdsAsync **ppAsync);
+	HRESULT (STDMETHODCALLTYPE *Delete)(__RPC__in IVdsVolume *This, BOOL bForce);
+	HRESULT (STDMETHODCALLTYPE *SetFlags)(__RPC__in IVdsVolume *This, ULONG ulFlags, BOOL bRevertOnClose);
+	HRESULT (STDMETHODCALLTYPE *ClearFlags)(__RPC__in IVdsVolume *This, ULONG ulFlags);
+} IVdsVolumeVtbl;
+interface IVdsVolume {
+	CONST_VTBL struct IVdsVolumeVtbl *lpVtbl;
+};
+
+typedef struct IVdsVolumeMF3Vtbl {
+	HRESULT (STDMETHODCALLTYPE *QueryInterface)(__RPC__in IVdsVolumeMF3 *This, __RPC__in REFIID riid, _COM_Outptr_ void **ppvObject);
+	ULONG (STDMETHODCALLTYPE *AddRef)(__RPC__in IVdsVolumeMF3 *This);
+	ULONG (STDMETHODCALLTYPE *Release)(__RPC__in IVdsVolumeMF3 *This);
+	HRESULT (STDMETHODCALLTYPE *QueryVolumeGuidPathnames)(__RPC__in IVdsVolumeMF3 *This, __RPC__deref_out_ecount_full_opt_string(*pulNumberOfPaths) LPWSTR **pwszPathArray, __RPC__out ULONG *pulNumberOfPaths);
+	HRESULT (STDMETHODCALLTYPE *FormatEx2)(__RPC__in IVdsVolumeMF3 *This, __RPC__in_opt_string LPWSTR pwszFileSystemTypeName, USHORT usFileSystemRevision, ULONG ulDesiredUnitAllocationSize, __RPC__in_opt_string LPWSTR pwszLabel, DWORD Options, __RPC__deref_out_opt IVdsAsync **ppAsync);
+	HRESULT (STDMETHODCALLTYPE *OfflineVolume)(__RPC__in IVdsVolumeMF3 *This);
+} IVdsVolumeMF3Vtbl;
+interface IVdsVolumeMF3 {
+	CONST_VTBL struct IVdsVolumeMF3Vtbl *lpVtbl;
+};
+
+typedef struct IVdsAsyncVtbl {
+	HRESULT (STDMETHODCALLTYPE *QueryInterface)(__RPC__in IVdsAsync *This, __RPC__in REFIID riid, _COM_Outptr_ void **ppvObject);
+	ULONG (STDMETHODCALLTYPE *AddRef)(__RPC__in IVdsAsync *This);
+	ULONG (STDMETHODCALLTYPE *Release)(__RPC__in IVdsAsync *This);
+	HRESULT (STDMETHODCALLTYPE *Cancel)(__RPC__in IVdsAsync *This);
+	HRESULT (STDMETHODCALLTYPE *Wait)(__RPC__in IVdsAsync *This, __RPC__out HRESULT *pHrResult, __RPC__out VDS_ASYNC_OUTPUT *pAsyncOut);
+	HRESULT (STDMETHODCALLTYPE *QueryStatus)(__RPC__in IVdsAsync *This, __RPC__out HRESULT *pHrResult, __RPC__out ULONG *pulPercentCompleted);
+} IVdsAsyncVtbl;
+interface IVdsAsync {
+	CONST_VTBL struct IVdsAsyncVtbl *lpVtbl;
+};
+
+#define IVdsServiceLoader_LoadService(This, pwszMachineName, ppService) (This)->lpVtbl->LoadService(This, pwszMachineName, ppService)
 #define IVdsServiceLoader_Release(This) (This)->lpVtbl->Release(This)
-#define IVdsService_QueryProviders(This,masks,ppEnum) (This)->lpVtbl->QueryProviders(This,masks,ppEnum)
-#define IVdsSwProvider_QueryInterface(This,riid,ppvObject) (This)->lpVtbl->QueryInterface(This,riid,ppvObject)
+#define IVdsService_QueryProviders(This, masks, ppEnum) (This)->lpVtbl->QueryProviders(This, masks, ppEnum)
+#define IVdsSwProvider_QueryInterface(This, riid, ppvObject) (This)->lpVtbl->QueryInterface(This, riid, ppvObject)
 #define IVdsProvider_Release(This) (This)->lpVtbl->Release(This)
-#define IVdsSwProvider_QueryPacks(This,ppEnum) (This)->lpVtbl->QueryPacks(This,ppEnum)
+#define IVdsSwProvider_QueryPacks(This, ppEnum) (This)->lpVtbl->QueryPacks(This, ppEnum)
 #define IVdsSwProvider_Release(This) (This)->lpVtbl->Release(This)
-#define IVdsPack_QueryDisks(This,ppEnum) (This)->lpVtbl->QueryDisks(This,ppEnum)
-#define IVdsDisk_GetProperties(This,pDiskProperties) (This)->lpVtbl->GetProperties(This,pDiskProperties)
+#define IVdsPack_QueryDisks(This, ppEnum) (This)->lpVtbl->QueryDisks(This, ppEnum)
+#define IVdsDisk_GetProperties(This, pDiskProperties) (This)->lpVtbl->GetProperties(This, pDiskProperties)
 #define IVdsDisk_Release(This) (This)->lpVtbl->Release(This)
-#define IVdsDisk_QueryInterface(This,riid,ppvObject) (This)->lpVtbl->QueryInterface(This,riid,ppvObject)
-#define IVdsAdvancedDisk_QueryPartitions(This,ppPartitionPropArray,plNumberOfPartitions) (This)->lpVtbl->QueryPartitions(This,ppPartitionPropArray,plNumberOfPartitions)
-#define IVdsAdvancedDisk_DeletePartition(This,ullOffset,bForce,bForceProtected) (This)->lpVtbl->DeletePartition(This,ullOffset,bForce,bForceProtected)
+#define IVdsDisk_QueryInterface(This, riid, ppvObject) (This)->lpVtbl->QueryInterface(This, riid, ppvObject)
+#define IVdsAdvancedDisk_QueryPartitions(This, ppPartitionPropArray, plNumberOfPartitions) (This)->lpVtbl->QueryPartitions(This, ppPartitionPropArray, plNumberOfPartitions)
+#define IVdsAdvancedDisk_DeletePartition(This, ullOffset, bForce, bForceProtected) (This)->lpVtbl->DeletePartition(This, ullOffset, bForce, bForceProtected)
+#define IVdsAdvancedDisk_Clean(This, bForce, bForceOEM, bFullClean, ppAsync) (This)->lpVtbl->Clean(This, bForce, bForceOEM, bFullClean, ppAsync)
 #define IVdsAdvancedDisk_Release(This) (This)->lpVtbl->Release(This)
-#define IEnumVdsObject_Next(This,celt,ppObjectArray,pcFetched) (This)->lpVtbl->Next(This,celt,ppObjectArray,pcFetched)
+#define IEnumVdsObject_Next(This, celt, ppObjectArray, pcFetched) (This)->lpVtbl->Next(This, celt, ppObjectArray, pcFetched)
+#define IVdsPack_QueryVolumes(This, ppEnum) (This)->lpVtbl->QueryVolumes(This, ppEnum)
+#define IVdsVolume_QueryInterface(This, riid, ppvObject) (This)->lpVtbl->QueryInterface(This, riid, ppvObject)
+#define IVdsVolume_Release(This) (This)->lpVtbl->Release(This)
+#define IVdsVolumeMF3_QueryVolumeGuidPathnames(This, pwszPathArray, pulNumberOfPaths) (This)->lpVtbl->QueryVolumeGuidPathnames(This,pwszPathArray,pulNumberOfPaths)
+#define IVdsVolumeMF3_FormatEx2(This, pwszFileSystemTypeName, usFileSystemRevision, ulDesiredUnitAllocationSize, pwszLabel, Options, ppAsync) (This)->lpVtbl->FormatEx2(This, pwszFileSystemTypeName, usFileSystemRevision, ulDesiredUnitAllocationSize, pwszLabel, Options, ppAsync)
+#define IVdsVolumeMF3_Release(This) (This)->lpVtbl->Release(This)
+#define IVdsVolume_GetProperties(This, pVolumeProperties) (This)->lpVtbl->GetProperties(This,pVolumeProperties)
+#define IVdsAsync_Cancel(This) (This)->lpVtbl->Cancel(This)
+#define IVdsAsync_QueryStatus(This,pHrResult,pulPercentCompleted) (This)->lpVtbl->QueryStatus(This,pHrResult,pulPercentCompleted)
+#define IVdsAsync_Wait(This,pHrResult,pAsyncOut) (This)->lpVtbl->Wait(This,pHrResult,pAsyncOut)
+#define IVdsAsync_Release(This) (This)->lpVtbl->Release(This)
 #endif
 
 static __inline BOOL UnlockDrive(HANDLE hDrive) {
@@ -256,16 +345,17 @@ typedef struct {
 } RUFUS_DRIVE_INFO;
 extern RUFUS_DRIVE_INFO SelectedDrive;
 extern uint64_t persistence_size;
+extern DWORD partition_index[3];
 
 BOOL SetAutoMount(BOOL enable);
 BOOL GetAutoMount(BOOL* enabled);
 char* GetPhysicalName(DWORD DriveIndex);
-char* GetPartitionName(DWORD DriveIndex, DWORD PartitionNumber);
+char* GetPartitionName(DWORD DriveIndex, DWORD PartitionIndex);
 BOOL DeletePartitions(DWORD DriveIndex);
 HANDLE GetPhysicalHandle(DWORD DriveIndex, BOOL bLockDrive, BOOL bWriteAccess, BOOL bWriteShare);
-char* GetLogicalName(DWORD DriveIndex, BOOL bKeepTrailingBackslash, BOOL bSilent);
-BOOL WaitForLogical(DWORD DriveIndex);
-HANDLE GetLogicalHandle(DWORD DriveIndex, BOOL bLockDrive, BOOL bWriteAccess, BOOL bWriteShare);
+char* GetLogicalName(DWORD DriveIndex, DWORD PartitionIndex, BOOL bKeepTrailingBackslash, BOOL bSilent);
+BOOL WaitForLogical(DWORD DriveIndex, DWORD PartitionIndex);
+HANDLE GetLogicalHandle(DWORD DriveIndex, DWORD PartitionIndex, BOOL bLockDrive, BOOL bWriteAccess, BOOL bWriteShare);
 int GetDriveNumber(HANDLE hDrive, char* path);
 BOOL GetDriveLetters(DWORD DriveIndex, char* drive_letters);
 UINT GetDriveTypeFromIndex(DWORD DriveIndex);
@@ -279,7 +369,7 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 BOOL UnmountVolume(HANDLE hDrive);
 BOOL MountVolume(char* drive_name, char *drive_guid);
 BOOL AltUnmountVolume(const char* drive_name);
-char* AltMountVolume(const char* drive_name, uint8_t part_nr);
+char* AltMountVolume(DWORD DriveIndex, DWORD PartitionIndex);
 BOOL RemountVolume(char* drive_name);
 BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL mbr_uefi_marker, uint8_t extra_partitions);
 BOOL InitializeDisk(HANDLE hDrive);

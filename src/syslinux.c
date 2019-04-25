@@ -136,7 +136,7 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int file_system)
 	 * weird reason.the Syslinux install process *MUST* have FILE_SHARE_WRITE
 	 * on the volume, or else creating 'ldlinux.sys' will fail...
 	 */
-	d_handle = GetLogicalHandle(drive_index, FALSE, TRUE, TRUE);
+	d_handle = GetLogicalHandle(drive_index, 0, FALSE, TRUE, TRUE);
 	if ((d_handle == INVALID_HANDLE_VALUE) || (d_handle == NULL)) {
 		uprintf("Could open volume for Syslinux installation");
 		goto out;

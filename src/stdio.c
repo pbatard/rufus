@@ -272,7 +272,7 @@ const char* _StrError(DWORD error_code)
 		return lmprintf(MSG_050);
 	}
 	if (SCODE_FACILITY(error_code) != FACILITY_STORAGE) {
-		uprintf("StrError: non storage - %08X (%X)\n", error_code, SCODE_FACILITY(error_code));
+//		uprintf("StrError: non storage - %08X (%X)\n", error_code, SCODE_FACILITY(error_code));
 		SetLastError(error_code);
 		return WindowsErrorString();
 	}

@@ -43,8 +43,10 @@ extern char* ini_file;
 #define SETTING_LAST_UPDATE                 "LastUpdateCheck"
 #define SETTING_LOCALE                      "Locale"
 #define SETTING_UPDATE_INTERVAL             "UpdateCheckInterval"
-#define SETTING_USE_EXTFS_VERSION           "UseExtFsVersion"
+#define SETTING_USE_EXT_VERSION             "UseExtVersion"
 #define SETTING_USE_PROPER_SIZE_UNITS       "UseProperSizeUnits"
+#define SETTING_USE_UDF_VERSION             "UseUdfVersion"
+#define SETTING_USE_VDS                     "UseVds"
 #define SETTING_PRESERVE_TIMESTAMPS         "PreserveTimestamps"
 #define SETTING_VERBOSE_UPDATES             "VerboseUpdateCheck"
 

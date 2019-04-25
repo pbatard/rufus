@@ -43,7 +43,7 @@
 
 UINT_PTR UM_LANGUAGE_MENU_MAX = UM_LANGUAGE_MENU;
 HIMAGELIST hUpImageList, hDownImageList;
-extern BOOL enable_fido;
+extern BOOL enable_fido, use_vds;
 int advanced_device_section_height, advanced_format_section_height;
 // (empty) check box width, (empty) drop down width, button height (for and without dropdown match)
 int cbw, ddw, ddbh = 0, bh = 0;
@@ -1168,20 +1168,21 @@ void InitProgress(BOOL bOnlyFormat)
 			nb_slots[OP_ZERO_MBR] = 1;
 			nb_slots[OP_PARTITION] = 1;
 			nb_slots[OP_FIX_MBR] = 1;
-			nb_slots[OP_CREATE_FS] =
+			nb_slots[OP_CREATE_FS] = (use_vds) ? 2 :
 				nb_steps[ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem))];
 			// So, yeah, if you're doing slow format, or using Large FAT32, and have persistence, you'll see
 			// the progress bar revert during format on account that we reuse the same operation for both
 			// partitions. Maybe one day I'll be bothered to handle two separate OP_FORMAT ops...
-			if ((!IsChecked(IDC_QUICK_FORMAT)) || (persistence_size != 0)
-				|| ((fs_type == FS_FAT32) && ((SelectedDrive.DiskSize >= LARGE_FAT32_SIZE) || (force_large_fat32)))) {
+			if ((!IsChecked(IDC_QUICK_FORMAT)) || (persistence_size != 0) ||
+				((fs_type == FS_FAT32) && ((SelectedDrive.DiskSize >= LARGE_FAT32_SIZE) || (force_large_fat32)))) {
 				nb_slots[OP_FORMAT] = -1;
+				nb_slots[OP_CREATE_FS] = 0;
 			}
 			nb_slots[OP_FINALIZE] = ((selection_default == BT_IMAGE) && (fs_type == FS_NTFS)) ? 3 : 2;
 		}
 	}
 
-	for (i = 0; i<OP_MAX; i++) {
+	for (i = 0; i < OP_MAX; i++) {
 		if (nb_slots[i] > 0) {
 			slots_discrete += nb_slots[i] * 1.0f;
 		}
@@ -1190,7 +1191,7 @@ void InitProgress(BOOL bOnlyFormat)
 		}
 	}
 
-	for (i = 0; i<OP_MAX; i++) {
+	for (i = 0; i < OP_MAX; i++) {
 		if (nb_slots[i] == 0) {
 			slot_end[i + 1] = last_end;
 		} else if (nb_slots[i] > 0) {
@@ -1203,7 +1204,7 @@ void InitProgress(BOOL bOnlyFormat)
 
 	// If there's no analog, adjust our discrete ends to fill the whole bar
 	if (slots_analog == 0.0f) {
-		for (i = 0; i<OP_MAX; i++) {
+		for (i = 0; i < OP_MAX; i++) {
 			slot_end[i + 1] *= 100.0f / slots_discrete;
 		}
 	}

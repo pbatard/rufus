@@ -85,6 +85,10 @@ static __inline char* wchar_to_utf8(const wchar_t* wstr)
 	int size = 0;
 	char* str = NULL;
 
+	// Convert the empty string too
+	if (wstr[0] == 0)
+		return calloc(1, 1);
+
 	// Find out the size we need to allocate for our converted string
 	size = WideCharToMultiByte(CP_UTF8, 0, wstr, -1, NULL, 0, NULL, NULL);
 	if (size <= 1)	// An empty string would be size 1
@@ -112,6 +116,10 @@ static __inline wchar_t* utf8_to_wchar(const char* str)
 
 	if (str == NULL)
 		return NULL;
+
+	// Convert the empty string too
+	if (str[0] == 0)
+		return calloc(1, sizeof(wchar_t));
 
 	// Find out the size we need to allocate for our converted string
 	size = MultiByteToWideChar(CP_UTF8, 0, str, -1, NULL, 0);

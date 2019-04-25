@@ -22,13 +22,16 @@
 #if defined(_MSC_VER)
 // Disable some VS Code Analysis warnings
 #pragma warning(disable: 4996)		// Ignore deprecated
-#pragma warning(disable: 28159)		// I'll keep using GetVersionEx(), thank you very much!
 #pragma warning(disable: 6258)		// I know what I'm using TerminateThread for
+#pragma warning(disable: 26451)		// Stop bugging me with casts already!
+#pragma warning(disable: 28159)		// I'll keep using GetVersionEx(), thank you very much...
 #endif
 
 #pragma once
 
-/* Features not ready for prime time and that may *DESTROY* your data - USE AT YOUR OWN RISKS! */
+/*
+ * Features not ready for prime time and that may *DESTROY* your data - USE AT YOUR OWN RISKS!
+ */
 //#define RUFUS_TEST
 
 #define APPLICATION_NAME            "Rufus"
@@ -67,7 +70,7 @@
 #define MAX_LOG_SIZE                0x7FFFFFFE
 #define MAX_REFRESH                 25			// How long we should wait to refresh UI elements (in ms)
 #define MAX_GUID_STRING_LENGTH      40
-#define MAX_GPT_PARTITIONS          128
+#define MAX_PARTITIONS              16			// Maximum number of partitions we handle
 #define MAX_SECTORS_TO_CLEAR        128			// nb sectors to zap when clearing the MBR/GPT (must be >34)
 #define MAX_WININST                 4			// Max number of install[.wim|.esd] we can handle on an image
 #define MBR_UEFI_MARKER             0x49464555	// 'U', 'E', 'F', 'I', as a 32 bit little endian longword
@@ -80,7 +83,6 @@
 #define CHECK_DRIVE_TIMEOUT         2000
 #define MARQUEE_TIMER_REFRESH       10			// Time between progress bar marquee refreshes, in ms
 #define FS_DEFAULT                  FS_FAT32
-#define CASPER_PARTITION_DEFAULT    2
 #define SINGLE_CLUSTERSIZE_DEFAULT  0x00000100
 #define BADLOCKS_PATTERN_TYPES      3
 #define BADBLOCK_PATTERN_COUNT      4
@@ -118,7 +120,7 @@
 #endif
 #define IsChecked(CheckBox_ID)      (IsDlgButtonChecked(hMainDialog, CheckBox_ID) == BST_CHECKED)
 #define MB_IS_RTL                   (right_to_left_mode?MB_RTLREADING|MB_RIGHT:0)
-#define CHECK_FOR_USER_CANCEL       if (IS_ERROR(FormatStatus)) goto out
+#define CHECK_FOR_USER_CANCEL       if (IS_ERROR(FormatStatus) && (SCODE_CODE(FormatStatus) == ERROR_CANCELLED)) goto out
 // Bit masks used for the display of additional image options in the UI
 #define IMOP_WINTOGO                0x01
 #define IMOP_PERSISTENCE            0x02
@@ -243,6 +245,9 @@ enum fs_type {
 	FS_UDF,
 	FS_EXFAT,
 	FS_REFS,
+	FS_EXT2,
+	FS_EXT3,
+	FS_EXT4,
 	FS_MAX
 };
 

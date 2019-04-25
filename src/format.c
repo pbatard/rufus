@@ -32,6 +32,7 @@
 #include <ctype.h>
 #include <locale.h>
 #include <assert.h>
+#include <vds.h>
 
 #include "rufus.h"
 #include "missing.h"
@@ -55,6 +56,7 @@
 /*
  * Globals
  */
+const char* FileSystemLabel[FS_MAX] = { "FAT", "FAT32", "NTFS", "UDF", "exFAT", "ReFS", "ext2", "ext3", "ext4" };
 DWORD FormatStatus = 0, LastWriteError = 0;
 badblocks_report report = { 0 };
 static uint64_t LastRefresh = 0;
@@ -62,8 +64,9 @@ static float format_percent = 0.0f;
 static int task_number = 0;
 extern const int nb_steps[FS_MAX];
 extern uint32_t dur_mins, dur_secs;
-static int fs_index = 0, wintogo_index = -1, wininst_index = 0;
+static int actual_fs_type, wintogo_index = -1, wininst_index = 0;
 extern BOOL force_large_fat32, enable_ntfs_compression, lock_drive, zero_drive, fast_zeroing, enable_file_indexing, write_as_image;
+extern BOOL use_vds;
 uint8_t *grub2_buf = NULL;
 long grub2_len;
 static BOOL WritePBR(HANDLE hLogicalDrive);
@@ -105,6 +108,8 @@ static BOOLEAN __stdcall FormatExCallback(FILE_SYSTEM_CALLBACK_COMMAND Command, 
 	if (IS_ERROR(FormatStatus))
 		return FALSE;
 
+	assert((actual_fs_type >= 0) && (actual_fs_type < FS_MAX));
+
 	switch(Command) {
 	case FCC_PROGRESS:
 		percent = (DWORD*)pData;
@@ -112,28 +117,23 @@ static BOOLEAN __stdcall FormatExCallback(FILE_SYSTEM_CALLBACK_COMMAND Command, 
 		UpdateProgress(OP_FORMAT, 1.0f * (*percent));
 		break;
 	case FCC_STRUCTURE_PROGRESS:	// No progress on quick format
-		if (task_number < nb_steps[fs_index] - 1) {
+		if (task_number < nb_steps[actual_fs_type] - 1) {
 			if (task_number == 0)
 				uprintf("Creating file system...");
-			PrintInfo(0, MSG_218, ++task_number, nb_steps[fs_index]);
-			format_percent += 100.0f / (1.0f * nb_steps[fs_index]);
+			PrintInfo(0, MSG_218, ++task_number, nb_steps[actual_fs_type]);
+			format_percent += 100.0f / (1.0f * nb_steps[actual_fs_type]);
 			UpdateProgress(OP_CREATE_FS, format_percent);
 		}
 		break;
 	case FCC_DONE:
-		PrintInfo(0, MSG_218, nb_steps[fs_index], nb_steps[fs_index]);
+		PrintInfo(0, MSG_218, nb_steps[actual_fs_type], nb_steps[actual_fs_type]);
 		UpdateProgress(OP_CREATE_FS, 100.0f);
 		if(*(BOOLEAN*)pData == FALSE) {
 			uprintf("Error while formatting");
 			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_GEN_FAILURE;
 		}
 		break;
-	case FCC_DONE_WITH_STRUCTURE:	// We get this message when formatting Small FAT16
-		// pData Seems to be a struct with at least one (32 BIT!!!) string pointer to the size in MB
-		// uprintf("Done with that sort of thing: Action=%d pData=%0p\n", Action, pData);
-		// /!\ THE FOLLOWING ONLY WORKS ON VISTA OR LATER - DO NOT ENABLE ON XP!
-		// DumpBufferHex(pData, 8);
-		// uprintf("Volume size: %s MB\n", (char*)(LONG_PTR)(*(ULONG32*)pData));
+	case FCC_DONE_WITH_STRUCTURE:
 		break;
 	case FCC_INCOMPATIBLE_FILE_SYSTEM:
 		uprintf("Incompatible File System");
@@ -243,61 +243,71 @@ static BOOLEAN __stdcall ChkdskCallback(FILE_SYSTEM_CALLBACK_COMMAND Command, DW
 }
 
 /*
- * Converts an UTF-16 label to a valid FAT/NTFS one
+ * Converts an UTF-8 label to a valid FAT/NTFS one
  */
-static void ToValidLabel(WCHAR* name, BOOL bFAT)
+static void ToValidLabel(char* Label, BOOL bFAT)
 {
 	size_t i, j, k;
 	BOOL found;
 	WCHAR unauthorized[] = L"*?,;:/\\|+=<>[]\"";
 	WCHAR to_underscore[] = L"\t.";
+	WCHAR *wLabel = utf8_to_wchar(Label);
 
-	if (name == NULL)
+	if (wLabel == NULL)
 		return;
 
-	for (i=0, k=0; i<wcslen(name); i++) {
+
+	for (i = 0, k = 0; i < wcslen(wLabel); i++) {
 		if (bFAT) {	// NTFS does allows all the FAT unauthorized above
 			found = FALSE;
-			for (j=0; j<wcslen(unauthorized); j++) {
-				if (name[i] == unauthorized[j]) {
-					found = TRUE; break;
+			for (j = 0; j < wcslen(unauthorized); j++) {
+				if (wLabel[i] == unauthorized[j]) {
+					found = TRUE;
+					break;
 				}
 			}
 			// A FAT label that contains extended chars will be rejected
-			if (name[i] >= 0x80) {
-				name[k++] = '_';
+			if (wLabel[i] >= 0x80) {
+				wLabel[k++] = L'_';
 				found = TRUE;
 			}
-			if (found) continue;
+			if (found)
+				continue;
 		}
 		found = FALSE;
-		for (j=0; j<wcslen(to_underscore); j++) {
-			if (name[i] == to_underscore[j]) {
-				name[k++] = '_';
-				found = TRUE; break;
+		for (j = 0; j < wcslen(to_underscore); j++) {
+			if (wLabel[i] == to_underscore[j]) {
+				wLabel[k++] = '_';
+				found = TRUE;
+				break;
 			}
 		}
-		if (found) continue;
-		name[k++] = bFAT?toupper(name[i]):name[i];
+		if (found)
+			continue;
+		wLabel[k++] = bFAT ? toupper(wLabel[i]) : wLabel[i];
 	}
-	name[k] = 0;
+	wLabel[k] = 0;
 	if (bFAT) {
-		name[11] = 0;
-		for (i=0, j=0; name[i]!=0; i++)
-			if (name[i] == '_') j++;
-		if (i<2*j) {
+		if (wcslen(wLabel) > 11)
+			wLabel[11] = 0;
+		for (i = 0, j = 0; wLabel[i] != 0 ; i++)
+			if (wLabel[i] == '_')
+				j++;
+		if (i < 2*j) {
 			// If the final label is mostly underscore, use the proposed label
-			uprintf("FAT label is mostly underscores. Using '%s' label instead.\n", SelectedDrive.proposed_label);
-			for(i=0; SelectedDrive.proposed_label[i]!=0; i++)
-				name[i] = SelectedDrive.proposed_label[i];
-			name[i] = 0;
+			uprintf("FAT label is mostly underscores. Using '%s' label instead.", SelectedDrive.proposed_label);
+			for(i = 0; SelectedDrive.proposed_label[i] != 0; i++)
+				wLabel[i] = SelectedDrive.proposed_label[i];
+			wLabel[i] = 0;
 		}
-	} else {
-		name[32] = 0;
+	} else if (wcslen(wLabel) > 32) {
+		wLabel[32] = 0;
 	}
 
 	// Needed for disk by label isolinux.cfg workaround
-	wchar_to_utf8_no_alloc(name, img_report.usb_label, sizeof(img_report.usb_label));
+	wchar_to_utf8_no_alloc(wLabel, img_report.usb_label, sizeof(img_report.usb_label));
+	safe_strcpy(Label, strlen(Label), img_report.usb_label);
+	free(wLabel);
 }
 
 /*
@@ -361,11 +371,11 @@ static DWORD GetFATSizeSectors(DWORD DskSize, DWORD ReservedSecCnt, DWORD SecPer
  * Large FAT32 volume formatting from fat32format by Tom Thornhill
  * http://www.ridgecrop.demon.co.uk/index.htm?fat32format.htm
  */
-static BOOL FormatFAT32(DWORD DriveIndex)
+static BOOL FormatFAT32(DWORD DriveIndex, DWORD PartitionIndex, DWORD ClusterSize, LPCSTR FSName, LPCSTR Label, DWORD Flags)
 {
 	BOOL r = FALSE;
 	DWORD i;
-	HANDLE hLogicalVolume;
+	HANDLE hLogicalVolume = NULL;
 	DWORD cbRet;
 	DISK_GEOMETRY dgDrive;
 	BYTE geometry_ex[256]; // DISK_GEOMETRY_EX is variable size
@@ -378,13 +388,11 @@ static BOOL FormatFAT32(DWORD DriveIndex)
 	DWORD BackupBootSect = 6;
 	DWORD VolumeId = 0; // calculated before format
 	char* VolumeName = NULL;
-	WCHAR wLabel[64], *wVolumeName = NULL;
 	DWORD BurstSize = 128; // Zero in blocks of 64K typically
 
 	// Calculated later
 	DWORD FatSize = 0;
 	DWORD BytesPerSect = 0;
-	DWORD ClusterSize = 0;
 	DWORD SectorsPerCluster = 0;
 	DWORD TotalSectors = 0;
 	DWORD SystemAreaSize = 0;
@@ -401,15 +409,20 @@ static BOOL FormatFAT32(DWORD DriveIndex)
 	// Debug temp vars
 	ULONGLONG FatNeeded, ClusterCount;
 
+	if (safe_strncmp(FSName, "FAT", 3) != 0) {
+		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_INVALID_PARAMETER;
+		goto out;
+	}
 	PrintInfoDebug(0, MSG_222, "Large FAT32");
 	LastRefresh = 0;
 	VolumeId = GetVolumeID();
 
 	// Open the drive and lock it
-	hLogicalVolume = GetLogicalHandle(DriveIndex, TRUE, TRUE, FALSE);
-	if (IS_ERROR(FormatStatus)) goto out;
+	hLogicalVolume = GetLogicalHandle(DriveIndex, PartitionIndex, TRUE, TRUE, FALSE);
+	if (IS_ERROR(FormatStatus))
+		goto out;
 	if ((hLogicalVolume == INVALID_HANDLE_VALUE) || (hLogicalVolume == NULL))
-		die("Invalid logical volume handle\n", ERROR_INVALID_HANDLE);
+		die("Invalid logical volume handle", ERROR_INVALID_HANDLE);
 
 	// Try to disappear the volume while we're formatting it
 	UnmountVolume(hLogicalVolume);
@@ -419,8 +432,8 @@ static BOOL FormatFAT32(DWORD DriveIndex)
 		sizeof(dgDrive), &cbRet, NULL)) {
 		if (!DeviceIoControl (hLogicalVolume, IOCTL_DISK_GET_DRIVE_GEOMETRY_EX, NULL, 0, xdgDrive,
 			sizeof(geometry_ex), &cbRet, NULL)) {
-			uprintf("IOCTL_DISK_GET_DRIVE_GEOMETRY error: %s\n", WindowsErrorString());
-			die("Failed to get device geometry (both regular and _ex)\n", ERROR_NOT_SUPPORTED);
+			uprintf("IOCTL_DISK_GET_DRIVE_GEOMETRY error: %s", WindowsErrorString());
+			die("Failed to get device geometry (both regular and _ex)", ERROR_NOT_SUPPORTED);
 		}
 		memcpy(&dgDrive, &xdgDrive->Geometry, sizeof(dgDrive));
 	}
@@ -431,8 +444,8 @@ static BOOL FormatFAT32(DWORD DriveIndex)
 		sizeof(piDrive), &cbRet, NULL)) {
 		if (!DeviceIoControl (hLogicalVolume, IOCTL_DISK_GET_PARTITION_INFO_EX, NULL, 0, &xpiDrive,
 			sizeof(xpiDrive), &cbRet, NULL)) {
-			uprintf("IOCTL_DISK_GET_PARTITION_INFO error: %s\n", WindowsErrorString());
-			die("Failed to get partition info (both regular and _ex)\n", ERROR_NOT_SUPPORTED);
+			uprintf("IOCTL_DISK_GET_PARTITION_INFO error: %s", WindowsErrorString());
+			die("Failed to get partition info (both regular and _ex)", ERROR_NOT_SUPPORTED);
 		}
 
 		memset(&piDrive, 0, sizeof(piDrive));
@@ -450,7 +463,7 @@ static BOOL FormatFAT32(DWORD DriveIndex)
 	if (qTotalSectors < 65536) {
 		// Most FAT32 implementations would probably mount this volume just fine,
 		// but the spec says that we shouldn't do this, so we won't
-		die("This drive is too small for FAT32 - there must be at least 64K clusters\n", APPERR(ERROR_INVALID_CLUSTER_SIZE));
+		die("This drive is too small for FAT32 - there must be at least 64K clusters", APPERR(ERROR_INVALID_CLUSTER_SIZE));
 	}
 
 	if (qTotalSectors >= 0xffffffff) {
@@ -459,7 +472,7 @@ static BOOL FormatFAT32(DWORD DriveIndex)
 		// There would need to be an extra field in the FSInfo sector, and the old sector count could
 		// be set to 0xffffffff. This is non standard though, the Windows FAT driver FASTFAT.SYS won't
 		// understand this. Perhaps a future version of FAT32 and FASTFAT will handle this.
-		die("This drive is too big for FAT32 - max 2TB supported\n", APPERR(ERROR_INVALID_VOLUME_SIZE));
+		die("This drive is too big for FAT32 - max 2TB supported", APPERR(ERROR_INVALID_VOLUME_SIZE));
 	}
 
 	// coverity[tainted_data]
@@ -467,7 +480,7 @@ static BOOL FormatFAT32(DWORD DriveIndex)
 	pFAT32FsInfo = (FAT_FSINFO*) calloc(BytesPerSect, 1);
 	pFirstSectOfFat = (DWORD*) calloc(BytesPerSect, 1);
 	if (!pFAT32BootSect || !pFAT32FsInfo || !pFirstSectOfFat) {
-		die("Failed to allocate memory\n", ERROR_NOT_ENOUGH_MEMORY);
+		die("Failed to allocate memory", ERROR_NOT_ENOUGH_MEMORY);
 	}
 
 	// fill out the boot sector and fs info
@@ -476,8 +489,6 @@ static BOOL FormatFAT32(DWORD DriveIndex)
 	pFAT32BootSect->sJmpBoot[2]=0x90;
 	memcpy(pFAT32BootSect->sOEMName, "MSWIN4.1", 8);
 	pFAT32BootSect->wBytsPerSec = (WORD) BytesPerSect;
-
-	ClusterSize = (DWORD)ComboBox_GetItemData(hClusterSize, ComboBox_GetCurSel(hClusterSize));
 	SectorsPerCluster = ClusterSize / BytesPerSect;
 
 	pFAT32BootSect->bSecPerClus = (BYTE) SectorsPerCluster ;
@@ -558,13 +569,13 @@ static BOOL FormatFAT32(DWORD DriveIndex)
 	// Sanity check for a cluster count of >2^28, since the upper 4 bits of the cluster values in
 	// the FAT are reserved.
 	if (ClusterCount > 0x0FFFFFFF) {
-		die("This drive has more than 2^28 clusters, try to specify a larger cluster size or use the default\n",
+		die("This drive has more than 2^28 clusters, try to specify a larger cluster size or use the default",
 			ERROR_INVALID_CLUSTER_SIZE);
 	}
 
 	// Sanity check - < 64K clusters means that the volume will be misdetected as FAT16
 	if (ClusterCount < 65536) {
-		die("FAT32 must have at least 65536 clusters, try to specify a smaller cluster size or use the default\n",
+		die("FAT32 must have at least 65536 clusters, try to specify a smaller cluster size or use the default",
 			ERROR_INVALID_CLUSTER_SIZE);
 	}
 
@@ -575,42 +586,42 @@ static BOOL FormatFAT32(DWORD DriveIndex)
 	FatNeeded += (BytesPerSect-1);
 	FatNeeded /= BytesPerSect;
 	if (FatNeeded > FatSize) {
-		die("This drive is too big for large FAT32 format\n", APPERR(ERROR_INVALID_VOLUME_SIZE));
+		die("This drive is too big for large FAT32 format", APPERR(ERROR_INVALID_VOLUME_SIZE));
 	}
 
 	// Now we're committed - print some info first
-	uprintf("Size : %s %u sectors\n", SizeToHumanReadable(piDrive.PartitionLength.QuadPart, TRUE, FALSE), TotalSectors);
-	uprintf("Cluster size %d bytes, %d Bytes Per Sector\n", SectorsPerCluster*BytesPerSect, BytesPerSect);
-	uprintf("Volume ID is %x:%x\n", VolumeId>>16, VolumeId&0xffff);
-	uprintf("%d Reserved Sectors, %d Sectors per FAT, %d FATs\n", ReservedSectCount, FatSize, NumFATs);
-	uprintf("%d Total clusters\n", ClusterCount);
+	uprintf("Size : %s %u sectors", SizeToHumanReadable(piDrive.PartitionLength.QuadPart, TRUE, FALSE), TotalSectors);
+	uprintf("Cluster size %d bytes, %d Bytes Per Sector", SectorsPerCluster*BytesPerSect, BytesPerSect);
+	uprintf("Volume ID is %x:%x", VolumeId>>16, VolumeId&0xffff);
+	uprintf("%d Reserved Sectors, %d Sectors per FAT, %d FATs", ReservedSectCount, FatSize, NumFATs);
+	uprintf("%d Total clusters", ClusterCount);
 
 	// Fix up the FSInfo sector
 	pFAT32FsInfo->dFree_Count = (UserAreaSize/SectorsPerCluster) - 1;
 	pFAT32FsInfo->dNxt_Free = 3; // clusters 0-1 reserved, we used cluster 2 for the root dir
 
-	uprintf("%d Free Clusters\n", pFAT32FsInfo->dFree_Count);
+	uprintf("%d Free Clusters", pFAT32FsInfo->dFree_Count);
 	// Work out the Cluster count
 
 	// First zero out ReservedSect + FatSize * NumFats + SectorsPerCluster
 	SystemAreaSize = ReservedSectCount + (NumFATs*FatSize) + SectorsPerCluster;
-	uprintf("Clearing out %d sectors for reserved sectors, FATs and root cluster...\n", SystemAreaSize);
+	uprintf("Clearing out %d sectors for reserved sectors, FATs and root cluster...", SystemAreaSize);
 
 	// Not the most effective, but easy on RAM
 	pZeroSect = (BYTE*)calloc(BytesPerSect, BurstSize);
 	if (!pZeroSect) {
-		die("Failed to allocate memory\n", ERROR_NOT_ENOUGH_MEMORY);
+		die("Failed to allocate memory", ERROR_NOT_ENOUGH_MEMORY);
 	}
 
 	for (i=0; i<(SystemAreaSize+BurstSize-1); i+=BurstSize) {
 		UPDATE_PERCENT(MSG_217, (100.0f*i) / (1.0f*(SystemAreaSize + BurstSize)));
 		CHECK_FOR_USER_CANCEL;
 		if (write_sectors(hLogicalVolume, BytesPerSect, i, BurstSize, pZeroSect) != (BytesPerSect*BurstSize)) {
-			die("Error clearing reserved sectors\n", ERROR_WRITE_FAULT);
+			die("Error clearing reserved sectors", ERROR_WRITE_FAULT);
 		}
 	}
 
-	uprintf ("Initializing reserved sectors and FATs...\n");
+	uprintf ("Initializing reserved sectors and FATs...");
 	// Now we should write the boot sector and fsinfo twice, once at 0 and once at the backup boot sect position
 	for (i=0; i<2; i++) {
 		int SectorStart = (i==0) ? 0 : BackupBootSect;
@@ -621,36 +632,34 @@ static BOOL FormatFAT32(DWORD DriveIndex)
 	// Write the first fat sector in the right places
 	for ( i=0; i<NumFATs; i++ ) {
 		int SectorStart = ReservedSectCount + (i * FatSize );
-		uprintf("FAT #%d sector at address: %d\n", i, SectorStart);
+		uprintf("FAT #%d sector at address: %d", i, SectorStart);
 		write_sectors(hLogicalVolume, BytesPerSect, SectorStart, 1, pFirstSectOfFat);
 	}
 
-	// Must do it here, as have issues when trying to write the PBR after a remount
-	PrintInfoDebug(0, MSG_229);
-	if (!WritePBR(hLogicalVolume)) {
-		// Non fatal error, but the drive probably won't boot
-		uprintf("Could not write partition boot record - drive may not boot...\n");
+	if (!(Flags & FP_NO_BOOT)) {
+		// Must do it here, as have issues when trying to write the PBR after a remount
+		PrintInfoDebug(0, MSG_229);
+		if (!WritePBR(hLogicalVolume)) {
+			// Non fatal error, but the drive probably won't boot
+			uprintf("Could not write partition boot record - drive may not boot...");
+		}
 	}
 
 	// Set the FAT32 volume label
-	GetWindowTextW(hLabel, wLabel, ARRAYSIZE(wLabel));
-	ToValidLabel(wLabel, TRUE);
 	PrintInfoDebug(0, MSG_221);
 	// Handle must be closed for SetVolumeLabel to work
 	safe_closehandle(hLogicalVolume);
-	VolumeName = GetLogicalName(DriveIndex, TRUE, TRUE);
-	wVolumeName = utf8_to_wchar(VolumeName);
-	if ((wVolumeName == NULL) || (!SetVolumeLabelW(wVolumeName, wLabel))) {
-		uprintf("Could not set label: %s\n", WindowsErrorString());
+	VolumeName = GetLogicalName(DriveIndex, PartitionIndex, TRUE, TRUE);
+	if ((VolumeName == NULL) || (!SetVolumeLabelA(VolumeName, Label))) {
+		uprintf("Could not set label: %s", WindowsErrorString());
 		// Non fatal error
 	}
 
-	uprintf("Format completed.\n");
+	uprintf("Format completed.");
 	r = TRUE;
 
 out:
 	safe_free(VolumeName);
-	safe_free(wVolumeName);
 	safe_closehandle(hLogicalVolume);
 	safe_free(pFAT32BootSect);
 	safe_free(pFAT32FsInfo);
@@ -806,7 +815,7 @@ errcode_t ext2fs_print_progress(int64_t cur_value, int64_t max_value)
 	return IS_ERROR(FormatStatus) ? EXT2_ET_CANCEL_REQUESTED : 0;
 }
 
-BOOL FormatExtFs(const char* label, uint32_t version)
+BOOL FormatExtFs(DWORD DriveIndex, DWORD PartitionIndex, DWORD BlockSize, LPCSTR FSName, LPCSTR Label, DWORD Flags)
 {
 	// Mostly taken from mke2fs.conf
 	const float reserve_ratio = 0.05f;
@@ -819,7 +828,7 @@ BOOL FormatExtFs(const char* label, uint32_t version)
 	};
 
 	BOOL ret = FALSE;
-	char *path = NULL, *extfs_name = "ext#";;
+	char *volume_name = NULL;
 	int i, count;
 	struct ext2_super_block features = { 0 };
 	io_manager manager = nt_io_manager();
@@ -834,9 +843,9 @@ BOOL FormatExtFs(const char* label, uint32_t version)
 	uint8_t zb[1024];
 	HANDLE h;
 	DWORD dwSize;
-	path = strdup("\\??\\C:\\tmp\\disk.img");
+	volume_name = strdup("\\??\\C:\\tmp\\disk.img");
 	memset(zb, 0xFF, sizeof(zb));	// Set to nonzero so we can detect init issues
-	h = CreateFileU(path, GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+	h = CreateFileU(volume_name, GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 	for (i = 0; i < 32 * 1024; i++) {
 		if (!WriteFile(h, zb, sizeof(zb), &dwSize, NULL) || (dwSize != sizeof(zb))) {
 			uprintf("Write error: %s", WindowsErrorString());
@@ -845,25 +854,30 @@ BOOL FormatExtFs(const char* label, uint32_t version)
 	}
 	CloseHandle(h);
 #else
-	path = GetPartitionName((DWORD)ComboBox_GetItemData(hDeviceList, ComboBox_GetCurSel(hDeviceList)), CASPER_PARTITION_DEFAULT);
+	volume_name = GetPartitionName(DriveIndex, PartitionIndex);
 #endif
-	if (path == NULL)
+	if ((volume_name == NULL) | (strlen(FSName) != 4) || (strncmp(FSName, "ext", 3) != 0)) {
+		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_INVALID_PARAMETER;
 		goto out;
-	if ((version < 2) || (version > 3)) {
-		if (version == 4)
-			uprintf("ext4 file system is not supported, will use ext3 instead");
-		else if (version != 0)
-			uprintf("invalid ext file system version requested, will use ext3");
-		version = 3;
 	}
 
-	extfs_name[3] = '0' + version;
-	PrintInfoDebug(0, MSG_222, extfs_name);
+	if ((strcmp(FSName, FileSystemLabel[FS_EXT2]) != 0) && (strcmp(FSName, FileSystemLabel[FS_EXT3]) != 0)) {
+		if (strcmp(FSName, FileSystemLabel[FS_EXT4]) == 0)
+			uprintf("ext4 file system is not supported, will use ext3 instead");
+		else
+			uprintf("invalid ext file system version requested, will use ext3");
+	}
+
+	if ((strcmp(FSName, FileSystemLabel[FS_EXT2]) != 0) && (strcmp(FSName, FileSystemLabel[FS_EXT3]) != 0))
+		FSName = FileSystemLabel[FS_EXT3];
+
+	PrintInfoDebug(0, MSG_222, FSName);
 	LastRefresh = 0;
 
 	// Figure out the volume size and block size
-	r = ext2fs_get_device_size2(path, KB, &size);
+	r = ext2fs_get_device_size2(volume_name, KB, &size);
 	if ((r != 0) || (size == 0)) {
+		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_READ_FAULT;
 		uprintf("Could not read device size: %s", error_message(r));
 		goto out;
 	}
@@ -873,9 +887,12 @@ BOOL FormatExtFs(const char* label, uint32_t version)
 			break;
 	}
 	assert(i < ARRAYSIZE(ext2fs_default));
-	size /= ext2fs_default[i].block_size;
+	// NB: We validated that BlockSize is a power of two in FormatPartition()
+	if (BlockSize == 0)
+		BlockSize = ext2fs_default[i].block_size;
+	size /= BlockSize;
 	for (features.s_log_block_size = 0; EXT2_BLOCK_SIZE_BITS(&features) <= EXT2_MAX_BLOCK_LOG_SIZE; features.s_log_block_size++) {
-		if (EXT2_BLOCK_SIZE(&features) == ext2fs_default[i].block_size)
+		if (EXT2_BLOCK_SIZE(&features) == BlockSize)
 			break;
 	}
 	assert(EXT2_BLOCK_SIZE_BITS(&features) <= EXT2_MAX_BLOCK_LOG_SIZE);
@@ -897,15 +914,16 @@ BOOL FormatExtFs(const char* label, uint32_t version)
 	ext2fs_set_feature_filetype(&features);
 	ext2fs_set_feature_sparse_super(&features);
 	ext2fs_set_feature_large_file(&features);
-	if (version >= 3)
+	if (FSName[3] != '2')
 		ext2fs_set_feature_journal(&features);
 	features.s_backup_bgs[0] = ~0;
 	features.s_default_mount_opts = EXT2_DEFM_XATTR_USER | EXT2_DEFM_ACL;
 
 	// Now that we have set our base features, initialize a virtual superblock
-	r = ext2fs_initialize(path, EXT2_FLAG_EXCLUSIVE | EXT2_FLAG_64BITS, &features, manager, &ext2fs);
+	r = ext2fs_initialize(volume_name, EXT2_FLAG_EXCLUSIVE | EXT2_FLAG_64BITS, &features, manager, &ext2fs);
 	if (r != 0) {
-		uprintf("Could not initialize %s features: %s", extfs_name, error_message(r));
+		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_INVALID_DATA;
+		uprintf("Could not initialize %s features: %s", FSName, error_message(r));
 		goto out;
 	}
 
@@ -915,7 +933,8 @@ BOOL FormatExtFs(const char* label, uint32_t version)
 	r = io_channel_write_blk64(ext2fs->io, 0, 16, buf);
 	safe_free(buf);
 	if (r != 0) {
-		uprintf("Could not zero %s superblock area: %s", extfs_name, error_message(r));
+		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_WRITE_FAULT;
+		uprintf("Could not zero %s superblock area: %s", FSName, error_message(r));
 		goto out;
 	}
 
@@ -927,21 +946,23 @@ BOOL FormatExtFs(const char* label, uint32_t version)
 	ext2fs->super->s_max_mnt_count = -1;
 	ext2fs->super->s_creator_os = EXT2_OS_WINDOWS;
 	ext2fs->super->s_errors = EXT2_ERRORS_CONTINUE;
-	static_strcpy(ext2fs->super->s_volume_name, label);
+	if (Label != NULL)
+		static_strcpy(ext2fs->super->s_volume_name, Label);
 
 	r = ext2fs_allocate_tables(ext2fs);
 	if (r != 0) {
-		uprintf("Could not allocate %s tables: %s", extfs_name, error_message(r));
+		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_INVALID_DATA;
+		uprintf("Could not allocate %s tables: %s", FSName, error_message(r));
 		goto out;
 	}
 	r = ext2fs_convert_subcluster_bitmap(ext2fs, &ext2fs->block_map);
 	if (r != 0) {
-		uprintf("Could set %s cluster bitmap: %s", extfs_name, error_message(r));
+		uprintf("Could set %s cluster bitmap: %s", FSName, error_message(r));
 		goto out;
 	}
 
 	ext2_percent_start = 0.0f;
-	ext2_percent_share = (version < 3) ? 100.0f : 50.0f;
+	ext2_percent_share = (FSName[3] == '2') ? 100.0f : 50.0f;
 	uprintf("Creating %d inode sets: [1 marker = %0.1f set(s)]", ext2fs->group_desc_count,
 		max((float)ext2fs->group_desc_count / ext2_max_marker, 1.0f));
 	for (i = 0; i < (int)ext2fs->group_desc_count; i++) {
@@ -952,6 +973,7 @@ BOOL FormatExtFs(const char* label, uint32_t version)
 			* EXT2_BLOCK_SIZE(ext2fs->super), EXT2_BLOCK_SIZE(ext2fs->super));
 		r = ext2fs_zero_blocks2(ext2fs, cur, count, &cur, &count);
 		if (r != 0) {
+			FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_WRITE_FAULT;
 			uprintf("\r\nCould not zero inode set at position %llu (%d blocks): %s", cur, count, error_message(r));
 			goto out;
 		}
@@ -961,13 +983,15 @@ BOOL FormatExtFs(const char* label, uint32_t version)
 	// Create root and lost+found dirs
 	r = ext2fs_mkdir(ext2fs, EXT2_ROOT_INO, EXT2_ROOT_INO, 0);
 	if (r != 0) {
-		uprintf("Failed to create %s root dir: %s", extfs_name, error_message(r));
+		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_DIR_NOT_ROOT;
+		uprintf("Failed to create %s root dir: %s", FSName, error_message(r));
 		goto out;
 	}
 	ext2fs->umask = 077;
 	r = ext2fs_mkdir(ext2fs, EXT2_ROOT_INO, 0, "lost+found");
 	if (r != 0) {
-		uprintf("Failed to create %s 'lost+found' dir: %s", extfs_name, error_message(r));
+		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_DIR_NOT_ROOT;
+		uprintf("Failed to create %s 'lost+found' dir: %s", FSName, error_message(r));
 		goto out;
 	}
 
@@ -978,17 +1002,19 @@ BOOL FormatExtFs(const char* label, uint32_t version)
 
 	r = ext2fs_mark_inode_bitmap2(ext2fs->inode_map, EXT2_BAD_INO);
 	if (r != 0) {
+		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_WRITE_FAULT;
 		uprintf("Could not set inode bitmaps: %s", error_message(r));
 		goto out;
 	}
 	ext2fs_inode_alloc_stats(ext2fs, EXT2_BAD_INO, 1);
 	r = ext2fs_update_bb_inode(ext2fs, NULL);
 	if (r != 0) {
+		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_WRITE_FAULT;
 		uprintf("Could not set inode stats: %s", error_message(r));
 		goto out;
 	}
 
-	if (version >= 3) {
+	if (FSName[3] != '2') {
 		// Create the journal
 		ext2_percent_start = 50.0f;
 		journal_size = ext2fs_default_journal_size(ext2fs_blocks_count(ext2fs->super));
@@ -996,10 +1022,11 @@ BOOL FormatExtFs(const char* label, uint32_t version)
 		uprintf("Creating %d journal blocks: [1 marker = %0.1f block(s)]", journal_size,
 			max((float)journal_size / ext2_max_marker, 1.0f));
 		// Even with EXT2_MKJOURNAL_LAZYINIT, this call is absolutely dreadful in terms of speed...
-		r = ext2fs_add_journal_inode(ext2fs, journal_size, EXT2_MKJOURNAL_NO_MNT_CHECK | EXT2_MKJOURNAL_LAZYINIT);
+		r = ext2fs_add_journal_inode(ext2fs, journal_size, EXT2_MKJOURNAL_NO_MNT_CHECK | ((Flags & FP_QUICK) ? EXT2_MKJOURNAL_LAZYINIT : 0));
 		uprintfs("\r\n");
 		if (r != 0) {
-			uprintf("Could not create %s journal: %s", extfs_name, error_message(r));
+			FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_WRITE_FAULT;
+			uprintf("Could not create %s journal: %s", FSName, error_message(r));
 			goto out;
 		}
 	}
@@ -1007,7 +1034,8 @@ BOOL FormatExtFs(const char* label, uint32_t version)
 	// Finally we can call close() to get the file system gets created
 	r = ext2fs_close(ext2fs);
 	if (r != 0) {
-		uprintf("Could not create %s volume: %s", extfs_name, error_message(r));
+		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_WRITE_FAULT;
+		uprintf("Could not create %s volume: %s", FSName, error_message(r));
 		goto out;
 	}
 	UPDATE_PERCENT(MSG_217, 100.0f);
@@ -1017,42 +1045,263 @@ BOOL FormatExtFs(const char* label, uint32_t version)
 out:
 	ext2fs_free(ext2fs);
 	free(buf);
-	free(path);
+	free(volume_name);
 	return ret;
+}
+
+/*
+ * Call on VDS to format a partition
+ */
+static BOOL FormatDriveVds(DWORD DriveIndex, DWORD PartitionIndex, DWORD ClusterSize, LPCSTR FSName, LPCSTR Label, DWORD Flags)
+{
+	BOOL r = FALSE;
+	HRESULT hr;
+	ULONG ulFetched;
+	IVdsServiceLoader *pLoader;
+	IVdsService *pService;
+	IEnumVdsObject *pEnum;
+	IUnknown *pUnk;
+	char* VolumeName = NULL;
+	WCHAR *wVolumeName = NULL, *wLabel = utf8_to_wchar(Label), *wFSName = utf8_to_wchar(FSName);
+
+	if ((strcmp(FSName, FileSystemLabel[FS_EXFAT]) == 0) && !((dur_mins == 0) && (dur_secs == 0))) {
+		PrintInfoDebug(0, MSG_220, FSName, dur_mins, dur_secs);
+	} else {
+		PrintInfoDebug(0, MSG_222, FSName);
+	}
+	LastRefresh = 0;
+	VolumeName = GetLogicalName(DriveIndex, PartitionIndex, TRUE, TRUE);
+	wVolumeName = utf8_to_wchar(VolumeName);
+	if (wVolumeName == NULL) {
+		uprintf("Could not read volume name");
+		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_GEN_FAILURE;
+		goto out;
+	}
+
+	// Initialize COM
+	IGNORE_RETVAL(CoInitializeEx(NULL, COINIT_APARTMENTTHREADED));
+	IGNORE_RETVAL(CoInitializeSecurity(NULL, -1, NULL, NULL, RPC_C_AUTHN_LEVEL_CONNECT,
+		RPC_C_IMP_LEVEL_IMPERSONATE, NULL, 0, NULL));
+
+	// Create a VDS Loader Instance
+	hr = CoCreateInstance(&CLSID_VdsLoader, NULL, CLSCTX_LOCAL_SERVER | CLSCTX_REMOTE_SERVER,
+		&IID_IVdsServiceLoader, (void **)&pLoader);
+	if (hr != S_OK) {
+		VDS_SET_ERROR(hr);
+		uprintf("Could not create VDS Loader Instance: %s", WindowsErrorString());
+		goto out;
+	}
+
+	// Load the VDS Service
+	hr = IVdsServiceLoader_LoadService(pLoader, L"", &pService);
+	IVdsServiceLoader_Release(pLoader);
+	if (hr != S_OK) {
+		VDS_SET_ERROR(hr);
+		uprintf("Could not load VDS Service: %s", WindowsErrorString());
+		goto out;
+	}
+
+	// Query the VDS Service Providers
+	hr = IVdsService_QueryProviders(pService, VDS_QUERY_SOFTWARE_PROVIDERS, &pEnum);
+	if (hr != S_OK) {
+		VDS_SET_ERROR(hr);
+		uprintf("Could not query VDS Service Providers: %s", WindowsErrorString());
+		goto out;
+	}
+
+	while (IEnumVdsObject_Next(pEnum, 1, &pUnk, &ulFetched) == S_OK) {
+		IVdsProvider *pProvider;
+		IVdsSwProvider *pSwProvider;
+		IEnumVdsObject *pEnumPack;
+		IUnknown *pPackUnk;
+		CHECK_FOR_USER_CANCEL;
+
+		// Get VDS Provider
+		hr = IUnknown_QueryInterface(pUnk, &IID_IVdsProvider, (void **)&pProvider);
+		IUnknown_Release(pUnk);
+		if (hr != S_OK) {
+			VDS_SET_ERROR(hr);
+			uprintf("Could not get VDS Provider: %s", WindowsErrorString());
+			goto out;
+		}
+
+		// Get VDS Software Provider
+		hr = IVdsSwProvider_QueryInterface(pProvider, &IID_IVdsSwProvider, (void **)&pSwProvider);
+		IVdsProvider_Release(pProvider);
+		if (hr != S_OK) {
+			VDS_SET_ERROR(hr);
+			uprintf("Could not get VDS Software Provider: %s", WindowsErrorString());
+			goto out;
+		}
+
+		// Get VDS Software Provider Packs
+		hr = IVdsSwProvider_QueryPacks(pSwProvider, &pEnumPack);
+		IVdsSwProvider_Release(pSwProvider);
+		if (hr != S_OK) {
+			VDS_SET_ERROR(hr);
+			uprintf("Could not get VDS Software Provider Packs: %s", WindowsErrorString());
+			goto out;
+		}
+
+		// Enumerate Provider Packs
+		while (IEnumVdsObject_Next(pEnumPack, 1, &pPackUnk, &ulFetched) == S_OK) {
+			IVdsPack *pPack;
+			IEnumVdsObject *pEnumVolume;
+			IUnknown *pVolumeUnk;
+			CHECK_FOR_USER_CANCEL;
+
+			hr = IUnknown_QueryInterface(pPackUnk, &IID_IVdsPack, (void **)&pPack);
+			IUnknown_Release(pPackUnk);
+			if (hr != S_OK) {
+				VDS_SET_ERROR(hr);
+				uprintf("Could not query VDS Software Provider Pack: %s", WindowsErrorString());
+				goto out;
+			}
+
+			// Use the pack interface to access the volumes
+			hr = IVdsPack_QueryVolumes(pPack, &pEnumVolume);
+			if (hr != S_OK) {
+				VDS_SET_ERROR(hr);
+				uprintf("Could not query VDS volumes: %s", WindowsErrorString());
+				goto out;
+			}
+
+			// List volumes
+			while (IEnumVdsObject_Next(pEnumVolume, 1, &pVolumeUnk, &ulFetched) == S_OK) {
+				BOOL match;
+				HRESULT hr2 = E_FAIL;
+				VDS_VOLUME_PROP VolumeProps;
+				LPWSTR *wszPathArray;
+				ULONG ulPercentCompleted, ulNumberOfPaths;
+				USHORT usFsVersion = 0;
+				IVdsVolume *pVolume;
+				IVdsAsync* pAsync;
+				IVdsVolumeMF3 *pVolumeMF3;
+				CHECK_FOR_USER_CANCEL;
+
+				// Get the volume interface.
+				hr = IUnknown_QueryInterface(pVolumeUnk, &IID_IVdsVolume, (void **)&pVolume);
+				if (hr != S_OK) {
+					VDS_SET_ERROR(hr);
+					uprintf("Could not query VDS Volume Interface: %s", WindowsErrorString());
+					goto out;
+				}
+
+				hr = IVdsVolume_GetProperties(pVolume, &VolumeProps);
+				if ((hr != S_OK) && (hr != VDS_S_PROPERTIES_INCOMPLETE)) {
+					VDS_SET_ERROR(hr);
+					IVdsVolume_Release(pVolume);
+					uprintf("Could not query VDS Volume Properties: %s", WindowsErrorString());
+					continue;
+				}
+				CoTaskMemFree(VolumeProps.pwszName);
+
+				// Instantiate the IVdsVolumeMF3 interface for our volume.
+				hr = IVdsVolume_QueryInterface(pVolume, &IID_IVdsVolumeMF3, (void **)&pVolumeMF3);
+				IVdsVolume_Release(pVolume);
+				if (hr != S_OK) {
+					VDS_SET_ERROR(hr);
+					uprintf("Could not access VDS VolumeMF3 interface: %s", WindowsErrorString());
+					continue;
+				}
+
+				// Query the volume GUID
+				hr = IVdsVolumeMF3_QueryVolumeGuidPathnames(pVolumeMF3, &wszPathArray, &ulNumberOfPaths);
+				if (hr != S_OK) {
+					VDS_SET_ERROR(hr);
+					uprintf("Could not query VDS VolumeGuidPathnames: %s", WindowsErrorString());
+					continue;
+				}
+
+				if (ulNumberOfPaths > 1)
+					uprintf("Notice: Volume %S has more than one GUID...", wszPathArray[0]);
+
+				match = (wcscmp(wVolumeName, wszPathArray[0]) == 0);
+				CoTaskMemFree(wszPathArray);
+				if (!match)
+					continue;
+
+				if (strcmp(Label, FileSystemLabel[FS_UDF]) == 0)
+					usFsVersion = ReadSetting32(SETTING_USE_UDF_VERSION);
+				if (ClusterSize < 0x200) {
+					ClusterSize = 0;
+					uprintf("Using default cluster size");
+				} else {
+					uprintf("Using cluster size: %d bytes", ClusterSize);
+				}
+				format_percent = 0.0f;
+				uprintf("%s format was selected", (Flags & FP_QUICK) ? "Quick" : "Slow");
+				if (Flags & FP_COMPRESSION)
+					uprintf("NTFS compression is enabled");
+
+				hr = IVdsVolumeMF3_FormatEx2(pVolumeMF3, wFSName, usFsVersion, ClusterSize, wLabel, Flags, &pAsync);
+				while (SUCCEEDED(hr)) {
+					if (IS_ERROR(FormatStatus)) {
+						IVdsAsync_Cancel(pAsync);
+						break;
+					}
+					hr = IVdsAsync_QueryStatus(pAsync, &hr2, &ulPercentCompleted);
+					if (SUCCEEDED(hr)) {
+						if (Flags & FP_QUICK) {
+							// Progress report on quick format is useless, so we'll just pretend we have 2 tasks
+							PrintInfo(0, MSG_218, (ulPercentCompleted < 100) ? 1 : 2, 2);
+							UpdateProgress(OP_CREATE_FS, (float)ulPercentCompleted);
+						} else {
+							PrintInfo(0, MSG_217, (float)ulPercentCompleted);
+							UpdateProgress(OP_FORMAT, (float)ulPercentCompleted);
+						}
+						hr = hr2;
+						if (hr == S_OK)
+							break;
+						if (hr == VDS_E_OPERATION_PENDING)
+							hr = S_OK;
+					}
+					Sleep(500);
+				}
+				if (!SUCCEEDED(hr)) {
+					VDS_SET_ERROR(hr);
+					uprintf("Could not format drive: %s", WindowsErrorString());
+					goto out;
+				}
+
+				IVdsAsync_Release(pAsync);
+				IVdsVolumeMF3_Release(pVolumeMF3);
+
+				if (!IS_ERROR(FormatStatus)) {
+					uprintf("Format completed.");
+					r = TRUE;
+				}
+				goto out;
+			}
+		}
+	}
+
+out:
+	safe_free(VolumeName);
+	safe_free(wVolumeName);
+	safe_free(wLabel);
+	safe_free(wFSName);
+	return r;
 }
 
 /*
  * Call on fmifs.dll's FormatEx() to format the drive
  */
-static BOOL FormatDrive(DWORD DriveIndex)
+static BOOL FormatDrive(DWORD DriveIndex, DWORD PartitionIndex, DWORD ClusterSize, LPCSTR FSName, LPCSTR Label, DWORD Flags)
 {
 	BOOL r = FALSE;
 	PF_DECL(FormatEx);
 	PF_DECL(EnableVolumeCompression);
-	char FSType[64], path[MAX_PATH];
 	char *locale, *VolumeName = NULL;
-	WCHAR* wVolumeName = NULL;
-	WCHAR wFSType[64];
-	WCHAR wLabel[64];
-	ULONG ulClusterSize;
-	size_t i, index;
+	WCHAR* wVolumeName = NULL, *wLabel = utf8_to_wchar(Label), *wFSName = utf8_to_wchar(FSName);
+	size_t i;
 
-	GetWindowTextU(hFileSystem, FSType, ARRAYSIZE(FSType));
-	// Skip the RIGHT_TO_LEFT_EMBEDDING mark from LTR languages
-	index = (strncmp(FSType, RIGHT_TO_LEFT_EMBEDDING, sizeof(RIGHT_TO_LEFT_EMBEDDING) - 1) == 0) ? (sizeof(RIGHT_TO_LEFT_EMBEDDING) - 1) : 0;
-	// Might have a (Default) suffix => remove it
-	for (i=strlen(FSType); i>2; i--) {
-		if (FSType[i] == '(') {
-			FSType[i-1] = 0;
-			break;
-		}
-	}
-	if ((fs_type == FS_UDF) && !((dur_mins == 0) && (dur_secs == 0))) {
-		PrintInfoDebug(0, MSG_220, &FSType[index], dur_mins, dur_secs);
+	if ((strcmp(FSName, FileSystemLabel[FS_EXFAT]) == 0) && !((dur_mins == 0) && (dur_secs == 0))) {
+		PrintInfoDebug(0, MSG_220, FSName, dur_mins, dur_secs);
 	} else {
-		PrintInfoDebug(0, MSG_222, &FSType[index]);
+		PrintInfoDebug(0, MSG_222, FSName);
 	}
-	VolumeName = GetLogicalName(DriveIndex, TRUE, TRUE);
+	VolumeName = GetLogicalName(DriveIndex, PartitionIndex, TRUE, TRUE);
 	wVolumeName = utf8_to_wchar(VolumeName);
 	if (wVolumeName == NULL) {
 		uprintf("Could not read volume name\n");
@@ -1063,16 +1312,6 @@ static BOOL FormatDrive(DWORD DriveIndex)
 	// a trailing backslash, but EnableCompression() fails without...
 	wVolumeName[wcslen(wVolumeName)-1] = 0;		// Remove trailing backslash
 
-	// Check if Windows picked the UEFI:NTFS partition
-	// NB: No need to do this for Large FAT32, as this only applies to NTFS
-	static_strcpy(path, VolumeName);
-	static_strcat(path, "EFI\\Rufus\\ntfs_x64.efi");
-	if (PathFileExistsA(path)) {
-		uprintf("Windows selected the UEFI:NTFS partition for formatting - Retry needed", VolumeName);
-		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_RETRY;
-		goto out;
-	}
-
 	// LoadLibrary("fmifs.dll") appears to changes the locale, which can lead to
 	// problems with tolower(). Make sure we restore the locale. For more details,
 	// see http://comments.gmane.org/gmane.comp.gnu.mingw.user/39300
@@ -1081,46 +1320,39 @@ static BOOL FormatDrive(DWORD DriveIndex)
 	PF_INIT(EnableVolumeCompression, fmifs);
 	setlocale(LC_ALL, locale);
 
-	GetWindowTextW(hFileSystem, wFSType, ARRAYSIZE(wFSType));
-	// Again, skip the RIGHT_TO_LEFT_EMBEDDING mark if present
-	index = (wFSType[0] == 0x202b) ? 1 : 0;
-	// We may have a " (Default)" trail
-	for (i=0; i<wcslen(wFSType); i++) {
-		if (wFSType[i] == ' ') {
-			wFSType[i] = 0;
-			break;
-		}
-	}
-	GetWindowTextW(hLabel, wLabel, ARRAYSIZE(wLabel));
-	// Make sure the label is valid
-	ToValidLabel(wLabel, (fs_type == FS_FAT16) || (fs_type == FS_FAT32) || (fs_type == FS_EXFAT));
-	ulClusterSize = (ULONG)ComboBox_GetItemData(hClusterSize, ComboBox_GetCurSel(hClusterSize));
-	if (ulClusterSize < 0x200) {
+	if (ClusterSize < 0x200) {
 		// 0 is FormatEx's value for default, which we need to use for UDF
-		ulClusterSize = 0;
-		uprintf("Using default cluster size\n");
+		ClusterSize = 0;
+		uprintf("Using default cluster size");
 	} else {
-		uprintf("Using cluster size: %d bytes\n", ulClusterSize);
+		uprintf("Using cluster size: %d bytes", ClusterSize);
 	}
 	format_percent = 0.0f;
 	task_number = 0;
-	fs_index = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
 
-	uprintf("%s format was selected\n", IsChecked(IDC_QUICK_FORMAT)?"Quick":"Slow");
-	pfFormatEx(wVolumeName, SelectedDrive.MediaType, &wFSType[index], wLabel,
-		IsChecked(IDC_QUICK_FORMAT), ulClusterSize, FormatExCallback);
+	uprintf("%s format was selected", (Flags & FP_QUICK) ? "Quick" : "Slow");
+	for (i = 0; i < WRITE_RETRIES; i++) {
+		pfFormatEx(wVolumeName, SelectedDrive.MediaType, wFSName, wLabel,
+			(Flags & FP_QUICK), ClusterSize, FormatExCallback);
+		if (!IS_ERROR(FormatStatus) || (HRESULT_CODE(FormatStatus) == ERROR_CANCELLED))
+			break;
+		uprintf("%s - Retrying...", WindowsErrorString());
+		Sleep(WRITE_TIMEOUT);
+	}
+	if (IS_ERROR(FormatStatus))
+		goto out;
 
-	if ((fs_type == FS_NTFS) && (enable_ntfs_compression) && (pfEnableVolumeCompression != NULL)) {
+	if (Flags & FP_COMPRESSION) {
 		wVolumeName[wcslen(wVolumeName)] = '\\';	// Add trailing backslash back again
 		if (pfEnableVolumeCompression(wVolumeName, FPF_COMPRESSED)) {
-			uprintf("Enabled NTFS compression\n");
+			uprintf("Enabled NTFS compression");
 		} else {
-			uprintf("Could not enable NTFS compression: %s\n", WindowsErrorString());
+			uprintf("Could not enable NTFS compression: %s", WindowsErrorString());
 		}
 	}
 
 	if (!IS_ERROR(FormatStatus)) {
-		uprintf("Format completed.\n");
+		uprintf("Format completed.");
 		r = TRUE;
 	}
 
@@ -1129,7 +1361,28 @@ out:
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|SCODE_CODE(GetLastError());
 	safe_free(VolumeName);
 	safe_free(wVolumeName);
+	safe_free(wLabel);
+	safe_free(wFSName);
 	return r;
+}
+
+static BOOL FormatPartition(DWORD DriveIndex, DWORD PartitionIndex, DWORD UnitAllocationSize, USHORT FSType, LPCSTR Label, DWORD Flags)
+{
+	if ((DriveIndex < 0x80) || (DriveIndex > 0x100) || (PartitionIndex >= MAX_PARTITIONS) || (FSType >= FS_MAX) ||
+		// The following validates that UnitAllocationSize is a power of 2
+		((UnitAllocationSize != 0) && (UnitAllocationSize & (UnitAllocationSize - 1)))) {
+		ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_INVALID_PARAMETER;
+		return FALSE;
+	}
+	actual_fs_type = FSType;
+	if ((FSType == FS_FAT32) && ((SelectedDrive.DiskSize > LARGE_FAT32_SIZE) || (force_large_fat32) || (Flags & FP_LARGE_FAT32)))
+		return FormatFAT32(DriveIndex, PartitionIndex, UnitAllocationSize, FileSystemLabel[FSType], Label, Flags);
+	else if (FSType >= FS_EXT2)
+		return FormatExtFs(DriveIndex, PartitionIndex, UnitAllocationSize, FileSystemLabel[FSType], Label, Flags);
+	else if (use_vds)
+		return FormatDriveVds(DriveIndex, PartitionIndex, UnitAllocationSize, FileSystemLabel[FSType], Label, Flags);
+	else
+		return FormatDrive(DriveIndex, PartitionIndex, UnitAllocationSize, FileSystemLabel[FSType], Label, Flags);
 }
 
 /*
@@ -1457,19 +1710,19 @@ static BOOL WritePBR(HANDLE hLogicalVolume)
 	int i;
 	FAKE_FD fake_fd = { 0 };
 	FILE* fp = (FILE*)&fake_fd;
-	const char* using_msg = "Using %s %s partition boot record\n";
+	const char* using_msg = "Using %s %s partition boot record";
 
 	fake_fd._handle = (char*)hLogicalVolume;
 	set_bytes_per_sector(SelectedDrive.SectorSize);
 
-	switch (ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem))) {
+	switch (actual_fs_type) {
 	case FS_FAT16:
 		uprintf(using_msg, bt_to_name(), "FAT16");
 		if (!is_fat_16_fs(fp)) {
-			uprintf("New volume does not have a FAT16 boot sector - aborting\n");
+			uprintf("New volume does not have a FAT16 boot sector - aborting");
 			break;
 		}
-		uprintf("Confirmed new volume has a FAT16 boot sector\n");
+		uprintf("Confirmed new volume has a FAT16 boot sector");
 		if (boot_type == BT_FREEDOS) {
 			if (!write_fat_16_fd_br(fp, 0)) break;
 		} else if (boot_type == BT_REACTOS) {
@@ -1786,11 +2039,9 @@ out:
 
 // http://technet.microsoft.com/en-ie/library/jj721578.aspx
 // As opposed to the technet guide above, we no longer set internal drives offline,
-// due to people wondering why they can't see them by default, and also due to dism
-// incompatibilities from one version of Windows to the next.
-// Maybe when we use wimlib we'll review this, but for now just turn it off.
+// due to people wondering why they can't see them by default.
 //#define SET_INTERNAL_DRIVES_OFFLINE
-static BOOL SetupWinToGo(const char* drive_name, BOOL use_ms_efi)
+static BOOL SetupWinToGo(DWORD DriveIndex, const char* drive_name, BOOL use_esp)
 {
 #ifdef SET_INTERNAL_DRIVES_OFFLINE
 	static char san_policy_path[] = "?:\\san_policy.xml";
@@ -1798,16 +2049,13 @@ static BOOL SetupWinToGo(const char* drive_name, BOOL use_ms_efi)
 	static char unattend_path[] = "?:\\Windows\\System32\\sysprep\\unattend.xml";
 	char *mounted_iso, *ms_efi = NULL, image[128], cmd[MAX_PATH];
 	unsigned char *buffer;
-	wchar_t wVolumeName[] = L"?:";
 	DWORD bufsize;
 	ULONG cluster_size;
 	FILE* fd;
-	PF_DECL(FormatEx);
-	PF_INIT(FormatEx, Fmifs);
 
 	uprintf("Windows To Go mode selected");
 	// Additional sanity checks
-	if ( (use_ms_efi) && (SelectedDrive.MediaType != FixedMedia) && (nWindowsBuildNumber < 15000)) {
+	if ((use_esp) && (SelectedDrive.MediaType != FixedMedia) && (nWindowsBuildNumber < 15000)) {
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_NOT_SUPPORTED;
 		return FALSE;
 	}
@@ -1832,16 +2080,8 @@ static BOOL SetupWinToGo(const char* drive_name, BOOL use_ms_efi)
 	}
 	UnMountISO();
 
-	if (use_ms_efi) {
-		uprintf("Setting up MS EFI system partition");
-		if (pfFormatEx == NULL)
-			return FALSE;
-		ms_efi = AltMountVolume(drive_name, 3);	// MSR, main, EFI
-		if (ms_efi == NULL) {
-			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_ASSIGN_LETTER);
-			return FALSE;
-		}
-		uprintf("Formatting EFI system partition %s", ms_efi);
+	if (use_esp) {
+		uprintf("Setting up EFI System Partition");
 		// According to Ubuntu (https://bugs.launchpad.net/ubuntu/+source/partman-efi/+bug/811485) you want to use FAT32.
 		// However, you have to be careful that the cluster size needs to be greater or equal to the sector size, which
 		// in turn has an impact on the minimum EFI partition size we can create (see ms_efi_size_MB in drive.c)
@@ -1851,18 +2091,26 @@ static BOOL SetupWinToGo(const char* drive_name, BOOL use_ms_efi)
 			cluster_size = 4096;
 		else	// Go for broke
 			cluster_size = (ULONG)SelectedDrive.SectorSize;
-		fs_index = 1;	// FAT32
-		task_number = 0;
-		wVolumeName[0] = ms_efi[0];
-
 		// Boy do you *NOT* want to specify a label here, and spend HOURS figuring out why your EFI partition cannot boot...
-		pfFormatEx(wVolumeName, SelectedDrive.MediaType, L"FAT32", L"", TRUE, cluster_size, FormatExCallback);
-		if (IS_ERROR(FormatStatus)) {
-			uprintf("Failed to format EFI partition");
-			AltUnmountVolume(ms_efi);
+		// Also, we use the Large FAT32 facility Microsoft APIs are *UTTERLY USELESS* for achieving what we want:
+		// VDS cannot list ESP volumes (talk about allegedly improving on the old disk and volume APIs, only to
+		// completely neuter it) and IVdsDiskPartitionMF::FormatPartitionEx(), which is what you are supposed to
+		// use for ESPs, explicitly states: "This method cannot be used to format removable media."
+		if (!FormatPartition(DriveIndex, partition_index[PI_ESP], cluster_size, FS_FAT32, "",
+			FP_QUICK | FP_FORCE | FP_LARGE_FAT32 | FP_NO_BOOT)) {
+			uprintf("Could not format EFI System Partition");
 			return FALSE;
 		}
 		Sleep(200);
+	}
+
+	if (use_esp) {
+		// Need to have the ESP mounted to invoke bcdboot
+		ms_efi = AltMountVolume(DriveIndex, partition_index[PI_ESP]);
+		if (ms_efi == NULL) {
+			FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_CANT_ASSIGN_LETTER);
+			return FALSE;
+		}
 	}
 
 	// We invoke the 'bcdboot' command from the host, as the one from the drive produces problems (#558)
@@ -1871,7 +2119,7 @@ static BOOL SetupWinToGo(const char* drive_name, BOOL use_ms_efi)
 	// will get converted to 'C:\Windows\SysWOW64' behind the scenes, and there is no bcdboot.exe there.
 	static_sprintf(cmd, "%s\\bcdboot.exe %s\\Windows /v /f %s /s %s", sysnative_dir, drive_name,
 		HAS_BOOTMGR_BIOS(img_report) ? (HAS_BOOTMGR_EFI(img_report) ? "ALL" : "BIOS") : "UEFI",
-		(use_ms_efi)?ms_efi:drive_name);
+		(use_esp)?ms_efi:drive_name);
 	uprintf("Enabling boot using command '%s'", cmd);
 	if (RunCommand(cmd, sysnative_dir, usb_debug) != 0) {
 		// Try to continue... but report a failure
@@ -1879,7 +2127,7 @@ static BOOL SetupWinToGo(const char* drive_name, BOOL use_ms_efi)
 		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_ISO_EXTRACT);
 	}
 
-	if (use_ms_efi) {
+	if (use_esp) {
 		Sleep(200);
 		AltUnmountVolume(ms_efi);
 	}
@@ -1915,10 +2163,10 @@ static BOOL SetupWinToGo(const char* drive_name, BOOL use_ms_efi)
 		_RT_RCDATA, "unattend.xml", &bufsize, FALSE);
 	unattend_path[0] = drive_name[0];
 	fd = fopenU(unattend_path, "wb");
-	if ((fd == NULL) || (fwrite(buffer, 1, bufsize, fd) != bufsize)) {
-		uprintf("Could not write '%s'\n", unattend_path);
-	}
-	fclose(fd);
+	if ((fd == NULL) || (fwrite(buffer, 1, bufsize, fd) != bufsize))
+		uprintf("Could not write '%s'", unattend_path);
+	if (fd != NULL)
+		fclose(fd);
 	PrintInfo(0, MSG_267, 100.0f);
 	UpdateProgress(OP_DOS, 100.0f);
 
@@ -1955,7 +2203,7 @@ static BOOL WriteDrive(HANDLE hPhysicalDrive, HANDLE hSourceImage)
 		bled_exit();
 		if ((bled_ret < 0) && (SCODE_CODE(FormatStatus) != ERROR_CANCELLED)) {
 			// Unfortunately, different compression backends return different negative error codes
-			uprintf("Could not write compressed image: %" PRIi64, bled_ret);
+			uprintf("Could not write compressed image: %lld", bled_ret);
 			FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_WRITE_FAULT;
 			goto out;
 		}
@@ -2060,7 +2308,7 @@ static BOOL WriteDrive(HANDLE hPhysicalDrive, HANDLE hSourceImage)
 				if (s)
 					uprintf("Write error: Wrote %d bytes, expected %d bytes", wSize, rSize);
 				else
-					uprintf("Write error at sector %" PRIi64 ": %s", wb / SelectedDrive.SectorSize, WindowsErrorString());
+					uprintf("Write error at sector %lld: %s", wb / SelectedDrive.SectorSize, WindowsErrorString());
 				if (i < WRITE_RETRIES) {
 					li.QuadPart = wb;
 					uprintf("Retrying in %d seconds...", WRITE_TIMEOUT / 1000);
@@ -2102,16 +2350,16 @@ DWORD WINAPI FormatThread(void* param)
 {
 	int i, r;
 	BOOL ret, use_large_fat32, windows_to_go;
-	DWORD DriveIndex = (DWORD)(uintptr_t)param;
+	DWORD DriveIndex = (DWORD)(uintptr_t)param, ClusterSize, Flags;
 	HANDLE hPhysicalDrive = INVALID_HANDLE_VALUE;
 	HANDLE hLogicalVolume = INVALID_HANDLE_VALUE;
 	HANDLE hSourceImage = INVALID_HANDLE_VALUE;
 	SYSTEMTIME lt;
 	FILE* log_fd;
 	uint8_t *buffer = NULL, extra_partitions = 0;
-	char *bb_msg, *guid_volume = NULL;
+	char *bb_msg, *volume_name = NULL;
 	char drive_name[] = "?:\\";
-	char drive_letters[27], fs_name[32];
+	char drive_letters[27], fs_name[32], label[64];
 	char logfile[MAX_PATH], *userdir;
 	char efi_dst[] = "?:\\efi\\boot\\bootx64.efi";
 	char kolibri_dst[] = "?:\\MTLD_F32";
@@ -2127,14 +2375,14 @@ DWORD WINAPI FormatThread(void* param)
 	if ((windows_to_go) && (target_type == TT_UEFI) && (partition_type == PARTITION_STYLE_GPT))
 		// According to Microsoft, every GPT disk (we RUN Windows from) must have an MSR due to not having hidden sectors
 		// http://msdn.microsoft.com/en-us/library/windows/hardware/dn640535.aspx#gpt_faq_what_disk_require_msr
-		extra_partitions = XP_MSR | XP_EFI;
+		extra_partitions = XP_ESP | XP_MSR;
 	else if ( (fs_type == FS_NTFS) && ((boot_type == BT_UEFI_NTFS) ||
 			  ((boot_type == BT_IMAGE) && IS_EFI_BOOTABLE(img_report) && ((target_type == TT_UEFI) || (windows_to_go) || (allow_dual_uefi_bios)))) )
 		extra_partitions = XP_UEFI_NTFS;
-	else if (IsChecked(IDC_OLD_BIOS_FIXES))
-		extra_partitions = XP_COMPAT;
 	else if ((boot_type == BT_IMAGE) && !write_as_image && HAS_PERSISTENCE(img_report) && persistence_size)
 		extra_partitions = XP_CASPER;
+	else if (IsChecked(IDC_OLD_BIOS_FIXES))
+		extra_partitions = XP_COMPAT;
 
 	PrintInfoDebug(0, MSG_225);
 	hPhysicalDrive = GetPhysicalHandle(DriveIndex, lock_drive, FALSE, !lock_drive);
@@ -2171,18 +2419,22 @@ DWORD WINAPI FormatThread(void* param)
 				}
 			}
 			if (!DeleteVolumeMountPointA(drive_name)) {
-				uprintf("Failed to delete mountpoint %s: %", drive_name, WindowsErrorString());
+				uprintf("Failed to delete mountpoint %s: %s", drive_name, WindowsErrorString());
 				// Try to continue. We will bail out if this causes an issue.
 			}
 		}
 	}
-	uprintf("Will use '%c:' as volume mountpoint", drive_name[0]);
+	uprintf("Will use '%C:' as volume mountpoint", drive_name[0]);
 
 	// It kind of blows, but we have to relinquish access to the physical drive
 	// for VDS to be able to delete the partitions that reside on it...
 	safe_unlockclose(hPhysicalDrive);
 	PrintInfoDebug(0, MSG_239);
-	DeletePartitions(DriveIndex);
+	if (!DeletePartitions(DriveIndex)) {
+		SetLastError(FormatStatus);
+		uprintf("Notice: Could not delete partitions: %s", WindowsErrorString());
+		FormatStatus = 0;
+	}
 
 	// Now get RW access to the physical drive...
 	hPhysicalDrive = GetPhysicalHandle(DriveIndex, lock_drive, TRUE, !lock_drive);
@@ -2190,9 +2442,10 @@ DWORD WINAPI FormatThread(void* param)
 		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_OPEN_FAILED;
 		goto out;
 	}
+	RefreshDriveLayout(hPhysicalDrive);
 
 	// ...and get a lock to the logical drive so that we can actually write something
-	hLogicalVolume = GetLogicalHandle(DriveIndex, TRUE, FALSE, !lock_drive);
+	hLogicalVolume = GetLogicalHandle(DriveIndex, 0, TRUE, FALSE, !lock_drive);
 	if (hLogicalVolume == INVALID_HANDLE_VALUE) {
 		uprintf("Could not lock volume");
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_OPEN_FAILED;
@@ -2311,11 +2564,11 @@ DWORD WINAPI FormatThread(void* param)
 		safe_unlockclose(hPhysicalDrive);
 		safe_unlockclose(hLogicalVolume);
 		Sleep(200);
-		WaitForLogical(DriveIndex);
+		WaitForLogical(DriveIndex, 0);
 		if (GetDrivePartitionData(SelectedDrive.DeviceNumber, fs_name, sizeof(fs_name), TRUE)) {
-			guid_volume = GetLogicalName(DriveIndex, TRUE, TRUE);
-			if ((guid_volume != NULL) && (MountVolume(drive_name, guid_volume)))
-				uprintf("Remounted %s as %C:", guid_volume, drive_name[0]);
+			volume_name = GetLogicalName(DriveIndex, 0, TRUE, TRUE);
+			if ((volume_name != NULL) && (MountVolume(drive_name, volume_name)))
+				uprintf("Remounted %s as %C:", volume_name, drive_name[0]);
 		}
 		goto out;
 	}
@@ -2340,31 +2593,57 @@ DWORD WINAPI FormatThread(void* param)
 	}
 	hLogicalVolume = INVALID_HANDLE_VALUE;
 
+	// VDS wants us to unlock the phys
+	if (use_vds)
+		safe_unlockclose(hPhysicalDrive);
+
 	// Wait for the logical drive we just created to appear
 	uprintf("Waiting for logical drive to reappear...");
 	Sleep(200);
-	if (!WaitForLogical(DriveIndex))
+	if (!WaitForLogical(DriveIndex, partition_index[PI_MAIN]))
 		uprintf("Logical drive was not found!");	// We try to continue even if this fails, just in case
 	CHECK_FOR_USER_CANCEL;
 
 	// Format Casper partition if required. Do it before we format anything with
 	// a file system that Windows will recognize, to avoid concurrent access.
 	if (extra_partitions & XP_CASPER) {
-		if (!FormatExtFs("casper-rw", ReadSetting32(SETTING_USE_EXTFS_VERSION))) {
+		uint32_t ext_version = ReadSetting32(SETTING_USE_EXT_VERSION);
+		if ((ext_version < 2) || (ext_version > 4))
+			ext_version = 3;
+		if (!FormatPartition(DriveIndex, partition_index[PI_CASPER], 0, FS_EXT2 + (ext_version - 2),
+			"casper-rw", IsChecked(IDC_QUICK_FORMAT) ? FP_QUICK : 0)) {
 			if (!IS_ERROR(FormatStatus))
 				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_WRITE_FAULT;
 			goto out;
 		}
 	}
 
-	// If FAT32 is requested and we have a large drive (>32 GB) use
-	// large FAT32 format, else use MS's FormatEx.
-	// TODO: We'll want a single call for ext2/ext3/ext4, large FAT32 and everything (after we switch to VDS?)
-	ret = use_large_fat32?FormatFAT32(DriveIndex):FormatDrive(DriveIndex);
+	GetWindowTextU(hLabel, label, sizeof(label));
+	ToValidLabel(label, (fs_type == FS_FAT16) || (fs_type == FS_FAT32) || (fs_type == FS_EXFAT));
+	ClusterSize = (DWORD)ComboBox_GetItemData(hClusterSize, ComboBox_GetCurSel(hClusterSize));
+	if (ClusterSize < 0x200)
+		ClusterSize = 0;	// 0 = default cluster size
+
+	Flags = FP_FORCE;
+	if (IsChecked(IDC_QUICK_FORMAT))
+		Flags |= FP_QUICK;
+	if ((fs_type == FS_NTFS) && (enable_ntfs_compression))
+		Flags |= FP_COMPRESSION;
+
+	ret = FormatPartition(DriveIndex, partition_index[PI_MAIN], ClusterSize, fs_type, label, Flags);
 	if (!ret) {
-		// Error will be set by FormatDrive() in FormatStatus
+		// Error will be set by FormatPartition() in FormatStatus
 		uprintf("Format error: %s", StrError(FormatStatus, TRUE));
 		goto out;
+	}
+
+	if (use_vds) {
+		// Get RW access back to the physical drive...
+		hPhysicalDrive = GetPhysicalHandle(DriveIndex, lock_drive, TRUE, !lock_drive);
+		if (hPhysicalDrive == INVALID_HANDLE_VALUE) {
+			FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_OPEN_FAILED;
+			goto out;
+		}
 	}
 
 	// Thanks to Microsoft, we must fix the MBR AFTER the drive has been formatted
@@ -2378,20 +2657,20 @@ DWORD WINAPI FormatThread(void* param)
 		UpdateProgress(OP_FIX_MBR, -1.0f);
 	}
 	Sleep(200);
-	WaitForLogical(DriveIndex);
+	WaitForLogical(DriveIndex, 0);
 	// Try to continue
 	CHECK_FOR_USER_CANCEL;
 
-	guid_volume = GetLogicalName(DriveIndex, TRUE, TRUE);
-	if (guid_volume == NULL) {
-		uprintf("Could not get GUID volume name");
+	volume_name = GetLogicalName(DriveIndex, partition_index[PI_MAIN], TRUE, TRUE);
+	if (volume_name == NULL) {
+		uprintf("Could not get volume name");
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_NO_VOLUME_ID;
 		goto out;
 	}
-	uprintf("Found volume GUID %s", guid_volume);
+	uprintf("Found volume %s", volume_name);
 
-	if (!MountVolume(drive_name, guid_volume)) {
-		uprintf("Could not remount %s as %C: %s\n", guid_volume, drive_name[0], WindowsErrorString());
+	if (!MountVolume(drive_name, volume_name)) {
+		uprintf("Could not remount %s as %C: %s\n", volume_name, drive_name[0], WindowsErrorString());
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_MOUNT_VOLUME);
 		goto out;
 	}
@@ -2400,7 +2679,7 @@ DWORD WINAPI FormatThread(void* param)
 	// Disable file indexing, unless it was force-enabled by the user
 	if ((!enable_file_indexing) && ((fs_type == FS_NTFS) || (fs_type == FS_UDF) || (fs_type == FS_REFS))) {
 		uprintf("Disabling file indexing...");
-		if (!SetFileAttributesA(guid_volume, FILE_ATTRIBUTE_NOT_CONTENT_INDEXED))
+		if (!SetFileAttributesA(volume_name, FILE_ATTRIBUTE_NOT_CONTENT_INDEXED))
 			uprintf("Could not disable file indexing: %s", WindowsErrorString());
 	}
 
@@ -2431,7 +2710,8 @@ DWORD WINAPI FormatThread(void* param)
 		} else {
 			// We still have a lock, which we need to modify the volume boot record
 			// => no need to reacquire the lock...
-			hLogicalVolume = GetLogicalHandle(DriveIndex, FALSE, TRUE, FALSE);
+			// TODO: Shouldn't PI always be 1 here?
+			hLogicalVolume = GetLogicalHandle(DriveIndex, partition_index[PI_MAIN], FALSE, TRUE, FALSE);
 			if ((hLogicalVolume == INVALID_HANDLE_VALUE) || (hLogicalVolume == NULL)) {
 				uprintf("Could not re-mount volume for partition boot record access");
 				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_OPEN_FAILED;
@@ -2482,7 +2762,7 @@ DWORD WINAPI FormatThread(void* param)
 			drive_name[2] = 0;	// Ensure our drive is something like 'D:'
 			if (windows_to_go) {
 				PrintInfoDebug(0, MSG_268);
-				if (!SetupWinToGo(drive_name, (extra_partitions & XP_EFI))) {
+				if (!SetupWinToGo(DriveIndex, drive_name, (extra_partitions & XP_ESP))) {
 					if (!IS_ERROR(FormatStatus))
 						FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_ISO_EXTRACT);
 					goto out;
@@ -2547,17 +2827,17 @@ DWORD WINAPI FormatThread(void* param)
 
 out:
 	zero_drive = FALSE;
-	safe_free(guid_volume);
+	safe_free(volume_name);
 	safe_free(buffer);
 	safe_closehandle(hSourceImage);
 	safe_unlockclose(hLogicalVolume);
 	safe_unlockclose(hPhysicalDrive);	// This can take a while
 	if (IS_ERROR(FormatStatus)) {
-		guid_volume = GetLogicalName(DriveIndex, TRUE, FALSE);
-		if (guid_volume != NULL) {
-			if (MountVolume(drive_name, guid_volume))
+		volume_name = GetLogicalName(DriveIndex, 0, TRUE, FALSE);
+		if (volume_name != NULL) {
+			if (MountVolume(drive_name, volume_name))
 				uprintf("Re-mounted volume as %C: after error", drive_name[0]);
-			free(guid_volume);
+			free(volume_name);
 		}
 	}
 	PostMessage(hMainDialog, UM_FORMAT_COMPLETED, (WPARAM)TRUE, 0);

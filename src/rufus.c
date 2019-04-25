@@ -51,7 +51,6 @@
 #include "../res/grub2/grub2_version.h"
 
 static const char* cmdline_hogger = "rufus.com";
-static const char* FileSystemLabel[FS_MAX] = { "FAT", "FAT32", "NTFS", "UDF", "exFAT", "ReFS" };
 static const char* ep_reg = "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer";
 static const char* vs_reg = "Software\\Microsoft\\VisualStudio";
 static BOOL existing_key = FALSE;	// For LGP set/restore
@@ -84,6 +83,7 @@ extern long grub2_len;
 extern char* szStatusMessage;
 extern const char* old_c32_name[NB_OLD_C32];
 extern const char* cert_name[3];
+extern const char* FileSystemLabel[FS_MAX];
 
 /*
  * Globals
@@ -108,7 +108,7 @@ BOOL enable_HDDs = FALSE, enable_ntfs_compression = FALSE, no_confirmation_on_ca
 BOOL advanced_mode_device, advanced_mode_format, allow_dual_uefi_bios, detect_fakes, enable_vmdk, force_large_fat32, usb_debug;
 BOOL use_fake_units, preserve_timestamps = FALSE, fast_zeroing = FALSE, app_changed_size = FALSE;
 BOOL zero_drive = FALSE, list_non_usb_removable_drives = FALSE, enable_file_indexing, large_drive = FALSE;
-BOOL write_as_image = FALSE, installed_uefi_ntfs = FALSE, enable_fido = FALSE;
+BOOL write_as_image = FALSE, installed_uefi_ntfs = FALSE, enable_fido = FALSE, use_vds = FALSE;
 float fScale = 1.0f;
 int dialog_showing = 0, selection_default = BT_IMAGE, windows_to_go_selection = 0, persistence_unit_selection = -1;
 int default_fs, fs_type, boot_type, partition_type, target_type; // file system, boot type, partition type, target type
@@ -121,7 +121,7 @@ char msgbox[1024], msgbox_title[32], *ini_file = NULL, *image_path = NULL, *shor
 char image_option_txt[128], *fido_url = NULL;
 StrArray DriveID, DriveLabel, DriveHub, BlockingProcess, ImageList;
 // Number of steps for each FS for FCC_STRUCTURE_PROGRESS
-const int nb_steps[FS_MAX] = { 5, 5, 12, 1, 10 };
+const int nb_steps[FS_MAX] = { 5, 5, 12, 1, 10, 1, 1, 1, 1 };
 const char* flash_type[BADLOCKS_PATTERN_TYPES] = { "SLC", "MLC", "TLC" };
 
 // TODO: Remember to update copyright year in stdlg's AboutCallback() WM_INITDIALOG,
@@ -1859,10 +1859,6 @@ out:
 	return ret;
 }
 
-
-#ifdef RUFUS_TEST
-extern BOOL FormatExtFs(const char* label, uint32_t version);
-#endif
 /*
  * Main dialog callback
  */
@@ -1898,7 +1894,15 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	case WM_COMMAND:
 #ifdef RUFUS_TEST
 		if (LOWORD(wParam) == IDC_TEST) {
-			FormatExtFs("casper-rw", 3);
+//			uprintf("  IID_IVdsVolume: %s", GuidToString(&IID_IVdsVolume));
+//			uprintf("  IID_IVdsVolumeMF3: %s", GuidToString(&IID_IVdsVolumeMF3));
+			nDeviceIndex = ComboBox_GetCurSel(hDeviceList);
+//			AltMountVolume2("G:", 3);
+			AltMountVolume((DWORD)ComboBox_GetItemData(hDeviceList, nDeviceIndex), 3);
+//			AltUnmountVolume("P:");
+//			uprintf("%s", GetLogicalName((DWORD)ComboBox_GetItemData(hDeviceList, nDeviceIndex), 0, FALSE, FALSE));
+//			uprintf("%s", GetLogicalName((DWORD)ComboBox_GetItemData(hDeviceList, nDeviceIndex), 1, FALSE, FALSE));
+//			uprintf("%s", GetLogicalName((DWORD)ComboBox_GetItemData(hDeviceList, nDeviceIndex), 2, FALSE, FALSE));
 			break;
 		}
 #endif
@@ -3026,6 +3030,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	advanced_mode_format = ReadSettingBool(SETTING_ADVANCED_MODE_FORMAT);
 	preserve_timestamps = ReadSettingBool(SETTING_PRESERVE_TIMESTAMPS);
 	use_fake_units = !ReadSettingBool(SETTING_USE_PROPER_SIZE_UNITS);
+	use_vds = ReadSettingBool(SETTING_USE_VDS);
 	usb_debug = ReadSettingBool(SETTING_ENABLE_USB_DEBUG);
 	detect_fakes = !ReadSettingBool(SETTING_DISABLE_FAKE_DRIVES_CHECK);
 	allow_dual_uefi_bios = ReadSettingBool(SETTING_ENABLE_WIN_DUAL_EFI_BIOS);
@@ -3198,7 +3203,7 @@ relaunch:
 
 	// Do our own event processing and process "magic" commands
 	while(GetMessage(&msg, NULL, 0, 0)) {
-		// ** *****  **** ** ***** ****
+		// ** *****  **** ** **********
 		// .,ABCDEFGHIJKLMNOPQRSTUVWXYZ
 
 		// Ctrl-A => Select the log data
@@ -3355,6 +3360,13 @@ relaunch:
 			WriteSettingBool(SETTING_USE_PROPER_SIZE_UNITS, !use_fake_units);
 			PrintStatusTimeout(lmprintf(MSG_263), !use_fake_units);
 			GetDevices(0);
+			continue;
+		}
+		// Alt-V => Use VDS facilities for formatting
+		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'V')) {
+			use_vds = !use_vds;
+			WriteSettingBool(SETTING_USE_VDS, use_vds);
+			PrintStatusTimeout("VDS", use_vds);
 			continue;
 		}
 		// Alt-W => Enable VMWare disk detection
