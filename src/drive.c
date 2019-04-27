@@ -1348,16 +1348,28 @@ BOOL RemountVolume(char* drive_name)
 	return TRUE;
 }
 
-/* MinGW is unhappy about accessing partitions beside the first unless we redef */
-typedef struct _DRIVE_LAYOUT_INFORMATION_EX4 {
-	DWORD PartitionStyle;
-	DWORD PartitionCount;
-	union {
-		DRIVE_LAYOUT_INFORMATION_MBR Mbr;
-		DRIVE_LAYOUT_INFORMATION_GPT Gpt;
-	} Type;
-	PARTITION_INFORMATION_EX PartitionEntry[MAX_PARTITIONS];
-} DRIVE_LAYOUT_INFORMATION_EX4,*PDRIVE_LAYOUT_INFORMATION_EX4;
+/*
+ * Zero the first 'size' bytes of a partition. This is needed because we haven't found a way to
+ * properly reset Windows's cached view of a drive partitioning short of cycling the USB port
+ * (especially IOCTL_DISK_UPDATE_PROPERTIES is *USELESS*), and therefore the OS will try to
+ * read the file system data at an old location, even if the partition has just been deleted.
+ * TODO: We should do something like this is DeletePartitions() too.
+ */
+static BOOL ClearPartition(HANDLE hDrive, LARGE_INTEGER offset, DWORD size)
+{
+	BOOL r = FALSE;
+	uint8_t* buffer = calloc(size, 1);
+
+	if (buffer == NULL)
+		return FALSE;
+
+	if (!SetFilePointerEx(hDrive, offset, NULL, FILE_BEGIN))
+		return FALSE;
+
+	r = WriteFileWithRetry(hDrive, buffer, size, &size, WRITE_RETRIES);
+	free(buffer);
+	return r;
+}
 
 /*
  * Create a partition table
@@ -1369,15 +1381,16 @@ typedef struct _DRIVE_LAYOUT_INFORMATION_EX4 {
 BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL mbr_uefi_marker, uint8_t extra_partitions)
 {
 	const char* PartitionTypeName[] = { "MBR", "GPT", "SFD" };
-	const wchar_t* extra_part_name;
-	unsigned char* buffer;
+	const wchar_t *extra_part_name = L"", *main_part_name = L"Main Data Partition";
+	const LONGLONG bytes_per_track = ((LONGLONG)SelectedDrive.SectorsPerTrack) * SelectedDrive.SectorSize;
+	const DWORD size_to_clear = MAX_SECTORS_TO_CLEAR * SelectedDrive.SectorSize;
+	uint8_t* buffer;
 	size_t uefi_ntfs_size = 0;
 	CREATE_DISK CreateDisk = {PARTITION_STYLE_RAW, {{0}}};
 	DRIVE_LAYOUT_INFORMATION_EX4 DriveLayoutEx = {0};
 	BOOL r;
 	DWORD i, size, bufsize, pn = 0;
 	LONGLONG main_part_size_in_sectors, extra_part_size_in_tracks = 0, ms_esp_size;
-	const LONGLONG bytes_per_track = ((LONGLONG)SelectedDrive.SectorsPerTrack) * SelectedDrive.SectorSize;
 
 	PrintInfoDebug(0, MSG_238, PartitionTypeName[partition_style]);
 
@@ -1403,7 +1416,7 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 
 	// If required, set the ESP (which Microsoft wants to be the first)
 	if (extra_partitions & XP_ESP) {
-		uprintf("● Creating EFI System Partition");
+		extra_part_name = L"EFI System Partition";
 		// The size of the ESP depends on the minimum size we're able to format in FAT32, which
 		// in turn depends on the cluster size used, which in turn depends on the disk sector size.
 		// Plus some people are complaining that the *OFFICIAL MINIMUM SIZE* as documented by Microsoft at
@@ -1415,15 +1428,18 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 			ms_esp_size = 1200 * MB;	// That'll teach you to have a nonstandard disk!
 		extra_part_size_in_tracks = (ms_esp_size + bytes_per_track - 1) / bytes_per_track;
 		DriveLayoutEx.PartitionEntry[pn].PartitionLength.QuadPart = extra_part_size_in_tracks * bytes_per_track;
-
+		uprintf("● Creating %S Partition (offset: %lld, size: %s)", extra_part_name, DriveLayoutEx.PartitionEntry[pn].StartingOffset.QuadPart,
+			SizeToHumanReadable(DriveLayoutEx.PartitionEntry[pn].PartitionLength.QuadPart, TRUE, FALSE));
 		if (partition_style == PARTITION_STYLE_GPT) {
 			DriveLayoutEx.PartitionEntry[pn].Gpt.PartitionType = PARTITION_SYSTEM_GUID;
 			IGNORE_RETVAL(CoCreateGuid(&DriveLayoutEx.PartitionEntry[pn].Gpt.PartitionId));
-			// coverity[strcpy_overrun]
-			wcscpy(DriveLayoutEx.PartitionEntry[pn].Gpt.Name, L"EFI System Partition");
+			wcscpy(DriveLayoutEx.PartitionEntry[pn].Gpt.Name, extra_part_name);
 		} else {
 			DriveLayoutEx.PartitionEntry[pn].Mbr.PartitionType = 0xef;
 		}
+		// Zero the first sectors from this partition to avoid file system caching issues
+		if (!ClearPartition(hDrive, DriveLayoutEx.PartitionEntry[pn].StartingOffset, size_to_clear))
+			uprintf("Could not zero %S: %s", extra_part_name, WindowsErrorString());
 		pn++;
 		partition_index[PI_ESP] = pn;
 		DriveLayoutEx.PartitionEntry[pn].StartingOffset.QuadPart = DriveLayoutEx.PartitionEntry[pn - 1].StartingOffset.QuadPart +
@@ -1431,24 +1447,18 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 	}
 
 	// If required, set the MSR partition (GPT only - must be created before the data part)
-	if ((partition_style == PARTITION_STYLE_GPT) && (extra_partitions & XP_MSR)) {
-		uprintf("● Creating MSR Partition");
+	if (extra_partitions & XP_MSR) {
+		assert (partition_style == PARTITION_STYLE_GPT);
+		extra_part_name = L"Microsoft Reserved Partition";
 		DriveLayoutEx.PartitionEntry[pn].PartitionLength.QuadPart = 128*MB;
 		DriveLayoutEx.PartitionEntry[pn].Gpt.PartitionType = PARTITION_MSFT_RESERVED_GUID;
+		uprintf("● Creating %S Partition (offset: %lld, size: %s)", extra_part_name, DriveLayoutEx.PartitionEntry[pn].StartingOffset.QuadPart,
+			SizeToHumanReadable(DriveLayoutEx.PartitionEntry[pn].PartitionLength.QuadPart, TRUE, FALSE));
 		IGNORE_RETVAL(CoCreateGuid(&DriveLayoutEx.PartitionEntry[pn].Gpt.PartitionId));
-		// coverity[strcpy_overrun]
-		wcscpy(DriveLayoutEx.PartitionEntry[pn].Gpt.Name, L"Microsoft Reserved Partition");
-
-		// We must zero the beginning of this partition, else we get FAT leftovers and stuff
-		if (SetFilePointerEx(hDrive, DriveLayoutEx.PartitionEntry[pn].StartingOffset, NULL, FILE_BEGIN)) {
-			bufsize = 65536;	// 64K should be enough for everyone
-			buffer = calloc(bufsize, 1);
-			if (buffer != NULL) {
-				if (!WriteFileWithRetry(hDrive, buffer, bufsize, &size, WRITE_RETRIES))
-					uprintf("  Could not zero MSR: %s", WindowsErrorString());
-				free(buffer);
-			}
-		}
+		wcsncpy(DriveLayoutEx.PartitionEntry[pn].Gpt.Name, extra_part_name, ARRAYSIZE(DriveLayoutEx.PartitionEntry[pn].Gpt.Name));
+		// Zero the first sectors from this partition to avoid file system caching issues
+		if (!ClearPartition(hDrive, DriveLayoutEx.PartitionEntry[pn].StartingOffset, size_to_clear))
+			uprintf("Could not zero %S: %s", extra_part_name, WindowsErrorString());
 		pn++;
 		DriveLayoutEx.PartitionEntry[pn].StartingOffset.QuadPart = DriveLayoutEx.PartitionEntry[pn-1].StartingOffset.QuadPart +
 				DriveLayoutEx.PartitionEntry[pn-1].PartitionLength.QuadPart;
@@ -1460,10 +1470,7 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 	main_part_size_in_sectors = (SelectedDrive.DiskSize - DriveLayoutEx.PartitionEntry[pn].StartingOffset.QuadPart) /
 		// Need 33 sectors at the end for secondary GPT
 		SelectedDrive.SectorSize - ((partition_style == PARTITION_STYLE_GPT)?33:0);
-	if (!extra_partitions) {
-		uprintf("● Creating Main Data Partition: %lld tracks (%s)", main_part_size_in_sectors / SelectedDrive.SectorsPerTrack,
-			SizeToHumanReadable(main_part_size_in_sectors * SelectedDrive.SectorSize, TRUE, FALSE));
-	} else {
+	if (extra_partitions) {
 		// Adjust the size according to extra partitions (which we always align to a track)
 		if (extra_partitions & XP_UEFI_NTFS) {
 			extra_part_name = L"UEFI:NTFS";
@@ -1475,18 +1482,21 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 		} else if (extra_partitions & XP_COMPAT) {
 			extra_part_name = L"BIOS Compatibility";
 			extra_part_size_in_tracks = 1;	// One track for the extra partition
+		} else {
+			assert(FALSE);
 		}
 		main_part_size_in_sectors = ((main_part_size_in_sectors / SelectedDrive.SectorsPerTrack) -
 			extra_part_size_in_tracks) * SelectedDrive.SectorsPerTrack;
-		uprintf("● Creating Main Data Partition: %lld tracks (%s)", main_part_size_in_sectors / SelectedDrive.SectorsPerTrack,
-			SizeToHumanReadable(main_part_size_in_sectors * SelectedDrive.SectorSize, TRUE, FALSE));
-		uprintf("● Creating %S Partition: %lld tracks (%s)", extra_part_name, extra_part_size_in_tracks,
-			SizeToHumanReadable(extra_part_size_in_tracks * bytes_per_track, TRUE, FALSE));
 	}
 	if (main_part_size_in_sectors <= 0) {
-		uprintf("Error: Invalid Main Partition size!");
+		uprintf("Error: Invalid %S size", main_part_name);
 		return FALSE;
 	}
+	uprintf("● Creating %S (offset: %lld, size: %s)", main_part_name, DriveLayoutEx.PartitionEntry[pn].StartingOffset.QuadPart,
+		SizeToHumanReadable(main_part_size_in_sectors * SelectedDrive.SectorSize, TRUE, FALSE));
+	// Zero the beginning of this partition to avoid conflicting leftovers
+	if (!ClearPartition(hDrive, DriveLayoutEx.PartitionEntry[pn].StartingOffset, size_to_clear))
+		uprintf("Could not zero %S: %s", main_part_name, WindowsErrorString());
 
 	DriveLayoutEx.PartitionEntry[pn].PartitionLength.QuadPart = main_part_size_in_sectors * SelectedDrive.SectorSize;
 	if (partition_style == PARTITION_STYLE_MBR) {
@@ -1516,7 +1526,7 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 	} else {
 		DriveLayoutEx.PartitionEntry[pn].Gpt.PartitionType = PARTITION_BASIC_DATA_GUID;
 		IGNORE_RETVAL(CoCreateGuid(&DriveLayoutEx.PartitionEntry[pn].Gpt.PartitionId));
-		wcscpy(DriveLayoutEx.PartitionEntry[pn].Gpt.Name, L"Basic Data");
+		wcsncpy(DriveLayoutEx.PartitionEntry[pn].Gpt.Name, main_part_name, ARRAYSIZE(DriveLayoutEx.PartitionEntry[pn].Gpt.Name));
 	}
 	pn++;
 	partition_index[PI_MAIN] = pn;
@@ -1531,10 +1541,12 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 			DriveLayoutEx.PartitionEntry[pn-1].PartitionLength.QuadPart;
 		DriveLayoutEx.PartitionEntry[pn].PartitionLength.QuadPart = (extra_partitions & XP_UEFI_NTFS)?uefi_ntfs_size:
 			extra_part_size_in_tracks * bytes_per_track;
+		uprintf("● Creating %S Partition (offset: %lld, size: %s)", extra_part_name, DriveLayoutEx.PartitionEntry[pn].StartingOffset.QuadPart,
+			SizeToHumanReadable(DriveLayoutEx.PartitionEntry[pn].PartitionLength.QuadPart, TRUE, FALSE));
 		if (partition_style == PARTITION_STYLE_GPT) {
 			DriveLayoutEx.PartitionEntry[pn].Gpt.PartitionType = PARTITION_BASIC_DATA_GUID;
 			IGNORE_RETVAL(CoCreateGuid(&DriveLayoutEx.PartitionEntry[pn].Gpt.PartitionId));
-			wcscpy(DriveLayoutEx.PartitionEntry[pn].Gpt.Name, extra_part_name);
+			wcsncpy(DriveLayoutEx.PartitionEntry[pn].Gpt.Name, extra_part_name, ARRAYSIZE(DriveLayoutEx.PartitionEntry[pn].Gpt.Name));
 		} else {
 			if (extra_partitions & XP_UEFI_NTFS) {
 				DriveLayoutEx.PartitionEntry[pn].Mbr.PartitionType = 0xef;

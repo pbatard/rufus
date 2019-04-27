@@ -1038,8 +1038,10 @@ static __inline char* getenvU(const char* varname)
 	// _wgetenv() is *BROKEN* in MS compilers => use GetEnvironmentVariableW()
 	DWORD dwSize = GetEnvironmentVariableW(wvarname, wbuf, 0);
 	wbuf = calloc(dwSize, sizeof(wchar_t));
-	if (wbuf == NULL)
+	if (wbuf == NULL) {
+		wfree(varname);
 		return NULL;
+	}
 	dwSize = GetEnvironmentVariableW(wvarname, wbuf, dwSize);
 	if (dwSize != 0)
 		ret = wchar_to_utf8(wbuf);

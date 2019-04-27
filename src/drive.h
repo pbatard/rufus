@@ -318,6 +318,17 @@ interface IVdsAsync {
 #define IVdsAsync_Release(This) (This)->lpVtbl->Release(This)
 #endif
 
+/* MinGW is unhappy about accessing partitions beside the first unless we redef */
+typedef struct _DRIVE_LAYOUT_INFORMATION_EX4 {
+	DWORD PartitionStyle;
+	DWORD PartitionCount;
+	union {
+		DRIVE_LAYOUT_INFORMATION_MBR Mbr;
+		DRIVE_LAYOUT_INFORMATION_GPT Gpt;
+	} Type;
+	PARTITION_INFORMATION_EX PartitionEntry[MAX_PARTITIONS];
+} DRIVE_LAYOUT_INFORMATION_EX4, *PDRIVE_LAYOUT_INFORMATION_EX4;
+
 static __inline BOOL UnlockDrive(HANDLE hDrive) {
 	DWORD size;
 	return DeviceIoControl(hDrive, FSCTL_UNLOCK_VOLUME, NULL, 0, NULL, 0, &size, NULL);

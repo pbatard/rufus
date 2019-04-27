@@ -1529,7 +1529,7 @@ static void InitDialog(HWND hDlg)
 	CharUpperBuffU(uppercase_select[0], sizeof(uppercase_select[0]));
 	CharUpperBuffU(uppercase_select[1], sizeof(uppercase_select[1]));
 	SetWindowTextU(GetDlgItem(hDlg, IDC_SELECT), uppercase_select[0]);
-	strcpy(uppercase_cancel, lmprintf(MSG_007));
+	static_strcpy(uppercase_cancel, lmprintf(MSG_007));
 	CharUpperBuffU(uppercase_cancel, sizeof(uppercase_cancel));
 
 	CreateSmallButtons(hDlg);

@@ -1277,7 +1277,7 @@ BOOL DumpFatDir(const char* path, int32_t cluster)
 	void* buf;
 	char *target = NULL, *name = NULL;
 	BOOL ret = FALSE;
-	HANDLE handle;
+	HANDLE handle = NULL;
 	DWORD size, written;
 	libfat_diritem_t diritem = { 0 };
 	libfat_dirpos_t dirpos = { cluster, -1, 0 };
@@ -1351,28 +1351,28 @@ BOOL DumpFatDir(const char* path, int32_t cluster)
 				handle = CreateFileU(target, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ,
 					NULL, CREATE_ALWAYS, diritem.attributes, NULL);
 				if (handle == INVALID_HANDLE_VALUE) {
-					uprintf("Unable to create '%s': %s", target, WindowsErrorString());
+					uprintf("Could not create '%s': %s", target, WindowsErrorString());
 					continue;
 				}
 
 				written = 0;
 				s = libfat_clustertosector(lf_fs, dirpos.cluster);
 				while ((s != 0) && (s < 0xFFFFFFFFULL) && (written < diritem.size)) {
-					if (FormatStatus) goto out;
+					if (FormatStatus)
+						goto out;
 					buf = libfat_get_sector(lf_fs, s);
 					size = MIN(LIBFAT_SECTOR_SIZE, diritem.size - written);
 					if (!WriteFileWithRetry(handle, buf, size, &size, WRITE_RETRIES) ||
 						(size != MIN(LIBFAT_SECTOR_SIZE, diritem.size - written))) {
-						uprintf("Error writing '%s': %s", target, WindowsErrorString());
-						CloseHandle(handle);
-						continue;
+						uprintf("Could not write '%s': %s", target, WindowsErrorString());
+						break;
 					}
 					written += size;
 					s = libfat_nextsector(lf_fs, s);
 					// Trust me, you *REALLY* want to invoke libfat_flush() here
 					libfat_flush(lf_fs);
 				}
-				CloseHandle(handle);
+				safe_closehandle(handle);
 				if (props.is_conf)
 					fix_config(target, NULL, NULL, &props);
 			}
@@ -1395,6 +1395,7 @@ out:
 		if (p_iso != NULL)
 			iso9660_close(p_iso);
 	}
+	safe_closehandle(handle);
 	safe_free(name);
 	safe_free(target);
 	return ret;
