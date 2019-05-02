@@ -2,7 +2,7 @@
  * Rufus: The Reliable USB Formatting Utility
  * Formatting function calls
  * Copyright © 2007-2009 Tom Thornhill/Ridgecrop
- * Copyright © 2011-2018 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2019 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <windows.h>
-#include <winioctl.h>				// for MEDIA_TYPE
+#include <winioctl.h>	// for MEDIA_TYPE
 
 #include "ext2fs/ext2fs.h"
 
@@ -170,3 +170,4 @@ typedef struct {
 } ext2fs_default_t;
 
 extern io_manager nt_io_manager(void);
+extern DWORD ext2_last_winerror(DWORD default_error);
