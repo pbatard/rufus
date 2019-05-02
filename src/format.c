@@ -244,6 +244,8 @@ static BOOLEAN __stdcall ChkdskCallback(FILE_SYSTEM_CALLBACK_COMMAND Command, DW
 
 /*
  * Converts an UTF-8 label to a valid FAT/NTFS one
+ * TODO: Use IVdsService::QueryFileSystemTypes -> VDS_FILE_SYSTEM_TYPE_PROP
+ * to get the list of unauthorised and max length for each FS.
  */
 static void ToValidLabel(char* Label, BOOL bFAT)
 {
@@ -877,7 +879,7 @@ BOOL FormatExtFs(DWORD DriveIndex, DWORD PartitionIndex, DWORD BlockSize, LPCSTR
 	// Figure out the volume size and block size
 	r = ext2fs_get_device_size2(volume_name, KB, &size);
 	if ((r != 0) || (size == 0)) {
-		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_READ_FAULT;
+		FormatStatus = ext2_last_winerror(ERROR_READ_FAULT);
 		uprintf("Could not read device size: %s", error_message(r));
 		goto out;
 	}
@@ -922,7 +924,7 @@ BOOL FormatExtFs(DWORD DriveIndex, DWORD PartitionIndex, DWORD BlockSize, LPCSTR
 	// Now that we have set our base features, initialize a virtual superblock
 	r = ext2fs_initialize(volume_name, EXT2_FLAG_EXCLUSIVE | EXT2_FLAG_64BITS, &features, manager, &ext2fs);
 	if (r != 0) {
-		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_INVALID_DATA;
+		FormatStatus = ext2_last_winerror(ERROR_INVALID_DATA);
 		uprintf("Could not initialize %s features: %s", FSName, error_message(r));
 		goto out;
 	}
@@ -933,7 +935,7 @@ BOOL FormatExtFs(DWORD DriveIndex, DWORD PartitionIndex, DWORD BlockSize, LPCSTR
 	r = io_channel_write_blk64(ext2fs->io, 0, 16, buf);
 	safe_free(buf);
 	if (r != 0) {
-		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_WRITE_FAULT;
+		FormatStatus = ext2_last_winerror(ERROR_WRITE_FAULT);
 		uprintf("Could not zero %s superblock area: %s", FSName, error_message(r));
 		goto out;
 	}
@@ -951,7 +953,7 @@ BOOL FormatExtFs(DWORD DriveIndex, DWORD PartitionIndex, DWORD BlockSize, LPCSTR
 
 	r = ext2fs_allocate_tables(ext2fs);
 	if (r != 0) {
-		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_INVALID_DATA;
+		FormatStatus = ext2_last_winerror(ERROR_INVALID_DATA);
 		uprintf("Could not allocate %s tables: %s", FSName, error_message(r));
 		goto out;
 	}
@@ -973,7 +975,7 @@ BOOL FormatExtFs(DWORD DriveIndex, DWORD PartitionIndex, DWORD BlockSize, LPCSTR
 			* EXT2_BLOCK_SIZE(ext2fs->super), EXT2_BLOCK_SIZE(ext2fs->super));
 		r = ext2fs_zero_blocks2(ext2fs, cur, count, &cur, &count);
 		if (r != 0) {
-			FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_WRITE_FAULT;
+			FormatStatus = ext2_last_winerror(ERROR_WRITE_FAULT);
 			uprintf("\r\nCould not zero inode set at position %llu (%d blocks): %s", cur, count, error_message(r));
 			goto out;
 		}
@@ -983,14 +985,14 @@ BOOL FormatExtFs(DWORD DriveIndex, DWORD PartitionIndex, DWORD BlockSize, LPCSTR
 	// Create root and lost+found dirs
 	r = ext2fs_mkdir(ext2fs, EXT2_ROOT_INO, EXT2_ROOT_INO, 0);
 	if (r != 0) {
-		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_DIR_NOT_ROOT;
+		FormatStatus = ext2_last_winerror(ERROR_DIR_NOT_ROOT);
 		uprintf("Failed to create %s root dir: %s", FSName, error_message(r));
 		goto out;
 	}
 	ext2fs->umask = 077;
 	r = ext2fs_mkdir(ext2fs, EXT2_ROOT_INO, 0, "lost+found");
 	if (r != 0) {
-		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_DIR_NOT_ROOT;
+		FormatStatus = ext2_last_winerror(ERROR_DIR_NOT_ROOT);
 		uprintf("Failed to create %s 'lost+found' dir: %s", FSName, error_message(r));
 		goto out;
 	}
@@ -1002,14 +1004,14 @@ BOOL FormatExtFs(DWORD DriveIndex, DWORD PartitionIndex, DWORD BlockSize, LPCSTR
 
 	r = ext2fs_mark_inode_bitmap2(ext2fs->inode_map, EXT2_BAD_INO);
 	if (r != 0) {
-		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_WRITE_FAULT;
+		FormatStatus = ext2_last_winerror(ERROR_WRITE_FAULT);
 		uprintf("Could not set inode bitmaps: %s", error_message(r));
 		goto out;
 	}
 	ext2fs_inode_alloc_stats(ext2fs, EXT2_BAD_INO, 1);
 	r = ext2fs_update_bb_inode(ext2fs, NULL);
 	if (r != 0) {
-		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_WRITE_FAULT;
+		FormatStatus = ext2_last_winerror(ERROR_WRITE_FAULT);
 		uprintf("Could not set inode stats: %s", error_message(r));
 		goto out;
 	}
@@ -1025,7 +1027,7 @@ BOOL FormatExtFs(DWORD DriveIndex, DWORD PartitionIndex, DWORD BlockSize, LPCSTR
 		r = ext2fs_add_journal_inode(ext2fs, journal_size, EXT2_MKJOURNAL_NO_MNT_CHECK | ((Flags & FP_QUICK) ? EXT2_MKJOURNAL_LAZYINIT : 0));
 		uprintfs("\r\n");
 		if (r != 0) {
-			FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_WRITE_FAULT;
+			FormatStatus = ext2_last_winerror(ERROR_WRITE_FAULT);
 			uprintf("Could not create %s journal: %s", FSName, error_message(r));
 			goto out;
 		}
@@ -1034,7 +1036,7 @@ BOOL FormatExtFs(DWORD DriveIndex, DWORD PartitionIndex, DWORD BlockSize, LPCSTR
 	// Finally we can call close() to get the file system gets created
 	r = ext2fs_close(ext2fs);
 	if (r != 0) {
-		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_WRITE_FAULT;
+		FormatStatus = ext2_last_winerror(ERROR_WRITE_FAULT);
 		uprintf("Could not create %s volume: %s", FSName, error_message(r));
 		goto out;
 	}
@@ -2594,6 +2596,8 @@ DWORD WINAPI FormatThread(void* param)
 	hLogicalVolume = INVALID_HANDLE_VALUE;
 
 	// VDS wants us to unlock the phys
+	// TODO: IVdsDiskOnline::Offline? -> NOPE, NO_GO for removable media
+	// TODO: IVdsService::Refresh()? IVdsHwProvider::Reenumerate()??
 	if (use_vds)
 		safe_unlockclose(hPhysicalDrive);
 

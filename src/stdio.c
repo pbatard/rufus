@@ -1,6 +1,6 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
- * Standard User I/O Routines (logging, status, etc.)
+ * Standard User I/O Routines (logging, status, error, etc.)
  * Copyright © 2011-2019 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -375,13 +375,11 @@ static const char *GetVdsError(DWORD error_code)
 	case 0x8004250F:	// VDS_E_BAD_PNP_MESSAGE
 		return "The PNP service sent a corrupted notification to the provider.";
 	case 0x80042510:	// VDS_E_NO_PNP_DISK_ARRIVE
-		return "No disk arrival notification was received.";
 	case 0x80042511:	// VDS_E_NO_PNP_VOLUME_ARRIVE
-		return "No volume arrival notification was received.";
+		return "No disk/volume arrival notification was received.";
 	case 0x80042512:	// VDS_E_NO_PNP_DISK_REMOVE
-		return "No disk removal notification was received.";
 	case 0x80042513:	// VDS_E_NO_PNP_VOLUME_REMOVE
-		return "No volume removal notification was received.";
+		return "No disk/volume removal notification was received.";
 	case 0x80042514:	// VDS_E_PROVIDER_EXITING
 		return "The provider is exiting.";
 	case 0x00042517:	// VDS_S_NO_NOTIFICATION
@@ -401,7 +399,7 @@ static const char *GetVdsError(DWORD error_code)
 	case 0x8004253F:	// VDS_E_DISK_LAYOUT_PARTITIONS_TOO_SMALL
 		return "The disk layout contains partitions which are less than the minimum required size.";
 	case 0x80042540:	// VDS_E_DISK_IO_FAILING
-		return "The IO to the disk is failing.";
+		return "The I/O to the disk is failing.";
 	case 0x80042543:	// VDS_E_GPT_ATTRIBUTES_INVALID
 		return "Invalid GPT attributes were specified.";
 	case 0x8004254D:	// VDS_E_UNEXPECTED_DISK_LAYOUT_CHANGE
@@ -473,7 +471,7 @@ static const char *GetVdsError(DWORD error_code)
 	case 0x80042572:	// VDS_E_PROVIDER_INTERNAL_ERROR
 		return "An internal error has occurred in the provider.";
 	case 0x80042575:	// VDS_E_UNRECOVERABLE_PROVIDER_ERROR
-		return "An unrecoverable error occurred in a provider.";
+		return "An unrecoverable error occurred in the provider.";
 	case 0x80042576:	// VDS_E_VOLUME_HIDDEN
 		return "Cannot assign a mount point to a hidden volume.";
 	case 0x00042577:	// VDS_S_DISMOUNT_FAILED
@@ -536,15 +534,12 @@ static const char *GetVdsError(DWORD error_code)
 	case 0x00042809:	// VDS_S_DISK_DISMOUNT_FAILED
 		return "One or more of the volumes on the disk could not be mounted/dismounted.";
 	case 0x8004280A:	// VDS_E_DISK_IS_OFFLINE
-		return "The operation cannot be performed on a disk that is offline.";
 	case 0x8004280B:	// VDS_E_DISK_IS_READ_ONLY
-		return "The operation cannot be performed on a disk that is read-only.";
+		return "The operation cannot be performed on a disk that is offline or read-only.";
 	case 0x8004280C:	// VDS_E_PAGEFILE_DISK
-		return "The operation cannot be performed on a disk that contains a pagefile volume.";
 	case 0x8004280D:	// VDS_E_HIBERNATION_FILE_DISK
-		return "The operation cannot be performed on a disk that contains a hibernation file volume.";
 	case 0x8004280E:	// VDS_E_CRASHDUMP_DISK
-		return "The operation cannot be performed on a disk that contains a crashdump file volume.";
+		return "The operation cannot be performed on a disk that contains a pagefile, hibernation or crashdump volume.";
 	case 0x8004280F:	// VDS_E_UNABLE_TO_FIND_SYSTEM_DISK
 		return "A system error occurred while retrieving the system disk information.";
 	case 0x80042810:	// VDS_E_INCORRECT_SYSTEM_VOLUME_EXTENT_INFO
@@ -564,19 +559,16 @@ static const char *GetVdsError(DWORD error_code)
 	case 0x8004290F:	// VDS_E_DELETE_WITH_CRITICAL
 		return "Delete is not allowed on a critical volume.";
 	case 0x80042910:	// VDS_E_CLEAN_WITH_DATA
-		return "The FORCE parameter MUST be set to TRUE in order to clean a disk that contains a data volume.";
 	case 0x80042911:	// VDS_E_CLEAN_WITH_OEM
-		return "The FORCE parameter MUST be set to TRUE in order to clean a disk that contains an OEM volume.";
+		return "The FORCE parameter MUST be set to TRUE in order to clean a disk that contains a data or OEM volume.";
 	case 0x80042912:	// VDS_E_CLEAN_WITH_CRITICAL
 		return "Clean is not allowed on a critical disk.";
 	case 0x80042913:	// VDS_E_FORMAT_CRITICAL
 		return "Format is not allowed on a critical volume.";
 	case 0x80042914:	// VDS_E_NTFS_FORMAT_NOT_SUPPORTED
-		return "The NTFS file system format is not supported on this volume.";
 	case 0x80042915:	// VDS_E_FAT32_FORMAT_NOT_SUPPORTED
-		return "The FAT32 file system format is not supported on this volume.";
 	case 0x80042916:	// VDS_E_FAT_FORMAT_NOT_SUPPORTED
-		return "The FAT file system format is not supported on this volume.";
+		return "The requested file system format is not supported on this volume.";
 	case 0x80042917:	// VDS_E_FORMAT_NOT_SUPPORTED
 		return "The volume is not formattable.";
 	case 0x80042918:	// VDS_E_COMPRESSION_NOT_SUPPORTED

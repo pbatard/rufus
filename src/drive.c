@@ -1363,8 +1363,10 @@ static BOOL ClearPartition(HANDLE hDrive, LARGE_INTEGER offset, DWORD size)
 	if (buffer == NULL)
 		return FALSE;
 
-	if (!SetFilePointerEx(hDrive, offset, NULL, FILE_BEGIN))
+	if (!SetFilePointerEx(hDrive, offset, NULL, FILE_BEGIN)) {
+		free(buffer);
 		return FALSE;
+	}
 
 	r = WriteFileWithRetry(hDrive, buffer, size, &size, WRITE_RETRIES);
 	free(buffer);

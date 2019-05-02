@@ -31,6 +31,7 @@
 #include "msapi_utf8.h"
 
 extern char* NtStatusError(NTSTATUS Status);
+static DWORD LastWinError = 0;
 
 PF_TYPE_DECL(NTAPI, ULONG, RtlNtStatusToDosError, (NTSTATUS));
 PF_TYPE_DECL(NTAPI, NTSTATUS, NtClose, (HANDLE));
@@ -95,7 +96,7 @@ io_manager nt_io_manager(void)
 typedef struct {
 	ULONG WinError;
 	int errnocode;
-}ERROR_ENTRY;
+} ERROR_ENTRY;
 
 static ERROR_ENTRY ErrorTable[] = {
         {  ERROR_INVALID_FUNCTION,       EINVAL    },
@@ -149,6 +150,7 @@ static unsigned _MapDosError(IN ULONG WinError)
 {
 	int i;
 
+	LastWinError = WinError;
 	for (i = 0; i < (sizeof(ErrorTable)/sizeof(ErrorTable[0])); ++i) {
 		if (WinError == ErrorTable[i].WinError) {
 			return ErrorTable[i].errnocode;
@@ -169,6 +171,12 @@ static __inline unsigned _MapNtStatus(IN NTSTATUS Status)
 {
 	PF_INIT(RtlNtStatusToDosError, Ntdll);
 	return (pfRtlNtStatusToDosError == NULL) ? EFAULT: _MapDosError(pfRtlNtStatusToDosError(Status));
+}
+
+// Return the last Windows Error
+DWORD ext2_last_winerror(DWORD default_error)
+{
+	return ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | (LastWinError ? LastWinError : default_error);
 }
 
 //
@@ -201,7 +209,6 @@ static NTSTATUS _OpenNtName(IN PCSTR Name, IN BOOLEAN Readonly, OUT PHANDLE Hand
 			      &ObjectAttributes, &IoStatusBlock, FILE_SHARE_WRITE | FILE_SHARE_READ,
 			      FILE_SYNCHRONOUS_IO_NONALERT);
 	if (!NT_SUCCESS(Status)) {
-		uprintf("_OpenNtName: [%x] %s", Status, NtStatusError(Status));
 		// Maybe was just mounted? wait 0.5 sec and retry.
 		LARGE_INTEGER Interval;
 		Interval.QuadPart = -5000000; // 0.5 sec. from now
@@ -339,7 +346,9 @@ static BOOLEAN _Ext2OpenDevice(IN PCSTR Name, IN BOOLEAN ReadOnly, OUT PHANDLE H
 	CHAR NormalizedDeviceName[512];
 	NTSTATUS Status;
 
+	LastWinError = 0;
 	if (Name == NULL) {
+		LastWinError = ERROR_INVALID_PARAMETER;
 		if (ARGUMENT_PRESENT(Errno))
 			*Errno = ENOENT;
 		return FALSE;
@@ -351,6 +360,7 @@ static BOOLEAN _Ext2OpenDevice(IN PCSTR Name, IN BOOLEAN ReadOnly, OUT PHANDLE H
 	} else {
 		Name = _NormalizeDeviceName(Name, NormalizedDeviceName);
 		if (Name == NULL) {
+			LastWinError = ERROR_INVALID_PARAMETER;
 			if (ARGUMENT_PRESENT(Errno))
 				*Errno = ENOENT;
 			return FALSE;
@@ -368,7 +378,7 @@ static BOOLEAN _Ext2OpenDevice(IN PCSTR Name, IN BOOLEAN ReadOnly, OUT PHANDLE H
 	return TRUE;
 }
 
-static BOOLEAN _BlockIo(IN HANDLE Handle, IN LARGE_INTEGER Offset, IN ULONG Bytes, IN OUT PCHAR Buffer, IN BOOLEAN Read, OUT unsigned* Errno)
+static BOOLEAN _BlockIo(IN HANDLE Handle, IN LARGE_INTEGER Offset, IN ULONG Bytes, IN OUT PCHAR Buffer, IN BOOLEAN Read, OUT errcode_t *Errno OPTIONAL)
 {
 	IO_STATUS_BLOCK IoStatusBlock;
 	NTSTATUS Status = STATUS_DLL_NOT_FOUND;
@@ -379,6 +389,7 @@ static BOOLEAN _BlockIo(IN HANDLE Handle, IN LARGE_INTEGER Offset, IN ULONG Byte
 	assert((Bytes % 512) == 0);
 	assert((Offset.LowPart % 512) == 0);
 
+	LastWinError = 0;
 	// Perform io
 	if(Read) {
 		Status = pfNtReadFile(Handle, NULL, NULL, NULL,
@@ -389,22 +400,23 @@ static BOOLEAN _BlockIo(IN HANDLE Handle, IN LARGE_INTEGER Offset, IN ULONG Byte
 	}
 
 out:
-	if (NT_SUCCESS(Status)) {
-		*Errno = 0;
-		return TRUE;
+	if (!NT_SUCCESS(Status)) {
+		if (ARGUMENT_PRESENT(Errno))
+			*Errno = _MapNtStatus(Status);
+		return FALSE;
 	}
 
-	*Errno = _MapNtStatus(Status);
-
-	return FALSE;
+	if (ARGUMENT_PRESENT(Errno))
+		*Errno = 0;
+	return TRUE;
 }
 
-static BOOLEAN _RawWrite(IN HANDLE Handle, IN LARGE_INTEGER Offset, IN ULONG Bytes, OUT const CHAR* Buffer, OUT unsigned* Errno)
+static BOOLEAN _RawWrite(IN HANDLE Handle, IN LARGE_INTEGER Offset, IN ULONG Bytes, OUT const CHAR* Buffer, OUT errcode_t* Errno)
 {
 	return _BlockIo(Handle, Offset, Bytes, (PCHAR)Buffer, FALSE, Errno);
 }
 
-static BOOLEAN _RawRead(IN HANDLE Handle, IN LARGE_INTEGER Offset, IN ULONG Bytes, IN PCHAR Buffer, OUT unsigned* Errno)
+static BOOLEAN _RawRead(IN HANDLE Handle, IN LARGE_INTEGER Offset, IN ULONG Bytes, IN PCHAR Buffer, OUT errcode_t* Errno)
 {
 	return _BlockIo(Handle, Offset, Bytes, Buffer, TRUE, Errno);
 }
@@ -425,13 +437,14 @@ static BOOLEAN _SetPartType(IN HANDLE Handle, IN UCHAR Type)
 //
 errcode_t ext2fs_check_if_mounted(const char *file, int *mount_flags)
 {
+	errcode_t errcode = 0;
 	HANDLE h;
 	BOOLEAN Readonly;
 
 	*mount_flags = 0;
 
-	if (!_Ext2OpenDevice(file, TRUE, &h, &Readonly, NULL))
-		return 0;
+	if (!_Ext2OpenDevice(file, TRUE, &h, &Readonly, &errcode))
+		return errcode;
 
 	*mount_flags &= _IsMounted(h) ? EXT2_MF_MOUNTED : 0;
 	_CloseDisk(h);
@@ -450,14 +463,13 @@ errcode_t ext2fs_check_mount_point(const char *file, int *mount_flags, char *mtp
 // different removable devices (e.g. UFD) may be remounted under the same path.
 errcode_t ext2fs_get_device_size2(const char *file, int blocksize, blk64_t *retblocks)
 {
+	errcode_t errcode;
 	__int64 fs_size = 0;
 	HANDLE h;
 	BOOLEAN Readonly;
 
-	if (!_Ext2OpenDevice(file, TRUE, &h, &Readonly, NULL)) {
-		uprintf("FAILED TO OPEN '%s'", file);
-		return EACCES;
-	}
+	if (!_Ext2OpenDevice(file, TRUE, &h, &Readonly, &errcode))
+		return errcode;
 
 	_GetDeviceSize(h, &fs_size);
 	_CloseDisk(h);
@@ -604,7 +616,7 @@ static errcode_t nt_read_blk(io_channel channel, unsigned long block, int count,
 	ULONG size;
 	LARGE_INTEGER offset;
 	PNT_PRIVATE_DATA nt_data = NULL;
-	unsigned errcode = 0;
+	errcode_t errcode = 0;
 
 	EXT2_CHECK_MAGIC(channel, EXT2_ET_MAGIC_IO_CHANNEL);
 	nt_data = (PNT_PRIVATE_DATA) channel->private_data;
@@ -653,7 +665,7 @@ static errcode_t nt_write_blk(io_channel channel, unsigned long block, int count
 	ULONG write_size;
 	LARGE_INTEGER offset;
 	PNT_PRIVATE_DATA nt_data = NULL;
-	unsigned errcode = 0;
+	errcode_t errcode = 0;
 
 	EXT2_CHECK_MAGIC(channel, EXT2_ET_MAGIC_IO_CHANNEL);
 	nt_data = (PNT_PRIVATE_DATA) channel->private_data;
