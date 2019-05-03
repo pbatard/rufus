@@ -903,6 +903,10 @@ static DWORD WINAPI DownloadISOThread(LPVOID param)
 //#define FORCE_URL "https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-9.8.0-amd64-netinst.iso"
 #if !defined(FORCE_URL)
 #if defined(RUFUS_TEST)
+	IGNORE_RETVAL(hFile);
+	IGNORE_RETVAL(sig_url);
+	IGNORE_RETVAL(dwCompressedSize);
+	IGNORE_RETVAL(uncompressed_size);
 	// In test mode, just use our local script
 	static_strcpy(script_path, "D:\\Projects\\Fido\\Fido.ps1");
 #else

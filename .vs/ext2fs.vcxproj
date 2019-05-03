@@ -77,6 +77,7 @@
     <ClCompile Include="..\src\ext2fs\mmp.c" />
     <ClCompile Include="..\src\ext2fs\newdir.c" />
     <ClCompile Include="..\src\ext2fs\nt_io.c" />
+    <ClCompile Include="..\src\ext2fs\openfs.c" />
     <ClCompile Include="..\src\ext2fs\punch.c" />
     <ClCompile Include="..\src\ext2fs\rbtree.c" />
     <ClCompile Include="..\src\ext2fs\read_bb.c" />

@@ -258,7 +258,6 @@ static void ToValidLabel(char* Label, BOOL bFAT)
 	if (wLabel == NULL)
 		return;
 
-
 	for (i = 0, k = 0; i < wcslen(wLabel); i++) {
 		if (bFAT) {	// NTFS does allows all the FAT unauthorized above
 			found = FALSE;
@@ -289,6 +288,7 @@ static void ToValidLabel(char* Label, BOOL bFAT)
 		wLabel[k++] = bFAT ? toupper(wLabel[i]) : wLabel[i];
 	}
 	wLabel[k] = 0;
+
 	if (bFAT) {
 		if (wcslen(wLabel) > 11)
 			wLabel[11] = 0;
@@ -308,7 +308,7 @@ static void ToValidLabel(char* Label, BOOL bFAT)
 
 	// Needed for disk by label isolinux.cfg workaround
 	wchar_to_utf8_no_alloc(wLabel, img_report.usb_label, sizeof(img_report.usb_label));
-	safe_strcpy(Label, strlen(Label), img_report.usb_label);
+	safe_strcpy(Label, strlen(Label) + 1, img_report.usb_label);
 	free(wLabel);
 }
 
@@ -815,6 +815,24 @@ errcode_t ext2fs_print_progress(int64_t cur_value, int64_t max_value)
 		uprintfs("+");
 	}
 	return IS_ERROR(FormatStatus) ? EXT2_ET_CANCEL_REQUESTED : 0;
+}
+
+const char* GetExtFsLabel(DWORD DriveIndex, DWORD PartitionIndex)
+{
+	static char label[EXT2_LABEL_LEN + 1];
+	errcode_t r;
+	ext2_filsys ext2fs = NULL;
+	io_manager manager = nt_io_manager();
+	char* volume_name = GetPartitionName(DriveIndex, PartitionIndex);
+
+	r = ext2fs_open(volume_name, EXT2_FLAG_SKIP_MMP, 0, 0, manager, &ext2fs);
+	free(volume_name);
+	if (r != 0)
+		return NULL;
+	strncpy(label, ext2fs->super->s_volume_name, EXT2_LABEL_LEN);
+	label[EXT2_LABEL_LEN] = 0;
+	ext2fs_close(ext2fs);
+	return label;
 }
 
 BOOL FormatExtFs(DWORD DriveIndex, DWORD PartitionIndex, DWORD BlockSize, LPCSTR FSName, LPCSTR Label, DWORD Flags)
@@ -1494,9 +1512,9 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 	unsigned char* buffer = NULL;
 	FAKE_FD fake_fd = { 0 };
 	FILE* fp = (FILE*)&fake_fd;
-	const char* using_msg = "Using %s MBR\n";
+	const char* using_msg = "Using %s MBR";
 
-	AnalyzeMBR(hPhysicalDrive, "Drive", FALSE);
+//	AnalyzeMBR(hPhysicalDrive, "Drive", FALSE);
 
 	if (SelectedDrive.SectorSize < 512)
 		goto out;
@@ -1561,12 +1579,12 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 
 	// What follows is really a case statement with complex conditions listed
 	// by order of preference
-	if (HAS_WINDOWS(img_report) && (allow_dual_uefi_bios) && (target_type == TT_BIOS))
+	if ((boot_type == BT_IMAGE) && HAS_WINDOWS(img_report) && (allow_dual_uefi_bios) && (target_type == TT_BIOS))
 		goto windows_mbr;
 
-	// Forced UEFI (by zeroing the MBR)
-	if (target_type == TT_UEFI) {
-		uprintf(using_msg, "zeroed");
+	// Non bootable or forced UEFI (zeroed MBR)
+	if ((boot_type == BT_NON_BOOTABLE) || (target_type == TT_UEFI)) {
+		uprintf(using_msg, "Zeroed");
 		r = write_zero_mbr(fp);
 		goto notify;
 	}
@@ -2623,7 +2641,8 @@ DWORD WINAPI FormatThread(void* param)
 	}
 
 	GetWindowTextU(hLabel, label, sizeof(label));
-	ToValidLabel(label, (fs_type == FS_FAT16) || (fs_type == FS_FAT32) || (fs_type == FS_EXFAT));
+	if (fs_type < FS_EXT2)
+		ToValidLabel(label, (fs_type == FS_FAT16) || (fs_type == FS_FAT32) || (fs_type == FS_EXFAT));
 	ClusterSize = (DWORD)ComboBox_GetItemData(hClusterSize, ComboBox_GetCurSel(hClusterSize));
 	if (ClusterSize < 0x200)
 		ClusterSize = 0;	// 0 = default cluster size
@@ -2689,9 +2708,13 @@ DWORD WINAPI FormatThread(void* param)
 
 	// Refresh the drive label - This is needed as Windows may have altered it from
 	// the name we proposed, and we require an exact label, to patch config files.
-	if (!GetVolumeInformationU(drive_name, img_report.usb_label, ARRAYSIZE(img_report.usb_label),
-		NULL, NULL, NULL, NULL, 0)) {
+	if ((fs_type < FS_EXT2) && !GetVolumeInformationU(drive_name, img_report.usb_label,
+		ARRAYSIZE(img_report.usb_label), NULL, NULL, NULL, NULL, 0)) {
 		uprintf("Warning: Failed to refresh label: %s", WindowsErrorString());
+	} else if ((fs_type >= FS_EXT2) && (fs_type <= FS_EXT4)) {
+		const char* ext_label = GetExtFsLabel(DriveIndex, 0);
+		if (ext_label != NULL)
+			static_strcpy(img_report.usb_label, label);
 	}
 
 	if (boot_type != BT_NON_BOOTABLE) {

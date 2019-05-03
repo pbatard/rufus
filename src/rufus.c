@@ -480,7 +480,16 @@ static BOOL SetFileSystemAndClusterSize(char* fs_name)
 		SelectedDrive.ClusterSize[FS_UDF].Allowed = SINGLE_CLUSTERSIZE_DEFAULT;
 		SelectedDrive.ClusterSize[FS_UDF].Default = 1;
 
+		// ext2/ext3/ext4
+		if (advanced_mode_format) {
+			SelectedDrive.ClusterSize[FS_EXT2].Allowed = SINGLE_CLUSTERSIZE_DEFAULT;
+			SelectedDrive.ClusterSize[FS_EXT2].Default = 1;
+			SelectedDrive.ClusterSize[FS_EXT3].Allowed = SINGLE_CLUSTERSIZE_DEFAULT;
+			SelectedDrive.ClusterSize[FS_EXT3].Default = 1;
+		}
+
 		// ReFS (only supported for Windows 8.1 and later and for fixed disks)
+		// TODO: Check later versions of Windows 10 for disabled ReFS (IVdsService::QueryFileSystemTypes?)
 		if (SelectedDrive.DiskSize >= 512*MB) {
 			if ((nWindowsVersion >= WINDOWS_8_1) && (SelectedDrive.MediaType == FixedMedia)) {
 				SelectedDrive.ClusterSize[FS_REFS].Allowed = SINGLE_CLUSTERSIZE_DEFAULT;
@@ -668,7 +677,8 @@ static void EnableMBRBootOptions(BOOL enable, BOOL remove_checkboxes)
 	BOOL actual_enable_fix = enable;
 	static UINT uXPartChecked = BST_UNCHECKED;
 
-	if ((partition_type != PARTITION_STYLE_MBR) || (target_type != TT_BIOS) || ((boot_type == BT_IMAGE) && !IS_BIOS_BOOTABLE(img_report))) {
+	if ((partition_type != PARTITION_STYLE_MBR) || (target_type != TT_BIOS) || (boot_type == BT_NON_BOOTABLE) ||
+		((boot_type == BT_IMAGE) && !IS_BIOS_BOOTABLE(img_report))) {
 		// These options cannot apply if we aren't using MBR+BIOS, or are using an image that isn't BIOS bootable
 		actual_enable_mbr = FALSE;
 		actual_enable_fix = FALSE;
@@ -699,6 +709,23 @@ static void EnableMBRBootOptions(BOOL enable, BOOL remove_checkboxes)
 	EnableWindow(GetDlgItem(hMainDialog, IDC_OLD_BIOS_FIXES), actual_enable_fix);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_RUFUS_MBR), actual_enable_mbr);
 	EnableWindow(hDiskID, actual_enable_mbr);
+}
+
+static void EnableExtendedLabel(BOOL enable)
+{
+	HWND hCtrl = GetDlgItem(hMainDialog, IDC_EXTENDED_LABEL);
+	static UINT checked, state = 0;
+
+	if (!enable && IsWindowEnabled(hCtrl) && (state != 1)) {
+		checked = IsChecked(IDC_EXTENDED_LABEL);
+		CheckDlgButton(hMainDialog, IDC_EXTENDED_LABEL, BST_UNCHECKED);
+		state = 1;
+	} else if (enable && !IsWindowEnabled(hCtrl) && (state != 2)) {
+		if (state != 0)
+			CheckDlgButton(hMainDialog, IDC_EXTENDED_LABEL, checked);
+		state = 2;
+	}
+	EnableWindow(hCtrl, enable);
 }
 
 static void EnableQuickFormat(BOOL enable)
@@ -753,7 +780,7 @@ static void EnableBootOptions(BOOL enable, BOOL remove_checkboxes)
 	EnableQuickFormat(actual_enable);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_BAD_BLOCKS), actual_enable_bb);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_NB_PASSES), actual_enable_bb);
-	EnableWindow(GetDlgItem(hMainDialog, IDC_EXTENDED_LABEL), actual_enable);
+	EnableExtendedLabel((fs_type < FS_EXT2) ? actual_enable : FALSE);
 }
 
 // Toggle controls according to operation
@@ -1266,11 +1293,16 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 					static_sprintf(tmp, "%s/%s-%s/%s", FILES_URL, grub, img_report.grub2_version, core_img);
 					grub2_len = (long)DownloadSignedFile(tmp, core_img, hMainDialog, FALSE);
 					if ((grub2_len == 0) && (DownloadStatus == 404)) {
+						// Manjaro (always them!) are using "2.03.5" as identifier, so we must detect first dot...
+						BOOL first_dot = TRUE;
 						// Couldn't locate the file on the server => try to download without the version extra
 						uprintf("Extended version was not found, trying main version...");
 						static_strcpy(tmp2, img_report.grub2_version);
 						// Isolate the #.### part
-						for (i = 0; ((tmp2[i] >= '0') && (tmp2[i] <= '9')) || (tmp2[i] == '.'); i++);
+						for (i = 0; ((tmp2[i] >= '0') && (tmp2[i] <= '9')) || ((tmp2[i] == '.') && first_dot); i++) {
+							if (tmp2[i] == '.')
+								first_dot = FALSE;
+						}
 						tmp2[i] = 0;
 						static_sprintf(tmp, "%s/%s-%s/%s", FILES_URL, grub, tmp2, core_img);
 						grub2_len = (long)DownloadSignedFile(tmp, core_img, hMainDialog, FALSE);
@@ -1894,15 +1926,8 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	case WM_COMMAND:
 #ifdef RUFUS_TEST
 		if (LOWORD(wParam) == IDC_TEST) {
-//			uprintf("  IID_IVdsVolume: %s", GuidToString(&IID_IVdsVolume));
-//			uprintf("  IID_IVdsVolumeMF3: %s", GuidToString(&IID_IVdsVolumeMF3));
-			nDeviceIndex = ComboBox_GetCurSel(hDeviceList);
-//			AltMountVolume2("G:", 3);
-			AltMountVolume((DWORD)ComboBox_GetItemData(hDeviceList, nDeviceIndex), 3);
-//			AltUnmountVolume("P:");
-//			uprintf("%s", GetLogicalName((DWORD)ComboBox_GetItemData(hDeviceList, nDeviceIndex), 0, FALSE, FALSE));
-//			uprintf("%s", GetLogicalName((DWORD)ComboBox_GetItemData(hDeviceList, nDeviceIndex), 1, FALSE, FALSE));
-//			uprintf("%s", GetLogicalName((DWORD)ComboBox_GetItemData(hDeviceList, nDeviceIndex), 2, FALSE, FALSE));
+			DWORD DriveIndex = (DWORD)ComboBox_GetItemData(hDeviceList, ComboBox_GetCurSel(hDeviceList));
+			uprintf("label = '%s'", GetExtFsLabel(DriveIndex, 1));
 			break;
 		}
 #endif
@@ -2035,6 +2060,11 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			advanced_mode_format = !advanced_mode_format;
 			WriteSettingBool(SETTING_ADVANCED_MODE_FORMAT, advanced_mode_format);
 			ToggleAdvancedFormatOptions(advanced_mode_format);
+			if (selected_fs == FS_UNKNOWN)
+				selected_fs = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
+			SetFileSystemAndClusterSize(NULL);
+			SendMessage(hMainDialog, WM_COMMAND, (CBN_SELCHANGE_INTERNAL << 16) | IDC_FILE_SYSTEM,
+				ComboBox_GetCurSel(hFileSystem));
 			break;
 		case IDC_LABEL:
 			if (HIWORD(wParam) == EN_CHANGE) {
@@ -2141,6 +2171,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				selected_fs = fs_type;
 			EnableMBRBootOptions(TRUE, FALSE);
 			SetMBRProps();
+			EnableExtendedLabel((fs_type < FS_EXT2));
 			break;
 		case IDC_BOOT_SELECTION:
 			if (HIWORD(wParam) != CBN_SELCHANGE)

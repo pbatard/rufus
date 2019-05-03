@@ -386,3 +386,4 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 BOOL InitializeDisk(HANDLE hDrive);
 BOOL RefreshDriveLayout(HANDLE hDrive);
 const char* GetPartitionType(BYTE Type);
+const char* GetExtFsLabel(DWORD DriveIndex, DWORD PartitionIndex);

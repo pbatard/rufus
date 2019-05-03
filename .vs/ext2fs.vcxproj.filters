@@ -156,6 +156,9 @@
     <ClCompile Include="..\src\ext2fs\fallocate.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\ext2fs\openfs.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\ext2fs\ext2_fs.h">

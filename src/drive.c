@@ -844,7 +844,7 @@ out:
 BOOL GetDriveLabel(DWORD DriveIndex, char* letters, char** label)
 {
 	HANDLE hPhysical;
-	DWORD size;
+	DWORD size, error;
 	static char VolumeLabel[MAX_PATH + 1];
 	char DrivePath[] = "#:\\", AutorunPath[] = "#:\\autorun.inf", *AutorunLabel = NULL;
 
@@ -879,9 +879,15 @@ BOOL GetDriveLabel(DWORD DriveIndex, char* letters, char** label)
 		NULL, NULL, NULL, NULL, 0) && (VolumeLabel[0] != 0)) {
 		*label = VolumeLabel;
 	} else {
-		duprintf("Failed to read label: %s", WindowsErrorString());
+		// Might be an extfs label
+		error = GetLastError();
+		*label = (char*)GetExtFsLabel(DriveIndex, 0);
+		if (*label == NULL) {
+			SetLastError(error);
+			duprintf("Failed to read label: %s", WindowsErrorString());
+			*label = STR_NO_LABEL;
+		}
 	}
-
 	return TRUE;
 }
 
