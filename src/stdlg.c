@@ -811,19 +811,18 @@ BOOL Notification(int type, const char* dont_display_setting, const notification
 {
 	BOOL ret;
 	va_list args;
-	const int max_msg_size = 1024;
 
 	dialog_showing++;
-	szMessageText = (char*)malloc(max_msg_size);
+	szMessageText = (char*)malloc(LOC_MESSAGE_SIZE);
 	if (szMessageText == NULL)
 		return FALSE;
 	szMessageTitle = safe_strdup(title);
 	if (szMessageTitle == NULL)
 		return FALSE;
 	va_start(args, format);
-	safe_vsnprintf(szMessageText, max_msg_size -1, format, args);
+	safe_vsnprintf(szMessageText, LOC_MESSAGE_SIZE - 1, format, args);
 	va_end(args);
-	szMessageText[max_msg_size -1] = 0;
+	szMessageText[LOC_MESSAGE_SIZE - 1] = 0;
 	notification_more_info = more_info;
 	notification_is_question = FALSE;
 	notification_dont_display_setting = dont_display_setting;
