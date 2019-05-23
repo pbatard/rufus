@@ -504,6 +504,7 @@ out:
 	if (p_udf_dirent != NULL)
 		udf_dirent_free(p_udf_dirent);
 	ISO_BLOCKING(safe_closehandle(file_handle));
+	safe_free(psz_sanpath);
 	safe_free(psz_fullpath);
 	return 1;
 }
@@ -516,7 +517,7 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 	EXTRACT_PROPS props;
 	BOOL is_symlink, is_identical;
 	int length, r = 1;
-	char tmp[128], psz_fullpath[MAX_PATH], *psz_basename, *psz_sanpath;
+	char tmp[128], psz_fullpath[MAX_PATH], *psz_basename = NULL, *psz_sanpath = NULL;
 	const char *psz_iso_name = &psz_fullpath[strlen(psz_extract_dir)];
 	unsigned char buf[ISO_BLOCKSIZE];
 	CdioListNode_t* p_entnode;
@@ -651,6 +652,7 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 out:
 	ISO_BLOCKING(safe_closehandle(file_handle));
 	iso9660_filelist_free(p_entlist);
+	safe_free(psz_sanpath);
 	return r;
 }
 

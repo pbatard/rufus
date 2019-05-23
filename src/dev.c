@@ -32,6 +32,7 @@
 #include <inttypes.h>
 #include <commctrl.h>
 #include <setupapi.h>
+#include <cfg.h>
 #include <assert.h>
 
 #include "rufus.h"
@@ -43,7 +44,7 @@
 #include "drive.h"
 #include "dev.h"
 
-extern StrArray DriveID, DriveLabel, DriveHub;
+extern StrArray DriveId, DriveName, DriveLabel, DriveHub;
 extern uint32_t DrivePort[MAX_DRIVES];
 extern BOOL enable_HDDs, use_fake_units, enable_vmdk, usb_debug, list_non_usb_removable_drives;
 
@@ -126,9 +127,9 @@ out:
 }
 
 /*
- * Cycle port (reset) the selected device
+ * Cycle the USB port of the selected device
  */
-BOOL ResetDevice(int index)
+BOOL CyclePort(int index)
 {
 	static uint64_t LastReset = 0;
 	BOOL r = FALSE;
@@ -159,7 +160,7 @@ BOOL ResetDevice(int index)
 	memset(&cycle_port, 0, size);
 	cycle_port.ConnectionIndex = DrivePort[index];
 	uprintf("Cycling port %d (reset) on %s", DrivePort[index], DriveHub.String[index]);
-	// As per https://msdn.microsoft.com/en-us/library/windows/hardware/ff537340.aspx
+	// As per https://docs.microsoft.com/en-us/windows-hardware/drivers/ddi/content/usbioctl/ni-usbioctl-ioctl_usb_hub_cycle_port
 	// IOCTL_USB_HUB_CYCLE_PORT is not supported on Windows 7, Windows Vista, and Windows Server 2008
 	if (!DeviceIoControl(handle, IOCTL_USB_HUB_CYCLE_PORT, &cycle_port, size, &cycle_port, size, &size, NULL)) {
 		uprintf("  Failed to cycle port: %s", WindowsErrorString());
@@ -171,6 +172,109 @@ BOOL ResetDevice(int index)
 out:
 	safe_closehandle(handle);
 	return r;
+}
+
+/*
+ * Forces a refresh by disabling and then re-enabling the device using SetupAPI.
+ * Returns the Windows error code from the operation.
+ * Note: Currently, this may leave the device disabled after re-plug or reboot...
+ */
+int CycleDevice(int index)
+{
+	BOOL found = FALSE, disabled = FALSE;
+	char device_instance_id[MAX_PATH];
+	DWORD i, size, ret = ERROR_DEV_NOT_EXIST;
+	LONG dev_status, problem_code;
+	HDEVINFO dev_info;
+	SP_DEVINFO_DATA dev_info_data;
+	SP_PROPCHANGE_PARAMS propchange_params;
+
+	if ((index < 0) || (safe_strlen(DriveId.String[index]) < 8))
+		return ERROR_INVALID_PARAMETER;
+
+	// Need DIGCF_ALLCLASSES else disabled devices won't be listed.
+	dev_info = SetupDiGetClassDevsA(&_GUID_DEVINTERFACE_DISK, NULL, NULL, DIGCF_PRESENT | DIGCF_ALLCLASSES);
+	if (dev_info == INVALID_HANDLE_VALUE) {
+		uprintf("Could not get classes for device cycling: %s", WindowsErrorString());
+		return ERROR_PATH_NOT_FOUND;
+	}
+
+	dev_info_data.cbSize = sizeof(SP_DEVINFO_DATA);
+	for (i = 0; SetupDiEnumDeviceInfo(dev_info, i, &dev_info_data); i++) {
+		memset(device_instance_id, 0, sizeof(device_instance_id));
+		size = sizeof(device_instance_id);
+
+		if (!SetupDiGetDeviceInstanceIdA(dev_info, &dev_info_data, device_instance_id, size, &size)) {
+			continue;
+		}
+
+		if (safe_strcmp(DriveId.String[index], device_instance_id) != 0)
+			continue;
+
+		found = TRUE;
+
+		// Detect if the device is already disabled
+		if (CM_Get_DevNode_Status(&dev_status, &problem_code, dev_info_data.DevInst, 0) == CR_SUCCESS)
+			disabled = (dev_status & DN_HAS_PROBLEM) && (problem_code == CM_PROB_DISABLED);
+
+		// Disable the device
+		if (!disabled) {
+			memset(&propchange_params, 0, sizeof(propchange_params));
+			propchange_params.ClassInstallHeader.cbSize = sizeof(SP_CLASSINSTALL_HEADER);
+			propchange_params.ClassInstallHeader.InstallFunction = DIF_PROPERTYCHANGE;
+			propchange_params.Scope = DICS_FLAG_GLOBAL;
+			propchange_params.StateChange = DICS_DISABLE;
+
+			if (!SetupDiSetClassInstallParams(dev_info, &dev_info_data,
+				(SP_CLASSINSTALL_HEADER*)&propchange_params, sizeof(propchange_params))) {
+				uprintf("Could not cycle device (D1): %s", WindowsErrorString());
+				break;
+			}
+
+			if (!SetupDiChangeState(dev_info, &dev_info_data)) {
+				uprintf("Could not cycle device (D2): %s", WindowsErrorString());
+				// If we failed to actually change the status, we must revert the properties
+				ret = ERROR_OPERATION_ABORTED;
+			}
+			Sleep(250);
+		}
+
+		// Re-enable the device
+		memset(&propchange_params, 0, sizeof(propchange_params));
+		propchange_params.ClassInstallHeader.cbSize = sizeof(SP_CLASSINSTALL_HEADER);
+		propchange_params.ClassInstallHeader.InstallFunction = DIF_PROPERTYCHANGE;
+		propchange_params.Scope = DICS_FLAG_GLOBAL;
+		propchange_params.StateChange = DICS_ENABLE;
+		if (!SetupDiSetClassInstallParams(dev_info, &dev_info_data,
+			(SP_CLASSINSTALL_HEADER*)&propchange_params, sizeof(propchange_params))) {
+			uprintf("Could not cycle device (E1): %s", WindowsErrorString());
+			ret = ERROR_OPERATION_ABORTED;
+		}
+		if (ret == ERROR_OPERATION_ABORTED)
+			break;
+		if (!SetupDiChangeState(dev_info, &dev_info_data)) {
+			uprintf("Could not cycle device (E2): %s", WindowsErrorString());
+			ret = ERROR_GEN_FAILURE;
+		} else {
+			ret = ERROR_SUCCESS;
+		}
+
+		// This is great: The MS APIs may let you believe that disabling and reenabling was
+		// successful, but leave the device in an actual disabled state... So we can end up
+		// with zombie devices, that are effectively disabled, but that Windows still sees
+		// as enabled... So we need to detect this.
+		if (CM_Get_DevNode_Status(&dev_status, &problem_code, dev_info_data.DevInst, 0) == CR_SUCCESS) {
+			disabled = (dev_status & DN_HAS_PROBLEM) && (problem_code == CM_PROB_DISABLED);
+			if (disabled)
+				ret = ERROR_DEVICE_REINITIALIZATION_NEEDED;
+		}
+		break;
+	}
+
+	SetupDiDestroyDeviceInfoList(dev_info);
+	if (!found)
+		uprintf("Could not find a device to cycle!");
+	return ret;
 }
 
 static __inline BOOL IsVHD(const char* buffer)
@@ -225,7 +329,7 @@ BOOL GetOpticalMedia(IMG_SAVE* img_save)
 
 	dev_info = SetupDiGetClassDevsA(&_GUID_DEVINTERFACE_CDROM, NULL, NULL, DIGCF_PRESENT | DIGCF_DEVICEINTERFACE);
 	if (dev_info == INVALID_HANDLE_VALUE) {
-		uprintf("SetupDiGetClassDevs (Interface) failed: %s\n", WindowsErrorString());
+		uprintf("SetupDiGetClassDevs (Interface) failed: %s", WindowsErrorString());
 		return FALSE;
 	}
 	dev_info_data.cbSize = sizeof(dev_info_data);
@@ -233,7 +337,7 @@ BOOL GetOpticalMedia(IMG_SAVE* img_save)
 		memset(str, 0, sizeof(str));
 		if (!SetupDiGetDeviceRegistryPropertyU(dev_info, &dev_info_data, SPDRP_FRIENDLYNAME,
 			&datatype, (LPBYTE)str, sizeof(str), &size)) {
-			uprintf("SetupDiGetDeviceRegistryProperty (Friendly Name) failed: %s\n", WindowsErrorString());
+			uprintf("SetupDiGetDeviceRegistryProperty (Friendly Name) failed: %s", WindowsErrorString());
 			static_strcpy(str, "Generic Optical Drive");
 		}
 		uprintf("Found '%s' optical device", str);
@@ -246,7 +350,7 @@ BOOL GetOpticalMedia(IMG_SAVE* img_save)
 
 			if (!SetupDiEnumDeviceInterfaces(dev_info, &dev_info_data, &_GUID_DEVINTERFACE_CDROM, j, &devint_data)) {
 				if (GetLastError() != ERROR_NO_MORE_ITEMS) {
-					uprintf("SetupDiEnumDeviceInterfaces failed: %s\n", WindowsErrorString());
+					uprintf("SetupDiEnumDeviceInterfaces failed: %s", WindowsErrorString());
 				}
 				break;
 			}
@@ -255,21 +359,21 @@ BOOL GetOpticalMedia(IMG_SAVE* img_save)
 				if (GetLastError() == ERROR_INSUFFICIENT_BUFFER) {
 					devint_detail_data = (PSP_DEVICE_INTERFACE_DETAIL_DATA_A)calloc(1, size);
 					if (devint_detail_data == NULL) {
-						uprintf("Unable to allocate data for SP_DEVICE_INTERFACE_DETAIL_DATA\n");
+						uprintf("Unable to allocate data for SP_DEVICE_INTERFACE_DETAIL_DATA");
 						continue;
 					}
 					devint_detail_data->cbSize = sizeof(SP_DEVICE_INTERFACE_DETAIL_DATA_A);
 				} else {
-					uprintf("SetupDiGetDeviceInterfaceDetail (dummy) failed: %s\n", WindowsErrorString());
+					uprintf("SetupDiGetDeviceInterfaceDetail (dummy) failed: %s", WindowsErrorString());
 					continue;
 				}
 			}
 			if (devint_detail_data == NULL) {
-				uprintf("SetupDiGetDeviceInterfaceDetail (dummy) - no data was allocated\n");
+				uprintf("SetupDiGetDeviceInterfaceDetail (dummy) - no data was allocated");
 				continue;
 			}
 			if (!SetupDiGetDeviceInterfaceDetailA(dev_info, &devint_data, devint_detail_data, size, &size, NULL)) {
-				uprintf("SetupDiGetDeviceInterfaceDetail (actual) failed: %s\n", WindowsErrorString());
+				uprintf("SetupDiGetDeviceInterfaceDetail (actual) failed: %s", WindowsErrorString());
 				continue;
 			}
 
@@ -338,8 +442,8 @@ BOOL GetDevices(DWORD devnum)
 		"SCSI", // "STORAGE",	// "STORAGE" is used by 'Storage Spaces" and stuff => DANGEROUS!
 		// Non-USB card reader drivers - This list *MUST* start with "SD" (delimiter)
 		// See http://itdoc.hitachi.co.jp/manuals/3021/30213B5200e/DMDS0094.HTM
-		// Also  http://www.carrona.org/dvrref.php. NB: These should be reported
-		// as enumerators by Rufus when Enum Debug is enabled
+		// Also  http://www.carrona.org/dvrref.php. NB: All members from this list should have
+		// been reported as enumerators by Rufus, when Enum Debug is enabled.
 		"SD", "PCISTOR", "RTSOR", "JMCR", "JMCF", "RIMMPTSK", "RIMSPTSK", "RISD", "RIXDPTSK",
 		"TI21SONY", "ESD7SK", "ESM7SK", "O2MD", "O2SD", "VIACR"
 	};
@@ -362,18 +466,19 @@ BOOL GetDevices(DWORD devnum)
 	SP_DEVICE_INTERFACE_DATA devint_data;
 	PSP_DEVICE_INTERFACE_DETAIL_DATA_A devint_detail_data;
 	DEVINST parent_inst, grandparent_inst, device_inst;
-	DWORD size, i, j, k, l, datatype, drive_index;
+	DWORD size, i, j, k, l, data_type, drive_index;
 	DWORD uasp_start = ARRAYSIZE(usbstor_name), card_start = ARRAYSIZE(genstor_name);
 	ULONG list_size[ARRAYSIZE(usbstor_name)] = { 0 }, list_start[ARRAYSIZE(usbstor_name)] = { 0 }, full_list_size, ulFlags;
 	HANDLE hDrive;
 	LONG maxwidth = 0;
 	int s, score, drive_number, remove_drive;
 	char drive_letters[27], *device_id, *devid_list = NULL, entry_msg[128];
-	char *p, *label, *entry, buffer[MAX_PATH], str[MAX_PATH], *method_str, *hub_path;
+	char *p, *label, *entry, buffer[MAX_PATH], str[MAX_PATH], device_instance_id[MAX_PATH], *method_str, *hub_path;
 	usb_device_props props;
 
 	IGNORE_RETVAL(ComboBox_ResetContent(hDeviceList));
-	StrArrayClear(&DriveID);
+	StrArrayClear(&DriveId);
+	StrArrayClear(&DriveName);
 	StrArrayClear(&DriveLabel);
 	StrArrayClear(&DriveHub);
 	StrArrayCreate(&dev_if_path, 128);
@@ -386,7 +491,7 @@ BOOL GetDevices(DWORD devnum)
 
 	// Build a hash table associating a CM Device ID of an USB device with the SetupDI Device Interface Path
 	// of its parent hub - this is needed to retrieve the device speed
-	dev_info = SetupDiGetClassDevsA(&_GUID_DEVINTERFACE_USB_HUB, NULL, NULL, DIGCF_PRESENT|DIGCF_DEVICEINTERFACE);
+	dev_info = SetupDiGetClassDevsA(&_GUID_DEVINTERFACE_USB_HUB, NULL, NULL, DIGCF_PRESENT | DIGCF_DEVICEINTERFACE);
 	if (dev_info != INVALID_HANDLE_VALUE) {
 		if (htab_create(DEVID_HTAB_SIZE, &htab_devid)) {
 			dev_info_data.cbSize = sizeof(dev_info_data);
@@ -464,7 +569,7 @@ BOOL GetDevices(DWORD devnum)
 		full_list_size += 1;	// add extra NUL terminator
 		devid_list = (char*)malloc(full_list_size);
 		if (devid_list == NULL) {
-			uprintf("Could not allocate Device ID list\n");
+			uprintf("Could not allocate Device ID list");
 			goto out;
 		}
 		for (s=0, i=0; s<ARRAYSIZE(usbstor_name); s++) {
@@ -487,9 +592,9 @@ BOOL GetDevices(DWORD devnum)
 	}
 
 	// Now use SetupDi to enumerate all our disk storage devices
-	dev_info = SetupDiGetClassDevsA(&_GUID_DEVINTERFACE_DISK, NULL, NULL, DIGCF_PRESENT|DIGCF_DEVICEINTERFACE);
+	dev_info = SetupDiGetClassDevsA(&_GUID_DEVINTERFACE_DISK, NULL, NULL, DIGCF_PRESENT | DIGCF_DEVICEINTERFACE);
 	if (dev_info == INVALID_HANDLE_VALUE) {
-		uprintf("SetupDiGetClassDevs (Interface) failed: %s\n", WindowsErrorString());
+		uprintf("SetupDiGetClassDevs (Interface) failed: %s", WindowsErrorString());
 		goto out;
 	}
 	dev_info_data.cbSize = sizeof(dev_info_data);
@@ -499,8 +604,8 @@ BOOL GetDevices(DWORD devnum)
 		method_str = "";
 		hub_path = NULL;
 		if (!SetupDiGetDeviceRegistryPropertyA(dev_info, &dev_info_data, SPDRP_ENUMERATOR_NAME,
-				&datatype, (LPBYTE)buffer, sizeof(buffer), &size)) {
-			uprintf("SetupDiGetDeviceRegistryProperty (Enumerator Name) failed: %s\n", WindowsErrorString());
+				&data_type, (LPBYTE)buffer, sizeof(buffer), &size)) {
+			uprintf("SetupDiGetDeviceRegistryProperty (Enumerator Name) failed: %s", WindowsErrorString());
 			continue;
 		}
 
@@ -533,7 +638,7 @@ BOOL GetDevices(DWORD devnum)
 		// according to your locale, so we poke the Hardware ID
 		memset(buffer, 0, sizeof(buffer));
 		props.is_VHD = SetupDiGetDeviceRegistryPropertyA(dev_info, &dev_info_data, SPDRP_HARDWAREID,
-			&datatype, (LPBYTE)buffer, sizeof(buffer), &size) && IsVHD(buffer);
+			&data_type, (LPBYTE)buffer, sizeof(buffer), &size) && IsVHD(buffer);
 		// Additional detection for SCSI card readers
 		if ((!props.is_CARD) && (safe_strnicmp(buffer, scsi_disk_prefix, sizeof(scsi_disk_prefix)-1) == 0)) {
 			for (j = 0; j < ARRAYSIZE(scsi_card_name); j++) {
@@ -553,14 +658,21 @@ BOOL GetDevices(DWORD devnum)
 		}
 		uuprintf("  Hardware ID: '%s'", buffer);
 
+		// Keep track of the Device Instance ID, which we'll need to "reset" the device
+		if (!SetupDiGetDeviceInstanceIdA(dev_info, &dev_info_data, device_instance_id,
+			sizeof(device_instance_id), &size)) {
+			uprintf("SetupDiGetDeviceInstanceId failed: %s", WindowsErrorString());
+			static_strcpy(device_instance_id, "<N/A>");
+		}
+
 		memset(buffer, 0, sizeof(buffer));
 		props.is_Removable = SetupDiGetDeviceRegistryPropertyA(dev_info, &dev_info_data, SPDRP_REMOVAL_POLICY,
-			&datatype, (LPBYTE)buffer, sizeof(buffer), &size) && IsRemovable(buffer);
+			&data_type, (LPBYTE)buffer, sizeof(buffer), &size) && IsRemovable(buffer);
 
 		memset(buffer, 0, sizeof(buffer));
 		if (!SetupDiGetDeviceRegistryPropertyU(dev_info, &dev_info_data, SPDRP_FRIENDLYNAME,
-				&datatype, (LPBYTE)buffer, sizeof(buffer), &size)) {
-			uprintf("SetupDiGetDeviceRegistryProperty (Friendly Name) failed: %s\n", WindowsErrorString());
+				&data_type, (LPBYTE)buffer, sizeof(buffer), &size)) {
+			uprintf("SetupDiGetDeviceRegistryProperty (Friendly Name) failed: %s", WindowsErrorString());
 			// We can afford a failure on this call - just replace the name with "USB Storage Device (Generic)"
 			static_strcpy(buffer, lmprintf(MSG_045));
 		} else if ((!props.is_VHD) && (devid_list != NULL)) {
@@ -668,7 +780,7 @@ BOOL GetDevices(DWORD devnum)
 			}
 			if (props.speed >= USB_SPEED_MAX)
 				props.speed = 0;
-			uprintf("Found %s%s%s device '%s' (%s) %s\n", props.is_UASP?"UAS (":"",
+			uprintf("Found %s%s%s device '%s' (%s) %s", props.is_UASP?"UAS (":"",
 				usb_speed_name[props.speed], props.is_UASP?")":"", buffer, str, method_str);
 			if (props.is_LowerSpeed)
 				uprintf("NOTE: This device is an USB 3.0 device operating at lower speed...");
@@ -682,9 +794,9 @@ BOOL GetDevices(DWORD devnum)
 
 			if (!SetupDiEnumDeviceInterfaces(dev_info, &dev_info_data, &_GUID_DEVINTERFACE_DISK, j, &devint_data)) {
 				if(GetLastError() != ERROR_NO_MORE_ITEMS) {
-					uprintf("SetupDiEnumDeviceInterfaces failed: %s\n", WindowsErrorString());
+					uprintf("SetupDiEnumDeviceInterfaces failed: %s", WindowsErrorString());
 				} else {
-					uprintf("A device was eliminated because it didn't report itself as a disk\n");
+					uprintf("A device was eliminated because it didn't report itself as a disk");
 				}
 				break;
 			}
@@ -693,28 +805,28 @@ BOOL GetDevices(DWORD devnum)
 				if(GetLastError() == ERROR_INSUFFICIENT_BUFFER) {
 					devint_detail_data = (PSP_DEVICE_INTERFACE_DETAIL_DATA_A)calloc(1, size);
 					if (devint_detail_data == NULL) {
-						uprintf("Unable to allocate data for SP_DEVICE_INTERFACE_DETAIL_DATA\n");
+						uprintf("Unable to allocate data for SP_DEVICE_INTERFACE_DETAIL_DATA");
 						continue;
 					}
 					devint_detail_data->cbSize = sizeof(SP_DEVICE_INTERFACE_DETAIL_DATA_A);
 				} else {
-					uprintf("SetupDiGetDeviceInterfaceDetail (dummy) failed: %s\n", WindowsErrorString());
+					uprintf("SetupDiGetDeviceInterfaceDetail (dummy) failed: %s", WindowsErrorString());
 					continue;
 				}
 			}
 			if (devint_detail_data == NULL) {
-				uprintf("SetupDiGetDeviceInterfaceDetail (dummy) - no data was allocated\n");
+				uprintf("SetupDiGetDeviceInterfaceDetail (dummy) - no data was allocated");
 				continue;
 			}
 			if(!SetupDiGetDeviceInterfaceDetailA(dev_info, &devint_data, devint_detail_data, size, &size, NULL)) {
-				uprintf("SetupDiGetDeviceInterfaceDetail (actual) failed: %s\n", WindowsErrorString());
+				uprintf("SetupDiGetDeviceInterfaceDetail (actual) failed: %s", WindowsErrorString());
 				continue;
 			}
 
 			hDrive = CreateFileA(devint_detail_data->DevicePath, GENERIC_READ|GENERIC_WRITE,
 				FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 			if(hDrive == INVALID_HANDLE_VALUE) {
-				uprintf("Could not open '%s': %s\n", devint_detail_data->DevicePath, WindowsErrorString());
+				uprintf("Could not open '%s': %s", devint_detail_data->DevicePath, WindowsErrorString());
 				continue;
 			}
 
@@ -724,13 +836,13 @@ BOOL GetDevices(DWORD devnum)
 
 			drive_index = drive_number + DRIVE_INDEX_MIN;
 			if (!IsMediaPresent(drive_index)) {
-				uprintf("Device eliminated because it appears to contain no media\n");
+				uprintf("Device eliminated because it appears to contain no media");
 				safe_closehandle(hDrive);
 				safe_free(devint_detail_data);
 				break;
 			}
 			if (GetDriveSize(drive_index) < (MIN_DRIVE_SIZE*MB)) {
-				uprintf("Device eliminated because it is smaller than %d MB\n", MIN_DRIVE_SIZE);
+				uprintf("Device eliminated because it is smaller than %d MB", MIN_DRIVE_SIZE);
 				safe_closehandle(hDrive);
 				safe_free(devint_detail_data);
 				break;
@@ -815,7 +927,8 @@ BOOL GetDevices(DWORD devnum)
 				}
 
 				// Must ensure that the combo box is UNSORTED for indexes to be the same
-				StrArrayAdd(&DriveID, buffer, TRUE);
+				StrArrayAdd(&DriveId, device_instance_id, TRUE);
+				StrArrayAdd(&DriveName, buffer, TRUE);
 				StrArrayAdd(&DriveLabel, label, TRUE);
 				if ((hub_path != NULL) && (StrArrayAdd(&DriveHub, hub_path, TRUE) >= 0))
 					DrivePort[DriveHub.Index - 1] = props.port;
@@ -834,7 +947,7 @@ BOOL GetDevices(DWORD devnum)
 	SendMessage(hDeviceList, CB_SETDROPPEDWIDTH, (WPARAM)maxwidth, 0);
 
 	if (devnum >= DRIVE_INDEX_MIN) {
-		for (i=0; i<ComboBox_GetCount(hDeviceList); i++) {
+		for (i = 0; i < ComboBox_GetCount(hDeviceList); i++) {
 			if ((DWORD)ComboBox_GetItemData(hDeviceList, i) == devnum) {
 				found = TRUE;
 				break;

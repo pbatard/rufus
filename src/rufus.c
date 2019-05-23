@@ -119,7 +119,7 @@ char embedded_sl_version_ext[2][32];
 char ClusterSizeLabel[MAX_CLUSTER_SIZES][64];
 char msgbox[1024], msgbox_title[32], *ini_file = NULL, *image_path = NULL, *short_image_path;
 char image_option_txt[128], *fido_url = NULL;
-StrArray DriveID, DriveLabel, DriveHub, BlockingProcess, ImageList;
+StrArray DriveId, DriveName, DriveLabel, DriveHub, BlockingProcess, ImageList;
 // Number of steps for each FS for FCC_STRUCTURE_PROGRESS
 const int nb_steps[FS_MAX] = { 5, 5, 12, 1, 10, 1, 1, 1, 1 };
 const char* flash_type[BADLOCKS_PATTERN_TYPES] = { "SLC", "MLC", "TLC" };
@@ -857,14 +857,14 @@ static BOOL PopulateProperties(void)
 		SizeToHumanReadable(SelectedDrive.DiskSize, FALSE, use_fake_units));
 
 	// Add a tooltip (with the size of the device in parenthesis)
-	device_tooltip = (char*) malloc(safe_strlen(DriveID.String[device_index]) + 32);
+	device_tooltip = (char*) malloc(safe_strlen(DriveName.String[device_index]) + 32);
 	if (device_tooltip != NULL) {
 		if (right_to_left_mode)
-			safe_sprintf(device_tooltip, safe_strlen(DriveID.String[device_index]) + 32, "(%s) %s",
-				SizeToHumanReadable(SelectedDrive.DiskSize, FALSE, FALSE), DriveID.String[device_index]);
+			safe_sprintf(device_tooltip, safe_strlen(DriveName.String[device_index]) + 32, "(%s) %s",
+				SizeToHumanReadable(SelectedDrive.DiskSize, FALSE, FALSE), DriveName.String[device_index]);
 		else
-			safe_sprintf(device_tooltip, safe_strlen(DriveID.String[device_index]) + 32, "%s (%s)",
-				DriveID.String[device_index], SizeToHumanReadable(SelectedDrive.DiskSize, FALSE, FALSE));
+			safe_sprintf(device_tooltip, safe_strlen(DriveName.String[device_index]) + 32, "%s (%s)",
+				DriveName.String[device_index], SizeToHumanReadable(SelectedDrive.DiskSize, FALSE, FALSE));
 		CreateTooltip(hDeviceList, device_tooltip, -1);
 		free(device_tooltip);
 	}
@@ -1644,7 +1644,8 @@ static void InitDialog(HWND hDlg)
 	IGNORE_RETVAL(ComboBox_SetCurSel(hDiskID, 0));
 
 	// Create the string arrays
-	StrArrayCreate(&DriveID, MAX_DRIVES);
+	StrArrayCreate(&DriveId, MAX_DRIVES);
+	StrArrayCreate(&DriveName, MAX_DRIVES);
 	StrArrayCreate(&DriveLabel, MAX_DRIVES);
 	StrArrayCreate(&DriveHub, MAX_DRIVES);
 	StrArrayCreate(&BlockingProcess, 16);
@@ -1982,7 +1983,8 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			if (ulRegister != 0)
 				SHChangeNotifyDeregister(ulRegister);
 			PostQuitMessage(0);
-			StrArrayDestroy(&DriveID);
+			StrArrayDestroy(&DriveId);
+			StrArrayDestroy(&DriveName);
 			StrArrayDestroy(&DriveLabel);
 			StrArrayDestroy(&DriveHub);
 			StrArrayDestroy(&BlockingProcess);
@@ -2765,7 +2767,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 					int index = ComboBox_GetCurSel(hDeviceList);
 					if (index >= 0) {
 						uprintf("Device not ready → Trying to cycle port...");
-						ResetDevice(index);
+						CyclePort(index);
 					}
 				}
 				Notification(MSG_ERROR, NULL, NULL, lmprintf(MSG_042), lmprintf(MSG_043, StrError(FormatStatus, FALSE)));
@@ -3278,7 +3280,7 @@ relaunch:
 		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'C')) {
 			int index = ComboBox_GetCurSel(hDeviceList);
 			if (index >= 0)
-				ResetDevice(index);
+				CyclePort(index);
 			continue;
 		}
 		// Alt-D => Delete the 'rufus_files' subdirectory

@@ -292,6 +292,10 @@ interface IVdsAsync {
 #define IVdsServiceLoader_LoadService(This, pwszMachineName, ppService) (This)->lpVtbl->LoadService(This, pwszMachineName, ppService)
 #define IVdsServiceLoader_Release(This) (This)->lpVtbl->Release(This)
 #define IVdsService_QueryProviders(This, masks, ppEnum) (This)->lpVtbl->QueryProviders(This, masks, ppEnum)
+#define IVdsService_WaitForServiceReady(This) ((This)->lpVtbl->WaitForServiceReady(This))
+#define IVdsService_CleanupObsoleteMountPoints(This) ((This)->lpVtbl->CleanupObsoleteMountPoints(This))
+#define IVdsService_Refresh(This) ((This)->lpVtbl->Refresh(This))
+#define IVdsService_Reenumerate(This) ((This)->lpVtbl->Reenumerate(This)) 
 #define IVdsSwProvider_QueryInterface(This, riid, ppvObject) (This)->lpVtbl->QueryInterface(This, riid, ppvObject)
 #define IVdsProvider_Release(This) (This)->lpVtbl->Release(This)
 #define IVdsSwProvider_QueryPacks(This, ppEnum) (This)->lpVtbl->QueryPacks(This, ppEnum)
@@ -367,6 +371,7 @@ HANDLE GetPhysicalHandle(DWORD DriveIndex, BOOL bLockDrive, BOOL bWriteAccess, B
 char* GetLogicalName(DWORD DriveIndex, DWORD PartitionIndex, BOOL bKeepTrailingBackslash, BOOL bSilent);
 BOOL WaitForLogical(DWORD DriveIndex, DWORD PartitionIndex);
 HANDLE GetLogicalHandle(DWORD DriveIndex, DWORD PartitionIndex, BOOL bLockDrive, BOOL bWriteAccess, BOOL bWriteShare);
+HANDLE GetPartitionHandle(DWORD DriveIndex, DWORD PartitionIndex, BOOL bLockDrive, BOOL bWriteAccess, BOOL bWriteShare);
 int GetDriveNumber(HANDLE hDrive, char* path);
 BOOL GetDriveLetters(DWORD DriveIndex, char* drive_letters);
 UINT GetDriveTypeFromIndex(DWORD DriveIndex);
@@ -387,3 +392,8 @@ BOOL InitializeDisk(HANDLE hDrive);
 BOOL RefreshDriveLayout(HANDLE hDrive);
 const char* GetPartitionType(BYTE Type);
 const char* GetExtFsLabel(DWORD DriveIndex, DWORD PartitionIndex);
+BOOL GetDevices(DWORD devnum);
+BOOL CyclePort(int index);
+int CycleDevice(int index);
+BOOL RefreshLayout(DWORD DriveIndex);
+BOOL GetOpticalMedia(IMG_SAVE* img_save);

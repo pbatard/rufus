@@ -793,10 +793,12 @@ const char* error_message(errcode_t error_code)
 	case EXT2_ET_EA_INODE_CORRUPTED:
 		return "Inode is corrupted";
 	default:
-		if ((error_code > EXT2_ET_BASE) && error_code < (EXT2_ET_BASE + 1000))
+		if ((error_code > EXT2_ET_BASE) && error_code < (EXT2_ET_BASE + 1000)) {
 			static_sprintf(error_string, "Unknown ext2fs error %ld (EXT2_ET_BASE + %ld)", error_code, error_code - EXT2_ET_BASE);
-		else
-			static_sprintf(error_string, "Unknown ext2fs error 0x%08lX", error_code);
+		} else {
+			SetLastError((FormatStatus == 0) ? (ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | (error_code & 0xFFFF)) : FormatStatus);
+			static_sprintf(error_string, WindowsErrorString());
+		}
 		return error_string;
 	}
 }
@@ -826,13 +828,14 @@ const char* GetExtFsLabel(DWORD DriveIndex, DWORD PartitionIndex)
 	char* volume_name = GetPartitionName(DriveIndex, PartitionIndex);
 
 	r = ext2fs_open(volume_name, EXT2_FLAG_SKIP_MMP, 0, 0, manager, &ext2fs);
+	if (r == 0) {
+		strncpy(label, ext2fs->super->s_volume_name, EXT2_LABEL_LEN);
+		label[EXT2_LABEL_LEN] = 0;
+	}
+	if (ext2fs != NULL)
+		ext2fs_close(ext2fs);
 	free(volume_name);
-	if (r != 0)
-		return NULL;
-	strncpy(label, ext2fs->super->s_volume_name, EXT2_LABEL_LEN);
-	label[EXT2_LABEL_LEN] = 0;
-	ext2fs_close(ext2fs);
-	return label;
+	return (r == 0) ? label : NULL;
 }
 
 BOOL FormatExtFs(DWORD DriveIndex, DWORD PartitionIndex, DWORD BlockSize, LPCSTR FSName, LPCSTR Label, DWORD Flags)
@@ -1074,7 +1077,7 @@ out:
  */
 static BOOL FormatDriveVds(DWORD DriveIndex, DWORD PartitionIndex, DWORD ClusterSize, LPCSTR FSName, LPCSTR Label, DWORD Flags)
 {
-	BOOL r = FALSE;
+	BOOL r = FALSE, bFoundVolume = FALSE;
 	HRESULT hr;
 	ULONG ulFetched;
 	IVdsServiceLoader *pLoader;
@@ -1118,6 +1121,14 @@ static BOOL FormatDriveVds(DWORD DriveIndex, DWORD PartitionIndex, DWORD Cluster
 	if (hr != S_OK) {
 		VDS_SET_ERROR(hr);
 		uprintf("Could not load VDS Service: %s", WindowsErrorString());
+		goto out;
+	}
+
+	// Wait for the Service to become ready if needed
+	hr = IVdsService_WaitForServiceReady(pService);
+	if (hr != S_OK) {
+		VDS_SET_ERROR(hr);
+		uprintf("VDS Service is not ready: %s", WindowsErrorString());
 		goto out;
 	}
 
@@ -1241,6 +1252,7 @@ static BOOL FormatDriveVds(DWORD DriveIndex, DWORD PartitionIndex, DWORD Cluster
 				if (!match)
 					continue;
 
+				bFoundVolume = TRUE;
 				if (strcmp(Label, FileSystemLabel[FS_UDF]) == 0)
 					usFsVersion = ReadSetting32(SETTING_USE_UDF_VERSION);
 				if (ClusterSize < 0x200) {
@@ -1297,6 +1309,8 @@ static BOOL FormatDriveVds(DWORD DriveIndex, DWORD PartitionIndex, DWORD Cluster
 	}
 
 out:
+	if ((!bFoundVolume) && (FormatStatus == 0))
+		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_PATH_NOT_FOUND;
 	safe_free(VolumeName);
 	safe_free(wVolumeName);
 	safe_free(wLabel);
@@ -2616,8 +2630,24 @@ DWORD WINAPI FormatThread(void* param)
 	// VDS wants us to unlock the phys
 	// TODO: IVdsDiskOnline::Offline? -> NOPE, NO_GO for removable media
 	// TODO: IVdsService::Refresh()? IVdsHwProvider::Reenumerate()??
-	if (use_vds)
+	if (use_vds) {
 		safe_unlockclose(hPhysicalDrive);
+		uprintf("Refreshing drive layout...");
+#if 0
+		// **DON'T USE** This may leave the device disabled on re-plug or reboot
+		DWORD cr = CycleDevice(ComboBox_GetCurSel(hDeviceList));
+		if (cr == ERROR_DEVICE_REINITIALIZATION_NEEDED) {
+			uprintf("Zombie device detected, trying again...");
+			Sleep(1000);
+			cr = CycleDevice(ComboBox_GetCurSel(hDeviceList));
+		}
+		if (cr == 0)
+			uprintf("Successfully cycled device");
+		else
+			uprintf("Cycling device failed!");
+#endif
+		RefreshLayout(DriveIndex);
+	}
 
 	// Wait for the logical drive we just created to appear
 	uprintf("Waiting for logical drive to reappear...");

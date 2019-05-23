@@ -420,6 +420,89 @@ out:
 }
 
 /*
+ * Call on VDS to refresh the drive layout
+ */
+BOOL RefreshLayout(DWORD DriveIndex)
+{
+	BOOL r = FALSE;
+	HRESULT hr;
+	wchar_t wPhysicalName[24];
+	IVdsServiceLoader *pLoader;
+	IVdsService *pService;
+	IEnumVdsObject *pEnum;
+
+	CheckDriveIndex(DriveIndex);
+	wnsprintf(wPhysicalName, ARRAYSIZE(wPhysicalName), L"\\\\?\\PhysicalDrive%lu", DriveIndex);
+
+	// Initialize COM
+	IGNORE_RETVAL(CoInitializeEx(NULL, COINIT_APARTMENTTHREADED));
+	IGNORE_RETVAL(CoInitializeSecurity(NULL, -1, NULL, NULL, RPC_C_AUTHN_LEVEL_CONNECT,
+		RPC_C_IMP_LEVEL_IMPERSONATE, NULL, 0, NULL));
+
+	// Create a VDS Loader Instance
+	hr = CoCreateInstance(&CLSID_VdsLoader, NULL, CLSCTX_LOCAL_SERVER | CLSCTX_REMOTE_SERVER,
+		&IID_IVdsServiceLoader, (void **)&pLoader);
+	if (hr != S_OK) {
+		VDS_SET_ERROR(hr);
+		uprintf("Could not create VDS Loader Instance: %s", WindowsErrorString());
+		goto out;
+	}
+
+	// Load the VDS Service
+	hr = IVdsServiceLoader_LoadService(pLoader, L"", &pService);
+	IVdsServiceLoader_Release(pLoader);
+	if (hr != S_OK) {
+		VDS_SET_ERROR(hr);
+		uprintf("Could not load VDS Service: %s", WindowsErrorString());
+		goto out;
+	}
+
+	// Wait for the Service to become ready if needed
+	hr = IVdsService_WaitForServiceReady(pService);
+	if (hr != S_OK) {
+		VDS_SET_ERROR(hr);
+		uprintf("VDS Service is not ready: %s", WindowsErrorString());
+		goto out;
+	}
+
+	// Query the VDS Service Providers
+	hr = IVdsService_QueryProviders(pService, VDS_QUERY_SOFTWARE_PROVIDERS, &pEnum);
+	if (hr != S_OK) {
+		VDS_SET_ERROR(hr);
+		uprintf("Could not query VDS Service Providers: %s", WindowsErrorString());
+		goto out;
+	}
+
+	// Remove mountpoints
+	hr = IVdsService_CleanupObsoleteMountPoints(pService);
+	if (hr != S_OK) {
+		VDS_SET_ERROR(hr);
+		uprintf("Could not clean up VDS mountpoints: %s", WindowsErrorString());
+		goto out;
+	}
+
+	// Invoke layout refresh
+	hr = IVdsService_Refresh(pService);
+	if (hr != S_OK) {
+		VDS_SET_ERROR(hr);
+		uprintf("Could not refresh VDS layout: %s", WindowsErrorString());
+		goto out;
+	}
+
+	// Force re-enum
+	hr = IVdsService_Reenumerate(pService);
+	if (hr != S_OK) {
+		VDS_SET_ERROR(hr);
+		uprintf("Could not refresh VDS layout: %s", WindowsErrorString());
+		goto out;
+	}
+	r = TRUE;
+
+	out:
+		return r;
+}
+
+/*
  * Delete all the partitions from a disk, using VDS
  * Mostly copied from https://social.msdn.microsoft.com/Forums/vstudio/en-US/b90482ae-4e44-4b08-8731-81915030b32a/createpartition-using-vds-interface-throw-error-enointerface-dcom?forum=vcgeneral
  */
@@ -457,6 +540,14 @@ BOOL DeletePartitions(DWORD DriveIndex)
 	if (hr != S_OK) {
 		VDS_SET_ERROR(hr);
 		uprintf("Could not load VDS Service: %s", WindowsErrorString());
+		goto out;
+	}
+
+	// Wait for the Service to become ready if needed
+	hr = IVdsService_WaitForServiceReady(pService);
+	if (hr != S_OK) {
+		VDS_SET_ERROR(hr);
+		uprintf("VDS Service is not ready: %s", WindowsErrorString());
 		goto out;
 	}
 
@@ -664,6 +755,24 @@ HANDLE GetLogicalHandle(DWORD DriveIndex, DWORD PartitionIndex, BOOL bLockDrive,
 	hLogical = GetHandle(LogicalPath, bLockDrive, bWriteAccess, bWriteShare);
 	free(LogicalPath);
 	return hLogical;
+}
+
+/*
+ * Similar to the above, but use the partition name instead
+ */
+HANDLE GetPartitionHandle(DWORD DriveIndex, DWORD PartitionIndex, BOOL bLockDrive, BOOL bWriteAccess, BOOL bWriteShare)
+{
+	HANDLE handle = INVALID_HANDLE_VALUE;
+	char* volume_name = GetPartitionName(DriveIndex, PartitionIndex);
+
+	if (volume_name == NULL) {
+		uprintf("Could not get partition volume name");
+		return NULL;
+	}
+
+	handle = GetHandle(volume_name, bLockDrive, bWriteAccess, bWriteShare);
+	free(volume_name);
+	return handle;
 }
 
 /*
