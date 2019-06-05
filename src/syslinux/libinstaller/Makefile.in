@@ -244,7 +244,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 noinst_LIBRARIES = libinstaller.a
 libinstaller_a_SOURCES = fs.c setadv.c syslxmod.c
-libinstaller_a_CFLAGS = $(AM_CFLAGS)
+libinstaller_a_CFLAGS = $(AM_CFLAGS) -Wno-address-of-packed-member
 all: all-am
 
 .SUFFIXES:
