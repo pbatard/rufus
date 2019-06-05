@@ -686,11 +686,11 @@ void TogglePersistenceControls(BOOL display)
 	ShowWindow(hUnits, display ? SW_SHOW : SW_HIDE);
 }
 
-void SetPeristencePos(uint64_t pos)
+void SetPersistencePos(uint64_t pos)
 {
 	char tmp[64];
 
-	if (pos != 0) {
+	if ((boot_type == BT_IMAGE) && (pos != 0)) {
 		TogglePersistenceControls(TRUE);
 		static_sprintf(tmp, "%ld", (LONG)pos);
 	} else {
@@ -745,7 +745,7 @@ void SetPersistenceSize(void)
 	SendMessage(hCtrl, TBM_SETRANGEMAX, (WPARAM)TRUE, (LPARAM)max);
 	SendMessage(hCtrl, TBM_SETPOS, (WPARAM)TRUE, (LPARAM)pos);
 
-	SetPeristencePos(pos);
+	SetPersistencePos(pos);
 }
 
 // Toggle the Image Option dropdown (Windows To Go or persistence settings)

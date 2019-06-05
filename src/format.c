@@ -2628,8 +2628,6 @@ DWORD WINAPI FormatThread(void* param)
 	hLogicalVolume = INVALID_HANDLE_VALUE;
 
 	// VDS wants us to unlock the phys
-	// TODO: IVdsDiskOnline::Offline? -> NOPE, NO_GO for removable media
-	// TODO: IVdsService::Refresh()? IVdsHwProvider::Reenumerate()??
 	if (use_vds) {
 		safe_unlockclose(hPhysicalDrive);
 		uprintf("Refreshing drive layout...");

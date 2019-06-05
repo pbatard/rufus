@@ -2523,7 +2523,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 
 	case WM_HSCROLL:
 		lPos = (LONG)SendMessage(GetDlgItem(hMainDialog, IDC_PERSISTENCE_SLIDER), TBM_GETPOS, 0, 0);
-		SetPeristencePos(lPos);
+		SetPersistencePos(lPos);
 		persistence_size = lPos * MB;
 		for (i = 0; i < persistence_unit_selection; i++)
 			persistence_size *= 1024;

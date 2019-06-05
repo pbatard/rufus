@@ -982,8 +982,8 @@ static DWORD WINAPI DownloadISOThread(LPVOID param)
 		goto out;
 	}
 
-	static_sprintf(cmdline, "%s -NonInteractive -Sta -NoProfile –ExecutionPolicy Bypass "
-		"-File \"%s\" -DisableFirstRunCustomize -PipeName %s -LocData \"%s\" -Icon %s -AppTitle \"%s\"",
+	static_sprintf(cmdline, "\"%s\" -NonInteractive -Sta -NoProfile –ExecutionPolicy Bypass "
+		"-File \"%s\" -DisableFirstRunCustomize -PipeName %s -LocData \"%s\" -Icon \"%s\" -AppTitle \"%s\"",
 		powershell_path, script_path, &pipe[9], locale_str, icon_path, lmprintf(MSG_149));
 	// Signal our Windows alert hook that it should close the IE cookie prompts from Fido
 	close_fido_cookie_prompts = TRUE;

@@ -63,7 +63,7 @@ extern void GetFullWidth(HWND hDlg);
 extern void PositionMainControls(HWND hDlg);
 extern void AdjustForLowDPI(HWND hDlg);
 extern void SetSectionHeaders(HWND hDlg);
-extern void SetPeristencePos(uint64_t pos);
+extern void SetPersistencePos(uint64_t pos);
 extern void SetPersistenceSize(void);
 extern void TogglePersistenceControls(BOOL display);
 extern void ToggleAdvancedDeviceOptions(BOOL enable);
