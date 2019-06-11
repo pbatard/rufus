@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 3.5\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2019-03-29 16:15+0000\n"
-"PO-Revision-Date: 2019-03-29 16:18+0000\n"
+"POT-Creation-Date: 2019-06-11 15:19+0100\n"
+"PO-Revision-Date: 2019-06-11 15:19+0100\n"
 "Language: tr_TR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Rufus-LCID: 0x041F\n"
 "Last-Translator: \n"
 "Language-Team: \n"
-"X-Generator: Poedit 2.2.1\n"
+"X-Generator: Poedit 2.2.3\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -819,7 +819,7 @@ msgstr "gelişmiş sürücü özellikleri"
 
 #. • MSG_120
 msgid "advanced format options"
-msgstr "gelimiş biçimlendirme seçenekleri"
+msgstr "gelişmiş biçimlendirme seçenekleri"
 
 #. • MSG_121
 msgid "Show %s"
@@ -922,7 +922,7 @@ msgstr "Yayın"
 
 #. • MSG_137
 msgid "Edition"
-msgstr "Sürüm"
+msgstr "Yapı"
 
 #. • MSG_138
 msgid "Language"
@@ -1339,11 +1339,11 @@ msgid "Closing existing volume..."
 msgstr "Varolan birim kapatılıyor..."
 
 #. • MSG_228
-msgid "Writing master boot record..."
+msgid "Writing Master Boot Record..."
 msgstr "MBR Yazılıyor..."
 
 #. • MSG_229
-msgid "Writing partition boot record..."
+msgid "Writing Partition Boot Record..."
 msgstr "PBR Yazılıyor..."
 
 #. • MSG_230
