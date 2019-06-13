@@ -401,15 +401,15 @@ msgstr "%s (Disks %d) [%s]"
 #.
 #. Used when a drive is detected that contains more than one partition
 msgid "Multiple Partitions"
-msgstr "Multi partīcijas"
+msgstr "Vairākas partīcijas"
 
 #. • MSG_048
 msgid "Rufus - Flushing buffers"
-msgstr "Ātrapmaiņas buferis"
+msgstr "Rufus - Buferu attīrīšana"
 
 #. • MSG_049
 msgid "Rufus - Cancellation"
-msgstr "Darbības atcelšana"
+msgstr "Rufus - Darbības atcelšana"
 
 #. • MSG_050
 msgid "Success."
@@ -465,7 +465,7 @@ msgstr "Tika saņemta neatbalstāma komanda."
 
 #. • MSG_063
 msgid "Memory allocation error."
-msgstr "Atmiņas kļūda."
+msgstr "Atmiņas iedalīšanas kļūda."
 
 #. • MSG_064
 msgid "Read error."
@@ -1379,7 +1379,7 @@ msgstr "Bojātie sektori: %s %d/%d - %0.2f%% (%d/%d/%d kļūdu)"
 
 #. • MSG_236
 msgid "Bad Blocks: Testing with random pattern"
-msgstr "Bojātie sektori: Testēšana ar gadījuma paraugu"
+msgstr "Bojātie sektori: Testēšana pēc nejaušā šablona"
 
 #. • MSG_237
 msgid "Bad Blocks: Testing with pattern 0x%02X"
@@ -1409,7 +1409,7 @@ msgstr ""
 
 #. • MSG_241
 msgid "Downloading: %0.1f%%"
-msgstr "Ielādējas: %0.1f%%"
+msgstr "Lejupielādē: %0.1f%%"
 
 #. • MSG_242
 msgid "Failed to download file."
@@ -1483,7 +1483,7 @@ msgstr "Rock Ridge atbalsts"
 
 #. • MSG_259
 msgid "Force update"
-msgstr "Ātrā jaunināšana"
+msgstr "Piespiedu jaunināšana"
 
 #. • MSG_260
 msgid "NTFS compression"
@@ -1527,7 +1527,7 @@ msgstr "Pielietots Windows virtuālais attēls..."
 
 #. • MSG_269
 msgid "Preserve timestamps"
-msgstr "Atļauja laika zīmogam"
+msgstr "Saglabāt laika zīmogu"
 
 #. • MSG_270
 msgid "USB debug"
