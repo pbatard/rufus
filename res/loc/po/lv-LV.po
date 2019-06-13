@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 3.5\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2019-03-21 15:24+0000\n"
-"PO-Revision-Date: 2019-03-21 15:29+0000\n"
+"POT-Creation-Date: 2019-06-14 13:05+0100\n"
+"PO-Revision-Date: 2019-06-14 13:05+0100\n"
 "Language: lv_LV\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Rufus-LCID: 0x0426\n"
 "Last-Translator: \n"
 "Language-Team: \n"
-"X-Generator: Poedit 2.2.1\n"
+"X-Generator: Poedit 2.2.3\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -401,15 +401,15 @@ msgstr "%s (Disks %d) [%s]"
 #.
 #. Used when a drive is detected that contains more than one partition
 msgid "Multiple Partitions"
-msgstr "Multi partīcijas"
+msgstr "Vairākas partīcijas"
 
 #. • MSG_048
 msgid "Rufus - Flushing buffers"
-msgstr "Ātrapmaiņas buferis"
+msgstr "Rufus - Buferu attīrīšana"
 
 #. • MSG_049
 msgid "Rufus - Cancellation"
-msgstr "Darbības atcelšana"
+msgstr "Rufus - Darbības atcelšana"
 
 #. • MSG_050
 msgid "Success."
@@ -465,7 +465,7 @@ msgstr "Tika saņemta neatbalstāma komanda."
 
 #. • MSG_063
 msgid "Memory allocation error."
-msgstr "Atmiņas kļūda."
+msgstr "Atmiņas iedalīšanas kļūda."
 
 #. • MSG_064
 msgid "Read error."
@@ -1340,11 +1340,11 @@ msgid "Closing existing volume..."
 msgstr "Eksistējošā diska aizvēršana..."
 
 #. • MSG_228
-msgid "Writing master boot record..."
+msgid "Writing Master Boot Record..."
 msgstr "Galvenā ielādes ieraksta (MBR) izveide..."
 
 #. • MSG_229
-msgid "Writing partition boot record..."
+msgid "Writing Partition Boot Record..."
 msgstr "Sadaļas ielādes ieraksta izveide..."
 
 #. • MSG_230
@@ -1379,7 +1379,7 @@ msgstr "Bojātie sektori: %s %d/%d - %0.2f%% (%d/%d/%d kļūdu)"
 
 #. • MSG_236
 msgid "Bad Blocks: Testing with random pattern"
-msgstr "Bojātie sektori: Testēšana ar gadījuma paraugu"
+msgstr "Bojātie sektori: Testēšana pēc nejaušā šablona"
 
 #. • MSG_237
 msgid "Bad Blocks: Testing with pattern 0x%02X"
@@ -1409,7 +1409,7 @@ msgstr ""
 
 #. • MSG_241
 msgid "Downloading: %0.1f%%"
-msgstr "Ielādējas: %0.1f%%"
+msgstr "Lejupielādē: %0.1f%%"
 
 #. • MSG_242
 msgid "Failed to download file."
@@ -1483,7 +1483,7 @@ msgstr "Rock Ridge atbalsts"
 
 #. • MSG_259
 msgid "Force update"
-msgstr "Ātrā jaunināšana"
+msgstr "Piespiedu jaunināšana"
 
 #. • MSG_260
 msgid "NTFS compression"
@@ -1527,7 +1527,7 @@ msgstr "Pielietots Windows virtuālais attēls..."
 
 #. • MSG_269
 msgid "Preserve timestamps"
-msgstr "Atļauja laika zīmogam"
+msgstr "Saglabāt laika zīmogu"
 
 #. • MSG_270
 msgid "USB debug"
