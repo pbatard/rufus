@@ -698,10 +698,13 @@ static void EnableMBRBootOptions(BOOL enable, BOOL remove_checkboxes)
 		if (IsWindowEnabled(GetDlgItem(hMainDialog, IDC_RUFUS_MBR)) && !actual_enable_mbr) {
 			uMBRChecked = IsChecked(IDC_RUFUS_MBR);
 			CheckDlgButton(hMainDialog, IDC_RUFUS_MBR, BST_UNCHECKED);
-			uXPartChecked = IsChecked(IDC_OLD_BIOS_FIXES);
-			CheckDlgButton(hMainDialog, IDC_OLD_BIOS_FIXES, BST_UNCHECKED);
 		} else if (!IsWindowEnabled(GetDlgItem(hMainDialog, IDC_RUFUS_MBR)) && actual_enable_mbr) {
 			CheckDlgButton(hMainDialog, IDC_RUFUS_MBR, uMBRChecked);
+		}
+		if (IsWindowEnabled(GetDlgItem(hMainDialog, IDC_OLD_BIOS_FIXES)) && !actual_enable_fix) {
+			uXPartChecked = IsChecked(IDC_OLD_BIOS_FIXES);
+			CheckDlgButton(hMainDialog, IDC_OLD_BIOS_FIXES, BST_UNCHECKED);
+		} else if (!IsWindowEnabled(GetDlgItem(hMainDialog, IDC_OLD_BIOS_FIXES)) && actual_enable_fix) {
 			CheckDlgButton(hMainDialog, IDC_OLD_BIOS_FIXES, uXPartChecked);
 		}
 	}
@@ -812,7 +815,7 @@ static void EnableControls(BOOL bEnable)
 	// Enable or disable the Start button and the other boot options
 	bEnable = ((boot_type == BT_IMAGE) && (image_path == NULL)) ? FALSE : bEnable;
 	EnableWindow(hStart, bEnable);
-	EnableBootOptions(bEnable, FALSE);
+	EnableBootOptions(bEnable, TRUE);
 
 	// Finally, only enable the half-size dropdowns if we aren't dealing with a pure DD image
 	bEnable = ((boot_type == BT_IMAGE) && (image_path != NULL) && (!img_report.is_iso)) ? FALSE : bEnable;
@@ -2158,7 +2161,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			partition_type = (int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme));
 			SetPartitionSchemeAndTargetSystem(TRUE);
 			SetFileSystemAndClusterSize(NULL);
-			EnableMBRBootOptions(TRUE, FALSE);
+			EnableMBRBootOptions(TRUE, TRUE);
 			selected_pt = partition_type;
 			break;
 		case IDC_FILE_SYSTEM:
@@ -2171,7 +2174,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			SetClusterSizes(fs_type);
 			if (set_selected_fs && (fs_type > 0))
 				selected_fs = fs_type;
-			EnableMBRBootOptions(TRUE, FALSE);
+			EnableMBRBootOptions(TRUE, TRUE);
 			SetMBRProps();
 			EnableExtendedLabel((fs_type < FS_EXT2));
 			break;
@@ -3221,10 +3224,10 @@ relaunch:
 		SetWindowPos(hDlg, HWND_TOP, relaunch_rc.left, relaunch_rc.top, 0, 0, SWP_NOSIZE);
 
 	// Enable drag-n-drop through the message filter
-	ChangeWindowMessageFilter(WM_DROPFILES, MSGFLT_ADD);
-	ChangeWindowMessageFilter(WM_COPYDATA, MSGFLT_ADD);
-	// CopyGlobalData is needed sine we are running elevated
-	ChangeWindowMessageFilter(WM_COPYGLOBALDATA, MSGFLT_ADD);
+	ChangeWindowMessageFilterEx(hDlg, WM_DROPFILES, MSGFLT_ADD, NULL);
+	ChangeWindowMessageFilterEx(hDlg, WM_COPYDATA, MSGFLT_ADD, NULL);
+	// CopyGlobalData is needed since we are running elevated
+	ChangeWindowMessageFilterEx(hDlg, WM_COPYGLOBALDATA, MSGFLT_ADD, NULL);
 
 	// Set the hook to automatically close Windows' "You need to format the disk in drive..." prompt
 	SetAlertPromptMessages();
