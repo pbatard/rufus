@@ -91,6 +91,7 @@ static const char* pe_file[] = { "ntdetect.com", "setupldr.bin", "txtsetup.sif" 
 static const char* reactos_name = "setupldr.sys"; // TODO: freeldr.sys doesn't seem to work
 static const char* kolibri_name = "kolibri.img";
 static const char* autorun_name = "autorun.inf";
+static const char* manjaro_marker = ".miso";
 static const char* stupid_antivirus = "  NOTE: This is usually caused by a poorly designed security solution. "
 	"See https://goo.gl/QTobxX.\r\n  This file will be skipped for now, but you should really "
 	"look into using a *SMARTER* antivirus solution.";
@@ -200,6 +201,9 @@ static BOOL check_iso_props(const char* psz_dirname, int64_t file_length, const 
 			}
 			if (safe_stricmp(psz_basename, bootmgr_efi_name) == 0) {
 				img_report.has_efi |= 1;
+			}
+			if (safe_stricmp(psz_basename, manjaro_marker) == 0) {
+				img_report.disable_iso = TRUE;
 			}
 		}
 

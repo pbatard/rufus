@@ -1103,8 +1103,9 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 	if (img_report.is_iso) {
 		DisplayISOProps();
 		// If we have an ISOHybrid, but without an ISO method we support, disable ISO support altogether
-		if (IS_DD_BOOTABLE(img_report) && !IS_BIOS_BOOTABLE(img_report) && !IS_EFI_BOOTABLE(img_report)) {
-			uprintf("This ISOHybrid is not compatible with any of the ISO boot methods we support");
+		if (IS_DD_BOOTABLE(img_report) && (img_report.disable_iso ||
+				(!IS_BIOS_BOOTABLE(img_report) && !IS_EFI_BOOTABLE(img_report)))) {
+			uprintf("Note: ISO mode will be disabled because this ISOHybrid is not compatible with ISO boot.");
 			img_report.is_iso = FALSE;
 		}
 		selection_default = BT_IMAGE;

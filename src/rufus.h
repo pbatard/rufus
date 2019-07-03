@@ -341,6 +341,7 @@ typedef struct {
 	BOOLEAN uses_minint;
 	BOOLEAN compression_type;
 	BOOLEAN is_vhd;
+	BOOLEAN disable_iso;
 	uint16_t sl_version;	// Syslinux/Isolinux version
 	char sl_version_str[12];
 	char sl_version_ext[32];
