@@ -595,6 +595,9 @@ void ToggleAdvancedDeviceOptions(BOOL enable)
 	GetWindowRect(hAdvancedDeviceToolbar, &rc);
 	MapWindowPoints(NULL, hMainDialog, (POINT*)&rc, 2);
 	SendMessage(hAdvancedDeviceToolbar, TB_GETIDEALSIZE, (WPARAM)FALSE, (LPARAM)&sz);
+	// TB_GETIDEALSIZE may act up and report negative values
+	if (sz.cx < 16)
+		sz.cx = fw;
 	SetWindowPos(hAdvancedDeviceToolbar, hTargetSystem, rc.left, rc.top, sz.cx, rc.bottom - rc.top, 0);
 
 	// Move the controls up or down
@@ -637,6 +640,8 @@ void ToggleAdvancedFormatOptions(BOOL enable)
 	GetWindowRect(hAdvancedFormatToolbar, &rc);
 	MapWindowPoints(NULL, hMainDialog, (POINT*)&rc, 2);
 	SendMessage(hAdvancedFormatToolbar, TB_GETIDEALSIZE, (WPARAM)FALSE, (LPARAM)&sz);
+	if (sz.cx < 16)
+		sz.cx = fw;
 	SetWindowPos(hAdvancedFormatToolbar, hClusterSize, rc.left, rc.top, sz.cx, rc.bottom - rc.top, 0);
 
 	// Move the controls up or down
