@@ -1998,7 +1998,8 @@ void SetAlertPromptMessages(void)
 	char mui_path[MAX_PATH];
 
 	// Fetch the localized strings in the relevant MUI
-	static_sprintf(mui_path, "%s\\%s\\shell32.dll.mui", system_dir, GetCurrentMUI());
+	// Must use sysnative_dir rather than system_dir as we may not find the MUI's otherwise
+	static_sprintf(mui_path, "%s\\%s\\shell32.dll.mui", sysnative_dir, GetCurrentMUI());
 	mui_lib = LoadLibraryU(mui_path);
 	if (mui_lib != NULL) {
 		// 4097 = "You need to format the disk in drive %c: before you can use it." (dialog text)
@@ -2014,7 +2015,7 @@ void SetAlertPromptMessages(void)
 		}
 		FreeLibrary(mui_lib);
 	}
-	static_sprintf(mui_path, "%s\\%s\\urlmon.dll.mui", system_dir, GetCurrentMUI());
+	static_sprintf(mui_path, "%s\\%s\\urlmon.dll.mui", sysnative_dir, GetCurrentMUI());
 	mui_lib = LoadLibraryU(mui_path);
 	if (mui_lib != NULL) {
 		// 2070 = "Windows Security Warning" (yes, that's what MS uses for a stupid cookie!)
