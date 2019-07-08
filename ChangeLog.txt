@@ -1,3 +1,17 @@
+o Version 3.6 (2019.07.??)
+    Add support for persistent partitions [EXPERIMENTAL]
+    (Note: The above won't work with Ubuntu until Ubuntu bug #1489855 is fixed)
+    Add a mode to use VHD when partitioning/formatting (Alt-V) [EXPERIMENTAL]
+    Add full extraction support for efi.img (Solus)
+    Fix listing of blocking processes
+    Fix NTFS not being selectable when using Grub4DOS
+    Fix download script not running when the username contains a space
+    Fix translated messages potentially being truncated (e.g. Thai)
+    Fix progress bar report for screen readers (Accessibility)
+    Improve(?) Windows To Go support by following Microsoft recommended partition order
+    Disable ISO mode when Manjaro ISOHybrids are being used
+    Update embedded GRUB to version 2.04
+
 o Version 3.5 (2019.03.28)
     Add a feature to download official retail Windows 8.1 or Windows 10 ISOs
     (Note: 'Check for updates' must be enabled for the above to be active)
