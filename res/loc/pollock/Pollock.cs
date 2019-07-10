@@ -43,7 +43,7 @@ using System.Windows.Forms;
 [assembly: AssemblyProduct("Pollock")]
 [assembly: AssemblyCopyright("Copyright © 2018 Pete Batard <pete@akeo.ie>")]
 [assembly: AssemblyTrademark("GNU GPLv3")]
-[assembly: AssemblyVersion("1.2.*")]
+[assembly: AssemblyVersion("1.3.*")]
 
 namespace pollock
 {
@@ -1058,7 +1058,7 @@ namespace pollock
             }
             else
             {
-                var local_loc = @"C:\rufus\res\loc\rufus.loc";
+                var local_loc = @"C:\Projects\rufus\res\loc\rufus.loc";
                 Console.Write($"Copying loc file from '{local_loc}'... ");
                 File.Copy(local_loc, "rufus.loc", true);
             }
@@ -1092,9 +1092,15 @@ Menu:
             for (int i = 1; i < split + 1; i++)
             {
                 name = $"{list[i][0]} ({list[i][1]})";
-                Console.Write($"[{i.ToString("00")}] {name,-29} {$"(v{list[i][2]})",-7}");
-                name = $"{list[i + split][0]} ({list[i + split][1]})";
-                Console.WriteLine($"  |  [{(i + split).ToString("00")}] {name,-29} {$"(v{list[i + split][2]})",-7}");
+                Console.Write($"[{i.ToString("00")}] {name,-29} {$"(v{list[i][2]})",-7}  |  ");
+                if ((i + split) < list.Count)
+                {
+                    name = $"{list[i + split][0]} ({list[i + split][1]})";
+                    Console.WriteLine($"[{(i + split).ToString("00")}] {name,-29} {$"(v{list[i + split][2]})",-7}");
+                } else
+                {
+                    Console.WriteLine();
+                }
             }
             Console.WriteLine();
 
@@ -1144,9 +1150,7 @@ Retry:
                     if (str == null)
                         goto Exit;
                     var sha = str.Substring(str.IndexOf("/pbatard/rufus/commit/") + 22, 40);
-                    // TODO: Remove this once everyone has upgraded past 3.2
-                    string loc_dir = ((list[index][2][0] == '2') || ((list[index][2][0] == '3') && (list[index][2][2] == '0'))) ? "localization" : "loc";
-                    url = "https://github.com/pbatard/rufus/raw/" + sha + "/res/" + loc_dir + "/rufus.loc";
+                    url = "https://github.com/pbatard/rufus/raw/" + sha + "/res/loc/rufus.loc";
                     if (!DownloadFile(url, old_loc_file))
                         goto Exit;
                 }

@@ -1,15 +1,15 @@
 o Version 3.6 (2019.07.??)
     Add support for persistent partitions [EXPERIMENTAL]
     (Note: The above won't work with Ubuntu until Ubuntu bug #1489855 is fixed)
-    Add a mode to use VHD when partitioning/formatting (Alt-V) [EXPERIMENTAL]
+    Add a mode to use VDS when partitioning/formatting (Alt-V) [EXPERIMENTAL]
     Add full extraction support for efi.img (Solus)
-    Fix listing of blocking processes
+    Fix listing of potentially blocking processes
     Fix NTFS not being selectable when using Grub4DOS
-    Fix download script not running when the username contains a space
+    Fix download script not being launched when the user name contains a space
     Fix translated messages potentially being truncated (e.g. Thai)
-    Fix progress bar report for screen readers (Accessibility)
+    Fix progress bar report for screen readers (Accessibility issue)
     Fix a regression where Windows format prompts would not be suppressed
-    Improve(?) Windows To Go support by following Microsoft recommended partition order
+    Improve(?) Windows To Go support by following Microsoft's recommended partition order
     Disable ISO mode when Manjaro ISOHybrids are being used
     Update embedded GRUB to version 2.04
 
