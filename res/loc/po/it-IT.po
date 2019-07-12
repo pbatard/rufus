@@ -84,7 +84,7 @@ msgstr "Formattazione rapida"
 
 #. • IDD_DIALOG → IDC_BAD_BLOCKS
 msgid "Check device for bad blocks"
-msgstr "Test controllo blocchi errati unità"
+msgstr Verifica presenza di blocchi errati nell’unità"
 
 #. • IDD_DIALOG → IDC_EXTENDED_LABEL
 msgid "Create extended label and icon files"
