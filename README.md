@@ -11,17 +11,18 @@ Rufus: The Reliable USB Formatting Utility
 Features
 --------
 
-* Format USB, flash card and virtual drives to FAT/FAT32/NTFS/UDF/exFAT/ReFS
+* Format USB, flash card and virtual drives to FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3
 * Create DOS bootable USB drives, using [FreeDOS](http://www.freedos.org) or MS-DOS (Windows 8.1 or earlier)
 * Create BIOS or UEFI bootable drives, including [UEFI bootable NTFS](https://github.com/pbatard/uefi-ntfs)
 * Create bootable drives from bootable ISOs (Windows, Linux, etc.)
 * Create bootable drives from bootable disk images, including compressed ones
 * Create [Windows To Go](https://en.wikipedia.org/wiki/Windows_To_Go) drives
+* Create persistent Linux partitions
 * Download official Microsoft Windows 8 or Windows 10 retail ISOs
 * Compute MD5, SHA-1 and SHA-256 checksums of the selected image
 * Twice as fast as Microsoft's USB/DVD tool or UNetbootin, on ISO -> USB creation <sup>(1)</sup>
 * Perform bad blocks checks, including detection of "fake" flash drives
-* Modern and familiar UI, with [39 languages natively supported](https://github.com/pbatard/rufus/wiki/FAQ#What_languages_are_natively_supported_by_Rufus)
+* Modern and familiar UI, with [38 languages natively supported](https://github.com/pbatard/rufus/wiki/FAQ#What_languages_are_natively_supported_by_Rufus)
 * Small footprint. No installation required.
 * Portable
 * 100% [Free Software](https://www.gnu.org/philosophy/free-sw) ([GPL v3](https://www.gnu.org/licenses/gpl-3.0))

@@ -453,6 +453,7 @@ BOOL GetDevices(DWORD devnum)
 		"_SD_", "_SDHC_", "_MMC_", "_MS_", "_MSPro_", "_xDPicture_", "_O2Media_"
 	};
 	const char* usb_speed_name[USB_SPEED_MAX] = { "USB", "USB 1.0", "USB 1.1", "USB 2.0", "USB 3.0" };
+	const char* windows_sandbox_vhd_label = "PortableBaseLayer";
 	// Hash table and String Array used to match a Device ID with the parent hub's Device Interface Path
 	htab_table htab_devid = HTAB_EMPTY;
 	StrArray dev_if_path;
@@ -879,6 +880,13 @@ BOOL GetDevices(DWORD devnum)
 					if (!list_non_usb_removable_drives)
 						uprintf("If this device is not a Hard Drive, please e-mail the author of this application");
 					uprintf("NOTE: You can enable the listing of Hard Drives under 'advanced drive properties'");
+					safe_closehandle(hDrive);
+					safe_free(devint_detail_data);
+					break;
+				}
+				// Windows 10 19H1 mounts a 'PortableBaseLayer' for its Windows Sandbox feature => unlist those
+				if (safe_strcmp(label, windows_sandbox_vhd_label) == 0) {
+					uprintf("Device eliminated because it's a Windows Sandbox VHD");
 					safe_closehandle(hDrive);
 					safe_free(devint_detail_data);
 					break;

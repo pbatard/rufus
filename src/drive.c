@@ -954,14 +954,23 @@ BOOL GetDriveLabel(DWORD DriveIndex, char* letters, char** label)
 {
 	HANDLE hPhysical;
 	DWORD size, error;
-	static char VolumeLabel[MAX_PATH + 1];
+	static char VolumeLabel[MAX_PATH + 1] = { 0 };
 	char DrivePath[] = "#:\\", AutorunPath[] = "#:\\autorun.inf", *AutorunLabel = NULL;
+	WCHAR VolumeName[MAX_PATH + 1] = { 0 }, FileSystemName[64];
+	DWORD VolumeSerialNumber, MaximumComponentLength, FileSystemFlags;
 
 	*label = STR_NO_LABEL;
 
 	if (!GetDriveLetters(DriveIndex, letters))
 		return FALSE;
 	if (letters[0] == 0) {
+		// Even if we don't have a letter, try to obtain the label of the first partition
+		HANDLE h = GetLogicalHandle(DriveIndex, 0, FALSE, FALSE, FALSE);
+		if (GetVolumeInformationByHandleW(h, VolumeName, 64, &VolumeSerialNumber,
+			&MaximumComponentLength, &FileSystemFlags, FileSystemName, 64)) {
+			wchar_to_utf8_no_alloc(VolumeName, VolumeLabel, sizeof(VolumeLabel));
+			*label = VolumeLabel;
+		}
 		// Drive without volume assigned - always enabled
 		return TRUE;
 	}

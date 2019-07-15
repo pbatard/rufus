@@ -10,6 +10,7 @@ o Version 3.6 (2019.07.??)
     Fix progress bar report for screen readers (Accessibility issue)
     Fix a regression where Windows format prompts would not be suppressed
     Improve(?) Windows To Go support by following Microsoft's recommended partition order
+    Don't enumerate Windows Sandbox VHDs
     Disable ISO mode when Manjaro ISOHybrids are being used
     Update embedded GRUB to version 2.04
 
