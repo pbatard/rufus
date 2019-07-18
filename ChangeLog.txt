@@ -1,6 +1,6 @@
-o Version 3.6 (2019.07.??)
+o Version 3.6 (2019.07.18)
     Add support for persistent partitions [EXPERIMENTAL]
-    (Note: The above won't work with Ubuntu until Ubuntu bug #1489855 is fixed)
+    (Note: The above won't work with Ubuntu until Ubuntu bug #1489855 is properly fixed)
     Add a mode to use VDS when partitioning/formatting (Alt-V) [EXPERIMENTAL]
     Add full extraction support for efi.img (Solus)
     Fix listing of potentially blocking processes
