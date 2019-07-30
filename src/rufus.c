@@ -714,19 +714,21 @@ static void EnableMBRBootOptions(BOOL enable, BOOL remove_checkboxes)
 	EnableWindow(hDiskID, actual_enable_mbr);
 }
 
-static void EnableExtendedLabel(BOOL enable)
+static void EnableExtendedLabel(BOOL enable, BOOL remove_checkboxes)
 {
 	HWND hCtrl = GetDlgItem(hMainDialog, IDC_EXTENDED_LABEL);
 	static UINT checked, state = 0;
 
-	if (!enable && IsWindowEnabled(hCtrl) && (state != 1)) {
-		checked = IsChecked(IDC_EXTENDED_LABEL);
-		CheckDlgButton(hMainDialog, IDC_EXTENDED_LABEL, BST_UNCHECKED);
-		state = 1;
-	} else if (enable && !IsWindowEnabled(hCtrl) && (state != 2)) {
-		if (state != 0)
-			CheckDlgButton(hMainDialog, IDC_EXTENDED_LABEL, checked);
-		state = 2;
+	if (remove_checkboxes) {
+		if (!enable && IsWindowEnabled(hCtrl) && (state != 1)) {
+			checked = IsChecked(IDC_EXTENDED_LABEL);
+			CheckDlgButton(hMainDialog, IDC_EXTENDED_LABEL, BST_UNCHECKED);
+			state = 1;
+		} else if (enable && !IsWindowEnabled(hCtrl) && (state != 2)) {
+			if (state != 0)
+				CheckDlgButton(hMainDialog, IDC_EXTENDED_LABEL, checked);
+			state = 2;
+		}
 	}
 	EnableWindow(hCtrl, enable);
 }
@@ -783,47 +785,47 @@ static void EnableBootOptions(BOOL enable, BOOL remove_checkboxes)
 	EnableQuickFormat(actual_enable);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_BAD_BLOCKS), actual_enable_bb);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_NB_PASSES), actual_enable_bb);
-	EnableExtendedLabel((fs_type < FS_EXT2) ? actual_enable : FALSE);
+	EnableExtendedLabel((fs_type < FS_EXT2) ? actual_enable : FALSE, remove_checkboxes);
 }
 
 // Toggle controls according to operation
-static void EnableControls(BOOL bEnable)
+static void EnableControls(BOOL enable, BOOL remove_checkboxes)
 {
 	// The following only get disabled on format/checksum and otherwise remain enabled,
 	// even if no device or image are selected
-	EnableWindow(hDeviceList, bEnable);
-	EnableWindow(hBootType, bEnable);
-	EnableWindow(hSelectImage, bEnable);
-	EnableWindow(GetDlgItem(hMainDialog, IDC_LIST_USB_HDD), bEnable);
-	EnableWindow(hAdvancedDeviceToolbar, bEnable);
-	EnableWindow(hAdvancedFormatToolbar, bEnable);
-	SendMessage(hMultiToolbar, TB_ENABLEBUTTON, (WPARAM)IDC_LANG, (LPARAM)bEnable);
-	SendMessage(hMultiToolbar, TB_ENABLEBUTTON, (WPARAM)IDC_ABOUT, (LPARAM)bEnable);
-	SendMessage(hMultiToolbar, TB_ENABLEBUTTON, (WPARAM)IDC_SETTINGS, (LPARAM)bEnable);
+	EnableWindow(hDeviceList, enable);
+	EnableWindow(hBootType, enable);
+	EnableWindow(hSelectImage, enable);
+	EnableWindow(GetDlgItem(hMainDialog, IDC_LIST_USB_HDD), enable);
+	EnableWindow(hAdvancedDeviceToolbar, enable);
+	EnableWindow(hAdvancedFormatToolbar, enable);
+	SendMessage(hMultiToolbar, TB_ENABLEBUTTON, (WPARAM)IDC_LANG, (LPARAM)enable);
+	SendMessage(hMultiToolbar, TB_ENABLEBUTTON, (WPARAM)IDC_ABOUT, (LPARAM)enable);
+	SendMessage(hMultiToolbar, TB_ENABLEBUTTON, (WPARAM)IDC_SETTINGS, (LPARAM)enable);
 
 	// Checksum button is enabled if an image has been selected
-	EnableWindow(hHashToolbar, bEnable && (boot_type == BT_IMAGE) && (image_path != NULL));
+	EnableWindow(hHashToolbar, enable && (boot_type == BT_IMAGE) && (image_path != NULL));
 
 	// Toggle CLOSE/CANCEL
-	SetDlgItemTextU(hMainDialog, IDCANCEL, bEnable ? uppercase_close : uppercase_cancel);
+	SetDlgItemTextU(hMainDialog, IDCANCEL, enable ? uppercase_close : uppercase_cancel);
 
 	// Only enable the following controls if a device is active
-	bEnable = (ComboBox_GetCurSel(hDeviceList) < 0) ? FALSE : bEnable;
-	EnableWindow(GetDlgItem(hMainDialog, IDC_IMAGE_OPTION), bEnable);
-	EnableWindow(hSaveToolbar, bEnable);
+	enable = (ComboBox_GetCurSel(hDeviceList) < 0) ? FALSE : enable;
+	EnableWindow(GetDlgItem(hMainDialog, IDC_IMAGE_OPTION), enable);
+	EnableWindow(hSaveToolbar, enable);
 
 	// Enable or disable the Start button and the other boot options
-	bEnable = ((boot_type == BT_IMAGE) && (image_path == NULL)) ? FALSE : bEnable;
-	EnableWindow(hStart, bEnable);
-	EnableBootOptions(bEnable, TRUE);
+	enable = ((boot_type == BT_IMAGE) && (image_path == NULL)) ? FALSE : enable;
+	EnableWindow(hStart, enable);
+	EnableBootOptions(enable, remove_checkboxes);
 
 	// Finally, only enable the half-size dropdowns if we aren't dealing with a pure DD image
-	bEnable = ((boot_type == BT_IMAGE) && (image_path != NULL) && (!img_report.is_iso)) ? FALSE : bEnable;
-	EnableWindow(hPartitionScheme, bEnable);
-	EnableWindow(hTargetSystem, bEnable);
-	EnableWindow(GetDlgItem(hMainDialog, IDS_CSM_HELP_TXT), bEnable);
-	EnableWindow(hFileSystem, bEnable);
-	EnableWindow(hClusterSize, bEnable);
+	enable = ((boot_type == BT_IMAGE) && (image_path != NULL) && (!img_report.is_iso)) ? FALSE : enable;
+	EnableWindow(hPartitionScheme, enable);
+	EnableWindow(hTargetSystem, enable);
+	EnableWindow(GetDlgItem(hMainDialog, IDS_CSM_HELP_TXT), enable);
+	EnableWindow(hFileSystem, enable);
+	EnableWindow(hClusterSize, enable);
 }
 
 // Populate the UI main dropdown properties.
@@ -853,7 +855,7 @@ static BOOL PopulateProperties(void)
 		return FALSE;
 	}
 
-	EnableControls(TRUE);
+	EnableControls(TRUE, FALSE);
 
 	// Set a proposed label according to the size (eg: "256MB", "8GB")
 	static_sprintf(SelectedDrive.proposed_label,
@@ -1075,7 +1077,7 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 	format_op_in_progress = TRUE;
 	PrintInfoDebug(0, MSG_202);
 	user_notified = FALSE;
-	EnableControls(FALSE);
+	EnableControls(FALSE, FALSE);
 	memset(&img_report, 0, sizeof(img_report));
 	img_report.is_iso = (BOOLEAN)ExtractISO(image_path, "", TRUE);
 	img_report.is_bootable_img = (BOOLEAN)IsBootableImage(image_path);
@@ -1090,7 +1092,7 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 		PopulateProperties();
 		PrintInfoDebug(0, MSG_203);
 		PrintStatus(0, MSG_203);
-		EnableControls(TRUE);
+		EnableControls(TRUE, FALSE);
 		goto out;
 	}
 
@@ -1116,7 +1118,7 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 		safe_free(image_path);
 		MessageBoxExU(hMainDialog, lmprintf(MSG_082), lmprintf(MSG_081), MB_OK | MB_ICONINFORMATION | MB_IS_RTL, selected_langid);
 		PrintStatus(0, MSG_086);
-		EnableControls(TRUE);
+		EnableControls(TRUE, FALSE);
 		SetMBRProps();
 	} else {
 		if (!dont_display_image_name) {
@@ -1129,7 +1131,7 @@ DWORD WINAPI ISOScanThread(LPVOID param)
 			uprintf("Using image: %s (%s)", short_image_path, SizeToHumanReadable(img_report.image_size, FALSE, FALSE));
 		}
 		ToggleImageOptions();
-		EnableControls(TRUE);
+		EnableControls(TRUE, FALSE);
 		// Set Target and FS accordingly
 		if (img_report.is_iso) {
 			IGNORE_RETVAL(ComboBox_SetCurSel(hBootType, image_index));
@@ -1743,7 +1745,7 @@ static void SaveVHD(void)
 				&& (GetDiskFreeSpaceExA(path, &free_space, NULL, NULL))
 				&& ((LONGLONG)free_space.QuadPart > (SelectedDrive.DiskSize + 512))) {
 				// Disable all controls except cancel
-				EnableControls(FALSE);
+				EnableControls(FALSE, FALSE);
 				FormatStatus = 0;
 				InitProgress(TRUE);
 				format_thid = CreateThread(NULL, 0, SaveImageThread, &img_save, 0, NULL);
@@ -1803,7 +1805,7 @@ static void SaveISO(void)
 	FormatStatus = 0;
 	format_op_in_progress = TRUE;
 	// Disable all controls except cancel
-	EnableControls(FALSE);
+	EnableControls(FALSE, FALSE);
 	InitProgress(TRUE);
 	format_thid = CreateThread(NULL, 0, SaveImageThread, &img_save, 0, NULL);
 	if (format_thid != NULL) {
@@ -2057,7 +2059,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			ToggleAdvancedDeviceOptions(advanced_mode_device);
 			SetBootOptions();
 			boot_type = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
-			EnableControls(TRUE);
+			EnableControls(TRUE, FALSE);
 			SetFileSystemAndClusterSize(NULL);
 			SendMessage(hMainDialog, WM_COMMAND, (CBN_SELCHANGE_INTERNAL<<16) | IDC_FILE_SYSTEM,
 				ComboBox_GetCurSel(hFileSystem));
@@ -2177,7 +2179,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				selected_fs = fs_type;
 			EnableMBRBootOptions(TRUE, TRUE);
 			SetMBRProps();
-			EnableExtendedLabel((fs_type < FS_EXT2));
+			EnableExtendedLabel((fs_type < FS_EXT2), TRUE);
 			break;
 		case IDC_BOOT_SELECTION:
 			if (HIWORD(wParam) != CBN_SELCHANGE)
@@ -2194,13 +2196,13 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			SetFileSystemAndClusterSize(tmp);
 			ToggleImageOptions();
 			SetProposedLabel(ComboBox_GetCurSel(hDeviceList));
-			EnableControls(TRUE);
+			EnableControls(TRUE, TRUE);
 			target_type = (int)ComboBox_GetItemData(hPartitionScheme, ComboBox_GetCurSel(hPartitionScheme));
 			partition_type = (int)ComboBox_GetItemData(hTargetSystem, ComboBox_GetCurSel(hTargetSystem));
 			return (INT_PTR)TRUE;
 		case IDC_SELECT:
 			if (select_index == 1) {
-				EnableControls(FALSE);
+				EnableControls(FALSE, FALSE);
 				DownloadISO();
 			} else {
 				if (iso_provided) {
@@ -2255,7 +2257,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			write_as_image = FALSE;
 			installed_uefi_ntfs = FALSE;
 			// Disable all controls except Cancel
-			EnableControls(FALSE);
+			EnableControls(FALSE, FALSE);
 			FormatStatus = 0;
 			LastWriteError = 0;
 			StrArrayClear(&BlockingProcess);
@@ -2288,7 +2290,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				no_confirmation_on_cancel = TRUE;
 				SendMessage(hMainDialog, UM_PROGRESS_INIT, 0, 0);
 				// Disable all controls except cancel
-				EnableControls(FALSE);
+				EnableControls(FALSE, FALSE);
 				InitProgress(FALSE);
 				SetThreadAffinity(thread_affinity, CHECKSUM_MAX + 1);
 				format_thid = CreateThread(NULL, 0, SumThread, (LPVOID)thread_affinity, 0, NULL);
@@ -2335,7 +2337,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			PrintInfo(0, MSG_212);
 			break;
 		}
-		EnableControls(TRUE);
+		EnableControls(TRUE, FALSE);
 		break;
 	case UM_TIMER_START:
 		PrintInfo(0, -1);
@@ -2375,7 +2377,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 					queued_hotplug_event = FALSE;
 					GetDevices((DWORD)ComboBox_GetItemData(hDeviceList, ComboBox_GetCurSel(hDeviceList)));
 					user_changed_label = FALSE;
-					EnableControls(TRUE);
+					EnableControls(TRUE, FALSE);
 					if (ComboBox_GetCurSel(hDeviceList) < 0) {
 						SetPartitionSchemeAndTargetSystem(FALSE);
 						SetFileSystemAndClusterSize(NULL);
@@ -2411,7 +2413,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		hLogDialog = MyCreateDialog(hMainInstance, IDD_LOG, hDlg, (DLGPROC)LogCallback);
 		InitDialog(hDlg);
 		GetDevices(0);
-		EnableControls(TRUE);
+		EnableControls(TRUE, FALSE);
 		CheckForUpdates(FALSE);
 		// Register MEDIA_INSERTED/MEDIA_REMOVED notifications for card readers
 		if (SUCCEEDED(SHGetSpecialFolderLocation(0, CSIDL_DESKTOP, &pidlDesktop))) {
@@ -2691,7 +2693,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			break;
 	aborted_start:
 		format_op_in_progress = FALSE;
-		EnableControls(TRUE);
+		EnableControls(TRUE, FALSE);
 		zero_drive = FALSE;
 		if (queued_hotplug_event)
 			SendMessage(hDlg, UM_MEDIA_CHANGE, 0, 0);
@@ -2706,7 +2708,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		SendMessage(FindWindowA(MAKEINTRESOURCEA(32770), lmprintf(MSG_049)), WM_COMMAND, IDNO, 0);
 		SendMessage(FindWindowA(MAKEINTRESOURCEA(32770), lmprintf(MSG_049)), WM_COMMAND, IDYES, 0);
 		EnableWindow(GetDlgItem(hMainDialog, IDCANCEL), TRUE);
-		EnableControls(TRUE);
+		EnableControls(TRUE, FALSE);
 		if (wParam) {
 			uprintf("\r\n");
 			GetDevices(DeviceNum);
