@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
- * Device listing
- * Copyright © 2014-2016 Pete Batard <pete@akeo.ie>
+ * Device detection and enumeration
+ * Copyright © 2014-2019 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,19 +18,22 @@
  */
 
 #include <windows.h>
+#include <cfgmgr32.h>
 
 #define USB_SPEED_UNKNOWN			0
 #define USB_SPEED_LOW				1
 #define USB_SPEED_FULL				2
 #define USB_SPEED_HIGH				3
-#define USB_SPEED_SUPER_OR_LATER	4
-#define USB_SPEED_MAX				5
+#define USB_SPEED_SUPER				4
+#define USB_SPEED_SUPER_PLUS		5
+#define USB_SPEED_MAX				6
 
 /* List of the properties we are interested in */
 typedef struct usb_device_props {
 	uint32_t  vid;
 	uint32_t  pid;
 	uint32_t  speed;
+	uint32_t  lower_speed;
 	uint32_t  port;
 	BOOLEAN   is_USB;
 	BOOLEAN   is_SCSI;
@@ -38,7 +41,6 @@ typedef struct usb_device_props {
 	BOOLEAN   is_UASP;
 	BOOLEAN   is_VHD;
 	BOOLEAN   is_Removable;
-	BOOLEAN   is_LowerSpeed;
 } usb_device_props;
 
 /*
@@ -50,32 +52,12 @@ typedef DWORD RETURN_TYPE;
 typedef RETURN_TYPE CONFIGRET;
 typedef CHAR *DEVINSTID_A;
 
-#define CR_SUCCESS                                  0x00000000
-#define CR_NO_SUCH_DEVNODE                          0x0000000D
-#define CM_GETIDLIST_FILTER_SERVICE                 0x00000002
-#define CM_REMOVAL_POLICY_EXPECT_NO_REMOVAL         0x00000001
-#define CM_REMOVAL_POLICY_EXPECT_ORDERLY_REMOVAL    0x00000002
-#define CM_REMOVAL_POLICY_EXPECT_SURPRISE_REMOVAL   0x00000003
-// /!\ The following flag is only available on Windows 7 or later!
+#ifndef CM_GETIDLIST_FILTER_PRESENT
 #define CM_GETIDLIST_FILTER_PRESENT                 0x00000100
-#define CM_DRP_ADDRESS                              0x0000001D
+#endif
 
-#ifndef METHOD_BUFFERED
-#define METHOD_BUFFERED                         0
-#endif
-#ifndef FILE_ANY_ACCESS
-#define FILE_ANY_ACCESS                         0x00000000
-#endif
-#ifndef FILE_DEVICE_UNKNOWN
-#define FILE_DEVICE_UNKNOWN                     0x00000022
-#endif
 #ifndef FILE_DEVICE_USB
 #define FILE_DEVICE_USB                         FILE_DEVICE_UNKNOWN
-#endif
-
-#ifndef CTL_CODE
-#define CTL_CODE(DeviceType, Function, Method, Access)( \
-  ((DeviceType) << 16) | ((Access) << 14) | ((Function) << 2) | (Method))
 #endif
 
 typedef enum USB_CONNECTION_STATUS {
@@ -96,7 +78,7 @@ typedef enum USB_HUB_NODE {
 } USB_HUB_NODE;
 
 /* Cfgmgr32.dll interface */
-DECLSPEC_IMPORT CONFIGRET WINAPI CM_Get_Device_IDA(DEVINST dnDevInst, PCSTR Buffer, ULONG BufferLen, ULONG ulFlags);
+DECLSPEC_IMPORT CONFIGRET WINAPI CM_Get_Device_IDA(DEVINST dnDevInst, CHAR* Buffer, ULONG BufferLen, ULONG ulFlags);
 DECLSPEC_IMPORT CONFIGRET WINAPI CM_Get_Device_ID_List_SizeA(PULONG pulLen, PCSTR pszFilter, ULONG ulFlags);
 DECLSPEC_IMPORT CONFIGRET WINAPI CM_Get_Device_ID_ListA(PCSTR pszFilter, PCHAR Buffer, ULONG BufferLen, ULONG ulFlags);
 DECLSPEC_IMPORT CONFIGRET WINAPI CM_Locate_DevNodeA(PDEVINST pdnDevInst, DEVINSTID_A pDeviceID, ULONG ulFlags);
@@ -165,7 +147,9 @@ typedef union _USB_NODE_CONNECTION_INFORMATION_EX_V2_FLAGS {
 	struct {
 		ULONG DeviceIsOperatingAtSuperSpeedOrHigher:1;
 		ULONG DeviceIsSuperSpeedCapableOrHigher:1;
-		ULONG ReservedMBZ:30;
+		ULONG DeviceIsOperatingAtSuperSpeedPlusOrHigher : 1;
+		ULONG DeviceIsSuperSpeedPlusCapableOrHigher : 1;
+		ULONG ReservedMBZ:28;
 	};
 } USB_NODE_CONNECTION_INFORMATION_EX_V2_FLAGS, *PUSB_NODE_CONNECTION_INFORMATION_EX_V2_FLAGS;
 
@@ -183,11 +167,7 @@ typedef struct {
 
 #pragma pack(pop)
 
-const GUID _GUID_DEVINTERFACE_DISK =
-	{ 0x53f56307L, 0xb6bf, 0x11d0, {0x94, 0xf2, 0x00, 0xa0, 0xc9, 0x1e, 0xfb, 0x8b} };
-const GUID _GUID_DEVINTERFACE_CDROM =
-	{ 0x53f56308L, 0xb6bf, 0x11d0, {0x94, 0xf2, 0x00, 0xa0, 0xc9, 0x1e, 0xfb, 0x8b} };
-const GUID _GUID_DEVINTERFACE_USB_HUB =
+const GUID GUID_DEVINTERFACE_USB_HUB =
 	{ 0xf18a0e88L, 0xc30c, 0x11d0, {0x88, 0x15, 0x00, 0xa0, 0xc9, 0x06, 0xbe, 0xd8} };
 
 #define DEVID_HTAB_SIZE		257

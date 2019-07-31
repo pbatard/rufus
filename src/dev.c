@@ -114,10 +114,14 @@ static BOOL GetUSBProperties(char* parent_path, char* device_id, usb_device_prop
 		conn_info_v2.SupportedUsbProtocols.Usb300 = 1;
 		if (!DeviceIoControl(handle, IOCTL_USB_GET_NODE_CONNECTION_INFORMATION_EX_V2, &conn_info_v2, size, &conn_info_v2, size, &size, NULL)) {
 			uprintf("Could not get node connection information (V2) for device '%s': %s", device_id, WindowsErrorString());
+		} else if (conn_info_v2.Flags.DeviceIsOperatingAtSuperSpeedPlusOrHigher) {
+			props->speed = USB_SPEED_SUPER_PLUS;
 		} else if (conn_info_v2.Flags.DeviceIsOperatingAtSuperSpeedOrHigher) {
-			props->speed = USB_SPEED_SUPER_OR_LATER;
+			props->speed = USB_SPEED_SUPER;
+		} else if (conn_info_v2.Flags.DeviceIsSuperSpeedPlusCapableOrHigher) {
+			props->lower_speed = 2;
 		} else if (conn_info_v2.Flags.DeviceIsSuperSpeedCapableOrHigher) {
-			props->is_LowerSpeed = TRUE;
+			props->lower_speed = 1;
 		}
 	}
 
@@ -193,7 +197,7 @@ int CycleDevice(int index)
 		return ERROR_INVALID_PARAMETER;
 
 	// Need DIGCF_ALLCLASSES else disabled devices won't be listed.
-	dev_info = SetupDiGetClassDevsA(&_GUID_DEVINTERFACE_DISK, NULL, NULL, DIGCF_PRESENT | DIGCF_ALLCLASSES);
+	dev_info = SetupDiGetClassDevsA(&GUID_DEVINTERFACE_DISK, NULL, NULL, DIGCF_PRESENT | DIGCF_ALLCLASSES);
 	if (dev_info == INVALID_HANDLE_VALUE) {
 		uprintf("Could not get classes for device cycling: %s", WindowsErrorString());
 		return ERROR_PATH_NOT_FOUND;
@@ -327,7 +331,7 @@ BOOL GetOpticalMedia(IMG_SAVE* img_save)
 	HANDLE hDrive = INVALID_HANDLE_VALUE;
 	LARGE_INTEGER li;
 
-	dev_info = SetupDiGetClassDevsA(&_GUID_DEVINTERFACE_CDROM, NULL, NULL, DIGCF_PRESENT | DIGCF_DEVICEINTERFACE);
+	dev_info = SetupDiGetClassDevsA(&GUID_DEVINTERFACE_CDROM, NULL, NULL, DIGCF_PRESENT | DIGCF_DEVICEINTERFACE);
 	if (dev_info == INVALID_HANDLE_VALUE) {
 		uprintf("SetupDiGetClassDevs (Interface) failed: %s", WindowsErrorString());
 		return FALSE;
@@ -348,7 +352,7 @@ BOOL GetOpticalMedia(IMG_SAVE* img_save)
 			safe_free(devint_detail_data);
 			safe_free(buffer);
 
-			if (!SetupDiEnumDeviceInterfaces(dev_info, &dev_info_data, &_GUID_DEVINTERFACE_CDROM, j, &devint_data)) {
+			if (!SetupDiEnumDeviceInterfaces(dev_info, &dev_info_data, &GUID_DEVINTERFACE_CDROM, j, &devint_data)) {
 				if (GetLastError() != ERROR_NO_MORE_ITEMS) {
 					uprintf("SetupDiEnumDeviceInterfaces failed: %s", WindowsErrorString());
 				}
@@ -452,7 +456,7 @@ BOOL GetDevices(DWORD devnum)
 	const char* scsi_card_name[] = {
 		"_SD_", "_SDHC_", "_MMC_", "_MS_", "_MSPro_", "_xDPicture_", "_O2Media_"
 	};
-	const char* usb_speed_name[USB_SPEED_MAX] = { "USB", "USB 1.0", "USB 1.1", "USB 2.0", "USB 3.0" };
+	const char* usb_speed_name[USB_SPEED_MAX] = { "USB", "USB 1.0", "USB 1.1", "USB 2.0", "USB 3.0", "USB 3.1" };
 	const char* windows_sandbox_vhd_label = "PortableBaseLayer";
 	// Hash table and String Array used to match a Device ID with the parent hub's Device Interface Path
 	htab_table htab_devid = HTAB_EMPTY;
@@ -490,9 +494,9 @@ BOOL GetDevices(DWORD devnum)
 	if (device_id == NULL)
 		goto out;
 
-	// Build a hash table associating a CM Device ID of an USB device with the SetupDI Device Interface Path
+	// Build a hash table associating a CM Device ID of a USB device with the SetupDI Device Interface Path
 	// of its parent hub - this is needed to retrieve the device speed
-	dev_info = SetupDiGetClassDevsA(&_GUID_DEVINTERFACE_USB_HUB, NULL, NULL, DIGCF_PRESENT | DIGCF_DEVICEINTERFACE);
+	dev_info = SetupDiGetClassDevsA(&GUID_DEVINTERFACE_USB_HUB, NULL, NULL, DIGCF_PRESENT | DIGCF_DEVICEINTERFACE);
 	if (dev_info != INVALID_HANDLE_VALUE) {
 		if (htab_create(DEVID_HTAB_SIZE, &htab_devid)) {
 			dev_info_data.cbSize = sizeof(dev_info_data);
@@ -501,7 +505,7 @@ BOOL GetDevices(DWORD devnum)
 				devint_detail_data = NULL;
 				devint_data.cbSize = sizeof(devint_data);
 				// Only care about the first interface (MemberIndex 0)
-				if ( (SetupDiEnumDeviceInterfaces(dev_info, &dev_info_data, &_GUID_DEVINTERFACE_USB_HUB, 0, &devint_data))
+				if ( (SetupDiEnumDeviceInterfaces(dev_info, &dev_info_data, &GUID_DEVINTERFACE_USB_HUB, 0, &devint_data))
 				  && (!SetupDiGetDeviceInterfaceDetailA(dev_info, &devint_data, NULL, 0, &size, NULL))
 				  && (GetLastError() == ERROR_INSUFFICIENT_BUFFER)
 				  && ((devint_detail_data = (PSP_DEVICE_INTERFACE_DETAIL_DATA_A)calloc(1, size)) != NULL) ) {
@@ -593,7 +597,7 @@ BOOL GetDevices(DWORD devnum)
 	}
 
 	// Now use SetupDi to enumerate all our disk storage devices
-	dev_info = SetupDiGetClassDevsA(&_GUID_DEVINTERFACE_DISK, NULL, NULL, DIGCF_PRESENT | DIGCF_DEVICEINTERFACE);
+	dev_info = SetupDiGetClassDevsA(&GUID_DEVINTERFACE_DISK, NULL, NULL, DIGCF_PRESENT | DIGCF_DEVICEINTERFACE);
 	if (dev_info == INVALID_HANDLE_VALUE) {
 		uprintf("SetupDiGetClassDevs (Interface) failed: %s", WindowsErrorString());
 		goto out;
@@ -783,8 +787,8 @@ BOOL GetDevices(DWORD devnum)
 				props.speed = 0;
 			uprintf("Found %s%s%s device '%s' (%s) %s", props.is_UASP?"UAS (":"",
 				usb_speed_name[props.speed], props.is_UASP?")":"", buffer, str, method_str);
-			if (props.is_LowerSpeed)
-				uprintf("NOTE: This device is an USB 3.0 device operating at lower speed...");
+			if (props.lower_speed)
+				uprintf("NOTE: This device is a USB 3.%c device operating at lower speed...", '0' + props.lower_speed - 1);
 		}
 		devint_data.cbSize = sizeof(devint_data);
 		hDrive = INVALID_HANDLE_VALUE;
@@ -793,7 +797,7 @@ BOOL GetDevices(DWORD devnum)
 			safe_closehandle(hDrive);
 			safe_free(devint_detail_data);
 
-			if (!SetupDiEnumDeviceInterfaces(dev_info, &dev_info_data, &_GUID_DEVINTERFACE_DISK, j, &devint_data)) {
+			if (!SetupDiEnumDeviceInterfaces(dev_info, &dev_info_data, &GUID_DEVINTERFACE_DISK, j, &devint_data)) {
 				if(GetLastError() != ERROR_NO_MORE_ITEMS) {
 					uprintf("SetupDiEnumDeviceInterfaces failed: %s", WindowsErrorString());
 				} else {
