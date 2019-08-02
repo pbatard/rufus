@@ -1276,7 +1276,7 @@ static BOOL get_data_from_asn1_internal(const uint8_t* buf, size_t buf_len, cons
 	BOOL is_sequence, is_universal_tag;
 
 	while (pos < buf_len) {
-		is_sequence = buf[pos] & 0x20;
+		is_sequence = buf[pos] & 0x30;
 		is_universal_tag = ((buf[pos] & 0xC0) == 0x00);
 		tag = buf[pos++] & 0x1F;
 		if (tag == 0x1F) {
