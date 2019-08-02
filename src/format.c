@@ -1054,6 +1054,35 @@ BOOL FormatExtFs(DWORD DriveIndex, DWORD PartitionIndex, DWORD BlockSize, LPCSTR
 		}
 	}
 
+	// Create a 'persistence.conf' file if required
+	if (Flags & FP_CREATE_PERSISTENCE_CONF) {
+		// You *do* want the LF at the end of the "/ union" line, else Debian Live bails out...
+		const char *name = "persistence.conf", data[] = "/ union\n";
+		int written = 0, fsize = sizeof(data) - 1;
+		ext2_file_t ext2fd;
+		ext2_ino_t inode_id;
+		uint32_t ctime = (uint32_t)time(0);
+		struct ext2_inode inode = { 0 };
+		inode.i_mode = 0100644;
+		inode.i_links_count = 1;
+		inode.i_atime = ctime;
+		inode.i_ctime = ctime;
+		inode.i_mtime = ctime;
+		inode.i_size = fsize;
+
+		ext2fs_namei(ext2fs, EXT2_ROOT_INO, EXT2_ROOT_INO, name, &inode_id);
+		ext2fs_new_inode(ext2fs, EXT2_ROOT_INO, 010755, 0, &inode_id);
+		ext2fs_link(ext2fs, EXT2_ROOT_INO, name, inode_id, EXT2_FT_REG_FILE);
+		ext2fs_inode_alloc_stats(ext2fs, inode_id, 1);
+		ext2fs_write_new_inode(ext2fs, inode_id, &inode);
+		ext2fs_file_open(ext2fs, inode_id, EXT2_FILE_WRITE, &ext2fd);
+		if ((ext2fs_file_write(ext2fd, data, fsize, &written) != 0) || (written != fsize))
+			uprintf("Error: Could not create '%s' file", name);
+		else
+			uprintf("Created '%s' file", name);
+		ext2fs_file_close(ext2fd);
+	}
+
 	// Finally we can call close() to get the file system gets created
 	r = ext2fs_close(ext2fs);
 	if (r != 0) {
@@ -2660,8 +2689,11 @@ DWORD WINAPI FormatThread(void* param)
 		uint32_t ext_version = ReadSetting32(SETTING_USE_EXT_VERSION);
 		if ((ext_version < 2) || (ext_version > 4))
 			ext_version = 3;
+		uprintf("Using %s-like method to enable persistence", img_report.uses_casper ? "Ubuntu" : "Debian");
 		if (!FormatPartition(DriveIndex, partition_index[PI_CASPER], 0, FS_EXT2 + (ext_version - 2),
-			"casper-rw", IsChecked(IDC_QUICK_FORMAT) ? FP_QUICK : 0)) {
+			img_report.uses_casper ? "casper-rw" : "persistence",
+			(img_report.uses_casper ? 0 : FP_CREATE_PERSISTENCE_CONF) |
+			(IsChecked(IDC_QUICK_FORMAT) ? FP_QUICK : 0))) {
 			if (!IS_ERROR(FormatStatus))
 				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_WRITE_FAULT;
 			goto out;

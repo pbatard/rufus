@@ -1090,7 +1090,7 @@ char* replace_in_token_data(const char* filename, const char* token, const char*
 	wchar_t *wtoken = NULL, *wfilename = NULL, *wtmpname = NULL, *wsrc = NULL, *wrep = NULL, bom = 0;
 	wchar_t buf[1024], *torep;
 	FILE *fd_in = NULL, *fd_out = NULL;
-	size_t i, size;
+	size_t i, ns, size;
 	int mode = 0;
 	char *ret = NULL, tmp[2];
 
@@ -1180,8 +1180,11 @@ char* replace_in_token_data(const char* filename, const char* token, const char*
 		// Token was found, move past token
 		i += wcslen(wtoken);
 
-		// Skip spaces
-		i += wcsspn(&buf[i], wspace);
+		// Skip whitespaces after token (while making sure there's at least one)
+		ns = wcsspn(&buf[i], wspace);
+		if (ns == 0)
+			continue;
+		i += ns;
 
 		torep = wcsstr(&buf[i], wsrc);
 		if (torep == NULL) {

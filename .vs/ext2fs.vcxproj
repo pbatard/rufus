@@ -75,6 +75,7 @@
     <ClCompile Include="..\src\ext2fs\mkdir.c" />
     <ClCompile Include="..\src\ext2fs\mkjournal.c" />
     <ClCompile Include="..\src\ext2fs\mmp.c" />
+    <ClCompile Include="..\src\ext2fs\namei.c" />
     <ClCompile Include="..\src\ext2fs\newdir.c" />
     <ClCompile Include="..\src\ext2fs\nt_io.c" />
     <ClCompile Include="..\src\ext2fs\openfs.c" />

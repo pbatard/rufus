@@ -76,6 +76,7 @@ static const char* bootmgr_efi_name = "bootmgr.efi";
 static const char* grldr_name = "grldr";
 static const char* ldlinux_name = "ldlinux.sys";
 static const char* ldlinux_c32 = "ldlinux.c32";
+static const char* casper_dirname = "/casper";
 static const char* efi_dirname = "/efi/boot";
 static const char* efi_bootname[] = { "bootia32.efi", "bootia64.efi", "bootx64.efi", "bootarm.efi", "bootaa64.efi", "bootebc.efi" };
 static const char* sources_str = "/sources";
@@ -185,6 +186,11 @@ static BOOL check_iso_props(const char* psz_dirname, int64_t file_length, const 
 			has_ldlinux_c32 = TRUE;
 		}
 
+		// Check for a /casper directory
+		if (safe_stricmp(psz_dirname, casper_dirname) == 0) {
+			img_report.uses_casper = TRUE;
+		}
+
 		// Check for various files in root (psz_dirname = "")
 		if ((psz_dirname != NULL) && (psz_dirname[0] == 0)) {
 			if (safe_stricmp(psz_basename, bootmgr_name) == 0) {
@@ -290,13 +296,40 @@ static void fix_config(const char* psz_fullpath, const char* psz_path, const cha
 	for (i=0; i<nul_pos; i++)
 		if (src[i] == '/') src[i] = '\\';
 
+	// Add persistence to the kernel options
+	if ((boot_type == BT_IMAGE) && HAS_PERSISTENCE(img_report) && persistence_size) {
+		if (props->is_grub_cfg) {
+			// Ubuntu & derivatives are assumed to use '/casper/vmlinuz'
+			// in their kernel options and use 'persistent' as keyword.
+			if (replace_in_token_data(src, "linux", "/casper/vmlinuz",
+				"/casper/vmlinuz persistent", TRUE) != NULL)
+				uprintf("  Added 'persistent' kernel option");
+			// Debian & derivatives are assumed to use 'boot=live' in
+			// their kernel options and use 'persistence' as keyword.
+			else if (replace_in_token_data(src, "linux", "boot=live",
+				"boot=live persistence", TRUE) != NULL)
+				uprintf("  Added 'persistence' kernel option");
+			// Other distros can go to hell. Seriously, just check all partitions for
+			// an ext volume with the right label and use persistence *THEN*. I mean,
+			// why on earth do you need a bloody *NONSTANDARD* kernel option and/or a
+			// "persistence.conf" file. This is SO INCREDIBLY RETARDED that it makes
+			// Windows look smart in comparison. Great job there, Linux people!
+		}
+	}
+
 	// Workaround for config files requiring an ISO label for kernel append that may be
 	// different from our USB label. Oh, and these labels must have spaces converted to \x20.
 	if ((props->is_cfg) || (props->is_conf)) {
 		iso_label = replace_char(img_report.label, ' ', "\\x20");
 		usb_label = replace_char(img_report.usb_label, ' ', "\\x20");
 		if ((iso_label != NULL) && (usb_label != NULL)) {
-			if (replace_in_token_data(src, (props->is_grub_cfg) ? "linuxefi" : ((props->is_conf) ? "options" : "append"),
+			if (props->is_grub_cfg) {
+				// Older versions of GRUB EFI used "linuxefi", newer just use "linux"
+				if ((replace_in_token_data(src, "linux", iso_label, usb_label, TRUE) != NULL) ||
+					(replace_in_token_data(src, "linuxefi", iso_label, usb_label, TRUE) != NULL))
+					uprintf("  Patched %s: '%s' ➔ '%s'\n", src, iso_label, usb_label);
+			}
+			else if (replace_in_token_data(src, (props->is_conf) ? "options" : "append",
 				iso_label, usb_label, TRUE) != NULL)
 				uprintf("  Patched %s: '%s' ➔ '%s'\n", src, iso_label, usb_label);
 		}

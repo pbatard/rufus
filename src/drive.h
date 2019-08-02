@@ -49,6 +49,7 @@
 #define FP_DUPLICATE_METADATA               0x00000008
 #define FP_LARGE_FAT32                      0x00010000
 #define FP_NO_BOOT                          0x00020000
+#define FP_CREATE_PERSISTENCE_CONF          0x00040000
 
 #define FILE_FLOPPY_DISKETTE                0x00000004
 
@@ -359,7 +360,6 @@ typedef struct {
 	} ClusterSize[FS_MAX];
 } RUFUS_DRIVE_INFO;
 extern RUFUS_DRIVE_INFO SelectedDrive;
-extern uint64_t persistence_size;
 extern DWORD partition_index[3];
 
 BOOL SetAutoMount(BOOL enable);

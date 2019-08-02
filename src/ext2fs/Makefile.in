@@ -117,12 +117,13 @@ am_libext2fs_a_OBJECTS = libext2fs_a-alloc.$(OBJEXT) \
 	libext2fs_a-inline_data.$(OBJEXT) libext2fs_a-inode.$(OBJEXT) \
 	libext2fs_a-io_manager.$(OBJEXT) libext2fs_a-link.$(OBJEXT) \
 	libext2fs_a-lookup.$(OBJEXT) libext2fs_a-mkdir.$(OBJEXT) \
-	libext2fs_a-mkjournal.$(OBJEXT) libext2fs_a-mmp.$(OBJEXT) \
-	libext2fs_a-newdir.$(OBJEXT) libext2fs_a-nt_io.$(OBJEXT) \
-	libext2fs_a-openfs.$(OBJEXT) libext2fs_a-punch.$(OBJEXT) \
-	libext2fs_a-rbtree.$(OBJEXT) libext2fs_a-read_bb.$(OBJEXT) \
-	libext2fs_a-rw_bitmaps.$(OBJEXT) libext2fs_a-sha512.$(OBJEXT) \
-	libext2fs_a-symlink.$(OBJEXT) libext2fs_a-valid_blk.$(OBJEXT)
+	libext2fs_a-mkjournal.$(OBJEXT) libext2fs_a-namei.$(OBJEXT) \
+	libext2fs_a-mmp.$(OBJEXT) libext2fs_a-newdir.$(OBJEXT) \
+	libext2fs_a-nt_io.$(OBJEXT) libext2fs_a-openfs.$(OBJEXT) \
+	libext2fs_a-punch.$(OBJEXT) libext2fs_a-rbtree.$(OBJEXT) \
+	libext2fs_a-read_bb.$(OBJEXT) libext2fs_a-rw_bitmaps.$(OBJEXT) \
+	libext2fs_a-sha512.$(OBJEXT) libext2fs_a-symlink.$(OBJEXT) \
+	libext2fs_a-valid_blk.$(OBJEXT)
 libext2fs_a_OBJECTS = $(am_libext2fs_a_OBJECTS)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -274,8 +275,8 @@ libext2fs_a_SOURCES = alloc.c alloc_sb.c alloc_stats.c alloc_tables.c badblocks.
 	bitmaps.c bitops.c blkmap64_ba.c blkmap64_rb.c blknum.c block.c bmap.c closefs.c crc16.c         \
 	crc32c.c csum.c dirblock.c dir_iterate.c extent.c ext_attr.c extent.c fallocate.c fileio.c       \
 	freefs.c gen_bitmap.c gen_bitmap64.c get_num_dirs.c hashmap.c i_block.c ind_block.c initialize.c \
-	inline.c inline_data.c inode.c io_manager.c link.c lookup.c mkdir.c mkjournal.c mmp.c newdir.c   \
-	nt_io.c openfs.c punch.c rbtree.c read_bb.c rw_bitmaps.c sha512.c symlink.c valid_blk.c
+	inline.c inline_data.c inode.c io_manager.c link.c lookup.c mkdir.c mkjournal.c namei.c mmp.c    \
+	newdir.c nt_io.c openfs.c punch.c rbtree.c read_bb.c rw_bitmaps.c sha512.c symlink.c valid_blk.c
 
 libext2fs_a_CFLAGS = $(AM_CFLAGS) -DEXT2_FLAT_INCLUDES=0 -DHAVE_CONFIG_H -I. -I.. -Wno-undef -Wno-strict-aliasing -Wno-shadow
 all: all-am
@@ -566,6 +567,12 @@ libext2fs_a-mkjournal.o: mkjournal.c
 
 libext2fs_a-mkjournal.obj: mkjournal.c
 	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libext2fs_a_CFLAGS) $(CFLAGS) -c -o libext2fs_a-mkjournal.obj `if test -f 'mkjournal.c'; then $(CYGPATH_W) 'mkjournal.c'; else $(CYGPATH_W) '$(srcdir)/mkjournal.c'; fi`
+
+libext2fs_a-namei.o: namei.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libext2fs_a_CFLAGS) $(CFLAGS) -c -o libext2fs_a-namei.o `test -f 'namei.c' || echo '$(srcdir)/'`namei.c
+
+libext2fs_a-namei.obj: namei.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libext2fs_a_CFLAGS) $(CFLAGS) -c -o libext2fs_a-namei.obj `if test -f 'namei.c'; then $(CYGPATH_W) 'namei.c'; else $(CYGPATH_W) '$(srcdir)/namei.c'; fi`
 
 libext2fs_a-mmp.o: mmp.c
 	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libext2fs_a_CFLAGS) $(CFLAGS) -c -o libext2fs_a-mmp.o `test -f 'mmp.c' || echo '$(srcdir)/'`mmp.c

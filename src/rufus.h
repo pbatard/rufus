@@ -322,6 +322,8 @@ typedef struct {
 	uint32_t wininst_version;
 	BOOLEAN is_iso;
 	BOOLEAN is_bootable_img;
+	BOOLEAN is_vhd;
+	BOOLEAN disable_iso;
 	uint16_t winpe;
 	uint8_t has_efi;
 	uint8_t wininst_index;
@@ -338,10 +340,9 @@ typedef struct {
 	BOOLEAN has_grub4dos;
 	BOOLEAN has_grub2;
 	BOOLEAN has_kolibrios;
+	BOOLEAN uses_casper;
 	BOOLEAN uses_minint;
 	BOOLEAN compression_type;
-	BOOLEAN is_vhd;
-	BOOLEAN disable_iso;
 	uint16_t sl_version;	// Syslinux/Isolinux version
 	char sl_version_str[12];
 	char sl_version_ext[32];
@@ -445,6 +446,7 @@ extern BOOL allow_dual_uefi_bios, large_drive, usb_debug;
 extern int64_t iso_blocking_status;
 extern uint8_t image_options;
 extern uint16_t rufus_version[3], embedded_sl_version[2];
+extern uint64_t persistence_size;
 extern size_t ubuffer_pos;
 extern const int nb_steps[FS_MAX];
 extern float fScale;
