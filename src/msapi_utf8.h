@@ -336,6 +336,7 @@ static __inline int GetWindowTextU(HWND hWnd, char* lpString, int nMaxCount)
 	walloc(lpString, nMaxCount);
 	ret = GetWindowTextW(hWnd, wlpString, nMaxCount);
 	err = GetLastError();
+	// coverity[var_deref_model]
 	if ( (ret != 0) && ((ret = wchar_to_utf8_no_alloc(wlpString, lpString, nMaxCount)) == 0) ) {
 		err = GetLastError();
 	}

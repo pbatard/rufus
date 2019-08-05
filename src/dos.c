@@ -216,7 +216,7 @@ static BOOL ExtractFAT(int entry, const char* path)
 		uprintf("invalid path supplied for MS-DOS FAT extraction\n");
 		return FALSE;
 	}
-	strcpy(filename, path);
+	static_strcpy(filename, path);
 	pos = strlen(path);
 	fnamepos = pos;
 

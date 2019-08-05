@@ -293,6 +293,10 @@ retry:
 		  ext2fs_has_feature_64bit(super) ?
 		  EXT2_MIN_DESC_SIZE_64BIT : 0);
 
+	if (EXT2_DESC_SIZE(super) == 0) {
+		retval = EXT2_ET_UNEXPECTED_BLOCK_SIZE;
+		goto cleanup;
+	}
 	fs->desc_blocks = ext2fs_div_ceil(fs->group_desc_count,
 					  EXT2_DESC_PER_BLOCK(super));
 

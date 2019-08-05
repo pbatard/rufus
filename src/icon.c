@@ -177,8 +177,8 @@ BOOL SetAutorun(const char* path)
 
 	GetWindowTextW(hLabel, wlabel, ARRAYSIZE(wlabel));
 	GetWindowTextW(hMainDialog, wRufusVersion, ARRAYSIZE(wRufusVersion));
-	fwprintf(fd, L"; Created by %s\n; " LTEXT(RUFUS_URL) L"\n", wRufusVersion);
-	fwprintf(fd, L"[autorun]\nicon  = autorun.ico\nlabel = %s\n", wlabel);
+	fwprintf_s(fd, L"; Created by %s\n; " LTEXT(RUFUS_URL) L"\n", wRufusVersion);
+	fwprintf_s(fd, L"[autorun]\nicon  = autorun.ico\nlabel = %s\n", wlabel);
 	fclose(fd);
 	uprintf("Created: %s", filename);
 

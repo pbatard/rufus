@@ -782,13 +782,13 @@ char* set_token_data_file(const char* token, const char* data, const char* filen
 		fputws(buf, fd_out);
 
 		// Now output the new data
-		fwprintf(fd_out, L"%s\n", wdata);
+		fwprintf_s(fd_out, L"%s\n", wdata);
 		ret = (char*)data;
 	}
 
 	if (ret == NULL) {
 		// Didn't find an existing token => append it
-		fwprintf(fd_out, L"%s = %s\n", wtoken, wdata);
+		fwprintf_s(fd_out, L"%s = %s\n", wtoken, wdata);
 		ret = (char*)data;
 	}
 
@@ -1039,7 +1039,7 @@ char* insert_section_data(const char* filename, const char* section, const char*
 		// Section was found, output it
 		fputws(buf, fd_out);
 		// Now output the new data
-		fwprintf(fd_out, L"%s\n", wdata);
+		fwprintf_s(fd_out, L"%s\n", wdata);
 		ret = (char*)data;
 	}
 
@@ -1194,7 +1194,7 @@ char* replace_in_token_data(const char* filename, const char* token, const char*
 
 		i = (torep-buf) + wcslen(wsrc);
 		*torep = 0;
-		fwprintf(fd_out, L"%s%s%s", buf, wrep, &buf[i]);
+		fwprintf_s(fd_out, L"%s%s%s", buf, wrep, &buf[i]);
 		ret = (char*)rep;
 	}
 

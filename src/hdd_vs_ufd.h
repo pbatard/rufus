@@ -280,7 +280,9 @@ static vidpid_score_t vidpid_score[] = {
 	{ 0x0930, 0x6544, -20 },
 	{ 0x0930, 0x6545, -20 },
 	// Innostor exceptions
-	{ 0x0BC2, 0x03312, -20 },
+	{ 0x0bc2, 0x3312, -20 },
+	// JMicron exceptions
+	{ 0x152d, 0x0901, -20 },
 	// Verbatim exceptions
 	{ 0x18a5, 0x0243, -20 },
 	{ 0x18a5, 0x0245, -20 },
