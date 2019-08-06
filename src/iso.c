@@ -62,6 +62,8 @@ typedef struct {
 	BOOLEAN is_conf;
 	BOOLEAN is_syslinux_cfg;
 	BOOLEAN is_grub_cfg;
+	BOOLEAN is_menu_cfg;
+	BOOLEAN is_txt_cfg;
 	BOOLEAN is_old_c32[NB_OLD_C32];
 } EXTRACT_PROPS;
 
@@ -85,6 +87,8 @@ static const char* wininst_name[] = { "install.wim", "install.esd", "install.swm
 // If the disc was mastered properly, GRUB/EFI will take care of itself
 static const char* grub_dirname = "/boot/grub/i386-pc";
 static const char* grub_cfg = "grub.cfg";
+static const char* menu_cfg = "menu.cfg";
+static const char* txt_cfg = "txt.cfg";
 static const char* syslinux_cfg[] = { "isolinux.cfg", "syslinux.cfg", "extlinux.conf" };
 static const char* isolinux_bin[] = { "isolinux.bin", "boot.bin" };
 static const char* pe_dirname[] = { "/i386", "/amd64", "/minint" };
@@ -165,22 +169,30 @@ static BOOL check_iso_props(const char* psz_dirname, int64_t file_length, const 
 			props->is_old_c32[i] = TRUE;
 	}
 
-	// Check for config files that may need patching
-	if (!scan_only) {
+	if (!scan_only) {	// Write-time checks
+		// Check for config files that may need patching
 		len = safe_strlen(psz_basename);
-		if ((len >= 4) && safe_stricmp(&psz_basename[len-4], ".cfg") == 0)
+		if ((len >= 4) && safe_stricmp(&psz_basename[len - 4], ".cfg") == 0) {
 			props->is_cfg = TRUE;
-	}
+			if (safe_stricmp(psz_basename, grub_cfg) == 0) {
+				props->is_grub_cfg = TRUE;
+			} else if (safe_stricmp(psz_basename, menu_cfg) == 0) {
+				props->is_menu_cfg = TRUE;
+			} else if (safe_stricmp(psz_basename, txt_cfg) == 0) {
+				props->is_txt_cfg = TRUE;
+			}
+		}
 
-	// Check for GRUB artifacts
-	if (scan_only) {
+		// In case there's an ldlinux.sys on the ISO, prevent it from overwriting ours
+		if ((psz_dirname != NULL) && (psz_dirname[0] == 0) && (safe_strcmp(psz_basename, ldlinux_name) == 0)) {
+			uprintf("skipping % file from ISO image\n", ldlinux_name);
+			return TRUE;
+		}
+	} else {	// Scan-time checks
+		// Check for GRUB artifacts
 		if (safe_stricmp(psz_dirname, grub_dirname) == 0)
 			img_report.has_grub2 = TRUE;
-	} else if (safe_stricmp(psz_basename, grub_cfg) == 0) {
-		props->is_grub_cfg = TRUE;
-	}
 
-	if (scan_only) {
 		// Check for a syslinux v5.0+ file anywhere
 		if (safe_stricmp(psz_basename, ldlinux_c32) == 0) {
 			has_ldlinux_c32 = TRUE;
@@ -275,11 +287,6 @@ static BOOL check_iso_props(const char* psz_dirname, int64_t file_length, const 
 			total_blocks++;
 		return TRUE;
 	}
-	// In case there's an ldlinux.sys on the ISO, prevent it from overwriting ours
-	if ((psz_dirname != NULL) && (psz_dirname[0] == 0) && (safe_strcmp(psz_basename, ldlinux_name) == 0)) {
-		uprintf("skipping % file from ISO image\n", ldlinux_name);
-		return TRUE;
-	}
 	return FALSE;
 }
 
@@ -298,16 +305,17 @@ static void fix_config(const char* psz_fullpath, const char* psz_path, const cha
 
 	// Add persistence to the kernel options
 	if ((boot_type == BT_IMAGE) && HAS_PERSISTENCE(img_report) && persistence_size) {
-		if (props->is_grub_cfg) {
+		if ((props->is_grub_cfg) || (props->is_menu_cfg) || (props->is_txt_cfg)) {
 			// Ubuntu & derivatives are assumed to use '/casper/vmlinuz'
 			// in their kernel options and use 'persistent' as keyword.
-			if (replace_in_token_data(src, "linux", "/casper/vmlinuz",
-				"/casper/vmlinuz persistent", TRUE) != NULL)
+			if (replace_in_token_data(src, props->is_grub_cfg ? "linux" : "append",
+				props->is_grub_cfg ? "/casper/vmlinuz" : "/casper/initrd",
+				props->is_grub_cfg ? "/casper/vmlinuz persistent" : "/casper/initrd persistent", TRUE) != NULL)
 				uprintf("  Added 'persistent' kernel option");
 			// Debian & derivatives are assumed to use 'boot=live' in
 			// their kernel options and use 'persistence' as keyword.
-			else if (replace_in_token_data(src, "linux", "boot=live",
-				"boot=live persistence", TRUE) != NULL)
+			else if (replace_in_token_data(src, props->is_grub_cfg ? "linux" : "append",
+				"boot=live", "boot=live persistence", TRUE) != NULL)
 				uprintf("  Added 'persistence' kernel option");
 			// Other distros can go to hell. Seriously, just check all partitions for
 			// an ext volume with the right label and use persistence *THEN*. I mean,
