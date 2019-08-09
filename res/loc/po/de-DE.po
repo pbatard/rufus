@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 3.5\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2019-03-21 10:39+0100\n"
-"PO-Revision-Date: 2019-03-21 10:41+0100\n"
+"POT-Creation-Date: 2019-08-13 09:20+0100\n"
+"PO-Revision-Date: 2019-08-13 09:21+0100\n"
 "Language: de_DE\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Rufus-LCID: 0x0407, 0x0807, 0x0c07, 0x1007, 0x1407\n"
 "Last-Translator: \n"
 "Language-Team: \n"
-"X-Generator: Poedit 2.2.1\n"
+"X-Generator: Poedit 2.2.3\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -121,7 +121,7 @@ msgstr ""
 
 #. • IDD_LICENSE → IDD_LICENSE
 msgid "Rufus License"
-msgstr "Rufus Lizenz"
+msgstr "Rufus-Lizenz"
 
 #. • IDD_NOTIFICATION → IDC_MORE_INFO
 msgid "More information"
@@ -209,7 +209,7 @@ msgid ""
 "To continue with this operation, click OK. To quit click CANCEL."
 msgstr ""
 "WARNUNG: ALLE DATEN AUF LAUFWERK '%s' WERDEN GELÖSCHT.\n"
-"Klicken Sie auf OK um forzufahren. Klicken Sie auf ABBRECHEN um abzubrechen."
+"Klicken Sie auf OK um fortzufahren. Klicken Sie auf ABBRECHEN um abzubrechen."
 
 #. • MSG_004
 msgid "Rufus update policy"
@@ -507,11 +507,11 @@ msgstr "Prüfung auf fehlerhafte Blöcke nicht abgeschlossen."
 
 #. • MSG_073
 msgid "ISO image scan failure."
-msgstr "Fehler beim analysieren der ISO-Abbild-Datei."
+msgstr "Fehler beim Analysieren der ISO-Abbild-Datei."
 
 #. • MSG_074
 msgid "ISO image extraction failure."
-msgstr "Fehler beim entpacken der ISO-Abbild-Datei."
+msgstr "Fehler beim Entpacken der ISO-Abbild-Datei."
 
 #. • MSG_075
 msgid "Unable to remount volume."
@@ -628,7 +628,7 @@ msgid ""
 msgstr ""
 "ACHTUNG! DIESES LAUFWERK VERFÜGT ÜBER MEHRERE PARTITIONEN ODER VOLUMES!!\n"
 "\n"
-"Darunter sind möglicherweise Partitionen, die unter Windows nicht sicht- bzw. nutzbar sind.Wenn Sie fortfahren, sind Sie selbst für den Datenverlust auf diesen Partitionen verantwortlich."
+"Darunter sind möglicherweise Partitionen, die unter Windows nicht sicht- bzw. nutzbar sind. Wenn Sie fortfahren, sind Sie selbst für den Datenverlust auf diesen Partitionen verantwortlich."
 
 #. • MSG_094
 msgid "Multiple partitions detected"
@@ -636,7 +636,7 @@ msgstr "Mehrere Partitionen erkannt"
 
 #. • MSG_095
 msgid "DD Image"
-msgstr "DD Abbild"
+msgstr "DD-Abbild"
 
 #. • MSG_096
 msgid "The file system currently selected can not be used with this type of ISO. Please select a different file system or use a different ISO."
@@ -666,7 +666,7 @@ msgstr "Dateisystembeschränkung"
 
 #. • MSG_100
 msgid "This ISO image contains a file larger than 4 GB, which is more than the maximum size allowed for a FAT or FAT32 file system."
-msgstr "Diese ISO-Abbild-Datei enthält eine Datei größer 4 GB. Diese Dateigröße ist für FAT oder FAT32 Dateisysteme nicht zulässig."
+msgstr "Diese ISO-Abbild-Datei enthält eine Datei größer 4 GB. Diese Dateigröße ist für FAT- oder FAT32-Dateisysteme nicht zulässig."
 
 #. • MSG_101
 msgid "Missing WIM support"
@@ -975,11 +975,11 @@ msgstr "Der Typ des Computers, an dem Sie das startfähige Laufwerk verwenden wo
 #.
 #. You shouldn't translate 'Legacy Mode' as this is an option that usually appears in English in the UEFI settings.
 msgid "'UEFI-CSM' means that the device will only boot in BIOS emulation mode (also known as 'Legacy Mode') under UEFI, and not in native UEFI mode."
-msgstr "'UEFI-CSM' bedeutet, der Computer startet im BIOS-Modus (auch bekannt als 'Legacy Mode') unter UEFI, und nicht im nativen UEFI-Modus."
+msgstr "'UEFI-CSM' bedeutet, dass der Computer im BIOS-Modus von UEFI startet (auch bekannt als 'Legacy Mode'), und nicht im nativen UEFI-Modus."
 
 #. • MSG_152
 msgid "'non CSM' means that the device will only boot in native UEFI mode, and not in BIOS emulation mode (also known as 'Legacy Mode')."
-msgstr "'ohne CSM' bedeutet, das Gerät startet nur im nativen UEFI-Modus und nicht im 'Legacy Mode' bzw. 'CSM' Modus."
+msgstr "'ohne CSM' bedeutet, dass das Gerät nur im nativen UEFI-Modus und nicht im 'Legacy Mode' bzw. 'CSM'-Modus startet."
 
 #. • MSG_153
 msgid "Test pattern: 0x%02X"
@@ -1011,7 +1011,7 @@ msgid ""
 "International characters are accepted."
 msgstr ""
 "Geben Sie hier die Datenträgerbezeichnung ein.\n"
-"International Schriftzeichen sind erlaubt."
+"Internationale Schriftzeichen sind erlaubt."
 
 #. • MSG_160
 msgid "Toggle advanced options"
@@ -1063,7 +1063,7 @@ msgstr ""
 
 #. • MSG_170
 msgid "Enable the listing of USB Hard Drive enclosures. USE AT YOUR OWN RISKS!!!"
-msgstr "Erkennung von USB-Festplatten Gehäusen aktivieren. VERWENDUNG AUF EIGENES RISIKO!!!"
+msgstr "Erkennung von externen USB-Festplatten aktivieren. VERWENDUNG AUF EIGENES RISIKO!!!"
 
 #. • MSG_171
 msgid ""
@@ -1094,7 +1094,7 @@ msgstr ""
 
 #. • MSG_176
 msgid "English translation: Pete Batard <mailto:pete@akeo.ie>"
-msgstr "Deutsche Übersetzung: Thilo Langbein"
+msgstr "Deutsche Übersetzung: Thilo Langbein <mailto:mail@thilo-langbein.de>"
 
 #. • MSG_177
 msgid "Report bugs or request enhancements at:"
@@ -1180,7 +1180,7 @@ msgstr "%s konnte nicht heruntergeladen werden"
 #.
 #. Example: "Using embedded version of Grub2 file(s)"
 msgid "Using embedded version of %s file(s)"
-msgstr "Verwende embedded Version der %s Datei(en)"
+msgstr "Verwende Embedded-Version der %s Datei(en)"
 
 #. • MSG_196
 msgid ""
@@ -1338,11 +1338,11 @@ msgid "Closing existing volume..."
 msgstr "Vorhandenes Volume schließen..."
 
 #. • MSG_228
-msgid "Writing master boot record..."
+msgid "Writing Master Boot Record..."
 msgstr "Master Boot Record schreiben..."
 
 #. • MSG_229
-msgid "Writing partition boot record..."
+msgid "Writing Partition Boot Record..."
 msgstr "Schreibe Partitions Boot Record.."
 
 #. • MSG_230
@@ -1647,7 +1647,7 @@ msgstr "Nicht unterstützte Windows-Version"
 
 #. • MSG_294
 msgid "This version of Windows is no longer supported by Rufus."
-msgstr "Diese Version von Windows ist nicht mehr von Rufus unterstützt."
+msgstr "Diese Version von Windows wird nicht mehr von Rufus unterstützt."
 
 #. • MSG_295
 msgid "Warning: Unofficial version"
