@@ -2679,8 +2679,11 @@ DWORD WINAPI FormatThread(void* param)
 	// Wait for the logical drive we just created to appear
 	uprintf("Waiting for logical drive to reappear...");
 	Sleep(200);
-	if (!WaitForLogical(DriveIndex, partition_index[PI_MAIN]))
-		uprintf("Logical drive was not found!");	// We try to continue even if this fails, just in case
+	if (!WaitForLogical(DriveIndex, partition_index[PI_MAIN])) {
+		uprintf("Logical drive was not found - aborting");
+		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_NO_VOLUME_ID;
+		goto out;
+	}
 	CHECK_FOR_USER_CANCEL;
 
 	// Format Casper partition if required. Do it before we format anything with

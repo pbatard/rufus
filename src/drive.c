@@ -287,6 +287,7 @@ char* GetLogicalName(DWORD DriveIndex, DWORD PartitionIndex, BOOL bKeepTrailingB
 	static const char* ignore_device[] = { "\\Device\\CdRom", "\\Device\\Floppy" };
 	static const char* volume_start = "\\\\?\\";
 	char *ret = NULL, volume_name[MAX_PATH], path[MAX_PATH];
+	BOOL bPrintHeader = TRUE;
 	HANDLE hDrive = INVALID_HANDLE_VALUE, hVolume = INVALID_HANDLE_VALUE;
 	VOLUME_DISK_EXTENTS_REDEF DiskExtents;
 	DWORD size;
@@ -378,7 +379,13 @@ char* GetLogicalName(DWORD DriveIndex, DWORD PartitionIndex, BOOL bKeepTrailingB
 			volume_name[len - 1] = '\\';
 		found_offset[found_name.Index] = DiskExtents.Extents[0].StartingOffset.QuadPart;
 		StrArrayAdd(&found_name, volume_name, TRUE);
-		// uprintf("GOT %s @%lld", volume_name, DiskExtents.Extents[0].StartingOffset.QuadPart);
+		if (!bSilent) {
+			if (bPrintHeader) {
+				bPrintHeader = FALSE;
+				uuprintf("Windows volumes from this device:");
+			}
+			uuprintf("● %s @%lld", volume_name, DiskExtents.Extents[0].StartingOffset.QuadPart);
+		}
 	}
 
 	if (found_name.Index == 0)
@@ -731,7 +738,7 @@ BOOL WaitForLogical(DWORD DriveIndex, DWORD PartitionIndex)
 		free(LogicalPath);
 		if (IS_ERROR(FormatStatus))	// User cancel
 			return FALSE;
-		Sleep(DRIVE_ACCESS_TIMEOUT/DRIVE_ACCESS_RETRIES);
+		Sleep(DRIVE_ACCESS_TIMEOUT / DRIVE_ACCESS_RETRIES);
 	} while (GetTickCount64() < EndTime);
 	uprintf("Timeout while waiting for logical drive");
 	return FALSE;
@@ -1540,45 +1547,13 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 		DriveLayoutEx.PartitionEntry[pn].StartingOffset.QuadPart = bytes_per_track;
 	}
 
-	// If required, set the ESP (which Microsoft wants to be the first)
-	if (extra_partitions & XP_ESP) {
-		extra_part_name = L"EFI System Partition";
-		// The size of the ESP depends on the minimum size we're able to format in FAT32, which
-		// in turn depends on the cluster size used, which in turn depends on the disk sector size.
-		// Plus some people are complaining that the *OFFICIAL MINIMUM SIZE* as documented by Microsoft at
-		// https://docs.microsoft.com/en-us/windows-hardware/manufacture/desktop/configure-uefigpt-based-hard-drive-partitions
-		// is too small. See: https://github.com/pbatard/rufus/issues/979
-		if (SelectedDrive.SectorSize <= 4096)
-			ms_esp_size = 300 * MB;
-		else
-			ms_esp_size = 1200 * MB;	// That'll teach you to have a nonstandard disk!
-		extra_part_size_in_tracks = (ms_esp_size + bytes_per_track - 1) / bytes_per_track;
-		DriveLayoutEx.PartitionEntry[pn].PartitionLength.QuadPart = extra_part_size_in_tracks * bytes_per_track;
-		uprintf("● Creating %S Partition (offset: %lld, size: %s)", extra_part_name, DriveLayoutEx.PartitionEntry[pn].StartingOffset.QuadPart,
-			SizeToHumanReadable(DriveLayoutEx.PartitionEntry[pn].PartitionLength.QuadPart, TRUE, FALSE));
-		if (partition_style == PARTITION_STYLE_GPT) {
-			DriveLayoutEx.PartitionEntry[pn].Gpt.PartitionType = PARTITION_SYSTEM_GUID;
-			IGNORE_RETVAL(CoCreateGuid(&DriveLayoutEx.PartitionEntry[pn].Gpt.PartitionId));
-			wcscpy(DriveLayoutEx.PartitionEntry[pn].Gpt.Name, extra_part_name);
-		} else {
-			DriveLayoutEx.PartitionEntry[pn].Mbr.PartitionType = 0xef;
-		}
-		// Zero the first sectors from this partition to avoid file system caching issues
-		if (!ClearPartition(hDrive, DriveLayoutEx.PartitionEntry[pn].StartingOffset, size_to_clear))
-			uprintf("Could not zero %S: %s", extra_part_name, WindowsErrorString());
-		pn++;
-		partition_index[PI_ESP] = pn;
-		DriveLayoutEx.PartitionEntry[pn].StartingOffset.QuadPart = DriveLayoutEx.PartitionEntry[pn - 1].StartingOffset.QuadPart +
-			DriveLayoutEx.PartitionEntry[pn - 1].PartitionLength.QuadPart;
-	}
-
 	// If required, set the MSR partition (GPT only - must be created before the data part)
 	if (extra_partitions & XP_MSR) {
 		assert (partition_style == PARTITION_STYLE_GPT);
 		extra_part_name = L"Microsoft Reserved Partition";
 		DriveLayoutEx.PartitionEntry[pn].PartitionLength.QuadPart = 128*MB;
 		DriveLayoutEx.PartitionEntry[pn].Gpt.PartitionType = PARTITION_MSFT_RESERVED_GUID;
-		uprintf("● Creating %S Partition (offset: %lld, size: %s)", extra_part_name, DriveLayoutEx.PartitionEntry[pn].StartingOffset.QuadPart,
+		uprintf("● Creating %S (offset: %lld, size: %s)", extra_part_name, DriveLayoutEx.PartitionEntry[pn].StartingOffset.QuadPart,
 			SizeToHumanReadable(DriveLayoutEx.PartitionEntry[pn].PartitionLength.QuadPart, TRUE, FALSE));
 		IGNORE_RETVAL(CoCreateGuid(&DriveLayoutEx.PartitionEntry[pn].Gpt.PartitionId));
 		wcsncpy(DriveLayoutEx.PartitionEntry[pn].Gpt.Name, extra_part_name, ARRAYSIZE(DriveLayoutEx.PartitionEntry[pn].Gpt.Name));
@@ -1588,9 +1563,9 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 		pn++;
 		DriveLayoutEx.PartitionEntry[pn].StartingOffset.QuadPart = DriveLayoutEx.PartitionEntry[pn-1].StartingOffset.QuadPart +
 				DriveLayoutEx.PartitionEntry[pn-1].PartitionLength.QuadPart;
+		// Clear the extra partition we processed
+		extra_partitions &= ~(XP_MSR);
 	}
-	// Clear the extra partitions we processed
-	extra_partitions &= ~(XP_ESP|XP_MSR);
 
 	// Set our main data partition
 	main_part_size_in_sectors = (SelectedDrive.DiskSize - DriveLayoutEx.PartitionEntry[pn].StartingOffset.QuadPart) /
@@ -1598,7 +1573,19 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 		SelectedDrive.SectorSize - ((partition_style == PARTITION_STYLE_GPT)?33:0);
 	if (extra_partitions) {
 		// Adjust the size according to extra partitions (which we always align to a track)
-		if (extra_partitions & XP_UEFI_NTFS) {
+		if (extra_partitions & XP_ESP) {
+			extra_part_name = L"EFI System";
+			// The size of the ESP depends on the minimum size we're able to format in FAT32, which
+			// in turn depends on the cluster size used, which in turn depends on the disk sector size.
+			// Plus some people are complaining that the *OFFICIAL MINIMUM SIZE* as documented by Microsoft at
+			// https://docs.microsoft.com/en-us/windows-hardware/manufacture/desktop/configure-uefigpt-based-hard-drive-partitions
+			// is too small. See: https://github.com/pbatard/rufus/issues/979
+			if (SelectedDrive.SectorSize <= 4096)
+				ms_esp_size = 300 * MB;
+			else
+				ms_esp_size = 1200 * MB;	// That'll teach you to have a nonstandard disk!
+			extra_part_size_in_tracks = (ms_esp_size + bytes_per_track - 1) / bytes_per_track;
+		} else if (extra_partitions & XP_UEFI_NTFS) {
 			extra_part_name = L"UEFI:NTFS";
 			extra_part_size_in_tracks = (max(MIN_EXTRA_PART_SIZE, uefi_ntfs_size) + bytes_per_track - 1) / bytes_per_track;
 		} else if ((extra_partitions & XP_CASPER)) {
@@ -1659,9 +1646,10 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 
 	// Set the optional extra partition
 	if (extra_partitions) {
-		// Don't forget to set our peristent partition index!
 		if (extra_partitions & XP_CASPER)
 			partition_index[PI_CASPER] = pn + 1;
+		else if (extra_partitions & XP_ESP)
+			partition_index[PI_ESP] = pn + 1;
 		// Should end on a track boundary
 		DriveLayoutEx.PartitionEntry[pn].StartingOffset.QuadPart = DriveLayoutEx.PartitionEntry[pn-1].StartingOffset.QuadPart +
 			DriveLayoutEx.PartitionEntry[pn-1].PartitionLength.QuadPart;
@@ -1670,11 +1658,12 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 		uprintf("● Creating %S Partition (offset: %lld, size: %s)", extra_part_name, DriveLayoutEx.PartitionEntry[pn].StartingOffset.QuadPart,
 			SizeToHumanReadable(DriveLayoutEx.PartitionEntry[pn].PartitionLength.QuadPart, TRUE, FALSE));
 		if (partition_style == PARTITION_STYLE_GPT) {
-			DriveLayoutEx.PartitionEntry[pn].Gpt.PartitionType = PARTITION_BASIC_DATA_GUID;
+			DriveLayoutEx.PartitionEntry[pn].Gpt.PartitionType = (extra_partitions & XP_ESP) ? PARTITION_SYSTEM_GUID : PARTITION_BASIC_DATA_GUID;
 			IGNORE_RETVAL(CoCreateGuid(&DriveLayoutEx.PartitionEntry[pn].Gpt.PartitionId));
-			wcsncpy(DriveLayoutEx.PartitionEntry[pn].Gpt.Name, extra_part_name, ARRAYSIZE(DriveLayoutEx.PartitionEntry[pn].Gpt.Name));
+			wcsncpy(DriveLayoutEx.PartitionEntry[pn].Gpt.Name, (extra_partitions & XP_ESP) ? L"EFI System Partition" : extra_part_name,
+				ARRAYSIZE(DriveLayoutEx.PartitionEntry[pn].Gpt.Name));
 		} else {
-			if (extra_partitions & XP_UEFI_NTFS) {
+			if (extra_partitions & (XP_UEFI_NTFS | XP_ESP)) {
 				DriveLayoutEx.PartitionEntry[pn].Mbr.PartitionType = 0xef;
 			} else if (extra_partitions & XP_CASPER) {
 				DriveLayoutEx.PartitionEntry[pn].Mbr.PartitionType = 0x83;
@@ -1732,7 +1721,7 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 		//     ms-sys's write_partition_number_of_heads() and write_partition_start_sector_number() can be used if needed
 		break;
 	case PARTITION_STYLE_GPT:
-		// TODO: (?) As per MSDN: "When specifying a GUID partition table (GPT) as the PARTITION_STYLE of the CREATE_DISK
+		// TODO: (HOW?!?!?) As per MSDN: "When specifying a GUID partition table (GPT) as the PARTITION_STYLE of the CREATE_DISK
 		// structure, an application should wait for the MSR partition arrival before sending the IOCTL_DISK_SET_DRIVE_LAYOUT_EX
 		// control code. For more information about device notification, see RegisterDeviceNotification."
 
@@ -1750,16 +1739,19 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 		break;
 	}
 
-	// If you don't call IOCTL_DISK_CREATE_DISK, the next call will fail
+	// If you don't call IOCTL_DISK_CREATE_DISK, the IOCTL_DISK_SET_DRIVE_LAYOUT_EX call will fail
 	size = sizeof(CreateDisk);
-	r = DeviceIoControl(hDrive, IOCTL_DISK_CREATE_DISK, (BYTE*)&CreateDisk, size, NULL, 0, &size, NULL );
+	r = DeviceIoControl(hDrive, IOCTL_DISK_CREATE_DISK, (BYTE*)&CreateDisk, size, NULL, 0, &size, NULL);
 	if (!r) {
 		uprintf("Could not reset disk: %s", WindowsErrorString());
 		return FALSE;
 	}
 
+	// "The goggles, they do nothing!"
+	RefreshDriveLayout(hDrive);
+
 	size = sizeof(DriveLayoutEx) - ((partition_style == PARTITION_STYLE_GPT)?((4-pn)*sizeof(PARTITION_INFORMATION_EX)):0);
-	r = DeviceIoControl(hDrive, IOCTL_DISK_SET_DRIVE_LAYOUT_EX, (BYTE*)&DriveLayoutEx, size, NULL, 0, &size, NULL );
+	r = DeviceIoControl(hDrive, IOCTL_DISK_SET_DRIVE_LAYOUT_EX, (BYTE*)&DriveLayoutEx, size, NULL, 0, &size, NULL);
 	if (!r) {
 		uprintf("Could not set drive layout: %s", WindowsErrorString());
 		return FALSE;
