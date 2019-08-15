@@ -1086,6 +1086,7 @@ out:
  * it with 'rep'. File can be ANSI or UNICODE and is overwritten. Parameters are UTF-8.
  * The parsed line is of the form: [ ]token[ ]data
  * Returns a pointer to rep if replacement occurred, NULL otherwise
+ * TODO: We might have to end up with a regexp engine, so that we can do stuff like: "foo*" -> "bar\1"
  */
 char* replace_in_token_data(const char* filename, const char* token, const char* src, const char* rep, BOOL dos2unix)
 {

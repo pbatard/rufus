@@ -63,7 +63,6 @@ typedef struct {
 	BOOLEAN is_syslinux_cfg;
 	BOOLEAN is_grub_cfg;
 	BOOLEAN is_menu_cfg;
-	BOOLEAN is_txt_cfg;
 	BOOLEAN is_old_c32[NB_OLD_C32];
 } EXTRACT_PROPS;
 
@@ -88,8 +87,7 @@ static const char* wininst_name[] = { "install.wim", "install.esd", "install.swm
 static const char* grub_dirname = "/boot/grub/i386-pc";
 static const char* grub_cfg = "grub.cfg";
 static const char* menu_cfg = "menu.cfg";
-static const char* txt_cfg = "txt.cfg";
-static const char* syslinux_cfg[] = { "isolinux.cfg", "syslinux.cfg", "extlinux.conf" };
+static const char* syslinux_cfg[] = { "isolinux.cfg", "syslinux.cfg", "txt.cfg", "extlinux.conf" };
 static const char* isolinux_bin[] = { "isolinux.bin", "boot.bin" };
 static const char* pe_dirname[] = { "/i386", "/amd64", "/minint" };
 static const char* pe_file[] = { "ntdetect.com", "setupldr.bin", "txtsetup.sif" };
@@ -97,6 +95,7 @@ static const char* reactos_name = "setupldr.sys"; // TODO: freeldr.sys doesn't s
 static const char* kolibri_name = "kolibri.img";
 static const char* autorun_name = "autorun.inf";
 static const char* manjaro_marker = ".miso";
+static const char* pop_os_name = "pop-os";
 static const char* stupid_antivirus = "  NOTE: This is usually caused by a poorly designed security solution. "
 	"See https://goo.gl/QTobxX.\r\n  This file will be skipped for now, but you should really "
 	"look into using a *SMARTER* antivirus solution.";
@@ -178,8 +177,6 @@ static BOOL check_iso_props(const char* psz_dirname, int64_t file_length, const 
 				props->is_grub_cfg = TRUE;
 			} else if (safe_stricmp(psz_basename, menu_cfg) == 0) {
 				props->is_menu_cfg = TRUE;
-			} else if (safe_stricmp(psz_basename, txt_cfg) == 0) {
-				props->is_txt_cfg = TRUE;
 			}
 		}
 
@@ -198,9 +195,11 @@ static BOOL check_iso_props(const char* psz_dirname, int64_t file_length, const 
 			has_ldlinux_c32 = TRUE;
 		}
 
-		// Check for a /casper directory
-		if (safe_stricmp(psz_dirname, casper_dirname) == 0) {
+		// Check for a '/casper#####' directory (non-empty)
+		if (safe_strnicmp(psz_dirname, casper_dirname, strlen(casper_dirname)) == 0) {
 			img_report.uses_casper = TRUE;
+			if (safe_strstr(psz_dirname, pop_os_name) != NULL)
+				img_report.disable_iso = TRUE;
 		}
 
 		// Check for various files in root (psz_dirname = "")
@@ -305,12 +304,13 @@ static void fix_config(const char* psz_fullpath, const char* psz_path, const cha
 
 	// Add persistence to the kernel options
 	if ((boot_type == BT_IMAGE) && HAS_PERSISTENCE(img_report) && persistence_size) {
-		if ((props->is_grub_cfg) || (props->is_menu_cfg) || (props->is_txt_cfg)) {
+		if ((props->is_grub_cfg) || (props->is_menu_cfg) || (props->is_syslinux_cfg)) {
 			// Ubuntu & derivatives are assumed to use '/casper/vmlinuz'
 			// in their kernel options and use 'persistent' as keyword.
 			if (replace_in_token_data(src, props->is_grub_cfg ? "linux" : "append",
-				props->is_grub_cfg ? "/casper/vmlinuz" : "/casper/initrd",
-				props->is_grub_cfg ? "/casper/vmlinuz persistent" : "/casper/initrd persistent", TRUE) != NULL)
+				props->is_grub_cfg ? "/casper/vmlinuz" : "initrd=/casper/initrd",
+				// Of course, Mint has to use 'initrd=/casper/initrd.lz' instead of 'initrd=/casper/initrd'
+				props->is_grub_cfg ? "/casper/vmlinuz persistent" : "persistent initrd=/casper/initrd", TRUE) != NULL)
 				uprintf("  Added 'persistent' kernel option");
 			// Debian & derivatives are assumed to use 'boot=live' in
 			// their kernel options and use 'persistence' as keyword.
