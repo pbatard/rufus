@@ -86,7 +86,7 @@ PF_TYPE_DECL(NTAPI, NTSTATUS, NtQueryVolumeInformationFile, (HANDLE, PIO_STATUS_
  */
 RUFUS_DRIVE_INFO SelectedDrive;
 BOOL installed_uefi_ntfs;
-DWORD partition_index[3];
+uint64_t partition_offset[3];
 uint64_t persistence_size = 0;
 
 /*
@@ -245,22 +245,18 @@ out:
 /*
  * Return the path to access a partition on a specific disk, or NULL on error.
  * The string is allocated and must be freed (to ensure concurrent access)
+ * If PartitionOffset is 0, the offset is ignored and the first partition found is returned.
  */
-char* GetPartitionName(DWORD DriveIndex, DWORD PartitionIndex)
+char* GetPartitionName(DWORD DriveIndex, uint64_t PartitionOffset)
 {
-	BOOL success = FALSE;
 	char partition_name[32];
+	DWORD i = MAX_PARTITIONS + 1;
 
 	CheckDriveIndex(DriveIndex);
-	if (PartitionIndex >= MAX_PARTITIONS)
-		goto out;
-	if (PartitionIndex == 0)
-		PartitionIndex = 1;
-	
-	static_sprintf(partition_name, "\\Device\\Harddisk%lu\\Partition%lu", DriveIndex, PartitionIndex);
-	success = TRUE;
+	for (i = 1; (i <= MAX_PARTITIONS) && (PartitionOffset != 0) && (SelectedDrive.PartitionOffset[i - 1] != PartitionOffset); i++);
+	static_sprintf(partition_name, "\\Device\\Harddisk%lu\\Partition%lu", DriveIndex, i);
 out:
-	return (success) ? safe_strdup(partition_name) : NULL;
+	return (i <= MAX_PARTITIONS) ? safe_strdup(partition_name) : NULL;
 }
 
 /*
@@ -278,11 +274,10 @@ HANDLE GetPhysicalHandle(DWORD DriveIndex, BOOL bLockDrive, BOOL bWriteAccess, B
 /*
  * Return the GUID volume name for the disk and partition specified, or NULL if not found.
  * See http://msdn.microsoft.com/en-us/library/cc542456.aspx
- * PartitionIndex starts at 1 (for the first partition). If PartitionIndex is zero, then
- * the first partition found by this function (which *MAY NOT* be the actual first partition)
- * is returned. The returned string is allocated and must be freed.
+ * If PartitionOffset is 0, the offset is ignored and the first partition found is returned.
+ * The returned string is allocated and must be freed.
  */
-char* GetLogicalName(DWORD DriveIndex, DWORD PartitionIndex, BOOL bKeepTrailingBackslash, BOOL bSilent)
+char* GetLogicalName(DWORD DriveIndex, uint64_t PartitionOffset, BOOL bKeepTrailingBackslash, BOOL bSilent)
 {
 	static const char* ignore_device[] = { "\\Device\\CdRom", "\\Device\\Floppy" };
 	static const char* volume_start = "\\\\?\\";
@@ -294,13 +289,11 @@ char* GetLogicalName(DWORD DriveIndex, DWORD PartitionIndex, BOOL bKeepTrailingB
 	UINT drive_type;
 	StrArray found_name;
 	uint64_t found_offset[MAX_PARTITIONS] = { 0 };
-	uint32_t i, j, k;
+	uint32_t i, j;
 	size_t len;
 
 	StrArrayCreate(&found_name, MAX_PARTITIONS);
 	CheckDriveIndex(DriveIndex);
-	if (PartitionIndex > MAX_PARTITIONS)
-		goto out;
 
 	for (i = 0; hDrive == INVALID_HANDLE_VALUE; i++) {
 		if (i == 0) {
@@ -391,38 +384,53 @@ char* GetLogicalName(DWORD DriveIndex, DWORD PartitionIndex, BOOL bKeepTrailingB
 	if (found_name.Index == 0)
 		goto out;
 
-	// Now process all the volumes we found, and find the one that matches our partition index
-	if (PartitionIndex == 0) {
-		i = 0;
-	} else for (i = 0, k = 0; i < found_name.Index; i++) {
-		for (j = 0; j < found_name.Index; j++) {
-			if (found_offset[i] > found_offset[j])
-				k++;
-		}
-		if (k == ((int)PartitionIndex) - 1)
-			break;
-	}
-	if (i < found_name.Index) {
+	// Now process all the volumes we found, and try to match one with our partition offset
+	for (i = 0; (i < found_name.Index) && (PartitionOffset != 0) && (PartitionOffset != found_offset[i]); i++);
+
+	if (i < found_name.Index)
 		ret = safe_strdup(found_name.String[i]);
-	} else {
-		// Some volumes, such as ESPs, are not listed by Windows, be it with VDS or other APIs.
-		// For these, we return the "\\?\GLOBALROOT\Device\HarddiskVolume#" identifier that
-		// matches our "Harddisk#Partition#", as reported by QueryDosDevice().
-		static_sprintf(path, "Harddisk%luPartition%lu", DriveIndex, PartitionIndex);
-		static_strcpy(volume_name, groot_name);
-		if (!QueryDosDeviceA(path, &volume_name[groot_len], (DWORD)(MAX_PATH - groot_len)) || (strlen(volume_name) < 20)) {
-			uprintf("Could not find the DOS volume name for '%s': %s", path, WindowsErrorString());
-		} else {
-			if (bKeepTrailingBackslash)
-				static_strcat(volume_name, "\\");
-			ret = safe_strdup(volume_name);
-		}
-	}
+	else
+		// NB: We need to re-add DRIVE_INDEX_MIN for this call since CheckDriveIndex() substracted it
+		ret = AltGetLogicalName(DriveIndex + DRIVE_INDEX_MIN, PartitionOffset, bKeepTrailingBackslash, bSilent);
 
 out:
 	if (hVolume != INVALID_HANDLE_VALUE)
 		FindVolumeClose(hVolume);
 	StrArrayDestroy(&found_name);
+	return ret;
+}
+
+/*
+ * Alternative version of the above, needed because some volumes, such as ESPs, are not listed
+ * by Windows, be it with VDS or other APIs.
+ * For these, we return the "\\?\GLOBALROOT\Device\HarddiskVolume#" identifier that matches
+ * our "Harddisk#Partition#", as reported by QueryDosDevice().
+ * The returned string is allocated and must be freed.
+*/
+char* AltGetLogicalName(DWORD DriveIndex, uint64_t PartitionOffset, BOOL bKeepTrailingBackslash, BOOL bSilent)
+{
+	DWORD i;
+	char *ret = NULL, volume_name[MAX_PATH], path[MAX_PATH];
+
+	CheckDriveIndex(DriveIndex);
+
+	// Match the offset to a partition index
+	for (i = 0; (i < MAX_PARTITIONS) && (PartitionOffset != 0) && (PartitionOffset != SelectedDrive.PartitionOffset[i]); i++);
+	if (i >= MAX_PARTITIONS) {
+		suprintf("Error: Could not find a partition at offset %lld on this disk", PartitionOffset);
+		goto out;
+	}
+	static_sprintf(path, "Harddisk%luPartition%lu", DriveIndex, i + 1);
+	static_strcpy(volume_name, groot_name);
+	if (!QueryDosDeviceA(path, &volume_name[groot_len], (DWORD)(MAX_PATH - groot_len)) || (strlen(volume_name) < 20)) {
+		suprintf("Could not find the DOS volume name for '%s': %s", path, WindowsErrorString());
+	} else {
+		if (bKeepTrailingBackslash)
+			static_strcat(volume_name, "\\");
+		ret = safe_strdup(volume_name);
+	}
+
+out:
 	return ret;
 }
 
@@ -720,7 +728,7 @@ out:
 
 
 /* Wait for a logical drive to reappear - Used when a drive has just been repartitioned */
-BOOL WaitForLogical(DWORD DriveIndex, DWORD PartitionIndex)
+BOOL WaitForLogical(DWORD DriveIndex, uint64_t PartitionOffset)
 {
 	uint64_t EndTime;
 	char* LogicalPath = NULL;
@@ -729,7 +737,7 @@ BOOL WaitForLogical(DWORD DriveIndex, DWORD PartitionIndex)
 	// make sure we don't spend more than DRIVE_ACCESS_TIMEOUT in wait.
 	EndTime = GetTickCount64() + DRIVE_ACCESS_TIMEOUT;
 	do {
-		LogicalPath = GetLogicalName(DriveIndex, PartitionIndex, FALSE, TRUE);
+		LogicalPath = GetLogicalName(DriveIndex, PartitionOffset, FALSE, TRUE);
 		// Need to filter out GlobalRoot devices as we don't want to wait on those
 		if ((LogicalPath != NULL) && (strncmp(LogicalPath, groot_name, groot_len) != 0)) {
 			free(LogicalPath);
@@ -749,10 +757,10 @@ BOOL WaitForLogical(DWORD DriveIndex, DWORD PartitionIndex)
  * Returns INVALID_HANDLE_VALUE on error or NULL if no logical path exists (typical
  * of unpartitioned drives)
  */
-HANDLE GetLogicalHandle(DWORD DriveIndex, DWORD PartitionIndex, BOOL bLockDrive, BOOL bWriteAccess, BOOL bWriteShare)
+HANDLE GetLogicalHandle(DWORD DriveIndex, uint64_t PartitionOffset, BOOL bLockDrive, BOOL bWriteAccess, BOOL bWriteShare)
 {
 	HANDLE hLogical = INVALID_HANDLE_VALUE;
-	char* LogicalPath = GetLogicalName(DriveIndex, PartitionIndex, FALSE, FALSE);
+	char* LogicalPath = GetLogicalName(DriveIndex, PartitionOffset, FALSE, FALSE);
 
 	if (LogicalPath == NULL) {
 		uprintf("No logical drive found (unpartitioned?)");
@@ -767,10 +775,10 @@ HANDLE GetLogicalHandle(DWORD DriveIndex, DWORD PartitionIndex, BOOL bLockDrive,
 /*
  * Similar to the above, but use the partition name instead
  */
-HANDLE GetPartitionHandle(DWORD DriveIndex, DWORD PartitionIndex, BOOL bLockDrive, BOOL bWriteAccess, BOOL bWriteShare)
+HANDLE GetPartitionHandle(DWORD DriveIndex, uint64_t PartitionOffset, BOOL bLockDrive, BOOL bWriteAccess, BOOL bWriteShare)
 {
 	HANDLE handle = INVALID_HANDLE_VALUE;
-	char* volume_name = GetPartitionName(DriveIndex, PartitionIndex);
+	char* volume_name = GetPartitionName(DriveIndex, PartitionOffset);
 
 	if (volume_name == NULL) {
 		uprintf("Could not get partition volume name");
@@ -1158,6 +1166,7 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 		return FALSE;
 
 	SelectedDrive.nPartitions = 0;
+	memset(SelectedDrive.PartitionOffset, 0, sizeof(SelectedDrive.PartitionOffset));
 	// Populate the filesystem data
 	FileSystemName[0] = 0;
 	volume_name = GetLogicalName(DriveIndex, 0, TRUE, FALSE);
@@ -1246,6 +1255,8 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 						break;
 					}
 				}
+				if (i < MAX_PARTITIONS)
+					SelectedDrive.PartitionOffset[i] = DriveLayout->PartitionEntry[i].StartingOffset.QuadPart;
 				// NB: MinGW's gcc 4.9.2 broke "%lld" printout on XP so we use the inttypes.h "PRI##" qualifiers
 				suprintf("  Type: %s (0x%02x)\r\n  Size: %s (%" PRIi64 " bytes)\r\n  Start Sector: %" PRIi64 ", Boot: %s",
 					((part_type==0x07||super_floppy_disk)&&(FileSystemName[0]!=0))?FileSystemName:GetPartitionType(part_type), super_floppy_disk?0:part_type,
@@ -1271,6 +1282,8 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 		suprintf("Max parts: %d, Start Offset: %" PRIi64 ", Usable = %" PRIi64 " bytes",
 			DriveLayout->Gpt.MaxPartitionCount, DriveLayout->Gpt.StartingUsableOffset.QuadPart, DriveLayout->Gpt.UsableLength.QuadPart);
 		for (i=0; i<DriveLayout->PartitionCount; i++) {
+			if (i < MAX_PARTITIONS)
+				SelectedDrive.PartitionOffset[i] = DriveLayout->PartitionEntry[i].StartingOffset.QuadPart;
 			SelectedDrive.nPartitions++;
 			isUefiNtfs = (wcscmp(DriveLayout->PartitionEntry[i].Gpt.Name, L"UEFI:NTFS") == 0);
 			suprintf("Partition %d%s:\r\n  Type: %s\r\n  Name: '%S'", i+1, isUefiNtfs ? " (UEFI:NTFS)" : "",
@@ -1401,33 +1414,33 @@ BOOL MountVolume(char* drive_name, char *volume_name)
 /*
  * Alternate version of MountVolume required for ESP's, since Windows (including VDS) does
  * *NOT* provide any means of mounting these volume but through DefineDosDevice(). Also
- * note the bcdboot is very finicky about what it may or may not handle, even if the
+ * note that bcdboot is very finicky about what it may or may not handle, even if the
  * mount was successful (e.g. '\Device\HarddiskVolume###' vs 'Device\HarddiskVolume###').
- * Returned string is static (no concurrency) and should not be freed.
+ * Returned string is static (no concurrency) and must not be freed.
  */
-char* AltMountVolume(DWORD DriveIndex, DWORD PartitionIndex)
+char* AltMountVolume(DWORD DriveIndex, uint64_t PartitionOffset, BOOL bSilent)
 {
 	char* ret = NULL, *volume_name = NULL;
 	static char mounted_drive[] = "?:";
 
 	mounted_drive[0] = GetUnusedDriveLetter();
 	if (mounted_drive[0] == 0) {
-		uprintf("Could not find an unused drive letter");
+		suprintf("Could not find an unused drive letter");
 		goto out;
 	}
-	volume_name = GetLogicalName(DriveIndex, PartitionIndex, FALSE, TRUE);
+	// Can't use a regular volume GUID for ESPs...
+	volume_name = AltGetLogicalName(DriveIndex, PartitionOffset, FALSE, TRUE);
 	if ((volume_name == NULL) || (strncmp(volume_name, groot_name, groot_len) != 0)) {
-		uprintf("Unexpected volume name: '%s'", volume_name);
+		suprintf("Unexpected volume name: '%s'", volume_name);
 		goto out;
 	}
 
-	// bcdboot sure won't like it if you forget the starting '\'
+	suprintf("Mounting '%s' as '%s'", &volume_name[14], mounted_drive);
+	// bcdboot doesn't like it if you forget the starting '\'
 	if (!DefineDosDeviceA(DDD_RAW_TARGET_PATH | DDD_NO_BROADCAST_SYSTEM, mounted_drive, &volume_name[14])) {
-		uprintf("Could not mount '%s' to '%s': %s", &volume_name[14], mounted_drive, WindowsErrorString());
+		suprintf("Mount operation failed: %s", WindowsErrorString());
 		goto out;
 	}
-
-	uprintf("Successfully mounted '%s' (Partition %d) as '%s'", &volume_name[14], PartitionIndex, mounted_drive);
 	ret = mounted_drive;
 
 out:
@@ -1438,15 +1451,15 @@ out:
 /*
  * Unmount a volume that was mounted by AltmountVolume()
  */
-BOOL AltUnmountVolume(const char* drive_name)
+BOOL AltUnmountVolume(const char* drive_name, BOOL bSilent)
 {
 	if (drive_name == NULL)
 		return FALSE;
 	if (!DefineDosDeviceA(DDD_REMOVE_DEFINITION | DDD_NO_BROADCAST_SYSTEM, drive_name, NULL)) {
-		uprintf("Could not unmount '%s': %s", drive_name, WindowsErrorString());
+		suprintf("Could not unmount '%s': %s", drive_name, WindowsErrorString());
 		return FALSE;
 	}
-	uprintf("Successfully unmounted '%s'", drive_name);
+	suprintf("Successfully unmounted '%s'", drive_name);
 	return TRUE;
 }
 
@@ -1536,7 +1549,8 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 		if (uefi_ntfs_size == 0)
 			return FALSE;
 	}
-	memset(partition_index, 0, sizeof(partition_index));
+	memset(partition_offset, 0, sizeof(partition_offset));
+	memset(SelectedDrive.PartitionOffset, 0, sizeof(SelectedDrive.PartitionOffset));
 
 	// Compute the start offset of our first partition
 	if ((partition_style == PARTITION_STYLE_GPT) || (!IsChecked(IDC_OLD_BIOS_FIXES))) {
@@ -1560,6 +1574,7 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 		// Zero the first sectors from this partition to avoid file system caching issues
 		if (!ClearPartition(hDrive, DriveLayoutEx.PartitionEntry[pn].StartingOffset, size_to_clear))
 			uprintf("Could not zero %S: %s", extra_part_name, WindowsErrorString());
+		SelectedDrive.PartitionOffset[pn] = DriveLayoutEx.PartitionEntry[pn].StartingOffset.QuadPart;
 		pn++;
 		DriveLayoutEx.PartitionEntry[pn].StartingOffset.QuadPart = DriveLayoutEx.PartitionEntry[pn-1].StartingOffset.QuadPart +
 				DriveLayoutEx.PartitionEntry[pn-1].PartitionLength.QuadPart;
@@ -1641,15 +1656,12 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 		IGNORE_RETVAL(CoCreateGuid(&DriveLayoutEx.PartitionEntry[pn].Gpt.PartitionId));
 		wcsncpy(DriveLayoutEx.PartitionEntry[pn].Gpt.Name, main_part_name, ARRAYSIZE(DriveLayoutEx.PartitionEntry[pn].Gpt.Name));
 	}
+	SelectedDrive.PartitionOffset[pn] = DriveLayoutEx.PartitionEntry[pn].StartingOffset.QuadPart;
+	partition_offset[PI_MAIN] = SelectedDrive.PartitionOffset[pn];
 	pn++;
-	partition_index[PI_MAIN] = pn;
 
 	// Set the optional extra partition
 	if (extra_partitions) {
-		if (extra_partitions & XP_CASPER)
-			partition_index[PI_CASPER] = pn + 1;
-		else if (extra_partitions & XP_ESP)
-			partition_index[PI_ESP] = pn + 1;
 		// Should end on a track boundary
 		DriveLayoutEx.PartitionEntry[pn].StartingOffset.QuadPart = DriveLayoutEx.PartitionEntry[pn-1].StartingOffset.QuadPart +
 			DriveLayoutEx.PartitionEntry[pn-1].PartitionLength.QuadPart;
@@ -1657,6 +1669,12 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 			extra_part_size_in_tracks * bytes_per_track;
 		uprintf("● Creating %S Partition (offset: %lld, size: %s)", extra_part_name, DriveLayoutEx.PartitionEntry[pn].StartingOffset.QuadPart,
 			SizeToHumanReadable(DriveLayoutEx.PartitionEntry[pn].PartitionLength.QuadPart, TRUE, FALSE));
+		SelectedDrive.PartitionOffset[pn] = DriveLayoutEx.PartitionEntry[pn].StartingOffset.QuadPart;
+		if (extra_partitions & XP_CASPER)
+			partition_offset[PI_CASPER] = SelectedDrive.PartitionOffset[pn];
+		else if (extra_partitions & XP_ESP)
+			partition_offset[PI_ESP] = SelectedDrive.PartitionOffset[pn];
+
 		if (partition_style == PARTITION_STYLE_GPT) {
 			DriveLayoutEx.PartitionEntry[pn].Gpt.PartitionType = (extra_partitions & XP_ESP) ? PARTITION_SYSTEM_GUID : PARTITION_BASIC_DATA_GUID;
 			IGNORE_RETVAL(CoCreateGuid(&DriveLayoutEx.PartitionEntry[pn].Gpt.PartitionId));

@@ -373,7 +373,7 @@ static DWORD GetFATSizeSectors(DWORD DskSize, DWORD ReservedSecCnt, DWORD SecPer
  * Large FAT32 volume formatting from fat32format by Tom Thornhill
  * http://www.ridgecrop.demon.co.uk/index.htm?fat32format.htm
  */
-static BOOL FormatFAT32(DWORD DriveIndex, DWORD PartitionIndex, DWORD ClusterSize, LPCSTR FSName, LPCSTR Label, DWORD Flags)
+static BOOL FormatFAT32(DWORD DriveIndex, uint64_t PartitionOffset, DWORD ClusterSize, LPCSTR FSName, LPCSTR Label, DWORD Flags)
 {
 	BOOL r = FALSE;
 	DWORD i;
@@ -420,7 +420,7 @@ static BOOL FormatFAT32(DWORD DriveIndex, DWORD PartitionIndex, DWORD ClusterSiz
 	VolumeId = GetVolumeID();
 
 	// Open the drive and lock it
-	hLogicalVolume = GetLogicalHandle(DriveIndex, PartitionIndex, TRUE, TRUE, FALSE);
+	hLogicalVolume = GetLogicalHandle(DriveIndex, PartitionOffset, TRUE, TRUE, FALSE);
 	if (IS_ERROR(FormatStatus))
 		goto out;
 	if ((hLogicalVolume == INVALID_HANDLE_VALUE) || (hLogicalVolume == NULL))
@@ -651,7 +651,7 @@ static BOOL FormatFAT32(DWORD DriveIndex, DWORD PartitionIndex, DWORD ClusterSiz
 	PrintInfoDebug(0, MSG_221);
 	// Handle must be closed for SetVolumeLabel to work
 	safe_closehandle(hLogicalVolume);
-	VolumeName = GetLogicalName(DriveIndex, PartitionIndex, TRUE, TRUE);
+	VolumeName = GetLogicalName(DriveIndex, PartitionOffset, TRUE, TRUE);
 	if ((VolumeName == NULL) || (!SetVolumeLabelA(VolumeName, Label))) {
 		uprintf("Could not set label: %s", WindowsErrorString());
 		// Non fatal error
@@ -819,14 +819,16 @@ errcode_t ext2fs_print_progress(int64_t cur_value, int64_t max_value)
 	return IS_ERROR(FormatStatus) ? EXT2_ET_CANCEL_REQUESTED : 0;
 }
 
-const char* GetExtFsLabel(DWORD DriveIndex, DWORD PartitionIndex)
+const char* GetExtFsLabel(DWORD DriveIndex, uint64_t PartitionOffset)
 {
 	static char label[EXT2_LABEL_LEN + 1];
 	errcode_t r;
 	ext2_filsys ext2fs = NULL;
 	io_manager manager = nt_io_manager();
-	char* volume_name = GetPartitionName(DriveIndex, PartitionIndex);
+	char* volume_name = AltMountVolume(DriveIndex, PartitionOffset, TRUE);
 
+	if (volume_name == NULL)
+		return NULL;
 	r = ext2fs_open(volume_name, EXT2_FLAG_SKIP_MMP, 0, 0, manager, &ext2fs);
 	if (r == 0) {
 		strncpy(label, ext2fs->super->s_volume_name, EXT2_LABEL_LEN);
@@ -834,11 +836,11 @@ const char* GetExtFsLabel(DWORD DriveIndex, DWORD PartitionIndex)
 	}
 	if (ext2fs != NULL)
 		ext2fs_close(ext2fs);
-	free(volume_name);
+	AltUnmountVolume(volume_name, TRUE);
 	return (r == 0) ? label : NULL;
 }
 
-BOOL FormatExtFs(DWORD DriveIndex, DWORD PartitionIndex, DWORD BlockSize, LPCSTR FSName, LPCSTR Label, DWORD Flags)
+BOOL FormatExtFs(DWORD DriveIndex, uint64_t PartitionOffset, DWORD BlockSize, LPCSTR FSName, LPCSTR Label, DWORD Flags)
 {
 	// Mostly taken from mke2fs.conf
 	const float reserve_ratio = 0.05f;
@@ -877,7 +879,7 @@ BOOL FormatExtFs(DWORD DriveIndex, DWORD PartitionIndex, DWORD BlockSize, LPCSTR
 	}
 	CloseHandle(h);
 #else
-	volume_name = GetPartitionName(DriveIndex, PartitionIndex);
+	volume_name = AltMountVolume(DriveIndex, PartitionOffset, FALSE);
 #endif
 	if ((volume_name == NULL) | (strlen(FSName) != 4) || (strncmp(FSName, "ext", 3) != 0)) {
 		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_INVALID_PARAMETER;
@@ -1097,14 +1099,14 @@ BOOL FormatExtFs(DWORD DriveIndex, DWORD PartitionIndex, DWORD BlockSize, LPCSTR
 out:
 	ext2fs_free(ext2fs);
 	free(buf);
-	free(volume_name);
+	AltUnmountVolume(volume_name, FALSE);
 	return ret;
 }
 
 /*
  * Call on VDS to format a partition
  */
-static BOOL FormatDriveVds(DWORD DriveIndex, DWORD PartitionIndex, DWORD ClusterSize, LPCSTR FSName, LPCSTR Label, DWORD Flags)
+static BOOL FormatDriveVds(DWORD DriveIndex, uint64_t PartitionOffset, DWORD ClusterSize, LPCSTR FSName, LPCSTR Label, DWORD Flags)
 {
 	BOOL r = FALSE, bFoundVolume = FALSE;
 	HRESULT hr;
@@ -1122,7 +1124,7 @@ static BOOL FormatDriveVds(DWORD DriveIndex, DWORD PartitionIndex, DWORD Cluster
 		PrintInfoDebug(0, MSG_222, FSName);
 	}
 	LastRefresh = 0;
-	VolumeName = GetLogicalName(DriveIndex, PartitionIndex, TRUE, TRUE);
+	VolumeName = GetLogicalName(DriveIndex, PartitionOffset, TRUE, TRUE);
 	wVolumeName = utf8_to_wchar(VolumeName);
 	if (wVolumeName == NULL) {
 		uprintf("Could not read volume name");
@@ -1350,7 +1352,7 @@ out:
 /*
  * Call on fmifs.dll's FormatEx() to format the drive
  */
-static BOOL FormatDrive(DWORD DriveIndex, DWORD PartitionIndex, DWORD ClusterSize, LPCSTR FSName, LPCSTR Label, DWORD Flags)
+static BOOL FormatDrive(DWORD DriveIndex, uint64_t PartitionOffset, DWORD ClusterSize, LPCSTR FSName, LPCSTR Label, DWORD Flags)
 {
 	BOOL r = FALSE;
 	PF_DECL(FormatEx);
@@ -1364,10 +1366,10 @@ static BOOL FormatDrive(DWORD DriveIndex, DWORD PartitionIndex, DWORD ClusterSiz
 	} else {
 		PrintInfoDebug(0, MSG_222, FSName);
 	}
-	VolumeName = GetLogicalName(DriveIndex, PartitionIndex, TRUE, TRUE);
+	VolumeName = GetLogicalName(DriveIndex, PartitionOffset, TRUE, TRUE);
 	wVolumeName = utf8_to_wchar(VolumeName);
 	if (wVolumeName == NULL) {
-		uprintf("Could not read volume name\n");
+		uprintf("Could not read volume name");
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_GEN_FAILURE;
 		goto out;
 	}
@@ -1429,9 +1431,9 @@ out:
 	return r;
 }
 
-static BOOL FormatPartition(DWORD DriveIndex, DWORD PartitionIndex, DWORD UnitAllocationSize, USHORT FSType, LPCSTR Label, DWORD Flags)
+static BOOL FormatPartition(DWORD DriveIndex, uint64_t PartitionOffset, DWORD UnitAllocationSize, USHORT FSType, LPCSTR Label, DWORD Flags)
 {
-	if ((DriveIndex < 0x80) || (DriveIndex > 0x100) || (PartitionIndex >= MAX_PARTITIONS) || (FSType >= FS_MAX) ||
+	if ((DriveIndex < 0x80) || (DriveIndex > 0x100) || (FSType >= FS_MAX) ||
 		// The following validates that UnitAllocationSize is a power of 2
 		((UnitAllocationSize != 0) && (UnitAllocationSize & (UnitAllocationSize - 1)))) {
 		ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_INVALID_PARAMETER;
@@ -1439,13 +1441,13 @@ static BOOL FormatPartition(DWORD DriveIndex, DWORD PartitionIndex, DWORD UnitAl
 	}
 	actual_fs_type = FSType;
 	if ((FSType == FS_FAT32) && ((SelectedDrive.DiskSize > LARGE_FAT32_SIZE) || (force_large_fat32) || (Flags & FP_LARGE_FAT32)))
-		return FormatFAT32(DriveIndex, PartitionIndex, UnitAllocationSize, FileSystemLabel[FSType], Label, Flags);
+		return FormatFAT32(DriveIndex, PartitionOffset, UnitAllocationSize, FileSystemLabel[FSType], Label, Flags);
 	else if (FSType >= FS_EXT2)
-		return FormatExtFs(DriveIndex, PartitionIndex, UnitAllocationSize, FileSystemLabel[FSType], Label, Flags);
+		return FormatExtFs(DriveIndex, PartitionOffset, UnitAllocationSize, FileSystemLabel[FSType], Label, Flags);
 	else if (use_vds)
-		return FormatDriveVds(DriveIndex, PartitionIndex, UnitAllocationSize, FileSystemLabel[FSType], Label, Flags);
+		return FormatDriveVds(DriveIndex, PartitionOffset, UnitAllocationSize, FileSystemLabel[FSType], Label, Flags);
 	else
-		return FormatDrive(DriveIndex, PartitionIndex, UnitAllocationSize, FileSystemLabel[FSType], Label, Flags);
+		return FormatDrive(DriveIndex, PartitionOffset, UnitAllocationSize, FileSystemLabel[FSType], Label, Flags);
 }
 
 /*
@@ -2159,7 +2161,7 @@ static BOOL SetupWinToGo(DWORD DriveIndex, const char* drive_name, BOOL use_esp)
 		// VDS cannot list ESP volumes (talk about allegedly improving on the old disk and volume APIs, only to
 		// completely neuter it) and IVdsDiskPartitionMF::FormatPartitionEx(), which is what you are supposed to
 		// use for ESPs, explicitly states: "This method cannot be used to format removable media."
-		if (!FormatPartition(DriveIndex, partition_index[PI_ESP], cluster_size, FS_FAT32, "",
+		if (!FormatPartition(DriveIndex, partition_offset[PI_ESP], cluster_size, FS_FAT32, "",
 			FP_QUICK | FP_FORCE | FP_LARGE_FAT32 | FP_NO_BOOT)) {
 			uprintf("Could not format EFI System Partition");
 			return FALSE;
@@ -2169,7 +2171,7 @@ static BOOL SetupWinToGo(DWORD DriveIndex, const char* drive_name, BOOL use_esp)
 
 	if (use_esp) {
 		// Need to have the ESP mounted to invoke bcdboot
-		ms_efi = AltMountVolume(DriveIndex, partition_index[PI_ESP]);
+		ms_efi = AltMountVolume(DriveIndex, partition_offset[PI_ESP], FALSE);
 		if (ms_efi == NULL) {
 			FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_CANT_ASSIGN_LETTER);
 			return FALSE;
@@ -2192,7 +2194,7 @@ static BOOL SetupWinToGo(DWORD DriveIndex, const char* drive_name, BOOL use_esp)
 
 	if (use_esp) {
 		Sleep(200);
-		AltUnmountVolume(ms_efi);
+		AltUnmountVolume(ms_efi, FALSE);
 	}
 	PrintInfo(0, MSG_267, 99.9f);
 	UpdateProgress(OP_DOS, 99.9f);
@@ -2679,7 +2681,7 @@ DWORD WINAPI FormatThread(void* param)
 	// Wait for the logical drive we just created to appear
 	uprintf("Waiting for logical drive to reappear...");
 	Sleep(200);
-	if (!WaitForLogical(DriveIndex, partition_index[PI_MAIN])) {
+	if (!WaitForLogical(DriveIndex, partition_offset[PI_MAIN])) {
 		uprintf("Logical drive was not found - aborting");
 		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_NO_VOLUME_ID;
 		goto out;
@@ -2693,7 +2695,7 @@ DWORD WINAPI FormatThread(void* param)
 		if ((ext_version < 2) || (ext_version > 4))
 			ext_version = 3;
 		uprintf("Using %s-like method to enable persistence", img_report.uses_casper ? "Ubuntu" : "Debian");
-		if (!FormatPartition(DriveIndex, partition_index[PI_CASPER], 0, FS_EXT2 + (ext_version - 2),
+		if (!FormatPartition(DriveIndex, partition_offset[PI_CASPER], 0, FS_EXT2 + (ext_version - 2),
 			img_report.uses_casper ? "casper-rw" : "persistence",
 			(img_report.uses_casper ? 0 : FP_CREATE_PERSISTENCE_CONF) |
 			(IsChecked(IDC_QUICK_FORMAT) ? FP_QUICK : 0))) {
@@ -2716,7 +2718,7 @@ DWORD WINAPI FormatThread(void* param)
 	if ((fs_type == FS_NTFS) && (enable_ntfs_compression))
 		Flags |= FP_COMPRESSION;
 
-	ret = FormatPartition(DriveIndex, partition_index[PI_MAIN], ClusterSize, fs_type, label, Flags);
+	ret = FormatPartition(DriveIndex, partition_offset[PI_MAIN], ClusterSize, fs_type, label, Flags);
 	if (!ret) {
 		// Error will be set by FormatPartition() in FormatStatus
 		uprintf("Format error: %s", StrError(FormatStatus, TRUE));
@@ -2747,7 +2749,7 @@ DWORD WINAPI FormatThread(void* param)
 	// Try to continue
 	CHECK_FOR_USER_CANCEL;
 
-	volume_name = GetLogicalName(DriveIndex, partition_index[PI_MAIN], TRUE, TRUE);
+	volume_name = GetLogicalName(DriveIndex, partition_offset[PI_MAIN], TRUE, TRUE);
 	if (volume_name == NULL) {
 		uprintf("Could not get volume name");
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_NO_VOLUME_ID;
@@ -2800,8 +2802,7 @@ DWORD WINAPI FormatThread(void* param)
 		} else {
 			// We still have a lock, which we need to modify the volume boot record
 			// => no need to reacquire the lock...
-			// TODO: Shouldn't PI always be 1 here?
-			hLogicalVolume = GetLogicalHandle(DriveIndex, partition_index[PI_MAIN], FALSE, TRUE, FALSE);
+			hLogicalVolume = GetLogicalHandle(DriveIndex, partition_offset[PI_MAIN], FALSE, TRUE, FALSE);
 			if ((hLogicalVolume == INVALID_HANDLE_VALUE) || (hLogicalVolume == NULL)) {
 				uprintf("Could not re-mount volume for partition boot record access");
 				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_OPEN_FAILED;
