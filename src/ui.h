@@ -43,6 +43,14 @@
 											  TBSTYLE_AUTOSIZE | TBSTYLE_LIST    | \
 											  TBSTYLE_TOOLTIPS )
 
+// Types of update progress we report
+enum update_progress_type {
+	UPT_PERCENT = 0,
+	UPT_SPEED,
+	UPT_TIME,
+	UPT_MAX
+};
+
 extern HWND hMultiToolbar, hSaveToolbar, hHashToolbar, hAdvancedDeviceToolbar, hAdvancedFormatToolbar;
 extern HFONT hInfoFont;
 extern UINT_PTR UM_LANGUAGE_MENU_MAX;
@@ -53,7 +61,7 @@ extern const char *sfd_name, *flash_type[BADLOCKS_PATTERN_TYPES];
 extern char *short_image_path, image_option_txt[128];
 extern int advanced_device_section_height, advanced_format_section_height;
 extern int windows_to_go_selection, persistence_unit_selection;
-extern int selection_default, cbw, ddw, ddbh, bh;
+extern int selection_default, cbw, ddw, ddbh, bh, update_progress_type;
 
 extern void SetComboEntry(HWND hDlg, int data);
 extern void GetBasicControlsWidth(HWND hDlg);

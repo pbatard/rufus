@@ -44,6 +44,8 @@
 UINT_PTR UM_LANGUAGE_MENU_MAX = UM_LANGUAGE_MENU;
 HIMAGELIST hUpImageList, hDownImageList;
 extern BOOL enable_fido, use_vds;
+// TODO: Use an enum or something
+int update_progress_type = UPT_PERCENT;
 int advanced_device_section_height, advanced_format_section_height;
 // (empty) check box width, (empty) drop down width, button height (for and without dropdown match)
 int cbw, ddw, ddbh = 0, bh = 0;
@@ -1157,16 +1159,16 @@ void InitProgress(BOOL bOnlyFormat)
 			// 1 extra slot for PBR writing
 			switch (selection_default) {
 			case BT_MSDOS:
-				nb_slots[OP_DOS] = 3 + 1;
+				nb_slots[OP_FILE_COPY] = 3 + 1;
 				break;
 			case BT_FREEDOS:
-				nb_slots[OP_DOS] = 5 + 1;
+				nb_slots[OP_FILE_COPY] = 5 + 1;
 				break;
 			case BT_IMAGE:
-				nb_slots[OP_DOS] = img_report.is_iso ? -1 : 0;
+				nb_slots[OP_FILE_COPY] = img_report.is_iso ? -1 : 0;
 				break;
 			default:
-				nb_slots[OP_DOS] = 2 + 1;
+				nb_slots[OP_FILE_COPY] = 2 + 1;
 				break;
 			}
 		}
@@ -1229,7 +1231,7 @@ void UpdateProgress(int op, float percent)
 		return;
 	}
 	if (percent > 100.1f) {
-		//		duprintf("UpdateProgress(%d): invalid percentage %0.2f\n", op, percent);
+		// duprintf("UpdateProgress(%d): invalid percentage %0.2f\n", op, percent);
 		return;
 	}
 	if ((percent < 0.0f) && (nb_slots[op] <= 0)) {
@@ -1259,6 +1261,69 @@ void UpdateProgress(int op, float percent)
 		LastRefresh = GetTickCount64();
 		SendMessage(hProgress, PBM_SETPOS, (WPARAM)pos, 0);
 		SetTaskbarProgressValue(pos, MAX_PROGRESS);
+	}
+}
+
+// This updates the progress bar as well as the data displayed on it so that we can
+// display percentage completed, rate of transfer and estimated remaining duration.
+// During init (op = OP_INIT) an optional HWND can be passed on which to look for
+// a progress bar.
+void UpdateProgressWithInfo(int op, int msg, uint64_t processed, uint64_t total)
+{
+	HWND hProgressDialog = (HWND)(uintptr_t)processed;
+	static HWND hProgressBar = NULL;
+	static uint64_t start_time = 0, last_refresh = 0;
+	uint64_t rate = 0, current_time = GetTickCount64();
+	static float percent = 0.0f;
+	char msg_data[128];
+	static BOOL bNoAltMode = FALSE;
+
+	if (op == OP_INIT) {
+		start_time = current_time - 1;
+		last_refresh = 0;
+		percent = 0.0f;
+		rate = 0;
+		hProgressBar = NULL;
+		bNoAltMode = (BOOL)msg;
+		if (hProgressDialog != NULL) {
+			// Use the progress control provided, if any
+			hProgressBar = GetDlgItem(hProgressDialog, IDC_PROGRESS);
+			if (hProgressBar != NULL) {
+				SendMessage(hProgressBar, PBM_SETSTATE, (WPARAM)PBST_NORMAL, 0);
+				SendMessage(hProgressBar, PBM_SETMARQUEE, FALSE, 0);
+				SendMessage(hProgressBar, PBM_SETPOS, 0, 0);
+			}
+			SendMessage(hProgressDialog, UM_PROGRESS_INIT, 0, 0);
+		}
+	} else if ((hProgressBar != NULL) || (op > 0)) {
+		if (processed > total)
+			processed = total;
+		percent = (100.0f * processed) / (1.0f * total);
+		// TODO: Better transfer rate computation using a weighted algorithm such as one from
+		// https://stackoverflow.com/questions/2779600/how-to-estimate-download-time-remaining-accurately
+		rate = (current_time == start_time) ? 0 : (processed * 1000) / (current_time - start_time);
+		if ((processed == total) || (current_time > last_refresh + MAX_REFRESH)) {
+			if (bNoAltMode)
+				update_progress_type = 0;
+			if (update_progress_type == UPT_SPEED) {
+				static_sprintf(msg_data, "%s/s", SizeToHumanReadable(rate, FALSE, FALSE));
+			} else if (update_progress_type == UPT_TIME) {
+				uint64_t seconds = (rate == 0) ? 24 * 3600 : (total - processed) / rate + 1;
+				static_sprintf(msg_data, "%d:%02d:%02d", (uint32_t)(seconds / 3600), (uint16_t)((seconds % 3600) / 60), (uint16_t)(seconds % 60));
+			} else {
+				static_sprintf(msg_data, "%0.1f%%", percent);
+			}
+			last_refresh = current_time;
+			if (op < 0) {
+				SendMessage(hProgressBar, PBM_SETPOS, (WPARAM)(MAX_PROGRESS * percent / 100.0f), 0);
+				if (op == OP_NOOP_WITH_TASKBAR)
+					SetTaskbarProgressValue((ULONGLONG)(MAX_PROGRESS * percent / 100.0f), MAX_PROGRESS);
+			} else {
+				UpdateProgress(op, percent);
+			}
+			if (msg >= 0)
+				PrintInfo(0, msg, msg_data);
+		}
 	}
 }
 

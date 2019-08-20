@@ -695,6 +695,29 @@ char* TimestampToHumanReadable(uint64_t ts)
 	return str;
 }
 
+// TODO: Add granularity
+char* RateToHumanReadable(uint64_t transferred, uint64_t total)
+{
+	const uint64_t refresh_rate = 1000;
+	static uint64_t start_time, last_refresh = 0;
+	uint64_t current_time, rate;
+	if (total == 0) {
+		// init
+		start_time = GetTickCount64();
+		last_refresh = start_time;
+	} else {
+		current_time = GetTickCount64();
+		if (current_time <= start_time)
+			return NULL;
+		rate = (transferred  * 1000) / (current_time - start_time);
+		if (current_time > last_refresh + refresh_rate) {
+			last_refresh = current_time;
+			uprintf("%s/s", SizeToHumanReadable(rate, FALSE, FALSE));
+		}
+	}
+	return NULL;
+}
+
 // Convert custom error code to messages
 const char* _StrError(DWORD error_code)
 {

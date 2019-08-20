@@ -334,7 +334,7 @@ static BOOL ExtractMSDOS(const char* path)
 			if (memcmp(extractlist[j], &DiskImage[FAT12_ROOTDIR_OFFSET + i*FAT_BYTES_PER_DIRENT], 8+3) == 0) {
 				r = ExtractFAT(i, (j<3)?path:locale_path);
 				if ((j == 2) || (j == 7) || (j == 12))
-					UpdateProgress(OP_DOS, -1.0f);
+					UpdateProgress(OP_FILE_COPY, -1.0f);
 			}
 		}
 	}
@@ -405,7 +405,7 @@ BOOL ExtractFreeDOS(const char* path)
 		uprintf("Successfully wrote '%s' (%d bytes)\n", filename, res_size);
 
 		if ((i == 4) || (i == 10) || (i == 16) || (i == 22) || (i == ARRAYSIZE(res_name)-1))
-			UpdateProgress(OP_DOS, -1.0f);
+			UpdateProgress(OP_FILE_COPY, -1.0f);
 	}
 
 	return SetDOSLocale(path, TRUE);

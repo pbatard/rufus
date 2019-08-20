@@ -224,14 +224,17 @@ enum timer_type {
 
 /* Action type, for progress bar breakdown */
 enum action_type {
-	OP_ANALYZE_MBR,
+	OP_NOOP_WITH_TASKBAR = -3,
+	OP_NOOP = -2,
+	OP_INIT = -1,
+	OP_ANALYZE_MBR = 0,
 	OP_BADBLOCKS,
 	OP_ZERO_MBR,
 	OP_PARTITION,
 	OP_FORMAT,
 	OP_CREATE_FS,
 	OP_FIX_MBR,
-	OP_DOS,
+	OP_FILE_COPY,
 	OP_FINALIZE,
 	OP_MAX
 };
@@ -472,10 +475,13 @@ extern void PrintStatusInfo(BOOL info, BOOL debug, unsigned int duration, int ms
 #define PrintInfo(...) PrintStatusInfo(TRUE, FALSE, __VA_ARGS__)
 #define PrintInfoDebug(...) PrintStatusInfo(TRUE, TRUE, __VA_ARGS__)
 extern void UpdateProgress(int op, float percent);
+extern void UpdateProgressWithInfo(int op, int msg, uint64_t processed, uint64_t total);
+#define UpdateProgressWithInfoInit(hProgressDialog, bNoAltMode) UpdateProgressWithInfo(OP_INIT, (int)bNoAltMode, (uint64_t)(uintptr_t)hProgressDialog, 0);
 extern const char* StrError(DWORD error_code, BOOL use_default_locale);
 extern char* GuidToString(const GUID* guid);
 extern char* SizeToHumanReadable(uint64_t size, BOOL copy_to_log, BOOL fake_units);
 extern char* TimestampToHumanReadable(uint64_t ts);
+extern char* RateToHumanReadable(uint64_t transferred, uint64_t total);
 extern HWND MyCreateDialog(HINSTANCE hInstance, int Dialog_ID, HWND hWndParent, DLGPROC lpDialogFunc);
 extern INT_PTR MyDialogBox(HINSTANCE hInstance, int Dialog_ID, HWND hWndParent, DLGPROC lpDialogFunc);
 extern void CenterDialog(HWND hDlg, HWND hParent);
@@ -505,7 +511,6 @@ extern char* MountISO(const char* path);
 extern void UnMountISO(void);
 extern BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int fs);
 extern uint16_t GetSyslinuxVersion(char* buf, size_t buf_size, char** ext);
-extern BOOL CreateProgress(void);
 extern BOOL SetAutorun(const char* path);
 extern char* FileDialog(BOOL save, char* path, const ext_t* ext, DWORD options);
 extern BOOL FileIO(BOOL save, char* path, char** buffer, DWORD* size);
@@ -524,7 +529,6 @@ extern BOOL CheckForUpdates(BOOL force);
 extern void DownloadNewVersion(void);
 extern BOOL DownloadISO(void);
 extern BOOL IsDownloadable(const char* url);
-extern const char* ResolveRedirect(const char* url);
 extern BOOL IsShown(HWND hDlg);
 extern char* get_token_data_file_indexed(const char* token, const char* filename, int index);
 #define get_token_data_file(token, filename) get_token_data_file_indexed(token, filename, 1)

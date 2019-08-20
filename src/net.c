@@ -316,7 +316,6 @@ uint64_t DownloadToFileOrBuffer(const char* url, const char* file, BYTE** buffer
 	const char* short_name;
 	unsigned char buf[DOWNLOAD_BUFFER_SIZE];
 	char hostname[64], urlpath[128], strsize[32];
-	HWND hProgressBar = NULL;
 	BOOL r = FALSE;
 	DWORD dwSize, dwWritten, dwDownloaded;
 	HANDLE hFile = INVALID_HANDLE_VALUE;
@@ -343,16 +342,8 @@ uint64_t DownloadToFileOrBuffer(const char* url, const char* file, BYTE** buffer
 
 	FormatStatus = 0;
 	DownloadStatus = 404;
-	if (hProgressDialog != NULL) {
-		// Use the progress control provided, if any
-		hProgressBar = GetDlgItem(hProgressDialog, IDC_PROGRESS);
-		if (hProgressBar != NULL) {
-			SendMessage(hProgressBar, PBM_SETSTATE, (WPARAM)PBST_NORMAL, 0);
-			SendMessage(hProgressBar, PBM_SETMARQUEE, FALSE, 0);
-			SendMessage(hProgressBar, PBM_SETPOS, 0, 0);
-		}
-		SendMessage(hProgressDialog, UM_PROGRESS_INIT, 0, 0);
-	}
+	if (hProgressDialog != NULL)
+		UpdateProgressWithInfoInit(hProgressDialog, FALSE);
 
 	assert(url != NULL);
 	if (buffer != NULL)
@@ -449,12 +440,8 @@ uint64_t DownloadToFileOrBuffer(const char* url, const char* file, BYTE** buffer
 			goto out;
 		if (!pfInternetReadFile(hRequest, buf, sizeof(buf), &dwDownloaded) || (dwDownloaded == 0))
 			break;
-		if (hProgressDialog != NULL) {
-			SendMessage(hProgressBar, PBM_SETPOS, (WPARAM)((1.0f * MAX_PROGRESS * size) / (1.0f * total_size)), 0);
-			if (bTaskBarProgress)
-				SetTaskbarProgressValue((ULONGLONG)((1.0f * MAX_PROGRESS * size) / (1.0f * total_size)), MAX_PROGRESS);
-			PrintInfo(0, MSG_241, (100.0f*size) / (1.0f*total_size));
-		}
+		if (hProgressDialog != NULL)
+			UpdateProgressWithInfo(OP_NOOP, MSG_241, size, total_size);
 		if (file != NULL) {
 			if (!WriteFile(hFile, buf, dwDownloaded, &dwWritten, NULL)) {
 				uprintf("Error writing file '%s': %s", short_name, WinInetErrorString());
@@ -477,9 +464,8 @@ uint64_t DownloadToFileOrBuffer(const char* url, const char* file, BYTE** buffer
 		DownloadStatus = 200;
 		r = TRUE;
 		if (hProgressDialog != NULL) {
+			UpdateProgressWithInfo(OP_NOOP, MSG_241, total_size, total_size);
 			uprintf("Successfully downloaded '%s'", short_name);
-			SendMessage(hProgressBar, PBM_SETPOS, (WPARAM)MAX_PROGRESS, 0);
-			PrintInfo(0, MSG_241, 100.0f);
 		}
 	}
 

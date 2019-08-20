@@ -157,10 +157,6 @@ typedef struct {
 	FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|err; \
 	goto out; } while(0)
 
-#define UPDATE_PERCENT(msg, percent) if (GetTickCount64() > LastRefresh + MAX_REFRESH) { \
-	LastRefresh = GetTickCount64(); PrintInfo(0, msg, percent); \
-	UpdateProgress(OP_FORMAT, percent); }
-
 // For ext2/ext3/ext4 formatting
 typedef struct {
 	uint64_t max_size;

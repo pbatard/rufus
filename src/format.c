@@ -59,7 +59,6 @@
 const char* FileSystemLabel[FS_MAX] = { "FAT", "FAT32", "NTFS", "UDF", "exFAT", "ReFS", "ext2", "ext3", "ext4" };
 DWORD FormatStatus = 0, LastWriteError = 0;
 badblocks_report report = { 0 };
-static uint64_t LastRefresh = 0;
 static float format_percent = 0.0f;
 static int task_number = 0;
 extern const int nb_steps[FS_MAX];
@@ -416,7 +415,7 @@ static BOOL FormatFAT32(DWORD DriveIndex, uint64_t PartitionOffset, DWORD Cluste
 		goto out;
 	}
 	PrintInfoDebug(0, MSG_222, "Large FAT32");
-	LastRefresh = 0;
+	UpdateProgressWithInfoInit(NULL, TRUE);
 	VolumeId = GetVolumeID();
 
 	// Open the drive and lock it
@@ -616,7 +615,7 @@ static BOOL FormatFAT32(DWORD DriveIndex, uint64_t PartitionOffset, DWORD Cluste
 	}
 
 	for (i=0; i<(SystemAreaSize+BurstSize-1); i+=BurstSize) {
-		UPDATE_PERCENT(MSG_217, (100.0f*i) / (1.0f*(SystemAreaSize + BurstSize)));
+		UpdateProgressWithInfo(OP_FORMAT, MSG_217, (uint64_t)i, (uint64_t)(SystemAreaSize + BurstSize));
 		CHECK_FOR_USER_CANCEL;
 		if (write_sectors(hLogicalVolume, BytesPerSect, i, BurstSize, pZeroSect) != (BytesPerSect*BurstSize)) {
 			die("Error clearing reserved sectors", ERROR_WRITE_FAULT);
@@ -803,14 +802,15 @@ const char* error_message(errcode_t error_code)
 	}
 }
 
-static float ext2_percent_start = 0.0f, ext2_percent_share = 50.0f;
+static float ext2_percent_start = 0.0f, ext2_percent_share = 0.5f;
 const float ext2_max_marker = 80.0f;
 errcode_t ext2fs_print_progress(int64_t cur_value, int64_t max_value)
 {
 	static int64_t last_value = -1;
 	if (max_value == 0)
 		return 0;
-	UPDATE_PERCENT(MSG_217, ext2_percent_start + ext2_percent_share * cur_value / (float)max_value);
+	// TODO: Need to use OP_CREATE_FS here for standalone format
+	UpdateProgressWithInfo(OP_FORMAT, MSG_217, (uint64_t)((ext2_percent_start * max_value) + (ext2_percent_share * cur_value)), max_value);
 	cur_value = (int64_t)(((float)cur_value / (float)max_value) * min(ext2_max_marker, (float)max_value));
 	if ((cur_value < last_value) || (cur_value > last_value)) {
 		last_value = cur_value;
@@ -897,7 +897,7 @@ BOOL FormatExtFs(DWORD DriveIndex, uint64_t PartitionOffset, DWORD BlockSize, LP
 		FSName = FileSystemLabel[FS_EXT3];
 
 	PrintInfoDebug(0, MSG_222, FSName);
-	LastRefresh = 0;
+	UpdateProgressWithInfoInit(NULL, TRUE);
 
 	// Figure out the volume size and block size
 	r = ext2fs_get_device_size2(volume_name, KB, &size);
@@ -987,7 +987,7 @@ BOOL FormatExtFs(DWORD DriveIndex, uint64_t PartitionOffset, DWORD BlockSize, LP
 	}
 
 	ext2_percent_start = 0.0f;
-	ext2_percent_share = (FSName[3] == '2') ? 100.0f : 50.0f;
+	ext2_percent_share = (FSName[3] == '2') ? 1.0f : 0.5f;
 	uprintf("Creating %d inode sets: [1 marker = %0.1f set(s)]", ext2fs->group_desc_count,
 		max((float)ext2fs->group_desc_count / ext2_max_marker, 1.0f));
 	for (i = 0; i < (int)ext2fs->group_desc_count; i++) {
@@ -1041,7 +1041,7 @@ BOOL FormatExtFs(DWORD DriveIndex, uint64_t PartitionOffset, DWORD BlockSize, LP
 
 	if (FSName[3] != '2') {
 		// Create the journal
-		ext2_percent_start = 50.0f;
+		ext2_percent_start = 0.5f;
 		journal_size = ext2fs_default_journal_size(ext2fs_blocks_count(ext2fs->super));
 		journal_size /= 2;	// That journal init is really killing us!
 		uprintf("Creating %d journal blocks: [1 marker = %0.1f block(s)]", journal_size,
@@ -1092,7 +1092,7 @@ BOOL FormatExtFs(DWORD DriveIndex, uint64_t PartitionOffset, DWORD BlockSize, LP
 		uprintf("Could not create %s volume: %s", FSName, error_message(r));
 		goto out;
 	}
-	UPDATE_PERCENT(MSG_217, 100.0f);
+	UpdateProgressWithInfo(OP_FORMAT, MSG_217, 100, 100);
 	uprintf("Done");
 	ret = TRUE;
 
@@ -1123,7 +1123,7 @@ static BOOL FormatDriveVds(DWORD DriveIndex, uint64_t PartitionOffset, DWORD Clu
 	} else {
 		PrintInfoDebug(0, MSG_222, FSName);
 	}
-	LastRefresh = 0;
+	UpdateProgressWithInfoInit(NULL, TRUE);
 	VolumeName = GetLogicalName(DriveIndex, PartitionOffset, TRUE, TRUE);
 	wVolumeName = utf8_to_wchar(VolumeName);
 	if (wVolumeName == NULL) {
@@ -2197,7 +2197,7 @@ static BOOL SetupWinToGo(DWORD DriveIndex, const char* drive_name, BOOL use_esp)
 		AltUnmountVolume(ms_efi, FALSE);
 	}
 	PrintInfo(0, MSG_267, 99.9f);
-	UpdateProgress(OP_DOS, 99.9f);
+	UpdateProgress(OP_FILE_COPY, 99.9f);
 
 	// The following are non fatal if they fail
 
@@ -2233,14 +2233,14 @@ static BOOL SetupWinToGo(DWORD DriveIndex, const char* drive_name, BOOL use_esp)
 	if (fd != NULL)
 		fclose(fd);
 	PrintInfo(0, MSG_267, 100.0f);
-	UpdateProgress(OP_DOS, 100.0f);
+	UpdateProgress(OP_FILE_COPY, 100.0f);
 
 	return TRUE;
 }
 
 static void update_progress(const uint64_t processed_bytes)
 {
-	UPDATE_PERCENT(MSG_261, (100.0f*processed_bytes) / (1.0f*img_report.image_size));
+	UpdateProgressWithInfo(OP_FORMAT, MSG_261, processed_bytes, img_report.image_size);
 }
 
 /* Write an image file or zero a drive */
@@ -2259,7 +2259,7 @@ static BOOL WriteDrive(HANDLE hPhysicalDrive, HANDLE hSourceImage)
 	li.QuadPart = 0;
 	if (!SetFilePointerEx(hPhysicalDrive, li, NULL, FILE_BEGIN))
 		uprintf("Warning: Unable to rewind image position - wrong data might be copied!");
-	LastRefresh = 0;
+	UpdateProgressWithInfoInit(NULL, FALSE);
 
 	if (img_report.compression_type != BLED_COMPRESSION_NONE) {
 		uprintf("Writing compressed image...");
@@ -2300,7 +2300,7 @@ static BOOL WriteDrive(HANDLE hPhysicalDrive, HANDLE hSourceImage)
 		// will be as fast, if not faster, than whatever async scheme you can come up with.
 		rSize = BufSize;
 		for (wb = 0, wSize = 0; wb < (uint64_t)SelectedDrive.DiskSize; wb += wSize) {
-			UPDATE_PERCENT(hSourceImage?MSG_261:fast_zeroing?MSG_306:MSG_286, (100.0f*wb)/(1.0f*target_size));
+			UpdateProgressWithInfo(OP_FORMAT, hSourceImage ? MSG_261 : fast_zeroing ? MSG_306 : MSG_286, wb, target_size);
 			if (hSourceImage != NULL) {
 				s = ReadFile(hSourceImage, buffer, BufSize, &rSize, NULL);
 				if (!s) {
@@ -2834,7 +2834,7 @@ DWORD WINAPI FormatThread(void* param)
 
 	if (boot_type != BT_NON_BOOTABLE) {
 		if ((boot_type == BT_MSDOS) || (boot_type == BT_FREEDOS)) {
-			UpdateProgress(OP_DOS, -1.0f);
+			UpdateProgress(OP_FILE_COPY, -1.0f);
 			PrintInfoDebug(0, MSG_230);
 			if (!ExtractDOS(drive_name)) {
 				if (!IS_ERROR(FormatStatus))
@@ -2849,7 +2849,7 @@ DWORD WINAPI FormatThread(void* param)
 			if (!CopyFileU(FILES_DIR "\\grub4dos-" GRUB4DOS_VERSION "\\grldr", grub4dos_dst, FALSE))
 				uprintf("Failed to copy file: %s", WindowsErrorString());
 		} else if ((boot_type == BT_IMAGE) && (image_path != NULL) && (img_report.is_iso)) {
-			UpdateProgress(OP_DOS, 0.0f);
+			UpdateProgress(OP_FILE_COPY, 0.0f);
 			drive_name[2] = 0;	// Ensure our drive is something like 'D:'
 			if (windows_to_go) {
 				PrintInfoDebug(0, MSG_268);
@@ -2859,7 +2859,6 @@ DWORD WINAPI FormatThread(void* param)
 					goto out;
 				}
 			} else {
-				PrintInfoDebug(0, MSG_231);
 				if (!ExtractISO(image_path, drive_name, FALSE)) {
 					if (!IS_ERROR(FormatStatus))
 						FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_ISO_EXTRACT);
@@ -2948,7 +2947,6 @@ DWORD WINAPI SaveImageThread(void* param)
 	int i;
 
 	PrintInfoDebug(0, MSG_225);
-	LastRefresh = 0;
 	switch (img_save->Type) {
 	case IMG_SAVE_TYPE_VHD:
 		hPhysicalDrive = GetPhysicalHandle(img_save->DeviceNum, TRUE, FALSE, FALSE);
@@ -2991,6 +2989,7 @@ DWORD WINAPI SaveImageThread(void* param)
 	// Don't bother trying for something clever, using double buffering overlapped and whatnot:
 	// With Windows' default optimizations, sync read + sync write for sequential operations
 	// will be as fast, if not faster, than whatever async scheme you can come up with.
+	UpdateProgressWithInfoInit(NULL, FALSE);
 	for (wb = 0; ; wb += wSize) {
 		if (img_save->Type == IMG_SAVE_TYPE_ISO) {
 			// Optical drives do not appear to increment the sectors to read automatically
@@ -3007,7 +3006,7 @@ DWORD WINAPI SaveImageThread(void* param)
 		}
 		if (rSize == 0)
 			break;
-		UPDATE_PERCENT(MSG_261, (100.0f*wb)/(1.0f*img_save->DeviceSize));
+		UpdateProgressWithInfo(OP_FORMAT, MSG_261, wb, img_save->DeviceSize);
 		for (i = 1; i <= WRITE_RETRIES; i++) {
 			CHECK_FOR_USER_CANCEL;
 			s = WriteFile(hDestImage, buffer, rSize, &wSize, NULL);

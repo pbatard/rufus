@@ -445,6 +445,8 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 	if ((p_udf_dirent == NULL) || (psz_path == NULL))
 		return 1;
 
+	if (psz_path[0] == 0)
+		UpdateProgressWithInfoInit(NULL, TRUE);
 	while ((p_udf_dirent = udf_readdir(p_udf_dirent)) != NULL) {
 		if (FormatStatus) goto out;
 		psz_basename = udf_get_filename(p_udf_dirent);
@@ -524,7 +526,7 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 					}
 					file_length -= read;
 					if (nb_blocks++ % PROGRESS_THRESHOLD == 0)
-						UpdateProgress(OP_DOS, 100.0f*nb_blocks/total_blocks);
+						UpdateProgressWithInfo(OP_FILE_COPY, MSG_231, nb_blocks, total_blocks);
 				}
 			}
 			if ((preserve_timestamps) && (!SetFileTime(file_handle, to_filetime(udf_get_attribute_time(p_udf_dirent)),
@@ -586,6 +588,8 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 		return 1;
 	}
 
+	if (psz_path[0] == 0)
+		UpdateProgressWithInfoInit(NULL, TRUE);
 	_CDIO_LIST_FOREACH(p_entnode, p_entlist) {
 		if (FormatStatus) goto out;
 		p_statbuf = (iso9660_stat_t*) _cdio_list_node_data(p_entnode);
@@ -677,7 +681,7 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 						}
 						extent_length -= ISO_BLOCKSIZE;
 						if (nb_blocks++ % PROGRESS_THRESHOLD == 0)
-							UpdateProgress(OP_DOS, 100.0f*nb_blocks/total_blocks);
+							UpdateProgressWithInfo(OP_FILE_COPY, MSG_231, nb_blocks, total_blocks);
 					}
 				}
 			}
@@ -764,7 +768,7 @@ BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan)
 	} else {
 		uprintf("Extracting files...\n");
 		IGNORE_RETVAL(_chdirU(app_dir));
-		PrintInfo(0, MSG_231);
+//		PrintInfo(0, MSG_231);
 		if (total_blocks == 0) {
 			uprintf("Error: ISO has not been properly scanned.\n");
 			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_ISO_SCAN);

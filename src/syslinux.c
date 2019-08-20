@@ -219,7 +219,7 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int file_system)
 
 	uprintf("Successfully wrote '%s'", &path[3]);
 	if (boot_type != BT_IMAGE)
-		UpdateProgress(OP_DOS, -1.0f);
+		UpdateProgress(OP_FILE_COPY, -1.0f);
 
 	/* Now flush the media */
 	if (!FlushFileBuffers(f_handle)) {
@@ -380,7 +380,7 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int file_system)
 	}
 
 	if (boot_type != BT_IMAGE)
-		UpdateProgress(OP_DOS, -1.0f);
+		UpdateProgress(OP_FILE_COPY, -1.0f);
 
 	r = TRUE;
 

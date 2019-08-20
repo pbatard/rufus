@@ -580,7 +580,7 @@ DWORD WINAPI WimProgressCallback(DWORD dwMsgId, WPARAM wParam, LPARAM lParam, PV
 		// the files have been processed), so we don't use it
 #if 0
 		PrintInfo(0, MSG_267, (DWORD)wParam);
-		UpdateProgress(OP_DOS, 0.98f*(DWORD)wParam);
+		UpdateProgress(OP_FILE_COPY, 0.98f*(DWORD)wParam);
 #endif
 		break;
 	case WIM_MSG_PROCESS:
@@ -600,12 +600,12 @@ DWORD WINAPI WimProgressCallback(DWORD dwMsgId, WPARAM wParam, LPARAM lParam, PV
 				if (wim_proc_files > wim_nb_files)
 					wim_proc_files = wim_nb_files;
 				LastRefresh = GetTickCount64();
-				// x^3 progress, so as not to give a better idea right from the onset
-				// as to the dismal speed with which the WIM API can actually apply files...
+				// x^3 progress, so as to give a better idea right from the onset of the dismal
+				// speed with which the WIM API actually applies files...
 				apply_percent = 4.636942595f * ((float)wim_proc_files) / ((float)wim_nb_files);
 				apply_percent = apply_percent * apply_percent * apply_percent;
 				PrintInfo(0, MSG_267, apply_percent);
-				UpdateProgress(OP_DOS, apply_percent);
+				UpdateProgress(OP_FILE_COPY, apply_percent);
 			}
 		}
 		// Halt on error
@@ -710,7 +710,7 @@ static DWORD WINAPI WimApplyImageThread(LPVOID param)
 		goto out;
 	}
 	PrintInfo(0, MSG_267, 99.8f);
-	UpdateProgress(OP_DOS, 99.8f);
+	UpdateProgress(OP_FILE_COPY, 99.8f);
 	r = TRUE;
 
 out:

@@ -80,18 +80,18 @@ unsigned char ALIGNED(64) buffer[2][BUFFER_SIZE];
 
 /* SHA-256 constants */
 static const uint32_t K[64] = {
-	0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,
-	0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,
-	0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,
-	0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,
-	0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,
-	0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,
-	0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,
-	0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2
+	0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
+	0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
+	0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
+	0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
+	0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,
+	0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
+	0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
+	0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
 };
 
 /*
- * For convenience, we use a common context for all the checksums algorithms,
+ * For convenience, we use a common context for all the checksum algorithms,
  * which means some elements may be unused...
  */
 typedef struct ALIGNED(64) {
@@ -159,10 +159,10 @@ static void sha1_transform(SUM_CONTEXT *ctx, const unsigned char *data)
 	}
 #endif
 
-#define K1  0x5A827999L
-#define K2  0x6ED9EBA1L
-#define K3  0x8F1BBCDCL
-#define K4  0xCA62C1D6L
+#define K1  0x5a827999L
+#define K2  0x6ed9eba1L
+#define K3  0x8f1bbcdcL
+#define K4  0xca62c1d6L
 #define F1(x,y,z)   ( z ^ ( x & ( y ^ z ) ) )
 #define F2(x,y,z)   ( x ^ y ^ z )
 #define F3(x,y,z)   ( ( x & y ) | ( z & ( x | y ) ) )
@@ -170,8 +170,8 @@ static void sha1_transform(SUM_CONTEXT *ctx, const unsigned char *data)
 
 #define M(i) ( tm = x[i&0x0f] ^ x[(i-14)&0x0f] ^ x[(i-8)&0x0f] ^ x[(i-3)&0x0f], (x[i&0x0f] = ROL(tm,1)) )
 
-#define SHA1STEP(a,b,c,d,e,f,k,m) do { e += ROL(a, 5) + f(b, c, d) + k + m; \
-                                       b = ROL(b, 30); } while(0)
+#define SHA1STEP(a, b, c, d, e, f, k, m) do { e += ROL(a, 5) + f(b, c, d) + k + m; \
+                                              b = ROL(b, 30); } while(0)
 	SHA1STEP(a, b, c, d, e, F1, K1, x[0]);
 	SHA1STEP(e, a, b, c, d, F1, K1, x[1]);
 	SHA1STEP(d, e, a, b, c, F1, K1, x[2]);
@@ -289,19 +289,19 @@ static __inline void sha256_transform(SUM_CONTEXT *ctx, const unsigned char *dat
 #define s1(x) (ROR(ROR(x,2)^(x),17)^((x)>>10))
 #define BLK0(i) (x[i])
 #define BLK2(i) (x[i] += s1(x[((i)-2)&15]) + x[((i)-7)&15] + s0(x[((i)-15)&15]))
-#define R(a,b,c,d,e,f,g,h,i) \
+#define R(a, b, c, d, e, f, g, h, i) \
 	h += S1(e) + CH(e,f,g) + K[(i)+(j)] + (j ? BLK2(i) : BLK0(i)); \
 	d += h; \
 	h += S0(a) + MAJ(a, b, c)
 #define RX_8(i) \
-	R(a,b,c,d,e,f,g,h, i); \
-	R(h,a,b,c,d,e,f,g, i+1); \
-	R(g,h,a,b,c,d,e,f, i+2); \
-	R(f,g,h,a,b,c,d,e, i+3); \
-	R(e,f,g,h,a,b,c,d, i+4); \
-	R(d,e,f,g,h,a,b,c, i+5); \
-	R(c,d,e,f,g,h,a,b, i+6); \
-	R(b,c,d,e,f,g,h,a, i+7)
+	R(a, b, c, d, e, f, g, h, i); \
+	R(h, a, b, c, d, e, f, g, i+1); \
+	R(g, h, a, b, c, d, e, f, i+2); \
+	R(f, g, h, a, b, c, d, e, i+3); \
+	R(e, f, g, h, a, b, c, d, i+4); \
+	R(d, e, f, g, h, a, b, c, i+5); \
+	R(c, d, e, f, g, h, a, b, i+6); \
+	R(b, c, d, e, f, g, h, a, i+7)
 
 #ifdef BIG_ENDIAN_HOST
 	memcpy(x, data, sizeof(x));
@@ -880,9 +880,8 @@ DWORD WINAPI SumThread(void* param)
 	DWORD_PTR* thread_affinity = (DWORD_PTR*)param;
 	HANDLE sum_thread[CHECKSUM_MAX] = { NULL, NULL, NULL };
 	HANDLE h = INVALID_HANDLE_VALUE;
-	uint64_t rb, LastRefresh = 0;
+	uint64_t rb;
 	int i, _bufnum, r = -1;
-	float format_percent = 0.0f;
 
 	if ((image_path == NULL) || (thread_affinity == NULL))
 		ExitThread(r);
@@ -926,15 +925,10 @@ DWORD WINAPI SumThread(void* param)
 	bufnum = 0;
 	_bufnum = 0;
 	read_size[0] = 1;	// Don't trigger the first loop break
+	UpdateProgressWithInfoInit(hMainDialog, FALSE);
 	for (rb = 0; ;rb += read_size[_bufnum]) {
 		// Update the progress and check for cancel
-		if (GetTickCount64() > LastRefresh + MAX_REFRESH) {
-			LastRefresh = GetTickCount64();
-			format_percent = (100.0f*rb) / (1.0f*img_report.image_size);
-			PrintInfo(0, MSG_271, format_percent);
-			SendMessage(hProgress, PBM_SETPOS, (WPARAM)((format_percent / 100.0f)*MAX_PROGRESS), 0);
-			SetTaskbarProgressValue(rb, img_report.image_size);
-		}
+		UpdateProgressWithInfo(OP_NOOP_WITH_TASKBAR, MSG_271, rb, img_report.image_size);
 		CHECK_FOR_USER_CANCEL;
 
 		// Signal the threads that we have data to process

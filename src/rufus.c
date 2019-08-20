@@ -2870,6 +2870,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	FILE* fd;
 	BOOL attached_console = FALSE, external_loc_file = FALSE, lgp_set = FALSE, automount = TRUE;
 	BOOL disable_hogger = FALSE, previous_enable_HDDs = FALSE, vc = IsRegistryNode(REGKEY_HKCU, vs_reg);
+	BOOL alt_pressed = FALSE, alt_command = FALSE;
 	BYTE *loc_data;
 	DWORD loc_size, size;
 	char tmp_path[MAX_PATH] = "", loc_file[MAX_PATH] = "", ini_path[MAX_PATH] = "", ini_flags[] = "rb";
@@ -3245,6 +3246,12 @@ relaunch:
 		// ** *****  **** ** **********
 		// .,ABCDEFGHIJKLMNOPQRSTUVWXYZ
 
+		// Sigh... The things one need to do to detect standalone use of the 'Alt' key.
+		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam != VK_MENU))
+			alt_command = TRUE;
+		else if (GetAsyncKeyState(VK_MENU))
+			alt_pressed = TRUE;
+
 		// Ctrl-A => Select the log data
 		if ( (IsWindowVisible(hLogDialog)) && (GetKeyState(VK_CONTROL) & 0x8000) &&
 			(msg.message == WM_KEYDOWN) && (msg.wParam == 'A') ) {
@@ -3476,6 +3483,15 @@ relaunch:
 			force_update = (force_update > 0) ? 0 : 2;
 			PrintStatusTimeout(lmprintf(MSG_259), force_update);
 			continue;
+		}
+
+		// Standalone 'Alt' key toggles progress report between percent, rate (if available)
+		// and remaining time (if availabe)
+		if (alt_pressed && !GetAsyncKeyState(VK_MENU)) {
+			alt_pressed = FALSE;
+			if (!alt_command)
+				update_progress_type = (update_progress_type + 1) % UPT_MAX;
+			alt_command = FALSE;
 		}
 
 		// Let the system handle dialog messages (e.g. those from the tab key)
