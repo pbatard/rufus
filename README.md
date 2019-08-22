@@ -30,7 +30,7 @@ Features
 Compilation
 -----------
 
-Use either Visual Studio 2017 (version 15.8 or later with SDK 10.0.17134 installed) or MinGW and
+Use either Visual Studio 2019 (version 16.0 or later with SDK 10.0.18362 installed) or MinGW and
 then invoke the `.sln` or `configure`/`make` respectively.
 
 #### Visual Studio

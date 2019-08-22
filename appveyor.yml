@@ -1,4 +1,5 @@
-os: Visual Studio 2017
+# The image below must be enabled in the AppVeyor settings
+image: Visual Studio 2019
 
 skip_commits:
   # Don't run AppVeyor for commits that only modify resource or non-code files
