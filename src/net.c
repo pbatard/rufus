@@ -641,7 +641,7 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 		do {
 			for (i=0; (i<30) && (!force_update_check); i++)
 				Sleep(500);
-		} while ((!force_update_check) && ((iso_op_in_progress || format_op_in_progress || (dialog_showing>0))));
+		} while ((!force_update_check) && ((op_in_progress || (dialog_showing > 0))));
 		if (!force_update_check) {
 			if ((ReadSetting32(SETTING_UPDATE_INTERVAL) == -1)) {
 				vuprintf("Check for updates disabled, as per settings.");
@@ -829,7 +829,7 @@ out:
 	// Start the new download after cleanup
 	if (found_new_version) {
 		// User may have started an operation while we were checking
-		while ((!force_update_check) && (iso_op_in_progress || format_op_in_progress || (dialog_showing > 0))) {
+		while ((!force_update_check) && (op_in_progress || (dialog_showing > 0))) {
 			Sleep(15000);
 		}
 		DownloadNewVersion();
@@ -994,7 +994,6 @@ static DWORD WINAPI DownloadISOThread(LPVOID param)
 			// Download the ISO and report errors if any
 			SendMessage(hMainDialog, UM_PROGRESS_INIT, 0, 0);
 			FormatStatus = 0;
-			format_op_in_progress = TRUE;
 			SendMessage(hMainDialog, UM_TIMER_START, 0, 0);
 			if (DownloadToFileOrBuffer(url, img_save.ImagePath, NULL, hMainDialog, TRUE) == 0) {
 				SendMessage(hMainDialog, UM_PROGRESS_EXIT, 0, 0);
@@ -1011,7 +1010,6 @@ static DWORD WINAPI DownloadISOThread(LPVOID param)
 				image_path = safe_strdup(img_save.ImagePath);
 				PostMessage(hMainDialog, UM_SELECT_ISO, 0, 0);
 			}
-			format_op_in_progress = FALSE;
 			safe_free(img_save.ImagePath);
 		}
 	}

@@ -444,7 +444,7 @@ extern HWND hPartitionScheme, hTargetSystem, hFileSystem, hClusterSize, hLabel, 
 extern HWND hInfo, hProgress, hDiskID;
 extern WORD selected_langid;
 extern DWORD FormatStatus, DownloadStatus, MainThreadId, LastWriteError;
-extern BOOL use_own_c32[NB_OLD_C32], detect_fakes, iso_op_in_progress, format_op_in_progress, right_to_left_mode;
+extern BOOL use_own_c32[NB_OLD_C32], detect_fakes, op_in_progress, right_to_left_mode;
 extern BOOL allow_dual_uefi_bios, large_drive, usb_debug;
 extern int64_t iso_blocking_status;
 extern uint8_t image_options;
@@ -481,7 +481,6 @@ extern const char* StrError(DWORD error_code, BOOL use_default_locale);
 extern char* GuidToString(const GUID* guid);
 extern char* SizeToHumanReadable(uint64_t size, BOOL copy_to_log, BOOL fake_units);
 extern char* TimestampToHumanReadable(uint64_t ts);
-extern char* RateToHumanReadable(uint64_t transferred, uint64_t total);
 extern HWND MyCreateDialog(HINSTANCE hInstance, int Dialog_ID, HWND hWndParent, DLGPROC lpDialogFunc);
 extern INT_PTR MyDialogBox(HINSTANCE hInstance, int Dialog_ID, HWND hWndParent, DLGPROC lpDialogFunc);
 extern void CenterDialog(HWND hDlg, HWND hParent);
