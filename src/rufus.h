@@ -306,6 +306,7 @@ enum checksum_type {
 #define HAS_WIN7_EFI(r)     ((r.has_efi == 1) && HAS_WININST(r))
 #define HAS_EFI_IMG(r)      (r.efi_img_path[0] != 0)
 #define IS_DD_BOOTABLE(r)   (r.is_bootable_img)
+#define IS_DD_ONLY(r)       (r.is_bootable_img && (!r.is_iso || r.disable_iso))
 #define IS_EFI_BOOTABLE(r)  (r.has_efi != 0)
 #define IS_BIOS_BOOTABLE(r) (HAS_BOOTMGR(r) || HAS_SYSLINUX(r) || HAS_WINPE(r) || HAS_GRUB(r) || HAS_REACTOS(r) || HAS_KOLIBRIOS(r))
 #define HAS_WINTOGO(r)      (HAS_BOOTMGR(r) && IS_EFI_BOOTABLE(r) && HAS_WININST(r))

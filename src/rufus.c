@@ -67,7 +67,7 @@ static int64_t last_iso_blocking_status;
 static int selected_pt = -1, selected_fs = FS_UNKNOWN, preselected_fs = FS_UNKNOWN;
 static int image_index = 0, select_index = 0;
 static RECT relaunch_rc = { -65536, -65536, 0, 0};
-static UINT uQFChecked = BST_CHECKED, uMBRChecked = BST_UNCHECKED;
+static UINT uMBRChecked = BST_UNCHECKED;
 static HANDLE format_thid = NULL;
 static HWND hSelectImage = NULL, hStart = NULL;
 static char szTimer[12] = "00:00:00";
@@ -678,7 +678,7 @@ static void EnableMBRBootOptions(BOOL enable, BOOL remove_checkboxes)
 	static UINT uXPartChecked = BST_UNCHECKED;
 
 	if ((partition_type != PARTITION_STYLE_MBR) || (target_type != TT_BIOS) || (boot_type == BT_NON_BOOTABLE) ||
-		((boot_type == BT_IMAGE) && !IS_BIOS_BOOTABLE(img_report))) {
+		((boot_type == BT_IMAGE) && (!IS_BIOS_BOOTABLE(img_report) || IS_DD_ONLY(img_report)))) {
 		// These options cannot apply if we aren't using MBR+BIOS, or are using an image that isn't BIOS bootable
 		actual_enable_mbr = FALSE;
 		actual_enable_fix = FALSE;
@@ -716,11 +716,14 @@ static void EnableMBRBootOptions(BOOL enable, BOOL remove_checkboxes)
 
 static void EnableExtendedLabel(BOOL enable, BOOL remove_checkboxes)
 {
-	HWND hCtrl = GetDlgItem(hMainDialog, IDC_EXTENDED_LABEL);
 	static UINT checked, state = 0;
+	HWND hCtrl = GetDlgItem(hMainDialog, IDC_EXTENDED_LABEL);
+
+	if ((fs_type >= FS_EXT2) || ((boot_type == BT_IMAGE) && IS_DD_ONLY(img_report)))
+		enable = FALSE;
 
 	if (remove_checkboxes) {
-		if (!enable && IsWindowEnabled(hCtrl) && (state != 1)) {
+		if (!enable && (state != 1)) {
 			checked = IsChecked(IDC_EXTENDED_LABEL);
 			CheckDlgButton(hMainDialog, IDC_EXTENDED_LABEL, BST_UNCHECKED);
 			state = 1;
@@ -733,27 +736,33 @@ static void EnableExtendedLabel(BOOL enable, BOOL remove_checkboxes)
 	EnableWindow(hCtrl, enable);
 }
 
-static void EnableQuickFormat(BOOL enable)
+static void EnableQuickFormat(BOOL enable, BOOL remove_checkboxes)
 {
+	static UINT checked, state = 0;
 	HWND hCtrl = GetDlgItem(hMainDialog, IDC_QUICK_FORMAT);
 
-	// Keep track of the current state if we are going to disable it
-	if (IsWindowEnabled(hCtrl) && !enable) {
-		uQFChecked = IsChecked(IDC_QUICK_FORMAT);
-	}
+	if ((boot_type == BT_IMAGE) && IS_DD_ONLY(img_report))
+		enable = FALSE;
 
 	// Disable/restore the quick format control depending on large FAT32 or ReFS
 	if (((fs_type == FS_FAT32) && ((SelectedDrive.DiskSize > LARGE_FAT32_SIZE) || (force_large_fat32))) || (fs_type == FS_REFS)) {
 		enable = FALSE;
+		// Quick Format is the only option for the above
+		remove_checkboxes = FALSE;
 		CheckDlgButton(hMainDialog, IDC_QUICK_FORMAT, BST_CHECKED);
 	}
 
-	// Restore state if we are re-enabling the control
-	if (!IsWindowEnabled(hCtrl) && enable) {
-		CheckDlgButton(hMainDialog, IDC_QUICK_FORMAT, uQFChecked);
+	if (remove_checkboxes) {
+		if (!enable && (state != 1)) {
+			checked = IsChecked(IDC_QUICK_FORMAT);
+			CheckDlgButton(hMainDialog, IDC_QUICK_FORMAT, BST_UNCHECKED);
+			state = 1;
+		} else if (enable && !IsWindowEnabled(hCtrl) && (state != 2)) {
+			if (state != 0)
+				CheckDlgButton(hMainDialog, IDC_QUICK_FORMAT, checked);
+			state = 2;
+		}
 	}
-
-	// Now enable or disable the control
 	EnableWindow(hCtrl, enable);
 }
 
@@ -782,10 +791,16 @@ static void EnableBootOptions(BOOL enable, BOOL remove_checkboxes)
 	EnableMBRBootOptions(actual_enable, remove_checkboxes);
 
 	EnableWindow(GetDlgItem(hMainDialog, IDC_LABEL), actual_enable);
-	EnableQuickFormat(actual_enable);
+	if (boot_type == BT_IMAGE) {
+		if (IS_DD_ONLY(img_report))
+			remove_checkboxes = TRUE;
+		else if (image_path == NULL)
+			remove_checkboxes = FALSE;
+	}
+	EnableQuickFormat(actual_enable, remove_checkboxes);
+	EnableExtendedLabel(actual_enable, remove_checkboxes);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_BAD_BLOCKS), actual_enable_bb);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_NB_PASSES), actual_enable_bb);
-	EnableExtendedLabel((fs_type < FS_EXT2) ? actual_enable : FALSE, remove_checkboxes);
 }
 
 // Toggle controls according to operation
@@ -2165,16 +2180,16 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		case IDC_FILE_SYSTEM:
 			if ((HIWORD(wParam) != CBN_SELCHANGE) && (HIWORD(wParam) != CBN_SELCHANGE_INTERNAL))
 				break;
-			if (IsWindowEnabled(hFileSystem))
-				EnableQuickFormat(TRUE);
 			set_selected_fs = (HIWORD(wParam) == CBN_SELCHANGE);
-			fs_type = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem)); 
+			fs_type = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
 			SetClusterSizes(fs_type);
 			if (set_selected_fs && (fs_type > 0))
 				selected_fs = fs_type;
+			// Some FS's (such as ReFS or Large FAT32) only have QuickFormat so make sure we reflect that
+			EnableQuickFormat(TRUE, TRUE);
 			EnableMBRBootOptions(TRUE, TRUE);
 			SetMBRProps();
-			EnableExtendedLabel((fs_type < FS_EXT2), TRUE);
+			EnableExtendedLabel(TRUE, TRUE);
 			break;
 		case IDC_BOOT_SELECTION:
 			if (HIWORD(wParam) != CBN_SELCHANGE)
