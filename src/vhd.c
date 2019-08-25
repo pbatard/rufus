@@ -100,12 +100,12 @@ PF_TYPE_DECL(WINAPI, DWORD, WIMRegisterMessageCallback, (HANDLE, FARPROC, PVOID)
 PF_TYPE_DECL(WINAPI, DWORD, WIMUnregisterMessageCallback, (HANDLE, FARPROC));
 PF_TYPE_DECL(RPC_ENTRY, RPC_STATUS, UuidCreate, (UUID __RPC_FAR*));
 
+uint32_t wim_nb_files, wim_proc_files, wim_extra_files;
+
 static uint8_t wim_flags = 0;
 static char sevenzip_path[MAX_PATH];
 static const char conectix_str[] = VHD_FOOTER_COOKIE;
-static uint32_t wim_nb_files, wim_proc_files;
 static BOOL count_files;
-static uint64_t LastRefresh;
 
 static BOOL Get7ZipPath(void)
 {
@@ -572,7 +572,6 @@ DWORD WINAPI WimProgressCallback(DWORD dwMsgId, WPARAM wParam, LPARAM lParam, PV
 	PWIN32_FIND_DATA pFileData;
 	const char* level = NULL;
 	uint64_t size;
-	float apply_percent;
 
 	switch (dwMsgId) {
 	case WIM_MSG_PROGRESS:
@@ -593,20 +592,13 @@ DWORD WINAPI WimProgressCallback(DWORD dwMsgId, WPARAM wParam, LPARAM lParam, PV
 		if (count_files) {
 			wim_nb_files++;
 		} else {
-			wim_proc_files++;
-			if (GetTickCount64() > LastRefresh + 100) {
-				// At the end of an actual apply, the WIM API re-lists a bunch of directories it
-				// already processed, so we end up with more entries than counted - ignore those.
-				if (wim_proc_files > wim_nb_files)
-					wim_proc_files = wim_nb_files;
-				LastRefresh = GetTickCount64();
-				// x^3 progress, so as to give a better idea right from the onset of the dismal
-				// speed with which the WIM API actually applies files...
-				apply_percent = 4.636942595f * ((float)wim_proc_files) / ((float)wim_nb_files);
-				apply_percent = apply_percent * apply_percent * apply_percent;
-				PrintInfo(0, MSG_267, apply_percent);
-				UpdateProgress(OP_FILE_COPY, apply_percent);
-			}
+			// At the end of an actual apply, the WIM API re-lists a bunch of directories it already processed,
+			// so, even as we try to compensate, we might end up with more entries than counted - ignore those.
+			if (wim_proc_files < wim_nb_files)
+				wim_proc_files++;
+			else
+				wim_extra_files++;
+			UpdateProgressWithInfo(OP_FILE_COPY, MSG_267, wim_proc_files, wim_nb_files);
 		}
 		// Halt on error
 		if (IS_ERROR(FormatStatus)) {
@@ -697,20 +689,30 @@ static DWORD WINAPI WimApplyImageThread(LPVOID param)
 	// Run a first pass using WIM_FLAG_NO_APPLY to count the files
 	wim_nb_files = 0;
 	wim_proc_files = 0;
-	LastRefresh = 0;
+	wim_extra_files = 0;
 	count_files = TRUE;
 	if (!pfWIMApplyImage(hImage, wdst, WIM_FLAG_NO_APPLY)) {
 		uprintf("  Could not count the files to apply: %s", WindowsErrorString());
 		goto out;
 	}
+	// The latest Windows 10 ISOs have a ~17.5% discrepancy between the number of
+	// files and directories actually applied vs. the ones counted when not applying.
+	// Therefore, we add a 'safe' 20% to our counted files to compensate for yet
+	// another dismal Microsoft progress reporting API...
+	wim_nb_files += wim_nb_files / 5;
 	count_files = FALSE;
 	// Actual apply
 	if (!pfWIMApplyImage(hImage, wdst, WIM_FLAG_FILEINFO)) {
 		uprintf("  Could not apply image: %s", WindowsErrorString());
 		goto out;
 	}
-	PrintInfo(0, MSG_267, 99.8f);
-	UpdateProgress(OP_FILE_COPY, 99.8f);
+	// Ensure that we'll pick if need to readjust our 20% above from user reports
+	if (wim_extra_files > 0)
+		uprintf("Notice: An extra %d files and directories were applied, from the %d expected",
+			wim_extra_files, wim_nb_files);
+	// Re-use extra files as the final progress step
+	wim_extra_files = (wim_nb_files - wim_proc_files) / 3;
+	UpdateProgressWithInfo(OP_FILE_COPY, MSG_267, wim_proc_files + wim_extra_files, wim_nb_files);
 	r = TRUE;
 
 out:

@@ -63,6 +63,7 @@ static float format_percent = 0.0f;
 static int task_number = 0;
 extern const int nb_steps[FS_MAX];
 extern uint32_t dur_mins, dur_secs;
+extern uint32_t wim_nb_files, wim_proc_files, wim_extra_files;
 static int actual_fs_type, wintogo_index = -1, wininst_index = 0;
 extern BOOL force_large_fat32, enable_ntfs_compression, lock_drive, zero_drive, fast_zeroing, enable_file_indexing, write_as_image;
 extern BOOL use_vds;
@@ -1310,8 +1311,7 @@ static BOOL FormatNativeVds(DWORD DriveIndex, uint64_t PartitionOffset, DWORD Cl
 							PrintInfo(0, MSG_218, (ulPercentCompleted < 100) ? 1 : 2, 2);
 							UpdateProgress(OP_CREATE_FS, (float)ulPercentCompleted);
 						} else {
-							PrintInfo(0, MSG_217, (float)ulPercentCompleted);
-							UpdateProgress(OP_FORMAT, (float)ulPercentCompleted);
+							UpdateProgressWithInfo(OP_FORMAT, MSG_217, ulPercentCompleted, 100);
 						}
 						hr = hr2;
 						if (hr == S_OK)
@@ -2196,8 +2196,7 @@ static BOOL SetupWinToGo(DWORD DriveIndex, const char* drive_name, BOOL use_esp)
 		Sleep(200);
 		AltUnmountVolume(ms_efi, FALSE);
 	}
-	PrintInfo(0, MSG_267, 99.9f);
-	UpdateProgress(OP_FILE_COPY, 99.9f);
+	UpdateProgressWithInfo(OP_FILE_COPY, MSG_267, wim_proc_files + 2 * wim_extra_files, wim_nb_files);
 
 	// The following are non fatal if they fail
 
@@ -2232,8 +2231,7 @@ static BOOL SetupWinToGo(DWORD DriveIndex, const char* drive_name, BOOL use_esp)
 		uprintf("Could not write '%s'", unattend_path);
 	if (fd != NULL)
 		fclose(fd);
-	PrintInfo(0, MSG_267, 100.0f);
-	UpdateProgress(OP_FILE_COPY, 100.0f);
+	UpdateProgressWithInfo(OP_FILE_COPY, MSG_267, wim_nb_files, wim_nb_files);
 
 	return TRUE;
 }
