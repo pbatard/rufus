@@ -1,3 +1,20 @@
+o Version 3.7 (2019.09.??)
+    Finalize persistent partition support for Debian and Ubuntu:
+    - Debian with persistence should work out of the box with any recent "Debian Live" ISO.
+    - Ubuntu with persistence should also work *IF* using a post 2019.08.01 ISO. Note that,
+      because of bug #1489855, trying to use persistence with Ubuntu ISOs that were released
+      before August 2019 will only result in rescue mode during boot - You have been warned!
+    - Other distros may work with persistence as long as they use a Debian-like or Ubuntu-like
+      method, and, in the case of Ubuntu-like, if they use casper with the #1489855 bugfix.
+    Add cheat mode (<Alt>) to switch between percent/speed/ETA on *some* operations [EXPERIMENTAL]
+    Report SuperSpeed+ devices in the log (Come on USB-IF, just add "Ludicrous Speed" already!)
+    Fix UI checkboxes (Extended label, Fixes for old BIOSes) being cleared on START
+    Fix "Can't mount GUID volume" regression when creating Windows To Go drives
+    Fix "Volume label is invalid" error with empty labels on Windows 7
+    Fix stale progress bar during standalone ext2/ext3 formatting
+    Disable ISO mode for Pop_OS
+    Other cosmetic and internal improvements
+
 o Version 3.6 (2019.07.18)
     Add support for persistent partitions [EXPERIMENTAL]
     (Note: The above won't work with Ubuntu until Ubuntu bug #1489855 is properly fixed)
