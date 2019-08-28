@@ -787,7 +787,7 @@ BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan)
 	p_udf_root = udf_get_root(p_udf, true, 0);
 	if (p_udf_root == NULL) {
 		uprintf("%sCould not locate UDF root directory", spacing);
-		goto out;
+		goto try_iso;
 	}
 	if (scan_only) {
 		if (udf_get_logical_volume_id(p_udf, img_report.label, sizeof(img_report.label)) <= 0)

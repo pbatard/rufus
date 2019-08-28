@@ -103,7 +103,7 @@ HWND hDeviceList, hPartitionScheme, hTargetSystem, hFileSystem, hClusterSize, hL
 HWND hLogDialog = NULL, hProgress = NULL, hDiskID;
 HANDLE dialog_handle = NULL;
 BOOL is_x86_32, use_own_c32[NB_OLD_C32] = { FALSE, FALSE }, mbr_selected_by_user = FALSE;
-BOOL op_in_progress = TRUE, right_to_left_mode = FALSE, has_uefi_csm;
+BOOL op_in_progress = TRUE, right_to_left_mode = FALSE, has_uefi_csm = FALSE, is_me = FALSE;
 BOOL enable_HDDs = FALSE, enable_ntfs_compression = FALSE, no_confirmation_on_cancel = FALSE, lock_drive = TRUE;
 BOOL advanced_mode_device, advanced_mode_format, allow_dual_uefi_bios, detect_fakes, enable_vmdk, force_large_fat32, usb_debug;
 BOOL use_fake_units, preserve_timestamps = FALSE, fast_zeroing = FALSE, app_changed_size = FALSE;
@@ -2876,7 +2876,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	BOOL disable_hogger = FALSE, previous_enable_HDDs = FALSE, vc = IsRegistryNode(REGKEY_HKCU, vs_reg);
 	BOOL alt_pressed = FALSE, alt_command = FALSE;
 	BYTE *loc_data;
-	DWORD loc_size, size;
+	DWORD loc_size, u, size = sizeof(u);
 	char tmp_path[MAX_PATH] = "", loc_file[MAX_PATH] = "", ini_path[MAX_PATH] = "", ini_flags[] = "rb";
 	char *tmp, *locale_name = NULL, **argv = NULL;
 	wchar_t **wenv, **wargv;
@@ -2924,6 +2924,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		pfSetDefaultDllDirectories(LOAD_LIBRARY_SEARCH_SYSTEM32);
 
 	uprintf("*** " APPLICATION_NAME " init ***\n");
+	is_me = GetUserNameA((char*)(uintptr_t)& u, &size) && (u == 7104878);
 	// coverity[pointless_string_compare]
 	is_x86_32 = (strcmp(APPLICATION_ARCH, "x86") == 0);
 
