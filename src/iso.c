@@ -181,8 +181,8 @@ static BOOL check_iso_props(const char* psz_dirname, int64_t file_length, const 
 		}
 
 		// In case there's an ldlinux.sys on the ISO, prevent it from overwriting ours
-		if ((psz_dirname != NULL) && (psz_dirname[0] == 0) && (safe_strcmp(psz_basename, ldlinux_name) == 0)) {
-			uprintf("skipping % file from ISO image\n", ldlinux_name);
+		if ((psz_dirname != NULL) && (psz_dirname[0] == 0) && (safe_stricmp(psz_basename, ldlinux_name) == 0)) {
+			uprintf("Skipping '%s' file from ISO image", psz_basename);
 			return TRUE;
 		}
 	} else {	// Scan-time checks
