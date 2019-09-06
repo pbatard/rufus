@@ -240,8 +240,7 @@ int GetCpuArch(void)
 		return CPU_ARCH_X86_64;
 	case PROCESSOR_ARCHITECTURE_INTEL:
 		return CPU_ARCH_X86_64;
-	// TODO: Set this back to PROCESSOR_ARCHITECTURE_ARM64 when the MinGW headers have it
-	case 12:
+	case PROCESSOR_ARCHITECTURE_ARM64:
 		return CPU_ARCH_ARM_64;
 	case PROCESSOR_ARCHITECTURE_ARM:
 		return CPU_ARCH_ARM_32;

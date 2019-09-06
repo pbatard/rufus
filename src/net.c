@@ -71,7 +71,6 @@ const char* WinInetErrorString(void)
 	if ((error_code < INTERNET_ERROR_BASE) || (error_code > INTERNET_ERROR_LAST))
 		return WindowsErrorString();
 
-	// TODO: These should be localized on an ad-hoc basis
 	switch(error_code) {
 	case ERROR_INTERNET_OUT_OF_HANDLES:
 		return "No more handles could be generated at this time.";

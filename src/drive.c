@@ -1497,7 +1497,7 @@ BOOL RemountVolume(char* drive_name)
  * properly reset Windows's cached view of a drive partitioning short of cycling the USB port
  * (especially IOCTL_DISK_UPDATE_PROPERTIES is *USELESS*), and therefore the OS will try to
  * read the file system data at an old location, even if the partition has just been deleted.
- * TODO: We should do something like this is DeletePartitions() too.
+ * TODO: We should do something like this in DeletePartitions() too.
  */
 static BOOL ClearPartition(HANDLE hDrive, LARGE_INTEGER offset, DWORD size)
 {

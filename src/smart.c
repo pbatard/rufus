@@ -496,7 +496,6 @@ int IsHDD(DWORD DriveIndex, uint16_t vid, uint16_t pid, const char* strid)
 		}
 	}
 
-	// TODO: try to perform inquiry if below a specific threshold (Verbatim, etc)?
 	duprintf("  Score: %d\n", score);
 	return score;
 }
