@@ -44,7 +44,6 @@
 UINT_PTR UM_LANGUAGE_MENU_MAX = UM_LANGUAGE_MENU;
 HIMAGELIST hUpImageList, hDownImageList;
 extern BOOL enable_fido, use_vds;
-// TODO: Use an enum or something
 int update_progress_type = UPT_PERCENT;
 int advanced_device_section_height, advanced_format_section_height;
 // (empty) check box width, (empty) drop down width, button height (for and without dropdown match)
@@ -1264,25 +1263,134 @@ void UpdateProgress(int op, float percent)
 	}
 }
 
+/*
+ * The following is taken from GNU wget (progress.c)
+ */
+struct bar_progress {
+	uint64_t total_length;          // expected total byte count when the download finishes
+	uint64_t count;                 // bytes downloaded so far
+	uint64_t last_screen_update;    // time of the last screen update, measured since the beginning of download.
+	uint64_t dltime;                // download time so far
+	// Keep track of recent download speeds.
+	struct bar_progress_hist {
+		uint64_t pos;
+		uint64_t times[SPEED_HISTORY_SIZE];
+		uint64_t bytes[SPEED_HISTORY_SIZE];
+		// The sum of times and bytes respectively, maintained for efficiency.
+		uint64_t total_time;
+		uint64_t total_bytes;
+	} hist;
+	uint64_t recent_start;          // timestamp of beginning of current position.
+	uint64_t recent_bytes;          // bytes downloaded so far.
+	BOOL stalled;                   // set when no data arrives for longer than STALL_START_TIME, then reset when new data arrives.
+
+	// The following are used to make sure that ETA information doesn't flicker.
+	uint64_t last_eta_time;         // time of the last update to download speed and ETA, measured since the beginning of download.
+	int last_eta_value;
+};
+
+// This code attempts to maintain the notion of a "current" download speed, over the course
+// of no less than 3s. (Shorter intervals produce very erratic results.)
+//
+// To do so, it samples the speed in 150ms intervals and stores the recorded samples in a
+// FIFO history ring. The ring stores no more than 20 intervals, hence the history covers
+// the period of at least three seconds and at most 20 reads into the past. This method
+// should produce reasonable results for downloads ranging from very slow to very fast.
+//
+// The idea is that for fast downloads, we get the speed over exactly the last three seconds.
+// For slow downloads (where a network read takes more than 150ms to complete), we get the
+// speed over a larger time period, as large as it takes to complete twenty reads. This is
+// good because slow downloads tend to fluctuate more and a 3-second average would be too
+// erratic.
+static void bar_update(struct bar_progress* bp, uint64_t howmuch, uint64_t dltime)
+{
+	struct bar_progress_hist* hist = &bp->hist;
+	uint64_t recent_age = dltime - bp->recent_start;
+
+	// Update the download count.
+	bp->recent_bytes += howmuch;
+
+	// For very small time intervals, we return after having updated the
+	// "recent" download count. When its age reaches or exceeds minimum
+	// sample time, it will be recorded in the history ring.
+	if (recent_age < SPEED_SAMPLE_MIN)
+		return;
+
+	if (howmuch == 0) {
+		// If we're not downloading anything, we might be stalling,
+		// i.e. not downloading anything for an extended period of time.
+		// Since 0-reads do not enter the history ring, recent_age
+		// effectively measures the time since last read.
+		if (recent_age >= STALL_START_TIME) {
+			// If we're stalling, reset the ring contents because it's
+			// stale and because it will make bar_update stop printing
+			// the (bogus) current bandwidth.
+			bp->stalled = TRUE;
+			memset(hist, 0, sizeof(struct bar_progress_hist));
+			bp->recent_bytes = 0;
+		}
+		return;
+	}
+
+	// We now have a non-zero amount of to store to the speed ring.
+
+	// If the stall status was acquired, reset it.
+	if (bp->stalled) {
+		bp->stalled = FALSE;
+		// "recent_age" includes the entire stalled period, which
+		// could be very long. Don't update the speed ring with that
+		// value because the current bandwidth would start too small.
+		// Start with an arbitrary (but more reasonable) time value and
+		// let it level out.
+		recent_age = 1000;
+	}
+
+	// Store "recent" bytes and download time to history ring at the position POS.
+
+	// To correctly maintain the totals, first invalidate existing data
+	// (least recent in time) at this position. */
+	hist->total_time -= hist->times[hist->pos];
+	hist->total_bytes -= hist->bytes[hist->pos];
+
+	// Now store the new data and update the totals.
+	hist->times[hist->pos] = recent_age;
+	hist->bytes[hist->pos] = bp->recent_bytes;
+	hist->total_time += recent_age;
+	hist->total_bytes += bp->recent_bytes;
+
+	// Start a new "recent" period.
+	bp->recent_start = dltime;
+	bp->recent_bytes = 0;
+
+	// Advance the current ring position.
+	if (++hist->pos == SPEED_HISTORY_SIZE)
+		hist->pos = 0;
+}
+
 // This updates the progress bar as well as the data displayed on it so that we can
 // display percentage completed, rate of transfer and estimated remaining duration.
 // During init (op = OP_INIT) an optional HWND can be passed on which to look for
-// a progress bar.
+// a progress bar. Part of the code (eta, speed) comes from GNU wget.
 void UpdateProgressWithInfo(int op, int msg, uint64_t processed, uint64_t total)
 {
+	static int last_update_progress_type = UPT_PERCENT;
+	static struct bar_progress bp = { 0 };
 	HWND hProgressDialog = (HWND)(uintptr_t)processed;
 	static HWND hProgressBar = NULL;
 	static uint64_t start_time = 0, last_refresh = 0;
-	uint64_t rate = 0, current_time = GetTickCount64();
-	static float percent = 0.0f;
+	uint64_t speed = 0, current_time = GetTickCount64();
+	double percent = 0.0;
 	char msg_data[128];
 	static BOOL bNoAltMode = FALSE;
 
 	if (op == OP_INIT) {
 		start_time = current_time - 1;
 		last_refresh = 0;
+		last_update_progress_type = UPT_PERCENT;
 		percent = 0.0f;
-		rate = 0;
+		speed = 0;
+		memset(&bp, 0, sizeof(bp));
+		bp.total_length = total;
 		hProgressBar = NULL;
 		bNoAltMode = (BOOL)msg;
 		if (hProgressDialog != NULL) {
@@ -1296,34 +1404,88 @@ void UpdateProgressWithInfo(int op, int msg, uint64_t processed, uint64_t total)
 			SendMessage(hProgressDialog, UM_PROGRESS_INIT, 0, 0);
 		}
 	} else if ((hProgressBar != NULL) || (op > 0)) {
-		if (processed > total)
-			processed = total;
-		percent = (100.0f * processed) / (1.0f * total);
-		// TODO: Better transfer rate computation using a weighted algorithm such as one from
-		// https://stackoverflow.com/questions/2779600/how-to-estimate-download-time-remaining-accurately
-		rate = (current_time == start_time) ? 0 : (processed * 1000) / (current_time - start_time);
-		if ((processed == total) || (current_time > last_refresh + MAX_REFRESH)) {
-			if (bNoAltMode)
-				update_progress_type = 0;
-			if (update_progress_type == UPT_SPEED) {
-				static_sprintf(msg_data, "%s/s", SizeToHumanReadable(rate, FALSE, FALSE));
-			} else if (update_progress_type == UPT_TIME) {
-				uint64_t seconds = (rate == 0) ? 24 * 3600 : (total - processed) / rate + 1;
-				static_sprintf(msg_data, "%d:%02d:%02d", (uint32_t)(seconds / 3600), (uint16_t)((seconds % 3600) / 60), (uint16_t)(seconds % 60));
+		uint64_t dl_total_time = current_time - start_time;
+		uint64_t howmuch = processed - bp.count;
+		bp.count = processed;
+		bp.total_length = total;
+		if (bp.count > bp.total_length)
+			bp.total_length = bp.count;
+		if (bp.total_length > 0)
+			percent = (100.0f * bp.count) / (1.0f * bp.total_length);
+		else
+			percent = 0.0f;
+
+		if ((bp.hist.total_time > 999) && (bp.hist.total_bytes != 0)) {
+			// Calculate the download speed using the history ring and
+			// recent data that hasn't made it to the ring yet.
+			uint64_t dlquant = bp.hist.total_bytes + bp.recent_bytes;
+			uint64_t dltime = bp.hist.total_time + (dl_total_time - bp.recent_start);
+			speed = (dltime == 0) ? 0 : (dlquant * 1000) / dltime;
+		} else {
+			speed = 0;
+		}
+		bar_update(&bp, howmuch, dl_total_time);
+
+		if (bNoAltMode)
+			update_progress_type = UPT_PERCENT;
+		switch (update_progress_type) {
+		case UPT_SPEED:
+			if (speed != 0)
+				static_sprintf(msg_data, "%s/s", SizeToHumanReadable(speed, FALSE, FALSE));
+			else
+				static_sprintf(msg_data, "---");
+			break;
+		case UPT_ETA:
+			if ((bp.total_length > 0) && (bp.count > 0) && (dl_total_time > 3000)) {
+				uint32_t eta = 0;
+
+				// Don't change the value of ETA more than approximately once
+				// per second; doing so would cause flashing without providing
+				// any value to the user.
+				if ((bp.total_length != processed) && (bp.last_eta_value != 0) &&
+					(dl_total_time - bp.last_eta_time < ETA_REFRESH_INTERVAL)) {
+					eta = bp.last_eta_value;
+				} else {
+					// Calculate ETA using the average download speed to predict
+					// the future speed. If you want to use a speed averaged
+					// over a more recent period, replace dl_total_time with
+					// hist->total_time and bp->count with hist->total_bytes.
+					// I found that doing that results in a very jerky and
+					// ultimately unreliable ETA.
+					uint64_t bytes_remaining = bp.total_length - processed;
+					double d_eta = (dl_total_time / 1000.0) * (bytes_remaining * 1.0) / (bp.count * 1.0);
+					if (d_eta >= INT_MAX - 1)
+						goto skip_eta;
+					eta = (uint32_t)(d_eta + 0.5);
+					bp.last_eta_value = eta;
+					bp.last_eta_time = dl_total_time;
+				}
+				static_sprintf(msg_data, "%d:%02d:%02d", eta / 3600, (uint16_t)((eta % 3600) / 60), (uint16_t)(eta % 60));
 			} else {
-				static_sprintf(msg_data, "%0.1f%%", percent);
+			skip_eta:
+				static_sprintf(msg_data, "-:--:--");
 			}
-			last_refresh = current_time;
+			break;
+		default:
+			static_sprintf(msg_data, "%0.1f%%", percent);
+			break;
+		}
+		if ((bp.count == bp.total_length) || (current_time > last_refresh + MAX_REFRESH)) {
 			if (op < 0) {
 				SendMessage(hProgressBar, PBM_SETPOS, (WPARAM)(MAX_PROGRESS * percent / 100.0f), 0);
 				if (op == OP_NOOP_WITH_TASKBAR)
 					SetTaskbarProgressValue((ULONGLONG)(MAX_PROGRESS * percent / 100.0f), MAX_PROGRESS);
 			} else {
-				UpdateProgress(op, percent);
+				UpdateProgress(op, (float)percent);
 			}
-			if (msg >= 0)
+			if ((msg >= 0) && ((current_time > bp.last_screen_update + SCREEN_REFRESH_INTERVAL) ||
+				(last_update_progress_type != update_progress_type) || (bp.count == bp.total_length))) {
 				PrintInfo(0, msg, msg_data);
+				bp.last_screen_update = current_time;
+			}
+			last_refresh = current_time;
 		}
+		last_update_progress_type = update_progress_type;
 	}
 }
 
