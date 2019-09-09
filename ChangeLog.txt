@@ -1,4 +1,4 @@
-o Version 3.7 (2019.09.??)
+o Version 3.7 (2019.09.09)
     Finalize persistent partition support for Debian and Ubuntu:
     - Debian with persistence should work out of the box with any recent "Debian Live" ISO.
     - Ubuntu with persistence should also work *IF* using a post 2019.08.01 ISO. Note that,
@@ -12,6 +12,7 @@ o Version 3.7 (2019.09.??)
     Fix "Can't mount GUID volume" regression when creating Windows To Go drives
     Fix "Volume label is invalid" error with empty labels on Windows 7
     Fix stale progress bar during standalone ext2/ext3 formatting
+    Fix an extraction failure with R-Drive Image bootable ISOs
     Disable ISO mode for Pop_OS
     Other cosmetic and internal improvements
 
