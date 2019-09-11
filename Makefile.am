@@ -19,3 +19,6 @@ appx:
 	@sed -b -i -f cmd.sed res/appstore/AppxManifest.xml
 	@rm cmd.sed
 	@cd res/appstore; cmd.exe //c packme.cmd
+	@mv arm/Release/$(TARGET)$(EXEEXT) $(TARGET)-$(VERSION)_arm$(EXEEXT)
+	@mv arm64/Release/$(TARGET)$(EXEEXT) $(TARGET)-$(VERSION)_arm64$(EXEEXT)
+	@mv res/appstore/Rufus-$(VERSION).appx .
