@@ -87,7 +87,8 @@ static const char* wininst_name[] = { "install.wim", "install.esd", "install.swm
 static const char* grub_dirname = "/boot/grub/i386-pc";
 static const char* grub_cfg = "grub.cfg";
 static const char* menu_cfg = "menu.cfg";
-static const char* syslinux_cfg[] = { "isolinux.cfg", "syslinux.cfg", "txt.cfg", "extlinux.conf" };
+// NB: Do not alter the order of the array below without validating hardcoded indexes in check_iso_props
+static const char* syslinux_cfg[] = { "isolinux.cfg", "syslinux.cfg", "extlinux.conf", "txt.cfg" };
 static const char* isolinux_bin[] = { "isolinux.bin", "boot.bin" };
 static const char* pe_dirname[] = { "/i386", "/amd64", "/minint" };
 static const char* pe_file[] = { "ntdetect.com", "setupldr.bin", "txtsetup.sif" };
@@ -151,19 +152,23 @@ static BOOL check_iso_props(const char* psz_dirname, int64_t file_length, const 
 	const char* psz_fullpath, EXTRACT_PROPS *props)
 {
 	size_t i, j, len;
+
 	// Check for an isolinux/syslinux config file anywhere
 	memset(props, 0, sizeof(EXTRACT_PROPS));
-	for (i=0; i<ARRAYSIZE(syslinux_cfg); i++) {
+	for (i = 0; i < ARRAYSIZE(syslinux_cfg); i++) {
 		if (safe_stricmp(psz_basename, syslinux_cfg[i]) == 0) {
 			props->is_cfg = TRUE;	// Required for "extlinux.conf"
 			props->is_syslinux_cfg = TRUE;
+			// Maintain a list of all the isolinux/syslinux config files identified so far
+			if ((scan_only) && (i < 3))
+				StrArrayAdd(&config_path, psz_fullpath, TRUE);
 			if ((scan_only) && (i == 1) && (safe_stricmp(psz_dirname, efi_dirname) == 0))
 				img_report.has_efi_syslinux = TRUE;
 		}
 	}
 
 	// Check for an old incompatible c32 file anywhere
-	for (i=0; i<NB_OLD_C32; i++) {
+	for (i = 0; i < NB_OLD_C32; i++) {
 		if ((safe_stricmp(psz_basename, old_c32_name[i]) == 0) && (file_length <= old_c32_threshold[i]))
 			props->is_old_c32[i] = TRUE;
 	}
@@ -262,10 +267,6 @@ static BOOL check_iso_props(const char* psz_dirname, int64_t file_length, const 
 					if (safe_stricmp(psz_basename, pe_file[j]) == 0)
 						img_report.winpe |= (1<<j)<<(ARRAYSIZE(pe_dirname)*i);
 
-		if (props->is_syslinux_cfg) {
-			// Maintain a list of all the isolinux/syslinux configs identified so far
-			StrArrayAdd(&config_path, psz_fullpath, TRUE);
-		}
 		for (i=0; i<ARRAYSIZE(isolinux_bin); i++) {
 			if (safe_stricmp(psz_basename, isolinux_bin[i]) == 0) {
 				// Maintain a list of all the isolinux.bin files found
@@ -1007,7 +1008,7 @@ out:
 						fprintf(fd, "  APPEND %s/\n", img_report.cfg_path);
 						img_report.cfg_path[i] = '/';
 					}
-					uprintf("Created: %s", path);
+					uprintf("Created: %s → %s", path, img_report.cfg_path);
 				}
 			}
 			if (fd != NULL)
