@@ -158,7 +158,8 @@ errcode_t ext2fs_open2(const char *name, const char *io_options,
 		goto cleanup;
 	strcpy(fs->device_name, name);
 	cp = strchr(fs->device_name, '?');
-	if (!io_options && cp) {
+	// Don't process "?\" as an option since some Windows device paths use "\\?\..."
+	if (!io_options && cp && cp[1] != '\\') {
 		*cp++ = 0;
 		io_options = cp;
 	}

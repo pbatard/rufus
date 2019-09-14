@@ -351,6 +351,7 @@ typedef struct {
 	int PartitionStyle;
 	int nPartitions;	// number of partitions we actually care about
 	uint64_t PartitionOffset[MAX_PARTITIONS];
+	uint64_t PartitionSize[MAX_PARTITIONS];
 	int FSType;
 	char proposed_label[16];
 	BOOL has_protective_mbr;
@@ -366,14 +367,12 @@ extern uint64_t partition_offset[3];
 BOOL SetAutoMount(BOOL enable);
 BOOL GetAutoMount(BOOL* enabled);
 char* GetPhysicalName(DWORD DriveIndex);
-char* GetPartitionName(DWORD DriveIndex, uint64_t PartitionOffset);
 BOOL DeletePartitions(DWORD DriveIndex);
 HANDLE GetPhysicalHandle(DWORD DriveIndex, BOOL bLockDrive, BOOL bWriteAccess, BOOL bWriteShare);
 char* GetLogicalName(DWORD DriveIndex, uint64_t PartitionOffset, BOOL bKeepTrailingBackslash, BOOL bSilent);
 char* AltGetLogicalName(DWORD DriveIndex, uint64_t PartitionOffset, BOOL bKeepTrailingBackslash, BOOL bSilent);
 BOOL WaitForLogical(DWORD DriveIndex, uint64_t PartitionOffset);
 HANDLE GetLogicalHandle(DWORD DriveIndex, uint64_t PartitionOffset, BOOL bLockDrive, BOOL bWriteAccess, BOOL bWriteShare);
-HANDLE GetPartitionHandle(DWORD DriveIndex, uint64_t PartitionOffset, BOOL bLockDrive, BOOL bWriteAccess, BOOL bWriteShare);
 int GetDriveNumber(HANDLE hDrive, char* path);
 BOOL GetDriveLetters(DWORD DriveIndex, char* drive_letters);
 UINT GetDriveTypeFromIndex(DWORD DriveIndex);

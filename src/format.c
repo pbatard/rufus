@@ -825,18 +825,18 @@ const char* GetExtFsLabel(DWORD DriveIndex, uint64_t PartitionOffset)
 	errcode_t r;
 	ext2_filsys ext2fs = NULL;
 	io_manager manager = nt_io_manager();
-	char* volume_name = AltMountVolume(DriveIndex, PartitionOffset, TRUE);
+	char* volume_name = AltGetLogicalName(DriveIndex, PartitionOffset, FALSE, TRUE);
 
 	if (volume_name == NULL)
 		return NULL;
 	r = ext2fs_open(volume_name, EXT2_FLAG_SKIP_MMP, 0, 0, manager, &ext2fs);
+	free(volume_name);
 	if (r == 0) {
 		strncpy(label, ext2fs->super->s_volume_name, EXT2_LABEL_LEN);
 		label[EXT2_LABEL_LEN] = 0;
 	}
 	if (ext2fs != NULL)
 		ext2fs_close(ext2fs);
-	AltUnmountVolume(volume_name, TRUE);
 	return (r == 0) ? label : NULL;
 }
 
@@ -879,18 +879,20 @@ BOOL FormatExtFs(DWORD DriveIndex, uint64_t PartitionOffset, DWORD BlockSize, LP
 	}
 	CloseHandle(h);
 #else
-	volume_name = AltMountVolume(DriveIndex, PartitionOffset, FALSE);
+	volume_name = AltGetLogicalName(DriveIndex, PartitionOffset, FALSE, TRUE);
 #endif
 	if ((volume_name == NULL) | (strlen(FSName) != 4) || (strncmp(FSName, "ext", 3) != 0)) {
 		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_INVALID_PARAMETER;
 		goto out;
 	}
+	if (strchr(volume_name, ' ') != NULL)
+		uprintf("Notice: Using physical device to access partition data");
 
 	if ((strcmp(FSName, FileSystemLabel[FS_EXT2]) != 0) && (strcmp(FSName, FileSystemLabel[FS_EXT3]) != 0)) {
 		if (strcmp(FSName, FileSystemLabel[FS_EXT4]) == 0)
-			uprintf("ext4 file system is not supported, will use ext3 instead");
+			uprintf("ext4 file system is not supported, defaulting to ext3");
 		else
-			uprintf("invalid ext file system version requested, will use ext3");
+			uprintf("Invalid ext file system version requested, defaulting to ext3");
 	}
 
 	if ((strcmp(FSName, FileSystemLabel[FS_EXT2]) != 0) && (strcmp(FSName, FileSystemLabel[FS_EXT3]) != 0))
@@ -1097,9 +1099,9 @@ BOOL FormatExtFs(DWORD DriveIndex, uint64_t PartitionOffset, DWORD BlockSize, LP
 	ret = TRUE;
 
 out:
+	free(volume_name);
 	ext2fs_free(ext2fs);
 	free(buf);
-	AltUnmountVolume(volume_name, FALSE);
 	return ret;
 }
 
@@ -2411,7 +2413,7 @@ out:
 DWORD WINAPI FormatThread(void* param)
 {
 	int i, r;
-	BOOL ret, use_large_fat32, windows_to_go;
+	BOOL ret, use_large_fat32, windows_to_go, actual_lock_drive = lock_drive;
 	DWORD DriveIndex = (DWORD)(uintptr_t)param, ClusterSize, Flags;
 	HANDLE hPhysicalDrive = INVALID_HANDLE_VALUE;
 	HANDLE hLogicalVolume = INVALID_HANDLE_VALUE;
@@ -2445,9 +2447,13 @@ DWORD WINAPI FormatThread(void* param)
 		extra_partitions = XP_CASPER;
 	else if (IsChecked(IDC_OLD_BIOS_FIXES))
 		extra_partitions = XP_COMPAT;
+	// On pre 1703 platforms (and even on later ones), anything with ext2/ext3 doesn't sit
+	// too well with Windows. Relaxing our locking rules seems to help...
+	if ((extra_partitions == XP_CASPER) || (fs_type >= FS_EXT2))
+		actual_lock_drive = FALSE;
 
 	PrintInfoDebug(0, MSG_225);
-	hPhysicalDrive = GetPhysicalHandle(DriveIndex, lock_drive, FALSE, !lock_drive);
+	hPhysicalDrive = GetPhysicalHandle(DriveIndex, actual_lock_drive, FALSE, !actual_lock_drive);
 	if (hPhysicalDrive == INVALID_HANDLE_VALUE) {
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_OPEN_FAILED;
 		goto out;
@@ -2499,7 +2505,7 @@ DWORD WINAPI FormatThread(void* param)
 	}
 
 	// Now get RW access to the physical drive...
-	hPhysicalDrive = GetPhysicalHandle(DriveIndex, lock_drive, TRUE, !lock_drive);
+	hPhysicalDrive = GetPhysicalHandle(DriveIndex, actual_lock_drive, TRUE, !actual_lock_drive);
 	if (hPhysicalDrive == INVALID_HANDLE_VALUE) {
 		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_OPEN_FAILED;
 		goto out;
@@ -2507,7 +2513,7 @@ DWORD WINAPI FormatThread(void* param)
 	RefreshDriveLayout(hPhysicalDrive);
 
 	// ...and get a lock to the logical drive so that we can actually write something
-	hLogicalVolume = GetLogicalHandle(DriveIndex, 0, TRUE, FALSE, !lock_drive);
+	hLogicalVolume = GetLogicalHandle(DriveIndex, 0, TRUE, FALSE, !actual_lock_drive);
 	if (hLogicalVolume == INVALID_HANDLE_VALUE) {
 		uprintf("Could not lock volume");
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_OPEN_FAILED;
@@ -2724,7 +2730,7 @@ DWORD WINAPI FormatThread(void* param)
 
 	if (use_vds) {
 		// Get RW access back to the physical drive...
-		hPhysicalDrive = GetPhysicalHandle(DriveIndex, lock_drive, TRUE, !lock_drive);
+		hPhysicalDrive = GetPhysicalHandle(DriveIndex, actual_lock_drive, TRUE, !actual_lock_drive);
 		if (hPhysicalDrive == INVALID_HANDLE_VALUE) {
 			FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_OPEN_FAILED;
 			goto out;

@@ -1227,7 +1227,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 			}
 			if (SelectedDrive.MediaType != FixedMedia) {
 				if ((target_type == TT_UEFI) && (partition_type == PARTITION_STYLE_GPT) && (nWindowsBuildNumber < 15000)) {
-					// Up to Windows 10 Creators Update, we were screwed, since we need access to 2 partitions at the same time.
+					// Up to Windows 10 Creators Update (1703), we were screwed, since we need access to 2 partitions at the same time.
 					// Thankfully, the newer Windows allow mounting multiple partitions on the same REMOVABLE drive.
 					MessageBoxExU(hMainDialog, lmprintf(MSG_198), lmprintf(MSG_190), MB_OK|MB_ICONERROR|MB_IS_RTL, selected_langid);
 					goto out;
