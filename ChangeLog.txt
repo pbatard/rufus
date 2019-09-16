@@ -1,3 +1,7 @@
+o Version 3.7 (2019.09.16) [BUGFIX RELEASE]
+    Fix regression where some ISOs (Debian) would produce a Syslinux error when booted in BIOS mode
+    Fix potential 0xC0030057 errors when trying to create a persistent partitions on a non-FIXED drive
+
 o Version 3.7 (2019.09.09)
     Finalize persistent partition support for Debian and Ubuntu:
     - Debian with persistence should work out of the box with any recent "Debian Live" ISO.
