@@ -1251,7 +1251,7 @@ void UpdateProgress(int op, float percent)
 		pos = (int)((previous_end + ((slot_end[op + 1] - previous_end) * (percent / 100.0f))) / 100.0f * MAX_PROGRESS);
 	}
 	if (pos > MAX_PROGRESS) {
-		duprintf("UpdateProgress(%d): rounding error - pos %d is greater than %d\n", op, pos, MAX_PROGRESS);
+		duprintf("UpdateProgress(%d): rounding error - pos %d is greater than %d", op, pos, MAX_PROGRESS);
 		pos = MAX_PROGRESS;
 	}
 

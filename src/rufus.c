@@ -103,7 +103,7 @@ HWND hDeviceList, hPartitionScheme, hTargetSystem, hFileSystem, hClusterSize, hL
 HWND hLogDialog = NULL, hProgress = NULL, hDiskID;
 HANDLE dialog_handle = NULL;
 BOOL is_x86_32, use_own_c32[NB_OLD_C32] = { FALSE, FALSE }, mbr_selected_by_user = FALSE;
-BOOL op_in_progress = TRUE, right_to_left_mode = FALSE, has_uefi_csm = FALSE, is_me = FALSE;
+BOOL op_in_progress = TRUE, right_to_left_mode = FALSE, has_uefi_csm = FALSE, its_a_me_mario = FALSE;
 BOOL enable_HDDs = FALSE, enable_ntfs_compression = FALSE, no_confirmation_on_cancel = FALSE, lock_drive = TRUE;
 BOOL advanced_mode_device, advanced_mode_format, allow_dual_uefi_bios, detect_fakes, enable_vmdk, force_large_fat32, usb_debug;
 BOOL use_fake_units, preserve_timestamps = FALSE, fast_zeroing = FALSE, app_changed_size = FALSE;
@@ -2901,7 +2901,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	// PS: You know that official MSDN documentation for SetDllDirectory() that explicitly
 	// indicates that "If the parameter is an empty string (""), the call removes the current
 	// directory from the default DLL search order"? Yeah, that doesn't work. At all.
-	// Still, we invoke it, for platforms where the following call might not work...
+	// Still, we invoke it, for platforms where the following call might actually work...
 	SetDllDirectoryA("");
 
 	// Also, even if you use SetDefaultDllDirectories(LOAD_LIBRARY_SEARCH_SYSTEM32), you're
@@ -2924,7 +2924,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		pfSetDefaultDllDirectories(LOAD_LIBRARY_SEARCH_SYSTEM32);
 
 	uprintf("*** " APPLICATION_NAME " init ***\n");
-	is_me = GetUserNameA((char*)(uintptr_t)& u, &size) && (u == 7104878);
+	its_a_me_mario = GetUserNameA((char*)(uintptr_t)&u, &size) && (u == 7104878);
 	// coverity[pointless_string_compare]
 	is_x86_32 = (strcmp(APPLICATION_ARCH, "x86") == 0);
 

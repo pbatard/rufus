@@ -46,7 +46,7 @@
 
 extern StrArray DriveId, DriveName, DriveLabel, DriveHub;
 extern uint32_t DrivePort[MAX_DRIVES];
-extern BOOL enable_HDDs, use_fake_units, enable_vmdk, usb_debug, list_non_usb_removable_drives, is_me;
+extern BOOL enable_HDDs, use_fake_units, enable_vmdk, usb_debug, list_non_usb_removable_drives, its_a_me_mario;
 
 /*
  * Get the VID, PID and current device speed
@@ -782,7 +782,7 @@ BOOL GetDevices(DWORD devnum)
 				static_strcpy(str, "????:????");	// Couldn't figure VID:PID
 			} else {
 				// because I don't want to end up erasing this specific device of mine by accident
-				if (is_me && (props.vid == 0x0525) && (props.pid == 0x622b))
+				if (its_a_me_mario && (props.vid == 0x0525) && (props.pid == 0x622b))
 					continue;
 				static_sprintf(str, "%04X:%04X", props.vid, props.pid);
 			}

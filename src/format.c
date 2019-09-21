@@ -104,7 +104,7 @@ out:
  */
 static BOOLEAN __stdcall FormatExCallback(FILE_SYSTEM_CALLBACK_COMMAND Command, DWORD Action, PVOID pData)
 {
-	DWORD* percent;
+	char percent_str[8];
 	if (IS_ERROR(FormatStatus))
 		return FALSE;
 
@@ -112,9 +112,9 @@ static BOOLEAN __stdcall FormatExCallback(FILE_SYSTEM_CALLBACK_COMMAND Command, 
 
 	switch(Command) {
 	case FCC_PROGRESS:
-		percent = (DWORD*)pData;
-		PrintInfo(0, MSG_217, 1.0f * (*percent));
-		UpdateProgress(OP_FORMAT, 1.0f * (*percent));
+		static_sprintf(percent_str, "%lu%%", *((DWORD*)pData));
+		PrintInfo(0, MSG_217, percent_str);
+		UpdateProgress(OP_FORMAT, 1.0f * (*((DWORD*)pData)));
 		break;
 	case FCC_STRUCTURE_PROGRESS:	// No progress on quick format
 		if (task_number < nb_steps[actual_fs_type] - 1) {
