@@ -68,7 +68,7 @@ typedef struct {
 
 RUFUS_IMG_REPORT img_report;
 int64_t iso_blocking_status = -1;
-extern BOOL preserve_timestamps;
+extern BOOL preserve_timestamps, enable_ntfs_compression;
 BOOL enable_iso = TRUE, enable_joliet = TRUE, enable_rockridge = TRUE, has_ldlinux_c32;
 #define ISO_BLOCKING(x) do {x; iso_blocking_status++; } while(0)
 static const char* psz_extract_dir;
@@ -1013,6 +1013,9 @@ out:
 			}
 			if (fd != NULL)
 				fclose(fd);
+		} else if (HAS_BOOTMGR(img_report) && enable_ntfs_compression) {
+			// bootmgr might need to be uncompressed: https://github.com/pbatard/rufus/issues/1381
+			RunCommand("compact /u bootmgr bootmgr.efi", dest_dir, TRUE);
 		}
 	}
 	if (p_iso != NULL)
