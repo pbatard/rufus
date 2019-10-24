@@ -699,6 +699,9 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 #endif
 	vuprintf("Using %s for the update check", RUFUS_URL);
 	for (k=0; (k<max_channel) && (!found_new_version); k++) {
+		// Free any previous buffers we might have used
+		safe_free(buf);
+		safe_free(sig);
 		uprintf("Checking %s channel...", channel[k]);
 		// At this stage we can query the server for various update version files.
 		// We first try to lookup for "<appname>_<os_arch>_<os_version_major>_<os_version_minor>.ver"
@@ -770,7 +773,6 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 		if (!pfHttpQueryInfoA(hRequest, HTTP_QUERY_CONTENT_LENGTH|HTTP_QUERY_FLAG_NUMBER, (LPVOID)&dwTotalSize, &dwSize, NULL))
 			goto out;
 
-		safe_free(buf);
 		// Make sure the file is NUL terminated
 		buf = (char*)calloc(dwTotalSize+1, 1);
 		if (buf == NULL)
