@@ -984,7 +984,7 @@ BOOL FormatExtFs(DWORD DriveIndex, uint64_t PartitionOffset, DWORD BlockSize, LP
 	}
 	r = ext2fs_convert_subcluster_bitmap(ext2fs, &ext2fs->block_map);
 	if (r != 0) {
-		uprintf("Could set %s cluster bitmap: %s", FSName, error_message(r));
+		uprintf("Could not set %s cluster bitmap: %s", FSName, error_message(r));
 		goto out;
 	}
 
