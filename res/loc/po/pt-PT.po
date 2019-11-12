@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 3.5\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
 "POT-Creation-Date: 2019-03-14 12:25+0000\n"
-"PO-Revision-Date: 2019-03-14 12:25+0000\n"
+"PO-Revision-Date: 2019-11-12 22:20+0000\n"
 "Language: pt_PT\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -11,9 +11,9 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Rufus-LanguageName: Portuguese Standard (Português)\n"
 "X-Rufus-LCID: 0x0816\n"
-"Last-Translator: \n"
+"Last-Translator: Hugo Carvalho <hugokarvalho@hotmail.com>\n"
 "Language-Team: \n"
-"X-Generator: Poedit 2.2.1\n"
+"X-Generator: Poedit 2.2.4\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -21,11 +21,11 @@ msgstr "Propriedades do dispositivo"
 
 #. • IDD_DIALOG → IDS_DEVICE_TXT
 msgid "Device"
-msgstr "Dispositivo/Disco"
+msgstr "Dispositivo"
 
 #. • IDD_DIALOG → IDS_BOOT_SELECTION_TXT
 msgid "Boot selection"
-msgstr "Tipo de arranque"
+msgstr "Seleção do arranque"
 
 #. • IDD_DIALOG → IDC_SELECT
 msgid "Select"
@@ -117,7 +117,7 @@ msgstr "Licença"
 
 #. • IDD_ABOUTBOX → IDOK
 msgid "OK"
-msgstr ""
+msgstr "OK"
 
 #. • IDD_LICENSE → IDD_LICENSE
 msgid "Rufus License"
@@ -155,11 +155,11 @@ msgstr "Configuração e política das atualizações"
 
 #. • IDD_UPDATE_POLICY → IDS_UPDATE_SETTINGS_GRP
 msgid "Settings"
-msgstr "Configurações"
+msgstr "Definições"
 
 #. • IDD_UPDATE_POLICY → IDS_UPDATE_FREQUENCY_TXT
 msgid "Check for updates"
-msgstr "Procurar atualizações"
+msgstr "Procurar por atualizações"
 
 #. • IDD_UPDATE_POLICY → IDS_INCLUDE_BETAS_TXT
 msgid "Include beta versions"
@@ -167,11 +167,11 @@ msgstr "Incluir versões de teste"
 
 #. • IDD_UPDATE_POLICY → IDC_CHECK_NOW
 msgid "Check Now"
-msgstr "Procurar"
+msgstr "Procurar agora"
 
 #. • IDD_NEW_VERSION → IDD_NEW_VERSION
 msgid "Check For Updates - Rufus"
-msgstr "Procurar atualizações de Rufus"
+msgstr "Procurar atualizações - Rufus"
 
 #. • IDD_NEW_VERSION → IDS_NEW_VERSION_AVAIL_TXT
 msgid "A newer version is available. Please download the latest version!"
@@ -282,45 +282,45 @@ msgstr "Última versão: %d.%d (Build %d)"
 #. • MSG_020
 #. • MSG_026
 msgid "bytes"
-msgstr ""
+msgstr "bytes"
 
 #. • MSG_021
 #.
 #. *Short* version of the kilobyte size suffix
 msgid "KB"
-msgstr ""
+msgstr "KB"
 
 #. • MSG_022
 #.
 #. *Short* version of the megabyte size suffix
 msgid "MB"
-msgstr ""
+msgstr "MB"
 
 #. • MSG_023
 #.
 #. *Short* version of the gigabyte size suffix
 msgid "GB"
-msgstr ""
+msgstr "GB"
 
 #. • MSG_024
 #.
 #. *Short* version of the terabyte size suffix
 msgid "TB"
-msgstr ""
+msgstr "TB"
 
 #. • MSG_025
 #.
 #. *Short* version of the pentabyte size suffix
 msgid "PB"
-msgstr ""
+msgstr "PB"
 
 #. • MSG_027
 msgid "kilobytes"
-msgstr ""
+msgstr "kilobytes"
 
 #. • MSG_028
 msgid "megabytes"
-msgstr ""
+msgstr "megabytes"
 
 #. • MSG_029
 msgid "Default"
@@ -814,7 +814,7 @@ msgstr "Instalação padrão do Windows"
 #. http://en.wikipedia.org/wiki/Windows_To_Go in your language.
 #. Otherwise, you may add a parenthesis eg. "Windows To Go (<hint at what it does>)"
 msgid "Windows To Go"
-msgstr ""
+msgstr "Windows To Go"
 
 #. • MSG_119
 msgid "advanced drive properties"
@@ -965,7 +965,7 @@ msgstr "Pretende ligar e fazer a transferência?"
 
 #. • MSG_148
 msgid "Running download script..."
-msgstr "A executar script da transferência"
+msgstr "A executar script da transferência..."
 
 #. • MSG_149
 msgid "Download ISO Image"
@@ -1039,7 +1039,7 @@ msgstr "Método a usar para tornar a unidade inicializável"
 
 #. • MSG_165
 msgid "Click to select or download an image..."
-msgstr "Clique para selecionar ou transferir uma imagem.."
+msgstr "Clique para selecionar ou transferir uma imagem..."
 
 #. • MSG_166
 msgid "Check this box to allow the display of international labels and set a device icon (creates an autorun.inf)"
@@ -1096,7 +1096,7 @@ msgstr "Versão %d.%d (Build %d)"
 
 #. • MSG_176
 msgid "English translation: Pete Batard <mailto:pete@akeo.ie>"
-msgstr "Tradução para Português: Dinis Medeiros, Fernando Baptista"
+msgstr "Tradução para Português: Dinis Medeiros, Fernando Baptista, Hugo Carvalho <hugokarvalho@hotmail.com>"
 
 #. • MSG_177
 msgid "Report bugs or request enhancements at:"
