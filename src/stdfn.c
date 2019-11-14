@@ -351,14 +351,17 @@ void GetWindowsVersion(void)
 	else
 		safe_sprintf(vptr, vlen, "%s %s", w, w64);
 
-	// Add the build number for Windows 8.0 and later
+	// Add the build number (including UBR if available) for Windows 8.0 and later
 	nWindowsBuildNumber = vi.dwBuildNumber;
 	if (nWindowsVersion >= 0x62) {
+		int nUbr = ReadRegistryKey32(REGKEY_HKLM, "Software\\Microsoft\\Windows NT\\CurrentVersion\\UBR");
 		vptr = &WindowsVersionStr[safe_strlen(WindowsVersionStr)];
 		vlen = sizeof(WindowsVersionStr) - safe_strlen(WindowsVersionStr) - 1;
-		safe_sprintf(vptr, vlen, " (Build %d)", nWindowsBuildNumber);
+		if (nUbr > 0)
+			safe_sprintf(vptr, vlen, " (Build %d.%d)", nWindowsBuildNumber, nUbr);
+		else
+			safe_sprintf(vptr, vlen, " (Build %d)", nWindowsBuildNumber);
 	}
-
 }
 
 /*
