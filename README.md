@@ -9,6 +9,8 @@ Rufus: The Reliable USB Formatting Utility
 
 ![Rufus logo](https://raw.githubusercontent.com/pbatard/rufus/master/res/icons/rufus-128.png)
 
+Rufus is a utility that helps format and create bootable USB flash drives, such as USB keys/pendrives, memory sticks, etc.
+
 Features
 --------
 
