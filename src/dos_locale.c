@@ -30,6 +30,11 @@
 
 #include "rufus.h"
 
+#if defined(_MSC_VER)
+// We have a bunch of \xCD characters in this file that MS doesn't like
+#pragma warning(disable: 4819)
+#endif
+
 /*
  * Note: if you want a book that can be used as a keyboards and codepages bible, I
  * would recommend the "OS/2 Warp Server for e-business - Keyboards and Codepages".
