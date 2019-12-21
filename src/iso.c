@@ -1015,7 +1015,7 @@ out:
 				fclose(fd);
 		} else if (HAS_BOOTMGR(img_report) && enable_ntfs_compression) {
 			// bootmgr might need to be uncompressed: https://github.com/pbatard/rufus/issues/1381
-			RunCommand("compact /u bootmgr bootmgr.efi", dest_dir, TRUE);
+			RunCommand("compact /u bootmgr* efi/boot/*.efi", dest_dir, TRUE);
 		}
 	}
 	if (p_iso != NULL)
