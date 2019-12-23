@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 3.5\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
 "POT-Creation-Date: 2019-08-13 09:20+0100\n"
-"PO-Revision-Date: 2019-08-13 09:21+0100\n"
+"PO-Revision-Date: 2019-12-23 19:03+0100\n"
 "Language: de_DE\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Rufus-LCID: 0x0407, 0x0807, 0x0c07, 0x1007, 0x1407\n"
 "Last-Translator: \n"
 "Language-Team: \n"
-"X-Generator: Poedit 2.2.3\n"
+"X-Generator: Poedit 2.2.4\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -52,7 +52,7 @@ msgstr "USB-Festplatten anzeigen"
 #. It is acceptable to drop the parenthesis () if you are running out of space
 #. as there is a tooltip (MSG_169) providing these details.
 msgid "Add fixes for old BIOSes (extra partition, align, etc.)"
-msgstr "Fix für ältere BIOSe verwenden (zus. Partition, usw.)"
+msgstr "Fix für ältere BIOSe verwenden (zusätzliche Partition usw.)"
 
 #. • IDD_DIALOG → IDC_RUFUS_MBR
 #.
@@ -60,7 +60,7 @@ msgstr "Fix für ältere BIOSe verwenden (zus. Partition, usw.)"
 #. Rufus can install it's own custom MBR (the Rufus MBR), which also allows users to
 #. specify a custom disk ID for the BIOS. The tooltip for this control is MSG_167.
 msgid "Use Rufus MBR with BIOS ID"
-msgstr "Rufus MBR benutzen mit BIOS ID"
+msgstr "Rufus-MBR mit BIOS-ID benutzen"
 
 #. • IDD_DIALOG → IDS_FORMAT_OPTIONS_TXT
 msgid "Format Options"
@@ -147,7 +147,7 @@ msgstr "Löschen"
 
 #. • IDD_LOG → IDC_LOG_SAVE
 msgid "Save"
-msgstr "Speichern"
+msgstr "Speichern..."
 
 #. • IDD_UPDATE_POLICY → IDD_UPDATE_POLICY
 msgid "Update policy and settings"
@@ -201,7 +201,7 @@ msgid ""
 "Please close the first application before running another one."
 msgstr ""
 "Rufus ist bereits gestartet.\n"
-"Bitte schließen Sie es erst, bevor Sie es neue starten."
+"Bitte schließen Sie es erst, bevor Sie es erneut starten."
 
 #. • MSG_003
 msgid ""
@@ -209,11 +209,11 @@ msgid ""
 "To continue with this operation, click OK. To quit click CANCEL."
 msgstr ""
 "WARNUNG: ALLE DATEN AUF LAUFWERK '%s' WERDEN GELÖSCHT.\n"
-"Klicken Sie auf OK um fortzufahren. Klicken Sie auf ABBRECHEN um abzubrechen."
+"Klicken Sie auf OK, um fortzufahren. Klicken Sie auf ABBRECHEN, um abzubrechen."
 
 #. • MSG_004
 msgid "Rufus update policy"
-msgstr "Rufus Aktualisierungseinstellungen"
+msgstr "Rufus-Aktualisierungseinstellungen"
 
 #. • MSG_005
 msgid "Do you want to allow Rufus to check for application updates online?"
@@ -221,7 +221,7 @@ msgstr "Wollen Sie, dass Rufus auf neuen Versionen prüft?"
 
 #. • MSG_007
 msgid "Cancel"
-msgstr "Abbruch"
+msgstr "Abbrechen"
 
 #. • MSG_010
 msgid "Bad blocks found"
@@ -391,7 +391,7 @@ msgstr "Dateidownload"
 
 #. • MSG_045
 msgid "USB Storage Device (Generic)"
-msgstr "USB Massenspeichergerät (Allgemein)"
+msgstr "USB-Massenspeichergerät (allgemein)"
 
 #. • MSG_046
 msgid "%s (Disk %d) [%s]"
@@ -453,7 +453,7 @@ msgstr "Die ausgewählte Größe der Zuordnungseinheit ist für dieses Laufwerk 
 
 #. • MSG_060
 msgid "The volume size is invalid."
-msgstr "Die Volumen-Größe ist ungültig."
+msgstr "Die Volume-Größe ist ungültig."
 
 #. • MSG_061
 msgid "Please insert a removable media in drive."
@@ -541,11 +541,11 @@ msgid ""
 "\n"
 "We recommend that you let Windows finish, to avoid corruption. But if you grow tired of waiting, you can just unplug the device..."
 msgstr ""
-"Rufus hat erkannt, dass Inhalte des Datenpuffer auf das USB-Laufwerk geschrieben werden.\n"
+"Rufus hat erkannt, dass Inhalte des Datenpuffers auf das USB-Laufwerk geschrieben werden.\n"
 "\n"
-"Abhängig von der Geschwindigkeit des USB-Laufwerks, kann dieser Vorgang lange dauern; speziell für große Dateien.\n"
+"Abhängig von der Geschwindigkeit des USB-Laufwerks kann dieser Vorgang lange dauern, insbesondere bei großen Dateien.\n"
 "\n"
-"Wir empfehlen, dass Sie Windows den Vorgang beenden lassen, um eine Problem zu vermeiden. Wenn Ihnen der Vorgang zu lange dauert, können Sie das Gerät einfach entfernen..."
+"Wir empfehlen, dass Sie Windows den Vorgang beenden lassen, um ein Problem zu vermeiden. Wenn Ihnen der Vorgang zu lange dauert, können Sie das Gerät einfach entfernen."
 
 #. • MSG_081
 msgid "Unsupported image"
@@ -553,11 +553,11 @@ msgstr "Nicht unterstützte Abbild-Datei"
 
 #. • MSG_082
 msgid "This image is either non-bootable, or it uses a boot or compression method that is not supported by Rufus..."
-msgstr "Dieses Abbild ist nicht startfähig oder benutzt eine nicht unterstützte Startart und/oder Kompression."
+msgstr "Dieses Abbild ist nicht startfähig oder benutzt eine nicht unterstützte Start- oder Kompressionsmethode."
 
 #. • MSG_083
 msgid "Replace %s?"
-msgstr "Ersetze %s?"
+msgstr "%s ersetzen?"
 
 #. • MSG_084
 msgid ""
@@ -574,7 +574,7 @@ msgstr ""
 "Diese ISO-Abbild-Datei verwendet eine veraltete Version von '%s'.\n"
 "Bootmenüs werden deswegen möglicherweise fehlerhaft dargestellt.\n"
 "\n"
-"Eine neuere Version kann von Rufus heruntergeladen werden, um diese Problem zu vermeiden:\n"
+"Eine neuere Version kann von Rufus heruntergeladen werden, um dieses Problem zu vermeiden:\n"
 "- Wählen Sie 'Ja', um die Datei herunterzuladen\n"
 "- Wählen Sie 'Nein', um das ISO-Abbild nicht zu verändern\n"
 "Wenn Sie unsicher sind, wählen Sie 'Ja'.\n"
@@ -583,7 +583,7 @@ msgstr ""
 
 #. • MSG_085
 msgid "Downloading %s"
-msgstr "Download %s"
+msgstr "Herunterladen von %s"
 
 #. • MSG_086
 msgid "No image selected"
@@ -598,7 +598,7 @@ msgstr "Keine Abbild-Datei gewählt"
 #. If you prefer, it's okay to use "type" or "device" instead of "NAND" (e.g. "for TLC type").
 #. See also MSG_035.
 msgid "for %s NAND"
-msgstr "für %s Flash"
+msgstr "für %s-Flash"
 
 #. • MSG_088
 msgid "Image is too big"
@@ -626,7 +626,7 @@ msgid ""
 "\n"
 "This may include partitions/volumes that aren't listed or even visible from Windows. Should you wish to proceed, you are responsible for any data loss on these partitions."
 msgstr ""
-"ACHTUNG! DIESES LAUFWERK VERFÜGT ÜBER MEHRERE PARTITIONEN ODER VOLUMES!!\n"
+"ACHTUNG! DIESES LAUFWERK VERFÜGT ÜBER MEHRERE PARTITIONEN!\n"
 "\n"
 "Darunter sind möglicherweise Partitionen, die unter Windows nicht sicht- bzw. nutzbar sind. Wenn Sie fortfahren, sind Sie selbst für den Datenverlust auf diesen Partitionen verantwortlich."
 
@@ -654,11 +654,11 @@ msgid ""
 "\n"
 "Note: The 'FIXED/REMOVABLE' attribute is a hardware property that can only be changed using custom tools from the drive manufacturer. However those tools are ALMOST NEVER provided to the public..."
 msgstr ""
-"WICHTIG: Sie versuchen 'Windows To Go' zu installieren, aber das Ziel-Laufwerk hat nicht das 'FIXED'-Attribut. Deswegen wird Windows beim Systemstart höchstwahrscheinlich einfrieren, weil Microsoft nicht vorgesehen hat, Laufwerke mit dem 'REMOVABLE'-Attribut zu unterstützen.\n"
+"WICHTIG: Sie versuchen, 'Windows To Go' zu installieren, aber das Ziel-Laufwerk hat nicht das 'FIXED'-Attribut. Deswegen wird Windows beim Systemstart höchstwahrscheinlich einfrieren, weil Microsoft nicht vorgesehen hat, Laufwerke mit dem 'REMOVABLE'-Attribut zu unterstützen.\n"
 "\n"
 "Wollen Sie den Vorgang trotzdem fortsetzen?\n"
 "\n"
-"Hinweis: Das 'FIXED/REMOVABLE'-Attribut ist eine Hardware-Eigenschaft und kann nur mit speziellen Tools der Hersteller geändert werden. Wobei diese Tools MEIST NICHT öffentlich sind...."
+"Hinweis: Das 'FIXED/REMOVABLE'-Attribut ist eine Hardware-Eigenschaft und kann nur mit speziellen Tools der Hersteller geändert werden. Wobei diese Tools MEIST NICHT öffentlich sind."
 
 #. • MSG_099
 msgid "Filesystem limitation"
@@ -666,7 +666,7 @@ msgstr "Dateisystembeschränkung"
 
 #. • MSG_100
 msgid "This ISO image contains a file larger than 4 GB, which is more than the maximum size allowed for a FAT or FAT32 file system."
-msgstr "Diese ISO-Abbild-Datei enthält eine Datei größer 4 GB. Diese Dateigröße ist für FAT- oder FAT32-Dateisysteme nicht zulässig."
+msgstr "Diese ISO-Abbild-Datei enthält eine Datei größer als 4 GB. Diese Dateigröße ist für FAT- oder FAT32-Dateisysteme nicht zulässig."
 
 #. • MSG_101
 msgid "Missing WIM support"
@@ -677,8 +677,8 @@ msgid ""
 "Your platform cannot extract files from WIM archives. WIM extraction is required to create EFI bootable Windows 7 and Windows Vista USB drives. You can fix that by installing a recent version of 7-Zip.\n"
 "Do you want to visit the 7-zip download page?"
 msgstr ""
-"Ihre Plattform kann keine Dateien aus WIM-Containern extrahieren. WIM-Extraktion ist erforderlich, um EFI-startfähige Windows 7 und Windows Vista USB-Laufwerke zu erzeugen. Sie können das durch die Installation der aktuellen 7-ZIP Version beheben.\n"
-"Möchten Sie die 7-ZIP Download-Seite aufrufen?"
+"Ihre Plattform kann keine Dateien aus WIM-Containern extrahieren. WIM-Extraktion ist erforderlich, um EFI-startfähige Windows 7 und Windows Vista USB-Laufwerke zu erzeugen. Sie können das durch die Installation der aktuellen 7-Zip-Version beheben.\n"
+"Möchten Sie die 7-Zip-Download-Seite aufrufen?"
 
 #. • MSG_103
 msgid "Download %s?"
@@ -698,8 +698,8 @@ msgid ""
 "\n"
 "Note: The file will be downloaded in the current directory and once a '%s' exists there, it will be reused automatically."
 msgstr ""
-"%s oder neuer erfordert, dass eine '%s' installiert ist.\n"
-"Weil diese Datei größer als 100 kB ist, und in %s ISO-Abbildern immer enthalten ist, ist sie in Rufus nicht enthalten.\n"
+"%s oder neuer erfordert, dass eine Datei '%s' installiert ist.\n"
+"Weil diese Datei größer als 100 kB ist und in %s ISO-Abbildern immer enthalten ist, ist sie in Rufus nicht enthalten.\n"
 "\n"
 "Rufus kann die fehlende Datei für Sie herunterladen:\n"
 "- Wählen Sie 'Ja', um die Datei herunterzuladen\n"
@@ -712,7 +712,7 @@ msgid ""
 "Cancelling may leave the device in an UNUSABLE state.\n"
 "If you are sure you want to cancel, click YES. Otherwise, click NO."
 msgstr ""
-"Durch einen Abbruch wird das Gerät in einem INSTABILEN Zustand versetzt.\n"
+"Durch einen Abbruch wird das Gerät in einen INSTABILEN Zustand versetzt.\n"
 "Wenn Sie sicher sind, dass Sie abbrechen wollen, klicken Sie JA, andernfalls klicken Sie NEIN."
 
 #. • MSG_106
@@ -725,7 +725,7 @@ msgstr "Alle Dateien"
 
 #. • MSG_108
 msgid "Rufus log"
-msgstr "Rufus Log"
+msgstr "Rufus-Log"
 
 #. • MSG_109
 msgid "0x%02X (Disk %d)"
@@ -738,7 +738,9 @@ msgstr ""
 msgid ""
 "MS-DOS cannot boot from a drive using a 64 kilobytes Cluster size.\n"
 "Please change the Cluster size or use FreeDOS."
-msgstr "MS-DOS kann nicht von einem Laufwerk starten, das 64 Kilobyte große Zuordnungseinheiten verwendet..."
+msgstr ""
+"MS-DOS kann nicht von einem Laufwerk mit einer Zuordnungseinheitengröße von 64 Kilobyte starten.\n"
+"Bitte ändern Sie die Zuordnungseinheitengröße oder verwenden Sie FreeDOS."
 
 #. • MSG_111
 msgid "Incompatible Cluster size"
@@ -748,7 +750,7 @@ msgstr "Inkompatible Zuordnungseinheitengröße"
 #.
 #. "%d:%02d" is a duration (mins:secs)
 msgid "Formatting a large UDF volumes can take a lot of time. At USB 2.0 speeds, the estimated formatting duration is %d:%02d, during which the progress bar will appear frozen. Please be patient!"
-msgstr "Großes UDF-Laufwerke zu formatieren, kann viel Zeit benötigen. Bei USB 2.0-Geschwindigkeiten beträgt die geschätzte Formatierungsdauer %d:%02d, während der die Fortschrittsleiste eingefroren erscheint. Bitte haben Sie Geduld!"
+msgstr "Die Formatierung eines großen UDF-Laufwerks kann viel Zeit benötigen. Bei USB 2.0-Geschwindigkeiten beträgt die geschätzte Formatierungsdauer %d:%02d, während der die Fortschrittsleiste eingefroren erscheint. Bitte haben Sie Geduld!"
 
 #. • MSG_113
 msgid "Large UDF volume"
@@ -766,8 +768,8 @@ msgid ""
 msgstr ""
 "Dieses Abbild benutzt Syslinux %s%s, aber diese Anwendung verfügt nur über Installationsdateien für Syslinux %s%s.\n"
 "\n"
-"Neuere Syslinux-Versionen sind untereinander nicht kompatibel. Rufus kann nicht alle Versionen unterstützen. Zwei zusätzliche Dateien müssen vom Internet heruntergeladen werden ('ldlinux.sys' and 'ldlinux.bss'):\n"
-"- Wählen Sie 'Ja', um dem Download zuzustimmen oder\n"
+"Neuere Syslinux-Versionen sind untereinander nicht kompatibel. Rufus kann nicht alle Versionen unterstützen. Zwei zusätzliche Dateien müssen aus dem Internet heruntergeladen werden ('ldlinux.sys' und 'ldlinux.bss'):\n"
+"- Wählen Sie 'Ja', um dem Download zuzustimmen\n"
 "- Wählen Sie 'Nein', um den Vorgang abzubrechen\n"
 "\n"
 "Hinweis: Die Dateien werden in das Programmverzeichnis heruntergeladen und können bei Bedarf wiederverwendet werden."
@@ -790,9 +792,9 @@ msgid ""
 "\n"
 "Note: The file will be downloaded in the current application directory and will be reused automatically if present. If no match can be found online, then the default version will be used."
 msgstr ""
-"Dieses Abbild verwendet Grub %s, aber die Anwendung beinhaltet nur Installations-Dateien für Grub %s.\n"
+"Dieses Abbild verwendet Grub %s, aber die Anwendung beinhaltet nur Installationsdateien für Grub %s.\n"
 "\n"
-"Weil verschiedene Versionen von Grub nicht untereinander kompatibel sind, und es nicht möglich ist, alle mit Rufus auszuliefern, wird Rufus versuchen eine Version der Installations-Datei ('core.img') von Grub zu finden, die zur Version im Abbild passt:\n"
+"Weil verschiedene Versionen von Grub nicht untereinander kompatibel sind und es nicht möglich ist, alle mit Rufus auszuliefern, wird Rufus versuchen, eine Version der Installationsdatei ('core.img') von Grub zu finden, die zur Version im Abbild passt:\n"
 "- Wählen Sie 'Ja', um sich mit dem Internet zu verbinden und sie herunterzuladen\n"
 "- Wählen Sie 'Nein', um die Standardversion zu verwenden\n"
 "- Wählen Sie 'Abbrechen', um den Vorgang abzubrechen\n"
@@ -801,7 +803,7 @@ msgstr ""
 
 #. • MSG_117
 msgid "Standard Windows installation"
-msgstr "Standard Windows-Installation"
+msgstr "Standard-Windows-Installation"
 
 #. • MSG_118
 #.
@@ -848,7 +850,7 @@ msgstr "Keine Persistenz"
 #.
 #. Tooltips used for the peristence size slider and edit control
 msgid "Set the size of the persistent partition for live USB media. Setting the size to 0 disables the persistent partition."
-msgstr "Größe der persistenten Partition des Live-USB Systems. Eine Größe von 0 deaktiviert die Persistenz."
+msgstr "Größe der persistenten Partition des Live-USB-Systems. Eine Größe von 0 deaktiviert die Persistenz."
 
 #. • MSG_126
 msgid "Set the partition size units."
@@ -867,9 +869,9 @@ msgid ""
 "You have just created a media that uses the UEFI:NTFS bootloader. Please remember that, to boot this media, YOU MUST DISABLE SECURE BOOT.\n"
 "For details on why this is necessary, see the 'More Information' button below."
 msgstr ""
-"Sie haben gerade ein Medium erstellt, das den UEFI:NTFS Bootloader verwendet. Bitte denken Sie daran, dass Sie SECURE BOOT deaktivieren müssen, um dieses Medium zu starten.\n"
+"Sie haben gerade ein Medium erstellt, das den UEFI:NTFS-Bootloader verwendet. Bitte denken Sie daran, dass Sie zum Starten dieses Mediums SECURE BOOT DEAKTIVIEREN müssen.\n"
 "Nach dem Abschluss des Vorgangs sollten Sie SECURE BOOT wieder aktivieren.\n"
-"Weitere Informationen, u. a. warum dies notwendig ist, finden Sie über die \"Weitere Informationen\" Schaltfläche."
+"Weitere Informationen, warum dies notwendig ist, finden Sie über die Schaltfläche \"Weitere Informationen\"."
 
 #. • MSG_130
 msgid "Windows image selection"
@@ -885,7 +887,7 @@ msgstr ""
 
 #. • MSG_132
 msgid "Another program or process is accessing this drive. Do you want to format it anyway?"
-msgstr "Ein anderer Prozess bzw. ein anderes Programm verwenden das Laufwerk gerade. Wollen Sie es trotzdem formatieren?"
+msgstr "Ein anderer Prozess bzw. ein anderes Programm verwendet das Laufwerk gerade. Wollen Sie es trotzdem formatieren?"
 
 #. • MSG_133
 msgid ""
@@ -895,7 +897,7 @@ msgid ""
 "\n"
 "Also note that the reason Rufus cannot automatically fix this for you is that 'WppRecorder.sys' is a Microsoft copyrighted file, so we cannot legally embed a copy of the file in the application..."
 msgstr ""
-"Rufus hat erkannt, dass Sie ein Windows To Go Startmedium - basierend auf Windows 10 Version 1809 - erstellen wollen.\n"
+"Rufus hat erkannt, dass Sie ein 'Windows To Go'-Startmedium, basierend auf Windows 10 Version 1809, erstellen wollen.\n"
 "\n"
 "Aufgrund eines \"MICROSOFT BUGS\" wird das Startmedium nicht funktionieren (Blue Screen), wenn Sie die Datei 'WppRecorder.sys' nicht mit der 1803-Version ersetzen.\n"
 "\n"
@@ -907,7 +909,7 @@ msgid ""
 "\n"
 "Are you sure you want to continue?"
 msgstr ""
-"Weil MBR als Partitions-Schema gewählt wurde, kann Rufus nur eine maximal 2 TB große Partition auf diesem Laufwerk erstellen. %s des Speicherplatzes bleiben ungenutzt. \n"
+"Weil MBR als Partitionsschema gewählt wurde, kann Rufus nur eine maximal 2 TB große Partition auf diesem Laufwerk erstellen. %s des Speicherplatzes bleiben ungenutzt.\n"
 "\n"
 "Wollen Sie fortfahren?"
 
@@ -949,7 +951,7 @@ msgstr "Mit dem Browser herunterladen"
 
 #. • MSG_144
 msgid "Temporarily banned by Microsoft for requesting too many downloads - Please try again later..."
-msgstr "Download von Microsoft, aufgrund zu vieler Versuche, blockiert. Bitte versuchen Sie es später..."
+msgstr "Download von Microsoft aufgrund zu vieler Versuche blockiert. Bitte versuchen Sie es später noch einmal."
 
 #. • MSG_145
 msgid "PowerShell 3.0 or later is required to run this script."
@@ -961,7 +963,7 @@ msgstr "Wollen Sie online gehen und den Download ausführen?"
 
 #. • MSG_148
 msgid "Running download script..."
-msgstr "Führe Download-Skript aus..."
+msgstr "Download-Skript ausführen..."
 
 #. • MSG_149
 msgid "Download ISO Image"
@@ -969,17 +971,17 @@ msgstr "ISO-Abbild herunterladen"
 
 #. • MSG_150
 msgid "Type of computer you plan to use this bootable drive with. It is your responsibility to determine whether your target is of BIOS or UEFI type before you start creating the drive, as it may fail to boot otherwise."
-msgstr "Der Typ des Computers, an dem Sie das startfähige Laufwerk verwenden wollen. Sie müssen entscheiden, ob BIOS oder UEFI. Andernfalls schlägt der Start fehl."
+msgstr "Der Typ des Computers, an dem Sie das startfähige Laufwerk verwenden wollen. Sie müssen entscheiden, ob Ihr Ziel vom Typ BIOS oder UEFI ist. Andernfalls schlägt der Start fehl."
 
 #. • MSG_151
 #.
 #. You shouldn't translate 'Legacy Mode' as this is an option that usually appears in English in the UEFI settings.
 msgid "'UEFI-CSM' means that the device will only boot in BIOS emulation mode (also known as 'Legacy Mode') under UEFI, and not in native UEFI mode."
-msgstr "'UEFI-CSM' bedeutet, dass der Computer im BIOS-Modus von UEFI startet (auch bekannt als 'Legacy Mode'), und nicht im nativen UEFI-Modus."
+msgstr "'UEFI-CSM' bedeutet, dass der Computer unter UEFI nur im BIOS-Emulationsmodus (auch als 'Legacy-Modus' bezeichnet) und nicht im nativen UEFI-Modus gestartet wird."
 
 #. • MSG_152
 msgid "'non CSM' means that the device will only boot in native UEFI mode, and not in BIOS emulation mode (also known as 'Legacy Mode')."
-msgstr "'ohne CSM' bedeutet, dass das Gerät nur im nativen UEFI-Modus und nicht im 'Legacy Mode' bzw. 'CSM'-Modus startet."
+msgstr "'Ohne CSM' bedeutet, dass das Gerät nur im nativen UEFI-Modus und nicht im 'Legacy- bzw. CSM-Modus' startet."
 
 #. • MSG_153
 msgid "Test pattern: 0x%02X"
@@ -1019,7 +1021,7 @@ msgstr "Erweiterte Optionen ein- bzw. ausblenden"
 
 #. • MSG_161
 msgid "Check the device for bad blocks using a test pattern"
-msgstr "Das Laufwerk mittels eines Musters auf fehlerhafte Blöcke prüfen"
+msgstr "Das Laufwerk mittels eines Testmusters auf fehlerhafte Blöcke prüfen"
 
 #. • MSG_162
 msgid "Uncheck this box to use the \"slow\" format method"
@@ -1039,31 +1041,31 @@ msgstr "Abbild-Datei oder Download auswählen..."
 
 #. • MSG_166
 msgid "Check this box to allow the display of international labels and set a device icon (creates an autorun.inf)"
-msgstr "Wählen Sie diese Option, um die Anzeige internationaler Bezeichnungen zu ermöglichen und ein Gerätesymbol zu erzeugen (Datei autorun.inf)"
+msgstr "Wählen Sie diese Option, um die Anzeige internationaler Bezeichnungen zu ermöglichen und ein Gerätesymbol zu erzeugen (autorun.inf)"
 
 #. • MSG_167
 msgid "Install an MBR that allows boot selection and can masquerade the BIOS USB drive ID"
-msgstr "Erzeugt einen MBR, der ein Bootmenü erzeugt und die ID des BIOS USB-Laufwerks maskieren kann"
+msgstr "Erzeugt einen MBR, der ein Bootmenü erzeugt und die ID des BIOS-USB-Laufwerks maskieren kann"
 
 #. • MSG_168
 msgid ""
 "Try to masquerade first bootable USB drive (usually 0x80) as a different disk.\n"
 "This should only be necessary if you install Windows XP and have more than one disk."
 msgstr ""
-"Das erste startfähige USB-Laufwerk maskieren (normalerweise 0x80) als andere Festplatte.\n"
-"Das sollte nur notwendig sein, wenn Sie Windows XP installieren und mehr als ein Festplatte haben."
+"Das erste startfähige USB-Laufwerk als andere Festplatte (normalerweise 0x80) maskieren.\n"
+"Das sollte nur notwendig sein, wenn Sie Windows XP installieren und mehr als eine Festplatte haben."
 
 #. • MSG_169
 msgid ""
 "Create an extra hidden partition and try to align partitions boundaries.\n"
 "This can improve boot detection for older BIOSes."
 msgstr ""
-"Eine extra Partition erzeugen und die Partitionsgrenzen ausrichten.\n"
-"Das kann die Starterkennung unter älteren BIOSen verbessern."
+"Eine zusätzliche versteckte Partition erzeugen und die Partitionsgrenzen ausrichten.\n"
+"Das kann die Starterkennung für ältere BIOSe verbessern."
 
 #. • MSG_170
 msgid "Enable the listing of USB Hard Drive enclosures. USE AT YOUR OWN RISKS!!!"
-msgstr "Erkennung von externen USB-Festplatten aktivieren. VERWENDUNG AUF EIGENES RISIKO!!!"
+msgstr "Erkennung von externen USB-Festplatten aktivieren. VERWENDUNG AUF EIGENES RISIKO!"
 
 #. • MSG_171
 msgid ""
@@ -1086,7 +1088,7 @@ msgstr "Klicken Sie, um auszuwählen..."
 
 #. • MSG_174
 msgid "Rufus - The Reliable USB Formatting Utility"
-msgstr "Rufus - Das zuverlässige USB-Formatierungs Utility"
+msgstr "Rufus - Das zuverlässige USB-Formatierungstool"
 
 #. • MSG_175
 msgid "Version %d.%d (Build %d)"
@@ -1126,7 +1128,7 @@ msgstr "Ihre IP-Adresse"
 
 #. • MSG_184
 msgid "For the purpose of generating private usage statistics, we may keep the information collected, \\b for at most a year\\b0 . However, we will not willingly disclose any of this individual data to third parties."
-msgstr "Zum privaten Statistikzwecken speichern wir diese Informationen \\b für höchstens ein Jahr\\b0. Keine Daten werden an Dritte weitergegeben."
+msgstr "Zu privaten Statistikzwecken speichern wir diese Informationen \\b für höchstens ein Jahr\\b0. Es werden keine Daten an Dritte weitergegeben."
 
 #. • MSG_185
 msgid "Update Process:"
@@ -1137,7 +1139,7 @@ msgid ""
 "Rufus does not install or run background services, therefore update checks are performed only when the main application is running.\\line\n"
 "Internet access is of course required when checking for updates."
 msgstr ""
-"Rufus verwendet keine Hintergrundprozesse, deshalb wird nur auf Updates geprüft, wenn die Anwendung läuft.\\line\n"
+"Rufus verwendet keine Hintergrundprozesse. Deshalb wird nur auf Updates geprüft, wenn die Anwendung läuft.\\line\n"
 "Eine Internetverbindung ist natürlich für die Prüfung auf neue Versionen erforderlich."
 
 #. • MSG_187
@@ -1180,7 +1182,7 @@ msgstr "%s konnte nicht heruntergeladen werden"
 #.
 #. Example: "Using embedded version of Grub2 file(s)"
 msgid "Using embedded version of %s file(s)"
-msgstr "Verwende Embedded-Version der %s Datei(en)"
+msgstr "Embedded-Version der %s Datei(en) verwenden"
 
 #. • MSG_196
 msgid ""
@@ -1189,18 +1191,18 @@ msgid ""
 "Conventional drives use a 512-byte sector size but this drive uses a %d-byte one. In many cases, this means that you will NOT be able to boot from this drive.\n"
 "Rufus can try to create a bootable drive, but there is NO WARRANTY that it will work."
 msgstr ""
-"WICHTIG: DIESES LAUFWERK HAT EINE NICHT STANDARDKONFORME SEKTORGRÖSSE!\n"
+"WICHTIG: DIESES LAUFWERK HAT EINE NICHT STANDARDISIERTE SEKTORGRÖSSE!\n"
 "\n"
-"Herkömmliche Laufwerke nutzen eine 512-Byte Sektorgröße, aber dieses Laufwerk nutzt %d-Byte. Höchstwahrscheinlich können Sie von diesem Laufwerk NICHT starten.\n"
+"Herkömmliche Laufwerke nutzen eine Sektorgröße von 512 Byte, aber dieses Laufwerk nutzt %d Byte. Höchstwahrscheinlich können Sie von diesem Laufwerk NICHT starten.\n"
 "Rufus kann versuchen, ein startfähiges Laufwerk zu erstellen, aber es gibt KEINE GARANTIE, dass es funktionieren wird."
 
 #. • MSG_197
 msgid "Nonstandard sector size detected"
-msgstr "Nicht standardkonforme Sektorgröße erkannt"
+msgstr "Nicht standardisierte Sektorgröße erkannt"
 
 #. • MSG_198
 msgid "'Windows To Go' can only be installed on a GPT partitioned drive if it has the FIXED attribute set. The current drive was not detected as FIXED."
-msgstr "'Windows To Go' kann nur auf ein GPT-partitioniertes Laufwerk installiert werden, wenn das FIXED-Attribut gesetzt ist. Das aktuelle Laufwerk hat diese nicht."
+msgstr "'Windows To Go' kann nur auf ein GPT-partitioniertes Laufwerk installiert werden, wenn das FIXED-Attribut gesetzt ist. Das aktuelle Laufwerk hat dieses nicht."
 
 #. • MSG_201
 msgid "Cancelling - Please wait..."
@@ -1208,7 +1210,7 @@ msgstr "Abbrechen - Bitte warten..."
 
 #. • MSG_202
 msgid "Scanning image..."
-msgstr "Lese Abbild-Datei..."
+msgstr "Abbild-Datei lesen..."
 
 #. • MSG_203
 msgid "Failed to scan image"
@@ -1267,7 +1269,7 @@ msgstr "FEHLGESCHLAGEN"
 #.
 #. Used when a new update has been downloaded and launched
 msgid "Launching new application..."
-msgstr "Starte Anwendung neu..."
+msgstr "Anwendung neu starten..."
 
 #. • MSG_214
 msgid "Failed to launch new application"
@@ -1297,7 +1299,7 @@ msgstr "Dateisystem erzeugen: Aufgabe %d/%d abgeschlossen"
 
 #. • MSG_219
 msgid "NTFS Fixup: %d%% completed"
-msgstr "NTFS Fixup: %d%% erledigt"
+msgstr "NTFS-Reparatur: %d%% erledigt"
 
 #. • MSG_220
 #.
@@ -1309,7 +1311,7 @@ msgstr "Formatiere (%s) - geschätzte Dauer %d:%02d..."
 
 #. • MSG_221
 msgid "Setting Label (This may take a while)..."
-msgstr "Setzte Bezeichnung (kann etwas dauern)..."
+msgstr "Bezeichnung einstellen (kann etwas dauern)..."
 
 #. • MSG_222
 #.
@@ -1343,19 +1345,19 @@ msgstr "Master Boot Record schreiben..."
 
 #. • MSG_229
 msgid "Writing Partition Boot Record..."
-msgstr "Schreibe Partitions Boot Record.."
+msgstr "Partition Boot Record schreiben..."
 
 #. • MSG_230
 msgid "Copying DOS files..."
-msgstr "Kopiere DOS-Dateien..."
+msgstr "DOS-Dateien kopieren..."
 
 #. • MSG_231
 msgid "Copying ISO files..."
-msgstr "Kopiere ISO-Dateien..."
+msgstr "ISO-Dateien kopieren..."
 
 #. • MSG_232
 msgid "Win7 EFI boot setup (This may take a while)..."
-msgstr "Win7 EFI Boot setup (kann etwas dauern)..."
+msgstr "Win7 EFI-Boot-Setup (kann etwas dauern)..."
 
 #. • MSG_233
 msgid "Finalizing, please wait..."
@@ -1377,11 +1379,11 @@ msgstr "Fehlerhafte Blöcke: %s %d/%d - %0.2f%% (%d/%d/%d Fehler)"
 
 #. • MSG_236
 msgid "Bad Blocks: Testing with random pattern"
-msgstr "Fehlerhafte Blöcke: Prüfe mit zufälligen Mustern"
+msgstr "Fehlerhafte Blöcke: Mit Zufallsmuster prüfen"
 
 #. • MSG_237
 msgid "Bad Blocks: Testing with pattern 0x%02X"
-msgstr "Fehlerhafte Blöcke: Prüfe mit Muster 0x%02X"
+msgstr "Fehlerhafte Blöcke: Mit Muster 0x%02X prüfen"
 
 #. • MSG_238
 #.
@@ -1403,7 +1405,7 @@ msgid ""
 msgstr ""
 "Die Signatur des heruntergeladenen Updates konnte nicht überprüft werden. Das könnte bedeuten, dass Ihr System für die Prüfung der Signatur nicht konfiguriert ist oder der Download bösartig ist.\n"
 "\n"
-"Der Download wird gelöscht. Bitte prüfen sie das LOG für weitere Informationen."
+"Der Download wird gelöscht. Bitte prüfen Sie das Log für weitere Informationen."
 
 #. • MSG_241
 msgid "Downloading: %0.1f%%"
@@ -1431,11 +1433,11 @@ msgstr "Eine neue Version von Rufus ist verfügbar!"
 
 #. • MSG_247
 msgid "No new version of Rufus was found"
-msgstr "Keine neue Version von Rufus wurde gefunden"
+msgstr "Es wurde keine neue Version von Rufus gefunden"
 
 #. • MSG_248
 msgid "Application registry keys successfully deleted"
-msgstr "Anwendungseinst. in der Registrierdatenbank gelöscht"
+msgstr "Anwendungeinstellungen in der Registrierdatenbank erfolgreich gelöscht"
 
 #. • MSG_249
 msgid "Failed to delete application registry keys"
@@ -1461,7 +1463,7 @@ msgstr "Festplattenerkennung"
 
 #. • MSG_254
 msgid "Force large FAT32 formatting"
-msgstr "Große FAT32-Formatierung erzwingen"
+msgstr "Large FAT32-Formatierung erzwingen"
 
 #. • MSG_255
 msgid "NoDriveTypeAutorun will be deleted on exit"
@@ -1469,7 +1471,7 @@ msgstr "NoDriveTypeAutorun wird beim Beenden gelöscht"
 
 #. • MSG_256
 msgid "Fake drive detection"
-msgstr "Gefälschte Laufwerke erkennen"
+msgstr "Erkennung falscher Laufwerke"
 
 #. • MSG_257
 msgid "Joliet support"
@@ -1501,7 +1503,7 @@ msgstr "ISO-Unterstützung"
 #.
 #. Cheat mode to force legacy size units, where 1 KB is 1024 bytes and NOT that fake 1000 bytes abomination!
 msgid "Use PROPER size units"
-msgstr "Verwenden Sie korrekten Größeneinheiten"
+msgstr "Korrekte Größeneinheiten verwenden"
 
 #. • MSG_264
 msgid "Deleting directory '%s'"
@@ -1509,7 +1511,7 @@ msgstr "Lösche Ordner '%s'"
 
 #. • MSG_265
 msgid "VMWare disk detection"
-msgstr "VMWare-Laufwerks-Erkennung"
+msgstr "VMware-Laufwerkserkennung"
 
 #. • MSG_266
 msgid "Dual UEFI/BIOS mode"
@@ -1517,7 +1519,7 @@ msgstr "Dualer UEFI/BIOS-Modus"
 
 #. • MSG_267
 msgid "Applying Windows image: %0.1f%% completed"
-msgstr "Spiele Windows-Abbild auf: %0.1f%% fertiggestellt"
+msgstr "Windows-Abbild aufspielen: %0.1f%% fertiggestellt"
 
 #. • MSG_268
 msgid "Applying Windows image..."
@@ -1529,7 +1531,7 @@ msgstr "Zeitstempel bewahren"
 
 #. • MSG_270
 msgid "USB debug"
-msgstr "USB Testmodus"
+msgstr "USB-Testmodus"
 
 #. • MSG_271
 msgid "Computing image checksums: %0.1f%% completed"
@@ -1557,9 +1559,9 @@ msgid ""
 "\n"
 "Please select the mode that you want to use to write this image:"
 msgstr ""
-"Das gewählte Abbild ist eine hybrides ISO-Abbild. Es kann entweder im %s (Dateikopier-) oder %s (Abbild-) Modus kopiert werden.\n"
-"Rufus empfiehlt den %s Modus, denn dann haben Sie nach dem Schreiben vollen Zugriff auf das Laufwerk.\n"
-"Wenn Sie beim Starten Probleme haben, können Sie den %s Modus versuchen.\n"
+"Das gewählte Abbild ist eine hybrides ISO-Abbild. Es kann entweder im %s- (Dateikopier-) oder im %s- (Abbild-) Modus kopiert werden.\n"
+"Rufus empfiehlt den %s-Modus, denn dann haben Sie nach dem Schreiben vollen Zugriff auf das Laufwerk.\n"
+"Wenn Sie beim Starten Probleme haben, können Sie den %s-Modus versuchen.\n"
 "\n"
 "Bitte wählen Sie den Modus, mit dem Sie das Abbild schreiben wollen:"
 
@@ -1567,13 +1569,13 @@ msgstr ""
 #.
 #. '%s' will be replaced with your translation for MSG_036 ("ISO Image")
 msgid "Write in %s mode (Recommended)"
-msgstr "Im %s Modus schreiben (empfohlen)"
+msgstr "Im %s-Modus schreiben (empfohlen)"
 
 #. • MSG_277
 #.
 #. '%s' will be replaced with your translation for MSG_095 ("DD Image")
 msgid "Write in %s mode"
-msgstr "Im %s Modus schreiben"
+msgstr "Im %s-Modus schreiben"
 
 #. • MSG_278
 msgid "Checking for conflicting processes..."
@@ -1589,11 +1591,11 @@ msgstr "Medium oder Abbilddatei"
 
 #. • MSG_281
 msgid "%s (Please select)"
-msgstr "(Bitte wählen Sie ein Abbild)"
+msgstr "%s (Bitte wählen Sie ein Abbild)"
 
 #. • MSG_282
 msgid "Exclusive USB drive locking"
-msgstr "Exclusive Sperre für das USB-Laufwerk"
+msgstr "Exklusive Sperre für das USB-Laufwerk"
 
 #. • MSG_283
 msgid "Invalid signature"
@@ -1601,7 +1603,7 @@ msgstr "Ungültige Signatur"
 
 #. • MSG_284
 msgid "The downloaded executable is missing a digital signature."
-msgstr "Die heruntergeladene ausführbare Datei verfügt über keine Signatur."
+msgstr "Der heruntergeladenen ausführbaren Datei fehlt eine digitale Signatur."
 
 #. • MSG_285
 msgid ""
@@ -1609,8 +1611,8 @@ msgid ""
 "This is not a signature we recognize and could indicate some form of malicious activity...\n"
 "Are you sure you want to run this file?"
 msgstr ""
-"Die heruntergeladene ausführbare Datei ist von '%s' signiert.\n"
-"Diese Signatur ist nicht akzeptiert und könnte auf eine böswillige Aktivität hindeuten...\n"
+"Die heruntergeladene ausführbare Datei ist mit '%s' signiert.\n"
+"Diese Signatur ist nicht akzeptiert und könnte auf eine böswillige Aktivität hindeuten.\n"
 "Sind Sie sicher, dass Sie diese Datei ausführen wollen?"
 
 #. • MSG_286
@@ -1677,9 +1679,9 @@ msgid ""
 msgstr ""
 "Das ISO-Abbild, dass Sie gewählt haben, hat nicht die erwartete Größe. %s Daten fehlen!\n"
 "\n"
-"Sollten Sie das Abbild vom Internet heruntergeladen haben, sollten Sie den Download wiederholen und prüfen, ob die MD5- oder SHA-Prüfsummen übereinstimmen.\n"
+"Wenn Sie das Abbild aus dem Internet heruntergeladen haben, sollten Sie den Download wiederholen und prüfen, ob die MD5- oder SHA-Prüfsummen übereinstimmen.\n"
 "\n"
-"Hinweis: Mit der (✓) Schaltfläche in der Statuszeile können Sie die Prüfsummen des gewählten Abbilds anzeigen."
+"Hinweis: Mit der Schaltfläche (✓) in der Statuszeile können Sie die Prüfsummen des gewählten Abbilds anzeigen."
 
 #. • MSG_299
 msgid "Timestamp validation error"
@@ -1691,7 +1693,7 @@ msgid ""
 "\n"
 "In order to prevent potential attack scenarios, the update process has been aborted and the download will be deleted. Please check the log for more details."
 msgstr ""
-"Rufus konnten nicht prüfen, ob der Zeitstempel des Update-Downloads aktueller ist, als der des aktuell ausgeführten Programms.\n"
+"Rufus konnten nicht prüfen, ob der Zeitstempel des Update-Downloads aktueller ist als der des aktuell ausgeführten Programms.\n"
 "\n"
 "Aus Sicherheitsgründen wurde der Aktualisierungsprozess abgebrochen und der Download wurde gelöscht. Im Log finden Sie weitere Details."
 
@@ -1709,7 +1711,7 @@ msgstr "Log anzeigen"
 
 #. • MSG_304
 msgid "Create a disk image of the selected device"
-msgstr "Erstelle ein Abbild des gewählten Laufwerks"
+msgstr "Ein Abbild des gewählten Laufwerks erstellen"
 
 #. • MSG_305
 msgid "Use this option to indicate whether you want to use this device to install Windows on another disk, or if you want to run Windows directly from this drive (Windows To Go)."
