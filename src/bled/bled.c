@@ -21,6 +21,8 @@ typedef long long int(*unpacker_t)(transformer_state_t *xstate);
 smallint bb_got_signal;
 uint64_t bb_total_rb;
 printf_t bled_printf = NULL;
+read_t bled_read = NULL;
+write_t bled_write = NULL;
 progress_t bled_progress = NULL;
 unsigned long* bled_cancel_request;
 static bool bled_initialized = 0;
@@ -228,12 +230,15 @@ int64_t bled_uncompress_from_buffer_to_buffer(const char* src, const size_t src_
  *   void progress_function(const uint64_t read_bytes);
  * - point to an unsigned long variable, to be used to cancel operations when set to non zero
  */
-int bled_init(printf_t print_function, progress_t progress_function, unsigned long* cancel_request)
+int bled_init(printf_t print_function, read_t read_function, write_t write_function, 
+	progress_t progress_function, unsigned long* cancel_request)
 {
 	if (bled_initialized)
 		return -1;
 	bled_initialized = true;
 	bled_printf = print_function;
+	bled_read = read_function;
+	bled_write = write_function;
 	bled_progress = progress_function;
 	bled_cancel_request = cancel_request;
 	return 0;

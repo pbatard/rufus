@@ -17,6 +17,8 @@
 
 typedef void (*printf_t) (const char* format, ...);
 typedef void (*progress_t) (const uint64_t read_bytes);
+typedef int (*read_t)(int fd, void* buf, unsigned int count);
+typedef int (*write_t)(int fd, const void* buf, unsigned int count);
 
 typedef enum {
 	BLED_COMPRESSION_NONE = 0,
@@ -46,11 +48,13 @@ int64_t bled_uncompress_from_buffer_to_buffer(const char* src, const size_t src_
  * When the parameters are not NULL you can:
  * - specify the printf-like function you want to use to output message
  *   void print_function(const char* format, ...);
+ * - specify the read/write functions you want to use;
  * - specify the function you want to use to display progress, based on number of source archive bytes read
  *   void progress_function(const uint64_t read_bytes);
  * - point to an unsigned long variable, to be used to cancel operations when set to non zero
  */
-int bled_init(printf_t print_function, progress_t progress_function, unsigned long* cancel_request);
+int bled_init(printf_t print_function, read_t read_function, write_t write_function,
+    progress_t progress_function, unsigned long* cancel_request);
 
 /* This call frees any resource used by the library */
 void bled_exit(void);

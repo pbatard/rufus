@@ -2262,7 +2262,7 @@ static BOOL WriteDrive(HANDLE hPhysicalDrive, HANDLE hSourceImage)
 
 	if (img_report.compression_type != BLED_COMPRESSION_NONE) {
 		uprintf("Writing compressed image...");
-		bled_init(_uprintf, update_progress, &FormatStatus);
+		bled_init(_uprintf, NULL, NULL, update_progress, &FormatStatus);
 		bled_ret = bled_uncompress_with_handles(hSourceImage, hPhysicalDrive, img_report.compression_type);
 		bled_exit();
 		if ((bled_ret < 0) && (SCODE_CODE(FormatStatus) != ERROR_CANCELLED)) {
