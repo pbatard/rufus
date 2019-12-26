@@ -125,6 +125,8 @@ typedef struct _llist_t {
 
 extern void (*bled_printf) (const char* format, ...);
 extern void (*bled_progress) (const uint64_t processed_bytes);
+extern int (*bled_read)(int fd, void* buf, unsigned int count);
+extern int (*bled_write)(int fd, const void* buf, unsigned int count);
 extern unsigned long* bled_cancel_request;
 
 #define xfunc_die() longjmp(bb_error_jmp, 1)
@@ -159,9 +161,9 @@ static inline int fnmatch(const char *pattern, const char *string, int flags) {r
 static inline pid_t wait(int* status) { *status = 4; return -1; }
 #define wait_any_nohang wait
 
-/* This override enables the display of a progress based on the number of bytes read */
+/* This enables the display of a progress based on the number of bytes read */
 extern uint64_t bb_total_rb;
-static inline int full_read(int fd, void *buf, size_t count) {
+static inline int full_read(int fd, void *buf, unsigned int count) {
 	int rb;
 
 	if (fd < 0) {
@@ -179,12 +181,12 @@ static inline int full_read(int fd, void *buf, size_t count) {
 
 	if (fd == bb_virtual_fd) {
 		if (bb_virtual_pos + count > bb_virtual_len)
-			count = bb_virtual_len - bb_virtual_pos;
+			count = (unsigned int)(bb_virtual_len - bb_virtual_pos);
 		memcpy(buf, &bb_virtual_buf[bb_virtual_pos], count);
 		bb_virtual_pos += count;
 		rb = (int)count;
 	} else {
-		rb = _read(fd, buf, (int)count);
+		rb = (bled_read != NULL) ? bled_read(fd, buf, count) : _read(fd, buf, count);
 	}
 	if (rb > 0) {
 		bb_total_rb += rb;
@@ -194,13 +196,17 @@ static inline int full_read(int fd, void *buf, size_t count) {
 	return rb;
 }
 
+static inline int full_write(int fd, const void* buffer, unsigned int count)
+{
+	return (bled_write != NULL) ? bled_write(fd, buffer, count) : _write(fd, buffer, count);
+}
+
 static inline struct tm *localtime_r(const time_t *timep, struct tm *result) {
 	if (localtime_s(result, timep) != 0)
 		result = NULL;
 	return result;
 }
 
-#define full_write _write
 #define safe_read full_read
 #define lstat stat
 #define xmalloc malloc
