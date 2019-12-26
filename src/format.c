@@ -61,13 +61,14 @@ DWORD FormatStatus = 0, LastWriteError = 0;
 badblocks_report report = { 0 };
 static float format_percent = 0.0f;
 static int task_number = 0;
+static unsigned int sec_buf_pos = 0;
 extern const int nb_steps[FS_MAX];
 extern uint32_t dur_mins, dur_secs;
 extern uint32_t wim_nb_files, wim_proc_files, wim_extra_files;
 static int actual_fs_type, wintogo_index = -1, wininst_index = 0;
 extern BOOL force_large_fat32, enable_ntfs_compression, lock_drive, zero_drive, fast_zeroing, enable_file_indexing, write_as_image;
 extern BOOL use_vds;
-uint8_t *grub2_buf = NULL;
+uint8_t *grub2_buf = NULL, *sec_buf = NULL;
 long grub2_len;
 static BOOL WritePBR(HANDLE hLogicalDrive);
 
@@ -2242,6 +2243,50 @@ static void update_progress(const uint64_t processed_bytes)
 	UpdateProgressWithInfo(OP_FORMAT, MSG_261, processed_bytes, img_report.image_size);
 }
 
+// Some compressed images use streams that aren't multiple of the sector
+// size and cause write failures => Use a write override that alleviates
+// the problem. See GitHub issue #1422 for details.
+static int sector_write(int fd, const void* _buf, unsigned int count)
+{
+	const uint8_t* buf = (const uint8_t*)_buf;
+	const unsigned int sec_size = (unsigned int)SelectedDrive.SectorSize;
+	int written, fill_size = 0;
+
+	// If we are on a sector boundary and count is multiple of the
+	// sector size, just issue a regular write
+	if ((sec_buf_pos == 0) && (count % sec_size == 0))
+		return _write(fd, buf, count);
+
+	// If we have an existing partial sector, fill and write it
+	if (sec_buf_pos > 0) {
+		fill_size = min(sec_size - sec_buf_pos, count);
+		memcpy(&sec_buf[sec_buf_pos], buf, fill_size);
+		sec_buf_pos += fill_size;
+		// If we don't have a full sector just buffer it for next call
+		if (sec_buf_pos < sec_size)
+			return (int)count;
+		sec_buf_pos = 0;
+		written = _write(fd, sec_buf, sec_size);
+		if (written != sec_size)
+			return written;
+	}
+
+	// Now write as many full sectors as we can
+	uint32_t sec_num = (count - fill_size) / sec_size;
+	written = _write(fd, &buf[fill_size], sec_num * sec_size);
+	if (written < 0)
+		return written;
+	else if (written != sec_num * sec_size)
+		return fill_size + written;
+	sec_buf_pos = count - fill_size - written;
+	assert(sec_buf_pos < sec_size);
+
+	// Keep leftover bytes, if any, in the sector buffer
+	if (sec_buf_pos != 0)
+		memcpy(sec_buf, &buf[fill_size + written], sec_buf_pos);
+	return (int)count;
+}
+
 /* Write an image file or zero a drive */
 static BOOL WriteDrive(HANDLE hPhysicalDrive, HANDLE hSourceImage)
 {
@@ -2262,9 +2307,26 @@ static BOOL WriteDrive(HANDLE hPhysicalDrive, HANDLE hSourceImage)
 
 	if (img_report.compression_type != BLED_COMPRESSION_NONE) {
 		uprintf("Writing compressed image...");
-		bled_init(_uprintf, NULL, NULL, update_progress, &FormatStatus);
+		sec_buf = (uint8_t*)_mm_malloc(SelectedDrive.SectorSize, SelectedDrive.SectorSize);
+		if (sec_buf == NULL) {
+			FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_NOT_ENOUGH_MEMORY;
+			uprintf("Could not allocate disk write buffer");
+			goto out;
+		}
+		assert((uintptr_t)sec_buf % SelectedDrive.SectorSize == 0);
+		sec_buf_pos = 0;
+		bled_init(_uprintf, NULL, sector_write, update_progress, &FormatStatus);
 		bled_ret = bled_uncompress_with_handles(hSourceImage, hPhysicalDrive, img_report.compression_type);
 		bled_exit();
+		if ((bled_ret >= 0) && (sec_buf_pos != 0)) {
+			// A disk image that doesn't end up on disk boundary should be a rare
+			// enough case, so we dont bother checking the write operation and
+			// just issue a notice about it in the log.
+			uprintf("Notice: Compressed image data didn't end on block boundary.");
+			// Gonna assert that WriteFile() and _write() share the same file offset
+			WriteFile(hPhysicalDrive, sec_buf, SelectedDrive.SectorSize, &wSize, NULL);
+		}
+		safe_mm_free(sec_buf);
 		if ((bled_ret < 0) && (SCODE_CODE(FormatStatus) != ERROR_CANCELLED)) {
 			// Unfortunately, different compression backends return different negative error codes
 			uprintf("Could not write compressed image: %lld", bled_ret);
