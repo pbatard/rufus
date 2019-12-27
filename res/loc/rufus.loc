@@ -26,7 +26,7 @@
 # • v3.5  "lt-LT" "Lithuanian (Lietuvių)"
 # • v3.5  "ms-MY" "Malay (Bahasa Malaysia)"
 # • v3.5  "nb-NO" "Norwegian (Norsk)"
-# • v3.5  "fa-IR" "Persian (فارسی)"
+# • v3.5  "fa-IR" "Persian (پارسی)"
 # • v3.5  "pl-PL" "Polish (Polski)"
 # • v3.5  "pt-BR" "Portuguese Brazilian (Português do Brasil)"
 # • v3.5  "pt-PT" "Portuguese Standard (Português)"
@@ -8461,7 +8461,7 @@ t MSG_305 "Bruk dette alternativet for å angi om du vil bruke denne enheten til
 t MSG_306 "Hurtig nullstilling av disken: %s"
 
 #########################################################################
-l "fa-IR" "Persian (فارسی)" 0x0429
+l "fa-IR" "Persian (پارسی)" 0x0429
 v 3.5
 b "en-US"
 a "r"
