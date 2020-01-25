@@ -2873,7 +2873,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	int wait_for_mutex = 0;
 	FILE* fd;
 	BOOL attached_console = FALSE, external_loc_file = FALSE, lgp_set = FALSE, automount = TRUE;
-	BOOL disable_hogger = FALSE, previous_enable_HDDs = FALSE, vc = IsRegistryNode(REGKEY_HKCU, vs_reg);
+	BOOL disable_hogger = SHRegGetBoolUSValueA("SOFTWARE\\" COMPANY_NAME "\\" APPLICATION_NAME, "gui", /*fIgnoreHKCU*/ FALSE, /*fDefault*/ FALSE);
+	BOOL previous_enable_HDDs = FALSE, vc = IsRegistryNode(REGKEY_HKCU, vs_reg);
 	BOOL alt_pressed = FALSE, alt_command = FALSE;
 	BYTE *loc_data;
 	DWORD loc_size, u, size = sizeof(u);
@@ -2944,7 +2945,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 				// processing arguments with getopt, as we may want to print messages
 				// on the commandline then, which the hogger makes more intuitive.
 				if ((strcmp(argv[i], "-g") == 0) || (strcmp(argv[i], "--gui") == 0))
-					disable_hogger = TRUE;
+					disable_hogger ^= TRUE;
 			}
 			// If our application name contains a 'p' (for "portable") create a 'rufus.ini'
 			// NB: argv[0] is populated in the previous loop
