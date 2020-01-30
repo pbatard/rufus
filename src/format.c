@@ -2,7 +2,7 @@
  * Rufus: The Reliable USB Formatting Utility
  * Formatting function calls
  * Copyright © 2007-2009 Tom Thornhill/Ridgecrop
- * Copyright © 2011-2019 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2020 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -2502,8 +2502,9 @@ DWORD WINAPI FormatThread(void* param)
 		// According to Microsoft, every GPT disk (we RUN Windows from) must have an MSR due to not having hidden sectors
 		// http://msdn.microsoft.com/en-us/library/windows/hardware/dn640535.aspx#gpt_faq_what_disk_require_msr
 		extra_partitions = XP_ESP | XP_MSR;
-	else if ( (fs_type == FS_NTFS) && ((boot_type == BT_UEFI_NTFS) ||
-			  ((boot_type == BT_IMAGE) && IS_EFI_BOOTABLE(img_report) && ((target_type == TT_UEFI) || (windows_to_go) || (allow_dual_uefi_bios)))) )
+	else if ( ((fs_type == FS_NTFS) || (fs_type == FS_EXFAT)) &&
+			  ((boot_type == BT_UEFI_NTFS) || ((boot_type == BT_IMAGE) && IS_EFI_BOOTABLE(img_report) &&
+			   ((target_type == TT_UEFI) || (windows_to_go) || (allow_dual_uefi_bios)))) )
 		extra_partitions = XP_UEFI_NTFS;
 	else if ((boot_type == BT_IMAGE) && !write_as_image && HAS_PERSISTENCE(img_report) && persistence_size)
 		extra_partitions = XP_CASPER;
