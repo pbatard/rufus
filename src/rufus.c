@@ -1,6 +1,6 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
- * Copyright © 2011-2019 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2020 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -183,6 +183,7 @@ static void SetAllowedFileSystems(void)
 		break;
 	case BT_UEFI_NTFS:
 		allowed_filesystem[FS_NTFS] = TRUE;
+		allowed_filesystem[FS_EXFAT] = TRUE;
 		break;
 	}
 
@@ -1508,7 +1509,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 uefi_target:
 	if (boot_type == BT_UEFI_NTFS) {
 		fs_type = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
-		if (fs_type != FS_NTFS) {
+		if (fs_type != FS_NTFS && fs_type != FS_EXFAT) {
 			MessageBoxExU(hMainDialog, lmprintf(MSG_097, "UEFI:NTFS"), lmprintf(MSG_092), MB_OK|MB_ICONERROR|MB_IS_RTL, selected_langid);
 			goto out;
 		}
