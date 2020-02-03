@@ -294,6 +294,3 @@ typedef struct _RTL_HEAP_PARAMETERS
 #define SE_TIME_ZONE_PRIVILEGE (34L)
 #define SE_CREATE_SYMBOLIC_LINK_PRIVILEGE (35L)
 #define SE_MAX_WELL_KNOWN_PRIVILEGE SE_CREATE_SYMBOLIC_LINK_PRIVILEGE
-
-#define PF_INIT_OR_SET_STATUS(proc, name)  do {PF_INIT(proc, name);                            \
-	if ((pf##proc == NULL) && (NT_SUCCESS(status))) status = STATUS_NOT_IMPLEMENTED; } while(0)
