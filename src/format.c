@@ -2982,7 +2982,6 @@ DWORD WINAPI FormatThread(void* param)
 	}
 
 out:
-	zero_drive = FALSE;
 	safe_free(volume_name);
 	safe_free(buffer);
 	safe_closehandle(hSourceImage);

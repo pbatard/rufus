@@ -50,6 +50,13 @@
 #include "../res/grub/grub_version.h"
 #include "../res/grub2/grub2_version.h"
 
+enum bootcheck_return {
+	BOOTCHECK_PROCEED = 0,
+	BOOTCHECK_CANCEL = -1,
+	BOOTCHECK_DOWNLOAD_ERROR = -2,
+	BOOTCHECK_GENERAL_ERROR = -3,
+};
+
 static const char* cmdline_hogger = "rufus.com";
 static const char* ep_reg = "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer";
 static const char* vs_reg = "Software\\Microsoft\\VisualStudio";
@@ -1185,7 +1192,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 	int i, r;
 	FILE *fd;
 	DWORD len;
-	WPARAM ret = -1;
+	WPARAM ret = BOOTCHECK_CANCEL;
 	BOOL in_files_dir = FALSE;
 	const char* grub = "grub";
 	const char* core_img = "core.img";
@@ -1202,7 +1209,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 
 	if ((zero_drive) || (boot_type == BT_NON_BOOTABLE)) {
 		// Nothing to check
-		ret = 0;
+		ret = BOOTCHECK_PROCEED;
 		goto out;
 	}
 
@@ -1217,7 +1224,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 		}
 		if (IS_DD_BOOTABLE(img_report) && !img_report.is_iso) {
 			// Pure DD images are fine at this stage
-			ret = 0;
+			ret = BOOTCHECK_PROCEED;
 			goto out;
 		}
 		if ((image_options & IMOP_WINTOGO) && (ComboBox_GetCurSel(GetDlgItem(hMainDialog, IDC_IMAGE_OPTION)) == 1)) {
@@ -1375,6 +1382,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 								len = DownloadSignedFile(tmp, &tmp[sizeof(FILES_URL)], hMainDialog, TRUE);
 								if (len == 0) {
 									uprintf("Could not download file - cancelling");
+									ret = BOOTCHECK_DOWNLOAD_ERROR;
 									goto out;
 								}
 								use_own_c32[i] = TRUE;
@@ -1442,6 +1450,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 								uprintf("Could not download the file - will try to use embedded %s version instead", img_report.sl_version_str);
 							} else {
 								uprintf("Could not download the file - cancelling");
+								ret = BOOTCHECK_DOWNLOAD_ERROR;
 								goto out;
 							}
 						}
@@ -1470,8 +1479,10 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 				static_sprintf(tmp, "%s-%s", syslinux, embedded_sl_version_str[1]);
 				IGNORE_RETVAL(_mkdir(tmp));
 				static_sprintf(tmp, "%s/%s-%s/%s.%s", FILES_URL, syslinux, embedded_sl_version_str[1], ldlinux, ldlinux_ext[2]);
-				if (DownloadSignedFile(tmp, &tmp[sizeof(FILES_URL)], hMainDialog, TRUE) == 0)
+				if (DownloadSignedFile(tmp, &tmp[sizeof(FILES_URL)], hMainDialog, TRUE) == 0) {
+					ret = BOOTCHECK_DOWNLOAD_ERROR;
 					goto out;
+				}
 			}
 		}
 	} else if (boot_type == BT_MSDOS) {
@@ -1500,8 +1511,10 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 				static_sprintf(tmp, "grub4dos-%s", GRUB4DOS_VERSION);
 				IGNORE_RETVAL(_mkdir(tmp));
 				static_sprintf(tmp, "%s/grub4dos-%s/grldr", FILES_URL, GRUB4DOS_VERSION);
-				if (DownloadSignedFile(tmp, &tmp[sizeof(FILES_URL)], hMainDialog, TRUE) == 0)
+				if (DownloadSignedFile(tmp, &tmp[sizeof(FILES_URL)], hMainDialog, TRUE) == 0) {
+					ret = BOOTCHECK_DOWNLOAD_ERROR;
 					goto out;
+				}
 			}
 		}
 	}
@@ -1514,7 +1527,7 @@ uefi_target:
 			goto out;
 		}
 	}
-	ret = 0;
+	ret = BOOTCHECK_PROCEED;
 
 out:
 	PostMessage(hMainDialog, UM_FORMAT_START, ret, 0);
@@ -2622,8 +2635,10 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		break;
 
 	case UM_FORMAT_START:
-		if (wParam != 0)
+		if (wParam != BOOTCHECK_PROCEED)
 			goto aborted_start;
+		// All subsequent aborts below translate to a user cancellation
+		wParam = BOOTCHECK_CANCEL;
 
 		if ((partition_type == PARTITION_STYLE_MBR) && (SelectedDrive.DiskSize > 2 * TB)) {
 			if (MessageBoxExU(hMainDialog, lmprintf(MSG_134, SizeToHumanReadable(SelectedDrive.DiskSize - 2 * TB, FALSE, FALSE)),
@@ -2699,14 +2714,19 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		if (format_thid != NULL)
 			break;
 	aborted_start:
-		EnableControls(TRUE, FALSE);
 		zero_drive = FALSE;
 		if (queued_hotplug_event)
 			SendMessage(hDlg, UM_MEDIA_CHANGE, 0, 0);
-		EnableWindow(GetDlgItem(hDlg, IDCANCEL), TRUE);
-		break;
+		if (wParam == BOOTCHECK_CANCEL) {
+			EnableControls(TRUE, FALSE);
+			break;
+		}
+		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) |
+			((wParam == BOOTCHECK_DOWNLOAD_ERROR) ? APPERR(ERROR_CANT_DOWNLOAD) : ERROR_GEN_FAILURE);
+		// Fall through
 
 	case UM_FORMAT_COMPLETED:
+		zero_drive = FALSE;
 		format_thid = NULL;
 		// Stop the timer
 		KillTimer(hMainDialog, TID_APP_TIMER);
