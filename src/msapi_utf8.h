@@ -19,7 +19,9 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
+#include "rufus.h"
 #include <windows.h>
+#include <winternl.h>
 #include <stdio.h>
 #include <shlobj.h>
 #include <ctype.h>
@@ -75,6 +77,17 @@ extern "C" {
 #define wconvert(p)     wchar_t* w ## p = utf8_to_wchar(p)
 #define walloc(p, size) wchar_t* w ## p = (p == NULL)?NULL:(wchar_t*)calloc(size, sizeof(wchar_t))
 #define wfree(p) sfree(w ## p)
+
+#define STATUS_SUCCESS					((NTSTATUS)0x00000000L)
+#define STATUS_NOT_IMPLEMENTED			((NTSTATUS)0xC0000002L)
+#define FILE_ATTRIBUTE_VALID_FLAGS		0x00007fb7
+#define NtCurrentPeb()					(NtCurrentTeb()->ProcessEnvironmentBlock)
+#define RtlGetProcessHeap()				(NtCurrentPeb()->Reserved4[1]) // NtCurrentPeb()->ProcessHeap, mangled due to deficiencies in winternl.h
+
+PF_TYPE_DECL(NTAPI, NTSTATUS, NtCreateFile, (PHANDLE, ACCESS_MASK, POBJECT_ATTRIBUTES, PIO_STATUS_BLOCK, PLARGE_INTEGER, ULONG, ULONG, ULONG, ULONG, PVOID, ULONG));
+PF_TYPE_DECL(NTAPI, BOOLEAN, RtlDosPathNameToNtPathName_U, (PCWSTR, PUNICODE_STRING, PWSTR*, PVOID));
+PF_TYPE_DECL(NTAPI, BOOLEAN, RtlFreeHeap, (PVOID, ULONG, PVOID));
+PF_TYPE_DECL(NTAPI, VOID, RtlSetLastWin32ErrorAndNtStatusFromNtStatus, (NTSTATUS));
 
 /*
  * Converts an UTF-16 string to UTF8 (allocate returned string)
@@ -475,6 +488,145 @@ static __inline HANDLE CreateFileU(const char* lpFileName, DWORD dwDesiredAccess
 	wfree(lpFileName);
 	SetLastError(err);
 	return ret;
+}
+
+static __inline HANDLE CreatePreallocatedFileU(const char* lpFileName, DWORD dwDesiredAccess, DWORD dwShareMode,
+											LPSECURITY_ATTRIBUTES lpSecurityAttributes, DWORD dwCreationDisposition,
+											DWORD dwFlagsAndAttributes, LONGLONG fileSize)
+{
+	HANDLE fileHandle = INVALID_HANDLE_VALUE;
+	OBJECT_ATTRIBUTES objectAttributes;
+	IO_STATUS_BLOCK ioStatusBlock;
+	UNICODE_STRING ntPath;
+	ULONG fileAttributes, flags = 0;
+	LARGE_INTEGER allocationSize;
+	NTSTATUS status = STATUS_SUCCESS;
+	
+	PF_INIT_OR_SET_STATUS(NtCreateFile, Ntdll);
+	PF_INIT_OR_SET_STATUS(RtlDosPathNameToNtPathName_U, Ntdll);
+	PF_INIT_OR_SET_STATUS(RtlFreeHeap, Ntdll);
+	PF_INIT_OR_SET_STATUS(RtlSetLastWin32ErrorAndNtStatusFromNtStatus, Ntdll);
+
+	if (!NT_SUCCESS(status))
+	{
+		return CreateFileU(lpFileName, dwDesiredAccess, dwShareMode, lpSecurityAttributes,
+			dwCreationDisposition, dwFlagsAndAttributes, NULL);
+	}
+
+	wconvert(lpFileName);
+	
+	// Determine creation disposition and flags
+	switch (dwCreationDisposition)
+	{
+		case CREATE_NEW:
+			dwCreationDisposition = FILE_CREATE;
+			break;
+		case CREATE_ALWAYS:
+			dwCreationDisposition = FILE_OVERWRITE_IF;
+			break;
+		case OPEN_EXISTING:
+			dwCreationDisposition = FILE_OPEN;
+			break;
+		case OPEN_ALWAYS:
+			dwCreationDisposition = FILE_OPEN_IF;
+			break;
+		case TRUNCATE_EXISTING:
+			dwCreationDisposition = FILE_OVERWRITE;
+			break;
+		default:
+			SetLastError(ERROR_INVALID_PARAMETER);
+			return INVALID_HANDLE_VALUE;
+	}
+
+	if ((dwFlagsAndAttributes & FILE_FLAG_OVERLAPPED) == 0)
+		flags |= FILE_SYNCHRONOUS_IO_NONALERT;
+
+	if ((dwFlagsAndAttributes & FILE_FLAG_WRITE_THROUGH) != 0)
+		flags |= FILE_WRITE_THROUGH;
+
+	if ((dwFlagsAndAttributes & FILE_FLAG_NO_BUFFERING) != 0)
+		flags |= FILE_NO_INTERMEDIATE_BUFFERING;
+
+	if ((dwFlagsAndAttributes & FILE_FLAG_RANDOM_ACCESS) != 0)
+		flags |= FILE_RANDOM_ACCESS;
+
+	if ((dwFlagsAndAttributes & FILE_FLAG_SEQUENTIAL_SCAN) != 0)
+		flags |= FILE_SEQUENTIAL_ONLY;
+
+	if ((dwFlagsAndAttributes & FILE_FLAG_DELETE_ON_CLOSE) != 0)
+	{
+		flags |= FILE_DELETE_ON_CLOSE;
+		dwDesiredAccess |= DELETE;
+	}
+
+	if ((dwFlagsAndAttributes & FILE_FLAG_BACKUP_SEMANTICS) != 0)
+	{
+		if ((dwDesiredAccess & GENERIC_ALL) != 0)
+			flags |= (FILE_OPEN_FOR_BACKUP_INTENT | FILE_OPEN_REMOTE_INSTANCE);
+		else
+		{
+			if ((dwDesiredAccess & GENERIC_READ) != 0)
+				flags |= FILE_OPEN_FOR_BACKUP_INTENT;
+
+			if ((dwDesiredAccess & GENERIC_WRITE) != 0)
+				flags |= FILE_OPEN_REMOTE_INSTANCE;
+		}
+	}
+	else
+	{
+		flags |= FILE_NON_DIRECTORY_FILE;
+	}
+
+	if ((dwFlagsAndAttributes & FILE_FLAG_OPEN_REPARSE_POINT) != 0)
+		flags |= FILE_OPEN_REPARSE_POINT;
+
+	if ((dwFlagsAndAttributes & FILE_FLAG_OPEN_NO_RECALL) != 0)
+		flags |= FILE_OPEN_NO_RECALL;
+
+	fileAttributes = dwFlagsAndAttributes & (FILE_ATTRIBUTE_VALID_FLAGS & ~FILE_ATTRIBUTE_DIRECTORY);
+
+	dwDesiredAccess |= (SYNCHRONIZE | FILE_READ_ATTRIBUTES);
+
+	// Convert DOS path to NT format
+	if (!pfRtlDosPathNameToNtPathName_U(wlpFileName, &ntPath, NULL, NULL))
+	{
+		wfree(lpFileName);
+		SetLastError(ERROR_FILE_NOT_FOUND);
+		return INVALID_HANDLE_VALUE;
+	}
+
+	InitializeObjectAttributes(&objectAttributes, &ntPath, 0, NULL, NULL);
+
+	if (lpSecurityAttributes != NULL)
+	{
+		if (lpSecurityAttributes->bInheritHandle)
+			objectAttributes.Attributes |= OBJ_INHERIT;
+		objectAttributes.SecurityDescriptor = lpSecurityAttributes->lpSecurityDescriptor;
+	}
+
+	if ((dwFlagsAndAttributes & FILE_FLAG_POSIX_SEMANTICS) == 0)
+		objectAttributes.Attributes |= OBJ_CASE_INSENSITIVE;
+
+	allocationSize.QuadPart = fileSize;
+
+	// Call NtCreateFile
+	status = pfNtCreateFile(&fileHandle,
+							dwDesiredAccess,
+							&objectAttributes,
+							&ioStatusBlock,
+							&allocationSize,
+							fileAttributes,
+							dwShareMode,
+							dwCreationDisposition,
+							flags,
+							NULL,
+							0);
+
+	pfRtlFreeHeap(RtlGetProcessHeap(), 0, ntPath.Buffer);
+	wfree(lpFileName);
+	pfRtlSetLastWin32ErrorAndNtStatusFromNtStatus(status);
+
+	return fileHandle;
 }
 
 static __inline BOOL CreateDirectoryU(const char* lpPathName, LPSECURITY_ATTRIBUTES lpSecurityAttributes)
