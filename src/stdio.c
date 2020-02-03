@@ -766,6 +766,8 @@ const char* _StrError(DWORD error_code)
 		return lmprintf(MSG_079);
 	case ERROR_BAD_SIGNATURE:
 		return lmprintf(MSG_172);
+	case ERROR_CANT_DOWNLOAD:
+		return lmprintf(MSG_242);
 	default:
 		SetLastError(error_code);
 		return WindowsErrorString();
