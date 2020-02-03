@@ -422,15 +422,6 @@ static void __inline set_directory_timestamp(char* path, LPFILETIME creation, LP
 	safe_closehandle(dir_handle);
 }
 
-// Preallocates the target size of a newly created file in order to prevent fragmentation from repeated writes
-static void __inline preallocate_filesize(HANDLE hFile, int64_t file_length)
-{
-	SetFileInformationByHandle(hFile, FileEndOfFileInfo, &file_length, sizeof(file_length));
-
-	// FileAllocationInfo does not require the size to be a multiple of the cluster size; the FS driver takes care of this.
-	SetFileInformationByHandle(hFile, FileAllocationInfo, &file_length, sizeof(file_length));
-}
-
 // Returns 0 on success, nonzero on error
 static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const char *psz_path)
 {
@@ -505,8 +496,8 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 			psz_sanpath = sanitize_filename(psz_fullpath, &is_identical);
 			if (!is_identical)
 				uprintf("  File name sanitized to '%s'", psz_sanpath);
-			file_handle = CreateFileU(psz_sanpath, GENERIC_READ | GENERIC_WRITE,
-				FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+			file_handle = CreatePreallocatedFile(psz_sanpath, GENERIC_READ | GENERIC_WRITE,
+				FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, file_length);
 			if (file_handle == INVALID_HANDLE_VALUE) {
 				err = GetLastError();
 				uprintf("  Unable to create file: %s", WindowsErrorString());
@@ -515,7 +506,6 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 				else
 					goto out;
 			} else {
-				preallocate_filesize(file_handle, file_length);
 				while (file_length > 0) {
 					if (FormatStatus) goto out;
 					memset(buf, 0, UDF_BLOCKSIZE);
@@ -657,8 +647,8 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 					uprintf("  Ignoring Rock Ridge symbolic link to '%s'", p_statbuf->rr.psz_symlink);
 				safe_free(p_statbuf->rr.psz_symlink);
 			}
-			file_handle = CreateFileU(psz_sanpath, GENERIC_READ | GENERIC_WRITE,
-				FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+			file_handle = CreatePreallocatedFile(psz_sanpath, GENERIC_READ | GENERIC_WRITE,
+				FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, file_length);
 			if (file_handle == INVALID_HANDLE_VALUE) {
 				err = GetLastError();
 				uprintf("  Unable to create file: %s", WindowsErrorString());
@@ -667,7 +657,6 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 				else
 					goto out;
 			} else {
-				preallocate_filesize(file_handle, file_length);
 				for (j=0; j<p_statbuf->extents; j++) {
 					extent_length = p_statbuf->extsize[j];
 					for (i=0; extent_length>0; i++) {

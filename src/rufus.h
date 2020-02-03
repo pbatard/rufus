@@ -577,6 +577,9 @@ extern BOOL EnablePrivileges(void);
 extern void FlashTaskbar(HANDLE handle);
 extern DWORD WaitForSingleObjectWithMessages(HANDLE hHandle, DWORD dwMilliseconds);
 extern HICON CreateMirroredIcon(HICON hiconOrg);
+extern HANDLE CreatePreallocatedFile(const char* lpFileName, DWORD dwDesiredAccess,
+	DWORD dwShareMode, LPSECURITY_ATTRIBUTES lpSecurityAttributes, DWORD dwCreationDisposition,
+	DWORD dwFlagsAndAttributes, LONGLONG fileSize);
 #define GetTextWidth(hDlg, id) GetTextSize(GetDlgItem(hDlg, id), NULL).cx
 
 DWORD WINAPI FormatThread(void* param);
@@ -649,6 +652,8 @@ static __inline HMODULE GetLibraryHandle(char* szLibraryName) {
 #define PF_INIT_OR_OUT(proc, name)			do {PF_INIT(proc, name);         \
 	if (pf##proc == NULL) {uprintf("Unable to locate %s() in %s.dll: %s\n",  \
 	#proc, #name, WindowsErrorString()); goto out;} } while(0)
+#define PF_INIT_OR_SET_STATUS(proc, name)	do {PF_INIT(proc, name);         \
+	if ((pf##proc == NULL) && (NT_SUCCESS(status))) status = STATUS_NOT_IMPLEMENTED; } while(0)
 
 /* Custom application errors */
 #define FAC(f)                         (f<<16)
