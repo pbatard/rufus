@@ -67,7 +67,7 @@
 #define RETVAL_OBSOLETE_INPUT           (dbg("%d", __LINE__), -7)
 
 /* Other housekeeping constants */
-#define IOBUF_SIZE          4096
+#define IOBUF_SIZE          BB_BUFSIZE
 
 /* This is what we know about each Huffman coding group */
 struct group_data {

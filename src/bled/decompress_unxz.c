@@ -1,7 +1,7 @@
 /*
  * unxz implementation for Bled/busybox
  *
- * Copyright © 2014-2015 Pete Batard <pete@akeo.ie>
+ * Copyright © 2014-2020 Pete Batard <pete@akeo.ie>
  * Based on xz-embedded © Lasse Collin <lasse.collin@tukaani.org> - Public Domain
  *
  * Licensed under GPLv2 or later, see file LICENSE in this source tree.
@@ -13,6 +13,8 @@
 #define XZ_EXTERN static
 // We get XZ_OPTIONS_ERROR in xz_dec_stream if this is not defined
 #define XZ_DEC_ANY_CHECK
+
+#define XZ_BUFSIZE BB_BUFSIZE
 
 #include "xz_dec_bcj.c"
 #include "xz_dec_lzma2.c"
@@ -49,26 +51,26 @@ IF_DESKTOP(long long) int FAST_FUNC unpack_xz_stream(transformer_state_t *xstate
 	if (!s)
 		bb_error_msg_and_err("memory allocation error");
 
-	in = xmalloc(BUFSIZ);
-	out = xmalloc(BUFSIZ);
+	in = xmalloc(XZ_BUFSIZE);
+	out = xmalloc(XZ_BUFSIZE);
 
 	b.in = in;
 	b.in_pos = 0;
 	b.in_size = 0;
 	b.out = out;
 	b.out_pos = 0;
-	b.out_size = BUFSIZ;
+	b.out_size = XZ_BUFSIZE;
 
 	while (true) {
 		if (b.in_pos == b.in_size) {
-			b.in_size = safe_read(xstate->src_fd, in, BUFSIZ);
+			b.in_size = safe_read(xstate->src_fd, in, XZ_BUFSIZE);
 			if ((int)b.in_size < 0)
 				bb_error_msg_and_err("read error (errno: %d)", errno);
 			b.in_pos = 0;
 		}
 		ret = xz_dec_run(s, &b);
 
-		if (b.out_pos == BUFSIZ) {
+		if (b.out_pos == XZ_BUFSIZE) {
 			nwrote = transformer_write(xstate, b.out, b.out_pos);
 			if (nwrote == -ENOSPC) {
 				ret = XZ_BUF_FULL;

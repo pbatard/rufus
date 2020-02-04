@@ -33,7 +33,7 @@ typedef struct {
 
 /* Had provisions for variable buffer, but we don't need it here */
 	/* int buffer_size; */
-#define RC_BUFFER_SIZE 0x10000
+#define RC_BUFFER_SIZE BB_BUFSIZE
 
 	uint32_t code;
 	uint32_t range;

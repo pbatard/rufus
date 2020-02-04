@@ -49,7 +49,7 @@ typedef struct huft_t {
 enum {
 	/* gunzip_window size--must be a power of two, and
 	 * at least 32K for zip's deflate method */
-	GUNZIP_WSIZE = 0x8000,
+	GUNZIP_WSIZE = BB_BUFSIZE,
 	/* If BMAX needs to be larger than 16, then h and x[] should be ulg. */
 	BMAX = 16,	/* maximum bit length of any code (16 for explode) */
 	N_MAX = 288,	/* maximum number of codes in any set */
@@ -128,9 +128,7 @@ typedef struct state_t {
 #define gunzip_bb           (S()gunzip_bb          )
 #define gunzip_bk           (S()gunzip_bk          )
 #define to_read             (S()to_read            )
-// #define bytebuffer_max   (S()bytebuffer_max     )
-// Both gunzip and unzip can use constant buffer size now (16k):
-#define bytebuffer_max      0x4000
+#define bytebuffer_max      BB_BUFSIZE
 #define bytebuffer          (S()bytebuffer         )
 #define bytebuffer_offset   (S()bytebuffer_offset  )
 #define bytebuffer_size     (S()bytebuffer_size    )

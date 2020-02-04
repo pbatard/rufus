@@ -2,7 +2,7 @@
  * Library header for busybox/Bled
  *
  * Rewritten for Bled (Base Library for Easy Decompression)
- * Copyright © 2014-2015 Pete Batard <pete@akeo.ie>
+ * Copyright © 2014-2020 Pete Batard <pete@akeo.ie>
  *
  * Licensed under GPLv2 or later, see file LICENSE in this source tree.
  */
@@ -39,10 +39,7 @@
 #include <sys/types.h>
 #include <io.h>
 
-#ifdef BUFSIZ
-#undef BUFSIZ
-#endif
-#define BUFSIZ 65536
+#define BB_BUFSIZE 0x40000
 
 #define IF_DESKTOP(x) x
 #define IF_NOT_DESKTOP(x)
