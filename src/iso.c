@@ -33,6 +33,7 @@
 #include <direct.h>
 #include <ctype.h>
 #include <virtdisk.h>
+#include <sys/stat.h>
 
 #include <cdio/cdio.h>
 #include <cdio/logging.h>
@@ -50,6 +51,10 @@
 // the progress bar for every block will bring extraction to a crawl
 #define PROGRESS_THRESHOLD        128
 #define FOUR_GIGABYTES            4294967296LL
+
+// Needed for UDF symbolic link testing
+#define S_IFLNK                   0xA000
+#define S_ISLNK(m)                (((m) & S_IFMT) == S_IFLNK)
 
 // Needed for UDF ISO access
 CdIo_t* cdio_open (const char* psz_source, driver_id_t driver_id) {return NULL;}
@@ -280,11 +285,9 @@ static BOOL check_iso_props(const char* psz_dirname, int64_t file_length, const 
 		}
 		if (file_length >= FOUR_GIGABYTES)
 			img_report.has_4GB_file = TRUE;
-		// Compute projected size needed
-		total_blocks += file_length / ISO_BLOCKSIZE;
-		// NB: ISO_BLOCKSIZE = UDF_BLOCKSIZE
-		if ((file_length != 0) && (file_length % ISO_BLOCKSIZE != 0))
-			total_blocks++;
+		// Compute projected size needed (NB: ISO_BLOCKSIZE = UDF_BLOCKSIZE)
+		if (file_length != 0)
+			total_blocks += (file_length + (ISO_BLOCKSIZE - 1)) / ISO_BLOCKSIZE;
 		return TRUE;
 	}
 	return FALSE;
@@ -463,6 +466,8 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 		if (length < 0) {
 			goto out;
 		}
+		if (S_ISLNK(udf_get_posix_filemode(p_udf_dirent)))
+			img_report.has_symlinks = SYMLINKS_UDF;
 		if (udf_is_dir(p_udf_dirent)) {
 			if (!scan_only) {
 				psz_sanpath = sanitize_filename(psz_fullpath, &is_identical);
@@ -608,7 +613,7 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 			// a generic list that's unaware of RR extensions is being used, so we prevent that memleak ourselves
 			is_symlink = (p_statbuf->rr.psz_symlink != NULL);
 			if (is_symlink)
-				img_report.has_symlinks = TRUE;
+				img_report.has_symlinks = SYMLINKS_RR;
 			if (scan_only)
 				safe_free(p_statbuf->rr.psz_symlink);
 		} else {
@@ -769,7 +774,6 @@ BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan)
 	} else {
 		uprintf("Extracting files...\n");
 		IGNORE_RETVAL(_chdirU(app_dir));
-//		PrintInfo(0, MSG_231);
 		if (total_blocks == 0) {
 			uprintf("Error: ISO has not been properly scanned.\n");
 			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_ISO_SCAN);
@@ -803,7 +807,8 @@ try_iso:
 	// Perform our first scan with Joliet disabled (if Rock Ridge is enabled), so that we can find if
 	// there exists a Rock Ridge file with a name > 64 chars or if there are symlinks. If that is the
 	// case then we also disable Joliet during the extract phase.
-	if ((!enable_joliet) || (enable_rockridge && (scan_only || img_report.has_long_filename || img_report.has_symlinks))) {
+	if ((!enable_joliet) || (enable_rockridge && (scan_only || img_report.has_long_filename ||
+		(img_report.has_symlinks == SYMLINKS_RR)))) {
 		iso_extension_mask &= ~ISO_EXTENSION_JOLIET;
 	}
 	if (!enable_rockridge) {

@@ -1073,8 +1073,12 @@ static void DisplayISOProps(void)
 			(img_report.wininst_version >> 16) & 0xff, (img_report.wininst_version >> 8) & 0xff,
 			(img_report.wininst_version >= SPECIAL_WIM_VERSION) ? "+": "");
 	}
-	PRINT_ISO_PROP(img_report.has_symlinks, "  Note: This ISO uses symbolic links, which will not be replicated due to file system limitations.");
-	PRINT_ISO_PROP(img_report.has_symlinks, "  Because of this, some features from this image may not work...");
+	PRINT_ISO_PROP(img_report.has_symlinks,
+		"  Note: This ISO uses symbolic links, which will not be replicated due to file system limitations.");
+	PRINT_ISO_PROP((img_report.has_symlinks == SYMLINKS_RR),
+		"  Because of this, some features from this image may not work...");
+	PRINT_ISO_PROP((img_report.has_symlinks == SYMLINKS_UDF),
+		"  Because of this, the size required for the target media may be much larger than size of the ISO...");
 }
 
 // Insert the image name into the Boot selection dropdown
