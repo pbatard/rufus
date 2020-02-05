@@ -87,6 +87,12 @@
 #if !defined S_IFIFO && defined _WIN32
 # define S_IFIFO 0x1000
 #endif
+#if !defined S_IFLNK && defined _WIN32
+#define S_IFLNK 0xA000
+#endif
+#if !defined S_IFSOCK && defined _WIN32
+#define S_IFSOCK 0xC000
+#endif
 
 #if !defined S_ISBLK && defined S_IFBLK
 # define S_ISBLK(m) (((m) & S_IFMT) == S_IFBLK)

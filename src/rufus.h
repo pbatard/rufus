@@ -312,6 +312,8 @@ enum checksum_type {
 #define HAS_WINTOGO(r)      (HAS_BOOTMGR(r) && IS_EFI_BOOTABLE(r) && HAS_WININST(r))
 #define HAS_PERSISTENCE(r)  ((HAS_SYSLINUX(r) || HAS_GRUB(r)) && !(HAS_WINDOWS(r) || HAS_REACTOS(r) || HAS_KOLIBRIOS(r)))
 #define IS_FAT(fs)          ((fs_type == FS_FAT16) || (fs_type == FS_FAT32))
+#define SYMLINKS_RR         0x01
+#define SYMLINKS_UDF        0x02
 
 typedef struct {
 	char label[192];					// 3*64 to account for UTF-8
@@ -331,9 +333,9 @@ typedef struct {
 	uint16_t winpe;
 	uint8_t has_efi;
 	uint8_t wininst_index;
+	uint8_t has_symlinks;
 	BOOLEAN has_4GB_file;
 	BOOLEAN has_long_filename;
-	BOOLEAN has_symlinks;
 	BOOLEAN has_bootmgr;
 	BOOLEAN has_bootmgr_efi;
 	BOOLEAN has_autorun;
