@@ -360,7 +360,9 @@
     <ClInclude Include="..\src\bled\bled.h" />
     <ClInclude Include="..\src\drive.h" />
     <ClInclude Include="..\src\format.h" />
+    <ClInclude Include="..\src\gpt_types.h" />
     <ClInclude Include="..\src\hdd_vs_ufd.h" />
+    <ClInclude Include="..\src\mbr_types.h" />
     <ClInclude Include="..\src\missing.h" />
     <ClInclude Include="..\src\process.h" />
     <ClInclude Include="..\src\settings.h" />
@@ -377,7 +379,6 @@
     <ClInclude Include="..\src\license.h" />
     <ClInclude Include="..\src\db.h" />
     <ClInclude Include="..\src\smart.h" />
-    <ClInclude Include="..\src\sys_types.h" />
     <ClInclude Include="..\src\dev.h" />
     <ClInclude Include="..\src\ui.h" />
     <ClInclude Include="..\src\ui_data.h" />
