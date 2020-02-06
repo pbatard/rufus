@@ -39,7 +39,8 @@
 
 #include "file.h"
 #include "drive.h"
-#include "sys_types.h"
+#include "mbr_types.h"
+#include "gpt_types.h"
 #include "br.h"
 #include "fat16.h"
 #include "fat32.h"
@@ -50,22 +51,6 @@ const char* sfd_name = "Super Floppy Disk";
 const char* groot_name = GLOBALROOT_NAME;
 const size_t groot_len = sizeof(GLOBALROOT_NAME) - 1;
 
-#if !defined(PARTITION_BASIC_DATA_GUID)
-const GUID PARTITION_BASIC_DATA_GUID =
-	{ 0xebd0a0a2L, 0xb9e5, 0x4433, {0x87, 0xc0, 0x68, 0xb6, 0xb7, 0x26, 0x99, 0xc7} };
-#endif
-#if !defined(PARTITION_MSFT_RESERVED_GUID)
-const GUID PARTITION_MSFT_RESERVED_GUID =
-	{ 0xe3c9e316L, 0x0b5c, 0x4db8, {0x81, 0x7d, 0xf9, 0x2d, 0xf0, 0x02, 0x15, 0xae} };
-#endif
-#if !defined(PARTITION_SYSTEM_GUID)
-const GUID PARTITION_SYSTEM_GUID =
-	{ 0xc12a7328L, 0xf81f, 0x11d2, {0xba, 0x4b, 0x00, 0xa0, 0xc9, 0x3e, 0xc9, 0x3b} };
-#endif
-#if !defined(PARTITION_LINUX_HOME_GUID)
-const GUID PARTITION_LINUX_HOME_GUID =
-	{ 0x933ac7e1l, 0x2eb4, 0x4f13, {0xb8, 0x44, 0x0e, 0x14, 0xe2, 0xae, 0xf9, 0x15 } };
-#endif
 
 #if defined(__MINGW32__)
 const IID CLSID_VdsLoader = { 0x9c38ed61, 0xd565, 0x4728, { 0xae, 0xee, 0xc8, 0x09, 0x52, 0xf0, 0xec, 0xde } };
@@ -1242,7 +1227,7 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 				}
 				// NB: MinGW's gcc 4.9.2 broke "%lld" printout on XP so we use the inttypes.h "PRI##" qualifiers
 				suprintf("  Type: %s (0x%02x)\r\n  Size: %s (%" PRIi64 " bytes)\r\n  Start Sector: %" PRIi64 ", Boot: %s",
-					((part_type==0x07||super_floppy_disk)&&(FileSystemName[0]!=0))?FileSystemName:GetPartitionType(part_type), super_floppy_disk?0:part_type,
+					((part_type==0x07||super_floppy_disk)&&(FileSystemName[0]!=0))?FileSystemName:GetMBRPartitionType(part_type), super_floppy_disk?0:part_type,
 					SizeToHumanReadable(DriveLayout->PartitionEntry[i].PartitionLength.QuadPart, TRUE, FALSE),
 					DriveLayout->PartitionEntry[i].PartitionLength.QuadPart,
 					DriveLayout->PartitionEntry[i].StartingOffset.QuadPart / SelectedDrive.SectorSize,
@@ -1272,7 +1257,7 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 			SelectedDrive.nPartitions++;
 			isUefiNtfs = (wcscmp(DriveLayout->PartitionEntry[i].Gpt.Name, L"UEFI:NTFS") == 0);
 			suprintf("Partition %d%s:\r\n  Type: %s\r\n  Name: '%S'", i+1, isUefiNtfs ? " (UEFI:NTFS)" : "",
-				GuidToString(&DriveLayout->PartitionEntry[i].Gpt.PartitionType), DriveLayout->PartitionEntry[i].Gpt.Name);
+				GetGPTPartitionType(&DriveLayout->PartitionEntry[i].Gpt.PartitionType), DriveLayout->PartitionEntry[i].Gpt.Name);
 			suprintf("  ID: %s\r\n  Size: %s (%" PRIi64 " bytes)\r\n  Start Sector: %" PRIi64 ", Attributes: 0x%016" PRIX64,
 				GuidToString(&DriveLayout->PartitionEntry[i].Gpt.PartitionId),
 				SizeToHumanReadable(DriveLayout->PartitionEntry[i].PartitionLength.QuadPart, TRUE, FALSE),
@@ -1283,10 +1268,10 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 				(DWORD)(DriveLayout->PartitionEntry[i].StartingOffset.QuadPart / SelectedDrive.SectorSize));
 			// Don't register the partitions that we don't care about destroying
 			if ( isUefiNtfs ||
-				 (CompareGUID(&DriveLayout->PartitionEntry[i].Gpt.PartitionType, &PARTITION_MSFT_RESERVED_GUID)) ||
-				 (CompareGUID(&DriveLayout->PartitionEntry[i].Gpt.PartitionType, &PARTITION_SYSTEM_GUID)) )
+				 (CompareGUID(&DriveLayout->PartitionEntry[i].Gpt.PartitionType, &PARTITION_MICROSOFT_RESERVED)) ||
+				 (CompareGUID(&DriveLayout->PartitionEntry[i].Gpt.PartitionType, &PARTITION_GENERIC_ESP)) )
 				--SelectedDrive.nPartitions;
-			if (memcmp(&PARTITION_BASIC_DATA_GUID, &DriveLayout->PartitionEntry[i].Gpt.PartitionType, sizeof(GUID)) == 0)
+			if (CompareGUID(&DriveLayout->PartitionEntry[i].Gpt.PartitionType, &PARTITION_MICROSOFT_DATA))
 				ret = TRUE;
 		}
 		break;
@@ -1552,7 +1537,7 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 		assert (partition_style == PARTITION_STYLE_GPT);
 		extra_part_name = L"Microsoft Reserved Partition";
 		DriveLayoutEx.PartitionEntry[pn].PartitionLength.QuadPart = 128*MB;
-		DriveLayoutEx.PartitionEntry[pn].Gpt.PartitionType = PARTITION_MSFT_RESERVED_GUID;
+		DriveLayoutEx.PartitionEntry[pn].Gpt.PartitionType = PARTITION_MICROSOFT_RESERVED;
 		uprintf("● Creating %S (offset: %lld, size: %s)", extra_part_name, DriveLayoutEx.PartitionEntry[pn].StartingOffset.QuadPart,
 			SizeToHumanReadable(DriveLayoutEx.PartitionEntry[pn].PartitionLength.QuadPart, TRUE, FALSE));
 		IGNORE_RETVAL(CoCreateGuid(&DriveLayoutEx.PartitionEntry[pn].Gpt.PartitionId));
@@ -1639,7 +1624,7 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 			return FALSE;
 		}
 	} else {
-		DriveLayoutEx.PartitionEntry[pn].Gpt.PartitionType = PARTITION_BASIC_DATA_GUID;
+		DriveLayoutEx.PartitionEntry[pn].Gpt.PartitionType = PARTITION_MICROSOFT_DATA;
 		IGNORE_RETVAL(CoCreateGuid(&DriveLayoutEx.PartitionEntry[pn].Gpt.PartitionId));
 		wcsncpy(DriveLayoutEx.PartitionEntry[pn].Gpt.Name, main_part_name, ARRAYSIZE(DriveLayoutEx.PartitionEntry[pn].Gpt.Name));
 	}
@@ -1665,7 +1650,7 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 			partition_offset[PI_ESP] = SelectedDrive.PartitionOffset[pn];
 
 		if (partition_style == PARTITION_STYLE_GPT) {
-			DriveLayoutEx.PartitionEntry[pn].Gpt.PartitionType = (extra_partitions & XP_ESP) ? PARTITION_SYSTEM_GUID : PARTITION_BASIC_DATA_GUID;
+			DriveLayoutEx.PartitionEntry[pn].Gpt.PartitionType = (extra_partitions & XP_ESP) ? PARTITION_GENERIC_ESP : PARTITION_MICROSOFT_DATA;
 			IGNORE_RETVAL(CoCreateGuid(&DriveLayoutEx.PartitionEntry[pn].Gpt.PartitionId));
 			wcsncpy(DriveLayoutEx.PartitionEntry[pn].Gpt.Name, (extra_partitions & XP_ESP) ? L"EFI System Partition" : extra_part_name,
 				ARRAYSIZE(DriveLayoutEx.PartitionEntry[pn].Gpt.Name));
@@ -1811,15 +1796,18 @@ BOOL InitializeDisk(HANDLE hDrive)
 }
 
 /*
- * Convert a partition type to its human readable form using
- * (slightly modified) entries from GNU fdisk
+ * Convert MBR or GPT partition types to their human readable forms
  */
-const char* GetPartitionType(BYTE Type)
+const char* GetMBRPartitionType(const uint8_t type)
 {
 	int i;
-	for (i=0; i<ARRAYSIZE(msdos_systypes); i++) {
-		if (msdos_systypes[i].type == Type)
-			return msdos_systypes[i].name;
-	}
-	return "Unknown";
+	for (i = 0; (i < ARRAYSIZE(mbr_type)) && (mbr_type[i].type != type); i++);
+	return (i < ARRAYSIZE(mbr_type)) ? mbr_type[i].name : "Unknown";
+}
+
+const char* GetGPTPartitionType(const GUID* guid)
+{
+	int i;
+	for (i = 0; (i < ARRAYSIZE(gpt_type)) && !CompareGUID(guid, gpt_type[i].guid); i++);
+	return (i < ARRAYSIZE(gpt_type)) ? gpt_type[i].name : GuidToString(guid);
 }
