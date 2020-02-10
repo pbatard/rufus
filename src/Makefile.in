@@ -90,7 +90,8 @@ PROGRAMS = $(noinst_PROGRAMS)
 am_rufus_OBJECTS = rufus-badblocks.$(OBJEXT) rufus-checksum.$(OBJEXT) \
 	rufus-dev.$(OBJEXT) rufus-dos.$(OBJEXT) \
 	rufus-dos_locale.$(OBJEXT) rufus-drive.$(OBJEXT) \
-	rufus-format.$(OBJEXT) rufus-icon.$(OBJEXT) \
+	rufus-format.$(OBJEXT) rufus-format_ext.$(OBJEXT) \
+	rufus-format_fat32.$(OBJEXT) rufus-icon.$(OBJEXT) \
 	rufus-iso.$(OBJEXT) rufus-localization.$(OBJEXT) \
 	rufus-net.$(OBJEXT) rufus-parser.$(OBJEXT) rufus-pki.$(OBJEXT) \
 	rufus-process.$(OBJEXT) rufus-rufus.$(OBJEXT) \
@@ -272,7 +273,7 @@ AM_V_WINDRES_0 = @echo "  RC     $@";$(WINDRES)
 AM_V_WINDRES_1 = $(WINDRES)
 AM_V_WINDRES_ = $(AM_V_WINDRES_$(AM_DEFAULT_VERBOSITY))
 AM_V_WINDRES = $(AM_V_WINDRES_$(V))
-rufus_SOURCES = badblocks.c checksum.c dev.c dos.c dos_locale.c drive.c format.c icon.c iso.c localization.c \
+rufus_SOURCES = badblocks.c checksum.c dev.c dos.c dos_locale.c drive.c format.c format_ext.c format_fat32.c icon.c iso.c localization.c \
 	net.c parser.c pki.c process.c rufus.c smart.c stdfn.c stdio.c stdlg.c syslinux.c ui.c vhd.c
 
 rufus_CFLAGS = -I$(srcdir)/ms-sys/inc -I$(srcdir)/syslinux/libfat -I$(srcdir)/syslinux/libinstaller -I$(srcdir)/syslinux/win -I$(srcdir)/libcdio $(AM_CFLAGS) \
@@ -377,6 +378,18 @@ rufus-format.o: format.c
 
 rufus-format.obj: format.c
 	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_CFLAGS) $(CFLAGS) -c -o rufus-format.obj `if test -f 'format.c'; then $(CYGPATH_W) 'format.c'; else $(CYGPATH_W) '$(srcdir)/format.c'; fi`
+
+rufus-format_ext.o: format_ext.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_CFLAGS) $(CFLAGS) -c -o rufus-format_ext.o `test -f 'format_ext.c' || echo '$(srcdir)/'`format_ext.c
+
+rufus-format_ext.obj: format_ext.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_CFLAGS) $(CFLAGS) -c -o rufus-format_ext.obj `if test -f 'format_ext.c'; then $(CYGPATH_W) 'format_ext.c'; else $(CYGPATH_W) '$(srcdir)/format_ext.c'; fi`
+
+rufus-format_fat32.o: format_fat32.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_CFLAGS) $(CFLAGS) -c -o rufus-format_fat32.o `test -f 'format_fat32.c' || echo '$(srcdir)/'`format_fat32.c
+
+rufus-format_fat32.obj: format_fat32.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_CFLAGS) $(CFLAGS) -c -o rufus-format_fat32.obj `if test -f 'format_fat32.c'; then $(CYGPATH_W) 'format_fat32.c'; else $(CYGPATH_W) '$(srcdir)/format_fat32.c'; fi`
 
 rufus-icon.o: icon.c
 	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_CFLAGS) $(CFLAGS) -c -o rufus-icon.o `test -f 'icon.c' || echo '$(srcdir)/'`icon.c
