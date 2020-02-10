@@ -367,7 +367,7 @@ uninstall-am:
 all-local: embedded.loc
 
 embedded.loc: rufus.loc
-	$(AM_V_SED) -f embedded.sed $< > $@
+	$(AM_V_SED) -f $(srcdir)/embedded.sed $< > $@
 
 clean-local:
 	-rm -rf embedded.loc
