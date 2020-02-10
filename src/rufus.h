@@ -124,6 +124,8 @@
 // Bit masks used for the display of additional image options in the UI
 #define IMOP_WINTOGO                0x01
 #define IMOP_PERSISTENCE            0x02
+#define TEST_IMG_PATH               "\\??\\C:\\tmp\\disk.img"
+#define TEST_IMG_SIZE               4500		// Size in MB
 
 #define safe_free(p) do {free((void*)p); p = NULL;} while(0)
 #define safe_mm_free(p) do {_mm_free((void*)p); p = NULL;} while(0)

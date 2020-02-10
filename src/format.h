@@ -1,8 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Formatting function calls
- * Copyright © 2007-2009 Tom Thornhill/Ridgecrop
- * Copyright © 2011-2019 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2020 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,8 +18,6 @@
  */
 #include <windows.h>
 #include <winioctl.h>	// for MEDIA_TYPE
-
-#include "ext2fs/ext2fs.h"
 
 #pragma once
 
@@ -107,63 +104,6 @@ typedef BOOLEAN (WINAPI* EnableVolumeCompression_t)(
 	ULONG                CompressionFlags	// FILE_SYSTEM_PROP_FLAG
 );
 
-/* Large FAT32 */
-#pragma pack(push, 1)
-typedef struct tagFAT_BOOTSECTOR32
-{
-	// Common fields.
-	BYTE sJmpBoot[3];
-	BYTE sOEMName[8];
-	WORD wBytsPerSec;
-	BYTE bSecPerClus;
-	WORD wRsvdSecCnt;
-	BYTE bNumFATs;
-	WORD wRootEntCnt;
-	WORD wTotSec16;           // if zero, use dTotSec32 instead
-	BYTE bMedia;
-	WORD wFATSz16;
-	WORD wSecPerTrk;
-	WORD wNumHeads;
-	DWORD dHiddSec;
-	DWORD dTotSec32;
-	// Fat 32/16 only
-	DWORD dFATSz32;
-	WORD wExtFlags;
-	WORD wFSVer;
-	DWORD dRootClus;
-	WORD wFSInfo;
-	WORD wBkBootSec;
-	BYTE Reserved[12];
-	BYTE bDrvNum;
-	BYTE Reserved1;
-	BYTE bBootSig;           // == 0x29 if next three fields are ok
-	DWORD dBS_VolID;
-	BYTE sVolLab[11];
-	BYTE sBS_FilSysType[8];
-} FAT_BOOTSECTOR32;
-
-typedef struct {
-	DWORD dLeadSig;         // 0x41615252
-	BYTE sReserved1[480];   // zeros
-	DWORD dStrucSig;        // 0x61417272
-	DWORD dFree_Count;      // 0xFFFFFFFF
-	DWORD dNxt_Free;        // 0xFFFFFFFF
-	BYTE sReserved2[12];    // zeros
-	DWORD dTrailSig;        // 0xAA550000
-} FAT_FSINFO;
-#pragma pack(pop)
-
-#define die(msg, err) do { uprintf(msg); \
-	FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|err; \
-	goto out; } while(0)
-
-// For ext2/ext3/ext4 formatting
-typedef struct {
-	uint64_t max_size;
-	uint32_t block_size;
-	uint32_t inode_size;
-	uint32_t inode_ratio;	// inode to data ration (bitshift)
-} ext2fs_default_t;
-
-extern io_manager nt_io_manager(void);
-extern DWORD ext2_last_winerror(DWORD default_error);
+BOOL WritePBR(HANDLE hLogicalDrive);
+BOOL FormatLargeFAT32(DWORD DriveIndex, uint64_t PartitionOffset, DWORD ClusterSize, LPCSTR FSName, LPCSTR Label, DWORD Flags);
+BOOL FormatExtFs(DWORD DriveIndex, uint64_t PartitionOffset, DWORD BlockSize, LPCSTR FSName, LPCSTR Label, DWORD Flags);

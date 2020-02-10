@@ -81,6 +81,12 @@
     <ClCompile Include="..\src\ui.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\format_ext.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\format_fat32.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\rufus.h">
