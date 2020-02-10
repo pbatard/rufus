@@ -3918,6 +3918,8 @@ ac_config_files="$ac_config_files Makefile"
 
 ac_config_files="$ac_config_files src/Makefile"
 
+ac_config_files="$ac_config_files src/rufus.rc"
+
 ac_config_files="$ac_config_files src/bled/Makefile"
 
 ac_config_files="$ac_config_files src/ext2fs/Makefile"
@@ -4665,6 +4667,7 @@ do
   case $ac_config_target in
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
     "src/Makefile") CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;
+    "src/rufus.rc") CONFIG_FILES="$CONFIG_FILES src/rufus.rc" ;;
     "src/bled/Makefile") CONFIG_FILES="$CONFIG_FILES src/bled/Makefile" ;;
     "src/ext2fs/Makefile") CONFIG_FILES="$CONFIG_FILES src/ext2fs/Makefile" ;;
     "src/libcdio/iso9660/Makefile") CONFIG_FILES="$CONFIG_FILES src/libcdio/iso9660/Makefile" ;;

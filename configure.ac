@@ -71,6 +71,7 @@ AC_SUBST([SUFFIX])
 
 AC_CONFIG_FILES([Makefile])
 AC_CONFIG_FILES([src/Makefile])
+AC_CONFIG_FILES([src/rufus.rc])
 AC_CONFIG_FILES([src/bled/Makefile])
 AC_CONFIG_FILES([src/ext2fs/Makefile])
 AC_CONFIG_FILES([src/libcdio/iso9660/Makefile])
