@@ -270,7 +270,7 @@ libbled_a_SOURCES = bled.c crc32.c data_align.c data_extract_all.c data_skip.c d
   header_list.c header_skip.c header_verbose_list.c init_handle.c open_transformer.c \
   seek_by_jump.c seek_by_read.c xz_dec_bcj.c xz_dec_lzma2.c xz_dec_stream.c
 
-libbled_a_CFLAGS = $(AM_CFLAGS) -I.. -Wno-undef -Wno-strict-aliasing
+libbled_a_CFLAGS = $(AM_CFLAGS) -I$(srcdir)/.. -Wno-undef -Wno-strict-aliasing
 all: all-am
 
 .SUFFIXES:

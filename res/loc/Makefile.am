@@ -10,7 +10,7 @@ AM_V_SED_  = $(AM_V_SED_$(AM_DEFAULT_VERBOSITY))
 AM_V_SED   = $(AM_V_SED_$(V))
 
 embedded.loc: rufus.loc
-	$(AM_V_SED) -f embedded.sed $< > $@
+	$(AM_V_SED) -f $(srcdir)/embedded.sed $< > $@
 
 clean-local:
 	-rm -rf embedded.loc
