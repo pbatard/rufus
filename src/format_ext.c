@@ -218,15 +218,18 @@ const char* GetExtFsLabel(DWORD DriveIndex, uint64_t PartitionOffset)
 	return (r == 0) ? label : NULL;
 }
 
+#define TEST_IMG_PATH               "\\??\\C:\\tmp\\disk.img"
+#define TEST_IMG_SIZE               4000		// Size in MB
+
 BOOL FormatExtFs(DWORD DriveIndex, uint64_t PartitionOffset, DWORD BlockSize, LPCSTR FSName, LPCSTR Label, DWORD Flags)
 {
 	// Mostly taken from mke2fs.conf
 	const float reserve_ratio = 0.05f;
 	const ext2fs_default_t ext2fs_default[5] = {
-		{ 3 * MB, 1024, 128, 3},		// "floppy"
+		{ 3 * MB, 1024, 128, 3},	// "floppy"
 		{ 512 * MB, 1024, 128, 2},	// "small"
-		{ 4 * GB, 4096, 256, 2},		// "default"
-		{ 16 * GB, 4096, 256, 3},		// "big"
+		{ 4 * GB, 4096, 256, 2},	// "default"
+		{ 16 * GB, 4096, 256, 3},	// "big"
 		{ 1024 * TB, 4096, 256, 4}	// "huge"
 	};
 
@@ -298,15 +301,16 @@ BOOL FormatExtFs(DWORD DriveIndex, uint64_t PartitionOffset, DWORD BlockSize, LP
 			break;
 	}
 	assert(i < ARRAYSIZE(ext2fs_default));
-	// NB: We validated that BlockSize is a power of two in FormatPartition()
-	if (BlockSize == 0)
+	if ((BlockSize == 0) || (BlockSize < EXT2_MIN_BLOCK_SIZE))
 		BlockSize = ext2fs_default[i].block_size;
-	size /= BlockSize;
+	assert(IS_POWER_OF_2(BlockSize));
 	for (features.s_log_block_size = 0; EXT2_BLOCK_SIZE_BITS(&features) <= EXT2_MAX_BLOCK_LOG_SIZE; features.s_log_block_size++) {
 		if (EXT2_BLOCK_SIZE(&features) == BlockSize)
 			break;
 	}
 	assert(EXT2_BLOCK_SIZE_BITS(&features) <= EXT2_MAX_BLOCK_LOG_SIZE);
+	features.s_log_cluster_size = features.s_log_block_size;
+	size /= BlockSize;
 
 	// Set the blocks, reserved blocks and inodes
 	ext2fs_blocks_count_set(&features, size);
@@ -320,10 +324,10 @@ BOOL FormatExtFs(DWORD DriveIndex, uint64_t PartitionOffset, DWORD BlockSize, LP
 
 	// Set features
 	ext2fs_set_feature_xattr(&features);
-	//	ext2fs_set_feature_resize_inode(&features);
+//	ext2fs_set_feature_resize_inode(&features);
 	ext2fs_set_feature_dir_index(&features);
 	ext2fs_set_feature_filetype(&features);
-	ext2fs_set_feature_sparse_super(&features);
+//	ext2fs_set_feature_sparse_super(&features);
 	ext2fs_set_feature_large_file(&features);
 	if (FSName[3] != '2')
 		ext2fs_set_feature_journal(&features);
@@ -372,6 +376,8 @@ BOOL FormatExtFs(DWORD DriveIndex, uint64_t PartitionOffset, DWORD BlockSize, LP
 		goto out;
 	}
 
+	// TODO: mke2fs appears to be zeroing some data at the end of the partition as well
+
 	ext2_percent_start = 0.0f;
 	ext2_percent_share = (FSName[3] == '2') ? 1.0f : 0.5f;
 	uprintf("Creating %d inode sets: [1 marker = %0.1f set(s)]", ext2fs->group_desc_count,
@@ -381,7 +387,7 @@ BOOL FormatExtFs(DWORD DriveIndex, uint64_t PartitionOffset, DWORD BlockSize, LP
 			goto out;
 		cur = ext2fs_inode_table_loc(ext2fs, i);
 		count = ext2fs_div_ceil((ext2fs->super->s_inodes_per_group - ext2fs_bg_itable_unused(ext2fs, i))
-			* EXT2_BLOCK_SIZE(ext2fs->super), EXT2_BLOCK_SIZE(ext2fs->super));
+			* EXT2_INODE_SIZE(ext2fs->super), EXT2_BLOCK_SIZE(ext2fs->super));
 		r = ext2fs_zero_blocks2(ext2fs, cur, count, &cur, &count);
 		if (r != 0) {
 			FormatStatus = ext2_last_winerror(ERROR_WRITE_FAULT);
@@ -488,4 +494,3 @@ out:
 	free(buf);
 	return ret;
 }
-

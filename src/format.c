@@ -641,8 +641,7 @@ out:
 static BOOL FormatPartition(DWORD DriveIndex, uint64_t PartitionOffset, DWORD UnitAllocationSize, USHORT FSType, LPCSTR Label, DWORD Flags)
 {
 	if ((DriveIndex < 0x80) || (DriveIndex > 0x100) || (FSType >= FS_MAX) ||
-		// The following validates that UnitAllocationSize is a power of 2
-		((UnitAllocationSize != 0) && (UnitAllocationSize & (UnitAllocationSize - 1)))) {
+		((UnitAllocationSize != 0) && (!IS_POWER_OF_2(UnitAllocationSize)))) {
 		ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_INVALID_PARAMETER;
 		return FALSE;
 	}

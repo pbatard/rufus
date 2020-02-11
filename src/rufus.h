@@ -111,6 +111,7 @@
 #define WPPRECORDER_MORE_INFO_URL   "https://github.com/pbatard/rufus/wiki/FAQ#BSODs_with_Windows_To_Go_drives_created_from_Windows_10_1809_ISOs"
 #define SEVENZIP_URL                "https://www.7-zip.org"
 #define FILES_DIR                   "rufus_files"
+#define IS_POWER_OF_2(x)            ((x != 0) && (((x) & ((x) - 1)) == 0))
 #define IGNORE_RETVAL(expr)         do { (void)(expr); } while(0)
 #ifndef ARRAYSIZE
 #define ARRAYSIZE(A)                (sizeof(A)/sizeof((A)[0]))
@@ -124,8 +125,6 @@
 // Bit masks used for the display of additional image options in the UI
 #define IMOP_WINTOGO                0x01
 #define IMOP_PERSISTENCE            0x02
-#define TEST_IMG_PATH               "\\??\\C:\\tmp\\disk.img"
-#define TEST_IMG_SIZE               4500		// Size in MB
 
 #define safe_free(p) do {free((void*)p); p = NULL;} while(0)
 #define safe_mm_free(p) do {_mm_free((void*)p); p = NULL;} while(0)
