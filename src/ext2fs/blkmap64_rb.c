@@ -726,13 +726,13 @@ static errcode_t rb_set_bmap_range(ext2fs_generic_bitmap_64 bitmap,
 			continue;
 
 		rb_insert_extent(start + first_set - bitmap->start,
-				 i - first_set, bp);
+				 (__u64)i - first_set, bp);
 		check_tree(&bp->root, __func__);
 		first_set = -1;
 	}
 	if (first_set != -1) {
 		rb_insert_extent(start + first_set - bitmap->start,
-				 num - first_set, bp);
+				 (__u64)num - first_set, bp);
 		check_tree(&bp->root, __func__);
 	}
 
@@ -792,8 +792,8 @@ static errcode_t rb_get_bmap_range(ext2fs_generic_bitmap_64 bitmap,
 				int offset = (pos - start) >> 3;
 
 				memset(((char *) out) + offset, 0xFF, nbytes);
-				pos += nbytes << 3;
-				count -= nbytes << 3;
+				pos += (__u64)nbytes << 3;
+				count -= (__u64)nbytes << 3;
 				continue;
 			}
 			ext2fs_fast_set_bit64((pos - start), out);

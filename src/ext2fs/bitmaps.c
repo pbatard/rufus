@@ -62,7 +62,7 @@ errcode_t ext2fs_allocate_inode_bitmap(ext2_filsys fs,
 
 	start = 1;
 	end = fs->super->s_inodes_count;
-	real_end = (EXT2_INODES_PER_GROUP(fs->super) * fs->group_desc_count);
+	real_end = ((__u64)EXT2_INODES_PER_GROUP(fs->super) * fs->group_desc_count);
 
 	/* Are we permitted to use new-style bitmaps? */
 	if (fs->flags & EXT2_FLAG_64BITS)

@@ -37,7 +37,7 @@ int is_fat_32_br(FILE *fp)
    int i;
 
    for(i=0 ; i<3 ; i++)
-      if( ! contains_data(fp, 0x1FE + i*0x200, aucRef, sizeof(aucRef)))
+      if( ! contains_data(fp, 0x1FEULL + i * 0x200ULL, aucRef, sizeof(aucRef)))
 	 return 0;
    if( ! contains_data(fp, 0x03, aucMagic, sizeof(aucMagic)))
       return 0;

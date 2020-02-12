@@ -262,7 +262,7 @@ unpack_lzma_stream(transformer_state_t *xstate)
 
 	rc = rc_init(xstate->src_fd); /*, RC_BUFFER_SIZE); */
 
-	while (global_pos + buffer_pos < header.dst_size) {
+	while ((uint64_t)global_pos + buffer_pos < header.dst_size) {
 		int pos_state = (buffer_pos + global_pos) & pos_state_mask;
 		uintptr_t off1 = LZMA_IS_MATCH + (state << LZMA_NUM_POS_BITS_MAX) + pos_state;
 		uint16_t *prob1 = p + off1;

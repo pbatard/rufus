@@ -89,7 +89,7 @@ errcode_t ext2fs_super_and_bgd_loc2(ext2_filsys fs,
 		old_desc_blocks = fs->super->s_first_meta_bg;
 	else
 		old_desc_blocks =
-			fs->desc_blocks + fs->super->s_reserved_gdt_blocks;
+			(blk64_t)fs->desc_blocks + fs->super->s_reserved_gdt_blocks;
 
 	has_super = ext2fs_bg_has_super(fs, group);
 

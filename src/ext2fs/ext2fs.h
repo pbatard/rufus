@@ -1875,14 +1875,17 @@ _INLINE_ errcode_t ext2fs_free_mem(void *ptr)
 _INLINE_ errcode_t ext2fs_resize_mem(unsigned long EXT2FS_ATTR((unused)) old_size,
 				     unsigned long size, void *ptr)
 {
-	void *p;
+	void *p, *old_p;
 
 	/* Use "memcpy" for pointer assignments here to avoid problems
 	 * with C99 strict type aliasing rules. */
 	memcpy(&p, ptr, sizeof(p));
+	old_p = p;
 	p = realloc(p, size);
-	if (!p)
+	if (!p) {
+		free(old_p);
 		return EXT2_ET_NO_MEMORY;
+	}
 	memcpy(ptr, &p, sizeof(p));
 	return 0;
 }

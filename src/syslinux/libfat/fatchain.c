@@ -34,7 +34,7 @@ libfat_sector_t libfat_clustertosector(const struct libfat_filesystem *fs,
     else if (cluster < 2 || cluster >= fs->endcluster)
 	return -1;
     else
-	return fs->data + ((libfat_sector_t) (cluster - 2) << fs->clustshift);
+	return fs->data + (((libfat_sector_t)cluster - 2) << fs->clustshift);
 }
 
 /*

@@ -113,7 +113,7 @@ errcode_t ext2fs_allocate_group_table(ext2_filsys fs, dgrp_t group,
 		if (retval)
 			return retval;
 		start_blk += fs->inode_blocks_per_group;
-		start_blk += ((fs->stride * group) %
+		start_blk += (((blk64_t)fs->stride * group) %
 			      (last_blk - start_blk + 1));
 		if (start_blk >= last_blk)
 			start_blk = group_blk;

@@ -682,7 +682,7 @@ int ext2fs_test_block_bitmap_range2(ext2fs_block_bitmap gen_bmap,
 
 	/* convert to clusters if necessary */
 	block >>= bmap->cluster_bits;
-	end += (1 << bmap->cluster_bits) - 1;
+	end += (1ULL << bmap->cluster_bits) - 1;
 	end >>= bmap->cluster_bits;
 	num = end - block;
 
@@ -723,7 +723,7 @@ void ext2fs_mark_block_bitmap_range2(ext2fs_block_bitmap gen_bmap,
 
 	/* convert to clusters if necessary */
 	block >>= bmap->cluster_bits;
-	end += (1 << bmap->cluster_bits) - 1;
+	end += (1ULL << bmap->cluster_bits) - 1;
 	end >>= bmap->cluster_bits;
 	num = end - block;
 
@@ -764,7 +764,7 @@ void ext2fs_unmark_block_bitmap_range2(ext2fs_block_bitmap gen_bmap,
 
 	/* convert to clusters if necessary */
 	block >>= bmap->cluster_bits;
-	end += (1 << bmap->cluster_bits) - 1;
+	end += (1ULL << bmap->cluster_bits) - 1;
 	end >>= bmap->cluster_bits;
 	num = end - block;
 
@@ -799,8 +799,7 @@ errcode_t ext2fs_convert_subcluster_bitmap(ext2_filsys fs,
 	ext2fs_generic_bitmap_64 bmap, cmap;
 	ext2fs_block_bitmap	gen_bmap = *bitmap, gen_cmap;
 	errcode_t		retval;
-	blk64_t			i, b_end, c_end;
-	int			n, ratio;
+	blk64_t			i, b_end, c_end, n, ratio;
 
 	bmap = (ext2fs_generic_bitmap_64) gen_bmap;
 	if (fs->cluster_ratio_bits == ext2fs_get_bitmap_granularity(gen_bmap))
@@ -818,7 +817,7 @@ errcode_t ext2fs_convert_subcluster_bitmap(ext2_filsys fs,
 	c_end = cmap->end;
 	cmap->end = cmap->real_end;
 	n = 0;
-	ratio = 1 << fs->cluster_ratio_bits;
+	ratio = 1ULL << fs->cluster_ratio_bits;
 	while (i < bmap->real_end) {
 		if (ext2fs_test_block_bitmap2(gen_bmap, i)) {
 			ext2fs_mark_block_bitmap2(gen_cmap, i);

@@ -417,7 +417,7 @@ errcode_t ext2fs_bmap2(ext2_filsys fs, ext2_ino_t ino, struct ext2_inode *inode,
 
 	/* Doubly indirect block  */
 	block -= addr_per_block;
-	if (block < addr_per_block * addr_per_block) {
+	if (block < (blk64_t)addr_per_block * addr_per_block) {
 		b = inode_bmap(inode, EXT2_DIND_BLOCK);
 		if (!b) {
 			if (!(bmap_flags & BMAP_ALLOC)) {
@@ -444,7 +444,7 @@ errcode_t ext2fs_bmap2(ext2_filsys fs, ext2_ino_t ino, struct ext2_inode *inode,
 	}
 
 	/* Triply indirect block */
-	block -= addr_per_block * addr_per_block;
+	block -= (blk64_t)addr_per_block * addr_per_block;
 	b = inode_bmap(inode, EXT2_TIND_BLOCK);
 	if (!b) {
 		if (!(bmap_flags & BMAP_ALLOC)) {
