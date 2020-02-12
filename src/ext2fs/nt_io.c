@@ -76,7 +76,9 @@ static errcode_t nt_open(const char *name, int flags, io_channel *channel);
 static errcode_t nt_close(io_channel channel);
 static errcode_t nt_set_blksize(io_channel channel, int blksize);
 static errcode_t nt_read_blk(io_channel channel, unsigned long block, int count, void *data);
+static errcode_t nt_read_blk64(io_channel channel, unsigned long long block, int count, void* data);
 static errcode_t nt_write_blk(io_channel channel, unsigned long block, int count, const void *data);
+static errcode_t nt_write_blk64(io_channel channel, unsigned long long block, int count, const void* data);
 static errcode_t nt_flush(io_channel channel);
 
 static struct struct_io_manager struct_nt_manager = {
@@ -86,7 +88,9 @@ static struct struct_io_manager struct_nt_manager = {
 	.close		= nt_close,
 	.set_blksize	= nt_set_blksize,
 	.read_blk	= nt_read_blk,
+	.read_blk64	= nt_read_blk64,
 	.write_blk	= nt_write_blk,
+	.write_blk64	= nt_write_blk64,
 	.flush		= nt_flush
 };
 
@@ -620,7 +624,7 @@ static errcode_t nt_set_blksize(io_channel channel, int blksize)
 	return 0;
 }
 
-static errcode_t nt_read_blk(io_channel channel, unsigned long block, int count, void *buf)
+static errcode_t nt_read_blk64(io_channel channel, unsigned long long block, int count, void *buf)
 {
 	PVOID read_buffer;
 	ULONG read_size;
@@ -671,7 +675,12 @@ static errcode_t nt_read_blk(io_channel channel, unsigned long block, int count,
 	return 0;
 }
 
-static errcode_t nt_write_blk(io_channel channel, unsigned long block, int count, const void *buf)
+static errcode_t nt_read_blk(io_channel channel, unsigned long block, int count, void* buf)
+{
+	return nt_read_blk64(channel, block, count, buf);
+}
+
+static errcode_t nt_write_blk64(io_channel channel, unsigned long long block, int count, const void *buf)
 {
 	ULONG write_size;
 	LARGE_INTEGER offset;
@@ -716,6 +725,11 @@ static errcode_t nt_write_blk(io_channel channel, unsigned long block, int count
 	nt_data->written = TRUE;
 
 	return 0;
+}
+
+static errcode_t nt_write_blk(io_channel channel, unsigned long block, int count, const void* buf)
+{
+	return nt_write_blk64(channel, block, count, buf);
 }
 
 static errcode_t nt_flush(io_channel channel)

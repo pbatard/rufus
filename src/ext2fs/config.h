@@ -3,10 +3,6 @@
 #include <crtdbg.h>
 #endif
 
-/* Define to 1 if translation of program messages to the user's native
-   language is requested. */
-#define ENABLE_NLS 0
-
 /* Define to 1 if you have `alloca', as a function or macro. */
 #define HAVE_ALLOCA 1
 
@@ -206,12 +202,6 @@
 
 /* Define to 1 if you have the ANSI C header files. */
 #define STDC_HEADERS 1
-
-/* If the compiler supports a TLS storage class define it to that here */
-#define TLS __thread
-
-/* Define if the POSIX multithreading library can be used. */
-#define USE_POSIX_THREADS 1
 
 /* Enable GNU extensions on systems that have them.  */
 #ifndef _GNU_SOURCE

@@ -376,8 +376,6 @@ BOOL FormatExtFs(DWORD DriveIndex, uint64_t PartitionOffset, DWORD BlockSize, LP
 		goto out;
 	}
 
-	// TODO: mke2fs appears to be zeroing some data at the end of the partition as well
-
 	ext2_percent_start = 0.0f;
 	ext2_percent_share = (FSName[3] == '2') ? 1.0f : 0.5f;
 	uprintf("Creating %d inode sets: [1 marker = %0.1f set(s)]", ext2fs->group_desc_count,
