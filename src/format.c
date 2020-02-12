@@ -1954,7 +1954,8 @@ DWORD WINAPI FormatThread(void* param)
 	Sleep(200);
 	if (!WaitForLogical(DriveIndex, partition_offset[PI_MAIN])) {
 		uprintf("Logical drive was not found - aborting");
-		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_NO_VOLUME_ID;
+		if (!IS_ERROR(FormatStatus))
+			FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_TIMEOUT;
 		goto out;
 	}
 	CHECK_FOR_USER_CANCEL;
