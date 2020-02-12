@@ -1568,8 +1568,8 @@ errcode_t ext2fs_extent_set_bmap(ext2_extent_handle_t handle,
 			}
 		}
 		/* add post-split extent */
-		extent.e_pblk += extent.e_len + 1;
-		extent.e_lblk += extent.e_len + 1;
+		extent.e_pblk += (blk64_t)extent.e_len + 1;
+		extent.e_lblk += (blk64_t)extent.e_len + 1;
 		extent.e_len = save_length - extent.e_len - 1;
 		retval = ext2fs_extent_insert(handle,
 				EXT2_EXTENT_INSERT_AFTER, &extent);

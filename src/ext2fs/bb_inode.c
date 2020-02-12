@@ -129,7 +129,7 @@ errcode_t ext2fs_update_bb_inode(ext2_filsys fs, ext2_badblocks_list bb_list)
 		inode.i_ctime = fs->now ? fs->now : time(0);
 	ext2fs_iblk_set(fs, &inode, rec.bad_block_count);
 	retval = ext2fs_inode_size_set(fs, &inode,
-				       rec.bad_block_count * fs->blocksize);
+				       (ext2_off64_t)rec.bad_block_count * fs->blocksize);
 	if (retval)
 		goto cleanup;
 

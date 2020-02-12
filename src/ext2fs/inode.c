@@ -967,6 +967,10 @@ errcode_t ext2fs_write_inode2(ext2_filsys fs, ext2_ino_t ino,
 		if ((offset + length) > fs->blocksize)
 			clen = fs->blocksize - offset;
 
+		if (!fs->icache) {
+			retval = EXT2_ET_GDESC_READ;
+			goto errout;
+		}
 		if (fs->icache->buffer_blk != block_nr) {
 			retval = io_channel_read_blk64(fs->io, block_nr, 1,
 						     fs->icache->buffer);

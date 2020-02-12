@@ -106,7 +106,7 @@ static errcode_t write_bitmaps(ext2_filsys fs, int do_inode, int do_block)
 			}
 		}
 	skip_this_block_bitmap:
-		blk_itr += block_nbytes << 3;
+		blk_itr += (blk64_t)block_nbytes << 3;
 	skip_block_bitmap:
 
 		if (!do_inode)
@@ -322,7 +322,7 @@ static errcode_t read_bitmaps(ext2_filsys fs, int do_inode, int do_block)
 					       blk_itr, cnt, block_bitmap);
 			if (retval)
 				goto cleanup;
-			blk_itr += block_nbytes << 3;
+			blk_itr += (blk64_t)block_nbytes << 3;
 		}
 		if (inode_bitmap) {
 			blk = ext2fs_inode_bitmap_loc(fs, i);

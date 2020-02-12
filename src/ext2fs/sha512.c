@@ -169,7 +169,7 @@ static void sha512_done(struct hash_state * md, unsigned char *out)
 	int i;
 
 	/* increase the length of the message */
-	md->sha512.length += md->sha512.curlen * CONST64(8);
+	md->sha512.length += (__u64)md->sha512.curlen * CONST64(8);
 
 	/* append the '1' bit */
 	md->sha512.buf[md->sha512.curlen++] = (unsigned char)0x80;

@@ -165,7 +165,7 @@ static int block_iterate_dind(blk_t *dind_block, blk_t ref_block,
 	}
 	check_for_ro_violation_return(ctx, ret);
 	if (!*dind_block || (ret & BLOCK_ABORT)) {
-		ctx->bcount += limit*limit;
+		ctx->bcount += (e2_blkcnt_t)limit * limit;
 		return ret;
 	}
 	if (*dind_block >= ext2fs_blocks_count(ctx->fs->super) ||
@@ -284,7 +284,7 @@ static int block_iterate_tind(blk_t *tind_block, blk_t ref_block,
 	} else {
 		for (i = 0; i < limit; i++, block_nr++) {
 			if (*block_nr == 0) {
-				ctx->bcount += limit*limit;
+				ctx->bcount += (e2_blkcnt_t)limit * limit;
 				continue;
 			}
 			flags = block_iterate_dind(block_nr,
@@ -544,7 +544,7 @@ errcode_t ext2fs_block_iterate3(ext2_filsys fs,
 		if (ret & BLOCK_ABORT)
 			goto abort_exit;
 	} else
-		ctx.bcount += limit * limit;
+		ctx.bcount += (e2_blkcnt_t)limit * limit;
 	if (inode.i_block[EXT2_TIND_BLOCK] || (flags & BLOCK_FLAG_APPEND)) {
 		ret |= block_iterate_tind(&inode.i_block[EXT2_TIND_BLOCK],
 					  0, EXT2_TIND_BLOCK, &ctx);
