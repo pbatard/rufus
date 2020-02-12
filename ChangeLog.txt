@@ -1,3 +1,16 @@
+o Version 3.9 (2020.02.??)
+    Fix ext2/ext3 corruption for partitions larger than 4 GB
+    Improve ex2/ext3 formatting speed
+    Add exFAT support for bare UEFI:NTFS partitions [EXPERIMENTAL]
+    Keep early boot files uncompressed on compressed NTFS partitions
+    Improve reporting of GPT partition types
+    Improve reporting of Windows version
+    Improve error reporting on Syslinux/GRUB download issues
+    Report the usage of UDF symbolic links
+    Fix writing of compressed streams that don't end on sector boundary
+    Fix percent not being displayed on slow format
+    Update embedded Syslinux to 6.04-pre1
+
 o Version 3.8 (2019.09.16) [BUGFIX RELEASE]
     Fix regression where some ISOs (Debian) would produce a Syslinux error when booted in BIOS mode
     Fix potential 0xC0030057 errors when trying to create a persistent partitions on a non-FIXED drive
