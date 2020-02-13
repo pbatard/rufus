@@ -726,7 +726,7 @@ static BOOL ClearMBRGPT(HANDLE hPhysicalDrive, LONGLONG DiskSize, DWORD SectorSi
 				uprintf("Retrying in %d seconds...", WRITE_TIMEOUT / 1000);
 				// Don't sit idly but use the downtime to check for conflicting processes...
 				Sleep(CheckDriveAccess(WRITE_TIMEOUT, FALSE));
-			}
+			} else break;
 		}
 	}
 	for (i = last_sector - MAX_SECTORS_TO_CLEAR; i < last_sector; i++) {
@@ -743,7 +743,7 @@ static BOOL ClearMBRGPT(HANDLE hPhysicalDrive, LONGLONG DiskSize, DWORD SectorSi
 					r = TRUE;
 					goto out;
 				}
-			}
+			} else break;
 		}
 	}
 	r = TRUE;
