@@ -717,33 +717,32 @@ static BOOL ClearMBRGPT(HANDLE hPhysicalDrive, LONGLONG DiskSize, DWORD SectorSi
 		num_sectors_to_clear = (DWORD)((add1MB ? 2048 : 0) + MAX_SECTORS_TO_CLEAR);
 
 	uprintf("Erasing %d sectors", num_sectors_to_clear);
-	for (i=0; i<num_sectors_to_clear; i++) {
+	for (i = 0; i < num_sectors_to_clear; i++) {
 		for (j = 1; j <= WRITE_RETRIES; j++) {
 			CHECK_FOR_USER_CANCEL;
-			if (write_sectors(hPhysicalDrive, SectorSize, i, 1, pBuf) != SectorSize) {
-				if (j >= WRITE_RETRIES)
-					goto out;
-				uprintf("Retrying in %d seconds...", WRITE_TIMEOUT / 1000);
-				// Don't sit idly but use the downtime to check for conflicting processes...
-				Sleep(CheckDriveAccess(WRITE_TIMEOUT, FALSE));
-			}
+			if (write_sectors(hPhysicalDrive, SectorSize, i, 1, pBuf) == SectorSize)
+				break;
+			if (j >= WRITE_RETRIES)
+				goto out;
+			uprintf("Retrying in %d seconds...", WRITE_TIMEOUT / 1000);
+			// Don't sit idly but use the downtime to check for conflicting processes...
+			Sleep(CheckDriveAccess(WRITE_TIMEOUT, FALSE));
 		}
 	}
 	for (i = last_sector - MAX_SECTORS_TO_CLEAR; i < last_sector; i++) {
 		for (j = 1; j <= WRITE_RETRIES; j++) {
 			CHECK_FOR_USER_CANCEL;
-			if (write_sectors(hPhysicalDrive, SectorSize, i, 1, pBuf) != SectorSize) {
-				if (j < WRITE_RETRIES) {
-					uprintf("Retrying in %d seconds...", WRITE_TIMEOUT / 1000);
-					Sleep(CheckDriveAccess(WRITE_TIMEOUT, FALSE));
-				} else {
-					// Windows seems to be an ass about keeping a lock on a backup GPT,
-					// so we try to be lenient about not being able to clear it.
-					uprintf("Warning: Failed to clear backup GPT...");
-					r = TRUE;
-					goto out;
-				}
+			if (write_sectors(hPhysicalDrive, SectorSize, i, 1, pBuf) == SectorSize)
+				break;
+			if (j >= WRITE_RETRIES) {
+				// Windows seems to be an ass about keeping a lock on a backup GPT,
+				// so we try to be lenient about not being able to clear it.
+				uprintf("Warning: Failed to clear backup GPT...");
+				r = TRUE;
+				goto out;
 			}
+			uprintf("Retrying in %d seconds...", WRITE_TIMEOUT / 1000);
+			Sleep(CheckDriveAccess(WRITE_TIMEOUT, FALSE));
 		}
 	}
 	r = TRUE;
