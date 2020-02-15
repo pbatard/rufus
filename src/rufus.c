@@ -778,9 +778,11 @@ static void EnableBootOptions(BOOL enable, BOOL remove_checkboxes)
 {
 	BOOL actual_enable_bb, actual_enable = enable;
 
-	// If no device is selected, don't enable anything
-	if (ComboBox_GetCurSel(hDeviceList) < 0)
+	// If no device is selected, don't enable anything and also don't remove the checkboxes
+	if (ComboBox_GetCurSel(hDeviceList) < 0) {
 		actual_enable = FALSE;
+		remove_checkboxes = FALSE;
+	}
 	// If boot selection is set to image, but no image is currently selected, don't enable anything
 	if ((boot_type == BT_IMAGE) && (image_path == NULL))
 		actual_enable = FALSE;
