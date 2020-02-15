@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Device detection and enumeration
- * Copyright © 2014-2019 Pete Batard <pete@akeo.ie>
+ * Copyright © 2014-2020 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -181,7 +181,7 @@ out:
 /*
  * Forces a refresh by disabling and then re-enabling the device using SetupAPI.
  * Returns the Windows error code from the operation.
- * Note: Currently, this may leave the device disabled after re-plug or reboot...
+ * Note: In some circumstances, this may leave the device disabled after re-plug or reboot...
  */
 int CycleDevice(int index)
 {
@@ -226,7 +226,7 @@ int CycleDevice(int index)
 			memset(&propchange_params, 0, sizeof(propchange_params));
 			propchange_params.ClassInstallHeader.cbSize = sizeof(SP_CLASSINSTALL_HEADER);
 			propchange_params.ClassInstallHeader.InstallFunction = DIF_PROPERTYCHANGE;
-			propchange_params.Scope = DICS_FLAG_GLOBAL;
+			propchange_params.Scope = DICS_FLAG_CONFIGSPECIFIC;
 			propchange_params.StateChange = DICS_DISABLE;
 
 			if (!SetupDiSetClassInstallParams(dev_info, &dev_info_data,
@@ -247,7 +247,7 @@ int CycleDevice(int index)
 		memset(&propchange_params, 0, sizeof(propchange_params));
 		propchange_params.ClassInstallHeader.cbSize = sizeof(SP_CLASSINSTALL_HEADER);
 		propchange_params.ClassInstallHeader.InstallFunction = DIF_PROPERTYCHANGE;
-		propchange_params.Scope = DICS_FLAG_GLOBAL;
+		propchange_params.Scope = DICS_FLAG_CONFIGSPECIFIC;
 		propchange_params.StateChange = DICS_ENABLE;
 		if (!SetupDiSetClassInstallParams(dev_info, &dev_info_data,
 			(SP_CLASSINSTALL_HEADER*)&propchange_params, sizeof(propchange_params))) {

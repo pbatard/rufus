@@ -1680,7 +1680,7 @@ DWORD WINAPI FormatThread(void* param)
 {
 	int i, r;
 	BOOL ret, use_large_fat32, windows_to_go, actual_lock_drive = lock_drive;
-	DWORD DriveIndex = (DWORD)(uintptr_t)param, ClusterSize, Flags;
+	DWORD cr, DriveIndex = (DWORD)(uintptr_t)param, ClusterSize, Flags;
 	HANDLE hPhysicalDrive = INVALID_HANDLE_VALUE;
 	HANDLE hLogicalVolume = INVALID_HANDLE_VALUE;
 	HANDLE hSourceImage = INVALID_HANDLE_VALUE;
@@ -1932,9 +1932,9 @@ DWORD WINAPI FormatThread(void* param)
 	if (use_vds) {
 		safe_unlockclose(hPhysicalDrive);
 		uprintf("Refreshing drive layout...");
-#if 0
-		// **DON'T USE** This may leave the device disabled on re-plug or reboot
-		DWORD cr = CycleDevice(ComboBox_GetCurSel(hDeviceList));
+		// Note: This may leave the device disabled on re-plug or reboot
+		// so only do this for the experimental VDS path for now...
+		cr = CycleDevice(ComboBox_GetCurSel(hDeviceList));
 		if (cr == ERROR_DEVICE_REINITIALIZATION_NEEDED) {
 			uprintf("Zombie device detected, trying again...");
 			Sleep(1000);
@@ -1944,7 +1944,6 @@ DWORD WINAPI FormatThread(void* param)
 			uprintf("Successfully cycled device");
 		else
 			uprintf("Cycling device failed!");
-#endif
 		RefreshLayout(DriveIndex);
 	}
 
