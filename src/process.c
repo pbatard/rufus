@@ -4,7 +4,7 @@
  *
  * Modified from Process Hacker:
  *   https://github.com/processhacker2/processhacker2/
- * Copyright © 2017-2019 Pete Batard <pete@akeo.ie>
+ * Copyright © 2017-2020 Pete Batard <pete@akeo.ie>
  * Copyright © 2017 dmex
  * Copyright © 2009-2016 wj32
  *
@@ -51,9 +51,6 @@ PF_TYPE_DECL(NTAPI, NTSTATUS, NtOpenProcess, (PHANDLE, ACCESS_MASK, POBJECT_ATTR
 PF_TYPE_DECL(NTAPI, NTSTATUS, NtOpenProcessToken, (HANDLE, ACCESS_MASK, PHANDLE));
 PF_TYPE_DECL(NTAPI, NTSTATUS, NtAdjustPrivilegesToken, (HANDLE, BOOLEAN, PTOKEN_PRIVILEGES, ULONG, PTOKEN_PRIVILEGES, PULONG));
 PF_TYPE_DECL(NTAPI, NTSTATUS, NtClose, (HANDLE));
-
-// This one is only available on Vista or later...
-PF_TYPE_DECL(WINAPI, BOOL, QueryFullProcessImageNameW, (HANDLE, DWORD, LPWSTR, PDWORD));
 
 static PVOID PhHeapHandle = NULL;
 static wchar_t* _wHandleName;
@@ -598,6 +595,7 @@ static DWORD WINAPI SearchProcessThread(LPVOID param)
 
 		// Where possible, try to get the full command line
 		bGotCmdLine = FALSE;
+		size = MAX_PATH;
 		wcmdline = GetProcessCommandLine(processHandle);
 		if (wcmdline != NULL) {
 			bGotCmdLine = TRUE;
@@ -611,10 +609,8 @@ static DWORD WINAPI SearchProcessThread(LPVOID param)
 
 		// The above may not work on Windows 7, so try QueryFullProcessImageName (Vista or later)
 		if (!bGotCmdLine) {
-			size = MAX_PATH;
-			PF_INIT(QueryFullProcessImageNameW, kernel32);
-			if ( (pfQueryFullProcessImageNameW != NULL) &&
-				 (bGotCmdLine = pfQueryFullProcessImageNameW(processHandle, 0, wexe_path, &size)) )
+			bGotCmdLine = QueryFullProcessImageNameW(processHandle, 0, wexe_path, &size);
+			if (bGotCmdLine)
 				wchar_to_utf8_no_alloc(wexe_path, cmdline, sizeof(cmdline));
 		}
 
