@@ -283,7 +283,7 @@ static __inline BOOLEAN _IsMounted(IN HANDLE Handle)
 	NTSTATUS Status = STATUS_DLL_NOT_FOUND;
 	PF_INIT(NtFsControlFile, NtDll);
 	if (pfNtFsControlFile != NULL)
-		pfNtFsControlFile(Handle, 0, 0, 0, &IoStatusBlock, FSCTL_IS_VOLUME_MOUNTED, 0, 0, 0, 0);
+		Status = pfNtFsControlFile(Handle, 0, 0, 0, &IoStatusBlock, FSCTL_IS_VOLUME_MOUNTED, 0, 0, 0, 0);
 	return (BOOLEAN)(Status == STATUS_SUCCESS);
 }
 
