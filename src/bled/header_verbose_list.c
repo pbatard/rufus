@@ -33,13 +33,13 @@ void FAST_FUNC header_verbose_list(const file_header_t *file_header)
 		bb_mode_string(file_header->mode),
 		user,
 		group,
-		file_header->size,
-		1900 + ptm->tm_year,
-		1 + ptm->tm_mon,
-		ptm->tm_mday,
-		ptm->tm_hour,
-		ptm->tm_min,
-		ptm->tm_sec,
+		(unsigned long long)file_header->size,
+		1900U + (unsigned)ptm->tm_year,
+		1U + (unsigned)ptm->tm_mon,
+		(unsigned)ptm->tm_mday,
+		(unsigned)ptm->tm_hour,
+		(unsigned)ptm->tm_min,
+		(unsigned)ptm->tm_sec,
 		file_header->name);
 
 #else /* !FEATURE_TAR_UNAME_GNAME */
@@ -50,13 +50,13 @@ void FAST_FUNC header_verbose_list(const file_header_t *file_header)
 		bb_mode_string(file_header->mode),
 		(unsigned)file_header->uid,
 		(unsigned)file_header->gid,
-		file_header->size,
-		1900 + ptm->tm_year,
-		1 + ptm->tm_mon,
-		ptm->tm_mday,
-		ptm->tm_hour,
-		ptm->tm_min,
-		ptm->tm_sec,
+		(unsigned long long)file_header->size,
+		1900U + (unsigned)ptm->tm_year,
+		1U + (unsigned)ptm->tm_mon,
+		(unsigned)ptm->tm_mday,
+		(unsigned)ptm->tm_hour,
+		(unsigned)ptm->tm_min,
+		(unsigned)ptm->tm_sec,
 		file_header->name);
 
 #endif /* FEATURE_TAR_UNAME_GNAME */

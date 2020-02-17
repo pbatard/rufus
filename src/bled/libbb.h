@@ -46,7 +46,7 @@
 #define IF_NOT_FEATURE_LZMA_FAST(x) x
 
 #define uoff_t unsigned off_t
-#define OFF_FMT "I64"
+#define OFF_FMT "ll"
 
 #ifndef _MODE_T_
 #define _MODE_T_
