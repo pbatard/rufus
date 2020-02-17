@@ -280,11 +280,9 @@ static __inline NTSTATUS _DismountDrive(IN HANDLE Handle)
 static __inline BOOLEAN _IsMounted(IN HANDLE Handle)
 {
 	IO_STATUS_BLOCK IoStatusBlock;
-	NTSTATUS Status = STATUS_DLL_NOT_FOUND;
 	PF_INIT(NtFsControlFile, NtDll);
-	if (pfNtFsControlFile != NULL)
-		pfNtFsControlFile(Handle, 0, 0, 0, &IoStatusBlock, FSCTL_IS_VOLUME_MOUNTED, 0, 0, 0, 0);
-	return (BOOLEAN)(Status == STATUS_SUCCESS);
+	return (pfNtFsControlFile == NULL) ? STATUS_DLL_NOT_FOUND :
+		(BOOLEAN)(pfNtFsControlFile(Handle, 0, 0, 0, &IoStatusBlock, FSCTL_IS_VOLUME_MOUNTED, 0, 0, 0, 0) == STATUS_SUCCESS);
 }
 
 static __inline NTSTATUS _CloseDisk(IN HANDLE Handle)
