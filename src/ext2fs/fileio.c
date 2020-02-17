@@ -358,16 +358,12 @@ ext2fs_file_write_inline_data(ext2_file_t file, const void *buf,
 
 		/* Update inode size */
 		if (count != 0 && EXT2_I_SIZE(&file->inode) < file->pos) {
-			errcode_t	rc;
-
-			rc = ext2fs_file_set_size2(file, file->pos);
-			if (retval == 0)
-				retval = rc;
+			retval = ext2fs_file_set_size2(file, file->pos);
 		}
 
 		if (written)
 			*written = count;
-		return 0;
+		return retval;
 	}
 
 expand:
