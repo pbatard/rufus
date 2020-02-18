@@ -586,7 +586,7 @@ static BOOL FormatNative(DWORD DriveIndex, uint64_t PartitionOffset, DWORD Clust
 
 	// LoadLibrary("fmifs.dll") appears to changes the locale, which can lead to
 	// problems with tolower(). Make sure we restore the locale. For more details,
-	// see http://comments.gmane.org/gmane.comp.gnu.mingw.user/39300
+	// see https://sourceforge.net/p/mingw/mailman/message/29269040/
 	locale = setlocale(LC_ALL, NULL);
 	PF_INIT_OR_OUT(FormatEx, fmifs);
 	PF_INIT(EnableVolumeCompression, fmifs);
