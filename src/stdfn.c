@@ -549,10 +549,17 @@ out:
 	return ret;
 }
 
+/*
+ * Get a resource from the RC. If needed that resource can be duplicated.
+ * If duplicate is true and len is non-zero, the a zeroed buffer of 'len'
+ * size is allocated for the resource. Else the buffer is allocate for
+ * the resource size.
+ */
 unsigned char* GetResource(HMODULE module, char* name, char* type, const char* desc, DWORD* len, BOOL duplicate)
 {
 	HGLOBAL res_handle;
 	HRSRC res;
+	DWORD res_len;
 	unsigned char* p = NULL;
 
 	res = FindResourceA(module, name, type);
@@ -565,18 +572,23 @@ unsigned char* GetResource(HMODULE module, char* name, char* type, const char* d
 		uprintf("Could not load resource '%s': %s\n", desc, WindowsErrorString());
 		goto out;
 	}
-	*len = SizeofResource(module, res);
+	res_len = SizeofResource(module, res);
 
 	if (duplicate) {
-		p = (unsigned char*)malloc(*len);
+		if (*len == 0)
+			*len = res_len;
+		p = (unsigned char*)calloc(*len, 1);
 		if (p == NULL) {
-			uprintf("Coult not allocate resource '%s'\n", desc);
+			uprintf("Could not allocate resource '%s'\n", desc);
 			goto out;
 		}
-		memcpy(p, LockResource(res_handle), *len);
+		memcpy(p, LockResource(res_handle), res_len);
+		if (res_len < *len)
+			uprintf("Warning: Resource '%s' was truncated by %d bytes!\n", desc, *len - res_len);
 	} else {
 		p = (unsigned char*)LockResource(res_handle);
 	}
+	*len = res_len;
 
 out:
 	return p;

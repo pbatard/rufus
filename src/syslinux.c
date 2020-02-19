@@ -2,7 +2,7 @@
  *
  *   Copyright 2003 Lars Munch Christensen - All Rights Reserved
  *   Copyright 1998-2008 H. Peter Anvin - All Rights Reserved
- *   Copyright 2012-2018 Pete Batard
+ *   Copyright 2012-2020 Pete Batard
  *
  *   Based on the Linux installer program for SYSLINUX by H. Peter Anvin
  *
@@ -185,6 +185,7 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int file_system)
 	} else {
 		for (i=0; i<2; i++) {
 		static_sprintf(tmp, "%s.%s", ldlinux, ldlinux_ext[i]);
+		syslinux_ldlinux_len[i] = 0;
 		syslinux_ldlinux[i] = GetResource(hMainInstance, resource[use_v5?1:0][i],
 			_RT_RCDATA, tmp, &syslinux_ldlinux_len[i], TRUE);
 		if (syslinux_ldlinux[i] == NULL)
