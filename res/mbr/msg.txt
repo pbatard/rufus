@@ -1,11 +1,21 @@
-****************************************
-*** ERROR: LEGACY BOOT OF UEFI MEDIA ***
-****************************************
+\07
+             \70 ษออออออออออออออออออออออออออออออออออออออออออออออออป \07
+             \70 บ                                                บ \07
+             \70 บ   \74ERROR: BIOS/LEGACY BOOT OF UEFI-ONLY MEDIA\70   บ \07
+             \70 บ                                                บ \07
+             \70 ศออออออออออออออออออออออออออออออออออออออออออออออออผ \07
 
-This drive can only boot in UEFI mode.
-It can not boot in BIOS/Legacy mode.
 
-If you want to boot this drive in BIOS/Legacy mode, you
-should recreate it in Rufus using the following settings:
-* Partition scheme -> MBR
-* Target system -> BIOS...
+             This drive was created by Rufus [\09https://rufus.ie\07].
+
+             It can boot in \04UEFI mode only\07 but you are trying to
+             boot it in BIOS/Legacy mode. THIS WILL NOT WORK!
+
+             To remove this message you need to do \02ONE\07 of the following:
+             o If this computer supports UEFI, go to the UEFI settings
+               and disable or lower the priority of \09CSM/Legacy mode\07.
+             o \02OR\07 Recreate the drive in Rufus and use:
+               * \09Partition scheme\07 -> \09MBR\07.
+               * \09Target system\07 -> \09BIOS (...)\07
+             o \02OR\07 Erase the whole drive in Rufus by selecting:
+               * \09Boot Type\07 -> \09Non bootable\07
