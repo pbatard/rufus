@@ -1,6 +1,6 @@
-/********************************************************************************/
+﻿/********************************************************************************/
 /* MSG - A protective MBR that displays an ASCII message located in the         */
-/*       following sectors.                                                     */
+/*       subsequent sectors.                                                     */
 /*                                                                              */
 /* Copyright (c) 2019-2020 Pete Batard <pete@akeo.ie>                           */
 /*                                                                              */
@@ -139,19 +139,49 @@ display_msg:			# Display the message
 	mov  ax, es
 	mov  ds, ax
 	call print_msg
-	jmp  halt_system
+	jmp  prompt_user
 
 display_err:			# Read error -> display shorter message from this MBR
 	mov  si, offset err_msg
 	call print_msg
-	
-halt_system:			# Halt the system
-	hlt
-	jmp halt_system		# Just in case...
+
+prompt_user:
+	xor  ax, ax
+	mov  ds, ax
+	mov  si, offset prompt_string
+	call print_msg		# Prompt the user
+	call flush_keyboard
+
+wait_for_keyboard:
+	mov  ah, 0x01
+	int  0x16		# KEYBOARD - CHECK BUFFER, DO NOT CLEAR
+	jnz  reboot		# Z is clear when characters are present in the buffer
+	mov  ah, 0x02
+	int  0x16		# KEYBOARD - GET SHIFT STATUS
+	and  al, 0x04		# AL = shift status bits
+	jz   wait_for_keyboard
+
+reboot:				# Trigger a reboot
+	xor  ax, ax
+	mov  ds, ax
+	mov  ax, 0x1234
+	mov  [0x473], ax
+	jmp  0xffff:0000
 
 /********************************************************************************/
 /* Subroutines                                                                  */
 /********************************************************************************/
+
+flush_keyboard:			# Flush the keyboard buffer
+	mov  ah, 0x01
+	int  0x16		# KEYBOARD - CHECK BUFFER, DO NOT CLEAR
+	jz   0f			# Z is set if no character in buffer
+	mov  ah, 0x00
+	int  0x16		# KEYBOARD - READ CHAR FROM BUFFER
+	loop flush_keyboard
+0:	ret
+
+# ---------------------------------------------------------------------------
 
 print_msg:			# Print NUL terminated string in DS:SI to console
 	lodsb
@@ -204,7 +234,9 @@ print_msg:			# Print NUL terminated string in DS:SI to console
 /* Data section                                                                 */
 /********************************************************************************/
 err_msg:
-		.string "*** ERROR: THIS MEDIA CANNOT BOOT IN LEGACY MODE ***"
+		.string "\r\n             \\04*** ERROR: THIS MEDIA CANNOT BOOT IN LEGACY MODE ***\\07\r\n"
+prompt_string:
+		.string "\r\n\r\n             \\70Please remove this media and press any key to reboot\\07"
 
 /********************************************************************************/
 /* From offset 0x1b8, the MBR contains the partition table and signature data   */
