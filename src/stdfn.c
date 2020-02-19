@@ -582,9 +582,9 @@ unsigned char* GetResource(HMODULE module, char* name, char* type, const char* d
 			uprintf("Could not allocate resource '%s'\n", desc);
 			goto out;
 		}
-		memcpy(p, LockResource(res_handle), res_len);
-		if (res_len < *len)
-			uprintf("Warning: Resource '%s' was truncated by %d bytes!\n", desc, *len - res_len);
+		memcpy(p, LockResource(res_handle), min(res_len, *len));
+		if (res_len > *len)
+			uprintf("WARNING: Resource '%s' was truncated by %d bytes!\n", desc, res_len - *len);
 	} else {
 		p = (unsigned char*)LockResource(res_handle);
 	}

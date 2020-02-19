@@ -111,9 +111,9 @@ int write_win7_mbr(FILE *fp);
    FALSE */
 int write_rufus_mbr(FILE *fp);
 
-/* Writes a Rufus GPT master boot record to a file, returns TRUE on success, otherwise
+/* Writes a Rufus MSG master boot record to a file, returns TRUE on success, otherwise
    FALSE */
-int write_rufus_gpt_mbr(FILE *fp);
+int write_rufus_msg_mbr(FILE *fp);
 
 /* Writes a ReactOS master boot record to a file, returns TRUE on success, otherwise
    FALSE */
