@@ -86,6 +86,7 @@
 #define IDR_SL_MBOOT_C32                404
 #define IDR_GR_GRUB_GRLDR_MBR           450
 #define IDR_GR_GRUB2_CORE_IMG           451
+#define IDR_SBR_MSG                     452
 #define IDR_LC_RUFUS_LOC                500
 #define IDR_XT_HOGGER                   501
 #define IDR_UEFI_NTFS                   502

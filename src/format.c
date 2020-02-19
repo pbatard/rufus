@@ -764,17 +764,15 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 	FILE* fp = (FILE*)&fake_fd;
 	const char* using_msg = "Using %s MBR";
 
-//	AnalyzeMBR(hPhysicalDrive, "Drive", FALSE);
-
 	if (SelectedDrive.SectorSize < 512)
 		goto out;
 
 	if (partition_type == PARTITION_STYLE_GPT) {
-		// Add a notice in the protective MBR
+		// Add a notice with a protective MBR
 		fake_fd._handle = (char*)hPhysicalDrive;
 		set_bytes_per_sector(SelectedDrive.SectorSize);
 		uprintf(using_msg, "Rufus protective");
-		r = write_rufus_gpt_mbr(fp);
+		r = write_rufus_msg_mbr(fp);
 		goto notify;
 	}
 
@@ -907,14 +905,11 @@ static BOOL WriteSBR(HANDLE hPhysicalDrive)
 	FAKE_FD fake_fd = { 0 };
 	FILE* fp = (FILE*)&fake_fd;
 
-	if (partition_type == PARTITION_STYLE_GPT)
-		return TRUE;
-
 	fake_fd._handle = (char*)hPhysicalDrive;
 	set_bytes_per_sector(SelectedDrive.SectorSize);
 	// Ensure that we have sufficient space for the SBR
 	max_size = IsChecked(IDC_OLD_BIOS_FIXES) ?
-		(DWORD)(SelectedDrive.SectorsPerTrack * SelectedDrive.SectorSize) : 1*MB;
+		(DWORD)(SelectedDrive.SectorsPerTrack * SelectedDrive.SectorSize) : 1 * MB;
 	max_size -= mbr_size;
 	// Syslinux has precedence over Grub
 	if ((boot_type == BT_IMAGE) && (!HAS_SYSLINUX(img_report))) {
@@ -922,6 +917,8 @@ static BOOL WriteSBR(HANDLE hPhysicalDrive)
 			sub_type = BT_GRUB4DOS;
 		if (img_report.has_grub2)
 			sub_type = BT_GRUB2;
+	} else if (partition_type == PARTITION_STYLE_GPT) {
+		sub_type = BT_NON_BOOTABLE;
 	}
 
 	switch (sub_type) {
@@ -950,6 +947,15 @@ static BOOL WriteSBR(HANDLE hPhysicalDrive)
 			}
 		}
 		break;
+	case BT_NON_BOOTABLE:
+		uprintf("Writing protective message SBR");
+		size = 4 * KB;
+		buf = GetResource(hMainInstance, MAKEINTRESOURCEA(IDR_SBR_MSG), _RT_RCDATA, "msg.txt", &size, TRUE);
+		if (buf == NULL) {
+			uprintf("Could not access message");
+			return FALSE;
+		}
+		break;
 	default:
 		// No need to write secondary block
 		return TRUE;
@@ -961,6 +967,8 @@ static BOOL WriteSBR(HANDLE hPhysicalDrive)
 	}
 	r = write_data(fp, mbr_size, buf, (uint64_t)size);
 	safe_free(grub2_buf);
+	if (sub_type == BT_NON_BOOTABLE)
+		safe_free(buf);
 	return (r != 0);
 }
 
@@ -1009,7 +1017,7 @@ BOOL WritePBR(HANDLE hLogicalVolume)
 		return TRUE;
 	case FS_FAT32:
 		uprintf(using_msg, bt_to_name(), "FAT32");
-		for (i=0; i<2; i++) {
+		for (i = 0; i < 2; i++) {
 			if (!is_fat_32_fs(fp)) {
 				uprintf("New volume does not have a %s FAT32 boot sector - aborting\n", i?"secondary":"primary");
 				break;

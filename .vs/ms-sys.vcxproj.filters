@@ -152,10 +152,10 @@
     <ClInclude Include="..\src\ms-sys\inc\br_fat32pe_0x1800.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\ms-sys\inc\mbr_gpt_rufus.h">
+    <ClInclude Include="..\src\ms-sys\inc\mbr_gpt_syslinux.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\ms-sys\inc\mbr_gpt_syslinux.h">
+    <ClInclude Include="..\src\ms-sys\inc\mbr_msg_rufus.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
