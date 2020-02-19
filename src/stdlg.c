@@ -1856,7 +1856,7 @@ LPCDLGTEMPLATE GetDialogTemplate(int Dialog_ID)
 	int i;
 	const char thai_id[] = "th-TH";
 	size_t len;
-	DWORD size;
+	DWORD size = 0;
 	DWORD* dwBuf;
 	WCHAR* wBuf;
 	LPCDLGTEMPLATE rcTemplate = (LPCDLGTEMPLATE) GetResource(hMainInstance, MAKEINTRESOURCEA(Dialog_ID),
