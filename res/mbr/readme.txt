@@ -14,11 +14,17 @@ a different ID according to the one found in its partition table entry. Eg. if
 the partition table lists the disk ID for the first partition as 0x81, then it
 will be swapped for 0x80.
 
+An additional MBR (msg.S) also exists in this directory, that can be used to
+display an ASCII message contained in the sectors directly following the MBR.
+This can be used, for instance, to display a notice for media that cannot be
+booted in BIOS/Legacy mode.
+
 # Compilation
 
 Any gcc suite (except possibly the X-Code one on OS-X) should be able to compile
 the MBR by invoking 'make'. A 'make dis', that produces a disassembly dump is
-also provided for your convenience.
+also provided for your convenience. If you have the Bochs emulator installed, 
+you can also invoke 'make test' to test the MBR with Bochs.
 
 # Primer
 

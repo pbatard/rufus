@@ -17,23 +17,23 @@
 # along with this program; if not, see <http://www.gnu.org/licenses/>.
 #
 
-OBJECTS   = mbr.o
-TARGET    = mbr
+TEST_TARGET = msg
 
-ASM       = gcc
-CC        = gcc
-LD        = ld
-OBJDUMP   = objdump
-OBJCOPY   = objcopy
-CFLAGS    = -m32
-LDFLAGS   = -nostartfile
+ASM         = gcc
+CC          = gcc
+LD          = ld
+OBJDUMP     = objdump
+OBJCOPY     = objcopy
+CFLAGS      = -m32
+LDFLAGS     = -nostartfile
+BOCHS       = "C:/Program Files/Bochs/bochsdbg.exe"
 
 .PHONY: all clean
 
-all: $(TARGET).bin
+all: mbr.bin msg.bin
 
 clean:
-	@-rm -f -v *.o *.out $(TARGET).map
+	@-rm -f -v *.o *.out *.map *.bin *.img *.ini
 
 %.o: %.c Makefile
 	@echo "[CC]  $@"
@@ -44,17 +44,25 @@ clean:
 	@$(ASM) -c -o $*.o $(CFLAGS) $<
 
 # Produce a disassembly dump, for verification purposes
-dis: $(TARGET).out
+dis: $(TEST_TARGET).out
 	@echo "[DIS] $<"
 	@$(OBJCOPY) -O binary -j .main --set-section-flags .main=alloc,load,readonly,code $< main.bin
 	@$(OBJDUMP) -D -bbinary -mi8086 -Mintel main.bin | less
 	@-rm -f main.bin
 
-$(TARGET).out: $(OBJECTS) $(TARGET).ld
-	@echo "[LD]  $@"
-	@$(LD) $(LDFLAGS) -T$(TARGET).ld -o $@ $(OBJECTS) -Map $(TARGET).map
+# Run the MBR in a Bochs environment (append msg.txt in subsequent blocks)
+test: $(TEST_TARGET).bin
+	@test -s $(BOCHS) || { echo "Error: $(BOCHS) was not found on this system"; exit 1; }
+	@cat $(TEST_TARGET).bin msg.txt > disk.img
+	@truncate -c -s 10M disk.img
+	-@$(BOCHS) -f bochsrc.bxrc -q
 
-$(TARGET).bin: $(TARGET).out
+%.out: %.o mbr.ld
+	@echo "[LD]  $@"
+	@$(LD) $(LDFLAGS) -Tmbr.ld -o $@ $< -Map $*.map
+
+%.bin: %.out
 	@echo "[MBR] $@"
 	@# Note: -j only works for sections that have the 'ALLOC' flag set
 	@$(OBJCOPY) -O binary -j .main --gap-fill=0x00 $< $@
+	@-rm -f $< $*.map
