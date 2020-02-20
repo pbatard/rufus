@@ -1183,7 +1183,7 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 	switch (DriveLayout->PartitionStyle) {
 	case PARTITION_STYLE_MBR:
 		SelectedDrive.PartitionStyle = PARTITION_STYLE_MBR;
-		for (i=0; i<DriveLayout->PartitionCount; i++) {
+		for (i = 0; i < DriveLayout->PartitionCount; i++) {
 			if (DriveLayout->PartitionEntry[i].Mbr.PartitionType != PARTITION_ENTRY_UNUSED) {
 				SelectedDrive.nPartitions++;
 			}
@@ -1191,7 +1191,7 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 		// Detect drives that are using the whole disk as a single partition
 		if ((DriveLayout->PartitionEntry[0].Mbr.PartitionType != PARTITION_ENTRY_UNUSED) &&
 			(DriveLayout->PartitionEntry[0].StartingOffset.QuadPart == 0LL)) {
-			suprintf("Partition type: SFD (%s) or Unpartitioned", sfd_name);
+			suprintf("Partition type: SFD (%s) or unpartitioned", sfd_name);
 			super_floppy_disk = TRUE;
 		} else {
 			suprintf("Partition type: MBR, NB Partitions: %d", SelectedDrive.nPartitions);
@@ -1199,10 +1199,16 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 			suprintf("Disk ID: 0x%08X %s", DriveLayout->Mbr.Signature, SelectedDrive.has_mbr_uefi_marker?"(UEFI target)":"");
 			AnalyzeMBR(hPhysical, "Drive", bSilent);
 		}
-		for (i=0; i<DriveLayout->PartitionCount; i++) {
+		for (i = 0; i < DriveLayout->PartitionCount; i++) {
 			isUefiNtfs = FALSE;
 			if (DriveLayout->PartitionEntry[i].Mbr.PartitionType != PARTITION_ENTRY_UNUSED) {
 				part_type = DriveLayout->PartitionEntry[i].Mbr.PartitionType;
+				// Microsoft will have to explain why they completely ignore the actual MBR partition
+				// type for zeroed drive (which *IS* 0x00) and fill in Small FAT16 instead (0x04).
+				// This means that if we detect a Small FAT16 "partition", that "starts" at offset 0
+				// and that is larger than 16 MB, our drive is actually unpartitioned. 
+				if (part_type == 0x04 && super_floppy_disk && SelectedDrive.DiskSize > 16 * MB)
+					break;
 				if (part_type == 0xef) {
 					// Check the FAT label to see if we're dealing with an UEFI_NTFS partition
 					buf = calloc(SelectedDrive.SectorSize, 1);
@@ -1214,8 +1220,8 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 						free(buf);
 					}
 				}
-				suprintf("Partition %d%s:", i+(super_floppy_disk?0:1), isUefiNtfs?" (UEFI:NTFS)":"");
-				for (j=0; j<ARRAYSIZE(mbr_mountable); j++) {
+				suprintf("Partition %d%s:", i + (super_floppy_disk ? 0 : 1), isUefiNtfs ? " (UEFI:NTFS)" : "");
+				for (j = 0; j < ARRAYSIZE(mbr_mountable); j++) {
 					if (part_type == mbr_mountable[j]) {
 						ret = TRUE;
 						break;
@@ -1227,7 +1233,8 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 				}
 				// NB: MinGW's gcc 4.9.2 broke "%lld" printout on XP so we use the inttypes.h "PRI##" qualifiers
 				suprintf("  Type: %s (0x%02x)\r\n  Size: %s (%" PRIi64 " bytes)\r\n  Start Sector: %" PRIi64 ", Boot: %s",
-					((part_type==0x07||super_floppy_disk)&&(FileSystemName[0]!=0))?FileSystemName:GetMBRPartitionType(part_type), super_floppy_disk?0:part_type,
+					((part_type == 0x07 || super_floppy_disk) && (FileSystemName[0] != 0)) ?
+					FileSystemName : GetMBRPartitionType(part_type), super_floppy_disk ? 0: part_type,
 					SizeToHumanReadable(DriveLayout->PartitionEntry[i].PartitionLength.QuadPart, TRUE, FALSE),
 					DriveLayout->PartitionEntry[i].PartitionLength.QuadPart,
 					DriveLayout->PartitionEntry[i].StartingOffset.QuadPart / SelectedDrive.SectorSize,
@@ -1249,7 +1256,7 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 		suprintf("Disk GUID: %s", GuidToString(&DriveLayout->Gpt.DiskId));
 		suprintf("Max parts: %d, Start Offset: %" PRIi64 ", Usable = %" PRIi64 " bytes",
 			DriveLayout->Gpt.MaxPartitionCount, DriveLayout->Gpt.StartingUsableOffset.QuadPart, DriveLayout->Gpt.UsableLength.QuadPart);
-		for (i=0; i<DriveLayout->PartitionCount; i++) {
+		for (i = 0; i < DriveLayout->PartitionCount; i++) {
 			if (i < MAX_PARTITIONS) {
 				SelectedDrive.PartitionOffset[i] = DriveLayout->PartitionEntry[i].StartingOffset.QuadPart;
 				SelectedDrive.PartitionSize[i] = DriveLayout->PartitionEntry[i].PartitionLength.QuadPart;
