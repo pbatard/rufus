@@ -1,10 +1,8 @@
-\07
-             \70 ษออออออออออออออออออออออออออออออออออออออออออออออออป \07
+\07             \70 ษออออออออออออออออออออออออออออออออออออออออออออออออป \07
              \70 บ                                                บ \07
              \70 บ   \74ERROR: BIOS/LEGACY BOOT OF UEFI-ONLY MEDIA\70   บ \07
              \70 บ                                                บ \07
              \70 ศออออออออออออออออออออออออออออออออออออออออออออออออผ \07
-
 
              This drive was created by Rufus [\09https://rufus.ie\07].
 
@@ -19,3 +17,6 @@
                * \09Target system\07 -> \09BIOS (...)\07
              o \02OR\07 Erase the whole drive in Rufus by selecting:
                * \09Boot Type\07 -> \09Non bootable\07
+
+             Note: You may also see this message if you installed a new
+             OS and your computer is unable to boot that OS in UEFI mode.
