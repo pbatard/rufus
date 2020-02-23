@@ -1538,8 +1538,8 @@ BOOL SetUpdateCheck(void)
 			return FALSE;
 		}
 		// If the user hasn't set the interval in the dialog, set to default
-		if ( (ReadSetting32(SETTING_UPDATE_INTERVAL) == 0) ||
-			 ((ReadSetting32(SETTING_UPDATE_INTERVAL) == -1) && enable_updates) )
+		if ((ReadSetting32(SETTING_UPDATE_INTERVAL) == 0) ||
+			 (ReadSetting32(SETTING_UPDATE_INTERVAL) == -1))
 			WriteSetting32(SETTING_UPDATE_INTERVAL, 86400);
 	}
 	// Also detect if we can use Fido, which depends on:
