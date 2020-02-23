@@ -2307,7 +2307,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			SendMessage(hMultiToolbar, TB_GETRECT, (WPARAM)IDC_ABOUT, (LPARAM)&rc);
 			MapWindowPoints(hDlg, NULL, (POINT*)&rc, 2);
 			rc.left += cbw / 2;
-			ShowLanguageMenu(rc);
+			ShowLanguageMenu(&rc);
 			break;
 		case IDC_SETTINGS:
 			MyDialogBox(hMainInstance, IDD_UPDATE_POLICY, hDlg, UpdateCallback);

@@ -1489,7 +1489,7 @@ void UpdateProgressWithInfo(int op, int msg, uint64_t processed, uint64_t total)
 	}
 }
 
-void ShowLanguageMenu(RECT rcExclude)
+void ShowLanguageMenu(const RECT *rcExclude)
 {
 	TPMPARAMS tpm;
 	HMENU menu;
@@ -1499,6 +1499,8 @@ void ShowLanguageMenu(RECT rcExclude)
 	char lang[256];
 	char *search = "()";
 	char *l, *r, *str;
+
+	assert(rcExclude);
 
 	UM_LANGUAGE_MENU_MAX = UM_LANGUAGE_MENU;
 	menu = CreatePopupMenu();
@@ -1526,11 +1528,11 @@ void ShowLanguageMenu(RECT rcExclude)
 
 	// Open the menu such that it doesn't overlap the specified rect
 	tpm.cbSize = sizeof(TPMPARAMS);
-	tpm.rcExclude = rcExclude;
+	tpm.rcExclude = *rcExclude;
 	TrackPopupMenuEx(menu, 0,
 		// In RTL languages, the menu should be placed at the bottom-right of the rect
-		right_to_left_mode ? rcExclude.right : rcExclude.left,
-		rcExclude.bottom + adjust, hMainDialog, &tpm);
+		right_to_left_mode ? rcExclude->right : rcExclude->left,
+		rcExclude->bottom + adjust, hMainDialog, &tpm);
 	DestroyMenu(menu);
 }
 

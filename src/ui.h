@@ -100,7 +100,7 @@ extern void ToggleImageOptions(void);
 extern void CreateSmallButtons(HWND hDlg);
 extern void CreateAdditionalControls(HWND hDlg);
 extern void InitProgress(BOOL bOnlyFormat);
-extern void ShowLanguageMenu(RECT rcExclude);
+extern void ShowLanguageMenu(const RECT *rcExclude);
 extern void SetPassesTooltip(void);
 extern void SetBootTypeDropdownWidth(void);
 extern void OnPaint(HDC hdc);
