@@ -250,8 +250,8 @@ static void ToValidLabel(char* Label, BOOL bFAT)
 {
 	size_t i, j, k;
 	BOOL found;
-	WCHAR unauthorized[] = L"*?,;:/\\|+=<>[]\"";
-	WCHAR to_underscore[] = L"\t.";
+	const WCHAR unauthorized[] = L"*?,;:/\\|+=<>[]\"";
+	const WCHAR to_underscore[] = L"\t.";
 	WCHAR *wLabel = utf8_to_wchar(Label);
 
 	if (wLabel == NULL)
@@ -1863,7 +1863,7 @@ DWORD WINAPI FormatThread(void* param)
 			if (report.bb_count) {
 				bb_msg = lmprintf(MSG_011, report.bb_count, report.num_read_errors, report.num_write_errors,
 					report.num_corruption_errors);
-				fprintf(log_fd, bb_msg);
+				fprintf(log_fd, "%s", bb_msg);
 				GetLocalTime(&lt);
 				fprintf(log_fd, APPLICATION_NAME " bad blocks check ended on: %04d.%02d.%02d %02d:%02d:%02d",
 				lt.wYear, lt.wMonth, lt.wDay, lt.wHour, lt.wMinute, lt.wSecond);

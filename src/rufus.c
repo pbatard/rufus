@@ -138,7 +138,7 @@ const char* flash_type[BADLOCKS_PATTERN_TYPES] = { "SLC", "MLC", "TLC" };
 static void SetClusterSizeLabels(void)
 {
 	unsigned int i, j, msg_id;
-	safe_sprintf(ClusterSizeLabel[0], 64, lmprintf(MSG_029));
+	safe_sprintf(ClusterSizeLabel[0], 64, "%s", lmprintf(MSG_029));
 	for (i=512, j=1, msg_id=MSG_026; j<MAX_CLUSTER_SIZES; i<<=1, j++) {
 		if (i > 8192) {
 			i /= 1024;
@@ -885,7 +885,7 @@ static BOOL PopulateProperties(void)
 	EnableControls(TRUE, FALSE);
 
 	// Set a proposed label according to the size (eg: "256MB", "8GB")
-	static_sprintf(SelectedDrive.proposed_label,
+	static_sprintf(SelectedDrive.proposed_label, "%s",
 		SizeToHumanReadable(SelectedDrive.DiskSize, FALSE, use_fake_units));
 
 	// Add a tooltip (with the size of the device in parenthesis)

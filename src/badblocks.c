@@ -463,7 +463,7 @@ static unsigned int test_rw(HANDLE hDrive, blk64_t last_block, size_t block_size
 			if (max_bb && bb_count >= max_bb) {
 				if (s_flag || v_flag) {
 					uprintf(abort_msg);
-					fprintf(log_fd, abort_msg);
+					fprintf(log_fd, "%s", abort_msg);
 					fflush(log_fd);
 				}
 				cancel_ops = -1;
@@ -511,7 +511,7 @@ static unsigned int test_rw(HANDLE hDrive, blk64_t last_block, size_t block_size
 			if (max_bb && bb_count >= max_bb) {
 				if (s_flag || v_flag) {
 					uprintf(abort_msg);
-					fprintf(log_fd, abort_msg);
+					fprintf(log_fd, "%s", abort_msg);
 					fflush(log_fd);
 				}
 				cancel_ops = -1;

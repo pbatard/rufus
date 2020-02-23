@@ -149,7 +149,7 @@ void GetMainButtonsWidth(HWND hDlg)
 {
 	unsigned int i;
 	RECT rc;
-	LONG style;
+	LONG_PTR style;
 	char download[64];
 
 	GetWindowRect(GetDlgItem(hDlg, main_button_ids[0]), &rc);
@@ -167,9 +167,9 @@ void GetMainButtonsWidth(HWND hDlg)
 		static_strcpy(download, lmprintf(MSG_040));
 		CharUpperBuffU(download, sizeof(download));
 		bw = max(bw, GetTextSize(GetDlgItem(hDlg, IDC_SELECT), download).cx + (3 * cbw) / 2);
-		style = GetWindowLong(GetDlgItem(hDlg, IDC_SELECT), GWL_STYLE);
-		style|= BS_SPLITBUTTON;
-		SetWindowLong(GetDlgItem(hDlg, IDC_SELECT), GWL_STYLE, style);
+		style = GetWindowLongPtr(GetDlgItem(hDlg, IDC_SELECT), GWL_STYLE);
+		style |= BS_SPLITBUTTON;
+		SetWindowLongPtr(GetDlgItem(hDlg, IDC_SELECT), GWL_STYLE, style);
 	}
 }
 
@@ -561,7 +561,7 @@ void SetSectionHeaders(HWND hDlg)
 		SendDlgItemMessageA(hDlg, section_control_ids[i], WM_SETFONT, (WPARAM)hf, TRUE);
 		hCtrl = GetDlgItem(hDlg, section_control_ids[i]);
 		memset(wtmp, 0, sizeof(wtmp));
-		GetWindowTextW(hCtrl, wtmp, ARRAYSIZE(wtmp));
+		GetWindowTextW(hCtrl, wtmp, ARRAYSIZE(wtmp) - 3);
 		wlen = wcslen(wtmp);
 		wtmp[wlen++] = L' ';
 		wtmp[wlen++] = L' ';
