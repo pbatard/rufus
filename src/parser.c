@@ -89,7 +89,7 @@ static loc_cmd* get_loc_cmd(char c, char* line) {
 			}
 			r = i;
 			// locate ending quote
-			while ((line[i] != 0) && ((line[i] != '"') || ((line[i] == '"') && (line[i-1] == '\\')))) {
+			while ((line[i] != 0) && ((line[i] != '"') || ((line[i-1] == '\\')))) {
 				if ((line[i] == '"') && (line[i-1] == '\\')) {
 					strcpy(&line[i-1], &line[i]);
 				} else {
