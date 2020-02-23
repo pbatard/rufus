@@ -1111,7 +1111,7 @@ char* replace_in_token_data(const char* filename, const char* token, const char*
 		goto out;
 	}
 	wtoken = utf8_to_wchar(token);
-	if (wfilename == NULL) {
+	if (wtoken == NULL) {
 		uprintf(conversion_error, token);
 		goto out;
 	}
@@ -1121,7 +1121,7 @@ char* replace_in_token_data(const char* filename, const char* token, const char*
 		goto out;
 	}
 	wrep = utf8_to_wchar(rep);
-	if (wsrc == NULL) {
+	if (wrep == NULL) {
 		uprintf(conversion_error, rep);
 		goto out;
 	}
