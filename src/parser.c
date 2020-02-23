@@ -680,7 +680,7 @@ char* set_token_data_file(const char* token, const char* data, const char* filen
 	wchar_t *wtoken = NULL, *wfilename = NULL, *wtmpname = NULL, *wdata = NULL, bom = 0;
 	wchar_t buf[1024];
 	FILE *fd_in = NULL, *fd_out = NULL;
-	size_t i, size;
+	size_t i, size, wtoken_len;
 	int mode = 0;
 	char *ret = NULL, tmp[2];
 
@@ -695,6 +695,7 @@ char* set_token_data_file(const char* token, const char* data, const char* filen
 		goto out;
 	}
 	wtoken = utf8_to_wchar(token);
+	wtoken_len = wcslen(wtoken);
 	if (wfilename == NULL) {
 		uprintf(conversion_error, token);
 		goto out;
@@ -755,13 +756,13 @@ char* set_token_data_file(const char* token, const char* data, const char* filen
 		}
 
 		// Our token should begin a line
-		if (_wcsnicmp(&buf[i], wtoken, wcslen(wtoken)) != 0) {
+		if (_wcsnicmp(&buf[i], wtoken, wtoken_len) != 0) {
 			fputws(buf, fd_out);
 			continue;
 		}
 
 		// Token was found, move past token
-		i += wcslen(wtoken);
+		i += wtoken_len;
 
 		// Skip spaces
 		i += wcsspn(&buf[i], wspace);
