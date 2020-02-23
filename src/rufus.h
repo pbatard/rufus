@@ -656,8 +656,8 @@ static __inline HMODULE GetLibraryHandle(char* szLibraryName) {
 	if ((pf##proc == NULL) && (NT_SUCCESS(status))) status = STATUS_NOT_IMPLEMENTED; } while(0)
 
 /* Custom application errors */
-#define FAC(f)                         (f<<16)
-#define APPERR(err)                    (APPLICATION_ERROR_MASK|err)
+#define FAC(f)                         ((f)<<16)
+#define APPERR(err)                    (APPLICATION_ERROR_MASK|(err))
 #define ERROR_INCOMPATIBLE_FS          0x1201
 #define ERROR_CANT_QUICK_FORMAT        0x1202
 #define ERROR_INVALID_CLUSTER_SIZE     0x1203
