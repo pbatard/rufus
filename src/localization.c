@@ -378,7 +378,7 @@ char* lmprintf(uint32_t msg_id, ...)
 	}
 
 	if (format == NULL) {
-		safe_sprintf(buf[buf_id], LOC_MESSAGE_SIZE-1, "MSG_%03d UNTRANSLATED", msg_id - MSG_000);
+		safe_sprintf(buf[buf_id], LOC_MESSAGE_SIZE-1, "MSG_%03u UNTRANSLATED", msg_id - MSG_000);
 	} else {
 		if (right_to_left_mode && (msg_table != default_msg_table)) {
 			if (is_rtf) {

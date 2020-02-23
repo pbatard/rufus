@@ -177,7 +177,7 @@ const char* error_message(errcode_t error_code)
 			static_sprintf(error_string, "Unknown ext2fs error %ld (EXT2_ET_BASE + %ld)", error_code, error_code - EXT2_ET_BASE);
 		} else {
 			SetLastError((FormatStatus == 0) ? (ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | (error_code & 0xFFFF)) : FormatStatus);
-			static_sprintf(error_string, WindowsErrorString());
+			static_sprintf(error_string, "%s", WindowsErrorString());
 		}
 		return error_string;
 	}

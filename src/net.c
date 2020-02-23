@@ -41,7 +41,7 @@
 #include "settings.h"
 
 /* Maximum download chunk size, in bytes */
-#define DOWNLOAD_BUFFER_SIZE    10*KB
+#define DOWNLOAD_BUFFER_SIZE    (10*KB)
 /* Default delay between update checks (1 day) */
 #define DEFAULT_UPDATE_INTERVAL (24*3600)
 
