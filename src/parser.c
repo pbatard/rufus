@@ -960,7 +960,7 @@ char* insert_section_data(const char* filename, const char* section, const char*
 	wchar_t *wsection = NULL, *wfilename = NULL, *wtmpname = NULL, *wdata = NULL, bom = 0;
 	wchar_t buf[1024];
 	FILE *fd_in = NULL, *fd_out = NULL;
-	size_t i, size;
+	size_t i, size, wsection_len;
 	int mode = 0;
 	char *ret = NULL, tmp[2];
 
@@ -979,6 +979,7 @@ char* insert_section_data(const char* filename, const char* section, const char*
 		uprintf(conversion_error, section);
 		goto out;
 	}
+	wsection_len = wcslen(wsection);
 	wdata = utf8_to_wchar(data);
 	if (wdata == NULL) {
 		uprintf(conversion_error, data);
@@ -1033,7 +1034,7 @@ char* insert_section_data(const char* filename, const char* section, const char*
 		i += wcsspn(&buf[i], wspace);
 
 		// Our token should begin a line
-		if (_wcsnicmp(&buf[i], wsection, wcslen(wsection)) != 0) {
+		if (_wcsnicmp(&buf[i], wsection, wsection_len) != 0) {
 			fputws(buf, fd_out);
 			continue;
 		}
@@ -1094,7 +1095,7 @@ char* replace_in_token_data(const char* filename, const char* token, const char*
 	wchar_t *wtoken = NULL, *wfilename = NULL, *wtmpname = NULL, *wsrc = NULL, *wrep = NULL, bom = 0;
 	wchar_t buf[1024], *torep;
 	FILE *fd_in = NULL, *fd_out = NULL;
-	size_t i, ns, size;
+	size_t i, ns, size, wtoken_len, wsrc_len;
 	int mode = 0;
 	char *ret = NULL, tmp[2];
 
@@ -1115,11 +1116,13 @@ char* replace_in_token_data(const char* filename, const char* token, const char*
 		uprintf(conversion_error, token);
 		goto out;
 	}
+	wtoken_len = wcslen(wtoken);
 	wsrc = utf8_to_wchar(src);
 	if (wsrc == NULL) {
 		uprintf(conversion_error, src);
 		goto out;
 	}
+	wsrc_len = wcslen(wsrc);
 	wrep = utf8_to_wchar(rep);
 	if (wrep == NULL) {
 		uprintf(conversion_error, rep);
@@ -1176,13 +1179,13 @@ char* replace_in_token_data(const char* filename, const char* token, const char*
 		i += wcsspn(&buf[i], wspace);
 
 		// Our token should begin a line
-		if (_wcsnicmp(&buf[i], wtoken, wcslen(wtoken)) != 0) {
+		if (_wcsnicmp(&buf[i], wtoken, wtoken_len) != 0) {
 			fputws(buf, fd_out);
 			continue;
 		}
 
 		// Token was found, move past token
-		i += wcslen(wtoken);
+		i += wtoken_len;
 
 		// Skip whitespaces after token (while making sure there's at least one)
 		ns = wcsspn(&buf[i], wspace);
@@ -1196,7 +1199,7 @@ char* replace_in_token_data(const char* filename, const char* token, const char*
 			continue;
 		}
 
-		i = (torep-buf) + wcslen(wsrc);
+		i = (torep-buf) + wsrc_len;
 		*torep = 0;
 		// coverity[invalid_type]
 		fwprintf_s(fd_out, L"%s%s%s", buf, wrep, &buf[i]);
