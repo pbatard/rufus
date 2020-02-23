@@ -563,8 +563,11 @@ void SetSectionHeaders(HWND hDlg)
 		memset(wtmp, 0, sizeof(wtmp));
 		GetWindowTextW(hCtrl, wtmp, ARRAYSIZE(wtmp));
 		wlen = wcslen(wtmp);
-		wtmp[wlen++] = L' ';
-		wtmp[wlen++] = L' ';
+		if (wlen < ARRAYSIZE(wtmp) - 1)
+			wtmp[wlen++] = L' ';
+		if (wlen < ARRAYSIZE(wtmp) - 1)
+			wtmp[wlen++] = L' ';
+		wtmp[ARRAYSIZE(wtmp) - 1] = L'\0';
 		SetWindowTextW(hCtrl, wtmp);
 		GetWindowRect(hCtrl, &rc);
 		MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
