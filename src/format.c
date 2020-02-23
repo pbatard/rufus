@@ -250,8 +250,8 @@ static void ToValidLabel(char* Label, BOOL bFAT)
 {
 	size_t i, j, k;
 	BOOL found;
-	WCHAR unauthorized[] = L"*?,;:/\\|+=<>[]\"";
-	WCHAR to_underscore[] = L"\t.";
+	const WCHAR unauthorized[] = L"*?,;:/\\|+=<>[]\"";
+	const WCHAR to_underscore[] = L"\t.";
 	WCHAR *wLabel = utf8_to_wchar(Label);
 
 	if (wLabel == NULL)
