@@ -646,7 +646,7 @@ char* get_token_data_file_indexed(const char* token, const char* filename, int i
 		goto out;
 	}
 	wtoken = utf8_to_wchar(token);
-	if (wfilename == NULL) {
+	if (wtoken == NULL) {
 		uprintf(conversion_error, token);
 		goto out;
 	}
@@ -696,7 +696,7 @@ char* set_token_data_file(const char* token, const char* data, const char* filen
 	}
 	wtoken = utf8_to_wchar(token);
 	wtoken_len = wcslen(wtoken);
-	if (wfilename == NULL) {
+	if (wtoken == NULL) {
 		uprintf(conversion_error, token);
 		goto out;
 	}
@@ -975,7 +975,7 @@ char* insert_section_data(const char* filename, const char* section, const char*
 		goto out;
 	}
 	wsection = utf8_to_wchar(section);
-	if (wfilename == NULL) {
+	if (wsection == NULL) {
 		uprintf(conversion_error, section);
 		goto out;
 	}
