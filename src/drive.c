@@ -1046,7 +1046,7 @@ const struct {int (*fn)(FILE *fp); char* str;} known_mbr[] = {
 };
 
 // Returns TRUE if the drive seems bootable, FALSE otherwise
-BOOL AnalyzeMBR(HANDLE hPhysicalDrive, const char* TargetName, BOOL bSilent)
+BOOLEAN AnalyzeMBR(HANDLE hPhysicalDrive, const char* TargetName, BOOL bSilent)
 {
 	const char* mbr_name = "Master Boot Record";
 	FAKE_FD fake_fd = { 0 };

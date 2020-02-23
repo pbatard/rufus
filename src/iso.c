@@ -725,7 +725,7 @@ void GetGrubVersion(char* buf, size_t buf_size)
 		img_report.grub2_version[0] = 0;
 }
 
-BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan)
+BOOLEAN ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan)
 {
 	size_t i, j, size, sl_index = 0;
 	uint16_t sl_version;

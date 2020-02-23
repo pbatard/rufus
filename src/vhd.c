@@ -229,12 +229,12 @@ static comp_assoc file_assoc[] = {
 
 // For now we consider that an image that matches a known extension is bootable
 #define MBR_SIZE 512	// Might need to review this once we see bootable 4k systems
-BOOL IsCompressedBootableImage(const char* path)
+BOOLEAN IsCompressedBootableImage(const char* path)
 {
 	char *p;
 	unsigned char *buf = NULL;
 	int i;
-	BOOL r = FALSE;
+	BOOLEAN r = FALSE;
 	int64_t dc;
 
 	img_report.compression_type = BLED_COMPRESSION_NONE;
@@ -267,7 +267,7 @@ BOOL IsCompressedBootableImage(const char* path)
 }
 
 
-BOOL IsBootableImage(const char* path)
+BOOLEAN IsBootableImage(const char* path)
 {
 	HANDLE handle = INVALID_HANDLE_VALUE;
 	LARGE_INTEGER liImageSize;
@@ -276,7 +276,7 @@ BOOL IsBootableImage(const char* path)
 	size_t i;
 	uint32_t checksum, old_checksum;
 	LARGE_INTEGER ptr;
-	BOOL is_bootable_img = FALSE;
+	BOOLEAN is_bootable_img = FALSE;
 
 	uprintf("Disk image analysis:");
 	handle = CreateFileU(path, GENERIC_READ, FILE_SHARE_READ, NULL,
@@ -286,9 +286,9 @@ BOOL IsBootableImage(const char* path)
 		goto out;
 	}
 
-	is_bootable_img = (BOOLEAN)IsCompressedBootableImage(path);
+	is_bootable_img = IsCompressedBootableImage(path);
 	if (img_report.compression_type == BLED_COMPRESSION_NONE)
-		is_bootable_img = (BOOLEAN)AnalyzeMBR(handle, "  Image", FALSE);
+		is_bootable_img = AnalyzeMBR(handle, "  Image", FALSE);
 
 	if (!GetFileSizeEx(handle, &liImageSize)) {
 		uprintf("  Could not get image size: %s", WindowsErrorString());

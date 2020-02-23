@@ -609,7 +609,7 @@ static DWORD WINAPI SearchProcessThread(LPVOID param)
 
 		// The above may not work on Windows 7, so try QueryFullProcessImageName (Vista or later)
 		if (!bGotCmdLine) {
-			bGotCmdLine = QueryFullProcessImageNameW(processHandle, 0, wexe_path, &size);
+			bGotCmdLine = QueryFullProcessImageNameW(processHandle, 0, wexe_path, &size) ? TRUE : FALSE;
 			if (bGotCmdLine)
 				wchar_to_utf8_no_alloc(wexe_path, cmdline, sizeof(cmdline));
 		}

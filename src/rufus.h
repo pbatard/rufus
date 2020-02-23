@@ -506,7 +506,7 @@ extern void ListDialog(char* title, char* message, char** items, int size);
 extern SIZE GetTextSize(HWND hCtrl, char* txt);
 extern BOOL ExtractAppIcon(const char* filename, BOOL bSilent);
 extern BOOL ExtractDOS(const char* path);
-extern BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan);
+extern BOOLEAN ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan);
 extern int64_t ExtractISOFile(const char* iso, const char* iso_file, const char* dest_file, DWORD attributes);
 extern BOOL HasEfiImgBootLoaders(void);
 extern BOOL DumpFatDir(const char* path, int32_t cluster);
@@ -547,7 +547,7 @@ extern BOOL WimExtractFile(const char* wim_image, int index, const char* src, co
 extern BOOL WimExtractFile_API(const char* image, int index, const char* src, const char* dst);
 extern BOOL WimExtractFile_7z(const char* image, int index, const char* src, const char* dst);
 extern BOOL WimApplyImage(const char* image, int index, const char* dst);
-extern BOOL IsBootableImage(const char* path);
+extern BOOLEAN IsBootableImage(const char* path);
 extern BOOL AppendVHDFooter(const char* vhd_path);
 extern int SetWinToGoIndex(void);
 extern int IsHDD(DWORD DriveIndex, uint16_t vid, uint16_t pid, const char* strid);
