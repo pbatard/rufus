@@ -220,7 +220,7 @@ static __inline uint64_t bswap_64(uint64_t x)
 #elif defined(BYTE_ORDER) && BYTE_ORDER == LITTLE_ENDIAN
 # define BB_BIG_ENDIAN 0
 # define BB_LITTLE_ENDIAN 1
-#elif defined(__386__) || defined(__i386__) || defined(__x86_64__) || defined(_M_IX86) || defined(_M_X64)
+#elif defined(__386__) || defined(__i386__) || defined(__x86_64__) || defined(_M_IX86) || defined(_M_X64) || defined(_M_ARM) || (defined(_M_ARM64))
 # define BB_BIG_ENDIAN 0
 # define BB_LITTLE_ENDIAN 1
 #else

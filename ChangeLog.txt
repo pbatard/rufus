@@ -1,13 +1,13 @@
-o Version 3.9 (2020.02.??)
+o Version 3.9 (2020.02.29)
     Add exFAT support when creating blank UEFI:NTFS drives [EXPERIMENTAL]
     Fix ext2/ext3 corruption for partitions larger than 4 GB
     Fix early boot files not being usable on compressed NTFS partitions
     Fix writing of compressed streams that don't end on sector boundary
     Fix percent not being displayed on slow format
     Improve file preallocation and speed up ISO extraction (courtesy of Mattiwatti)
-    Improve ex2/ext3 formatting speed
+    Improve ext2/ext3 formatting speed
     Improve protective MBR message for GPT partitioned drives
-    Improve reporting on Syslinux/GRUB download errors
+    Improve reporting of Syslinux/GRUB download errors
     Improve reporting of partition types and of Windows' version
     Report the usage of UDF symbolic links
     Update embedded Syslinux to 6.04-pre1
