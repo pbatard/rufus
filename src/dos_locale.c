@@ -419,7 +419,8 @@ static cp_list cp_hr_list[] = {
 	{ 59829, "Georgian"},
 	{ 60258, "Lat-Azeri"},
 	{ 60853, "Georgian (Alt)"},
-	{ 62306, "Cyr-Uzbek"}
+	{ 62306, "Cyr-Uzbek"},
+	{ 65001, "Unicode (UTF-8)"}
 };
 
 static const char* cp_to_hr(ULONG cp)
