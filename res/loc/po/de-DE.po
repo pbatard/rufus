@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 3.5\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2019-08-13 09:20+0100\n"
-"PO-Revision-Date: 2019-12-23 19:03+0100\n"
+"POT-Creation-Date: 2020-03-09 21:14+0000\n"
+"PO-Revision-Date: 2020-03-09 21:20+0000\n"
 "Language: de_DE\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Rufus-LCID: 0x0407, 0x0807, 0x0c07, 0x1007, 0x1407\n"
 "Last-Translator: \n"
 "Language-Team: \n"
-"X-Generator: Poedit 2.2.4\n"
+"X-Generator: Poedit 2.3\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -147,7 +147,7 @@ msgstr "Löschen"
 
 #. • IDD_LOG → IDC_LOG_SAVE
 msgid "Save"
-msgstr "Speichern..."
+msgstr "Speichern"
 
 #. • IDD_UPDATE_POLICY → IDD_UPDATE_POLICY
 msgid "Update policy and settings"
@@ -1289,9 +1289,9 @@ msgstr "Gespeichert %s"
 
 #. • MSG_217
 #.
-#. Formatting status (make sure you use a double % to print the percent sign)
-msgid "Formatting: %0.1f%% completed"
-msgstr "Formatieren: %0.1f%% erledigt"
+#. Formatting status
+msgid "Formatting: %s"
+msgstr "Formatieren: %"
 
 #. • MSG_218
 msgid "Creating file system: Task %d/%d completed"
@@ -1352,8 +1352,8 @@ msgid "Copying DOS files..."
 msgstr "DOS-Dateien kopieren..."
 
 #. • MSG_231
-msgid "Copying ISO files..."
-msgstr "ISO-Dateien kopieren..."
+msgid "Copying ISO files: %s"
+msgstr "ISO-Dateien kopieren: %s"
 
 #. • MSG_232
 msgid "Win7 EFI boot setup (This may take a while)..."
@@ -1408,8 +1408,8 @@ msgstr ""
 "Der Download wird gelöscht. Bitte prüfen Sie das Log für weitere Informationen."
 
 #. • MSG_241
-msgid "Downloading: %0.1f%%"
-msgstr "Download: %0.1f%%"
+msgid "Downloading: %s"
+msgstr "Download: %s"
 
 #. • MSG_242
 msgid "Failed to download file."
@@ -1490,8 +1490,8 @@ msgid "NTFS compression"
 msgstr "NTFS-Komprimierung"
 
 #. • MSG_261
-msgid "Writing image: %0.1f%% completed"
-msgstr "Schreibe Abbild-Datei: %0.1f%% fertiggestellt"
+msgid "Writing image: %s"
+msgstr "Schreibe Abbild-Datei: %s"
 
 #. • MSG_262
 #.
@@ -1518,8 +1518,8 @@ msgid "Dual UEFI/BIOS mode"
 msgstr "Dualer UEFI/BIOS-Modus"
 
 #. • MSG_267
-msgid "Applying Windows image: %0.1f%% completed"
-msgstr "Windows-Abbild aufspielen: %0.1f%% fertiggestellt"
+msgid "Applying Windows image: %s"
+msgstr "Windows-Abbild aufspielen: %s"
 
 #. • MSG_268
 msgid "Applying Windows image..."
@@ -1534,8 +1534,8 @@ msgid "USB debug"
 msgstr "USB-Testmodus"
 
 #. • MSG_271
-msgid "Computing image checksums: %0.1f%% completed"
-msgstr "Berechne Abbild-Prüfsumme: %0.1f%% fertiggestellt"
+msgid "Computing image checksums: %s"
+msgstr "Berechne Abbild-Prüfsumme: %s"
 
 #. • MSG_272
 msgid "Compute the MD5, SHA1 and SHA256 checksums for the selected image"
@@ -1616,8 +1616,8 @@ msgstr ""
 "Sind Sie sicher, dass Sie diese Datei ausführen wollen?"
 
 #. • MSG_286
-msgid "Zeroing drive: %0.1f%% completed"
-msgstr "Überschreiben mit Nullen: %0.1f%% fertiggestellt"
+msgid "Zeroing drive: %s"
+msgstr "Überschreiben mit Nullen: %s"
 
 #. • MSG_287
 msgid "Detection of non-USB removable drives"
@@ -1721,5 +1721,5 @@ msgstr "Wollen Sie Windows auf einem anderen Laufwerk installieren oder Windows 
 #.
 #. You can see this status message by pressing <Ctrl>-<Alt>-<Z> and then selecting START.
 #. It's the same as MSG_286 but with a process that *may* be faster, hence the name.
-msgid "Fast-zeroing drive: %0.1f%% completed"
-msgstr "Laufwerk mit Nullen überschreiben: %0.1f%% erledigt"
+msgid "Fast-zeroing drive: %s"
+msgstr "Laufwerk mit Nullen überschreiben: %s"
