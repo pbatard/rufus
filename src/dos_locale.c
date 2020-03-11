@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * DOS keyboard locale setup
- * Copyright © 2011-2013 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2020 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -419,7 +419,8 @@ static cp_list cp_hr_list[] = {
 	{ 59829, "Georgian"},
 	{ 60258, "Lat-Azeri"},
 	{ 60853, "Georgian (Alt)"},
-	{ 62306, "Cyr-Uzbek"}
+	{ 62306, "Cyr-Uzbek"},
+	{ 65001, "Unicode (UTF-8)" }
 };
 
 static const char* cp_to_hr(ULONG cp)
@@ -961,13 +962,13 @@ static ULONG fd_upgrade_cp(ULONG cp)
 	}
 }
 
-
 // Don't bother about setting up the country or multiple codepages
 BOOL SetDOSLocale(const char* path, BOOL bFreeDOS)
 {
 	FILE* fd;
 	char filename[MAX_PATH];
 	ULONG cp;
+	UINT actual_cp;
 	const char *kb;
 	int kbdrv;
 	const char* egadrv;
@@ -985,6 +986,13 @@ BOOL SetDOSLocale(const char* path, BOOL bFreeDOS)
 
 	// Now get a codepage
 	cp = GetOEMCP();
+	if (cp == 65001) {
+		// GetOEMCP() may return UTF-8 for the codepage (65001),
+		// in which case we need to find the actual system OEM cp.
+		if (GetLocaleInfoA(GetUserDefaultUILanguage(), LOCALE_IDEFAULTCODEPAGE | LOCALE_RETURN_NUMBER,
+			(char*)&actual_cp, sizeof(actual_cp)))
+			cp = actual_cp;
+	}
 	egadrv = bFreeDOS?fd_get_ega(cp):ms_get_ega(cp);
 	if (egadrv == NULL) {
 		// We need to use the fallback CP from the keyboard we got above, as 437 is not always available
