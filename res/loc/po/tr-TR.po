@@ -33,7 +33,7 @@ msgstr "Seç"
 
 #. • IDD_DIALOG → IDS_IMAGE_OPTION_TXT
 msgid "Image Option"
-msgstr "Yansıma Seçeneği"
+msgstr "İmaj Seçeneği"
 
 #. • IDD_DIALOG → IDS_PARTITION_TYPE_TXT
 msgid "Partition scheme"
@@ -253,7 +253,7 @@ msgstr ""
 
 #. • MSG_013
 msgid "Disabled"
-msgstr "Devredışı"
+msgstr "Devre dışı"
 
 #. • MSG_014
 msgid "Daily"
@@ -359,7 +359,7 @@ msgstr "%d geçiş %s"
 
 #. • MSG_036
 msgid "ISO Image"
-msgstr "ISO Yansıması"
+msgstr "ISO İmajı"
 
 #. • MSG_037
 msgid "Application"
@@ -409,7 +409,7 @@ msgstr "Rufus - Tamponlanıyor"
 
 #. • MSG_049
 msgid "Rufus - Cancellation"
-msgstr "Rufus - Vazgeçme"
+msgstr "Rufus - İptal"
 
 #. • MSG_050
 msgid "Success."
@@ -507,11 +507,11 @@ msgstr "Hatalı blokların denetimi tamamlanamadı."
 
 #. • MSG_073
 msgid "ISO image scan failure."
-msgstr "ISO yansıması taranamadı."
+msgstr "ISO imajı taranamadı."
 
 #. • MSG_074
 msgid "ISO image extraction failure."
-msgstr "ISO yansıması ayrıştırma hatası."
+msgstr "ISO imajı ayrıştırma hatası."
 
 #. • MSG_075
 msgid "Unable to remount volume."
@@ -549,11 +549,11 @@ msgstr ""
 
 #. • MSG_081
 msgid "Unsupported image"
-msgstr "Desteklenmeyen Yansıması"
+msgstr "Desteklenmeyen imaj"
 
 #. • MSG_082
 msgid "This image is either non-bootable, or it uses a boot or compression method that is not supported by Rufus..."
-msgstr "Bu yansıma ya önyüklenebilir değil ya da Rufus tarafından desteklenmeyen bir önyükleme veya bir sıkıştırma yöntemi kullanıyor..."
+msgstr "Bu imaj ya önyüklenebilir değil ya da Rufus tarafından desteklenmeyen bir önyükleme veya bir sıkıştırma yöntemi kullanıyor..."
 
 #. • MSG_083
 msgid "Replace %s?"
@@ -571,7 +571,7 @@ msgid ""
 "\n"
 "Note: The new file will be downloaded in the current directory and once a '%s' exists there, it will be reused automatically."
 msgstr ""
-"Bu ISO yansıması eski bir '%s' sürümünü kullanıyor gibi görünüyor.\n"
+"Bu ISO imajı eski bir '%s' sürümünü kullanıyor gibi görünüyor.\n"
 "Açılış menüsü bundan dolayı düzgün görüntülenmeyebilir.\n"
 "\n"
 "Bu durumu düzeltmek için yeni sürümü Rufus tarafından indirilebilir:\n"
@@ -587,7 +587,7 @@ msgstr "%s indiriliyor"
 
 #. • MSG_086
 msgid "No image selected"
-msgstr "Yansıma seçilmedi"
+msgstr "İmaj seçilmedi"
 
 #. • MSG_087
 #.
@@ -602,11 +602,11 @@ msgstr "%s NAND için"
 
 #. • MSG_088
 msgid "Image is too big"
-msgstr "Yansıma çok büyük"
+msgstr "İmaj boyutu çok büyük"
 
 #. • MSG_089
 msgid "The image is too big for the selected target."
-msgstr "Yansıması seçilen hedef için çok büyük."
+msgstr "Seçilen imaj boyutu hedef için çok büyük."
 
 #. • MSG_090
 msgid "Unsupported ISO"
@@ -614,7 +614,7 @@ msgstr "Desteklenmeyen ISO"
 
 #. • MSG_091
 msgid "When using UEFI Target Type, only EFI bootable ISO images are supported. Please select an EFI bootable ISO or set the Target Type to BIOS."
-msgstr "EFI Hedef Türünü kullanıyorken, sadece EFI açılabilir ISO yansımaları desteklenir. Lütfen bir EFI açılabilir ISO'su seçin yada Hedef Türünü BIOS'a ayarlayın."
+msgstr "EFI Hedef Türünü kullanıyorken, sadece EFI açılabilir ISO imajları desteklenir. Lütfen bir EFI açılabilir ISO'su seçin ya da Hedef Türünü BIOS'a ayarlayın."
 
 #. • MSG_092
 msgid "Unsupported filesystem"
@@ -636,11 +636,11 @@ msgstr "Çoklu disk bölümü algılandı"
 
 #. • MSG_095
 msgid "DD Image"
-msgstr "DD Yansıması"
+msgstr "DD İmajı"
 
 #. • MSG_096
 msgid "The file system currently selected can not be used with this type of ISO. Please select a different file system or use a different ISO."
-msgstr "Mevcut seçili dosya sistemi bu ISO türüyle kullanılamaz. Lütfen farklı bir dosya sistemi seçin yada farklı bir ISO kullanın."
+msgstr "Mevcut seçili dosya sistemi bu ISO türüyle kullanılamaz. Lütfen farklı bir dosya sistemi seçin ya da farklı bir ISO kullanın."
 
 #. • MSG_097
 msgid "'%s' can only be applied if the file system is NTFS."
@@ -666,7 +666,7 @@ msgstr "Dosya Sistemi Sınırlandırması"
 
 #. • MSG_100
 msgid "This ISO image contains a file larger than 4 GB, which is more than the maximum size allowed for a FAT or FAT32 file system."
-msgstr "Bu ISO yansıması, FAT yada FAT32 dosya sisteminin desteklediği en fazla boyut olan 4 GB'tan daha büyük bir dosya içeriyor."
+msgstr "Bu ISO imajı, FAT ya da FAT32 dosya sisteminin desteklediği en fazla boyut olan 4 GB'tan daha büyük bir dosya içeriyor."
 
 #. • MSG_101
 msgid "Missing WIM support"
@@ -698,8 +698,8 @@ msgid ""
 "\n"
 "Note: The file will be downloaded in the current directory and once a '%s' exists there, it will be reused automatically."
 msgstr ""
-"%s yada daha üstünün yüklenebilmesi için '%s' dosyası gerekir.\n"
-"Çünkü bu dosyanın boyutu 100 KB tan daha büyüktür ve %s ISO yansımalarında mutlaka bulunur, Rufus'a gömülü değildir.\n"
+"%s ya da daha üstünün yüklenebilmesi için '%s' dosyası gerekir.\n"
+"Çünkü bu dosyanın boyutu 100 KB tan daha büyüktür ve %s ISO imajlarında mutlaka bulunur, Rufus'a gömülü değildir.\n"
 "\n"
 "Rufus eksik dosyayı sizin için indirebilir:\n"
 "- İnternete bağlanıp dosyayı indirmek için 'Evet'i seçin\n"
@@ -740,7 +740,7 @@ msgid ""
 "Please change the Cluster size or use FreeDOS."
 msgstr ""
 "MS-DOS, 64 kilobyte Ayırma Birimi Boyutu kullanan bir sürücüden başlatılamaz.\n"
-"Lütfen farklı bir Ayırma Birimi Boyutu seçin yada FreeDOS kullanın."
+"Lütfen farklı bir Ayırma Birimi Boyutu seçin ya da FreeDOS kullanın."
 
 #. • MSG_111
 msgid "Incompatible Cluster size"
@@ -766,7 +766,7 @@ msgid ""
 "\n"
 "Note: The files will be downloaded in the current application directory and will be reused automatically if present."
 msgstr ""
-"Bu yansıma Syslinux %s%s kullanıyor fakat bu uygulama yalnız Syslinux %s%s için yükleme dosyalarını içeriyor.\n"
+"Bu imaj Syslinux %s%s kullanıyor fakat bu uygulama yalnız Syslinux %s%s için yükleme dosyalarını içeriyor.\n"
 "\n"
 "Syslinux'un yeni sürümleri bir başkasıyla uyumlu olmadığından ve Rufus'un bunların tamamını içermesi mümkün olmadığından, iki ek dosyanın('ldlinux.sys' ve 'ldlinux.bss') internet üzerinden indirilmesi gerekli:\n"
 "- İnternete bağlanıp bu dosyaları indirmek için 'Evet'i seçin\n"
@@ -792,9 +792,9 @@ msgid ""
 "\n"
 "Note: The file will be downloaded in the current application directory and will be reused automatically if present. If no match can be found online, then the default version will be used."
 msgstr ""
-"Bu yansıma Grub %s kullanıyor fakat bu uygulama yalnız Grub %s için yükleme dosyalarını içeriyor.\n"
+"Bu imaj Grub %s kullanıyor fakat bu uygulama yalnız Grub %s için yükleme dosyalarını içeriyor.\n"
 "\n"
-"Grub 'un yeni sürümleri bir başkasıyla uyumlu olmadığından ve Rufus'un bunların tamamını içermesi mümkün olmadığından, Rufus yansımanızla eşleşen Grub'un bir yükleme dosyasını ('core.img') edinmeyi çalışacak:\n"
+"Grub 'un yeni sürümleri bir başkasıyla uyumlu olmadığından ve Rufus'un bunların tamamını içermesi mümkün olmadığından, Rufus imajıyla eşleşen Grub'un bir yükleme dosyasını ('core.img') edinmeyi çalışacak:\n"
 "- İnternete bağlanıp bu dosyaları indirmek için 'Evet'i seçin\n"
 "- Rufustan varsayılan sürümü kullanmak için 'Hayır''ı seçin\n"
 "- İşlemden vazgeçmek için 'Vazgeç'i seçin\n"
@@ -803,7 +803,7 @@ msgstr ""
 
 #. • MSG_117
 msgid "Standard Windows installation"
-msgstr "Standart Windows Yüklemesi"
+msgstr "Standart Windows yüklemesi"
 
 #. • MSG_118
 #.
@@ -869,20 +869,20 @@ msgid ""
 "You have just created a media that uses the UEFI:NTFS bootloader. Please remember that, to boot this media, YOU MUST DISABLE SECURE BOOT.\n"
 "For details on why this is necessary, see the 'More Information' button below."
 msgstr ""
-"Az önce UEFI:NTFS önyükleyicisini kullanan bir ortam yarattınız. Lütfen, bu ortamı önyükleyebilmek için GÜVENLİ BOOT'U DEVREDIŞI BIRAKMANIZ gerektiğini unutmayın.\n"
+"Az önce UEFI:NTFS önyükleyicisini kullanan bir ortam yarattınız. Lütfen, bu ortamı önyükleyebilmek için GÜVENLİ BOOT'U DEVRE DIŞI BIRAKMANIZ gerektiğini unutmayın.\n"
 "Bunun neden gerekli olduğu hakkında ayrıntılar için aşağıdaki 'Daha Fazla Bilgi' düğmesine bakın."
 
 #. • MSG_130
 msgid "Windows image selection"
-msgstr "Windows Yansıma Seçimi"
+msgstr "Windows imaj seçimi"
 
 #. • MSG_131
 msgid ""
 "This ISO contains multiple Windows images.\n"
 "Please select the image you wish to use for this installation:"
 msgstr ""
-"Bu ISO birden çok Windows yansıması içeriyor.\n"
-"Lütfen bu yükleme için kullanmak istediğiniz yansıyı seçin:"
+"Bu ISO birden çok Windows imajı içeriyor.\n"
+"Lütfen bu yükleme için kullanmak istediğiniz imajı seçin:"
 
 #. • MSG_132
 msgid "Another program or process is accessing this drive. Do you want to format it anyway?"
@@ -966,7 +966,7 @@ msgstr "İndirme komutu çalıştırılıyor ..."
 
 #. • MSG_149
 msgid "Download ISO Image"
-msgstr "ISO Yansımasını indir"
+msgstr "ISO İmajını indir"
 
 #. • MSG_150
 msgid "Type of computer you plan to use this bootable drive with. It is your responsibility to determine whether your target is of BIOS or UEFI type before you start creating the drive, as it may fail to boot otherwise."
@@ -1036,7 +1036,7 @@ msgstr "Sürücüyü açılabilir yapmak için kullanılacak yöntem"
 
 #. • MSG_165
 msgid "Click to select or download an image..."
-msgstr "Yansıma seçmek ya da indirmek için tıklayın..."
+msgstr "İmaj seçmek ya da indirmek için tıklayın..."
 
 #. • MSG_166
 msgid "Check this box to allow the display of international labels and set a device icon (creates an autorun.inf)"
@@ -1099,7 +1099,7 @@ msgstr "Türkçe Çeviri: Mehmetali KURAN <mailto:mehmetalikuran@gmail.com>"
 
 #. • MSG_177
 msgid "Report bugs or request enhancements at:"
-msgstr "Hataları yada geliştirme isteklerini buraya raporlayın:"
+msgstr "Hataları ya da geliştirme isteklerini buraya raporlayın:"
 
 #. • MSG_178
 msgid "Additional Copyrights:"
@@ -1138,20 +1138,20 @@ msgid ""
 "Rufus does not install or run background services, therefore update checks are performed only when the main application is running.\\line\n"
 "Internet access is of course required when checking for updates."
 msgstr ""
-"Güncelleme denetiminin sadece ana uygulama çalışırken gerçekleşmesinden dolayı, Rufus arkaplan hizmeti yüklemez yada çalıştırmaz.\\line\n"
+"Güncelleme denetiminin sadece ana uygulama çalışırken gerçekleşmesinden dolayı, Rufus arkaplan hizmeti yüklemez ya da çalıştırmaz.\\line\n"
 "Güncellemeler denetlenirken doğal olarak internet erişimi gerekir."
 
 #. • MSG_187
 msgid "Invalid image for selected boot option"
-msgstr "Seçilen açılış seçeneği için geçersiz yansıma"
+msgstr "Seçilen açılış seçeneği için geçersiz imaj"
 
 #. • MSG_188
 msgid "The current image doesn't match the boot option selected. Please use a different image or choose a different boot option."
-msgstr "Mevcut yansıma, seçilen açılış seçeneği ile eşleşmiyor. Lütfen farklı bir yansıma kullanın ya da farklı bir açılış seçeneği seçin."
+msgstr "Mevcut imaj, seçilen açılış seçeneği ile eşleşmiyor. Lütfen farklı bir imaj kullanın ya da farklı bir açılış seçeneği seçin."
 
 #. • MSG_189
 msgid "This ISO image is not compatible with the selected filesystem"
-msgstr "Bu ISO yansıması, seçilen dosya sistemi ile uyumlu değil"
+msgstr "Bu ISO imajı, seçilen dosya sistemi ile uyumlu değil"
 
 #. • MSG_190
 msgid "Incompatible drive detected"
@@ -1209,11 +1209,11 @@ msgstr "Vazgeçiliyor - Lütfen Bekleyin..."
 
 #. • MSG_202
 msgid "Scanning image..."
-msgstr "Yansıma taranıyor..."
+msgstr "İmaj taranıyor..."
 
 #. • MSG_203
 msgid "Failed to scan image"
-msgstr "Yansıma taranamadı"
+msgstr "İmaj taranamadı"
 
 #. • MSG_204
 #.
@@ -1225,7 +1225,7 @@ msgstr "Eski %s algılandı"
 #.
 #. Display the name of the image selected. eg: "Using image: en_win7_x64_sp1.iso"
 msgid "Using image: %s"
-msgstr "Kullanılan Yansıma: %s"
+msgstr "Kullanılan İmaj: %s"
 
 #. • MSG_206
 #.
@@ -1450,7 +1450,7 @@ msgstr "%s etkin"
 
 #. • MSG_251
 msgid "%s disabled"
-msgstr "%s devredışı"
+msgstr "%s devre dışı"
 
 #. • MSG_252
 msgid "Size checks"
@@ -1490,7 +1490,7 @@ msgstr "NTFS sıkıştırma"
 
 #. • MSG_261
 msgid "Writing image: %0.1f%% completed"
-msgstr "Yansıma yazılıyor: %0.1f%% tamamlandı"
+msgstr "İmaj yazılıyor: %0.1f%% tamamlandı"
 
 #. • MSG_262
 #.
@@ -1518,11 +1518,11 @@ msgstr "Çift UEFI/BIOS modu"
 
 #. • MSG_267
 msgid "Applying Windows image: %0.1f%% completed"
-msgstr "Windows yansıması uygulanıyor: %0.1f%% tamamlandı"
+msgstr "Windows imajı uygulanıyor: %0.1f%% tamamlandı"
 
 #. • MSG_268
 msgid "Applying Windows image..."
-msgstr "Windows yansıması uygulanıyor..."
+msgstr "Windows imajı uygulanıyor..."
 
 #. • MSG_269
 msgid "Preserve timestamps"
@@ -1534,11 +1534,11 @@ msgstr "USB Hata Ayıklama"
 
 #. • MSG_271
 msgid "Computing image checksums: %0.1f%% completed"
-msgstr "Yansıma sağlaması hesaplanıyor: %0.1f%% tamamlandı"
+msgstr "İmaj sağlaması hesaplanıyor: %0.1f%% tamamlandı"
 
 #. • MSG_272
 msgid "Compute the MD5, SHA1 and SHA256 checksums for the selected image"
-msgstr "Seçilen yansıma için MD5, SHA1 ve SHA256 sağlamasını hesapla"
+msgstr "Seçilen imaj için MD5, SHA1 ve SHA256 sağlamasını hesapla"
 
 #. • MSG_273
 msgid "Change the application language"
@@ -1546,7 +1546,7 @@ msgstr "Uygulama dilini değiştir"
 
 #. • MSG_274
 msgid "ISOHybrid image detected"
-msgstr "ISOHybrid yansıma algılandı"
+msgstr "ISOHybrid imaj algılandı"
 
 #. • MSG_275
 #.
@@ -1558,11 +1558,11 @@ msgid ""
 "\n"
 "Please select the mode that you want to use to write this image:"
 msgstr ""
-"Seçtiğiniz yansıma bir 'ISOHybrid' yansımasıdır. Bu da yansımanın ya %s (dosya kopyalama) modunda ya da %s (disk yansıması) modunda yazılabileceği anlamına geliyor.\n"
+"Seçtiğiniz imaj bir 'ISOHybrid' imajıdır. Bu da imajının ya %s (dosya kopyalama) modunda ya da %s (disk imajı) modunda yazılabileceği anlamına geliyor.\n"
 "Rufus %s modunun kullanılmasını önerir, Böylece yazdırmadan sonra, sürücüye her zaman tam erişim sağlanabilir.\n"
-"Ancak, Önyükleme sırasında sorunlarla karşılaşırsanız, Yansımayı %s modunda yeniden yazmayı deneyebilirsiniz.\n"
+"Ancak, Önyükleme sırasında sorunlarla karşılaşırsanız, imajı %s modunda yeniden yazmayı deneyebilirsiniz.\n"
 "\n"
-"Lütfen bu yansımanın yazdırılmasında kullanmak istediğiniz modu seçin:"
+"Lütfen bu imajın yazdırılmasında kullanmak istediğiniz modu seçin:"
 
 #. • MSG_276
 #.
@@ -1586,7 +1586,7 @@ msgstr "Önyüklenebilir değil"
 
 #. • MSG_280
 msgid "Disk or ISO image"
-msgstr "Disk ya da ISO yansıması"
+msgstr "Disk ya da ISO imajı"
 
 #. • MSG_281
 msgid "%s (Please select)"
@@ -1710,7 +1710,7 @@ msgstr "Günlüğü göster"
 
 #. • MSG_304
 msgid "Create a disk image of the selected device"
-msgstr "Seçilen cihazın disk yansımasını oluşturur"
+msgstr "Seçilen cihazın disk imajını oluşturur"
 
 #. • MSG_305
 msgid "Use this option to indicate whether you want to use this device to install Windows on another disk, or if you want to run Windows directly from this drive (Windows To Go)."
