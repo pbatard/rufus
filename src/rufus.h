@@ -19,6 +19,11 @@
 #include <malloc.h>
 #include <inttypes.h>
 
+// MinGW doesn't know this one yet
+#if !defined(PROCESSOR_ARCHITECTURE_ARM64)
+#define PROCESSOR_ARCHITECTURE_ARM64       12
+#endif
+
 #if defined(_MSC_VER)
 // Disable some VS Code Analysis warnings
 #pragma warning(disable: 4996)		// Ignore deprecated
