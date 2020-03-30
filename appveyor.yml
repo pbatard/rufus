@@ -1,3 +1,5 @@
+os: Visual Studio 2019
+
 skip_commits:
   # Don't run AppVeyor for commits that only modify resource or non-code files
   files:
@@ -20,32 +22,25 @@ environment:
   global:
     BITS: 32
   matrix:
-  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
-    CONFIGURATION: Debug
+  - CONFIGURATION: Debug
     COMPILER: MSVC
     PLATFORM: x86
-  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
-    CONFIGURATION: Debug
+  - CONFIGURATION: Debug
     COMPILER: MSVC
     PLATFORM: x64
-  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
-    CONFIGURATION: Release
+  - CONFIGURATION: Release
     COMPILER: MSVC
     PLATFORM: x86
-  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
-    CONFIGURATION: Release
+  - CONFIGURATION: Release
     COMPILER: MSVC
     PLATFORM: x64
-  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-    CONFIGURATION: Release
+  - CONFIGURATION: Release
     COMPILER: MinGW
     PLATFORM: i686
-  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-    CONFIGURATION: Release
+  - CONFIGURATION: Release
     COMPILER: MinGW
     PLATFORM: x86_64
-  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
-    CONFIGURATION: Release
+  - CONFIGURATION: Release
     COMPILER: Coverity
     PLATFORM: x86
 
