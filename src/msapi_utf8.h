@@ -87,7 +87,7 @@ static __inline char* wchar_to_utf8(const wchar_t* wstr)
 
 	// Convert the empty string too
 	if (wstr[0] == 0)
-		return calloc(1, 1);
+		return (char*)calloc(1, 1);
 
 	// Find out the size we need to allocate for our converted string
 	size = WideCharToMultiByte(CP_UTF8, 0, wstr, -1, NULL, 0, NULL, NULL);
@@ -119,7 +119,7 @@ static __inline wchar_t* utf8_to_wchar(const char* str)
 
 	// Convert the empty string too
 	if (str[0] == 0)
-		return calloc(1, sizeof(wchar_t));
+		return (wchar_t*)calloc(1, sizeof(wchar_t));
 
 	// Find out the size we need to allocate for our converted string
 	size = MultiByteToWideChar(CP_UTF8, 0, str, -1, NULL, 0);
@@ -367,7 +367,7 @@ static __inline int GetWindowTextLengthU(HWND hWnd)
 	ret = GetWindowTextLengthW(hWnd);
 	err = GetLastError();
 	if (ret == 0) goto out;
-	wbuf = calloc(ret, sizeof(wchar_t));
+	wbuf = (wchar_t* )calloc(ret, sizeof(wchar_t));
 	err = GetLastError();
 	if (wbuf == NULL) {
 		err = ERROR_OUTOFMEMORY; ret = 0; goto out;
@@ -452,7 +452,7 @@ static __inline int ComboBox_GetLBTextU(HWND hCtrl, int index, char* lpString)
 static __inline DWORD CharUpperBuffU(char* lpString, DWORD len)
 {
 	DWORD ret;
-	wchar_t *wlpString = calloc(len, sizeof(wchar_t));
+	wchar_t *wlpString = (wchar_t*)calloc(len, sizeof(wchar_t));
 	if (wlpString == NULL)
 		return 0;
 	utf8_to_wchar_no_alloc(lpString, wlpString, len);
@@ -878,10 +878,10 @@ static __inline BOOL WINAPI GetOpenSaveFileNameU(LPOPENFILENAMEA lpofn, BOOL sav
 	}
 	wofn.nMaxCustFilter = lpofn->nMaxCustFilter;
 	wofn.nFilterIndex = lpofn->nFilterIndex;
-	wofn.lpstrFile = calloc(lpofn->nMaxFile, sizeof(wchar_t));
+	wofn.lpstrFile = (LPWSTR)calloc(lpofn->nMaxFile, sizeof(wchar_t));
 	utf8_to_wchar_no_alloc(lpofn->lpstrFile, wofn.lpstrFile, lpofn->nMaxFile);
 	wofn.nMaxFile = lpofn->nMaxFile;
-	wofn.lpstrFileTitle = calloc(lpofn->nMaxFileTitle, sizeof(wchar_t));
+	wofn.lpstrFileTitle = (LPWSTR)calloc(lpofn->nMaxFileTitle, sizeof(wchar_t));
 	utf8_to_wchar_no_alloc(lpofn->lpstrFileTitle, wofn.lpstrFileTitle, lpofn->nMaxFileTitle);
 	wofn.nMaxFileTitle = lpofn->nMaxFileTitle;
 	wofn.lpstrInitialDir = utf8_to_wchar(lpofn->lpstrInitialDir);
@@ -1050,7 +1050,7 @@ static __inline char* getenvU(const char* varname)
 	wchar_t* wbuf = NULL;
 	// _wgetenv() is *BROKEN* in MS compilers => use GetEnvironmentVariableW()
 	DWORD dwSize = GetEnvironmentVariableW(wvarname, wbuf, 0);
-	wbuf = calloc(dwSize, sizeof(wchar_t));
+	wbuf = (wchar_t*)calloc(dwSize, sizeof(wchar_t));
 	if (wbuf == NULL) {
 		wfree(varname);
 		return NULL;
