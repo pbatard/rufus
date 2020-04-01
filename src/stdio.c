@@ -879,7 +879,7 @@ DWORD WaitForSingleObjectWithMessages(HANDLE hHandle, DWORD dwMilliseconds)
 #define RtlGetProcessHeap()				(NtCurrentPeb()->Reserved4[1]) // NtCurrentPeb()->ProcessHeap, mangled due to deficiencies in winternl.h
 
 PF_TYPE_DECL(NTAPI, NTSTATUS, NtCreateFile, (PHANDLE, ACCESS_MASK, POBJECT_ATTRIBUTES, PIO_STATUS_BLOCK, PLARGE_INTEGER, ULONG, ULONG, ULONG, ULONG, PVOID, ULONG));
-PF_TYPE_DECL(NTAPI, BOOLEAN, RtlDosPathNameToNtPathName_U, (PCWSTR, PUNICODE_STRING, PWSTR*, PVOID));
+PF_TYPE_DECL(NTAPI, BOOLEAN, RtlDosPathNameToNtPathNameW, (PCWSTR, PUNICODE_STRING, PWSTR*, PVOID));
 PF_TYPE_DECL(NTAPI, BOOLEAN, RtlFreeHeap, (PVOID, ULONG, PVOID));
 PF_TYPE_DECL(NTAPI, VOID, RtlSetLastWin32ErrorAndNtStatusFromNtStatus, (NTSTATUS));
 
@@ -896,7 +896,7 @@ HANDLE CreatePreallocatedFile(const char* lpFileName, DWORD dwDesiredAccess,
 	NTSTATUS status = STATUS_SUCCESS;
 
 	PF_INIT_OR_SET_STATUS(NtCreateFile, Ntdll);
-	PF_INIT_OR_SET_STATUS(RtlDosPathNameToNtPathName_U, Ntdll);
+	PF_INIT_OR_SET_STATUS(RtlDosPathNameToNtPathNameW, Ntdll);
 	PF_INIT_OR_SET_STATUS(RtlFreeHeap, Ntdll);
 	PF_INIT_OR_SET_STATUS(RtlSetLastWin32ErrorAndNtStatusFromNtStatus, Ntdll);
 
@@ -974,7 +974,7 @@ HANDLE CreatePreallocatedFile(const char* lpFileName, DWORD dwDesiredAccess,
 	dwDesiredAccess |= (SYNCHRONIZE | FILE_READ_ATTRIBUTES);
 
 	// Convert DOS path to NT format
-	if (!pfRtlDosPathNameToNtPathName_U(wlpFileName, &ntPath, NULL, NULL)) {
+	if (!pfRtlDosPathNameToNtPathNameW(wlpFileName, &ntPath, NULL, NULL)) {
 		wfree(lpFileName);
 		SetLastError(ERROR_FILE_NOT_FOUND);
 		return INVALID_HANDLE_VALUE;
