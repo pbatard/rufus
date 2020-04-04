@@ -309,12 +309,10 @@ static void fix_config(const char* psz_fullpath, const char* psz_path, const cha
 	// Add persistence to the kernel options
 	if ((boot_type == BT_IMAGE) && HAS_PERSISTENCE(img_report) && persistence_size) {
 		if ((props->is_grub_cfg) || (props->is_menu_cfg) || (props->is_syslinux_cfg)) {
-			// Ubuntu & derivatives are assumed to use '/casper/vmlinuz'
-			// in their kernel options and use 'persistent' as keyword.
+			// Ubuntu & derivatives are assumed to use 'file=/cdrom/preseed/...'
+			// somewhere in their kernel options and use 'persistent' as keyword.
 			if (replace_in_token_data(src, props->is_grub_cfg ? "linux" : "append",
-				props->is_grub_cfg ? "/casper/vmlinuz" : "initrd=/casper/initrd",
-				// Of course, Mint has to use 'initrd=/casper/initrd.lz' instead of 'initrd=/casper/initrd'
-				props->is_grub_cfg ? "/casper/vmlinuz persistent" : "persistent initrd=/casper/initrd", TRUE) != NULL)
+				"file=/cdrom/preseed", "persistent file=/cdrom/preseed", TRUE) != NULL)
 				uprintf("  Added 'persistent' kernel option");
 			// Debian & derivatives are assumed to use 'boot=live' in
 			// their kernel options and use 'persistence' as keyword.
