@@ -2,7 +2,7 @@
  * Rufus: The Reliable USB Formatting Utility
  * Standard User I/O Routines (logging, status, error, etc.)
  * Copyright © 2020 Mattiwatti <mattiwatti@gmail.com>
- * Copyright © 2011-2019 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2020 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -91,6 +91,53 @@ void _uprintfs(const char* str)
 		Edit_Scroll(hLog, Edit_GetLineCount(hLog), 0);
 	}
 	free(wstr);
+}
+
+uint32_t read_file(const char* path, uint8_t** buf)
+{
+	FILE* fd = fopenU(path, "rb");
+	if (fd == NULL) {
+		uprintf("Error: Can't open file '%s'", path);
+		return 0;
+	}
+
+	fseek(fd, 0L, SEEK_END);
+	uint32_t size = (uint32_t)ftell(fd);
+	fseek(fd, 0L, SEEK_SET);
+
+	*buf = malloc(size);
+	if (*buf == NULL) {
+		uprintf("Error: Can't allocate %d bytes buffer for file '%s'", size, path);
+		size = 0;
+		goto out;
+	}
+	if (fread(*buf, 1, size, fd) != size) {
+		uprintf("Error: Can't read '%s'", path);
+		size = 0;
+	}
+
+out:
+	fclose(fd);
+	if (size == 0) {
+		free(*buf);
+		*buf = NULL;
+	}
+	return size;
+}
+
+uint32_t write_file(const char* path, const uint8_t* buf, const uint32_t size)
+{
+	uint32_t written;
+	FILE* fd = fopenU(path, "wb");
+	if (fd == NULL) {
+		uprintf("Error: Can't create '%s'", path);
+		return 0;
+	}
+	written = (uint32_t)fwrite(buf, 1, size, fd);
+	if (written != size)
+		uprintf("Error: Can't write '%s'", path);
+	fclose(fd);
+	return written;
 }
 
 // Prints a bitstring of a number of any size, with or without leading zeroes.

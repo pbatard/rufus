@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * ISO file extraction
- * Copyright © 2011-2019 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2020 Pete Batard <pete@akeo.ie>
  * Based on libcdio's iso & udf samples:
  * Copyright © 2003-2014 Rocky Bernstein <rocky@gnu.org>
  *
@@ -32,6 +32,7 @@
 #include <errno.h>
 #include <direct.h>
 #include <ctype.h>
+#include <assert.h>
 #include <virtdisk.h>
 #include <sys/stat.h>
 
@@ -82,6 +83,7 @@ static const char* bootmgr_efi_name = "bootmgr.efi";
 static const char* grldr_name = "grldr";
 static const char* ldlinux_name = "ldlinux.sys";
 static const char* ldlinux_c32 = "ldlinux.c32";
+static const char* md5sum_name[] = { "MD5SUMS", "md5sum.txt" };
 static const char* casper_dirname = "/casper";
 static const char* efi_dirname = "/efi/boot";
 static const char* efi_bootname[] = { "bootia32.efi", "bootia64.efi", "bootx64.efi", "bootarm.efi", "bootaa64.efi", "bootebc.efi" };
@@ -90,7 +92,7 @@ static const char* wininst_name[] = { "install.wim", "install.esd", "install.swm
 // We only support GRUB/BIOS (x86) that uses a standard config dir (/boot/grub/i386-pc/)
 // If the disc was mastered properly, GRUB/EFI will take care of itself
 static const char* grub_dirname = "/boot/grub/i386-pc";
-static const char* grub_cfg = "grub.cfg";
+static const char* grub_cfg[] = { "grub.cfg", "loopback.cfg" };
 static const char* menu_cfg = "menu.cfg";
 // NB: Do not alter the order of the array below without validating hardcoded indexes in check_iso_props
 static const char* syslinux_cfg[] = { "isolinux.cfg", "syslinux.cfg", "extlinux.conf", "txt.cfg" };
@@ -110,7 +112,7 @@ static const int64_t old_c32_threshold[NB_OLD_C32] = OLD_C32_THRESHOLD;
 static uint8_t joliet_level = 0;
 static uint64_t total_blocks, nb_blocks;
 static BOOL scan_only = FALSE;
-static StrArray config_path, isolinux_path;
+static StrArray config_path, isolinux_path, modified_path;
 
 // Ensure filenames do not contain invalid FAT32 or NTFS characters
 static __inline char* sanitize_filename(char* filename, BOOL* is_identical)
@@ -183,9 +185,11 @@ static BOOL check_iso_props(const char* psz_dirname, int64_t file_length, const 
 		len = safe_strlen(psz_basename);
 		if ((len >= 4) && safe_stricmp(&psz_basename[len - 4], ".cfg") == 0) {
 			props->is_cfg = TRUE;
-			if (safe_stricmp(psz_basename, grub_cfg) == 0) {
-				props->is_grub_cfg = TRUE;
-			} else if (safe_stricmp(psz_basename, menu_cfg) == 0) {
+			for (i = 0; i < ARRAYSIZE(grub_cfg); i++) {
+				if (safe_stricmp(psz_basename, grub_cfg[i]) == 0)
+					props->is_grub_cfg = TRUE;
+			}
+			if (safe_stricmp(psz_basename, menu_cfg) == 0) {
 				props->is_menu_cfg = TRUE;
 			}
 		}
@@ -218,6 +222,7 @@ static BOOL check_iso_props(const char* psz_dirname, int64_t file_length, const 
 				img_report.has_bootmgr = TRUE;
 			}
 			if (safe_stricmp(psz_basename, bootmgr_efi_name) == 0) {
+				img_report.has_efi |= 1;
 				img_report.has_bootmgr_efi = TRUE;
 			}
 			if (safe_stricmp(psz_basename, grldr_name) == 0) {
@@ -226,11 +231,12 @@ static BOOL check_iso_props(const char* psz_dirname, int64_t file_length, const 
 			if (safe_stricmp(psz_basename, kolibri_name) == 0) {
 				img_report.has_kolibrios = TRUE;
 			}
-			if (safe_stricmp(psz_basename, bootmgr_efi_name) == 0) {
-				img_report.has_efi |= 1;
-			}
 			if (safe_stricmp(psz_basename, manjaro_marker) == 0) {
 				img_report.disable_iso = TRUE;
+			}
+			for (i = 0; i < ARRAYSIZE(md5sum_name); i++) {
+				if (safe_stricmp(psz_basename, md5sum_name[i]) == 0)
+					img_report.has_md5sum = (uint8_t)(i + 1);
 			}
 		}
 
@@ -248,7 +254,7 @@ static BOOL check_iso_props(const char* psz_dirname, int64_t file_length, const 
 		if (safe_stricmp(psz_dirname, efi_dirname) == 0) {
 			for (i=0; i<ARRAYSIZE(efi_bootname); i++)
 				if (safe_stricmp(psz_basename, efi_bootname[i]) == 0)
-					img_report.has_efi |= (2<<i);	// start at 2 since "bootmgr.efi" is bit 0
+					img_report.has_efi |= (2 << i);	// start at 2 since "bootmgr.efi" is bit 0
 		}
 
 		// Check for "install.###" in "###/sources/"
@@ -296,6 +302,7 @@ static BOOL check_iso_props(const char* psz_dirname, int64_t file_length, const 
 // Apply various workarounds to Linux config files
 static void fix_config(const char* psz_fullpath, const char* psz_path, const char* psz_basename, EXTRACT_PROPS* props)
 {
+	BOOL modified = FALSE;
 	size_t i, nul_pos;
 	char *iso_label = NULL, *usb_label = NULL, *src, *dst;
 
@@ -309,16 +316,19 @@ static void fix_config(const char* psz_fullpath, const char* psz_path, const cha
 	// Add persistence to the kernel options
 	if ((boot_type == BT_IMAGE) && HAS_PERSISTENCE(img_report) && persistence_size) {
 		if ((props->is_grub_cfg) || (props->is_menu_cfg) || (props->is_syslinux_cfg)) {
-			// Ubuntu & derivatives are assumed to use 'file=/cdrom/preseed/...'
-			// somewhere in their kernel options and use 'persistent' as keyword.
 			if (replace_in_token_data(src, props->is_grub_cfg ? "linux" : "append",
-				"file=/cdrom/preseed", "persistent file=/cdrom/preseed", TRUE) != NULL)
+				"file=/cdrom/preseed", "persistent file=/cdrom/preseed", TRUE) != NULL) {
+				// Ubuntu & derivatives are assumed to use 'file=/cdrom/preseed/...'
+				// somewhere in their kernel options and use 'persistent' as keyword.
 				uprintf("  Added 'persistent' kernel option");
-			// Debian & derivatives are assumed to use 'boot=live' in
-			// their kernel options and use 'persistence' as keyword.
-			else if (replace_in_token_data(src, props->is_grub_cfg ? "linux" : "append",
-				"boot=live", "boot=live persistence", TRUE) != NULL)
+				modified = TRUE;
+			} else if (replace_in_token_data(src, props->is_grub_cfg ? "linux" : "append",
+				"boot=live", "boot=live persistence", TRUE) != NULL) {
+				// Debian & derivatives are assumed to use 'boot=live' in
+				// their kernel options and use 'persistence' as keyword.
 				uprintf("  Added 'persistence' kernel option");
+				modified = TRUE;
+			}
 			// Other distros can go to hell. Seriously, just check all partitions for
 			// an ext volume with the right label and use persistence *THEN*. I mean,
 			// why on earth do you need a bloody *NONSTANDARD* kernel option and/or a
@@ -336,12 +346,15 @@ static void fix_config(const char* psz_fullpath, const char* psz_path, const cha
 			if (props->is_grub_cfg) {
 				// Older versions of GRUB EFI used "linuxefi", newer just use "linux"
 				if ((replace_in_token_data(src, "linux", iso_label, usb_label, TRUE) != NULL) ||
-					(replace_in_token_data(src, "linuxefi", iso_label, usb_label, TRUE) != NULL))
+					(replace_in_token_data(src, "linuxefi", iso_label, usb_label, TRUE) != NULL)) {
 					uprintf("  Patched %s: '%s' ➔ '%s'\n", src, iso_label, usb_label);
-			}
-			else if (replace_in_token_data(src, (props->is_conf) ? "options" : "append",
-				iso_label, usb_label, TRUE) != NULL)
+					modified = TRUE;
+				}
+			} else if (replace_in_token_data(src, (props->is_conf) ? "options" : "append",
+				iso_label, usb_label, TRUE) != NULL) {
 				uprintf("  Patched %s: '%s' ➔ '%s'\n", src, iso_label, usb_label);
+				modified = TRUE;
+			}
 		}
 		safe_free(iso_label);
 		safe_free(usb_label);
@@ -364,12 +377,17 @@ static void fix_config(const char* psz_fullpath, const char* psz_path, const cha
 		if ((iso_label != NULL) && (usb_label != NULL)) {
 			safe_sprintf(iso_label, MAX_PATH, "cd9660:/dev/iso9660/%s", img_report.label);
 			safe_sprintf(usb_label, MAX_PATH, "msdosfs:/dev/msdosfs/%s", img_report.usb_label);
-			if (replace_in_token_data(src, "set", iso_label, usb_label, TRUE) != NULL)
+			if (replace_in_token_data(src, "set", iso_label, usb_label, TRUE) != NULL) {
 				uprintf("  Patched %s: '%s' ➔ '%s'\n", src, iso_label, usb_label);
+				modified = TRUE;
+			}
 		}
 		safe_free(iso_label);
 		safe_free(usb_label);
 	}
+
+	if (modified)
+		StrArrayAdd(&modified_path, psz_fullpath, TRUE);
 
 	free(src);
 }
@@ -549,6 +567,59 @@ out:
 	safe_free(psz_sanpath);
 	safe_free(psz_fullpath);
 	return 1;
+}
+
+// This upates the MD5SUMS/md5sum.txt file that some distros (Ubuntu, Mint...)
+// use to validate the media. Because we may alter some of the validated files
+// to add persistence and whatnot, we need to alter the MD5 list as a result.
+// The format of the file is expected to always be "<MD5SUM> <FILE_PATH>" on
+// individual lines.
+static void update_md5sum(void)
+{
+	BOOL display_header = TRUE;
+	intptr_t pos;
+	uint32_t i, j, size, md5_size;
+	uint8_t *buf = NULL, sum[16];
+	char md5_path[64], *md5_data = NULL, *str_pos;
+
+	if (!img_report.has_md5sum)
+		return;
+
+	assert(img_report.has_md5sum <= ARRAYSIZE(md5sum_name));
+	if (img_report.has_md5sum > ARRAYSIZE(md5sum_name))
+		return;
+
+	static_sprintf(md5_path, "%s\\%s", psz_extract_dir, md5sum_name[img_report.has_md5sum - 1]);
+	md5_size = read_file(md5_path, (uint8_t**)&md5_data);
+	if (md5_size == 0)
+		return;
+
+	for (i = 0; i < modified_path.Index; i++) {
+		str_pos = strstr(md5_data, &modified_path.String[i][2]);
+		if (str_pos == NULL)
+			// File is not listed in md5 sums
+			continue;
+		if (display_header) {
+			uprintf("Updating %s:", md5_path);
+			display_header = FALSE;
+		}
+		uprintf("● %s", &modified_path.String[i][2]);
+		pos = str_pos - md5_data;
+		size = read_file(modified_path.String[i], &buf);
+		if (size == 0)
+			continue;
+		HashBuffer(CHECKSUM_MD5, buf, size, sum);
+		free(buf);
+		while ((pos > 0) && (md5_data[pos - 1] != '\n'))
+			pos--;
+		for (j = 0; j < 16; j++) {
+			md5_data[pos + 2 * j] =     ((sum[j] >> 4) < 10) ? ('0' + (sum[j] >> 4)) : ('a' - 0xa + (sum[j] >> 4));
+			md5_data[pos + 2 * j + 1] = ((sum[j] & 15) < 10) ? ('0' + (sum[j] & 15)) : ('a' - 0xa + (sum[j] & 15));
+		}
+	}
+
+	write_file(md5_path, md5_data, md5_size);
+	free(md5_data);
 }
 
 // Returns 0 on success, nonzero on error
@@ -770,6 +841,7 @@ BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan)
 		}
 		nb_blocks = 0;
 		iso_blocking_status = 0;
+		StrArrayCreate(&modified_path, 8);
 	}
 
 	// First try to open as UDF - fallback to ISO if it failed
@@ -1007,6 +1079,8 @@ out:
 			}
 			if (fd != NULL)
 				fclose(fd);
+			update_md5sum();
+			StrArrayDestroy(&modified_path);
 		} else if (HAS_BOOTMGR(img_report) && enable_ntfs_compression) {
 			// bootmgr might need to be uncompressed: https://github.com/pbatard/rufus/issues/1381
 			RunCommand("compact /u bootmgr* efi/boot/*.efi", dest_dir, TRUE);

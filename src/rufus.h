@@ -1,6 +1,6 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
- * Copyright © 2011-2019 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2020 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -333,6 +333,7 @@ typedef struct {
 	BOOLEAN disable_iso;
 	uint16_t winpe;
 	uint8_t has_efi;
+	uint8_t has_md5sum;
 	uint8_t wininst_index;
 	uint8_t has_symlinks;
 	BOOLEAN has_4GB_file;
@@ -533,6 +534,8 @@ extern void DownloadNewVersion(void);
 extern BOOL DownloadISO(void);
 extern BOOL IsDownloadable(const char* url);
 extern BOOL IsShown(HWND hDlg);
+extern uint32_t read_file(const char* path, uint8_t** buf);
+extern uint32_t write_file(const char* path, const uint8_t* buf, const uint32_t size);
 extern char* get_token_data_file_indexed(const char* token, const char* filename, int index);
 #define get_token_data_file(token, filename) get_token_data_file_indexed(token, filename, 1)
 extern char* set_token_data_file(const char* token, const char* data, const char* filename);
