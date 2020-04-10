@@ -240,6 +240,7 @@ static char* GetShortName(const char* url)
 			break;
 		}
 	}
+	memset(short_name, 0, sizeof(short_name));
 	static_strcpy(short_name, &url[i]);
 	// If the URL is followed by a query, remove that part
 	// Make sure we detect escaped queries too

@@ -252,6 +252,7 @@ static void ToValidLabel(char* Label, BOOL bFAT)
 	BOOL found;
 	const WCHAR unauthorized[] = L"*?,;:/\\|+=<>[]\"";
 	const WCHAR to_underscore[] = L"\t.";
+	char label[16] = { 0 };
 	WCHAR *wLabel = utf8_to_wchar(Label);
 
 	if (wLabel == NULL)
@@ -295,11 +296,15 @@ static void ToValidLabel(char* Label, BOOL bFAT)
 			if (wLabel[i] == '_')
 				j++;
 		if (i < 2*j) {
-			// If the final label is mostly underscore, use the proposed label
-			uprintf("FAT label is mostly underscores. Using '%s' label instead.", SelectedDrive.proposed_label);
-			for(i = 0; SelectedDrive.proposed_label[i] != 0; i++)
-				wLabel[i] = SelectedDrive.proposed_label[i];
+			// If the final label is mostly underscore, use an alternate label according to the
+			// size (eg: "256 MB", "7.9 GB"). Note that we can't use SelectedDrive.proposed_label
+			// here as it may contain localized character for GB or MB, so make sure that the
+			// effective label we use is an English one, and also make sure we convert the dot.
+			static_sprintf(label, "%s", SizeToHumanReadable(SelectedDrive.DiskSize, TRUE, FALSE));
+			for (i = 0; label[i] != 0; i++)
+				wLabel[i] = (label[i] == '.') ? '_' : label[i];
 			wLabel[i] = 0;
+			uprintf("FAT label is mostly underscores. Using '%S' label instead.", wLabel);
 		}
 	} else if (wcslen(wLabel) > 32) {
 		wLabel[32] = 0;
