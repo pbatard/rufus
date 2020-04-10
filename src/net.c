@@ -865,7 +865,7 @@ BOOL CheckForUpdates(BOOL force)
 static DWORD WINAPI DownloadISOThread(LPVOID param)
 {
 	char locale_str[1024], cmdline[sizeof(locale_str) + 512], pipe[MAX_GUID_STRING_LENGTH + 16] = "\\\\.\\pipe\\";
-	char powershell_path[MAX_PATH], icon_path[MAX_PATH] = "", script_path[MAX_PATH] = "";
+	char powershell_path[MAX_PATH], icon_path[MAX_PATH] = { 0 }, script_path[MAX_PATH] = { 0 };
 	char *url = NULL, sig_url[128];
 	uint64_t uncompressed_size;
 	int64_t size = -1;

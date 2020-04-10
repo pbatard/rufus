@@ -3,7 +3,7 @@
  * Compensating for what Microsoft should have done a long long time ago.
  * Also see https://utf8everywhere.org
  *
- * Copyright © 2010-2019 Pete Batard <pete@akeo.ie>
+ * Copyright © 2010-2020 Pete Batard <pete@akeo.ie>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -439,7 +439,7 @@ static __inline int ComboBox_GetLBTextU(HWND hCtrl, int index, char* lpString)
 	size = (int)SendMessageW(hCtrl, CB_GETLBTEXTLEN, (WPARAM)index, (LPARAM)0);
 	if (size < 0)
 		return size;
-	wlpString = (wchar_t*)calloc(size+1, sizeof(wchar_t));
+	wlpString = (wchar_t*)calloc((size_t)size + 1, sizeof(wchar_t));
 	size = (int)SendMessageW(hCtrl, CB_GETLBTEXT, (WPARAM)index, (LPARAM)wlpString);
 	err = GetLastError();
 	if (size > 0)

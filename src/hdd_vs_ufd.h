@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * SMART HDD vs Flash detection - isHDD() tables
- * Copyright © 2013-2019 Pete Batard <pete@akeo.ie>
+ * Copyright © 2013-2020 Pete Batard <pete@akeo.ie>
  *
  * Based in part on drivedb.h from Smartmontools:
  * http://svn.code.sf.net/p/smartmontools/code/trunk/smartmontools/drivedb.h
@@ -261,6 +261,8 @@ static vidpid_score_t vidpid_score[] = {
 	{ 0x05ac, 0x8405, -20},
 	{ 0x05ac, 0x8406, -20},
 	{ 0x05ac, 0x8407, -20},
+	// No idea who these guys are. They don't exist in usb.ids.
+	{ 0x6557, 0x0021, -5},
 	// Prolific exceptions
 	{ 0x067b, 0x2506, -20 },	// 8 GB Micro Hard Drive
 	{ 0x067b, 0x2517, -20 },	// 1 GB UFD

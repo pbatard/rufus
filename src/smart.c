@@ -1,11 +1,11 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * SMART HDD vs Flash detection (using ATA over USB, S.M.A.R.T., etc.)
- * Copyright © 2013-2016 Pete Batard <pete@akeo.ie>
+ * Copyright © 2013-2020 Pete Batard <pete@akeo.ie>
  *
  * Based in part on scsiata.cpp from Smartmontools: http://smartmontools.sourceforge.net
- * Copyright © 2006-12 Douglas Gilbert <dgilbert@interlog.com>
- * Copyright © 2009-13 Christian Franke <smartmontools-support@lists.sourceforge.net>
+ * Copyright © 2006-2012 Douglas Gilbert <dgilbert@interlog.com>
+ * Copyright © 2009-2013 Christian Franke <smartmontools-support@lists.sourceforge.net>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -446,7 +446,6 @@ int IsHDD(DWORD DriveIndex, uint16_t vid, uint16_t pid, const char* strid)
 	uint64_t drive_size;
 
 	// Boost the score if fixed, as these are *generally* HDDs
-	// NB: Due to a Windows API limitation, drives with no mounted partition will never have DRIVE_FIXED
 	if (GetDriveTypeFromIndex(DriveIndex) == DRIVE_FIXED)
 		score += 3;
 

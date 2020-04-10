@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Drive access function calls
- * Copyright © 2011-2019 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2020 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -797,11 +797,13 @@ static BOOL _GetDriveLettersAndType(DWORD DriveIndex, char* drive_letters, UINT*
 {
 	DWORD size;
 	BOOL r = FALSE;
-	HANDLE hDrive = INVALID_HANDLE_VALUE;
+	HANDLE hDrive = INVALID_HANDLE_VALUE, hPhysical = INVALID_HANDLE_VALUE;
 	UINT _drive_type;
 	IO_STATUS_BLOCK io_status_block;
 	FILE_FS_DEVICE_INFORMATION file_fs_device_info;
-	int i = 0, drive_number;
+	BYTE geometry[256] = { 0 };
+	PDISK_GEOMETRY_EX DiskGeometry = (PDISK_GEOMETRY_EX)(void*)geometry;
+	int i = 0, drives_found = 0, drive_number;
 	char *drive, drives[26*4 + 1];	/* "D:\", "E:\", etc., plus one NUL */
 	char logical_drive[] = "\\\\.\\#:";
 
@@ -831,7 +833,7 @@ static BOOL _GetDriveLettersAndType(DWORD DriveIndex, char* drive_letters, UINT*
 	}
 
 	r = TRUE;	// Required to detect drives that don't have volumes assigned
-	for (drive = drives ;*drive; drive += safe_strlen(drive)+1) {
+	for (drive = drives ;*drive; drive += safe_strlen(drive) + 1) {
 		if (!isalpha(*drive))
 			continue;
 		*drive = (char)toupper((int)*drive);
@@ -865,11 +867,27 @@ static BOOL _GetDriveLettersAndType(DWORD DriveIndex, char* drive_letters, UINT*
 		safe_closehandle(hDrive);
 		if (drive_number == DriveIndex) {
 			r = TRUE;
+			drives_found++;
 			if (drive_letters != NULL)
 				drive_letters[i++] = *drive;
 			// The drive type should be the same for all volumes, so we can overwrite
 			if (drive_type != NULL)
 				*drive_type = _drive_type;
+		}
+	}
+
+	// Devices that don't have mounted partitions require special
+	// handling to determine if they are fixed or removable.
+	if ((drives_found == 0) && (drive_type != NULL)) {
+		hPhysical = GetPhysicalHandle(DriveIndex + DRIVE_INDEX_MIN, FALSE, FALSE, FALSE);
+		r = DeviceIoControl(hPhysical, IOCTL_DISK_GET_DRIVE_GEOMETRY_EX,
+			NULL, 0, geometry, sizeof(geometry), &size, NULL);
+		safe_closehandle(hPhysical);
+		if (r && size > 0) {
+			if (DiskGeometry->Geometry.MediaType == FixedMedia)
+				*drive_type = DRIVE_FIXED;
+			else if (DiskGeometry->Geometry.MediaType == RemovableMedia)
+				*drive_type = DRIVE_REMOVABLE;
 		}
 	}
 
