@@ -1559,7 +1559,7 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 
 	// If required, set the MSR partition (GPT only - must be created before the data part)
 	if (extra_partitions & XP_MSR) {
-		assert (partition_style == PARTITION_STYLE_GPT);
+		assert(partition_style == PARTITION_STYLE_GPT);
 		extra_part_name = L"Microsoft Reserved Partition";
 		DriveLayoutEx.PartitionEntry[pn].PartitionLength.QuadPart = 128*MB;
 		DriveLayoutEx.PartitionEntry[pn].Gpt.PartitionType = PARTITION_MICROSOFT_RESERVED;
@@ -1684,7 +1684,7 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 				DriveLayoutEx.PartitionEntry[pn].Mbr.PartitionType = 0xef;
 			} else if (extra_partitions & XP_CASPER) {
 				DriveLayoutEx.PartitionEntry[pn].Mbr.PartitionType = 0x83;
-			}  else if (extra_partitions & XP_COMPAT) {
+			} else if (extra_partitions & XP_COMPAT) {
 				DriveLayoutEx.PartitionEntry[pn].Mbr.PartitionType = RUFUS_EXTRA_PARTITION_TYPE;
 				// Set the one track compatibility partition to be all hidden sectors
 				DriveLayoutEx.PartitionEntry[pn].Mbr.HiddenSectors = SelectedDrive.SectorsPerTrack;

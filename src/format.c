@@ -108,6 +108,8 @@ static BOOLEAN __stdcall FormatExCallback(FILE_SYSTEM_CALLBACK_COMMAND Command, 
 		return FALSE;
 
 	assert((actual_fs_type >= 0) && (actual_fs_type < FS_MAX));
+	if ((actual_fs_type < 0) || (actual_fs_type >= FS_MAX))
+		return FALSE;
 
 	switch(Command) {
 	case FCC_PROGRESS:
