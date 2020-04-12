@@ -569,7 +569,7 @@ out:
 	return 1;
 }
 
-// This upates the MD5SUMS/md5sum.txt file that some distros (Ubuntu, Mint...)
+// This updates the MD5SUMS/md5sum.txt file that some distros (Ubuntu, Mint...)
 // use to validate the media. Because we may alter some of the validated files
 // to add persistence and whatnot, we need to alter the MD5 list as a result.
 // The format of the file is expected to always be "<MD5SUM> <FILE_PATH>" on

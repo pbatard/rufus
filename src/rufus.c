@@ -3312,6 +3312,14 @@ relaunch:
 			SendMessage(hMainDialog, WM_COMMAND, IDC_LOG, 0);
 			continue;
 		}
+#if defined(_DEBUG)
+		// Ctrl-T => Alternate Test mode that doesn't require a full rebuild
+		if ((ctrl_without_focus || ((GetKeyState(VK_CONTROL) & 0x8000) && (msg.message == WM_KEYDOWN)))
+			&& (msg.wParam == 'T')) {
+			uprintf("TEST");
+			continue;
+		}
+#endif
 
 		if (no_focus && (msg.wParam != VK_CONTROL))
 			ctrl_without_focus = FALSE;
@@ -3409,11 +3417,6 @@ relaunch:
 			}
 			// Alt-L => Force Large FAT32 format to be used on < 32 GB drives
 			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'L')) {
-				uprintf("DAFUQ!?!? LPARAM = 0x%08X", msg.lParam);
-
-				if ((msg.message == WM_SYSKEYDOWN) && !(msg.lParam & 0x20000000)) {
-					uprintf("KIDDING ME?!?!.");
-				}
 				force_large_fat32 = !force_large_fat32;
 				WriteSettingBool(SETTING_FORCE_LARGE_FAT32_FORMAT, force_large_fat32);
 				PrintStatusTimeout(lmprintf(MSG_254), force_large_fat32);
