@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 3.5\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2019-03-13 19:29+0200\n"
-"PO-Revision-Date: 2019-03-15 10:25+0000\n"
+"POT-Creation-Date: 2020-04-01 13:41+0300\n"
+"PO-Revision-Date: 2020-04-12 23:32+0100\n"
 "Language: he_IL\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -13,11 +13,11 @@ msgstr ""
 "X-Rufus-LCID: 0x040d\n"
 "Last-Translator: \n"
 "Language-Team: \n"
-"X-Generator: Poedit 2.2.1\n"
+"X-Generator: Poedit 2.3\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
-msgstr "מאפייני כונן"
+msgstr "מאפייני הכונן"
 
 #. • IDD_DIALOG → IDS_DEVICE_TXT
 msgid "Device"
@@ -25,7 +25,7 @@ msgstr "התקן"
 
 #. • IDD_DIALOG → IDS_BOOT_SELECTION_TXT
 msgid "Boot selection"
-msgstr "בחירת אתחול"
+msgstr "בחירת האתחול"
 
 #. • IDD_DIALOG → IDC_SELECT
 msgid "Select"
@@ -37,7 +37,7 @@ msgstr "אפשרות קובץ תמונה"
 
 #. • IDD_DIALOG → IDS_PARTITION_TYPE_TXT
 msgid "Partition scheme"
-msgstr "סוג מחיצה"
+msgstr "סגנון המחיצות"
 
 #. • IDD_DIALOG → IDS_TARGET_SYSTEM_TXT
 msgid "Target system"
@@ -45,7 +45,7 @@ msgstr "מערכת היעד"
 
 #. • IDD_DIALOG → IDC_LIST_USB_HDD
 msgid "List USB Hard Drives"
-msgstr "הצגת רשימה של כוננים קשיחים מסוג USB"
+msgstr "הצגת רשימה של כונני USB קשיחים"
 
 #. • IDD_DIALOG → IDC_OLD_BIOS_FIXES
 #.
@@ -68,15 +68,15 @@ msgstr "אפשרויות אתחול"
 
 #. • IDD_DIALOG → IDS_FILE_SYSTEM_TXT
 msgid "File system"
-msgstr "מערכת קבצים"
+msgstr "מערכת הקבצים"
 
 #. • IDD_DIALOG → IDS_CLUSTER_SIZE_TXT
 msgid "Cluster size"
-msgstr "גודל אשכול"
+msgstr "גודל האשכול"
 
 #. • IDD_DIALOG → IDS_LABEL_TXT
 msgid "Volume label"
-msgstr "תווית אמצעי אחסון"
+msgstr "תווית שם אמצעי האחסון"
 
 #. • IDD_DIALOG → IDC_QUICK_FORMAT
 msgid "Quick format"
@@ -151,7 +151,7 @@ msgstr "שמירה"
 
 #. • IDD_UPDATE_POLICY → IDD_UPDATE_POLICY
 msgid "Update policy and settings"
-msgstr "מדיניות והגדרות העדכונים"
+msgstr "מדיניות העדכונים והגדרות"
 
 #. • IDD_UPDATE_POLICY → IDS_UPDATE_SETTINGS_GRP
 msgid "Settings"
@@ -159,7 +159,7 @@ msgstr "הגדרות"
 
 #. • IDD_UPDATE_POLICY → IDS_UPDATE_FREQUENCY_TXT
 msgid "Check for updates"
-msgstr "בדיקה אחר עדכונים"
+msgstr "חיפוש אחר עדכונים"
 
 #. • IDD_UPDATE_POLICY → IDS_INCLUDE_BETAS_TXT
 msgid "Include beta versions"
@@ -167,11 +167,11 @@ msgstr "כולל גרסאות בטא"
 
 #. • IDD_UPDATE_POLICY → IDC_CHECK_NOW
 msgid "Check Now"
-msgstr "בדיקה כעת"
+msgstr "לבדוק כעת"
 
 #. • IDD_NEW_VERSION → IDD_NEW_VERSION
 msgid "Check For Updates - Rufus"
-msgstr "בדיקה אחר עדכונים - Rufus"
+msgstr "חיפוש אחר עדכונים - Rufus"
 
 #. • IDD_NEW_VERSION → IDS_NEW_VERSION_AVAIL_TXT
 msgid "A newer version is available. Please download the latest version!"
@@ -183,7 +183,7 @@ msgstr "נא ללחוץ כאן כדי לעבור לאתר הבית"
 
 #. • IDD_NEW_VERSION → IDS_NEW_VERSION_NOTES_GRP
 msgid "Release Notes"
-msgstr "הערות שחרור"
+msgstr "הערות שחרור גרסה"
 
 #. • IDD_NEW_VERSION → IDS_NEW_VERSION_DOWNLOAD_GRP
 #. • IDD_NEW_VERSION → IDC_DOWNLOAD
@@ -193,14 +193,14 @@ msgstr "הורדה"
 
 #. • MSG_001
 msgid "Other instance detected"
-msgstr "זוהה מופע אחר"
+msgstr "זוהתה הפעלה אחרת"
 
 #. • MSG_002
 msgid ""
 "Another Rufus application is running.\n"
 "Please close the first application before running another one."
 msgstr ""
-"יישום Rufus אחר פועל ברקע.\n"
+"חלון Rufus אחר פועל ברקע.\n"
 "נא לסגור את היישום הראשון לפני הפעלת יישום נוסף."
 
 #. • MSG_003
@@ -417,11 +417,11 @@ msgstr "הצלחה."
 
 #. • MSG_051
 msgid "Undetermined error while formatting."
-msgstr "שגיאה לא מזוהה בזמן האתחול."
+msgstr "שגיאה לא מזוהה במהלך האתחול."
 
 #. • MSG_052
 msgid "Cannot use the selected file system for this media."
-msgstr "לא ניתן להשתמש במערכת הקבצים שבחרת עבור המדיה הזו."
+msgstr "לא ניתן להשתמש במערכת הקבצים שנבחרה עבור המדיה הזו."
 
 #. • MSG_053
 msgid "Access to the device is denied."
@@ -437,23 +437,23 @@ msgstr "ההתקן בשימוש על־ידי תהליך אחר. נא לסגור 
 
 #. • MSG_056
 msgid "Quick format is not available for this device."
-msgstr "אתחול מהיר לא זמין עבור ההתקן הזה."
+msgstr "אתחול מהיר אינו זמין עבור התקן זה."
 
 #. • MSG_057
 msgid "The volume label is invalid."
-msgstr "תווית השם של אמצעי האחסון שגויה."
+msgstr "תווית השם של אמצעי האחסון אינה תקינה."
 
 #. • MSG_058
 msgid "The device handle is invalid."
-msgstr "מזהה ההתקן (handle) שגוי."
+msgstr "מזהה ההתקן (handle) אינו תקין."
 
 #. • MSG_059
 msgid "The selected cluster size is not valid for this device."
-msgstr "גודל האשכול שנבחר אינו תקף להתקן זה."
+msgstr "גודל האשכול שנבחר אינו תקין להתקן זה."
 
 #. • MSG_060
 msgid "The volume size is invalid."
-msgstr "גודל אמצעי האחסון שגוי."
+msgstr "גודל אמצעי האחסון אינו תקין."
 
 #. • MSG_061
 msgid "Please insert a removable media in drive."
@@ -503,7 +503,7 @@ msgstr "לא ניתן להתחיל תהליכון."
 
 #. • MSG_072
 msgid "Bad blocks check didn't complete."
-msgstr "בדיקת אזורים פגומים לא הושלמה."
+msgstr "בדיקת האזורים הפגומים לא הושלמה."
 
 #. • MSG_073
 msgid "ISO image scan failure."
@@ -574,7 +574,7 @@ msgstr ""
 "נראה שקובץ ה־ISO הזה משתמש בגרסה מיושנת של '%s'.\n"
 "לפיכך, יתכן שתפריטי האתחול לא יוצגו כראוי.\n"
 "\n"
-"Rufus יכול להוריד גרסה חדשה כדי לתקן בעיה זו:\n"
+"Rufus יכול להוריד גרסה חדשה יותר כדי לתקן בעיה זו:\n"
 "- יש לבחור 'כן' כדי להתחבר לאינטרנט ולהוריד את הקובץ\n"
 "- יש לבחור 'לא' כדי להשאיר את קובץ ה־ISO ללא שינויים\n"
 "אם לא ברור לך מה לעשות, כדאי לבחור באפשרות 'כן'.\n"
@@ -837,7 +837,7 @@ msgstr "הסתרת %s"
 #. To test this feature, please download and select 'casper_test.iso' from:
 #. https://github.com/pbatard/rufus/raw/master/res/loc/test/casper_test.iso
 msgid "Persistent partition size"
-msgstr "גודל אחסון קבוע"
+msgstr "גודל מחיצה קבועה"
 
 #. • MSG_124
 #.
@@ -851,7 +851,7 @@ msgstr "ללא"
 #.
 #. Tooltips used for the peristence size slider and edit control
 msgid "Set the size of the persistent partition for live USB media. Setting the size to 0 disables the persistent partition."
-msgstr "הגדרת גודל האחסון הקבוע עבור מדיית Live USB. הגדרת הגודל ל־0 מבטלת את האחסון הקבוע."
+msgstr "הגדרת גודל המחיצה הקבועה עבור מדיית Live USB. הגדרת הגודל ל־0 מבטלת את המחיצה הקבועה."
 
 #. • MSG_126
 msgid "Set the partition size units."
@@ -954,7 +954,7 @@ msgstr "נחסמת זמנית על־ידי Microsoft עקב בקשות להור�
 
 #. • MSG_145
 msgid "PowerShell 3.0 or later is required to run this script."
-msgstr "דרוש PowerShell 3.0 ומעלה כדי להריץ תסריט זה."
+msgstr "נדרש PowerShell 3.0 ומעלה כדי להריץ תסריט זה."
 
 #. • MSG_146
 msgid "Do you want to go online and download it?"
@@ -1288,9 +1288,9 @@ msgstr "הקובץ ‪%s‬ נשמר"
 
 #. • MSG_217
 #.
-#. Formatting status (make sure you use a double % to print the percent sign)
-msgid "Formatting: %0.1f%% completed"
-msgstr "מאתחל: %0.1f%% הושלמו"
+#. Formatting status
+msgid "Formatting: %s"
+msgstr "מאתחל: %s"
 
 #. • MSG_218
 msgid "Creating file system: Task %d/%d completed"
@@ -1339,11 +1339,11 @@ msgid "Closing existing volume..."
 msgstr "סוגר את אמצעי האחסון הקיים..."
 
 #. • MSG_228
-msgid "Writing master boot record..."
+msgid "Writing Master Boot Record..."
 msgstr "כותב רשומת אתחול ראשית (MBR)..."
 
 #. • MSG_229
-msgid "Writing partition boot record..."
+msgid "Writing Partition Boot Record..."
 msgstr "כותב רשומת אתחול של המחיצה (PBR)..."
 
 #. • MSG_230
@@ -1351,8 +1351,8 @@ msgid "Copying DOS files..."
 msgstr "מעתיק קובצי DOS..."
 
 #. • MSG_231
-msgid "Copying ISO files..."
-msgstr "מעתיק קובצי ISO..."
+msgid "Copying ISO files: %s"
+msgstr "מעתיק קובצי ISO: %s"
 
 #. • MSG_232
 msgid "Win7 EFI boot setup (This may take a while)..."
@@ -1407,8 +1407,8 @@ msgstr ""
 "ההורדה תימחק. נא לבדוק את יומן הרישום לפרטים נוספים."
 
 #. • MSG_241
-msgid "Downloading: %0.1f%%"
-msgstr "מוריד: %0.1f%%"
+msgid "Downloading: %s"
+msgstr "מוריד: %s"
 
 #. • MSG_242
 msgid "Failed to download file."
@@ -1462,7 +1462,7 @@ msgstr "זיהוי כוננים קשיחים"
 
 #. • MSG_254
 msgid "Force large FAT32 formatting"
-msgstr "מצב כפיית אתחול של כונני FAT32 גדולים"
+msgstr "מצב כפיית אתחול כ־Large FAT32"
 
 #. • MSG_255
 msgid "NoDriveTypeAutorun will be deleted on exit"
@@ -1489,8 +1489,8 @@ msgid "NTFS compression"
 msgstr "מצב דחיסת NTFS"
 
 #. • MSG_261
-msgid "Writing image: %0.1f%% completed"
-msgstr "כותב קובץ תמונה: %0.1f%% הושלמו"
+msgid "Writing image: %s"
+msgstr "כותב קובץ תמונה: %s"
 
 #. • MSG_262
 #.
@@ -1517,8 +1517,8 @@ msgid "Dual UEFI/BIOS mode"
 msgstr "מצב UEFI/BIOS משולב"
 
 #. • MSG_267
-msgid "Applying Windows image: %0.1f%% completed"
-msgstr "מחיל קובץ תמונה של Windows‏: %0.1f%% הושלמו"
+msgid "Applying Windows image: %s"
+msgstr "מחיל קובץ תמונה של Windows‏: %s"
 
 #. • MSG_268
 msgid "Applying Windows image..."
@@ -1533,8 +1533,8 @@ msgid "USB debug"
 msgstr "ניפוי שגיאות USB"
 
 #. • MSG_271
-msgid "Computing image checksums: %0.1f%% completed"
-msgstr "מחשב סיכומי ביקורת של קובץ תמונה: %0.1f%% הושלמו"
+msgid "Computing image checksums: %s"
+msgstr "מחשב סיכומי ביקורת של קובץ תמונה: %s"
 
 #. • MSG_272
 msgid "Compute the MD5, SHA1 and SHA256 checksums for the selected image"
@@ -1615,8 +1615,8 @@ msgstr ""
 "האם ברצונך להפעיל קובץ זה בכל זאת?"
 
 #. • MSG_286
-msgid "Zeroing drive: %0.1f%% completed"
-msgstr "מבצע איפוס לכונן: %0.1f%% הושלמו"
+msgid "Zeroing drive: %s"
+msgstr "מבצע איפוס לכונן: %s"
 
 #. • MSG_287
 msgid "Detection of non-USB removable drives"
@@ -1720,5 +1720,5 @@ msgstr "ניתן להשתמש באפשרות זו כדי לציין האם בר�
 #.
 #. You can see this status message by pressing <Ctrl>-<Alt>-<Z> and then selecting START.
 #. It's the same as MSG_286 but with a process that *may* be faster, hence the name.
-msgid "Fast-zeroing drive: %0.1f%% completed"
-msgstr "מבצע איפוס מהיר לכונן: %0.1f%% הושלמו"
+msgid "Fast-zeroing drive: %s"
+msgstr "מבצע איפוס מהיר לכונן: %s"
