@@ -15,7 +15,8 @@ the partition table lists the disk ID for the first partition as 0x81, then it
 will be swapped for 0x80.
 
 An additional MBR (msg.S) also exists in this directory, that can be used to
-display an ASCII message contained in the sectors directly following the MBR.
+display an ASCII message contained in the sectors following the primary GPT
+(LBA sectors 34 and later).
 This can be used, for instance, to display a notice for media that cannot be
 booted in BIOS/Legacy mode.
 

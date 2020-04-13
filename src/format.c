@@ -906,7 +906,7 @@ out:
 static BOOL WriteSBR(HANDLE hPhysicalDrive)
 {
 	// TODO: Do we need anything special for 4K sectors?
-	DWORD size, max_size, mbr_size = 0x200;
+	DWORD size, max_size, br_size = 0x200;
 	int r, sub_type = boot_type;
 	unsigned char* buf = NULL;
 	FAKE_FD fake_fd = { 0 };
@@ -914,10 +914,6 @@ static BOOL WriteSBR(HANDLE hPhysicalDrive)
 
 	fake_fd._handle = (char*)hPhysicalDrive;
 	set_bytes_per_sector(SelectedDrive.SectorSize);
-	// Ensure that we have sufficient space for the SBR
-	max_size = IsChecked(IDC_OLD_BIOS_FIXES) ?
-		(DWORD)(SelectedDrive.SectorsPerTrack * SelectedDrive.SectorSize) : 1 * MB;
-	max_size -= mbr_size;
 	// Syslinux has precedence over Grub
 	if ((boot_type == BT_IMAGE) && (!HAS_SYSLINUX(img_report))) {
 		if (img_report.has_grub4dos)
@@ -932,12 +928,12 @@ static BOOL WriteSBR(HANDLE hPhysicalDrive)
 	case BT_GRUB4DOS:
 		uprintf("Writing Grub4Dos SBR");
 		buf = GetResource(hMainInstance, MAKEINTRESOURCEA(IDR_GR_GRUB_GRLDR_MBR), _RT_RCDATA, "grldr.mbr", &size, FALSE);
-		if ((buf == NULL) || (size <= mbr_size)) {
+		if ((buf == NULL) || (size <= br_size)) {
 			uprintf("grldr.mbr is either not present or too small");
 			return FALSE;
 		}
-		buf = &buf[mbr_size];
-		size -= mbr_size;
+		buf = &buf[br_size];
+		size -= br_size;
 		break;
 	case BT_GRUB2:
 		if (grub2_buf != NULL) {
@@ -957,6 +953,7 @@ static BOOL WriteSBR(HANDLE hPhysicalDrive)
 	case BT_NON_BOOTABLE:
 		uprintf("Writing protective message SBR");
 		size = 4 * KB;
+		br_size = 17 * KB;	// 34 sectors are reserved for protective MBR + primary GPT
 		buf = GetResource(hMainInstance, MAKEINTRESOURCEA(IDR_SBR_MSG), _RT_RCDATA, "msg.txt", &size, TRUE);
 		if (buf == NULL) {
 			uprintf("Could not access message");
@@ -968,11 +965,15 @@ static BOOL WriteSBR(HANDLE hPhysicalDrive)
 		return TRUE;
 	}
 
-	if (size > max_size) {
+	// Ensure that we have sufficient space for the SBR
+	max_size = IsChecked(IDC_OLD_BIOS_FIXES) ?
+		(DWORD)(SelectedDrive.SectorsPerTrack * SelectedDrive.SectorSize) : 1 * MB;
+	if (br_size + size > max_size) {
 		uprintf("  SBR size is too large - You may need to uncheck 'Add fixes for old BIOSes'.");
 		return FALSE;
 	}
-	r = write_data(fp, mbr_size, buf, (uint64_t)size);
+
+	r = write_data(fp, br_size, buf, (uint64_t)size);
 	safe_free(grub2_buf);
 	if (sub_type == BT_NON_BOOTABLE)
 		safe_free(buf);

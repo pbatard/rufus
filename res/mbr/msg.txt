@@ -10,8 +10,8 @@
              boot it in BIOS/Legacy mode. THIS WILL NOT WORK!
 
              To remove this message you need to do \02ONE\07 of the following:
-             o If this computer supports UEFI, go to the UEFI settings
-               and disable or lower the priority of \09CSM/Legacy mode\07.
+             o If this computer supports UEFI, go to your UEFI settings
+               and lower or disable the priority of \09CSM/Legacy mode\07.
              o \02OR\07 Recreate the drive in Rufus and use:
                * \09Partition scheme\07 -> \09MBR\07.
                * \09Target system\07 -> \09BIOS (...)\07

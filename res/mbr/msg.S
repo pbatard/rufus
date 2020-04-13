@@ -31,6 +31,7 @@
 /********************************************************************************/
 MBR_ADDR      = 0x7c00
 MBR_RESERVED  = 0x1b8	# Start of the reserved section (partition table, etc.)
+MSG_SECTOR    = 0x22  # First sector of the message (must be after the GPT)
 NB_SECTORS    = 0x08	# Number of sectors to read
 PT_MAX        = 0x04	# Number of partition entries in the partition table
 PT_ENTRY_SIZE = 0x10	# Size of a partition entry in the partition table
@@ -109,10 +110,9 @@ read_sectors:			# Copy the next sectors into RAM
 ext:	# http://en.wikipedia.org/wiki/INT_13H#INT_13h_AH.3D42h:_Extended_Read_Sectors_From_Drive
 	xor  eax, eax
 	push eax		# bits 32-63 of sector address
-	inc  eax
-	push eax		# bits 0-31 of sector address
+	push MSG_SECTOR # bits 0-31 of sector address
 	push es			# destination segment
-	push 0x0000		# destination address
+	push eax		# destination address (0)
 	push NB_SECTORS		# number of sectors to be read
 	push 0x0010		# size of DAP struct
 	mov  si, sp		# DAP address (= stack)
@@ -125,7 +125,7 @@ ext:	# http://en.wikipedia.org/wiki/INT_13H#INT_13h_AH.3D42h:_Extended_Read_Sect
 
 no_ext:	# http://en.wikipedia.org/wiki/INT_13H#INT_13h_AH.3D02h:_Read_Sectors_From_Drive
 	mov  ax, 0x0200 + NB_SECTORS
-	mov  cx, 0x0002		# Sector address (starts at 1)
+	mov  cx, (MSG_SECTOR + 1)	# Sector address (starts at 1)
 	mov  dx, 0x0080		# Drive ID
 	xor  bx, bx		# Destination address in ES
 	int  0x13

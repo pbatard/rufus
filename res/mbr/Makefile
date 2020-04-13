@@ -53,9 +53,11 @@ dis: $(TEST_TARGET).out
 # Run the MBR in a Bochs environment (append msg.txt in subsequent blocks)
 test: $(TEST_TARGET).bin
 	@test -s $(BOCHS) || { echo "Error: $(BOCHS) was not found on this system"; exit 1; }
-	@cat $(TEST_TARGET).bin msg.txt > disk.img
+	@cp $(TEST_TARGET).bin disk.img
+	@truncate -c -s 17K disk.img
+	@cat msg.txt >> disk.img
 	@truncate -c -s 10M disk.img
-	-@$(BOCHS) -f bochsrc.bxrc -q
+	@-$(BOCHS) -f bochsrc.bxrc -q
 
 %.out: %.o mbr.ld
 	@echo "[LD]  $@"
