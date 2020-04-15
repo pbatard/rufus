@@ -1,3 +1,11 @@
+o Version 3.10 (2020.04.??)
+    Improve Ubuntu 20.04 support
+    Improve detection of FIXED drives with no mounted partitions
+    Update UEFI:NTFS file system drivers to v1.5
+    Fix progress not being updated for German UI
+    Fix an assert during FreeDOS drive creation when the system locale is UTF-8
+    Fix invalid label errors when using a non-Western locale
+
 o Version 3.9 (2020.02.29)
     Add exFAT support when creating blank UEFI:NTFS drives [EXPERIMENTAL]
     Fix ext2/ext3 corruption for partitions larger than 4 GB

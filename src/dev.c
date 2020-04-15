@@ -781,9 +781,13 @@ BOOL GetDevices(DWORD devnum)
 				}
 				static_strcpy(str, "????:????");	// Couldn't figure VID:PID
 			} else {
-				// because I don't want to end up erasing this specific device of mine by accident
-				if (its_a_me_mario && (props.vid == 0x0525) && (props.pid == 0x622b))
-					continue;
+				// I *REALLY* don't want to erase the devices below by accident.
+				if (its_a_me_mario) {
+					if ((props.vid == 0x0525) && (props.pid == 0x622b))
+						continue;
+					if ((props.vid == 0x0781) && (props.pid == 0x75a0))
+						continue;
+				}
 				static_sprintf(str, "%04X:%04X", props.vid, props.pid);
 			}
 			if (props.speed >= USB_SPEED_MAX)
