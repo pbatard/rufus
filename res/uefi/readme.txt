@@ -6,9 +6,8 @@ See https://github.com/pbatard/uefi-ntfs for more details.
 This image, which you can mount as FAT filesystem or open in 7-zip, contains
 the following data:
 o The NTFS and exFAT UEFI drivers from EfiFs (https://github.com/pbatard/efifs).
-  These are the \EFI\Rufus\[exfat|ntfs]_[ia32|x64|arm|aa64].efi files, which were
-  compiled unmodified from the EfiFs source (@d19363a5), using Visual Studio
-  2017 Community Edition (v15.8.7) using the gnu-efi submodule rather than EDK2.
+  These are the \EFI\Rufus\[exfat|ntfs]_[ia32|x64|arm|aa64].efi files, which are
+  identical to the v1.5 EfiFs binaries published at https://efi.akeo.ie.
 o The UEFI:NTFS binaries (https://github.com/pbatard/uefi-ntfs), which were
   compiled using Visual Studio 2019 Community Edition.
   These are the \EFI\Boot\boot[ia32|x64|arm|aa64].efi files.
