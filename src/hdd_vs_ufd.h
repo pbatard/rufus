@@ -89,7 +89,9 @@ static str_score_t str_score[] = {
 
 static str_score_t str_adjust[] = {
 	{ "Gadget", -10 },
-	{ "Flash", -10 }
+	{ "Flash", -10 },
+	{ "HDD", +20 },
+	{ "SSD", +20 }
 };
 
 /* The lists belows set a score according to VID & VID:PID
