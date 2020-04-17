@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 3.5\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2019-03-29 23:12+0000\n"
-"PO-Revision-Date: 2019-03-29 23:21+0000\n"
+"POT-Creation-Date: 2020-04-17 12:17+0100\n"
+"PO-Revision-Date: 2020-04-17 12:19+0100\n"
 "Language: bg_BG\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Rufus-LCID: 0x0402\n"
 "Last-Translator: \n"
 "Language-Team: \n"
-"X-Generator: Poedit 2.2.1\n"
+"X-Generator: Poedit 2.3\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -1289,9 +1289,9 @@ msgstr "Запазен %s"
 
 #. • MSG_217
 #.
-#. Formatting status (make sure you use a double % to print the percent sign)
-msgid "Formatting: %0.1f%% completed"
-msgstr "Форматирането е: %0.1f%% завършено"
+#. Formatting status
+msgid "Formatting: %s"
+msgstr "Форматирането е: %s"
 
 #. • MSG_218
 msgid "Creating file system: Task %d/%d completed"
@@ -1340,11 +1340,11 @@ msgid "Closing existing volume..."
 msgstr "Затваряне на съществуващия том..."
 
 #. • MSG_228
-msgid "Writing master boot record..."
+msgid "Writing Master Boot Record..."
 msgstr "Създаване на MBR..."
 
 #. • MSG_229
-msgid "Writing partition boot record..."
+msgid "Writing Partition Boot Record..."
 msgstr "Създаване на стартиращ запис на дяла..."
 
 #. • MSG_230
@@ -1352,8 +1352,8 @@ msgid "Copying DOS files..."
 msgstr "Копиране на DOS файловете..."
 
 #. • MSG_231
-msgid "Copying ISO files..."
-msgstr "Копиране на ISO файловете..."
+msgid "Copying ISO files: %s"
+msgstr "Копиране на ISO файловете: %s"
 
 #. • MSG_232
 msgid "Win7 EFI boot setup (This may take a while)..."
@@ -1408,8 +1408,8 @@ msgstr ""
 "Изтеглянето ще бъде изтрито. Проверете регистъра за повече детайли."
 
 #. • MSG_241
-msgid "Downloading: %0.1f%%"
-msgstr "Изтегляне: %0.1f%%"
+msgid "Downloading: %s"
+msgstr "Изтегляне: %s"
 
 #. • MSG_242
 msgid "Failed to download file."
@@ -1490,8 +1490,8 @@ msgid "NTFS compression"
 msgstr "NTFS компресиране"
 
 #. • MSG_261
-msgid "Writing image: %0.1f%% completed"
-msgstr "Записване на образ: %0.1f%% завършено"
+msgid "Writing image: %s"
+msgstr "Записване на образ: %s"
 
 #. • MSG_262
 #.
@@ -1518,8 +1518,8 @@ msgid "Dual UEFI/BIOS mode"
 msgstr "Двоен UEFI/BIOS режим"
 
 #. • MSG_267
-msgid "Applying Windows image: %0.1f%% completed"
-msgstr "Прилагане на Windows образ: %0.1f%% завършено"
+msgid "Applying Windows image: %s"
+msgstr "Прилагане на Windows образ: %s"
 
 #. • MSG_268
 msgid "Applying Windows image..."
@@ -1534,8 +1534,8 @@ msgid "USB debug"
 msgstr "Отстраняване на USB грешки"
 
 #. • MSG_271
-msgid "Computing image checksums: %0.1f%% completed"
-msgstr "Изчисляване на чексуми на образа: %0.1f%% завършено"
+msgid "Computing image checksums: %s"
+msgstr "Изчисляване на чексуми на образа: %s"
 
 #. • MSG_272
 msgid "Compute the MD5, SHA1 and SHA256 checksums for the selected image"
@@ -1616,8 +1616,8 @@ msgstr ""
 "Сигурни ли сте че искате да стартирате тази програма?"
 
 #. • MSG_286
-msgid "Zeroing drive: %0.1f%% completed"
-msgstr "Нулиране на устройството: %0.1f%% завършено"
+msgid "Zeroing drive: %s"
+msgstr "Нулиране на устройството: %s"
 
 #. • MSG_287
 msgid "Detection of non-USB removable drives"
@@ -1721,5 +1721,5 @@ msgstr "Използвайте тази опция, за да покажете �
 #.
 #. You can see this status message by pressing <Ctrl>-<Alt>-<Z> and then selecting START.
 #. It's the same as MSG_286 but with a process that *may* be faster, hence the name.
-msgid "Fast-zeroing drive: %0.1f%% completed"
-msgstr "Бързо нулиране на устройството: %0.1f%% завършени"
+msgid "Fast-zeroing drive: %s"
+msgstr "Бързо нулиране на устройството: %s"

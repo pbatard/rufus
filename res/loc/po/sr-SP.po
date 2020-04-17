@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 3.5\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2019-05-21 21:48+0100\n"
-"PO-Revision-Date: 2019-05-22 00:04+0100\n"
+"POT-Creation-Date: 2020-04-17 12:19+0100\n"
+"PO-Revision-Date: 2020-04-17 12:29+0100\n"
 "Language: sr_SP\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -11,9 +11,9 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Rufus-LanguageName: Serbian (Srpski)\n"
 "X-Rufus-LCID: 0x241a, 0x081a, 0x181a, 0x2c1a, 0x701a, 0x7c1a\n"
-"Last-Translator: Miloš ljubičić <ljubimilos@gmail.com>\n"
+"Last-Translator: \n"
 "Language-Team: \n"
-"X-Generator: Poedit 2.2.3\n"
+"X-Generator: Poedit 2.3\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -217,7 +217,7 @@ msgstr "Polisa ažuriranja Rufus-a"
 
 #. • MSG_005
 msgid "Do you want to allow Rufus to check for application updates online?"
-msgstr "Dozvolite Rufus-u da automatski traži nove verzije"
+msgstr "Dozvolite Rufus-u da automatski traži nove verzije?"
 
 #. • MSG_007
 msgid "Cancel"
@@ -870,7 +870,7 @@ msgid ""
 "For details on why this is necessary, see the 'More Information' button below."
 msgstr ""
 "Upravo si napravio mediju koja koristi UEFI:NTFS bootloader. Molim te zapamti da dabi koristi ovakve fajlove moraš da isključiš bezbedno butovanje. \n"
-"Za detalje o tome zašto je ovo neophodno, pritisni dugme \"Više informacija\" dole"
+"Za detalje o tome zašto je ovo neophodno, pritisni dugme \"Više informacija\" dole."
 
 #. • MSG_130
 msgid "Windows image selection"
@@ -1044,7 +1044,7 @@ msgstr "Označite ovo polje kako biste dozvolili prikaz internacionalnih oznaka 
 
 #. • MSG_167
 msgid "Install an MBR that allows boot selection and can masquerade the BIOS USB drive ID"
-msgstr "Instaliraj MBR koji omogućava odabir pri podizanju sistema i može pretvoriti ID BIOS-a USB uređaja "
+msgstr "Instaliraj MBR koji omogućava odabir pri podizanju sistema i može pretvoriti ID BIOS-a USB uređaja"
 
 #. • MSG_168
 msgid ""
@@ -1060,7 +1060,7 @@ msgid ""
 "This can improve boot detection for older BIOSes."
 msgstr ""
 "Napravi dodatnu skrivenu particiju i pokušaj poravnati granice particije.\n"
-"Ovo može poboljšati pronalaske uređaja za podizanje sistema kod starih BIOS-a"
+"Ovo može poboljšati pronalaske uređaja za podizanje sistema kod starih BIOS-a."
 
 #. • MSG_170
 msgid "Enable the listing of USB Hard Drive enclosures. USE AT YOUR OWN RISKS!!!"
@@ -1127,7 +1127,7 @@ msgstr "Vaša IP adresa"
 
 #. • MSG_184
 msgid "For the purpose of generating private usage statistics, we may keep the information collected, \\b for at most a year\\b0 . However, we will not willingly disclose any of this individual data to third parties."
-msgstr "U svrhu izrade privatne statistike korišćenja, možemo zadržati navedene informacije, \\b najduže jednu godinu\\b0 . Međutim, nećemo dobrovoljno dijeliti sa trećim strankama"
+msgstr "U svrhu izrade privatne statistike korišćenja, možemo zadržati navedene informacije, \\b najduže jednu godinu\\b0 . Međutim, nećemo dobrovoljno dijeliti sa trećim strankama."
 
 #. • MSG_185
 msgid "Update Process:"
@@ -1151,7 +1151,7 @@ msgstr "Trenutna datoteka se ne podudara s odabranim opcijama za podizanje siste
 
 #. • MSG_189
 msgid "This ISO image is not compatible with the selected filesystem"
-msgstr "Ova ISO datoteka nije kompatibilna sa odabranim sistemom datoteka."
+msgstr "Ova ISO datoteka nije kompatibilna sa odabranim sistemom datoteka"
 
 #. • MSG_190
 msgid "Incompatible drive detected"
@@ -1219,7 +1219,7 @@ msgstr "Neuspjeh pri skeniranju slike"
 #.
 #. %s is the name of an obsolete Syslinux .c32 module. Example: "Obsolete vesamenu.c32 detected"
 msgid "Obsolete %s detected"
-msgstr "Pronađen zastario %s "
+msgstr "Pronađen zastario %s"
 
 #. • MSG_205
 #.
@@ -1288,9 +1288,9 @@ msgstr "Sačuvano %s"
 
 #. • MSG_217
 #.
-#. Formatting status (make sure you use a double % to print the percent sign)
-msgid "Formatting: %0.1f%% completed"
-msgstr "Formatiranje: %0.1f%% završeno"
+#. Formatting status
+msgid "Formatting: %s"
+msgstr "Formatiranje: %s"
 
 #. • MSG_218
 msgid "Creating file system: Task %d/%d completed"
@@ -1351,8 +1351,8 @@ msgid "Copying DOS files..."
 msgstr "Kopiranje DOS datoteka..."
 
 #. • MSG_231
-msgid "Copying ISO files..."
-msgstr "Kopiranje ISO datoteka..."
+msgid "Copying ISO files: %s"
+msgstr "Kopiranje ISO datoteka: %s"
 
 #. • MSG_232
 msgid "Win7 EFI boot setup (This may take a while)..."
@@ -1407,8 +1407,8 @@ msgstr ""
 "Preuzimanje će biti obrisano. Molimo vas pogledajte log fajl za više detalja."
 
 #. • MSG_241
-msgid "Downloading: %0.1f%%"
-msgstr "Preuzimanje: %0.1f%%"
+msgid "Downloading: %s"
+msgstr "Preuzimanje: %s"
 
 #. • MSG_242
 msgid "Failed to download file."
@@ -1489,8 +1489,8 @@ msgid "NTFS compression"
 msgstr "NTFS komprimovanje"
 
 #. • MSG_261
-msgid "Writing image: %0.1f%% completed"
-msgstr "Pisanje slike: %0.1f%% završeno"
+msgid "Writing image: %s"
+msgstr "Pisanje slike: %s"
 
 #. • MSG_262
 #.
@@ -1517,8 +1517,8 @@ msgid "Dual UEFI/BIOS mode"
 msgstr "Dvostruki UEFI/BIOS režim"
 
 #. • MSG_267
-msgid "Applying Windows image: %0.1f%% completed"
-msgstr "Primjenjivanje Windows datoteke: %0.1f%% završeno"
+msgid "Applying Windows image: %s"
+msgstr "Primjenjivanje Windows datoteke: %s"
 
 #. • MSG_268
 msgid "Applying Windows image..."
@@ -1533,8 +1533,8 @@ msgid "USB debug"
 msgstr "USB uklanjanje grešaka"
 
 #. • MSG_271
-msgid "Computing image checksums: %0.1f%% completed"
-msgstr "Računanje kontrolnog zbira datoteke: %0.1f%% završeno"
+msgid "Computing image checksums: %s"
+msgstr "Računanje kontrolnog zbira datoteke: %s"
 
 #. • MSG_272
 msgid "Compute the MD5, SHA1 and SHA256 checksums for the selected image"
@@ -1615,8 +1615,8 @@ msgstr ""
 "Da li ste sigurni da želite pokrenuti ovaj program?"
 
 #. • MSG_286
-msgid "Zeroing drive: %0.1f%% completed"
-msgstr "Anuliranje uređaja: %0.1f%% završeno"
+msgid "Zeroing drive: %s"
+msgstr "Anuliranje uređaja: %s"
 
 #. • MSG_287
 msgid "Detection of non-USB removable drives"
@@ -1720,5 +1720,5 @@ msgstr "Izaberite ovu opciju kako bi odlučili da li želite koristiti ovaj ure�
 #.
 #. You can see this status message by pressing <Ctrl>-<Alt>-<Z> and then selecting START.
 #. It's the same as MSG_286 but with a process that *may* be faster, hence the name.
-msgid "Fast-zeroing drive: %0.1f%% completed"
-msgstr "Brže-popunavanje nulom diska: %0.1f%% završeno"
+msgid "Fast-zeroing drive: %s"
+msgstr "Brže-popunavanje nulom diska: %s"

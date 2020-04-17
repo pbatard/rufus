@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 3.5\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2019-03-16 16:17+0000\n"
-"PO-Revision-Date: 2019-03-16 18:52+0000\n"
+"POT-Creation-Date: 2020-04-17 12:17+0100\n"
+"PO-Revision-Date: 2020-04-17 12:19+0100\n"
 "Language: cs_CZ\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Rufus-LCID: 0x0405\n"
 "Last-Translator: \n"
 "Language-Team: \n"
-"X-Generator: Poedit 2.2.1\n"
+"X-Generator: Poedit 2.3\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -1292,9 +1292,9 @@ msgstr "Uložený soubor: %s"
 
 #. • MSG_217
 #.
-#. Formatting status (make sure you use a double % to print the percent sign)
-msgid "Formatting: %0.1f%% completed"
-msgstr "Formátování: %0.1f%% dokončeno"
+#. Formatting status
+msgid "Formatting: %s"
+msgstr "Formátování: %s"
 
 #. • MSG_218
 msgid "Creating file system: Task %d/%d completed"
@@ -1343,11 +1343,11 @@ msgid "Closing existing volume..."
 msgstr "Uzavření stávajícího svazku..."
 
 #. • MSG_228
-msgid "Writing master boot record..."
+msgid "Writing Master Boot Record..."
 msgstr "Zapisování hlavního záznamu boot..."
 
 #. • MSG_229
-msgid "Writing partition boot record..."
+msgid "Writing Partition Boot Record..."
 msgstr "Zapisování boot záznamu oddílu..."
 
 #. • MSG_230
@@ -1355,8 +1355,8 @@ msgid "Copying DOS files..."
 msgstr "Kopírování DOS souborů..."
 
 #. • MSG_231
-msgid "Copying ISO files..."
-msgstr "Kopírování ISO souborů..."
+msgid "Copying ISO files: %s"
+msgstr "Kopírování ISO souborů: %s"
 
 #. • MSG_232
 msgid "Win7 EFI boot setup (This may take a while)..."
@@ -1411,8 +1411,8 @@ msgstr ""
 "Stahování bude smazáno. Zkontrolujte podrobnosti v protokolu."
 
 #. • MSG_241
-msgid "Downloading: %0.1f%%"
-msgstr "Stahování: %0.1f%% dokončeno"
+msgid "Downloading: %s"
+msgstr "Stahování: %s"
 
 #. • MSG_242
 msgid "Failed to download file."
@@ -1493,8 +1493,8 @@ msgid "NTFS compression"
 msgstr "NTFS komprese"
 
 #. • MSG_261
-msgid "Writing image: %0.1f%% completed"
-msgstr "Zápis obrazu: %0.1f%% dokončeno"
+msgid "Writing image: %s"
+msgstr "Zápis obrazu: %s"
 
 #. • MSG_262
 #.
@@ -1521,8 +1521,8 @@ msgid "Dual UEFI/BIOS mode"
 msgstr "Dvojí UEFI/BIOS režim"
 
 #. • MSG_267
-msgid "Applying Windows image: %0.1f%% completed"
-msgstr "Použití Windows obrazu: %0.1f%% komplet"
+msgid "Applying Windows image: %s"
+msgstr "Použití Windows obrazu: %s"
 
 #. • MSG_268
 msgid "Applying Windows image..."
@@ -1537,8 +1537,8 @@ msgid "USB debug"
 msgstr "USB ladění"
 
 #. • MSG_271
-msgid "Computing image checksums: %0.1f%% completed"
-msgstr "Výpočet kontrolních součtů: %0.1f%% komplet"
+msgid "Computing image checksums: %s"
+msgstr "Výpočet kontrolních součtů: %s"
 
 #. • MSG_272
 msgid "Compute the MD5, SHA1 and SHA256 checksums for the selected image"
@@ -1619,8 +1619,8 @@ msgstr ""
 "Opravdu chcete spustit tento program?"
 
 #. • MSG_286
-msgid "Zeroing drive: %0.1f%% completed"
-msgstr "Nulování jednotky: %0.1f%% komplet"
+msgid "Zeroing drive: %s"
+msgstr "Nulování jednotky: %s"
 
 #. • MSG_287
 msgid "Detection of non-USB removable drives"
@@ -1724,5 +1724,5 @@ msgstr "Touto volbou označte, zda chcete toto zařízení používat k instalac
 #.
 #. You can see this status message by pressing <Ctrl>-<Alt>-<Z> and then selecting START.
 #. It's the same as MSG_286 but with a process that *may* be faster, hence the name.
-msgid "Fast-zeroing drive: %0.1f%% completed"
-msgstr "Rychlé-přepsání jednotky: %0.1f%% kompletní"
+msgid "Fast-zeroing drive: %s"
+msgstr "Rychlé-přepsání jednotky: %s"

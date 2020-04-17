@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 3.5\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2019-04-06 11:32+0100\n"
-"PO-Revision-Date: 2019-04-06 11:33+0100\n"
+"POT-Creation-Date: 2020-04-17 12:18+0100\n"
+"PO-Revision-Date: 2020-04-17 12:21+0100\n"
 "Language: ko_KR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Rufus-LCID: 0x0412\n"
 "Last-Translator: \n"
 "Language-Team: \n"
-"X-Generator: Poedit 2.2.1\n"
+"X-Generator: Poedit 2.3\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -1286,9 +1286,9 @@ msgstr "%s 저장 됨"
 
 #. • MSG_217
 #.
-#. Formatting status (make sure you use a double % to print the percent sign)
-msgid "Formatting: %0.1f%% completed"
-msgstr "포맷 중: %0.1f%% 완료"
+#. Formatting status
+msgid "Formatting: %s"
+msgstr "포맷 중: %s"
 
 #. • MSG_218
 msgid "Creating file system: Task %d/%d completed"
@@ -1337,11 +1337,11 @@ msgid "Closing existing volume..."
 msgstr "기존 볼륨 닫기..."
 
 #. • MSG_228
-msgid "Writing master boot record..."
+msgid "Writing Master Boot Record..."
 msgstr "마스터 부트 레코드를 작성..."
 
 #. • MSG_229
-msgid "Writing partition boot record..."
+msgid "Writing Partition Boot Record..."
 msgstr "파티션 부트 레코드를 작성..."
 
 #. • MSG_230
@@ -1349,8 +1349,8 @@ msgid "Copying DOS files..."
 msgstr "DOS 파일을 복사..."
 
 #. • MSG_231
-msgid "Copying ISO files..."
-msgstr "ISO 파일을 복사..."
+msgid "Copying ISO files: %s"
+msgstr "ISO 파일을 복사: %s"
 
 #. • MSG_232
 msgid "Win7 EFI boot setup (This may take a while)..."
@@ -1404,8 +1404,8 @@ msgstr ""
 "다운로드가 삭제됩니다. 자세한 내용은 로그를 확인하십시오."
 
 #. • MSG_241
-msgid "Downloading: %0.1f%%"
-msgstr "다운로드: %0.1f%%"
+msgid "Downloading: %s"
+msgstr "다운로드: %s"
 
 #. • MSG_242
 msgid "Failed to download file."
@@ -1486,8 +1486,8 @@ msgid "NTFS compression"
 msgstr "NTFS 압축"
 
 #. • MSG_261
-msgid "Writing image: %0.1f%% completed"
-msgstr "이미지 만들기: %0.1f%% 완료"
+msgid "Writing image: %s"
+msgstr "이미지 만들기: %s"
 
 #. • MSG_262
 #.
@@ -1514,8 +1514,8 @@ msgid "Dual UEFI/BIOS mode"
 msgstr "듀얼 UEFI/BIOS 모드"
 
 #. • MSG_267
-msgid "Applying Windows image: %0.1f%% completed"
-msgstr "Windows 이미지 적용: %0.1f%% 완료"
+msgid "Applying Windows image: %s"
+msgstr "Windows 이미지 적용: %s"
 
 #. • MSG_268
 msgid "Applying Windows image..."
@@ -1530,8 +1530,8 @@ msgid "USB debug"
 msgstr "USB 디버그"
 
 #. • MSG_271
-msgid "Computing image checksums: %0.1f%% completed"
-msgstr "이미지 체크섬을 계산 중: %0.1f%% 완료"
+msgid "Computing image checksums: %s"
+msgstr "이미지 체크섬을 계산 중: %s"
 
 #. • MSG_272
 msgid "Compute the MD5, SHA1 and SHA256 checksums for the selected image"
@@ -1612,8 +1612,8 @@ msgstr ""
 "그래도 이 파일을 실행하시겠습니까?"
 
 #. • MSG_286
-msgid "Zeroing drive: %0.1f%% completed"
-msgstr "드라이브 제로필: %0.1f%% 완료"
+msgid "Zeroing drive: %s"
+msgstr "드라이브 제로필: %s"
 
 #. • MSG_287
 msgid "Detection of non-USB removable drives"
@@ -1717,5 +1717,5 @@ msgstr "이 장치를 사용하여 다른 디스크에 Windows를 설치하거�
 #.
 #. You can see this status message by pressing <Ctrl>-<Alt>-<Z> and then selecting START.
 #. It's the same as MSG_286 but with a process that *may* be faster, hence the name.
-msgid "Fast-zeroing drive: %0.1f%% completed"
-msgstr "빠른 드라이브 제로필 : % 0.1f %% 완료"
+msgid "Fast-zeroing drive: %s"
+msgstr "빠른 드라이브 제로필: %s"

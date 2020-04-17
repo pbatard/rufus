@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 3.5\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2019-03-18 12:14+0000\n"
-"PO-Revision-Date: 2019-03-18 12:14+0000\n"
+"POT-Creation-Date: 2020-04-17 12:19+0100\n"
+"PO-Revision-Date: 2020-04-17 12:30+0100\n"
 "Language: uk_UA\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Rufus-LCID: 0x0422\n"
 "Last-Translator: \n"
 "Language-Team: \n"
-"X-Generator: Poedit 2.2.1\n"
+"X-Generator: Poedit 2.3\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -1288,13 +1288,13 @@ msgstr "Збережено %s"
 
 #. • MSG_217
 #.
-#. Formatting status (make sure you use a double % to print the percent sign)
-msgid "Formatting: %0.1f%% completed"
-msgstr "Форматування: %0.1f%% виконано"
+#. Formatting status
+msgid "Formatting: %s"
+msgstr "Форматування: %s"
 
 #. • MSG_218
 msgid "Creating file system: Task %d/%d completed"
-msgstr "Створення файлової системи: Завдання виконано на %d/%d "
+msgstr "Створення файлової системи: Завдання виконано на %d/%d"
 
 #. • MSG_219
 msgid "NTFS Fixup: %d%% completed"
@@ -1339,11 +1339,11 @@ msgid "Closing existing volume..."
 msgstr "Закриття існуючого розділу..."
 
 #. • MSG_228
-msgid "Writing master boot record..."
+msgid "Writing Master Boot Record..."
 msgstr "Створення головного завантажувального запису..."
 
 #. • MSG_229
-msgid "Writing partition boot record..."
+msgid "Writing Partition Boot Record..."
 msgstr "Створення завантажувального запису розділу..."
 
 #. • MSG_230
@@ -1351,8 +1351,8 @@ msgid "Copying DOS files..."
 msgstr "Копіювання DOS-файлів..."
 
 #. • MSG_231
-msgid "Copying ISO files..."
-msgstr "Копіювання ISO-файлів..."
+msgid "Copying ISO files: %s"
+msgstr "Копіювання ISO-файлів: %s"
 
 #. • MSG_232
 msgid "Win7 EFI boot setup (This may take a while)..."
@@ -1407,8 +1407,8 @@ msgstr ""
 "Завантаження було видалено. Будь ласка, перегляньте логи для більш детальної інформації."
 
 #. • MSG_241
-msgid "Downloading: %0.1f%%"
-msgstr "Завантаження: %0.1f%%"
+msgid "Downloading: %s"
+msgstr "Завантаження: %s"
 
 #. • MSG_242
 msgid "Failed to download file."
@@ -1489,8 +1489,8 @@ msgid "NTFS compression"
 msgstr "Стиснення NTFS"
 
 #. • MSG_261
-msgid "Writing image: %0.1f%% completed"
-msgstr "Запис образа: %0.1f%% виконано"
+msgid "Writing image: %s"
+msgstr "Запис образа: %s"
 
 #. • MSG_262
 #.
@@ -1517,8 +1517,8 @@ msgid "Dual UEFI/BIOS mode"
 msgstr "Подвійний режим UEFI/BIOS"
 
 #. • MSG_267
-msgid "Applying Windows image: %0.1f%% completed"
-msgstr "Застосування Windows-образа: %0.1f%% виконано"
+msgid "Applying Windows image: %s"
+msgstr "Застосування Windows-образа: %s"
 
 #. • MSG_268
 msgid "Applying Windows image..."
@@ -1533,8 +1533,8 @@ msgid "USB debug"
 msgstr "Режим USB-відлагодження"
 
 #. • MSG_271
-msgid "Computing image checksums: %0.1f%% completed"
-msgstr "Обчислення контрольних сум: %0.1f%% завершено"
+msgid "Computing image checksums: %s"
+msgstr "Обчислення контрольних сум: %s"
 
 #. • MSG_272
 msgid "Compute the MD5, SHA1 and SHA256 checksums for the selected image"
@@ -1615,8 +1615,8 @@ msgstr ""
 "Ви впевнені, що хочете запустити цей файл?"
 
 #. • MSG_286
-msgid "Zeroing drive: %0.1f%% completed"
-msgstr "Обнуління диска: %0.1f%% завершено"
+msgid "Zeroing drive: %s"
+msgstr "Обнуління диска: %s"
 
 #. • MSG_287
 msgid "Detection of non-USB removable drives"
@@ -1720,5 +1720,5 @@ msgstr "Використовуйте цей параметр, щоб вказа�
 #.
 #. You can see this status message by pressing <Ctrl>-<Alt>-<Z> and then selecting START.
 #. It's the same as MSG_286 but with a process that *may* be faster, hence the name.
-msgid "Fast-zeroing drive: %0.1f%% completed"
-msgstr "Швидке обнуління диска: %0.1f%% завершено"
+msgid "Fast-zeroing drive: %s"
+msgstr "Швидке обнуління диска: %s"

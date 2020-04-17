@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 3.5\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2019-03-14 14:59+0300\n"
-"PO-Revision-Date: 2019-03-14 13:03+0000\n"
+"POT-Creation-Date: 2020-04-17 12:18+0100\n"
+"PO-Revision-Date: 2020-04-17 12:25+0100\n"
 "Language: ru_RU\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Rufus-LCID: 0x0419, 0x0819\n"
 "Last-Translator: \n"
 "Language-Team: \n"
-"X-Generator: Poedit 2.2.1\n"
+"X-Generator: Poedit 2.3\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -477,7 +477,7 @@ msgstr "Ошибка записи."
 
 #. • MSG_066
 msgid "Installation failure"
-msgstr "Ошибка установки."
+msgstr "Ошибка установки"
 
 #. • MSG_067
 msgid "Could not open media. It may be in use by another process. Please re-plug the media and try again."
@@ -493,7 +493,7 @@ msgstr "Невозможно скопировать файлы на выбран
 
 #. • MSG_070
 msgid "Cancelled by user."
-msgstr "Отменено пользователем"
+msgstr "Отменено пользователем."
 
 #. • MSG_071
 #.
@@ -582,7 +582,6 @@ msgstr ""
 "Файл будет загружен в текущую директорию, а в случае наличия '%s' - заменен автоматически."
 
 #. • MSG_085
-#, fuzzy
 msgid "Downloading %s"
 msgstr "Загружено %s"
 
@@ -667,7 +666,7 @@ msgstr "Ограничения файловой системы"
 
 #. • MSG_100
 msgid "This ISO image contains a file larger than 4 GB, which is more than the maximum size allowed for a FAT or FAT32 file system."
-msgstr "Этот ISO-образ содержит файл размером более 4 Гб, что недопустимо при использовании файловой системы FAT или FAT32"
+msgstr "Этот ISO-образ содержит файл размером более 4 Гб, что недопустимо при использовании файловой системы FAT или FAT32."
 
 #. • MSG_101
 msgid "Missing WIM support"
@@ -810,7 +809,7 @@ msgstr "Стандартная установка Windows"
 #. http://en.wikipedia.org/wiki/Windows_To_Go in your language.
 #. Otherwise, you may add a parenthesis eg. "Windows To Go (<hint at what it does>)"
 msgid "Windows To Go"
-msgstr "Windows To Go"
+msgstr ""
 
 #. • MSG_119
 msgid "advanced drive properties"
@@ -1292,9 +1291,9 @@ msgstr "Сохранен %s"
 
 #. • MSG_217
 #.
-#. Formatting status (make sure you use a double % to print the percent sign)
-msgid "Formatting: %0.1f%% completed"
-msgstr "Форматирование: %0.1f%% выполнено"
+#. Formatting status
+msgid "Formatting: %s"
+msgstr "Форматирование: %s"
 
 #. • MSG_218
 msgid "Creating file system: Task %d/%d completed"
@@ -1343,11 +1342,11 @@ msgid "Closing existing volume..."
 msgstr "Закрытие существующего раздела..."
 
 #. • MSG_228
-msgid "Writing master boot record..."
+msgid "Writing Master Boot Record..."
 msgstr "Создание главной загрузочной записи..."
 
 #. • MSG_229
-msgid "Writing partition boot record..."
+msgid "Writing Partition Boot Record..."
 msgstr "Создание загрузочной записи раздела..."
 
 #. • MSG_230
@@ -1355,8 +1354,8 @@ msgid "Copying DOS files..."
 msgstr "Копирование DOS-файлов..."
 
 #. • MSG_231
-msgid "Copying ISO files..."
-msgstr "Копирование ISO-файлов..."
+msgid "Copying ISO files: %s"
+msgstr "Копирование ISO-файлов: %s"
 
 #. • MSG_232
 msgid "Win7 EFI boot setup (This may take a while)..."
@@ -1411,8 +1410,8 @@ msgstr ""
 "Обновление будет удалено. Пожалуйста, проверьте журнал для получения более подробной информации."
 
 #. • MSG_241
-msgid "Downloading: %0.1f%%"
-msgstr "Загружено: %0.1f%%"
+msgid "Downloading: %s"
+msgstr "Загружено: %s"
 
 #. • MSG_242
 msgid "Failed to download file."
@@ -1493,8 +1492,8 @@ msgid "NTFS compression"
 msgstr "NTFS-компрессия"
 
 #. • MSG_261
-msgid "Writing image: %0.1f%% completed"
-msgstr "Запись образа: %0.1f%% выполнено"
+msgid "Writing image: %s"
+msgstr "Запись образа: %s"
 
 #. • MSG_262
 #.
@@ -1521,8 +1520,8 @@ msgid "Dual UEFI/BIOS mode"
 msgstr "Двойной UEFI/BIOS режим"
 
 #. • MSG_267
-msgid "Applying Windows image: %0.1f%% completed"
-msgstr "Использование Windows-образа: %0.1f%% завершено"
+msgid "Applying Windows image: %s"
+msgstr "Использование Windows-образа: %s"
 
 #. • MSG_268
 msgid "Applying Windows image..."
@@ -1537,8 +1536,8 @@ msgid "USB debug"
 msgstr "Режим USB отладки"
 
 #. • MSG_271
-msgid "Computing image checksums: %0.1f%% completed"
-msgstr "Вычисление контрольных сумм: %0.1f%% завершено"
+msgid "Computing image checksums: %s"
+msgstr "Вычисление контрольных сумм: %s"
 
 #. • MSG_272
 msgid "Compute the MD5, SHA1 and SHA256 checksums for the selected image"
@@ -1619,8 +1618,8 @@ msgstr ""
 "Вы уверены, что хотите запустить этот файл?"
 
 #. • MSG_286
-msgid "Zeroing drive: %0.1f%% completed"
-msgstr "Обнуление диска: %0.1f%% выполнено"
+msgid "Zeroing drive: %s"
+msgstr "Обнуление диска: %s"
 
 #. • MSG_287
 msgid "Detection of non-USB removable drives"
@@ -1724,5 +1723,5 @@ msgstr "Используйте этот параметр, чтобы указа�
 #.
 #. You can see this status message by pressing <Ctrl>-<Alt>-<Z> and then selecting START.
 #. It's the same as MSG_286 but with a process that *may* be faster, hence the name.
-msgid "Fast-zeroing drive: %0.1f%% completed"
-msgstr "Быстрое обнуление диска: %0.1f %% завершено"
+msgid "Fast-zeroing drive: %s"
+msgstr "Быстрое обнуление диска: %s"

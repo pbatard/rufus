@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 3.5\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2019-03-14 13:29+0800\n"
-"PO-Revision-Date: 2019-03-14 12:54+0000\n"
+"POT-Creation-Date: 2020-04-17 12:17+0100\n"
+"PO-Revision-Date: 2020-04-17 12:30+0100\n"
 "Language: zh_TW\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Rufus-LCID: 0x0404, 0x0c04, 0x1404, 0x7c04\n"
 "Last-Translator: \n"
 "Language-Team: \n"
-"X-Generator: Poedit 2.2.1\n"
+"X-Generator: Poedit 2.3\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -1283,9 +1283,9 @@ msgstr "已儲存: %s"
 
 #. • MSG_217
 #.
-#. Formatting status (make sure you use a double % to print the percent sign)
-msgid "Formatting: %0.1f%% completed"
-msgstr "格式化中，已完成: %0.1f%%"
+#. Formatting status
+msgid "Formatting: %s"
+msgstr "格式化中，已完成: %s"
 
 #. • MSG_218
 msgid "Creating file system: Task %d/%d completed"
@@ -1334,11 +1334,11 @@ msgid "Closing existing volume..."
 msgstr "關閉既有磁碟區..."
 
 #. • MSG_228
-msgid "Writing master boot record..."
+msgid "Writing Master Boot Record..."
 msgstr "寫入主開機記錄..."
 
 #. • MSG_229
-msgid "Writing partition boot record..."
+msgid "Writing Partition Boot Record..."
 msgstr "寫入磁區開機記錄..."
 
 #. • MSG_230
@@ -1346,8 +1346,8 @@ msgid "Copying DOS files..."
 msgstr "複製 DOS 檔案..."
 
 #. • MSG_231
-msgid "Copying ISO files..."
-msgstr "複製 ISO 檔案..."
+msgid "Copying ISO files: %s"
+msgstr "複製 ISO 檔案: %s"
 
 #. • MSG_232
 msgid "Win7 EFI boot setup (This may take a while)..."
@@ -1402,8 +1402,8 @@ msgstr ""
 "下載的檔案將被刪除。更詳盡資料請見記錄檔。"
 
 #. • MSG_241
-msgid "Downloading: %0.1f%%"
-msgstr "下載中: %0.1f%%"
+msgid "Downloading: %s"
+msgstr "下載中: %s"
 
 #. • MSG_242
 msgid "Failed to download file."
@@ -1484,8 +1484,8 @@ msgid "NTFS compression"
 msgstr "NTFS 壓縮"
 
 #. • MSG_261
-msgid "Writing image: %0.1f%% completed"
-msgstr "映像檔寫入中，已完成: %0.1f%%"
+msgid "Writing image: %s"
+msgstr "映像檔寫入中，已完成: %s"
 
 #. • MSG_262
 #.
@@ -1512,8 +1512,8 @@ msgid "Dual UEFI/BIOS mode"
 msgstr "Dual UEFI/BIOS 模式"
 
 #. • MSG_267
-msgid "Applying Windows image: %0.1f%% completed"
-msgstr "套用 Windows 映像檔: 已完成 %0.1f%%"
+msgid "Applying Windows image: %s"
+msgstr "套用 Windows 映像檔: %s"
 
 #. • MSG_268
 msgid "Applying Windows image..."
@@ -1528,8 +1528,8 @@ msgid "USB debug"
 msgstr "USB 除錯"
 
 #. • MSG_271
-msgid "Computing image checksums: %0.1f%% completed"
-msgstr "計算映像檔總和檢查碼: 已完成 %0.1f%%"
+msgid "Computing image checksums: %s"
+msgstr "計算映像檔總和檢查碼: %s"
 
 #. • MSG_272
 msgid "Compute the MD5, SHA1 and SHA256 checksums for the selected image"
@@ -1610,8 +1610,8 @@ msgstr ""
 "是否要執行檔案?"
 
 #. • MSG_286
-msgid "Zeroing drive: %0.1f%% completed"
-msgstr "正在寫入零: 已完成 %0.1f%%"
+msgid "Zeroing drive: %s"
+msgstr "正在寫入零: %s"
 
 #. • MSG_287
 msgid "Detection of non-USB removable drives"
@@ -1715,5 +1715,5 @@ msgstr "是否要使用此裝置來安裝 Windows 在另一個磁碟上，或是
 #.
 #. You can see this status message by pressing <Ctrl>-<Alt>-<Z> and then selecting START.
 #. It's the same as MSG_286 but with a process that *may* be faster, hence the name.
-msgid "Fast-zeroing drive: %0.1f%% completed"
-msgstr "正在快速寫入零: 已完成 %0.1f%%"
+msgid "Fast-zeroing drive: %s"
+msgstr "正在快速寫入零: %s"

@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 3.5\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2019-03-14 12:58+0100\n"
-"PO-Revision-Date: 2019-03-21 17:40+0000\n"
+"POT-Creation-Date: 2020-04-17 12:18+0100\n"
+"PO-Revision-Date: 2020-04-17 12:20+0100\n"
 "Language: es_ES\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Rufus-LCID: 0x040a, 0x080a, 0x0c0a, 0x100a, 0x140a, 0x180a, 0x1c0a, 0x200a, 0x240a, 0x280a, 0x2c0a, 0x300a, 0x340a, 0x380a, 0x3c0a, 0x400a, 0x440a, 0x480a, 0x4c0a, 0x500a, 0x540a, 0x580a\n"
 "Last-Translator: \n"
 "Language-Team: \n"
-"X-Generator: Poedit 2.2.1\n"
+"X-Generator: Poedit 2.3\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -1293,9 +1293,9 @@ msgstr "%s guardado"
 
 #. • MSG_217
 #.
-#. Formatting status (make sure you use a double % to print the percent sign)
-msgid "Formatting: %0.1f%% completed"
-msgstr "Formateando: %0.1f%% completo"
+#. Formatting status
+msgid "Formatting: %s"
+msgstr "Formateando: %s"
 
 #. • MSG_218
 msgid "Creating file system: Task %d/%d completed"
@@ -1344,11 +1344,11 @@ msgid "Closing existing volume..."
 msgstr "Cerrando el volumen existente..."
 
 #. • MSG_228
-msgid "Writing master boot record..."
+msgid "Writing Master Boot Record..."
 msgstr "Escribiendo el registro maestro de arranque (Master Boot Record)..."
 
 #. • MSG_229
-msgid "Writing partition boot record..."
+msgid "Writing Partition Boot Record..."
 msgstr "Escribiendo el registro de arranque de la partición (Partition Boot Record)..."
 
 #. • MSG_230
@@ -1356,8 +1356,8 @@ msgid "Copying DOS files..."
 msgstr "Copiando archivos DOS..."
 
 #. • MSG_231
-msgid "Copying ISO files..."
-msgstr "Copiando archivos ISO..."
+msgid "Copying ISO files: %s"
+msgstr "Copiando archivos ISO: %s"
 
 #. • MSG_232
 msgid "Win7 EFI boot setup (This may take a while)..."
@@ -1412,8 +1412,8 @@ msgstr ""
 "La descargas será borrada. Revise el registro para más detalles."
 
 #. • MSG_241
-msgid "Downloading: %0.1f%%"
-msgstr "Descargando: %0.1f%%"
+msgid "Downloading: %s"
+msgstr "Descargando: %s"
 
 #. • MSG_242
 msgid "Failed to download file."
@@ -1494,8 +1494,8 @@ msgid "NTFS compression"
 msgstr "Compresión NTFS"
 
 #. • MSG_261
-msgid "Writing image: %0.1f%% completed"
-msgstr "Escribiendo imagen: %0.1f%% completada"
+msgid "Writing image: %s"
+msgstr "Escribiendo imagen: %s"
 
 #. • MSG_262
 #.
@@ -1522,8 +1522,8 @@ msgid "Dual UEFI/BIOS mode"
 msgstr "Modo dual EFI/BIOS"
 
 #. • MSG_267
-msgid "Applying Windows image: %0.1f%% completed"
-msgstr "Aplicando imagen Windows: %0.1f%% completado"
+msgid "Applying Windows image: %s"
+msgstr "Aplicando imagen Windows: %s"
 
 #. • MSG_268
 msgid "Applying Windows image..."
@@ -1538,8 +1538,8 @@ msgid "USB debug"
 msgstr "Depuración USB"
 
 #. • MSG_271
-msgid "Computing image checksums: %0.1f%% completed"
-msgstr "Calculando checksums de la imagen: %0.1f%% completado"
+msgid "Computing image checksums: %s"
+msgstr "Calculando checksums de la imagen: %s"
 
 #. • MSG_272
 msgid "Compute the MD5, SHA1 and SHA256 checksums for the selected image"
@@ -1620,8 +1620,8 @@ msgstr ""
 "¿Está seguro que desea ejecutar este fichero?"
 
 #. • MSG_286
-msgid "Zeroing drive: %0.1f%% completed"
-msgstr "Borrando a ceros la unidad: %0.1f%% completado"
+msgid "Zeroing drive: %s"
+msgstr "Borrando a ceros la unidad: %s"
 
 #. • MSG_287
 msgid "Detection of non-USB removable drives"
@@ -1725,5 +1725,5 @@ msgstr "Use esta opción para indicar si desea usar este dispositivo para instal
 #.
 #. You can see this status message by pressing <Ctrl>-<Alt>-<Z> and then selecting START.
 #. It's the same as MSG_286 but with a process that *may* be faster, hence the name.
-msgid "Fast-zeroing drive: %0.1f%% completed"
-msgstr "Borrando a ceros la unidad de forma rápida: %0.1f%% completado"
+msgid "Fast-zeroing drive: %s"
+msgstr "Borrando a ceros la unidad de forma rápida: %s"

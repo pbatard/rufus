@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 3.5\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2019-03-24 23:31+0900\n"
-"PO-Revision-Date: 2019-03-25 16:15+0000\n"
+"POT-Creation-Date: 2020-04-17 12:18+0100\n"
+"PO-Revision-Date: 2020-04-17 12:20+0100\n"
 "Language: ja_JP\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Rufus-LCID: 0x0411\n"
 "Last-Translator: \n"
 "Language-Team: \n"
-"X-Generator: Poedit 2.2.1\n"
+"X-Generator: Poedit 2.3\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -582,7 +582,6 @@ msgstr ""
 "注意: 新しいファイルは現在のフォルダーにダウンロードされます。すでに “%s” のファイルがある場合は自動的に再利用します。"
 
 #. • MSG_085
-#, fuzzy
 msgid "Downloading %s"
 msgstr "%s をダウンロード中"
 
@@ -875,7 +874,6 @@ msgstr ""
 "この変更が必要な理由については、下の [詳細情報] から確認してください。"
 
 #. • MSG_130
-#, fuzzy
 msgid "Windows image selection"
 msgstr "Windows イメージの選択"
 
@@ -906,7 +904,6 @@ msgstr ""
 "“WppRecorder.sys” は Microsoft の著作権で保護されたファイルであり、アプリケーションにファイルのコピーを合法的に埋め込めないため、Rufus が自動的にこの不具合を修正することはできません。"
 
 #. • MSG_134
-#, fuzzy
 msgid ""
 "Because MBR has been selected for the partition scheme, Rufus can only create a partition up to 2 TB on this media, which will leave %s of disk space unavailable.\n"
 "\n"
@@ -917,42 +914,34 @@ msgstr ""
 "続けますか?"
 
 #. • MSG_135
-#, fuzzy
 msgid "Version"
 msgstr "バージョン"
 
 #. • MSG_136
-#, fuzzy
 msgid "Release"
 msgstr "リリース"
 
 #. • MSG_137
-#, fuzzy
 msgid "Edition"
 msgstr "エディション"
 
 #. • MSG_138
-#, fuzzy
 msgid "Language"
 msgstr "言語"
 
 #. • MSG_139
-#, fuzzy
 msgid "Architecture"
 msgstr "アーキテクチャ"
 
 #. • MSG_140
-#, fuzzy
 msgid "Continue"
 msgstr "続ける"
 
 #. • MSG_141
-#, fuzzy
 msgid "Back"
 msgstr "戻る"
 
 #. • MSG_142
-#, fuzzy
 msgid "Please wait..."
 msgstr "お待ちください..."
 
@@ -961,17 +950,14 @@ msgid "Download using a browser"
 msgstr "ブラウザーを使ってダウンロードする"
 
 #. • MSG_144
-#, fuzzy
 msgid "Temporarily banned by Microsoft for requesting too many downloads - Please try again later..."
 msgstr "リクエストが多すぎたため Microsoft が一時的にダウンロードを禁止しました - しばらくしてからもう一度お試しください..."
 
 #. • MSG_145
-#, fuzzy
 msgid "PowerShell 3.0 or later is required to run this script."
 msgstr "このスクリプトの実行には PowerShell 3.0 以降が必要です。"
 
 #. • MSG_146
-#, fuzzy
 msgid "Do you want to go online and download it?"
 msgstr "ネットワークに接続してダウンロードしますか?"
 
@@ -1052,7 +1038,6 @@ msgid "Method that will be used to make the drive bootable"
 msgstr "ドライブを起動可能にするために使用する方法です。"
 
 #. • MSG_165
-#, fuzzy
 msgid "Click to select or download an image..."
 msgstr "イメージを選択するか、イメージをダウンロードするにはここをクリックしてください。"
 
@@ -1306,9 +1291,9 @@ msgstr "%s を保存しました。"
 
 #. • MSG_217
 #.
-#. Formatting status (make sure you use a double % to print the percent sign)
-msgid "Formatting: %0.1f%% completed"
-msgstr "フォーマット中: %0.1f%% 完了"
+#. Formatting status
+msgid "Formatting: %s"
+msgstr "フォーマット中: %s"
 
 #. • MSG_218
 msgid "Creating file system: Task %d/%d completed"
@@ -1357,11 +1342,11 @@ msgid "Closing existing volume..."
 msgstr "ボリュームを閉じています..."
 
 #. • MSG_228
-msgid "Writing master boot record..."
+msgid "Writing Master Boot Record..."
 msgstr "マスター ブート レコードを書き込んでいます..."
 
 #. • MSG_229
-msgid "Writing partition boot record..."
+msgid "Writing Partition Boot Record..."
 msgstr "パーティション ブート レコードを書き込んでいます..."
 
 #. • MSG_230
@@ -1369,8 +1354,8 @@ msgid "Copying DOS files..."
 msgstr "DOS ファイルをコピー中..."
 
 #. • MSG_231
-msgid "Copying ISO files..."
-msgstr "ISO ファイルをコピー中..."
+msgid "Copying ISO files: %s"
+msgstr "ISO ファイルをコピー中: %s"
 
 #. • MSG_232
 msgid "Win7 EFI boot setup (This may take a while)..."
@@ -1425,8 +1410,8 @@ msgstr ""
 "ダウンロードは削除されます。詳しくはログを確認してください。"
 
 #. • MSG_241
-msgid "Downloading: %0.1f%%"
-msgstr "ダウンロード中: %0.1f%%"
+msgid "Downloading: %s"
+msgstr "ダウンロード中: %s"
 
 #. • MSG_242
 msgid "Failed to download file."
@@ -1507,8 +1492,8 @@ msgid "NTFS compression"
 msgstr "NTFS 圧縮"
 
 #. • MSG_261
-msgid "Writing image: %0.1f%% completed"
-msgstr "イメージを書き込み中: %0.1f%% 完了"
+msgid "Writing image: %s"
+msgstr "イメージを書き込み中: %s"
 
 #. • MSG_262
 #.
@@ -1535,8 +1520,8 @@ msgid "Dual UEFI/BIOS mode"
 msgstr "デュアル UEFI/BIOS モード"
 
 #. • MSG_267
-msgid "Applying Windows image: %0.1f%% completed"
-msgstr "Windows イメージを適用中: %0.1f%% 完了"
+msgid "Applying Windows image: %s"
+msgstr "Windows イメージを適用中: %s"
 
 #. • MSG_268
 msgid "Applying Windows image..."
@@ -1551,8 +1536,8 @@ msgid "USB debug"
 msgstr "USB デバッグ"
 
 #. • MSG_271
-msgid "Computing image checksums: %0.1f%% completed"
-msgstr "イメージのチェックサムを計算中 : %0.1f%% 完了"
+msgid "Computing image checksums: %s"
+msgstr "イメージのチェックサムを計算中: %s"
 
 #. • MSG_272
 msgid "Compute the MD5, SHA1 and SHA256 checksums for the selected image"
@@ -1634,8 +1619,8 @@ msgstr ""
 "このファイルを実行しますか?"
 
 #. • MSG_286
-msgid "Zeroing drive: %0.1f%% completed"
-msgstr "“0” をドライブへ書き込み初期化中: %0.1f%% 完了"
+msgid "Zeroing drive: %s"
+msgstr "“0” をドライブへ書き込み初期化中: %s"
 
 #. • MSG_287
 msgid "Detection of non-USB removable drives"
@@ -1739,5 +1724,5 @@ msgstr "このデバイスを使用して別のディスクに Windows をイン
 #.
 #. You can see this status message by pressing <Ctrl>-<Alt>-<Z> and then selecting START.
 #. It's the same as MSG_286 but with a process that *may* be faster, hence the name.
-msgid "Fast-zeroing drive: %0.1f%% completed"
-msgstr "ドライブを高速完全消去中: %0.1f%% 完了"
+msgid "Fast-zeroing drive: %s"
+msgstr "ドライブを高速完全消去中: %s"

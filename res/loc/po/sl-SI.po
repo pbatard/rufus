@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 3.5\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2019-03-25 19:50+0100\n"
-"PO-Revision-Date: 2019-03-25 19:53+0000\n"
+"POT-Creation-Date: 2020-04-17 12:18+0100\n"
+"PO-Revision-Date: 2020-04-17 12:28+0100\n"
 "Language: sl_SI\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Rufus-LCID: 0x0424\n"
 "Last-Translator: \n"
 "Language-Team: \n"
-"X-Generator: Poedit 2.2.1\n"
+"X-Generator: Poedit 2.3\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -545,7 +545,7 @@ msgstr ""
 "\n"
 "Odvisno od hitrosti naprave to lahko traja veliko časa, še posebej za velike datoteke.\n"
 "\n"
-"Priporočamo vam, da počakate, da Windows opravi svoje, da se izognete poškodbi podatkov. Če pa se čakanja naveličate, lahko napravo kar izvlečete…"
+"Priporočamo vam, da počakate, da Windows opravi svoje, da se izognete poškodbi podatkov. Če pa se čakanja naveličate, lahko napravo kar izvlečete..."
 
 #. • MSG_081
 msgid "Unsupported image"
@@ -553,7 +553,7 @@ msgstr "Nepodprta slika"
 
 #. • MSG_082
 msgid "This image is either non-bootable, or it uses a boot or compression method that is not supported by Rufus..."
-msgstr "Ta slika ni zagonska ali pa Rufus ne podpira njenega načina zagona ali metode stiskanja.Ta ISO očitno ne uporablja nobenega izmed njih…"
+msgstr "Ta slika ni zagonska ali pa Rufus ne podpira njenega načina zagona ali metode stiskanja.Ta ISO očitno ne uporablja nobenega izmed njih..."
 
 #. • MSG_083
 msgid "Replace %s?"
@@ -942,7 +942,7 @@ msgstr "Nazaj"
 
 #. • MSG_142
 msgid "Please wait..."
-msgstr "Prosim, počakajte…"
+msgstr "Prosim, počakajte..."
 
 #. • MSG_143
 msgid "Download using a browser"
@@ -950,7 +950,7 @@ msgstr "Prenesi z brskalnikom"
 
 #. • MSG_144
 msgid "Temporarily banned by Microsoft for requesting too many downloads - Please try again later..."
-msgstr "Prenos trenutno ni mogoč zaradi preveč poskusov prenosa - prosim, poskusite znova pozneje…"
+msgstr "Prenos trenutno ni mogoč zaradi preveč poskusov prenosa - prosim, poskusite znova pozneje..."
 
 #. • MSG_145
 msgid "PowerShell 3.0 or later is required to run this script."
@@ -962,7 +962,7 @@ msgstr "Ali ga želite prenesti?"
 
 #. • MSG_148
 msgid "Running download script..."
-msgstr "Izvajam skripto za prenos…"
+msgstr "Izvajam skripto za prenos..."
 
 #. • MSG_149
 msgid "Download ISO Image"
@@ -1036,7 +1036,7 @@ msgstr "Metoda, ki bo uporabljena, da bo s pogona mogoče zagnati računalnik"
 
 #. • MSG_165
 msgid "Click to select or download an image..."
-msgstr "Kliknite, da izberete sliko…"
+msgstr "Kliknite, da izberete sliko..."
 
 #. • MSG_166
 msgid "Check this box to allow the display of international labels and set a device icon (creates an autorun.inf)"
@@ -1083,7 +1083,7 @@ msgstr "Podpis prenesene datoteke ni pristen"
 
 #. • MSG_173
 msgid "Click to select..."
-msgstr "Kliknite, da izberete…"
+msgstr "Kliknite, da izberete..."
 
 #. • MSG_174
 msgid "Rufus - The Reliable USB Formatting Utility"
@@ -1205,11 +1205,11 @@ msgstr "'Windows To Go' je lahko nameščen le na napravo s particijsko shemo GP
 
 #. • MSG_201
 msgid "Cancelling - Please wait..."
-msgstr "Preklicujem - prosim, počakajte…"
+msgstr "Preklicujem - prosim, počakajte..."
 
 #. • MSG_202
 msgid "Scanning image..."
-msgstr "Preiskujem sliko…"
+msgstr "Preiskujem sliko..."
 
 #. • MSG_203
 msgid "Failed to scan image"
@@ -1268,7 +1268,7 @@ msgstr "NI USPELO"
 #.
 #. Used when a new update has been downloaded and launched
 msgid "Launching new application..."
-msgstr "Zaganjam novo aplikacijo…"
+msgstr "Zaganjam novo aplikacijo..."
 
 #. • MSG_214
 msgid "Failed to launch new application"
@@ -1288,9 +1288,9 @@ msgstr "Shranil %s"
 
 #. • MSG_217
 #.
-#. Formatting status (make sure you use a double % to print the percent sign)
-msgid "Formatting: %0.1f%% completed"
-msgstr "Formatiranje: %0.1f%% končano"
+#. Formatting status
+msgid "Formatting: %s"
+msgstr "Formatiranje: %s"
 
 #. • MSG_218
 msgid "Creating file system: Task %d/%d completed"
@@ -1306,68 +1306,68 @@ msgstr "Popravki za NTFS: %d%% končano"
 #. Example: "Formatting (UDF) - Estimated duration 3:21..."
 #. If "estimated duration" is too long, just use "estimated" or an abbreviation
 msgid "Formatting (%s) - estimated duration %d:%02d..."
-msgstr "Formatiranje (%s) - predviden čas trajanja %d:%02d…"
+msgstr "Formatiranje (%s) - predviden čas trajanja %d:%02d..."
 
 #. • MSG_221
 msgid "Setting Label (This may take a while)..."
-msgstr "Nastavljam oznako (to utegne trajati nekaj časa)…"
+msgstr "Nastavljam oznako (to utegne trajati nekaj časa)..."
 
 #. • MSG_222
 #.
 #. Example: "Formatting (FAT32)..."
 msgid "Formatting (%s)..."
-msgstr "Formatiranje (%s)…"
+msgstr "Formatiranje (%s)..."
 
 #. • MSG_223
 msgid "NTFS Fixup (Checkdisk)..."
-msgstr "Popravki za NTFS (chkdsk)…"
+msgstr "Popravki za NTFS (chkdsk)..."
 
 #. • MSG_224
 msgid "Clearing MBR/PBR/GPT structures..."
-msgstr "Brišem strukture MBR/PBR/GPT…"
+msgstr "Brišem strukture MBR/PBR/GPT..."
 
 #. • MSG_225
 msgid "Requesting disk access..."
-msgstr "Zahtevam dostop do diska…"
+msgstr "Zahtevam dostop do diska..."
 
 #. • MSG_226
 msgid "Analyzing existing boot records..."
-msgstr "Pregledujem obstoječe zagonske vnose…"
+msgstr "Pregledujem obstoječe zagonske vnose..."
 
 #. • MSG_227
 msgid "Closing existing volume..."
-msgstr "Zapiram obstoječi nosilec…"
+msgstr "Zapiram obstoječi nosilec..."
 
 #. • MSG_228
-msgid "Writing master boot record..."
-msgstr "Zapisujem glavni zagonski sektor (MBR)…"
+msgid "Writing Master Boot Record..."
+msgstr "Zapisujem glavni zagonski sektor (MBR)..."
 
 #. • MSG_229
-msgid "Writing partition boot record..."
-msgstr "Zapisujem particijske podatke…"
+msgid "Writing Partition Boot Record..."
+msgstr "Zapisujem particijske podatke..."
 
 #. • MSG_230
 msgid "Copying DOS files..."
-msgstr "Kopiram DOS datoteke…"
+msgstr "Kopiram DOS datoteke..."
 
 #. • MSG_231
-msgid "Copying ISO files..."
-msgstr "Kopiram ISO datoteke…"
+msgid "Copying ISO files: %s"
+msgstr "Kopiram ISO datoteke: %s"
 
 #. • MSG_232
 msgid "Win7 EFI boot setup (This may take a while)..."
-msgstr "Pripravljam pogon za zagon Windows 7 na EFI (to lahko traja)…"
+msgstr "Pripravljam pogon za zagon Windows 7 na EFI (to lahko traja)..."
 
 #. • MSG_233
 msgid "Finalizing, please wait..."
-msgstr "Zaključujem; prosim, počakajte…"
+msgstr "Zaključujem; prosim, počakajte..."
 
 #. • MSG_234
 #.
 #. Takes a Syslinux version as parameter.
 #. Example: "Installing Syslinux v5.10..."
 msgid "Installing Syslinux %s..."
-msgstr "Nameščam Syslinux %s…"
+msgstr "Nameščam Syslinux %s..."
 
 #. • MSG_235
 #.
@@ -1388,11 +1388,11 @@ msgstr "Slabi bloki: testiram z vzorcem 0x%02X"
 #.
 #. Example: "Partitioning (MBR)..."
 msgid "Partitioning (%s)..."
-msgstr "Ustvarjam particije (%s)…"
+msgstr "Ustvarjam particije (%s)..."
 
 #. • MSG_239
 msgid "Deleting partitions..."
-msgstr "Brišem particije…"
+msgstr "Brišem particije..."
 
 #. • MSG_240
 #.
@@ -1407,8 +1407,8 @@ msgstr ""
 "Prenesena datoteka bo izbrisana. Prosim, preverite zapisnik za več podrobnosti."
 
 #. • MSG_241
-msgid "Downloading: %0.1f%%"
-msgstr "Prenos: %0.1f%%"
+msgid "Downloading: %s"
+msgstr "Prenos: %s"
 
 #. • MSG_242
 msgid "Failed to download file."
@@ -1416,7 +1416,7 @@ msgstr "Ni mogoče prenesti datoteke."
 
 #. • MSG_243
 msgid "Checking for Rufus updates..."
-msgstr "Preverjam za posodobitve Rufusa…"
+msgstr "Preverjam za posodobitve Rufusa..."
 
 #. • MSG_244
 msgid "Updates: Unable to connect to the internet"
@@ -1489,8 +1489,8 @@ msgid "NTFS compression"
 msgstr "NTFS stiskanje"
 
 #. • MSG_261
-msgid "Writing image: %0.1f%% completed"
-msgstr "Zapisujem sliko: %0.1f%%"
+msgid "Writing image: %s"
+msgstr "Zapisujem sliko: %s"
 
 #. • MSG_262
 #.
@@ -1517,12 +1517,12 @@ msgid "Dual UEFI/BIOS mode"
 msgstr "Dvojni način BIOS/UEFI"
 
 #. • MSG_267
-msgid "Applying Windows image: %0.1f%% completed"
-msgstr "Nameščam sliko za Windows: %0.1f%%"
+msgid "Applying Windows image: %s"
+msgstr "Nameščam sliko za Windows: %s"
 
 #. • MSG_268
 msgid "Applying Windows image..."
-msgstr "Nameščam sliko za Windows…"
+msgstr "Nameščam sliko za Windows..."
 
 #. • MSG_269
 msgid "Preserve timestamps"
@@ -1533,8 +1533,8 @@ msgid "USB debug"
 msgstr "Razhroščevanje USB"
 
 #. • MSG_271
-msgid "Computing image checksums: %0.1f%% completed"
-msgstr "Računam zgoščene vrednosti: %0.1f%%"
+msgid "Computing image checksums: %s"
+msgstr "Računam zgoščene vrednosti: %s"
 
 #. • MSG_272
 msgid "Compute the MD5, SHA1 and SHA256 checksums for the selected image"
@@ -1578,7 +1578,7 @@ msgstr "Zapiši kot %s"
 
 #. • MSG_278
 msgid "Checking for conflicting processes..."
-msgstr "Preverjam, ali se izvajajo konfliktni procesi…"
+msgstr "Preverjam, ali se izvajajo konfliktni procesi..."
 
 #. • MSG_279
 msgid "Non bootable"
@@ -1615,8 +1615,8 @@ msgstr ""
 "Ali ste prepričani, da jo želite zagnati?"
 
 #. • MSG_286
-msgid "Zeroing drive: %0.1f%% completed"
-msgstr "Zapolnjujem nosilec z ničlami: %0.1f%%"
+msgid "Zeroing drive: %s"
+msgstr "Zapolnjujem nosilec z ničlami: %s"
 
 #. • MSG_287
 msgid "Detection of non-USB removable drives"
@@ -1720,5 +1720,5 @@ msgstr "Tu izberete, ali želite uporabiti to napravo, da bi namestili operacijs
 #.
 #. You can see this status message by pressing <Ctrl>-<Alt>-<Z> and then selecting START.
 #. It's the same as MSG_286 but with a process that *may* be faster, hence the name.
-msgid "Fast-zeroing drive: %0.1f%% completed"
-msgstr "Hitro zapolnjujem nosilec z ničlami: %0.1f%%"
+msgid "Fast-zeroing drive: %s"
+msgstr "Hitro zapolnjujem nosilec z ničlami: %s"

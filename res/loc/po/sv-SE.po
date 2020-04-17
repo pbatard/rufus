@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 3.5\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2019-03-14 12:46+0000\n"
-"PO-Revision-Date: 2019-03-14 12:51+0000\n"
+"POT-Creation-Date: 2020-04-17 12:18+0100\n"
+"PO-Revision-Date: 2020-04-17 12:29+0100\n"
 "Language: sv_SE\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Rufus-LCID: 0x041d, 0x081d\n"
 "Last-Translator: \n"
 "Language-Team: \n"
-"X-Generator: Poedit 2.2.1\n"
+"X-Generator: Poedit 2.3\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -1289,9 +1289,9 @@ msgstr "Sparad %s"
 
 #. • MSG_217
 #.
-#. Formatting status (make sure you use a double % to print the percent sign)
-msgid "Formatting: %0.1f%% completed"
-msgstr "Formaterar: %0.1f%% klart"
+#. Formatting status
+msgid "Formatting: %s"
+msgstr "Formaterar: %s"
 
 #. • MSG_218
 msgid "Creating file system: Task %d/%d completed"
@@ -1340,11 +1340,11 @@ msgid "Closing existing volume..."
 msgstr "Stänger nuvarande volym..."
 
 #. • MSG_228
-msgid "Writing master boot record..."
+msgid "Writing Master Boot Record..."
 msgstr "Skriver huvudstartsektor..."
 
 #. • MSG_229
-msgid "Writing partition boot record..."
+msgid "Writing Partition Boot Record..."
 msgstr "Skriver partitionsstartsektor..."
 
 #. • MSG_230
@@ -1352,8 +1352,8 @@ msgid "Copying DOS files..."
 msgstr "Kopierar DOS-filer..."
 
 #. • MSG_231
-msgid "Copying ISO files..."
-msgstr "Kopierar ISO-filer..."
+msgid "Copying ISO files: %s"
+msgstr "Kopierar ISO-filer: %s"
 
 #. • MSG_232
 msgid "Win7 EFI boot setup (This may take a while)..."
@@ -1408,8 +1408,8 @@ msgstr ""
 "Nerladdad fil kommer att tas bort. Kontrollera loggfilen för mer detaljerad information."
 
 #. • MSG_241
-msgid "Downloading: %0.1f%%"
-msgstr "Laddar ner: %0.1f%%"
+msgid "Downloading: %s"
+msgstr "Laddar ner: %s"
 
 #. • MSG_242
 msgid "Failed to download file."
@@ -1490,8 +1490,8 @@ msgid "NTFS compression"
 msgstr "NTFS-kompressionen är"
 
 #. • MSG_261
-msgid "Writing image: %0.1f%% completed"
-msgstr "Skriver avbild: %0.1f%% klart"
+msgid "Writing image: %s"
+msgstr "Skriver avbild: %s"
 
 #. • MSG_262
 #.
@@ -1518,8 +1518,8 @@ msgid "Dual UEFI/BIOS mode"
 msgstr "Dubbla UEFI/BIOS-läget är"
 
 #. • MSG_267
-msgid "Applying Windows image: %0.1f%% completed"
-msgstr "Tillämpar Windows-avbild: %0.1f%% klart"
+msgid "Applying Windows image: %s"
+msgstr "Tillämpar Windows-avbild: %s"
 
 #. • MSG_268
 msgid "Applying Windows image..."
@@ -1534,8 +1534,8 @@ msgid "USB debug"
 msgstr "USB-felsökning är"
 
 #. • MSG_271
-msgid "Computing image checksums: %0.1f%% completed"
-msgstr "Beräknar kontrollsummor för avbilden: %0.1f%% klart"
+msgid "Computing image checksums: %s"
+msgstr "Beräknar kontrollsummor för avbilden: %s"
 
 #. • MSG_272
 msgid "Compute the MD5, SHA1 and SHA256 checksums for the selected image"
@@ -1616,8 +1616,8 @@ msgstr ""
 "Är du säker på att du vill köra filen?"
 
 #. • MSG_286
-msgid "Zeroing drive: %0.1f%% completed"
-msgstr "Nollställer enheten: %0.1f%% klart"
+msgid "Zeroing drive: %s"
+msgstr "Nollställer enheten: %s"
 
 #. • MSG_287
 msgid "Detection of non-USB removable drives"
@@ -1721,5 +1721,5 @@ msgstr "Använd det här alternativet om du vill använda den här enheten för 
 #.
 #. You can see this status message by pressing <Ctrl>-<Alt>-<Z> and then selecting START.
 #. It's the same as MSG_286 but with a process that *may* be faster, hence the name.
-msgid "Fast-zeroing drive: %0.1f%% completed"
-msgstr "Snabbnollställer enheten: %0.1f%% klart"
+msgid "Fast-zeroing drive: %s"
+msgstr "Snabbnollställer enheten: %s"

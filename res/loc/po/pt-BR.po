@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 3.5\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2019-03-16 12:12+0000\n"
-"PO-Revision-Date: 2019-03-16 12:22+0000\n"
+"POT-Creation-Date: 2020-04-17 12:18+0100\n"
+"PO-Revision-Date: 2020-04-17 12:23+0100\n"
 "Language: pt_BR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Rufus-LCID: 0x0416\n"
 "Last-Translator: \n"
 "Language-Team: \n"
-"X-Generator: Poedit 2.2.1\n"
+"X-Generator: Poedit 2.3\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -659,7 +659,7 @@ msgstr ""
 "\n"
 "Você ainda deseja continuar?\n"
 "\n"
-"Nota: O atributo 'FIXED/REMOVABLE' é uma propriedade do hardware que só pode ser alterada utilizando-se ferramentas personalizadas do fabricante do drive. No entanto, essas ferramentas QUASE NUNCA são disponibilizadas para o público…"
+"Nota: O atributo 'FIXED/REMOVABLE' é uma propriedade do hardware que só pode ser alterada utilizando-se ferramentas personalizadas do fabricante do drive. No entanto, essas ferramentas QUASE NUNCA são disponibilizadas para o público..."
 
 #. • MSG_099
 msgid "Filesystem limitation"
@@ -1061,7 +1061,7 @@ msgid ""
 "This can improve boot detection for older BIOSes."
 msgstr ""
 "Criar uma partição oculta extra e tentar alinhar os limites das partições.\n"
-"Isso pode melhorar a detecção de inicialização para BIOSs mais antigos"
+"Isso pode melhorar a detecção de inicialização para BIOSs mais antigos."
 
 #. • MSG_170
 msgid "Enable the listing of USB Hard Drive enclosures. USE AT YOUR OWN RISKS!!!"
@@ -1084,7 +1084,7 @@ msgstr "Assinatura do download inválida"
 
 #. • MSG_173
 msgid "Click to select..."
-msgstr "Clique para selecionar…"
+msgstr "Clique para selecionar..."
 
 #. • MSG_174
 msgid "Rufus - The Reliable USB Formatting Utility"
@@ -1289,9 +1289,9 @@ msgstr "%s salvo"
 
 #. • MSG_217
 #.
-#. Formatting status (make sure you use a double % to print the percent sign)
-msgid "Formatting: %0.1f%% completed"
-msgstr "Formatando: %0.1f%% completado(s)"
+#. Formatting status
+msgid "Formatting: %s"
+msgstr "Formatando: %s"
 
 #. • MSG_218
 msgid "Creating file system: Task %d/%d completed"
@@ -1311,7 +1311,7 @@ msgstr "Formatando (%s) - duração estimada %d:%02d..."
 
 #. • MSG_221
 msgid "Setting Label (This may take a while)..."
-msgstr "Atribuindo o nome do volume (pode demorar um pouco)…"
+msgstr "Atribuindo o nome do volume (pode demorar um pouco)..."
 
 #. • MSG_222
 #.
@@ -1340,11 +1340,11 @@ msgid "Closing existing volume..."
 msgstr "Fechando o volume existente..."
 
 #. • MSG_228
-msgid "Writing master boot record..."
+msgid "Writing Master Boot Record..."
 msgstr "Escrevendo o registro mestre de inicialização (Master Boot Record)..."
 
 #. • MSG_229
-msgid "Writing partition boot record..."
+msgid "Writing Partition Boot Record..."
 msgstr "Escrevendo o registro de inicialização de partição (Partition Boot Record)..."
 
 #. • MSG_230
@@ -1352,8 +1352,8 @@ msgid "Copying DOS files..."
 msgstr "Copiando arquivos do DOS..."
 
 #. • MSG_231
-msgid "Copying ISO files..."
-msgstr "Copiando arquivos da ISO..."
+msgid "Copying ISO files: %s"
+msgstr "Copiando arquivos da ISO: %s"
 
 #. • MSG_232
 msgid "Win7 EFI boot setup (This may take a while)..."
@@ -1361,14 +1361,14 @@ msgstr "Configuração de inicialização EFI do Win7 (pode demorar um pouco)...
 
 #. • MSG_233
 msgid "Finalizing, please wait..."
-msgstr "Finalizando, por favor aguarde…"
+msgstr "Finalizando, por favor aguarde..."
 
 #. • MSG_234
 #.
 #. Takes a Syslinux version as parameter.
 #. Example: "Installing Syslinux v5.10..."
 msgid "Installing Syslinux %s..."
-msgstr "Instalando Syslinux %d…"
+msgstr "Instalando Syslinux %d..."
 
 #. • MSG_235
 #.
@@ -1393,7 +1393,7 @@ msgstr "Particionando (%s)..."
 
 #. • MSG_239
 msgid "Deleting partitions..."
-msgstr "Apagando partições…"
+msgstr "Apagando partições..."
 
 #. • MSG_240
 #.
@@ -1408,8 +1408,8 @@ msgstr ""
 "O download será excluído. Verifique o registro para obter mais detalhes."
 
 #. • MSG_241
-msgid "Downloading: %0.1f%%"
-msgstr "Baixando: %0.1f%%"
+msgid "Downloading: %s"
+msgstr "Baixando: %s"
 
 #. • MSG_242
 msgid "Failed to download file."
@@ -1490,8 +1490,8 @@ msgid "NTFS compression"
 msgstr "Compressão do NTFS"
 
 #. • MSG_261
-msgid "Writing image: %0.1f%% completed"
-msgstr "Escrevendo imagem: %0.1f%% completado(s)"
+msgid "Writing image: %s"
+msgstr "Escrevendo imagem: %s"
 
 #. • MSG_262
 #.
@@ -1518,8 +1518,8 @@ msgid "Dual UEFI/BIOS mode"
 msgstr "Modo dual UEFI/BIOS"
 
 #. • MSG_267
-msgid "Applying Windows image: %0.1f%% completed"
-msgstr "Aplicando imagem do Windows: %0.1f%% completado(s)"
+msgid "Applying Windows image: %s"
+msgstr "Aplicando imagem do Windows: %s"
 
 #. • MSG_268
 msgid "Applying Windows image..."
@@ -1534,8 +1534,8 @@ msgid "USB debug"
 msgstr "Depuração do USB"
 
 #. • MSG_271
-msgid "Computing image checksums: %0.1f%% completed"
-msgstr "Calculando as somas de verificação da imagem: %0.1f%% completado(s)"
+msgid "Computing image checksums: %s"
+msgstr "Calculando as somas de verificação da imagem: %s"
 
 #. • MSG_272
 msgid "Compute the MD5, SHA1 and SHA256 checksums for the selected image"
@@ -1616,8 +1616,8 @@ msgstr ""
 "Você tem certeza de que deseja executar esse arquivo?"
 
 #. • MSG_286
-msgid "Zeroing drive: %0.1f%% completed"
-msgstr "Zerando o drive: %0.1f%% completado(s)"
+msgid "Zeroing drive: %s"
+msgstr "Zerando o drive: %s"
 
 #. • MSG_287
 msgid "Detection of non-USB removable drives"
@@ -1721,5 +1721,5 @@ msgstr "Use esta opção caso queira instalar o Windows neste dispositivo ou em 
 #.
 #. You can see this status message by pressing <Ctrl>-<Alt>-<Z> and then selecting START.
 #. It's the same as MSG_286 but with a process that *may* be faster, hence the name.
-msgid "Fast-zeroing drive: %0.1f%% completed"
-msgstr "Modo expresso de zerar o disco: %0.1f%% completo"
+msgid "Fast-zeroing drive: %s"
+msgstr "Modo expresso de zerar o disco: %s"

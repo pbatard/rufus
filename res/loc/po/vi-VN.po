@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 3.5\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2019-03-16 12:24+0000\n"
-"PO-Revision-Date: 2019-03-16 12:24+0000\n"
+"POT-Creation-Date: 2020-04-17 12:19+0100\n"
+"PO-Revision-Date: 2020-04-17 12:30+0100\n"
 "Language: vi_VN\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Rufus-LCID: 0x042A\n"
 "Last-Translator: \n"
 "Language-Team: \n"
-"X-Generator: Poedit 2.2.1\n"
+"X-Generator: Poedit 2.3\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -1288,9 +1288,9 @@ msgstr "Đã lưu %s"
 
 #. • MSG_217
 #.
-#. Formatting status (make sure you use a double % to print the percent sign)
-msgid "Formatting: %0.1f%% completed"
-msgstr "Đang định dạng: %0.1f%% đã hoàn thành"
+#. Formatting status
+msgid "Formatting: %s"
+msgstr "Đang định dạng: %s"
 
 #. • MSG_218
 msgid "Creating file system: Task %d/%d completed"
@@ -1339,11 +1339,11 @@ msgid "Closing existing volume..."
 msgstr "Đang đóng ổ đang có..."
 
 #. • MSG_228
-msgid "Writing master boot record..."
+msgid "Writing Master Boot Record..."
 msgstr "Đang ghi bản ghi khởi động chính..."
 
 #. • MSG_229
-msgid "Writing partition boot record..."
+msgid "Writing Partition Boot Record..."
 msgstr "Đang ghi bản ghi khởi động phân vùng..."
 
 #. • MSG_230
@@ -1351,8 +1351,8 @@ msgid "Copying DOS files..."
 msgstr "Đang chép các tập tin DOS..."
 
 #. • MSG_231
-msgid "Copying ISO files..."
-msgstr "Đang chép các tập tin ISO..."
+msgid "Copying ISO files: %s"
+msgstr "Đang chép các tập tin ISO: %s"
 
 #. • MSG_232
 msgid "Win7 EFI boot setup (This may take a while)..."
@@ -1407,8 +1407,8 @@ msgstr ""
 "File tải sẽ bị xóa. Kiểm tra log để biết thêm thông tin."
 
 #. • MSG_241
-msgid "Downloading: %0.1f%%"
-msgstr "Đang tải xuống: %0.1f%%"
+msgid "Downloading: %s"
+msgstr "Đang tải xuống: %s"
 
 #. • MSG_242
 msgid "Failed to download file."
@@ -1489,8 +1489,8 @@ msgid "NTFS compression"
 msgstr "Nén NTFS"
 
 #. • MSG_261
-msgid "Writing image: %0.1f%% completed"
-msgstr "Ghi ảnh: %0.1f%% đã hoàn thành"
+msgid "Writing image: %s"
+msgstr "Ghi ảnh: %s"
 
 #. • MSG_262
 #.
@@ -1517,8 +1517,8 @@ msgid "Dual UEFI/BIOS mode"
 msgstr "Chế độ Dual UEFI/BIOS"
 
 #. • MSG_267
-msgid "Applying Windows image: %0.1f%% completed"
-msgstr "Đang áp dụng ảnh Windows: %0.1f%% đã hoàn thành"
+msgid "Applying Windows image: %s"
+msgstr "Đang áp dụng ảnh Windows: %s"
 
 #. • MSG_268
 msgid "Applying Windows image..."
@@ -1533,8 +1533,8 @@ msgid "USB debug"
 msgstr "Gỡ rối USB"
 
 #. • MSG_271
-msgid "Computing image checksums: %0.1f%% completed"
-msgstr "Đang tính toán kiểm tổng ảnh: %0.1f%% đã hoàn thành"
+msgid "Computing image checksums: %s"
+msgstr "Đang tính toán kiểm tổng ảnh: %s"
 
 #. • MSG_272
 msgid "Compute the MD5, SHA1 and SHA256 checksums for the selected image"
@@ -1615,8 +1615,8 @@ msgstr ""
 "Bạn chắc muốn chạy tập tin này?"
 
 #. • MSG_286
-msgid "Zeroing drive: %0.1f%% completed"
-msgstr "Đang xóa ổ đĩa: %0.1f%% đã hoàn thành"
+msgid "Zeroing drive: %s"
+msgstr "Đang xóa ổ đĩa: %s"
 
 #. • MSG_287
 msgid "Detection of non-USB removable drives"
@@ -1720,5 +1720,5 @@ msgstr "Sử dụng tùy chọn này để chỉ thị rằng bạn muốn sử 
 #.
 #. You can see this status message by pressing <Ctrl>-<Alt>-<Z> and then selecting START.
 #. It's the same as MSG_286 but with a process that *may* be faster, hence the name.
-msgid "Fast-zeroing drive: %0.1f%% completed"
-msgstr "Đang xóa nhanh ổ đĩa: %0.1f%% đã hoàn thành"
+msgid "Fast-zeroing drive: %s"
+msgstr "Đang xóa nhanh ổ đĩa: %s"

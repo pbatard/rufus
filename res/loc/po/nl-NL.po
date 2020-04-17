@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 3.5\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2019-03-14 12:06+0100\n"
-"PO-Revision-Date: 2019-03-14 12:59+0000\n"
+"POT-Creation-Date: 2020-04-17 12:17+0100\n"
+"PO-Revision-Date: 2020-04-17 12:21+0100\n"
 "Language: nl_NL\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Rufus-LCID: 0x0413, 0x0813\n"
 "Last-Translator: \n"
 "Language-Team: \n"
-"X-Generator: Poedit 2.2.1\n"
+"X-Generator: Poedit 2.3\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -288,7 +288,7 @@ msgstr ""
 #.
 #. *Short* version of the kilobyte size suffix
 msgid "KB"
-msgstr "kB"
+msgstr ""
 
 #. • MSG_022
 #.
@@ -918,7 +918,7 @@ msgstr "Versie"
 
 #. • MSG_136
 msgid "Release"
-msgstr "Release"
+msgstr ""
 
 #. • MSG_137
 msgid "Edition"
@@ -1288,9 +1288,9 @@ msgstr "%s opgeslagen"
 
 #. • MSG_217
 #.
-#. Formatting status (make sure you use a double % to print the percent sign)
-msgid "Formatting: %0.1f%% completed"
-msgstr "Formatteren: %0.1f%% voltooid"
+#. Formatting status
+msgid "Formatting: %s"
+msgstr "Formatteren: %s"
 
 #. • MSG_218
 msgid "Creating file system: Task %d/%d completed"
@@ -1339,20 +1339,20 @@ msgid "Closing existing volume..."
 msgstr "Bestaand volume afsluiten..."
 
 #. • MSG_228
-msgid "Writing master boot record..."
-msgstr "Master boot record schrijven..."
+msgid "Writing Master Boot Record..."
+msgstr "Master Boot Record schrijven..."
 
 #. • MSG_229
-msgid "Writing partition boot record..."
-msgstr "Partitie-boot-record schrijven..."
+msgid "Writing Partition Boot Record..."
+msgstr "Partitie Boot Record schrijven..."
 
 #. • MSG_230
 msgid "Copying DOS files..."
 msgstr "DOS-bestanden kopiëren..."
 
 #. • MSG_231
-msgid "Copying ISO files..."
-msgstr "ISO-bestanden kopiëren..."
+msgid "Copying ISO files: %s"
+msgstr "ISO-bestanden kopiëren: %s"
 
 #. • MSG_232
 msgid "Win7 EFI boot setup (This may take a while)..."
@@ -1407,8 +1407,8 @@ msgstr ""
 "De download zal verwijderd worden. Controleer het logboek voor meer details."
 
 #. • MSG_241
-msgid "Downloading: %0.1f%%"
-msgstr "Downloaden: %0.1f%%"
+msgid "Downloading: %s"
+msgstr "Downloaden: %s"
 
 #. • MSG_242
 msgid "Failed to download file."
@@ -1489,8 +1489,8 @@ msgid "NTFS compression"
 msgstr "NTFS-compressie"
 
 #. • MSG_261
-msgid "Writing image: %0.1f%% completed"
-msgstr "Image schrijven: %0.1f%% voltooid"
+msgid "Writing image: %s"
+msgstr "Image schrijven: %s"
 
 #. • MSG_262
 #.
@@ -1517,8 +1517,8 @@ msgid "Dual UEFI/BIOS mode"
 msgstr "Dubbele UEFI/BIOS-modus"
 
 #. • MSG_267
-msgid "Applying Windows image: %0.1f%% completed"
-msgstr "Windows-image toepassen: %0.1f%% voltooid"
+msgid "Applying Windows image: %s"
+msgstr "Windows-image toepassen: %s"
 
 #. • MSG_268
 msgid "Applying Windows image..."
@@ -1533,8 +1533,8 @@ msgid "USB debug"
 msgstr "USB-debug"
 
 #. • MSG_271
-msgid "Computing image checksums: %0.1f%% completed"
-msgstr "Image checksums berekenen: %0.1f%% voltooid"
+msgid "Computing image checksums: %s"
+msgstr "Image checksums berekenen: %s"
 
 #. • MSG_272
 msgid "Compute the MD5, SHA1 and SHA256 checksums for the selected image"
@@ -1615,8 +1615,8 @@ msgstr ""
 "Weet u zeker dat u dit bestand wilt uitvoeren?"
 
 #. • MSG_286
-msgid "Zeroing drive: %0.1f%% completed"
-msgstr "Nullen schrijven : %0.1f%% voltooid"
+msgid "Zeroing drive: %s"
+msgstr "Nullen schrijven : %s"
 
 #. • MSG_287
 msgid "Detection of non-USB removable drives"
@@ -1720,5 +1720,5 @@ msgstr "Gebruik deze optie om aan te geven of u dit apparaat wilt gebruiken om W
 #.
 #. You can see this status message by pressing <Ctrl>-<Alt>-<Z> and then selecting START.
 #. It's the same as MSG_286 but with a process that *may* be faster, hence the name.
-msgid "Fast-zeroing drive: %0.1f%% completed"
-msgstr "Snel nullen schrijven: %0.1f%% voltooid"
+msgid "Fast-zeroing drive: %s"
+msgstr "Snel nullen schrijven: %s"

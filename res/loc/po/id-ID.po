@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 3.5\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2019-03-20 23:40+0700\n"
-"PO-Revision-Date: 2019-03-20 17:16+0000\n"
+"POT-Creation-Date: 2020-04-17 12:18+0100\n"
+"PO-Revision-Date: 2020-04-17 12:20+0100\n"
 "Language: id_ID\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -11,9 +11,9 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Rufus-LanguageName: Indonesian (Bahasa Indonesia)\n"
 "X-Rufus-LCID: 0x0421\n"
-"Last-Translator: Arif Budiman <arifpedia@gmail.com>\n"
+"Last-Translator: \n"
 "Language-Team: \n"
-"X-Generator: Poedit 2.2.1\n"
+"X-Generator: Poedit 2.3\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -582,7 +582,6 @@ msgstr ""
 "Catatan: Berkas baru akan diunduh di direktori saat ini dan karena '%s' sudah ada disana, berkas tersebut akan digunakan kembali secara otomatis."
 
 #. • MSG_085
-#, fuzzy
 msgid "Downloading %s"
 msgstr "Mengunduh %s"
 
@@ -1036,7 +1035,6 @@ msgid "Method that will be used to make the drive bootable"
 msgstr "Metode yang akan digunakan untuk membuat perangkat bootable"
 
 #. • MSG_165
-#, fuzzy
 msgid "Click to select or download an image..."
 msgstr "Klik untuk memilih sebuah image..."
 
@@ -1290,9 +1288,9 @@ msgstr "Menyimpan %s"
 
 #. • MSG_217
 #.
-#. Formatting status (make sure you use a double % to print the percent sign)
-msgid "Formatting: %0.1f%% completed"
-msgstr "Memformat: %0.1f%% selesai"
+#. Formatting status
+msgid "Formatting: %s"
+msgstr "Memformat: %s"
 
 #. • MSG_218
 msgid "Creating file system: Task %d/%d completed"
@@ -1341,11 +1339,11 @@ msgid "Closing existing volume..."
 msgstr "Menutup volume yang ada..."
 
 #. • MSG_228
-msgid "Writing master boot record..."
-msgstr "Menulis master boot record..."
+msgid "Writing Master Boot Record..."
+msgstr "Menulis Master Boot Record..."
 
 #. • MSG_229
-msgid "Writing partition boot record..."
+msgid "Writing Partition Boot Record..."
 msgstr "Menulis boot record partisi..."
 
 #. • MSG_230
@@ -1353,8 +1351,8 @@ msgid "Copying DOS files..."
 msgstr "Menyalin berkas DOS..."
 
 #. • MSG_231
-msgid "Copying ISO files..."
-msgstr "Menyalin berkas ISO..."
+msgid "Copying ISO files: %s"
+msgstr "Menyalin berkas ISO: %s"
 
 #. • MSG_232
 msgid "Win7 EFI boot setup (This may take a while)..."
@@ -1409,8 +1407,8 @@ msgstr ""
 "Unduhan akan dihapus. Silakan periksa log untuk lebih rinci."
 
 #. • MSG_241
-msgid "Downloading: %0.1f%%"
-msgstr "Mengunduh: %0.1f%%"
+msgid "Downloading: %s"
+msgstr "Mengunduh: %s"
 
 #. • MSG_242
 msgid "Failed to download file."
@@ -1491,8 +1489,8 @@ msgid "NTFS compression"
 msgstr "Kompresi NTFS"
 
 #. • MSG_261
-msgid "Writing image: %0.1f%% completed"
-msgstr "Menulis image: %0.1f%% selesai"
+msgid "Writing image: %s"
+msgstr "Menulis image: %s"
 
 #. • MSG_262
 #.
@@ -1519,8 +1517,8 @@ msgid "Dual UEFI/BIOS mode"
 msgstr "Modus Dual UEFI/BIOS"
 
 #. • MSG_267
-msgid "Applying Windows image: %0.1f%% completed"
-msgstr "Menerapkan image Windows: %0.1f%% selesai"
+msgid "Applying Windows image: %s"
+msgstr "Menerapkan image Windows: %s"
 
 #. • MSG_268
 msgid "Applying Windows image..."
@@ -1535,8 +1533,8 @@ msgid "USB debug"
 msgstr ""
 
 #. • MSG_271
-msgid "Computing image checksums: %0.1f%% completed"
-msgstr "Menghitung ceksum image: %0.1f%% selesai"
+msgid "Computing image checksums: %s"
+msgstr "Menghitung ceksum image: %s"
 
 #. • MSG_272
 msgid "Compute the MD5, SHA1 and SHA256 checksums for the selected image"
@@ -1617,8 +1615,8 @@ msgstr ""
 "Apakah Anda yakin ingin menjalankan berkas ini?"
 
 #. • MSG_286
-msgid "Zeroing drive: %0.1f%% completed"
-msgstr "Mengosongkan perangkat: %0.1f%% selesai"
+msgid "Zeroing drive: %s"
+msgstr "Mengosongkan perangkat: %s"
 
 #. • MSG_287
 msgid "Detection of non-USB removable drives"
@@ -1719,5 +1717,5 @@ msgstr "Gunakan opsi ini jika Anda ingin menggunakan perangkat ini untuk mengins
 #.
 #. You can see this status message by pressing <Ctrl>-<Alt>-<Z> and then selecting START.
 #. It's the same as MSG_286 but with a process that *may* be faster, hence the name.
-msgid "Fast-zeroing drive: %0.1f%% completed"
-msgstr "Pengosongan-cepat perangkat: %0.1f%% selesai"
+msgid "Fast-zeroing drive: %s"
+msgstr "Pengosongan-cepat perangkat: %s"
