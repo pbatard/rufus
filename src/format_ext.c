@@ -323,15 +323,13 @@ BOOL FormatExtFs(DWORD DriveIndex, uint64_t PartitionOffset, DWORD BlockSize, LP
 	uprintf("%lld blocks (%0.1f%%) reserved for the super user", ext2fs_r_blocks_count(&features), reserve_ratio * 100.0f);
 
 	// Set features
-	ext2fs_set_feature_xattr(&features);
-//	ext2fs_set_feature_resize_inode(&features);
 	ext2fs_set_feature_dir_index(&features);
 	ext2fs_set_feature_filetype(&features);
-//	ext2fs_set_feature_sparse_super(&features);
 	ext2fs_set_feature_large_file(&features);
+	ext2fs_set_feature_sparse_super(&features);
+	ext2fs_set_feature_xattr(&features);
 	if (FSName[3] != '2')
 		ext2fs_set_feature_journal(&features);
-	features.s_backup_bgs[0] = ~0;
 	features.s_default_mount_opts = EXT2_DEFM_XATTR_USER | EXT2_DEFM_ACL;
 
 	// Now that we have set our base features, initialize a virtual superblock

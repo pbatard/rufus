@@ -922,6 +922,9 @@ static BOOL WriteSBR(HANDLE hPhysicalDrive)
 			sub_type = BT_GRUB2;
 	} else if (partition_type == PARTITION_STYLE_GPT) {
 		sub_type = BT_NON_BOOTABLE;
+	} else {
+		// Needed to prevent protective message to be written for MBR mode
+		sub_type = BT_MAX;
 	}
 
 	switch (sub_type) {
