@@ -920,12 +920,11 @@ static BOOL WriteSBR(HANDLE hPhysicalDrive)
 			sub_type = BT_GRUB4DOS;
 		if (img_report.has_grub2)
 			sub_type = BT_GRUB2;
-	} else if (partition_type == PARTITION_STYLE_GPT) {
-		sub_type = BT_NON_BOOTABLE;
-	} else {
-		// Needed to prevent protective message to be written for MBR mode
-		sub_type = BT_MAX;
 	}
+
+	// Use BT_MAX for the protective message
+	if (partition_type == PARTITION_STYLE_GPT)
+		sub_type = BT_MAX;
 
 	switch (sub_type) {
 	case BT_GRUB4DOS:
@@ -953,7 +952,7 @@ static BOOL WriteSBR(HANDLE hPhysicalDrive)
 			}
 		}
 		break;
-	case BT_NON_BOOTABLE:
+	case BT_MAX:
 		uprintf("Writing protective message SBR");
 		size = 4 * KB;
 		br_size = 17 * KB;	// 34 sectors are reserved for protective MBR + primary GPT
@@ -1789,6 +1788,9 @@ DWORD WINAPI FormatThread(void* param)
 		uprintf("Notice: Could not delete partitions: %s", WindowsErrorString());
 		FormatStatus = 0;
 	}
+
+	// An extra refresh of the (now empty) partition data here appears to be helpful
+	GetDrivePartitionData(SelectedDrive.DeviceNumber, fs_name, sizeof(fs_name), TRUE);
 
 	// Now get RW access to the physical drive...
 	hPhysicalDrive = GetPhysicalHandle(DriveIndex, actual_lock_drive, TRUE, !actual_lock_drive);

@@ -1,11 +1,12 @@
-o Version 3.10 (2020.04.??)
-    Improve Ubuntu 20.04 support
+o Version 3.10 (2020.04.22)
+    Improve support for Ubuntu 20.04
     Improve detection of FIXED drives with no mounted partitions
+    Improve extfs formatting
     Update UEFI:NTFS file system drivers to v1.5
-    Fix progress not being updated for German locale
-    Fix primary GPT being overwritten when adding the protective message MBR
+    Fix progress not being updated when using the German localization
+    Fix primary GPT being overwritten when adding the protective MBR message
     Fix a regression with lousy security solutions that prevent the creation of an 'autorun.inf'
-    Fix an assert during FreeDOS drive creation when the Windows system locale is UTF-8
+    Fix an assert during FreeDOS drive creation when the Windows system locale is set to UTF-8
     Fix invalid label errors when using a non-Western locale
 
 o Version 3.9 (2020.02.29)
