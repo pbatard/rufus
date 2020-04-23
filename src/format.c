@@ -923,7 +923,7 @@ static BOOL WriteSBR(HANDLE hPhysicalDrive)
 	}
 
 	// Use BT_MAX for the protective message
-	if (partition_type == PARTITION_STYLE_GPT)
+	if ((boot_type != BT_NON_BOOTABLE) && (partition_type == PARTITION_STYLE_GPT))
 		sub_type = BT_MAX;
 
 	switch (sub_type) {

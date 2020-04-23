@@ -1,7 +1,7 @@
 o Version 3.10 (2020.04.22)
     Improve support for Ubuntu 20.04
     Improve detection of FIXED drives with no mounted partitions
-    Improve extfs formatting
+    Improve extfs formatting (courtesy of Marcos Mello)
     Update UEFI:NTFS file system drivers to v1.5
     Fix progress not being updated when using the German localization
     Fix primary GPT being overwritten when adding the protective MBR message
