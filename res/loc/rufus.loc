@@ -564,6 +564,7 @@ t MSG_305 "Use this option to indicate whether you want to use this device to in
 # You can see this status message by pressing <Ctrl>-<Alt>-<Z> and then selecting START.
 # It's the same as MSG_286 but with a process that *may* be faster, hence the name.
 t MSG_306 "Fast-zeroing drive: %s"
+t MSG_307 "VHD detection"
 
 #########################################################################
 l "ar-SA" "Arabic (العربية)" 0x0401, 0x0801, 0x0c01, 0x1001, 0x1401, 0x1801, 0x1c01, 0x2001, 0x2401, 0x2801, 0x2c01, 0x3001, 0x3401, 0x3801, 0x3c01, 0x4001

@@ -46,7 +46,8 @@
 
 extern StrArray DriveId, DriveName, DriveLabel, DriveHub;
 extern uint32_t DrivePort[MAX_DRIVES];
-extern BOOL enable_HDDs, use_fake_units, enable_vmdk, usb_debug, list_non_usb_removable_drives, its_a_me_mario;
+extern BOOL enable_HDDs, enable_VHDs, use_fake_units, enable_vmdk, usb_debug;
+extern BOOL list_non_usb_removable_drives, its_a_me_mario;
 
 /*
  * Get the VID, PID and current device speed
@@ -897,7 +898,13 @@ BOOL GetDevices(DWORD devnum)
 				}
 				// Windows 10 19H1 mounts a 'PortableBaseLayer' for its Windows Sandbox feature => unlist those
 				if (safe_strcmp(label, windows_sandbox_vhd_label) == 0) {
-					uprintf("Device eliminated because it's a Windows Sandbox VHD");
+					uprintf("Device eliminated because it is a Windows Sandbox VHD");
+					safe_closehandle(hDrive);
+					safe_free(devint_detail_data);
+					break;
+				}
+				if (props.is_VHD && (!enable_VHDs)) {
+					uprintf("Device eliminated because listing of VHDs is disabled (Alt-G)");
 					safe_closehandle(hDrive);
 					safe_free(devint_detail_data);
 					break;

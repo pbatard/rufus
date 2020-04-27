@@ -34,6 +34,7 @@ extern char* ini_file;
 #define SETTING_DISABLE_FAKE_DRIVES_CHECK   "DisableFakeDrivesCheck"
 #define SETTING_DISABLE_LGP                 "DisableLGP"
 #define SETTING_DISABLE_SECURE_BOOT_NOTICE  "DisableSecureBootNotice"
+#define SETTING_DISABLE_VHDS                "DisableVHDs"
 #define SETTING_ENABLE_FILE_INDEXING        "EnableFileIndexing"
 #define SETTING_ENABLE_USB_DEBUG            "EnableUsbDebug"
 #define SETTING_ENABLE_VMDK_DETECTION       "EnableVmdkDetection"

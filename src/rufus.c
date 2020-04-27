@@ -111,7 +111,7 @@ HWND hLogDialog = NULL, hProgress = NULL, hDiskID;
 HANDLE dialog_handle = NULL;
 BOOL is_x86_32, use_own_c32[NB_OLD_C32] = { FALSE, FALSE }, mbr_selected_by_user = FALSE;
 BOOL op_in_progress = TRUE, right_to_left_mode = FALSE, has_uefi_csm = FALSE, its_a_me_mario = FALSE;
-BOOL enable_HDDs = FALSE, enable_ntfs_compression = FALSE, no_confirmation_on_cancel = FALSE, lock_drive = TRUE;
+BOOL enable_HDDs = FALSE, enable_VHDs = TRUE, enable_ntfs_compression = FALSE, no_confirmation_on_cancel = FALSE, lock_drive = TRUE;
 BOOL advanced_mode_device, advanced_mode_format, allow_dual_uefi_bios, detect_fakes, enable_vmdk, force_large_fat32, usb_debug;
 BOOL use_fake_units, preserve_timestamps = FALSE, fast_zeroing = FALSE, app_changed_size = FALSE;
 BOOL zero_drive = FALSE, list_non_usb_removable_drives = FALSE, enable_file_indexing, large_drive = FALSE;
@@ -3110,6 +3110,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	force_large_fat32 = ReadSettingBool(SETTING_FORCE_LARGE_FAT32_FORMAT);
 	enable_vmdk = ReadSettingBool(SETTING_ENABLE_VMDK_DETECTION);
 	enable_file_indexing = ReadSettingBool(SETTING_ENABLE_FILE_INDEXING);
+	enable_VHDs = !ReadSettingBool(SETTING_DISABLE_VHDS);
 
 	// Initialize the global scaling, in case we need it before we initialize the dialog
 	hDC = GetDC(NULL);
@@ -3278,7 +3279,7 @@ relaunch:
 	while(GetMessage(&msg, NULL, 0, 0)) {
 		static BOOL ctrl_without_focus = FALSE;
 		BOOL no_focus = (msg.message == WM_SYSKEYDOWN) && !(msg.lParam & 0x20000000);
-		// ** *****  **** ** **********
+		// ** ****** **** ** **********
 		// .,ABCDEFGHIJKLMNOPQRSTUVWXYZ
 
 		// Sigh... The things one need to do to detect standalone use of the 'Alt' key.
@@ -3385,6 +3386,15 @@ relaunch:
 				PrintStatusTimeout(lmprintf(MSG_253), enable_HDDs);
 				GetDevices(0);
 				CheckDlgButton(hMainDialog, IDC_LIST_USB_HDD, enable_HDDs ? BST_CHECKED : BST_UNCHECKED);
+				continue;
+			}
+			// Alt-G => Toggle detection of Virtual Disks
+			// By default Rufus list Virtual Disks but some people use them for backup.
+			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'G')) {
+				enable_VHDs = !enable_VHDs;
+				WriteSettingBool(SETTING_DISABLE_VHDS, !enable_VHDs);
+				PrintStatusTimeout(lmprintf(MSG_307), enable_VHDs);
+				GetDevices(0);
 				continue;
 			}
 			// Alt-I => Toggle ISO support
