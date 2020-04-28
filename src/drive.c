@@ -969,6 +969,7 @@ BOOL GetDriveLabel(DWORD DriveIndex, char* letters, char** label)
 			wchar_to_utf8_no_alloc(VolumeName, VolumeLabel, sizeof(VolumeLabel));
 			*label = (VolumeLabel[0] != 0) ? VolumeLabel : STR_NO_LABEL;
 		}
+		safe_closehandle(h);
 		// Drive without volume assigned - always enabled
 		return TRUE;
 	}
