@@ -312,6 +312,14 @@ BOOL FormatExtFs(DWORD DriveIndex, uint64_t PartitionOffset, DWORD BlockSize, LP
 	features.s_log_cluster_size = features.s_log_block_size;
 	size /= BlockSize;
 
+	// ext2 and ext3 have a can only accomodate up to Blocksize * 2^32 sized volumes
+	if (((strcmp(FSName, FileSystemLabel[FS_EXT2]) == 0) || (strcmp(FSName, FileSystemLabel[FS_EXT3]) == 0)) &&
+		(size >= 0x100000000ULL)) {
+		FormatStatus = ext2_last_winerror(ERROR_INVALID_VOLUME_SIZE);
+		uprintf("Volume size is too large for ext2 or ext3");
+		goto out;
+	}
+
 	// Set the blocks, reserved blocks and inodes
 	ext2fs_blocks_count_set(&features, size);
 	ext2fs_r_blocks_count_set(&features, (blk64_t)(reserve_ratio * size));
