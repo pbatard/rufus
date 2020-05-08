@@ -753,7 +753,7 @@ BOOL EnablePrivileges(void)
 
 	if (NT_SUCCESS(status)) {
 		CHAR privilegesBuffer[FIELD_OFFSET(TOKEN_PRIVILEGES, Privileges) +
-			sizeof(LUID_AND_ATTRIBUTES) * ARRAYSIZE(requestedPrivileges)];
+			sizeof(LUID_AND_ATTRIBUTES) * ARRAYSIZE(requestedPrivileges)] = { 0 };
 		PTOKEN_PRIVILEGES privileges;
 		ULONG i;
 

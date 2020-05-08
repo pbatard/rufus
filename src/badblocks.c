@@ -427,13 +427,12 @@ static unsigned int test_rw(HANDLE hDrive, blk64_t last_block, size_t block_size
 	}
 
 	buffer = allocate_buffer(2 * blocks_at_once * block_size);
-	read_buffer = buffer + blocks_at_once * block_size;
-
 	if (!buffer) {
 		uprintf("%sError while allocating buffers\n", bb_prefix);
 		cancel_ops = -1;
 		return 0;
 	}
+	read_buffer = buffer + blocks_at_once * block_size;
 
 	uprintf("%sChecking from block %lu to %lu (1 block = %s)\n", bb_prefix,
 		(unsigned long) first_block, (unsigned long) last_block - 1,

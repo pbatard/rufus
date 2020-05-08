@@ -1391,9 +1391,6 @@ static BOOL SetupWinToGo(DWORD DriveIndex, const char* drive_name, BOOL use_esp)
 			return FALSE;
 		}
 		Sleep(200);
-	}
-
-	if (use_esp) {
 		// Need to have the ESP mounted to invoke bcdboot
 		ms_efi = AltMountVolume(DriveIndex, partition_offset[PI_ESP], FALSE);
 		if (ms_efi == NULL) {

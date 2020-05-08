@@ -280,10 +280,8 @@ BOOL FormatExtFs(DWORD DriveIndex, uint64_t PartitionOffset, DWORD BlockSize, LP
 			uprintf("ext4 file system is not supported, defaulting to ext3");
 		else
 			uprintf("Invalid ext file system version requested, defaulting to ext3");
-	}
-
-	if ((strcmp(FSName, FileSystemLabel[FS_EXT2]) != 0) && (strcmp(FSName, FileSystemLabel[FS_EXT3]) != 0))
 		FSName = FileSystemLabel[FS_EXT3];
+	}
 
 	PrintInfoDebug(0, MSG_222, FSName);
 	UpdateProgressWithInfoInit(NULL, TRUE);
