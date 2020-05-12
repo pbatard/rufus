@@ -142,13 +142,7 @@ static __inline char* sanitize_filename(char* filename, BOOL* is_identical)
 
 static void log_handler (cdio_log_level_t level, const char *message)
 {
-	switch(level) {
-	case CDIO_LOG_DEBUG:
-		// TODO: use a setting to enable libcdio debug?
-		return;
-	default:
-		uprintf("libcdio: %s\n", message);
-	}
+	uprintf("libcdio: %s", message);
 }
 
 /*
@@ -1080,11 +1074,11 @@ out:
 			if (fd != NULL)
 				fclose(fd);
 			update_md5sum();
-			StrArrayDestroy(&modified_path);
 		} else if (HAS_BOOTMGR(img_report) && enable_ntfs_compression) {
 			// bootmgr might need to be uncompressed: https://github.com/pbatard/rufus/issues/1381
 			RunCommand("compact /u bootmgr* efi/boot/*.efi", dest_dir, TRUE);
 		}
+		StrArrayDestroy(&modified_path);
 	}
 	if (p_iso != NULL)
 		iso9660_close(p_iso);

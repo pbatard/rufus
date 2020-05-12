@@ -977,7 +977,7 @@ static BOOL WriteSBR(HANDLE hPhysicalDrive)
 
 	r = write_data(fp, br_size, buf, (uint64_t)size);
 	safe_free(grub2_buf);
-	if (sub_type == BT_NON_BOOTABLE)
+	if (sub_type == BT_MAX)
 		safe_free(buf);
 	return (r != 0);
 }
