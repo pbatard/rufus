@@ -70,7 +70,7 @@ PF_TYPE_DECL(NTAPI, NTSTATUS, NtQueryVolumeInformationFile, (HANDLE, PIO_STATUS_
  * Globals
  */
 RUFUS_DRIVE_INFO SelectedDrive;
-BOOL installed_uefi_ntfs;
+extern BOOL installed_uefi_ntfs;
 uint64_t partition_offset[3];
 uint64_t persistence_size = 0;
 

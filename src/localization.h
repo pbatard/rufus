@@ -148,9 +148,9 @@ typedef struct loc_dlg_list_struct {
 extern const loc_parse parse_cmd[7];
 extern struct list_head locale_list;
 extern char *default_msg_table[], *current_msg_table[], **msg_table;
-int loc_line_nr;
-char *loc_filename, *embedded_loc_filename;
-BOOL en_msg_mode;
+extern int loc_line_nr;
+extern char *loc_filename, *embedded_loc_filename;
+extern BOOL en_msg_mode;
 
 void free_loc_cmd(loc_cmd* lcmd);
 BOOL dispatch_loc_cmd(loc_cmd* lcmd);
