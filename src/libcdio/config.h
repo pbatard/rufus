@@ -48,6 +48,9 @@
 /* Define if you have the iconv() function and it works. */
 /* #undef HAVE_ICONV */
 
+/* Define this if you want to use the 2020 version of the libcdio API. */
+#define DO_NOT_WANT_COMPATIBILITY /**/
+
 /* Define to 1 if you have the <inttypes.h> header file. */
 #define HAVE_INTTYPES_H 1 /* provided in MSVC/missing if needed */
 

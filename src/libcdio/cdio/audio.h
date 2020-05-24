@@ -1,5 +1,5 @@
 /* -*- c -*-
-    Copyright (C) 2005, 2007, 2008 Rocky Bernstein <rocky@gnu.org>
+    Copyright (C) 2005, 2007, 2008, 2019 Rocky Bernstein <rocky@gnu.org>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -15,10 +15,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/** \file audio.h 
+/** \file audio.h
  *
  *  \brief The top-level header for CD audio-related libcdio
- *         calls.  These control playing of the CD-ROM through its 
+ *         calls.  These control playing of the CD-ROM through its
  *         line-out jack.
  */
 #ifndef CDIO_AUDIO_H_
@@ -31,7 +31,7 @@ extern "C" {
 #endif /* __cplusplus */
 
   /*! This struct is used by the cdio_audio_read_subchannel */
-  typedef struct cdio_subchannel_s 
+  typedef struct cdio_subchannel_s
   {
     uint8_t format;
     uint8_t audio_status;
@@ -42,13 +42,13 @@ extern "C" {
     msf_t   abs_addr;
     msf_t   rel_addr;
   } cdio_subchannel_t;
-  
+
   /*! This struct is used by cdio_audio_get_volume and cdio_audio_set_volume */
   typedef struct cdio_audio_volume_s
   {
     uint8_t level[4];
   } cdio_audio_volume_t;
-  
+
 
   /*! This struct is used by the CDROMPLAYTRKIND ioctl */
   typedef struct cdio_track_index_s
@@ -61,19 +61,19 @@ extern "C" {
 
   /*!
     Get volume of an audio CD.
-    
+
     @param p_cdio the CD object to be acted upon.
     @param p_volume place to put the list of volume outputs levels
 
-    p_volume can be NULL in which case we return only whether the driver
-    has the ability to get the volume or not.
+    \p p_volume can be \p NULL in which case we return only whether
+    the driver has the ability to get the volume or not.
 
   */
   driver_return_code_t cdio_audio_get_volume (CdIo_t *p_cdio,  /*out*/
 					      cdio_audio_volume_t *p_volume);
 
-  /*! 
-    Return the number of seconds (discarding frame portion) of an MSF 
+  /*!
+    Return the number of seconds (discarding frame portion) of an MSF
   */
   uint32_t cdio_audio_get_msf_seconds(msf_t *p_msf);
 
@@ -91,7 +91,7 @@ extern "C" {
     @param p_start_msf pointer to staring MSF
     @param p_end_msf pointer to ending MSF
   */
-  driver_return_code_t cdio_audio_play_msf (CdIo_t *p_cdio, 
+  driver_return_code_t cdio_audio_play_msf (CdIo_t *p_cdio,
 					    /*in*/msf_t *p_start_msf,
 					    /*in*/ msf_t *p_end_msf);
 
@@ -101,7 +101,7 @@ extern "C" {
     @param p_cdio the CD object to be acted upon.
     @param p_track_index location to start/end.
   */
-  driver_return_code_t cdio_audio_play_track_index 
+  driver_return_code_t cdio_audio_play_track_index
   ( CdIo_t *p_cdio,  cdio_track_index_t *p_track_index);
 
   /*!
@@ -110,12 +110,12 @@ extern "C" {
     @param p_cdio the CD object to be acted upon.
     @param p_subchannel place for returned subchannel information
   */
-  driver_return_code_t cdio_audio_read_subchannel (CdIo_t *p_cdio, 
+  driver_return_code_t cdio_audio_read_subchannel (CdIo_t *p_cdio,
 						   /*out*/ cdio_subchannel_t *p_subchannel);
 
   /*!
     Resume playing an audio CD.
-    
+
     @param p_cdio the CD object to be acted upon.
 
   */
@@ -123,7 +123,7 @@ extern "C" {
 
   /*!
     Set volume of an audio CD.
-    
+
     @param p_cdio the CD object to be acted upon.
     @param p_volume place for returned volume-level information
 
@@ -133,7 +133,7 @@ extern "C" {
 
   /*!
     Stop playing an audio CD.
-    
+
     @param p_cdio the CD object to be acted upon.
 
   */

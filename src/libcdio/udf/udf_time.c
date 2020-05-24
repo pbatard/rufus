@@ -133,12 +133,13 @@ udf_stamp_to_time(time_t *dest, long int *dest_usec,
       return NULL;
     }
   *dest = year_seconds[src.year - EPOCH_YEAR];
-  *dest -= (time_t)offset * SECS_PER_MINUTE;
+  *dest -= offset * SECS_PER_MINUTE;
   
   yday = ((__mon_yday[__isleap (src.year)]
 	   [src.month-1]) + (src.day-1));
-  *dest += (time_t)src.second + ((time_t)SECS_PER_MINUTE *
-      ( ( ((time_t)yday* HOURS_PER_DAY) + src.hour ) * 60 + src.minute ) );
+  *dest += src.second + 
+    ( SECS_PER_MINUTE *
+      ( ( (yday* HOURS_PER_DAY) + src.hour ) * 60 + src.minute ) );
 
   *dest_usec = src.microseconds
     + (src.centiseconds * 10000)

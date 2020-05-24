@@ -71,7 +71,9 @@ extern "C" {
     XA_FORM2_FILE =  (XA_ATTR_MODE2FORM2 | XA_PERM_ALL_ALL)
   } xa_misc_enum_t;
   
-extern const char ISO_XA_MARKER_STRING[8];
+extern const char ISO_XA_MARKER_STRING[sizeof("CD-XA001")-1];
+
+#define ISO_XA_MARKER_STRING    "CD-XA001"
 
 /*! \brief "Extended Architecture" according to the Philips Yellow Book.
  

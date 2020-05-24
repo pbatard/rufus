@@ -1,5 +1,6 @@
 /*
-    Copyright (C) 2004, 2005, 2008, 2012 Rocky Bernstein <rocky@gnu.org>
+    Copyright (C) 2018 Thomas Schmitt
+    Copyright (C) 2004, 2005, 2008, 2012, 2019 Rocky Bernstein <rocky@gnu.org>
     adapted from cuetools
     Copyright (C) 2003 Svend Sanjay Sorensen <ssorensen@fastmail.fm>
 
@@ -17,7 +18,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 /*!
- * \file cdtext.h 
+ * \file cdtext.h
  *
  * \brief The top-level header for CD-Text information. Applications
  *  include this for CD-Text access.
@@ -36,7 +37,10 @@ extern "C" {
 #define MIN_CDTEXT_FIELD          0
 #define MAX_CDTEXT_FIELDS         10
 
-/*! Enumeration of CD-TEXT text fields. */
+/*! \typedef enum cdtext_field_t
+
+  \brief Enumeration of CD-TEXT text fields.
+*/
 typedef enum {
   CDTEXT_FIELD_TITLE          =  0,   /**< title of album name or track titles */
   CDTEXT_FIELD_PERFORMER      =  1,   /**< name(s) of the performer(s) */
@@ -51,7 +55,10 @@ typedef enum {
   CDTEXT_FIELD_INVALID        =  MAX_CDTEXT_FIELDS /**< INVALID FIELD*/
 } cdtext_field_t;
 
-/*! Enumeration of possible genre codes. */
+/*! \typedef enum cdtext_genre_t
+
+  \brief Enumeration of possible genre codes.
+*/
 typedef enum {
   CDTEXT_GENRE_UNUSED         =  0,   /**< field is not used. default */
   CDTEXT_GENRE_UNDEFINED      =  1,   /**< not defined */
@@ -84,10 +91,12 @@ typedef enum {
   CDTEXT_GENRE_WORLD_MUSIC    = 28    /**< World Music */
 } cdtext_genre_t;
 
-/*! Enumeration of possible CD-TEXT languages.
- * 
- * The language code is encoded as specified in ANNEX 1 to part 5 of EBU
- * Tech 32 58 -E (1991).
+/*! \typedef typedef enum cdtext_lang_t
+
+    \brief Enumeration of possible CD-TEXT languages.
+
+  The language code is encoded as specified in ANNEX 1 to part 5 of EBU
+  Tech 32 58 -E (1991).
  */
 typedef enum {
   CDTEXT_LANGUAGE_UNKNOWN     = 0x00,
@@ -192,11 +201,19 @@ typedef enum {
   CDTEXT_LANGUAGE_ASSAMESE    = 0x7C,
   CDTEXT_LANGUAGE_ARMENIAN    = 0x7D,
   CDTEXT_LANGUAGE_ARABIC      = 0x7E,
-  CDTEXT_LANGUAGE_AMHARIC     = 0x7F
+  CDTEXT_LANGUAGE_AMHARIC     = 0x7F,
+
+  /* libcdio-internal pseudo codes: */
+
+  CDTEXT_LANGUAGE_INVALID      = 0x100, /**< Invalid language code */
+  CDTEXT_LANGUAGE_BLOCK_UNUSED = 0x101  /**< Language code should be ignored */
+
 } cdtext_lang_t;
 
 /*!
-  Opaque type for CD-Text.
+  \typedef struct cdtext_s cdtext_t
+
+  \brief Opaque type for CD-Text.
 */
 typedef struct cdtext_s cdtext_t;
 
@@ -211,33 +228,68 @@ const char *cdtext_genre2str (cdtext_genre_t i);
 const char *cdtext_lang2str (cdtext_lang_t i);
 
 /*!
+  Return the language code of a given language string representation.
+  This is the inverse of cdtext_lang2str().
+
+  @param lang language to look up
+
+  @return if lang is among the possible results of cdtext_lang2str():
+          the \p cdtext_lang_t which is associated, or \p
+          CDTEXT_LANGUAGE_INVALID otherwise.
+*/
+cdtext_lang_t cdtext_str2lang (const char *lang);
+
+/*!
   Return string representation of given field type.
 */
 const char *cdtext_field2str (cdtext_field_t i);
 
-/*! 
-  Initialize a new cdtext structure.
+/*!
+  Initialize a new \p cdtext_t structure.
 
-  When the structure is no longer needed, release the 
+  When the structure is no longer needed, release the
   resources using cdtext_delete.
 */
 cdtext_t *cdtext_init (void);
 
 /*!
-  Read a binary CD-TEXT and fill a cdtext struct.
+  Fill a cdtext_t object with text pack bytes as they were handed out by the
+  CD drive, but without the 4-byte header which the drive prepended.
+
+  The text pack data can be obtained by the calls
+
+    - cdio_get_cdtext_raw()
+    - mmc_read_cdtext()
+    - mmc_read_toc_cdtext()
+
+  Each sets in the buffer passed into values that begin with a 4-byte header. This should
+  be skipped. Here is some sample code:
+
+  @code
+    #include <cdio/mmc_ll_cmds.h>
+    if (DRIVER_OP_SUCCESS == mmc_read_toc_cdtext (p_cdio, &i_length, p_buf, 0)
+        && 4 < i_length)
+        cdtext_data_init(p_cdtext, p_buf + 4, (size_t) i_length - 4);
+  @endcode
+
+  Instead of calling cdtext_data_init(), you can call
+  cdio_get_cdtext() which returns a pointer to the \p cdtext_t object
+  that is attached to the inquired \p CdIo_t object. This \p cdtext_t
+  object gets created and filled if none is yet attached to the
+  inquired \p CdIo_t object.
 
   @param p_cdtext the CD-TEXT object
   @param wdata the data
   @param i_data size of wdata
 
   @returns 0 on success, non-zero on failure
-*/       
+*/
 int cdtext_data_init(cdtext_t *p_cdtext, uint8_t *wdata, size_t i_data);
 
 /*!
-  Free memory associated with the given cdtext_t object.
+  Free memory associated with the given \p cdtext_t object.
 
-  @param p_cdtext the CD-TEXT object 
+  @param p_cdtext the CD-TEXT object
 */
 void cdtext_destroy (cdtext_t *p_cdtext);
 
@@ -259,7 +311,7 @@ char *cdtext_get (const cdtext_t *p_cdtext, cdtext_field_t key, track_t track);
   @param field type of the field to return
   @param track specifies the track, 0 stands for disc
 */
-const char *cdtext_get_const (const cdtext_t *p_cdtext, cdtext_field_t field, 
+const char *cdtext_get_const (const cdtext_t *p_cdtext, cdtext_field_t field,
                               track_t track);
 
 /*!
@@ -300,20 +352,66 @@ track_t cdtext_get_last_track(const cdtext_t *p_cdtext);
 */
 bool cdtext_select_language(cdtext_t *p_cdtext, cdtext_lang_t language);
 
-/*
+/*!
+
+  @deprecated Use cdtext_list_languages_v2()
+
   Returns a list of available languages or NULL.
+
+  __WARNING__: The indices in the returned array _do not_ match the indexing
+           as expected by cdtext_set_language_index().
+           Use cdtext_select_language() with the values of array elements.
 
   Internally the list is stored in a static array.
 
   @param p_cdtext the CD-TEXT object
+  @return NULL if p_cdtext is NULL, or an array of 8 cdtext_lang_t elements:
+          CDTEXT_LANGUAGE_UNKNOWN not only marks language code 0x00
+          but also invalid language codes and invalid language blocks.
 */
 cdtext_lang_t *cdtext_list_languages (const cdtext_t *p_cdtext);
 
-/*! 
+/*!
+  Returns an array of available languages or NULL.
+  The index of an array element may be used to select the corresponding
+  language block by call cdtext_set_language_index().
+
+  The return value is a pointer into the memory range of *p_cdtext.
+  Do not use it after having freed that memory range.
+
+  @param p_cdtext the CD-TEXT object
+  @return NULL if p_cdtext is NULL, or an array of 8 cdtext_lang_t elements.
+
+  If an enumeration is CDTEXT_LANGUAGE_INVALID, then the language block has an invalid
+  language code.
+
+  If an enumeration is CDTEXT_LANGUAGE_BLOCK_UNUSED, then the block does not
+  exist on CD or could not be read in CD-TEXT for some reason.
+
+  Otherwise, the enumeration of element will be a value in
+  CDTEXT_LANGUAGE_UNKNOWN to CDTEXT_LANGUAGE_AMHARIC, and is a block
+  in that language.
+*/
+cdtext_lang_t *cdtext_list_languages_v2(cdtext_t *p_cdtext);
+
+/*!
+  Select the given language by block index. See cdtext_list_languages_v2().
+  If the index is bad, or no language block with that index was read:
+  select the default language at index 0 and return false.
+
+  @param p_cdtext the CD-TEXT object
+  @param idx      the desired index: 0 to 7.
+
+  @return true on success, false if no language block is associated to \p idx.
+*/
+bool
+cdtext_set_language_index(cdtext_t *p_cdtext, int idx);
+
+/*!
   Sets the given field at the given track to the given value.
-  
-  Recodes to UTF-8 if charset is not NULL.
-  
+
+  Recodes to UTF-8 if charset is not \p NULL.
+
   @param p_cdtext the CD-TEXT object
   @param key field to set
   @param value value to set
@@ -328,7 +426,7 @@ void cdtext_set (cdtext_t *p_cdtext, cdtext_field_t key, const uint8_t *value, t
 
 #endif /* CDIO_CDTEXT_H_ */
 
-/* 
+/*
  * Local variables:
  *  c-file-style: "gnu"
  *  tab-width: 8

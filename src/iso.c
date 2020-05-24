@@ -36,6 +36,7 @@
 #include <virtdisk.h>
 #include <sys/stat.h>
 
+#define DO_NOT_WANT_COMPATIBILITY
 #include <cdio/cdio.h>
 #include <cdio/logging.h>
 #include <cdio/iso9660.h>
@@ -630,9 +631,9 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 	CdioListNode_t* p_entnode;
 	iso9660_stat_t *p_statbuf;
 	CdioISO9660FileList_t* p_entlist;
-	size_t i, j;
+	size_t i;
 	lsn_t lsn;
-	int64_t file_length, extent_length;
+	int64_t file_length;
 
 	if ((p_iso == NULL) || (psz_path == NULL))
 		return 1;
@@ -686,7 +687,7 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 			if (iso_extract_files(p_iso, psz_iso_name))
 				goto out;
 		} else {
-			file_length = p_statbuf->size;
+			file_length = p_statbuf->total_size;
 			if (check_iso_props(psz_path, file_length, psz_basename, psz_fullpath, &props)) {
 				continue;
 			}
@@ -721,29 +722,24 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 					uprintf(stupid_antivirus);
 				else
 					goto out;
-			} else {
-				for (j=0; j<p_statbuf->extents; j++) {
-					extent_length = p_statbuf->extsize[j];
-					for (i=0; extent_length>0; i++) {
-						if (FormatStatus) goto out;
-						memset(buf, 0, ISO_BLOCKSIZE);
-						lsn = p_statbuf->lsn[j] + (lsn_t)i;
-						if (iso9660_iso_seek_read(p_iso, buf, lsn, 1) != ISO_BLOCKSIZE) {
-							uprintf("  Error reading ISO9660 file %s at LSN %lu",
-								psz_iso_name, (long unsigned int)lsn);
-							goto out;
-						}
-						buf_size = (DWORD)MIN(extent_length, ISO_BLOCKSIZE);
-						ISO_BLOCKING(r = WriteFileWithRetry(file_handle, buf, buf_size, &wr_size, WRITE_RETRIES));
-						if (!r) {
-							uprintf("  Error writing file: %s", WindowsErrorString());
-							goto out;
-						}
-						extent_length -= ISO_BLOCKSIZE;
-						if (nb_blocks++ % PROGRESS_THRESHOLD == 0)
-							UpdateProgressWithInfo(OP_FILE_COPY, MSG_231, nb_blocks, total_blocks);
-					}
+			} else for (i = 0; file_length > 0; i++) {
+				if (FormatStatus) goto out;
+				memset(buf, 0, ISO_BLOCKSIZE);
+				lsn = p_statbuf->lsn + (lsn_t)i;
+				if (iso9660_iso_seek_read(p_iso, buf, lsn, 1) != ISO_BLOCKSIZE) {
+					uprintf("  Error reading ISO9660 file %s at LSN %lu",
+						psz_iso_name, (long unsigned int)lsn);
+					goto out;
 				}
+				buf_size = (DWORD)MIN(file_length, ISO_BLOCKSIZE);
+				ISO_BLOCKING(r = WriteFileWithRetry(file_handle, buf, buf_size, &wr_size, WRITE_RETRIES));
+				if (!r) {
+					uprintf("  Error writing file: %s", WindowsErrorString());
+					goto out;
+				}
+				file_length -= ISO_BLOCKSIZE;
+				if (nb_blocks++ % PROGRESS_THRESHOLD == 0)
+					UpdateProgressWithInfo(OP_FILE_COPY, MSG_231, nb_blocks, total_blocks);
 			}
 			if (preserve_timestamps) {
 				LPFILETIME ft = to_filetime(mktime(&p_statbuf->tm));
@@ -1091,9 +1087,9 @@ out:
 
 int64_t ExtractISOFile(const char* iso, const char* iso_file, const char* dest_file, DWORD attributes)
 {
-	size_t i, j;
+	size_t i;
 	ssize_t read_size;
-	int64_t file_length, extent_length, r = 0;
+	int64_t file_length, r = 0;
 	char buf[UDF_BLOCKSIZE];
 	DWORD buf_size, wr_size;
 	iso9660_t* p_iso = NULL;
@@ -1156,23 +1152,21 @@ try_iso:
 		goto out;
 	}
 
-	for (j = 0; j < p_statbuf->extents; j++) {
-		extent_length = p_statbuf->extsize[j];
-		for (i = 0; extent_length > 0; i++) {
-			memset(buf, 0, ISO_BLOCKSIZE);
-			lsn = p_statbuf->lsn[j] + (lsn_t)i;
-			if (iso9660_iso_seek_read(p_iso, buf, lsn, 1) != ISO_BLOCKSIZE) {
-				uprintf("  Error reading ISO9660 file %s at LSN %lu", iso_file, (long unsigned int)lsn);
-				goto out;
-			}
-			buf_size = (DWORD)MIN(extent_length, ISO_BLOCKSIZE);
-			if (!WriteFileWithRetry(file_handle, buf, buf_size, &wr_size, WRITE_RETRIES)) {
-				uprintf("  Error writing file %s: %s", dest_file, WindowsErrorString());
-				goto out;
-			}
-			extent_length -= ISO_BLOCKSIZE;
-			r += ISO_BLOCKSIZE;
+	file_length = p_statbuf->total_size;
+	for (i = 0; file_length > 0; i++) {
+		memset(buf, 0, ISO_BLOCKSIZE);
+		lsn = p_statbuf->lsn + (lsn_t)i;
+		if (iso9660_iso_seek_read(p_iso, buf, lsn, 1) != ISO_BLOCKSIZE) {
+			uprintf("  Error reading ISO9660 file %s at LSN %lu", iso_file, (long unsigned int)lsn);
+			goto out;
 		}
+		buf_size = (DWORD)MIN(file_length, ISO_BLOCKSIZE);
+		if (!WriteFileWithRetry(file_handle, buf, buf_size, &wr_size, WRITE_RETRIES)) {
+			uprintf("  Error writing file %s: %s", dest_file, WindowsErrorString());
+			goto out;
+		}
+		file_length -= ISO_BLOCKSIZE;
+		r += ISO_BLOCKSIZE;
 	}
 
 out:
@@ -1241,8 +1235,8 @@ try_iso:
 		uprintf("Could not get ISO-9660 file information for file %s", wim_path);
 		goto out;
 	}
-	if (iso9660_iso_seek_read(p_iso, buf, p_statbuf->lsn[0], 1) != ISO_BLOCKSIZE) {
-		uprintf("Error reading ISO-9660 file %s at LSN %d", wim_path, p_statbuf->lsn[0]);
+	if (iso9660_iso_seek_read(p_iso, buf, p_statbuf->lsn, 1) != ISO_BLOCKSIZE) {
+		uprintf("Error reading ISO-9660 file %s at LSN %d", wim_path, p_statbuf->lsn);
 		goto out;
 	}
 	r = wim_header[3];
@@ -1332,7 +1326,7 @@ BOOL HasEfiImgBootLoaders(void)
 	if (p_private == NULL)
 		goto out;
 	p_private->p_iso = p_iso;
-	p_private->lsn = p_statbuf->lsn[0];	// Image should be small enough not to use multiextents
+	p_private->lsn = p_statbuf->lsn;
 	p_private->sec_start = 0;
 	// Populate our intial buffer
 	if (iso9660_iso_seek_read(p_private->p_iso, p_private->buf, p_private->lsn, ISO_NB_BLOCKS) != ISO_NB_BLOCKS * ISO_BLOCKSIZE) {
@@ -1424,7 +1418,7 @@ BOOL DumpFatDir(const char* path, int32_t cluster)
 		if (p_private == NULL)
 			goto out;
 		p_private->p_iso = p_iso;
-		p_private->lsn = p_statbuf->lsn[0];	// Image should be small enough not to use multiextents
+		p_private->lsn = p_statbuf->lsn;
 		p_private->sec_start = 0;
 		// Populate our intial buffer
 		if (iso9660_iso_seek_read(p_private->p_iso, p_private->buf, p_private->lsn, ISO_NB_BLOCKS) != ISO_NB_BLOCKS * ISO_BLOCKSIZE) {

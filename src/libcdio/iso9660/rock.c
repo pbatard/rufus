@@ -422,7 +422,7 @@ parse_rock_ridge_stat_internal(iso9660_dir_t *p_iso9660_dir,
 	    switch(p_sl->flags &~1){
 	    case 0:
 	      realloc_symlink(p_stat, p_sl->len);
-	      if (p_sl->text && p_sl->len)
+	      if (p_sl->len)
 		memcpy(&(p_stat->rr.psz_symlink[p_stat->rr.i_symlink]),
 		       p_sl->text, p_sl->len);
 	      p_stat->rr.i_symlink += p_sl->len;

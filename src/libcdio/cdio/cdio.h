@@ -17,7 +17,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/** \file cdio.h 
+/** \file cdio.h
  *
  *  \brief The top-level header for libcdio: the CD Input and Control
  *  library. Applications include this for anything regarding libcdio.
@@ -42,15 +42,15 @@ extern "C" {
 
 /* For compatibility. */
 #define CdIo CdIo_t
-    
+
   /** This is an opaque structure for the CD object. */
-  typedef struct _CdIo CdIo_t; 
+  typedef struct _CdIo CdIo_t;
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-/* Drive(r)/Device-related functions. Perhaps we should break out 
+/* Drive(r)/Device-related functions. Perhaps we should break out
    Driver from device?
 */
 #include <cdio/device.h>
@@ -62,7 +62,7 @@ extern "C" {
 #include <cdio/disc.h>
 
 /* Sector (frame, or block)-related functions. Uses driver_return_code_t
-   from <cdio/device.h> so it should come after that. 
+   from <cdio/device.h> so it should come after that.
 */
 #include <cdio/read.h>
 

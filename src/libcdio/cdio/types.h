@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002, 2003, 2004, 2005, 2006, 2008, 2012, 2017
+    Copyright (C) 2002-2008, 2012, 2017 2019
                   Rocky Bernstein <rocky@gnu.org>
     Copyright (C) 2000 Herbert Valerio Riedel <hvr@gnu.org>
 
@@ -27,6 +27,8 @@
 
 #ifdef __cplusplus
 extern "C" {
+#else
+# include <stdbool.h>
 #endif /* __cplusplus */
 
 /* If <sys/types.h> is not available on your platform please
@@ -103,27 +105,6 @@ typedef uint8_t ubyte;
 # endif
 #endif
 
-#ifndef __cplusplus
-
-/* All the stdbool.h seem to define those */
-#ifndef __bool_true_false_are_defined
-#define __bool_true_false_are_defined 1
-
-#undef bool
-#undef true
-#undef false
-
-#ifdef _Bool
-#define bool _Bool
-#else
-#define bool unsigned char
-#endif
-#define true 1
-#define false 0
-
-#endif /* __bool_true_false_are_defined */
-#endif /*C++*/
-
   /* some GCC optimizations -- gcc 2.5+ */
 
 #if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ > 4)
@@ -151,7 +132,7 @@ typedef uint8_t ubyte;
 #define GNUC_PACKED
 #endif  /* !__GNUC__ */
 
-#if defined(__MINGW32__)
+#if defined(__MINGW32__) || (defined( __clang_major__) && __clang_major__ > 9)
 #  define PRAGMA_BEGIN_PACKED _Pragma("pack(push)") \
                               _Pragma("pack(1)")
 #  define PRAGMA_END_PACKED   _Pragma("pack(pop)")
