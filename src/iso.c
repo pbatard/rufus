@@ -654,6 +654,10 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 	_CDIO_LIST_FOREACH(p_entnode, p_entlist) {
 		if (FormatStatus) goto out;
 		p_statbuf = (iso9660_stat_t*) _cdio_list_node_data(p_entnode);
+		if ((p_statbuf->rr.b3_rock == yep) && enable_rockridge) {
+			if (p_statbuf->rr.u_su_fields & ISO_ROCK_SUF_PL)
+				img_report.has_deep_directories = TRUE;
+		}
 		// Eliminate . and .. entries
 		if ( (strcmp(p_statbuf->filename, ".") == 0)
 			|| (strcmp(p_statbuf->filename, "..") == 0) )

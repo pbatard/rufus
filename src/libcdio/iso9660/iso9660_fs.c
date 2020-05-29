@@ -61,6 +61,7 @@
 
 /** Implementation of iso9660_t type */
 struct _iso9660_s {
+  cdio_header_t header;     /**< Internal header - MUST come first. */
   CdioDataSource_t *stream; /**< Stream pointer */
   bool_3way_t b_xa;         /**< true if has XA attributes. */
   bool_3way_t b_mode2;      /**< true if has mode 2, false for mode 1. */
@@ -92,8 +93,7 @@ struct _iso9660_s {
 			         filesystem inside that it may be
 			         different.
 			     */
-    bool b_have_superblock; /**< Superblock has been read in? */
-
+  bool b_have_superblock;   /**< Superblock has been read in? */
 };
 
 static long int iso9660_seek_read_framesize (const iso9660_t *p_iso,
@@ -174,8 +174,10 @@ iso9660_open_ext_private (const char *psz_path,
 {
   iso9660_t *p_iso = (iso9660_t *) calloc(1, sizeof(iso9660_t)) ;
 
-  if (!p_iso) return NULL;
+  if (!p_iso)
+     return NULL;
 
+  p_iso->header.u_type = CDIO_HEADER_TYPE_ISO;
   p_iso->stream = cdio_stdio_new( psz_path );
   if (NULL == p_iso->stream)
     goto error;
@@ -778,19 +780,34 @@ iso9660_check_dir_block_end(iso9660_dir_t *p_iso9660_dir, unsigned *offset)
   return false;
 }
 
+static inline bool
+_iso9660_is_rock_ridge_enabled(void* p_image)
+{
+  cdio_header_t* p_header = (cdio_header_t*)p_image;
 
+  if (!p_header)
+    return false;
+  if (p_header->u_type == CDIO_HEADER_TYPE_ISO) {
+    iso9660_t* p_iso = (iso9660_t*)p_image;
+    return (p_iso->iso_extension_mask & ISO_EXTENSION_ROCK_RIDGE);
+  }
+  /* Rock Ridge is always enabled for other types */
+  return true;
+}
 
 static iso9660_stat_t *
 _iso9660_dir_to_statbuf (iso9660_dir_t *p_iso9660_dir,
 			 iso9660_stat_t *last_p_stat,
-			 bool_3way_t b_xa, uint8_t u_joliet_level)
+			 void* p_image,
+			 bool_3way_t b_xa,
+			 uint8_t u_joliet_level)
 {
   uint8_t dir_len= iso9660_get_dir_len(p_iso9660_dir);
   iso711_t i_fname;
   unsigned int stat_len;
   iso9660_stat_t *p_stat = last_p_stat;
   char rr_fname[256] = "";
-  int i_rr_fname;
+  int i_rr_fname = 0;
   lsn_t extent_lsn;
   bool first_extent;
 
@@ -814,6 +831,9 @@ _iso9660_dir_to_statbuf (iso9660_dir_t *p_iso9660_dir,
   }
   p_stat->type    = (p_iso9660_dir->file_flags & ISO_DIRECTORY)
     ? _STAT_DIR : _STAT_FILE;
+  /* Ignore Rock Ridge Deep Directory RE entries */
+  if (p_stat->rr.u_su_fields & ISO_ROCK_SUF_RE)
+    goto fail;
 
   /* Test for gaps between extents. Important: Use previous .total_size */
   extent_lsn = from_733 (p_iso9660_dir->extent);
@@ -831,8 +851,11 @@ _iso9660_dir_to_statbuf (iso9660_dir_t *p_iso9660_dir,
   /* Only now update .total_size */
   p_stat->total_size += from_733(p_iso9660_dir->size);
 
-  p_stat->rr.b3_rock = dunno; /*FIXME should do based on mask */
-  p_stat->b_xa    = false;
+#ifdef HAVE_ROCK
+  if (_iso9660_is_rock_ridge_enabled(p_image))
+    p_stat->rr.b3_rock = dunno;
+#endif
+  p_stat->b_xa = false;
 
 #ifndef DO_NOT_WANT_COMPATIBILITY
   if (first_extent) {
@@ -842,8 +865,7 @@ _iso9660_dir_to_statbuf (iso9660_dir_t *p_iso9660_dir,
 #endif /* DO_NOT_WANT_COMPATIBILITY */
 
   /* Only resolve the full filename when we're not dealing with extent */
-  if ((p_iso9660_dir->file_flags & ISO_MULTIEXTENT) == 0)
-  {
+  if ((p_iso9660_dir->file_flags & ISO_MULTIEXTENT) == 0) {
     /* Check if this is the last part of a multiextent file */
     if (!first_extent) {
       if (strlen(p_stat->filename) != i_fname ||
@@ -853,11 +875,9 @@ _iso9660_dir_to_statbuf (iso9660_dir_t *p_iso9660_dir,
 	goto fail;
       }
     }
-    i_rr_fname =
+
 #ifdef HAVE_ROCK
-      get_rock_ridge_filename(p_iso9660_dir, rr_fname, p_stat);
-#else
-      0;
+    i_rr_fname = get_rock_ridge_filename(p_iso9660_dir, p_image, rr_fname, p_stat);
 #endif
 
     if (i_rr_fname > 0) {
@@ -1024,7 +1044,7 @@ _fs_stat_root (CdIo_t *p_cdio)
     p_iso9660_dir = &(p_env->pvd.root_directory_record) ;
 #endif
 
-    p_stat = _iso9660_dir_to_statbuf (p_iso9660_dir, NULL,
+    p_stat = _iso9660_dir_to_statbuf (p_iso9660_dir, NULL, p_cdio,
 				      b_xa, p_env->u_joliet_level);
     return p_stat;
   }
@@ -1046,7 +1066,7 @@ _ifs_stat_root (iso9660_t *p_iso)
 #endif
 
   p_stat = _iso9660_dir_to_statbuf (p_iso9660_dir, NULL,
-				    p_iso->b_xa,
+				    p_iso, p_iso->b_xa,
 				    p_iso->u_joliet_level);
   return p_stat;
 }
@@ -1105,8 +1125,8 @@ _fs_stat_traverse (const CdIo_t *p_cdio, const iso9660_stat_t *_root,
 	/* Do not register remaining extents of ill file */
 	p_iso9660_stat = NULL;
       } else {
-	p_iso9660_stat = _iso9660_dir_to_statbuf (p_iso9660_dir,
-				p_iso9660_stat, dunno, p_env->u_joliet_level);
+	p_iso9660_stat = _iso9660_dir_to_statbuf (p_iso9660_dir, p_iso9660_stat,
+				(CdIo_t*)p_cdio, dunno, p_env->u_joliet_level);
 	if (NULL == p_iso9660_stat)
 	  skip_following_extents = true; /* Start ill file mode */
       }
@@ -1213,7 +1233,7 @@ _fs_iso_stat_traverse (iso9660_t *p_iso, const iso9660_stat_t *_root,
       if (iso9660_check_dir_block_end(p_iso9660_dir, &offset))
 	continue;
 
-      p_stat = _iso9660_dir_to_statbuf (p_iso9660_dir, p_stat,
+      p_stat = _iso9660_dir_to_statbuf (p_iso9660_dir, p_stat, p_iso,
 					p_iso->b_xa, p_iso->u_joliet_level);
 
       if (!p_stat) {
@@ -1476,8 +1496,8 @@ iso9660_fs_readdir (CdIo_t *p_cdio, const char psz_path[])
 	  p_iso9660_stat = NULL;
 	} else {
 	  p_iso9660_stat = _iso9660_dir_to_statbuf(p_iso9660_dir,
-						   p_iso9660_stat, dunno,
-						   p_env->u_joliet_level);
+						   p_iso9660_stat, p_cdio,
+						   dunno, p_env->u_joliet_level);
 	  if (NULL == p_iso9660_stat)
 	    skip_following_extents = true; /* Start ill file mode */
 	}
@@ -1570,10 +1590,13 @@ iso9660_ifs_readdir (iso9660_t *p_iso, const char psz_path[])
 	} else {
 	  p_iso9660_stat = _iso9660_dir_to_statbuf(p_iso9660_dir,
 						   p_iso9660_stat,
+						   p_iso,
 						   p_iso->b_xa,
 						   p_iso->u_joliet_level);
 	  if (NULL == p_iso9660_stat)
 	    skip_following_extents = true; /* Start ill file mode */
+	  else if (p_iso9660_stat->rr.u_su_fields & ISO_ROCK_SUF_RE)
+	    continue; /* Ignore RE entries */
 	}
 	if ((p_iso9660_dir->file_flags & ISO_MULTIEXTENT) == 0)
 	  skip_following_extents = false; /* Ill or not: The file ends now */
@@ -1752,6 +1775,55 @@ iso9660_ifs_find_lsn(iso9660_t *p_iso, lsn_t i_lsn)
   return ret;
 }
 
+#ifdef HAVE_ROCK
+/* Some compilers complain if the prototype is not defined */
+iso9660_stat_t *
+_iso9660_dd_find_lsn(void* p_image, lsn_t i_lsn);
+
+/* Same as above for Rock Ridge deep directory traversing. */
+iso9660_stat_t *
+_iso9660_dd_find_lsn(void* p_image, lsn_t i_lsn)
+{
+  cdio_header_t* p_header = (cdio_header_t*)p_image;
+  char* psz_full_filename = NULL;
+  void* p_image_dd;
+  iso9660_readdir_t* f_readdir;
+  iso9660_stat_t* ret;
+  size_t size;
+
+  switch(p_header->u_type) {
+  case CDIO_HEADER_TYPE_ISO:
+    size = sizeof(iso9660_t);
+    f_readdir = (iso9660_readdir_t*)iso9660_ifs_readdir;
+    break;
+  case CDIO_HEADER_TYPE_CDIO:
+    size = sizeof(CdIo_t);
+    f_readdir = (iso9660_readdir_t*)iso9660_fs_readdir;
+    break;
+  default:
+    cdio_assert(false);
+    return NULL;
+  }
+
+  /* Work with a duplicate to allow concurrency. */
+  p_image_dd = calloc(1, size);
+  if (!p_image_dd) {
+    cdio_warn("Memory duplication error");
+    return NULL;
+  }
+  memcpy(p_image_dd, p_image, size);
+
+  /* Disable the deep directory flag so we can process all entries */
+  p_header = (cdio_header_t*)p_image_dd;
+  p_header->u_flags |= CDIO_HEADER_FLAGS_DISABLE_RR_DD;
+  ret = find_lsn_recurse(p_image_dd, f_readdir, "/", i_lsn, &psz_full_filename);
+  if (psz_full_filename != NULL)
+    free(psz_full_filename);
+  free(p_image_dd);
+  return ret;
+}
+#endif /* HAVE ROCK */
+
 /*!
    Given a directory pointer, find the filesystem entry that contains
    lsn and return information about it.
@@ -1860,8 +1932,8 @@ iso_have_rr_traverse (iso9660_t *p_iso, const iso9660_stat_t *_root,
       if (iso9660_check_dir_block_end(p_iso9660_dir, &offset))
 	continue;
 
-      p_stat = _iso9660_dir_to_statbuf (p_iso9660_dir, NULL, p_iso->b_xa,
-					p_iso->u_joliet_level);
+      p_stat = _iso9660_dir_to_statbuf (p_iso9660_dir, NULL, p_iso,
+					p_iso->b_xa, p_iso->u_joliet_level);
       have_rr = p_stat->rr.b3_rock;
       if ( have_rr != yep) {
 	if (strlen(splitpath[0]) == 0)

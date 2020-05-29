@@ -1,4 +1,5 @@
 /*
+  Copyright (C) 2020 Pete Batard <pete@akeo.ie>
   Copyright (C) 2005, 2008, 2010-2011, 2014, 2017 Rocky Bernstein
   <rocky@gnu.org>
 
@@ -40,6 +41,7 @@
 #include <cdio/logging.h>
 #include <cdio/bytesex.h>
 #include "filemode.h"
+#include "cdio_private.h"
 
 #define CDIO_MKDEV(ma,mi)	((ma)<<16 | (mi))
 
@@ -47,6 +49,10 @@ enum iso_rock_enums iso_rock_enums;
 iso_rock_nm_flag_t iso_rock_nm_flag;
 iso_rock_sl_flag_t iso_rock_sl_flag;
 iso_rock_tf_flag_t iso_rock_tf_flag;
+
+/* Used by get_rock_ridge_filename() */
+extern iso9660_stat_t*
+_iso9660_dd_find_lsn(void* p_image, lsn_t i_lsn);
 
 /* Our own realloc routine tailored for the iso9660_stat_t symlink
    field.  I can't figure out how to make realloc() work without
@@ -142,12 +148,22 @@ realloc_symlink(/*in/out*/ iso9660_stat_t *p_stat, uint8_t i_grow)
     }								  \
   }
 
+/* Indicates if we should process deep directory entries */
+static inline bool
+is_rr_dd_enabled(void * p_image) {
+  cdio_header_t* p_header = (cdio_header_t*)p_image;
+  if (!p_header)
+    return false;
+  return !(p_header->u_flags & CDIO_HEADER_FLAGS_DISABLE_RR_DD);
+}
+
 /*!
   Get
   @return length of name field; 0: not found, -1: to be ignored
 */
 int
 get_rock_ridge_filename(iso9660_dir_t * p_iso9660_dir,
+			/*in*/ void * p_image,
 			/*out*/ char * psz_name,
 			/*in/out*/ iso9660_stat_t *p_stat)
 {
@@ -158,7 +174,8 @@ get_rock_ridge_filename(iso9660_dir_t * p_iso9660_dir,
   int i_namelen = 0;
   int truncate=0;
 
-  if (!p_stat || nope == p_stat->rr.b3_rock) return 0;
+  if (!p_stat || nope == p_stat->rr.b3_rock)
+    return 0;
   *psz_name = 0;
 
   SETUP_ROCK_RIDGE(p_iso9660_dir, chr, len);
@@ -172,19 +189,21 @@ get_rock_ridge_filename(iso9660_dir_t * p_iso9660_dir,
       rr = (iso_extension_record_t *) chr;
       sig = *chr+(*(chr+1) << 8);
 
-      /* We used to check for some vaid values of SIG, specifically
+      /* We used to check for some valid values of SIG, specifically
 	 SP, CE, ER, RR, PX, PN, SL, NM, CL, PL, TF, and ZF.
 	 However there are various extensions to this set. So we
 	 skip checking now.
       */
 
-      if (rr->len == 0) goto out; /* Something got screwed up here */
+      if (rr->len == 0)
+	goto out; /* Something got screwed up here */
       chr += rr->len;
       len -= rr->len;
 
-      switch(sig){
+      switch(sig) {
       case SIG('S','P'):
 	CHECK_SP(goto out);
+	p_stat->rr.u_su_fields |= ISO_ROCK_SUF_SP;
 	break;
       case SIG('C','E'):
 	{
@@ -195,19 +214,21 @@ get_rock_ridge_filename(iso9660_dir_t * p_iso9660_dir,
 	    break;
 	}
 	CHECK_CE;
+	p_stat->rr.u_su_fields |= ISO_ROCK_SUF_CE;
 	break;
       case SIG('E','R'):
-	p_stat->rr.b3_rock = yep;
 	cdio_debug("ISO 9660 Extensions: ");
 	{
 	  int p;
-	  for(p=0;p<rr->u.ER.len_id;p++) cdio_debug("%c",rr->u.ER.data[p]);
+	  for (p=0; p < rr->u.ER.len_id; p++)
+	    cdio_debug("%c", rr->u.ER.data[p]);
 	}
 	break;
       case SIG('N','M'):
 	/* Alternate name */
-	p_stat->rr.b3_rock = yep;
-	if (truncate) break;
+	p_stat->rr.u_su_fields |= ISO_ROCK_SUF_NM;
+	if (truncate)
+	  break;
 	if (rr->u.NM.flags & ISO_ROCK_NM_PARENT) {
 	  i_namelen = sizeof("..");
 	  strncat(psz_name, "..", i_namelen);
@@ -235,7 +256,7 @@ get_rock_ridge_filename(iso9660_dir_t * p_iso9660_dir,
 	p_stat->rr.st_nlinks = from_733(rr->u.PX.st_nlinks);
 	p_stat->rr.st_uid    = from_733(rr->u.PX.st_uid);
 	p_stat->rr.st_gid    = from_733(rr->u.PX.st_gid);
-	p_stat->rr.b3_rock    = yep;
+	p_stat->rr.u_su_fields |= ISO_ROCK_SUF_PX;
 	break;
       case SIG('S','L'):
 	{
@@ -246,6 +267,7 @@ get_rock_ridge_filename(iso9660_dir_t * p_iso9660_dir,
 	  slen = rr->len - 5;
 	  p_sl = &rr->u.SL.link;
 	  p_stat->rr.i_symlink = symlink_len;
+	  p_stat->rr.u_su_fields |= ISO_ROCK_SUF_SL;
 	  while (slen > 1){
 	    rootflag = 0;
 	    switch(p_sl->flags &~1){
@@ -294,9 +316,6 @@ get_rock_ridge_filename(iso9660_dir_t * p_iso9660_dir,
 	realloc_symlink(p_stat, 1);
 	p_stat->rr.psz_symlink[symlink_len]='\0';
 	break;
-      case SIG('R','E'):
-	free(buffer);
-	return -1;
       case SIG('T','F'):
 	/* Time stamp(s) for a file */
 	{
@@ -308,215 +327,54 @@ get_rock_ridge_filename(iso9660_dir_t * p_iso9660_dir,
 	  add_time(ISO_ROCK_TF_BACKUP,     backup);
 	  add_time(ISO_ROCK_TF_EXPIRATION, expiration);
 	  add_time(ISO_ROCK_TF_EFFECTIVE,  effective);
-	  p_stat->rr.b3_rock = yep;
+	  p_stat->rr.u_su_fields |= ISO_ROCK_SUF_TF;
 	  break;
 	}
-      default:
-	break;
-      }
-    }
-  }
-  free(buffer);
-  return i_namelen; /* If 0, this file did not have a NM field */
- out:
-  free(buffer);
-  return 0;
-}
-
-static int
-parse_rock_ridge_stat_internal(iso9660_dir_t *p_iso9660_dir,
-			       iso9660_stat_t *p_stat, int regard_xa)
-{
-  int len;
-  unsigned char * chr;
-  int symlink_len = 0;
-  CONTINUE_DECLS;
-
-  if (nope == p_stat->rr.b3_rock) return 0;
-
-  SETUP_ROCK_RIDGE(p_iso9660_dir, chr, len);
-  if (regard_xa)
-    {
-      chr+=14;
-      len-=14;
-      if (len<0) len=0;
-    }
-
-  /* repeat:*/
-  {
-    int sig;
-    iso_extension_record_t * rr;
-    int rootflag;
-
-    while (len > 1){ /* There may be one byte for padding somewhere */
-      rr = (iso_extension_record_t *) chr;
-      if (rr->len == 0) goto out; /* Something got screwed up here */
-      sig = from_721(*chr);
-      chr += rr->len;
-      len -= rr->len;
-
-      switch(sig){
-      case SIG('S','P'):
-	CHECK_SP(goto out);
-	break;
-      case SIG('C','E'):
-	CHECK_CE;
-	break;
-      case SIG('E','R'):
-	p_stat->rr.b3_rock = yep;
-	cdio_debug("ISO 9660 Extensions: ");
-	{ int p;
-	  for(p=0;p<rr->u.ER.len_id;p++) cdio_debug("%c",rr->u.ER.data[p]);
-	}
-	break;
-      case SIG('P','X'):
-	p_stat->rr.st_mode   = from_733(rr->u.PX.st_mode);
-	p_stat->rr.st_nlinks = from_733(rr->u.PX.st_nlinks);
-	p_stat->rr.st_uid    = from_733(rr->u.PX.st_uid);
-	p_stat->rr.st_gid    = from_733(rr->u.PX.st_gid);
-	break;
-      case SIG('P','N'):
-	/* Device major,minor number */
-	{ int32_t high, low;
-	  high = from_733(rr->u.PN.dev_high);
-	  low = from_733(rr->u.PN.dev_low);
-	  /*
-	   * The Rock Ridge standard specifies that if sizeof(dev_t) <= 4,
-	   * then the high field is unused, and the device number is completely
-	   * stored in the low field.  Some writers may ignore this subtlety,
-	   * and as a result we test to see if the entire device number is
-	   * stored in the low field, and use that.
-	   */
-	  if((low & ~0xff) && high == 0) {
-	    p_stat->rr.i_rdev = CDIO_MKDEV(low >> 8, low & 0xff);
-	  } else {
-	    p_stat->rr.i_rdev = CDIO_MKDEV(high, low);
-	  }
-	}
-	break;
-      case SIG('T','F'):
-	/* Time stamp(s) for a file */
-	{
-	  int cnt = 0;
-	  add_time(ISO_ROCK_TF_CREATE,     create);
-	  add_time(ISO_ROCK_TF_MODIFY,     modify);
-	  add_time(ISO_ROCK_TF_ACCESS,     access);
-	  add_time(ISO_ROCK_TF_ATTRIBUTES, attributes);
-	  add_time(ISO_ROCK_TF_BACKUP,     backup);
-	  add_time(ISO_ROCK_TF_EXPIRATION, expiration);
-	  add_time(ISO_ROCK_TF_EFFECTIVE,  effective);
-	  p_stat->rr.b3_rock = yep;
-	  break;
-	}
-      case SIG('S','L'):
-	{
-	  /* Symbolic link */
-	  uint8_t slen;
-	  iso_rock_sl_part_t * p_sl;
-	  iso_rock_sl_part_t * p_oldsl;
-	  slen = rr->len - 5;
-	  p_sl = &rr->u.SL.link;
-	  p_stat->rr.i_symlink = symlink_len;
-	  while (slen > 1){
-	    rootflag = 0;
-	    switch(p_sl->flags &~1){
-	    case 0:
-	      realloc_symlink(p_stat, p_sl->len);
-	      if (p_sl->len)
-		memcpy(&(p_stat->rr.psz_symlink[p_stat->rr.i_symlink]),
-		       p_sl->text, p_sl->len);
-	      p_stat->rr.i_symlink += p_sl->len;
-	      break;
-	    case 4:
-	      realloc_symlink(p_stat, 1);
-	      p_stat->rr.psz_symlink[p_stat->rr.i_symlink++] = '.';
-	      /* continue into next case. */
-	    case 2:
-	      realloc_symlink(p_stat, 1);
-	      p_stat->rr.psz_symlink[p_stat->rr.i_symlink++] = '.';
-	      break;
-	    case 8:
-	      rootflag = 1;
-	      realloc_symlink(p_stat, 1);
-	      p_stat->rr.psz_symlink[p_stat->rr.i_symlink++] = '/';
-	      p_stat->rr.i_symlink++;
-	      break;
-	    default:
-	      cdio_warn("Symlink component flag not implemented");
-	    }
-	    slen -= p_sl->len + 2;
-	    p_oldsl = p_sl;
-	    p_sl = (iso_rock_sl_part_t *) (((char *) p_sl) + p_sl->len + 2);
-
-	    if (slen < 2) {
-	      if (((rr->u.SL.flags & 1) != 0) && ((p_oldsl->flags & 1) == 0))
-		p_stat->rr.i_symlink += 1;
-	      break;
-	    }
-
-	    /*
-	     * If this component record isn't continued, then append a '/'.
-	     */
-	    if (!rootflag && (p_oldsl->flags & 1) == 0) {
-	      realloc_symlink(p_stat, 1);
-	      p_stat->rr.psz_symlink[p_stat->rr.i_symlink++] = '/';
-	    }
-	  }
-	}
-	symlink_len = p_stat->rr.i_symlink;
-	realloc_symlink(p_stat, 1);
-	p_stat->rr.psz_symlink[symlink_len]='\0';
-	break;
-      case SIG('R','E'):
-	cdio_warn("Attempt to read p_stat for relocated directory");
-	goto out;
-#ifdef FINISHED
       case SIG('C','L'):
+	/* Child Link for a deep directory */
+	if (!is_rr_dd_enabled(p_image))
+	  break;
 	{
-	  iso9660_stat_t * reloc;
-	  ISOFS_I(p_stat)->i_first_extent = from_733(rr->u.CL.location);
-	  reloc = isofs_iget(p_stat->rr.i_sb, p_stat->rr.i_first_extent, 0);
-	  if (!reloc)
-	    goto out;
-	  p_stat->rr.st_mode   = reloc->st_mode;
-	  p_stat->rr.st_nlinks = reloc->st_nlinks;
-	  p_stat->rr.st_uid    = reloc->st_uid;
-	  p_stat->rr.st_gid    = reloc->st_gid;
-	  p_stat->rr.i_rdev    = reloc->i_rdev;
-	  p_stat->rr.i_symlink = reloc->i_symlink;
-	  p_stat->rr.i_blocks  = reloc->i_blocks;
-	  p_stat->rr.i_atime   = reloc->i_atime;
-	  p_stat->rr.i_ctime   = reloc->i_ctime;
-	  p_stat->rr.i_mtime   = reloc->i_mtime;
-	  iput(reloc);
+	  iso9660_stat_t* target = NULL;
+	  p_stat->rr.u_su_fields |= ISO_ROCK_SUF_CL;
+	  target = _iso9660_dd_find_lsn(p_image, from_733(rr->u.PL.location));
+	  if (!target) {
+	    cdio_warn("Could not get Rock Ridge deep directory child");
+	    break;
+	  }
+	  memcpy(p_stat, target, sizeof(iso9660_stat_t));
+	  /* Prevent the symlink from being freed on the duplicated struct */
+	  target->rr.psz_symlink = NULL;
+	  iso9660_stat_free(target);
 	}
 	break;
-#endif
+      case SIG('P','L'):
+	/* Parent link of a deep directory */
+	if (is_rr_dd_enabled(p_image))
+	  p_stat->rr.u_su_fields |= ISO_ROCK_SUF_PL;
+	break;
+      case SIG('R','E'):
+	/* Relocated entry for a deep directory */
+	if (is_rr_dd_enabled(p_image))
+	  p_stat->rr.u_su_fields |= ISO_ROCK_SUF_RE;
+	break;
+      case SIG('S','F'):
+	/* Sparse File */
+	p_stat->rr.u_su_fields |= ISO_ROCK_SUF_SF;
+	cdio_warn("Rock Ridge Sparse File detected");
+	break;
       default:
 	break;
       }
     }
   }
- out:
+  free(buffer);
+  if (p_stat->rr.u_su_fields & ISO_ROCK_SUF_FORMAL)
+    p_stat->rr.b3_rock = yep;
+  return i_namelen; /* If 0, this file did not have a NM field */
+out:
   free(buffer);
   return 0;
-}
-
-int
-parse_rock_ridge_stat(iso9660_dir_t *p_iso9660_dir,
-		      /*out*/ iso9660_stat_t *p_stat)
-{
-  int result;
-
-  if (!p_stat) return 0;
-
-  result = parse_rock_ridge_stat_internal(p_iso9660_dir, p_stat, 0);
-  /* if Rock-Ridge flag was reset and we didn't look for attributes
-   * behind eventual XA attributes, have a look there */
-  if (0xFF == p_stat->rr.s_rock_offset && nope != p_stat->rr.b3_rock) {
-    result = parse_rock_ridge_stat_internal(p_iso9660_dir, p_stat, 14);
-  }
-  return result;
 }
 
 #define BUF_COUNT 16

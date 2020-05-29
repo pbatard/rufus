@@ -55,7 +55,7 @@ static inline char *libcdio_strndup(const char *s, size_t n)
     if (!result)
         return 0;
     result[len] = '\0';
-    return (char *) strncpy (result, s, len);
+    return (char *) memcpy (result, s, len);
 }
 #endif /*HAVE_STRNDUP*/
 
@@ -467,13 +467,23 @@ extern "C" {
 
   } cdio_funcs_t;
 
+  typedef struct {
+    uint16_t    u_type;
+    uint16_t    u_flags;
+  } cdio_header_t;
+
+#define CDIO_HEADER_TYPE_CDIO           0x0000
+#define CDIO_HEADER_TYPE_ISO            0x0001
+
+#define CDIO_HEADER_FLAGS_DISABLE_RR_DD 0x0001
 
   /*! Implementation of CdIo type */
   struct _CdIo {
-    driver_id_t driver_id; /**< Particular driver opened. */
-    cdio_funcs_t op;       /**< driver-specific routines handling
-                                implementation*/
-    void *env;             /**< environment. Passed to routine above. */
+    cdio_header_t header;    /**< Internal header - MUST come first. */
+    driver_id_t   driver_id; /**< Particular driver opened. */
+    cdio_funcs_t  op;        /**< driver-specific routines handling
+                                  implementation. */
+    void*         env;       /**< environment. Passed to routine above. */
   };
 
   /* This is used in drivers that must keep their own internal

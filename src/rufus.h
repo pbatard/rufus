@@ -338,6 +338,7 @@ typedef struct {
 	uint8_t has_symlinks;
 	BOOLEAN has_4GB_file;
 	BOOLEAN has_long_filename;
+	BOOLEAN has_deep_directories;
 	BOOLEAN has_bootmgr;
 	BOOLEAN has_bootmgr_efi;
 	BOOLEAN has_autorun;

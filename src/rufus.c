@@ -1052,6 +1052,7 @@ static void DisplayISOProps(void)
 
 	PRINT_ISO_PROP(img_report.has_4GB_file, "  Has a >4GB file");
 	PRINT_ISO_PROP(img_report.has_long_filename, "  Has a >64 chars filename");
+	PRINT_ISO_PROP(img_report.has_deep_directories, "  Has a Rock Ridge deep directory");
 	PRINT_ISO_PROP(HAS_SYSLINUX(img_report), "  Uses: Syslinux/Isolinux v%s", img_report.sl_version_str);
 	if (HAS_SYSLINUX(img_report) && (SL_MAJOR(img_report.sl_version) < 5)) {
 		for (i = 0; i<NB_OLD_C32; i++) {

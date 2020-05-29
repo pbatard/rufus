@@ -190,12 +190,12 @@ typedef struct iso_rock_nm_s {
 
 /*! Child link. See Section 4.1.5.1 */
 typedef struct iso_rock_cl_s {
-  char location[1];
+  iso733_t location;
 } GNUC_PACKED iso_rock_cl_t ;
 
 /*! Parent link. See Section 4.1.5.2 */
 typedef struct iso_rock_pl_s {
-  char location[1];
+  iso733_t location;
 } GNUC_PACKED iso_rock_pl_t ;
 
 /*! These are the bits and their meanings for flags in the TF structure. */
@@ -264,8 +264,28 @@ typedef struct iso_extension_record_s {
     iso_rock_cl_t  CL;  /**< Rock Ridge child link */
     iso_rock_pl_t  PL;  /**< Rock Ridge parent link */
     iso_rock_tf_t  TF;  /**< Rock Ridge timestamp(s) for a file */
+    iso_rock_sf_t  SF;  /**< Rock Ridge sparse file */
   } u;
 } GNUC_PACKED iso_extension_record_t;
+
+/* Bits for the u_su_fields of iso_rock_statbuf_t */
+#define ISO_ROCK_SUF_SP 0x00000001
+#define ISO_ROCK_SUF_ER 0x00000002
+#define ISO_ROCK_SUF_CE 0x00000004
+#define ISO_ROCK_SUF_PX 0x00000008
+#define ISO_ROCK_SUF_PN 0x00000010
+#define ISO_ROCK_SUF_SL 0x00000020
+#define ISO_ROCK_SUF_NM 0x00000040
+#define ISO_ROCK_SUF_TF 0x00000080
+#define ISO_ROCK_SUF_CL 0x00000100
+#define ISO_ROCK_SUF_PL 0x00000200
+#define ISO_ROCK_SUF_RE 0x00000400
+#define ISO_ROCK_SUF_SF 0x00000800
+
+#define ISO_ROCK_SUF_FORMAL (ISO_ROCK_SUF_ER | ISO_ROCK_SUF_PX | ISO_ROCK_SUF_PN | \
+                             ISO_ROCK_SUF_SL | ISO_ROCK_SUF_NM | ISO_ROCK_SUF_CL | \
+                             ISO_ROCK_SUF_PL | ISO_ROCK_SUF_RE | ISO_ROCK_SUF_TF | \
+                             ISO_ROCK_SUF_SF)
 
 typedef struct iso_rock_time_s {
   bool          b_used;     /**< If true, field has been set and  is valid. 
@@ -306,19 +326,23 @@ typedef struct iso_rock_statbuf_s {
                                          9660:9.5.6. */
   iso_rock_time_t effective;          /**< Effective time; See ISO 9660:9.5.7.
                                        */
-  uint32_t i_rdev;                    /**< the upper 16-bits is major device 
+  uint32_t        i_rdev;             /**< the upper 16-bits is major device 
                                          number, the lower 16-bits is the
                                          minor device number */
+  uint32_t        u_su_fields;        /**< System Use field attributes */
 
 } iso_rock_statbuf_t;
-  
+
 PRAGMA_END_PACKED
 
 /*! return length of name field; 0: not found, -1: to be ignored */
-int get_rock_ridge_filename(iso9660_dir_t * de, /*out*/ char * retname, 
+int get_rock_ridge_filename(iso9660_dir_t * de,
+                            /*in*/ void * p_iso,
+                            /*out*/ char * retname,
                             /*out*/ iso9660_stat_t *p_stat);
 
-  int parse_rock_ridge_stat(iso9660_dir_t *de, /*out*/ iso9660_stat_t *p_stat);
+int parse_rock_ridge_stat(iso9660_dir_t *de,
+                          /*out*/ iso9660_stat_t *p_stat);
 
   /*!
     Returns POSIX mode bitstring for a given file.
