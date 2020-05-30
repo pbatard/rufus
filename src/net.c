@@ -264,8 +264,8 @@ static HINTERNET GetInternetSession(BOOL bRetry)
 {
 	int i;
 	char agent[64];
-	BOOL r;
-	DWORD dwFlags, dwTimeout = NET_SESSION_TIMEOUT;
+	BOOL r, decodingSupport = TRUE;
+	DWORD dwFlags, dwTimeout = NET_SESSION_TIMEOUT, protocalSupport = HTTP_PROTOCOL_FLAG_HTTP2;
 	HINTERNET hSession = NULL;
 
 	PF_TYPE_DECL(WINAPI, BOOL, InternetGetConnectedState, (LPDWORD, DWORD));
@@ -295,6 +295,10 @@ static HINTERNET GetInternetSession(BOOL bRetry)
 	pfInternetSetOptionA(hSession, INTERNET_OPTION_CONNECT_TIMEOUT, (LPVOID)&dwTimeout, sizeof(dwTimeout));
 	pfInternetSetOptionA(hSession, INTERNET_OPTION_SEND_TIMEOUT, (LPVOID)&dwTimeout, sizeof(dwTimeout));
 	pfInternetSetOptionA(hSession, INTERNET_OPTION_RECEIVE_TIMEOUT, (LPVOID)&dwTimeout, sizeof(dwTimeout));
+	// Enable gzip and deflate decoding schemes
+	pfInternetSetOptionA(hSession, INTERNET_OPTION_HTTP_DECODING, (LPVOID)&decodingSupport, sizeof(decodingSupport));
+	// Enable HTTP/2 protocol support
+	pfInternetSetOptionA(hSession, INTERNET_OPTION_ENABLE_HTTP_PROTOCOL, (LPVOID)&protocalSupport, sizeof(protocalSupport));
 
 out:
 	return hSession;
@@ -384,7 +388,7 @@ uint64_t DownloadToFileOrBuffer(const char* url, const char* file, BYTE** buffer
 		goto out;
 	}
 
-	if (!pfHttpSendRequestA(hRequest, NULL, 0, NULL, 0)) {
+	if (!pfHttpSendRequestA(hRequest, "Accept-Encoding: gzip, deflate", -1L, NULL, 0)) {
 		uprintf("Unable to send request: %s", WinInetErrorString());
 		goto out;
 	}
@@ -727,7 +731,7 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 				INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTP|INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTPS|
 				INTERNET_FLAG_NO_COOKIES|INTERNET_FLAG_NO_UI|INTERNET_FLAG_NO_CACHE_WRITE|INTERNET_FLAG_HYPERLINK|
 				((UrlParts.nScheme == INTERNET_SCHEME_HTTPS)?INTERNET_FLAG_SECURE:0), (DWORD_PTR)NULL);
-			if ((hRequest == NULL) || (!pfHttpSendRequestA(hRequest, NULL, 0, NULL, 0))) {
+			if ((hRequest == NULL) || (!pfHttpSendRequestA(hRequest, "Accept-Encoding: gzip, deflate", -1L, NULL, 0))) {
 				uprintf("Unable to send request: %s", WinInetErrorString());
 				goto out;
 			}
@@ -1091,7 +1095,7 @@ BOOL IsDownloadable(const char* url)
 	if (hRequest == NULL)
 		goto out;
 
-	if (!pfHttpSendRequestA(hRequest, NULL, 0, NULL, 0))
+	if (!pfHttpSendRequestA(hRequest, "Accept-Encoding: gzip, deflate", -1L, NULL, 0))
 		goto out;
 
 	// Get the file size
