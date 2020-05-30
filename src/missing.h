@@ -104,10 +104,19 @@ static __inline void *_reallocf(void *ptr, size_t size) {
 
 /* MinGW doesn't know these */
 #ifndef WM_CLIENTSHUTDOWN
-#define WM_CLIENTSHUTDOWN 0x3B
+#define WM_CLIENTSHUTDOWN                       0x3B
 #endif
 #ifndef WM_COPYGLOBALDATA
-#define WM_COPYGLOBALDATA 0x49
+#define WM_COPYGLOBALDATA                       0x49
+#endif
+#ifndef INTERNET_OPTION_ENABLE_HTTP_PROTOCOL
+#define INTERNET_OPTION_ENABLE_HTTP_PROTOCOL    148
+#endif
+#ifndef INTERNET_OPTION_HTTP_DECODING
+#define INTERNET_OPTION_HTTP_DECODING           65
+#endif
+#ifndef HTTP_PROTOCOL_FLAG_HTTP2
+#define HTTP_PROTOCOL_FLAG_HTTP2                2
 #endif
 
 /* The following is used for native ISO mounting in Windows 8 or later */
