@@ -109,6 +109,15 @@ static __inline void *_reallocf(void *ptr, size_t size) {
 #ifndef WM_COPYGLOBALDATA
 #define WM_COPYGLOBALDATA 0x49
 #endif
+#ifndef INTERNET_OPTION_ENABLE_HTTP_PROTOCOL
+#define INTERNET_OPTION_ENABLE_HTTP_PROTOCOL 148
+#endif
+#ifndef INTERNET_OPTION_HTTP_DECODING
+#define INTERNET_OPTION_HTTP_DECODING 65
+#endif
+#ifndef HTTP_PROTOCOL_FLAG_HTTP2
+#define HTTP_PROTOCOL_FLAG_HTTP2 0x2
+#endif
 
 /* The following is used for native ISO mounting in Windows 8 or later */
 #define VIRTUAL_STORAGE_TYPE_VENDOR_MICROSOFT \
