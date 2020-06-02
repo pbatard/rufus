@@ -342,7 +342,7 @@ static BOOL FormatNativeVds(DWORD DriveIndex, uint64_t PartitionOffset, DWORD Cl
 	VolumeName = GetLogicalName(DriveIndex, PartitionOffset, TRUE, TRUE);
 	wVolumeName = utf8_to_wchar(VolumeName);
 	if (wVolumeName == NULL) {
-		uprintf("Could not read volume name");
+		uprintf("Could not read volume name (%s)", VolumeName);
 		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_GEN_FAILURE;
 		goto out;
 	}
@@ -583,7 +583,7 @@ static BOOL FormatNative(DWORD DriveIndex, uint64_t PartitionOffset, DWORD Clust
 	VolumeName = GetLogicalName(DriveIndex, PartitionOffset, TRUE, TRUE);
 	wVolumeName = utf8_to_wchar(VolumeName);
 	if (wVolumeName == NULL) {
-		uprintf("Could not read volume name");
+		uprintf("Could not read volume name (%s)", VolumeName);
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_GEN_FAILURE;
 		goto out;
 	}
