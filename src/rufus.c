@@ -2244,7 +2244,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				} else {
 					char* old_image_path = image_path;
 					// If declared globaly, lmprintf(MSG_036) would be called on each message...
-					EXT_DECL(img_ext, NULL, __VA_GROUP__("*.iso;*.img;*.vhd;*.gz;*.bzip2;*.bz2;*.xz;*.lzma;*.Z;*.zip"),
+					EXT_DECL(img_ext, NULL, __VA_GROUP__("*.iso;*.img;*.vhd;*.usb;*.bz2;*.bzip2;*.gz;*.lzma;*.xz;*.Z;*.zip"),
 						__VA_GROUP__(lmprintf(MSG_036)));
 					image_path = FileDialog(FALSE, NULL, &img_ext, 0);
 					if (image_path == NULL) {
@@ -2470,10 +2470,14 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		MessageBoxA(NULL, "This is a Test version of " APPLICATION_NAME " - It is meant to be used for "
 			"testing ONLY and should NOT be distributed as a release.", "TEST VERSION", MSG_INFO);
 #endif
+		// Let's not take any risk: Ask Windows to redraw the whole dialog before we exit init
+		RedrawWindow(hMainDialog, NULL, NULL, RDW_ALLCHILDREN | RDW_UPDATENOW);
+		InvalidateRect(hMainDialog, NULL, TRUE);
+
 		return (INT_PTR)FALSE;
 
-		// The things one must do to get an ellipsis and text alignment on the status bar...
 	case WM_DRAWITEM:
+		// The things one must do to get an ellipsis and text alignment on the status bar...
 		if (wParam == IDC_STATUS) {
 			pDI = (DRAWITEMSTRUCT*)lParam;
 			if (nWindowsVersion >= WINDOWS_10)
