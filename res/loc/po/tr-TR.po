@@ -68,7 +68,7 @@ msgstr "Biçimlendirme Seçenekleri"
 
 #. • IDD_DIALOG → IDS_FILE_SYSTEM_TXT
 msgid "File system"
-msgstr "Dosya Sistemi"
+msgstr "Dosya sistemi"
 
 #. • IDD_DIALOG → IDS_CLUSTER_SIZE_TXT
 msgid "Cluster size"
@@ -76,15 +76,15 @@ msgstr "Ayırma Birimi Boyutu"
 
 #. • IDD_DIALOG → IDS_LABEL_TXT
 msgid "Volume label"
-msgstr "Yeni Birim Etiketi"
+msgstr "Yeni birim etiketi"
 
 #. • IDD_DIALOG → IDC_QUICK_FORMAT
 msgid "Quick format"
-msgstr "Hızlı Biçimlendir"
+msgstr "Hızlı biçimlendir"
 
 #. • IDD_DIALOG → IDC_BAD_BLOCKS
 msgid "Check device for bad blocks"
-msgstr "Hatalı Bloklar için Aygıtı Denetle"
+msgstr "Hatalı bloklar için aygıtı denetle"
 
 #. • IDD_DIALOG → IDC_EXTENDED_LABEL
 msgid "Create extended label and icon files"
@@ -151,7 +151,7 @@ msgstr "Kaydet"
 
 #. • IDD_UPDATE_POLICY → IDD_UPDATE_POLICY
 msgid "Update policy and settings"
-msgstr "Güncelleme İlkesi ve Ayarlar"
+msgstr "Güncelleme ilkesi ve ayarlar"
 
 #. • IDD_UPDATE_POLICY → IDS_UPDATE_SETTINGS_GRP
 msgid "Settings"
