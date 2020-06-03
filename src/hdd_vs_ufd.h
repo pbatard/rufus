@@ -273,6 +273,8 @@ static vidpid_score_t vidpid_score[] = {
 	{ 0x067b, 0x2733, -20 },	// EAGET Mass Storage USB Device
 	{ 0x067b, 0x3400, -10 },	// Hi-Speed Flash Disk with TruePrint AES3400
 	{ 0x067b, 0x3500, -10 },	// Hi-Speed Flash Disk with TruePrint AES3500
+	// Sandisk exceptions
+	{ 0x0781, 0x5580, -20 },
 	// Freecom exceptions
 	{ 0x07ab, 0xfcab, -20 },	// 4 GB UFD
 	// Samsung exceptions

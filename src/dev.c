@@ -419,9 +419,9 @@ BOOL GetOpticalMedia(IMG_SAVE* img_save)
 /* For debugging user reports of HDDs vs UFDs */
 //#define FORCED_DEVICE
 #ifdef FORCED_DEVICE
-#define FORCED_VID 0x05DC
-#define FORCED_PID 0xBA12
-#define FORCED_NAME "Lexar SFF-SSD SCSI Disk Device"
+#define FORCED_VID 0x0781
+#define FORCED_PID 0x5580
+#define FORCED_NAME "SanDisk SSD U100 16GB 1 USB Device"
 #endif
 
 /*
