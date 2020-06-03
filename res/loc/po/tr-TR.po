@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 3.5\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2020-03-18 15:51+0000\n"
-"PO-Revision-Date: 2020-03-18 15:51+0000\n"
+"POT-Creation-Date: 2020-06-03 18:02+0100\n"
+"PO-Revision-Date: 2020-06-03 18:02+0100\n"
 "Language: tr_TR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Rufus-LCID: 0x041F\n"
 "Last-Translator: \n"
 "Language-Team: \n"
-"X-Generator: Poedit 2.3\n"
+"X-Generator: Poedit 2.3.1\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -68,7 +68,7 @@ msgstr "Biçimlendirme Seçenekleri"
 
 #. • IDD_DIALOG → IDS_FILE_SYSTEM_TXT
 msgid "File system"
-msgstr "Dosya Sistemi"
+msgstr "Dosya sistemi"
 
 #. • IDD_DIALOG → IDS_CLUSTER_SIZE_TXT
 msgid "Cluster size"
@@ -76,15 +76,15 @@ msgstr "Ayırma Birimi Boyutu"
 
 #. • IDD_DIALOG → IDS_LABEL_TXT
 msgid "Volume label"
-msgstr "Yeni Birim Etiketi"
+msgstr "Yeni birim etiketi"
 
 #. • IDD_DIALOG → IDC_QUICK_FORMAT
 msgid "Quick format"
-msgstr "Hızlı Biçimlendir"
+msgstr "Hızlı biçimlendir"
 
 #. • IDD_DIALOG → IDC_BAD_BLOCKS
 msgid "Check device for bad blocks"
-msgstr "Hatalı Bloklar için Aygıtı Denetle"
+msgstr "Hatalı bloklar için aygıtı denetle"
 
 #. • IDD_DIALOG → IDC_EXTENDED_LABEL
 msgid "Create extended label and icon files"
@@ -151,7 +151,7 @@ msgstr "Kaydet"
 
 #. • IDD_UPDATE_POLICY → IDD_UPDATE_POLICY
 msgid "Update policy and settings"
-msgstr "Güncelleme İlkesi ve Ayarlar"
+msgstr "Güncelleme ilkesi ve ayarlar"
 
 #. • IDD_UPDATE_POLICY → IDS_UPDATE_SETTINGS_GRP
 msgid "Settings"
@@ -1309,8 +1309,8 @@ msgid "Formatting (%s) - estimated duration %d:%02d..."
 msgstr "Biçimlendiriliyor (%s) - Tahmini Süre %d:%02d..."
 
 #. • MSG_221
-msgid "Setting Label (This may take a while)..."
-msgstr "Etiket Ayarlanıyor (Biraz zaman alabilir)..."
+msgid "Setting Label (%s)..."
+msgstr "Etiket Ayarlanıyor (%s)..."
 
 #. • MSG_222
 #.
@@ -1355,8 +1355,8 @@ msgid "Copying ISO files: %s"
 msgstr "ISO Dosyaları Kopyalanıyor: %s"
 
 #. • MSG_232
-msgid "Win7 EFI boot setup (This may take a while)..."
-msgstr "Win7 EFI Açılış Kurulumu (Biraz zaman alabilir)..."
+msgid "Win7 EFI boot setup (%s)..."
+msgstr "Win7 EFI Açılış Kurulumu (%s)..."
 
 #. • MSG_233
 msgid "Finalizing, please wait..."
@@ -1391,8 +1391,8 @@ msgid "Partitioning (%s)..."
 msgstr "Bölümlendiriliyor (%s)..."
 
 #. • MSG_239
-msgid "Deleting partitions..."
-msgstr "Bölümler siliniyor..."
+msgid "Deleting partitions (%s)..."
+msgstr "Bölümler siliniyor (%s)..."
 
 #. • MSG_240
 #.
@@ -1722,3 +1722,11 @@ msgstr "Windows'u başka bir diske yüklemek için bu cihazı kullanmak isteyip 
 #. It's the same as MSG_286 but with a process that *may* be faster, hence the name.
 msgid "Fast-zeroing drive: %s"
 msgstr "Hızlı sürücü sıfırlama: %s"
+
+#. • MSG_307
+msgid "This may take a while"
+msgstr "Biraz zaman alabilir"
+
+#. • MSG_308
+msgid "VHD detection"
+msgstr ""
