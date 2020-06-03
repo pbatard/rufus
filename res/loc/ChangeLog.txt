@@ -5,8 +5,10 @@ To edit a translation, please make sure to follow:
 https://github.com/pbatard/rufus/wiki/Localization#Editing_an_existing_translation
 Or simply download https://rufus-web.akeo.ie/locale/pollock.exe and follow its directions.
 
-o v3.?
+o v3.*
   - *UPDATED*  MSG_068 "Error while partitioning drive." -> "Could not partition drive."
+  You can test this new message with <Alt>-<G>
+  - *NEW*      MSG_308 "VHD detection"
 
 o v3.5 (2019.03.12)
   The following 3 messages can be tested by creating a UEFI:NTFS drive in Rufus ('Show advanced drive properties' must be enabled

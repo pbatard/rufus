@@ -3397,7 +3397,7 @@ relaunch:
 			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'G')) {
 				enable_VHDs = !enable_VHDs;
 				WriteSettingBool(SETTING_DISABLE_VHDS, !enable_VHDs);
-				PrintStatusTimeout(lmprintf(MSG_307), enable_VHDs);
+				PrintStatusTimeout(lmprintf(MSG_308), enable_VHDs);
 				GetDevices(0);
 				continue;
 			}

@@ -1779,7 +1779,7 @@ DWORD WINAPI FormatThread(void* param)
 	// It kind of blows, but we have to relinquish access to the physical drive
 	// for VDS to be able to delete the partitions that reside on it...
 	safe_unlockclose(hPhysicalDrive);
-	PrintInfoDebug(0, MSG_239);
+	PrintInfoDebug(0, MSG_239, lmprintf(MSG_307));
 	if (!DeletePartitions(DriveIndex)) {
 		SetLastError(FormatStatus);
 		uprintf("Notice: Could not delete partitions: %s", WindowsErrorString());
@@ -2162,7 +2162,7 @@ DWORD WINAPI FormatThread(void* param)
 				}
 				// EFI mode selected, with no 'boot###.efi' but Windows 7 x64's 'bootmgr.efi' (bit #0)
 				if (((target_type == TT_UEFI) || allow_dual_uefi_bios) && HAS_WIN7_EFI(img_report)) {
-					PrintInfoDebug(0, MSG_232);
+					PrintInfoDebug(0, MSG_232, lmprintf(MSG_307));
 					img_report.wininst_path[0][0] = drive_name[0];
 					efi_dst[0] = drive_name[0];
 					efi_dst[sizeof(efi_dst) - sizeof("\\bootx64.efi")] = 0;

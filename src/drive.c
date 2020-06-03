@@ -1800,7 +1800,7 @@ BOOL InitializeDisk(HANDLE hDrive)
 	DWORD size;
 	CREATE_DISK CreateDisk = {PARTITION_STYLE_RAW, {{0}}};
 
-	PrintInfoDebug(0, MSG_239);
+	uprintf("Initializing disk...");
 
 	size = sizeof(CreateDisk);
 	r = DeviceIoControl(hDrive, IOCTL_DISK_CREATE_DISK,
