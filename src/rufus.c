@@ -3286,7 +3286,7 @@ relaunch:
 	while(GetMessage(&msg, NULL, 0, 0)) {
 		static BOOL ctrl_without_focus = FALSE;
 		BOOL no_focus = (msg.message == WM_SYSKEYDOWN) && !(msg.lParam & 0x20000000);
-		// ** ****** **** ** **********
+		// ** ****** **** *************
 		// .,ABCDEFGHIJKLMNOPQRSTUVWXYZ
 
 		// Sigh... The things one need to do to detect standalone use of the 'Alt' key.
@@ -3450,6 +3450,14 @@ relaunch:
 			// Alt-O => Save from Optical drive to ISO
 			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'O')) {
 				SaveISO();
+				continue;
+			}
+			// Alt-P => Toggle GPT ESP to and from Basic Data type (Windows 10 or later)
+			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'P')) {
+				int index = ComboBox_GetCurSel(hDeviceList);
+				DWORD DeviceNum = (DWORD)ComboBox_GetItemData(hDeviceList, index);
+				if (ToggleEsp(DeviceNum))
+					CyclePort(index);
 				continue;
 			}
 			// Alt-Q => Enable file indexing (for file systems that support it)

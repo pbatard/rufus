@@ -34,6 +34,7 @@
 #include "rufus.h"
 #include "missing.h"
 #include "resource.h"
+#include "settings.h"
 #include "msapi_utf8.h"
 #include "localization.h"
 
@@ -917,7 +918,7 @@ UINT GetDriveTypeFromIndex(DWORD DriveIndex)
 char GetUnusedDriveLetter(void)
 {
 	DWORD size;
-	char drive_letter = 'Z'+1, *drive, drives[26*4 + 1];	/* "D:\", "E:\", etc., plus one NUL */
+	char drive_letter, *drive, drives[26*4 + 1];	/* "D:\", "E:\", etc., plus one NUL */
 
 	size = GetLogicalDriveStringsA(sizeof(drives), drives);
 	if (size == 0) {
@@ -930,7 +931,7 @@ char GetUnusedDriveLetter(void)
 	}
 
 	for (drive_letter = 'C'; drive_letter <= 'Z'; drive_letter++) {
-		for (drive = drives ;*drive; drive += safe_strlen(drive)+1) {
+		for (drive = drives ; *drive; drive += safe_strlen(drive) + 1) {
 			if (!isalpha(*drive))
 				continue;
 			if (drive_letter == (char)toupper((int)*drive))
@@ -941,7 +942,30 @@ char GetUnusedDriveLetter(void)
 	}
 
 out:
-	return (drive_letter>'Z')?0:drive_letter;
+	return (drive_letter > 'Z') ? 0 : drive_letter;
+}
+
+BOOL IsDriveLetterInUse(const char drive_letter)
+{
+	DWORD size;
+	char *drive, drives[26 * 4 + 1];
+
+	size = GetLogicalDriveStringsA(sizeof(drives), drives);
+	if (size == 0) {
+		uprintf("GetLogicalDriveStrings failed: %s", WindowsErrorString());
+		return TRUE;
+	}
+	if (size > sizeof(drives)) {
+		uprintf("GetLogicalDriveStrings: Buffer too small (required %d vs. %d)", size, sizeof(drives));
+		return TRUE;
+	}
+
+	for (drive = drives; *drive; drive += safe_strlen(drive) + 1) {
+		if (drive_letter == (char)toupper((int)*drive))
+			return TRUE;
+	}
+
+	return FALSE;
 }
 
 /*
@@ -1130,6 +1154,142 @@ BOOL AnalyzePBR(HANDLE hLogicalVolume)
 	return TRUE;
 }
 
+static BOOL StoreEspInfo(GUID* guid)
+{
+	uint8_t j;
+	char key_name[2][16], *str;
+	// Look for an empty slot and use that if available
+	for (j = 1; j <= MAX_ESP_TOGGLE; j++) {
+		static_sprintf(key_name[0], "ToggleEsp%02u", j);
+		str = ReadSettingStr(key_name[0]);
+		if ((str == NULL) || (str[0] == 0))
+			return WriteSettingStr(key_name[0], GuidToString(guid));
+	}
+	// All slots are used => Move every key down and add to last slot
+	// NB: No, we don't care that the slot we remove may not be the oldest.
+	for (j = 1; j < MAX_ESP_TOGGLE; j++) {
+		static_sprintf(key_name[0], "ToggleEsp%02u", j);
+		static_sprintf(key_name[1], "ToggleEsp%02u", j + 1);
+		WriteSettingStr(key_name[0], ReadSettingStr(key_name[1]));
+	}
+	return WriteSettingStr(key_name[1], GuidToString(guid));
+}
+
+static GUID* GetEspGuid(uint8_t index)
+{
+	char key_name[16];
+
+	static_sprintf(key_name, "ToggleEsp%02u", index);
+	return StringToGuid(ReadSettingStr(key_name));
+}
+
+static BOOL ClearEspInfo(uint8_t index)
+{
+	char key_name[16];
+	static_sprintf(key_name, "ToggleEsp%02u", index);
+	return WriteSettingStr(key_name, "");
+}
+
+/*
+ * This calls changes the type of a GPT ESP back and forth to Basic Data.
+ * Needed because Windows 10 doesn't mount ESPs by default, and also
+ * doesn't let usermode apps (such as File Explorer) access mounted ESPs.
+ */
+BOOL ToggleEsp(DWORD DriveIndex)
+{
+	char *volume_name, mount_point[] = DEFAULT_ESP_MOUNT_POINT;
+	BOOL r, ret = FALSE, found = FALSE;
+	HANDLE hPhysical;
+	DWORD size, i, j, esp_index = 0;
+	BYTE layout[4096] = { 0 };
+	GUID* guid;
+	PDRIVE_LAYOUT_INFORMATION_EX DriveLayout = (PDRIVE_LAYOUT_INFORMATION_EX)(void*)layout;
+
+	if (nWindowsVersion < WINDOWS_10) {
+		uprintf("ESP toggling is only available for Windows 10 or later");
+		return FALSE;
+	}
+
+	hPhysical = GetPhysicalHandle(DriveIndex, FALSE, TRUE, TRUE);
+	if (hPhysical == INVALID_HANDLE_VALUE)
+		return FALSE;
+
+	r = DeviceIoControl(hPhysical, IOCTL_DISK_GET_DRIVE_LAYOUT_EX,
+		NULL, 0, layout, sizeof(layout), &size, NULL);
+	if (!r || size <= 0) {
+		uprintf("Could not get layout for drive 0x%02x: %s", DriveIndex, WindowsErrorString());
+		goto out;
+	}
+	if (DriveLayout->PartitionStyle != PARTITION_STYLE_GPT) {
+		uprintf("ESP toggling is only available for GPT drives");
+		goto out;
+	}
+
+	// See if the current drive contains an ESP
+	for (i = 0, j = 0; i < DriveLayout->PartitionCount; i++) {
+		if (CompareGUID(&DriveLayout->PartitionEntry[i].Gpt.PartitionType, &PARTITION_GENERIC_ESP)) {
+			esp_index = i;
+			j++;
+		}
+	}
+
+	if (j > 1) {
+		uprintf("ESP toggling is not available for drives with more than one ESP");
+		goto out;
+	}
+	if (j == 1) {
+		// ESP -> Basic Data
+		i = esp_index;
+		uprintf("ESP name: '%S'", DriveLayout->PartitionEntry[i].Gpt.Name);
+		if (!StoreEspInfo(&DriveLayout->PartitionEntry[i].Gpt.PartitionId)) {
+			uprintf("ESP toggling data could not be stored");
+			goto out;
+		}
+		DriveLayout->PartitionEntry[i].Gpt.PartitionType = PARTITION_MICROSOFT_DATA;
+	} else {
+		// Basic Data -> ESP
+		for (j = 1; j <= MAX_ESP_TOGGLE; j++) {
+			guid = GetEspGuid((uint8_t)j);
+			if (guid != NULL) {
+				for (i = 0; i < DriveLayout->PartitionCount; i++) {
+					if (CompareGUID(guid, &DriveLayout->PartitionEntry[i].Gpt.PartitionId)) {
+						uprintf("BD name: '%S'", DriveLayout->PartitionEntry[i].Gpt.Name);
+						found = TRUE;
+						break;
+					}
+				}
+				if (found)
+					break;
+			}
+		}
+		if (j > MAX_ESP_TOGGLE)
+			goto out;
+		DriveLayout->PartitionEntry[i].Gpt.PartitionType = PARTITION_GENERIC_ESP;
+	}
+
+	DriveLayout->PartitionEntry[i].RewritePartition = TRUE;	// Just in case
+	r = DeviceIoControl(hPhysical, IOCTL_DISK_SET_DRIVE_LAYOUT_EX, (BYTE*)DriveLayout, size, NULL, 0, &size, NULL);
+	if (!r) {
+		uprintf("Could not set drive layout: %s", WindowsErrorString());
+		return FALSE;
+	}
+	RefreshDriveLayout(hPhysical);
+	if (CompareGUID(&DriveLayout->PartitionEntry[i].Gpt.PartitionType, &PARTITION_GENERIC_ESP)) {
+		// We successfully reverted ESP from Basic Data -> Delete stored ESP info
+		ClearEspInfo((uint8_t)j);
+	} else if (!IsDriveLetterInUse(*mount_point)) {
+		// We succesfully switched ESP to Basic Data -> Try to mount it
+		volume_name = GetLogicalName(DriveIndex, DriveLayout->PartitionEntry[i].StartingOffset.QuadPart, TRUE, FALSE);
+		MountVolume(mount_point, volume_name);
+		free(volume_name);
+	}
+	ret = TRUE;
+
+out:
+	safe_closehandle(hPhysical);
+	return ret;
+}
+
 /*
  * Fill the drive properties (size, FS, etc)
  * Returns TRUE if the drive has a partition that can be mounted in Windows, FALSE otherwise
@@ -1162,14 +1322,14 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 
 	hPhysical = GetPhysicalHandle(DriveIndex, FALSE, FALSE, TRUE);
 	if (hPhysical == INVALID_HANDLE_VALUE)
-		return 0;
+		return FALSE;
 
 	r = DeviceIoControl(hPhysical, IOCTL_DISK_GET_DRIVE_GEOMETRY_EX,
 			NULL, 0, geometry, sizeof(geometry), &size, NULL);
 	if (!r || size <= 0) {
 		suprintf("Could not get geometry for drive 0x%02x: %s", DriveIndex, WindowsErrorString());
 		safe_closehandle(hPhysical);
-		return 0;
+		return FALSE;
 	}
 	SelectedDrive.DiskSize = DiskGeometry->DiskSize.QuadPart;
 	SelectedDrive.SectorSize = DiskGeometry->Geometry.BytesPerSector;
@@ -1192,7 +1352,7 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 	if (!r || size <= 0) {
 		suprintf("Could not get layout for drive 0x%02x: %s", DriveIndex, WindowsErrorString());
 		safe_closehandle(hPhysical);
-		return 0;
+		return FALSE;
 	}
 
 #if defined(__GNUC__)
@@ -1282,8 +1442,10 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 			}
 			SelectedDrive.nPartitions++;
 			isUefiNtfs = (wcscmp(DriveLayout->PartitionEntry[i].Gpt.Name, L"UEFI:NTFS") == 0);
-			suprintf("Partition %d%s:\r\n  Type: %s\r\n  Name: '%S'", i+1, isUefiNtfs ? " (UEFI:NTFS)" : "",
-				GetGPTPartitionType(&DriveLayout->PartitionEntry[i].Gpt.PartitionType), DriveLayout->PartitionEntry[i].Gpt.Name);
+			suprintf("Partition %d%s:\r\n  Type: %s", i+1, isUefiNtfs ? " (UEFI:NTFS)" : "",
+				GetGPTPartitionType(&DriveLayout->PartitionEntry[i].Gpt.PartitionType));
+			if (DriveLayout->PartitionEntry[i].Gpt.Name[0] != 0)
+				suprintf("  Name: '%S'", DriveLayout->PartitionEntry[i].Gpt.Name);
 			suprintf("  ID: %s\r\n  Size: %s (%" PRIi64 " bytes)\r\n  Start Sector: %" PRIi64 ", Attributes: 0x%016" PRIX64,
 				GuidToString(&DriveLayout->PartitionEntry[i].Gpt.PartitionId),
 				SizeToHumanReadable(DriveLayout->PartitionEntry[i].PartitionLength.QuadPart, TRUE, FALSE),
