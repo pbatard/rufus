@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 3.5\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2020-06-03 18:02+0100\n"
-"PO-Revision-Date: 2020-06-03 18:02+0100\n"
+"POT-Creation-Date: 2020-06-06 22:26+0100\n"
+"PO-Revision-Date: 2020-06-06 22:29+0100\n"
 "Language: tr_TR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -37,11 +37,11 @@ msgstr "İmaj Seçeneği"
 
 #. • IDD_DIALOG → IDS_PARTITION_TYPE_TXT
 msgid "Partition scheme"
-msgstr "Disk Bölüm Düzeni"
+msgstr "Disk bölüm düzeni"
 
 #. • IDD_DIALOG → IDS_TARGET_SYSTEM_TXT
 msgid "Target system"
-msgstr "Hedef Sistem"
+msgstr "Hedef sistem"
 
 #. • IDD_DIALOG → IDC_LIST_USB_HDD
 msgid "List USB Hard Drives"
@@ -72,7 +72,7 @@ msgstr "Dosya sistemi"
 
 #. • IDD_DIALOG → IDS_CLUSTER_SIZE_TXT
 msgid "Cluster size"
-msgstr "Ayırma Birimi Boyutu"
+msgstr "Ayırma Birimi boyutu"
 
 #. • IDD_DIALOG → IDS_LABEL_TXT
 msgid "Volume label"
@@ -88,7 +88,7 @@ msgstr "Hatalı bloklar için aygıtı denetle"
 
 #. • IDD_DIALOG → IDC_EXTENDED_LABEL
 msgid "Create extended label and icon files"
-msgstr "Genişletilmiş Etiket ve Simge Dosyaları Oluştur"
+msgstr "Genişletilmiş etiket ve simge dosyaları oluştur"
 
 #. • IDD_DIALOG → IDS_STATUS_TXT
 msgid "Status"
@@ -179,7 +179,7 @@ msgstr "Yeni bir sürüm mevcut. Lütfen son sürümü indirin!"
 
 #. • IDD_NEW_VERSION → IDC_WEBSITE
 msgid "Click here to go to the website"
-msgstr "Websitesine gitmek için buraya tıklayın"
+msgstr "Web sitesine gitmek için buraya tıklayın"
 
 #. • IDD_NEW_VERSION → IDS_NEW_VERSION_NOTES_GRP
 msgid "Release Notes"
@@ -273,7 +273,7 @@ msgstr "Özel"
 
 #. • MSG_018
 msgid "Your version: %d.%d (Build %d)"
-msgstr "Mevcut Sürüm: %d.%d (Yapı %d)"
+msgstr "Mevcut sürüm: %d.%d (Yapı %d)"
 
 #. • MSG_019
 msgid "Latest version: %d.%d (Build %d)"
@@ -713,11 +713,11 @@ msgid ""
 "If you are sure you want to cancel, click YES. Otherwise, click NO."
 msgstr ""
 "Vazgeçmek aygıtı KULLANILAMAZ hale getirebilir.\n"
-"Vazgeçmek istediğinize eminseniz, Evet'e tıklayın. Aksi halde Hayır'a tıklayın."
+"Vazgeçmek istediğinize eminseniz, EVET'e tıklayın. Aksi halde HAYIR'a tıklayın."
 
 #. • MSG_106
 msgid "Please select folder"
-msgstr "Lütfen Klasör Seçin"
+msgstr "Lütfen klasör seçin"
 
 #. • MSG_107
 msgid "All files"
@@ -754,7 +754,7 @@ msgstr "Geniş bir UDF Biriminin biçimlendirilmesi çok uzun bir süre alabilir
 
 #. • MSG_113
 msgid "Large UDF volume"
-msgstr "Geniş UDF Birimi"
+msgstr "Geniş UDF birimi"
 
 #. • MSG_114
 msgid ""
@@ -958,15 +958,15 @@ msgstr "Bu komutu çalıştırmak için PowerShell 3.0 veya üstü gerekir."
 
 #. • MSG_146
 msgid "Do you want to go online and download it?"
-msgstr "Çevrimiçi olmak ve indirmek istiyor musunuz?"
+msgstr "Çevrimiçi olarak indirmek istiyor musunuz?"
 
 #. • MSG_148
 msgid "Running download script..."
-msgstr "İndirme komutu çalıştırılıyor ..."
+msgstr "İndirme komutu çalıştırılıyor..."
 
 #. • MSG_149
 msgid "Download ISO Image"
-msgstr "ISO İmajını indir"
+msgstr "ISO İmajını İndir"
 
 #. • MSG_150
 msgid "Type of computer you plan to use this bootable drive with. It is your responsibility to determine whether your target is of BIOS or UEFI type before you start creating the drive, as it may fail to boot otherwise."
@@ -1095,7 +1095,7 @@ msgstr "Sürüm %d.%d (Yapı %d)"
 
 #. • MSG_176
 msgid "English translation: Pete Batard <mailto:pete@akeo.ie>"
-msgstr "Türkçe Çeviri: Mehmetali KURAN <mailto:mehmetalikuran@gmail.com>"
+msgstr "Türkçe Çeviri:\\line• Mehmetali KURAN <mailto:mehmetalikuran@gmail.com>\\line• İlhami TUĞRAL <mailto:ilhamitugral@gmail.com>"
 
 #. • MSG_177
 msgid "Report bugs or request enhancements at:"
@@ -1262,7 +1262,7 @@ msgstr "Vazgeçildi"
 
 #. • MSG_212
 msgid "Failed"
-msgstr "BAŞARISIZ"
+msgstr "Başarısız"
 
 #. • MSG_213
 #.
@@ -1320,7 +1320,7 @@ msgstr "Biçimlendiriliyor (%s)..."
 
 #. • MSG_223
 msgid "NTFS Fixup (Checkdisk)..."
-msgstr "NTFS Düzeltme (Checkdisk)..."
+msgstr "NTFS Onarımı (Checkdisk)..."
 
 #. • MSG_224
 msgid "Clearing MBR/PBR/GPT structures..."
@@ -1454,11 +1454,11 @@ msgstr "%s devre dışı"
 
 #. • MSG_252
 msgid "Size checks"
-msgstr "Boyut Denetlemeleri"
+msgstr "Boyut denetlemeleri"
 
 #. • MSG_253
 msgid "Hard disk detection"
-msgstr "Sabit Disk Algılama"
+msgstr "Sabit disk algılama"
 
 #. • MSG_254
 msgid "Force large FAT32 formatting"
@@ -1530,7 +1530,7 @@ msgstr "Zaman damgalarını koruma"
 
 #. • MSG_270
 msgid "USB debug"
-msgstr "USB Hata Ayıklama"
+msgstr "USB hata ayıklama"
 
 #. • MSG_271
 msgid "Computing image checksums: %s"
@@ -1729,4 +1729,15 @@ msgstr "Biraz zaman alabilir"
 
 #. • MSG_308
 msgid "VHD detection"
+msgstr "VHD Algılama"
+
+#. • MSG_309
+msgid "ISO → ESP"
+msgstr ""
+
+#. • MSG_310
+msgid ""
+"The ISO you have selected uses UEFI and is small enough to be written as an EFI System Partition (ESP). Writing to an ESP, instead of writing to a generic data partition occupying the whole disk, can be preferable for some types of installations.\n"
+"\n"
+"Please select the mode that you want to use to write this image:"
 msgstr ""
