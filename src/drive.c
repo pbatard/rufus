@@ -71,7 +71,7 @@ PF_TYPE_DECL(NTAPI, NTSTATUS, NtQueryVolumeInformationFile, (HANDLE, PIO_STATUS_
  * Globals
  */
 RUFUS_DRIVE_INFO SelectedDrive;
-extern BOOL installed_uefi_ntfs;
+extern BOOL installed_uefi_ntfs, write_as_esp;
 uint64_t partition_offset[3];
 uint64_t persistence_size = 0;
 
@@ -913,7 +913,7 @@ UINT GetDriveTypeFromIndex(DWORD DriveIndex)
 }
 
 /*
- * Return the next unused drive letter from the system
+ * Return the next unused drive letter from the system or NUL on error.
  */
 char GetUnusedDriveLetter(void)
 {
@@ -923,11 +923,11 @@ char GetUnusedDriveLetter(void)
 	size = GetLogicalDriveStringsA(sizeof(drives), drives);
 	if (size == 0) {
 		uprintf("GetLogicalDriveStrings failed: %s", WindowsErrorString());
-		goto out;
+		return 0;
 	}
 	if (size > sizeof(drives)) {
 		uprintf("GetLogicalDriveStrings: Buffer too small (required %d vs. %d)", size, sizeof(drives));
-		goto out;
+		return 0;
 	}
 
 	for (drive_letter = 'C'; drive_letter <= 'Z'; drive_letter++) {
@@ -941,7 +941,6 @@ char GetUnusedDriveLetter(void)
 			break;
 	}
 
-out:
 	return (drive_letter > 'Z') ? 0 : drive_letter;
 }
 
@@ -1685,7 +1684,8 @@ static BOOL ClearPartition(HANDLE hDrive, LARGE_INTEGER offset, DWORD size)
 BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL mbr_uefi_marker, uint8_t extra_partitions)
 {
 	const char* PartitionTypeName[] = { "MBR", "GPT", "SFD" };
-	const wchar_t *extra_part_name = L"", *main_part_name = L"Main Data Partition";
+	const wchar_t *extra_part_name = L"", *main_part_name = write_as_esp ? L"EFI System Partition" : L"Main Data Partition";
+	const LONGLONG main_part_size = write_as_esp ? MAX_ISO_TO_ESP_SIZE * MB : SelectedDrive.DiskSize;
 	const LONGLONG bytes_per_track = ((LONGLONG)SelectedDrive.SectorsPerTrack) * SelectedDrive.SectorSize;
 	const DWORD size_to_clear = MAX_SECTORS_TO_CLEAR * SelectedDrive.SectorSize;
 	uint8_t* buffer;
@@ -1694,7 +1694,7 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 	DRIVE_LAYOUT_INFORMATION_EX4 DriveLayoutEx = {0};
 	BOOL r;
 	DWORD i, size, bufsize, pn = 0;
-	LONGLONG main_part_size_in_sectors, extra_part_size_in_tracks = 0, ms_esp_size;
+	LONGLONG main_part_size_in_sectors, extra_part_size_in_tracks = 0, esp_size;
 
 	PrintInfoDebug(0, MSG_238, PartitionTypeName[partition_style]);
 
@@ -1743,9 +1743,16 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 	}
 
 	// Set our main data partition
-	main_part_size_in_sectors = (SelectedDrive.DiskSize - DriveLayoutEx.PartitionEntry[pn].StartingOffset.QuadPart) /
-		// Need 33 sectors at the end for secondary GPT
-		SelectedDrive.SectorSize - ((partition_style == PARTITION_STYLE_GPT)?33:0);
+	if (write_as_esp) {
+		// Align ESP to 64 MB while leaving at least 32 MB free space
+		esp_size = (((img_report.projected_size / MB) + 96) / 64) * 64 * MB;
+		main_part_size_in_sectors = (esp_size - DriveLayoutEx.PartitionEntry[pn].StartingOffset.QuadPart) /
+			SelectedDrive.SectorSize;
+	} else {
+		main_part_size_in_sectors = (main_part_size - DriveLayoutEx.PartitionEntry[pn].StartingOffset.QuadPart) /
+			// Need 33 sectors at the end for secondary GPT
+			SelectedDrive.SectorSize - ((partition_style == PARTITION_STYLE_GPT) ? 33 : 0);
+	}
 	if (extra_partitions) {
 		// Adjust the size according to extra partitions (which we always align to a track)
 		if (extra_partitions & XP_ESP) {
@@ -1756,10 +1763,10 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 			// https://docs.microsoft.com/en-us/windows-hardware/manufacture/desktop/configure-uefigpt-based-hard-drive-partitions
 			// is too small. See: https://github.com/pbatard/rufus/issues/979
 			if (SelectedDrive.SectorSize <= 4096)
-				ms_esp_size = 300 * MB;
+				esp_size = 300 * MB;
 			else
-				ms_esp_size = 1200 * MB;	// That'll teach you to have a nonstandard disk!
-			extra_part_size_in_tracks = (ms_esp_size + bytes_per_track - 1) / bytes_per_track;
+				esp_size = 1200 * MB;	// That'll teach you to have a nonstandard disk!
+			extra_part_size_in_tracks = (esp_size + bytes_per_track - 1) / bytes_per_track;
 		} else if (extra_partitions & XP_UEFI_NTFS) {
 			extra_part_name = L"UEFI:NTFS";
 			extra_part_size_in_tracks = (max(MIN_EXTRA_PART_SIZE, uefi_ntfs_size) + bytes_per_track - 1) / bytes_per_track;
@@ -1812,7 +1819,7 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 			return FALSE;
 		}
 	} else {
-		DriveLayoutEx.PartitionEntry[pn].Gpt.PartitionType = PARTITION_MICROSOFT_DATA;
+		DriveLayoutEx.PartitionEntry[pn].Gpt.PartitionType = write_as_esp ? PARTITION_GENERIC_ESP : PARTITION_MICROSOFT_DATA;
 		IGNORE_RETVAL(CoCreateGuid(&DriveLayoutEx.PartitionEntry[pn].Gpt.PartitionId));
 		wcsncpy(DriveLayoutEx.PartitionEntry[pn].Gpt.Name, main_part_name, ARRAYSIZE(DriveLayoutEx.PartitionEntry[pn].Gpt.Name));
 	}

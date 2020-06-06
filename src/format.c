@@ -66,7 +66,7 @@ extern uint32_t dur_mins, dur_secs;
 extern uint32_t wim_nb_files, wim_proc_files, wim_extra_files;
 static int actual_fs_type, wintogo_index = -1, wininst_index = 0;
 extern BOOL force_large_fat32, enable_ntfs_compression, lock_drive, zero_drive, fast_zeroing, enable_file_indexing, write_as_image;
-extern BOOL use_vds;
+extern BOOL use_vds, write_as_esp;
 uint8_t *grub2_buf = NULL, *sec_buf = NULL;
 long grub2_len;
 
@@ -1997,7 +1997,7 @@ DWORD WINAPI FormatThread(void* param)
 	if (fs_type < FS_EXT2)
 		ToValidLabel(label, (fs_type == FS_FAT16) || (fs_type == FS_FAT32) || (fs_type == FS_EXFAT));
 	ClusterSize = (DWORD)ComboBox_GetItemData(hClusterSize, ComboBox_GetCurSel(hClusterSize));
-	if (ClusterSize < 0x200)
+	if ((ClusterSize < 0x200) || (write_as_esp))
 		ClusterSize = 0;	// 0 = default cluster size
 
 	Flags = FP_FORCE;

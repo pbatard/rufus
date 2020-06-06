@@ -116,7 +116,7 @@ BOOL enable_HDDs = FALSE, enable_VHDs = TRUE, enable_ntfs_compression = FALSE, n
 BOOL advanced_mode_device, advanced_mode_format, allow_dual_uefi_bios, detect_fakes, enable_vmdk, force_large_fat32, usb_debug;
 BOOL use_fake_units, preserve_timestamps = FALSE, fast_zeroing = FALSE, app_changed_size = FALSE;
 BOOL zero_drive = FALSE, list_non_usb_removable_drives = FALSE, enable_file_indexing, large_drive = FALSE;
-BOOL write_as_image = FALSE, installed_uefi_ntfs = FALSE, enable_fido = FALSE, use_vds = FALSE;
+BOOL write_as_image = FALSE, write_as_esp = FALSE, installed_uefi_ntfs = FALSE, enable_fido = FALSE, use_vds = FALSE;
 float fScale = 1.0f;
 int dialog_showing = 0, selection_default = BT_IMAGE, windows_to_go_selection = 0, persistence_unit_selection = -1;
 int default_fs, fs_type, boot_type, partition_type, target_type; // file system, boot type, partition type, target type
@@ -2287,6 +2287,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			target_type = (int)ComboBox_GetItemData(hTargetSystem, ComboBox_GetCurSel(hTargetSystem));
 			fs_type = (int)ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem));
 			write_as_image = FALSE;
+			write_as_esp = FALSE;
 			installed_uefi_ntfs = FALSE;
 			// Disable all controls except Cancel
 			EnableControls(FALSE, FALSE);
@@ -2681,17 +2682,44 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 					if (persistence_size == 0) {
 						char* iso_image = lmprintf(MSG_036);
 						char* dd_image = lmprintf(MSG_095);
-						char* choices[2] = { lmprintf(MSG_276, iso_image), lmprintf(MSG_277, dd_image) };
-						i = SelectionDialog(lmprintf(MSG_274), lmprintf(MSG_275, iso_image, dd_image, iso_image, dd_image),
-							choices, 2);
-						if (i < 0)	// Cancel
-							goto aborted_start;
-						else if (i == 2)
-							write_as_image = TRUE;
+						char* esp_image = lmprintf(MSG_309);
+						// If the ISO is small enough to be written as an ESP and we are using GPT add the ISO → ESP option
+						if ((img_report.projected_size < MAX_ISO_TO_ESP_SIZE * MB) && HAS_REGULAR_EFI(img_report) &&
+							(partition_type == PARTITION_STYLE_GPT) && IS_FAT(fs_type)) {
+							char* choices[3] = { lmprintf(MSG_276, iso_image), lmprintf(MSG_277, esp_image), lmprintf(MSG_277, dd_image) };
+							i = SelectionDialog(lmprintf(MSG_274), lmprintf(MSG_275, iso_image, dd_image, iso_image, dd_image),
+								choices, 3);
+							if (i < 0)	// Cancel
+								goto aborted_start;
+							else if (i == 2)
+								write_as_esp = TRUE;
+							else if (i == 3)
+								write_as_image = TRUE;
+						} else {
+							char* choices[2] = { lmprintf(MSG_276, iso_image), lmprintf(MSG_277, dd_image) };
+							i = SelectionDialog(lmprintf(MSG_274), lmprintf(MSG_275, iso_image, dd_image, iso_image, dd_image),
+								choices, 2);
+							if (i < 0)	// Cancel
+								goto aborted_start;
+							else if (i == 2)
+								write_as_image = TRUE;
+						}
 					}
 				} else {
 					write_as_image = TRUE;
 				}
+			} else if ((img_report.projected_size < MAX_ISO_TO_ESP_SIZE * MB) && HAS_REGULAR_EFI(img_report) &&
+				(partition_type == PARTITION_STYLE_GPT) && IS_FAT(fs_type)) {
+				// The ISO is small enough to be written as an ESP and we are using GPT
+				// so ask the users if they want to write it as an ESP.
+				char* iso_image = lmprintf(MSG_036);
+				char* esp_image = lmprintf(MSG_309);
+				char* choices[2] = { lmprintf(MSG_276, iso_image), lmprintf(MSG_277, esp_image) };
+				i = SelectionDialog(lmprintf(MSG_274), lmprintf(MSG_310), choices, 2);
+				if (i < 0)	// Cancel
+					goto aborted_start;
+				else if (i == 2)
+					write_as_esp = TRUE;
 			}
 		}
 

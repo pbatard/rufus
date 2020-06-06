@@ -72,6 +72,7 @@
 #define MAX_GUID_STRING_LENGTH      40
 #define MAX_PARTITIONS              16			// Maximum number of partitions we handle
 #define MAX_ESP_TOGGLE              8			// Maximum number of entries we record to toggle GPT ESP back and forth
+#define MAX_ISO_TO_ESP_SIZE         512			// Maximum size we allow for the ISO → ESP option (in MB)
 #define MAX_SECTORS_TO_CLEAR        128			// nb sectors to zap when clearing the MBR/GPT (must be >34)
 #define MAX_WININST                 4			// Max number of install[.wim|.esd] we can handle on an image
 #define MBR_UEFI_MARKER             0x49464555	// 'U', 'E', 'F', 'I', as a 32 bit little endian longword
@@ -303,6 +304,7 @@ enum checksum_type {
 #define HAS_BOOTMGR_BIOS(r) (r.has_bootmgr)
 #define HAS_BOOTMGR_EFI(r)  (r.has_bootmgr_efi)
 #define HAS_BOOTMGR(r)      (HAS_BOOTMGR_BIOS(r) || HAS_BOOTMGR_EFI(r))
+#define HAS_REGULAR_EFI(r)  (r.has_efi & 0x7E)
 #define HAS_WININST(r)      (r.wininst_index != 0)
 #define HAS_WINPE(r)        (((r.winpe & WINPE_I386) == WINPE_I386)||((r.winpe & WINPE_AMD64) == WINPE_AMD64)||((r.winpe & WINPE_MININT) == WINPE_MININT))
 #define HAS_WINDOWS(r)      (HAS_BOOTMGR(r) || (r.uses_minint) || HAS_WINPE(r))

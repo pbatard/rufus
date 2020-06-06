@@ -566,6 +566,10 @@ t MSG_305 "Use this option to indicate whether you want to use this device to in
 t MSG_306 "Fast-zeroing drive: %s"
 t MSG_307 "This may take a while"
 t MSG_308 "VHD detection"
+t MSG_309 "ISO → ESP"
+t MSG_310 "The ISO you have selected uses UEFI and is small enough to be written as an EFI System Partition (ESP). "
+	"Writing to an ESP, instead of writing to a generic data partition occupying the whole disk, can be preferable "
+	"for some types of installations.\n\nPlease select the mode that you want to use to write this image:"
 
 #########################################################################
 l "ar-SA" "Arabic (العربية)" 0x0401, 0x0801, 0x0c01, 0x1001, 0x1401, 0x1801, 0x1c01, 0x2001, 0x2401, 0x2801, 0x2c01, 0x3001, 0x3401, 0x3801, 0x3c01, 0x4001
