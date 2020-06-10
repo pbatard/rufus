@@ -9,6 +9,7 @@ o v3.*
   - *UPDATED*  MSG_068 "Error while partitioning drive." -> "Could not partition drive."
   You can test this new message with <Alt>-<G>
   - *NEW*      MSG_308 "VHD detection"
+  - *NEW*      MSG_309 "Compressed archive"
   // TODO: Add a test ISO for this.
   - *NEW*      MSG_310 "The ISO you have selected uses UEFI and is small enough to be written as (...)"
 

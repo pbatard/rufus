@@ -126,7 +126,7 @@ char embedded_sl_version_str[2][12] = { "?.??", "?.??" };
 char embedded_sl_version_ext[2][32];
 char ClusterSizeLabel[MAX_CLUSTER_SIZES][64];
 char msgbox[1024], msgbox_title[32], *ini_file = NULL, *image_path = NULL, *short_image_path;
-char image_option_txt[128], *fido_url = NULL;
+char *archive_path = NULL, image_option_txt[128], *fido_url = NULL;
 StrArray DriveId, DriveName, DriveLabel, DriveHub, BlockingProcess, ImageList;
 // Number of steps for each FS for FCC_STRUCTURE_PROGRESS
 const int nb_steps[FS_MAX] = { 5, 5, 12, 1, 10, 1, 1, 1, 1 };
@@ -2234,6 +2234,24 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			partition_type = (int)ComboBox_GetItemData(hTargetSystem, ComboBox_GetCurSel(hTargetSystem));
 			return (INT_PTR)TRUE;
 		case IDC_SELECT:
+			// Ctrl-SELECT is used to select an additional archive of files to extract
+			// For now only zip archives are supported.
+			if (GetKeyState(VK_CONTROL) & 0x8000) {
+				EXT_DECL(arch_ext, NULL, __VA_GROUP__("*.zip"), __VA_GROUP__(lmprintf(MSG_309)));
+				if (image_path == NULL)
+					break;
+				archive_path = FileDialog(FALSE, NULL, &arch_ext, 0);
+				if (archive_path != NULL) {
+					struct __stat64 stat64 = { 0 };
+					_stat64U(archive_path, &stat64);
+					img_report.projected_size -= img_report.archive_size;
+					img_report.archive_size = stat64.st_size;
+					img_report.projected_size += img_report.archive_size;
+					uprintf("Using archive: %s (%s)", _filenameU(archive_path),
+						SizeToHumanReadable(img_report.archive_size, FALSE, FALSE));
+				}
+				break;
+			}
 			if (select_index == 1) {
 				EnableControls(FALSE, FALSE);
 				DownloadISO();
@@ -2257,6 +2275,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 						}
 						break;
 					} else {
+						safe_free(archive_path);
 						free(old_image_path);
 					}
 				}
@@ -2682,11 +2701,10 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 					if (persistence_size == 0) {
 						char* iso_image = lmprintf(MSG_036);
 						char* dd_image = lmprintf(MSG_095);
-						char* esp_image = lmprintf(MSG_309);
 						// If the ISO is small enough to be written as an ESP and we are using GPT add the ISO → ESP option
 						if ((img_report.projected_size < MAX_ISO_TO_ESP_SIZE * MB) && HAS_REGULAR_EFI(img_report) &&
 							(partition_type == PARTITION_STYLE_GPT) && IS_FAT(fs_type)) {
-							char* choices[3] = { lmprintf(MSG_276, iso_image), lmprintf(MSG_277, esp_image), lmprintf(MSG_277, dd_image) };
+							char* choices[3] = { lmprintf(MSG_276, iso_image), lmprintf(MSG_277, "ISO → ESP"), lmprintf(MSG_277, dd_image) };
 							i = SelectionDialog(lmprintf(MSG_274), lmprintf(MSG_275, iso_image, dd_image, iso_image, dd_image),
 								choices, 3);
 							if (i < 0)	// Cancel
@@ -2713,8 +2731,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				// The ISO is small enough to be written as an ESP and we are using GPT
 				// so ask the users if they want to write it as an ESP.
 				char* iso_image = lmprintf(MSG_036);
-				char* esp_image = lmprintf(MSG_309);
-				char* choices[2] = { lmprintf(MSG_276, iso_image), lmprintf(MSG_277, esp_image) };
+				char* choices[2] = { lmprintf(MSG_276, iso_image), lmprintf(MSG_277, "ISO → ESP") };
 				i = SelectionDialog(lmprintf(MSG_274), lmprintf(MSG_310), choices, 2);
 				if (i < 0)	// Cancel
 					goto aborted_start;
@@ -3643,6 +3660,7 @@ out:
 	ClrAlertPromptHook();
 	exit_localization();
 	safe_free(image_path);
+	safe_free(archive_path);
 	safe_free(locale_name);
 	safe_free(update.download_url);
 	safe_free(update.release_notes);

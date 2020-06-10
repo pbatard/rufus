@@ -1052,6 +1052,17 @@ static __inline int _accessU(const char* path, int mode)
 	return ret;
 }
 
+static __inline const char* _filenameU(const char* path)
+{
+	int i;
+	if (path == NULL)
+		return NULL;
+	for (i = strlen(path) - 1; i >= 0; i--)
+		if ((path[i] == '/') || (path[i] == '\\'))
+			return &path[i + 1];
+	return path;
+}
+
 // returned UTF-8 string must be freed
 static __inline char* getenvU(const char* varname)
 {

@@ -328,6 +328,7 @@ typedef struct {
 	char wininst_path[MAX_WININST][64];	// path to the Windows install image(s)
 	char efi_img_path[128];				// path to an efi.img file
 	uint64_t image_size;
+	uint64_t archive_size;
 	uint64_t projected_size;
 	int64_t mismatch_size;
 	uint32_t wininst_version;

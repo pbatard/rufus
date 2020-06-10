@@ -48,6 +48,7 @@
 #include "resource.h"
 #include "msapi_utf8.h"
 #include "localization.h"
+#include "bled/bled.h"
 
 // How often should we update the progress bar (in 2K blocks) as updating
 // the progress bar for every block will bring extraction to a crawl
@@ -76,6 +77,7 @@ typedef struct {
 RUFUS_IMG_REPORT img_report;
 int64_t iso_blocking_status = -1;
 extern BOOL preserve_timestamps, enable_ntfs_compression;
+extern char* archive_path;
 BOOL enable_iso = TRUE, enable_joliet = TRUE, enable_rockridge = TRUE, has_ldlinux_c32;
 #define ISO_BLOCKING(x) do {x; iso_blocking_status++; } while(0)
 static const char* psz_extract_dir;
@@ -387,7 +389,7 @@ static void fix_config(const char* psz_fullpath, const char* psz_path, const cha
 	free(src);
 }
 
-static void print_extracted_file(char* psz_fullpath, int64_t file_length)
+static void print_extracted_file(char* psz_fullpath, uint64_t file_length)
 {
 	size_t i, nul_pos;
 
@@ -395,17 +397,25 @@ static void print_extracted_file(char* psz_fullpath, int64_t file_length)
 		return;
 	// Replace slashes with backslashes and append the size to the path for UI display
 	nul_pos = strlen(psz_fullpath);
-	for (i=0; i<nul_pos; i++)
-		if (psz_fullpath[i] == '/') psz_fullpath[i] = '\\';
+	for (i = 0; i < nul_pos; i++)
+		if (psz_fullpath[i] == '/')
+			psz_fullpath[i] = '\\';
 	safe_sprintf(&psz_fullpath[nul_pos], 24, " (%s)", SizeToHumanReadable(file_length, TRUE, FALSE));
 	uprintf("Extracting: %s\n", psz_fullpath);
 	safe_sprintf(&psz_fullpath[nul_pos], 24, " (%s)", SizeToHumanReadable(file_length, FALSE, FALSE));
 	PrintStatus(0, MSG_000, psz_fullpath);	// MSG_000 is "%s"
 	// ISO9660 cannot handle backslashes
-	for (i=0; i<nul_pos; i++)
-		if (psz_fullpath[i] == '\\') psz_fullpath[i] = '/';
+	for (i = 0; i < nul_pos; i++)
+		if (psz_fullpath[i] == '\\')
+			psz_fullpath[i] = '/';
 	// Remove the appended size for extraction
 	psz_fullpath[nul_pos] = 0;
+}
+
+static void alt_print_extracted_file(const char* psz_fullpath, uint64_t file_length)
+{
+	uprintf("Extracting: %s (%s)", psz_fullpath, SizeToHumanReadable(file_length, FALSE, FALSE));
+	PrintStatus(0, MSG_000, psz_fullpath);
 }
 
 // Convert from time_t to FILETIME
@@ -1079,6 +1089,12 @@ out:
 			RunCommand("compact /u bootmgr* efi/boot/*.efi", dest_dir, TRUE);
 		}
 		StrArrayDestroy(&modified_path);
+		if (archive_path != NULL) {
+			uprintf("● Adding files from %s", archive_path);
+			bled_init(NULL, NULL, NULL, NULL, alt_print_extracted_file, NULL);
+			bled_uncompress_to_dir(archive_path, dest_dir, BLED_COMPRESSION_ZIP);
+			bled_exit();
+		}
 	}
 	if (p_iso != NULL)
 		iso9660_close(p_iso);
