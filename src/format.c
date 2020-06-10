@@ -1534,7 +1534,7 @@ static BOOL WriteDrive(HANDLE hPhysicalDrive, HANDLE hSourceImage)
 		}
 		assert((uintptr_t)sec_buf % SelectedDrive.SectorSize == 0);
 		sec_buf_pos = 0;
-		bled_init(_uprintf, NULL, sector_write, update_progress, &FormatStatus);
+		bled_init(_uprintf, NULL, sector_write, update_progress, NULL, &FormatStatus);
 		bled_ret = bled_uncompress_with_handles(hSourceImage, hPhysicalDrive, img_report.compression_type);
 		bled_exit();
 		if ((bled_ret >= 0) && (sec_buf_pos != 0)) {

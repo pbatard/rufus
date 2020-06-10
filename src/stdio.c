@@ -645,9 +645,9 @@ const char *WindowsErrorString(void)
 	static_sprintf(err_string, "[0x%08lX] ", error_code);
 	presize = (DWORD)strlen(err_string);
 
-	size = FormatMessageU(FORMAT_MESSAGE_FROM_SYSTEM|FORMAT_MESSAGE_IGNORE_INSERTS, NULL, HRESULT_CODE(error_code),
-		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), &err_string[presize],
-		sizeof(err_string)-(DWORD)strlen(err_string), NULL);
+	size = FormatMessageU(FORMAT_MESSAGE_FROM_SYSTEM|FORMAT_MESSAGE_IGNORE_INSERTS, NULL,
+		HRESULT_CODE(error_code), MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US),
+		&err_string[presize], sizeof(err_string)-(DWORD)strlen(err_string), NULL);
 	if (size == 0) {
 		format_error = GetLastError();
 		if ((format_error) && (format_error != 0x13D))		// 0x13D, decode error, is returned for unknown codes

@@ -158,8 +158,6 @@ struct BUG_tar_header {
 	char c[sizeof(tar_header_t) == TAR_BLOCK_SIZE ? 1 : -1];
 };
 
-
-
 archive_handle_t *init_handle(void) FAST_FUNC;
 
 char filter_accept_all(archive_handle_t *archive_handle) FAST_FUNC;
@@ -205,29 +203,61 @@ void dealloc_bunzip(bunzip_data *bd) FAST_FUNC;
 
 /* Meaning and direction (input/output) of the fields are transformer-specific */
 typedef struct transformer_state_t {
-	smallint check_signature; /* most often referenced member */
+	int8_t      check_signature;        /* most often referenced member */
 
 	IF_DESKTOP(long long) int FAST_FUNC (*xformer)(struct transformer_state_t *xstate);
 	USE_FOR_NOMMU(const char *xformer_prog;)
 
 	/* Source */
-	int      src_fd;
+	int         src_fd;
 	/* Output */
-	int      dst_fd;
-	size_t   mem_output_size_max; /* if non-zero, decompress to RAM instead of fd */
-	size_t   mem_output_size;
-	char     *mem_output_buf;
+	int         dst_fd;
+	const char  *dst_dir;               /* if non-NULL, extract to dir */
+	char        *dst_name;
+	uint64_t    dst_size;
+	size_t      mem_output_size_max;    /* if non-zero, decompress to RAM instead of fd */
+	size_t      mem_output_size;
+	char        *mem_output_buf;
 
-	off_t    bytes_out;
-	off_t    bytes_in;  /* used in unzip code only: needs to know packed size */
-	uint32_t crc32;
-	time_t   mtime;     /* gunzip code may set this on exit */
+	uint64_t    bytes_out;
+	uint64_t    bytes_in;   /* used in unzip code only: needs to know packed size */
+	uint32_t    crc32;
+	time_t      mtime;      /* gunzip code may set this on exit */
 } transformer_state_t;
 
 void init_transformer_state(transformer_state_t *xstate) FAST_FUNC;
 ssize_t transformer_write(transformer_state_t *xstate, const void *buf, size_t bufsize) FAST_FUNC;
 ssize_t xtransformer_write(transformer_state_t *xstate, const void *buf, size_t bufsize) FAST_FUNC;
 int check_signature16(transformer_state_t *xstate, unsigned magic16) FAST_FUNC;
+
+static inline int transformer_switch_file(transformer_state_t* xstate)
+{
+	char dst[MAX_PATH];
+	size_t i, last_slash = 0;
+
+	if (xstate->dst_fd > 0) {
+		_close(xstate->dst_fd);
+		xstate->dst_fd = -1;
+	}
+	_snprintf_s(dst, sizeof(dst), sizeof(dst), "%s/%s", xstate->dst_dir, xstate->dst_name);
+	for (i = 0; i < strlen(dst); i++) {
+		if (dst[i] == '/')
+			dst[i] = '\\';
+		if (dst[i] == '\\')
+			last_slash = i;
+	}
+	if (bled_switch != NULL)
+		bled_switch(dst, xstate->dst_size);
+	dst[last_slash] = 0;
+	bb_make_directory(dst, 0, 0);
+	dst[last_slash] = '/';
+	xstate->dst_fd = _openU(dst, _O_WRONLY | _O_CREAT | _O_TRUNC | _O_BINARY, _S_IREAD | _S_IWRITE);
+	if (xstate->dst_fd < 0) {
+		bb_error_msg("Could not create '%s' (errno: %d)", dst, errno);
+		return -errno;
+	}
+	return 0;
+}
 
 IF_DESKTOP(long long) int inflate_unzip(transformer_state_t *xstate) FAST_FUNC;
 IF_DESKTOP(long long) int unpack_zip_stream(transformer_state_t *xstate) FAST_FUNC;

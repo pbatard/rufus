@@ -41,8 +41,14 @@
 
 #define BB_BUFSIZE 0x40000
 
+#define ENABLE_DESKTOP 1
+#if ENABLE_DESKTOP
 #define IF_DESKTOP(x) x
 #define IF_NOT_DESKTOP(x)
+#else
+#define IF_DESKTOP(x)
+#define IF_NOT_DESKTOP(x) x
+#endif
 #define IF_NOT_FEATURE_LZMA_FAST(x) x
 
 #define uoff_t unsigned off_t
@@ -122,6 +128,7 @@ typedef struct _llist_t {
 
 extern void (*bled_printf) (const char* format, ...);
 extern void (*bled_progress) (const uint64_t processed_bytes);
+extern void (*bled_switch) (const char* filename, const uint64_t filesize);
 extern int (*bled_read)(int fd, void* buf, unsigned int count);
 extern int (*bled_write)(int fd, const void* buf, unsigned int count);
 extern unsigned long* bled_cancel_request;

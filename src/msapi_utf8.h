@@ -1043,6 +1043,15 @@ static __inline int _stat64U(const char *path, struct __stat64 *buffer)
 	return ret;
 }
 
+static __inline int _accessU(const char* path, int mode)
+{
+	int ret;
+	wconvert(path);
+	ret = _waccess(wpath, mode);
+	wfree(path);
+	return ret;
+}
+
 // returned UTF-8 string must be freed
 static __inline char* getenvU(const char* varname)
 {

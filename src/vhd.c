@@ -112,7 +112,7 @@ static BOOL Get7ZipPath(void)
 	if ( (GetRegistryKeyStr(REGKEY_HKCU, "7-Zip\\Path", sevenzip_path, sizeof(sevenzip_path)))
 	  || (GetRegistryKeyStr(REGKEY_HKLM, "7-Zip\\Path", sevenzip_path, sizeof(sevenzip_path))) ) {
 		static_strcat(sevenzip_path, "\\7z.exe");
-		return (_access(sevenzip_path, 0) != -1);
+		return (_accessU(sevenzip_path, 0) != -1);
 	}
 	return FALSE;
 }
@@ -250,7 +250,7 @@ BOOL IsCompressedBootableImage(const char* path)
 			if (buf == NULL)
 				return FALSE;
 			FormatStatus = 0;
-			bled_init(_uprintf, NULL, NULL, NULL, &FormatStatus);
+			bled_init(_uprintf, NULL, NULL, NULL, NULL, &FormatStatus);
 			dc = bled_uncompress_to_buffer(path, (char*)buf, MBR_SIZE, file_assoc[i].type);
 			bled_exit();
 			if (dc != MBR_SIZE) {
