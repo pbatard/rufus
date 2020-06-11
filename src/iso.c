@@ -319,6 +319,10 @@ static void fix_config(const char* psz_fullpath, const char* psz_path, const cha
 				// somewhere in their kernel options and use 'persistent' as keyword.
 				uprintf("  Added 'persistent' kernel option");
 				modified = TRUE;
+				// Also remove Ubuntu's "maybe-ubiquity" to avoid splash screen (GRUB only)
+				if ((props->is_grub_cfg) && replace_in_token_data(src, "linux",
+					"maybe-ubiquity", "", TRUE))
+					uprintf("  Removed 'maybe-ubiquity' kernel option");
 			} else if (replace_in_token_data(src, props->is_grub_cfg ? "linux" : "append",
 				"boot=live", "boot=live persistence", TRUE) != NULL) {
 				// Debian & derivatives are assumed to use 'boot=live' in

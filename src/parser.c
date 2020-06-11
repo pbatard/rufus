@@ -1100,7 +1100,7 @@ char* replace_in_token_data(const char* filename, const char* token, const char*
 
 	if ((filename == NULL) || (token == NULL) || (src == NULL) || (rep == NULL))
 		return NULL;
-	if ((filename[0] == 0) || (token[0] == 0) || (src[0] == 0) || (rep[0] == 0))
+	if ((filename[0] == 0) || (token[0] == 0) || (src[0] == 0))
 		return NULL;
 	if (strcmp(src, rep) == 0)	// No need for processing is source is same as replacement
 		return NULL;
