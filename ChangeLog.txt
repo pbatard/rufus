@@ -1,3 +1,14 @@
+o Version 3.11 (2020.06.??)
+    Add Rock Ridge deep directory support
+    Add an option to write small ISOs to an ESP (GPT only)
+    Add a cheat mode (Ctrl-SELECT) to extract content from an additional zip archive on top of the ISO
+    Add a cheat mode (Alt-G) to disable Virtual Hard Disk listing
+    Add a cheat mode (Alt-P) to toggle a GPT ESP to Basic Data (Windows 10 only)
+    Fix improper x86 32-bit NTFS driver being used for UEFI:NTFS
+    Improve UEFI:NTFS compatibility with older UEFI firmwares
+    Remove Ubuntu's splash screen for persistent UEFI drives
+    Enable ASLR for the Rufus executable
+
 o Version 3.10 (2020.04.22)
     Improve support for Ubuntu 20.04
     Improve detection of FIXED drives with no mounted partitions
