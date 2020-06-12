@@ -27,11 +27,13 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <assert.h>
 
 #include "rufus.h"
 #include "file.h"
 #include "drive.h"
 #include "format.h"
+#include "missing.h"
 #include "resource.h"
 #include "msapi_utf8.h"
 #include "localization.h"
@@ -251,6 +253,27 @@ BOOL FormatLargeFAT32(DWORD DriveIndex, uint64_t PartitionOffset, DWORD ClusterS
 		die("This drive is too big for FAT32 - max 2TB supported", APPERR(ERROR_INVALID_VOLUME_SIZE));
 	}
 
+	// Set default cluster size
+	// https://support.microsoft.com/en-us/help/140365/default-cluster-size-for-ntfs-fat-and-exfat
+	if (ClusterSize == 0) {
+		if (piDrive.PartitionLength.QuadPart < 64 * MB)
+			ClusterSize = 512;
+		else if (piDrive.PartitionLength.QuadPart < 128 * MB)
+			ClusterSize = 1 * KB;
+		else if (piDrive.PartitionLength.QuadPart < 256 * MB)
+			ClusterSize = 2 * KB;
+		else if (piDrive.PartitionLength.QuadPart < 8 * GB)
+			ClusterSize = 4 * KB;
+		else if (piDrive.PartitionLength.QuadPart < 16 * GB)
+			ClusterSize = 8 * KB;
+		else if (piDrive.PartitionLength.QuadPart < 32 * GB)
+			ClusterSize = 16 * KB;
+		else if (piDrive.PartitionLength.QuadPart < 2 * TB)
+			ClusterSize = 32 * KB;
+		else
+			ClusterSize = 64 * KB;
+	}
+
 	// coverity[tainted_data]
 	pFAT32BootSect = (FAT_BOOTSECTOR32*)calloc(BytesPerSect, 1);
 	pFAT32FsInfo = (FAT_FSINFO*)calloc(BytesPerSect, 1);
@@ -340,6 +363,7 @@ BOOL FormatLargeFAT32(DWORD DriveIndex, uint64_t PartitionOffset, DWORD ClusterS
 	// RootDir - allocated to cluster2
 
 	UserAreaSize = TotalSectors - ReservedSectCount - (NumFATs * FatSize);
+	assert(SectorsPerCluster > 0);
 	ClusterCount = UserAreaSize / SectorsPerCluster;
 
 	// Sanity check for a cluster count of >2^28, since the upper 4 bits of the cluster values in
@@ -367,16 +391,16 @@ BOOL FormatLargeFAT32(DWORD DriveIndex, uint64_t PartitionOffset, DWORD ClusterS
 
 	// Now we're committed - print some info first
 	uprintf("Size : %s %u sectors", SizeToHumanReadable(piDrive.PartitionLength.QuadPart, TRUE, FALSE), TotalSectors);
-	uprintf("Cluster size %d bytes, %d Bytes Per Sector", SectorsPerCluster * BytesPerSect, BytesPerSect);
+	uprintf("Cluster size %d bytes, %d bytes per sector", SectorsPerCluster * BytesPerSect, BytesPerSect);
 	uprintf("Volume ID is %x:%x", VolumeId >> 16, VolumeId & 0xffff);
-	uprintf("%d Reserved Sectors, %d Sectors per FAT, %d FATs", ReservedSectCount, FatSize, NumFATs);
+	uprintf("%d Reserved sectors, %d sectors per FAT, %d FATs", ReservedSectCount, FatSize, NumFATs);
 	uprintf("%d Total clusters", ClusterCount);
 
 	// Fix up the FSInfo sector
 	pFAT32FsInfo->dFree_Count = (UserAreaSize / SectorsPerCluster) - 1;
 	pFAT32FsInfo->dNxt_Free = 3; // clusters 0-1 reserved, we used cluster 2 for the root dir
 
-	uprintf("%d Free Clusters", pFAT32FsInfo->dFree_Count);
+	uprintf("%d Free clusters", pFAT32FsInfo->dFree_Count);
 	// Work out the Cluster count
 
 	// First zero out ReservedSect + FatSize * NumFats + SectorsPerCluster
