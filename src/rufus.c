@@ -116,7 +116,7 @@ BOOL enable_HDDs = FALSE, enable_VHDs = TRUE, enable_ntfs_compression = FALSE, n
 BOOL advanced_mode_device, advanced_mode_format, allow_dual_uefi_bios, detect_fakes, enable_vmdk, force_large_fat32, usb_debug;
 BOOL use_fake_units, preserve_timestamps = FALSE, fast_zeroing = FALSE, app_changed_size = FALSE;
 BOOL zero_drive = FALSE, list_non_usb_removable_drives = FALSE, enable_file_indexing, large_drive = FALSE;
-BOOL write_as_image = FALSE, write_as_esp = FALSE, installed_uefi_ntfs = FALSE, enable_fido = FALSE, use_vds = FALSE;
+BOOL write_as_image = FALSE, write_as_esp = FALSE, installed_uefi_ntfs = FALSE, use_vds = FALSE;
 float fScale = 1.0f;
 int dialog_showing = 0, selection_default = BT_IMAGE, windows_to_go_selection = 0, persistence_unit_selection = -1;
 int default_fs, fs_type, boot_type, partition_type, target_type; // file system, boot type, partition type, target type
@@ -3286,8 +3286,7 @@ relaunch:
 	image_option_txt[0] = 0;
 	select_index = 0;
 	safe_free(fido_url);
-	enable_fido = FALSE;
-	SetProcessDefaultLayout(right_to_left_mode?LAYOUT_RTL:0);
+	SetProcessDefaultLayout(right_to_left_mode ? LAYOUT_RTL : 0);
 	if (get_loc_data_file(loc_file, selected_locale))
 		WriteSettingStr(SETTING_LOCALE, selected_locale->txt[0]);
 

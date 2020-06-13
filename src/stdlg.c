@@ -45,7 +45,7 @@
 #include "license.h"
 
 /* Globals */
-extern BOOL is_x86_32, enable_fido;
+extern BOOL is_x86_32;
 static HICON hMessageIcon = (HICON)INVALID_HANDLE_VALUE;
 static char* szMessageText = NULL;
 static char* szMessageTitle = NULL;
@@ -1498,6 +1498,55 @@ INT_PTR CALLBACK UpdateCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 }
 
 /*
+ * Use a thread to enable the download button as this may be a lengthy
+ * operation due to the external download check.
+ */
+static DWORD WINAPI CheckForFidoThread(LPVOID param)
+{
+	static BOOL is_active = FALSE;
+	LONG_PTR style;
+	char* loc = NULL;
+	uint64_t len;
+	HWND hCtrl;
+
+	// Because a user may switch language before this thread has completed,
+	// we need to detect concurrency.
+	// Checking on a static boolean is more than good enough for our purpose.
+	if (is_active)
+		return -1;
+	is_active = TRUE;
+	safe_free(fido_url);
+
+	// Get the Fido URL from parsing a 'Fido.ver' on our server. This enables the use of different
+	// Fido versions from different versions of Rufus, if needed, as opposed to always downloading
+	// the latest release from GitHub, which may contain incompatible changes...
+	len = DownloadToFileOrBuffer(RUFUS_URL "/Fido.ver", NULL, (BYTE**)&loc, NULL, FALSE);
+	if ((len == 0) || (len >= 4 * KB))
+		goto out;
+
+	len++;	// DownloadToFileOrBuffer allocated an extra NUL character if needed
+	fido_url = get_token_data_buffer(FIDO_VERSION, 1, loc, (size_t)len);
+	if (safe_strncmp(fido_url, "https://github.com/pbatard/Fido", 31) != 0) {
+		uprintf("WARNING: Download script URL %s is invalid ✗", fido_url);
+		safe_free(fido_url);
+		goto out;
+	}
+	if (IsDownloadable(fido_url)) {
+		hCtrl = GetDlgItem(hMainDialog, IDC_SELECT);
+		style = GetWindowLongPtr(hCtrl, GWL_STYLE);
+		style |= BS_SPLITBUTTON;
+		SetWindowLongPtr(hCtrl, GWL_STYLE, style);
+		RedrawWindow(hCtrl, NULL, NULL, RDW_ALLCHILDREN | RDW_UPDATENOW);
+		InvalidateRect(hCtrl, NULL, TRUE);
+	}
+
+out:
+	safe_free(loc);
+	is_active = FALSE;
+	return 0;
+}
+
+/*
  * Initial update check setup
  */
 BOOL SetUpdateCheck(void)
@@ -1549,27 +1598,10 @@ BOOL SetUpdateCheck(void)
 	if (((ReadRegistryKey32(REGKEY_HKLM, "Microsoft\\PowerShell\\1\\Install") > 0) ||
 		 (ReadRegistryKey32(REGKEY_HKLM, "Microsoft\\PowerShell\\3\\Install") > 0)) &&
 		(ReadSetting32(SETTING_UPDATE_INTERVAL) > 0)) {
-		char *loc = NULL;
-		// Get the Fido URL from parsing a 'Fido.ver' on our server. This enables the use of different
-		// Fido versions from different versions of Rufus, if needed, as opposed to always downloading
-		// the latest release from GitHub, which may contain incompatible changes...
-		uint64_t loc_len = DownloadToFileOrBuffer(RUFUS_URL "/Fido.ver", NULL, (BYTE**)&loc, NULL, FALSE);
-		if ((loc_len != 0) && (loc_len < 4 * KB)) {
-			loc_len++;	// DownloadToFileOrBuffer allocated an extra NUL character if needed
-			fido_url = get_token_data_buffer(FIDO_VERSION, 1, loc, (size_t)loc_len);
-			if (safe_strncmp(fido_url, "https://github.com/pbatard/Fido", 31) != 0) {
-				ubprintf("WARNING: Download script URL %s is invalid ✗", fido_url);
-				safe_free(fido_url);
-			} else {
-				uprintf("Fido URL is %s", fido_url);
-				enable_fido = IsDownloadable(fido_url);
-			}
-		}
-		safe_free(loc);
-	}
-	if (!enable_fido) {
-		ubprintf("Notice: The ISO download feature has been deactivated because %s", (ReadSetting32(SETTING_UPDATE_INTERVAL) <= 0) ?
-			"'Check for updates' is disabled in your settings." : "the remote download script can not be accessed.");
+		CreateThread(NULL, 0, CheckForFidoThread, NULL, 0, NULL);
+	} else {
+		ubprintf("Notice: The ISO download feature has been deactivated because "
+			"'Check for updates' is disabled in your settings.");
 	}
 	return TRUE;
 }

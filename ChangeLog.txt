@@ -6,6 +6,7 @@ o Version 3.11 (2020.06.??)
     Add a cheat mode (Alt-P) to toggle a GPT ESP to Basic Data (Windows 10 only)
     Fix improper x86 32-bit NTFS driver being used for UEFI:NTFS
     Improve UEFI:NTFS compatibility with older UEFI firmwares
+    Improve startup time by running the ISO download feature check in the background
     Remove Ubuntu's splash screen for persistent UEFI drives
     Enable ASLR for the Rufus executable
 
