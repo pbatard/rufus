@@ -823,6 +823,9 @@ _iso9660_dir_to_statbuf (iso9660_dir_t *p_iso9660_dir,
     p_stat = calloc(1, stat_len);
     first_extent = true;
   } else {
+    /* Ignore Rock Ridge Deep Directory RE entries */
+    if (p_stat->rr.u_su_fields & ISO_ROCK_SUF_RE)
+      goto fail;
     first_extent = false;
   }
   if (!p_stat) {
@@ -831,9 +834,6 @@ _iso9660_dir_to_statbuf (iso9660_dir_t *p_iso9660_dir,
   }
   p_stat->type    = (p_iso9660_dir->file_flags & ISO_DIRECTORY)
     ? _STAT_DIR : _STAT_FILE;
-  /* Ignore Rock Ridge Deep Directory RE entries */
-  if (p_stat->rr.u_su_fields & ISO_ROCK_SUF_RE)
-    goto fail;
 
   /* Test for gaps between extents. Important: Use previous .total_size */
   extent_lsn = from_733 (p_iso9660_dir->extent);
