@@ -1,4 +1,4 @@
-o Version 3.11 (2020.06.??)
+o Version 3.11 (2020.06.18)
     Add Rock Ridge deep directory support
     Add an option to write small ISOs to an ESP (GPT only)
     Add a cheat mode (Ctrl-SELECT) to extract content from an additional zip archive on top of the ISO

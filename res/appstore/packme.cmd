@@ -11,6 +11,11 @@ set MSBUILD_PATH=C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\M
 set MANIFEST=AppxManifest.xml
 set ARCHS=x86 x64 arm arm64
 
+rem if you don't set the temp/tmp you get:
+rem error MSB6001: Invalid command line switch for "CL.exe". System.ArgumentExcep Key being added: 'TEMP'
+set temp=
+set tmp=
+
 cd /d "%~dp0"
 setlocal EnableDelayedExpansion
 set FILES_TO_SIGN=

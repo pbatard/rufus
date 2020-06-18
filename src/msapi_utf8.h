@@ -1057,7 +1057,7 @@ static __inline const char* _filenameU(const char* path)
 	int i;
 	if (path == NULL)
 		return NULL;
-	for (i = strlen(path) - 1; i >= 0; i--)
+	for (i = (int)strlen(path) - 1; i >= 0; i--)
 		if ((path[i] == '/') || (path[i] == '\\'))
 			return &path[i + 1];
 	return path;
