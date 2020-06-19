@@ -21,6 +21,9 @@ environment:
   global:
     BITS: 32
   matrix:
+  - CONFIGURATION: Release
+    COMPILER: Coverity
+    PLATFORM: x86
   - CONFIGURATION: Debug
     COMPILER: MSVC
     PLATFORM: x86
@@ -39,9 +42,6 @@ environment:
   - CONFIGURATION: Release
     COMPILER: MinGW
     PLATFORM: x86_64
-  - CONFIGURATION: Release
-    COMPILER: Coverity
-    PLATFORM: x86
 
 init:
 # Set the AppVeyor build version number to our tag or, if untagged, to the commit hash
@@ -82,16 +82,7 @@ build_script:
         }
         cov-build.exe --dir cov-int msbuild rufus.sln /m /p:Configuration=$env:CONFIGURATION,Platform=$env:PLATFORM /l:$APPVEYOR_LOGGER;
         7z a -r cov-int.zip cov-int
-        $curlArguments = @(
-          '--form email=%COVERITY_SCAN_EMAIL%',
-          '--form token=%COVERITY_SCAN_TOKEN%',
-          '--form file=cov-int.zip',
-          '--form version="%APPVEYOR_BUILD_VERSION%"',
-          '--form description="Rufus"',
-          'https://scan.coverity.com/builds?project=pbatard%2Frufus'
-        )
-        $curlArgumentList = [System.Environment]::ExpandEnvironmentVariables($curlArguments)
         # MUST use 'curl.exe' since 'curl' is a PowerShell alias to Invoke-Webrequest
-        curl.exe $curlArgumentList
+        curl.exe --form email=$env:COVERITY_SCAN_EMAIL --form token=$env:COVERITY_SCAN_TOKEN  --form file=@cov-int.zip --form version="$env:APPVEYOR_BUILD_VERSION" --form description="Rufus" https://scan.coverity.com/builds?project=pbatard%2Frufus
       }
     }
