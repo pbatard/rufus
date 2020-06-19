@@ -15,8 +15,6 @@ skip_commits:
   - '**/*.xml'
 
 environment:
-  COVERITY_SCAN_PROJECT_NAME:       "pbatard/rufus"
-  COVERITY_SCAN_NOTIFICATION_EMAIL: "pete@akeo.ie"
   COVERITY_SCAN_TOKEN:
     secure: XZADvwlRFo57sBA54pBH2oVT/eR/OytZYY/sCKq61io=
   global:
@@ -77,15 +75,12 @@ build_script:
         C:\msys64\usr\bin\bash -lc "export PATH=/mingw$env:BITS/bin:`$PATH; cd /c/projects/rufus; mkdir -p m4; ./configure --build=$env:PLATFORM-w64-mingw32 --host=$env:PLATFORM-w64-mingw32 --disable-debug; make -j4";
       }
       Coverity {
-        $PUBLISHCOVERITY = "$env:APPVEYOR_BUILD_FOLDER\PublishCoverity\tools\PublishCoverity.exe";
         if (!"$env:COVERITY_SCAN_TOKEN") {
           Write-Output "Not running Coverity due to missing credential.";
           return;
         }
-        & nuget install PublishCoverity -o "$env:APPVEYOR_BUILD_FOLDER" -excludeversion;
-        & cov-build.exe --dir cov-int msbuild rufus.sln /m /p:Configuration=$env:CONFIGURATION,Platform=$env:PLATFORM /l:$APPVEYOR_LOGGER;
-        & $PUBLISHCOVERITY compress --nologo -i "$env:APPVEYOR_BUILD_FOLDER\cov-int" -o "$env:APPVEYOR_BUILD_FOLDER\coverity.zip" --overwrite;
-        & $PUBLISHCOVERITY publish --nologo -t $env:COVERITY_SCAN_TOKEN -e $env:COVERITY_SCAN_NOTIFICATION_EMAIL -r $env:COVERITY_SCAN_PROJECT_NAME -z "$env:APPVEYOR_BUILD_FOLDER\coverity.zip" -d "Appveyor build." --codeVersion $env:APPVEYOR_BUILD_VERSION;
-        Get-ChildItem -Path ./ -Recurse | Remove-Item -Force -Recurse;
+        cov-build.exe --dir cov-int msbuild rufus.sln /m /p:Configuration=$env:CONFIGURATION,Platform=$env:PLATFORM /l:$APPVEYOR_LOGGER;
+        7z a cov-int.zip cov-int
+        curl --form token=$env:COVERITY_SCAN_TOKEN --form email=pete@akeo.ie --form file=cov-int.zip --form version="$env:APPVEYOR_BUILD_VERSION" --form description="Appveyor build" https://scan.coverity.com/builds?project=pbatard%2Frufus
       }
     }

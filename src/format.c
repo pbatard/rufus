@@ -972,6 +972,8 @@ static BOOL WriteSBR(HANDLE hPhysicalDrive)
 		(DWORD)(SelectedDrive.SectorsPerTrack * SelectedDrive.SectorSize) : 1 * MB;
 	if (br_size + size > max_size) {
 		uprintf("  SBR size is too large - You may need to uncheck 'Add fixes for old BIOSes'.");
+		if (sub_type == BT_MAX)
+			safe_free(buf);
 		return FALSE;
 	}
 
@@ -1468,8 +1470,11 @@ static void update_progress(const uint64_t processed_bytes)
 static int sector_write(int fd, const void* _buf, unsigned int count)
 {
 	const uint8_t* buf = (const uint8_t*)_buf;
-	const unsigned int sec_size = (unsigned int)SelectedDrive.SectorSize;
+	unsigned int sec_size = (unsigned int)SelectedDrive.SectorSize;
 	int written, fill_size = 0;
+
+	if (sec_size == 0)
+		sec_size = 512;
 
 	// If we are on a sector boundary and count is multiple of the
 	// sector size, just issue a regular write

@@ -1270,7 +1270,7 @@ BOOL ToggleEsp(DWORD DriveIndex)
 	r = DeviceIoControl(hPhysical, IOCTL_DISK_SET_DRIVE_LAYOUT_EX, (BYTE*)DriveLayout, size, NULL, 0, &size, NULL);
 	if (!r) {
 		uprintf("Could not set drive layout: %s", WindowsErrorString());
-		return FALSE;
+		goto out;
 	}
 	RefreshDriveLayout(hPhysical);
 	if (CompareGUID(&DriveLayout->PartitionEntry[i].Gpt.PartitionType, &PARTITION_GENERIC_ESP)) {
@@ -1279,7 +1279,7 @@ BOOL ToggleEsp(DWORD DriveIndex)
 	} else if (!IsDriveLetterInUse(*mount_point)) {
 		// We succesfully switched ESP to Basic Data -> Try to mount it
 		volume_name = GetLogicalName(DriveIndex, DriveLayout->PartitionEntry[i].StartingOffset.QuadPart, TRUE, FALSE);
-		MountVolume(mount_point, volume_name);
+		IGNORE_RETVAL(MountVolume(mount_point, volume_name));
 		free(volume_name);
 	}
 	ret = TRUE;
