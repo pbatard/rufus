@@ -81,6 +81,6 @@ build_script:
         }
         cov-build.exe --dir cov-int msbuild rufus.sln /m /p:Configuration=$env:CONFIGURATION,Platform=$env:PLATFORM /l:$APPVEYOR_LOGGER;
         7z a cov-int.zip cov-int
-        curl --form token=$env:COVERITY_SCAN_TOKEN --form email=pete@akeo.ie --form file=cov-int.zip --form version="$env:APPVEYOR_BUILD_VERSION" --form description="Appveyor build" https://scan.coverity.com/builds?project=pbatard%2Frufus
+        curl.exe --form token=$env:COVERITY_SCAN_TOKEN --form email=pete@akeo.ie --form file=cov-int.zip --form version="$env:APPVEYOR_BUILD_VERSION" --form description="Appveyor build" https://scan.coverity.com/builds?project=pbatard%2Frufus
       }
     }
