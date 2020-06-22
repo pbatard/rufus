@@ -82,7 +82,7 @@ build_script:
         }
         cov-build.exe --dir cov-int msbuild rufus.sln /m /p:Configuration=$env:CONFIGURATION,Platform=$env:PLATFORM /l:$APPVEYOR_LOGGER;
         7z a -r cov-int.zip cov-int
-        # MUST use 'curl.exe' since 'curl' is a PowerShell alias to Invoke-Webrequest
-        curl.exe --form email=$env:COVERITY_SCAN_EMAIL --form token=$env:COVERITY_SCAN_TOKEN  --form file=@cov-int.zip --form version="$env:APPVEYOR_BUILD_VERSION" --form description="Rufus" https://scan.coverity.com/builds?project=pbatard%2Frufus
+        # MUST use 'curl.exe' since 'curl' is a PowerShell alias to Invoke-Webrequest. Also MUST use @ sign before uploaded file.
+        curl.exe -s --form email=$env:COVERITY_SCAN_EMAIL --form token=$env:COVERITY_SCAN_TOKEN  --form file=@cov-int.zip --form version="$env:APPVEYOR_BUILD_VERSION" --form description="Rufus" https://scan.coverity.com/builds?project=pbatard%2Frufus
       }
     }

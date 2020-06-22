@@ -72,7 +72,7 @@
 #define read_swap64(p) bswap_uint64(*(const uint64_t*)(const uint8_t*)(p))
 #define write_swap16(p,v) (*(uint16_t*)(void*)(p)) = bswap_uint16(v)
 #define write_swap32(p,v) (*(uint32_t*)(void*)(p)) = bswap_uint32(v)
-#define write_swap64(p,v) (*(uint32_t*)(void*)(p)) = bswap_uint64(v)
+#define write_swap64(p,v) (*(uint64_t*)(void*)(p)) = bswap_uint64(v)
 
 /*
  * Nibbled from https://github.com/hanji/popcnt/blob/master/populationcount.cpp

@@ -4,7 +4,7 @@
  * Copyright © 1998-2001 Free Software Foundation, Inc.
  * Copyright © 2004 g10 Code GmbH
  * Copyright © 2002-2015 Wei Dai & Igor Pavlov
- * Copyright © 2015-2019 Pete Batard <pete@akeo.ie>
+ * Copyright © 2015-2020 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -60,26 +60,38 @@
 
 #undef BIG_ENDIAN_HOST
 
-#define BUFFER_SIZE     (64*KB)
-#define WAIT_TIME       5000
+#define BUFFER_SIZE         (64*KB)
+#define WAIT_TIME           5000
+
+/* Blocksize for each algorithm - Must be a power of 2 */
+#define MD5_BLOCKSIZE       64
+#define SHA1_BLOCKSIZE      64
+#define SHA256_BLOCKSIZE    64
 
 /* Globals */
 char sum_str[CHECKSUM_MAX][65];
 uint32_t bufnum, sum_count[CHECKSUM_MAX] = { 16, 20, 32 };
 HANDLE data_ready[CHECKSUM_MAX] = { 0 }, thread_ready[CHECKSUM_MAX] = { 0 };
 DWORD read_size[2];
-unsigned char ALIGNED(64) buffer[2][BUFFER_SIZE];
+uint8_t ALIGNED(64) buffer[2][BUFFER_SIZE];
 
 /*
  * Rotate 32 bit integers by n bytes.
  * Don't bother trying to hand-optimize those, as the
  * compiler usually does a pretty good job at that.
  */
-#define ROL(a,b) (((a) << (b)) | ((a) >> (32-(b))))
-#define ROR(a,b) (((a) >> (b)) | ((a) << (32-(b))))
+#define ROL32(a,b) (((a) << (b)) | ((a) >> (32-(b))))
+#define ROR32(a,b) (((a) >> (b)) | ((a) << (32-(b))))
+
+
+/*
+ * SHA-256 macros (use Wikipedia SHA-2 names for clarity)
+ */
+#define Ch(x,y,z) ((z) ^ ((x) & ((y) ^ (z))))
+#define Ma(x,y,z) (((x) & (y)) | ((z) & ((x) | (y))))
 
 /* SHA-256 constants */
-static const uint32_t K[64] = {
+static const uint32_t K256[64] = {
 	0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
 	0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
 	0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
@@ -95,7 +107,7 @@ static const uint32_t K[64] = {
  * which means some elements may be unused...
  */
 typedef struct ALIGNED(64) {
-	unsigned char buf[64];
+	uint8_t buf[64];
 	uint32_t state[8];
 	uint64_t bytecount;
 } SUM_CONTEXT;
@@ -133,7 +145,7 @@ static void sha256_init(SUM_CONTEXT *ctx)
 }
 
 /* Transform the message X which consists of 16 32-bit-words (SHA-1) */
-static void sha1_transform(SUM_CONTEXT *ctx, const unsigned char *data)
+static void sha1_transform(SUM_CONTEXT *ctx, const uint8_t *data)
 {
 	uint32_t a, b, c, d, e, tm, x[16];
 
@@ -150,7 +162,7 @@ static void sha1_transform(SUM_CONTEXT *ctx, const unsigned char *data)
 	{
 		unsigned k;
 		for (k = 0; k < 16; k += 4) {
-			const unsigned char *p2 = data + k * 4;
+			const uint8_t *p2 = data + k * 4;
 			x[k] = read_swap32(p2);
 			x[k + 1] = read_swap32(p2 + 4);
 			x[k + 2] = read_swap32(p2 + 8);
@@ -168,10 +180,10 @@ static void sha1_transform(SUM_CONTEXT *ctx, const unsigned char *data)
 #define F3(x,y,z)   ( ( x & y ) | ( z & ( x | y ) ) )
 #define F4(x,y,z)   ( x ^ y ^ z )
 
-#define M(i) ( tm = x[i&0x0f] ^ x[(i-14)&0x0f] ^ x[(i-8)&0x0f] ^ x[(i-3)&0x0f], (x[i&0x0f] = ROL(tm,1)) )
+#define M(i) ( tm = x[i&0x0f] ^ x[(i-14)&0x0f] ^ x[(i-8)&0x0f] ^ x[(i-3)&0x0f], (x[i&0x0f] = ROL32(tm,1)) )
 
-#define SHA1STEP(a, b, c, d, e, f, k, m) do { e += ROL(a, 5) + f(b, c, d) + k + m; \
-                                              b = ROL(b, 30); } while(0)
+#define SHA1STEP(a, b, c, d, e, f, k, m) do { e += ROL32(a, 5) + f(b, c, d) + k + m; \
+                                              b = ROL32(b, 30); } while(0)
 	SHA1STEP(a, b, c, d, e, F1, K1, x[0]);
 	SHA1STEP(e, a, b, c, d, F1, K1, x[1]);
 	SHA1STEP(d, e, a, b, c, F1, K1, x[2]);
@@ -267,7 +279,7 @@ static void sha1_transform(SUM_CONTEXT *ctx, const unsigned char *data)
 }
 
 /* Transform the message X which consists of 16 32-bit-words (SHA-256) */
-static __inline void sha256_transform(SUM_CONTEXT *ctx, const unsigned char *data)
+static __inline void sha256_transform(SUM_CONTEXT *ctx, const uint8_t *data)
 {
 	uint32_t a, b, c, d, e, f, g, h, j, x[16];
 
@@ -280,21 +292,19 @@ static __inline void sha256_transform(SUM_CONTEXT *ctx, const unsigned char *dat
 	g = ctx->state[6];
 	h = ctx->state[7];
 
-#define CH(x,y,z) ((z) ^ ((x) & ((y) ^ (z))))
-#define MAJ(x,y,z) (((x) & (y)) | ((z) & ((x) | (y))))
 // Nesting the ROR allows for single register compiler optimizations
-#define S0(x) (ROR(ROR(ROR(x,9)^(x),11)^(x),2))
-#define S1(x) (ROR(ROR(ROR(x,14)^(x),5)^(x),6))
-#define s0(x) (ROR(ROR(x,11)^(x),7)^((x)>>3))
-#define s1(x) (ROR(ROR(x,2)^(x),17)^((x)>>10))
+#define S0(x) (ROR32(ROR32(ROR32(x,9)^(x),11)^(x),2))	// Σ0 (Sigma 0)
+#define S1(x) (ROR32(ROR32(ROR32(x,14)^(x),5)^(x),6))	// Σ1 (Sigma 1)
+#define g0(x) (ROR32(ROR32(x,11)^(x),7)^((x)>>3))		// γ0 (gamma 0)
+#define g1(x) (ROR32(ROR32(x,2)^(x),17)^((x)>>10))		// γ1 (gamma 1)
 #define BLK0(i) (x[i])
-#define BLK2(i) (x[i] += s1(x[((i)-2)&15]) + x[((i)-7)&15] + s0(x[((i)-15)&15]))
+#define BLK2(i) (x[i] += g1(x[((i)-2)&15]) + x[((i)-7)&15] + g0(x[((i)-15)&15]))
 #define R(a, b, c, d, e, f, g, h, i) \
-	h += S1(e) + CH(e,f,g) + K[(i)+(j)] + (j ? BLK2(i) : BLK0(i)); \
+	h += S1(e) + Ch(e,f,g) + K256[(i)+(j)] + (j ? BLK2(i) : BLK0(i)); \
 	d += h; \
-	h += S0(a) + MAJ(a, b, c)
+	h += S0(a) + Ma(a, b, c)
 #define RX_8(i) \
-	R(a, b, c, d, e, f, g, h, i); \
+	R(a, b, c, d, e, f, g, h, i);   \
 	R(h, a, b, c, d, e, f, g, i+1); \
 	R(g, h, a, b, c, d, e, f, i+2); \
 	R(f, g, h, a, b, c, d, e, i+3); \
@@ -307,9 +317,9 @@ static __inline void sha256_transform(SUM_CONTEXT *ctx, const unsigned char *dat
 	memcpy(x, data, sizeof(x));
 #else
 	{
-		unsigned k;
+		uint32_t k;
 		for (k = 0; k < 16; k += 4) {
-			const unsigned char *p2 = data + k * 4;
+			const uint8_t* p2 = data + k * 4;
 			x[k] = read_swap32(p2);
 			x[k + 1] = read_swap32(p2 + 4);
 			x[k + 2] = read_swap32(p2 + 8);
@@ -325,8 +335,12 @@ static __inline void sha256_transform(SUM_CONTEXT *ctx, const unsigned char *dat
 
 #undef S0
 #undef S1
-#undef s0
-#undef s1
+#undef g0
+#undef g1
+#undef BLK0
+#undef BLK2
+#undef R
+#undef RX_8
 
 	ctx->state[0] += a;
 	ctx->state[1] += b;
@@ -339,7 +353,7 @@ static __inline void sha256_transform(SUM_CONTEXT *ctx, const unsigned char *dat
 }
 
 /* Transform the message X which consists of 16 32-bit-words (MD5) */
-static void md5_transform(SUM_CONTEXT *ctx, const unsigned char *data)
+static void md5_transform(SUM_CONTEXT *ctx, const uint8_t *data)
 {
 	uint32_t a, b, c, d, x[16];
 
@@ -350,9 +364,9 @@ static void md5_transform(SUM_CONTEXT *ctx, const unsigned char *data)
 
 #ifdef BIG_ENDIAN_HOST
 	{
-		unsigned k;
+		uint32_t k;
 		for (k = 0; k < 16; k += 4) {
-			const unsigned char *p2 = data + k * 4;
+			const uint8_t *p2 = data + k * 4;
 			x[k] = read_swap32(p2);
 			x[k + 1] = read_swap32(p2 + 4);
 			x[k + 2] = read_swap32(p2 + 8);
@@ -452,18 +466,18 @@ static void md5_transform(SUM_CONTEXT *ctx, const unsigned char *data)
 }
 
 /* Update the message digest with the contents of the buffer (SHA-1) */
-static void sha1_write(SUM_CONTEXT *ctx, const unsigned char *buf, size_t len)
+static void sha1_write(SUM_CONTEXT *ctx, const uint8_t *buf, size_t len)
 {
-	size_t num = ctx->bytecount & 0x3f;
+	size_t num = ctx->bytecount & (SHA1_BLOCKSIZE - 1);
 
 	/* Update bytecount */
 	ctx->bytecount += len;
 
 	/* Handle any leading odd-sized chunks */
 	if (num) {
-		unsigned char *p = ctx->buf + num;
+		uint8_t *p = ctx->buf + num;
 
-		num = 64 - num;
+		num = SHA1_BLOCKSIZE - num;
 		if (len < num) {
 			memcpy(p, buf, len);
 			return;
@@ -474,12 +488,12 @@ static void sha1_write(SUM_CONTEXT *ctx, const unsigned char *buf, size_t len)
 		len -= num;
 	}
 
-	/* Process data in 64-byte chunks */
-	while (len >= 64) {
-		PREFETCH64(buf + 64);
+	/* Process data in blocksize chunks */
+	while (len >= SHA1_BLOCKSIZE) {
+		PREFETCH64(buf + SHA1_BLOCKSIZE);
 		sha1_transform(ctx, buf);
-		buf += 64;
-		len -= 64;
+		buf += SHA1_BLOCKSIZE;
+		len -= SHA1_BLOCKSIZE;
 	}
 
 	/* Handle any remaining bytes of data. */
@@ -487,18 +501,18 @@ static void sha1_write(SUM_CONTEXT *ctx, const unsigned char *buf, size_t len)
 }
 
 /* Update the message digest with the contents of the buffer (SHA-256) */
-static void sha256_write(SUM_CONTEXT *ctx, const unsigned char *buf, size_t len)
+static void sha256_write(SUM_CONTEXT *ctx, const uint8_t *buf, size_t len)
 {
-	size_t num = ctx->bytecount & 0x3f;
+	size_t num = ctx->bytecount & (SHA256_BLOCKSIZE - 1);
 
 	/* Update bytecount */
 	ctx->bytecount += len;
 
 	/* Handle any leading odd-sized chunks */
 	if (num) {
-		unsigned char *p = ctx->buf + num;
+		uint8_t *p = ctx->buf + num;
 
-		num = 64 - num;
+		num = SHA256_BLOCKSIZE - num;
 		if (len < num) {
 			memcpy(p, buf, len);
 			return;
@@ -509,12 +523,12 @@ static void sha256_write(SUM_CONTEXT *ctx, const unsigned char *buf, size_t len)
 		len -= num;
 	}
 
-	/* Process data in 64-byte chunks */
-	while (len >= 64) {
-		PREFETCH64(buf + 64);
+	/* Process data in blocksize chunks */
+	while (len >= SHA256_BLOCKSIZE) {
+		PREFETCH64(buf + SHA256_BLOCKSIZE);
 		sha256_transform(ctx, buf);
-		buf += 64;
-		len -= 64;
+		buf += SHA256_BLOCKSIZE;
+		len -= SHA256_BLOCKSIZE;
 	}
 
 	/* Handle any remaining bytes of data. */
@@ -522,18 +536,18 @@ static void sha256_write(SUM_CONTEXT *ctx, const unsigned char *buf, size_t len)
 }
 
 /* Update the message digest with the contents of the buffer (MD5) */
-static void md5_write(SUM_CONTEXT *ctx, const unsigned char *buf, size_t len)
+static void md5_write(SUM_CONTEXT *ctx, const uint8_t *buf, size_t len)
 {
-	size_t num = ctx->bytecount & 0x3f;
+	size_t num = ctx->bytecount & (MD5_BLOCKSIZE - 1);
 
 	/* Update bytecount */
 	ctx->bytecount += len;
 
 	/* Handle any leading odd-sized chunks */
 	if (num) {
-		unsigned char *p = ctx->buf + num;
+		uint8_t *p = ctx->buf + num;
 
-		num = 64 - num;
+		num = MD5_BLOCKSIZE - num;
 		if (len < num) {
 			memcpy(p, buf, num);
 			return;
@@ -544,12 +558,12 @@ static void md5_write(SUM_CONTEXT *ctx, const unsigned char *buf, size_t len)
 		len -= num;
 	}
 
-	/* Process data in 64-byte chunks */
-	while (len >= 64) {
-		PREFETCH64(buf + 64);
+	/* Process data in blocksize chunks */
+	while (len >= MD5_BLOCKSIZE) {
+		PREFETCH64(buf + MD5_BLOCKSIZE);
 		md5_transform(ctx, buf);
-		buf += 64;
-		len -= 64;
+		buf += MD5_BLOCKSIZE;
+		len -= MD5_BLOCKSIZE;
 	}
 
 	/* Handle any remaining bytes of data. */
@@ -559,29 +573,29 @@ static void md5_write(SUM_CONTEXT *ctx, const unsigned char *buf, size_t len)
 /* Finalize the computation and write the digest in ctx->state[] (SHA-1) */
 static void sha1_final(SUM_CONTEXT *ctx)
 {
+	size_t pos = ((size_t)ctx->bytecount) & (SHA1_BLOCKSIZE - 1);
 	uint64_t bitcount = ctx->bytecount << 3;
-	size_t pos = ((size_t)ctx->bytecount) & 0x3F;
-	unsigned char *p;
+	uint8_t *p;
 
 	ctx->buf[pos++] = 0x80;
 
 	/* Pad whatever data is left in the buffer */
-	while (pos != (64 - 8)) {
-		pos &= 0x3F;
+	while (pos != (SHA1_BLOCKSIZE - 8)) {
+		pos &= (SHA1_BLOCKSIZE - 1);
 		if (pos == 0)
 			sha1_transform(ctx, ctx->buf);
 		ctx->buf[pos++] = 0;
 	}
 
 	/* Append to the padding the total message's length in bits and transform */
-	ctx->buf[63] = (unsigned char) bitcount;
-	ctx->buf[62] = (unsigned char) (bitcount >> 8);
-	ctx->buf[61] = (unsigned char) (bitcount >> 16);
-	ctx->buf[60] = (unsigned char) (bitcount >> 24);
-	ctx->buf[59] = (unsigned char) (bitcount >> 32);
-	ctx->buf[58] = (unsigned char) (bitcount >> 40);
-	ctx->buf[57] = (unsigned char) (bitcount >> 48);
-	ctx->buf[56] = (unsigned char) (bitcount >> 56);
+	ctx->buf[SHA1_BLOCKSIZE - 1] = (uint8_t) bitcount;
+	ctx->buf[SHA1_BLOCKSIZE - 2] = (uint8_t) (bitcount >> 8);
+	ctx->buf[SHA1_BLOCKSIZE - 3] = (uint8_t) (bitcount >> 16);
+	ctx->buf[SHA1_BLOCKSIZE - 4] = (uint8_t) (bitcount >> 24);
+	ctx->buf[SHA1_BLOCKSIZE - 5] = (uint8_t) (bitcount >> 32);
+	ctx->buf[SHA1_BLOCKSIZE - 6] = (uint8_t) (bitcount >> 40);
+	ctx->buf[SHA1_BLOCKSIZE - 7] = (uint8_t) (bitcount >> 48);
+	ctx->buf[SHA1_BLOCKSIZE - 8] = (uint8_t) (bitcount >> 56);
 
 	sha1_transform(ctx, ctx->buf);
 
@@ -602,29 +616,29 @@ static void sha1_final(SUM_CONTEXT *ctx)
 /* Finalize the computation and write the digest in ctx->state[] (SHA-256) */
 static void sha256_final(SUM_CONTEXT *ctx)
 {
+	size_t pos = ((size_t)ctx->bytecount) & (SHA256_BLOCKSIZE - 1);
 	uint64_t bitcount = ctx->bytecount << 3;
-	size_t pos = ((size_t)ctx->bytecount) & 0x3F;
-	unsigned char *p;
+	uint8_t *p;
 
 	ctx->buf[pos++] = 0x80;
 
 	/* Pad whatever data is left in the buffer */
-	while (pos != (64 - 8)) {
-		pos &= 0x3F;
+	while (pos != (SHA256_BLOCKSIZE - 8)) {
+		pos &= (SHA256_BLOCKSIZE - 1);
 		if (pos == 0)
 			sha256_transform(ctx, ctx->buf);
 		ctx->buf[pos++] = 0;
 	}
 
 	/* Append to the padding the total message's length in bits and transform */
-	ctx->buf[63] = (unsigned char) bitcount;
-	ctx->buf[62] = (unsigned char) (bitcount >> 8);
-	ctx->buf[61] = (unsigned char) (bitcount >> 16);
-	ctx->buf[60] = (unsigned char) (bitcount >> 24);
-	ctx->buf[59] = (unsigned char) (bitcount >> 32);
-	ctx->buf[58] = (unsigned char) (bitcount >> 40);
-	ctx->buf[57] = (unsigned char) (bitcount >> 48);
-	ctx->buf[56] = (unsigned char) (bitcount >> 56);
+	ctx->buf[SHA256_BLOCKSIZE - 1] = (uint8_t) bitcount;
+	ctx->buf[SHA256_BLOCKSIZE - 2] = (uint8_t) (bitcount >> 8);
+	ctx->buf[SHA256_BLOCKSIZE - 3] = (uint8_t) (bitcount >> 16);
+	ctx->buf[SHA256_BLOCKSIZE - 4] = (uint8_t) (bitcount >> 24);
+	ctx->buf[SHA256_BLOCKSIZE - 5] = (uint8_t) (bitcount >> 32);
+	ctx->buf[SHA256_BLOCKSIZE - 6] = (uint8_t) (bitcount >> 40);
+	ctx->buf[SHA256_BLOCKSIZE - 7] = (uint8_t) (bitcount >> 48);
+	ctx->buf[SHA256_BLOCKSIZE - 8] = (uint8_t) (bitcount >> 56);
 
 	sha256_transform(ctx, ctx->buf);
 
@@ -648,9 +662,9 @@ static void sha256_final(SUM_CONTEXT *ctx)
 /* Finalize the computation and write the digest in ctx->state[] (MD5) */
 static void md5_final(SUM_CONTEXT *ctx)
 {
-	size_t count = ((size_t)ctx->bytecount) & 0x3F;
+	size_t count = ((size_t)ctx->bytecount) & (MD5_BLOCKSIZE - 1);
 	uint64_t bitcount = ctx->bytecount << 3;
-	unsigned char *p;
+	uint8_t *p;
 
 	/* Set the first char of padding to 0x80.
 	 * This is safe since there is always at least one byte free
@@ -658,31 +672,31 @@ static void md5_final(SUM_CONTEXT *ctx)
 	p = ctx->buf + count;
 	*p++ = 0x80;
 
-	/* Bytes of padding needed to make 64 bytes */
-	count = 64 - 1 - count;
+	/* Bytes of padding needed to make blocksize */
+	count = (MD5_BLOCKSIZE - 1) - count;
 
 	/* Pad out to 56 mod 64 */
 	if (count < 8) {
-		/* Two lots of padding: Pad the first block to 64 bytes */
+		/* Two lots of padding: Pad the first block to blocksize */
 		memset(p, 0, count);
 		md5_transform(ctx, ctx->buf);
 
-		/* Now fill the next block with 56 bytes */
-		memset(ctx->buf, 0, 56);
+		/* Now fill the next block */
+		memset(ctx->buf, 0, MD5_BLOCKSIZE - 8);
 	} else {
-		/* Pad block to 56 bytes */
+		/* Pad block to blocksize */
 		memset(p, 0, count - 8);
 	}
 
 	/* append the 64 bit count (little endian) */
-	ctx->buf[56] = (unsigned char) bitcount;
-	ctx->buf[57] = (unsigned char) (bitcount >> 8);
-	ctx->buf[58] = (unsigned char) (bitcount >> 16);
-	ctx->buf[59] = (unsigned char) (bitcount >> 24);
-	ctx->buf[60] = (unsigned char) (bitcount >> 32);
-	ctx->buf[61] = (unsigned char) (bitcount >> 40);
-	ctx->buf[62] = (unsigned char) (bitcount >> 48);
-	ctx->buf[63] = (unsigned char) (bitcount >> 56);
+	ctx->buf[MD5_BLOCKSIZE - 8] = (uint8_t) bitcount;
+	ctx->buf[MD5_BLOCKSIZE - 7] = (uint8_t) (bitcount >> 8);
+	ctx->buf[MD5_BLOCKSIZE - 6] = (uint8_t) (bitcount >> 16);
+	ctx->buf[MD5_BLOCKSIZE - 5] = (uint8_t) (bitcount >> 24);
+	ctx->buf[MD5_BLOCKSIZE - 4] = (uint8_t) (bitcount >> 32);
+	ctx->buf[MD5_BLOCKSIZE - 3] = (uint8_t) (bitcount >> 40);
+	ctx->buf[MD5_BLOCKSIZE - 2] = (uint8_t) (bitcount >> 48);
+	ctx->buf[MD5_BLOCKSIZE - 1] = (uint8_t) (bitcount >> 56);
 
 	md5_transform(ctx, ctx->buf);
 
@@ -703,12 +717,12 @@ static void md5_final(SUM_CONTEXT *ctx)
 #ifdef NULL_TEST
 // These 'null' calls are useful for testing load balancing and individual algorithm speed
 static void null_init(SUM_CONTEXT *ctx) { memset(ctx, 0, sizeof(*ctx)); }
-static void null_write(SUM_CONTEXT *ctx, const unsigned char *buf, size_t len) { }
+static void null_write(SUM_CONTEXT *ctx, const uint8_t *buf, size_t len) { }
 static void null_final(SUM_CONTEXT *ctx) { }
 #endif
 
 typedef void sum_init_t(SUM_CONTEXT *ctx);
-typedef void sum_write_t(SUM_CONTEXT *ctx, const unsigned char *buf, size_t len);
+typedef void sum_write_t(SUM_CONTEXT *ctx, const uint8_t *buf, size_t len);
 typedef void sum_final_t(SUM_CONTEXT *ctx);
 sum_init_t *sum_init[CHECKSUM_MAX] = { md5_init, sha1_init , sha256_init };
 sum_write_t *sum_write[CHECKSUM_MAX] = { md5_write, sha1_write , sha256_write };
@@ -722,7 +736,7 @@ BOOL HashFile(const unsigned type, const char* path, uint8_t* sum)
 	HANDLE h = INVALID_HANDLE_VALUE;
 	DWORD rs = 0;
 	uint64_t rb;
-	unsigned char buf[4096];
+	uint8_t buf[4096];
 
 	if ((type >= CHECKSUM_MAX) || (path == NULL) || (sum == NULL))
 		goto out;
@@ -756,7 +770,7 @@ out:
 	return r;
 }
 
-BOOL HashBuffer(const unsigned type, const unsigned char* buf, const size_t len, uint8_t* sum)
+BOOL HashBuffer(const unsigned type, const uint8_t* buf, const size_t len, uint8_t* sum)
 {
 	BOOL r = FALSE;
 	SUM_CONTEXT sum_ctx = { {0} };
