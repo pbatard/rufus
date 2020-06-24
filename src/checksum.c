@@ -1,7 +1,8 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
- * Message-Digest algorithms (md5sum, sha1sum, sha256sum)
+ * Message-Digest algorithms (md5sum, sha1sum, sha256sum, sha512sum)
  * Copyright © 1998-2001 Free Software Foundation, Inc.
+ * Copyright © 2004-2019 Tom St Denis
  * Copyright © 2004 g10 Code GmbH
  * Copyright © 2002-2015 Wei Dai & Igor Pavlov
  * Copyright © 2015-2020 Pete Batard <pete@akeo.ie>
@@ -25,6 +26,8 @@
  *
  * SHA-256 taken from 7-zip's Sha256.c, itself based on Crypto++ - Public Domain
  *
+ * SHA-512 modified from LibTomCrypt - Public Domain
+ *
  * MD5 code from various public domain sources sharing the following
  * copyright declaration:
  *
@@ -43,6 +46,12 @@
  * needed on buffers full of bytes, and then call MD5Final, which
  * will fill a supplied 16-byte array with the digest.
  */
+
+ /* Memory leaks detection - define _CRTDBG_MAP_ALLOC as preprocessor macro */
+#ifdef _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -67,25 +76,35 @@
 #define MD5_BLOCKSIZE       64
 #define SHA1_BLOCKSIZE      64
 #define SHA256_BLOCKSIZE    64
+#define SHA512_BLOCKSIZE    128
+#define MAX_BLOCKSIZE       SHA512_BLOCKSIZE
+
+/* Hashsize for each algorithm */
+#define MD5_HASHSIZE        16
+#define SHA1_HASHSIZE       20
+#define SHA256_HASHSIZE     32
+#define SHA512_HASHSIZE     64
+#define MAX_HASHSIZE        SHA512_HASHSIZE
 
 /* Globals */
-char sum_str[CHECKSUM_MAX][65];
-uint32_t bufnum, sum_count[CHECKSUM_MAX] = { 16, 20, 32 };
+char sum_str[CHECKSUM_MAX][150];
+uint32_t bufnum, sum_count[CHECKSUM_MAX] = { MD5_HASHSIZE, SHA1_HASHSIZE, SHA256_HASHSIZE, SHA512_HASHSIZE };
 HANDLE data_ready[CHECKSUM_MAX] = { 0 }, thread_ready[CHECKSUM_MAX] = { 0 };
 DWORD read_size[2];
 uint8_t ALIGNED(64) buffer[2][BUFFER_SIZE];
 
 /*
- * Rotate 32 bit integers by n bytes.
+ * Rotate 32 or 64 bit integers by n bytes.
  * Don't bother trying to hand-optimize those, as the
  * compiler usually does a pretty good job at that.
  */
 #define ROL32(a,b) (((a) << (b)) | ((a) >> (32-(b))))
 #define ROR32(a,b) (((a) >> (b)) | ((a) << (32-(b))))
-
+#define ROL64(a,b) (((a) << (b)) | ((a) >> (64-(b))))
+#define ROR64(a,b) (((a) >> (b)) | ((a) << (64-(b))))
 
 /*
- * SHA-256 macros (use Wikipedia SHA-2 names for clarity)
+ * SHA-256, SHA-512 common macros (use Wikipedia SHA-2 names for clarity)
  */
 #define Ch(x,y,z) ((z) ^ ((x) & ((y) ^ (z))))
 #define Ma(x,y,z) (((x) & (y)) | ((z) & ((x) | (y))))
@@ -102,13 +121,37 @@ static const uint32_t K256[64] = {
 	0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
 };
 
+/* SHA-512 constants */
+static const uint64_t K512[80] = {
+	0x428a2f98d728ae22ULL, 0x7137449123ef65cdULL, 0xb5c0fbcfec4d3b2fULL, 0xe9b5dba58189dbbcULL,
+	0x3956c25bf348b538ULL, 0x59f111f1b605d019ULL, 0x923f82a4af194f9bULL, 0xab1c5ed5da6d8118ULL,
+	0xd807aa98a3030242ULL, 0x12835b0145706fbeULL, 0x243185be4ee4b28cULL, 0x550c7dc3d5ffb4e2ULL,
+	0x72be5d74f27b896fULL, 0x80deb1fe3b1696b1ULL, 0x9bdc06a725c71235ULL, 0xc19bf174cf692694ULL,
+	0xe49b69c19ef14ad2ULL, 0xefbe4786384f25e3ULL, 0x0fc19dc68b8cd5b5ULL, 0x240ca1cc77ac9c65ULL,
+	0x2de92c6f592b0275ULL, 0x4a7484aa6ea6e483ULL, 0x5cb0a9dcbd41fbd4ULL, 0x76f988da831153b5ULL,
+	0x983e5152ee66dfabULL, 0xa831c66d2db43210ULL, 0xb00327c898fb213fULL, 0xbf597fc7beef0ee4ULL,
+	0xc6e00bf33da88fc2ULL, 0xd5a79147930aa725ULL, 0x06ca6351e003826fULL, 0x142929670a0e6e70ULL,
+	0x27b70a8546d22ffcULL, 0x2e1b21385c26c926ULL, 0x4d2c6dfc5ac42aedULL, 0x53380d139d95b3dfULL,
+	0x650a73548baf63deULL, 0x766a0abb3c77b2a8ULL, 0x81c2c92e47edaee6ULL, 0x92722c851482353bULL,
+	0xa2bfe8a14cf10364ULL, 0xa81a664bbc423001ULL, 0xc24b8b70d0f89791ULL, 0xc76c51a30654be30ULL,
+	0xd192e819d6ef5218ULL, 0xd69906245565a910ULL, 0xf40e35855771202aULL, 0x106aa07032bbd1b8ULL,
+	0x19a4c116b8d2d0c8ULL, 0x1e376c085141ab53ULL, 0x2748774cdf8eeb99ULL, 0x34b0bcb5e19b48a8ULL,
+	0x391c0cb3c5c95a63ULL, 0x4ed8aa4ae3418acbULL, 0x5b9cca4f7763e373ULL, 0x682e6ff3d6b2b8a3ULL,
+	0x748f82ee5defb2fcULL, 0x78a5636f43172f60ULL, 0x84c87814a1f0ab72ULL, 0x8cc702081a6439ecULL,
+	0x90befffa23631e28ULL, 0xa4506cebde82bde9ULL, 0xbef9a3f7b2c67915ULL, 0xc67178f2e372532bULL,
+	0xca273eceea26619cULL, 0xd186b8c721c0c207ULL, 0xeada7dd6cde0eb1eULL, 0xf57d4f7fee6ed178ULL,
+	0x06f067aa72176fbaULL, 0x0a637dc5a2c898a6ULL, 0x113f9804bef90daeULL, 0x1b710b35131c471bULL,
+	0x28db77f523047d84ULL, 0x32caab7b40c72493ULL, 0x3c9ebe0a15c9bebcULL, 0x431d67c49c100d4cULL,
+	0x4cc5d4becb3e42b6ULL, 0x597f299cfc657e2aULL, 0x5fcb6fab3ad6faecULL, 0x6c44198c4a475817ULL
+};
+
 /*
  * For convenience, we use a common context for all the checksum algorithms,
  * which means some elements may be unused...
  */
 typedef struct ALIGNED(64) {
-	uint8_t buf[64];
-	uint32_t state[8];
+	uint8_t buf[MAX_BLOCKSIZE];
+	uint64_t state[8];
 	uint64_t bytecount;
 } SUM_CONTEXT;
 
@@ -144,17 +187,30 @@ static void sha256_init(SUM_CONTEXT *ctx)
 	ctx->state[7] = 0x5be0cd19;
 }
 
+static void sha512_init(SUM_CONTEXT* ctx)
+{
+	memset(ctx, 0, sizeof(*ctx));
+	ctx->state[0] = 0x6a09e667f3bcc908ULL;
+	ctx->state[1] = 0xbb67ae8584caa73bULL;
+	ctx->state[2] = 0x3c6ef372fe94f82bULL;
+	ctx->state[3] = 0xa54ff53a5f1d36f1ULL;
+	ctx->state[4] = 0x510e527fade682d1ULL;
+	ctx->state[5] = 0x9b05688c2b3e6c1fULL;
+	ctx->state[6] = 0x1f83d9abfb41bd6bULL;
+	ctx->state[7] = 0x5be0cd19137e2179ULL;
+}
+
 /* Transform the message X which consists of 16 32-bit-words (SHA-1) */
 static void sha1_transform(SUM_CONTEXT *ctx, const uint8_t *data)
 {
 	uint32_t a, b, c, d, e, tm, x[16];
 
 	/* get values from the chaining vars */
-	a = ctx->state[0];
-	b = ctx->state[1];
-	c = ctx->state[2];
-	d = ctx->state[3];
-	e = ctx->state[4];
+	a = (uint32_t)ctx->state[0];
+	b = (uint32_t)ctx->state[1];
+	c = (uint32_t)ctx->state[2];
+	d = (uint32_t)ctx->state[3];
+	e = (uint32_t)ctx->state[4];
 
 #ifdef BIG_ENDIAN_HOST
 	memcpy(x, data, sizeof(x));
@@ -283,22 +339,22 @@ static __inline void sha256_transform(SUM_CONTEXT *ctx, const uint8_t *data)
 {
 	uint32_t a, b, c, d, e, f, g, h, j, x[16];
 
-	a = ctx->state[0];
-	b = ctx->state[1];
-	c = ctx->state[2];
-	d = ctx->state[3];
-	e = ctx->state[4];
-	f = ctx->state[5];
-	g = ctx->state[6];
-	h = ctx->state[7];
+	a = (uint32_t)ctx->state[0];
+	b = (uint32_t)ctx->state[1];
+	c = (uint32_t)ctx->state[2];
+	d = (uint32_t)ctx->state[3];
+	e = (uint32_t)ctx->state[4];
+	f = (uint32_t)ctx->state[5];
+	g = (uint32_t)ctx->state[6];
+	h = (uint32_t)ctx->state[7];
 
 // Nesting the ROR allows for single register compiler optimizations
 #define S0(x) (ROR32(ROR32(ROR32(x,9)^(x),11)^(x),2))	// Σ0 (Sigma 0)
 #define S1(x) (ROR32(ROR32(ROR32(x,14)^(x),5)^(x),6))	// Σ1 (Sigma 1)
-#define g0(x) (ROR32(ROR32(x,11)^(x),7)^((x)>>3))		// γ0 (gamma 0)
-#define g1(x) (ROR32(ROR32(x,2)^(x),17)^((x)>>10))		// γ1 (gamma 1)
+#define s0(x) (ROR32(ROR32(x,11)^(x),7)^((x)>>3))		// σ0 (sigma 0)
+#define s1(x) (ROR32(ROR32(x,2)^(x),17)^((x)>>10))		// σ1 (sigma 1)
 #define BLK0(i) (x[i])
-#define BLK2(i) (x[i] += g1(x[((i)-2)&15]) + x[((i)-7)&15] + g0(x[((i)-15)&15]))
+#define BLK2(i) (x[i] += s1(x[((i)-2)&15]) + x[((i)-7)&15] + s0(x[((i)-15)&15]))
 #define R(a, b, c, d, e, f, g, h, i) \
 	h += S1(e) + Ch(e,f,g) + K256[(i)+(j)] + (j ? BLK2(i) : BLK0(i)); \
 	d += h; \
@@ -335,12 +391,71 @@ static __inline void sha256_transform(SUM_CONTEXT *ctx, const uint8_t *data)
 
 #undef S0
 #undef S1
-#undef g0
-#undef g1
+#undef s0
+#undef s1
 #undef BLK0
 #undef BLK2
 #undef R
 #undef RX_8
+
+	ctx->state[0] += a;
+	ctx->state[1] += b;
+	ctx->state[2] += c;
+	ctx->state[3] += d;
+	ctx->state[4] += e;
+	ctx->state[5] += f;
+	ctx->state[6] += g;
+	ctx->state[7] += h;
+}
+
+/* Transform the message X which consists of 16 64-bit-words (SHA-512) */
+static __inline void sha512_transform(SUM_CONTEXT* ctx, const uint8_t* data)
+{
+	uint64_t a, b, c, d, e, f, g, h, W[80];
+	uint32_t i;
+
+	a = ctx->state[0];
+	b = ctx->state[1];
+	c = ctx->state[2];
+	d = ctx->state[3];
+	e = ctx->state[4];
+	f = ctx->state[5];
+	g = ctx->state[6];
+	h = ctx->state[7];
+
+// Nesting the ROR allows for single register compiler optimizations
+#define S0(x) (ROR64(ROR64(ROR64(x,5)^(x),6)^(x),28))	// Σ0 (Sigma 0)
+#define S1(x) (ROR64(ROR64(ROR64(x,23)^(x),4)^(x),14))	// Σ1 (Sigma 1)
+#define s0(x) (ROR64(ROR64(x,7)^(x),1)^((x)>>7))		// σ0 (sigma 0)
+#define s1(x) (ROR64(ROR64(x,42)^(x),19)^((x)>>6))		// σ1 (sigma 1)
+#define R(a, b, c, d, e, f, g, h, i) \
+	h += S1(e) + Ch(e, f, g) + K512[i] + W[i]; \
+	d += h; \
+	h += S0(a) + Ma(a, b, c)
+
+	for (i = 0; i < 80; i++) {
+		if (i < 16)
+			W[i] = read_swap64(&data[8 * i]);
+		else
+			W[i] = s1(W[i - 2]) + W[i - 7] + s0(W[i - 15]) + W[i - 16];
+	}
+
+	for (i = 0; i < 80; i += 8) {
+		R(a, b, c, d, e, f, g, h, i);
+		R(h, a, b, c, d, e, f, g, i+1);
+		R(g, h, a, b, c, d, e, f, i+2);
+		R(f, g, h, a, b, c, d, e, i+3);
+		R(e, f, g, h, a, b, c, d, i+4);
+		R(d, e, f, g, h, a, b, c, i+5);
+		R(c, d, e, f, g, h, a, b, i+6);
+		R(b, c, d, e, f, g, h, a, i+7);
+	}
+
+#undef S0
+#undef S1
+#undef s0
+#undef s1
+#undef R
 
 	ctx->state[0] += a;
 	ctx->state[1] += b;
@@ -357,10 +472,10 @@ static void md5_transform(SUM_CONTEXT *ctx, const uint8_t *data)
 {
 	uint32_t a, b, c, d, x[16];
 
-	a = ctx->state[0];
-	b = ctx->state[1];
-	c = ctx->state[2];
-	d = ctx->state[3];
+	a = (uint32_t)ctx->state[0];
+	b = (uint32_t)ctx->state[1];
+	c = (uint32_t)ctx->state[2];
+	d = (uint32_t)ctx->state[3];
 
 #ifdef BIG_ENDIAN_HOST
 	{
@@ -535,6 +650,41 @@ static void sha256_write(SUM_CONTEXT *ctx, const uint8_t *buf, size_t len)
 	memcpy(ctx->buf, buf, len);
 }
 
+/* Update the message digest with the contents of the buffer (SHA-512) */
+static void sha512_write(SUM_CONTEXT* ctx, const uint8_t* buf, size_t len)
+{
+	size_t num = ctx->bytecount & (SHA512_BLOCKSIZE - 1);
+
+	/* Update bytecount */
+	ctx->bytecount += len;
+
+	/* Handle any leading odd-sized chunks */
+	if (num) {
+		uint8_t* p = ctx->buf + num;
+
+		num = SHA512_BLOCKSIZE - num;
+		if (len < num) {
+			memcpy(p, buf, len);
+			return;
+		}
+		memcpy(p, buf, num);
+		sha512_transform(ctx, ctx->buf);
+		buf += num;
+		len -= num;
+	}
+
+	/* Process data in blocksize chunks */
+	while (len >= SHA512_BLOCKSIZE) {
+		PREFETCH64(buf + SHA512_BLOCKSIZE);
+		sha512_transform(ctx, buf);
+		buf += SHA512_BLOCKSIZE;
+		len -= SHA512_BLOCKSIZE;
+	}
+
+	/* Handle any remaining bytes of data. */
+	memcpy(ctx->buf, buf, len);
+}
+
 /* Update the message digest with the contents of the buffer (MD5) */
 static void md5_write(SUM_CONTEXT *ctx, const uint8_t *buf, size_t len)
 {
@@ -580,7 +730,7 @@ static void sha1_final(SUM_CONTEXT *ctx)
 	ctx->buf[pos++] = 0x80;
 
 	/* Pad whatever data is left in the buffer */
-	while (pos != (SHA1_BLOCKSIZE - 8)) {
+	while (pos != (SHA1_BLOCKSIZE - sizeof(uint64_t))) {
 		pos &= (SHA1_BLOCKSIZE - 1);
 		if (pos == 0)
 			sha1_transform(ctx, ctx->buf);
@@ -601,9 +751,9 @@ static void sha1_final(SUM_CONTEXT *ctx)
 
 	p = ctx->buf;
 #ifdef BIG_ENDIAN_HOST
-#define X(a) do { *(uint32_t*)p = ctx->state[a]; p += 4; } while(0)
+#define X(a) do { *(uint32_t*)p = (uint32_t)ctx->state[a]; p += 4; } while(0)
 #else
-#define X(a) do { write_swap32(p, ctx->state[a]); p += 4; } while(0);
+#define X(a) do { write_swap32(p, (uint32_t)ctx->state[a]); p += 4; } while(0);
 #endif
 	X(0);
 	X(1);
@@ -623,7 +773,7 @@ static void sha256_final(SUM_CONTEXT *ctx)
 	ctx->buf[pos++] = 0x80;
 
 	/* Pad whatever data is left in the buffer */
-	while (pos != (SHA256_BLOCKSIZE - 8)) {
+	while (pos != (SHA256_BLOCKSIZE - sizeof(uint64_t))) {
 		pos &= (SHA256_BLOCKSIZE - 1);
 		if (pos == 0)
 			sha256_transform(ctx, ctx->buf);
@@ -644,9 +794,66 @@ static void sha256_final(SUM_CONTEXT *ctx)
 
 	p = ctx->buf;
 #ifdef BIG_ENDIAN_HOST
-#define X(a) do { *(uint32_t*)p = ctx->state[a]; p += 4; } while(0)
+#define X(a) do { *(uint32_t*)p = (uint32_t)ctx->state[a]; p += 4; } while(0)
 #else
-#define X(a) do { write_swap32(p, ctx->state[a]); p += 4; } while(0);
+#define X(a) do { write_swap32(p, (uint32_t)ctx->state[a]); p += 4; } while(0);
+#endif
+	X(0);
+	X(1);
+	X(2);
+	X(3);
+	X(4);
+	X(5);
+	X(6);
+	X(7);
+#undef X
+}
+
+/* Finalize the computation and write the digest in ctx->state[] (SHA-256) */
+static void sha512_final(SUM_CONTEXT* ctx)
+{
+	size_t pos = ((size_t)ctx->bytecount) & (SHA512_BLOCKSIZE - 1);
+	/* 16 EB ought to be enough for everybody... */
+	uint64_t bitcount_lo = ctx->bytecount << 3;
+	uint64_t bitcount_hi = ctx->bytecount >> (64 - 3);
+	uint8_t* p;
+
+	ctx->buf[pos++] = 0x80;
+
+	/* Pad whatever data is left in the buffer */
+	while (pos != (SHA512_BLOCKSIZE - (2 * sizeof(uint64_t)))) {
+		pos &= (SHA512_BLOCKSIZE - 1);
+		if (pos == 0)
+			sha512_transform(ctx, ctx->buf);
+		ctx->buf[pos++] = 0;
+	}
+
+	/* Append to the padding the total message's length in bits and transform */
+	ctx->buf[SHA512_BLOCKSIZE - 1] = (uint8_t)bitcount_lo;
+	ctx->buf[SHA512_BLOCKSIZE - 2] = (uint8_t)(bitcount_lo >> 8);
+	ctx->buf[SHA512_BLOCKSIZE - 3] = (uint8_t)(bitcount_lo >> 16);
+	ctx->buf[SHA512_BLOCKSIZE - 4] = (uint8_t)(bitcount_lo >> 24);
+	ctx->buf[SHA512_BLOCKSIZE - 5] = (uint8_t)(bitcount_lo >> 32);
+	ctx->buf[SHA512_BLOCKSIZE - 6] = (uint8_t)(bitcount_lo >> 40);
+	ctx->buf[SHA512_BLOCKSIZE - 7] = (uint8_t)(bitcount_lo >> 48);
+	ctx->buf[SHA512_BLOCKSIZE - 8] = (uint8_t)(bitcount_lo >> 56);
+	ctx->buf[SHA512_BLOCKSIZE - 9] = (uint8_t)bitcount_hi;
+	/* For clarity since, with a 64-bit bytecount, the following are always 0 */
+	ctx->buf[SHA512_BLOCKSIZE - 10] = (uint8_t)(bitcount_hi >> 8);
+	ctx->buf[SHA512_BLOCKSIZE - 11] = (uint8_t)(bitcount_hi >> 16);
+	ctx->buf[SHA512_BLOCKSIZE - 12] = (uint8_t)(bitcount_hi >> 24);
+	ctx->buf[SHA512_BLOCKSIZE - 13] = (uint8_t)(bitcount_hi >> 32);
+	ctx->buf[SHA512_BLOCKSIZE - 14] = (uint8_t)(bitcount_hi >> 40);
+	ctx->buf[SHA512_BLOCKSIZE - 15] = (uint8_t)(bitcount_hi >> 48);
+	ctx->buf[SHA512_BLOCKSIZE - 16] = (uint8_t)(bitcount_hi >> 56);
+
+	sha512_transform(ctx, ctx->buf);
+
+	p = ctx->buf;
+#ifdef BIG_ENDIAN_HOST
+#define X(a) do { *p = ctx->state[a]; p += 8; } while(0)
+#else
+#define X(a) do { write_swap64(p, ctx->state[a]); p += 8; } while(0);
 #endif
 	X(0);
 	X(1);
@@ -702,9 +909,9 @@ static void md5_final(SUM_CONTEXT *ctx)
 
 	p = ctx->buf;
 #ifdef BIG_ENDIAN_HOST
-#define X(a) do { write_swap32(p, ctx->state[a]); p += 4; } while(0);
+#define X(a) do { write_swap32(p, (uint32_t)ctx->state[a]); p += 4; } while(0);
 #else
-#define X(a) do { *(uint32_t*)p = ctx->state[a]; p += 4; } while(0)
+#define X(a) do { *(uint32_t*)p = (uint32_t)ctx->state[a]; p += 4; } while(0)
 #endif
 	X(0);
 	X(1);
@@ -724,9 +931,9 @@ static void null_final(SUM_CONTEXT *ctx) { }
 typedef void sum_init_t(SUM_CONTEXT *ctx);
 typedef void sum_write_t(SUM_CONTEXT *ctx, const uint8_t *buf, size_t len);
 typedef void sum_final_t(SUM_CONTEXT *ctx);
-sum_init_t *sum_init[CHECKSUM_MAX] = { md5_init, sha1_init , sha256_init };
-sum_write_t *sum_write[CHECKSUM_MAX] = { md5_write, sha1_write , sha256_write };
-sum_final_t *sum_final[CHECKSUM_MAX] = { md5_final, sha1_final , sha256_final };
+sum_init_t *sum_init[CHECKSUM_MAX] = { md5_init, sha1_init , sha256_init, sha512_init };
+sum_write_t *sum_write[CHECKSUM_MAX] = { md5_write, sha1_write , sha256_write, sha512_write };
+sum_final_t *sum_final[CHECKSUM_MAX] = { md5_final, sha1_final , sha256_final, sha512_final };
 
 // Compute an individual checksum without threading or buffering, for a single file
 BOOL HashFile(const unsigned type, const char* path, uint8_t* sum)
@@ -855,11 +1062,12 @@ INT_PTR CALLBACK ChecksumCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 	return (INT_PTR)FALSE;
 }
 
-// Individual thread that computes one of MD5, SHA1 or SHA256 in parallel
+// Individual thread that computes one of MD5, SHA1, SHA256 or SHA512 in parallel
 DWORD WINAPI IndividualSumThread(void* param)
 {
 	SUM_CONTEXT sum_ctx = { {0} }; // There's a memset in sum_init, but static analyzers still bug us
 	uint32_t i = (uint32_t)(uintptr_t)param, j;
+	char val[3] = { 0 };
 
 	sum_init[i](&sum_ctx);
 	// Signal that we're ready to service requests
@@ -879,8 +1087,13 @@ DWORD WINAPI IndividualSumThread(void* param)
 		} else {
 			sum_final[i](&sum_ctx);
 			memset(&sum_str[i], 0, ARRAYSIZE(sum_str[i]));
-			for (j = 0; j < sum_count[i]; j++)
-				safe_sprintf(&sum_str[i][2 * j], ARRAYSIZE(sum_str[i]) - 2 * j, "%02x", sum_ctx.buf[j]);
+			for (j = 0; j < sum_count[i]; j++) {
+				val[0] = ((sum_ctx.buf[j] >> 4) < 10) ? ((sum_ctx.buf[j] >> 4) + '0') : ((sum_ctx.buf[j] >> 4) - 0xa + 'a');
+				val[1] = ((sum_ctx.buf[j] & 15) < 10) ? ((sum_ctx.buf[j] & 15) + '0') : ((sum_ctx.buf[j] & 15) - 0xa + 'a');
+				static_strcat(sum_str[i], val);
+				if (j == 31)
+					static_strcat(sum_str[i], "\r\n          ");
+			}
 			return 0;
 		}
 	}
@@ -983,9 +1196,10 @@ DWORD WINAPI SumThread(void* param)
 		goto out;
 	}
 
-	uprintf("  MD5:\t %s", sum_str[0]);
-	uprintf("  SHA1:\t %s", sum_str[1]);
+	uprintf("  MD5:    %s", sum_str[0]);
+	uprintf("  SHA1:   %s", sum_str[1]);
 	uprintf("  SHA256: %s", sum_str[2]);
+	uprintf("  SHA512: %s", sum_str[3]);
 	r = 0;
 
 out:
@@ -1028,3 +1242,110 @@ BOOL IsFileInDB(const char* path)
 			return TRUE;
 	return FALSE;
 }
+
+#if defined(_DEBUG)
+/* Convert a lowercase hex string to binary. Returned value must be freed */
+uint8_t* to_bin(const char* str)
+{
+	size_t i, len = safe_strlen(str);
+	uint8_t val = 0, *ret = NULL;
+
+	if ((len < 2) || (len % 2))
+		return NULL;
+	ret = malloc(len / 2);
+	if (ret == NULL)
+		return NULL;
+
+	for (i = 0; i < len; i++) {
+		val <<= 4;
+		val |= ((str[i] - '0') < 0xa) ? (str[i] - '0') : (str[i] - 'a' + 0xa);
+		if (i % 2)
+			ret[i / 2] = val;
+	}
+
+	return ret;
+}
+
+const char* test_msg = "Did you ever hear the tragedy of Darth Plagueis The Wise? "
+	"I thought not. It's not a story the Jedi would tell you. It's a Sith legend. "
+	"Darth Plagueis was a Dark Lord of the Sith, so powerful and so wise he could "
+	"use the Force to influence the midichlorians to create life... He had such a "
+	"knowledge of the dark side that he could even keep the ones he cared about "
+	"from dying. The dark side of the Force is a pathway to many abilities some "
+	"consider to be unnatural. He became so powerful... the only thing he was afraid "
+	"of was losing his power, which eventually, of course, he did. Unfortunately, "
+	"he taught his apprentice everything he knew, then his apprentice killed him "
+	"in his sleep. Ironic. He could save others from death, but not himself.";
+
+/*
+ * Yeah, I'm not gonna bother with binary arrays of hash values since
+ * they have different sizes and MSVC is an ass with initializing unions.
+ * Much rather copy paste from md5sum/sha#sum output from Linux and just
+ * convert the string.
+ */
+const char* test_hash[CHECKSUM_MAX][4] = {
+	{
+		"d41d8cd98f00b204e9800998ecf8427e",
+		"74cac558072300385f7ab4dff7465e3c",
+		"88c7cb90ea8c60be51e8e20875b4d912",
+		"e0ea372ac14a3574167543b851d4babb"
+	},
+	{
+		"da39a3ee5e6b4b0d3255bfef95601890afd80709",
+		"a5bac908bf3e51ff0036a94d43b4f3bd2d01a75d",
+		"8af850c7238f320cba940299e0f4f2da66bd75f9",
+		"09463ec0b5917706c9cb1d6b164b2582c04018e0"
+	},
+	{
+		"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+		"62c1a97974dfe6848942794be4f2f027b5f4815e1eb76db63a30f0e290b5c1c4",
+		"662a80c59d2a44023d3b111b5242bb7fc0bc7e50ab3ae986df005a630dd7ddb5",
+		"c9b43c1058bc7f7661619e9d983fc9d31356e97f9195a2405ab972d0737b11bf"
+	},
+	{
+		"cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e",
+		"4913ace12f1169e5a5f524ef87ab8fc39dff0418851fbbbb1f609d3261b2b4072bd1746e6accb91bf38f3b1b3d59b0a60af5de67aab87b76c2456fde523efc1c",
+		"33df8a16dd624cbc4613b5ae902b722411c7e90f37dd3947c9a86e01c51ada68fcf5a0cd4ca928d7cc1ed469bb34c2ed008af069d8b28cc4512e6c8b2e7a5592",
+		"999b4eae14de584cce5fa5962b768beda076b06df00d384bb502c6389df8159c006a5b94d1324f47e8d7bd2efe9d8d3dc1fa1429798e49826987ab5ae7ed5c21"
+	},
+};
+
+/* Tests the message digest aglorithms */
+int TestChecksum(void)
+{
+	const char* hash_name[4] = { "MD5   ", "SHA1  ", "SHA256", "SHA512" };
+	int i, j, errors = 0;
+	uint8_t sum[MAX_HASHSIZE], *sum_expected;
+	size_t full_msg_len = strlen(test_msg);
+	char* msg = malloc(full_msg_len);
+	if (msg == NULL)
+		return -1;
+
+	for (j = 0; j < CHECKSUM_MAX; j++) {
+		size_t copy_msg_len[4];
+		copy_msg_len[0] = 0;
+		copy_msg_len[1] = 3;
+		// Designed to test the case where we pad into the total message length area
+		// For SHA-512 this is 128 - 16 = 112 bytes, for others 64 - 8 = 56 bytes
+		copy_msg_len[2] = SHA512_BLOCKSIZE - (SHA512_BLOCKSIZE >> 3);
+		copy_msg_len[3] = full_msg_len;
+		for (i = 0; i < 4; i++) {
+			memset(msg, 0, full_msg_len);
+			if (i != 0)
+				memcpy(msg, test_msg, copy_msg_len[i]);
+			HashBuffer(j, msg, copy_msg_len[i], sum);
+			sum_expected = to_bin(test_hash[j][i]);
+			if (memcmp(sum, sum_expected, sum_count[j]) != 0) {
+				uprintf("Test %s %d: FAIL", hash_name[j], i);
+				errors++;
+			} else {
+				uprintf("Test %s %d: PASS", hash_name[j], i);
+			}
+			free(sum_expected);
+		}
+	}
+
+	free(msg);
+	return errors;
+}
+#endif

@@ -3369,7 +3369,8 @@ relaunch:
 		// Ctrl-T => Alternate Test mode that doesn't require a full rebuild
 		if ((ctrl_without_focus || ((GetKeyState(VK_CONTROL) & 0x8000) && (msg.message == WM_KEYDOWN)))
 			&& (msg.wParam == 'T')) {
-			uprintf("TEST");
+			extern int TestChecksum(void);
+			TestChecksum();
 			continue;
 		}
 #endif
