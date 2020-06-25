@@ -91,6 +91,7 @@ char sum_str[CHECKSUM_MAX][150];
 uint32_t bufnum, sum_count[CHECKSUM_MAX] = { MD5_HASHSIZE, SHA1_HASHSIZE, SHA256_HASHSIZE, SHA512_HASHSIZE };
 HANDLE data_ready[CHECKSUM_MAX] = { 0 }, thread_ready[CHECKSUM_MAX] = { 0 };
 DWORD read_size[2];
+BOOL enable_extra_hashes = FALSE;
 uint8_t ALIGNED(64) buffer[2][BUFFER_SIZE];
 
 /*
@@ -408,7 +409,11 @@ static __inline void sha256_transform(SUM_CONTEXT *ctx, const uint8_t *data)
 	ctx->state[7] += h;
 }
 
-/* Transform the message X which consists of 16 64-bit-words (SHA-512) */
+/*
+ * Transform the message X which consists of 16 64-bit-words (SHA-512)
+ * This is an algorithm that *REALLY* benefits from being executed as 64-bit
+ * code rather than 32-bit, as it's more than twice as fast then...
+ */
 static __inline void sha512_transform(SUM_CONTEXT* ctx, const uint8_t* data)
 {
 	uint64_t a, b, c, d, e, f, g, h, W[80];
@@ -435,7 +440,11 @@ static __inline void sha512_transform(SUM_CONTEXT* ctx, const uint8_t* data)
 
 	for (i = 0; i < 80; i++) {
 		if (i < 16)
+#ifdef BIG_ENDIAN_HOST
+			W[i] = *((uint64_t*)&data[8 * i]));
+#else
 			W[i] = read_swap64(&data[8 * i]);
+#endif
 		else
 			W[i] = s1(W[i - 2]) + W[i - 7] + s0(W[i - 15]) + W[i - 16];
 	}
@@ -1017,9 +1026,14 @@ INT_PTR CALLBACK ChecksumCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 		SendDlgItemMessageA(hDlg, IDC_MD5, WM_SETFONT, (WPARAM)hFont, TRUE);
 		SendDlgItemMessageA(hDlg, IDC_SHA1, WM_SETFONT, (WPARAM)hFont, TRUE);
 		SendDlgItemMessageA(hDlg, IDC_SHA256, WM_SETFONT, (WPARAM)hFont, TRUE);
+		SendDlgItemMessageA(hDlg, IDC_SHA512, WM_SETFONT, (WPARAM)hFont, TRUE);
 		SetWindowTextA(GetDlgItem(hDlg, IDC_MD5), sum_str[0]);
 		SetWindowTextA(GetDlgItem(hDlg, IDC_SHA1), sum_str[1]);
 		SetWindowTextA(GetDlgItem(hDlg, IDC_SHA256), sum_str[2]);
+		if (enable_extra_hashes)
+			SetWindowTextA(GetDlgItem(hDlg, IDC_SHA512), sum_str[3]);
+		else
+			SetWindowTextU(GetDlgItem(hDlg, IDC_SHA512), lmprintf(MSG_311, "<Alt>-<H>"));
 
 		// Move/Resize the controls as needed to fit our text
 		hDC = GetDC(GetDlgItem(hDlg, IDC_MD5));
@@ -1032,6 +1046,7 @@ INT_PTR CALLBACK ChecksumCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 		dw = rc.right - rc.left - dw + 12;	// Ideally we'd compute the field borders from the system, but hey...
 		dh = rc.bottom - rc.top - dh + 6;
 		ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDC_SHA256), 0, 0, dw, dh, 1.0f);
+		ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDC_SHA512), 0, 0, dw, dh, 1.0f);
 
 		GetWindowRect(GetDlgItem(hDlg, IDC_SHA1), &rc);
 		dw = rc.right - rc.left;
@@ -1088,12 +1103,12 @@ DWORD WINAPI IndividualSumThread(void* param)
 			sum_final[i](&sum_ctx);
 			memset(&sum_str[i], 0, ARRAYSIZE(sum_str[i]));
 			for (j = 0; j < sum_count[i]; j++) {
-				val[0] = ((sum_ctx.buf[j] >> 4) < 10) ? ((sum_ctx.buf[j] >> 4) + '0') : ((sum_ctx.buf[j] >> 4) - 0xa + 'a');
-				val[1] = ((sum_ctx.buf[j] & 15) < 10) ? ((sum_ctx.buf[j] & 15) + '0') : ((sum_ctx.buf[j] & 15) - 0xa + 'a');
-				static_strcat(sum_str[i], val);
-				if (j == 31)
-					static_strcat(sum_str[i], "\r\n          ");
+				sum_str[i][2 * j] = ((sum_ctx.buf[j] >> 4) < 10) ?
+					((sum_ctx.buf[j] >> 4) + '0') : ((sum_ctx.buf[j] >> 4) - 0xa + 'a');
+				sum_str[i][2 * j + 1] = ((sum_ctx.buf[j] & 15) < 10) ?
+					((sum_ctx.buf[j] & 15) + '0') : ((sum_ctx.buf[j] & 15) - 0xa + 'a');
 			}
+			sum_str[i][2 * j] = 0;
 			return 0;
 		}
 	}
@@ -1105,10 +1120,11 @@ error:
 DWORD WINAPI SumThread(void* param)
 {
 	DWORD_PTR* thread_affinity = (DWORD_PTR*)param;
-	HANDLE sum_thread[CHECKSUM_MAX] = { NULL, NULL, NULL };
+	HANDLE sum_thread[CHECKSUM_MAX] = { NULL, NULL, NULL, NULL };
 	HANDLE h = INVALID_HANDLE_VALUE;
 	uint64_t rb;
 	int i, _bufnum, r = -1;
+	int num_checksums = CHECKSUM_MAX - (enable_extra_hashes ? 0 : 1);
 
 	if ((image_path == NULL) || (thread_affinity == NULL))
 		ExitThread(r);
@@ -1122,7 +1138,7 @@ DWORD WINAPI SumThread(void* param)
 		// is usually in this first mask, for other tasks.
 		SetThreadAffinityMask(GetCurrentThread(), thread_affinity[0]);
 
-	for (i = 0; i < CHECKSUM_MAX; i++) {
+	for (i = 0; i < num_checksums; i++) {
 		// NB: Can't use a single manual-reset event for data_ready as we
 		// wouldn't be able to ensure the event is reset before the thread
 		// gets into its next wait loop
@@ -1164,7 +1180,7 @@ DWORD WINAPI SumThread(void* param)
 			// Toggle the read buffer
 			_bufnum = (bufnum + 1) % 2;
 			// Signal the waiting threads
-			for (i = 0; i < CHECKSUM_MAX; i++) {
+			for (i = 0; i < num_checksums; i++) {
 				if (!SetEvent(data_ready[i])) {
 					uprintf("Could not signal checksum thread %d: %s", i, WindowsErrorString());
 					goto out;
@@ -1184,14 +1200,14 @@ DWORD WINAPI SumThread(void* param)
 		}
 
 		// Wait for the thread to signal they are ready to process data
-		if (WaitForMultipleObjects(CHECKSUM_MAX, thread_ready, TRUE, WAIT_TIME) != WAIT_OBJECT_0) {
+		if (WaitForMultipleObjects(num_checksums, thread_ready, TRUE, WAIT_TIME) != WAIT_OBJECT_0) {
 			uprintf("Checksum threads failed to signal: %s", WindowsErrorString());
 			goto out;
 		}
 	}
 
 	// Our last event with read_size=0 signaled the threads to exit - wait for that to happen
-	if (WaitForMultipleObjects(CHECKSUM_MAX, sum_thread, TRUE, WAIT_TIME) != WAIT_OBJECT_0) {
+	if (WaitForMultipleObjects(num_checksums, sum_thread, TRUE, WAIT_TIME) != WAIT_OBJECT_0) {
 		uprintf("Checksum threads did not finalize: %s", WindowsErrorString());
 		goto out;
 	}
@@ -1199,11 +1215,17 @@ DWORD WINAPI SumThread(void* param)
 	uprintf("  MD5:    %s", sum_str[0]);
 	uprintf("  SHA1:   %s", sum_str[1]);
 	uprintf("  SHA256: %s", sum_str[2]);
-	uprintf("  SHA512: %s", sum_str[3]);
+	if (enable_extra_hashes) {
+		char c = sum_str[3][SHA512_HASHSIZE];
+		sum_str[3][SHA512_HASHSIZE] = 0;
+		uprintf("  SHA512: %s", sum_str[3]);
+		sum_str[3][SHA512_HASHSIZE] = c;
+		uprintf("          %s", &sum_str[3][SHA512_HASHSIZE]);
+	}
 	r = 0;
 
 out:
-	for (i = 0; i < CHECKSUM_MAX; i++) {
+	for (i = 0; i < num_checksums; i++) {
 		if (sum_thread[i] != NULL)
 			TerminateThread(sum_thread[i], 1);
 		safe_closehandle(data_ready[i]);
@@ -1287,22 +1309,19 @@ const char* test_hash[CHECKSUM_MAX][4] = {
 	{
 		"d41d8cd98f00b204e9800998ecf8427e",
 		"74cac558072300385f7ab4dff7465e3c",
-		"88c7cb90ea8c60be51e8e20875b4d912",
+		"f99d37d3bee20f9c0ca3204991be2698",
 		"e0ea372ac14a3574167543b851d4babb"
-	},
-	{
+	}, {
 		"da39a3ee5e6b4b0d3255bfef95601890afd80709",
 		"a5bac908bf3e51ff0036a94d43b4f3bd2d01a75d",
-		"8af850c7238f320cba940299e0f4f2da66bd75f9",
+		"8aa6c0064b013b8a6f4e88a0421d39bbf07e2e1b",
 		"09463ec0b5917706c9cb1d6b164b2582c04018e0"
-	},
-	{
+	}, {
 		"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
 		"62c1a97974dfe6848942794be4f2f027b5f4815e1eb76db63a30f0e290b5c1c4",
-		"662a80c59d2a44023d3b111b5242bb7fc0bc7e50ab3ae986df005a630dd7ddb5",
+		"dbca61af192edba49ea215c49a23feee302c98cc4d2c018347fe78db572f07a5",
 		"c9b43c1058bc7f7661619e9d983fc9d31356e97f9195a2405ab972d0737b11bf"
-	},
-	{
+	}, {
 		"cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e",
 		"4913ace12f1169e5a5f524ef87ab8fc39dff0418851fbbbb1f609d3261b2b4072bd1746e6accb91bf38f3b1b3d59b0a60af5de67aab87b76c2456fde523efc1c",
 		"33df8a16dd624cbc4613b5ae902b722411c7e90f37dd3947c9a86e01c51ada68fcf5a0cd4ca928d7cc1ed469bb34c2ed008af069d8b28cc4512e6c8b2e7a5592",
@@ -1313,6 +1332,7 @@ const char* test_hash[CHECKSUM_MAX][4] = {
 /* Tests the message digest aglorithms */
 int TestChecksum(void)
 {
+	const uint32_t blocksize[CHECKSUM_MAX] = { MD5_BLOCKSIZE, SHA1_BLOCKSIZE, SHA256_BLOCKSIZE, SHA512_BLOCKSIZE };
 	const char* hash_name[4] = { "MD5   ", "SHA1  ", "SHA256", "SHA512" };
 	int i, j, errors = 0;
 	uint8_t sum[MAX_HASHSIZE], *sum_expected;
@@ -1327,7 +1347,7 @@ int TestChecksum(void)
 		copy_msg_len[1] = 3;
 		// Designed to test the case where we pad into the total message length area
 		// For SHA-512 this is 128 - 16 = 112 bytes, for others 64 - 8 = 56 bytes
-		copy_msg_len[2] = SHA512_BLOCKSIZE - (SHA512_BLOCKSIZE >> 3);
+		copy_msg_len[2] = blocksize[j] - (blocksize[j] >> 3);
 		copy_msg_len[3] = full_msg_len;
 		for (i = 0; i < 4; i++) {
 			memset(msg, 0, full_msg_len);

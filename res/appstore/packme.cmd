@@ -1,6 +1,6 @@
 @echo off
 setlocal EnableExtensions DisableDelayedExpansion
-set VERSION=3.11
+set VERSION=3.12
 
 del /q *.appx >NUL 2>&1
 del /q *.appxbundle >NUL 2>&1

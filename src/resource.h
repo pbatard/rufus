@@ -158,6 +158,7 @@
 #define IDC_MD5                         1071
 #define IDC_SHA1                        1072
 #define IDC_SHA256                      1073
+#define IDC_SHA512                      1112
 #define IDC_SELECTION_ICON              1074
 #define IDC_SELECTION_TEXT              1075
 #define IDC_SELECTION_LINE              1076

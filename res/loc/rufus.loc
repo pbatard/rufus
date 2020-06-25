@@ -570,6 +570,8 @@ t MSG_309 "Compressed archive"
 t MSG_310 "The ISO you have selected uses UEFI and is small enough to be written as an EFI System Partition (ESP). "
 	"Writing to an ESP, instead of writing to a generic data partition occupying the whole disk, can be preferable "
 	"for some types of installations.\n\nPlease select the mode that you want to use to write this image:"
+t MSG_311 "Use %s in the main application window to enable."
+t MSG_312 "Extra hashes (SHA512)"
 
 #########################################################################
 l "ar-SA" "Arabic (العربية)" 0x0401, 0x0801, 0x0c01, 0x1001, 0x1401, 0x1801, 0x1c01, 0x2001, 0x2401, 0x2801, 0x2c01, 0x3001, 0x3401, 0x3801, 0x3c01, 0x4001

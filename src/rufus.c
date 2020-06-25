@@ -84,7 +84,7 @@ static unsigned int timer;
 static char uppercase_select[2][64], uppercase_start[64], uppercase_close[64], uppercase_cancel[64];
 
 extern HANDLE update_check_thread;
-extern BOOL enable_iso, enable_joliet, enable_rockridge;
+extern BOOL enable_iso, enable_joliet, enable_rockridge, enable_extra_hashes;
 extern BYTE* fido_script;
 extern HWND hFidoDlg;
 extern uint8_t* grub2_buf;
@@ -927,10 +927,10 @@ BOOL CALLBACK LogCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 		PostMessage(hLog, EM_LIMITTEXT, MAX_LOG_SIZE , 0);
 		// Set the font to Unicode so that we can display anything
 		hDC = GetDC(NULL);
-		lfHeight = -MulDiv(8, GetDeviceCaps(hDC, LOGPIXELSY), 72);
+		lfHeight = -MulDiv(9, GetDeviceCaps(hDC, LOGPIXELSY), 72);
 		safe_release_dc(NULL, hDC);
 		hf = CreateFontA(lfHeight, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE,
-			DEFAULT_CHARSET, 0, 0, PROOF_QUALITY, 0, "Arial Unicode MS");
+			DEFAULT_CHARSET, 0, 0, PROOF_QUALITY, 0, "Consolas");
 		SendDlgItemMessageA(hDlg, IDC_LOG_EDIT, WM_SETFONT, (WPARAM)hf, TRUE);
 		// Set 'Close Log' as the selected button
 		SendMessage(hDlg, WM_NEXTDLGCTL, (WPARAM)GetDlgItem(hDlg, IDCANCEL), TRUE);
@@ -3164,6 +3164,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	enable_vmdk = ReadSettingBool(SETTING_ENABLE_VMDK_DETECTION);
 	enable_file_indexing = ReadSettingBool(SETTING_ENABLE_FILE_INDEXING);
 	enable_VHDs = !ReadSettingBool(SETTING_DISABLE_VHDS);
+	enable_extra_hashes = ReadSettingBool(SETTING_ENABLE_EXTRA_HASHES);
 
 	// Initialize the global scaling, in case we need it before we initialize the dialog
 	hDC = GetDC(NULL);
@@ -3331,7 +3332,7 @@ relaunch:
 	while(GetMessage(&msg, NULL, 0, 0)) {
 		static BOOL ctrl_without_focus = FALSE;
 		BOOL no_focus = (msg.message == WM_SYSKEYDOWN) && !(msg.lParam & 0x20000000);
-		// ** ****** **** *************
+		// ** *********** *************
 		// .,ABCDEFGHIJKLMNOPQRSTUVWXYZ
 
 		// Sigh... The things one need to do to detect standalone use of the 'Alt' key.
@@ -3449,6 +3450,13 @@ relaunch:
 				WriteSettingBool(SETTING_DISABLE_VHDS, !enable_VHDs);
 				PrintStatusTimeout(lmprintf(MSG_308), enable_VHDs);
 				GetDevices(0);
+				continue;
+			}
+			// Alt-H => Toggle computation of SHA512 digest
+			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'H')) {
+				enable_extra_hashes = !enable_extra_hashes;
+				WriteSettingBool(SETTING_ENABLE_EXTRA_HASHES, enable_extra_hashes);
+				PrintStatusTimeout(lmprintf(MSG_312), enable_extra_hashes);
 				continue;
 			}
 			// Alt-I => Toggle ISO support
