@@ -1614,6 +1614,10 @@ static void InitDialog(HWND hDlg)
 	GetHalfDropwdownWidth(hDlg);
 	GetFullWidth(hDlg);
 
+	// Set some missing labels
+	SetAccessibleName(hNBPasses, lmprintf(MSG_316));
+	SetAccessibleName(hDiskID, lmprintf(MSG_317));
+
 	// Create the font and brush for the progress messages
 	hInfoFont = CreateFontA(lfHeight, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE, DEFAULT_CHARSET,
 		0, 0, PROOF_QUALITY, 0, "Segoe UI");

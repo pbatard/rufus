@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * UI element lists
- * Copyright © 2018 Pete Batard <pete@akeo.ie>
+ * Copyright © 2018-2020 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +21,16 @@
 #include "resource.h"
 
 #pragma once
+
+// GUIDs needed to set a control's accessibility props
+#if defined(_MSC_VER)
+const GUID DECLSPEC_SELECTANY CLSID_AccPropServices =
+	{ 0xb5f8350b, 0x0548, 0x48b1, { 0xa6, 0xee, 0x88, 0xbd, 0x00, 0xb4, 0xa5, 0xe7 } };
+#endif
+const GUID DECLSPEC_SELECTANY Name_Property_GUID =
+	{ 0xc3a6921b, 0x4a99, 0x44f1, { 0xbc, 0xa6, 0x61, 0x18, 0x70, 0x52, 0xc4, 0x31 } };
+const GUID DECLSPEC_SELECTANY HelpText_Property_GUID =
+	{ 0x08555685, 0x0977, 0x45c7, { 0xa7, 0xa6, 0xab, 0xaf, 0x56, 0x84, 0x12, 0x1a } };
 
 static int section_control_ids[] = {
 	IDS_DRIVE_PROPERTIES_TXT,

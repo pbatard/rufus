@@ -12,6 +12,14 @@ o v3.*
   - *NEW*      MSG_309 "Compressed archive"
   // TODO: Add a test ISO for this.
   - *NEW*      MSG_310 "The ISO you have selected uses UEFI and is small enough to be written as (...)"
+  - *NEW*      MSG_311 "Use %s in the main application window to enable."
+  - *NEW*      MSG_312 "Extra hashes (SHA512)"
+  // The following are accessibility labels for some UI elements
+  - *NEW*      MSG_313 "Save to VHD"
+  - *NEW*      MSG_314 "Compute image checksums"
+  - *NEW*      MSG_315 "Multiple buttons"
+  - *NEW*      MSG_316 "Number of passes"
+  - *NEW*      MSG_317 "Disk ID" 
 
 o v3.5 (2019.03.12)
   The following 3 messages can be tested by creating a UEFI:NTFS drive in Rufus ('Show advanced drive properties' must be enabled

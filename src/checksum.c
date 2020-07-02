@@ -1082,7 +1082,6 @@ DWORD WINAPI IndividualSumThread(void* param)
 {
 	SUM_CONTEXT sum_ctx = { {0} }; // There's a memset in sum_init, but static analyzers still bug us
 	uint32_t i = (uint32_t)(uintptr_t)param, j;
-	char val[3] = { 0 };
 
 	sum_init[i](&sum_ctx);
 	// Signal that we're ready to service requests

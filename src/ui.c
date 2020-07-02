@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * UI-related function calls
- * Copyright © 2018-2019 Pete Batard <pete@akeo.ie>
+ * Copyright © 2018-2020 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,6 +28,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <oleacc.h>
 #include <winioctl.h>
 #include <assert.h>
 
@@ -54,6 +55,7 @@ static int rh, ddh, bw, hw, fw;
 static int sw, mw, bsw, sbw, ssw, tw, dbw;
 static WNDPROC progress_original_proc = NULL;
 static wchar_t wtbtext[2][128];
+static IAccPropServices* pfaps = NULL;
 
 /*
  * The following is used to allocate slots within the progress bar
@@ -66,6 +68,21 @@ static wchar_t wtbtext[2][128];
 static int nb_slots[OP_MAX];
 static float slot_end[OP_MAX+1];	// shifted +1 so that we can subtract 1 to OP indexes
 static float previous_end;
+
+void SetAccessibleName(HWND hCtrl, const char* name)
+{
+	const MSAAPROPID props[] = { Name_Property_GUID };
+	wchar_t* wname = utf8_to_wchar(name);
+
+	SetWindowTextW(hCtrl, wname);
+	if (pfaps == NULL)
+		CoCreateInstance(&CLSID_AccPropServices, NULL, CLSCTX_INPROC, &IID_IAccPropServices, (LPVOID)&pfaps);
+	if (pfaps != NULL) {
+		IAccPropServices_ClearHwndProps(pfaps, hCtrl, OBJID_CLIENT, CHILDID_SELF, props, ARRAYSIZE(props));
+		IAccPropServices_SetHwndPropStr(pfaps, hCtrl, OBJID_CLIENT, CHILDID_SELF, Name_Property_GUID, wname);
+	}
+	free(wname);
+}
 
 // Set the combo selection according to the data
 void SetComboEntry(HWND hDlg, int data)
@@ -438,7 +455,7 @@ void PositionMainControls(HWND hDlg)
 		// Still need to adjust the width of the device selection dropdown
 		GetWindowRect(hDeviceList, &rc);
 		MapWindowPoints(NULL, hMainDialog, (POINT*)&rc, 2);
-		SetWindowPos(hDeviceList, HWND_TOP, rc.left, rc.top, fw - ssw - sbw, rc.bottom - rc.top, 0);
+		SetWindowPos(hDeviceList, GetDlgItem(hDlg, IDS_DEVICE_TXT), rc.left, rc.top, fw - ssw - sbw, rc.bottom - rc.top, 0);
 	}
 
 	// Resize the full width controls
@@ -605,7 +622,7 @@ void ToggleAdvancedDeviceOptions(BOOL enable)
 
 	GetWindowRect(hDeviceList, &rc);
 	MapWindowPoints(NULL, hMainDialog, (POINT*)&rc, 2);
-	SetWindowPos(hDeviceList, HWND_TOP, rc.left, rc.top, enable ? fw - ssw - sbw : fw, rc.bottom - rc.top, 0);
+	SetWindowPos(hDeviceList, GetDlgItem(hMainDialog, IDS_DEVICE_TXT), rc.left, rc.top, enable ? fw - ssw - sbw : fw, rc.bottom - rc.top, 0);
 
 	// Resize the main dialog and log window
 	ResizeDialogs(shift);
@@ -841,6 +858,7 @@ void CreateSmallButtons(HWND hDlg)
 	tbToolbarButtons[0].fsState = TBSTATE_ENABLED;
 	tbToolbarButtons[0].iBitmap = 0;
 	SendMessage(hSaveToolbar, TB_ADDBUTTONS, (WPARAM)1, (LPARAM)&tbToolbarButtons);
+	SetAccessibleName(hSaveToolbar, lmprintf(MSG_313));
 
 	hHashToolbar = CreateWindowEx(0, TOOLBARCLASSNAME, NULL, TOOLBAR_STYLE,
 		0, 0, 0, 0, hMainDialog, (HMENU)IDC_HASH_TOOLBAR, hMainInstance, NULL);
@@ -857,6 +875,7 @@ void CreateSmallButtons(HWND hDlg)
 	tbToolbarButtons[0].fsState = TBSTATE_ENABLED;
 	tbToolbarButtons[0].iBitmap = 0;
 	SendMessage(hHashToolbar, TB_ADDBUTTONS, (WPARAM)1, (LPARAM)&tbToolbarButtons);
+	SetAccessibleName(hHashToolbar, lmprintf(MSG_314));
 }
 
 static INT_PTR CALLBACK ProgressCallback(HWND hCtrl, UINT message, WPARAM wParam, LPARAM lParam)
@@ -1058,6 +1077,7 @@ void CreateAdditionalControls(HWND hDlg)
 	if (sz.cx < 16)
 		sz.cx = fw;
 	SetWindowPos(hAdvancedDeviceToolbar, hTargetSystem, rc.left + toolbar_dx, rc.top, sz.cx, rc.bottom - rc.top, 0);
+	SetAccessibleName(hAdvancedDeviceToolbar, lmprintf(MSG_119));
 
 	utf8_to_wchar_no_alloc(lmprintf((advanced_mode_format) ? MSG_122 : MSG_121, lmprintf(MSG_120)), wtbtext[1], ARRAYSIZE(wtbtext[1]));
 	hAdvancedFormatToolbar = CreateWindowEx(0, TOOLBARCLASSNAME, NULL, TOOLBAR_STYLE,
@@ -1078,6 +1098,7 @@ void CreateAdditionalControls(HWND hDlg)
 	if (sz.cx < 16)
 		sz.cx = fw;
 	SetWindowPos(hAdvancedFormatToolbar, hClusterSize, rc.left + toolbar_dx, rc.top, sz.cx, rc.bottom - rc.top, 0);
+	SetAccessibleName(hAdvancedFormatToolbar, lmprintf(MSG_120));
 
 	// Create the multi toolbar
 	hMultiToolbar = CreateWindowEx(0, TOOLBARCLASSNAME, NULL, TOOLBAR_STYLE,
@@ -1126,6 +1147,7 @@ void CreateAdditionalControls(HWND hDlg)
 	tbToolbarButtons[6].iBitmap = 3;
 	SendMessage(hMultiToolbar, TB_ADDBUTTONS, (WPARAM)7, (LPARAM)&tbToolbarButtons);
 	SendMessage(hMultiToolbar, TB_SETBUTTONSIZE, 0, MAKELPARAM(i16, ddbh));
+	SetAccessibleName(hMultiToolbar, lmprintf(MSG_315));
 
 	// Subclass the progress bar so that we can write on it
 	progress_original_proc = (WNDPROC)SetWindowLongPtr(hProgress, GWLP_WNDPROC, (LONG_PTR)ProgressCallback);

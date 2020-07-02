@@ -64,11 +64,12 @@ HWND hFidoDlg = NULL;
 BOOL close_fido_cookie_prompts = FALSE;
 
 static int update_settings_reposition_ids[] = {
+	IDI_ICON,
 	IDC_POLICY,
 	IDS_UPDATE_SETTINGS_GRP,
 	IDS_UPDATE_FREQUENCY_TXT,
-	IDS_INCLUDE_BETAS_TXT,
 	IDC_UPDATE_FREQUENCY,
+	IDS_INCLUDE_BETAS_TXT,
 	IDC_INCLUDE_BETAS,
 	IDS_CHECK_NOW_GRP,
 	IDC_CHECK_NOW,
@@ -1312,15 +1313,16 @@ BOOL SetTaskbarProgressValue(ULONGLONG ullCompleted, ULONGLONG ullTotal)
 	return !FAILED(ITaskbarList3_SetProgressValue(ptbl, hMainDialog, ullCompleted, ullTotal));
 }
 
-static void Reposition(HWND hDlg, int id, int dx, int dw)
+static void Reposition(HWND hDlg, int id, int prev_id, int dx, int dw)
 {
-	HWND hCtrl;
+	HWND hCtrl, hPrevCtrl;
 	RECT rc;
 
 	hCtrl = GetDlgItem(hDlg, id);
+	hPrevCtrl = (prev_id > 0) ? GetDlgItem(hDlg, prev_id) : HWND_TOP;
 	GetWindowRect(hCtrl, &rc);
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
-	SetWindowPos(hCtrl, HWND_TOP, rc.left + dx, rc.top, rc.right - rc.left + dw, rc.bottom - rc.top, 0);
+	SetWindowPos(hCtrl, hPrevCtrl, rc.left + dx, rc.top, rc.right - rc.left + dw, rc.bottom - rc.top, 0);
 }
 
 static void PositionControls(HWND hDlg)
@@ -1338,8 +1340,9 @@ static void PositionControls(HWND hDlg)
 	if (dw > 0) {
 		GetWindowRect(hDlg, &rc);
 		SetWindowPos(hDlg, NULL, -1, -1, rc.right - rc.left + dw, rc.bottom - rc.top, SWP_NOMOVE | SWP_NOZORDER);
-		for (i = 0; i < ARRAYSIZE(update_settings_reposition_ids); i++)
-			Reposition(hDlg, update_settings_reposition_ids[i], (i < 4) ? 0 : dw, (i >= 4) ? 0 : dw);
+		for (i = 1; i < ARRAYSIZE(update_settings_reposition_ids); i++)
+			Reposition(hDlg, update_settings_reposition_ids[i], update_settings_reposition_ids[i-1],
+				((i < 5) && (i != 4)) ? 0 : dw, ((i >= 5) || (i == 4)) ? 0 : dw);
 	}
 
 	hCtrl = GetDlgItem(hDlg, IDC_UPDATE_FREQUENCY);
@@ -1357,10 +1360,11 @@ static void PositionControls(HWND hDlg)
 	if (dw > 0) {
 		GetWindowRect(hDlg, &rc);
 		SetWindowPos(hDlg, NULL, -1, -1, rc.right - rc.left + dw, rc.bottom - rc.top, SWP_NOMOVE | SWP_NOZORDER);
-		for (i = 0; i < ARRAYSIZE(update_settings_reposition_ids); i++) {
-			if ((i >= 2) && (i <= 3))
+		for (i = 1; i < ARRAYSIZE(update_settings_reposition_ids); i++) {
+			if ((i == 3) || (i == 5))
 				continue;
-			Reposition(hDlg, update_settings_reposition_ids[i], (i < 6) ? 0 : dw, (i >= 6) ? 0 : dw);
+			Reposition(hDlg, update_settings_reposition_ids[i], update_settings_reposition_ids[i-1],
+				(i < 7) ? 0 : dw, (i >= 7) ? 0 : dw);
 		}
 	}
 
@@ -1372,10 +1376,10 @@ static void PositionControls(HWND hDlg)
 	if (dw > 0) {
 		GetWindowRect(hDlg, &rc);
 		SetWindowPos(hDlg, NULL, -1, -1, rc.right - rc.left + dw, rc.bottom - rc.top, SWP_NOMOVE | SWP_NOZORDER);
-		for (i = 0; i < ARRAYSIZE(update_settings_reposition_ids); i++) {
-			if ((i >= 1) && (i <= 5))
+		for (i = 1; i < ARRAYSIZE(update_settings_reposition_ids); i++) {
+			if ((i >= 2) && (i <= 6))
 				continue;
-			Reposition(hDlg, update_settings_reposition_ids[i], 0, dw);
+			Reposition(hDlg, update_settings_reposition_ids[i], update_settings_reposition_ids[i-1], 0, dw);
 		}
 	}
 	hCtrl = GetDlgItem(hDlg, IDC_CHECK_NOW);
@@ -1464,7 +1468,7 @@ INT_PTR CALLBACK UpdateCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 			dy -= rsz->rc.bottom - rsz->rc.top + 6;	// add the border
 			ResizeMoveCtrl(hDlg, hDlg, 0, 0, 0, -dy, 1.0f);
 			ResizeMoveCtrl(hDlg, hPolicy, 0, 0, 0, -dy, 1.0f);
-			for (i = 1; i < ARRAYSIZE(update_settings_reposition_ids); i++)
+			for (i = 2; i < ARRAYSIZE(update_settings_reposition_ids); i++)
 				ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, update_settings_reposition_ids[i]), 0, -dy, 0, 0, 1.0f);
 		}
 		break;
@@ -1484,7 +1488,7 @@ INT_PTR CALLBACK UpdateCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 				break;
 			freq = (int32_t)ComboBox_GetItemData(hFrequency, ComboBox_GetCurSel(hFrequency));
 			WriteSetting32(SETTING_UPDATE_INTERVAL, (DWORD)freq);
-			EnableWindow(hBeta, (freq >= 0));
+			EnableWindow(hBeta, (freq >= 0) && is_x86_32);
 			return (INT_PTR)TRUE;
 		case IDC_INCLUDE_BETAS:
 			if (HIWORD(wParam) != CBN_SELCHANGE)

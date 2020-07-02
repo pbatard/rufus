@@ -83,6 +83,7 @@ extern int advanced_device_section_height, advanced_format_section_height;
 extern int windows_to_go_selection, persistence_unit_selection;
 extern int selection_default, cbw, ddw, ddbh, bh, update_progress_type;
 
+extern void SetAccessibleName(HWND hCtrl, const char* name);
 extern void SetComboEntry(HWND hDlg, int data);
 extern void GetBasicControlsWidth(HWND hDlg);
 extern void GetMainButtonsWidth(HWND hDlg);
