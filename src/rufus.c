@@ -2230,7 +2230,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			// Try to reselect current FS from the drive for non-bootable
 			tmp[0] = 0;
 			if ((selected_fs == FS_UNKNOWN) && (SelectedDrive.DeviceNumber != 0))
-				GetDrivePartitionData(SelectedDrive.DeviceNumber, tmp, sizeof(tmp), TRUE);
+				GetDrivePartitionData(SelectedDrive.DeviceNumber, tmp, sizeof(tmp), !usb_debug);
 			SetFileSystemAndClusterSize(tmp);
 			ToggleImageOptions();
 			SetProposedLabel(ComboBox_GetCurSel(hDeviceList));

@@ -181,8 +181,12 @@ static BOOLEAN __stdcall FormatExCallback(FILE_SYSTEM_CALLBACK_COMMAND Command, 
 		uprintf("No media in drive");
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_NO_MEDIA_IN_DRIVE;
 		break;
+	case FCC_ALIGNMENT_VIOLATION:
+		uprintf("Partition start offset is not aligned to the cluster size");
+		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_OFFSET_ALIGNMENT_VIOLATION;
+		break;
 	default:
-		uprintf("FormatExCallback: Received unhandled command 0x02%X - aborting", Command);
+		uprintf("FormatExCallback: Received unhandled command 0x%02X - aborting", Command);
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_NOT_SUPPORTED;
 		break;
 	}

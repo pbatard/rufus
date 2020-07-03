@@ -22,7 +22,7 @@
 #pragma once
 
 /* Callback command types (some errorcode were filled from HPUSBFW V2.2.3 and their
-   designation from msdn.microsoft.com/en-us/library/windows/desktop/aa819439.aspx */
+   designation from docs.microsoft.com/windows/win32/api/vds/nf-vds-ivdsvolumemf2-formatex */
 typedef enum {
 	FCC_PROGRESS,
 	FCC_DONE_WITH_STRUCTURE,
@@ -57,6 +57,11 @@ typedef enum {
 	FCC_UNKNOWN1E,
 	FCC_UNKNOWN1F,
 	FCC_READ_ONLY_MODE,
+	FCC_UNKNOWN21,
+	FCC_UNKNOWN22,
+	FCC_UNKNOWN23,
+	FCC_UNKNOWN24,
+	FCC_ALIGNMENT_VIOLATION,
 } FILE_SYSTEM_CALLBACK_COMMAND;
 
 typedef struct {

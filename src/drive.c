@@ -22,6 +22,7 @@
 #endif
 
 #include <windows.h>
+#include <windowsx.h>
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
@@ -507,7 +508,7 @@ BOOL RefreshLayout(DWORD DriveIndex)
  */
 BOOL DeletePartitions(DWORD DriveIndex)
 {
-	BOOL r = FALSE;
+	BOOL r = FALSE, bNeverFound = TRUE;
 	HRESULT hr;
 	ULONG ulFetched;
 	wchar_t wPhysicalName[24];
@@ -642,6 +643,7 @@ BOOL DeletePartitions(DWORD DriveIndex)
 					IVdsDisk_Release(pDisk);
 					continue;
 				}
+				bNeverFound = FALSE;
 
 				// Instantiate the AdvanceDisk interface for our disk.
 				hr = IVdsDisk_QueryInterface(pDisk, &IID_IVdsAdvancedDisk, (void **)&pAdvancedDisk);
@@ -707,6 +709,8 @@ BOOL DeletePartitions(DWORD DriveIndex)
 	}
 
 out:
+	if (bNeverFound)
+		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_PATH_NOT_FOUND;
 	return r;
 }
 
@@ -1354,10 +1358,6 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 		return FALSE;
 	}
 
-#if defined(__GNUC__)
-// GCC 4.9 bugs us about the fact that MS defined an expandable array as array[1]
-#pragma GCC diagnostic ignored "-Warray-bounds"
-#endif
 	switch (DriveLayout->PartitionStyle) {
 	case PARTITION_STYLE_MBR:
 		SelectedDrive.PartitionStyle = PARTITION_STYLE_MBR;
@@ -1716,8 +1716,19 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 		// Go with the MS 1 MB wastage at the beginning...
 		DriveLayoutEx.PartitionEntry[pn].StartingOffset.QuadPart = MB;
 	} else {
-		// Align on Cylinder
-		DriveLayoutEx.PartitionEntry[pn].StartingOffset.QuadPart = bytes_per_track;
+		// Some folks appear to think that 'Fixes for old BIOSes' is some kind of magic
+		// wand and are adamant to try to apply them when creating *MODERN* VHD drives.
+		// This, however, wrecks havok on MS' internal format calls because, as opposed
+		// to what is the case for regular drives, VHDs require each cluster block to
+		// be aligned to the cluster size, and that may not be the case with the stupid
+		// CHS sizes that IBM imparted upon us. Long story short, we now align to a
+		// cylinder size that is itself aligned to the cluster size.
+		// If this actually breaks old systems, please send your complaints to IBM.
+		LONGLONG ClusterSize = (LONGLONG)ComboBox_GetItemData(hClusterSize, ComboBox_GetCurSel(hClusterSize));
+		if (ClusterSize == 0)
+			ClusterSize = 0x200;
+		DriveLayoutEx.PartitionEntry[pn].StartingOffset.QuadPart =
+			((bytes_per_track + (ClusterSize - 1)) / ClusterSize) * ClusterSize;
 	}
 
 	// If required, set the MSR partition (GPT only - must be created before the data part)

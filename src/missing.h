@@ -118,6 +118,9 @@ static __inline void *_reallocf(void *ptr, size_t size) {
 #ifndef HTTP_PROTOCOL_FLAG_HTTP2
 #define HTTP_PROTOCOL_FLAG_HTTP2                2
 #endif
+#ifndef ERROR_OFFSET_ALIGNMENT_VIOLATION
+#define ERROR_OFFSET_ALIGNMENT_VIOLATION        327
+#endif
 
 /* The following is used for native ISO mounting in Windows 8 or later */
 #define VIRTUAL_STORAGE_TYPE_VENDOR_MICROSOFT \
