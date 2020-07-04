@@ -450,7 +450,7 @@ BOOL GetDevices(DWORD devnum)
 		// Also  http://www.carrona.org/dvrref.php. NB: All members from this list should have
 		// been reported as enumerators by Rufus, when Enum Debug is enabled.
 		"SD", "PCISTOR", "RTSOR", "JMCR", "JMCF", "RIMMPTSK", "RIMSPTSK", "RISD", "RIXDPTSK",
-		"TI21SONY", "ESD7SK", "ESM7SK", "O2MD", "O2SD", "VIACR"
+		"TI21SONY", "ESD7SK", "ESM7SK", "O2MD", "O2SD", "VIACR", "GLREADER"
 	};
 	// Oh, and we also have card devices (e.g. 'SCSI\DiskO2Micro_SD_...') under the SCSI enumerator...
 	const char* scsi_disk_prefix = "SCSI\\Disk";
