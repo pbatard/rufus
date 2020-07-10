@@ -101,6 +101,8 @@ PF_TYPE_DECL(WINAPI, DWORD, WIMUnregisterMessageCallback, (HANDLE, FARPROC));
 PF_TYPE_DECL(RPC_ENTRY, RPC_STATUS, UuidCreate, (UUID __RPC_FAR*));
 
 uint32_t wim_nb_files, wim_proc_files, wim_extra_files;
+HANDLE apply_wim_thread = NULL;
+extern int default_thread_priority;
 
 static uint8_t wim_flags = 0;
 static char sevenzip_path[MAX_PATH];
@@ -730,19 +732,20 @@ out:
 
 BOOL WimApplyImage(const char* image, int index, const char* dst)
 {
-	HANDLE handle;
 	DWORD dw = 0;
 	_image = image;
 	_index = index;
 	_dst = dst;
 
-	handle = CreateThread(NULL, 0, WimApplyImageThread, NULL, 0, NULL);
-	if (handle == NULL) {
+	apply_wim_thread = CreateThread(NULL, 0, WimApplyImageThread, NULL, 0, NULL);
+	if (apply_wim_thread == NULL) {
 		uprintf("Unable to start apply-image thread");
 		return FALSE;
 	}
-	WaitForSingleObject(handle, INFINITE);
-	if (!GetExitCodeThread(handle, &dw))
-		return FALSE;
-	return (BOOL)dw;
+	SetThreadPriority(apply_wim_thread, default_thread_priority);
+	WaitForSingleObject(apply_wim_thread, INFINITE);
+	if (!GetExitCodeThread(apply_wim_thread, &dw))
+		dw = 0;
+	apply_wim_thread = NULL;
+	return dw;
 }

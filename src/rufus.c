@@ -77,13 +77,13 @@ static int selected_pt = -1, selected_fs = FS_UNKNOWN, preselected_fs = FS_UNKNO
 static int image_index = 0, select_index = 0;
 static RECT relaunch_rc = { -65536, -65536, 0, 0};
 static UINT uMBRChecked = BST_UNCHECKED;
-static HANDLE format_thid = NULL;
+static HANDLE format_thread = NULL;
 static HWND hSelectImage = NULL, hStart = NULL;
 static char szTimer[12] = "00:00:00";
 static unsigned int timer;
 static char uppercase_select[2][64], uppercase_start[64], uppercase_close[64], uppercase_cancel[64];
 
-extern HANDLE update_check_thread;
+extern HANDLE update_check_thread, apply_wim_thread;
 extern BOOL enable_iso, enable_joliet, enable_rockridge, enable_extra_hashes;
 extern BYTE* fido_script;
 extern HWND hFidoDlg;
@@ -121,7 +121,7 @@ BOOL write_as_image = FALSE, write_as_esp = FALSE, installed_uefi_ntfs = FALSE, 
 float fScale = 1.0f;
 int dialog_showing = 0, selection_default = BT_IMAGE, windows_to_go_selection = 0, persistence_unit_selection = -1;
 int default_fs, fs_type, boot_type, partition_type, target_type; // file system, boot type, partition type, target type
-int force_update = 0;
+int force_update = 0, default_thread_priority = THREAD_PRIORITY_ABOVE_NORMAL;
 char szFolderPath[MAX_PATH], app_dir[MAX_PATH], system_dir[MAX_PATH], temp_dir[MAX_PATH], sysnative_dir[MAX_PATH];
 char embedded_sl_version_str[2][12] = { "?.??", "?.??" };
 char embedded_sl_version_ext[2][32];
@@ -1770,7 +1770,7 @@ static void SaveVHD(void)
 	EXT_DECL(img_ext, filename, __VA_GROUP__("*.vhd"), __VA_GROUP__(lmprintf(MSG_095)));
 	ULARGE_INTEGER free_space;
 
-	if ((DriveIndex < 0) || (format_thid != NULL))
+	if ((DriveIndex < 0) || (format_thread != NULL))
 		return;
 
 	static_sprintf(filename, "%s.vhd", DriveLabel.String[DriveIndex]);
@@ -1791,8 +1791,8 @@ static void SaveVHD(void)
 			EnableControls(FALSE, FALSE);
 			FormatStatus = 0;
 			InitProgress(TRUE);
-			format_thid = CreateThread(NULL, 0, SaveImageThread, &img_save, 0, NULL);
-			if (format_thid != NULL) {
+			format_thread = CreateThread(NULL, 0, SaveImageThread, &img_save, 0, NULL);
+			if (format_thread != NULL) {
 				uprintf("\r\nSave to VHD operation started");
 				PrintInfo(0, -1);
 				SendMessage(hMainDialog, UM_TIMER_START, 0, 0);
@@ -1822,7 +1822,7 @@ static void SaveISO(void)
 	char filename[33] = "disc_image.iso";
 	EXT_DECL(img_ext, filename, __VA_GROUP__("*.iso"), __VA_GROUP__(lmprintf(MSG_036)));
 
-	if (op_in_progress || (format_thid != NULL))
+	if (op_in_progress || (format_thread != NULL))
 		return;
 
 	img_save.Type = IMG_SAVE_TYPE_ISO;
@@ -1846,8 +1846,8 @@ static void SaveISO(void)
 	// Disable all controls except cancel
 	EnableControls(FALSE, FALSE);
 	InitProgress(TRUE);
-	format_thid = CreateThread(NULL, 0, SaveImageThread, &img_save, 0, NULL);
-	if (format_thid != NULL) {
+	format_thread = CreateThread(NULL, 0, SaveImageThread, &img_save, 0, NULL);
+	if (format_thread != NULL) {
 		uprintf("\r\nSave to ISO operation started");
 		PrintInfo(0, -1);
 		SendMessage(hMainDialog, UM_TIMER_START, 0, 0);
@@ -1998,11 +1998,11 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		case IDOK:			// close application
 		case IDCANCEL:
 			EnableWindow(GetDlgItem(hDlg, IDCANCEL), FALSE);
-			if (format_thid != NULL) {
+			if (format_thread != NULL) {
 				if ((no_confirmation_on_cancel) || (MessageBoxExU(hMainDialog, lmprintf(MSG_105), lmprintf(MSG_049),
 					MB_YESNO|MB_ICONWARNING|MB_IS_RTL, selected_langid) == IDYES)) {
 					// Operation may have completed in the meantime
-					if (format_thid != NULL) {
+					if (format_thread != NULL) {
 						FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANCELLED;
 						PrintInfo(0, MSG_201);
 						uprintf("Cancelling");
@@ -2303,7 +2303,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			}
 			break;
 		case IDC_START:
-			if (format_thid != NULL)
+			if (format_thread != NULL)
 				return (INT_PTR)TRUE;
 			// Just in case
 			boot_type = (int)ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType));
@@ -2340,7 +2340,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			MyDialogBox(hMainInstance, IDD_UPDATE_POLICY, hDlg, UpdateCallback);
 			break;
 		case IDC_HASH:
-			if ((format_thid == NULL) && (image_path != NULL)) {
+			if ((format_thread == NULL) && (image_path != NULL)) {
 				FormatStatus = 0;
 				no_confirmation_on_cancel = TRUE;
 				SendMessage(hMainDialog, UM_PROGRESS_INIT, 0, 0);
@@ -2348,8 +2348,9 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				EnableControls(FALSE, FALSE);
 				InitProgress(FALSE);
 				SetThreadAffinity(thread_affinity, CHECKSUM_MAX + 1);
-				format_thid = CreateThread(NULL, 0, SumThread, (LPVOID)thread_affinity, 0, NULL);
-				if (format_thid != NULL) {
+				format_thread = CreateThread(NULL, 0, SumThread, (LPVOID)thread_affinity, 0, NULL);
+				if (format_thread != NULL) {
+					SetThreadPriority(format_thread, default_thread_priority);
 					PrintInfo(0, -1);
 					SendMessage(hMainDialog, UM_TIMER_START, 0, 0);
 				} else {
@@ -2420,7 +2421,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		// DO *NOT* USE WM_DEVICECHANGE AS THE MESSAGE FROM THE TIMER PROC, as it may be filtered!
 		// For instance filtering will occur when (un)plugging in a FreeBSD UFD on Windows 8.
 		// Instead, use a custom user message, such as UM_MEDIA_CHANGE, to set DBT_CUSTOMEVENT.
-		if (format_thid == NULL) {
+		if (format_thread == NULL) {
 			switch (wParam) {
 			case DBT_DEVICEARRIVAL:
 			case DBT_DEVICEREMOVECOMPLETE:
@@ -2763,18 +2764,19 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		nDeviceIndex = ComboBox_GetCurSel(hDeviceList);
 		DeviceNum = (DWORD)ComboBox_GetItemData(hDeviceList, nDeviceIndex);
 		InitProgress(zero_drive || write_as_image);
-		format_thid = CreateThread(NULL, 0, FormatThread, (LPVOID)(uintptr_t)DeviceNum, 0, NULL);
-		if (format_thid == NULL) {
+		format_thread = CreateThread(NULL, 0, FormatThread, (LPVOID)(uintptr_t)DeviceNum, 0, NULL);
+		if (format_thread == NULL) {
 			uprintf("Unable to start formatting thread");
 			FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_CANT_START_THREAD);
 			PostMessage(hMainDialog, UM_FORMAT_COMPLETED, (WPARAM)FALSE, 0);
 		} else {
+			SetThreadPriority(format_thread, default_thread_priority);
 			uprintf("\r\nFormat operation started");
 			SendMessage(hMainDialog, UM_TIMER_START, 0, 0);
 			// Set focus to the Cancel button
 			SendMessage(hMainDialog, WM_NEXTDLGCTL, (WPARAM)GetDlgItem(hMainDialog, IDCANCEL), TRUE);
 		}
-		if (format_thid != NULL)
+		if (format_thread != NULL)
 			break;
 	aborted_start:
 		zero_drive = FALSE;
@@ -2790,7 +2792,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 
 	case UM_FORMAT_COMPLETED:
 		zero_drive = FALSE;
-		format_thid = NULL;
+		format_thread = NULL;
 		// Stop the timer
 		KillTimer(hMainDialog, TID_APP_TIMER);
 		// Close the cancel MessageBox and Blocking notification if active
@@ -3169,6 +3171,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	enable_file_indexing = ReadSettingBool(SETTING_ENABLE_FILE_INDEXING);
 	enable_VHDs = !ReadSettingBool(SETTING_DISABLE_VHDS);
 	enable_extra_hashes = ReadSettingBool(SETTING_ENABLE_EXTRA_HASHES);
+	// We want above normal priority by default, so we offset the value.
+	default_thread_priority = ReadSetting32(SETTING_DEFAULT_THREAD_PRIORITY) + THREAD_PRIORITY_ABOVE_NORMAL;
 
 	// Initialize the global scaling, in case we need it before we initialize the dialog
 	hDC = GetDC(NULL);
@@ -3336,8 +3340,8 @@ relaunch:
 	while(GetMessage(&msg, NULL, 0, 0)) {
 		static BOOL ctrl_without_focus = FALSE;
 		BOOL no_focus = (msg.message == WM_SYSKEYDOWN) && !(msg.lParam & 0x20000000);
-		// ** *********** *************
-		// .,ABCDEFGHIJKLMNOPQRSTUVWXYZ
+		// ** *********** ***************
+		// .,ABCDEFGHIJKLMNOPQRSTUVWXYZ+-
 
 		// Sigh... The things one need to do to detect standalone use of the 'Alt' key.
 		if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam != VK_MENU))
@@ -3386,6 +3390,23 @@ relaunch:
 		if (no_focus)
 			continue;
 
+		// Alt +/- => Increase or decrease thread priority for format/file-copy/wim-apply operations
+		if ((msg.message == WM_SYSKEYDOWN) && ((msg.wParam == VK_OEM_PLUS) || (msg.wParam == VK_OEM_MINUS) ||
+			(msg.wParam == VK_ADD) || (msg.wParam == VK_SUBTRACT))) {
+			int delta = ((msg.wParam == VK_OEM_PLUS) || (msg.wParam == VK_ADD)) ? +1 : -1;
+			if (((delta == +1) && (default_thread_priority < THREAD_PRIORITY_HIGHEST)) ||
+				((delta == -1) && (default_thread_priority > THREAD_PRIORITY_LOWEST))) {
+				default_thread_priority += delta;
+				WriteSetting32(SETTING_DEFAULT_THREAD_PRIORITY, default_thread_priority - THREAD_PRIORITY_ABOVE_NORMAL);
+				if (format_thread != NULL)
+					SetThreadPriority(format_thread, default_thread_priority);
+				if (apply_wim_thread != NULL)
+					SetThreadPriority(apply_wim_thread, default_thread_priority);
+			}
+			PrintStatus(STATUS_MSG_TIMEOUT, MSG_318, default_thread_priority);
+			continue;
+		}
+
 		// The following cheat modes should not be enacted when an operation is in progress
 		if (!op_in_progress) {
 			// Alt-. => Enable USB enumeration debug
@@ -3424,7 +3445,7 @@ relaunch:
 			// Alt-D => Delete the 'rufus_files' subdirectory
 			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'D')) {
 				static_sprintf(tmp_path, "%s\\%s", app_dir, FILES_DIR);
-				PrintStatus(2000, MSG_264, tmp_path);
+				PrintStatus(STATUS_MSG_TIMEOUT, MSG_264, tmp_path);
 				SHDeleteDirectoryExU(NULL, tmp_path, FOF_SILENT | FOF_NOERRORUI | FOF_NOCONFIRMATION);
 				continue;
 			}
@@ -3528,7 +3549,7 @@ relaunch:
 			}
 			// Alt-R => Remove all the registry keys that may have been created by Rufus
 			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'R')) {
-				PrintStatus(2000, DeleteRegistryKey(REGKEY_HKCU, COMPANY_NAME "\\" APPLICATION_NAME) ? MSG_248 : MSG_249);
+				PrintStatus(STATUS_MSG_TIMEOUT, DeleteRegistryKey(REGKEY_HKCU, COMPANY_NAME "\\" APPLICATION_NAME) ? MSG_248 : MSG_249);
 				// Also try to delete the upper key (company name) if it's empty (don't care about the result)
 				DeleteRegistryKey(REGKEY_HKCU, COMPANY_NAME);
 				continue;

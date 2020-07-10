@@ -31,6 +31,7 @@ extern char* ini_file;
 #define SETTING_ADVANCED_MODE_DEVICE        "ShowAdvancedDriveProperties"
 #define SETTING_ADVANCED_MODE_FORMAT        "ShowAdvancedFormatOptions"
 #define SETTING_COMM_CHECK                  "CommCheck64"
+#define SETTING_DEFAULT_THREAD_PRIORITY     "DefaultThreadPriority"
 #define SETTING_DISABLE_FAKE_DRIVES_CHECK   "DisableFakeDrivesCheck"
 #define SETTING_DISABLE_LGP                 "DisableLGP"
 #define SETTING_DISABLE_SECURE_BOOT_NOTICE  "DisableSecureBootNotice"

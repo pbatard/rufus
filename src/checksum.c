@@ -93,6 +93,7 @@ HANDLE data_ready[CHECKSUM_MAX] = { 0 }, thread_ready[CHECKSUM_MAX] = { 0 };
 DWORD read_size[2];
 BOOL enable_extra_hashes = FALSE;
 uint8_t ALIGNED(64) buffer[2][BUFFER_SIZE];
+extern int default_thread_priority;
 
 /*
  * Rotate 32 or 64 bit integers by n bytes.
@@ -1152,6 +1153,7 @@ DWORD WINAPI SumThread(void* param)
 			uprintf("Unable to start checksum thread #%d", i);
 			goto out;
 		}
+		SetThreadPriority(sum_thread[i], default_thread_priority);
 		if (thread_affinity[i+1] != 0)
 			SetThreadAffinityMask(sum_thread[i], thread_affinity[i+1]);
 	}
