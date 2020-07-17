@@ -48,7 +48,7 @@ int64_t write_sectors(HANDLE hDrive, uint64_t SectorSize,
    }
 
    LastWriteError = 0;
-   if(!WriteFile(hDrive, pBuf, Size, &Size, NULL))
+   if(!WriteFileWithRetry(hDrive, pBuf, Size, &Size, WRITE_RETRIES))
    {
       LastWriteError = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|GetLastError();
       uprintf("write_sectors: Write error %s\n", WindowsErrorString());

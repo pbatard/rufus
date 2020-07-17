@@ -414,7 +414,7 @@ BOOL ExtractFreeDOS(const char* path)
 
 BOOL ExtractDOS(const char* path)
 {
-	switch(ComboBox_GetItemData(hBootType, ComboBox_GetCurSel(hBootType))) {
+	switch(ComboBox_GetCurItemData(hBootType)) {
 	case BT_MSDOS:
 		return ExtractMSDOS(path);
 	case BT_FREEDOS:

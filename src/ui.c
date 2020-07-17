@@ -271,8 +271,8 @@ void GetFullWidth(HWND hDlg)
 	fw = rc.right - rc.left - ddw;
 
 	// Go through the Image Options for Windows To Go
-	fw = max(fw, GetTextSize(GetDlgItem(hDlg, IDC_IMAGE_OPTION), lmprintf(MSG_117)).cx);
-	fw = max(fw, GetTextSize(GetDlgItem(hDlg, IDC_IMAGE_OPTION), lmprintf(MSG_118)).cx);
+	fw = max(fw, GetTextSize(hImageOption, lmprintf(MSG_117)).cx);
+	fw = max(fw, GetTextSize(hImageOption, lmprintf(MSG_118)).cx);
 
 	// Now deal with full length checkbox lines
 	for (i = 0; i<ARRAYSIZE(full_width_checkboxes); i++)
@@ -428,7 +428,7 @@ void PositionMainControls(HWND hDlg)
 	hCtrl = GetDlgItem(hDlg, IDC_PERSISTENCE_SLIDER);
 	GetWindowRect(hCtrl, &rc);
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
-	SetWindowPos(hCtrl, GetDlgItem(hDlg, IDC_IMAGE_OPTION), mw, rc.top, bsw, rc.bottom - rc.top, 0);
+	SetWindowPos(hCtrl, hImageOption, mw, rc.top, bsw, rc.bottom - rc.top, 0);
 
 	// Reposition the Persistence Units dropdown (no need to resize)
 	hCtrl = GetDlgItem(hDlg, IDC_PERSISTENCE_UNITS);
@@ -785,7 +785,7 @@ void ToggleImageOptions(void)
 		 ((!has_wintogo) && (image_options & IMOP_WINTOGO)) ) {
 		image_options ^= IMOP_WINTOGO;
 		// Set the Windows To Go selection in the dropdown
-		IGNORE_RETVAL(ComboBox_SetCurSel(GetDlgItem(hMainDialog, IDC_IMAGE_OPTION), windows_to_go_selection));
+		IGNORE_RETVAL(ComboBox_SetCurSel(hImageOption, windows_to_go_selection));
 	}
 
 	if (((has_persistence) && !(image_options & IMOP_PERSISTENCE)) ||
@@ -818,7 +818,7 @@ void ToggleImageOptions(void)
 	// Set the dropdown default selection
 	if (image_options & IMOP_WINTOGO) {
 		SetWindowTextU(GetDlgItem(hMainDialog, IDS_IMAGE_OPTION_TXT), image_option_txt);
-		IGNORE_RETVAL(ComboBox_SetCurSel(GetDlgItem(hMainDialog, IDC_IMAGE_OPTION), windows_to_go_selection));
+		IGNORE_RETVAL(ComboBox_SetCurSel(hImageOption, windows_to_go_selection));
 	} else if (image_options & IMOP_PERSISTENCE) {
 		SetWindowTextU(GetDlgItem(hMainDialog, IDS_IMAGE_OPTION_TXT), lmprintf(MSG_123));
 		TogglePersistenceControls(persistence_size != 0);
@@ -1194,7 +1194,7 @@ void InitProgress(BOOL bOnlyFormat)
 			nb_slots[OP_PARTITION] = 1;
 			nb_slots[OP_FIX_MBR] = 1;
 			nb_slots[OP_CREATE_FS] = (use_vds) ? 2 :
-				nb_steps[ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem))];
+				nb_steps[ComboBox_GetCurItemData(hFileSystem)];
 			// So, yeah, if you're doing slow format, or using Large FAT32, and have persistence, you'll see
 			// the progress bar revert during format on account that we reuse the same operation for both
 			// partitions. Maybe one day I'll be bothered to handle two separate OP_FORMAT ops...

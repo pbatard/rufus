@@ -802,7 +802,7 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 		goto out;
 	}
 
-	switch (ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem))) {
+	switch (ComboBox_GetCurItemData(hFileSystem)) {
 	case FS_FAT16:
 		if (buffer[0x1c2] == 0x0e) {
 			uprintf("Partition is already FAT16 LBA...\n");
@@ -823,7 +823,7 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 	if ((boot_type != BT_NON_BOOTABLE) && (target_type == TT_BIOS)) {
 		// Set first partition bootable - masquerade as per the DiskID selected
 		buffer[0x1be] = IsChecked(IDC_RUFUS_MBR) ?
-			(BYTE)ComboBox_GetItemData(hDiskID, ComboBox_GetCurSel(hDiskID)):0x80;
+			(BYTE)ComboBox_GetCurItemData(hDiskID):0x80;
 		uprintf("Set bootable USB partition as 0x%02X\n", buffer[0x1be]);
 	}
 
@@ -1231,7 +1231,7 @@ int SetWinToGoIndex(void)
 	wintogo_index = -1;
 	wininst_index = 0;
 	if ((nWindowsVersion < WINDOWS_8) || ((WimExtractCheck() & 4) == 0) ||
-		(ComboBox_GetItemData(hFileSystem, ComboBox_GetCurSel(hFileSystem)) != FS_NTFS)) {
+		(ComboBox_GetCurItemData(hFileSystem) != FS_NTFS)) {
 		return -1;
 	}
 
@@ -1721,7 +1721,7 @@ DWORD WINAPI FormatThread(void* param)
 
 	use_large_fat32 = (fs_type == FS_FAT32) && ((SelectedDrive.DiskSize > LARGE_FAT32_SIZE) || (force_large_fat32));
 	windows_to_go = (image_options & IMOP_WINTOGO) && (boot_type == BT_IMAGE) && HAS_WINTOGO(img_report) &&
-		(ComboBox_GetCurSel(GetDlgItem(hMainDialog, IDC_IMAGE_OPTION)) == 1);
+		ComboBox_GetCurItemData(hImageOption);
 	large_drive = (SelectedDrive.DiskSize > (1*TB));
 	if (large_drive)
 		uprintf("Notice: Large drive detected (may produce short writes)");
@@ -2005,7 +2005,7 @@ DWORD WINAPI FormatThread(void* param)
 	GetWindowTextU(hLabel, label, sizeof(label));
 	if (fs_type < FS_EXT2)
 		ToValidLabel(label, (fs_type == FS_FAT16) || (fs_type == FS_FAT32) || (fs_type == FS_EXFAT));
-	ClusterSize = (DWORD)ComboBox_GetItemData(hClusterSize, ComboBox_GetCurSel(hClusterSize));
+	ClusterSize = (DWORD)ComboBox_GetCurItemData(hClusterSize);
 	if ((ClusterSize < 0x200) || (write_as_esp))
 		ClusterSize = 0;	// 0 = default cluster size
 

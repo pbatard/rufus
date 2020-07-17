@@ -1256,7 +1256,6 @@ BOOL ToggleEsp(DWORD DriveIndex)
 			if (guid != NULL) {
 				for (i = 0; i < DriveLayout->PartitionCount; i++) {
 					if (CompareGUID(guid, &DriveLayout->PartitionEntry[i].Gpt.PartitionId)) {
-						uprintf("BD name: '%S'", DriveLayout->PartitionEntry[i].Gpt.Name);
 						found = TRUE;
 						break;
 					}
@@ -1724,7 +1723,7 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 		// CHS sizes that IBM imparted upon us. Long story short, we now align to a
 		// cylinder size that is itself aligned to the cluster size.
 		// If this actually breaks old systems, please send your complaints to IBM.
-		LONGLONG ClusterSize = (LONGLONG)ComboBox_GetItemData(hClusterSize, ComboBox_GetCurSel(hClusterSize));
+		LONGLONG ClusterSize = (LONGLONG)ComboBox_GetCurItemData(hClusterSize);
 		if (ClusterSize == 0)
 			ClusterSize = 0x200;
 		DriveLayoutEx.PartitionEntry[pn].StartingOffset.QuadPart =

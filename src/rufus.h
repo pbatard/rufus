@@ -129,6 +129,8 @@
 #define IMOP_WINTOGO                0x01
 #define IMOP_PERSISTENCE            0x02
 
+#define ComboBox_GetCurItemData(hCtrl) ComboBox_GetItemData(hCtrl, ComboBox_GetCurSel(hCtrl))
+
 #define safe_free(p) do {free((void*)p); p = NULL;} while(0)
 #define safe_mm_free(p) do {_mm_free((void*)p); p = NULL;} while(0)
 #define safe_min(a, b) min((size_t)(a), (size_t)(b))
@@ -451,7 +453,7 @@ enum CpuArch {
 extern RUFUS_UPDATE update;
 extern RUFUS_IMG_REPORT img_report;
 extern HINSTANCE hMainInstance;
-extern HWND hMainDialog, hLogDialog, hStatus, hDeviceList, hCapacity;
+extern HWND hMainDialog, hLogDialog, hStatus, hDeviceList, hCapacity, hImageOption;
 extern HWND hPartitionScheme, hTargetSystem, hFileSystem, hClusterSize, hLabel, hBootType, hNBPasses, hLog;
 extern HWND hInfo, hProgress, hDiskID;
 extern WORD selected_langid;
