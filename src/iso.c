@@ -89,7 +89,8 @@ static const char* ldlinux_c32 = "ldlinux.c32";
 static const char* md5sum_name[] = { "MD5SUMS", "md5sum.txt" };
 static const char* casper_dirname = "/casper";
 static const char* efi_dirname = "/efi/boot";
-static const char* efi_bootname[] = { "bootia32.efi", "bootia64.efi", "bootx64.efi", "bootarm.efi", "bootaa64.efi", "bootebc.efi" };
+static const char* efi_bootname[MAX_ARCHS] =
+	{ "bootia32.efi", "bootia64.efi", "bootx64.efi", "bootarm.efi", "bootaa64.efi", "bootebc.efi" };
 static const char* sources_str = "/sources";
 static const char* wininst_name[] = { "install.wim", "install.esd", "install.swm" };
 // We only support GRUB/BIOS (x86) that uses a standard config dir (/boot/grub/i386-pc/)
@@ -249,7 +250,7 @@ static BOOL check_iso_props(const char* psz_dirname, int64_t file_length, const 
 
 		// Check for the EFI boot entries
 		if (safe_stricmp(psz_dirname, efi_dirname) == 0) {
-			for (i=0; i<ARRAYSIZE(efi_bootname); i++)
+			for (i = 0; i < ARRAYSIZE(efi_bootname); i++)
 				if (safe_stricmp(psz_basename, efi_bootname[i]) == 0)
 					img_report.has_efi |= (2 << i);	// start at 2 since "bootmgr.efi" is bit 0
 		}
@@ -1044,7 +1045,7 @@ out:
 		if (img_report.has_grub2) {
 			// In case we have a GRUB2 based iso, we extract boot/grub/i386-pc/normal.mod to parse its version
 			img_report.grub2_version[0] = 0;
-			if ((GetTempPathU(sizeof(path), path) != 0) && (GetTempFileNameU(path, APPLICATION_NAME, 0, path) != 0)) {
+			if (GetTempFileNameU(temp_dir, APPLICATION_NAME, 0, path) != 0) {
 				size = (size_t)ExtractISOFile(src_iso, "boot/grub/i386-pc/normal.mod", path, FILE_ATTRIBUTE_NORMAL);
 				buf = (char*)calloc(size, 1);
 				fd = fopen(path, "rb");

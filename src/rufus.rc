@@ -33,7 +33,7 @@ LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
 IDD_DIALOG DIALOGEX 12, 12, 232, 326
 STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_MINIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_ACCEPTFILES
-CAPTION "Rufus 3.12.1690"
+CAPTION "Rufus 3.12.1691"
 FONT 9, "Segoe UI Symbol", 400, 0, 0x0
 BEGIN
     LTEXT           "Drive Properties",IDS_DRIVE_PROPERTIES_TXT,8,6,53,12,NOT WS_GROUP
@@ -308,8 +308,6 @@ BEGIN
     "IDR_FD_EGA18_CPX        RCDATA                  ""../res/freedos/EGA18.CPX""\r\n"
     "IDR_XT_HOGGER           RCDATA                  ""../res/hogger/hogger.exe""\r\n"
     "IDR_UEFI_NTFS           RCDATA                  ""../res/uefi/uefi-ntfs.img""\r\n"
-    "IDR_TOGO_SAN_POLICY_XML RCDATA                  ""../res/togo/san_policy.xml""\r\n"
-    "IDR_TOGO_UNATTEND_XML   RCDATA                  ""../res/togo/unattend.xml""\r\n"
     "IDI_LANG_16             RCDATA                  ""../res/icons/lang-16.png""\r\n"
     "IDI_INFO_16             RCDATA                  ""../res/icons/info-16.png""\r\n"
     "IDI_SETTINGS_16         RCDATA                  ""../res/icons/settings-16.png""\r\n"
@@ -397,8 +395,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 3,12,1690,0
- PRODUCTVERSION 3,12,1690,0
+ FILEVERSION 3,12,1691,0
+ PRODUCTVERSION 3,12,1691,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -416,13 +414,13 @@ BEGIN
             VALUE "Comments", "https://rufus.ie"
             VALUE "CompanyName", "Akeo Consulting"
             VALUE "FileDescription", "Rufus"
-            VALUE "FileVersion", "3.12.1690"
+            VALUE "FileVersion", "3.12.1691"
             VALUE "InternalName", "Rufus"
             VALUE "LegalCopyright", "© 2011-2020 Pete Batard (GPL v3)"
             VALUE "LegalTrademarks", "https://www.gnu.org/licenses/gpl-3.0.html"
             VALUE "OriginalFilename", "rufus-3.12.exe"
             VALUE "ProductName", "Rufus"
-            VALUE "ProductVersion", "3.12.1690"
+            VALUE "ProductVersion", "3.12.1691"
         END
     END
     BLOCK "VarFileInfo"
@@ -494,8 +492,6 @@ IDR_FD_EGA17_CPX        RCDATA                  "../res/freedos/EGA17.CPX"
 IDR_FD_EGA18_CPX        RCDATA                  "../res/freedos/EGA18.CPX"
 IDR_XT_HOGGER           RCDATA                  "../res/hogger/hogger.exe"
 IDR_UEFI_NTFS           RCDATA                  "../res/uefi/uefi-ntfs.img"
-IDR_TOGO_SAN_POLICY_XML RCDATA                  "../res/togo/san_policy.xml"
-IDR_TOGO_UNATTEND_XML   RCDATA                  "../res/togo/unattend.xml"
 IDI_LANG_16             RCDATA                  "../res/icons/lang-16.png"
 IDI_INFO_16             RCDATA                  "../res/icons/info-16.png"
 IDI_SETTINGS_16         RCDATA                  "../res/icons/settings-16.png"

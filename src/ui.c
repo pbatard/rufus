@@ -772,7 +772,8 @@ void ToggleImageOptions(void)
 	uint8_t entry_image_options = image_options;
 	int i, shift = rh;
 
-	has_wintogo = ((boot_type == BT_IMAGE) && (image_path != NULL) && (img_report.is_iso) && (nWindowsVersion >= WINDOWS_8) && (HAS_WINTOGO(img_report)));
+	has_wintogo = ((boot_type == BT_IMAGE) && (image_path != NULL) && (img_report.is_iso || img_report.is_windows_img) &&
+		(nWindowsVersion >= WINDOWS_8) && (HAS_WINTOGO(img_report)));
 	has_persistence = ((boot_type == BT_IMAGE) && (image_path != NULL) && (img_report.is_iso) && (HAS_PERSISTENCE(img_report)));
 
 	assert(popcnt8(image_options) <= 1);
@@ -784,13 +785,20 @@ void ToggleImageOptions(void)
 	if ( ((has_wintogo) && !(image_options & IMOP_WINTOGO)) ||
 		 ((!has_wintogo) && (image_options & IMOP_WINTOGO)) ) {
 		image_options ^= IMOP_WINTOGO;
-		// Set the Windows To Go selection in the dropdown
-		IGNORE_RETVAL(ComboBox_SetCurSel(hImageOption, windows_to_go_selection));
+		if (image_options & IMOP_WINTOGO) {
+			// Set the Windows To Go selection in the dropdown
+			IGNORE_RETVAL(ComboBox_SetCurSel(hImageOption, (img_report.is_windows_img || !windows_to_go_selected) ? 0 : 1));
+		}
 	}
 
 	if (((has_persistence) && !(image_options & IMOP_PERSISTENCE)) ||
 		((!has_persistence) && (image_options & IMOP_PERSISTENCE))) {
 		image_options ^= IMOP_PERSISTENCE;
+		if (image_options & IMOP_PERSISTENCE) {
+			SetWindowTextU(GetDlgItem(hMainDialog, IDS_IMAGE_OPTION_TXT), lmprintf(MSG_123));
+			TogglePersistenceControls(persistence_size != 0);
+			SetPersistenceSize();
+		}
 	}
 
 	if ( ((entry_image_options != 0) && (has_wintogo || has_persistence)) ||
@@ -814,15 +822,6 @@ void ToggleImageOptions(void)
 	for (i = 0; i < ARRAYSIZE(image_option_toggle_ids); i++) {
 		ShowWindow(GetDlgItem(hMainDialog, image_option_toggle_ids[i][0]),
 			(image_options & image_option_toggle_ids[i][1]) ? SW_SHOW : SW_HIDE);
-	}
-	// Set the dropdown default selection
-	if (image_options & IMOP_WINTOGO) {
-		SetWindowTextU(GetDlgItem(hMainDialog, IDS_IMAGE_OPTION_TXT), image_option_txt);
-		IGNORE_RETVAL(ComboBox_SetCurSel(hImageOption, windows_to_go_selection));
-	} else if (image_options & IMOP_PERSISTENCE) {
-		SetWindowTextU(GetDlgItem(hMainDialog, IDS_IMAGE_OPTION_TXT), lmprintf(MSG_123));
-		TogglePersistenceControls(persistence_size != 0);
-		SetPersistenceSize();
 	}
 	// If you don't force a redraw here, all kind of bad UI artifacts happen...
 	InvalidateRect(hMainDialog, NULL, TRUE);
@@ -1180,14 +1179,14 @@ void InitProgress(BOOL bOnlyFormat)
 				nb_slots[OP_FILE_COPY] = 5 + 1;
 				break;
 			case BT_IMAGE:
-				nb_slots[OP_FILE_COPY] = img_report.is_iso ? -1 : 0;
+				nb_slots[OP_FILE_COPY] = (img_report.is_iso || img_report.is_windows_img) ? -1 : 0;
 				break;
 			default:
 				nb_slots[OP_FILE_COPY] = 2 + 1;
 				break;
 			}
 		}
-		if (selection_default == BT_IMAGE && !img_report.is_iso) {
+		if (selection_default == BT_IMAGE && !(img_report.is_iso || img_report.is_windows_img)) {
 			nb_slots[OP_FORMAT] = -1;
 		} else {
 			nb_slots[OP_ZERO_MBR] = 1;

@@ -74,13 +74,12 @@ enum update_progress_type {
 extern HWND hMultiToolbar, hSaveToolbar, hHashToolbar, hAdvancedDeviceToolbar, hAdvancedFormatToolbar;
 extern HFONT hInfoFont;
 extern UINT_PTR UM_LANGUAGE_MENU_MAX;
-extern BOOL advanced_mode_device, advanced_mode_format, force_large_fat32, app_changed_size;
+extern BOOL advanced_mode_device, advanced_mode_format, force_large_fat32, app_changed_size, windows_to_go_selected;
 extern loc_cmd* selected_locale;
 extern uint64_t persistence_size;
 extern const char *sfd_name, *flash_type[BADLOCKS_PATTERN_TYPES];
 extern char *short_image_path, image_option_txt[128];
-extern int advanced_device_section_height, advanced_format_section_height;
-extern int windows_to_go_selection, persistence_unit_selection;
+extern int advanced_device_section_height, advanced_format_section_height, persistence_unit_selection;
 extern int selection_default, cbw, ddw, ddbh, bh, update_progress_type;
 
 extern void SetAccessibleName(HWND hCtrl, const char* name);
