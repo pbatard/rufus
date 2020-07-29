@@ -62,7 +62,8 @@ enum bootcheck_return {
 static const char* cmdline_hogger = "rufus.com";
 static const char* ep_reg = "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer";
 static const char* vs_reg = "Software\\Microsoft\\VisualStudio";
-static const char* arch_name[MAX_ARCHS] = { "x86_32", "Itanic", "x86_64", "ARM", "ARM64", "EBC" };
+static const char* arch_name[MAX_ARCHS] = {
+	"x86_32", "Itanic", "x86_64", "ARM", "ARM64", "EBC","Risc-V 32", "Risc-V 64", "Risc-V 128" };
 static BOOL existing_key = FALSE;	// For LGP set/restore
 static BOOL size_check = TRUE;
 static BOOL log_displayed = FALSE;
@@ -1167,6 +1168,15 @@ static uint8_t FindArch(const char* filename)
 	case IMAGE_FILE_MACHINE_EBC:
 		ret = 6;
 		break;
+	case IMAGE_FILE_MACHINE_RISCV32:
+		ret = 7;
+		break;
+	case IMAGE_FILE_MACHINE_RISCV64:
+		ret = 8;
+		break;
+	case IMAGE_FILE_MACHINE_RISCV128:
+		ret = 9;
+		break;
 	}
 
 out:
@@ -1212,12 +1222,13 @@ DWORD WINAPI ImageScanThread(LPVOID param)
 
 	if (img_report.is_windows_img) {
 		selection_default = BT_IMAGE;
+		// coverity[swapped_arguments]
 		if (GetTempFileNameU(temp_dir, APPLICATION_NAME, 0, tmp_path) != 0) {
 			// Only look at index 1 for now. If people complain, we may look for more.
 			if (WimExtractFile(image_path, 1, "Windows\\Boot\\EFI\\bootmgr.efi", tmp_path, TRUE)) {
 				arch = FindArch(tmp_path);
 				if (arch != 0) {
-					uprintf("  Image contains an %s EFI boot manager", arch_name[arch - 1]);
+					uprintf("  Image contains a%s %s EFI boot manager", arch_name[arch - 1], (arch < 7) ? "n" : "");
 					img_report.has_efi = 1 | (1 << arch);
 					img_report.has_bootmgr_efi = TRUE;
 					img_report.wininst_index = 1;
@@ -1727,7 +1738,7 @@ static void InitDialog(HWND hDlg)
 	// Count on Microsoft for making it more attractive to read a
 	// version using strtok() than using GetFileVersionInfo()
 	token = strtok(tmp, " ");
-	for (i=0; (i<3) && ((token = strtok(NULL, ".")) != NULL); i++)
+	for (i = 0; (i < 3) && ((token = strtok(NULL, ".")) != NULL); i++)
 		rufus_version[i] = (uint16_t)atoi(token);
 
 	// Redefine the title to be able to add "Alpha" or "Beta"
@@ -1738,7 +1749,7 @@ static void InitDialog(HWND hDlg)
 	dialog_handle = FindWindowA(NULL, tmp);
 	uprintf(APPLICATION_NAME " " APPLICATION_ARCH " v%d.%d.%d%s%s", rufus_version[0], rufus_version[1], rufus_version[2],
 		IsAlphaOrBeta(), (ini_file != NULL)?"(Portable)":"");
-	for (i=0; i<ARRAYSIZE(resource); i++) {
+	for (i = 0; i < ARRAYSIZE(resource); i++) {
 		len = 0;
 		buf = (char*)GetResource(hMainInstance, resource[i], _RT_RCDATA, "ldlinux_sys", &len, TRUE);
 		if (buf == NULL) {

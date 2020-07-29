@@ -125,3 +125,14 @@ static __inline void *_reallocf(void *ptr, size_t size) {
 /* The following is used for native ISO mounting in Windows 8 or later */
 #define VIRTUAL_STORAGE_TYPE_VENDOR_MICROSOFT \
 	{ 0xEC984AECL, 0xA0F9, 0x47e9, { 0x90, 0x1F, 0x71, 0x41, 0x5A, 0x66, 0x34, 0x5B } }
+
+/* RISC-V is still bleeding edge */
+#ifndef IMAGE_FILE_MACHINE_RISCV32
+#define IMAGE_FILE_MACHINE_RISCV32 0x5032
+#endif
+#ifndef IMAGE_FILE_MACHINE_RISCV64
+#define IMAGE_FILE_MACHINE_RISCV64 0x5064
+#endif
+#ifndef IMAGE_FILE_MACHINE_RISCV128
+#define IMAGE_FILE_MACHINE_RISCV128 0x5128
+#endif

@@ -62,7 +62,7 @@
 #define DRIVE_INDEX_MAX             0x000000C0
 #define MIN_DRIVE_SIZE              8			// Minimum size a drive must have, to be formattable (in MB)
 #define MIN_EXTRA_PART_SIZE         (1024*1024)	// Minimum size of the extra partition, in bytes
-#define MAX_ARCHS                   6			// Number of arhitectures we recognize
+#define MAX_ARCHS                   9			// Number of arhitectures we recognize
 #define MAX_DRIVES                  (DRIVE_INDEX_MAX - DRIVE_INDEX_MIN)
 #define MAX_TOOLTIPS                128
 #define MAX_SIZE_SUFFIXES           6			// bytes, KB, MB, GB, TB, PB
@@ -308,7 +308,7 @@ enum checksum_type {
 #define HAS_BOOTMGR_BIOS(r) (r.has_bootmgr)
 #define HAS_BOOTMGR_EFI(r)  (r.has_bootmgr_efi)
 #define HAS_BOOTMGR(r)      (HAS_BOOTMGR_BIOS(r) || HAS_BOOTMGR_EFI(r))
-#define HAS_REGULAR_EFI(r)  (r.has_efi & 0x7E)
+#define HAS_REGULAR_EFI(r)  (r.has_efi & 0x7FFE)
 #define HAS_WININST(r)      (r.wininst_index != 0)
 #define HAS_WINPE(r)        (((r.winpe & WINPE_I386) == WINPE_I386)||((r.winpe & WINPE_AMD64) == WINPE_AMD64)||((r.winpe & WINPE_MININT) == WINPE_MININT))
 #define HAS_WINDOWS(r)      (HAS_BOOTMGR(r) || (r.uses_minint) || HAS_WINPE(r))
@@ -342,7 +342,7 @@ typedef struct {
 	BOOLEAN is_windows_img;
 	BOOLEAN disable_iso;
 	uint16_t winpe;
-	uint8_t has_efi;
+	uint16_t has_efi;
 	uint8_t has_md5sum;
 	uint8_t wininst_index;
 	uint8_t has_symlinks;

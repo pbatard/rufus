@@ -307,7 +307,7 @@ BOOL IsBootableImage(const char* path)
 	}
 	img_report.image_size = (uint64_t)liImageSize.QuadPart;
 	size = sizeof(wim_magic);
-	SetFilePointerEx(handle, ptr, NULL, FILE_BEGIN);
+	IGNORE_RETVAL(SetFilePointerEx(handle, ptr, NULL, FILE_BEGIN));
 	img_report.is_windows_img = ReadFile(handle, &wim_magic, size, &size, NULL) && (wim_magic == WIM_MAGIC);
 	if (img_report.is_windows_img)
 		goto out;

@@ -76,7 +76,7 @@ void SetAccessibleName(HWND hCtrl, const char* name)
 
 	SetWindowTextW(hCtrl, wname);
 	if (pfaps == NULL)
-		CoCreateInstance(&CLSID_AccPropServices, NULL, CLSCTX_INPROC, &IID_IAccPropServices, (LPVOID)&pfaps);
+		IGNORE_RETVAL(CoCreateInstance(&CLSID_AccPropServices, NULL, CLSCTX_INPROC, &IID_IAccPropServices, (LPVOID)&pfaps));
 	if (pfaps != NULL) {
 		IAccPropServices_ClearHwndProps(pfaps, hCtrl, OBJID_CLIENT, CHILDID_SELF, props, ARRAYSIZE(props));
 		IAccPropServices_SetHwndPropStr(pfaps, hCtrl, OBJID_CLIENT, CHILDID_SELF, Name_Property_GUID, wname);

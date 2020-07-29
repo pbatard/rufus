@@ -89,8 +89,9 @@ static const char* ldlinux_c32 = "ldlinux.c32";
 static const char* md5sum_name[] = { "MD5SUMS", "md5sum.txt" };
 static const char* casper_dirname = "/casper";
 static const char* efi_dirname = "/efi/boot";
-static const char* efi_bootname[MAX_ARCHS] =
-	{ "bootia32.efi", "bootia64.efi", "bootx64.efi", "bootarm.efi", "bootaa64.efi", "bootebc.efi" };
+static const char* efi_bootname[MAX_ARCHS] = {
+	"bootia32.efi", "bootia64.efi", "bootx64.efi", "bootarm.efi", "bootaa64.efi",
+	"bootebc.efi", "bootriscv32.efi", "bootriscv64.efi", "bootriscv128.efi" };
 static const char* sources_str = "/sources";
 static const char* wininst_name[] = { "install.wim", "install.esd", "install.swm" };
 // We only support GRUB/BIOS (x86) that uses a standard config dir (/boot/grub/i386-pc/)
@@ -1020,7 +1021,7 @@ out:
 			}
 		}
 		if (!IS_EFI_BOOTABLE(img_report) && HAS_EFI_IMG(img_report) && HasEfiImgBootLoaders()) {
-			img_report.has_efi = 0x80;
+			img_report.has_efi = 0x8000;
 		}
 		if (HAS_WINPE(img_report)) {
 			// In case we have a WinPE 1.x based iso, we extract and parse txtsetup.sif
@@ -1045,6 +1046,7 @@ out:
 		if (img_report.has_grub2) {
 			// In case we have a GRUB2 based iso, we extract boot/grub/i386-pc/normal.mod to parse its version
 			img_report.grub2_version[0] = 0;
+			// coverity[swapped_arguments]
 			if (GetTempFileNameU(temp_dir, APPLICATION_NAME, 0, path) != 0) {
 				size = (size_t)ExtractISOFile(src_iso, "boot/grub/i386-pc/normal.mod", path, FILE_ATTRIBUTE_NORMAL);
 				buf = (char*)calloc(size, 1);
@@ -1071,7 +1073,7 @@ out:
 		SendMessage(hMainDialog, UM_PROGRESS_EXIT, 0, 0);
 	} else {
 		// Solus and other ISOs only provide EFI boot files in a FAT efi.img
-		if (img_report.has_efi == 0x80)
+		if (img_report.has_efi == 0x8000)
 			DumpFatDir(dest_dir, 0);
 		if (HAS_SYSLINUX(img_report)) {
 			static_sprintf(path, "%s\\syslinux.cfg", dest_dir);
