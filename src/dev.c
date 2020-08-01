@@ -419,9 +419,9 @@ BOOL GetOpticalMedia(IMG_SAVE* img_save)
 /* For debugging user reports of HDDs vs UFDs */
 //#define FORCED_DEVICE
 #ifdef FORCED_DEVICE
-#define FORCED_VID 0x0781
-#define FORCED_PID 0x5580
-#define FORCED_NAME "SanDisk SSD U100 16GB 1 USB Device"
+#define FORCED_VID 0x2109
+#define FORCED_PID 0x0715
+#define FORCED_NAME "KINGSTON  SA400S37960 USB Device"
 #endif
 
 /*

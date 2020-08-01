@@ -168,6 +168,7 @@ static vid_score_t vid_score[] = {
 	{ 0x1f75, -2 },		// Innostor
 	{ 0x2001, -5 },		// Micov
 	{ 0x201e, -5 },		// Evdo
+	{ 0x2109, 10 },		// VIA Labs
 	{ 0x2188, -5 },		// SMI
 	{ 0x3538, -5 },		// PQI
 	{ 0x413c, -5 },		// Ameco
