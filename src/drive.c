@@ -1522,12 +1522,19 @@ BOOL MountVolume(char* drive_name, char *volume_name)
 {
 	char mounted_guid[52];
 	char mounted_letter[27] = { 0 };
+#if defined(WINDOWS_IS_NOT_BUGGY)
 	DWORD size;
+#endif
 
 	if ((drive_name == NULL) || (volume_name == NULL) || (drive_name[0] == '?') ||
 		(strncmp(volume_name, groot_name, groot_len) == 0))
 		return FALSE;
 
+	// Great: Windows has a *MAJOR BUG* whereas, in some circumstances, GetVolumePathNamesForVolumeName()
+	// can return the *WRONG* drive letter. And yes, we validated that this is *NOT* an issue like stack
+	// or buffer corruption and whatnot. It *IS* a Windows bug. So just drop the idea of updating the
+	// drive letter if already mounted and use the passed target always.
+#if defined(WINDOWS_IS_NOT_BUGGY)
 	// Windows may already have the volume mounted but under a different letter.
 	// If that is the case, update drive_name to that letter.
 	if ( (GetVolumePathNamesForVolumeNameA(volume_name, mounted_letter, sizeof(mounted_letter), &size))
@@ -1537,6 +1544,7 @@ BOOL MountVolume(char* drive_name, char *volume_name)
 		drive_name[0] = mounted_letter[0];
 		return TRUE;
 	}
+#endif
 
 	if (!SetVolumeMountPointA(drive_name, volume_name)) {
 		if (GetLastError() == ERROR_DIR_NOT_EMPTY) {

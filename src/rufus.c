@@ -3479,12 +3479,12 @@ relaunch:
 			SendMessage(hMainDialog, WM_COMMAND, IDC_LOG, 0);
 			continue;
 		}
-#if defined(_DEBUG)
+#if defined(_DEBUG) || defined(TEST)
 		// Ctrl-T => Alternate Test mode that doesn't require a full rebuild
 		if ((ctrl_without_focus || ((GetKeyState(VK_CONTROL) & 0x8000) && (msg.message == WM_KEYDOWN)))
 			&& (msg.wParam == 'T')) {
-			extern int TestChecksum(void);
-			TestChecksum();
+			//extern int TestChecksum(void);
+			//TestChecksum();
 			continue;
 		}
 #endif

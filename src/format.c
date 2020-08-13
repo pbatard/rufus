@@ -1732,7 +1732,7 @@ DWORD WINAPI FormatThread(void* param)
 	}
 	if (drive_letters[0] == 0) {
 		uprintf("No drive letter was assigned...");
-		drive_name[0] =  GetUnusedDriveLetter();
+		drive_name[0] = GetUnusedDriveLetter();
 		if (drive_name[0] == 0) {
 			uprintf("Could not find a suitable drive letter");
 			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_ASSIGN_LETTER);
