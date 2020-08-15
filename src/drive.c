@@ -73,6 +73,7 @@ PF_TYPE_DECL(NTAPI, NTSTATUS, NtQueryVolumeInformationFile, (HANDLE, PIO_STATUS_
  */
 RUFUS_DRIVE_INFO SelectedDrive;
 extern BOOL installed_uefi_ntfs, write_as_esp;
+extern int nWindowsVersion;
 uint64_t partition_offset[3];
 uint64_t persistence_size = 0;
 
@@ -1198,7 +1199,7 @@ static BOOL ClearEspInfo(uint8_t index)
  * Needed because Windows 10 doesn't mount ESPs by default, and also
  * doesn't let usermode apps (such as File Explorer) access mounted ESPs.
  */
-BOOL ToggleEsp(DWORD DriveIndex)
+BOOL ToggleEsp(DWORD DriveIndex, uint64_t PartitionOffset)
 {
 	char *volume_name, mount_point[] = DEFAULT_ESP_MOUNT_POINT;
 	BOOL r, ret = FALSE, found = FALSE;
@@ -1208,7 +1209,7 @@ BOOL ToggleEsp(DWORD DriveIndex)
 	GUID* guid;
 	PDRIVE_LAYOUT_INFORMATION_EX DriveLayout = (PDRIVE_LAYOUT_INFORMATION_EX)(void*)layout;
 
-	if (nWindowsVersion < WINDOWS_10) {
+	if ((PartitionOffset == 0) && (nWindowsVersion < WINDOWS_10)) {
 		uprintf("ESP toggling is only available for Windows 10 or later");
 		return FALSE;
 	}
@@ -1223,50 +1224,62 @@ BOOL ToggleEsp(DWORD DriveIndex)
 		uprintf("Could not get layout for drive 0x%02x: %s", DriveIndex, WindowsErrorString());
 		goto out;
 	}
+	// TODO: Handle MBR
 	if (DriveLayout->PartitionStyle != PARTITION_STYLE_GPT) {
 		uprintf("ESP toggling is only available for GPT drives");
 		goto out;
 	}
 
-	// See if the current drive contains an ESP
-	for (i = 0, j = 0; i < DriveLayout->PartitionCount; i++) {
-		if (CompareGUID(&DriveLayout->PartitionEntry[i].Gpt.PartitionType, &PARTITION_GENERIC_ESP)) {
-			esp_index = i;
-			j++;
-		}
-	}
-
-	if (j > 1) {
-		uprintf("ESP toggling is not available for drives with more than one ESP");
-		goto out;
-	}
-	if (j == 1) {
-		// ESP -> Basic Data
-		i = esp_index;
-		uprintf("ESP name: '%S'", DriveLayout->PartitionEntry[i].Gpt.Name);
-		if (!StoreEspInfo(&DriveLayout->PartitionEntry[i].Gpt.PartitionId)) {
-			uprintf("ESP toggling data could not be stored");
-			goto out;
-		}
-		DriveLayout->PartitionEntry[i].Gpt.PartitionType = PARTITION_MICROSOFT_DATA;
-	} else {
-		// Basic Data -> ESP
-		for (j = 1; j <= MAX_ESP_TOGGLE; j++) {
-			guid = GetEspGuid((uint8_t)j);
-			if (guid != NULL) {
-				for (i = 0; i < DriveLayout->PartitionCount; i++) {
-					if (CompareGUID(guid, &DriveLayout->PartitionEntry[i].Gpt.PartitionId)) {
-						found = TRUE;
-						break;
-					}
-				}
-				if (found)
-					break;
+	if (PartitionOffset == 0) {
+		// See if the current drive contains an ESP
+		for (i = 0, j = 0; i < DriveLayout->PartitionCount; i++) {
+			if (CompareGUID(&DriveLayout->PartitionEntry[i].Gpt.PartitionType, &PARTITION_GENERIC_ESP)) {
+				esp_index = i;
+				j++;
 			}
 		}
-		if (j > MAX_ESP_TOGGLE)
+
+		if (j > 1) {
+			uprintf("ESP toggling is not available for drives with more than one ESP");
 			goto out;
-		DriveLayout->PartitionEntry[i].Gpt.PartitionType = PARTITION_GENERIC_ESP;
+		}
+		if (j == 1) {
+			// ESP -> Basic Data
+			i = esp_index;
+			uprintf("ESP name: '%S'", DriveLayout->PartitionEntry[i].Gpt.Name);
+			if (!StoreEspInfo(&DriveLayout->PartitionEntry[i].Gpt.PartitionId)) {
+				uprintf("ESP toggling data could not be stored");
+				goto out;
+			}
+			DriveLayout->PartitionEntry[i].Gpt.PartitionType = PARTITION_MICROSOFT_DATA;
+		} else {
+			// Basic Data -> ESP
+			for (j = 1; j <= MAX_ESP_TOGGLE; j++) {
+				guid = GetEspGuid((uint8_t)j);
+				if (guid != NULL) {
+					for (i = 0; i < DriveLayout->PartitionCount; i++) {
+						if (CompareGUID(guid, &DriveLayout->PartitionEntry[i].Gpt.PartitionId)) {
+							found = TRUE;
+							break;
+						}
+					}
+					if (found)
+						break;
+				}
+			}
+			if (j > MAX_ESP_TOGGLE)
+				goto out;
+			DriveLayout->PartitionEntry[i].Gpt.PartitionType = PARTITION_GENERIC_ESP;
+		}
+	} else {
+		for (i = 0, j = 0; i < DriveLayout->PartitionCount; i++) {
+			if (DriveLayout->PartitionEntry[i].StartingOffset.QuadPart == PartitionOffset)
+				DriveLayout->PartitionEntry[i].Gpt.PartitionType = PARTITION_GENERIC_ESP;
+		}
+	}
+	if (i >= DriveLayout->PartitionCount) {
+		uprintf("No partition to toggle");
+		goto out;
 	}
 
 	DriveLayout->PartitionEntry[i].RewritePartition = TRUE;	// Just in case
@@ -1276,14 +1289,16 @@ BOOL ToggleEsp(DWORD DriveIndex)
 		goto out;
 	}
 	RefreshDriveLayout(hPhysical);
-	if (CompareGUID(&DriveLayout->PartitionEntry[i].Gpt.PartitionType, &PARTITION_GENERIC_ESP)) {
-		// We successfully reverted ESP from Basic Data -> Delete stored ESP info
-		ClearEspInfo((uint8_t)j);
-	} else if (!IsDriveLetterInUse(*mount_point)) {
-		// We succesfully switched ESP to Basic Data -> Try to mount it
-		volume_name = GetLogicalName(DriveIndex, DriveLayout->PartitionEntry[i].StartingOffset.QuadPart, TRUE, FALSE);
-		IGNORE_RETVAL(MountVolume(mount_point, volume_name));
-		free(volume_name);
+	if (PartitionOffset == 0) {
+		if (CompareGUID(&DriveLayout->PartitionEntry[i].Gpt.PartitionType, &PARTITION_GENERIC_ESP)) {
+			// We successfully reverted ESP from Basic Data -> Delete stored ESP info
+			ClearEspInfo((uint8_t)j);
+		} else if (!IsDriveLetterInUse(*mount_point)) {
+			// We succesfully switched ESP to Basic Data -> Try to mount it
+			volume_name = GetLogicalName(DriveIndex, DriveLayout->PartitionEntry[i].StartingOffset.QuadPart, TRUE, FALSE);
+			IGNORE_RETVAL(MountVolume(mount_point, volume_name));
+			free(volume_name);
+		}
 	}
 	ret = TRUE;
 
@@ -1521,8 +1536,8 @@ BOOL UnmountVolume(HANDLE hDrive)
 BOOL MountVolume(char* drive_name, char *volume_name)
 {
 	char mounted_guid[52];
-	char mounted_letter[27] = { 0 };
 #if defined(WINDOWS_IS_NOT_BUGGY)
+	char mounted_letter[27] = { 0 };
 	DWORD size;
 #endif
 

@@ -400,4 +400,4 @@ BOOL CyclePort(int index);
 int CycleDevice(int index);
 BOOL RefreshLayout(DWORD DriveIndex);
 BOOL GetOpticalMedia(IMG_SAVE* img_save);
-BOOL ToggleEsp(DWORD DriveIndex);
+BOOL ToggleEsp(DWORD DriveIndex, uint64_t PartitionOffset);

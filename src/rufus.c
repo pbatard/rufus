@@ -3640,7 +3640,7 @@ relaunch:
 			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'P')) {
 				int index = ComboBox_GetCurSel(hDeviceList);
 				DWORD DeviceNum = (DWORD)ComboBox_GetItemData(hDeviceList, index);
-				if (ToggleEsp(DeviceNum))
+				if (ToggleEsp(DeviceNum, 0))
 					CyclePort(index);
 				continue;
 			}
