@@ -23,7 +23,7 @@ Features
 * Create persistent Linux partitions
 * Download official Microsoft Windows 8 or Windows 10 retail ISOs
 * Compute MD5, SHA-1 and SHA-256 checksums of the selected image
-* Twice as fast as Microsoft's USB/DVD tool or UNetbootin, on ISO -> USB creation <sup>(1)</sup>
+* Twice as fast as Microsoft's USB/DVD tool or UNetbootin, on ISO → USB creation <sup>(1)</sup>
 * Perform bad blocks checks, including detection of "fake" flash drives
 * Modern and familiar UI, with [38 languages natively supported](https://github.com/pbatard/rufus/wiki/FAQ#What_languages_are_natively_supported_by_Rufus)
 * Small footprint. No installation required.
