@@ -2052,7 +2052,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	static ULONG ulRegister = 0;
 	static LPITEMIDLIST pidlDesktop = NULL;
 	static SHChangeNotifyEntry NotifyEntry;
-	static DWORD_PTR thread_affinity[4];
+	static DWORD_PTR thread_affinity[CHECKSUM_MAX + 1];
 	static HFONT hyperlink_font = NULL;
 	LONG lPos;
 	BOOL set_selected_fs;
@@ -2851,7 +2851,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			}
 		}
 
-		if (!CheckDriveAccess(CHECK_DRIVE_TIMEOUT, TRUE))
+		if (!CheckDriveAccess(SEARCH_PROCESS_TIMEOUT, TRUE))
 			goto aborted_start;
 
 		GetWindowTextU(hDeviceList, tmp, ARRAYSIZE(tmp));

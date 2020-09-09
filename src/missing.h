@@ -76,9 +76,18 @@
 
 /*
  * Nibbled from https://github.com/hanji/popcnt/blob/master/populationcount.cpp
- * Since MSVC x86_32 does not have intrinsic popcount64 and I don't have all day
+ * Since MSVC x86_32 and/or ARM don't have intrinsic popcount and I don't have all day
  */
-static __inline int popcnt64(register uint64_t u)
+static __inline uint8_t popcnt8(uint8_t val)
+{
+	static const uint8_t nibble_lookup[16] = {
+		0, 1, 1, 2, 1, 2, 2, 3,
+		1, 2, 2, 3, 2, 3, 3, 4
+	};
+	return nibble_lookup[val & 0x0F] + nibble_lookup[val >> 4];
+}
+
+static __inline uint8_t popcnt64(register uint64_t u)
 {
 	u = (u & 0x5555555555555555) + ((u >> 1) & 0x5555555555555555);
 	u = (u & 0x3333333333333333) + ((u >> 2) & 0x3333333333333333);
@@ -86,7 +95,7 @@ static __inline int popcnt64(register uint64_t u)
 	u = (u & 0x00ff00ff00ff00ff) + ((u >> 8) & 0x00ff00ff00ff00ff);
 	u = (u & 0x0000ffff0000ffff) + ((u >> 16) & 0x0000ffff0000ffff);
 	u = (u & 0x00000000ffffffff) + ((u >> 32) & 0x00000000ffffffff);
-	return (int)u;
+	return (uint8_t)u;
 }
 
 static __inline void *_reallocf(void *ptr, size_t size) {

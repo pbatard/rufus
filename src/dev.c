@@ -799,10 +799,8 @@ BOOL GetDevices(DWORD devnum)
 				uprintf("NOTE: This device is a USB 3.%c device operating at lower speed...", '0' + props.lower_speed - 1);
 		}
 		devint_data.cbSize = sizeof(devint_data);
-		hDrive = INVALID_HANDLE_VALUE;
 		devint_detail_data = NULL;
-		for (j=0; ;j++) {
-			safe_closehandle(hDrive);
+		for (j = 0; ; j++) {
 			safe_free(devint_detail_data);
 
 			if (!SetupDiEnumDeviceInterfaces(dev_info, &dev_info_data, &GUID_DEVINTERFACE_DISK, j, &devint_data)) {
@@ -844,19 +842,18 @@ BOOL GetDevices(DWORD devnum)
 			}
 
 			drive_number = GetDriveNumber(hDrive, devint_detail_data->DevicePath);
+			CloseHandle(hDrive);
 			if (drive_number < 0)
 				continue;
 
 			drive_index = drive_number + DRIVE_INDEX_MIN;
 			if (!IsMediaPresent(drive_index)) {
 				uprintf("Device eliminated because it appears to contain no media");
-				safe_closehandle(hDrive);
 				safe_free(devint_detail_data);
 				break;
 			}
 			if (GetDriveSize(drive_index) < (MIN_DRIVE_SIZE*MB)) {
 				uprintf("Device eliminated because it is smaller than %d MB", MIN_DRIVE_SIZE);
-				safe_closehandle(hDrive);
 				safe_free(devint_detail_data);
 				break;
 			}
@@ -866,7 +863,6 @@ BOOL GetDevices(DWORD devnum)
 					if (!props.is_Removable) {
 						// Non removables should have been eliminated above, but since we
 						// are potentially dealing with system drives, better safe than sorry
-						safe_closehandle(hDrive);
 						safe_free(devint_detail_data);
 						break;
 					}
@@ -880,7 +876,6 @@ BOOL GetDevices(DWORD devnum)
 						}
 						if (*p) {
 							uprintf("Device eliminated because it contains a mounted partition that is set as non-removable");
-							safe_closehandle(hDrive);
 							safe_free(devint_detail_data);
 							break;
 						}
@@ -892,20 +887,17 @@ BOOL GetDevices(DWORD devnum)
 					if (!list_non_usb_removable_drives)
 						uprintf("If this device is not a Hard Drive, please e-mail the author of this application");
 					uprintf("NOTE: You can enable the listing of Hard Drives under 'advanced drive properties'");
-					safe_closehandle(hDrive);
 					safe_free(devint_detail_data);
 					break;
 				}
 				// Windows 10 19H1 mounts a 'PortableBaseLayer' for its Windows Sandbox feature => unlist those
 				if (safe_strcmp(label, windows_sandbox_vhd_label) == 0) {
 					uprintf("Device eliminated because it is a Windows Sandbox VHD");
-					safe_closehandle(hDrive);
 					safe_free(devint_detail_data);
 					break;
 				}
 				if (props.is_VHD && (!enable_VHDs)) {
 					uprintf("Device eliminated because listing of VHDs is disabled (Alt-G)");
-					safe_closehandle(hDrive);
 					safe_free(devint_detail_data);
 					break;
 				}
@@ -943,7 +935,6 @@ BOOL GetDevices(DWORD devnum)
 					if (remove_drive) {
 						uprintf("Removing %C: from the list: This is the %s!", drive_letters[--k],
 							(remove_drive==1)?"disk from which " APPLICATION_NAME " is running":"system disk");
-						safe_closehandle(hDrive);
 						safe_free(devint_detail_data);
 						break;
 					}
@@ -961,7 +952,6 @@ BOOL GetDevices(DWORD devnum)
 
 				IGNORE_RETVAL(ComboBox_SetItemData(hDeviceList, ComboBox_AddStringU(hDeviceList, entry), drive_index));
 				maxwidth = max(maxwidth, GetEntryWidth(hDeviceList, entry));
-				safe_closehandle(hDrive);
 				safe_free(devint_detail_data);
 				break;
 			}
