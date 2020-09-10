@@ -73,7 +73,7 @@ PF_TYPE_DECL(NTAPI, NTSTATUS, NtQueryVolumeInformationFile, (HANDLE, PIO_STATUS_
  */
 RUFUS_DRIVE_INFO SelectedDrive;
 extern BOOL installed_uefi_ntfs, write_as_esp;
-extern int nWindowsVersion;
+extern int nWindowsVersion, nWindowsBuildNumber;
 uint64_t partition_offset[3];
 uint64_t persistence_size = 0;
 
@@ -1575,7 +1575,7 @@ BOOL MountVolume(char* drive_name, char *volume_name)
 			}
 			uprintf("Retrying after dismount...");
 			if (!DeleteVolumeMountPointA(drive_name))
-				uprintf("Warning: Could not delete volume mountpoint: %s", WindowsErrorString());
+				uprintf("Warning: Could not delete volume mountpoint '%s': %s", drive_name, WindowsErrorString());
 			if (SetVolumeMountPointA(drive_name, volume_name))
 				return TRUE;
 			if ((GetLastError() == ERROR_DIR_NOT_EMPTY) &&
@@ -1608,7 +1608,7 @@ char* AltMountVolume(DWORD DriveIndex, uint64_t PartitionOffset, BOOL bSilent)
 		goto out;
 	}
 	// Can't use a regular volume GUID for ESPs...
-	volume_name = AltGetLogicalName(DriveIndex, PartitionOffset, FALSE, TRUE);
+	volume_name = AltGetLogicalName(DriveIndex, PartitionOffset, FALSE, FALSE);
 	if ((volume_name == NULL) || (strncmp(volume_name, groot_name, groot_len) != 0)) {
 		suprintf("Unexpected volume name: '%s'", volume_name);
 		goto out;
@@ -1716,7 +1716,11 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 	DRIVE_LAYOUT_INFORMATION_EX4 DriveLayoutEx = {0};
 	BOOL r;
 	DWORD i, size, bufsize, pn = 0;
-	LONGLONG main_part_size_in_sectors, extra_part_size_in_tracks = 0, esp_size;
+	LONGLONG main_part_size_in_sectors, extra_part_size_in_tracks = 0;
+	// Go for a 260 MB sized ESP by default to keep everyone happy, including 4K sector users:
+	// https://docs.microsoft.com/en-us/windows-hardware/manufacture/desktop/configure-uefigpt-based-hard-drive-partitions
+	// and folks using MacOS: https://github.com/pbatard/rufus/issues/979
+	LONGLONG esp_size = 260 * MB;
 
 	PrintInfoDebug(0, MSG_238, PartitionTypeName[partition_style]);
 
@@ -1753,6 +1757,32 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 			((bytes_per_track + (ClusterSize - 1)) / ClusterSize) * ClusterSize;
 	}
 
+	// Having the ESP up front may help (and is the Microsoft recommended way) but this
+	// is only achievable if we can mount more than one partition at once, which means
+	// either fixed drive or Windows 10 1703 or later.
+	if (((SelectedDrive.MediaType == FixedMedia) || (nWindowsBuildNumber > 15000)) &&
+		(extra_partitions & XP_ESP)) {
+		assert(partition_style == PARTITION_STYLE_GPT);
+		extra_part_name = L"EFI System Partition";
+		DriveLayoutEx.PartitionEntry[pn].PartitionLength.QuadPart = esp_size;
+		DriveLayoutEx.PartitionEntry[pn].Gpt.PartitionType = PARTITION_GENERIC_ESP;
+		uprintf("● Creating %S (offset: %lld, size: %s)", extra_part_name, DriveLayoutEx.PartitionEntry[pn].StartingOffset.QuadPart,
+			SizeToHumanReadable(DriveLayoutEx.PartitionEntry[pn].PartitionLength.QuadPart, TRUE, FALSE));
+		IGNORE_RETVAL(CoCreateGuid(&DriveLayoutEx.PartitionEntry[pn].Gpt.PartitionId));
+		wcsncpy(DriveLayoutEx.PartitionEntry[pn].Gpt.Name, extra_part_name, ARRAYSIZE(DriveLayoutEx.PartitionEntry[pn].Gpt.Name));
+		// Zero the first sectors from this partition to avoid file system caching issues
+		if (!ClearPartition(hDrive, DriveLayoutEx.PartitionEntry[pn].StartingOffset, size_to_clear))
+			uprintf("Could not zero %S: %s", extra_part_name, WindowsErrorString());
+		SelectedDrive.PartitionOffset[pn] = DriveLayoutEx.PartitionEntry[pn].StartingOffset.QuadPart;
+		SelectedDrive.PartitionSize[pn] = DriveLayoutEx.PartitionEntry[pn].PartitionLength.QuadPart;
+		partition_offset[PI_ESP] = SelectedDrive.PartitionOffset[pn];
+		pn++;
+		DriveLayoutEx.PartitionEntry[pn].StartingOffset.QuadPart = DriveLayoutEx.PartitionEntry[pn - 1].StartingOffset.QuadPart +
+			DriveLayoutEx.PartitionEntry[pn - 1].PartitionLength.QuadPart;
+		// Clear the extra partition we processed
+		extra_partitions &= ~(XP_ESP);
+	}
+
 	// If required, set the MSR partition (GPT only - must be created before the data part)
 	if (extra_partitions & XP_MSR) {
 		assert(partition_style == PARTITION_STYLE_GPT);
@@ -1778,7 +1808,7 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 	// Set our main data partition
 	if (write_as_esp) {
 		// Align ESP to 64 MB while leaving at least 32 MB free space
-		esp_size = (((img_report.projected_size / MB) + 96) / 64) * 64 * MB;
+		esp_size = max(esp_size, ((((LONGLONG)img_report.projected_size / MB) + 96) / 64) * 64 * MB);
 		main_part_size_in_sectors = (esp_size - DriveLayoutEx.PartitionEntry[pn].StartingOffset.QuadPart) /
 			SelectedDrive.SectorSize;
 	} else {
@@ -1790,15 +1820,6 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 		// Adjust the size according to extra partitions (which we always align to a track)
 		if (extra_partitions & XP_ESP) {
 			extra_part_name = L"EFI System";
-			// The size of the ESP depends on the minimum size we're able to format in FAT32, which
-			// in turn depends on the cluster size used, which in turn depends on the disk sector size.
-			// Plus some people are complaining that the *OFFICIAL MINIMUM SIZE* as documented by Microsoft at
-			// https://docs.microsoft.com/en-us/windows-hardware/manufacture/desktop/configure-uefigpt-based-hard-drive-partitions
-			// is too small. See: https://github.com/pbatard/rufus/issues/979
-			if (SelectedDrive.SectorSize <= 4096)
-				esp_size = 300 * MB;
-			else
-				esp_size = 1200 * MB;	// That'll teach you to have a nonstandard disk!
 			extra_part_size_in_tracks = (esp_size + bytes_per_track - 1) / bytes_per_track;
 		} else if (extra_partitions & XP_UEFI_NTFS) {
 			extra_part_name = L"UEFI:NTFS";
