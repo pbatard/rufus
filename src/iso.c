@@ -1389,17 +1389,16 @@ BOOL HasEfiImgBootLoaders(void)
 	dc = direntry.entry[26] + (direntry.entry[27] << 8);
 
 	for (i = 0; i < ARRAYSIZE(efi_bootname); i++) {
-		// Sanity check in case the EFI forum comes up with a 'bootmips64.efi' or something...
-		if (strlen(efi_bootname[i]) > 12) {
-			uprintf("Internal error: FAT 8.3");
+		// TODO: bootriscv###.efi will need LFN support but cross that bridge when/if we get there...
+		if (strlen(efi_bootname[i]) > 12)
 			continue;
-		}
 		for (j = 0, k = 0; efi_bootname[i][j] != 0; j++) {
 			if (efi_bootname[i][j] == '.') {
 				while (k < 8)
 					name[k++] = ' ';
-			} else
+			} else {
 				name[k++] = toupper(efi_bootname[i][j]);
+			}
 		}
 		c = libfat_searchdir(lf_fs, dc, name, &direntry);
 		if (c > 0) {
