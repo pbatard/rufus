@@ -406,16 +406,35 @@ char* AltGetLogicalName(DWORD DriveIndex, uint64_t PartitionOffset, BOOL bKeepTr
 	static_strcpy(volume_name, groot_name);
 	if (!QueryDosDeviceA(path, &volume_name[groot_len], (DWORD)(MAX_PATH - groot_len)) || (strlen(volume_name) < 20)) {
 		suprintf("Could not find a DOS volume name for '%s': %s", path, WindowsErrorString());
-		// If we are on the right drive, we enable a custom access mode through physical + offset
-		if (!matching_drive)
 			goto out;
-		static_sprintf(volume_name, "\\\\.\\PhysicalDrive%lu%s %I64u %I64u", DriveIndex, bKeepTrailingBackslash ? "\\" : "",
-			SelectedDrive.PartitionOffset[i], SelectedDrive.PartitionSize[i]);
 	} else if (bKeepTrailingBackslash) {
 		static_strcat(volume_name, "\\");
 	}
 	ret = safe_strdup(volume_name);
 
+out:
+	return ret;
+}
+
+/*
+ * Custom volume name for extfs formatting (that includes partition offset and partition size)
+ * so that these can be created and accessed on pre 1703 versions of Windows.
+ */
+char* GetExtPartitionName(DWORD DriveIndex, uint64_t PartitionOffset)
+{
+	DWORD i;
+	char* ret = NULL, volume_name[MAX_PATH];
+
+	// Can't operate if we're not on the selected drive
+	if (DriveIndex != SelectedDrive.DeviceNumber)
+		goto out;
+	CheckDriveIndex(DriveIndex);
+	for (i = 0; (i < MAX_PARTITIONS) && (PartitionOffset != SelectedDrive.PartitionOffset[i]); i++);
+	if (i >= MAX_PARTITIONS)
+		goto out;
+	static_sprintf(volume_name, "\\\\.\\PhysicalDrive%lu %I64u %I64u", DriveIndex,
+		SelectedDrive.PartitionOffset[i], SelectedDrive.PartitionSize[i]);
+	ret = safe_strdup(volume_name);
 out:
 	return ret;
 }

@@ -203,7 +203,7 @@ const char* GetExtFsLabel(DWORD DriveIndex, uint64_t PartitionOffset)
 	errcode_t r;
 	ext2_filsys ext2fs = NULL;
 	io_manager manager = nt_io_manager();
-	char* volume_name = AltGetLogicalName(DriveIndex, PartitionOffset, FALSE, TRUE);
+	char* volume_name = GetExtPartitionName(DriveIndex, PartitionOffset);
 
 	if (volume_name == NULL)
 		return NULL;
@@ -266,7 +266,7 @@ BOOL FormatExtFs(DWORD DriveIndex, uint64_t PartitionOffset, DWORD BlockSize, LP
 	}
 	CloseHandle(h);
 #else
-	volume_name = AltGetLogicalName(DriveIndex, PartitionOffset, FALSE, TRUE);
+	volume_name = GetExtPartitionName(DriveIndex, PartitionOffset);
 #endif
 	if ((volume_name == NULL) | (strlen(FSName) != 4) || (strncmp(FSName, "ext", 3) != 0)) {
 		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_INVALID_PARAMETER;
