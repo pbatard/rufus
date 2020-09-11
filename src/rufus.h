@@ -482,7 +482,6 @@ extern char *image_path, *fido_url;
 /*
  * Shared prototypes
  */
-extern uint8_t popcnt8(uint8_t val);
 extern void GetWindowsVersion(void);
 extern BOOL is_x64(void);
 extern BOOL GetCpuArch(void);

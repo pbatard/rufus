@@ -406,7 +406,7 @@ char* AltGetLogicalName(DWORD DriveIndex, uint64_t PartitionOffset, BOOL bKeepTr
 	static_strcpy(volume_name, groot_name);
 	if (!QueryDosDeviceA(path, &volume_name[groot_len], (DWORD)(MAX_PATH - groot_len)) || (strlen(volume_name) < 20)) {
 		suprintf("Could not find a DOS volume name for '%s': %s", path, WindowsErrorString());
-			goto out;
+		goto out;
 	} else if (bKeepTrailingBackslash) {
 		static_strcat(volume_name, "\\");
 	}

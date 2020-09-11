@@ -59,6 +59,10 @@
 #define S_IFLNK                   0xA000
 #define S_ISLNK(m)                (((m) & S_IFMT) == S_IFLNK)
 
+// Set the iso_open_ext() extension mask according to our global options
+#define ISO_EXTENSION_MASK        (ISO_EXTENSION_ALL & (enable_joliet ? ISO_EXTENSION_ALL : ~ISO_EXTENSION_JOLIET) & \
+                                  (enable_rockridge ? ISO_EXTENSION_ALL : ~ISO_EXTENSION_ROCK_RIDGE))
+
 // Needed for UDF ISO access
 CdIo_t* cdio_open (const char* psz_source, driver_id_t driver_id) {return NULL;}
 void cdio_destroy (CdIo_t* p_cdio) {}
@@ -1181,7 +1185,9 @@ int64_t ExtractISOFile(const char* iso, const char* iso_file, const char* dest_f
 	goto out;
 
 try_iso:
-	p_iso = iso9660_open(iso);
+	// Make sure to enable extensions, else we may not match the name of the file we are looking
+	// for since Rock Ridge may be needed to translate something like 'I386_PC' into 'i386-pc'...
+	p_iso = iso9660_open_ext(iso, ISO_EXTENSION_MASK);
 	if (p_iso == NULL) {
 		uprintf("Unable to open image '%s'", iso);
 		goto out;
@@ -1266,7 +1272,7 @@ uint32_t GetInstallWimVersion(const char* iso)
 	goto out;
 
 try_iso:
-	p_iso = iso9660_open(iso);
+	p_iso = iso9660_open_ext(iso, ISO_EXTENSION_MASK);
 	if (p_iso == NULL) {
 		uprintf("Could not open image '%s'", iso);
 		goto out;
@@ -1353,7 +1359,7 @@ BOOL HasEfiImgBootLoaders(void)
 	if ((image_path == NULL) || !HAS_EFI_IMG(img_report))
 		return FALSE;
 
-	p_iso = iso9660_open(image_path);
+	p_iso = iso9660_open_ext(image_path, ISO_EXTENSION_MASK);
 	if (p_iso == NULL) {
 		uprintf("Could not open image '%s' as an ISO-9660 file system", image_path);
 		goto out;
@@ -1444,7 +1450,7 @@ BOOL DumpFatDir(const char* path, int32_t cluster)
 		// Root dir => Perform init stuff
 		if (image_path == NULL)
 			return FALSE;
-		p_iso = iso9660_open(image_path);
+		p_iso = iso9660_open_ext(image_path, ISO_EXTENSION_MASK);
 		if (p_iso == NULL) {
 			uprintf("Could not open image '%s' as an ISO-9660 file system", image_path);
 			goto out;
