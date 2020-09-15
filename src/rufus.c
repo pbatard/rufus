@@ -279,6 +279,12 @@ static void SetPartitionSchemeAndTargetSystem(BOOL only_target)
 				allowed_target_system[1] = TRUE;
 				allowed_target_system[2] = TRUE;
 			}
+			// Syslinux 4.x or earlier has no support for NTFS so if an image is using Syslinux 4.x only
+			// and has a 4 GB file (which forces us to use NTFS) then disable MBR altogether as we won't
+			// be able to make a working MBR install of Syslinux.
+			if (HAS_SYSLINUX(img_report) && (SL_MAJOR(img_report.sl_version) < 5) && img_report.has_4GB_file &&
+				!HAS_BOOTMGR(img_report) && !HAS_WINPE(img_report) && !HAS_GRUB(img_report))
+				allowed_partition_scheme[PARTITION_STYLE_MBR] = FALSE;
 		} else {
 			allowed_target_system[0] = FALSE;
 		}
@@ -1373,12 +1379,12 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 		} else if (target_type == TT_UEFI) {
 			if (!IS_EFI_BOOTABLE(img_report)) {
 				// Unsupported ISO
-				MessageBoxExU(hMainDialog, lmprintf(MSG_091), lmprintf(MSG_090), MB_OK|MB_ICONERROR|MB_IS_RTL, selected_langid);
+				MessageBoxExU(hMainDialog, lmprintf(MSG_091), lmprintf(MSG_090), MB_OK | MB_ICONERROR | MB_IS_RTL, selected_langid);
 				goto out;
 			}
 			if (HAS_WIN7_EFI(img_report) && (!WimExtractCheck(FALSE))) {
 				// Your platform cannot extract files from WIM archives => download 7-zip?
-				if (MessageBoxExU(hMainDialog, lmprintf(MSG_102), lmprintf(MSG_101), MB_YESNO|MB_ICONERROR|MB_IS_RTL, selected_langid) == IDYES)
+				if (MessageBoxExU(hMainDialog, lmprintf(MSG_102), lmprintf(MSG_101), MB_YESNO | MB_ICONERROR | MB_IS_RTL, selected_langid) == IDYES)
 					ShellExecuteA(hMainDialog, "open", SEVENZIP_URL, NULL, NULL, SW_SHOWNORMAL);
 				goto out;
 			}
@@ -1388,16 +1394,16 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 					 (!HAS_REACTOS(img_report)) && !HAS_KOLIBRIOS(img_report) && (!HAS_GRUB(img_report)))
 				 || ((IS_FAT(fs_type)) && (HAS_WINDOWS(img_report) || HAS_WININST(img_report)) && (!allow_dual_uefi_bios)) ) {
 			// Incompatible FS and ISO
-			MessageBoxExU(hMainDialog, lmprintf(MSG_096), lmprintf(MSG_092), MB_OK|MB_ICONERROR|MB_IS_RTL, selected_langid);
+			MessageBoxExU(hMainDialog, lmprintf(MSG_096), lmprintf(MSG_092), MB_OK | MB_ICONERROR | MB_IS_RTL, selected_langid);
 			goto out;
 		} else if ((fs_type == FS_FAT16) && HAS_KOLIBRIOS(img_report)) {
 			// KolibriOS doesn't support FAT16
-			MessageBoxExU(hMainDialog, lmprintf(MSG_189), lmprintf(MSG_099), MB_OK|MB_ICONERROR|MB_IS_RTL, selected_langid);
+			MessageBoxExU(hMainDialog, lmprintf(MSG_189), lmprintf(MSG_099), MB_OK | MB_ICONERROR | MB_IS_RTL, selected_langid);
 			goto out;
 		}
 		if ((IS_FAT(fs_type)) && (img_report.has_4GB_file)) {
 			// This ISO image contains a file larger than 4GB file (FAT32)
-			MessageBoxExU(hMainDialog, lmprintf(MSG_100), lmprintf(MSG_099), MB_OK|MB_ICONERROR|MB_IS_RTL, selected_langid);
+			MessageBoxExU(hMainDialog, lmprintf(MSG_100), lmprintf(MSG_099), MB_OK | MB_ICONERROR | MB_IS_RTL, selected_langid);
 			goto out;
 		}
 
