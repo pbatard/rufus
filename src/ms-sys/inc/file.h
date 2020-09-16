@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 /* Max valid value of uiLen for contains_data */
-#define MAX_DATA_LEN 32768
+#define MAX_DATA_LEN 65536
 
 /* We hijack the FILE structure for our own needs */
 typedef struct {

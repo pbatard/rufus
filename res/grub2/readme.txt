@@ -1,10 +1,16 @@
 This directory contains the Grub 2.0 boot records that are used by Rufus
 
-* boot.img and core.img were compiled from
-  https://ftp.gnu.org/gnu/grub/grub-2.04.tar.xz, on a Debian 9.9 x64 system.
-  This was done following the guide from:
-  https://pete.akeo.ie/2014/05/compiling-and-installing-grub2-for.html.
-  --enable-boot-time was also added during ./configure for Manjaro Linux compatibility.
+* boot.img and core.img were created from:
+    https://ftp.gnu.org/gnu/grub/grub-2.04.tar.xz
+  with the following two extra patches applied:
+  - https://lists.gnu.org/archive/html/grub-devel/2020-07/msg00016.html
+  - https://lists.gnu.org/archive/html/grub-devel/2020-07/msg00017.html
+  on a Debian 10.x x64 system using the commands:
+    ./autogen.sh
+    ./configure --disable-nls --enable-boot-time
+    make -j6
+    cd grub-core
+    ../grub-mkimage -v -O i386-pc -d. -p\(hd0,msdos1\)/boot/grub biosdisk part_msdos fat ntfs exfat -o core.img
 
 * boot.img has been modified to nop the jump @ 0x66 as per grub2's setup.c comments:
   /* If DEST_DRIVE is a hard disk, enable the workaround, which is
