@@ -177,7 +177,7 @@ static void SetAllowedFileSystems(void)
 		if ((image_path != NULL) && (img_report.has_4GB_file))
 			break;
 		if (!HAS_WINDOWS(img_report) || (target_type != TT_BIOS) || allow_dual_uefi_bios) {
-			if (!HAS_WINTOGO(img_report) || ComboBox_GetCurItemData(hImageOption)) {
+			if (!HAS_WINTOGO(img_report) || (!ComboBox_GetCurItemData(hImageOption))) {
 				allowed_filesystem[FS_FAT16] = TRUE;
 				allowed_filesystem[FS_FAT32] = TRUE;
 			}
