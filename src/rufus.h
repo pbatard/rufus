@@ -62,6 +62,7 @@
 #define DRIVE_INDEX_MAX             0x000000C0
 #define MIN_DRIVE_SIZE              8			// Minimum size a drive must have, to be formattable (in MB)
 #define MIN_EXTRA_PART_SIZE         (1024*1024)	// Minimum size of the extra partition, in bytes
+#define MIN_EXT_SIZE                (256*1024*1024)	// Minimum size we allow for ext formatting
 #define MAX_ARCHS                   9			// Number of arhitectures we recognize
 #define MAX_DRIVES                  (DRIVE_INDEX_MAX - DRIVE_INDEX_MIN)
 #define MAX_TOOLTIPS                128

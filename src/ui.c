@@ -671,7 +671,7 @@ void ToggleAdvancedFormatOptions(BOOL enable)
 	InvalidateRect(hMainDialog, NULL, TRUE);
 }
 
-// Toggle the display of peristence unit dropdown and resize the size field
+// Toggle the display of persistence unit dropdown and resize the size field
 void TogglePersistenceControls(BOOL display)
 {
 	RECT rc;
@@ -747,12 +747,15 @@ void SetPersistenceSize(void)
 			persistence_unit_selection = proposed_unit_selection;
 
 		IGNORE_RETVAL(ComboBox_SetCurSel(hCtrl, persistence_unit_selection));
+		if ((pos != 0) && (pos < MIN_EXT_SIZE))
+			pos = MIN_EXT_SIZE;
 		pos /= MB;
 		max /= MB;
 		for (i = 0; i < persistence_unit_selection; i++) {
 			pos /= 1024;
 			max /= 1024;
 		}
+
 	}
 
 	hCtrl = GetDlgItem(hMainDialog, IDC_PERSISTENCE_SLIDER);

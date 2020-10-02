@@ -500,7 +500,7 @@ static BOOL SetFileSystemAndClusterSize(char* fs_name)
 		SelectedDrive.ClusterSize[FS_UDF].Default = 1;
 
 		// ext2/ext3/ext4
-		if (advanced_mode_format) {
+		if (advanced_mode_format && (SelectedDrive.DiskSize >= MIN_EXT_SIZE)) {
 			SelectedDrive.ClusterSize[FS_EXT2].Allowed = SINGLE_CLUSTERSIZE_DEFAULT;
 			SelectedDrive.ClusterSize[FS_EXT2].Default = 1;
 			SelectedDrive.ClusterSize[FS_EXT3].Allowed = SINGLE_CLUSTERSIZE_DEFAULT;
@@ -2278,6 +2278,16 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				if (persistence_size == 0) {
 					TogglePersistenceControls(FALSE);
 					static_sprintf(tmp, "0 (%s)", lmprintf(MSG_124));
+					app_changed_size = TRUE;
+					SetWindowTextU(GetDlgItem(hMainDialog, IDC_PERSISTENCE_SIZE), tmp);
+				} else if (persistence_size < MIN_EXT_SIZE) {
+					persistence_size = MIN_EXT_SIZE;
+					uint64_t pos = persistence_size / MB;
+					for (i = 0; i < persistence_unit_selection; i++)
+						pos /= 1024;
+					lPos = (LONG)pos;
+					SendMessage(GetDlgItem(hMainDialog, IDC_PERSISTENCE_SLIDER), TBM_SETPOS, TRUE, lPos);
+					static_sprintf(tmp, "%ld", lPos);
 					app_changed_size = TRUE;
 					SetWindowTextU(GetDlgItem(hMainDialog, IDC_PERSISTENCE_SIZE), tmp);
 				}
