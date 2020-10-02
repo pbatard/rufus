@@ -446,7 +446,8 @@ BOOL FormatLargeFAT32(DWORD DriveIndex, uint64_t PartitionOffset, DWORD ClusterS
 	}
 
 	// Set the FAT32 volume label
-	PrintInfoDebug(0, MSG_221, lmprintf(MSG_307));
+	PrintInfo(0, MSG_221, lmprintf(MSG_307));
+	uprintf("Setting label...");
 	// Handle must be closed for SetVolumeLabel to work
 	safe_closehandle(hLogicalVolume);
 	VolumeName = GetLogicalName(DriveIndex, PartitionOffset, TRUE, TRUE);

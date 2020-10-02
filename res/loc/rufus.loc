@@ -451,7 +451,7 @@ t MSG_219 "NTFS Fixup: %d%% completed"
 # Example: "Formatting (UDF) - Estimated duration 3:21..."
 # If "estimated duration" is too long, just use "estimated" or an abbreviation
 t MSG_220 "Formatting (%s) - estimated duration %d:%02d..."
-t MSG_221 "Setting Label (%s)..."
+t MSG_221 "Setting label (%s)..."
 # Example: "Formatting (FAT32)..."
 t MSG_222 "Formatting (%s)..."
 t MSG_223 "NTFS Fixup (Checkdisk)..."

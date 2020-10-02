@@ -1,3 +1,14 @@
+o Version 3.12 (2020.10.??)
+    Add optional SHA-512 digest algorithm (Alt-H)
+    Add a cheat mode (Alt +/-) to increase/decrease application priority
+    Enable direct provision of install.wim/install.esd for Windows To Go
+    Move the ESP to the beginning of the drive for Windows To Go, on systems that allow it
+    Enforce a minimum volume size of 256 MB for ext2/ext3 partitions
+    Speed up the scanning of ISOs with lots of Rock Ridge deep directory entries
+    Fix detection of GRUB version and update embedded GRUB for Ubuntu 20.10 support
+    Fix user interface labels for accessibility 
+    Work around a Windows bug where the wrong drive letter may be returned
+
 o Version 3.11 (2020.06.18)
     Add Rock Ridge deep directory support
     Add an option to write small ISOs to an ESP (GPT only)
