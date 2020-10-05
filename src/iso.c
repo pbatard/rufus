@@ -598,16 +598,16 @@ static void update_md5sum(void)
 	char md5_path[64], *md5_data = NULL, *str_pos;
 
 	if (!img_report.has_md5sum)
-		return;
+		goto out;
 
 	assert(img_report.has_md5sum <= ARRAYSIZE(md5sum_name));
 	if (img_report.has_md5sum > ARRAYSIZE(md5sum_name))
-		return;
+		goto out;
 
 	static_sprintf(md5_path, "%s\\%s", psz_extract_dir, md5sum_name[img_report.has_md5sum - 1]);
 	md5_size = read_file(md5_path, (uint8_t**)&md5_data);
 	if (md5_size == 0)
-		return;
+		goto out;
 
 	for (i = 0; i < modified_path.Index; i++) {
 		str_pos = strstr(md5_data, &modified_path.String[i][2]);
@@ -635,6 +635,9 @@ static void update_md5sum(void)
 
 	write_file(md5_path, md5_data, md5_size);
 	free(md5_data);
+
+out:
+	StrArrayDestroy(&modified_path);
 }
 
 // Returns 0 on success, >0 on error, <0 to ignore current dir
@@ -1108,12 +1111,11 @@ out:
 			}
 			if (fd != NULL)
 				fclose(fd);
-			update_md5sum();
 		} else if (HAS_BOOTMGR(img_report) && enable_ntfs_compression) {
 			// bootmgr might need to be uncompressed: https://github.com/pbatard/rufus/issues/1381
 			RunCommand("compact /u bootmgr* efi/boot/*.efi", dest_dir, TRUE);
 		}
-		StrArrayDestroy(&modified_path);
+		update_md5sum();
 		if (archive_path != NULL) {
 			uprintf("● Adding files from %s", archive_path);
 			bled_init(NULL, NULL, NULL, NULL, alt_print_extracted_file, NULL);
