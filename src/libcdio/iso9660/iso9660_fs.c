@@ -243,7 +243,7 @@ iso9660_open_ext (const char *psz_path,
   contained in a file format that libiso9660 doesn't know natively
   (or knows imperfectly.)
 
-  Some tolerence allowed for positioning the ISO 9660 image. We scan
+  Some tolerance allowed for positioning the ISO 9660 image. We scan
   for STANDARD_ID and use that to set the eventual offset to adjust
   by (as long as that is <= i_fuzz).
 
@@ -258,7 +258,7 @@ iso9660_open_fuzzy (const char *psz_path, uint16_t i_fuzz /*, mode*/)
 }
 
 /*!
-  Open an ISO 9660 image for reading with some tolerence for positioning
+  Open an ISO 9660 image for reading with some tolerance for positioning
   of the ISO9660 image. We scan for ISO_STANDARD_ID and use that to set
   the eventual offset to adjust by (as long as that is <= i_fuzz).
 
