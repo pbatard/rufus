@@ -679,6 +679,9 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 		p_statbuf = (iso9660_stat_t*) _cdio_list_node_data(p_entnode);
 		if (scan_only && (p_statbuf->rr.b3_rock == yep) && enable_rockridge) {
 			if (p_statbuf->rr.u_su_fields & ISO_ROCK_SUF_PL) {
+				if (!img_report.has_deep_directories)
+					uprintf("  Note: The selected ISO uses Rock Ridge 'deep directories'.\r\n"
+						"  Because of this, it may take a very long time to scan or extract...");
 				img_report.has_deep_directories = TRUE;
 				// Due to the nature of the parsing of Rock Ridge deep directories
 				// which requires performing a *very costly* search of the whole
@@ -689,6 +692,8 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 				// short by telling the parent not to bother any further once we
 				// find that we are dealing with a deep directory.
 				r = -1;
+				// Add at least one extra block, since we're skipping content.
+				total_blocks++;
 				goto out;
 			}
 		}
