@@ -4,6 +4,7 @@ Rufus: The Reliable USB Formatting Utility
 [![Build status](https://img.shields.io/appveyor/ci/pbatard/rufus.svg?style=flat-square)](https://ci.appveyor.com/project/pbatard/rufus)
 [![Coverity Scan Build Status](https://img.shields.io/coverity/scan/2172.svg?style=flat-square)](https://scan.coverity.com/projects/pbatard-rufus)
 [![Build contributors](https://img.shields.io/github/contributors/pbatard/rufus.svg?style=flat-square)](https://github.com/pbatard/rufus/graphs/contributors)
+[![Github stats](https://img.shields.io/github/downloads/pbatard/rufus/total.svg?label=downloads%20%28since%202019%29&style=flat-square)](https://github.com/pbatard/rufus/releases)
 [![Release](https://img.shields.io/github/release-pre/pbatard/rufus.svg?style=flat-square)](https://github.com/pbatard/rufus/releases)
 [![Licence](https://img.shields.io/badge/license-GPLv3-blue.svg?style=flat-square)](https://www.gnu.org/licenses/gpl-3.0.en.html)
 
