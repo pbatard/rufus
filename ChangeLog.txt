@@ -1,4 +1,4 @@
-o Version 3.12 (2020.10.??)
+o Version 3.12 (2020.10.14)
     Add optional SHA-512 digest algorithm (Alt-H)
     Add a cheat mode (Alt +/-) to increase/decrease application priority
     Enable direct provision of install.wim/install.esd for Windows To Go
