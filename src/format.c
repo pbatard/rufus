@@ -705,7 +705,7 @@ out:
 static BOOL ClearMBRGPT(HANDLE hPhysicalDrive, LONGLONG DiskSize, DWORD SectorSize, BOOL add1MB)
 {
 	BOOL r = FALSE;
-	uint64_t i, j, last_sector = DiskSize/SectorSize, num_sectors_to_clear;
+	uint64_t i, last_sector = DiskSize/SectorSize, num_sectors_to_clear;
 	unsigned char* pBuf = (unsigned char*) calloc(SectorSize, 1);
 
 	PrintInfoDebug(0, MSG_224);
@@ -729,32 +729,16 @@ static BOOL ClearMBRGPT(HANDLE hPhysicalDrive, LONGLONG DiskSize, DWORD SectorSi
 
 	uprintf("Erasing %d sectors", num_sectors_to_clear);
 	for (i = 0; i < num_sectors_to_clear; i++) {
-		for (j = 1; j <= WRITE_RETRIES; j++) {
-			CHECK_FOR_USER_CANCEL;
-			if (write_sectors(hPhysicalDrive, SectorSize, i, 1, pBuf) == SectorSize)
-				break;
-			if (j >= WRITE_RETRIES)
-				goto out;
-			uprintf("Retrying in %d seconds...", WRITE_TIMEOUT / 1000);
-			// Don't sit idly but use the downtime to check for conflicting processes...
-			Sleep(CheckDriveAccess(WRITE_TIMEOUT, FALSE));
-		}
+		CHECK_FOR_USER_CANCEL;
+		if (write_sectors(hPhysicalDrive, SectorSize, i, 1, pBuf) != SectorSize)
+			goto out;
 	}
 	for (i = last_sector - MAX_SECTORS_TO_CLEAR; i < last_sector; i++) {
-		for (j = 1; j <= WRITE_RETRIES; j++) {
-			CHECK_FOR_USER_CANCEL;
-			if (write_sectors(hPhysicalDrive, SectorSize, i, 1, pBuf) == SectorSize)
-				break;
-			if (j >= WRITE_RETRIES) {
-				// Windows seems to be an ass about keeping a lock on a backup GPT,
-				// so we try to be lenient about not being able to clear it.
-				uprintf("Warning: Failed to clear backup GPT...");
-				r = TRUE;
-				goto out;
-			}
-			uprintf("Retrying in %d seconds...", WRITE_TIMEOUT / 1000);
-			Sleep(CheckDriveAccess(WRITE_TIMEOUT, FALSE));
-		}
+		CHECK_FOR_USER_CANCEL;
+		// Windows seems to be an ass about keeping a lock on a backup GPT,
+		// so we try to be lenient about not being able to clear it.
+		if (write_sectors(hPhysicalDrive, SectorSize, i, 1, pBuf) != SectorSize)
+			break;
 	}
 	r = TRUE;
 
@@ -2195,7 +2179,7 @@ out:
 	safe_unlockclose(hLogicalVolume);
 	safe_unlockclose(hPhysicalDrive);	// This can take a while
 	if (IS_ERROR(FormatStatus)) {
-		volume_name = GetLogicalName(DriveIndex, 0, TRUE, FALSE);
+		volume_name = GetLogicalName(DriveIndex, partition_offset[PI_MAIN], TRUE, TRUE);
 		if (volume_name != NULL) {
 			if (MountVolume(drive_name, volume_name))
 				uprintf("Re-mounted volume as %C: after error", drive_name[0]);

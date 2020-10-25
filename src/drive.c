@@ -74,7 +74,7 @@ PF_TYPE_DECL(NTAPI, NTSTATUS, NtQueryVolumeInformationFile, (HANDLE, PIO_STATUS_
 RUFUS_DRIVE_INFO SelectedDrive;
 extern BOOL installed_uefi_ntfs, write_as_esp;
 extern int nWindowsVersion, nWindowsBuildNumber;
-uint64_t partition_offset[3];
+uint64_t partition_offset[PI_MAX];
 uint64_t persistence_size = 0;
 
 /*
@@ -93,9 +93,8 @@ BOOL SetAutoMount(BOOL enable)
 	DWORD size;
 	BOOL ret = FALSE;
 
-	hMountMgr = CreateFileA(MOUNTMGR_DOS_DEVICE_NAME, GENERIC_READ|GENERIC_WRITE,
-		FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-	if (hMountMgr == NULL)
+	hMountMgr = CreateFileA(MOUNTMGR_DOS_DEVICE_NAME, 0, FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	if (hMountMgr == INVALID_HANDLE_VALUE)
 		return FALSE;
 	ret = DeviceIoControl(hMountMgr, IOCTL_MOUNTMGR_SET_AUTO_MOUNT, &enable, sizeof(enable), NULL, 0, &size, NULL);
 	CloseHandle(hMountMgr);
@@ -110,9 +109,8 @@ BOOL GetAutoMount(BOOL* enabled)
 
 	if (enabled == NULL)
 		return FALSE;
-	hMountMgr = CreateFileA(MOUNTMGR_DOS_DEVICE_NAME, GENERIC_READ|GENERIC_WRITE,
-		FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-	if (hMountMgr == NULL)
+	hMountMgr = CreateFileA(MOUNTMGR_DOS_DEVICE_NAME, 0, FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	if (hMountMgr == INVALID_HANDLE_VALUE)
 		return FALSE;
 	ret = DeviceIoControl(hMountMgr, IOCTL_MOUNTMGR_QUERY_AUTO_MOUNT, NULL, 0, enabled, sizeof(*enabled), &size, NULL);
 	CloseHandle(hMountMgr);
@@ -1292,8 +1290,10 @@ BOOL ToggleEsp(DWORD DriveIndex, uint64_t PartitionOffset)
 		}
 	} else {
 		for (i = 0, j = 0; i < DriveLayout->PartitionCount; i++) {
-			if (DriveLayout->PartitionEntry[i].StartingOffset.QuadPart == PartitionOffset)
+			if (DriveLayout->PartitionEntry[i].StartingOffset.QuadPart == PartitionOffset) {
 				DriveLayout->PartitionEntry[i].Gpt.PartitionType = PARTITION_GENERIC_ESP;
+				break;
+			}
 		}
 	}
 	if (i >= DriveLayout->PartitionCount) {
@@ -1853,6 +1853,8 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 		} else {
 			assert(FALSE);
 		}
+		// NB: Because we already subtracted the backup GPT size from the main partition size and
+		// this extra partition is indexed on main size, it does not overflow into the backup GPT.
 		main_part_size_in_sectors = ((main_part_size_in_sectors / SelectedDrive.SectorsPerTrack) -
 			extra_part_size_in_tracks) * SelectedDrive.SectorsPerTrack;
 	}

@@ -41,6 +41,7 @@
 #define PI_MAIN                             0
 #define PI_ESP                              1
 #define PI_CASPER                           2
+#define PI_MAX                              3
 
 // The following should match VDS_FSOF_FLAGS as much as possible
 #define FP_FORCE                            0x00000001
@@ -362,7 +363,7 @@ typedef struct {
 	} ClusterSize[FS_MAX];
 } RUFUS_DRIVE_INFO;
 extern RUFUS_DRIVE_INFO SelectedDrive;
-extern uint64_t partition_offset[3];
+extern uint64_t partition_offset[PI_MAX];
 
 BOOL SetAutoMount(BOOL enable);
 BOOL GetAutoMount(BOOL* enabled);
