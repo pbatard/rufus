@@ -297,12 +297,14 @@ interface IVdsAsync {
 #define IVdsService_WaitForServiceReady(This) ((This)->lpVtbl->WaitForServiceReady(This))
 #define IVdsService_CleanupObsoleteMountPoints(This) ((This)->lpVtbl->CleanupObsoleteMountPoints(This))
 #define IVdsService_Refresh(This) ((This)->lpVtbl->Refresh(This))
-#define IVdsService_Reenumerate(This) ((This)->lpVtbl->Reenumerate(This)) 
+#define IVdsService_Reenumerate(This) ((This)->lpVtbl->Reenumerate(This))
+#define IVdsService_Release(This) (This)->lpVtbl->Release(This)
 #define IVdsSwProvider_QueryInterface(This, riid, ppvObject) (This)->lpVtbl->QueryInterface(This, riid, ppvObject)
 #define IVdsProvider_Release(This) (This)->lpVtbl->Release(This)
 #define IVdsSwProvider_QueryPacks(This, ppEnum) (This)->lpVtbl->QueryPacks(This, ppEnum)
 #define IVdsSwProvider_Release(This) (This)->lpVtbl->Release(This)
 #define IVdsPack_QueryDisks(This, ppEnum) (This)->lpVtbl->QueryDisks(This, ppEnum)
+#define IVdsPack_Release(This) (This)->lpVtbl->Release(This)
 #define IVdsDisk_GetProperties(This, pDiskProperties) (This)->lpVtbl->GetProperties(This, pDiskProperties)
 #define IVdsDisk_Release(This) (This)->lpVtbl->Release(This)
 #define IVdsDisk_QueryInterface(This, riid, ppvObject) (This)->lpVtbl->QueryInterface(This, riid, ppvObject)
@@ -311,6 +313,7 @@ interface IVdsAsync {
 #define IVdsAdvancedDisk_Clean(This, bForce, bForceOEM, bFullClean, ppAsync) (This)->lpVtbl->Clean(This, bForce, bForceOEM, bFullClean, ppAsync)
 #define IVdsAdvancedDisk_Release(This) (This)->lpVtbl->Release(This)
 #define IEnumVdsObject_Next(This, celt, ppObjectArray, pcFetched) (This)->lpVtbl->Next(This, celt, ppObjectArray, pcFetched)
+#define IEnumVdsObject_Release(This) (This)->lpVtbl->Release(This)
 #define IVdsPack_QueryVolumes(This, ppEnum) (This)->lpVtbl->QueryVolumes(This, ppEnum)
 #define IVdsVolume_QueryInterface(This, riid, ppvObject) (This)->lpVtbl->QueryInterface(This, riid, ppvObject)
 #define IVdsVolume_Release(This) (This)->lpVtbl->Release(This)
@@ -368,7 +371,8 @@ extern uint64_t partition_offset[PI_MAX];
 BOOL SetAutoMount(BOOL enable);
 BOOL GetAutoMount(BOOL* enabled);
 char* GetPhysicalName(DWORD DriveIndex);
-BOOL DeletePartitions(DWORD DriveIndex);
+BOOL DeletePartition(DWORD DriveIndex, ULONGLONG PartitionOffset, BOOL bSilent);
+BOOL ListVdsVolumes(BOOL bSilent);
 HANDLE GetPhysicalHandle(DWORD DriveIndex, BOOL bLockDrive, BOOL bWriteAccess, BOOL bWriteShare);
 char* GetLogicalName(DWORD DriveIndex, uint64_t PartitionOffset, BOOL bKeepTrailingBackslash, BOOL bSilent);
 char* AltGetLogicalName(DWORD DriveIndex, uint64_t PartitionOffset, BOOL bKeepTrailingBackslash, BOOL bSilent);

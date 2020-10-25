@@ -1747,7 +1747,7 @@ DWORD WINAPI FormatThread(void* param)
 	// for VDS to be able to delete the partitions that reside on it...
 	safe_unlockclose(hPhysicalDrive);
 	PrintInfo(0, MSG_239, lmprintf(MSG_307));
-	if (!DeletePartitions(DriveIndex)) {
+	if (!DeletePartition(DriveIndex, 0, FALSE)) {
 		SetLastError(FormatStatus);
 		uprintf("Notice: Could not delete partitions: %s", WindowsErrorString());
 		FormatStatus = 0;

@@ -445,8 +445,8 @@ BOOL RefreshLayout(DWORD DriveIndex)
 	BOOL r = FALSE;
 	HRESULT hr;
 	wchar_t wPhysicalName[24];
-	IVdsServiceLoader *pLoader;
-	IVdsService *pService;
+	IVdsServiceLoader* pLoader = NULL;
+	IVdsService* pService = NULL;
 	IEnumVdsObject *pEnum;
 
 	CheckDriveIndex(DriveIndex);
@@ -468,7 +468,6 @@ BOOL RefreshLayout(DWORD DriveIndex)
 
 	// Load the VDS Service
 	hr = IVdsServiceLoader_LoadService(pLoader, L"", &pService);
-	IVdsServiceLoader_Release(pLoader);
 	if (hr != S_OK) {
 		VDS_SET_ERROR(hr);
 		uprintf("Could not load VDS Service: %s", WindowsErrorString());
@@ -516,25 +515,30 @@ BOOL RefreshLayout(DWORD DriveIndex)
 	}
 	r = TRUE;
 
-	out:
-		return r;
+out:
+	if (pService != NULL)
+		IVdsService_Release(pService);
+	if (pLoader != NULL)
+		IVdsServiceLoader_Release(pLoader);
+	return r;
 }
 
 /*
- * Delete all the partitions from a disk, using VDS
- * Mostly copied from https://social.msdn.microsoft.com/Forums/vstudio/en-US/b90482ae-4e44-4b08-8731-81915030b32a/createpartition-using-vds-interface-throw-error-enointerface-dcom?forum=vcgeneral
+ * Generic call to instantiate a VDS Disk Interface. Mostly copied from:
+ * https://social.msdn.microsoft.com/Forums/vstudio/en-US/b90482ae-4e44-4b08-8731-81915030b32a/createpartition-using-vds-interface-throw-error-enointerface-dcom?forum=vcgeneral
+ * See also: https://docs.microsoft.com/en-us/windows/win32/vds/working-with-enumeration-objects
  */
-BOOL DeletePartitions(DWORD DriveIndex)
+static BOOL GetVdsDiskInterface(DWORD DriveIndex, const IID* InterfaceIID, void** pInterfaceInstance, BOOL bSilent)
 {
-	BOOL r = FALSE, bNeverFound = TRUE;
-	HRESULT hr;
+	HRESULT hr = S_FALSE;
 	ULONG ulFetched;
 	wchar_t wPhysicalName[24];
-	IVdsServiceLoader *pLoader;
-	IVdsService *pService;
-	IEnumVdsObject *pEnum;
-	IUnknown *pUnk;
+	IVdsServiceLoader* pLoader;
+	IVdsService* pService;
+	IEnumVdsObject* pEnum;
+	IUnknown* pUnk;
 
+	*pInterfaceInstance = NULL;
 	CheckDriveIndex(DriveIndex);
 	wnsprintf(wPhysicalName, ARRAYSIZE(wPhysicalName), L"\\\\?\\PhysicalDrive%lu", DriveIndex);
 
@@ -545,10 +549,10 @@ BOOL DeletePartitions(DWORD DriveIndex)
 
 	// Create a VDS Loader Instance
 	hr = CoCreateInstance(&CLSID_VdsLoader, NULL, CLSCTX_LOCAL_SERVER | CLSCTX_REMOTE_SERVER,
-		&IID_IVdsServiceLoader, (void **)&pLoader);
+		&IID_IVdsServiceLoader, (void**)&pLoader);
 	if (hr != S_OK) {
 		VDS_SET_ERROR(hr);
-		uprintf("Could not create VDS Loader Instance: %s", WindowsErrorString());
+		suprintf("Could not create VDS Loader Instance: %s", WindowsErrorString());
 		goto out;
 	}
 
@@ -557,7 +561,7 @@ BOOL DeletePartitions(DWORD DriveIndex)
 	IVdsServiceLoader_Release(pLoader);
 	if (hr != S_OK) {
 		VDS_SET_ERROR(hr);
-		uprintf("Could not load VDS Service: %s", WindowsErrorString());
+		suprintf("Could not load VDS Service: %s", WindowsErrorString());
 		goto out;
 	}
 
@@ -565,39 +569,40 @@ BOOL DeletePartitions(DWORD DriveIndex)
 	hr = IVdsService_WaitForServiceReady(pService);
 	if (hr != S_OK) {
 		VDS_SET_ERROR(hr);
-		uprintf("VDS Service is not ready: %s", WindowsErrorString());
+		suprintf("VDS Service is not ready: %s", WindowsErrorString());
 		goto out;
 	}
 
 	// Query the VDS Service Providers
 	hr = IVdsService_QueryProviders(pService, VDS_QUERY_SOFTWARE_PROVIDERS, &pEnum);
+	IVdsService_Release(pService);
 	if (hr != S_OK) {
 		VDS_SET_ERROR(hr);
-		uprintf("Could not query VDS Service Providers: %s", WindowsErrorString());
+		suprintf("Could not query VDS Service Providers: %s", WindowsErrorString());
 		goto out;
 	}
 
 	while (IEnumVdsObject_Next(pEnum, 1, &pUnk, &ulFetched) == S_OK) {
-		IVdsProvider *pProvider;
-		IVdsSwProvider *pSwProvider;
-		IEnumVdsObject *pEnumPack;
-		IUnknown *pPackUnk;
+		IVdsProvider* pProvider;
+		IVdsSwProvider* pSwProvider;
+		IEnumVdsObject* pEnumPack;
+		IUnknown* pPackUnk;
 
 		// Get VDS Provider
-		hr = IUnknown_QueryInterface(pUnk, &IID_IVdsProvider, (void **)&pProvider);
+		hr = IUnknown_QueryInterface(pUnk, &IID_IVdsProvider, (void**)&pProvider);
 		IUnknown_Release(pUnk);
 		if (hr != S_OK) {
 			VDS_SET_ERROR(hr);
-			uprintf("Could not get VDS Provider: %s", WindowsErrorString());
+			suprintf("Could not get VDS Provider: %s", WindowsErrorString());
 			goto out;
 		}
 
 		// Get VDS Software Provider
-		hr = IVdsSwProvider_QueryInterface(pProvider, &IID_IVdsSwProvider, (void **)&pSwProvider);
+		hr = IVdsSwProvider_QueryInterface(pProvider, &IID_IVdsSwProvider, (void**)&pSwProvider);
 		IVdsProvider_Release(pProvider);
 		if (hr != S_OK) {
 			VDS_SET_ERROR(hr);
-			uprintf("Could not get VDS Software Provider: %s", WindowsErrorString());
+			suprintf("Could not get VDS Software Provider: %s", WindowsErrorString());
 			goto out;
 		}
 
@@ -606,132 +611,292 @@ BOOL DeletePartitions(DWORD DriveIndex)
 		IVdsSwProvider_Release(pSwProvider);
 		if (hr != S_OK) {
 			VDS_SET_ERROR(hr);
-			uprintf("Could not get VDS Software Provider Packs: %s", WindowsErrorString());
+			suprintf("Could not get VDS Software Provider Packs: %s", WindowsErrorString());
 			goto out;
 		}
 
 		// Enumerate Provider Packs
 		while (IEnumVdsObject_Next(pEnumPack, 1, &pPackUnk, &ulFetched) == S_OK) {
-			IVdsPack *pPack;
-			IEnumVdsObject *pEnumDisk;
-			IUnknown *pDiskUnk;
+			IVdsPack* pPack;
+			IEnumVdsObject* pEnumDisk;
+			IUnknown* pDiskUnk;
 
-			hr = IUnknown_QueryInterface(pPackUnk, &IID_IVdsPack, (void **)&pPack);
+			hr = IUnknown_QueryInterface(pPackUnk, &IID_IVdsPack, (void**)&pPack);
 			IUnknown_Release(pPackUnk);
 			if (hr != S_OK) {
 				VDS_SET_ERROR(hr);
-				uprintf("Could not query VDS Software Provider Pack: %s", WindowsErrorString());
+				suprintf("Could not query VDS Software Provider Pack: %s", WindowsErrorString());
 				goto out;
 			}
 
 			// Use the pack interface to access the disks
 			hr = IVdsPack_QueryDisks(pPack, &pEnumDisk);
+			IVdsPack_Release(pPack);
 			if (hr != S_OK) {
 				VDS_SET_ERROR(hr);
-				uprintf("Could not query VDS disks: %s", WindowsErrorString());
+				suprintf("Could not query VDS disks: %s", WindowsErrorString());
 				goto out;
 			}
 
 			// List disks
 			while (IEnumVdsObject_Next(pEnumDisk, 1, &pDiskUnk, &ulFetched) == S_OK) {
-				VDS_DISK_PROP diskprop;
-				VDS_PARTITION_PROP* prop_array;
-				LONG i, prop_array_size;
-				IVdsDisk *pDisk;
-				IVdsAdvancedDisk *pAdvancedDisk;
+				VDS_DISK_PROP prop;
+				IVdsDisk* pDisk;
 
 				// Get the disk interface.
-				hr = IUnknown_QueryInterface(pDiskUnk, &IID_IVdsDisk, (void **)&pDisk);
+				hr = IUnknown_QueryInterface(pDiskUnk, &IID_IVdsDisk, (void**)&pDisk);
+				IUnknown_Release(pDiskUnk);
 				if (hr != S_OK) {
 					VDS_SET_ERROR(hr);
-					uprintf("Could not query VDS Disk Interface: %s", WindowsErrorString());
+					suprintf("Could not query VDS Disk Interface: %s", WindowsErrorString());
 					goto out;
 				}
 
 				// Get the disk properties
-				hr = IVdsDisk_GetProperties(pDisk, &diskprop);
-				if (hr != S_OK) {
+				hr = IVdsDisk_GetProperties(pDisk, &prop);
+				if ((hr != S_OK) && (hr != VDS_S_PROPERTIES_INCOMPLETE)) {
+					IVdsDisk_Release(pDisk);
 					VDS_SET_ERROR(hr);
-					uprintf("Could not query VDS Disk Properties: %s", WindowsErrorString());
+					suprintf("Could not query VDS Disk Properties: %s", WindowsErrorString());
 					goto out;
 				}
 
-				// Isolate the disk we want
-				if (_wcsicmp(wPhysicalName, diskprop.pwszName) != 0) {
+				// Check if we are on the target disk
+				hr = (HRESULT)_wcsicmp(wPhysicalName, prop.pwszName);
+				CoTaskMemFree(prop.pwszName);
+				if (hr != S_OK) {
 					IVdsDisk_Release(pDisk);
 					continue;
 				}
-				bNeverFound = FALSE;
 
-				// Instantiate the AdvanceDisk interface for our disk.
-				hr = IVdsDisk_QueryInterface(pDisk, &IID_IVdsAdvancedDisk, (void **)&pAdvancedDisk);
+				// Instantiate the requested VDS disk interface
+				hr = IVdsDisk_QueryInterface(pDisk, InterfaceIID, pInterfaceInstance);
 				IVdsDisk_Release(pDisk);
 				if (hr != S_OK) {
 					VDS_SET_ERROR(hr);
-					uprintf("Could not access VDS Advanced Disk interface: %s", WindowsErrorString());
+					suprintf("Could not access the requested Disk interface: %s", WindowsErrorString());
+				}
+				goto out;
+			}
+			IEnumVdsObject_Release(pEnumDisk);
+		}
+		IEnumVdsObject_Release(pEnumPack);
+	}
+	IEnumVdsObject_Release(pEnum);
+
+out:
+	return (hr == S_OK);
+}
+
+/*
+ * Delete one partition at offset PartitionOffset, or all partitions if the offset is 0.
+ */
+BOOL DeletePartition(DWORD DriveIndex, ULONGLONG PartitionOffset, BOOL bSilent)
+{
+	HRESULT hr = S_FALSE;
+	VDS_PARTITION_PROP* prop_array;
+	LONG i, prop_array_size;
+	IVdsAdvancedDisk *pAdvancedDisk;
+
+	if (!GetVdsDiskInterface(DriveIndex, &IID_IVdsAdvancedDisk, (void**)&pAdvancedDisk, bSilent))
+		return FALSE;
+
+	// Query the partition data, so we can get the start offset, which we need for deletion
+	hr = IVdsAdvancedDisk_QueryPartitions(pAdvancedDisk, &prop_array, &prop_array_size);
+	if (hr == S_OK) {
+		suprintf("Deleting partition%s:", (PartitionOffset == 0) ? "s" : "");
+		// Now go through each partition
+		for (i = 0; i < prop_array_size; i++) {
+			if ((PartitionOffset != 0) && (prop_array[i].ullOffset != PartitionOffset))
+				continue;
+			suprintf("● Partition %d (offset: %lld, size: %s)", prop_array[i].ulPartitionNumber,
+				prop_array[i].ullOffset, SizeToHumanReadable(prop_array[i].ullSize, FALSE, FALSE));
+			hr = IVdsAdvancedDisk_DeletePartition(pAdvancedDisk, prop_array[i].ullOffset, TRUE, TRUE);
+			if (hr != S_OK) {
+				VDS_SET_ERROR(hr);
+				suprintf("Could not delete partition: %s", WindowsErrorString());
+			}
+		}
+	} else {
+		suprintf("No partition to delete on disk");
+		hr = S_OK;
+	}
+	CoTaskMemFree(prop_array);
+	IVdsAdvancedDisk_Release(pAdvancedDisk);
+	return (hr == S_OK);
+}
+
+/*
+ * Count on Microsoft for *COMPLETELY CRIPPLING* an API when alledgedly upgrading it...
+ * As illustrated when you do so with diskpart (which uses VDS behind the scenes), VDS
+ * simply *DOES NOT* list all the volumes that the system can see, especially compared
+ * to what mountvol (which uses FindFirstVolume()/FindNextVolume()) and other APIs do.
+ * Also for reference, if you want to list volumes through WMI in PowerShell:
+ * Get-WmiObject win32_volume | Format-Table -Property DeviceID,Name,Label,Capacity
+ */
+BOOL ListVdsVolumes(BOOL bSilent)
+{
+	HRESULT hr = S_FALSE;
+	ULONG ulFetched;
+	IVdsServiceLoader* pLoader;
+	IVdsService* pService;
+	IEnumVdsObject* pEnum;
+	IUnknown* pUnk;
+
+	// Initialize COM
+	IGNORE_RETVAL(CoInitializeEx(NULL, COINIT_APARTMENTTHREADED));
+	IGNORE_RETVAL(CoInitializeSecurity(NULL, -1, NULL, NULL, RPC_C_AUTHN_LEVEL_CONNECT,
+		RPC_C_IMP_LEVEL_IMPERSONATE, NULL, 0, NULL));
+
+	// Create a VDS Loader Instance
+	hr = CoCreateInstance(&CLSID_VdsLoader, NULL, CLSCTX_LOCAL_SERVER | CLSCTX_REMOTE_SERVER,
+		&IID_IVdsServiceLoader, (void**)&pLoader);
+	if (hr != S_OK) {
+		VDS_SET_ERROR(hr);
+		suprintf("Could not create VDS Loader Instance: %s", WindowsErrorString());
+		goto out;
+	}
+
+	// Load the VDS Service
+	hr = IVdsServiceLoader_LoadService(pLoader, L"", &pService);
+	IVdsServiceLoader_Release(pLoader);
+	if (hr != S_OK) {
+		VDS_SET_ERROR(hr);
+		suprintf("Could not load VDS Service: %s", WindowsErrorString());
+		goto out;
+	}
+
+	// Wait for the Service to become ready if needed
+	hr = IVdsService_WaitForServiceReady(pService);
+	if (hr != S_OK) {
+		VDS_SET_ERROR(hr);
+		suprintf("VDS Service is not ready: %s", WindowsErrorString());
+		goto out;
+	}
+
+	// Query the VDS Service Providers
+	hr = IVdsService_QueryProviders(pService, VDS_QUERY_SOFTWARE_PROVIDERS, &pEnum);
+	IVdsService_Release(pService);
+	if (hr != S_OK) {
+		VDS_SET_ERROR(hr);
+		suprintf("Could not query VDS Service Providers: %s", WindowsErrorString());
+		goto out;
+	}
+
+	while (IEnumVdsObject_Next(pEnum, 1, &pUnk, &ulFetched) == S_OK) {
+		IVdsProvider* pProvider;
+		IVdsSwProvider* pSwProvider;
+		IEnumVdsObject* pEnumPack;
+		IUnknown* pPackUnk;
+
+		// Get VDS Provider
+		hr = IUnknown_QueryInterface(pUnk, &IID_IVdsProvider, (void**)&pProvider);
+		IUnknown_Release(pUnk);
+		if (hr != S_OK) {
+			VDS_SET_ERROR(hr);
+			suprintf("Could not get VDS Provider: %s", WindowsErrorString());
+			goto out;
+		}
+
+		// Get VDS Software Provider
+		hr = IVdsSwProvider_QueryInterface(pProvider, &IID_IVdsSwProvider, (void**)&pSwProvider);
+		IVdsProvider_Release(pProvider);
+		if (hr != S_OK) {
+			VDS_SET_ERROR(hr);
+			suprintf("Could not get VDS Software Provider: %s", WindowsErrorString());
+			goto out;
+		}
+
+		// Get VDS Software Provider Packs
+		hr = IVdsSwProvider_QueryPacks(pSwProvider, &pEnumPack);
+		IVdsSwProvider_Release(pSwProvider);
+		if (hr != S_OK) {
+			VDS_SET_ERROR(hr);
+			suprintf("Could not get VDS Software Provider Packs: %s", WindowsErrorString());
+			goto out;
+		}
+
+		// Enumerate Provider Packs
+		while (IEnumVdsObject_Next(pEnumPack, 1, &pPackUnk, &ulFetched) == S_OK) {
+			IVdsPack* pPack;
+			IEnumVdsObject* pEnumVolume;
+			IUnknown* pVolumeUnk;
+
+			hr = IUnknown_QueryInterface(pPackUnk, &IID_IVdsPack, (void**)&pPack);
+			IUnknown_Release(pPackUnk);
+			if (hr != S_OK) {
+				VDS_SET_ERROR(hr);
+				suprintf("Could not query VDS Software Provider Pack: %s", WindowsErrorString());
+				goto out;
+			}
+
+			// Use the pack interface to access the disks
+			hr = IVdsPack_QueryVolumes(pPack, &pEnumVolume);
+			if (hr != S_OK) {
+				VDS_SET_ERROR(hr);
+				suprintf("Could not query VDS volumes: %s", WindowsErrorString());
+				goto out;
+			}
+
+			// List volumes
+			while (IEnumVdsObject_Next(pEnumVolume, 1, &pVolumeUnk, &ulFetched) == S_OK) {
+				IVdsVolume* pVolume;
+				IVdsVolumeMF3* pVolumeMF3;
+				VDS_VOLUME_PROP prop;
+				LPWSTR* wszPathArray;
+				ULONG i, ulNumberOfPaths;
+
+				// Get the volume interface.
+				hr = IUnknown_QueryInterface(pVolumeUnk, &IID_IVdsVolume, (void**)&pVolume);
+				if (hr != S_OK) {
+					VDS_SET_ERROR(hr);
+					suprintf("Could not query VDS Volume Interface: %s", WindowsErrorString());
 					goto out;
 				}
 
-				// Query the partition data, so we can get the start offset, which we need for deletion
-				hr = IVdsAdvancedDisk_QueryPartitions(pAdvancedDisk, &prop_array, &prop_array_size);
-				if (hr == S_OK) {
-					uprintf("Deleting ALL partition(s) from disk '%S':", diskprop.pwszName);
-					// Now go through each partition
-					for (i = 0; i < prop_array_size; i++) {
-						uprintf("● Partition %d (offset: %lld, size: %s)", prop_array[i].ulPartitionNumber,
-							prop_array[i].ullOffset, SizeToHumanReadable(prop_array[i].ullSize, FALSE, FALSE));
-						hr = IVdsAdvancedDisk_DeletePartition(pAdvancedDisk, prop_array[i].ullOffset, TRUE, TRUE);
-						if (hr != S_OK) {
-							r = FALSE;
-							VDS_SET_ERROR(hr);
-							uprintf("Could not delete partitions: %s", WindowsErrorString());
-						}
-					}
-					r = TRUE;
-				} else {
-					uprintf("No partition to delete on disk '%S'", diskprop.pwszName);
-					r = TRUE;
+				// Get the volume properties
+				hr = IVdsVolume_GetProperties(pVolume, &prop);
+				if ((hr != S_OK) && (hr != VDS_S_PROPERTIES_INCOMPLETE)) {
+					VDS_SET_ERROR(hr);
+					suprintf("Could not query VDS Volume Properties: %s", WindowsErrorString());
+					goto out;
 				}
-				CoTaskMemFree(prop_array);
 
-#if 0
-				// Issue a Clean while we're at it
-				HRESULT hr2 = E_FAIL;
-				ULONG completed;
-				IVdsAsync* pAsync;
-				hr = IVdsAdvancedDisk_Clean(pAdvancedDisk, TRUE, FALSE, FALSE, &pAsync);
-				while (SUCCEEDED(hr)) {
-					if (IS_ERROR(FormatStatus)) {
-						IVdsAsync_Cancel(pAsync);
-						break;
-					}
-					hr = IVdsAsync_QueryStatus(pAsync, &hr2, &completed);
-					if (SUCCEEDED(hr)) {
-						hr = hr2;
-						if (hr == S_OK)
-							break;
-						if (hr == VDS_E_OPERATION_PENDING)
-							hr = S_OK;
-					}
-					Sleep(500);
-				}
+				uprintf("FOUND VOLUME: '%S'", prop.pwszName);
+				CoTaskMemFree(prop.pwszName);
+				IVdsVolume_Release(pVolume);
+
+				// Get the volume MF3 interface.
+				hr = IUnknown_QueryInterface(pVolumeUnk, &IID_IVdsVolumeMF3, (void**)&pVolumeMF3);
 				if (hr != S_OK) {
 					VDS_SET_ERROR(hr);
-					uprintf("Could not clean disk: %s", WindowsErrorString());
+					suprintf("Could not query VDS VolumeMF3 Interface: %s", WindowsErrorString());
+					goto out;
 				}
-#endif
-				IVdsAdvancedDisk_Release(pAdvancedDisk);
-				goto out;
+
+				// Get the volume properties
+				hr = IVdsVolumeMF3_QueryVolumeGuidPathnames(pVolumeMF3, &wszPathArray, &ulNumberOfPaths);
+				if ((hr != S_OK) && (hr != VDS_S_PROPERTIES_INCOMPLETE)) {
+					VDS_SET_ERROR(hr);
+					suprintf("Could not query VDS VolumeMF3 GUID PathNames: %s", WindowsErrorString());
+					goto out;
+				}
+
+				for (i = 0; i < ulNumberOfPaths; i++)
+					uprintf("  VOL GUID: '%S'", wszPathArray[i]);
+				CoTaskMemFree(wszPathArray);
+				IVdsVolume_Release(pVolumeMF3);
+				IUnknown_Release(pVolumeUnk);
 			}
+			IEnumVdsObject_Release(pEnumVolume);
 		}
+		IEnumVdsObject_Release(pEnumPack);
 	}
+	IEnumVdsObject_Release(pEnum);
 
 out:
-	if (bNeverFound)
-		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_PATH_NOT_FOUND;
-	return r;
+	return (hr == S_OK);
 }
-
 
 /* Wait for a logical drive to reappear - Used when a drive has just been repartitioned */
 BOOL WaitForLogical(DWORD DriveIndex, uint64_t PartitionOffset)
@@ -1695,7 +1860,6 @@ BOOL RemountVolume(char* drive_name)
  * properly reset Windows's cached view of a drive partitioning short of cycling the USB port
  * (especially IOCTL_DISK_UPDATE_PROPERTIES is *USELESS*), and therefore the OS will try to
  * read the file system data at an old location, even if the partition has just been deleted.
- * TODO: We should do something like this in DeletePartitions() too.
  */
 static BOOL ClearPartition(HANDLE hDrive, LARGE_INTEGER offset, DWORD size)
 {

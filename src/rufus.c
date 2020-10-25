@@ -3502,6 +3502,7 @@ relaunch:
 			&& (msg.wParam == 'T')) {
 			//extern int TestChecksum(void);
 			//TestChecksum();
+			ListVdsVolumes(FALSE);
 			continue;
 		}
 #endif
