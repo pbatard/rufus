@@ -1485,6 +1485,11 @@ static BOOL WriteDrive(HANDLE hPhysicalDrive, HANDLE hSourceImage)
 	uint8_t *cmp_buffer = NULL;
 	int i, *ptr, zero_data, throttle_fast_zeroing = 0;
 
+	if (SelectedDrive.SectorSize < 512) {
+		uprintf("Unexpected sector size (%d) - Aborting", SelectedDrive.SectorSize);
+		return FALSE;
+	}
+
 	// We poked the MBR and other stuff, so we need to rewind
 	li.QuadPart = 0;
 	if (!SetFilePointerEx(hPhysicalDrive, li, NULL, FILE_BEGIN))
@@ -1697,8 +1702,8 @@ DWORD WINAPI FormatThread(void* param)
 	else if (IsChecked(IDC_OLD_BIOS_FIXES))
 		extra_partitions = XP_COMPAT;
 	// On pre 1703 platforms (and even on later ones), anything with ext2/ext3 doesn't sit
-	// too well with Windows. Relaxing our locking rules seems to help...
-	if ((extra_partitions == XP_CASPER) || (fs_type >= FS_EXT2))
+	// too well with Windows. Same with ESPs. Relaxing our locking rules seems to help...
+	if ((extra_partitions & (XP_ESP | XP_CASPER)) || (fs_type >= FS_EXT2))
 		actual_lock_drive = FALSE;
 
 	PrintInfoDebug(0, MSG_225);
@@ -1737,26 +1742,13 @@ DWORD WINAPI FormatThread(void* param)
 	// An extra refresh of the (now empty) partition data here appears to be helpful
 	GetDrivePartitionData(SelectedDrive.DeviceNumber, fs_name, sizeof(fs_name), TRUE);
 
-	// Now get RW access to the physical drive...
+	// Now get RW access to the physical drive
 	hPhysicalDrive = GetPhysicalHandle(DriveIndex, actual_lock_drive, TRUE, !actual_lock_drive);
 	if (hPhysicalDrive == INVALID_HANDLE_VALUE) {
 		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_OPEN_FAILED;
 		goto out;
 	}
 	RefreshDriveLayout(hPhysicalDrive);
-
-	// ...and get a lock to the logical drive so that we can actually write something
-	hLogicalVolume = GetLogicalHandle(DriveIndex, 0, TRUE, FALSE, !actual_lock_drive);
-	if (hLogicalVolume == INVALID_HANDLE_VALUE) {
-		uprintf("Could not lock volume");
-		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_OPEN_FAILED;
-		goto out;
-	} else if (hLogicalVolume == NULL) {
-		// NULL is returned for cases where the drive is not yet partitioned
-		uprintf("Drive does not appear to be partitioned");
-	} else if (!UnmountVolume(hLogicalVolume)) {
-		uprintf("Trying to continue regardless...");
-	}
 	CHECK_FOR_USER_CANCEL;
 
 	if (!zero_drive && !write_as_image) {
@@ -1877,7 +1869,8 @@ DWORD WINAPI FormatThread(void* param)
 	UpdateProgress(OP_ZERO_MBR, -1.0f);
 	CHECK_FOR_USER_CANCEL;
 
-	if (!CreatePartition(hPhysicalDrive, partition_type, fs_type, (partition_type==PARTITION_STYLE_MBR) && (target_type==TT_UEFI), extra_partitions)) {
+	if (!CreatePartition(hPhysicalDrive, partition_type, fs_type, (partition_type == PARTITION_STYLE_MBR)
+		&& (target_type == TT_UEFI), extra_partitions)) {
 		FormatStatus = (LastWriteError != 0) ? LastWriteError : (ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_PARTITION_FAILURE);
 		goto out;
 	}
