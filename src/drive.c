@@ -1099,6 +1099,47 @@ UINT GetDriveTypeFromIndex(DWORD DriveIndex)
 	return drive_type;
 }
 
+
+// Removes all drive letters associated with the specific drive, and return
+// either the first or last letter that was removed, according to bReturnLast.
+char RemoveDriveLetters(DWORD DriveIndex, BOOL bReturnLast, BOOL bSilent)
+{
+	int i, len;
+	char drive_letters[27] = { 0 }, drive_name[4] = "#:\\";
+
+	if (!GetDriveLetters(DriveIndex, drive_letters)) {
+		suprintf("Failed to get a drive letter");
+		return 0;
+	}
+	if (drive_letters[0] == 0) {
+		suprintf("No drive letter was assigned...");
+		return GetUnusedDriveLetter();
+	}
+	len = (int)strlen(drive_letters);
+	if (len == 0)
+		return 0;
+
+	// Unmount all mounted volumes that belong to this drive
+	for (i = 0; i < len; i++) {
+		// Check that the current image isn't located on a drive we are trying to dismount
+		if ((boot_type == BT_IMAGE) && (drive_letters[i] == (PathGetDriveNumberU(image_path) + 'A'))) {
+			if ((PathGetDriveNumberU(image_path) + 'A') == drive_letters[i]) {
+				suprintf("ABORTED: Cannot use an image that is located on the target drive!");
+				return 0;
+			}
+		}
+		drive_name[0] = drive_letters[i];
+		// DefineDosDevice() cannot have a trailing backslash...
+		drive_name[2] = 0;
+		DefineDosDeviceA(DDD_REMOVE_DEFINITION, drive_name, NULL);
+		// ... but DeleteVolumeMountPoint() requires one. Go figure...
+		drive_name[2] = '\\';
+		if (!DeleteVolumeMountPointA(drive_name))
+			suprintf("Failed to delete mountpoint %s: %s", drive_name, WindowsErrorString());
+	}
+	return drive_letters[bReturnLast ? (len - 1) : 0];
+}
+
 /*
  * Return the next unused drive letter from the system or NUL on error.
  */
@@ -1719,15 +1760,33 @@ BOOL UnmountVolume(HANDLE hDrive)
  */
 BOOL MountVolume(char* drive_name, char *volume_name)
 {
-	char mounted_guid[52];
+	char mounted_guid[52], dos_name[] = "?:";
 #if defined(WINDOWS_IS_NOT_BUGGY)
 	char mounted_letter[27] = { 0 };
 	DWORD size;
 #endif
 
-	if ((drive_name == NULL) || (volume_name == NULL) || (drive_name[0] == '?') ||
-		(strncmp(volume_name, groot_name, groot_len) == 0))
+	if ((drive_name == NULL) || (volume_name == NULL) || (drive_name[0] == '?')) {
+		SetLastError(ERROR_INVALID_PARAMETER);
 		return FALSE;
+	}
+
+	// If we are working with a "\\?\GLOBALROOT" device, SetVolumeMountPoint()
+	// is useless, so try with DefineDosDevice() instead.
+	if (_strnicmp(volume_name, groot_name, groot_len) == 0) {
+		dos_name[0] = drive_name[0];
+		// Microsoft will also have to explain why "In no case is a trailing backslash allowed" [1] in
+		// DefineDosDevice(), instead of just checking if the driver parameter is "X:\" and remove the
+		// backslash from a copy of the parameter in the bloody API call. *THIS* really tells a lot
+		// about the level of thought and foresight that actually goes into the Windows APIs...
+		// [1] https://docs.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-definedosdevicew
+		if (!DefineDosDeviceA(DDD_RAW_TARGET_PATH | DDD_NO_BROADCAST_SYSTEM, dos_name, &volume_name[14])) {
+			uprintf("Could not mount %s as %C:", volume_name, drive_name[0]);
+			return FALSE;
+		}
+		uprintf("%s was successfully mounted as %C:", volume_name, drive_name[0]);
+		return TRUE;
+	}
 
 	// Great: Windows has a *MAJOR BUG* whereas, in some circumstances, GetVolumePathNamesForVolumeName()
 	// can return the *WRONG* drive letter. And yes, we validated that this is *NOT* an issue like stack
@@ -1837,19 +1896,13 @@ BOOL RemountVolume(char* drive_name)
 	// UDF requires a sync/flush, and it's also a good idea for other FS's
 	FlushDrive(drive_name[0]);
 	if (GetVolumeNameForVolumeMountPointA(drive_name, volume_name, sizeof(volume_name))) {
-		if (DeleteVolumeMountPointA(drive_name)) {
-			Sleep(200);
-			if (MountVolume(drive_name, volume_name)) {
-				uprintf("Successfully remounted %s as %C:", volume_name, drive_name[0]);
-			} else {
-				uprintf("Failed to remount %s as %C:", volume_name, drive_name[0]);
-				// This will leave the drive inaccessible and must be flagged as an error
-				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_REMOUNT_VOLUME);
-				return FALSE;
-			}
+		if (MountVolume(drive_name, volume_name)) {
+			uprintf("Successfully remounted %s as %C:", volume_name, drive_name[0]);
 		} else {
 			uprintf("Could not remount %s as %C: %s", volume_name, drive_name[0], WindowsErrorString());
-			// Try to continue regardless
+			// This will leave the drive inaccessible and must be flagged as an error
+			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_REMOUNT_VOLUME);
+			return FALSE;
 		}
 	}
 	return TRUE;

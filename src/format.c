@@ -1660,7 +1660,7 @@ out:
  */
 DWORD WINAPI FormatThread(void* param)
 {
-	int i, r;
+	int r;
 	BOOL ret, use_large_fat32, windows_to_go, actual_lock_drive = lock_drive;
 	DWORD cr, DriveIndex = (DWORD)(uintptr_t)param, ClusterSize, Flags;
 	HANDLE hPhysicalDrive = INVALID_HANDLE_VALUE;
@@ -1714,32 +1714,13 @@ DWORD WINAPI FormatThread(void* param)
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_ASSIGN_LETTER);
 		goto out;
 	}
-	if (drive_letters[0] == 0) {
-		uprintf("No drive letter was assigned...");
-		drive_name[0] = GetUnusedDriveLetter();
-		if (drive_name[0] == 0) {
-			uprintf("Could not find a suitable drive letter");
-			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_ASSIGN_LETTER);
-			goto out;
-		}
-	} else {
-		// Unmount all mounted volumes that belong to this drive
-		// Do it in reverse so that we always end on the first volume letter
-		for (i = (int)safe_strlen(drive_letters); i > 0; i--) {
-			drive_name[0] = drive_letters[i-1];
-			if (boot_type == BT_IMAGE) {
-				// If we are using an image, check that it isn't located on the drive we are trying to format
-				if ((PathGetDriveNumberU(image_path) + 'A') == drive_letters[i-1]) {
-					uprintf("ABORTED: Cannot use an image that is located on the target drive!");
-					FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_ACCESS_DENIED;
-					goto out;
-				}
-			}
-			if (!DeleteVolumeMountPointA(drive_name)) {
-				uprintf("Failed to delete mountpoint %s: %s", drive_name, WindowsErrorString());
-				// Try to continue. We will bail out if this causes an issue.
-			}
-		}
+
+	// Unassign all drives letters
+	drive_name[0] = RemoveDriveLetters(DriveIndex, TRUE, FALSE);
+	if (drive_name[0] == 0) {
+		uprintf("Unable to find a drive letter to use");
+		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_CANT_ASSIGN_LETTER);
+		goto out;
 	}
 	uprintf("Will use '%C:' as volume mountpoint", drive_name[0]);
 
@@ -2012,6 +1993,9 @@ DWORD WINAPI FormatThread(void* param)
 	}
 	uprintf("Found volume %s", volume_name);
 
+	// Windows is really finicky with regards to reassigning drive letters even after
+	// we forcibly removed them, so add yet another explicit call to RemoveDriveLetters()
+	RemoveDriveLetters(DriveIndex, FALSE, TRUE);
 	if (!MountVolume(drive_name, volume_name)) {
 		uprintf("Could not remount %s as %C: %s\n", volume_name, drive_name[0], WindowsErrorString());
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_MOUNT_VOLUME);
@@ -2080,7 +2064,7 @@ DWORD WINAPI FormatThread(void* param)
 	}
 	CHECK_FOR_USER_CANCEL;
 
-	// We issue a complete remount of the filesystem at on account of:
+	// We issue a complete remount of the filesystem on account of:
 	// - Ensuring the file explorer properly detects that the volume was updated
 	// - Ensuring that an NTFS system will be reparsed so that it becomes bootable
 	if (!RemountVolume(drive_name))

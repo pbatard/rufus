@@ -384,6 +384,7 @@ BOOL GetDriveLetters(DWORD DriveIndex, char* drive_letters);
 UINT GetDriveTypeFromIndex(DWORD DriveIndex);
 char GetUnusedDriveLetter(void);
 BOOL IsDriveLetterInUse(const char drive_letter);
+char RemoveDriveLetters(DWORD DriveIndex, BOOL bUseLast, BOOL bSilent);
 BOOL GetDriveLabel(DWORD DriveIndex, char* letter, char** label);
 uint64_t GetDriveSize(DWORD DriveIndex);
 BOOL IsMediaPresent(DWORD DriveIndex);
