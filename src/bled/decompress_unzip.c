@@ -169,6 +169,8 @@ static uint32_t find_cdf_offset(int fd)
 	off_t end;
 	unsigned char *buf = xzalloc(PEEK_FROM_END);
 
+	if (buf == NULL)
+		return 0;
 	end = lseek(fd, 0, SEEK_END);
 	end -= PEEK_FROM_END;
 	if (end < 0)
@@ -216,7 +218,8 @@ static uint32_t read_next_cdf(int fd, uint32_t cdf_offset, cdf_header_t *cdf_ptr
 
 	if (cdf_offset != BAD_CDF_OFFSET) {
 		lseek(fd, cdf_offset + 4, SEEK_SET);
-		_read(fd, cdf_ptr->raw, CDF_HEADER_LEN);
+		if (_read(fd, cdf_ptr->raw, CDF_HEADER_LEN) != CDF_HEADER_LEN)
+			return 0;
 		FIX_ENDIANNESS_CDF(*cdf_ptr);
 		cdf_offset += 4 + CDF_HEADER_LEN
 			+ cdf_ptr->formatted.file_name_length

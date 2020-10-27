@@ -1478,12 +1478,12 @@ static BOOL WriteDrive(HANDLE hPhysicalDrive, HANDLE hSourceImage)
 {
 	BOOL s, ret = FALSE;
 	LARGE_INTEGER li;
-	DWORD rSize, wSize, xSize, BufSize;
+	DWORD i, rSize, wSize, xSize, BufSize;
 	uint64_t wb, target_size = hSourceImage?img_report.image_size:SelectedDrive.DiskSize;
 	int64_t bled_ret;
-	uint8_t *buffer = NULL;
-	uint8_t *cmp_buffer = NULL;
-	int i, *ptr, zero_data, throttle_fast_zeroing = 0;
+	uint8_t* buffer = NULL;
+	uint32_t zero_data, *cmp_buffer = NULL;
+	int throttle_fast_zeroing = 0;
 
 	if (SelectedDrive.SectorSize < 512) {
 		uprintf("Unexpected sector size (%d) - Aborting", SelectedDrive.SectorSize);
@@ -1539,13 +1539,15 @@ static BOOL WriteDrive(HANDLE hPhysicalDrive, HANDLE hSourceImage)
 		// Clear buffer
 		memset(buffer, fast_zeroing ? 0xff : 0x00, BufSize);
 
-		cmp_buffer = (uint8_t*)_mm_malloc(BufSize, SelectedDrive.SectorSize);
-		if (cmp_buffer == NULL) {
-			FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_NOT_ENOUGH_MEMORY;
-			uprintf("Could not allocate disk comparison buffer");
-			goto out;
+		if (fast_zeroing) {
+			cmp_buffer = (uint32_t*)_mm_malloc(BufSize, SelectedDrive.SectorSize);
+			if (cmp_buffer == NULL) {
+				FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_NOT_ENOUGH_MEMORY;
+				uprintf("Could not allocate disk comparison buffer");
+				goto out;
+			}
+			assert((uintptr_t)cmp_buffer % SelectedDrive.SectorSize == 0);
 		}
-		assert((uintptr_t)cmp_buffer % SelectedDrive.SectorSize == 0);
 
 		// Don't bother trying for something clever, using double buffering overlapped and whatnot:
 		// With Windows' default optimizations, sync read + sync write for sequential operations
@@ -1585,22 +1587,17 @@ static BOOL WriteDrive(HANDLE hPhysicalDrive, HANDLE hSourceImage)
 				// Read block and compare against the block that needs to be written
 				s = ReadFile(hPhysicalDrive, cmp_buffer, rSize, &xSize, NULL);
 				if ((!s) || (xSize != rSize) ) {
-					uprintf("Read error: Could not read data for comparison - %s", WindowsErrorString());
+					uprintf("Read error: Could not read data for fast zeroing comparison - %s", WindowsErrorString());
 					goto out;
 				}
 
-				// Check for an empty block
-				ptr = (int*)(cmp_buffer);
-				// Get first element
-				zero_data = ptr[0];
+				// Check for an empty block by comparing with the first element
+				zero_data = cmp_buffer[0];
 				// Check all bits are the same
-				if ((zero_data == 0) || (zero_data == -1)) {
+				if ((zero_data == 0) || (zero_data == 0xffffffff)) {
 					// Compare the rest of the block against the first element
-					for (i = 1; i < (int)(rSize / sizeof(int)); i++) {
-						if (ptr[i] != zero_data)
-							break;
-					}
-					if (i >= (int)(rSize / sizeof(int))) {
+					for (i = 1; (i < rSize / sizeof(uint32_t)) && (cmp_buffer[i] == zero_data); i++);
+					if (i >= rSize / sizeof(uint32_t)) {
 						// Block is empty, skip write
 						wSize = rSize;
 						continue;

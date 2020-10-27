@@ -680,6 +680,8 @@ int FAST_FUNC start_bunzip(bunzip_data **bdp, int in_fd,
 
 	/* Allocate bunzip_data.  Most fields initialize to zero. */
 	bd = *bdp = xzalloc(i);
+	if (bd == NULL)
+		return -1;
 
 	/* Setup input buffer */
 	bd->in_fd = in_fd;
@@ -743,6 +745,8 @@ unpack_bz2_stream(transformer_state_t *xstate)
 		return -1;
 
 	outbuf = xmalloc(IOBUF_SIZE);
+	if (outbuf == NULL)
+		return -1;
 	len = 0;
 	while (1) { /* "Process one BZ... stream" loop */
 

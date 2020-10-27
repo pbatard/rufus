@@ -79,6 +79,8 @@ static ALWAYS_INLINE rc_t* rc_init(int fd) /*, int buffer_size) */
 	rc_t *rc;
 
 	rc = xzalloc(sizeof(*rc) + RC_BUFFER_SIZE);
+	if (rc == NULL)
+		return NULL;
 
 	rc->fd = fd;
 	/* rc->ptr = rc->buffer_end; */

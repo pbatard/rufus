@@ -1039,6 +1039,8 @@ inflate_unzip(transformer_state_t *xstate)
 	DECLARE_STATE;
 
 	ALLOC_STATE;
+	if (state == NULL)
+		return -1;
 
 	to_read = xstate->bytes_in;
 //	bytebuffer_max = 0x8000;
@@ -1212,9 +1214,13 @@ unpack_gz_stream(transformer_state_t *xstate)
 	total = 0;
 
 	ALLOC_STATE;
+	if (state == NULL)
+		return -1;
 	to_read = -1;
 //	bytebuffer_max = 0x8000;
 	bytebuffer = xmalloc(bytebuffer_max);
+	if (bytebuffer == NULL)
+		return -1;
 	gunzip_src_fd = xstate->src_fd;
 
  again:

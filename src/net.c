@@ -985,13 +985,21 @@ static DWORD WINAPI DownloadISOThread(LPVOID param)
 	close_fido_cookie_prompts = FALSE;
 	if ((dwExitCode == 0) && PeekNamedPipe(hPipe, NULL, dwPipeSize, NULL, &dwAvail, NULL) && (dwAvail != 0)) {
 		url = malloc(dwAvail + 1);
+		dwSize = 0;
 		if ((url != NULL) && ReadFile(hPipe, url, dwAvail, &dwSize, NULL) && (dwSize > 4)) {
 #else
 	{	{	url = strdup(FORCE_URL);
 			dwSize = (DWORD)strlen(FORCE_URL);
 #endif
 			IMG_SAVE img_save = { 0 };
-			url[dwSize] = 0;
+// WTF is wrong with Microsoft's static analyzer reporting a potential buffer overflow here?!?
+#if defined(_MSC_VER)
+#pragma warning(disable: 6386)
+#endif
+			url[min(dwSize, dwAvail)] = 0;
+#if defined(_MSC_VER)
+#pragma warning(default: 6386)
+#endif
 			EXT_DECL(img_ext, GetShortName(url), __VA_GROUP__("*.iso"), __VA_GROUP__(lmprintf(MSG_036)));
 			img_save.Type = IMG_SAVE_TYPE_ISO;
 			img_save.ImagePath = FileDialog(TRUE, NULL, &img_ext, 0);

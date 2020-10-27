@@ -12,6 +12,8 @@ archive_handle_t* FAST_FUNC init_handle(void)
 
 	/* Initialize default values */
 	archive_handle = xzalloc(sizeof(archive_handle_t));
+	if (archive_handle == NULL)
+		return NULL;
 	archive_handle->file_header = xzalloc(sizeof(file_header_t));
 	archive_handle->action_header = header_skip;
 	archive_handle->action_data = data_skip;
