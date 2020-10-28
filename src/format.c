@@ -1746,6 +1746,23 @@ DWORD WINAPI FormatThread(void* param)
 		goto out;
 	}
 	RefreshDriveLayout(hPhysicalDrive);
+
+	// If we write an image that contains an ESP, Windows forcibly reassigns/removes the target
+	// drive, which causes a write error. To work around this, we must lock the logical drive.
+	if ((boot_type == BT_IMAGE) && write_as_image) {
+		// ...and get a lock to the logical drive so that we can actually write something
+		hLogicalVolume = GetLogicalHandle(DriveIndex, 0, TRUE, FALSE, !actual_lock_drive);
+		if (hLogicalVolume == INVALID_HANDLE_VALUE) {
+			uprintf("Could not lock volume");
+			FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_OPEN_FAILED;
+			goto out;
+		} else if (hLogicalVolume == NULL) {
+			// NULL is returned for cases where the drive is not yet partitioned
+			uprintf("Drive does not appear to be partitioned");
+		} else if (!UnmountVolume(hLogicalVolume)) {
+			uprintf("Trying to continue regardless...");
+		}
+	}
 	CHECK_FOR_USER_CANCEL;
 
 	if (!zero_drive && !write_as_image) {

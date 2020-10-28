@@ -1214,13 +1214,18 @@ unpack_gz_stream(transformer_state_t *xstate)
 	total = 0;
 
 	ALLOC_STATE;
-	if (state == NULL)
+	if (state == NULL) {
+		bb_error_msg("alloc error");
 		return -1;
+	}
 	to_read = -1;
 //	bytebuffer_max = 0x8000;
 	bytebuffer = xmalloc(bytebuffer_max);
-	if (bytebuffer == NULL)
-		return -1;
+	if (bytebuffer == NULL) {
+		bb_error_msg("alloc error");
+		total = -1;
+		goto ret;
+	}
 	gunzip_src_fd = xstate->src_fd;
 
  again:

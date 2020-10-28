@@ -1099,7 +1099,6 @@ UINT GetDriveTypeFromIndex(DWORD DriveIndex)
 	return drive_type;
 }
 
-
 // Removes all drive letters associated with the specific drive, and return
 // either the first or last letter that was removed, according to bReturnLast.
 char RemoveDriveLetters(DWORD DriveIndex, BOOL bReturnLast, BOOL bSilent)
