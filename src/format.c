@@ -2074,7 +2074,7 @@ DWORD WINAPI FormatThread(void* param)
 	// We issue a complete remount of the filesystem on account of:
 	// - Ensuring the file explorer properly detects that the volume was updated
 	// - Ensuring that an NTFS system will be reparsed so that it becomes bootable
-	if (!RemountVolume(drive_name))
+	if (!RemountVolume(drive_name, FALSE))
 		goto out;
 	CHECK_FOR_USER_CANCEL;
 
@@ -2149,7 +2149,7 @@ DWORD WINAPI FormatThread(void* param)
 		if (IsChecked(IDC_EXTENDED_LABEL))
 			SetAutorun(drive_name);
 		// Issue another complete remount before we exit, to ensure we're clean
-		RemountVolume(drive_name);
+		RemountVolume(drive_name, TRUE);
 		// NTFS fixup (WinPE/AIK images don't seem to boot without an extra checkdisk)
 		if ((boot_type == BT_IMAGE) && (img_report.is_iso) && (fs_type == FS_NTFS)) {
 			// Try to ensure that all messages from Checkdisk will be in English

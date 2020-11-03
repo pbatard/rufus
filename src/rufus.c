@@ -898,7 +898,7 @@ static BOOL PopulateProperties(void)
 
 	// Set a proposed label according to the size (eg: "256MB", "8GB")
 	static_sprintf(SelectedDrive.proposed_label, "%s",
-		SizeToHumanReadable(SelectedDrive.DiskSize, FALSE, use_fake_units));
+		SizeToHumanReadable(SelectedDrive.DiskSize, FALSE, TRUE));
 
 	// Add a tooltip (with the size of the device in parenthesis)
 	device_tooltip = (char*) malloc(safe_strlen(DriveName.String[device_index]) + 32);

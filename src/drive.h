@@ -395,7 +395,7 @@ BOOL UnmountVolume(HANDLE hDrive);
 BOOL MountVolume(char* drive_name, char *drive_guid);
 BOOL AltUnmountVolume(const char* drive_name, BOOL bSilent);
 char* AltMountVolume(DWORD DriveIndex, uint64_t PartitionOffset, BOOL bSilent);
-BOOL RemountVolume(char* drive_name);
+BOOL RemountVolume(char* drive_name, BOOL bSilent);
 BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL mbr_uefi_marker, uint8_t extra_partitions);
 BOOL InitializeDisk(HANDLE hDrive);
 BOOL RefreshDriveLayout(HANDLE hDrive);

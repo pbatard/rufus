@@ -165,7 +165,8 @@ static HANDLE GetHandle(char* Path, BOOL bLockDrive, BOOL bWriteAccess, BOOL bWr
 		if ((GetLastError() != ERROR_SHARING_VIOLATION) && (GetLastError() != ERROR_ACCESS_DENIED))
 			break;
 		if (i == 0) {
-			uprintf("Waiting for access on %s [%s]...", Path, DevPath);
+			uprintf("Notice: Volume Device Path is %s", DevPath);
+			uprintf("Waiting for access on %s...", Path);
 		} else if (!bWriteShare && (i > DRIVE_ACCESS_RETRIES/3)) {
 			// If we can't seem to get a hold of the drive for some time, try to enable FILE_SHARE_WRITE...
 			uprintf("Warning: Could not obtain exclusive rights. Retrying with write sharing enabled...");
@@ -1812,7 +1813,7 @@ BOOL MountVolume(char* drive_name, char *volume_name)
 				uprintf("%s is mounted, but volume GUID doesn't match:\r\n  expected %s, got %s",
 					drive_name, volume_name, mounted_guid);
 			} else {
-				uprintf("%s is already mounted as %C:", volume_name, drive_name[0]);
+				duprintf("%s is already mounted as %C:", volume_name, drive_name[0]);
 				return TRUE;
 			}
 			uprintf("Retrying after dismount...");
@@ -1888,7 +1889,7 @@ BOOL AltUnmountVolume(const char* drive_name, BOOL bSilent)
  * Issue a complete remount of the volume.
  * Note that drive_name *may* be altered when the volume gets remounted.
  */
-BOOL RemountVolume(char* drive_name)
+BOOL RemountVolume(char* drive_name, BOOL bSilent)
 {
 	char volume_name[51];
 
@@ -1896,9 +1897,9 @@ BOOL RemountVolume(char* drive_name)
 	FlushDrive(drive_name[0]);
 	if (GetVolumeNameForVolumeMountPointA(drive_name, volume_name, sizeof(volume_name))) {
 		if (MountVolume(drive_name, volume_name)) {
-			uprintf("Successfully remounted %s as %C:", volume_name, drive_name[0]);
+			suprintf("Successfully remounted %s as %C:", volume_name, drive_name[0]);
 		} else {
-			uprintf("Could not remount %s as %C: %s", volume_name, drive_name[0], WindowsErrorString());
+			suprintf("Could not remount %s as %C: %s", volume_name, drive_name[0], WindowsErrorString());
 			// This will leave the drive inaccessible and must be flagged as an error
 			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_REMOUNT_VOLUME);
 			return FALSE;
