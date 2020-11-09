@@ -443,8 +443,7 @@ out:
  */
 BOOL RefreshLayout(DWORD DriveIndex)
 {
-	BOOL r = FALSE;
-	HRESULT hr;
+	HRESULT hr = S_FALSE;
 	wchar_t wPhysicalName[24];
 	IVdsServiceLoader* pLoader = NULL;
 	IVdsService* pService = NULL;
@@ -462,7 +461,6 @@ BOOL RefreshLayout(DWORD DriveIndex)
 	hr = CoCreateInstance(&CLSID_VdsLoader, NULL, CLSCTX_LOCAL_SERVER | CLSCTX_REMOTE_SERVER,
 		&IID_IVdsServiceLoader, (void **)&pLoader);
 	if (hr != S_OK) {
-		VDS_SET_ERROR(hr);
 		uprintf("Could not create VDS Loader Instance: %s", WindowsErrorString());
 		goto out;
 	}
@@ -470,7 +468,6 @@ BOOL RefreshLayout(DWORD DriveIndex)
 	// Load the VDS Service
 	hr = IVdsServiceLoader_LoadService(pLoader, L"", &pService);
 	if (hr != S_OK) {
-		VDS_SET_ERROR(hr);
 		uprintf("Could not load VDS Service: %s", WindowsErrorString());
 		goto out;
 	}
@@ -478,7 +475,6 @@ BOOL RefreshLayout(DWORD DriveIndex)
 	// Wait for the Service to become ready if needed
 	hr = IVdsService_WaitForServiceReady(pService);
 	if (hr != S_OK) {
-		VDS_SET_ERROR(hr);
 		uprintf("VDS Service is not ready: %s", WindowsErrorString());
 		goto out;
 	}
@@ -486,7 +482,6 @@ BOOL RefreshLayout(DWORD DriveIndex)
 	// Query the VDS Service Providers
 	hr = IVdsService_QueryProviders(pService, VDS_QUERY_SOFTWARE_PROVIDERS, &pEnum);
 	if (hr != S_OK) {
-		VDS_SET_ERROR(hr);
 		uprintf("Could not query VDS Service Providers: %s", WindowsErrorString());
 		goto out;
 	}
@@ -494,7 +489,6 @@ BOOL RefreshLayout(DWORD DriveIndex)
 	// Remove mountpoints
 	hr = IVdsService_CleanupObsoleteMountPoints(pService);
 	if (hr != S_OK) {
-		VDS_SET_ERROR(hr);
 		uprintf("Could not clean up VDS mountpoints: %s", WindowsErrorString());
 		goto out;
 	}
@@ -502,7 +496,6 @@ BOOL RefreshLayout(DWORD DriveIndex)
 	// Invoke layout refresh
 	hr = IVdsService_Refresh(pService);
 	if (hr != S_OK) {
-		VDS_SET_ERROR(hr);
 		uprintf("Could not refresh VDS layout: %s", WindowsErrorString());
 		goto out;
 	}
@@ -510,18 +503,17 @@ BOOL RefreshLayout(DWORD DriveIndex)
 	// Force re-enum
 	hr = IVdsService_Reenumerate(pService);
 	if (hr != S_OK) {
-		VDS_SET_ERROR(hr);
 		uprintf("Could not refresh VDS layout: %s", WindowsErrorString());
 		goto out;
 	}
-	r = TRUE;
 
 out:
 	if (pService != NULL)
 		IVdsService_Release(pService);
 	if (pLoader != NULL)
 		IVdsServiceLoader_Release(pLoader);
-	return r;
+	VDS_SET_ERROR(hr);
+	return (hr == S_OK);
 }
 
 /*
@@ -552,7 +544,6 @@ static BOOL GetVdsDiskInterface(DWORD DriveIndex, const IID* InterfaceIID, void*
 	hr = CoCreateInstance(&CLSID_VdsLoader, NULL, CLSCTX_LOCAL_SERVER | CLSCTX_REMOTE_SERVER,
 		&IID_IVdsServiceLoader, (void**)&pLoader);
 	if (hr != S_OK) {
-		VDS_SET_ERROR(hr);
 		suprintf("Could not create VDS Loader Instance: %s", WindowsErrorString());
 		goto out;
 	}
@@ -561,7 +552,6 @@ static BOOL GetVdsDiskInterface(DWORD DriveIndex, const IID* InterfaceIID, void*
 	hr = IVdsServiceLoader_LoadService(pLoader, L"", &pService);
 	IVdsServiceLoader_Release(pLoader);
 	if (hr != S_OK) {
-		VDS_SET_ERROR(hr);
 		suprintf("Could not load VDS Service: %s", WindowsErrorString());
 		goto out;
 	}
@@ -569,7 +559,6 @@ static BOOL GetVdsDiskInterface(DWORD DriveIndex, const IID* InterfaceIID, void*
 	// Wait for the Service to become ready if needed
 	hr = IVdsService_WaitForServiceReady(pService);
 	if (hr != S_OK) {
-		VDS_SET_ERROR(hr);
 		suprintf("VDS Service is not ready: %s", WindowsErrorString());
 		goto out;
 	}
@@ -578,7 +567,6 @@ static BOOL GetVdsDiskInterface(DWORD DriveIndex, const IID* InterfaceIID, void*
 	hr = IVdsService_QueryProviders(pService, VDS_QUERY_SOFTWARE_PROVIDERS, &pEnum);
 	IVdsService_Release(pService);
 	if (hr != S_OK) {
-		VDS_SET_ERROR(hr);
 		suprintf("Could not query VDS Service Providers: %s", WindowsErrorString());
 		goto out;
 	}
@@ -593,27 +581,24 @@ static BOOL GetVdsDiskInterface(DWORD DriveIndex, const IID* InterfaceIID, void*
 		hr = IUnknown_QueryInterface(pUnk, &IID_IVdsProvider, (void**)&pProvider);
 		IUnknown_Release(pUnk);
 		if (hr != S_OK) {
-			VDS_SET_ERROR(hr);
 			suprintf("Could not get VDS Provider: %s", WindowsErrorString());
-			goto out;
+			break;
 		}
 
 		// Get VDS Software Provider
 		hr = IVdsSwProvider_QueryInterface(pProvider, &IID_IVdsSwProvider, (void**)&pSwProvider);
 		IVdsProvider_Release(pProvider);
 		if (hr != S_OK) {
-			VDS_SET_ERROR(hr);
 			suprintf("Could not get VDS Software Provider: %s", WindowsErrorString());
-			goto out;
+			break;
 		}
 
 		// Get VDS Software Provider Packs
 		hr = IVdsSwProvider_QueryPacks(pSwProvider, &pEnumPack);
 		IVdsSwProvider_Release(pSwProvider);
 		if (hr != S_OK) {
-			VDS_SET_ERROR(hr);
 			suprintf("Could not get VDS Software Provider Packs: %s", WindowsErrorString());
-			goto out;
+			break;
 		}
 
 		// Enumerate Provider Packs
@@ -625,18 +610,16 @@ static BOOL GetVdsDiskInterface(DWORD DriveIndex, const IID* InterfaceIID, void*
 			hr = IUnknown_QueryInterface(pPackUnk, &IID_IVdsPack, (void**)&pPack);
 			IUnknown_Release(pPackUnk);
 			if (hr != S_OK) {
-				VDS_SET_ERROR(hr);
 				suprintf("Could not query VDS Software Provider Pack: %s", WindowsErrorString());
-				goto out;
+				break;
 			}
 
 			// Use the pack interface to access the disks
 			hr = IVdsPack_QueryDisks(pPack, &pEnumDisk);
 			IVdsPack_Release(pPack);
 			if (hr != S_OK) {
-				VDS_SET_ERROR(hr);
 				suprintf("Could not query VDS disks: %s", WindowsErrorString());
-				goto out;
+				break;
 			}
 
 			// List disks
@@ -648,36 +631,34 @@ static BOOL GetVdsDiskInterface(DWORD DriveIndex, const IID* InterfaceIID, void*
 				hr = IUnknown_QueryInterface(pDiskUnk, &IID_IVdsDisk, (void**)&pDisk);
 				IUnknown_Release(pDiskUnk);
 				if (hr != S_OK) {
-					VDS_SET_ERROR(hr);
 					suprintf("Could not query VDS Disk Interface: %s", WindowsErrorString());
-					goto out;
+					break;
 				}
 
 				// Get the disk properties
 				hr = IVdsDisk_GetProperties(pDisk, &prop);
 				if ((hr != S_OK) && (hr != VDS_S_PROPERTIES_INCOMPLETE)) {
 					IVdsDisk_Release(pDisk);
-					VDS_SET_ERROR(hr);
 					suprintf("Could not query VDS Disk Properties: %s", WindowsErrorString());
-					goto out;
+					break;
 				}
 
 				// Check if we are on the target disk
 				hr = (HRESULT)_wcsicmp(wPhysicalName, prop.pwszName);
 				CoTaskMemFree(prop.pwszName);
 				if (hr != S_OK) {
-					IVdsDisk_Release(pDisk);
+					hr = S_OK;
 					continue;
 				}
 
 				// Instantiate the requested VDS disk interface
 				hr = IVdsDisk_QueryInterface(pDisk, InterfaceIID, pInterfaceInstance);
 				IVdsDisk_Release(pDisk);
-				if (hr != S_OK) {
-					VDS_SET_ERROR(hr);
+				if (hr != S_OK)
 					suprintf("Could not access the requested Disk interface: %s", WindowsErrorString());
-				}
-				goto out;
+
+				// With the interface found, we should be able to return
+				break;
 			}
 			IEnumVdsObject_Release(pEnumDisk);
 		}
@@ -686,6 +667,7 @@ static BOOL GetVdsDiskInterface(DWORD DriveIndex, const IID* InterfaceIID, void*
 	IEnumVdsObject_Release(pEnum);
 
 out:
+	VDS_SET_ERROR(hr);
 	return (hr == S_OK);
 }
 
@@ -713,10 +695,8 @@ BOOL DeletePartition(DWORD DriveIndex, ULONGLONG PartitionOffset, BOOL bSilent)
 			suprintf("● Partition %d (offset: %lld, size: %s)", prop_array[i].ulPartitionNumber,
 				prop_array[i].ullOffset, SizeToHumanReadable(prop_array[i].ullSize, FALSE, FALSE));
 			hr = IVdsAdvancedDisk_DeletePartition(pAdvancedDisk, prop_array[i].ullOffset, TRUE, TRUE);
-			if (hr != S_OK) {
-				VDS_SET_ERROR(hr);
+			if (hr != S_OK)
 				suprintf("Could not delete partition: %s", WindowsErrorString());
-			}
 		}
 	} else {
 		suprintf("No partition to delete on disk");
@@ -724,6 +704,7 @@ BOOL DeletePartition(DWORD DriveIndex, ULONGLONG PartitionOffset, BOOL bSilent)
 	}
 	CoTaskMemFree(prop_array);
 	IVdsAdvancedDisk_Release(pAdvancedDisk);
+	VDS_SET_ERROR(hr);
 	return (hr == S_OK);
 }
 
@@ -753,7 +734,6 @@ BOOL ListVdsVolumes(BOOL bSilent)
 	hr = CoCreateInstance(&CLSID_VdsLoader, NULL, CLSCTX_LOCAL_SERVER | CLSCTX_REMOTE_SERVER,
 		&IID_IVdsServiceLoader, (void**)&pLoader);
 	if (hr != S_OK) {
-		VDS_SET_ERROR(hr);
 		suprintf("Could not create VDS Loader Instance: %s", WindowsErrorString());
 		goto out;
 	}
@@ -762,7 +742,6 @@ BOOL ListVdsVolumes(BOOL bSilent)
 	hr = IVdsServiceLoader_LoadService(pLoader, L"", &pService);
 	IVdsServiceLoader_Release(pLoader);
 	if (hr != S_OK) {
-		VDS_SET_ERROR(hr);
 		suprintf("Could not load VDS Service: %s", WindowsErrorString());
 		goto out;
 	}
@@ -770,7 +749,6 @@ BOOL ListVdsVolumes(BOOL bSilent)
 	// Wait for the Service to become ready if needed
 	hr = IVdsService_WaitForServiceReady(pService);
 	if (hr != S_OK) {
-		VDS_SET_ERROR(hr);
 		suprintf("VDS Service is not ready: %s", WindowsErrorString());
 		goto out;
 	}
@@ -779,7 +757,6 @@ BOOL ListVdsVolumes(BOOL bSilent)
 	hr = IVdsService_QueryProviders(pService, VDS_QUERY_SOFTWARE_PROVIDERS, &pEnum);
 	IVdsService_Release(pService);
 	if (hr != S_OK) {
-		VDS_SET_ERROR(hr);
 		suprintf("Could not query VDS Service Providers: %s", WindowsErrorString());
 		goto out;
 	}
@@ -794,27 +771,24 @@ BOOL ListVdsVolumes(BOOL bSilent)
 		hr = IUnknown_QueryInterface(pUnk, &IID_IVdsProvider, (void**)&pProvider);
 		IUnknown_Release(pUnk);
 		if (hr != S_OK) {
-			VDS_SET_ERROR(hr);
 			suprintf("Could not get VDS Provider: %s", WindowsErrorString());
-			goto out;
+			break;
 		}
 
 		// Get VDS Software Provider
 		hr = IVdsSwProvider_QueryInterface(pProvider, &IID_IVdsSwProvider, (void**)&pSwProvider);
 		IVdsProvider_Release(pProvider);
 		if (hr != S_OK) {
-			VDS_SET_ERROR(hr);
 			suprintf("Could not get VDS Software Provider: %s", WindowsErrorString());
-			goto out;
+			break;
 		}
 
 		// Get VDS Software Provider Packs
 		hr = IVdsSwProvider_QueryPacks(pSwProvider, &pEnumPack);
 		IVdsSwProvider_Release(pSwProvider);
 		if (hr != S_OK) {
-			VDS_SET_ERROR(hr);
 			suprintf("Could not get VDS Software Provider Packs: %s", WindowsErrorString());
-			goto out;
+			break;
 		}
 
 		// Enumerate Provider Packs
@@ -826,17 +800,15 @@ BOOL ListVdsVolumes(BOOL bSilent)
 			hr = IUnknown_QueryInterface(pPackUnk, &IID_IVdsPack, (void**)&pPack);
 			IUnknown_Release(pPackUnk);
 			if (hr != S_OK) {
-				VDS_SET_ERROR(hr);
 				suprintf("Could not query VDS Software Provider Pack: %s", WindowsErrorString());
-				goto out;
+				break;
 			}
 
 			// Use the pack interface to access the disks
 			hr = IVdsPack_QueryVolumes(pPack, &pEnumVolume);
 			if (hr != S_OK) {
-				VDS_SET_ERROR(hr);
 				suprintf("Could not query VDS volumes: %s", WindowsErrorString());
-				goto out;
+				break;
 			}
 
 			// List volumes
@@ -850,17 +822,15 @@ BOOL ListVdsVolumes(BOOL bSilent)
 				// Get the volume interface.
 				hr = IUnknown_QueryInterface(pVolumeUnk, &IID_IVdsVolume, (void**)&pVolume);
 				if (hr != S_OK) {
-					VDS_SET_ERROR(hr);
 					suprintf("Could not query VDS Volume Interface: %s", WindowsErrorString());
-					goto out;
+					break;
 				}
 
 				// Get the volume properties
 				hr = IVdsVolume_GetProperties(pVolume, &prop);
 				if ((hr != S_OK) && (hr != VDS_S_PROPERTIES_INCOMPLETE)) {
-					VDS_SET_ERROR(hr);
 					suprintf("Could not query VDS Volume Properties: %s", WindowsErrorString());
-					goto out;
+					break;
 				}
 
 				uprintf("FOUND VOLUME: '%S'", prop.pwszName);
@@ -870,18 +840,17 @@ BOOL ListVdsVolumes(BOOL bSilent)
 				// Get the volume MF3 interface.
 				hr = IUnknown_QueryInterface(pVolumeUnk, &IID_IVdsVolumeMF3, (void**)&pVolumeMF3);
 				if (hr != S_OK) {
-					VDS_SET_ERROR(hr);
 					suprintf("Could not query VDS VolumeMF3 Interface: %s", WindowsErrorString());
-					goto out;
+					break;
 				}
 
 				// Get the volume properties
 				hr = IVdsVolumeMF3_QueryVolumeGuidPathnames(pVolumeMF3, &wszPathArray, &ulNumberOfPaths);
 				if ((hr != S_OK) && (hr != VDS_S_PROPERTIES_INCOMPLETE)) {
-					VDS_SET_ERROR(hr);
 					suprintf("Could not query VDS VolumeMF3 GUID PathNames: %s", WindowsErrorString());
-					goto out;
+					break;
 				}
+				hr = S_OK;
 
 				for (i = 0; i < ulNumberOfPaths; i++)
 					uprintf("  VOL GUID: '%S'", wszPathArray[i]);
@@ -896,6 +865,7 @@ BOOL ListVdsVolumes(BOOL bSilent)
 	IEnumVdsObject_Release(pEnum);
 
 out:
+	VDS_SET_ERROR(hr);
 	return (hr == S_OK);
 }
 

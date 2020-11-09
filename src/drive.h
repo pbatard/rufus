@@ -54,7 +54,7 @@
 
 #define FILE_FLOPPY_DISKETTE                0x00000004
 
-#define VDS_SET_ERROR(hr) do { if (hr == S_FALSE) hr = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_GEN_FAILURE; FormatStatus = hr; SetLastError(hr); } while(0)
+#define VDS_SET_ERROR(hr) do { if (hr != S_OK) { hr = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_GEN_FAILURE; FormatStatus = hr; SetLastError(hr); } } while(0)
 
 #if !defined(__MINGW32__)
 typedef enum _FSINFOCLASS {
