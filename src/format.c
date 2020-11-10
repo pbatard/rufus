@@ -1810,8 +1810,7 @@ DWORD WINAPI FormatThread(void* param)
 				fflush(log_fd);
 			}
 
-			if (!BadBlocks(hPhysicalDrive, SelectedDrive.DiskSize, (sel >= 2) ? 4 : sel +1,
-				(sel < 2) ? 0 : sel - 2, &report, log_fd)) {
+			if (!BadBlocks(hPhysicalDrive, SelectedDrive.DiskSize, (sel >= 2) ? 4 : sel +1, sel, &report, log_fd)) {
 				uprintf("Bad blocks: Check failed.");
 				if (!IS_ERROR(FormatStatus))
 					FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_BADBLOCKS_FAILURE);

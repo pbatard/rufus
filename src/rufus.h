@@ -91,8 +91,10 @@
 #define MARQUEE_TIMER_REFRESH       10			// Time between progress bar marquee refreshes, in ms
 #define FS_DEFAULT                  FS_FAT32
 #define SINGLE_CLUSTERSIZE_DEFAULT  0x00000100
-#define BADLOCKS_PATTERN_TYPES      3
+#define BADLOCKS_PATTERN_TYPES      5
 #define BADBLOCK_PATTERN_COUNT      4
+#define BADBLOCK_PATTERN_ONE_PASS   {0x55, 0x00, 0x00, 0x00}
+#define BADBLOCK_PATTERN_TWO_PASSES {0x55, 0xaa, 0x00, 0x00}
 #define BADBLOCK_PATTERN_SLC        {0x00, 0xff, 0x55, 0xaa}
 #define BADCLOCK_PATTERN_MLC        {0x00, 0xff, 0x33, 0xcc}
 #define BADBLOCK_PATTERN_TLC        {0x00, 0xff, 0x1c71c7, 0xe38e38}

@@ -408,7 +408,8 @@ static unsigned int test_rw(HANDLE hDrive, blk64_t last_block, size_t block_size
 							size_t blocks_at_once, int pattern_type, int nb_passes)
 {
 	const unsigned int pattern[BADLOCKS_PATTERN_TYPES][BADBLOCK_PATTERN_COUNT] =
-		{ BADBLOCK_PATTERN_SLC, BADCLOCK_PATTERN_MLC, BADBLOCK_PATTERN_TLC };
+		{ BADBLOCK_PATTERN_ONE_PASS, BADBLOCK_PATTERN_TWO_PASSES, BADBLOCK_PATTERN_SLC,
+		  BADCLOCK_PATTERN_MLC, BADBLOCK_PATTERN_TLC };
 	unsigned char *buffer = NULL, *read_buffer;
 	int i, pat_idx;
 	unsigned int bb_count = 0;

@@ -1555,11 +1555,11 @@ void ShowLanguageMenu(RECT rcExclude)
 void SetPassesTooltip(void)
 {
 	const unsigned int pattern[BADLOCKS_PATTERN_TYPES][BADBLOCK_PATTERN_COUNT] =
-	{ BADBLOCK_PATTERN_SLC, BADCLOCK_PATTERN_MLC, BADBLOCK_PATTERN_TLC };
+	{ BADBLOCK_PATTERN_ONE_PASS, BADBLOCK_PATTERN_TWO_PASSES, BADBLOCK_PATTERN_SLC,
+	  BADCLOCK_PATTERN_MLC, BADBLOCK_PATTERN_TLC };
 	int sel = ComboBox_GetCurSel(hNBPasses);
-	int type = (sel < 2) ? 0 : sel - 2;
 	CreateTooltip(hNBPasses, lmprintf(MSG_153 + ((sel >= 2) ? 3 : sel),
-		pattern[type][0], pattern[type][1], pattern[type][2], pattern[type][3]), -1);
+		pattern[sel][0], pattern[sel][1], pattern[sel][2], pattern[sel][3]), -1);
 }
 
 void SetBootTypeDropdownWidth(void)
