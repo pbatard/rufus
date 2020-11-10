@@ -683,6 +683,10 @@ BOOL DeletePartition(DWORD DriveIndex, ULONGLONG PartitionOffset, BOOL bSilent)
 
 	if (!GetVdsDiskInterface(DriveIndex, &IID_IVdsAdvancedDisk, (void**)&pAdvancedDisk, bSilent))
 		return FALSE;
+	if (pAdvancedDisk == NULL) {
+		suprintf("No partition to delete on disk");
+		return TRUE;
+	}
 
 	// Query the partition data, so we can get the start offset, which we need for deletion
 	hr = IVdsAdvancedDisk_QueryPartitions(pAdvancedDisk, &prop_array, &prop_array_size);
@@ -1222,7 +1226,8 @@ BOOL GetDriveLabel(DWORD DriveIndex, char* letters, char** label)
 		*label = (char*)GetExtFsLabel(DriveIndex, 0);
 		if (*label == NULL) {
 			SetLastError(error);
-			duprintf("Failed to read label: %s", WindowsErrorString());
+			if (error != ERROR_UNRECOGNIZED_VOLUME)
+				duprintf("Failed to read label: %s", WindowsErrorString());
 			*label = STR_NO_LABEL;
 		}
 	}
