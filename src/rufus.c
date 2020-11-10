@@ -2760,12 +2760,14 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	case UM_PROGRESS_INIT:
 		isMarquee = (wParam == PBS_MARQUEE);
 		SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_NORMAL, 0);
-		if (isMarquee)
+		if (isMarquee) {
 			SendMessage(hProgress, PBM_SETMARQUEE, TRUE, 0);
-		else
+			SetTaskbarProgressState(TASKBAR_INDETERMINATE);
+		} else {
 			SendMessage(hProgress, PBM_SETPOS, 0, 0);
-		SetTaskbarProgressState(TASKBAR_NORMAL);
-		SetTaskbarProgressValue(0, MAX_PROGRESS);
+			SetTaskbarProgressState(TASKBAR_NORMAL);
+			SetTaskbarProgressValue(0, MAX_PROGRESS);
+		}
 		break;
 
 	case UM_PROGRESS_EXIT:
