@@ -343,7 +343,7 @@ typedef struct {
 	int64_t mismatch_size;
 	uint32_t wininst_version;
 	BOOLEAN is_iso;
-	BOOLEAN is_bootable_img;
+	uint8_t is_bootable_img;
 	BOOLEAN is_vhd;
 	BOOLEAN is_windows_img;
 	BOOLEAN disable_iso;
@@ -567,7 +567,7 @@ extern BOOL WimExtractFile(const char* wim_image, int index, const char* src, co
 extern BOOL WimExtractFile_API(const char* image, int index, const char* src, const char* dst, BOOL bSilent);
 extern BOOL WimExtractFile_7z(const char* image, int index, const char* src, const char* dst, BOOL bSilent);
 extern BOOL WimApplyImage(const char* image, int index, const char* dst);
-extern BOOL IsBootableImage(const char* path);
+extern uint8_t IsBootableImage(const char* path);
 extern BOOL AppendVHDFooter(const char* vhd_path);
 extern int SetWinToGoIndex(void);
 extern int IsHDD(DWORD DriveIndex, uint16_t vid, uint16_t pid, const char* strid);

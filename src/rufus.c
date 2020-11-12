@@ -119,7 +119,7 @@ BOOL enable_HDDs = FALSE, enable_VHDs = TRUE, enable_ntfs_compression = FALSE, n
 BOOL advanced_mode_device, advanced_mode_format, allow_dual_uefi_bios, detect_fakes, enable_vmdk, force_large_fat32, usb_debug;
 BOOL use_fake_units, preserve_timestamps = FALSE, fast_zeroing = FALSE, app_changed_size = FALSE;
 BOOL zero_drive = FALSE, list_non_usb_removable_drives = FALSE, enable_file_indexing, large_drive = FALSE;
-BOOL write_as_image = FALSE, write_as_esp = FALSE, installed_uefi_ntfs = FALSE, use_vds = FALSE;
+BOOL write_as_image = FALSE, write_as_esp = FALSE, installed_uefi_ntfs = FALSE, use_vds = FALSE, ignore_boot_marker = FALSE;
 BOOL windows_to_go_selected = FALSE;
 float fScale = 1.0f;
 int dialog_showing = 0, selection_default = BT_IMAGE, persistence_unit_selection = -1;
@@ -1209,7 +1209,7 @@ DWORD WINAPI ImageScanThread(LPVOID param)
 	EnableControls(FALSE, FALSE);
 	memset(&img_report, 0, sizeof(img_report));
 	img_report.is_iso = (BOOLEAN)ExtractISO(image_path, "", TRUE);
-	img_report.is_bootable_img = (BOOLEAN)IsBootableImage(image_path);
+	img_report.is_bootable_img = IsBootableImage(image_path);
 	ComboBox_ResetContent(hImageOption);
 
 	if ((FormatStatus == (ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_CANCELLED)) ||
@@ -1224,6 +1224,7 @@ DWORD WINAPI ImageScanThread(LPVOID param)
 		PrintInfoDebug(0, MSG_203);
 		PrintStatus(0, MSG_203);
 		EnableControls(TRUE, FALSE);
+		MessageBoxExU(hMainDialog, lmprintf(MSG_082), lmprintf(MSG_081), MB_OK | MB_ICONINFORMATION | MB_IS_RTL, selected_langid);
 		goto out;
 	}
 
@@ -1247,8 +1248,11 @@ DWORD WINAPI ImageScanThread(LPVOID param)
 		}
 		uprintf("  Image is %sa UEFI bootable Windows installation image", img_report.has_efi ? "" : "NOT ");
 	} else if (img_report.is_bootable_img) {
-		uprintf("  Image is a %sbootable %s image",
-			(img_report.compression_type != BLED_COMPRESSION_NONE) ? "compressed " : "", img_report.is_vhd ? "VHD" : "disk");
+		if (img_report.is_bootable_img == 2)
+			uprintf("  Image is a FORCED non-bootable image");
+		else
+			uprintf("  Image is a %sbootable %s image",
+				(img_report.compression_type != BLED_COMPRESSION_NONE) ? "compressed " : "", img_report.is_vhd ? "VHD" : "disk");
 		selection_default = BT_IMAGE;
 	}
 
@@ -3295,6 +3299,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	enable_file_indexing = ReadSettingBool(SETTING_ENABLE_FILE_INDEXING);
 	enable_VHDs = !ReadSettingBool(SETTING_DISABLE_VHDS);
 	enable_extra_hashes = ReadSettingBool(SETTING_ENABLE_EXTRA_HASHES);
+	ignore_boot_marker = ReadSettingBool(SETTING_IGNORE_BOOT_MARKER);
 	// We want above normal priority by default, so we offset the value.
 	default_thread_priority = ReadSetting32(SETTING_DEFAULT_THREAD_PRIORITY) + THREAD_PRIORITY_ABOVE_NORMAL;
 
@@ -3464,7 +3469,7 @@ relaunch:
 	while(GetMessage(&msg, NULL, 0, 0)) {
 		static BOOL ctrl_without_focus = FALSE;
 		BOOL no_focus = (msg.message == WM_SYSKEYDOWN) && !(msg.lParam & 0x20000000);
-		// ** *********** ***************
+		// ** ***************************
 		// .,ABCDEFGHIJKLMNOPQRSTUVWXYZ+-
 
 		// Sigh... The things one need to do to detect standalone use of the 'Alt' key.
@@ -3643,6 +3648,14 @@ relaunch:
 				WriteSettingBool(SETTING_FORCE_LARGE_FAT32_FORMAT, force_large_fat32);
 				PrintStatusTimeout(lmprintf(MSG_254), force_large_fat32);
 				GetDevices(0);
+				continue;
+			}
+			// Alt-M => Toggle the check for the 0x55 0xAA boot marker at offset 0x1fe.
+			// This means that Rufus treats anything selected as a writeable DD image.
+			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'M')) {
+				ignore_boot_marker = !ignore_boot_marker;
+				WriteSettingBool(SETTING_IGNORE_BOOT_MARKER, ignore_boot_marker);
+				PrintStatusTimeout(lmprintf(MSG_319), ignore_boot_marker);
 				continue;
 			}
 			// Alt N => Enable NTFS compression

@@ -578,6 +578,7 @@ t MSG_315 "Multiple buttons"
 t MSG_316 "Number of passes"
 t MSG_317 "Disk ID"
 t MSG_318 "Default thread priority: %d"
+t MSG_319 "Ignore Boot Marker"
 
 #########################################################################
 l "ar-SA" "Arabic (العربية)" 0x0401, 0x0801, 0x0c01, 0x1001, 0x1401, 0x1801, 0x1c01, 0x2001, 0x2401, 0x2801, 0x2c01, 0x3001, 0x3401, 0x3801, 0x3c01, 0x4001

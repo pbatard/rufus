@@ -1293,7 +1293,6 @@ const struct {int (*fn)(FILE *fp); char* str;} known_mbr[] = {
 // Returns TRUE if the drive seems bootable, FALSE otherwise
 BOOL AnalyzeMBR(HANDLE hPhysicalDrive, const char* TargetName, BOOL bSilent)
 {
-	const char* mbr_name = "Master Boot Record";
 	FAKE_FD fake_fd = { 0 };
 	FILE* fp = (FILE*)&fake_fd;
 	int i;
@@ -1302,17 +1301,17 @@ BOOL AnalyzeMBR(HANDLE hPhysicalDrive, const char* TargetName, BOOL bSilent)
 	set_bytes_per_sector(SelectedDrive.SectorSize);
 
 	if (!is_br(fp)) {
-		suprintf("%s does not have an x86 %s", TargetName, mbr_name);
+		suprintf("%s does not have a Boot Marker", TargetName);
 		return FALSE;
 	}
 	for (i=0; i<ARRAYSIZE(known_mbr); i++) {
 		if (known_mbr[i].fn(fp)) {
-			suprintf("%s has a %s %s", TargetName, known_mbr[i].str, mbr_name);
+			suprintf("%s has a %s Master Boot Record", TargetName, known_mbr[i].str);
 			return TRUE;
 		}
 	}
 
-	suprintf("%s has an unknown %s", TargetName, mbr_name);
+	suprintf("%s has an unknown Master Boot Record", TargetName);
 	return TRUE;
 }
 

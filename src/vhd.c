@@ -111,6 +111,7 @@ PF_TYPE_DECL(RPC_ENTRY, RPC_STATUS, UuidCreate, (UUID __RPC_FAR*));
 uint32_t wim_nb_files, wim_proc_files, wim_extra_files;
 HANDLE apply_wim_thread = NULL;
 extern int default_thread_priority;
+extern BOOL ignore_boot_marker;
 
 static uint8_t wim_flags = 0;
 static wchar_t wmount_path[MAX_PATH] = { 0 };
@@ -277,7 +278,8 @@ BOOL IsCompressedBootableImage(const char* path)
 	return FALSE;
 }
 
-BOOL IsBootableImage(const char* path)
+// 0: non-bootable, 1: bootable, 2: forced bootable
+uint8_t IsBootableImage(const char* path)
 {
 	HANDLE handle = INVALID_HANDLE_VALUE;
 	LARGE_INTEGER liImageSize;
@@ -287,7 +289,7 @@ BOOL IsBootableImage(const char* path)
 	uint32_t checksum, old_checksum;
 	uint64_t wim_magic = 0;
 	LARGE_INTEGER ptr = { 0 };
-	BOOL is_bootable_img = FALSE;
+	uint8_t is_bootable_img = 0;
 
 	uprintf("Disk image analysis:");
 	handle = CreateFileU(path, GENERIC_READ, FILE_SHARE_READ, NULL,
@@ -297,9 +299,9 @@ BOOL IsBootableImage(const char* path)
 		goto out;
 	}
 
-	is_bootable_img = (BOOLEAN)IsCompressedBootableImage(path);
+	is_bootable_img = IsCompressedBootableImage(path) ? 1 : 0;
 	if (img_report.compression_type == BLED_COMPRESSION_NONE)
-		is_bootable_img = (BOOLEAN)AnalyzeMBR(handle, "  Image", FALSE);
+		is_bootable_img = AnalyzeMBR(handle, "  Image", FALSE) ? 1 : (ignore_boot_marker ? 2 : 0);
 
 	if (!GetFileSizeEx(handle, &liImageSize)) {
 		uprintf("  Could not get image size: %s", WindowsErrorString());
@@ -326,7 +328,7 @@ BOOL IsBootableImage(const char* path)
 			if ( (bswap_uint32(footer->file_format_version) != VHD_FOOTER_FILE_FORMAT_V1_0)
 			  || (bswap_uint32(footer->disk_type) != VHD_FOOTER_TYPE_FIXED_HARD_DISK)) {
 				uprintf("  Unsupported type of VHD image");
-				is_bootable_img = FALSE;
+				is_bootable_img = 0;
 				goto out;
 			}
 			// Might as well validate the checksum while we're at it

@@ -42,6 +42,7 @@ extern char* ini_file;
 #define SETTING_ENABLE_VMDK_DETECTION       "EnableVmdkDetection"
 #define SETTING_ENABLE_WIN_DUAL_EFI_BIOS    "EnableWindowsDualUefiBiosMode"
 #define SETTING_FORCE_LARGE_FAT32_FORMAT    "ForceLargeFat32Formatting"
+#define SETTING_IGNORE_BOOT_MARKER          "IgnoreBootMarker"
 #define SETTING_INCLUDE_BETAS               "CheckForBetas"
 #define SETTING_LAST_UPDATE                 "LastUpdateCheck"
 #define SETTING_LOCALE                      "Locale"
