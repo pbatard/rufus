@@ -1480,6 +1480,7 @@ static BOOL WriteDrive(HANDLE hPhysicalDrive, HANDLE hSourceImage)
 	LARGE_INTEGER li;
 	DWORD i, rSize, wSize, xSize, BufSize;
 	uint64_t wb, target_size = hSourceImage?img_report.image_size:SelectedDrive.DiskSize;
+	uint64_t cur_value, last_value = UINT64_MAX;
 	int64_t bled_ret;
 	uint8_t* buffer = NULL;
 	uint32_t zero_data, *cmp_buffer = NULL;
@@ -1525,7 +1526,7 @@ static BOOL WriteDrive(HANDLE hPhysicalDrive, HANDLE hSourceImage)
 			goto out;
 		}
 	} else {
-		uprintf(hSourceImage?"Writing Image...":fast_zeroing?"Fast-zeroing drive...":"Zeroing drive...");
+		uprintf(hSourceImage?"Writing Image:":fast_zeroing?"Fast-zeroing drive:":"Zeroing drive:");
 		// Our buffer size must be a multiple of the sector size and *ALIGNED* to the sector size
 		BufSize = ((DD_BUFFER_SIZE + SelectedDrive.SectorSize - 1) / SelectedDrive.SectorSize) * SelectedDrive.SectorSize;
 		buffer = (uint8_t*)_mm_malloc(BufSize, SelectedDrive.SectorSize);
@@ -1553,8 +1554,13 @@ static BOOL WriteDrive(HANDLE hPhysicalDrive, HANDLE hSourceImage)
 		// With Windows' default optimizations, sync read + sync write for sequential operations
 		// will be as fast, if not faster, than whatever async scheme you can come up with.
 		rSize = BufSize;
-		for (wb = 0, wSize = 0; wb < (uint64_t)SelectedDrive.DiskSize; wb += wSize) {
+		for (wb = 0, wSize = 0; wb < target_size; wb += wSize) {
 			UpdateProgressWithInfo(OP_FORMAT, hSourceImage ? MSG_261 : fast_zeroing ? MSG_306 : MSG_286, wb, target_size);
+			cur_value = (wb * min(80, target_size)) / target_size;
+			if (cur_value != last_value) {
+				last_value = cur_value;
+				uprintfs("+");
+			}
 			if (hSourceImage != NULL) {
 				s = ReadFile(hSourceImage, buffer, BufSize, &rSize, NULL);
 				if (!s) {

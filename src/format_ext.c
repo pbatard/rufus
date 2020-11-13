@@ -190,7 +190,7 @@ errcode_t ext2fs_print_progress(int64_t cur_value, int64_t max_value)
 		return 0;
 	UpdateProgressWithInfo(OP_FORMAT, MSG_217, (uint64_t)((ext2_percent_start * max_value) + (ext2_percent_share * cur_value)), max_value);
 	cur_value = (int64_t)(((float)cur_value / (float)max_value) * min(ext2_max_marker, (float)max_value));
-	if ((cur_value < last_value) || (cur_value > last_value)) {
+	if (cur_value != last_value) {
 		last_value = cur_value;
 		uprintfs("+");
 	}
