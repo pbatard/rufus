@@ -1670,6 +1670,7 @@ DWORD WINAPI FormatThread(void* param)
 {
 	int r;
 	BOOL ret, use_large_fat32, windows_to_go, actual_lock_drive = lock_drive;
+	BOOL need_logical = FALSE;
 	DWORD cr, DriveIndex = (DWORD)(uintptr_t)param, ClusterSize, Flags;
 	HANDLE hPhysicalDrive = INVALID_HANDLE_VALUE;
 	HANDLE hLogicalVolume = INVALID_HANDLE_VALUE;
@@ -1738,8 +1739,10 @@ DWORD WINAPI FormatThread(void* param)
 	PrintInfo(0, MSG_239, lmprintf(MSG_307));
 	if (!DeletePartition(DriveIndex, 0, FALSE)) {
 		SetLastError(FormatStatus);
-		uprintf("Notice: Could not delete partitions: %s", WindowsErrorString());
 		FormatStatus = 0;
+		// If we couldn't delete partitions, Windows give us trouble unless we
+		// request access to the logical drive. Don't ask me why!
+		need_logical = TRUE;
 	}
 
 	// An extra refresh of the (now empty) partition data here appears to be helpful
@@ -1755,17 +1758,17 @@ DWORD WINAPI FormatThread(void* param)
 
 	// If we write an image that contains an ESP, Windows forcibly reassigns/removes the target
 	// drive, which causes a write error. To work around this, we must lock the logical drive.
-	if ((boot_type == BT_IMAGE) && write_as_image) {
-		// ...and get a lock to the logical drive so that we can actually write something
+	// Also need to lock logical drive if we couldn't delete partitions, to keep Windows happy...
+	if (((boot_type == BT_IMAGE) && write_as_image) || (need_logical)) {
+		uprintf("Requesting logical volume handle...");
 		hLogicalVolume = GetLogicalHandle(DriveIndex, 0, TRUE, FALSE, !actual_lock_drive);
 		if (hLogicalVolume == INVALID_HANDLE_VALUE) {
-			uprintf("Could not lock volume");
+			uprintf("Could not access logical volume");
 			FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_OPEN_FAILED;
 			goto out;
-		} else if (hLogicalVolume == NULL) {
-			// NULL is returned for cases where the drive is not yet partitioned
-			uprintf("Drive does not appear to be partitioned");
-		} else if (!UnmountVolume(hLogicalVolume)) {
+		// If the call succeeds (and we don't get a NULL logical handle as returned for
+		// unpartitioned drives), try to unmount the volume.
+		} else if ((hLogicalVolume == NULL) && (!UnmountVolume(hLogicalVolume))) {
 			uprintf("Trying to continue regardless...");
 		}
 	}
