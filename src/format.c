@@ -1423,7 +1423,16 @@ static BOOL SetupWinToGo(DWORD DriveIndex, const char* drive_name, BOOL use_esp)
 
 static void update_progress(const uint64_t processed_bytes)
 {
+	// NB: We don't really care about resetting this value to UINT64_MAX for a new pass.
+	static uint64_t last_value = UINT64_MAX;
+	uint64_t cur_value;
+
 	UpdateProgressWithInfo(OP_FORMAT, MSG_261, processed_bytes, img_report.image_size);
+	cur_value = (processed_bytes * min(80, img_report.image_size)) / img_report.image_size;
+	if (cur_value != last_value) {
+		last_value = cur_value;
+		uprintfs("+");
+	}
 }
 
 // Some compressed images use streams that aren't multiple of the sector
@@ -1498,7 +1507,7 @@ static BOOL WriteDrive(HANDLE hPhysicalDrive, HANDLE hSourceImage)
 	UpdateProgressWithInfoInit(NULL, FALSE);
 
 	if (img_report.compression_type != BLED_COMPRESSION_NONE) {
-		uprintf("Writing compressed image...");
+		uprintf("Writing compressed image:");
 		sec_buf = (uint8_t*)_mm_malloc(SelectedDrive.SectorSize, SelectedDrive.SectorSize);
 		if (sec_buf == NULL) {
 			FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_NOT_ENOUGH_MEMORY;

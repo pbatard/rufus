@@ -749,6 +749,7 @@ static DWORD WINAPI WimApplyImageThread(LPVOID param)
 	}
 
 	uprintf("Applying Windows image...");
+	UpdateProgressWithInfoInit(NULL, TRUE);
 	// Run a first pass using WIM_FLAG_NO_APPLY to count the files
 	wim_nb_files = 0;
 	wim_proc_files = 0;
