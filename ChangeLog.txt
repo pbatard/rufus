@@ -3,10 +3,11 @@ o Version 3.13 (2020.11.??)
     Add marquee operation progress to the taskbar icon
     Add zeroing/image writing progress to the log
     Switch to using 0x55 and 0xAA instead of 0x00 and 0xFF for low pass badblock check
-    Switch to using fake/maufacturer units when computing the default label
+    Switch to using fake/manufacturer units when computing the default label
     Fix overnumerous write retries on error when writing a disk image
     Work around Windows' abysmal handling of removable drives that contain an ESP
     Improve mounting/unmounting of volumes
+    Update UEFI:NTFS file system drivers to version 1.7
     Other internal fixes and improvements (VDS, error reporting, etc.)
 
 o Version 3.12 (2020.10.14)
