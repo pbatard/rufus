@@ -1,4 +1,4 @@
-o Version 3.13 (2020.11.??)
+o Version 3.13 (2020.11.20)
     Add a cheat mode (Alt-M) to accept disk images without a Boot Marker
     Add marquee operation progress to the taskbar icon
     Add zeroing/image writing progress to the log

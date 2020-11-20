@@ -8,7 +8,7 @@
        for an interesting struggle, when you also happen to have a comma in one of the fields... -->
   <Identity
    Name="Rufus"
-   Version="3.13.1710.0"
+   Version="3.13.1730.0"
    ProcessorArchitecture="@ARCH@"
    Publisher='CN=Akeo Consulting, O=Akeo Consulting, STREET=24 Grey Rock, L=Milford, S=Co. Donegal, PostalCode=F92 D667, C=IE' />
   <Properties>
@@ -24,7 +24,7 @@
     <TargetDeviceFamily
      Name="Windows.Desktop"
      MinVersion="10.0.14316.0"
-     MaxVersionTested="10.0.19041.329" />
+     MaxVersionTested="10.0.19042.572" />
   </Dependencies>
   <Capabilities>
     <rescap:Capability Name="runFullTrust" />
