@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 3.5\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2020-04-17 12:18+0100\n"
-"PO-Revision-Date: 2020-04-17 12:25+0100\n"
+"POT-Creation-Date: 2020-12-11 17:07+0000\n"
+"PO-Revision-Date: 2020-12-11 17:08+0000\n"
 "Language: ru_RU\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Rufus-LCID: 0x0419, 0x0819\n"
 "Last-Translator: \n"
 "Language-Team: \n"
-"X-Generator: Poedit 2.3\n"
+"X-Generator: Poedit 2.4.2\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -288,31 +288,31 @@ msgstr "байт"
 #.
 #. *Short* version of the kilobyte size suffix
 msgid "KB"
-msgstr "Кб"
+msgstr "КБ"
 
 #. • MSG_022
 #.
 #. *Short* version of the megabyte size suffix
 msgid "MB"
-msgstr "Мб"
+msgstr "МБ"
 
 #. • MSG_023
 #.
 #. *Short* version of the gigabyte size suffix
 msgid "GB"
-msgstr "Гб"
+msgstr "ГБ"
 
 #. • MSG_024
 #.
 #. *Short* version of the terabyte size suffix
 msgid "TB"
-msgstr "Тб"
+msgstr "ТБ"
 
 #. • MSG_025
 #.
 #. *Short* version of the pentabyte size suffix
 msgid "PB"
-msgstr "Пб"
+msgstr "ПБ"
 
 #. • MSG_027
 msgid "kilobytes"
@@ -1312,8 +1312,8 @@ msgid "Formatting (%s) - estimated duration %d:%02d..."
 msgstr "Форматирование (%s) - Окончание через %d:%02d..."
 
 #. • MSG_221
-msgid "Setting Label (This may take a while)..."
-msgstr "Установка метки (Это может занять время)..."
+msgid "Setting label (%s)..."
+msgstr "Установка метки (%s)..."
 
 #. • MSG_222
 #.
@@ -1358,8 +1358,8 @@ msgid "Copying ISO files: %s"
 msgstr "Копирование ISO-файлов: %s"
 
 #. • MSG_232
-msgid "Win7 EFI boot setup (This may take a while)..."
-msgstr "Настройка Win7 EFI boot (Это может занять время)..."
+msgid "Win7 EFI boot setup (%s)..."
+msgstr "Настройка Win7 EFI boot (%s)..."
 
 #. • MSG_233
 msgid "Finalizing, please wait..."
@@ -1394,8 +1394,8 @@ msgid "Partitioning (%s)..."
 msgstr "Разметка раздела (%s)..."
 
 #. • MSG_239
-msgid "Deleting partitions..."
-msgstr "Удаление разделов..."
+msgid "Deleting partitions (%s)..."
+msgstr "Удаление разделов (%s)..."
 
 #. • MSG_240
 #.
@@ -1725,3 +1725,7 @@ msgstr "Используйте этот параметр, чтобы указа�
 #. It's the same as MSG_286 but with a process that *may* be faster, hence the name.
 msgid "Fast-zeroing drive: %s"
 msgstr "Быстрое обнуление диска: %s"
+
+#. • MSG_307
+msgid "This may take a while"
+msgstr "Это может занять время"
