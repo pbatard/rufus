@@ -1,7 +1,10 @@
 /*
  * MSAPI_UTF8: Common API calls using UTF-8 strings
- * Compensating for what Microsoft should have done a long long time ago.
- * Also see https://utf8everywhere.org
+ * Compensating for what Microsoft should have done a long long time ago, that they
+ * ONLY started to do in mid-2019 (What the £%^& took them so long?!?), as per:
+ * https://docs.microsoft.com/en-us/windows/uwp/design/globalizing/use-utf8-code-page
+ *
+ * See also: https://utf8everywhere.org
  *
  * Copyright © 2010-2020 Pete Batard <pete@akeo.ie>
  *

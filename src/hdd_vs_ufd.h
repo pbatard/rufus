@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * SMART HDD vs Flash detection - isHDD() tables
- * Copyright © 2013-2020 Pete Batard <pete@akeo.ie>
+ * Copyright © 2013-2021 Pete Batard <pete@akeo.ie>
  *
  * Based in part on drivedb.h from Smartmontools:
  * http://svn.code.sf.net/p/smartmontools/code/trunk/smartmontools/drivedb.h
@@ -138,6 +138,7 @@ static vid_score_t vid_score[] = {
 	{ 0x09da, -5 },		// A4 Tech
 	{ 0x0b27, -5 },		// Ritek
 	{ 0x0bc2, 10 },		// Seagate
+	{ 0x0bda, -10 },	// Realtek
 	{ 0x0c76, -5 },		// JMTek
 	{ 0x0cf2, -5 },		// ENE
 	{ 0x0d49, 10 },		// Maxtor

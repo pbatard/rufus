@@ -8,7 +8,7 @@
        for an interesting struggle, when you also happen to have a comma in one of the fields... -->
   <Identity
    Name="Rufus"
-   Version="3.13.1730.0"
+   Version="3.14.1730.0"
    ProcessorArchitecture="@ARCH@"
    Publisher='CN=Akeo Consulting, O=Akeo Consulting, STREET=24 Grey Rock, L=Milford, S=Co. Donegal, PostalCode=F92 D667, C=IE' />
   <Properties>

@@ -3379,14 +3379,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		Sleep(100);
 		mutex = CreateMutexA(NULL, TRUE, "Global/" APPLICATION_NAME);
 	}
-	if ((mutex == NULL) || (GetLastError() == ERROR_ALREADY_EXISTS)) {
-		// Load the translation before we print the error
-		get_loc_data_file(loc_file, selected_locale);
-		right_to_left_mode = ((selected_locale->ctrl_id) & LOC_RIGHT_TO_LEFT);
-		// Set MB_SYSTEMMODAL to prevent Far Manager from stealing focus...
-		MessageBoxExU(NULL, lmprintf(MSG_002), lmprintf(MSG_001), MB_ICONSTOP|MB_IS_RTL|MB_SYSTEMMODAL, selected_langid);
-		goto out;
-	}
+	//if ((mutex == NULL) || (GetLastError() == ERROR_ALREADY_EXISTS)) {
+	//	// Load the translation before we print the error
+	//	get_loc_data_file(loc_file, selected_locale);
+	//	right_to_left_mode = ((selected_locale->ctrl_id) & LOC_RIGHT_TO_LEFT);
+	//	// Set MB_SYSTEMMODAL to prevent Far Manager from stealing focus...
+	//	MessageBoxExU(NULL, lmprintf(MSG_002), lmprintf(MSG_001), MB_ICONSTOP|MB_IS_RTL|MB_SYSTEMMODAL, selected_langid);
+	//	goto out;
+	//}
 
 	// Save instance of the application for further reference
 	hMainInstance = hInstance;

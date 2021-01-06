@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Device detection and enumeration
- * Copyright © 2014-2020 Pete Batard <pete@akeo.ie>
+ * Copyright © 2014-2021 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -419,9 +419,9 @@ BOOL GetOpticalMedia(IMG_SAVE* img_save)
 /* For debugging user reports of HDDs vs UFDs */
 //#define FORCED_DEVICE
 #ifdef FORCED_DEVICE
-#define FORCED_VID 0x2109
-#define FORCED_PID 0x0715
-#define FORCED_NAME "KINGSTON  SA400S37960 USB Device"
+#define FORCED_VID 0x0BDA
+#define FORCED_PID 0x0306
+#define FORCED_NAME "SDXC Card"
 #endif
 
 /*
