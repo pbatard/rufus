@@ -52,7 +52,7 @@ errcode_t ext2fs_create_journal_superblock(ext2_filsys fs,
 	errcode_t		retval;
 	journal_superblock_t	*jsb;
 
-	if (num_blocks < JFS_MIN_JOURNAL_BLOCKS)
+	if (num_blocks < JBD2_MIN_JOURNAL_BLOCKS)
 		return EXT2_ET_JOURNAL_TOO_SMALL;
 
 	if ((retval = ext2fs_get_mem(fs->blocksize, &jsb)))
@@ -60,11 +60,11 @@ errcode_t ext2fs_create_journal_superblock(ext2_filsys fs,
 
 	memset (jsb, 0, fs->blocksize);
 
-	jsb->s_header.h_magic = htonl(JFS_MAGIC_NUMBER);
+	jsb->s_header.h_magic = htonl(JBD2_MAGIC_NUMBER);
 	if (flags & EXT2_MKJOURNAL_V1_SUPER)
-		jsb->s_header.h_blocktype = htonl(JFS_SUPERBLOCK_V1);
+		jsb->s_header.h_blocktype = htonl(JBD2_SUPERBLOCK_V1);
 	else
-		jsb->s_header.h_blocktype = htonl(JFS_SUPERBLOCK_V2);
+		jsb->s_header.h_blocktype = htonl(JBD2_SUPERBLOCK_V2);
 	jsb->s_blocksize = htonl(fs->blocksize);
 	jsb->s_maxlen = htonl(num_blocks);
 	jsb->s_nr_users = htonl(1);
@@ -394,8 +394,8 @@ errcode_t ext2fs_add_journal_device(ext2_filsys fs, ext2_filsys journal_dev)
 		return retval;
 
 	jsb = (journal_superblock_t *) buf;
-	if ((jsb->s_header.h_magic != (unsigned) ntohl(JFS_MAGIC_NUMBER)) ||
-	    (jsb->s_header.h_blocktype != (unsigned) ntohl(JFS_SUPERBLOCK_V2)))
+	if ((jsb->s_header.h_magic != (unsigned) ntohl(JBD2_MAGIC_NUMBER)) ||
+	    (jsb->s_header.h_blocktype != (unsigned) ntohl(JBD2_SUPERBLOCK_V2)))
 		return EXT2_ET_NO_JOURNAL_SB;
 
 	if (ntohl(jsb->s_blocksize) != (unsigned long) fs->blocksize)
@@ -403,7 +403,7 @@ errcode_t ext2fs_add_journal_device(ext2_filsys fs, ext2_filsys journal_dev)
 
 	/* Check and see if this filesystem has already been added */
 	nr_users = ntohl(jsb->s_nr_users);
-	if (nr_users > JFS_USERS_MAX)
+	if (nr_users > JBD2_USERS_MAX)
 		return EXT2_ET_CORRUPT_JOURNAL_SB;
 	for (i=0; i < nr_users; i++) {
 		if (memcmp(fs->super->s_uuid,
@@ -575,7 +575,7 @@ main(int argc, char **argv)
 		exit(1);
 	}
 
-	retval = ext2fs_add_journal_inode(fs, JFS_MIN_JOURNAL_BLOCKS, 0);
+	retval = ext2fs_add_journal_inode(fs, JBD2_MIN_JOURNAL_BLOCKS, 0);
 	if (retval) {
 		com_err(argv[0], retval, "while adding journal to %s",
 			device_name);

@@ -22,8 +22,8 @@
 #define KERN_ERR ""
 #define KERN_DEBUG ""
 
-#define READ 0
-#define WRITE 1
+#define REQ_OP_READ 0
+#define REQ_OP_WRITE 1
 
 #define cpu_to_be32(n) htonl(n)
 #define be32_to_cpu(n) ntohl(n)
@@ -37,14 +37,14 @@ typedef struct kdev_s *kdev_t;
 struct buffer_head;
 struct inode;
 
+typedef unsigned int gfp_t;
 #define GFP_KERNEL	0
-#define JFS_TAG_SIZE32	JBD_TAG_SIZE32
-#define JFS_BARRIER	0
+#define GFP_NOFS	0
+#define __GFP_NOFAIL	0
+#define JBD2_TAG_SIZE32	JBD_TAG_SIZE32
+#define JBD2_BARRIER	0
 typedef __u64 u64;
-#define JFS_CRC32_CHKSUM	JBD2_CRC32_CHKSUM
-#define JFS_CRC32_CHKSUM_SIZE	JBD2_CRC32_CHKSUM_SIZE
 #define put_bh(x)	brelse(x)
-#define be64_to_cpu(x)	ext2fs_be64_to_cpu(x)
 
 static inline __u32 jbd2_chksum(journal_t *j EXT2FS_ATTR((unused)),
 				__u32 crc, const void *address,
@@ -56,7 +56,6 @@ static inline __u32 jbd2_chksum(journal_t *j EXT2FS_ATTR((unused)),
 #define spin_lock_init(x)
 #define spin_lock(x)
 #define spin_unlock(x)
-#define yield()
 #define SLAB_HWCACHE_ALIGN	0
 #define SLAB_TEMPORARY		0
 #define KMEM_CACHE(__struct, __flags) kmem_cache_create(#__struct,\
@@ -65,6 +64,7 @@ static inline __u32 jbd2_chksum(journal_t *j EXT2FS_ATTR((unused)),
 
 #define blkdev_issue_flush(kdev, a, b)	sync_blockdev(kdev)
 #define is_power_of_2(x)	((x) != 0 && (((x) & ((x) - 1)) == 0))
+#define pr_emerg(fmt)
 
 struct journal_s
 {

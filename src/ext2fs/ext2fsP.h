@@ -92,6 +92,20 @@ struct ext2_inode_cache_ent {
 	struct ext2_inode	*inode;
 };
 
+/*
+ * NLS defintions
+ */
+struct ext2fs_nls_table {
+	int version;
+	const struct ext2fs_nls_ops *ops;
+};
+
+struct ext2fs_nls_ops {
+	int (*casefold)(const struct ext2fs_nls_table *charset,
+			const unsigned char *str, size_t len,
+			unsigned char *dest, size_t dlen);
+};
+
 /* Function prototypes */
 
 extern int ext2fs_process_dir_block(ext2_filsys  	fs,

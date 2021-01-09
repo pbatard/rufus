@@ -54,6 +54,7 @@ errcode_t ext2fs_symlink(ext2_filsys fs, ext2_ino_t parent, ext2_ino_t ino,
 	int			fastlink, inlinelink;
 	unsigned int		target_len;
 	char			*block_buf = 0;
+	int			drop_refcount = 0;
 
 	EXT2_CHECK_MAGIC(fs, EXT2_ET_MAGIC_EXT2FS_FILSYS);
 
@@ -163,6 +164,14 @@ need_block:
 	}
 
 	/*
+	 * Update accounting....
+	 */
+	if (!fastlink && !inlinelink)
+		ext2fs_block_alloc_stats2(fs, blk, +1);
+	ext2fs_inode_alloc_stats2(fs, ino, +1, 0);
+	drop_refcount = 1;
+
+	/*
 	 * Link the symlink into the filesystem hierarchy
 	 */
 	if (name) {
@@ -178,17 +187,16 @@ need_block:
 		if (retval)
 			goto cleanup;
 	}
-
-	/*
-	 * Update accounting....
-	 */
-	if (!fastlink && !inlinelink)
-		ext2fs_block_alloc_stats2(fs, blk, +1);
-	ext2fs_inode_alloc_stats2(fs, ino, +1, 0);
+	drop_refcount = 0;
 
 cleanup:
 	if (block_buf)
 		ext2fs_free_mem(&block_buf);
+	if (drop_refcount) {
+		if (!fastlink && !inlinelink)
+			ext2fs_block_alloc_stats2(fs, blk, -1);
+		ext2fs_inode_alloc_stats2(fs, ino, -1, 0);
+	}
 	return retval;
 }
 

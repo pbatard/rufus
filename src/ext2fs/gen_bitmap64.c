@@ -799,7 +799,7 @@ errcode_t ext2fs_convert_subcluster_bitmap(ext2_filsys fs,
 	ext2fs_generic_bitmap_64 bmap, cmap;
 	ext2fs_block_bitmap	gen_bmap = *bitmap, gen_cmap;
 	errcode_t		retval;
-	blk64_t			i, b_end, c_end, n, ratio;
+	blk64_t			i, next, b_end, c_end;
 
 	bmap = (ext2fs_generic_bitmap_64) gen_bmap;
 	if (fs->cluster_ratio_bits == ext2fs_get_bitmap_granularity(gen_bmap))
@@ -816,18 +816,13 @@ errcode_t ext2fs_convert_subcluster_bitmap(ext2_filsys fs,
 	bmap->end = bmap->real_end;
 	c_end = cmap->end;
 	cmap->end = cmap->real_end;
-	n = 0;
-	ratio = 1ULL << fs->cluster_ratio_bits;
 	while (i < bmap->real_end) {
-		if (ext2fs_test_block_bitmap2(gen_bmap, i)) {
-			ext2fs_mark_block_bitmap2(gen_cmap, i);
-			i += ratio - n;
-			n = 0;
-			continue;
-		}
-		i++; n++;
-		if (n >= ratio)
-			n = 0;
+		retval = ext2fs_find_first_set_block_bitmap2(gen_bmap,
+						i, bmap->real_end, &next);
+		if (retval)
+			break;
+		ext2fs_mark_block_bitmap2(gen_cmap, next);
+		i = EXT2FS_C2B(fs, EXT2FS_B2C(fs, next) + 1);
 	}
 	bmap->end = b_end;
 	cmap->end = c_end;
@@ -944,4 +939,39 @@ errcode_t ext2fs_find_first_set_generic_bmap(ext2fs_generic_bitmap bitmap,
 			goto found;
 
 	return ENOENT;
+}
+
+errcode_t ext2fs_count_used_clusters(ext2_filsys fs, blk64_t start,
+				     blk64_t end, blk64_t *out)
+{
+	blk64_t		next;
+	blk64_t		tot_set = 0;
+	errcode_t	retval;
+
+	while (start < end) {
+		retval = ext2fs_find_first_set_block_bitmap2(fs->block_map,
+							start, end, &next);
+		if (retval) {
+			if (retval == ENOENT)
+				retval = 0;
+			break;
+		}
+		start = next;
+
+		retval = ext2fs_find_first_zero_block_bitmap2(fs->block_map,
+							start, end, &next);
+		if (retval == 0) {
+			tot_set += next - start;
+			start  = next + 1;
+		} else if (retval == ENOENT) {
+			retval = 0;
+			tot_set += end - start + 1;
+			break;
+		} else
+			break;
+	}
+
+	if (!retval)
+		*out = EXT2FS_NUM_B2C(fs, tot_set);
+	return retval;
 }

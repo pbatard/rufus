@@ -1550,14 +1550,15 @@ errcode_t ext2fs_xattr_set(struct ext2_xattr_handle *h,
 						       new_value, &value_len);
 		if (ret)
 			goto out;
-	} else
+	} else if (value_len)
 		memcpy(new_value, value, value_len);
 
 	/* Imitate kernel behavior by skipping update if value is the same. */
 	for (x = h->attrs; x < h->attrs + h->count; x++) {
 		if (!strcmp(x->name, name)) {
 			if (!x->ea_ino && x->value_len == value_len &&
-			    !memcmp(x->value, new_value, value_len)) {
+			    (!value_len ||
+			     !memcmp(x->value, new_value, value_len))) {
 				ret = 0;
 				goto out;
 			}

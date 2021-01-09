@@ -53,6 +53,7 @@
     <ClCompile Include="..\src\ext2fs\crc32c.c" />
     <ClCompile Include="..\src\ext2fs\csum.c" />
     <ClCompile Include="..\src\ext2fs\dirblock.c" />
+    <ClCompile Include="..\src\ext2fs\dirhash.c" />
     <ClCompile Include="..\src\ext2fs\dir_iterate.c" />
     <ClCompile Include="..\src\ext2fs\extent.c" />
     <ClCompile Include="..\src\ext2fs\ext_attr.c" />

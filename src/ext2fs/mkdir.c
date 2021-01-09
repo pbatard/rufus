@@ -43,6 +43,7 @@ errcode_t ext2fs_mkdir(ext2_filsys fs, ext2_ino_t parent, ext2_ino_t inum,
 	blk64_t			blk;
 	char			*block = 0;
 	int			inline_data = 0;
+	int			drop_refcount = 0;
 
 	EXT2_CHECK_MAGIC(fs, EXT2_ET_MAGIC_EXT2FS_FILSYS);
 
@@ -144,6 +145,14 @@ errcode_t ext2fs_mkdir(ext2_filsys fs, ext2_ino_t parent, ext2_ino_t inum,
 	}
 
 	/*
+	 * Update accounting....
+	 */
+	if (!inline_data)
+		ext2fs_block_alloc_stats2(fs, blk, +1);
+	ext2fs_inode_alloc_stats2(fs, ino, +1, 1);
+	drop_refcount = 1;
+
+	/*
 	 * Link the directory into the filesystem hierarchy
 	 */
 	if (name) {
@@ -174,17 +183,16 @@ errcode_t ext2fs_mkdir(ext2_filsys fs, ext2_ino_t parent, ext2_ino_t inum,
 		if (retval)
 			goto cleanup;
 	}
-
-	/*
-	 * Update accounting....
-	 */
-	if (!inline_data)
-		ext2fs_block_alloc_stats2(fs, blk, +1);
-	ext2fs_inode_alloc_stats2(fs, ino, +1, 1);
+	drop_refcount = 0;
 
 cleanup:
 	if (block)
 		ext2fs_free_mem(&block);
+	if (drop_refcount) {
+		if (!inline_data)
+			ext2fs_block_alloc_stats2(fs, blk, -1);
+		ext2fs_inode_alloc_stats2(fs, ino, -1, 1);
+	}
 	return retval;
 
 }

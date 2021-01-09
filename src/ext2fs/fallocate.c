@@ -808,7 +808,8 @@ errcode_t ext2fs_fallocate(ext2_filsys fs, int flags, ext2_ino_t ino,
 			   blk64_t start, blk64_t len)
 {
 	struct ext2_inode	inode_buf;
-	blk64_t			blk, x;
+	blk64_t			blk, x, zero_blk = 0, last = 0;
+	int			zero_len = 0;
 	errcode_t		err = 0;
 
 	if (((flags & EXT2_FALLOCATE_FORCE_INIT) &&
@@ -848,15 +849,32 @@ errcode_t ext2fs_fallocate(ext2_filsys fs, int flags, ext2_ino_t ino,
 		if (x)
 			continue;
 
-		err = ext2fs_bmap2(fs, ino, inode, NULL,
-				   BMAP_ALLOC | BMAP_UNINIT | BMAP_ZERO, blk,
-				   0, &x);
+		err = ext2fs_bmap2(fs, ino, inode, NULL, BMAP_ALLOC,
+				   blk, 0, &x);
 		if (err)
-			return err;
+			goto errout;
+		if ((zero_len && (x != last+1)) ||
+		    (zero_len >= 65536)) {
+			err = ext2fs_zero_blocks2(fs, zero_blk, zero_len,
+						  NULL, NULL);
+			zero_len = 0;
+			if (err)
+				goto errout;
+		}
+		if (zero_len == 0) {
+			zero_blk = x;
+			zero_len = 1;
+		} else {
+			zero_len++;
+		}
+		last = x;
 	}
 
 out:
 	if (inode == &inode_buf)
 		ext2fs_write_inode(fs, ino, inode);
+errout:
+	if (zero_len)
+		ext2fs_zero_blocks2(fs, zero_blk, zero_len, NULL, NULL);
 	return err;
 }

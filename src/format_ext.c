@@ -39,7 +39,7 @@
 #include "ext2fs/ext2fs.h"
 
 extern const char* FileSystemLabel[FS_MAX];
-extern io_manager nt_io_manager(void);
+extern io_manager nt_io_manager;
 extern DWORD ext2_last_winerror(DWORD default_error);
 static float ext2_percent_start = 0.0f, ext2_percent_share = 0.5f;
 const float ext2_max_marker = 80.0f;
@@ -172,6 +172,8 @@ const char* error_message(errcode_t error_code)
 	case EXT2_ET_INODE_CORRUPTED:
 	case EXT2_ET_EA_INODE_CORRUPTED:
 		return "Inode is corrupted";
+	case EXT2_ET_NO_GDESC:
+		return "Group descriptors not loaded";
 	default:
 		if ((error_code > EXT2_ET_BASE) && error_code < (EXT2_ET_BASE + 1000)) {
 			static_sprintf(error_string, "Unknown ext2fs error %ld (EXT2_ET_BASE + %ld)", error_code, error_code - EXT2_ET_BASE);
@@ -202,7 +204,7 @@ const char* GetExtFsLabel(DWORD DriveIndex, uint64_t PartitionOffset)
 	static char label[EXT2_LABEL_LEN + 1];
 	errcode_t r;
 	ext2_filsys ext2fs = NULL;
-	io_manager manager = nt_io_manager();
+	io_manager manager = nt_io_manager;
 	char* volume_name = GetExtPartitionName(DriveIndex, PartitionOffset);
 
 	if (volume_name == NULL)
@@ -238,7 +240,7 @@ BOOL FormatExtFs(DWORD DriveIndex, uint64_t PartitionOffset, DWORD BlockSize, LP
 	char* volume_name = NULL;
 	int i, count;
 	struct ext2_super_block features = { 0 };
-	io_manager manager = nt_io_manager();
+	io_manager manager = nt_io_manager;
 	blk_t journal_size;
 	blk64_t size = 0, cur;
 	ext2_filsys ext2fs = NULL;

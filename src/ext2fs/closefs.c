@@ -293,6 +293,11 @@ errcode_t ext2fs_flush2(ext2_filsys fs, int flags)
 
 	EXT2_CHECK_MAGIC(fs, EXT2_ET_MAGIC_EXT2FS_FILSYS);
 
+	if ((fs->flags & EXT2_FLAG_SUPER_ONLY) == 0 &&
+	    !ext2fs_has_feature_journal_dev(fs->super) &&
+	    fs->group_desc == NULL)
+		return EXT2_ET_NO_GDESC;
+
 	fs_state = fs->super->s_state;
 	feature_incompat = fs->super->s_feature_incompat;
 
@@ -328,18 +333,22 @@ errcode_t ext2fs_flush2(ext2_filsys fs, int flags)
 	retval = ext2fs_get_mem(SUPERBLOCK_SIZE, &super_shadow);
 	if (retval)
 		goto errout;
-	retval = ext2fs_get_array(fs->desc_blocks, fs->blocksize,
-				  &group_shadow);
-	if (retval)
-		goto errout;
 	memcpy(super_shadow, fs->super, sizeof(struct ext2_super_block));
-	memcpy(group_shadow, fs->group_desc, (size_t) fs->blocksize *
-	       fs->desc_blocks);
-
 	ext2fs_swap_super(super_shadow);
-	for (j = 0; j < fs->group_desc_count; j++) {
-		gdp = ext2fs_group_desc(fs, group_shadow, j);
-		ext2fs_swap_group_desc2(fs, gdp);
+
+	if (((fs->flags & EXT2_FLAG_SUPER_ONLY) == 0) &&
+	    !ext2fs_has_feature_journal_dev(fs->super)) {
+		retval = ext2fs_get_array(fs->desc_blocks, fs->blocksize,
+					  &group_shadow);
+		if (retval)
+			goto errout;
+		memcpy(group_shadow, fs->group_desc, (size_t) fs->blocksize *
+		       fs->desc_blocks);
+
+		for (j = 0; j < fs->group_desc_count; j++) {
+			gdp = ext2fs_group_desc(fs, group_shadow, j);
+			ext2fs_swap_group_desc2(fs, gdp);
+		}
 	}
 #else
 	super_shadow = fs->super;

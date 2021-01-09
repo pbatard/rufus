@@ -1,6 +1,22 @@
 #include "hashmap.h"
 #include <string.h>
 
+struct ext2fs_hashmap {
+	uint32_t size;
+	uint32_t(*hash)(const void *key, size_t len);
+	void(*free)(void*);
+	struct ext2fs_hashmap_entry *first;
+	struct ext2fs_hashmap_entry *last;
+#if __GNUC_PREREQ (4, 8)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
+#endif
+	struct ext2fs_hashmap_entry *entries[0];
+#if __GNUC_PREREQ (4, 8)
+#pragma GCC diagnostic pop
+#endif
+};
+
 uint32_t ext2fs_djb2_hash(const void *str, size_t size)
 {
 	int c;

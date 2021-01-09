@@ -190,6 +190,9 @@ errcode_t ext2fs_initialize(const char *name, int flags,
 	assign_field(s_encoding);
 	assign_field(s_encoding_flags);
 
+//	if (ext2fs_has_feature_casefold(param))
+//		fs->encoding = ext2fs_load_nls_table(param->s_encoding);
+
 	if (super->s_feature_incompat & ~EXT2_LIB_FEATURE_INCOMPAT_SUPP) {
 		retval = EXT2_ET_UNSUPP_FEATURE;
 		goto cleanup;

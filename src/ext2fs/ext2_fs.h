@@ -351,6 +351,7 @@ struct ext2_dx_tail {
 /* EXT4_EOFBLOCKS_FL 0x00400000 was here */
 #define FS_NOCOW_FL			0x00800000 /* Do not cow file */
 #define EXT4_SNAPFILE_FL		0x01000000  /* Inode is a snapshot */
+#define FS_DAX_FL			0x02000000 /* Inode is DAX */
 #define EXT4_SNAPFILE_DELETED_FL	0x04000000  /* Snapshot is being deleted */
 #define EXT4_SNAPFILE_SHRUNK_FL		0x08000000  /* Snapshot shrink has completed */
 #define EXT4_INLINE_DATA_FL		0x10000000 /* Inode has inline data */
@@ -698,8 +699,8 @@ struct ext2_super_block {
 /*060*/	__u32	s_feature_incompat;	/* incompatible feature set */
 	__u32	s_feature_ro_compat;	/* readonly-compatible feature set */
 /*068*/	__u8	s_uuid[16];		/* 128-bit uuid for volume */
-/*078*/	char	s_volume_name[EXT2_LABEL_LEN];	/* volume name */
-/*088*/	char	s_last_mounted[64];	/* directory where last mounted */
+/*078*/	__u8	s_volume_name[EXT2_LABEL_LEN];	/* volume name, no NUL? */
+/*088*/	__u8	s_last_mounted[64];	/* directory last mounted on, no NUL? */
 /*0c8*/	__u32	s_algorithm_usage_bitmap; /* For compression */
 	/*
 	 * Performance hints.  Directory preallocation should only
@@ -747,18 +748,18 @@ struct ext2_super_block {
 	__u32	s_first_error_time;	/* first time an error happened */
 	__u32	s_first_error_ino;	/* inode involved in first error */
 /*1a0*/	__u64	s_first_error_block;	/* block involved in first error */
-	__u8	s_first_error_func[32];	/* function where the error happened */
+	__u8	s_first_error_func[32];	/* function where error hit, no NUL? */
 /*1c8*/	__u32	s_first_error_line;	/* line number where error happened */
 	__u32	s_last_error_time;	/* most recent time of an error */
 /*1d0*/	__u32	s_last_error_ino;	/* inode involved in last error */
 	__u32	s_last_error_line;	/* line number where error happened */
 	__u64	s_last_error_block;	/* block involved of last error */
-/*1e0*/	__u8	s_last_error_func[32];	/* function where the error happened */
+/*1e0*/	__u8	s_last_error_func[32];	/* function where error hit, no NUL? */
 #define EXT4_S_ERR_END ext4_offsetof(struct ext2_super_block, s_mount_opts)
-/*200*/	__u8	s_mount_opts[64];
+/*200*/	__u8	s_mount_opts[64];	/* default mount options, no NUL? */
 /*240*/	__u32	s_usr_quota_inum;	/* inode number of user quota file */
 	__u32	s_grp_quota_inum;	/* inode number of group quota file */
-	__u32	s_overhead_blocks;	/* overhead blocks/clusters in fs */
+	__u32	s_overhead_clusters;	/* overhead blocks/clusters in fs */
 /*24c*/	__u32	s_backup_bgs[2];	/* If sparse_super2 enabled */
 /*254*/	__u8	s_encrypt_algos[4];	/* Encryption algorithms in use  */
 /*258*/	__u8	s_encrypt_pw_salt[16];	/* Salt used for string2key algorithm */
@@ -771,7 +772,8 @@ struct ext2_super_block {
 	__u8	s_lastcheck_hi;
 	__u8	s_first_error_time_hi;
 	__u8	s_last_error_time_hi;
-	__u8	s_pad[2];
+	__u8	s_first_error_errcode;
+	__u8    s_last_error_errcode;
 /*27c*/ __le16	s_encoding;		/* Filename charset encoding */
 	__le16	s_encoding_flags;	/* Filename charset encoding flags */
 	__le32	s_reserved[95];		/* Padding to the end of the block */
@@ -779,6 +781,7 @@ struct ext2_super_block {
 };
 
 #define EXT4_S_ERR_LEN (EXT4_S_ERR_END - EXT4_S_ERR_START)
+#define EXT2_LEN_STR(buf) (int)sizeof(buf), (char *)buf
 
 /*
  * Codes for operating systems
@@ -828,6 +831,8 @@ struct ext2_super_block {
 /* #define EXT2_FEATURE_COMPAT_EXCLUDE_INODE	0x0080 not used, legacy */
 #define EXT2_FEATURE_COMPAT_EXCLUDE_BITMAP	0x0100
 #define EXT4_FEATURE_COMPAT_SPARSE_SUPER2	0x0200
+#define EXT4_FEATURE_COMPAT_FAST_COMMIT		0x0400
+#define EXT4_FEATURE_COMPAT_STABLE_INODES	0x0800
 
 
 #define EXT2_FEATURE_RO_COMPAT_SPARSE_SUPER	0x0001
@@ -867,7 +872,7 @@ struct ext2_super_block {
 #define EXT4_FEATURE_INCOMPAT_LARGEDIR		0x4000 /* >2GB or 3-lvl htree */
 #define EXT4_FEATURE_INCOMPAT_INLINE_DATA	0x8000 /* data in inode */
 #define EXT4_FEATURE_INCOMPAT_ENCRYPT		0x10000
-#define EXT4_FEATURE_INCOMPAT_FNAME_ENCODING	0x20000
+#define EXT4_FEATURE_INCOMPAT_CASEFOLD		0x20000
 
 #define EXT4_FEATURE_COMPAT_FUNCS(name, ver, flagname) \
 static inline int ext2fs_has_feature_##name(struct ext2_super_block *sb) \
@@ -929,6 +934,8 @@ EXT4_FEATURE_COMPAT_FUNCS(dir_index,		2, DIR_INDEX)
 EXT4_FEATURE_COMPAT_FUNCS(lazy_bg,		2, LAZY_BG)
 EXT4_FEATURE_COMPAT_FUNCS(exclude_bitmap,	2, EXCLUDE_BITMAP)
 EXT4_FEATURE_COMPAT_FUNCS(sparse_super2,	4, SPARSE_SUPER2)
+EXT4_FEATURE_COMPAT_FUNCS(fast_commit,		4, FAST_COMMIT)
+EXT4_FEATURE_COMPAT_FUNCS(stable_inodes,	4, STABLE_INODES)
 
 EXT4_FEATURE_RO_COMPAT_FUNCS(sparse_super,	2, SPARSE_SUPER)
 EXT4_FEATURE_RO_COMPAT_FUNCS(large_file,	2, LARGE_FILE)
@@ -961,7 +968,7 @@ EXT4_FEATURE_INCOMPAT_FUNCS(csum_seed,		4, CSUM_SEED)
 EXT4_FEATURE_INCOMPAT_FUNCS(largedir,		4, LARGEDIR)
 EXT4_FEATURE_INCOMPAT_FUNCS(inline_data,	4, INLINE_DATA)
 EXT4_FEATURE_INCOMPAT_FUNCS(encrypt,		4, ENCRYPT)
-EXT4_FEATURE_INCOMPAT_FUNCS(fname_encoding,	4, FNAME_ENCODING)
+EXT4_FEATURE_INCOMPAT_FUNCS(casefold,		4, CASEFOLD)
 
 #define EXT2_FEATURE_COMPAT_SUPP	0
 #define EXT2_FEATURE_INCOMPAT_SUPP    (EXT2_FEATURE_INCOMPAT_FILETYPE| \
@@ -1112,9 +1119,9 @@ struct ext2_dir_entry_tail {
 struct mmp_struct {
 	__u32	mmp_magic;		/* Magic number for MMP */
 	__u32	mmp_seq;		/* Sequence no. updated periodically */
-	__u64	mmp_time;		/* Time last updated */
-	char	mmp_nodename[64];	/* Node which last updated MMP block */
-	char	mmp_bdevname[32];	/* Bdev which last updated MMP block */
+	__u64	mmp_time;		/* Time last updated (seconds) */
+	__u8	mmp_nodename[64];	/* Node updating MMP block, no NUL? */
+	__u8	mmp_bdevname[32];	/* Bdev updating MMP block, no NUL? */
 	__u16	mmp_check_interval;	/* Changed mmp_check_interval */
 	__u16	mmp_pad1;
 	__u32	mmp_pad2[226];
@@ -1146,11 +1153,8 @@ struct mmp_struct {
  */
 #define EXT4_INLINE_DATA_DOTDOT_SIZE	(4)
 
-#define EXT4_ENC_ASCII		0
-#define EXT4_ENC_UTF8_11_0	1
+#define EXT4_ENC_UTF8_12_1	1
 
 #define EXT4_ENC_STRICT_MODE_FL			(1 << 0) /* Reject invalid sequences */
-#define EXT4_UTF8_NORMALIZATION_TYPE_NFKD	(1 << 1)
-#define EXT4_UTF8_CASEFOLD_TYPE_NFKDCF		(1 << 4)
 
 #endif	/* _LINUX_EXT2_FS_H */

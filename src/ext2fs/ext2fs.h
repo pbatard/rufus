@@ -198,6 +198,8 @@ typedef struct ext2_file *ext2_file_t;
 #define EXT2_FLAG_IGNORE_CSUM_ERRORS	0x200000
 #define EXT2_FLAG_SHARE_DUP		0x400000
 #define EXT2_FLAG_IGNORE_SB_ERRORS	0x800000
+#define EXT2_FLAG_BBITMAP_TAIL_PROBLEM	0x1000000
+#define EXT2_FLAG_IBITMAP_TAIL_PROBLEM	0x2000000
 
 /*
  * Special flag in the ext2 inode i_flag field that means that this is
@@ -302,7 +304,7 @@ struct struct_ext2_filsys {
 	/* hashmap for SHA of data blocks */
 	struct ext2fs_hashmap* block_sha_map;
 
-	const struct nls_table *encoding;
+	const struct ext2fs_nls_table *encoding;
 };
 
 #if EXT2_FLAT_INCLUDES
@@ -603,7 +605,9 @@ typedef struct ext2_icount *ext2_icount_t;
 					 EXT2_FEATURE_COMPAT_RESIZE_INODE|\
 					 EXT2_FEATURE_COMPAT_DIR_INDEX|\
 					 EXT2_FEATURE_COMPAT_EXT_ATTR|\
-					 EXT4_FEATURE_COMPAT_SPARSE_SUPER2)
+					 EXT4_FEATURE_COMPAT_SPARSE_SUPER2|\
+					 EXT4_FEATURE_COMPAT_FAST_COMMIT|\
+					 EXT4_FEATURE_COMPAT_STABLE_INODES)
 
 #ifdef CONFIG_MMP
 #define EXT4_LIB_INCOMPAT_MMP		EXT4_FEATURE_INCOMPAT_MMP
@@ -622,7 +626,7 @@ typedef struct ext2_icount *ext2_icount_t;
 					 EXT4_FEATURE_INCOMPAT_64BIT|\
 					 EXT4_FEATURE_INCOMPAT_INLINE_DATA|\
 					 EXT4_FEATURE_INCOMPAT_ENCRYPT|\
-					 EXT4_FEATURE_INCOMPAT_FNAME_ENCODING|\
+					 EXT4_FEATURE_INCOMPAT_CASEFOLD|\
 					 EXT4_FEATURE_INCOMPAT_CSUM_SEED|\
 					 EXT4_FEATURE_INCOMPAT_LARGEDIR)
 
@@ -900,7 +904,9 @@ extern int ext2fs_group_blocks_count(ext2_filsys fs, dgrp_t group);
 extern blk64_t ext2fs_inode_data_blocks2(ext2_filsys fs,
 					 struct ext2_inode *inode);
 extern blk64_t ext2fs_inode_i_blocks(ext2_filsys fs,
-					 struct ext2_inode *inode);
+				     struct ext2_inode *inode);
+extern blk64_t ext2fs_get_stat_i_blocks(ext2_filsys fs,
+					struct ext2_inode *inode);
 extern blk64_t ext2fs_blocks_count(struct ext2_super_block *super);
 extern void ext2fs_blocks_count_set(struct ext2_super_block *super,
 				    blk64_t blk);
@@ -1072,6 +1078,9 @@ extern errcode_t ext2fs_get_dx_countlimit(ext2_filsys fs,
 					  struct ext2_dir_entry *dirent,
 					  struct ext2_dx_countlimit **cc,
 					  int *offset);
+extern errcode_t ext2fs_dx_csum(ext2_filsys fs, ext2_ino_t inum,
+				struct ext2_dir_entry *dirent,
+				__u32 *crc, struct ext2_dx_tail **ret_t);
 extern errcode_t ext2fs_extent_block_csum_set(ext2_filsys fs,
 					      ext2_ino_t inum,
 					      struct ext3_extent_header *eh);
@@ -1181,7 +1190,7 @@ extern errcode_t ext2fs_dirhash(int version, const char *name, int len,
 				ext2_dirhash_t *ret_minor_hash);
 
 extern errcode_t ext2fs_dirhash2(int version, const char *name, int len,
-				 const struct nls_table *charset,
+				 const struct ext2fs_nls_table *charset,
 				 int hash_flags,
 				 const __u32 *seed,
 				 ext2_dirhash_t *ret_hash,
@@ -1429,6 +1438,8 @@ errcode_t ext2fs_set_generic_bmap_range(ext2fs_generic_bitmap bmap,
 					void *in);
 errcode_t ext2fs_convert_subcluster_bitmap(ext2_filsys fs,
 					   ext2fs_block_bitmap *bitmap);
+errcode_t ext2fs_count_used_clusters(ext2_filsys fs, blk64_t start,
+				     blk64_t end, blk64_t *out);
 
 /* get_num_dirs.c */
 extern errcode_t ext2fs_get_num_dirs(ext2_filsys fs, ext2_ino_t *ret_num_dirs);
@@ -1594,6 +1605,9 @@ extern errcode_t ext2fs_new_dir_block(ext2_filsys fs, ext2_ino_t dir_ino,
 extern errcode_t ext2fs_new_dir_inline_data(ext2_filsys fs, ext2_ino_t dir_ino,
 				ext2_ino_t parent_ino, __u32 *iblock);
 
+/* nls_utf8.c */
+extern const struct ext2fs_nls_table *ext2fs_load_nls_table(int encoding);
+
 /* mkdir.c */
 extern errcode_t ext2fs_mkdir(ext2_filsys fs, ext2_ino_t parent, ext2_ino_t inum,
 			      const char *name);
@@ -1751,6 +1765,8 @@ extern errcode_t ext2fs_get_arrayzero(unsigned long count,
 extern errcode_t ext2fs_free_mem(void *ptr);
 extern errcode_t ext2fs_resize_mem(unsigned long old_size,
 				   unsigned long size, void *ptr);
+extern errcode_t ext2fs_resize_array(unsigned long old_count, unsigned long count,
+				     unsigned long size, void *ptr);
 extern void ext2fs_mark_super_dirty(ext2_filsys fs);
 extern void ext2fs_mark_changed(ext2_filsys fs);
 extern int ext2fs_test_changed(ext2_filsys fs);
@@ -1834,7 +1850,8 @@ _INLINE_ errcode_t ext2fs_get_memzero(unsigned long size, void *ptr)
 	return 0;
 }
 
-_INLINE_ errcode_t ext2fs_get_array(unsigned long count, unsigned long size, void *ptr)
+_INLINE_ errcode_t ext2fs_get_array(unsigned long count, unsigned long size,
+				    void *ptr)
 {
 	if (count && (~0UL)/count < size)
 		return EXT2_ET_NO_MEMORY;
@@ -1887,6 +1904,36 @@ _INLINE_ errcode_t ext2fs_resize_mem(unsigned long EXT2FS_ATTR((unused)) old_siz
 		return EXT2_ET_NO_MEMORY;
 	}
 	memcpy(ptr, &p, sizeof(p));
+	return 0;
+}
+
+/*
+ *  Resize array.  The 'ptr' arg must point to a pointer.
+ */
+_INLINE_ errcode_t ext2fs_resize_array(unsigned long size,
+				       unsigned long old_count,
+				       unsigned long count, void *ptr)
+{
+	unsigned long old_size;
+	errcode_t retval;
+
+	if (count && (~0UL)/count < size)
+		return EXT2_ET_NO_MEMORY;
+
+	size *= count;
+	old_size = size * old_count;
+	retval = ext2fs_resize_mem(old_size, size, ptr);
+	if (retval)
+		return retval;
+
+	if (size > old_size) {
+		void *p;
+
+		memcpy(&p, ptr, sizeof(p));
+		memset((char *)p + old_size, 0, size - old_size);
+		memcpy(ptr, &p, sizeof(p));
+	}
+
 	return 0;
 }
 #endif	/* Custom memory routines */
@@ -2010,7 +2057,13 @@ _INLINE_ blk_t ext2fs_inode_data_blocks(ext2_filsys fs,
 
 _INLINE_ int ext2fs_htree_intnode_maxrecs(ext2_filsys fs, int blocks)
 {
-	return blocks * ((fs->blocksize - 8) / sizeof(struct ext2_dx_entry));
+	int csum_size = 0;
+
+	if ((EXT2_SB(fs->super)->s_feature_ro_compat &
+	     EXT4_FEATURE_RO_COMPAT_METADATA_CSUM) != 0)
+		csum_size = sizeof(struct ext2_dx_tail);
+	return blocks * ((fs->blocksize - (8 + csum_size)) /
+						sizeof(struct ext2_dx_entry));
 }
 
 /*

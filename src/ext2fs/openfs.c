@@ -29,7 +29,6 @@
 
 #include "ext2_fs.h"
 
-
 #include "ext2fs.h"
 #include "e2image.h"
 
@@ -135,6 +134,7 @@ errcode_t ext2fs_open2(const char *name, const char *io_options,
 	int		j;
 #endif
 	char		*time_env;
+	int		csum_retries = 0;
 
 	EXT2_CHECK_MAGIC(manager, EXT2_ET_MAGIC_IO_MANAGER);
 
@@ -223,6 +223,7 @@ errcode_t ext2fs_open2(const char *name, const char *io_options,
 		if (retval)
 			goto cleanup;
 	}
+retry:
 	retval = io_channel_read_blk(fs->io, superblock, -SUPERBLOCK_SIZE,
 				     fs->super);
 	if (retval)
@@ -234,8 +235,11 @@ errcode_t ext2fs_open2(const char *name, const char *io_options,
 		retval = 0;
 		if (!ext2fs_verify_csum_type(fs, fs->super))
 			retval = EXT2_ET_UNKNOWN_CSUM;
-		if (!ext2fs_superblock_csum_verify(fs, fs->super))
+		if (!ext2fs_superblock_csum_verify(fs, fs->super)) {
+			if (csum_retries++ < 3)
+				goto retry;
 			retval = EXT2_ET_SB_CSUM_INVALID;
+		}
 	}
 
 #ifdef WORDS_BIGENDIAN
@@ -395,6 +399,8 @@ errcode_t ext2fs_open2(const char *name, const char *io_options,
 	}
 	fs->desc_blocks = ext2fs_div_ceil(fs->group_desc_count,
 					  EXT2_DESC_PER_BLOCK(fs->super));
+	if (flags & EXT2_FLAG_SUPER_ONLY)
+		goto skip_read_bg;
 	retval = ext2fs_get_array(fs->desc_blocks, fs->blocksize,
 				&fs->group_desc);
 	if (retval)
@@ -435,7 +441,8 @@ errcode_t ext2fs_open2(const char *name, const char *io_options,
 		gdp = (struct ext2_group_desc *) dest;
 		for (j=0; j < groups_per_block*first_meta_bg; j++) {
 			gdp = ext2fs_group_desc(fs, fs->group_desc, j);
-			ext2fs_swap_group_desc2(fs, gdp);
+			if (gdp)
+				ext2fs_swap_group_desc2(fs, gdp);
 		}
 #endif
 		dest += fs->blocksize*first_meta_bg;
@@ -455,7 +462,8 @@ errcode_t ext2fs_open2(const char *name, const char *io_options,
 		for (j=0; j < groups_per_block; j++) {
 			gdp = ext2fs_group_desc(fs, fs->group_desc,
 						i * groups_per_block + j);
-			ext2fs_swap_group_desc2(fs, gdp);
+			if (gdp)
+				ext2fs_swap_group_desc2(fs, gdp);
 		}
 #endif
 		dest += fs->blocksize;
@@ -481,7 +489,7 @@ errcode_t ext2fs_open2(const char *name, const char *io_options,
 		if (fs->flags & EXT2_FLAG_RW)
 			ext2fs_mark_super_dirty(fs);
 	}
-
+skip_read_bg:
 	if (ext2fs_has_feature_mmp(fs->super) &&
 	    !(flags & EXT2_FLAG_SKIP_MMP) &&
 	    (flags & (EXT2_FLAG_RW | EXT2_FLAG_EXCLUSIVE))) {
@@ -502,6 +510,9 @@ errcode_t ext2fs_open2(const char *name, const char *io_options,
 		}
 		ext2fs_set_feature_shared_blocks(fs->super);
 	}
+
+//	if (ext2fs_has_feature_casefold(fs->super))
+//		fs->encoding = ext2fs_load_nls_table(fs->super->s_encoding);
 
 	fs->flags &= ~EXT2_FLAG_NOFREE_ON_ERROR;
 	*ret_fs = fs;
