@@ -104,7 +104,9 @@ errcode_t ext2fs_symlink(ext2_filsys fs, ext2_ino_t parent, ext2_ino_t ino,
 	inode.i_mode = LINUX_S_IFLNK | 0777;
 	inode.i_uid = inode.i_gid = 0;
 	inode.i_links_count = 1;
-	ext2fs_inode_size_set(fs, &inode, target_len);
+	retval = ext2fs_inode_size_set(fs, &inode, target_len);
+	if (retval)
+		goto cleanup;
 	/* The time fields are set by ext2fs_write_new_inode() */
 
 	inlinelink = !fastlink && ext2fs_has_feature_inline_data(fs->super);

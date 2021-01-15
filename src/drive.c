@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Drive access function calls
- * Copyright © 2011-2020 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2021 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -649,6 +649,7 @@ static BOOL GetVdsDiskInterface(DWORD DriveIndex, const IID* InterfaceIID, void*
 				}
 
 				// Check if we are on the target disk
+				// uprintf("GetVdsDiskInterface: Seeking %S found %S", wPhysicalName, prop.pwszName);
 				hr = (HRESULT)_wcsicmp(wPhysicalName, prop.pwszName);
 				CoTaskMemFree(prop.pwszName);
 				if (hr != S_OK) {
@@ -677,6 +678,71 @@ out:
 }
 
 /*
+ * Invoke IVdsService::Refresh() and/or IVdsService::Reenumerate() to force a
+ * rescan of the VDS disks. This can become necessary after writing an image
+ * such as Ubuntu 20.10, as Windows may "lose" the active disk otherwise...
+ */
+BOOL VdsRescan(DWORD dwRescanType, DWORD dwSleepTime, BOOL bSilent)
+{
+	BOOL ret = TRUE;
+	HRESULT hr = S_FALSE;
+	IVdsServiceLoader* pLoader;
+	IVdsService* pService;
+
+	IGNORE_RETVAL(CoInitializeEx(NULL, COINIT_APARTMENTTHREADED));
+	IGNORE_RETVAL(CoInitializeSecurity(NULL, -1, NULL, NULL, RPC_C_AUTHN_LEVEL_CONNECT,
+		RPC_C_IMP_LEVEL_IMPERSONATE, NULL, 0, NULL));
+
+	hr = CoCreateInstance(&CLSID_VdsLoader, NULL, CLSCTX_LOCAL_SERVER | CLSCTX_REMOTE_SERVER,
+		&IID_IVdsServiceLoader, (void**)&pLoader);
+	if (hr != S_OK) {
+		suprintf("Could not create VDS Loader Instance: %s", VdsErrorString(hr));
+		return FALSE;
+	}
+
+	hr = IVdsServiceLoader_LoadService(pLoader, L"", &pService);
+	IVdsServiceLoader_Release(pLoader);
+	if (hr != S_OK) {
+		suprintf("Could not load VDS Service: %s", VdsErrorString(hr));
+		return FALSE;
+	}
+
+	hr = IVdsService_WaitForServiceReady(pService);
+	if (hr != S_OK) {
+		suprintf("VDS Service is not ready: %s", VdsErrorString(hr));
+		return FALSE;
+	}
+
+	// https://docs.microsoft.com/en-us/windows/win32/api/vds/nf-vds-ivdsservice-refresh
+	// This method synchronizes the disk layout to the layout known to the disk driver.
+	// It does not force the driver to read the layout from the disk.
+	// Additionally, this method refreshes the view of all objects in the VDS cache.
+	if (dwRescanType & VDS_RESCAN_REFRESH) {
+		hr = IVdsService_Refresh(pService);
+		if (hr != S_OK) {
+			suprintf("VDS Refresh failed: %s", VdsErrorString(hr));
+			ret = FALSE;
+		}
+	}
+
+	// https://docs.microsoft.com/en-us/windows/win32/api/vds/nf-vds-ivdsservice-reenumerate
+	// This method returns immediately after a bus rescan request is issued.
+	// The operation might be incomplete when the method returns.
+	if (dwRescanType & VDS_RESCAN_REENUMERATE) {
+		hr = IVdsService_Reenumerate(pService);
+		if (hr != S_OK) {
+			suprintf("VDS Re-enumeration failed: %s", VdsErrorString(hr));
+			ret = FALSE;
+		}
+	}
+
+	if (dwSleepTime != 0)
+		Sleep(dwSleepTime);
+
+	return ret;
+}
+
+/*
  * Delete one partition at offset PartitionOffset, or all partitions if the offset is 0.
  */
 BOOL DeletePartition(DWORD DriveIndex, ULONGLONG PartitionOffset, BOOL bSilent)
@@ -689,8 +755,13 @@ BOOL DeletePartition(DWORD DriveIndex, ULONGLONG PartitionOffset, BOOL bSilent)
 	if (!GetVdsDiskInterface(DriveIndex, &IID_IVdsAdvancedDisk, (void**)&pAdvancedDisk, bSilent))
 		return FALSE;
 	if (pAdvancedDisk == NULL) {
-		suprintf("No partition to delete on disk");
-		return TRUE;
+		suprintf("Looks like Windows has \"lost\" our disk - Forcing a VDS rescan...");
+		VdsRescan(VDS_RESCAN_REFRESH | VDS_RESCAN_REENUMERATE, 1000, bSilent);
+		if (!GetVdsDiskInterface(DriveIndex, &IID_IVdsAdvancedDisk, (void**)&pAdvancedDisk, bSilent) ||
+			(pAdvancedDisk == NULL)) {
+			suprintf("Could not locate disk - Aborting.");
+			return FALSE;
+		}
 	}
 
 	// Query the partition data, so we can get the start offset, which we need for deletion

@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Formatting function calls
- * Copyright © 2011-2020 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2021 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -2181,6 +2181,7 @@ DWORD WINAPI FormatThread(void* param)
 	}
 
 out:
+	VdsRescan(VDS_RESCAN_REFRESH, 0, TRUE);
 	safe_free(volume_name);
 	safe_free(buffer);
 	safe_closehandle(hSourceImage);
