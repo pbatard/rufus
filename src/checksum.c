@@ -5,7 +5,7 @@
  * Copyright © 2004-2019 Tom St Denis
  * Copyright © 2004 g10 Code GmbH
  * Copyright © 2002-2015 Wei Dai & Igor Pavlov
- * Copyright © 2015-2020 Pete Batard <pete@akeo.ie>
+ * Copyright © 2015-2021 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -62,6 +62,7 @@
 
 #include "db.h"
 #include "rufus.h"
+#include "winio.h"
 #include "missing.h"
 #include "resource.h"
 #include "msapi_utf8.h"
@@ -86,13 +87,17 @@
 #define SHA512_HASHSIZE     64
 #define MAX_HASHSIZE        SHA512_HASHSIZE
 
+/* Number of buffers we work with */
+#define NUM_BUFFERS         3   // 2 + 1 as a mere double buffered async I/O
+                                // would modify the buffer being processed.
+
 /* Globals */
 char sum_str[CHECKSUM_MAX][150];
-uint32_t bufnum, sum_count[CHECKSUM_MAX] = { MD5_HASHSIZE, SHA1_HASHSIZE, SHA256_HASHSIZE, SHA512_HASHSIZE };
+uint32_t proc_bufnum, sum_count[CHECKSUM_MAX] = { MD5_HASHSIZE, SHA1_HASHSIZE, SHA256_HASHSIZE, SHA512_HASHSIZE };
 HANDLE data_ready[CHECKSUM_MAX] = { 0 }, thread_ready[CHECKSUM_MAX] = { 0 };
-DWORD read_size[2];
+DWORD read_size[NUM_BUFFERS];
 BOOL enable_extra_hashes = FALSE;
-uint8_t ALIGNED(64) buffer[2][BUFFER_SIZE];
+uint8_t ALIGNED(64) buffer[NUM_BUFFERS][BUFFER_SIZE];
 extern int default_thread_priority;
 
 /*
@@ -1095,8 +1100,8 @@ DWORD WINAPI IndividualSumThread(void* param)
 			uprintf("Failed to wait for event for checksum thread #%d: %s", i, WindowsErrorString());
 			return 1;
 		}
-		if (read_size[bufnum] != 0) {
-			sum_write[i](&sum_ctx, buffer[bufnum], (size_t)read_size[bufnum]);
+		if (read_size[proc_bufnum] != 0) {
+			sum_write[i](&sum_ctx, buffer[proc_bufnum], (size_t)read_size[proc_bufnum]);
 			if (!SetEvent(thread_ready[i]))
 				goto error;
 		} else {
@@ -1121,9 +1126,10 @@ DWORD WINAPI SumThread(void* param)
 {
 	DWORD_PTR* thread_affinity = (DWORD_PTR*)param;
 	HANDLE sum_thread[CHECKSUM_MAX] = { NULL, NULL, NULL, NULL };
-	HANDLE h = INVALID_HANDLE_VALUE;
-	uint64_t rb;
-	int i, _bufnum, r = -1;
+	DWORD wr;
+	VOID* fd = NULL;
+	uint64_t processed_bytes;
+	int i, read_bufnum, r = -1;
 	int num_checksums = CHECKSUM_MAX - (enable_extra_hashes ? 0 : 1);
 
 	if ((image_path == NULL) || (thread_affinity == NULL))
@@ -1158,52 +1164,59 @@ DWORD WINAPI SumThread(void* param)
 			SetThreadAffinityMask(sum_thread[i], thread_affinity[i+1]);
 	}
 
-	h = CreateFileU(image_path, GENERIC_READ, FILE_SHARE_READ, NULL,
-		OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, NULL);
-	if (h == INVALID_HANDLE_VALUE) {
+	fd = CreateFileAsync(image_path, GENERIC_READ, FILE_SHARE_READ, OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN);
+	if (fd == NULL) {
 		uprintf("Could not open file: %s", WindowsErrorString());
 		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_OPEN_FAILED;
 		goto out;
 	}
 
-	bufnum = 0;
-	_bufnum = 0;
-	read_size[0] = 1;	// Don't trigger the first loop break
+	read_bufnum = 0;
+	proc_bufnum = 1;
+	read_size[proc_bufnum] = 1;	// To avoid early loop exit
 	UpdateProgressWithInfoInit(hMainDialog, FALSE);
-	for (rb = 0; ;rb += read_size[_bufnum]) {
-		// Update the progress and check for cancel
-		UpdateProgressWithInfo(OP_NOOP_WITH_TASKBAR, MSG_271, rb, img_report.image_size);
+
+	// Start the initial read
+	ReadFileAsync(fd, buffer[read_bufnum], BUFFER_SIZE);
+
+	for (processed_bytes = 0; read_size[proc_bufnum] != 0; processed_bytes += read_size[proc_bufnum]) {
+		// 0. Update the progress and check for cancel
+		UpdateProgressWithInfo(OP_NOOP_WITH_TASKBAR, MSG_271, processed_bytes, img_report.image_size);
 		CHECK_FOR_USER_CANCEL;
 
-		// Signal the threads that we have data to process
-		if (rb != 0) {
-			bufnum = _bufnum;
-			// Toggle the read buffer
-			_bufnum = (bufnum + 1) % 2;
-			// Signal the waiting threads
-			for (i = 0; i < num_checksums; i++) {
-				if (!SetEvent(data_ready[i])) {
-					uprintf("Could not signal checksum thread %d: %s", i, WindowsErrorString());
-					goto out;
-				}
-			}
-		}
-
-		// Break the loop when data has been exhausted
-		if (read_size[bufnum] == 0)
-			break;
-
-		// Read data (double buffered)
-		if (!ReadFile(h, buffer[_bufnum], BUFFER_SIZE, &read_size[_bufnum], NULL)) {
-			FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_READ_FAULT;
+		// 1. Wait for the current read operation to complete (and update the read size)
+		if ((!WaitFileAsync(fd, DRIVE_ACCESS_TIMEOUT)) ||
+			(!GetSizeAsync(fd, &read_size[read_bufnum]))) {
 			uprintf("Read error: %s", WindowsErrorString());
+			FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_READ_FAULT;
 			goto out;
 		}
 
-		// Wait for the thread to signal they are ready to process data
-		if (WaitForMultipleObjects(num_checksums, thread_ready, TRUE, WAIT_TIME) != WAIT_OBJECT_0) {
+		// 2. Switch to the next reading buffer
+		read_bufnum = (read_bufnum + 1) % NUM_BUFFERS;
+
+		// 3. Launch the next asynchronous read operation
+		ReadFileAsync(fd, buffer[read_bufnum], BUFFER_SIZE);
+
+		// 4. Wait for all the sum threads to indicate that they are ready to process data
+		wr = WaitForMultipleObjects(num_checksums, thread_ready, TRUE, WAIT_TIME);
+		if (wr != WAIT_OBJECT_0) {
+			if (wr == STATUS_TIMEOUT)
+				SetLastError(ERROR_TIMEOUT);
 			uprintf("Checksum threads failed to signal: %s", WindowsErrorString());
 			goto out;
+		}
+
+		// 5. Set the target buffer we want to process to the buffer we just read data into
+		// Note that this variable should only be updated AFTER all the threads have signalled.
+		proc_bufnum = (read_bufnum + NUM_BUFFERS - 1) % NUM_BUFFERS;
+
+		// 6. Signal the waiting threads that there is data available
+		for (i = 0; i < num_checksums; i++) {
+			if (!SetEvent(data_ready[i])) {
+				uprintf("Could not signal checksum thread %d: %s", i, WindowsErrorString());
+				goto out;
+			}
 		}
 	}
 
@@ -1232,7 +1245,7 @@ out:
 		safe_closehandle(data_ready[i]);
 		safe_closehandle(thread_ready[i]);
 	}
-	safe_closehandle(h);
+	CloseFileAsync(fd);
 	PostMessage(hMainDialog, UM_FORMAT_COMPLETED, (WPARAM)FALSE, 0);
 	if (r == 0)
 		MyDialogBox(hMainInstance, IDD_CHECKSUM, hMainDialog, ChecksumCallback);

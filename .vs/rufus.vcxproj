@@ -388,6 +388,7 @@
     <ClInclude Include="..\src\dev.h" />
     <ClInclude Include="..\src\ui.h" />
     <ClInclude Include="..\src\ui_data.h" />
+    <ClInclude Include="..\src\winio.h" />
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="..\src\rufus.manifest" />
