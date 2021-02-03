@@ -1,4 +1,3 @@
-
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29215.179
@@ -24,6 +23,8 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bled", ".vs\bled.vcxproj", "{FB6D52D4-A2F8-C358-DB85-BBCAECFDDD7D}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ext2fs", ".vs\ext2fs.vcxproj", "{B01F5886-2B39-4B66-B65C-6427135B6A02}"
+EndProject
+Project("{C7167F0D-BC9F-4E6E-AFE1-012C56B48DB5}") = "appstore", "res\appstore\appstore.wapproj", "{9440518F-38FE-43D9-9151-A26618E8C978}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -213,6 +214,30 @@ Global
 		{B01F5886-2B39-4B66-B65C-6427135B6A02}.Release|x64.Build.0 = Release|x64
 		{B01F5886-2B39-4B66-B65C-6427135B6A02}.Release|x86.ActiveCfg = Release|Win32
 		{B01F5886-2B39-4B66-B65C-6427135B6A02}.Release|x86.Build.0 = Release|Win32
+		{9440518F-38FE-43D9-9151-A26618E8C978}.Debug|arm.ActiveCfg = Debug|ARM
+		{9440518F-38FE-43D9-9151-A26618E8C978}.Debug|arm.Build.0 = Debug|ARM
+		{9440518F-38FE-43D9-9151-A26618E8C978}.Debug|arm.Deploy.0 = Debug|ARM
+		{9440518F-38FE-43D9-9151-A26618E8C978}.Debug|arm64.ActiveCfg = Debug|ARM64
+		{9440518F-38FE-43D9-9151-A26618E8C978}.Debug|arm64.Build.0 = Debug|ARM64
+		{9440518F-38FE-43D9-9151-A26618E8C978}.Debug|arm64.Deploy.0 = Debug|ARM64
+		{9440518F-38FE-43D9-9151-A26618E8C978}.Debug|x64.ActiveCfg = Debug|x64
+		{9440518F-38FE-43D9-9151-A26618E8C978}.Debug|x64.Build.0 = Debug|x64
+		{9440518F-38FE-43D9-9151-A26618E8C978}.Debug|x64.Deploy.0 = Debug|x64
+		{9440518F-38FE-43D9-9151-A26618E8C978}.Debug|x86.ActiveCfg = Debug|x86
+		{9440518F-38FE-43D9-9151-A26618E8C978}.Debug|x86.Build.0 = Debug|x86
+		{9440518F-38FE-43D9-9151-A26618E8C978}.Debug|x86.Deploy.0 = Debug|x86
+		{9440518F-38FE-43D9-9151-A26618E8C978}.Release|arm.ActiveCfg = Release|ARM
+		{9440518F-38FE-43D9-9151-A26618E8C978}.Release|arm.Build.0 = Release|ARM
+		{9440518F-38FE-43D9-9151-A26618E8C978}.Release|arm.Deploy.0 = Release|ARM
+		{9440518F-38FE-43D9-9151-A26618E8C978}.Release|arm64.ActiveCfg = Release|ARM64
+		{9440518F-38FE-43D9-9151-A26618E8C978}.Release|arm64.Build.0 = Release|ARM64
+		{9440518F-38FE-43D9-9151-A26618E8C978}.Release|arm64.Deploy.0 = Release|ARM64
+		{9440518F-38FE-43D9-9151-A26618E8C978}.Release|x64.ActiveCfg = Release|x64
+		{9440518F-38FE-43D9-9151-A26618E8C978}.Release|x64.Build.0 = Release|x64
+		{9440518F-38FE-43D9-9151-A26618E8C978}.Release|x64.Deploy.0 = Release|x64
+		{9440518F-38FE-43D9-9151-A26618E8C978}.Release|x86.ActiveCfg = Release|x86
+		{9440518F-38FE-43D9-9151-A26618E8C978}.Release|x86.Build.0 = Release|x86
+		{9440518F-38FE-43D9-9151-A26618E8C978}.Release|x86.Deploy.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
