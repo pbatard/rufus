@@ -28,7 +28,7 @@ msgid "Boot selection"
 msgstr "Opstartstype"
 
 #. • IDD_DIALOG → IDC_SELECT
-msgid "Select"
+msgid "Browse"
 msgstr "Valg"
 
 #. • IDD_DIALOG → IDS_IMAGE_OPTION_TXT

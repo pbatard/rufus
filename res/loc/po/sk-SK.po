@@ -28,7 +28,7 @@ msgid "Boot selection"
 msgstr "Typ bootovania"
 
 #. • IDD_DIALOG → IDC_SELECT
-msgid "Select"
+msgid "Browse"
 msgstr "Prehliadať"
 
 #. • IDD_DIALOG → IDS_IMAGE_OPTION_TXT

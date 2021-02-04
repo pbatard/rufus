@@ -28,7 +28,7 @@ msgid "Boot selection"
 msgstr "ブートの種類"
 
 #. • IDD_DIALOG → IDC_SELECT
-msgid "Select"
+msgid "Browse"
 msgstr "選択"
 
 #. • IDD_DIALOG → IDS_IMAGE_OPTION_TXT

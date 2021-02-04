@@ -28,7 +28,7 @@ msgid "Boot selection"
 msgstr "Метод загрузки"
 
 #. • IDD_DIALOG → IDC_SELECT
-msgid "Select"
+msgid "Browse"
 msgstr "Выбрать"
 
 #. • IDD_DIALOG → IDS_IMAGE_OPTION_TXT

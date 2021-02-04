@@ -28,7 +28,7 @@ msgid "Boot selection"
 msgstr "Önyükleme seçimi"
 
 #. • IDD_DIALOG → IDC_SELECT
-msgid "Select"
+msgid "Browse"
 msgstr "Seç"
 
 #. • IDD_DIALOG → IDS_IMAGE_OPTION_TXT

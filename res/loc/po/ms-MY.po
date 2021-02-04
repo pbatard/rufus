@@ -28,7 +28,7 @@ msgid "Boot selection"
 msgstr "Jenis boot"
 
 #. • IDD_DIALOG → IDC_SELECT
-msgid "Select"
+msgid "Browse"
 msgstr "Pilih"
 
 #. • IDD_DIALOG → IDS_IMAGE_OPTION_TXT

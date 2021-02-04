@@ -853,7 +853,7 @@ static void EnableControls(BOOL enable, BOOL remove_checkboxes)
 	EnableWindow(hSaveToolbar, enable);
 
 	// Enable or disable the Start button and the other boot options
-	enable = ((boot_type == BT_IMAGE) && (image_path == NULL)) ? FALSE : enable;
+	//enable = ((boot_type == BT_IMAGE) && (image_path == NULL)) ? FALSE : enable;
 	EnableWindow(hStart, enable);
 	EnableBootOptions(enable, remove_checkboxes);
 
@@ -2431,6 +2431,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		case IDC_START:
 			if (format_thread != NULL)
 				return (INT_PTR)TRUE;
+
 			// Just in case
 			boot_type = (int)ComboBox_GetCurItemData(hBootType);
 			partition_type = (int)ComboBox_GetCurItemData(hPartitionScheme);

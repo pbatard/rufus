@@ -28,7 +28,7 @@ msgid "Boot selection"
 msgstr "Boot kiválasztása"
 
 #. • IDD_DIALOG → IDC_SELECT
-msgid "Select"
+msgid "Browse"
 msgstr "Kiválasztás"
 
 #. • IDD_DIALOG → IDS_IMAGE_OPTION_TXT

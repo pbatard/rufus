@@ -28,7 +28,7 @@ msgid "Boot selection"
 msgstr "نوع راه‌اندازی (Boot)"
 
 #. • IDD_DIALOG → IDC_SELECT
-msgid "Select"
+msgid "Browse"
 msgstr "انتخاب"
 
 #. • IDD_DIALOG → IDS_IMAGE_OPTION_TXT

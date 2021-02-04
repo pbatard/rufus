@@ -50,7 +50,7 @@ g IDD_DIALOG
 t IDS_DRIVE_PROPERTIES_TXT "Drive Properties"
 t IDS_DEVICE_TXT "Device"
 t IDS_BOOT_SELECTION_TXT "Boot selection"
-t IDC_SELECT "Select"
+t IDC_SELECT "Browse"
 t IDS_IMAGE_OPTION_TXT "Image Option"
 t IDS_PARTITION_TYPE_TXT "Partition scheme"
 t IDS_TARGET_SYSTEM_TXT "Target system"

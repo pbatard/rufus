@@ -28,7 +28,7 @@ msgid "Boot selection"
 msgstr "부트 선택"
 
 #. • IDD_DIALOG → IDC_SELECT
-msgid "Select"
+msgid "Browse"
 msgstr "선택"
 
 #. • IDD_DIALOG → IDS_IMAGE_OPTION_TXT

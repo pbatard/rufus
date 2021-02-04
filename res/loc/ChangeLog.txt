@@ -95,7 +95,7 @@ o v3.0 (2018.03.27)
   - *NEW*      IDS_BOOT_SELECTION_TXT "Boot selection"
                Note: The current translation was taken from MSG_278 when available, which was for "Boot type".
                However, "Boot selection", is more appropriate, so please update if it makes sense.
-  - *NEW*      IDC_SELECT "Select"
+  - *NEW*      IDC_SELECT "Browse"
   - *NEW*      IDS_IMAGE_OPTION_TXT "Image Option"
   - *UPDATED*  IDS_PARTITION_TYPE_TXT Partition scheme and target system type -> "Partition scheme"
   - *NEW*      IDS_TARGET_SYSTEM_TXT "Target system"
