@@ -3087,7 +3087,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	int wait_for_mutex = 0;
 	FILE* fd;
 	BOOL attached_console = FALSE, external_loc_file = FALSE, lgp_set = FALSE, automount = TRUE;
-	BOOL disable_hogger = FALSE, previous_enable_HDDs = FALSE, vc = IsRegistryNode(REGKEY_HKCU, vs_reg);
+	BOOL disable_hogger = FALSE, previous_enable_HDDs = FALSE; // , vc = IsRegistryNode(REGKEY_HKCU, vs_reg);
 	BOOL alt_pressed = FALSE, alt_command = FALSE;
 	BYTE *loc_data;
 	DWORD loc_size, u, size = sizeof(u);
@@ -3230,6 +3230,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 				case '?':
 				case 'h':
 				default:
+uprintf("Rufus usage selected");
 					PrintUsage(argv[0]);
 					goto out;
 				}
@@ -3238,7 +3239,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	} else {
 		uprintf("Could not access UTF-16 args");
 	}
-
+uprintf("Post args processing");
 	// Retrieve various app & system directories
 	if (GetCurrentDirectoryU(sizeof(app_dir), app_dir) == 0) {
 		uprintf("Could not get current directory: %s", WindowsErrorString());
@@ -3252,6 +3253,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		uprintf("Could not get temp directory: %s", WindowsErrorString());
 		static_strcpy(temp_dir, ".\\");
 	}
+uprintf("Post dirs processing");
 	// Construct Sysnative ourselves as there is no GetSysnativeDirectory() call
 	// By default (64bit app running on 64 bit OS or 32 bit app running on 32 bit OS)
 	// Sysnative and System32 are the same
@@ -3270,7 +3272,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	// Look for a .ini file in the current app directory
 	static_sprintf(ini_path, "%s\\rufus.ini", app_dir);
 	fd = fopenU(ini_path, ini_flags);	// Will create the file if portable mode is requested
-	vc |= (safe_strcmp(GetSignatureName(NULL, NULL), cert_name[0]) == 0);
+//	vc |= (safe_strcmp(GetSignatureName(NULL, NULL), cert_name[0]) == 0);
 	if (fd != NULL) {
 		ini_file = ini_path;
 		fclose(fd);
@@ -3429,12 +3431,12 @@ relaunch:
 	if (get_loc_data_file(loc_file, selected_locale))
 		WriteSettingStr(SETTING_LOCALE, selected_locale->txt[0]);
 
-	if (!vc) {
-		if (MessageBoxExU(NULL, lmprintf(MSG_296), lmprintf(MSG_295),
-			MB_YESNO | MB_ICONWARNING | MB_IS_RTL | MB_SYSTEMMODAL, selected_langid) != IDYES)
-			goto out;
-		vc = TRUE;
-	}
+	//if (!vc) {
+	//	if (MessageBoxExU(NULL, lmprintf(MSG_296), lmprintf(MSG_295),
+	//		MB_YESNO | MB_ICONWARNING | MB_IS_RTL | MB_SYSTEMMODAL, selected_langid) != IDYES)
+	//		goto out;
+	//	vc = TRUE;
+	//}
 
 	/*
 	 * Create the main Window
