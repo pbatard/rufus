@@ -43,7 +43,6 @@
 HWND hStatus;
 size_t ubuffer_pos = 0;
 char ubuffer[UBUFFER_SIZE];	// Buffer for ubpushf() messages we don't log right away
-static HANDLE print_mutex = NULL;
 
 void _uprintf(const char *format, ...)
 {
@@ -52,11 +51,6 @@ void _uprintf(const char *format, ...)
 	wchar_t* wbuf;
 	va_list args;
 	int n;
-
-	if (print_mutex == NULL)
-		print_mutex = CreateMutex(NULL, FALSE, NULL);
-	if (WaitForSingleObject(print_mutex, INFINITE) != WAIT_OBJECT_0)
-		return;
 
 	va_start(args, format);
 	n = safe_vsnprintf(p, sizeof(buf)-3, format, args); // buf-3 is room for CR/LF/NUL
@@ -84,8 +78,6 @@ void _uprintf(const char *format, ...)
 		Edit_Scroll(hLog, Edit_GetLineCount(hLog), 0);
 	}
 	free(wbuf);
-
-	ReleaseMutex(print_mutex);
 }
 
 void _uprintfs(const char* str)

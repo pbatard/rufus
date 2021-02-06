@@ -3290,7 +3290,9 @@ skip_args_processing:
 	// Look for a .ini file in the current app directory
 	static_sprintf(ini_path, "%s\\rufus.ini", app_dir);
 	fd = fopenU(ini_path, ini_flags);	// Will create the file if portable mode is requested
-	vc |= (safe_strcmp(GetSignatureName(NULL, NULL), cert_name[0]) == 0);
+	// Using the string directly in safe_strcmp() would call GetSignatureName() twice
+	tmp = GetSignatureName(NULL, NULL);
+	vc |= (safe_strcmp(tmp, cert_name[0]) == 0);
 	if (fd != NULL) {
 		ini_file = ini_path;
 		fclose(fd);

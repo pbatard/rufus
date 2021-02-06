@@ -10,7 +10,7 @@
   <Identity
     Name="19453.net.Rufus"
     Publisher="CN=7AC86D13-3E5A-491A-ADD5-80095C212740"
-    Version="3.13.1738.0" />
+    Version="3.13.1739.0" />
 
   <Properties>
     <DisplayName>Rufus</DisplayName>
@@ -36,7 +36,13 @@
         BackgroundColor="transparent"
         Square150x150Logo="Images\Square150x150Logo.png"
         Square44x44Logo="Images\Square44x44Logo.png">
-        <uap:DefaultTile Wide310x150Logo="Images\Wide310x150Logo.png"  Square71x71Logo="Images\SmallTile.png" Square310x310Logo="Images\LargeTile.png"/>
+        <uap:DefaultTile Wide310x150Logo="Images\Wide310x150Logo.png"  Square71x71Logo="Images\SmallTile.png" Square310x310Logo="Images\LargeTile.png">
+          <uap:ShowNameOnTiles>
+            <uap:ShowOn Tile="square150x150Logo"/>
+            <uap:ShowOn Tile="wide310x150Logo"/>
+            <uap:ShowOn Tile="square310x310Logo"/>
+          </uap:ShowNameOnTiles>
+        </uap:DefaultTile >
       </uap:VisualElements>
     </Application>
   </Applications>

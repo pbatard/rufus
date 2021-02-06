@@ -2181,6 +2181,7 @@ DWORD WINAPI FormatThread(void* param)
 	}
 
 out:
+	// TODO: Use a thread or only issue this on DD write
 	VdsRescan(VDS_RESCAN_REFRESH, 0, TRUE);
 	safe_free(volume_name);
 	safe_free(buffer);

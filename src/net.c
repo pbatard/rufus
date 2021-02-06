@@ -25,6 +25,7 @@
 
 #include <windows.h>
 #include <wininet.h>
+#include <netlistmgr.h>
 #include <stdio.h>
 #include <malloc.h>
 #include <string.h>
@@ -265,27 +266,32 @@ static HINTERNET GetInternetSession(BOOL bRetry)
 {
 	int i;
 	char agent[64];
-	BOOL r, decodingSupport = TRUE;
-	DWORD dwFlags, dwTimeout = NET_SESSION_TIMEOUT, dwProtocolSupport = HTTP_PROTOCOL_FLAG_HTTP2;
+	BOOL decodingSupport = TRUE;
+	DWORD dwTimeout = NET_SESSION_TIMEOUT, dwProtocolSupport = HTTP_PROTOCOL_FLAG_HTTP2;
 	HINTERNET hSession = NULL;
+	HRESULT hr = S_FALSE;
+	INetworkListManager* pNetworkListManager;
+	NLM_CONNECTIVITY Connectivity = NLM_CONNECTIVITY_DISCONNECTED;
 
-	PF_TYPE_DECL(WINAPI, BOOL, InternetGetConnectedState, (LPDWORD, DWORD));
 	PF_TYPE_DECL(WINAPI, HINTERNET, InternetOpenA, (LPCSTR, DWORD, LPCSTR, LPCSTR, DWORD));
 	PF_TYPE_DECL(WINAPI, BOOL, InternetSetOptionA, (HINTERNET, DWORD, LPVOID, DWORD));
-	PF_INIT_OR_OUT(InternetGetConnectedState, WinInet);
 	PF_INIT_OR_OUT(InternetOpenA, WinInet);
 	PF_INIT_OR_OUT(InternetSetOptionA, WinInet);
 
-	for (i = 0; i <= WRITE_RETRIES; i++) {
-		r = pfInternetGetConnectedState(&dwFlags, 0);
-		if (r || !bRetry)
-			break;
-		Sleep(1000);
+	// Create a NetworkListManager Instance to check the network connection
+	IGNORE_RETVAL(CoInitializeEx(NULL, COINIT_APARTMENTTHREADED));
+	hr = CoCreateInstance(&CLSID_NetworkListManager, NULL, CLSCTX_ALL,
+		&IID_INetworkListManager, (LPVOID*)&pNetworkListManager);
+	if (hr == S_OK) {
+		for (i = 0; i <= WRITE_RETRIES; i++) {
+			hr = INetworkListManager_GetConnectivity(pNetworkListManager, &Connectivity);
+			if (hr == S_OK || !bRetry)
+				break;
+			Sleep(1000);
+		}
 	}
-	if (!r) {
-		// http://msdn.microsoft.com/en-us/library/windows/desktop/aa384702.aspx is wrong...
-		SetLastError(ERROR_INTERNET_NOT_INITIALIZED);
-		uprintf("Network is unavailable: %s", WinInetErrorString());
+	if (Connectivity == NLM_CONNECTIVITY_DISCONNECTED) {
+		SetLastError(ERROR_INTERNET_DISCONNECTED);
 		goto out;
 	}
 	static_sprintf(agent, APPLICATION_NAME "/%d.%d.%d (Windows NT %d.%d%s)",
