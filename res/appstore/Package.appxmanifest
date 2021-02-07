@@ -4,13 +4,12 @@
   xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
   xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
   xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
-  xmlns:iot="http://schemas.microsoft.com/appx/manifest/iot/windows10"
-  IgnorableNamespaces="uap rescap iot">
+  IgnorableNamespaces="uap rescap">
 
   <Identity
     Name="19453.net.Rufus"
     Publisher="CN=7AC86D13-3E5A-491A-ADD5-80095C212740"
-    Version="3.13.1739.0" />
+    Version="3.14.1740.0" />
 
   <Properties>
     <DisplayName>Rufus</DisplayName>
