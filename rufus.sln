@@ -219,9 +219,17 @@ Global
 		{9440518F-38FE-43D9-9151-A26618E8C978}.Debug|x64.ActiveCfg = Debug|x64
 		{9440518F-38FE-43D9-9151-A26618E8C978}.Debug|x86.ActiveCfg = Debug|x86
 		{9440518F-38FE-43D9-9151-A26618E8C978}.Release|arm.ActiveCfg = Release|ARM
+		{9440518F-38FE-43D9-9151-A26618E8C978}.Release|arm.Build.0 = Release|ARM
+		{9440518F-38FE-43D9-9151-A26618E8C978}.Release|arm.Deploy.0 = Release|ARM
 		{9440518F-38FE-43D9-9151-A26618E8C978}.Release|arm64.ActiveCfg = Release|ARM64
+		{9440518F-38FE-43D9-9151-A26618E8C978}.Release|arm64.Build.0 = Release|ARM64
+		{9440518F-38FE-43D9-9151-A26618E8C978}.Release|arm64.Deploy.0 = Release|ARM64
 		{9440518F-38FE-43D9-9151-A26618E8C978}.Release|x64.ActiveCfg = Release|x64
+		{9440518F-38FE-43D9-9151-A26618E8C978}.Release|x64.Build.0 = Release|x64
+		{9440518F-38FE-43D9-9151-A26618E8C978}.Release|x64.Deploy.0 = Release|x64
 		{9440518F-38FE-43D9-9151-A26618E8C978}.Release|x86.ActiveCfg = Release|x86
+		{9440518F-38FE-43D9-9151-A26618E8C978}.Release|x86.Build.0 = Release|x86
+		{9440518F-38FE-43D9-9151-A26618E8C978}.Release|x86.Deploy.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

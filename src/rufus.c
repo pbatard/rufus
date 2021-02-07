@@ -3101,7 +3101,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	HDC hDC;
 	MSG msg;
 	struct option long_options[] = {
-		{"appstore",   no_argument,       NULL, 'a'},
 		{"extra-devs", no_argument,       NULL, 'x'},
 		{"gui",        no_argument,       NULL, 'g'},
 		{"help",       no_argument,       NULL, 'h'},
@@ -3143,10 +3142,49 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	// coverity[pointless_string_compare]
 	is_x86_32 = (strcmp(APPLICATION_ARCH, "x86") == 0);
 
+	// Retrieve various app & system directories.
+	if (GetCurrentDirectoryU(sizeof(app_dir), app_dir) == 0) {
+		uprintf("Could not get current directory: %s", WindowsErrorString());
+		app_dir[0] = 0;
+	}
+	if (GetSystemDirectoryU(system_dir, sizeof(system_dir)) == 0) {
+		uprintf("Could not get system directory: %s", WindowsErrorString());
+		static_strcpy(system_dir, "C:\\Windows\\System32");
+	}
+	if (GetTempPathU(sizeof(temp_dir), temp_dir) == 0) {
+		uprintf("Could not get temp directory: %s", WindowsErrorString());
+		static_strcpy(temp_dir, ".\\");
+	}
+	// Construct Sysnative ourselves as there is no GetSysnativeDirectory() call
+	// By default (64bit app running on 64 bit OS or 32 bit app running on 32 bit OS)
+	// Sysnative and System32 are the same
+	static_strcpy(sysnative_dir, system_dir);
+	// But if the app is 32 bit and the OS is 64 bit, Sysnative must differ from System32
+#if (!defined(_WIN64) && !defined(BUILD64))
+	if (is_x64()) {
+		if (GetSystemWindowsDirectoryU(sysnative_dir, sizeof(sysnative_dir)) == 0) {
+			uprintf("Could not get Windows directory: %s", WindowsErrorString());
+			static_strcpy(sysnative_dir, "C:\\Windows");
+		}
+		static_strcat(sysnative_dir, "\\Sysnative");
+	}
+#endif
+
+	// Look for a rufus.app file in the current app directory
+	// Since Microsoft makes it downright impossible to pass an arg in the app manifest
+	// and the automated VS2019 package building process doesn't like renaming the .exe
+	// right under its nose (else we would use the same trick as for portable vs regular)
+	// we use yet another workaround to detect if we are running the AppStore version...
+	static_sprintf(ini_path, "%s\\rufus.app", app_dir);
+	if (PathFileExistsU(ini_path)) {
+		appstore_version = TRUE;
+		goto skip_args_processing;
+	}
+
 	// We have to process the arguments before we acquire the lock and process the locale
 	PF_INIT(__wgetmainargs, Msvcrt);
 	if (pf__wgetmainargs != NULL) {
-		BOOL list_params = TRUE; // TODO: Remove this once we've seen more from AppStore
+		BOOL list_params = FALSE;
 		pf__wgetmainargs(&argc, &wargv, &wenv, 1, &si);
 		argv = (char**)calloc(argc, sizeof(char*));
 		if (argv != NULL) {
@@ -3161,11 +3199,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 				// on the commandline then, which the hogger makes more intuitive.
 				if ((strcmp(argv[i], "-g") == 0) || (strcmp(argv[i], "--gui") == 0))
 					disable_hogger = TRUE;
-				// Check for "/InvokerPRAID", which is *STUPIDLY* added by Microsoft
+				// Check for "/InvokerPRAID", which may *STUPIDLY* be added by Microsoft
 				// when starting an app that was installed from the Windows store...
-				if ((stricmp(argv[i], "/InvokerPRAID") == 0) || (strcmp(argv[i], "-a") == 0) ||
-					(strcmp(argv[i], "--appstore") == 0)) {
-					uprintf("AppStore version detected");
+				if (stricmp(argv[i], "/InvokerPRAID") == 0) {
 					appstore_version = TRUE;
 					goto skip_args_processing;
 				}
@@ -3259,38 +3295,15 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	}
 
 skip_args_processing:
-	// Retrieve various app & system directories
-	if (GetCurrentDirectoryU(sizeof(app_dir), app_dir) == 0) {
-		uprintf("Could not get current directory: %s", WindowsErrorString());
-		app_dir[0] = 0;
-	}
-	if (GetSystemDirectoryU(system_dir, sizeof(system_dir)) == 0) {
-		uprintf("Could not get system directory: %s", WindowsErrorString());
-		static_strcpy(system_dir, "C:\\Windows\\System32");
-	}
-	if (GetTempPathU(sizeof(temp_dir), temp_dir) == 0) {
-		uprintf("Could not get temp directory: %s", WindowsErrorString());
-		static_strcpy(temp_dir, ".\\");
-	}
-	// Construct Sysnative ourselves as there is no GetSysnativeDirectory() call
-	// By default (64bit app running on 64 bit OS or 32 bit app running on 32 bit OS)
-	// Sysnative and System32 are the same
-	static_strcpy(sysnative_dir, system_dir);
-	// But if the app is 32 bit and the OS is 64 bit, Sysnative must differ from System32
-#if (!defined(_WIN64) && !defined(BUILD64))
-	if (is_x64()) {
-		if (GetSystemWindowsDirectoryU(sysnative_dir, sizeof(sysnative_dir)) == 0) {
-			uprintf("Could not get Windows directory: %s", WindowsErrorString());
-			static_strcpy(sysnative_dir, "C:\\Windows");
-		}
-		static_strcat(sysnative_dir, "\\Sysnative");
-	}
-#endif
+	if (appstore_version)
+		uprintf("AppStore version detected");
 
 	// Look for a .ini file in the current app directory
 	static_sprintf(ini_path, "%s\\rufus.ini", app_dir);
 	fd = fopenU(ini_path, ini_flags);	// Will create the file if portable mode is requested
-	vc |= (safe_strcmp(GetSignatureName(NULL, NULL), cert_name[0]) == 0);
+	// Using the string directly in safe_strcmp() would call GetSignatureName() twice
+	tmp = GetSignatureName(NULL, NULL);
+	vc |= (safe_strcmp(tmp, cert_name[0]) == 0);
 	if (fd != NULL) {
 		ini_file = ini_path;
 		fclose(fd);
