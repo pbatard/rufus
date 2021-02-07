@@ -212,7 +212,6 @@ char* GetSignatureName(const char* path, const char* country_code)
 	char *p = NULL, *mpath = NULL;
 	int i;
 	BOOL r;
-	HMODULE hm;
 	HCERTSTORE hStore = NULL;
 	HCRYPTMSG hMsg = NULL;
 	PCCERT_CONTEXT pCertContext = NULL;
@@ -228,12 +227,7 @@ char* GetSignatureName(const char* path, const char* country_code)
 		szFileName = calloc(MAX_PATH, sizeof(wchar_t));
 		if (szFileName == NULL)
 			return NULL;
-		hm = GetModuleHandle(NULL);
-		if (hm == NULL) {
-			uprintf("PKI: Could not get current executable handle: %s", WinPKIErrorString());
-			goto out;
-		}
-		dwSize = GetModuleFileNameW(hm, szFileName, MAX_PATH);
+		dwSize = GetModuleFileNameW(NULL, szFileName, MAX_PATH);
 		if ((dwSize == 0) || ((dwSize == MAX_PATH) && (GetLastError() == ERROR_INSUFFICIENT_BUFFER))) {
 			uprintf("PKI: Could not get module filename: %s", WinPKIErrorString());
 			goto out;

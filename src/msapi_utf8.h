@@ -571,13 +571,23 @@ static __inline BOOL GetTextExtentPointU(HDC hdc, const char* lpString, LPSIZE l
 	return ret;
 }
 
+// A UTF-8 alternative to MS GetCurrentDirectory() since the latter is useless for
+// apps installed from the App Store...
 static __inline DWORD GetCurrentDirectoryU(DWORD nBufferLength, char* lpBuffer)
 {
-	DWORD ret = 0, err = ERROR_INVALID_DATA;
+	DWORD i, ret = 0, err = ERROR_INVALID_DATA;
 	// coverity[returned_null]
 	walloc(lpBuffer, nBufferLength);
-	ret = GetCurrentDirectoryW(nBufferLength, wlpBuffer);
+	ret = GetModuleFileNameW(NULL, wlpBuffer, nBufferLength);
 	err = GetLastError();
+	if (ret > 0) {
+		for (i = ret - 1; i > 0; i--) {
+			if (wlpBuffer[i] == L'\\') {
+				wlpBuffer[i] = 0;
+				break;
+			}
+		}
+	}
 	if ((ret != 0) && ((ret = wchar_to_utf8_no_alloc(wlpBuffer, lpBuffer, nBufferLength)) == 0)) {
 		err = GetLastError();
 	}
