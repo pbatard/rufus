@@ -1759,7 +1759,7 @@ static void InitDialog(HWND hDlg)
 	// Now that we have a title, we can find the handle of our Dialog
 	dialog_handle = FindWindowA(NULL, tmp);
 	uprintf(APPLICATION_NAME " " APPLICATION_ARCH " v%d.%d.%d%s%s", rufus_version[0], rufus_version[1], rufus_version[2],
-		IsAlphaOrBeta(), (ini_file != NULL)?"(Portable)":"");
+		IsAlphaOrBeta(), (ini_file != NULL)?"(Portable)": (appstore_version ? "(AppStore version)" : ""));
 	for (i = 0; i < ARRAYSIZE(resource); i++) {
 		len = 0;
 		buf = (char*)GetResource(hMainInstance, resource[i], _RT_RCDATA, "ldlinux_sys", &len, TRUE);
@@ -2588,14 +2588,20 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		fScale = GetDeviceCaps(hDC, LOGPIXELSX) / 96.0f;
 		safe_release_dc(hDlg, hDC);
 		apply_localization(IDD_DIALOG, hDlg);
-		SetUpdateCheck();
+		// The AppStore version always enables Fido
+		if (appstore_version)
+			SetFidoCheck();
+		else
+			SetUpdateCheck();
 		first_log_display = TRUE;
 		log_displayed = FALSE;
 		hLogDialog = MyCreateDialog(hMainInstance, IDD_LOG, hDlg, (DLGPROC)LogCallback);
 		InitDialog(hDlg);
 		GetDevices(0);
 		EnableControls(TRUE, FALSE);
-		CheckForUpdates(FALSE);
+		// The AppStore version does not need the internal check for updates
+		if (!appstore_version)
+			CheckForUpdates(FALSE);
 		// Register MEDIA_INSERTED/MEDIA_REMOVED notifications for card readers
 		if (SUCCEEDED(SHGetSpecialFolderLocation(0, CSIDL_DESKTOP, &pidlDesktop))) {
 			NotifyEntry.pidl = pidlDesktop;

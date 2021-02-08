@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Standard Dialog Routines (Browse for folder, About, etc)
- * Copyright © 2011-2020 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2021 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,7 +45,7 @@
 #include "license.h"
 
 /* Globals */
-extern BOOL is_x86_32;
+extern BOOL is_x86_32, appstore_version;
 static HICON hMessageIcon = (HICON)INVALID_HANDLE_VALUE;
 static char* szMessageText = NULL;
 static char* szMessageTitle = NULL;
@@ -589,7 +589,7 @@ INT_PTR CALLBACK AboutCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 		ResizeButtonHeight(hDlg, IDOK);
 		static_sprintf(about_blurb, about_blurb_format, lmprintf(MSG_174|MSG_RTF),
 			lmprintf(MSG_175|MSG_RTF, rufus_version[0], rufus_version[1], rufus_version[2]),
-			"Copyright © 2011-2020 Pete Batard / Akeo",
+			"Copyright © 2011-2021 Pete Batard / Akeo",
 			lmprintf(MSG_176|MSG_RTF), lmprintf(MSG_177|MSG_RTF), lmprintf(MSG_178|MSG_RTF));
 		for (i=0; i<ARRAYSIZE(hEdit); i++) {
 			hEdit[i] = GetDlgItem(hDlg, edit_id[i]);
@@ -1550,6 +1550,28 @@ out:
 	return 0;
 }
 
+void SetFidoCheck(void)
+{
+	// Detect if we can use Fido, which depends on:
+	// - Powershell being installed
+	// - Update check being enabled
+	// - URL for the script being reachable
+	if ((ReadRegistryKey32(REGKEY_HKLM, "Microsoft\\PowerShell\\1\\Install") <= 0) &&
+		(ReadRegistryKey32(REGKEY_HKLM, "Microsoft\\PowerShell\\3\\Install") <= 0)) {
+		ubprintf("Notice: The ISO download feature has been deactivated because "
+			"a compatible PowerShell version was not detected on this system.");
+		return;
+	}
+
+	if (!appstore_version && (ReadSetting32(SETTING_UPDATE_INTERVAL) <= 0)) {
+		ubprintf("Notice: The ISO download feature has been deactivated because "
+			"'Check for updates' is disabled in your settings.");
+		return;
+	}
+
+	CreateThread(NULL, 0, CheckForFidoThread, NULL, 0, NULL);
+}
+
 /*
  * Initial update check setup
  */
@@ -1595,18 +1617,7 @@ BOOL SetUpdateCheck(void)
 			 ((ReadSetting32(SETTING_UPDATE_INTERVAL) == -1) && enable_updates) )
 			WriteSetting32(SETTING_UPDATE_INTERVAL, 86400);
 	}
-	// Also detect if we can use Fido, which depends on:
-	// - Powershell being installed
-	// - Update check being enabled
-	// - URL for the script being reachable
-	if (((ReadRegistryKey32(REGKEY_HKLM, "Microsoft\\PowerShell\\1\\Install") > 0) ||
-		 (ReadRegistryKey32(REGKEY_HKLM, "Microsoft\\PowerShell\\3\\Install") > 0)) &&
-		(ReadSetting32(SETTING_UPDATE_INTERVAL) > 0)) {
-		CreateThread(NULL, 0, CheckForFidoThread, NULL, 0, NULL);
-	} else {
-		ubprintf("Notice: The ISO download feature has been deactivated because "
-			"'Check for updates' is disabled in your settings.");
-	}
+	SetFidoCheck();
 	return TRUE;
 }
 

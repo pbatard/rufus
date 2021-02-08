@@ -9,7 +9,7 @@
   <Identity
     Name="19453.net.Rufus"
     Publisher="CN=7AC86D13-3E5A-491A-ADD5-80095C212740"
-    Version="3.13.1734.0" />
+    Version="3.13.1735.0" />
 
   <Properties>
     <DisplayName>Rufus</DisplayName>
