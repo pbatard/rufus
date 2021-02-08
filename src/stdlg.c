@@ -45,7 +45,7 @@
 #include "license.h"
 
 /* Globals */
-extern BOOL is_x86_32;
+extern BOOL is_x86_32, appstore_version;
 static HICON hMessageIcon = (HICON)INVALID_HANDLE_VALUE;
 static char* szMessageText = NULL;
 static char* szMessageTitle = NULL;
@@ -1550,6 +1550,28 @@ out:
 	return 0;
 }
 
+void SetFidoCheck(void)
+{
+	// Detect if we can use Fido, which depends on:
+	// - Powershell being installed
+	// - Rufus running in AppStore mode or update check being enabled
+	// - URL for the script being reachable
+	if ((ReadRegistryKey32(REGKEY_HKLM, "Microsoft\\PowerShell\\1\\Install") <= 0) &&
+		(ReadRegistryKey32(REGKEY_HKLM, "Microsoft\\PowerShell\\3\\Install") <= 0)) {
+		ubprintf("Notice: The ISO download feature has been deactivated because "
+			"a compatible PowerShell version was not detected on this system.");
+		return;
+	}
+
+	if (!appstore_version && (ReadSetting32(SETTING_UPDATE_INTERVAL) <= 0)) {
+		ubprintf("Notice: The ISO download feature has been deactivated because "
+			"'Check for updates' is disabled in your settings.");
+		return;
+	}
+
+	CreateThread(NULL, 0, CheckForFidoThread, NULL, 0, NULL);
+}
+
 /*
  * Initial update check setup
  */
@@ -1595,18 +1617,7 @@ BOOL SetUpdateCheck(void)
 			 ((ReadSetting32(SETTING_UPDATE_INTERVAL) == -1) && enable_updates) )
 			WriteSetting32(SETTING_UPDATE_INTERVAL, 86400);
 	}
-	// Also detect if we can use Fido, which depends on:
-	// - Powershell being installed
-	// - Update check being enabled
-	// - URL for the script being reachable
-	if (((ReadRegistryKey32(REGKEY_HKLM, "Microsoft\\PowerShell\\1\\Install") > 0) ||
-		 (ReadRegistryKey32(REGKEY_HKLM, "Microsoft\\PowerShell\\3\\Install") > 0)) &&
-		(ReadSetting32(SETTING_UPDATE_INTERVAL) > 0)) {
-		CreateThread(NULL, 0, CheckForFidoThread, NULL, 0, NULL);
-	} else {
-		ubprintf("Notice: The ISO download feature has been deactivated because "
-			"'Check for updates' is disabled in your settings.");
-	}
+	SetFidoCheck();
 	return TRUE;
 }
 
