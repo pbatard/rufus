@@ -3,13 +3,15 @@
 <Package
   xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
   xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+  xmlns:uap7="http://schemas.microsoft.com/appx/manifest/uap/windows10/7"
+  xmlns:uap8="http://schemas.microsoft.com/appx/manifest/uap/windows10/8"
   xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
-  IgnorableNamespaces="uap rescap">
+  IgnorableNamespaces="uap uap7 uap8 rescap">
 
   <Identity
     Name="19453.net.Rufus"
     Publisher="CN=7AC86D13-3E5A-491A-ADD5-80095C212740"
-    Version="3.14.1742.0" />
+    Version="3.14.1743.0" />
 
   <Properties>
     <DisplayName>Rufus</DisplayName>
@@ -43,6 +45,9 @@
           </uap:ShowNameOnTiles>
         </uap:DefaultTile >
       </uap:VisualElements>
+      <uap7:Properties>
+        <uap8:ActiveCodePage>UTF-8</uap8:ActiveCodePage>
+      </uap7:Properties>
     </Application>
   </Applications>
 

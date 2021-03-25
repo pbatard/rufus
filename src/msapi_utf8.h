@@ -578,6 +578,10 @@ static __inline DWORD GetCurrentDirectoryU(DWORD nBufferLength, char* lpBuffer)
 	DWORD i, ret = 0, err = ERROR_INVALID_DATA;
 	// coverity[returned_null]
 	walloc(lpBuffer, nBufferLength);
+	if (wlpBuffer == NULL) {
+		SetLastError(ERROR_OUTOFMEMORY);
+		return 0;
+	}
 	ret = GetModuleFileNameW(NULL, wlpBuffer, nBufferLength);
 	err = GetLastError();
 	if (ret > 0) {
