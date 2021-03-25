@@ -24,6 +24,8 @@ o v3.*
   // The following can be tested with <Alt>-<+> and <Alt>-<->
   - *NEW*      MSG_318 "Default thread priority: %d"
   - *NEW*      MSG_319 "Ignore Boot Marker"
+  - *NEW*      MSG_320 "Refreshing partition layout"
+  - *NEW*      MSG_321 "The image you have selected is an ISOHybrid, but its creators have not made it compatible with ISO mode (...)
 
 o v3.5 (2019.03.12)
   The following 3 messages can be tested by creating a UEFI:NTFS drive in Rufus ('Show advanced drive properties' must be enabled

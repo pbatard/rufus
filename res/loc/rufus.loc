@@ -579,6 +579,9 @@ t MSG_316 "Number of passes"
 t MSG_317 "Disk ID"
 t MSG_318 "Default thread priority: %d"
 t MSG_319 "Ignore Boot Marker"
+t MSG_320 "Refreshing partition layout (%s)..."
+t MSG_321 "The image you have selected is an ISOHybrid, but its creators have not made it compatible with ISO/File "
+	"copy mode.\nAs a result, DD image writing mode will be enforced." 
 
 #########################################################################
 l "ar-SA" "Arabic (العربية)" 0x0401, 0x0801, 0x0c01, 0x1001, 0x1401, 0x1801, 0x1c01, 0x2001, 0x2401, 0x2801, 0x2c01, 0x3001, 0x3401, 0x3801, 0x3c01, 0x4001
