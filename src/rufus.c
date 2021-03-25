@@ -1352,11 +1352,44 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 			MessageBoxExU(hMainDialog, lmprintf(MSG_089), lmprintf(MSG_088), MB_OK|MB_ICONERROR|MB_IS_RTL, selected_langid);
 			goto out;
 		}
-		if (IS_DD_BOOTABLE(img_report) && !img_report.is_iso) {
-			// Pure DD images are fine at this stage
-			ret = BOOTCHECK_PROCEED;
-			goto out;
+		if (IS_DD_BOOTABLE(img_report)) {
+			if (!img_report.is_iso) {
+				// Pure DD images are fine at this stage
+				write_as_image = TRUE;
+			} else if (persistence_size == 0) {
+				// Ask users how they want to write ISOHybrid images,
+				// but only do so if persistence has not been selected.
+				char* iso_image = lmprintf(MSG_036);
+				char* dd_image = lmprintf(MSG_095);
+				// If the ISO is small enough to be written as an ESP and we are using GPT add the ISO → ESP option
+				if ((img_report.projected_size < MAX_ISO_TO_ESP_SIZE * MB) && HAS_REGULAR_EFI(img_report) &&
+					(partition_type == PARTITION_STYLE_GPT) && IS_FAT(fs_type)) {
+					char* choices[3] = { lmprintf(MSG_276, iso_image), lmprintf(MSG_277, "ISO → ESP"), lmprintf(MSG_277, dd_image) };
+					i = SelectionDialog(lmprintf(MSG_274), lmprintf(MSG_275, iso_image, dd_image, iso_image, dd_image),
+						choices, 3);
+					if (i < 0)	// Cancel
+						goto out;
+					else if (i == 2)
+						write_as_esp = TRUE;
+					else if (i == 3)
+						write_as_image = TRUE;
+				} else {
+					char* choices[2] = { lmprintf(MSG_276, iso_image), lmprintf(MSG_277, dd_image) };
+					i = SelectionDialog(lmprintf(MSG_274), lmprintf(MSG_275, iso_image, dd_image, iso_image, dd_image),
+						choices, 2);
+					if (i < 0)	// Cancel
+						goto out;
+					else if (i == 2)
+						write_as_image = TRUE;
+				}
+			}
 		}
+
+		if (write_as_image) {
+				ret = BOOTCHECK_PROCEED;
+				goto out;
+		}
+
 		if ((image_options & IMOP_WINTOGO) && ComboBox_GetCurItemData(hImageOption)) {
 			if (fs_type != FS_NTFS) {
 				// Windows To Go only works for NTFS
@@ -1415,6 +1448,19 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 		// If the selected target doesn't include include BIOS, skip file downloads for GRUB/Syslinux
 		if (target_type != TT_BIOS)
 			goto uefi_target;
+
+		if ((img_report.projected_size < MAX_ISO_TO_ESP_SIZE * MB) && HAS_REGULAR_EFI(img_report) &&
+			(partition_type == PARTITION_STYLE_GPT) && IS_FAT(fs_type)) {
+			// The ISO is small enough to be written as an ESP and we are using GPT
+			// so ask the users if they want to write it as an ESP.
+			char* iso_image = lmprintf(MSG_036);
+			char* choices[2] = { lmprintf(MSG_276, iso_image), lmprintf(MSG_277, "ISO → ESP") };
+			i = SelectionDialog(lmprintf(MSG_274), lmprintf(MSG_310), choices, 2);
+			if (i < 0)	// Cancel
+				goto out;
+			else if (i == 2)
+				write_as_esp = TRUE;
+		}
 
 		if ((partition_type == PARTITION_STYLE_MBR) && (img_report.has_grub2) && (img_report.grub2_version[0] != 0) &&
 			(strcmp(img_report.grub2_version, GRUB2_PACKAGE_VERSION) != 0)) {
@@ -2819,64 +2865,17 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				goto aborted_start;
 		}
 
-		if (!zero_drive) {
+		if (!zero_drive && (fs_type == FS_UDF)) {
 			// Display a warning about UDF formatting times
-			if (fs_type == FS_UDF) {
-				dur_secs = (uint32_t)(((double)SelectedDrive.DiskSize) / 1073741824.0f / UDF_FORMAT_SPEED);
-				if (dur_secs > UDF_FORMAT_WARN) {
-					dur_mins = dur_secs / 60;
-					dur_secs -= dur_mins * 60;
-					MessageBoxExU(hMainDialog, lmprintf(MSG_112, dur_mins, dur_secs), lmprintf(MSG_113),
-						MB_OK | MB_ICONASTERISK | MB_IS_RTL, selected_langid);
-				} else {
-					dur_secs = 0;
-					dur_mins = 0;
-				}
-			}
-
-			if ((boot_type == BT_IMAGE) && IS_DD_BOOTABLE(img_report)) {
-				if (img_report.is_iso) {
-					// Ask users how they want to write ISOHybrid images,
-					// but only do so if persistence has not been selected.
-					if (persistence_size == 0) {
-						char* iso_image = lmprintf(MSG_036);
-						char* dd_image = lmprintf(MSG_095);
-						// If the ISO is small enough to be written as an ESP and we are using GPT add the ISO → ESP option
-						if ((img_report.projected_size < MAX_ISO_TO_ESP_SIZE * MB) && HAS_REGULAR_EFI(img_report) &&
-							(partition_type == PARTITION_STYLE_GPT) && IS_FAT(fs_type)) {
-							char* choices[3] = { lmprintf(MSG_276, iso_image), lmprintf(MSG_277, "ISO → ESP"), lmprintf(MSG_277, dd_image) };
-							i = SelectionDialog(lmprintf(MSG_274), lmprintf(MSG_275, iso_image, dd_image, iso_image, dd_image),
-								choices, 3);
-							if (i < 0)	// Cancel
-								goto aborted_start;
-							else if (i == 2)
-								write_as_esp = TRUE;
-							else if (i == 3)
-								write_as_image = TRUE;
-						} else {
-							char* choices[2] = { lmprintf(MSG_276, iso_image), lmprintf(MSG_277, dd_image) };
-							i = SelectionDialog(lmprintf(MSG_274), lmprintf(MSG_275, iso_image, dd_image, iso_image, dd_image),
-								choices, 2);
-							if (i < 0)	// Cancel
-								goto aborted_start;
-							else if (i == 2)
-								write_as_image = TRUE;
-						}
-					}
-				} else {
-					write_as_image = TRUE;
-				}
-			} else if ((img_report.projected_size < MAX_ISO_TO_ESP_SIZE * MB) && HAS_REGULAR_EFI(img_report) &&
-				(partition_type == PARTITION_STYLE_GPT) && IS_FAT(fs_type)) {
-				// The ISO is small enough to be written as an ESP and we are using GPT
-				// so ask the users if they want to write it as an ESP.
-				char* iso_image = lmprintf(MSG_036);
-				char* choices[2] = { lmprintf(MSG_276, iso_image), lmprintf(MSG_277, "ISO → ESP") };
-				i = SelectionDialog(lmprintf(MSG_274), lmprintf(MSG_310), choices, 2);
-				if (i < 0)	// Cancel
-					goto aborted_start;
-				else if (i == 2)
-					write_as_esp = TRUE;
+			dur_secs = (uint32_t)(((double)SelectedDrive.DiskSize) / 1073741824.0f / UDF_FORMAT_SPEED);
+			if (dur_secs > UDF_FORMAT_WARN) {
+				dur_mins = dur_secs / 60;
+				dur_secs -= dur_mins * 60;
+				MessageBoxExU(hMainDialog, lmprintf(MSG_112, dur_mins, dur_secs), lmprintf(MSG_113),
+					MB_OK | MB_ICONASTERISK | MB_IS_RTL, selected_langid);
+			} else {
+				dur_secs = 0;
+				dur_mins = 0;
 			}
 		}
 
